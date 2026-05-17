@@ -106,11 +106,11 @@ module LambdaConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~invocationType ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let invocationType =
-        field_map_exn json "InvocationType" InvocationType.of_json in
+        field_map_exn json__ "InvocationType" InvocationType.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" LambdaFunctionArn.of_json in
+        field_map_exn json__ "ResourceArn" LambdaFunctionArn.of_json in
       make ~invocationType ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stores metadata about a Lambda processor."]
@@ -118,6 +118,9 @@ module MessageAttributeStringValues =
   struct
     type nonrec t = MessageAttributeStringValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MessageAttributeStringValue.to_value)) |>
         (fun x -> `List x)
@@ -139,6 +142,28 @@ module MessageAttributeStringValues =
       list_of_json ~kind:"MessageAttributeStringValues"
         ~of_json:MessageAttributeStringValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ChimeArn =
+  struct
+    type nonrec t = string
+    let context_ = "ChimeArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:1600) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChimeArn" j
+    let to_json = simple_to_json to_value
   end
 module ChannelFlowExecutionOrder =
   struct
@@ -224,11 +249,31 @@ module ProcessorConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Lambda") in
       make ~lambda ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lambda = field_map_exn json "Lambda" LambdaConfiguration.of_json in
+    let of_json json__ =
+      let lambda = field_map_exn json__ "Lambda" LambdaConfiguration.of_json in
       make ~lambda ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A processor's metadata."]
+module SearchFieldValue =
+  struct
+    type nonrec t = string
+    let context_ = "SearchFieldValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchFieldValue" j
+    let to_json = simple_to_json to_value
+  end
 module ChannelMode =
   struct
     type nonrec t =
@@ -277,28 +322,6 @@ module ChannelPrivacy =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ChannelPrivacy" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ChannelPrivacy" j)
-    let to_json = simple_to_json to_value
-  end
-module ChimeArn =
-  struct
-    type nonrec t = string
-    let context_ = "ChimeArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:5) >>=
-             (fun () ->
-                (check_string_max i ~max:1600) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:[a-z0-9-\\.]{1,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[a-z0-9-\\.]{0,63}:[^/].{0,1023}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ChimeArn" j
     let to_json = simple_to_json to_value
   end
 module Metadata =
@@ -446,12 +469,34 @@ module MessageAttributeValue =
           (Xml.child xml_arg0 "StringValues") in
       make ?stringValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stringValues =
-        field_map json "StringValues" MessageAttributeStringValues.of_json in
+        field_map json__ "StringValues" MessageAttributeStringValues.of_json in
       make ?stringValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of message attribute values."]
+module Target =
+  struct
+    type nonrec t =
+      {
+      memberArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of the target channel member."]}
+    let make ?memberArn = fun () -> { memberArn }
+    let to_value x =
+      structure_to_value
+        [("MemberArn", (Option.map x.memberArn ~f:ChimeArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let memberArn =
+        (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "MemberArn") in
+      make ?memberArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let memberArn = field_map json__ "MemberArn" ChimeArn.of_json in
+      make ?memberArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The target of a message, a sender, a user, or a bot. Only the target and the sender can view targeted messages. Only users who can see targeted messages can take actions on them. However, administrators can delete targeted messages that they can\226\128\153t see."]
 module ChannelMembershipType =
   struct
     type nonrec t =
@@ -477,6 +522,26 @@ module ChannelMembershipType =
         (string_of_xml ~kind:"enumeration ChannelMembershipType" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ChannelMembershipType" j)
+    let to_json = simple_to_json to_value
+  end
+module SubChannelId =
+  struct
+    type nonrec t = string
+    let context_ = "SubChannelId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[-_a-zA-Z0-9]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubChannelId" j
     let to_json = simple_to_json to_value
   end
 module Processor =
@@ -524,14 +589,15 @@ module Processor =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~fallbackAction ~executionOrder ~configuration ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fallbackAction =
-        field_map_exn json "FallbackAction" FallbackAction.of_json in
+        field_map_exn json__ "FallbackAction" FallbackAction.of_json in
       let executionOrder =
-        field_map_exn json "ExecutionOrder" ChannelFlowExecutionOrder.of_json in
+        field_map_exn json__ "ExecutionOrder"
+          ChannelFlowExecutionOrder.of_json in
       let configuration =
-        field_map_exn json "Configuration" ProcessorConfiguration.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
+        field_map_exn json__ "Configuration" ProcessorConfiguration.of_json in
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
       make ~fallbackAction ~executionOrder ~configuration ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about a processor in a channel flow."]
@@ -569,6 +635,106 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module SearchFieldKey =
+  struct
+    type nonrec t =
+      | MEMBERS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | MEMBERS -> "MEMBERS" | Non_static_id s -> s
+    let of_string = function | "MEMBERS" -> MEMBERS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SearchFieldKey" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchFieldKey" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchFieldOperator =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | INCLUDES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EQUALS -> "EQUALS"
+      | INCLUDES -> "INCLUDES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EQUALS" -> EQUALS
+      | "INCLUDES" -> INCLUDES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SearchFieldOperator" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchFieldOperator" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchFieldValues =
+  struct
+    type nonrec t = SearchFieldValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchFieldValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchFieldValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchFieldValues"
+        ~of_json:SearchFieldValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MessagingDataType =
+  struct
+    type nonrec t =
+      | Channel 
+      | ChannelMessage 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Channel -> "Channel"
+      | ChannelMessage -> "ChannelMessage"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Channel" -> Channel
+      | "ChannelMessage" -> ChannelMessage
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MessagingDataType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MessagingDataType" j)
     let to_json = simple_to_json to_value
   end
 module AllowNotifications =
@@ -618,6 +784,20 @@ module FilterRule =
     let of_json j = string_of_json ~kind:"FilterRule" j
     let to_json = simple_to_json to_value
   end
+module MembershipCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MembershipCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ChannelSummary =
   struct
     type nonrec t =
@@ -631,7 +811,7 @@ module ChannelSummary =
       metadata: Metadata.t option [@ocaml.doc "The metadata of the channel."];
       lastMessageTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time at which the last message in a channel was sent."]}
+          "The time at which the last persistent message visible to the caller in a channel was sent."]}
     let make ?name =
       fun ?channelArn ->
         fun ?mode ->
@@ -675,14 +855,14 @@ module ChannelSummary =
       make ?lastMessageTimestamp ?metadata ?privacy ?mode ?channelArn ?name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastMessageTimestamp =
-        field_map json "LastMessageTimestamp" Timestamp.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
-      let mode = field_map json "Mode" ChannelMode.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
+        field_map json__ "LastMessageTimestamp" Timestamp.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let privacy = field_map json__ "Privacy" ChannelPrivacy.of_json in
+      let mode = field_map json__ "Mode" ChannelMode.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
       make ?lastMessageTimestamp ?metadata ?privacy ?mode ?channelArn ?name
         ()
     let to_json v = composed_to_json to_value v
@@ -705,11 +885,11 @@ module Identity =
       let arn = (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" ResourceName.of_json in
-      let arn = field_map json "Arn" ChimeArn.of_json in make ?name ?arn ()
+    let of_json json__ =
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let arn = field_map json__ "Arn" ChimeArn.of_json in make ?name ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of a user."]
+  end[@@ocaml.doc "The details of a user or bot."]
 module ChannelMessageStatusStructure =
   struct
     type nonrec t =
@@ -717,7 +897,7 @@ module ChannelMessageStatusStructure =
       value: ChannelMessageStatus.t option
         [@ocaml.doc "The message status value."];
       detail: StatusDetail.t option
-        [@ocaml.doc "Contains more details about the messasge status."]}
+        [@ocaml.doc "Contains more details about the message status."]}
     let make ?value = fun ?detail -> fun () -> { value; detail }
     let to_value x =
       structure_to_value
@@ -732,9 +912,9 @@ module ChannelMessageStatusStructure =
           (Xml.child xml_arg0 "Value") in
       make ?detail ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let detail = field_map json "Detail" StatusDetail.of_json in
-      let value = field_map json "Value" ChannelMessageStatus.of_json in
+    let of_json json__ =
+      let detail = field_map json__ "Detail" StatusDetail.of_json in
+      let value = field_map json__ "Value" ChannelMessageStatus.of_json in
       make ?detail ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stores information about a message status."]
@@ -784,6 +964,26 @@ module Content =
     let of_json j = string_of_json ~kind:"Content" j
     let to_json = simple_to_json to_value
   end
+module ContentType =
+  struct
+    type nonrec t = string
+    let context_ = "ContentType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:45) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContentType" j
+    let to_json = simple_to_json to_value
+  end
 module MessageAttributeMap =
   struct
     type nonrec t = (MessageAttributeName.t * MessageAttributeValue.t) list
@@ -809,6 +1009,8 @@ module MessageAttributeMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -849,6 +1051,36 @@ module NonNullableBoolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module TargetList =
+  struct
+    type nonrec t = Target.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Target.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Target.of_xml)
+    let of_json j = list_of_json ~kind:"TargetList" ~of_json:Target.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AppInstanceUserMembershipSummary =
   struct
     type nonrec t =
@@ -856,29 +1088,41 @@ module AppInstanceUserMembershipSummary =
       type_: ChannelMembershipType.t option
         [@ocaml.doc "The type of ChannelMembership."];
       readMarkerTimestamp: Timestamp.t option
-        [@ocaml.doc "The time at which a message was last read."]}
+        [@ocaml.doc
+          "The time at which an AppInstanceUser last marked a channel as read."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel that the AppInstanceUser is a member of."]}
     let make ?type_ =
-      fun ?readMarkerTimestamp -> fun () -> { type_; readMarkerTimestamp }
+      fun ?readMarkerTimestamp ->
+        fun ?subChannelId ->
+          fun () -> { type_; readMarkerTimestamp; subChannelId }
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:ChannelMembershipType.to_value));
         ("ReadMarkerTimestamp",
-          (Option.map x.readMarkerTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.readMarkerTimestamp ~f:Timestamp.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let readMarkerTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "ReadMarkerTimestamp") in
       let type_ =
         (Option.map ~f:ChannelMembershipType.of_xml)
           (Xml.child xml_arg0 "Type") in
-      make ?readMarkerTimestamp ?type_ ()
+      make ?subChannelId ?readMarkerTimestamp ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let readMarkerTimestamp =
-        field_map json "ReadMarkerTimestamp" Timestamp.of_json in
-      let type_ = field_map json "Type" ChannelMembershipType.of_json in
-      make ?readMarkerTimestamp ?type_ ()
+        field_map json__ "ReadMarkerTimestamp" Timestamp.of_json in
+      let type_ = field_map json__ "Type" ChannelMembershipType.of_json in
+      make ?subChannelId ?readMarkerTimestamp ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the membership details of an AppInstanceUser."]
 module ProcessorList =
@@ -889,6 +1133,9 @@ module ProcessorList =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Processor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -909,6 +1156,100 @@ module ProcessorList =
       list_of_json ~kind:"ProcessorList" ~of_json:Processor.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MaximumSubChannels =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:2); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaximumSubChannels" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinimumMembershipPercentage =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:40) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MinimumMembershipPercentage"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetMembershipsPerSubChannel =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:2); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for TargetMembershipsPerSubChannel"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpirationCriterion =
+  struct
+    type nonrec t =
+      | CREATED_TIMESTAMP 
+      | LAST_MESSAGE_TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED_TIMESTAMP -> "CREATED_TIMESTAMP"
+      | LAST_MESSAGE_TIMESTAMP -> "LAST_MESSAGE_TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED_TIMESTAMP" -> CREATED_TIMESTAMP
+      | "LAST_MESSAGE_TIMESTAMP" -> LAST_MESSAGE_TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExpirationCriterion" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExpirationCriterion" j)
+    let to_json = simple_to_json to_value
+  end
+module ExpirationDays =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:5475) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ExpirationDays" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PushNotificationBody =
   struct
     type nonrec t = string
@@ -916,7 +1257,7 @@ module PushNotificationBody =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:0) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:150) >>=
                   (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
@@ -936,7 +1277,7 @@ module PushNotificationTitle =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:0) >>=
+          ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:50) >>=
                   (fun () -> check_pattern i ~pattern:".*")));
@@ -1068,12 +1409,88 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A tag object containing a key-value pair."]
+module SearchField =
+  struct
+    type nonrec t =
+      {
+      key: SearchFieldKey.t
+        [@ocaml.doc
+          "An enum value that indicates the key to search the channel on. MEMBERS allows you to search channels based on memberships. You can use it with the EQUALS operator to get channels whose memberships are equal to the specified values, and with the INCLUDES operator to get channels whose memberships include the specified values."];
+      values: SearchFieldValues.t
+        [@ocaml.doc
+          "The values that you want to search for, a list of strings. The values must be AppInstanceUserArns specified as a list of strings. This operation isn't supported for AppInstanceUsers with a large number of memberships."];
+      operator: SearchFieldOperator.t
+        [@ocaml.doc
+          "The operator used to compare field values, currently EQUALS or INCLUDES. Use the EQUALS operator to find channels whose memberships equal the specified values. Use the INCLUDES operator to find channels whose memberships include the specified values."]}
+    let context_ = "SearchField"
+    let make ~key =
+      fun ~values -> fun ~operator -> fun () -> { key; values; operator }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (SearchFieldKey.to_value x.key)));
+        ("Values", (Some (SearchFieldValues.to_value x.values)));
+        ("Operator", (Some (SearchFieldOperator.to_value x.operator)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operator =
+        SearchFieldOperator.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Operator") in
+      let values =
+        SearchFieldValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Values") in
+      let key =
+        SearchFieldKey.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~operator ~values ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operator =
+        field_map_exn json__ "Operator" SearchFieldOperator.of_json in
+      let values = field_map_exn json__ "Values" SearchFieldValues.of_json in
+      let key = field_map_exn json__ "Key" SearchFieldKey.of_json in
+      make ~operator ~values ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A Field of the channel that you want to search. This operation isn't supported for AppInstanceUsers with a large number of memberships."]
+module StreamingConfiguration =
+  struct
+    type nonrec t =
+      {
+      dataType: MessagingDataType.t
+        [@ocaml.doc "The data type of the configuration."];
+      resourceArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the resource in the configuration."]}
+    let context_ = "StreamingConfiguration"
+    let make ~dataType =
+      fun ~resourceArn -> fun () -> { dataType; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("DataType", (Some (MessagingDataType.to_value x.dataType)));
+        ("ResourceArn", (Some (ChimeArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let dataType =
+        MessagingDataType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataType") in
+      make ~resourceArn ~dataType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" ChimeArn.of_json in
+      let dataType =
+        field_map_exn json__ "DataType" MessagingDataType.of_json in
+      make ~resourceArn ~dataType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for connecting a messaging stream to Amazon Kinesis."]
 module PushNotificationPreferences =
   struct
     type nonrec t =
@@ -1083,7 +1500,7 @@ module PushNotificationPreferences =
           "Enum value that indicates which push notifications to send to the requested member of a channel. ALL sends all push notifications, NONE sends no push notifications, FILTERED sends only filtered push notifications."];
       filterRule: FilterRule.t option
         [@ocaml.doc
-          "The simple JSON object used to send a subset of a push notification to the requsted member."]}
+          "The simple JSON object used to send a subset of a push notification to the requested member."]}
     let context_ = "PushNotificationPreferences"
     let make ?filterRule =
       fun ~allowNotifications -> fun () -> { filterRule; allowNotifications }
@@ -1101,14 +1518,48 @@ module PushNotificationPreferences =
           (Xml.child_exn ~context:context_ xml_arg0 "AllowNotifications") in
       make ?filterRule ~allowNotifications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filterRule = field_map json "FilterRule" FilterRule.of_json in
+    let of_json json__ =
+      let filterRule = field_map json__ "FilterRule" FilterRule.of_json in
       let allowNotifications =
-        field_map_exn json "AllowNotifications" AllowNotifications.of_json in
+        field_map_exn json__ "AllowNotifications" AllowNotifications.of_json in
       make ?filterRule ~allowNotifications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The channel membership preferences for push notification."]
+module SubChannelSummary =
+  struct
+    type nonrec t =
+      {
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The unique ID of a SubChannel."];
+      membershipCount: MembershipCount.t option
+        [@ocaml.doc "The number of members in a SubChannel."]}
+    let make ?subChannelId =
+      fun ?membershipCount -> fun () -> { subChannelId; membershipCount }
+    let to_value x =
+      structure_to_value
+        [("SubChannelId",
+           (Option.map x.subChannelId ~f:SubChannelId.to_value));
+        ("MembershipCount",
+          (Option.map x.membershipCount ~f:MembershipCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipCount =
+        (Option.map ~f:MembershipCount.of_xml)
+          (Xml.child xml_arg0 "MembershipCount") in
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
+      make ?membershipCount ?subChannelId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipCount =
+        field_map json__ "MembershipCount" MembershipCount.of_json in
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      make ?membershipCount ?subChannelId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary of the sub-channels associated with the elastic channel."]
 module ChannelModeratedByAppInstanceUserSummary =
   struct
     type nonrec t =
@@ -1127,9 +1578,9 @@ module ChannelModeratedByAppInstanceUserSummary =
           (Xml.child xml_arg0 "ChannelSummary") in
       make ?channelSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelSummary =
-        field_map json "ChannelSummary" ChannelSummary.of_json in
+        field_map json__ "ChannelSummary" ChannelSummary.of_json in
       make ?channelSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of a moderated channel."]
@@ -1172,12 +1623,12 @@ module ChannelAssociatedWithFlowSummary =
           (Xml.child xml_arg0 "Name") in
       make ?metadata ?privacy ?mode ?channelArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
-      let mode = field_map json "Mode" ChannelMode.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
+    let of_json json__ =
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let privacy = field_map json__ "Privacy" ChannelPrivacy.of_json in
+      let mode = field_map json__ "Mode" ChannelMode.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
       make ?metadata ?privacy ?mode ?channelArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1197,8 +1648,8 @@ module ChannelModeratorSummary =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Moderator") in
       make ?moderator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let moderator = field_map json "Moderator" Identity.of_json in
+    let of_json json__ =
+      let moderator = field_map json__ "Moderator" Identity.of_json in
       make ?moderator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of a ChannelModerator."]
@@ -1207,7 +1658,9 @@ module ChannelMessageSummary =
     type nonrec t =
       {
       messageId: MessageId.t option [@ocaml.doc "The ID of the message."];
-      content: Content.t option [@ocaml.doc "The content of the message."];
+      content: Content.t option
+        [@ocaml.doc
+          "The content of the channel message. For Amazon Lex V2 bot responses, this field holds a list of messages originating from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
       metadata: Metadata.t option [@ocaml.doc "The metadata of the message."];
       type_: ChannelMessageType.t option [@ocaml.doc "The type of message."];
       createdTimestamp: Timestamp.t option
@@ -1224,7 +1677,13 @@ module ChannelMessageSummary =
           "The message status. The status value is SENT for messages sent to a channel without a channel flow. For channels associated with channel flow, the value determines the processing stage."];
       messageAttributes: MessageAttributeMap.t option
         [@ocaml.doc
-          "The message attribues listed in a the summary of a channel message."]}
+          "The attributes for the channel message. For Amazon Lex V2 bot responses, the attributes are mapped to specific fields from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
+      contentType: ContentType.t option
+        [@ocaml.doc
+          "The content type of the channel message listed in the summary. For Amazon Lex V2 bot responses, the content type is application/amz-chime-lex-msgs for success responses and application/amz-chime-lex-error for failure responses. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
+      target: TargetList.t option
+        [@ocaml.doc
+          "The target of a message, a sender, a user, or a bot. Only the target and the sender can view targeted messages. Only users who can see targeted messages can take actions on them. However, administrators can delete targeted messages that they can\226\128\153t see."]}
     let make ?messageId =
       fun ?content ->
         fun ?metadata ->
@@ -1236,20 +1695,24 @@ module ChannelMessageSummary =
                     fun ?redacted ->
                       fun ?status ->
                         fun ?messageAttributes ->
-                          fun () ->
-                            {
-                              messageId;
-                              content;
-                              metadata;
-                              type_;
-                              createdTimestamp;
-                              lastUpdatedTimestamp;
-                              lastEditedTimestamp;
-                              sender;
-                              redacted;
-                              status;
-                              messageAttributes
-                            }
+                          fun ?contentType ->
+                            fun ?target ->
+                              fun () ->
+                                {
+                                  messageId;
+                                  content;
+                                  metadata;
+                                  type_;
+                                  createdTimestamp;
+                                  lastUpdatedTimestamp;
+                                  lastEditedTimestamp;
+                                  sender;
+                                  redacted;
+                                  status;
+                                  messageAttributes;
+                                  contentType;
+                                  target
+                                }
     let to_value x =
       structure_to_value
         [("MessageId", (Option.map x.messageId ~f:MessageId.to_value));
@@ -1267,9 +1730,15 @@ module ChannelMessageSummary =
         ("Status",
           (Option.map x.status ~f:ChannelMessageStatusStructure.to_value));
         ("MessageAttributes",
-          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value))]
+          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value));
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("Target", (Option.map x.target ~f:TargetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let target =
+        (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "Target") in
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
       let messageAttributes =
         (Option.map ~f:MessageAttributeMap.of_xml)
           (Xml.child xml_arg0 "MessageAttributes") in
@@ -1298,30 +1767,32 @@ module ChannelMessageSummary =
         (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Content") in
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
-      make ?messageAttributes ?status ?redacted ?sender ?lastEditedTimestamp
-        ?lastUpdatedTimestamp ?createdTimestamp ?type_ ?metadata ?content
-        ?messageId ()
+      make ?target ?contentType ?messageAttributes ?status ?redacted ?sender
+        ?lastEditedTimestamp ?lastUpdatedTimestamp ?createdTimestamp ?type_
+        ?metadata ?content ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let target = field_map json__ "Target" TargetList.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let status =
-        field_map json "Status" ChannelMessageStatusStructure.of_json in
-      let redacted = field_map json "Redacted" NonNullableBoolean.of_json in
-      let sender = field_map json "Sender" Identity.of_json in
+        field_map json__ "Status" ChannelMessageStatusStructure.of_json in
+      let redacted = field_map json__ "Redacted" NonNullableBoolean.of_json in
+      let sender = field_map json__ "Sender" Identity.of_json in
       let lastEditedTimestamp =
-        field_map json "LastEditedTimestamp" Timestamp.of_json in
+        field_map json__ "LastEditedTimestamp" Timestamp.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let type_ = field_map json "Type" ChannelMessageType.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let content = field_map json "Content" Content.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      make ?messageAttributes ?status ?redacted ?sender ?lastEditedTimestamp
-        ?lastUpdatedTimestamp ?createdTimestamp ?type_ ?metadata ?content
-        ?messageId ()
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let type_ = field_map json__ "Type" ChannelMessageType.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let content = field_map json__ "Content" Content.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      make ?target ?contentType ?messageAttributes ?status ?redacted ?sender
+        ?lastEditedTimestamp ?lastUpdatedTimestamp ?createdTimestamp ?type_
+        ?metadata ?content ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the messages in a Channel."]
 module ChannelMembershipSummary =
@@ -1339,8 +1810,8 @@ module ChannelMembershipSummary =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let member = field_map json "Member" Identity.of_json in
+    let of_json json__ =
+      let member = field_map json__ "Member" Identity.of_json in
       make ?member ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of a ChannelMembership."]
@@ -1374,12 +1845,12 @@ module ChannelMembershipForAppInstanceUserSummary =
           (Xml.child xml_arg0 "ChannelSummary") in
       make ?appInstanceUserMembershipSummary ?channelSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appInstanceUserMembershipSummary =
-        field_map json "AppInstanceUserMembershipSummary"
+        field_map json__ "AppInstanceUserMembershipSummary"
           AppInstanceUserMembershipSummary.of_json in
       let channelSummary =
-        field_map json "ChannelSummary" ChannelSummary.of_json in
+        field_map json__ "ChannelSummary" ChannelSummary.of_json in
       make ?appInstanceUserMembershipSummary ?channelSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1415,10 +1886,10 @@ module ChannelFlowSummary =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?processors ?name ?channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let processors = field_map json "Processors" ProcessorList.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
-      let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
+    let of_json json__ =
+      let processors = field_map json__ "Processors" ProcessorList.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      let channelFlowArn = field_map json__ "ChannelFlowArn" ChimeArn.of_json in
       make ?processors ?name ?channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of details of a channel flow."]
@@ -1438,8 +1909,8 @@ module ChannelBanSummary =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?member ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let member = field_map json "Member" Identity.of_json in
+    let of_json json__ =
+      let member = field_map json__ "Member" Identity.of_json in
       make ?member ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary of the details of a ChannelBan."]
@@ -1485,6 +1956,110 @@ module ChannelMessagePersistenceType =
       of_string (string_of_json ~kind:"ChannelMessagePersistenceType" j)
     let to_json = simple_to_json to_value
   end
+module ElasticChannelConfiguration =
+  struct
+    type nonrec t =
+      {
+      maximumSubChannels: MaximumSubChannels.t
+        [@ocaml.doc
+          "The maximum number of SubChannels that you want to allow in the elastic channel."];
+      targetMembershipsPerSubChannel: TargetMembershipsPerSubChannel.t
+        [@ocaml.doc "The maximum number of members allowed in a SubChannel."];
+      minimumMembershipPercentage: MinimumMembershipPercentage.t
+        [@ocaml.doc
+          "The minimum allowed percentage of TargetMembershipsPerSubChannel users. Ceil of the calculated value is used in balancing members among SubChannels of the elastic channel."]}
+    let context_ = "ElasticChannelConfiguration"
+    let make ~maximumSubChannels =
+      fun ~targetMembershipsPerSubChannel ->
+        fun ~minimumMembershipPercentage ->
+          fun () ->
+            {
+              maximumSubChannels;
+              targetMembershipsPerSubChannel;
+              minimumMembershipPercentage
+            }
+    let to_value x =
+      structure_to_value
+        [("MaximumSubChannels",
+           (Some (MaximumSubChannels.to_value x.maximumSubChannels)));
+        ("TargetMembershipsPerSubChannel",
+          (Some
+             (TargetMembershipsPerSubChannel.to_value
+                x.targetMembershipsPerSubChannel)));
+        ("MinimumMembershipPercentage",
+          (Some
+             (MinimumMembershipPercentage.to_value
+                x.minimumMembershipPercentage)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumMembershipPercentage =
+        MinimumMembershipPercentage.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MinimumMembershipPercentage") in
+      let targetMembershipsPerSubChannel =
+        TargetMembershipsPerSubChannel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "TargetMembershipsPerSubChannel") in
+      let maximumSubChannels =
+        MaximumSubChannels.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MaximumSubChannels") in
+      make ~minimumMembershipPercentage ~targetMembershipsPerSubChannel
+        ~maximumSubChannels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumMembershipPercentage =
+        field_map_exn json__ "MinimumMembershipPercentage"
+          MinimumMembershipPercentage.of_json in
+      let targetMembershipsPerSubChannel =
+        field_map_exn json__ "TargetMembershipsPerSubChannel"
+          TargetMembershipsPerSubChannel.of_json in
+      let maximumSubChannels =
+        field_map_exn json__ "MaximumSubChannels" MaximumSubChannels.of_json in
+      make ~minimumMembershipPercentage ~targetMembershipsPerSubChannel
+        ~maximumSubChannels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The attributes required to configure and create an elastic channel. An elastic channel can support a maximum of 1-million members."]
+module ExpirationSettings =
+  struct
+    type nonrec t =
+      {
+      expirationDays: ExpirationDays.t
+        [@ocaml.doc
+          "The period in days after which the system automatically deletes a channel."];
+      expirationCriterion: ExpirationCriterion.t
+        [@ocaml.doc
+          "The conditions that must be met for a channel to expire."]}
+    let context_ = "ExpirationSettings"
+    let make ~expirationDays =
+      fun ~expirationCriterion ->
+        fun () -> { expirationDays; expirationCriterion }
+    let to_value x =
+      structure_to_value
+        [("ExpirationDays",
+           (Some (ExpirationDays.to_value x.expirationDays)));
+        ("ExpirationCriterion",
+          (Some (ExpirationCriterion.to_value x.expirationCriterion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationCriterion =
+        ExpirationCriterion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExpirationCriterion") in
+      let expirationDays =
+        ExpirationDays.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExpirationDays") in
+      make ~expirationCriterion ~expirationDays ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationCriterion =
+        field_map_exn json__ "ExpirationCriterion"
+          ExpirationCriterion.of_json in
+      let expirationDays =
+        field_map_exn json__ "ExpirationDays" ExpirationDays.of_json in
+      make ~expirationCriterion ~expirationDays ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings that control the interval after which a channel is deleted."]
 module NonEmptyContent =
   struct
     type nonrec t = string
@@ -1534,10 +2109,10 @@ module PushNotificationConfiguration =
           (Xml.child xml_arg0 "Title") in
       make ?type_ ?body ?title ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" PushNotificationType.of_json in
-      let body = field_map json "Body" PushNotificationBody.of_json in
-      let title = field_map json "Title" PushNotificationTitle.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" PushNotificationType.of_json in
+      let body = field_map json__ "Body" PushNotificationBody.of_json in
+      let title = field_map json__ "Title" PushNotificationTitle.of_json in
       make ?type_ ?body ?title ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The push notification configuration of the message."]
@@ -1545,6 +2120,9 @@ module Members =
   struct
     type nonrec t = Identity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Identity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1591,10 +2169,10 @@ module BatchCreateChannelMembershipError =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "MemberArn") in
       make ?errorMessage ?errorCode ?memberArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let memberArn = field_map json "MemberArn" ChimeArn.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let memberArn = field_map json__ "MemberArn" ChimeArn.of_json in
       make ?errorMessage ?errorCode ?memberArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1616,9 +2194,9 @@ module BadRequestException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1640,9 +2218,9 @@ module ConflictException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1664,9 +2242,9 @@ module ForbiddenException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1688,9 +2266,9 @@ module ServiceFailureException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service encountered an unexpected error."]
@@ -1711,9 +2289,9 @@ module ServiceUnavailableException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is currently unavailable."]
@@ -1734,9 +2312,9 @@ module ThrottledClientException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The client exceeded its request rate limit."]
@@ -1757,9 +2335,9 @@ module UnauthorizedClientException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1772,6 +2350,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1799,6 +2380,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1838,37 +2422,13 @@ module ClientRequestToken =
     let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end
-module ChannelMembershipPreferences =
-  struct
-    type nonrec t =
-      {
-      pushNotifications: PushNotificationPreferences.t option
-        [@ocaml.doc "The push notification configuration of a message."]}
-    let make ?pushNotifications = fun () -> { pushNotifications }
-    let to_value x =
-      structure_to_value
-        [("PushNotifications",
-           (Option.map x.pushNotifications
-              ~f:PushNotificationPreferences.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let pushNotifications =
-        (Option.map ~f:PushNotificationPreferences.of_xml)
-          (Xml.child xml_arg0 "PushNotifications") in
-      make ?pushNotifications ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pushNotifications =
-        field_map json "PushNotifications"
-          PushNotificationPreferences.of_json in
-      make ?pushNotifications ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The channel membership preferences for an AppInstanceUser."]
 module ChannelSummaryList =
   struct
     type nonrec t = ChannelSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1928,10 +2488,156 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module SearchFields =
+  struct
+    type nonrec t = SearchField.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SearchField.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SearchField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SearchFields" ~of_json:SearchField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NotFoundException =
+  struct
+    type nonrec t = {
+      code: ErrorCode.t option ;
+      message: String_.t option }
+    let make ?code = fun ?message -> fun () -> { code; message }
+    let to_value x =
+      structure_to_value
+        [("Code", (Option.map x.code ~f:ErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
+      make ?message ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
+      make ?message ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One or more of the resources in the request does not exist in the system."]
+module StreamingConfigurationList =
+  struct
+    type nonrec t = StreamingConfiguration.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StreamingConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StreamingConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StreamingConfigurationList"
+        ~of_json:StreamingConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ChannelMembershipPreferences =
+  struct
+    type nonrec t =
+      {
+      pushNotifications: PushNotificationPreferences.t option
+        [@ocaml.doc "The push notification configuration of a message."]}
+    let make ?pushNotifications = fun () -> { pushNotifications }
+    let to_value x =
+      structure_to_value
+        [("PushNotifications",
+           (Option.map x.pushNotifications
+              ~f:PushNotificationPreferences.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pushNotifications =
+        (Option.map ~f:PushNotificationPreferences.of_xml)
+          (Xml.child xml_arg0 "PushNotifications") in
+      make ?pushNotifications ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pushNotifications =
+        field_map json__ "PushNotifications"
+          PushNotificationPreferences.of_json in
+      make ?pushNotifications ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The channel membership preferences for an AppInstanceUser."]
+module SubChannelSummaryList =
+  struct
+    type nonrec t = SubChannelSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubChannelSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubChannelSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubChannelSummaryList"
+        ~of_json:SubChannelSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ChannelModeratedByAppInstanceUserSummaryList =
   struct
     type nonrec t = ChannelModeratedByAppInstanceUserSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelModeratedByAppInstanceUserSummary.to_value))
         |> (fun x -> `List x)
@@ -1959,6 +2665,9 @@ module ChannelAssociatedWithFlowSummaryList =
   struct
     type nonrec t = ChannelAssociatedWithFlowSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelAssociatedWithFlowSummary.to_value)) |>
         (fun x -> `List x)
@@ -1986,6 +2695,9 @@ module ChannelModeratorSummaryList =
   struct
     type nonrec t = ChannelModeratorSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelModeratorSummary.to_value)) |>
         (fun x -> `List x)
@@ -2012,6 +2724,9 @@ module ChannelMessageSummaryList =
   struct
     type nonrec t = ChannelMessageSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelMessageSummary.to_value)) |>
         (fun x -> `List x)
@@ -2063,6 +2778,9 @@ module ChannelMembershipSummaryList =
   struct
     type nonrec t = ChannelMembershipSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelMembershipSummary.to_value)) |>
         (fun x -> `List x)
@@ -2089,6 +2807,9 @@ module ChannelMembershipForAppInstanceUserSummaryList =
   struct
     type nonrec t = ChannelMembershipForAppInstanceUserSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:ChannelMembershipForAppInstanceUserSummary.to_value))
@@ -2117,6 +2838,9 @@ module ChannelFlowSummaryList =
   struct
     type nonrec t = ChannelFlowSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelFlowSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2142,6 +2866,9 @@ module ChannelBanSummaryList =
   struct
     type nonrec t = ChannelBanSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChannelBanSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2178,18 +2905,45 @@ module MessagingSessionEndpoint =
       let url = (Option.map ~f:UrlType.of_xml) (Xml.child xml_arg0 "Url") in
       make ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" UrlType.of_json in make ?url ()
+    let of_json json__ =
+      let url = field_map json__ "Url" UrlType.of_json in make ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The websocket endpoint used to connect to Amazon Chime SDK messaging."]
+module NetworkType =
+  struct
+    type nonrec t =
+      | IPV4_ONLY 
+      | DUAL_STACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4_ONLY -> "IPV4_ONLY"
+      | DUAL_STACK -> "DUAL_STACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4_ONLY" -> IPV4_ONLY
+      | "DUAL_STACK" -> DUAL_STACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module ChannelMessage =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t option [@ocaml.doc "The ARN of the channel."];
       messageId: MessageId.t option [@ocaml.doc "The ID of a message."];
-      content: Content.t option [@ocaml.doc "The message content."];
+      content: Content.t option
+        [@ocaml.doc
+          "The content of the channel message. For Amazon Lex V2 bot responses, this field holds a list of messages originating from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
       metadata: Metadata.t option [@ocaml.doc "The message metadata."];
       type_: ChannelMessageType.t option [@ocaml.doc "The message type."];
       createdTimestamp: Timestamp.t option
@@ -2207,7 +2961,15 @@ module ChannelMessage =
         [@ocaml.doc "The status of the channel message."];
       messageAttributes: MessageAttributeMap.t option
         [@ocaml.doc
-          "The attributes for the message, used for message filtering along with a FilterRule defined in the PushNotificationPreferences."]}
+          "The attributes for the channel message. For Amazon Lex V2 bot responses, the attributes are mapped to specific fields from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel."];
+      contentType: ContentType.t option
+        [@ocaml.doc
+          "The content type of the channel message. For Amazon Lex V2 bot responses, the content type is application/amz-chime-lex-msgs for success responses and application/amz-chime-lex-error for failure responses. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
+      target: TargetList.t option
+        [@ocaml.doc
+          "The target of a message, a sender, a user, or a bot. Only the target and the sender can view targeted messages. Only users who can see targeted messages can take actions on them. However, administrators can delete targeted messages that they can\226\128\153t see."]}
     let make ?channelArn =
       fun ?messageId ->
         fun ?content ->
@@ -2221,22 +2983,28 @@ module ChannelMessage =
                         fun ?persistence ->
                           fun ?status ->
                             fun ?messageAttributes ->
-                              fun () ->
-                                {
-                                  channelArn;
-                                  messageId;
-                                  content;
-                                  metadata;
-                                  type_;
-                                  createdTimestamp;
-                                  lastEditedTimestamp;
-                                  lastUpdatedTimestamp;
-                                  sender;
-                                  redacted;
-                                  persistence;
-                                  status;
-                                  messageAttributes
-                                }
+                              fun ?subChannelId ->
+                                fun ?contentType ->
+                                  fun ?target ->
+                                    fun () ->
+                                      {
+                                        channelArn;
+                                        messageId;
+                                        content;
+                                        metadata;
+                                        type_;
+                                        createdTimestamp;
+                                        lastEditedTimestamp;
+                                        lastUpdatedTimestamp;
+                                        sender;
+                                        redacted;
+                                        persistence;
+                                        status;
+                                        messageAttributes;
+                                        subChannelId;
+                                        contentType;
+                                        target
+                                      }
     let to_value x =
       structure_to_value
         [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
@@ -2257,9 +3025,20 @@ module ChannelMessage =
         ("Status",
           (Option.map x.status ~f:ChannelMessageStatusStructure.to_value));
         ("MessageAttributes",
-          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value))]
+          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value));
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("Target", (Option.map x.target ~f:TargetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let target =
+        (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "Target") in
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let messageAttributes =
         (Option.map ~f:MessageAttributeMap.of_xml)
           (Xml.child xml_arg0 "MessageAttributes") in
@@ -2293,59 +3072,40 @@ module ChannelMessage =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?messageAttributes ?status ?persistence ?redacted ?sender
-        ?lastUpdatedTimestamp ?lastEditedTimestamp ?createdTimestamp ?type_
-        ?metadata ?content ?messageId ?channelArn ()
+      make ?target ?contentType ?subChannelId ?messageAttributes ?status
+        ?persistence ?redacted ?sender ?lastUpdatedTimestamp
+        ?lastEditedTimestamp ?createdTimestamp ?type_ ?metadata ?content
+        ?messageId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let target = field_map json__ "Target" TargetList.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let status =
-        field_map json "Status" ChannelMessageStatusStructure.of_json in
+        field_map json__ "Status" ChannelMessageStatusStructure.of_json in
       let persistence =
-        field_map json "Persistence" ChannelMessagePersistenceType.of_json in
-      let redacted = field_map json "Redacted" NonNullableBoolean.of_json in
-      let sender = field_map json "Sender" Identity.of_json in
+        field_map json__ "Persistence" ChannelMessagePersistenceType.of_json in
+      let redacted = field_map json__ "Redacted" NonNullableBoolean.of_json in
+      let sender = field_map json__ "Sender" Identity.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let lastEditedTimestamp =
-        field_map json "LastEditedTimestamp" Timestamp.of_json in
+        field_map json__ "LastEditedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let type_ = field_map json "Type" ChannelMessageType.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let content = field_map json "Content" Content.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?messageAttributes ?status ?persistence ?redacted ?sender
-        ?lastUpdatedTimestamp ?lastEditedTimestamp ?createdTimestamp ?type_
-        ?metadata ?content ?messageId ?channelArn ()
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let type_ = field_map json__ "Type" ChannelMessageType.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let content = field_map json__ "Content" Content.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?target ?contentType ?subChannelId ?messageAttributes ?status
+        ?persistence ?redacted ?sender ?lastUpdatedTimestamp
+        ?lastEditedTimestamp ?createdTimestamp ?type_ ?metadata ?content
+        ?messageId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a message in a channel."]
-module NotFoundException =
-  struct
-    type nonrec t = {
-      code: ErrorCode.t option ;
-      message: String_.t option }
-    let make ?code = fun ?message -> fun () -> { code; message }
-    let to_value x =
-      structure_to_value
-        [("Code", (Option.map x.code ~f:ErrorCode.to_value));
-        ("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
-      make ?message ?code ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
-      make ?message ?code ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more of the resources in the request does not exist in the system."]
 module Channel =
   struct
     type nonrec t =
@@ -2368,7 +3128,12 @@ module Channel =
       lastUpdatedTimestamp: Timestamp.t option
         [@ocaml.doc "The time at which a channel was last updated."];
       channelFlowArn: ChimeArn.t option
-        [@ocaml.doc "The ARN of the channel flow."]}
+        [@ocaml.doc "The ARN of the channel flow."];
+      elasticChannelConfiguration: ElasticChannelConfiguration.t option
+        [@ocaml.doc
+          "The attributes required to configure and create an elastic channel. An elastic channel can support a maximum of 1-million members."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc "Settings that control when a channel expires."]}
     let make ?name =
       fun ?channelArn ->
         fun ?mode ->
@@ -2379,19 +3144,23 @@ module Channel =
                   fun ?lastMessageTimestamp ->
                     fun ?lastUpdatedTimestamp ->
                       fun ?channelFlowArn ->
-                        fun () ->
-                          {
-                            name;
-                            channelArn;
-                            mode;
-                            privacy;
-                            metadata;
-                            createdBy;
-                            createdTimestamp;
-                            lastMessageTimestamp;
-                            lastUpdatedTimestamp;
-                            channelFlowArn
-                          }
+                        fun ?elasticChannelConfiguration ->
+                          fun ?expirationSettings ->
+                            fun () ->
+                              {
+                                name;
+                                channelArn;
+                                mode;
+                                privacy;
+                                metadata;
+                                createdBy;
+                                createdTimestamp;
+                                lastMessageTimestamp;
+                                lastUpdatedTimestamp;
+                                channelFlowArn;
+                                elasticChannelConfiguration;
+                                expirationSettings
+                              }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:NonEmptyResourceName.to_value));
@@ -2407,9 +3176,20 @@ module Channel =
         ("LastUpdatedTimestamp",
           (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
         ("ChannelFlowArn",
-          (Option.map x.channelFlowArn ~f:ChimeArn.to_value))]
+          (Option.map x.channelFlowArn ~f:ChimeArn.to_value));
+        ("ElasticChannelConfiguration",
+          (Option.map x.elasticChannelConfiguration
+             ~f:ElasticChannelConfiguration.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let elasticChannelConfiguration =
+        (Option.map ~f:ElasticChannelConfiguration.of_xml)
+          (Xml.child xml_arg0 "ElasticChannelConfiguration") in
       let channelFlowArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       let lastUpdatedTimestamp =
@@ -2434,27 +3214,32 @@ module Channel =
       let name =
         (Option.map ~f:NonEmptyResourceName.of_xml)
           (Xml.child xml_arg0 "Name") in
-      make ?channelFlowArn ?lastUpdatedTimestamp ?lastMessageTimestamp
-        ?createdTimestamp ?createdBy ?metadata ?privacy ?mode ?channelArn
-        ?name ()
+      make ?expirationSettings ?elasticChannelConfiguration ?channelFlowArn
+        ?lastUpdatedTimestamp ?lastMessageTimestamp ?createdTimestamp
+        ?createdBy ?metadata ?privacy ?mode ?channelArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let elasticChannelConfiguration =
+        field_map json__ "ElasticChannelConfiguration"
+          ElasticChannelConfiguration.of_json in
+      let channelFlowArn = field_map json__ "ChannelFlowArn" ChimeArn.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let lastMessageTimestamp =
-        field_map json "LastMessageTimestamp" Timestamp.of_json in
+        field_map json__ "LastMessageTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let createdBy = field_map json "CreatedBy" Identity.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
-      let mode = field_map json "Mode" ChannelMode.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
-      make ?channelFlowArn ?lastUpdatedTimestamp ?lastMessageTimestamp
-        ?createdTimestamp ?createdBy ?metadata ?privacy ?mode ?channelArn
-        ?name ()
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let createdBy = field_map json__ "CreatedBy" Identity.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let privacy = field_map json__ "Privacy" ChannelPrivacy.of_json in
+      let mode = field_map json__ "Mode" ChannelMode.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      make ?expirationSettings ?elasticChannelConfiguration ?channelFlowArn
+        ?lastUpdatedTimestamp ?lastMessageTimestamp ?createdTimestamp
+        ?createdBy ?metadata ?privacy ?mode ?channelArn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a channel."]
 module ChannelModerator =
@@ -2493,12 +3278,12 @@ module ChannelModerator =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Moderator") in
       make ?createdBy ?createdTimestamp ?channelArn ?moderator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdBy = field_map json "CreatedBy" Identity.of_json in
+    let of_json json__ =
+      let createdBy = field_map json__ "CreatedBy" Identity.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let moderator = field_map json "Moderator" Identity.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let moderator = field_map json__ "Moderator" Identity.of_json in
       make ?createdBy ?createdTimestamp ?channelArn ?moderator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a channel moderator."]
@@ -2519,22 +3304,26 @@ module ChannelMembership =
         [@ocaml.doc "The time at which the channel membership was created."];
       lastUpdatedTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The time at which a channel membership was last updated."]}
+          "The time at which a channel membership was last updated."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel that a user belongs to."]}
     let make ?invitedBy =
       fun ?type_ ->
         fun ?member ->
           fun ?channelArn ->
             fun ?createdTimestamp ->
               fun ?lastUpdatedTimestamp ->
-                fun () ->
-                  {
-                    invitedBy;
-                    type_;
-                    member;
-                    channelArn;
-                    createdTimestamp;
-                    lastUpdatedTimestamp
-                  }
+                fun ?subChannelId ->
+                  fun () ->
+                    {
+                      invitedBy;
+                      type_;
+                      member;
+                      channelArn;
+                      createdTimestamp;
+                      lastUpdatedTimestamp;
+                      subChannelId
+                    }
     let to_value x =
       structure_to_value
         [("InvitedBy", (Option.map x.invitedBy ~f:Identity.to_value));
@@ -2544,9 +3333,14 @@ module ChannelMembership =
         ("CreatedTimestamp",
           (Option.map x.createdTimestamp ~f:Timestamp.to_value));
         ("LastUpdatedTimestamp",
-          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let lastUpdatedTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "LastUpdatedTimestamp") in
@@ -2562,20 +3356,21 @@ module ChannelMembership =
           (Xml.child xml_arg0 "Type") in
       let invitedBy =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "InvitedBy") in
-      make ?lastUpdatedTimestamp ?createdTimestamp ?channelArn ?member ?type_
-        ?invitedBy ()
+      make ?subChannelId ?lastUpdatedTimestamp ?createdTimestamp ?channelArn
+        ?member ?type_ ?invitedBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let member = field_map json "Member" Identity.of_json in
-      let type_ = field_map json "Type" ChannelMembershipType.of_json in
-      let invitedBy = field_map json "InvitedBy" Identity.of_json in
-      make ?lastUpdatedTimestamp ?createdTimestamp ?channelArn ?member ?type_
-        ?invitedBy ()
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let member = field_map json__ "Member" Identity.of_json in
+      let type_ = field_map json__ "Type" ChannelMembershipType.of_json in
+      let invitedBy = field_map json__ "InvitedBy" Identity.of_json in
+      make ?subChannelId ?lastUpdatedTimestamp ?createdTimestamp ?channelArn
+        ?member ?type_ ?invitedBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a channel member."]
 module ChannelFlow =
@@ -2634,14 +3429,14 @@ module ChannelFlow =
       make ?lastUpdatedTimestamp ?createdTimestamp ?name ?processors
         ?channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let name = field_map json "Name" NonEmptyResourceName.of_json in
-      let processors = field_map json "Processors" ProcessorList.of_json in
-      let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      let processors = field_map json__ "Processors" ProcessorList.of_json in
+      let channelFlowArn = field_map json__ "ChannelFlowArn" ChimeArn.of_json in
       make ?lastUpdatedTimestamp ?createdTimestamp ?name ?processors
         ?channelFlowArn ()
     let to_json v = composed_to_json to_value v
@@ -2684,12 +3479,12 @@ module ChannelBan =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       make ?createdBy ?createdTimestamp ?channelArn ?member ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdBy = field_map json "CreatedBy" Identity.of_json in
+    let of_json json__ =
+      let createdBy = field_map json__ "CreatedBy" Identity.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let member = field_map json "Member" Identity.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let member = field_map json__ "Member" Identity.of_json in
       make ?createdBy ?createdTimestamp ?channelArn ?member ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a channel ban."]
@@ -2710,12 +3505,96 @@ module ResourceLimitExceededException =
       let code = (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ErrorCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request exceeds the resource limit."]
+module ChannelId =
+  struct
+    type nonrec t = string
+    let context_ = "ChannelId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9]([A-Za-z0-9\\:\\-\\_\\.\\@]{0,62}[A-Za-z0-9])?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChannelId" j
+    let to_json = simple_to_json to_value
+  end
+module ChannelMemberArns =
+  struct
+    type nonrec t = ChimeArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChimeArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChimeArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ChannelMemberArns" ~of_json:ChimeArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ChannelModeratorArns =
+  struct
+    type nonrec t = ChimeArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChimeArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChimeArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ChannelModeratorArns" ~of_json:ChimeArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CallbackIdType =
   struct
     type nonrec t = string
@@ -2739,27 +3618,38 @@ module ChannelMessageCallback =
     type nonrec t =
       {
       messageId: MessageId.t [@ocaml.doc "The message ID."];
-      content: NonEmptyContent.t option [@ocaml.doc "The message content."];
+      content: NonEmptyContent.t option
+        [@ocaml.doc
+          "The message content. For Amazon Lex V2 bot responses, this field holds a list of messages originating from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
       metadata: Metadata.t option [@ocaml.doc "The message metadata."];
       pushNotification: PushNotificationConfiguration.t option
         [@ocaml.doc "The push notification configuration of the message."];
       messageAttributes: MessageAttributeMap.t option
         [@ocaml.doc
-          "The attributes for the message, used for message filtering along with a FilterRule defined in the PushNotificationPreferences."]}
+          "The attributes for the channel message. For Amazon Lex V2 bot responses, the attributes are mapped to specific fields from the bot. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel."];
+      contentType: ContentType.t option
+        [@ocaml.doc
+          "The content type of the call-back message. For Amazon Lex V2 bot responses, the content type is application/amz-chime-lex-msgs for success responses and application/amz-chime-lex-error for failure responses. For more information, refer to Processing responses from an AppInstanceBot in the Amazon Chime SDK Messaging Developer Guide."]}
     let context_ = "ChannelMessageCallback"
     let make ?content =
       fun ?metadata ->
         fun ?pushNotification ->
           fun ?messageAttributes ->
-            fun ~messageId ->
-              fun () ->
-                {
-                  content;
-                  metadata;
-                  pushNotification;
-                  messageAttributes;
-                  messageId
-                }
+            fun ?subChannelId ->
+              fun ?contentType ->
+                fun ~messageId ->
+                  fun () ->
+                    {
+                      content;
+                      metadata;
+                      pushNotification;
+                      messageAttributes;
+                      subChannelId;
+                      contentType;
+                      messageId
+                    }
     let to_value x =
       structure_to_value
         [("MessageId", (Some (MessageId.to_value x.messageId)));
@@ -2769,9 +3659,17 @@ module ChannelMessageCallback =
           (Option.map x.pushNotification
              ~f:PushNotificationConfiguration.to_value));
         ("MessageAttributes",
-          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value))]
+          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value));
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let messageAttributes =
         (Option.map ~f:MessageAttributeMap.of_xml)
           (Xml.child xml_arg0 "MessageAttributes") in
@@ -2785,20 +3683,22 @@ module ChannelMessageCallback =
       let messageId =
         MessageId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
-      make ?messageAttributes ?pushNotification ?metadata ?content ~messageId
-        ()
+      make ?contentType ?subChannelId ?messageAttributes ?pushNotification
+        ?metadata ?content ~messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let pushNotification =
-        field_map json "PushNotification"
+        field_map json__ "PushNotification"
           PushNotificationConfiguration.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let content = field_map json "Content" NonEmptyContent.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      make ?messageAttributes ?pushNotification ?metadata ?content ~messageId
-        ()
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let content = field_map json__ "Content" NonEmptyContent.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      make ?contentType ?subChannelId ?messageAttributes ?pushNotification
+        ?metadata ?content ~messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stores information about a callback."]
 module BatchChannelMemberships =
@@ -2809,24 +3709,33 @@ module BatchChannelMemberships =
         [@ocaml.doc
           "The identifier of the member who invited another member."];
       type_: ChannelMembershipType.t option
-        [@ocaml.doc "The membership types set for the channel users."];
+        [@ocaml.doc "The membership types set for the channel members."];
       members: Members.t option
         [@ocaml.doc "The users successfully added to the request."];
       channelArn: ChimeArn.t option
-        [@ocaml.doc "The ARN of the channel to which you're adding users."]}
+        [@ocaml.doc "The ARN of the channel to which you're adding members."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel."]}
     let make ?invitedBy =
       fun ?type_ ->
         fun ?members ->
           fun ?channelArn ->
-            fun () -> { invitedBy; type_; members; channelArn }
+            fun ?subChannelId ->
+              fun () ->
+                { invitedBy; type_; members; channelArn; subChannelId }
     let to_value x =
       structure_to_value
         [("InvitedBy", (Option.map x.invitedBy ~f:Identity.to_value));
         ("Type", (Option.map x.type_ ~f:ChannelMembershipType.to_value));
         ("Members", (Option.map x.members ~f:Members.to_value));
-        ("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value))]
+        ("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       let members =
@@ -2836,14 +3745,15 @@ module BatchChannelMemberships =
           (Xml.child xml_arg0 "Type") in
       let invitedBy =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "InvitedBy") in
-      make ?channelArn ?members ?type_ ?invitedBy ()
+      make ?subChannelId ?channelArn ?members ?type_ ?invitedBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      let members = field_map json "Members" Members.of_json in
-      let type_ = field_map json "Type" ChannelMembershipType.of_json in
-      let invitedBy = field_map json "InvitedBy" Identity.of_json in
-      make ?channelArn ?members ?type_ ?invitedBy ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      let members = field_map json__ "Members" Members.of_json in
+      let type_ = field_map json__ "Type" ChannelMembershipType.of_json in
+      let invitedBy = field_map json__ "InvitedBy" Identity.of_json in
+      make ?subChannelId ?channelArn ?members ?type_ ?invitedBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The membership information, including member ARNs, the channel ARN, and membership types."]
@@ -2851,6 +3761,9 @@ module BatchCreateChannelMembershipErrors =
   struct
     type nonrec t = BatchCreateChannelMembershipError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchCreateChannelMembershipError.to_value)) |>
         (fun x -> `List x)
@@ -2883,6 +3796,9 @@ module MemberArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChimeArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3003,36 +3919,38 @@ module UpdateChannelResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update a channel's attributes. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Update a channel's attributes. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelRequest =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
-      name: NonEmptyResourceName.t [@ocaml.doc "The name of the channel."];
-      mode: ChannelMode.t [@ocaml.doc "The mode of the update request."];
+      name: NonEmptyResourceName.t option
+        [@ocaml.doc "The name of the channel."];
+      mode: ChannelMode.t option
+        [@ocaml.doc "The mode of the update request."];
       metadata: Metadata.t option
         [@ocaml.doc "The metadata for the update request."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "UpdateChannelRequest"
-    let make ?metadata =
-      fun ~channelArn ->
-        fun ~name ->
-          fun ~mode ->
+    let make ?name =
+      fun ?mode ->
+        fun ?metadata ->
+          fun ~channelArn ->
             fun ~chimeBearer ->
-              fun () -> { metadata; channelArn; name; mode; chimeBearer }
+              fun () -> { name; mode; metadata; channelArn; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
-        ("Name", (Some (NonEmptyResourceName.to_value x.name)));
-        ("Mode", (Some (ChannelMode.to_value x.mode)));
+        ("Name", (Option.map x.name ~f:NonEmptyResourceName.to_value));
+        ("Mode", (Option.map x.mode ~f:ChannelMode.to_value));
         ("Metadata", (Option.map x.metadata ~f:Metadata.to_value));
         ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
     let to_query v = to_query to_value v
@@ -3043,25 +3961,25 @@ module UpdateChannelRequest =
       let metadata =
         (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       let mode =
-        ChannelMode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+        (Option.map ~f:ChannelMode.of_xml) (Xml.child xml_arg0 "Mode") in
       let name =
-        NonEmptyResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:NonEmptyResourceName.of_xml)
+          (Xml.child xml_arg0 "Name") in
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ?metadata ~mode ~name ~channelArn ()
+      make ~chimeBearer ?metadata ?mode ?name ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let mode = field_map_exn json "Mode" ChannelMode.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ?metadata ~mode ~name ~channelArn ()
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let mode = field_map json__ "Mode" ChannelMode.of_json in
+      let name = field_map json__ "Name" NonEmptyResourceName.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ~chimeBearer ?metadata ?mode ?name ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Update a channel's attributes. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Update a channel's attributes. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelReadMarkerResponse =
   struct
     type nonrec t =
@@ -3162,12 +4080,12 @@ module UpdateChannelReadMarkerResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The details of the time when a user last read messages in a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "The details of the time when a user last read messages in a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelReadMarkerRequest =
   struct
     type nonrec t =
@@ -3175,7 +4093,7 @@ module UpdateChannelReadMarkerRequest =
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "UpdateChannelReadMarkerRequest"
     let make ~channelArn =
       fun ~chimeBearer -> fun () -> { channelArn; chimeBearer }
@@ -3193,13 +4111,13 @@ module UpdateChannelReadMarkerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The details of the time when a user last read messages in a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "The details of the time when a user last read messages in a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelMessageResponse =
   struct
     type nonrec t =
@@ -3208,7 +4126,9 @@ module UpdateChannelMessageResponse =
       messageId: MessageId.t option
         [@ocaml.doc "The ID string of the message being updated."];
       status: ChannelMessageStatusStructure.t option
-        [@ocaml.doc "The status of the message update."]}
+        [@ocaml.doc "The status of the message update."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the response."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -3220,7 +4140,9 @@ module UpdateChannelMessageResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?channelArn =
       fun ?messageId ->
-        fun ?status -> fun () -> { channelArn; messageId; status }
+        fun ?status ->
+          fun ?subChannelId ->
+            fun () -> { channelArn; messageId; status; subChannelId }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3302,9 +4224,14 @@ module UpdateChannelMessageResponse =
         [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
         ("MessageId", (Option.map x.messageId ~f:MessageId.to_value));
         ("Status",
-          (Option.map x.status ~f:ChannelMessageStatusStructure.to_value))]
+          (Option.map x.status ~f:ChannelMessageStatusStructure.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let status =
         (Option.map ~f:ChannelMessageStatusStructure.of_xml)
           (Xml.child xml_arg0 "Status") in
@@ -3312,17 +4239,18 @@ module UpdateChannelMessageResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?status ?messageId ?channelArn ()
+      make ?subChannelId ?status ?messageId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let status =
-        field_map json "Status" ChannelMessageStatusStructure.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?status ?messageId ?channelArn ()
+        field_map json__ "Status" ChannelMessageStatusStructure.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ?status ?messageId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the content of a message. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Updates the content of a message. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelMessageRequest =
   struct
     type nonrec t =
@@ -3330,55 +4258,83 @@ module UpdateChannelMessageRequest =
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
       messageId: MessageId.t
         [@ocaml.doc "The ID string of the message being updated."];
-      content: Content.t option
-        [@ocaml.doc "The content of the message being updated."];
+      content: NonEmptyContent.t
+        [@ocaml.doc "The content of the channel message."];
       metadata: Metadata.t option
         [@ocaml.doc "The metadata of the message being updated."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when updating messages in a SubChannel that the user belongs to."];
+      contentType: ContentType.t option
+        [@ocaml.doc "The content type of the channel message."]}
     let context_ = "UpdateChannelMessageRequest"
-    let make ?content =
-      fun ?metadata ->
-        fun ~channelArn ->
-          fun ~messageId ->
-            fun ~chimeBearer ->
-              fun () ->
-                { content; metadata; channelArn; messageId; chimeBearer }
+    let make ?metadata =
+      fun ?subChannelId ->
+        fun ?contentType ->
+          fun ~channelArn ->
+            fun ~messageId ->
+              fun ~content ->
+                fun ~chimeBearer ->
+                  fun () ->
+                    {
+                      metadata;
+                      subChannelId;
+                      contentType;
+                      channelArn;
+                      messageId;
+                      content;
+                      chimeBearer
+                    }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("messageId", (Some (MessageId.to_value x.messageId)));
-        ("Content", (Option.map x.content ~f:Content.to_value));
+        ("Content", (Some (NonEmptyContent.to_value x.content)));
         ("Metadata", (Option.map x.metadata ~f:Metadata.to_value));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value));
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
       let metadata =
         (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "Metadata") in
       let content =
-        (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Content") in
+        NonEmptyContent.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
       let messageId =
         MessageId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "messageId") in
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ?metadata ?content ~messageId ~channelArn ()
+      make ?contentType ?subChannelId ~chimeBearer ?metadata ~content
+        ~messageId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let content = field_map json "Content" Content.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ?metadata ?content ~messageId ~channelArn ()
+    let of_json json__ =
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let content = field_map_exn json__ "Content" NonEmptyContent.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?contentType ?subChannelId ~chimeBearer ?metadata ~content
+        ~messageId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the content of a message. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Updates the content of a message. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module UpdateChannelFlowResponse =
   struct
     type nonrec t =
@@ -3481,8 +4437,8 @@ module UpdateChannelFlowResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
+    let of_json json__ =
+      let channelFlowArn = field_map json__ "ChannelFlowArn" ChimeArn.of_json in
       make ?channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3518,11 +4474,12 @@ module UpdateChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~name ~processors ~channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
-      let processors = field_map_exn json "Processors" ProcessorList.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
+      let processors =
+        field_map_exn json__ "Processors" ProcessorList.of_json in
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
       make ~name ~processors ~channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3550,9 +4507,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3578,9 +4535,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3593,7 +4550,9 @@ module SendChannelMessageResponse =
       messageId: MessageId.t option
         [@ocaml.doc "The ID string assigned to each message."];
       status: ChannelMessageStatusStructure.t option
-        [@ocaml.doc "The status of the channel message."]}
+        [@ocaml.doc "The status of the channel message."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the response."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
@@ -3605,7 +4564,9 @@ module SendChannelMessageResponse =
       | `Unknown_operation_error of (string * string option) ]
     let make ?channelArn =
       fun ?messageId ->
-        fun ?status -> fun () -> { channelArn; messageId; status }
+        fun ?status ->
+          fun ?subChannelId ->
+            fun () -> { channelArn; messageId; status; subChannelId }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3687,9 +4648,14 @@ module SendChannelMessageResponse =
         [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
         ("MessageId", (Option.map x.messageId ~f:MessageId.to_value));
         ("Status",
-          (Option.map x.status ~f:ChannelMessageStatusStructure.to_value))]
+          (Option.map x.status ~f:ChannelMessageStatusStructure.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let status =
         (Option.map ~f:ChannelMessageStatusStructure.of_xml)
           (Xml.child xml_arg0 "Status") in
@@ -3697,25 +4663,28 @@ module SendChannelMessageResponse =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?status ?messageId ?channelArn ()
+      make ?subChannelId ?status ?messageId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let status =
-        field_map json "Status" ChannelMessageStatusStructure.of_json in
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?status ?messageId ?channelArn ()
+        field_map json__ "Status" ChannelMessageStatusStructure.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ?status ?messageId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a message to a particular channel that the member is a part of. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header. Also, STANDARD messages can contain 4KB of data and the 1KB of metadata. CONTROL messages can contain 30 bytes of data and no metadata."]
+       "Sends a message to a particular channel that the member is a part of. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. Also, STANDARD messages can be up to 4KB in size and contain metadata. Metadata is arbitrary, and you can use it in a variety of ways, such as containing a link to an attachment. CONTROL messages are limited to 30 bytes and do not contain metadata."]
 module SendChannelMessageRequest =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
-      content: NonEmptyContent.t [@ocaml.doc "The content of the message."];
+      content: NonEmptyContent.t
+        [@ocaml.doc "The content of the channel message."];
       type_: ChannelMessageType.t
-        [@ocaml.doc "The type of message, STANDARD or CONTROL."];
+        [@ocaml.doc
+          "The type of message, STANDARD or CONTROL. STANDARD messages can be up to 4KB in size and contain metadata. Metadata is arbitrary, and you can use it in a variety of ways, such as containing a link to an attachment. CONTROL messages are limited to 30 bytes and do not contain metadata."];
       persistence: ChannelMessagePersistenceType.t
         [@ocaml.doc
           "Boolean that controls whether the message is persisted on the back end. Required."];
@@ -3725,34 +4694,47 @@ module SendChannelMessageRequest =
         [@ocaml.doc "The Idempotency token for each client request."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."];
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
       pushNotification: PushNotificationConfiguration.t option
         [@ocaml.doc "The push notification configuration of the message."];
       messageAttributes: MessageAttributeMap.t option
         [@ocaml.doc
-          "The attributes for the message, used for message filtering along with a FilterRule defined in the PushNotificationPreferences."]}
+          "The attributes for the message, used for message filtering along with a FilterRule defined in the PushNotificationPreferences."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the request."];
+      contentType: ContentType.t option
+        [@ocaml.doc "The content type of the channel message."];
+      target: TargetList.t option
+        [@ocaml.doc
+          "The target of a message. Must be a member of the channel, such as another user, a bot, or the sender. Only the target and the sender can view targeted messages. Only users who can see targeted messages can take actions on them. However, administrators can delete targeted messages that they can\226\128\153t see."]}
     let context_ = "SendChannelMessageRequest"
     let make ?metadata =
       fun ?pushNotification ->
         fun ?messageAttributes ->
-          fun ~channelArn ->
-            fun ~content ->
-              fun ~type_ ->
-                fun ~persistence ->
-                  fun ~clientRequestToken ->
-                    fun ~chimeBearer ->
-                      fun () ->
-                        {
-                          metadata;
-                          pushNotification;
-                          messageAttributes;
-                          channelArn;
-                          content;
-                          type_;
-                          persistence;
-                          clientRequestToken;
-                          chimeBearer
-                        }
+          fun ?subChannelId ->
+            fun ?contentType ->
+              fun ?target ->
+                fun ~channelArn ->
+                  fun ~content ->
+                    fun ~type_ ->
+                      fun ~persistence ->
+                        fun ~clientRequestToken ->
+                          fun ~chimeBearer ->
+                            fun () ->
+                              {
+                                metadata;
+                                pushNotification;
+                                messageAttributes;
+                                subChannelId;
+                                contentType;
+                                target;
+                                channelArn;
+                                content;
+                                type_;
+                                persistence;
+                                clientRequestToken;
+                                chimeBearer
+                              }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
@@ -3768,9 +4750,20 @@ module SendChannelMessageRequest =
           (Option.map x.pushNotification
              ~f:PushNotificationConfiguration.to_value));
         ("MessageAttributes",
-          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value))]
+          (Option.map x.messageAttributes ~f:MessageAttributeMap.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value));
+        ("ContentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("Target", (Option.map x.target ~f:TargetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let target =
+        (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "Target") in
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "ContentType") in
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let messageAttributes =
         (Option.map ~f:MessageAttributeMap.of_xml)
           (Xml.child xml_arg0 "MessageAttributes") in
@@ -3797,41 +4790,44 @@ module SendChannelMessageRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ?messageAttributes ?pushNotification ~chimeBearer
-        ~clientRequestToken ?metadata ~persistence ~type_ ~content
-        ~channelArn ()
+      make ?target ?contentType ?subChannelId ?messageAttributes
+        ?pushNotification ~chimeBearer ~clientRequestToken ?metadata
+        ~persistence ~type_ ~content ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let target = field_map json__ "Target" TargetList.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let messageAttributes =
-        field_map json "MessageAttributes" MessageAttributeMap.of_json in
+        field_map json__ "MessageAttributes" MessageAttributeMap.of_json in
       let pushNotification =
-        field_map json "PushNotification"
+        field_map json__ "PushNotification"
           PushNotificationConfiguration.of_json in
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
       let persistence =
-        field_map_exn json "Persistence"
+        field_map_exn json__ "Persistence"
           ChannelMessagePersistenceType.of_json in
-      let type_ = field_map_exn json "Type" ChannelMessageType.of_json in
-      let content = field_map_exn json "Content" NonEmptyContent.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ?messageAttributes ?pushNotification ~chimeBearer
-        ~clientRequestToken ?metadata ~persistence ~type_ ~content
-        ~channelArn ()
+      let type_ = field_map_exn json__ "Type" ChannelMessageType.of_json in
+      let content = field_map_exn json__ "Content" NonEmptyContent.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?target ?contentType ?subChannelId ?messageAttributes
+        ?pushNotification ~chimeBearer ~clientRequestToken ?metadata
+        ~persistence ~type_ ~content ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sends a message to a particular channel that the member is a part of. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header. Also, STANDARD messages can contain 4KB of data and the 1KB of metadata. CONTROL messages can contain 30 bytes of data and no metadata."]
-module RedactChannelMessageResponse =
+       "Sends a message to a particular channel that the member is a part of. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. Also, STANDARD messages can be up to 4KB in size and contain metadata. Metadata is arbitrary, and you can use it in a variety of ways, such as containing a link to an attachment. CONTROL messages are limited to 30 bytes and do not contain metadata."]
+module SearchChannelsResponse =
   struct
     type nonrec t =
       {
-      channelArn: ChimeArn.t option
+      channels: ChannelSummaryList.t option
+        [@ocaml.doc "A list of the channels in the request."];
+      nextToken: NextToken.t option
         [@ocaml.doc
-          "The ARN of the channel containing the messages that you want to redact."];
-      messageId: MessageId.t option
-        [@ocaml.doc "The ID of the message being redacted."]}
+          "The token returned from previous API responses until the number of channels is reached."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -3840,8 +4836,7 @@ module RedactChannelMessageResponse =
       | `ThrottledClientException of ThrottledClientException.t 
       | `UnauthorizedClientException of UnauthorizedClientException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?channelArn =
-      fun ?messageId -> fun () -> { channelArn; messageId }
+    let make ?channels = fun ?nextToken -> fun () -> { channels; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -3912,23 +4907,201 @@ module RedactChannelMessageResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
-        ("MessageId", (Option.map x.messageId ~f:MessageId.to_value))]
+        [("Channels", (Option.map x.channels ~f:ChannelSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let channels =
+        (Option.map ~f:ChannelSummaryList.of_xml)
+          (Xml.child xml_arg0 "Channels") in
+      make ?nextToken ?channels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let channels = field_map json__ "Channels" ChannelSummaryList.of_json in
+      make ?nextToken ?channels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows the ChimeBearer to search channels by channel members. Users or bots can search across the channels that they belong to. Users in the AppInstanceAdmin role can search across all channels. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. This operation isn't supported for AppInstanceUsers with a large number of memberships."]
+module SearchChannelsRequest =
+  struct
+    type nonrec t =
+      {
+      chimeBearer: ChimeArn.t option
+        [@ocaml.doc
+          "The AppInstanceUserArn of the user making the API call."];
+      fields: SearchFields.t
+        [@ocaml.doc
+          "A list of the Field objects in the channel being searched."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of channels that you want returned."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token returned from previous API requests until the number of channels is reached."]}
+    let context_ = "SearchChannelsRequest"
+    let make ?chimeBearer =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~fields ->
+            fun () -> { chimeBearer; maxResults; nextToken; fields }
+    let to_value x =
+      structure_to_value
+        [("x-amz-chime-bearer",
+           (Option.map x.chimeBearer ~f:ChimeArn.to_value));
+        ("Fields", (Some (SearchFields.to_value x.fields)));
+        ("max-results", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max-results") in
+      let fields =
+        SearchFields.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Fields") in
+      let chimeBearer =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "x-amz-chime-bearer") in
+      make ?nextToken ?maxResults ~fields ?chimeBearer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let fields = field_map_exn json__ "Fields" SearchFields.of_json in
+      let chimeBearer = field_map json__ "ChimeBearer" ChimeArn.of_json in
+      make ?nextToken ?maxResults ~fields ?chimeBearer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows the ChimeBearer to search channels by channel members. Users or bots can search across the channels that they belong to. Users in the AppInstanceAdmin role can search across all channels. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. This operation isn't supported for AppInstanceUsers with a large number of memberships."]
+module RedactChannelMessageResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChimeArn.t option
+        [@ocaml.doc
+          "The ARN of the channel containing the messages that you want to redact."];
+      messageId: MessageId.t option
+        [@ocaml.doc "The ID of the message being redacted."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the response. Only required when redacting messages in a SubChannel that the user belongs to."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channelArn =
+      fun ?messageId ->
+        fun ?subChannelId ->
+          fun () -> { channelArn; messageId; subChannelId }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
+        ("MessageId", (Option.map x.messageId ~f:MessageId.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let messageId =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "MessageId") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?messageId ?channelArn ()
+      make ?subChannelId ?messageId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" MessageId.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?messageId ?channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let messageId = field_map json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ?messageId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Redacts message content, but not metadata. The message exists in the back end, but the action returns null content, and the state shows as redacted. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Redacts message content and metadata. The message exists in the back end, but the action returns null content, and the state shows as redacted. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module RedactChannelMessageRequest =
   struct
     type nonrec t =
@@ -3940,18 +5113,27 @@ module RedactChannelMessageRequest =
         [@ocaml.doc "The ID of the message being redacted."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the request."]}
     let context_ = "RedactChannelMessageRequest"
-    let make ~channelArn =
-      fun ~messageId ->
-        fun ~chimeBearer -> fun () -> { channelArn; messageId; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~messageId ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; messageId; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("messageId", (Some (MessageId.to_value x.messageId)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -3961,22 +5143,182 @@ module RedactChannelMessageRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~messageId ~channelArn ()
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~messageId ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Redacts message content, but not metadata. The message exists in the back end, but the action returns null content, and the state shows as redacted. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Redacts message content and metadata. The message exists in the back end, but the action returns null content, and the state shows as redacted. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
+module PutMessagingStreamingConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      streamingConfigurations: StreamingConfigurationList.t option
+        [@ocaml.doc "The requested streaming configurations."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamingConfigurations = fun () -> { streamingConfigurations }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamingConfigurations",
+           (Option.map x.streamingConfigurations
+              ~f:StreamingConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamingConfigurations =
+        (Option.map ~f:StreamingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "StreamingConfigurations") in
+      make ?streamingConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamingConfigurations =
+        field_map json__ "StreamingConfigurations"
+          StreamingConfigurationList.of_json in
+      make ?streamingConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the data streaming configuration for an AppInstance. For more information, see Streaming messaging data in the Amazon Chime SDK Developer Guide."]
+module PutMessagingStreamingConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the streaming configuration."];
+      streamingConfigurations: StreamingConfigurationList.t
+        [@ocaml.doc "The streaming configurations."]}
+    let context_ = "PutMessagingStreamingConfigurationsRequest"
+    let make ~appInstanceArn =
+      fun ~streamingConfigurations ->
+        fun () -> { appInstanceArn; streamingConfigurations }
+    let to_value x =
+      structure_to_value
+        [("appInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)));
+        ("StreamingConfigurations",
+          (Some
+             (StreamingConfigurationList.to_value x.streamingConfigurations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamingConfigurations =
+        StreamingConfigurationList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StreamingConfigurations") in
+      let appInstanceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
+      make ~streamingConfigurations ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamingConfigurations =
+        field_map_exn json__ "StreamingConfigurations"
+          StreamingConfigurationList.of_json in
+      let appInstanceArn =
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ~streamingConfigurations ~appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the data streaming configuration for an AppInstance. For more information, see Streaming messaging data in the Amazon Chime SDK Developer Guide."]
 module PutChannelMembershipPreferencesResponse =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t option [@ocaml.doc "The ARN of the channel."];
-      member: Identity.t option ;
+      member: Identity.t option [@ocaml.doc "The details of a user."];
       preferences: ChannelMembershipPreferences.t option
         [@ocaml.doc "The ARN and metadata of the member being added."]}
     type nonrec error =
@@ -4084,26 +5426,25 @@ module PutChannelMembershipPreferencesResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?preferences ?member ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferences =
-        field_map json "Preferences" ChannelMembershipPreferences.of_json in
-      let member = field_map json "Member" Identity.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+        field_map json__ "Preferences" ChannelMembershipPreferences.of_json in
+      let member = field_map json__ "Member" Identity.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?preferences ?member ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the membership preferences of an AppInstanceUser for the specified channel. The AppInstanceUser must be a member of the channel. Only the AppInstanceUser who owns the membership can set preferences. Users in the AppInstanceAdmin and channel moderator roles can't set preferences for other users. Banned users can't set membership preferences for the channel from which they are banned."]
+       "Sets the membership preferences of an AppInstanceUser or AppInstanceBot for the specified channel. The user or bot must be a member of the channel. Only the user or bot who owns the membership can set preferences. Users or bots in the AppInstanceAdmin and channel moderator roles can't set preferences for other users. Banned users or bots can't set membership preferences for the channel from which they are banned. The x-amz-chime-bearer request header is mandatory. Use the ARN of an AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module PutChannelMembershipPreferencesRequest =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
       memberArn: ChimeArn.t
-        [@ocaml.doc
-          "The AppInstanceUserArn of the member setting the preferences."];
+        [@ocaml.doc "The ARN of the member setting the preferences."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserARN of the user making the API call."];
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
       preferences: ChannelMembershipPreferences.t
         [@ocaml.doc
           "The channel membership preferences of an AppInstanceUser ."]}
@@ -4136,16 +5477,179 @@ module PutChannelMembershipPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~preferences ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferences =
-        field_map_exn json "Preferences" ChannelMembershipPreferences.of_json in
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "Preferences"
+          ChannelMembershipPreferences.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~preferences ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Sets the membership preferences of an AppInstanceUser for the specified channel. The AppInstanceUser must be a member of the channel. Only the AppInstanceUser who owns the membership can set preferences. Users in the AppInstanceAdmin and channel moderator roles can't set preferences for other users. Banned users can't set membership preferences for the channel from which they are banned."]
+       "Sets the membership preferences of an AppInstanceUser or AppInstanceBot for the specified channel. The user or bot must be a member of the channel. Only the user or bot who owns the membership can set preferences. Users or bots in the AppInstanceAdmin and channel moderator roles can't set preferences for other users. Banned users or bots can't set membership preferences for the channel from which they are banned. The x-amz-chime-bearer request header is mandatory. Use the ARN of an AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
+module PutChannelExpirationSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChimeArn.t option [@ocaml.doc "The channel ARN."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which a channel is deleted."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channelArn =
+      fun ?expirationSettings -> fun () -> { channelArn; expirationSettings }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let channelArn =
+        (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?expirationSettings ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?expirationSettings ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the number of days before the channel is automatically deleted. A background process deletes expired channels within 6 hours of expiration. Actual deletion times may vary. Expired channels that have not yet been deleted appear as active, and you can update their expiration settings. The system honors the new settings. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
+module PutChannelExpirationSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
+      chimeBearer: ChimeArn.t option
+        [@ocaml.doc
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which a channel is deleted."]}
+    let context_ = "PutChannelExpirationSettingsRequest"
+    let make ?chimeBearer =
+      fun ?expirationSettings ->
+        fun ~channelArn ->
+          fun () -> { chimeBearer; expirationSettings; channelArn }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
+        ("x-amz-chime-bearer",
+          (Option.map x.chimeBearer ~f:ChimeArn.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let chimeBearer =
+        (Option.map ~f:ChimeArn.of_xml)
+          (Xml.child xml_arg0 "x-amz-chime-bearer") in
+      let channelArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
+      make ?expirationSettings ?chimeBearer ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let chimeBearer = field_map json__ "ChimeBearer" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?expirationSettings ?chimeBearer ~channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the number of days before the channel is automatically deleted. A background process deletes expired channels within 6 hours of expiration. Actual deletion times may vary. Expired channels that have not yet been deleted appear as active, and you can update their expiration settings. The system honors the new settings. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -4235,8 +5739,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags applied to an Amazon Chime SDK messaging resource."]
@@ -4255,12 +5759,177 @@ module ListTagsForResourceRequest =
         ChimeArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ChimeArn.of_json in
+    let of_json json__ =
+      let resourceARN = field_map_exn json__ "ResourceARN" ChimeArn.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the tags applied to an Amazon Chime SDK messaging resource."]
+module ListSubChannelsResponse =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChimeArn.t option
+        [@ocaml.doc "The ARN of elastic channel."];
+      subChannels: SubChannelSummaryList.t option
+        [@ocaml.doc "The information about each sub-channel."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token passed by previous API calls until all requested sub-channels are returned."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?channelArn =
+      fun ?subChannels ->
+        fun ?nextToken -> fun () -> { channelArn; subChannels; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
+        ("SubChannels",
+          (Option.map x.subChannels ~f:SubChannelSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let subChannels =
+        (Option.map ~f:SubChannelSummaryList.of_xml)
+          (Xml.child xml_arg0 "SubChannels") in
+      let channelArn =
+        (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
+      make ?nextToken ?subChannels ?channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let subChannels =
+        field_map json__ "SubChannels" SubChannelSummaryList.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?nextToken ?subChannels ?channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the SubChannels in an elastic channel when given a channel ID. Available only to the app instance admins and channel moderators of elastic channels."]
+module ListSubChannelsRequest =
+  struct
+    type nonrec t =
+      {
+      channelArn: ChimeArn.t [@ocaml.doc "The ARN of elastic channel."];
+      chimeBearer: ChimeArn.t
+        [@ocaml.doc
+          "The AppInstanceUserArn of the user making the API call."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of sub-channels that you want to return."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token passed by previous API calls until all requested sub-channels are returned."]}
+    let context_ = "ListSubChannelsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~channelArn ->
+          fun ~chimeBearer ->
+            fun () -> { maxResults; nextToken; channelArn; chimeBearer }
+    let to_value x =
+      structure_to_value
+        [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("max-results", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "max-results") in
+      let chimeBearer =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
+      let channelArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
+      make ?nextToken ?maxResults ~chimeBearer ~channelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?nextToken ?maxResults ~chimeBearer ~channelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the SubChannels in an elastic channel when given a channel ID. Available only to the app instance admins and channel moderators of elastic channels."]
 module ListChannelsResponse =
   struct
     type nonrec t =
@@ -4360,13 +6029,13 @@ module ListChannelsResponse =
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let channels = field_map json "Channels" ChannelSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let channels = field_map json__ "Channels" ChannelSummaryList.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all Channels created under a single Chime App as a paginated list. You can specify filters to narrow results. Functionality & restrictions Use privacy = PUBLIC to retrieve all public channels in the account. Only an AppInstanceAdmin can set privacy = PRIVATE to list the private channels in an account. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all Channels created under a single Chime App as a paginated list. You can specify filters to narrow results. Functionality & restrictions Use privacy = PUBLIC to retrieve all public channels in the account. Only an AppInstanceAdmin can set privacy = PRIVATE to list the private channels in an account. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelsRequest =
   struct
     type nonrec t =
@@ -4383,7 +6052,7 @@ module ListChannelsRequest =
           "The token passed by previous API calls until all requested channels are returned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "ListChannelsRequest"
     let make ?privacy =
       fun ?maxResults ->
@@ -4416,17 +6085,17 @@ module ListChannelsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?privacy ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let privacy = field_map json__ "Privacy" ChannelPrivacy.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~chimeBearer ?nextToken ?maxResults ?privacy ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all Channels created under a single Chime App as a paginated list. You can specify filters to narrow results. Functionality & restrictions Use privacy = PUBLIC to retrieve all public channels in the account. Only an AppInstanceAdmin can set privacy = PRIVATE to list the private channels in an account. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all Channels created under a single Chime App as a paginated list. You can specify filters to narrow results. Functionality & restrictions Use privacy = PUBLIC to retrieve all public channels in the account. Only an AppInstanceAdmin can set privacy = PRIVATE to list the private channels in an account. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelsModeratedByAppInstanceUserResponse =
   struct
     type nonrec t =
@@ -4528,21 +6197,21 @@ module ListChannelsModeratedByAppInstanceUserResponse =
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channels =
-        field_map json "Channels"
+        field_map json__ "Channels"
           ChannelModeratedByAppInstanceUserSummaryList.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of the channels moderated by an AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "A list of the channels moderated by an AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelsModeratedByAppInstanceUserRequest =
   struct
     type nonrec t =
       {
       appInstanceUserArn: ChimeArn.t option
-        [@ocaml.doc "The ARN of the user in the moderated channel."];
+        [@ocaml.doc "The ARN of the user or bot in the moderated channel."];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of channels in the request."];
       nextToken: NextToken.t option
@@ -4550,7 +6219,7 @@ module ListChannelsModeratedByAppInstanceUserRequest =
           "The token returned from previous API requests until the number of channels moderated by the user is reached."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "ListChannelsModeratedByAppInstanceUserRequest"
     let make ?appInstanceUserArn =
       fun ?maxResults ->
@@ -4579,16 +6248,16 @@ module ListChannelsModeratedByAppInstanceUserRequest =
           (Xml.child xml_arg0 "app-instance-user-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of the channels moderated by an AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "A list of the channels moderated by an AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelsAssociatedWithChannelFlowResponse =
   struct
     type nonrec t =
@@ -4690,10 +6359,10 @@ module ListChannelsAssociatedWithChannelFlowResponse =
           (Xml.child xml_arg0 "Channels") in
       make ?nextToken ?channels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channels =
-        field_map json "Channels"
+        field_map json__ "Channels"
           ChannelAssociatedWithFlowSummaryList.of_json in
       make ?nextToken ?channels ()
     let to_json v = composed_to_json to_value v
@@ -4731,11 +6400,11 @@ module ListChannelsAssociatedWithChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channel-flow-arn") in
       make ?nextToken ?maxResults ~channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
       make ?nextToken ?maxResults ~channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4848,16 +6517,16 @@ module ListChannelModeratorsResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelModerators ?nextToken ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelModerators =
-        field_map json "ChannelModerators"
+        field_map json__ "ChannelModerators"
           ChannelModeratorSummaryList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelModerators ?nextToken ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the moderators for a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all the moderators for a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelModeratorsRequest =
   struct
     type nonrec t =
@@ -4871,7 +6540,7 @@ module ListChannelModeratorsRequest =
           "The token passed by previous API calls until all requested moderators are returned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "ListChannelModeratorsRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -4898,15 +6567,15 @@ module ListChannelModeratorsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the moderators for a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all the moderators for a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelMessagesResponse =
   struct
     type nonrec t =
@@ -4919,7 +6588,9 @@ module ListChannelMessagesResponse =
           "The token passed by previous API calls until all requested messages are returned."];
       channelMessages: ChannelMessageSummaryList.t option
         [@ocaml.doc
-          "The information about, and content of, each requested message."]}
+          "The information about, and content of, each requested message."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the response."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
@@ -4931,7 +6602,9 @@ module ListChannelMessagesResponse =
     let make ?channelArn =
       fun ?nextToken ->
         fun ?channelMessages ->
-          fun () -> { channelArn; nextToken; channelMessages }
+          fun ?subChannelId ->
+            fun () ->
+              { channelArn; nextToken; channelMessages; subChannelId }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5005,9 +6678,14 @@ module ListChannelMessagesResponse =
         [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("ChannelMessages",
-          (Option.map x.channelMessages ~f:ChannelMessageSummaryList.to_value))]
+          (Option.map x.channelMessages ~f:ChannelMessageSummaryList.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let channelMessages =
         (Option.map ~f:ChannelMessageSummaryList.of_xml)
           (Xml.child xml_arg0 "ChannelMessages") in
@@ -5015,17 +6693,18 @@ module ListChannelMessagesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?channelMessages ?nextToken ?channelArn ()
+      make ?subChannelId ?channelMessages ?nextToken ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
       let channelMessages =
-        field_map json "ChannelMessages" ChannelMessageSummaryList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?channelMessages ?nextToken ?channelArn ()
+        field_map json__ "ChannelMessages" ChannelMessageSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ?channelMessages ?nextToken ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all the messages in a channel. Returns a paginated list of ChannelMessages. By default, sorted by creation timestamp in descending order. Redacted messages appear in the results as empty, since they are only redacted, not deleted. Deleted messages do not appear in the results. This action always returns the latest version of an edited message. Also, the x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "List all the messages in a channel. Returns a paginated list of ChannelMessages. By default, sorted by creation timestamp in descending order. Redacted messages appear in the results as empty, since they are only redacted, not deleted. Deleted messages do not appear in the results. This action always returns the latest version of an edited message. Also, the x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelMessagesRequest =
   struct
     type nonrec t =
@@ -5047,25 +6726,30 @@ module ListChannelMessagesRequest =
           "The token passed by previous API calls until all requested messages are returned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when listing the messages in a SubChannel that the user belongs to."]}
     let context_ = "ListChannelMessagesRequest"
     let make ?sortOrder =
       fun ?notBefore ->
         fun ?notAfter ->
           fun ?maxResults ->
             fun ?nextToken ->
-              fun ~channelArn ->
-                fun ~chimeBearer ->
-                  fun () ->
-                    {
-                      sortOrder;
-                      notBefore;
-                      notAfter;
-                      maxResults;
-                      nextToken;
-                      channelArn;
-                      chimeBearer
-                    }
+              fun ?subChannelId ->
+                fun ~channelArn ->
+                  fun ~chimeBearer ->
+                    fun () ->
+                      {
+                        sortOrder;
+                        notBefore;
+                        notAfter;
+                        maxResults;
+                        nextToken;
+                        subChannelId;
+                        channelArn;
+                        chimeBearer
+                      }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
@@ -5074,9 +6758,14 @@ module ListChannelMessagesRequest =
         ("not-after", (Option.map x.notAfter ~f:Timestamp.to_value));
         ("max-results", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("next-token", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -5093,22 +6782,23 @@ module ListChannelMessagesRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ?nextToken ?maxResults ?notAfter ?notBefore
-        ?sortOrder ~channelArn ()
+      make ?subChannelId ~chimeBearer ?nextToken ?maxResults ?notAfter
+        ?notBefore ?sortOrder ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let notAfter = field_map json "NotAfter" Timestamp.of_json in
-      let notBefore = field_map json "NotBefore" Timestamp.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ?nextToken ?maxResults ?notAfter ?notBefore
-        ?sortOrder ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let notAfter = field_map json__ "NotAfter" Timestamp.of_json in
+      let notBefore = field_map json__ "NotBefore" Timestamp.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ?nextToken ?maxResults ?notAfter
+        ?notBefore ?sortOrder ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "List all the messages in a channel. Returns a paginated list of ChannelMessages. By default, sorted by creation timestamp in descending order. Redacted messages appear in the results as empty, since they are only redacted, not deleted. Deleted messages do not appear in the results. This action always returns the latest version of an edited message. Also, the x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "List all the messages in a channel. Returns a paginated list of ChannelMessages. By default, sorted by creation timestamp in descending order. Redacted messages appear in the results as empty, since they are only redacted, not deleted. Deleted messages do not appear in the results. This action always returns the latest version of an edited message. Also, the x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelMembershipsResponse =
   struct
     type nonrec t =
@@ -5217,16 +6907,16 @@ module ListChannelMembershipsResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?nextToken ?channelMemberships ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channelMemberships =
-        field_map json "ChannelMemberships"
+        field_map json__ "ChannelMemberships"
           ChannelMembershipSummaryList.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?nextToken ?channelMemberships ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all channel memberships in a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header. If you want to list the channels to which a specific app instance user belongs, see the ListChannelMembershipsForAppInstanceUser API."]
+       "Lists all channel memberships in a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. If you want to list the channels to which a specific app instance user belongs, see the ListChannelMembershipsForAppInstanceUser API."]
 module ListChannelMembershipsRequest =
   struct
     type nonrec t =
@@ -5245,24 +6935,40 @@ module ListChannelMembershipsRequest =
           "The token passed by previous API calls until all requested channel memberships are returned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when listing a user's memberships in a particular sub-channel of an elastic channel."]}
     let context_ = "ListChannelMembershipsRequest"
     let make ?type_ =
       fun ?maxResults ->
         fun ?nextToken ->
-          fun ~channelArn ->
-            fun ~chimeBearer ->
-              fun () ->
-                { type_; maxResults; nextToken; channelArn; chimeBearer }
+          fun ?subChannelId ->
+            fun ~channelArn ->
+              fun ~chimeBearer ->
+                fun () ->
+                  {
+                    type_;
+                    maxResults;
+                    nextToken;
+                    subChannelId;
+                    channelArn;
+                    chimeBearer
+                  }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("type", (Option.map x.type_ ~f:ChannelMembershipType.to_value));
         ("max-results", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("next-token", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -5276,26 +6982,28 @@ module ListChannelMembershipsRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ?nextToken ?maxResults ?type_ ~channelArn ()
+      make ?subChannelId ~chimeBearer ?nextToken ?maxResults ?type_
+        ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let type_ = field_map json "Type" ChannelMembershipType.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ?nextToken ?maxResults ?type_ ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let type_ = field_map json__ "Type" ChannelMembershipType.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ?nextToken ?maxResults ?type_
+        ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all channel memberships in a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header. If you want to list the channels to which a specific app instance user belongs, see the ListChannelMembershipsForAppInstanceUser API."]
+       "Lists all channel memberships in a channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header. If you want to list the channels to which a specific app instance user belongs, see the ListChannelMembershipsForAppInstanceUser API."]
 module ListChannelMembershipsForAppInstanceUserResponse =
   struct
     type nonrec t =
       {
       channelMemberships:
         ChannelMembershipForAppInstanceUserSummaryList.t option
-        [@ocaml.doc
-          "The token passed by previous API calls until all requested users are returned."];
+        [@ocaml.doc "The information for the requested channel memberships."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token passed by previous API calls until all requested users are returned."]}
@@ -5392,21 +7100,21 @@ module ListChannelMembershipsForAppInstanceUserResponse =
           (Xml.child xml_arg0 "ChannelMemberships") in
       make ?nextToken ?channelMemberships ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channelMemberships =
-        field_map json "ChannelMemberships"
+        field_map json__ "ChannelMemberships"
           ChannelMembershipForAppInstanceUserSummaryList.of_json in
       make ?nextToken ?channelMemberships ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all channels that a particular AppInstanceUser is a part of. Only an AppInstanceAdmin can call the API with a user ARN that is not their own. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all channels that an AppInstanceUser or AppInstanceBot is a part of. Only an AppInstanceAdmin can call the API with a user ARN that is not their own. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelMembershipsForAppInstanceUserRequest =
   struct
     type nonrec t =
       {
       appInstanceUserArn: ChimeArn.t option
-        [@ocaml.doc "The ARN of the AppInstanceUsers"];
+        [@ocaml.doc "The ARN of the user or bot."];
       maxResults: MaxResults.t option
         [@ocaml.doc "The maximum number of users that you want returned."];
       nextToken: NextToken.t option
@@ -5414,7 +7122,7 @@ module ListChannelMembershipsForAppInstanceUserRequest =
           "The token returned from previous API requests until the number of channel memberships is reached."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "ListChannelMembershipsForAppInstanceUserRequest"
     let make ?appInstanceUserArn =
       fun ?maxResults ->
@@ -5443,16 +7151,16 @@ module ListChannelMembershipsForAppInstanceUserRequest =
           (Xml.child xml_arg0 "app-instance-user-arn") in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceUserArn =
-        field_map json "AppInstanceUserArn" ChimeArn.of_json in
+        field_map json__ "AppInstanceUserArn" ChimeArn.of_json in
       make ~chimeBearer ?nextToken ?maxResults ?appInstanceUserArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all channels that a particular AppInstanceUser is a part of. Only an AppInstanceAdmin can call the API with a user ARN that is not their own. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all channels that an AppInstanceUser or AppInstanceBot is a part of. Only an AppInstanceAdmin can call the API with a user ARN that is not their own. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelFlowsResponse =
   struct
     type nonrec t =
@@ -5554,10 +7262,10 @@ module ListChannelFlowsResponse =
           (Xml.child xml_arg0 "ChannelFlows") in
       make ?nextToken ?channelFlows ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let channelFlows =
-        field_map json "ChannelFlows" ChannelFlowSummaryList.of_json in
+        field_map json__ "ChannelFlows" ChannelFlowSummaryList.of_json in
       make ?nextToken ?channelFlows ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5594,11 +7302,11 @@ module ListChannelFlowsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "app-instance-arn") in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ?nextToken ?maxResults ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5709,15 +7417,15 @@ module ListChannelBansResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelBans ?nextToken ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelBans =
-        field_map json "ChannelBans" ChannelBanSummaryList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+        field_map json__ "ChannelBans" ChannelBanSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelBans ?nextToken ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the users banned from a particular channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all the users and bots banned from a particular channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ListChannelBansRequest =
   struct
     type nonrec t =
@@ -5730,7 +7438,7 @@ module ListChannelBansRequest =
           "The token passed by previous API calls until all requested bans are returned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "ListChannelBansRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -5757,15 +7465,152 @@ module ListChannelBansRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ?nextToken ?maxResults ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all the users banned from a particular channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Lists all the users and bots banned from a particular channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
+module GetMessagingStreamingConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      streamingConfigurations: StreamingConfigurationList.t option
+        [@ocaml.doc "The streaming settings."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottledClientException of ThrottledClientException.t 
+      | `UnauthorizedClientException of UnauthorizedClientException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamingConfigurations = fun () -> { streamingConfigurations }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_json json)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ForbiddenException" ->
+          `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottledClientException" ->
+          `ThrottledClientException (ThrottledClientException.of_xml xml)
+      | "UnauthorizedClientException" ->
+          `UnauthorizedClientException
+            (UnauthorizedClientException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ForbiddenException e ->
+          `Assoc
+            [("error", (`String "ForbiddenException"));
+            ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottledClientException e ->
+          `Assoc
+            [("error", (`String "ThrottledClientException"));
+            ("details", (ThrottledClientException.to_json e))]
+      | `UnauthorizedClientException e ->
+          `Assoc
+            [("error", (`String "UnauthorizedClientException"));
+            ("details", (UnauthorizedClientException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamingConfigurations",
+           (Option.map x.streamingConfigurations
+              ~f:StreamingConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamingConfigurations =
+        (Option.map ~f:StreamingConfigurationList.of_xml)
+          (Xml.child xml_arg0 "StreamingConfigurations") in
+      make ?streamingConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamingConfigurations =
+        field_map json__ "StreamingConfigurations"
+          StreamingConfigurationList.of_json in
+      make ?streamingConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the data streaming configuration for an AppInstance. For more information, see Streaming messaging data in the Amazon Chime SDK Developer Guide."]
+module GetMessagingStreamingConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the streaming configurations."]}
+    let context_ = "GetMessagingStreamingConfigurationsRequest"
+    let make ~appInstanceArn = fun () -> { appInstanceArn }
+    let to_value x =
+      structure_to_value
+        [("appInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
+      make ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceArn =
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ~appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the data streaming configuration for an AppInstance. For more information, see Streaming messaging data in the Amazon Chime SDK Developer Guide."]
 module GetMessagingSessionEndpointResponse =
   struct
     type nonrec t =
@@ -5851,22 +7696,33 @@ module GetMessagingSessionEndpointResponse =
           (Xml.child xml_arg0 "Endpoint") in
       make ?endpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endpoint =
-        field_map json "Endpoint" MessagingSessionEndpoint.of_json in
+        field_map json__ "Endpoint" MessagingSessionEndpoint.of_json in
       make ?endpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the endpoint for the messaging session."]
 module GetMessagingSessionEndpointRequest =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t =
+      {
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The type of network for the messaging session endpoint. Either IPv4 only or dual-stack (IPv4 and IPv6)."]}
+    let make ?networkType = fun () -> { networkType }
+    let to_value x =
+      structure_to_value
+        [("network-type", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml)
+          (Xml.child xml_arg0 "network-type") in
+      make ?networkType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      make ?networkType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the endpoint for the messaging session."]
 module GetChannelMessageStatusResponse =
@@ -5963,13 +7819,13 @@ module GetChannelMessageStatusResponse =
           (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "Status" ChannelMessageStatusStructure.of_json in
+        field_map json__ "Status" ChannelMessageStatusStructure.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets message status for a specified messageId. Use this API to determine the intermediate status of messages going through channel flow processing. The API provides an alternative to retrieving message status if the event was not received because a client wasn't connected to a websocket. Messages can have any one of these statuses. SENT Message processed successfully PENDING Ongoing processing FAILED Processing failed DENIED Messasge denied by the processor This API does not return statuses for denied messages, because we don't store them once the processor denies them. Only the message sender can invoke this API. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header"]
+       "Gets message status for a specified messageId. Use this API to determine the intermediate status of messages going through channel flow processing. The API provides an alternative to retrieving message status if the event was not received because a client wasn't connected to a websocket. Messages can have any one of these statuses. SENT Message processed successfully PENDING Ongoing processing FAILED Processing failed DENIED Message denied by the processor This API does not return statuses for denied messages, because we don't store them once the processor denies them. Only the message sender can invoke this API. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module GetChannelMessageStatusRequest =
   struct
     type nonrec t =
@@ -5978,18 +7834,28 @@ module GetChannelMessageStatusRequest =
       messageId: MessageId.t [@ocaml.doc "The ID of the message."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user making the API call."]}
+          "The AppInstanceUserArn of the user making the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when getting message status in a SubChannel that the user belongs to."]}
     let context_ = "GetChannelMessageStatusRequest"
-    let make ~channelArn =
-      fun ~messageId ->
-        fun ~chimeBearer -> fun () -> { channelArn; messageId; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~messageId ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; messageId; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("messageId", (Some (MessageId.to_value x.messageId)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -5999,16 +7865,17 @@ module GetChannelMessageStatusRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~messageId ~channelArn ()
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~messageId ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets message status for a specified messageId. Use this API to determine the intermediate status of messages going through channel flow processing. The API provides an alternative to retrieving message status if the event was not received because a client wasn't connected to a websocket. Messages can have any one of these statuses. SENT Message processed successfully PENDING Ongoing processing FAILED Processing failed DENIED Messasge denied by the processor This API does not return statuses for denied messages, because we don't store them once the processor denies them. Only the message sender can invoke this API. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header"]
+       "Gets message status for a specified messageId. Use this API to determine the intermediate status of messages going through channel flow processing. The API provides an alternative to retrieving message status if the event was not received because a client wasn't connected to a websocket. Messages can have any one of these statuses. SENT Message processed successfully PENDING Ongoing processing FAILED Processing failed DENIED Message denied by the processor This API does not return statuses for denied messages, because we don't store them once the processor denies them. Only the message sender can invoke this API. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module GetChannelMessageResponse =
   struct
     type nonrec t =
@@ -6112,13 +7979,13 @@ module GetChannelMessageResponse =
           (Xml.child xml_arg0 "ChannelMessage") in
       make ?channelMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelMessage =
-        field_map json "ChannelMessage" ChannelMessage.of_json in
+        field_map json__ "ChannelMessage" ChannelMessage.of_json in
       make ?channelMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the full details of a channel message. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Gets the full details of a channel message. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module GetChannelMessageRequest =
   struct
     type nonrec t =
@@ -6127,18 +7994,28 @@ module GetChannelMessageRequest =
       messageId: MessageId.t [@ocaml.doc "The ID of the message."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when getting messages in a SubChannel that the user belongs to."]}
     let context_ = "GetChannelMessageRequest"
-    let make ~channelArn =
-      fun ~messageId ->
-        fun ~chimeBearer -> fun () -> { channelArn; messageId; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~messageId ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; messageId; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("messageId", (Some (MessageId.to_value x.messageId)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -6148,22 +8025,23 @@ module GetChannelMessageRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~messageId ~channelArn ()
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~messageId ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the full details of a channel message. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Gets the full details of a channel message. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module GetChannelMembershipPreferencesResponse =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t option [@ocaml.doc "The ARN of the channel."];
-      member: Identity.t option ;
+      member: Identity.t option [@ocaml.doc "The details of a user."];
       preferences: ChannelMembershipPreferences.t option
         [@ocaml.doc
           "The channel membership preferences for an AppInstanceUser ."]}
@@ -6263,15 +8141,15 @@ module GetChannelMembershipPreferencesResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?preferences ?member ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let preferences =
-        field_map json "Preferences" ChannelMembershipPreferences.of_json in
-      let member = field_map json "Member" Identity.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+        field_map json__ "Preferences" ChannelMembershipPreferences.of_json in
+      let member = field_map json__ "Member" Identity.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?preferences ?member ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the membership preferences of an AppInstanceUser for the specified channel. The AppInstanceUser must be a member of the channel. Only the AppInstanceUser who owns the membership can retrieve preferences. Users in the AppInstanceAdmin and channel moderator roles can't retrieve preferences for other users. Banned users can't retrieve membership preferences for the channel from which they are banned."]
+       "Gets the membership preferences of an AppInstanceUser or AppInstanceBot for the specified channel. A user or a bot must be a member of the channel and own the membership in order to retrieve membership preferences. Users or bots in the AppInstanceAdmin and channel moderator roles can't retrieve preferences for other users or bots. Banned users or bots can't retrieve membership preferences for the channel from which they are banned. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module GetChannelMembershipPreferencesRequest =
   struct
     type nonrec t =
@@ -6282,7 +8160,7 @@ module GetChannelMembershipPreferencesRequest =
           "The AppInstanceUserArn of the member retrieving the preferences."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserARN of the user making the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "GetChannelMembershipPreferencesRequest"
     let make ~channelArn =
       fun ~memberArn ->
@@ -6305,14 +8183,14 @@ module GetChannelMembershipPreferencesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the membership preferences of an AppInstanceUser for the specified channel. The AppInstanceUser must be a member of the channel. Only the AppInstanceUser who owns the membership can retrieve preferences. Users in the AppInstanceAdmin and channel moderator roles can't retrieve preferences for other users. Banned users can't retrieve membership preferences for the channel from which they are banned."]
+       "Gets the membership preferences of an AppInstanceUser or AppInstanceBot for the specified channel. A user or a bot must be a member of the channel and own the membership in order to retrieve membership preferences. Users or bots in the AppInstanceAdmin and channel moderator roles can't retrieve preferences for other users or bots. Banned users or bots can't retrieve membership preferences for the channel from which they are banned. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DisassociateChannelFlowRequest =
   struct
     type nonrec t =
@@ -6345,15 +8223,15 @@ module DisassociateChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a channel flow from all its channels. Once disassociated, all messages to that channel stop going through the channel flow processor. Only administrators or channel moderators can disassociate a channel flow. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Disassociates a channel flow from all its channels. Once disassociated, all messages to that channel stop going through the channel flow processor. Only administrators or channel moderators can disassociate a channel flow. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelResponse =
   struct
     type nonrec t =
@@ -6445,12 +8323,12 @@ module DescribeChannelResponse =
         (Option.map ~f:Channel.of_xml) (Xml.child xml_arg0 "Channel") in
       make ?channel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channel = field_map json "Channel" Channel.of_json in
+    let of_json json__ =
+      let channel = field_map json__ "Channel" Channel.of_json in
       make ?channel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel in an Amazon Chime AppInstance. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel in an Amazon Chime AppInstance. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelRequest =
   struct
     type nonrec t =
@@ -6458,7 +8336,7 @@ module DescribeChannelRequest =
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the channel."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DescribeChannelRequest"
     let make ~channelArn =
       fun ~chimeBearer -> fun () -> { channelArn; chimeBearer }
@@ -6476,13 +8354,13 @@ module DescribeChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel in an Amazon Chime AppInstance. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel in an Amazon Chime AppInstance. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelModeratorResponse =
   struct
     type nonrec t =
@@ -6586,9 +8464,9 @@ module DescribeChannelModeratorResponse =
           (Xml.child xml_arg0 "ChannelModerator") in
       make ?channelModerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelModerator =
-        field_map json "ChannelModerator" ChannelModerator.of_json in
+        field_map json__ "ChannelModerator" ChannelModerator.of_json in
       make ?channelModerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6602,7 +8480,7 @@ module DescribeChannelModeratorRequest =
         [@ocaml.doc "The AppInstanceUserArn of the channel moderator."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DescribeChannelModeratorRequest"
     let make ~channelArn =
       fun ~channelModeratorArn ->
@@ -6627,11 +8505,11 @@ module DescribeChannelModeratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
-        field_map_exn json "ChannelModeratorArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelModeratorArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6731,25 +8609,24 @@ module DescribeChannelModeratedByAppInstanceUserResponse =
           (Xml.child xml_arg0 "Channel") in
       make ?channel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channel =
-        field_map json "Channel"
+        field_map json__ "Channel"
           ChannelModeratedByAppInstanceUserSummary.of_json in
       make ?channel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel moderated by the specified AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel moderated by the specified AppInstanceUser or AppInstanceBot. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelModeratedByAppInstanceUserRequest =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t [@ocaml.doc "The ARN of the moderated channel."];
       appInstanceUserArn: ChimeArn.t
-        [@ocaml.doc
-          "The ARN of the AppInstanceUser in the moderated channel."];
+        [@ocaml.doc "The ARN of the user or bot in the moderated channel."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DescribeChannelModeratedByAppInstanceUserRequest"
     let make ~channelArn =
       fun ~appInstanceUserArn ->
@@ -6774,15 +8651,15 @@ module DescribeChannelModeratedByAppInstanceUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel moderated by the specified AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel moderated by the specified AppInstanceUser or AppInstanceBot. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelMembershipResponse =
   struct
     type nonrec t =
@@ -6886,13 +8763,13 @@ module DescribeChannelMembershipResponse =
           (Xml.child xml_arg0 "ChannelMembership") in
       make ?channelMembership ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelMembership =
-        field_map json "ChannelMembership" ChannelMembership.of_json in
+        field_map json__ "ChannelMembership" ChannelMembership.of_json in
       make ?channelMembership ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a user's channel membership. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a user's channel membership. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelMembershipRequest =
   struct
     type nonrec t =
@@ -6902,18 +8779,28 @@ module DescribeChannelMembershipRequest =
         [@ocaml.doc "The AppInstanceUserArn of the member."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. The response contains an ElasticChannelConfiguration object. Only required to get a user\226\128\153s SubChannel membership details."]}
     let context_ = "DescribeChannelMembershipRequest"
-    let make ~channelArn =
-      fun ~memberArn ->
-        fun ~chimeBearer -> fun () -> { channelArn; memberArn; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~memberArn ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; memberArn; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("memberArn", (Some (ChimeArn.to_value x.memberArn)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -6923,16 +8810,17 @@ module DescribeChannelMembershipRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~memberArn ~channelArn ()
+      make ?subChannelId ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~memberArn ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a user's channel membership. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a user's channel membership. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelMembershipForAppInstanceUserResponse =
   struct
     type nonrec t =
@@ -7028,14 +8916,14 @@ module DescribeChannelMembershipForAppInstanceUserResponse =
           (Xml.child xml_arg0 "ChannelMembership") in
       make ?channelMembership ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelMembership =
-        field_map json "ChannelMembership"
+        field_map json__ "ChannelMembership"
           ChannelMembershipForAppInstanceUserSummary.of_json in
       make ?channelMembership ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of a channel based on the membership of the specified AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the details of a channel based on the membership of the specified AppInstanceUser or AppInstanceBot. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelMembershipForAppInstanceUserRequest =
   struct
     type nonrec t =
@@ -7043,10 +8931,10 @@ module DescribeChannelMembershipForAppInstanceUserRequest =
       channelArn: ChimeArn.t
         [@ocaml.doc "The ARN of the channel to which the user belongs."];
       appInstanceUserArn: ChimeArn.t
-        [@ocaml.doc "The ARN of the user in a channel."];
+        [@ocaml.doc "The ARN of the user or bot in a channel."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DescribeChannelMembershipForAppInstanceUserRequest"
     let make ~channelArn =
       fun ~appInstanceUserArn ->
@@ -7071,15 +8959,15 @@ module DescribeChannelMembershipForAppInstanceUserRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let appInstanceUserArn =
-        field_map_exn json "AppInstanceUserArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceUserArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~appInstanceUserArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the details of a channel based on the membership of the specified AppInstanceUser. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the details of a channel based on the membership of the specified AppInstanceUser or AppInstanceBot. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelFlowResponse =
   struct
     type nonrec t =
@@ -7172,8 +9060,8 @@ module DescribeChannelFlowResponse =
         (Option.map ~f:ChannelFlow.of_xml) (Xml.child xml_arg0 "ChannelFlow") in
       make ?channelFlow ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelFlow = field_map json "ChannelFlow" ChannelFlow.of_json in
+    let of_json json__ =
+      let channelFlow = field_map json__ "ChannelFlow" ChannelFlow.of_json in
       make ?channelFlow ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7195,9 +9083,9 @@ module DescribeChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
       make ~channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7302,12 +9190,12 @@ module DescribeChannelBanResponse =
         (Option.map ~f:ChannelBan.of_xml) (Xml.child xml_arg0 "ChannelBan") in
       make ?channelBan ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelBan = field_map json "ChannelBan" ChannelBan.of_json in
+    let of_json json__ =
+      let channelBan = field_map json__ "ChannelBan" ChannelBan.of_json in
       make ?channelBan ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel ban. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel ban. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DescribeChannelBanRequest =
   struct
     type nonrec t =
@@ -7318,7 +9206,7 @@ module DescribeChannelBanRequest =
         [@ocaml.doc "The AppInstanceUserArn of the member being banned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DescribeChannelBanRequest"
     let make ~channelArn =
       fun ~memberArn ->
@@ -7341,14 +9229,39 @@ module DescribeChannelBanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the full details of a channel ban. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Returns the full details of a channel ban. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
+module DeleteMessagingStreamingConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      appInstanceArn: ChimeArn.t
+        [@ocaml.doc "The ARN of the streaming configurations being deleted."]}
+    let context_ = "DeleteMessagingStreamingConfigurationsRequest"
+    let make ~appInstanceArn = fun () -> { appInstanceArn }
+    let to_value x =
+      structure_to_value
+        [("appInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appInstanceArn =
+        ChimeArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appInstanceArn") in
+      make ~appInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appInstanceArn =
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ~appInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the streaming configurations for an AppInstance. For more information, see Streaming messaging data in the Amazon Chime SDK Developer Guide."]
 module DeleteChannelRequest =
   struct
     type nonrec t =
@@ -7357,7 +9270,7 @@ module DeleteChannelRequest =
         [@ocaml.doc "The ARN of the channel being deleted."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DeleteChannelRequest"
     let make ~channelArn =
       fun ~chimeBearer -> fun () -> { channelArn; chimeBearer }
@@ -7375,13 +9288,13 @@ module DeleteChannelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Immediately makes a channel and its memberships inaccessible and marks them for deletion. This is an irreversible process. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Immediately makes a channel and its memberships inaccessible and marks them for deletion. This is an irreversible process. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUserArn or AppInstanceBot that makes the API call as the value in the header."]
 module DeleteChannelModeratorRequest =
   struct
     type nonrec t =
@@ -7391,7 +9304,7 @@ module DeleteChannelModeratorRequest =
         [@ocaml.doc "The AppInstanceUserArn of the moderator being deleted."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DeleteChannelModeratorRequest"
     let make ~channelArn =
       fun ~channelModeratorArn ->
@@ -7416,15 +9329,15 @@ module DeleteChannelModeratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
-        field_map_exn json "ChannelModeratorArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelModeratorArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a channel moderator. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Deletes a channel moderator. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DeleteChannelMessageRequest =
   struct
     type nonrec t =
@@ -7434,18 +9347,28 @@ module DeleteChannelMessageRequest =
         [@ocaml.doc "The ID of the message being deleted."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when deleting messages in a SubChannel that the user belongs to."]}
     let context_ = "DeleteChannelMessageRequest"
-    let make ~channelArn =
-      fun ~messageId ->
-        fun ~chimeBearer -> fun () -> { channelArn; messageId; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~messageId ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; messageId; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("messageId", (Some (MessageId.to_value x.messageId)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -7455,16 +9378,17 @@ module DeleteChannelMessageRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~messageId ~channelArn ()
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let messageId = field_map_exn json "MessageId" MessageId.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~messageId ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let messageId = field_map_exn json__ "MessageId" MessageId.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~messageId ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a channel message. Only admins can perform this action. Deletion makes messages inaccessible immediately. A background process deletes any revisions created by UpdateChannelMessage. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Deletes a channel message. Only admins can perform this action. Deletion makes messages inaccessible immediately. A background process deletes any revisions created by UpdateChannelMessage. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module DeleteChannelMembershipRequest =
   struct
     type nonrec t =
@@ -7477,18 +9401,28 @@ module DeleteChannelMembershipRequest =
           "The AppInstanceUserArn of the member that you're removing from the channel."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only for use by moderators."]}
     let context_ = "DeleteChannelMembershipRequest"
-    let make ~channelArn =
-      fun ~memberArn ->
-        fun ~chimeBearer -> fun () -> { channelArn; memberArn; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~memberArn ->
+          fun ~chimeBearer ->
+            fun () -> { subChannelId; channelArn; memberArn; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("memberArn", (Some (ChimeArn.to_value x.memberArn)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("sub-channel-id",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "sub-channel-id") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -7498,13 +9432,14 @@ module DeleteChannelMembershipRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~memberArn ~channelArn ()
+      make ?subChannelId ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~memberArn ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes a member from a channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
@@ -7525,9 +9460,9 @@ module DeleteChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelFlowArn") in
       make ~channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
       make ~channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7544,7 +9479,7 @@ module DeleteChannelBanRequest =
           "The ARN of the AppInstanceUser that you want to reinstate."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "DeleteChannelBanRequest"
     let make ~channelArn =
       fun ~memberArn ->
@@ -7567,14 +9502,14 @@ module DeleteChannelBanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a user from a channel's ban list. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Removes a member from a channel's ban list. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelResponse =
   struct
     type nonrec t =
@@ -7686,12 +9621,12 @@ module CreateChannelResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a channel to which you can add users and send messages. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Creates a channel to which you can add users and send messages. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelRequest =
   struct
     type nonrec t =
@@ -7715,27 +9650,50 @@ module CreateChannelRequest =
         [@ocaml.doc "The tags for the creation request."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      channelId: ChannelId.t option
+        [@ocaml.doc
+          "An ID for the channel being created. If you do not specify an ID, a UUID will be created for the channel."];
+      memberArns: ChannelMemberArns.t option
+        [@ocaml.doc "The ARNs of the channel members in the request."];
+      moderatorArns: ChannelModeratorArns.t option
+        [@ocaml.doc "The ARNs of the channel moderators in the request."];
+      elasticChannelConfiguration: ElasticChannelConfiguration.t option
+        [@ocaml.doc
+          "The attributes required to configure and create an elastic channel. An elastic channel can support a maximum of 1-million users, excluding moderators."];
+      expirationSettings: ExpirationSettings.t option
+        [@ocaml.doc
+          "Settings that control the interval after which the channel is automatically deleted."]}
     let context_ = "CreateChannelRequest"
     let make ?mode =
       fun ?privacy ->
         fun ?metadata ->
           fun ?tags ->
-            fun ~appInstanceArn ->
-              fun ~name ->
-                fun ~clientRequestToken ->
-                  fun ~chimeBearer ->
-                    fun () ->
-                      {
-                        mode;
-                        privacy;
-                        metadata;
-                        tags;
-                        appInstanceArn;
-                        name;
-                        clientRequestToken;
-                        chimeBearer
-                      }
+            fun ?channelId ->
+              fun ?memberArns ->
+                fun ?moderatorArns ->
+                  fun ?elasticChannelConfiguration ->
+                    fun ?expirationSettings ->
+                      fun ~appInstanceArn ->
+                        fun ~name ->
+                          fun ~clientRequestToken ->
+                            fun ~chimeBearer ->
+                              fun () ->
+                                {
+                                  mode;
+                                  privacy;
+                                  metadata;
+                                  tags;
+                                  channelId;
+                                  memberArns;
+                                  moderatorArns;
+                                  elasticChannelConfiguration;
+                                  expirationSettings;
+                                  appInstanceArn;
+                                  name;
+                                  clientRequestToken;
+                                  chimeBearer
+                                }
     let to_value x =
       structure_to_value
         [("AppInstanceArn", (Some (ChimeArn.to_value x.appInstanceArn)));
@@ -7746,9 +9704,33 @@ module CreateChannelRequest =
         ("ClientRequestToken",
           (Some (ClientRequestToken.to_value x.clientRequestToken)));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("ChannelId", (Option.map x.channelId ~f:ChannelId.to_value));
+        ("MemberArns",
+          (Option.map x.memberArns ~f:ChannelMemberArns.to_value));
+        ("ModeratorArns",
+          (Option.map x.moderatorArns ~f:ChannelModeratorArns.to_value));
+        ("ElasticChannelConfiguration",
+          (Option.map x.elasticChannelConfiguration
+             ~f:ElasticChannelConfiguration.to_value));
+        ("ExpirationSettings",
+          (Option.map x.expirationSettings ~f:ExpirationSettings.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let expirationSettings =
+        (Option.map ~f:ExpirationSettings.of_xml)
+          (Xml.child xml_arg0 "ExpirationSettings") in
+      let elasticChannelConfiguration =
+        (Option.map ~f:ElasticChannelConfiguration.of_xml)
+          (Xml.child xml_arg0 "ElasticChannelConfiguration") in
+      let moderatorArns =
+        (Option.map ~f:ChannelModeratorArns.of_xml)
+          (Xml.child xml_arg0 "ModeratorArns") in
+      let memberArns =
+        (Option.map ~f:ChannelMemberArns.of_xml)
+          (Xml.child xml_arg0 "MemberArns") in
+      let channelId =
+        (Option.map ~f:ChannelId.of_xml) (Xml.child xml_arg0 "ChannelId") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -7768,25 +9750,37 @@ module CreateChannelRequest =
       let appInstanceArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
-      make ~chimeBearer ?tags ~clientRequestToken ?metadata ?privacy ?mode
-        ~name ~appInstanceArn ()
+      make ?expirationSettings ?elasticChannelConfiguration ?moderatorArns
+        ?memberArns ?channelId ~chimeBearer ?tags ~clientRequestToken
+        ?metadata ?privacy ?mode ~name ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let expirationSettings =
+        field_map json__ "ExpirationSettings" ExpirationSettings.of_json in
+      let elasticChannelConfiguration =
+        field_map json__ "ElasticChannelConfiguration"
+          ElasticChannelConfiguration.of_json in
+      let moderatorArns =
+        field_map json__ "ModeratorArns" ChannelModeratorArns.of_json in
+      let memberArns =
+        field_map json__ "MemberArns" ChannelMemberArns.of_json in
+      let channelId = field_map json__ "ChannelId" ChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let metadata = field_map json "Metadata" Metadata.of_json in
-      let privacy = field_map json "Privacy" ChannelPrivacy.of_json in
-      let mode = field_map json "Mode" ChannelMode.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let metadata = field_map json__ "Metadata" Metadata.of_json in
+      let privacy = field_map json__ "Privacy" ChannelPrivacy.of_json in
+      let mode = field_map json__ "Mode" ChannelMode.of_json in
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
-      make ~chimeBearer ?tags ~clientRequestToken ?metadata ?privacy ?mode
-        ~name ~appInstanceArn ()
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
+      make ?expirationSettings ?elasticChannelConfiguration ?moderatorArns
+        ?memberArns ?channelId ~chimeBearer ?tags ~clientRequestToken
+        ?metadata ?privacy ?mode ~name ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a channel to which you can add users and send messages. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Creates a channel to which you can add users and send messages. Restriction: You can't change a channel's privacy. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelModeratorResponse =
   struct
     type nonrec t =
@@ -7906,14 +9900,14 @@ module CreateChannelModeratorResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?channelModerator ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelModerator =
-        field_map json "ChannelModerator" Identity.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+        field_map json__ "ChannelModerator" Identity.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?channelModerator ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new ChannelModerator. A channel moderator can: Add and remove other members of the channel. Add and remove other moderators of the channel. Add and remove user bans for the channel. Redact messages in the channel. List messages in the channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Creates a new ChannelModerator. A channel moderator can: Add and remove other members of the channel. Add and remove other moderators of the channel. Add and remove user bans for the channel. Redact messages in the channel. List messages in the channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBotof the user that makes the API call as the value in the header."]
 module CreateChannelModeratorRequest =
   struct
     type nonrec t =
@@ -7923,7 +9917,7 @@ module CreateChannelModeratorRequest =
         [@ocaml.doc "The AppInstanceUserArn of the moderator."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "CreateChannelModeratorRequest"
     let make ~channelArn =
       fun ~channelModeratorArn ->
@@ -7948,33 +9942,38 @@ module CreateChannelModeratorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let channelModeratorArn =
-        field_map_exn json "ChannelModeratorArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelModeratorArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelModeratorArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new ChannelModerator. A channel moderator can: Add and remove other members of the channel. Add and remove other moderators of the channel. Add and remove user bans for the channel. Redact messages in the channel. List messages in the channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Creates a new ChannelModerator. A channel moderator can: Add and remove other members of the channel. Add and remove other moderators of the channel. Add and remove user bans for the channel. Redact messages in the channel. List messages in the channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBotof the user that makes the API call as the value in the header."]
 module CreateChannelMembershipResponse =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t option [@ocaml.doc "The ARN of the channel."];
       member: Identity.t option
-        [@ocaml.doc "The ARN and metadata of the member being added."]}
+        [@ocaml.doc "The ARN and metadata of the member being added."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc "The ID of the SubChannel in the response."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ConflictException of ConflictException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
       | `ResourceLimitExceededException of ResourceLimitExceededException.t 
       | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottledClientException of ThrottledClientException.t 
       | `UnauthorizedClientException of UnauthorizedClientException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?channelArn = fun ?member -> fun () -> { channelArn; member }
+    let make ?channelArn =
+      fun ?member ->
+        fun ?subChannelId -> fun () -> { channelArn; member; subChannelId }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7983,6 +9982,8 @@ module CreateChannelMembershipResponse =
           `ConflictException (ConflictException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
       | "ResourceLimitExceededException" ->
           `ResourceLimitExceededException
             (ResourceLimitExceededException.of_json json)
@@ -8007,6 +10008,8 @@ module CreateChannelMembershipResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
       | "ResourceLimitExceededException" ->
           `ResourceLimitExceededException
             (ResourceLimitExceededException.of_xml xml)
@@ -8036,6 +10039,10 @@ module CreateChannelMembershipResponse =
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
       | `ResourceLimitExceededException e ->
           `Assoc
             [("error", (`String "ResourceLimitExceededException"));
@@ -8064,22 +10071,28 @@ module CreateChannelMembershipResponse =
     let to_value x =
       structure_to_value
         [("ChannelArn", (Option.map x.channelArn ~f:ChimeArn.to_value));
-        ("Member", (Option.map x.member ~f:Identity.to_value))]
+        ("Member", (Option.map x.member ~f:Identity.to_value));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let member =
         (Option.map ~f:Identity.of_xml) (Xml.child xml_arg0 "Member") in
       let channelArn =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
-      make ?member ?channelArn ()
+      make ?subChannelId ?member ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let member = field_map json "Member" Identity.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
-      make ?member ?channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let member = field_map json__ "Member" Identity.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ?member ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a user to a channel. The InvitedBy field in ChannelMembership is derived from the request header. A channel member can: List messages Send messages Receive messages Edit their own messages Leave the channel Privacy settings impact this action as follows: Public Channels: You do not need to be a member to list messages, but you must be a member to send messages. Private Channels: You must be a member to list or send messages. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Adds a member to a channel. The InvitedBy field in ChannelMembership is derived from the request header. A channel member can: List messages Send messages Receive messages Edit their own messages Leave the channel Privacy settings impact this action as follows: Public Channels: You do not need to be a member to list messages, but you must be a member to send messages. Private Channels: You must be a member to list or send messages. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUserArn or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelMembershipRequest =
   struct
     type nonrec t =
@@ -8094,21 +10107,31 @@ module CreateChannelMembershipRequest =
           "The membership type of a user, DEFAULT or HIDDEN. Default members are always returned as part of ListChannelMemberships. Hidden members are only returned if the type filter in ListChannelMemberships equals HIDDEN. Otherwise hidden members are not returned. This is only supported by moderators."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when creating membership in a SubChannel for a moderator in an elastic channel."]}
     let context_ = "CreateChannelMembershipRequest"
-    let make ~channelArn =
-      fun ~memberArn ->
-        fun ~type_ ->
-          fun ~chimeBearer ->
-            fun () -> { channelArn; memberArn; type_; chimeBearer }
+    let make ?subChannelId =
+      fun ~channelArn ->
+        fun ~memberArn ->
+          fun ~type_ ->
+            fun ~chimeBearer ->
+              fun () ->
+                { subChannelId; channelArn; memberArn; type_; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("MemberArn", (Some (ChimeArn.to_value x.memberArn)));
         ("Type", (Some (ChannelMembershipType.to_value x.type_)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -8121,17 +10144,18 @@ module CreateChannelMembershipRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~type_ ~memberArn ~channelArn ()
+      make ?subChannelId ~chimeBearer ~type_ ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let type_ = field_map_exn json "Type" ChannelMembershipType.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~type_ ~memberArn ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let type_ = field_map_exn json__ "Type" ChannelMembershipType.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~type_ ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a user to a channel. The InvitedBy field in ChannelMembership is derived from the request header. A channel member can: List messages Send messages Receive messages Edit their own messages Leave the channel Privacy settings impact this action as follows: Public Channels: You do not need to be a member to list messages, but you must be a member to send messages. Private Channels: You must be a member to list or send messages. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Adds a member to a channel. The InvitedBy field in ChannelMembership is derived from the request header. A channel member can: List messages Send messages Receive messages Edit their own messages Leave the channel Privacy settings impact this action as follows: Public Channels: You do not need to be a member to list messages, but you must be a member to send messages. Private Channels: You must be a member to list or send messages. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUserArn or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelFlowResponse =
   struct
     type nonrec t =
@@ -8245,12 +10269,12 @@ module CreateChannelFlowResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelFlowArn") in
       make ?channelFlowArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelFlowArn = field_map json "ChannelFlowArn" ChimeArn.of_json in
+    let of_json json__ =
+      let channelFlowArn = field_map json__ "ChannelFlowArn" ChimeArn.of_json in
       make ?channelFlowArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a channel flow, a container for processors. Processors are AWS Lambda functions that perform actions on chat messages, such as stripping out profanity. You can associate channel flows with channels, and the processors in the channel flow then take action on all messages sent to that channel. This is a developer API. Channel flows process the following items: New and updated messages Persistent and non-persistent messages The Standard message type Channel flows don't process Control or System messages. For more information about the message types provided by Chime SDK Messaging, refer to Message types in the Amazon Chime developer guide."]
+       "Creates a channel flow, a container for processors. Processors are AWS Lambda functions that perform actions on chat messages, such as stripping out profanity. You can associate channel flows with channels, and the processors in the channel flow then take action on all messages sent to that channel. This is a developer API. Channel flows process the following items: New and updated messages Persistent and non-persistent messages The Standard message type Channel flows don't process Control or System messages. For more information about the message types provided by Chime SDK messaging, refer to Message types in the Amazon Chime developer guide."]
 module CreateChannelFlowRequest =
   struct
     type nonrec t =
@@ -8300,18 +10324,19 @@ module CreateChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AppInstanceArn") in
       make ~clientRequestToken ?tags ~name ~processors ~appInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map_exn json "ClientRequestToken" ClientRequestToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let name = field_map_exn json "Name" NonEmptyResourceName.of_json in
-      let processors = field_map_exn json "Processors" ProcessorList.of_json in
+        field_map_exn json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let name = field_map_exn json__ "Name" NonEmptyResourceName.of_json in
+      let processors =
+        field_map_exn json__ "Processors" ProcessorList.of_json in
       let appInstanceArn =
-        field_map_exn json "AppInstanceArn" ChimeArn.of_json in
+        field_map_exn json__ "AppInstanceArn" ChimeArn.of_json in
       make ~clientRequestToken ?tags ~name ~processors ~appInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a channel flow, a container for processors. Processors are AWS Lambda functions that perform actions on chat messages, such as stripping out profanity. You can associate channel flows with channels, and the processors in the channel flow then take action on all messages sent to that channel. This is a developer API. Channel flows process the following items: New and updated messages Persistent and non-persistent messages The Standard message type Channel flows don't process Control or System messages. For more information about the message types provided by Chime SDK Messaging, refer to Message types in the Amazon Chime developer guide."]
+       "Creates a channel flow, a container for processors. Processors are AWS Lambda functions that perform actions on chat messages, such as stripping out profanity. You can associate channel flows with channels, and the processors in the channel flow then take action on all messages sent to that channel. This is a developer API. Channel flows process the following items: New and updated messages Persistent and non-persistent messages The Standard message type Channel flows don't process Control or System messages. For more information about the message types provided by Chime SDK messaging, refer to Message types in the Amazon Chime developer guide."]
 module CreateChannelBanResponse =
   struct
     type nonrec t =
@@ -8430,13 +10455,13 @@ module CreateChannelBanResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?member ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let member = field_map json "Member" Identity.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let member = field_map json__ "Member" Identity.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?member ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Permanently bans a member from a channel. Moderators can't add banned members to a channel. To undo a ban, you first have to DeleteChannelBan, and then CreateChannelMembership. Bans are cleaned up when you delete users or channels. If you ban a user who is already part of a channel, that user is automatically kicked from the channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Permanently bans a member from a channel. Moderators can't add banned members to a channel. To undo a ban, you first have to DeleteChannelBan, and then CreateChannelMembership. Bans are cleaned up when you delete users or channels. If you ban a user who is already part of a channel, that user is automatically kicked from the channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module CreateChannelBanRequest =
   struct
     type nonrec t =
@@ -8446,7 +10471,7 @@ module CreateChannelBanRequest =
         [@ocaml.doc "The AppInstanceUserArn of the member being banned."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."]}
     let context_ = "CreateChannelBanRequest"
     let make ~channelArn =
       fun ~memberArn ->
@@ -8469,14 +10494,14 @@ module CreateChannelBanRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~memberArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArn = field_map_exn json "MemberArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArn = field_map_exn json__ "MemberArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~memberArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Permanently bans a member from a channel. Moderators can't add banned members to a channel. To undo a ban, you first have to DeleteChannelBan, and then CreateChannelMembership. Bans are cleaned up when you delete users or channels. If you ban a user who is already part of a channel, that user is automatically kicked from the channel. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Permanently bans a member from a channel. Moderators can't add banned members to a channel. To undo a ban, you first have to DeleteChannelBan, and then CreateChannelMembership. Bans are cleaned up when you delete users or channels. If you ban a user who is already part of a channel, that user is automatically kicked from the channel. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]
 module ChannelFlowCallbackResponse =
   struct
     type nonrec t =
@@ -8584,13 +10609,13 @@ module ChannelFlowCallbackResponse =
         (Option.map ~f:ChimeArn.of_xml) (Xml.child xml_arg0 "ChannelArn") in
       make ?callbackId ?channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let callbackId = field_map json "CallbackId" CallbackIdType.of_json in
-      let channelArn = field_map json "ChannelArn" ChimeArn.of_json in
+    let of_json json__ =
+      let callbackId = field_map json__ "CallbackId" CallbackIdType.of_json in
+      let channelArn = field_map json__ "ChannelArn" ChimeArn.of_json in
       make ?callbackId ?channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Calls back Chime SDK Messaging with a processing response message. This should be invoked from the processor Lambda. This is a developer API. You can return one of the following processing responses: Update message content or metadata Deny a message Make no changes to the message"]
+       "Calls back Amazon Chime SDK messaging with a processing response message. This should be invoked from the processor Lambda. This is a developer API. You can return one of the following processing responses: Update message content or metadata Deny a message Make no changes to the message"]
 module ChannelFlowCallbackRequest =
   struct
     type nonrec t =
@@ -8635,17 +10660,18 @@ module ChannelFlowCallbackRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CallbackId") in
       make ~channelMessage ?deleteResource ~channelArn ~callbackId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let channelMessage =
-        field_map_exn json "ChannelMessage" ChannelMessageCallback.of_json in
+        field_map_exn json__ "ChannelMessage" ChannelMessageCallback.of_json in
       let deleteResource =
-        field_map json "DeleteResource" NonNullableBoolean.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      let callbackId = field_map_exn json "CallbackId" CallbackIdType.of_json in
+        field_map json__ "DeleteResource" NonNullableBoolean.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      let callbackId =
+        field_map_exn json__ "CallbackId" CallbackIdType.of_json in
       make ~channelMessage ?deleteResource ~channelArn ~callbackId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Calls back Chime SDK Messaging with a processing response message. This should be invoked from the processor Lambda. This is a developer API. You can return one of the following processing responses: Update message content or metadata Deny a message Make no changes to the message"]
+       "Calls back Amazon Chime SDK messaging with a processing response message. This should be invoked from the processor Lambda. This is a developer API. You can return one of the following processing responses: Update message content or metadata Deny a message Make no changes to the message"]
 module BatchCreateChannelMembershipResponse =
   struct
     type nonrec t =
@@ -8658,6 +10684,8 @@ module BatchCreateChannelMembershipResponse =
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
       | `ServiceFailureException of ServiceFailureException.t 
       | `ServiceUnavailableException of ServiceUnavailableException.t 
       | `ThrottledClientException of ThrottledClientException.t 
@@ -8671,6 +10699,11 @@ module BatchCreateChannelMembershipResponse =
           `BadRequestException (BadRequestException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
       | "ServiceFailureException" ->
           `ServiceFailureException (ServiceFailureException.of_json json)
       | "ServiceUnavailableException" ->
@@ -8690,6 +10723,11 @@ module BatchCreateChannelMembershipResponse =
           `BadRequestException (BadRequestException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
       | "ServiceFailureException" ->
           `ServiceFailureException (ServiceFailureException.of_xml xml)
       | "ServiceUnavailableException" ->
@@ -8712,6 +10750,14 @@ module BatchCreateChannelMembershipResponse =
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
       | `ServiceFailureException e ->
           `Assoc
             [("error", (`String "ServiceFailureException"));
@@ -8750,44 +10796,55 @@ module BatchCreateChannelMembershipResponse =
           (Xml.child xml_arg0 "BatchChannelMemberships") in
       make ?errors ?batchChannelMemberships ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map json "Errors" BatchCreateChannelMembershipErrors.of_json in
+        field_map json__ "Errors" BatchCreateChannelMembershipErrors.of_json in
       let batchChannelMemberships =
-        field_map json "BatchChannelMemberships"
+        field_map json__ "BatchChannelMemberships"
           BatchChannelMemberships.of_json in
       make ?errors ?batchChannelMemberships ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds a specified number of users to a channel."]
+  end[@@ocaml.doc "Adds a specified number of users and bots to a channel."]
 module BatchCreateChannelMembershipRequest =
   struct
     type nonrec t =
       {
       channelArn: ChimeArn.t
-        [@ocaml.doc "The ARN of the channel to which you're adding users."];
+        [@ocaml.doc
+          "The ARN of the channel to which you're adding users or bots."];
       type_: ChannelMembershipType.t option
         [@ocaml.doc
           "The membership type of a user, DEFAULT or HIDDEN. Default members are always returned as part of ListChannelMemberships. Hidden members are only returned if the type filter in ListChannelMemberships equals HIDDEN. Otherwise hidden members are not returned. This is only supported by moderators."];
       memberArns: MemberArns.t
         [@ocaml.doc
-          "The AppInstanceUserArns of the members you want to add to the channel."];
+          "The ARNs of the members you want to add to the channel. Only AppInstanceUsers and AppInstanceBots can be added as a channel member."];
       chimeBearer: ChimeArn.t
         [@ocaml.doc
-          "The AppInstanceUserArn of the user that makes the API call."]}
+          "The ARN of the AppInstanceUser or AppInstanceBot that makes the API call."];
+      subChannelId: SubChannelId.t option
+        [@ocaml.doc
+          "The ID of the SubChannel in the request. Only required when creating membership in a SubChannel for a moderator in an elastic channel."]}
     let context_ = "BatchCreateChannelMembershipRequest"
     let make ?type_ =
-      fun ~channelArn ->
-        fun ~memberArns ->
-          fun ~chimeBearer ->
-            fun () -> { type_; channelArn; memberArns; chimeBearer }
+      fun ?subChannelId ->
+        fun ~channelArn ->
+          fun ~memberArns ->
+            fun ~chimeBearer ->
+              fun () ->
+                { type_; subChannelId; channelArn; memberArns; chimeBearer }
     let to_value x =
       structure_to_value
         [("channelArn", (Some (ChimeArn.to_value x.channelArn)));
         ("Type", (Option.map x.type_ ~f:ChannelMembershipType.to_value));
         ("MemberArns", (Some (MemberArns.to_value x.memberArns)));
-        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)))]
+        ("x-amz-chime-bearer", (Some (ChimeArn.to_value x.chimeBearer)));
+        ("SubChannelId",
+          (Option.map x.subChannelId ~f:SubChannelId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let subChannelId =
+        (Option.map ~f:SubChannelId.of_xml)
+          (Xml.child xml_arg0 "SubChannelId") in
       let chimeBearer =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "x-amz-chime-bearer") in
@@ -8800,16 +10857,17 @@ module BatchCreateChannelMembershipRequest =
       let channelArn =
         ChimeArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
-      make ~chimeBearer ~memberArns ?type_ ~channelArn ()
+      make ?subChannelId ~chimeBearer ~memberArns ?type_ ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
-      let memberArns = field_map_exn json "MemberArns" MemberArns.of_json in
-      let type_ = field_map json "Type" ChannelMembershipType.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
-      make ~chimeBearer ~memberArns ?type_ ~channelArn ()
+    let of_json json__ =
+      let subChannelId = field_map json__ "SubChannelId" SubChannelId.of_json in
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
+      let memberArns = field_map_exn json__ "MemberArns" MemberArns.of_json in
+      let type_ = field_map json__ "Type" ChannelMembershipType.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
+      make ?subChannelId ~chimeBearer ~memberArns ?type_ ~channelArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds a specified number of users to a channel."]
+  end[@@ocaml.doc "Adds a specified number of users and bots to a channel."]
 module AssociateChannelFlowRequest =
   struct
     type nonrec t =
@@ -8842,12 +10900,12 @@ module AssociateChannelFlowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "channelArn") in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let chimeBearer = field_map_exn json "ChimeBearer" ChimeArn.of_json in
+    let of_json json__ =
+      let chimeBearer = field_map_exn json__ "ChimeBearer" ChimeArn.of_json in
       let channelFlowArn =
-        field_map_exn json "ChannelFlowArn" ChimeArn.of_json in
-      let channelArn = field_map_exn json "ChannelArn" ChimeArn.of_json in
+        field_map_exn json__ "ChannelFlowArn" ChimeArn.of_json in
+      let channelArn = field_map_exn json__ "ChannelArn" ChimeArn.of_json in
       make ~chimeBearer ~channelFlowArn ~channelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a channel flow with a channel. Once associated, all messages to that channel go through channel flow processors. To stop processing, use the DisassociateChannelFlow API. Only administrators or channel moderators can associate a channel flow. The x-amz-chime-bearer request header is mandatory. Use the AppInstanceUserArn of the user that makes the API call as the value in the header."]
+       "Associates a channel flow with a channel. Once associated, all messages to that channel go through channel flow processors. To stop processing, use the DisassociateChannelFlow API. Only administrators or channel moderators can associate a channel flow. The x-amz-chime-bearer request header is mandatory. Use the ARN of the AppInstanceUser or AppInstanceBot that makes the API call as the value in the header."]

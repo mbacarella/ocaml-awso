@@ -13,20 +13,35 @@ type ('i, 'o, 'e) t =
   DeleteConnectorResponse.error) t 
   | DeleteCustomPlugin: (DeleteCustomPluginRequest.t,
   DeleteCustomPluginResponse.t, DeleteCustomPluginResponse.error) t 
+  | DeleteWorkerConfiguration: (DeleteWorkerConfigurationRequest.t,
+  DeleteWorkerConfigurationResponse.t,
+  DeleteWorkerConfigurationResponse.error) t 
   | DescribeConnector: (DescribeConnectorRequest.t,
   DescribeConnectorResponse.t, DescribeConnectorResponse.error) t 
+  | DescribeConnectorOperation: (DescribeConnectorOperationRequest.t,
+  DescribeConnectorOperationResponse.t,
+  DescribeConnectorOperationResponse.error) t 
   | DescribeCustomPlugin: (DescribeCustomPluginRequest.t,
   DescribeCustomPluginResponse.t, DescribeCustomPluginResponse.error) t 
   | DescribeWorkerConfiguration: (DescribeWorkerConfigurationRequest.t,
   DescribeWorkerConfigurationResponse.t,
   DescribeWorkerConfigurationResponse.error) t 
+  | ListConnectorOperations: (ListConnectorOperationsRequest.t,
+  ListConnectorOperationsResponse.t, ListConnectorOperationsResponse.error) t
+  
   | ListConnectors: (ListConnectorsRequest.t, ListConnectorsResponse.t,
   ListConnectorsResponse.error) t 
   | ListCustomPlugins: (ListCustomPluginsRequest.t,
   ListCustomPluginsResponse.t, ListCustomPluginsResponse.error) t 
+  | ListTagsForResource: (ListTagsForResourceRequest.t,
+  ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListWorkerConfigurations: (ListWorkerConfigurationsRequest.t,
   ListWorkerConfigurationsResponse.t, ListWorkerConfigurationsResponse.error)
   t 
+  | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
+  TagResourceResponse.error) t 
+  | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
+  UntagResourceResponse.error) t 
   | UpdateConnector: (UpdateConnectorRequest.t, UpdateConnectorResponse.t,
   UpdateConnectorResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -36,12 +51,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateWorkerConfiguration -> `POST
   | DeleteConnector -> `DELETE
   | DeleteCustomPlugin -> `DELETE
+  | DeleteWorkerConfiguration -> `DELETE
   | DescribeConnector -> `GET
+  | DescribeConnectorOperation -> `GET
   | DescribeCustomPlugin -> `GET
   | DescribeWorkerConfiguration -> `GET
+  | ListConnectorOperations -> `GET
   | ListConnectors -> `GET
   | ListCustomPlugins -> `GET
+  | ListTagsForResource -> `GET
   | ListWorkerConfigurations -> `GET
+  | TagResource -> `POST
+  | UntagResource -> `DELETE
   | UpdateConnector -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -62,9 +83,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteCustomPlugin ->
           (Format.kasprintf Uri.of_string) "/v1/custom-plugins/%s"
             (Zz__string.to_header x.DeleteCustomPluginRequest.customPluginArn)
+      | DeleteWorkerConfiguration ->
+          (Format.kasprintf Uri.of_string) "/v1/worker-configurations/%s"
+            (Zz__string.to_header
+               x.DeleteWorkerConfigurationRequest.workerConfigurationArn)
       | DescribeConnector ->
           (Format.kasprintf Uri.of_string) "/v1/connectors/%s"
             (Zz__string.to_header x.DescribeConnectorRequest.connectorArn)
+      | DescribeConnectorOperation ->
+          (Format.kasprintf Uri.of_string) "/v1/connectorOperations/%s"
+            (Zz__string.to_header
+               x.DescribeConnectorOperationRequest.connectorOperationArn)
       | DescribeCustomPlugin ->
           (Format.kasprintf Uri.of_string) "/v1/custom-plugins/%s"
             (Zz__string.to_header
@@ -73,6 +102,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/v1/worker-configurations/%s"
             (Zz__string.to_header
                x.DescribeWorkerConfigurationRequest.workerConfigurationArn)
+      | ListConnectorOperations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/connectors/%s/operations"
+               (Zz__string.to_header
+                  x.ListConnectorOperationsRequest.connectorArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
       | ListConnectors ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/connectors")
@@ -96,7 +137,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("namePrefix", (Zz__string.to_header v)))
+                 x.namePrefix])
+      | ListTagsForResource ->
+          (Format.kasprintf Uri.of_string) "/v1/tags/%s"
+            (Zz__string.to_header x.ListTagsForResourceRequest.resourceArn)
       | ListWorkerConfigurations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/worker-configurations")
@@ -106,7 +153,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("namePrefix", (Zz__string.to_header v)))
+                 x.namePrefix])
+      | TagResource ->
+          (Format.kasprintf Uri.of_string) "/v1/tags/%s"
+            (Zz__string.to_header x.TagResourceRequest.resourceArn)
+      | UntagResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v1/tags/%s"
+               (Zz__string.to_header x.UntagResourceRequest.resourceArn))
+            (List.filter_opt
+               [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateConnector ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/v1/connectors/%s"
@@ -133,7 +192,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.CreateConnectorRequest.capacity));
                       Some
                         ("connectorConfiguration",
-                          (SyntheticCreateConnectorRequest__mapOf__string.to_value
+                          (ConnectorConfiguration.to_value
                              req.CreateConnectorRequest.connectorConfiguration));
                       Option.map
                         req.CreateConnectorRequest.connectorDescription
@@ -163,6 +222,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateConnectorRequest.logDelivery
                         ~f:(fun x ->
                               ("logDelivery", (LogDelivery.to_value x)));
+                      Option.map req.CreateConnectorRequest.networkType
+                        ~f:(fun x ->
+                              ("networkType", (NetworkType.to_value x)));
                       Some
                         ("plugins",
                           (Zz__listOfPlugin.to_value
@@ -175,7 +237,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateConnectorRequest.workerConfiguration
                         ~f:(fun x ->
                               ("workerConfiguration",
-                                (WorkerConfiguration.to_value x)))])
+                                (WorkerConfiguration.to_value x)));
+                      Option.map req.CreateConnectorRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -206,7 +270,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("name",
                           (Zz__stringMin1Max128.to_value
-                             req.CreateCustomPluginRequest.name))])
+                             req.CreateCustomPluginRequest.name));
+                      Option.map req.CreateCustomPluginRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -234,8 +300,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateWorkerConfigurationRequest.name));
                       Some
                         ("propertiesFileContent",
-                          (SyntheticCreateWorkerConfigurationRequest__string.to_value
-                             req.CreateWorkerConfigurationRequest.propertiesFileContent))])
+                          (Zz__sensitiveString.to_value
+                             req.CreateWorkerConfigurationRequest.propertiesFileContent));
+                      Option.map req.CreateWorkerConfigurationRequest.tags
+                        ~f:(fun x -> ("tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -245,7 +313,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteConnector -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCustomPlugin -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteWorkerConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeConnector ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeConnectorOperation ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeCustomPlugin ->
@@ -254,15 +327,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeWorkerConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConnectorOperations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListConnectors ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCustomPlugins ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListWorkerConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | TagResource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("tags",
+                           (Tags.to_value req.TagResourceRequest.tags))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateConnector -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -343,12 +442,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteCustomPluginResponse.error_of_json))
+  | DeleteWorkerConfiguration ->
+      if is_success
+      then
+        Ok
+          (DeleteWorkerConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWorkerConfigurationResponse.error_of_json))
   | DescribeConnector ->
       if is_success
       then Ok (DescribeConnectorResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeConnectorResponse.error_of_json))
+  | DescribeConnectorOperation ->
+      if is_success
+      then
+        Ok
+          (DescribeConnectorOperationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeConnectorOperationResponse.error_of_json))
   | DescribeCustomPlugin ->
       if is_success
       then Ok (DescribeCustomPluginResponse.of_json (response_to_json resp))
@@ -365,6 +482,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeWorkerConfigurationResponse.error_of_json))
+  | ListConnectorOperations ->
+      if is_success
+      then
+        Ok (ListConnectorOperationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListConnectorOperationsResponse.error_of_json))
   | ListConnectors ->
       if is_success
       then Ok (ListConnectorsResponse.of_json (response_to_json resp))
@@ -376,6 +501,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListCustomPluginsResponse.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
   | ListWorkerConfigurations ->
       if is_success
       then
@@ -384,6 +515,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListWorkerConfigurationsResponse.error_of_json))
+  | TagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (TagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | UntagResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UntagResourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
   | UpdateConnector ->
       if is_success
       then Ok (UpdateConnectorResponse.of_json (response_to_json resp))

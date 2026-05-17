@@ -11,15 +11,29 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_describe_entities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDescribeEntities input
 let cancel_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelChangeSet input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let describe_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeChangeSet input
 let describe_entity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEntity input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
 let list_change_sets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChangeSets input
 let list_entities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEntities input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let start_change_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartChangeSet input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input

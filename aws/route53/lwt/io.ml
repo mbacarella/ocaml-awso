@@ -15,10 +15,14 @@ let activate_key_signing_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ActivateKeySigningKey input
 let associate_v_p_c_with_hosted_zone ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateVPCWithHostedZone input
+let change_cidr_collection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ChangeCidrCollection input
 let change_resource_record_sets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ChangeResourceRecordSets input
 let change_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ChangeTagsForResource input
+let create_cidr_collection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCidrCollection input
 let create_health_check ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateHealthCheck input
 let create_hosted_zone ?endpoint_url ?cfg input =
@@ -39,6 +43,8 @@ let create_v_p_c_association_authorization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVPCAssociationAuthorization input
 let deactivate_key_signing_key ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeactivateKeySigningKey input
+let delete_cidr_collection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCidrCollection input
 let delete_health_check ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHealthCheck input
 let delete_hosted_zone ?endpoint_url ?cfg input =
@@ -97,6 +103,12 @@ let get_traffic_policy_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTrafficPolicyInstance input
 let get_traffic_policy_instance_count ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTrafficPolicyInstanceCount input
+let list_cidr_blocks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCidrBlocks input
+let list_cidr_collections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCidrCollections input
+let list_cidr_locations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCidrLocations input
 let list_geo_locations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGeoLocations input
 let list_health_checks ?endpoint_url ?cfg input =
@@ -136,6 +148,8 @@ let update_health_check ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateHealthCheck input
 let update_hosted_zone_comment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateHostedZoneComment input
+let update_hosted_zone_features ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHostedZoneFeatures input
 let update_traffic_policy_comment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTrafficPolicyComment input
 let update_traffic_policy_instance ?endpoint_url ?cfg input =

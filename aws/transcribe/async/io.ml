@@ -27,6 +27,8 @@ let delete_call_analytics_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCallAnalyticsJob input
 let delete_language_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteLanguageModel input
+let delete_medical_scribe_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMedicalScribeJob input
 let delete_medical_transcription_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMedicalTranscriptionJob input
 let delete_medical_vocabulary ?endpoint_url ?cfg input =
@@ -43,6 +45,8 @@ let get_call_analytics_category ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCallAnalyticsCategory input
 let get_call_analytics_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCallAnalyticsJob input
+let get_medical_scribe_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMedicalScribeJob input
 let get_medical_transcription_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMedicalTranscriptionJob input
 let get_medical_vocabulary ?endpoint_url ?cfg input =
@@ -59,6 +63,8 @@ let list_call_analytics_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCallAnalyticsJobs input
 let list_language_models ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLanguageModels input
+let list_medical_scribe_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMedicalScribeJobs input
 let list_medical_transcription_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMedicalTranscriptionJobs input
 let list_medical_vocabularies ?endpoint_url ?cfg input =
@@ -73,6 +79,8 @@ let list_vocabulary_filters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListVocabularyFilters input
 let start_call_analytics_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCallAnalyticsJob input
+let start_medical_scribe_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMedicalScribeJob input
 let start_medical_transcription_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMedicalTranscriptionJob input
 let start_transcription_job ?endpoint_url ?cfg input =

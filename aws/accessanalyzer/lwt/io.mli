@@ -10,6 +10,24 @@ val cancel_policy_generation :
       CancelPolicyGenerationRequest.t ->
         (CancelPolicyGenerationResponse.t,
           CancelPolicyGenerationResponse.error) Result.t Lwt.t
+val check_access_not_granted :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CheckAccessNotGrantedRequest.t ->
+        (CheckAccessNotGrantedResponse.t,
+          CheckAccessNotGrantedResponse.error) Result.t Lwt.t
+val check_no_new_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CheckNoNewAccessRequest.t ->
+        (CheckNoNewAccessResponse.t, CheckNoNewAccessResponse.error) Result.t
+          Lwt.t
+val check_no_public_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CheckNoPublicAccessRequest.t ->
+        (CheckNoPublicAccessResponse.t, CheckNoPublicAccessResponse.error)
+          Result.t Lwt.t
 val create_access_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -33,6 +51,10 @@ val delete_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteArchiveRuleRequest.t -> (unit, unit) Result.t Lwt.t
+val generate_finding_recommendation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GenerateFindingRecommendationRequest.t -> (unit, unit) Result.t Lwt.t
 val get_access_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -61,6 +83,23 @@ val get_finding :
     ?cfg:Awso.Cfg.t ->
       GetFindingRequest.t ->
         (GetFindingResponse.t, GetFindingResponse.error) Result.t Lwt.t
+val get_finding_recommendation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingRecommendationRequest.t ->
+        (GetFindingRecommendationResponse.t,
+          GetFindingRecommendationResponse.error) Result.t Lwt.t
+val get_finding_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingV2Request.t ->
+        (GetFindingV2Response.t, GetFindingV2Response.error) Result.t Lwt.t
+val get_findings_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingsStatisticsRequest.t ->
+        (GetFindingsStatisticsResponse.t,
+          GetFindingsStatisticsResponse.error) Result.t Lwt.t
 val get_generated_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -101,6 +140,12 @@ val list_findings :
     ?cfg:Awso.Cfg.t ->
       ListFindingsRequest.t ->
         (ListFindingsResponse.t, ListFindingsResponse.error) Result.t Lwt.t
+val list_findings_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFindingsV2Request.t ->
+        (ListFindingsV2Response.t, ListFindingsV2Response.error) Result.t
+          Lwt.t
 val list_policy_generations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -133,6 +178,12 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_analyzer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAnalyzerRequest.t ->
+        (UpdateAnalyzerResponse.t, UpdateAnalyzerResponse.error) Result.t
+          Lwt.t
 val update_archive_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

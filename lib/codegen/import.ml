@@ -1,5 +1,4 @@
 include Awso_common.Jane_compat
-
 module Service = Awso.Service
 module Region = Awso.Region
 module Botodata = Awso.Botodata

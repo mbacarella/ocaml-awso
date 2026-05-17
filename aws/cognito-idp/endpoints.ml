@@ -4,6 +4,9 @@ open Values
 type ('i, 'o, 'e) t =
   | AddCustomAttributes: (AddCustomAttributesRequest.t,
   AddCustomAttributesResponse.t, AddCustomAttributesResponse.error) t 
+  | AddUserPoolClientSecret: (AddUserPoolClientSecretRequest.t,
+  AddUserPoolClientSecretResponse.t, AddUserPoolClientSecretResponse.error) t
+  
   | AdminAddUserToGroup: (AdminAddUserToGroupRequest.t, unit, unit) t 
   | AdminConfirmSignUp: (AdminConfirmSignUpRequest.t,
   AdminConfirmSignUpResponse.t, AdminConfirmSignUpResponse.error) t 
@@ -66,6 +69,9 @@ type ('i, 'o, 'e) t =
   AssociateSoftwareTokenResponse.t, AssociateSoftwareTokenResponse.error) t 
   | ChangePassword: (ChangePasswordRequest.t, ChangePasswordResponse.t,
   ChangePasswordResponse.error) t 
+  | CompleteWebAuthnRegistration: (CompleteWebAuthnRegistrationRequest.t,
+  CompleteWebAuthnRegistrationResponse.t,
+  CompleteWebAuthnRegistrationResponse.error) t 
   | ConfirmDevice: (ConfirmDeviceRequest.t, ConfirmDeviceResponse.t,
   ConfirmDeviceResponse.error) t 
   | ConfirmForgotPassword: (ConfirmForgotPasswordRequest.t,
@@ -76,8 +82,13 @@ type ('i, 'o, 'e) t =
   CreateGroupResponse.error) t 
   | CreateIdentityProvider: (CreateIdentityProviderRequest.t,
   CreateIdentityProviderResponse.t, CreateIdentityProviderResponse.error) t 
+  | CreateManagedLoginBranding: (CreateManagedLoginBrandingRequest.t,
+  CreateManagedLoginBrandingResponse.t,
+  CreateManagedLoginBrandingResponse.error) t 
   | CreateResourceServer: (CreateResourceServerRequest.t,
   CreateResourceServerResponse.t, CreateResourceServerResponse.error) t 
+  | CreateTerms: (CreateTermsRequest.t, CreateTermsResponse.t,
+  CreateTermsResponse.error) t 
   | CreateUserImportJob: (CreateUserImportJobRequest.t,
   CreateUserImportJobResponse.t, CreateUserImportJobResponse.error) t 
   | CreateUserPool: (CreateUserPoolRequest.t, CreateUserPoolResponse.t,
@@ -88,22 +99,40 @@ type ('i, 'o, 'e) t =
   CreateUserPoolDomainResponse.t, CreateUserPoolDomainResponse.error) t 
   | DeleteGroup: (DeleteGroupRequest.t, unit, unit) t 
   | DeleteIdentityProvider: (DeleteIdentityProviderRequest.t, unit, unit) t 
+  | DeleteManagedLoginBranding: (DeleteManagedLoginBrandingRequest.t, 
+  unit, unit) t 
   | DeleteResourceServer: (DeleteResourceServerRequest.t, unit, unit) t 
+  | DeleteTerms: (DeleteTermsRequest.t, unit, unit) t 
   | DeleteUser: (DeleteUserRequest.t, unit, unit) t 
   | DeleteUserAttributes: (DeleteUserAttributesRequest.t,
   DeleteUserAttributesResponse.t, DeleteUserAttributesResponse.error) t 
   | DeleteUserPool: (DeleteUserPoolRequest.t, unit, unit) t 
   | DeleteUserPoolClient: (DeleteUserPoolClientRequest.t, unit, unit) t 
+  | DeleteUserPoolClientSecret: (DeleteUserPoolClientSecretRequest.t,
+  DeleteUserPoolClientSecretResponse.t,
+  DeleteUserPoolClientSecretResponse.error) t 
   | DeleteUserPoolDomain: (DeleteUserPoolDomainRequest.t,
   DeleteUserPoolDomainResponse.t, DeleteUserPoolDomainResponse.error) t 
+  | DeleteWebAuthnCredential: (DeleteWebAuthnCredentialRequest.t,
+  DeleteWebAuthnCredentialResponse.t, DeleteWebAuthnCredentialResponse.error)
+  t 
   | DescribeIdentityProvider: (DescribeIdentityProviderRequest.t,
   DescribeIdentityProviderResponse.t, DescribeIdentityProviderResponse.error)
   t 
+  | DescribeManagedLoginBranding: (DescribeManagedLoginBrandingRequest.t,
+  DescribeManagedLoginBrandingResponse.t,
+  DescribeManagedLoginBrandingResponse.error) t 
+  | DescribeManagedLoginBrandingByClient:
+  (DescribeManagedLoginBrandingByClientRequest.t,
+  DescribeManagedLoginBrandingByClientResponse.t,
+  DescribeManagedLoginBrandingByClientResponse.error) t 
   | DescribeResourceServer: (DescribeResourceServerRequest.t,
   DescribeResourceServerResponse.t, DescribeResourceServerResponse.error) t 
   | DescribeRiskConfiguration: (DescribeRiskConfigurationRequest.t,
   DescribeRiskConfigurationResponse.t,
   DescribeRiskConfigurationResponse.error) t 
+  | DescribeTerms: (DescribeTermsRequest.t, DescribeTermsResponse.t,
+  DescribeTermsResponse.error) t 
   | DescribeUserImportJob: (DescribeUserImportJobRequest.t,
   DescribeUserImportJobResponse.t, DescribeUserImportJobResponse.error) t 
   | DescribeUserPool: (DescribeUserPoolRequest.t, DescribeUserPoolResponse.t,
@@ -125,8 +154,14 @@ type ('i, 'o, 'e) t =
   (GetIdentityProviderByIdentifierRequest.t,
   GetIdentityProviderByIdentifierResponse.t,
   GetIdentityProviderByIdentifierResponse.error) t 
+  | GetLogDeliveryConfiguration: (GetLogDeliveryConfigurationRequest.t,
+  GetLogDeliveryConfigurationResponse.t,
+  GetLogDeliveryConfigurationResponse.error) t 
   | GetSigningCertificate: (GetSigningCertificateRequest.t,
   GetSigningCertificateResponse.t, GetSigningCertificateResponse.error) t 
+  | GetTokensFromRefreshToken: (GetTokensFromRefreshTokenRequest.t,
+  GetTokensFromRefreshTokenResponse.t,
+  GetTokensFromRefreshTokenResponse.error) t 
   | GetUICustomization: (GetUICustomizationRequest.t,
   GetUICustomizationResponse.t, GetUICustomizationResponse.error) t 
   | GetUser: (GetUserRequest.t, GetUserResponse.t, GetUserResponse.error) t 
@@ -134,6 +169,8 @@ type ('i, 'o, 'e) t =
   (GetUserAttributeVerificationCodeRequest.t,
   GetUserAttributeVerificationCodeResponse.t,
   GetUserAttributeVerificationCodeResponse.error) t 
+  | GetUserAuthFactors: (GetUserAuthFactorsRequest.t,
+  GetUserAuthFactorsResponse.t, GetUserAuthFactorsResponse.error) t 
   | GetUserPoolMfaConfig: (GetUserPoolMfaConfigRequest.t,
   GetUserPoolMfaConfigResponse.t, GetUserPoolMfaConfigResponse.error) t 
   | GlobalSignOut: (GlobalSignOutRequest.t, GlobalSignOutResponse.t,
@@ -150,8 +187,13 @@ type ('i, 'o, 'e) t =
   ListResourceServersResponse.t, ListResourceServersResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListTerms: (ListTermsRequest.t, ListTermsResponse.t,
+  ListTermsResponse.error) t 
   | ListUserImportJobs: (ListUserImportJobsRequest.t,
   ListUserImportJobsResponse.t, ListUserImportJobsResponse.error) t 
+  | ListUserPoolClientSecrets: (ListUserPoolClientSecretsRequest.t,
+  ListUserPoolClientSecretsResponse.t,
+  ListUserPoolClientSecretsResponse.error) t 
   | ListUserPoolClients: (ListUserPoolClientsRequest.t,
   ListUserPoolClientsResponse.t, ListUserPoolClientsResponse.error) t 
   | ListUserPools: (ListUserPoolsRequest.t, ListUserPoolsResponse.t,
@@ -160,12 +202,18 @@ type ('i, 'o, 'e) t =
   ListUsersResponse.error) t 
   | ListUsersInGroup: (ListUsersInGroupRequest.t, ListUsersInGroupResponse.t,
   ListUsersInGroupResponse.error) t 
+  | ListWebAuthnCredentials: (ListWebAuthnCredentialsRequest.t,
+  ListWebAuthnCredentialsResponse.t, ListWebAuthnCredentialsResponse.error) t
+  
   | ResendConfirmationCode: (ResendConfirmationCodeRequest.t,
   ResendConfirmationCodeResponse.t, ResendConfirmationCodeResponse.error) t 
   | RespondToAuthChallenge: (RespondToAuthChallengeRequest.t,
   RespondToAuthChallengeResponse.t, RespondToAuthChallengeResponse.error) t 
   | RevokeToken: (RevokeTokenRequest.t, RevokeTokenResponse.t,
   RevokeTokenResponse.error) t 
+  | SetLogDeliveryConfiguration: (SetLogDeliveryConfigurationRequest.t,
+  SetLogDeliveryConfigurationResponse.t,
+  SetLogDeliveryConfigurationResponse.error) t 
   | SetRiskConfiguration: (SetRiskConfigurationRequest.t,
   SetRiskConfigurationResponse.t, SetRiskConfigurationResponse.error) t 
   | SetUICustomization: (SetUICustomizationRequest.t,
@@ -179,6 +227,9 @@ type ('i, 'o, 'e) t =
   | SignUp: (SignUpRequest.t, SignUpResponse.t, SignUpResponse.error) t 
   | StartUserImportJob: (StartUserImportJobRequest.t,
   StartUserImportJobResponse.t, StartUserImportJobResponse.error) t 
+  | StartWebAuthnRegistration: (StartWebAuthnRegistrationRequest.t,
+  StartWebAuthnRegistrationResponse.t,
+  StartWebAuthnRegistrationResponse.error) t 
   | StopUserImportJob: (StopUserImportJobRequest.t,
   StopUserImportJobResponse.t, StopUserImportJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -194,8 +245,13 @@ type ('i, 'o, 'e) t =
   UpdateGroupResponse.error) t 
   | UpdateIdentityProvider: (UpdateIdentityProviderRequest.t,
   UpdateIdentityProviderResponse.t, UpdateIdentityProviderResponse.error) t 
+  | UpdateManagedLoginBranding: (UpdateManagedLoginBrandingRequest.t,
+  UpdateManagedLoginBrandingResponse.t,
+  UpdateManagedLoginBrandingResponse.error) t 
   | UpdateResourceServer: (UpdateResourceServerRequest.t,
   UpdateResourceServerResponse.t, UpdateResourceServerResponse.error) t 
+  | UpdateTerms: (UpdateTermsRequest.t, UpdateTermsResponse.t,
+  UpdateTermsResponse.error) t 
   | UpdateUserAttributes: (UpdateUserAttributesRequest.t,
   UpdateUserAttributesResponse.t, UpdateUserAttributesResponse.error) t 
   | UpdateUserPool: (UpdateUserPoolRequest.t, UpdateUserPoolResponse.t,
@@ -211,6 +267,7 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddCustomAttributes -> `POST
+  | AddUserPoolClientSecret -> `POST
   | AdminAddUserToGroup -> `POST
   | AdminConfirmSignUp -> `POST
   | AdminCreateUser -> `POST
@@ -239,27 +296,37 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AdminUserGlobalSignOut -> `POST
   | AssociateSoftwareToken -> `POST
   | ChangePassword -> `POST
+  | CompleteWebAuthnRegistration -> `POST
   | ConfirmDevice -> `POST
   | ConfirmForgotPassword -> `POST
   | ConfirmSignUp -> `POST
   | CreateGroup -> `POST
   | CreateIdentityProvider -> `POST
+  | CreateManagedLoginBranding -> `POST
   | CreateResourceServer -> `POST
+  | CreateTerms -> `POST
   | CreateUserImportJob -> `POST
   | CreateUserPool -> `POST
   | CreateUserPoolClient -> `POST
   | CreateUserPoolDomain -> `POST
   | DeleteGroup -> `POST
   | DeleteIdentityProvider -> `POST
+  | DeleteManagedLoginBranding -> `POST
   | DeleteResourceServer -> `POST
+  | DeleteTerms -> `POST
   | DeleteUser -> `POST
   | DeleteUserAttributes -> `POST
   | DeleteUserPool -> `POST
   | DeleteUserPoolClient -> `POST
+  | DeleteUserPoolClientSecret -> `POST
   | DeleteUserPoolDomain -> `POST
+  | DeleteWebAuthnCredential -> `POST
   | DescribeIdentityProvider -> `POST
+  | DescribeManagedLoginBranding -> `POST
+  | DescribeManagedLoginBrandingByClient -> `POST
   | DescribeResourceServer -> `POST
   | DescribeRiskConfiguration -> `POST
+  | DescribeTerms -> `POST
   | DescribeUserImportJob -> `POST
   | DescribeUserPool -> `POST
   | DescribeUserPoolClient -> `POST
@@ -270,10 +337,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetDevice -> `POST
   | GetGroup -> `POST
   | GetIdentityProviderByIdentifier -> `POST
+  | GetLogDeliveryConfiguration -> `POST
   | GetSigningCertificate -> `POST
+  | GetTokensFromRefreshToken -> `POST
   | GetUICustomization -> `POST
   | GetUser -> `POST
   | GetUserAttributeVerificationCode -> `POST
+  | GetUserAuthFactors -> `POST
   | GetUserPoolMfaConfig -> `POST
   | GlobalSignOut -> `POST
   | InitiateAuth -> `POST
@@ -282,14 +352,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListIdentityProviders -> `POST
   | ListResourceServers -> `POST
   | ListTagsForResource -> `POST
+  | ListTerms -> `POST
   | ListUserImportJobs -> `POST
+  | ListUserPoolClientSecrets -> `POST
   | ListUserPoolClients -> `POST
   | ListUserPools -> `POST
   | ListUsers -> `POST
   | ListUsersInGroup -> `POST
+  | ListWebAuthnCredentials -> `POST
   | ResendConfirmationCode -> `POST
   | RespondToAuthChallenge -> `POST
   | RevokeToken -> `POST
+  | SetLogDeliveryConfiguration -> `POST
   | SetRiskConfiguration -> `POST
   | SetUICustomization -> `POST
   | SetUserMFAPreference -> `POST
@@ -297,6 +371,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SetUserSettings -> `POST
   | SignUp -> `POST
   | StartUserImportJob -> `POST
+  | StartWebAuthnRegistration -> `POST
   | StopUserImportJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
@@ -304,7 +379,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateDeviceStatus -> `POST
   | UpdateGroup -> `POST
   | UpdateIdentityProvider -> `POST
+  | UpdateManagedLoginBranding -> `POST
   | UpdateResourceServer -> `POST
+  | UpdateTerms -> `POST
   | UpdateUserAttributes -> `POST
   | UpdateUserPool -> `POST
   | UpdateUserPoolClient -> `POST
@@ -315,6 +392,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddCustomAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | AddUserPoolClientSecret -> (Format.kasprintf Uri.of_string) "/"
       | AdminAddUserToGroup -> (Format.kasprintf Uri.of_string) "/"
       | AdminConfirmSignUp -> (Format.kasprintf Uri.of_string) "/"
       | AdminCreateUser -> (Format.kasprintf Uri.of_string) "/"
@@ -343,27 +421,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AdminUserGlobalSignOut -> (Format.kasprintf Uri.of_string) "/"
       | AssociateSoftwareToken -> (Format.kasprintf Uri.of_string) "/"
       | ChangePassword -> (Format.kasprintf Uri.of_string) "/"
+      | CompleteWebAuthnRegistration -> (Format.kasprintf Uri.of_string) "/"
       | ConfirmDevice -> (Format.kasprintf Uri.of_string) "/"
       | ConfirmForgotPassword -> (Format.kasprintf Uri.of_string) "/"
       | ConfirmSignUp -> (Format.kasprintf Uri.of_string) "/"
       | CreateGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateIdentityProvider -> (Format.kasprintf Uri.of_string) "/"
+      | CreateManagedLoginBranding -> (Format.kasprintf Uri.of_string) "/"
       | CreateResourceServer -> (Format.kasprintf Uri.of_string) "/"
+      | CreateTerms -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserImportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserPool -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserPoolClient -> (Format.kasprintf Uri.of_string) "/"
       | CreateUserPoolDomain -> (Format.kasprintf Uri.of_string) "/"
       | DeleteGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteIdentityProvider -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteManagedLoginBranding -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResourceServer -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTerms -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserAttributes -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserPool -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserPoolClient -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteUserPoolClientSecret -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUserPoolDomain -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteWebAuthnCredential -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIdentityProvider -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeManagedLoginBranding -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeManagedLoginBrandingByClient ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeResourceServer -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRiskConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTerms -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUserImportJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUserPool -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUserPoolClient -> (Format.kasprintf Uri.of_string) "/"
@@ -375,11 +464,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetGroup -> (Format.kasprintf Uri.of_string) "/"
       | GetIdentityProviderByIdentifier ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetLogDeliveryConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | GetSigningCertificate -> (Format.kasprintf Uri.of_string) "/"
+      | GetTokensFromRefreshToken -> (Format.kasprintf Uri.of_string) "/"
       | GetUICustomization -> (Format.kasprintf Uri.of_string) "/"
       | GetUser -> (Format.kasprintf Uri.of_string) "/"
       | GetUserAttributeVerificationCode ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetUserAuthFactors -> (Format.kasprintf Uri.of_string) "/"
       | GetUserPoolMfaConfig -> (Format.kasprintf Uri.of_string) "/"
       | GlobalSignOut -> (Format.kasprintf Uri.of_string) "/"
       | InitiateAuth -> (Format.kasprintf Uri.of_string) "/"
@@ -388,14 +480,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListIdentityProviders -> (Format.kasprintf Uri.of_string) "/"
       | ListResourceServers -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | ListTerms -> (Format.kasprintf Uri.of_string) "/"
       | ListUserImportJobs -> (Format.kasprintf Uri.of_string) "/"
+      | ListUserPoolClientSecrets -> (Format.kasprintf Uri.of_string) "/"
       | ListUserPoolClients -> (Format.kasprintf Uri.of_string) "/"
       | ListUserPools -> (Format.kasprintf Uri.of_string) "/"
       | ListUsers -> (Format.kasprintf Uri.of_string) "/"
       | ListUsersInGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ListWebAuthnCredentials -> (Format.kasprintf Uri.of_string) "/"
       | ResendConfirmationCode -> (Format.kasprintf Uri.of_string) "/"
       | RespondToAuthChallenge -> (Format.kasprintf Uri.of_string) "/"
       | RevokeToken -> (Format.kasprintf Uri.of_string) "/"
+      | SetLogDeliveryConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | SetRiskConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | SetUICustomization -> (Format.kasprintf Uri.of_string) "/"
       | SetUserMFAPreference -> (Format.kasprintf Uri.of_string) "/"
@@ -403,6 +499,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SetUserSettings -> (Format.kasprintf Uri.of_string) "/"
       | SignUp -> (Format.kasprintf Uri.of_string) "/"
       | StartUserImportJob -> (Format.kasprintf Uri.of_string) "/"
+      | StartWebAuthnRegistration -> (Format.kasprintf Uri.of_string) "/"
       | StopUserImportJob -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -410,7 +507,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateDeviceStatus -> (Format.kasprintf Uri.of_string) "/"
       | UpdateGroup -> (Format.kasprintf Uri.of_string) "/"
       | UpdateIdentityProvider -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateManagedLoginBranding -> (Format.kasprintf Uri.of_string) "/"
       | UpdateResourceServer -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateTerms -> (Format.kasprintf Uri.of_string) "/"
       | UpdateUserAttributes -> (Format.kasprintf Uri.of_string) "/"
       | UpdateUserPool -> (Format.kasprintf Uri.of_string) "/"
       | UpdateUserPoolClient -> (Format.kasprintf Uri.of_string) "/"
@@ -428,6 +527,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.AddCustomAttributes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AddUserPoolClientSecret ->
+      let json = AddUserPoolClientSecretRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.AddUserPoolClientSecret")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AdminAddUserToGroup ->
       let json = AdminAddUserToGroupRequest.to_json req in
@@ -680,6 +788,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.ChangePassword")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CompleteWebAuthnRegistration ->
+      let json = CompleteWebAuthnRegistrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.CompleteWebAuthnRegistration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ConfirmDevice ->
       let json = ConfirmDeviceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -722,6 +839,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.CreateIdentityProvider")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateManagedLoginBranding ->
+      let json = CreateManagedLoginBrandingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.CreateManagedLoginBranding")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateResourceServer ->
       let json = CreateResourceServerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -730,6 +856,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.CreateResourceServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateTerms ->
+      let json = CreateTermsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSCognitoIdentityProviderService.CreateTerms")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateUserImportJob ->
       let json = CreateUserImportJobRequest.to_json req in
@@ -784,6 +918,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DeleteIdentityProvider")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteManagedLoginBranding ->
+      let json = DeleteManagedLoginBrandingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.DeleteManagedLoginBranding")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteResourceServer ->
       let json = DeleteResourceServerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -792,6 +935,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DeleteResourceServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteTerms ->
+      let json = DeleteTermsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSCognitoIdentityProviderService.DeleteTerms")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteUser ->
       let json = DeleteUserRequest.to_json req in
@@ -828,6 +979,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DeleteUserPoolClient")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteUserPoolClientSecret ->
+      let json = DeleteUserPoolClientSecretRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.DeleteUserPoolClientSecret")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteUserPoolDomain ->
       let json = DeleteUserPoolDomainRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -837,6 +997,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DeleteUserPoolDomain")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteWebAuthnCredential ->
+      let json = DeleteWebAuthnCredentialRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.DeleteWebAuthnCredential")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeIdentityProvider ->
       let json = DescribeIdentityProviderRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -845,6 +1014,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DescribeIdentityProvider")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeManagedLoginBranding ->
+      let json = DescribeManagedLoginBrandingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.DescribeManagedLoginBranding")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeManagedLoginBrandingByClient ->
+      let json = DescribeManagedLoginBrandingByClientRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.DescribeManagedLoginBrandingByClient")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeResourceServer ->
       let json = DescribeResourceServerRequest.to_json req in
@@ -863,6 +1050,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.DescribeRiskConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeTerms ->
+      let json = DescribeTermsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSCognitoIdentityProviderService.DescribeTerms")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeUserImportJob ->
       let json = DescribeUserImportJobRequest.to_json req in
@@ -950,6 +1145,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.GetIdentityProviderByIdentifier")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLogDeliveryConfiguration ->
+      let json = GetLogDeliveryConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.GetLogDeliveryConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetSigningCertificate ->
       let json = GetSigningCertificateRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -958,6 +1162,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.GetSigningCertificate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetTokensFromRefreshToken ->
+      let json = GetTokensFromRefreshTokenRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.GetTokensFromRefreshToken")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetUICustomization ->
       let json = GetUICustomizationRequest.to_json req in
@@ -984,6 +1197,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.GetUserAttributeVerificationCode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetUserAuthFactors ->
+      let json = GetUserAuthFactorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.GetUserAuthFactors")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetUserPoolMfaConfig ->
       let json = GetUserPoolMfaConfigRequest.to_json req in
@@ -1053,6 +1275,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.ListTagsForResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTerms ->
+      let json = ListTermsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSCognitoIdentityProviderService.ListTerms")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListUserImportJobs ->
       let json = ListUserImportJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1061,6 +1291,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.ListUserImportJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListUserPoolClientSecrets ->
+      let json = ListUserPoolClientSecretsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.ListUserPoolClientSecrets")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListUserPoolClients ->
       let json = ListUserPoolClientsRequest.to_json req in
@@ -1096,6 +1335,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.ListUsersInGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListWebAuthnCredentials ->
+      let json = ListWebAuthnCredentialsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.ListWebAuthnCredentials")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ResendConfirmationCode ->
       let json = ResendConfirmationCodeRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1121,6 +1369,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSCognitoIdentityProviderService.RevokeToken")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetLogDeliveryConfiguration ->
+      let json = SetLogDeliveryConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.SetLogDeliveryConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetRiskConfiguration ->
       let json = SetRiskConfigurationRequest.to_json req in
@@ -1184,6 +1441,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.StartUserImportJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartWebAuthnRegistration ->
+      let json = StartWebAuthnRegistrationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.StartWebAuthnRegistration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopUserImportJob ->
       let json = StopUserImportJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1244,6 +1510,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.UpdateIdentityProvider")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateManagedLoginBranding ->
+      let json = UpdateManagedLoginBrandingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSCognitoIdentityProviderService.UpdateManagedLoginBranding")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateResourceServer ->
       let json = UpdateResourceServerRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1252,6 +1527,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSCognitoIdentityProviderService.UpdateResourceServer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateTerms ->
+      let json = UpdateTermsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSCognitoIdentityProviderService.UpdateTerms")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateUserAttributes ->
       let json = UpdateUserAttributesRequest.to_json req in
@@ -1338,6 +1621,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some AddCustomAttributesResponse.error_of_json))
+  | AddUserPoolClientSecret ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AddUserPoolClientSecretResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AddUserPoolClientSecretResponse.error_of_json))
   | AdminAddUserToGroup ->
       if is_success then Ok () else Error (parse_aws_error None)
   | AdminConfirmSignUp ->
@@ -1543,6 +1835,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ChangePasswordResponse.of_json json)
       else
         Error (parse_aws_error (Some ChangePasswordResponse.error_of_json))
+  | CompleteWebAuthnRegistration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CompleteWebAuthnRegistrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CompleteWebAuthnRegistrationResponse.error_of_json))
   | ConfirmDevice ->
       if is_success
       then
@@ -1578,6 +1879,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateIdentityProviderResponse.error_of_json))
+  | CreateManagedLoginBranding ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateManagedLoginBrandingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateManagedLoginBrandingResponse.error_of_json))
   | CreateResourceServer ->
       if is_success
       then
@@ -1586,6 +1896,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateResourceServerResponse.error_of_json))
+  | CreateTerms ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateTermsResponse.of_json json)
+      else Error (parse_aws_error (Some CreateTermsResponse.error_of_json))
   | CreateUserImportJob ->
       if is_success
       then
@@ -1620,8 +1936,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteGroup -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteIdentityProvider ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteManagedLoginBranding ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteResourceServer ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTerms -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUser -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUserAttributes ->
       if is_success
@@ -1635,6 +1954,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteUserPoolClient ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteUserPoolClientSecret ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteUserPoolClientSecretResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteUserPoolClientSecretResponse.error_of_json))
   | DeleteUserPoolDomain ->
       if is_success
       then
@@ -1643,6 +1971,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteUserPoolDomainResponse.error_of_json))
+  | DeleteWebAuthnCredential ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteWebAuthnCredentialResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteWebAuthnCredentialResponse.error_of_json))
   | DescribeIdentityProvider ->
       if is_success
       then
@@ -1652,6 +1989,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeIdentityProviderResponse.error_of_json))
+  | DescribeManagedLoginBranding ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeManagedLoginBrandingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeManagedLoginBrandingResponse.error_of_json))
+  | DescribeManagedLoginBrandingByClient ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeManagedLoginBrandingByClientResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeManagedLoginBrandingByClientResponse.error_of_json))
   | DescribeResourceServer ->
       if is_success
       then
@@ -1670,6 +2025,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRiskConfigurationResponse.error_of_json))
+  | DescribeTerms ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeTermsResponse.of_json json)
+      else Error (parse_aws_error (Some DescribeTermsResponse.error_of_json))
   | DescribeUserImportJob ->
       if is_success
       then
@@ -1739,6 +2100,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetIdentityProviderByIdentifierResponse.error_of_json))
+  | GetLogDeliveryConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLogDeliveryConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLogDeliveryConfigurationResponse.error_of_json))
   | GetSigningCertificate ->
       if is_success
       then
@@ -1747,6 +2117,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetSigningCertificateResponse.error_of_json))
+  | GetTokensFromRefreshToken ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetTokensFromRefreshTokenResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetTokensFromRefreshTokenResponse.error_of_json))
   | GetUICustomization ->
       if is_success
       then
@@ -1770,6 +2149,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetUserAttributeVerificationCodeResponse.error_of_json))
+  | GetUserAuthFactors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetUserAuthFactorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetUserAuthFactorsResponse.error_of_json))
   | GetUserPoolMfaConfig ->
       if is_success
       then
@@ -1826,6 +2213,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListTerms ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTermsResponse.of_json json)
+      else Error (parse_aws_error (Some ListTermsResponse.error_of_json))
   | ListUserImportJobs ->
       if is_success
       then
@@ -1834,6 +2227,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListUserImportJobsResponse.error_of_json))
+  | ListUserPoolClientSecrets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListUserPoolClientSecretsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListUserPoolClientSecretsResponse.error_of_json))
   | ListUserPoolClients ->
       if is_success
       then
@@ -1861,6 +2263,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListUsersInGroupResponse.of_json json)
       else
         Error (parse_aws_error (Some ListUsersInGroupResponse.error_of_json))
+  | ListWebAuthnCredentials ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListWebAuthnCredentialsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListWebAuthnCredentialsResponse.error_of_json))
   | ResendConfirmationCode ->
       if is_success
       then
@@ -1885,6 +2296,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (RevokeTokenResponse.of_json json)
       else Error (parse_aws_error (Some RevokeTokenResponse.error_of_json))
+  | SetLogDeliveryConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetLogDeliveryConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some SetLogDeliveryConfigurationResponse.error_of_json))
   | SetRiskConfiguration ->
       if is_success
       then
@@ -1938,6 +2358,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartUserImportJobResponse.error_of_json))
+  | StartWebAuthnRegistration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartWebAuthnRegistrationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartWebAuthnRegistrationResponse.error_of_json))
   | StopUserImportJob ->
       if is_success
       then
@@ -1990,6 +2419,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateIdentityProviderResponse.error_of_json))
+  | UpdateManagedLoginBranding ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateManagedLoginBrandingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateManagedLoginBrandingResponse.error_of_json))
   | UpdateResourceServer ->
       if is_success
       then
@@ -1998,6 +2436,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateResourceServerResponse.error_of_json))
+  | UpdateTerms ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateTermsResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateTermsResponse.error_of_json))
   | UpdateUserAttributes ->
       if is_success
       then

@@ -5,7 +5,7 @@ open! Import
 let service = Service.ecr
 let apiVersion = "2015-09-21"
 let endpointPrefix = "api.ecr"
-let serviceFullName = "Amazon EC2 Container Registry"
+let serviceFullName = "Amazon Elastic Container Registry"
 let signatureVersion = "v4"
 let protocol = "json"
 let globalEndpoint = endpointPrefix ^ ".amazonaws.com"
@@ -98,6 +98,9 @@ module ImageTagsList =
   struct
     type nonrec t = ImageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -117,6 +120,20 @@ module ImageTagsList =
     let of_json j =
       list_of_json ~kind:"ImageTagsList" ~of_json:ImageTag.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module InUseCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
   end
 module Platform =
   struct
@@ -158,7 +175,7 @@ module RepositoryName =
                 (check_string_max i ~max:256) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"(?:[a-z0-9]+(?:[._-][a-z0-9]+)*/)*[a-z0-9]+(?:[._-][a-z0-9]+)*")));
+                       ~pattern:"[a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*(\\/[a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*)*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -272,6 +289,19 @@ module FilePath =
     let of_json j = string_of_json ~kind:"FilePath" j
     let to_json = simple_to_json to_value
   end
+module FixedInVersion =
+  struct
+    type nonrec t = string
+    let context_ = "FixedInVersion"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FixedInVersion" j
+    let to_json = simple_to_json to_value
+  end
 module PackageManager =
   struct
     type nonrec t = string
@@ -342,6 +372,12 @@ module AwsEcrContainerImageDetails =
       pushedAt: Date.t option
         [@ocaml.doc
           "The date and time the Amazon ECR container image was pushed."];
+      lastInUseAt: Date.t option
+        [@ocaml.doc
+          "The most recent date and time a cluster was running the image."];
+      inUseCount: InUseCount.t option
+        [@ocaml.doc
+          "The number of Amazon ECS or Amazon EKS clusters currently running the image."];
       registry: RegistryId.t option
         [@ocaml.doc
           "The registry the Amazon ECR container image belongs to."];
@@ -354,19 +390,23 @@ module AwsEcrContainerImageDetails =
           fun ?imageTags ->
             fun ?platform ->
               fun ?pushedAt ->
-                fun ?registry ->
-                  fun ?repositoryName ->
-                    fun () ->
-                      {
-                        architecture;
-                        author;
-                        imageHash;
-                        imageTags;
-                        platform;
-                        pushedAt;
-                        registry;
-                        repositoryName
-                      }
+                fun ?lastInUseAt ->
+                  fun ?inUseCount ->
+                    fun ?registry ->
+                      fun ?repositoryName ->
+                        fun () ->
+                          {
+                            architecture;
+                            author;
+                            imageHash;
+                            imageTags;
+                            platform;
+                            pushedAt;
+                            lastInUseAt;
+                            inUseCount;
+                            registry;
+                            repositoryName
+                          }
     let to_value x =
       structure_to_value
         [("architecture", (Option.map x.architecture ~f:Arch.to_value));
@@ -375,6 +415,8 @@ module AwsEcrContainerImageDetails =
         ("imageTags", (Option.map x.imageTags ~f:ImageTagsList.to_value));
         ("platform", (Option.map x.platform ~f:Platform.to_value));
         ("pushedAt", (Option.map x.pushedAt ~f:Date.to_value));
+        ("lastInUseAt", (Option.map x.lastInUseAt ~f:Date.to_value));
+        ("inUseCount", (Option.map x.inUseCount ~f:InUseCount.to_value));
         ("registry", (Option.map x.registry ~f:RegistryId.to_value));
         ("repositoryName",
           (Option.map x.repositoryName ~f:RepositoryName.to_value))]
@@ -385,6 +427,10 @@ module AwsEcrContainerImageDetails =
           (Xml.child xml_arg0 "repositoryName") in
       let registry =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registry") in
+      let inUseCount =
+        (Option.map ~f:InUseCount.of_xml) (Xml.child xml_arg0 "inUseCount") in
+      let lastInUseAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "lastInUseAt") in
       let pushedAt =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "pushedAt") in
       let platform =
@@ -397,21 +443,23 @@ module AwsEcrContainerImageDetails =
         (Option.map ~f:Author.of_xml) (Xml.child xml_arg0 "author") in
       let architecture =
         (Option.map ~f:Arch.of_xml) (Xml.child xml_arg0 "architecture") in
-      make ?repositoryName ?registry ?pushedAt ?platform ?imageTags
-        ?imageHash ?author ?architecture ()
+      make ?repositoryName ?registry ?inUseCount ?lastInUseAt ?pushedAt
+        ?platform ?imageTags ?imageHash ?author ?architecture ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registry = field_map json "registry" RegistryId.of_json in
-      let pushedAt = field_map json "pushedAt" Date.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let imageTags = field_map json "imageTags" ImageTagsList.of_json in
-      let imageHash = field_map json "imageHash" ImageDigest.of_json in
-      let author = field_map json "author" Author.of_json in
-      let architecture = field_map json "architecture" Arch.of_json in
-      make ?repositoryName ?registry ?pushedAt ?platform ?imageTags
-        ?imageHash ?author ?architecture ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registry = field_map json__ "registry" RegistryId.of_json in
+      let inUseCount = field_map json__ "inUseCount" InUseCount.of_json in
+      let lastInUseAt = field_map json__ "lastInUseAt" Date.of_json in
+      let pushedAt = field_map json__ "pushedAt" Date.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let imageTags = field_map json__ "imageTags" ImageTagsList.of_json in
+      let imageHash = field_map json__ "imageHash" ImageDigest.of_json in
+      let author = field_map json__ "author" Author.of_json in
+      let architecture = field_map json__ "architecture" Arch.of_json in
+      make ?repositoryName ?registry ?inUseCount ?lastInUseAt ?pushedAt
+        ?platform ?imageTags ?imageHash ?author ?architecture ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The image details of the Amazon ECR container image."]
 module TagKey =
@@ -461,13 +509,56 @@ module CvssScoreAdjustment =
         (Option.map ~f:Metric.of_xml) (Xml.child xml_arg0 "metric") in
       make ?reason ?metric ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" Reason.of_json in
-      let metric = field_map json "metric" Metric.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" Reason.of_json in
+      let metric = field_map json__ "metric" Metric.of_json in
       make ?reason ?metric ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details on adjustments Amazon Inspector made to the CVSS score for a finding."]
+module SigningRepositoryFilterType =
+  struct
+    type nonrec t =
+      | WILDCARD_MATCH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | WILDCARD_MATCH -> "WILDCARD_MATCH" | Non_static_id s -> s
+    let of_string =
+      function | "WILDCARD_MATCH" -> WILDCARD_MATCH | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SigningRepositoryFilterType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SigningRepositoryFilterType" j)
+    let to_json = simple_to_json to_value
+  end
+module SigningRepositoryFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "SigningRepositoryFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:[a-z0-9*]+(?:[._-][a-z0-9*]+)*/)*[a-z0-9*]+(?:[._-][a-z0-9*]+)*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SigningRepositoryFilterValue" j
+    let to_json = simple_to_json to_value
+  end
 module Region =
   struct
     type nonrec t = string
@@ -606,12 +697,12 @@ module CvssScore =
         (Option.map ~f:BaseScore.of_xml) (Xml.child xml_arg0 "baseScore") in
       make ?version ?source ?scoringVector ?baseScore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" Version.of_json in
-      let source = field_map json "source" Source.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" Version.of_json in
+      let source = field_map json__ "source" Source.of_json in
       let scoringVector =
-        field_map json "scoringVector" ScoringVector.of_json in
-      let baseScore = field_map json "baseScore" BaseScore.of_json in
+        field_map json__ "scoringVector" ScoringVector.of_json in
+      let baseScore = field_map json__ "baseScore" BaseScore.of_json in
       make ?version ?source ?scoringVector ?baseScore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The CVSS score for a finding."]
@@ -660,7 +751,10 @@ module VulnerablePackage =
       sourceLayerHash: SourceLayerHash.t option
         [@ocaml.doc "The source layer hash of the vulnerable package."];
       version: Version.t option
-        [@ocaml.doc "The version of the vulnerable package."]}
+        [@ocaml.doc "The version of the vulnerable package."];
+      fixedInVersion: FixedInVersion.t option
+        [@ocaml.doc
+          "The version of the package that contains the vulnerability fix."]}
     let make ?arch =
       fun ?epoch ->
         fun ?filePath ->
@@ -669,17 +763,19 @@ module VulnerablePackage =
               fun ?release ->
                 fun ?sourceLayerHash ->
                   fun ?version ->
-                    fun () ->
-                      {
-                        arch;
-                        epoch;
-                        filePath;
-                        name;
-                        packageManager;
-                        release;
-                        sourceLayerHash;
-                        version
-                      }
+                    fun ?fixedInVersion ->
+                      fun () ->
+                        {
+                          arch;
+                          epoch;
+                          filePath;
+                          name;
+                          packageManager;
+                          release;
+                          sourceLayerHash;
+                          version;
+                          fixedInVersion
+                        }
     let to_value x =
       structure_to_value
         [("arch", (Option.map x.arch ~f:Arch.to_value));
@@ -691,9 +787,14 @@ module VulnerablePackage =
         ("release", (Option.map x.release ~f:Release.to_value));
         ("sourceLayerHash",
           (Option.map x.sourceLayerHash ~f:SourceLayerHash.to_value));
-        ("version", (Option.map x.version ~f:Version.to_value))]
+        ("version", (Option.map x.version ~f:Version.to_value));
+        ("fixedInVersion",
+          (Option.map x.fixedInVersion ~f:FixedInVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fixedInVersion =
+        (Option.map ~f:FixedInVersion.of_xml)
+          (Xml.child xml_arg0 "fixedInVersion") in
       let version =
         (Option.map ~f:Version.of_xml) (Xml.child xml_arg0 "version") in
       let sourceLayerHash =
@@ -711,22 +812,24 @@ module VulnerablePackage =
         (Option.map ~f:FilePath.of_xml) (Xml.child xml_arg0 "filePath") in
       let epoch = (Option.map ~f:Epoch.of_xml) (Xml.child xml_arg0 "epoch") in
       let arch = (Option.map ~f:Arch.of_xml) (Xml.child xml_arg0 "arch") in
-      make ?version ?sourceLayerHash ?release ?packageManager ?name ?filePath
-        ?epoch ?arch ()
+      make ?fixedInVersion ?version ?sourceLayerHash ?release ?packageManager
+        ?name ?filePath ?epoch ?arch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" Version.of_json in
+    let of_json json__ =
+      let fixedInVersion =
+        field_map json__ "fixedInVersion" FixedInVersion.of_json in
+      let version = field_map json__ "version" Version.of_json in
       let sourceLayerHash =
-        field_map json "sourceLayerHash" SourceLayerHash.of_json in
-      let release = field_map json "release" Release.of_json in
+        field_map json__ "sourceLayerHash" SourceLayerHash.of_json in
+      let release = field_map json__ "release" Release.of_json in
       let packageManager =
-        field_map json "packageManager" PackageManager.of_json in
-      let name = field_map json "name" VulnerablePackageName.of_json in
-      let filePath = field_map json "filePath" FilePath.of_json in
-      let epoch = field_map json "epoch" Epoch.of_json in
-      let arch = field_map json "arch" Arch.of_json in
-      make ?version ?sourceLayerHash ?release ?packageManager ?name ?filePath
-        ?epoch ?arch ()
+        field_map json__ "packageManager" PackageManager.of_json in
+      let name = field_map json__ "name" VulnerablePackageName.of_json in
+      let filePath = field_map json__ "filePath" FilePath.of_json in
+      let epoch = field_map json__ "epoch" Epoch.of_json in
+      let arch = field_map json__ "arch" Arch.of_json in
+      make ?fixedInVersion ?version ?sourceLayerHash ?release ?packageManager
+        ?name ?filePath ?epoch ?arch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information on the vulnerable package identified by a finding."]
@@ -763,9 +866,9 @@ module ResourceDetails =
           (Xml.child xml_arg0 "awsEcrContainerImage") in
       make ?awsEcrContainerImage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsEcrContainerImage =
-        field_map json "awsEcrContainerImage"
+        field_map json__ "awsEcrContainerImage"
           AwsEcrContainerImageDetails.of_json in
       make ?awsEcrContainerImage ()
     let to_json v = composed_to_json to_value v
@@ -805,6 +908,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -829,6 +934,9 @@ module CvssScoreAdjustmentList =
   struct
     type nonrec t = CvssScoreAdjustment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CvssScoreAdjustment.to_value)) |>
         (fun x -> `List x)
@@ -900,6 +1008,42 @@ module AttributeValue =
     let of_json j = string_of_json ~kind:"AttributeValue" j
     let to_json = simple_to_json to_value
   end
+module SigningRepositoryFilter =
+  struct
+    type nonrec t =
+      {
+      filter: SigningRepositoryFilterValue.t
+        [@ocaml.doc
+          "The filter value used to match repository names. When using WILDCARD_MATCH, the * character matches any sequence of characters. Examples: myapp/* - Matches all repositories starting with myapp/ */production - Matches all repositories ending with /production *prod* - Matches all repositories containing prod"];
+      filterType: SigningRepositoryFilterType.t
+        [@ocaml.doc
+          "The type of filter to apply. Currently, only WILDCARD_MATCH is supported, which uses wildcard patterns to match repository names."]}
+    let context_ = "SigningRepositoryFilter"
+    let make ~filter = fun ~filterType -> fun () -> { filter; filterType }
+    let to_value x =
+      structure_to_value
+        [("filter", (Some (SigningRepositoryFilterValue.to_value x.filter)));
+        ("filterType",
+          (Some (SigningRepositoryFilterType.to_value x.filterType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filterType =
+        SigningRepositoryFilterType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filterType") in
+      let filter =
+        SigningRepositoryFilterValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filter") in
+      make ~filterType ~filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filterType =
+        field_map_exn json__ "filterType" SigningRepositoryFilterType.of_json in
+      let filter =
+        field_map_exn json__ "filter" SigningRepositoryFilterValue.of_json in
+      make ~filterType ~filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A repository filter used to determine which repositories have their images automatically signed on push. Each filter consists of a filter type and filter value."]
 module ReplicationDestination =
   struct
     type nonrec t =
@@ -923,9 +1067,9 @@ module ReplicationDestination =
         Region.of_xml (Xml.child_exn ~context:context_ xml_arg0 "region") in
       make ~registryId ~region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map_exn json "registryId" RegistryId.of_json in
-      let region = field_map_exn json "region" Region.of_json in
+    let of_json json__ =
+      let registryId = field_map_exn json__ "registryId" RegistryId.of_json in
+      let region = field_map_exn json__ "region" Region.of_json in
       make ~registryId ~region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -956,14 +1100,15 @@ module RepositoryFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
       make ~filterType ~filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filterType =
-        field_map_exn json "filterType" RepositoryFilterType.of_json in
-      let filter = field_map_exn json "filter" RepositoryFilterValue.of_json in
+        field_map_exn json__ "filterType" RepositoryFilterType.of_json in
+      let filter =
+        field_map_exn json__ "filter" RepositoryFilterValue.of_json in
       make ~filterType ~filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The filter settings used with image replication. Specifying a repository filter to a replication rule provides a method for controlling which repositories in a private registry are replicated. If no repository filter is specified, all images in the repository are replicated."]
+       "The filter settings used with image replication. Specifying a repository filter to a replication rule provides a method for controlling which repositories in a private registry are replicated. If no filters are added, the contents of all repositories are replicated."]
 module ScanningRepositoryFilter =
   struct
     type nonrec t =
@@ -989,15 +1134,58 @@ module ScanningRepositoryFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "filter") in
       make ~filterType ~filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filterType =
-        field_map_exn json "filterType" ScanningRepositoryFilterType.of_json in
+        field_map_exn json__ "filterType"
+          ScanningRepositoryFilterType.of_json in
       let filter =
-        field_map_exn json "filter" ScanningRepositoryFilterValue.of_json in
+        field_map_exn json__ "filter" ScanningRepositoryFilterValue.of_json in
       make ~filterType ~filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details of a scanning repository filter. For more information on how to use filters, see Using filters in the Amazon Elastic Container Registry User Guide."]
+module ImageTagMutabilityExclusionFilterType =
+  struct
+    type nonrec t =
+      | WILDCARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | WILDCARD -> "WILDCARD" | Non_static_id s -> s
+    let of_string = function | "WILDCARD" -> WILDCARD | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ImageTagMutabilityExclusionFilterType" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ImageTagMutabilityExclusionFilterType" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageTagMutabilityExclusionFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "ImageTagMutabilityExclusionFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9a-zA-Z._*-]{1,128}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ImageTagMutabilityExclusionFilterValue" j
+    let to_json = simple_to_json to_value
+  end
 module FindingSeverity =
   struct
     type nonrec t =
@@ -1054,6 +1242,9 @@ module CvssScoreList =
   struct
     type nonrec t = CvssScore.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CvssScore.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1078,6 +1269,9 @@ module ReferenceUrlsList =
   struct
     type nonrec t = Url.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Url.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1102,6 +1296,9 @@ module RelatedVulnerabilitiesList =
   struct
     type nonrec t = RelatedVulnerability.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RelatedVulnerability.to_value)) |>
         (fun x -> `List x)
@@ -1154,6 +1351,9 @@ module VulnerablePackagesList =
   struct
     type nonrec t = VulnerablePackage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VulnerablePackage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1197,9 +1397,9 @@ module Recommendation =
       let url = (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "url") in
       make ?text ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map json "text" RecommendationText.of_json in
-      let url = field_map json "url" Url.of_json in make ?text ?url ()
+    let of_json json__ =
+      let text = field_map json__ "text" RecommendationText.of_json in
+      let url = field_map json__ "url" Url.of_json in make ?text ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about the recommended course of action to remediate the finding."]
@@ -1231,11 +1431,11 @@ module Resource =
         (Option.map ~f:ResourceDetails.of_xml) (Xml.child xml_arg0 "details") in
       make ?type_ ?tags ?id ?details ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" Type.of_json in
-      let tags = field_map json "tags" Tags.of_json in
-      let id = field_map json "id" ResourceId.of_json in
-      let details = field_map json "details" ResourceDetails.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" Type.of_json in
+      let tags = field_map json__ "tags" Tags.of_json in
+      let id = field_map json__ "id" ResourceId.of_json in
+      let details = field_map json__ "details" ResourceDetails.of_json in
       make ?type_ ?tags ?id ?details ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the resource involved in a finding."]
@@ -1284,14 +1484,14 @@ module CvssScoreDetails =
           (Xml.child xml_arg0 "adjustments") in
       make ?version ?scoringVector ?scoreSource ?score ?adjustments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" Version.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" Version.of_json in
       let scoringVector =
-        field_map json "scoringVector" ScoringVector.of_json in
-      let scoreSource = field_map json "scoreSource" Source.of_json in
-      let score = field_map json "score" Score.of_json in
+        field_map json__ "scoringVector" ScoringVector.of_json in
+      let scoreSource = field_map json__ "scoreSource" Source.of_json in
+      let score = field_map json__ "score" Score.of_json in
       let adjustments =
-        field_map json "adjustments" CvssScoreAdjustmentList.of_json in
+        field_map json__ "adjustments" CvssScoreAdjustmentList.of_json in
       make ?version ?scoringVector ?scoreSource ?score ?adjustments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the CVSS score."]
@@ -1299,38 +1499,97 @@ module Attribute =
   struct
     type nonrec t =
       {
-      key: AttributeKey.t [@ocaml.doc "The attribute key."];
+      key: AttributeKey.t option [@ocaml.doc "The attribute key."];
       value: AttributeValue.t option
         [@ocaml.doc "The value assigned to the attribute key."]}
-    let context_ = "Attribute"
-    let make ?value = fun ~key -> fun () -> { value; key }
+    let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
-        [("key", (Some (AttributeKey.to_value x.key)));
+        [("key", (Option.map x.key ~f:AttributeKey.to_value));
         ("value", (Option.map x.value ~f:AttributeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
         (Option.map ~f:AttributeValue.of_xml) (Xml.child xml_arg0 "value") in
       let key =
-        AttributeKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
-      make ?value ~key ()
+        (Option.map ~f:AttributeKey.of_xml) (Xml.child xml_arg0 "key") in
+      make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" AttributeValue.of_json in
-      let key = field_map_exn json "key" AttributeKey.of_json in
-      make ?value ~key ()
+    let of_json json__ =
+      let value = field_map json__ "value" AttributeValue.of_json in
+      let key = field_map json__ "key" AttributeKey.of_json in
+      make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This data type is used in the ImageScanFinding data type."]
+module SigningProfileArn =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The Amazon Resource Name (ARN) of an Amazon Web Services Signer signing profile. The ARN contains the arn:aws:signer namespace, followed by the region, Amazon Web Services account ID, and signing profile resource path. For example, arn:aws:signer:region:012345678910:/signing-profiles/profile-name."]
+    let context_ = "SigningProfileArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:aws(-[a-z]+)*:signer:[a-z0-9-]+:[0-9]{12}:\\/signing-profiles\\/[a-zA-Z0-9_]{2,}$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SigningProfileArn" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The Amazon Resource Name (ARN) of an Amazon Web Services Signer signing profile. The ARN contains the arn:aws:signer namespace, followed by the region, Amazon Web Services account ID, and signing profile resource path. For example, arn:aws:signer:region:012345678910:/signing-profiles/profile-name."]
+module SigningRepositoryFilterList =
+  struct
+    type nonrec t = SigningRepositoryFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SigningRepositoryFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SigningRepositoryFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SigningRepositoryFilterList"
+        ~of_json:SigningRepositoryFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReplicationDestinationList =
   struct
     type nonrec t = ReplicationDestination.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:0));
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationDestination.to_value)) |>
         (fun x -> `List x)
@@ -1362,6 +1621,9 @@ module RepositoryFilterList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1420,6 +1682,9 @@ module ScanningRepositoryFilterList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScanningRepositoryFilter.to_value)) |>
         (fun x -> `List x)
@@ -1442,14 +1707,36 @@ module ScanningRepositoryFilterList =
         ~of_json:ScanningRepositoryFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
 module ImageActionType =
   struct
     type nonrec t =
       | EXPIRE 
+      | TRANSITION 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | EXPIRE -> "EXPIRE" | Non_static_id s -> s
-    let of_string = function | "EXPIRE" -> EXPIRE | x -> Non_static_id x
+    let to_string =
+      function
+      | EXPIRE -> "EXPIRE"
+      | TRANSITION -> "TRANSITION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EXPIRE" -> EXPIRE
+      | "TRANSITION" -> TRANSITION
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1458,17 +1745,60 @@ module ImageActionType =
     let of_json j = of_string (string_of_json ~kind:"ImageActionType" j)
     let to_json = simple_to_json to_value
   end
+module LifecyclePolicyTargetStorageClass =
+  struct
+    type nonrec t =
+      | ARCHIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | ARCHIVE -> "ARCHIVE" | Non_static_id s -> s
+    let of_string = function | "ARCHIVE" -> ARCHIVE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyTargetStorageClass"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyTargetStorageClass" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ImageCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module EncryptionType =
   struct
     type nonrec t =
       | AES256 
       | KMS 
+      | KMS_DSSE 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | AES256 -> "AES256" | KMS -> "KMS" | Non_static_id s -> s
+      function
+      | AES256 -> "AES256"
+      | KMS -> "KMS"
+      | KMS_DSSE -> "KMS_DSSE"
+      | Non_static_id s -> s
     let of_string =
-      function | "AES256" -> AES256 | "KMS" -> KMS | x -> Non_static_id x
+      function
+      | "AES256" -> AES256
+      | "KMS" -> KMS
+      | "KMS_DSSE" -> KMS_DSSE
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -1477,6 +1807,128 @@ module EncryptionType =
     let of_json j = of_string (string_of_json ~kind:"EncryptionType" j)
     let to_json = simple_to_json to_value
   end
+module KmsKeyForRepositoryCreationTemplate =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyForRepositoryCreationTemplate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^$|arn:aws[a-z0-9-]*:kms:[a-z0-9-]+:[0-9]{12}:key\\/[a-z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"KmsKeyForRepositoryCreationTemplate" j
+    let to_json = simple_to_json to_value
+  end
+module ImageTagMutabilityExclusionFilter =
+  struct
+    type nonrec t =
+      {
+      filterType: ImageTagMutabilityExclusionFilterType.t
+        [@ocaml.doc
+          "The type of filter to apply for excluding image tags from mutability settings."];
+      filter: ImageTagMutabilityExclusionFilterValue.t
+        [@ocaml.doc
+          "The filter value used to match image tags for exclusion from mutability settings."]}
+    let context_ = "ImageTagMutabilityExclusionFilter"
+    let make ~filterType = fun ~filter -> fun () -> { filterType; filter }
+    let to_value x =
+      structure_to_value
+        [("filterType",
+           (Some
+              (ImageTagMutabilityExclusionFilterType.to_value x.filterType)));
+        ("filter",
+          (Some (ImageTagMutabilityExclusionFilterValue.to_value x.filter)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filter =
+        ImageTagMutabilityExclusionFilterValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filter") in
+      let filterType =
+        ImageTagMutabilityExclusionFilterType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "filterType") in
+      make ~filter ~filterType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filter =
+        field_map_exn json__ "filter"
+          ImageTagMutabilityExclusionFilterValue.of_json in
+      let filterType =
+        field_map_exn json__ "filterType"
+          ImageTagMutabilityExclusionFilterType.of_json in
+      make ~filter ~filterType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter that specifies which image tags should be excluded from the repository's image tag mutability setting."]
+module RCTAppliedFor =
+  struct
+    type nonrec t =
+      | REPLICATION 
+      | PULL_THROUGH_CACHE 
+      | CREATE_ON_PUSH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REPLICATION -> "REPLICATION"
+      | PULL_THROUGH_CACHE -> "PULL_THROUGH_CACHE"
+      | CREATE_ON_PUSH -> "CREATE_ON_PUSH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REPLICATION" -> REPLICATION
+      | "PULL_THROUGH_CACHE" -> PULL_THROUGH_CACHE
+      | "CREATE_ON_PUSH" -> CREATE_ON_PUSH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RCTAppliedFor" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RCTAppliedFor" j)
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "One part of a key-value pair that make up a tag. A key is a general label that acts like a category for more specific tag values."];
+      value: TagValue.t
+        [@ocaml.doc
+          "A value acts as a descriptor within a tag category (key)."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metadata to apply to a resource to help you categorize and organize them. Each tag consists of a key and a value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]
 module KmsKey =
   struct
     type nonrec t = string
@@ -1529,6 +1981,8 @@ module FindingSeverityCounts =
                     (fun x -> (SeverityCount.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1571,6 +2025,8 @@ module ScanStatus =
       | PENDING 
       | SCAN_ELIGIBILITY_EXPIRED 
       | FINDINGS_UNAVAILABLE 
+      | LIMIT_EXCEEDED 
+      | IMAGE_ARCHIVED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1583,6 +2039,8 @@ module ScanStatus =
       | PENDING -> "PENDING"
       | SCAN_ELIGIBILITY_EXPIRED -> "SCAN_ELIGIBILITY_EXPIRED"
       | FINDINGS_UNAVAILABLE -> "FINDINGS_UNAVAILABLE"
+      | LIMIT_EXCEEDED -> "LIMIT_EXCEEDED"
+      | IMAGE_ARCHIVED -> "IMAGE_ARCHIVED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1594,6 +2052,8 @@ module ScanStatus =
       | "PENDING" -> PENDING
       | "SCAN_ELIGIBILITY_EXPIRED" -> SCAN_ELIGIBILITY_EXPIRED
       | "FINDINGS_UNAVAILABLE" -> FINDINGS_UNAVAILABLE
+      | "LIMIT_EXCEEDED" -> LIMIT_EXCEEDED
+      | "IMAGE_ARCHIVED" -> IMAGE_ARCHIVED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1614,6 +2074,19 @@ module ScanStatusDescription =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ScanStatusDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ExploitAvailable =
+  struct
+    type nonrec t = string
+    let context_ = "ExploitAvailable"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExploitAvailable" j
     let to_json = simple_to_json to_value
   end
 module FindingArn =
@@ -1640,6 +2113,19 @@ module FindingDescription =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FindingDescription" j
+    let to_json = simple_to_json to_value
+  end
+module FixAvailable =
+  struct
+    type nonrec t = string
+    let context_ = "FixAvailable"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FixAvailable" j
     let to_json = simple_to_json to_value
   end
 module PackageVulnerabilityDetails =
@@ -1743,22 +2229,22 @@ module PackageVulnerabilityDetails =
         ?vendorSeverity ?vendorCreatedAt ?sourceUrl ?source
         ?relatedVulnerabilities ?referenceUrls ?cvss ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vulnerablePackages =
-        field_map json "vulnerablePackages" VulnerablePackagesList.of_json in
+        field_map json__ "vulnerablePackages" VulnerablePackagesList.of_json in
       let vulnerabilityId =
-        field_map json "vulnerabilityId" VulnerabilityId.of_json in
-      let vendorUpdatedAt = field_map json "vendorUpdatedAt" Date.of_json in
-      let vendorSeverity = field_map json "vendorSeverity" Severity.of_json in
-      let vendorCreatedAt = field_map json "vendorCreatedAt" Date.of_json in
-      let sourceUrl = field_map json "sourceUrl" Url.of_json in
-      let source = field_map json "source" Source.of_json in
+        field_map json__ "vulnerabilityId" VulnerabilityId.of_json in
+      let vendorUpdatedAt = field_map json__ "vendorUpdatedAt" Date.of_json in
+      let vendorSeverity = field_map json__ "vendorSeverity" Severity.of_json in
+      let vendorCreatedAt = field_map json__ "vendorCreatedAt" Date.of_json in
+      let sourceUrl = field_map json__ "sourceUrl" Url.of_json in
+      let source = field_map json__ "source" Source.of_json in
       let relatedVulnerabilities =
-        field_map json "relatedVulnerabilities"
+        field_map json__ "relatedVulnerabilities"
           RelatedVulnerabilitiesList.of_json in
       let referenceUrls =
-        field_map json "referenceUrls" ReferenceUrlsList.of_json in
-      let cvss = field_map json "cvss" CvssScoreList.of_json in
+        field_map json__ "referenceUrls" ReferenceUrlsList.of_json in
+      let cvss = field_map json__ "cvss" CvssScoreList.of_json in
       make ?vulnerablePackages ?vulnerabilityId ?vendorUpdatedAt
         ?vendorSeverity ?vendorCreatedAt ?sourceUrl ?source
         ?relatedVulnerabilities ?referenceUrls ?cvss ()
@@ -1783,9 +2269,9 @@ module Remediation =
           (Xml.child xml_arg0 "recommendation") in
       make ?recommendation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendation =
-        field_map json "recommendation" Recommendation.of_json in
+        field_map json__ "recommendation" Recommendation.of_json in
       make ?recommendation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information on how to remediate a finding."]
@@ -1793,6 +2279,9 @@ module ResourceList =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1830,8 +2319,8 @@ module ScoreDetails =
         (Option.map ~f:CvssScoreDetails.of_xml) (Xml.child xml_arg0 "cvss") in
       make ?cvss ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cvss = field_map json "cvss" CvssScoreDetails.of_json in
+    let of_json json__ =
+      let cvss = field_map json__ "cvss" CvssScoreDetails.of_json in
       make ?cvss ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1870,6 +2359,9 @@ module AttributeList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1903,6 +2395,47 @@ module FindingName =
     let of_json j = string_of_json ~kind:"FindingName" j
     let to_json = simple_to_json to_value
   end
+module SigningRule =
+  struct
+    type nonrec t =
+      {
+      signingProfileArn: SigningProfileArn.t
+        [@ocaml.doc
+          "The ARN of the Amazon Web Services Signer signing profile to use for signing images that match this rule. For more information about signing profiles, see Signing profiles in the Amazon Web Services Signer Developer Guide."];
+      repositoryFilters: SigningRepositoryFilterList.t option
+        [@ocaml.doc
+          "A list of repository filters that determine which repositories have their images signed on push. If no filters are specified, all images pushed to the registry are signed using the rule's signing profile. Maximum of 100 filters per rule."]}
+    let context_ = "SigningRule"
+    let make ?repositoryFilters =
+      fun ~signingProfileArn ->
+        fun () -> { repositoryFilters; signingProfileArn }
+    let to_value x =
+      structure_to_value
+        [("signingProfileArn",
+           (Some (SigningProfileArn.to_value x.signingProfileArn)));
+        ("repositoryFilters",
+          (Option.map x.repositoryFilters
+             ~f:SigningRepositoryFilterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryFilters =
+        (Option.map ~f:SigningRepositoryFilterList.of_xml)
+          (Xml.child xml_arg0 "repositoryFilters") in
+      let signingProfileArn =
+        SigningProfileArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "signingProfileArn") in
+      make ?repositoryFilters ~signingProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryFilters =
+        field_map json__ "repositoryFilters"
+          SigningRepositoryFilterList.of_json in
+      let signingProfileArn =
+        field_map_exn json__ "signingProfileArn" SigningProfileArn.of_json in
+      make ?repositoryFilters ~signingProfileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A signing rule that specifies a signing profile and optional repository filters. When an image is pushed to a matching repository, a signing job is created using the specified profile."]
 module ReplicationRule =
   struct
     type nonrec t =
@@ -1932,11 +2465,12 @@ module ReplicationRule =
           (Xml.child_exn ~context:context_ xml_arg0 "destinations") in
       make ?repositoryFilters ~destinations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryFilters =
-        field_map json "repositoryFilters" RepositoryFilterList.of_json in
+        field_map json__ "repositoryFilters" RepositoryFilterList.of_json in
       let destinations =
-        field_map_exn json "destinations" ReplicationDestinationList.of_json in
+        field_map_exn json__ "destinations"
+          ReplicationDestinationList.of_json in
       make ?repositoryFilters ~destinations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1947,7 +2481,7 @@ module RegistryScanningRule =
       {
       scanFrequency: ScanFrequency.t
         [@ocaml.doc
-          "The frequency that scans are performed at for a private registry. When the ENHANCED scan type is specified, the supported scan frequencies are CONTINUOUS_SCAN and SCAN_ON_PUSH. When the BASIC scan type is specified, the SCAN_ON_PUSH and MANUAL scan frequencies are supported."];
+          "The frequency that scans are performed at for a private registry. When the ENHANCED scan type is specified, the supported scan frequencies are CONTINUOUS_SCAN and SCAN_ON_PUSH. When the BASIC scan type is specified, the SCAN_ON_PUSH scan frequency is supported. If scan on push is not specified, then the MANUAL scan frequency is set by default."];
       repositoryFilters: ScanningRepositoryFilterList.t
         [@ocaml.doc
           "The repository filters associated with the scanning configuration for a private registry."]}
@@ -1970,19 +2504,124 @@ module RegistryScanningRule =
           (Xml.child_exn ~context:context_ xml_arg0 "scanFrequency") in
       make ~repositoryFilters ~scanFrequency ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryFilters =
-        field_map_exn json "repositoryFilters"
+        field_map_exn json__ "repositoryFilters"
           ScanningRepositoryFilterList.of_json in
       let scanFrequency =
-        field_map_exn json "scanFrequency" ScanFrequency.of_json in
+        field_map_exn json__ "scanFrequency" ScanFrequency.of_json in
       make ~repositoryFilters ~scanFrequency ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a scanning rule for a private registry."]
+module Annotations =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ArtifactStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ARCHIVED 
+      | ACTIVATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ARCHIVED -> "ARCHIVED"
+      | ACTIVATING -> "ACTIVATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ARCHIVED" -> ARCHIVED
+      | "ACTIVATING" -> ACTIVATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ArtifactStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ArtifactStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ArtifactType =
+  struct
+    type nonrec t = string
+    let context_ = "ArtifactType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ArtifactType" j
+    let to_json = simple_to_json to_value
+  end
+module ImageSizeInBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module MediaType =
+  struct
+    type nonrec t = string
+    let context_ = "MediaType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MediaType" j
+    let to_json = simple_to_json to_value
+  end
 module ImageTagList =
   struct
     type nonrec t = ImageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2008,20 +2647,33 @@ module LifecyclePolicyRuleAction =
     type nonrec t =
       {
       type_: ImageActionType.t option
-        [@ocaml.doc "The type of action to be taken."]}
-    let make ?type_ = fun () -> { type_ }
+        [@ocaml.doc "The type of action to be taken."];
+      targetStorageClass: LifecyclePolicyTargetStorageClass.t option
+        [@ocaml.doc
+          "The target storage class for the action. This is only present when the type is TRANSITION."]}
+    let make ?type_ =
+      fun ?targetStorageClass -> fun () -> { type_; targetStorageClass }
     let to_value x =
       structure_to_value
-        [("type", (Option.map x.type_ ~f:ImageActionType.to_value))]
+        [("type", (Option.map x.type_ ~f:ImageActionType.to_value));
+        ("targetStorageClass",
+          (Option.map x.targetStorageClass
+             ~f:LifecyclePolicyTargetStorageClass.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let targetStorageClass =
+        (Option.map ~f:LifecyclePolicyTargetStorageClass.of_xml)
+          (Xml.child xml_arg0 "targetStorageClass") in
       let type_ =
         (Option.map ~f:ImageActionType.of_xml) (Xml.child xml_arg0 "type") in
-      make ?type_ ()
+      make ?targetStorageClass ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ImageActionType.of_json in
-      make ?type_ ()
+    let of_json json__ =
+      let targetStorageClass =
+        field_map json__ "targetStorageClass"
+          LifecyclePolicyTargetStorageClass.of_json in
+      let type_ = field_map json__ "type" ImageActionType.of_json in
+      make ?targetStorageClass ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The type of action to be taken."]
 module LifecyclePolicyRulePriority =
@@ -2040,6 +2692,34 @@ module LifecyclePolicyRulePriority =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module LifecyclePolicyStorageClass =
+  struct
+    type nonrec t =
+      | ARCHIVE 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ARCHIVE -> "ARCHIVE"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ARCHIVE" -> ARCHIVE
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LifecyclePolicyStorageClass"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LifecyclePolicyStorageClass" j)
+    let to_json = simple_to_json to_value
+  end
 module PushTimestamp =
   struct
     type nonrec t = string
@@ -2052,6 +2732,45 @@ module PushTimestamp =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module TransitioningImageTotalCount =
+  struct
+    type nonrec t =
+      {
+      targetStorageClass: LifecyclePolicyTargetStorageClass.t option
+        [@ocaml.doc "The target storage class."];
+      imageTotalCount: ImageCount.t option
+        [@ocaml.doc
+          "The total number of images transitioning to the storage class."]}
+    let make ?targetStorageClass =
+      fun ?imageTotalCount ->
+        fun () -> { targetStorageClass; imageTotalCount }
+    let to_value x =
+      structure_to_value
+        [("targetStorageClass",
+           (Option.map x.targetStorageClass
+              ~f:LifecyclePolicyTargetStorageClass.to_value));
+        ("imageTotalCount",
+          (Option.map x.imageTotalCount ~f:ImageCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageTotalCount =
+        (Option.map ~f:ImageCount.of_xml)
+          (Xml.child xml_arg0 "imageTotalCount") in
+      let targetStorageClass =
+        (Option.map ~f:LifecyclePolicyTargetStorageClass.of_xml)
+          (Xml.child xml_arg0 "targetStorageClass") in
+      make ?imageTotalCount ?targetStorageClass ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageTotalCount =
+        field_map json__ "imageTotalCount" ImageCount.of_json in
+      let targetStorageClass =
+        field_map json__ "targetStorageClass"
+          LifecyclePolicyTargetStorageClass.of_json in
+      make ?imageTotalCount ?targetStorageClass ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The total count of images transitioning to a storage class."]
 module Base64 =
   struct
     type nonrec t = string
@@ -2092,6 +2811,252 @@ module ProxyEndpoint =
     let of_json j = string_of_json ~kind:"ProxyEndpoint" j
     let to_json = simple_to_json to_value
   end
+module CustomRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "CustomRoleArn"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module EncryptionConfigurationForRepositoryCreationTemplate =
+  struct
+    type nonrec t =
+      {
+      encryptionType: EncryptionType.t
+        [@ocaml.doc
+          "The encryption type to use. If you use the KMS encryption type, the contents of the repository will be encrypted using server-side encryption with Key Management Service key stored in KMS. When you use KMS to encrypt your data, you can either use the default Amazon Web Services managed KMS key for Amazon ECR, or specify your own KMS key, which you already created. For more information, see Protecting data using server-side encryption with an KMS key stored in Key Management Service (SSE-KMS) in the Amazon Simple Storage Service Console Developer Guide. If you use the AES256 encryption type, Amazon ECR uses server-side encryption with Amazon S3-managed encryption keys which encrypts the images in the repository using an AES256 encryption algorithm. For more information, see Protecting data using server-side encryption with Amazon S3-managed encryption keys (SSE-S3) in the Amazon Simple Storage Service Console Developer Guide."];
+      kmsKey: KmsKeyForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "If you use the KMS encryption type, specify the KMS key to use for encryption. The full ARN of the KMS key must be specified. The key must exist in the same Region as the repository. If no key is specified, the default Amazon Web Services managed KMS key for Amazon ECR will be used."]}
+    let context_ = "EncryptionConfigurationForRepositoryCreationTemplate"
+    let make ?kmsKey =
+      fun ~encryptionType -> fun () -> { kmsKey; encryptionType }
+    let to_value x =
+      structure_to_value
+        [("encryptionType",
+           (Some (EncryptionType.to_value x.encryptionType)));
+        ("kmsKey",
+          (Option.map x.kmsKey
+             ~f:KmsKeyForRepositoryCreationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKey =
+        (Option.map ~f:KmsKeyForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "kmsKey") in
+      let encryptionType =
+        EncryptionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
+      make ?kmsKey ~encryptionType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKey =
+        field_map json__ "kmsKey" KmsKeyForRepositoryCreationTemplate.of_json in
+      let encryptionType =
+        field_map_exn json__ "encryptionType" EncryptionType.of_json in
+      make ?kmsKey ~encryptionType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The encryption configuration to associate with the repository creation template."]
+module ImageTagMutability =
+  struct
+    type nonrec t =
+      | MUTABLE 
+      | IMMUTABLE 
+      | IMMUTABLE_WITH_EXCLUSION 
+      | MUTABLE_WITH_EXCLUSION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MUTABLE -> "MUTABLE"
+      | IMMUTABLE -> "IMMUTABLE"
+      | IMMUTABLE_WITH_EXCLUSION -> "IMMUTABLE_WITH_EXCLUSION"
+      | MUTABLE_WITH_EXCLUSION -> "MUTABLE_WITH_EXCLUSION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MUTABLE" -> MUTABLE
+      | "IMMUTABLE" -> IMMUTABLE
+      | "IMMUTABLE_WITH_EXCLUSION" -> IMMUTABLE_WITH_EXCLUSION
+      | "MUTABLE_WITH_EXCLUSION" -> MUTABLE_WITH_EXCLUSION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageTagMutability" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageTagMutability" j)
+    let to_json = simple_to_json to_value
+  end
+module ImageTagMutabilityExclusionFilters =
+  struct
+    type nonrec t = ImageTagMutabilityExclusionFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageTagMutabilityExclusionFilter.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ImageTagMutabilityExclusionFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageTagMutabilityExclusionFilters"
+        ~of_json:ImageTagMutabilityExclusionFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LifecyclePolicyTextForRepositoryCreationTemplate =
+  struct
+    type nonrec t = string
+    let context_ = "LifecyclePolicyTextForRepositoryCreationTemplate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:30720) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"LifecyclePolicyTextForRepositoryCreationTemplate"
+        j
+    let to_json = simple_to_json to_value
+  end
+module Prefix =
+  struct
+    type nonrec t = string
+    let context_ = "Prefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*(\\/[a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*)*\\/?|ROOT)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Prefix" j
+    let to_json = simple_to_json to_value
+  end
+module RCTAppliedForList =
+  struct
+    type nonrec t = RCTAppliedFor.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RCTAppliedFor.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RCTAppliedFor.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RCTAppliedForList" ~of_json:RCTAppliedFor.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RepositoryPolicyText =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryPolicyText"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10240) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryPolicyText" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryTemplateDescription =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryTemplateDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryTemplateDescription" j
+    let to_json = simple_to_json to_value
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Arn =
   struct
     type nonrec t = string
@@ -2123,7 +3088,7 @@ module EncryptionConfiguration =
       {
       encryptionType: EncryptionType.t
         [@ocaml.doc
-          "The encryption type to use. If you use the KMS encryption type, the contents of the repository will be encrypted using server-side encryption with Key Management Service key stored in KMS. When you use KMS to encrypt your data, you can either use the default Amazon Web Services managed KMS key for Amazon ECR, or specify your own KMS key, which you already created. For more information, see Protecting data using server-side encryption with an KMS key stored in Key Management Service (SSE-KMS) in the Amazon Simple Storage Service Console Developer Guide. If you use the AES256 encryption type, Amazon ECR uses server-side encryption with Amazon S3-managed encryption keys which encrypts the images in the repository using an AES-256 encryption algorithm. For more information, see Protecting data using server-side encryption with Amazon S3-managed encryption keys (SSE-S3) in the Amazon Simple Storage Service Console Developer Guide."];
+          "The encryption type to use. If you use the KMS encryption type, the contents of the repository will be encrypted using server-side encryption with Key Management Service key stored in KMS. When you use KMS to encrypt your data, you can either use the default Amazon Web Services managed KMS key for Amazon ECR, or specify your own KMS key, which you already created. If you use the KMS_DSSE encryption type, the contents of the repository will be encrypted with two layers of encryption using server-side encryption with the KMS Management Service key stored in KMS. Similar to the KMS encryption type, you can either use the default Amazon Web Services managed KMS key for Amazon ECR, or specify your own KMS key, which you've already created. If you use the AES256 encryption type, Amazon ECR uses server-side encryption with Amazon S3-managed encryption keys which encrypts the images in the repository using an AES256 encryption algorithm. For more information, see Amazon ECR encryption at rest in the Amazon Elastic Container Registry User Guide."];
       kmsKey: KmsKey.t option
         [@ocaml.doc
           "If you use the KMS encryption type, specify the KMS key to use for encryption. The alias, key ID, or full ARN of the KMS key can be specified. The key must exist in the same Region as the repository. If no key is specified, the default Amazon Web Services managed KMS key for Amazon ECR will be used."]}
@@ -2144,14 +3109,14 @@ module EncryptionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "encryptionType") in
       make ?kmsKey ~encryptionType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKey = field_map json "kmsKey" KmsKey.of_json in
+    let of_json json__ =
+      let kmsKey = field_map json__ "kmsKey" KmsKey.of_json in
       let encryptionType =
-        field_map_exn json "encryptionType" EncryptionType.of_json in
+        field_map_exn json__ "encryptionType" EncryptionType.of_json in
       make ?kmsKey ~encryptionType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The encryption configuration for the repository. This determines how the contents of your repository are encrypted at rest. By default, when no encryption configuration is set or the AES256 encryption type is used, Amazon ECR uses server-side encryption with Amazon S3-managed encryption keys which encrypts your data at rest using an AES-256 encryption algorithm. This does not require any action on your part. For more control over the encryption of the contents of your repository, you can use server-side encryption with Key Management Service key stored in Key Management Service (KMS) to encrypt your images. For more information, see Amazon ECR encryption at rest in the Amazon Elastic Container Registry User Guide."]
+       "The encryption configuration for the repository. This determines how the contents of your repository are encrypted at rest. By default, when no encryption configuration is set or the AES256 encryption type is used, Amazon ECR uses server-side encryption with Amazon S3-managed encryption keys which encrypts your data at rest using an AES256 encryption algorithm. This does not require any action on your part. For more control over the encryption of the contents of your repository, you can use server-side encryption with Key Management Service key stored in Key Management Service (KMS) to encrypt your images. For more information, see Amazon ECR encryption at rest in the Amazon Elastic Container Registry User Guide."]
 module ImageScanningConfiguration =
   struct
     type nonrec t =
@@ -2170,35 +3135,31 @@ module ImageScanningConfiguration =
           (Xml.child xml_arg0 "scanOnPush") in
       make ?scanOnPush ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scanOnPush = field_map json "scanOnPush" ScanOnPushFlag.of_json in
+    let of_json json__ =
+      let scanOnPush = field_map json__ "scanOnPush" ScanOnPushFlag.of_json in
       make ?scanOnPush ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The image scanning configuration for a repository."]
-module ImageTagMutability =
+module CredentialArn =
   struct
-    type nonrec t =
-      | MUTABLE 
-      | IMMUTABLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | MUTABLE -> "MUTABLE"
-      | IMMUTABLE -> "IMMUTABLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "MUTABLE" -> MUTABLE
-      | "IMMUTABLE" -> IMMUTABLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = string
+    let context_ = "CredentialArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:50) >>=
+             (fun () ->
+                (check_string_max i ~max:612) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws(-\\w+)*:secretsmanager:[a-zA-Z0-9-:]+:secret:ecr\\-pullthroughcache\\/[a-zA-Z0-9\\/_+=.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ImageTagMutability" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ImageTagMutability" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CredentialArn" j
     let to_json = simple_to_json to_value
   end
 module PullThroughCacheRuleRepositoryPrefix =
@@ -2210,9 +3171,10 @@ module PullThroughCacheRuleRepositoryPrefix =
         ok_or_failwith
           ((check_string_min i ~min:2) >>=
              (fun () ->
-                (check_string_max i ~max:20) >>=
+                (check_string_max i ~max:30) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"[a-z0-9]+(?:[._-][a-z0-9]+)*")));
+                     check_pattern i
+                       ~pattern:"^([a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*(\\/[a-z0-9]+((\\.|_|__|-+)[a-z0-9]+)*)*\\/?|ROOT)$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2221,6 +3183,64 @@ module PullThroughCacheRuleRepositoryPrefix =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j =
       string_of_json ~kind:"PullThroughCacheRuleRepositoryPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module UpdatedTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module UpstreamRegistry =
+  struct
+    type nonrec t =
+      | Ecr 
+      | Ecr_public 
+      | Quay 
+      | K8s 
+      | Docker_hub 
+      | Github_container_registry 
+      | Azure_container_registry 
+      | Gitlab_container_registry 
+      | Chainguard 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Ecr -> "ecr"
+      | Ecr_public -> "ecr-public"
+      | Quay -> "quay"
+      | K8s -> "k8s"
+      | Docker_hub -> "docker-hub"
+      | Github_container_registry -> "github-container-registry"
+      | Azure_container_registry -> "azure-container-registry"
+      | Gitlab_container_registry -> "gitlab-container-registry"
+      | Chainguard -> "chainguard"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ecr" -> Ecr
+      | "ecr-public" -> Ecr_public
+      | "quay" -> Quay
+      | "k8s" -> K8s
+      | "docker-hub" -> Docker_hub
+      | "github-container-registry" -> Github_container_registry
+      | "azure-container-registry" -> Azure_container_registry
+      | "gitlab-container-registry" -> Gitlab_container_registry
+      | "chainguard" -> Chainguard
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UpstreamRegistry" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UpstreamRegistry" j)
     let to_json = simple_to_json to_value
   end
 module ImageScanFindingsSummary =
@@ -2267,14 +3287,15 @@ module ImageScanFindingsSummary =
       make ?findingSeverityCounts ?vulnerabilitySourceUpdatedAt
         ?imageScanCompletedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingSeverityCounts =
-        field_map json "findingSeverityCounts" FindingSeverityCounts.of_json in
+        field_map json__ "findingSeverityCounts"
+          FindingSeverityCounts.of_json in
       let vulnerabilitySourceUpdatedAt =
-        field_map json "vulnerabilitySourceUpdatedAt"
+        field_map json__ "vulnerabilitySourceUpdatedAt"
           VulnerabilitySourceUpdateTimestamp.of_json in
       let imageScanCompletedAt =
-        field_map json "imageScanCompletedAt" ScanTimestamp.of_json in
+        field_map json__ "imageScanCompletedAt" ScanTimestamp.of_json in
       make ?findingSeverityCounts ?vulnerabilitySourceUpdatedAt
         ?imageScanCompletedAt ()
     let to_json v = composed_to_json to_value v
@@ -2302,37 +3323,63 @@ module ImageScanStatus =
         (Option.map ~f:ScanStatus.of_xml) (Xml.child xml_arg0 "status") in
       make ?description ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "description" ScanStatusDescription.of_json in
-      let status = field_map json "status" ScanStatus.of_json in
+        field_map json__ "description" ScanStatusDescription.of_json in
+      let status = field_map json__ "status" ScanStatus.of_json in
       make ?description ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The current status of an image scan."]
-module ImageSizeInBytes =
+module ImageStatus =
   struct
-    type nonrec t = Int64.t
+    type nonrec t =
+      | ACTIVE 
+      | ARCHIVED 
+      | ACTIVATING 
+      | Non_static_id of string 
     let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ARCHIVED -> "ARCHIVED"
+      | ACTIVATING -> "ACTIVATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ARCHIVED" -> ARCHIVED
+      | "ACTIVATING" -> ACTIVATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+      of_string (string_of_xml ~kind:"enumeration ImageStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageStatus" j)
     let to_json = simple_to_json to_value
   end
-module MediaType =
+module LastActivatedAtTimestamp =
   struct
     type nonrec t = string
-    let context_ = "MediaType"
     let make i = i
     let of_string x = x
-    let to_value x = `String x
+    let to_value x = `Timestamp x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"MediaType" j
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module LastArchivedAtTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module RecordedPullTimestamp =
@@ -2345,6 +3392,60 @@ module RecordedPullTimestamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module SigningStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETE 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETE -> "COMPLETE"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETE" -> COMPLETE
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SigningStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SigningStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SigningStatusFailureCode =
+  struct
+    type nonrec t = string
+    let context_ = "SigningStatusFailureCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SigningStatusFailureCode" j
+    let to_json = simple_to_json to_value
+  end
+module SigningStatusFailureReason =
+  struct
+    type nonrec t = string
+    let context_ = "SigningStatusFailureReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SigningStatusFailureReason" j
     let to_json = simple_to_json to_value
   end
 module EnhancedImageScanFinding =
@@ -2381,7 +3482,13 @@ module EnhancedImageScanFinding =
       title: Title.t option [@ocaml.doc "The title of the finding."];
       type_: Type.t option [@ocaml.doc "The type of the finding."];
       updatedAt: Date.t option
-        [@ocaml.doc "The date and time the finding was last updated at."]}
+        [@ocaml.doc "The date and time the finding was last updated at."];
+      fixAvailable: FixAvailable.t option
+        [@ocaml.doc
+          "Details on whether a fix is available through a version update. This value can be YES, NO, or PARTIAL. A PARTIAL fix means that some, but not all, of the packages identified in the finding have fixes available through updated versions."];
+      exploitAvailable: ExploitAvailable.t option
+        [@ocaml.doc
+          "If a finding discovered in your environment has an exploit available."]}
     let make ?awsAccountId =
       fun ?description ->
         fun ?findingArn ->
@@ -2397,24 +3504,28 @@ module EnhancedImageScanFinding =
                             fun ?title ->
                               fun ?type_ ->
                                 fun ?updatedAt ->
-                                  fun () ->
-                                    {
-                                      awsAccountId;
-                                      description;
-                                      findingArn;
-                                      firstObservedAt;
-                                      lastObservedAt;
-                                      packageVulnerabilityDetails;
-                                      remediation;
-                                      resources;
-                                      score;
-                                      scoreDetails;
-                                      severity;
-                                      status;
-                                      title;
-                                      type_;
-                                      updatedAt
-                                    }
+                                  fun ?fixAvailable ->
+                                    fun ?exploitAvailable ->
+                                      fun () ->
+                                        {
+                                          awsAccountId;
+                                          description;
+                                          findingArn;
+                                          firstObservedAt;
+                                          lastObservedAt;
+                                          packageVulnerabilityDetails;
+                                          remediation;
+                                          resources;
+                                          score;
+                                          scoreDetails;
+                                          severity;
+                                          status;
+                                          title;
+                                          type_;
+                                          updatedAt;
+                                          fixAvailable;
+                                          exploitAvailable
+                                        }
     let to_value x =
       structure_to_value
         [("awsAccountId", (Option.map x.awsAccountId ~f:RegistryId.to_value));
@@ -2435,9 +3546,19 @@ module EnhancedImageScanFinding =
         ("status", (Option.map x.status ~f:Status.to_value));
         ("title", (Option.map x.title ~f:Title.to_value));
         ("type", (Option.map x.type_ ~f:Type.to_value));
-        ("updatedAt", (Option.map x.updatedAt ~f:Date.to_value))]
+        ("updatedAt", (Option.map x.updatedAt ~f:Date.to_value));
+        ("fixAvailable",
+          (Option.map x.fixAvailable ~f:FixAvailable.to_value));
+        ("exploitAvailable",
+          (Option.map x.exploitAvailable ~f:ExploitAvailable.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let exploitAvailable =
+        (Option.map ~f:ExploitAvailable.of_xml)
+          (Xml.child xml_arg0 "exploitAvailable") in
+      let fixAvailable =
+        (Option.map ~f:FixAvailable.of_xml)
+          (Xml.child xml_arg0 "fixAvailable") in
       let updatedAt =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "updatedAt") in
       let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "type") in
@@ -2468,32 +3589,37 @@ module EnhancedImageScanFinding =
           (Xml.child xml_arg0 "description") in
       let awsAccountId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "awsAccountId") in
-      make ?updatedAt ?type_ ?title ?status ?severity ?scoreDetails ?score
-        ?resources ?remediation ?packageVulnerabilityDetails ?lastObservedAt
-        ?firstObservedAt ?findingArn ?description ?awsAccountId ()
+      make ?exploitAvailable ?fixAvailable ?updatedAt ?type_ ?title ?status
+        ?severity ?scoreDetails ?score ?resources ?remediation
+        ?packageVulnerabilityDetails ?lastObservedAt ?firstObservedAt
+        ?findingArn ?description ?awsAccountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "updatedAt" Date.of_json in
-      let type_ = field_map json "type" Type.of_json in
-      let title = field_map json "title" Title.of_json in
-      let status = field_map json "status" Status.of_json in
-      let severity = field_map json "severity" Severity.of_json in
-      let scoreDetails = field_map json "scoreDetails" ScoreDetails.of_json in
-      let score = field_map json "score" Score.of_json in
-      let resources = field_map json "resources" ResourceList.of_json in
-      let remediation = field_map json "remediation" Remediation.of_json in
+    let of_json json__ =
+      let exploitAvailable =
+        field_map json__ "exploitAvailable" ExploitAvailable.of_json in
+      let fixAvailable = field_map json__ "fixAvailable" FixAvailable.of_json in
+      let updatedAt = field_map json__ "updatedAt" Date.of_json in
+      let type_ = field_map json__ "type" Type.of_json in
+      let title = field_map json__ "title" Title.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let severity = field_map json__ "severity" Severity.of_json in
+      let scoreDetails = field_map json__ "scoreDetails" ScoreDetails.of_json in
+      let score = field_map json__ "score" Score.of_json in
+      let resources = field_map json__ "resources" ResourceList.of_json in
+      let remediation = field_map json__ "remediation" Remediation.of_json in
       let packageVulnerabilityDetails =
-        field_map json "packageVulnerabilityDetails"
+        field_map json__ "packageVulnerabilityDetails"
           PackageVulnerabilityDetails.of_json in
-      let lastObservedAt = field_map json "lastObservedAt" Date.of_json in
-      let firstObservedAt = field_map json "firstObservedAt" Date.of_json in
-      let findingArn = field_map json "findingArn" FindingArn.of_json in
+      let lastObservedAt = field_map json__ "lastObservedAt" Date.of_json in
+      let firstObservedAt = field_map json__ "firstObservedAt" Date.of_json in
+      let findingArn = field_map json__ "findingArn" FindingArn.of_json in
       let description =
-        field_map json "description" FindingDescription.of_json in
-      let awsAccountId = field_map json "awsAccountId" RegistryId.of_json in
-      make ?updatedAt ?type_ ?title ?status ?severity ?scoreDetails ?score
-        ?resources ?remediation ?packageVulnerabilityDetails ?lastObservedAt
-        ?firstObservedAt ?findingArn ?description ?awsAccountId ()
+        field_map json__ "description" FindingDescription.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" RegistryId.of_json in
+      make ?exploitAvailable ?fixAvailable ?updatedAt ?type_ ?title ?status
+        ?severity ?scoreDetails ?score ?resources ?remediation
+        ?packageVulnerabilityDetails ?lastObservedAt ?firstObservedAt
+        ?findingArn ?description ?awsAccountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The details of an enhanced image scan. This is returned when enhanced scanning is enabled for your private registry."]
@@ -2543,13 +3669,13 @@ module ImageScanFinding =
         (Option.map ~f:FindingName.of_xml) (Xml.child xml_arg0 "name") in
       make ?attributes ?severity ?uri ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" AttributeList.of_json in
-      let severity = field_map json "severity" FindingSeverity.of_json in
-      let uri = field_map json "uri" Url.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" AttributeList.of_json in
+      let severity = field_map json__ "severity" FindingSeverity.of_json in
+      let uri = field_map json__ "uri" Url.of_json in
       let description =
-        field_map json "description" FindingDescription.of_json in
-      let name = field_map json "name" FindingName.of_json in
+        field_map json__ "description" FindingDescription.of_json in
+      let name = field_map json__ "name" FindingName.of_json in
       make ?attributes ?severity ?uri ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an image scan finding."]
@@ -2644,6 +3770,10 @@ module ImageFailureCode =
       | MissingDigestAndTag 
       | ImageReferencedByManifestList 
       | KmsError 
+      | UpstreamAccessDenied 
+      | UpstreamTooManyRequests 
+      | UpstreamUnavailable 
+      | ImageInaccessible 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2655,6 +3785,10 @@ module ImageFailureCode =
       | MissingDigestAndTag -> "MissingDigestAndTag"
       | ImageReferencedByManifestList -> "ImageReferencedByManifestList"
       | KmsError -> "KmsError"
+      | UpstreamAccessDenied -> "UpstreamAccessDenied"
+      | UpstreamTooManyRequests -> "UpstreamTooManyRequests"
+      | UpstreamUnavailable -> "UpstreamUnavailable"
+      | ImageInaccessible -> "ImageInaccessible"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2665,6 +3799,10 @@ module ImageFailureCode =
       | "MissingDigestAndTag" -> MissingDigestAndTag
       | "ImageReferencedByManifestList" -> ImageReferencedByManifestList
       | "KmsError" -> KmsError
+      | "UpstreamAccessDenied" -> UpstreamAccessDenied
+      | "UpstreamTooManyRequests" -> UpstreamTooManyRequests
+      | "UpstreamUnavailable" -> UpstreamUnavailable
+      | "ImageInaccessible" -> ImageInaccessible
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2708,9 +3846,9 @@ module ImageIdentifier =
         (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "imageDigest") in
       make ?imageTag ?imageDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageTag = field_map json "imageTag" ImageTag.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
+    let of_json json__ =
+      let imageTag = field_map json__ "imageTag" ImageTag.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
       make ?imageTag ?imageDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2794,17 +3932,20 @@ module LayerAvailability =
     type nonrec t =
       | AVAILABLE 
       | UNAVAILABLE 
+      | ARCHIVED 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | AVAILABLE -> "AVAILABLE"
       | UNAVAILABLE -> "UNAVAILABLE"
+      | ARCHIVED -> "ARCHIVED"
       | Non_static_id s -> s
     let of_string =
       function
       | "AVAILABLE" -> AVAILABLE
       | "UNAVAILABLE" -> UNAVAILABLE
+      | "ARCHIVED" -> ARCHIVED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2903,34 +4044,37 @@ module KmsError =
     let of_json j = string_of_json ~kind:"KmsError" j
     let to_json = simple_to_json to_value
   end
-module Tag =
+module SigningRuleList =
   struct
-    type nonrec t =
-      {
-      key: TagKey.t option
-        [@ocaml.doc
-          "One part of a key-value pair that make up a tag. A key is a general label that acts like a category for more specific tag values."];
-      value: TagValue.t option
-        [@ocaml.doc
-          "A value acts as a descriptor within a tag category (key)."]}
-    let make ?key = fun ?value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Option.map x.key ~f:TagKey.to_value));
-        ("Value", (Option.map x.value ~f:TagValue.to_value))]
+    type nonrec t = SigningRule.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SigningRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
-      make ?value ?key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SigningRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SigningRuleList" ~of_json:SigningRule.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The metadata to apply to a resource to help you categorize and organize them. Each tag consists of a key and a value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."]
+  end
 module ReplicationRuleList =
   struct
     type nonrec t = ReplicationRule.t list
@@ -2939,6 +4083,9 @@ module ReplicationRuleList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplicationRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2968,6 +4115,9 @@ module RegistryScanningRuleList =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegistryScanningRule.to_value)) |>
         (fun x -> `List x)
@@ -3015,6 +4165,58 @@ module ScanType =
     let of_json j = of_string (string_of_json ~kind:"ScanType" j)
     let to_json = simple_to_json to_value
   end
+module PrincipalArn =
+  struct
+    type nonrec t = string
+    let context_ = "PrincipalArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:200) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^arn:aws(-[a-z]+)*:iam::[0-9]{12}:(role|user)/[\\w+=,.@-]+(/[\\w+=,.@-]+)*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrincipalArn" j
+    let to_json = simple_to_json to_value
+  end
+module ImageStatusFilter =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ARCHIVED 
+      | ACTIVATING 
+      | ANY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ARCHIVED -> "ARCHIVED"
+      | ACTIVATING -> "ACTIVATING"
+      | ANY -> "ANY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ARCHIVED" -> ARCHIVED
+      | "ACTIVATING" -> ACTIVATING
+      | "ANY" -> ANY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImageStatusFilter" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ImageStatusFilter" j)
+    let to_json = simple_to_json to_value
+  end
 module TagStatus =
   struct
     type nonrec t =
@@ -3043,6 +4245,143 @@ module TagStatus =
     let of_json j = of_string (string_of_json ~kind:"TagStatus" j)
     let to_json = simple_to_json to_value
   end
+module ImageReferrer =
+  struct
+    type nonrec t =
+      {
+      digest: ImageDigest.t option
+        [@ocaml.doc "The digest of the artifact manifest."];
+      mediaType: MediaType.t option
+        [@ocaml.doc "The media type of the artifact manifest."];
+      artifactType: ArtifactType.t option
+        [@ocaml.doc "A string identifying the type of artifact."];
+      size: ImageSizeInBytes.t option
+        [@ocaml.doc "The size, in bytes, of the artifact."];
+      annotations: Annotations.t option
+        [@ocaml.doc "A map of annotations associated with the artifact."];
+      artifactStatus: ArtifactStatus.t option
+        [@ocaml.doc
+          "The status of the artifact. Valid values are ACTIVE, ARCHIVED, or ACTIVATING."]}
+    let make ?digest =
+      fun ?mediaType ->
+        fun ?artifactType ->
+          fun ?size ->
+            fun ?annotations ->
+              fun ?artifactStatus ->
+                fun () ->
+                  {
+                    digest;
+                    mediaType;
+                    artifactType;
+                    size;
+                    annotations;
+                    artifactStatus
+                  }
+    let to_value x =
+      structure_to_value
+        [("digest", (Option.map x.digest ~f:ImageDigest.to_value));
+        ("mediaType", (Option.map x.mediaType ~f:MediaType.to_value));
+        ("artifactType",
+          (Option.map x.artifactType ~f:ArtifactType.to_value));
+        ("size", (Option.map x.size ~f:ImageSizeInBytes.to_value));
+        ("annotations", (Option.map x.annotations ~f:Annotations.to_value));
+        ("artifactStatus",
+          (Option.map x.artifactStatus ~f:ArtifactStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let artifactStatus =
+        (Option.map ~f:ArtifactStatus.of_xml)
+          (Xml.child xml_arg0 "artifactStatus") in
+      let annotations =
+        (Option.map ~f:Annotations.of_xml) (Xml.child xml_arg0 "annotations") in
+      let size =
+        (Option.map ~f:ImageSizeInBytes.of_xml) (Xml.child xml_arg0 "size") in
+      let artifactType =
+        (Option.map ~f:ArtifactType.of_xml)
+          (Xml.child xml_arg0 "artifactType") in
+      let mediaType =
+        (Option.map ~f:MediaType.of_xml) (Xml.child xml_arg0 "mediaType") in
+      let digest =
+        (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "digest") in
+      make ?artifactStatus ?annotations ?size ?artifactType ?mediaType
+        ?digest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let artifactStatus =
+        field_map json__ "artifactStatus" ArtifactStatus.of_json in
+      let annotations = field_map json__ "annotations" Annotations.of_json in
+      let size = field_map json__ "size" ImageSizeInBytes.of_json in
+      let artifactType = field_map json__ "artifactType" ArtifactType.of_json in
+      let mediaType = field_map json__ "mediaType" MediaType.of_json in
+      let digest = field_map json__ "digest" ImageDigest.of_json in
+      make ?artifactStatus ?annotations ?size ?artifactType ?mediaType
+        ?digest ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing an artifact associated with a subject image."]
+module ArtifactStatusFilter =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ARCHIVED 
+      | ACTIVATING 
+      | ANY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ARCHIVED -> "ARCHIVED"
+      | ACTIVATING -> "ACTIVATING"
+      | ANY -> "ANY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ARCHIVED" -> ARCHIVED
+      | "ACTIVATING" -> ACTIVATING
+      | "ANY" -> ANY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ArtifactStatusFilter" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ArtifactStatusFilter" j)
+    let to_json = simple_to_json to_value
+  end
+module ArtifactTypeList =
+  struct
+    type nonrec t = ArtifactType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ArtifactType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ArtifactType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ArtifactTypeList" ~of_json:ArtifactType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LifecyclePolicyPreviewResult =
   struct
     type nonrec t =
@@ -3057,20 +4396,24 @@ module LifecyclePolicyPreviewResult =
       action: LifecyclePolicyRuleAction.t option
         [@ocaml.doc "The type of action to be taken."];
       appliedRulePriority: LifecyclePolicyRulePriority.t option
-        [@ocaml.doc "The priority of the applied rule."]}
+        [@ocaml.doc "The priority of the applied rule."];
+      storageClass: LifecyclePolicyStorageClass.t option
+        [@ocaml.doc "The storage class of the image."]}
     let make ?imageTags =
       fun ?imageDigest ->
         fun ?imagePushedAt ->
           fun ?action ->
             fun ?appliedRulePriority ->
-              fun () ->
-                {
-                  imageTags;
-                  imageDigest;
-                  imagePushedAt;
-                  action;
-                  appliedRulePriority
-                }
+              fun ?storageClass ->
+                fun () ->
+                  {
+                    imageTags;
+                    imageDigest;
+                    imagePushedAt;
+                    action;
+                    appliedRulePriority;
+                    storageClass
+                  }
     let to_value x =
       structure_to_value
         [("imageTags", (Option.map x.imageTags ~f:ImageTagList.to_value));
@@ -3081,9 +4424,14 @@ module LifecyclePolicyPreviewResult =
           (Option.map x.action ~f:LifecyclePolicyRuleAction.to_value));
         ("appliedRulePriority",
           (Option.map x.appliedRulePriority
-             ~f:LifecyclePolicyRulePriority.to_value))]
+             ~f:LifecyclePolicyRulePriority.to_value));
+        ("storageClass",
+          (Option.map x.storageClass ~f:LifecyclePolicyStorageClass.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let storageClass =
+        (Option.map ~f:LifecyclePolicyStorageClass.of_xml)
+          (Xml.child xml_arg0 "storageClass") in
       let appliedRulePriority =
         (Option.map ~f:LifecyclePolicyRulePriority.of_xml)
           (Xml.child xml_arg0 "appliedRulePriority") in
@@ -3097,36 +4445,53 @@ module LifecyclePolicyPreviewResult =
         (Option.map ~f:ImageDigest.of_xml) (Xml.child xml_arg0 "imageDigest") in
       let imageTags =
         (Option.map ~f:ImageTagList.of_xml) (Xml.child xml_arg0 "imageTags") in
-      make ?appliedRulePriority ?action ?imagePushedAt ?imageDigest
-        ?imageTags ()
+      make ?storageClass ?appliedRulePriority ?action ?imagePushedAt
+        ?imageDigest ?imageTags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let storageClass =
+        field_map json__ "storageClass" LifecyclePolicyStorageClass.of_json in
       let appliedRulePriority =
-        field_map json "appliedRulePriority"
+        field_map json__ "appliedRulePriority"
           LifecyclePolicyRulePriority.of_json in
-      let action = field_map json "action" LifecyclePolicyRuleAction.of_json in
+      let action =
+        field_map json__ "action" LifecyclePolicyRuleAction.of_json in
       let imagePushedAt =
-        field_map json "imagePushedAt" PushTimestamp.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
-      let imageTags = field_map json "imageTags" ImageTagList.of_json in
-      make ?appliedRulePriority ?action ?imagePushedAt ?imageDigest
-        ?imageTags ()
+        field_map json__ "imagePushedAt" PushTimestamp.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
+      let imageTags = field_map json__ "imageTags" ImageTagList.of_json in
+      make ?storageClass ?appliedRulePriority ?action ?imagePushedAt
+        ?imageDigest ?imageTags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the lifecycle policy preview."]
-module ImageCount =
+module TransitioningImageTotalCounts =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:0); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = TransitioningImageTotalCount.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TransitioningImageTotalCount.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ImageCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TransitioningImageTotalCount.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TransitioningImageTotalCounts"
+        ~of_json:TransitioningImageTotalCount.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module AuthorizationData =
   struct
@@ -3166,23 +4531,191 @@ module AuthorizationData =
           (Xml.child xml_arg0 "authorizationToken") in
       make ?proxyEndpoint ?expiresAt ?authorizationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let proxyEndpoint =
-        field_map json "proxyEndpoint" ProxyEndpoint.of_json in
-      let expiresAt = field_map json "expiresAt" ExpirationTimestamp.of_json in
+        field_map json__ "proxyEndpoint" ProxyEndpoint.of_json in
+      let expiresAt =
+        field_map json__ "expiresAt" ExpirationTimestamp.of_json in
       let authorizationToken =
-        field_map json "authorizationToken" Base64.of_json in
+        field_map json__ "authorizationToken" Base64.of_json in
       make ?proxyEndpoint ?expiresAt ?authorizationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing authorization data for an Amazon ECR registry."]
+module RepositoryCreationTemplate =
+  struct
+    type nonrec t =
+      {
+      prefix: Prefix.t option
+        [@ocaml.doc
+          "The repository namespace prefix associated with the repository creation template."];
+      description: RepositoryTemplateDescription.t option
+        [@ocaml.doc
+          "The description associated with the repository creation template."];
+      encryptionConfiguration:
+        EncryptionConfigurationForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The encryption configuration associated with the repository creation template."];
+      resourceTags: TagList.t option
+        [@ocaml.doc
+          "The metadata to apply to the repository to help you categorize and organize. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      imageTagMutability: ImageTagMutability.t option
+        [@ocaml.doc
+          "The tag mutability setting for the repository. If this parameter is omitted, the default setting of MUTABLE will be used which will allow image tags to be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags are excluded from the repository creation template's image tag mutability setting."];
+      repositoryPolicy: RepositoryPolicyText.t option
+        [@ocaml.doc
+          "The repository policy to apply to repositories created using the template. A repository policy is a permissions policy associated with a repository to control access permissions."];
+      lifecyclePolicy:
+        LifecyclePolicyTextForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The lifecycle policy to use for repositories created using the template."];
+      appliedFor: RCTAppliedForList.t option
+        [@ocaml.doc
+          "A list of enumerable Strings representing the repository creation scenarios that this template will apply towards. The supported scenarios are PULL_THROUGH_CACHE, REPLICATION, and CREATE_ON_PUSH"];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the role to be assumed by Amazon ECR. Amazon ECR will assume your supplied role when the customRoleArn is specified. When this field isn't specified, Amazon ECR will use the service-linked role for the repository creation template."];
+      createdAt: Date.t option
+        [@ocaml.doc
+          "The date and time, in JavaScript date format, when the repository creation template was created."];
+      updatedAt: Date.t option
+        [@ocaml.doc
+          "The date and time, in JavaScript date format, when the repository creation template was last updated."]}
+    let make ?prefix =
+      fun ?description ->
+        fun ?encryptionConfiguration ->
+          fun ?resourceTags ->
+            fun ?imageTagMutability ->
+              fun ?imageTagMutabilityExclusionFilters ->
+                fun ?repositoryPolicy ->
+                  fun ?lifecyclePolicy ->
+                    fun ?appliedFor ->
+                      fun ?customRoleArn ->
+                        fun ?createdAt ->
+                          fun ?updatedAt ->
+                            fun () ->
+                              {
+                                prefix;
+                                description;
+                                encryptionConfiguration;
+                                resourceTags;
+                                imageTagMutability;
+                                imageTagMutabilityExclusionFilters;
+                                repositoryPolicy;
+                                lifecyclePolicy;
+                                appliedFor;
+                                customRoleArn;
+                                createdAt;
+                                updatedAt
+                              }
+    let to_value x =
+      structure_to_value
+        [("prefix", (Option.map x.prefix ~f:Prefix.to_value));
+        ("description",
+          (Option.map x.description ~f:RepositoryTemplateDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfigurationForRepositoryCreationTemplate.to_value));
+        ("resourceTags", (Option.map x.resourceTags ~f:TagList.to_value));
+        ("imageTagMutability",
+          (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value));
+        ("repositoryPolicy",
+          (Option.map x.repositoryPolicy ~f:RepositoryPolicyText.to_value));
+        ("lifecyclePolicy",
+          (Option.map x.lifecyclePolicy
+             ~f:LifecyclePolicyTextForRepositoryCreationTemplate.to_value));
+        ("appliedFor",
+          (Option.map x.appliedFor ~f:RCTAppliedForList.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Date.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "updatedAt") in
+      let createdAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let appliedFor =
+        (Option.map ~f:RCTAppliedForList.of_xml)
+          (Xml.child xml_arg0 "appliedFor") in
+      let lifecyclePolicy =
+        (Option.map
+           ~f:LifecyclePolicyTextForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicy") in
+      let repositoryPolicy =
+        (Option.map ~f:RepositoryPolicyText.of_xml)
+          (Xml.child xml_arg0 "repositoryPolicy") in
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
+      let imageTagMutability =
+        (Option.map ~f:ImageTagMutability.of_xml)
+          (Xml.child xml_arg0 "imageTagMutability") in
+      let resourceTags =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "resourceTags") in
+      let encryptionConfiguration =
+        (Option.map
+           ~f:EncryptionConfigurationForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let description =
+        (Option.map ~f:RepositoryTemplateDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let prefix =
+        (Option.map ~f:Prefix.of_xml) (Xml.child xml_arg0 "prefix") in
+      make ?updatedAt ?createdAt ?customRoleArn ?appliedFor ?lifecyclePolicy
+        ?repositoryPolicy ?imageTagMutabilityExclusionFilters
+        ?imageTagMutability ?resourceTags ?encryptionConfiguration
+        ?description ?prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" Date.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let appliedFor =
+        field_map json__ "appliedFor" RCTAppliedForList.of_json in
+      let lifecyclePolicy =
+        field_map json__ "lifecyclePolicy"
+          LifecyclePolicyTextForRepositoryCreationTemplate.of_json in
+      let repositoryPolicy =
+        field_map json__ "repositoryPolicy" RepositoryPolicyText.of_json in
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
+      let imageTagMutability =
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagList.of_json in
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfigurationForRepositoryCreationTemplate.of_json in
+      let description =
+        field_map json__ "description" RepositoryTemplateDescription.of_json in
+      let prefix = field_map json__ "prefix" Prefix.of_json in
+      make ?updatedAt ?createdAt ?customRoleArn ?appliedFor ?lifecyclePolicy
+        ?repositoryPolicy ?imageTagMutabilityExclusionFilters
+        ?imageTagMutability ?resourceTags ?encryptionConfiguration
+        ?description ?prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details of the repository creation template associated with the request."]
 module Repository =
   struct
     type nonrec t =
       {
       repositoryArn: Arn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the repository. The ARN contains the arn:aws:ecr namespace, followed by the region of the repository, Amazon Web Services account ID of the repository owner, repository namespace, and repository name. For example, arn:aws:ecr:region:012345678910:repository/test."];
+          "The Amazon Resource Name (ARN) that identifies the repository. The ARN contains the arn:aws:ecr namespace, followed by the region of the repository, Amazon Web Services account ID of the repository owner, repository namespace, and repository name. For example, arn:aws:ecr:region:012345678910:repository-namespace/repository-name."];
       registryId: RegistryId.t option
         [@ocaml.doc
           "The Amazon Web Services account ID associated with the registry that contains the repository."];
@@ -3196,6 +4729,10 @@ module Repository =
           "The date and time, in JavaScript date format, when the repository was created."];
       imageTagMutability: ImageTagMutability.t option
         [@ocaml.doc "The tag mutability setting for the repository."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags are excluded from the repository's image tag mutability setting."];
       imageScanningConfiguration: ImageScanningConfiguration.t option ;
       encryptionConfiguration: EncryptionConfiguration.t option
         [@ocaml.doc
@@ -3206,19 +4743,21 @@ module Repository =
           fun ?repositoryUri ->
             fun ?createdAt ->
               fun ?imageTagMutability ->
-                fun ?imageScanningConfiguration ->
-                  fun ?encryptionConfiguration ->
-                    fun () ->
-                      {
-                        repositoryArn;
-                        registryId;
-                        repositoryName;
-                        repositoryUri;
-                        createdAt;
-                        imageTagMutability;
-                        imageScanningConfiguration;
-                        encryptionConfiguration
-                      }
+                fun ?imageTagMutabilityExclusionFilters ->
+                  fun ?imageScanningConfiguration ->
+                    fun ?encryptionConfiguration ->
+                      fun () ->
+                        {
+                          repositoryArn;
+                          registryId;
+                          repositoryName;
+                          repositoryUri;
+                          createdAt;
+                          imageTagMutability;
+                          imageTagMutabilityExclusionFilters;
+                          imageScanningConfiguration;
+                          encryptionConfiguration
+                        }
     let to_value x =
       structure_to_value
         [("repositoryArn", (Option.map x.repositoryArn ~f:Arn.to_value));
@@ -3229,6 +4768,9 @@ module Repository =
         ("createdAt", (Option.map x.createdAt ~f:CreationTimestamp.to_value));
         ("imageTagMutability",
           (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value));
         ("imageScanningConfiguration",
           (Option.map x.imageScanningConfiguration
              ~f:ImageScanningConfiguration.to_value));
@@ -3243,6 +4785,9 @@ module Repository =
       let imageScanningConfiguration =
         (Option.map ~f:ImageScanningConfiguration.of_xml)
           (Xml.child xml_arg0 "imageScanningConfiguration") in
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
       let imageTagMutability =
         (Option.map ~f:ImageTagMutability.of_xml)
           (Xml.child xml_arg0 "imageTagMutability") in
@@ -3259,27 +4804,30 @@ module Repository =
       let repositoryArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "repositoryArn") in
       make ?encryptionConfiguration ?imageScanningConfiguration
-        ?imageTagMutability ?createdAt ?repositoryUri ?repositoryName
-        ?registryId ?repositoryArn ()
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?createdAt
+        ?repositoryUri ?repositoryName ?registryId ?repositoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionConfiguration =
-        field_map json "encryptionConfiguration"
+        field_map json__ "encryptionConfiguration"
           EncryptionConfiguration.of_json in
       let imageScanningConfiguration =
-        field_map json "imageScanningConfiguration"
+        field_map json__ "imageScanningConfiguration"
           ImageScanningConfiguration.of_json in
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
       let imageTagMutability =
-        field_map json "imageTagMutability" ImageTagMutability.of_json in
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let repositoryUri = field_map json "repositoryUri" Url.of_json in
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let repositoryUri = field_map json__ "repositoryUri" Url.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let repositoryArn = field_map json "repositoryArn" Arn.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let repositoryArn = field_map json__ "repositoryArn" Arn.of_json in
       make ?encryptionConfiguration ?imageScanningConfiguration
-        ?imageTagMutability ?createdAt ?repositoryUri ?repositoryName
-        ?registryId ?repositoryArn ()
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?createdAt
+        ?repositoryUri ?repositoryName ?registryId ?repositoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing a repository."]
 module PullThroughCacheRule =
@@ -3296,18 +4844,43 @@ module PullThroughCacheRule =
         [@ocaml.doc "The date and time the pull through cache was created."];
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID associated with the registry the pull through cache rule is associated with."]}
+          "The Amazon Web Services account ID associated with the registry the pull through cache rule is associated with."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The ARN of the Secrets Manager secret associated with the pull through cache rule."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role associated with the pull through cache rule."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The upstream repository prefix associated with the pull through cache rule."];
+      upstreamRegistry: UpstreamRegistry.t option
+        [@ocaml.doc
+          "The name of the upstream source registry associated with the pull through cache rule."];
+      updatedAt: UpdatedTimestamp.t option
+        [@ocaml.doc
+          "The date and time, in JavaScript date format, when the pull through cache rule was last updated."]}
     let make ?ecrRepositoryPrefix =
       fun ?upstreamRegistryUrl ->
         fun ?createdAt ->
           fun ?registryId ->
-            fun () ->
-              {
-                ecrRepositoryPrefix;
-                upstreamRegistryUrl;
-                createdAt;
-                registryId
-              }
+            fun ?credentialArn ->
+              fun ?customRoleArn ->
+                fun ?upstreamRepositoryPrefix ->
+                  fun ?upstreamRegistry ->
+                    fun ?updatedAt ->
+                      fun () ->
+                        {
+                          ecrRepositoryPrefix;
+                          upstreamRegistryUrl;
+                          createdAt;
+                          registryId;
+                          credentialArn;
+                          customRoleArn;
+                          upstreamRepositoryPrefix;
+                          upstreamRegistry;
+                          updatedAt
+                        }
     let to_value x =
       structure_to_value
         [("ecrRepositoryPrefix",
@@ -3316,9 +4889,34 @@ module PullThroughCacheRule =
         ("upstreamRegistryUrl",
           (Option.map x.upstreamRegistryUrl ~f:Url.to_value));
         ("createdAt", (Option.map x.createdAt ~f:CreationTimestamp.to_value));
-        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value));
+        ("upstreamRegistry",
+          (Option.map x.upstreamRegistry ~f:UpstreamRegistry.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:UpdatedTimestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let updatedAt =
+        (Option.map ~f:UpdatedTimestamp.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let upstreamRegistry =
+        (Option.map ~f:UpstreamRegistry.of_xml)
+          (Xml.child xml_arg0 "upstreamRegistry") in
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       let createdAt =
@@ -3329,19 +4927,31 @@ module PullThroughCacheRule =
       let ecrRepositoryPrefix =
         (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
           (Xml.child xml_arg0 "ecrRepositoryPrefix") in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      make ?updatedAt ?upstreamRegistry ?upstreamRepositoryPrefix
+        ?customRoleArn ?credentialArn ?registryId ?createdAt
+        ?upstreamRegistryUrl ?ecrRepositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let upstreamRegistryUrl =
-        field_map json "upstreamRegistryUrl" Url.of_json in
-      let ecrRepositoryPrefix =
-        field_map json "ecrRepositoryPrefix"
+    let of_json json__ =
+      let updatedAt = field_map json__ "updatedAt" UpdatedTimestamp.of_json in
+      let upstreamRegistry =
+        field_map json__ "upstreamRegistry" UpstreamRegistry.of_json in
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
           PullThroughCacheRuleRepositoryPrefix.of_json in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let upstreamRegistryUrl =
+        field_map json__ "upstreamRegistryUrl" Url.of_json in
+      let ecrRepositoryPrefix =
+        field_map json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?updatedAt ?upstreamRegistry ?upstreamRepositoryPrefix
+        ?customRoleArn ?credentialArn ?registryId ?createdAt
+        ?upstreamRegistryUrl ?ecrRepositoryPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of a pull through cache rule."]
 module ImageDetail =
@@ -3360,7 +4970,7 @@ module ImageDetail =
         [@ocaml.doc "The list of tags associated with this image."];
       imageSizeInBytes: ImageSizeInBytes.t option
         [@ocaml.doc
-          "The size, in bytes, of the image in the repository. If the image is a manifest list, this will be the max size of all manifests in the list. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."];
+          "The size, in bytes, of the image in the repository. If the image is a manifest list, this will be the max size of all manifests in the list. Starting with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size. Therefore, Docker might return a larger image than the image shown in the Amazon Web Services Management Console."];
       imagePushedAt: PushTimestamp.t option
         [@ocaml.doc
           "The date and time, expressed in standard JavaScript date format, at which the current image was pushed to the repository."];
@@ -3374,7 +4984,18 @@ module ImageDetail =
         [@ocaml.doc "The artifact media type of the image."];
       lastRecordedPullTime: RecordedPullTimestamp.t option
         [@ocaml.doc
-          "The date and time, expressed in standard JavaScript date format, when Amazon ECR recorded the last image pull. Amazon ECR refreshes the last image pull timestamp at least once every 24 hours. For example, if you pull an image once a day then the lastRecordedPullTime timestamp will indicate the exact time that the image was last pulled. However, if you pull an image once an hour, because Amazon ECR refreshes the lastRecordedPullTime timestamp at least once every 24 hours, the result may not be the exact time that the image was last pulled."]}
+          "The date and time, expressed in standard JavaScript date format, when Amazon ECR recorded the last image pull. Amazon ECR refreshes the last image pull timestamp at least once every 24 hours. For example, if you pull an image once a day then the lastRecordedPullTime timestamp will indicate the exact time that the image was last pulled. However, if you pull an image once an hour, because Amazon ECR refreshes the lastRecordedPullTime timestamp at least once every 24 hours, the result may not be the exact time that the image was last pulled."];
+      subjectManifestDigest: ImageDigest.t option
+        [@ocaml.doc
+          "The digest of the subject manifest for images that are referrers."];
+      imageStatus: ImageStatus.t option
+        [@ocaml.doc "The current status of the image."];
+      lastArchivedAt: LastArchivedAtTimestamp.t option
+        [@ocaml.doc
+          "The date and time, expressed in standard JavaScript date format, when the image was last transitioned to Amazon ECR archive."];
+      lastActivatedAt: LastActivatedAtTimestamp.t option
+        [@ocaml.doc
+          "The date and time, expressed in standard JavaScript date format, when the image was last restored from Amazon ECR archive to Amazon ECR standard."]}
     let make ?registryId =
       fun ?repositoryName ->
         fun ?imageDigest ->
@@ -3386,20 +5007,28 @@ module ImageDetail =
                     fun ?imageManifestMediaType ->
                       fun ?artifactMediaType ->
                         fun ?lastRecordedPullTime ->
-                          fun () ->
-                            {
-                              registryId;
-                              repositoryName;
-                              imageDigest;
-                              imageTags;
-                              imageSizeInBytes;
-                              imagePushedAt;
-                              imageScanStatus;
-                              imageScanFindingsSummary;
-                              imageManifestMediaType;
-                              artifactMediaType;
-                              lastRecordedPullTime
-                            }
+                          fun ?subjectManifestDigest ->
+                            fun ?imageStatus ->
+                              fun ?lastArchivedAt ->
+                                fun ?lastActivatedAt ->
+                                  fun () ->
+                                    {
+                                      registryId;
+                                      repositoryName;
+                                      imageDigest;
+                                      imageTags;
+                                      imageSizeInBytes;
+                                      imagePushedAt;
+                                      imageScanStatus;
+                                      imageScanFindingsSummary;
+                                      imageManifestMediaType;
+                                      artifactMediaType;
+                                      lastRecordedPullTime;
+                                      subjectManifestDigest;
+                                      imageStatus;
+                                      lastArchivedAt;
+                                      lastActivatedAt
+                                    }
     let to_value x =
       structure_to_value
         [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
@@ -3422,9 +5051,27 @@ module ImageDetail =
           (Option.map x.artifactMediaType ~f:MediaType.to_value));
         ("lastRecordedPullTime",
           (Option.map x.lastRecordedPullTime
-             ~f:RecordedPullTimestamp.to_value))]
+             ~f:RecordedPullTimestamp.to_value));
+        ("subjectManifestDigest",
+          (Option.map x.subjectManifestDigest ~f:ImageDigest.to_value));
+        ("imageStatus", (Option.map x.imageStatus ~f:ImageStatus.to_value));
+        ("lastArchivedAt",
+          (Option.map x.lastArchivedAt ~f:LastArchivedAtTimestamp.to_value));
+        ("lastActivatedAt",
+          (Option.map x.lastActivatedAt ~f:LastActivatedAtTimestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastActivatedAt =
+        (Option.map ~f:LastActivatedAtTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastActivatedAt") in
+      let lastArchivedAt =
+        (Option.map ~f:LastArchivedAtTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastArchivedAt") in
+      let imageStatus =
+        (Option.map ~f:ImageStatus.of_xml) (Xml.child xml_arg0 "imageStatus") in
+      let subjectManifestDigest =
+        (Option.map ~f:ImageDigest.of_xml)
+          (Xml.child xml_arg0 "subjectManifestDigest") in
       let lastRecordedPullTime =
         (Option.map ~f:RecordedPullTimestamp.of_xml)
           (Xml.child xml_arg0 "lastRecordedPullTime") in
@@ -3455,43 +5102,113 @@ module ImageDetail =
           (Xml.child xml_arg0 "repositoryName") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
-      make ?lastRecordedPullTime ?artifactMediaType ?imageManifestMediaType
-        ?imageScanFindingsSummary ?imageScanStatus ?imagePushedAt
-        ?imageSizeInBytes ?imageTags ?imageDigest ?repositoryName ?registryId
-        ()
+      make ?lastActivatedAt ?lastArchivedAt ?imageStatus
+        ?subjectManifestDigest ?lastRecordedPullTime ?artifactMediaType
+        ?imageManifestMediaType ?imageScanFindingsSummary ?imageScanStatus
+        ?imagePushedAt ?imageSizeInBytes ?imageTags ?imageDigest
+        ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let lastActivatedAt =
+        field_map json__ "lastActivatedAt" LastActivatedAtTimestamp.of_json in
+      let lastArchivedAt =
+        field_map json__ "lastArchivedAt" LastArchivedAtTimestamp.of_json in
+      let imageStatus = field_map json__ "imageStatus" ImageStatus.of_json in
+      let subjectManifestDigest =
+        field_map json__ "subjectManifestDigest" ImageDigest.of_json in
       let lastRecordedPullTime =
-        field_map json "lastRecordedPullTime" RecordedPullTimestamp.of_json in
+        field_map json__ "lastRecordedPullTime" RecordedPullTimestamp.of_json in
       let artifactMediaType =
-        field_map json "artifactMediaType" MediaType.of_json in
+        field_map json__ "artifactMediaType" MediaType.of_json in
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imageScanFindingsSummary =
-        field_map json "imageScanFindingsSummary"
+        field_map json__ "imageScanFindingsSummary"
           ImageScanFindingsSummary.of_json in
       let imageScanStatus =
-        field_map json "imageScanStatus" ImageScanStatus.of_json in
+        field_map json__ "imageScanStatus" ImageScanStatus.of_json in
       let imagePushedAt =
-        field_map json "imagePushedAt" PushTimestamp.of_json in
+        field_map json__ "imagePushedAt" PushTimestamp.of_json in
       let imageSizeInBytes =
-        field_map json "imageSizeInBytes" ImageSizeInBytes.of_json in
-      let imageTags = field_map json "imageTags" ImageTagList.of_json in
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
+        field_map json__ "imageSizeInBytes" ImageSizeInBytes.of_json in
+      let imageTags = field_map json__ "imageTags" ImageTagList.of_json in
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      make ?lastRecordedPullTime ?artifactMediaType ?imageManifestMediaType
-        ?imageScanFindingsSummary ?imageScanStatus ?imagePushedAt
-        ?imageSizeInBytes ?imageTags ?imageDigest ?repositoryName ?registryId
-        ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?lastActivatedAt ?lastArchivedAt ?imageStatus
+        ?subjectManifestDigest ?lastRecordedPullTime ?artifactMediaType
+        ?imageManifestMediaType ?imageScanFindingsSummary ?imageScanStatus
+        ?imagePushedAt ?imageSizeInBytes ?imageTags ?imageDigest
+        ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that describes an image returned by a DescribeImages operation."]
+module ImageSigningStatus =
+  struct
+    type nonrec t =
+      {
+      signingProfileArn: SigningProfileArn.t option
+        [@ocaml.doc
+          "The ARN of the Amazon Web Services Signer signing profile used to sign the image."];
+      failureCode: SigningStatusFailureCode.t option
+        [@ocaml.doc
+          "The failure code, which is only present if status is FAILED."];
+      failureReason: SigningStatusFailureReason.t option
+        [@ocaml.doc
+          "A description of why signing the image failed. This field is only present if status is FAILED."];
+      status: SigningStatus.t option
+        [@ocaml.doc
+          "The image's signing status. Possible values are: IN_PROGRESS - Signing is currently in progress. COMPLETE - The signature was successfully generated. FAILED - Signing failed. See failureCode and failureReason for details."]}
+    let make ?signingProfileArn =
+      fun ?failureCode ->
+        fun ?failureReason ->
+          fun ?status ->
+            fun () ->
+              { signingProfileArn; failureCode; failureReason; status }
+    let to_value x =
+      structure_to_value
+        [("signingProfileArn",
+           (Option.map x.signingProfileArn ~f:SigningProfileArn.to_value));
+        ("failureCode",
+          (Option.map x.failureCode ~f:SigningStatusFailureCode.to_value));
+        ("failureReason",
+          (Option.map x.failureReason ~f:SigningStatusFailureReason.to_value));
+        ("status", (Option.map x.status ~f:SigningStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:SigningStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let failureReason =
+        (Option.map ~f:SigningStatusFailureReason.of_xml)
+          (Xml.child xml_arg0 "failureReason") in
+      let failureCode =
+        (Option.map ~f:SigningStatusFailureCode.of_xml)
+          (Xml.child xml_arg0 "failureCode") in
+      let signingProfileArn =
+        (Option.map ~f:SigningProfileArn.of_xml)
+          (Xml.child xml_arg0 "signingProfileArn") in
+      make ?status ?failureReason ?failureCode ?signingProfileArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" SigningStatus.of_json in
+      let failureReason =
+        field_map json__ "failureReason" SigningStatusFailureReason.of_json in
+      let failureCode =
+        field_map json__ "failureCode" SigningStatusFailureCode.of_json in
+      let signingProfileArn =
+        field_map json__ "signingProfileArn" SigningProfileArn.of_json in
+      make ?status ?failureReason ?failureCode ?signingProfileArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The signing status for an image. Each status corresponds to a signing profile."]
 module EnhancedImageScanFindingList =
   struct
     type nonrec t = EnhancedImageScanFinding.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnhancedImageScanFinding.to_value)) |>
         (fun x -> `List x)
@@ -3518,6 +5235,9 @@ module ImageScanFindingList =
   struct
     type nonrec t = ImageScanFinding.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageScanFinding.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3578,11 +5298,12 @@ module ImageReplicationStatus =
         (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "region") in
       make ?failureCode ?status ?registryId ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureCode = field_map json "failureCode" ReplicationError.of_json in
-      let status = field_map json "status" ReplicationStatus.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let region = field_map json "region" Region.of_json in
+    let of_json json__ =
+      let failureCode =
+        field_map json__ "failureCode" ReplicationError.of_json in
+      let status = field_map json__ "status" ReplicationStatus.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let region = field_map json__ "region" Region.of_json in
       make ?failureCode ?status ?registryId ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of the replication process for an image."]
@@ -3623,14 +5344,15 @@ module RepositoryScanningConfigurationFailure =
           (Xml.child xml_arg0 "repositoryName") in
       make ?failureReason ?failureCode ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason"
+        field_map json__ "failureReason"
           ScanningConfigurationFailureReason.of_json in
       let failureCode =
-        field_map json "failureCode" ScanningConfigurationFailureCode.of_json in
+        field_map json__ "failureCode"
+          ScanningConfigurationFailureCode.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?failureReason ?failureCode ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3692,16 +5414,16 @@ module RepositoryScanningConfiguration =
       make ?appliedScanFilters ?scanFrequency ?scanOnPush ?repositoryName
         ?repositoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appliedScanFilters =
-        field_map json "appliedScanFilters"
+        field_map json__ "appliedScanFilters"
           ScanningRepositoryFilterList.of_json in
       let scanFrequency =
-        field_map json "scanFrequency" ScanFrequency.of_json in
-      let scanOnPush = field_map json "scanOnPush" ScanOnPushFlag.of_json in
+        field_map json__ "scanFrequency" ScanFrequency.of_json in
+      let scanOnPush = field_map json__ "scanOnPush" ScanOnPushFlag.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let repositoryArn = field_map json "repositoryArn" Arn.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let repositoryArn = field_map json__ "repositoryArn" Arn.of_json in
       make ?appliedScanFilters ?scanFrequency ?scanOnPush ?repositoryName
         ?repositoryArn ()
     let to_json v = composed_to_json to_value v
@@ -3740,11 +5462,12 @@ module ImageFailure =
         (Option.map ~f:ImageIdentifier.of_xml) (Xml.child xml_arg0 "imageId") in
       make ?failureReason ?failureCode ?imageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" ImageFailureReason.of_json in
-      let failureCode = field_map json "failureCode" ImageFailureCode.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "failureReason" ImageFailureReason.of_json in
+      let failureCode =
+        field_map json__ "failureCode" ImageFailureCode.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       make ?failureReason ?failureCode ?imageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an Amazon ECR image failure."]
@@ -3805,15 +5528,15 @@ module Image =
       make ?imageManifestMediaType ?imageManifest ?imageId ?repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imageManifest =
-        field_map json "imageManifest" ImageManifest.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "imageManifest" ImageManifest.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?imageManifestMediaType ?imageManifest ?imageId ?repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
@@ -3853,12 +5576,13 @@ module LayerFailure =
           (Xml.child xml_arg0 "layerDigest") in
       make ?failureReason ?failureCode ?layerDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "failureReason" LayerFailureReason.of_json in
-      let failureCode = field_map json "failureCode" LayerFailureCode.of_json in
+        field_map json__ "failureReason" LayerFailureReason.of_json in
+      let failureCode =
+        field_map json__ "failureCode" LayerFailureCode.of_json in
       let layerDigest =
-        field_map json "layerDigest" BatchedOperationLayerDigest.of_json in
+        field_map json__ "layerDigest" BatchedOperationLayerDigest.of_json in
       make ?failureReason ?failureCode ?layerDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3903,15 +5627,127 @@ module Layer =
         (Option.map ~f:LayerDigest.of_xml) (Xml.child xml_arg0 "layerDigest") in
       make ?mediaType ?layerSize ?layerAvailability ?layerDigest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mediaType = field_map json "mediaType" MediaType.of_json in
-      let layerSize = field_map json "layerSize" LayerSizeInBytes.of_json in
+    let of_json json__ =
+      let mediaType = field_map json__ "mediaType" MediaType.of_json in
+      let layerSize = field_map json__ "layerSize" LayerSizeInBytes.of_json in
       let layerAvailability =
-        field_map json "layerAvailability" LayerAvailability.of_json in
-      let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
+        field_map json__ "layerAvailability" LayerAvailability.of_json in
+      let layerDigest = field_map json__ "layerDigest" LayerDigest.of_json in
       make ?mediaType ?layerSize ?layerAvailability ?layerDigest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing an Amazon ECR image layer."]
+module InvalidParameterException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option
+        [@ocaml.doc "The error message associated with the exception."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified parameter is invalid. Review the available parameters for the API request."]
+module IsPTCRuleValid =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module PTCValidateFailure =
+  struct
+    type nonrec t = string
+    let context_ = "PTCValidateFailure"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PTCValidateFailure" j
+    let to_json = simple_to_json to_value
+  end
+module PullThroughCacheRuleNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The pull through cache rule was not found. Specify a valid pull through cache rule and try again."]
+module ServerException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option
+        [@ocaml.doc "The error message associated with the exception."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "These errors are usually caused by a server-side issue."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There was an exception validating this request."]
 module InvalidLayerPartException =
   struct
     type nonrec t =
@@ -3967,42 +5803,19 @@ module InvalidLayerPartException =
       make ?message ?lastValidByteReceived ?uploadId ?repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       let lastValidByteReceived =
-        field_map json "lastValidByteReceived" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+        field_map json__ "lastValidByteReceived" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?message ?lastValidByteReceived ?uploadId ?repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The layer part size is not valid, or the first byte specified is not consecutive to the last byte of a previous layer part upload."]
-module InvalidParameterException =
-  struct
-    type nonrec t =
-      {
-      message: ExceptionMessage.t option
-        [@ocaml.doc "The error message associated with the exception."]}
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The specified parameter is invalid. Review the available parameters for the API request."]
 module KmsException =
   struct
     type nonrec t =
@@ -4024,9 +5837,9 @@ module KmsException =
           (Xml.child xml_arg0 "message") in
       make ?kmsError ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsError = field_map json "kmsError" KmsError.of_json in
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let kmsError = field_map json__ "kmsError" KmsError.of_json in
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?kmsError ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation failed due to a KMS exception."]
@@ -4047,8 +5860,8 @@ module LimitExceededException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4070,34 +5883,12 @@ module RepositoryNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified repository could not be found. Check the spelling of the specified repository and ensure that you are performing operations on the correct registry."]
-module ServerException =
-  struct
-    type nonrec t =
-      {
-      message: ExceptionMessage.t option
-        [@ocaml.doc "The error message associated with the exception."]}
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "These errors are usually caused by a server-side issue."]
 module UploadNotFoundException =
   struct
     type nonrec t =
@@ -4115,8 +5906,8 @@ module UploadNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4131,6 +5922,158 @@ module LayerPartBlob =
     let to_header x = x
     let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
     let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module TemplateNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified repository creation template can't be found. Verify the registry ID and prefix and try again."]
+module SecretNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ARN of the secret specified in the pull through cache rule was not found. Update the pull through cache rule with a valid secret ARN and try again."]
+module UnableToAccessSecretException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The secret is unable to be accessed. Verify the resource permissions for the secret and try again."]
+module UnableToDecryptSecretValueException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The secret is accessible but is unable to be decrypted. Verify the resource permisisons and try again."]
+module ImageNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The image requested does not exist in the specified repository."]
+module ImageStorageClassUpdateNotSupportedException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The requested image storage class update is not supported."]
+module TargetStorageClass =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | ARCHIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | ARCHIVE -> "ARCHIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "ARCHIVE" -> ARCHIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TargetStorageClass" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TargetStorageClass" j)
     let to_json = simple_to_json to_value
   end
 module InvalidTagParameterException =
@@ -4148,8 +6091,8 @@ module InvalidTagParameterException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4169,8 +6112,8 @@ module TooManyTagsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4179,6 +6122,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4198,29 +6144,6 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module LifecyclePolicyNotFoundException =
   struct
     type nonrec t = {
@@ -4236,8 +6159,8 @@ module LifecyclePolicyNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4257,8 +6180,8 @@ module LifecyclePolicyPreviewInProgressException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4315,7 +6238,7 @@ module LifecyclePolicyText =
     let of_json j = string_of_json ~kind:"LifecyclePolicyText" j
     let to_json = simple_to_json to_value
   end
-module ImageNotFoundException =
+module ImageArchivedException =
   struct
     type nonrec t = {
       message: ExceptionMessage.t option }
@@ -4330,12 +6253,11 @@ module ImageNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The image requested does not exist in the specified repository."]
+  end[@@ocaml.doc "The specified image is archived and cannot be scanned."]
 module UnsupportedImageTypeException =
   struct
     type nonrec t = {
@@ -4351,12 +6273,25 @@ module UnsupportedImageTypeException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The image is of a type that cannot be scanned."]
-module ValidationException =
+module ForceFlag =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ExclusionAlreadyExistsException =
   struct
     type nonrec t = {
       message: ExceptionMessage.t option }
@@ -4371,42 +6306,37 @@ module ValidationException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There was an exception validating this request."]
-module RepositoryPolicyText =
+  end[@@ocaml.doc
+       "The specified pull time update exclusion already exists for the registry."]
+module SigningConfiguration =
   struct
-    type nonrec t = string
-    let context_ = "RepositoryPolicyText"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:10240) >>=
-             (fun () -> check_string_min i ~min:0));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      rules: SigningRuleList.t
+        [@ocaml.doc
+          "A list of signing rules. Each rule defines a signing profile and optional repository filters that determine which images are automatically signed. Maximum of 10 rules."]}
+    let context_ = "SigningConfiguration"
+    let make ~rules = fun () -> { rules }
+    let to_value x =
+      structure_to_value
+        [("rules", (Some (SigningRuleList.to_value x.rules)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RepositoryPolicyText" j
-    let to_json = simple_to_json to_value
-  end
-module ForceFlag =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
+      let rules =
+        SigningRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "rules") in
+      make ~rules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rules = field_map_exn json__ "rules" SigningRuleList.of_json in
+      make ~rules ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The signing configuration for a registry, which specifies rules for automatically signing images when pushed."]
 module ReplicationConfiguration =
   struct
     type nonrec t =
@@ -4426,11 +6356,32 @@ module ReplicationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "rules") in
       make ~rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "rules" ReplicationRuleList.of_json in
+    let of_json json__ =
+      let rules = field_map_exn json__ "rules" ReplicationRuleList.of_json in
       make ~rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The replication configuration for a registry."]
+module BlockedByOrganizationPolicyException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation did not succeed because the account is managed by a organization policy."]
 module RegistryScanningConfiguration =
   struct
     type nonrec t =
@@ -4453,9 +6404,9 @@ module RegistryScanningConfiguration =
         (Option.map ~f:ScanType.of_xml) (Xml.child xml_arg0 "scanType") in
       make ?rules ?scanType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "rules" RegistryScanningRuleList.of_json in
-      let scanType = field_map json "scanType" ScanType.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "rules" RegistryScanningRuleList.of_json in
+      let scanType = field_map json__ "scanType" ScanType.of_json in
       make ?rules ?scanType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The scanning configuration for a private registry."]
@@ -4494,8 +6445,8 @@ module ImageAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4515,8 +6466,8 @@ module ImageDigestDoesNotMatchException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4536,8 +6487,8 @@ module ImageTagAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4559,8 +6510,8 @@ module LayersNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4580,12 +6531,107 @@ module ReferencedImagesNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The manifest list is referencing an image that does not exist."]
+module AccountSettingName =
+  struct
+    type nonrec t = string
+    let context_ = "AccountSettingName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountSettingName" j
+    let to_json = simple_to_json to_value
+  end
+module AccountSettingValue =
+  struct
+    type nonrec t = string
+    let context_ = "AccountSettingValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountSettingValue" j
+    let to_json = simple_to_json to_value
+  end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module PullTimeUpdateExclusionList =
+  struct
+    type nonrec t = PrincipalArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PrincipalArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PrincipalArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PullTimeUpdateExclusionList"
+        ~of_json:PrincipalArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ImageIdentifierList =
   struct
     type nonrec t = ImageIdentifier.t list
@@ -4595,6 +6641,9 @@ module ImageIdentifierList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4616,49 +6665,95 @@ module ImageIdentifierList =
         ~of_json:ImageIdentifier.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end
 module ListImagesFilter =
   struct
     type nonrec t =
       {
       tagStatus: TagStatus.t option
         [@ocaml.doc
-          "The tag status with which to filter your ListImages results. You can filter results based on whether they are TAGGED or UNTAGGED."]}
-    let make ?tagStatus = fun () -> { tagStatus }
+          "The tag status with which to filter your ListImages results."];
+      imageStatus: ImageStatusFilter.t option
+        [@ocaml.doc
+          "The image status with which to filter your ListImages results. Valid values are ACTIVE, ARCHIVED, and ACTIVATING. If not specified, only images with ACTIVE status are returned."]}
+    let make ?tagStatus =
+      fun ?imageStatus -> fun () -> { tagStatus; imageStatus }
     let to_value x =
       structure_to_value
-        [("tagStatus", (Option.map x.tagStatus ~f:TagStatus.to_value))]
+        [("tagStatus", (Option.map x.tagStatus ~f:TagStatus.to_value));
+        ("imageStatus",
+          (Option.map x.imageStatus ~f:ImageStatusFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageStatus =
+        (Option.map ~f:ImageStatusFilter.of_xml)
+          (Xml.child xml_arg0 "imageStatus") in
       let tagStatus =
         (Option.map ~f:TagStatus.of_xml) (Xml.child xml_arg0 "tagStatus") in
-      make ?tagStatus ()
+      make ?imageStatus ?tagStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagStatus = field_map json "tagStatus" TagStatus.of_json in
-      make ?tagStatus ()
+    let of_json json__ =
+      let imageStatus =
+        field_map json__ "imageStatus" ImageStatusFilter.of_json in
+      let tagStatus = field_map json__ "tagStatus" TagStatus.of_json in
+      make ?imageStatus ?tagStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a filter on a ListImages operation."]
-module MaxResults =
+module ImageReferrerList =
+  struct
+    type nonrec t = ImageReferrer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageReferrer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageReferrer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageReferrerList" ~of_json:ImageReferrer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnableToListUpstreamImageReferrersException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The referrer or referrers were unable to be listed using the pull through cache rule. This is usually caused because of an issue with the Secrets Manager secret containing the credentials for the upstream registry."]
+module FiftyMaxResults =
   struct
     type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -4666,10 +6761,93 @@ module MaxResults =
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
       Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+        (string_of_xml ~kind:"an integer for FiftyMaxResults" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ListImageReferrersFilter =
+  struct
+    type nonrec t =
+      {
+      artifactTypes: ArtifactTypeList.t option
+        [@ocaml.doc
+          "The artifact types with which to filter your ListImageReferrers results."];
+      artifactStatus: ArtifactStatusFilter.t option
+        [@ocaml.doc
+          "The artifact status with which to filter your ListImageReferrers results. Valid values are ACTIVE, ARCHIVED, ACTIVATING, or ANY. If not specified, only artifacts with ACTIVE status are returned."]}
+    let make ?artifactTypes =
+      fun ?artifactStatus -> fun () -> { artifactTypes; artifactStatus }
+    let to_value x =
+      structure_to_value
+        [("artifactTypes",
+           (Option.map x.artifactTypes ~f:ArtifactTypeList.to_value));
+        ("artifactStatus",
+          (Option.map x.artifactStatus ~f:ArtifactStatusFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let artifactStatus =
+        (Option.map ~f:ArtifactStatusFilter.of_xml)
+          (Xml.child xml_arg0 "artifactStatus") in
+      let artifactTypes =
+        (Option.map ~f:ArtifactTypeList.of_xml)
+          (Xml.child xml_arg0 "artifactTypes") in
+      make ?artifactStatus ?artifactTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let artifactStatus =
+        field_map json__ "artifactStatus" ArtifactStatusFilter.of_json in
+      let artifactTypes =
+        field_map json__ "artifactTypes" ArtifactTypeList.of_json in
+      make ?artifactStatus ?artifactTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object representing a filter on a ListImageReferrers operation."]
+module SubjectIdentifier =
+  struct
+    type nonrec t =
+      {
+      imageDigest: ImageDigest.t [@ocaml.doc "The digest of the image."]}
+    let context_ = "SubjectIdentifier"
+    let make ~imageDigest = fun () -> { imageDigest }
+    let to_value x =
+      structure_to_value
+        [("imageDigest", (Some (ImageDigest.to_value x.imageDigest)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageDigest =
+        ImageDigest.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageDigest") in
+      make ~imageDigest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageDigest =
+        field_map_exn json__ "imageDigest" ImageDigest.of_json in
+      make ~imageDigest ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object that identifies an image subject."]
+module SigningConfigurationNotFoundException =
+  struct
+    type nonrec t =
+      {
+      message: ExceptionMessage.t option
+        [@ocaml.doc "The error message associated with the exception."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified signing configuration was not found. This occurs when attempting to retrieve or delete a signing configuration that does not exist."]
 module RepositoryPolicyNotFoundException =
   struct
     type nonrec t =
@@ -4687,8 +6865,8 @@ module RepositoryPolicyNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4708,8 +6886,8 @@ module RegistryPolicyNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The registry doesn't have an associated registry policy."]
@@ -4740,8 +6918,8 @@ module LifecyclePolicyPreviewNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There is no dry run for this repository."]
@@ -4749,6 +6927,9 @@ module LifecyclePolicyPreviewResultList =
   struct
     type nonrec t = LifecyclePolicyPreviewResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LifecyclePolicyPreviewResult.to_value)) |>
         (fun x -> `List x)
@@ -4776,23 +6957,37 @@ module LifecyclePolicyPreviewSummary =
     type nonrec t =
       {
       expiringImageTotalCount: ImageCount.t option
-        [@ocaml.doc "The number of expiring images."]}
-    let make ?expiringImageTotalCount = fun () -> { expiringImageTotalCount }
+        [@ocaml.doc "The number of expiring images."];
+      transitioningImageTotalCounts: TransitioningImageTotalCounts.t option
+        [@ocaml.doc
+          "The total count of images that will be transitioned to each storage class. This field is only present if at least one image will be transitoned in the summary."]}
+    let make ?expiringImageTotalCount =
+      fun ?transitioningImageTotalCounts ->
+        fun () -> { expiringImageTotalCount; transitioningImageTotalCounts }
     let to_value x =
       structure_to_value
         [("expiringImageTotalCount",
-           (Option.map x.expiringImageTotalCount ~f:ImageCount.to_value))]
+           (Option.map x.expiringImageTotalCount ~f:ImageCount.to_value));
+        ("transitioningImageTotalCounts",
+          (Option.map x.transitioningImageTotalCounts
+             ~f:TransitioningImageTotalCounts.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let transitioningImageTotalCounts =
+        (Option.map ~f:TransitioningImageTotalCounts.of_xml)
+          (Xml.child xml_arg0 "transitioningImageTotalCounts") in
       let expiringImageTotalCount =
         (Option.map ~f:ImageCount.of_xml)
           (Xml.child xml_arg0 "expiringImageTotalCount") in
-      make ?expiringImageTotalCount ()
+      make ?transitioningImageTotalCounts ?expiringImageTotalCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let transitioningImageTotalCounts =
+        field_map json__ "transitioningImageTotalCounts"
+          TransitioningImageTotalCounts.of_json in
       let expiringImageTotalCount =
-        field_map json "expiringImageTotalCount" ImageCount.of_json in
-      make ?expiringImageTotalCount ()
+        field_map json__ "expiringImageTotalCount" ImageCount.of_json in
+      make ?transitioningImageTotalCounts ?expiringImageTotalCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the lifecycle policy preview request."]
 module LifecyclePolicyPreviewFilter =
@@ -4811,8 +7006,8 @@ module LifecyclePolicyPreviewFilter =
         (Option.map ~f:TagStatus.of_xml) (Xml.child xml_arg0 "tagStatus") in
       make ?tagStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagStatus = field_map json "tagStatus" TagStatus.of_json in
+    let of_json json__ =
+      let tagStatus = field_map json__ "tagStatus" TagStatus.of_json in
       make ?tagStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The filter for the lifecycle policy preview."]
@@ -4852,16 +7047,40 @@ module LayerInaccessibleException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified layer is not available because it is not associated with an image. Unassociated image layers may be cleaned up at any time."]
+module UnableToGetUpstreamLayerException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was an issue getting the upstream layer matching the pull through cache rule."]
 module AuthorizationDataList =
   struct
     type nonrec t = AuthorizationData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AuthorizationData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4891,6 +7110,9 @@ module GetAuthorizationTokenRegistryIdList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegistryId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4912,10 +7134,68 @@ module GetAuthorizationTokenRegistryIdList =
         ~of_json:RegistryId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RepositoryCreationTemplateList =
+  struct
+    type nonrec t = RepositoryCreationTemplate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositoryCreationTemplate.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositoryCreationTemplate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositoryCreationTemplateList"
+        ~of_json:RepositoryCreationTemplate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrefixList =
+  struct
+    type nonrec t = Prefix.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Prefix.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Prefix.of_xml)
+    let of_json j = list_of_json ~kind:"PrefixList" ~of_json:Prefix.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RepositoryList =
   struct
     type nonrec t = Repository.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Repository.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4945,6 +7225,9 @@ module RepositoryNameList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4970,6 +7253,9 @@ module PullThroughCacheRuleList =
   struct
     type nonrec t = PullThroughCacheRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PullThroughCacheRule.to_value)) |>
         (fun x -> `List x)
@@ -4992,27 +7278,6 @@ module PullThroughCacheRuleList =
         ~of_json:PullThroughCacheRule.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PullThroughCacheRuleNotFoundException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The pull through cache rule was not found. Specify a valid pull through cache rule and try again."]
 module PullThroughCacheRuleRepositoryPrefixList =
   struct
     type nonrec t = PullThroughCacheRuleRepositoryPrefix.t list
@@ -5022,6 +7287,9 @@ module PullThroughCacheRuleRepositoryPrefixList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PullThroughCacheRuleRepositoryPrefix.to_value)) |>
         (fun x -> `List x)
@@ -5049,6 +7317,9 @@ module ImageDetailList =
   struct
     type nonrec t = ImageDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5075,23 +7346,62 @@ module DescribeImagesFilter =
       {
       tagStatus: TagStatus.t option
         [@ocaml.doc
-          "The tag status with which to filter your DescribeImages results. You can filter results based on whether they are TAGGED or UNTAGGED."]}
-    let make ?tagStatus = fun () -> { tagStatus }
+          "The tag status with which to filter your DescribeImages results. You can filter results based on whether they are TAGGED or UNTAGGED."];
+      imageStatus: ImageStatusFilter.t option
+        [@ocaml.doc
+          "The image status with which to filter your DescribeImages results. Valid values are ACTIVE, ARCHIVED, and ACTIVATING. If not specified, only images with ACTIVE status are returned."]}
+    let make ?tagStatus =
+      fun ?imageStatus -> fun () -> { tagStatus; imageStatus }
     let to_value x =
       structure_to_value
-        [("tagStatus", (Option.map x.tagStatus ~f:TagStatus.to_value))]
+        [("tagStatus", (Option.map x.tagStatus ~f:TagStatus.to_value));
+        ("imageStatus",
+          (Option.map x.imageStatus ~f:ImageStatusFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageStatus =
+        (Option.map ~f:ImageStatusFilter.of_xml)
+          (Xml.child xml_arg0 "imageStatus") in
       let tagStatus =
         (Option.map ~f:TagStatus.of_xml) (Xml.child xml_arg0 "tagStatus") in
-      make ?tagStatus ()
+      make ?imageStatus ?tagStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagStatus = field_map json "tagStatus" TagStatus.of_json in
-      make ?tagStatus ()
+    let of_json json__ =
+      let imageStatus =
+        field_map json__ "imageStatus" ImageStatusFilter.of_json in
+      let tagStatus = field_map json__ "tagStatus" TagStatus.of_json in
+      make ?imageStatus ?tagStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object representing a filter on a DescribeImages operation."]
+module ImageSigningStatusList =
+  struct
+    type nonrec t = ImageSigningStatus.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImageSigningStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImageSigningStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImageSigningStatusList"
+        ~of_json:ImageSigningStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ImageScanFindings =
   struct
     type nonrec t =
@@ -5156,18 +7466,19 @@ module ImageScanFindings =
       make ?enhancedFindings ?findings ?findingSeverityCounts
         ?vulnerabilitySourceUpdatedAt ?imageScanCompletedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enhancedFindings =
-        field_map json "enhancedFindings"
+        field_map json__ "enhancedFindings"
           EnhancedImageScanFindingList.of_json in
-      let findings = field_map json "findings" ImageScanFindingList.of_json in
+      let findings = field_map json__ "findings" ImageScanFindingList.of_json in
       let findingSeverityCounts =
-        field_map json "findingSeverityCounts" FindingSeverityCounts.of_json in
+        field_map json__ "findingSeverityCounts"
+          FindingSeverityCounts.of_json in
       let vulnerabilitySourceUpdatedAt =
-        field_map json "vulnerabilitySourceUpdatedAt"
+        field_map json__ "vulnerabilitySourceUpdatedAt"
           VulnerabilitySourceUpdateTimestamp.of_json in
       let imageScanCompletedAt =
-        field_map json "imageScanCompletedAt" ScanTimestamp.of_json in
+        field_map json__ "imageScanCompletedAt" ScanTimestamp.of_json in
       make ?enhancedFindings ?findings ?findingSeverityCounts
         ?vulnerabilitySourceUpdatedAt ?imageScanCompletedAt ()
     let to_json v = composed_to_json to_value v
@@ -5187,8 +7498,8 @@ module ScanNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5197,6 +7508,9 @@ module ImageReplicationStatusList =
   struct
     type nonrec t = ImageReplicationStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageReplicationStatus.to_value)) |>
         (fun x -> `List x)
@@ -5219,6 +7533,26 @@ module ImageReplicationStatusList =
         ~of_json:ImageReplicationStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExclusionNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified pull time update exclusion was not found."]
 module RepositoryNotEmptyException =
   struct
     type nonrec t =
@@ -5236,8 +7570,8 @@ module RepositoryNotEmptyException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5259,12 +7593,33 @@ module RepositoryAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified repository already exists in the specified registry."]
+module TemplateAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The repository creation template already exists. Specify a unique prefix and try again."]
 module PullThroughCacheRuleAlreadyExistsException =
   struct
     type nonrec t = {
@@ -5280,8 +7635,8 @@ module PullThroughCacheRuleAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5301,8 +7656,8 @@ module UnsupportedUpstreamRegistryException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified upstream registry isn't supported."]
@@ -5323,8 +7678,8 @@ module EmptyUploadException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5346,8 +7701,8 @@ module InvalidLayerException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5369,8 +7724,8 @@ module LayerAlreadyExistsException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5392,8 +7747,8 @@ module LayerPartTooSmallException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Layer parts must be at least 5 MiB in size."]
@@ -5406,6 +7761,9 @@ module LayerDigestList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LayerDigest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5430,6 +7788,9 @@ module RepositoryScanningConfigurationFailureList =
   struct
     type nonrec t = RepositoryScanningConfigurationFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryScanningConfigurationFailure.to_value))
         |> (fun x -> `List x)
@@ -5457,6 +7818,9 @@ module RepositoryScanningConfigurationList =
   struct
     type nonrec t = RepositoryScanningConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryScanningConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -5487,6 +7851,9 @@ module ScanningConfigurationRepositoryNameList =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5512,6 +7879,9 @@ module ImageFailureList =
   struct
     type nonrec t = ImageFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageFailure.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5536,6 +7906,9 @@ module ImageList =
   struct
     type nonrec t = Image.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Image.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5555,6 +7928,27 @@ module ImageList =
     let of_json j = list_of_json ~kind:"ImageList" ~of_json:Image.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UnableToGetUpstreamImageException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The image or images were unable to be pulled using the pull through cache rule. This is usually caused because of an issue with the Secrets Manager secret containing the credentials for the upstream registry."]
 module MediaTypeList =
   struct
     type nonrec t = MediaType.t list
@@ -5564,6 +7958,9 @@ module MediaTypeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MediaType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5588,6 +7985,9 @@ module LayerFailureList =
   struct
     type nonrec t = LayerFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LayerFailure.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5612,6 +8012,9 @@ module LayerList =
   struct
     type nonrec t = Layer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Layer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5640,6 +8043,9 @@ module BatchedOperationLayerDigestList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchedOperationLayerDigest.to_value)) |>
         (fun x -> `List x)
@@ -5662,6 +8068,212 @@ module BatchedOperationLayerDigestList =
         ~of_json:BatchedOperationLayerDigest.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ValidatePullThroughCacheRuleResponse =
+  struct
+    type nonrec t =
+      {
+      ecrRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The Amazon ECR repository prefix associated with the pull through cache rule."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      upstreamRegistryUrl: Url.t option
+        [@ocaml.doc
+          "The upstream registry URL associated with the pull through cache rule."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret associated with the pull through cache rule."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role associated with the pull through cache rule."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The upstream repository prefix associated with the pull through cache rule."];
+      isValid: IsPTCRuleValid.t option
+        [@ocaml.doc
+          "Whether or not the pull through cache rule was validated. If true, Amazon ECR was able to reach the upstream registry and authentication was successful. If false, there was an issue and validation failed. The failure reason indicates the cause."];
+      failure: PTCValidateFailure.t option
+        [@ocaml.doc
+          "The reason the validation failed. For more details about possible causes and how to address them, see Using pull through cache rules in the Amazon Elastic Container Registry User Guide."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `PullThroughCacheRuleNotFoundException of
+          PullThroughCacheRuleNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ecrRepositoryPrefix =
+      fun ?registryId ->
+        fun ?upstreamRegistryUrl ->
+          fun ?credentialArn ->
+            fun ?customRoleArn ->
+              fun ?upstreamRepositoryPrefix ->
+                fun ?isValid ->
+                  fun ?failure ->
+                    fun () ->
+                      {
+                        ecrRepositoryPrefix;
+                        registryId;
+                        upstreamRegistryUrl;
+                        credentialArn;
+                        customRoleArn;
+                        upstreamRepositoryPrefix;
+                        isValid;
+                        failure
+                      }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "PullThroughCacheRuleNotFoundException" ->
+          `PullThroughCacheRuleNotFoundException
+            (PullThroughCacheRuleNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "PullThroughCacheRuleNotFoundException" ->
+          `PullThroughCacheRuleNotFoundException
+            (PullThroughCacheRuleNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `PullThroughCacheRuleNotFoundException e ->
+          `Assoc
+            [("error", (`String "PullThroughCacheRuleNotFoundException"));
+            ("details", (PullThroughCacheRuleNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ecrRepositoryPrefix",
+           (Option.map x.ecrRepositoryPrefix
+              ~f:PullThroughCacheRuleRepositoryPrefix.to_value));
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("upstreamRegistryUrl",
+          (Option.map x.upstreamRegistryUrl ~f:Url.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value));
+        ("isValid", (Option.map x.isValid ~f:IsPTCRuleValid.to_value));
+        ("failure", (Option.map x.failure ~f:PTCValidateFailure.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failure =
+        (Option.map ~f:PTCValidateFailure.of_xml)
+          (Xml.child xml_arg0 "failure") in
+      let isValid =
+        (Option.map ~f:IsPTCRuleValid.of_xml) (Xml.child xml_arg0 "isValid") in
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
+      let upstreamRegistryUrl =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "upstreamRegistryUrl") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      let ecrRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "ecrRepositoryPrefix") in
+      make ?failure ?isValid ?upstreamRepositoryPrefix ?customRoleArn
+        ?credentialArn ?upstreamRegistryUrl ?registryId ?ecrRepositoryPrefix
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failure = field_map json__ "failure" PTCValidateFailure.of_json in
+      let isValid = field_map json__ "isValid" IsPTCRuleValid.of_json in
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let upstreamRegistryUrl =
+        field_map json__ "upstreamRegistryUrl" Url.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let ecrRepositoryPrefix =
+        field_map json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?failure ?isValid ?upstreamRepositoryPrefix ?customRoleArn
+        ?credentialArn ?upstreamRegistryUrl ?registryId ?ecrRepositoryPrefix
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Validates an existing pull through cache rule for an upstream registry that requires authentication. This will retrieve the contents of the Amazon Web Services Secrets Manager secret, verify the syntax, and then validate that authentication to the upstream registry is successful."]
+module ValidatePullThroughCacheRuleRequest =
+  struct
+    type nonrec t =
+      {
+      ecrRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t
+        [@ocaml.doc
+          "The repository name prefix associated with the pull through cache rule."];
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The registry ID associated with the pull through cache rule. If you do not specify a registry, the default registry is assumed."]}
+    let context_ = "ValidatePullThroughCacheRuleRequest"
+    let make ?registryId =
+      fun ~ecrRepositoryPrefix ->
+        fun () -> { registryId; ecrRepositoryPrefix }
+    let to_value x =
+      structure_to_value
+        [("ecrRepositoryPrefix",
+           (Some
+              (PullThroughCacheRuleRepositoryPrefix.to_value
+                 x.ecrRepositoryPrefix)));
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      let ecrRepositoryPrefix =
+        PullThroughCacheRuleRepositoryPrefix.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ecrRepositoryPrefix") in
+      make ?registryId ~ecrRepositoryPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let ecrRepositoryPrefix =
+        field_map_exn json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?registryId ~ecrRepositoryPrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Validates an existing pull through cache rule for an upstream registry that requires authentication. This will retrieve the contents of the Amazon Web Services Secrets Manager secret, verify the syntax, and then validate that authentication to the upstream registry is successful."]
 module UploadLayerPartResponse =
   struct
     type nonrec t =
@@ -5782,13 +8394,13 @@ module UploadLayerPartResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?lastByteReceived ?uploadId ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastByteReceived =
-        field_map json "lastByteReceived" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+        field_map json__ "lastByteReceived" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lastByteReceived ?uploadId ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5859,20 +8471,667 @@ module UploadLayerPartRequest =
       make ~layerPartBlob ~partLastByte ~partFirstByte ~uploadId
         ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerPartBlob =
-        field_map_exn json "layerPartBlob" LayerPartBlob.of_json in
-      let partLastByte = field_map_exn json "partLastByte" PartSize.of_json in
-      let partFirstByte = field_map_exn json "partFirstByte" PartSize.of_json in
-      let uploadId = field_map_exn json "uploadId" UploadId.of_json in
+        field_map_exn json__ "layerPartBlob" LayerPartBlob.of_json in
+      let partLastByte = field_map_exn json__ "partLastByte" PartSize.of_json in
+      let partFirstByte =
+        field_map_exn json__ "partFirstByte" PartSize.of_json in
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~layerPartBlob ~partLastByte ~partFirstByte ~uploadId
         ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Uploads an image layer part to Amazon ECR. When an image is pushed, each new image layer is uploaded in parts. The maximum size of each image layer part can be 20971520 bytes (or about 20MB). The UploadLayerPart API is called once per each new image layer part. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+module UpdateRepositoryCreationTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      repositoryCreationTemplate: RepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The details of the repository creation template associated with the request."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `TemplateNotFoundException of TemplateNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?repositoryCreationTemplate ->
+        fun () -> { registryId; repositoryCreationTemplate }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "TemplateNotFoundException" ->
+          `TemplateNotFoundException (TemplateNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "TemplateNotFoundException" ->
+          `TemplateNotFoundException (TemplateNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `TemplateNotFoundException e ->
+          `Assoc
+            [("error", (`String "TemplateNotFoundException"));
+            ("details", (TemplateNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryCreationTemplate",
+          (Option.map x.repositoryCreationTemplate
+             ~f:RepositoryCreationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryCreationTemplate =
+        (Option.map ~f:RepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "repositoryCreationTemplate") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?repositoryCreationTemplate ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryCreationTemplate =
+        field_map json__ "repositoryCreationTemplate"
+          RepositoryCreationTemplate.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?repositoryCreationTemplate ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing repository creation template."]
+module UpdateRepositoryCreationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      prefix: Prefix.t
+        [@ocaml.doc
+          "The repository namespace prefix that matches an existing repository creation template in the registry. All repositories created using this namespace prefix will have the settings defined in this template applied. For example, a prefix of prod would apply to all repositories beginning with prod/. This includes a repository named prod/team1 as well as a repository named prod/repository1. To apply a template to all repositories in your registry that don't have an associated creation template, you can use ROOT as the prefix."];
+      description: RepositoryTemplateDescription.t option
+        [@ocaml.doc "A description for the repository creation template."];
+      encryptionConfiguration:
+        EncryptionConfigurationForRepositoryCreationTemplate.t option ;
+      resourceTags: TagList.t option
+        [@ocaml.doc
+          "The metadata to apply to the repository to help you categorize and organize. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      imageTagMutability: ImageTagMutability.t option
+        [@ocaml.doc
+          "Updates the tag mutability setting for the repository. If this parameter is omitted, the default setting of MUTABLE will be used which will allow image tags to be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags should be excluded from the repository creation template's image tag mutability setting."];
+      repositoryPolicy: RepositoryPolicyText.t option
+        [@ocaml.doc
+          "Updates the repository policy created using the template. A repository policy is a permissions policy associated with a repository to control access permissions."];
+      lifecyclePolicy:
+        LifecyclePolicyTextForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "Updates the lifecycle policy associated with the specified repository creation template."];
+      appliedFor: RCTAppliedForList.t option
+        [@ocaml.doc
+          "Updates the list of enumerable strings representing the Amazon ECR repository creation scenarios that this template will apply towards. The supported scenarios are PULL_THROUGH_CACHE, REPLICATION, and CREATE_ON_PUSH"];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the role to be assumed by Amazon ECR. This role must be in the same account as the registry that you are configuring. Amazon ECR will assume your supplied role when the customRoleArn is specified. When this field isn't specified, Amazon ECR will use the service-linked role for the repository creation template."]}
+    let context_ = "UpdateRepositoryCreationTemplateRequest"
+    let make ?description =
+      fun ?encryptionConfiguration ->
+        fun ?resourceTags ->
+          fun ?imageTagMutability ->
+            fun ?imageTagMutabilityExclusionFilters ->
+              fun ?repositoryPolicy ->
+                fun ?lifecyclePolicy ->
+                  fun ?appliedFor ->
+                    fun ?customRoleArn ->
+                      fun ~prefix ->
+                        fun () ->
+                          {
+                            description;
+                            encryptionConfiguration;
+                            resourceTags;
+                            imageTagMutability;
+                            imageTagMutabilityExclusionFilters;
+                            repositoryPolicy;
+                            lifecyclePolicy;
+                            appliedFor;
+                            customRoleArn;
+                            prefix
+                          }
+    let to_value x =
+      structure_to_value
+        [("prefix", (Some (Prefix.to_value x.prefix)));
+        ("description",
+          (Option.map x.description ~f:RepositoryTemplateDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfigurationForRepositoryCreationTemplate.to_value));
+        ("resourceTags", (Option.map x.resourceTags ~f:TagList.to_value));
+        ("imageTagMutability",
+          (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value));
+        ("repositoryPolicy",
+          (Option.map x.repositoryPolicy ~f:RepositoryPolicyText.to_value));
+        ("lifecyclePolicy",
+          (Option.map x.lifecyclePolicy
+             ~f:LifecyclePolicyTextForRepositoryCreationTemplate.to_value));
+        ("appliedFor",
+          (Option.map x.appliedFor ~f:RCTAppliedForList.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let appliedFor =
+        (Option.map ~f:RCTAppliedForList.of_xml)
+          (Xml.child xml_arg0 "appliedFor") in
+      let lifecyclePolicy =
+        (Option.map
+           ~f:LifecyclePolicyTextForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicy") in
+      let repositoryPolicy =
+        (Option.map ~f:RepositoryPolicyText.of_xml)
+          (Xml.child xml_arg0 "repositoryPolicy") in
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
+      let imageTagMutability =
+        (Option.map ~f:ImageTagMutability.of_xml)
+          (Xml.child xml_arg0 "imageTagMutability") in
+      let resourceTags =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "resourceTags") in
+      let encryptionConfiguration =
+        (Option.map
+           ~f:EncryptionConfigurationForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let description =
+        (Option.map ~f:RepositoryTemplateDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let prefix =
+        Prefix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "prefix") in
+      make ?customRoleArn ?appliedFor ?lifecyclePolicy ?repositoryPolicy
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?resourceTags
+        ?encryptionConfiguration ?description ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let appliedFor =
+        field_map json__ "appliedFor" RCTAppliedForList.of_json in
+      let lifecyclePolicy =
+        field_map json__ "lifecyclePolicy"
+          LifecyclePolicyTextForRepositoryCreationTemplate.of_json in
+      let repositoryPolicy =
+        field_map json__ "repositoryPolicy" RepositoryPolicyText.of_json in
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
+      let imageTagMutability =
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagList.of_json in
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfigurationForRepositoryCreationTemplate.of_json in
+      let description =
+        field_map json__ "description" RepositoryTemplateDescription.of_json in
+      let prefix = field_map_exn json__ "prefix" Prefix.of_json in
+      make ?customRoleArn ?appliedFor ?lifecyclePolicy ?repositoryPolicy
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?resourceTags
+        ?encryptionConfiguration ?description ~prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing repository creation template."]
+module UpdatePullThroughCacheRuleResponse =
+  struct
+    type nonrec t =
+      {
+      ecrRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The Amazon ECR repository prefix associated with the pull through cache rule."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      updatedAt: UpdatedTimestamp.t option
+        [@ocaml.doc
+          "The date and time, in JavaScript date format, when the pull through cache rule was updated."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret associated with the pull through cache rule."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role associated with the pull through cache rule."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The upstream repository prefix associated with the pull through cache rule."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `PullThroughCacheRuleNotFoundException of
+          PullThroughCacheRuleNotFoundException.t 
+      | `SecretNotFoundException of SecretNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `UnableToAccessSecretException of UnableToAccessSecretException.t 
+      | `UnableToDecryptSecretValueException of
+          UnableToDecryptSecretValueException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ecrRepositoryPrefix =
+      fun ?registryId ->
+        fun ?updatedAt ->
+          fun ?credentialArn ->
+            fun ?customRoleArn ->
+              fun ?upstreamRepositoryPrefix ->
+                fun () ->
+                  {
+                    ecrRepositoryPrefix;
+                    registryId;
+                    updatedAt;
+                    credentialArn;
+                    customRoleArn;
+                    upstreamRepositoryPrefix
+                  }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "PullThroughCacheRuleNotFoundException" ->
+          `PullThroughCacheRuleNotFoundException
+            (PullThroughCacheRuleNotFoundException.of_json json)
+      | "SecretNotFoundException" ->
+          `SecretNotFoundException (SecretNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnableToAccessSecretException" ->
+          `UnableToAccessSecretException
+            (UnableToAccessSecretException.of_json json)
+      | "UnableToDecryptSecretValueException" ->
+          `UnableToDecryptSecretValueException
+            (UnableToDecryptSecretValueException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "PullThroughCacheRuleNotFoundException" ->
+          `PullThroughCacheRuleNotFoundException
+            (PullThroughCacheRuleNotFoundException.of_xml xml)
+      | "SecretNotFoundException" ->
+          `SecretNotFoundException (SecretNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnableToAccessSecretException" ->
+          `UnableToAccessSecretException
+            (UnableToAccessSecretException.of_xml xml)
+      | "UnableToDecryptSecretValueException" ->
+          `UnableToDecryptSecretValueException
+            (UnableToDecryptSecretValueException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `PullThroughCacheRuleNotFoundException e ->
+          `Assoc
+            [("error", (`String "PullThroughCacheRuleNotFoundException"));
+            ("details", (PullThroughCacheRuleNotFoundException.to_json e))]
+      | `SecretNotFoundException e ->
+          `Assoc
+            [("error", (`String "SecretNotFoundException"));
+            ("details", (SecretNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `UnableToAccessSecretException e ->
+          `Assoc
+            [("error", (`String "UnableToAccessSecretException"));
+            ("details", (UnableToAccessSecretException.to_json e))]
+      | `UnableToDecryptSecretValueException e ->
+          `Assoc
+            [("error", (`String "UnableToDecryptSecretValueException"));
+            ("details", (UnableToDecryptSecretValueException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ecrRepositoryPrefix",
+           (Option.map x.ecrRepositoryPrefix
+              ~f:PullThroughCacheRuleRepositoryPrefix.to_value));
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("updatedAt", (Option.map x.updatedAt ~f:UpdatedTimestamp.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
+      let updatedAt =
+        (Option.map ~f:UpdatedTimestamp.of_xml)
+          (Xml.child xml_arg0 "updatedAt") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      let ecrRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "ecrRepositoryPrefix") in
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn ?updatedAt
+        ?registryId ?ecrRepositoryPrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let updatedAt = field_map json__ "updatedAt" UpdatedTimestamp.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let ecrRepositoryPrefix =
+        field_map json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn ?updatedAt
+        ?registryId ?ecrRepositoryPrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing pull through cache rule."]
+module UpdatePullThroughCacheRuleRequest =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry associated with the pull through cache rule. If you do not specify a registry, the default registry is assumed."];
+      ecrRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t
+        [@ocaml.doc
+          "The repository name prefix to use when caching images from the source registry."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that identifies the credentials to authenticate to the upstream registry."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the IAM role to be assumed by Amazon ECR to authenticate to the ECR upstream registry. This role must be in the same account as the registry that you are configuring."]}
+    let context_ = "UpdatePullThroughCacheRuleRequest"
+    let make ?registryId =
+      fun ?credentialArn ->
+        fun ?customRoleArn ->
+          fun ~ecrRepositoryPrefix ->
+            fun () ->
+              { registryId; credentialArn; customRoleArn; ecrRepositoryPrefix
+              }
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("ecrRepositoryPrefix",
+          (Some
+             (PullThroughCacheRuleRepositoryPrefix.to_value
+                x.ecrRepositoryPrefix)));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
+      let ecrRepositoryPrefix =
+        PullThroughCacheRuleRepositoryPrefix.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ecrRepositoryPrefix") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?customRoleArn ?credentialArn ~ecrRepositoryPrefix ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let ecrRepositoryPrefix =
+        field_map_exn json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?customRoleArn ?credentialArn ~ecrRepositoryPrefix ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates an existing pull through cache rule."]
+module UpdateImageStorageClassResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The repository name associated with the request."];
+      imageId: ImageIdentifier.t option ;
+      imageStatus: ImageStatus.t option
+        [@ocaml.doc
+          "The current status of the image after the call to UpdateImageStorageClass is complete. Valid values are ACTIVE, ARCHIVED, and ACTIVATING."]}
+    type nonrec error =
+      [ `ImageNotFoundException of ImageNotFoundException.t 
+      | `ImageStorageClassUpdateNotSupportedException of
+          ImageStorageClassUpdateNotSupportedException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `RepositoryNotFoundException of RepositoryNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?repositoryName ->
+        fun ?imageId ->
+          fun ?imageStatus ->
+            fun () -> { registryId; repositoryName; imageId; imageStatus }
+    let error_of_json name json =
+      match name with
+      | "ImageNotFoundException" ->
+          `ImageNotFoundException (ImageNotFoundException.of_json json)
+      | "ImageStorageClassUpdateNotSupportedException" ->
+          `ImageStorageClassUpdateNotSupportedException
+            (ImageStorageClassUpdateNotSupportedException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImageNotFoundException" ->
+          `ImageNotFoundException (ImageNotFoundException.of_xml xml)
+      | "ImageStorageClassUpdateNotSupportedException" ->
+          `ImageStorageClassUpdateNotSupportedException
+            (ImageStorageClassUpdateNotSupportedException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImageNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImageNotFoundException"));
+            ("details", (ImageNotFoundException.to_json e))]
+      | `ImageStorageClassUpdateNotSupportedException e ->
+          `Assoc
+            [("error",
+               (`String "ImageStorageClassUpdateNotSupportedException"));
+            ("details",
+              (ImageStorageClassUpdateNotSupportedException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `RepositoryNotFoundException e ->
+          `Assoc
+            [("error", (`String "RepositoryNotFoundException"));
+            ("details", (RepositoryNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("imageId", (Option.map x.imageId ~f:ImageIdentifier.to_value));
+        ("imageStatus", (Option.map x.imageStatus ~f:ImageStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let imageStatus =
+        (Option.map ~f:ImageStatus.of_xml) (Xml.child xml_arg0 "imageStatus") in
+      let imageId =
+        (Option.map ~f:ImageIdentifier.of_xml) (Xml.child xml_arg0 "imageId") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?imageStatus ?imageId ?repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let imageStatus = field_map json__ "imageStatus" ImageStatus.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?imageStatus ?imageId ?repositoryName ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transitions an image between storage classes. You can transition images from Amazon ECR standard storage class to Amazon ECR archival storage class for long-term storage, or restore archived images back to Amazon ECR standard."]
+module UpdateImageStorageClassRequest =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry that contains the image to transition. If you do not specify a registry, the default registry is assumed."];
+      repositoryName: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository that contains the image to transition."];
+      imageId: ImageIdentifier.t ;
+      targetStorageClass: TargetStorageClass.t
+        [@ocaml.doc "The target storage class for the image."]}
+    let context_ = "UpdateImageStorageClassRequest"
+    let make ?registryId =
+      fun ~repositoryName ->
+        fun ~imageId ->
+          fun ~targetStorageClass ->
+            fun () ->
+              { registryId; repositoryName; imageId; targetStorageClass }
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        ("imageId", (Some (ImageIdentifier.to_value x.imageId)));
+        ("targetStorageClass",
+          (Some (TargetStorageClass.to_value x.targetStorageClass)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetStorageClass =
+        TargetStorageClass.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "targetStorageClass") in
+      let imageId =
+        ImageIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageId") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ~targetStorageClass ~imageId ~repositoryName ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetStorageClass =
+        field_map_exn json__ "targetStorageClass" TargetStorageClass.of_json in
+      let imageId = field_map_exn json__ "imageId" ImageIdentifier.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ~targetStorageClass ~imageId ~repositoryName ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transitions an image between storage classes. You can transition images from Amazon ECR standard storage class to Amazon ECR archival storage class for long-term storage, or restore archived images back to Amazon ECR standard."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -5975,9 +9234,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
@@ -6083,9 +9342,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6110,6 +9369,7 @@ module StartLifecyclePolicyPreviewResponse =
           LifecyclePolicyPreviewInProgressException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -6131,6 +9391,8 @@ module StartLifecyclePolicyPreviewResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6148,6 +9410,8 @@ module StartLifecyclePolicyPreviewResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6173,6 +9437,10 @@ module StartLifecyclePolicyPreviewResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6202,14 +9470,14 @@ module StartLifecyclePolicyPreviewResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?status ?lifecyclePolicyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "status" LifecyclePolicyPreviewStatus.of_json in
+        field_map json__ "status" LifecyclePolicyPreviewStatus.of_json in
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?status ?lifecyclePolicyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6249,12 +9517,12 @@ module StartLifecyclePolicyPreviewRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?lifecyclePolicyText ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lifecyclePolicyText ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6271,7 +9539,8 @@ module StartImageScanResponse =
       imageScanStatus: ImageScanStatus.t option
         [@ocaml.doc "The current state of the scan."]}
     type nonrec error =
-      [ `ImageNotFoundException of ImageNotFoundException.t 
+      [ `ImageArchivedException of ImageArchivedException.t 
+      | `ImageNotFoundException of ImageNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
@@ -6287,6 +9556,8 @@ module StartImageScanResponse =
               { registryId; repositoryName; imageId; imageScanStatus }
     let error_of_json name json =
       match name with
+      | "ImageArchivedException" ->
+          `ImageArchivedException (ImageArchivedException.of_json json)
       | "ImageNotFoundException" ->
           `ImageNotFoundException (ImageNotFoundException.of_json json)
       | "InvalidParameterException" ->
@@ -6307,6 +9578,8 @@ module StartImageScanResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ImageArchivedException" ->
+          `ImageArchivedException (ImageArchivedException.of_xml xml)
       | "ImageNotFoundException" ->
           `ImageNotFoundException (ImageNotFoundException.of_xml xml)
       | "InvalidParameterException" ->
@@ -6326,6 +9599,10 @@ module StartImageScanResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ImageArchivedException e ->
+          `Assoc
+            [("error", (`String "ImageArchivedException"));
+            ("details", (ImageArchivedException.to_json e))]
       | `ImageNotFoundException e ->
           `Assoc
             [("error", (`String "ImageNotFoundException"));
@@ -6381,17 +9658,17 @@ module StartImageScanResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?imageScanStatus ?imageId ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageScanStatus =
-        field_map json "imageScanStatus" ImageScanStatus.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "imageScanStatus" ImageScanStatus.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?imageScanStatus ?imageId ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an image vulnerability scan. An image scan can only be started once per 24 hours on an individual image. This limit includes if an image was scanned on initial push. For more information, see Image scanning in the Amazon Elastic Container Registry User Guide."]
+       "Starts a basic image vulnerability scan. A basic image scan can only be started once per 24 hours on an individual image. This limit includes if an image was scanned on initial push. You can start up to 100,000 basic scans per 24 hours. This limit includes both scans on initial push and scans initiated by the StartImageScan API. For more information, see Basic scanning in the Amazon Elastic Container Registry User Guide."]
 module StartImageScanRequest =
   struct
     type nonrec t =
@@ -6424,15 +9701,15 @@ module StartImageScanRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~imageId ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageId = field_map_exn json "imageId" ImageIdentifier.of_json in
+    let of_json json__ =
+      let imageId = field_map_exn json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~imageId ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an image vulnerability scan. An image scan can only be started once per 24 hours on an individual image. This limit includes if an image was scanned on initial push. For more information, see Image scanning in the Amazon Elastic Container Registry User Guide."]
+       "Starts a basic image vulnerability scan. A basic image scan can only be started once per 24 hours on an individual image. This limit includes if an image was scanned on initial push. You can start up to 100,000 basic scans per 24 hours. This limit includes both scans on initial push and scans initiated by the StartImageScan API. For more information, see Basic scanning in the Amazon Elastic Container Registry User Guide."]
 module SetRepositoryPolicyResponse =
   struct
     type nonrec t =
@@ -6512,12 +9789,12 @@ module SetRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6563,17 +9840,237 @@ module SetRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~policyText ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "force" ForceFlag.of_json in
+    let of_json json__ =
+      let force = field_map json__ "force" ForceFlag.of_json in
       let policyText =
-        field_map_exn json "policyText" RepositoryPolicyText.of_json in
+        field_map_exn json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?force ~policyText ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Applies a repository policy to the specified repository to control access permissions. For more information, see Amazon ECR Repository policies in the Amazon Elastic Container Registry User Guide."]
+module RegisterPullTimeUpdateExclusionResponse =
+  struct
+    type nonrec t =
+      {
+      principalArn: PrincipalArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM principal that was added to the pull time update exclusion list."];
+      createdAt: CreationTimestamp.t option
+        [@ocaml.doc
+          "The date and time, expressed in standard JavaScript date format, when the exclusion was created."]}
+    type nonrec error =
+      [
+        `ExclusionAlreadyExistsException of ExclusionAlreadyExistsException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?principalArn =
+      fun ?createdAt -> fun () -> { principalArn; createdAt }
+    let error_of_json name json =
+      match name with
+      | "ExclusionAlreadyExistsException" ->
+          `ExclusionAlreadyExistsException
+            (ExclusionAlreadyExistsException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExclusionAlreadyExistsException" ->
+          `ExclusionAlreadyExistsException
+            (ExclusionAlreadyExistsException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExclusionAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ExclusionAlreadyExistsException"));
+            ("details", (ExclusionAlreadyExistsException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("principalArn",
+           (Option.map x.principalArn ~f:PrincipalArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:CreationTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:CreationTimestamp.of_xml)
+          (Xml.child xml_arg0 "createdAt") in
+      let principalArn =
+        (Option.map ~f:PrincipalArn.of_xml)
+          (Xml.child xml_arg0 "principalArn") in
+      make ?createdAt ?principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let principalArn = field_map json__ "principalArn" PrincipalArn.of_json in
+      make ?createdAt ?principalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds an IAM principal to the pull time update exclusion list for a registry. Amazon ECR will not record the pull time if an excluded principal pulls an image."]
+module RegisterPullTimeUpdateExclusionRequest =
+  struct
+    type nonrec t =
+      {
+      principalArn: PrincipalArn.t
+        [@ocaml.doc
+          "The ARN of the IAM principal to exclude from having image pull times recorded."]}
+    let context_ = "RegisterPullTimeUpdateExclusionRequest"
+    let make ~principalArn = fun () -> { principalArn }
+    let to_value x =
+      structure_to_value
+        [("principalArn", (Some (PrincipalArn.to_value x.principalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principalArn =
+        PrincipalArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      make ~principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principalArn =
+        field_map_exn json__ "principalArn" PrincipalArn.of_json in
+      make ~principalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds an IAM principal to the pull time update exclusion list for a registry. Amazon ECR will not record the pull time if an excluded principal pulls an image."]
+module PutSigningConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      signingConfiguration: SigningConfiguration.t option
+        [@ocaml.doc "The registry's updated signing configuration."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?signingConfiguration = fun () -> { signingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("signingConfiguration",
+           (Option.map x.signingConfiguration
+              ~f:SigningConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingConfiguration =
+        (Option.map ~f:SigningConfiguration.of_xml)
+          (Xml.child xml_arg0 "signingConfiguration") in
+      make ?signingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingConfiguration =
+        field_map json__ "signingConfiguration" SigningConfiguration.of_json in
+      make ?signingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates the registry's signing configuration, which defines rules for automatically signing images with Amazon Web Services Signer. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide. To successfully generate a signature, the IAM principal pushing images must have permission to sign payloads with the Amazon Web Services Signer signing profile referenced in the signing configuration."]
+module PutSigningConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      signingConfiguration: SigningConfiguration.t
+        [@ocaml.doc "The signing configuration to assign to the registry."]}
+    let context_ = "PutSigningConfigurationRequest"
+    let make ~signingConfiguration = fun () -> { signingConfiguration }
+    let to_value x =
+      structure_to_value
+        [("signingConfiguration",
+           (Some (SigningConfiguration.to_value x.signingConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingConfiguration =
+        SigningConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "signingConfiguration") in
+      make ~signingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingConfiguration =
+        field_map_exn json__ "signingConfiguration"
+          SigningConfiguration.of_json in
+      make ~signingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates the registry's signing configuration, which defines rules for automatically signing images with Amazon Web Services Signer. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide. To successfully generate a signature, the IAM principal pushing images must have permission to sign payloads with the Amazon Web Services Signer signing profile referenced in the signing configuration."]
 module PutReplicationConfigurationResponse =
   struct
     type nonrec t =
@@ -6638,14 +10135,14 @@ module PutReplicationConfigurationResponse =
           (Xml.child xml_arg0 "replicationConfiguration") in
       make ?replicationConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationConfiguration =
-        field_map json "replicationConfiguration"
+        field_map json__ "replicationConfiguration"
           ReplicationConfiguration.of_json in
       make ?replicationConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the replication configuration for a registry. The existing replication configuration for a repository can be retrieved with the DescribeRegistry API action. The first time the PutReplicationConfiguration API is called, a service-linked IAM role is created in your account for the replication process. For more information, see Using service-linked roles for Amazon ECR in the Amazon Elastic Container Registry User Guide. When configuring cross-account replication, the destination account must grant the source account permission to replicate. This permission is controlled using a registry permissions policy. For more information, see PutRegistryPolicy."]
+       "Creates or updates the replication configuration for a registry. The existing replication configuration for a repository can be retrieved with the DescribeRegistry API action. The first time the PutReplicationConfiguration API is called, a service-linked IAM role is created in your account for the replication process. For more information, see Using service-linked roles for Amazon ECR in the Amazon Elastic Container Registry User Guide. For more information on the custom role for replication, see Creating an IAM role for replication. When configuring cross-account replication, the destination account must grant the source account permission to replicate. This permission is controlled using a registry permissions policy. For more information, see PutRegistryPolicy."]
 module PutReplicationConfigurationRequest =
   struct
     type nonrec t =
@@ -6669,14 +10166,14 @@ module PutReplicationConfigurationRequest =
              "replicationConfiguration") in
       make ~replicationConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationConfiguration =
-        field_map_exn json "replicationConfiguration"
+        field_map_exn json__ "replicationConfiguration"
           ReplicationConfiguration.of_json in
       make ~replicationConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates the replication configuration for a registry. The existing replication configuration for a repository can be retrieved with the DescribeRegistry API action. The first time the PutReplicationConfiguration API is called, a service-linked IAM role is created in your account for the replication process. For more information, see Using service-linked roles for Amazon ECR in the Amazon Elastic Container Registry User Guide. When configuring cross-account replication, the destination account must grant the source account permission to replicate. This permission is controlled using a registry permissions policy. For more information, see PutRegistryPolicy."]
+       "Creates or updates the replication configuration for a registry. The existing replication configuration for a repository can be retrieved with the DescribeRegistry API action. The first time the PutReplicationConfiguration API is called, a service-linked IAM role is created in your account for the replication process. For more information, see Using service-linked roles for Amazon ECR in the Amazon Elastic Container Registry User Guide. For more information on the custom role for replication, see Creating an IAM role for replication. When configuring cross-account replication, the destination account must grant the source account permission to replicate. This permission is controlled using a registry permissions policy. For more information, see PutRegistryPolicy."]
 module PutRegistryScanningConfigurationResponse =
   struct
     type nonrec t =
@@ -6684,7 +10181,10 @@ module PutRegistryScanningConfigurationResponse =
       registryScanningConfiguration: RegistryScanningConfiguration.t option
         [@ocaml.doc "The scanning configuration for your registry."]}
     type nonrec error =
-      [ `InvalidParameterException of InvalidParameterException.t 
+      [
+        `BlockedByOrganizationPolicyException of
+          BlockedByOrganizationPolicyException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `ServerException of ServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -6692,6 +10192,9 @@ module PutRegistryScanningConfigurationResponse =
       fun () -> { registryScanningConfiguration }
     let error_of_json name json =
       match name with
+      | "BlockedByOrganizationPolicyException" ->
+          `BlockedByOrganizationPolicyException
+            (BlockedByOrganizationPolicyException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
@@ -6702,6 +10205,9 @@ module PutRegistryScanningConfigurationResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "BlockedByOrganizationPolicyException" ->
+          `BlockedByOrganizationPolicyException
+            (BlockedByOrganizationPolicyException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
@@ -6711,6 +10217,10 @@ module PutRegistryScanningConfigurationResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `BlockedByOrganizationPolicyException e ->
+          `Assoc
+            [("error", (`String "BlockedByOrganizationPolicyException"));
+            ("details", (BlockedByOrganizationPolicyException.to_json e))]
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
@@ -6740,9 +10250,9 @@ module PutRegistryScanningConfigurationResponse =
           (Xml.child xml_arg0 "registryScanningConfiguration") in
       make ?registryScanningConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registryScanningConfiguration =
-        field_map json "registryScanningConfiguration"
+        field_map json__ "registryScanningConfiguration"
           RegistryScanningConfiguration.of_json in
       make ?registryScanningConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -6772,9 +10282,9 @@ module PutRegistryScanningConfigurationRequest =
         (Option.map ~f:ScanType.of_xml) (Xml.child xml_arg0 "scanType") in
       make ?rules ?scanType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "rules" RegistryScanningRuleList.of_json in
-      let scanType = field_map json "scanType" ScanType.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "rules" RegistryScanningRuleList.of_json in
+      let scanType = field_map json__ "scanType" ScanType.of_json in
       make ?rules ?scanType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6783,7 +10293,8 @@ module PutRegistryPolicyResponse =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t option [@ocaml.doc "The registry ID."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
       policyText: RegistryPolicyText.t option
         [@ocaml.doc "The JSON policy text for your registry."]}
     type nonrec error =
@@ -6845,9 +10356,10 @@ module PutRegistryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyText = field_map json "policyText" RegistryPolicyText.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+    let of_json json__ =
+      let policyText =
+        field_map json__ "policyText" RegistryPolicyText.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6871,9 +10383,9 @@ module PutRegistryPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "policyText") in
       make ~policyText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map_exn json "policyText" RegistryPolicyText.of_json in
+        field_map_exn json__ "policyText" RegistryPolicyText.of_json in
       make ~policyText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6892,6 +10404,7 @@ module PutLifecyclePolicyResponse =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -6905,6 +10418,8 @@ module PutLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6916,6 +10431,8 @@ module PutLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6932,6 +10449,10 @@ module PutLifecyclePolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6956,12 +10477,12 @@ module PutLifecyclePolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?lifecyclePolicyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lifecyclePolicyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7001,12 +10522,13 @@ module PutLifecyclePolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~lifecyclePolicyText ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicyText =
-        field_map_exn json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map_exn json__ "lifecyclePolicyText"
+          LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~lifecyclePolicyText ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7020,7 +10542,11 @@ module PutImageTagMutabilityResponse =
       repositoryName: RepositoryName.t option
         [@ocaml.doc "The repository name associated with the request."];
       imageTagMutability: ImageTagMutability.t option
-        [@ocaml.doc "The image tag mutability setting for the repository."]}
+        [@ocaml.doc "The image tag mutability setting for the repository."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "The list of filters that specify which image tags are excluded from the repository's image tag mutability setting."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
@@ -7029,7 +10555,14 @@ module PutImageTagMutabilityResponse =
     let make ?registryId =
       fun ?repositoryName ->
         fun ?imageTagMutability ->
-          fun () -> { registryId; repositoryName; imageTagMutability }
+          fun ?imageTagMutabilityExclusionFilters ->
+            fun () ->
+              {
+                registryId;
+                repositoryName;
+                imageTagMutability;
+                imageTagMutabilityExclusionFilters
+              }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -7076,9 +10609,15 @@ module PutImageTagMutabilityResponse =
         ("repositoryName",
           (Option.map x.repositoryName ~f:RepositoryName.to_value));
         ("imageTagMutability",
-          (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value))]
+          (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
       let imageTagMutability =
         (Option.map ~f:ImageTagMutability.of_xml)
           (Xml.child xml_arg0 "imageTagMutability") in
@@ -7087,15 +10626,20 @@ module PutImageTagMutabilityResponse =
           (Xml.child xml_arg0 "repositoryName") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
-      make ?imageTagMutability ?repositoryName ?registryId ()
+      make ?imageTagMutabilityExclusionFilters ?imageTagMutability
+        ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
       let imageTagMutability =
-        field_map json "imageTagMutability" ImageTagMutability.of_json in
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      make ?imageTagMutability ?repositoryName ?registryId ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?imageTagMutabilityExclusionFilters ?imageTagMutability
+        ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the image tag mutability settings for the specified repository. For more information, see Image tag mutability in the Amazon Elastic Container Registry User Guide."]
@@ -7111,20 +10655,37 @@ module PutImageTagMutabilityRequest =
           "The name of the repository in which to update the image tag mutability settings."];
       imageTagMutability: ImageTagMutability.t
         [@ocaml.doc
-          "The tag mutability setting for the repository. If MUTABLE is specified, image tags can be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."]}
+          "The tag mutability setting for the repository. If MUTABLE is specified, image tags can be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags should be excluded from the image tag mutability setting being applied."]}
     let context_ = "PutImageTagMutabilityRequest"
     let make ?registryId =
-      fun ~repositoryName ->
-        fun ~imageTagMutability ->
-          fun () -> { registryId; repositoryName; imageTagMutability }
+      fun ?imageTagMutabilityExclusionFilters ->
+        fun ~repositoryName ->
+          fun ~imageTagMutability ->
+            fun () ->
+              {
+                registryId;
+                imageTagMutabilityExclusionFilters;
+                repositoryName;
+                imageTagMutability
+              }
     let to_value x =
       structure_to_value
         [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
         ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
         ("imageTagMutability",
-          (Some (ImageTagMutability.to_value x.imageTagMutability)))]
+          (Some (ImageTagMutability.to_value x.imageTagMutability)));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
       let imageTagMutability =
         ImageTagMutability.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageTagMutability") in
@@ -7133,15 +10694,20 @@ module PutImageTagMutabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
-      make ~imageTagMutability ~repositoryName ?registryId ()
+      make ?imageTagMutabilityExclusionFilters ~imageTagMutability
+        ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
       let imageTagMutability =
-        field_map_exn json "imageTagMutability" ImageTagMutability.of_json in
+        field_map_exn json__ "imageTagMutability" ImageTagMutability.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      make ~imageTagMutability ~repositoryName ?registryId ()
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?imageTagMutabilityExclusionFilters ~imageTagMutability
+        ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the image tag mutability settings for the specified repository. For more information, see Image tag mutability in the Amazon Elastic Container Registry User Guide."]
@@ -7235,13 +10801,13 @@ module PutImageScanningConfigurationResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?imageScanningConfiguration ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageScanningConfiguration =
-        field_map json "imageScanningConfiguration"
+        field_map json__ "imageScanningConfiguration"
           ImageScanningConfiguration.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?imageScanningConfiguration ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7286,13 +10852,13 @@ module PutImageScanningConfigurationRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~imageScanningConfiguration ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageScanningConfiguration =
-        field_map_exn json "imageScanningConfiguration"
+        field_map_exn json__ "imageScanningConfiguration"
           ImageScanningConfiguration.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~imageScanningConfiguration ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7426,8 +10992,8 @@ module PutImageResponse =
       let image = (Option.map ~f:Image.of_xml) (Xml.child xml_arg0 "image") in
       make ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let image = field_map json "image" Image.of_json in make ?image ()
+    let of_json json__ =
+      let image = field_map json__ "image" Image.of_json in make ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates or updates the image manifest and tags associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
@@ -7448,7 +11014,7 @@ module PutImageRequest =
           "The media type of the image manifest. If you push an image manifest that does not contain the mediaType field, you must specify the imageManifestMediaType in the request."];
       imageTag: ImageTag.t option
         [@ocaml.doc
-          "The tag to associate with the image. This parameter is required for images that use the Docker Image Manifest V2 Schema 2 or Open Container Initiative (OCI) formats."];
+          "The tag to associate with the image. This parameter is optional."];
       imageDigest: ImageDigest.t option
         [@ocaml.doc
           "The image digest of the image manifest corresponding to the image."]}
@@ -7497,21 +11063,135 @@ module PutImageRequest =
       make ?imageDigest ?imageTag ?imageManifestMediaType ~imageManifest
         ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imageDigest = field_map json "imageDigest" ImageDigest.of_json in
-      let imageTag = field_map json "imageTag" ImageTag.of_json in
+    let of_json json__ =
+      let imageDigest = field_map json__ "imageDigest" ImageDigest.of_json in
+      let imageTag = field_map json__ "imageTag" ImageTag.of_json in
       let imageManifestMediaType =
-        field_map json "imageManifestMediaType" MediaType.of_json in
+        field_map json__ "imageManifestMediaType" MediaType.of_json in
       let imageManifest =
-        field_map_exn json "imageManifest" ImageManifest.of_json in
+        field_map_exn json__ "imageManifest" ImageManifest.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?imageDigest ?imageTag ?imageManifestMediaType ~imageManifest
         ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates or updates the image manifest and tags associated with an image. When an image is pushed and all new image layers have been uploaded, the PutImage API is called once to create or update the image manifest and the tags associated with the image. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+module PutAccountSettingResponse =
+  struct
+    type nonrec t =
+      {
+      name: AccountSettingName.t option
+        [@ocaml.doc "Retrieves the name of the account setting."];
+      value: AccountSettingValue.t option
+        [@ocaml.doc "Retrieves the value of the specified account setting."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:AccountSettingName.to_value));
+        ("value", (Option.map x.value ~f:AccountSettingValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:AccountSettingValue.of_xml)
+          (Xml.child xml_arg0 "value") in
+      let name =
+        (Option.map ~f:AccountSettingName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" AccountSettingValue.of_json in
+      let name = field_map json__ "name" AccountSettingName.of_json in
+      make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to change the basic scan type version or registry policy scope."]
+module PutAccountSettingRequest =
+  struct
+    type nonrec t =
+      {
+      name: AccountSettingName.t
+        [@ocaml.doc
+          "The name of the account setting, such as BASIC_SCAN_TYPE_VERSION, REGISTRY_POLICY_SCOPE, or BLOB_MOUNTING."];
+      value: AccountSettingValue.t
+        [@ocaml.doc
+          "Setting value that is specified. Valid value for basic scan type: AWS_NATIVE. Valid values for registry policy scope: V2. Valid values for blob mounting: ENABLED or DISABLED."]}
+    let context_ = "PutAccountSettingRequest"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (AccountSettingName.to_value x.name)));
+        ("value", (Some (AccountSettingValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        AccountSettingValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let name =
+        AccountSettingName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "value" AccountSettingValue.of_json in
+      let name = field_map_exn json__ "name" AccountSettingName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to change the basic scan type version or registry policy scope."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -7570,8 +11250,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon ECR resource."]
 module ListTagsForResourceRequest =
@@ -7592,11 +11272,130 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List the tags for an Amazon ECR resource."]
+module ListPullTimeUpdateExclusionsResponse =
+  struct
+    type nonrec t =
+      {
+      pullTimeUpdateExclusions: PullTimeUpdateExclusionList.t option
+        [@ocaml.doc
+          "The list of IAM principal ARNs that are excluded from having their image pull times recorded."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListPullTimeUpdateExclusions request. When the results of a ListPullTimeUpdateExclusions request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?pullTimeUpdateExclusions =
+      fun ?nextToken -> fun () -> { pullTimeUpdateExclusions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("pullTimeUpdateExclusions",
+           (Option.map x.pullTimeUpdateExclusions
+              ~f:PullTimeUpdateExclusionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let pullTimeUpdateExclusions =
+        (Option.map ~f:PullTimeUpdateExclusionList.of_xml)
+          (Xml.child xml_arg0 "pullTimeUpdateExclusions") in
+      make ?nextToken ?pullTimeUpdateExclusions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let pullTimeUpdateExclusions =
+        field_map json__ "pullTimeUpdateExclusions"
+          PullTimeUpdateExclusionList.of_json in
+      make ?nextToken ?pullTimeUpdateExclusions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the IAM principals that are excluded from having their image pull times recorded."]
+module ListPullTimeUpdateExclusionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of pull time update exclusion results returned by ListPullTimeUpdateExclusions in paginated output. When this parameter is used, ListPullTimeUpdateExclusions only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another ListPullTimeUpdateExclusions request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then ListPullTimeUpdateExclusions returns up to 100 results and a nextToken value, if applicable."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListPullTimeUpdateExclusions request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the IAM principals that are excluded from having their image pull times recorded."]
 module ListImagesResponse =
   struct
     type nonrec t =
@@ -7666,9 +11465,9 @@ module ListImagesResponse =
           (Xml.child xml_arg0 "imageIds") in
       make ?nextToken ?imageIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       make ?nextToken ?imageIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7721,17 +11520,200 @@ module ListImagesRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?filter ?maxResults ?nextToken ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" ListImagesFilter.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "filter" ListImagesFilter.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?filter ?maxResults ?nextToken ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the image IDs for the specified repository. You can filter images based on whether or not they are tagged by using the tagStatus filter and specifying either TAGGED, UNTAGGED or ANY. For example, you can filter your results to return only UNTAGGED images and then pipe that result to a BatchDeleteImage operation to delete them. Or, you can filter your results to return only TAGGED images to list all of the tags in your repository."]
+module ListImageReferrersResponse =
+  struct
+    type nonrec t =
+      {
+      referrers: ImageReferrerList.t option
+        [@ocaml.doc
+          "The list of artifacts associated with the subject image."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListImageReferrers request. When the results of a ListImageReferrers request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `RepositoryNotFoundException of RepositoryNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `UnableToListUpstreamImageReferrersException of
+          UnableToListUpstreamImageReferrersException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?referrers =
+      fun ?nextToken -> fun () -> { referrers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnableToListUpstreamImageReferrersException" ->
+          `UnableToListUpstreamImageReferrersException
+            (UnableToListUpstreamImageReferrersException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnableToListUpstreamImageReferrersException" ->
+          `UnableToListUpstreamImageReferrersException
+            (UnableToListUpstreamImageReferrersException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `RepositoryNotFoundException e ->
+          `Assoc
+            [("error", (`String "RepositoryNotFoundException"));
+            ("details", (RepositoryNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `UnableToListUpstreamImageReferrersException e ->
+          `Assoc
+            [("error",
+               (`String "UnableToListUpstreamImageReferrersException"));
+            ("details",
+              (UnableToListUpstreamImageReferrersException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("referrers",
+           (Option.map x.referrers ~f:ImageReferrerList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let referrers =
+        (Option.map ~f:ImageReferrerList.of_xml)
+          (Xml.child xml_arg0 "referrers") in
+      make ?nextToken ?referrers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let referrers = field_map json__ "referrers" ImageReferrerList.of_json in
+      make ?nextToken ?referrers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the artifacts associated with a specified subject image. The IAM principal invoking this operation must have the ecr:BatchGetImage permission."]
+module ListImageReferrersRequest =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry that contains the repository in which to list image referrers. If you do not specify a registry, the default registry is assumed."];
+      repositoryName: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository that contains the subject image."];
+      subjectId: SubjectIdentifier.t
+        [@ocaml.doc
+          "An object containing the image digest of the subject image for which to retrieve associated artifacts."];
+      filter: ListImageReferrersFilter.t option
+        [@ocaml.doc
+          "The filter key and value with which to filter your ListImageReferrers results. If no filter is specified, only artifacts with ACTIVE status are returned."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListImageReferrers request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
+      maxResults: FiftyMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of image referrer results returned by ListImageReferrers in paginated output. When this parameter is used, ListImageReferrers only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another ListImageReferrers request with the returned nextToken value. This value can be between 1 and 50. If this parameter is not used, then ListImageReferrers returns up to 20 results and a nextToken value, if applicable."]}
+    let context_ = "ListImageReferrersRequest"
+    let make ?registryId =
+      fun ?filter ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun ~repositoryName ->
+              fun ~subjectId ->
+                fun () ->
+                  {
+                    registryId;
+                    filter;
+                    nextToken;
+                    maxResults;
+                    repositoryName;
+                    subjectId
+                  }
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        ("subjectId", (Some (SubjectIdentifier.to_value x.subjectId)));
+        ("filter",
+          (Option.map x.filter ~f:ListImageReferrersFilter.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:FiftyMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:FiftyMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let filter =
+        (Option.map ~f:ListImageReferrersFilter.of_xml)
+          (Xml.child xml_arg0 "filter") in
+      let subjectId =
+        SubjectIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "subjectId") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?maxResults ?nextToken ?filter ~subjectId ~repositoryName
+        ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" FiftyMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let filter = field_map json__ "filter" ListImageReferrersFilter.of_json in
+      let subjectId =
+        field_map_exn json__ "subjectId" SubjectIdentifier.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?maxResults ?nextToken ?filter ~subjectId ~repositoryName
+        ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the artifacts associated with a specified subject image. The IAM principal invoking this operation must have the ecr:BatchGetImage permission."]
 module InitiateLayerUploadResponse =
   struct
     type nonrec t =
@@ -7807,9 +11789,9 @@ module InitiateLayerUploadResponse =
         (Option.map ~f:UploadId.of_xml) (Xml.child xml_arg0 "uploadId") in
       make ?partSize ?uploadId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partSize = field_map json "partSize" PartSize.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+    let of_json json__ =
+      let partSize = field_map json__ "partSize" PartSize.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       make ?partSize ?uploadId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7840,14 +11822,116 @@ module InitiateLayerUploadRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Notifies Amazon ECR that you intend to upload an image layer. When an image is pushed, the InitiateLayerUpload API is called once per image layer that has not already been uploaded. Whether or not an image layer has been uploaded is determined by the BatchCheckLayerAvailability API action. This operation is used by the Amazon ECR proxy and is not generally used by customers for pulling and pushing images. In most cases, you should use the docker CLI to pull, tag, and push images."]
+module GetSigningConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry."];
+      signingConfiguration: SigningConfiguration.t option
+        [@ocaml.doc "The registry's signing configuration."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `SigningConfigurationNotFoundException of
+          SigningConfigurationNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?signingConfiguration ->
+        fun () -> { registryId; signingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "SigningConfigurationNotFoundException" ->
+          `SigningConfigurationNotFoundException
+            (SigningConfigurationNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "SigningConfigurationNotFoundException" ->
+          `SigningConfigurationNotFoundException
+            (SigningConfigurationNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `SigningConfigurationNotFoundException e ->
+          `Assoc
+            [("error", (`String "SigningConfigurationNotFoundException"));
+            ("details", (SigningConfigurationNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("signingConfiguration",
+          (Option.map x.signingConfiguration ~f:SigningConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingConfiguration =
+        (Option.map ~f:SigningConfiguration.of_xml)
+          (Xml.child xml_arg0 "signingConfiguration") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?signingConfiguration ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingConfiguration =
+        field_map json__ "signingConfiguration" SigningConfiguration.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?signingConfiguration ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the registry's signing configuration, which defines rules for automatically signing images using Amazon Web Services Signer. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide."]
+module GetSigningConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the registry's signing configuration, which defines rules for automatically signing images using Amazon Web Services Signer. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide."]
 module GetRepositoryPolicyResponse =
   struct
     type nonrec t =
@@ -7939,12 +12023,12 @@ module GetRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7975,10 +12059,10 @@ module GetRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7987,7 +12071,8 @@ module GetRegistryScanningConfigurationResponse =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t option [@ocaml.doc "The ID of the registry."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
       scanningConfiguration: RegistryScanningConfiguration.t option
         [@ocaml.doc "The scanning configuration for the registry."]}
     type nonrec error =
@@ -8051,11 +12136,11 @@ module GetRegistryScanningConfigurationResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?scanningConfiguration ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scanningConfiguration =
-        field_map json "scanningConfiguration"
+        field_map json__ "scanningConfiguration"
           RegistryScanningConfiguration.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?scanningConfiguration ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the scanning configuration for a registry."]
@@ -8075,7 +12160,8 @@ module GetRegistryPolicyResponse =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t option [@ocaml.doc "The ID of the registry."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
       policyText: RegistryPolicyText.t option
         [@ocaml.doc
           "The JSON text of the permissions policy for a registry."]}
@@ -8149,9 +12235,10 @@ module GetRegistryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyText = field_map json "policyText" RegistryPolicyText.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+    let of_json json__ =
+      let policyText =
+        field_map json__ "policyText" RegistryPolicyText.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the permissions policy for a registry."]
@@ -8186,6 +12273,7 @@ module GetLifecyclePolicyResponse =
           LifecyclePolicyNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -8209,6 +12297,8 @@ module GetLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8223,6 +12313,8 @@ module GetLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8243,6 +12335,10 @@ module GetLifecyclePolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8273,14 +12369,14 @@ module GetLifecyclePolicyResponse =
       make ?lastEvaluatedAt ?lifecyclePolicyText ?repositoryName ?registryId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedAt =
-        field_map json "lastEvaluatedAt" EvaluationTimestamp.of_json in
+        field_map json__ "lastEvaluatedAt" EvaluationTimestamp.of_json in
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lastEvaluatedAt ?lifecyclePolicyText ?repositoryName ?registryId
         ()
     let to_json v = composed_to_json to_value v
@@ -8311,10 +12407,10 @@ module GetLifecyclePolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8345,6 +12441,7 @@ module GetLifecyclePolicyPreviewResponse =
           LifecyclePolicyPreviewNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -8374,6 +12471,8 @@ module GetLifecyclePolicyPreviewResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8388,6 +12487,8 @@ module GetLifecyclePolicyPreviewResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8408,6 +12509,10 @@ module GetLifecyclePolicyPreviewResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8452,20 +12557,20 @@ module GetLifecyclePolicyPreviewResponse =
       make ?summary ?previewResults ?nextToken ?status ?lifecyclePolicyText
         ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summary =
-        field_map json "summary" LifecyclePolicyPreviewSummary.of_json in
+        field_map json__ "summary" LifecyclePolicyPreviewSummary.of_json in
       let previewResults =
-        field_map json "previewResults"
+        field_map json__ "previewResults"
           LifecyclePolicyPreviewResultList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let status =
-        field_map json "status" LifecyclePolicyPreviewStatus.of_json in
+        field_map json__ "status" LifecyclePolicyPreviewStatus.of_json in
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?summary ?previewResults ?nextToken ?status ?lifecyclePolicyText
         ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
@@ -8487,7 +12592,7 @@ module GetLifecyclePolicyPreviewRequest =
           "The nextToken value returned from a previous paginated&#x2028; GetLifecyclePolicyPreviewRequest request where maxResults was used and the&#x2028; results exceeded the value of that parameter. Pagination continues from the end of the&#x2028; previous results that returned the nextToken value. This value is&#x2028; null when there are no more results to return. This option cannot be used when you specify images with imageIds."];
       maxResults: LifecyclePreviewMaxResults.t option
         [@ocaml.doc
-          "The maximum number of repository results returned by GetLifecyclePolicyPreviewRequest in&#x2028; paginated output. When this parameter is used, GetLifecyclePolicyPreviewRequest only returns&#x2028; maxResults results in a single page along with a nextToken&#x2028; response element. The remaining results of the initial request can be seen by sending&#x2028; another GetLifecyclePolicyPreviewRequest request with the returned nextToken&#x2028; value. This value can be between 1 and 1000. If this&#x2028; parameter is not used, then GetLifecyclePolicyPreviewRequest returns up to&#x2028; 100 results and a nextToken value, if&#x2028; applicable. This option cannot be used when you specify images with imageIds."];
+          "The maximum number of repository results returned by GetLifecyclePolicyPreviewRequest in&#x2028; paginated output. When this parameter is used, GetLifecyclePolicyPreviewRequest only returns&#x2028; maxResults results in a single page along with a nextToken&#x2028; response element. The remaining results of the initial request can be seen by sending&#x2028; another GetLifecyclePolicyPreviewRequest request with the returned nextToken&#x2028; value. This value can be between 1 and 100. If this&#x2028; parameter is not used, then GetLifecyclePolicyPreviewRequest returns up to&#x2028;100 results and a nextToken value, if&#x2028; applicable. This option cannot be used when you specify images with imageIds."];
       filter: LifecyclePolicyPreviewFilter.t option
         [@ocaml.doc
           "An optional parameter that filters results based on image tag status and all tags, if tagged."]}
@@ -8538,16 +12643,16 @@ module GetLifecyclePolicyPreviewRequest =
       make ?filter ?maxResults ?nextToken ?imageIds ~repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filter =
-        field_map json "filter" LifecyclePolicyPreviewFilter.of_json in
+        field_map json__ "filter" LifecyclePolicyPreviewFilter.of_json in
       let maxResults =
-        field_map json "maxResults" LifecyclePreviewMaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+        field_map json__ "maxResults" LifecyclePreviewMaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?filter ?maxResults ?nextToken ?imageIds ~repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
@@ -8568,6 +12673,8 @@ module GetDownloadUrlForLayerResponse =
       | `LayersNotFoundException of LayersNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnableToGetUpstreamLayerException of
+          UnableToGetUpstreamLayerException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?downloadUrl =
       fun ?layerDigest -> fun () -> { downloadUrl; layerDigest }
@@ -8584,6 +12691,9 @@ module GetDownloadUrlForLayerResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnableToGetUpstreamLayerException" ->
+          `UnableToGetUpstreamLayerException
+            (UnableToGetUpstreamLayerException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8599,6 +12709,9 @@ module GetDownloadUrlForLayerResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnableToGetUpstreamLayerException" ->
+          `UnableToGetUpstreamLayerException
+            (UnableToGetUpstreamLayerException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8623,6 +12736,10 @@ module GetDownloadUrlForLayerResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnableToGetUpstreamLayerException e ->
+          `Assoc
+            [("error", (`String "UnableToGetUpstreamLayerException"));
+            ("details", (UnableToGetUpstreamLayerException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8640,9 +12757,9 @@ module GetDownloadUrlForLayerResponse =
         (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "downloadUrl") in
       make ?layerDigest ?downloadUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
-      let downloadUrl = field_map json "downloadUrl" Url.of_json in
+    let of_json json__ =
+      let layerDigest = field_map json__ "layerDigest" LayerDigest.of_json in
+      let downloadUrl = field_map json__ "downloadUrl" Url.of_json in
       make ?layerDigest ?downloadUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8681,11 +12798,12 @@ module GetDownloadUrlForLayerRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~layerDigest ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let layerDigest = field_map_exn json "layerDigest" LayerDigest.of_json in
+    let of_json json__ =
+      let layerDigest =
+        field_map_exn json__ "layerDigest" LayerDigest.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~layerDigest ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8696,7 +12814,7 @@ module GetAuthorizationTokenResponse =
       {
       authorizationData: AuthorizationDataList.t option
         [@ocaml.doc
-          "A list of authorization token data objects that correspond to the registryIds values in the request."]}
+          "A list of authorization token data objects that correspond to the registryIds values in the request. The size of the authorization token returned by Amazon ECR is not fixed. We recommend that you don't make assumptions about the maximum size."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `ServerException of ServerException.t 
@@ -8743,9 +12861,9 @@ module GetAuthorizationTokenResponse =
           (Xml.child xml_arg0 "authorizationData") in
       make ?authorizationData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authorizationData =
-        field_map json "authorizationData" AuthorizationDataList.of_json in
+        field_map json__ "authorizationData" AuthorizationDataList.of_json in
       make ?authorizationData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8770,14 +12888,237 @@ module GetAuthorizationTokenRequest =
           (Xml.child xml_arg0 "registryIds") in
       make ?registryIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registryIds =
-        field_map json "registryIds"
+        field_map json__ "registryIds"
           GetAuthorizationTokenRegistryIdList.of_json in
       make ?registryIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves an authorization token. An authorization token represents your IAM authentication credentials and can be used to access any Amazon ECR registry that your IAM principal has access to. The authorization token is valid for 12 hours. The authorizationToken returned is a base64 encoded string that can be decoded and used in a docker login command to authenticate to a registry. The CLI offers an get-login-password command that simplifies the login process. For more information, see Registry authentication in the Amazon Elastic Container Registry User Guide."]
+module GetAccountSettingResponse =
+  struct
+    type nonrec t =
+      {
+      name: AccountSettingName.t option
+        [@ocaml.doc "Retrieves the name of the account setting."];
+      value: AccountSettingName.t option
+        [@ocaml.doc
+          "The setting value for the setting name. Valid value for basic scan type: AWS_NATIVE. Valid values for registry policy scope: V2. Valid values for blob mounting: ENABLED or DISABLED."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:AccountSettingName.to_value));
+        ("value", (Option.map x.value ~f:AccountSettingName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:AccountSettingName.of_xml)
+          (Xml.child xml_arg0 "value") in
+      let name =
+        (Option.map ~f:AccountSettingName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" AccountSettingName.of_json in
+      let name = field_map json__ "name" AccountSettingName.of_json in
+      make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the account setting value for the specified setting name."]
+module GetAccountSettingRequest =
+  struct
+    type nonrec t =
+      {
+      name: AccountSettingName.t
+        [@ocaml.doc
+          "The name of the account setting, such as BASIC_SCAN_TYPE_VERSION, REGISTRY_POLICY_SCOPE, or BLOB_MOUNTING."]}
+    let context_ = "GetAccountSettingRequest"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (AccountSettingName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        AccountSettingName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" AccountSettingName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the account setting value for the specified setting name."]
+module DescribeRepositoryCreationTemplatesResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      repositoryCreationTemplates: RepositoryCreationTemplateList.t option
+        [@ocaml.doc "The details of the repository creation templates."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future DescribeRepositoryCreationTemplates request. When the results of a DescribeRepositoryCreationTemplates request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?repositoryCreationTemplates ->
+        fun ?nextToken ->
+          fun () -> { registryId; repositoryCreationTemplates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryCreationTemplates",
+          (Option.map x.repositoryCreationTemplates
+             ~f:RepositoryCreationTemplateList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let repositoryCreationTemplates =
+        (Option.map ~f:RepositoryCreationTemplateList.of_xml)
+          (Xml.child xml_arg0 "repositoryCreationTemplates") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?nextToken ?repositoryCreationTemplates ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let repositoryCreationTemplates =
+        field_map json__ "repositoryCreationTemplates"
+          RepositoryCreationTemplateList.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?nextToken ?repositoryCreationTemplates ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about the repository creation templates in a registry. The prefixes request parameter can be used to return the details for a specific repository creation template."]
+module DescribeRepositoryCreationTemplatesRequest =
+  struct
+    type nonrec t =
+      {
+      prefixes: PrefixList.t option
+        [@ocaml.doc
+          "The repository namespace prefixes associated with the repository creation templates to describe. If this value is not specified, all repository creation templates are returned."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated DescribeRepositoryCreationTemplates request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that is only used to retrieve the next items in a list and not for other programmatic purposes."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of repository results returned by DescribeRepositoryCreationTemplatesRequest in paginated output. When this parameter is used, DescribeRepositoryCreationTemplatesRequest only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeRepositoryCreationTemplatesRequest request with the returned nextToken value. This value can be between 1 and 1000. If this parameter is not used, then DescribeRepositoryCreationTemplatesRequest returns up to 100 results and a nextToken value, if applicable."]}
+    let make ?prefixes =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { prefixes; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("prefixes", (Option.map x.prefixes ~f:PrefixList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let prefixes =
+        (Option.map ~f:PrefixList.of_xml) (Xml.child xml_arg0 "prefixes") in
+      make ?maxResults ?nextToken ?prefixes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let prefixes = field_map json__ "prefixes" PrefixList.of_json in
+      make ?maxResults ?nextToken ?prefixes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about the repository creation templates in a registry. The prefixes request parameter can be used to return the details for a specific repository creation template."]
 module DescribeRepositoriesResponse =
   struct
     type nonrec t =
@@ -8849,9 +13190,10 @@ module DescribeRepositoriesResponse =
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let repositories = field_map json "repositories" RepositoryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let repositories =
+        field_map json__ "repositories" RepositoryList.of_json in
       make ?nextToken ?repositories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes image repositories in a registry."]
@@ -8896,12 +13238,12 @@ module DescribeRepositoriesRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ?repositoryNames ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryNames =
-        field_map json "repositoryNames" RepositoryNameList.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryNames" RepositoryNameList.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?maxResults ?nextToken ?repositoryNames ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes image repositories in a registry."]
@@ -8909,7 +13251,8 @@ module DescribeRegistryResponse =
   struct
     type nonrec t =
       {
-      registryId: RegistryId.t option [@ocaml.doc "The ID of the registry."];
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
       replicationConfiguration: ReplicationConfiguration.t option
         [@ocaml.doc "The replication configuration for the registry."]}
     type nonrec error =
@@ -8973,11 +13316,11 @@ module DescribeRegistryResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?replicationConfiguration ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationConfiguration =
-        field_map json "replicationConfiguration"
+        field_map json__ "replicationConfiguration"
           ReplicationConfiguration.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?replicationConfiguration ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9076,10 +13419,10 @@ module DescribePullThroughCacheRulesResponse =
           (Xml.child xml_arg0 "pullThroughCacheRules") in
       make ?nextToken ?pullThroughCacheRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let pullThroughCacheRules =
-        field_map json "pullThroughCacheRules"
+        field_map json__ "pullThroughCacheRules"
           PullThroughCacheRuleList.of_json in
       make ?nextToken ?pullThroughCacheRules ()
     let to_json v = composed_to_json to_value v
@@ -9128,13 +13471,13 @@ module DescribePullThroughCacheRulesRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ?ecrRepositoryPrefixes ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let ecrRepositoryPrefixes =
-        field_map json "ecrRepositoryPrefixes"
+        field_map json__ "ecrRepositoryPrefixes"
           PullThroughCacheRuleRepositoryPrefixList.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?maxResults ?nextToken ?ecrRepositoryPrefixes ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the pull through cache rules for a registry."]
@@ -9218,14 +13561,14 @@ module DescribeImagesResponse =
           (Xml.child xml_arg0 "imageDetails") in
       make ?nextToken ?imageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let imageDetails =
-        field_map json "imageDetails" ImageDetailList.of_json in
+        field_map json__ "imageDetails" ImageDetailList.of_json in
       make ?nextToken ?imageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about the images in a repository. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."]
+       "Returns metadata about the images in a repository. Starting with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size. Therefore, Docker might return a larger image than the image shown in the Amazon Web Services Management Console. The new version of Amazon ECR Basic Scanning doesn't use the ImageDetail$imageScanFindingsSummary and ImageDetail$imageScanStatus attributes from the API response to return scan results. Use the DescribeImageScanFindings API instead. For more information about Amazon Web Services native basic scanning, see Scan images for software vulnerabilities in Amazon ECR."]
 module DescribeImagesRequest =
   struct
     type nonrec t =
@@ -9290,19 +13633,178 @@ module DescribeImagesRequest =
       make ?filter ?maxResults ?nextToken ?imageIds ~repositoryName
         ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" DescribeImagesFilter.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "filter" DescribeImagesFilter.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?filter ?maxResults ?nextToken ?imageIds ~repositoryName
         ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns metadata about the images in a repository. Beginning with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size, so it may return a larger image size than the image sizes returned by DescribeImages."]
+       "Returns metadata about the images in a repository. Starting with Docker version 1.9, the Docker client compresses image layers before pushing them to a V2 Docker registry. The output of the docker images command shows the uncompressed image size. Therefore, Docker might return a larger image than the image shown in the Amazon Web Services Management Console. The new version of Amazon ECR Basic Scanning doesn't use the ImageDetail$imageScanFindingsSummary and ImageDetail$imageScanStatus attributes from the API response to return scan results. Use the DescribeImageScanFindings API instead. For more information about Amazon Web Services native basic scanning, see Scan images for software vulnerabilities in Amazon ECR."]
+module DescribeImageSigningStatusResponse =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The name of the repository."];
+      imageId: ImageIdentifier.t option
+        [@ocaml.doc "An object with identifying information for the image."];
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry."];
+      signingStatuses: ImageSigningStatusList.t option
+        [@ocaml.doc
+          "A list of signing statuses for the specified image. Each status corresponds to a signing profile."]}
+    type nonrec error =
+      [ `ImageNotFoundException of ImageNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `RepositoryNotFoundException of RepositoryNotFoundException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryName =
+      fun ?imageId ->
+        fun ?registryId ->
+          fun ?signingStatuses ->
+            fun () ->
+              { repositoryName; imageId; registryId; signingStatuses }
+    let error_of_json name json =
+      match name with
+      | "ImageNotFoundException" ->
+          `ImageNotFoundException (ImageNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ImageNotFoundException" ->
+          `ImageNotFoundException (ImageNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "RepositoryNotFoundException" ->
+          `RepositoryNotFoundException
+            (RepositoryNotFoundException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ImageNotFoundException e ->
+          `Assoc
+            [("error", (`String "ImageNotFoundException"));
+            ("details", (ImageNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `RepositoryNotFoundException e ->
+          `Assoc
+            [("error", (`String "RepositoryNotFoundException"));
+            ("details", (RepositoryNotFoundException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("imageId", (Option.map x.imageId ~f:ImageIdentifier.to_value));
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("signingStatuses",
+          (Option.map x.signingStatuses ~f:ImageSigningStatusList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingStatuses =
+        (Option.map ~f:ImageSigningStatusList.of_xml)
+          (Xml.child xml_arg0 "signingStatuses") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      let imageId =
+        (Option.map ~f:ImageIdentifier.of_xml) (Xml.child xml_arg0 "imageId") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      make ?signingStatuses ?registryId ?imageId ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingStatuses =
+        field_map json__ "signingStatuses" ImageSigningStatusList.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      make ?signingStatuses ?registryId ?imageId ?repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the signing status for a specified image. If the image matched signing rules that reference different signing profiles, a status is returned for each profile. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide."]
+module DescribeImageSigningStatusRequest =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t
+        [@ocaml.doc "The name of the repository that contains the image."];
+      imageId: ImageIdentifier.t
+        [@ocaml.doc
+          "An object containing identifying information for an image."];
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry that contains the repository. If you do not specify a registry, the default registry is assumed."]}
+    let context_ = "DescribeImageSigningStatusRequest"
+    let make ?registryId =
+      fun ~repositoryName ->
+        fun ~imageId -> fun () -> { registryId; repositoryName; imageId }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Some (RepositoryName.to_value x.repositoryName)));
+        ("imageId", (Some (ImageIdentifier.to_value x.imageId)));
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      let imageId =
+        ImageIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "imageId") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      make ?registryId ~imageId ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let imageId = field_map_exn json__ "imageId" ImageIdentifier.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      make ?registryId ~imageId ~repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the signing status for a specified image. If the image matched signing rules that reference different signing profiles, a status is returned for each profile. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide."]
 module DescribeImageScanFindingsResponse =
   struct
     type nonrec t =
@@ -9437,16 +13939,16 @@ module DescribeImageScanFindingsResponse =
       make ?nextToken ?imageScanFindings ?imageScanStatus ?imageId
         ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let imageScanFindings =
-        field_map json "imageScanFindings" ImageScanFindings.of_json in
+        field_map json__ "imageScanFindings" ImageScanFindings.of_json in
       let imageScanStatus =
-        field_map json "imageScanStatus" ImageScanStatus.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+        field_map json__ "imageScanStatus" ImageScanStatus.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?nextToken ?imageScanFindings ?imageScanStatus ?imageId
         ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
@@ -9500,13 +14002,13 @@ module DescribeImageScanFindingsRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?maxResults ?nextToken ~imageId ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let imageId = field_map_exn json "imageId" ImageIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let imageId = field_map_exn json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?maxResults ?nextToken ~imageId ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the scan findings for the specified image."]
@@ -9607,13 +14109,13 @@ module DescribeImageReplicationStatusResponse =
           (Xml.child xml_arg0 "repositoryName") in
       make ?replicationStatuses ?imageId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replicationStatuses =
-        field_map json "replicationStatuses"
+        field_map json__ "replicationStatuses"
           ImageReplicationStatusList.of_json in
-      let imageId = field_map json "imageId" ImageIdentifier.of_json in
+      let imageId = field_map json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?replicationStatuses ?imageId ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the replication status for a specified image."]
@@ -9649,14 +14151,220 @@ module DescribeImageReplicationStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?registryId ~imageId ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let imageId = field_map_exn json "imageId" ImageIdentifier.of_json in
+    let of_json json__ =
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let imageId = field_map_exn json__ "imageId" ImageIdentifier.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?registryId ~imageId ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the replication status for a specified image."]
+module DeregisterPullTimeUpdateExclusionResponse =
+  struct
+    type nonrec t =
+      {
+      principalArn: PrincipalArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM principal that was removed from the pull time update exclusion list."]}
+    type nonrec error =
+      [ `ExclusionNotFoundException of ExclusionNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?principalArn = fun () -> { principalArn }
+    let error_of_json name json =
+      match name with
+      | "ExclusionNotFoundException" ->
+          `ExclusionNotFoundException
+            (ExclusionNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ExclusionNotFoundException" ->
+          `ExclusionNotFoundException (ExclusionNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ExclusionNotFoundException e ->
+          `Assoc
+            [("error", (`String "ExclusionNotFoundException"));
+            ("details", (ExclusionNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("principalArn",
+           (Option.map x.principalArn ~f:PrincipalArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principalArn =
+        (Option.map ~f:PrincipalArn.of_xml)
+          (Xml.child xml_arg0 "principalArn") in
+      make ?principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principalArn = field_map json__ "principalArn" PrincipalArn.of_json in
+      make ?principalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a principal from the pull time update exclusion list for a registry. Once removed, Amazon ECR will resume updating the pull time if the specified principal pulls an image."]
+module DeregisterPullTimeUpdateExclusionRequest =
+  struct
+    type nonrec t =
+      {
+      principalArn: PrincipalArn.t
+        [@ocaml.doc
+          "The ARN of the IAM principal to remove from the pull time update exclusion list."]}
+    let context_ = "DeregisterPullTimeUpdateExclusionRequest"
+    let make ~principalArn = fun () -> { principalArn }
+    let to_value x =
+      structure_to_value
+        [("principalArn", (Some (PrincipalArn.to_value x.principalArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principalArn =
+        PrincipalArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "principalArn") in
+      make ~principalArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principalArn =
+        field_map_exn json__ "principalArn" PrincipalArn.of_json in
+      make ~principalArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a principal from the pull time update exclusion list for a registry. Once removed, Amazon ECR will resume updating the pull time if the specified principal pulls an image."]
+module DeleteSigningConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID associated with the registry."];
+      signingConfiguration: SigningConfiguration.t option
+        [@ocaml.doc "The registry's deleted signing configuration."]}
+    type nonrec error =
+      [ `ServerException of ServerException.t 
+      | `SigningConfigurationNotFoundException of
+          SigningConfigurationNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?signingConfiguration ->
+        fun () -> { registryId; signingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "SigningConfigurationNotFoundException" ->
+          `SigningConfigurationNotFoundException
+            (SigningConfigurationNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "SigningConfigurationNotFoundException" ->
+          `SigningConfigurationNotFoundException
+            (SigningConfigurationNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `SigningConfigurationNotFoundException e ->
+          `Assoc
+            [("error", (`String "SigningConfigurationNotFoundException"));
+            ("details", (SigningConfigurationNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("signingConfiguration",
+          (Option.map x.signingConfiguration ~f:SigningConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingConfiguration =
+        (Option.map ~f:SigningConfiguration.of_xml)
+          (Xml.child xml_arg0 "signingConfiguration") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?signingConfiguration ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingConfiguration =
+        field_map json__ "signingConfiguration" SigningConfiguration.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?signingConfiguration ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the registry's signing configuration. Images pushed after deletion of the signing configuration will no longer be automatically signed. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide. Deleting the signing configuration does not affect existing image signatures."]
+module DeleteSigningConfigurationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the registry's signing configuration. Images pushed after deletion of the signing configuration will no longer be automatically signed. For more information, see Managed signing in the Amazon Elastic Container Registry User Guide. Deleting the signing configuration does not affect existing image signatures."]
 module DeleteRepositoryResponse =
   struct
     type nonrec t =
@@ -9736,12 +14444,12 @@ module DeleteRepositoryResponse =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a repository. If the repository contains images, you must either delete all images in the repository or use the force option to delete the repository."]
+       "Deletes a repository. If the repository isn't empty, you must either delete the contents of the repository or use the force option to delete the repository and have Amazon ECR delete all of its contents on your behalf."]
 module DeleteRepositoryRequest =
   struct
     type nonrec t =
@@ -9752,7 +14460,8 @@ module DeleteRepositoryRequest =
       repositoryName: RepositoryName.t
         [@ocaml.doc "The name of the repository to delete."];
       force: ForceFlag.t option
-        [@ocaml.doc "If a repository contains images, forces the deletion."]}
+        [@ocaml.doc
+          "If true, deleting the repository force deletes the contents of the repository. If false, the repository must be empty before attempting to delete it."]}
     let context_ = "DeleteRepositoryRequest"
     let make ?registryId =
       fun ?force ->
@@ -9774,15 +14483,15 @@ module DeleteRepositoryRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?force ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let force = field_map json "force" ForceFlag.of_json in
+    let of_json json__ =
+      let force = field_map json__ "force" ForceFlag.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?force ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a repository. If the repository contains images, you must either delete all images in the repository or use the force option to delete the repository."]
+       "Deletes a repository. If the repository isn't empty, you must either delete the contents of the repository or use the force option to delete the repository and have Amazon ECR delete all of its contents on your behalf."]
 module DeleteRepositoryPolicyResponse =
   struct
     type nonrec t =
@@ -9874,12 +14583,12 @@ module DeleteRepositoryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyText =
-        field_map json "policyText" RepositoryPolicyText.of_json in
+        field_map json__ "policyText" RepositoryPolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9910,14 +14619,123 @@ module DeleteRepositoryPolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the repository policy associated with the specified repository."]
+module DeleteRepositoryCreationTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      repositoryCreationTemplate: RepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The details of the repository creation template that was deleted."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `ServerException of ServerException.t 
+      | `TemplateNotFoundException of TemplateNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?repositoryCreationTemplate ->
+        fun () -> { registryId; repositoryCreationTemplate }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "TemplateNotFoundException" ->
+          `TemplateNotFoundException (TemplateNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "TemplateNotFoundException" ->
+          `TemplateNotFoundException (TemplateNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `TemplateNotFoundException e ->
+          `Assoc
+            [("error", (`String "TemplateNotFoundException"));
+            ("details", (TemplateNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryCreationTemplate",
+          (Option.map x.repositoryCreationTemplate
+             ~f:RepositoryCreationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryCreationTemplate =
+        (Option.map ~f:RepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "repositoryCreationTemplate") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?repositoryCreationTemplate ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryCreationTemplate =
+        field_map json__ "repositoryCreationTemplate"
+          RepositoryCreationTemplate.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?repositoryCreationTemplate ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a repository creation template."]
+module DeleteRepositoryCreationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      prefix: Prefix.t
+        [@ocaml.doc
+          "The repository namespace prefix associated with the repository creation template."]}
+    let context_ = "DeleteRepositoryCreationTemplateRequest"
+    let make ~prefix = fun () -> { prefix }
+    let to_value x =
+      structure_to_value [("prefix", (Some (Prefix.to_value x.prefix)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        Prefix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "prefix") in
+      make ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix = field_map_exn json__ "prefix" Prefix.of_json in
+      make ~prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a repository creation template."]
 module DeleteRegistryPolicyResponse =
   struct
     type nonrec t =
@@ -9997,9 +14815,10 @@ module DeleteRegistryPolicyResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?policyText ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyText = field_map json "policyText" RegistryPolicyText.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+    let of_json json__ =
+      let policyText =
+        field_map json__ "policyText" RegistryPolicyText.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?policyText ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the registry permissions policy."]
@@ -10029,7 +14848,16 @@ module DeletePullThroughCacheRuleResponse =
         [@ocaml.doc
           "The timestamp associated with the pull through cache rule."];
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."]}
+        [@ocaml.doc "The registry ID associated with the request."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret associated with the pull through cache rule."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role associated with the pull through cache rule."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The upstream repository prefix associated with the pull through cache rule."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `PullThroughCacheRuleNotFoundException of
@@ -10041,13 +14869,19 @@ module DeletePullThroughCacheRuleResponse =
       fun ?upstreamRegistryUrl ->
         fun ?createdAt ->
           fun ?registryId ->
-            fun () ->
-              {
-                ecrRepositoryPrefix;
-                upstreamRegistryUrl;
-                createdAt;
-                registryId
-              }
+            fun ?credentialArn ->
+              fun ?customRoleArn ->
+                fun ?upstreamRepositoryPrefix ->
+                  fun () ->
+                    {
+                      ecrRepositoryPrefix;
+                      upstreamRegistryUrl;
+                      createdAt;
+                      registryId;
+                      credentialArn;
+                      customRoleArn;
+                      upstreamRepositoryPrefix
+                    }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -10104,9 +14938,25 @@ module DeletePullThroughCacheRuleResponse =
         ("upstreamRegistryUrl",
           (Option.map x.upstreamRegistryUrl ~f:Url.to_value));
         ("createdAt", (Option.map x.createdAt ~f:CreationTimestamp.to_value));
-        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       let createdAt =
@@ -10117,19 +14967,26 @@ module DeletePullThroughCacheRuleResponse =
       let ecrRepositoryPrefix =
         (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
           (Xml.child xml_arg0 "ecrRepositoryPrefix") in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let upstreamRegistryUrl =
-        field_map json "upstreamRegistryUrl" Url.of_json in
-      let ecrRepositoryPrefix =
-        field_map json "ecrRepositoryPrefix"
+    let of_json json__ =
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
           PullThroughCacheRuleRepositoryPrefix.of_json in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let upstreamRegistryUrl =
+        field_map json__ "upstreamRegistryUrl" Url.of_json in
+      let ecrRepositoryPrefix =
+        field_map json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a pull through cache rule."]
 module DeletePullThroughCacheRuleRequest =
@@ -10162,10 +15019,10 @@ module DeletePullThroughCacheRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ecrRepositoryPrefix") in
       make ?registryId ~ecrRepositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
+    let of_json json__ =
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       let ecrRepositoryPrefix =
-        field_map_exn json "ecrRepositoryPrefix"
+        field_map_exn json__ "ecrRepositoryPrefix"
           PullThroughCacheRuleRepositoryPrefix.of_json in
       make ?registryId ~ecrRepositoryPrefix ()
     let to_json v = composed_to_json to_value v
@@ -10189,6 +15046,7 @@ module DeleteLifecyclePolicyResponse =
           LifecyclePolicyNotFoundException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?registryId =
       fun ?repositoryName ->
@@ -10212,6 +15070,8 @@ module DeleteLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -10226,6 +15086,8 @@ module DeleteLifecyclePolicyResponse =
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -10246,6 +15108,10 @@ module DeleteLifecyclePolicyResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -10276,14 +15142,14 @@ module DeleteLifecyclePolicyResponse =
       make ?lastEvaluatedAt ?lifecyclePolicyText ?repositoryName ?registryId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedAt =
-        field_map json "lastEvaluatedAt" EvaluationTimestamp.of_json in
+        field_map json__ "lastEvaluatedAt" EvaluationTimestamp.of_json in
       let lifecyclePolicyText =
-        field_map json "lifecyclePolicyText" LifecyclePolicyText.of_json in
+        field_map json__ "lifecyclePolicyText" LifecyclePolicyText.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?lastEvaluatedAt ?lifecyclePolicyText ?repositoryName ?registryId
         ()
     let to_json v = composed_to_json to_value v
@@ -10314,10 +15180,10 @@ module DeleteLifecyclePolicyRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10420,8 +15286,8 @@ module CreateRepositoryResponse =
         (Option.map ~f:Repository.of_xml) (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map json "repository" Repository.of_json in
+    let of_json json__ =
+      let repository = field_map json__ "repository" Repository.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10435,16 +15301,20 @@ module CreateRepositoryRequest =
           "The Amazon Web Services account ID associated with the registry to create the repository. If you do not specify a registry, the default registry is assumed."];
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name to use for the repository. The repository name may be specified on its own (such as nginx-web-app) or it can be prepended with a namespace to group the repository into a category (such as project-a/nginx-web-app)."];
+          "The name to use for the repository. The repository name may be specified on its own (such as nginx-web-app) or it can be prepended with a namespace to group the repository into a category (such as project-a/nginx-web-app). The repository name must start with a letter and can only contain lowercase letters, numbers, hyphens, underscores, and forward slashes."];
       tags: TagList.t option
         [@ocaml.doc
           "The metadata that you apply to the repository to help you categorize and organize them. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
       imageTagMutability: ImageTagMutability.t option
         [@ocaml.doc
           "The tag mutability setting for the repository. If this parameter is omitted, the default setting of MUTABLE will be used which will allow image tags to be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags should be excluded from the repository's image tag mutability setting."];
       imageScanningConfiguration: ImageScanningConfiguration.t option
         [@ocaml.doc
-          "The image scanning configuration for the repository. This determines whether images are scanned for known vulnerabilities after being pushed to the repository."];
+          "The imageScanningConfiguration parameter is being deprecated, in favor of specifying the image scanning configuration at the registry level. For more information, see PutRegistryScanningConfiguration. The image scanning configuration for the repository. This determines whether images are scanned for known vulnerabilities after being pushed to the repository."];
       encryptionConfiguration: EncryptionConfiguration.t option
         [@ocaml.doc
           "The encryption configuration for the repository. This determines how the contents of your repository are encrypted at rest."]}
@@ -10452,18 +15322,20 @@ module CreateRepositoryRequest =
     let make ?registryId =
       fun ?tags ->
         fun ?imageTagMutability ->
-          fun ?imageScanningConfiguration ->
-            fun ?encryptionConfiguration ->
-              fun ~repositoryName ->
-                fun () ->
-                  {
-                    registryId;
-                    tags;
-                    imageTagMutability;
-                    imageScanningConfiguration;
-                    encryptionConfiguration;
-                    repositoryName
-                  }
+          fun ?imageTagMutabilityExclusionFilters ->
+            fun ?imageScanningConfiguration ->
+              fun ?encryptionConfiguration ->
+                fun ~repositoryName ->
+                  fun () ->
+                    {
+                      registryId;
+                      tags;
+                      imageTagMutability;
+                      imageTagMutabilityExclusionFilters;
+                      imageScanningConfiguration;
+                      encryptionConfiguration;
+                      repositoryName
+                    }
     let to_value x =
       structure_to_value
         [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
@@ -10471,6 +15343,9 @@ module CreateRepositoryRequest =
         ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("imageTagMutability",
           (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value));
         ("imageScanningConfiguration",
           (Option.map x.imageScanningConfiguration
              ~f:ImageScanningConfiguration.to_value));
@@ -10485,6 +15360,9 @@ module CreateRepositoryRequest =
       let imageScanningConfiguration =
         (Option.map ~f:ImageScanningConfiguration.of_xml)
           (Xml.child xml_arg0 "imageScanningConfiguration") in
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
       let imageTagMutability =
         (Option.map ~f:ImageTagMutability.of_xml)
           (Xml.child xml_arg0 "imageTagMutability") in
@@ -10495,26 +15373,276 @@ module CreateRepositoryRequest =
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?encryptionConfiguration ?imageScanningConfiguration
-        ?imageTagMutability ?tags ~repositoryName ?registryId ()
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?tags
+        ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionConfiguration =
-        field_map json "encryptionConfiguration"
+        field_map json__ "encryptionConfiguration"
           EncryptionConfiguration.of_json in
       let imageScanningConfiguration =
-        field_map json "imageScanningConfiguration"
+        field_map json__ "imageScanningConfiguration"
           ImageScanningConfiguration.of_json in
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
       let imageTagMutability =
-        field_map json "imageTagMutability" ImageTagMutability.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?encryptionConfiguration ?imageScanningConfiguration
-        ?imageTagMutability ?tags ~repositoryName ?registryId ()
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?tags
+        ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a repository. For more information, see Amazon ECR repositories in the Amazon Elastic Container Registry User Guide."]
+module CreateRepositoryCreationTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      registryId: RegistryId.t option
+        [@ocaml.doc "The registry ID associated with the request."];
+      repositoryCreationTemplate: RepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The details of the repository creation template associated with the request."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServerException of ServerException.t 
+      | `TemplateAlreadyExistsException of TemplateAlreadyExistsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?registryId =
+      fun ?repositoryCreationTemplate ->
+        fun () -> { registryId; repositoryCreationTemplate }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "TemplateAlreadyExistsException" ->
+          `TemplateAlreadyExistsException
+            (TemplateAlreadyExistsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "TemplateAlreadyExistsException" ->
+          `TemplateAlreadyExistsException
+            (TemplateAlreadyExistsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `TemplateAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "TemplateAlreadyExistsException"));
+            ("details", (TemplateAlreadyExistsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("repositoryCreationTemplate",
+          (Option.map x.repositoryCreationTemplate
+             ~f:RepositoryCreationTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryCreationTemplate =
+        (Option.map ~f:RepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "repositoryCreationTemplate") in
+      let registryId =
+        (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
+      make ?repositoryCreationTemplate ?registryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryCreationTemplate =
+        field_map json__ "repositoryCreationTemplate"
+          RepositoryCreationTemplate.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      make ?repositoryCreationTemplate ?registryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a repository creation template. This template is used to define the settings for repositories created by Amazon ECR on your behalf. For example, repositories created through pull through cache actions. For more information, see Private repository creation templates in the Amazon Elastic Container Registry User Guide."]
+module CreateRepositoryCreationTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      prefix: Prefix.t
+        [@ocaml.doc
+          "The repository namespace prefix to associate with the template. All repositories created using this namespace prefix will have the settings defined in this template applied. For example, a prefix of prod would apply to all repositories beginning with prod/. Similarly, a prefix of prod/team would apply to all repositories beginning with prod/team/. To apply a template to all repositories in your registry that don't have an associated creation template, you can use ROOT as the prefix. There is always an assumed / applied to the end of the prefix. If you specify ecr-public as the prefix, Amazon ECR treats that as ecr-public/. When using a pull through cache rule, the repository prefix you specify during rule creation is what you should specify as your repository creation template prefix as well."];
+      description: RepositoryTemplateDescription.t option
+        [@ocaml.doc "A description for the repository creation template."];
+      encryptionConfiguration:
+        EncryptionConfigurationForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The encryption configuration to use for repositories created using the template."];
+      resourceTags: TagList.t option
+        [@ocaml.doc
+          "The metadata to apply to the repository to help you categorize and organize. Each tag consists of a key and an optional value, both of which you define. Tag keys can have a maximum character length of 128 characters, and tag values can have a maximum length of 256 characters."];
+      imageTagMutability: ImageTagMutability.t option
+        [@ocaml.doc
+          "The tag mutability setting for the repository. If this parameter is omitted, the default setting of MUTABLE will be used which will allow image tags to be overwritten. If IMMUTABLE is specified, all image tags within the repository will be immutable which will prevent them from being overwritten."];
+      imageTagMutabilityExclusionFilters:
+        ImageTagMutabilityExclusionFilters.t option
+        [@ocaml.doc
+          "A list of filters that specify which image tags should be excluded from the repository creation template's image tag mutability setting."];
+      repositoryPolicy: RepositoryPolicyText.t option
+        [@ocaml.doc
+          "The repository policy to apply to repositories created using the template. A repository policy is a permissions policy associated with a repository to control access permissions."];
+      lifecyclePolicy:
+        LifecyclePolicyTextForRepositoryCreationTemplate.t option
+        [@ocaml.doc
+          "The lifecycle policy to use for repositories created using the template."];
+      appliedFor: RCTAppliedForList.t
+        [@ocaml.doc
+          "A list of enumerable strings representing the Amazon ECR repository creation scenarios that this template will apply towards. The supported scenarios are PULL_THROUGH_CACHE, REPLICATION, and CREATE_ON_PUSH"];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the role to be assumed by Amazon ECR. This role must be in the same account as the registry that you are configuring. Amazon ECR will assume your supplied role when the customRoleArn is specified. When this field isn't specified, Amazon ECR will use the service-linked role for the repository creation template."]}
+    let context_ = "CreateRepositoryCreationTemplateRequest"
+    let make ?description =
+      fun ?encryptionConfiguration ->
+        fun ?resourceTags ->
+          fun ?imageTagMutability ->
+            fun ?imageTagMutabilityExclusionFilters ->
+              fun ?repositoryPolicy ->
+                fun ?lifecyclePolicy ->
+                  fun ?customRoleArn ->
+                    fun ~prefix ->
+                      fun ~appliedFor ->
+                        fun () ->
+                          {
+                            description;
+                            encryptionConfiguration;
+                            resourceTags;
+                            imageTagMutability;
+                            imageTagMutabilityExclusionFilters;
+                            repositoryPolicy;
+                            lifecyclePolicy;
+                            customRoleArn;
+                            prefix;
+                            appliedFor
+                          }
+    let to_value x =
+      structure_to_value
+        [("prefix", (Some (Prefix.to_value x.prefix)));
+        ("description",
+          (Option.map x.description ~f:RepositoryTemplateDescription.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfigurationForRepositoryCreationTemplate.to_value));
+        ("resourceTags", (Option.map x.resourceTags ~f:TagList.to_value));
+        ("imageTagMutability",
+          (Option.map x.imageTagMutability ~f:ImageTagMutability.to_value));
+        ("imageTagMutabilityExclusionFilters",
+          (Option.map x.imageTagMutabilityExclusionFilters
+             ~f:ImageTagMutabilityExclusionFilters.to_value));
+        ("repositoryPolicy",
+          (Option.map x.repositoryPolicy ~f:RepositoryPolicyText.to_value));
+        ("lifecyclePolicy",
+          (Option.map x.lifecyclePolicy
+             ~f:LifecyclePolicyTextForRepositoryCreationTemplate.to_value));
+        ("appliedFor", (Some (RCTAppliedForList.to_value x.appliedFor)));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let appliedFor =
+        RCTAppliedForList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "appliedFor") in
+      let lifecyclePolicy =
+        (Option.map
+           ~f:LifecyclePolicyTextForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "lifecyclePolicy") in
+      let repositoryPolicy =
+        (Option.map ~f:RepositoryPolicyText.of_xml)
+          (Xml.child xml_arg0 "repositoryPolicy") in
+      let imageTagMutabilityExclusionFilters =
+        (Option.map ~f:ImageTagMutabilityExclusionFilters.of_xml)
+          (Xml.child xml_arg0 "imageTagMutabilityExclusionFilters") in
+      let imageTagMutability =
+        (Option.map ~f:ImageTagMutability.of_xml)
+          (Xml.child xml_arg0 "imageTagMutability") in
+      let resourceTags =
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "resourceTags") in
+      let encryptionConfiguration =
+        (Option.map
+           ~f:EncryptionConfigurationForRepositoryCreationTemplate.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let description =
+        (Option.map ~f:RepositoryTemplateDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let prefix =
+        Prefix.of_xml (Xml.child_exn ~context:context_ xml_arg0 "prefix") in
+      make ?customRoleArn ~appliedFor ?lifecyclePolicy ?repositoryPolicy
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?resourceTags
+        ?encryptionConfiguration ?description ~prefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let appliedFor =
+        field_map_exn json__ "appliedFor" RCTAppliedForList.of_json in
+      let lifecyclePolicy =
+        field_map json__ "lifecyclePolicy"
+          LifecyclePolicyTextForRepositoryCreationTemplate.of_json in
+      let repositoryPolicy =
+        field_map json__ "repositoryPolicy" RepositoryPolicyText.of_json in
+      let imageTagMutabilityExclusionFilters =
+        field_map json__ "imageTagMutabilityExclusionFilters"
+          ImageTagMutabilityExclusionFilters.of_json in
+      let imageTagMutability =
+        field_map json__ "imageTagMutability" ImageTagMutability.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagList.of_json in
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfigurationForRepositoryCreationTemplate.of_json in
+      let description =
+        field_map json__ "description" RepositoryTemplateDescription.of_json in
+      let prefix = field_map_exn json__ "prefix" Prefix.of_json in
+      make ?customRoleArn ~appliedFor ?lifecyclePolicy ?repositoryPolicy
+        ?imageTagMutabilityExclusionFilters ?imageTagMutability ?resourceTags
+        ?encryptionConfiguration ?description ~prefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a repository creation template. This template is used to define the settings for repositories created by Amazon ECR on your behalf. For example, repositories created through pull through cache actions. For more information, see Private repository creation templates in the Amazon Elastic Container Registry User Guide."]
 module CreatePullThroughCacheRuleResponse =
   struct
     type nonrec t =
@@ -10529,13 +15657,29 @@ module CreatePullThroughCacheRuleResponse =
         [@ocaml.doc
           "The date and time, in JavaScript date format, when the pull through cache rule was created."];
       registryId: RegistryId.t option
-        [@ocaml.doc "The registry ID associated with the request."]}
+        [@ocaml.doc "The registry ID associated with the request."];
+      upstreamRegistry: UpstreamRegistry.t option
+        [@ocaml.doc
+          "The name of the upstream registry associated with the pull through cache rule."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret associated with the pull through cache rule."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role associated with the pull through cache rule."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The upstream repository prefix associated with the pull through cache rule."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `PullThroughCacheRuleAlreadyExistsException of
           PullThroughCacheRuleAlreadyExistsException.t 
+      | `SecretNotFoundException of SecretNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnableToAccessSecretException of UnableToAccessSecretException.t 
+      | `UnableToDecryptSecretValueException of
+          UnableToDecryptSecretValueException.t 
       | `UnsupportedUpstreamRegistryException of
           UnsupportedUpstreamRegistryException.t 
       | `ValidationException of ValidationException.t 
@@ -10544,13 +15688,21 @@ module CreatePullThroughCacheRuleResponse =
       fun ?upstreamRegistryUrl ->
         fun ?createdAt ->
           fun ?registryId ->
-            fun () ->
-              {
-                ecrRepositoryPrefix;
-                upstreamRegistryUrl;
-                createdAt;
-                registryId
-              }
+            fun ?upstreamRegistry ->
+              fun ?credentialArn ->
+                fun ?customRoleArn ->
+                  fun ?upstreamRepositoryPrefix ->
+                    fun () ->
+                      {
+                        ecrRepositoryPrefix;
+                        upstreamRegistryUrl;
+                        createdAt;
+                        registryId;
+                        upstreamRegistry;
+                        credentialArn;
+                        customRoleArn;
+                        upstreamRepositoryPrefix
+                      }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -10560,7 +15712,15 @@ module CreatePullThroughCacheRuleResponse =
       | "PullThroughCacheRuleAlreadyExistsException" ->
           `PullThroughCacheRuleAlreadyExistsException
             (PullThroughCacheRuleAlreadyExistsException.of_json json)
+      | "SecretNotFoundException" ->
+          `SecretNotFoundException (SecretNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnableToAccessSecretException" ->
+          `UnableToAccessSecretException
+            (UnableToAccessSecretException.of_json json)
+      | "UnableToDecryptSecretValueException" ->
+          `UnableToDecryptSecretValueException
+            (UnableToDecryptSecretValueException.of_json json)
       | "UnsupportedUpstreamRegistryException" ->
           `UnsupportedUpstreamRegistryException
             (UnsupportedUpstreamRegistryException.of_json json)
@@ -10578,7 +15738,15 @@ module CreatePullThroughCacheRuleResponse =
       | "PullThroughCacheRuleAlreadyExistsException" ->
           `PullThroughCacheRuleAlreadyExistsException
             (PullThroughCacheRuleAlreadyExistsException.of_xml xml)
+      | "SecretNotFoundException" ->
+          `SecretNotFoundException (SecretNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnableToAccessSecretException" ->
+          `UnableToAccessSecretException
+            (UnableToAccessSecretException.of_xml xml)
+      | "UnableToDecryptSecretValueException" ->
+          `UnableToDecryptSecretValueException
+            (UnableToDecryptSecretValueException.of_xml xml)
       | "UnsupportedUpstreamRegistryException" ->
           `UnsupportedUpstreamRegistryException
             (UnsupportedUpstreamRegistryException.of_xml xml)
@@ -10602,10 +15770,22 @@ module CreatePullThroughCacheRuleResponse =
                (`String "PullThroughCacheRuleAlreadyExistsException"));
             ("details",
               (PullThroughCacheRuleAlreadyExistsException.to_json e))]
+      | `SecretNotFoundException e ->
+          `Assoc
+            [("error", (`String "SecretNotFoundException"));
+            ("details", (SecretNotFoundException.to_json e))]
       | `ServerException e ->
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnableToAccessSecretException e ->
+          `Assoc
+            [("error", (`String "UnableToAccessSecretException"));
+            ("details", (UnableToAccessSecretException.to_json e))]
+      | `UnableToDecryptSecretValueException e ->
+          `Assoc
+            [("error", (`String "UnableToDecryptSecretValueException"));
+            ("details", (UnableToDecryptSecretValueException.to_json e))]
       | `UnsupportedUpstreamRegistryException e ->
           `Assoc
             [("error", (`String "UnsupportedUpstreamRegistryException"));
@@ -10627,9 +15807,30 @@ module CreatePullThroughCacheRuleResponse =
         ("upstreamRegistryUrl",
           (Option.map x.upstreamRegistryUrl ~f:Url.to_value));
         ("createdAt", (Option.map x.createdAt ~f:CreationTimestamp.to_value));
-        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("upstreamRegistry",
+          (Option.map x.upstreamRegistry ~f:UpstreamRegistry.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
+      let upstreamRegistry =
+        (Option.map ~f:UpstreamRegistry.of_xml)
+          (Xml.child xml_arg0 "upstreamRegistry") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       let createdAt =
@@ -10640,40 +15841,75 @@ module CreatePullThroughCacheRuleResponse =
       let ecrRepositoryPrefix =
         (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
           (Xml.child xml_arg0 "ecrRepositoryPrefix") in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?upstreamRegistry ?registryId ?createdAt ?upstreamRegistryUrl
+        ?ecrRepositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let createdAt = field_map json "createdAt" CreationTimestamp.of_json in
-      let upstreamRegistryUrl =
-        field_map json "upstreamRegistryUrl" Url.of_json in
-      let ecrRepositoryPrefix =
-        field_map json "ecrRepositoryPrefix"
+    let of_json json__ =
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
           PullThroughCacheRuleRepositoryPrefix.of_json in
-      make ?registryId ?createdAt ?upstreamRegistryUrl ?ecrRepositoryPrefix
-        ()
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let upstreamRegistry =
+        field_map json__ "upstreamRegistry" UpstreamRegistry.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let createdAt = field_map json__ "createdAt" CreationTimestamp.of_json in
+      let upstreamRegistryUrl =
+        field_map json__ "upstreamRegistryUrl" Url.of_json in
+      let ecrRepositoryPrefix =
+        field_map json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?upstreamRegistry ?registryId ?createdAt ?upstreamRegistryUrl
+        ?ecrRepositoryPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a pull through cache rule. A pull through cache rule provides a way to cache images from an external public registry in your Amazon ECR private registry."]
+       "Creates a pull through cache rule. A pull through cache rule provides a way to cache images from an upstream registry source in your Amazon ECR private registry. For more information, see Using pull through cache rules in the Amazon Elastic Container Registry User Guide."]
 module CreatePullThroughCacheRuleRequest =
   struct
     type nonrec t =
       {
       ecrRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t
         [@ocaml.doc
-          "The repository name prefix to use when caching images from the source registry."];
+          "The repository name prefix to use when caching images from the source registry. There is always an assumed / applied to the end of the prefix. If you specify ecr-public as the prefix, Amazon ECR treats that as ecr-public/."];
       upstreamRegistryUrl: Url.t
         [@ocaml.doc
-          "The registry URL of the upstream public registry to use as the source for the pull through cache rule."];
+          "The registry URL of the upstream public registry to use as the source for the pull through cache rule. The following is the syntax to use for each supported upstream registry. Amazon ECR (ecr) \226\128\147 <accountId>.dkr.ecr.<region>.amazonaws.com Amazon ECR Public (ecr-public) \226\128\147 public.ecr.aws Docker Hub (docker-hub) \226\128\147 registry-1.docker.io GitHub Container Registry (github-container-registry) \226\128\147 ghcr.io GitLab Container Registry (gitlab-container-registry) \226\128\147 registry.gitlab.com Kubernetes (k8s) \226\128\147 registry.k8s.io Microsoft Azure Container Registry (azure-container-registry) \226\128\147 <custom>.azurecr.io Quay (quay) \226\128\147 quay.io"];
       registryId: RegistryId.t option
         [@ocaml.doc
-          "The Amazon Web Services account ID associated with the registry to create the pull through cache rule for. If you do not specify a registry, the default registry is assumed."]}
+          "The Amazon Web Services account ID associated with the registry to create the pull through cache rule for. If you do not specify a registry, the default registry is assumed."];
+      upstreamRegistry: UpstreamRegistry.t option
+        [@ocaml.doc "The name of the upstream registry."];
+      credentialArn: CredentialArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Web Services Secrets Manager secret that identifies the credentials to authenticate to the upstream registry."];
+      customRoleArn: CustomRoleArn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the IAM role to be assumed by Amazon ECR to authenticate to the ECR upstream registry. This role must be in the same account as the registry that you are configuring."];
+      upstreamRepositoryPrefix: PullThroughCacheRuleRepositoryPrefix.t option
+        [@ocaml.doc
+          "The repository name prefix of the upstream registry to match with the upstream repository name. When this field isn't specified, Amazon ECR will use the ROOT."]}
     let context_ = "CreatePullThroughCacheRuleRequest"
     let make ?registryId =
-      fun ~ecrRepositoryPrefix ->
-        fun ~upstreamRegistryUrl ->
-          fun () -> { registryId; ecrRepositoryPrefix; upstreamRegistryUrl }
+      fun ?upstreamRegistry ->
+        fun ?credentialArn ->
+          fun ?customRoleArn ->
+            fun ?upstreamRepositoryPrefix ->
+              fun ~ecrRepositoryPrefix ->
+                fun ~upstreamRegistryUrl ->
+                  fun () ->
+                    {
+                      registryId;
+                      upstreamRegistry;
+                      credentialArn;
+                      customRoleArn;
+                      upstreamRepositoryPrefix;
+                      ecrRepositoryPrefix;
+                      upstreamRegistryUrl
+                    }
     let to_value x =
       structure_to_value
         [("ecrRepositoryPrefix",
@@ -10681,9 +15917,30 @@ module CreatePullThroughCacheRuleRequest =
               (PullThroughCacheRuleRepositoryPrefix.to_value
                  x.ecrRepositoryPrefix)));
         ("upstreamRegistryUrl", (Some (Url.to_value x.upstreamRegistryUrl)));
-        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value))]
+        ("registryId", (Option.map x.registryId ~f:RegistryId.to_value));
+        ("upstreamRegistry",
+          (Option.map x.upstreamRegistry ~f:UpstreamRegistry.to_value));
+        ("credentialArn",
+          (Option.map x.credentialArn ~f:CredentialArn.to_value));
+        ("customRoleArn",
+          (Option.map x.customRoleArn ~f:CustomRoleArn.to_value));
+        ("upstreamRepositoryPrefix",
+          (Option.map x.upstreamRepositoryPrefix
+             ~f:PullThroughCacheRuleRepositoryPrefix.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let upstreamRepositoryPrefix =
+        (Option.map ~f:PullThroughCacheRuleRepositoryPrefix.of_xml)
+          (Xml.child xml_arg0 "upstreamRepositoryPrefix") in
+      let customRoleArn =
+        (Option.map ~f:CustomRoleArn.of_xml)
+          (Xml.child xml_arg0 "customRoleArn") in
+      let credentialArn =
+        (Option.map ~f:CredentialArn.of_xml)
+          (Xml.child xml_arg0 "credentialArn") in
+      let upstreamRegistry =
+        (Option.map ~f:UpstreamRegistry.of_xml)
+          (Xml.child xml_arg0 "upstreamRegistry") in
       let registryId =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       let upstreamRegistryUrl =
@@ -10692,19 +15949,32 @@ module CreatePullThroughCacheRuleRequest =
       let ecrRepositoryPrefix =
         PullThroughCacheRuleRepositoryPrefix.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ecrRepositoryPrefix") in
-      make ?registryId ~upstreamRegistryUrl ~ecrRepositoryPrefix ()
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?upstreamRegistry ?registryId ~upstreamRegistryUrl
+        ~ecrRepositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let registryId = field_map json "registryId" RegistryId.of_json in
-      let upstreamRegistryUrl =
-        field_map_exn json "upstreamRegistryUrl" Url.of_json in
-      let ecrRepositoryPrefix =
-        field_map_exn json "ecrRepositoryPrefix"
+    let of_json json__ =
+      let upstreamRepositoryPrefix =
+        field_map json__ "upstreamRepositoryPrefix"
           PullThroughCacheRuleRepositoryPrefix.of_json in
-      make ?registryId ~upstreamRegistryUrl ~ecrRepositoryPrefix ()
+      let customRoleArn =
+        field_map json__ "customRoleArn" CustomRoleArn.of_json in
+      let credentialArn =
+        field_map json__ "credentialArn" CredentialArn.of_json in
+      let upstreamRegistry =
+        field_map json__ "upstreamRegistry" UpstreamRegistry.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
+      let upstreamRegistryUrl =
+        field_map_exn json__ "upstreamRegistryUrl" Url.of_json in
+      let ecrRepositoryPrefix =
+        field_map_exn json__ "ecrRepositoryPrefix"
+          PullThroughCacheRuleRepositoryPrefix.of_json in
+      make ?upstreamRepositoryPrefix ?customRoleArn ?credentialArn
+        ?upstreamRegistry ?registryId ~upstreamRegistryUrl
+        ~ecrRepositoryPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a pull through cache rule. A pull through cache rule provides a way to cache images from an external public registry in your Amazon ECR private registry."]
+       "Creates a pull through cache rule. A pull through cache rule provides a way to cache images from an upstream registry source in your Amazon ECR private registry. For more information, see Using pull through cache rules in the Amazon Elastic Container Registry User Guide."]
 module CompleteLayerUploadResponse =
   struct
     type nonrec t =
@@ -10842,12 +16112,12 @@ module CompleteLayerUploadResponse =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?layerDigest ?uploadId ?repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let layerDigest = field_map json "layerDigest" LayerDigest.of_json in
-      let uploadId = field_map json "uploadId" UploadId.of_json in
+    let of_json json__ =
+      let layerDigest = field_map json__ "layerDigest" LayerDigest.of_json in
+      let uploadId = field_map json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?layerDigest ?uploadId ?repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10893,13 +16163,13 @@ module CompleteLayerUploadRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~uploadId ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerDigests =
-        field_map_exn json "layerDigests" LayerDigestList.of_json in
-      let uploadId = field_map_exn json "uploadId" UploadId.of_json in
+        field_map_exn json__ "layerDigests" LayerDigestList.of_json in
+      let uploadId = field_map_exn json__ "uploadId" UploadId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~layerDigests ~uploadId ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10987,12 +16257,12 @@ module BatchGetRepositoryScanningConfigurationResponse =
           (Xml.child xml_arg0 "scanningConfigurations") in
       make ?failures ?scanningConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failures =
-        field_map json "failures"
+        field_map json__ "failures"
           RepositoryScanningConfigurationFailureList.of_json in
       let scanningConfigurations =
-        field_map json "scanningConfigurations"
+        field_map json__ "scanningConfigurations"
           RepositoryScanningConfigurationList.of_json in
       make ?failures ?scanningConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -11020,9 +16290,9 @@ module BatchGetRepositoryScanningConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryNames") in
       make ~repositoryNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryNames =
-        field_map_exn json "repositoryNames"
+        field_map_exn json__ "repositoryNames"
           ScanningConfigurationRepositoryNameList.of_json in
       make ~repositoryNames ()
     let to_json v = composed_to_json to_value v
@@ -11039,18 +16309,26 @@ module BatchGetImageResponse =
         [@ocaml.doc "Any failures associated with the call."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `RepositoryNotFoundException of RepositoryNotFoundException.t 
       | `ServerException of ServerException.t 
+      | `UnableToGetUpstreamImageException of
+          UnableToGetUpstreamImageException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?images = fun ?failures -> fun () -> { images; failures }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
       | "RepositoryNotFoundException" ->
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_json json)
       | "ServerException" -> `ServerException (ServerException.of_json json)
+      | "UnableToGetUpstreamImageException" ->
+          `UnableToGetUpstreamImageException
+            (UnableToGetUpstreamImageException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11058,10 +16336,15 @@ module BatchGetImageResponse =
       match name with
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
       | "RepositoryNotFoundException" ->
           `RepositoryNotFoundException
             (RepositoryNotFoundException.of_xml xml)
       | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | "UnableToGetUpstreamImageException" ->
+          `UnableToGetUpstreamImageException
+            (UnableToGetUpstreamImageException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11070,6 +16353,10 @@ module BatchGetImageResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
       | `RepositoryNotFoundException e ->
           `Assoc
             [("error", (`String "RepositoryNotFoundException"));
@@ -11078,6 +16365,10 @@ module BatchGetImageResponse =
           `Assoc
             [("error", (`String "ServerException"));
             ("details", (ServerException.to_json e))]
+      | `UnableToGetUpstreamImageException e ->
+          `Assoc
+            [("error", (`String "UnableToGetUpstreamImageException"));
+            ("details", (UnableToGetUpstreamImageException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11096,9 +16387,9 @@ module BatchGetImageResponse =
         (Option.map ~f:ImageList.of_xml) (Xml.child xml_arg0 "images") in
       make ?failures ?images ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "failures" ImageFailureList.of_json in
-      let images = field_map json "images" ImageList.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "failures" ImageFailureList.of_json in
+      let images = field_map json__ "images" ImageList.of_json in
       make ?failures ?images ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11147,14 +16438,14 @@ module BatchGetImageRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ?acceptedMediaTypes ~imageIds ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptedMediaTypes =
-        field_map json "acceptedMediaTypes" MediaTypeList.of_json in
+        field_map json__ "acceptedMediaTypes" MediaTypeList.of_json in
       let imageIds =
-        field_map_exn json "imageIds" ImageIdentifierList.of_json in
+        field_map_exn json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ?acceptedMediaTypes ~imageIds ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11228,9 +16519,9 @@ module BatchDeleteImageResponse =
           (Xml.child xml_arg0 "imageIds") in
       make ?failures ?imageIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "failures" ImageFailureList.of_json in
-      let imageIds = field_map json "imageIds" ImageIdentifierList.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "failures" ImageFailureList.of_json in
+      let imageIds = field_map json__ "imageIds" ImageIdentifierList.of_json in
       make ?failures ?imageIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11268,12 +16559,12 @@ module BatchDeleteImageRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~imageIds ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageIds =
-        field_map_exn json "imageIds" ImageIdentifierList.of_json in
+        field_map_exn json__ "imageIds" ImageIdentifierList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~imageIds ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11346,9 +16637,9 @@ module BatchCheckLayerAvailabilityResponse =
         (Option.map ~f:LayerList.of_xml) (Xml.child xml_arg0 "layers") in
       make ?failures ?layers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failures = field_map json "failures" LayerFailureList.of_json in
-      let layers = field_map json "layers" LayerList.of_json in
+    let of_json json__ =
+      let failures = field_map json__ "failures" LayerFailureList.of_json in
+      let layers = field_map json__ "layers" LayerList.of_json in
       make ?failures ?layers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11388,13 +16679,13 @@ module BatchCheckLayerAvailabilityRequest =
         (Option.map ~f:RegistryId.of_xml) (Xml.child xml_arg0 "registryId") in
       make ~layerDigests ~repositoryName ?registryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let layerDigests =
-        field_map_exn json "layerDigests"
+        field_map_exn json__ "layerDigests"
           BatchedOperationLayerDigestList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      let registryId = field_map json "registryId" RegistryId.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      let registryId = field_map json__ "registryId" RegistryId.of_json in
       make ~layerDigests ~repositoryName ?registryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

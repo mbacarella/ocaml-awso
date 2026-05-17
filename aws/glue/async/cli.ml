@@ -208,6 +208,45 @@ let batch_get_crawlers =
               ~crawlerNames:(Values.CrawlerNameList.of_json crawlerNames) ())
            (Some Values.BatchGetCrawlersResponse.to_json)
            (Some Values.BatchGetCrawlersResponse.error_to_json)])
+let batch_get_custom_entity_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and names =
+         flag "names" (required json_arg) ~doc:"JSON CustomEntityTypeNames" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_custom_entity_types
+           (Values.BatchGetCustomEntityTypesRequest.make
+              ~names:(Values.CustomEntityTypeNames.of_json names) ())
+           (Some Values.BatchGetCustomEntityTypesResponse.to_json)
+           (Some Values.BatchGetCustomEntityTypesResponse.error_to_json)])
+let batch_get_data_quality_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resultIds =
+         flag "result-ids" (required json_arg)
+           ~doc:"JSON DataQualityResultIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_data_quality_result
+           (Values.BatchGetDataQualityResultRequest.make
+              ~resultIds:(Values.DataQualityResultIds.of_json resultIds) ())
+           (Some Values.BatchGetDataQualityResultResponse.to_json)
+           (Some Values.BatchGetDataQualityResultResponse.error_to_json)])
 let batch_get_dev_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -260,6 +299,11 @@ let batch_get_partition =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and querySessionContext =
+         flag "query-session-context" (optional json_arg)
+           ~doc:"JSON QuerySessionContext"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and tableName =
@@ -270,12 +314,37 @@ let batch_get_partition =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_get_partition
-           (Values.BatchGetPartitionRequest.make ?catalogId ~databaseName
+           (Values.BatchGetPartitionRequest.make ?catalogId
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext)
+              ?querySessionContext:(Option.map
+                                      ~f:Values.QuerySessionContext.of_json
+                                      querySessionContext) ~databaseName
               ~tableName
               ~partitionsToGet:(Values.BatchGetPartitionValueList.of_json
                                   partitionsToGet) ())
            (Some Values.BatchGetPartitionResponse.to_json)
            (Some Values.BatchGetPartitionResponse.error_to_json)])
+let batch_get_table_optimizer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and entries =
+         flag "entries" (required json_arg)
+           ~doc:"JSON BatchGetTableOptimizerEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_table_optimizer
+           (Values.BatchGetTableOptimizerRequest.make
+              ~entries:(Values.BatchGetTableOptimizerEntries.of_json entries)
+              ()) (Some Values.BatchGetTableOptimizerResponse.to_json)
+           (Some Values.BatchGetTableOptimizerResponse.error_to_json)])
 let batch_get_triggers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -315,6 +384,32 @@ let batch_get_workflows =
               ~names:(Values.WorkflowNames.of_json names) ())
            (Some Values.BatchGetWorkflowsResponse.to_json)
            (Some Values.BatchGetWorkflowsResponse.error_to_json)])
+let batch_put_data_quality_statistic_annotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING HashString"
+       and inclusionAnnotations =
+         flag "inclusion-annotations" (required json_arg)
+           ~doc:"JSON InclusionAnnotationList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_put_data_quality_statistic_annotation
+           (Values.BatchPutDataQualityStatisticAnnotationRequest.make
+              ?clientToken
+              ~inclusionAnnotations:(Values.InclusionAnnotationList.of_json
+                                       inclusionAnnotations) ())
+           (Some
+              Values.BatchPutDataQualityStatisticAnnotationResponse.to_json)
+           (Some
+              Values.BatchPutDataQualityStatisticAnnotationResponse.error_to_json)])
 let batch_stop_job_run =
   Command.async ~summary:""
     ([%map_open.Command
@@ -366,6 +461,45 @@ let batch_update_partition =
                           entries) ())
            (Some Values.BatchUpdatePartitionResponse.to_json)
            (Some Values.BatchUpdatePartitionResponse.error_to_json)])
+let cancel_data_quality_rule_recommendation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and runId = flag "run-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_data_quality_rule_recommendation_run
+           (Values.CancelDataQualityRuleRecommendationRunRequest.make ~runId
+              ())
+           (Some
+              Values.CancelDataQualityRuleRecommendationRunResponse.to_json)
+           (Some
+              Values.CancelDataQualityRuleRecommendationRunResponse.error_to_json)])
+let cancel_data_quality_ruleset_evaluation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and runId = flag "run-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_data_quality_ruleset_evaluation_run
+           (Values.CancelDataQualityRulesetEvaluationRunRequest.make ~runId
+              ())
+           (Some Values.CancelDataQualityRulesetEvaluationRunResponse.to_json)
+           (Some
+              Values.CancelDataQualityRulesetEvaluationRunResponse.error_to_json)])
 let cancel_m_l_task_run =
   Command.async ~summary:""
     ([%map_open.Command
@@ -458,6 +592,29 @@ let create_blueprint =
               ~blueprintLocation ())
            (Some Values.CreateBlueprintResponse.to_json)
            (Some Values.CreateBlueprintResponse.error_to_json)])
+let create_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and name =
+         flag "name" (required string) ~doc:"STRING CatalogNameString"
+       and catalogInput =
+         flag "catalog-input" (required json_arg) ~doc:"JSON CatalogInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_catalog
+           (Values.CreateCatalogRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~name
+              ~catalogInput:(Values.CatalogInput.of_json catalogInput) ())
+           (Some Values.CreateCatalogResponse.to_json)
+           (Some Values.CreateCatalogResponse.error_to_json)])
 let create_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -498,6 +655,47 @@ let create_classifier =
                                 csvClassifier) ())
            (Some Values.CreateClassifierResponse.to_json)
            (Some Values.CreateClassifierResponse.error_to_json)])
+let create_column_statistics_task_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and schedule =
+         flag "schedule" (optional string) ~doc:"STRING CronExpression"
+       and columnNameList =
+         flag "column-name-list" (optional json_arg)
+           ~doc:"JSON ColumnNameList"
+       and sampleSize =
+         flag "sample-size" (optional float)
+           ~doc:"FLOAT SampleSizePercentage"
+       and catalogID =
+         flag "catalog-i-d" (optional string) ~doc:"STRING NameString"
+       and securityConfiguration =
+         flag "security-configuration" (optional string)
+           ~doc:"STRING NameString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and role = flag "role" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_column_statistics_task_settings
+           (Values.CreateColumnStatisticsTaskSettingsRequest.make ?schedule
+              ?columnNameList:(Option.map ~f:Values.ColumnNameList.of_json
+                                 columnNameList) ?sampleSize ?catalogID
+              ?securityConfiguration
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~databaseName
+              ~tableName ~role ())
+           (Some Values.CreateColumnStatisticsTaskSettingsResponse.to_json)
+           (Some
+              Values.CreateColumnStatisticsTaskSettingsResponse.error_to_json)])
 let create_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -589,6 +787,68 @@ let create_crawler =
               ~targets:(Values.CrawlerTargets.of_json targets) ())
            (Some Values.CreateCrawlerResponse.to_json)
            (Some Values.CreateCrawlerResponse.error_to_json)])
+let create_custom_entity_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and contextWords =
+         flag "context-words" (optional json_arg) ~doc:"JSON ContextWords"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and regexString =
+         flag "regex-string" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_custom_entity_type
+           (Values.CreateCustomEntityTypeRequest.make
+              ?contextWords:(Option.map ~f:Values.ContextWords.of_json
+                               contextWords)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~name
+              ~regexString ())
+           (Some Values.CreateCustomEntityTypeResponse.to_json)
+           (Some Values.CreateCustomEntityTypeResponse.error_to_json)])
+let create_data_quality_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and targetTable =
+         flag "target-table" (optional json_arg)
+           ~doc:"JSON DataQualityTargetTable"
+       and dataQualitySecurityConfiguration =
+         flag "data-quality-security-configuration" (optional string)
+           ~doc:"STRING NameString"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING HashString"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and ruleset =
+         flag "ruleset" (required string)
+           ~doc:"STRING DataQualityRulesetString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_data_quality_ruleset
+           (Values.CreateDataQualityRulesetRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?targetTable:(Option.map
+                              ~f:Values.DataQualityTargetTable.of_json
+                              targetTable) ?dataQualitySecurityConfiguration
+              ?clientToken ~name ~ruleset ())
+           (Some Values.CreateDataQualityRulesetResponse.to_json)
+           (Some Values.CreateDataQualityRulesetResponse.error_to_json)])
 let create_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -601,12 +861,14 @@ let create_database =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
        and databaseInput =
          flag "database-input" (required json_arg) ~doc:"JSON DatabaseInput" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_database
            (Values.CreateDatabaseRequest.make ?catalogId
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
               ~databaseInput:(Values.DatabaseInput.of_json databaseInput) ())
            (Some Values.CreateDatabaseResponse.to_json)
            (Some Values.CreateDatabaseResponse.error_to_json)])
@@ -668,6 +930,150 @@ let create_dev_endpoint =
               ~endpointName ~roleArn ())
            (Some Values.CreateDevEndpointResponse.to_json)
            (Some Values.CreateDevEndpointResponse.error_to_json)])
+let create_glue_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scopes =
+         flag "scopes" (optional json_arg)
+           ~doc:"JSON IdentityCenterScopesList"
+       and userBackgroundSessionsEnabled =
+         flag "user-background-sessions-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
+       and instanceArn =
+         flag "instance-arn" (required string)
+           ~doc:"STRING IdentityCenterInstanceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_glue_identity_center_configuration
+           (Values.CreateGlueIdentityCenterConfigurationRequest.make
+              ?scopes:(Option.map ~f:Values.IdentityCenterScopesList.of_json
+                         scopes) ?userBackgroundSessionsEnabled ~instanceArn
+              ())
+           (Some Values.CreateGlueIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.CreateGlueIdentityCenterConfigurationResponse.error_to_json)])
+let create_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING IntegrationDescription"
+       and dataFilter =
+         flag "data-filter" (optional string) ~doc:"STRING String2048"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING String2048"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON IntegrationAdditionalEncryptionContextMap"
+       and tags =
+         flag "tags" (optional json_arg) ~doc:"JSON IntegrationTagsList"
+       and integrationConfig =
+         flag "integration-config" (optional json_arg)
+           ~doc:"JSON IntegrationConfig"
+       and integrationName =
+         flag "integration-name" (required string) ~doc:"STRING String128"
+       and sourceArn =
+         flag "source-arn" (required string) ~doc:"STRING String512"
+       and targetArn =
+         flag "target-arn" (required string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_integration
+           (Values.CreateIntegrationRequest.make ?description ?dataFilter
+              ?kmsKeyId
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.IntegrationAdditionalEncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?tags:(Option.map ~f:Values.IntegrationTagsList.of_json tags)
+              ?integrationConfig:(Option.map
+                                    ~f:Values.IntegrationConfig.of_json
+                                    integrationConfig) ~integrationName
+              ~sourceArn ~targetArn ())
+           (Some Values.CreateIntegrationResponse.to_json)
+           (Some Values.CreateIntegrationResponse.error_to_json)])
+let create_integration_resource_property =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceProcessingProperties =
+         flag "source-processing-properties" (optional json_arg)
+           ~doc:"JSON SourceProcessingProperties"
+       and targetProcessingProperties =
+         flag "target-processing-properties" (optional json_arg)
+           ~doc:"JSON TargetProcessingProperties"
+       and tags =
+         flag "tags" (optional json_arg) ~doc:"JSON IntegrationTagsList"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_integration_resource_property
+           (Values.CreateIntegrationResourcePropertyRequest.make
+              ?sourceProcessingProperties:(Option.map
+                                             ~f:Values.SourceProcessingProperties.of_json
+                                             sourceProcessingProperties)
+              ?targetProcessingProperties:(Option.map
+                                             ~f:Values.TargetProcessingProperties.of_json
+                                             targetProcessingProperties)
+              ?tags:(Option.map ~f:Values.IntegrationTagsList.of_json tags)
+              ~resourceArn ())
+           (Some Values.CreateIntegrationResourcePropertyResponse.to_json)
+           (Some
+              Values.CreateIntegrationResourcePropertyResponse.error_to_json)])
+let create_integration_table_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceTableConfig =
+         flag "source-table-config" (optional json_arg)
+           ~doc:"JSON SourceTableConfig"
+       and targetTableConfig =
+         flag "target-table-config" (optional json_arg)
+           ~doc:"JSON TargetTableConfig"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_integration_table_properties
+           (Values.CreateIntegrationTablePropertiesRequest.make
+              ?sourceTableConfig:(Option.map
+                                    ~f:Values.SourceTableConfig.of_json
+                                    sourceTableConfig)
+              ?targetTableConfig:(Option.map
+                                    ~f:Values.TargetTableConfig.of_json
+                                    targetTableConfig) ~resourceArn
+              ~tableName ())
+           (Some Values.CreateIntegrationTablePropertiesResponse.to_json)
+           (Some
+              Values.CreateIntegrationTablePropertiesResponse.error_to_json)])
 let create_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -678,6 +1084,10 @@ let create_job =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and jobMode = flag "job-mode" (optional json_arg) ~doc:"JSON JobMode"
+       and jobRunQueuingEnabled =
+         flag "job-run-queuing-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and description =
          flag "description" (optional string) ~doc:"STRING DescriptionString"
        and logUri = flag "log-uri" (optional string) ~doc:"STRING UriString"
@@ -712,6 +1122,18 @@ let create_job =
          flag "number-of-workers" (optional int) ~doc:"INT NullableInteger"
        and workerType =
          flag "worker-type" (optional json_arg) ~doc:"JSON WorkerType"
+       and codeGenConfigurationNodes =
+         flag "code-gen-configuration-nodes" (optional json_arg)
+           ~doc:"JSON CodeGenConfigurationNodes"
+       and executionClass =
+         flag "execution-class" (optional json_arg)
+           ~doc:"JSON ExecutionClass"
+       and sourceControlDetails =
+         flag "source-control-details" (optional json_arg)
+           ~doc:"JSON SourceControlDetails"
+       and maintenanceWindow =
+         flag "maintenance-window" (optional string)
+           ~doc:"STRING MaintenanceWindow"
        and name = flag "name" (required string) ~doc:"STRING NameString"
        and role = flag "role" (required string) ~doc:"STRING RoleString"
        and command =
@@ -719,7 +1141,9 @@ let create_job =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_job
-           (Values.CreateJobRequest.make ?description ?logUri
+           (Values.CreateJobRequest.make
+              ?jobMode:(Option.map ~f:Values.JobMode.of_json jobMode)
+              ?jobRunQueuingEnabled ?description ?logUri
               ?executionProperty:(Option.map
                                     ~f:Values.ExecutionProperty.of_json
                                     executionProperty)
@@ -737,7 +1161,16 @@ let create_job =
                                        notificationProperty) ?glueVersion
               ?numberOfWorkers
               ?workerType:(Option.map ~f:Values.WorkerType.of_json workerType)
-              ~name ~role ~command:(Values.JobCommand.of_json command) ())
+              ?codeGenConfigurationNodes:(Option.map
+                                            ~f:Values.CodeGenConfigurationNodes.of_json
+                                            codeGenConfigurationNodes)
+              ?executionClass:(Option.map ~f:Values.ExecutionClass.of_json
+                                 executionClass)
+              ?sourceControlDetails:(Option.map
+                                       ~f:Values.SourceControlDetails.of_json
+                                       sourceControlDetails)
+              ?maintenanceWindow ~name ~role
+              ~command:(Values.JobCommand.of_json command) ())
            (Some Values.CreateJobResponse.to_json)
            (Some Values.CreateJobResponse.error_to_json)])
 let create_m_l_transform =
@@ -1022,27 +1455,63 @@ let create_table =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (optional string) ~doc:"STRING NameString"
+       and tableInput =
+         flag "table-input" (optional json_arg) ~doc:"JSON TableInput"
        and partitionIndexes =
          flag "partition-indexes" (optional json_arg)
            ~doc:"JSON PartitionIndexList"
        and transactionId =
          flag "transaction-id" (optional string)
            ~doc:"STRING TransactionIdString"
+       and openTableFormatInput =
+         flag "open-table-format-input" (optional json_arg)
+           ~doc:"JSON OpenTableFormatInput"
        and databaseName =
-         flag "database-name" (required string) ~doc:"STRING NameString"
-       and tableInput =
-         flag "table-input" (required json_arg) ~doc:"JSON TableInput" in
+         flag "database-name" (required string) ~doc:"STRING NameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_table
-           (Values.CreateTableRequest.make ?catalogId
+           (Values.CreateTableRequest.make ?catalogId ?name
+              ?tableInput:(Option.map ~f:Values.TableInput.of_json tableInput)
               ?partitionIndexes:(Option.map
                                    ~f:Values.PartitionIndexList.of_json
                                    partitionIndexes) ?transactionId
-              ~databaseName
-              ~tableInput:(Values.TableInput.of_json tableInput) ())
+              ?openTableFormatInput:(Option.map
+                                       ~f:Values.OpenTableFormatInput.of_json
+                                       openTableFormatInput) ~databaseName ())
            (Some Values.CreateTableResponse.to_json)
            (Some Values.CreateTableResponse.error_to_json)])
+let create_table_optimizer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON TableOptimizerType"
+       and tableOptimizerConfiguration =
+         flag "table-optimizer-configuration" (required json_arg)
+           ~doc:"JSON TableOptimizerConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_table_optimizer
+           (Values.CreateTableOptimizerRequest.make ~catalogId ~databaseName
+              ~tableName ~type_:(Values.TableOptimizerType.of_json type_)
+              ~tableOptimizerConfiguration:(Values.TableOptimizerConfiguration.of_json
+                                              tableOptimizerConfiguration) ())
+           (Some Values.CreateTableOptimizerResponse.to_json)
+           (Some Values.CreateTableOptimizerResponse.error_to_json)])
 let create_trigger =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1085,6 +1554,32 @@ let create_trigger =
               ~actions:(Values.ActionList.of_json actions) ())
            (Some Values.CreateTriggerResponse.to_json)
            (Some Values.CreateTriggerResponse.error_to_json)])
+let create_usage_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON ProfileConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_usage_profile
+           (Values.CreateUsageProfileRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~name
+              ~configuration:(Values.ProfileConfiguration.of_json
+                                configuration) ())
+           (Some Values.CreateUsageProfileResponse.to_json)
+           (Some Values.CreateUsageProfileResponse.error_to_json)])
 let create_user_defined_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1122,7 +1617,8 @@ let create_workflow =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and description =
-         flag "description" (optional string) ~doc:"STRING GenericString"
+         flag "description" (optional string)
+           ~doc:"STRING WorkflowDescriptionString"
        and defaultRunProperties =
          flag "default-run-properties" (optional json_arg)
            ~doc:"JSON WorkflowRunProperties"
@@ -1157,6 +1653,23 @@ let delete_blueprint =
            Io.delete_blueprint (Values.DeleteBlueprintRequest.make ~name ())
            (Some Values.DeleteBlueprintResponse.to_json)
            (Some Values.DeleteBlueprintResponse.error_to_json)])
+let delete_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_catalog (Values.DeleteCatalogRequest.make ~catalogId ())
+           (Some Values.DeleteCatalogResponse.to_json)
+           (Some Values.DeleteCatalogResponse.error_to_json)])
 let delete_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1230,6 +1743,28 @@ let delete_column_statistics_for_table =
               ~databaseName ~tableName ~columnName ())
            (Some Values.DeleteColumnStatisticsForTableResponse.to_json)
            (Some Values.DeleteColumnStatisticsForTableResponse.error_to_json)])
+let delete_column_statistics_task_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_column_statistics_task_settings
+           (Values.DeleteColumnStatisticsTaskSettingsRequest.make
+              ~databaseName ~tableName ())
+           (Some Values.DeleteColumnStatisticsTaskSettingsResponse.to_json)
+           (Some
+              Values.DeleteColumnStatisticsTaskSettingsResponse.error_to_json)])
 let delete_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1250,6 +1785,24 @@ let delete_connection =
            (Values.DeleteConnectionRequest.make ?catalogId ~connectionName ())
            (Some Values.DeleteConnectionResponse.to_json)
            (Some Values.DeleteConnectionResponse.error_to_json)])
+let delete_connection_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionType =
+         flag "connection-type" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connection_type
+           (Values.DeleteConnectionTypeRequest.make ~connectionType ())
+           (Some Values.DeleteConnectionTypeResponse.to_json)
+           (Some Values.DeleteConnectionTypeResponse.error_to_json)])
 let delete_crawler =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1266,6 +1819,40 @@ let delete_crawler =
            Io.delete_crawler (Values.DeleteCrawlerRequest.make ~name ())
            (Some Values.DeleteCrawlerResponse.to_json)
            (Some Values.DeleteCrawlerResponse.error_to_json)])
+let delete_custom_entity_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_custom_entity_type
+           (Values.DeleteCustomEntityTypeRequest.make ~name ())
+           (Some Values.DeleteCustomEntityTypeResponse.to_json)
+           (Some Values.DeleteCustomEntityTypeResponse.error_to_json)])
+let delete_data_quality_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_data_quality_ruleset
+           (Values.DeleteDataQualityRulesetRequest.make ~name ())
+           (Some Values.DeleteDataQualityRulesetResponse.to_json)
+           (Some Values.DeleteDataQualityRulesetResponse.error_to_json)])
 let delete_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1303,6 +1890,85 @@ let delete_dev_endpoint =
            (Values.DeleteDevEndpointRequest.make ~endpointName ())
            (Some Values.DeleteDevEndpointResponse.to_json)
            (Some Values.DeleteDevEndpointResponse.error_to_json)])
+let delete_glue_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_glue_identity_center_configuration
+           (Values.DeleteGlueIdentityCenterConfigurationRequest.make ())
+           (Some Values.DeleteGlueIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.DeleteGlueIdentityCenterConfigurationResponse.error_to_json)])
+let delete_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationIdentifier =
+         flag "integration-identifier" (required string)
+           ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_integration
+           (Values.DeleteIntegrationRequest.make ~integrationIdentifier ())
+           (Some Values.DeleteIntegrationResponse.to_json)
+           (Some Values.DeleteIntegrationResponse.error_to_json)])
+let delete_integration_resource_property =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_integration_resource_property
+           (Values.DeleteIntegrationResourcePropertyRequest.make ~resourceArn
+              ())
+           (Some Values.DeleteIntegrationResourcePropertyResponse.to_json)
+           (Some
+              Values.DeleteIntegrationResourcePropertyResponse.error_to_json)])
+let delete_integration_table_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_integration_table_properties
+           (Values.DeleteIntegrationTablePropertiesRequest.make ~resourceArn
+              ~tableName ())
+           (Some Values.DeleteIntegrationTablePropertiesResponse.to_json)
+           (Some
+              Values.DeleteIntegrationTablePropertiesResponse.error_to_json)])
 let delete_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1534,6 +2200,31 @@ let delete_table =
               ~databaseName ~name ())
            (Some Values.DeleteTableResponse.to_json)
            (Some Values.DeleteTableResponse.error_to_json)])
+let delete_table_optimizer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON TableOptimizerType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_table_optimizer
+           (Values.DeleteTableOptimizerRequest.make ~catalogId ~databaseName
+              ~tableName ~type_:(Values.TableOptimizerType.of_json type_) ())
+           (Some Values.DeleteTableOptimizerResponse.to_json)
+           (Some Values.DeleteTableOptimizerResponse.error_to_json)])
 let delete_table_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1575,6 +2266,23 @@ let delete_trigger =
            Io.delete_trigger (Values.DeleteTriggerRequest.make ~name ())
            (Some Values.DeleteTriggerResponse.to_json)
            (Some Values.DeleteTriggerResponse.error_to_json)])
+let delete_usage_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_usage_profile
+           (Values.DeleteUsageProfileRequest.make ~name ())
+           (Some Values.DeleteUsageProfileResponse.to_json)
+           (Some Values.DeleteUsageProfileResponse.error_to_json)])
 let delete_user_defined_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1614,6 +2322,103 @@ let delete_workflow =
            Io.delete_workflow (Values.DeleteWorkflowRequest.make ~name ())
            (Some Values.DeleteWorkflowResponse.to_json)
            (Some Values.DeleteWorkflowResponse.error_to_json)])
+let describe_connection_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionType =
+         flag "connection-type" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_connection_type
+           (Values.DescribeConnectionTypeRequest.make ~connectionType ())
+           (Some Values.DescribeConnectionTypeResponse.to_json)
+           (Some Values.DescribeConnectionTypeResponse.error_to_json)])
+let describe_entity =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dataStoreApiVersion =
+         flag "data-store-api-version" (optional string)
+           ~doc:"STRING ApiVersion"
+       and connectionName =
+         flag "connection-name" (required string) ~doc:"STRING NameString"
+       and entityName =
+         flag "entity-name" (required string) ~doc:"STRING EntityName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_entity
+           (Values.DescribeEntityRequest.make ?catalogId ?nextToken
+              ?dataStoreApiVersion ~connectionName ~entityName ())
+           (Some Values.DescribeEntityResponse.to_json)
+           (Some Values.DescribeEntityResponse.error_to_json)])
+let describe_inbound_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (optional string) ~doc:"STRING String128"
+       and marker = flag "marker" (optional string) ~doc:"STRING String128"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegrationInteger"
+       and targetArn =
+         flag "target-arn" (optional string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_inbound_integrations
+           (Values.DescribeInboundIntegrationsRequest.make ?integrationArn
+              ?marker ?maxRecords ?targetArn ())
+           (Some Values.DescribeInboundIntegrationsResponse.to_json)
+           (Some Values.DescribeInboundIntegrationsResponse.error_to_json)])
+let describe_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationIdentifier =
+         flag "integration-identifier" (optional string)
+           ~doc:"STRING String128"
+       and marker = flag "marker" (optional string) ~doc:"STRING String128"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegrationInteger"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON IntegrationFilterList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_integrations
+           (Values.DescribeIntegrationsRequest.make ?integrationIdentifier
+              ?marker ?maxRecords
+              ?filters:(Option.map ~f:Values.IntegrationFilterList.of_json
+                          filters) ())
+           (Some Values.DescribeIntegrationsResponse.to_json)
+           (Some Values.DescribeIntegrationsResponse.error_to_json)])
 let get_blueprint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1679,6 +2484,23 @@ let get_blueprint_runs =
               ~blueprintName ())
            (Some Values.GetBlueprintRunsResponse.to_json)
            (Some Values.GetBlueprintRunsResponse.error_to_json)])
+let get_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_catalog (Values.GetCatalogRequest.make ~catalogId ())
+           (Some Values.GetCatalogResponse.to_json)
+           (Some Values.GetCatalogResponse.error_to_json)])
 let get_catalog_import_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1697,6 +2519,34 @@ let get_catalog_import_status =
            (Values.GetCatalogImportStatusRequest.make ?catalogId ())
            (Some Values.GetCatalogImportStatusResponse.to_json)
            (Some Values.GetCatalogImportStatusResponse.error_to_json)])
+let get_catalogs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and parentCatalogId =
+         flag "parent-catalog-id" (optional string)
+           ~doc:"STRING CatalogIdString"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and recursive = flag "recursive" (optional bool) ~doc:"BOOL Boolean"
+       and includeRoot =
+         flag "include-root" (optional bool) ~doc:"BOOL NullableBoolean"
+       and hasDatabases =
+         flag "has-databases" (optional bool) ~doc:"BOOL NullableBoolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_catalogs
+           (Values.GetCatalogsRequest.make ?parentCatalogId ?nextToken
+              ?maxResults ?recursive ?includeRoot ?hasDatabases ())
+           (Some Values.GetCatalogsResponse.to_json)
+           (Some Values.GetCatalogsResponse.error_to_json)])
 let get_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1791,6 +2641,71 @@ let get_column_statistics_for_table =
               ~columnNames:(Values.GetColumnNamesList.of_json columnNames) ())
            (Some Values.GetColumnStatisticsForTableResponse.to_json)
            (Some Values.GetColumnStatisticsForTableResponse.error_to_json)])
+let get_column_statistics_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and columnStatisticsTaskRunId =
+         flag "column-statistics-task-run-id" (required string)
+           ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_column_statistics_task_run
+           (Values.GetColumnStatisticsTaskRunRequest.make
+              ~columnStatisticsTaskRunId ())
+           (Some Values.GetColumnStatisticsTaskRunResponse.to_json)
+           (Some Values.GetColumnStatisticsTaskRunResponse.error_to_json)])
+let get_column_statistics_task_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_column_statistics_task_runs
+           (Values.GetColumnStatisticsTaskRunsRequest.make ?maxResults
+              ?nextToken ~databaseName ~tableName ())
+           (Some Values.GetColumnStatisticsTaskRunsResponse.to_json)
+           (Some Values.GetColumnStatisticsTaskRunsResponse.error_to_json)])
+let get_column_statistics_task_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_column_statistics_task_settings
+           (Values.GetColumnStatisticsTaskSettingsRequest.make ~databaseName
+              ~tableName ())
+           (Some Values.GetColumnStatisticsTaskSettingsResponse.to_json)
+           (Some Values.GetColumnStatisticsTaskSettingsResponse.error_to_json)])
 let get_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1805,12 +2720,18 @@ let get_connection =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
        and hidePassword =
          flag "hide-password" (optional bool) ~doc:"BOOL Boolean"
+       and applyOverrideForComputeEnvironment =
+         flag "apply-override-for-compute-environment" (optional json_arg)
+           ~doc:"JSON ComputeEnvironment"
        and name = flag "name" (required string) ~doc:"STRING NameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_connection
-           (Values.GetConnectionRequest.make ?catalogId ?hidePassword ~name
-              ()) (Some Values.GetConnectionResponse.to_json)
+           (Values.GetConnectionRequest.make ?catalogId ?hidePassword
+              ?applyOverrideForComputeEnvironment:(Option.map
+                                                     ~f:Values.ComputeEnvironment.of_json
+                                                     applyOverrideForComputeEnvironment)
+              ~name ()) (Some Values.GetConnectionResponse.to_json)
            (Some Values.GetConnectionResponse.error_to_json)])
 let get_connections =
   Command.async ~summary:""
@@ -1898,6 +2819,23 @@ let get_crawlers =
            (Values.GetCrawlersRequest.make ?maxResults ?nextToken ())
            (Some Values.GetCrawlersResponse.to_json)
            (Some Values.GetCrawlersResponse.error_to_json)])
+let get_custom_entity_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_custom_entity_type
+           (Values.GetCustomEntityTypeRequest.make ~name ())
+           (Some Values.GetCustomEntityTypeResponse.to_json)
+           (Some Values.GetCustomEntityTypeResponse.error_to_json)])
 let get_data_catalog_encryption_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1917,6 +2855,118 @@ let get_data_catalog_encryption_settings =
            (Some Values.GetDataCatalogEncryptionSettingsResponse.to_json)
            (Some
               Values.GetDataCatalogEncryptionSettingsResponse.error_to_json)])
+let get_data_quality_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and statisticId =
+         flag "statistic-id" (optional string) ~doc:"STRING HashString"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_model
+           (Values.GetDataQualityModelRequest.make ?statisticId ~profileId ())
+           (Some Values.GetDataQualityModelResponse.to_json)
+           (Some Values.GetDataQualityModelResponse.error_to_json)])
+let get_data_quality_model_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and statisticId =
+         flag "statistic-id" (required string) ~doc:"STRING HashString"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_model_result
+           (Values.GetDataQualityModelResultRequest.make ~statisticId
+              ~profileId ())
+           (Some Values.GetDataQualityModelResultResponse.to_json)
+           (Some Values.GetDataQualityModelResultResponse.error_to_json)])
+let get_data_quality_result =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resultId =
+         flag "result-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_result
+           (Values.GetDataQualityResultRequest.make ~resultId ())
+           (Some Values.GetDataQualityResultResponse.to_json)
+           (Some Values.GetDataQualityResultResponse.error_to_json)])
+let get_data_quality_rule_recommendation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and runId = flag "run-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_rule_recommendation_run
+           (Values.GetDataQualityRuleRecommendationRunRequest.make ~runId ())
+           (Some Values.GetDataQualityRuleRecommendationRunResponse.to_json)
+           (Some
+              Values.GetDataQualityRuleRecommendationRunResponse.error_to_json)])
+let get_data_quality_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_ruleset
+           (Values.GetDataQualityRulesetRequest.make ~name ())
+           (Some Values.GetDataQualityRulesetResponse.to_json)
+           (Some Values.GetDataQualityRulesetResponse.error_to_json)])
+let get_data_quality_ruleset_evaluation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and runId = flag "run-id" (required string) ~doc:"STRING HashString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_data_quality_ruleset_evaluation_run
+           (Values.GetDataQualityRulesetEvaluationRunRequest.make ~runId ())
+           (Some Values.GetDataQualityRulesetEvaluationRunResponse.to_json)
+           (Some
+              Values.GetDataQualityRulesetEvaluationRunResponse.error_to_json)])
 let get_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1954,14 +3004,20 @@ let get_databases =
          flag "max-results" (optional int) ~doc:"INT CatalogGetterPageSize"
        and resourceShareType =
          flag "resource-share-type" (optional json_arg)
-           ~doc:"JSON ResourceShareType" in
+           ~doc:"JSON ResourceShareType"
+       and attributesToGet =
+         flag "attributes-to-get" (optional json_arg)
+           ~doc:"JSON DatabaseAttributesList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_databases
            (Values.GetDatabasesRequest.make ?catalogId ?nextToken ?maxResults
               ?resourceShareType:(Option.map
                                     ~f:Values.ResourceShareType.of_json
-                                    resourceShareType) ())
+                                    resourceShareType)
+              ?attributesToGet:(Option.map
+                                  ~f:Values.DatabaseAttributesList.of_json
+                                  attributesToGet) ())
            (Some Values.GetDatabasesResponse.to_json)
            (Some Values.GetDatabasesResponse.error_to_json)])
 let get_dataflow_graph =
@@ -2019,6 +3075,109 @@ let get_dev_endpoints =
            (Values.GetDevEndpointsRequest.make ?maxResults ?nextToken ())
            (Some Values.GetDevEndpointsResponse.to_json)
            (Some Values.GetDevEndpointsResponse.error_to_json)])
+let get_entity_records =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionName =
+         flag "connection-name" (optional string) ~doc:"STRING NameString"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dataStoreApiVersion =
+         flag "data-store-api-version" (optional string)
+           ~doc:"STRING ApiVersion"
+       and connectionOptions =
+         flag "connection-options" (optional json_arg)
+           ~doc:"JSON ConnectionOptions"
+       and filterPredicate =
+         flag "filter-predicate" (optional string)
+           ~doc:"STRING FilterPredicate"
+       and orderBy = flag "order-by" (optional string) ~doc:"STRING String"
+       and selectedFields =
+         flag "selected-fields" (optional json_arg)
+           ~doc:"JSON SelectedFields"
+       and entityName =
+         flag "entity-name" (required string) ~doc:"STRING EntityName"
+       and limit = flag "limit" (required json_arg) ~doc:"JSON Limit" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_entity_records
+           (Values.GetEntityRecordsRequest.make ?connectionName ?catalogId
+              ?nextToken ?dataStoreApiVersion
+              ?connectionOptions:(Option.map
+                                    ~f:Values.ConnectionOptions.of_json
+                                    connectionOptions) ?filterPredicate
+              ?orderBy
+              ?selectedFields:(Option.map ~f:Values.SelectedFields.of_json
+                                 selectedFields) ~entityName
+              ~limit:(Values.Limit.of_json limit) ())
+           (Some Values.GetEntityRecordsResponse.to_json)
+           (Some Values.GetEntityRecordsResponse.error_to_json)])
+let get_glue_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_glue_identity_center_configuration
+           (Values.GetGlueIdentityCenterConfigurationRequest.make ())
+           (Some Values.GetGlueIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.GetGlueIdentityCenterConfigurationResponse.error_to_json)])
+let get_integration_resource_property =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_integration_resource_property
+           (Values.GetIntegrationResourcePropertyRequest.make ~resourceArn ())
+           (Some Values.GetIntegrationResourcePropertyResponse.to_json)
+           (Some Values.GetIntegrationResourcePropertyResponse.error_to_json)])
+let get_integration_table_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_integration_table_properties
+           (Values.GetIntegrationTablePropertiesRequest.make ~resourceArn
+              ~tableName ())
+           (Some Values.GetIntegrationTablePropertiesResponse.to_json)
+           (Some Values.GetIntegrationTablePropertiesResponse.error_to_json)])
 let get_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2088,7 +3247,9 @@ let get_job_runs =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT OrchestrationPageSize200"
        and jobName =
          flag "job-name" (required string) ~doc:"STRING NameString" in
        fun () ->
@@ -2233,6 +3394,29 @@ let get_mapping =
               ~source:(Values.CatalogEntry.of_json source) ())
            (Some Values.GetMappingResponse.to_json)
            (Some Values.GetMappingResponse.error_to_json)])
+let get_materialized_view_refresh_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING NameString"
+       and materializedViewRefreshTaskRunId =
+         flag "materialized-view-refresh-task-run-id" (required string)
+           ~doc:"STRING UUIDv4" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_materialized_view_refresh_task_run
+           (Values.GetMaterializedViewRefreshTaskRunRequest.make ~catalogId
+              ~materializedViewRefreshTaskRunId ())
+           (Some Values.GetMaterializedViewRefreshTaskRunResponse.to_json)
+           (Some
+              Values.GetMaterializedViewRefreshTaskRunResponse.error_to_json)])
 let get_partition =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2245,6 +3429,8 @@ let get_partition =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and tableName =
@@ -2255,8 +3441,9 @@ let get_partition =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_partition
-           (Values.GetPartitionRequest.make ?catalogId ~databaseName
-              ~tableName
+           (Values.GetPartitionRequest.make ?catalogId
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ~databaseName ~tableName
               ~partitionValues:(Values.ValueStringList.of_json
                                   partitionValues) ())
            (Some Values.GetPartitionResponse.to_json)
@@ -2312,6 +3499,8 @@ let get_partitions =
            ~doc:"STRING TransactionIdString"
        and queryAsOfTime =
          flag "query-as-of-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and tableName =
@@ -2324,7 +3513,9 @@ let get_partitions =
               ?segment:(Option.map ~f:Values.Segment.of_json segment)
               ?maxResults ?excludeColumnSchema ?transactionId
               ?queryAsOfTime:(Option.map ~f:Values.Timestamp.of_json
-                                queryAsOfTime) ~databaseName ~tableName ())
+                                queryAsOfTime)
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ~databaseName ~tableName ())
            (Some Values.GetPartitionsResponse.to_json)
            (Some Values.GetPartitionsResponse.error_to_json)])
 let get_plan =
@@ -2619,6 +3810,11 @@ let get_table =
            ~doc:"STRING TransactionIdString"
        and queryAsOfTime =
          flag "query-as-of-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and includeStatusDetails =
+         flag "include-status-details" (optional bool)
+           ~doc:"BOOL BooleanNullable"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and name = flag "name" (required string) ~doc:"STRING NameString" in
@@ -2627,9 +3823,36 @@ let get_table =
            Io.get_table
            (Values.GetTableRequest.make ?catalogId ?transactionId
               ?queryAsOfTime:(Option.map ~f:Values.Timestamp.of_json
-                                queryAsOfTime) ~databaseName ~name ())
-           (Some Values.GetTableResponse.to_json)
+                                queryAsOfTime)
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ?includeStatusDetails
+              ~databaseName ~name ()) (Some Values.GetTableResponse.to_json)
            (Some Values.GetTableResponse.error_to_json)])
+let get_table_optimizer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON TableOptimizerType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_table_optimizer
+           (Values.GetTableOptimizerRequest.make ~catalogId ~databaseName
+              ~tableName ~type_:(Values.TableOptimizerType.of_json type_) ())
+           (Some Values.GetTableOptimizerResponse.to_json)
+           (Some Values.GetTableOptimizerResponse.error_to_json)])
 let get_table_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2644,6 +3867,8 @@ let get_table_version =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
        and versionId =
          flag "version-id" (optional string) ~doc:"STRING VersionString"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and tableName =
@@ -2652,7 +3877,8 @@ let get_table_version =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_table_version
            (Values.GetTableVersionRequest.make ?catalogId ?versionId
-              ~databaseName ~tableName ())
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ~databaseName ~tableName ())
            (Some Values.GetTableVersionResponse.to_json)
            (Some Values.GetTableVersionResponse.error_to_json)])
 let get_table_versions =
@@ -2671,6 +3897,8 @@ let get_table_versions =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT CatalogGetterPageSize"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString"
        and tableName =
@@ -2679,7 +3907,9 @@ let get_table_versions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_table_versions
            (Values.GetTableVersionsRequest.make ?catalogId ?nextToken
-              ?maxResults ~databaseName ~tableName ())
+              ?maxResults
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ~databaseName ~tableName ())
            (Some Values.GetTableVersionsResponse.to_json)
            (Some Values.GetTableVersionsResponse.error_to_json)])
 let get_tables =
@@ -2705,6 +3935,14 @@ let get_tables =
            ~doc:"STRING TransactionIdString"
        and queryAsOfTime =
          flag "query-as-of-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and auditContext =
+         flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and includeStatusDetails =
+         flag "include-status-details" (optional bool)
+           ~doc:"BOOL BooleanNullable"
+       and attributesToGet =
+         flag "attributes-to-get" (optional json_arg)
+           ~doc:"JSON TableAttributesList"
        and databaseName =
          flag "database-name" (required string) ~doc:"STRING NameString" in
        fun () ->
@@ -2713,7 +3951,12 @@ let get_tables =
            (Values.GetTablesRequest.make ?catalogId ?expression ?nextToken
               ?maxResults ?transactionId
               ?queryAsOfTime:(Option.map ~f:Values.Timestamp.of_json
-                                queryAsOfTime) ~databaseName ())
+                                queryAsOfTime)
+              ?auditContext:(Option.map ~f:Values.AuditContext.of_json
+                               auditContext) ?includeStatusDetails
+              ?attributesToGet:(Option.map
+                                  ~f:Values.TableAttributesList.of_json
+                                  attributesToGet) ~databaseName ())
            (Some Values.GetTablesResponse.to_json)
            (Some Values.GetTablesResponse.error_to_json)])
 let get_tags =
@@ -2763,7 +4006,9 @@ let get_triggers =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
        and dependentJobName =
          flag "dependent-job-name" (optional string) ~doc:"STRING NameString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize" in
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT OrchestrationPageSize200" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_triggers
@@ -2780,8 +4025,12 @@ let get_unfiltered_partition_metadata =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and region = flag "region" (optional string) ~doc:"STRING ValueString"
        and auditContext =
          flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and querySessionContext =
+         flag "query-session-context" (optional json_arg)
+           ~doc:"JSON QuerySessionContext"
        and catalogId =
          flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
        and databaseName =
@@ -2797,10 +4046,13 @@ let get_unfiltered_partition_metadata =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_unfiltered_partition_metadata
-           (Values.GetUnfilteredPartitionMetadataRequest.make
+           (Values.GetUnfilteredPartitionMetadataRequest.make ?region
               ?auditContext:(Option.map ~f:Values.AuditContext.of_json
-                               auditContext) ~catalogId ~databaseName
-              ~tableName
+                               auditContext)
+              ?querySessionContext:(Option.map
+                                      ~f:Values.QuerySessionContext.of_json
+                                      querySessionContext) ~catalogId
+              ~databaseName ~tableName
               ~partitionValues:(Values.ValueStringList.of_json
                                   partitionValues)
               ~supportedPermissionTypes:(Values.PermissionTypeList.of_json
@@ -2817,6 +4069,7 @@ let get_unfiltered_partitions_metadata =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and region = flag "region" (optional string) ~doc:"STRING ValueString"
        and expression =
          flag "expression" (optional string) ~doc:"STRING PredicateString"
        and auditContext =
@@ -2825,6 +4078,9 @@ let get_unfiltered_partitions_metadata =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and segment = flag "segment" (optional json_arg) ~doc:"JSON Segment"
        and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and querySessionContext =
+         flag "query-session-context" (optional json_arg)
+           ~doc:"JSON QuerySessionContext"
        and catalogId =
          flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
        and databaseName =
@@ -2837,11 +4093,16 @@ let get_unfiltered_partitions_metadata =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_unfiltered_partitions_metadata
-           (Values.GetUnfilteredPartitionsMetadataRequest.make ?expression
+           (Values.GetUnfilteredPartitionsMetadataRequest.make ?region
+              ?expression
               ?auditContext:(Option.map ~f:Values.AuditContext.of_json
                                auditContext) ?nextToken
               ?segment:(Option.map ~f:Values.Segment.of_json segment)
-              ?maxResults ~catalogId ~databaseName ~tableName
+              ?maxResults
+              ?querySessionContext:(Option.map
+                                      ~f:Values.QuerySessionContext.of_json
+                                      querySessionContext) ~catalogId
+              ~databaseName ~tableName
               ~supportedPermissionTypes:(Values.PermissionTypeList.of_json
                                            supportedPermissionTypes) ())
            (Some Values.GetUnfilteredPartitionsMetadataResponse.to_json)
@@ -2856,8 +4117,21 @@ let get_unfiltered_table_metadata =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and region = flag "region" (optional string) ~doc:"STRING ValueString"
        and auditContext =
          flag "audit-context" (optional json_arg) ~doc:"JSON AuditContext"
+       and parentResourceArn =
+         flag "parent-resource-arn" (optional string) ~doc:"STRING ArnString"
+       and rootResourceArn =
+         flag "root-resource-arn" (optional string) ~doc:"STRING ArnString"
+       and supportedDialect =
+         flag "supported-dialect" (optional json_arg)
+           ~doc:"JSON SupportedDialect"
+       and permissions =
+         flag "permissions" (optional json_arg) ~doc:"JSON PermissionList"
+       and querySessionContext =
+         flag "query-session-context" (optional json_arg)
+           ~doc:"JSON QuerySessionContext"
        and catalogId =
          flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
        and databaseName =
@@ -2869,13 +4143,39 @@ let get_unfiltered_table_metadata =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_unfiltered_table_metadata
-           (Values.GetUnfilteredTableMetadataRequest.make
+           (Values.GetUnfilteredTableMetadataRequest.make ?region
               ?auditContext:(Option.map ~f:Values.AuditContext.of_json
-                               auditContext) ~catalogId ~databaseName ~name
+                               auditContext) ?parentResourceArn
+              ?rootResourceArn
+              ?supportedDialect:(Option.map
+                                   ~f:Values.SupportedDialect.of_json
+                                   supportedDialect)
+              ?permissions:(Option.map ~f:Values.PermissionList.of_json
+                              permissions)
+              ?querySessionContext:(Option.map
+                                      ~f:Values.QuerySessionContext.of_json
+                                      querySessionContext) ~catalogId
+              ~databaseName ~name
               ~supportedPermissionTypes:(Values.PermissionTypeList.of_json
                                            supportedPermissionTypes) ())
            (Some Values.GetUnfilteredTableMetadataResponse.to_json)
            (Some Values.GetUnfilteredTableMetadataResponse.error_to_json)])
+let get_usage_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_usage_profile (Values.GetUsageProfileRequest.make ~name ())
+           (Some Values.GetUsageProfileResponse.to_json)
+           (Some Values.GetUsageProfileResponse.error_to_json)])
 let get_user_defined_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2913,6 +4213,8 @@ let get_user_defined_functions =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
        and databaseName =
          flag "database-name" (optional string) ~doc:"STRING NameString"
+       and functionType =
+         flag "function-type" (optional json_arg) ~doc:"JSON FunctionType"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING Token"
        and maxResults =
@@ -2923,8 +4225,10 @@ let get_user_defined_functions =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_user_defined_functions
            (Values.GetUserDefinedFunctionsRequest.make ?catalogId
-              ?databaseName ?nextToken ?maxResults ~pattern ())
-           (Some Values.GetUserDefinedFunctionsResponse.to_json)
+              ?databaseName
+              ?functionType:(Option.map ~f:Values.FunctionType.of_json
+                               functionType) ?nextToken ?maxResults ~pattern
+              ()) (Some Values.GetUserDefinedFunctionsResponse.to_json)
            (Some Values.GetUserDefinedFunctionsResponse.error_to_json)])
 let get_workflow =
   Command.async ~summary:""
@@ -3036,7 +4340,8 @@ let list_blueprints =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT OrchestrationPageSize25"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -3045,6 +4350,46 @@ let list_blueprints =
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
            (Some Values.ListBlueprintsResponse.to_json)
            (Some Values.ListBlueprintsResponse.error_to_json)])
+let list_column_statistics_task_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_column_statistics_task_runs
+           (Values.ListColumnStatisticsTaskRunsRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListColumnStatisticsTaskRunsResponse.to_json)
+           (Some Values.ListColumnStatisticsTaskRunsResponse.error_to_json)])
+let list_connection_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connection_types
+           (Values.ListConnectionTypesRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListConnectionTypesResponse.to_json)
+           (Some Values.ListConnectionTypesResponse.error_to_json)])
 let list_crawlers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3066,6 +4411,215 @@ let list_crawlers =
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
            (Some Values.ListCrawlersResponse.to_json)
            (Some Values.ListCrawlersResponse.error_to_json)])
+let list_crawls =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON CrawlsFilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and crawlerName =
+         flag "crawler-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_crawls
+           (Values.ListCrawlsRequest.make ?maxResults
+              ?filters:(Option.map ~f:Values.CrawlsFilterList.of_json filters)
+              ?nextToken ~crawlerName ())
+           (Some Values.ListCrawlsResponse.to_json)
+           (Some Values.ListCrawlsResponse.error_to_json)])
+let list_custom_entity_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_custom_entity_types
+           (Values.ListCustomEntityTypesRequest.make ?nextToken ?maxResults
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
+           (Some Values.ListCustomEntityTypesResponse.to_json)
+           (Some Values.ListCustomEntityTypesResponse.error_to_json)])
+let list_data_quality_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON DataQualityResultFilterCriteria"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_results
+           (Values.ListDataQualityResultsRequest.make
+              ?filter:(Option.map
+                         ~f:Values.DataQualityResultFilterCriteria.of_json
+                         filter) ?nextToken ?maxResults ())
+           (Some Values.ListDataQualityResultsResponse.to_json)
+           (Some Values.ListDataQualityResultsResponse.error_to_json)])
+let list_data_quality_rule_recommendation_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON DataQualityRuleRecommendationRunFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_rule_recommendation_runs
+           (Values.ListDataQualityRuleRecommendationRunsRequest.make
+              ?filter:(Option.map
+                         ~f:Values.DataQualityRuleRecommendationRunFilter.of_json
+                         filter) ?nextToken ?maxResults ())
+           (Some Values.ListDataQualityRuleRecommendationRunsResponse.to_json)
+           (Some
+              Values.ListDataQualityRuleRecommendationRunsResponse.error_to_json)])
+let list_data_quality_ruleset_evaluation_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON DataQualityRulesetEvaluationRunFilter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_ruleset_evaluation_runs
+           (Values.ListDataQualityRulesetEvaluationRunsRequest.make
+              ?filter:(Option.map
+                         ~f:Values.DataQualityRulesetEvaluationRunFilter.of_json
+                         filter) ?nextToken ?maxResults ())
+           (Some Values.ListDataQualityRulesetEvaluationRunsResponse.to_json)
+           (Some
+              Values.ListDataQualityRulesetEvaluationRunsResponse.error_to_json)])
+let list_data_quality_rulesets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and filter =
+         flag "filter" (optional json_arg)
+           ~doc:"JSON DataQualityRulesetFilterCriteria"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_rulesets
+           (Values.ListDataQualityRulesetsRequest.make ?nextToken ?maxResults
+              ?filter:(Option.map
+                         ~f:Values.DataQualityRulesetFilterCriteria.of_json
+                         filter)
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
+           (Some Values.ListDataQualityRulesetsResponse.to_json)
+           (Some Values.ListDataQualityRulesetsResponse.error_to_json)])
+let list_data_quality_statistic_annotations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and statisticId =
+         flag "statistic-id" (optional string) ~doc:"STRING HashString"
+       and profileId =
+         flag "profile-id" (optional string) ~doc:"STRING HashString"
+       and timestampFilter =
+         flag "timestamp-filter" (optional json_arg)
+           ~doc:"JSON TimestampFilter"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_statistic_annotations
+           (Values.ListDataQualityStatisticAnnotationsRequest.make
+              ?statisticId ?profileId
+              ?timestampFilter:(Option.map ~f:Values.TimestampFilter.of_json
+                                  timestampFilter) ?maxResults ?nextToken ())
+           (Some Values.ListDataQualityStatisticAnnotationsResponse.to_json)
+           (Some
+              Values.ListDataQualityStatisticAnnotationsResponse.error_to_json)])
+let list_data_quality_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and statisticId =
+         flag "statistic-id" (optional string) ~doc:"STRING HashString"
+       and profileId =
+         flag "profile-id" (optional string) ~doc:"STRING HashString"
+       and timestampFilter =
+         flag "timestamp-filter" (optional json_arg)
+           ~doc:"JSON TimestampFilter"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_data_quality_statistics
+           (Values.ListDataQualityStatisticsRequest.make ?statisticId
+              ?profileId
+              ?timestampFilter:(Option.map ~f:Values.TimestampFilter.of_json
+                                  timestampFilter) ?maxResults ?nextToken ())
+           (Some Values.ListDataQualityStatisticsResponse.to_json)
+           (Some Values.ListDataQualityStatisticsResponse.error_to_json)])
 let list_dev_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3087,6 +4641,60 @@ let list_dev_endpoints =
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
            (Some Values.ListDevEndpointsResponse.to_json)
            (Some Values.ListDevEndpointsResponse.error_to_json)])
+let list_entities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionName =
+         flag "connection-name" (optional string) ~doc:"STRING NameString"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and parentEntityName =
+         flag "parent-entity-name" (optional string) ~doc:"STRING EntityName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dataStoreApiVersion =
+         flag "data-store-api-version" (optional string)
+           ~doc:"STRING ApiVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_entities
+           (Values.ListEntitiesRequest.make ?connectionName ?catalogId
+              ?parentEntityName ?nextToken ?dataStoreApiVersion ())
+           (Some Values.ListEntitiesResponse.to_json)
+           (Some Values.ListEntitiesResponse.error_to_json)])
+let list_integration_resource_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING String1024"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON IntegrationResourcePropertyFilterList"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegrationInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_integration_resource_properties
+           (Values.ListIntegrationResourcePropertiesRequest.make ?marker
+              ?filters:(Option.map
+                          ~f:Values.IntegrationResourcePropertyFilterList.of_json
+                          filters) ?maxRecords ())
+           (Some Values.ListIntegrationResourcePropertiesResponse.to_json)
+           (Some
+              Values.ListIntegrationResourcePropertiesResponse.error_to_json)])
 let list_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3137,6 +4745,33 @@ let list_m_l_transforms =
               ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ())
            (Some Values.ListMLTransformsResponse.to_json)
            (Some Values.ListMLTransformsResponse.error_to_json)])
+let list_materialized_view_refresh_task_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (optional string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (optional string) ~doc:"STRING NameString"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_materialized_view_refresh_task_runs
+           (Values.ListMaterializedViewRefreshTaskRunsRequest.make
+              ?databaseName ?tableName ?maxResults ?nextToken ~catalogId ())
+           (Some Values.ListMaterializedViewRefreshTaskRunsResponse.to_json)
+           (Some
+              Values.ListMaterializedViewRefreshTaskRunsResponse.error_to_json)])
 let list_registries =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3254,6 +4889,38 @@ let list_statements =
            (Values.ListStatementsRequest.make ?requestOrigin ?nextToken
               ~sessionId ()) (Some Values.ListStatementsResponse.to_json)
            (Some Values.ListStatementsResponse.error_to_json)])
+let list_table_optimizer_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxListTableOptimizerRunsTokenResults"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ListTableOptimizerRunsToken"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON TableOptimizerType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_table_optimizer_runs
+           (Values.ListTableOptimizerRunsRequest.make ?maxResults ?nextToken
+              ~catalogId ~databaseName ~tableName
+              ~type_:(Values.TableOptimizerType.of_json type_) ())
+           (Some Values.ListTableOptimizerRunsResponse.to_json)
+           (Some Values.ListTableOptimizerRunsResponse.error_to_json)])
 let list_triggers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3268,7 +4935,9 @@ let list_triggers =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
        and dependentJobName =
          flag "dependent-job-name" (optional string) ~doc:"STRING NameString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT OrchestrationPageSize200"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -3277,6 +4946,27 @@ let list_triggers =
               ?maxResults ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
               ()) (Some Values.ListTriggersResponse.to_json)
            (Some Values.ListTriggersResponse.error_to_json)])
+let list_usage_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING OrchestrationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT OrchestrationPageSize200" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_usage_profiles
+           (Values.ListUsageProfilesRequest.make ?nextToken ?maxResults ())
+           (Some Values.ListUsageProfilesResponse.to_json)
+           (Some Values.ListUsageProfilesResponse.error_to_json)])
 let list_workflows =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3289,13 +4979,47 @@ let list_workflows =
            ~doc:"URL override endpoint url"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
-       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize" in
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT OrchestrationPageSize25" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_workflows
            (Values.ListWorkflowsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListWorkflowsResponse.to_json)
            (Some Values.ListWorkflowsResponse.error_to_json)])
+let modify_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING IntegrationDescription"
+       and dataFilter =
+         flag "data-filter" (optional string) ~doc:"STRING String2048"
+       and integrationConfig =
+         flag "integration-config" (optional json_arg)
+           ~doc:"JSON IntegrationConfig"
+       and integrationName =
+         flag "integration-name" (optional string) ~doc:"STRING String128"
+       and integrationIdentifier =
+         flag "integration-identifier" (required string)
+           ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_integration
+           (Values.ModifyIntegrationRequest.make ?description ?dataFilter
+              ?integrationConfig:(Option.map
+                                    ~f:Values.IntegrationConfig.of_json
+                                    integrationConfig) ?integrationName
+              ~integrationIdentifier ())
+           (Some Values.ModifyIntegrationResponse.to_json)
+           (Some Values.ModifyIntegrationResponse.error_to_json)])
 let put_data_catalog_encryption_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3321,6 +5045,29 @@ let put_data_catalog_encryption_settings =
            (Some Values.PutDataCatalogEncryptionSettingsResponse.to_json)
            (Some
               Values.PutDataCatalogEncryptionSettingsResponse.error_to_json)])
+let put_data_quality_profile_annotation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING HashString"
+       and inclusionAnnotation =
+         flag "inclusion-annotation" (required json_arg)
+           ~doc:"JSON InclusionAnnotationValue" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_data_quality_profile_annotation
+           (Values.PutDataQualityProfileAnnotationRequest.make ~profileId
+              ~inclusionAnnotation:(Values.InclusionAnnotationValue.of_json
+                                      inclusionAnnotation) ())
+           (Some Values.PutDataQualityProfileAnnotationResponse.to_json)
+           (Some Values.PutDataQualityProfileAnnotationResponse.error_to_json)])
 let put_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3451,6 +5198,49 @@ let query_schema_version_metadata =
                                metadataList) ?maxResults ?nextToken ())
            (Some Values.QuerySchemaVersionMetadataResponse.to_json)
            (Some Values.QuerySchemaVersionMetadataResponse.error_to_json)])
+let register_connection_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and connectionType =
+         flag "connection-type" (required string) ~doc:"STRING NameString"
+       and integrationType =
+         flag "integration-type" (required json_arg)
+           ~doc:"JSON IntegrationType"
+       and connectionProperties =
+         flag "connection-properties" (required json_arg)
+           ~doc:"JSON ConnectionPropertiesConfiguration"
+       and connectorAuthenticationConfiguration =
+         flag "connector-authentication-configuration" (required json_arg)
+           ~doc:"JSON ConnectorAuthenticationConfiguration"
+       and restConfiguration =
+         flag "rest-configuration" (required json_arg)
+           ~doc:"JSON RestConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_connection_type
+           (Values.RegisterConnectionTypeRequest.make ?description
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~connectionType
+              ~integrationType:(Values.IntegrationType.of_json
+                                  integrationType)
+              ~connectionProperties:(Values.ConnectionPropertiesConfiguration.of_json
+                                       connectionProperties)
+              ~connectorAuthenticationConfiguration:(Values.ConnectorAuthenticationConfiguration.of_json
+                                                       connectorAuthenticationConfiguration)
+              ~restConfiguration:(Values.RestConfiguration.of_json
+                                    restConfiguration) ())
+           (Some Values.RegisterConnectionTypeResponse.to_json)
+           (Some Values.RegisterConnectionTypeResponse.error_to_json)])
 let register_schema_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3593,7 +5383,10 @@ let search_tables =
        and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
        and resourceShareType =
          flag "resource-share-type" (optional json_arg)
-           ~doc:"JSON ResourceShareType" in
+           ~doc:"JSON ResourceShareType"
+       and includeStatusDetails =
+         flag "include-status-details" (optional bool)
+           ~doc:"BOOL BooleanNullable" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_tables
@@ -3604,8 +5397,8 @@ let search_tables =
                                sortCriteria) ?maxResults
               ?resourceShareType:(Option.map
                                     ~f:Values.ResourceShareType.of_json
-                                    resourceShareType) ())
-           (Some Values.SearchTablesResponse.to_json)
+                                    resourceShareType) ?includeStatusDetails
+              ()) (Some Values.SearchTablesResponse.to_json)
            (Some Values.SearchTablesResponse.error_to_json)])
 let start_blueprint_run =
   Command.async ~summary:""
@@ -3632,6 +5425,63 @@ let start_blueprint_run =
            (Values.StartBlueprintRunRequest.make ?parameters ~blueprintName
               ~roleArn ()) (Some Values.StartBlueprintRunResponse.to_json)
            (Some Values.StartBlueprintRunResponse.error_to_json)])
+let start_column_statistics_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and columnNameList =
+         flag "column-name-list" (optional json_arg)
+           ~doc:"JSON ColumnNameList"
+       and sampleSize =
+         flag "sample-size" (optional float)
+           ~doc:"FLOAT SampleSizePercentage"
+       and catalogID =
+         flag "catalog-i-d" (optional string) ~doc:"STRING NameString"
+       and securityConfiguration =
+         flag "security-configuration" (optional string)
+           ~doc:"STRING NameString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and role = flag "role" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_column_statistics_task_run
+           (Values.StartColumnStatisticsTaskRunRequest.make
+              ?columnNameList:(Option.map ~f:Values.ColumnNameList.of_json
+                                 columnNameList) ?sampleSize ?catalogID
+              ?securityConfiguration ~databaseName ~tableName ~role ())
+           (Some Values.StartColumnStatisticsTaskRunResponse.to_json)
+           (Some Values.StartColumnStatisticsTaskRunResponse.error_to_json)])
+let start_column_statistics_task_run_schedule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_column_statistics_task_run_schedule
+           (Values.StartColumnStatisticsTaskRunScheduleRequest.make
+              ~databaseName ~tableName ())
+           (Some Values.StartColumnStatisticsTaskRunScheduleResponse.to_json)
+           (Some
+              Values.StartColumnStatisticsTaskRunScheduleResponse.error_to_json)])
 let start_crawler =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3666,6 +5516,82 @@ let start_crawler_schedule =
            (Values.StartCrawlerScheduleRequest.make ~crawlerName ())
            (Some Values.StartCrawlerScheduleResponse.to_json)
            (Some Values.StartCrawlerScheduleResponse.error_to_json)])
+let start_data_quality_rule_recommendation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and numberOfWorkers =
+         flag "number-of-workers" (optional int) ~doc:"INT NullableInteger"
+       and timeout = flag "timeout" (optional int) ~doc:"INT Timeout"
+       and createdRulesetName =
+         flag "created-ruleset-name" (optional string)
+           ~doc:"STRING NameString"
+       and dataQualitySecurityConfiguration =
+         flag "data-quality-security-configuration" (optional string)
+           ~doc:"STRING NameString"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING HashString"
+       and dataSource =
+         flag "data-source" (required json_arg) ~doc:"JSON DataSource"
+       and role = flag "role" (required string) ~doc:"STRING RoleString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_data_quality_rule_recommendation_run
+           (Values.StartDataQualityRuleRecommendationRunRequest.make
+              ?numberOfWorkers ?timeout ?createdRulesetName
+              ?dataQualitySecurityConfiguration ?clientToken
+              ~dataSource:(Values.DataSource.of_json dataSource) ~role ())
+           (Some Values.StartDataQualityRuleRecommendationRunResponse.to_json)
+           (Some
+              Values.StartDataQualityRuleRecommendationRunResponse.error_to_json)])
+let start_data_quality_ruleset_evaluation_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and numberOfWorkers =
+         flag "number-of-workers" (optional int) ~doc:"INT NullableInteger"
+       and timeout = flag "timeout" (optional int) ~doc:"INT Timeout"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING HashString"
+       and additionalRunOptions =
+         flag "additional-run-options" (optional json_arg)
+           ~doc:"JSON DataQualityEvaluationRunAdditionalRunOptions"
+       and additionalDataSources =
+         flag "additional-data-sources" (optional json_arg)
+           ~doc:"JSON DataSourceMap"
+       and dataSource =
+         flag "data-source" (required json_arg) ~doc:"JSON DataSource"
+       and role = flag "role" (required string) ~doc:"STRING RoleString"
+       and rulesetNames =
+         flag "ruleset-names" (required json_arg) ~doc:"JSON RulesetNames" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_data_quality_ruleset_evaluation_run
+           (Values.StartDataQualityRulesetEvaluationRunRequest.make
+              ?numberOfWorkers ?timeout ?clientToken
+              ?additionalRunOptions:(Option.map
+                                       ~f:Values.DataQualityEvaluationRunAdditionalRunOptions.of_json
+                                       additionalRunOptions)
+              ?additionalDataSources:(Option.map
+                                        ~f:Values.DataSourceMap.of_json
+                                        additionalDataSources)
+              ~dataSource:(Values.DataSource.of_json dataSource) ~role
+              ~rulesetNames:(Values.RulesetNames.of_json rulesetNames) ())
+           (Some Values.StartDataQualityRulesetEvaluationRunResponse.to_json)
+           (Some
+              Values.StartDataQualityRulesetEvaluationRunResponse.error_to_json)])
 let start_export_labels_task_run =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3720,6 +5646,9 @@ let start_job_run =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and jobRunQueuingEnabled =
+         flag "job-run-queuing-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and jobRunId =
          flag "job-run-id" (optional string) ~doc:"STRING IdString"
        and arguments =
@@ -3739,20 +5668,28 @@ let start_job_run =
          flag "worker-type" (optional json_arg) ~doc:"JSON WorkerType"
        and numberOfWorkers =
          flag "number-of-workers" (optional int) ~doc:"INT NullableInteger"
+       and executionClass =
+         flag "execution-class" (optional json_arg)
+           ~doc:"JSON ExecutionClass"
+       and executionRoleSessionPolicy =
+         flag "execution-role-session-policy" (optional string)
+           ~doc:"STRING OrchestrationPolicyJsonString"
        and jobName =
          flag "job-name" (required string) ~doc:"STRING NameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_job_run
-           (Values.StartJobRunRequest.make ?jobRunId
+           (Values.StartJobRunRequest.make ?jobRunQueuingEnabled ?jobRunId
               ?arguments:(Option.map ~f:Values.GenericMap.of_json arguments)
               ?allocatedCapacity ?timeout ?maxCapacity ?securityConfiguration
               ?notificationProperty:(Option.map
                                        ~f:Values.NotificationProperty.of_json
                                        notificationProperty)
               ?workerType:(Option.map ~f:Values.WorkerType.of_json workerType)
-              ?numberOfWorkers ~jobName ())
-           (Some Values.StartJobRunResponse.to_json)
+              ?numberOfWorkers
+              ?executionClass:(Option.map ~f:Values.ExecutionClass.of_json
+                                 executionClass) ?executionRoleSessionPolicy
+              ~jobName ()) (Some Values.StartJobRunResponse.to_json)
            (Some Values.StartJobRunResponse.error_to_json)])
 let start_m_l_evaluation_task_run =
   Command.async ~summary:""
@@ -3794,6 +5731,32 @@ let start_m_l_labeling_set_generation_task_run =
            (Some Values.StartMLLabelingSetGenerationTaskRunResponse.to_json)
            (Some
               Values.StartMLLabelingSetGenerationTaskRunResponse.error_to_json)])
+let start_materialized_view_refresh_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and fullRefresh =
+         flag "full-refresh" (optional bool) ~doc:"BOOL NullableBoolean"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING NameString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_materialized_view_refresh_task_run
+           (Values.StartMaterializedViewRefreshTaskRunRequest.make
+              ?fullRefresh ~catalogId ~databaseName ~tableName ())
+           (Some Values.StartMaterializedViewRefreshTaskRunResponse.to_json)
+           (Some
+              Values.StartMaterializedViewRefreshTaskRunResponse.error_to_json)])
 let start_trigger =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3833,6 +5796,49 @@ let start_workflow_run =
                                 runProperties) ~name ())
            (Some Values.StartWorkflowRunResponse.to_json)
            (Some Values.StartWorkflowRunResponse.error_to_json)])
+let stop_column_statistics_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING DatabaseName"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_column_statistics_task_run
+           (Values.StopColumnStatisticsTaskRunRequest.make ~databaseName
+              ~tableName ())
+           (Some Values.StopColumnStatisticsTaskRunResponse.to_json)
+           (Some Values.StopColumnStatisticsTaskRunResponse.error_to_json)])
+let stop_column_statistics_task_run_schedule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_column_statistics_task_run_schedule
+           (Values.StopColumnStatisticsTaskRunScheduleRequest.make
+              ~databaseName ~tableName ())
+           (Some Values.StopColumnStatisticsTaskRunScheduleResponse.to_json)
+           (Some
+              Values.StopColumnStatisticsTaskRunScheduleResponse.error_to_json)])
 let stop_crawler =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3867,6 +5873,30 @@ let stop_crawler_schedule =
            (Values.StopCrawlerScheduleRequest.make ~crawlerName ())
            (Some Values.StopCrawlerScheduleResponse.to_json)
            (Some Values.StopCrawlerScheduleResponse.error_to_json)])
+let stop_materialized_view_refresh_task_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING NameString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_materialized_view_refresh_task_run
+           (Values.StopMaterializedViewRefreshTaskRunRequest.make ~catalogId
+              ~databaseName ~tableName ())
+           (Some Values.StopMaterializedViewRefreshTaskRunResponse.to_json)
+           (Some
+              Values.StopMaterializedViewRefreshTaskRunResponse.error_to_json)])
 let stop_session =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3942,6 +5972,32 @@ let tag_resource =
               ~tagsToAdd:(Values.TagsMap.of_json tagsToAdd) ())
            (Some Values.TagResourceResponse.to_json)
            (Some Values.TagResourceResponse.error_to_json)])
+let test_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionName =
+         flag "connection-name" (optional string) ~doc:"STRING NameString"
+       and catalogId =
+         flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and testConnectionInput =
+         flag "test-connection-input" (optional json_arg)
+           ~doc:"JSON TestConnectionInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_connection
+           (Values.TestConnectionRequest.make ?connectionName ?catalogId
+              ?testConnectionInput:(Option.map
+                                      ~f:Values.TestConnectionInput.of_json
+                                      testConnectionInput) ())
+           (Some Values.TestConnectionResponse.to_json)
+           (Some Values.TestConnectionResponse.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3988,6 +6044,27 @@ let update_blueprint =
               ~blueprintLocation ())
            (Some Values.UpdateBlueprintResponse.to_json)
            (Some Values.UpdateBlueprintResponse.error_to_json)])
+let update_catalog =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and catalogInput =
+         flag "catalog-input" (required json_arg) ~doc:"JSON CatalogInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_catalog
+           (Values.UpdateCatalogRequest.make ~catalogId
+              ~catalogInput:(Values.CatalogInput.of_json catalogInput) ())
+           (Some Values.UpdateCatalogResponse.to_json)
+           (Some Values.UpdateCatalogResponse.error_to_json)])
 let update_classifier =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4090,6 +6167,45 @@ let update_column_statistics_for_table =
                                        columnStatisticsList) ())
            (Some Values.UpdateColumnStatisticsForTableResponse.to_json)
            (Some Values.UpdateColumnStatisticsForTableResponse.error_to_json)])
+let update_column_statistics_task_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and role = flag "role" (optional string) ~doc:"STRING NameString"
+       and schedule =
+         flag "schedule" (optional string) ~doc:"STRING CronExpression"
+       and columnNameList =
+         flag "column-name-list" (optional json_arg)
+           ~doc:"JSON ColumnNameList"
+       and sampleSize =
+         flag "sample-size" (optional float)
+           ~doc:"FLOAT SampleSizePercentage"
+       and catalogID =
+         flag "catalog-i-d" (optional string) ~doc:"STRING NameString"
+       and securityConfiguration =
+         flag "security-configuration" (optional string)
+           ~doc:"STRING NameString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_column_statistics_task_settings
+           (Values.UpdateColumnStatisticsTaskSettingsRequest.make ?role
+              ?schedule
+              ?columnNameList:(Option.map ~f:Values.ColumnNameList.of_json
+                                 columnNameList) ?sampleSize ?catalogID
+              ?securityConfiguration ~databaseName ~tableName ())
+           (Some Values.UpdateColumnStatisticsTaskSettingsResponse.to_json)
+           (Some
+              Values.UpdateColumnStatisticsTaskSettingsResponse.error_to_json)])
 let update_connection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4199,6 +6315,29 @@ let update_crawler_schedule =
            (Values.UpdateCrawlerScheduleRequest.make ?schedule ~crawlerName
               ()) (Some Values.UpdateCrawlerScheduleResponse.to_json)
            (Some Values.UpdateCrawlerScheduleResponse.error_to_json)])
+let update_data_quality_ruleset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and ruleset =
+         flag "ruleset" (optional string)
+           ~doc:"STRING DataQualityRulesetString"
+       and name = flag "name" (required string) ~doc:"STRING NameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_data_quality_ruleset
+           (Values.UpdateDataQualityRulesetRequest.make ?description ?ruleset
+              ~name ())
+           (Some Values.UpdateDataQualityRulesetResponse.to_json)
+           (Some Values.UpdateDataQualityRulesetResponse.error_to_json)])
 let update_database =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4267,6 +6406,97 @@ let update_dev_endpoint =
                                addArguments) ~endpointName ())
            (Some Values.UpdateDevEndpointResponse.to_json)
            (Some Values.UpdateDevEndpointResponse.error_to_json)])
+let update_glue_identity_center_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scopes =
+         flag "scopes" (optional json_arg)
+           ~doc:"JSON IdentityCenterScopesList"
+       and userBackgroundSessionsEnabled =
+         flag "user-background-sessions-enabled" (optional bool)
+           ~doc:"BOOL NullableBoolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_glue_identity_center_configuration
+           (Values.UpdateGlueIdentityCenterConfigurationRequest.make
+              ?scopes:(Option.map ~f:Values.IdentityCenterScopesList.of_json
+                         scopes) ?userBackgroundSessionsEnabled ())
+           (Some Values.UpdateGlueIdentityCenterConfigurationResponse.to_json)
+           (Some
+              Values.UpdateGlueIdentityCenterConfigurationResponse.error_to_json)])
+let update_integration_resource_property =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceProcessingProperties =
+         flag "source-processing-properties" (optional json_arg)
+           ~doc:"JSON SourceProcessingProperties"
+       and targetProcessingProperties =
+         flag "target-processing-properties" (optional json_arg)
+           ~doc:"JSON TargetProcessingProperties"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_integration_resource_property
+           (Values.UpdateIntegrationResourcePropertyRequest.make
+              ?sourceProcessingProperties:(Option.map
+                                             ~f:Values.SourceProcessingProperties.of_json
+                                             sourceProcessingProperties)
+              ?targetProcessingProperties:(Option.map
+                                             ~f:Values.TargetProcessingProperties.of_json
+                                             targetProcessingProperties)
+              ~resourceArn ())
+           (Some Values.UpdateIntegrationResourcePropertyResponse.to_json)
+           (Some
+              Values.UpdateIntegrationResourcePropertyResponse.error_to_json)])
+let update_integration_table_properties =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceTableConfig =
+         flag "source-table-config" (optional json_arg)
+           ~doc:"JSON SourceTableConfig"
+       and targetTableConfig =
+         flag "target-table-config" (optional json_arg)
+           ~doc:"JSON TargetTableConfig"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String512"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING String128" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_integration_table_properties
+           (Values.UpdateIntegrationTablePropertiesRequest.make
+              ?sourceTableConfig:(Option.map
+                                    ~f:Values.SourceTableConfig.of_json
+                                    sourceTableConfig)
+              ?targetTableConfig:(Option.map
+                                    ~f:Values.TargetTableConfig.of_json
+                                    targetTableConfig) ~resourceArn
+              ~tableName ())
+           (Some Values.UpdateIntegrationTablePropertiesResponse.to_json)
+           (Some
+              Values.UpdateIntegrationTablePropertiesResponse.error_to_json)])
 let update_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4288,6 +6518,47 @@ let update_job =
               ~jobUpdate:(Values.JobUpdate.of_json jobUpdate) ())
            (Some Values.UpdateJobResponse.to_json)
            (Some Values.UpdateJobResponse.error_to_json)])
+let update_job_from_source_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobName =
+         flag "job-name" (optional string) ~doc:"STRING NameString"
+       and provider =
+         flag "provider" (optional json_arg)
+           ~doc:"JSON SourceControlProvider"
+       and repositoryName =
+         flag "repository-name" (optional string) ~doc:"STRING NameString"
+       and repositoryOwner =
+         flag "repository-owner" (optional string) ~doc:"STRING NameString"
+       and branchName =
+         flag "branch-name" (optional string) ~doc:"STRING NameString"
+       and folder = flag "folder" (optional string) ~doc:"STRING NameString"
+       and commitId =
+         flag "commit-id" (optional string) ~doc:"STRING CommitIdString"
+       and authStrategy =
+         flag "auth-strategy" (optional json_arg)
+           ~doc:"JSON SourceControlAuthStrategy"
+       and authToken =
+         flag "auth-token" (optional string) ~doc:"STRING AuthTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_job_from_source_control
+           (Values.UpdateJobFromSourceControlRequest.make ?jobName
+              ?provider:(Option.map ~f:Values.SourceControlProvider.of_json
+                           provider) ?repositoryName ?repositoryOwner
+              ?branchName ?folder ?commitId
+              ?authStrategy:(Option.map
+                               ~f:Values.SourceControlAuthStrategy.of_json
+                               authStrategy) ?authToken ())
+           (Some Values.UpdateJobFromSourceControlResponse.to_json)
+           (Some Values.UpdateJobFromSourceControlResponse.error_to_json)])
 let update_m_l_transform =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4413,6 +6684,47 @@ let update_schema =
               ~schemaId:(Values.SchemaId.of_json schemaId) ())
            (Some Values.UpdateSchemaResponse.to_json)
            (Some Values.UpdateSchemaResponse.error_to_json)])
+let update_source_control_from_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobName =
+         flag "job-name" (optional string) ~doc:"STRING NameString"
+       and provider =
+         flag "provider" (optional json_arg)
+           ~doc:"JSON SourceControlProvider"
+       and repositoryName =
+         flag "repository-name" (optional string) ~doc:"STRING NameString"
+       and repositoryOwner =
+         flag "repository-owner" (optional string) ~doc:"STRING NameString"
+       and branchName =
+         flag "branch-name" (optional string) ~doc:"STRING NameString"
+       and folder = flag "folder" (optional string) ~doc:"STRING NameString"
+       and commitId =
+         flag "commit-id" (optional string) ~doc:"STRING CommitIdString"
+       and authStrategy =
+         flag "auth-strategy" (optional json_arg)
+           ~doc:"JSON SourceControlAuthStrategy"
+       and authToken =
+         flag "auth-token" (optional string) ~doc:"STRING AuthTokenString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_source_control_from_job
+           (Values.UpdateSourceControlFromJobRequest.make ?jobName
+              ?provider:(Option.map ~f:Values.SourceControlProvider.of_json
+                           provider) ?repositoryName ?repositoryOwner
+              ?branchName ?folder ?commitId
+              ?authStrategy:(Option.map
+                               ~f:Values.SourceControlAuthStrategy.of_json
+                               authStrategy) ?authToken ())
+           (Some Values.UpdateSourceControlFromJobResponse.to_json)
+           (Some Values.UpdateSourceControlFromJobResponse.error_to_json)])
 let update_table =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4425,6 +6737,9 @@ let update_table =
            ~doc:"URL override endpoint url"
        and catalogId =
          flag "catalog-id" (optional string) ~doc:"STRING CatalogIdString"
+       and name = flag "name" (optional string) ~doc:"STRING NameString"
+       and tableInput =
+         flag "table-input" (optional json_arg) ~doc:"JSON TableInput"
        and skipArchive =
          flag "skip-archive" (optional bool) ~doc:"BOOL BooleanNullable"
        and transactionId =
@@ -4432,18 +6747,59 @@ let update_table =
            ~doc:"STRING TransactionIdString"
        and versionId =
          flag "version-id" (optional string) ~doc:"STRING VersionString"
+       and viewUpdateAction =
+         flag "view-update-action" (optional json_arg)
+           ~doc:"JSON ViewUpdateAction"
+       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
+       and updateOpenTableFormatInput =
+         flag "update-open-table-format-input" (optional json_arg)
+           ~doc:"JSON UpdateOpenTableFormatInput"
        and databaseName =
-         flag "database-name" (required string) ~doc:"STRING NameString"
-       and tableInput =
-         flag "table-input" (required json_arg) ~doc:"JSON TableInput" in
+         flag "database-name" (required string) ~doc:"STRING NameString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_table
-           (Values.UpdateTableRequest.make ?catalogId ?skipArchive
-              ?transactionId ?versionId ~databaseName
-              ~tableInput:(Values.TableInput.of_json tableInput) ())
-           (Some Values.UpdateTableResponse.to_json)
+           (Values.UpdateTableRequest.make ?catalogId ?name
+              ?tableInput:(Option.map ~f:Values.TableInput.of_json tableInput)
+              ?skipArchive ?transactionId ?versionId
+              ?viewUpdateAction:(Option.map
+                                   ~f:Values.ViewUpdateAction.of_json
+                                   viewUpdateAction) ?force
+              ?updateOpenTableFormatInput:(Option.map
+                                             ~f:Values.UpdateOpenTableFormatInput.of_json
+                                             updateOpenTableFormatInput)
+              ~databaseName ()) (Some Values.UpdateTableResponse.to_json)
            (Some Values.UpdateTableResponse.error_to_json)])
+let update_table_optimizer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and catalogId =
+         flag "catalog-id" (required string) ~doc:"STRING CatalogIdString"
+       and databaseName =
+         flag "database-name" (required string) ~doc:"STRING NameString"
+       and tableName =
+         flag "table-name" (required string) ~doc:"STRING NameString"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON TableOptimizerType"
+       and tableOptimizerConfiguration =
+         flag "table-optimizer-configuration" (required json_arg)
+           ~doc:"JSON TableOptimizerConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_table_optimizer
+           (Values.UpdateTableOptimizerRequest.make ~catalogId ~databaseName
+              ~tableName ~type_:(Values.TableOptimizerType.of_json type_)
+              ~tableOptimizerConfiguration:(Values.TableOptimizerConfiguration.of_json
+                                              tableOptimizerConfiguration) ())
+           (Some Values.UpdateTableOptimizerResponse.to_json)
+           (Some Values.UpdateTableOptimizerResponse.error_to_json)])
 let update_trigger =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4464,6 +6820,30 @@ let update_trigger =
               ~triggerUpdate:(Values.TriggerUpdate.of_json triggerUpdate) ())
            (Some Values.UpdateTriggerResponse.to_json)
            (Some Values.UpdateTriggerResponse.error_to_json)])
+let update_usage_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING DescriptionString"
+       and name = flag "name" (required string) ~doc:"STRING NameString"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON ProfileConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_usage_profile
+           (Values.UpdateUsageProfileRequest.make ?description ~name
+              ~configuration:(Values.ProfileConfiguration.of_json
+                                configuration) ())
+           (Some Values.UpdateUsageProfileResponse.to_json)
+           (Some Values.UpdateUsageProfileResponse.error_to_json)])
 let update_user_defined_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4503,7 +6883,8 @@ let update_workflow =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and description =
-         flag "description" (optional string) ~doc:"STRING GenericString"
+         flag "description" (optional string)
+           ~doc:"STRING WorkflowDescriptionString"
        and defaultRunProperties =
          flag "default-run-properties" (optional json_arg)
            ~doc:"JSON WorkflowRunProperties"
@@ -4530,22 +6911,43 @@ let main =
     ("batch-delete-table-version", batch_delete_table_version);
     ("batch-get-blueprints", batch_get_blueprints);
     ("batch-get-crawlers", batch_get_crawlers);
+    ("batch-get-custom-entity-types", batch_get_custom_entity_types);
+    ("batch-get-data-quality-result", batch_get_data_quality_result);
     ("batch-get-dev-endpoints", batch_get_dev_endpoints);
     ("batch-get-jobs", batch_get_jobs);
     ("batch-get-partition", batch_get_partition);
+    ("batch-get-table-optimizer", batch_get_table_optimizer);
     ("batch-get-triggers", batch_get_triggers);
     ("batch-get-workflows", batch_get_workflows);
+    ("batch-put-data-quality-statistic-annotation",
+      batch_put_data_quality_statistic_annotation);
     ("batch-stop-job-run", batch_stop_job_run);
     ("batch-update-partition", batch_update_partition);
+    ("cancel-data-quality-rule-recommendation-run",
+      cancel_data_quality_rule_recommendation_run);
+    ("cancel-data-quality-ruleset-evaluation-run",
+      cancel_data_quality_ruleset_evaluation_run);
     ("cancel-m-l-task-run", cancel_m_l_task_run);
     ("cancel-statement", cancel_statement);
     ("check-schema-version-validity", check_schema_version_validity);
     ("create-blueprint", create_blueprint);
+    ("create-catalog", create_catalog);
     ("create-classifier", create_classifier);
+    ("create-column-statistics-task-settings",
+      create_column_statistics_task_settings);
     ("create-connection", create_connection);
     ("create-crawler", create_crawler);
+    ("create-custom-entity-type", create_custom_entity_type);
+    ("create-data-quality-ruleset", create_data_quality_ruleset);
     ("create-database", create_database);
     ("create-dev-endpoint", create_dev_endpoint);
+    ("create-glue-identity-center-configuration",
+      create_glue_identity_center_configuration);
+    ("create-integration", create_integration);
+    ("create-integration-resource-property",
+      create_integration_resource_property);
+    ("create-integration-table-properties",
+      create_integration_table_properties);
     ("create-job", create_job);
     ("create-m-l-transform", create_m_l_transform);
     ("create-partition", create_partition);
@@ -4556,19 +6958,34 @@ let main =
     ("create-security-configuration", create_security_configuration);
     ("create-session", create_session);
     ("create-table", create_table);
+    ("create-table-optimizer", create_table_optimizer);
     ("create-trigger", create_trigger);
+    ("create-usage-profile", create_usage_profile);
     ("create-user-defined-function", create_user_defined_function);
     ("create-workflow", create_workflow);
     ("delete-blueprint", delete_blueprint);
+    ("delete-catalog", delete_catalog);
     ("delete-classifier", delete_classifier);
     ("delete-column-statistics-for-partition",
       delete_column_statistics_for_partition);
     ("delete-column-statistics-for-table",
       delete_column_statistics_for_table);
+    ("delete-column-statistics-task-settings",
+      delete_column_statistics_task_settings);
     ("delete-connection", delete_connection);
+    ("delete-connection-type", delete_connection_type);
     ("delete-crawler", delete_crawler);
+    ("delete-custom-entity-type", delete_custom_entity_type);
+    ("delete-data-quality-ruleset", delete_data_quality_ruleset);
     ("delete-database", delete_database);
     ("delete-dev-endpoint", delete_dev_endpoint);
+    ("delete-glue-identity-center-configuration",
+      delete_glue_identity_center_configuration);
+    ("delete-integration", delete_integration);
+    ("delete-integration-resource-property",
+      delete_integration_resource_property);
+    ("delete-integration-table-properties",
+      delete_integration_table_properties);
     ("delete-job", delete_job);
     ("delete-m-l-transform", delete_m_l_transform);
     ("delete-partition", delete_partition);
@@ -4580,31 +6997,57 @@ let main =
     ("delete-security-configuration", delete_security_configuration);
     ("delete-session", delete_session);
     ("delete-table", delete_table);
+    ("delete-table-optimizer", delete_table_optimizer);
     ("delete-table-version", delete_table_version);
     ("delete-trigger", delete_trigger);
+    ("delete-usage-profile", delete_usage_profile);
     ("delete-user-defined-function", delete_user_defined_function);
     ("delete-workflow", delete_workflow);
+    ("describe-connection-type", describe_connection_type);
+    ("describe-entity", describe_entity);
+    ("describe-inbound-integrations", describe_inbound_integrations);
+    ("describe-integrations", describe_integrations);
     ("get-blueprint", get_blueprint);
     ("get-blueprint-run", get_blueprint_run);
     ("get-blueprint-runs", get_blueprint_runs);
+    ("get-catalog", get_catalog);
     ("get-catalog-import-status", get_catalog_import_status);
+    ("get-catalogs", get_catalogs);
     ("get-classifier", get_classifier);
     ("get-classifiers", get_classifiers);
     ("get-column-statistics-for-partition",
       get_column_statistics_for_partition);
     ("get-column-statistics-for-table", get_column_statistics_for_table);
+    ("get-column-statistics-task-run", get_column_statistics_task_run);
+    ("get-column-statistics-task-runs", get_column_statistics_task_runs);
+    ("get-column-statistics-task-settings",
+      get_column_statistics_task_settings);
     ("get-connection", get_connection);
     ("get-connections", get_connections);
     ("get-crawler", get_crawler);
     ("get-crawler-metrics", get_crawler_metrics);
     ("get-crawlers", get_crawlers);
+    ("get-custom-entity-type", get_custom_entity_type);
     ("get-data-catalog-encryption-settings",
       get_data_catalog_encryption_settings);
+    ("get-data-quality-model", get_data_quality_model);
+    ("get-data-quality-model-result", get_data_quality_model_result);
+    ("get-data-quality-result", get_data_quality_result);
+    ("get-data-quality-rule-recommendation-run",
+      get_data_quality_rule_recommendation_run);
+    ("get-data-quality-ruleset", get_data_quality_ruleset);
+    ("get-data-quality-ruleset-evaluation-run",
+      get_data_quality_ruleset_evaluation_run);
     ("get-database", get_database);
     ("get-databases", get_databases);
     ("get-dataflow-graph", get_dataflow_graph);
     ("get-dev-endpoint", get_dev_endpoint);
     ("get-dev-endpoints", get_dev_endpoints);
+    ("get-entity-records", get_entity_records);
+    ("get-glue-identity-center-configuration",
+      get_glue_identity_center_configuration);
+    ("get-integration-resource-property", get_integration_resource_property);
+    ("get-integration-table-properties", get_integration_table_properties);
     ("get-job", get_job);
     ("get-job-bookmark", get_job_bookmark);
     ("get-job-run", get_job_run);
@@ -4615,6 +7058,8 @@ let main =
     ("get-m-l-transform", get_m_l_transform);
     ("get-m-l-transforms", get_m_l_transforms);
     ("get-mapping", get_mapping);
+    ("get-materialized-view-refresh-task-run",
+      get_materialized_view_refresh_task_run);
     ("get-partition", get_partition);
     ("get-partition-indexes", get_partition_indexes);
     ("get-partitions", get_partitions);
@@ -4631,6 +7076,7 @@ let main =
     ("get-session", get_session);
     ("get-statement", get_statement);
     ("get-table", get_table);
+    ("get-table-optimizer", get_table_optimizer);
     ("get-table-version", get_table_version);
     ("get-table-versions", get_table_versions);
     ("get-tables", get_tables);
@@ -4641,6 +7087,7 @@ let main =
     ("get-unfiltered-partitions-metadata",
       get_unfiltered_partitions_metadata);
     ("get-unfiltered-table-metadata", get_unfiltered_table_metadata);
+    ("get-usage-profile", get_usage_profile);
     ("get-user-defined-function", get_user_defined_function);
     ("get-user-defined-functions", get_user_defined_functions);
     ("get-workflow", get_workflow);
@@ -4649,23 +7096,47 @@ let main =
     ("get-workflow-runs", get_workflow_runs);
     ("import-catalog-to-glue", import_catalog_to_glue);
     ("list-blueprints", list_blueprints);
+    ("list-column-statistics-task-runs", list_column_statistics_task_runs);
+    ("list-connection-types", list_connection_types);
     ("list-crawlers", list_crawlers);
+    ("list-crawls", list_crawls);
+    ("list-custom-entity-types", list_custom_entity_types);
+    ("list-data-quality-results", list_data_quality_results);
+    ("list-data-quality-rule-recommendation-runs",
+      list_data_quality_rule_recommendation_runs);
+    ("list-data-quality-ruleset-evaluation-runs",
+      list_data_quality_ruleset_evaluation_runs);
+    ("list-data-quality-rulesets", list_data_quality_rulesets);
+    ("list-data-quality-statistic-annotations",
+      list_data_quality_statistic_annotations);
+    ("list-data-quality-statistics", list_data_quality_statistics);
     ("list-dev-endpoints", list_dev_endpoints);
+    ("list-entities", list_entities);
+    ("list-integration-resource-properties",
+      list_integration_resource_properties);
     ("list-jobs", list_jobs);
     ("list-m-l-transforms", list_m_l_transforms);
+    ("list-materialized-view-refresh-task-runs",
+      list_materialized_view_refresh_task_runs);
     ("list-registries", list_registries);
     ("list-schema-versions", list_schema_versions);
     ("list-schemas", list_schemas);
     ("list-sessions", list_sessions);
     ("list-statements", list_statements);
+    ("list-table-optimizer-runs", list_table_optimizer_runs);
     ("list-triggers", list_triggers);
+    ("list-usage-profiles", list_usage_profiles);
     ("list-workflows", list_workflows);
+    ("modify-integration", modify_integration);
     ("put-data-catalog-encryption-settings",
       put_data_catalog_encryption_settings);
+    ("put-data-quality-profile-annotation",
+      put_data_quality_profile_annotation);
     ("put-resource-policy", put_resource_policy);
     ("put-schema-version-metadata", put_schema_version_metadata);
     ("put-workflow-run-properties", put_workflow_run_properties);
     ("query-schema-version-metadata", query_schema_version_metadata);
+    ("register-connection-type", register_connection_type);
     ("register-schema-version", register_schema_version);
     ("remove-schema-version-metadata", remove_schema_version_metadata);
     ("reset-job-bookmark", reset_job_bookmark);
@@ -4673,40 +7144,69 @@ let main =
     ("run-statement", run_statement);
     ("search-tables", search_tables);
     ("start-blueprint-run", start_blueprint_run);
+    ("start-column-statistics-task-run", start_column_statistics_task_run);
+    ("start-column-statistics-task-run-schedule",
+      start_column_statistics_task_run_schedule);
     ("start-crawler", start_crawler);
     ("start-crawler-schedule", start_crawler_schedule);
+    ("start-data-quality-rule-recommendation-run",
+      start_data_quality_rule_recommendation_run);
+    ("start-data-quality-ruleset-evaluation-run",
+      start_data_quality_ruleset_evaluation_run);
     ("start-export-labels-task-run", start_export_labels_task_run);
     ("start-import-labels-task-run", start_import_labels_task_run);
     ("start-job-run", start_job_run);
     ("start-m-l-evaluation-task-run", start_m_l_evaluation_task_run);
     ("start-m-l-labeling-set-generation-task-run",
       start_m_l_labeling_set_generation_task_run);
+    ("start-materialized-view-refresh-task-run",
+      start_materialized_view_refresh_task_run);
     ("start-trigger", start_trigger);
     ("start-workflow-run", start_workflow_run);
+    ("stop-column-statistics-task-run", stop_column_statistics_task_run);
+    ("stop-column-statistics-task-run-schedule",
+      stop_column_statistics_task_run_schedule);
     ("stop-crawler", stop_crawler);
     ("stop-crawler-schedule", stop_crawler_schedule);
+    ("stop-materialized-view-refresh-task-run",
+      stop_materialized_view_refresh_task_run);
     ("stop-session", stop_session);
     ("stop-trigger", stop_trigger);
     ("stop-workflow-run", stop_workflow_run);
     ("tag-resource", tag_resource);
+    ("test-connection", test_connection);
     ("untag-resource", untag_resource);
     ("update-blueprint", update_blueprint);
+    ("update-catalog", update_catalog);
     ("update-classifier", update_classifier);
     ("update-column-statistics-for-partition",
       update_column_statistics_for_partition);
     ("update-column-statistics-for-table",
       update_column_statistics_for_table);
+    ("update-column-statistics-task-settings",
+      update_column_statistics_task_settings);
     ("update-connection", update_connection);
     ("update-crawler", update_crawler);
     ("update-crawler-schedule", update_crawler_schedule);
+    ("update-data-quality-ruleset", update_data_quality_ruleset);
     ("update-database", update_database);
     ("update-dev-endpoint", update_dev_endpoint);
+    ("update-glue-identity-center-configuration",
+      update_glue_identity_center_configuration);
+    ("update-integration-resource-property",
+      update_integration_resource_property);
+    ("update-integration-table-properties",
+      update_integration_table_properties);
     ("update-job", update_job);
+    ("update-job-from-source-control", update_job_from_source_control);
     ("update-m-l-transform", update_m_l_transform);
     ("update-partition", update_partition);
     ("update-registry", update_registry);
     ("update-schema", update_schema);
+    ("update-source-control-from-job", update_source_control_from_job);
     ("update-table", update_table);
+    ("update-table-optimizer", update_table_optimizer);
     ("update-trigger", update_trigger);
+    ("update-usage-profile", update_usage_profile);
     ("update-user-defined-function", update_user_defined_function);
     ("update-workflow", update_workflow)]

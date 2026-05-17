@@ -127,7 +127,7 @@ let create_service =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and namespaceId =
-         flag "namespace-id" (optional string) ~doc:"STRING ResourceId"
+         flag "namespace-id" (optional string) ~doc:"STRING Arn"
        and creatorRequestId =
          flag "creator-request-id" (optional string) ~doc:"STRING ResourceId"
        and description =
@@ -171,7 +171,7 @@ let delete_namespace =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       and id = flag "id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_namespace (Values.DeleteNamespaceRequest.make ~id ())
@@ -187,12 +187,33 @@ let delete_service =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       and id = flag "id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_service (Values.DeleteServiceRequest.make ~id ())
            (Some Values.DeleteServiceResponse.to_json)
            (Some Values.DeleteServiceResponse.error_to_json)])
+let delete_service_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
+       and attributes =
+         flag "attributes" (required json_arg)
+           ~doc:"JSON ServiceAttributeKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_service_attributes
+           (Values.DeleteServiceAttributesRequest.make ~serviceId
+              ~attributes:(Values.ServiceAttributeKeyList.of_json attributes)
+              ()) (Some Values.DeleteServiceAttributesResponse.to_json)
+           (Some Values.DeleteServiceAttributesResponse.error_to_json)])
 let deregister_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -203,8 +224,7 @@ let deregister_instance =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING ResourceId" in
        fun () ->
@@ -233,6 +253,8 @@ let discover_instances =
        and healthStatus =
          flag "health-status" (optional json_arg)
            ~doc:"JSON HealthStatusFilter"
+       and ownerAccount =
+         flag "owner-account" (optional string) ~doc:"STRING AWSAccountId"
        and namespaceName =
          flag "namespace-name" (required string) ~doc:"STRING NamespaceName"
        and serviceName =
@@ -246,9 +268,33 @@ let discover_instances =
               ?optionalParameters:(Option.map ~f:Values.Attributes.of_json
                                      optionalParameters)
               ?healthStatus:(Option.map ~f:Values.HealthStatusFilter.of_json
-                               healthStatus) ~namespaceName ~serviceName ())
+                               healthStatus) ?ownerAccount ~namespaceName
+              ~serviceName ())
            (Some Values.DiscoverInstancesResponse.to_json)
            (Some Values.DiscoverInstancesResponse.error_to_json)])
+let discover_instances_revision =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ownerAccount =
+         flag "owner-account" (optional string) ~doc:"STRING AWSAccountId"
+       and namespaceName =
+         flag "namespace-name" (required string) ~doc:"STRING NamespaceName"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ServiceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.discover_instances_revision
+           (Values.DiscoverInstancesRevisionRequest.make ?ownerAccount
+              ~namespaceName ~serviceName ())
+           (Some Values.DiscoverInstancesRevisionResponse.to_json)
+           (Some Values.DiscoverInstancesRevisionResponse.error_to_json)])
 let get_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -259,8 +305,7 @@ let get_instance =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING ResourceId" in
        fun () ->
@@ -285,8 +330,7 @@ let get_instances_health_status =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId" in
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_instances_health_status
@@ -305,7 +349,7 @@ let get_namespace =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       and id = flag "id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_namespace (Values.GetNamespaceRequest.make ~id ())
@@ -321,11 +365,14 @@ let get_operation =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and ownerAccount =
+         flag "owner-account" (optional string) ~doc:"STRING AWSAccountId"
        and operationId =
-         flag "operation-id" (required string) ~doc:"STRING ResourceId" in
+         flag "operation-id" (required string) ~doc:"STRING OperationId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_operation (Values.GetOperationRequest.make ~operationId ())
+           Io.get_operation
+           (Values.GetOperationRequest.make ?ownerAccount ~operationId ())
            (Some Values.GetOperationResponse.to_json)
            (Some Values.GetOperationResponse.error_to_json)])
 let get_service =
@@ -338,12 +385,29 @@ let get_service =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId" in
+       and id = flag "id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_service (Values.GetServiceRequest.make ~id ())
            (Some Values.GetServiceResponse.to_json)
            (Some Values.GetServiceResponse.error_to_json)])
+let get_service_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_service_attributes
+           (Values.GetServiceAttributesRequest.make ~serviceId ())
+           (Some Values.GetServiceAttributesResponse.to_json)
+           (Some Values.GetServiceAttributesResponse.error_to_json)])
 let list_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -358,8 +422,7 @@ let list_instances =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId" in
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_instances
@@ -466,8 +529,7 @@ let register_instance =
            ~doc:"URL override endpoint url"
        and creatorRequestId =
          flag "creator-request-id" (optional string) ~doc:"STRING ResourceId"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId"
        and attributes =
@@ -534,7 +596,7 @@ let update_http_namespace =
            ~doc:"URL override endpoint url"
        and updaterRequestId =
          flag "updater-request-id" (optional string) ~doc:"STRING ResourceId"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and id = flag "id" (required string) ~doc:"STRING Arn"
        and namespace =
          flag "namespace" (required json_arg) ~doc:"JSON HttpNamespaceChange" in
        fun () ->
@@ -554,8 +616,7 @@ let update_instance_custom_health_status =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and serviceId =
-         flag "service-id" (required string) ~doc:"STRING ResourceId"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING ResourceId"
        and status =
@@ -578,7 +639,7 @@ let update_private_dns_namespace =
            ~doc:"URL override endpoint url"
        and updaterRequestId =
          flag "updater-request-id" (optional string) ~doc:"STRING ResourceId"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and id = flag "id" (required string) ~doc:"STRING Arn"
        and namespace =
          flag "namespace" (required json_arg)
            ~doc:"JSON PrivateDnsNamespaceChange" in
@@ -602,7 +663,7 @@ let update_public_dns_namespace =
            ~doc:"URL override endpoint url"
        and updaterRequestId =
          flag "updater-request-id" (optional string) ~doc:"STRING ResourceId"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and id = flag "id" (required string) ~doc:"STRING Arn"
        and namespace =
          flag "namespace" (required json_arg)
            ~doc:"JSON PublicDnsNamespaceChange" in
@@ -623,7 +684,7 @@ let update_service =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and id = flag "id" (required string) ~doc:"STRING Arn"
        and service =
          flag "service" (required json_arg) ~doc:"JSON ServiceChange" in
        fun () ->
@@ -633,6 +694,27 @@ let update_service =
               ~service:(Values.ServiceChange.of_json service) ())
            (Some Values.UpdateServiceResponse.to_json)
            (Some Values.UpdateServiceResponse.error_to_json)])
+let update_service_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceId = flag "service-id" (required string) ~doc:"STRING Arn"
+       and attributes =
+         flag "attributes" (required json_arg)
+           ~doc:"JSON ServiceAttributesMap" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_service_attributes
+           (Values.UpdateServiceAttributesRequest.make ~serviceId
+              ~attributes:(Values.ServiceAttributesMap.of_json attributes) ())
+           (Some Values.UpdateServiceAttributesResponse.to_json)
+           (Some Values.UpdateServiceAttributesResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
@@ -642,13 +724,16 @@ let main =
     ("create-service", create_service);
     ("delete-namespace", delete_namespace);
     ("delete-service", delete_service);
+    ("delete-service-attributes", delete_service_attributes);
     ("deregister-instance", deregister_instance);
     ("discover-instances", discover_instances);
+    ("discover-instances-revision", discover_instances_revision);
     ("get-instance", get_instance);
     ("get-instances-health-status", get_instances_health_status);
     ("get-namespace", get_namespace);
     ("get-operation", get_operation);
     ("get-service", get_service);
+    ("get-service-attributes", get_service_attributes);
     ("list-instances", list_instances);
     ("list-namespaces", list_namespaces);
     ("list-operations", list_operations);
@@ -662,4 +747,5 @@ let main =
       update_instance_custom_health_status);
     ("update-private-dns-namespace", update_private_dns_namespace);
     ("update-public-dns-namespace", update_public_dns_namespace);
-    ("update-service", update_service)]
+    ("update-service", update_service);
+    ("update-service-attributes", update_service_attributes)]

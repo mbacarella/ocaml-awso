@@ -8,6 +8,10 @@ type ('i, 'o, 'e) t =
   AddThingToBillingGroupResponse.t, AddThingToBillingGroupResponse.error) t 
   | AddThingToThingGroup: (AddThingToThingGroupRequest.t,
   AddThingToThingGroupResponse.t, AddThingToThingGroupResponse.error) t 
+  | AssociateSbomWithPackageVersion:
+  (AssociateSbomWithPackageVersionRequest.t,
+  AssociateSbomWithPackageVersionResponse.t,
+  AssociateSbomWithPackageVersionResponse.error) t 
   | AssociateTargetsWithJob: (AssociateTargetsWithJobRequest.t,
   AssociateTargetsWithJobResponse.t, AssociateTargetsWithJobResponse.error) t
   
@@ -46,6 +50,11 @@ type ('i, 'o, 'e) t =
   | CreateCertificateFromCsr: (CreateCertificateFromCsrRequest.t,
   CreateCertificateFromCsrResponse.t, CreateCertificateFromCsrResponse.error)
   t 
+  | CreateCertificateProvider: (CreateCertificateProviderRequest.t,
+  CreateCertificateProviderResponse.t,
+  CreateCertificateProviderResponse.error) t 
+  | CreateCommand: (CreateCommandRequest.t, CreateCommandResponse.t,
+  CreateCommandResponse.error) t 
   | CreateCustomMetric: (CreateCustomMetricRequest.t,
   CreateCustomMetricResponse.t, CreateCustomMetricResponse.error) t 
   | CreateDimension: (CreateDimensionRequest.t, CreateDimensionResponse.t,
@@ -69,6 +78,10 @@ type ('i, 'o, 'e) t =
   CreateMitigationActionResponse.t, CreateMitigationActionResponse.error) t 
   | CreateOTAUpdate: (CreateOTAUpdateRequest.t, CreateOTAUpdateResponse.t,
   CreateOTAUpdateResponse.error) t 
+  | CreatePackage: (CreatePackageRequest.t, CreatePackageResponse.t,
+  CreatePackageResponse.error) t 
+  | CreatePackageVersion: (CreatePackageVersionRequest.t,
+  CreatePackageVersionResponse.t, CreatePackageVersionResponse.error) t 
   | CreatePolicy: (CreatePolicyRequest.t, CreatePolicyResponse.t,
   CreatePolicyResponse.error) t 
   | CreatePolicyVersion: (CreatePolicyVersionRequest.t,
@@ -114,6 +127,13 @@ type ('i, 'o, 'e) t =
   | DeleteCACertificate: (DeleteCACertificateRequest.t,
   DeleteCACertificateResponse.t, DeleteCACertificateResponse.error) t 
   | DeleteCertificate: (DeleteCertificateRequest.t, unit, unit) t 
+  | DeleteCertificateProvider: (DeleteCertificateProviderRequest.t,
+  DeleteCertificateProviderResponse.t,
+  DeleteCertificateProviderResponse.error) t 
+  | DeleteCommand: (DeleteCommandRequest.t, DeleteCommandResponse.t,
+  DeleteCommandResponse.error) t 
+  | DeleteCommandExecution: (DeleteCommandExecutionRequest.t,
+  DeleteCommandExecutionResponse.t, DeleteCommandExecutionResponse.error) t 
   | DeleteCustomMetric: (DeleteCustomMetricRequest.t,
   DeleteCustomMetricResponse.t, DeleteCustomMetricResponse.error) t 
   | DeleteDimension: (DeleteDimensionRequest.t, DeleteDimensionResponse.t,
@@ -132,6 +152,10 @@ type ('i, 'o, 'e) t =
   DeleteMitigationActionResponse.t, DeleteMitigationActionResponse.error) t 
   | DeleteOTAUpdate: (DeleteOTAUpdateRequest.t, DeleteOTAUpdateResponse.t,
   DeleteOTAUpdateResponse.error) t 
+  | DeletePackage: (DeletePackageRequest.t, DeletePackageResponse.t,
+  DeletePackageResponse.error) t 
+  | DeletePackageVersion: (DeletePackageVersionRequest.t,
+  DeletePackageVersionResponse.t, DeletePackageVersionResponse.error) t 
   | DeletePolicy: (DeletePolicyRequest.t, unit, unit) t 
   | DeletePolicyVersion: (DeletePolicyVersionRequest.t, unit, unit) t 
   | DeleteProvisioningTemplate: (DeleteProvisioningTemplateRequest.t,
@@ -187,6 +211,9 @@ type ('i, 'o, 'e) t =
   DescribeCACertificateResponse.t, DescribeCACertificateResponse.error) t 
   | DescribeCertificate: (DescribeCertificateRequest.t,
   DescribeCertificateResponse.t, DescribeCertificateResponse.error) t 
+  | DescribeCertificateProvider: (DescribeCertificateProviderRequest.t,
+  DescribeCertificateProviderResponse.t,
+  DescribeCertificateProviderResponse.error) t 
   | DescribeCustomMetric: (DescribeCustomMetricRequest.t,
   DescribeCustomMetricResponse.t, DescribeCustomMetricResponse.error) t 
   | DescribeDefaultAuthorizer: (DescribeDefaultAuthorizerRequest.t,
@@ -201,6 +228,10 @@ type ('i, 'o, 'e) t =
   | DescribeDomainConfiguration: (DescribeDomainConfigurationRequest.t,
   DescribeDomainConfigurationResponse.t,
   DescribeDomainConfigurationResponse.error) t 
+  | DescribeEncryptionConfiguration:
+  (DescribeEncryptionConfigurationRequest.t,
+  DescribeEncryptionConfigurationResponse.t,
+  DescribeEncryptionConfigurationResponse.error) t 
   | DescribeEndpoint: (DescribeEndpointRequest.t, DescribeEndpointResponse.t,
   DescribeEndpointResponse.error) t 
   | DescribeEventConfigurations: (DescribeEventConfigurationsRequest.t,
@@ -254,6 +285,10 @@ type ('i, 'o, 'e) t =
   | DetachThingPrincipal: (DetachThingPrincipalRequest.t,
   DetachThingPrincipalResponse.t, DetachThingPrincipalResponse.error) t 
   | DisableTopicRule: (DisableTopicRuleRequest.t, unit, unit) t 
+  | DisassociateSbomFromPackageVersion:
+  (DisassociateSbomFromPackageVersionRequest.t,
+  DisassociateSbomFromPackageVersionResponse.t,
+  DisassociateSbomFromPackageVersionResponse.error) t 
   | EnableTopicRule: (EnableTopicRuleRequest.t, unit, unit) t 
   | GetBehaviorModelTrainingSummaries:
   (GetBehaviorModelTrainingSummariesRequest.t,
@@ -263,6 +298,10 @@ type ('i, 'o, 'e) t =
   GetBucketsAggregationResponse.t, GetBucketsAggregationResponse.error) t 
   | GetCardinality: (GetCardinalityRequest.t, GetCardinalityResponse.t,
   GetCardinalityResponse.error) t 
+  | GetCommand: (GetCommandRequest.t, GetCommandResponse.t,
+  GetCommandResponse.error) t 
+  | GetCommandExecution: (GetCommandExecutionRequest.t,
+  GetCommandExecutionResponse.t, GetCommandExecutionResponse.error) t 
   | GetEffectivePolicies: (GetEffectivePoliciesRequest.t,
   GetEffectivePoliciesResponse.t, GetEffectivePoliciesResponse.error) t 
   | GetIndexingConfiguration: (GetIndexingConfigurationRequest.t,
@@ -274,6 +313,13 @@ type ('i, 'o, 'e) t =
   GetLoggingOptionsResponse.t, GetLoggingOptionsResponse.error) t 
   | GetOTAUpdate: (GetOTAUpdateRequest.t, GetOTAUpdateResponse.t,
   GetOTAUpdateResponse.error) t 
+  | GetPackage: (GetPackageRequest.t, GetPackageResponse.t,
+  GetPackageResponse.error) t 
+  | GetPackageConfiguration: (GetPackageConfigurationRequest.t,
+  GetPackageConfigurationResponse.t, GetPackageConfigurationResponse.error) t
+  
+  | GetPackageVersion: (GetPackageVersionRequest.t,
+  GetPackageVersionResponse.t, GetPackageVersionResponse.error) t 
   | GetPercentiles: (GetPercentilesRequest.t, GetPercentilesResponse.t,
   GetPercentilesResponse.error) t 
   | GetPolicy: (GetPolicyRequest.t, GetPolicyResponse.t,
@@ -284,6 +330,9 @@ type ('i, 'o, 'e) t =
   GetRegistrationCodeResponse.t, GetRegistrationCodeResponse.error) t 
   | GetStatistics: (GetStatisticsRequest.t, GetStatisticsResponse.t,
   GetStatisticsResponse.error) t 
+  | GetThingConnectivityData: (GetThingConnectivityDataRequest.t,
+  GetThingConnectivityDataResponse.t, GetThingConnectivityDataResponse.error)
+  t 
   | GetTopicRule: (GetTopicRuleRequest.t, GetTopicRuleResponse.t,
   GetTopicRuleResponse.error) t 
   | GetTopicRuleDestination: (GetTopicRuleDestinationRequest.t,
@@ -315,10 +364,17 @@ type ('i, 'o, 'e) t =
   ListBillingGroupsResponse.t, ListBillingGroupsResponse.error) t 
   | ListCACertificates: (ListCACertificatesRequest.t,
   ListCACertificatesResponse.t, ListCACertificatesResponse.error) t 
+  | ListCertificateProviders: (ListCertificateProvidersRequest.t,
+  ListCertificateProvidersResponse.t, ListCertificateProvidersResponse.error)
+  t 
   | ListCertificates: (ListCertificatesRequest.t, ListCertificatesResponse.t,
   ListCertificatesResponse.error) t 
   | ListCertificatesByCA: (ListCertificatesByCARequest.t,
   ListCertificatesByCAResponse.t, ListCertificatesByCAResponse.error) t 
+  | ListCommandExecutions: (ListCommandExecutionsRequest.t,
+  ListCommandExecutionsResponse.t, ListCommandExecutionsResponse.error) t 
+  | ListCommands: (ListCommandsRequest.t, ListCommandsResponse.t,
+  ListCommandsResponse.error) t 
   | ListCustomMetrics: (ListCustomMetricsRequest.t,
   ListCustomMetricsResponse.t, ListCustomMetricsResponse.error) t 
   | ListDetectMitigationActionsExecutions:
@@ -360,6 +416,10 @@ type ('i, 'o, 'e) t =
   | ListOutgoingCertificates: (ListOutgoingCertificatesRequest.t,
   ListOutgoingCertificatesResponse.t, ListOutgoingCertificatesResponse.error)
   t 
+  | ListPackageVersions: (ListPackageVersionsRequest.t,
+  ListPackageVersionsResponse.t, ListPackageVersionsResponse.error) t 
+  | ListPackages: (ListPackagesRequest.t, ListPackagesResponse.t,
+  ListPackagesResponse.error) t 
   | ListPolicies: (ListPoliciesRequest.t, ListPoliciesResponse.t,
   ListPoliciesResponse.error) t 
   | ListPolicyPrincipals: (ListPolicyPrincipalsRequest.t,
@@ -370,6 +430,8 @@ type ('i, 'o, 'e) t =
   ListPrincipalPoliciesResponse.t, ListPrincipalPoliciesResponse.error) t 
   | ListPrincipalThings: (ListPrincipalThingsRequest.t,
   ListPrincipalThingsResponse.t, ListPrincipalThingsResponse.error) t 
+  | ListPrincipalThingsV2: (ListPrincipalThingsV2Request.t,
+  ListPrincipalThingsV2Response.t, ListPrincipalThingsV2Response.error) t 
   | ListProvisioningTemplateVersions:
   (ListProvisioningTemplateVersionsRequest.t,
   ListProvisioningTemplateVersionsResponse.t,
@@ -377,8 +439,15 @@ type ('i, 'o, 'e) t =
   | ListProvisioningTemplates: (ListProvisioningTemplatesRequest.t,
   ListProvisioningTemplatesResponse.t,
   ListProvisioningTemplatesResponse.error) t 
+  | ListRelatedResourcesForAuditFinding:
+  (ListRelatedResourcesForAuditFindingRequest.t,
+  ListRelatedResourcesForAuditFindingResponse.t,
+  ListRelatedResourcesForAuditFindingResponse.error) t 
   | ListRoleAliases: (ListRoleAliasesRequest.t, ListRoleAliasesResponse.t,
   ListRoleAliasesResponse.error) t 
+  | ListSbomValidationResults: (ListSbomValidationResultsRequest.t,
+  ListSbomValidationResultsResponse.t,
+  ListSbomValidationResultsResponse.error) t 
   | ListScheduledAudits: (ListScheduledAuditsRequest.t,
   ListScheduledAuditsResponse.t, ListScheduledAuditsResponse.error) t 
   | ListSecurityProfiles: (ListSecurityProfilesRequest.t,
@@ -402,6 +471,8 @@ type ('i, 'o, 'e) t =
   
   | ListThingPrincipals: (ListThingPrincipalsRequest.t,
   ListThingPrincipalsResponse.t, ListThingPrincipalsResponse.error) t 
+  | ListThingPrincipalsV2: (ListThingPrincipalsV2Request.t,
+  ListThingPrincipalsV2Response.t, ListThingPrincipalsV2Response.error) t 
   | ListThingRegistrationTaskReports:
   (ListThingRegistrationTaskReportsRequest.t,
   ListThingRegistrationTaskReportsResponse.t,
@@ -496,6 +567,11 @@ type ('i, 'o, 'e) t =
   UpdateBillingGroupResponse.t, UpdateBillingGroupResponse.error) t 
   | UpdateCACertificate: (UpdateCACertificateRequest.t, unit, unit) t 
   | UpdateCertificate: (UpdateCertificateRequest.t, unit, unit) t 
+  | UpdateCertificateProvider: (UpdateCertificateProviderRequest.t,
+  UpdateCertificateProviderResponse.t,
+  UpdateCertificateProviderResponse.error) t 
+  | UpdateCommand: (UpdateCommandRequest.t, UpdateCommandResponse.t,
+  UpdateCommandResponse.error) t 
   | UpdateCustomMetric: (UpdateCustomMetricRequest.t,
   UpdateCustomMetricResponse.t, UpdateCustomMetricResponse.error) t 
   | UpdateDimension: (UpdateDimensionRequest.t, UpdateDimensionResponse.t,
@@ -506,6 +582,9 @@ type ('i, 'o, 'e) t =
   | UpdateDynamicThingGroup: (UpdateDynamicThingGroupRequest.t,
   UpdateDynamicThingGroupResponse.t, UpdateDynamicThingGroupResponse.error) t
   
+  | UpdateEncryptionConfiguration: (UpdateEncryptionConfigurationRequest.t,
+  UpdateEncryptionConfigurationResponse.t,
+  UpdateEncryptionConfigurationResponse.error) t 
   | UpdateEventConfigurations: (UpdateEventConfigurationsRequest.t,
   UpdateEventConfigurationsResponse.t,
   UpdateEventConfigurationsResponse.error) t 
@@ -516,6 +595,13 @@ type ('i, 'o, 'e) t =
   | UpdateJob: (UpdateJobRequest.t, unit, unit) t 
   | UpdateMitigationAction: (UpdateMitigationActionRequest.t,
   UpdateMitigationActionResponse.t, UpdateMitigationActionResponse.error) t 
+  | UpdatePackage: (UpdatePackageRequest.t, UpdatePackageResponse.t,
+  UpdatePackageResponse.error) t 
+  | UpdatePackageConfiguration: (UpdatePackageConfigurationRequest.t,
+  UpdatePackageConfigurationResponse.t,
+  UpdatePackageConfigurationResponse.error) t 
+  | UpdatePackageVersion: (UpdatePackageVersionRequest.t,
+  UpdatePackageVersionResponse.t, UpdatePackageVersionResponse.error) t 
   | UpdateProvisioningTemplate: (UpdateProvisioningTemplateRequest.t,
   UpdateProvisioningTemplateResponse.t,
   UpdateProvisioningTemplateResponse.error) t 
@@ -534,6 +620,8 @@ type ('i, 'o, 'e) t =
   | UpdateThingGroupsForThing: (UpdateThingGroupsForThingRequest.t,
   UpdateThingGroupsForThingResponse.t,
   UpdateThingGroupsForThingResponse.error) t 
+  | UpdateThingType: (UpdateThingTypeRequest.t, UpdateThingTypeResponse.t,
+  UpdateThingTypeResponse.error) t 
   | UpdateTopicRuleDestination: (UpdateTopicRuleDestinationRequest.t,
   UpdateTopicRuleDestinationResponse.t,
   UpdateTopicRuleDestinationResponse.error) t 
@@ -546,6 +634,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AcceptCertificateTransfer -> `PATCH
   | AddThingToBillingGroup -> `PUT
   | AddThingToThingGroup -> `PUT
+  | AssociateSbomWithPackageVersion -> `PUT
   | AssociateTargetsWithJob -> `POST
   | AttachPolicy -> `PUT
   | AttachPrincipalPolicy -> `PUT
@@ -563,6 +652,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateAuthorizer -> `POST
   | CreateBillingGroup -> `POST
   | CreateCertificateFromCsr -> `POST
+  | CreateCertificateProvider -> `POST
+  | CreateCommand -> `PUT
   | CreateCustomMetric -> `POST
   | CreateDimension -> `POST
   | CreateDomainConfiguration -> `POST
@@ -573,6 +664,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateKeysAndCertificate -> `POST
   | CreateMitigationAction -> `POST
   | CreateOTAUpdate -> `POST
+  | CreatePackage -> `PUT
+  | CreatePackageVersion -> `PUT
   | CreatePolicy -> `POST
   | CreatePolicyVersion -> `POST
   | CreateProvisioningClaim -> `POST
@@ -593,6 +686,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteBillingGroup -> `DELETE
   | DeleteCACertificate -> `DELETE
   | DeleteCertificate -> `DELETE
+  | DeleteCertificateProvider -> `DELETE
+  | DeleteCommand -> `DELETE
+  | DeleteCommandExecution -> `DELETE
   | DeleteCustomMetric -> `DELETE
   | DeleteDimension -> `DELETE
   | DeleteDomainConfiguration -> `DELETE
@@ -603,6 +699,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteJobTemplate -> `DELETE
   | DeleteMitigationAction -> `DELETE
   | DeleteOTAUpdate -> `DELETE
+  | DeletePackage -> `DELETE
+  | DeletePackageVersion -> `DELETE
   | DeletePolicy -> `DELETE
   | DeletePolicyVersion -> `DELETE
   | DeleteProvisioningTemplate -> `DELETE
@@ -628,11 +726,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeBillingGroup -> `GET
   | DescribeCACertificate -> `GET
   | DescribeCertificate -> `GET
+  | DescribeCertificateProvider -> `GET
   | DescribeCustomMetric -> `GET
   | DescribeDefaultAuthorizer -> `GET
   | DescribeDetectMitigationActionsTask -> `GET
   | DescribeDimension -> `GET
   | DescribeDomainConfiguration -> `GET
+  | DescribeEncryptionConfiguration -> `GET
   | DescribeEndpoint -> `GET
   | DescribeEventConfigurations -> `GET
   | DescribeFleetMetric -> `GET
@@ -657,20 +757,27 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DetachSecurityProfile -> `DELETE
   | DetachThingPrincipal -> `DELETE
   | DisableTopicRule -> `POST
+  | DisassociateSbomFromPackageVersion -> `DELETE
   | EnableTopicRule -> `POST
   | GetBehaviorModelTrainingSummaries -> `GET
   | GetBucketsAggregation -> `POST
   | GetCardinality -> `POST
+  | GetCommand -> `GET
+  | GetCommandExecution -> `GET
   | GetEffectivePolicies -> `POST
   | GetIndexingConfiguration -> `GET
   | GetJobDocument -> `GET
   | GetLoggingOptions -> `GET
   | GetOTAUpdate -> `GET
+  | GetPackage -> `GET
+  | GetPackageConfiguration -> `GET
+  | GetPackageVersion -> `GET
   | GetPercentiles -> `POST
   | GetPolicy -> `GET
   | GetPolicyVersion -> `GET
   | GetRegistrationCode -> `GET
   | GetStatistics -> `POST
+  | GetThingConnectivityData -> `POST
   | GetTopicRule -> `GET
   | GetTopicRuleDestination -> `GET
   | GetV2LoggingOptions -> `GET
@@ -684,8 +791,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListAuthorizers -> `GET
   | ListBillingGroups -> `GET
   | ListCACertificates -> `GET
+  | ListCertificateProviders -> `GET
   | ListCertificates -> `GET
   | ListCertificatesByCA -> `GET
+  | ListCommandExecutions -> `POST
+  | ListCommands -> `GET
   | ListCustomMetrics -> `GET
   | ListDetectMitigationActionsExecutions -> `GET
   | ListDetectMitigationActionsTasks -> `GET
@@ -702,14 +812,19 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListMitigationActions -> `GET
   | ListOTAUpdates -> `GET
   | ListOutgoingCertificates -> `GET
+  | ListPackageVersions -> `GET
+  | ListPackages -> `GET
   | ListPolicies -> `GET
   | ListPolicyPrincipals -> `GET
   | ListPolicyVersions -> `GET
   | ListPrincipalPolicies -> `GET
   | ListPrincipalThings -> `GET
+  | ListPrincipalThingsV2 -> `GET
   | ListProvisioningTemplateVersions -> `GET
   | ListProvisioningTemplates -> `GET
+  | ListRelatedResourcesForAuditFinding -> `GET
   | ListRoleAliases -> `GET
+  | ListSbomValidationResults -> `GET
   | ListScheduledAudits -> `GET
   | ListSecurityProfiles -> `GET
   | ListSecurityProfilesForTarget -> `GET
@@ -720,6 +835,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListThingGroups -> `GET
   | ListThingGroupsForThing -> `GET
   | ListThingPrincipals -> `GET
+  | ListThingPrincipalsV2 -> `GET
   | ListThingRegistrationTaskReports -> `GET
   | ListThingRegistrationTasks -> `GET
   | ListThingTypes -> `GET
@@ -761,15 +877,21 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateBillingGroup -> `PATCH
   | UpdateCACertificate -> `PUT
   | UpdateCertificate -> `PUT
+  | UpdateCertificateProvider -> `PUT
+  | UpdateCommand -> `PATCH
   | UpdateCustomMetric -> `PATCH
   | UpdateDimension -> `PATCH
   | UpdateDomainConfiguration -> `PUT
   | UpdateDynamicThingGroup -> `PATCH
+  | UpdateEncryptionConfiguration -> `PATCH
   | UpdateEventConfigurations -> `PATCH
   | UpdateFleetMetric -> `PATCH
   | UpdateIndexingConfiguration -> `POST
   | UpdateJob -> `PATCH
   | UpdateMitigationAction -> `PATCH
+  | UpdatePackage -> `PATCH
+  | UpdatePackageConfiguration -> `PATCH
+  | UpdatePackageVersion -> `PATCH
   | UpdateProvisioningTemplate -> `PATCH
   | UpdateRoleAlias -> `PUT
   | UpdateScheduledAudit -> `PATCH
@@ -778,6 +900,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateThing -> `PATCH
   | UpdateThingGroup -> `PATCH
   | UpdateThingGroupsForThing -> `PUT
+  | UpdateThingType -> `PATCH
   | UpdateTopicRuleDestination -> `PATCH
   | ValidateSecurityProfileBehaviors -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -799,6 +922,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AddThingToThingGroup ->
           (Format.kasprintf Uri.of_string)
             "/thing-groups/addThingToThingGroup"
+      | AssociateSbomWithPackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions/%s/sbom"
+               (PackageName.to_header
+                  x.AssociateSbomWithPackageVersionRequest.packageName)
+               (VersionName.to_header
+                  x.AssociateSbomWithPackageVersionRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | AssociateTargetsWithJob ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/jobs/%s/targets"
@@ -824,8 +958,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                     (SecurityProfileTargetArn.to_header
                        x.securityProfileTargetArn))])
       | AttachThingPrincipal ->
-          (Format.kasprintf Uri.of_string) "/things/%s/principals"
-            (ThingName.to_header x.AttachThingPrincipalRequest.thingName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/things/%s/principals"
+               (ThingName.to_header x.AttachThingPrincipalRequest.thingName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("thingPrincipalType",
+                          (ThingPrincipalType.to_header v)))
+                  x.thingPrincipalType])
       | CancelAuditMitigationActionsTask ->
           (Format.kasprintf Uri.of_string)
             "/audit/mitigationactions/tasks/%s/cancel"
@@ -881,6 +1022,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("setAsActive", (SetAsActive.to_header v)))
                   x.setAsActive])
+      | CreateCertificateProvider ->
+          (Format.kasprintf Uri.of_string) "/certificate-providers/%s"
+            (CertificateProviderName.to_header
+               x.CreateCertificateProviderRequest.certificateProviderName)
+      | CreateCommand ->
+          (Format.kasprintf Uri.of_string) "/commands/%s"
+            (CommandId.to_header x.CreateCommandRequest.commandId)
       | CreateCustomMetric ->
           (Format.kasprintf Uri.of_string) "/custom-metric/%s"
             (MetricName.to_header x.CreateCustomMetricRequest.metricName)
@@ -918,6 +1066,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateOTAUpdate ->
           (Format.kasprintf Uri.of_string) "/otaUpdates/%s"
             (OTAUpdateId.to_header x.CreateOTAUpdateRequest.otaUpdateId)
+      | CreatePackage ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s"
+               (PackageName.to_header x.CreatePackageRequest.packageName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | CreatePackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions/%s"
+               (PackageName.to_header
+                  x.CreatePackageVersionRequest.packageName)
+               (VersionName.to_header
+                  x.CreatePackageVersionRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | CreatePolicy ->
           (Format.kasprintf Uri.of_string) "/policies/%s"
             (PolicyName.to_header x.CreatePolicyRequest.policyName)
@@ -1013,6 +1180,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("forceDelete", (ForceDelete.to_header v)))
                   x.forceDelete])
+      | DeleteCertificateProvider ->
+          (Format.kasprintf Uri.of_string) "/certificate-providers/%s"
+            (CertificateProviderName.to_header
+               x.DeleteCertificateProviderRequest.certificateProviderName)
+      | DeleteCommand ->
+          (Format.kasprintf Uri.of_string) "/commands/%s"
+            (CommandId.to_header x.DeleteCommandRequest.commandId)
+      | DeleteCommandExecution ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/command-executions/%s"
+               (CommandExecutionId.to_header
+                  x.DeleteCommandExecutionRequest.executionId))
+            (List.filter_opt
+               [Some ("targetArn", (TargetArn.to_header x.targetArn))])
       | DeleteCustomMetric ->
           (Format.kasprintf Uri.of_string) "/custom-metric/%s"
             (MetricName.to_header x.DeleteCustomMetricRequest.metricName)
@@ -1086,6 +1267,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("forceDeleteAWSJob", (ForceDeleteAWSJob.to_header v)))
                  x.forceDeleteAWSJob])
+      | DeletePackage ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s"
+               (PackageName.to_header x.DeletePackageRequest.packageName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | DeletePackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions/%s"
+               (PackageName.to_header
+                  x.DeletePackageVersionRequest.packageName)
+               (VersionName.to_header
+                  x.DeletePackageVersionRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | DeletePolicy ->
           (Format.kasprintf Uri.of_string) "/policies/%s"
             (PolicyName.to_header x.DeletePolicyRequest.policyName)
@@ -1196,6 +1396,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/certificates/%s"
             (CertificateId.to_header
                x.DescribeCertificateRequest.certificateId)
+      | DescribeCertificateProvider ->
+          (Format.kasprintf Uri.of_string) "/certificate-providers/%s"
+            (CertificateProviderName.to_header
+               x.DescribeCertificateProviderRequest.certificateProviderName)
       | DescribeCustomMetric ->
           (Format.kasprintf Uri.of_string) "/custom-metric/%s"
             (MetricName.to_header x.DescribeCustomMetricRequest.metricName)
@@ -1213,6 +1417,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/domainConfigurations/%s"
             (ReservedDomainConfigurationName.to_header
                x.DescribeDomainConfigurationRequest.domainConfigurationName)
+      | DescribeEncryptionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/encryption-configuration"
       | DescribeEndpoint ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/endpoint")
@@ -1230,8 +1436,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/indices/%s"
             (IndexName.to_header x.DescribeIndexRequest.indexName)
       | DescribeJob ->
-          (Format.kasprintf Uri.of_string) "/jobs/%s"
-            (JobId.to_header x.DescribeJobRequest.jobId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/jobs/%s"
+               (JobId.to_header x.DescribeJobRequest.jobId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("beforeSubstitution",
+                          (BeforeSubstitutionFlag.to_header v)))
+                  x.beforeSubstitution])
       | DescribeJobExecution ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/things/%s/jobs/%s"
@@ -1321,6 +1534,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableTopicRule ->
           (Format.kasprintf Uri.of_string) "/rules/%s/disable"
             (RuleName.to_header x.DisableTopicRuleRequest.ruleName)
+      | DisassociateSbomFromPackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions/%s/sbom"
+               (PackageName.to_header
+                  x.DisassociateSbomFromPackageVersionRequest.packageName)
+               (VersionName.to_header
+                  x.DisassociateSbomFromPackageVersionRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | EnableTopicRule ->
           (Format.kasprintf Uri.of_string) "/rules/%s/enable"
             (RuleName.to_header x.EnableTopicRuleRequest.ruleName)
@@ -1344,6 +1568,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/indices/buckets"
       | GetCardinality ->
           (Format.kasprintf Uri.of_string) "/indices/cardinality"
+      | GetCommand ->
+          (Format.kasprintf Uri.of_string) "/commands/%s"
+            (CommandId.to_header x.GetCommandRequest.commandId)
+      | GetCommandExecution ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/command-executions/%s"
+               (CommandExecutionId.to_header
+                  x.GetCommandExecutionRequest.executionId))
+            (List.filter_opt
+               [Some ("targetArn", (TargetArn.to_header x.targetArn));
+               Option.map
+                 ~f:(fun v ->
+                       ("includeResult", (BooleanWrapperObject.to_header v)))
+                 x.includeResult])
       | GetEffectivePolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/effective-policies")
@@ -1354,13 +1592,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetIndexingConfiguration ->
           (Format.kasprintf Uri.of_string) "/indexing/config"
       | GetJobDocument ->
-          (Format.kasprintf Uri.of_string) "/jobs/%s/job-document"
-            (JobId.to_header x.GetJobDocumentRequest.jobId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/jobs/%s/job-document"
+               (JobId.to_header x.GetJobDocumentRequest.jobId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("beforeSubstitution",
+                          (BeforeSubstitutionFlag.to_header v)))
+                  x.beforeSubstitution])
       | GetLoggingOptions ->
           (Format.kasprintf Uri.of_string) "/loggingOptions"
       | GetOTAUpdate ->
           (Format.kasprintf Uri.of_string) "/otaUpdates/%s"
             (OTAUpdateId.to_header x.GetOTAUpdateRequest.otaUpdateId)
+      | GetPackage ->
+          (Format.kasprintf Uri.of_string) "/packages/%s"
+            (PackageName.to_header x.GetPackageRequest.packageName)
+      | GetPackageConfiguration ->
+          (Format.kasprintf Uri.of_string) "/package-configuration"
+      | GetPackageVersion ->
+          (Format.kasprintf Uri.of_string) "/packages/%s/versions/%s"
+            (PackageName.to_header x.GetPackageVersionRequest.packageName)
+            (VersionName.to_header x.GetPackageVersionRequest.versionName)
       | GetPercentiles ->
           (Format.kasprintf Uri.of_string) "/indices/percentiles"
       | GetPolicy ->
@@ -1375,6 +1629,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/registrationcode"
       | GetStatistics ->
           (Format.kasprintf Uri.of_string) "/indices/statistics"
+      | GetThingConnectivityData ->
+          (Format.kasprintf Uri.of_string) "/things/%s/connectivity-data"
+            (ConnectivityApiThingName.to_header
+               x.GetThingConnectivityDataRequest.thingName)
       | GetTopicRule ->
           (Format.kasprintf Uri.of_string) "/rules/%s"
             (RuleName.to_header x.GetTopicRuleRequest.ruleName)
@@ -1382,7 +1640,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/destinations/%s"
             (AwsArn.to_header x.GetTopicRuleDestinationRequest.arn)
       | GetV2LoggingOptions ->
-          (Format.kasprintf Uri.of_string) "/v2LoggingOptions"
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/v2LoggingOptions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("verbose", (VerboseFlag.to_header v)))
+                  x.verbose])
       | ListActiveViolations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/active-violations")
@@ -1533,6 +1796,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v ->
                        ("isAscendingOrder", (AscendingOrder.to_header v)))
+                 x.ascendingOrder;
+               Option.map
+                 ~f:(fun v -> ("templateName", (TemplateName.to_header v)))
+                 x.templateName])
+      | ListCertificateProviders ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/certificate-providers/")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (Marker.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("isAscendingOrder", (AscendingOrder.to_header v)))
                  x.ascendingOrder])
       | ListCertificates ->
           Uri.add_query_params'
@@ -1560,6 +1836,39 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("isAscendingOrder", (AscendingOrder.to_header v)))
                  x.ascendingOrder])
+      | ListCommandExecutions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/command-executions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (CommandMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListCommands ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/commands")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (CommandMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("namespace", (CommandNamespace.to_header v)))
+                 x.namespace;
+               Option.map
+                 ~f:(fun v ->
+                       ("commandParameterName",
+                         (CommandParameterName.to_header v)))
+                 x.commandParameterName;
+               Option.map
+                 ~f:(fun v -> ("sortOrder", (SortOrder.to_header v)))
+                 x.sortOrder])
       | ListCustomMetrics ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/custom-metrics")
@@ -1798,6 +2107,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("isAscendingOrder", (AscendingOrder.to_header v)))
                  x.ascendingOrder])
+      | ListPackageVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions"
+               (PackageName.to_header
+                  x.ListPackageVersionsRequest.packageName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("status", (PackageVersionStatus.to_header v)))
+                  x.status;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (PackageCatalogMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListPackages ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (PackageCatalogMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListPolicies ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/policies")
@@ -1848,6 +2185,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("maxResults", (RegistryMaxResults.to_header v)))
                  x.maxResults])
+      | ListPrincipalThingsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/principals/things-v2")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (RegistryMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("thingPrincipalType",
+                         (ThingPrincipalType.to_header v)))
+                 x.thingPrincipalType])
       | ListProvisioningTemplateVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -1871,6 +2224,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListRelatedResourcesForAuditFinding ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/audit/relatedResources")
+            (List.filter_opt
+               [Some ("findingId", (FindingId.to_header x.findingId));
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListRoleAliases ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/role-aliases")
@@ -1883,6 +2247,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("isAscendingOrder", (AscendingOrder.to_header v)))
                  x.ascendingOrder])
+      | ListSbomValidationResults ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/packages/%s/versions/%s/sbom-validation-results"
+               (PackageName.to_header
+                  x.ListSbomValidationResultsRequest.packageName)
+               (VersionName.to_header
+                  x.ListSbomValidationResultsRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("validationResult",
+                          (SbomValidationResult.to_header v)))
+                  x.validationResult;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (PackageCatalogMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListScheduledAudits ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/audit/scheduledaudits")
@@ -2016,6 +2401,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("maxResults", (RegistryMaxResults.to_header v)))
                  x.maxResults])
+      | ListThingPrincipalsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/things/%s/principals-v2"
+               (ThingName.to_header x.ListThingPrincipalsV2Request.thingName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (RegistryMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("thingPrincipalType",
+                         (ThingPrincipalType.to_header v)))
+                 x.thingPrincipalType])
       | ListThingRegistrationTaskReports ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -2314,6 +2716,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.UpdateCertificateRequest.certificateId))
             (List.filter_opt
                [Some ("newStatus", (CertificateStatus.to_header x.newStatus))])
+      | UpdateCertificateProvider ->
+          (Format.kasprintf Uri.of_string) "/certificate-providers/%s"
+            (CertificateProviderName.to_header
+               x.UpdateCertificateProviderRequest.certificateProviderName)
+      | UpdateCommand ->
+          (Format.kasprintf Uri.of_string) "/commands/%s"
+            (CommandId.to_header x.UpdateCommandRequest.commandId)
       | UpdateCustomMetric ->
           (Format.kasprintf Uri.of_string) "/custom-metric/%s"
             (MetricName.to_header x.UpdateCustomMetricRequest.metricName)
@@ -2328,6 +2737,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/dynamic-thing-groups/%s"
             (ThingGroupName.to_header
                x.UpdateDynamicThingGroupRequest.thingGroupName)
+      | UpdateEncryptionConfiguration ->
+          (Format.kasprintf Uri.of_string) "/encryption-configuration"
       | UpdateEventConfigurations ->
           (Format.kasprintf Uri.of_string) "/event-configurations"
       | UpdateFleetMetric ->
@@ -2347,6 +2758,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/mitigationactions/actions/%s"
             (MitigationActionName.to_header
                x.UpdateMitigationActionRequest.actionName)
+      | UpdatePackage ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s"
+               (PackageName.to_header x.UpdatePackageRequest.packageName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | UpdatePackageConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/package-configuration")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
+      | UpdatePackageVersion ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/packages/%s/versions/%s"
+               (PackageName.to_header
+                  x.UpdatePackageVersionRequest.packageName)
+               (VersionName.to_header
+                  x.UpdatePackageVersionRequest.versionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clientToken", (ClientToken.to_header v)))
+                  x.clientToken])
       | UpdateProvisioningTemplate ->
           (Format.kasprintf Uri.of_string) "/provisioning-templates/%s"
             (TemplateName.to_header
@@ -2381,6 +2818,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateThingGroupsForThing ->
           (Format.kasprintf Uri.of_string)
             "/thing-groups/updateThingGroupsForThing"
+      | UpdateThingType ->
+          (Format.kasprintf Uri.of_string) "/thing-types/%s"
+            (ThingTypeName.to_header x.UpdateThingTypeRequest.thingTypeName)
       | UpdateTopicRuleDestination ->
           (Format.kasprintf Uri.of_string) "/destinations"
       | ValidateSecurityProfileBehaviors ->
@@ -2395,6 +2835,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | AddThingToBillingGroup ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | AddThingToThingGroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateSbomWithPackageVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateTargetsWithJob ->
       let (headers, body) =
         let headers =
@@ -2560,6 +3002,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCertificateProvider ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("lambdaFunctionArn",
+                           (CertificateProviderFunctionArn.to_value
+                              req.CreateCertificateProviderRequest.lambdaFunctionArn));
+                      Some
+                        ("accountDefaultForOperations",
+                          (CertificateProviderAccountDefaultForOperations.to_value
+                             req.CreateCertificateProviderRequest.accountDefaultForOperations));
+                      Option.map
+                        req.CreateCertificateProviderRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateCertificateProviderRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCommand -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateCustomMetric ->
       let (headers, body) =
         let headers =
@@ -2652,7 +3125,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("serviceType", (ServiceType.to_value x)));
                       Option.map req.CreateDomainConfigurationRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateDomainConfigurationRequest.tlsConfig
+                        ~f:(fun x -> ("tlsConfig", (TlsConfig.to_value x)));
+                      Option.map
+                        req.CreateDomainConfigurationRequest.serverCertificateConfig
+                        ~f:(fun x ->
+                              ("serverCertificateConfig",
+                                (ServerCertificateConfig.to_value x)));
+                      Option.map
+                        req.CreateDomainConfigurationRequest.authenticationType
+                        ~f:(fun x ->
+                              ("authenticationType",
+                                (AuthenticationType.to_value x)));
+                      Option.map
+                        req.CreateDomainConfigurationRequest.applicationProtocol
+                        ~f:(fun x ->
+                              ("applicationProtocol",
+                                (ApplicationProtocol.to_value x)));
+                      Option.map
+                        req.CreateDomainConfigurationRequest.clientCertificateConfig
+                        ~f:(fun x ->
+                              ("clientCertificateConfig",
+                                (ClientCertificateConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2789,6 +3285,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreatePackageVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreatePolicy ->
       let (headers, body) =
         let headers =
@@ -2869,7 +3367,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("preProvisioningHook",
                                 (ProvisioningHook.to_value x)));
                       Option.map req.CreateProvisioningTemplateRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map req.CreateProvisioningTemplateRequest.type_
+                        ~f:(fun x -> ("type", (TemplateType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2985,7 +3485,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("additionalMetricsToRetainV2",
                                 (AdditionalMetricsToRetainV2List.to_value x)));
                       Option.map req.CreateSecurityProfileRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateSecurityProfileRequest.metricsExportConfig
+                        ~f:(fun x ->
+                              ("metricsExportConfig",
+                                (MetricsExportConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -3161,6 +3666,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteBillingGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCACertificate -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCertificate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCertificateProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCommand -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCommandExecution ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCustomMetric -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDimension -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDomainConfiguration ->
@@ -3174,6 +3684,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteMitigationAction ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteOTAUpdate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePackageVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePolicyVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteProvisioningTemplate ->
@@ -3260,6 +3772,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeCertificate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeCertificateProvider ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeCustomMetric ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -3273,6 +3788,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDomainConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEncryptionConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeEndpoint ->
@@ -3358,6 +3876,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DisableTopicRule ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateSbomFromPackageVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | EnableTopicRule ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -3427,6 +3947,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCommand ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCommandExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEffectivePolicies ->
       let (headers, body) =
         let headers =
@@ -3460,6 +3986,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetOTAUpdate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPackage ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPackageConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetPackageVersion ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPercentiles ->
@@ -3530,6 +4065,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          (x, value))))
                |> Yojson.Safe.to_string) in
         (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetThingConnectivityData ->
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTopicRule ->
       let (headers, body) = (None, None) in
@@ -3635,10 +4173,53 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListCACertificates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCertificateProviders ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCertificates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCertificatesByCA ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCommandExecutions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListCommandExecutionsRequest.namespace
+                         ~f:(fun x ->
+                               ("namespace", (CommandNamespace.to_value x)));
+                      Option.map req.ListCommandExecutionsRequest.status
+                        ~f:(fun x ->
+                              ("status", (CommandExecutionStatus.to_value x)));
+                      Option.map req.ListCommandExecutionsRequest.sortOrder
+                        ~f:(fun x -> ("sortOrder", (SortOrder.to_value x)));
+                      Option.map
+                        req.ListCommandExecutionsRequest.startedTimeFilter
+                        ~f:(fun x ->
+                              ("startedTimeFilter", (TimeFilter.to_value x)));
+                      Option.map
+                        req.ListCommandExecutionsRequest.completedTimeFilter
+                        ~f:(fun x ->
+                              ("completedTimeFilter",
+                                (TimeFilter.to_value x)));
+                      Option.map req.ListCommandExecutionsRequest.targetArn
+                        ~f:(fun x -> ("targetArn", (TargetArn.to_value x)));
+                      Option.map req.ListCommandExecutionsRequest.commandArn
+                        ~f:(fun x -> ("commandArn", (CommandArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCommands ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCustomMetrics ->
@@ -3687,6 +4268,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListOutgoingCertificates ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPackageVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPackages ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPolicies ->
@@ -3758,13 +4345,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPrincipalThingsV2 ->
+      let (headers, body) =
+        let headers =
+          Some
+            ((List.filter_opt
+                [Some
+                   ("x-amzn-principal",
+                     (Principal.to_header
+                        req.ListPrincipalThingsV2Request.principal))])
+               |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map (List.filter_opt [])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListProvisioningTemplateVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListProvisioningTemplates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRelatedResourcesForAuditFinding ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRoleAliases ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSbomValidationResults ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListScheduledAudits ->
@@ -3795,6 +4409,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListThingPrincipals ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListThingPrincipalsV2 ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListThingRegistrationTaskReports ->
@@ -3865,17 +4482,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("caCertificate",
                            (CertificatePem.to_value
                               req.RegisterCACertificateRequest.caCertificate));
-                      Some
-                        ("verificationCertificate",
-                          (CertificatePem.to_value
-                             req.RegisterCACertificateRequest.verificationCertificate));
+                      Option.map
+                        req.RegisterCACertificateRequest.verificationCertificate
+                        ~f:(fun x ->
+                              ("verificationCertificate",
+                                (CertificatePem.to_value x)));
                       Option.map
                         req.RegisterCACertificateRequest.registrationConfig
                         ~f:(fun x ->
                               ("registrationConfig",
                                 (RegistrationConfig.to_value x)));
                       Option.map req.RegisterCACertificateRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.RegisterCACertificateRequest.certificateMode
+                        ~f:(fun x ->
+                              ("certificateMode",
+                                (CertificateMode.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -3990,7 +4613,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("nextToken", (NextToken.to_value x)));
                       Option.map req.SearchIndexRequest.maxResults
                         ~f:(fun x ->
-                              ("maxResults", (QueryMaxResults.to_value x)));
+                              ("maxResults",
+                                (SearchQueryMaxResults.to_value x)));
                       Option.map req.SearchIndexRequest.queryVersion
                         ~f:(fun x ->
                               ("queryVersion", (QueryVersion.to_value x)))])
@@ -4073,7 +4697,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.SetV2LoggingOptionsRequest.disableAllLogs
                         ~f:(fun x ->
-                              ("disableAllLogs", (DisableAllLogs.to_value x)))])
+                              ("disableAllLogs", (DisableAllLogs.to_value x)));
+                      Option.map
+                        req.SetV2LoggingOptionsRequest.eventConfigurations
+                        ~f:(fun x ->
+                              ("eventConfigurations",
+                                (LogEventConfigurations.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -4284,11 +4913,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateBillingGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCACertificate -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCertificate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCertificateProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCommand -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCustomMetric -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDimension -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDomainConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDynamicThingGroup ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateEncryptionConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateEventConfigurations ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -4322,6 +4956,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMitigationAction ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePackage -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePackageConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdatePackageVersion -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateProvisioningTemplate ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateRoleAlias -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -4332,6 +4970,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateThingGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateThingGroupsForThing ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateThingType -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTopicRuleDestination ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ValidateSecurityProfileBehaviors ->
@@ -4423,6 +5062,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some AddThingToThingGroupResponse.error_of_json))
+  | AssociateSbomWithPackageVersion ->
+      if is_success
+      then
+        Ok
+          (AssociateSbomWithPackageVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateSbomWithPackageVersionResponse.error_of_json))
   | AssociateTargetsWithJob ->
       if is_success
       then
@@ -4544,6 +5193,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateCertificateFromCsrResponse.error_of_json))
+  | CreateCertificateProvider ->
+      if is_success
+      then
+        Ok
+          (CreateCertificateProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCertificateProviderResponse.error_of_json))
+  | CreateCommand ->
+      if is_success
+      then Ok (CreateCommandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateCommandResponse.error_of_json))
   | CreateCustomMetric ->
       if is_success
       then Ok (CreateCustomMetricResponse.of_json (response_to_json resp))
@@ -4609,6 +5271,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateOTAUpdateResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateOTAUpdateResponse.error_of_json))
+  | CreatePackage ->
+      if is_success
+      then Ok (CreatePackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreatePackageResponse.error_of_json))
+  | CreatePackageVersion ->
+      if is_success
+      then Ok (CreatePackageVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreatePackageVersionResponse.error_of_json))
   | CreatePolicy ->
       if is_success
       then Ok (CreatePolicyResponse.of_json (response_to_json resp))
@@ -4742,6 +5414,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some DeleteCACertificateResponse.error_of_json))
   | DeleteCertificate ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCertificateProvider ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteCertificateProviderResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCertificateProviderResponse.error_of_json))
+  | DeleteCommand ->
+      if is_success
+      then Ok (DeleteCommandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteCommandResponse.error_of_json))
+  | DeleteCommandExecution ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteCommandExecutionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCommandExecutionResponse.error_of_json))
   | DeleteCustomMetric ->
       if is_success
       then
@@ -4805,6 +5502,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteOTAUpdateResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteOTAUpdateResponse.error_of_json))
+  | DeletePackage ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePackageResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeletePackageResponse.error_of_json))
+  | DeletePackageVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeletePackageVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeletePackageVersionResponse.error_of_json))
   | DeletePolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePolicyVersion ->
@@ -4988,6 +5701,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeCertificateResponse.error_of_json))
+  | DescribeCertificateProvider ->
+      if is_success
+      then
+        Ok
+          (DescribeCertificateProviderResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCertificateProviderResponse.error_of_json))
   | DescribeCustomMetric ->
       if is_success
       then Ok (DescribeCustomMetricResponse.of_json (response_to_json resp))
@@ -5029,6 +5752,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDomainConfigurationResponse.error_of_json))
+  | DescribeEncryptionConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeEncryptionConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEncryptionConfigurationResponse.error_of_json))
   | DescribeEndpoint ->
       if is_success
       then Ok (DescribeEndpointResponse.of_json (response_to_json resp))
@@ -5184,6 +5917,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error (Some DetachThingPrincipalResponse.error_of_json))
   | DisableTopicRule ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateSbomFromPackageVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateSbomFromPackageVersionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateSbomFromPackageVersionResponse.error_of_json))
   | EnableTopicRule ->
       if is_success then Ok () else Error (parse_aws_error None)
   | GetBehaviorModelTrainingSummaries ->
@@ -5207,6 +5952,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetCardinalityResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetCardinalityResponse.error_of_json))
+  | GetCommand ->
+      if is_success
+      then Ok (GetCommandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetCommandResponse.error_of_json))
+  | GetCommandExecution ->
+      if is_success
+      then Ok (GetCommandExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCommandExecutionResponse.error_of_json))
   | GetEffectivePolicies ->
       if is_success
       then Ok (GetEffectivePoliciesResponse.of_json (response_to_json resp))
@@ -5236,6 +5991,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetOTAUpdateResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetOTAUpdateResponse.error_of_json))
+  | GetPackage ->
+      if is_success
+      then Ok (GetPackageResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetPackageResponse.error_of_json))
+  | GetPackageConfiguration ->
+      if is_success
+      then
+        Ok (GetPackageConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetPackageConfigurationResponse.error_of_json))
+  | GetPackageVersion ->
+      if is_success
+      then Ok (GetPackageVersionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetPackageVersionResponse.error_of_json))
   | GetPercentiles ->
       if is_success
       then Ok (GetPercentilesResponse.of_json (response_to_json resp))
@@ -5260,6 +6033,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetStatisticsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetStatisticsResponse.error_of_json))
+  | GetThingConnectivityData ->
+      if is_success
+      then
+        Ok (GetThingConnectivityDataResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetThingConnectivityDataResponse.error_of_json))
   | GetTopicRule ->
       if is_success
       then Ok (GetTopicRuleResponse.of_json (response_to_json resp))
@@ -5344,6 +6125,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListCACertificatesResponse.error_of_json))
+  | ListCertificateProviders ->
+      if is_success
+      then
+        Ok (ListCertificateProvidersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCertificateProvidersResponse.error_of_json))
   | ListCertificates ->
       if is_success
       then Ok (ListCertificatesResponse.of_json (response_to_json resp))
@@ -5355,6 +6144,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListCertificatesByCAResponse.error_of_json))
+  | ListCommandExecutions ->
+      if is_success
+      then Ok (ListCommandExecutionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCommandExecutionsResponse.error_of_json))
+  | ListCommands ->
+      if is_success
+      then Ok (ListCommandsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListCommandsResponse.error_of_json))
   | ListCustomMetrics ->
       if is_success
       then Ok (ListCustomMetricsResponse.of_json (response_to_json resp))
@@ -5462,6 +6261,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListOutgoingCertificatesResponse.error_of_json))
+  | ListPackageVersions ->
+      if is_success
+      then Ok (ListPackageVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPackageVersionsResponse.error_of_json))
+  | ListPackages ->
+      if is_success
+      then Ok (ListPackagesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListPackagesResponse.error_of_json))
   | ListPolicies ->
       if is_success
       then Ok (ListPoliciesResponse.of_json (response_to_json resp))
@@ -5490,6 +6299,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListPrincipalThingsResponse.error_of_json))
+  | ListPrincipalThingsV2 ->
+      if is_success
+      then Ok (ListPrincipalThingsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListPrincipalThingsV2Response.error_of_json))
   | ListProvisioningTemplateVersions ->
       if is_success
       then
@@ -5509,11 +6324,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListProvisioningTemplatesResponse.error_of_json))
+  | ListRelatedResourcesForAuditFinding ->
+      if is_success
+      then
+        Ok
+          (ListRelatedResourcesForAuditFindingResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRelatedResourcesForAuditFindingResponse.error_of_json))
   | ListRoleAliases ->
       if is_success
       then Ok (ListRoleAliasesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListRoleAliasesResponse.error_of_json))
+  | ListSbomValidationResults ->
+      if is_success
+      then
+        Ok
+          (ListSbomValidationResultsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSbomValidationResultsResponse.error_of_json))
   | ListScheduledAudits ->
       if is_success
       then Ok (ListScheduledAuditsResponse.of_json (response_to_json resp))
@@ -5581,6 +6415,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListThingPrincipalsResponse.error_of_json))
+  | ListThingPrincipalsV2 ->
+      if is_success
+      then Ok (ListThingPrincipalsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListThingPrincipalsV2Response.error_of_json))
   | ListThingRegistrationTaskReports ->
       if is_success
       then
@@ -5851,6 +6691,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateCertificate ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateCertificateProvider ->
+      if is_success
+      then
+        Ok
+          (UpdateCertificateProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCertificateProviderResponse.error_of_json))
+  | UpdateCommand ->
+      if is_success
+      then Ok (UpdateCommandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateCommandResponse.error_of_json))
   | UpdateCustomMetric ->
       if is_success
       then Ok (UpdateCustomMetricResponse.of_json (response_to_json resp))
@@ -5879,6 +6732,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateDynamicThingGroupResponse.error_of_json))
+  | UpdateEncryptionConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateEncryptionConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateEncryptionConfigurationResponse.error_of_json))
   | UpdateEventConfigurations ->
       if is_success
       then
@@ -5913,6 +6778,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateMitigationActionResponse.error_of_json))
+  | UpdatePackage ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdatePackageResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some UpdatePackageResponse.error_of_json))
+  | UpdatePackageConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdatePackageConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePackageConfigurationResponse.error_of_json))
+  | UpdatePackageVersion ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdatePackageVersionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdatePackageVersionResponse.error_of_json))
   | UpdateProvisioningTemplate ->
       if is_success
       then
@@ -5969,6 +6862,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateThingGroupsForThingResponse.error_of_json))
+  | UpdateThingType ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateThingTypeResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some UpdateThingTypeResponse.error_of_json))
   | UpdateTopicRuleDestination ->
       if is_success
       then

@@ -43,13 +43,17 @@ let describe_stream =
        and exclusiveStartShardId =
          flag "exclusive-start-shard-id" (optional string)
            ~doc:"STRING ShardId"
+       and shardFilter =
+         flag "shard-filter" (optional json_arg) ~doc:"JSON ShardFilter"
        and streamArn =
          flag "stream-arn" (required string) ~doc:"STRING StreamArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_stream
            (Values.DescribeStreamInput.make ?limit ?exclusiveStartShardId
-              ~streamArn ()) (Some Values.DescribeStreamOutput.to_json)
+              ?shardFilter:(Option.map ~f:Values.ShardFilter.of_json
+                              shardFilter) ~streamArn ())
+           (Some Values.DescribeStreamOutput.to_json)
            (Some Values.DescribeStreamOutput.error_to_json)])
 let get_records =
   Command.async ~summary:""

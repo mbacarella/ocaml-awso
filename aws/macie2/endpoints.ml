@@ -7,6 +7,12 @@ type ('i, 'o, 'e) t =
   | BatchGetCustomDataIdentifiers: (BatchGetCustomDataIdentifiersRequest.t,
   BatchGetCustomDataIdentifiersResponse.t,
   BatchGetCustomDataIdentifiersResponse.error) t 
+  | BatchUpdateAutomatedDiscoveryAccounts:
+  (BatchUpdateAutomatedDiscoveryAccountsRequest.t,
+  BatchUpdateAutomatedDiscoveryAccountsResponse.t,
+  BatchUpdateAutomatedDiscoveryAccountsResponse.error) t 
+  | CreateAllowList: (CreateAllowListRequest.t, CreateAllowListResponse.t,
+  CreateAllowListResponse.error) t 
   | CreateClassificationJob: (CreateClassificationJobRequest.t,
   CreateClassificationJobResponse.t, CreateClassificationJobResponse.error) t
   
@@ -23,6 +29,8 @@ type ('i, 'o, 'e) t =
   CreateSampleFindingsResponse.t, CreateSampleFindingsResponse.error) t 
   | DeclineInvitations: (DeclineInvitationsRequest.t,
   DeclineInvitationsResponse.t, DeclineInvitationsResponse.error) t 
+  | DeleteAllowList: (DeleteAllowListRequest.t, DeleteAllowListResponse.t,
+  DeleteAllowListResponse.error) t 
   | DeleteCustomDataIdentifier: (DeleteCustomDataIdentifierRequest.t,
   DeleteCustomDataIdentifierResponse.t,
   DeleteCustomDataIdentifierResponse.error) t 
@@ -64,12 +72,20 @@ type ('i, 'o, 'e) t =
   | GetAdministratorAccount: (GetAdministratorAccountRequest.t,
   GetAdministratorAccountResponse.t, GetAdministratorAccountResponse.error) t
   
+  | GetAllowList: (GetAllowListRequest.t, GetAllowListResponse.t,
+  GetAllowListResponse.error) t 
+  | GetAutomatedDiscoveryConfiguration:
+  (GetAutomatedDiscoveryConfigurationRequest.t,
+  GetAutomatedDiscoveryConfigurationResponse.t,
+  GetAutomatedDiscoveryConfigurationResponse.error) t 
   | GetBucketStatistics: (GetBucketStatisticsRequest.t,
   GetBucketStatisticsResponse.t, GetBucketStatisticsResponse.error) t 
   | GetClassificationExportConfiguration:
   (GetClassificationExportConfigurationRequest.t,
   GetClassificationExportConfigurationResponse.t,
   GetClassificationExportConfigurationResponse.error) t 
+  | GetClassificationScope: (GetClassificationScopeRequest.t,
+  GetClassificationScopeResponse.t, GetClassificationScopeResponse.error) t 
   | GetCustomDataIdentifier: (GetCustomDataIdentifierRequest.t,
   GetCustomDataIdentifierResponse.t, GetCustomDataIdentifierResponse.error) t
   
@@ -91,12 +107,35 @@ type ('i, 'o, 'e) t =
   GetMasterAccountResponse.error) t 
   | GetMember: (GetMemberRequest.t, GetMemberResponse.t,
   GetMemberResponse.error) t 
+  | GetResourceProfile: (GetResourceProfileRequest.t,
+  GetResourceProfileResponse.t, GetResourceProfileResponse.error) t 
+  | GetRevealConfiguration: (GetRevealConfigurationRequest.t,
+  GetRevealConfigurationResponse.t, GetRevealConfigurationResponse.error) t 
+  | GetSensitiveDataOccurrences: (GetSensitiveDataOccurrencesRequest.t,
+  GetSensitiveDataOccurrencesResponse.t,
+  GetSensitiveDataOccurrencesResponse.error) t 
+  | GetSensitiveDataOccurrencesAvailability:
+  (GetSensitiveDataOccurrencesAvailabilityRequest.t,
+  GetSensitiveDataOccurrencesAvailabilityResponse.t,
+  GetSensitiveDataOccurrencesAvailabilityResponse.error) t 
+  | GetSensitivityInspectionTemplate:
+  (GetSensitivityInspectionTemplateRequest.t,
+  GetSensitivityInspectionTemplateResponse.t,
+  GetSensitivityInspectionTemplateResponse.error) t 
   | GetUsageStatistics: (GetUsageStatisticsRequest.t,
   GetUsageStatisticsResponse.t, GetUsageStatisticsResponse.error) t 
   | GetUsageTotals: (GetUsageTotalsRequest.t, GetUsageTotalsResponse.t,
   GetUsageTotalsResponse.error) t 
+  | ListAllowLists: (ListAllowListsRequest.t, ListAllowListsResponse.t,
+  ListAllowListsResponse.error) t 
+  | ListAutomatedDiscoveryAccounts: (ListAutomatedDiscoveryAccountsRequest.t,
+  ListAutomatedDiscoveryAccountsResponse.t,
+  ListAutomatedDiscoveryAccountsResponse.error) t 
   | ListClassificationJobs: (ListClassificationJobsRequest.t,
   ListClassificationJobsResponse.t, ListClassificationJobsResponse.error) t 
+  | ListClassificationScopes: (ListClassificationScopesRequest.t,
+  ListClassificationScopesResponse.t, ListClassificationScopesResponse.error)
+  t 
   | ListCustomDataIdentifiers: (ListCustomDataIdentifiersRequest.t,
   ListCustomDataIdentifiersResponse.t,
   ListCustomDataIdentifiersResponse.error) t 
@@ -114,6 +153,16 @@ type ('i, 'o, 'e) t =
   | ListOrganizationAdminAccounts: (ListOrganizationAdminAccountsRequest.t,
   ListOrganizationAdminAccountsResponse.t,
   ListOrganizationAdminAccountsResponse.error) t 
+  | ListResourceProfileArtifacts: (ListResourceProfileArtifactsRequest.t,
+  ListResourceProfileArtifactsResponse.t,
+  ListResourceProfileArtifactsResponse.error) t 
+  | ListResourceProfileDetections: (ListResourceProfileDetectionsRequest.t,
+  ListResourceProfileDetectionsResponse.t,
+  ListResourceProfileDetectionsResponse.error) t 
+  | ListSensitivityInspectionTemplates:
+  (ListSensitivityInspectionTemplatesRequest.t,
+  ListSensitivityInspectionTemplatesResponse.t,
+  ListSensitivityInspectionTemplatesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | PutClassificationExportConfiguration:
@@ -133,9 +182,18 @@ type ('i, 'o, 'e) t =
   t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAllowList: (UpdateAllowListRequest.t, UpdateAllowListResponse.t,
+  UpdateAllowListResponse.error) t 
+  | UpdateAutomatedDiscoveryConfiguration:
+  (UpdateAutomatedDiscoveryConfigurationRequest.t,
+  UpdateAutomatedDiscoveryConfigurationResponse.t,
+  UpdateAutomatedDiscoveryConfigurationResponse.error) t 
   | UpdateClassificationJob: (UpdateClassificationJobRequest.t,
   UpdateClassificationJobResponse.t, UpdateClassificationJobResponse.error) t
   
+  | UpdateClassificationScope: (UpdateClassificationScopeRequest.t,
+  UpdateClassificationScopeResponse.t,
+  UpdateClassificationScopeResponse.error) t 
   | UpdateFindingsFilter: (UpdateFindingsFilterRequest.t,
   UpdateFindingsFilterResponse.t, UpdateFindingsFilterResponse.error) t 
   | UpdateMacieSession: (UpdateMacieSessionRequest.t,
@@ -146,10 +204,25 @@ type ('i, 'o, 'e) t =
   (UpdateOrganizationConfigurationRequest.t,
   UpdateOrganizationConfigurationResponse.t,
   UpdateOrganizationConfigurationResponse.error) t 
+  | UpdateResourceProfile: (UpdateResourceProfileRequest.t,
+  UpdateResourceProfileResponse.t, UpdateResourceProfileResponse.error) t 
+  | UpdateResourceProfileDetections:
+  (UpdateResourceProfileDetectionsRequest.t,
+  UpdateResourceProfileDetectionsResponse.t,
+  UpdateResourceProfileDetectionsResponse.error) t 
+  | UpdateRevealConfiguration: (UpdateRevealConfigurationRequest.t,
+  UpdateRevealConfigurationResponse.t,
+  UpdateRevealConfigurationResponse.error) t 
+  | UpdateSensitivityInspectionTemplate:
+  (UpdateSensitivityInspectionTemplateRequest.t,
+  UpdateSensitivityInspectionTemplateResponse.t,
+  UpdateSensitivityInspectionTemplateResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptInvitation -> `POST
   | BatchGetCustomDataIdentifiers -> `POST
+  | BatchUpdateAutomatedDiscoveryAccounts -> `PATCH
+  | CreateAllowList -> `POST
   | CreateClassificationJob -> `POST
   | CreateCustomDataIdentifier -> `POST
   | CreateFindingsFilter -> `POST
@@ -157,6 +230,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateMember -> `POST
   | CreateSampleFindings -> `POST
   | DeclineInvitations -> `POST
+  | DeleteAllowList -> `DELETE
   | DeleteCustomDataIdentifier -> `DELETE
   | DeleteFindingsFilter -> `DELETE
   | DeleteInvitations -> `POST
@@ -172,8 +246,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | EnableMacie -> `POST
   | EnableOrganizationAdminAccount -> `POST
   | GetAdministratorAccount -> `GET
+  | GetAllowList -> `GET
+  | GetAutomatedDiscoveryConfiguration -> `GET
   | GetBucketStatistics -> `POST
   | GetClassificationExportConfiguration -> `GET
+  | GetClassificationScope -> `GET
   | GetCustomDataIdentifier -> `GET
   | GetFindingStatistics -> `POST
   | GetFindings -> `POST
@@ -183,9 +260,17 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetMacieSession -> `GET
   | GetMasterAccount -> `GET
   | GetMember -> `GET
+  | GetResourceProfile -> `GET
+  | GetRevealConfiguration -> `GET
+  | GetSensitiveDataOccurrences -> `GET
+  | GetSensitiveDataOccurrencesAvailability -> `GET
+  | GetSensitivityInspectionTemplate -> `GET
   | GetUsageStatistics -> `POST
   | GetUsageTotals -> `GET
+  | ListAllowLists -> `GET
+  | ListAutomatedDiscoveryAccounts -> `GET
   | ListClassificationJobs -> `POST
+  | ListClassificationScopes -> `GET
   | ListCustomDataIdentifiers -> `POST
   | ListFindings -> `POST
   | ListFindingsFilters -> `GET
@@ -193,6 +278,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListManagedDataIdentifiers -> `POST
   | ListMembers -> `GET
   | ListOrganizationAdminAccounts -> `GET
+  | ListResourceProfileArtifacts -> `GET
+  | ListResourceProfileDetections -> `GET
+  | ListSensitivityInspectionTemplates -> `GET
   | ListTagsForResource -> `GET
   | PutClassificationExportConfiguration -> `PUT
   | PutFindingsPublicationConfiguration -> `PUT
@@ -200,11 +288,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | TestCustomDataIdentifier -> `POST
   | UntagResource -> `DELETE
+  | UpdateAllowList -> `PUT
+  | UpdateAutomatedDiscoveryConfiguration -> `PUT
   | UpdateClassificationJob -> `PATCH
+  | UpdateClassificationScope -> `PATCH
   | UpdateFindingsFilter -> `PATCH
   | UpdateMacieSession -> `PATCH
   | UpdateMemberSession -> `PATCH
   | UpdateOrganizationConfiguration -> `PATCH
+  | UpdateResourceProfile -> `PATCH
+  | UpdateResourceProfileDetections -> `PATCH
+  | UpdateRevealConfiguration -> `PUT
+  | UpdateSensitivityInspectionTemplate -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -212,6 +307,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/invitations/accept"
       | BatchGetCustomDataIdentifiers ->
           (Format.kasprintf Uri.of_string) "/custom-data-identifiers/get"
+      | BatchUpdateAutomatedDiscoveryAccounts ->
+          (Format.kasprintf Uri.of_string) "/automated-discovery/accounts"
+      | CreateAllowList -> (Format.kasprintf Uri.of_string) "/allow-lists"
       | CreateClassificationJob -> (Format.kasprintf Uri.of_string) "/jobs"
       | CreateCustomDataIdentifier ->
           (Format.kasprintf Uri.of_string) "/custom-data-identifiers"
@@ -223,6 +321,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/findings/sample"
       | DeclineInvitations ->
           (Format.kasprintf Uri.of_string) "/invitations/decline"
+      | DeleteAllowList ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/allow-lists/%s"
+               (Zz__string.to_header x.DeleteAllowListRequest.id))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("ignoreJobChecks", (Zz__string.to_header v)))
+                  x.ignoreJobChecks])
       | DeleteCustomDataIdentifier ->
           (Format.kasprintf Uri.of_string) "/custom-data-identifiers/%s"
             (Zz__string.to_header x.DeleteCustomDataIdentifierRequest.id)
@@ -258,11 +364,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/admin"
       | GetAdministratorAccount ->
           (Format.kasprintf Uri.of_string) "/administrator"
+      | GetAllowList ->
+          (Format.kasprintf Uri.of_string) "/allow-lists/%s"
+            (Zz__string.to_header x.GetAllowListRequest.id)
+      | GetAutomatedDiscoveryConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/automated-discovery/configuration"
       | GetBucketStatistics ->
           (Format.kasprintf Uri.of_string) "/datasources/s3/statistics"
       | GetClassificationExportConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/classification-export-configuration"
+      | GetClassificationScope ->
+          (Format.kasprintf Uri.of_string) "/classification-scopes/%s"
+            (Zz__string.to_header x.GetClassificationScopeRequest.id)
       | GetCustomDataIdentifier ->
           (Format.kasprintf Uri.of_string) "/custom-data-identifiers/%s"
             (Zz__string.to_header x.GetCustomDataIdentifierRequest.id)
@@ -282,6 +397,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetMember ->
           (Format.kasprintf Uri.of_string) "/members/%s"
             (Zz__string.to_header x.GetMemberRequest.id)
+      | GetResourceProfile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-profiles")
+            (List.filter_opt
+               [Some ("resourceArn", (Zz__string.to_header x.resourceArn))])
+      | GetRevealConfiguration ->
+          (Format.kasprintf Uri.of_string) "/reveal-configuration"
+      | GetSensitiveDataOccurrences ->
+          (Format.kasprintf Uri.of_string) "/findings/%s/reveal"
+            (Zz__string.to_header
+               x.GetSensitiveDataOccurrencesRequest.findingId)
+      | GetSensitiveDataOccurrencesAvailability ->
+          (Format.kasprintf Uri.of_string) "/findings/%s/reveal/availability"
+            (Zz__string.to_header
+               x.GetSensitiveDataOccurrencesAvailabilityRequest.findingId)
+      | GetSensitivityInspectionTemplate ->
+          (Format.kasprintf Uri.of_string)
+            "/templates/sensitivity-inspections/%s"
+            (Zz__string.to_header
+               x.GetSensitivityInspectionTemplateRequest.id)
       | GetUsageStatistics ->
           (Format.kasprintf Uri.of_string) "/usage/statistics"
       | GetUsageTotals ->
@@ -290,8 +425,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("timeRange", (Zz__string.to_header v)))
                   x.timeRange])
+      | ListAllowLists ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/allow-lists")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | ListAutomatedDiscoveryAccounts ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/automated-discovery/accounts")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("accountIds", (Zz__listOf__string.to_header v)))
+                  x.accountIds;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
       | ListClassificationJobs ->
           (Format.kasprintf Uri.of_string) "/jobs/list"
+      | ListClassificationScopes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/classification-scopes")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("name", (Zz__string.to_header v)))
+                  x.name;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
       | ListCustomDataIdentifiers ->
           (Format.kasprintf Uri.of_string) "/custom-data-identifiers/list"
       | ListFindings -> (Format.kasprintf Uri.of_string) "/findings"
@@ -338,6 +506,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
                  x.nextToken])
+      | ListResourceProfileArtifacts ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-profiles/artifacts")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                  x.nextToken;
+               Some ("resourceArn", (Zz__string.to_header x.resourceArn))])
+      | ListResourceProfileDetections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-profiles/detections")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken;
+               Some ("resourceArn", (Zz__string.to_header x.resourceArn))])
+      | ListSensitivityInspectionTemplates ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/templates/sensitivity-inspections")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (Zz__string.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -360,9 +558,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (Zz__string.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (Zz__listOf__string.to_header x.tagKeys))])
+      | UpdateAllowList ->
+          (Format.kasprintf Uri.of_string) "/allow-lists/%s"
+            (Zz__string.to_header x.UpdateAllowListRequest.id)
+      | UpdateAutomatedDiscoveryConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/automated-discovery/configuration"
       | UpdateClassificationJob ->
           (Format.kasprintf Uri.of_string) "/jobs/%s"
             (Zz__string.to_header x.UpdateClassificationJobRequest.jobId)
+      | UpdateClassificationScope ->
+          (Format.kasprintf Uri.of_string) "/classification-scopes/%s"
+            (Zz__string.to_header x.UpdateClassificationScopeRequest.id)
       | UpdateFindingsFilter ->
           (Format.kasprintf Uri.of_string) "/findingsfilters/%s"
             (Zz__string.to_header x.UpdateFindingsFilterRequest.id)
@@ -371,7 +578,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/macie/members/%s"
             (Zz__string.to_header x.UpdateMemberSessionRequest.id)
       | UpdateOrganizationConfiguration ->
-          (Format.kasprintf Uri.of_string) "/admin/configuration")
+          (Format.kasprintf Uri.of_string) "/admin/configuration"
+      | UpdateResourceProfile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-profiles")
+            (List.filter_opt
+               [Some ("resourceArn", (Zz__string.to_header x.resourceArn))])
+      | UpdateResourceProfileDetections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resource-profiles/detections")
+            (List.filter_opt
+               [Some ("resourceArn", (Zz__string.to_header x.resourceArn))])
+      | UpdateRevealConfiguration ->
+          (Format.kasprintf Uri.of_string) "/reveal-configuration"
+      | UpdateSensitivityInspectionTemplate ->
+          (Format.kasprintf Uri.of_string)
+            "/templates/sensitivity-inspections/%s"
+            (Zz__string.to_header
+               x.UpdateSensitivityInspectionTemplateRequest.id))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -424,7 +648,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
-  | CreateClassificationJob ->
+  | BatchUpdateAutomatedDiscoveryAccounts ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateAllowList ->
       let (headers, body) =
         let headers =
           Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
@@ -436,7 +662,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("clientToken",
                            (Zz__string.to_value
-                              req.CreateClassificationJobRequest.clientToken));
+                              req.CreateAllowListRequest.clientToken));
+                      Some
+                        ("criteria",
+                          (AllowListCriteria.to_value
+                             req.CreateAllowListRequest.criteria));
+                      Option.map req.CreateAllowListRequest.description
+                        ~f:(fun x ->
+                              ("description",
+                                (Zz__stringMin1Max512PatternSS.to_value x)));
+                      Some
+                        ("name",
+                          (Zz__stringMin1Max128Pattern.to_value
+                             req.CreateAllowListRequest.name));
+                      Option.map req.CreateAllowListRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateClassificationJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateClassificationJobRequest.allowListIds
+                         ~f:(fun x ->
+                               ("allowListIds",
+                                 (Zz__listOf__string.to_value x)));
+                      Some
+                        ("clientToken",
+                          (Zz__string.to_value
+                             req.CreateClassificationJobRequest.clientToken));
                       Option.map
                         req.CreateClassificationJobRequest.customDataIdentifierIds
                         ~f:(fun x ->
@@ -667,6 +932,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAllowList -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCustomDataIdentifier ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFindingsFilter -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -788,6 +1054,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetAdministratorAccount ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAllowList ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAutomatedDiscoveryConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetBucketStatistics ->
       let (headers, body) =
         let headers =
@@ -807,6 +1079,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetClassificationExportConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetClassificationScope ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCustomDataIdentifier ->
@@ -884,6 +1159,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetMember ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourceProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRevealConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSensitiveDataOccurrences ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSensitiveDataOccurrencesAvailability ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSensitivityInspectionTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetUsageStatistics ->
       let (headers, body) =
         let headers =
@@ -916,6 +1206,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetUsageTotals ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAllowLists ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAutomatedDiscoveryAccounts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListClassificationJobs ->
       let (headers, body) =
         let headers =
@@ -945,6 +1241,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          (x, value))))
                |> Yojson.Safe.to_string) in
         (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListClassificationScopes ->
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCustomDataIdentifiers ->
       let (headers, body) =
@@ -1025,6 +1324,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListOrganizationAdminAccounts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListResourceProfileArtifacts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListResourceProfileDetections ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSensitivityInspectionTemplates ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -1119,12 +1427,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAllowList -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAutomatedDiscoveryConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateClassificationJob ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateClassificationScope ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFindingsFilter -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMacieSession -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateMemberSession -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateOrganizationConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateResourceProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateResourceProfileDetections ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRevealConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateSensitivityInspectionTemplate ->
       Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -1192,6 +1512,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some BatchGetCustomDataIdentifiersResponse.error_of_json))
+  | BatchUpdateAutomatedDiscoveryAccounts ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateAutomatedDiscoveryAccountsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchUpdateAutomatedDiscoveryAccountsResponse.error_of_json))
+  | CreateAllowList ->
+      if is_success
+      then Ok (CreateAllowListResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateAllowListResponse.error_of_json))
   | CreateClassificationJob ->
       if is_success
       then
@@ -1240,6 +1576,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeclineInvitationsResponse.error_of_json))
+  | DeleteAllowList ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAllowListResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some DeleteAllowListResponse.error_of_json))
   | DeleteCustomDataIdentifier ->
       if is_success
       then
@@ -1377,6 +1721,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetAdministratorAccountResponse.error_of_json))
+  | GetAllowList ->
+      if is_success
+      then Ok (GetAllowListResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetAllowListResponse.error_of_json))
+  | GetAutomatedDiscoveryConfiguration ->
+      if is_success
+      then
+        Ok
+          (GetAutomatedDiscoveryConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetAutomatedDiscoveryConfigurationResponse.error_of_json))
   | GetBucketStatistics ->
       if is_success
       then Ok (GetBucketStatisticsResponse.of_json (response_to_json resp))
@@ -1393,6 +1751,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetClassificationExportConfigurationResponse.error_of_json))
+  | GetClassificationScope ->
+      if is_success
+      then
+        Ok (GetClassificationScopeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetClassificationScopeResponse.error_of_json))
   | GetCustomDataIdentifier ->
       if is_success
       then
@@ -1447,6 +1813,51 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMemberResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMemberResponse.error_of_json))
+  | GetResourceProfile ->
+      if is_success
+      then Ok (GetResourceProfileResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourceProfileResponse.error_of_json))
+  | GetRevealConfiguration ->
+      if is_success
+      then
+        Ok (GetRevealConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRevealConfigurationResponse.error_of_json))
+  | GetSensitiveDataOccurrences ->
+      if is_success
+      then
+        Ok
+          (GetSensitiveDataOccurrencesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSensitiveDataOccurrencesResponse.error_of_json))
+  | GetSensitiveDataOccurrencesAvailability ->
+      if is_success
+      then
+        Ok
+          (GetSensitiveDataOccurrencesAvailabilityResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetSensitiveDataOccurrencesAvailabilityResponse.error_of_json))
+  | GetSensitivityInspectionTemplate ->
+      if is_success
+      then
+        Ok
+          (GetSensitivityInspectionTemplateResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSensitivityInspectionTemplateResponse.error_of_json))
   | GetUsageStatistics ->
       if is_success
       then Ok (GetUsageStatisticsResponse.of_json (response_to_json resp))
@@ -1458,6 +1869,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetUsageTotalsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetUsageTotalsResponse.error_of_json))
+  | ListAllowLists ->
+      if is_success
+      then Ok (ListAllowListsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListAllowListsResponse.error_of_json))
+  | ListAutomatedDiscoveryAccounts ->
+      if is_success
+      then
+        Ok
+          (ListAutomatedDiscoveryAccountsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAutomatedDiscoveryAccountsResponse.error_of_json))
   | ListClassificationJobs ->
       if is_success
       then
@@ -1466,6 +1892,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListClassificationJobsResponse.error_of_json))
+  | ListClassificationScopes ->
+      if is_success
+      then
+        Ok (ListClassificationScopesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListClassificationScopesResponse.error_of_json))
   | ListCustomDataIdentifiers ->
       if is_success
       then
@@ -1513,6 +1947,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListOrganizationAdminAccountsResponse.error_of_json))
+  | ListResourceProfileArtifacts ->
+      if is_success
+      then
+        Ok
+          (ListResourceProfileArtifactsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceProfileArtifactsResponse.error_of_json))
+  | ListResourceProfileDetections ->
+      if is_success
+      then
+        Ok
+          (ListResourceProfileDetectionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceProfileDetectionsResponse.error_of_json))
+  | ListSensitivityInspectionTemplates ->
+      if is_success
+      then
+        Ok
+          (ListSensitivityInspectionTemplatesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSensitivityInspectionTemplatesResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -1568,6 +2032,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAllowList ->
+      if is_success
+      then Ok (UpdateAllowListResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateAllowListResponse.error_of_json))
+  | UpdateAutomatedDiscoveryConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateAutomatedDiscoveryConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateAutomatedDiscoveryConfigurationResponse.error_of_json))
   | UpdateClassificationJob ->
       if is_success
       then
@@ -1578,6 +2060,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateClassificationJobResponse.error_of_json))
+  | UpdateClassificationScope ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateClassificationScopeResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateClassificationScopeResponse.error_of_json))
   | UpdateFindingsFilter ->
       if is_success
       then Ok (UpdateFindingsFilterResponse.of_json (response_to_json resp))
@@ -1614,3 +2107,45 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateOrganizationConfigurationResponse.error_of_json))
+  | UpdateResourceProfile ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateResourceProfileResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateResourceProfileResponse.error_of_json))
+  | UpdateResourceProfileDetections ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateResourceProfileDetectionsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResourceProfileDetectionsResponse.error_of_json))
+  | UpdateRevealConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateRevealConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRevealConfigurationResponse.error_of_json))
+  | UpdateSensitivityInspectionTemplate ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateSensitivityInspectionTemplateResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSensitivityInspectionTemplateResponse.error_of_json))

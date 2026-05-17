@@ -64,32 +64,30 @@ module HashKeyRange =
   struct
     type nonrec t =
       {
-      startingHashKey: HashKey.t
+      startingHashKey: HashKey.t option
         [@ocaml.doc "The starting hash key of the hash key range."];
-      endingHashKey: HashKey.t
+      endingHashKey: HashKey.t option
         [@ocaml.doc "The ending hash key of the hash key range."]}
-    let context_ = "HashKeyRange"
-    let make ~startingHashKey =
-      fun ~endingHashKey -> fun () -> { startingHashKey; endingHashKey }
+    let make ?startingHashKey =
+      fun ?endingHashKey -> fun () -> { startingHashKey; endingHashKey }
     let to_value x =
       structure_to_value
-        [("StartingHashKey", (Some (HashKey.to_value x.startingHashKey)));
-        ("EndingHashKey", (Some (HashKey.to_value x.endingHashKey)))]
+        [("StartingHashKey",
+           (Option.map x.startingHashKey ~f:HashKey.to_value));
+        ("EndingHashKey", (Option.map x.endingHashKey ~f:HashKey.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endingHashKey =
-        HashKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndingHashKey") in
+        (Option.map ~f:HashKey.of_xml) (Xml.child xml_arg0 "EndingHashKey") in
       let startingHashKey =
-        HashKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartingHashKey") in
-      make ~endingHashKey ~startingHashKey ()
+        (Option.map ~f:HashKey.of_xml) (Xml.child xml_arg0 "StartingHashKey") in
+      make ?endingHashKey ?startingHashKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endingHashKey = field_map_exn json "EndingHashKey" HashKey.of_json in
+    let of_json json__ =
+      let endingHashKey = field_map json__ "EndingHashKey" HashKey.of_json in
       let startingHashKey =
-        field_map_exn json "StartingHashKey" HashKey.of_json in
-      make ~endingHashKey ~startingHashKey ()
+        field_map json__ "StartingHashKey" HashKey.of_json in
+      make ?endingHashKey ?startingHashKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The range of possible hash key values for the shard, which is a set of ordered contiguous positive integers."]
@@ -97,6 +95,9 @@ module ShardIdList =
   struct
     type nonrec t = ShardId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShardId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -244,42 +245,40 @@ module ChildShard =
   struct
     type nonrec t =
       {
-      shardId: ShardId.t
+      shardId: ShardId.t option
         [@ocaml.doc
           "The shard ID of the existing child shard of the current shard."];
-      parentShards: ShardIdList.t
+      parentShards: ShardIdList.t option
         [@ocaml.doc
           "The current shard that is the parent of the existing child shard."];
-      hashKeyRange: HashKeyRange.t }
-    let context_ = "ChildShard"
-    let make ~shardId =
-      fun ~parentShards ->
-        fun ~hashKeyRange ->
+      hashKeyRange: HashKeyRange.t option }
+    let make ?shardId =
+      fun ?parentShards ->
+        fun ?hashKeyRange ->
           fun () -> { shardId; parentShards; hashKeyRange }
     let to_value x =
       structure_to_value
-        [("ShardId", (Some (ShardId.to_value x.shardId)));
-        ("ParentShards", (Some (ShardIdList.to_value x.parentShards)));
-        ("HashKeyRange", (Some (HashKeyRange.to_value x.hashKeyRange)))]
+        [("ShardId", (Option.map x.shardId ~f:ShardId.to_value));
+        ("ParentShards", (Option.map x.parentShards ~f:ShardIdList.to_value));
+        ("HashKeyRange",
+          (Option.map x.hashKeyRange ~f:HashKeyRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hashKeyRange =
-        HashKeyRange.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HashKeyRange") in
+        (Option.map ~f:HashKeyRange.of_xml)
+          (Xml.child xml_arg0 "HashKeyRange") in
       let parentShards =
-        ShardIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ParentShards") in
+        (Option.map ~f:ShardIdList.of_xml)
+          (Xml.child xml_arg0 "ParentShards") in
       let shardId =
-        ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
-      make ~hashKeyRange ~parentShards ~shardId ()
+        (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ShardId") in
+      make ?hashKeyRange ?parentShards ?shardId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hashKeyRange =
-        field_map_exn json "HashKeyRange" HashKeyRange.of_json in
-      let parentShards =
-        field_map_exn json "ParentShards" ShardIdList.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      make ~hashKeyRange ~parentShards ~shardId ()
+    let of_json json__ =
+      let hashKeyRange = field_map json__ "HashKeyRange" HashKeyRange.of_json in
+      let parentShards = field_map json__ "ParentShards" ShardIdList.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
+      make ?hashKeyRange ?parentShards ?shardId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Output parameter of the GetRecords API. The existing child shard of the current shard."]
@@ -287,42 +286,42 @@ module Record =
   struct
     type nonrec t =
       {
-      sequenceNumber: SequenceNumber.t
+      sequenceNumber: SequenceNumber.t option
         [@ocaml.doc "The unique identifier of the record within its shard."];
       approximateArrivalTimestamp: Timestamp.t option
         [@ocaml.doc
           "The approximate time that the record was inserted into the stream."];
-      data: Data.t
+      data: Data.t option
         [@ocaml.doc
           "The data blob. The data in the blob is both opaque and immutable to Kinesis Data Streams, which does not inspect, interpret, or change the data in the blob in any way. When the data blob (the payload before base64-encoding) is added to the partition key size, the total size must not exceed the maximum record size (1 MiB)."];
-      partitionKey: PartitionKey.t
+      partitionKey: PartitionKey.t option
         [@ocaml.doc
           "Identifies which shard in the stream the data record is assigned to."];
       encryptionType: EncryptionType.t option
         [@ocaml.doc
           "The encryption type used on the record. This parameter can be one of the following values: NONE: Do not encrypt the records in the stream. KMS: Use server-side encryption on the records in the stream using a customer-managed Amazon Web Services KMS key."]}
-    let context_ = "Record"
-    let make ?approximateArrivalTimestamp =
-      fun ?encryptionType ->
-        fun ~sequenceNumber ->
-          fun ~data ->
-            fun ~partitionKey ->
+    let make ?sequenceNumber =
+      fun ?approximateArrivalTimestamp ->
+        fun ?data ->
+          fun ?partitionKey ->
+            fun ?encryptionType ->
               fun () ->
                 {
-                  approximateArrivalTimestamp;
-                  encryptionType;
                   sequenceNumber;
+                  approximateArrivalTimestamp;
                   data;
-                  partitionKey
+                  partitionKey;
+                  encryptionType
                 }
     let to_value x =
       structure_to_value
         [("SequenceNumber",
-           (Some (SequenceNumber.to_value x.sequenceNumber)));
+           (Option.map x.sequenceNumber ~f:SequenceNumber.to_value));
         ("ApproximateArrivalTimestamp",
           (Option.map x.approximateArrivalTimestamp ~f:Timestamp.to_value));
-        ("Data", (Some (Data.to_value x.data)));
-        ("PartitionKey", (Some (PartitionKey.to_value x.partitionKey)));
+        ("Data", (Option.map x.data ~f:Data.to_value));
+        ("PartitionKey",
+          (Option.map x.partitionKey ~f:PartitionKey.to_value));
         ("EncryptionType",
           (Option.map x.encryptionType ~f:EncryptionType.to_value))]
     let to_query v = to_query to_value v
@@ -331,34 +330,57 @@ module Record =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       let partitionKey =
-        PartitionKey.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PartitionKey") in
-      let data =
-        Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
+        (Option.map ~f:PartitionKey.of_xml)
+          (Xml.child xml_arg0 "PartitionKey") in
+      let data = (Option.map ~f:Data.of_xml) (Xml.child xml_arg0 "Data") in
       let approximateArrivalTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "ApproximateArrivalTimestamp") in
       let sequenceNumber =
-        SequenceNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SequenceNumber") in
-      make ?encryptionType ~partitionKey ~data ?approximateArrivalTimestamp
-        ~sequenceNumber ()
+        (Option.map ~f:SequenceNumber.of_xml)
+          (Xml.child xml_arg0 "SequenceNumber") in
+      make ?encryptionType ?partitionKey ?data ?approximateArrivalTimestamp
+        ?sequenceNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
-      let partitionKey =
-        field_map_exn json "PartitionKey" PartitionKey.of_json in
-      let data = field_map_exn json "Data" Data.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
+      let partitionKey = field_map json__ "PartitionKey" PartitionKey.of_json in
+      let data = field_map json__ "Data" Data.of_json in
       let approximateArrivalTimestamp =
-        field_map json "ApproximateArrivalTimestamp" Timestamp.of_json in
+        field_map json__ "ApproximateArrivalTimestamp" Timestamp.of_json in
       let sequenceNumber =
-        field_map_exn json "SequenceNumber" SequenceNumber.of_json in
-      make ?encryptionType ~partitionKey ~data ?approximateArrivalTimestamp
-        ~sequenceNumber ()
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
+      make ?encryptionType ?partitionKey ?data ?approximateArrivalTimestamp
+        ?sequenceNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The unit of data of the Kinesis data stream, which is composed of a sequence number, a partition key, and a data blob."]
+module StreamMode =
+  struct
+    type nonrec t =
+      | PROVISIONED 
+      | ON_DEMAND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PROVISIONED -> "PROVISIONED"
+      | ON_DEMAND -> "ON_DEMAND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PROVISIONED" -> PROVISIONED
+      | "ON_DEMAND" -> ON_DEMAND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StreamMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StreamMode" j)
+    let to_json = simple_to_json to_value
+  end
 module MetricsNameList =
   struct
     type nonrec t = MetricsName.t list
@@ -367,6 +389,9 @@ module MetricsNameList =
         ok_or_failwith
           ((check_list_max i ~max:7) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricsName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -391,19 +416,18 @@ module SequenceNumberRange =
   struct
     type nonrec t =
       {
-      startingSequenceNumber: SequenceNumber.t
+      startingSequenceNumber: SequenceNumber.t option
         [@ocaml.doc "The starting sequence number for the range."];
       endingSequenceNumber: SequenceNumber.t option
         [@ocaml.doc
           "The ending sequence number for the range. Shards that are in the OPEN state have an ending sequence number of null."]}
-    let context_ = "SequenceNumberRange"
-    let make ?endingSequenceNumber =
-      fun ~startingSequenceNumber ->
-        fun () -> { endingSequenceNumber; startingSequenceNumber }
+    let make ?startingSequenceNumber =
+      fun ?endingSequenceNumber ->
+        fun () -> { startingSequenceNumber; endingSequenceNumber }
     let to_value x =
       structure_to_value
         [("StartingSequenceNumber",
-           (Some (SequenceNumber.to_value x.startingSequenceNumber)));
+           (Option.map x.startingSequenceNumber ~f:SequenceNumber.to_value));
         ("EndingSequenceNumber",
           (Option.map x.endingSequenceNumber ~f:SequenceNumber.to_value))]
     let to_query v = to_query to_value v
@@ -412,16 +436,16 @@ module SequenceNumberRange =
         (Option.map ~f:SequenceNumber.of_xml)
           (Xml.child xml_arg0 "EndingSequenceNumber") in
       let startingSequenceNumber =
-        SequenceNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartingSequenceNumber") in
-      make ?endingSequenceNumber ~startingSequenceNumber ()
+        (Option.map ~f:SequenceNumber.of_xml)
+          (Xml.child xml_arg0 "StartingSequenceNumber") in
+      make ?endingSequenceNumber ?startingSequenceNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endingSequenceNumber =
-        field_map json "EndingSequenceNumber" SequenceNumber.of_json in
+        field_map json__ "EndingSequenceNumber" SequenceNumber.of_json in
       let startingSequenceNumber =
-        field_map_exn json "StartingSequenceNumber" SequenceNumber.of_json in
-      make ?endingSequenceNumber ~startingSequenceNumber ()
+        field_map json__ "StartingSequenceNumber" SequenceNumber.of_json in
+      make ?endingSequenceNumber ?startingSequenceNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The range of possible sequence numbers for the shard."]
 module ErrorMessage =
@@ -441,6 +465,9 @@ module ChildShardList =
   struct
     type nonrec t = ChildShard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChildShard.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -479,6 +506,9 @@ module RecordList =
   struct
     type nonrec t = Record.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -545,6 +575,104 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module StreamARN =
+  struct
+    type nonrec t = string
+    let context_ = "StreamARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws.*:kinesis:.*:\\d{12}:stream/\\S+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StreamARN" j
+    let to_json = simple_to_json to_value
+  end
+module StreamModeDetails =
+  struct
+    type nonrec t =
+      {
+      streamMode: StreamMode.t
+        [@ocaml.doc
+          "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]}
+    let context_ = "StreamModeDetails"
+    let make ~streamMode = fun () -> { streamMode }
+    let to_value x =
+      structure_to_value
+        [("StreamMode", (Some (StreamMode.to_value x.streamMode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamMode =
+        StreamMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StreamMode") in
+      make ~streamMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamMode = field_map_exn json__ "StreamMode" StreamMode.of_json in
+      make ~streamMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]
+module StreamName =
+  struct
+    type nonrec t = string
+    let context_ = "StreamName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StreamName" j
+    let to_json = simple_to_json to_value
+  end
+module StreamStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | DELETING 
+      | ACTIVE 
+      | UPDATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | DELETING -> "DELETING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "DELETING" -> DELETING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StreamStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StreamStatus" j)
     let to_json = simple_to_json to_value
   end
 module ConsumerARN =
@@ -636,108 +764,164 @@ module EnhancedMetrics =
           (Xml.child xml_arg0 "ShardLevelMetrics") in
       make ?shardLevelMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shardLevelMetrics =
-        field_map json "ShardLevelMetrics" MetricsNameList.of_json in
+        field_map json__ "ShardLevelMetrics" MetricsNameList.of_json in
       make ?shardLevelMetrics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents enhanced metrics types."]
-module StreamMode =
+module NaturalIntegerObject =
   struct
-    type nonrec t =
-      | PROVISIONED 
-      | ON_DEMAND 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | PROVISIONED -> "PROVISIONED"
-      | ON_DEMAND -> "ON_DEMAND"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "PROVISIONED" -> PROVISIONED
-      | "ON_DEMAND" -> ON_DEMAND
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration StreamMode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StreamMode" j)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NaturalIntegerObject" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module Shard =
   struct
     type nonrec t =
       {
-      shardId: ShardId.t
+      shardId: ShardId.t option
         [@ocaml.doc "The unique identifier of the shard within the stream."];
       parentShardId: ShardId.t option
         [@ocaml.doc "The shard ID of the shard's parent."];
       adjacentParentShardId: ShardId.t option
         [@ocaml.doc
           "The shard ID of the shard adjacent to the shard's parent."];
-      hashKeyRange: HashKeyRange.t
+      hashKeyRange: HashKeyRange.t option
         [@ocaml.doc
           "The range of possible hash key values for the shard, which is a set of ordered contiguous positive integers."];
-      sequenceNumberRange: SequenceNumberRange.t
+      sequenceNumberRange: SequenceNumberRange.t option
         [@ocaml.doc "The range of possible sequence numbers for the shard."]}
-    let context_ = "Shard"
-    let make ?parentShardId =
-      fun ?adjacentParentShardId ->
-        fun ~shardId ->
-          fun ~hashKeyRange ->
-            fun ~sequenceNumberRange ->
+    let make ?shardId =
+      fun ?parentShardId ->
+        fun ?adjacentParentShardId ->
+          fun ?hashKeyRange ->
+            fun ?sequenceNumberRange ->
               fun () ->
                 {
+                  shardId;
                   parentShardId;
                   adjacentParentShardId;
-                  shardId;
                   hashKeyRange;
                   sequenceNumberRange
                 }
     let to_value x =
       structure_to_value
-        [("ShardId", (Some (ShardId.to_value x.shardId)));
+        [("ShardId", (Option.map x.shardId ~f:ShardId.to_value));
         ("ParentShardId", (Option.map x.parentShardId ~f:ShardId.to_value));
         ("AdjacentParentShardId",
           (Option.map x.adjacentParentShardId ~f:ShardId.to_value));
-        ("HashKeyRange", (Some (HashKeyRange.to_value x.hashKeyRange)));
+        ("HashKeyRange",
+          (Option.map x.hashKeyRange ~f:HashKeyRange.to_value));
         ("SequenceNumberRange",
-          (Some (SequenceNumberRange.to_value x.sequenceNumberRange)))]
+          (Option.map x.sequenceNumberRange ~f:SequenceNumberRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sequenceNumberRange =
-        SequenceNumberRange.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SequenceNumberRange") in
+        (Option.map ~f:SequenceNumberRange.of_xml)
+          (Xml.child xml_arg0 "SequenceNumberRange") in
       let hashKeyRange =
-        HashKeyRange.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HashKeyRange") in
+        (Option.map ~f:HashKeyRange.of_xml)
+          (Xml.child xml_arg0 "HashKeyRange") in
       let adjacentParentShardId =
         (Option.map ~f:ShardId.of_xml)
           (Xml.child xml_arg0 "AdjacentParentShardId") in
       let parentShardId =
         (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ParentShardId") in
       let shardId =
-        ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
-      make ~sequenceNumberRange ~hashKeyRange ?adjacentParentShardId
-        ?parentShardId ~shardId ()
+        (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ShardId") in
+      make ?sequenceNumberRange ?hashKeyRange ?adjacentParentShardId
+        ?parentShardId ?shardId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sequenceNumberRange =
-        field_map_exn json "SequenceNumberRange" SequenceNumberRange.of_json in
-      let hashKeyRange =
-        field_map_exn json "HashKeyRange" HashKeyRange.of_json in
+        field_map json__ "SequenceNumberRange" SequenceNumberRange.of_json in
+      let hashKeyRange = field_map json__ "HashKeyRange" HashKeyRange.of_json in
       let adjacentParentShardId =
-        field_map json "AdjacentParentShardId" ShardId.of_json in
-      let parentShardId = field_map json "ParentShardId" ShardId.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      make ~sequenceNumberRange ~hashKeyRange ?adjacentParentShardId
-        ?parentShardId ~shardId ()
+        field_map json__ "AdjacentParentShardId" ShardId.of_json in
+      let parentShardId = field_map json__ "ParentShardId" ShardId.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
+      make ?sequenceNumberRange ?hashKeyRange ?adjacentParentShardId
+        ?parentShardId ?shardId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A uniquely identified group of data records in a Kinesis data stream."]
+module MinimumThroughputBillingCommitmentOutputStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | ENABLED_UNTIL_EARLIEST_ALLOWED_END 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | ENABLED_UNTIL_EARLIEST_ALLOWED_END ->
+          "ENABLED_UNTIL_EARLIEST_ALLOWED_END"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "ENABLED_UNTIL_EARLIEST_ALLOWED_END" ->
+          ENABLED_UNTIL_EARLIEST_ALLOWED_END
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration MinimumThroughputBillingCommitmentOutputStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json
+           ~kind:"MinimumThroughputBillingCommitmentOutputStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module MinimumThroughputBillingCommitmentInputStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration MinimumThroughputBillingCommitmentInputStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"MinimumThroughputBillingCommitmentInputStatus"
+           j)
+    let to_json = simple_to_json to_value
+  end
 module InternalFailureException =
   struct
     type nonrec t = {
@@ -752,8 +936,8 @@ module InternalFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -774,8 +958,8 @@ module KMSAccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -796,8 +980,8 @@ module KMSDisabledException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -818,8 +1002,8 @@ module KMSInvalidStateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -840,8 +1024,8 @@ module KMSNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -862,8 +1046,8 @@ module KMSOptInRequired =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -884,8 +1068,8 @@ module KMSThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -906,8 +1090,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -928,8 +1112,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -938,35 +1122,34 @@ module SubscribeToShardEvent =
   struct
     type nonrec t =
       {
-      records: RecordList.t ;
-      continuationSequenceNumber: SequenceNumber.t
+      records: RecordList.t option ;
+      continuationSequenceNumber: SequenceNumber.t option
         [@ocaml.doc
           "Use this as SequenceNumber in the next call to SubscribeToShard, with StartingPosition set to AT_SEQUENCE_NUMBER or AFTER_SEQUENCE_NUMBER. Use ContinuationSequenceNumber for checkpointing because it captures your shard progress even when no data is written to the shard."];
-      millisBehindLatest: MillisBehindLatest.t
+      millisBehindLatest: MillisBehindLatest.t option
         [@ocaml.doc
           "The number of milliseconds the read records are from the tip of the stream, indicating how far behind current time the consumer is. A value of zero indicates that record processing is caught up, and there are no new records to process at this moment."];
       childShards: ChildShardList.t option
         [@ocaml.doc
           "The list of the child shards of the current shard, returned only at the end of the current shard."]}
-    let context_ = "SubscribeToShardEvent"
-    let make ?childShards =
-      fun ~records ->
-        fun ~continuationSequenceNumber ->
-          fun ~millisBehindLatest ->
+    let make ?records =
+      fun ?continuationSequenceNumber ->
+        fun ?millisBehindLatest ->
+          fun ?childShards ->
             fun () ->
               {
-                childShards;
                 records;
                 continuationSequenceNumber;
-                millisBehindLatest
+                millisBehindLatest;
+                childShards
               }
     let to_value x =
       structure_to_value
-        [("Records", (Some (RecordList.to_value x.records)));
+        [("Records", (Option.map x.records ~f:RecordList.to_value));
         ("ContinuationSequenceNumber",
-          (Some (SequenceNumber.to_value x.continuationSequenceNumber)));
+          (Option.map x.continuationSequenceNumber ~f:SequenceNumber.to_value));
         ("MillisBehindLatest",
-          (Some (MillisBehindLatest.to_value x.millisBehindLatest)));
+          (Option.map x.millisBehindLatest ~f:MillisBehindLatest.to_value));
         ("ChildShards",
           (Option.map x.childShards ~f:ChildShardList.to_value))]
     let to_query v = to_query to_value v
@@ -975,28 +1158,25 @@ module SubscribeToShardEvent =
         (Option.map ~f:ChildShardList.of_xml)
           (Xml.child xml_arg0 "ChildShards") in
       let millisBehindLatest =
-        MillisBehindLatest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MillisBehindLatest") in
+        (Option.map ~f:MillisBehindLatest.of_xml)
+          (Xml.child xml_arg0 "MillisBehindLatest") in
       let continuationSequenceNumber =
-        SequenceNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ContinuationSequenceNumber") in
+        (Option.map ~f:SequenceNumber.of_xml)
+          (Xml.child xml_arg0 "ContinuationSequenceNumber") in
       let records =
-        RecordList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Records") in
-      make ?childShards ~millisBehindLatest ~continuationSequenceNumber
-        ~records ()
+        (Option.map ~f:RecordList.of_xml) (Xml.child xml_arg0 "Records") in
+      make ?childShards ?millisBehindLatest ?continuationSequenceNumber
+        ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let childShards = field_map json "ChildShards" ChildShardList.of_json in
+    let of_json json__ =
+      let childShards = field_map json__ "ChildShards" ChildShardList.of_json in
       let millisBehindLatest =
-        field_map_exn json "MillisBehindLatest" MillisBehindLatest.of_json in
+        field_map json__ "MillisBehindLatest" MillisBehindLatest.of_json in
       let continuationSequenceNumber =
-        field_map_exn json "ContinuationSequenceNumber"
-          SequenceNumber.of_json in
-      let records = field_map_exn json "Records" RecordList.of_json in
-      make ?childShards ~millisBehindLatest ~continuationSequenceNumber
-        ~records ()
+        field_map json__ "ContinuationSequenceNumber" SequenceNumber.of_json in
+      let records = field_map json__ "Records" RecordList.of_json in
+      make ?childShards ?millisBehindLatest ?continuationSequenceNumber
+        ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "After you call SubscribeToShard, Kinesis Data Streams sends events of this type over an HTTP/2 connection to your consumer."]
@@ -1076,12 +1256,12 @@ module PutRecordsResultEntry =
           (Xml.child xml_arg0 "SequenceNumber") in
       make ?errorMessage ?errorCode ?shardId ?sequenceNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
-      let shardId = field_map json "ShardId" ShardId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
       let sequenceNumber =
-        field_map json "SequenceNumber" SequenceNumber.of_json in
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
       make ?errorMessage ?errorCode ?shardId ?sequenceNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1092,7 +1272,7 @@ module PutRecordsRequestEntry =
       {
       data: Data.t
         [@ocaml.doc
-          "The data blob to put into the record, which is base64-encoded when the blob is serialized. When the data blob (the payload before base64-encoding) is added to the partition key size, the total size must not exceed the maximum record size (1 MiB)."];
+          "The data blob to put into the record, which is base64-encoded when the blob is serialized. When the data blob (the payload before base64-encoding) is added to the partition key size, the total size must not exceed the maximum record size (10 MiB)."];
       explicitHashKey: HashKey.t option
         [@ocaml.doc
           "The hash value used to determine explicitly the shard that the data record is assigned to by overriding the partition key hash."];
@@ -1121,11 +1301,12 @@ module PutRecordsRequestEntry =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~partitionKey ?explicitHashKey ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let partitionKey =
-        field_map_exn json "PartitionKey" PartitionKey.of_json in
-      let explicitHashKey = field_map json "ExplicitHashKey" HashKey.of_json in
-      let data = field_map_exn json "Data" Data.of_json in
+        field_map_exn json__ "PartitionKey" PartitionKey.of_json in
+      let explicitHashKey =
+        field_map json__ "ExplicitHashKey" HashKey.of_json in
+      let data = field_map_exn json__ "Data" Data.of_json in
       make ~partitionKey ?explicitHashKey ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for PutRecords."]
@@ -1133,72 +1314,112 @@ module Tag =
   struct
     type nonrec t =
       {
-      key: TagKey.t
+      key: TagKey.t option
         [@ocaml.doc
           "A unique identifier for the tag. Maximum length: 128 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"];
       value: TagValue.t option
         [@ocaml.doc
           "An optional string, typically used to describe or define the tag. Maximum length: 256 characters. Valid characters: Unicode letters, digits, white space, _ . / = + - % \\@"]}
-    let context_ = "Tag"
-    let make ?value = fun ~key -> fun () -> { value; key }
+    let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
+        [("Key", (Option.map x.key ~f:TagKey.to_value));
         ("Value", (Option.map x.value ~f:TagValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
         (Option.map ~f:TagValue.of_xml) (Xml.child xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ?value ~key ()
+      let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ?value ~key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Metadata assigned to the stream, consisting of a key-value pair."]
-module StreamName =
+       "Metadata assigned to the stream or consumer, consisting of a key-value pair."]
+module StreamSummary =
   struct
-    type nonrec t = string
-    let context_ = "StreamName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      streamName: StreamName.t option [@ocaml.doc "The name of a stream."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamStatus: StreamStatus.t option
+        [@ocaml.doc "The status of the stream."];
+      streamModeDetails: StreamModeDetails.t option ;
+      streamCreationTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp at which the stream was created."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamStatus ->
+          fun ?streamModeDetails ->
+            fun ?streamCreationTimestamp ->
+              fun () ->
+                {
+                  streamName;
+                  streamARN;
+                  streamStatus;
+                  streamModeDetails;
+                  streamCreationTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamStatus",
+          (Option.map x.streamStatus ~f:StreamStatus.to_value));
+        ("StreamModeDetails",
+          (Option.map x.streamModeDetails ~f:StreamModeDetails.to_value));
+        ("StreamCreationTimestamp",
+          (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StreamName" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let streamCreationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StreamCreationTimestamp") in
+      let streamModeDetails =
+        (Option.map ~f:StreamModeDetails.of_xml)
+          (Xml.child xml_arg0 "StreamModeDetails") in
+      let streamStatus =
+        (Option.map ~f:StreamStatus.of_xml)
+          (Xml.child xml_arg0 "StreamStatus") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamCreationTimestamp ?streamModeDetails ?streamStatus
+        ?streamARN ?streamName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamCreationTimestamp =
+        field_map json__ "StreamCreationTimestamp" Timestamp.of_json in
+      let streamModeDetails =
+        field_map json__ "StreamModeDetails" StreamModeDetails.of_json in
+      let streamStatus = field_map json__ "StreamStatus" StreamStatus.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamCreationTimestamp ?streamModeDetails ?streamStatus
+        ?streamARN ?streamName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of a stream."]
 module Consumer =
   struct
     type nonrec t =
       {
-      consumerName: ConsumerName.t
+      consumerName: ConsumerName.t option
         [@ocaml.doc
           "The name of the consumer is something you choose when you register the consumer."];
-      consumerARN: ConsumerARN.t
+      consumerARN: ConsumerARN.t option
         [@ocaml.doc
           "When you register a consumer, Kinesis Data Streams generates an ARN for it. You need this ARN to be able to call SubscribeToShard. If you delete a consumer and then create a new one with the same name, it won't have the same ARN. That's because consumer ARNs contain the creation timestamp. This is important to keep in mind if you have IAM policies that reference consumer ARNs."];
-      consumerStatus: ConsumerStatus.t
+      consumerStatus: ConsumerStatus.t option
         [@ocaml.doc
           "A consumer can't read data while in the CREATING or DELETING states."];
-      consumerCreationTimestamp: Timestamp.t }
-    let context_ = "Consumer"
-    let make ~consumerName =
-      fun ~consumerARN ->
-        fun ~consumerStatus ->
-          fun ~consumerCreationTimestamp ->
+      consumerCreationTimestamp: Timestamp.t option }
+    let make ?consumerName =
+      fun ?consumerARN ->
+        fun ?consumerStatus ->
+          fun ?consumerCreationTimestamp ->
             fun () ->
               {
                 consumerName;
@@ -1208,39 +1429,38 @@ module Consumer =
               }
     let to_value x =
       structure_to_value
-        [("ConsumerName", (Some (ConsumerName.to_value x.consumerName)));
-        ("ConsumerARN", (Some (ConsumerARN.to_value x.consumerARN)));
-        ("ConsumerStatus", (Some (ConsumerStatus.to_value x.consumerStatus)));
+        [("ConsumerName",
+           (Option.map x.consumerName ~f:ConsumerName.to_value));
+        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value));
+        ("ConsumerStatus",
+          (Option.map x.consumerStatus ~f:ConsumerStatus.to_value));
         ("ConsumerCreationTimestamp",
-          (Some (Timestamp.to_value x.consumerCreationTimestamp)))]
+          (Option.map x.consumerCreationTimestamp ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let consumerCreationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ConsumerCreationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ConsumerCreationTimestamp") in
       let consumerStatus =
-        ConsumerStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerStatus") in
+        (Option.map ~f:ConsumerStatus.of_xml)
+          (Xml.child xml_arg0 "ConsumerStatus") in
       let consumerARN =
-        ConsumerARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerARN") in
+        (Option.map ~f:ConsumerARN.of_xml) (Xml.child xml_arg0 "ConsumerARN") in
       let consumerName =
-        ConsumerName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerName") in
-      make ~consumerCreationTimestamp ~consumerStatus ~consumerARN
-        ~consumerName ()
+        (Option.map ~f:ConsumerName.of_xml)
+          (Xml.child xml_arg0 "ConsumerName") in
+      make ?consumerCreationTimestamp ?consumerStatus ?consumerARN
+        ?consumerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumerCreationTimestamp =
-        field_map_exn json "ConsumerCreationTimestamp" Timestamp.of_json in
+        field_map json__ "ConsumerCreationTimestamp" Timestamp.of_json in
       let consumerStatus =
-        field_map_exn json "ConsumerStatus" ConsumerStatus.of_json in
-      let consumerARN = field_map_exn json "ConsumerARN" ConsumerARN.of_json in
-      let consumerName =
-        field_map_exn json "ConsumerName" ConsumerName.of_json in
-      make ~consumerCreationTimestamp ~consumerStatus ~consumerARN
-        ~consumerName ()
+        field_map json__ "ConsumerStatus" ConsumerStatus.of_json in
+      let consumerARN = field_map json__ "ConsumerARN" ConsumerARN.of_json in
+      let consumerName = field_map json__ "ConsumerName" ConsumerName.of_json in
+      make ?consumerCreationTimestamp ?consumerStatus ?consumerARN
+        ?consumerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the details of the consumer you registered. This type of object is returned by RegisterStreamConsumer."]
@@ -1304,6 +1524,9 @@ module EnhancedMonitoringList =
   struct
     type nonrec t = EnhancedMetrics.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnhancedMetrics.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1343,6 +1566,25 @@ module KeyId =
     let of_json j = string_of_json ~kind:"KeyId" j
     let to_json = simple_to_json to_value
   end
+module MaxRecordSizeInKiB =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10240) >>=
+             (fun () -> check_int_min i ~min:1024));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxRecordSizeInKiB" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module RetentionPeriodHours =
   struct
     type nonrec t = int
@@ -1376,84 +1618,64 @@ module ShardCountObject =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module StreamARN =
+module StreamId =
   struct
     type nonrec t = string
-    let context_ = "StreamARN"
+    let context_ = "StreamId"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2048) >>=
+                (check_string_max i ~max:24) >>=
                   (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:aws.*:kinesis:.*:\\d{12}:stream/.+")));
+                     check_pattern i ~pattern:"[a-z0-9]{20}-[a-z0-9]{3}")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"StreamARN" j
+    let of_json j = string_of_json ~kind:"StreamId" j
     let to_json = simple_to_json to_value
   end
-module StreamModeDetails =
+module WarmThroughputObject =
   struct
     type nonrec t =
       {
-      streamMode: StreamMode.t
+      targetMiBps: NaturalIntegerObject.t option
         [@ocaml.doc
-          "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]}
-    let context_ = "StreamModeDetails"
-    let make ~streamMode = fun () -> { streamMode }
+          "The target warm throughput value on the stream. This indicates that the stream is currently scaling towards this target value."];
+      currentMiBps: NaturalIntegerObject.t option
+        [@ocaml.doc
+          "The current warm throughput value on the stream. This is the write throughput in MiBps that the stream is currently scaled to handle."]}
+    let make ?targetMiBps =
+      fun ?currentMiBps -> fun () -> { targetMiBps; currentMiBps }
     let to_value x =
       structure_to_value
-        [("StreamMode", (Some (StreamMode.to_value x.streamMode)))]
+        [("TargetMiBps",
+           (Option.map x.targetMiBps ~f:NaturalIntegerObject.to_value));
+        ("CurrentMiBps",
+          (Option.map x.currentMiBps ~f:NaturalIntegerObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamMode =
-        StreamMode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamMode") in
-      make ~streamMode ()
+      let currentMiBps =
+        (Option.map ~f:NaturalIntegerObject.of_xml)
+          (Xml.child xml_arg0 "CurrentMiBps") in
+      let targetMiBps =
+        (Option.map ~f:NaturalIntegerObject.of_xml)
+          (Xml.child xml_arg0 "TargetMiBps") in
+      make ?currentMiBps ?targetMiBps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamMode = field_map_exn json "StreamMode" StreamMode.of_json in
-      make ~streamMode ()
+    let of_json json__ =
+      let currentMiBps =
+        field_map json__ "CurrentMiBps" NaturalIntegerObject.of_json in
+      let targetMiBps =
+        field_map json__ "TargetMiBps" NaturalIntegerObject.of_json in
+      make ?currentMiBps ?targetMiBps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]
-module StreamStatus =
-  struct
-    type nonrec t =
-      | CREATING 
-      | DELETING 
-      | ACTIVE 
-      | UPDATING 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CREATING -> "CREATING"
-      | DELETING -> "DELETING"
-      | ACTIVE -> "ACTIVE"
-      | UPDATING -> "UPDATING"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CREATING" -> CREATING
-      | "DELETING" -> DELETING
-      | "ACTIVE" -> ACTIVE
-      | "UPDATING" -> UPDATING
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration StreamStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"StreamStatus" j)
-    let to_json = simple_to_json to_value
-  end
+       "Represents the warm throughput configuration on the stream. This is only present for On-Demand Kinesis Data Streams in accounts that have MinimumThroughputBillingCommitment enabled."]
 module BooleanObject =
   struct
     type nonrec t = bool
@@ -1471,6 +1693,9 @@ module ShardList =
   struct
     type nonrec t = Shard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Shard.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1490,6 +1715,26 @@ module ShardList =
     let of_json j = list_of_json ~kind:"ShardList" ~of_json:Shard.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that you do not have the permissions required to perform this operation."]
 module InvalidArgumentException =
   struct
     type nonrec t =
@@ -1506,8 +1751,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1528,27 +1773,12 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The requested resource exceeds the maximum number allowed, or the number of concurrent stream requests exceeds the maximum number allowed."]
-module PositiveIntegerObject =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:1); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for PositiveIntegerObject" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ValidationException =
   struct
     type nonrec t = {
@@ -1563,10 +1793,26 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that you tried to invoke this API for a data stream with the on-demand capacity mode. This API is only supported for data streams with the provisioned capacity mode."]
+module PositiveIntegerObject =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PositiveIntegerObject" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module ScalingType =
   struct
@@ -1586,11 +1832,182 @@ module ScalingType =
     let of_json j = of_string (string_of_json ~kind:"ScalingType" j)
     let to_json = simple_to_json to_value
   end
+module MinimumThroughputBillingCommitmentOutput =
+  struct
+    type nonrec t =
+      {
+      status: MinimumThroughputBillingCommitmentOutputStatus.t option
+        [@ocaml.doc
+          "The current status of the minimum throughput billing commitment."];
+      startedAt: Timestamp.t option
+        [@ocaml.doc "The timestamp when the commitment was started."];
+      endedAt: Timestamp.t option
+        [@ocaml.doc "The timestamp when the commitment was ended."];
+      earliestAllowedEndAt: Timestamp.t option
+        [@ocaml.doc
+          "The earliest timestamp when the commitment can be ended."]}
+    let make ?status =
+      fun ?startedAt ->
+        fun ?endedAt ->
+          fun ?earliestAllowedEndAt ->
+            fun () -> { status; startedAt; endedAt; earliestAllowedEndAt }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status
+              ~f:MinimumThroughputBillingCommitmentOutputStatus.to_value));
+        ("StartedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("EndedAt", (Option.map x.endedAt ~f:Timestamp.to_value));
+        ("EarliestAllowedEndAt",
+          (Option.map x.earliestAllowedEndAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let earliestAllowedEndAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "EarliestAllowedEndAt") in
+      let endedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndedAt") in
+      let startedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartedAt") in
+      let status =
+        (Option.map ~f:MinimumThroughputBillingCommitmentOutputStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?earliestAllowedEndAt ?endedAt ?startedAt ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let earliestAllowedEndAt =
+        field_map json__ "EarliestAllowedEndAt" Timestamp.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let startedAt = field_map json__ "StartedAt" Timestamp.of_json in
+      let status =
+        field_map json__ "Status"
+          MinimumThroughputBillingCommitmentOutputStatus.of_json in
+      make ?earliestAllowedEndAt ?endedAt ?startedAt ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the current status of minimum throughput billing commitment for an account."]
+module MinimumThroughputBillingCommitmentInput =
+  struct
+    type nonrec t =
+      {
+      status: MinimumThroughputBillingCommitmentInputStatus.t
+        [@ocaml.doc
+          "The desired status of the minimum throughput billing commitment."]}
+    let context_ = "MinimumThroughputBillingCommitmentInput"
+    let make ~status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Some
+              (MinimumThroughputBillingCommitmentInputStatus.to_value
+                 x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        MinimumThroughputBillingCommitmentInputStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map_exn json__ "Status"
+          MinimumThroughputBillingCommitmentInputStatus.of_json in
+      make ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the request parameters for configuring minimum throughput billing commitment. Minimum throughput billing commitments provide cost savings on on-demand data streams in exchange for committing to a minimum level of throughput usage. Commitments have a minimum duration of 24 hours that must be honored before they can be disabled. If you attempt to disable a commitment before the minimum commitment period ends, the commitment will be scheduled for automatic disable at the earliest allowed end time. You can cancel a pending disable by enabling the commitment again before the earliest allowed end time."]
+module ResourceARN =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws.*:kinesis:.*:\\d{12}:.*stream/\\S+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceARN" j
+    let to_json = simple_to_json to_value
+  end
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SubscribeToShardEventStream =
   struct
     type nonrec t =
       {
-      subscribeToShardEvent: SubscribeToShardEvent.t
+      subscribeToShardEvent: SubscribeToShardEvent.t option
         [@ocaml.doc
           "After you call SubscribeToShard, Kinesis Data Streams sends events of this type to your consumer. For an example of how to handle these events, see Enhanced Fan-Out Using the Kinesis Data Streams API."];
       resourceNotFoundException: ResourceNotFoundException.t option ;
@@ -1604,19 +2021,19 @@ module SubscribeToShardEventStream =
       internalFailureException: InternalFailureException.t option
         [@ocaml.doc
           "The processing of the request failed because of an unknown error, exception, or failure."]}
-    let context_ = "SubscribeToShardEventStream"
-    let make ?resourceNotFoundException =
-      fun ?resourceInUseException ->
-        fun ?kMSDisabledException ->
-          fun ?kMSInvalidStateException ->
-            fun ?kMSAccessDeniedException ->
-              fun ?kMSNotFoundException ->
-                fun ?kMSOptInRequired ->
-                  fun ?kMSThrottlingException ->
-                    fun ?internalFailureException ->
-                      fun ~subscribeToShardEvent ->
+    let make ?subscribeToShardEvent =
+      fun ?resourceNotFoundException ->
+        fun ?resourceInUseException ->
+          fun ?kMSDisabledException ->
+            fun ?kMSInvalidStateException ->
+              fun ?kMSAccessDeniedException ->
+                fun ?kMSNotFoundException ->
+                  fun ?kMSOptInRequired ->
+                    fun ?kMSThrottlingException ->
+                      fun ?internalFailureException ->
                         fun () ->
                           {
+                            subscribeToShardEvent;
                             resourceNotFoundException;
                             resourceInUseException;
                             kMSDisabledException;
@@ -1625,13 +2042,13 @@ module SubscribeToShardEventStream =
                             kMSNotFoundException;
                             kMSOptInRequired;
                             kMSThrottlingException;
-                            internalFailureException;
-                            subscribeToShardEvent
+                            internalFailureException
                           }
     let to_value x =
       structure_to_value
         [("SubscribeToShardEvent",
-           (Some (SubscribeToShardEvent.to_value x.subscribeToShardEvent)));
+           (Option.map x.subscribeToShardEvent
+              ~f:SubscribeToShardEvent.to_value));
         ("ResourceNotFoundException",
           (Option.map x.resourceNotFoundException
              ~f:ResourceNotFoundException.to_value));
@@ -1686,47 +2103,47 @@ module SubscribeToShardEventStream =
         (Option.map ~f:ResourceNotFoundException.of_xml)
           (Xml.child xml_arg0 "ResourceNotFoundException") in
       let subscribeToShardEvent =
-        SubscribeToShardEvent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscribeToShardEvent") in
+        (Option.map ~f:SubscribeToShardEvent.of_xml)
+          (Xml.child xml_arg0 "SubscribeToShardEvent") in
       make ?internalFailureException ?kMSThrottlingException
         ?kMSOptInRequired ?kMSNotFoundException ?kMSAccessDeniedException
         ?kMSInvalidStateException ?kMSDisabledException
         ?resourceInUseException ?resourceNotFoundException
-        ~subscribeToShardEvent ()
+        ?subscribeToShardEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let internalFailureException =
-        field_map json "InternalFailureException"
+        field_map json__ "InternalFailureException"
           InternalFailureException.of_json in
       let kMSThrottlingException =
-        field_map json "KMSThrottlingException"
+        field_map json__ "KMSThrottlingException"
           KMSThrottlingException.of_json in
       let kMSOptInRequired =
-        field_map json "KMSOptInRequired" KMSOptInRequired.of_json in
+        field_map json__ "KMSOptInRequired" KMSOptInRequired.of_json in
       let kMSNotFoundException =
-        field_map json "KMSNotFoundException" KMSNotFoundException.of_json in
+        field_map json__ "KMSNotFoundException" KMSNotFoundException.of_json in
       let kMSAccessDeniedException =
-        field_map json "KMSAccessDeniedException"
+        field_map json__ "KMSAccessDeniedException"
           KMSAccessDeniedException.of_json in
       let kMSInvalidStateException =
-        field_map json "KMSInvalidStateException"
+        field_map json__ "KMSInvalidStateException"
           KMSInvalidStateException.of_json in
       let kMSDisabledException =
-        field_map json "KMSDisabledException" KMSDisabledException.of_json in
+        field_map json__ "KMSDisabledException" KMSDisabledException.of_json in
       let resourceInUseException =
-        field_map json "ResourceInUseException"
+        field_map json__ "ResourceInUseException"
           ResourceInUseException.of_json in
       let resourceNotFoundException =
-        field_map json "ResourceNotFoundException"
+        field_map json__ "ResourceNotFoundException"
           ResourceNotFoundException.of_json in
       let subscribeToShardEvent =
-        field_map_exn json "SubscribeToShardEvent"
+        field_map json__ "SubscribeToShardEvent"
           SubscribeToShardEvent.of_json in
       make ?internalFailureException ?kMSThrottlingException
         ?kMSOptInRequired ?kMSNotFoundException ?kMSAccessDeniedException
         ?kMSInvalidStateException ?kMSDisabledException
         ?resourceInUseException ?resourceNotFoundException
-        ~subscribeToShardEvent ()
+        ?subscribeToShardEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This is a tagged union for all of the types of events an enhanced fan-out consumer can receive over HTTP/2 after a call to SubscribeToShard."]
@@ -1765,41 +2182,27 @@ module StartingPosition =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?timestamp ?sequenceNumber ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       let sequenceNumber =
-        field_map json "SequenceNumber" SequenceNumber.of_json in
-      let type_ = field_map_exn json "Type" ShardIteratorType.of_json in
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
+      let type_ = field_map_exn json__ "Type" ShardIteratorType.of_json in
       make ?timestamp ?sequenceNumber ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The starting position in the data stream from which to start streaming."]
-module TagKeyList =
+module Policy =
   struct
-    type nonrec t = TagKey.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    type nonrec t = string
+    let context_ = "Policy"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:TagKey.of_xml)
-    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
-    let to_json v = composed_to_json to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Policy" j
+    let to_json = simple_to_json to_value
   end
 module ProvisionedThroughputExceededException =
   struct
@@ -1817,8 +2220,8 @@ module ProvisionedThroughputExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1832,6 +2235,9 @@ module PutRecordsResultEntryList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutRecordsResultEntry.to_value)) |>
         (fun x -> `List x)
@@ -1863,6 +2269,9 @@ module PutRecordsRequestEntryList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutRecordsRequestEntry.to_value)) |>
         (fun x -> `List x)
@@ -1894,6 +2303,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1932,10 +2344,50 @@ module ListTagsForStreamInputLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ExpiredNextTokenException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The pagination token passed to the operation is expired."]
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1048576) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
 module StreamNameList =
   struct
     type nonrec t = StreamName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StreamName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1954,6 +2406,33 @@ module StreamNameList =
                      | _ -> true))) ~f:StreamName.of_xml)
     let of_json j =
       list_of_json ~kind:"StreamNameList" ~of_json:StreamName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StreamSummaryList =
+  struct
+    type nonrec t = StreamSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StreamSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StreamSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StreamSummaryList" ~of_json:StreamSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ListStreamsInputLimit =
@@ -1979,6 +2458,9 @@ module ConsumerList =
   struct
     type nonrec t = Consumer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Consumer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1998,43 +2480,6 @@ module ConsumerList =
     let of_json j =
       list_of_json ~kind:"ConsumerList" ~of_json:Consumer.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module ExpiredNextTokenException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The pagination token passed to the operation is expired."]
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1048576) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
   end
 module ListStreamConsumersInputLimit =
   struct
@@ -2107,10 +2552,10 @@ module ShardFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?timestamp ?shardId ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let shardId = field_map json "ShardId" ShardId.of_json in
-      let type_ = field_map_exn json "Type" ShardFilterType.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
+      let type_ = field_map_exn json__ "Type" ShardFilterType.of_json in
       make ?timestamp ?shardId ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2149,8 +2594,8 @@ module ExpiredIteratorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The provided iterator exceeds the maximum age allowed."]
@@ -2177,22 +2622,24 @@ module StreamDescriptionSummary =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream being described."];
-      streamARN: StreamARN.t
+      streamARN: StreamARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the stream being described."];
-      streamStatus: StreamStatus.t
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      streamStatus: StreamStatus.t option
         [@ocaml.doc
           "The current status of the stream being described. The stream status is one of the following states: CREATING - The stream is being created. Kinesis Data Streams immediately returns and sets StreamStatus to CREATING. DELETING - The stream is being deleted. The specified stream is in the DELETING state until Kinesis Data Streams completes the deletion. ACTIVE - The stream exists and is ready for read and write operations or deletion. You should perform read and write operations only on an ACTIVE stream. UPDATING - Shards in the stream are being merged or split. Read and write operations continue to work while the stream is in the UPDATING state."];
       streamModeDetails: StreamModeDetails.t option
         [@ocaml.doc
           "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand ycapacity mode and a provisioned capacity mode for your data streams."];
-      retentionPeriodHours: RetentionPeriodHours.t
+      retentionPeriodHours: RetentionPeriodHours.t option
         [@ocaml.doc "The current retention period, in hours."];
-      streamCreationTimestamp: Timestamp.t
+      streamCreationTimestamp: Timestamp.t option
         [@ocaml.doc "The approximate time that the stream was created."];
-      enhancedMonitoring: EnhancedMonitoringList.t
+      enhancedMonitoring: EnhancedMonitoringList.t option
         [@ocaml.doc
           "Represents the current enhanced monitoring settings of the stream."];
       encryptionType: EncryptionType.t option
@@ -2201,146 +2648,174 @@ module StreamDescriptionSummary =
       keyId: KeyId.t option
         [@ocaml.doc
           "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified ARN to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"];
-      openShardCount: ShardCountObject.t
+      openShardCount: ShardCountObject.t option
         [@ocaml.doc "The number of open shards in the stream."];
       consumerCount: ConsumerCountObject.t option
         [@ocaml.doc
-          "The number of enhanced fan-out consumers registered with the stream."]}
-    let context_ = "StreamDescriptionSummary"
-    let make ?streamModeDetails =
-      fun ?encryptionType ->
-        fun ?keyId ->
-          fun ?consumerCount ->
-            fun ~streamName ->
-              fun ~streamARN ->
-                fun ~streamStatus ->
-                  fun ~retentionPeriodHours ->
-                    fun ~streamCreationTimestamp ->
-                      fun ~enhancedMonitoring ->
-                        fun ~openShardCount ->
-                          fun () ->
-                            {
-                              streamModeDetails;
-                              encryptionType;
-                              keyId;
-                              consumerCount;
-                              streamName;
-                              streamARN;
-                              streamStatus;
-                              retentionPeriodHours;
-                              streamCreationTimestamp;
-                              enhancedMonitoring;
-                              openShardCount
-                            }
+          "The number of enhanced fan-out consumers registered with the stream."];
+      warmThroughput: WarmThroughputObject.t option
+        [@ocaml.doc
+          "The warm throughput in MB/s for the stream. This represents the throughput capacity that will be immediately available for write operations."];
+      maxRecordSizeInKiB: MaxRecordSizeInKiB.t option
+        [@ocaml.doc
+          "The maximum record size of a single record in kibibyte (KiB) that you can write to, and read from a stream."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ?streamStatus ->
+            fun ?streamModeDetails ->
+              fun ?retentionPeriodHours ->
+                fun ?streamCreationTimestamp ->
+                  fun ?enhancedMonitoring ->
+                    fun ?encryptionType ->
+                      fun ?keyId ->
+                        fun ?openShardCount ->
+                          fun ?consumerCount ->
+                            fun ?warmThroughput ->
+                              fun ?maxRecordSizeInKiB ->
+                                fun () ->
+                                  {
+                                    streamName;
+                                    streamARN;
+                                    streamId;
+                                    streamStatus;
+                                    streamModeDetails;
+                                    retentionPeriodHours;
+                                    streamCreationTimestamp;
+                                    enhancedMonitoring;
+                                    encryptionType;
+                                    keyId;
+                                    openShardCount;
+                                    consumerCount;
+                                    warmThroughput;
+                                    maxRecordSizeInKiB
+                                  }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
-        ("StreamARN", (Some (StreamARN.to_value x.streamARN)));
-        ("StreamStatus", (Some (StreamStatus.to_value x.streamStatus)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("StreamStatus",
+          (Option.map x.streamStatus ~f:StreamStatus.to_value));
         ("StreamModeDetails",
           (Option.map x.streamModeDetails ~f:StreamModeDetails.to_value));
         ("RetentionPeriodHours",
-          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)));
+          (Option.map x.retentionPeriodHours ~f:RetentionPeriodHours.to_value));
         ("StreamCreationTimestamp",
-          (Some (Timestamp.to_value x.streamCreationTimestamp)));
+          (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value));
         ("EnhancedMonitoring",
-          (Some (EnhancedMonitoringList.to_value x.enhancedMonitoring)));
+          (Option.map x.enhancedMonitoring ~f:EnhancedMonitoringList.to_value));
         ("EncryptionType",
           (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KeyId", (Option.map x.keyId ~f:KeyId.to_value));
         ("OpenShardCount",
-          (Some (ShardCountObject.to_value x.openShardCount)));
+          (Option.map x.openShardCount ~f:ShardCountObject.to_value));
         ("ConsumerCount",
-          (Option.map x.consumerCount ~f:ConsumerCountObject.to_value))]
+          (Option.map x.consumerCount ~f:ConsumerCountObject.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughputObject.to_value));
+        ("MaxRecordSizeInKiB",
+          (Option.map x.maxRecordSizeInKiB ~f:MaxRecordSizeInKiB.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxRecordSizeInKiB =
+        (Option.map ~f:MaxRecordSizeInKiB.of_xml)
+          (Xml.child xml_arg0 "MaxRecordSizeInKiB") in
+      let warmThroughput =
+        (Option.map ~f:WarmThroughputObject.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
       let consumerCount =
         (Option.map ~f:ConsumerCountObject.of_xml)
           (Xml.child xml_arg0 "ConsumerCount") in
       let openShardCount =
-        ShardCountObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenShardCount") in
+        (Option.map ~f:ShardCountObject.of_xml)
+          (Xml.child xml_arg0 "OpenShardCount") in
       let keyId = (Option.map ~f:KeyId.of_xml) (Xml.child xml_arg0 "KeyId") in
       let encryptionType =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       let enhancedMonitoring =
-        EnhancedMonitoringList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EnhancedMonitoring") in
+        (Option.map ~f:EnhancedMonitoringList.of_xml)
+          (Xml.child xml_arg0 "EnhancedMonitoring") in
       let streamCreationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamCreationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StreamCreationTimestamp") in
       let retentionPeriodHours =
-        RetentionPeriodHours.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodHours") in
+        (Option.map ~f:RetentionPeriodHours.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriodHours") in
       let streamModeDetails =
         (Option.map ~f:StreamModeDetails.of_xml)
           (Xml.child xml_arg0 "StreamModeDetails") in
       let streamStatus =
-        StreamStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamStatus") in
+        (Option.map ~f:StreamStatus.of_xml)
+          (Xml.child xml_arg0 "StreamStatus") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let streamARN =
-        StreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?consumerCount ~openShardCount ?keyId ?encryptionType
-        ~enhancedMonitoring ~streamCreationTimestamp ~retentionPeriodHours
-        ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?maxRecordSizeInKiB ?warmThroughput ?consumerCount ?openShardCount
+        ?keyId ?encryptionType ?enhancedMonitoring ?streamCreationTimestamp
+        ?retentionPeriodHours ?streamModeDetails ?streamStatus ?streamId
+        ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxRecordSizeInKiB =
+        field_map json__ "MaxRecordSizeInKiB" MaxRecordSizeInKiB.of_json in
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughputObject.of_json in
       let consumerCount =
-        field_map json "ConsumerCount" ConsumerCountObject.of_json in
+        field_map json__ "ConsumerCount" ConsumerCountObject.of_json in
       let openShardCount =
-        field_map_exn json "OpenShardCount" ShardCountObject.of_json in
-      let keyId = field_map json "KeyId" KeyId.of_json in
+        field_map json__ "OpenShardCount" ShardCountObject.of_json in
+      let keyId = field_map json__ "KeyId" KeyId.of_json in
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let enhancedMonitoring =
-        field_map_exn json "EnhancedMonitoring"
-          EnhancedMonitoringList.of_json in
+        field_map json__ "EnhancedMonitoring" EnhancedMonitoringList.of_json in
       let streamCreationTimestamp =
-        field_map_exn json "StreamCreationTimestamp" Timestamp.of_json in
+        field_map json__ "StreamCreationTimestamp" Timestamp.of_json in
       let retentionPeriodHours =
-        field_map_exn json "RetentionPeriodHours"
-          RetentionPeriodHours.of_json in
+        field_map json__ "RetentionPeriodHours" RetentionPeriodHours.of_json in
       let streamModeDetails =
-        field_map json "StreamModeDetails" StreamModeDetails.of_json in
-      let streamStatus =
-        field_map_exn json "StreamStatus" StreamStatus.of_json in
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?consumerCount ~openShardCount ?keyId ?encryptionType
-        ~enhancedMonitoring ~streamCreationTimestamp ~retentionPeriodHours
-        ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+        field_map json__ "StreamModeDetails" StreamModeDetails.of_json in
+      let streamStatus = field_map json__ "StreamStatus" StreamStatus.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?maxRecordSizeInKiB ?warmThroughput ?consumerCount ?openShardCount
+        ?keyId ?encryptionType ?enhancedMonitoring ?streamCreationTimestamp
+        ?retentionPeriodHours ?streamModeDetails ?streamStatus ?streamId
+        ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for DescribeStreamSummary"]
 module StreamDescription =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream being described."];
-      streamARN: StreamARN.t
+      streamARN: StreamARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the stream being described."];
-      streamStatus: StreamStatus.t
+      streamStatus: StreamStatus.t option
         [@ocaml.doc
           "The current status of the stream being described. The stream status is one of the following states: CREATING - The stream is being created. Kinesis Data Streams immediately returns and sets StreamStatus to CREATING. DELETING - The stream is being deleted. The specified stream is in the DELETING state until Kinesis Data Streams completes the deletion. ACTIVE - The stream exists and is ready for read and write operations or deletion. You should perform read and write operations only on an ACTIVE stream. UPDATING - Shards in the stream are being merged or split. Read and write operations continue to work while the stream is in the UPDATING state."];
       streamModeDetails: StreamModeDetails.t option
         [@ocaml.doc
           "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."];
-      shards: ShardList.t [@ocaml.doc "The shards that comprise the stream."];
-      hasMoreShards: BooleanObject.t
+      shards: ShardList.t option
+        [@ocaml.doc "The shards that comprise the stream."];
+      hasMoreShards: BooleanObject.t option
         [@ocaml.doc
           "If set to true, more shards in the stream are available to describe."];
-      retentionPeriodHours: RetentionPeriodHours.t
+      retentionPeriodHours: RetentionPeriodHours.t option
         [@ocaml.doc
           "The current retention period, in hours. Minimum value of 24. Maximum value of 168."];
-      streamCreationTimestamp: Timestamp.t
+      streamCreationTimestamp: Timestamp.t option
         [@ocaml.doc "The approximate time that the stream was created."];
-      enhancedMonitoring: EnhancedMonitoringList.t
+      enhancedMonitoring: EnhancedMonitoringList.t option
         [@ocaml.doc
           "Represents the current enhanced monitoring settings of the stream."];
       encryptionType: EncryptionType.t option
@@ -2349,47 +2824,48 @@ module StreamDescription =
       keyId: KeyId.t option
         [@ocaml.doc
           "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified ARN to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"]}
-    let context_ = "StreamDescription"
-    let make ?streamModeDetails =
-      fun ?encryptionType ->
-        fun ?keyId ->
-          fun ~streamName ->
-            fun ~streamARN ->
-              fun ~streamStatus ->
-                fun ~shards ->
-                  fun ~hasMoreShards ->
-                    fun ~retentionPeriodHours ->
-                      fun ~streamCreationTimestamp ->
-                        fun ~enhancedMonitoring ->
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamStatus ->
+          fun ?streamModeDetails ->
+            fun ?shards ->
+              fun ?hasMoreShards ->
+                fun ?retentionPeriodHours ->
+                  fun ?streamCreationTimestamp ->
+                    fun ?enhancedMonitoring ->
+                      fun ?encryptionType ->
+                        fun ?keyId ->
                           fun () ->
                             {
-                              streamModeDetails;
-                              encryptionType;
-                              keyId;
                               streamName;
                               streamARN;
                               streamStatus;
+                              streamModeDetails;
                               shards;
                               hasMoreShards;
                               retentionPeriodHours;
                               streamCreationTimestamp;
-                              enhancedMonitoring
+                              enhancedMonitoring;
+                              encryptionType;
+                              keyId
                             }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
-        ("StreamARN", (Some (StreamARN.to_value x.streamARN)));
-        ("StreamStatus", (Some (StreamStatus.to_value x.streamStatus)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamStatus",
+          (Option.map x.streamStatus ~f:StreamStatus.to_value));
         ("StreamModeDetails",
           (Option.map x.streamModeDetails ~f:StreamModeDetails.to_value));
-        ("Shards", (Some (ShardList.to_value x.shards)));
-        ("HasMoreShards", (Some (BooleanObject.to_value x.hasMoreShards)));
+        ("Shards", (Option.map x.shards ~f:ShardList.to_value));
+        ("HasMoreShards",
+          (Option.map x.hasMoreShards ~f:BooleanObject.to_value));
         ("RetentionPeriodHours",
-          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)));
+          (Option.map x.retentionPeriodHours ~f:RetentionPeriodHours.to_value));
         ("StreamCreationTimestamp",
-          (Some (Timestamp.to_value x.streamCreationTimestamp)));
+          (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value));
         ("EnhancedMonitoring",
-          (Some (EnhancedMonitoringList.to_value x.enhancedMonitoring)));
+          (Option.map x.enhancedMonitoring ~f:EnhancedMonitoringList.to_value));
         ("EncryptionType",
           (Option.map x.encryptionType ~f:EncryptionType.to_value));
         ("KeyId", (Option.map x.keyId ~f:KeyId.to_value))]
@@ -2400,59 +2876,54 @@ module StreamDescription =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       let enhancedMonitoring =
-        EnhancedMonitoringList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EnhancedMonitoring") in
+        (Option.map ~f:EnhancedMonitoringList.of_xml)
+          (Xml.child xml_arg0 "EnhancedMonitoring") in
       let streamCreationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamCreationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "StreamCreationTimestamp") in
       let retentionPeriodHours =
-        RetentionPeriodHours.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodHours") in
+        (Option.map ~f:RetentionPeriodHours.of_xml)
+          (Xml.child xml_arg0 "RetentionPeriodHours") in
       let hasMoreShards =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreShards") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreShards") in
       let shards =
-        ShardList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Shards") in
+        (Option.map ~f:ShardList.of_xml) (Xml.child xml_arg0 "Shards") in
       let streamModeDetails =
         (Option.map ~f:StreamModeDetails.of_xml)
           (Xml.child xml_arg0 "StreamModeDetails") in
       let streamStatus =
-        StreamStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamStatus") in
+        (Option.map ~f:StreamStatus.of_xml)
+          (Xml.child xml_arg0 "StreamStatus") in
       let streamARN =
-        StreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?keyId ?encryptionType ~enhancedMonitoring
-        ~streamCreationTimestamp ~retentionPeriodHours ~hasMoreShards ~shards
-        ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?keyId ?encryptionType ?enhancedMonitoring
+        ?streamCreationTimestamp ?retentionPeriodHours ?hasMoreShards ?shards
+        ?streamModeDetails ?streamStatus ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyId = field_map json "KeyId" KeyId.of_json in
+    let of_json json__ =
+      let keyId = field_map json__ "KeyId" KeyId.of_json in
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let enhancedMonitoring =
-        field_map_exn json "EnhancedMonitoring"
-          EnhancedMonitoringList.of_json in
+        field_map json__ "EnhancedMonitoring" EnhancedMonitoringList.of_json in
       let streamCreationTimestamp =
-        field_map_exn json "StreamCreationTimestamp" Timestamp.of_json in
+        field_map json__ "StreamCreationTimestamp" Timestamp.of_json in
       let retentionPeriodHours =
-        field_map_exn json "RetentionPeriodHours"
-          RetentionPeriodHours.of_json in
+        field_map json__ "RetentionPeriodHours" RetentionPeriodHours.of_json in
       let hasMoreShards =
-        field_map_exn json "HasMoreShards" BooleanObject.of_json in
-      let shards = field_map_exn json "Shards" ShardList.of_json in
+        field_map json__ "HasMoreShards" BooleanObject.of_json in
+      let shards = field_map json__ "Shards" ShardList.of_json in
       let streamModeDetails =
-        field_map json "StreamModeDetails" StreamModeDetails.of_json in
-      let streamStatus =
-        field_map_exn json "StreamStatus" StreamStatus.of_json in
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?keyId ?encryptionType ~enhancedMonitoring
-        ~streamCreationTimestamp ~retentionPeriodHours ~hasMoreShards ~shards
-        ?streamModeDetails ~streamStatus ~streamARN ~streamName ()
+        field_map json__ "StreamModeDetails" StreamModeDetails.of_json in
+      let streamStatus = field_map json__ "StreamStatus" StreamStatus.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?keyId ?encryptionType ?enhancedMonitoring
+        ?streamCreationTimestamp ?retentionPeriodHours ?hasMoreShards ?shards
+        ?streamModeDetails ?streamStatus ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for DescribeStream."]
 module DescribeStreamInputLimit =
@@ -2479,25 +2950,24 @@ module ConsumerDescription =
   struct
     type nonrec t =
       {
-      consumerName: ConsumerName.t
+      consumerName: ConsumerName.t option
         [@ocaml.doc
           "The name of the consumer is something you choose when you register the consumer."];
-      consumerARN: ConsumerARN.t
+      consumerARN: ConsumerARN.t option
         [@ocaml.doc
           "When you register a consumer, Kinesis Data Streams generates an ARN for it. You need this ARN to be able to call SubscribeToShard. If you delete a consumer and then create a new one with the same name, it won't have the same ARN. That's because consumer ARNs contain the creation timestamp. This is important to keep in mind if you have IAM policies that reference consumer ARNs."];
-      consumerStatus: ConsumerStatus.t
+      consumerStatus: ConsumerStatus.t option
         [@ocaml.doc
           "A consumer can't read data while in the CREATING or DELETING states."];
-      consumerCreationTimestamp: Timestamp.t ;
-      streamARN: StreamARN.t
+      consumerCreationTimestamp: Timestamp.t option ;
+      streamARN: StreamARN.t option
         [@ocaml.doc
           "The ARN of the stream with which you registered the consumer."]}
-    let context_ = "ConsumerDescription"
-    let make ~consumerName =
-      fun ~consumerARN ->
-        fun ~consumerStatus ->
-          fun ~consumerCreationTimestamp ->
-            fun ~streamARN ->
+    let make ?consumerName =
+      fun ?consumerARN ->
+        fun ?consumerStatus ->
+          fun ?consumerCreationTimestamp ->
+            fun ?streamARN ->
               fun () ->
                 {
                   consumerName;
@@ -2508,44 +2978,42 @@ module ConsumerDescription =
                 }
     let to_value x =
       structure_to_value
-        [("ConsumerName", (Some (ConsumerName.to_value x.consumerName)));
-        ("ConsumerARN", (Some (ConsumerARN.to_value x.consumerARN)));
-        ("ConsumerStatus", (Some (ConsumerStatus.to_value x.consumerStatus)));
+        [("ConsumerName",
+           (Option.map x.consumerName ~f:ConsumerName.to_value));
+        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value));
+        ("ConsumerStatus",
+          (Option.map x.consumerStatus ~f:ConsumerStatus.to_value));
         ("ConsumerCreationTimestamp",
-          (Some (Timestamp.to_value x.consumerCreationTimestamp)));
-        ("StreamARN", (Some (StreamARN.to_value x.streamARN)))]
+          (Option.map x.consumerCreationTimestamp ~f:Timestamp.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let streamARN =
-        StreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let consumerCreationTimestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ConsumerCreationTimestamp") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ConsumerCreationTimestamp") in
       let consumerStatus =
-        ConsumerStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerStatus") in
+        (Option.map ~f:ConsumerStatus.of_xml)
+          (Xml.child xml_arg0 "ConsumerStatus") in
       let consumerARN =
-        ConsumerARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerARN") in
+        (Option.map ~f:ConsumerARN.of_xml) (Xml.child xml_arg0 "ConsumerARN") in
       let consumerName =
-        ConsumerName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerName") in
-      make ~streamARN ~consumerCreationTimestamp ~consumerStatus ~consumerARN
-        ~consumerName ()
+        (Option.map ~f:ConsumerName.of_xml)
+          (Xml.child xml_arg0 "ConsumerName") in
+      make ?streamARN ?consumerCreationTimestamp ?consumerStatus ?consumerARN
+        ?consumerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let consumerCreationTimestamp =
-        field_map_exn json "ConsumerCreationTimestamp" Timestamp.of_json in
+        field_map json__ "ConsumerCreationTimestamp" Timestamp.of_json in
       let consumerStatus =
-        field_map_exn json "ConsumerStatus" ConsumerStatus.of_json in
-      let consumerARN = field_map_exn json "ConsumerARN" ConsumerARN.of_json in
-      let consumerName =
-        field_map_exn json "ConsumerName" ConsumerName.of_json in
-      make ~streamARN ~consumerCreationTimestamp ~consumerStatus ~consumerARN
-        ~consumerName ()
+        field_map json__ "ConsumerStatus" ConsumerStatus.of_json in
+      let consumerARN = field_map json__ "ConsumerARN" ConsumerARN.of_json in
+      let consumerName = field_map json__ "ConsumerName" ConsumerName.of_json in
+      make ?streamARN ?consumerCreationTimestamp ?consumerStatus ?consumerARN
+        ?consumerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the details of a registered consumer. This type of object is returned by DescribeStreamConsumer."]
@@ -2589,97 +3057,33 @@ module OnDemandStreamCountObject =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module TagMap =
-  struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:200) >>=
-             (fun () -> check_list_min i ~min:1));
-        i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module UpdateStreamModeInput =
+module UpdateStreamWarmThroughputOutput =
   struct
     type nonrec t =
       {
-      streamARN: StreamARN.t
+      streamARN: StreamARN.t option
+        [@ocaml.doc "The ARN of the stream that was updated."];
+      streamName: StreamName.t option
+        [@ocaml.doc "The name of the stream that was updated."];
+      warmThroughput: WarmThroughputObject.t option
         [@ocaml.doc
-          "Specifies the ARN of the data stream whose capacity mode you want to update."];
-      streamModeDetails: StreamModeDetails.t
-        [@ocaml.doc
-          "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]}
-    let context_ = "UpdateStreamModeInput"
-    let make ~streamARN =
-      fun ~streamModeDetails -> fun () -> { streamARN; streamModeDetails }
-    let to_value x =
-      structure_to_value
-        [("StreamARN", (Some (StreamARN.to_value x.streamARN)));
-        ("StreamModeDetails",
-          (Some (StreamModeDetails.to_value x.streamModeDetails)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let streamModeDetails =
-        StreamModeDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamModeDetails") in
-      let streamARN =
-        StreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
-      make ~streamModeDetails ~streamARN ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamModeDetails =
-        field_map_exn json "StreamModeDetails" StreamModeDetails.of_json in
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
-      make ~streamModeDetails ~streamARN ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates the capacity mode of the data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data stream."]
-module UpdateShardCountOutput =
-  struct
-    type nonrec t =
-      {
-      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
-      currentShardCount: PositiveIntegerObject.t option
-        [@ocaml.doc "The current number of shards."];
-      targetShardCount: PositiveIntegerObject.t option
-        [@ocaml.doc "The updated number of shards."]}
+          "Specifies the updated warm throughput configuration for your data stream."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?streamName =
-      fun ?currentShardCount ->
-        fun ?targetShardCount ->
-          fun () -> { streamName; currentShardCount; targetShardCount }
+    let make ?streamARN =
+      fun ?streamName ->
+        fun ?warmThroughput ->
+          fun () -> { streamARN; streamName; warmThroughput }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
@@ -2695,6 +3099,8 @@ module UpdateShardCountOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
@@ -2709,6 +3115,231 @@ module UpdateShardCountOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("WarmThroughput",
+          (Option.map x.warmThroughput ~f:WarmThroughputObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warmThroughput =
+        (Option.map ~f:WarmThroughputObject.of_xml)
+          (Xml.child xml_arg0 "WarmThroughput") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      make ?warmThroughput ?streamName ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warmThroughput =
+        field_map json__ "WarmThroughput" WarmThroughputObject.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      make ?warmThroughput ?streamName ?streamARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the warm throughput configuration for the specified Amazon Kinesis Data Streams on-demand data stream. This operation allows you to proactively scale your on-demand data stream to a specified throughput level, enabling better performance for sudden traffic spikes. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Updating the warm throughput is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. This operation is only supported for data streams with the on-demand capacity mode in accounts that have MinimumThroughputBillingCommitment enabled. Provisioned capacity mode streams do not support warm throughput configuration. This operation has the following default limits. By default, you cannot do the following: Scale to more than 10 GiBps for an on-demand stream. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException. For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
+module UpdateStreamWarmThroughputInput =
+  struct
+    type nonrec t =
+      {
+      streamARN: StreamARN.t option
+        [@ocaml.doc "The ARN of the stream to be updated."];
+      streamName: StreamName.t option
+        [@ocaml.doc "The name of the stream to be updated."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      warmThroughputMiBps: NaturalIntegerObject.t
+        [@ocaml.doc
+          "The target warm throughput in MB/s that the stream should be scaled to handle. This represents the throughput capacity that will be immediately available for write operations."]}
+    let context_ = "UpdateStreamWarmThroughputInput"
+    let make ?streamARN =
+      fun ?streamName ->
+        fun ?streamId ->
+          fun ~warmThroughputMiBps ->
+            fun () ->
+              { streamARN; streamName; streamId; warmThroughputMiBps }
+    let to_value x =
+      structure_to_value
+        [("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("WarmThroughputMiBps",
+          (Some (NaturalIntegerObject.to_value x.warmThroughputMiBps)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warmThroughputMiBps =
+        NaturalIntegerObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WarmThroughputMiBps") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamName =
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      make ~warmThroughputMiBps ?streamId ?streamName ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warmThroughputMiBps =
+        field_map_exn json__ "WarmThroughputMiBps"
+          NaturalIntegerObject.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      make ~warmThroughputMiBps ?streamId ?streamName ?streamARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the warm throughput configuration for the specified Amazon Kinesis Data Streams on-demand data stream. This operation allows you to proactively scale your on-demand data stream to a specified throughput level, enabling better performance for sudden traffic spikes. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Updating the warm throughput is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. This operation is only supported for data streams with the on-demand capacity mode in accounts that have MinimumThroughputBillingCommitment enabled. Provisioned capacity mode streams do not support warm throughput configuration. This operation has the following default limits. By default, you cannot do the following: Scale to more than 10 GiBps for an on-demand stream. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException. For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
+module UpdateStreamModeInput =
+  struct
+    type nonrec t =
+      {
+      streamARN: StreamARN.t
+        [@ocaml.doc
+          "Specifies the ARN of the data stream whose capacity mode you want to update."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      streamModeDetails: StreamModeDetails.t
+        [@ocaml.doc
+          "Specifies the capacity mode to which you want to set your data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."];
+      warmThroughputMiBps: NaturalIntegerObject.t option
+        [@ocaml.doc
+          "The target warm throughput in MB/s that the stream should be scaled to handle. This represents the throughput capacity that will be immediately available for write operations. This field is only valid when the stream mode is being updated to on-demand."]}
+    let context_ = "UpdateStreamModeInput"
+    let make ?streamId =
+      fun ?warmThroughputMiBps ->
+        fun ~streamARN ->
+          fun ~streamModeDetails ->
+            fun () ->
+              { streamId; warmThroughputMiBps; streamARN; streamModeDetails }
+    let to_value x =
+      structure_to_value
+        [("StreamARN", (Some (StreamARN.to_value x.streamARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("StreamModeDetails",
+          (Some (StreamModeDetails.to_value x.streamModeDetails)));
+        ("WarmThroughputMiBps",
+          (Option.map x.warmThroughputMiBps ~f:NaturalIntegerObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warmThroughputMiBps =
+        (Option.map ~f:NaturalIntegerObject.of_xml)
+          (Xml.child xml_arg0 "WarmThroughputMiBps") in
+      let streamModeDetails =
+        StreamModeDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StreamModeDetails") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        StreamARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
+      make ?warmThroughputMiBps ~streamModeDetails ?streamId ~streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warmThroughputMiBps =
+        field_map json__ "WarmThroughputMiBps" NaturalIntegerObject.of_json in
+      let streamModeDetails =
+        field_map_exn json__ "StreamModeDetails" StreamModeDetails.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map_exn json__ "StreamARN" StreamARN.of_json in
+      make ?warmThroughputMiBps ~streamModeDetails ?streamId ~streamARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the capacity mode of the data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data stream. If you'd still like to proactively scale your on-demand data stream\226\128\153s capacity, you can unlock the warm throughput feature for on-demand data streams by enabling MinimumThroughputBillingCommitment for your account. Once your account has MinimumThroughputBillingCommitment enabled, you can specify the warm throughput in MiB per second that your stream can support in writes."]
+module UpdateShardCountOutput =
+  struct
+    type nonrec t =
+      {
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
+      currentShardCount: PositiveIntegerObject.t option
+        [@ocaml.doc "The current number of shards."];
+      targetShardCount: PositiveIntegerObject.t option
+        [@ocaml.doc "The updated number of shards."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?streamName =
+      fun ?currentShardCount ->
+        fun ?targetShardCount ->
+          fun ?streamARN ->
+            fun () ->
+              { streamName; currentShardCount; targetShardCount; streamARN }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -2740,9 +3371,12 @@ module UpdateShardCountOutput =
         ("CurrentShardCount",
           (Option.map x.currentShardCount ~f:PositiveIntegerObject.to_value));
         ("TargetShardCount",
-          (Option.map x.targetShardCount ~f:PositiveIntegerObject.to_value))]
+          (Option.map x.targetShardCount ~f:PositiveIntegerObject.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let targetShardCount =
         (Option.map ~f:PositiveIntegerObject.of_xml)
           (Xml.child xml_arg0 "TargetShardCount") in
@@ -2751,42 +3385,61 @@ module UpdateShardCountOutput =
           (Xml.child xml_arg0 "CurrentShardCount") in
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
-      make ?targetShardCount ?currentShardCount ?streamName ()
+      make ?streamARN ?targetShardCount ?currentShardCount ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let targetShardCount =
-        field_map json "TargetShardCount" PositiveIntegerObject.of_json in
+        field_map json__ "TargetShardCount" PositiveIntegerObject.of_json in
       let currentShardCount =
-        field_map json "CurrentShardCount" PositiveIntegerObject.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      make ?targetShardCount ?currentShardCount ?streamName ()
+        field_map json__ "CurrentShardCount" PositiveIntegerObject.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?targetShardCount ?currentShardCount ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the shard count of the specified stream to the specified number of shards. Updating the shard count is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. To update the shard count, Kinesis Data Streams performs splits or merges on individual shards. This can cause short-lived shards to be created, in addition to the final shards. These short-lived shards count towards your total shard limit for your account in the Region. When using this operation, we recommend that you specify a target shard count that is a multiple of 25% (25%, 50%, 75%, 100%). You can specify any target value within your shard limit. However, if you specify a target that isn't a multiple of 25%, the scaling action might take longer to complete. This operation has the following default limits. By default, you cannot do the following: Scale more than ten times per rolling 24-hour period per stream Scale up to more than double your current shard count for a stream Scale down below half your current shard count for a stream Scale up to more than 10000 shards in a stream Scale a stream with more than 10000 shards down unless the result is less than 10000 shards Scale up to more than the shard limit for your account For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
+       "Updates the shard count of the specified stream to the specified number of shards. This API is only supported for the data streams with the provisioned capacity mode. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Updating the shard count is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. To update the shard count, Kinesis Data Streams performs splits or merges on individual shards. This can cause short-lived shards to be created, in addition to the final shards. These short-lived shards count towards your total shard limit for your account in the Region. When using this operation, we recommend that you specify a target shard count that is a multiple of 25% (25%, 50%, 75%, 100%). You can specify any target value within your shard limit. However, if you specify a target that isn't a multiple of 25%, the scaling action might take longer to complete. This operation has the following default limits. By default, you cannot do the following: Scale more than ten times per rolling 24-hour period per stream Scale up to more than double your current shard count for a stream Scale down below half your current shard count for a stream Scale up to more than 10000 shards in a stream Scale a stream with more than 10000 shards down unless the result is less than 10000 shards Scale up to more than the shard limit for your account Make over 10 TPS. TPS over 10 will trigger the LimitExceededException For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
 module UpdateShardCountInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t [@ocaml.doc "The name of the stream."];
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
       targetShardCount: PositiveIntegerObject.t
         [@ocaml.doc
           "The new number of shards. This value has the following default limits. By default, you cannot do the following: Set this value to more than double your current shard count for a stream. Set this value below half your current shard count for a stream. Set this value to more than 10000 shards in a stream (the default limit for shard count per stream is 10000 per account per region), unless you request a limit increase. Scale a stream with more than 10000 shards down unless you set this value to less than 10000 shards."];
       scalingType: ScalingType.t
         [@ocaml.doc
-          "The scaling type. Uniform scaling creates shards of equal size."]}
+          "The scaling type. Uniform scaling creates shards of equal size."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "UpdateShardCountInput"
-    let make ~streamName =
-      fun ~targetShardCount ->
-        fun ~scalingType ->
-          fun () -> { streamName; targetShardCount; scalingType }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~targetShardCount ->
+            fun ~scalingType ->
+              fun () ->
+                {
+                  streamName;
+                  streamARN;
+                  streamId;
+                  targetShardCount;
+                  scalingType
+                }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("TargetShardCount",
           (Some (PositiveIntegerObject.to_value x.targetShardCount)));
-        ("ScalingType", (Some (ScalingType.to_value x.scalingType)))]
+        ("ScalingType", (Some (ScalingType.to_value x.scalingType)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let scalingType =
         ScalingType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScalingType") in
@@ -2794,36 +3447,274 @@ module UpdateShardCountInput =
         PositiveIntegerObject.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TargetShardCount") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~scalingType ~targetShardCount ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~scalingType ~targetShardCount ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let scalingType = field_map_exn json "ScalingType" ScalingType.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let scalingType =
+        field_map_exn json__ "ScalingType" ScalingType.of_json in
       let targetShardCount =
-        field_map_exn json "TargetShardCount" PositiveIntegerObject.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~scalingType ~targetShardCount ~streamName ()
+        field_map_exn json__ "TargetShardCount" PositiveIntegerObject.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~scalingType ~targetShardCount ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the shard count of the specified stream to the specified number of shards. Updating the shard count is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. To update the shard count, Kinesis Data Streams performs splits or merges on individual shards. This can cause short-lived shards to be created, in addition to the final shards. These short-lived shards count towards your total shard limit for your account in the Region. When using this operation, we recommend that you specify a target shard count that is a multiple of 25% (25%, 50%, 75%, 100%). You can specify any target value within your shard limit. However, if you specify a target that isn't a multiple of 25%, the scaling action might take longer to complete. This operation has the following default limits. By default, you cannot do the following: Scale more than ten times per rolling 24-hour period per stream Scale up to more than double your current shard count for a stream Scale down below half your current shard count for a stream Scale up to more than 10000 shards in a stream Scale a stream with more than 10000 shards down unless the result is less than 10000 shards Scale up to more than the shard limit for your account For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
+       "Updates the shard count of the specified stream to the specified number of shards. This API is only supported for the data streams with the provisioned capacity mode. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Updating the shard count is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Depending on the size of the stream, the scaling action could take a few minutes to complete. You can continue to read and write data to your stream while its status is UPDATING. To update the shard count, Kinesis Data Streams performs splits or merges on individual shards. This can cause short-lived shards to be created, in addition to the final shards. These short-lived shards count towards your total shard limit for your account in the Region. When using this operation, we recommend that you specify a target shard count that is a multiple of 25% (25%, 50%, 75%, 100%). You can specify any target value within your shard limit. However, if you specify a target that isn't a multiple of 25%, the scaling action might take longer to complete. This operation has the following default limits. By default, you cannot do the following: Scale more than ten times per rolling 24-hour period per stream Scale up to more than double your current shard count for a stream Scale down below half your current shard count for a stream Scale up to more than 10000 shards in a stream Scale a stream with more than 10000 shards down unless the result is less than 10000 shards Scale up to more than the shard limit for your account Make over 10 TPS. TPS over 10 will trigger the LimitExceededException For the default limits for an Amazon Web Services account, see Streams Limits in the Amazon Kinesis Data Streams Developer Guide. To request an increase in the call rate limit, the shard limit for this API, or your overall shard limit, use the limits form."]
+module UpdateMaxRecordSizeInput =
+  struct
+    type nonrec t =
+      {
+      streamARN: StreamARN.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the stream for the MaxRecordSize update."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      maxRecordSizeInKiB: MaxRecordSizeInKiB.t
+        [@ocaml.doc
+          "The maximum record size of a single record in KiB that you can write to, and read from a stream. Specify a value between 1024 and 10240 KiB (1 to 10 MiB). If you specify a value that is out of this range, UpdateMaxRecordSize sends back an ValidationException message."]}
+    let context_ = "UpdateMaxRecordSizeInput"
+    let make ?streamARN =
+      fun ?streamId ->
+        fun ~maxRecordSizeInKiB ->
+          fun () -> { streamARN; streamId; maxRecordSizeInKiB }
+    let to_value x =
+      structure_to_value
+        [("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("MaxRecordSizeInKiB",
+          (Some (MaxRecordSizeInKiB.to_value x.maxRecordSizeInKiB)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxRecordSizeInKiB =
+        MaxRecordSizeInKiB.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MaxRecordSizeInKiB") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
+      make ~maxRecordSizeInKiB ?streamId ?streamARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxRecordSizeInKiB =
+        field_map_exn json__ "MaxRecordSizeInKiB" MaxRecordSizeInKiB.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      make ~maxRecordSizeInKiB ?streamId ?streamARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This allows you to update the MaxRecordSize of a single record that you can write to, and read from a stream. You can ingest and digest single records up to 10240 KiB."]
+module UpdateAccountSettingsOutput =
+  struct
+    type nonrec t =
+      {
+      minimumThroughputBillingCommitment:
+        MinimumThroughputBillingCommitmentOutput.t option
+        [@ocaml.doc
+          "The updated configuration of the minimum throughput billing commitment for your account."]}
+    type nonrec error =
+      [ `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?minimumThroughputBillingCommitment =
+      fun () -> { minimumThroughputBillingCommitment }
+    let error_of_json name json =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MinimumThroughputBillingCommitment",
+           (Option.map x.minimumThroughputBillingCommitment
+              ~f:MinimumThroughputBillingCommitmentOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumThroughputBillingCommitment =
+        (Option.map ~f:MinimumThroughputBillingCommitmentOutput.of_xml)
+          (Xml.child xml_arg0 "MinimumThroughputBillingCommitment") in
+      make ?minimumThroughputBillingCommitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumThroughputBillingCommitment =
+        field_map json__ "MinimumThroughputBillingCommitment"
+          MinimumThroughputBillingCommitmentOutput.of_json in
+      make ?minimumThroughputBillingCommitment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the account-level settings for Amazon Kinesis Data Streams. Updating account settings is a synchronous operation. Upon receiving the request, Kinesis Data Streams will return immediately with your account\226\128\153s updated settings. API limits Certain account configurations have minimum commitment windows. Attempting to update your settings prior to the end of the minimum commitment window might have certain restrictions. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException."]
+module UpdateAccountSettingsInput =
+  struct
+    type nonrec t =
+      {
+      minimumThroughputBillingCommitment:
+        MinimumThroughputBillingCommitmentInput.t
+        [@ocaml.doc
+          "Specifies the minimum throughput billing commitment configuration for your account."]}
+    let context_ = "UpdateAccountSettingsInput"
+    let make ~minimumThroughputBillingCommitment =
+      fun () -> { minimumThroughputBillingCommitment }
+    let to_value x =
+      structure_to_value
+        [("MinimumThroughputBillingCommitment",
+           (Some
+              (MinimumThroughputBillingCommitmentInput.to_value
+                 x.minimumThroughputBillingCommitment)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumThroughputBillingCommitment =
+        MinimumThroughputBillingCommitmentInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MinimumThroughputBillingCommitment") in
+      make ~minimumThroughputBillingCommitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumThroughputBillingCommitment =
+        field_map_exn json__ "MinimumThroughputBillingCommitment"
+          MinimumThroughputBillingCommitmentInput.of_json in
+      make ~minimumThroughputBillingCommitment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the account-level settings for Amazon Kinesis Data Streams. Updating account settings is a synchronous operation. Upon receiving the request, Kinesis Data Streams will return immediately with your account\226\128\153s updated settings. API limits Certain account configurations have minimum commitment windows. Attempting to update your settings prior to the end of the minimum commitment window might have certain restrictions. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException."]
+module UntagResourceInput =
+  struct
+    type nonrec t =
+      {
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "A list of tag key-value pairs. Existing tags of the resource whose keys are members of this list will be removed from the Kinesis resource."];
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis resource from which to remove tags."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let context_ = "UntagResourceInput"
+    let make ?streamId =
+      fun ~tagKeys ->
+        fun ~resourceARN -> fun () -> { streamId; tagKeys; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("TagKeys", (Some (TagKeyList.to_value x.tagKeys)));
+        ("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      make ?streamId ~resourceARN ~tagKeys ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      make ?streamId ~resourceARN ~tagKeys ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes tags from the specified Kinesis resource. Removed tags are deleted and can't be recovered after this operation completes successfully."]
+module TagResourceInput =
+  struct
+    type nonrec t =
+      {
+      tags: TagMap.t
+        [@ocaml.doc
+          "An array of tags to be added to the Kinesis resource. A tag consists of a required key and an optional value. You can add up to 50 tags per resource. Tags may only contain Unicode letters, digits, white space, or these symbols: _ . : / = + - \\@."];
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis resource to which to add tags."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let context_ = "TagResourceInput"
+    let make ?streamId =
+      fun ~tags ->
+        fun ~resourceARN -> fun () -> { streamId; tags; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("Tags", (Some (TagMap.to_value x.tags)));
+        ("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let tags =
+        TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      make ?streamId ~resourceARN ~tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      make ?streamId ~resourceARN ~tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds or updates tags for the specified Kinesis resource. Each tag is a label consisting of a user-defined key and value. Tags can help you manage, identify, organize, search for, and filter resources. You can assign up to 50 tags to a Kinesis resource."]
 module SubscribeToShardOutput =
   struct
     type nonrec t =
       {
-      eventStream: SubscribeToShardEventStream.t
+      eventStream: SubscribeToShardEventStream.t option
         [@ocaml.doc
           "The event stream that your consumer can use to read records from the shard."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SubscribeToShardOutput"
-    let make ~eventStream = fun () -> { eventStream }
+    let make ?eventStream = fun () -> { eventStream }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
@@ -2837,6 +3728,8 @@ module SubscribeToShardOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
@@ -2849,6 +3742,10 @@ module SubscribeToShardOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -2873,21 +3770,21 @@ module SubscribeToShardOutput =
     let to_value x =
       structure_to_value
         [("EventStream",
-           (Some (SubscribeToShardEventStream.to_value x.eventStream)))]
+           (Option.map x.eventStream ~f:SubscribeToShardEventStream.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let eventStream =
-        SubscribeToShardEventStream.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EventStream") in
-      make ~eventStream ()
+        (Option.map ~f:SubscribeToShardEventStream.of_xml)
+          (Xml.child xml_arg0 "EventStream") in
+      make ?eventStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventStream =
-        field_map_exn json "EventStream" SubscribeToShardEventStream.of_json in
-      make ~eventStream ()
+        field_map json__ "EventStream" SubscribeToShardEventStream.of_json in
+      make ?eventStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation establishes an HTTP/2 connection between the consumer you specify in the ConsumerARN parameter and the shard you specify in the ShardId parameter. After the connection is successfully established, Kinesis Data Streams pushes records from the shard to the consumer over this connection. Before you call this operation, call RegisterStreamConsumer to register the consumer with Kinesis Data Streams. When the SubscribeToShard call succeeds, your consumer starts receiving events of type SubscribeToShardEvent over the HTTP/2 connection for up to 5 minutes, after which time you need to call SubscribeToShard again to renew the subscription if you want to continue to receive records. You can make one call to SubscribeToShard per second per registered consumer per shard. For example, if you have a 4000 shard stream and two registered stream consumers, you can make one SubscribeToShard request per second for each combination of shard and registered consumer, allowing you to subscribe both consumers to all 4000 shards in one second. If you call SubscribeToShard again with the same ConsumerARN and ShardId within 5 seconds of a successful call, you'll get a ResourceInUseException. If you call SubscribeToShard 5 seconds or more after a successful call, the second call takes over the subscription and the previous connection expires or fails with a ResourceInUseException. For an example of how to use this operations, see Enhanced Fan-Out Using the Kinesis Data Streams API."]
+       "This operation establishes an HTTP/2 connection between the consumer you specify in the ConsumerARN parameter and the shard you specify in the ShardId parameter. After the connection is successfully established, Kinesis Data Streams pushes records from the shard to the consumer over this connection. Before you call this operation, call RegisterStreamConsumer to register the consumer with Kinesis Data Streams. When the SubscribeToShard call succeeds, your consumer starts receiving events of type SubscribeToShardEvent over the HTTP/2 connection for up to 5 minutes, after which time you need to call SubscribeToShard again to renew the subscription if you want to continue to receive records. You can make one call to SubscribeToShard per second per registered consumer per shard. For example, if you have a 4000 shard stream and two registered stream consumers, you can make one SubscribeToShard request per second for each combination of shard and registered consumer, allowing you to subscribe both consumers to all 4000 shards in one second. If you call SubscribeToShard again with the same ConsumerARN and ShardId within 5 seconds of a successful call, you'll get a ResourceInUseException. If you call SubscribeToShard 5 seconds or more after a successful call, the second call takes over the subscription and the previous connection expires or fails with a ResourceInUseException. For an example of how to use this operation, see Enhanced Fan-Out Using the Kinesis Data Streams API."]
 module SubscribeToShardInput =
   struct
     type nonrec t =
@@ -2895,6 +3792,8 @@ module SubscribeToShardInput =
       consumerARN: ConsumerARN.t
         [@ocaml.doc
           "For this parameter, use the value you obtained when you called RegisterStreamConsumer."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
       shardId: ShardId.t
         [@ocaml.doc
           "The ID of the shard you want to subscribe to. To see a list of all the shards for a given stream, use ListShards."];
@@ -2902,13 +3801,15 @@ module SubscribeToShardInput =
         [@ocaml.doc
           "The starting position in the data stream from which to start streaming."]}
     let context_ = "SubscribeToShardInput"
-    let make ~consumerARN =
-      fun ~shardId ->
-        fun ~startingPosition ->
-          fun () -> { consumerARN; shardId; startingPosition }
+    let make ?streamId =
+      fun ~consumerARN ->
+        fun ~shardId ->
+          fun ~startingPosition ->
+            fun () -> { streamId; consumerARN; shardId; startingPosition }
     let to_value x =
       structure_to_value
         [("ConsumerARN", (Some (ConsumerARN.to_value x.consumerARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
         ("ShardId", (Some (ShardId.to_value x.shardId)));
         ("StartingPosition",
           (Some (StartingPosition.to_value x.startingPosition)))]
@@ -2919,67 +3820,85 @@ module SubscribeToShardInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StartingPosition") in
       let shardId =
         ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let consumerARN =
         ConsumerARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerARN") in
-      make ~startingPosition ~shardId ~consumerARN ()
+      make ~startingPosition ~shardId ?streamId ~consumerARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startingPosition =
-        field_map_exn json "StartingPosition" StartingPosition.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      let consumerARN = field_map_exn json "ConsumerARN" ConsumerARN.of_json in
-      make ~startingPosition ~shardId ~consumerARN ()
+        field_map_exn json__ "StartingPosition" StartingPosition.of_json in
+      let shardId = field_map_exn json__ "ShardId" ShardId.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let consumerARN =
+        field_map_exn json__ "ConsumerARN" ConsumerARN.of_json in
+      make ~startingPosition ~shardId ?streamId ~consumerARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation establishes an HTTP/2 connection between the consumer you specify in the ConsumerARN parameter and the shard you specify in the ShardId parameter. After the connection is successfully established, Kinesis Data Streams pushes records from the shard to the consumer over this connection. Before you call this operation, call RegisterStreamConsumer to register the consumer with Kinesis Data Streams. When the SubscribeToShard call succeeds, your consumer starts receiving events of type SubscribeToShardEvent over the HTTP/2 connection for up to 5 minutes, after which time you need to call SubscribeToShard again to renew the subscription if you want to continue to receive records. You can make one call to SubscribeToShard per second per registered consumer per shard. For example, if you have a 4000 shard stream and two registered stream consumers, you can make one SubscribeToShard request per second for each combination of shard and registered consumer, allowing you to subscribe both consumers to all 4000 shards in one second. If you call SubscribeToShard again with the same ConsumerARN and ShardId within 5 seconds of a successful call, you'll get a ResourceInUseException. If you call SubscribeToShard 5 seconds or more after a successful call, the second call takes over the subscription and the previous connection expires or fails with a ResourceInUseException. For an example of how to use this operations, see Enhanced Fan-Out Using the Kinesis Data Streams API."]
+       "This operation establishes an HTTP/2 connection between the consumer you specify in the ConsumerARN parameter and the shard you specify in the ShardId parameter. After the connection is successfully established, Kinesis Data Streams pushes records from the shard to the consumer over this connection. Before you call this operation, call RegisterStreamConsumer to register the consumer with Kinesis Data Streams. When the SubscribeToShard call succeeds, your consumer starts receiving events of type SubscribeToShardEvent over the HTTP/2 connection for up to 5 minutes, after which time you need to call SubscribeToShard again to renew the subscription if you want to continue to receive records. You can make one call to SubscribeToShard per second per registered consumer per shard. For example, if you have a 4000 shard stream and two registered stream consumers, you can make one SubscribeToShard request per second for each combination of shard and registered consumer, allowing you to subscribe both consumers to all 4000 shards in one second. If you call SubscribeToShard again with the same ConsumerARN and ShardId within 5 seconds of a successful call, you'll get a ResourceInUseException. If you call SubscribeToShard 5 seconds or more after a successful call, the second call takes over the subscription and the previous connection expires or fails with a ResourceInUseException. For an example of how to use this operation, see Enhanced Fan-Out Using the Kinesis Data Streams API."]
 module StopStreamEncryptionInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc
           "The name of the stream on which to stop encrypting records."];
       encryptionType: EncryptionType.t
         [@ocaml.doc "The encryption type. The only valid value is KMS."];
       keyId: KeyId.t
         [@ocaml.doc
-          "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified Amazon Resource Name (ARN) to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"]}
+          "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified Amazon Resource Name (ARN) to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "StopStreamEncryptionInput"
-    let make ~streamName =
-      fun ~encryptionType ->
-        fun ~keyId -> fun () -> { streamName; encryptionType; keyId }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~encryptionType ->
+            fun ~keyId ->
+              fun () ->
+                { streamName; streamARN; streamId; encryptionType; keyId }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("EncryptionType", (Some (EncryptionType.to_value x.encryptionType)));
-        ("KeyId", (Some (KeyId.to_value x.keyId)))]
+        ("KeyId", (Some (KeyId.to_value x.keyId)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let keyId =
         KeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       let encryptionType =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EncryptionType") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~keyId ~encryptionType ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~keyId ~encryptionType ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyId = field_map_exn json "KeyId" KeyId.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let keyId = field_map_exn json__ "KeyId" KeyId.of_json in
       let encryptionType =
-        field_map_exn json "EncryptionType" EncryptionType.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~keyId ~encryptionType ~streamName ()
+        field_map_exn json__ "EncryptionType" EncryptionType.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~keyId ~encryptionType ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disables server-side encryption for a specified stream. Stopping encryption is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Stopping encryption normally takes a few seconds to complete, but it can take minutes. You can continue to read and write data to your stream while its status is UPDATING. Once the status of the stream is ACTIVE, records written to the stream are no longer encrypted by Kinesis Data Streams. API Limits: You can successfully disable server-side encryption 25 times in a rolling 24-hour period. Note: It can take up to 5 seconds after the stream is in an ACTIVE status before all records written to the stream are no longer subject to encryption. After you disabled encryption, you can verify that encryption is not applied by inspecting the API response from PutRecord or PutRecords."]
+       "Disables server-side encryption for a specified stream. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Stopping encryption is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Stopping encryption normally takes a few seconds to complete, but it can take minutes. You can continue to read and write data to your stream while its status is UPDATING. Once the status of the stream is ACTIVE, records written to the stream are no longer encrypted by Kinesis Data Streams. API Limits: You can successfully disable server-side encryption 25 times in a rolling 24-hour period. Note: It can take up to 5 seconds after the stream is in an ACTIVE status before all records written to the stream are no longer subject to encryption. After you disabled encryption, you can verify that encryption is not applied by inspecting the API response from PutRecord or PutRecords."]
 module StartStreamEncryptionInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc
           "The name of the stream for which to start encrypting records."];
       encryptionType: EncryptionType.t
@@ -2987,61 +3906,93 @@ module StartStreamEncryptionInput =
           "The encryption type to use. The only valid value is KMS."];
       keyId: KeyId.t
         [@ocaml.doc
-          "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified Amazon Resource Name (ARN) to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"]}
+          "The GUID for the customer-managed Amazon Web Services KMS key to use for encryption. This value can be a globally unique identifier, a fully specified Amazon Resource Name (ARN) to either an alias or a key, or an alias name prefixed by \"alias/\".You can also use a master key owned by Kinesis Data Streams by specifying the alias aws/kinesis. Key ARN example: arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012 Alias ARN example: arn:aws:kms:us-east-1:123456789012:alias/MyAliasName Globally unique key ID example: 12345678-1234-1234-1234-123456789012 Alias name example: alias/MyAliasName Master key owned by Kinesis Data Streams: alias/aws/kinesis"];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "StartStreamEncryptionInput"
-    let make ~streamName =
-      fun ~encryptionType ->
-        fun ~keyId -> fun () -> { streamName; encryptionType; keyId }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~encryptionType ->
+            fun ~keyId ->
+              fun () ->
+                { streamName; streamARN; streamId; encryptionType; keyId }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("EncryptionType", (Some (EncryptionType.to_value x.encryptionType)));
-        ("KeyId", (Some (KeyId.to_value x.keyId)))]
+        ("KeyId", (Some (KeyId.to_value x.keyId)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let keyId =
         KeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyId") in
       let encryptionType =
         EncryptionType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EncryptionType") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~keyId ~encryptionType ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~keyId ~encryptionType ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyId = field_map_exn json "KeyId" KeyId.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let keyId = field_map_exn json__ "KeyId" KeyId.of_json in
       let encryptionType =
-        field_map_exn json "EncryptionType" EncryptionType.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~keyId ~encryptionType ~streamName ()
+        field_map_exn json__ "EncryptionType" EncryptionType.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~keyId ~encryptionType ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables or updates server-side encryption using an Amazon Web Services KMS key for a specified stream. Starting encryption is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Updating or applying encryption normally takes a few seconds to complete, but it can take minutes. You can continue to read and write data to your stream while its status is UPDATING. Once the status of the stream is ACTIVE, encryption begins for records written to the stream. API Limits: You can successfully apply a new Amazon Web Services KMS key for server-side encryption 25 times in a rolling 24-hour period. Note: It can take up to 5 seconds after the stream is in an ACTIVE status before all records written to the stream are encrypted. After you enable encryption, you can verify that encryption is applied by inspecting the API response from PutRecord or PutRecords."]
+       "Enables or updates server-side encryption using an Amazon Web Services KMS key for a specified stream. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. Starting encryption is an asynchronous operation. Upon receiving the request, Kinesis Data Streams returns immediately and sets the status of the stream to UPDATING. After the update is complete, Kinesis Data Streams sets the status of the stream back to ACTIVE. Updating or applying encryption normally takes a few seconds to complete, but it can take minutes. You can continue to read and write data to your stream while its status is UPDATING. Once the status of the stream is ACTIVE, encryption begins for records written to the stream. API Limits: You can successfully apply a new Amazon Web Services KMS key for server-side encryption 25 times in a rolling 24-hour period. Note: It can take up to 5 seconds after the stream is in an ACTIVE status before all records written to the stream are encrypted. After you enable encryption, you can verify that encryption is applied by inspecting the API response from PutRecord or PutRecords."]
 module SplitShardInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream for the shard split."];
       shardToSplit: ShardId.t
         [@ocaml.doc "The shard ID of the shard to split."];
       newStartingHashKey: HashKey.t
         [@ocaml.doc
-          "A hash key value for the starting hash key of one of the child shards created by the split. The hash key range for a given shard constitutes a set of ordered contiguous positive integers. The value for NewStartingHashKey must be in the range of hash keys being mapped into the shard. The NewStartingHashKey hash key value and all higher hash key values in hash key range are distributed to one of the child shards. All the lower hash key values in the range are distributed to the other child shard."]}
+          "A hash key value for the starting hash key of one of the child shards created by the split. The hash key range for a given shard constitutes a set of ordered contiguous positive integers. The value for NewStartingHashKey must be in the range of hash keys being mapped into the shard. The NewStartingHashKey hash key value and all higher hash key values in hash key range are distributed to one of the child shards. All the lower hash key values in the range are distributed to the other child shard."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "SplitShardInput"
-    let make ~streamName =
-      fun ~shardToSplit ->
-        fun ~newStartingHashKey ->
-          fun () -> { streamName; shardToSplit; newStartingHashKey }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~shardToSplit ->
+            fun ~newStartingHashKey ->
+              fun () ->
+                {
+                  streamName;
+                  streamARN;
+                  streamId;
+                  shardToSplit;
+                  newStartingHashKey
+                }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ShardToSplit", (Some (ShardId.to_value x.shardToSplit)));
         ("NewStartingHashKey",
-          (Some (HashKey.to_value x.newStartingHashKey)))]
+          (Some (HashKey.to_value x.newStartingHashKey)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let newStartingHashKey =
         HashKey.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NewStartingHashKey") in
@@ -3049,53 +4000,70 @@ module SplitShardInput =
         ShardId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardToSplit") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~newStartingHashKey ~shardToSplit ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~newStartingHashKey ~shardToSplit ?streamName
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let newStartingHashKey =
-        field_map_exn json "NewStartingHashKey" HashKey.of_json in
-      let shardToSplit = field_map_exn json "ShardToSplit" ShardId.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~newStartingHashKey ~shardToSplit ~streamName ()
+        field_map_exn json__ "NewStartingHashKey" HashKey.of_json in
+      let shardToSplit = field_map_exn json__ "ShardToSplit" ShardId.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~newStartingHashKey ~shardToSplit ?streamName
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for SplitShard."]
 module RemoveTagsFromStreamInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t [@ocaml.doc "The name of the stream."];
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
       tagKeys: TagKeyList.t
         [@ocaml.doc
-          "A list of tag keys. Each corresponding tag is removed from the stream."]}
+          "A list of tag keys. Each corresponding tag is removed from the stream."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "RemoveTagsFromStreamInput"
-    let make ~streamName = fun ~tagKeys -> fun () -> { streamName; tagKeys }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~tagKeys ->
+            fun () -> { streamName; streamARN; streamId; tagKeys }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
-        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let tagKeys =
         TagKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~tagKeys ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~tagKeys ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~tagKeys ~streamName ()
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~tagKeys ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for RemoveTagsFromStream."]
 module RegisterStreamConsumerOutput =
   struct
     type nonrec t =
       {
-      consumer: Consumer.t
+      consumer: Consumer.t option
         [@ocaml.doc
           "An object that represents the details of the consumer you registered. When you register a consumer, it gets an ARN that is generated by Kinesis Data Streams."]}
     type nonrec error =
@@ -3104,8 +4072,7 @@ module RegisterStreamConsumerOutput =
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RegisterStreamConsumerOutput"
-    let make ~consumer = fun () -> { consumer }
+    let make ?consumer = fun () -> { consumer }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -3156,19 +4123,19 @@ module RegisterStreamConsumerOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Consumer", (Some (Consumer.to_value x.consumer)))]
+        [("Consumer", (Option.map x.consumer ~f:Consumer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let consumer =
-        Consumer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Consumer") in
-      make ~consumer ()
+        (Option.map ~f:Consumer.of_xml) (Xml.child xml_arg0 "Consumer") in
+      make ?consumer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consumer = field_map_exn json "Consumer" Consumer.of_json in
-      make ~consumer ()
+    let of_json json__ =
+      let consumer = field_map json__ "Consumer" Consumer.of_json in
+      make ?consumer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a consumer with a Kinesis data stream. When you use this operation, the consumer you register can then call SubscribeToShard to receive data from the stream using enhanced fan-out, at a rate of up to 2 MiB per second for every shard you subscribe to. This rate is unaffected by the total number of consumers that read from the same stream. You can register up to 20 consumers per stream. A given consumer can only be registered with one stream at a time. For an example of how to use this operations, see Enhanced Fan-Out Using the Kinesis Data Streams API. The use of this operation has a limit of five transactions per second per account. Also, only 5 consumers can be created simultaneously. In other words, you cannot have more than 5 consumers in a CREATING status at the same time. Registering a 6th consumer while there are 5 in a CREATING status results in a LimitExceededException."]
+       "Registers a consumer with a Kinesis data stream. When you use this operation, the consumer you register can then call SubscribeToShard to receive data from the stream using enhanced fan-out, at a rate of up to 2 MiB per second for every shard you subscribe to. This rate is unaffected by the total number of consumers that read from the same stream. You can add tags to the registered consumer when making a RegisterStreamConsumer request by setting the Tags parameter. If you pass the Tags parameter, in addition to having the kinesis:RegisterStreamConsumer permission, you must also have the kinesis:TagResource permission for the consumer that will be registered. Tags will take effect from the CREATING status of the consumer. With On-demand Advantage streams, you can register up to 50 consumers per stream to use Enhanced Fan-out. With On-demand Standard and Provisioned streams, you can register up to 20 consumers per stream to use Enhanced Fan-out. A given consumer can only be registered with one stream at a time. For an example of how to use this operation, see Enhanced Fan-Out Using the Kinesis Data Streams API. The use of this operation has a limit of five transactions per second per account. Also, only 5 consumers can be created simultaneously. In other words, you cannot have more than 5 consumers in a CREATING status at the same time. Registering a 6th consumer while there are 5 in a CREATING status results in a LimitExceededException."]
 module RegisterStreamConsumerInput =
   struct
     type nonrec t =
@@ -3178,32 +4145,88 @@ module RegisterStreamConsumerInput =
           "The ARN of the Kinesis data stream that you want to register the consumer with. For more info, see Amazon Resource Names (ARNs) and Amazon Web Services Service Namespaces."];
       consumerName: ConsumerName.t
         [@ocaml.doc
-          "For a given Kinesis data stream, each consumer must have a unique name. However, consumer names don't have to be unique across data streams."]}
+          "For a given Kinesis data stream, each consumer must have a unique name. However, consumer names don't have to be unique across data streams."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of up to 50 key-value pairs. A tag consists of a required key and an optional value."]}
     let context_ = "RegisterStreamConsumerInput"
-    let make ~streamARN =
-      fun ~consumerName -> fun () -> { streamARN; consumerName }
+    let make ?streamId =
+      fun ?tags ->
+        fun ~streamARN ->
+          fun ~consumerName ->
+            fun () -> { streamId; tags; streamARN; consumerName }
     let to_value x =
       structure_to_value
         [("StreamARN", (Some (StreamARN.to_value x.streamARN)));
-        ("ConsumerName", (Some (ConsumerName.to_value x.consumerName)))]
+        ("ConsumerName", (Some (ConsumerName.to_value x.consumerName)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let consumerName =
         ConsumerName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConsumerName") in
       let streamARN =
         StreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
-      make ~consumerName ~streamARN ()
+      make ?tags ?streamId ~consumerName ~streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
       let consumerName =
-        field_map_exn json "ConsumerName" ConsumerName.of_json in
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
-      make ~consumerName ~streamARN ()
+        field_map_exn json__ "ConsumerName" ConsumerName.of_json in
+      let streamARN = field_map_exn json__ "StreamARN" StreamARN.of_json in
+      make ?tags ?streamId ~consumerName ~streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a consumer with a Kinesis data stream. When you use this operation, the consumer you register can then call SubscribeToShard to receive data from the stream using enhanced fan-out, at a rate of up to 2 MiB per second for every shard you subscribe to. This rate is unaffected by the total number of consumers that read from the same stream. You can register up to 20 consumers per stream. A given consumer can only be registered with one stream at a time. For an example of how to use this operations, see Enhanced Fan-Out Using the Kinesis Data Streams API. The use of this operation has a limit of five transactions per second per account. Also, only 5 consumers can be created simultaneously. In other words, you cannot have more than 5 consumers in a CREATING status at the same time. Registering a 6th consumer while there are 5 in a CREATING status results in a LimitExceededException."]
+       "Registers a consumer with a Kinesis data stream. When you use this operation, the consumer you register can then call SubscribeToShard to receive data from the stream using enhanced fan-out, at a rate of up to 2 MiB per second for every shard you subscribe to. This rate is unaffected by the total number of consumers that read from the same stream. You can add tags to the registered consumer when making a RegisterStreamConsumer request by setting the Tags parameter. If you pass the Tags parameter, in addition to having the kinesis:RegisterStreamConsumer permission, you must also have the kinesis:TagResource permission for the consumer that will be registered. Tags will take effect from the CREATING status of the consumer. With On-demand Advantage streams, you can register up to 50 consumers per stream to use Enhanced Fan-out. With On-demand Standard and Provisioned streams, you can register up to 20 consumers per stream to use Enhanced Fan-out. A given consumer can only be registered with one stream at a time. For an example of how to use this operation, see Enhanced Fan-Out Using the Kinesis Data Streams API. The use of this operation has a limit of five transactions per second per account. Also, only 5 consumers can be created simultaneously. In other words, you cannot have more than 5 consumers in a CREATING status at the same time. Registering a 6th consumer while there are 5 in a CREATING status results in a LimitExceededException."]
+module PutResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data stream or consumer."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."];
+      policy: Policy.t
+        [@ocaml.doc
+          "Details of the resource policy. It must include the identity of the principal and the actions allowed on this resource. This is formatted as a JSON string."]}
+    let context_ = "PutResourcePolicyInput"
+    let make ?streamId =
+      fun ~resourceARN ->
+        fun ~policy -> fun () -> { streamId; resourceARN; policy }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value));
+        ("Policy", (Some (Policy.to_value x.policy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        Policy.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ~policy ?streamId ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      make ~policy ?streamId ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Attaches a resource-based policy to a data stream or registered consumer. If you are using an identity other than the root user of the Amazon Web Services account that owns the resource, the calling identity must have the PutResourcePolicy permissions on the specified Kinesis Data Streams resource and belong to the owner's account in order to use this operation. If you don't have PutResourcePolicy permissions, Amazon Kinesis Data Streams returns a 403 Access Denied error. If you receive a ResourceNotFoundException, check to see if you passed a valid stream or consumer resource. Request patterns can be one of the following: Data stream pattern: arn:aws.*:kinesis:.*:\\d\\{12\\}:.*stream/\\S+ Consumer pattern: ^(arn):aws.*:kinesis:.*:\\d\\{12\\}:.*stream\\/\\[a-zA-Z0-9_.-\\]+\\/consumer\\/\\[a-zA-Z0-9_.-\\]+:\\[0-9\\]+ For more information, see Controlling Access to Amazon Kinesis Data Streams Resources Using IAM."]
 module PutRecordsOutput =
   struct
     type nonrec t =
@@ -3211,14 +4234,16 @@ module PutRecordsOutput =
       failedRecordCount: PositiveIntegerObject.t option
         [@ocaml.doc
           "The number of unsuccessfully processed records in a PutRecords request."];
-      records: PutRecordsResultEntryList.t
+      records: PutRecordsResultEntryList.t option
         [@ocaml.doc
           "An array of successfully and unsuccessfully processed record results. A record that is successfully added to a stream includes SequenceNumber and ShardId in the result. A record that fails to be added to a stream includes ErrorCode and ErrorMessage in the result."];
       encryptionType: EncryptionType.t option
         [@ocaml.doc
           "The encryption type used on the records. This parameter can be one of the following values: NONE: Do not encrypt the records. KMS: Use server-side encryption on the records using a customer-managed Amazon Web Services KMS key."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `KMSAccessDeniedException of KMSAccessDeniedException.t 
       | `KMSDisabledException of KMSDisabledException.t 
       | `KMSInvalidStateException of KMSInvalidStateException.t 
@@ -3229,13 +4254,16 @@ module PutRecordsOutput =
           ProvisionedThroughputExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRecordsOutput"
     let make ?failedRecordCount =
-      fun ?encryptionType ->
-        fun ~records ->
-          fun () -> { failedRecordCount; encryptionType; records }
+      fun ?records ->
+        fun ?encryptionType ->
+          fun () -> { failedRecordCount; records; encryptionType }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "KMSAccessDeniedException" ->
@@ -3260,6 +4288,10 @@ module PutRecordsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "KMSAccessDeniedException" ->
@@ -3282,6 +4314,14 @@ module PutRecordsOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -3327,7 +4367,8 @@ module PutRecordsOutput =
       structure_to_value
         [("FailedRecordCount",
            (Option.map x.failedRecordCount ~f:PositiveIntegerObject.to_value));
-        ("Records", (Some (PutRecordsResultEntryList.to_value x.records)));
+        ("Records",
+          (Option.map x.records ~f:PutRecordsResultEntryList.to_value));
         ("EncryptionType",
           (Option.map x.encryptionType ~f:EncryptionType.to_value))]
     let to_query v = to_query to_value v
@@ -3336,21 +4377,21 @@ module PutRecordsOutput =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       let records =
-        PutRecordsResultEntryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Records") in
+        (Option.map ~f:PutRecordsResultEntryList.of_xml)
+          (Xml.child xml_arg0 "Records") in
       let failedRecordCount =
         (Option.map ~f:PositiveIntegerObject.of_xml)
           (Xml.child xml_arg0 "FailedRecordCount") in
-      make ?encryptionType ~records ?failedRecordCount ()
+      make ?encryptionType ?records ?failedRecordCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let records =
-        field_map_exn json "Records" PutRecordsResultEntryList.of_json in
+        field_map json__ "Records" PutRecordsResultEntryList.of_json in
       let failedRecordCount =
-        field_map json "FailedRecordCount" PositiveIntegerObject.of_json in
-      make ?encryptionType ~records ?failedRecordCount ()
+        field_map json__ "FailedRecordCount" PositiveIntegerObject.of_json in
+      make ?encryptionType ?records ?failedRecordCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "PutRecords results."]
 module PutRecordsInput =
@@ -3359,46 +4400,62 @@ module PutRecordsInput =
       {
       records: PutRecordsRequestEntryList.t
         [@ocaml.doc "The records associated with the request."];
-      streamName: StreamName.t
-        [@ocaml.doc "The stream name associated with the request."]}
+      streamName: StreamName.t option
+        [@ocaml.doc "The stream name associated with the request."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "PutRecordsInput"
-    let make ~records = fun ~streamName -> fun () -> { records; streamName }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~records ->
+            fun () -> { streamName; streamARN; streamId; records }
     let to_value x =
       structure_to_value
         [("Records", (Some (PutRecordsRequestEntryList.to_value x.records)));
-        ("StreamName", (Some (StreamName.to_value x.streamName)))]
+        ("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
       let records =
         PutRecordsRequestEntryList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Records") in
-      make ~streamName ~records ()
+      make ?streamId ?streamARN ?streamName ~records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
       let records =
-        field_map_exn json "Records" PutRecordsRequestEntryList.of_json in
-      make ~streamName ~records ()
+        field_map_exn json__ "Records" PutRecordsRequestEntryList.of_json in
+      make ?streamId ?streamARN ?streamName ~records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A PutRecords request."]
 module PutRecordOutput =
   struct
     type nonrec t =
       {
-      shardId: ShardId.t
+      shardId: ShardId.t option
         [@ocaml.doc
           "The shard ID of the shard where the data record was placed."];
-      sequenceNumber: SequenceNumber.t
+      sequenceNumber: SequenceNumber.t option
         [@ocaml.doc
           "The sequence number identifier that was assigned to the put data record. The sequence number for the record is unique across all records in the stream. A sequence number is the identifier associated with every record put into the stream."];
       encryptionType: EncryptionType.t option
         [@ocaml.doc
           "The encryption type to use on the record. This parameter can be one of the following values: NONE: Do not encrypt the records in the stream. KMS: Use server-side encryption on the records in the stream using a customer-managed Amazon Web Services KMS key."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `KMSAccessDeniedException of KMSAccessDeniedException.t 
       | `KMSDisabledException of KMSDisabledException.t 
       | `KMSInvalidStateException of KMSInvalidStateException.t 
@@ -3409,13 +4466,16 @@ module PutRecordOutput =
           ProvisionedThroughputExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutRecordOutput"
-    let make ?encryptionType =
-      fun ~shardId ->
-        fun ~sequenceNumber ->
-          fun () -> { encryptionType; shardId; sequenceNumber }
+    let make ?shardId =
+      fun ?sequenceNumber ->
+        fun ?encryptionType ->
+          fun () -> { shardId; sequenceNumber; encryptionType }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "KMSAccessDeniedException" ->
@@ -3440,6 +4500,10 @@ module PutRecordOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "KMSAccessDeniedException" ->
@@ -3462,6 +4526,14 @@ module PutRecordOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -3505,8 +4577,9 @@ module PutRecordOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ShardId", (Some (ShardId.to_value x.shardId)));
-        ("SequenceNumber", (Some (SequenceNumber.to_value x.sequenceNumber)));
+        [("ShardId", (Option.map x.shardId ~f:ShardId.to_value));
+        ("SequenceNumber",
+          (Option.map x.sequenceNumber ~f:SequenceNumber.to_value));
         ("EncryptionType",
           (Option.map x.encryptionType ~f:EncryptionType.to_value))]
     let to_query v = to_query to_value v
@@ -3515,30 +4588,30 @@ module PutRecordOutput =
         (Option.map ~f:EncryptionType.of_xml)
           (Xml.child xml_arg0 "EncryptionType") in
       let sequenceNumber =
-        SequenceNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SequenceNumber") in
+        (Option.map ~f:SequenceNumber.of_xml)
+          (Xml.child xml_arg0 "SequenceNumber") in
       let shardId =
-        ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
-      make ?encryptionType ~sequenceNumber ~shardId ()
+        (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ShardId") in
+      make ?encryptionType ?sequenceNumber ?shardId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionType =
-        field_map json "EncryptionType" EncryptionType.of_json in
+        field_map json__ "EncryptionType" EncryptionType.of_json in
       let sequenceNumber =
-        field_map_exn json "SequenceNumber" SequenceNumber.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      make ?encryptionType ~sequenceNumber ~shardId ()
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
+      make ?encryptionType ?sequenceNumber ?shardId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for PutRecord."]
 module PutRecordInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream to put the data record into."];
       data: Data.t
         [@ocaml.doc
-          "The data blob to put into the record, which is base64-encoded when the blob is serialized. When the data blob (the payload before base64-encoding) is added to the partition key size, the total size must not exceed the maximum record size (1 MiB)."];
+          "The data blob to put into the record, which is base64-encoded when the blob is serialized. When the data blob (the payload before base64-encoding) is added to the partition key size, the total size must not exceed the maximum record size (10 MiB)."];
       partitionKey: PartitionKey.t
         [@ocaml.doc
           "Determines which shard in the stream the data record is assigned to. Partition keys are Unicode strings with a maximum length limit of 256 characters for each key. Amazon Kinesis Data Streams uses the partition key as input to a hash function that maps the partition key and associated data to a specific shard. Specifically, an MD5 hash function is used to map partition keys to 128-bit integer values and to map associated data records to shards. As a result of this hashing mechanism, all data records with the same partition key map to the same shard within the stream."];
@@ -3547,32 +4620,45 @@ module PutRecordInput =
           "The hash value used to explicitly determine the shard the data record is assigned to by overriding the partition key hash."];
       sequenceNumberForOrdering: SequenceNumber.t option
         [@ocaml.doc
-          "Guarantees strictly increasing sequence numbers, for puts from the same client and to the same partition key. Usage: set the SequenceNumberForOrdering of record n to the sequence number of record n-1 (as returned in the result when putting record n-1). If this parameter is not set, records are coarsely ordered based on arrival time."]}
+          "Guarantees strictly increasing sequence numbers, for puts from the same client and to the same partition key. Usage: set the SequenceNumberForOrdering of record n to the sequence number of record n-1 (as returned in the result when putting record n-1). If this parameter is not set, records are coarsely ordered based on arrival time."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "PutRecordInput"
-    let make ?explicitHashKey =
-      fun ?sequenceNumberForOrdering ->
-        fun ~streamName ->
-          fun ~data ->
-            fun ~partitionKey ->
-              fun () ->
-                {
-                  explicitHashKey;
-                  sequenceNumberForOrdering;
-                  streamName;
-                  data;
-                  partitionKey
-                }
+    let make ?streamName =
+      fun ?explicitHashKey ->
+        fun ?sequenceNumberForOrdering ->
+          fun ?streamARN ->
+            fun ?streamId ->
+              fun ~data ->
+                fun ~partitionKey ->
+                  fun () ->
+                    {
+                      streamName;
+                      explicitHashKey;
+                      sequenceNumberForOrdering;
+                      streamARN;
+                      streamId;
+                      data;
+                      partitionKey
+                    }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("Data", (Some (Data.to_value x.data)));
         ("PartitionKey", (Some (PartitionKey.to_value x.partitionKey)));
         ("ExplicitHashKey",
           (Option.map x.explicitHashKey ~f:HashKey.to_value));
         ("SequenceNumberForOrdering",
-          (Option.map x.sequenceNumberForOrdering ~f:SequenceNumber.to_value))]
+          (Option.map x.sequenceNumberForOrdering ~f:SequenceNumber.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let sequenceNumberForOrdering =
         (Option.map ~f:SequenceNumber.of_xml)
           (Xml.child xml_arg0 "SequenceNumberForOrdering") in
@@ -3584,47 +4670,67 @@ module PutRecordInput =
       let data =
         Data.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?sequenceNumberForOrdering ?explicitHashKey ~partitionKey ~data
-        ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?sequenceNumberForOrdering ?explicitHashKey
+        ~partitionKey ~data ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let sequenceNumberForOrdering =
-        field_map json "SequenceNumberForOrdering" SequenceNumber.of_json in
-      let explicitHashKey = field_map json "ExplicitHashKey" HashKey.of_json in
+        field_map json__ "SequenceNumberForOrdering" SequenceNumber.of_json in
+      let explicitHashKey =
+        field_map json__ "ExplicitHashKey" HashKey.of_json in
       let partitionKey =
-        field_map_exn json "PartitionKey" PartitionKey.of_json in
-      let data = field_map_exn json "Data" Data.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?sequenceNumberForOrdering ?explicitHashKey ~partitionKey ~data
-        ~streamName ()
+        field_map_exn json__ "PartitionKey" PartitionKey.of_json in
+      let data = field_map_exn json__ "Data" Data.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?sequenceNumberForOrdering ?explicitHashKey
+        ~partitionKey ~data ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for PutRecord."]
 module MergeShardsInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream for the merge."];
       shardToMerge: ShardId.t
         [@ocaml.doc
           "The shard ID of the shard to combine with the adjacent shard for the merge."];
       adjacentShardToMerge: ShardId.t
-        [@ocaml.doc "The shard ID of the adjacent shard for the merge."]}
+        [@ocaml.doc "The shard ID of the adjacent shard for the merge."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "MergeShardsInput"
-    let make ~streamName =
-      fun ~shardToMerge ->
-        fun ~adjacentShardToMerge ->
-          fun () -> { streamName; shardToMerge; adjacentShardToMerge }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~shardToMerge ->
+            fun ~adjacentShardToMerge ->
+              fun () ->
+                {
+                  streamName;
+                  streamARN;
+                  streamId;
+                  shardToMerge;
+                  adjacentShardToMerge
+                }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ShardToMerge", (Some (ShardId.to_value x.shardToMerge)));
         ("AdjacentShardToMerge",
-          (Some (ShardId.to_value x.adjacentShardToMerge)))]
+          (Some (ShardId.to_value x.adjacentShardToMerge)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let adjacentShardToMerge =
         ShardId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AdjacentShardToMerge") in
@@ -3632,37 +4738,42 @@ module MergeShardsInput =
         ShardId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardToMerge") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~adjacentShardToMerge ~shardToMerge ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~adjacentShardToMerge ~shardToMerge
+        ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let adjacentShardToMerge =
-        field_map_exn json "AdjacentShardToMerge" ShardId.of_json in
-      let shardToMerge = field_map_exn json "ShardToMerge" ShardId.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~adjacentShardToMerge ~shardToMerge ~streamName ()
+        field_map_exn json__ "AdjacentShardToMerge" ShardId.of_json in
+      let shardToMerge = field_map_exn json__ "ShardToMerge" ShardId.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~adjacentShardToMerge ~shardToMerge
+        ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for MergeShards."]
 module ListTagsForStreamOutput =
   struct
     type nonrec t =
       {
-      tags: TagList.t
+      tags: TagList.t option
         [@ocaml.doc
           "A list of tags associated with StreamName, starting with the first tag after ExclusiveStartTagKey and up to the specified Limit."];
-      hasMoreTags: BooleanObject.t
+      hasMoreTags: BooleanObject.t option
         [@ocaml.doc
           "If set to true, more tags are available. To request additional tags, set ExclusiveStartTagKey to the key of the last tag returned."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForStreamOutput"
-    let make ~tags = fun ~hasMoreTags -> fun () -> { tags; hasMoreTags }
+    let make ?tags = fun ?hasMoreTags -> fun () -> { tags; hasMoreTags }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
@@ -3674,6 +4785,8 @@ module ListTagsForStreamOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
@@ -3684,6 +4797,10 @@ module ListTagsForStreamOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -3703,49 +4820,64 @@ module ListTagsForStreamOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Tags", (Some (TagList.to_value x.tags)));
-        ("HasMoreTags", (Some (BooleanObject.to_value x.hasMoreTags)))]
+        [("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("HasMoreTags", (Option.map x.hasMoreTags ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hasMoreTags =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreTags") in
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ~hasMoreTags ~tags ()
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreTags") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?hasMoreTags ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hasMoreTags =
-        field_map_exn json "HasMoreTags" BooleanObject.of_json in
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      make ~hasMoreTags ~tags ()
+    let of_json json__ =
+      let hasMoreTags = field_map json__ "HasMoreTags" BooleanObject.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      make ?hasMoreTags ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for ListTagsForStream."]
 module ListTagsForStreamInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t [@ocaml.doc "The name of the stream."];
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
       exclusiveStartTagKey: TagKey.t option
         [@ocaml.doc
           "The key to use as the starting point for the list of tags. If this parameter is set, ListTagsForStream gets all tags that occur after ExclusiveStartTagKey."];
       limit: ListTagsForStreamInputLimit.t option
         [@ocaml.doc
-          "The number of tags to return. If this number is less than the total number of tags associated with the stream, HasMoreTags is set to true. To list additional tags, set ExclusiveStartTagKey to the last key in the response."]}
-    let context_ = "ListTagsForStreamInput"
-    let make ?exclusiveStartTagKey =
-      fun ?limit ->
-        fun ~streamName ->
-          fun () -> { exclusiveStartTagKey; limit; streamName }
+          "The number of tags to return. If this number is less than the total number of tags associated with the stream, HasMoreTags is set to true. To list additional tags, set ExclusiveStartTagKey to the last key in the response."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let make ?streamName =
+      fun ?exclusiveStartTagKey ->
+        fun ?limit ->
+          fun ?streamARN ->
+            fun ?streamId ->
+              fun () ->
+                {
+                  streamName;
+                  exclusiveStartTagKey;
+                  limit;
+                  streamARN;
+                  streamId
+                }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ExclusiveStartTagKey",
           (Option.map x.exclusiveStartTagKey ~f:TagKey.to_value));
         ("Limit",
-          (Option.map x.limit ~f:ListTagsForStreamInputLimit.to_value))]
+          (Option.map x.limit ~f:ListTagsForStreamInputLimit.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let limit =
         (Option.map ~f:ListTagsForStreamInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
@@ -3753,36 +4885,165 @@ module ListTagsForStreamInput =
         (Option.map ~f:TagKey.of_xml)
           (Xml.child xml_arg0 "ExclusiveStartTagKey") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?limit ?exclusiveStartTagKey ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?limit ?exclusiveStartTagKey ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" ListTagsForStreamInputLimit.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let limit =
+        field_map json__ "Limit" ListTagsForStreamInputLimit.of_json in
       let exclusiveStartTagKey =
-        field_map json "ExclusiveStartTagKey" TagKey.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?limit ?exclusiveStartTagKey ~streamName ()
+        field_map json__ "ExclusiveStartTagKey" TagKey.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?limit ?exclusiveStartTagKey ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for ListTagsForStream."]
+module ListTagsForResourceOutput =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of tags associated with the specified Kinesis resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all tags added to the specified Kinesis resource. Each tag is a label consisting of a user-defined key and value. Tags can help you manage, identify, organize, search for, and filter resources. For more information about tagging Kinesis resources, see Tag your Amazon Kinesis Data Streams resources."]
+module ListTagsForResourceInput =
+  struct
+    type nonrec t =
+      {
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Kinesis resource for which to list tags."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let context_ = "ListTagsForResourceInput"
+    let make ?streamId =
+      fun ~resourceARN -> fun () -> { streamId; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ?streamId ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      make ?streamId ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all tags added to the specified Kinesis resource. Each tag is a label consisting of a user-defined key and value. Tags can help you manage, identify, organize, search for, and filter resources. For more information about tagging Kinesis resources, see Tag your Amazon Kinesis Data Streams resources."]
 module ListStreamsOutput =
   struct
     type nonrec t =
       {
-      streamNames: StreamNameList.t
+      streamNames: StreamNameList.t option
         [@ocaml.doc
           "The names of the streams that are associated with the Amazon Web Services account making the ListStreams request."];
-      hasMoreStreams: BooleanObject.t
+      hasMoreStreams: BooleanObject.t option
         [@ocaml.doc
-          "If set to true, there are more streams available to list."]}
+          "If set to true, there are more streams available to list."];
+      nextToken: NextToken.t option ;
+      streamSummaries: StreamSummaryList.t option }
     type nonrec error =
-      [ `LimitExceededException of LimitExceededException.t 
+      [ `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListStreamsOutput"
-    let make ~streamNames =
-      fun ~hasMoreStreams -> fun () -> { streamNames; hasMoreStreams }
+    let make ?streamNames =
+      fun ?hasMoreStreams ->
+        fun ?nextToken ->
+          fun ?streamSummaries ->
+            fun () ->
+              { streamNames; hasMoreStreams; nextToken; streamSummaries }
     let error_of_json name json =
       match name with
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
       | name ->
@@ -3790,12 +5051,24 @@ module ListStreamsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
@@ -3807,24 +5080,36 @@ module ListStreamsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("StreamNames", (Some (StreamNameList.to_value x.streamNames)));
-        ("HasMoreStreams", (Some (BooleanObject.to_value x.hasMoreStreams)))]
+        [("StreamNames",
+           (Option.map x.streamNames ~f:StreamNameList.to_value));
+        ("HasMoreStreams",
+          (Option.map x.hasMoreStreams ~f:BooleanObject.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("StreamSummaries",
+          (Option.map x.streamSummaries ~f:StreamSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamSummaries =
+        (Option.map ~f:StreamSummaryList.of_xml)
+          (Xml.child xml_arg0 "StreamSummaries") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let hasMoreStreams =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreStreams") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreStreams") in
       let streamNames =
-        StreamNameList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamNames") in
-      make ~hasMoreStreams ~streamNames ()
+        (Option.map ~f:StreamNameList.of_xml)
+          (Xml.child xml_arg0 "StreamNames") in
+      make ?streamSummaries ?nextToken ?hasMoreStreams ?streamNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamSummaries =
+        field_map json__ "StreamSummaries" StreamSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let hasMoreStreams =
-        field_map_exn json "HasMoreStreams" BooleanObject.of_json in
-      let streamNames =
-        field_map_exn json "StreamNames" StreamNameList.of_json in
-      make ~hasMoreStreams ~streamNames ()
+        field_map json__ "HasMoreStreams" BooleanObject.of_json in
+      let streamNames = field_map json__ "StreamNames" StreamNameList.of_json in
+      make ?streamSummaries ?nextToken ?hasMoreStreams ?streamNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for ListStreams."]
 module ListStreamsInput =
@@ -3835,30 +5120,36 @@ module ListStreamsInput =
         [@ocaml.doc
           "The maximum number of streams to list. The default value is 100. If you specify a value greater than 100, at most 100 results are returned."];
       exclusiveStartStreamName: StreamName.t option
-        [@ocaml.doc "The name of the stream to start the list with."]}
+        [@ocaml.doc "The name of the stream to start the list with."];
+      nextToken: NextToken.t option }
     let make ?limit =
       fun ?exclusiveStartStreamName ->
-        fun () -> { limit; exclusiveStartStreamName }
+        fun ?nextToken ->
+          fun () -> { limit; exclusiveStartStreamName; nextToken }
     let to_value x =
       structure_to_value
         [("Limit", (Option.map x.limit ~f:ListStreamsInputLimit.to_value));
         ("ExclusiveStartStreamName",
-          (Option.map x.exclusiveStartStreamName ~f:StreamName.to_value))]
+          (Option.map x.exclusiveStartStreamName ~f:StreamName.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let exclusiveStartStreamName =
         (Option.map ~f:StreamName.of_xml)
           (Xml.child xml_arg0 "ExclusiveStartStreamName") in
       let limit =
         (Option.map ~f:ListStreamsInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
-      make ?exclusiveStartStreamName ?limit ()
+      make ?nextToken ?exclusiveStartStreamName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let exclusiveStartStreamName =
-        field_map json "ExclusiveStartStreamName" StreamName.of_json in
-      let limit = field_map json "Limit" ListStreamsInputLimit.of_json in
-      make ?exclusiveStartStreamName ?limit ()
+        field_map json__ "ExclusiveStartStreamName" StreamName.of_json in
+      let limit = field_map json__ "Limit" ListStreamsInputLimit.of_json in
+      make ?nextToken ?exclusiveStartStreamName ?limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for ListStreams."]
 module ListStreamConsumersOutput =
@@ -3948,9 +5239,9 @@ module ListStreamConsumersOutput =
         (Option.map ~f:ConsumerList.of_xml) (Xml.child xml_arg0 "Consumers") in
       make ?nextToken ?consumers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let consumers = field_map json "Consumers" ConsumerList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let consumers = field_map json__ "Consumers" ConsumerList.of_json in
       make ?nextToken ?consumers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3970,14 +5261,23 @@ module ListStreamConsumersInput =
           "The maximum number of consumers that you want a single call of ListStreamConsumers to return. The default value is 100. If you specify a value greater than 100, at most 100 results are returned."];
       streamCreationTimestamp: Timestamp.t option
         [@ocaml.doc
-          "Specify this input parameter to distinguish data streams that have the same name. For example, if you create a data stream and then delete it, and you later create another data stream with the same name, you can use this input parameter to specify which of the two streams you want to list the consumers for. You can't specify this parameter if you specify the NextToken parameter."]}
+          "Specify this input parameter to distinguish data streams that have the same name. For example, if you create a data stream and then delete it, and you later create another data stream with the same name, you can use this input parameter to specify which of the two streams you want to list the consumers for. You can't specify this parameter if you specify the NextToken parameter."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "ListStreamConsumersInput"
     let make ?nextToken =
       fun ?maxResults ->
         fun ?streamCreationTimestamp ->
-          fun ~streamARN ->
-            fun () ->
-              { nextToken; maxResults; streamCreationTimestamp; streamARN }
+          fun ?streamId ->
+            fun ~streamARN ->
+              fun () ->
+                {
+                  nextToken;
+                  maxResults;
+                  streamCreationTimestamp;
+                  streamId;
+                  streamARN
+                }
     let to_value x =
       structure_to_value
         [("StreamARN", (Some (StreamARN.to_value x.streamARN)));
@@ -3985,9 +5285,12 @@ module ListStreamConsumersInput =
         ("MaxResults",
           (Option.map x.maxResults ~f:ListStreamConsumersInputLimit.to_value));
         ("StreamCreationTimestamp",
-          (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let streamCreationTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "StreamCreationTimestamp") in
@@ -3999,16 +5302,19 @@ module ListStreamConsumersInput =
       let streamARN =
         StreamARN.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamARN") in
-      make ?streamCreationTimestamp ?maxResults ?nextToken ~streamARN ()
+      make ?streamId ?streamCreationTimestamp ?maxResults ?nextToken
+        ~streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
       let streamCreationTimestamp =
-        field_map json "StreamCreationTimestamp" Timestamp.of_json in
+        field_map json__ "StreamCreationTimestamp" Timestamp.of_json in
       let maxResults =
-        field_map json "MaxResults" ListStreamConsumersInputLimit.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let streamARN = field_map_exn json "StreamARN" StreamARN.of_json in
-      make ?streamCreationTimestamp ?maxResults ?nextToken ~streamARN ()
+        field_map json__ "MaxResults" ListStreamConsumersInputLimit.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let streamARN = field_map_exn json__ "StreamARN" StreamARN.of_json in
+      make ?streamId ?streamCreationTimestamp ?maxResults ?nextToken
+        ~streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the consumers registered to receive data from a stream using enhanced fan-out, and provides information about each consumer. This operation has a limit of 5 transactions per second per stream."]
@@ -4023,7 +5329,8 @@ module ListShardsOutput =
         [@ocaml.doc
           "When the number of shards in the data stream is greater than the default value for the MaxResults parameter, or if you explicitly specify a value for MaxResults that is less than the number of shards in the data stream, the response includes a pagination token named NextToken. You can specify this NextToken value in a subsequent call to ListShards to list the next set of shards. For more information about the use of this pagination token when calling the ListShards operation, see ListShardsInput$NextToken. Tokens expire after 300 seconds. When you obtain a value for NextToken in the response to a call to ListShards, you have 300 seconds to use that value. If you specify an expired token in a call to ListShards, you get ExpiredNextTokenException."]}
     type nonrec error =
-      [ `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceInUseException of ResourceInUseException.t 
@@ -4032,6 +5339,8 @@ module ListShardsOutput =
     let make ?shards = fun ?nextToken -> fun () -> { shards; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
       | "InvalidArgumentException" ->
@@ -4047,6 +5356,8 @@ module ListShardsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
       | "InvalidArgumentException" ->
@@ -4061,6 +5372,10 @@ module ListShardsOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ExpiredNextTokenException e ->
           `Assoc
             [("error", (`String "ExpiredNextTokenException"));
@@ -4098,13 +5413,13 @@ module ListShardsOutput =
         (Option.map ~f:ShardList.of_xml) (Xml.child xml_arg0 "Shards") in
       make ?nextToken ?shards ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let shards = field_map json "Shards" ShardList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let shards = field_map json__ "Shards" ShardList.of_json in
       make ?nextToken ?shards ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the shards in a stream and provides information about each shard. This operation has a limit of 1000 transactions per second per data stream. This action does not list expired shards. For information about expired shards, see Data Routing, Data Persistence, and Shard State after a Reshard. This API is a new operation that is used by the Amazon Kinesis Client Library (KCL). If you have a fine-grained IAM policy that only allows specific operations, you must update your policy to allow calls to this API. For more information, see Controlling Access to Amazon Kinesis Data Streams Resources Using IAM."]
+       "Lists the shards in a stream and provides information about each shard. This operation has a limit of 1000 transactions per second per data stream. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. This action does not list expired shards. For information about expired shards, see Data Routing, Data Persistence, and Shard State after a Reshard. This API is a new operation that is used by the Amazon Kinesis Client Library (KCL). If you have a fine-grained IAM policy that only allows specific operations, you must update your policy to allow calls to this API. For more information, see Controlling Access to Amazon Kinesis Data Streams Resources Using IAM."]
 module ListShardsInput =
   struct
     type nonrec t =
@@ -4126,22 +5441,29 @@ module ListShardsInput =
           "Specify this input parameter to distinguish data streams that have the same name. For example, if you create a data stream and then delete it, and you later create another data stream with the same name, you can use this input parameter to specify which of the two streams you want to list the shards for. You cannot specify this parameter if you specify the NextToken parameter."];
       shardFilter: ShardFilter.t option
         [@ocaml.doc
-          "Enables you to filter out the response of the ListShards API. You can only specify one filter at a time. If you use the ShardFilter parameter when invoking the ListShards API, the Type is the required property and must be specified. If you specify the AT_TRIM_HORIZON, FROM_TRIM_HORIZON, or AT_LATEST types, you do not need to specify either the ShardId or the Timestamp optional properties. If you specify the AFTER_SHARD_ID type, you must also provide the value for the optional ShardId property. The ShardId property is identical in fuctionality to the ExclusiveStartShardId parameter of the ListShards API. When ShardId property is specified, the response includes the shards starting with the shard whose ID immediately follows the ShardId that you provided. If you specify the AT_TIMESTAMP or FROM_TIMESTAMP_ID type, you must also provide the value for the optional Timestamp property. If you specify the AT_TIMESTAMP type, then all shards that were open at the provided timestamp are returned. If you specify the FROM_TIMESTAMP type, then all shards starting from the provided timestamp to TIP are returned."]}
+          "Enables you to filter out the response of the ListShards API. You can only specify one filter at a time. If you use the ShardFilter parameter when invoking the ListShards API, the Type is the required property and must be specified. If you specify the AT_TRIM_HORIZON, FROM_TRIM_HORIZON, or AT_LATEST types, you do not need to specify either the ShardId or the Timestamp optional properties. If you specify the AFTER_SHARD_ID type, you must also provide the value for the optional ShardId property. The ShardId property is identical in fuctionality to the ExclusiveStartShardId parameter of the ListShards API. When ShardId property is specified, the response includes the shards starting with the shard whose ID immediately follows the ShardId that you provided. If you specify the AT_TIMESTAMP or FROM_TIMESTAMP_ID type, you must also provide the value for the optional Timestamp property. If you specify the AT_TIMESTAMP type, then all shards that were open at the provided timestamp are returned. If you specify the FROM_TIMESTAMP type, then all shards starting from the provided timestamp to TIP are returned."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let make ?streamName =
       fun ?nextToken ->
         fun ?exclusiveStartShardId ->
           fun ?maxResults ->
             fun ?streamCreationTimestamp ->
               fun ?shardFilter ->
-                fun () ->
-                  {
-                    streamName;
-                    nextToken;
-                    exclusiveStartShardId;
-                    maxResults;
-                    streamCreationTimestamp;
-                    shardFilter
-                  }
+                fun ?streamARN ->
+                  fun ?streamId ->
+                    fun () ->
+                      {
+                        streamName;
+                        nextToken;
+                        exclusiveStartShardId;
+                        maxResults;
+                        streamCreationTimestamp;
+                        shardFilter;
+                        streamARN;
+                        streamId
+                      }
     let to_value x =
       structure_to_value
         [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
@@ -4152,9 +5474,15 @@ module ListShardsInput =
           (Option.map x.maxResults ~f:ListShardsInputLimit.to_value));
         ("StreamCreationTimestamp",
           (Option.map x.streamCreationTimestamp ~f:Timestamp.to_value));
-        ("ShardFilter", (Option.map x.shardFilter ~f:ShardFilter.to_value))]
+        ("ShardFilter", (Option.map x.shardFilter ~f:ShardFilter.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let shardFilter =
         (Option.map ~f:ShardFilter.of_xml) (Xml.child xml_arg0 "ShardFilter") in
       let streamCreationTimestamp =
@@ -4170,58 +5498,73 @@ module ListShardsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
-      make ?shardFilter ?streamCreationTimestamp ?maxResults
-        ?exclusiveStartShardId ?nextToken ?streamName ()
+      make ?streamId ?streamARN ?shardFilter ?streamCreationTimestamp
+        ?maxResults ?exclusiveStartShardId ?nextToken ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shardFilter = field_map json "ShardFilter" ShardFilter.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let shardFilter = field_map json__ "ShardFilter" ShardFilter.of_json in
       let streamCreationTimestamp =
-        field_map json "StreamCreationTimestamp" Timestamp.of_json in
+        field_map json__ "StreamCreationTimestamp" Timestamp.of_json in
       let maxResults =
-        field_map json "MaxResults" ListShardsInputLimit.of_json in
+        field_map json__ "MaxResults" ListShardsInputLimit.of_json in
       let exclusiveStartShardId =
-        field_map json "ExclusiveStartShardId" ShardId.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      make ?shardFilter ?streamCreationTimestamp ?maxResults
-        ?exclusiveStartShardId ?nextToken ?streamName ()
+        field_map json__ "ExclusiveStartShardId" ShardId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?shardFilter ?streamCreationTimestamp
+        ?maxResults ?exclusiveStartShardId ?nextToken ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the shards in a stream and provides information about each shard. This operation has a limit of 1000 transactions per second per data stream. This action does not list expired shards. For information about expired shards, see Data Routing, Data Persistence, and Shard State after a Reshard. This API is a new operation that is used by the Amazon Kinesis Client Library (KCL). If you have a fine-grained IAM policy that only allows specific operations, you must update your policy to allow calls to this API. For more information, see Controlling Access to Amazon Kinesis Data Streams Resources Using IAM."]
+       "Lists the shards in a stream and provides information about each shard. This operation has a limit of 1000 transactions per second per data stream. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. This action does not list expired shards. For information about expired shards, see Data Routing, Data Persistence, and Shard State after a Reshard. This API is a new operation that is used by the Amazon Kinesis Client Library (KCL). If you have a fine-grained IAM policy that only allows specific operations, you must update your policy to allow calls to this API. For more information, see Controlling Access to Amazon Kinesis Data Streams Resources Using IAM."]
 module IncreaseStreamRetentionPeriodInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream to modify."];
       retentionPeriodHours: RetentionPeriodHours.t
         [@ocaml.doc
-          "The new retention period of the stream, in hours. Must be more than the current retention period."]}
+          "The new retention period of the stream, in hours. Must be more than the current retention period."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "IncreaseStreamRetentionPeriodInput"
-    let make ~streamName =
-      fun ~retentionPeriodHours ->
-        fun () -> { streamName; retentionPeriodHours }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~retentionPeriodHours ->
+            fun () ->
+              { streamName; streamARN; streamId; retentionPeriodHours }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("RetentionPeriodHours",
-          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)))]
+          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let retentionPeriodHours =
         RetentionPeriodHours.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodHours") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~retentionPeriodHours ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~retentionPeriodHours ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let retentionPeriodHours =
-        field_map_exn json "RetentionPeriodHours"
+        field_map_exn json__ "RetentionPeriodHours"
           RetentionPeriodHours.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~retentionPeriodHours ~streamName ()
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~retentionPeriodHours ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for IncreaseStreamRetentionPeriod."]
 module GetShardIteratorOutput =
@@ -4232,7 +5575,9 @@ module GetShardIteratorOutput =
         [@ocaml.doc
           "The position in the shard from which to start reading data records sequentially. A shard iterator specifies this position using the sequence number of a data record in a shard."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalFailureException of InternalFailureException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `ProvisionedThroughputExceededException of
           ProvisionedThroughputExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -4240,6 +5585,10 @@ module GetShardIteratorOutput =
     let make ?shardIterator = fun () -> { shardIterator }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "ProvisionedThroughputExceededException" ->
@@ -4252,6 +5601,10 @@ module GetShardIteratorOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "ProvisionedThroughputExceededException" ->
@@ -4263,6 +5616,14 @@ module GetShardIteratorOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -4291,9 +5652,9 @@ module GetShardIteratorOutput =
           (Xml.child xml_arg0 "ShardIterator") in
       make ?shardIterator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shardIterator =
-        field_map json "ShardIterator" ShardIterator.of_json in
+        field_map json__ "ShardIterator" ShardIterator.of_json in
       make ?shardIterator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for GetShardIterator."]
@@ -4301,7 +5662,7 @@ module GetShardIteratorInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the Amazon Kinesis data stream."];
       shardId: ShardId.t
         [@ocaml.doc
@@ -4314,32 +5675,45 @@ module GetShardIteratorInput =
           "The sequence number of the data record in the shard from which to start reading. Used with shard iterator type AT_SEQUENCE_NUMBER and AFTER_SEQUENCE_NUMBER."];
       timestamp: Timestamp.t option
         [@ocaml.doc
-          "The time stamp of the data record from which to start reading. Used with shard iterator type AT_TIMESTAMP. A time stamp is the Unix epoch date with precision in milliseconds. For example, 2016-04-04T19:58:46.480-00:00 or 1459799926.480. If a record with this exact time stamp does not exist, the iterator returned is for the next (later) record. If the time stamp is older than the current trim horizon, the iterator returned is for the oldest untrimmed data record (TRIM_HORIZON)."]}
+          "The time stamp of the data record from which to start reading. Used with shard iterator type AT_TIMESTAMP. A time stamp is the Unix epoch date with precision in milliseconds. For example, 2016-04-04T19:58:46.480-00:00 or 1459799926.480. If a record with this exact time stamp does not exist, the iterator returned is for the next (later) record. If the time stamp is older than the current trim horizon, the iterator returned is for the oldest untrimmed data record (TRIM_HORIZON)."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "GetShardIteratorInput"
-    let make ?startingSequenceNumber =
-      fun ?timestamp ->
-        fun ~streamName ->
-          fun ~shardId ->
-            fun ~shardIteratorType ->
-              fun () ->
-                {
-                  startingSequenceNumber;
-                  timestamp;
-                  streamName;
-                  shardId;
-                  shardIteratorType
-                }
+    let make ?streamName =
+      fun ?startingSequenceNumber ->
+        fun ?timestamp ->
+          fun ?streamARN ->
+            fun ?streamId ->
+              fun ~shardId ->
+                fun ~shardIteratorType ->
+                  fun () ->
+                    {
+                      streamName;
+                      startingSequenceNumber;
+                      timestamp;
+                      streamARN;
+                      streamId;
+                      shardId;
+                      shardIteratorType
+                    }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ShardId", (Some (ShardId.to_value x.shardId)));
         ("ShardIteratorType",
           (Some (ShardIteratorType.to_value x.shardIteratorType)));
         ("StartingSequenceNumber",
           (Option.map x.startingSequenceNumber ~f:SequenceNumber.to_value));
-        ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value))]
+        ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       let startingSequenceNumber =
@@ -4351,28 +5725,148 @@ module GetShardIteratorInput =
       let shardId =
         ShardId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ShardId") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?timestamp ?startingSequenceNumber ~shardIteratorType ~shardId
-        ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?timestamp ?startingSequenceNumber
+        ~shardIteratorType ~shardId ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       let startingSequenceNumber =
-        field_map json "StartingSequenceNumber" SequenceNumber.of_json in
+        field_map json__ "StartingSequenceNumber" SequenceNumber.of_json in
       let shardIteratorType =
-        field_map_exn json "ShardIteratorType" ShardIteratorType.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?timestamp ?startingSequenceNumber ~shardIteratorType ~shardId
-        ~streamName ()
+        field_map_exn json__ "ShardIteratorType" ShardIteratorType.of_json in
+      let shardId = field_map_exn json__ "ShardId" ShardId.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?timestamp ?startingSequenceNumber
+        ~shardIteratorType ~shardId ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for GetShardIterator."]
+module GetResourcePolicyOutput =
+  struct
+    type nonrec t =
+      {
+      policy: Policy.t option
+        [@ocaml.doc
+          "Details of the resource policy. This is formatted as a JSON string."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceInUseException of ResourceInUseException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun () -> { policy }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceInUseException" ->
+          `ResourceInUseException (ResourceInUseException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceInUseException e ->
+          `Assoc
+            [("error", (`String "ResourceInUseException"));
+            ("details", (ResourceInUseException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Policy", (Option.map x.policy ~f:Policy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:Policy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Policy.of_json in
+      make ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a policy attached to the specified data stream or consumer. Request patterns can be one of the following: Data stream pattern: arn:aws.*:kinesis:.*:\\d\\{12\\}:.*stream/\\S+ Consumer pattern: ^(arn):aws.*:kinesis:.*:\\d\\{12\\}:.*stream\\/\\[a-zA-Z0-9_.-\\]+\\/consumer\\/\\[a-zA-Z0-9_.-\\]+:\\[0-9\\]+"]
+module GetResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data stream or consumer."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let context_ = "GetResourcePolicyInput"
+    let make ?streamId =
+      fun ~resourceARN -> fun () -> { streamId; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ?streamId ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      make ?streamId ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a policy attached to the specified data stream or consumer. Request patterns can be one of the following: Data stream pattern: arn:aws.*:kinesis:.*:\\d\\{12\\}:.*stream/\\S+ Consumer pattern: ^(arn):aws.*:kinesis:.*:\\d\\{12\\}:.*stream\\/\\[a-zA-Z0-9_.-\\]+\\/consumer\\/\\[a-zA-Z0-9_.-\\]+:\\[0-9\\]+"]
 module GetRecordsOutput =
   struct
     type nonrec t =
       {
-      records: RecordList.t
+      records: RecordList.t option
         [@ocaml.doc "The data records retrieved from the shard."];
       nextShardIterator: ShardIterator.t option
         [@ocaml.doc
@@ -4384,7 +5878,9 @@ module GetRecordsOutput =
         [@ocaml.doc
           "The list of the current shard's child shards, returned in the GetRecords API's response only when the end of the current shard is reached."]}
     type nonrec error =
-      [ `ExpiredIteratorException of ExpiredIteratorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredIteratorException of ExpiredIteratorException.t 
+      | `InternalFailureException of InternalFailureException.t 
       | `InvalidArgumentException of InvalidArgumentException.t 
       | `KMSAccessDeniedException of KMSAccessDeniedException.t 
       | `KMSDisabledException of KMSDisabledException.t 
@@ -4396,17 +5892,20 @@ module GetRecordsOutput =
           ProvisionedThroughputExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetRecordsOutput"
-    let make ?nextShardIterator =
-      fun ?millisBehindLatest ->
-        fun ?childShards ->
-          fun ~records ->
+    let make ?records =
+      fun ?nextShardIterator ->
+        fun ?millisBehindLatest ->
+          fun ?childShards ->
             fun () ->
-              { nextShardIterator; millisBehindLatest; childShards; records }
+              { records; nextShardIterator; millisBehindLatest; childShards }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ExpiredIteratorException" ->
           `ExpiredIteratorException (ExpiredIteratorException.of_json json)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "KMSAccessDeniedException" ->
@@ -4431,8 +5930,12 @@ module GetRecordsOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ExpiredIteratorException" ->
           `ExpiredIteratorException (ExpiredIteratorException.of_xml xml)
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "KMSAccessDeniedException" ->
@@ -4455,10 +5958,18 @@ module GetRecordsOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ExpiredIteratorException e ->
           `Assoc
             [("error", (`String "ExpiredIteratorException"));
             ("details", (ExpiredIteratorException.to_json e))]
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -4502,7 +6013,7 @@ module GetRecordsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Records", (Some (RecordList.to_value x.records)));
+        [("Records", (Option.map x.records ~f:RecordList.to_value));
         ("NextShardIterator",
           (Option.map x.nextShardIterator ~f:ShardIterator.to_value));
         ("MillisBehindLatest",
@@ -4521,18 +6032,17 @@ module GetRecordsOutput =
         (Option.map ~f:ShardIterator.of_xml)
           (Xml.child xml_arg0 "NextShardIterator") in
       let records =
-        RecordList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Records") in
-      make ?childShards ?millisBehindLatest ?nextShardIterator ~records ()
+        (Option.map ~f:RecordList.of_xml) (Xml.child xml_arg0 "Records") in
+      make ?childShards ?millisBehindLatest ?nextShardIterator ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let childShards = field_map json "ChildShards" ChildShardList.of_json in
+    let of_json json__ =
+      let childShards = field_map json__ "ChildShards" ChildShardList.of_json in
       let millisBehindLatest =
-        field_map json "MillisBehindLatest" MillisBehindLatest.of_json in
+        field_map json__ "MillisBehindLatest" MillisBehindLatest.of_json in
       let nextShardIterator =
-        field_map json "NextShardIterator" ShardIterator.of_json in
-      let records = field_map_exn json "Records" RecordList.of_json in
-      make ?childShards ?millisBehindLatest ?nextShardIterator ~records ()
+        field_map json__ "NextShardIterator" ShardIterator.of_json in
+      let records = field_map json__ "Records" RecordList.of_json in
+      make ?childShards ?millisBehindLatest ?nextShardIterator ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for GetRecords."]
 module GetRecordsInput =
@@ -4544,29 +6054,43 @@ module GetRecordsInput =
           "The position in the shard from which you want to start sequentially reading data records. A shard iterator specifies this position using the sequence number of a data record in the shard."];
       limit: GetRecordsInputLimit.t option
         [@ocaml.doc
-          "The maximum number of records to return. Specify a value of up to 10,000. If you specify a value that is greater than 10,000, GetRecords throws InvalidArgumentException. The default value is 10,000."]}
+          "The maximum number of records to return. Specify a value of up to 10,000. If you specify a value that is greater than 10,000, GetRecords throws InvalidArgumentException. The default value is 10,000."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "GetRecordsInput"
     let make ?limit =
-      fun ~shardIterator -> fun () -> { limit; shardIterator }
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~shardIterator ->
+            fun () -> { limit; streamARN; streamId; shardIterator }
     let to_value x =
       structure_to_value
         [("ShardIterator", (Some (ShardIterator.to_value x.shardIterator)));
-        ("Limit", (Option.map x.limit ~f:GetRecordsInputLimit.to_value))]
+        ("Limit", (Option.map x.limit ~f:GetRecordsInputLimit.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let limit =
         (Option.map ~f:GetRecordsInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
       let shardIterator =
         ShardIterator.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardIterator") in
-      make ?limit ~shardIterator ()
+      make ?streamId ?streamARN ?limit ~shardIterator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" GetRecordsInputLimit.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let limit = field_map json__ "Limit" GetRecordsInputLimit.of_json in
       let shardIterator =
-        field_map_exn json "ShardIterator" ShardIterator.of_json in
-      make ?limit ~shardIterator ()
+        field_map_exn json__ "ShardIterator" ShardIterator.of_json in
+      make ?streamId ?streamARN ?limit ~shardIterator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for GetRecords."]
 module EnhancedMonitoringOutput =
@@ -4580,9 +6104,11 @@ module EnhancedMonitoringOutput =
           "Represents the current state of the metrics that are in the enhanced state before the operation."];
       desiredShardLevelMetrics: MetricsNameList.t option
         [@ocaml.doc
-          "Represents the list of all the metrics that would be in the enhanced state after the operation."]}
+          "Represents the list of all the metrics that would be in the enhanced state after the operation."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."]}
     type nonrec error =
-      [ `InvalidArgumentException of InvalidArgumentException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -4590,11 +6116,18 @@ module EnhancedMonitoringOutput =
     let make ?streamName =
       fun ?currentShardLevelMetrics ->
         fun ?desiredShardLevelMetrics ->
-          fun () ->
-            { streamName; currentShardLevelMetrics; desiredShardLevelMetrics
-            }
+          fun ?streamARN ->
+            fun () ->
+              {
+                streamName;
+                currentShardLevelMetrics;
+                desiredShardLevelMetrics;
+                streamARN
+              }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
@@ -4608,6 +6141,8 @@ module EnhancedMonitoringOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InvalidArgumentException" ->
           `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
@@ -4620,6 +6155,10 @@ module EnhancedMonitoringOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InvalidArgumentException e ->
           `Assoc
             [("error", (`String "InvalidArgumentException"));
@@ -4647,9 +6186,12 @@ module EnhancedMonitoringOutput =
         ("CurrentShardLevelMetrics",
           (Option.map x.currentShardLevelMetrics ~f:MetricsNameList.to_value));
         ("DesiredShardLevelMetrics",
-          (Option.map x.desiredShardLevelMetrics ~f:MetricsNameList.to_value))]
+          (Option.map x.desiredShardLevelMetrics ~f:MetricsNameList.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let desiredShardLevelMetrics =
         (Option.map ~f:MetricsNameList.of_xml)
           (Xml.child xml_arg0 "DesiredShardLevelMetrics") in
@@ -4658,15 +6200,18 @@ module EnhancedMonitoringOutput =
           (Xml.child xml_arg0 "CurrentShardLevelMetrics") in
       let streamName =
         (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
-      make ?desiredShardLevelMetrics ?currentShardLevelMetrics ?streamName ()
+      make ?streamARN ?desiredShardLevelMetrics ?currentShardLevelMetrics
+        ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let desiredShardLevelMetrics =
-        field_map json "DesiredShardLevelMetrics" MetricsNameList.of_json in
+        field_map json__ "DesiredShardLevelMetrics" MetricsNameList.of_json in
       let currentShardLevelMetrics =
-        field_map json "CurrentShardLevelMetrics" MetricsNameList.of_json in
-      let streamName = field_map json "StreamName" StreamName.of_json in
-      make ?desiredShardLevelMetrics ?currentShardLevelMetrics ?streamName ()
+        field_map json__ "CurrentShardLevelMetrics" MetricsNameList.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamARN ?desiredShardLevelMetrics ?currentShardLevelMetrics
+        ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output for EnableEnhancedMonitoring and DisableEnhancedMonitoring."]
@@ -4674,88 +6219,119 @@ module EnableEnhancedMonitoringInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc
           "The name of the stream for which to enable enhanced monitoring."];
       shardLevelMetrics: MetricsNameList.t
         [@ocaml.doc
-          "List of shard-level metrics to enable. The following are the valid shard-level metrics. The value \"ALL\" enables every metric. IncomingBytes IncomingRecords OutgoingBytes OutgoingRecords WriteProvisionedThroughputExceeded ReadProvisionedThroughputExceeded IteratorAgeMilliseconds ALL For more information, see Monitoring the Amazon Kinesis Data Streams Service with Amazon CloudWatch in the Amazon Kinesis Data Streams Developer Guide."]}
+          "List of shard-level metrics to enable. The following are the valid shard-level metrics. The value \"ALL\" enables every metric. IncomingBytes IncomingRecords OutgoingBytes OutgoingRecords WriteProvisionedThroughputExceeded ReadProvisionedThroughputExceeded IteratorAgeMilliseconds ALL For more information, see Monitoring the Amazon Kinesis Data Streams Service with Amazon CloudWatch in the Amazon Kinesis Data Streams Developer Guide."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "EnableEnhancedMonitoringInput"
-    let make ~streamName =
-      fun ~shardLevelMetrics -> fun () -> { streamName; shardLevelMetrics }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~shardLevelMetrics ->
+            fun () -> { streamName; streamARN; streamId; shardLevelMetrics }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ShardLevelMetrics",
-          (Some (MetricsNameList.to_value x.shardLevelMetrics)))]
+          (Some (MetricsNameList.to_value x.shardLevelMetrics)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let shardLevelMetrics =
         MetricsNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardLevelMetrics") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~shardLevelMetrics ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~shardLevelMetrics ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let shardLevelMetrics =
-        field_map_exn json "ShardLevelMetrics" MetricsNameList.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~shardLevelMetrics ~streamName ()
+        field_map_exn json__ "ShardLevelMetrics" MetricsNameList.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~shardLevelMetrics ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for EnableEnhancedMonitoring."]
 module DisableEnhancedMonitoringInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc
           "The name of the Kinesis data stream for which to disable enhanced monitoring."];
       shardLevelMetrics: MetricsNameList.t
         [@ocaml.doc
-          "List of shard-level metrics to disable. The following are the valid shard-level metrics. The value \"ALL\" disables every metric. IncomingBytes IncomingRecords OutgoingBytes OutgoingRecords WriteProvisionedThroughputExceeded ReadProvisionedThroughputExceeded IteratorAgeMilliseconds ALL For more information, see Monitoring the Amazon Kinesis Data Streams Service with Amazon CloudWatch in the Amazon Kinesis Data Streams Developer Guide."]}
+          "List of shard-level metrics to disable. The following are the valid shard-level metrics. The value \"ALL\" disables every metric. IncomingBytes IncomingRecords OutgoingBytes OutgoingRecords WriteProvisionedThroughputExceeded ReadProvisionedThroughputExceeded IteratorAgeMilliseconds ALL For more information, see Monitoring the Amazon Kinesis Data Streams Service with Amazon CloudWatch in the Amazon Kinesis Data Streams Developer Guide."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "DisableEnhancedMonitoringInput"
-    let make ~streamName =
-      fun ~shardLevelMetrics -> fun () -> { streamName; shardLevelMetrics }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~shardLevelMetrics ->
+            fun () -> { streamName; streamARN; streamId; shardLevelMetrics }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("ShardLevelMetrics",
-          (Some (MetricsNameList.to_value x.shardLevelMetrics)))]
+          (Some (MetricsNameList.to_value x.shardLevelMetrics)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let shardLevelMetrics =
         MetricsNameList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ShardLevelMetrics") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~shardLevelMetrics ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~shardLevelMetrics ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let shardLevelMetrics =
-        field_map_exn json "ShardLevelMetrics" MetricsNameList.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~shardLevelMetrics ~streamName ()
+        field_map_exn json__ "ShardLevelMetrics" MetricsNameList.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~shardLevelMetrics ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for DisableEnhancedMonitoring."]
 module DescribeStreamSummaryOutput =
   struct
     type nonrec t =
       {
-      streamDescriptionSummary: StreamDescriptionSummary.t
+      streamDescriptionSummary: StreamDescriptionSummary.t option
         [@ocaml.doc
           "A StreamDescriptionSummary containing information about the stream."]}
     type nonrec error =
-      [ `LimitExceededException of LimitExceededException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStreamSummaryOutput"
-    let make ~streamDescriptionSummary =
+    let make ?streamDescriptionSummary =
       fun () -> { streamDescriptionSummary }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
@@ -4765,6 +6341,10 @@ module DescribeStreamSummaryOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -4773,6 +6353,14 @@ module DescribeStreamSummaryOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
@@ -4789,63 +6377,78 @@ module DescribeStreamSummaryOutput =
     let to_value x =
       structure_to_value
         [("StreamDescriptionSummary",
-           (Some
-              (StreamDescriptionSummary.to_value x.streamDescriptionSummary)))]
+           (Option.map x.streamDescriptionSummary
+              ~f:StreamDescriptionSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let streamDescriptionSummary =
-        StreamDescriptionSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "StreamDescriptionSummary") in
-      make ~streamDescriptionSummary ()
+        (Option.map ~f:StreamDescriptionSummary.of_xml)
+          (Xml.child xml_arg0 "StreamDescriptionSummary") in
+      make ?streamDescriptionSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamDescriptionSummary =
-        field_map_exn json "StreamDescriptionSummary"
+        field_map json__ "StreamDescriptionSummary"
           StreamDescriptionSummary.of_json in
-      make ~streamDescriptionSummary ()
+      make ?streamDescriptionSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a summarized description of the specified Kinesis data stream without the shard list. The information returned includes the stream name, Amazon Resource Name (ARN), status, record retention period, approximate creation time, monitoring, encryption details, and open shard count. DescribeStreamSummary has a limit of 20 transactions per second per account."]
+       "Provides a summarized description of the specified Kinesis data stream without the shard list. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. The information returned includes the stream name, Amazon Resource Name (ARN), status, record retention period, approximate creation time, monitoring, encryption details, and open shard count. DescribeStreamSummary has a limit of 20 transactions per second per account."]
 module DescribeStreamSummaryInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
-        [@ocaml.doc "The name of the stream to describe."]}
-    let context_ = "DescribeStreamSummaryInput"
-    let make ~streamName = fun () -> { streamName }
+      streamName: StreamName.t option
+        [@ocaml.doc "The name of the stream to describe."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId -> fun () -> { streamName; streamARN; streamId }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)))]
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~streamName ()
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides a summarized description of the specified Kinesis data stream without the shard list. The information returned includes the stream name, Amazon Resource Name (ARN), status, record retention period, approximate creation time, monitoring, encryption details, and open shard count. DescribeStreamSummary has a limit of 20 transactions per second per account."]
+       "Provides a summarized description of the specified Kinesis data stream without the shard list. When invoking this API, you must use either the StreamARN or the StreamName parameter, or both. It is recommended that you use the StreamARN input parameter when you invoke this API. The information returned includes the stream name, Amazon Resource Name (ARN), status, record retention period, approximate creation time, monitoring, encryption details, and open shard count. DescribeStreamSummary has a limit of 20 transactions per second per account."]
 module DescribeStreamOutput =
   struct
     type nonrec t =
       {
-      streamDescription: StreamDescription.t
+      streamDescription: StreamDescription.t option
         [@ocaml.doc
           "The current status of the stream, the stream Amazon Resource Name (ARN), an array of shard objects that comprise the stream, and whether there are more shards available."]}
     type nonrec error =
-      [ `LimitExceededException of LimitExceededException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStreamOutput"
-    let make ~streamDescription = fun () -> { streamDescription }
+    let make ?streamDescription = fun () -> { streamDescription }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
@@ -4855,6 +6458,10 @@ module DescribeStreamOutput =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -4863,6 +6470,14 @@ module DescribeStreamOutput =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
       | `LimitExceededException e ->
           `Assoc
             [("error", (`String "LimitExceededException"));
@@ -4879,45 +6494,62 @@ module DescribeStreamOutput =
     let to_value x =
       structure_to_value
         [("StreamDescription",
-           (Some (StreamDescription.to_value x.streamDescription)))]
+           (Option.map x.streamDescription ~f:StreamDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let streamDescription =
-        StreamDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamDescription") in
-      make ~streamDescription ()
+        (Option.map ~f:StreamDescription.of_xml)
+          (Xml.child xml_arg0 "StreamDescription") in
+      make ?streamDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamDescription =
-        field_map_exn json "StreamDescription" StreamDescription.of_json in
-      make ~streamDescription ()
+        field_map json__ "StreamDescription" StreamDescription.of_json in
+      make ?streamDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output for DescribeStream."]
 module DescribeStreamInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream to describe."];
       limit: DescribeStreamInputLimit.t option
         [@ocaml.doc
           "The maximum number of shards to return in a single call. The default value is 100. If you specify a value greater than 100, at most 100 results are returned."];
       exclusiveStartShardId: ShardId.t option
         [@ocaml.doc
-          "The shard ID of the shard to start with. Specify this parameter to indicate that you want to describe the stream starting with the shard whose ID immediately follows ExclusiveStartShardId. If you don't specify this parameter, the default behavior for DescribeStream is to describe the stream starting with the first shard in the stream."]}
-    let context_ = "DescribeStreamInput"
-    let make ?limit =
-      fun ?exclusiveStartShardId ->
-        fun ~streamName ->
-          fun () -> { limit; exclusiveStartShardId; streamName }
+          "The shard ID of the shard to start with. Specify this parameter to indicate that you want to describe the stream starting with the shard whose ID immediately follows ExclusiveStartShardId. If you don't specify this parameter, the default behavior for DescribeStream is to describe the stream starting with the first shard in the stream."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let make ?streamName =
+      fun ?limit ->
+        fun ?exclusiveStartShardId ->
+          fun ?streamARN ->
+            fun ?streamId ->
+              fun () ->
+                {
+                  streamName;
+                  limit;
+                  exclusiveStartShardId;
+                  streamARN;
+                  streamId
+                }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("Limit", (Option.map x.limit ~f:DescribeStreamInputLimit.to_value));
         ("ExclusiveStartShardId",
-          (Option.map x.exclusiveStartShardId ~f:ShardId.to_value))]
+          (Option.map x.exclusiveStartShardId ~f:ShardId.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let exclusiveStartShardId =
         (Option.map ~f:ShardId.of_xml)
           (Xml.child xml_arg0 "ExclusiveStartShardId") in
@@ -4925,31 +6557,31 @@ module DescribeStreamInput =
         (Option.map ~f:DescribeStreamInputLimit.of_xml)
           (Xml.child xml_arg0 "Limit") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?exclusiveStartShardId ?limit ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?exclusiveStartShardId ?limit ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let exclusiveStartShardId =
-        field_map json "ExclusiveStartShardId" ShardId.of_json in
-      let limit = field_map json "Limit" DescribeStreamInputLimit.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?exclusiveStartShardId ?limit ~streamName ()
+        field_map json__ "ExclusiveStartShardId" ShardId.of_json in
+      let limit = field_map json__ "Limit" DescribeStreamInputLimit.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?exclusiveStartShardId ?limit ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for DescribeStream."]
 module DescribeStreamConsumerOutput =
   struct
     type nonrec t =
       {
-      consumerDescription: ConsumerDescription.t
+      consumerDescription: ConsumerDescription.t option
         [@ocaml.doc "An object that represents the details of the consumer."]}
     type nonrec error =
       [ `InvalidArgumentException of InvalidArgumentException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeStreamConsumerOutput"
-    let make ~consumerDescription = fun () -> { consumerDescription }
+    let make ?consumerDescription = fun () -> { consumerDescription }
     let error_of_json name json =
       match name with
       | "InvalidArgumentException" ->
@@ -4993,21 +6625,21 @@ module DescribeStreamConsumerOutput =
     let to_value x =
       structure_to_value
         [("ConsumerDescription",
-           (Some (ConsumerDescription.to_value x.consumerDescription)))]
+           (Option.map x.consumerDescription ~f:ConsumerDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let consumerDescription =
-        ConsumerDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumerDescription") in
-      make ~consumerDescription ()
+        (Option.map ~f:ConsumerDescription.of_xml)
+          (Xml.child xml_arg0 "ConsumerDescription") in
+      make ?consumerDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumerDescription =
-        field_map_exn json "ConsumerDescription" ConsumerDescription.of_json in
-      make ~consumerDescription ()
+        field_map json__ "ConsumerDescription" ConsumerDescription.of_json in
+      make ?consumerDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "To get the description of a registered consumer, provide the ARN of the consumer. Alternatively, you can provide the ARN of the data stream and the name you gave the consumer when you registered it. You may also provide all three parameters, as long as they don't conflict with each other. If you don't know the name or ARN of the consumer that you want to describe, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. This operation has a limit of 20 transactions per second per stream."]
+       "To get the description of a registered consumer, provide the ARN of the consumer. Alternatively, you can provide the ARN of the data stream and the name you gave the consumer when you registered it. You may also provide all three parameters, as long as they don't conflict with each other. If you don't know the name or ARN of the consumer that you want to describe, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. This operation has a limit of 20 transactions per second per stream. When making a cross-account call with DescribeStreamConsumer, make sure to provide the ARN of the consumer."]
 module DescribeStreamConsumerInput =
   struct
     type nonrec t =
@@ -5019,19 +6651,25 @@ module DescribeStreamConsumerInput =
         [@ocaml.doc "The name that you gave to the consumer."];
       consumerARN: ConsumerARN.t option
         [@ocaml.doc
-          "The ARN returned by Kinesis Data Streams when you registered the consumer."]}
+          "The ARN returned by Kinesis Data Streams when you registered the consumer."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let make ?streamARN =
       fun ?consumerName ->
         fun ?consumerARN ->
-          fun () -> { streamARN; consumerName; consumerARN }
+          fun ?streamId ->
+            fun () -> { streamARN; consumerName; consumerARN; streamId }
     let to_value x =
       structure_to_value
         [("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
         ("ConsumerName",
           (Option.map x.consumerName ~f:ConsumerName.to_value));
-        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value))]
+        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let consumerARN =
         (Option.map ~f:ConsumerARN.of_xml) (Xml.child xml_arg0 "ConsumerARN") in
       let consumerName =
@@ -5039,38 +6677,38 @@ module DescribeStreamConsumerInput =
           (Xml.child xml_arg0 "ConsumerName") in
       let streamARN =
         (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
-      make ?consumerARN ?consumerName ?streamARN ()
+      make ?streamId ?consumerARN ?consumerName ?streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consumerARN = field_map json "ConsumerARN" ConsumerARN.of_json in
-      let consumerName = field_map json "ConsumerName" ConsumerName.of_json in
-      let streamARN = field_map json "StreamARN" StreamARN.of_json in
-      make ?consumerARN ?consumerName ?streamARN ()
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let consumerARN = field_map json__ "ConsumerARN" ConsumerARN.of_json in
+      let consumerName = field_map json__ "ConsumerName" ConsumerName.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      make ?streamId ?consumerARN ?consumerName ?streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "To get the description of a registered consumer, provide the ARN of the consumer. Alternatively, you can provide the ARN of the data stream and the name you gave the consumer when you registered it. You may also provide all three parameters, as long as they don't conflict with each other. If you don't know the name or ARN of the consumer that you want to describe, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. This operation has a limit of 20 transactions per second per stream."]
+       "To get the description of a registered consumer, provide the ARN of the consumer. Alternatively, you can provide the ARN of the data stream and the name you gave the consumer when you registered it. You may also provide all three parameters, as long as they don't conflict with each other. If you don't know the name or ARN of the consumer that you want to describe, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. This operation has a limit of 20 transactions per second per stream. When making a cross-account call with DescribeStreamConsumer, make sure to provide the ARN of the consumer."]
 module DescribeLimitsOutput =
   struct
     type nonrec t =
       {
-      shardLimit: ShardCountObject.t
+      shardLimit: ShardCountObject.t option
         [@ocaml.doc "The maximum number of shards."];
-      openShardCount: ShardCountObject.t
+      openShardCount: ShardCountObject.t option
         [@ocaml.doc "The number of open shards."];
-      onDemandStreamCount: OnDemandStreamCountObject.t
+      onDemandStreamCount: OnDemandStreamCountObject.t option
         [@ocaml.doc
           "Indicates the number of data streams with the on-demand capacity mode."];
-      onDemandStreamCountLimit: OnDemandStreamCountLimitObject.t
+      onDemandStreamCountLimit: OnDemandStreamCountLimitObject.t option
         [@ocaml.doc
           "The maximum number of data streams with the on-demand capacity mode."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeLimitsOutput"
-    let make ~shardLimit =
-      fun ~openShardCount ->
-        fun ~onDemandStreamCount ->
-          fun ~onDemandStreamCountLimit ->
+    let make ?shardLimit =
+      fun ?openShardCount ->
+        fun ?onDemandStreamCount ->
+          fun ?onDemandStreamCountLimit ->
             fun () ->
               {
                 shardLimit;
@@ -5104,46 +6742,45 @@ module DescribeLimitsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ShardLimit", (Some (ShardCountObject.to_value x.shardLimit)));
+        [("ShardLimit",
+           (Option.map x.shardLimit ~f:ShardCountObject.to_value));
         ("OpenShardCount",
-          (Some (ShardCountObject.to_value x.openShardCount)));
+          (Option.map x.openShardCount ~f:ShardCountObject.to_value));
         ("OnDemandStreamCount",
-          (Some (OnDemandStreamCountObject.to_value x.onDemandStreamCount)));
+          (Option.map x.onDemandStreamCount
+             ~f:OnDemandStreamCountObject.to_value));
         ("OnDemandStreamCountLimit",
-          (Some
-             (OnDemandStreamCountLimitObject.to_value
-                x.onDemandStreamCountLimit)))]
+          (Option.map x.onDemandStreamCountLimit
+             ~f:OnDemandStreamCountLimitObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let onDemandStreamCountLimit =
-        OnDemandStreamCountLimitObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "OnDemandStreamCountLimit") in
+        (Option.map ~f:OnDemandStreamCountLimitObject.of_xml)
+          (Xml.child xml_arg0 "OnDemandStreamCountLimit") in
       let onDemandStreamCount =
-        OnDemandStreamCountObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OnDemandStreamCount") in
+        (Option.map ~f:OnDemandStreamCountObject.of_xml)
+          (Xml.child xml_arg0 "OnDemandStreamCount") in
       let openShardCount =
-        ShardCountObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OpenShardCount") in
+        (Option.map ~f:ShardCountObject.of_xml)
+          (Xml.child xml_arg0 "OpenShardCount") in
       let shardLimit =
-        ShardCountObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ShardLimit") in
-      make ~onDemandStreamCountLimit ~onDemandStreamCount ~openShardCount
-        ~shardLimit ()
+        (Option.map ~f:ShardCountObject.of_xml)
+          (Xml.child xml_arg0 "ShardLimit") in
+      make ?onDemandStreamCountLimit ?onDemandStreamCount ?openShardCount
+        ?shardLimit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onDemandStreamCountLimit =
-        field_map_exn json "OnDemandStreamCountLimit"
+        field_map json__ "OnDemandStreamCountLimit"
           OnDemandStreamCountLimitObject.of_json in
       let onDemandStreamCount =
-        field_map_exn json "OnDemandStreamCount"
+        field_map json__ "OnDemandStreamCount"
           OnDemandStreamCountObject.of_json in
       let openShardCount =
-        field_map_exn json "OpenShardCount" ShardCountObject.of_json in
-      let shardLimit =
-        field_map_exn json "ShardLimit" ShardCountObject.of_json in
-      make ~onDemandStreamCountLimit ~onDemandStreamCount ~openShardCount
-        ~shardLimit ()
+        field_map json__ "OpenShardCount" ShardCountObject.of_json in
+      let shardLimit = field_map json__ "ShardLimit" ShardCountObject.of_json in
+      make ?onDemandStreamCountLimit ?onDemandStreamCount ?openShardCount
+        ?shardLimit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the shard limits and usage for the account. If you update your account limits, the old limits might be returned for a few minutes. This operation has a limit of one transaction per second per account."]
@@ -5160,6 +6797,76 @@ module DescribeLimitsInput =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the shard limits and usage for the account. If you update your account limits, the old limits might be returned for a few minutes. This operation has a limit of one transaction per second per account."]
+module DescribeAccountSettingsOutput =
+  struct
+    type nonrec t =
+      {
+      minimumThroughputBillingCommitment:
+        MinimumThroughputBillingCommitmentOutput.t option
+        [@ocaml.doc
+          "The current configuration of the minimum throughput billing commitment for your Amazon Web Services account."]}
+    type nonrec error =
+      [ `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?minimumThroughputBillingCommitment =
+      fun () -> { minimumThroughputBillingCommitment }
+    let error_of_json name json =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MinimumThroughputBillingCommitment",
+           (Option.map x.minimumThroughputBillingCommitment
+              ~f:MinimumThroughputBillingCommitmentOutput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minimumThroughputBillingCommitment =
+        (Option.map ~f:MinimumThroughputBillingCommitmentOutput.of_xml)
+          (Xml.child xml_arg0 "MinimumThroughputBillingCommitment") in
+      make ?minimumThroughputBillingCommitment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minimumThroughputBillingCommitment =
+        field_map json__ "MinimumThroughputBillingCommitment"
+          MinimumThroughputBillingCommitmentOutput.of_json in
+      make ?minimumThroughputBillingCommitment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the account-level settings for Amazon Kinesis Data Streams. This operation returns information about the minimum throughput billing commitments and other account-level configurations. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException."]
+module DescribeAccountSettingsInput =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the account-level settings for Amazon Kinesis Data Streams. This operation returns information about the minimum throughput billing commitments and other account-level configurations. This API has a call limit of 5 transactions per second (TPS) for each Amazon Web Services account. TPS over 5 will initiate the LimitExceededException."]
 module DeregisterStreamConsumerInput =
   struct
     type nonrec t =
@@ -5171,19 +6878,25 @@ module DeregisterStreamConsumerInput =
         [@ocaml.doc "The name that you gave to the consumer."];
       consumerARN: ConsumerARN.t option
         [@ocaml.doc
-          "The ARN returned by Kinesis Data Streams when you registered the consumer. If you don't know the ARN of the consumer that you want to deregister, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. The description of a consumer contains its ARN."]}
+          "The ARN returned by Kinesis Data Streams when you registered the consumer. If you don't know the ARN of the consumer that you want to deregister, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. The description of a consumer contains its ARN."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let make ?streamARN =
       fun ?consumerName ->
         fun ?consumerARN ->
-          fun () -> { streamARN; consumerName; consumerARN }
+          fun ?streamId ->
+            fun () -> { streamARN; consumerName; consumerARN; streamId }
     let to_value x =
       structure_to_value
         [("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
         ("ConsumerName",
           (Option.map x.consumerName ~f:ConsumerName.to_value));
-        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value))]
+        ("ConsumerARN", (Option.map x.consumerARN ~f:ConsumerARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
       let consumerARN =
         (Option.map ~f:ConsumerARN.of_xml) (Xml.child xml_arg0 "ConsumerARN") in
       let consumerName =
@@ -5191,13 +6904,14 @@ module DeregisterStreamConsumerInput =
           (Xml.child xml_arg0 "ConsumerName") in
       let streamARN =
         (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
-      make ?consumerARN ?consumerName ?streamARN ()
+      make ?streamId ?consumerARN ?consumerName ?streamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let consumerARN = field_map json "ConsumerARN" ConsumerARN.of_json in
-      let consumerName = field_map json "ConsumerName" ConsumerName.of_json in
-      let streamARN = field_map json "StreamARN" StreamARN.of_json in
-      make ?consumerARN ?consumerName ?streamARN ()
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let consumerARN = field_map json__ "ConsumerARN" ConsumerARN.of_json in
+      let consumerName = field_map json__ "ConsumerName" ConsumerName.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      make ?streamId ?consumerARN ?consumerName ?streamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "To deregister a consumer, provide its ARN. Alternatively, you can provide the ARN of the data stream and the name you gave the consumer when you registered it. You may also provide all three parameters, as long as they don't conflict with each other. If you don't know the name or ARN of the consumer that you want to deregister, you can use the ListStreamConsumers operation to get a list of the descriptions of all the consumers that are currently registered with a given data stream. The description of a consumer contains its name and ARN. This operation has a limit of five transactions per second per stream."]
@@ -5205,70 +6919,129 @@ module DeleteStreamInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream to delete."];
       enforceConsumerDeletion: BooleanObject.t option
         [@ocaml.doc
-          "If this parameter is unset (null) or if you set it to false, and the stream has registered consumers, the call to DeleteStream fails with a ResourceInUseException."]}
-    let context_ = "DeleteStreamInput"
-    let make ?enforceConsumerDeletion =
-      fun ~streamName -> fun () -> { enforceConsumerDeletion; streamName }
+          "If this parameter is unset (null) or if you set it to false, and the stream has registered consumers, the call to DeleteStream fails with a ResourceInUseException."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let make ?streamName =
+      fun ?enforceConsumerDeletion ->
+        fun ?streamARN ->
+          fun ?streamId ->
+            fun () ->
+              { streamName; enforceConsumerDeletion; streamARN; streamId }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("EnforceConsumerDeletion",
-          (Option.map x.enforceConsumerDeletion ~f:BooleanObject.to_value))]
+          (Option.map x.enforceConsumerDeletion ~f:BooleanObject.to_value));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let enforceConsumerDeletion =
         (Option.map ~f:BooleanObject.of_xml)
           (Xml.child xml_arg0 "EnforceConsumerDeletion") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?enforceConsumerDeletion ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ?enforceConsumerDeletion ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let enforceConsumerDeletion =
-        field_map json "EnforceConsumerDeletion" BooleanObject.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?enforceConsumerDeletion ~streamName ()
+        field_map json__ "EnforceConsumerDeletion" BooleanObject.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ?enforceConsumerDeletion ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for DeleteStream."]
+module DeleteResourcePolicyInput =
+  struct
+    type nonrec t =
+      {
+      resourceARN: ResourceARN.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the data stream or consumer."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
+    let context_ = "DeleteResourcePolicyInput"
+    let make ?streamId =
+      fun ~resourceARN -> fun () -> { streamId; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ResourceARN", (Some (ResourceARN.to_value x.resourceARN)));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let resourceARN =
+        ResourceARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      make ?streamId ~resourceARN ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
+      make ?streamId ~resourceARN ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete a policy for the specified data stream or consumer. Request patterns can be one of the following: Data stream pattern: arn:aws.*:kinesis:.*:\\d\\{12\\}:.*stream/\\S+ Consumer pattern: ^(arn):aws.*:kinesis:.*:\\d\\{12\\}:.*stream\\/\\[a-zA-Z0-9_.-\\]+\\/consumer\\/\\[a-zA-Z0-9_.-\\]+:\\[0-9\\]+"]
 module DecreaseStreamRetentionPeriodInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t
+      streamName: StreamName.t option
         [@ocaml.doc "The name of the stream to modify."];
       retentionPeriodHours: RetentionPeriodHours.t
         [@ocaml.doc
-          "The new retention period of the stream, in hours. Must be less than the current retention period."]}
+          "The new retention period of the stream, in hours. Must be less than the current retention period."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "DecreaseStreamRetentionPeriodInput"
-    let make ~streamName =
-      fun ~retentionPeriodHours ->
-        fun () -> { streamName; retentionPeriodHours }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~retentionPeriodHours ->
+            fun () ->
+              { streamName; streamARN; streamId; retentionPeriodHours }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
         ("RetentionPeriodHours",
-          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)))]
+          (Some (RetentionPeriodHours.to_value x.retentionPeriodHours)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let retentionPeriodHours =
         RetentionPeriodHours.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RetentionPeriodHours") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~retentionPeriodHours ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~retentionPeriodHours ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
       let retentionPeriodHours =
-        field_map_exn json "RetentionPeriodHours"
+        field_map_exn json__ "RetentionPeriodHours"
           RetentionPeriodHours.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~retentionPeriodHours ~streamName ()
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~retentionPeriodHours ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for DecreaseStreamRetentionPeriod."]
 module CreateStreamInput =
@@ -5283,21 +7056,53 @@ module CreateStreamInput =
           "The number of shards that the stream will use. The throughput of the stream is a function of the number of shards; more shards are required for greater provisioned throughput."];
       streamModeDetails: StreamModeDetails.t option
         [@ocaml.doc
-          "Indicates the capacity mode of the data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."]}
+          "Indicates the capacity mode of the data stream. Currently, in Kinesis Data Streams, you can choose between an on-demand capacity mode and a provisioned capacity mode for your data streams."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A set of up to 50 key-value pairs to use to create the tags. A tag consists of a required key and an optional value."];
+      warmThroughputMiBps: NaturalIntegerObject.t option
+        [@ocaml.doc
+          "The target warm throughput in MB/s that the stream should be scaled to handle. This represents the throughput capacity that will be immediately available for write operations."];
+      maxRecordSizeInKiB: MaxRecordSizeInKiB.t option
+        [@ocaml.doc
+          "The maximum record size of a single record in kibibyte (KiB) that you can write to, and read from a stream."]}
     let context_ = "CreateStreamInput"
     let make ?shardCount =
       fun ?streamModeDetails ->
-        fun ~streamName ->
-          fun () -> { shardCount; streamModeDetails; streamName }
+        fun ?tags ->
+          fun ?warmThroughputMiBps ->
+            fun ?maxRecordSizeInKiB ->
+              fun ~streamName ->
+                fun () ->
+                  {
+                    shardCount;
+                    streamModeDetails;
+                    tags;
+                    warmThroughputMiBps;
+                    maxRecordSizeInKiB;
+                    streamName
+                  }
     let to_value x =
       structure_to_value
         [("StreamName", (Some (StreamName.to_value x.streamName)));
         ("ShardCount",
           (Option.map x.shardCount ~f:PositiveIntegerObject.to_value));
         ("StreamModeDetails",
-          (Option.map x.streamModeDetails ~f:StreamModeDetails.to_value))]
+          (Option.map x.streamModeDetails ~f:StreamModeDetails.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("WarmThroughputMiBps",
+          (Option.map x.warmThroughputMiBps ~f:NaturalIntegerObject.to_value));
+        ("MaxRecordSizeInKiB",
+          (Option.map x.maxRecordSizeInKiB ~f:MaxRecordSizeInKiB.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxRecordSizeInKiB =
+        (Option.map ~f:MaxRecordSizeInKiB.of_xml)
+          (Xml.child xml_arg0 "MaxRecordSizeInKiB") in
+      let warmThroughputMiBps =
+        (Option.map ~f:NaturalIntegerObject.of_xml)
+          (Xml.child xml_arg0 "WarmThroughputMiBps") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let streamModeDetails =
         (Option.map ~f:StreamModeDetails.of_xml)
           (Xml.child xml_arg0 "StreamModeDetails") in
@@ -5307,43 +7112,63 @@ module CreateStreamInput =
       let streamName =
         StreamName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ?streamModeDetails ?shardCount ~streamName ()
+      make ?maxRecordSizeInKiB ?warmThroughputMiBps ?tags ?streamModeDetails
+        ?shardCount ~streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxRecordSizeInKiB =
+        field_map json__ "MaxRecordSizeInKiB" MaxRecordSizeInKiB.of_json in
+      let warmThroughputMiBps =
+        field_map json__ "WarmThroughputMiBps" NaturalIntegerObject.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let streamModeDetails =
-        field_map json "StreamModeDetails" StreamModeDetails.of_json in
+        field_map json__ "StreamModeDetails" StreamModeDetails.of_json in
       let shardCount =
-        field_map json "ShardCount" PositiveIntegerObject.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ?streamModeDetails ?shardCount ~streamName ()
+        field_map json__ "ShardCount" PositiveIntegerObject.of_json in
+      let streamName = field_map_exn json__ "StreamName" StreamName.of_json in
+      make ?maxRecordSizeInKiB ?warmThroughputMiBps ?tags ?streamModeDetails
+        ?shardCount ~streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for CreateStream."]
 module AddTagsToStreamInput =
   struct
     type nonrec t =
       {
-      streamName: StreamName.t [@ocaml.doc "The name of the stream."];
+      streamName: StreamName.t option [@ocaml.doc "The name of the stream."];
       tags: TagMap.t
         [@ocaml.doc
-          "A set of up to 10 key-value pairs to use to create the tags."]}
+          "A set of up to 50 key-value pairs to use to create the tags. A tag consists of a required key and an optional value. You can add up to 50 tags per resource."];
+      streamARN: StreamARN.t option [@ocaml.doc "The ARN of the stream."];
+      streamId: StreamId.t option
+        [@ocaml.doc "Not Implemented. Reserved for future use."]}
     let context_ = "AddTagsToStreamInput"
-    let make ~streamName = fun ~tags -> fun () -> { streamName; tags }
+    let make ?streamName =
+      fun ?streamARN ->
+        fun ?streamId ->
+          fun ~tags -> fun () -> { streamName; streamARN; streamId; tags }
     let to_value x =
       structure_to_value
-        [("StreamName", (Some (StreamName.to_value x.streamName)));
-        ("Tags", (Some (TagMap.to_value x.tags)))]
+        [("StreamName", (Option.map x.streamName ~f:StreamName.to_value));
+        ("Tags", (Some (TagMap.to_value x.tags)));
+        ("StreamARN", (Option.map x.streamARN ~f:StreamARN.to_value));
+        ("StreamId", (Option.map x.streamId ~f:StreamId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let streamId =
+        (Option.map ~f:StreamId.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let streamARN =
+        (Option.map ~f:StreamARN.of_xml) (Xml.child xml_arg0 "StreamARN") in
       let tags =
         TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
       let streamName =
-        StreamName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StreamName") in
-      make ~tags ~streamName ()
+        (Option.map ~f:StreamName.of_xml) (Xml.child xml_arg0 "StreamName") in
+      make ?streamId ?streamARN ~tags ?streamName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let streamName = field_map_exn json "StreamName" StreamName.of_json in
-      make ~tags ~streamName ()
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" StreamId.of_json in
+      let streamARN = field_map json__ "StreamARN" StreamARN.of_json in
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let streamName = field_map json__ "StreamName" StreamName.of_json in
+      make ?streamId ?streamARN ~tags ?streamName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input for AddTagsToStream."]

@@ -6,10 +6,13 @@ type ('i, 'o, 'e) t =
   CreateAppInstanceResponse.t, CreateAppInstanceResponse.error) t 
   | CreateAppInstanceAdmin: (CreateAppInstanceAdminRequest.t,
   CreateAppInstanceAdminResponse.t, CreateAppInstanceAdminResponse.error) t 
+  | CreateAppInstanceBot: (CreateAppInstanceBotRequest.t,
+  CreateAppInstanceBotResponse.t, CreateAppInstanceBotResponse.error) t 
   | CreateAppInstanceUser: (CreateAppInstanceUserRequest.t,
   CreateAppInstanceUserResponse.t, CreateAppInstanceUserResponse.error) t 
   | DeleteAppInstance: (DeleteAppInstanceRequest.t, unit, unit) t 
   | DeleteAppInstanceAdmin: (DeleteAppInstanceAdminRequest.t, unit, unit) t 
+  | DeleteAppInstanceBot: (DeleteAppInstanceBotRequest.t, unit, unit) t 
   | DeleteAppInstanceUser: (DeleteAppInstanceUserRequest.t, unit, unit) t 
   | DeregisterAppInstanceUserEndpoint:
   (DeregisterAppInstanceUserEndpointRequest.t, unit, unit) t 
@@ -18,6 +21,8 @@ type ('i, 'o, 'e) t =
   | DescribeAppInstanceAdmin: (DescribeAppInstanceAdminRequest.t,
   DescribeAppInstanceAdminResponse.t, DescribeAppInstanceAdminResponse.error)
   t 
+  | DescribeAppInstanceBot: (DescribeAppInstanceBotRequest.t,
+  DescribeAppInstanceBotResponse.t, DescribeAppInstanceBotResponse.error) t 
   | DescribeAppInstanceUser: (DescribeAppInstanceUserRequest.t,
   DescribeAppInstanceUserResponse.t, DescribeAppInstanceUserResponse.error) t
   
@@ -31,6 +36,8 @@ type ('i, 'o, 'e) t =
   GetAppInstanceRetentionSettingsResponse.error) t 
   | ListAppInstanceAdmins: (ListAppInstanceAdminsRequest.t,
   ListAppInstanceAdminsResponse.t, ListAppInstanceAdminsResponse.error) t 
+  | ListAppInstanceBots: (ListAppInstanceBotsRequest.t,
+  ListAppInstanceBotsResponse.t, ListAppInstanceBotsResponse.error) t 
   | ListAppInstanceUserEndpoints: (ListAppInstanceUserEndpointsRequest.t,
   ListAppInstanceUserEndpointsResponse.t,
   ListAppInstanceUserEndpointsResponse.error) t 
@@ -44,6 +51,10 @@ type ('i, 'o, 'e) t =
   (PutAppInstanceRetentionSettingsRequest.t,
   PutAppInstanceRetentionSettingsResponse.t,
   PutAppInstanceRetentionSettingsResponse.error) t 
+  | PutAppInstanceUserExpirationSettings:
+  (PutAppInstanceUserExpirationSettingsRequest.t,
+  PutAppInstanceUserExpirationSettingsResponse.t,
+  PutAppInstanceUserExpirationSettingsResponse.error) t 
   | RegisterAppInstanceUserEndpoint:
   (RegisterAppInstanceUserEndpointRequest.t,
   RegisterAppInstanceUserEndpointResponse.t,
@@ -52,6 +63,8 @@ type ('i, 'o, 'e) t =
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateAppInstance: (UpdateAppInstanceRequest.t,
   UpdateAppInstanceResponse.t, UpdateAppInstanceResponse.error) t 
+  | UpdateAppInstanceBot: (UpdateAppInstanceBotRequest.t,
+  UpdateAppInstanceBotResponse.t, UpdateAppInstanceBotResponse.error) t 
   | UpdateAppInstanceUser: (UpdateAppInstanceUserRequest.t,
   UpdateAppInstanceUserResponse.t, UpdateAppInstanceUserResponse.error) t 
   | UpdateAppInstanceUserEndpoint: (UpdateAppInstanceUserEndpointRequest.t,
@@ -61,26 +74,32 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateAppInstance -> `POST
   | CreateAppInstanceAdmin -> `POST
+  | CreateAppInstanceBot -> `POST
   | CreateAppInstanceUser -> `POST
   | DeleteAppInstance -> `DELETE
   | DeleteAppInstanceAdmin -> `DELETE
+  | DeleteAppInstanceBot -> `DELETE
   | DeleteAppInstanceUser -> `DELETE
   | DeregisterAppInstanceUserEndpoint -> `DELETE
   | DescribeAppInstance -> `GET
   | DescribeAppInstanceAdmin -> `GET
+  | DescribeAppInstanceBot -> `GET
   | DescribeAppInstanceUser -> `GET
   | DescribeAppInstanceUserEndpoint -> `GET
   | GetAppInstanceRetentionSettings -> `GET
   | ListAppInstanceAdmins -> `GET
+  | ListAppInstanceBots -> `GET
   | ListAppInstanceUserEndpoints -> `GET
   | ListAppInstanceUsers -> `GET
   | ListAppInstances -> `GET
   | ListTagsForResource -> `GET
   | PutAppInstanceRetentionSettings -> `PUT
+  | PutAppInstanceUserExpirationSettings -> `PUT
   | RegisterAppInstanceUserEndpoint -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateAppInstance -> `PUT
+  | UpdateAppInstanceBot -> `PUT
   | UpdateAppInstanceUser -> `PUT
   | UpdateAppInstanceUserEndpoint -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -92,6 +111,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/app-instances/%s/admins"
             (ChimeArn.to_header
                x.CreateAppInstanceAdminRequest.appInstanceArn)
+      | CreateAppInstanceBot ->
+          (Format.kasprintf Uri.of_string) "/app-instance-bots"
       | CreateAppInstanceUser ->
           (Format.kasprintf Uri.of_string) "/app-instance-users"
       | DeleteAppInstance ->
@@ -103,6 +124,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteAppInstanceAdminRequest.appInstanceArn)
             (ChimeArn.to_header
                x.DeleteAppInstanceAdminRequest.appInstanceAdminArn)
+      | DeleteAppInstanceBot ->
+          (Format.kasprintf Uri.of_string) "/app-instance-bots/%s"
+            (ChimeArn.to_header
+               x.DeleteAppInstanceBotRequest.appInstanceBotArn)
       | DeleteAppInstanceUser ->
           (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
             (ChimeArn.to_header
@@ -110,9 +135,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeregisterAppInstanceUserEndpoint ->
           (Format.kasprintf Uri.of_string)
             "/app-instance-users/%s/endpoints/%s"
-            (SensitiveChimeArn.to_header
+            (ChimeArn.to_header
                x.DeregisterAppInstanceUserEndpointRequest.appInstanceUserArn)
-            (SensitiveString64.to_header
+            (String64.to_header
                x.DeregisterAppInstanceUserEndpointRequest.endpointId)
       | DescribeAppInstance ->
           (Format.kasprintf Uri.of_string) "/app-instances/%s"
@@ -123,6 +148,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribeAppInstanceAdminRequest.appInstanceArn)
             (ChimeArn.to_header
                x.DescribeAppInstanceAdminRequest.appInstanceAdminArn)
+      | DescribeAppInstanceBot ->
+          (Format.kasprintf Uri.of_string) "/app-instance-bots/%s"
+            (ChimeArn.to_header
+               x.DescribeAppInstanceBotRequest.appInstanceBotArn)
       | DescribeAppInstanceUser ->
           (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
             (ChimeArn.to_header
@@ -130,9 +159,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeAppInstanceUserEndpoint ->
           (Format.kasprintf Uri.of_string)
             "/app-instance-users/%s/endpoints/%s"
-            (SensitiveString1600.to_header
+            (String1600.to_header
                x.DescribeAppInstanceUserEndpointRequest.appInstanceUserArn)
-            (SensitiveString64.to_header
+            (String64.to_header
                x.DescribeAppInstanceUserEndpointRequest.endpointId)
       | GetAppInstanceRetentionSettings ->
           (Format.kasprintf Uri.of_string)
@@ -148,6 +177,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                   x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("next-token", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListAppInstanceBots ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/app-instance-bots")
+            (List.filter_opt
+               [Some
+                  ("app-instance-arn", (ChimeArn.to_header x.appInstanceArn));
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults;
                Option.map
                  ~f:(fun v -> ("next-token", (NextToken.to_header v)))
                  x.nextToken])
@@ -195,6 +236,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/app-instances/%s/retention-settings"
             (ChimeArn.to_header
                x.PutAppInstanceRetentionSettingsRequest.appInstanceArn)
+      | PutAppInstanceUserExpirationSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/app-instance-users/%s/expiration-settings"
+            (ChimeArn.to_header
+               x.PutAppInstanceUserExpirationSettingsRequest.appInstanceUserArn)
       | RegisterAppInstanceUserEndpoint ->
           (Format.kasprintf Uri.of_string) "/app-instance-users/%s/endpoints"
             (SensitiveChimeArn.to_header
@@ -206,6 +252,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateAppInstance ->
           (Format.kasprintf Uri.of_string) "/app-instances/%s"
             (ChimeArn.to_header x.UpdateAppInstanceRequest.appInstanceArn)
+      | UpdateAppInstanceBot ->
+          (Format.kasprintf Uri.of_string) "/app-instance-bots/%s"
+            (ChimeArn.to_header
+               x.UpdateAppInstanceBotRequest.appInstanceBotArn)
       | UpdateAppInstanceUser ->
           (Format.kasprintf Uri.of_string) "/app-instance-users/%s"
             (ChimeArn.to_header
@@ -213,9 +263,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateAppInstanceUserEndpoint ->
           (Format.kasprintf Uri.of_string)
             "/app-instance-users/%s/endpoints/%s"
-            (SensitiveChimeArn.to_header
+            (ChimeArn.to_header
                x.UpdateAppInstanceUserEndpointRequest.appInstanceUserArn)
-            (SensitiveString64.to_header
+            (String64.to_header
                x.UpdateAppInstanceUserEndpointRequest.endpointId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
@@ -269,6 +319,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAppInstanceBot ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AppInstanceArn",
+                           (ChimeArn.to_value
+                              req.CreateAppInstanceBotRequest.appInstanceArn));
+                      Option.map req.CreateAppInstanceBotRequest.name
+                        ~f:(fun x -> ("Name", (ResourceName.to_value x)));
+                      Option.map req.CreateAppInstanceBotRequest.metadata
+                        ~f:(fun x -> ("Metadata", (Metadata.to_value x)));
+                      Some
+                        ("ClientRequestToken",
+                          (ClientRequestToken.to_value
+                             req.CreateAppInstanceBotRequest.clientRequestToken));
+                      Option.map req.CreateAppInstanceBotRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Some
+                        ("Configuration",
+                          (Configuration.to_value
+                             req.CreateAppInstanceBotRequest.configuration))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateAppInstanceUser ->
       let (headers, body) =
         let headers =
@@ -297,7 +381,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (ClientRequestToken.to_value
                              req.CreateAppInstanceUserRequest.clientRequestToken));
                       Option.map req.CreateAppInstanceUserRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateAppInstanceUserRequest.expirationSettings
+                        ~f:(fun x ->
+                              ("ExpirationSettings",
+                                (ExpirationSettings.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -308,6 +397,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteAppInstance -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAppInstanceAdmin ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAppInstanceBot -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAppInstanceUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeregisterAppInstanceUserEndpoint ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -315,6 +405,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAppInstanceAdmin ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAppInstanceBot ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAppInstanceUser ->
@@ -327,6 +420,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAppInstanceAdmins ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAppInstanceBots ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAppInstanceUserEndpoints ->
@@ -342,6 +438,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutAppInstanceRetentionSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutAppInstanceUserExpirationSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RegisterAppInstanceUserEndpoint ->
       let (headers, body) =
@@ -362,7 +460,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.RegisterAppInstanceUserEndpointRequest.type_));
                       Some
                         ("ResourceArn",
-                          (SensitiveChimeArn.to_value
+                          (ChimeArn.to_value
                              req.RegisterAppInstanceUserEndpointRequest.resourceArn));
                       Some
                         ("EndpointAttributes",
@@ -431,6 +529,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateAppInstance -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAppInstanceBot -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAppInstanceUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAppInstanceUserEndpoint ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -496,6 +595,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateAppInstanceAdminResponse.error_of_json))
+  | CreateAppInstanceBot ->
+      if is_success
+      then Ok (CreateAppInstanceBotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAppInstanceBotResponse.error_of_json))
   | CreateAppInstanceUser ->
       if is_success
       then Ok (CreateAppInstanceUserResponse.of_json (response_to_json resp))
@@ -505,6 +610,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteAppInstance ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteAppInstanceAdmin ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAppInstanceBot ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteAppInstanceUser ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -524,6 +631,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAppInstanceAdminResponse.error_of_json))
+  | DescribeAppInstanceBot ->
+      if is_success
+      then
+        Ok (DescribeAppInstanceBotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppInstanceBotResponse.error_of_json))
   | DescribeAppInstanceUser ->
       if is_success
       then
@@ -558,6 +673,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListAppInstanceAdminsResponse.error_of_json))
+  | ListAppInstanceBots ->
+      if is_success
+      then Ok (ListAppInstanceBotsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAppInstanceBotsResponse.error_of_json))
   | ListAppInstanceUserEndpoints ->
       if is_success
       then
@@ -595,6 +716,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutAppInstanceRetentionSettingsResponse.error_of_json))
+  | PutAppInstanceUserExpirationSettings ->
+      if is_success
+      then
+        Ok
+          (PutAppInstanceUserExpirationSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutAppInstanceUserExpirationSettingsResponse.error_of_json))
   | RegisterAppInstanceUserEndpoint ->
       if is_success
       then
@@ -614,6 +745,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateAppInstanceResponse.error_of_json))
+  | UpdateAppInstanceBot ->
+      if is_success
+      then Ok (UpdateAppInstanceBotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAppInstanceBotResponse.error_of_json))
   | UpdateAppInstanceUser ->
       if is_success
       then Ok (UpdateAppInstanceUserResponse.of_json (response_to_json resp))

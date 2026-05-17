@@ -9,52 +9,81 @@ let () =
     ; "account", Awso_account_async.Cli.main
     ; "acm", Awso_acm_async.Cli.main
     ; "acm-pca", Awso_acm_pca_async.Cli.main
-    ; "alexaforbusiness", Awso_alexaforbusiness_async.Cli.main
+    ; "aiops", Awso_aiops_async.Cli.main
     ; "amp", Awso_amp_async.Cli.main
     ; "amplify", Awso_amplify_async.Cli.main
     ; "amplifybackend", Awso_amplifybackend_async.Cli.main
     ; "amplifyuibuilder", Awso_amplifyuibuilder_async.Cli.main
     ; "apigatewaymanagementapi", Awso_apigatewaymanagementapi_async.Cli.main
+    ; "appfabric", Awso_appfabric_async.Cli.main
     ; "appflow", Awso_appflow_async.Cli.main
     ; "appintegrations", Awso_appintegrations_async.Cli.main
     ; "application-autoscaling", Awso_application_autoscaling_async.Cli.main
     ; "application-insights", Awso_application_insights_async.Cli.main
+    ; "application-signals", Awso_application_signals_async.Cli.main
     ; "applicationcostprofiler", Awso_applicationcostprofiler_async.Cli.main
     ; "appmesh", Awso_appmesh_async.Cli.main
     ; "apprunner", Awso_apprunner_async.Cli.main
     ; "appstream", Awso_appstream_async.Cli.main
+    ; "arc-region-switch", Awso_arc_region_switch_async.Cli.main
+    ; "arc-zonal-shift", Awso_arc_zonal_shift_async.Cli.main
+    ; "artifact", Awso_artifact_async.Cli.main
     ; "athena", Awso_athena_async.Cli.main
     ; "auditmanager", Awso_auditmanager_async.Cli.main
     ; "autoscaling", Awso_autoscaling_async.Cli.main
     ; "autoscaling-plans", Awso_autoscaling_plans_async.Cli.main
+    ; "b2bi", Awso_b2bi_async.Cli.main
     ; "backup", Awso_backup_async.Cli.main
     ; "backup-gateway", Awso_backup_gateway_async.Cli.main
+    ; "backupsearch", Awso_backupsearch_async.Cli.main
     ; "batch", Awso_batch_async.Cli.main
+    ; "bcm-dashboards", Awso_bcm_dashboards_async.Cli.main
+    ; "bcm-data-exports", Awso_bcm_data_exports_async.Cli.main
+    ; "bcm-pricing-calculator", Awso_bcm_pricing_calculator_async.Cli.main
+    ; "bcm-recommended-actions", Awso_bcm_recommended_actions_async.Cli.main
+    ; "bedrock", Awso_bedrock_async.Cli.main
+    ; "bedrock-agent", Awso_bedrock_agent_async.Cli.main
+    ; "bedrock-agent-runtime", Awso_bedrock_agent_runtime_async.Cli.main
+    ; "bedrock-agentcore", Awso_bedrock_agentcore_async.Cli.main
+    ; "bedrock-agentcore-control", Awso_bedrock_agentcore_control_async.Cli.main
+    ; "bedrock-data-automation", Awso_bedrock_data_automation_async.Cli.main
+    ; "bedrock-data-automation-runtime", Awso_bedrock_data_automation_runtime_async.Cli.main
+    ; "bedrock-runtime", Awso_bedrock_runtime_async.Cli.main
+    ; "billing", Awso_billing_async.Cli.main
     ; "billingconductor", Awso_billingconductor_async.Cli.main
     ; "braket", Awso_braket_async.Cli.main
     ; "budgets", Awso_budgets_async.Cli.main
     ; "ce", Awso_ce_async.Cli.main
+    ; "chatbot", Awso_chatbot_async.Cli.main
     ; "chime", Awso_chime_async.Cli.main
     ; "chime-sdk-identity", Awso_chime_sdk_identity_async.Cli.main
+    ; "chime-sdk-media-pipelines", Awso_chime_sdk_media_pipelines_async.Cli.main
     ; "chime-sdk-meetings", Awso_chime_sdk_meetings_async.Cli.main
     ; "chime-sdk-messaging", Awso_chime_sdk_messaging_async.Cli.main
+    ; "chime-sdk-voice", Awso_chime_sdk_voice_async.Cli.main
+    ; "cleanrooms", Awso_cleanrooms_async.Cli.main
+    ; "cleanroomsml", Awso_cleanroomsml_async.Cli.main
     ; "cloud9", Awso_cloud9_async.Cli.main
     ; "cloudcontrol", Awso_cloudcontrol_async.Cli.main
     ; "clouddirectory", Awso_clouddirectory_async.Cli.main
     ; "cloudformation", Awso_cloudformation_async.Cli.main
     ; "cloudfront", Awso_cloudfront_async.Cli.main
+    ; "cloudfront-keyvaluestore", Awso_cloudfront_keyvaluestore_async.Cli.main
     ; "cloudhsmv2", Awso_cloudhsmv2_async.Cli.main
     ; "cloudsearch", Awso_cloudsearch_async.Cli.main
     ; "cloudsearchdomain", Awso_cloudsearchdomain_async.Cli.main
     ; "cloudtrail", Awso_cloudtrail_async.Cli.main
+    ; "cloudtrail-data", Awso_cloudtrail_data_async.Cli.main
     ; "cloudwatch", Awso_cloudwatch_async.Cli.main
     ; "codeartifact", Awso_codeartifact_async.Cli.main
     ; "codebuild", Awso_codebuild_async.Cli.main
+    ; "codecatalyst", Awso_codecatalyst_async.Cli.main
     ; "codecommit", Awso_codecommit_async.Cli.main
+    ; "codeconnections", Awso_codeconnections_async.Cli.main
     ; "codedeploy", Awso_codedeploy_async.Cli.main
     ; "codeguru-reviewer", Awso_codeguru_reviewer_async.Cli.main
+    ; "codeguru-security", Awso_codeguru_security_async.Cli.main
     ; "codepipeline", Awso_codepipeline_async.Cli.main
-    ; "codestar", Awso_codestar_async.Cli.main
     ; "codestar-connections", Awso_codestar_connections_async.Cli.main
     ; "codestar-notifications", Awso_codestar_notifications_async.Cli.main
     ; "cognito-identity", Awso_cognito_identity_async.Cli.main
@@ -63,26 +92,40 @@ let () =
     ; "comprehend", Awso_comprehend_async.Cli.main
     ; "comprehendmedical", Awso_comprehendmedical_async.Cli.main
     ; "compute-optimizer", Awso_compute_optimizer_async.Cli.main
+    ; "compute-optimizer-automation", Awso_compute_optimizer_automation_async.Cli.main
     ; "config", Awso_config_async.Cli.main
     ; "connect", Awso_connect_async.Cli.main
     ; "connect-contact-lens", Awso_connect_contact_lens_async.Cli.main
+    ; "connectcampaigns", Awso_connectcampaigns_async.Cli.main
+    ; "connectcampaignsv2", Awso_connectcampaignsv2_async.Cli.main
+    ; "connectcases", Awso_connectcases_async.Cli.main
+    ; "connecthealth", Awso_connecthealth_async.Cli.main
     ; "connectparticipant", Awso_connectparticipant_async.Cli.main
+    ; "controlcatalog", Awso_controlcatalog_async.Cli.main
+    ; "controltower", Awso_controltower_async.Cli.main
+    ; "cost-optimization-hub", Awso_cost_optimization_hub_async.Cli.main
     ; "cur", Awso_cur_async.Cli.main
     ; "customer-profiles", Awso_customer_profiles_async.Cli.main
     ; "databrew", Awso_databrew_async.Cli.main
     ; "datapipeline", Awso_datapipeline_async.Cli.main
     ; "datasync", Awso_datasync_async.Cli.main
+    ; "datazone", Awso_datazone_async.Cli.main
     ; "dax", Awso_dax_async.Cli.main
+    ; "deadline", Awso_deadline_async.Cli.main
     ; "detective", Awso_detective_async.Cli.main
     ; "devicefarm", Awso_devicefarm_async.Cli.main
+    ; "devops-agent", Awso_devops_agent_async.Cli.main
     ; "devops-guru", Awso_devops_guru_async.Cli.main
     ; "directconnect", Awso_directconnect_async.Cli.main
     ; "discovery", Awso_discovery_async.Cli.main
     ; "dlm", Awso_dlm_async.Cli.main
     ; "dms", Awso_dms_async.Cli.main
     ; "docdb", Awso_docdb_async.Cli.main
+    ; "docdb-elastic", Awso_docdb_elastic_async.Cli.main
     ; "drs", Awso_drs_async.Cli.main
     ; "ds", Awso_ds_async.Cli.main
+    ; "ds-data", Awso_ds_data_async.Cli.main
+    ; "dsql", Awso_dsql_async.Cli.main
     ; "dynamodb", Awso_dynamodb_async.Cli.main
     ; "dynamodbstreams", Awso_dynamodbstreams_async.Cli.main
     ; "ebs", Awso_ebs_async.Cli.main
@@ -93,17 +136,19 @@ let () =
     ; "ecs", Awso_ecs_async.Cli.main
     ; "efs", Awso_efs_async.Cli.main
     ; "eks", Awso_eks_async.Cli.main
-    ; "elastic-inference", Awso_elastic_inference_async.Cli.main
+    ; "eks-auth", Awso_eks_auth_async.Cli.main
     ; "elasticache", Awso_elasticache_async.Cli.main
     ; "elasticbeanstalk", Awso_elasticbeanstalk_async.Cli.main
-    ; "elastictranscoder", Awso_elastictranscoder_async.Cli.main
     ; "elb", Awso_elb_async.Cli.main
     ; "elbv2", Awso_elbv2_async.Cli.main
+    ; "elementalinference", Awso_elementalinference_async.Cli.main
     ; "emr", Awso_emr_async.Cli.main
     ; "emr-containers", Awso_emr_containers_async.Cli.main
+    ; "emr-serverless", Awso_emr_serverless_async.Cli.main
+    ; "entityresolution", Awso_entityresolution_async.Cli.main
     ; "es", Awso_es_async.Cli.main
     ; "events", Awso_events_async.Cli.main
-    ; "evidently", Awso_evidently_async.Cli.main
+    ; "evs", Awso_evs_async.Cli.main
     ; "finspace", Awso_finspace_async.Cli.main
     ; "finspace-data", Awso_finspace_data_async.Cli.main
     ; "firehose", Awso_firehose_async.Cli.main
@@ -112,9 +157,13 @@ let () =
     ; "forecast", Awso_forecast_async.Cli.main
     ; "forecastquery", Awso_forecastquery_async.Cli.main
     ; "frauddetector", Awso_frauddetector_async.Cli.main
+    ; "freetier", Awso_freetier_async.Cli.main
     ; "fsx", Awso_fsx_async.Cli.main
     ; "gamelift", Awso_gamelift_async.Cli.main
-    ; "gamesparks", Awso_gamesparks_async.Cli.main
+    ; "gameliftstreams", Awso_gameliftstreams_async.Cli.main
+    ; "geo-maps", Awso_geo_maps_async.Cli.main
+    ; "geo-places", Awso_geo_places_async.Cli.main
+    ; "geo-routes", Awso_geo_routes_async.Cli.main
     ; "glacier", Awso_glacier_async.Cli.main
     ; "globalaccelerator", Awso_globalaccelerator_async.Cli.main
     ; "glue", Awso_glue_async.Cli.main
@@ -124,83 +173,120 @@ let () =
     ; "groundstation", Awso_groundstation_async.Cli.main
     ; "guardduty", Awso_guardduty_async.Cli.main
     ; "healthlake", Awso_healthlake_async.Cli.main
-    ; "honeycode", Awso_honeycode_async.Cli.main
     ; "iam", Awso_iam_async.Cli.main
     ; "identitystore", Awso_identitystore_async.Cli.main
     ; "imagebuilder", Awso_imagebuilder_async.Cli.main
     ; "importexport", Awso_importexport_async.Cli.main
     ; "inspector", Awso_inspector_async.Cli.main
+    ; "inspector-scan", Awso_inspector_scan_async.Cli.main
     ; "inspector2", Awso_inspector2_async.Cli.main
+    ; "interconnect", Awso_interconnect_async.Cli.main
+    ; "internetmonitor", Awso_internetmonitor_async.Cli.main
+    ; "invoicing", Awso_invoicing_async.Cli.main
     ; "iot", Awso_iot_async.Cli.main
     ; "iot-data", Awso_iot_data_async.Cli.main
     ; "iot-jobs-data", Awso_iot_jobs_data_async.Cli.main
-    ; "iot1click-devices", Awso_iot1click_devices_async.Cli.main
-    ; "iot1click-projects", Awso_iot1click_projects_async.Cli.main
-    ; "iotanalytics", Awso_iotanalytics_async.Cli.main
+    ; "iot-managed-integrations", Awso_iot_managed_integrations_async.Cli.main
     ; "iotdeviceadvisor", Awso_iotdeviceadvisor_async.Cli.main
     ; "iotevents", Awso_iotevents_async.Cli.main
     ; "iotevents-data", Awso_iotevents_data_async.Cli.main
-    ; "iotfleethub", Awso_iotfleethub_async.Cli.main
+    ; "iotfleetwise", Awso_iotfleetwise_async.Cli.main
     ; "iotsecuretunneling", Awso_iotsecuretunneling_async.Cli.main
     ; "iotsitewise", Awso_iotsitewise_async.Cli.main
     ; "iotthingsgraph", Awso_iotthingsgraph_async.Cli.main
     ; "iotwireless", Awso_iotwireless_async.Cli.main
     ; "ivs", Awso_ivs_async.Cli.main
+    ; "ivs-realtime", Awso_ivs_realtime_async.Cli.main
+    ; "ivschat", Awso_ivschat_async.Cli.main
     ; "kafka", Awso_kafka_async.Cli.main
     ; "kafkaconnect", Awso_kafkaconnect_async.Cli.main
     ; "kendra", Awso_kendra_async.Cli.main
+    ; "kendra-ranking", Awso_kendra_ranking_async.Cli.main
     ; "keyspaces", Awso_keyspaces_async.Cli.main
+    ; "keyspacesstreams", Awso_keyspacesstreams_async.Cli.main
     ; "kinesis", Awso_kinesis_async.Cli.main
     ; "kinesis-video-archived-media", Awso_kinesis_video_archived_media_async.Cli.main
     ; "kinesis-video-media", Awso_kinesis_video_media_async.Cli.main
     ; "kinesis-video-signaling", Awso_kinesis_video_signaling_async.Cli.main
+    ; "kinesis-video-webrtc-storage", Awso_kinesis_video_webrtc_storage_async.Cli.main
     ; "kinesisanalytics", Awso_kinesisanalytics_async.Cli.main
     ; "kinesisanalyticsv2", Awso_kinesisanalyticsv2_async.Cli.main
     ; "kinesisvideo", Awso_kinesisvideo_async.Cli.main
     ; "kms", Awso_kms_async.Cli.main
     ; "lakeformation", Awso_lakeformation_async.Cli.main
     ; "lambda", Awso_lambda_async.Cli.main
+    ; "launch-wizard", Awso_launch_wizard_async.Cli.main
     ; "lex-models", Awso_lex_models_async.Cli.main
     ; "lexv2-models", Awso_lexv2_models_async.Cli.main
     ; "license-manager", Awso_license_manager_async.Cli.main
+    ; "license-manager-linux-subscriptions", Awso_license_manager_linux_subscriptions_async.Cli.main
+    ; "license-manager-user-subscriptions", Awso_license_manager_user_subscriptions_async.Cli.main
     ; "lightsail", Awso_lightsail_async.Cli.main
     ; "location", Awso_location_async.Cli.main
     ; "logs", Awso_logs_async.Cli.main
     ; "lookoutequipment", Awso_lookoutequipment_async.Cli.main
-    ; "lookoutmetrics", Awso_lookoutmetrics_async.Cli.main
+    ; "m2", Awso_m2_async.Cli.main
     ; "machinelearning", Awso_machinelearning_async.Cli.main
-    ; "macie", Awso_macie_async.Cli.main
     ; "macie2", Awso_macie2_async.Cli.main
+    ; "mailmanager", Awso_mailmanager_async.Cli.main
     ; "managedblockchain", Awso_managedblockchain_async.Cli.main
+    ; "managedblockchain-query", Awso_managedblockchain_query_async.Cli.main
+    ; "marketplace-agreement", Awso_marketplace_agreement_async.Cli.main
     ; "marketplace-catalog", Awso_marketplace_catalog_async.Cli.main
+    ; "marketplace-deployment", Awso_marketplace_deployment_async.Cli.main
+    ; "marketplace-discovery", Awso_marketplace_discovery_async.Cli.main
     ; "marketplace-entitlement", Awso_marketplace_entitlement_async.Cli.main
+    ; "marketplace-reporting", Awso_marketplace_reporting_async.Cli.main
     ; "marketplacecommerceanalytics", Awso_marketplacecommerceanalytics_async.Cli.main
     ; "mediaconvert", Awso_mediaconvert_async.Cli.main
     ; "mediapackage", Awso_mediapackage_async.Cli.main
     ; "mediapackage-vod", Awso_mediapackage_vod_async.Cli.main
+    ; "mediapackagev2", Awso_mediapackagev2_async.Cli.main
     ; "mediastore", Awso_mediastore_async.Cli.main
     ; "mediastore-data", Awso_mediastore_data_async.Cli.main
     ; "mediatailor", Awso_mediatailor_async.Cli.main
+    ; "medical-imaging", Awso_medical_imaging_async.Cli.main
     ; "memorydb", Awso_memorydb_async.Cli.main
     ; "meteringmarketplace", Awso_meteringmarketplace_async.Cli.main
     ; "mgh", Awso_mgh_async.Cli.main
     ; "mgn", Awso_mgn_async.Cli.main
     ; "migration-hub-refactor-spaces", Awso_migration_hub_refactor_spaces_async.Cli.main
     ; "migrationhub-config", Awso_migrationhub_config_async.Cli.main
+    ; "migrationhuborchestrator", Awso_migrationhuborchestrator_async.Cli.main
     ; "migrationhubstrategy", Awso_migrationhubstrategy_async.Cli.main
-    ; "mobile", Awso_mobile_async.Cli.main
+    ; "mpa", Awso_mpa_async.Cli.main
     ; "mturk", Awso_mturk_async.Cli.main
     ; "mwaa", Awso_mwaa_async.Cli.main
+    ; "mwaa-serverless", Awso_mwaa_serverless_async.Cli.main
     ; "neptune", Awso_neptune_async.Cli.main
+    ; "neptune-graph", Awso_neptune_graph_async.Cli.main
+    ; "neptunedata", Awso_neptunedata_async.Cli.main
     ; "network-firewall", Awso_network_firewall_async.Cli.main
+    ; "networkflowmonitor", Awso_networkflowmonitor_async.Cli.main
     ; "networkmanager", Awso_networkmanager_async.Cli.main
-    ; "nimble", Awso_nimble_async.Cli.main
+    ; "networkmonitor", Awso_networkmonitor_async.Cli.main
+    ; "notifications", Awso_notifications_async.Cli.main
+    ; "notificationscontacts", Awso_notificationscontacts_async.Cli.main
+    ; "nova-act", Awso_nova_act_async.Cli.main
+    ; "oam", Awso_oam_async.Cli.main
+    ; "observabilityadmin", Awso_observabilityadmin_async.Cli.main
+    ; "odb", Awso_odb_async.Cli.main
+    ; "omics", Awso_omics_async.Cli.main
     ; "opensearch", Awso_opensearch_async.Cli.main
-    ; "opsworks", Awso_opsworks_async.Cli.main
-    ; "opsworkscm", Awso_opsworkscm_async.Cli.main
+    ; "opensearchserverless", Awso_opensearchserverless_async.Cli.main
     ; "organizations", Awso_organizations_async.Cli.main
+    ; "osis", Awso_osis_async.Cli.main
     ; "outposts", Awso_outposts_async.Cli.main
     ; "panorama", Awso_panorama_async.Cli.main
+    ; "partnercentral-account", Awso_partnercentral_account_async.Cli.main
+    ; "partnercentral-benefits", Awso_partnercentral_benefits_async.Cli.main
+    ; "partnercentral-channel", Awso_partnercentral_channel_async.Cli.main
+    ; "partnercentral-selling", Awso_partnercentral_selling_async.Cli.main
+    ; "payment-cryptography", Awso_payment_cryptography_async.Cli.main
+    ; "payment-cryptography-data", Awso_payment_cryptography_data_async.Cli.main
+    ; "pca-connector-ad", Awso_pca_connector_ad_async.Cli.main
+    ; "pca-connector-scep", Awso_pca_connector_scep_async.Cli.main
+    ; "pcs", Awso_pcs_async.Cli.main
     ; "personalize", Awso_personalize_async.Cli.main
     ; "personalize-events", Awso_personalize_events_async.Cli.main
     ; "personalize-runtime", Awso_personalize_runtime_async.Cli.main
@@ -208,11 +294,13 @@ let () =
     ; "pinpoint-email", Awso_pinpoint_email_async.Cli.main
     ; "pinpoint-sms-voice", Awso_pinpoint_sms_voice_async.Cli.main
     ; "pinpoint-sms-voice-v2", Awso_pinpoint_sms_voice_v2_async.Cli.main
+    ; "pipes", Awso_pipes_async.Cli.main
     ; "polly", Awso_polly_async.Cli.main
     ; "pricing", Awso_pricing_async.Cli.main
     ; "proton", Awso_proton_async.Cli.main
-    ; "qldb", Awso_qldb_async.Cli.main
-    ; "qldb-session", Awso_qldb_session_async.Cli.main
+    ; "qapps", Awso_qapps_async.Cli.main
+    ; "qbusiness", Awso_qbusiness_async.Cli.main
+    ; "qconnect", Awso_qconnect_async.Cli.main
     ; "quicksight", Awso_quicksight_async.Cli.main
     ; "ram", Awso_ram_async.Cli.main
     ; "rbin", Awso_rbin_async.Cli.main
@@ -220,29 +308,44 @@ let () =
     ; "rds-data", Awso_rds_data_async.Cli.main
     ; "redshift", Awso_redshift_async.Cli.main
     ; "redshift-data", Awso_redshift_data_async.Cli.main
+    ; "redshift-serverless", Awso_redshift_serverless_async.Cli.main
     ; "rekognition", Awso_rekognition_async.Cli.main
+    ; "repostspace", Awso_repostspace_async.Cli.main
     ; "resiliencehub", Awso_resiliencehub_async.Cli.main
+    ; "resource-explorer-2", Awso_resource_explorer_2_async.Cli.main
     ; "resource-groups", Awso_resource_groups_async.Cli.main
     ; "resourcegroupstaggingapi", Awso_resourcegroupstaggingapi_async.Cli.main
-    ; "robomaker", Awso_robomaker_async.Cli.main
+    ; "rolesanywhere", Awso_rolesanywhere_async.Cli.main
     ; "route53", Awso_route53_async.Cli.main
     ; "route53-recovery-cluster", Awso_route53_recovery_cluster_async.Cli.main
     ; "route53-recovery-control-config", Awso_route53_recovery_control_config_async.Cli.main
     ; "route53-recovery-readiness", Awso_route53_recovery_readiness_async.Cli.main
     ; "route53domains", Awso_route53domains_async.Cli.main
+    ; "route53globalresolver", Awso_route53globalresolver_async.Cli.main
+    ; "route53profiles", Awso_route53profiles_async.Cli.main
     ; "route53resolver", Awso_route53resolver_async.Cli.main
+    ; "rtbfabric", Awso_rtbfabric_async.Cli.main
     ; "rum", Awso_rum_async.Cli.main
     ; "s3", Awso_s3_async.Cli.main
+    ; "s3files", Awso_s3files_async.Cli.main
     ; "s3outposts", Awso_s3outposts_async.Cli.main
+    ; "s3tables", Awso_s3tables_async.Cli.main
+    ; "s3vectors", Awso_s3vectors_async.Cli.main
     ; "sagemaker", Awso_sagemaker_async.Cli.main
     ; "sagemaker-a2i-runtime", Awso_sagemaker_a2i_runtime_async.Cli.main
     ; "sagemaker-edge", Awso_sagemaker_edge_async.Cli.main
     ; "sagemaker-featurestore-runtime", Awso_sagemaker_featurestore_runtime_async.Cli.main
+    ; "sagemaker-geospatial", Awso_sagemaker_geospatial_async.Cli.main
+    ; "sagemaker-metrics", Awso_sagemaker_metrics_async.Cli.main
     ; "savingsplans", Awso_savingsplans_async.Cli.main
+    ; "scheduler", Awso_scheduler_async.Cli.main
     ; "schemas", Awso_schemas_async.Cli.main
     ; "sdb", Awso_sdb_async.Cli.main
     ; "secretsmanager", Awso_secretsmanager_async.Cli.main
+    ; "security-ir", Awso_security_ir_async.Cli.main
+    ; "securityagent", Awso_securityagent_async.Cli.main
     ; "securityhub", Awso_securityhub_async.Cli.main
+    ; "securitylake", Awso_securitylake_async.Cli.main
     ; "serverlessrepo", Awso_serverlessrepo_async.Cli.main
     ; "service-quotas", Awso_service_quotas_async.Cli.main
     ; "servicecatalog", Awso_servicecatalog_async.Cli.main
@@ -252,40 +355,59 @@ let () =
     ; "sesv2", Awso_sesv2_async.Cli.main
     ; "shield", Awso_shield_async.Cli.main
     ; "signer", Awso_signer_async.Cli.main
-    ; "sms", Awso_sms_async.Cli.main
+    ; "signer-data", Awso_signer_data_async.Cli.main
+    ; "signin", Awso_signin_async.Cli.main
+    ; "simpledbv2", Awso_simpledbv2_async.Cli.main
+    ; "simspaceweaver", Awso_simspaceweaver_async.Cli.main
     ; "sms-voice", Awso_sms_voice_async.Cli.main
     ; "snow-device-management", Awso_snow_device_management_async.Cli.main
     ; "snowball", Awso_snowball_async.Cli.main
     ; "sns", Awso_sns_async.Cli.main
+    ; "socialmessaging", Awso_socialmessaging_async.Cli.main
     ; "sqs", Awso_sqs_async.Cli.main
     ; "ssm", Awso_ssm_async.Cli.main
     ; "ssm-contacts", Awso_ssm_contacts_async.Cli.main
+    ; "ssm-guiconnect", Awso_ssm_guiconnect_async.Cli.main
     ; "ssm-incidents", Awso_ssm_incidents_async.Cli.main
+    ; "ssm-quicksetup", Awso_ssm_quicksetup_async.Cli.main
+    ; "ssm-sap", Awso_ssm_sap_async.Cli.main
     ; "sso", Awso_sso_async.Cli.main
     ; "sso-admin", Awso_sso_admin_async.Cli.main
     ; "sso-oidc", Awso_sso_oidc_async.Cli.main
     ; "stepfunctions", Awso_stepfunctions_async.Cli.main
     ; "storagegateway", Awso_storagegateway_async.Cli.main
     ; "sts", Awso_sts_async.Cli.main
+    ; "supplychain", Awso_supplychain_async.Cli.main
     ; "support", Awso_support_async.Cli.main
+    ; "support-app", Awso_support_app_async.Cli.main
+    ; "sustainability", Awso_sustainability_async.Cli.main
     ; "swf", Awso_swf_async.Cli.main
     ; "synthetics", Awso_synthetics_async.Cli.main
+    ; "taxsettings", Awso_taxsettings_async.Cli.main
     ; "textract", Awso_textract_async.Cli.main
+    ; "timestream-influxdb", Awso_timestream_influxdb_async.Cli.main
     ; "timestream-query", Awso_timestream_query_async.Cli.main
     ; "timestream-write", Awso_timestream_write_async.Cli.main
+    ; "tnb", Awso_tnb_async.Cli.main
     ; "transcribe", Awso_transcribe_async.Cli.main
     ; "transfer", Awso_transfer_async.Cli.main
     ; "translate", Awso_translate_async.Cli.main
+    ; "trustedadvisor", Awso_trustedadvisor_async.Cli.main
+    ; "uxc", Awso_uxc_async.Cli.main
+    ; "verifiedpermissions", Awso_verifiedpermissions_async.Cli.main
     ; "voice-id", Awso_voice_id_async.Cli.main
+    ; "vpc-lattice", Awso_vpc_lattice_async.Cli.main
     ; "waf", Awso_waf_async.Cli.main
     ; "waf-regional", Awso_waf_regional_async.Cli.main
     ; "wafv2", Awso_wafv2_async.Cli.main
     ; "wellarchitected", Awso_wellarchitected_async.Cli.main
+    ; "wickr", Awso_wickr_async.Cli.main
     ; "wisdom", Awso_wisdom_async.Cli.main
     ; "workdocs", Awso_workdocs_async.Cli.main
-    ; "worklink", Awso_worklink_async.Cli.main
     ; "workmail", Awso_workmail_async.Cli.main
     ; "workspaces", Awso_workspaces_async.Cli.main
+    ; "workspaces-instances", Awso_workspaces_instances_async.Cli.main
+    ; "workspaces-thin-client", Awso_workspaces_thin_client_async.Cli.main
     ; "workspaces-web", Awso_workspaces_web_async.Cli.main
     ; "xray", Awso_xray_async.Cli.main
     ])

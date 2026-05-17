@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let accept_primary_email_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING AccountId"
+       and primaryEmail =
+         flag "primary-email" (required string)
+           ~doc:"STRING PrimaryEmailAddress"
+       and otp = flag "otp" (required string) ~doc:"STRING Otp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.accept_primary_email_update
+           (Values.AcceptPrimaryEmailUpdateRequest.make ~accountId
+              ~primaryEmail ~otp ())
+           (Some Values.AcceptPrimaryEmailUpdateResponse.to_json)
+           (Some Values.AcceptPrimaryEmailUpdateResponse.error_to_json)])
 let delete_alternate_contact =
   Command.async ~summary:""
     ([%map_open.Command
@@ -49,6 +72,62 @@ let delete_alternate_contact =
            (Values.DeleteAlternateContactRequest.make ?accountId
               ~alternateContactType:(Values.AlternateContactType.of_json
                                        alternateContactType) ()) None None])
+let disable_region =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disable_region
+           (Values.DisableRegionRequest.make ?accountId ~regionName ()) None
+           None])
+let enable_region =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_region
+           (Values.EnableRegionRequest.make ?accountId ~regionName ()) None
+           None])
+let get_account_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_account_information
+           (Values.GetAccountInformationRequest.make ?accountId ())
+           (Some Values.GetAccountInformationResponse.to_json)
+           (Some Values.GetAccountInformationResponse.error_to_json)])
 let get_alternate_contact =
   Command.async ~summary:""
     ([%map_open.Command
@@ -72,6 +151,130 @@ let get_alternate_contact =
                                        alternateContactType) ())
            (Some Values.GetAlternateContactResponse.to_json)
            (Some Values.GetAlternateContactResponse.error_to_json)])
+let get_contact_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_contact_information
+           (Values.GetContactInformationRequest.make ?accountId ())
+           (Some Values.GetContactInformationResponse.to_json)
+           (Some Values.GetContactInformationResponse.error_to_json)])
+let get_gov_cloud_account_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and standardAccountId =
+         flag "standard-account-id" (optional string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_gov_cloud_account_information
+           (Values.GetGovCloudAccountInformationRequest.make
+              ?standardAccountId ())
+           (Some Values.GetGovCloudAccountInformationResponse.to_json)
+           (Some Values.GetGovCloudAccountInformationResponse.error_to_json)])
+let get_primary_email =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING AccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_primary_email
+           (Values.GetPrimaryEmailRequest.make ~accountId ())
+           (Some Values.GetPrimaryEmailResponse.to_json)
+           (Some Values.GetPrimaryEmailResponse.error_to_json)])
+let get_region_opt_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and regionName =
+         flag "region-name" (required string) ~doc:"STRING RegionName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_region_opt_status
+           (Values.GetRegionOptStatusRequest.make ?accountId ~regionName ())
+           (Some Values.GetRegionOptStatusResponse.to_json)
+           (Some Values.GetRegionOptStatusResponse.error_to_json)])
+let list_regions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRegionsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string)
+           ~doc:"STRING ListRegionsRequestNextTokenString"
+       and regionOptStatusContains =
+         flag "region-opt-status-contains" (optional json_arg)
+           ~doc:"JSON RegionOptStatusList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_regions
+           (Values.ListRegionsRequest.make ?accountId ?maxResults ?nextToken
+              ?regionOptStatusContains:(Option.map
+                                          ~f:Values.RegionOptStatusList.of_json
+                                          regionOptStatusContains) ())
+           (Some Values.ListRegionsResponse.to_json)
+           (Some Values.ListRegionsResponse.error_to_json)])
+let put_account_name =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and accountName =
+         flag "account-name" (required string) ~doc:"STRING AccountName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_account_name
+           (Values.PutAccountNameRequest.make ?accountId ~accountName ())
+           None None])
 let put_alternate_contact =
   Command.async ~summary:""
     ([%map_open.Command
@@ -84,25 +287,80 @@ let put_alternate_contact =
            ~doc:"URL override endpoint url"
        and accountId =
          flag "account-id" (optional string) ~doc:"STRING AccountId"
-       and alternateContactType =
-         flag "alternate-contact-type" (required json_arg)
-           ~doc:"JSON AlternateContactType"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and title = flag "title" (required string) ~doc:"STRING Title"
        and emailAddress =
          flag "email-address" (required string) ~doc:"STRING EmailAddress"
-       and name = flag "name" (required string) ~doc:"STRING Name"
        and phoneNumber =
          flag "phone-number" (required string) ~doc:"STRING PhoneNumber"
-       and title = flag "title" (required string) ~doc:"STRING Title" in
+       and alternateContactType =
+         flag "alternate-contact-type" (required json_arg)
+           ~doc:"JSON AlternateContactType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_alternate_contact
-           (Values.PutAlternateContactRequest.make ?accountId
+           (Values.PutAlternateContactRequest.make ?accountId ~name ~title
+              ~emailAddress ~phoneNumber
               ~alternateContactType:(Values.AlternateContactType.of_json
-                                       alternateContactType) ~emailAddress
-              ~name ~phoneNumber ~title ()) None None])
+                                       alternateContactType) ()) None None])
+let put_contact_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (optional string) ~doc:"STRING AccountId"
+       and contactInformation =
+         flag "contact-information" (required json_arg)
+           ~doc:"JSON ContactInformation" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_contact_information
+           (Values.PutContactInformationRequest.make ?accountId
+              ~contactInformation:(Values.ContactInformation.of_json
+                                     contactInformation) ()) None None])
+let start_primary_email_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING AccountId"
+       and primaryEmail =
+         flag "primary-email" (required string)
+           ~doc:"STRING PrimaryEmailAddress" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_primary_email_update
+           (Values.StartPrimaryEmailUpdateRequest.make ~accountId
+              ~primaryEmail ())
+           (Some Values.StartPrimaryEmailUpdateResponse.to_json)
+           (Some Values.StartPrimaryEmailUpdateResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("delete-alternate-contact", delete_alternate_contact);
+    [("accept-primary-email-update", accept_primary_email_update);
+    ("delete-alternate-contact", delete_alternate_contact);
+    ("disable-region", disable_region);
+    ("enable-region", enable_region);
+    ("get-account-information", get_account_information);
     ("get-alternate-contact", get_alternate_contact);
-    ("put-alternate-contact", put_alternate_contact)]
+    ("get-contact-information", get_contact_information);
+    ("get-gov-cloud-account-information", get_gov_cloud_account_information);
+    ("get-primary-email", get_primary_email);
+    ("get-region-opt-status", get_region_opt_status);
+    ("list-regions", list_regions);
+    ("put-account-name", put_account_name);
+    ("put-alternate-contact", put_alternate_contact);
+    ("put-contact-information", put_contact_information);
+    ("start-primary-email-update", start_primary_email_update)]

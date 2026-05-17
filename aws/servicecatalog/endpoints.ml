@@ -196,6 +196,18 @@ type ('i, 'o, 'e) t =
   ListStackInstancesForProvisionedProductOutput.error) t 
   | ListTagOptions: (ListTagOptionsInput.t, ListTagOptionsOutput.t,
   ListTagOptionsOutput.error) t 
+  | NotifyProvisionProductEngineWorkflowResult:
+  (NotifyProvisionProductEngineWorkflowResultInput.t,
+  NotifyProvisionProductEngineWorkflowResultOutput.t,
+  NotifyProvisionProductEngineWorkflowResultOutput.error) t 
+  | NotifyTerminateProvisionedProductEngineWorkflowResult:
+  (NotifyTerminateProvisionedProductEngineWorkflowResultInput.t,
+  NotifyTerminateProvisionedProductEngineWorkflowResultOutput.t,
+  NotifyTerminateProvisionedProductEngineWorkflowResultOutput.error) t 
+  | NotifyUpdateProvisionedProductEngineWorkflowResult:
+  (NotifyUpdateProvisionedProductEngineWorkflowResultInput.t,
+  NotifyUpdateProvisionedProductEngineWorkflowResultOutput.t,
+  NotifyUpdateProvisionedProductEngineWorkflowResultOutput.error) t 
   | ProvisionProduct: (ProvisionProductInput.t, ProvisionProductOutput.t,
   ProvisionProductOutput.error) t 
   | RejectPortfolioShare: (RejectPortfolioShareInput.t,
@@ -306,6 +318,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListServiceActionsForProvisioningArtifact -> `POST
   | ListStackInstancesForProvisionedProduct -> `POST
   | ListTagOptions -> `POST
+  | NotifyProvisionProductEngineWorkflowResult -> `POST
+  | NotifyTerminateProvisionedProductEngineWorkflowResult -> `POST
+  | NotifyUpdateProvisionedProductEngineWorkflowResult -> `POST
   | ProvisionProduct -> `POST
   | RejectPortfolioShare -> `POST
   | ScanProvisionedProducts -> `POST
@@ -415,6 +430,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListStackInstancesForProvisionedProduct ->
           (Format.kasprintf Uri.of_string) "/"
       | ListTagOptions -> (Format.kasprintf Uri.of_string) "/"
+      | NotifyProvisionProductEngineWorkflowResult ->
+          (Format.kasprintf Uri.of_string) "/"
+      | NotifyTerminateProvisionedProductEngineWorkflowResult ->
+          (Format.kasprintf Uri.of_string) "/"
+      | NotifyUpdateProvisionedProductEngineWorkflowResult ->
+          (Format.kasprintf Uri.of_string) "/"
       | ProvisionProduct -> (Format.kasprintf Uri.of_string) "/"
       | RejectPortfolioShare -> (Format.kasprintf Uri.of_string) "/"
       | ScanProvisionedProducts -> (Format.kasprintf Uri.of_string) "/"
@@ -1055,6 +1076,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWS242ServiceCatalogService.ListTagOptions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | NotifyProvisionProductEngineWorkflowResult ->
+      let json = NotifyProvisionProductEngineWorkflowResultInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWS242ServiceCatalogService.NotifyProvisionProductEngineWorkflowResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | NotifyTerminateProvisionedProductEngineWorkflowResult ->
+      let json =
+        NotifyTerminateProvisionedProductEngineWorkflowResultInput.to_json
+          req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWS242ServiceCatalogService.NotifyTerminateProvisionedProductEngineWorkflowResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | NotifyUpdateProvisionedProductEngineWorkflowResult ->
+      let json =
+        NotifyUpdateProvisionedProductEngineWorkflowResultInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWS242ServiceCatalogService.NotifyUpdateProvisionedProductEngineWorkflowResult")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ProvisionProduct ->
       let json = ProvisionProductInput.to_json req in
@@ -1809,6 +1860,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListTagOptionsOutput.of_json json)
       else Error (parse_aws_error (Some ListTagOptionsOutput.error_of_json))
+  | NotifyProvisionProductEngineWorkflowResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (NotifyProvisionProductEngineWorkflowResultOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                NotifyProvisionProductEngineWorkflowResultOutput.error_of_json))
+  | NotifyTerminateProvisionedProductEngineWorkflowResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (NotifyTerminateProvisionedProductEngineWorkflowResultOutput.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                NotifyTerminateProvisionedProductEngineWorkflowResultOutput.error_of_json))
+  | NotifyUpdateProvisionedProductEngineWorkflowResult ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (NotifyUpdateProvisionedProductEngineWorkflowResultOutput.of_json
+             json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                NotifyUpdateProvisionedProductEngineWorkflowResultOutput.error_of_json))
   | ProvisionProduct ->
       if is_success
       then

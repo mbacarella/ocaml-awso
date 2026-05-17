@@ -48,6 +48,12 @@ val delete_item :
       DeleteItemInput.t ->
         (DeleteItemOutput.t, DeleteItemOutput.error) Result.t
           Async.Deferred.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyInput.t ->
+        (DeleteResourcePolicyOutput.t, DeleteResourcePolicyOutput.error)
+          Result.t Async.Deferred.t
 val delete_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -96,6 +102,12 @@ val describe_global_table_settings :
       DescribeGlobalTableSettingsInput.t ->
         (DescribeGlobalTableSettingsOutput.t,
           DescribeGlobalTableSettingsOutput.error) Result.t Async.Deferred.t
+val describe_import :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeImportInput.t ->
+        (DescribeImportOutput.t, DescribeImportOutput.error) Result.t
+          Async.Deferred.t
 val describe_kinesis_streaming_destination :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -163,6 +175,18 @@ val get_item :
     ?cfg:Awso.Cfg.t ->
       GetItemInput.t ->
         (GetItemOutput.t, GetItemOutput.error) Result.t Async.Deferred.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyInput.t ->
+        (GetResourcePolicyOutput.t, GetResourcePolicyOutput.error) Result.t
+          Async.Deferred.t
+val import_table :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ImportTableInput.t ->
+        (ImportTableOutput.t, ImportTableOutput.error) Result.t
+          Async.Deferred.t
 val list_backups :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -187,6 +211,12 @@ val list_global_tables :
       ListGlobalTablesInput.t ->
         (ListGlobalTablesOutput.t, ListGlobalTablesOutput.error) Result.t
           Async.Deferred.t
+val list_imports :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImportsInput.t ->
+        (ListImportsOutput.t, ListImportsOutput.error) Result.t
+          Async.Deferred.t
 val list_tables :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -204,6 +234,12 @@ val put_item :
     ?cfg:Awso.Cfg.t ->
       PutItemInput.t ->
         (PutItemOutput.t, PutItemOutput.error) Result.t Async.Deferred.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyInput.t ->
+        (PutResourcePolicyOutput.t, PutResourcePolicyOutput.error) Result.t
+          Async.Deferred.t
 val query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -275,6 +311,13 @@ val update_item :
     ?cfg:Awso.Cfg.t ->
       UpdateItemInput.t ->
         (UpdateItemOutput.t, UpdateItemOutput.error) Result.t
+          Async.Deferred.t
+val update_kinesis_streaming_destination :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKinesisStreamingDestinationInput.t ->
+        (UpdateKinesisStreamingDestinationOutput.t,
+          UpdateKinesisStreamingDestinationOutput.error) Result.t
           Async.Deferred.t
 val update_table :
   ?endpoint_url:string ->

@@ -99,6 +99,12 @@ val list_anomalies_for_insight :
       ListAnomaliesForInsightRequest.t ->
         (ListAnomaliesForInsightResponse.t,
           ListAnomaliesForInsightResponse.error) Result.t Async.Deferred.t
+val list_anomalous_log_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAnomalousLogGroupsRequest.t ->
+        (ListAnomalousLogGroupsResponse.t,
+          ListAnomalousLogGroupsResponse.error) Result.t Async.Deferred.t
 val list_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -111,6 +117,12 @@ val list_insights :
       ListInsightsRequest.t ->
         (ListInsightsResponse.t, ListInsightsResponse.error) Result.t
           Async.Deferred.t
+val list_monitored_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMonitoredResourcesRequest.t ->
+        (ListMonitoredResourcesResponse.t,
+          ListMonitoredResourcesResponse.error) Result.t Async.Deferred.t
 val list_notification_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

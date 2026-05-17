@@ -28,6 +28,23 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let delete_alarm_mute_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alarmMuteRuleName =
+         flag "alarm-mute-rule-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_alarm_mute_rule
+           (Values.DeleteAlarmMuteRuleInput.make ~alarmMuteRuleName ()) None
+           None])
 let delete_alarms =
   Command.async ~summary:""
     ([%map_open.Command
@@ -142,6 +159,26 @@ let delete_metric_stream =
            (Values.DeleteMetricStreamInput.make ~name ())
            (Some Values.DeleteMetricStreamOutput.to_json)
            (Some Values.DeleteMetricStreamOutput.error_to_json)])
+let describe_alarm_contributors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and alarmName =
+         flag "alarm-name" (required string) ~doc:"STRING AlarmName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_alarm_contributors
+           (Values.DescribeAlarmContributorsInput.make ?nextToken ~alarmName
+              ()) (Some Values.DescribeAlarmContributorsOutput.to_json)
+           (Some Values.DescribeAlarmContributorsOutput.error_to_json)])
 let describe_alarm_history =
   Command.async ~summary:""
     ([%map_open.Command
@@ -154,6 +191,9 @@ let describe_alarm_history =
            ~doc:"URL override endpoint url"
        and alarmName =
          flag "alarm-name" (optional string) ~doc:"STRING AlarmName"
+       and alarmContributorId =
+         flag "alarm-contributor-id" (optional string)
+           ~doc:"STRING ContributorId"
        and alarmTypes =
          flag "alarm-types" (optional json_arg) ~doc:"JSON AlarmTypes"
        and historyItemType =
@@ -172,6 +212,7 @@ let describe_alarm_history =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_alarm_history
            (Values.DescribeAlarmHistoryInput.make ?alarmName
+              ?alarmContributorId
               ?alarmTypes:(Option.map ~f:Values.AlarmTypes.of_json alarmTypes)
               ?historyItemType:(Option.map ~f:Values.HistoryItemType.of_json
                                   historyItemType)
@@ -386,6 +427,24 @@ let enable_insight_rules =
               ~ruleNames:(Values.InsightRuleNames.of_json ruleNames) ())
            (Some Values.EnableInsightRulesOutput.to_json)
            (Some Values.EnableInsightRulesOutput.error_to_json)])
+let get_alarm_mute_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alarmMuteRuleName =
+         flag "alarm-mute-rule-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_alarm_mute_rule
+           (Values.GetAlarmMuteRuleInput.make ~alarmMuteRuleName ())
+           (Some Values.GetAlarmMuteRuleOutput.to_json)
+           (Some Values.GetAlarmMuteRuleOutput.error_to_json)])
 let get_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -555,6 +614,48 @@ let get_metric_widget_image =
            (Values.GetMetricWidgetImageInput.make ?outputFormat ~metricWidget
               ()) (Some Values.GetMetricWidgetImageOutput.to_json)
            (Some Values.GetMetricWidgetImageOutput.error_to_json)])
+let get_o_tel_enrichment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_o_tel_enrichment (Values.GetOTelEnrichmentInput.make ())
+           (Some Values.GetOTelEnrichmentOutput.to_json)
+           (Some Values.GetOTelEnrichmentOutput.error_to_json)])
+let list_alarm_mute_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alarmName = flag "alarm-name" (optional string) ~doc:"STRING Name"
+       and statuses =
+         flag "statuses" (optional json_arg)
+           ~doc:"JSON AlarmMuteRuleStatuses"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT MaxRecords"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_alarm_mute_rules
+           (Values.ListAlarmMuteRulesInput.make ?alarmName
+              ?statuses:(Option.map ~f:Values.AlarmMuteRuleStatuses.of_json
+                           statuses) ?maxRecords ?nextToken ())
+           (Some Values.ListAlarmMuteRulesOutput.to_json)
+           (Some Values.ListAlarmMuteRulesOutput.error_to_json)])
 let list_dashboards =
   Command.async ~summary:""
     ([%map_open.Command
@@ -576,6 +677,30 @@ let list_dashboards =
            (Values.ListDashboardsInput.make ?dashboardNamePrefix ?nextToken
               ()) (Some Values.ListDashboardsOutput.to_json)
            (Some Values.ListDashboardsOutput.error_to_json)])
+let list_managed_insight_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT InsightRuleMaxResults"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_managed_insight_rules
+           (Values.ListManagedInsightRulesInput.make ?nextToken ?maxResults
+              ~resourceARN ())
+           (Some Values.ListManagedInsightRulesOutput.to_json)
+           (Some Values.ListManagedInsightRulesOutput.error_to_json)])
 let list_metric_streams =
   Command.async ~summary:""
     ([%map_open.Command
@@ -617,7 +742,12 @@ let list_metrics =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and recentlyActive =
          flag "recently-active" (optional json_arg)
-           ~doc:"JSON RecentlyActive" in
+           ~doc:"JSON RecentlyActive"
+       and includeLinkedAccounts =
+         flag "include-linked-accounts" (optional bool)
+           ~doc:"BOOL IncludeLinkedAccounts"
+       and owningAccount =
+         flag "owning-account" (optional string) ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_metrics
@@ -625,8 +755,8 @@ let list_metrics =
               ?dimensions:(Option.map ~f:Values.DimensionFilters.of_json
                              dimensions) ?nextToken
               ?recentlyActive:(Option.map ~f:Values.RecentlyActive.of_json
-                                 recentlyActive) ())
-           (Some Values.ListMetricsOutput.to_json)
+                                 recentlyActive) ?includeLinkedAccounts
+              ?owningAccount ()) (Some Values.ListMetricsOutput.to_json)
            (Some Values.ListMetricsOutput.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
@@ -647,6 +777,37 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceInput.make ~resourceARN ())
            (Some Values.ListTagsForResourceOutput.to_json)
            (Some Values.ListTagsForResourceOutput.error_to_json)])
+let put_alarm_mute_rule =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING AlarmDescription"
+       and muteTargets =
+         flag "mute-targets" (optional json_arg) ~doc:"JSON MuteTargets"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and startDate =
+         flag "start-date" (optional json_arg) ~doc:"JSON Timestamp"
+       and expireDate =
+         flag "expire-date" (optional json_arg) ~doc:"JSON Timestamp"
+       and name = flag "name" (required string) ~doc:"STRING Name"
+       and rule = flag "rule" (required json_arg) ~doc:"JSON Rule" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_alarm_mute_rule
+           (Values.PutAlarmMuteRuleInput.make ?description
+              ?muteTargets:(Option.map ~f:Values.MuteTargets.of_json
+                              muteTargets)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?startDate:(Option.map ~f:Values.Timestamp.of_json startDate)
+              ?expireDate:(Option.map ~f:Values.Timestamp.of_json expireDate)
+              ~name ~rule:(Values.Rule.of_json rule) ()) None None])
 let put_anomaly_detector =
   Command.async ~summary:""
     ([%map_open.Command
@@ -669,6 +830,9 @@ let put_anomaly_detector =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON AnomalyDetectorConfiguration"
+       and metricCharacteristics =
+         flag "metric-characteristics" (optional json_arg)
+           ~doc:"JSON MetricCharacteristics"
        and singleMetricAnomalyDetector =
          flag "single-metric-anomaly-detector" (optional json_arg)
            ~doc:"JSON SingleMetricAnomalyDetector"
@@ -684,6 +848,9 @@ let put_anomaly_detector =
               ?configuration:(Option.map
                                 ~f:Values.AnomalyDetectorConfiguration.of_json
                                 configuration)
+              ?metricCharacteristics:(Option.map
+                                        ~f:Values.MetricCharacteristics.of_json
+                                        metricCharacteristics)
               ?singleMetricAnomalyDetector:(Option.map
                                               ~f:Values.SingleMetricAnomalyDetector.of_json
                                               singleMetricAnomalyDetector)
@@ -715,6 +882,14 @@ let put_composite_alarm =
        and oKActions =
          flag "o-k-actions" (optional json_arg) ~doc:"JSON ResourceList"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and actionsSuppressor =
+         flag "actions-suppressor" (optional string) ~doc:"STRING AlarmArn"
+       and actionsSuppressorWaitPeriod =
+         flag "actions-suppressor-wait-period" (optional int)
+           ~doc:"INT SuppressorPeriod"
+       and actionsSuppressorExtensionPeriod =
+         flag "actions-suppressor-extension-period" (optional int)
+           ~doc:"INT SuppressorPeriod"
        and alarmName =
          flag "alarm-name" (required string) ~doc:"STRING AlarmName"
        and alarmRule =
@@ -729,8 +904,10 @@ let put_composite_alarm =
                                           ~f:Values.ResourceList.of_json
                                           insufficientDataActions)
               ?oKActions:(Option.map ~f:Values.ResourceList.of_json oKActions)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~alarmName
-              ~alarmRule ()) None None])
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?actionsSuppressor ?actionsSuppressorWaitPeriod
+              ?actionsSuppressorExtensionPeriod ~alarmName ~alarmRule ())
+           None None])
 let put_dashboard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -741,6 +918,7 @@ let put_dashboard =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and dashboardName =
          flag "dashboard-name" (required string) ~doc:"STRING DashboardName"
        and dashboardBody =
@@ -748,7 +926,9 @@ let put_dashboard =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_dashboard
-           (Values.PutDashboardInput.make ~dashboardName ~dashboardBody ())
+           (Values.PutDashboardInput.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~dashboardName ~dashboardBody ())
            (Some Values.PutDashboardOutput.to_json)
            (Some Values.PutDashboardOutput.error_to_json)])
 let put_insight_rule =
@@ -764,6 +944,9 @@ let put_insight_rule =
        and ruleState =
          flag "rule-state" (optional string) ~doc:"STRING InsightRuleState"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and applyOnTransformedLogs =
+         flag "apply-on-transformed-logs" (optional bool)
+           ~doc:"BOOL InsightRuleOnTransformedLogs"
        and ruleName =
          flag "rule-name" (required string) ~doc:"STRING InsightRuleName"
        and ruleDefinition =
@@ -773,9 +956,29 @@ let put_insight_rule =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_insight_rule
            (Values.PutInsightRuleInput.make ?ruleState
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~ruleName
-              ~ruleDefinition ()) (Some Values.PutInsightRuleOutput.to_json)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?applyOnTransformedLogs ~ruleName ~ruleDefinition ())
+           (Some Values.PutInsightRuleOutput.to_json)
            (Some Values.PutInsightRuleOutput.error_to_json)])
+let put_managed_insight_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and managedRules =
+         flag "managed-rules" (required json_arg) ~doc:"JSON ManagedRules" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_managed_insight_rules
+           (Values.PutManagedInsightRulesInput.make
+              ~managedRules:(Values.ManagedRules.of_json managedRules) ())
+           (Some Values.PutManagedInsightRulesOutput.to_json)
+           (Some Values.PutManagedInsightRulesOutput.error_to_json)])
 let put_metric_alarm =
   Command.async ~summary:""
     ([%map_open.Command
@@ -811,11 +1014,17 @@ let put_metric_alarm =
          flag "dimensions" (optional json_arg) ~doc:"JSON Dimensions"
        and period = flag "period" (optional int) ~doc:"INT Period"
        and unit = flag "unit" (optional json_arg) ~doc:"JSON StandardUnit"
+       and evaluationPeriods =
+         flag "evaluation-periods" (optional int)
+           ~doc:"INT EvaluationPeriods"
        and datapointsToAlarm =
          flag "datapoints-to-alarm" (optional int)
            ~doc:"INT DatapointsToAlarm"
        and threshold =
          flag "threshold" (optional float) ~doc:"FLOAT Threshold"
+       and comparisonOperator =
+         flag "comparison-operator" (optional json_arg)
+           ~doc:"JSON ComparisonOperator"
        and treatMissingData =
          flag "treat-missing-data" (optional string)
            ~doc:"STRING TreatMissingData"
@@ -827,14 +1036,14 @@ let put_metric_alarm =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and thresholdMetricId =
          flag "threshold-metric-id" (optional string) ~doc:"STRING MetricId"
+       and evaluationCriteria =
+         flag "evaluation-criteria" (optional json_arg)
+           ~doc:"JSON EvaluationCriteria"
+       and evaluationInterval =
+         flag "evaluation-interval" (optional int)
+           ~doc:"INT EvaluationInterval"
        and alarmName =
-         flag "alarm-name" (required string) ~doc:"STRING AlarmName"
-       and evaluationPeriods =
-         flag "evaluation-periods" (required int)
-           ~doc:"INT EvaluationPeriods"
-       and comparisonOperator =
-         flag "comparison-operator" (required json_arg)
-           ~doc:"JSON ComparisonOperator" in
+         flag "alarm-name" (required string) ~doc:"STRING AlarmName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_metric_alarm
@@ -850,14 +1059,19 @@ let put_metric_alarm =
               ?extendedStatistic
               ?dimensions:(Option.map ~f:Values.Dimensions.of_json dimensions)
               ?period ?unit:(Option.map ~f:Values.StandardUnit.of_json unit)
-              ?datapointsToAlarm ?threshold ?treatMissingData
+              ?evaluationPeriods ?datapointsToAlarm ?threshold
+              ?comparisonOperator:(Option.map
+                                     ~f:Values.ComparisonOperator.of_json
+                                     comparisonOperator) ?treatMissingData
               ?evaluateLowSampleCountPercentile
               ?metrics:(Option.map ~f:Values.MetricDataQueries.of_json
                           metrics)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?thresholdMetricId ~alarmName ~evaluationPeriods
-              ~comparisonOperator:(Values.ComparisonOperator.of_json
-                                     comparisonOperator) ()) None None])
+              ?thresholdMetricId
+              ?evaluationCriteria:(Option.map
+                                     ~f:Values.EvaluationCriteria.of_json
+                                     evaluationCriteria) ?evaluationInterval
+              ~alarmName ()) None None])
 let put_metric_data =
   Command.async ~summary:""
     ([%map_open.Command
@@ -868,16 +1082,25 @@ let put_metric_data =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and namespace =
-         flag "namespace" (required string) ~doc:"STRING Namespace"
        and metricData =
-         flag "metric-data" (required json_arg) ~doc:"JSON MetricData" in
+         flag "metric-data" (optional json_arg) ~doc:"JSON MetricData"
+       and entityMetricData =
+         flag "entity-metric-data" (optional json_arg)
+           ~doc:"JSON EntityMetricDataList"
+       and strictEntityValidation =
+         flag "strict-entity-validation" (optional bool)
+           ~doc:"BOOL StrictEntityValidation"
+       and namespace =
+         flag "namespace" (required string) ~doc:"STRING Namespace" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_metric_data
-           (Values.PutMetricDataInput.make ~namespace
-              ~metricData:(Values.MetricData.of_json metricData) ()) None
-           None])
+           (Values.PutMetricDataInput.make
+              ?metricData:(Option.map ~f:Values.MetricData.of_json metricData)
+              ?entityMetricData:(Option.map
+                                   ~f:Values.EntityMetricDataList.of_json
+                                   entityMetricData) ?strictEntityValidation
+              ~namespace ()) None None])
 let put_metric_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -898,6 +1121,9 @@ let put_metric_stream =
        and statisticsConfigurations =
          flag "statistics-configurations" (optional json_arg)
            ~doc:"JSON MetricStreamStatisticsConfigurations"
+       and includeLinkedAccountsMetrics =
+         flag "include-linked-accounts-metrics" (optional bool)
+           ~doc:"BOOL IncludeLinkedAccountsMetrics"
        and name =
          flag "name" (required string) ~doc:"STRING MetricStreamName"
        and firehoseArn =
@@ -921,8 +1147,8 @@ let put_metric_stream =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?statisticsConfigurations:(Option.map
                                            ~f:Values.MetricStreamStatisticsConfigurations.of_json
-                                           statisticsConfigurations) ~name
-              ~firehoseArn ~roleArn
+                                           statisticsConfigurations)
+              ?includeLinkedAccountsMetrics ~name ~firehoseArn ~roleArn
               ~outputFormat:(Values.MetricStreamOutputFormat.of_json
                                outputFormat) ())
            (Some Values.PutMetricStreamOutput.to_json)
@@ -971,6 +1197,23 @@ let start_metric_streams =
               ~names:(Values.MetricStreamNames.of_json names) ())
            (Some Values.StartMetricStreamsOutput.to_json)
            (Some Values.StartMetricStreamsOutput.error_to_json)])
+let start_o_tel_enrichment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_o_tel_enrichment
+           (Values.StartOTelEnrichmentInput.make ())
+           (Some Values.StartOTelEnrichmentOutput.to_json)
+           (Some Values.StartOTelEnrichmentOutput.error_to_json)])
 let stop_metric_streams =
   Command.async ~summary:""
     ([%map_open.Command
@@ -990,6 +1233,22 @@ let stop_metric_streams =
               ~names:(Values.MetricStreamNames.of_json names) ())
            (Some Values.StopMetricStreamsOutput.to_json)
            (Some Values.StopMetricStreamsOutput.error_to_json)])
+let stop_o_tel_enrichment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_o_tel_enrichment (Values.StopOTelEnrichmentInput.make ())
+           (Some Values.StopOTelEnrichmentOutput.to_json)
+           (Some Values.StopOTelEnrichmentOutput.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1036,11 +1295,13 @@ let untag_resource =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("delete-alarms", delete_alarms);
+    [("delete-alarm-mute-rule", delete_alarm_mute_rule);
+    ("delete-alarms", delete_alarms);
     ("delete-anomaly-detector", delete_anomaly_detector);
     ("delete-dashboards", delete_dashboards);
     ("delete-insight-rules", delete_insight_rules);
     ("delete-metric-stream", delete_metric_stream);
+    ("describe-alarm-contributors", describe_alarm_contributors);
     ("describe-alarm-history", describe_alarm_history);
     ("describe-alarms", describe_alarms);
     ("describe-alarms-for-metric", describe_alarms_for_metric);
@@ -1050,25 +1311,33 @@ let main =
     ("disable-insight-rules", disable_insight_rules);
     ("enable-alarm-actions", enable_alarm_actions);
     ("enable-insight-rules", enable_insight_rules);
+    ("get-alarm-mute-rule", get_alarm_mute_rule);
     ("get-dashboard", get_dashboard);
     ("get-insight-rule-report", get_insight_rule_report);
     ("get-metric-data", get_metric_data);
     ("get-metric-statistics", get_metric_statistics);
     ("get-metric-stream", get_metric_stream);
     ("get-metric-widget-image", get_metric_widget_image);
+    ("get-o-tel-enrichment", get_o_tel_enrichment);
+    ("list-alarm-mute-rules", list_alarm_mute_rules);
     ("list-dashboards", list_dashboards);
+    ("list-managed-insight-rules", list_managed_insight_rules);
     ("list-metric-streams", list_metric_streams);
     ("list-metrics", list_metrics);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-alarm-mute-rule", put_alarm_mute_rule);
     ("put-anomaly-detector", put_anomaly_detector);
     ("put-composite-alarm", put_composite_alarm);
     ("put-dashboard", put_dashboard);
     ("put-insight-rule", put_insight_rule);
+    ("put-managed-insight-rules", put_managed_insight_rules);
     ("put-metric-alarm", put_metric_alarm);
     ("put-metric-data", put_metric_data);
     ("put-metric-stream", put_metric_stream);
     ("set-alarm-state", set_alarm_state);
     ("start-metric-streams", start_metric_streams);
+    ("start-o-tel-enrichment", start_o_tel_enrichment);
     ("stop-metric-streams", stop_metric_streams);
+    ("stop-o-tel-enrichment", stop_o_tel_enrichment);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

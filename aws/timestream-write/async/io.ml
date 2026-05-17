@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let create_batch_load_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBatchLoadTask input
 let create_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDatabase input
 let create_table ?endpoint_url ?cfg input =
@@ -19,18 +21,24 @@ let delete_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDatabase input
 let delete_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTable input
+let describe_batch_load_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBatchLoadTask input
 let describe_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDatabase input
 let describe_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEndpoints input
 let describe_table ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTable input
+let list_batch_load_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBatchLoadTasks input
 let list_databases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatabases input
 let list_tables ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTables input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let resume_batch_load_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ResumeBatchLoadTask input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

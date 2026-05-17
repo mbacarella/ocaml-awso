@@ -12,6 +12,12 @@ val associate_v_p_c_with_hosted_zone :
       AssociateVPCWithHostedZoneRequest.t ->
         (AssociateVPCWithHostedZoneResponse.t,
           AssociateVPCWithHostedZoneResponse.error) Result.t Lwt.t
+val change_cidr_collection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ChangeCidrCollectionRequest.t ->
+        (ChangeCidrCollectionResponse.t, ChangeCidrCollectionResponse.error)
+          Result.t Lwt.t
 val change_resource_record_sets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,6 +30,12 @@ val change_tags_for_resource :
       ChangeTagsForResourceRequest.t ->
         (ChangeTagsForResourceResponse.t,
           ChangeTagsForResourceResponse.error) Result.t Lwt.t
+val create_cidr_collection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCidrCollectionRequest.t ->
+        (CreateCidrCollectionResponse.t, CreateCidrCollectionResponse.error)
+          Result.t Lwt.t
 val create_health_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -84,6 +96,12 @@ val deactivate_key_signing_key :
       DeactivateKeySigningKeyRequest.t ->
         (DeactivateKeySigningKeyResponse.t,
           DeactivateKeySigningKeyResponse.error) Result.t Lwt.t
+val delete_cidr_collection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCidrCollectionRequest.t ->
+        (DeleteCidrCollectionResponse.t, DeleteCidrCollectionResponse.error)
+          Result.t Lwt.t
 val delete_health_check :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -255,6 +273,24 @@ val get_traffic_policy_instance_count :
       GetTrafficPolicyInstanceCountRequest.t ->
         (GetTrafficPolicyInstanceCountResponse.t,
           GetTrafficPolicyInstanceCountResponse.error) Result.t Lwt.t
+val list_cidr_blocks :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCidrBlocksRequest.t ->
+        (ListCidrBlocksResponse.t, ListCidrBlocksResponse.error) Result.t
+          Lwt.t
+val list_cidr_collections :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCidrCollectionsRequest.t ->
+        (ListCidrCollectionsResponse.t, ListCidrCollectionsResponse.error)
+          Result.t Lwt.t
+val list_cidr_locations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCidrLocationsRequest.t ->
+        (ListCidrLocationsResponse.t, ListCidrLocationsResponse.error)
+          Result.t Lwt.t
 val list_geo_locations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -369,6 +405,12 @@ val update_hosted_zone_comment :
       UpdateHostedZoneCommentRequest.t ->
         (UpdateHostedZoneCommentResponse.t,
           UpdateHostedZoneCommentResponse.error) Result.t Lwt.t
+val update_hosted_zone_features :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHostedZoneFeaturesRequest.t ->
+        (UpdateHostedZoneFeaturesResponse.t,
+          UpdateHostedZoneFeaturesResponse.error) Result.t Lwt.t
 val update_traffic_policy_comment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

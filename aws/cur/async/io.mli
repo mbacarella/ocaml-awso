@@ -12,6 +12,12 @@ val describe_report_definitions :
       DescribeReportDefinitionsRequest.t ->
         (DescribeReportDefinitionsResponse.t,
           DescribeReportDefinitionsResponse.error) Result.t Async.Deferred.t
+val list_tags_for_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTagsForResourceRequest.t ->
+        (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
+          Result.t Async.Deferred.t
 val modify_report_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,3 +30,15 @@ val put_report_definition :
       PutReportDefinitionRequest.t ->
         (PutReportDefinitionResponse.t, PutReportDefinitionResponse.error)
           Result.t Async.Deferred.t
+val tag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TagResourceRequest.t ->
+        (TagResourceResponse.t, TagResourceResponse.error) Result.t
+          Async.Deferred.t
+val untag_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UntagResourceRequest.t ->
+        (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+          Async.Deferred.t

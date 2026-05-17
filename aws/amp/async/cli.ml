@@ -40,19 +40,114 @@ let create_alert_manager_definition =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and data =
          flag "data" (required json_arg)
-           ~doc:"JSON AlertManagerDefinitionData"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+           ~doc:"JSON AlertManagerDefinitionData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_alert_manager_definition
            (Values.CreateAlertManagerDefinitionRequest.make ?clientToken
-              ~data:(Values.AlertManagerDefinitionData.of_json data)
-              ~workspaceId ())
+              ~workspaceId
+              ~data:(Values.AlertManagerDefinitionData.of_json data) ())
            (Some Values.CreateAlertManagerDefinitionResponse.to_json)
            (Some Values.CreateAlertManagerDefinitionResponse.error_to_json)])
+let create_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and evaluationIntervalInSeconds =
+         flag "evaluation-interval-in-seconds" (optional int)
+           ~doc:"INT AnomalyDetectorEvaluationInterval"
+       and missingDataAction =
+         flag "missing-data-action" (optional json_arg)
+           ~doc:"JSON AnomalyDetectorMissingDataAction"
+       and labels =
+         flag "labels" (optional json_arg)
+           ~doc:"JSON CreateAnomalyDetectorRequestLabelsMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and alias =
+         flag "alias" (required string) ~doc:"STRING AnomalyDetectorAlias"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON AnomalyDetectorConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_anomaly_detector
+           (Values.CreateAnomalyDetectorRequest.make
+              ?evaluationIntervalInSeconds
+              ?missingDataAction:(Option.map
+                                    ~f:Values.AnomalyDetectorMissingDataAction.of_json
+                                    missingDataAction)
+              ?labels:(Option.map
+                         ~f:Values.CreateAnomalyDetectorRequestLabelsMap.of_json
+                         labels) ?clientToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~workspaceId
+              ~alias
+              ~configuration:(Values.AnomalyDetectorConfiguration.of_json
+                                configuration) ())
+           (Some Values.CreateAnomalyDetectorResponse.to_json)
+           (Some Values.CreateAnomalyDetectorResponse.error_to_json)])
+let create_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and logGroupArn =
+         flag "log-group-arn" (required string) ~doc:"STRING LogGroupArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_logging_configuration
+           (Values.CreateLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId ~logGroupArn ())
+           (Some Values.CreateLoggingConfigurationResponse.to_json)
+           (Some Values.CreateLoggingConfigurationResponse.error_to_json)])
+let create_query_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and destinations =
+         flag "destinations" (required json_arg)
+           ~doc:"JSON LoggingDestinations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_query_logging_configuration
+           (Values.CreateQueryLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId
+              ~destinations:(Values.LoggingDestinations.of_json destinations)
+              ())
+           (Some Values.CreateQueryLoggingConfigurationResponse.to_json)
+           (Some Values.CreateQueryLoggingConfigurationResponse.error_to_json)])
 let create_rule_groups_namespace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -66,21 +161,57 @@ let create_rule_groups_namespace =
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
-       and data =
-         flag "data" (required json_arg) ~doc:"JSON RuleGroupsNamespaceData"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and name =
          flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       and data =
+         flag "data" (required json_arg) ~doc:"JSON RuleGroupsNamespaceData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_rule_groups_namespace
            (Values.CreateRuleGroupsNamespaceRequest.make ?clientToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~data:(Values.RuleGroupsNamespaceData.of_json data) ~name
-              ~workspaceId ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~workspaceId
+              ~name ~data:(Values.RuleGroupsNamespaceData.of_json data) ())
            (Some Values.CreateRuleGroupsNamespaceResponse.to_json)
            (Some Values.CreateRuleGroupsNamespaceResponse.error_to_json)])
+let create_scraper =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alias = flag "alias" (optional string) ~doc:"STRING ScraperAlias"
+       and roleConfiguration =
+         flag "role-configuration" (optional json_arg)
+           ~doc:"JSON RoleConfiguration"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and scrapeConfiguration =
+         flag "scrape-configuration" (required json_arg)
+           ~doc:"JSON ScrapeConfiguration"
+       and source = flag "source" (required json_arg) ~doc:"JSON Source"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON Destination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_scraper
+           (Values.CreateScraperRequest.make ?alias
+              ?roleConfiguration:(Option.map
+                                    ~f:Values.RoleConfiguration.of_json
+                                    roleConfiguration) ?clientToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~scrapeConfiguration:(Values.ScrapeConfiguration.of_json
+                                      scrapeConfiguration)
+              ~source:(Values.Source.of_json source)
+              ~destination:(Values.Destination.of_json destination) ())
+           (Some Values.CreateScraperResponse.to_json)
+           (Some Values.CreateScraperResponse.error_to_json)])
 let create_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -95,12 +226,14 @@ let create_workspace =
          flag "alias" (optional string) ~doc:"STRING WorkspaceAlias"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap" in
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and kmsKeyArn =
+         flag "kms-key-arn" (optional string) ~doc:"STRING KmsKeyArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_workspace
            (Values.CreateWorkspaceRequest.make ?alias ?clientToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?kmsKeyArn ())
            (Some Values.CreateWorkspaceResponse.to_json)
            (Some Values.CreateWorkspaceResponse.error_to_json)])
 let delete_alert_manager_definition =
@@ -122,6 +255,87 @@ let delete_alert_manager_definition =
            Io.delete_alert_manager_definition
            (Values.DeleteAlertManagerDefinitionRequest.make ?clientToken
               ~workspaceId ()) None None])
+let delete_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and anomalyDetectorId =
+         flag "anomaly-detector-id" (required string)
+           ~doc:"STRING AnomalyDetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_anomaly_detector
+           (Values.DeleteAnomalyDetectorRequest.make ?clientToken
+              ~workspaceId ~anomalyDetectorId ()) None None])
+let delete_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_logging_configuration
+           (Values.DeleteLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId ()) None None])
+let delete_query_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_query_logging_configuration
+           (Values.DeleteQueryLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId ()) None None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and revisionId =
+         flag "revision-id" (optional string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ?clientToken ?revisionId
+              ~workspaceId ()) None None])
 let delete_rule_groups_namespace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -134,15 +348,54 @@ let delete_rule_groups_namespace =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
-       and name =
-         flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName"
        and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and name =
+         flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_rule_groups_namespace
-           (Values.DeleteRuleGroupsNamespaceRequest.make ?clientToken ~name
-              ~workspaceId ()) None None])
+           (Values.DeleteRuleGroupsNamespaceRequest.make ?clientToken
+              ~workspaceId ~name ()) None None])
+let delete_scraper =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_scraper
+           (Values.DeleteScraperRequest.make ?clientToken ~scraperId ())
+           (Some Values.DeleteScraperResponse.to_json)
+           (Some Values.DeleteScraperResponse.error_to_json)])
+let delete_scraper_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_scraper_logging_configuration
+           (Values.DeleteScraperLoggingConfigurationRequest.make ?clientToken
+              ~scraperId ()) None None])
 let delete_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -180,6 +433,84 @@ let describe_alert_manager_definition =
            (Values.DescribeAlertManagerDefinitionRequest.make ~workspaceId ())
            (Some Values.DescribeAlertManagerDefinitionResponse.to_json)
            (Some Values.DescribeAlertManagerDefinitionResponse.error_to_json)])
+let describe_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and anomalyDetectorId =
+         flag "anomaly-detector-id" (required string)
+           ~doc:"STRING AnomalyDetectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_anomaly_detector
+           (Values.DescribeAnomalyDetectorRequest.make ~workspaceId
+              ~anomalyDetectorId ())
+           (Some Values.DescribeAnomalyDetectorResponse.to_json)
+           (Some Values.DescribeAnomalyDetectorResponse.error_to_json)])
+let describe_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_logging_configuration
+           (Values.DescribeLoggingConfigurationRequest.make ~workspaceId ())
+           (Some Values.DescribeLoggingConfigurationResponse.to_json)
+           (Some Values.DescribeLoggingConfigurationResponse.error_to_json)])
+let describe_query_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_query_logging_configuration
+           (Values.DescribeQueryLoggingConfigurationRequest.make ~workspaceId
+              ())
+           (Some Values.DescribeQueryLoggingConfigurationResponse.to_json)
+           (Some
+              Values.DescribeQueryLoggingConfigurationResponse.error_to_json)])
+let describe_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_resource_policy
+           (Values.DescribeResourcePolicyRequest.make ~workspaceId ())
+           (Some Values.DescribeResourcePolicyResponse.to_json)
+           (Some Values.DescribeResourcePolicyResponse.error_to_json)])
 let describe_rule_groups_namespace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -190,16 +521,54 @@ let describe_rule_groups_namespace =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name =
-         flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName"
        and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and name =
+         flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_rule_groups_namespace
-           (Values.DescribeRuleGroupsNamespaceRequest.make ~name ~workspaceId
+           (Values.DescribeRuleGroupsNamespaceRequest.make ~workspaceId ~name
               ()) (Some Values.DescribeRuleGroupsNamespaceResponse.to_json)
            (Some Values.DescribeRuleGroupsNamespaceResponse.error_to_json)])
+let describe_scraper =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_scraper
+           (Values.DescribeScraperRequest.make ~scraperId ())
+           (Some Values.DescribeScraperResponse.to_json)
+           (Some Values.DescribeScraperResponse.error_to_json)])
+let describe_scraper_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_scraper_logging_configuration
+           (Values.DescribeScraperLoggingConfigurationRequest.make ~scraperId
+              ())
+           (Some Values.DescribeScraperLoggingConfigurationResponse.to_json)
+           (Some
+              Values.DescribeScraperLoggingConfigurationResponse.error_to_json)])
 let describe_workspace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -218,6 +587,67 @@ let describe_workspace =
            (Values.DescribeWorkspaceRequest.make ~workspaceId ())
            (Some Values.DescribeWorkspaceResponse.to_json)
            (Some Values.DescribeWorkspaceResponse.error_to_json)])
+let describe_workspace_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_workspace_configuration
+           (Values.DescribeWorkspaceConfigurationRequest.make ~workspaceId ())
+           (Some Values.DescribeWorkspaceConfigurationResponse.to_json)
+           (Some Values.DescribeWorkspaceConfigurationResponse.error_to_json)])
+let get_default_scraper_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_default_scraper_configuration
+           (Values.GetDefaultScraperConfigurationRequest.make ())
+           (Some Values.GetDefaultScraperConfigurationResponse.to_json)
+           (Some Values.GetDefaultScraperConfigurationResponse.error_to_json)])
+let list_anomaly_detectors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alias =
+         flag "alias" (optional string) ~doc:"STRING AnomalyDetectorAlias"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAnomalyDetectorsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_anomaly_detectors
+           (Values.ListAnomalyDetectorsRequest.make ?alias ?maxResults
+              ?nextToken ~workspaceId ())
+           (Some Values.ListAnomalyDetectorsResponse.to_json)
+           (Some Values.ListAnomalyDetectorsResponse.error_to_json)])
 let list_rule_groups_namespaces =
   Command.async ~summary:""
     ([%map_open.Command
@@ -228,22 +658,47 @@ let list_rule_groups_namespaces =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and maxResults =
-         flag "max-results" (optional int)
-           ~doc:"INT ListRuleGroupsNamespacesRequestMaxResultsInteger"
        and name =
          flag "name" (optional string) ~doc:"STRING RuleGroupsNamespaceName"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRuleGroupsNamespacesRequestMaxResultsInteger"
        and workspaceId =
          flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_rule_groups_namespaces
-           (Values.ListRuleGroupsNamespacesRequest.make ?maxResults ?name
-              ?nextToken ~workspaceId ())
+           (Values.ListRuleGroupsNamespacesRequest.make ?name ?nextToken
+              ?maxResults ~workspaceId ())
            (Some Values.ListRuleGroupsNamespacesResponse.to_json)
            (Some Values.ListRuleGroupsNamespacesResponse.error_to_json)])
+let list_scrapers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON ScraperFilters"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListScrapersRequestMaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_scrapers
+           (Values.ListScrapersRequest.make
+              ?filters:(Option.map ~f:Values.ScraperFilters.of_json filters)
+              ?nextToken ?maxResults ())
+           (Some Values.ListScrapersResponse.to_json)
+           (Some Values.ListScrapersResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -272,17 +727,17 @@ let list_workspaces =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and alias =
          flag "alias" (optional string) ~doc:"STRING WorkspaceAlias"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT ListWorkspacesRequestMaxResultsInteger"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+           ~doc:"INT ListWorkspacesRequestMaxResultsInteger" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_workspaces
-           (Values.ListWorkspacesRequest.make ?alias ?maxResults ?nextToken
+           (Values.ListWorkspacesRequest.make ?nextToken ?alias ?maxResults
               ()) (Some Values.ListWorkspacesResponse.to_json)
            (Some Values.ListWorkspacesResponse.error_to_json)])
 let put_alert_manager_definition =
@@ -297,19 +752,87 @@ let put_alert_manager_definition =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and data =
          flag "data" (required json_arg)
-           ~doc:"JSON AlertManagerDefinitionData"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+           ~doc:"JSON AlertManagerDefinitionData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_alert_manager_definition
            (Values.PutAlertManagerDefinitionRequest.make ?clientToken
-              ~data:(Values.AlertManagerDefinitionData.of_json data)
-              ~workspaceId ())
+              ~workspaceId
+              ~data:(Values.AlertManagerDefinitionData.of_json data) ())
            (Some Values.PutAlertManagerDefinitionResponse.to_json)
            (Some Values.PutAlertManagerDefinitionResponse.error_to_json)])
+let put_anomaly_detector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and evaluationIntervalInSeconds =
+         flag "evaluation-interval-in-seconds" (optional int)
+           ~doc:"INT AnomalyDetectorEvaluationInterval"
+       and missingDataAction =
+         flag "missing-data-action" (optional json_arg)
+           ~doc:"JSON AnomalyDetectorMissingDataAction"
+       and labels =
+         flag "labels" (optional json_arg)
+           ~doc:"JSON PrometheusMetricLabelMap"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and anomalyDetectorId =
+         flag "anomaly-detector-id" (required string)
+           ~doc:"STRING AnomalyDetectorId"
+       and configuration =
+         flag "configuration" (required json_arg)
+           ~doc:"JSON AnomalyDetectorConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_anomaly_detector
+           (Values.PutAnomalyDetectorRequest.make
+              ?evaluationIntervalInSeconds
+              ?missingDataAction:(Option.map
+                                    ~f:Values.AnomalyDetectorMissingDataAction.of_json
+                                    missingDataAction)
+              ?labels:(Option.map ~f:Values.PrometheusMetricLabelMap.of_json
+                         labels) ?clientToken ~workspaceId ~anomalyDetectorId
+              ~configuration:(Values.AnomalyDetectorConfiguration.of_json
+                                configuration) ())
+           (Some Values.PutAnomalyDetectorResponse.to_json)
+           (Some Values.PutAnomalyDetectorResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and revisionId =
+         flag "revision-id" (optional string) ~doc:"STRING String"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and policyDocument =
+         flag "policy-document" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?clientToken ?revisionId
+              ~workspaceId ~policyDocument ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let put_rule_groups_namespace =
   Command.async ~summary:""
     ([%map_open.Command
@@ -322,18 +845,18 @@ let put_rule_groups_namespace =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
-       and data =
-         flag "data" (required json_arg) ~doc:"JSON RuleGroupsNamespaceData"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
        and name =
          flag "name" (required string) ~doc:"STRING RuleGroupsNamespaceName"
-       and workspaceId =
-         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       and data =
+         flag "data" (required json_arg) ~doc:"JSON RuleGroupsNamespaceData" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_rule_groups_namespace
            (Values.PutRuleGroupsNamespaceRequest.make ?clientToken
-              ~data:(Values.RuleGroupsNamespaceData.of_json data) ~name
-              ~workspaceId ())
+              ~workspaceId ~name
+              ~data:(Values.RuleGroupsNamespaceData.of_json data) ())
            (Some Values.PutRuleGroupsNamespaceResponse.to_json)
            (Some Values.PutRuleGroupsNamespaceResponse.error_to_json)])
 let tag_resource =
@@ -376,6 +899,122 @@ let untag_resource =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and logGroupArn =
+         flag "log-group-arn" (required string) ~doc:"STRING LogGroupArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_logging_configuration
+           (Values.UpdateLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId ~logGroupArn ())
+           (Some Values.UpdateLoggingConfigurationResponse.to_json)
+           (Some Values.UpdateLoggingConfigurationResponse.error_to_json)])
+let update_query_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId"
+       and destinations =
+         flag "destinations" (required json_arg)
+           ~doc:"JSON LoggingDestinations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_query_logging_configuration
+           (Values.UpdateQueryLoggingConfigurationRequest.make ?clientToken
+              ~workspaceId
+              ~destinations:(Values.LoggingDestinations.of_json destinations)
+              ())
+           (Some Values.UpdateQueryLoggingConfigurationResponse.to_json)
+           (Some Values.UpdateQueryLoggingConfigurationResponse.error_to_json)])
+let update_scraper =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and alias = flag "alias" (optional string) ~doc:"STRING ScraperAlias"
+       and scrapeConfiguration =
+         flag "scrape-configuration" (optional json_arg)
+           ~doc:"JSON ScrapeConfiguration"
+       and destination =
+         flag "destination" (optional json_arg) ~doc:"JSON Destination"
+       and roleConfiguration =
+         flag "role-configuration" (optional json_arg)
+           ~doc:"JSON RoleConfiguration"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_scraper
+           (Values.UpdateScraperRequest.make ?alias
+              ?scrapeConfiguration:(Option.map
+                                      ~f:Values.ScrapeConfiguration.of_json
+                                      scrapeConfiguration)
+              ?destination:(Option.map ~f:Values.Destination.of_json
+                              destination)
+              ?roleConfiguration:(Option.map
+                                    ~f:Values.RoleConfiguration.of_json
+                                    roleConfiguration) ?clientToken
+              ~scraperId ()) (Some Values.UpdateScraperResponse.to_json)
+           (Some Values.UpdateScraperResponse.error_to_json)])
+let update_scraper_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and scraperComponents =
+         flag "scraper-components" (optional json_arg)
+           ~doc:"JSON ScraperComponents"
+       and scraperId =
+         flag "scraper-id" (required string) ~doc:"STRING ScraperId"
+       and loggingDestination =
+         flag "logging-destination" (required json_arg)
+           ~doc:"JSON ScraperLoggingDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_scraper_logging_configuration
+           (Values.UpdateScraperLoggingConfigurationRequest.make
+              ?scraperComponents:(Option.map
+                                    ~f:Values.ScraperComponents.of_json
+                                    scraperComponents) ~scraperId
+              ~loggingDestination:(Values.ScraperLoggingDestination.of_json
+                                     loggingDestination) ())
+           (Some Values.UpdateScraperLoggingConfigurationResponse.to_json)
+           (Some
+              Values.UpdateScraperLoggingConfigurationResponse.error_to_json)])
 let update_workspace_alias =
   Command.async ~summary:""
     ([%map_open.Command
@@ -397,23 +1036,87 @@ let update_workspace_alias =
            Io.update_workspace_alias
            (Values.UpdateWorkspaceAliasRequest.make ?alias ?clientToken
               ~workspaceId ()) None None])
+let update_workspace_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING IdempotencyToken"
+       and limitsPerLabelSet =
+         flag "limits-per-label-set" (optional json_arg)
+           ~doc:"JSON LimitsPerLabelSetList"
+       and retentionPeriodInDays =
+         flag "retention-period-in-days" (optional int)
+           ~doc:"INT UpdateWorkspaceConfigurationRequestRetentionPeriodInDaysInteger"
+       and workspaceId =
+         flag "workspace-id" (required string) ~doc:"STRING WorkspaceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_workspace_configuration
+           (Values.UpdateWorkspaceConfigurationRequest.make ?clientToken
+              ?limitsPerLabelSet:(Option.map
+                                    ~f:Values.LimitsPerLabelSetList.of_json
+                                    limitsPerLabelSet) ?retentionPeriodInDays
+              ~workspaceId ())
+           (Some Values.UpdateWorkspaceConfigurationResponse.to_json)
+           (Some Values.UpdateWorkspaceConfigurationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-alert-manager-definition", create_alert_manager_definition);
+    ("create-anomaly-detector", create_anomaly_detector);
+    ("create-logging-configuration", create_logging_configuration);
+    ("create-query-logging-configuration",
+      create_query_logging_configuration);
     ("create-rule-groups-namespace", create_rule_groups_namespace);
+    ("create-scraper", create_scraper);
     ("create-workspace", create_workspace);
     ("delete-alert-manager-definition", delete_alert_manager_definition);
+    ("delete-anomaly-detector", delete_anomaly_detector);
+    ("delete-logging-configuration", delete_logging_configuration);
+    ("delete-query-logging-configuration",
+      delete_query_logging_configuration);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-rule-groups-namespace", delete_rule_groups_namespace);
+    ("delete-scraper", delete_scraper);
+    ("delete-scraper-logging-configuration",
+      delete_scraper_logging_configuration);
     ("delete-workspace", delete_workspace);
     ("describe-alert-manager-definition", describe_alert_manager_definition);
+    ("describe-anomaly-detector", describe_anomaly_detector);
+    ("describe-logging-configuration", describe_logging_configuration);
+    ("describe-query-logging-configuration",
+      describe_query_logging_configuration);
+    ("describe-resource-policy", describe_resource_policy);
     ("describe-rule-groups-namespace", describe_rule_groups_namespace);
+    ("describe-scraper", describe_scraper);
+    ("describe-scraper-logging-configuration",
+      describe_scraper_logging_configuration);
     ("describe-workspace", describe_workspace);
+    ("describe-workspace-configuration", describe_workspace_configuration);
+    ("get-default-scraper-configuration", get_default_scraper_configuration);
+    ("list-anomaly-detectors", list_anomaly_detectors);
     ("list-rule-groups-namespaces", list_rule_groups_namespaces);
+    ("list-scrapers", list_scrapers);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-workspaces", list_workspaces);
     ("put-alert-manager-definition", put_alert_manager_definition);
+    ("put-anomaly-detector", put_anomaly_detector);
+    ("put-resource-policy", put_resource_policy);
     ("put-rule-groups-namespace", put_rule_groups_namespace);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-workspace-alias", update_workspace_alias)]
+    ("update-logging-configuration", update_logging_configuration);
+    ("update-query-logging-configuration",
+      update_query_logging_configuration);
+    ("update-scraper", update_scraper);
+    ("update-scraper-logging-configuration",
+      update_scraper_logging_configuration);
+    ("update-workspace-alias", update_workspace_alias);
+    ("update-workspace-configuration", update_workspace_configuration)]

@@ -17,6 +17,8 @@ let create_scheduled_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateScheduledQuery input
 let delete_scheduled_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteScheduledQuery input
+let describe_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAccountSettings input
 let describe_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEndpoints input
 let describe_scheduled_query ?endpoint_url ?cfg input =
@@ -35,5 +37,7 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_account_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAccountSettings input
 let update_scheduled_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateScheduledQuery input

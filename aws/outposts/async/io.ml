@@ -11,30 +11,53 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let cancel_capacity_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelCapacityTask input
 let cancel_order ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelOrder input
 let create_order ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateOrder input
 let create_outpost ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateOutpost input
+let create_renewal ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRenewal input
 let create_site ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSite input
 let delete_outpost ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOutpost input
 let delete_site ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSite input
+let get_capacity_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityTask input
 let get_catalog_item ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCatalogItem input
+let get_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConnection input
 let get_order ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOrder input
 let get_outpost ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOutpost input
+let get_outpost_billing_information ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOutpostBillingInformation input
 let get_outpost_instance_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOutpostInstanceTypes input
+let get_outpost_supported_instance_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOutpostSupportedInstanceTypes input
+let get_renewal_pricing ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetRenewalPricing input
 let get_site ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSite input
 let get_site_address ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSiteAddress input
+let list_asset_instances ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssetInstances input
+let list_assets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssets input
+let list_blocking_instances_for_capacity_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBlockingInstancesForCapacityTask
+    input
+let list_capacity_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCapacityTasks input
 let list_catalog_items ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCatalogItems input
 let list_orders ?endpoint_url ?cfg input =
@@ -45,6 +68,12 @@ let list_sites ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSites input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let start_capacity_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCapacityTask input
+let start_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartConnection input
+let start_outpost_decommission ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartOutpostDecommission input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

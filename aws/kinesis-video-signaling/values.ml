@@ -84,6 +84,9 @@ module Uris =
   struct
     type nonrec t = Uri_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Uri_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -170,11 +173,11 @@ module IceServer =
       let uris = (Option.map ~f:Uris.of_xml) (Xml.child xml_arg0 "Uris") in
       make ?ttl ?password ?username ?uris ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ttl = field_map json "Ttl" Ttl.of_json in
-      let password = field_map json "Password" Password.of_json in
-      let username = field_map json "Username" Username.of_json in
-      let uris = field_map json "Uris" Uris.of_json in
+    let of_json json__ =
+      let ttl = field_map json__ "Ttl" Ttl.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let username = field_map json__ "Username" Username.of_json in
+      let uris = field_map json__ "Uris" Uris.of_json in
       make ?ttl ?password ?username ?uris ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for the ICE server connection data."]
@@ -223,8 +226,8 @@ module ClientLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -243,8 +246,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The value for this input parameter is invalid."]
@@ -262,8 +265,8 @@ module NotAuthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The caller is not authorized to perform this operation."]
@@ -281,8 +284,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is not found."]
@@ -352,6 +355,9 @@ module IceServerList =
   struct
     type nonrec t = IceServer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IceServer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -387,8 +393,8 @@ module InvalidClientException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified client is invalid."]
@@ -407,8 +413,8 @@ module SessionExpiredException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -501,8 +507,9 @@ module SendAlexaOfferToMasterResponse =
         (Option.map ~f:Answer.of_xml) (Xml.child xml_arg0 "Answer") in
       make ?answer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let answer = field_map json "Answer" Answer.of_json in make ?answer ()
+    let of_json json__ =
+      let answer = field_map json__ "Answer" Answer.of_json in
+      make ?answer ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This API allows you to connect WebRTC-enabled devices with Alexa display devices. When invoked, it sends the Alexa Session Description Protocol (SDP) offer to the master peer. The offer is delivered as soon as the master is connected to the specified signaling channel. This API returns the SDP answer from the connected master. If the master is not connected to the signaling channel, redelivery requests are made until the message expires."]
@@ -540,12 +547,12 @@ module SendAlexaOfferToMasterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ~messagePayload ~senderClientId ~channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let messagePayload =
-        field_map_exn json "MessagePayload" MessagePayload.of_json in
+        field_map_exn json__ "MessagePayload" MessagePayload.of_json in
       let senderClientId =
-        field_map_exn json "SenderClientId" ClientId.of_json in
-      let channelARN = field_map_exn json "ChannelARN" ResourceARN.of_json in
+        field_map_exn json__ "SenderClientId" ClientId.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
       make ~messagePayload ~senderClientId ~channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -642,9 +649,9 @@ module GetIceServerConfigResponse =
           (Xml.child xml_arg0 "IceServerList") in
       make ?iceServerList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let iceServerList =
-        field_map json "IceServerList" IceServerList.of_json in
+        field_map json__ "IceServerList" IceServerList.of_json in
       make ?iceServerList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -690,11 +697,11 @@ module GetIceServerConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ChannelARN") in
       make ?username ?service ?clientId ~channelARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let username = field_map json "Username" Username.of_json in
-      let service = field_map json "Service" Service.of_json in
-      let clientId = field_map json "ClientId" ClientId.of_json in
-      let channelARN = field_map_exn json "ChannelARN" ResourceARN.of_json in
+    let of_json json__ =
+      let username = field_map json__ "Username" Username.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      let clientId = field_map json__ "ClientId" ClientId.of_json in
+      let channelARN = field_map_exn json__ "ChannelARN" ResourceARN.of_json in
       make ?username ?service ?clientId ~channelARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

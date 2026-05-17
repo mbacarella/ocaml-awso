@@ -111,6 +111,8 @@ let list_associated_approval_rule_templates_for_repository ?endpoint_url ?cfg
     Endpoints.ListAssociatedApprovalRuleTemplatesForRepository input
 let list_branches ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBranches input
+let list_file_commit_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFileCommitHistory input
 let list_pull_requests ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPullRequests input
 let list_repositories ?endpoint_url ?cfg input =
@@ -176,5 +178,7 @@ let update_pull_request_title ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePullRequestTitle input
 let update_repository_description ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRepositoryDescription input
+let update_repository_encryption_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateRepositoryEncryptionKey input
 let update_repository_name ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRepositoryName input

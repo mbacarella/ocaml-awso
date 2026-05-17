@@ -23,6 +23,763 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module ByteValue =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module IpAddress =
+  struct
+    type nonrec t = string
+    let context_ = "IpAddress"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IpAddress" j
+    let to_json = simple_to_json to_value
+  end
+module Reason =
+  struct
+    type nonrec t =
+      | AWS_THREAT_INTELLIGENCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_THREAT_INTELLIGENCE -> "AWS_THREAT_INTELLIGENCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_THREAT_INTELLIGENCE" -> AWS_THREAT_INTELLIGENCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Reason" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Reason" j)
+    let to_json = simple_to_json to_value
+  end
+module HourlyTimeDelta =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for HourlyTimeDelta" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Location =
+  struct
+    type nonrec t = string
+    let context_ = "Location"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Location" j
+    let to_json = simple_to_json to_value
+  end
+module Aso =
+  struct
+    type nonrec t = string
+    let context_ = "Aso"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Aso" j
+    let to_json = simple_to_json to_value
+  end
+module IsNewForEntireAccount =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module UserAgent =
+  struct
+    type nonrec t = string
+    let context_ = "UserAgent"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserAgent" j
+    let to_json = simple_to_json to_value
+  end
+module EntityArn =
+  struct
+    type nonrec t = string
+    let context_ = "EntityArn"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^arn:.*"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityArn" j
+    let to_json = simple_to_json to_value
+  end
+module Type =
+  struct
+    type nonrec t = string
+    let context_ = "Type"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Type" j
+    let to_json = simple_to_json to_value
+  end
+module Id =
+  struct
+    type nonrec t = string
+    let context_ = "Id"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Id" j
+    let to_json = simple_to_json to_value
+  end
+module APIFailureCount =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module APIName =
+  struct
+    type nonrec t = string
+    let context_ = "APIName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"APIName" j
+    let to_json = simple_to_json to_value
+  end
+module APISuccessCount =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module Procedure =
+  struct
+    type nonrec t = string
+    let context_ = "Procedure"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Procedure" j
+    let to_json = simple_to_json to_value
+  end
+module Tactic =
+  struct
+    type nonrec t = string
+    let context_ = "Tactic"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Tactic" j
+    let to_json = simple_to_json to_value
+  end
+module Technique =
+  struct
+    type nonrec t = string
+    let context_ = "Technique"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Technique" j
+    let to_json = simple_to_json to_value
+  end
+module DatasourcePackageIngestState =
+  struct
+    type nonrec t =
+      | STARTED 
+      | STOPPED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STARTED -> "STARTED"
+      | STOPPED -> "STOPPED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STARTED" -> STARTED
+      | "STOPPED" -> STOPPED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DatasourcePackageIngestState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DatasourcePackageIngestState" j)
+    let to_json = simple_to_json to_value
+  end
+module TimestampForCollection =
+  struct
+    type nonrec t =
+      {
+      timestamp: Timestamp.t option
+        [@ocaml.doc
+          "The data and time when data collection began for a source package. The value is an ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."]}
+    let make ?timestamp = fun () -> { timestamp }
+    let to_value x =
+      structure_to_value
+        [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      make ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      make ?timestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details on when data collection began for a source package."]
+module DatasourcePackage =
+  struct
+    type nonrec t =
+      | DETECTIVE_CORE 
+      | EKS_AUDIT 
+      | ASFF_SECURITYHUB_FINDING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DETECTIVE_CORE -> "DETECTIVE_CORE"
+      | EKS_AUDIT -> "EKS_AUDIT"
+      | ASFF_SECURITYHUB_FINDING -> "ASFF_SECURITYHUB_FINDING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DETECTIVE_CORE" -> DETECTIVE_CORE
+      | "EKS_AUDIT" -> EKS_AUDIT
+      | "ASFF_SECURITYHUB_FINDING" -> ASFF_SECURITYHUB_FINDING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DatasourcePackage" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DatasourcePackage" j)
+    let to_json = simple_to_json to_value
+  end
+module DatasourcePackageUsageInfo =
+  struct
+    type nonrec t =
+      {
+      volumeUsageInBytes: ByteValue.t option
+        [@ocaml.doc
+          "Total volume of data in bytes per day ingested for a given data source package."];
+      volumeUsageUpdateTime: Timestamp.t option
+        [@ocaml.doc
+          "The data and time when the member account data volume was last updated. The value is an ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."]}
+    let make ?volumeUsageInBytes =
+      fun ?volumeUsageUpdateTime ->
+        fun () -> { volumeUsageInBytes; volumeUsageUpdateTime }
+    let to_value x =
+      structure_to_value
+        [("VolumeUsageInBytes",
+           (Option.map x.volumeUsageInBytes ~f:ByteValue.to_value));
+        ("VolumeUsageUpdateTime",
+          (Option.map x.volumeUsageUpdateTime ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeUsageUpdateTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "VolumeUsageUpdateTime") in
+      let volumeUsageInBytes =
+        (Option.map ~f:ByteValue.of_xml)
+          (Xml.child xml_arg0 "VolumeUsageInBytes") in
+      make ?volumeUsageUpdateTime ?volumeUsageInBytes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeUsageUpdateTime =
+        field_map json__ "VolumeUsageUpdateTime" Timestamp.of_json in
+      let volumeUsageInBytes =
+        field_map json__ "VolumeUsageInBytes" ByteValue.of_json in
+      make ?volumeUsageUpdateTime ?volumeUsageInBytes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information on the usage of a data source package in the behavior graph."]
+module FlaggedIpAddressDetail =
+  struct
+    type nonrec t =
+      {
+      ipAddress: IpAddress.t option
+        [@ocaml.doc "IP address of the suspicious entity."];
+      reason: Reason.t option
+        [@ocaml.doc
+          "Details the reason the IP address was flagged as suspicious."]}
+    let make ?ipAddress = fun ?reason -> fun () -> { ipAddress; reason }
+    let to_value x =
+      structure_to_value
+        [("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("Reason", (Option.map x.reason ~f:Reason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:Reason.of_xml) (Xml.child xml_arg0 "Reason") in
+      let ipAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      make ?reason ?ipAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" Reason.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      make ?reason ?ipAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information on suspicious IP addresses identified as indicators of compromise. This indicator is derived from Amazon Web Services threat intelligence."]
+module ImpossibleTravelDetail =
+  struct
+    type nonrec t =
+      {
+      startingIpAddress: IpAddress.t option
+        [@ocaml.doc
+          "IP address where the resource was first used in the impossible travel."];
+      endingIpAddress: IpAddress.t option
+        [@ocaml.doc
+          "IP address where the resource was last used in the impossible travel."];
+      startingLocation: Location.t option
+        [@ocaml.doc
+          "Location where the resource was first used in the impossible travel."];
+      endingLocation: Location.t option
+        [@ocaml.doc
+          "Location where the resource was last used in the impossible travel."];
+      hourlyTimeDelta: HourlyTimeDelta.t option
+        [@ocaml.doc
+          "Returns the time difference between the first and last timestamp the resource was used."]}
+    let make ?startingIpAddress =
+      fun ?endingIpAddress ->
+        fun ?startingLocation ->
+          fun ?endingLocation ->
+            fun ?hourlyTimeDelta ->
+              fun () ->
+                {
+                  startingIpAddress;
+                  endingIpAddress;
+                  startingLocation;
+                  endingLocation;
+                  hourlyTimeDelta
+                }
+    let to_value x =
+      structure_to_value
+        [("StartingIpAddress",
+           (Option.map x.startingIpAddress ~f:IpAddress.to_value));
+        ("EndingIpAddress",
+          (Option.map x.endingIpAddress ~f:IpAddress.to_value));
+        ("StartingLocation",
+          (Option.map x.startingLocation ~f:Location.to_value));
+        ("EndingLocation",
+          (Option.map x.endingLocation ~f:Location.to_value));
+        ("HourlyTimeDelta",
+          (Option.map x.hourlyTimeDelta ~f:HourlyTimeDelta.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hourlyTimeDelta =
+        (Option.map ~f:HourlyTimeDelta.of_xml)
+          (Xml.child xml_arg0 "HourlyTimeDelta") in
+      let endingLocation =
+        (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "EndingLocation") in
+      let startingLocation =
+        (Option.map ~f:Location.of_xml)
+          (Xml.child xml_arg0 "StartingLocation") in
+      let endingIpAddress =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "EndingIpAddress") in
+      let startingIpAddress =
+        (Option.map ~f:IpAddress.of_xml)
+          (Xml.child xml_arg0 "StartingIpAddress") in
+      make ?hourlyTimeDelta ?endingLocation ?startingLocation
+        ?endingIpAddress ?startingIpAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hourlyTimeDelta =
+        field_map json__ "HourlyTimeDelta" HourlyTimeDelta.of_json in
+      let endingLocation = field_map json__ "EndingLocation" Location.of_json in
+      let startingLocation =
+        field_map json__ "StartingLocation" Location.of_json in
+      let endingIpAddress =
+        field_map json__ "EndingIpAddress" IpAddress.of_json in
+      let startingIpAddress =
+        field_map json__ "StartingIpAddress" IpAddress.of_json in
+      make ?hourlyTimeDelta ?endingLocation ?startingLocation
+        ?endingIpAddress ?startingIpAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information on unusual and impossible travel in an account."]
+module NewAsoDetail =
+  struct
+    type nonrec t =
+      {
+      aso: Aso.t option
+        [@ocaml.doc
+          "Details about the new Autonomous System Organization (ASO)."];
+      isNewForEntireAccount: IsNewForEntireAccount.t option
+        [@ocaml.doc
+          "Checks if the Autonomous System Organization (ASO) is new for the entire account."]}
+    let make ?aso =
+      fun ?isNewForEntireAccount -> fun () -> { aso; isNewForEntireAccount }
+    let to_value x =
+      structure_to_value
+        [("Aso", (Option.map x.aso ~f:Aso.to_value));
+        ("IsNewForEntireAccount",
+          (Option.map x.isNewForEntireAccount
+             ~f:IsNewForEntireAccount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isNewForEntireAccount =
+        (Option.map ~f:IsNewForEntireAccount.of_xml)
+          (Xml.child xml_arg0 "IsNewForEntireAccount") in
+      let aso = (Option.map ~f:Aso.of_xml) (Xml.child xml_arg0 "Aso") in
+      make ?isNewForEntireAccount ?aso ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isNewForEntireAccount =
+        field_map json__ "IsNewForEntireAccount"
+          IsNewForEntireAccount.of_json in
+      let aso = field_map json__ "Aso" Aso.of_json in
+      make ?isNewForEntireAccount ?aso ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details new Autonomous System Organizations (ASOs) used either at the resource or account level."]
+module NewGeolocationDetail =
+  struct
+    type nonrec t =
+      {
+      location: Location.t option
+        [@ocaml.doc "Location where the resource was accessed."];
+      ipAddress: IpAddress.t option
+        [@ocaml.doc "IP address using which the resource was accessed."];
+      isNewForEntireAccount: IsNewForEntireAccount.t option
+        [@ocaml.doc
+          "Checks if the geolocation is new for the entire account."]}
+    let make ?location =
+      fun ?ipAddress ->
+        fun ?isNewForEntireAccount ->
+          fun () -> { location; ipAddress; isNewForEntireAccount }
+    let to_value x =
+      structure_to_value
+        [("Location", (Option.map x.location ~f:Location.to_value));
+        ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("IsNewForEntireAccount",
+          (Option.map x.isNewForEntireAccount
+             ~f:IsNewForEntireAccount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isNewForEntireAccount =
+        (Option.map ~f:IsNewForEntireAccount.of_xml)
+          (Xml.child xml_arg0 "IsNewForEntireAccount") in
+      let ipAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      let location =
+        (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
+      make ?isNewForEntireAccount ?ipAddress ?location ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isNewForEntireAccount =
+        field_map json__ "IsNewForEntireAccount"
+          IsNewForEntireAccount.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      let location = field_map json__ "Location" Location.of_json in
+      make ?isNewForEntireAccount ?ipAddress ?location ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details new geolocations used either at the resource or account level. For example, lists an observed geolocation that is an infrequent or unused location based on previous user activity."]
+module NewUserAgentDetail =
+  struct
+    type nonrec t =
+      {
+      userAgent: UserAgent.t option
+        [@ocaml.doc "New user agent which accessed the resource."];
+      isNewForEntireAccount: IsNewForEntireAccount.t option
+        [@ocaml.doc
+          "Checks if the user agent is new for the entire account."]}
+    let make ?userAgent =
+      fun ?isNewForEntireAccount ->
+        fun () -> { userAgent; isNewForEntireAccount }
+    let to_value x =
+      structure_to_value
+        [("UserAgent", (Option.map x.userAgent ~f:UserAgent.to_value));
+        ("IsNewForEntireAccount",
+          (Option.map x.isNewForEntireAccount
+             ~f:IsNewForEntireAccount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isNewForEntireAccount =
+        (Option.map ~f:IsNewForEntireAccount.of_xml)
+          (Xml.child xml_arg0 "IsNewForEntireAccount") in
+      let userAgent =
+        (Option.map ~f:UserAgent.of_xml) (Xml.child xml_arg0 "UserAgent") in
+      make ?isNewForEntireAccount ?userAgent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isNewForEntireAccount =
+        field_map json__ "IsNewForEntireAccount"
+          IsNewForEntireAccount.of_json in
+      let userAgent = field_map json__ "UserAgent" UserAgent.of_json in
+      make ?isNewForEntireAccount ?userAgent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details new user agents used either at the resource or account level."]
+module RelatedFindingDetail =
+  struct
+    type nonrec t =
+      {
+      arn: EntityArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the related finding."];
+      type_: Type.t option [@ocaml.doc "The type of finding."];
+      ipAddress: IpAddress.t option
+        [@ocaml.doc "The IP address of the finding."]}
+    let make ?arn =
+      fun ?type_ -> fun ?ipAddress -> fun () -> { arn; type_; ipAddress }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:EntityArn.to_value));
+        ("Type", (Option.map x.type_ ~f:Type.to_value));
+        ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      let arn = (Option.map ~f:EntityArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?ipAddress ?type_ ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
+      let arn = field_map json__ "Arn" EntityArn.of_json in
+      make ?ipAddress ?type_ ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details related activities associated with a potential security event. Lists all distinct categories of evidence that are connected to the resource or the finding group."]
+module RelatedFindingGroupDetail =
+  struct
+    type nonrec t =
+      {
+      id: Id.t option
+        [@ocaml.doc "The unique identifier for the finding group."]}
+    let make ?id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Option.map x.id ~f:Id.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" Id.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details multiple activities as they related to a potential security event. Detective uses graph analysis technique that infers relationships between findings and entities, and groups them together as a finding group."]
+module TTPsObservedDetail =
+  struct
+    type nonrec t =
+      {
+      tactic: Tactic.t option
+        [@ocaml.doc "The tactic used, identified by the investigation."];
+      technique: Technique.t option
+        [@ocaml.doc "The technique used, identified by the investigation."];
+      procedure: Procedure.t option
+        [@ocaml.doc "The procedure used, identified by the investigation."];
+      ipAddress: IpAddress.t option
+        [@ocaml.doc
+          "The IP address where the tactics, techniques, and procedure (TTP) was observed."];
+      aPIName: APIName.t option
+        [@ocaml.doc
+          "The name of the API where the tactics, techniques, and procedure (TTP) was observed."];
+      aPISuccessCount: APISuccessCount.t option
+        [@ocaml.doc "The total number of successful API requests."];
+      aPIFailureCount: APIFailureCount.t option
+        [@ocaml.doc "The total number of failed API requests."]}
+    let make ?tactic =
+      fun ?technique ->
+        fun ?procedure ->
+          fun ?ipAddress ->
+            fun ?aPIName ->
+              fun ?aPISuccessCount ->
+                fun ?aPIFailureCount ->
+                  fun () ->
+                    {
+                      tactic;
+                      technique;
+                      procedure;
+                      ipAddress;
+                      aPIName;
+                      aPISuccessCount;
+                      aPIFailureCount
+                    }
+    let to_value x =
+      structure_to_value
+        [("Tactic", (Option.map x.tactic ~f:Tactic.to_value));
+        ("Technique", (Option.map x.technique ~f:Technique.to_value));
+        ("Procedure", (Option.map x.procedure ~f:Procedure.to_value));
+        ("IpAddress", (Option.map x.ipAddress ~f:IpAddress.to_value));
+        ("APIName", (Option.map x.aPIName ~f:APIName.to_value));
+        ("APISuccessCount",
+          (Option.map x.aPISuccessCount ~f:APISuccessCount.to_value));
+        ("APIFailureCount",
+          (Option.map x.aPIFailureCount ~f:APIFailureCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aPIFailureCount =
+        (Option.map ~f:APIFailureCount.of_xml)
+          (Xml.child xml_arg0 "APIFailureCount") in
+      let aPISuccessCount =
+        (Option.map ~f:APISuccessCount.of_xml)
+          (Xml.child xml_arg0 "APISuccessCount") in
+      let aPIName =
+        (Option.map ~f:APIName.of_xml) (Xml.child xml_arg0 "APIName") in
+      let ipAddress =
+        (Option.map ~f:IpAddress.of_xml) (Xml.child xml_arg0 "IpAddress") in
+      let procedure =
+        (Option.map ~f:Procedure.of_xml) (Xml.child xml_arg0 "Procedure") in
+      let technique =
+        (Option.map ~f:Technique.of_xml) (Xml.child xml_arg0 "Technique") in
+      let tactic =
+        (Option.map ~f:Tactic.of_xml) (Xml.child xml_arg0 "Tactic") in
+      make ?aPIFailureCount ?aPISuccessCount ?aPIName ?ipAddress ?procedure
+        ?technique ?tactic ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aPIFailureCount =
+        field_map json__ "APIFailureCount" APIFailureCount.of_json in
+      let aPISuccessCount =
+        field_map json__ "APISuccessCount" APISuccessCount.of_json in
+      let aPIName = field_map json__ "APIName" APIName.of_json in
+      let ipAddress = field_map json__ "IpAddress" IpAddress.of_json in
+      let procedure = field_map json__ "Procedure" Procedure.of_json in
+      let technique = field_map json__ "Technique" Technique.of_json in
+      let tactic = field_map json__ "Tactic" Tactic.of_json in
+      make ?aPIFailureCount ?aPISuccessCount ?aPIName ?ipAddress ?procedure
+        ?technique ?tactic ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details tactics, techniques, and procedures (TTPs) used in a potential security event. Tactics are based on MITRE ATT&CK Matrix for Enterprise."]
+module LastIngestStateChangeDates =
+  struct
+    type nonrec t =
+      (DatasourcePackageIngestState.t * TimestampForCollection.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasourcePackageIngestState TimestampForCollection"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasourcePackageIngestState.to_value x) |>
+                    (fun x ->
+                       (TimestampForCollection.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasourcePackageIngestState.of_string
+        ~of_json:TimestampForCollection.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccountId =
   struct
     type nonrec t = string
@@ -61,30 +818,38 @@ module GraphArn =
     let of_json j = string_of_json ~kind:"GraphArn" j
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module DatasourcePackageIngestStates =
   struct
-    type nonrec t = string
+    type nonrec t =
+      (DatasourcePackage.t * DatasourcePackageIngestState.t) list
     let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((DatasourcePackage.of_string chopped),
+                              (DatasourcePackageIngestState.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasourcePackage.to_value x) |>
+                    (fun x ->
+                       (DatasourcePackageIngestState.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
-module ByteValue =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasourcePackage.of_string
+        ~of_json:DatasourcePackageIngestState.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module EmailAddress =
   struct
@@ -96,7 +861,9 @@ module EmailAddress =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"^.+@.+$")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^.+@(?:(?:(?!-)[A-Za-z0-9-]{1,62})?[A-Za-z0-9]{1}\\.)+[A-Za-z]{2,63}$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -204,6 +971,353 @@ module Percentage =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module VolumeUsageByDatasourcePackage =
+  struct
+    type nonrec t = (DatasourcePackage.t * DatasourcePackageUsageInfo.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasourcePackage DatasourcePackageUsageInfo"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasourcePackage.to_value x) |>
+                    (fun x ->
+                       (DatasourcePackageUsageInfo.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasourcePackage.of_string
+        ~of_json:DatasourcePackageUsageInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EntityType =
+  struct
+    type nonrec t =
+      | IAM_ROLE 
+      | IAM_USER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IAM_ROLE -> "IAM_ROLE"
+      | IAM_USER -> "IAM_USER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IAM_ROLE" -> IAM_ROLE
+      | "IAM_USER" -> IAM_USER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EntityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EntityType" j)
+    let to_json = simple_to_json to_value
+  end
+module InvestigationId =
+  struct
+    type nonrec t = string
+    let context_ = "InvestigationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:21) >>=
+             (fun () ->
+                (check_string_max i ~max:21) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InvestigationId" j
+    let to_json = simple_to_json to_value
+  end
+module Severity =
+  struct
+    type nonrec t =
+      | INFORMATIONAL 
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | CRITICAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INFORMATIONAL -> "INFORMATIONAL"
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | CRITICAL -> "CRITICAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INFORMATIONAL" -> INFORMATIONAL
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | "CRITICAL" -> CRITICAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Severity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Severity" j)
+    let to_json = simple_to_json to_value
+  end
+module State =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | ARCHIVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | ARCHIVED -> "ARCHIVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "ARCHIVED" -> ARCHIVED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration State" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"State" j)
+    let to_json = simple_to_json to_value
+  end
+module Status =
+  struct
+    type nonrec t =
+      | RUNNING 
+      | FAILED 
+      | SUCCESSFUL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUNNING -> "RUNNING"
+      | FAILED -> "FAILED"
+      | SUCCESSFUL -> "SUCCESSFUL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUNNING" -> RUNNING
+      | "FAILED" -> FAILED
+      | "SUCCESSFUL" -> SUCCESSFUL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Status" j)
+    let to_json = simple_to_json to_value
+  end
+module Value =
+  struct
+    type nonrec t = string
+    let context_ = "Value"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:500) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Value" j
+    let to_json = simple_to_json to_value
+  end
+module IndicatorDetail =
+  struct
+    type nonrec t =
+      {
+      tTPsObservedDetail: TTPsObservedDetail.t option
+        [@ocaml.doc "Details about the indicator of compromise."];
+      impossibleTravelDetail: ImpossibleTravelDetail.t option
+        [@ocaml.doc
+          "Identifies unusual and impossible user activity for an account."];
+      flaggedIpAddressDetail: FlaggedIpAddressDetail.t option
+        [@ocaml.doc
+          "Suspicious IP addresses that are flagged, which indicates critical or severe threats based on threat intelligence by Detective. This indicator is derived from Amazon Web Services threat intelligence."];
+      newGeolocationDetail: NewGeolocationDetail.t option
+        [@ocaml.doc "Contains details about the new geographic location."];
+      newAsoDetail: NewAsoDetail.t option
+        [@ocaml.doc
+          "Contains details about the new Autonomous System Organization (ASO)."];
+      newUserAgentDetail: NewUserAgentDetail.t option
+        [@ocaml.doc "Contains details about the new user agent."];
+      relatedFindingDetail: RelatedFindingDetail.t option
+        [@ocaml.doc "Contains details about related findings."];
+      relatedFindingGroupDetail: RelatedFindingGroupDetail.t option
+        [@ocaml.doc "Contains details about related finding groups."]}
+    let make ?tTPsObservedDetail =
+      fun ?impossibleTravelDetail ->
+        fun ?flaggedIpAddressDetail ->
+          fun ?newGeolocationDetail ->
+            fun ?newAsoDetail ->
+              fun ?newUserAgentDetail ->
+                fun ?relatedFindingDetail ->
+                  fun ?relatedFindingGroupDetail ->
+                    fun () ->
+                      {
+                        tTPsObservedDetail;
+                        impossibleTravelDetail;
+                        flaggedIpAddressDetail;
+                        newGeolocationDetail;
+                        newAsoDetail;
+                        newUserAgentDetail;
+                        relatedFindingDetail;
+                        relatedFindingGroupDetail
+                      }
+    let to_value x =
+      structure_to_value
+        [("TTPsObservedDetail",
+           (Option.map x.tTPsObservedDetail ~f:TTPsObservedDetail.to_value));
+        ("ImpossibleTravelDetail",
+          (Option.map x.impossibleTravelDetail
+             ~f:ImpossibleTravelDetail.to_value));
+        ("FlaggedIpAddressDetail",
+          (Option.map x.flaggedIpAddressDetail
+             ~f:FlaggedIpAddressDetail.to_value));
+        ("NewGeolocationDetail",
+          (Option.map x.newGeolocationDetail ~f:NewGeolocationDetail.to_value));
+        ("NewAsoDetail",
+          (Option.map x.newAsoDetail ~f:NewAsoDetail.to_value));
+        ("NewUserAgentDetail",
+          (Option.map x.newUserAgentDetail ~f:NewUserAgentDetail.to_value));
+        ("RelatedFindingDetail",
+          (Option.map x.relatedFindingDetail ~f:RelatedFindingDetail.to_value));
+        ("RelatedFindingGroupDetail",
+          (Option.map x.relatedFindingGroupDetail
+             ~f:RelatedFindingGroupDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let relatedFindingGroupDetail =
+        (Option.map ~f:RelatedFindingGroupDetail.of_xml)
+          (Xml.child xml_arg0 "RelatedFindingGroupDetail") in
+      let relatedFindingDetail =
+        (Option.map ~f:RelatedFindingDetail.of_xml)
+          (Xml.child xml_arg0 "RelatedFindingDetail") in
+      let newUserAgentDetail =
+        (Option.map ~f:NewUserAgentDetail.of_xml)
+          (Xml.child xml_arg0 "NewUserAgentDetail") in
+      let newAsoDetail =
+        (Option.map ~f:NewAsoDetail.of_xml)
+          (Xml.child xml_arg0 "NewAsoDetail") in
+      let newGeolocationDetail =
+        (Option.map ~f:NewGeolocationDetail.of_xml)
+          (Xml.child xml_arg0 "NewGeolocationDetail") in
+      let flaggedIpAddressDetail =
+        (Option.map ~f:FlaggedIpAddressDetail.of_xml)
+          (Xml.child xml_arg0 "FlaggedIpAddressDetail") in
+      let impossibleTravelDetail =
+        (Option.map ~f:ImpossibleTravelDetail.of_xml)
+          (Xml.child xml_arg0 "ImpossibleTravelDetail") in
+      let tTPsObservedDetail =
+        (Option.map ~f:TTPsObservedDetail.of_xml)
+          (Xml.child xml_arg0 "TTPsObservedDetail") in
+      make ?relatedFindingGroupDetail ?relatedFindingDetail
+        ?newUserAgentDetail ?newAsoDetail ?newGeolocationDetail
+        ?flaggedIpAddressDetail ?impossibleTravelDetail ?tTPsObservedDetail
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let relatedFindingGroupDetail =
+        field_map json__ "RelatedFindingGroupDetail"
+          RelatedFindingGroupDetail.of_json in
+      let relatedFindingDetail =
+        field_map json__ "RelatedFindingDetail" RelatedFindingDetail.of_json in
+      let newUserAgentDetail =
+        field_map json__ "NewUserAgentDetail" NewUserAgentDetail.of_json in
+      let newAsoDetail = field_map json__ "NewAsoDetail" NewAsoDetail.of_json in
+      let newGeolocationDetail =
+        field_map json__ "NewGeolocationDetail" NewGeolocationDetail.of_json in
+      let flaggedIpAddressDetail =
+        field_map json__ "FlaggedIpAddressDetail"
+          FlaggedIpAddressDetail.of_json in
+      let impossibleTravelDetail =
+        field_map json__ "ImpossibleTravelDetail"
+          ImpossibleTravelDetail.of_json in
+      let tTPsObservedDetail =
+        field_map json__ "TTPsObservedDetail" TTPsObservedDetail.of_json in
+      make ?relatedFindingGroupDetail ?relatedFindingDetail
+        ?newUserAgentDetail ?newAsoDetail ?newGeolocationDetail
+        ?flaggedIpAddressDetail ?impossibleTravelDetail ?tTPsObservedDetail
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the indicators of compromise which are used to determine if a resource is involved in a security incident. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. For the list of indicators of compromise that are generated by Detective investigations, see Detective investigations."]
+module IndicatorType =
+  struct
+    type nonrec t =
+      | TTP_OBSERVED 
+      | IMPOSSIBLE_TRAVEL 
+      | FLAGGED_IP_ADDRESS 
+      | NEW_GEOLOCATION 
+      | NEW_ASO 
+      | NEW_USER_AGENT 
+      | RELATED_FINDING 
+      | RELATED_FINDING_GROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TTP_OBSERVED -> "TTP_OBSERVED"
+      | IMPOSSIBLE_TRAVEL -> "IMPOSSIBLE_TRAVEL"
+      | FLAGGED_IP_ADDRESS -> "FLAGGED_IP_ADDRESS"
+      | NEW_GEOLOCATION -> "NEW_GEOLOCATION"
+      | NEW_ASO -> "NEW_ASO"
+      | NEW_USER_AGENT -> "NEW_USER_AGENT"
+      | RELATED_FINDING -> "RELATED_FINDING"
+      | RELATED_FINDING_GROUP -> "RELATED_FINDING_GROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TTP_OBSERVED" -> TTP_OBSERVED
+      | "IMPOSSIBLE_TRAVEL" -> IMPOSSIBLE_TRAVEL
+      | "FLAGGED_IP_ADDRESS" -> FLAGGED_IP_ADDRESS
+      | "NEW_GEOLOCATION" -> NEW_GEOLOCATION
+      | "NEW_ASO" -> NEW_ASO
+      | "NEW_USER_AGENT" -> NEW_USER_AGENT
+      | "RELATED_FINDING" -> RELATED_FINDING
+      | "RELATED_FINDING_GROUP" -> RELATED_FINDING_GROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IndicatorType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IndicatorType" j)
+    let to_json = simple_to_json to_value
+  end
 module UnprocessedReason =
   struct
     type nonrec t = string
@@ -215,6 +1329,99 @@ module UnprocessedReason =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"UnprocessedReason" j
+    let to_json = simple_to_json to_value
+  end
+module Resource =
+  struct
+    type nonrec t = string
+    let context_ = "Resource"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Resource" j
+    let to_json = simple_to_json to_value
+  end
+module DatasourcePackageIngestHistory =
+  struct
+    type nonrec t = (DatasourcePackage.t * LastIngestStateChangeDates.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasourcePackage LastIngestStateChangeDates"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasourcePackage.to_value x) |>
+                    (fun x ->
+                       (LastIngestStateChangeDates.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasourcePackage.of_string
+        ~of_json:LastIngestStateChangeDates.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ErrorCode =
+  struct
+    type nonrec t =
+      | INVALID_GRAPH_ARN 
+      | INVALID_REQUEST_BODY 
+      | INTERNAL_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INVALID_GRAPH_ARN -> "INVALID_GRAPH_ARN"
+      | INVALID_REQUEST_BODY -> "INVALID_REQUEST_BODY"
+      | INTERNAL_ERROR -> "INTERNAL_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INVALID_GRAPH_ARN" -> INVALID_GRAPH_ARN
+      | "INVALID_REQUEST_BODY" -> INVALID_REQUEST_BODY
+      | "INTERNAL_ERROR" -> INTERNAL_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorCodeReason =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorCodeReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorCodeReason" j
     let to_json = simple_to_json to_value
   end
 module ErrorMessage =
@@ -298,10 +1505,11 @@ module Administrator =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?delegationTime ?graphArn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let delegationTime = field_map json "DelegationTime" Timestamp.of_json in
-      let graphArn = field_map json "GraphArn" GraphArn.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let delegationTime =
+        field_map json__ "DelegationTime" Timestamp.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?delegationTime ?graphArn ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -350,7 +1558,13 @@ module MemberDetail =
           "The date and time when the graph utilization percentage was last updated. The value is an ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."];
       invitationType: InvitationType.t option
         [@ocaml.doc
-          "The type of behavior graph membership. For an organization account in the organization behavior graph, the type is ORGANIZATION. For an account that was invited to a behavior graph, the type is INVITATION."]}
+          "The type of behavior graph membership. For an organization account in the organization behavior graph, the type is ORGANIZATION. For an account that was invited to a behavior graph, the type is INVITATION."];
+      volumeUsageByDatasourcePackage: VolumeUsageByDatasourcePackage.t option
+        [@ocaml.doc
+          "Details on the volume of usage for each data source package in a behavior graph."];
+      datasourcePackageIngestStates: DatasourcePackageIngestStates.t option
+        [@ocaml.doc
+          "The state of a data source package for the behavior graph."]}
     let make ?accountId =
       fun ?emailAddress ->
         fun ?graphArn ->
@@ -365,23 +1579,27 @@ module MemberDetail =
                           fun ?percentOfGraphUtilization ->
                             fun ?percentOfGraphUtilizationUpdatedTime ->
                               fun ?invitationType ->
-                                fun () ->
-                                  {
-                                    accountId;
-                                    emailAddress;
-                                    graphArn;
-                                    masterId;
-                                    administratorId;
-                                    status;
-                                    disabledReason;
-                                    invitedTime;
-                                    updatedTime;
-                                    volumeUsageInBytes;
-                                    volumeUsageUpdatedTime;
-                                    percentOfGraphUtilization;
-                                    percentOfGraphUtilizationUpdatedTime;
-                                    invitationType
-                                  }
+                                fun ?volumeUsageByDatasourcePackage ->
+                                  fun ?datasourcePackageIngestStates ->
+                                    fun () ->
+                                      {
+                                        accountId;
+                                        emailAddress;
+                                        graphArn;
+                                        masterId;
+                                        administratorId;
+                                        status;
+                                        disabledReason;
+                                        invitedTime;
+                                        updatedTime;
+                                        volumeUsageInBytes;
+                                        volumeUsageUpdatedTime;
+                                        percentOfGraphUtilization;
+                                        percentOfGraphUtilizationUpdatedTime;
+                                        invitationType;
+                                        volumeUsageByDatasourcePackage;
+                                        datasourcePackageIngestStates
+                                      }
     let to_value x =
       structure_to_value
         [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
@@ -406,9 +1624,21 @@ module MemberDetail =
           (Option.map x.percentOfGraphUtilizationUpdatedTime
              ~f:Timestamp.to_value));
         ("InvitationType",
-          (Option.map x.invitationType ~f:InvitationType.to_value))]
+          (Option.map x.invitationType ~f:InvitationType.to_value));
+        ("VolumeUsageByDatasourcePackage",
+          (Option.map x.volumeUsageByDatasourcePackage
+             ~f:VolumeUsageByDatasourcePackage.to_value));
+        ("DatasourcePackageIngestStates",
+          (Option.map x.datasourcePackageIngestStates
+             ~f:DatasourcePackageIngestStates.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let datasourcePackageIngestStates =
+        (Option.map ~f:DatasourcePackageIngestStates.of_xml)
+          (Xml.child xml_arg0 "DatasourcePackageIngestStates") in
+      let volumeUsageByDatasourcePackage =
+        (Option.map ~f:VolumeUsageByDatasourcePackage.of_xml)
+          (Xml.child xml_arg0 "VolumeUsageByDatasourcePackage") in
       let invitationType =
         (Option.map ~f:InvitationType.of_xml)
           (Xml.child xml_arg0 "InvitationType") in
@@ -445,40 +1675,269 @@ module MemberDetail =
           (Xml.child xml_arg0 "EmailAddress") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ?invitationType ?percentOfGraphUtilizationUpdatedTime
+      make ?datasourcePackageIngestStates ?volumeUsageByDatasourcePackage
+        ?invitationType ?percentOfGraphUtilizationUpdatedTime
         ?percentOfGraphUtilization ?volumeUsageUpdatedTime
         ?volumeUsageInBytes ?updatedTime ?invitedTime ?disabledReason ?status
         ?administratorId ?masterId ?graphArn ?emailAddress ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let datasourcePackageIngestStates =
+        field_map json__ "DatasourcePackageIngestStates"
+          DatasourcePackageIngestStates.of_json in
+      let volumeUsageByDatasourcePackage =
+        field_map json__ "VolumeUsageByDatasourcePackage"
+          VolumeUsageByDatasourcePackage.of_json in
       let invitationType =
-        field_map json "InvitationType" InvitationType.of_json in
+        field_map json__ "InvitationType" InvitationType.of_json in
       let percentOfGraphUtilizationUpdatedTime =
-        field_map json "PercentOfGraphUtilizationUpdatedTime"
+        field_map json__ "PercentOfGraphUtilizationUpdatedTime"
           Timestamp.of_json in
       let percentOfGraphUtilization =
-        field_map json "PercentOfGraphUtilization" Percentage.of_json in
+        field_map json__ "PercentOfGraphUtilization" Percentage.of_json in
       let volumeUsageUpdatedTime =
-        field_map json "VolumeUsageUpdatedTime" Timestamp.of_json in
+        field_map json__ "VolumeUsageUpdatedTime" Timestamp.of_json in
       let volumeUsageInBytes =
-        field_map json "VolumeUsageInBytes" ByteValue.of_json in
-      let updatedTime = field_map json "UpdatedTime" Timestamp.of_json in
-      let invitedTime = field_map json "InvitedTime" Timestamp.of_json in
+        field_map json__ "VolumeUsageInBytes" ByteValue.of_json in
+      let updatedTime = field_map json__ "UpdatedTime" Timestamp.of_json in
+      let invitedTime = field_map json__ "InvitedTime" Timestamp.of_json in
       let disabledReason =
-        field_map json "DisabledReason" MemberDisabledReason.of_json in
-      let status = field_map json "Status" MemberStatus.of_json in
+        field_map json__ "DisabledReason" MemberDisabledReason.of_json in
+      let status = field_map json__ "Status" MemberStatus.of_json in
       let administratorId =
-        field_map json "AdministratorId" AccountId.of_json in
-      let masterId = field_map json "MasterId" AccountId.of_json in
-      let graphArn = field_map json "GraphArn" GraphArn.of_json in
-      let emailAddress = field_map json "EmailAddress" EmailAddress.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      make ?invitationType ?percentOfGraphUtilizationUpdatedTime
+        field_map json__ "AdministratorId" AccountId.of_json in
+      let masterId = field_map json__ "MasterId" AccountId.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?datasourcePackageIngestStates ?volumeUsageByDatasourcePackage
+        ?invitationType ?percentOfGraphUtilizationUpdatedTime
         ?percentOfGraphUtilization ?volumeUsageUpdatedTime
         ?volumeUsageInBytes ?updatedTime ?invitedTime ?disabledReason ?status
         ?administratorId ?masterId ?graphArn ?emailAddress ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a member account in a behavior graph."]
+module InvestigationDetail =
+  struct
+    type nonrec t =
+      {
+      investigationId: InvestigationId.t option
+        [@ocaml.doc "The investigation ID of the investigation report."];
+      severity: Severity.t option
+        [@ocaml.doc
+          "Severity based on the likelihood and impact of the indicators of compromise discovered in the investigation."];
+      status: Status.t option
+        [@ocaml.doc
+          "Status based on the completion status of the investigation."];
+      state: State.t option
+        [@ocaml.doc
+          "The current state of the investigation. An archived investigation indicates you have completed reviewing the investigation."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "The time stamp of the creation time of the investigation report. The value is an UTC ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."];
+      entityArn: EntityArn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) of the IAM user and IAM role."];
+      entityType: EntityType.t option
+        [@ocaml.doc
+          "Type of entity. For example, Amazon Web Services accounts, such as IAM user and role."]}
+    let make ?investigationId =
+      fun ?severity ->
+        fun ?status ->
+          fun ?state ->
+            fun ?createdTime ->
+              fun ?entityArn ->
+                fun ?entityType ->
+                  fun () ->
+                    {
+                      investigationId;
+                      severity;
+                      status;
+                      state;
+                      createdTime;
+                      entityArn;
+                      entityType
+                    }
+    let to_value x =
+      structure_to_value
+        [("InvestigationId",
+           (Option.map x.investigationId ~f:InvestigationId.to_value));
+        ("Severity", (Option.map x.severity ~f:Severity.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("State", (Option.map x.state ~f:State.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("EntityArn", (Option.map x.entityArn ~f:EntityArn.to_value));
+        ("EntityType", (Option.map x.entityType ~f:EntityType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entityType =
+        (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
+      let entityArn =
+        (Option.map ~f:EntityArn.of_xml) (Xml.child xml_arg0 "EntityArn") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "State") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let severity =
+        (Option.map ~f:Severity.of_xml) (Xml.child xml_arg0 "Severity") in
+      let investigationId =
+        (Option.map ~f:InvestigationId.of_xml)
+          (Xml.child xml_arg0 "InvestigationId") in
+      make ?entityType ?entityArn ?createdTime ?state ?status ?severity
+        ?investigationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      let entityArn = field_map json__ "EntityArn" EntityArn.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let state = field_map json__ "State" State.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let severity = field_map json__ "Severity" Severity.of_json in
+      let investigationId =
+        field_map json__ "InvestigationId" InvestigationId.of_json in
+      make ?entityType ?entityArn ?createdTime ?state ?status ?severity
+        ?investigationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the investigation related to a potential security event identified by Detective."]
+module DateFilter =
+  struct
+    type nonrec t =
+      {
+      startInclusive: Timestamp.t
+        [@ocaml.doc
+          "A timestamp representing the start of the time period from when data is filtered, including the start date."];
+      endInclusive: Timestamp.t
+        [@ocaml.doc
+          "A timestamp representing the end date of the time period until when data is filtered, including the end date."]}
+    let context_ = "DateFilter"
+    let make ~startInclusive =
+      fun ~endInclusive -> fun () -> { startInclusive; endInclusive }
+    let to_value x =
+      structure_to_value
+        [("StartInclusive", (Some (Timestamp.to_value x.startInclusive)));
+        ("EndInclusive", (Some (Timestamp.to_value x.endInclusive)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endInclusive =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndInclusive") in
+      let startInclusive =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartInclusive") in
+      make ~endInclusive ~startInclusive ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endInclusive =
+        field_map_exn json__ "EndInclusive" Timestamp.of_json in
+      let startInclusive =
+        field_map_exn json__ "StartInclusive" Timestamp.of_json in
+      make ~endInclusive ~startInclusive ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains details on the time range used to filter data."]
+module StringFilter =
+  struct
+    type nonrec t = {
+      value: Value.t [@ocaml.doc "The string filter value."]}
+    let context_ = "StringFilter"
+    let make ~value = fun () -> { value }
+    let to_value x =
+      structure_to_value [("Value", (Some (Value.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        Value.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      make ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Value.of_json in
+      make ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A string for filtering Detective investigations."]
+module Field =
+  struct
+    type nonrec t =
+      | SEVERITY 
+      | STATUS 
+      | CREATED_TIME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEVERITY -> "SEVERITY"
+      | STATUS -> "STATUS"
+      | CREATED_TIME -> "CREATED_TIME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEVERITY" -> SEVERITY
+      | "STATUS" -> STATUS
+      | "CREATED_TIME" -> CREATED_TIME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Field" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Field" j)
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASC 
+      | DESC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ASC -> "ASC" | DESC -> "DESC" | Non_static_id s -> s
+    let of_string =
+      function | "ASC" -> ASC | "DESC" -> DESC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module Indicator =
+  struct
+    type nonrec t =
+      {
+      indicatorType: IndicatorType.t option
+        [@ocaml.doc "The type of indicator."];
+      indicatorDetail: IndicatorDetail.t option
+        [@ocaml.doc
+          "Details about the indicators of compromise that are used to determine if a resource is involved in a security incident. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident."]}
+    let make ?indicatorType =
+      fun ?indicatorDetail -> fun () -> { indicatorType; indicatorDetail }
+    let to_value x =
+      structure_to_value
+        [("IndicatorType",
+           (Option.map x.indicatorType ~f:IndicatorType.to_value));
+        ("IndicatorDetail",
+          (Option.map x.indicatorDetail ~f:IndicatorDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let indicatorDetail =
+        (Option.map ~f:IndicatorDetail.of_xml)
+          (Xml.child xml_arg0 "IndicatorDetail") in
+      let indicatorType =
+        (Option.map ~f:IndicatorType.of_xml)
+          (Xml.child xml_arg0 "IndicatorType") in
+      make ?indicatorDetail ?indicatorType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let indicatorDetail =
+        field_map json__ "IndicatorDetail" IndicatorDetail.of_json in
+      let indicatorType =
+        field_map json__ "IndicatorType" IndicatorType.of_json in
+      make ?indicatorDetail ?indicatorType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations triages indicators of compromises such as a finding and surfaces only the most critical and suspicious issues, so you can focus on high-level investigations. An Indicator lets you determine if an Amazon Web Services resource is involved in unusual activity that could indicate malicious behavior and its impact."]
 module Graph =
   struct
     type nonrec t =
@@ -499,12 +1958,54 @@ module Graph =
       let arn = (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?createdTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdTime = field_map json "CreatedTime" Timestamp.of_json in
-      let arn = field_map json "Arn" GraphArn.of_json in
+    let of_json json__ =
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let arn = field_map json__ "Arn" GraphArn.of_json in
       make ?createdTime ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A behavior graph in Detective."]
+module DatasourcePackageIngestDetail =
+  struct
+    type nonrec t =
+      {
+      datasourcePackageIngestState: DatasourcePackageIngestState.t option
+        [@ocaml.doc
+          "Details on which data source packages are ingested for a member account."];
+      lastIngestStateChange: LastIngestStateChangeDates.t option
+        [@ocaml.doc
+          "The date a data source package was enabled for this account"]}
+    let make ?datasourcePackageIngestState =
+      fun ?lastIngestStateChange ->
+        fun () -> { datasourcePackageIngestState; lastIngestStateChange }
+    let to_value x =
+      structure_to_value
+        [("DatasourcePackageIngestState",
+           (Option.map x.datasourcePackageIngestState
+              ~f:DatasourcePackageIngestState.to_value));
+        ("LastIngestStateChange",
+          (Option.map x.lastIngestStateChange
+             ~f:LastIngestStateChangeDates.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastIngestStateChange =
+        (Option.map ~f:LastIngestStateChangeDates.of_xml)
+          (Xml.child xml_arg0 "LastIngestStateChange") in
+      let datasourcePackageIngestState =
+        (Option.map ~f:DatasourcePackageIngestState.of_xml)
+          (Xml.child xml_arg0 "DatasourcePackageIngestState") in
+      make ?lastIngestStateChange ?datasourcePackageIngestState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastIngestStateChange =
+        field_map json__ "LastIngestStateChange"
+          LastIngestStateChangeDates.of_json in
+      let datasourcePackageIngestState =
+        field_map json__ "DatasourcePackageIngestState"
+          DatasourcePackageIngestState.of_json in
+      make ?lastIngestStateChange ?datasourcePackageIngestState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the data source packages ingested by your behavior graph."]
 module UnprocessedAccount =
   struct
     type nonrec t =
@@ -529,13 +2030,44 @@ module UnprocessedAccount =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?reason ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" UnprocessedReason.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" UnprocessedReason.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?reason ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A member account that was included in a request but for which the request could not be processed."]
+module ResourceList =
+  struct
+    type nonrec t = Resource.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Resource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceList" ~of_json:Resource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Account =
   struct
     type nonrec t =
@@ -563,14 +2095,88 @@ module Account =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~emailAddress ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~emailAddress ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon Web Services account that is the administrator account of or a member of a behavior graph."]
+module MembershipDatasources =
+  struct
+    type nonrec t =
+      {
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The account identifier of the Amazon Web Services account."];
+      graphArn: GraphArn.t option
+        [@ocaml.doc "The ARN of the organization behavior graph."];
+      datasourcePackageIngestHistory: DatasourcePackageIngestHistory.t option
+        [@ocaml.doc
+          "Details on when a data source package was added to a behavior graph."]}
+    let make ?accountId =
+      fun ?graphArn ->
+        fun ?datasourcePackageIngestHistory ->
+          fun () -> { accountId; graphArn; datasourcePackageIngestHistory }
+    let to_value x =
+      structure_to_value
+        [("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("GraphArn", (Option.map x.graphArn ~f:GraphArn.to_value));
+        ("DatasourcePackageIngestHistory",
+          (Option.map x.datasourcePackageIngestHistory
+             ~f:DatasourcePackageIngestHistory.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasourcePackageIngestHistory =
+        (Option.map ~f:DatasourcePackageIngestHistory.of_xml)
+          (Xml.child xml_arg0 "DatasourcePackageIngestHistory") in
+      let graphArn =
+        (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      make ?datasourcePackageIngestHistory ?graphArn ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasourcePackageIngestHistory =
+        field_map json__ "DatasourcePackageIngestHistory"
+          DatasourcePackageIngestHistory.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      make ?datasourcePackageIngestHistory ?graphArn ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details on data source packages for members of the behavior graph."]
+module UnprocessedGraph =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t option
+        [@ocaml.doc "The ARN of the organization behavior graph."];
+      reason: UnprocessedReason.t option
+        [@ocaml.doc
+          "The reason data source package information could not be processed for a behavior graph."]}
+    let make ?graphArn = fun ?reason -> fun () -> { graphArn; reason }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Option.map x.graphArn ~f:GraphArn.to_value));
+        ("Reason", (Option.map x.reason ~f:UnprocessedReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:UnprocessedReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
+      let graphArn =
+        (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
+      make ?reason ?graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "Reason" UnprocessedReason.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      make ?reason ?graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Behavior graphs that could not be processed in the request."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -584,6 +2190,105 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module DatasourcePackageList =
+  struct
+    type nonrec t = DatasourcePackage.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DatasourcePackage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DatasourcePackage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatasourcePackageList"
+        ~of_json:DatasourcePackage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccessDeniedException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      errorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The SDK default error code associated with the access denied exception."];
+      errorCodeReason: ErrorCodeReason.t option
+        [@ocaml.doc "The SDK default explanation of why access was denied."];
+      subErrorCode: ErrorCode.t option
+        [@ocaml.doc
+          "The error code associated with the access denied exception."];
+      subErrorCodeReason: ErrorCodeReason.t option
+        [@ocaml.doc "An explanation of why access was denied."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?errorCodeReason ->
+          fun ?subErrorCode ->
+            fun ?subErrorCodeReason ->
+              fun () ->
+                {
+                  message;
+                  errorCode;
+                  errorCodeReason;
+                  subErrorCode;
+                  subErrorCodeReason
+                }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorCodeReason",
+          (Option.map x.errorCodeReason ~f:ErrorCodeReason.to_value));
+        ("SubErrorCode", (Option.map x.subErrorCode ~f:ErrorCode.to_value));
+        ("SubErrorCodeReason",
+          (Option.map x.subErrorCodeReason ~f:ErrorCodeReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subErrorCodeReason =
+        (Option.map ~f:ErrorCodeReason.of_xml)
+          (Xml.child xml_arg0 "SubErrorCodeReason") in
+      let subErrorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "SubErrorCode") in
+      let errorCodeReason =
+        (Option.map ~f:ErrorCodeReason.of_xml)
+          (Xml.child xml_arg0 "ErrorCodeReason") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?subErrorCodeReason ?subErrorCode ?errorCodeReason ?errorCode
+        ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subErrorCodeReason =
+        field_map json__ "SubErrorCodeReason" ErrorCodeReason.of_json in
+      let subErrorCode = field_map json__ "SubErrorCode" ErrorCode.of_json in
+      let errorCodeReason =
+        field_map json__ "ErrorCodeReason" ErrorCodeReason.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?subErrorCodeReason ?subErrorCode ?errorCodeReason ?errorCode
+        ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request issuer does not have permission to access this resource or perform this operation."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -598,8 +2303,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -618,28 +2323,47 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request refers to a nonexistent resource."]
 module ValidationException =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      errorCode: ErrorCode.t option
+        [@ocaml.doc "The error code associated with the validation failure."];
+      errorCodeReason: ErrorCodeReason.t option
+        [@ocaml.doc "An explanation of why validation failed."]}
+    let make ?message =
+      fun ?errorCode ->
+        fun ?errorCodeReason ->
+          fun () -> { message; errorCode; errorCodeReason }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorCodeReason",
+          (Option.map x.errorCodeReason ~f:ErrorCodeReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let errorCodeReason =
+        (Option.map ~f:ErrorCodeReason.of_xml)
+          (Xml.child xml_arg0 "ErrorCodeReason") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
+      make ?errorCodeReason ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let errorCodeReason =
+        field_map json__ "ErrorCodeReason" ErrorCodeReason.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?errorCodeReason ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request parameters are invalid."]
 module TagKeyList =
@@ -650,6 +2374,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -694,6 +2421,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -701,10 +2430,33 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TooManyRequestsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request cannot be completed because too many other requests are occurring at the same time."]
 module AdministratorList =
   struct
     type nonrec t = Administrator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Administrator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -743,26 +2495,6 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
-module TooManyRequestsException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request cannot be completed because too many other requests are occurring at the same time."]
 module MemberResultsLimit =
   struct
     type nonrec t = int
@@ -785,6 +2517,9 @@ module MemberDetailList =
   struct
     type nonrec t = MemberDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MemberDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -805,10 +2540,186 @@ module MemberDetailList =
       list_of_json ~kind:"MemberDetailList" ~of_json:MemberDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AiPaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "AiPaginationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AiPaginationToken" j
+    let to_json = simple_to_json to_value
+  end
+module InvestigationDetails =
+  struct
+    type nonrec t = InvestigationDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InvestigationDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InvestigationDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InvestigationDetails"
+        ~of_json:InvestigationDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FilterCriteria =
+  struct
+    type nonrec t =
+      {
+      severity: StringFilter.t option
+        [@ocaml.doc
+          "Filter the investigation results based on the severity."];
+      status: StringFilter.t option
+        [@ocaml.doc "Filter the investigation results based on the status."];
+      state: StringFilter.t option
+        [@ocaml.doc "Filter the investigation results based on the state."];
+      entityArn: StringFilter.t option
+        [@ocaml.doc
+          "Filter the investigation results based on the Amazon Resource Name (ARN) of the entity."];
+      createdTime: DateFilter.t option
+        [@ocaml.doc
+          "Filter the investigation results based on when the investigation was created."]}
+    let make ?severity =
+      fun ?status ->
+        fun ?state ->
+          fun ?entityArn ->
+            fun ?createdTime ->
+              fun () -> { severity; status; state; entityArn; createdTime }
+    let to_value x =
+      structure_to_value
+        [("Severity", (Option.map x.severity ~f:StringFilter.to_value));
+        ("Status", (Option.map x.status ~f:StringFilter.to_value));
+        ("State", (Option.map x.state ~f:StringFilter.to_value));
+        ("EntityArn", (Option.map x.entityArn ~f:StringFilter.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:DateFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTime =
+        (Option.map ~f:DateFilter.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let entityArn =
+        (Option.map ~f:StringFilter.of_xml) (Xml.child xml_arg0 "EntityArn") in
+      let state =
+        (Option.map ~f:StringFilter.of_xml) (Xml.child xml_arg0 "State") in
+      let status =
+        (Option.map ~f:StringFilter.of_xml) (Xml.child xml_arg0 "Status") in
+      let severity =
+        (Option.map ~f:StringFilter.of_xml) (Xml.child xml_arg0 "Severity") in
+      make ?createdTime ?entityArn ?state ?status ?severity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTime = field_map json__ "CreatedTime" DateFilter.of_json in
+      let entityArn = field_map json__ "EntityArn" StringFilter.of_json in
+      let state = field_map json__ "State" StringFilter.of_json in
+      let status = field_map json__ "Status" StringFilter.of_json in
+      let severity = field_map json__ "Severity" StringFilter.of_json in
+      make ?createdTime ?entityArn ?state ?status ?severity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details on the criteria used to define the filter for investigation results."]
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SortCriteria =
+  struct
+    type nonrec t =
+      {
+      field: Field.t option
+        [@ocaml.doc "Represents the Field attribute to sort investigations."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc "The order by which the sorted findings are displayed."]}
+    let make ?field = fun ?sortOrder -> fun () -> { field; sortOrder }
+    let to_value x =
+      structure_to_value
+        [("Field", (Option.map x.field ~f:Field.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let field = (Option.map ~f:Field.of_xml) (Xml.child xml_arg0 "Field") in
+      make ?sortOrder ?field ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let field = field_map json__ "Field" Field.of_json in
+      make ?sortOrder ?field ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the criteria used for sorting investigations."]
+module Indicators =
+  struct
+    type nonrec t = Indicator.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Indicator.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Indicator.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Indicators" ~of_json:Indicator.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module GraphList =
   struct
     type nonrec t = Graph.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Graph.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -828,10 +2739,48 @@ module GraphList =
     let of_json j = list_of_json ~kind:"GraphList" ~of_json:Graph.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DatasourcePackageIngestDetails =
+  struct
+    type nonrec t =
+      (DatasourcePackage.t * DatasourcePackageIngestDetail.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types DatasourcePackage DatasourcePackageIngestDetail"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DatasourcePackage.to_value x) |>
+                    (fun x ->
+                       (DatasourcePackageIngestDetail.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DatasourcePackage.of_string
+        ~of_json:DatasourcePackageIngestDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UnprocessedAccountList =
   struct
     type nonrec t = UnprocessedAccount.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnprocessedAccount.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -861,6 +2810,9 @@ module AccountIdList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -895,31 +2847,39 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request attempted an invalid action."]
 module ServiceQuotaExceededException =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      resources: ResourceList.t option
+        [@ocaml.doc
+          "The type of resource that has exceeded the service quota."]}
+    let make ?message = fun ?resources -> fun () -> { message; resources }
     let to_value x =
       structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("Resources", (Option.map x.resources ~f:ResourceList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resources =
+        (Option.map ~f:ResourceList.of_xml) (Xml.child xml_arg0 "Resources") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
+      make ?resources ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let resources = field_map json__ "Resources" ResourceList.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?resources ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This request cannot be completed for one of the following reasons. The request would cause the number of member accounts in the behavior graph to exceed the maximum allowed. A behavior graph cannot have more than 1200 member accounts. The request would cause the data rate for the behavior graph to exceed the maximum allowed. Detective is unable to verify the data rate for the member account. This is usually because the member account is not enrolled in Amazon GuardDuty."]
+       "This request cannot be completed for one of the following reasons. This request cannot be completed if it would cause the number of member accounts in the behavior graph to exceed the maximum allowed. A behavior graph cannot have more than 1,200 member accounts. This request cannot be completed if the current volume ingested is above the limit of 10 TB per day. Detective will not allow you to add additional member accounts."]
 module AccountList =
   struct
     type nonrec t = Account.t list
@@ -928,6 +2888,9 @@ module AccountList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Account.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -966,6 +2929,126 @@ module EmailMessage =
     let of_json j = string_of_json ~kind:"EmailMessage" j
     let to_json = simple_to_json to_value
   end
+module MembershipDatasourcesList =
+  struct
+    type nonrec t = MembershipDatasources.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MembershipDatasources.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MembershipDatasources.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MembershipDatasourcesList"
+        ~of_json:MembershipDatasources.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnprocessedGraphList =
+  struct
+    type nonrec t = UnprocessedGraph.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UnprocessedGraph.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UnprocessedGraph.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UnprocessedGraphList"
+        ~of_json:UnprocessedGraph.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GraphArnList =
+  struct
+    type nonrec t = GraphArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GraphArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GraphArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GraphArnList" ~of_json:GraphArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AccountIdExtendedList =
+  struct
+    type nonrec t = AccountId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdExtendedList" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpdateOrganizationConfigurationRequest =
   struct
     type nonrec t =
@@ -990,24 +3073,101 @@ module UpdateOrganizationConfigurationRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ?autoEnable ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoEnable = field_map json "AutoEnable" Boolean.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ?autoEnable ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the configuration for the Organizations integration in the current Region. Can only be called by the Detective administrator account for the organization."]
+module UpdateInvestigationStateRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      investigationId: InvestigationId.t
+        [@ocaml.doc "The investigation ID of the investigation report."];
+      state: State.t
+        [@ocaml.doc
+          "The current state of the investigation. An archived investigation indicates you have completed reviewing the investigation."]}
+    let context_ = "UpdateInvestigationStateRequest"
+    let make ~graphArn =
+      fun ~investigationId ->
+        fun ~state -> fun () -> { graphArn; investigationId; state }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("InvestigationId",
+          (Some (InvestigationId.to_value x.investigationId)));
+        ("State", (Some (State.to_value x.state)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        State.of_xml (Xml.child_exn ~context:context_ xml_arg0 "State") in
+      let investigationId =
+        InvestigationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InvestigationId") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ~state ~investigationId ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map_exn json__ "State" State.of_json in
+      let investigationId =
+        field_map_exn json__ "InvestigationId" InvestigationId.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ~state ~investigationId ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the state of an investigation."]
+module UpdateDatasourcePackagesRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t [@ocaml.doc "The ARN of the behavior graph."];
+      datasourcePackages: DatasourcePackageList.t
+        [@ocaml.doc
+          "The data source package to start for the behavior graph."]}
+    let context_ = "UpdateDatasourcePackagesRequest"
+    let make ~graphArn =
+      fun ~datasourcePackages -> fun () -> { graphArn; datasourcePackages }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("DatasourcePackages",
+          (Some (DatasourcePackageList.to_value x.datasourcePackages)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasourcePackages =
+        DatasourcePackageList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DatasourcePackages") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ~datasourcePackages ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasourcePackages =
+        field_map_exn json__ "DatasourcePackages"
+          DatasourcePackageList.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ~datasourcePackages ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Starts a data source package for the Detective behavior graph."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1019,6 +3179,8 @@ module UntagResourceResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1029,6 +3191,10 @@ module UntagResourceResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1080,9 +3246,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" GraphArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a behavior graph."]
@@ -1090,13 +3256,16 @@ module TagResourceResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1108,6 +3277,8 @@ module TagResourceResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1118,6 +3289,10 @@ module TagResourceResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1167,9 +3342,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" GraphArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies tag values to a behavior graph."]
@@ -1196,13 +3371,154 @@ module StartMonitoringMemberRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountId ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~accountId ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sends a request to enable data ingest for a member account that has a status of ACCEPTED_BUT_DISABLED. For valid member accounts, the status is updated as follows. If Detective enabled the member account, then the new status is ENABLED. If Detective cannot enable the member account, the status remains ACCEPTED_BUT_DISABLED."]
+module StartInvestigationResponse =
+  struct
+    type nonrec t =
+      {
+      investigationId: InvestigationId.t option
+        [@ocaml.doc "The investigation ID of the investigation report."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?investigationId = fun () -> { investigationId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InvestigationId",
+           (Option.map x.investigationId ~f:InvestigationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let investigationId =
+        (Option.map ~f:InvestigationId.of_xml)
+          (Xml.child xml_arg0 "InvestigationId") in
+      make ?investigationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let investigationId =
+        field_map json__ "InvestigationId" InvestigationId.of_json in
+      make ?investigationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. StartInvestigation initiates an investigation on an entity in a behavior graph."]
+module StartInvestigationRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      entityArn: EntityArn.t
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN) of the IAM user and IAM role."];
+      scopeStartTime: Timestamp.t
+        [@ocaml.doc
+          "The data and time when the investigation began. The value is an UTC ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."];
+      scopeEndTime: Timestamp.t
+        [@ocaml.doc
+          "The data and time when the investigation ended. The value is an UTC ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."]}
+    let context_ = "StartInvestigationRequest"
+    let make ~graphArn =
+      fun ~entityArn ->
+        fun ~scopeStartTime ->
+          fun ~scopeEndTime ->
+            fun () -> { graphArn; entityArn; scopeStartTime; scopeEndTime }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("EntityArn", (Some (EntityArn.to_value x.entityArn)));
+        ("ScopeStartTime", (Some (Timestamp.to_value x.scopeStartTime)));
+        ("ScopeEndTime", (Some (Timestamp.to_value x.scopeEndTime)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scopeEndTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScopeEndTime") in
+      let scopeStartTime =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScopeStartTime") in
+      let entityArn =
+        EntityArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EntityArn") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ~scopeEndTime ~scopeStartTime ~entityArn ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scopeEndTime =
+        field_map_exn json__ "ScopeEndTime" Timestamp.of_json in
+      let scopeStartTime =
+        field_map_exn json__ "ScopeStartTime" Timestamp.of_json in
+      let entityArn = field_map_exn json__ "EntityArn" EntityArn.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ~scopeEndTime ~scopeStartTime ~entityArn ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. StartInvestigation initiates an investigation on an entity in a behavior graph."]
 module RejectInvitationRequest =
   struct
     type nonrec t =
@@ -1221,8 +3537,8 @@ module RejectInvitationRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1235,13 +3551,16 @@ module ListTagsForResourceResponse =
         [@ocaml.doc
           "The tag values that are assigned to the behavior graph. The request returns up to 50 tag values."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?tags = fun () -> { tags }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1253,6 +3572,8 @@ module ListTagsForResourceResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1263,6 +3584,10 @@ module ListTagsForResourceResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1287,8 +3612,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the tag values that are assigned to a behavior graph."]
@@ -1311,8 +3636,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" GraphArn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" GraphArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1322,12 +3647,13 @@ module ListOrganizationAdminAccountsResponse =
     type nonrec t =
       {
       administrators: AdministratorList.t option
-        [@ocaml.doc "The list of delegated administrator accounts."];
+        [@ocaml.doc "The list of Detective administrator accounts."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "If there are more accounts remaining in the results, then this is the pagination token to use to request the next page of accounts."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1335,6 +3661,8 @@ module ListOrganizationAdminAccountsResponse =
       fun ?nextToken -> fun () -> { administrators; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "TooManyRequestsException" ->
@@ -1346,6 +3674,8 @@ module ListOrganizationAdminAccountsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "TooManyRequestsException" ->
@@ -1356,6 +3686,10 @@ module ListOrganizationAdminAccountsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1388,10 +3722,10 @@ module ListOrganizationAdminAccountsResponse =
           (Xml.child xml_arg0 "Administrators") in
       make ?nextToken ?administrators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let administrators =
-        field_map json "Administrators" AdministratorList.of_json in
+        field_map json__ "Administrators" AdministratorList.of_json in
       make ?nextToken ?administrators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1422,9 +3756,10 @@ module ListOrganizationAdminAccountsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MemberResultsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1440,7 +3775,8 @@ module ListMembersResponse =
         [@ocaml.doc
           "If there are more member accounts remaining in the results, then use this pagination token to request the next page of member accounts."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1448,6 +3784,8 @@ module ListMembersResponse =
       fun ?nextToken -> fun () -> { memberDetails; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1459,6 +3797,8 @@ module ListMembersResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1469,6 +3809,10 @@ module ListMembersResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1501,10 +3845,10 @@ module ListMembersResponse =
           (Xml.child xml_arg0 "MemberDetails") in
       make ?nextToken ?memberDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let memberDetails =
-        field_map json "MemberDetails" MemberDetailList.of_json in
+        field_map json__ "MemberDetails" MemberDetailList.of_json in
       make ?nextToken ?memberDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1544,10 +3888,11 @@ module ListMembersRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ?maxResults ?nextToken ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MemberResultsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ?maxResults ?nextToken ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1563,13 +3908,16 @@ module ListInvitationsResponse =
         [@ocaml.doc
           "If there are more behavior graphs remaining in the results, then this is the pagination token to use to request the next page of behavior graphs."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?invitations =
       fun ?nextToken -> fun () -> { invitations; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ValidationException" ->
@@ -1579,6 +3927,8 @@ module ListInvitationsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ValidationException" ->
@@ -1587,6 +3937,10 @@ module ListInvitationsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1615,9 +3969,10 @@ module ListInvitationsResponse =
           (Xml.child xml_arg0 "Invitations") in
       make ?nextToken ?invitations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let invitations = field_map json "Invitations" MemberDetailList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let invitations =
+        field_map json__ "Invitations" MemberDetailList.of_json in
       make ?nextToken ?invitations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1649,13 +4004,361 @@ module ListInvitationsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MemberResultsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of open and accepted behavior graph invitations for the member account. This operation can only be called by an invited member account. Open invitations are invitations that the member account has not responded to. The results do not include behavior graphs for which the member account declined the invitation. The results also do not include behavior graphs that the member account resigned from or was removed from."]
+module ListInvestigationsResponse =
+  struct
+    type nonrec t =
+      {
+      investigationDetails: InvestigationDetails.t option
+        [@ocaml.doc
+          "Lists the summary of uncommon behavior or malicious activity which indicates a compromise."];
+      nextToken: AiPaginationToken.t option
+        [@ocaml.doc
+          "Lists if there are more results available. The value of nextToken is a unique pagination token for each page. Repeat the call using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?investigationDetails =
+      fun ?nextToken -> fun () -> { investigationDetails; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InvestigationDetails",
+           (Option.map x.investigationDetails
+              ~f:InvestigationDetails.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:AiPaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:AiPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let investigationDetails =
+        (Option.map ~f:InvestigationDetails.of_xml)
+          (Xml.child xml_arg0 "InvestigationDetails") in
+      make ?nextToken ?investigationDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" AiPaginationToken.of_json in
+      let investigationDetails =
+        field_map json__ "InvestigationDetails" InvestigationDetails.of_json in
+      make ?nextToken ?investigationDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. ListInvestigations lists all active Detective investigations."]
+module ListInvestigationsRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      nextToken: AiPaginationToken.t option
+        [@ocaml.doc
+          "Lists if there are more results available. The value of nextToken is a unique pagination token for each page. Repeat the call using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a Validation Exception error."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Lists the maximum number of investigations in a page."];
+      filterCriteria: FilterCriteria.t option
+        [@ocaml.doc "Filters the investigation results based on a criteria."];
+      sortCriteria: SortCriteria.t option
+        [@ocaml.doc "Sorts the investigation results based on a criteria."]}
+    let context_ = "ListInvestigationsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?filterCriteria ->
+          fun ?sortCriteria ->
+            fun ~graphArn ->
+              fun () ->
+                {
+                  nextToken;
+                  maxResults;
+                  filterCriteria;
+                  sortCriteria;
+                  graphArn
+                }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("NextToken", (Option.map x.nextToken ~f:AiPaginationToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("FilterCriteria",
+          (Option.map x.filterCriteria ~f:FilterCriteria.to_value));
+        ("SortCriteria",
+          (Option.map x.sortCriteria ~f:SortCriteria.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortCriteria =
+        (Option.map ~f:SortCriteria.of_xml)
+          (Xml.child xml_arg0 "SortCriteria") in
+      let filterCriteria =
+        (Option.map ~f:FilterCriteria.of_xml)
+          (Xml.child xml_arg0 "FilterCriteria") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:AiPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ?sortCriteria ?filterCriteria ?maxResults ?nextToken ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortCriteria = field_map json__ "SortCriteria" SortCriteria.of_json in
+      let filterCriteria =
+        field_map json__ "FilterCriteria" FilterCriteria.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" AiPaginationToken.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ?sortCriteria ?filterCriteria ?maxResults ?nextToken ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. ListInvestigations lists all active Detective investigations."]
+module ListIndicatorsResponse =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      investigationId: InvestigationId.t option
+        [@ocaml.doc "The investigation ID of the investigation report."];
+      nextToken: AiPaginationToken.t option
+        [@ocaml.doc
+          "Lists if there are more results available. The value of nextToken is a unique pagination token for each page. Repeat the call using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a Validation Exception error."];
+      indicators: Indicators.t option
+        [@ocaml.doc "Lists the indicators of compromise."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?graphArn =
+      fun ?investigationId ->
+        fun ?nextToken ->
+          fun ?indicators ->
+            fun () -> { graphArn; investigationId; nextToken; indicators }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Option.map x.graphArn ~f:GraphArn.to_value));
+        ("InvestigationId",
+          (Option.map x.investigationId ~f:InvestigationId.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:AiPaginationToken.to_value));
+        ("Indicators", (Option.map x.indicators ~f:Indicators.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let indicators =
+        (Option.map ~f:Indicators.of_xml) (Xml.child xml_arg0 "Indicators") in
+      let nextToken =
+        (Option.map ~f:AiPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let investigationId =
+        (Option.map ~f:InvestigationId.of_xml)
+          (Xml.child xml_arg0 "InvestigationId") in
+      let graphArn =
+        (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
+      make ?indicators ?nextToken ?investigationId ?graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let indicators = field_map json__ "Indicators" Indicators.of_json in
+      let nextToken = field_map json__ "NextToken" AiPaginationToken.of_json in
+      let investigationId =
+        field_map json__ "InvestigationId" InvestigationId.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      make ?indicators ?nextToken ?investigationId ?graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the indicators from an investigation. You can use the information from the indicators to determine if an IAM user and/or IAM role is involved in an unusual activity that could indicate malicious behavior and its impact."]
+module ListIndicatorsRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      investigationId: InvestigationId.t
+        [@ocaml.doc "The investigation ID of the investigation report."];
+      indicatorType: IndicatorType.t option
+        [@ocaml.doc
+          "For the list of indicators of compromise that are generated by Detective investigations, see Detective investigations."];
+      nextToken: AiPaginationToken.t option
+        [@ocaml.doc
+          "Lists if there are more results available. The value of nextToken is a unique pagination token for each page. Repeat the call using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours. Using an expired pagination token will return a Validation Exception error."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "Lists the maximum number of indicators in a page."]}
+    let context_ = "ListIndicatorsRequest"
+    let make ?indicatorType =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~graphArn ->
+            fun ~investigationId ->
+              fun () ->
+                {
+                  indicatorType;
+                  nextToken;
+                  maxResults;
+                  graphArn;
+                  investigationId
+                }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("InvestigationId",
+          (Some (InvestigationId.to_value x.investigationId)));
+        ("IndicatorType",
+          (Option.map x.indicatorType ~f:IndicatorType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:AiPaginationToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:AiPaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let indicatorType =
+        (Option.map ~f:IndicatorType.of_xml)
+          (Xml.child xml_arg0 "IndicatorType") in
+      let investigationId =
+        InvestigationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InvestigationId") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ?maxResults ?nextToken ?indicatorType ~investigationId ~graphArn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" AiPaginationToken.of_json in
+      let indicatorType =
+        field_map json__ "IndicatorType" IndicatorType.of_json in
+      let investigationId =
+        field_map_exn json__ "InvestigationId" InvestigationId.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ?maxResults ?nextToken ?indicatorType ~investigationId ~graphArn
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the indicators from an investigation. You can use the information from the indicators to determine if an IAM user and/or IAM role is involved in an unusual activity that could indicate malicious behavior and its impact."]
 module ListGraphsResponse =
   struct
     type nonrec t =
@@ -1667,13 +4370,16 @@ module ListGraphsResponse =
         [@ocaml.doc
           "If there are more behavior graphs remaining in the results, then this is the pagination token to use to request the next page of behavior graphs."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?graphList =
       fun ?nextToken -> fun () -> { graphList; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ValidationException" ->
@@ -1683,6 +4389,8 @@ module ListGraphsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ValidationException" ->
@@ -1691,6 +4399,10 @@ module ListGraphsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1717,9 +4429,9 @@ module ListGraphsResponse =
         (Option.map ~f:GraphList.of_xml) (Xml.child xml_arg0 "GraphList") in
       make ?nextToken ?graphList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let graphList = field_map json "GraphList" GraphList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let graphList = field_map json__ "GraphList" GraphList.of_json in
       make ?nextToken ?graphList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1751,33 +4463,36 @@ module ListGraphsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MemberResultsLimit.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MemberResultsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the list of behavior graphs that the calling account is an administrator account of. This operation can only be called by an administrator account. Because an account can currently only be the administrator of one behavior graph within a Region, the results always contain a single behavior graph."]
-module GetMembersResponse =
+module ListDatasourcePackagesResponse =
   struct
     type nonrec t =
       {
-      memberDetails: MemberDetailList.t option
+      datasourcePackages: DatasourcePackageIngestDetails.t option
         [@ocaml.doc
-          "The member account details that Detective is returning in response to the request."];
-      unprocessedAccounts: UnprocessedAccountList.t option
+          "Details on the data source packages active in the behavior graph."];
+      nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The requested member accounts for which Detective was unable to return member details. For each account, provides the reason why the request could not be processed."]}
+          "For requests to get the next page of results, the pagination token that was returned with the previous set of results. The initial request does not include a pagination token."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?memberDetails =
-      fun ?unprocessedAccounts ->
-        fun () -> { memberDetails; unprocessedAccounts }
+    let make ?datasourcePackages =
+      fun ?nextToken -> fun () -> { datasourcePackages; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1789,6 +4504,8 @@ module GetMembersResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1799,6 +4516,141 @@ module GetMembersResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DatasourcePackages",
+           (Option.map x.datasourcePackages
+              ~f:DatasourcePackageIngestDetails.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let datasourcePackages =
+        (Option.map ~f:DatasourcePackageIngestDetails.of_xml)
+          (Xml.child xml_arg0 "DatasourcePackages") in
+      make ?nextToken ?datasourcePackages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let datasourcePackages =
+        field_map json__ "DatasourcePackages"
+          DatasourcePackageIngestDetails.of_json in
+      make ?nextToken ?datasourcePackages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists data source packages in the behavior graph."]
+module ListDatasourcePackagesRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t [@ocaml.doc "The ARN of the behavior graph."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "For requests to get the next page of results, the pagination token that was returned with the previous set of results. The initial request does not include a pagination token."];
+      maxResults: MemberResultsLimit.t option
+        [@ocaml.doc "The maximum number of results to return."]}
+    let context_ = "ListDatasourcePackagesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~graphArn -> fun () -> { nextToken; maxResults; graphArn }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MemberResultsLimit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MemberResultsLimit.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ?maxResults ?nextToken ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MemberResultsLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ?maxResults ?nextToken ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists data source packages in the behavior graph."]
+module GetMembersResponse =
+  struct
+    type nonrec t =
+      {
+      memberDetails: MemberDetailList.t option
+        [@ocaml.doc
+          "The member account details that Detective is returning in response to the request."];
+      unprocessedAccounts: UnprocessedAccountList.t option
+        [@ocaml.doc
+          "The requested member accounts for which Detective was unable to return member details. For each account, provides the reason why the request could not be processed."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?memberDetails =
+      fun ?unprocessedAccounts ->
+        fun () -> { memberDetails; unprocessedAccounts }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1833,11 +4685,11 @@ module GetMembersResponse =
           (Xml.child xml_arg0 "MemberDetails") in
       make ?unprocessedAccounts ?memberDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
+        field_map json__ "UnprocessedAccounts" UnprocessedAccountList.of_json in
       let memberDetails =
-        field_map json "MemberDetails" MemberDetailList.of_json in
+        field_map json__ "MemberDetails" MemberDetailList.of_json in
       make ?unprocessedAccounts ?memberDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1868,13 +4720,223 @@ module GetMembersRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountIds ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let accountIds =
+        field_map_exn json__ "AccountIds" AccountIdList.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~accountIds ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the membership details for specified member accounts for a behavior graph."]
+module GetInvestigationResponse =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      investigationId: InvestigationId.t option
+        [@ocaml.doc "The investigation ID of the investigation report."];
+      entityArn: EntityArn.t option
+        [@ocaml.doc
+          "The unique Amazon Resource Name (ARN). Detective supports IAM user ARNs and IAM role ARNs."];
+      entityType: EntityType.t option
+        [@ocaml.doc
+          "Type of entity. For example, Amazon Web Services accounts, such as an IAM user and/or IAM role."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "The creation time of the investigation report in UTC time stamp format."];
+      scopeStartTime: Timestamp.t option
+        [@ocaml.doc
+          "The start date and time used to set the scope time within which you want to generate the investigation report. The value is an UTC ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."];
+      scopeEndTime: Timestamp.t option
+        [@ocaml.doc
+          "The data and time when the investigation began. The value is an UTC ISO8601 formatted string. For example, 2021-08-18T16:35:56.284Z."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status based on the completion status of the investigation."];
+      severity: Severity.t option
+        [@ocaml.doc
+          "The severity assigned is based on the likelihood and impact of the indicators of compromise discovered in the investigation."];
+      state: State.t option
+        [@ocaml.doc
+          "The current state of the investigation. An archived investigation indicates that you have completed reviewing the investigation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?graphArn =
+      fun ?investigationId ->
+        fun ?entityArn ->
+          fun ?entityType ->
+            fun ?createdTime ->
+              fun ?scopeStartTime ->
+                fun ?scopeEndTime ->
+                  fun ?status ->
+                    fun ?severity ->
+                      fun ?state ->
+                        fun () ->
+                          {
+                            graphArn;
+                            investigationId;
+                            entityArn;
+                            entityType;
+                            createdTime;
+                            scopeStartTime;
+                            scopeEndTime;
+                            status;
+                            severity;
+                            state
+                          }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Option.map x.graphArn ~f:GraphArn.to_value));
+        ("InvestigationId",
+          (Option.map x.investigationId ~f:InvestigationId.to_value));
+        ("EntityArn", (Option.map x.entityArn ~f:EntityArn.to_value));
+        ("EntityType", (Option.map x.entityType ~f:EntityType.to_value));
+        ("CreatedTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("ScopeStartTime",
+          (Option.map x.scopeStartTime ~f:Timestamp.to_value));
+        ("ScopeEndTime", (Option.map x.scopeEndTime ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Severity", (Option.map x.severity ~f:Severity.to_value));
+        ("State", (Option.map x.state ~f:State.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state = (Option.map ~f:State.of_xml) (Xml.child xml_arg0 "State") in
+      let severity =
+        (Option.map ~f:Severity.of_xml) (Xml.child xml_arg0 "Severity") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let scopeEndTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ScopeEndTime") in
+      let scopeStartTime =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "ScopeStartTime") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedTime") in
+      let entityType =
+        (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "EntityType") in
+      let entityArn =
+        (Option.map ~f:EntityArn.of_xml) (Xml.child xml_arg0 "EntityArn") in
+      let investigationId =
+        (Option.map ~f:InvestigationId.of_xml)
+          (Xml.child xml_arg0 "InvestigationId") in
+      let graphArn =
+        (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
+      make ?state ?severity ?status ?scopeEndTime ?scopeStartTime
+        ?createdTime ?entityType ?entityArn ?investigationId ?graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" State.of_json in
+      let severity = field_map json__ "Severity" Severity.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let scopeEndTime = field_map json__ "ScopeEndTime" Timestamp.of_json in
+      let scopeStartTime =
+        field_map json__ "ScopeStartTime" Timestamp.of_json in
+      let createdTime = field_map json__ "CreatedTime" Timestamp.of_json in
+      let entityType = field_map json__ "EntityType" EntityType.of_json in
+      let entityArn = field_map json__ "EntityArn" EntityArn.of_json in
+      let investigationId =
+        field_map json__ "InvestigationId" InvestigationId.of_json in
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
+      make ?state ?severity ?status ?scopeEndTime ?scopeStartTime
+        ?createdTime ?entityType ?entityArn ?investigationId ?graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. GetInvestigation returns the investigation results of an investigation for a behavior graph."]
+module GetInvestigationRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the behavior graph."];
+      investigationId: InvestigationId.t
+        [@ocaml.doc "The investigation ID of the investigation report."]}
+    let context_ = "GetInvestigationRequest"
+    let make ~graphArn =
+      fun ~investigationId -> fun () -> { graphArn; investigationId }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("InvestigationId",
+          (Some (InvestigationId.to_value x.investigationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let investigationId =
+        InvestigationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InvestigationId") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ~investigationId ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let investigationId =
+        field_map_exn json__ "InvestigationId" InvestigationId.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ~investigationId ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detective investigations lets you investigate IAM users and IAM roles using indicators of compromise. An indicator of compromise (IOC) is an artifact observed in or on a network, system, or environment that can (with a high level of confidence) identify malicious activity or a security incident. GetInvestigation returns the investigation results of an investigation for a behavior graph."]
 module EnableOrganizationAdminAccountRequest =
   struct
     type nonrec t =
@@ -1894,12 +4956,12 @@ module EnableOrganizationAdminAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AccountId") in
       make ~accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
       make ~accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Designates the Detective administrator account for the organization in the current Region. If the account does not have Detective enabled, then enables Detective for that account and creates a new behavior graph. Can only be called by the organization management account. The Detective administrator account for an organization must be the same in all Regions. If you already designated a Detective administrator account in another Region, then you must designate the same account."]
+       "Designates the Detective administrator account for the organization in the current Region. If the account does not have Detective enabled, then enables Detective for that account and creates a new behavior graph. Can only be called by the organization management account. If the organization has a delegated administrator account in Organizations, then the Detective administrator account must be either the delegated administrator account or the organization management account. If the organization does not have a delegated administrator account in Organizations, then you can choose any account in the organization. If you choose an account other than the organization management account, Detective calls Organizations to make that account the delegated administrator account for Detective. The organization management account cannot be the delegated administrator account."]
 module DisassociateMembershipRequest =
   struct
     type nonrec t =
@@ -1918,8 +4980,8 @@ module DisassociateMembershipRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1932,13 +4994,16 @@ module DescribeOrganizationConfigurationResponse =
         [@ocaml.doc
           "Indicates whether to automatically enable new organization accounts as member accounts in the organization behavior graph."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?autoEnable = fun () -> { autoEnable }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "TooManyRequestsException" ->
@@ -1950,6 +5015,8 @@ module DescribeOrganizationConfigurationResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "TooManyRequestsException" ->
@@ -1960,6 +5027,10 @@ module DescribeOrganizationConfigurationResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1986,8 +5057,8 @@ module DescribeOrganizationConfigurationResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoEnable") in
       make ?autoEnable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoEnable = field_map json "AutoEnable" Boolean.of_json in
+    let of_json json__ =
+      let autoEnable = field_map json__ "AutoEnable" Boolean.of_json in
       make ?autoEnable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2009,8 +5080,8 @@ module DescribeOrganizationConfigurationRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2026,7 +5097,8 @@ module DeleteMembersResponse =
         [@ocaml.doc
           "The list of member accounts that Detective was not able to remove from the behavior graph. For each member account, provides the reason that the deletion could not be processed."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
@@ -2036,6 +5108,8 @@ module DeleteMembersResponse =
         fun () -> { accountIds; unprocessedAccounts }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
@@ -2049,6 +5123,8 @@ module DeleteMembersResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
@@ -2061,6 +5137,10 @@ module DeleteMembersResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -2098,10 +5178,10 @@ module DeleteMembersResponse =
           (Xml.child xml_arg0 "AccountIds") in
       make ?unprocessedAccounts ?accountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
-      let accountIds = field_map json "AccountIds" AccountIdList.of_json in
+        field_map json__ "UnprocessedAccounts" UnprocessedAccountList.of_json in
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
       make ?unprocessedAccounts ?accountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2131,9 +5211,10 @@ module DeleteMembersRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accountIds ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let accountIds =
+        field_map_exn json__ "AccountIds" AccountIdList.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~accountIds ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2155,8 +5236,8 @@ module DeleteGraphRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2172,7 +5253,8 @@ module CreateMembersResponse =
         [@ocaml.doc
           "The list of accounts for which Detective was unable to process the invitation or enablement request. For each account, the list provides the reason why the request could not be processed. The list includes accounts that are already member accounts in the behavior graph."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
@@ -2181,6 +5263,8 @@ module CreateMembersResponse =
       fun ?unprocessedAccounts -> fun () -> { members; unprocessedAccounts }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -2195,6 +5279,8 @@ module CreateMembersResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -2208,6 +5294,10 @@ module CreateMembersResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -2245,10 +5335,10 @@ module CreateMembersResponse =
           (Xml.child xml_arg0 "Members") in
       make ?unprocessedAccounts ?members ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unprocessedAccounts =
-        field_map json "UnprocessedAccounts" UnprocessedAccountList.of_json in
-      let members = field_map json "Members" MemberDetailList.of_json in
+        field_map json__ "UnprocessedAccounts" UnprocessedAccountList.of_json in
+      let members = field_map json__ "Members" MemberDetailList.of_json in
       make ?unprocessedAccounts ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2295,12 +5385,12 @@ module CreateMembersRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~accounts ?disableEmailNotification ?message ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accounts = field_map_exn json "Accounts" AccountList.of_json in
+    let of_json json__ =
+      let accounts = field_map_exn json__ "Accounts" AccountList.of_json in
       let disableEmailNotification =
-        field_map json "DisableEmailNotification" Boolean.of_json in
-      let message = field_map json "Message" EmailMessage.of_json in
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+        field_map json__ "DisableEmailNotification" Boolean.of_json in
+      let message = field_map json__ "Message" EmailMessage.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~accounts ?disableEmailNotification ?message ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2312,13 +5402,16 @@ module CreateGraphResponse =
       graphArn: GraphArn.t option
         [@ocaml.doc "The ARN of the new behavior graph."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?graphArn = fun () -> { graphArn }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
@@ -2331,6 +5424,8 @@ module CreateGraphResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
@@ -2342,6 +5437,10 @@ module CreateGraphResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -2368,12 +5467,12 @@ module CreateGraphResponse =
         (Option.map ~f:GraphArn.of_xml) (Xml.child xml_arg0 "GraphArn") in
       make ?graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map json__ "GraphArn" GraphArn.of_json in
       make ?graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new behavior graph for the calling account, and sets that account as the administrator account. This operation is called by the account that is enabling Detective. Before you try to enable Detective, make sure that your account has been enrolled in Amazon GuardDuty for at least 48 hours. If you do not meet this requirement, you cannot enable Detective. If you do meet the GuardDuty prerequisite, then when you make the request to enable Detective, it checks whether your data volume is within the Detective quota. If it exceeds the quota, then you cannot enable Detective. The operation also enables Detective for the calling account in the currently selected Region. It returns the ARN of the new behavior graph. CreateGraph triggers a process to create the corresponding data tables for the new behavior graph. An account can only be the administrator account for one behavior graph within a Region. If the same account calls CreateGraph with the same administrator account, it always returns the same behavior graph ARN. It does not create a new behavior graph."]
+       "Creates a new behavior graph for the calling account, and sets that account as the administrator account. This operation is called by the account that is enabling Detective. The operation also enables Detective for the calling account in the currently selected Region. It returns the ARN of the new behavior graph. CreateGraph triggers a process to create the corresponding data tables for the new behavior graph. An account can only be the administrator account for one behavior graph within a Region. If the same account calls CreateGraph with the same administrator account, it always returns the same behavior graph ARN. It does not create a new behavior graph."]
 module CreateGraphRequest =
   struct
     type nonrec t =
@@ -2389,11 +5488,255 @@ module CreateGraphRequest =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new behavior graph for the calling account, and sets that account as the administrator account. This operation is called by the account that is enabling Detective. Before you try to enable Detective, make sure that your account has been enrolled in Amazon GuardDuty for at least 48 hours. If you do not meet this requirement, you cannot enable Detective. If you do meet the GuardDuty prerequisite, then when you make the request to enable Detective, it checks whether your data volume is within the Detective quota. If it exceeds the quota, then you cannot enable Detective. The operation also enables Detective for the calling account in the currently selected Region. It returns the ARN of the new behavior graph. CreateGraph triggers a process to create the corresponding data tables for the new behavior graph. An account can only be the administrator account for one behavior graph within a Region. If the same account calls CreateGraph with the same administrator account, it always returns the same behavior graph ARN. It does not create a new behavior graph."]
+       "Creates a new behavior graph for the calling account, and sets that account as the administrator account. This operation is called by the account that is enabling Detective. The operation also enables Detective for the calling account in the currently selected Region. It returns the ARN of the new behavior graph. CreateGraph triggers a process to create the corresponding data tables for the new behavior graph. An account can only be the administrator account for one behavior graph within a Region. If the same account calls CreateGraph with the same administrator account, it always returns the same behavior graph ARN. It does not create a new behavior graph."]
+module BatchGetMembershipDatasourcesResponse =
+  struct
+    type nonrec t =
+      {
+      membershipDatasources: MembershipDatasourcesList.t option
+        [@ocaml.doc
+          "Details on the data source package history for an member of the behavior graph."];
+      unprocessedGraphs: UnprocessedGraphList.t option
+        [@ocaml.doc
+          "Graphs that data source package information could not be retrieved for."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?membershipDatasources =
+      fun ?unprocessedGraphs ->
+        fun () -> { membershipDatasources; unprocessedGraphs }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MembershipDatasources",
+           (Option.map x.membershipDatasources
+              ~f:MembershipDatasourcesList.to_value));
+        ("UnprocessedGraphs",
+          (Option.map x.unprocessedGraphs ~f:UnprocessedGraphList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unprocessedGraphs =
+        (Option.map ~f:UnprocessedGraphList.of_xml)
+          (Xml.child xml_arg0 "UnprocessedGraphs") in
+      let membershipDatasources =
+        (Option.map ~f:MembershipDatasourcesList.of_xml)
+          (Xml.child xml_arg0 "MembershipDatasources") in
+      make ?unprocessedGraphs ?membershipDatasources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unprocessedGraphs =
+        field_map json__ "UnprocessedGraphs" UnprocessedGraphList.of_json in
+      let membershipDatasources =
+        field_map json__ "MembershipDatasources"
+          MembershipDatasourcesList.of_json in
+      make ?unprocessedGraphs ?membershipDatasources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information on the data source package history for an account."]
+module BatchGetMembershipDatasourcesRequest =
+  struct
+    type nonrec t =
+      {
+      graphArns: GraphArnList.t [@ocaml.doc "The ARN of the behavior graph."]}
+    let context_ = "BatchGetMembershipDatasourcesRequest"
+    let make ~graphArns = fun () -> { graphArns }
+    let to_value x =
+      structure_to_value
+        [("GraphArns", (Some (GraphArnList.to_value x.graphArns)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let graphArns =
+        GraphArnList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GraphArns") in
+      make ~graphArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let graphArns = field_map_exn json__ "GraphArns" GraphArnList.of_json in
+      make ~graphArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information on the data source package history for an account."]
+module BatchGetGraphMemberDatasourcesResponse =
+  struct
+    type nonrec t =
+      {
+      memberDatasources: MembershipDatasourcesList.t option
+        [@ocaml.doc
+          "Details on the status of data source packages for members of the behavior graph."];
+      unprocessedAccounts: UnprocessedAccountList.t option
+        [@ocaml.doc
+          "Accounts that data source package information could not be retrieved for."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?memberDatasources =
+      fun ?unprocessedAccounts ->
+        fun () -> { memberDatasources; unprocessedAccounts }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MemberDatasources",
+           (Option.map x.memberDatasources
+              ~f:MembershipDatasourcesList.to_value));
+        ("UnprocessedAccounts",
+          (Option.map x.unprocessedAccounts
+             ~f:UnprocessedAccountList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unprocessedAccounts =
+        (Option.map ~f:UnprocessedAccountList.of_xml)
+          (Xml.child xml_arg0 "UnprocessedAccounts") in
+      let memberDatasources =
+        (Option.map ~f:MembershipDatasourcesList.of_xml)
+          (Xml.child xml_arg0 "MemberDatasources") in
+      make ?unprocessedAccounts ?memberDatasources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unprocessedAccounts =
+        field_map json__ "UnprocessedAccounts" UnprocessedAccountList.of_json in
+      let memberDatasources =
+        field_map json__ "MemberDatasources"
+          MembershipDatasourcesList.of_json in
+      make ?unprocessedAccounts ?memberDatasources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets data source package information for the behavior graph."]
+module BatchGetGraphMemberDatasourcesRequest =
+  struct
+    type nonrec t =
+      {
+      graphArn: GraphArn.t [@ocaml.doc "The ARN of the behavior graph."];
+      accountIds: AccountIdExtendedList.t
+        [@ocaml.doc
+          "The list of Amazon Web Services accounts to get data source package information on."]}
+    let context_ = "BatchGetGraphMemberDatasourcesRequest"
+    let make ~graphArn =
+      fun ~accountIds -> fun () -> { graphArn; accountIds }
+    let to_value x =
+      structure_to_value
+        [("GraphArn", (Some (GraphArn.to_value x.graphArn)));
+        ("AccountIds", (Some (AccountIdExtendedList.to_value x.accountIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountIds =
+        AccountIdExtendedList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AccountIds") in
+      let graphArn =
+        GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
+      make ~accountIds ~graphArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountIds =
+        field_map_exn json__ "AccountIds" AccountIdExtendedList.of_json in
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
+      make ~accountIds ~graphArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets data source package information for the behavior graph."]
 module AcceptInvitationRequest =
   struct
     type nonrec t =
@@ -2412,8 +5755,8 @@ module AcceptInvitationRequest =
         GraphArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GraphArn") in
       make ~graphArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let graphArn = field_map_exn json "GraphArn" GraphArn.of_json in
+    let of_json json__ =
+      let graphArn = field_map_exn json__ "GraphArn" GraphArn.of_json in
       make ~graphArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

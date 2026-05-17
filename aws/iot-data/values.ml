@@ -130,12 +130,12 @@ module RetainedMessageSummary =
       let topic = (Option.map ~f:Topic.of_xml) (Xml.child xml_arg0 "topic") in
       make ?lastModifiedTime ?qos ?payloadSize ?topic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "lastModifiedTime" Timestamp.of_json in
-      let qos = field_map json "qos" Qos.of_json in
-      let payloadSize = field_map json "payloadSize" PayloadSize.of_json in
-      let topic = field_map json "topic" Topic.of_json in
+        field_map json__ "lastModifiedTime" Timestamp.of_json in
+      let qos = field_map json__ "qos" Qos.of_json in
+      let payloadSize = field_map json__ "payloadSize" PayloadSize.of_json in
+      let topic = field_map json__ "topic" Topic.of_json in
       make ?lastModifiedTime ?qos ?payloadSize ?topic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a single retained message."]
@@ -149,7 +149,7 @@ module ShadowName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9:_-]+")));
+                  (fun () -> check_pattern i ~pattern:"[$a-zA-Z0-9:_-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -175,8 +175,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -197,8 +197,8 @@ module InternalFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error has occurred."]
@@ -218,8 +218,8 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is not valid."]
@@ -251,8 +251,8 @@ module MethodNotAllowedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -273,8 +273,8 @@ module RequestEntityTooLargeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The payload exceeds the maximum size allowed."]
@@ -294,8 +294,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is temporarily unavailable."]
@@ -315,8 +315,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The rate exceeds the limit."]
@@ -336,8 +336,8 @@ module UnauthorizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You are not authorized to perform this operation."]
@@ -357,8 +357,8 @@ module UnsupportedDocumentEncodingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The document encoding is not supported."]
@@ -382,6 +382,45 @@ module ThingName =
     let of_json j = string_of_json ~kind:"ThingName" j
     let to_json = simple_to_json to_value
   end
+module ContentType =
+  struct
+    type nonrec t = string
+    let context_ = "ContentType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ContentType" j
+    let to_json = simple_to_json to_value
+  end
+module CorrelationData =
+  struct
+    type nonrec t = string
+    let context_ = "CorrelationData"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CorrelationData" j
+    let to_json = simple_to_json to_value
+  end
+module MessageExpiry =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module Payload =
   struct
     type nonrec t = string
@@ -392,6 +431,46 @@ module Payload =
     let to_header x = x
     let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
     let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module PayloadFormatIndicator =
+  struct
+    type nonrec t =
+      | UNSPECIFIED_BYTES 
+      | UTF8_DATA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNSPECIFIED_BYTES -> "UNSPECIFIED_BYTES"
+      | UTF8_DATA -> "UTF8_DATA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNSPECIFIED_BYTES" -> UNSPECIFIED_BYTES
+      | "UTF8_DATA" -> UTF8_DATA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PayloadFormatIndicator" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PayloadFormatIndicator" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponseTopic =
+  struct
+    type nonrec t = string
+    let context_ = "ResponseTopic"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponseTopic" j
     let to_json = simple_to_json to_value
   end
 module Retain =
@@ -405,6 +484,19 @@ module Retain =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module UserProperties =
+  struct
+    type nonrec t = string
+    let context_ = "UserProperties"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserProperties" j
     let to_json = simple_to_json to_value
   end
 module NextToken =
@@ -424,6 +516,9 @@ module RetainedMessageList =
   struct
     type nonrec t = RetainedMessageSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RetainedMessageSummary.to_value)) |>
         (fun x -> `List x)
@@ -468,6 +563,9 @@ module NamedShadowList =
   struct
     type nonrec t = ShadowName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ShadowName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -504,8 +602,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
@@ -524,6 +622,64 @@ module PageSize =
     let of_xml xml_arg0 =
       Int.of_string (string_of_xml ~kind:"an integer for PageSize" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module UserPropertiesBlob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module CleanSession =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ClientId =
+  struct
+    type nonrec t = string
+    let context_ = "ClientId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[^$].*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientId" j
+    let to_json = simple_to_json to_value
+  end
+module PreventWillMessage =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module UpdateThingShadowResponse =
@@ -650,8 +806,8 @@ module UpdateThingShadowResponse =
         (Option.map ~f:JsonDocument.of_xml) (Xml.child xml_arg0 "payload") in
       make ?payload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "payload" JsonDocument.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "payload" JsonDocument.of_json in
       make ?payload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output from the UpdateThingShadow operation."]
@@ -695,10 +851,10 @@ module UpdateThingShadowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ~payload ?shadowName ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map_exn json "payload" JsonDocument.of_json in
-      let shadowName = field_map json "shadowName" ShadowName.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let payload = field_map_exn json__ "payload" JsonDocument.of_json in
+      let shadowName = field_map json__ "shadowName" ShadowName.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ~payload ?shadowName ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the UpdateThingShadow operation."]
@@ -707,18 +863,57 @@ module PublishRequest =
     type nonrec t =
       {
       topic: Topic.t [@ocaml.doc "The name of the MQTT topic."];
-      qos: Qos.t option [@ocaml.doc "The Quality of Service (QoS) level."];
+      qos: Qos.t option
+        [@ocaml.doc
+          "The Quality of Service (QoS) level. The default QoS level is 0."];
       retain: Retain.t option
         [@ocaml.doc
           "A Boolean value that determines whether to set the RETAIN flag when the message is published. Setting the RETAIN flag causes the message to be retained and sent to new subscribers to the topic. Valid values: true | false Default value: false"];
       payload: Payload.t option
         [@ocaml.doc
-          "The message body. MQTT accepts text, binary, and empty (null) message payloads. Publishing an empty (null) payload with retain = true deletes the retained message identified by topic from Amazon Web Services IoT Core."]}
+          "The message body. MQTT accepts text, binary, and empty (null) message payloads. Publishing an empty (null) payload with retain = true deletes the retained message identified by topic from Amazon Web Services IoT Core."];
+      userProperties: UserProperties.t option
+        [@ocaml.doc
+          "A JSON string that contains an array of JSON objects. If you don\226\128\153t use Amazon Web Services SDK or CLI, you must encode the JSON string to base64 format before adding it to the HTTP header. userProperties is an HTTP header value in the API. The following example userProperties parameter is a JSON string which represents two User Properties. Note that it needs to be base64-encoded: \\[\\{\"deviceName\": \"alpha\"\\}, \\{\"deviceCnt\": \"45\"\\}\\]"];
+      payloadFormatIndicator: PayloadFormatIndicator.t option
+        [@ocaml.doc
+          "An Enum string value that indicates whether the payload is formatted as UTF-8. payloadFormatIndicator is an HTTP header value in the API."];
+      contentType: ContentType.t option
+        [@ocaml.doc
+          "A UTF-8 encoded string that describes the content of the publishing message."];
+      responseTopic: ResponseTopic.t option
+        [@ocaml.doc
+          "A UTF-8 encoded string that's used as the topic name for a response message. The response topic is used to describe the topic which the receiver should publish to as part of the request-response flow. The topic must not contain wildcard characters."];
+      correlationData: CorrelationData.t option
+        [@ocaml.doc
+          "The base64-encoded binary data used by the sender of the request message to identify which request the response message is for when it's received. correlationData is an HTTP header value in the API."];
+      messageExpiry: MessageExpiry.t option
+        [@ocaml.doc
+          "A user-defined integer value that represents the message expiry interval in seconds. If absent, the message doesn't expire. For more information about the limits of messageExpiry, see Amazon Web Services IoT Core message broker and protocol limits and quotas from the Amazon Web Services Reference Guide."]}
     let context_ = "PublishRequest"
     let make ?qos =
       fun ?retain ->
         fun ?payload ->
-          fun ~topic -> fun () -> { qos; retain; payload; topic }
+          fun ?userProperties ->
+            fun ?payloadFormatIndicator ->
+              fun ?contentType ->
+                fun ?responseTopic ->
+                  fun ?correlationData ->
+                    fun ?messageExpiry ->
+                      fun ~topic ->
+                        fun () ->
+                          {
+                            qos;
+                            retain;
+                            payload;
+                            userProperties;
+                            payloadFormatIndicator;
+                            contentType;
+                            responseTopic;
+                            correlationData;
+                            messageExpiry;
+                            topic
+                          }
     let of_header_and_body =
       ((fun (xs, pipe) ->
           make
@@ -731,16 +926,69 @@ module PublishRequest =
             ?retain:(Option.map
                        ((List.Assoc.find ~equal:String.Caseless.equal) xs
                           "retain") ~f:Retain.of_string) ?payload:(Some pipe)
-            ())
+            ?userProperties:(Option.map
+                               ((List.Assoc.find ~equal:String.Caseless.equal)
+                                  xs "x-amz-mqtt5-user-properties")
+                               ~f:UserProperties.of_string)
+            ?payloadFormatIndicator:(Option.map
+                                       ((List.Assoc.find
+                                           ~equal:String.Caseless.equal) xs
+                                          "x-amz-mqtt5-payload-format-indicator")
+                                       ~f:PayloadFormatIndicator.of_string)
+            ?contentType:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "contentType") ~f:ContentType.of_string)
+            ?responseTopic:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "responseTopic")
+                              ~f:ResponseTopic.of_string)
+            ?correlationData:(Option.map
+                                ((List.Assoc.find
+                                    ~equal:String.Caseless.equal) xs
+                                   "x-amz-mqtt5-correlation-data")
+                                ~f:CorrelationData.of_string)
+            ?messageExpiry:(Option.map
+                              ((List.Assoc.find ~equal:String.Caseless.equal)
+                                 xs "messageExpiry")
+                              ~f:MessageExpiry.of_string) ())
       [@warning "-27"])
     let to_value x =
       structure_to_value
         [("topic", (Some (Topic.to_value x.topic)));
         ("qos", (Option.map x.qos ~f:Qos.to_value));
         ("retain", (Option.map x.retain ~f:Retain.to_value));
-        ("payload", (Option.map x.payload ~f:Payload.to_value))]
+        ("payload", (Option.map x.payload ~f:Payload.to_value));
+        ("x-amz-mqtt5-user-properties",
+          (Option.map x.userProperties ~f:UserProperties.to_value));
+        ("x-amz-mqtt5-payload-format-indicator",
+          (Option.map x.payloadFormatIndicator
+             ~f:PayloadFormatIndicator.to_value));
+        ("contentType", (Option.map x.contentType ~f:ContentType.to_value));
+        ("responseTopic",
+          (Option.map x.responseTopic ~f:ResponseTopic.to_value));
+        ("x-amz-mqtt5-correlation-data",
+          (Option.map x.correlationData ~f:CorrelationData.to_value));
+        ("messageExpiry",
+          (Option.map x.messageExpiry ~f:MessageExpiry.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let messageExpiry =
+        (Option.map ~f:MessageExpiry.of_xml)
+          (Xml.child xml_arg0 "messageExpiry") in
+      let correlationData =
+        (Option.map ~f:CorrelationData.of_xml)
+          (Xml.child xml_arg0 "x-amz-mqtt5-correlation-data") in
+      let responseTopic =
+        (Option.map ~f:ResponseTopic.of_xml)
+          (Xml.child xml_arg0 "responseTopic") in
+      let contentType =
+        (Option.map ~f:ContentType.of_xml) (Xml.child xml_arg0 "contentType") in
+      let payloadFormatIndicator =
+        (Option.map ~f:PayloadFormatIndicator.of_xml)
+          (Xml.child xml_arg0 "x-amz-mqtt5-payload-format-indicator") in
+      let userProperties =
+        (Option.map ~f:UserProperties.of_xml)
+          (Xml.child xml_arg0 "x-amz-mqtt5-user-properties") in
       let payload =
         (Option.map ~f:Payload.of_xml) (Xml.child xml_arg0 "payload") in
       let retain =
@@ -748,14 +996,30 @@ module PublishRequest =
       let qos = (Option.map ~f:Qos.of_xml) (Xml.child xml_arg0 "qos") in
       let topic =
         Topic.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topic") in
-      make ?payload ?retain ?qos ~topic ()
+      make ?messageExpiry ?correlationData ?responseTopic ?contentType
+        ?payloadFormatIndicator ?userProperties ?payload ?retain ?qos ~topic
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "payload" Payload.of_json in
-      let retain = field_map json "retain" Retain.of_json in
-      let qos = field_map json "qos" Qos.of_json in
-      let topic = field_map_exn json "topic" Topic.of_json in
-      make ?payload ?retain ?qos ~topic ()
+    let of_json json__ =
+      let messageExpiry =
+        field_map json__ "messageExpiry" MessageExpiry.of_json in
+      let correlationData =
+        field_map json__ "correlationData" CorrelationData.of_json in
+      let responseTopic =
+        field_map json__ "responseTopic" ResponseTopic.of_json in
+      let contentType = field_map json__ "contentType" ContentType.of_json in
+      let payloadFormatIndicator =
+        field_map json__ "payloadFormatIndicator"
+          PayloadFormatIndicator.of_json in
+      let userProperties =
+        field_map json__ "userProperties" UserProperties.of_json in
+      let payload = field_map json__ "payload" Payload.of_json in
+      let retain = field_map json__ "retain" Retain.of_json in
+      let qos = field_map json__ "qos" Qos.of_json in
+      let topic = field_map_exn json__ "topic" Topic.of_json in
+      make ?messageExpiry ?correlationData ?responseTopic ?contentType
+        ?payloadFormatIndicator ?userProperties ?payload ?retain ?qos ~topic
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the Publish operation."]
 module ListRetainedMessagesResponse =
@@ -858,10 +1122,10 @@ module ListRetainedMessagesResponse =
           (Xml.child xml_arg0 "retainedTopics") in
       make ?nextToken ?retainedTopics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let retainedTopics =
-        field_map json "retainedTopics" RetainedMessageList.of_json in
+        field_map json__ "retainedTopics" RetainedMessageList.of_json in
       make ?nextToken ?retainedTopics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -889,9 +1153,9 @@ module ListRetainedMessagesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1009,10 +1273,10 @@ module ListNamedShadowsForThingResponse =
         (Option.map ~f:NamedShadowList.of_xml) (Xml.child xml_arg0 "results") in
       make ?timestamp ?nextToken ?results ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "timestamp" Timestamp.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let results = field_map json "results" NamedShadowList.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "timestamp" Timestamp.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let results = field_map json__ "results" NamedShadowList.of_json in
       make ?timestamp ?nextToken ?results ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1045,10 +1309,10 @@ module ListNamedShadowsForThingRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?pageSize ?nextToken ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "pageSize" PageSize.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "pageSize" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ?pageSize ?nextToken ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1166,8 +1430,8 @@ module GetThingShadowResponse =
         (Option.map ~f:JsonDocument.of_xml) (Xml.child xml_arg0 "payload") in
       make ?payload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map json "payload" JsonDocument.of_json in
+    let of_json json__ =
+      let payload = field_map json__ "payload" JsonDocument.of_json in
       make ?payload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output from the GetThingShadow operation."]
@@ -1193,9 +1457,9 @@ module GetThingShadowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?shadowName ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shadowName = field_map json "shadowName" ShadowName.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let shadowName = field_map json__ "shadowName" ShadowName.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ?shadowName ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the GetThingShadow operation."]
@@ -1214,7 +1478,10 @@ module GetRetainedMessageResponse =
           "The quality of service (QoS) level used to publish the retained message."];
       lastModifiedTime: Timestamp.t option
         [@ocaml.doc
-          "The Epoch date and time, in milliseconds, when the retained message was stored by IoT."]}
+          "The Epoch date and time, in milliseconds, when the retained message was stored by IoT."];
+      userProperties: UserPropertiesBlob.t option
+        [@ocaml.doc
+          "A base64-encoded JSON string that includes an array of JSON objects, or null if the retained message doesn't include any user properties. The following example userProperties parameter is a JSON string that represents two user properties. Note that it will be base64-encoded: \\[\\{\"deviceName\": \"alpha\"\\}, \\{\"deviceCnt\": \"45\"\\}\\]"]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
       | `InvalidRequestException of InvalidRequestException.t 
@@ -1228,7 +1495,9 @@ module GetRetainedMessageResponse =
       fun ?payload ->
         fun ?qos ->
           fun ?lastModifiedTime ->
-            fun () -> { topic; payload; qos; lastModifiedTime }
+            fun ?userProperties ->
+              fun () ->
+                { topic; payload; qos; lastModifiedTime; userProperties }
     let error_of_json name json =
       match name with
       | "InternalFailureException" ->
@@ -1309,9 +1578,14 @@ module GetRetainedMessageResponse =
         ("payload", (Option.map x.payload ~f:Payload.to_value));
         ("qos", (Option.map x.qos ~f:Qos.to_value));
         ("lastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:Timestamp.to_value))]
+          (Option.map x.lastModifiedTime ~f:Timestamp.to_value));
+        ("userProperties",
+          (Option.map x.userProperties ~f:UserPropertiesBlob.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let userProperties =
+        (Option.map ~f:UserPropertiesBlob.of_xml)
+          (Xml.child xml_arg0 "userProperties") in
       let lastModifiedTime =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastModifiedTime") in
@@ -1319,15 +1593,17 @@ module GetRetainedMessageResponse =
       let payload =
         (Option.map ~f:Payload.of_xml) (Xml.child xml_arg0 "payload") in
       let topic = (Option.map ~f:Topic.of_xml) (Xml.child xml_arg0 "topic") in
-      make ?lastModifiedTime ?qos ?payload ?topic ()
+      make ?userProperties ?lastModifiedTime ?qos ?payload ?topic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let userProperties =
+        field_map json__ "userProperties" UserPropertiesBlob.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" Timestamp.of_json in
-      let qos = field_map json "qos" Qos.of_json in
-      let payload = field_map json "payload" Payload.of_json in
-      let topic = field_map json "topic" Topic.of_json in
-      make ?lastModifiedTime ?qos ?payload ?topic ()
+        field_map json__ "lastModifiedTime" Timestamp.of_json in
+      let qos = field_map json__ "qos" Qos.of_json in
+      let payload = field_map json__ "payload" Payload.of_json in
+      let topic = field_map json__ "topic" Topic.of_json in
+      make ?userProperties ?lastModifiedTime ?qos ?payload ?topic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output from the GetRetainedMessage operation."]
 module GetRetainedMessageRequest =
@@ -1346,15 +1622,35 @@ module GetRetainedMessageRequest =
         Topic.of_xml (Xml.child_exn ~context:context_ xml_arg0 "topic") in
       make ~topic ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topic = field_map_exn json "topic" Topic.of_json in make ~topic ()
+    let of_json json__ =
+      let topic = field_map_exn json__ "topic" Topic.of_json in
+      make ~topic ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the GetRetainedMessage operation."]
+module ForbiddenException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The caller isn't authorized to make the request."]
 module DeleteThingShadowResponse =
   struct
     type nonrec t =
       {
-      payload: JsonDocument.t
+      payload: JsonDocument.t option
         [@ocaml.doc "The state information, in JSON format."]}
     type nonrec error =
       [ `InternalFailureException of InternalFailureException.t 
@@ -1367,8 +1663,7 @@ module DeleteThingShadowResponse =
       | `UnsupportedDocumentEncodingException of
           UnsupportedDocumentEncodingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteThingShadowResponse"
-    let make ~payload = fun () -> { payload }
+    let make ?payload = fun () -> { payload }
     let error_of_json name json =
       match name with
       | "InternalFailureException" ->
@@ -1453,21 +1748,20 @@ module DeleteThingShadowResponse =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~payload:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?payload:(Some pipe) ())[@warning "-27"])
     let to_value x =
       structure_to_value
-        [("payload", (Some (JsonDocument.to_value x.payload)))]
+        [("payload", (Option.map x.payload ~f:JsonDocument.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let payload =
-        JsonDocument.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "payload") in
-      make ~payload ()
+        (Option.map ~f:JsonDocument.of_xml) (Xml.child xml_arg0 "payload") in
+      make ?payload ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let payload = field_map_exn json "payload" JsonDocument.of_json in
-      make ~payload ()
+    let of_json json__ =
+      let payload = field_map json__ "payload" JsonDocument.of_json in
+      make ?payload ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output from the DeleteThingShadow operation."]
 module DeleteThingShadowRequest =
@@ -1492,9 +1786,55 @@ module DeleteThingShadowRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "thingName") in
       make ?shadowName ~thingName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shadowName = field_map json "shadowName" ShadowName.of_json in
-      let thingName = field_map_exn json "thingName" ThingName.of_json in
+    let of_json json__ =
+      let shadowName = field_map json__ "shadowName" ShadowName.of_json in
+      let thingName = field_map_exn json__ "thingName" ThingName.of_json in
       make ?shadowName ~thingName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DeleteThingShadow operation."]
+module DeleteConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      clientId: ClientId.t
+        [@ocaml.doc
+          "The unique identifier of the MQTT client to disconnect. The client ID can't start with a dollar sign ($)."];
+      cleanSession: CleanSession.t option
+        [@ocaml.doc
+          "Specifies whether to remove the client's session state when disconnecting. Set to TRUE to delete all session information, including subscriptions and queued messages. Set to FALSE to preserve the session state. By default, this is set to FALSE (preserves the session state)."];
+      preventWillMessage: PreventWillMessage.t option
+        [@ocaml.doc
+          "Controls if Amazon Web Services IoT Core publishes the client's Last Will and Testament (LWT) message upon disconnection. Set to TRUE to prevent publishing the LWT message. Set to FALSE to allow publishing. By default, this is set to FALSE (allows publishing the LWT message)."]}
+    let context_ = "DeleteConnectionRequest"
+    let make ?cleanSession =
+      fun ?preventWillMessage ->
+        fun ~clientId ->
+          fun () -> { cleanSession; preventWillMessage; clientId }
+    let to_value x =
+      structure_to_value
+        [("clientId", (Some (ClientId.to_value x.clientId)));
+        ("cleanSession",
+          (Option.map x.cleanSession ~f:CleanSession.to_value));
+        ("preventWillMessage",
+          (Option.map x.preventWillMessage ~f:PreventWillMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let preventWillMessage =
+        (Option.map ~f:PreventWillMessage.of_xml)
+          (Xml.child xml_arg0 "preventWillMessage") in
+      let cleanSession =
+        (Option.map ~f:CleanSession.of_xml)
+          (Xml.child xml_arg0 "cleanSession") in
+      let clientId =
+        ClientId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "clientId") in
+      make ?preventWillMessage ?cleanSession ~clientId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let preventWillMessage =
+        field_map json__ "preventWillMessage" PreventWillMessage.of_json in
+      let cleanSession = field_map json__ "cleanSession" CleanSession.of_json in
+      let clientId = field_map_exn json__ "clientId" ClientId.of_json in
+      make ?preventWillMessage ?cleanSession ~clientId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disconnects a connected MQTT client from Amazon Web Services IoT Core. When you disconnect a client, Amazon Web Services IoT Core closes the client's network connection and optionally cleans the session state."]

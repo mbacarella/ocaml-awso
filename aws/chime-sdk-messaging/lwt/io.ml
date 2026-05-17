@@ -39,6 +39,9 @@ let delete_channel_message ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChannelMessage input
 let delete_channel_moderator ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChannelModerator input
+let delete_messaging_streaming_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMessagingStreamingConfigurations
+    input
 let describe_channel ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeChannel input
 let describe_channel_ban ?endpoint_url ?cfg input =
@@ -67,6 +70,8 @@ let get_channel_message_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetChannelMessageStatus input
 let get_messaging_session_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMessagingSessionEndpoint input
+let get_messaging_streaming_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMessagingStreamingConfigurations input
 let list_channel_bans ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChannelBans input
 let list_channel_flows ?endpoint_url ?cfg input =
@@ -88,12 +93,20 @@ let list_channels_associated_with_channel_flow ?endpoint_url ?cfg input =
 let list_channels_moderated_by_app_instance_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListChannelsModeratedByAppInstanceUser
     input
+let list_sub_channels ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSubChannels input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_channel_expiration_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutChannelExpirationSettings input
 let put_channel_membership_preferences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutChannelMembershipPreferences input
+let put_messaging_streaming_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutMessagingStreamingConfigurations input
 let redact_channel_message ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RedactChannelMessage input
+let search_channels ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchChannels input
 let send_channel_message ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendChannelMessage input
 let tag_resource ?endpoint_url ?cfg input =

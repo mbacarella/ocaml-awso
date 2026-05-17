@@ -11,6 +11,12 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_create_custom_vocabulary_item ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchCreateCustomVocabularyItem input
+let batch_delete_custom_vocabulary_item ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteCustomVocabularyItem input
+let batch_update_custom_vocabulary_item ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchUpdateCustomVocabularyItem input
 let build_bot_locale ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BuildBotLocale input
 let create_bot ?endpoint_url ?cfg input =
@@ -19,6 +25,8 @@ let create_bot_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBotAlias input
 let create_bot_locale ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBotLocale input
+let create_bot_replica ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateBotReplica input
 let create_bot_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBotVersion input
 let create_export ?endpoint_url ?cfg input =
@@ -33,14 +41,20 @@ let create_slot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSlot input
 let create_slot_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSlotType input
+let create_test_set_discrepancy_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTestSetDiscrepancyReport input
 let create_upload_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUploadUrl input
 let delete_bot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBot input
 let delete_bot_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBotAlias input
+let delete_bot_analyzer_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteBotAnalyzerRecommendation input
 let delete_bot_locale ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBotLocale input
+let delete_bot_replica ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteBotReplica input
 let delete_bot_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBotVersion input
 let delete_custom_vocabulary ?endpoint_url ?cfg input =
@@ -59,16 +73,24 @@ let delete_slot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSlot input
 let delete_slot_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSlotType input
+let delete_test_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTestSet input
 let delete_utterances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUtterances input
 let describe_bot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBot input
 let describe_bot_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBotAlias input
+let describe_bot_analyzer_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBotAnalyzerRecommendation input
 let describe_bot_locale ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBotLocale input
 let describe_bot_recommendation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBotRecommendation input
+let describe_bot_replica ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBotReplica input
+let describe_bot_resource_generation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBotResourceGeneration input
 let describe_bot_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBotVersion input
 let describe_custom_vocabulary_metadata ?endpoint_url ?cfg input =
@@ -85,14 +107,36 @@ let describe_slot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSlot input
 let describe_slot_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSlotType input
+let describe_test_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTestExecution input
+let describe_test_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTestSet input
+let describe_test_set_discrepancy_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTestSetDiscrepancyReport input
+let describe_test_set_generation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTestSetGeneration input
+let generate_bot_element ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GenerateBotElement input
+let get_test_execution_artifacts_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTestExecutionArtifactsUrl input
 let list_aggregated_utterances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAggregatedUtterances input
+let list_bot_alias_replicas ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBotAliasReplicas input
 let list_bot_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBotAliases input
+let list_bot_analyzer_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBotAnalyzerHistory input
 let list_bot_locales ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBotLocales input
 let list_bot_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBotRecommendations input
+let list_bot_replicas ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBotReplicas input
+let list_bot_resource_generations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBotResourceGenerations input
+let list_bot_version_replicas ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListBotVersionReplicas input
 let list_bot_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBotVersions input
 let list_bots ?endpoint_url ?cfg input =
@@ -101,26 +145,62 @@ let list_built_in_intents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuiltInIntents input
 let list_built_in_slot_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBuiltInSlotTypes input
+let list_custom_vocabulary_items ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCustomVocabularyItems input
 let list_exports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExports input
 let list_imports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImports input
+let list_intent_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIntentMetrics input
+let list_intent_paths ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIntentPaths input
+let list_intent_stage_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListIntentStageMetrics input
 let list_intents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListIntents input
 let list_recommended_intents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRecommendedIntents input
+let list_session_analytics_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSessionAnalyticsData input
+let list_session_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSessionMetrics input
 let list_slot_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSlotTypes input
 let list_slots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSlots input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_test_execution_result_items ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTestExecutionResultItems input
+let list_test_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTestExecutions input
+let list_test_set_records ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTestSetRecords input
+let list_test_sets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTestSets input
+let list_utterance_analytics_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUtteranceAnalyticsData input
+let list_utterance_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUtteranceMetrics input
 let search_associated_transcripts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchAssociatedTranscripts input
+let start_bot_analyzer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartBotAnalyzer input
 let start_bot_recommendation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartBotRecommendation input
+let start_bot_resource_generation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartBotResourceGeneration input
 let start_import ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartImport input
+let start_test_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartTestExecution input
+let start_test_set_generation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartTestSetGeneration input
+let stop_bot_analyzer ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopBotAnalyzer input
+let stop_bot_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopBotRecommendation input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -143,3 +223,5 @@ let update_slot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSlot input
 let update_slot_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSlotType input
+let update_test_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTestSet input

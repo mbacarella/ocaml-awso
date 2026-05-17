@@ -43,7 +43,7 @@ let assume_role =
            ~doc:"JSON policyDescriptorListType"
        and policy =
          flag "policy" (optional string)
-           ~doc:"STRING sessionPolicyDocumentType"
+           ~doc:"STRING unrestrictedSessionPolicyDocumentType"
        and durationSeconds =
          flag "duration-seconds" (optional int)
            ~doc:"INT roleDurationSecondsType"
@@ -61,6 +61,9 @@ let assume_role =
        and sourceIdentity =
          flag "source-identity" (optional string)
            ~doc:"STRING sourceIdentityType"
+       and providedContexts =
+         flag "provided-contexts" (optional json_arg)
+           ~doc:"JSON ProvidedContextsListType"
        and roleArn = flag "role-arn" (required string) ~doc:"STRING arnType"
        and roleSessionName =
          flag "role-session-name" (required string)
@@ -75,7 +78,10 @@ let assume_role =
               ?tags:(Option.map ~f:Values.TagListType.of_json tags)
               ?transitiveTagKeys:(Option.map ~f:Values.TagKeyListType.of_json
                                     transitiveTagKeys) ?externalId
-              ?serialNumber ?tokenCode ?sourceIdentity ~roleArn
+              ?serialNumber ?tokenCode ?sourceIdentity
+              ?providedContexts:(Option.map
+                                   ~f:Values.ProvidedContextsListType.of_json
+                                   providedContexts) ~roleArn
               ~roleSessionName ()) (Some Values.AssumeRoleResponse.to_json)
            (Some Values.AssumeRoleResponse.error_to_json)])
 let assume_role_with_s_a_m_l =
@@ -151,6 +157,33 @@ let assume_role_with_web_identity =
               ~roleSessionName ~webIdentityToken ())
            (Some Values.AssumeRoleWithWebIdentityResponse.to_json)
            (Some Values.AssumeRoleWithWebIdentityResponse.error_to_json)])
+let assume_root =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durationSeconds =
+         flag "duration-seconds" (optional int)
+           ~doc:"INT RootDurationSecondsType"
+       and targetPrincipal =
+         flag "target-principal" (required string)
+           ~doc:"STRING TargetPrincipalType"
+       and taskPolicyArn =
+         flag "task-policy-arn" (required json_arg)
+           ~doc:"JSON PolicyDescriptorType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.assume_root
+           (Values.AssumeRootRequest.make ?durationSeconds ~targetPrincipal
+              ~taskPolicyArn:(Values.PolicyDescriptorType.of_json
+                                taskPolicyArn) ())
+           (Some Values.AssumeRootResponse.to_json)
+           (Some Values.AssumeRootResponse.error_to_json)])
 let decode_authorization_message =
   Command.async ~summary:""
     ([%map_open.Command
@@ -204,6 +237,25 @@ let get_caller_identity =
            Io.get_caller_identity (Values.GetCallerIdentityRequest.make ())
            (Some Values.GetCallerIdentityResponse.to_json)
            (Some Values.GetCallerIdentityResponse.error_to_json)])
+let get_delegated_access_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tradeInToken =
+         flag "trade-in-token" (required string)
+           ~doc:"STRING tradeInTokenType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_delegated_access_token
+           (Values.GetDelegatedAccessTokenRequest.make ~tradeInToken ())
+           (Some Values.GetDelegatedAccessTokenResponse.to_json)
+           (Some Values.GetDelegatedAccessTokenResponse.error_to_json)])
 let get_federation_token =
   Command.async ~summary:""
     ([%map_open.Command
@@ -259,14 +311,46 @@ let get_session_token =
            (Values.GetSessionTokenRequest.make ?durationSeconds ?serialNumber
               ?tokenCode ()) (Some Values.GetSessionTokenResponse.to_json)
            (Some Values.GetSessionTokenResponse.error_to_json)])
+let get_web_identity_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and durationSeconds =
+         flag "duration-seconds" (optional int)
+           ~doc:"INT webIdentityTokenDurationSecondsType"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON tagListType"
+       and audience =
+         flag "audience" (required json_arg)
+           ~doc:"JSON webIdentityTokenAudienceListType"
+       and signingAlgorithm =
+         flag "signing-algorithm" (required string)
+           ~doc:"STRING jwtAlgorithmType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_web_identity_token
+           (Values.GetWebIdentityTokenRequest.make ?durationSeconds
+              ?tags:(Option.map ~f:Values.TagListType.of_json tags)
+              ~audience:(Values.WebIdentityTokenAudienceListType.of_json
+                           audience) ~signingAlgorithm ())
+           (Some Values.GetWebIdentityTokenResponse.to_json)
+           (Some Values.GetWebIdentityTokenResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("assume-role", assume_role);
     ("assume-role-with-s-a-m-l", assume_role_with_s_a_m_l);
     ("assume-role-with-web-identity", assume_role_with_web_identity);
+    ("assume-root", assume_root);
     ("decode-authorization-message", decode_authorization_message);
     ("get-access-key-info", get_access_key_info);
     ("get-caller-identity", get_caller_identity);
+    ("get-delegated-access-token", get_delegated_access_token);
     ("get-federation-token", get_federation_token);
-    ("get-session-token", get_session_token)]
+    ("get-session-token", get_session_token);
+    ("get-web-identity-token", get_web_identity_token)]

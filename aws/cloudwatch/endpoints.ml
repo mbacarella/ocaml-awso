@@ -2,6 +2,7 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | DeleteAlarmMuteRule: (DeleteAlarmMuteRuleInput.t, unit, unit) t 
   | DeleteAlarms: (DeleteAlarmsInput.t, unit, unit) t 
   | DeleteAnomalyDetector: (DeleteAnomalyDetectorInput.t,
   DeleteAnomalyDetectorOutput.t, DeleteAnomalyDetectorOutput.error) t 
@@ -11,6 +12,9 @@ type ('i, 'o, 'e) t =
   DeleteInsightRulesOutput.t, DeleteInsightRulesOutput.error) t 
   | DeleteMetricStream: (DeleteMetricStreamInput.t,
   DeleteMetricStreamOutput.t, DeleteMetricStreamOutput.error) t 
+  | DescribeAlarmContributors: (DescribeAlarmContributorsInput.t,
+  DescribeAlarmContributorsOutput.t, DescribeAlarmContributorsOutput.error) t
+  
   | DescribeAlarmHistory: (DescribeAlarmHistoryInput.t,
   DescribeAlarmHistoryOutput.t, DescribeAlarmHistoryOutput.error) t 
   | DescribeAlarms: (DescribeAlarmsInput.t, DescribeAlarmsOutput.t,
@@ -27,6 +31,8 @@ type ('i, 'o, 'e) t =
   | EnableAlarmActions: (EnableAlarmActionsInput.t, unit, unit) t 
   | EnableInsightRules: (EnableInsightRulesInput.t,
   EnableInsightRulesOutput.t, EnableInsightRulesOutput.error) t 
+  | GetAlarmMuteRule: (GetAlarmMuteRuleInput.t, GetAlarmMuteRuleOutput.t,
+  GetAlarmMuteRuleOutput.error) t 
   | GetDashboard: (GetDashboardInput.t, GetDashboardOutput.t,
   GetDashboardOutput.error) t 
   | GetInsightRuleReport: (GetInsightRuleReportInput.t,
@@ -39,14 +45,21 @@ type ('i, 'o, 'e) t =
   GetMetricStreamOutput.error) t 
   | GetMetricWidgetImage: (GetMetricWidgetImageInput.t,
   GetMetricWidgetImageOutput.t, GetMetricWidgetImageOutput.error) t 
+  | GetOTelEnrichment: (GetOTelEnrichmentInput.t, GetOTelEnrichmentOutput.t,
+  GetOTelEnrichmentOutput.error) t 
+  | ListAlarmMuteRules: (ListAlarmMuteRulesInput.t,
+  ListAlarmMuteRulesOutput.t, ListAlarmMuteRulesOutput.error) t 
   | ListDashboards: (ListDashboardsInput.t, ListDashboardsOutput.t,
   ListDashboardsOutput.error) t 
+  | ListManagedInsightRules: (ListManagedInsightRulesInput.t,
+  ListManagedInsightRulesOutput.t, ListManagedInsightRulesOutput.error) t 
   | ListMetricStreams: (ListMetricStreamsInput.t, ListMetricStreamsOutput.t,
   ListMetricStreamsOutput.error) t 
   | ListMetrics: (ListMetricsInput.t, ListMetricsOutput.t,
   ListMetricsOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
+  | PutAlarmMuteRule: (PutAlarmMuteRuleInput.t, unit, unit) t 
   | PutAnomalyDetector: (PutAnomalyDetectorInput.t,
   PutAnomalyDetectorOutput.t, PutAnomalyDetectorOutput.error) t 
   | PutCompositeAlarm: (PutCompositeAlarmInput.t, unit, unit) t 
@@ -54,6 +67,8 @@ type ('i, 'o, 'e) t =
   PutDashboardOutput.error) t 
   | PutInsightRule: (PutInsightRuleInput.t, PutInsightRuleOutput.t,
   PutInsightRuleOutput.error) t 
+  | PutManagedInsightRules: (PutManagedInsightRulesInput.t,
+  PutManagedInsightRulesOutput.t, PutManagedInsightRulesOutput.error) t 
   | PutMetricAlarm: (PutMetricAlarmInput.t, unit, unit) t 
   | PutMetricData: (PutMetricDataInput.t, unit, unit) t 
   | PutMetricStream: (PutMetricStreamInput.t, PutMetricStreamOutput.t,
@@ -61,19 +76,25 @@ type ('i, 'o, 'e) t =
   | SetAlarmState: (SetAlarmStateInput.t, unit, unit) t 
   | StartMetricStreams: (StartMetricStreamsInput.t,
   StartMetricStreamsOutput.t, StartMetricStreamsOutput.error) t 
+  | StartOTelEnrichment: (StartOTelEnrichmentInput.t,
+  StartOTelEnrichmentOutput.t, StartOTelEnrichmentOutput.error) t 
   | StopMetricStreams: (StopMetricStreamsInput.t, StopMetricStreamsOutput.t,
   StopMetricStreamsOutput.error) t 
+  | StopOTelEnrichment: (StopOTelEnrichmentInput.t,
+  StopOTelEnrichmentOutput.t, StopOTelEnrichmentOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
   TagResourceOutput.error) t 
   | UntagResource: (UntagResourceInput.t, UntagResourceOutput.t,
   UntagResourceOutput.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | DeleteAlarmMuteRule -> `POST
   | DeleteAlarms -> `POST
   | DeleteAnomalyDetector -> `POST
   | DeleteDashboards -> `POST
   | DeleteInsightRules -> `POST
   | DeleteMetricStream -> `POST
+  | DescribeAlarmContributors -> `POST
   | DescribeAlarmHistory -> `POST
   | DescribeAlarms -> `POST
   | DescribeAlarmsForMetric -> `POST
@@ -83,36 +104,46 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisableInsightRules -> `POST
   | EnableAlarmActions -> `POST
   | EnableInsightRules -> `POST
+  | GetAlarmMuteRule -> `POST
   | GetDashboard -> `POST
   | GetInsightRuleReport -> `POST
   | GetMetricData -> `POST
   | GetMetricStatistics -> `POST
   | GetMetricStream -> `POST
   | GetMetricWidgetImage -> `POST
+  | GetOTelEnrichment -> `POST
+  | ListAlarmMuteRules -> `POST
   | ListDashboards -> `POST
+  | ListManagedInsightRules -> `POST
   | ListMetricStreams -> `POST
   | ListMetrics -> `POST
   | ListTagsForResource -> `POST
+  | PutAlarmMuteRule -> `POST
   | PutAnomalyDetector -> `POST
   | PutCompositeAlarm -> `POST
   | PutDashboard -> `POST
   | PutInsightRule -> `POST
+  | PutManagedInsightRules -> `POST
   | PutMetricAlarm -> `POST
   | PutMetricData -> `POST
   | PutMetricStream -> `POST
   | SetAlarmState -> `POST
   | StartMetricStreams -> `POST
+  | StartOTelEnrichment -> `POST
   | StopMetricStreams -> `POST
+  | StopOTelEnrichment -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | DeleteAlarmMuteRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAlarms -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDashboards -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInsightRules -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMetricStream -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAlarmContributors -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAlarmHistory -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAlarms -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAlarmsForMetric -> (Format.kasprintf Uri.of_string) "/"
@@ -122,32 +153,52 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableInsightRules -> (Format.kasprintf Uri.of_string) "/"
       | EnableAlarmActions -> (Format.kasprintf Uri.of_string) "/"
       | EnableInsightRules -> (Format.kasprintf Uri.of_string) "/"
+      | GetAlarmMuteRule -> (Format.kasprintf Uri.of_string) "/"
       | GetDashboard -> (Format.kasprintf Uri.of_string) "/"
       | GetInsightRuleReport -> (Format.kasprintf Uri.of_string) "/"
       | GetMetricData -> (Format.kasprintf Uri.of_string) "/"
       | GetMetricStatistics -> (Format.kasprintf Uri.of_string) "/"
       | GetMetricStream -> (Format.kasprintf Uri.of_string) "/"
       | GetMetricWidgetImage -> (Format.kasprintf Uri.of_string) "/"
+      | GetOTelEnrichment -> (Format.kasprintf Uri.of_string) "/"
+      | ListAlarmMuteRules -> (Format.kasprintf Uri.of_string) "/"
       | ListDashboards -> (Format.kasprintf Uri.of_string) "/"
+      | ListManagedInsightRules -> (Format.kasprintf Uri.of_string) "/"
       | ListMetricStreams -> (Format.kasprintf Uri.of_string) "/"
       | ListMetrics -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | PutAlarmMuteRule -> (Format.kasprintf Uri.of_string) "/"
       | PutAnomalyDetector -> (Format.kasprintf Uri.of_string) "/"
       | PutCompositeAlarm -> (Format.kasprintf Uri.of_string) "/"
       | PutDashboard -> (Format.kasprintf Uri.of_string) "/"
       | PutInsightRule -> (Format.kasprintf Uri.of_string) "/"
+      | PutManagedInsightRules -> (Format.kasprintf Uri.of_string) "/"
       | PutMetricAlarm -> (Format.kasprintf Uri.of_string) "/"
       | PutMetricData -> (Format.kasprintf Uri.of_string) "/"
       | PutMetricStream -> (Format.kasprintf Uri.of_string) "/"
       | SetAlarmState -> (Format.kasprintf Uri.of_string) "/"
       | StartMetricStreams -> (Format.kasprintf Uri.of_string) "/"
+      | StartOTelEnrichment -> (Format.kasprintf Uri.of_string) "/"
       | StopMetricStreams -> (Format.kasprintf Uri.of_string) "/"
+      | StopOTelEnrichment -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | DeleteAlarmMuteRule ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteAlarmMuteRule"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteAlarmMuteRuleInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteAlarms ->
       let headers =
         Awso.Http.Headers.of_list
@@ -206,6 +257,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteMetricStream"]); ("Version", [apiVersion])] in
         let query =
           (DeleteMetricStreamInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeAlarmContributors ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeAlarmContributors"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeAlarmContributorsInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeAlarmHistory ->
@@ -322,6 +387,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (EnableInsightRulesInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetAlarmMuteRule ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetAlarmMuteRule"]); ("Version", [apiVersion])] in
+        let query =
+          (GetAlarmMuteRuleInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetDashboard ->
       let headers =
         Awso.Http.Headers.of_list
@@ -394,6 +471,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetOTelEnrichment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetOTelEnrichment"]); ("Version", [apiVersion])] in
+        let query =
+          (GetOTelEnrichmentInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListAlarmMuteRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListAlarmMuteRules"]); ("Version", [apiVersion])] in
+        let query =
+          (ListAlarmMuteRulesInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListDashboards ->
       let headers =
         Awso.Http.Headers.of_list
@@ -404,6 +505,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ListDashboards"]); ("Version", [apiVersion])] in
         let query =
           (ListDashboardsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListManagedInsightRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListManagedInsightRules"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListManagedInsightRulesInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListMetricStreams ->
@@ -439,6 +554,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ListTagsForResource"]); ("Version", [apiVersion])] in
         let query =
           (ListTagsForResourceInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PutAlarmMuteRule ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PutAlarmMuteRule"]); ("Version", [apiVersion])] in
+        let query =
+          (PutAlarmMuteRuleInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | PutAnomalyDetector ->
@@ -486,6 +613,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["PutInsightRule"]); ("Version", [apiVersion])] in
         let query =
           (PutInsightRuleInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PutManagedInsightRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PutManagedInsightRules"]); ("Version", [apiVersion])] in
+        let query =
+          (PutManagedInsightRulesInput.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | PutMetricAlarm ->
@@ -546,6 +686,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (StartMetricStreamsInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | StartOTelEnrichment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["StartOTelEnrichment"]); ("Version", [apiVersion])] in
+        let query =
+          (StartOTelEnrichmentInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | StopMetricStreams ->
       let headers =
         Awso.Http.Headers.of_list
@@ -556,6 +708,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["StopMetricStreams"]); ("Version", [apiVersion])] in
         let query =
           (StopMetricStreamsInput.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | StopOTelEnrichment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["StopOTelEnrichment"]); ("Version", [apiVersion])] in
+        let query =
+          (StopOTelEnrichmentInput.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | TagResource ->
@@ -611,6 +775,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | DeleteAlarmMuteRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteAlarms ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteAnomalyDetector ->
@@ -641,6 +807,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteMetricStreamOutput.of_xml xml)
       else
         Error (parse_aws_error (Some DeleteMetricStreamOutput.error_of_xml))
+  | DescribeAlarmContributors ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (DescribeAlarmContributorsOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAlarmContributorsOutput.error_of_xml))
   | DescribeAlarmHistory ->
       if is_success
       then
@@ -695,6 +870,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (EnableInsightRulesOutput.of_xml xml)
       else
         Error (parse_aws_error (Some EnableInsightRulesOutput.error_of_xml))
+  | GetAlarmMuteRule ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetAlarmMuteRuleOutput.of_xml xml)
+      else Error (parse_aws_error (Some GetAlarmMuteRuleOutput.error_of_xml))
   | GetDashboard ->
       if is_success
       then
@@ -734,12 +915,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (GetMetricWidgetImageOutput.of_xml xml)
       else Error (parse_aws_error None)
+  | GetOTelEnrichment ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (GetOTelEnrichmentOutput.of_xml xml)
+      else Error (parse_aws_error None)
+  | ListAlarmMuteRules ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListAlarmMuteRulesOutput.of_xml xml)
+      else
+        Error (parse_aws_error (Some ListAlarmMuteRulesOutput.error_of_xml))
   | ListDashboards ->
       if is_success
       then
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (ListDashboardsOutput.of_xml xml)
       else Error (parse_aws_error (Some ListDashboardsOutput.error_of_xml))
+  | ListManagedInsightRules ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (ListManagedInsightRulesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some ListManagedInsightRulesOutput.error_of_xml))
   | ListMetricStreams ->
       if is_success
       then
@@ -760,6 +962,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListTagsForResourceOutput.of_xml xml)
       else
         Error (parse_aws_error (Some ListTagsForResourceOutput.error_of_xml))
+  | PutAlarmMuteRule ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutAnomalyDetector ->
       if is_success
       then
@@ -781,6 +985,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (PutInsightRuleOutput.of_xml xml)
       else Error (parse_aws_error (Some PutInsightRuleOutput.error_of_xml))
+  | PutManagedInsightRules ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (PutManagedInsightRulesOutput.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some PutManagedInsightRulesOutput.error_of_xml))
   | PutMetricAlarm ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutMetricData ->
@@ -800,6 +1012,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (StartMetricStreamsOutput.of_xml xml)
       else
         Error (parse_aws_error (Some StartMetricStreamsOutput.error_of_xml))
+  | StartOTelEnrichment ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StartOTelEnrichmentOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | StopMetricStreams ->
       if is_success
       then
@@ -807,6 +1025,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (StopMetricStreamsOutput.of_xml xml)
       else
         Error (parse_aws_error (Some StopMetricStreamsOutput.error_of_xml))
+  | StopOTelEnrichment ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (StopOTelEnrichmentOutput.of_xml xml)
+      else Error (parse_aws_error None)
   | TagResource ->
       if is_success
       then

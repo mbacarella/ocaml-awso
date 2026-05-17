@@ -6,19 +6,27 @@ type ('i, 'o, 'e) t =
   DescribeServicesResponse.error) t 
   | GetAttributeValues: (GetAttributeValuesRequest.t,
   GetAttributeValuesResponse.t, GetAttributeValuesResponse.error) t 
+  | GetPriceListFileUrl: (GetPriceListFileUrlRequest.t,
+  GetPriceListFileUrlResponse.t, GetPriceListFileUrlResponse.error) t 
   | GetProducts: (GetProductsRequest.t, GetProductsResponse.t,
   GetProductsResponse.error) t 
+  | ListPriceLists: (ListPriceListsRequest.t, ListPriceListsResponse.t,
+  ListPriceListsResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | DescribeServices -> `POST
   | GetAttributeValues -> `POST
+  | GetPriceListFileUrl -> `POST
   | GetProducts -> `POST
+  | ListPriceLists -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | DescribeServices -> (Format.kasprintf Uri.of_string) "/"
       | GetAttributeValues -> (Format.kasprintf Uri.of_string) "/"
-      | GetProducts -> (Format.kasprintf Uri.of_string) "/")
+      | GetPriceListFileUrl -> (Format.kasprintf Uri.of_string) "/"
+      | GetProducts -> (Format.kasprintf Uri.of_string) "/"
+      | ListPriceLists -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -38,6 +46,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSPriceListService.GetAttributeValues")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPriceListFileUrl ->
+      let json = GetPriceListFileUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSPriceListService.GetPriceListFileUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetProducts ->
       let json = GetProductsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -45,6 +61,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSPriceListService.GetProducts")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPriceLists ->
+      let json = ListPriceListsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSPriceListService.ListPriceLists")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -84,9 +108,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetAttributeValuesResponse.error_of_json))
+  | GetPriceListFileUrl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPriceListFileUrlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetPriceListFileUrlResponse.error_of_json))
   | GetProducts ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetProductsResponse.of_json json)
       else Error (parse_aws_error (Some GetProductsResponse.error_of_json))
+  | ListPriceLists ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPriceListsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListPriceListsResponse.error_of_json))

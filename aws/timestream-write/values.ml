@@ -25,6 +25,103 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ScalarMeasureValueType =
+  struct
+    type nonrec t =
+      | DOUBLE 
+      | BIGINT 
+      | BOOLEAN 
+      | VARCHAR 
+      | TIMESTAMP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DOUBLE -> "DOUBLE"
+      | BIGINT -> "BIGINT"
+      | BOOLEAN -> "BOOLEAN"
+      | VARCHAR -> "VARCHAR"
+      | TIMESTAMP -> "TIMESTAMP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DOUBLE" -> DOUBLE
+      | "BIGINT" -> BIGINT
+      | "BOOLEAN" -> BOOLEAN
+      | "VARCHAR" -> VARCHAR
+      | "TIMESTAMP" -> TIMESTAMP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ScalarMeasureValueType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ScalarMeasureValueType" j)
+    let to_json = simple_to_json to_value
+  end
+module SchemaName =
+  struct
+    type nonrec t = string
+    let context_ = "SchemaName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SchemaName" j
+    let to_json = simple_to_json to_value
+  end
+module MultiMeasureAttributeMapping =
+  struct
+    type nonrec t =
+      {
+      sourceColumn: SchemaName.t ;
+      targetMultiMeasureAttributeName: SchemaName.t option ;
+      measureValueType: ScalarMeasureValueType.t option }
+    let context_ = "MultiMeasureAttributeMapping"
+    let make ?targetMultiMeasureAttributeName =
+      fun ?measureValueType ->
+        fun ~sourceColumn ->
+          fun () ->
+            { targetMultiMeasureAttributeName; measureValueType; sourceColumn
+            }
+    let to_value x =
+      structure_to_value
+        [("SourceColumn", (Some (SchemaName.to_value x.sourceColumn)));
+        ("TargetMultiMeasureAttributeName",
+          (Option.map x.targetMultiMeasureAttributeName
+             ~f:SchemaName.to_value));
+        ("MeasureValueType",
+          (Option.map x.measureValueType ~f:ScalarMeasureValueType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let measureValueType =
+        (Option.map ~f:ScalarMeasureValueType.of_xml)
+          (Xml.child xml_arg0 "MeasureValueType") in
+      let targetMultiMeasureAttributeName =
+        (Option.map ~f:SchemaName.of_xml)
+          (Xml.child xml_arg0 "TargetMultiMeasureAttributeName") in
+      let sourceColumn =
+        SchemaName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceColumn") in
+      make ?measureValueType ?targetMultiMeasureAttributeName ~sourceColumn
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let measureValueType =
+        field_map json__ "MeasureValueType" ScalarMeasureValueType.of_json in
+      let targetMultiMeasureAttributeName =
+        field_map json__ "TargetMultiMeasureAttributeName" SchemaName.of_json in
+      let sourceColumn =
+        field_map_exn json__ "SourceColumn" SchemaName.of_json in
+      make ?measureValueType ?targetMultiMeasureAttributeName ~sourceColumn
+        ()
+    let to_json v = composed_to_json to_value v
+  end
 module S3BucketName =
   struct
     type nonrec t = string
@@ -113,48 +210,57 @@ module StringValue2048 =
     let of_json j = string_of_json ~kind:"StringValue2048" j
     let to_json = simple_to_json to_value
   end
-module DimensionValueType =
+module PartitionKeyEnforcementLevel =
   struct
     type nonrec t =
-      | VARCHAR 
+      | REQUIRED 
+      | OPTIONAL 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | VARCHAR -> "VARCHAR" | Non_static_id s -> s
-    let of_string = function | "VARCHAR" -> VARCHAR | x -> Non_static_id x
+    let to_string =
+      function
+      | REQUIRED -> "REQUIRED"
+      | OPTIONAL -> "OPTIONAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUIRED" -> REQUIRED
+      | "OPTIONAL" -> OPTIONAL
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string
-        (string_of_xml ~kind:"enumeration DimensionValueType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DimensionValueType" j)
+        (string_of_xml ~kind:"enumeration PartitionKeyEnforcementLevel"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PartitionKeyEnforcementLevel" j)
     let to_json = simple_to_json to_value
   end
-module SchemaName =
+module PartitionKeyType =
   struct
-    type nonrec t = string
-    let context_ = "SchemaName"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SchemaName" j
-    let to_json = simple_to_json to_value
-  end
-module SchemaValue =
-  struct
-    type nonrec t = string
-    let context_ = "SchemaValue"
+    type nonrec t =
+      | DIMENSION 
+      | MEASURE 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let to_string =
+      function
+      | DIMENSION -> "DIMENSION"
+      | MEASURE -> "MEASURE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DIMENSION" -> DIMENSION
+      | "MEASURE" -> MEASURE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SchemaValue" j
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PartitionKeyType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PartitionKeyType" j)
     let to_json = simple_to_json to_value
   end
 module MeasureValueType =
@@ -194,20 +300,80 @@ module MeasureValueType =
     let of_json j = of_string (string_of_json ~kind:"MeasureValueType" j)
     let to_json = simple_to_json to_value
   end
+module MultiMeasureAttributeMappingList =
+  struct
+    type nonrec t = MultiMeasureAttributeMapping.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MultiMeasureAttributeMapping.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MultiMeasureAttributeMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MultiMeasureAttributeMappingList"
+        ~of_json:MultiMeasureAttributeMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DimensionValueType =
+  struct
+    type nonrec t =
+      | VARCHAR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | VARCHAR -> "VARCHAR" | Non_static_id s -> s
+    let of_string = function | "VARCHAR" -> VARCHAR | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DimensionValueType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DimensionValueType" j)
+    let to_json = simple_to_json to_value
+  end
+module SchemaValue =
+  struct
+    type nonrec t = string
+    let context_ = "SchemaValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SchemaValue" j
+    let to_json = simple_to_json to_value
+  end
 module S3Configuration =
   struct
     type nonrec t =
       {
       bucketName: S3BucketName.t option
-        [@ocaml.doc ">Bucket name of the customer S3 bucket."];
+        [@ocaml.doc "The bucket name of the customer S3 bucket."];
       objectKeyPrefix: S3ObjectKeyPrefix.t option
-        [@ocaml.doc "Object key preview for the customer S3 location."];
+        [@ocaml.doc "The object key preview for the customer S3 location."];
       encryptionOption: S3EncryptionOption.t option
         [@ocaml.doc
-          "Encryption option for the customer s3 location. Options are S3 server side encryption with an S3-managed key or KMS managed key."];
+          "The encryption option for the customer S3 location. Options are S3 server-side encryption with an S3 managed key or Amazon Web Services managed key."];
       kmsKeyId: StringValue2048.t option
         [@ocaml.doc
-          "KMS key id for the customer s3 location when encrypting with a KMS managed key."]}
+          "The KMS key ID for the customer S3 location when encrypting with an Amazon Web Services managed key."]}
     let make ?bucketName =
       fun ?objectKeyPrefix ->
         fun ?encryptionOption ->
@@ -237,16 +403,157 @@ module S3Configuration =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?kmsKeyId ?encryptionOption ?objectKeyPrefix ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
       let encryptionOption =
-        field_map json "EncryptionOption" S3EncryptionOption.of_json in
+        field_map json__ "EncryptionOption" S3EncryptionOption.of_json in
       let objectKeyPrefix =
-        field_map json "ObjectKeyPrefix" S3ObjectKeyPrefix.of_json in
-      let bucketName = field_map json "BucketName" S3BucketName.of_json in
+        field_map json__ "ObjectKeyPrefix" S3ObjectKeyPrefix.of_json in
+      let bucketName = field_map json__ "BucketName" S3BucketName.of_json in
       make ?kmsKeyId ?encryptionOption ?objectKeyPrefix ?bucketName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Configuration specifing an S3 location."]
+  end[@@ocaml.doc "The configuration that specifies an S3 location."]
+module PartitionKey =
+  struct
+    type nonrec t =
+      {
+      type_: PartitionKeyType.t
+        [@ocaml.doc
+          "The type of the partition key. Options are DIMENSION (dimension key) and MEASURE (measure key)."];
+      name: SchemaName.t option
+        [@ocaml.doc "The name of the attribute used for a dimension key."];
+      enforcementInRecord: PartitionKeyEnforcementLevel.t option
+        [@ocaml.doc
+          "The level of enforcement for the specification of a dimension key in ingested records. Options are REQUIRED (dimension key must be specified) and OPTIONAL (dimension key does not have to be specified)."]}
+    let context_ = "PartitionKey"
+    let make ?name =
+      fun ?enforcementInRecord ->
+        fun ~type_ -> fun () -> { name; enforcementInRecord; type_ }
+    let to_value x =
+      structure_to_value
+        [("Type", (Some (PartitionKeyType.to_value x.type_)));
+        ("Name", (Option.map x.name ~f:SchemaName.to_value));
+        ("EnforcementInRecord",
+          (Option.map x.enforcementInRecord
+             ~f:PartitionKeyEnforcementLevel.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enforcementInRecord =
+        (Option.map ~f:PartitionKeyEnforcementLevel.of_xml)
+          (Xml.child xml_arg0 "EnforcementInRecord") in
+      let name =
+        (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "Name") in
+      let type_ =
+        PartitionKeyType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      make ?enforcementInRecord ?name ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enforcementInRecord =
+        field_map json__ "EnforcementInRecord"
+          PartitionKeyEnforcementLevel.of_json in
+      let name = field_map json__ "Name" SchemaName.of_json in
+      let type_ = field_map_exn json__ "Type" PartitionKeyType.of_json in
+      make ?enforcementInRecord ?name ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An attribute used in partitioning data in a table. A dimension key partitions data using the values of the dimension specified by the dimension-name as partition key, while a measure key partitions data using measure names (values of the 'measure_name' column)."]
+module DimensionMapping =
+  struct
+    type nonrec t =
+      {
+      sourceColumn: SchemaName.t option ;
+      destinationColumn: SchemaName.t option }
+    let make ?sourceColumn =
+      fun ?destinationColumn -> fun () -> { sourceColumn; destinationColumn }
+    let to_value x =
+      structure_to_value
+        [("SourceColumn", (Option.map x.sourceColumn ~f:SchemaName.to_value));
+        ("DestinationColumn",
+          (Option.map x.destinationColumn ~f:SchemaName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationColumn =
+        (Option.map ~f:SchemaName.of_xml)
+          (Xml.child xml_arg0 "DestinationColumn") in
+      let sourceColumn =
+        (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "SourceColumn") in
+      make ?destinationColumn ?sourceColumn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationColumn =
+        field_map json__ "DestinationColumn" SchemaName.of_json in
+      let sourceColumn = field_map json__ "SourceColumn" SchemaName.of_json in
+      make ?destinationColumn ?sourceColumn ()
+    let to_json v = composed_to_json to_value v
+  end
+module MixedMeasureMapping =
+  struct
+    type nonrec t =
+      {
+      measureName: SchemaName.t option ;
+      sourceColumn: SchemaName.t option ;
+      targetMeasureName: SchemaName.t option ;
+      measureValueType: MeasureValueType.t ;
+      multiMeasureAttributeMappings:
+        MultiMeasureAttributeMappingList.t option }
+    let context_ = "MixedMeasureMapping"
+    let make ?measureName =
+      fun ?sourceColumn ->
+        fun ?targetMeasureName ->
+          fun ?multiMeasureAttributeMappings ->
+            fun ~measureValueType ->
+              fun () ->
+                {
+                  measureName;
+                  sourceColumn;
+                  targetMeasureName;
+                  multiMeasureAttributeMappings;
+                  measureValueType
+                }
+    let to_value x =
+      structure_to_value
+        [("MeasureName", (Option.map x.measureName ~f:SchemaName.to_value));
+        ("SourceColumn", (Option.map x.sourceColumn ~f:SchemaName.to_value));
+        ("TargetMeasureName",
+          (Option.map x.targetMeasureName ~f:SchemaName.to_value));
+        ("MeasureValueType",
+          (Some (MeasureValueType.to_value x.measureValueType)));
+        ("MultiMeasureAttributeMappings",
+          (Option.map x.multiMeasureAttributeMappings
+             ~f:MultiMeasureAttributeMappingList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let multiMeasureAttributeMappings =
+        (Option.map ~f:MultiMeasureAttributeMappingList.of_xml)
+          (Xml.child xml_arg0 "MultiMeasureAttributeMappings") in
+      let measureValueType =
+        MeasureValueType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MeasureValueType") in
+      let targetMeasureName =
+        (Option.map ~f:SchemaName.of_xml)
+          (Xml.child xml_arg0 "TargetMeasureName") in
+      let sourceColumn =
+        (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "SourceColumn") in
+      let measureName =
+        (Option.map ~f:SchemaName.of_xml) (Xml.child xml_arg0 "MeasureName") in
+      make ?multiMeasureAttributeMappings ~measureValueType
+        ?targetMeasureName ?sourceColumn ?measureName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let multiMeasureAttributeMappings =
+        field_map json__ "MultiMeasureAttributeMappings"
+          MultiMeasureAttributeMappingList.of_json in
+      let measureValueType =
+        field_map_exn json__ "MeasureValueType" MeasureValueType.of_json in
+      let targetMeasureName =
+        field_map json__ "TargetMeasureName" SchemaName.of_json in
+      let sourceColumn = field_map json__ "SourceColumn" SchemaName.of_json in
+      let measureName = field_map json__ "MeasureName" SchemaName.of_json in
+      make ?multiMeasureAttributeMappings ~measureValueType
+        ?targetMeasureName ?sourceColumn ?measureName ()
+    let to_json v = composed_to_json to_value v
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -293,11 +600,11 @@ module Dimension =
       {
       name: SchemaName.t
         [@ocaml.doc
-          "Dimension represents the meta data attributes of the time series. For example, the name and availability zone of an EC2 instance or the name of the manufacturer of a wind turbine are dimensions. For constraints on Dimension names, see Naming Constraints."];
+          "Dimension represents the metadata attributes of the time series. For example, the name and Availability Zone of an EC2 instance or the name of the manufacturer of a wind turbine are dimensions. For constraints on dimension names, see Naming Constraints."];
       value: SchemaValue.t [@ocaml.doc "The value of the dimension."];
       dimensionValueType: DimensionValueType.t option
         [@ocaml.doc
-          "The data type of the dimension for the time series data point."]}
+          "The data type of the dimension for the time-series data point."]}
     let context_ = "Dimension"
     let make ?dimensionValueType =
       fun ~name ->
@@ -319,26 +626,28 @@ module Dimension =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?dimensionValueType ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionValueType =
-        field_map json "DimensionValueType" DimensionValueType.of_json in
-      let value = field_map_exn json "Value" SchemaValue.of_json in
-      let name = field_map_exn json "Name" SchemaName.of_json in
+        field_map json__ "DimensionValueType" DimensionValueType.of_json in
+      let value = field_map_exn json__ "Value" SchemaValue.of_json in
+      let name = field_map_exn json__ "Name" SchemaName.of_json in
       make ?dimensionValueType ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Dimension represents the meta data attributes of the time series. For example, the name and availability zone of an EC2 instance or the name of the manufacturer of a wind turbine are dimensions."]
+       "Represents the metadata attributes of the time series. For example, the name and Availability Zone of an EC2 instance or the name of the manufacturer of a wind turbine are dimensions."]
 module MeasureValue =
   struct
     type nonrec t =
       {
       name: SchemaName.t
         [@ocaml.doc
-          "Name of the MeasureValue. For constraints on MeasureValue names, refer to Naming Constraints in the Timestream developer guide."];
-      value: StringValue2048.t [@ocaml.doc "Value for the MeasureValue."];
+          "The name of the MeasureValue. For constraints on MeasureValue names, see Naming Constraints in the Amazon Timestream Developer Guide."];
+      value: StringValue2048.t
+        [@ocaml.doc
+          "The value for the MeasureValue. For information, see Data types."];
       type_: MeasureValueType.t
         [@ocaml.doc
-          "Contains the data type of the MeasureValue for the time series data point."]}
+          "Contains the data type of the MeasureValue for the time-series data point."]}
     let context_ = "MeasureValue"
     let make ~name =
       fun ~value -> fun ~type_ -> fun () -> { name; value; type_ }
@@ -359,14 +668,14 @@ module MeasureValue =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~type_ ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" MeasureValueType.of_json in
-      let value = field_map_exn json "Value" StringValue2048.of_json in
-      let name = field_map_exn json "Name" SchemaName.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" MeasureValueType.of_json in
+      let value = field_map_exn json__ "Value" StringValue2048.of_json in
+      let name = field_map_exn json__ "Name" SchemaName.of_json in
       make ~type_ ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "MeasureValue represents the data attribute of the time series. For example, the CPU utilization of an EC2 instance or the RPM of a wind turbine are measures. MeasureValue has both name and value. MeasureValue is only allowed for type MULTI. Using MULTI type, you can pass multiple data attributes associated with the same time series in a single record"]
+       "Represents the data attribute of the time series. For example, the CPU utilization of an EC2 instance or the RPM of a wind turbine are measures. MeasureValue has both name and value. MeasureValue is only allowed for type MULTI. Using MULTI type, you can pass multiple data attributes associated with the same time series in a single record"]
 module Boolean =
   struct
     type nonrec t = bool
@@ -399,9 +708,9 @@ module MagneticStoreRejectedDataLocation =
           (Xml.child xml_arg0 "S3Configuration") in
       make ?s3Configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Configuration =
-        field_map json "S3Configuration" S3Configuration.of_json in
+        field_map json__ "S3Configuration" S3Configuration.of_json in
       make ?s3Configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -442,96 +751,129 @@ module MemoryStoreRetentionPeriodInHours =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module RejectedRecord =
+module PartitionKeyList =
+  struct
+    type nonrec t = PartitionKey.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PartitionKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PartitionKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PartitionKeyList" ~of_json:PartitionKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DimensionMappings =
+  struct
+    type nonrec t = DimensionMapping.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DimensionMapping.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DimensionMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionMappings"
+        ~of_json:DimensionMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MixedMeasureMappingList =
+  struct
+    type nonrec t = MixedMeasureMapping.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MixedMeasureMapping.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MixedMeasureMapping.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MixedMeasureMappingList"
+        ~of_json:MixedMeasureMapping.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MultiMeasureMappings =
   struct
     type nonrec t =
       {
-      recordIndex: RecordIndex.t option
-        [@ocaml.doc
-          "The index of the record in the input request for WriteRecords. Indexes begin with 0."];
-      reason: ErrorMessage.t option
-        [@ocaml.doc
-          "The reason why a record was not successfully inserted into Timestream. Possible causes of failure include: Records with duplicate data where there are multiple records with the same dimensions, timestamps, and measure names but: Measure values are different Version is not present in the request or the value of version in the new record is equal to or lower than the existing value If Timestream rejects data for this case, the ExistingVersion field in the RejectedRecords response will indicate the current record\226\128\153s version. To force an update, you can resend the request with a version for the record set to a value greater than the ExistingVersion. Records with timestamps that lie outside the retention duration of the memory store When the retention window is updated, you will receive a RejectedRecords exception if you immediately try to ingest data within the new window. To avoid a RejectedRecords exception, wait until the duration of the new window to ingest new data. For further information, see Best Practices for Configuring Timestream and the explanation of how storage works in Timestream. Records with dimensions or measures that exceed the Timestream defined limits. For more information, see Access Management in the Timestream Developer Guide."];
-      existingVersion: RecordVersion.t option
-        [@ocaml.doc
-          "The existing version of the record. This value is populated in scenarios where an identical record exists with a higher version than the version in the write request."]}
-    let make ?recordIndex =
-      fun ?reason ->
-        fun ?existingVersion ->
-          fun () -> { recordIndex; reason; existingVersion }
+      targetMultiMeasureName: SchemaName.t option ;
+      multiMeasureAttributeMappings: MultiMeasureAttributeMappingList.t }
+    let context_ = "MultiMeasureMappings"
+    let make ?targetMultiMeasureName =
+      fun ~multiMeasureAttributeMappings ->
+        fun () -> { targetMultiMeasureName; multiMeasureAttributeMappings }
     let to_value x =
       structure_to_value
-        [("RecordIndex", (Option.map x.recordIndex ~f:RecordIndex.to_value));
-        ("Reason", (Option.map x.reason ~f:ErrorMessage.to_value));
-        ("ExistingVersion",
-          (Option.map x.existingVersion ~f:RecordVersion.to_value))]
+        [("TargetMultiMeasureName",
+           (Option.map x.targetMultiMeasureName ~f:SchemaName.to_value));
+        ("MultiMeasureAttributeMappings",
+          (Some
+             (MultiMeasureAttributeMappingList.to_value
+                x.multiMeasureAttributeMappings)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let existingVersion =
-        (Option.map ~f:RecordVersion.of_xml)
-          (Xml.child xml_arg0 "ExistingVersion") in
-      let reason =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Reason") in
-      let recordIndex =
-        (Option.map ~f:RecordIndex.of_xml) (Xml.child xml_arg0 "RecordIndex") in
-      make ?existingVersion ?reason ?recordIndex ()
+      let multiMeasureAttributeMappings =
+        MultiMeasureAttributeMappingList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "MultiMeasureAttributeMappings") in
+      let targetMultiMeasureName =
+        (Option.map ~f:SchemaName.of_xml)
+          (Xml.child xml_arg0 "TargetMultiMeasureName") in
+      make ~multiMeasureAttributeMappings ?targetMultiMeasureName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let existingVersion =
-        field_map json "ExistingVersion" RecordVersion.of_json in
-      let reason = field_map json "Reason" ErrorMessage.of_json in
-      let recordIndex = field_map json "RecordIndex" RecordIndex.of_json in
-      make ?existingVersion ?reason ?recordIndex ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Records that were not successfully inserted into Timestream due to data validation issues that must be resolved prior to reinserting time series data into the system."]
-module Dimensions =
-  struct
-    type nonrec t = Dimension.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:128); i
-    let to_value xs =
-      (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Dimension.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Dimensions" ~of_json:Dimension.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MeasureValues =
-  struct
-    type nonrec t = MeasureValue.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:MeasureValue.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MeasureValue.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MeasureValues" ~of_json:MeasureValue.of_json j
+    let of_json json__ =
+      let multiMeasureAttributeMappings =
+        field_map_exn json__ "MultiMeasureAttributeMappings"
+          MultiMeasureAttributeMappingList.of_json in
+      let targetMultiMeasureName =
+        field_map json__ "TargetMultiMeasureName" SchemaName.of_json in
+      make ~multiMeasureAttributeMappings ?targetMultiMeasureName ()
     let to_json v = composed_to_json to_value v
   end
 module StringValue256 =
@@ -582,6 +924,144 @@ module TimeUnit =
       of_string (string_of_xml ~kind:"enumeration TimeUnit" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"TimeUnit" j)
     let to_json = simple_to_json to_value
+  end
+module S3ObjectKey =
+  struct
+    type nonrec t = string
+    let context_ = "S3ObjectKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9|!\\-_*'\\(\\)]([a-zA-Z0-9]|[!\\-_*'\\(\\)\\/.])+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ObjectKey" j
+    let to_json = simple_to_json to_value
+  end
+module StringValue1 =
+  struct
+    type nonrec t = string
+    let context_ = "StringValue1"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StringValue1" j
+    let to_json = simple_to_json to_value
+  end
+module RejectedRecord =
+  struct
+    type nonrec t =
+      {
+      recordIndex: RecordIndex.t option
+        [@ocaml.doc
+          "The index of the record in the input request for WriteRecords. Indexes begin with 0."];
+      reason: ErrorMessage.t option
+        [@ocaml.doc
+          "The reason why a record was not successfully inserted into Timestream. Possible causes of failure include: Records with duplicate data where there are multiple records with the same dimensions, timestamps, and measure names but: Measure values are different Version is not present in the request, or the value of version in the new record is equal to or lower than the existing value If Timestream rejects data for this case, the ExistingVersion field in the RejectedRecords response will indicate the current record\226\128\153s version. To force an update, you can resend the request with a version for the record set to a value greater than the ExistingVersion. Records with timestamps that lie outside the retention duration of the memory store. When the retention window is updated, you will receive a RejectedRecords exception if you immediately try to ingest data within the new window. To avoid a RejectedRecords exception, wait until the duration of the new window to ingest new data. For further information, see Best Practices for Configuring Timestream and the explanation of how storage works in Timestream. Records with dimensions or measures that exceed the Timestream defined limits. For more information, see Access Management in the Timestream Developer Guide."];
+      existingVersion: RecordVersion.t option
+        [@ocaml.doc
+          "The existing version of the record. This value is populated in scenarios where an identical record exists with a higher version than the version in the write request."]}
+    let make ?recordIndex =
+      fun ?reason ->
+        fun ?existingVersion ->
+          fun () -> { recordIndex; reason; existingVersion }
+    let to_value x =
+      structure_to_value
+        [("RecordIndex", (Option.map x.recordIndex ~f:RecordIndex.to_value));
+        ("Reason", (Option.map x.reason ~f:ErrorMessage.to_value));
+        ("ExistingVersion",
+          (Option.map x.existingVersion ~f:RecordVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let existingVersion =
+        (Option.map ~f:RecordVersion.of_xml)
+          (Xml.child xml_arg0 "ExistingVersion") in
+      let reason =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Reason") in
+      let recordIndex =
+        (Option.map ~f:RecordIndex.of_xml) (Xml.child xml_arg0 "RecordIndex") in
+      make ?existingVersion ?reason ?recordIndex ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let existingVersion =
+        field_map json__ "ExistingVersion" RecordVersion.of_json in
+      let reason = field_map json__ "Reason" ErrorMessage.of_json in
+      let recordIndex = field_map json__ "RecordIndex" RecordIndex.of_json in
+      make ?existingVersion ?reason ?recordIndex ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents records that were not successfully inserted into Timestream due to data validation issues that must be resolved before reinserting time-series data into the system."]
+module Dimensions =
+  struct
+    type nonrec t = Dimension.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:128); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Dimension.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Dimension.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Dimensions" ~of_json:Dimension.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MeasureValues =
+  struct
+    type nonrec t = MeasureValue.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MeasureValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MeasureValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MeasureValues" ~of_json:MeasureValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module TagKey =
   struct
@@ -664,12 +1144,12 @@ module MagneticStoreWriteProperties =
              "EnableMagneticStoreWrites") in
       make ?magneticStoreRejectedDataLocation ~enableMagneticStoreWrites ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let magneticStoreRejectedDataLocation =
-        field_map json "MagneticStoreRejectedDataLocation"
+        field_map json__ "MagneticStoreRejectedDataLocation"
           MagneticStoreRejectedDataLocation.of_json in
       let enableMagneticStoreWrites =
-        field_map_exn json "EnableMagneticStoreWrites" Boolean.of_json in
+        field_map_exn json__ "EnableMagneticStoreWrites" Boolean.of_json in
       make ?magneticStoreRejectedDataLocation ~enableMagneticStoreWrites ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -729,18 +1209,43 @@ module RetentionProperties =
       make ~magneticStoreRetentionPeriodInDays
         ~memoryStoreRetentionPeriodInHours ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let magneticStoreRetentionPeriodInDays =
-        field_map_exn json "MagneticStoreRetentionPeriodInDays"
+        field_map_exn json__ "MagneticStoreRetentionPeriodInDays"
           MagneticStoreRetentionPeriodInDays.of_json in
       let memoryStoreRetentionPeriodInHours =
-        field_map_exn json "MemoryStoreRetentionPeriodInHours"
+        field_map_exn json__ "MemoryStoreRetentionPeriodInHours"
           MemoryStoreRetentionPeriodInHours.of_json in
       make ~magneticStoreRetentionPeriodInDays
         ~memoryStoreRetentionPeriodInHours ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retention properties contain the duration for which your time series data must be stored in the magnetic store and the memory store."]
+       "Retention properties contain the duration for which your time-series data must be stored in the magnetic store and the memory store."]
+module Schema =
+  struct
+    type nonrec t =
+      {
+      compositePartitionKey: PartitionKeyList.t option
+        [@ocaml.doc
+          "A non-empty list of partition keys defining the attributes used to partition the table data. The order of the list determines the partition hierarchy. The name and type of each partition key as well as the partition key order cannot be changed after the table is created. However, the enforcement level of each partition key can be changed."]}
+    let make ?compositePartitionKey = fun () -> { compositePartitionKey }
+    let to_value x =
+      structure_to_value
+        [("CompositePartitionKey",
+           (Option.map x.compositePartitionKey ~f:PartitionKeyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let compositePartitionKey =
+        (Option.map ~f:PartitionKeyList.of_xml)
+          (Xml.child xml_arg0 "CompositePartitionKey") in
+      make ?compositePartitionKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let compositePartitionKey =
+        field_map json__ "CompositePartitionKey" PartitionKeyList.of_json in
+      make ?compositePartitionKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A Schema specifies the expected data model of the table."]
 module String_ =
   struct
     type nonrec t = string
@@ -759,17 +1264,20 @@ module TableStatus =
     type nonrec t =
       | ACTIVE 
       | DELETING 
+      | RESTORING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ACTIVE -> "ACTIVE"
       | DELETING -> "DELETING"
+      | RESTORING -> "RESTORING"
       | Non_static_id s -> s
     let of_string =
       function
       | "ACTIVE" -> ACTIVE
       | "DELETING" -> DELETING
+      | "RESTORING" -> RESTORING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -792,6 +1300,335 @@ module Long =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module BatchLoadStatus =
+  struct
+    type nonrec t =
+      | CREATED 
+      | IN_PROGRESS 
+      | FAILED 
+      | SUCCEEDED 
+      | PROGRESS_STOPPED 
+      | PENDING_RESUME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATED -> "CREATED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | FAILED -> "FAILED"
+      | SUCCEEDED -> "SUCCEEDED"
+      | PROGRESS_STOPPED -> "PROGRESS_STOPPED"
+      | PENDING_RESUME -> "PENDING_RESUME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATED" -> CREATED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "FAILED" -> FAILED
+      | "SUCCEEDED" -> SUCCEEDED
+      | "PROGRESS_STOPPED" -> PROGRESS_STOPPED
+      | "PENDING_RESUME" -> PENDING_RESUME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BatchLoadStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BatchLoadStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module BatchLoadTaskId =
+  struct
+    type nonrec t = string
+    let context_ = "BatchLoadTaskId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BatchLoadTaskId" j
+    let to_json = simple_to_json to_value
+  end
+module DataModel =
+  struct
+    type nonrec t =
+      {
+      timeColumn: StringValue256.t option
+        [@ocaml.doc "Source column to be mapped to time."];
+      timeUnit: TimeUnit.t option
+        [@ocaml.doc
+          "The granularity of the timestamp unit. It indicates if the time value is in seconds, milliseconds, nanoseconds, or other supported values. Default is MILLISECONDS."];
+      dimensionMappings: DimensionMappings.t
+        [@ocaml.doc "Source to target mappings for dimensions."];
+      multiMeasureMappings: MultiMeasureMappings.t option
+        [@ocaml.doc "Source to target mappings for multi-measure records."];
+      mixedMeasureMappings: MixedMeasureMappingList.t option
+        [@ocaml.doc "Source to target mappings for measures."];
+      measureNameColumn: StringValue256.t option }
+    let context_ = "DataModel"
+    let make ?timeColumn =
+      fun ?timeUnit ->
+        fun ?multiMeasureMappings ->
+          fun ?mixedMeasureMappings ->
+            fun ?measureNameColumn ->
+              fun ~dimensionMappings ->
+                fun () ->
+                  {
+                    timeColumn;
+                    timeUnit;
+                    multiMeasureMappings;
+                    mixedMeasureMappings;
+                    measureNameColumn;
+                    dimensionMappings
+                  }
+    let to_value x =
+      structure_to_value
+        [("TimeColumn", (Option.map x.timeColumn ~f:StringValue256.to_value));
+        ("TimeUnit", (Option.map x.timeUnit ~f:TimeUnit.to_value));
+        ("DimensionMappings",
+          (Some (DimensionMappings.to_value x.dimensionMappings)));
+        ("MultiMeasureMappings",
+          (Option.map x.multiMeasureMappings ~f:MultiMeasureMappings.to_value));
+        ("MixedMeasureMappings",
+          (Option.map x.mixedMeasureMappings
+             ~f:MixedMeasureMappingList.to_value));
+        ("MeasureNameColumn",
+          (Option.map x.measureNameColumn ~f:StringValue256.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let measureNameColumn =
+        (Option.map ~f:StringValue256.of_xml)
+          (Xml.child xml_arg0 "MeasureNameColumn") in
+      let mixedMeasureMappings =
+        (Option.map ~f:MixedMeasureMappingList.of_xml)
+          (Xml.child xml_arg0 "MixedMeasureMappings") in
+      let multiMeasureMappings =
+        (Option.map ~f:MultiMeasureMappings.of_xml)
+          (Xml.child xml_arg0 "MultiMeasureMappings") in
+      let dimensionMappings =
+        DimensionMappings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DimensionMappings") in
+      let timeUnit =
+        (Option.map ~f:TimeUnit.of_xml) (Xml.child xml_arg0 "TimeUnit") in
+      let timeColumn =
+        (Option.map ~f:StringValue256.of_xml)
+          (Xml.child xml_arg0 "TimeColumn") in
+      make ?measureNameColumn ?mixedMeasureMappings ?multiMeasureMappings
+        ~dimensionMappings ?timeUnit ?timeColumn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let measureNameColumn =
+        field_map json__ "MeasureNameColumn" StringValue256.of_json in
+      let mixedMeasureMappings =
+        field_map json__ "MixedMeasureMappings"
+          MixedMeasureMappingList.of_json in
+      let multiMeasureMappings =
+        field_map json__ "MultiMeasureMappings" MultiMeasureMappings.of_json in
+      let dimensionMappings =
+        field_map_exn json__ "DimensionMappings" DimensionMappings.of_json in
+      let timeUnit = field_map json__ "TimeUnit" TimeUnit.of_json in
+      let timeColumn = field_map json__ "TimeColumn" StringValue256.of_json in
+      make ?measureNameColumn ?mixedMeasureMappings ?multiMeasureMappings
+        ~dimensionMappings ?timeUnit ?timeColumn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Data model for a batch load task."]
+module DataModelS3Configuration =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t option ;
+      objectKey: S3ObjectKey.t option }
+    let make ?bucketName =
+      fun ?objectKey -> fun () -> { bucketName; objectKey }
+    let to_value x =
+      structure_to_value
+        [("BucketName", (Option.map x.bucketName ~f:S3BucketName.to_value));
+        ("ObjectKey", (Option.map x.objectKey ~f:S3ObjectKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let objectKey =
+        (Option.map ~f:S3ObjectKey.of_xml) (Xml.child xml_arg0 "ObjectKey") in
+      let bucketName =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
+      make ?objectKey ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let objectKey = field_map json__ "ObjectKey" S3ObjectKey.of_json in
+      let bucketName = field_map json__ "BucketName" S3BucketName.of_json in
+      make ?objectKey ?bucketName ()
+    let to_json v = composed_to_json to_value v
+  end
+module BatchLoadDataFormat =
+  struct
+    type nonrec t =
+      | CSV 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | CSV -> "CSV" | Non_static_id s -> s
+    let of_string = function | "CSV" -> CSV | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BatchLoadDataFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BatchLoadDataFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module CsvConfiguration =
+  struct
+    type nonrec t =
+      {
+      columnSeparator: StringValue1.t option
+        [@ocaml.doc
+          "Column separator can be one of comma (','), pipe ('|), semicolon (';'), tab('/t'), or blank space (' ')."];
+      escapeChar: StringValue1.t option
+        [@ocaml.doc "Escape character can be one of"];
+      quoteChar: StringValue1.t option
+        [@ocaml.doc "Can be single quote (') or double quote (\")."];
+      nullValue: StringValue256.t option
+        [@ocaml.doc "Can be blank space (' ')."];
+      trimWhiteSpace: Boolean.t option
+        [@ocaml.doc "Specifies to trim leading and trailing white space."]}
+    let make ?columnSeparator =
+      fun ?escapeChar ->
+        fun ?quoteChar ->
+          fun ?nullValue ->
+            fun ?trimWhiteSpace ->
+              fun () ->
+                {
+                  columnSeparator;
+                  escapeChar;
+                  quoteChar;
+                  nullValue;
+                  trimWhiteSpace
+                }
+    let to_value x =
+      structure_to_value
+        [("ColumnSeparator",
+           (Option.map x.columnSeparator ~f:StringValue1.to_value));
+        ("EscapeChar", (Option.map x.escapeChar ~f:StringValue1.to_value));
+        ("QuoteChar", (Option.map x.quoteChar ~f:StringValue1.to_value));
+        ("NullValue", (Option.map x.nullValue ~f:StringValue256.to_value));
+        ("TrimWhiteSpace", (Option.map x.trimWhiteSpace ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let trimWhiteSpace =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "TrimWhiteSpace") in
+      let nullValue =
+        (Option.map ~f:StringValue256.of_xml)
+          (Xml.child xml_arg0 "NullValue") in
+      let quoteChar =
+        (Option.map ~f:StringValue1.of_xml) (Xml.child xml_arg0 "QuoteChar") in
+      let escapeChar =
+        (Option.map ~f:StringValue1.of_xml) (Xml.child xml_arg0 "EscapeChar") in
+      let columnSeparator =
+        (Option.map ~f:StringValue1.of_xml)
+          (Xml.child xml_arg0 "ColumnSeparator") in
+      make ?trimWhiteSpace ?nullValue ?quoteChar ?escapeChar ?columnSeparator
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trimWhiteSpace = field_map json__ "TrimWhiteSpace" Boolean.of_json in
+      let nullValue = field_map json__ "NullValue" StringValue256.of_json in
+      let quoteChar = field_map json__ "QuoteChar" StringValue1.of_json in
+      let escapeChar = field_map json__ "EscapeChar" StringValue1.of_json in
+      let columnSeparator =
+        field_map json__ "ColumnSeparator" StringValue1.of_json in
+      make ?trimWhiteSpace ?nullValue ?quoteChar ?escapeChar ?columnSeparator
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A delimited data format where the column separator can be a comma and the record separator is a newline character."]
+module DataSourceS3Configuration =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t
+        [@ocaml.doc "The bucket name of the customer S3 bucket."];
+      objectKeyPrefix: S3ObjectKey.t option }
+    let context_ = "DataSourceS3Configuration"
+    let make ?objectKeyPrefix =
+      fun ~bucketName -> fun () -> { objectKeyPrefix; bucketName }
+    let to_value x =
+      structure_to_value
+        [("BucketName", (Some (S3BucketName.to_value x.bucketName)));
+        ("ObjectKeyPrefix",
+          (Option.map x.objectKeyPrefix ~f:S3ObjectKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let objectKeyPrefix =
+        (Option.map ~f:S3ObjectKey.of_xml)
+          (Xml.child xml_arg0 "ObjectKeyPrefix") in
+      let bucketName =
+        S3BucketName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
+      make ?objectKeyPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let objectKeyPrefix =
+        field_map json__ "ObjectKeyPrefix" S3ObjectKey.of_json in
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
+      make ?objectKeyPrefix ~bucketName ()
+    let to_json v = composed_to_json to_value v
+  end
+module ReportS3Configuration =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t ;
+      objectKeyPrefix: S3ObjectKeyPrefix.t option ;
+      encryptionOption: S3EncryptionOption.t option ;
+      kmsKeyId: StringValue2048.t option }
+    let context_ = "ReportS3Configuration"
+    let make ?objectKeyPrefix =
+      fun ?encryptionOption ->
+        fun ?kmsKeyId ->
+          fun ~bucketName ->
+            fun () ->
+              { objectKeyPrefix; encryptionOption; kmsKeyId; bucketName }
+    let to_value x =
+      structure_to_value
+        [("BucketName", (Some (S3BucketName.to_value x.bucketName)));
+        ("ObjectKeyPrefix",
+          (Option.map x.objectKeyPrefix ~f:S3ObjectKeyPrefix.to_value));
+        ("EncryptionOption",
+          (Option.map x.encryptionOption ~f:S3EncryptionOption.to_value));
+        ("KmsKeyId", (Option.map x.kmsKeyId ~f:StringValue2048.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:StringValue2048.of_xml)
+          (Xml.child xml_arg0 "KmsKeyId") in
+      let encryptionOption =
+        (Option.map ~f:S3EncryptionOption.of_xml)
+          (Xml.child xml_arg0 "EncryptionOption") in
+      let objectKeyPrefix =
+        (Option.map ~f:S3ObjectKeyPrefix.of_xml)
+          (Xml.child xml_arg0 "ObjectKeyPrefix") in
+      let bucketName =
+        S3BucketName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
+      make ?kmsKeyId ?encryptionOption ?objectKeyPrefix ~bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
+      let encryptionOption =
+        field_map json__ "EncryptionOption" S3EncryptionOption.of_json in
+      let objectKeyPrefix =
+        field_map json__ "ObjectKeyPrefix" S3ObjectKeyPrefix.of_json in
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
+      make ?kmsKeyId ?encryptionOption ?objectKeyPrefix ~bucketName ()
+    let to_json v = composed_to_json to_value v
+  end
 module Integer =
   struct
     type nonrec t = int
@@ -809,6 +1646,9 @@ module RejectedRecords =
   struct
     type nonrec t = RejectedRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RejectedRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -835,28 +1675,28 @@ module Record =
       {
       dimensions: Dimensions.t option
         [@ocaml.doc
-          "Contains the list of dimensions for time series data points."];
+          "Contains the list of dimensions for time-series data points."];
       measureName: SchemaName.t option
         [@ocaml.doc
           "Measure represents the data attribute of the time series. For example, the CPU utilization of an EC2 instance or the RPM of a wind turbine are measures."];
       measureValue: StringValue2048.t option
         [@ocaml.doc
-          "Contains the measure value for the time series data point."];
+          "Contains the measure value for the time-series data point."];
       measureValueType: MeasureValueType.t option
         [@ocaml.doc
-          "Contains the data type of the measure value for the time series data point. Default type is DOUBLE."];
+          "Contains the data type of the measure value for the time-series data point. Default type is DOUBLE. For more information, see Data types."];
       time: StringValue256.t option
         [@ocaml.doc
           "Contains the time at which the measure value for the data point was collected. The time value plus the unit provides the time elapsed since the epoch. For example, if the time value is 12345 and the unit is ms, then 12345 ms have elapsed since the epoch."];
       timeUnit: TimeUnit.t option
         [@ocaml.doc
-          "The granularity of the timestamp unit. It indicates if the time value is in seconds, milliseconds, nanoseconds or other supported values. Default is MILLISECONDS."];
+          "The granularity of the timestamp unit. It indicates if the time value is in seconds, milliseconds, nanoseconds, or other supported values. Default is MILLISECONDS."];
       version: RecordVersion.t option
         [@ocaml.doc
-          "64-bit attribute used for record updates. Write requests for duplicate data with a higher version number will update the existing measure value and version. In cases where the measure value is the same, Version will still be updated . Default value is 1. Version must be 1 or greater, or you will receive a ValidationException error."];
+          "64-bit attribute used for record updates. Write requests for duplicate data with a higher version number will update the existing measure value and version. In cases where the measure value is the same, Version will still be updated. Default value is 1. Version must be 1 or greater, or you will receive a ValidationException error."];
       measureValues: MeasureValues.t option
         [@ocaml.doc
-          "Contains the list of MeasureValue for time series data points. This is only allowed for type MULTI. For scalar values, use MeasureValue attribute of the Record directly."]}
+          "Contains the list of MeasureValue for time-series data points. This is only allowed for type MULTI. For scalar values, use MeasureValue attribute of the record directly."]}
     let make ?dimensions =
       fun ?measureName ->
         fun ?measureValue ->
@@ -913,23 +1753,23 @@ module Record =
       make ?measureValues ?version ?timeUnit ?time ?measureValueType
         ?measureValue ?measureName ?dimensions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let measureValues =
-        field_map json "MeasureValues" MeasureValues.of_json in
-      let version = field_map json "Version" RecordVersion.of_json in
-      let timeUnit = field_map json "TimeUnit" TimeUnit.of_json in
-      let time = field_map json "Time" StringValue256.of_json in
+        field_map json__ "MeasureValues" MeasureValues.of_json in
+      let version = field_map json__ "Version" RecordVersion.of_json in
+      let timeUnit = field_map json__ "TimeUnit" TimeUnit.of_json in
+      let time = field_map json__ "Time" StringValue256.of_json in
       let measureValueType =
-        field_map json "MeasureValueType" MeasureValueType.of_json in
+        field_map json__ "MeasureValueType" MeasureValueType.of_json in
       let measureValue =
-        field_map json "MeasureValue" StringValue2048.of_json in
-      let measureName = field_map json "MeasureName" SchemaName.of_json in
-      let dimensions = field_map json "Dimensions" Dimensions.of_json in
+        field_map json__ "MeasureValue" StringValue2048.of_json in
+      let measureName = field_map json__ "MeasureName" SchemaName.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
       make ?measureValues ?version ?timeUnit ?time ?measureValueType
         ?measureValue ?measureName ?dimensions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Record represents a time series data point being written into Timestream. Each record contains an array of dimensions. Dimensions represent the meta data attributes of a time series data point such as the instance name or availability zone of an EC2 instance. A record also contains the measure name which is the name of the measure being collected for example the CPU utilization of an EC2 instance. A record also contains the measure value and the value type which is the data type of the measure value. In addition, the record contains the timestamp when the measure was collected that the timestamp unit which represents the granularity of the timestamp. Records have a Version field, which is a 64-bit long that you can use for updating data points. Writes of a duplicate record with the same dimension, timestamp, and measure name but different measure value will only succeed if the Version attribute of the record in the write request is higher than that of the existing record. Timestream defaults to a Version of 1 for records without the Version field."]
+       "Represents a time-series data point being written into Timestream. Each record contains an array of dimensions. Dimensions represent the metadata attributes of a time-series data point, such as the instance name or Availability Zone of an EC2 instance. A record also contains the measure name, which is the name of the measure being collected (for example, the CPU utilization of an EC2 instance). Additionally, a record contains the measure value and the value type, which is the data type of the measure value. Also, the record contains the timestamp of when the measure was collected and the timestamp unit, which represents the granularity of the timestamp. Records have a Version field, which is a 64-bit long that you can use for updating data points. Writes of a duplicate record with the same dimension, timestamp, and measure name but different measure value will only succeed if the Version attribute of the record in the write request is higher than that of the existing record. Timestream defaults to a Version of 1 for records without the Version field."]
 module Tag =
   struct
     type nonrec t =
@@ -953,13 +1793,13 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a label that you assign to a Timestream database and/or table. Each tag consists of a key and an optional value, both of which you define. Tags enable you to categorize databases and/or tables, for example, by purpose, owner, or environment."]
+       "A tag is a label that you assign to a Timestream database and/or table. Each tag consists of a key and an optional value, both of which you define. With tags, you can categorize databases and/or tables, for example, by purpose, owner, or environment."]
 module Table =
   struct
     type nonrec t =
@@ -984,7 +1824,8 @@ module Table =
         [@ocaml.doc "The time when the Timestream table was last updated."];
       magneticStoreWriteProperties: MagneticStoreWriteProperties.t option
         [@ocaml.doc
-          "Contains properties to set on the table when enabling magnetic store writes."]}
+          "Contains properties to set on the table when enabling magnetic store writes."];
+      schema: Schema.t option [@ocaml.doc "The schema of the table."]}
     let make ?arn =
       fun ?tableName ->
         fun ?databaseName ->
@@ -993,17 +1834,19 @@ module Table =
               fun ?creationTime ->
                 fun ?lastUpdatedTime ->
                   fun ?magneticStoreWriteProperties ->
-                    fun () ->
-                      {
-                        arn;
-                        tableName;
-                        databaseName;
-                        tableStatus;
-                        retentionProperties;
-                        creationTime;
-                        lastUpdatedTime;
-                        magneticStoreWriteProperties
-                      }
+                    fun ?schema ->
+                      fun () ->
+                        {
+                          arn;
+                          tableName;
+                          databaseName;
+                          tableStatus;
+                          retentionProperties;
+                          creationTime;
+                          lastUpdatedTime;
+                          magneticStoreWriteProperties;
+                          schema
+                        }
     let to_value x =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:String_.to_value));
@@ -1017,9 +1860,12 @@ module Table =
         ("LastUpdatedTime", (Option.map x.lastUpdatedTime ~f:Date.to_value));
         ("MagneticStoreWriteProperties",
           (Option.map x.magneticStoreWriteProperties
-             ~f:MagneticStoreWriteProperties.to_value))]
+             ~f:MagneticStoreWriteProperties.to_value));
+        ("Schema", (Option.map x.schema ~f:Schema.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let schema =
+        (Option.map ~f:Schema.of_xml) (Xml.child xml_arg0 "Schema") in
       let magneticStoreWriteProperties =
         (Option.map ~f:MagneticStoreWriteProperties.of_xml)
           (Xml.child xml_arg0 "MagneticStoreWriteProperties") in
@@ -1038,26 +1884,29 @@ module Table =
       let tableName =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "TableName") in
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?magneticStoreWriteProperties ?lastUpdatedTime ?creationTime
-        ?retentionProperties ?tableStatus ?databaseName ?tableName ?arn ()
+      make ?schema ?magneticStoreWriteProperties ?lastUpdatedTime
+        ?creationTime ?retentionProperties ?tableStatus ?databaseName
+        ?tableName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let schema = field_map json__ "Schema" Schema.of_json in
       let magneticStoreWriteProperties =
-        field_map json "MagneticStoreWriteProperties"
+        field_map json__ "MagneticStoreWriteProperties"
           MagneticStoreWriteProperties.of_json in
-      let lastUpdatedTime = field_map json "LastUpdatedTime" Date.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let retentionProperties =
-        field_map json "RetentionProperties" RetentionProperties.of_json in
-      let tableStatus = field_map json "TableStatus" TableStatus.of_json in
-      let databaseName = field_map json "DatabaseName" ResourceName.of_json in
-      let tableName = field_map json "TableName" ResourceName.of_json in
-      let arn = field_map json "Arn" String_.of_json in
-      make ?magneticStoreWriteProperties ?lastUpdatedTime ?creationTime
-        ?retentionProperties ?tableStatus ?databaseName ?tableName ?arn ()
+        field_map json__ "RetentionProperties" RetentionProperties.of_json in
+      let tableStatus = field_map json__ "TableStatus" TableStatus.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
+      let tableName = field_map json__ "TableName" ResourceName.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
+      make ?schema ?magneticStoreWriteProperties ?lastUpdatedTime
+        ?creationTime ?retentionProperties ?tableStatus ?databaseName
+        ?tableName ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Table represents a database table in Timestream. Tables contain one or more related time series. You can modify the retention duration of the memory store and the magnetic store for a table."]
+       "Represents a database table in Timestream. Tables contain one or more related time series. You can modify the retention duration of the memory store and the magnetic store for a table."]
 module Database =
   struct
     type nonrec t =
@@ -1120,91 +1969,340 @@ module Database =
       make ?lastUpdatedTime ?creationTime ?kmsKeyId ?tableCount ?databaseName
         ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdatedTime = field_map json "LastUpdatedTime" Date.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
-      let tableCount = field_map json "TableCount" Long.of_json in
-      let databaseName = field_map json "DatabaseName" ResourceName.of_json in
-      let arn = field_map json "Arn" String_.of_json in
+    let of_json json__ =
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
+      let tableCount = field_map json__ "TableCount" Long.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
+      let arn = field_map json__ "Arn" String_.of_json in
       make ?lastUpdatedTime ?creationTime ?kmsKeyId ?tableCount ?databaseName
         ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A top level container for a table. Databases and tables are the fundamental management concepts in Amazon Timestream. All tables in a database are encrypted with the same KMS key."]
+       "A top-level container for a table. Databases and tables are the fundamental management concepts in Amazon Timestream. All tables in a database are encrypted with the same KMS key."]
+module BatchLoadTask =
+  struct
+    type nonrec t =
+      {
+      taskId: BatchLoadTaskId.t option
+        [@ocaml.doc "The ID of the batch load task."];
+      taskStatus: BatchLoadStatus.t option
+        [@ocaml.doc "Status of the batch load task."];
+      databaseName: ResourceName.t option
+        [@ocaml.doc
+          "Database name for the database into which a batch load task loads data."];
+      tableName: ResourceName.t option
+        [@ocaml.doc
+          "Table name for the table into which a batch load task loads data."];
+      creationTime: Date.t option
+        [@ocaml.doc
+          "The time when the Timestream batch load task was created."];
+      lastUpdatedTime: Date.t option
+        [@ocaml.doc
+          "The time when the Timestream batch load task was last updated."];
+      resumableUntil: Date.t option }
+    let make ?taskId =
+      fun ?taskStatus ->
+        fun ?databaseName ->
+          fun ?tableName ->
+            fun ?creationTime ->
+              fun ?lastUpdatedTime ->
+                fun ?resumableUntil ->
+                  fun () ->
+                    {
+                      taskId;
+                      taskStatus;
+                      databaseName;
+                      tableName;
+                      creationTime;
+                      lastUpdatedTime;
+                      resumableUntil
+                    }
+    let to_value x =
+      structure_to_value
+        [("TaskId", (Option.map x.taskId ~f:BatchLoadTaskId.to_value));
+        ("TaskStatus", (Option.map x.taskStatus ~f:BatchLoadStatus.to_value));
+        ("DatabaseName",
+          (Option.map x.databaseName ~f:ResourceName.to_value));
+        ("TableName", (Option.map x.tableName ~f:ResourceName.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("LastUpdatedTime", (Option.map x.lastUpdatedTime ~f:Date.to_value));
+        ("ResumableUntil", (Option.map x.resumableUntil ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resumableUntil =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "ResumableUntil") in
+      let lastUpdatedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let tableName =
+        (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "TableName") in
+      let databaseName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "DatabaseName") in
+      let taskStatus =
+        (Option.map ~f:BatchLoadStatus.of_xml)
+          (Xml.child xml_arg0 "TaskStatus") in
+      let taskId =
+        (Option.map ~f:BatchLoadTaskId.of_xml) (Xml.child xml_arg0 "TaskId") in
+      make ?resumableUntil ?lastUpdatedTime ?creationTime ?tableName
+        ?databaseName ?taskStatus ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resumableUntil = field_map json__ "ResumableUntil" Date.of_json in
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let tableName = field_map json__ "TableName" ResourceName.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
+      let taskStatus = field_map json__ "TaskStatus" BatchLoadStatus.of_json in
+      let taskId = field_map json__ "TaskId" BatchLoadTaskId.of_json in
+      make ?resumableUntil ?lastUpdatedTime ?creationTime ?tableName
+        ?databaseName ?taskStatus ?taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a batch load task."]
 module Endpoint =
   struct
     type nonrec t =
       {
-      address: String_.t [@ocaml.doc "An endpoint address."];
-      cachePeriodInMinutes: Long.t
+      address: String_.t option [@ocaml.doc "An endpoint address."];
+      cachePeriodInMinutes: Long.t option
         [@ocaml.doc "The TTL for the endpoint, in minutes."]}
-    let context_ = "Endpoint"
-    let make ~address =
-      fun ~cachePeriodInMinutes ->
+    let make ?address =
+      fun ?cachePeriodInMinutes ->
         fun () -> { address; cachePeriodInMinutes }
     let to_value x =
       structure_to_value
-        [("Address", (Some (String_.to_value x.address)));
+        [("Address", (Option.map x.address ~f:String_.to_value));
         ("CachePeriodInMinutes",
-          (Some (Long.to_value x.cachePeriodInMinutes)))]
+          (Option.map x.cachePeriodInMinutes ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cachePeriodInMinutes =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CachePeriodInMinutes") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "CachePeriodInMinutes") in
       let address =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
-      make ~cachePeriodInMinutes ~address ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
+      make ?cachePeriodInMinutes ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cachePeriodInMinutes =
-        field_map_exn json "CachePeriodInMinutes" Long.of_json in
-      let address = field_map_exn json "Address" String_.of_json in
-      make ~cachePeriodInMinutes ~address ()
+        field_map json__ "CachePeriodInMinutes" Long.of_json in
+      let address = field_map json__ "Address" String_.of_json in
+      make ?cachePeriodInMinutes ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an available endpoint against which to make API calls agaisnt, as well as the TTL for that endpoint."]
+       "Represents an available endpoint against which to make API calls against, as well as the TTL for that endpoint."]
+module BatchLoadProgressReport =
+  struct
+    type nonrec t =
+      {
+      recordsProcessed: Long.t option ;
+      recordsIngested: Long.t option ;
+      parseFailures: Long.t option ;
+      recordIngestionFailures: Long.t option ;
+      fileFailures: Long.t option ;
+      bytesMetered: Long.t option }
+    let make ?recordsProcessed =
+      fun ?recordsIngested ->
+        fun ?parseFailures ->
+          fun ?recordIngestionFailures ->
+            fun ?fileFailures ->
+              fun ?bytesMetered ->
+                fun () ->
+                  {
+                    recordsProcessed;
+                    recordsIngested;
+                    parseFailures;
+                    recordIngestionFailures;
+                    fileFailures;
+                    bytesMetered
+                  }
+    let to_value x =
+      structure_to_value
+        [("RecordsProcessed",
+           (Option.map x.recordsProcessed ~f:Long.to_value));
+        ("RecordsIngested", (Option.map x.recordsIngested ~f:Long.to_value));
+        ("ParseFailures", (Option.map x.parseFailures ~f:Long.to_value));
+        ("RecordIngestionFailures",
+          (Option.map x.recordIngestionFailures ~f:Long.to_value));
+        ("FileFailures", (Option.map x.fileFailures ~f:Long.to_value));
+        ("BytesMetered", (Option.map x.bytesMetered ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bytesMetered =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesMetered") in
+      let fileFailures =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "FileFailures") in
+      let recordIngestionFailures =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "RecordIngestionFailures") in
+      let parseFailures =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "ParseFailures") in
+      let recordsIngested =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RecordsIngested") in
+      let recordsProcessed =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RecordsProcessed") in
+      make ?bytesMetered ?fileFailures ?recordIngestionFailures
+        ?parseFailures ?recordsIngested ?recordsProcessed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bytesMetered = field_map json__ "BytesMetered" Long.of_json in
+      let fileFailures = field_map json__ "FileFailures" Long.of_json in
+      let recordIngestionFailures =
+        field_map json__ "RecordIngestionFailures" Long.of_json in
+      let parseFailures = field_map json__ "ParseFailures" Long.of_json in
+      let recordsIngested = field_map json__ "RecordsIngested" Long.of_json in
+      let recordsProcessed = field_map json__ "RecordsProcessed" Long.of_json in
+      make ?bytesMetered ?fileFailures ?recordIngestionFailures
+        ?parseFailures ?recordsIngested ?recordsProcessed ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the progress of a batch load task."]
+module DataModelConfiguration =
+  struct
+    type nonrec t =
+      {
+      dataModel: DataModel.t option ;
+      dataModelS3Configuration: DataModelS3Configuration.t option }
+    let make ?dataModel =
+      fun ?dataModelS3Configuration ->
+        fun () -> { dataModel; dataModelS3Configuration }
+    let to_value x =
+      structure_to_value
+        [("DataModel", (Option.map x.dataModel ~f:DataModel.to_value));
+        ("DataModelS3Configuration",
+          (Option.map x.dataModelS3Configuration
+             ~f:DataModelS3Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataModelS3Configuration =
+        (Option.map ~f:DataModelS3Configuration.of_xml)
+          (Xml.child xml_arg0 "DataModelS3Configuration") in
+      let dataModel =
+        (Option.map ~f:DataModel.of_xml) (Xml.child xml_arg0 "DataModel") in
+      make ?dataModelS3Configuration ?dataModel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataModelS3Configuration =
+        field_map json__ "DataModelS3Configuration"
+          DataModelS3Configuration.of_json in
+      let dataModel = field_map json__ "DataModel" DataModel.of_json in
+      make ?dataModelS3Configuration ?dataModel ()
+    let to_json v = composed_to_json to_value v
+  end
+module DataSourceConfiguration =
+  struct
+    type nonrec t =
+      {
+      dataSourceS3Configuration: DataSourceS3Configuration.t
+        [@ocaml.doc
+          "Configuration of an S3 location for a file which contains data to load."];
+      csvConfiguration: CsvConfiguration.t option ;
+      dataFormat: BatchLoadDataFormat.t [@ocaml.doc "This is currently CSV."]}
+    let context_ = "DataSourceConfiguration"
+    let make ?csvConfiguration =
+      fun ~dataSourceS3Configuration ->
+        fun ~dataFormat ->
+          fun () ->
+            { csvConfiguration; dataSourceS3Configuration; dataFormat }
+    let to_value x =
+      structure_to_value
+        [("DataSourceS3Configuration",
+           (Some
+              (DataSourceS3Configuration.to_value x.dataSourceS3Configuration)));
+        ("CsvConfiguration",
+          (Option.map x.csvConfiguration ~f:CsvConfiguration.to_value));
+        ("DataFormat", (Some (BatchLoadDataFormat.to_value x.dataFormat)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataFormat =
+        BatchLoadDataFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataFormat") in
+      let csvConfiguration =
+        (Option.map ~f:CsvConfiguration.of_xml)
+          (Xml.child xml_arg0 "CsvConfiguration") in
+      let dataSourceS3Configuration =
+        DataSourceS3Configuration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "DataSourceS3Configuration") in
+      make ~dataFormat ?csvConfiguration ~dataSourceS3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataFormat =
+        field_map_exn json__ "DataFormat" BatchLoadDataFormat.of_json in
+      let csvConfiguration =
+        field_map json__ "CsvConfiguration" CsvConfiguration.of_json in
+      let dataSourceS3Configuration =
+        field_map_exn json__ "DataSourceS3Configuration"
+          DataSourceS3Configuration.of_json in
+      make ~dataFormat ?csvConfiguration ~dataSourceS3Configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Defines configuration details about the data source."]
+module ReportConfiguration =
+  struct
+    type nonrec t =
+      {
+      reportS3Configuration: ReportS3Configuration.t option
+        [@ocaml.doc
+          "Configuration of an S3 location to write error reports and events for a batch load."]}
+    let make ?reportS3Configuration = fun () -> { reportS3Configuration }
+    let to_value x =
+      structure_to_value
+        [("ReportS3Configuration",
+           (Option.map x.reportS3Configuration
+              ~f:ReportS3Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportS3Configuration =
+        (Option.map ~f:ReportS3Configuration.of_xml)
+          (Xml.child xml_arg0 "ReportS3Configuration") in
+      make ?reportS3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportS3Configuration =
+        field_map json__ "ReportS3Configuration"
+          ReportS3Configuration.of_json in
+      make ?reportS3Configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Report configuration for a batch load task. This contains details about where error reports are stored."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You are not authorized to perform this action."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Timestream was unable to fully process this request because of an internal server error."]
@@ -1222,11 +2320,11 @@ module InvalidEndpointException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested endpoint was invalid."]
+  end[@@ocaml.doc "The requested endpoint was not valid."]
 module RecordsIngested =
   struct
     type nonrec t =
@@ -1254,10 +2352,10 @@ module RecordsIngested =
       let total = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Total") in
       make ?magneticStore ?memoryStore ?total ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let magneticStore = field_map json "MagneticStore" Integer.of_json in
-      let memoryStore = field_map json "MemoryStore" Integer.of_json in
-      let total = field_map json "Total" Integer.of_json in
+    let of_json json__ =
+      let magneticStore = field_map json__ "MagneticStore" Integer.of_json in
+      let memoryStore = field_map json__ "MemoryStore" Integer.of_json in
+      let total = field_map json__ "Total" Integer.of_json in
       make ?magneticStore ?memoryStore ?total ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information on the records ingested by this request."]
@@ -1283,14 +2381,14 @@ module RejectedRecordsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?rejectedRecords ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rejectedRecords =
-        field_map json "RejectedRecords" RejectedRecords.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "RejectedRecords" RejectedRecords.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?rejectedRecords ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "WriteRecords would throw this exception in the following cases: Records with duplicate data where there are multiple records with the same dimensions, timestamps, and measure names but: Measure values are different Version is not present in the request or the value of version in the new record is equal to or lower than the existing value In this case, if Timestream rejects data, the ExistingVersion field in the RejectedRecords response will indicate the current record\226\128\153s version. To force an update, you can resend the request with a version for the record set to a value greater than the ExistingVersion. Records with timestamps that lie outside the retention duration of the memory store Records with dimensions or measures that exceed the Timestream defined limits. For more information, see Quotas in the Timestream Developer Guide."]
+       "WriteRecords would throw this exception in the following cases: Records with duplicate data where there are multiple records with the same dimensions, timestamps, and measure names but: Measure values are different Version is not present in the request or the value of version in the new record is equal to or lower than the existing value In this case, if Timestream rejects data, the ExistingVersion field in the RejectedRecords response will indicate the current record\226\128\153s version. To force an update, you can resend the request with a version for the record set to a value greater than the ExistingVersion. Records with timestamps that lie outside the retention duration of the memory store. Records with dimensions or measures that exceed the Timestream defined limits. For more information, see Quotas in the Amazon Timestream Developer Guide."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -1305,8 +2403,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1314,46 +2412,42 @@ module ResourceNotFoundException =
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Too many requests were made by a user exceeding service quotas. The request was throttled."]
+       "Too many requests were made by a user and they exceeded the service quotas. The request was throttled."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Invalid or malformed request."]
+  end[@@ocaml.doc "An invalid or malformed request."]
 module Records =
   struct
     type nonrec t = Record.t list
@@ -1363,6 +2457,9 @@ module Records =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1396,11 +2493,12 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Instance quota of resource exceeded for this account."]
+  end[@@ocaml.doc
+       "The instance quota of resource exceeded for this account."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -1428,6 +2526,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1456,6 +2557,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1479,6 +2583,9 @@ module TableList =
   struct
     type nonrec t = Table.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Table.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1520,6 +2627,9 @@ module DatabaseList =
   struct
     type nonrec t = Database.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Database.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1540,10 +2650,57 @@ module DatabaseList =
       list_of_json ~kind:"DatabaseList" ~of_json:Database.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchLoadTaskList =
+  struct
+    type nonrec t = BatchLoadTask.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchLoadTask.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchLoadTask.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchLoadTaskList" ~of_json:BatchLoadTask.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PageLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for PageLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Endpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1564,25 +2721,178 @@ module Endpoints =
       list_of_json ~kind:"Endpoints" ~of_json:Endpoint.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchLoadTaskDescription =
+  struct
+    type nonrec t =
+      {
+      taskId: BatchLoadTaskId.t option
+        [@ocaml.doc "The ID of the batch load task."];
+      errorMessage: StringValue2048.t option ;
+      dataSourceConfiguration: DataSourceConfiguration.t option
+        [@ocaml.doc
+          "Configuration details about the data source for a batch load task."];
+      progressReport: BatchLoadProgressReport.t option ;
+      reportConfiguration: ReportConfiguration.t option
+        [@ocaml.doc
+          "Report configuration for a batch load task. This contains details about where error reports are stored."];
+      dataModelConfiguration: DataModelConfiguration.t option
+        [@ocaml.doc
+          "Data model configuration for a batch load task. This contains details about where a data model for a batch load task is stored."];
+      targetDatabaseName: ResourceName.t option ;
+      targetTableName: ResourceName.t option ;
+      taskStatus: BatchLoadStatus.t option
+        [@ocaml.doc "Status of the batch load task."];
+      recordVersion: RecordVersion.t option ;
+      creationTime: Date.t option
+        [@ocaml.doc
+          "The time when the Timestream batch load task was created."];
+      lastUpdatedTime: Date.t option
+        [@ocaml.doc
+          "The time when the Timestream batch load task was last updated."];
+      resumableUntil: Date.t option }
+    let make ?taskId =
+      fun ?errorMessage ->
+        fun ?dataSourceConfiguration ->
+          fun ?progressReport ->
+            fun ?reportConfiguration ->
+              fun ?dataModelConfiguration ->
+                fun ?targetDatabaseName ->
+                  fun ?targetTableName ->
+                    fun ?taskStatus ->
+                      fun ?recordVersion ->
+                        fun ?creationTime ->
+                          fun ?lastUpdatedTime ->
+                            fun ?resumableUntil ->
+                              fun () ->
+                                {
+                                  taskId;
+                                  errorMessage;
+                                  dataSourceConfiguration;
+                                  progressReport;
+                                  reportConfiguration;
+                                  dataModelConfiguration;
+                                  targetDatabaseName;
+                                  targetTableName;
+                                  taskStatus;
+                                  recordVersion;
+                                  creationTime;
+                                  lastUpdatedTime;
+                                  resumableUntil
+                                }
+    let to_value x =
+      structure_to_value
+        [("TaskId", (Option.map x.taskId ~f:BatchLoadTaskId.to_value));
+        ("ErrorMessage",
+          (Option.map x.errorMessage ~f:StringValue2048.to_value));
+        ("DataSourceConfiguration",
+          (Option.map x.dataSourceConfiguration
+             ~f:DataSourceConfiguration.to_value));
+        ("ProgressReport",
+          (Option.map x.progressReport ~f:BatchLoadProgressReport.to_value));
+        ("ReportConfiguration",
+          (Option.map x.reportConfiguration ~f:ReportConfiguration.to_value));
+        ("DataModelConfiguration",
+          (Option.map x.dataModelConfiguration
+             ~f:DataModelConfiguration.to_value));
+        ("TargetDatabaseName",
+          (Option.map x.targetDatabaseName ~f:ResourceName.to_value));
+        ("TargetTableName",
+          (Option.map x.targetTableName ~f:ResourceName.to_value));
+        ("TaskStatus", (Option.map x.taskStatus ~f:BatchLoadStatus.to_value));
+        ("RecordVersion",
+          (Option.map x.recordVersion ~f:RecordVersion.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("LastUpdatedTime", (Option.map x.lastUpdatedTime ~f:Date.to_value));
+        ("ResumableUntil", (Option.map x.resumableUntil ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resumableUntil =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "ResumableUntil") in
+      let lastUpdatedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastUpdatedTime") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let recordVersion =
+        (Option.map ~f:RecordVersion.of_xml)
+          (Xml.child xml_arg0 "RecordVersion") in
+      let taskStatus =
+        (Option.map ~f:BatchLoadStatus.of_xml)
+          (Xml.child xml_arg0 "TaskStatus") in
+      let targetTableName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TargetTableName") in
+      let targetDatabaseName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "TargetDatabaseName") in
+      let dataModelConfiguration =
+        (Option.map ~f:DataModelConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataModelConfiguration") in
+      let reportConfiguration =
+        (Option.map ~f:ReportConfiguration.of_xml)
+          (Xml.child xml_arg0 "ReportConfiguration") in
+      let progressReport =
+        (Option.map ~f:BatchLoadProgressReport.of_xml)
+          (Xml.child xml_arg0 "ProgressReport") in
+      let dataSourceConfiguration =
+        (Option.map ~f:DataSourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataSourceConfiguration") in
+      let errorMessage =
+        (Option.map ~f:StringValue2048.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage") in
+      let taskId =
+        (Option.map ~f:BatchLoadTaskId.of_xml) (Xml.child xml_arg0 "TaskId") in
+      make ?resumableUntil ?lastUpdatedTime ?creationTime ?recordVersion
+        ?taskStatus ?targetTableName ?targetDatabaseName
+        ?dataModelConfiguration ?reportConfiguration ?progressReport
+        ?dataSourceConfiguration ?errorMessage ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resumableUntil = field_map json__ "ResumableUntil" Date.of_json in
+      let lastUpdatedTime = field_map json__ "LastUpdatedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let recordVersion =
+        field_map json__ "RecordVersion" RecordVersion.of_json in
+      let taskStatus = field_map json__ "TaskStatus" BatchLoadStatus.of_json in
+      let targetTableName =
+        field_map json__ "TargetTableName" ResourceName.of_json in
+      let targetDatabaseName =
+        field_map json__ "TargetDatabaseName" ResourceName.of_json in
+      let dataModelConfiguration =
+        field_map json__ "DataModelConfiguration"
+          DataModelConfiguration.of_json in
+      let reportConfiguration =
+        field_map json__ "ReportConfiguration" ReportConfiguration.of_json in
+      let progressReport =
+        field_map json__ "ProgressReport" BatchLoadProgressReport.of_json in
+      let dataSourceConfiguration =
+        field_map json__ "DataSourceConfiguration"
+          DataSourceConfiguration.of_json in
+      let errorMessage =
+        field_map json__ "ErrorMessage" StringValue2048.of_json in
+      let taskId = field_map json__ "TaskId" BatchLoadTaskId.of_json in
+      make ?resumableUntil ?lastUpdatedTime ?creationTime ?recordVersion
+        ?taskStatus ?targetTableName ?targetDatabaseName
+        ?dataModelConfiguration ?reportConfiguration ?progressReport
+        ?dataSourceConfiguration ?errorMessage ?taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a batch load task."]
 module ConflictException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ErrorMessage.to_value x.message)))]
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        ErrorMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" ErrorMessage.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Timestream was unable to process this request because it contains resource that already exists."]
@@ -1599,6 +2909,24 @@ module ResourceCreateAPIName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ResourceCreateAPIName" j
+    let to_json = simple_to_json to_value
+  end
+module ClientRequestToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientRequestToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientRequestToken" j
     let to_json = simple_to_json to_value
   end
 module WriteRecordsResponse =
@@ -1700,13 +3028,13 @@ module WriteRecordsResponse =
           (Xml.child xml_arg0 "RecordsIngested") in
       make ?recordsIngested ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordsIngested =
-        field_map json "RecordsIngested" RecordsIngested.of_json in
+        field_map json__ "RecordsIngested" RecordsIngested.of_json in
       make ?recordsIngested ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The WriteRecords operation enables you to write your time series data into Timestream. You can specify a single data point or a batch of data points to be inserted into the system. Timestream offers you with a flexible schema that auto detects the column names and data types for your Timestream tables based on the dimension names and data types of the data points you specify when invoking writes into the database. Timestream support eventual consistency read semantics. This means that when you query data immediately after writing a batch of data into Timestream, the query results might not reflect the results of a recently completed write operation. The results may also include some stale data. If you repeat the query request after a short time, the results should return the latest data. Service quotas apply. See code sample for details. Upserts You can use the Version parameter in a WriteRecords request to update data points. Timestream tracks a version number with each record. Version defaults to 1 when not specified for the record in the request. Timestream will update an existing record\226\128\153s measure value along with its Version upon receiving a write request with a higher Version number for that record. Upon receiving an update request where the measure value is the same as that of the existing record, Timestream still updates Version, if it is greater than the existing value of Version. You can update a data point as many times as desired, as long as the value of Version continuously increases. For example, suppose you write a new record without indicating Version in the request. Timestream will store this record, and set Version to 1. Now, suppose you try to update this record with a WriteRecords request of the same record with a different measure value but, like before, do not provide Version. In this case, Timestream will reject this update with a RejectedRecordsException since the updated record\226\128\153s version is not greater than the existing value of Version. However, if you were to resend the update request with Version set to 2, Timestream would then succeed in updating the record\226\128\153s value, and the Version would be set to 2. Next, suppose you sent a WriteRecords request with this same record and an identical measure value, but with Version set to 3. In this case, Timestream would only update Version to 3. Any further updates would need to send a version number greater than 3, or the update requests would receive a RejectedRecordsException."]
+       "Enables you to write your time-series data into Timestream. You can specify a single data point or a batch of data points to be inserted into the system. Timestream offers you a flexible schema that auto detects the column names and data types for your Timestream tables based on the dimension names and data types of the data points you specify when invoking writes into the database. Timestream supports eventual consistency read semantics. This means that when you query data immediately after writing a batch of data into Timestream, the query results might not reflect the results of a recently completed write operation. The results may also include some stale data. If you repeat the query request after a short time, the results should return the latest data. Service quotas apply. See code sample for details. Upserts You can use the Version parameter in a WriteRecords request to update data points. Timestream tracks a version number with each record. Version defaults to 1 when it's not specified for the record in the request. Timestream updates an existing record\226\128\153s measure value along with its Version when it receives a write request with a higher Version number for that record. When it receives an update request where the measure value is the same as that of the existing record, Timestream still updates Version, if it is greater than the existing value of Version. You can update a data point as many times as desired, as long as the value of Version continuously increases. For example, suppose you write a new record without indicating Version in the request. Timestream stores this record, and set Version to 1. Now, suppose you try to update this record with a WriteRecords request of the same record with a different measure value but, like before, do not provide Version. In this case, Timestream will reject this update with a RejectedRecordsException since the updated record\226\128\153s version is not greater than the existing value of Version. However, if you were to resend the update request with Version set to 2, Timestream would then succeed in updating the record\226\128\153s value, and the Version would be set to 2. Next, suppose you sent a WriteRecords request with this same record and an identical measure value, but with Version set to 3. In this case, Timestream would only update Version to 3. Any further updates would need to send a version number greater than 3, or the update requests would receive a RejectedRecordsException."]
 module WriteRecordsRequest =
   struct
     type nonrec t =
@@ -1717,10 +3045,10 @@ module WriteRecordsRequest =
         [@ocaml.doc "The name of the Timestream table."];
       commonAttributes: Record.t option
         [@ocaml.doc
-          "A record containing the common measure, dimension, time, and version attributes shared across all the records in the request. The measure and dimension attributes specified will be merged with the measure and dimension attributes in the records object when the data is written into Timestream. Dimensions may not overlap, or a ValidationException will be thrown. In other words, a record must contain dimensions with unique names."];
+          "A record that contains the common measure, dimension, time, and version attributes shared across all the records in the request. The measure and dimension attributes specified will be merged with the measure and dimension attributes in the records object when the data is written into Timestream. Dimensions may not overlap, or a ValidationException will be thrown. In other words, a record must contain dimensions with unique names."];
       records: Records.t
         [@ocaml.doc
-          "An array of records containing the unique measure, dimension, time, and version attributes for each time series data point."]}
+          "An array of records that contain the unique measure, dimension, time, and version attributes for each time-series data point."]}
     let context_ = "WriteRecordsRequest"
     let make ?commonAttributes =
       fun ~databaseName ->
@@ -1748,16 +3076,17 @@ module WriteRecordsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~records ?commonAttributes ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let records = field_map_exn json "Records" Records.of_json in
-      let commonAttributes = field_map json "CommonAttributes" Record.of_json in
-      let tableName = field_map_exn json "TableName" ResourceName.of_json in
+    let of_json json__ =
+      let records = field_map_exn json__ "Records" Records.of_json in
+      let commonAttributes =
+        field_map json__ "CommonAttributes" Record.of_json in
+      let tableName = field_map_exn json__ "TableName" ResourceName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~records ?commonAttributes ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The WriteRecords operation enables you to write your time series data into Timestream. You can specify a single data point or a batch of data points to be inserted into the system. Timestream offers you with a flexible schema that auto detects the column names and data types for your Timestream tables based on the dimension names and data types of the data points you specify when invoking writes into the database. Timestream support eventual consistency read semantics. This means that when you query data immediately after writing a batch of data into Timestream, the query results might not reflect the results of a recently completed write operation. The results may also include some stale data. If you repeat the query request after a short time, the results should return the latest data. Service quotas apply. See code sample for details. Upserts You can use the Version parameter in a WriteRecords request to update data points. Timestream tracks a version number with each record. Version defaults to 1 when not specified for the record in the request. Timestream will update an existing record\226\128\153s measure value along with its Version upon receiving a write request with a higher Version number for that record. Upon receiving an update request where the measure value is the same as that of the existing record, Timestream still updates Version, if it is greater than the existing value of Version. You can update a data point as many times as desired, as long as the value of Version continuously increases. For example, suppose you write a new record without indicating Version in the request. Timestream will store this record, and set Version to 1. Now, suppose you try to update this record with a WriteRecords request of the same record with a different measure value but, like before, do not provide Version. In this case, Timestream will reject this update with a RejectedRecordsException since the updated record\226\128\153s version is not greater than the existing value of Version. However, if you were to resend the update request with Version set to 2, Timestream would then succeed in updating the record\226\128\153s value, and the Version would be set to 2. Next, suppose you sent a WriteRecords request with this same record and an identical measure value, but with Version set to 3. In this case, Timestream would only update Version to 3. Any further updates would need to send a version number greater than 3, or the update requests would receive a RejectedRecordsException."]
+       "Enables you to write your time-series data into Timestream. You can specify a single data point or a batch of data points to be inserted into the system. Timestream offers you a flexible schema that auto detects the column names and data types for your Timestream tables based on the dimension names and data types of the data points you specify when invoking writes into the database. Timestream supports eventual consistency read semantics. This means that when you query data immediately after writing a batch of data into Timestream, the query results might not reflect the results of a recently completed write operation. The results may also include some stale data. If you repeat the query request after a short time, the results should return the latest data. Service quotas apply. See code sample for details. Upserts You can use the Version parameter in a WriteRecords request to update data points. Timestream tracks a version number with each record. Version defaults to 1 when it's not specified for the record in the request. Timestream updates an existing record\226\128\153s measure value along with its Version when it receives a write request with a higher Version number for that record. When it receives an update request where the measure value is the same as that of the existing record, Timestream still updates Version, if it is greater than the existing value of Version. You can update a data point as many times as desired, as long as the value of Version continuously increases. For example, suppose you write a new record without indicating Version in the request. Timestream stores this record, and set Version to 1. Now, suppose you try to update this record with a WriteRecords request of the same record with a different measure value but, like before, do not provide Version. In this case, Timestream will reject this update with a RejectedRecordsException since the updated record\226\128\153s version is not greater than the existing value of Version. However, if you were to resend the update request with Version set to 2, Timestream would then succeed in updating the record\226\128\153s value, and the Version would be set to 2. Next, suppose you sent a WriteRecords request with this same record and an identical measure value, but with Version set to 3. In this case, Timestream would only update Version to 3. Any further updates would need to send a version number greater than 3, or the update requests would receive a RejectedRecordsException."]
 module UpdateTableResponse =
   struct
     type nonrec t =
@@ -1843,8 +3172,8 @@ module UpdateTableResponse =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let table = field_map json "Table" Table.of_json in make ?table ()
+    let of_json json__ =
+      let table = field_map json__ "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the retention duration of the memory store and magnetic store for your Timestream table. Note that the change in retention duration takes effect immediately. For example, if the retention period of the memory store was initially set to 2 hours and then changed to 24 hours, the memory store will be capable of holding 24 hours of data, but will be populated with 24 hours of data 22 hours after this change was made. Timestream does not retrieve data from the magnetic store to populate the memory store. See code sample for details."]
@@ -1861,19 +3190,22 @@ module UpdateTableRequest =
           "The retention duration of the memory store and the magnetic store."];
       magneticStoreWriteProperties: MagneticStoreWriteProperties.t option
         [@ocaml.doc
-          "Contains properties to set on the table when enabling magnetic store writes."]}
+          "Contains properties to set on the table when enabling magnetic store writes."];
+      schema: Schema.t option [@ocaml.doc "The schema of the table."]}
     let context_ = "UpdateTableRequest"
     let make ?retentionProperties =
       fun ?magneticStoreWriteProperties ->
-        fun ~databaseName ->
-          fun ~tableName ->
-            fun () ->
-              {
-                retentionProperties;
-                magneticStoreWriteProperties;
-                databaseName;
-                tableName
-              }
+        fun ?schema ->
+          fun ~databaseName ->
+            fun ~tableName ->
+              fun () ->
+                {
+                  retentionProperties;
+                  magneticStoreWriteProperties;
+                  schema;
+                  databaseName;
+                  tableName
+                }
     let to_value x =
       structure_to_value
         [("DatabaseName", (Some (ResourceName.to_value x.databaseName)));
@@ -1882,9 +3214,12 @@ module UpdateTableRequest =
           (Option.map x.retentionProperties ~f:RetentionProperties.to_value));
         ("MagneticStoreWriteProperties",
           (Option.map x.magneticStoreWriteProperties
-             ~f:MagneticStoreWriteProperties.to_value))]
+             ~f:MagneticStoreWriteProperties.to_value));
+        ("Schema", (Option.map x.schema ~f:Schema.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let schema =
+        (Option.map ~f:Schema.of_xml) (Xml.child xml_arg0 "Schema") in
       let magneticStoreWriteProperties =
         (Option.map ~f:MagneticStoreWriteProperties.of_xml)
           (Xml.child xml_arg0 "MagneticStoreWriteProperties") in
@@ -1897,20 +3232,21 @@ module UpdateTableRequest =
       let databaseName =
         ResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
-      make ?magneticStoreWriteProperties ?retentionProperties ~tableName
-        ~databaseName ()
+      make ?schema ?magneticStoreWriteProperties ?retentionProperties
+        ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let schema = field_map json__ "Schema" Schema.of_json in
       let magneticStoreWriteProperties =
-        field_map json "MagneticStoreWriteProperties"
+        field_map json__ "MagneticStoreWriteProperties"
           MagneticStoreWriteProperties.of_json in
       let retentionProperties =
-        field_map json "RetentionProperties" RetentionProperties.of_json in
-      let tableName = field_map_exn json "TableName" ResourceName.of_json in
+        field_map json__ "RetentionProperties" RetentionProperties.of_json in
+      let tableName = field_map_exn json__ "TableName" ResourceName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
-      make ?magneticStoreWriteProperties ?retentionProperties ~tableName
-        ~databaseName ()
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
+      make ?schema ?magneticStoreWriteProperties ?retentionProperties
+        ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the retention duration of the memory store and magnetic store for your Timestream table. Note that the change in retention duration takes effect immediately. For example, if the retention period of the memory store was initially set to 2 hours and then changed to 24 hours, the memory store will be capable of holding 24 hours of data, but will be populated with 24 hours of data 22 hours after this change was made. Timestream does not retrieve data from the magnetic store to populate the memory store. See code sample for details."]
@@ -2011,8 +3347,8 @@ module UpdateDatabaseResponse =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let database = field_map json "Database" Database.of_json in
+    let of_json json__ =
+      let database = field_map json__ "Database" Database.of_json in
       make ?database ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2042,10 +3378,10 @@ module UpdateDatabaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~kmsKeyId ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map_exn json "KmsKeyId" StringValue2048.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map_exn json__ "KmsKeyId" StringValue2048.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~kmsKeyId ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2155,10 +3491,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2240,7 +3576,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate a set of tags with a Timestream resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking."]
+       "Associates a set of tags with a Timestream resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -2265,14 +3601,121 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associate a set of tags with a Timestream resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking."]
+       "Associates a set of tags with a Timestream resource. You can then activate these user-defined tags so that they appear on the Billing and Cost Management console for cost allocation tracking."]
+module ResumeBatchLoadTaskResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end
+module ResumeBatchLoadTaskRequest =
+  struct
+    type nonrec t =
+      {
+      taskId: BatchLoadTaskId.t
+        [@ocaml.doc "The ID of the batch load task to resume."]}
+    let context_ = "ResumeBatchLoadTaskRequest"
+    let make ~taskId = fun () -> { taskId }
+    let to_value x =
+      structure_to_value
+        [("TaskId", (Some (BatchLoadTaskId.to_value x.taskId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId =
+        BatchLoadTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
+      make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map_exn json__ "TaskId" BatchLoadTaskId.of_json in
+      make ~taskId ()
+    let to_json v = composed_to_json to_value v
+  end
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -2342,10 +3785,10 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List all tags on a Timestream resource."]
+  end[@@ocaml.doc "Lists all tags on a Timestream resource."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -2365,12 +3808,12 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List all tags on a Timestream resource."]
+  end[@@ocaml.doc "Lists all tags on a Timestream resource."]
 module ListTablesResponse =
   struct
     type nonrec t =
@@ -2464,13 +3907,13 @@ module ListTablesResponse =
         (Option.map ~f:TableList.of_xml) (Xml.child xml_arg0 "Tables") in
       make ?nextToken ?tables ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let tables = field_map json "Tables" TableList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let tables = field_map json__ "Tables" TableList.of_json in
       make ?nextToken ?tables ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of tables, along with the name, status and retention properties of each table. See code sample for details."]
+       "Provides a list of tables, along with the name, status, and retention properties of each table. See code sample for details."]
 module ListTablesRequest =
   struct
     type nonrec t =
@@ -2504,14 +3947,14 @@ module ListTablesRequest =
           (Xml.child xml_arg0 "DatabaseName") in
       make ?maxResults ?nextToken ?databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PaginationLimit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let databaseName = field_map json "DatabaseName" ResourceName.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PaginationLimit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
       make ?maxResults ?nextToken ?databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of tables, along with the name, status and retention properties of each table. See code sample for details."]
+       "Provides a list of tables, along with the name, status, and retention properties of each table. See code sample for details."]
 module ListDatabasesResponse =
   struct
     type nonrec t =
@@ -2598,9 +4041,9 @@ module ListDatabasesResponse =
         (Option.map ~f:DatabaseList.of_xml) (Xml.child xml_arg0 "Databases") in
       make ?nextToken ?databases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let databases = field_map json "Databases" DatabaseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let databases = field_map json__ "Databases" DatabaseList.of_json in
       make ?nextToken ?databases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2630,13 +4073,148 @@ module ListDatabasesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PaginationLimit.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PaginationLimit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of your Timestream databases. Service quotas apply. See code sample for details."]
+module ListBatchLoadTasksResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. Provide the next ListBatchLoadTasksRequest."];
+      batchLoadTasks: BatchLoadTaskList.t option
+        [@ocaml.doc "A list of batch load task details."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?batchLoadTasks -> fun () -> { nextToken; batchLoadTasks }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("BatchLoadTasks",
+          (Option.map x.batchLoadTasks ~f:BatchLoadTaskList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let batchLoadTasks =
+        (Option.map ~f:BatchLoadTaskList.of_xml)
+          (Xml.child xml_arg0 "BatchLoadTasks") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?batchLoadTasks ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let batchLoadTasks =
+        field_map json__ "BatchLoadTasks" BatchLoadTaskList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?batchLoadTasks ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of batch load tasks, along with the name, status, when the task is resumable until, and other details. See code sample for details."]
+module ListBatchLoadTasksRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token to specify where to start paginating. This is the NextToken from a previously truncated response."];
+      maxResults: PageLimit.t option
+        [@ocaml.doc
+          "The total number of items to return in the output. If the total number of items available is more than the value specified, a NextToken is provided in the output. To resume pagination, provide the NextToken value as argument of a subsequent API invocation."];
+      taskStatus: BatchLoadStatus.t option
+        [@ocaml.doc "Status of the batch load task."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?taskStatus -> fun () -> { nextToken; maxResults; taskStatus }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:PageLimit.to_value));
+        ("TaskStatus", (Option.map x.taskStatus ~f:BatchLoadStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskStatus =
+        (Option.map ~f:BatchLoadStatus.of_xml)
+          (Xml.child xml_arg0 "TaskStatus") in
+      let maxResults =
+        (Option.map ~f:PageLimit.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?taskStatus ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskStatus = field_map json__ "TaskStatus" BatchLoadStatus.of_json in
+      let maxResults = field_map json__ "MaxResults" PageLimit.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?taskStatus ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of batch load tasks, along with the name, status, when the task is resumable until, and other details. See code sample for details."]
 module DescribeTableResponse =
   struct
     type nonrec t =
@@ -2722,8 +4300,8 @@ module DescribeTableResponse =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let table = field_map json "Table" Table.of_json in make ?table ()
+    let of_json json__ =
+      let table = field_map json__ "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the table, including the table name, database name, retention duration of the memory store and the magnetic store. Service quotas apply. See code sample for details."]
@@ -2752,10 +4330,10 @@ module DescribeTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" ResourceName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" ResourceName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2764,7 +4342,7 @@ module DescribeEndpointsResponse =
   struct
     type nonrec t =
       {
-      endpoints: Endpoints.t
+      endpoints: Endpoints.t option
         [@ocaml.doc
           "An Endpoints object is returned when a DescribeEndpoints request is made."]}
     type nonrec error =
@@ -2772,8 +4350,7 @@ module DescribeEndpointsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeEndpointsResponse"
-    let make ~endpoints = fun () -> { endpoints }
+    let make ?endpoints = fun () -> { endpoints }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2816,20 +4393,19 @@ module DescribeEndpointsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Endpoints", (Some (Endpoints.to_value x.endpoints)))]
+        [("Endpoints", (Option.map x.endpoints ~f:Endpoints.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpoints =
-        Endpoints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Endpoints") in
-      make ~endpoints ()
+        (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
+      make ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoints = field_map_exn json "Endpoints" Endpoints.of_json in
-      make ~endpoints ()
+    let of_json json__ =
+      let endpoints = field_map json__ "Endpoints" Endpoints.of_json in
+      make ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "DescribeEndpoints returns a list of available endpoints to make Timestream API calls against. This API is available through both Write and Query. Because the Timestream SDKs are designed to transparently work with the service\226\128\153s architecture, including the management and mapping of the service endpoints, it is not recommended that you use this API unless: You are using VPC endpoints (Amazon Web Services PrivateLink) with Timestream Your application uses a programming language that does not yet have SDK support You require better control over the client-side implementation For detailed information on how and when to use and implement DescribeEndpoints, see The Endpoint Discovery Pattern."]
+       "Returns a list of available endpoints to make Timestream API calls against. This API operation is available through both the Write and Query APIs. Because the Timestream SDKs are designed to transparently work with the service\226\128\153s architecture, including the management and mapping of the service endpoints, we don't recommend that you use this API operation unless: You are using VPC endpoints (Amazon Web Services PrivateLink) with Timestream Your application uses a programming language that does not yet have SDK support You require better control over the client-side implementation For detailed information on how and when to use and implement DescribeEndpoints, see The Endpoint Discovery Pattern."]
 module DescribeEndpointsRequest =
   struct
     type nonrec t = unit
@@ -2842,7 +4418,7 @@ module DescribeEndpointsRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "DescribeEndpoints returns a list of available endpoints to make Timestream API calls against. This API is available through both Write and Query. Because the Timestream SDKs are designed to transparently work with the service\226\128\153s architecture, including the management and mapping of the service endpoints, it is not recommended that you use this API unless: You are using VPC endpoints (Amazon Web Services PrivateLink) with Timestream Your application uses a programming language that does not yet have SDK support You require better control over the client-side implementation For detailed information on how and when to use and implement DescribeEndpoints, see The Endpoint Discovery Pattern."]
+       "Returns a list of available endpoints to make Timestream API calls against. This API operation is available through both the Write and Query APIs. Because the Timestream SDKs are designed to transparently work with the service\226\128\153s architecture, including the management and mapping of the service endpoints, we don't recommend that you use this API operation unless: You are using VPC endpoints (Amazon Web Services PrivateLink) with Timestream Your application uses a programming language that does not yet have SDK support You require better control over the client-side implementation For detailed information on how and when to use and implement DescribeEndpoints, see The Endpoint Discovery Pattern."]
 module DescribeDatabaseResponse =
   struct
     type nonrec t =
@@ -2931,8 +4507,8 @@ module DescribeDatabaseResponse =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let database = field_map json "Database" Database.of_json in
+    let of_json json__ =
+      let database = field_map json__ "Database" Database.of_json in
       make ?database ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2955,13 +4531,127 @@ module DescribeDatabaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the database, including the database name, time that the database was created, and the total number of tables found within the database. Service quotas apply. See code sample for details."]
+module DescribeBatchLoadTaskResponse =
+  struct
+    type nonrec t =
+      {
+      batchLoadTaskDescription: BatchLoadTaskDescription.t option
+        [@ocaml.doc "Description of the batch load task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?batchLoadTaskDescription =
+      fun () -> { batchLoadTaskDescription }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BatchLoadTaskDescription",
+           (Option.map x.batchLoadTaskDescription
+              ~f:BatchLoadTaskDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let batchLoadTaskDescription =
+        (Option.map ~f:BatchLoadTaskDescription.of_xml)
+          (Xml.child xml_arg0 "BatchLoadTaskDescription") in
+      make ?batchLoadTaskDescription ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let batchLoadTaskDescription =
+        field_map json__ "BatchLoadTaskDescription"
+          BatchLoadTaskDescription.of_json in
+      make ?batchLoadTaskDescription ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the batch load task, including configurations, mappings, progress, and other details. Service quotas apply. See code sample for details."]
+module DescribeBatchLoadTaskRequest =
+  struct
+    type nonrec t =
+      {
+      taskId: BatchLoadTaskId.t [@ocaml.doc "The ID of the batch load task."]}
+    let context_ = "DescribeBatchLoadTaskRequest"
+    let make ~taskId = fun () -> { taskId }
+    let to_value x =
+      structure_to_value
+        [("TaskId", (Some (BatchLoadTaskId.to_value x.taskId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId =
+        BatchLoadTaskId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
+      make ~taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map_exn json__ "TaskId" BatchLoadTaskId.of_json in
+      make ~taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about the batch load task, including configurations, mappings, progress, and other details. Service quotas apply. See code sample for details."]
 module DeleteTableRequest =
   struct
     type nonrec t =
@@ -2988,14 +4678,14 @@ module DeleteTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "TableName" ResourceName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "TableName" ResourceName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a given Timestream table. This is an irreversible operation. After a Timestream database table is deleted, the time series data stored in the table cannot be recovered. Due to the nature of distributed retries, the operation can return either success or a ResourceNotFoundException. Clients should consider them equivalent. See code sample for details."]
+       "Deletes a given Timestream table. This is an irreversible operation. After a Timestream database table is deleted, the time-series data stored in the table cannot be recovered. Due to the nature of distributed retries, the operation can return either success or a ResourceNotFoundException. Clients should consider them equivalent. See code sample for details."]
 module DeleteDatabaseRequest =
   struct
     type nonrec t =
@@ -3014,13 +4704,13 @@ module DeleteDatabaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a given Timestream database. This is an irreversible operation. After a database is deleted, the time series data from its tables cannot be recovered. All tables in the database must be deleted first, or a ValidationException error will be thrown. Due to the nature of distributed retries, the operation can return either success or a ResourceNotFoundException. Clients should consider them equivalent. See code sample for details."]
+       "Deletes a given Timestream database. This is an irreversible operation. After a database is deleted, the time-series data from its tables cannot be recovered. All tables in the database must be deleted first, or a ValidationException error will be thrown. Due to the nature of distributed retries, the operation can return either success or a ResourceNotFoundException. Clients should consider them equivalent. See code sample for details."]
 module CreateTableResponse =
   struct
     type nonrec t =
@@ -3127,11 +4817,11 @@ module CreateTableResponse =
       let table = (Option.map ~f:Table.of_xml) (Xml.child xml_arg0 "Table") in
       make ?table ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let table = field_map json "Table" Table.of_json in make ?table ()
+    let of_json json__ =
+      let table = field_map json__ "Table" Table.of_json in make ?table ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateTable operation adds a new table to an existing database in your account. In an Amazon Web Services account, table names must be at least unique within each Region if they are in the same database. You may have identical table names in the same Region if the tables are in separate databases. While creating the table, you must specify the table name, database name, and the retention properties. Service quotas apply. See code sample for details."]
+       "Adds a new table to an existing database in your account. In an Amazon Web Services account, table names must be at least unique within each Region if they are in the same database. You might have identical table names in the same Region if the tables are in separate databases. While creating the table, you must specify the table name, database name, and the retention properties. Service quotas apply. See code sample for details."]
 module CreateTableRequest =
   struct
     type nonrec t =
@@ -3142,26 +4832,29 @@ module CreateTableRequest =
         [@ocaml.doc "The name of the Timestream table."];
       retentionProperties: RetentionProperties.t option
         [@ocaml.doc
-          "The duration for which your time series data must be stored in the memory store and the magnetic store."];
+          "The duration for which your time-series data must be stored in the memory store and the magnetic store."];
       tags: TagList.t option
         [@ocaml.doc "A list of key-value pairs to label the table."];
       magneticStoreWriteProperties: MagneticStoreWriteProperties.t option
         [@ocaml.doc
-          "Contains properties to set on the table when enabling magnetic store writes."]}
+          "Contains properties to set on the table when enabling magnetic store writes."];
+      schema: Schema.t option [@ocaml.doc "The schema of the table."]}
     let context_ = "CreateTableRequest"
     let make ?retentionProperties =
       fun ?tags ->
         fun ?magneticStoreWriteProperties ->
-          fun ~databaseName ->
-            fun ~tableName ->
-              fun () ->
-                {
-                  retentionProperties;
-                  tags;
-                  magneticStoreWriteProperties;
-                  databaseName;
-                  tableName
-                }
+          fun ?schema ->
+            fun ~databaseName ->
+              fun ~tableName ->
+                fun () ->
+                  {
+                    retentionProperties;
+                    tags;
+                    magneticStoreWriteProperties;
+                    schema;
+                    databaseName;
+                    tableName
+                  }
     let to_value x =
       structure_to_value
         [("DatabaseName",
@@ -3172,9 +4865,12 @@ module CreateTableRequest =
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("MagneticStoreWriteProperties",
           (Option.map x.magneticStoreWriteProperties
-             ~f:MagneticStoreWriteProperties.to_value))]
+             ~f:MagneticStoreWriteProperties.to_value));
+        ("Schema", (Option.map x.schema ~f:Schema.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let schema =
+        (Option.map ~f:Schema.of_xml) (Xml.child xml_arg0 "Schema") in
       let magneticStoreWriteProperties =
         (Option.map ~f:MagneticStoreWriteProperties.of_xml)
           (Xml.child xml_arg0 "MagneticStoreWriteProperties") in
@@ -3188,25 +4884,26 @@ module CreateTableRequest =
       let databaseName =
         ResourceCreateAPIName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
-      make ?magneticStoreWriteProperties ?tags ?retentionProperties
+      make ?schema ?magneticStoreWriteProperties ?tags ?retentionProperties
         ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let schema = field_map json__ "Schema" Schema.of_json in
       let magneticStoreWriteProperties =
-        field_map json "MagneticStoreWriteProperties"
+        field_map json__ "MagneticStoreWriteProperties"
           MagneticStoreWriteProperties.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let retentionProperties =
-        field_map json "RetentionProperties" RetentionProperties.of_json in
+        field_map json__ "RetentionProperties" RetentionProperties.of_json in
       let tableName =
-        field_map_exn json "TableName" ResourceCreateAPIName.of_json in
+        field_map_exn json__ "TableName" ResourceCreateAPIName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceCreateAPIName.of_json in
-      make ?magneticStoreWriteProperties ?tags ?retentionProperties
+        field_map_exn json__ "DatabaseName" ResourceCreateAPIName.of_json in
+      make ?schema ?magneticStoreWriteProperties ?tags ?retentionProperties
         ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateTable operation adds a new table to an existing database in your account. In an Amazon Web Services account, table names must be at least unique within each Region if they are in the same database. You may have identical table names in the same Region if the tables are in separate databases. While creating the table, you must specify the table name, database name, and the retention properties. Service quotas apply. See code sample for details."]
+       "Adds a new table to an existing database in your account. In an Amazon Web Services account, table names must be at least unique within each Region if they are in the same database. You might have identical table names in the same Region if the tables are in separate databases. While creating the table, you must specify the table name, database name, and the retention properties. Service quotas apply. See code sample for details."]
 module CreateDatabaseResponse =
   struct
     type nonrec t =
@@ -3306,12 +5003,12 @@ module CreateDatabaseResponse =
         (Option.map ~f:Database.of_xml) (Xml.child xml_arg0 "Database") in
       make ?database ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let database = field_map json "Database" Database.of_json in
+    let of_json json__ =
+      let database = field_map json__ "Database" Database.of_json in
       make ?database ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Timestream database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. Refer to Amazon Web Services managed KMS keys for more info. Service quotas apply. See code sample for details."]
+       "Creates a new Timestream database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. For more information, see Amazon Web Services managed keys. Service quotas apply. For details, see code sample."]
 module CreateDatabaseRequest =
   struct
     type nonrec t =
@@ -3320,7 +5017,7 @@ module CreateDatabaseRequest =
         [@ocaml.doc "The name of the Timestream database."];
       kmsKeyId: StringValue2048.t option
         [@ocaml.doc
-          "The KMS key for the database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. Refer to Amazon Web Services managed KMS keys for more info."];
+          "The KMS key for the database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. For more information, see Amazon Web Services managed keys."];
       tags: TagList.t option
         [@ocaml.doc "A list of key-value pairs to label the table."]}
     let context_ = "CreateDatabaseRequest"
@@ -3344,12 +5041,228 @@ module CreateDatabaseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DatabaseName") in
       make ?tags ?kmsKeyId ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceCreateAPIName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceCreateAPIName.of_json in
       make ?tags ?kmsKeyId ~databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Timestream database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. Refer to Amazon Web Services managed KMS keys for more info. Service quotas apply. See code sample for details."]
+       "Creates a new Timestream database. If the KMS key is not specified, the database will be encrypted with a Timestream managed KMS key located in your account. For more information, see Amazon Web Services managed keys. Service quotas apply. For details, see code sample."]
+module CreateBatchLoadTaskResponse =
+  struct
+    type nonrec t =
+      {
+      taskId: BatchLoadTaskId.t option
+        [@ocaml.doc "The ID of the batch load task."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?taskId = fun () -> { taskId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TaskId", (Option.map x.taskId ~f:BatchLoadTaskId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskId =
+        (Option.map ~f:BatchLoadTaskId.of_xml) (Xml.child xml_arg0 "TaskId") in
+      make ?taskId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskId = field_map json__ "TaskId" BatchLoadTaskId.of_json in
+      make ?taskId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Timestream batch load task. A batch load task processes data from a CSV source in an S3 location and writes to a Timestream table. A mapping from source to target is defined in a batch load task. Errors and events are written to a report at an S3 location. For the report, if the KMS key is not specified, the report will be encrypted with an S3 managed key when SSE_S3 is the option. Otherwise an error is thrown. For more information, see Amazon Web Services managed keys. Service quotas apply. For details, see code sample."]
+module CreateBatchLoadTaskRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientRequestToken.t option ;
+      dataModelConfiguration: DataModelConfiguration.t option ;
+      dataSourceConfiguration: DataSourceConfiguration.t
+        [@ocaml.doc
+          "Defines configuration details about the data source for a batch load task."];
+      reportConfiguration: ReportConfiguration.t ;
+      targetDatabaseName: ResourceCreateAPIName.t
+        [@ocaml.doc "Target Timestream database for a batch load task."];
+      targetTableName: ResourceCreateAPIName.t
+        [@ocaml.doc "Target Timestream table for a batch load task."];
+      recordVersion: RecordVersion.t option }
+    let context_ = "CreateBatchLoadTaskRequest"
+    let make ?clientToken =
+      fun ?dataModelConfiguration ->
+        fun ?recordVersion ->
+          fun ~dataSourceConfiguration ->
+            fun ~reportConfiguration ->
+              fun ~targetDatabaseName ->
+                fun ~targetTableName ->
+                  fun () ->
+                    {
+                      clientToken;
+                      dataModelConfiguration;
+                      recordVersion;
+                      dataSourceConfiguration;
+                      reportConfiguration;
+                      targetDatabaseName;
+                      targetTableName
+                    }
+    let to_value x =
+      structure_to_value
+        [("ClientToken",
+           (Option.map x.clientToken ~f:ClientRequestToken.to_value));
+        ("DataModelConfiguration",
+          (Option.map x.dataModelConfiguration
+             ~f:DataModelConfiguration.to_value));
+        ("DataSourceConfiguration",
+          (Some (DataSourceConfiguration.to_value x.dataSourceConfiguration)));
+        ("ReportConfiguration",
+          (Some (ReportConfiguration.to_value x.reportConfiguration)));
+        ("TargetDatabaseName",
+          (Some (ResourceCreateAPIName.to_value x.targetDatabaseName)));
+        ("TargetTableName",
+          (Some (ResourceCreateAPIName.to_value x.targetTableName)));
+        ("RecordVersion",
+          (Option.map x.recordVersion ~f:RecordVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recordVersion =
+        (Option.map ~f:RecordVersion.of_xml)
+          (Xml.child xml_arg0 "RecordVersion") in
+      let targetTableName =
+        ResourceCreateAPIName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetTableName") in
+      let targetDatabaseName =
+        ResourceCreateAPIName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetDatabaseName") in
+      let reportConfiguration =
+        ReportConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReportConfiguration") in
+      let dataSourceConfiguration =
+        DataSourceConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataSourceConfiguration") in
+      let dataModelConfiguration =
+        (Option.map ~f:DataModelConfiguration.of_xml)
+          (Xml.child xml_arg0 "DataModelConfiguration") in
+      let clientToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      make ?recordVersion ~targetTableName ~targetDatabaseName
+        ~reportConfiguration ~dataSourceConfiguration ?dataModelConfiguration
+        ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recordVersion =
+        field_map json__ "RecordVersion" RecordVersion.of_json in
+      let targetTableName =
+        field_map_exn json__ "TargetTableName" ResourceCreateAPIName.of_json in
+      let targetDatabaseName =
+        field_map_exn json__ "TargetDatabaseName"
+          ResourceCreateAPIName.of_json in
+      let reportConfiguration =
+        field_map_exn json__ "ReportConfiguration"
+          ReportConfiguration.of_json in
+      let dataSourceConfiguration =
+        field_map_exn json__ "DataSourceConfiguration"
+          DataSourceConfiguration.of_json in
+      let dataModelConfiguration =
+        field_map json__ "DataModelConfiguration"
+          DataModelConfiguration.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientRequestToken.of_json in
+      make ?recordVersion ~targetTableName ~targetDatabaseName
+        ~reportConfiguration ~dataSourceConfiguration ?dataModelConfiguration
+        ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new Timestream batch load task. A batch load task processes data from a CSV source in an S3 location and writes to a Timestream table. A mapping from source to target is defined in a batch load task. Errors and events are written to a report at an S3 location. For the report, if the KMS key is not specified, the report will be encrypted with an S3 managed key when SSE_S3 is the option. Otherwise an error is thrown. For more information, see Amazon Web Services managed keys. Service quotas apply. For details, see code sample."]

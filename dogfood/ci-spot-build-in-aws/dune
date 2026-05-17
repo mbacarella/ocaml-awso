@@ -1,5 +1,10 @@
 (executable
  (name ci_spot_build_in_aws)
- (libraries awso-async.ec2 awso-async cohttp-async core_unix.command_unix cryptokit)
+ (libraries
+  awso-async.ec2
+  awso-async
+  cohttp-async
+  core_unix.command_unix
+  cryptokit)
  (preprocess
   (pps ppx_jane)))

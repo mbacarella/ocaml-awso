@@ -7,11 +7,15 @@ type ('i, 'o, 'e) t =
   | AssociateVPCWithHostedZone: (AssociateVPCWithHostedZoneRequest.t,
   AssociateVPCWithHostedZoneResponse.t,
   AssociateVPCWithHostedZoneResponse.error) t 
+  | ChangeCidrCollection: (ChangeCidrCollectionRequest.t,
+  ChangeCidrCollectionResponse.t, ChangeCidrCollectionResponse.error) t 
   | ChangeResourceRecordSets: (ChangeResourceRecordSetsRequest.t,
   ChangeResourceRecordSetsResponse.t, ChangeResourceRecordSetsResponse.error)
   t 
   | ChangeTagsForResource: (ChangeTagsForResourceRequest.t,
   ChangeTagsForResourceResponse.t, ChangeTagsForResourceResponse.error) t 
+  | CreateCidrCollection: (CreateCidrCollectionRequest.t,
+  CreateCidrCollectionResponse.t, CreateCidrCollectionResponse.error) t 
   | CreateHealthCheck: (CreateHealthCheckRequest.t,
   CreateHealthCheckResponse.t, CreateHealthCheckResponse.error) t 
   | CreateHostedZone: (CreateHostedZoneRequest.t, CreateHostedZoneResponse.t,
@@ -39,6 +43,8 @@ type ('i, 'o, 'e) t =
   | DeactivateKeySigningKey: (DeactivateKeySigningKeyRequest.t,
   DeactivateKeySigningKeyResponse.t, DeactivateKeySigningKeyResponse.error) t
   
+  | DeleteCidrCollection: (DeleteCidrCollectionRequest.t,
+  DeleteCidrCollectionResponse.t, DeleteCidrCollectionResponse.error) t 
   | DeleteHealthCheck: (DeleteHealthCheckRequest.t,
   DeleteHealthCheckResponse.t, DeleteHealthCheckResponse.error) t 
   | DeleteHostedZone: (DeleteHostedZoneRequest.t, DeleteHostedZoneResponse.t,
@@ -110,6 +116,12 @@ type ('i, 'o, 'e) t =
   | GetTrafficPolicyInstanceCount: (GetTrafficPolicyInstanceCountRequest.t,
   GetTrafficPolicyInstanceCountResponse.t,
   GetTrafficPolicyInstanceCountResponse.error) t 
+  | ListCidrBlocks: (ListCidrBlocksRequest.t, ListCidrBlocksResponse.t,
+  ListCidrBlocksResponse.error) t 
+  | ListCidrCollections: (ListCidrCollectionsRequest.t,
+  ListCidrCollectionsResponse.t, ListCidrCollectionsResponse.error) t 
+  | ListCidrLocations: (ListCidrLocationsRequest.t,
+  ListCidrLocationsResponse.t, ListCidrLocationsResponse.error) t 
   | ListGeoLocations: (ListGeoLocationsRequest.t, ListGeoLocationsResponse.t,
   ListGeoLocationsResponse.error) t 
   | ListHealthChecks: (ListHealthChecksRequest.t, ListHealthChecksResponse.t,
@@ -159,6 +171,9 @@ type ('i, 'o, 'e) t =
   | UpdateHostedZoneComment: (UpdateHostedZoneCommentRequest.t,
   UpdateHostedZoneCommentResponse.t, UpdateHostedZoneCommentResponse.error) t
   
+  | UpdateHostedZoneFeatures: (UpdateHostedZoneFeaturesRequest.t,
+  UpdateHostedZoneFeaturesResponse.t, UpdateHostedZoneFeaturesResponse.error)
+  t 
   | UpdateTrafficPolicyComment: (UpdateTrafficPolicyCommentRequest.t,
   UpdateTrafficPolicyCommentResponse.t,
   UpdateTrafficPolicyCommentResponse.error) t 
@@ -169,8 +184,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | ActivateKeySigningKey -> `POST
   | AssociateVPCWithHostedZone -> `POST
+  | ChangeCidrCollection -> `POST
   | ChangeResourceRecordSets -> `POST
   | ChangeTagsForResource -> `POST
+  | CreateCidrCollection -> `POST
   | CreateHealthCheck -> `POST
   | CreateHostedZone -> `POST
   | CreateKeySigningKey -> `POST
@@ -181,6 +198,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateTrafficPolicyVersion -> `POST
   | CreateVPCAssociationAuthorization -> `POST
   | DeactivateKeySigningKey -> `POST
+  | DeleteCidrCollection -> `DELETE
   | DeleteHealthCheck -> `DELETE
   | DeleteHostedZone -> `DELETE
   | DeleteKeySigningKey -> `DELETE
@@ -210,6 +228,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetTrafficPolicy -> `GET
   | GetTrafficPolicyInstance -> `GET
   | GetTrafficPolicyInstanceCount -> `GET
+  | ListCidrBlocks -> `GET
+  | ListCidrCollections -> `GET
+  | ListCidrLocations -> `GET
   | ListGeoLocations -> `GET
   | ListHealthChecks -> `GET
   | ListHostedZones -> `GET
@@ -229,6 +250,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TestDNSAnswer -> `GET
   | UpdateHealthCheck -> `POST
   | UpdateHostedZoneComment -> `POST
+  | UpdateHostedZoneFeatures -> `POST
   | UpdateTrafficPolicyComment -> `POST
   | UpdateTrafficPolicyInstance -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -244,6 +266,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2013-04-01/hostedzone/%s/associatevpc"
             (ResourceId.to_header
                x.AssociateVPCWithHostedZoneRequest.hostedZoneId)
+      | ChangeCidrCollection ->
+          (Format.kasprintf Uri.of_string) "/2013-04-01/cidrcollection/%s"
+            (UUID.to_header x.ChangeCidrCollectionRequest.id)
       | ChangeResourceRecordSets ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/hostedzone/%s/rrset/"
             (ResourceId.to_header
@@ -254,6 +279,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.ChangeTagsForResourceRequest.resourceType)
             (TagResourceId.to_header
                x.ChangeTagsForResourceRequest.resourceId)
+      | CreateCidrCollection ->
+          (Format.kasprintf Uri.of_string) "/2013-04-01/cidrcollection"
       | CreateHealthCheck ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/healthcheck"
       | CreateHostedZone ->
@@ -283,6 +310,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceId.to_header
                x.DeactivateKeySigningKeyRequest.hostedZoneId)
             (SigningKeyName.to_header x.DeactivateKeySigningKeyRequest.name)
+      | DeleteCidrCollection ->
+          (Format.kasprintf Uri.of_string) "/2013-04-01/cidrcollection/%s"
+            (UUID.to_header x.DeleteCidrCollectionRequest.id)
       | DeleteHealthCheck ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/healthcheck/%s"
             (HealthCheckId.to_header x.DeleteHealthCheckRequest.healthCheckId)
@@ -336,7 +366,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (AccountLimitType.to_header x.GetAccountLimitRequest.type_)
       | GetChange ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/change/%s"
-            (ResourceId.to_header x.GetChangeRequest.id)
+            (ChangeId.to_header x.GetChangeRequest.id)
       | GetCheckerIpRanges ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/checkeripranges"
       | GetDNSSEC ->
@@ -411,6 +441,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetTrafficPolicyInstanceCount ->
           (Format.kasprintf Uri.of_string)
             "/2013-04-01/trafficpolicyinstancecount"
+      | ListCidrBlocks ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2013-04-01/cidrcollection/%s/cidrblocks"
+               (UUID.to_header x.ListCidrBlocksRequest.collectionId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("location",
+                          (CidrLocationNameDefaultNotAllowed.to_header v)))
+                  x.locationName;
+               Option.map
+                 ~f:(fun v -> ("nexttoken", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxresults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListCidrCollections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2013-04-01/cidrcollection")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nexttoken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxresults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListCidrLocations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2013-04-01/cidrcollection/%s"
+               (UUID.to_header x.ListCidrLocationsRequest.collectionId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nexttoken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxresults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListGeoLocations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2013-04-01/geolocations")
@@ -453,7 +521,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxItems;
                Option.map
                  ~f:(fun v -> ("delegationsetid", (ResourceId.to_header v)))
-                 x.delegationSetId])
+                 x.delegationSetId;
+               Option.map
+                 ~f:(fun v ->
+                       ("hostedzonetype", (HostedZoneType.to_header v)))
+                 x.hostedZoneType])
       | ListHostedZonesByName ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2013-04-01/hostedzonesbyname")
@@ -651,6 +723,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateHostedZoneComment ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/hostedzone/%s"
             (ResourceId.to_header x.UpdateHostedZoneCommentRequest.id)
+      | UpdateHostedZoneFeatures ->
+          (Format.kasprintf Uri.of_string)
+            "/2013-04-01/hostedzone/%s/features"
+            (ResourceId.to_header
+               x.UpdateHostedZoneFeaturesRequest.hostedZoneId)
       | UpdateTrafficPolicyComment ->
           (Format.kasprintf Uri.of_string) "/2013-04-01/trafficpolicy/%s/%s"
             (TrafficPolicyId.to_header x.UpdateTrafficPolicyCommentRequest.id)
@@ -668,9 +745,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ActivateKeySigningKey -> Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateVPCWithHostedZone ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ChangeCidrCollection -> Awso.Http.Request.make (method_of_endpoint endp)
   | ChangeResourceRecordSets ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | ChangeTagsForResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateCidrCollection -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateHealthCheck -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateHostedZone -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateKeySigningKey -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -687,6 +766,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeactivateKeySigningKey ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCidrCollection -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteHealthCheck -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteHostedZone -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteKeySigningKey -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -728,6 +808,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetTrafficPolicyInstanceCount ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ListCidrBlocks -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListCidrCollections -> Awso.Http.Request.make (method_of_endpoint endp)
+  | ListCidrLocations -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListGeoLocations -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListHealthChecks -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListHostedZones -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -755,6 +838,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | TestDNSAnswer -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateHealthCheck -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateHostedZoneComment ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateHostedZoneFeatures ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTrafficPolicyComment ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -807,6 +892,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateVPCWithHostedZoneResponse.error_of_xml))
+  | ChangeCidrCollection ->
+      if is_success
+      then Ok (ChangeCidrCollectionResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ChangeCidrCollectionResponse.error_of_xml))
   | ChangeResourceRecordSets ->
       if is_success
       then
@@ -824,6 +915,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ChangeTagsForResourceResponse.error_of_xml))
+  | CreateCidrCollection ->
+      if is_success
+      then Ok (CreateCidrCollectionResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some CreateCidrCollectionResponse.error_of_xml))
   | CreateHealthCheck ->
       if is_success
       then Ok (CreateHealthCheckResponse.of_xml (response_to_xml resp))
@@ -897,6 +994,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeactivateKeySigningKeyResponse.error_of_xml))
+  | DeleteCidrCollection ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteCidrCollectionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteCidrCollectionResponse.error_of_xml))
   | DeleteHealthCheck ->
       if is_success
       then
@@ -1100,6 +1206,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (GetTrafficPolicyInstanceCountResponse.of_xml
              (response_to_xml resp))
       else Error (parse_aws_error None)
+  | ListCidrBlocks ->
+      if is_success
+      then Ok (ListCidrBlocksResponse.of_xml (response_to_xml resp))
+      else Error (parse_aws_error (Some ListCidrBlocksResponse.error_of_xml))
+  | ListCidrCollections ->
+      if is_success
+      then Ok (ListCidrCollectionsResponse.of_xml (response_to_xml resp))
+      else
+        Error
+          (parse_aws_error (Some ListCidrCollectionsResponse.error_of_xml))
+  | ListCidrLocations ->
+      if is_success
+      then Ok (ListCidrLocationsResponse.of_xml (response_to_xml resp))
+      else
+        Error (parse_aws_error (Some ListCidrLocationsResponse.error_of_xml))
   | ListGeoLocations ->
       if is_success
       then Ok (ListGeoLocationsResponse.of_xml (response_to_xml resp))
@@ -1229,6 +1350,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateHostedZoneCommentResponse.error_of_xml))
+  | UpdateHostedZoneFeatures ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateHostedZoneFeaturesResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateHostedZoneFeaturesResponse.error_of_xml))
   | UpdateTrafficPolicyComment ->
       if is_success
       then

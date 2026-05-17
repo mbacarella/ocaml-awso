@@ -11,13 +11,39 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let archive_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ArchiveApplication input
+let archive_wave ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ArchiveWave input
+let associate_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateApplications input
+let associate_source_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSourceServers input
 let change_server_life_cycle_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ChangeServerLifeCycleState input
+let create_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateApplication input
+let create_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateConnector input
+let create_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLaunchConfigurationTemplate input
+let create_network_migration_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateNetworkMigrationDefinition input
 let create_replication_configuration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateReplicationConfigurationTemplate
     input
+let create_wave ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWave input
+let delete_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteApplication input
+let delete_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteConnector input
 let delete_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteJob input
+let delete_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLaunchConfigurationTemplate input
+let delete_network_migration_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteNetworkMigrationDefinition input
 let delete_replication_configuration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteReplicationConfigurationTemplate
     input
@@ -25,10 +51,15 @@ let delete_source_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSourceServer input
 let delete_vcenter_client ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVcenterClient input
+let delete_wave ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWave input
 let describe_job_log_items ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobLogItems input
 let describe_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobs input
+let describe_launch_configuration_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLaunchConfigurationTemplates
+    input
 let describe_replication_configuration_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReplicationConfigurationTemplates
     input
@@ -36,40 +67,147 @@ let describe_source_servers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSourceServers input
 let describe_vcenter_clients ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVcenterClients input
+let disassociate_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateApplications input
+let disassociate_source_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSourceServers input
 let disconnect_from_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisconnectFromService input
 let finalize_cutover ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.FinalizeCutover input
 let get_launch_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLaunchConfiguration input
+let get_network_migration_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetNetworkMigrationDefinition input
+let get_network_migration_mapper_segment_construct ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetNetworkMigrationMapperSegmentConstruct
+    input
 let get_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetReplicationConfiguration input
 let initialize_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InitializeService input
+let list_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListApplications input
+let list_connectors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConnectors input
+let list_export_errors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExportErrors input
+let list_exports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExports input
+let list_import_errors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImportErrors input
+let list_import_file_enrichments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImportFileEnrichments input
+let list_imports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImports input
+let list_managed_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListManagedAccounts input
+let list_network_migration_analyses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationAnalyses input
+let list_network_migration_analysis_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationAnalysisResults input
+let list_network_migration_code_generation_segments ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.ListNetworkMigrationCodeGenerationSegments input
+let list_network_migration_code_generations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationCodeGenerations input
+let list_network_migration_definitions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationDefinitions input
+let list_network_migration_deployed_stacks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationDeployedStacks input
+let list_network_migration_deployments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationDeployments input
+let list_network_migration_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationExecutions input
+let list_network_migration_mapper_segment_constructs ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.ListNetworkMigrationMapperSegmentConstructs input
+let list_network_migration_mapper_segments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationMapperSegments input
+let list_network_migration_mapping_updates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationMappingUpdates input
+let list_network_migration_mappings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkMigrationMappings input
+let list_source_server_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSourceServerActions input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_template_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTemplateActions input
+let list_waves ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWaves input
 let mark_as_archived ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MarkAsArchived input
+let pause_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PauseReplication input
+let put_source_server_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutSourceServerAction input
+let put_template_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutTemplateAction input
+let remove_source_server_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveSourceServerAction input
+let remove_template_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RemoveTemplateAction input
+let resume_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ResumeReplication input
 let retry_data_replication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetryDataReplication input
 let start_cutover ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartCutover input
+let start_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartExport input
+let start_import ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartImport input
+let start_import_file_enrichment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartImportFileEnrichment input
+let start_network_migration_analysis ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartNetworkMigrationAnalysis input
+let start_network_migration_code_generation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartNetworkMigrationCodeGeneration input
+let start_network_migration_deployment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartNetworkMigrationDeployment input
+let start_network_migration_mapping ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartNetworkMigrationMapping input
+let start_network_migration_mapping_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartNetworkMigrationMappingUpdate input
 let start_replication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartReplication input
 let start_test ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartTest input
+let stop_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopReplication input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let terminate_target_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TerminateTargetInstances input
+let unarchive_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UnarchiveApplication input
+let unarchive_wave ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UnarchiveWave input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateApplication input
+let update_connector ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConnector input
 let update_launch_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLaunchConfiguration input
+let update_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLaunchConfigurationTemplate input
+let update_network_migration_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateNetworkMigrationDefinition input
+let update_network_migration_mapper_segment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateNetworkMigrationMapperSegment input
 let update_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateReplicationConfiguration input
 let update_replication_configuration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateReplicationConfigurationTemplate
     input
+let update_source_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSourceServer input
 let update_source_server_replication_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateSourceServerReplicationType input
+let update_wave ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWave input

@@ -2,13 +2,29 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | BatchCreateTopicReviewedAnswer: (BatchCreateTopicReviewedAnswerRequest.t,
+  BatchCreateTopicReviewedAnswerResponse.t,
+  BatchCreateTopicReviewedAnswerResponse.error) t 
+  | BatchDeleteTopicReviewedAnswer: (BatchDeleteTopicReviewedAnswerRequest.t,
+  BatchDeleteTopicReviewedAnswerResponse.t,
+  BatchDeleteTopicReviewedAnswerResponse.error) t 
   | CancelIngestion: (CancelIngestionRequest.t, CancelIngestionResponse.t,
   CancelIngestionResponse.error) t 
   | CreateAccountCustomization: (CreateAccountCustomizationRequest.t,
   CreateAccountCustomizationResponse.t,
   CreateAccountCustomizationResponse.error) t 
+  | CreateAccountSubscription: (CreateAccountSubscriptionRequest.t,
+  CreateAccountSubscriptionResponse.t,
+  CreateAccountSubscriptionResponse.error) t 
+  | CreateActionConnector: (CreateActionConnectorRequest.t,
+  CreateActionConnectorResponse.t, CreateActionConnectorResponse.error) t 
   | CreateAnalysis: (CreateAnalysisRequest.t, CreateAnalysisResponse.t,
   CreateAnalysisResponse.error) t 
+  | CreateBrand: (CreateBrandRequest.t, CreateBrandResponse.t,
+  CreateBrandResponse.error) t 
+  | CreateCustomPermissions: (CreateCustomPermissionsRequest.t,
+  CreateCustomPermissionsResponse.t, CreateCustomPermissionsResponse.error) t
+  
   | CreateDashboard: (CreateDashboardRequest.t, CreateDashboardResponse.t,
   CreateDashboardResponse.error) t 
   | CreateDataSet: (CreateDataSetRequest.t, CreateDataSetResponse.t,
@@ -30,6 +46,10 @@ type ('i, 'o, 'e) t =
   CreateIngestionResponse.error) t 
   | CreateNamespace: (CreateNamespaceRequest.t, CreateNamespaceResponse.t,
   CreateNamespaceResponse.error) t 
+  | CreateRefreshSchedule: (CreateRefreshScheduleRequest.t,
+  CreateRefreshScheduleResponse.t, CreateRefreshScheduleResponse.error) t 
+  | CreateRoleMembership: (CreateRoleMembershipRequest.t,
+  CreateRoleMembershipResponse.t, CreateRoleMembershipResponse.error) t 
   | CreateTemplate: (CreateTemplateRequest.t, CreateTemplateResponse.t,
   CreateTemplateResponse.error) t 
   | CreateTemplateAlias: (CreateTemplateAliasRequest.t,
@@ -38,17 +58,46 @@ type ('i, 'o, 'e) t =
   CreateThemeResponse.error) t 
   | CreateThemeAlias: (CreateThemeAliasRequest.t, CreateThemeAliasResponse.t,
   CreateThemeAliasResponse.error) t 
+  | CreateTopic: (CreateTopicRequest.t, CreateTopicResponse.t,
+  CreateTopicResponse.error) t 
+  | CreateTopicRefreshSchedule: (CreateTopicRefreshScheduleRequest.t,
+  CreateTopicRefreshScheduleResponse.t,
+  CreateTopicRefreshScheduleResponse.error) t 
+  | CreateVPCConnection: (CreateVPCConnectionRequest.t,
+  CreateVPCConnectionResponse.t, CreateVPCConnectionResponse.error) t 
+  | DeleteAccountCustomPermission: (DeleteAccountCustomPermissionRequest.t,
+  DeleteAccountCustomPermissionResponse.t,
+  DeleteAccountCustomPermissionResponse.error) t 
   | DeleteAccountCustomization: (DeleteAccountCustomizationRequest.t,
   DeleteAccountCustomizationResponse.t,
   DeleteAccountCustomizationResponse.error) t 
+  | DeleteAccountSubscription: (DeleteAccountSubscriptionRequest.t,
+  DeleteAccountSubscriptionResponse.t,
+  DeleteAccountSubscriptionResponse.error) t 
+  | DeleteActionConnector: (DeleteActionConnectorRequest.t,
+  DeleteActionConnectorResponse.t, DeleteActionConnectorResponse.error) t 
   | DeleteAnalysis: (DeleteAnalysisRequest.t, DeleteAnalysisResponse.t,
   DeleteAnalysisResponse.error) t 
+  | DeleteBrand: (DeleteBrandRequest.t, DeleteBrandResponse.t,
+  DeleteBrandResponse.error) t 
+  | DeleteBrandAssignment: (DeleteBrandAssignmentRequest.t,
+  DeleteBrandAssignmentResponse.t, DeleteBrandAssignmentResponse.error) t 
+  | DeleteCustomPermissions: (DeleteCustomPermissionsRequest.t,
+  DeleteCustomPermissionsResponse.t, DeleteCustomPermissionsResponse.error) t
+  
   | DeleteDashboard: (DeleteDashboardRequest.t, DeleteDashboardResponse.t,
   DeleteDashboardResponse.error) t 
   | DeleteDataSet: (DeleteDataSetRequest.t, DeleteDataSetResponse.t,
   DeleteDataSetResponse.error) t 
+  | DeleteDataSetRefreshProperties: (DeleteDataSetRefreshPropertiesRequest.t,
+  DeleteDataSetRefreshPropertiesResponse.t,
+  DeleteDataSetRefreshPropertiesResponse.error) t 
   | DeleteDataSource: (DeleteDataSourceRequest.t, DeleteDataSourceResponse.t,
   DeleteDataSourceResponse.error) t 
+  | DeleteDefaultQBusinessApplication:
+  (DeleteDefaultQBusinessApplicationRequest.t,
+  DeleteDefaultQBusinessApplicationResponse.t,
+  DeleteDefaultQBusinessApplicationResponse.error) t 
   | DeleteFolder: (DeleteFolderRequest.t, DeleteFolderResponse.t,
   DeleteFolderResponse.error) t 
   | DeleteFolderMembership: (DeleteFolderMembershipRequest.t,
@@ -60,8 +109,19 @@ type ('i, 'o, 'e) t =
   | DeleteIAMPolicyAssignment: (DeleteIAMPolicyAssignmentRequest.t,
   DeleteIAMPolicyAssignmentResponse.t,
   DeleteIAMPolicyAssignmentResponse.error) t 
+  | DeleteIdentityPropagationConfig:
+  (DeleteIdentityPropagationConfigRequest.t,
+  DeleteIdentityPropagationConfigResponse.t,
+  DeleteIdentityPropagationConfigResponse.error) t 
   | DeleteNamespace: (DeleteNamespaceRequest.t, DeleteNamespaceResponse.t,
   DeleteNamespaceResponse.error) t 
+  | DeleteRefreshSchedule: (DeleteRefreshScheduleRequest.t,
+  DeleteRefreshScheduleResponse.t, DeleteRefreshScheduleResponse.error) t 
+  | DeleteRoleCustomPermission: (DeleteRoleCustomPermissionRequest.t,
+  DeleteRoleCustomPermissionResponse.t,
+  DeleteRoleCustomPermissionResponse.error) t 
+  | DeleteRoleMembership: (DeleteRoleMembershipRequest.t,
+  DeleteRoleMembershipResponse.t, DeleteRoleMembershipResponse.error) t 
   | DeleteTemplate: (DeleteTemplateRequest.t, DeleteTemplateResponse.t,
   DeleteTemplateResponse.error) t 
   | DeleteTemplateAlias: (DeleteTemplateAliasRequest.t,
@@ -70,37 +130,105 @@ type ('i, 'o, 'e) t =
   DeleteThemeResponse.error) t 
   | DeleteThemeAlias: (DeleteThemeAliasRequest.t, DeleteThemeAliasResponse.t,
   DeleteThemeAliasResponse.error) t 
+  | DeleteTopic: (DeleteTopicRequest.t, DeleteTopicResponse.t,
+  DeleteTopicResponse.error) t 
+  | DeleteTopicRefreshSchedule: (DeleteTopicRefreshScheduleRequest.t,
+  DeleteTopicRefreshScheduleResponse.t,
+  DeleteTopicRefreshScheduleResponse.error) t 
   | DeleteUser: (DeleteUserRequest.t, DeleteUserResponse.t,
   DeleteUserResponse.error) t 
   | DeleteUserByPrincipalId: (DeleteUserByPrincipalIdRequest.t,
   DeleteUserByPrincipalIdResponse.t, DeleteUserByPrincipalIdResponse.error) t
   
+  | DeleteUserCustomPermission: (DeleteUserCustomPermissionRequest.t,
+  DeleteUserCustomPermissionResponse.t,
+  DeleteUserCustomPermissionResponse.error) t 
+  | DeleteVPCConnection: (DeleteVPCConnectionRequest.t,
+  DeleteVPCConnectionResponse.t, DeleteVPCConnectionResponse.error) t 
+  | DescribeAccountCustomPermission:
+  (DescribeAccountCustomPermissionRequest.t,
+  DescribeAccountCustomPermissionResponse.t,
+  DescribeAccountCustomPermissionResponse.error) t 
   | DescribeAccountCustomization: (DescribeAccountCustomizationRequest.t,
   DescribeAccountCustomizationResponse.t,
   DescribeAccountCustomizationResponse.error) t 
   | DescribeAccountSettings: (DescribeAccountSettingsRequest.t,
   DescribeAccountSettingsResponse.t, DescribeAccountSettingsResponse.error) t
   
+  | DescribeAccountSubscription: (DescribeAccountSubscriptionRequest.t,
+  DescribeAccountSubscriptionResponse.t,
+  DescribeAccountSubscriptionResponse.error) t 
+  | DescribeActionConnector: (DescribeActionConnectorRequest.t,
+  DescribeActionConnectorResponse.t, DescribeActionConnectorResponse.error) t
+  
+  | DescribeActionConnectorPermissions:
+  (DescribeActionConnectorPermissionsRequest.t,
+  DescribeActionConnectorPermissionsResponse.t,
+  DescribeActionConnectorPermissionsResponse.error) t 
   | DescribeAnalysis: (DescribeAnalysisRequest.t, DescribeAnalysisResponse.t,
   DescribeAnalysisResponse.error) t 
+  | DescribeAnalysisDefinition: (DescribeAnalysisDefinitionRequest.t,
+  DescribeAnalysisDefinitionResponse.t,
+  DescribeAnalysisDefinitionResponse.error) t 
   | DescribeAnalysisPermissions: (DescribeAnalysisPermissionsRequest.t,
   DescribeAnalysisPermissionsResponse.t,
   DescribeAnalysisPermissionsResponse.error) t 
+  | DescribeAssetBundleExportJob: (DescribeAssetBundleExportJobRequest.t,
+  DescribeAssetBundleExportJobResponse.t,
+  DescribeAssetBundleExportJobResponse.error) t 
+  | DescribeAssetBundleImportJob: (DescribeAssetBundleImportJobRequest.t,
+  DescribeAssetBundleImportJobResponse.t,
+  DescribeAssetBundleImportJobResponse.error) t 
+  | DescribeAutomationJob: (DescribeAutomationJobRequest.t,
+  DescribeAutomationJobResponse.t, DescribeAutomationJobResponse.error) t 
+  | DescribeBrand: (DescribeBrandRequest.t, DescribeBrandResponse.t,
+  DescribeBrandResponse.error) t 
+  | DescribeBrandAssignment: (DescribeBrandAssignmentRequest.t,
+  DescribeBrandAssignmentResponse.t, DescribeBrandAssignmentResponse.error) t
+  
+  | DescribeBrandPublishedVersion: (DescribeBrandPublishedVersionRequest.t,
+  DescribeBrandPublishedVersionResponse.t,
+  DescribeBrandPublishedVersionResponse.error) t 
+  | DescribeCustomPermissions: (DescribeCustomPermissionsRequest.t,
+  DescribeCustomPermissionsResponse.t,
+  DescribeCustomPermissionsResponse.error) t 
   | DescribeDashboard: (DescribeDashboardRequest.t,
   DescribeDashboardResponse.t, DescribeDashboardResponse.error) t 
+  | DescribeDashboardDefinition: (DescribeDashboardDefinitionRequest.t,
+  DescribeDashboardDefinitionResponse.t,
+  DescribeDashboardDefinitionResponse.error) t 
   | DescribeDashboardPermissions: (DescribeDashboardPermissionsRequest.t,
   DescribeDashboardPermissionsResponse.t,
   DescribeDashboardPermissionsResponse.error) t 
+  | DescribeDashboardSnapshotJob: (DescribeDashboardSnapshotJobRequest.t,
+  DescribeDashboardSnapshotJobResponse.t,
+  DescribeDashboardSnapshotJobResponse.error) t 
+  | DescribeDashboardSnapshotJobResult:
+  (DescribeDashboardSnapshotJobResultRequest.t,
+  DescribeDashboardSnapshotJobResultResponse.t,
+  DescribeDashboardSnapshotJobResultResponse.error) t 
+  | DescribeDashboardsQAConfiguration:
+  (DescribeDashboardsQAConfigurationRequest.t,
+  DescribeDashboardsQAConfigurationResponse.t,
+  DescribeDashboardsQAConfigurationResponse.error) t 
   | DescribeDataSet: (DescribeDataSetRequest.t, DescribeDataSetResponse.t,
   DescribeDataSetResponse.error) t 
   | DescribeDataSetPermissions: (DescribeDataSetPermissionsRequest.t,
   DescribeDataSetPermissionsResponse.t,
   DescribeDataSetPermissionsResponse.error) t 
+  | DescribeDataSetRefreshProperties:
+  (DescribeDataSetRefreshPropertiesRequest.t,
+  DescribeDataSetRefreshPropertiesResponse.t,
+  DescribeDataSetRefreshPropertiesResponse.error) t 
   | DescribeDataSource: (DescribeDataSourceRequest.t,
   DescribeDataSourceResponse.t, DescribeDataSourceResponse.error) t 
   | DescribeDataSourcePermissions: (DescribeDataSourcePermissionsRequest.t,
   DescribeDataSourcePermissionsResponse.t,
   DescribeDataSourcePermissionsResponse.error) t 
+  | DescribeDefaultQBusinessApplication:
+  (DescribeDefaultQBusinessApplicationRequest.t,
+  DescribeDefaultQBusinessApplicationResponse.t,
+  DescribeDefaultQBusinessApplicationResponse.error) t 
   | DescribeFolder: (DescribeFolderRequest.t, DescribeFolderResponse.t,
   DescribeFolderResponse.error) t 
   | DescribeFolderPermissions: (DescribeFolderPermissionsRequest.t,
@@ -122,12 +250,36 @@ type ('i, 'o, 'e) t =
   DescribeIngestionResponse.t, DescribeIngestionResponse.error) t 
   | DescribeIpRestriction: (DescribeIpRestrictionRequest.t,
   DescribeIpRestrictionResponse.t, DescribeIpRestrictionResponse.error) t 
+  | DescribeKeyRegistration: (DescribeKeyRegistrationRequest.t,
+  DescribeKeyRegistrationResponse.t, DescribeKeyRegistrationResponse.error) t
+  
   | DescribeNamespace: (DescribeNamespaceRequest.t,
   DescribeNamespaceResponse.t, DescribeNamespaceResponse.error) t 
+  | DescribeQPersonalizationConfiguration:
+  (DescribeQPersonalizationConfigurationRequest.t,
+  DescribeQPersonalizationConfigurationResponse.t,
+  DescribeQPersonalizationConfigurationResponse.error) t 
+  | DescribeQuickSightQSearchConfiguration:
+  (DescribeQuickSightQSearchConfigurationRequest.t,
+  DescribeQuickSightQSearchConfigurationResponse.t,
+  DescribeQuickSightQSearchConfigurationResponse.error) t 
+  | DescribeRefreshSchedule: (DescribeRefreshScheduleRequest.t,
+  DescribeRefreshScheduleResponse.t, DescribeRefreshScheduleResponse.error) t
+  
+  | DescribeRoleCustomPermission: (DescribeRoleCustomPermissionRequest.t,
+  DescribeRoleCustomPermissionResponse.t,
+  DescribeRoleCustomPermissionResponse.error) t 
+  | DescribeSelfUpgradeConfiguration:
+  (DescribeSelfUpgradeConfigurationRequest.t,
+  DescribeSelfUpgradeConfigurationResponse.t,
+  DescribeSelfUpgradeConfigurationResponse.error) t 
   | DescribeTemplate: (DescribeTemplateRequest.t, DescribeTemplateResponse.t,
   DescribeTemplateResponse.error) t 
   | DescribeTemplateAlias: (DescribeTemplateAliasRequest.t,
   DescribeTemplateAliasResponse.t, DescribeTemplateAliasResponse.error) t 
+  | DescribeTemplateDefinition: (DescribeTemplateDefinitionRequest.t,
+  DescribeTemplateDefinitionResponse.t,
+  DescribeTemplateDefinitionResponse.error) t 
   | DescribeTemplatePermissions: (DescribeTemplatePermissionsRequest.t,
   DescribeTemplatePermissionsResponse.t,
   DescribeTemplatePermissionsResponse.error) t 
@@ -138,8 +290,20 @@ type ('i, 'o, 'e) t =
   | DescribeThemePermissions: (DescribeThemePermissionsRequest.t,
   DescribeThemePermissionsResponse.t, DescribeThemePermissionsResponse.error)
   t 
+  | DescribeTopic: (DescribeTopicRequest.t, DescribeTopicResponse.t,
+  DescribeTopicResponse.error) t 
+  | DescribeTopicPermissions: (DescribeTopicPermissionsRequest.t,
+  DescribeTopicPermissionsResponse.t, DescribeTopicPermissionsResponse.error)
+  t 
+  | DescribeTopicRefresh: (DescribeTopicRefreshRequest.t,
+  DescribeTopicRefreshResponse.t, DescribeTopicRefreshResponse.error) t 
+  | DescribeTopicRefreshSchedule: (DescribeTopicRefreshScheduleRequest.t,
+  DescribeTopicRefreshScheduleResponse.t,
+  DescribeTopicRefreshScheduleResponse.error) t 
   | DescribeUser: (DescribeUserRequest.t, DescribeUserResponse.t,
   DescribeUserResponse.error) t 
+  | DescribeVPCConnection: (DescribeVPCConnectionRequest.t,
+  DescribeVPCConnectionResponse.t, DescribeVPCConnectionResponse.error) t 
   | GenerateEmbedUrlForAnonymousUser:
   (GenerateEmbedUrlForAnonymousUserRequest.t,
   GenerateEmbedUrlForAnonymousUserResponse.t,
@@ -148,12 +312,34 @@ type ('i, 'o, 'e) t =
   (GenerateEmbedUrlForRegisteredUserRequest.t,
   GenerateEmbedUrlForRegisteredUserResponse.t,
   GenerateEmbedUrlForRegisteredUserResponse.error) t 
+  | GenerateEmbedUrlForRegisteredUserWithIdentity:
+  (GenerateEmbedUrlForRegisteredUserWithIdentityRequest.t,
+  GenerateEmbedUrlForRegisteredUserWithIdentityResponse.t,
+  GenerateEmbedUrlForRegisteredUserWithIdentityResponse.error) t 
   | GetDashboardEmbedUrl: (GetDashboardEmbedUrlRequest.t,
   GetDashboardEmbedUrlResponse.t, GetDashboardEmbedUrlResponse.error) t 
+  | GetFlowMetadata: (GetFlowMetadataInput.t, GetFlowMetadataOutput.t,
+  GetFlowMetadataOutput.error) t 
+  | GetFlowPermissions: (GetFlowPermissionsInput.t,
+  GetFlowPermissionsOutput.t, GetFlowPermissionsOutput.error) t 
+  | GetIdentityContext: (GetIdentityContextRequest.t,
+  GetIdentityContextResponse.t, GetIdentityContextResponse.error) t 
   | GetSessionEmbedUrl: (GetSessionEmbedUrlRequest.t,
   GetSessionEmbedUrlResponse.t, GetSessionEmbedUrlResponse.error) t 
+  | ListActionConnectors: (ListActionConnectorsRequest.t,
+  ListActionConnectorsResponse.t, ListActionConnectorsResponse.error) t 
   | ListAnalyses: (ListAnalysesRequest.t, ListAnalysesResponse.t,
   ListAnalysesResponse.error) t 
+  | ListAssetBundleExportJobs: (ListAssetBundleExportJobsRequest.t,
+  ListAssetBundleExportJobsResponse.t,
+  ListAssetBundleExportJobsResponse.error) t 
+  | ListAssetBundleImportJobs: (ListAssetBundleImportJobsRequest.t,
+  ListAssetBundleImportJobsResponse.t,
+  ListAssetBundleImportJobsResponse.error) t 
+  | ListBrands: (ListBrandsRequest.t, ListBrandsResponse.t,
+  ListBrandsResponse.error) t 
+  | ListCustomPermissions: (ListCustomPermissionsRequest.t,
+  ListCustomPermissionsResponse.t, ListCustomPermissionsResponse.error) t 
   | ListDashboardVersions: (ListDashboardVersionsRequest.t,
   ListDashboardVersionsResponse.t, ListDashboardVersionsResponse.error) t 
   | ListDashboards: (ListDashboardsRequest.t, ListDashboardsResponse.t,
@@ -162,10 +348,14 @@ type ('i, 'o, 'e) t =
   ListDataSetsResponse.error) t 
   | ListDataSources: (ListDataSourcesRequest.t, ListDataSourcesResponse.t,
   ListDataSourcesResponse.error) t 
+  | ListFlows: (ListFlowsInput.t, ListFlowsOutput.t, ListFlowsOutput.error) t
+  
   | ListFolderMembers: (ListFolderMembersRequest.t,
   ListFolderMembersResponse.t, ListFolderMembersResponse.error) t 
   | ListFolders: (ListFoldersRequest.t, ListFoldersResponse.t,
   ListFoldersResponse.error) t 
+  | ListFoldersForResource: (ListFoldersForResourceRequest.t,
+  ListFoldersForResourceResponse.t, ListFoldersForResourceResponse.error) t 
   | ListGroupMemberships: (ListGroupMembershipsRequest.t,
   ListGroupMembershipsResponse.t, ListGroupMembershipsResponse.error) t 
   | ListGroups: (ListGroupsRequest.t, ListGroupsResponse.t,
@@ -177,10 +367,19 @@ type ('i, 'o, 'e) t =
   (ListIAMPolicyAssignmentsForUserRequest.t,
   ListIAMPolicyAssignmentsForUserResponse.t,
   ListIAMPolicyAssignmentsForUserResponse.error) t 
+  | ListIdentityPropagationConfigs: (ListIdentityPropagationConfigsRequest.t,
+  ListIdentityPropagationConfigsResponse.t,
+  ListIdentityPropagationConfigsResponse.error) t 
   | ListIngestions: (ListIngestionsRequest.t, ListIngestionsResponse.t,
   ListIngestionsResponse.error) t 
   | ListNamespaces: (ListNamespacesRequest.t, ListNamespacesResponse.t,
   ListNamespacesResponse.error) t 
+  | ListRefreshSchedules: (ListRefreshSchedulesRequest.t,
+  ListRefreshSchedulesResponse.t, ListRefreshSchedulesResponse.error) t 
+  | ListRoleMemberships: (ListRoleMembershipsRequest.t,
+  ListRoleMembershipsResponse.t, ListRoleMembershipsResponse.error) t 
+  | ListSelfUpgrades: (ListSelfUpgradesRequest.t, ListSelfUpgradesResponse.t,
+  ListSelfUpgradesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTemplateAliases: (ListTemplateAliasesRequest.t,
@@ -195,38 +394,103 @@ type ('i, 'o, 'e) t =
   ListThemeVersionsResponse.t, ListThemeVersionsResponse.error) t 
   | ListThemes: (ListThemesRequest.t, ListThemesResponse.t,
   ListThemesResponse.error) t 
+  | ListTopicRefreshSchedules: (ListTopicRefreshSchedulesRequest.t,
+  ListTopicRefreshSchedulesResponse.t,
+  ListTopicRefreshSchedulesResponse.error) t 
+  | ListTopicReviewedAnswers: (ListTopicReviewedAnswersRequest.t,
+  ListTopicReviewedAnswersResponse.t, ListTopicReviewedAnswersResponse.error)
+  t 
+  | ListTopics: (ListTopicsRequest.t, ListTopicsResponse.t,
+  ListTopicsResponse.error) t 
   | ListUserGroups: (ListUserGroupsRequest.t, ListUserGroupsResponse.t,
   ListUserGroupsResponse.error) t 
   | ListUsers: (ListUsersRequest.t, ListUsersResponse.t,
   ListUsersResponse.error) t 
+  | ListVPCConnections: (ListVPCConnectionsRequest.t,
+  ListVPCConnectionsResponse.t, ListVPCConnectionsResponse.error) t 
+  | PredictQAResults: (PredictQAResultsRequest.t, PredictQAResultsResponse.t,
+  PredictQAResultsResponse.error) t 
+  | PutDataSetRefreshProperties: (PutDataSetRefreshPropertiesRequest.t,
+  PutDataSetRefreshPropertiesResponse.t,
+  PutDataSetRefreshPropertiesResponse.error) t 
   | RegisterUser: (RegisterUserRequest.t, RegisterUserResponse.t,
   RegisterUserResponse.error) t 
   | RestoreAnalysis: (RestoreAnalysisRequest.t, RestoreAnalysisResponse.t,
   RestoreAnalysisResponse.error) t 
+  | SearchActionConnectors: (SearchActionConnectorsRequest.t,
+  SearchActionConnectorsResponse.t, SearchActionConnectorsResponse.error) t 
   | SearchAnalyses: (SearchAnalysesRequest.t, SearchAnalysesResponse.t,
   SearchAnalysesResponse.error) t 
   | SearchDashboards: (SearchDashboardsRequest.t, SearchDashboardsResponse.t,
   SearchDashboardsResponse.error) t 
+  | SearchDataSets: (SearchDataSetsRequest.t, SearchDataSetsResponse.t,
+  SearchDataSetsResponse.error) t 
+  | SearchDataSources: (SearchDataSourcesRequest.t,
+  SearchDataSourcesResponse.t, SearchDataSourcesResponse.error) t 
+  | SearchFlows: (SearchFlowsInput.t, SearchFlowsOutput.t,
+  SearchFlowsOutput.error) t 
   | SearchFolders: (SearchFoldersRequest.t, SearchFoldersResponse.t,
   SearchFoldersResponse.error) t 
   | SearchGroups: (SearchGroupsRequest.t, SearchGroupsResponse.t,
   SearchGroupsResponse.error) t 
+  | SearchTopics: (SearchTopicsRequest.t, SearchTopicsResponse.t,
+  SearchTopicsResponse.error) t 
+  | StartAssetBundleExportJob: (StartAssetBundleExportJobRequest.t,
+  StartAssetBundleExportJobResponse.t,
+  StartAssetBundleExportJobResponse.error) t 
+  | StartAssetBundleImportJob: (StartAssetBundleImportJobRequest.t,
+  StartAssetBundleImportJobResponse.t,
+  StartAssetBundleImportJobResponse.error) t 
+  | StartAutomationJob: (StartAutomationJobRequest.t,
+  StartAutomationJobResponse.t, StartAutomationJobResponse.error) t 
+  | StartDashboardSnapshotJob: (StartDashboardSnapshotJobRequest.t,
+  StartDashboardSnapshotJobResponse.t,
+  StartDashboardSnapshotJobResponse.error) t 
+  | StartDashboardSnapshotJobSchedule:
+  (StartDashboardSnapshotJobScheduleRequest.t,
+  StartDashboardSnapshotJobScheduleResponse.t,
+  StartDashboardSnapshotJobScheduleResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAccountCustomPermission: (UpdateAccountCustomPermissionRequest.t,
+  UpdateAccountCustomPermissionResponse.t,
+  UpdateAccountCustomPermissionResponse.error) t 
   | UpdateAccountCustomization: (UpdateAccountCustomizationRequest.t,
   UpdateAccountCustomizationResponse.t,
   UpdateAccountCustomizationResponse.error) t 
   | UpdateAccountSettings: (UpdateAccountSettingsRequest.t,
   UpdateAccountSettingsResponse.t, UpdateAccountSettingsResponse.error) t 
+  | UpdateActionConnector: (UpdateActionConnectorRequest.t,
+  UpdateActionConnectorResponse.t, UpdateActionConnectorResponse.error) t 
+  | UpdateActionConnectorPermissions:
+  (UpdateActionConnectorPermissionsRequest.t,
+  UpdateActionConnectorPermissionsResponse.t,
+  UpdateActionConnectorPermissionsResponse.error) t 
   | UpdateAnalysis: (UpdateAnalysisRequest.t, UpdateAnalysisResponse.t,
   UpdateAnalysisResponse.error) t 
   | UpdateAnalysisPermissions: (UpdateAnalysisPermissionsRequest.t,
   UpdateAnalysisPermissionsResponse.t,
   UpdateAnalysisPermissionsResponse.error) t 
+  | UpdateApplicationWithTokenExchangeGrant:
+  (UpdateApplicationWithTokenExchangeGrantRequest.t,
+  UpdateApplicationWithTokenExchangeGrantResponse.t,
+  UpdateApplicationWithTokenExchangeGrantResponse.error) t 
+  | UpdateBrand: (UpdateBrandRequest.t, UpdateBrandResponse.t,
+  UpdateBrandResponse.error) t 
+  | UpdateBrandAssignment: (UpdateBrandAssignmentRequest.t,
+  UpdateBrandAssignmentResponse.t, UpdateBrandAssignmentResponse.error) t 
+  | UpdateBrandPublishedVersion: (UpdateBrandPublishedVersionRequest.t,
+  UpdateBrandPublishedVersionResponse.t,
+  UpdateBrandPublishedVersionResponse.error) t 
+  | UpdateCustomPermissions: (UpdateCustomPermissionsRequest.t,
+  UpdateCustomPermissionsResponse.t, UpdateCustomPermissionsResponse.error) t
+  
   | UpdateDashboard: (UpdateDashboardRequest.t, UpdateDashboardResponse.t,
   UpdateDashboardResponse.error) t 
+  | UpdateDashboardLinks: (UpdateDashboardLinksRequest.t,
+  UpdateDashboardLinksResponse.t, UpdateDashboardLinksResponse.error) t 
   | UpdateDashboardPermissions: (UpdateDashboardPermissionsRequest.t,
   UpdateDashboardPermissionsResponse.t,
   UpdateDashboardPermissionsResponse.error) t 
@@ -234,6 +498,10 @@ type ('i, 'o, 'e) t =
   (UpdateDashboardPublishedVersionRequest.t,
   UpdateDashboardPublishedVersionResponse.t,
   UpdateDashboardPublishedVersionResponse.error) t 
+  | UpdateDashboardsQAConfiguration:
+  (UpdateDashboardsQAConfigurationRequest.t,
+  UpdateDashboardsQAConfigurationResponse.t,
+  UpdateDashboardsQAConfigurationResponse.error) t 
   | UpdateDataSet: (UpdateDataSetRequest.t, UpdateDataSetResponse.t,
   UpdateDataSetResponse.error) t 
   | UpdateDataSetPermissions: (UpdateDataSetPermissionsRequest.t,
@@ -244,6 +512,12 @@ type ('i, 'o, 'e) t =
   | UpdateDataSourcePermissions: (UpdateDataSourcePermissionsRequest.t,
   UpdateDataSourcePermissionsResponse.t,
   UpdateDataSourcePermissionsResponse.error) t 
+  | UpdateDefaultQBusinessApplication:
+  (UpdateDefaultQBusinessApplicationRequest.t,
+  UpdateDefaultQBusinessApplicationResponse.t,
+  UpdateDefaultQBusinessApplicationResponse.error) t 
+  | UpdateFlowPermissions: (UpdateFlowPermissionsInput.t,
+  UpdateFlowPermissionsOutput.t, UpdateFlowPermissionsOutput.error) t 
   | UpdateFolder: (UpdateFolderRequest.t, UpdateFolderResponse.t,
   UpdateFolderResponse.error) t 
   | UpdateFolderPermissions: (UpdateFolderPermissionsRequest.t,
@@ -254,8 +528,39 @@ type ('i, 'o, 'e) t =
   | UpdateIAMPolicyAssignment: (UpdateIAMPolicyAssignmentRequest.t,
   UpdateIAMPolicyAssignmentResponse.t,
   UpdateIAMPolicyAssignmentResponse.error) t 
+  | UpdateIdentityPropagationConfig:
+  (UpdateIdentityPropagationConfigRequest.t,
+  UpdateIdentityPropagationConfigResponse.t,
+  UpdateIdentityPropagationConfigResponse.error) t 
   | UpdateIpRestriction: (UpdateIpRestrictionRequest.t,
   UpdateIpRestrictionResponse.t, UpdateIpRestrictionResponse.error) t 
+  | UpdateKeyRegistration: (UpdateKeyRegistrationRequest.t,
+  UpdateKeyRegistrationResponse.t, UpdateKeyRegistrationResponse.error) t 
+  | UpdatePublicSharingSettings: (UpdatePublicSharingSettingsRequest.t,
+  UpdatePublicSharingSettingsResponse.t,
+  UpdatePublicSharingSettingsResponse.error) t 
+  | UpdateQPersonalizationConfiguration:
+  (UpdateQPersonalizationConfigurationRequest.t,
+  UpdateQPersonalizationConfigurationResponse.t,
+  UpdateQPersonalizationConfigurationResponse.error) t 
+  | UpdateQuickSightQSearchConfiguration:
+  (UpdateQuickSightQSearchConfigurationRequest.t,
+  UpdateQuickSightQSearchConfigurationResponse.t,
+  UpdateQuickSightQSearchConfigurationResponse.error) t 
+  | UpdateRefreshSchedule: (UpdateRefreshScheduleRequest.t,
+  UpdateRefreshScheduleResponse.t, UpdateRefreshScheduleResponse.error) t 
+  | UpdateRoleCustomPermission: (UpdateRoleCustomPermissionRequest.t,
+  UpdateRoleCustomPermissionResponse.t,
+  UpdateRoleCustomPermissionResponse.error) t 
+  | UpdateSPICECapacityConfiguration:
+  (UpdateSPICECapacityConfigurationRequest.t,
+  UpdateSPICECapacityConfigurationResponse.t,
+  UpdateSPICECapacityConfigurationResponse.error) t 
+  | UpdateSelfUpgrade: (UpdateSelfUpgradeRequest.t,
+  UpdateSelfUpgradeResponse.t, UpdateSelfUpgradeResponse.error) t 
+  | UpdateSelfUpgradeConfiguration: (UpdateSelfUpgradeConfigurationRequest.t,
+  UpdateSelfUpgradeConfigurationResponse.t,
+  UpdateSelfUpgradeConfigurationResponse.error) t 
   | UpdateTemplate: (UpdateTemplateRequest.t, UpdateTemplateResponse.t,
   UpdateTemplateResponse.error) t 
   | UpdateTemplateAlias: (UpdateTemplateAliasRequest.t,
@@ -269,13 +574,31 @@ type ('i, 'o, 'e) t =
   UpdateThemeAliasResponse.error) t 
   | UpdateThemePermissions: (UpdateThemePermissionsRequest.t,
   UpdateThemePermissionsResponse.t, UpdateThemePermissionsResponse.error) t 
+  | UpdateTopic: (UpdateTopicRequest.t, UpdateTopicResponse.t,
+  UpdateTopicResponse.error) t 
+  | UpdateTopicPermissions: (UpdateTopicPermissionsRequest.t,
+  UpdateTopicPermissionsResponse.t, UpdateTopicPermissionsResponse.error) t 
+  | UpdateTopicRefreshSchedule: (UpdateTopicRefreshScheduleRequest.t,
+  UpdateTopicRefreshScheduleResponse.t,
+  UpdateTopicRefreshScheduleResponse.error) t 
   | UpdateUser: (UpdateUserRequest.t, UpdateUserResponse.t,
   UpdateUserResponse.error) t 
+  | UpdateUserCustomPermission: (UpdateUserCustomPermissionRequest.t,
+  UpdateUserCustomPermissionResponse.t,
+  UpdateUserCustomPermissionResponse.error) t 
+  | UpdateVPCConnection: (UpdateVPCConnectionRequest.t,
+  UpdateVPCConnectionResponse.t, UpdateVPCConnectionResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | BatchCreateTopicReviewedAnswer -> `POST
+  | BatchDeleteTopicReviewedAnswer -> `POST
   | CancelIngestion -> `DELETE
   | CreateAccountCustomization -> `POST
+  | CreateAccountSubscription -> `POST
+  | CreateActionConnector -> `POST
   | CreateAnalysis -> `POST
+  | CreateBrand -> `POST
+  | CreateCustomPermissions -> `POST
   | CreateDashboard -> `POST
   | CreateDataSet -> `POST
   | CreateDataSource -> `POST
@@ -286,37 +609,76 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateIAMPolicyAssignment -> `POST
   | CreateIngestion -> `PUT
   | CreateNamespace -> `POST
+  | CreateRefreshSchedule -> `POST
+  | CreateRoleMembership -> `POST
   | CreateTemplate -> `POST
   | CreateTemplateAlias -> `POST
   | CreateTheme -> `POST
   | CreateThemeAlias -> `POST
+  | CreateTopic -> `POST
+  | CreateTopicRefreshSchedule -> `POST
+  | CreateVPCConnection -> `POST
+  | DeleteAccountCustomPermission -> `DELETE
   | DeleteAccountCustomization -> `DELETE
+  | DeleteAccountSubscription -> `DELETE
+  | DeleteActionConnector -> `DELETE
   | DeleteAnalysis -> `DELETE
+  | DeleteBrand -> `DELETE
+  | DeleteBrandAssignment -> `DELETE
+  | DeleteCustomPermissions -> `DELETE
   | DeleteDashboard -> `DELETE
   | DeleteDataSet -> `DELETE
+  | DeleteDataSetRefreshProperties -> `DELETE
   | DeleteDataSource -> `DELETE
+  | DeleteDefaultQBusinessApplication -> `DELETE
   | DeleteFolder -> `DELETE
   | DeleteFolderMembership -> `DELETE
   | DeleteGroup -> `DELETE
   | DeleteGroupMembership -> `DELETE
   | DeleteIAMPolicyAssignment -> `DELETE
+  | DeleteIdentityPropagationConfig -> `DELETE
   | DeleteNamespace -> `DELETE
+  | DeleteRefreshSchedule -> `DELETE
+  | DeleteRoleCustomPermission -> `DELETE
+  | DeleteRoleMembership -> `DELETE
   | DeleteTemplate -> `DELETE
   | DeleteTemplateAlias -> `DELETE
   | DeleteTheme -> `DELETE
   | DeleteThemeAlias -> `DELETE
+  | DeleteTopic -> `DELETE
+  | DeleteTopicRefreshSchedule -> `DELETE
   | DeleteUser -> `DELETE
   | DeleteUserByPrincipalId -> `DELETE
+  | DeleteUserCustomPermission -> `DELETE
+  | DeleteVPCConnection -> `DELETE
+  | DescribeAccountCustomPermission -> `GET
   | DescribeAccountCustomization -> `GET
   | DescribeAccountSettings -> `GET
+  | DescribeAccountSubscription -> `GET
+  | DescribeActionConnector -> `GET
+  | DescribeActionConnectorPermissions -> `GET
   | DescribeAnalysis -> `GET
+  | DescribeAnalysisDefinition -> `GET
   | DescribeAnalysisPermissions -> `GET
+  | DescribeAssetBundleExportJob -> `GET
+  | DescribeAssetBundleImportJob -> `GET
+  | DescribeAutomationJob -> `GET
+  | DescribeBrand -> `GET
+  | DescribeBrandAssignment -> `GET
+  | DescribeBrandPublishedVersion -> `GET
+  | DescribeCustomPermissions -> `GET
   | DescribeDashboard -> `GET
+  | DescribeDashboardDefinition -> `GET
   | DescribeDashboardPermissions -> `GET
+  | DescribeDashboardSnapshotJob -> `GET
+  | DescribeDashboardSnapshotJobResult -> `GET
+  | DescribeDashboardsQAConfiguration -> `GET
   | DescribeDataSet -> `GET
   | DescribeDataSetPermissions -> `GET
+  | DescribeDataSetRefreshProperties -> `GET
   | DescribeDataSource -> `GET
   | DescribeDataSourcePermissions -> `GET
+  | DescribeDefaultQBusinessApplication -> `GET
   | DescribeFolder -> `GET
   | DescribeFolderPermissions -> `GET
   | DescribeFolderResolvedPermissions -> `GET
@@ -325,31 +687,58 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeIAMPolicyAssignment -> `GET
   | DescribeIngestion -> `GET
   | DescribeIpRestriction -> `GET
+  | DescribeKeyRegistration -> `GET
   | DescribeNamespace -> `GET
+  | DescribeQPersonalizationConfiguration -> `GET
+  | DescribeQuickSightQSearchConfiguration -> `GET
+  | DescribeRefreshSchedule -> `GET
+  | DescribeRoleCustomPermission -> `GET
+  | DescribeSelfUpgradeConfiguration -> `GET
   | DescribeTemplate -> `GET
   | DescribeTemplateAlias -> `GET
+  | DescribeTemplateDefinition -> `GET
   | DescribeTemplatePermissions -> `GET
   | DescribeTheme -> `GET
   | DescribeThemeAlias -> `GET
   | DescribeThemePermissions -> `GET
+  | DescribeTopic -> `GET
+  | DescribeTopicPermissions -> `GET
+  | DescribeTopicRefresh -> `GET
+  | DescribeTopicRefreshSchedule -> `GET
   | DescribeUser -> `GET
+  | DescribeVPCConnection -> `GET
   | GenerateEmbedUrlForAnonymousUser -> `POST
   | GenerateEmbedUrlForRegisteredUser -> `POST
+  | GenerateEmbedUrlForRegisteredUserWithIdentity -> `POST
   | GetDashboardEmbedUrl -> `GET
+  | GetFlowMetadata -> `GET
+  | GetFlowPermissions -> `GET
+  | GetIdentityContext -> `POST
   | GetSessionEmbedUrl -> `GET
+  | ListActionConnectors -> `GET
   | ListAnalyses -> `GET
+  | ListAssetBundleExportJobs -> `GET
+  | ListAssetBundleImportJobs -> `GET
+  | ListBrands -> `GET
+  | ListCustomPermissions -> `GET
   | ListDashboardVersions -> `GET
   | ListDashboards -> `GET
   | ListDataSets -> `GET
   | ListDataSources -> `GET
+  | ListFlows -> `GET
   | ListFolderMembers -> `GET
   | ListFolders -> `GET
+  | ListFoldersForResource -> `GET
   | ListGroupMemberships -> `GET
   | ListGroups -> `GET
   | ListIAMPolicyAssignments -> `GET
   | ListIAMPolicyAssignmentsForUser -> `GET
+  | ListIdentityPropagationConfigs -> `GET
   | ListIngestions -> `GET
   | ListNamespaces -> `GET
+  | ListRefreshSchedules -> `GET
+  | ListRoleMemberships -> `GET
+  | ListSelfUpgrades -> `GET
   | ListTagsForResource -> `GET
   | ListTemplateAliases -> `GET
   | ListTemplateVersions -> `GET
@@ -357,42 +746,99 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListThemeAliases -> `GET
   | ListThemeVersions -> `GET
   | ListThemes -> `GET
+  | ListTopicRefreshSchedules -> `GET
+  | ListTopicReviewedAnswers -> `GET
+  | ListTopics -> `GET
   | ListUserGroups -> `GET
   | ListUsers -> `GET
+  | ListVPCConnections -> `GET
+  | PredictQAResults -> `POST
+  | PutDataSetRefreshProperties -> `PUT
   | RegisterUser -> `POST
   | RestoreAnalysis -> `POST
+  | SearchActionConnectors -> `POST
   | SearchAnalyses -> `POST
   | SearchDashboards -> `POST
+  | SearchDataSets -> `POST
+  | SearchDataSources -> `POST
+  | SearchFlows -> `POST
   | SearchFolders -> `POST
   | SearchGroups -> `POST
+  | SearchTopics -> `POST
+  | StartAssetBundleExportJob -> `POST
+  | StartAssetBundleImportJob -> `POST
+  | StartAutomationJob -> `POST
+  | StartDashboardSnapshotJob -> `POST
+  | StartDashboardSnapshotJobSchedule -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateAccountCustomPermission -> `PUT
   | UpdateAccountCustomization -> `PUT
   | UpdateAccountSettings -> `PUT
+  | UpdateActionConnector -> `PUT
+  | UpdateActionConnectorPermissions -> `POST
   | UpdateAnalysis -> `PUT
   | UpdateAnalysisPermissions -> `PUT
+  | UpdateApplicationWithTokenExchangeGrant -> `PUT
+  | UpdateBrand -> `PUT
+  | UpdateBrandAssignment -> `PUT
+  | UpdateBrandPublishedVersion -> `PUT
+  | UpdateCustomPermissions -> `PUT
   | UpdateDashboard -> `PUT
+  | UpdateDashboardLinks -> `PUT
   | UpdateDashboardPermissions -> `PUT
   | UpdateDashboardPublishedVersion -> `PUT
+  | UpdateDashboardsQAConfiguration -> `PUT
   | UpdateDataSet -> `PUT
   | UpdateDataSetPermissions -> `POST
   | UpdateDataSource -> `PUT
   | UpdateDataSourcePermissions -> `POST
+  | UpdateDefaultQBusinessApplication -> `PUT
+  | UpdateFlowPermissions -> `PUT
   | UpdateFolder -> `PUT
   | UpdateFolderPermissions -> `PUT
   | UpdateGroup -> `PUT
   | UpdateIAMPolicyAssignment -> `PUT
+  | UpdateIdentityPropagationConfig -> `POST
   | UpdateIpRestriction -> `POST
+  | UpdateKeyRegistration -> `POST
+  | UpdatePublicSharingSettings -> `PUT
+  | UpdateQPersonalizationConfiguration -> `PUT
+  | UpdateQuickSightQSearchConfiguration -> `PUT
+  | UpdateRefreshSchedule -> `PUT
+  | UpdateRoleCustomPermission -> `PUT
+  | UpdateSPICECapacityConfiguration -> `POST
+  | UpdateSelfUpgrade -> `POST
+  | UpdateSelfUpgradeConfiguration -> `PUT
   | UpdateTemplate -> `PUT
   | UpdateTemplateAlias -> `PUT
   | UpdateTemplatePermissions -> `PUT
   | UpdateTheme -> `PUT
   | UpdateThemeAlias -> `PUT
   | UpdateThemePermissions -> `PUT
+  | UpdateTopic -> `PUT
+  | UpdateTopicPermissions -> `PUT
+  | UpdateTopicRefreshSchedule -> `PUT
   | UpdateUser -> `PUT
+  | UpdateUserCustomPermission -> `PUT
+  | UpdateVPCConnection -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | BatchCreateTopicReviewedAnswer ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/batch-create-reviewed-answers"
+            (AwsAccountId.to_header
+               x.BatchCreateTopicReviewedAnswerRequest.awsAccountId)
+            (TopicId.to_header
+               x.BatchCreateTopicReviewedAnswerRequest.topicId)
+      | BatchDeleteTopicReviewedAnswer ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/batch-delete-reviewed-answers"
+            (AwsAccountId.to_header
+               x.BatchDeleteTopicReviewedAnswerRequest.awsAccountId)
+            (TopicId.to_header
+               x.BatchDeleteTopicReviewedAnswerRequest.topicId)
       | CancelIngestion ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/data-sets/%s/ingestions/%s"
@@ -408,15 +854,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("namespace", (Namespace.to_header v)))
                   x.namespace])
+      | CreateAccountSubscription ->
+          (Format.kasprintf Uri.of_string) "/account/%s"
+            (AwsAccountId.to_header
+               x.CreateAccountSubscriptionRequest.awsAccountId)
+      | CreateActionConnector ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/action-connectors"
+            (AwsAccountId.to_header
+               x.CreateActionConnectorRequest.awsAccountId)
       | CreateAnalysis ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/analyses/%s"
             (AwsAccountId.to_header x.CreateAnalysisRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.CreateAnalysisRequest.analysisId)
+      | CreateBrand ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brands/%s"
+            (AwsAccountId.to_header x.CreateBrandRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.CreateBrandRequest.brandId)
+      | CreateCustomPermissions ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/custom-permissions"
+            (AwsAccountId.to_header
+               x.CreateCustomPermissionsRequest.awsAccountId)
       | CreateDashboard ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/dashboards/%s"
             (AwsAccountId.to_header x.CreateDashboardRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.CreateDashboardRequest.dashboardId)
       | CreateDataSet ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sets"
@@ -467,29 +930,59 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateNamespace ->
           (Format.kasprintf Uri.of_string) "/accounts/%s"
             (AwsAccountId.to_header x.CreateNamespaceRequest.awsAccountId)
+      | CreateRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-schedules"
+            (AwsAccountId.to_header
+               x.CreateRefreshScheduleRequest.awsAccountId)
+            (ResourceId.to_header x.CreateRefreshScheduleRequest.dataSetId)
+      | CreateRoleMembership ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/roles/%s/members/%s"
+            (AwsAccountId.to_header
+               x.CreateRoleMembershipRequest.awsAccountId)
+            (Namespace.to_header x.CreateRoleMembershipRequest.namespace)
+            (Role.to_header x.CreateRoleMembershipRequest.role)
+            (GroupName.to_header x.CreateRoleMembershipRequest.memberName)
       | CreateTemplate ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/templates/%s"
             (AwsAccountId.to_header x.CreateTemplateRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.CreateTemplateRequest.templateId)
       | CreateTemplateAlias ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/templates/%s/aliases/%s"
             (AwsAccountId.to_header x.CreateTemplateAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.CreateTemplateAliasRequest.templateId)
             (AliasName.to_header x.CreateTemplateAliasRequest.aliasName)
       | CreateTheme ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/themes/%s"
             (AwsAccountId.to_header x.CreateThemeRequest.awsAccountId)
-            (RestrictiveResourceId.to_header x.CreateThemeRequest.themeId)
+            (ShortRestrictiveResourceId.to_header
+               x.CreateThemeRequest.themeId)
       | CreateThemeAlias ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/themes/%s/aliases/%s"
             (AwsAccountId.to_header x.CreateThemeAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.CreateThemeAliasRequest.themeId)
             (AliasName.to_header x.CreateThemeAliasRequest.aliasName)
+      | CreateTopic ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics"
+            (AwsAccountId.to_header x.CreateTopicRequest.awsAccountId)
+      | CreateTopicRefreshSchedule ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics/%s/schedules"
+            (AwsAccountId.to_header
+               x.CreateTopicRefreshScheduleRequest.awsAccountId)
+            (TopicId.to_header x.CreateTopicRefreshScheduleRequest.topicId)
+      | CreateVPCConnection ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/vpc-connections"
+            (AwsAccountId.to_header x.CreateVPCConnectionRequest.awsAccountId)
+      | DeleteAccountCustomPermission ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.DeleteAccountCustomPermissionRequest.awsAccountId)
       | DeleteAccountCustomization ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/customizations"
@@ -499,11 +992,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("namespace", (Namespace.to_header v)))
                   x.namespace])
+      | DeleteAccountSubscription ->
+          (Format.kasprintf Uri.of_string) "/account/%s"
+            (AwsAccountId.to_header
+               x.DeleteAccountSubscriptionRequest.awsAccountId)
+      | DeleteActionConnector ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/action-connectors/%s"
+            (AwsAccountId.to_header
+               x.DeleteActionConnectorRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DeleteActionConnectorRequest.actionConnectorId)
       | DeleteAnalysis ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/analyses/%s"
                (AwsAccountId.to_header x.DeleteAnalysisRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DeleteAnalysisRequest.analysisId))
             (List.filter_opt
                [Option.map
@@ -514,13 +1018,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v ->
                        ("force-delete-without-recovery",
-                         (Boolean__lc1.to_header v)))
-                 x.forceDeleteWithoutRecovery])
+                         (Boolean.to_header v))) x.forceDeleteWithoutRecovery])
+      | DeleteBrand ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brands/%s"
+            (AwsAccountId.to_header x.DeleteBrandRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DeleteBrandRequest.brandId)
+      | DeleteBrandAssignment ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brandassignments"
+            (AwsAccountId.to_header
+               x.DeleteBrandAssignmentRequest.awsAccountId)
+      | DeleteCustomPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/custom-permissions/%s"
+            (AwsAccountId.to_header
+               x.DeleteCustomPermissionsRequest.awsAccountId)
+            (CustomPermissionsName.to_header
+               x.DeleteCustomPermissionsRequest.customPermissionsName)
       | DeleteDashboard ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/dashboards/%s"
                (AwsAccountId.to_header x.DeleteDashboardRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DeleteDashboardRequest.dashboardId))
             (List.filter_opt
                [Option.map
@@ -531,10 +1050,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sets/%s"
             (AwsAccountId.to_header x.DeleteDataSetRequest.awsAccountId)
             (ResourceId.to_header x.DeleteDataSetRequest.dataSetId)
+      | DeleteDataSetRefreshProperties ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-properties"
+            (AwsAccountId.to_header
+               x.DeleteDataSetRefreshPropertiesRequest.awsAccountId)
+            (ResourceId.to_header
+               x.DeleteDataSetRefreshPropertiesRequest.dataSetId)
       | DeleteDataSource ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sources/%s"
             (AwsAccountId.to_header x.DeleteDataSourceRequest.awsAccountId)
             (ResourceId.to_header x.DeleteDataSourceRequest.dataSourceId)
+      | DeleteDefaultQBusinessApplication ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/default-qbusiness-application"
+               (AwsAccountId.to_header
+                  x.DeleteDefaultQBusinessApplicationRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("namespace", (Namespace.to_header v)))
+                  x.namespace])
       | DeleteFolder ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/folders/%s"
             (AwsAccountId.to_header x.DeleteFolderRequest.awsAccountId)
@@ -572,15 +1108,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Namespace.to_header x.DeleteIAMPolicyAssignmentRequest.namespace)
             (IAMPolicyAssignmentName.to_header
                x.DeleteIAMPolicyAssignmentRequest.assignmentName)
+      | DeleteIdentityPropagationConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/identity-propagation-config/%s"
+            (AwsAccountId.to_header
+               x.DeleteIdentityPropagationConfigRequest.awsAccountId)
+            (ServiceType.to_header
+               x.DeleteIdentityPropagationConfigRequest.service)
       | DeleteNamespace ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/namespaces/%s"
             (AwsAccountId.to_header x.DeleteNamespaceRequest.awsAccountId)
             (Namespace.to_header x.DeleteNamespaceRequest.namespace)
+      | DeleteRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-schedules/%s"
+            (AwsAccountId.to_header
+               x.DeleteRefreshScheduleRequest.awsAccountId)
+            (ResourceId.to_header x.DeleteRefreshScheduleRequest.dataSetId)
+            (String_.to_header x.DeleteRefreshScheduleRequest.scheduleId)
+      | DeleteRoleCustomPermission ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/roles/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.DeleteRoleCustomPermissionRequest.awsAccountId)
+            (Namespace.to_header
+               x.DeleteRoleCustomPermissionRequest.namespace)
+            (Role.to_header x.DeleteRoleCustomPermissionRequest.role)
+      | DeleteRoleMembership ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/roles/%s/members/%s"
+            (AwsAccountId.to_header
+               x.DeleteRoleMembershipRequest.awsAccountId)
+            (Namespace.to_header x.DeleteRoleMembershipRequest.namespace)
+            (Role.to_header x.DeleteRoleMembershipRequest.role)
+            (GroupName.to_header x.DeleteRoleMembershipRequest.memberName)
       | DeleteTemplate ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/templates/%s"
                (AwsAccountId.to_header x.DeleteTemplateRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DeleteTemplateRequest.templateId))
             (List.filter_opt
                [Option.map
@@ -591,14 +1157,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/templates/%s/aliases/%s"
             (AwsAccountId.to_header x.DeleteTemplateAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DeleteTemplateAliasRequest.templateId)
             (AliasName.to_header x.DeleteTemplateAliasRequest.aliasName)
       | DeleteTheme ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/themes/%s"
                (AwsAccountId.to_header x.DeleteThemeRequest.awsAccountId)
-               (RestrictiveResourceId.to_header x.DeleteThemeRequest.themeId))
+               (ShortRestrictiveResourceId.to_header
+                  x.DeleteThemeRequest.themeId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v ->
@@ -608,9 +1175,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/themes/%s/aliases/%s"
             (AwsAccountId.to_header x.DeleteThemeAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DeleteThemeAliasRequest.themeId)
             (AliasName.to_header x.DeleteThemeAliasRequest.aliasName)
+      | DeleteTopic ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics/%s"
+            (AwsAccountId.to_header x.DeleteTopicRequest.awsAccountId)
+            (TopicId.to_header x.DeleteTopicRequest.topicId)
+      | DeleteTopicRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/schedules/%s"
+            (AwsAccountId.to_header
+               x.DeleteTopicRefreshScheduleRequest.awsAccountId)
+            (TopicId.to_header x.DeleteTopicRefreshScheduleRequest.topicId)
+            (String_.to_header x.DeleteTopicRefreshScheduleRequest.datasetId)
       | DeleteUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/namespaces/%s/users/%s"
@@ -624,6 +1202,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DeleteUserByPrincipalIdRequest.awsAccountId)
             (Namespace.to_header x.DeleteUserByPrincipalIdRequest.namespace)
             (String_.to_header x.DeleteUserByPrincipalIdRequest.principalId)
+      | DeleteUserCustomPermission ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/users/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.DeleteUserCustomPermissionRequest.awsAccountId)
+            (Namespace.to_header
+               x.DeleteUserCustomPermissionRequest.namespace)
+            (UserName.to_header x.DeleteUserCustomPermissionRequest.userName)
+      | DeleteVPCConnection ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/vpc-connections/%s"
+            (AwsAccountId.to_header x.DeleteVPCConnectionRequest.awsAccountId)
+            (VPCConnectionResourceIdUnrestricted.to_header
+               x.DeleteVPCConnectionRequest.vPCConnectionId)
+      | DescribeAccountCustomPermission ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.DescribeAccountCustomPermissionRequest.awsAccountId)
       | DescribeAccountCustomization ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/customizations"
@@ -640,25 +1235,128 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/settings"
             (AwsAccountId.to_header
                x.DescribeAccountSettingsRequest.awsAccountId)
+      | DescribeAccountSubscription ->
+          (Format.kasprintf Uri.of_string) "/account/%s"
+            (AwsAccountId.to_header
+               x.DescribeAccountSubscriptionRequest.awsAccountId)
+      | DescribeActionConnector ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/action-connectors/%s"
+            (AwsAccountId.to_header
+               x.DescribeActionConnectorRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeActionConnectorRequest.actionConnectorId)
+      | DescribeActionConnectorPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/action-connectors/%s/permissions"
+            (AwsAccountId.to_header
+               x.DescribeActionConnectorPermissionsRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeActionConnectorPermissionsRequest.actionConnectorId)
       | DescribeAnalysis ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/analyses/%s"
             (AwsAccountId.to_header x.DescribeAnalysisRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeAnalysisRequest.analysisId)
+      | DescribeAnalysisDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/analyses/%s/definition"
+            (AwsAccountId.to_header
+               x.DescribeAnalysisDefinitionRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeAnalysisDefinitionRequest.analysisId)
       | DescribeAnalysisPermissions ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/analyses/%s/permissions"
             (AwsAccountId.to_header
                x.DescribeAnalysisPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeAnalysisPermissionsRequest.analysisId)
+      | DescribeAssetBundleExportJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/asset-bundle-export-jobs/%s"
+            (AwsAccountId.to_header
+               x.DescribeAssetBundleExportJobRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeAssetBundleExportJobRequest.assetBundleExportJobId)
+      | DescribeAssetBundleImportJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/asset-bundle-import-jobs/%s"
+            (AwsAccountId.to_header
+               x.DescribeAssetBundleImportJobRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeAssetBundleImportJobRequest.assetBundleImportJobId)
+      | DescribeAutomationJob ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/automation-groups/%s/automations/%s/jobs/%s"
+               (AwsAccountId.to_header
+                  x.DescribeAutomationJobRequest.awsAccountId)
+               (AutomateId.to_header
+                  x.DescribeAutomationJobRequest.automationGroupId)
+               (AutomateId.to_header
+                  x.DescribeAutomationJobRequest.automationId)
+               (AutomateId.to_header x.DescribeAutomationJobRequest.jobId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("includeInputPayload", (Boolean.to_header v)))
+                  x.includeInputPayload;
+               Option.map
+                 ~f:(fun v -> ("includeOutputPayload", (Boolean.to_header v)))
+                 x.includeOutputPayload])
+      | DescribeBrand ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/brands/%s"
+               (AwsAccountId.to_header x.DescribeBrandRequest.awsAccountId)
+               (ShortRestrictiveResourceId.to_header
+                  x.DescribeBrandRequest.brandId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("versionId",
+                          (ShortRestrictiveResourceId.to_header v)))
+                  x.versionId])
+      | DescribeBrandAssignment ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brandassignments"
+            (AwsAccountId.to_header
+               x.DescribeBrandAssignmentRequest.awsAccountId)
+      | DescribeBrandPublishedVersion ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/brands/%s/publishedversion"
+            (AwsAccountId.to_header
+               x.DescribeBrandPublishedVersionRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeBrandPublishedVersionRequest.brandId)
+      | DescribeCustomPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/custom-permissions/%s"
+            (AwsAccountId.to_header
+               x.DescribeCustomPermissionsRequest.awsAccountId)
+            (CustomPermissionsName.to_header
+               x.DescribeCustomPermissionsRequest.customPermissionsName)
       | DescribeDashboard ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/dashboards/%s"
                (AwsAccountId.to_header
                   x.DescribeDashboardRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DescribeDashboardRequest.dashboardId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("version-number", (VersionNumber.to_header v)))
+                  x.versionNumber;
+               Option.map
+                 ~f:(fun v -> ("alias-name", (AliasName.to_header v)))
+                 x.aliasName])
+      | DescribeDashboardDefinition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/dashboards/%s/definition"
+               (AwsAccountId.to_header
+                  x.DescribeDashboardDefinitionRequest.awsAccountId)
+               (ShortRestrictiveResourceId.to_header
+                  x.DescribeDashboardDefinitionRequest.dashboardId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v ->
@@ -672,8 +1370,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/dashboards/%s/permissions"
             (AwsAccountId.to_header
                x.DescribeDashboardPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeDashboardPermissionsRequest.dashboardId)
+      | DescribeDashboardSnapshotJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards/%s/snapshot-jobs/%s"
+            (AwsAccountId.to_header
+               x.DescribeDashboardSnapshotJobRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeDashboardSnapshotJobRequest.dashboardId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeDashboardSnapshotJobRequest.snapshotJobId)
+      | DescribeDashboardSnapshotJobResult ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards/%s/snapshot-jobs/%s/result"
+            (AwsAccountId.to_header
+               x.DescribeDashboardSnapshotJobResultRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeDashboardSnapshotJobResultRequest.dashboardId)
+            (ShortRestrictiveResourceId.to_header
+               x.DescribeDashboardSnapshotJobResultRequest.snapshotJobId)
+      | DescribeDashboardsQAConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards-qa-configuration"
+            (AwsAccountId.to_header
+               x.DescribeDashboardsQAConfigurationRequest.awsAccountId)
       | DescribeDataSet ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sets/%s"
             (AwsAccountId.to_header x.DescribeDataSetRequest.awsAccountId)
@@ -685,6 +1406,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribeDataSetPermissionsRequest.awsAccountId)
             (ResourceId.to_header
                x.DescribeDataSetPermissionsRequest.dataSetId)
+      | DescribeDataSetRefreshProperties ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-properties"
+            (AwsAccountId.to_header
+               x.DescribeDataSetRefreshPropertiesRequest.awsAccountId)
+            (ResourceId.to_header
+               x.DescribeDataSetRefreshPropertiesRequest.dataSetId)
       | DescribeDataSource ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sources/%s"
             (AwsAccountId.to_header x.DescribeDataSourceRequest.awsAccountId)
@@ -696,24 +1424,54 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribeDataSourcePermissionsRequest.awsAccountId)
             (ResourceId.to_header
                x.DescribeDataSourcePermissionsRequest.dataSourceId)
+      | DescribeDefaultQBusinessApplication ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/default-qbusiness-application"
+               (AwsAccountId.to_header
+                  x.DescribeDefaultQBusinessApplicationRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("namespace", (Namespace.to_header v)))
+                  x.namespace])
       | DescribeFolder ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/folders/%s"
             (AwsAccountId.to_header x.DescribeFolderRequest.awsAccountId)
             (RestrictiveResourceId.to_header x.DescribeFolderRequest.folderId)
       | DescribeFolderPermissions ->
-          (Format.kasprintf Uri.of_string)
-            "/accounts/%s/folders/%s/permissions"
-            (AwsAccountId.to_header
-               x.DescribeFolderPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
-               x.DescribeFolderPermissionsRequest.folderId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/folders/%s/permissions"
+               (AwsAccountId.to_header
+                  x.DescribeFolderPermissionsRequest.awsAccountId)
+               (RestrictiveResourceId.to_header
+                  x.DescribeFolderPermissionsRequest.folderId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("namespace", (Namespace.to_header v)))
+                  x.namespace;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | DescribeFolderResolvedPermissions ->
-          (Format.kasprintf Uri.of_string)
-            "/accounts/%s/folders/%s/resolved-permissions"
-            (AwsAccountId.to_header
-               x.DescribeFolderResolvedPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
-               x.DescribeFolderResolvedPermissionsRequest.folderId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/folders/%s/resolved-permissions"
+               (AwsAccountId.to_header
+                  x.DescribeFolderResolvedPermissionsRequest.awsAccountId)
+               (RestrictiveResourceId.to_header
+                  x.DescribeFolderResolvedPermissionsRequest.folderId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("namespace", (Namespace.to_header v)))
+                  x.namespace;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | DescribeGroup ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/namespaces/%s/groups/%s"
@@ -748,15 +1506,56 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/ip-restriction"
             (AwsAccountId.to_header
                x.DescribeIpRestrictionRequest.awsAccountId)
+      | DescribeKeyRegistration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/key-registration"
+               (AwsAccountId.to_header
+                  x.DescribeKeyRegistrationRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("default-key-only", (Boolean.to_header v)))
+                  x.defaultKeyOnly])
       | DescribeNamespace ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/namespaces/%s"
             (AwsAccountId.to_header x.DescribeNamespaceRequest.awsAccountId)
             (Namespace.to_header x.DescribeNamespaceRequest.namespace)
+      | DescribeQPersonalizationConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/q-personalization-configuration"
+            (AwsAccountId.to_header
+               x.DescribeQPersonalizationConfigurationRequest.awsAccountId)
+      | DescribeQuickSightQSearchConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/quicksight-q-search-configuration"
+            (AwsAccountId.to_header
+               x.DescribeQuickSightQSearchConfigurationRequest.awsAccountId)
+      | DescribeRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-schedules/%s"
+            (AwsAccountId.to_header
+               x.DescribeRefreshScheduleRequest.awsAccountId)
+            (ResourceId.to_header x.DescribeRefreshScheduleRequest.dataSetId)
+            (String_.to_header x.DescribeRefreshScheduleRequest.scheduleId)
+      | DescribeRoleCustomPermission ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/roles/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.DescribeRoleCustomPermissionRequest.awsAccountId)
+            (Namespace.to_header
+               x.DescribeRoleCustomPermissionRequest.namespace)
+            (Role.to_header x.DescribeRoleCustomPermissionRequest.role)
+      | DescribeSelfUpgradeConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/self-upgrade-configuration"
+            (AwsAccountId.to_header
+               x.DescribeSelfUpgradeConfigurationRequest.awsAccountId)
+            (Namespace.to_header
+               x.DescribeSelfUpgradeConfigurationRequest.namespace)
       | DescribeTemplate ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/templates/%s"
                (AwsAccountId.to_header x.DescribeTemplateRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DescribeTemplateRequest.templateId))
             (List.filter_opt
                [Option.map
@@ -771,21 +1570,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/templates/%s/aliases/%s"
             (AwsAccountId.to_header
                x.DescribeTemplateAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeTemplateAliasRequest.templateId)
             (AliasName.to_header x.DescribeTemplateAliasRequest.aliasName)
+      | DescribeTemplateDefinition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/templates/%s/definition"
+               (AwsAccountId.to_header
+                  x.DescribeTemplateDefinitionRequest.awsAccountId)
+               (ShortRestrictiveResourceId.to_header
+                  x.DescribeTemplateDefinitionRequest.templateId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("version-number", (VersionNumber.to_header v)))
+                  x.versionNumber;
+               Option.map
+                 ~f:(fun v -> ("alias-name", (AliasName.to_header v)))
+                 x.aliasName])
       | DescribeTemplatePermissions ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/templates/%s/permissions"
             (AwsAccountId.to_header
                x.DescribeTemplatePermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeTemplatePermissionsRequest.templateId)
       | DescribeTheme ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/themes/%s"
                (AwsAndAccountId.to_header x.DescribeThemeRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.DescribeThemeRequest.themeId))
             (List.filter_opt
                [Option.map
@@ -799,7 +1614,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/themes/%s/aliases/%s"
             (AwsAccountId.to_header x.DescribeThemeAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeThemeAliasRequest.themeId)
             (AliasName.to_header x.DescribeThemeAliasRequest.aliasName)
       | DescribeThemePermissions ->
@@ -807,14 +1622,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/themes/%s/permissions"
             (AwsAccountId.to_header
                x.DescribeThemePermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.DescribeThemePermissionsRequest.themeId)
+      | DescribeTopic ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics/%s"
+            (AwsAccountId.to_header x.DescribeTopicRequest.awsAccountId)
+            (TopicId.to_header x.DescribeTopicRequest.topicId)
+      | DescribeTopicPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/permissions"
+            (AwsAccountId.to_header
+               x.DescribeTopicPermissionsRequest.awsAccountId)
+            (TopicId.to_header x.DescribeTopicPermissionsRequest.topicId)
+      | DescribeTopicRefresh ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/refresh/%s"
+            (AwsAccountId.to_header
+               x.DescribeTopicRefreshRequest.awsAccountId)
+            (TopicId.to_header x.DescribeTopicRefreshRequest.topicId)
+            (ResourceId.to_header x.DescribeTopicRefreshRequest.refreshId)
+      | DescribeTopicRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/schedules/%s"
+            (AwsAccountId.to_header
+               x.DescribeTopicRefreshScheduleRequest.awsAccountId)
+            (TopicId.to_header x.DescribeTopicRefreshScheduleRequest.topicId)
+            (String_.to_header
+               x.DescribeTopicRefreshScheduleRequest.datasetId)
       | DescribeUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/namespaces/%s/users/%s"
             (AwsAccountId.to_header x.DescribeUserRequest.awsAccountId)
             (Namespace.to_header x.DescribeUserRequest.namespace)
             (UserName.to_header x.DescribeUserRequest.userName)
+      | DescribeVPCConnection ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/vpc-connections/%s"
+            (AwsAccountId.to_header
+               x.DescribeVPCConnectionRequest.awsAccountId)
+            (VPCConnectionResourceIdUnrestricted.to_header
+               x.DescribeVPCConnectionRequest.vPCConnectionId)
       | GenerateEmbedUrlForAnonymousUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/embed-url/anonymous-user"
@@ -825,13 +1671,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/embed-url/registered-user"
             (AwsAccountId.to_header
                x.GenerateEmbedUrlForRegisteredUserRequest.awsAccountId)
+      | GenerateEmbedUrlForRegisteredUserWithIdentity ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/embed-url/registered-user-with-identity"
+            (AwsAccountId.to_header
+               x.GenerateEmbedUrlForRegisteredUserWithIdentityRequest.awsAccountId)
       | GetDashboardEmbedUrl ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/accounts/%s/dashboards/%s/embed-url"
                (AwsAccountId.to_header
                   x.GetDashboardEmbedUrlRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.GetDashboardEmbedUrlRequest.dashboardId))
             (List.filter_opt
                [Some
@@ -862,6 +1713,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("additional-dashboard-ids",
                          (AdditionalDashboardIdList.to_header v)))
                  x.additionalDashboardIds])
+      | GetFlowMetadata ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/flows/%s/metadata"
+            (AccountId.to_header x.GetFlowMetadataInput.awsAccountId)
+            (FlowId.to_header x.GetFlowMetadataInput.flowId)
+      | GetFlowPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/flows/%s/permissions"
+            (AccountId.to_header x.GetFlowPermissionsInput.awsAccountId)
+            (FlowId.to_header x.GetFlowPermissionsInput.flowId)
+      | GetIdentityContext ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/identity-context"
+            (AwsAccountId.to_header x.GetIdentityContextRequest.awsAccountId)
       | GetSessionEmbedUrl ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -879,6 +1742,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.sessionLifetimeInMinutes;
                Option.map ~f:(fun v -> ("user-arn", (Arn.to_header v)))
                  x.userArn])
+      | ListActionConnectors ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/action-connectors"
+               (AwsAccountId.to_header
+                  x.ListActionConnectorsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | ListAnalyses ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/analyses"
@@ -890,13 +1765,61 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListAssetBundleExportJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/asset-bundle-export-jobs"
+               (AwsAccountId.to_header
+                  x.ListAssetBundleExportJobsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListAssetBundleImportJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/asset-bundle-import-jobs"
+               (AwsAccountId.to_header
+                  x.ListAssetBundleImportJobsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListBrands ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/brands"
+               (AwsAccountId.to_header x.ListBrandsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
+      | ListCustomPermissions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/custom-permissions"
+               (AwsAccountId.to_header
+                  x.ListCustomPermissionsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | ListDashboardVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/accounts/%s/dashboards/%s/versions"
                (AwsAccountId.to_header
                   x.ListDashboardVersionsRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.ListDashboardVersionsRequest.dashboardId))
             (List.filter_opt
                [Option.map
@@ -938,6 +1861,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListFlows ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/flows"
+               (AccountId.to_header x.ListFlowsInput.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (FlowMaxResults.to_header v)))
+                 x.maxResults])
       | ListFolderMembers ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -957,6 +1891,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/folders"
                (AwsAccountId.to_header x.ListFoldersRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListFoldersForResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/resource/%s/folders"
+               (AwsAccountId.to_header
+                  x.ListFoldersForResourceRequest.awsAccountId)
+               (Arn.to_header x.ListFoldersForResourceRequest.resourceArn))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("next-token", (String_.to_header v)))
@@ -995,15 +1943,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListIAMPolicyAssignments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
-               "/accounts/%s/namespaces/%s/iam-policy-assignments"
+               "/accounts/%s/namespaces/%s/v2/iam-policy-assignments"
                (AwsAccountId.to_header
                   x.ListIAMPolicyAssignmentsRequest.awsAccountId)
                (Namespace.to_header
                   x.ListIAMPolicyAssignmentsRequest.namespace))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("next-token", (String_.to_header v)))
-                  x.nextToken;
+                  ~f:(fun v ->
+                        ("assignment-status", (AssignmentStatus.to_header v)))
+                  x.assignmentStatus;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken;
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
@@ -1024,6 +1975,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListIdentityPropagationConfigs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/identity-propagation-config"
+               (AwsAccountId.to_header
+                  x.ListIdentityPropagationConfigsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("max-results",
+                          (ListIdentityPropagationMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | ListIngestions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -1049,6 +2014,40 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListRefreshSchedules ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-schedules"
+            (AwsAccountId.to_header
+               x.ListRefreshSchedulesRequest.awsAccountId)
+            (ResourceId.to_header x.ListRefreshSchedulesRequest.dataSetId)
+      | ListRoleMemberships ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/namespaces/%s/roles/%s/members"
+               (AwsAccountId.to_header
+                  x.ListRoleMembershipsRequest.awsAccountId)
+               (Namespace.to_header x.ListRoleMembershipsRequest.namespace)
+               (Role.to_header x.ListRoleMembershipsRequest.role))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListSelfUpgrades ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/namespaces/%s/self-upgrade-requests"
+               (AwsAccountId.to_header x.ListSelfUpgradesRequest.awsAccountId)
+               (Namespace.to_header x.ListSelfUpgradesRequest.namespace))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/resources/%s/tags"
             (Arn.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -1058,7 +2057,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                "/accounts/%s/templates/%s/aliases"
                (AwsAccountId.to_header
                   x.ListTemplateAliasesRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.ListTemplateAliasesRequest.templateId))
             (List.filter_opt
                [Option.map
@@ -1073,7 +2072,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                "/accounts/%s/templates/%s/versions"
                (AwsAccountId.to_header
                   x.ListTemplateVersionsRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.ListTemplateVersionsRequest.templateId))
             (List.filter_opt
                [Option.map
@@ -1098,7 +2097,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string)
                "/accounts/%s/themes/%s/aliases"
                (AwsAccountId.to_header x.ListThemeAliasesRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.ListThemeAliasesRequest.themeId))
             (List.filter_opt
                [Option.map
@@ -1113,7 +2112,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                "/accounts/%s/themes/%s/versions"
                (AwsAccountId.to_header
                   x.ListThemeVersionsRequest.awsAccountId)
-               (RestrictiveResourceId.to_header
+               (ShortRestrictiveResourceId.to_header
                   x.ListThemeVersionsRequest.themeId))
             (List.filter_opt
                [Option.map
@@ -1135,6 +2134,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map ~f:(fun v -> ("type", (ThemeType.to_header v)))
                  x.type_])
+      | ListTopicRefreshSchedules ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics/%s/schedules"
+            (AwsAccountId.to_header
+               x.ListTopicRefreshSchedulesRequest.awsAccountId)
+            (TopicId.to_header x.ListTopicRefreshSchedulesRequest.topicId)
+      | ListTopicReviewedAnswers ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/reviewed-answers"
+            (AwsAccountId.to_header
+               x.ListTopicReviewedAnswersRequest.awsAccountId)
+            (TopicId.to_header x.ListTopicReviewedAnswersRequest.topicId)
+      | ListTopics ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/topics"
+               (AwsAccountId.to_header x.ListTopicsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListUserGroups ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -1162,21 +2183,72 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListVPCConnections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/accounts/%s/vpc-connections"
+               (AwsAccountId.to_header
+                  x.ListVPCConnectionsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("next-token", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
+                 x.maxResults])
+      | PredictQAResults ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/qa/predict"
+            (AwsAccountId.to_header x.PredictQAResultsRequest.awsAccountId)
+      | PutDataSetRefreshProperties ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-properties"
+            (AwsAccountId.to_header
+               x.PutDataSetRefreshPropertiesRequest.awsAccountId)
+            (ResourceId.to_header
+               x.PutDataSetRefreshPropertiesRequest.dataSetId)
       | RegisterUser ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/namespaces/%s/users"
             (AwsAccountId.to_header x.RegisterUserRequest.awsAccountId)
             (Namespace.to_header x.RegisterUserRequest.namespace)
       | RestoreAnalysis ->
-          (Format.kasprintf Uri.of_string) "/accounts/%s/restore/analyses/%s"
-            (AwsAccountId.to_header x.RestoreAnalysisRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
-               x.RestoreAnalysisRequest.analysisId)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/restore/analyses/%s"
+               (AwsAccountId.to_header x.RestoreAnalysisRequest.awsAccountId)
+               (ShortRestrictiveResourceId.to_header
+                  x.RestoreAnalysisRequest.analysisId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("restore-to-folders", (Boolean.to_header v)))
+                  x.restoreToFolders])
+      | SearchActionConnectors ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/search/action-connectors"
+               (AwsAccountId.to_header
+                  x.SearchActionConnectorsRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("max-results",
+                          (SearchActionConnectorsRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (String_.to_header v)))
+                 x.nextToken])
       | SearchAnalyses ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/search/analyses"
             (AwsAccountId.to_header x.SearchAnalysesRequest.awsAccountId)
       | SearchDashboards ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/search/dashboards"
             (AwsAccountId.to_header x.SearchDashboardsRequest.awsAccountId)
+      | SearchDataSets ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/search/data-sets"
+            (AwsAccountId.to_header x.SearchDataSetsRequest.awsAccountId)
+      | SearchDataSources ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/search/data-sources"
+            (AwsAccountId.to_header x.SearchDataSourcesRequest.awsAccountId)
+      | SearchFlows ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/flows/searchFlows"
+            (AccountId.to_header x.SearchFlowsInput.awsAccountId)
       | SearchFolders ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/search/folders"
             (AwsAccountId.to_header x.SearchFoldersRequest.awsAccountId)
@@ -1193,6 +2265,42 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxResults.to_header v)))
                  x.maxResults])
+      | SearchTopics ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/search/topics"
+            (AwsAccountId.to_header x.SearchTopicsRequest.awsAccountId)
+      | StartAssetBundleExportJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/asset-bundle-export-jobs/export"
+            (AwsAccountId.to_header
+               x.StartAssetBundleExportJobRequest.awsAccountId)
+      | StartAssetBundleImportJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/asset-bundle-import-jobs/import"
+            (AwsAccountId.to_header
+               x.StartAssetBundleImportJobRequest.awsAccountId)
+      | StartAutomationJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/automation-groups/%s/automations/%s/jobs"
+            (AwsAccountId.to_header x.StartAutomationJobRequest.awsAccountId)
+            (AutomateId.to_header
+               x.StartAutomationJobRequest.automationGroupId)
+            (AutomateId.to_header x.StartAutomationJobRequest.automationId)
+      | StartDashboardSnapshotJob ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards/%s/snapshot-jobs"
+            (AwsAccountId.to_header
+               x.StartDashboardSnapshotJobRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.StartDashboardSnapshotJobRequest.dashboardId)
+      | StartDashboardSnapshotJobSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards/%s/schedules/%s"
+            (AwsAccountId.to_header
+               x.StartDashboardSnapshotJobScheduleRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.StartDashboardSnapshotJobScheduleRequest.dashboardId)
+            (ShortRestrictiveResourceId.to_header
+               x.StartDashboardSnapshotJobScheduleRequest.scheduleId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/resources/%s/tags"
             (Arn.to_header x.TagResourceRequest.resourceArn)
@@ -1202,6 +2310,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (Arn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("keys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateAccountCustomPermission ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.UpdateAccountCustomPermissionRequest.awsAccountId)
       | UpdateAccountCustomization ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/accounts/%s/customizations"
@@ -1215,39 +2327,96 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/accounts/%s/settings"
             (AwsAccountId.to_header
                x.UpdateAccountSettingsRequest.awsAccountId)
+      | UpdateActionConnector ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/action-connectors/%s"
+            (AwsAccountId.to_header
+               x.UpdateActionConnectorRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateActionConnectorRequest.actionConnectorId)
+      | UpdateActionConnectorPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/action-connectors/%s/permissions"
+            (AwsAccountId.to_header
+               x.UpdateActionConnectorPermissionsRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateActionConnectorPermissionsRequest.actionConnectorId)
       | UpdateAnalysis ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/analyses/%s"
             (AwsAccountId.to_header x.UpdateAnalysisRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateAnalysisRequest.analysisId)
       | UpdateAnalysisPermissions ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/analyses/%s/permissions"
             (AwsAccountId.to_header
                x.UpdateAnalysisPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateAnalysisPermissionsRequest.analysisId)
+      | UpdateApplicationWithTokenExchangeGrant ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/application-with-token-exchange-grant"
+               (AwsAccountId.to_header
+                  x.UpdateApplicationWithTokenExchangeGrantRequest.awsAccountId))
+            (List.filter_opt
+               [Some ("namespace", (Namespace.to_header x.namespace))])
+      | UpdateBrand ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brands/%s"
+            (AwsAccountId.to_header x.UpdateBrandRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateBrandRequest.brandId)
+      | UpdateBrandAssignment ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/brandassignments"
+            (AwsAccountId.to_header
+               x.UpdateBrandAssignmentRequest.awsAccountId)
+      | UpdateBrandPublishedVersion ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/brands/%s/publishedversion"
+            (AwsAccountId.to_header
+               x.UpdateBrandPublishedVersionRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateBrandPublishedVersionRequest.brandId)
+      | UpdateCustomPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/custom-permissions/%s"
+            (AwsAccountId.to_header
+               x.UpdateCustomPermissionsRequest.awsAccountId)
+            (CustomPermissionsName.to_header
+               x.UpdateCustomPermissionsRequest.customPermissionsName)
       | UpdateDashboard ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/dashboards/%s"
             (AwsAccountId.to_header x.UpdateDashboardRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateDashboardRequest.dashboardId)
+      | UpdateDashboardLinks ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards/%s/linked-entities"
+            (AwsAccountId.to_header
+               x.UpdateDashboardLinksRequest.awsAccountId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateDashboardLinksRequest.dashboardId)
       | UpdateDashboardPermissions ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/dashboards/%s/permissions"
             (AwsAccountId.to_header
                x.UpdateDashboardPermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateDashboardPermissionsRequest.dashboardId)
       | UpdateDashboardPublishedVersion ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/dashboards/%s/versions/%s"
             (AwsAccountId.to_header
                x.UpdateDashboardPublishedVersionRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateDashboardPublishedVersionRequest.dashboardId)
             (VersionNumber.to_header
                x.UpdateDashboardPublishedVersionRequest.versionNumber)
+      | UpdateDashboardsQAConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/dashboards-qa-configuration"
+            (AwsAccountId.to_header
+               x.UpdateDashboardsQAConfigurationRequest.awsAccountId)
       | UpdateDataSet ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/data-sets/%s"
             (AwsAccountId.to_header x.UpdateDataSetRequest.awsAccountId)
@@ -1269,6 +2438,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.UpdateDataSourcePermissionsRequest.awsAccountId)
             (ResourceId.to_header
                x.UpdateDataSourcePermissionsRequest.dataSourceId)
+      | UpdateDefaultQBusinessApplication ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/accounts/%s/default-qbusiness-application"
+               (AwsAccountId.to_header
+                  x.UpdateDefaultQBusinessApplicationRequest.awsAccountId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("namespace", (Namespace.to_header v)))
+                  x.namespace])
+      | UpdateFlowPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/flows/%s/permissions"
+            (AccountId.to_header x.UpdateFlowPermissionsInput.awsAccountId)
+            (FlowId.to_header x.UpdateFlowPermissionsInput.flowId)
       | UpdateFolder ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/folders/%s"
             (AwsAccountId.to_header x.UpdateFolderRequest.awsAccountId)
@@ -1294,19 +2478,76 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Namespace.to_header x.UpdateIAMPolicyAssignmentRequest.namespace)
             (IAMPolicyAssignmentName.to_header
                x.UpdateIAMPolicyAssignmentRequest.assignmentName)
+      | UpdateIdentityPropagationConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/identity-propagation-config/%s"
+            (AwsAccountId.to_header
+               x.UpdateIdentityPropagationConfigRequest.awsAccountId)
+            (ServiceType.to_header
+               x.UpdateIdentityPropagationConfigRequest.service)
       | UpdateIpRestriction ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/ip-restriction"
             (AwsAccountId.to_header x.UpdateIpRestrictionRequest.awsAccountId)
+      | UpdateKeyRegistration ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/key-registration"
+            (AwsAccountId.to_header
+               x.UpdateKeyRegistrationRequest.awsAccountId)
+      | UpdatePublicSharingSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/public-sharing-settings"
+            (AwsAccountId.to_header
+               x.UpdatePublicSharingSettingsRequest.awsAccountId)
+      | UpdateQPersonalizationConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/q-personalization-configuration"
+            (AwsAccountId.to_header
+               x.UpdateQPersonalizationConfigurationRequest.awsAccountId)
+      | UpdateQuickSightQSearchConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/quicksight-q-search-configuration"
+            (AwsAccountId.to_header
+               x.UpdateQuickSightQSearchConfigurationRequest.awsAccountId)
+      | UpdateRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/data-sets/%s/refresh-schedules"
+            (AwsAccountId.to_header
+               x.UpdateRefreshScheduleRequest.awsAccountId)
+            (ResourceId.to_header x.UpdateRefreshScheduleRequest.dataSetId)
+      | UpdateRoleCustomPermission ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/roles/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.UpdateRoleCustomPermissionRequest.awsAccountId)
+            (Namespace.to_header
+               x.UpdateRoleCustomPermissionRequest.namespace)
+            (Role.to_header x.UpdateRoleCustomPermissionRequest.role)
+      | UpdateSPICECapacityConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/spice-capacity-configuration"
+            (AwsAccountId.to_header
+               x.UpdateSPICECapacityConfigurationRequest.awsAccountId)
+      | UpdateSelfUpgrade ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/update-self-upgrade-request"
+            (AwsAccountId.to_header x.UpdateSelfUpgradeRequest.awsAccountId)
+            (Namespace.to_header x.UpdateSelfUpgradeRequest.namespace)
+      | UpdateSelfUpgradeConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/self-upgrade-configuration"
+            (AwsAccountId.to_header
+               x.UpdateSelfUpgradeConfigurationRequest.awsAccountId)
+            (Namespace.to_header
+               x.UpdateSelfUpgradeConfigurationRequest.namespace)
       | UpdateTemplate ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/templates/%s"
             (AwsAccountId.to_header x.UpdateTemplateRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateTemplateRequest.templateId)
       | UpdateTemplateAlias ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/templates/%s/aliases/%s"
             (AwsAccountId.to_header x.UpdateTemplateAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateTemplateAliasRequest.templateId)
             (AliasName.to_header x.UpdateTemplateAliasRequest.aliasName)
       | UpdateTemplatePermissions ->
@@ -1314,17 +2555,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/templates/%s/permissions"
             (AwsAccountId.to_header
                x.UpdateTemplatePermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateTemplatePermissionsRequest.templateId)
       | UpdateTheme ->
           (Format.kasprintf Uri.of_string) "/accounts/%s/themes/%s"
             (AwsAccountId.to_header x.UpdateThemeRequest.awsAccountId)
-            (RestrictiveResourceId.to_header x.UpdateThemeRequest.themeId)
+            (ShortRestrictiveResourceId.to_header
+               x.UpdateThemeRequest.themeId)
       | UpdateThemeAlias ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/themes/%s/aliases/%s"
             (AwsAccountId.to_header x.UpdateThemeAliasRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateThemeAliasRequest.themeId)
             (AliasName.to_header x.UpdateThemeAliasRequest.aliasName)
       | UpdateThemePermissions ->
@@ -1332,18 +2574,87 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/accounts/%s/themes/%s/permissions"
             (AwsAccountId.to_header
                x.UpdateThemePermissionsRequest.awsAccountId)
-            (RestrictiveResourceId.to_header
+            (ShortRestrictiveResourceId.to_header
                x.UpdateThemePermissionsRequest.themeId)
+      | UpdateTopic ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/topics/%s"
+            (AwsAccountId.to_header x.UpdateTopicRequest.awsAccountId)
+            (TopicId.to_header x.UpdateTopicRequest.topicId)
+      | UpdateTopicPermissions ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/permissions"
+            (AwsAccountId.to_header
+               x.UpdateTopicPermissionsRequest.awsAccountId)
+            (TopicId.to_header x.UpdateTopicPermissionsRequest.topicId)
+      | UpdateTopicRefreshSchedule ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/topics/%s/schedules/%s"
+            (AwsAccountId.to_header
+               x.UpdateTopicRefreshScheduleRequest.awsAccountId)
+            (TopicId.to_header x.UpdateTopicRefreshScheduleRequest.topicId)
+            (String_.to_header x.UpdateTopicRefreshScheduleRequest.datasetId)
       | UpdateUser ->
           (Format.kasprintf Uri.of_string)
             "/accounts/%s/namespaces/%s/users/%s"
             (AwsAccountId.to_header x.UpdateUserRequest.awsAccountId)
             (Namespace.to_header x.UpdateUserRequest.namespace)
-            (UserName.to_header x.UpdateUserRequest.userName))
+            (UserName.to_header x.UpdateUserRequest.userName)
+      | UpdateUserCustomPermission ->
+          (Format.kasprintf Uri.of_string)
+            "/accounts/%s/namespaces/%s/users/%s/custom-permission"
+            (AwsAccountId.to_header
+               x.UpdateUserCustomPermissionRequest.awsAccountId)
+            (Namespace.to_header
+               x.UpdateUserCustomPermissionRequest.namespace)
+            (UserName.to_header x.UpdateUserCustomPermissionRequest.userName)
+      | UpdateVPCConnection ->
+          (Format.kasprintf Uri.of_string) "/accounts/%s/vpc-connections/%s"
+            (AwsAccountId.to_header x.UpdateVPCConnectionRequest.awsAccountId)
+            (VPCConnectionResourceIdUnrestricted.to_header
+               x.UpdateVPCConnectionRequest.vPCConnectionId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | BatchCreateTopicReviewedAnswer ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Answers",
+                           (CreateTopicReviewedAnswers.to_value
+                              req.BatchCreateTopicReviewedAnswerRequest.answers))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDeleteTopicReviewedAnswer ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.BatchDeleteTopicReviewedAnswerRequest.answerIds
+                         ~f:(fun x -> ("AnswerIds", (AnswerIds.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CancelIngestion -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateAccountCustomization ->
       let (headers, body) =
@@ -1359,6 +2670,129 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (AccountCustomization.to_value
                               req.CreateAccountCustomizationRequest.accountCustomization));
                       Option.map req.CreateAccountCustomizationRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAccountSubscription ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateAccountSubscriptionRequest.edition
+                         ~f:(fun x -> ("Edition", (Edition.to_value x)));
+                      Some
+                        ("AuthenticationMethod",
+                          (AuthenticationMethodOption.to_value
+                             req.CreateAccountSubscriptionRequest.authenticationMethod));
+                      Some
+                        ("AccountName",
+                          (AccountName.to_value
+                             req.CreateAccountSubscriptionRequest.accountName));
+                      Some
+                        ("NotificationEmail",
+                          (String_.to_value
+                             req.CreateAccountSubscriptionRequest.notificationEmail));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.activeDirectoryName
+                        ~f:(fun x ->
+                              ("ActiveDirectoryName", (String_.to_value x)));
+                      Option.map req.CreateAccountSubscriptionRequest.realm
+                        ~f:(fun x -> ("Realm", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.directoryId
+                        ~f:(fun x -> ("DirectoryId", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.adminGroup
+                        ~f:(fun x -> ("AdminGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.authorGroup
+                        ~f:(fun x -> ("AuthorGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.readerGroup
+                        ~f:(fun x -> ("ReaderGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.adminProGroup
+                        ~f:(fun x ->
+                              ("AdminProGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.authorProGroup
+                        ~f:(fun x ->
+                              ("AuthorProGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.readerProGroup
+                        ~f:(fun x ->
+                              ("ReaderProGroup", (GroupsList.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.firstName
+                        ~f:(fun x -> ("FirstName", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.lastName
+                        ~f:(fun x -> ("LastName", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.emailAddress
+                        ~f:(fun x -> ("EmailAddress", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.contactNumber
+                        ~f:(fun x -> ("ContactNumber", (String_.to_value x)));
+                      Option.map
+                        req.CreateAccountSubscriptionRequest.iAMIdentityCenterInstanceArn
+                        ~f:(fun x ->
+                              ("IAMIdentityCenterInstanceArn",
+                                (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateActionConnector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ActionConnectorId",
+                           (ShortRestrictiveResourceId.to_value
+                              req.CreateActionConnectorRequest.actionConnectorId));
+                      Some
+                        ("Name",
+                          (ActionConnectorName.to_value
+                             req.CreateActionConnectorRequest.name));
+                      Some
+                        ("Type",
+                          (ActionConnectorType.to_value
+                             req.CreateActionConnectorRequest.type_));
+                      Some
+                        ("AuthenticationConfig",
+                          (AuthConfig.to_value
+                             req.CreateActionConnectorRequest.authenticationConfig));
+                      Option.map req.CreateActionConnectorRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (ActionConnectorDescription.to_value x)));
+                      Option.map req.CreateActionConnectorRequest.permissions
+                        ~f:(fun x ->
+                              ("Permissions",
+                                (ResourcePermissionList.to_value x)));
+                      Option.map
+                        req.CreateActionConnectorRequest.vpcConnectionArn
+                        ~f:(fun x -> ("VpcConnectionArn", (Arn.to_value x)));
+                      Option.map req.CreateActionConnectorRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -1386,13 +2820,71 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Permissions",
                                 (ResourcePermissionList.to_value x)));
-                      Some
-                        ("SourceEntity",
-                          (AnalysisSourceEntity.to_value
-                             req.CreateAnalysisRequest.sourceEntity));
+                      Option.map req.CreateAnalysisRequest.sourceEntity
+                        ~f:(fun x ->
+                              ("SourceEntity",
+                                (AnalysisSourceEntity.to_value x)));
                       Option.map req.CreateAnalysisRequest.themeArn
                         ~f:(fun x -> ("ThemeArn", (Arn.to_value x)));
                       Option.map req.CreateAnalysisRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateAnalysisRequest.definition
+                        ~f:(fun x ->
+                              ("Definition", (AnalysisDefinition.to_value x)));
+                      Option.map req.CreateAnalysisRequest.validationStrategy
+                        ~f:(fun x ->
+                              ("ValidationStrategy",
+                                (ValidationStrategy.to_value x)));
+                      Option.map req.CreateAnalysisRequest.folderArns
+                        ~f:(fun x ->
+                              ("FolderArns", (FolderArnList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateBrand ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateBrandRequest.brandDefinition
+                         ~f:(fun x ->
+                               ("BrandDefinition",
+                                 (BrandDefinition.to_value x)));
+                      Option.map req.CreateBrandRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCustomPermissions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CustomPermissionsName",
+                           (CustomPermissionsName.to_value
+                              req.CreateCustomPermissionsRequest.customPermissionsName));
+                      Option.map
+                        req.CreateCustomPermissionsRequest.capabilities
+                        ~f:(fun x ->
+                              ("Capabilities", (Capabilities.to_value x)));
+                      Option.map req.CreateCustomPermissionsRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -1420,10 +2912,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Permissions",
                                 (ResourcePermissionList.to_value x)));
-                      Some
-                        ("SourceEntity",
-                          (DashboardSourceEntity.to_value
-                             req.CreateDashboardRequest.sourceEntity));
+                      Option.map req.CreateDashboardRequest.sourceEntity
+                        ~f:(fun x ->
+                              ("SourceEntity",
+                                (DashboardSourceEntity.to_value x)));
                       Option.map req.CreateDashboardRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Option.map
@@ -1437,7 +2929,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("DashboardPublishOptions",
                                 (DashboardPublishOptions.to_value x)));
                       Option.map req.CreateDashboardRequest.themeArn
-                        ~f:(fun x -> ("ThemeArn", (Arn.to_value x)))])
+                        ~f:(fun x -> ("ThemeArn", (Arn.to_value x)));
+                      Option.map req.CreateDashboardRequest.definition
+                        ~f:(fun x ->
+                              ("Definition",
+                                (DashboardVersionDefinition.to_value x)));
+                      Option.map
+                        req.CreateDashboardRequest.validationStrategy
+                        ~f:(fun x ->
+                              ("ValidationStrategy",
+                                (ValidationStrategy.to_value x)));
+                      Option.map req.CreateDashboardRequest.folderArns
+                        ~f:(fun x ->
+                              ("FolderArns", (FolderArnList.to_value x)));
+                      Option.map
+                        req.CreateDashboardRequest.linkSharingConfiguration
+                        ~f:(fun x ->
+                              ("LinkSharingConfiguration",
+                                (LinkSharingConfiguration.to_value x)));
+                      Option.map req.CreateDashboardRequest.linkEntities
+                        ~f:(fun x ->
+                              ("LinkEntities",
+                                (LinkEntityArnList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1506,7 +3019,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateDataSetRequest.dataSetUsageConfiguration
                         ~f:(fun x ->
                               ("DataSetUsageConfiguration",
-                                (DataSetUsageConfiguration.to_value x)))])
+                                (DataSetUsageConfiguration.to_value x)));
+                      Option.map req.CreateDataSetRequest.datasetParameters
+                        ~f:(fun x ->
+                              ("DatasetParameters",
+                                (DatasetParameterList.to_value x)));
+                      Option.map req.CreateDataSetRequest.folderArns
+                        ~f:(fun x ->
+                              ("FolderArns", (FolderArnList.to_value x)));
+                      Option.map
+                        req.CreateDataSetRequest.performanceConfiguration
+                        ~f:(fun x ->
+                              ("PerformanceConfiguration",
+                                (PerformanceConfiguration.to_value x)));
+                      Option.map req.CreateDataSetRequest.useAs
+                        ~f:(fun x -> ("UseAs", (DataSetUseAs.to_value x)));
+                      Option.map
+                        req.CreateDataSetRequest.dataPrepConfiguration
+                        ~f:(fun x ->
+                              ("DataPrepConfiguration",
+                                (DataPrepConfiguration.to_value x)));
+                      Option.map
+                        req.CreateDataSetRequest.semanticModelConfiguration
+                        ~f:(fun x ->
+                              ("SemanticModelConfiguration",
+                                (SemanticModelConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1557,7 +3094,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("SslProperties", (SslProperties.to_value x)));
                       Option.map req.CreateDataSourceRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateDataSourceRequest.folderArns
+                        ~f:(fun x ->
+                              ("FolderArns", (FolderArnList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1585,7 +3125,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("Permissions",
                                 (ResourcePermissionList.to_value x)));
                       Option.map req.CreateFolderRequest.tags
-                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateFolderRequest.sharingModel
+                        ~f:(fun x ->
+                              ("SharingModel", (SharingModel.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1676,6 +3219,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRefreshSchedule ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Schedule",
+                           (RefreshSchedule.to_value
+                              req.CreateRefreshScheduleRequest.schedule))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRoleMembership ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateTemplate ->
       let (headers, body) =
         let headers =
@@ -1691,16 +3257,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Permissions",
                                 (ResourcePermissionList.to_value x)));
-                      Some
-                        ("SourceEntity",
-                          (TemplateSourceEntity.to_value
-                             req.CreateTemplateRequest.sourceEntity));
+                      Option.map req.CreateTemplateRequest.sourceEntity
+                        ~f:(fun x ->
+                              ("SourceEntity",
+                                (TemplateSourceEntity.to_value x)));
                       Option.map req.CreateTemplateRequest.tags
                         ~f:(fun x -> ("Tags", (TagList.to_value x)));
                       Option.map req.CreateTemplateRequest.versionDescription
                         ~f:(fun x ->
                               ("VersionDescription",
-                                (VersionDescription.to_value x)))])
+                                (VersionDescription.to_value x)));
+                      Option.map req.CreateTemplateRequest.definition
+                        ~f:(fun x ->
+                              ("Definition",
+                                (TemplateVersionDefinition.to_value x)));
+                      Option.map req.CreateTemplateRequest.validationStrategy
+                        ~f:(fun x ->
+                              ("ValidationStrategy",
+                                (ValidationStrategy.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1742,7 +3316,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (ThemeName.to_value req.CreateThemeRequest.name));
                       Some
                         ("BaseThemeId",
-                          (RestrictiveResourceId.to_value
+                          (ShortRestrictiveResourceId.to_value
                              req.CreateThemeRequest.baseThemeId));
                       Option.map req.CreateThemeRequest.versionDescription
                         ~f:(fun x ->
@@ -1785,12 +3359,124 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTopic ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TopicId",
+                           (TopicId.to_value req.CreateTopicRequest.topicId));
+                      Some
+                        ("Topic",
+                          (TopicDetails.to_value req.CreateTopicRequest.topic));
+                      Option.map req.CreateTopicRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)));
+                      Option.map req.CreateTopicRequest.folderArns
+                        ~f:(fun x ->
+                              ("FolderArns", (FolderArnList.to_value x)));
+                      Option.map req.CreateTopicRequest.customInstructions
+                        ~f:(fun x ->
+                              ("CustomInstructions",
+                                (CustomInstructions.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTopicRefreshSchedule ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DatasetArn",
+                           (Arn.to_value
+                              req.CreateTopicRefreshScheduleRequest.datasetArn));
+                      Option.map
+                        req.CreateTopicRefreshScheduleRequest.datasetName
+                        ~f:(fun x -> ("DatasetName", (String_.to_value x)));
+                      Some
+                        ("RefreshSchedule",
+                          (TopicRefreshSchedule.to_value
+                             req.CreateTopicRefreshScheduleRequest.refreshSchedule))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateVPCConnection ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("VPCConnectionId",
+                           (VPCConnectionResourceIdRestricted.to_value
+                              req.CreateVPCConnectionRequest.vPCConnectionId));
+                      Some
+                        ("Name",
+                          (ResourceName.to_value
+                             req.CreateVPCConnectionRequest.name));
+                      Some
+                        ("SubnetIds",
+                          (SubnetIdList.to_value
+                             req.CreateVPCConnectionRequest.subnetIds));
+                      Some
+                        ("SecurityGroupIds",
+                          (SecurityGroupIdList.to_value
+                             req.CreateVPCConnectionRequest.securityGroupIds));
+                      Option.map req.CreateVPCConnectionRequest.dnsResolvers
+                        ~f:(fun x ->
+                              ("DnsResolvers", (DnsResolverList.to_value x)));
+                      Some
+                        ("RoleArn",
+                          (RoleArn.to_value
+                             req.CreateVPCConnectionRequest.roleArn));
+                      Option.map req.CreateVPCConnectionRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAccountCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAccountCustomization ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAccountSubscription ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteActionConnector -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAnalysis -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBrand -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteBrandAssignment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCustomPermissions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDashboard -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDataSet -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataSetRefreshProperties ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDataSource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDefaultQBusinessApplication ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFolder -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFolderMembership ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -1798,30 +3484,90 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteGroupMembership -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteIAMPolicyAssignment ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteIdentityPropagationConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteNamespace -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRefreshSchedule -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRoleCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRoleMembership -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTemplateAlias -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTheme -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteThemeAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTopic -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTopicRefreshSchedule ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUser -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUserByPrincipalId ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteUserCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteVPCConnection -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeAccountCustomPermission ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAccountCustomization ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAccountSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAccountSubscription ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeActionConnector ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeActionConnectorPermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAnalysis ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAnalysisDefinition ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAnalysisPermissions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAssetBundleExportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAssetBundleImportJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAutomationJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBrand ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBrandAssignment ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeBrandPublishedVersion ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeCustomPermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDashboard ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDashboardDefinition ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDashboardPermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDashboardSnapshotJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDashboardSnapshotJobResult ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDashboardsQAConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDataSet ->
@@ -1830,10 +3576,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeDataSetPermissions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDataSetRefreshProperties ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDataSource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeDataSourcePermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeDefaultQBusinessApplication ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeFolder ->
@@ -1860,13 +3612,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeIpRestriction ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeKeyRegistration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeNamespace ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeQPersonalizationConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeQuickSightQSearchConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeRefreshSchedule ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeRoleCustomPermission ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeSelfUpgradeConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeTemplate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeTemplateAlias ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTemplateDefinition ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeTemplatePermissions ->
@@ -1881,7 +3654,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeThemePermissions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopic ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopicPermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopicRefresh ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeTopicRefreshSchedule ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeUser ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeVPCConnection ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GenerateEmbedUrlForAnonymousUser ->
@@ -1913,7 +3701,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ExperienceConfiguration",
                           (AnonymousUserEmbeddingExperienceConfiguration.to_value
-                             req.GenerateEmbedUrlForAnonymousUserRequest.experienceConfiguration))])
+                             req.GenerateEmbedUrlForAnonymousUserRequest.experienceConfiguration));
+                      Option.map
+                        req.GenerateEmbedUrlForAnonymousUserRequest.allowedDomains
+                        ~f:(fun x ->
+                              ("AllowedDomains", (StringList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1942,7 +3734,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ExperienceConfiguration",
                           (RegisteredUserEmbeddingExperienceConfiguration.to_value
-                             req.GenerateEmbedUrlForRegisteredUserRequest.experienceConfiguration))])
+                             req.GenerateEmbedUrlForRegisteredUserRequest.experienceConfiguration));
+                      Option.map
+                        req.GenerateEmbedUrlForRegisteredUserRequest.allowedDomains
+                        ~f:(fun x ->
+                              ("AllowedDomains", (StringList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GenerateEmbedUrlForRegisteredUserWithIdentity ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GenerateEmbedUrlForRegisteredUserWithIdentityRequest.sessionLifetimeInMinutes
+                         ~f:(fun x ->
+                               ("SessionLifetimeInMinutes",
+                                 (SessionLifetimeInMinutes.to_value x)));
+                      Some
+                        ("ExperienceConfiguration",
+                          (RegisteredUserEmbeddingExperienceConfiguration.to_value
+                             req.GenerateEmbedUrlForRegisteredUserWithIdentityRequest.experienceConfiguration));
+                      Option.map
+                        req.GenerateEmbedUrlForRegisteredUserWithIdentityRequest.allowedDomains
+                        ~f:(fun x ->
+                              ("AllowedDomains", (StringList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1953,10 +3778,59 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetDashboardEmbedUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFlowMetadata ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFlowPermissions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetIdentityContext ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UserIdentifier",
+                           (UserIdentifier.to_value
+                              req.GetIdentityContextRequest.userIdentifier));
+                      Option.map req.GetIdentityContextRequest.namespace
+                        ~f:(fun x -> ("Namespace", (Namespace.to_value x)));
+                      Option.map
+                        req.GetIdentityContextRequest.sessionExpiresAt
+                        ~f:(fun x ->
+                              ("SessionExpiresAt", (Timestamp.to_value x)));
+                      Option.map req.GetIdentityContextRequest.contextRegion
+                        ~f:(fun x -> ("ContextRegion", (Region.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSessionEmbedUrl ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListActionConnectors ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAnalyses ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetBundleExportJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssetBundleImportJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBrands ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCustomPermissions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDashboardVersions ->
@@ -1971,10 +3845,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListDataSources ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFlows ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFolderMembers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFolders ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFoldersForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListGroupMemberships ->
@@ -1984,33 +3864,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIAMPolicyAssignments ->
-      let (headers, body) =
-        let headers =
-          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
-        let body =
-          Some
-            ((`Assoc
-                (List.map
-                   (List.filter_opt
-                      [Option.map
-                         req.ListIAMPolicyAssignmentsRequest.assignmentStatus
-                         ~f:(fun x ->
-                               ("AssignmentStatus",
-                                 (AssignmentStatus.to_value x)))])
-                   ~f:(fun (x, y) ->
-                         let value =
-                           Awso.Botodata.Json.value_to_json_scalar y in
-                         (x, value))))
-               |> Yojson.Safe.to_string) in
-        (headers, body) in
+      let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIAMPolicyAssignmentsForUser ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIdentityPropagationConfigs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIngestions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListNamespaces ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRefreshSchedules ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRoleMemberships ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSelfUpgrades ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -2034,12 +3908,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListThemes ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTopicRefreshSchedules ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTopicReviewedAnswers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTopics ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUserGroups ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUsers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVPCConnections ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PredictQAResults ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("QueryText",
+                           (QAQueryText.to_value
+                              req.PredictQAResultsRequest.queryText));
+                      Option.map
+                        req.PredictQAResultsRequest.includeQuickSightQIndex
+                        ~f:(fun x ->
+                              ("IncludeQuickSightQIndex",
+                                (IncludeQuickSightQIndex.to_value x)));
+                      Option.map
+                        req.PredictQAResultsRequest.includeGeneratedAnswer
+                        ~f:(fun x ->
+                              ("IncludeGeneratedAnswer",
+                                (IncludeGeneratedAnswer.to_value x)));
+                      Option.map
+                        req.PredictQAResultsRequest.maxTopicsToConsider
+                        ~f:(fun x ->
+                              ("MaxTopicsToConsider",
+                                (MaxTopicsToConsider.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutDataSetRefreshProperties ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | RegisterUser ->
       let (headers, body) =
         let headers =
@@ -2083,7 +4006,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (String_.to_value x)));
                       Option.map req.RegisterUserRequest.externalLoginId
                         ~f:(fun x ->
-                              ("ExternalLoginId", (String_.to_value x)))])
+                              ("ExternalLoginId", (String_.to_value x)));
+                      Option.map req.RegisterUserRequest.tags
+                        ~f:(fun x -> ("Tags", (TagList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2093,6 +4018,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | RestoreAnalysis ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchActionConnectors ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (ActionConnectorSearchFilterList.to_value
+                              req.SearchActionConnectorsRequest.filters))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SearchAnalyses ->
       let (headers, body) =
@@ -2135,6 +4080,79 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("NextToken", (String_.to_value x)));
                       Option.map req.SearchDashboardsRequest.maxResults
                         ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchDataSets ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (DataSetSearchFilterList.to_value
+                              req.SearchDataSetsRequest.filters));
+                      Option.map req.SearchDataSetsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)));
+                      Option.map req.SearchDataSetsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchDataSources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (DataSourceSearchFilterList.to_value
+                              req.SearchDataSourcesRequest.filters));
+                      Option.map req.SearchDataSourcesRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)));
+                      Option.map req.SearchDataSourcesRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchFlows ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (SearchFlowsFilterList.to_value
+                              req.SearchFlowsInput.filters));
+                      Option.map req.SearchFlowsInput.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)));
+                      Option.map req.SearchFlowsInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (FlowMaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -2186,6 +4204,196 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SearchTopics ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Filters",
+                           (TopicSearchFilterList.to_value
+                              req.SearchTopicsRequest.filters));
+                      Option.map req.SearchTopicsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (String_.to_value x)));
+                      Option.map req.SearchTopicsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartAssetBundleExportJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AssetBundleExportJobId",
+                           (ShortRestrictiveResourceId.to_value
+                              req.StartAssetBundleExportJobRequest.assetBundleExportJobId));
+                      Some
+                        ("ResourceArns",
+                          (AssetBundleResourceArns.to_value
+                             req.StartAssetBundleExportJobRequest.resourceArns));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.includeAllDependencies
+                        ~f:(fun x ->
+                              ("IncludeAllDependencies",
+                                (Boolean.to_value x)));
+                      Some
+                        ("ExportFormat",
+                          (AssetBundleExportFormat.to_value
+                             req.StartAssetBundleExportJobRequest.exportFormat));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.cloudFormationOverridePropertyConfiguration
+                        ~f:(fun x ->
+                              ("CloudFormationOverridePropertyConfiguration",
+                                (AssetBundleCloudFormationOverridePropertyConfiguration.to_value
+                                   x)));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.includePermissions
+                        ~f:(fun x ->
+                              ("IncludePermissions", (Boolean.to_value x)));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.includeTags
+                        ~f:(fun x -> ("IncludeTags", (Boolean.to_value x)));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.validationStrategy
+                        ~f:(fun x ->
+                              ("ValidationStrategy",
+                                (AssetBundleExportJobValidationStrategy.to_value
+                                   x)));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.includeFolderMemberships
+                        ~f:(fun x ->
+                              ("IncludeFolderMemberships",
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.StartAssetBundleExportJobRequest.includeFolderMembers
+                        ~f:(fun x ->
+                              ("IncludeFolderMembers",
+                                (IncludeFolderMembers.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartAssetBundleImportJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AssetBundleImportJobId",
+                           (ShortRestrictiveResourceId.to_value
+                              req.StartAssetBundleImportJobRequest.assetBundleImportJobId));
+                      Some
+                        ("AssetBundleImportSource",
+                          (AssetBundleImportSource.to_value
+                             req.StartAssetBundleImportJobRequest.assetBundleImportSource));
+                      Option.map
+                        req.StartAssetBundleImportJobRequest.overrideParameters
+                        ~f:(fun x ->
+                              ("OverrideParameters",
+                                (AssetBundleImportJobOverrideParameters.to_value
+                                   x)));
+                      Option.map
+                        req.StartAssetBundleImportJobRequest.failureAction
+                        ~f:(fun x ->
+                              ("FailureAction",
+                                (AssetBundleImportFailureAction.to_value x)));
+                      Option.map
+                        req.StartAssetBundleImportJobRequest.overridePermissions
+                        ~f:(fun x ->
+                              ("OverridePermissions",
+                                (AssetBundleImportJobOverridePermissions.to_value
+                                   x)));
+                      Option.map
+                        req.StartAssetBundleImportJobRequest.overrideTags
+                        ~f:(fun x ->
+                              ("OverrideTags",
+                                (AssetBundleImportJobOverrideTags.to_value x)));
+                      Option.map
+                        req.StartAssetBundleImportJobRequest.overrideValidationStrategy
+                        ~f:(fun x ->
+                              ("OverrideValidationStrategy",
+                                (AssetBundleImportJobOverrideValidationStrategy.to_value
+                                   x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartAutomationJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartAutomationJobRequest.inputPayload
+                         ~f:(fun x ->
+                               ("InputPayload",
+                                 (SensitiveIOPayload.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartDashboardSnapshotJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SnapshotJobId",
+                           (ShortRestrictiveResourceId.to_value
+                              req.StartDashboardSnapshotJobRequest.snapshotJobId));
+                      Option.map
+                        req.StartDashboardSnapshotJobRequest.userConfiguration
+                        ~f:(fun x ->
+                              ("UserConfiguration",
+                                (SnapshotUserConfiguration.to_value x)));
+                      Some
+                        ("SnapshotConfiguration",
+                          (SnapshotConfiguration.to_value
+                             req.StartDashboardSnapshotJobRequest.snapshotConfiguration))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartDashboardSnapshotJobSchedule ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -2206,16 +4414,56 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAccountCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAccountCustomization ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAccountSettings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateActionConnector -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateActionConnectorPermissions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateActionConnectorPermissionsRequest.grantPermissions
+                         ~f:(fun x ->
+                               ("GrantPermissions",
+                                 (ResourcePermissionList.to_value x)));
+                      Option.map
+                        req.UpdateActionConnectorPermissionsRequest.revokePermissions
+                        ~f:(fun x ->
+                              ("RevokePermissions",
+                                (ResourcePermissionList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateAnalysis -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAnalysisPermissions ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateApplicationWithTokenExchangeGrant ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateBrand -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateBrandAssignment -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateBrandPublishedVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCustomPermissions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDashboard -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDashboardLinks -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDashboardPermissions ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDashboardPublishedVersion ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDashboardsQAConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDataSet -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDataSetPermissions ->
@@ -2271,12 +4519,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateDefaultQBusinessApplication ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateFlowPermissions -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFolder -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFolderPermissions ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateIAMPolicyAssignment ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateIdentityPropagationConfig ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateIdentityPropagationConfigRequest.authorizedTargets
+                         ~f:(fun x ->
+                               ("AuthorizedTargets",
+                                 (AuthorizedTargetsList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateIpRestriction ->
       let (headers, body) =
         let headers =
@@ -2291,6 +4563,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x ->
                                ("IpRestrictionRuleMap",
                                  (IpRestrictionRuleMap.to_value x)));
+                      Option.map
+                        req.UpdateIpRestrictionRequest.vpcIdRestrictionRuleMap
+                        ~f:(fun x ->
+                              ("VpcIdRestrictionRuleMap",
+                                (VpcIdRestrictionRuleMap.to_value x)));
+                      Option.map
+                        req.UpdateIpRestrictionRequest.vpcEndpointIdRestrictionRuleMap
+                        ~f:(fun x ->
+                              ("VpcEndpointIdRestrictionRuleMap",
+                                (VpcEndpointIdRestrictionRuleMap.to_value x)));
                       Option.map req.UpdateIpRestrictionRequest.enabled
                         ~f:(fun x ->
                               ("Enabled", (NullableBoolean.to_value x)))])
@@ -2301,6 +4583,81 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateKeyRegistration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("KeyRegistration",
+                           (KeyRegistration.to_value
+                              req.UpdateKeyRegistrationRequest.keyRegistration))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePublicSharingSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateQPersonalizationConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateQuickSightQSearchConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRefreshSchedule -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRoleCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateSPICECapacityConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("PurchaseMode",
+                           (PurchaseMode.to_value
+                              req.UpdateSPICECapacityConfigurationRequest.purchaseMode))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateSelfUpgrade ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("UpgradeRequestId",
+                           (String_.to_value
+                              req.UpdateSelfUpgradeRequest.upgradeRequestId));
+                      Some
+                        ("Action",
+                          (SelfUpgradeAdminAction.to_value
+                             req.UpdateSelfUpgradeRequest.action))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateSelfUpgradeConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTemplateAlias -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateTemplatePermissions ->
@@ -2309,7 +4666,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | UpdateThemeAlias -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateThemePermissions ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTopic -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTopicPermissions ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTopicRefreshSchedule ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUser -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateUserCustomPermission ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateVPCConnection -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -2358,6 +4723,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | BatchCreateTopicReviewedAnswer ->
+      if is_success
+      then
+        Ok
+          (BatchCreateTopicReviewedAnswerResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchCreateTopicReviewedAnswerResponse.error_of_json))
+  | BatchDeleteTopicReviewedAnswer ->
+      if is_success
+      then
+        Ok
+          (BatchDeleteTopicReviewedAnswerResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteTopicReviewedAnswerResponse.error_of_json))
   | CancelIngestion ->
       if is_success
       then Ok (CancelIngestionResponse.of_json (response_to_json resp))
@@ -2372,11 +4757,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateAccountCustomizationResponse.error_of_json))
+  | CreateAccountSubscription ->
+      if is_success
+      then
+        Ok
+          (CreateAccountSubscriptionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAccountSubscriptionResponse.error_of_json))
+  | CreateActionConnector ->
+      if is_success
+      then Ok (CreateActionConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateActionConnectorResponse.error_of_json))
   | CreateAnalysis ->
       if is_success
       then Ok (CreateAnalysisResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateAnalysisResponse.error_of_json))
+  | CreateBrand ->
+      if is_success
+      then Ok (CreateBrandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateBrandResponse.error_of_json))
+  | CreateCustomPermissions ->
+      if is_success
+      then
+        Ok (CreateCustomPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCustomPermissionsResponse.error_of_json))
   | CreateDashboard ->
       if is_success
       then Ok (CreateDashboardResponse.of_json (response_to_json resp))
@@ -2432,6 +4844,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateNamespaceResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateNamespaceResponse.error_of_json))
+  | CreateRefreshSchedule ->
+      if is_success
+      then Ok (CreateRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRefreshScheduleResponse.error_of_json))
+  | CreateRoleMembership ->
+      if is_success
+      then Ok (CreateRoleMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRoleMembershipResponse.error_of_json))
   | CreateTemplate ->
       if is_success
       then Ok (CreateTemplateResponse.of_json (response_to_json resp))
@@ -2452,6 +4876,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateThemeAliasResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateThemeAliasResponse.error_of_json))
+  | CreateTopic ->
+      if is_success
+      then Ok (CreateTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateTopicResponse.error_of_json))
+  | CreateTopicRefreshSchedule ->
+      if is_success
+      then
+        Ok
+          (CreateTopicRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTopicRefreshScheduleResponse.error_of_json))
+  | CreateVPCConnection ->
+      if is_success
+      then Ok (CreateVPCConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateVPCConnectionResponse.error_of_json))
+  | DeleteAccountCustomPermission ->
+      if is_success
+      then
+        Ok
+          (DeleteAccountCustomPermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccountCustomPermissionResponse.error_of_json))
   | DeleteAccountCustomization ->
       if is_success
       then
@@ -2461,11 +4914,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteAccountCustomizationResponse.error_of_json))
+  | DeleteAccountSubscription ->
+      if is_success
+      then
+        Ok
+          (DeleteAccountSubscriptionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAccountSubscriptionResponse.error_of_json))
+  | DeleteActionConnector ->
+      if is_success
+      then Ok (DeleteActionConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteActionConnectorResponse.error_of_json))
   | DeleteAnalysis ->
       if is_success
       then Ok (DeleteAnalysisResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteAnalysisResponse.error_of_json))
+  | DeleteBrand ->
+      if is_success
+      then Ok (DeleteBrandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteBrandResponse.error_of_json))
+  | DeleteBrandAssignment ->
+      if is_success
+      then Ok (DeleteBrandAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteBrandAssignmentResponse.error_of_json))
+  | DeleteCustomPermissions ->
+      if is_success
+      then
+        Ok (DeleteCustomPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCustomPermissionsResponse.error_of_json))
   | DeleteDashboard ->
       if is_success
       then Ok (DeleteDashboardResponse.of_json (response_to_json resp))
@@ -2475,11 +4961,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (DeleteDataSetResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteDataSetResponse.error_of_json))
+  | DeleteDataSetRefreshProperties ->
+      if is_success
+      then
+        Ok
+          (DeleteDataSetRefreshPropertiesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDataSetRefreshPropertiesResponse.error_of_json))
   | DeleteDataSource ->
       if is_success
       then Ok (DeleteDataSourceResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteDataSourceResponse.error_of_json))
+  | DeleteDefaultQBusinessApplication ->
+      if is_success
+      then
+        Ok
+          (DeleteDefaultQBusinessApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDefaultQBusinessApplicationResponse.error_of_json))
   | DeleteFolder ->
       if is_success
       then Ok (DeleteFolderResponse.of_json (response_to_json resp))
@@ -2511,11 +5017,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteIAMPolicyAssignmentResponse.error_of_json))
+  | DeleteIdentityPropagationConfig ->
+      if is_success
+      then
+        Ok
+          (DeleteIdentityPropagationConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIdentityPropagationConfigResponse.error_of_json))
   | DeleteNamespace ->
       if is_success
       then Ok (DeleteNamespaceResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteNamespaceResponse.error_of_json))
+  | DeleteRefreshSchedule ->
+      if is_success
+      then Ok (DeleteRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteRefreshScheduleResponse.error_of_json))
+  | DeleteRoleCustomPermission ->
+      if is_success
+      then
+        Ok
+          (DeleteRoleCustomPermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRoleCustomPermissionResponse.error_of_json))
+  | DeleteRoleMembership ->
+      if is_success
+      then Ok (DeleteRoleMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteRoleMembershipResponse.error_of_json))
   | DeleteTemplate ->
       if is_success
       then Ok (DeleteTemplateResponse.of_json (response_to_json resp))
@@ -2536,6 +5073,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DeleteThemeAliasResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteThemeAliasResponse.error_of_json))
+  | DeleteTopic ->
+      if is_success
+      then Ok (DeleteTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteTopicResponse.error_of_json))
+  | DeleteTopicRefreshSchedule ->
+      if is_success
+      then
+        Ok
+          (DeleteTopicRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTopicRefreshScheduleResponse.error_of_json))
   | DeleteUser ->
       if is_success
       then Ok (DeleteUserResponse.of_json (response_to_json resp))
@@ -2548,6 +5098,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteUserByPrincipalIdResponse.error_of_json))
+  | DeleteUserCustomPermission ->
+      if is_success
+      then
+        Ok
+          (DeleteUserCustomPermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteUserCustomPermissionResponse.error_of_json))
+  | DeleteVPCConnection ->
+      if is_success
+      then Ok (DeleteVPCConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteVPCConnectionResponse.error_of_json))
+  | DescribeAccountCustomPermission ->
+      if is_success
+      then
+        Ok
+          (DescribeAccountCustomPermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountCustomPermissionResponse.error_of_json))
   | DescribeAccountCustomization ->
       if is_success
       then
@@ -2566,11 +5141,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAccountSettingsResponse.error_of_json))
+  | DescribeAccountSubscription ->
+      if is_success
+      then
+        Ok
+          (DescribeAccountSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAccountSubscriptionResponse.error_of_json))
+  | DescribeActionConnector ->
+      if is_success
+      then
+        Ok (DescribeActionConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeActionConnectorResponse.error_of_json))
+  | DescribeActionConnectorPermissions ->
+      if is_success
+      then
+        Ok
+          (DescribeActionConnectorPermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeActionConnectorPermissionsResponse.error_of_json))
   | DescribeAnalysis ->
       if is_success
       then Ok (DescribeAnalysisResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeAnalysisResponse.error_of_json))
+  | DescribeAnalysisDefinition ->
+      if is_success
+      then
+        Ok
+          (DescribeAnalysisDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnalysisDefinitionResponse.error_of_json))
   | DescribeAnalysisPermissions ->
       if is_success
       then
@@ -2581,12 +5193,79 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAnalysisPermissionsResponse.error_of_json))
+  | DescribeAssetBundleExportJob ->
+      if is_success
+      then
+        Ok
+          (DescribeAssetBundleExportJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAssetBundleExportJobResponse.error_of_json))
+  | DescribeAssetBundleImportJob ->
+      if is_success
+      then
+        Ok
+          (DescribeAssetBundleImportJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAssetBundleImportJobResponse.error_of_json))
+  | DescribeAutomationJob ->
+      if is_success
+      then Ok (DescribeAutomationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAutomationJobResponse.error_of_json))
+  | DescribeBrand ->
+      if is_success
+      then Ok (DescribeBrandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeBrandResponse.error_of_json))
+  | DescribeBrandAssignment ->
+      if is_success
+      then
+        Ok (DescribeBrandAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBrandAssignmentResponse.error_of_json))
+  | DescribeBrandPublishedVersion ->
+      if is_success
+      then
+        Ok
+          (DescribeBrandPublishedVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeBrandPublishedVersionResponse.error_of_json))
+  | DescribeCustomPermissions ->
+      if is_success
+      then
+        Ok
+          (DescribeCustomPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeCustomPermissionsResponse.error_of_json))
   | DescribeDashboard ->
       if is_success
       then Ok (DescribeDashboardResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeDashboardResponse.error_of_json))
+  | DescribeDashboardDefinition ->
+      if is_success
+      then
+        Ok
+          (DescribeDashboardDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDashboardDefinitionResponse.error_of_json))
   | DescribeDashboardPermissions ->
       if is_success
       then
@@ -2597,6 +5276,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDashboardPermissionsResponse.error_of_json))
+  | DescribeDashboardSnapshotJob ->
+      if is_success
+      then
+        Ok
+          (DescribeDashboardSnapshotJobResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDashboardSnapshotJobResponse.error_of_json))
+  | DescribeDashboardSnapshotJobResult ->
+      if is_success
+      then
+        Ok
+          (DescribeDashboardSnapshotJobResultResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDashboardSnapshotJobResultResponse.error_of_json))
+  | DescribeDashboardsQAConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeDashboardsQAConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDashboardsQAConfigurationResponse.error_of_json))
   | DescribeDataSet ->
       if is_success
       then Ok (DescribeDataSetResponse.of_json (response_to_json resp))
@@ -2611,6 +5320,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDataSetPermissionsResponse.error_of_json))
+  | DescribeDataSetRefreshProperties ->
+      if is_success
+      then
+        Ok
+          (DescribeDataSetRefreshPropertiesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDataSetRefreshPropertiesResponse.error_of_json))
   | DescribeDataSource ->
       if is_success
       then Ok (DescribeDataSourceResponse.of_json (response_to_json resp))
@@ -2627,6 +5346,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDataSourcePermissionsResponse.error_of_json))
+  | DescribeDefaultQBusinessApplication ->
+      if is_success
+      then
+        Ok
+          (DescribeDefaultQBusinessApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeDefaultQBusinessApplicationResponse.error_of_json))
   | DescribeFolder ->
       if is_success
       then Ok (DescribeFolderResponse.of_json (response_to_json resp))
@@ -2685,12 +5414,70 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeIpRestrictionResponse.error_of_json))
+  | DescribeKeyRegistration ->
+      if is_success
+      then
+        Ok (DescribeKeyRegistrationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeKeyRegistrationResponse.error_of_json))
   | DescribeNamespace ->
       if is_success
       then Ok (DescribeNamespaceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeNamespaceResponse.error_of_json))
+  | DescribeQPersonalizationConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeQPersonalizationConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeQPersonalizationConfigurationResponse.error_of_json))
+  | DescribeQuickSightQSearchConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeQuickSightQSearchConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeQuickSightQSearchConfigurationResponse.error_of_json))
+  | DescribeRefreshSchedule ->
+      if is_success
+      then
+        Ok (DescribeRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRefreshScheduleResponse.error_of_json))
+  | DescribeRoleCustomPermission ->
+      if is_success
+      then
+        Ok
+          (DescribeRoleCustomPermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRoleCustomPermissionResponse.error_of_json))
+  | DescribeSelfUpgradeConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeSelfUpgradeConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSelfUpgradeConfigurationResponse.error_of_json))
   | DescribeTemplate ->
       if is_success
       then Ok (DescribeTemplateResponse.of_json (response_to_json resp))
@@ -2702,6 +5489,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeTemplateAliasResponse.error_of_json))
+  | DescribeTemplateDefinition ->
+      if is_success
+      then
+        Ok
+          (DescribeTemplateDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTemplateDefinitionResponse.error_of_json))
   | DescribeTemplatePermissions ->
       if is_success
       then
@@ -2730,10 +5526,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeThemePermissionsResponse.error_of_json))
+  | DescribeTopic ->
+      if is_success
+      then Ok (DescribeTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeTopicResponse.error_of_json))
+  | DescribeTopicPermissions ->
+      if is_success
+      then
+        Ok (DescribeTopicPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTopicPermissionsResponse.error_of_json))
+  | DescribeTopicRefresh ->
+      if is_success
+      then Ok (DescribeTopicRefreshResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeTopicRefreshResponse.error_of_json))
+  | DescribeTopicRefreshSchedule ->
+      if is_success
+      then
+        Ok
+          (DescribeTopicRefreshScheduleResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeTopicRefreshScheduleResponse.error_of_json))
   | DescribeUser ->
       if is_success
       then Ok (DescribeUserResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeUserResponse.error_of_json))
+  | DescribeVPCConnection ->
+      if is_success
+      then Ok (DescribeVPCConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeVPCConnectionResponse.error_of_json))
   | GenerateEmbedUrlForAnonymousUser ->
       if is_success
       then
@@ -2754,22 +5584,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GenerateEmbedUrlForRegisteredUserResponse.error_of_json))
+  | GenerateEmbedUrlForRegisteredUserWithIdentity ->
+      if is_success
+      then
+        Ok
+          (GenerateEmbedUrlForRegisteredUserWithIdentityResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GenerateEmbedUrlForRegisteredUserWithIdentityResponse.error_of_json))
   | GetDashboardEmbedUrl ->
       if is_success
       then Ok (GetDashboardEmbedUrlResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetDashboardEmbedUrlResponse.error_of_json))
+  | GetFlowMetadata ->
+      if is_success
+      then Ok (GetFlowMetadataOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFlowMetadataOutput.error_of_json))
+  | GetFlowPermissions ->
+      if is_success
+      then Ok (GetFlowPermissionsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetFlowPermissionsOutput.error_of_json))
+  | GetIdentityContext ->
+      if is_success
+      then Ok (GetIdentityContextResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetIdentityContextResponse.error_of_json))
   | GetSessionEmbedUrl ->
       if is_success
       then Ok (GetSessionEmbedUrlResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetSessionEmbedUrlResponse.error_of_json))
+  | ListActionConnectors ->
+      if is_success
+      then Ok (ListActionConnectorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListActionConnectorsResponse.error_of_json))
   | ListAnalyses ->
       if is_success
       then Ok (ListAnalysesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAnalysesResponse.error_of_json))
+  | ListAssetBundleExportJobs ->
+      if is_success
+      then
+        Ok
+          (ListAssetBundleExportJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetBundleExportJobsResponse.error_of_json))
+  | ListAssetBundleImportJobs ->
+      if is_success
+      then
+        Ok
+          (ListAssetBundleImportJobsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssetBundleImportJobsResponse.error_of_json))
+  | ListBrands ->
+      if is_success
+      then Ok (ListBrandsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListBrandsResponse.error_of_json))
+  | ListCustomPermissions ->
+      if is_success
+      then Ok (ListCustomPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCustomPermissionsResponse.error_of_json))
   | ListDashboardVersions ->
       if is_success
       then Ok (ListDashboardVersionsResponse.of_json (response_to_json resp))
@@ -2790,6 +5680,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListDataSourcesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListDataSourcesResponse.error_of_json))
+  | ListFlows ->
+      if is_success
+      then Ok (ListFlowsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListFlowsOutput.error_of_json))
   | ListFolderMembers ->
       if is_success
       then Ok (ListFolderMembersResponse.of_json (response_to_json resp))
@@ -2800,6 +5694,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListFoldersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListFoldersResponse.error_of_json))
+  | ListFoldersForResource ->
+      if is_success
+      then
+        Ok (ListFoldersForResourceResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListFoldersForResourceResponse.error_of_json))
   | ListGroupMemberships ->
       if is_success
       then Ok (ListGroupMembershipsResponse.of_json (response_to_json resp))
@@ -2828,6 +5730,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListIAMPolicyAssignmentsForUserResponse.error_of_json))
+  | ListIdentityPropagationConfigs ->
+      if is_success
+      then
+        Ok
+          (ListIdentityPropagationConfigsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIdentityPropagationConfigsResponse.error_of_json))
   | ListIngestions ->
       if is_success
       then Ok (ListIngestionsResponse.of_json (response_to_json resp))
@@ -2838,6 +5750,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListNamespacesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListNamespacesResponse.error_of_json))
+  | ListRefreshSchedules ->
+      if is_success
+      then Ok (ListRefreshSchedulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRefreshSchedulesResponse.error_of_json))
+  | ListRoleMemberships ->
+      if is_success
+      then Ok (ListRoleMembershipsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRoleMembershipsResponse.error_of_json))
+  | ListSelfUpgrades ->
+      if is_success
+      then Ok (ListSelfUpgradesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListSelfUpgradesResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -2875,6 +5804,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListThemesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListThemesResponse.error_of_json))
+  | ListTopicRefreshSchedules ->
+      if is_success
+      then
+        Ok
+          (ListTopicRefreshSchedulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTopicRefreshSchedulesResponse.error_of_json))
+  | ListTopicReviewedAnswers ->
+      if is_success
+      then
+        Ok (ListTopicReviewedAnswersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTopicReviewedAnswersResponse.error_of_json))
+  | ListTopics ->
+      if is_success
+      then Ok (ListTopicsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListTopicsResponse.error_of_json))
   | ListUserGroups ->
       if is_success
       then Ok (ListUserGroupsResponse.of_json (response_to_json resp))
@@ -2884,6 +5834,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListUsersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListUsersResponse.error_of_json))
+  | ListVPCConnections ->
+      if is_success
+      then Ok (ListVPCConnectionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListVPCConnectionsResponse.error_of_json))
+  | PredictQAResults ->
+      if is_success
+      then Ok (PredictQAResultsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some PredictQAResultsResponse.error_of_json))
+  | PutDataSetRefreshProperties ->
+      if is_success
+      then
+        Ok
+          (PutDataSetRefreshPropertiesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutDataSetRefreshPropertiesResponse.error_of_json))
   | RegisterUser ->
       if is_success
       then Ok (RegisterUserResponse.of_json (response_to_json resp))
@@ -2893,6 +5864,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (RestoreAnalysisResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some RestoreAnalysisResponse.error_of_json))
+  | SearchActionConnectors ->
+      if is_success
+      then
+        Ok (SearchActionConnectorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some SearchActionConnectorsResponse.error_of_json))
   | SearchAnalyses ->
       if is_success
       then Ok (SearchAnalysesResponse.of_json (response_to_json resp))
@@ -2903,6 +5882,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (SearchDashboardsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some SearchDashboardsResponse.error_of_json))
+  | SearchDataSets ->
+      if is_success
+      then Ok (SearchDataSetsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some SearchDataSetsResponse.error_of_json))
+  | SearchDataSources ->
+      if is_success
+      then Ok (SearchDataSourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some SearchDataSourcesResponse.error_of_json))
+  | SearchFlows ->
+      if is_success
+      then Ok (SearchFlowsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchFlowsOutput.error_of_json))
   | SearchFolders ->
       if is_success
       then Ok (SearchFoldersResponse.of_json (response_to_json resp))
@@ -2911,6 +5905,53 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (SearchGroupsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some SearchGroupsResponse.error_of_json))
+  | SearchTopics ->
+      if is_success
+      then Ok (SearchTopicsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchTopicsResponse.error_of_json))
+  | StartAssetBundleExportJob ->
+      if is_success
+      then
+        Ok
+          (StartAssetBundleExportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartAssetBundleExportJobResponse.error_of_json))
+  | StartAssetBundleImportJob ->
+      if is_success
+      then
+        Ok
+          (StartAssetBundleImportJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartAssetBundleImportJobResponse.error_of_json))
+  | StartAutomationJob ->
+      if is_success
+      then Ok (StartAutomationJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartAutomationJobResponse.error_of_json))
+  | StartDashboardSnapshotJob ->
+      if is_success
+      then
+        Ok
+          (StartDashboardSnapshotJobResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartDashboardSnapshotJobResponse.error_of_json))
+  | StartDashboardSnapshotJobSchedule ->
+      if is_success
+      then
+        Ok
+          (StartDashboardSnapshotJobScheduleResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartDashboardSnapshotJobScheduleResponse.error_of_json))
   | TagResource ->
       if is_success
       then Ok (TagResourceResponse.of_json (response_to_json resp))
@@ -2919,6 +5960,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UntagResourceResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAccountCustomPermission ->
+      if is_success
+      then
+        Ok
+          (UpdateAccountCustomPermissionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAccountCustomPermissionResponse.error_of_json))
   | UpdateAccountCustomization ->
       if is_success
       then
@@ -2934,6 +5985,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateAccountSettingsResponse.error_of_json))
+  | UpdateActionConnector ->
+      if is_success
+      then Ok (UpdateActionConnectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateActionConnectorResponse.error_of_json))
+  | UpdateActionConnectorPermissions ->
+      if is_success
+      then
+        Ok
+          (UpdateActionConnectorPermissionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateActionConnectorPermissionsResponse.error_of_json))
   | UpdateAnalysis ->
       if is_success
       then Ok (UpdateAnalysisResponse.of_json (response_to_json resp))
@@ -2948,11 +6015,56 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateAnalysisPermissionsResponse.error_of_json))
+  | UpdateApplicationWithTokenExchangeGrant ->
+      if is_success
+      then
+        Ok
+          (UpdateApplicationWithTokenExchangeGrantResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateApplicationWithTokenExchangeGrantResponse.error_of_json))
+  | UpdateBrand ->
+      if is_success
+      then Ok (UpdateBrandResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateBrandResponse.error_of_json))
+  | UpdateBrandAssignment ->
+      if is_success
+      then Ok (UpdateBrandAssignmentResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateBrandAssignmentResponse.error_of_json))
+  | UpdateBrandPublishedVersion ->
+      if is_success
+      then
+        Ok
+          (UpdateBrandPublishedVersionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateBrandPublishedVersionResponse.error_of_json))
+  | UpdateCustomPermissions ->
+      if is_success
+      then
+        Ok (UpdateCustomPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCustomPermissionsResponse.error_of_json))
   | UpdateDashboard ->
       if is_success
       then Ok (UpdateDashboardResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateDashboardResponse.error_of_json))
+  | UpdateDashboardLinks ->
+      if is_success
+      then Ok (UpdateDashboardLinksResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDashboardLinksResponse.error_of_json))
   | UpdateDashboardPermissions ->
       if is_success
       then
@@ -2972,6 +6084,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateDashboardPublishedVersionResponse.error_of_json))
+  | UpdateDashboardsQAConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateDashboardsQAConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDashboardsQAConfigurationResponse.error_of_json))
   | UpdateDataSet ->
       if is_success
       then Ok (UpdateDataSetResponse.of_json (response_to_json resp))
@@ -2999,6 +6121,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateDataSourcePermissionsResponse.error_of_json))
+  | UpdateDefaultQBusinessApplication ->
+      if is_success
+      then
+        Ok
+          (UpdateDefaultQBusinessApplicationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDefaultQBusinessApplicationResponse.error_of_json))
+  | UpdateFlowPermissions ->
+      if is_success
+      then Ok (UpdateFlowPermissionsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateFlowPermissionsOutput.error_of_json))
   | UpdateFolder ->
       if is_success
       then Ok (UpdateFolderResponse.of_json (response_to_json resp))
@@ -3024,12 +6162,99 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateIAMPolicyAssignmentResponse.error_of_json))
+  | UpdateIdentityPropagationConfig ->
+      if is_success
+      then
+        Ok
+          (UpdateIdentityPropagationConfigResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIdentityPropagationConfigResponse.error_of_json))
   | UpdateIpRestriction ->
       if is_success
       then Ok (UpdateIpRestrictionResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some UpdateIpRestrictionResponse.error_of_json))
+  | UpdateKeyRegistration ->
+      if is_success
+      then Ok (UpdateKeyRegistrationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateKeyRegistrationResponse.error_of_json))
+  | UpdatePublicSharingSettings ->
+      if is_success
+      then
+        Ok
+          (UpdatePublicSharingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePublicSharingSettingsResponse.error_of_json))
+  | UpdateQPersonalizationConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateQPersonalizationConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateQPersonalizationConfigurationResponse.error_of_json))
+  | UpdateQuickSightQSearchConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateQuickSightQSearchConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateQuickSightQSearchConfigurationResponse.error_of_json))
+  | UpdateRefreshSchedule ->
+      if is_success
+      then Ok (UpdateRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRefreshScheduleResponse.error_of_json))
+  | UpdateRoleCustomPermission ->
+      if is_success
+      then
+        Ok
+          (UpdateRoleCustomPermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRoleCustomPermissionResponse.error_of_json))
+  | UpdateSPICECapacityConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateSPICECapacityConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSPICECapacityConfigurationResponse.error_of_json))
+  | UpdateSelfUpgrade ->
+      if is_success
+      then Ok (UpdateSelfUpgradeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateSelfUpgradeResponse.error_of_json))
+  | UpdateSelfUpgradeConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateSelfUpgradeConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSelfUpgradeConfigurationResponse.error_of_json))
   | UpdateTemplate ->
       if is_success
       then Ok (UpdateTemplateResponse.of_json (response_to_json resp))
@@ -3067,7 +6292,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateThemePermissionsResponse.error_of_json))
+  | UpdateTopic ->
+      if is_success
+      then Ok (UpdateTopicResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateTopicResponse.error_of_json))
+  | UpdateTopicPermissions ->
+      if is_success
+      then
+        Ok (UpdateTopicPermissionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTopicPermissionsResponse.error_of_json))
+  | UpdateTopicRefreshSchedule ->
+      if is_success
+      then
+        Ok
+          (UpdateTopicRefreshScheduleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTopicRefreshScheduleResponse.error_of_json))
   | UpdateUser ->
       if is_success
       then Ok (UpdateUserResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))
+  | UpdateUserCustomPermission ->
+      if is_success
+      then
+        Ok
+          (UpdateUserCustomPermissionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateUserCustomPermissionResponse.error_of_json))
+  | UpdateVPCConnection ->
+      if is_success
+      then Ok (UpdateVPCConnectionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateVPCConnectionResponse.error_of_json))

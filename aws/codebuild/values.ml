@@ -92,10 +92,10 @@ module ResolvedArtifact =
         (Option.map ~f:ArtifactsType.of_xml) (Xml.child xml_arg0 "type") in
       make ?identifier ?location ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map json "identifier" String_.of_json in
-      let location = field_map json "location" String_.of_json in
-      let type_ = field_map json "type" ArtifactsType.of_json in
+    let of_json json__ =
+      let identifier = field_map json__ "identifier" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let type_ = field_map json__ "type" ArtifactsType.of_json in
       make ?identifier ?location ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -104,6 +104,9 @@ module ImageVersions =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -124,6 +127,35 @@ module ImageVersions =
       list_of_json ~kind:"ImageVersions" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PhaseContext =
+  struct
+    type nonrec t =
+      {
+      statusCode: String_.t option
+        [@ocaml.doc "The status code for the context of the build phase."];
+      message: String_.t option
+        [@ocaml.doc
+          "An explanation of the build phase's context. This might include a command ID and an exit code."]}
+    let make ?statusCode = fun ?message -> fun () -> { statusCode; message }
+    let to_value x =
+      structure_to_value
+        [("statusCode", (Option.map x.statusCode ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let statusCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusCode") in
+      make ?message ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let statusCode = field_map json__ "statusCode" String_.of_json in
+      make ?message ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Additional information about a build phase that has an error. You can use this information for troubleshooting."]
 module WebhookFilterType =
   struct
     type nonrec t =
@@ -133,6 +165,11 @@ module WebhookFilterType =
       | ACTOR_ACCOUNT_ID 
       | FILE_PATH 
       | COMMIT_MESSAGE 
+      | WORKFLOW_NAME 
+      | TAG_NAME 
+      | RELEASE_NAME 
+      | REPOSITORY_NAME 
+      | ORGANIZATION_NAME 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -143,6 +180,11 @@ module WebhookFilterType =
       | ACTOR_ACCOUNT_ID -> "ACTOR_ACCOUNT_ID"
       | FILE_PATH -> "FILE_PATH"
       | COMMIT_MESSAGE -> "COMMIT_MESSAGE"
+      | WORKFLOW_NAME -> "WORKFLOW_NAME"
+      | TAG_NAME -> "TAG_NAME"
+      | RELEASE_NAME -> "RELEASE_NAME"
+      | REPOSITORY_NAME -> "REPOSITORY_NAME"
+      | ORGANIZATION_NAME -> "ORGANIZATION_NAME"
       | Non_static_id s -> s
     let of_string =
       function
@@ -152,6 +194,11 @@ module WebhookFilterType =
       | "ACTOR_ACCOUNT_ID" -> ACTOR_ACCOUNT_ID
       | "FILE_PATH" -> FILE_PATH
       | "COMMIT_MESSAGE" -> COMMIT_MESSAGE
+      | "WORKFLOW_NAME" -> WORKFLOW_NAME
+      | "TAG_NAME" -> TAG_NAME
+      | "RELEASE_NAME" -> RELEASE_NAME
+      | "REPOSITORY_NAME" -> REPOSITORY_NAME
+      | "ORGANIZATION_NAME" -> ORGANIZATION_NAME
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -179,6 +226,9 @@ module ResolvedSecondaryArtifacts =
   struct
     type nonrec t = ResolvedArtifact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolvedArtifact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -275,10 +325,10 @@ module EnvironmentImage =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?versions ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versions = field_map json "versions" ImageVersions.of_json in
-      let description = field_map json "description" String_.of_json in
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let versions = field_map json__ "versions" ImageVersions.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?versions ?description ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -331,10 +381,22 @@ module SourceAuthType =
   struct
     type nonrec t =
       | OAUTH 
+      | CODECONNECTIONS 
+      | SECRETS_MANAGER 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | OAUTH -> "OAUTH" | Non_static_id s -> s
-    let of_string = function | "OAUTH" -> OAUTH | x -> Non_static_id x
+    let to_string =
+      function
+      | OAUTH -> "OAUTH"
+      | CODECONNECTIONS -> "CODECONNECTIONS"
+      | SECRETS_MANAGER -> "SECRETS_MANAGER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OAUTH" -> OAUTH
+      | "CODECONNECTIONS" -> CODECONNECTIONS
+      | "SECRETS_MANAGER" -> SECRETS_MANAGER
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -343,13 +405,108 @@ module SourceAuthType =
     let of_json j = of_string (string_of_json ~kind:"SourceAuthType" j)
     let to_json = simple_to_json to_value
   end
+module LogsConfigStatusType =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LogsConfigStatusType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogsConfigStatusType" j)
+    let to_json = simple_to_json to_value
+  end
+module BucketOwnerAccess =
+  struct
+    type nonrec t =
+      | NONE 
+      | READ_ONLY 
+      | FULL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | READ_ONLY -> "READ_ONLY"
+      | FULL -> "FULL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "READ_ONLY" -> READ_ONLY
+      | "FULL" -> FULL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BucketOwnerAccess" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BucketOwnerAccess" j)
+    let to_json = simple_to_json to_value
+  end
+module PhaseContexts =
+  struct
+    type nonrec t = PhaseContext.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PhaseContext.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PhaseContext.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PhaseContexts" ~of_json:PhaseContext.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WrapperLong =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module WebhookFilter =
   struct
     type nonrec t =
       {
       type_: WebhookFilterType.t
         [@ocaml.doc
-          "The type of webhook filter. There are six webhook filter types: EVENT, ACTOR_ACCOUNT_ID, HEAD_REF, BASE_REF, FILE_PATH, and COMMIT_MESSAGE. EVENT A webhook event triggers a build when the provided pattern matches one of five event types: PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED, PULL_REQUEST_REOPENED, and PULL_REQUEST_MERGED. The EVENT patterns are specified as a comma-separated string. For example, PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED filters all push, pull request created, and pull request updated events. The PULL_REQUEST_REOPENED works with GitHub and GitHub Enterprise only. ACTOR_ACCOUNT_ID A webhook event triggers a build when a GitHub, GitHub Enterprise, or Bitbucket account ID matches the regular expression pattern. HEAD_REF A webhook event triggers a build when the head reference matches the regular expression pattern. For example, refs/heads/branch-name and refs/tags/tag-name. Works with GitHub and GitHub Enterprise push, GitHub and GitHub Enterprise pull request, Bitbucket push, and Bitbucket pull request events. BASE_REF A webhook event triggers a build when the base reference matches the regular expression pattern. For example, refs/heads/branch-name. Works with pull request events only. FILE_PATH A webhook triggers a build when the path of a changed file matches the regular expression pattern. Works with GitHub and Bitbucket events push and pull requests events. Also works with GitHub Enterprise push events, but does not work with GitHub Enterprise pull request events. COMMIT_MESSAGE A webhook triggers a build when the head commit message matches the regular expression pattern. Works with GitHub and Bitbucket events push and pull requests events. Also works with GitHub Enterprise push events, but does not work with GitHub Enterprise pull request events."];
+          "The type of webhook filter. There are 11 webhook filter types: EVENT, ACTOR_ACCOUNT_ID, HEAD_REF, BASE_REF, FILE_PATH, COMMIT_MESSAGE, TAG_NAME, RELEASE_NAME, REPOSITORY_NAME, ORGANIZATION_NAME, and WORKFLOW_NAME. EVENT A webhook event triggers a build when the provided pattern matches one of nine event types: PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED, PULL_REQUEST_CLOSED, PULL_REQUEST_REOPENED, PULL_REQUEST_MERGED, RELEASED, PRERELEASED, and WORKFLOW_JOB_QUEUED. The EVENT patterns are specified as a comma-separated string. For example, PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED filters all push, pull request created, and pull request updated events. Types PULL_REQUEST_REOPENED and WORKFLOW_JOB_QUEUED work with GitHub and GitHub Enterprise only. Types RELEASED and PRERELEASED work with GitHub only. ACTOR_ACCOUNT_ID A webhook event triggers a build when a GitHub, GitHub Enterprise, or Bitbucket account ID matches the regular expression pattern. HEAD_REF A webhook event triggers a build when the head reference matches the regular expression pattern. For example, refs/heads/branch-name and refs/tags/tag-name. Works with GitHub and GitHub Enterprise push, GitHub and GitHub Enterprise pull request, Bitbucket push, and Bitbucket pull request events. BASE_REF A webhook event triggers a build when the base reference matches the regular expression pattern. For example, refs/heads/branch-name. Works with pull request events only. FILE_PATH A webhook triggers a build when the path of a changed file matches the regular expression pattern. Works with push and pull request events only. COMMIT_MESSAGE A webhook triggers a build when the head commit message matches the regular expression pattern. Works with push and pull request events only. TAG_NAME A webhook triggers a build when the tag name of the release matches the regular expression pattern. Works with RELEASED and PRERELEASED events only. RELEASE_NAME A webhook triggers a build when the release name matches the regular expression pattern. Works with RELEASED and PRERELEASED events only. REPOSITORY_NAME A webhook triggers a build when the repository name matches the regular expression pattern. Works with GitHub global or organization webhooks only. ORGANIZATION_NAME A webhook triggers a build when the organization name matches the regular expression pattern. Works with GitHub global webhooks only. WORKFLOW_NAME A webhook triggers a build when the workflow name matches the regular expression pattern. Works with WORKFLOW_JOB_QUEUED events only. For CodeBuild-hosted Buildkite runner builds, WORKFLOW_NAME filters will filter by pipeline name."];
       pattern: String_.t
         [@ocaml.doc
           "For a WebHookFilter that uses EVENT type, a comma-separated string that specifies one or more events. For example, the webhook filter PUSH, PULL_REQUEST_CREATED, PULL_REQUEST_UPDATED allows all push, pull request created, and pull request updated events to trigger a build. For a WebHookFilter that uses any of the other filter types, a regular expression pattern. For example, a WebHookFilter that uses HEAD_REF for its type and the pattern ^refs/heads/ triggers a build when the head reference is a branch with a reference name refs/heads/branch-name."];
@@ -378,44 +535,189 @@ module WebhookFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?excludeMatchedPattern ~pattern ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let excludeMatchedPattern =
-        field_map json "excludeMatchedPattern" WrapperBoolean.of_json in
-      let pattern = field_map_exn json "pattern" String_.of_json in
-      let type_ = field_map_exn json "type" WebhookFilterType.of_json in
+        field_map json__ "excludeMatchedPattern" WrapperBoolean.of_json in
+      let pattern = field_map_exn json__ "pattern" String_.of_json in
+      let type_ = field_map_exn json__ "type" WebhookFilterType.of_json in
       make ?excludeMatchedPattern ~pattern ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A filter used to determine which webhooks trigger a build."]
-module PhaseContext =
+module PullRequestBuildApproverRole =
   struct
     type nonrec t =
-      {
-      statusCode: String_.t option
-        [@ocaml.doc "The status code for the context of the build phase."];
-      message: String_.t option
-        [@ocaml.doc
-          "An explanation of the build phase's context. This might include a command ID and an exit code."]}
-    let make ?statusCode = fun ?message -> fun () -> { statusCode; message }
-    let to_value x =
-      structure_to_value
-        [("statusCode", (Option.map x.statusCode ~f:String_.to_value));
-        ("message", (Option.map x.message ~f:String_.to_value))]
+      | GITHUB_READ 
+      | GITHUB_TRIAGE 
+      | GITHUB_WRITE 
+      | GITHUB_MAINTAIN 
+      | GITHUB_ADMIN 
+      | GITLAB_GUEST 
+      | GITLAB_PLANNER 
+      | GITLAB_REPORTER 
+      | GITLAB_DEVELOPER 
+      | GITLAB_MAINTAINER 
+      | GITLAB_OWNER 
+      | BITBUCKET_READ 
+      | BITBUCKET_WRITE 
+      | BITBUCKET_ADMIN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GITHUB_READ -> "GITHUB_READ"
+      | GITHUB_TRIAGE -> "GITHUB_TRIAGE"
+      | GITHUB_WRITE -> "GITHUB_WRITE"
+      | GITHUB_MAINTAIN -> "GITHUB_MAINTAIN"
+      | GITHUB_ADMIN -> "GITHUB_ADMIN"
+      | GITLAB_GUEST -> "GITLAB_GUEST"
+      | GITLAB_PLANNER -> "GITLAB_PLANNER"
+      | GITLAB_REPORTER -> "GITLAB_REPORTER"
+      | GITLAB_DEVELOPER -> "GITLAB_DEVELOPER"
+      | GITLAB_MAINTAINER -> "GITLAB_MAINTAINER"
+      | GITLAB_OWNER -> "GITLAB_OWNER"
+      | BITBUCKET_READ -> "BITBUCKET_READ"
+      | BITBUCKET_WRITE -> "BITBUCKET_WRITE"
+      | BITBUCKET_ADMIN -> "BITBUCKET_ADMIN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GITHUB_READ" -> GITHUB_READ
+      | "GITHUB_TRIAGE" -> GITHUB_TRIAGE
+      | "GITHUB_WRITE" -> GITHUB_WRITE
+      | "GITHUB_MAINTAIN" -> GITHUB_MAINTAIN
+      | "GITHUB_ADMIN" -> GITHUB_ADMIN
+      | "GITLAB_GUEST" -> GITLAB_GUEST
+      | "GITLAB_PLANNER" -> GITLAB_PLANNER
+      | "GITLAB_REPORTER" -> GITLAB_REPORTER
+      | "GITLAB_DEVELOPER" -> GITLAB_DEVELOPER
+      | "GITLAB_MAINTAINER" -> GITLAB_MAINTAINER
+      | "GITLAB_OWNER" -> GITLAB_OWNER
+      | "BITBUCKET_READ" -> BITBUCKET_READ
+      | "BITBUCKET_WRITE" -> BITBUCKET_WRITE
+      | "BITBUCKET_ADMIN" -> BITBUCKET_ADMIN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
-      let statusCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusCode") in
-      make ?message ?statusCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
-      let statusCode = field_map json "statusCode" String_.of_json in
-      make ?message ?statusCode ()
+      of_string
+        (string_of_xml ~kind:"enumeration PullRequestBuildApproverRole"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PullRequestBuildApproverRole" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetProxyRuleEffectType =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | DENY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALLOW -> "ALLOW" | DENY -> "DENY" | Non_static_id s -> s
+    let of_string =
+      function | "ALLOW" -> ALLOW | "DENY" -> DENY | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FleetProxyRuleEffectType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FleetProxyRuleEffectType" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetProxyRuleEntities =
+  struct
+    type nonrec t = String_.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FleetProxyRuleEntities" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Additional information about a build phase that has an error. You can use this information for troubleshooting."]
+  end
+module FleetProxyRuleType =
+  struct
+    type nonrec t =
+      | DOMAIN 
+      | IP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DOMAIN -> "DOMAIN" | IP -> "IP" | Non_static_id s -> s
+    let of_string =
+      function | "DOMAIN" -> DOMAIN | "IP" -> IP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FleetProxyRuleType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FleetProxyRuleType" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetScalingMetricType =
+  struct
+    type nonrec t =
+      | FLEET_UTILIZATION_RATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FLEET_UTILIZATION_RATE -> "FLEET_UTILIZATION_RATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FLEET_UTILIZATION_RATE" -> FLEET_UTILIZATION_RATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FleetScalingMetricType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FleetScalingMetricType" j)
+    let to_json = simple_to_json to_value
+  end
+module WrapperDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
 module BuildSummary =
   struct
     type nonrec t =
@@ -472,15 +774,15 @@ module BuildSummary =
       make ?secondaryArtifacts ?primaryArtifact ?buildStatus ?requestedOn
         ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts"
+        field_map json__ "secondaryArtifacts"
           ResolvedSecondaryArtifacts.of_json in
       let primaryArtifact =
-        field_map json "primaryArtifact" ResolvedArtifact.of_json in
-      let buildStatus = field_map json "buildStatus" StatusType.of_json in
-      let requestedOn = field_map json "requestedOn" Timestamp.of_json in
-      let arn = field_map json "arn" String_.of_json in
+        field_map json__ "primaryArtifact" ResolvedArtifact.of_json in
+      let buildStatus = field_map json__ "buildStatus" StatusType.of_json in
+      let requestedOn = field_map json__ "requestedOn" Timestamp.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
       make ?secondaryArtifacts ?primaryArtifact ?buildStatus ?requestedOn
         ?arn ()
     let to_json v = composed_to_json to_value v
@@ -489,6 +791,9 @@ module EnvironmentImages =
   struct
     type nonrec t = EnvironmentImage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentImage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -559,6 +864,531 @@ module LanguageType =
     let of_json j = of_string (string_of_json ~kind:"LanguageType" j)
     let to_json = simple_to_json to_value
   end
+module MachineType =
+  struct
+    type nonrec t =
+      | GENERAL 
+      | NVME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | GENERAL -> "GENERAL" | NVME -> "NVME" | Non_static_id s -> s
+    let of_string =
+      function | "GENERAL" -> GENERAL | "NVME" -> NVME | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MachineType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MachineType" j)
+    let to_json = simple_to_json to_value
+  end
+module ComputeType =
+  struct
+    type nonrec t =
+      | BUILD_GENERAL1_SMALL 
+      | BUILD_GENERAL1_MEDIUM 
+      | BUILD_GENERAL1_LARGE 
+      | BUILD_GENERAL1_XLARGE 
+      | BUILD_GENERAL1_2XLARGE 
+      | BUILD_LAMBDA_1GB 
+      | BUILD_LAMBDA_2GB 
+      | BUILD_LAMBDA_4GB 
+      | BUILD_LAMBDA_8GB 
+      | BUILD_LAMBDA_10GB 
+      | ATTRIBUTE_BASED_COMPUTE 
+      | CUSTOM_INSTANCE_TYPE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BUILD_GENERAL1_SMALL -> "BUILD_GENERAL1_SMALL"
+      | BUILD_GENERAL1_MEDIUM -> "BUILD_GENERAL1_MEDIUM"
+      | BUILD_GENERAL1_LARGE -> "BUILD_GENERAL1_LARGE"
+      | BUILD_GENERAL1_XLARGE -> "BUILD_GENERAL1_XLARGE"
+      | BUILD_GENERAL1_2XLARGE -> "BUILD_GENERAL1_2XLARGE"
+      | BUILD_LAMBDA_1GB -> "BUILD_LAMBDA_1GB"
+      | BUILD_LAMBDA_2GB -> "BUILD_LAMBDA_2GB"
+      | BUILD_LAMBDA_4GB -> "BUILD_LAMBDA_4GB"
+      | BUILD_LAMBDA_8GB -> "BUILD_LAMBDA_8GB"
+      | BUILD_LAMBDA_10GB -> "BUILD_LAMBDA_10GB"
+      | ATTRIBUTE_BASED_COMPUTE -> "ATTRIBUTE_BASED_COMPUTE"
+      | CUSTOM_INSTANCE_TYPE -> "CUSTOM_INSTANCE_TYPE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BUILD_GENERAL1_SMALL" -> BUILD_GENERAL1_SMALL
+      | "BUILD_GENERAL1_MEDIUM" -> BUILD_GENERAL1_MEDIUM
+      | "BUILD_GENERAL1_LARGE" -> BUILD_GENERAL1_LARGE
+      | "BUILD_GENERAL1_XLARGE" -> BUILD_GENERAL1_XLARGE
+      | "BUILD_GENERAL1_2XLARGE" -> BUILD_GENERAL1_2XLARGE
+      | "BUILD_LAMBDA_1GB" -> BUILD_LAMBDA_1GB
+      | "BUILD_LAMBDA_2GB" -> BUILD_LAMBDA_2GB
+      | "BUILD_LAMBDA_4GB" -> BUILD_LAMBDA_4GB
+      | "BUILD_LAMBDA_8GB" -> BUILD_LAMBDA_8GB
+      | "BUILD_LAMBDA_10GB" -> BUILD_LAMBDA_10GB
+      | "ATTRIBUTE_BASED_COMPUTE" -> ATTRIBUTE_BASED_COMPUTE
+      | "CUSTOM_INSTANCE_TYPE" -> CUSTOM_INSTANCE_TYPE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ComputeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComputeType" j)
+    let to_json = simple_to_json to_value
+  end
+module DockerServerStatus =
+  struct
+    type nonrec t =
+      {
+      status: String_.t option
+        [@ocaml.doc "The status of the docker server."];
+      message: String_.t option
+        [@ocaml.doc
+          "A message associated with the status of a docker server."]}
+    let make ?status = fun ?message -> fun () -> { status; message }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      make ?message ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      make ?message ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the status of the docker server."]
+module SecurityGroupIds =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIds" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EnvironmentVariable =
+  struct
+    type nonrec t =
+      {
+      name: NonEmptyString.t
+        [@ocaml.doc "The name or key of the environment variable."];
+      value: String_.t
+        [@ocaml.doc
+          "The value of the environment variable. We strongly discourage the use of PLAINTEXT environment variables to store sensitive values, especially Amazon Web Services secret key IDs. PLAINTEXT environment variables can be displayed in plain text using the CodeBuild console and the CLI. For sensitive values, we recommend you use an environment variable of type PARAMETER_STORE or SECRETS_MANAGER."];
+      type_: EnvironmentVariableType.t option
+        [@ocaml.doc
+          "The type of environment variable. Valid values include: PARAMETER_STORE: An environment variable stored in Systems Manager Parameter Store. For environment variables of this type, specify the name of the parameter as the value of the EnvironmentVariable. The parameter value will be substituted for the name at runtime. You can also define Parameter Store environment variables in the buildspec. To learn how to do so, see env/parameter-store in the CodeBuild User Guide. PLAINTEXT: An environment variable in plain text format. This is the default value. SECRETS_MANAGER: An environment variable stored in Secrets Manager. For environment variables of this type, specify the name of the secret as the value of the EnvironmentVariable. The secret value will be substituted for the name at runtime. You can also define Secrets Manager environment variables in the buildspec. To learn how to do so, see env/secrets-manager in the CodeBuild User Guide."]}
+    let context_ = "EnvironmentVariable"
+    let make ?type_ =
+      fun ~name -> fun ~value -> fun () -> { type_; name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (NonEmptyString.to_value x.name)));
+        ("value", (Some (String_.to_value x.value)));
+        ("type", (Option.map x.type_ ~f:EnvironmentVariableType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:EnvironmentVariableType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      let value =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let name =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?type_ ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" EnvironmentVariableType.of_json in
+      let value = field_map_exn json__ "value" String_.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      make ?type_ ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an environment variable for a build project or a build."]
+module CredentialProviderType =
+  struct
+    type nonrec t =
+      | SECRETS_MANAGER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SECRETS_MANAGER -> "SECRETS_MANAGER" | Non_static_id s -> s
+    let of_string =
+      function | "SECRETS_MANAGER" -> SECRETS_MANAGER | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CredentialProviderType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CredentialProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module FileSystemType =
+  struct
+    type nonrec t =
+      | EFS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | EFS -> "EFS" | Non_static_id s -> s
+    let of_string = function | "EFS" -> EFS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FileSystemType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FileSystemType" j)
+    let to_json = simple_to_json to_value
+  end
+module BuildStatusConfig =
+  struct
+    type nonrec t =
+      {
+      context: String_.t option
+        [@ocaml.doc
+          "Specifies the context of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider. Bitbucket This parameter is used for the name parameter in the Bitbucket commit status. For more information, see build in the Bitbucket API documentation. GitHub/GitHub Enterprise Server This parameter is used for the context parameter in the GitHub commit status. For more information, see Create a commit status in the GitHub developer guide."];
+      targetUrl: String_.t option
+        [@ocaml.doc
+          "Specifies the target url of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider. Bitbucket This parameter is used for the url parameter in the Bitbucket commit status. For more information, see build in the Bitbucket API documentation. GitHub/GitHub Enterprise Server This parameter is used for the target_url parameter in the GitHub commit status. For more information, see Create a commit status in the GitHub developer guide."]}
+    let make ?context = fun ?targetUrl -> fun () -> { context; targetUrl }
+    let to_value x =
+      structure_to_value
+        [("context", (Option.map x.context ~f:String_.to_value));
+        ("targetUrl", (Option.map x.targetUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetUrl") in
+      let context =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
+      make ?targetUrl ?context ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetUrl = field_map json__ "targetUrl" String_.of_json in
+      let context = field_map json__ "context" String_.of_json in
+      make ?targetUrl ?context ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information that defines how the CodeBuild build project reports the build status to the source provider."]
+module GitCloneDepth =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GitCloneDepth" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module GitSubmodulesConfig =
+  struct
+    type nonrec t =
+      {
+      fetchSubmodules: WrapperBoolean.t
+        [@ocaml.doc
+          "Set to true to fetch Git submodules for your CodeBuild build project."]}
+    let context_ = "GitSubmodulesConfig"
+    let make ~fetchSubmodules = fun () -> { fetchSubmodules }
+    let to_value x =
+      structure_to_value
+        [("fetchSubmodules",
+           (Some (WrapperBoolean.to_value x.fetchSubmodules)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fetchSubmodules =
+        WrapperBoolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fetchSubmodules") in
+      make ~fetchSubmodules ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fetchSubmodules =
+        field_map_exn json__ "fetchSubmodules" WrapperBoolean.of_json in
+      make ~fetchSubmodules ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the Git submodules configuration for an CodeBuild build project."]
+module SourceAuth =
+  struct
+    type nonrec t =
+      {
+      type_: SourceAuthType.t
+        [@ocaml.doc
+          "The authorization type to use. Valid options are OAUTH, CODECONNECTIONS, or SECRETS_MANAGER."];
+      resource: String_.t option
+        [@ocaml.doc
+          "The resource value that applies to the specified authorization type."]}
+    let context_ = "SourceAuth"
+    let make ?resource = fun ~type_ -> fun () -> { resource; type_ }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (SourceAuthType.to_value x.type_)));
+        ("resource", (Option.map x.resource ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
+      let type_ =
+        SourceAuthType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?resource ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resource = field_map json__ "resource" String_.of_json in
+      let type_ = field_map_exn json__ "type" SourceAuthType.of_json in
+      make ?resource ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the authorization settings for CodeBuild to access the source code to be built."]
+module SourceType =
+  struct
+    type nonrec t =
+      | CODECOMMIT 
+      | CODEPIPELINE 
+      | GITHUB 
+      | GITLAB 
+      | GITLAB_SELF_MANAGED 
+      | S3 
+      | BITBUCKET 
+      | GITHUB_ENTERPRISE 
+      | NO_SOURCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CODECOMMIT -> "CODECOMMIT"
+      | CODEPIPELINE -> "CODEPIPELINE"
+      | GITHUB -> "GITHUB"
+      | GITLAB -> "GITLAB"
+      | GITLAB_SELF_MANAGED -> "GITLAB_SELF_MANAGED"
+      | S3 -> "S3"
+      | BITBUCKET -> "BITBUCKET"
+      | GITHUB_ENTERPRISE -> "GITHUB_ENTERPRISE"
+      | NO_SOURCE -> "NO_SOURCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CODECOMMIT" -> CODECOMMIT
+      | "CODEPIPELINE" -> CODEPIPELINE
+      | "GITHUB" -> GITHUB
+      | "GITLAB" -> GITLAB
+      | "GITLAB_SELF_MANAGED" -> GITLAB_SELF_MANAGED
+      | "S3" -> S3
+      | "BITBUCKET" -> BITBUCKET
+      | "GITHUB_ENTERPRISE" -> GITHUB_ENTERPRISE
+      | "NO_SOURCE" -> NO_SOURCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module CloudWatchLogsConfig =
+  struct
+    type nonrec t =
+      {
+      status: LogsConfigStatusType.t
+        [@ocaml.doc
+          "The current status of the logs in CloudWatch Logs for a build project. Valid values are: ENABLED: CloudWatch Logs are enabled for this build project. DISABLED: CloudWatch Logs are not enabled for this build project."];
+      groupName: String_.t option
+        [@ocaml.doc
+          "The group name of the logs in CloudWatch Logs. For more information, see Working with Log Groups and Log Streams."];
+      streamName: String_.t option
+        [@ocaml.doc
+          "The prefix of the stream name of the CloudWatch Logs. For more information, see Working with Log Groups and Log Streams."]}
+    let context_ = "CloudWatchLogsConfig"
+    let make ?groupName =
+      fun ?streamName ->
+        fun ~status -> fun () -> { groupName; streamName; status }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (LogsConfigStatusType.to_value x.status)));
+        ("groupName", (Option.map x.groupName ~f:String_.to_value));
+        ("streamName", (Option.map x.streamName ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "streamName") in
+      let groupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
+      let status =
+        LogsConfigStatusType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ?streamName ?groupName ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamName = field_map json__ "streamName" String_.of_json in
+      let groupName = field_map json__ "groupName" String_.of_json in
+      let status = field_map_exn json__ "status" LogsConfigStatusType.of_json in
+      make ?streamName ?groupName ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about CloudWatch Logs for a build project."]
+module S3LogsConfig =
+  struct
+    type nonrec t =
+      {
+      status: LogsConfigStatusType.t
+        [@ocaml.doc
+          "The current status of the S3 build logs. Valid values are: ENABLED: S3 build logs are enabled for this build project. DISABLED: S3 build logs are not enabled for this build project."];
+      location: String_.t option
+        [@ocaml.doc
+          "The ARN of an S3 bucket and the path prefix for S3 logs. If your Amazon S3 bucket name is my-bucket, and your path prefix is build-log, then acceptable formats are my-bucket/build-log or arn:aws:s3:::my-bucket/build-log."];
+      encryptionDisabled: WrapperBoolean.t option
+        [@ocaml.doc
+          "Set to true if you do not want your S3 build log output encrypted. By default S3 build logs are encrypted."];
+      bucketOwnerAccess: BucketOwnerAccess.t option }
+    let context_ = "S3LogsConfig"
+    let make ?location =
+      fun ?encryptionDisabled ->
+        fun ?bucketOwnerAccess ->
+          fun ~status ->
+            fun () ->
+              { location; encryptionDisabled; bucketOwnerAccess; status }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (LogsConfigStatusType.to_value x.status)));
+        ("location", (Option.map x.location ~f:String_.to_value));
+        ("encryptionDisabled",
+          (Option.map x.encryptionDisabled ~f:WrapperBoolean.to_value));
+        ("bucketOwnerAccess",
+          (Option.map x.bucketOwnerAccess ~f:BucketOwnerAccess.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let bucketOwnerAccess =
+        (Option.map ~f:BucketOwnerAccess.of_xml)
+          (Xml.child xml_arg0 "bucketOwnerAccess") in
+      let encryptionDisabled =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "encryptionDisabled") in
+      let location =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
+      let status =
+        LogsConfigStatusType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ?bucketOwnerAccess ?encryptionDisabled ?location ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let bucketOwnerAccess =
+        field_map json__ "bucketOwnerAccess" BucketOwnerAccess.of_json in
+      let encryptionDisabled =
+        field_map json__ "encryptionDisabled" WrapperBoolean.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let status = field_map_exn json__ "status" LogsConfigStatusType.of_json in
+      make ?bucketOwnerAccess ?encryptionDisabled ?location ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about S3 logs for a build project."]
+module SandboxSessionPhase =
+  struct
+    type nonrec t =
+      {
+      phaseType: String_.t option
+        [@ocaml.doc "The name of the sandbox phase."];
+      phaseStatus: StatusType.t option
+        [@ocaml.doc
+          "The current status of the sandbox phase. Valid values include: FAILED The sandbox phase failed. FAULT The sandbox phase faulted. IN_PROGRESS The sandbox phase is still in progress. STOPPED The sandbox phase stopped. SUCCEEDED The sandbox phase succeeded. TIMED_OUT The sandbox phase timed out."];
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox phase started, expressed in Unix time format."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox phase ended, expressed in Unix time format."];
+      durationInSeconds: WrapperLong.t option
+        [@ocaml.doc
+          "How long, in seconds, between the starting and ending times of the sandbox's phase."];
+      contexts: PhaseContexts.t option
+        [@ocaml.doc "An array of PhaseContext objects."]}
+    let make ?phaseType =
+      fun ?phaseStatus ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?durationInSeconds ->
+              fun ?contexts ->
+                fun () ->
+                  {
+                    phaseType;
+                    phaseStatus;
+                    startTime;
+                    endTime;
+                    durationInSeconds;
+                    contexts
+                  }
+    let to_value x =
+      structure_to_value
+        [("phaseType", (Option.map x.phaseType ~f:String_.to_value));
+        ("phaseStatus", (Option.map x.phaseStatus ~f:StatusType.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("durationInSeconds",
+          (Option.map x.durationInSeconds ~f:WrapperLong.to_value));
+        ("contexts", (Option.map x.contexts ~f:PhaseContexts.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contexts =
+        (Option.map ~f:PhaseContexts.of_xml) (Xml.child xml_arg0 "contexts") in
+      let durationInSeconds =
+        (Option.map ~f:WrapperLong.of_xml)
+          (Xml.child xml_arg0 "durationInSeconds") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let phaseStatus =
+        (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "phaseStatus") in
+      let phaseType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "phaseType") in
+      make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
+        ?phaseType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contexts = field_map json__ "contexts" PhaseContexts.of_json in
+      let durationInSeconds =
+        field_map json__ "durationInSeconds" WrapperLong.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let phaseStatus = field_map json__ "phaseStatus" StatusType.of_json in
+      let phaseType = field_map json__ "phaseType" String_.of_json in
+      make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
+        ?phaseType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the sandbox phase."]
 module ReportPackagingType =
   struct
     type nonrec t =
@@ -637,61 +1467,6 @@ module ValueInput =
     let of_json j = string_of_json ~kind:"ValueInput" j
     let to_json = simple_to_json to_value
   end
-module LogsConfigStatusType =
-  struct
-    type nonrec t =
-      | ENABLED 
-      | DISABLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration LogsConfigStatusType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"LogsConfigStatusType" j)
-    let to_json = simple_to_json to_value
-  end
-module BucketOwnerAccess =
-  struct
-    type nonrec t =
-      | NONE 
-      | READ_ONLY 
-      | FULL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NONE -> "NONE"
-      | READ_ONLY -> "READ_ONLY"
-      | FULL -> "FULL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NONE" -> NONE
-      | "READ_ONLY" -> READ_ONLY
-      | "FULL" -> FULL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration BucketOwnerAccess" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"BucketOwnerAccess" j)
-    let to_json = simple_to_json to_value
-  end
 module ArtifactNamespace =
   struct
     type nonrec t =
@@ -742,6 +1517,9 @@ module ComputeTypesAllowed =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -761,6 +1539,33 @@ module ComputeTypesAllowed =
     let of_json j =
       list_of_json ~kind:"ComputeTypesAllowed"
         ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FleetsAllowed =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FleetsAllowed" ~of_json:NonEmptyString.of_json j
     let to_json v = composed_to_json to_value v
   end
 module CacheMode =
@@ -791,230 +1596,13 @@ module CacheMode =
     let of_json j = of_string (string_of_json ~kind:"CacheMode" j)
     let to_json = simple_to_json to_value
   end
-module EnvironmentVariable =
-  struct
-    type nonrec t =
-      {
-      name: NonEmptyString.t
-        [@ocaml.doc "The name or key of the environment variable."];
-      value: String_.t
-        [@ocaml.doc
-          "The value of the environment variable. We strongly discourage the use of PLAINTEXT environment variables to store sensitive values, especially Amazon Web Services secret key IDs and secret access keys. PLAINTEXT environment variables can be displayed in plain text using the CodeBuild console and the CLI. For sensitive values, we recommend you use an environment variable of type PARAMETER_STORE or SECRETS_MANAGER."];
-      type_: EnvironmentVariableType.t option
-        [@ocaml.doc
-          "The type of environment variable. Valid values include: PARAMETER_STORE: An environment variable stored in Systems Manager Parameter Store. To learn how to specify a parameter store environment variable, see env/parameter-store in the CodeBuild User Guide. PLAINTEXT: An environment variable in plain text format. This is the default value. SECRETS_MANAGER: An environment variable stored in Secrets Manager. To learn how to specify a secrets manager environment variable, see env/secrets-manager in the CodeBuild User Guide."]}
-    let context_ = "EnvironmentVariable"
-    let make ?type_ =
-      fun ~name -> fun ~value -> fun () -> { type_; name; value }
-    let to_value x =
-      structure_to_value
-        [("name", (Some (NonEmptyString.to_value x.name)));
-        ("value", (Some (String_.to_value x.value)));
-        ("type", (Option.map x.type_ ~f:EnvironmentVariableType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        (Option.map ~f:EnvironmentVariableType.of_xml)
-          (Xml.child xml_arg0 "type") in
-      let value =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
-      let name =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?type_ ~value ~name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" EnvironmentVariableType.of_json in
-      let value = field_map_exn json "value" String_.of_json in
-      let name = field_map_exn json "name" NonEmptyString.of_json in
-      make ?type_ ~value ~name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about an environment variable for a build project or a build."]
-module CredentialProviderType =
-  struct
-    type nonrec t =
-      | SECRETS_MANAGER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | SECRETS_MANAGER -> "SECRETS_MANAGER" | Non_static_id s -> s
-    let of_string =
-      function | "SECRETS_MANAGER" -> SECRETS_MANAGER | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration CredentialProviderType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"CredentialProviderType" j)
-    let to_json = simple_to_json to_value
-  end
-module FileSystemType =
-  struct
-    type nonrec t =
-      | EFS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string = function | EFS -> "EFS" | Non_static_id s -> s
-    let of_string = function | "EFS" -> EFS | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration FileSystemType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FileSystemType" j)
-    let to_json = simple_to_json to_value
-  end
-module BuildStatusConfig =
-  struct
-    type nonrec t =
-      {
-      context: String_.t option
-        [@ocaml.doc
-          "Specifies the context of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider. Bitbucket This parameter is used for the name parameter in the Bitbucket commit status. For more information, see build in the Bitbucket API documentation. GitHub/GitHub Enterprise Server This parameter is used for the context parameter in the GitHub commit status. For more information, see Create a commit status in the GitHub developer guide."];
-      targetUrl: String_.t option
-        [@ocaml.doc
-          "Specifies the target url of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider. Bitbucket This parameter is used for the url parameter in the Bitbucket commit status. For more information, see build in the Bitbucket API documentation. GitHub/GitHub Enterprise Server This parameter is used for the target_url parameter in the GitHub commit status. For more information, see Create a commit status in the GitHub developer guide."]}
-    let make ?context = fun ?targetUrl -> fun () -> { context; targetUrl }
-    let to_value x =
-      structure_to_value
-        [("context", (Option.map x.context ~f:String_.to_value));
-        ("targetUrl", (Option.map x.targetUrl ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let targetUrl =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "targetUrl") in
-      let context =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
-      make ?targetUrl ?context ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetUrl = field_map json "targetUrl" String_.of_json in
-      let context = field_map json "context" String_.of_json in
-      make ?targetUrl ?context ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Contains information that defines how the CodeBuild build project reports the build status to the source provider."]
-module GitCloneDepth =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in ok_or_failwith (check_int_min i ~min:0); i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for GitCloneDepth" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module GitSubmodulesConfig =
-  struct
-    type nonrec t =
-      {
-      fetchSubmodules: WrapperBoolean.t
-        [@ocaml.doc
-          "Set to true to fetch Git submodules for your CodeBuild build project."]}
-    let context_ = "GitSubmodulesConfig"
-    let make ~fetchSubmodules = fun () -> { fetchSubmodules }
-    let to_value x =
-      structure_to_value
-        [("fetchSubmodules",
-           (Some (WrapperBoolean.to_value x.fetchSubmodules)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let fetchSubmodules =
-        WrapperBoolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fetchSubmodules") in
-      make ~fetchSubmodules ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fetchSubmodules =
-        field_map_exn json "fetchSubmodules" WrapperBoolean.of_json in
-      make ~fetchSubmodules ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the Git submodules configuration for an CodeBuild build project."]
-module SourceAuth =
-  struct
-    type nonrec t =
-      {
-      type_: SourceAuthType.t
-        [@ocaml.doc
-          "This data type is deprecated and is no longer accurate or used. The authorization type to use. The only valid value is OAUTH, which represents the OAuth authorization type."];
-      resource: String_.t option
-        [@ocaml.doc
-          "The resource value that applies to the specified authorization type."]}
-    let context_ = "SourceAuth"
-    let make ?resource = fun ~type_ -> fun () -> { resource; type_ }
-    let to_value x =
-      structure_to_value
-        [("type", (Some (SourceAuthType.to_value x.type_)));
-        ("resource", (Option.map x.resource ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let resource =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
-      let type_ =
-        SourceAuthType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      make ?resource ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map json "resource" String_.of_json in
-      let type_ = field_map_exn json "type" SourceAuthType.of_json in
-      make ?resource ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the authorization settings for CodeBuild to access the source code to be built. This information is for the CodeBuild console's use only. Your code should not get or set this information directly."]
-module SourceType =
-  struct
-    type nonrec t =
-      | CODECOMMIT 
-      | CODEPIPELINE 
-      | GITHUB 
-      | S3 
-      | BITBUCKET 
-      | GITHUB_ENTERPRISE 
-      | NO_SOURCE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CODECOMMIT -> "CODECOMMIT"
-      | CODEPIPELINE -> "CODEPIPELINE"
-      | GITHUB -> "GITHUB"
-      | S3 -> "S3"
-      | BITBUCKET -> "BITBUCKET"
-      | GITHUB_ENTERPRISE -> "GITHUB_ENTERPRISE"
-      | NO_SOURCE -> "NO_SOURCE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CODECOMMIT" -> CODECOMMIT
-      | "CODEPIPELINE" -> CODEPIPELINE
-      | "GITHUB" -> GITHUB
-      | "S3" -> S3
-      | "BITBUCKET" -> BITBUCKET
-      | "GITHUB_ENTERPRISE" -> GITHUB_ENTERPRISE
-      | "NO_SOURCE" -> NO_SOURCE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SourceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SourceType" j)
-    let to_json = simple_to_json to_value
-  end
 module FilterGroup =
   struct
     type nonrec t = WebhookFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WebhookFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1035,6 +1623,167 @@ module FilterGroup =
       list_of_json ~kind:"FilterGroup" ~of_json:WebhookFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PullRequestBuildApproverRoles =
+  struct
+    type nonrec t = PullRequestBuildApproverRole.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PullRequestBuildApproverRole.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PullRequestBuildApproverRole.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PullRequestBuildApproverRoles"
+        ~of_json:PullRequestBuildApproverRole.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PullRequestBuildCommentApproval =
+  struct
+    type nonrec t =
+      | DISABLED 
+      | ALL_PULL_REQUESTS 
+      | FORK_PULL_REQUESTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DISABLED -> "DISABLED"
+      | ALL_PULL_REQUESTS -> "ALL_PULL_REQUESTS"
+      | FORK_PULL_REQUESTS -> "FORK_PULL_REQUESTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DISABLED" -> DISABLED
+      | "ALL_PULL_REQUESTS" -> ALL_PULL_REQUESTS
+      | "FORK_PULL_REQUESTS" -> FORK_PULL_REQUESTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PullRequestBuildCommentApproval"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PullRequestBuildCommentApproval" j)
+    let to_json = simple_to_json to_value
+  end
+module WebhookScopeType =
+  struct
+    type nonrec t =
+      | GITHUB_ORGANIZATION 
+      | GITHUB_GLOBAL 
+      | GITLAB_GROUP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GITHUB_ORGANIZATION -> "GITHUB_ORGANIZATION"
+      | GITHUB_GLOBAL -> "GITHUB_GLOBAL"
+      | GITLAB_GROUP -> "GITLAB_GROUP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GITHUB_ORGANIZATION" -> GITHUB_ORGANIZATION
+      | "GITHUB_GLOBAL" -> GITHUB_GLOBAL
+      | "GITLAB_GROUP" -> GITLAB_GROUP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WebhookScopeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WebhookScopeType" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetProxyRule =
+  struct
+    type nonrec t =
+      {
+      type_: FleetProxyRuleType.t [@ocaml.doc "The type of proxy rule."];
+      effect_: FleetProxyRuleEffectType.t
+        [@ocaml.doc "The behavior of the proxy rule."];
+      entities: FleetProxyRuleEntities.t
+        [@ocaml.doc "The destination of the proxy rule."]}
+    let context_ = "FleetProxyRule"
+    let make ~type_ =
+      fun ~effect_ -> fun ~entities -> fun () -> { type_; effect_; entities }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (FleetProxyRuleType.to_value x.type_)));
+        ("effect", (Some (FleetProxyRuleEffectType.to_value x.effect_)));
+        ("entities", (Some (FleetProxyRuleEntities.to_value x.entities)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let entities =
+        FleetProxyRuleEntities.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "entities") in
+      let effect_ =
+        FleetProxyRuleEffectType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "effect") in
+      let type_ =
+        FleetProxyRuleType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ~entities ~effect_ ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let entities =
+        field_map_exn json__ "entities" FleetProxyRuleEntities.of_json in
+      let effect_ =
+        field_map_exn json__ "effect" FleetProxyRuleEffectType.of_json in
+      let type_ = field_map_exn json__ "type" FleetProxyRuleType.of_json in
+      make ~entities ~effect_ ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the proxy rule for your reserved capacity instances."]
+module TargetTrackingScalingConfiguration =
+  struct
+    type nonrec t =
+      {
+      metricType: FleetScalingMetricType.t option
+        [@ocaml.doc "The metric type to determine auto-scaling."];
+      targetValue: WrapperDouble.t option
+        [@ocaml.doc "The value of metricType when to start scaling."]}
+    let make ?metricType =
+      fun ?targetValue -> fun () -> { metricType; targetValue }
+    let to_value x =
+      structure_to_value
+        [("metricType",
+           (Option.map x.metricType ~f:FleetScalingMetricType.to_value));
+        ("targetValue", (Option.map x.targetValue ~f:WrapperDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetValue =
+        (Option.map ~f:WrapperDouble.of_xml)
+          (Xml.child xml_arg0 "targetValue") in
+      let metricType =
+        (Option.map ~f:FleetScalingMetricType.of_xml)
+          (Xml.child xml_arg0 "metricType") in
+      make ?targetValue ?metricType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetValue = field_map json__ "targetValue" WrapperDouble.of_json in
+      let metricType =
+        field_map json__ "metricType" FleetScalingMetricType.of_json in
+      make ?targetValue ?metricType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines when a new instance is auto-scaled into the compute fleet."]
 module BuildPhaseType =
   struct
     type nonrec t =
@@ -1085,43 +1834,6 @@ module BuildPhaseType =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration BuildPhaseType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"BuildPhaseType" j)
-    let to_json = simple_to_json to_value
-  end
-module PhaseContexts =
-  struct
-    type nonrec t = PhaseContext.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:PhaseContext.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:PhaseContext.of_xml)
-    let of_json j =
-      list_of_json ~kind:"PhaseContexts" ~of_json:PhaseContext.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module WrapperLong =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module BuildBatchPhaseType =
@@ -1182,6 +1894,9 @@ module BuildSummaries =
   struct
     type nonrec t = BuildSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1206,6 +1921,9 @@ module Identifiers =
   struct
     type nonrec t = NonEmptyString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1249,13 +1967,691 @@ module EnvironmentLanguage =
         (Option.map ~f:LanguageType.of_xml) (Xml.child xml_arg0 "language") in
       make ?images ?language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let images = field_map json "images" EnvironmentImages.of_json in
-      let language = field_map json "language" LanguageType.of_json in
+    let of_json json__ =
+      let images = field_map json__ "images" EnvironmentImages.of_json in
+      let language = field_map json__ "language" LanguageType.of_json in
       make ?images ?language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of Docker images that are related by programming language and are managed by CodeBuild."]
+module ComputeConfiguration =
+  struct
+    type nonrec t =
+      {
+      vCpu: WrapperLong.t option
+        [@ocaml.doc
+          "The number of vCPUs of the instance type included in your fleet."];
+      memory: WrapperLong.t option
+        [@ocaml.doc
+          "The amount of memory of the instance type included in your fleet."];
+      disk: WrapperLong.t option
+        [@ocaml.doc
+          "The amount of disk space of the instance type included in your fleet."];
+      machineType: MachineType.t option
+        [@ocaml.doc
+          "The machine type of the instance type included in your fleet."];
+      instanceType: NonEmptyString.t option
+        [@ocaml.doc "The EC2 instance type to be launched in your fleet."]}
+    let make ?vCpu =
+      fun ?memory ->
+        fun ?disk ->
+          fun ?machineType ->
+            fun ?instanceType ->
+              fun () -> { vCpu; memory; disk; machineType; instanceType }
+    let to_value x =
+      structure_to_value
+        [("vCpu", (Option.map x.vCpu ~f:WrapperLong.to_value));
+        ("memory", (Option.map x.memory ~f:WrapperLong.to_value));
+        ("disk", (Option.map x.disk ~f:WrapperLong.to_value));
+        ("machineType", (Option.map x.machineType ~f:MachineType.to_value));
+        ("instanceType",
+          (Option.map x.instanceType ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceType =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "instanceType") in
+      let machineType =
+        (Option.map ~f:MachineType.of_xml) (Xml.child xml_arg0 "machineType") in
+      let disk =
+        (Option.map ~f:WrapperLong.of_xml) (Xml.child xml_arg0 "disk") in
+      let memory =
+        (Option.map ~f:WrapperLong.of_xml) (Xml.child xml_arg0 "memory") in
+      let vCpu =
+        (Option.map ~f:WrapperLong.of_xml) (Xml.child xml_arg0 "vCpu") in
+      make ?instanceType ?machineType ?disk ?memory ?vCpu ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceType =
+        field_map json__ "instanceType" NonEmptyString.of_json in
+      let machineType = field_map json__ "machineType" MachineType.of_json in
+      let disk = field_map json__ "disk" WrapperLong.of_json in
+      let memory = field_map json__ "memory" WrapperLong.of_json in
+      let vCpu = field_map json__ "vCpu" WrapperLong.of_json in
+      make ?instanceType ?machineType ?disk ?memory ?vCpu ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains compute attributes. These attributes only need be specified when your project's or fleet's computeType is set to ATTRIBUTE_BASED_COMPUTE or CUSTOM_INSTANCE_TYPE."]
+module DockerServer =
+  struct
+    type nonrec t =
+      {
+      computeType: ComputeType.t
+        [@ocaml.doc
+          "Information about the compute resources the docker server uses. Available values include: BUILD_GENERAL1_SMALL: Use up to 4 GiB memory and 2 vCPUs for your docker server. BUILD_GENERAL1_MEDIUM: Use up to 8 GiB memory and 4 vCPUs for your docker server. BUILD_GENERAL1_LARGE: Use up to 16 GiB memory and 8 vCPUs for your docker server. BUILD_GENERAL1_XLARGE: Use up to 64 GiB memory and 32 vCPUs for your docker server. BUILD_GENERAL1_2XLARGE: Use up to 128 GiB memory and 64 vCPUs for your docker server."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "A list of one or more security groups IDs. Security groups configured for Docker servers should allow ingress network traffic from the VPC configured in the project. They should allow ingress on port 9876."];
+      status: DockerServerStatus.t option
+        [@ocaml.doc
+          "A DockerServerStatus object to use for this docker server."]}
+    let context_ = "DockerServer"
+    let make ?securityGroupIds =
+      fun ?status ->
+        fun ~computeType ->
+          fun () -> { securityGroupIds; status; computeType }
+    let to_value x =
+      structure_to_value
+        [("computeType", (Some (ComputeType.to_value x.computeType)));
+        ("securityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value));
+        ("status", (Option.map x.status ~f:DockerServerStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:DockerServerStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "securityGroupIds") in
+      let computeType =
+        ComputeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "computeType") in
+      make ?status ?securityGroupIds ~computeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" DockerServerStatus.of_json in
+      let securityGroupIds =
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
+      let computeType =
+        field_map_exn json__ "computeType" ComputeType.of_json in
+      make ?status ?securityGroupIds ~computeType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains docker server information."]
+module EnvironmentType =
+  struct
+    type nonrec t =
+      | WINDOWS_CONTAINER 
+      | LINUX_CONTAINER 
+      | LINUX_GPU_CONTAINER 
+      | ARM_CONTAINER 
+      | WINDOWS_SERVER_2019_CONTAINER 
+      | WINDOWS_SERVER_2022_CONTAINER 
+      | LINUX_LAMBDA_CONTAINER 
+      | ARM_LAMBDA_CONTAINER 
+      | LINUX_EC2 
+      | ARM_EC2 
+      | WINDOWS_EC2 
+      | MAC_ARM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | WINDOWS_CONTAINER -> "WINDOWS_CONTAINER"
+      | LINUX_CONTAINER -> "LINUX_CONTAINER"
+      | LINUX_GPU_CONTAINER -> "LINUX_GPU_CONTAINER"
+      | ARM_CONTAINER -> "ARM_CONTAINER"
+      | WINDOWS_SERVER_2019_CONTAINER -> "WINDOWS_SERVER_2019_CONTAINER"
+      | WINDOWS_SERVER_2022_CONTAINER -> "WINDOWS_SERVER_2022_CONTAINER"
+      | LINUX_LAMBDA_CONTAINER -> "LINUX_LAMBDA_CONTAINER"
+      | ARM_LAMBDA_CONTAINER -> "ARM_LAMBDA_CONTAINER"
+      | LINUX_EC2 -> "LINUX_EC2"
+      | ARM_EC2 -> "ARM_EC2"
+      | WINDOWS_EC2 -> "WINDOWS_EC2"
+      | MAC_ARM -> "MAC_ARM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "WINDOWS_CONTAINER" -> WINDOWS_CONTAINER
+      | "LINUX_CONTAINER" -> LINUX_CONTAINER
+      | "LINUX_GPU_CONTAINER" -> LINUX_GPU_CONTAINER
+      | "ARM_CONTAINER" -> ARM_CONTAINER
+      | "WINDOWS_SERVER_2019_CONTAINER" -> WINDOWS_SERVER_2019_CONTAINER
+      | "WINDOWS_SERVER_2022_CONTAINER" -> WINDOWS_SERVER_2022_CONTAINER
+      | "LINUX_LAMBDA_CONTAINER" -> LINUX_LAMBDA_CONTAINER
+      | "ARM_LAMBDA_CONTAINER" -> ARM_LAMBDA_CONTAINER
+      | "LINUX_EC2" -> LINUX_EC2
+      | "ARM_EC2" -> ARM_EC2
+      | "WINDOWS_EC2" -> WINDOWS_EC2
+      | "MAC_ARM" -> MAC_ARM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EnvironmentType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EnvironmentType" j)
+    let to_json = simple_to_json to_value
+  end
+module EnvironmentVariables =
+  struct
+    type nonrec t = EnvironmentVariable.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EnvironmentVariable.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EnvironmentVariable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EnvironmentVariables"
+        ~of_json:EnvironmentVariable.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImagePullCredentialsType =
+  struct
+    type nonrec t =
+      | CODEBUILD 
+      | SERVICE_ROLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CODEBUILD -> "CODEBUILD"
+      | SERVICE_ROLE -> "SERVICE_ROLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CODEBUILD" -> CODEBUILD
+      | "SERVICE_ROLE" -> SERVICE_ROLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImagePullCredentialsType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ImagePullCredentialsType" j)
+    let to_json = simple_to_json to_value
+  end
+module ProjectFleet =
+  struct
+    type nonrec t =
+      {
+      fleetArn: String_.t option
+        [@ocaml.doc "Specifies the compute fleet ARN for the build project."]}
+    let make ?fleetArn = fun () -> { fleetArn }
+    let to_value x =
+      structure_to_value
+        [("fleetArn", (Option.map x.fleetArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fleetArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "fleetArn") in
+      make ?fleetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fleetArn = field_map json__ "fleetArn" String_.of_json in
+      make ?fleetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the compute fleet of the build project. For more information, see Working with reserved capacity in CodeBuild."]
+module RegistryCredential =
+  struct
+    type nonrec t =
+      {
+      credential: NonEmptyString.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) or name of credentials created using Secrets Manager. The credential can use the name of the credentials only if they exist in your current Amazon Web Services Region."];
+      credentialProvider: CredentialProviderType.t
+        [@ocaml.doc
+          "The service that created the credentials to access a private Docker registry. The valid value, SECRETS_MANAGER, is for Secrets Manager."]}
+    let context_ = "RegistryCredential"
+    let make ~credential =
+      fun ~credentialProvider -> fun () -> { credential; credentialProvider }
+    let to_value x =
+      structure_to_value
+        [("credential", (Some (NonEmptyString.to_value x.credential)));
+        ("credentialProvider",
+          (Some (CredentialProviderType.to_value x.credentialProvider)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let credentialProvider =
+        CredentialProviderType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "credentialProvider") in
+      let credential =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "credential") in
+      make ~credentialProvider ~credential ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let credentialProvider =
+        field_map_exn json__ "credentialProvider"
+          CredentialProviderType.of_json in
+      let credential =
+        field_map_exn json__ "credential" NonEmptyString.of_json in
+      make ~credentialProvider ~credential ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about credentials that provide access to a private Docker registry. When this is set: imagePullCredentialsType must be set to SERVICE_ROLE. images cannot be curated or an Amazon ECR image. For more information, see Private Registry with Secrets Manager Sample for CodeBuild."]
+module ProjectFileSystemLocation =
+  struct
+    type nonrec t =
+      {
+      type_: FileSystemType.t option
+        [@ocaml.doc
+          "The type of the file system. The one supported type is EFS."];
+      location: String_.t option
+        [@ocaml.doc
+          "A string that specifies the location of the file system created by Amazon EFS. Its format is efs-dns-name:/directory-path. You can find the DNS name of file system when you view it in the Amazon EFS console. The directory path is a path to a directory in the file system that CodeBuild mounts. For example, if the DNS name of a file system is fs-abcd1234.efs.us-west-2.amazonaws.com, and its mount directory is my-efs-mount-directory, then the location is fs-abcd1234.efs.us-west-2.amazonaws.com:/my-efs-mount-directory. The directory path in the format efs-dns-name:/directory-path is optional. If you do not specify a directory path, the location is only the DNS name and CodeBuild mounts the entire file system."];
+      mountPoint: String_.t option
+        [@ocaml.doc
+          "The location in the container where you mount the file system."];
+      identifier: String_.t option
+        [@ocaml.doc
+          "The name used to access a file system created by Amazon EFS. CodeBuild creates an environment variable by appending the identifier in all capital letters to CODEBUILD_. For example, if you specify my_efs for identifier, a new environment variable is create named CODEBUILD_MY_EFS. The identifier is used to mount your file system."];
+      mountOptions: String_.t option
+        [@ocaml.doc
+          "The mount options for a file system created by Amazon EFS. The default mount options used by CodeBuild are nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2. For more information, see Recommended NFS Mount Options."]}
+    let make ?type_ =
+      fun ?location ->
+        fun ?mountPoint ->
+          fun ?identifier ->
+            fun ?mountOptions ->
+              fun () ->
+                { type_; location; mountPoint; identifier; mountOptions }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:FileSystemType.to_value));
+        ("location", (Option.map x.location ~f:String_.to_value));
+        ("mountPoint", (Option.map x.mountPoint ~f:String_.to_value));
+        ("identifier", (Option.map x.identifier ~f:String_.to_value));
+        ("mountOptions", (Option.map x.mountOptions ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mountOptions =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountOptions") in
+      let identifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "identifier") in
+      let mountPoint =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountPoint") in
+      let location =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
+      let type_ =
+        (Option.map ~f:FileSystemType.of_xml) (Xml.child xml_arg0 "type") in
+      make ?mountOptions ?identifier ?mountPoint ?location ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mountOptions = field_map json__ "mountOptions" String_.of_json in
+      let identifier = field_map json__ "identifier" String_.of_json in
+      let mountPoint = field_map json__ "mountPoint" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let type_ = field_map json__ "type" FileSystemType.of_json in
+      make ?mountOptions ?identifier ?mountPoint ?location ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a file system created by Amazon Elastic File System (EFS). For more information, see What Is Amazon Elastic File System?"]
+module ProjectSourceVersion =
+  struct
+    type nonrec t =
+      {
+      sourceIdentifier: String_.t
+        [@ocaml.doc
+          "An identifier for a source in the build project. The identifier can only contain alphanumeric characters and underscores, and must be less than 128 characters in length."];
+      sourceVersion: String_.t
+        [@ocaml.doc
+          "The source version for the corresponding source identifier. If specified, must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example, pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For GitLab: the commit ID, branch, or Git tag to use. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."]}
+    let context_ = "ProjectSourceVersion"
+    let make ~sourceIdentifier =
+      fun ~sourceVersion -> fun () -> { sourceIdentifier; sourceVersion }
+    let to_value x =
+      structure_to_value
+        [("sourceIdentifier", (Some (String_.to_value x.sourceIdentifier)));
+        ("sourceVersion", (Some (String_.to_value x.sourceVersion)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceVersion =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceVersion") in
+      let sourceIdentifier =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sourceIdentifier") in
+      make ~sourceVersion ~sourceIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceVersion =
+        field_map_exn json__ "sourceVersion" String_.of_json in
+      let sourceIdentifier =
+        field_map_exn json__ "sourceIdentifier" String_.of_json in
+      make ~sourceVersion ~sourceIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A source identifier and its corresponding version."]
+module ProjectSource =
+  struct
+    type nonrec t =
+      {
+      type_: SourceType.t
+        [@ocaml.doc
+          "The type of repository that contains the source code to be built. Valid values include: BITBUCKET: The source code is in a Bitbucket repository. CODECOMMIT: The source code is in an CodeCommit repository. CODEPIPELINE: The source code settings are specified in the source action of a pipeline in CodePipeline. GITHUB: The source code is in a GitHub repository. GITHUB_ENTERPRISE: The source code is in a GitHub Enterprise Server repository. GITLAB: The source code is in a GitLab repository. GITLAB_SELF_MANAGED: The source code is in a self-managed GitLab repository. NO_SOURCE: The project does not have input source code. S3: The source code is in an Amazon S3 bucket."];
+      location: String_.t option
+        [@ocaml.doc
+          "Information about the location of the source code to be built. Valid values include: For source code settings that are specified in the source action of a pipeline in CodePipeline, location should not be specified. If it is specified, CodePipeline ignores it. This is because CodePipeline uses the settings in a pipeline's source action instead of this value. For source code in an CodeCommit repository, the HTTPS clone URL to the repository that contains the source code and the buildspec file (for example, https://git-codecommit.<region-ID>.amazonaws.com/v1/repos/<repo-name>). For source code in an Amazon S3 input bucket, one of the following. The path to the ZIP file that contains the source code (for example, <bucket-name>/<path>/<object-name>.zip). The path to the folder that contains the source code (for example, <bucket-name>/<path-to-source-code>/<folder>/). For source code in a GitHub repository, the HTTPS clone URL to the repository that contains the source and the buildspec file. You must connect your Amazon Web Services account to your GitHub account. Use the CodeBuild console to start creating a build project. When you use the console to connect (or reconnect) with GitHub, on the GitHub Authorize application page, for Organization access, choose Request access next to each repository you want to allow CodeBuild to have access to, and then choose Authorize application. (After you have connected to your GitHub account, you do not need to finish creating the build project. You can leave the CodeBuild console.) To instruct CodeBuild to use this connection, in the source object, set the auth object's type value to OAUTH. For source code in an GitLab or self-managed GitLab repository, the HTTPS clone URL to the repository that contains the source and the buildspec file. You must connect your Amazon Web Services account to your GitLab account. Use the CodeBuild console to start creating a build project. When you use the console to connect (or reconnect) with GitLab, on the Connections Authorize application page, choose Authorize. Then on the CodeConnections Create GitLab connection page, choose Connect to GitLab. (After you have connected to your GitLab account, you do not need to finish creating the build project. You can leave the CodeBuild console.) To instruct CodeBuild to override the default connection and use this connection instead, set the auth object's type value to CODECONNECTIONS in the source object. For source code in a Bitbucket repository, the HTTPS clone URL to the repository that contains the source and the buildspec file. You must connect your Amazon Web Services account to your Bitbucket account. Use the CodeBuild console to start creating a build project. When you use the console to connect (or reconnect) with Bitbucket, on the Bitbucket Confirm access to your account page, choose Grant access. (After you have connected to your Bitbucket account, you do not need to finish creating the build project. You can leave the CodeBuild console.) To instruct CodeBuild to use this connection, in the source object, set the auth object's type value to OAUTH. If you specify CODEPIPELINE for the Type property, don't specify this property. For all of the other types, you must specify Location."];
+      gitCloneDepth: GitCloneDepth.t option
+        [@ocaml.doc
+          "Information about the Git clone depth for the build project."];
+      gitSubmodulesConfig: GitSubmodulesConfig.t option
+        [@ocaml.doc
+          "Information about the Git submodules configuration for the build project."];
+      buildspec: String_.t option
+        [@ocaml.doc
+          "The buildspec file declaration to use for the builds in this build project. If this value is set, it can be either an inline buildspec definition, the path to an alternate buildspec file relative to the value of the built-in CODEBUILD_SRC_DIR environment variable, or the path to an S3 bucket. The bucket must be in the same Amazon Web Services Region as the build project. Specify the buildspec file using its ARN (for example, arn:aws:s3:::my-codebuild-sample2/buildspec.yml). If this value is not provided or is set to an empty string, the source code must contain a buildspec file in its root directory. For more information, see Buildspec File Name and Storage Location."];
+      auth: SourceAuth.t option
+        [@ocaml.doc
+          "Information about the authorization settings for CodeBuild to access the source code to be built."];
+      reportBuildStatus: WrapperBoolean.t option
+        [@ocaml.doc
+          "Set to true to report the status of a build's start and finish to your source provider. This option is valid only when your source provider is GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, GitLab, GitLab Self Managed, or Bitbucket. If this is set and you use a different source provider, an invalidInputException is thrown. To be able to report the build status to the source provider, the user associated with the source provider must have write access to the repo. If the user does not have write access, the build status cannot be updated. For more information, see Source provider access in the CodeBuild User Guide. The status of a build triggered by a webhook is always reported to your source provider. If your project's builds are triggered by a webhook, you must push a new commit to the repo for a change to this property to take effect."];
+      buildStatusConfig: BuildStatusConfig.t option
+        [@ocaml.doc
+          "Contains information that defines how the build project reports the build status to the source provider. This option is only used when the source provider is GITHUB, GITHUB_ENTERPRISE, or BITBUCKET."];
+      insecureSsl: WrapperBoolean.t option
+        [@ocaml.doc
+          "Enable this flag to ignore SSL warnings while connecting to the project source code."];
+      sourceIdentifier: String_.t option
+        [@ocaml.doc
+          "An identifier for this project source. The identifier can only contain alphanumeric characters and underscores, and must be less than 128 characters in length."]}
+    let context_ = "ProjectSource"
+    let make ?location =
+      fun ?gitCloneDepth ->
+        fun ?gitSubmodulesConfig ->
+          fun ?buildspec ->
+            fun ?auth ->
+              fun ?reportBuildStatus ->
+                fun ?buildStatusConfig ->
+                  fun ?insecureSsl ->
+                    fun ?sourceIdentifier ->
+                      fun ~type_ ->
+                        fun () ->
+                          {
+                            location;
+                            gitCloneDepth;
+                            gitSubmodulesConfig;
+                            buildspec;
+                            auth;
+                            reportBuildStatus;
+                            buildStatusConfig;
+                            insecureSsl;
+                            sourceIdentifier;
+                            type_
+                          }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (SourceType.to_value x.type_)));
+        ("location", (Option.map x.location ~f:String_.to_value));
+        ("gitCloneDepth",
+          (Option.map x.gitCloneDepth ~f:GitCloneDepth.to_value));
+        ("gitSubmodulesConfig",
+          (Option.map x.gitSubmodulesConfig ~f:GitSubmodulesConfig.to_value));
+        ("buildspec", (Option.map x.buildspec ~f:String_.to_value));
+        ("auth", (Option.map x.auth ~f:SourceAuth.to_value));
+        ("reportBuildStatus",
+          (Option.map x.reportBuildStatus ~f:WrapperBoolean.to_value));
+        ("buildStatusConfig",
+          (Option.map x.buildStatusConfig ~f:BuildStatusConfig.to_value));
+        ("insecureSsl",
+          (Option.map x.insecureSsl ~f:WrapperBoolean.to_value));
+        ("sourceIdentifier",
+          (Option.map x.sourceIdentifier ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceIdentifier =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "sourceIdentifier") in
+      let insecureSsl =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "insecureSsl") in
+      let buildStatusConfig =
+        (Option.map ~f:BuildStatusConfig.of_xml)
+          (Xml.child xml_arg0 "buildStatusConfig") in
+      let reportBuildStatus =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "reportBuildStatus") in
+      let auth =
+        (Option.map ~f:SourceAuth.of_xml) (Xml.child xml_arg0 "auth") in
+      let buildspec =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "buildspec") in
+      let gitSubmodulesConfig =
+        (Option.map ~f:GitSubmodulesConfig.of_xml)
+          (Xml.child xml_arg0 "gitSubmodulesConfig") in
+      let gitCloneDepth =
+        (Option.map ~f:GitCloneDepth.of_xml)
+          (Xml.child xml_arg0 "gitCloneDepth") in
+      let location =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
+      let type_ =
+        SourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?sourceIdentifier ?insecureSsl ?buildStatusConfig
+        ?reportBuildStatus ?auth ?buildspec ?gitSubmodulesConfig
+        ?gitCloneDepth ?location ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceIdentifier =
+        field_map json__ "sourceIdentifier" String_.of_json in
+      let insecureSsl = field_map json__ "insecureSsl" WrapperBoolean.of_json in
+      let buildStatusConfig =
+        field_map json__ "buildStatusConfig" BuildStatusConfig.of_json in
+      let reportBuildStatus =
+        field_map json__ "reportBuildStatus" WrapperBoolean.of_json in
+      let auth = field_map json__ "auth" SourceAuth.of_json in
+      let buildspec = field_map json__ "buildspec" String_.of_json in
+      let gitSubmodulesConfig =
+        field_map json__ "gitSubmodulesConfig" GitSubmodulesConfig.of_json in
+      let gitCloneDepth =
+        field_map json__ "gitCloneDepth" GitCloneDepth.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let type_ = field_map_exn json__ "type" SourceType.of_json in
+      make ?sourceIdentifier ?insecureSsl ?buildStatusConfig
+        ?reportBuildStatus ?auth ?buildspec ?gitSubmodulesConfig
+        ?gitCloneDepth ?location ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the build input source code for the build project."]
+module LogsLocation =
+  struct
+    type nonrec t =
+      {
+      groupName: String_.t option
+        [@ocaml.doc
+          "The name of the CloudWatch Logs group for the build logs."];
+      streamName: String_.t option
+        [@ocaml.doc
+          "The name of the CloudWatch Logs stream for the build logs."];
+      deepLink: String_.t option
+        [@ocaml.doc
+          "The URL to an individual build log in CloudWatch Logs. The log stream is created during the PROVISIONING phase of a build and the deeplink will not be valid until it is created."];
+      s3DeepLink: String_.t option
+        [@ocaml.doc "The URL to a build log in an S3 bucket."];
+      cloudWatchLogsArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the CloudWatch Logs stream for a build execution. Its format is arn:$\\{Partition\\}:logs:$\\{Region\\}:$\\{Account\\}:log-group:$\\{LogGroupName\\}:log-stream:$\\{LogStreamName\\}. The CloudWatch Logs stream is created during the PROVISIONING phase of a build and the ARN will not be valid until it is created. For more information, see Resources Defined by CloudWatch Logs."];
+      s3LogsArn: String_.t option
+        [@ocaml.doc
+          "The ARN of S3 logs for a build project. Its format is arn:$\\{Partition\\}:s3:::$\\{BucketName\\}/$\\{ObjectName\\}. For more information, see Resources Defined by Amazon S3."];
+      cloudWatchLogs: CloudWatchLogsConfig.t option
+        [@ocaml.doc "Information about CloudWatch Logs for a build project."];
+      s3Logs: S3LogsConfig.t option
+        [@ocaml.doc "Information about S3 logs for a build project."]}
+    let make ?groupName =
+      fun ?streamName ->
+        fun ?deepLink ->
+          fun ?s3DeepLink ->
+            fun ?cloudWatchLogsArn ->
+              fun ?s3LogsArn ->
+                fun ?cloudWatchLogs ->
+                  fun ?s3Logs ->
+                    fun () ->
+                      {
+                        groupName;
+                        streamName;
+                        deepLink;
+                        s3DeepLink;
+                        cloudWatchLogsArn;
+                        s3LogsArn;
+                        cloudWatchLogs;
+                        s3Logs
+                      }
+    let to_value x =
+      structure_to_value
+        [("groupName", (Option.map x.groupName ~f:String_.to_value));
+        ("streamName", (Option.map x.streamName ~f:String_.to_value));
+        ("deepLink", (Option.map x.deepLink ~f:String_.to_value));
+        ("s3DeepLink", (Option.map x.s3DeepLink ~f:String_.to_value));
+        ("cloudWatchLogsArn",
+          (Option.map x.cloudWatchLogsArn ~f:String_.to_value));
+        ("s3LogsArn", (Option.map x.s3LogsArn ~f:String_.to_value));
+        ("cloudWatchLogs",
+          (Option.map x.cloudWatchLogs ~f:CloudWatchLogsConfig.to_value));
+        ("s3Logs", (Option.map x.s3Logs ~f:S3LogsConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Logs =
+        (Option.map ~f:S3LogsConfig.of_xml) (Xml.child xml_arg0 "s3Logs") in
+      let cloudWatchLogs =
+        (Option.map ~f:CloudWatchLogsConfig.of_xml)
+          (Xml.child xml_arg0 "cloudWatchLogs") in
+      let s3LogsArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3LogsArn") in
+      let cloudWatchLogsArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "cloudWatchLogsArn") in
+      let s3DeepLink =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3DeepLink") in
+      let deepLink =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deepLink") in
+      let streamName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "streamName") in
+      let groupName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
+      make ?s3Logs ?cloudWatchLogs ?s3LogsArn ?cloudWatchLogsArn ?s3DeepLink
+        ?deepLink ?streamName ?groupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Logs = field_map json__ "s3Logs" S3LogsConfig.of_json in
+      let cloudWatchLogs =
+        field_map json__ "cloudWatchLogs" CloudWatchLogsConfig.of_json in
+      let s3LogsArn = field_map json__ "s3LogsArn" String_.of_json in
+      let cloudWatchLogsArn =
+        field_map json__ "cloudWatchLogsArn" String_.of_json in
+      let s3DeepLink = field_map json__ "s3DeepLink" String_.of_json in
+      let deepLink = field_map json__ "deepLink" String_.of_json in
+      let streamName = field_map json__ "streamName" String_.of_json in
+      let groupName = field_map json__ "groupName" String_.of_json in
+      make ?s3Logs ?cloudWatchLogs ?s3LogsArn ?cloudWatchLogsArn ?s3DeepLink
+        ?deepLink ?streamName ?groupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about build logs in CloudWatch Logs."]
+module NetworkInterface =
+  struct
+    type nonrec t =
+      {
+      subnetId: NonEmptyString.t option [@ocaml.doc "The ID of the subnet."];
+      networkInterfaceId: NonEmptyString.t option
+        [@ocaml.doc "The ID of the network interface."]}
+    let make ?subnetId =
+      fun ?networkInterfaceId -> fun () -> { subnetId; networkInterfaceId }
+    let to_value x =
+      structure_to_value
+        [("subnetId", (Option.map x.subnetId ~f:NonEmptyString.to_value));
+        ("networkInterfaceId",
+          (Option.map x.networkInterfaceId ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkInterfaceId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "networkInterfaceId") in
+      let subnetId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "subnetId") in
+      make ?networkInterfaceId ?subnetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkInterfaceId =
+        field_map json__ "networkInterfaceId" NonEmptyString.of_json in
+      let subnetId = field_map json__ "subnetId" NonEmptyString.of_json in
+      make ?networkInterfaceId ?subnetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a network interface."]
+module SandboxSessionPhases =
+  struct
+    type nonrec t = SandboxSessionPhase.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SandboxSessionPhase.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SandboxSessionPhase.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SandboxSessionPhases"
+        ~of_json:SandboxSessionPhase.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Subnets =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:16); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"Subnets" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NonNegativeInt =
   struct
     type nonrec t = int
@@ -1376,15 +2772,16 @@ module S3ReportExportConfig =
       make ?encryptionDisabled ?encryptionKey ?packaging ?path ?bucketOwner
         ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionDisabled =
-        field_map json "encryptionDisabled" WrapperBoolean.of_json in
+        field_map json__ "encryptionDisabled" WrapperBoolean.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
-      let packaging = field_map json "packaging" ReportPackagingType.of_json in
-      let path = field_map json "path" String_.of_json in
-      let bucketOwner = field_map json "bucketOwner" String_.of_json in
-      let bucket = field_map json "bucket" NonEmptyString.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
+      let packaging =
+        field_map json__ "packaging" ReportPackagingType.of_json in
+      let path = field_map json__ "path" String_.of_json in
+      let bucketOwner = field_map json__ "bucketOwner" String_.of_json in
+      let bucket = field_map json__ "bucket" NonEmptyString.of_json in
       make ?encryptionDisabled ?encryptionKey ?packaging ?path ?bucketOwner
         ?bucket ()
     let to_json v = composed_to_json to_value v
@@ -1411,6 +2808,8 @@ module ReportStatusCounts =
                     (fun x -> (WrapperInt.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1436,106 +2835,13 @@ module Tag =
       let key = (Option.map ~f:KeyInput.of_xml) (Xml.child xml_arg0 "key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" ValueInput.of_json in
-      let key = field_map json "key" KeyInput.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "value" ValueInput.of_json in
+      let key = field_map json__ "key" KeyInput.of_json in
+      make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A tag, consisting of a key and a value. This tag is available for use by Amazon Web Services services that support tags in CodeBuild."]
-module CloudWatchLogsConfig =
-  struct
-    type nonrec t =
-      {
-      status: LogsConfigStatusType.t
-        [@ocaml.doc
-          "The current status of the logs in CloudWatch Logs for a build project. Valid values are: ENABLED: CloudWatch Logs are enabled for this build project. DISABLED: CloudWatch Logs are not enabled for this build project."];
-      groupName: String_.t option
-        [@ocaml.doc
-          "The group name of the logs in CloudWatch Logs. For more information, see Working with Log Groups and Log Streams."];
-      streamName: String_.t option
-        [@ocaml.doc
-          "The prefix of the stream name of the CloudWatch Logs. For more information, see Working with Log Groups and Log Streams."]}
-    let context_ = "CloudWatchLogsConfig"
-    let make ?groupName =
-      fun ?streamName ->
-        fun ~status -> fun () -> { groupName; streamName; status }
-    let to_value x =
-      structure_to_value
-        [("status", (Some (LogsConfigStatusType.to_value x.status)));
-        ("groupName", (Option.map x.groupName ~f:String_.to_value));
-        ("streamName", (Option.map x.streamName ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let streamName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "streamName") in
-      let groupName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
-      let status =
-        LogsConfigStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ?streamName ?groupName ~status ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamName = field_map json "streamName" String_.of_json in
-      let groupName = field_map json "groupName" String_.of_json in
-      let status = field_map_exn json "status" LogsConfigStatusType.of_json in
-      make ?streamName ?groupName ~status ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about CloudWatch Logs for a build project."]
-module S3LogsConfig =
-  struct
-    type nonrec t =
-      {
-      status: LogsConfigStatusType.t
-        [@ocaml.doc
-          "The current status of the S3 build logs. Valid values are: ENABLED: S3 build logs are enabled for this build project. DISABLED: S3 build logs are not enabled for this build project."];
-      location: String_.t option
-        [@ocaml.doc
-          "The ARN of an S3 bucket and the path prefix for S3 logs. If your Amazon S3 bucket name is my-bucket, and your path prefix is build-log, then acceptable formats are my-bucket/build-log or arn:aws:s3:::my-bucket/build-log."];
-      encryptionDisabled: WrapperBoolean.t option
-        [@ocaml.doc
-          "Set to true if you do not want your S3 build log output encrypted. By default S3 build logs are encrypted."];
-      bucketOwnerAccess: BucketOwnerAccess.t option }
-    let context_ = "S3LogsConfig"
-    let make ?location =
-      fun ?encryptionDisabled ->
-        fun ?bucketOwnerAccess ->
-          fun ~status ->
-            fun () ->
-              { location; encryptionDisabled; bucketOwnerAccess; status }
-    let to_value x =
-      structure_to_value
-        [("status", (Some (LogsConfigStatusType.to_value x.status)));
-        ("location", (Option.map x.location ~f:String_.to_value));
-        ("encryptionDisabled",
-          (Option.map x.encryptionDisabled ~f:WrapperBoolean.to_value));
-        ("bucketOwnerAccess",
-          (Option.map x.bucketOwnerAccess ~f:BucketOwnerAccess.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let bucketOwnerAccess =
-        (Option.map ~f:BucketOwnerAccess.of_xml)
-          (Xml.child xml_arg0 "bucketOwnerAccess") in
-      let encryptionDisabled =
-        (Option.map ~f:WrapperBoolean.of_xml)
-          (Xml.child xml_arg0 "encryptionDisabled") in
-      let location =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
-      let status =
-        LogsConfigStatusType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ?bucketOwnerAccess ?encryptionDisabled ?location ~status ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bucketOwnerAccess =
-        field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
-      let encryptionDisabled =
-        field_map json "encryptionDisabled" WrapperBoolean.of_json in
-      let location = field_map json "location" String_.of_json in
-      let status = field_map_exn json "status" LogsConfigStatusType.of_json in
-      make ?bucketOwnerAccess ?encryptionDisabled ?location ~status ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about S3 logs for a build project."]
 module ProjectArtifacts =
   struct
     type nonrec t =
@@ -1639,22 +2945,22 @@ module ProjectArtifacts =
         ?overrideArtifactName ?packaging ?name ?namespaceType ?path ?location
         ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bucketOwnerAccess =
-        field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
+        field_map json__ "bucketOwnerAccess" BucketOwnerAccess.of_json in
       let artifactIdentifier =
-        field_map json "artifactIdentifier" String_.of_json in
+        field_map json__ "artifactIdentifier" String_.of_json in
       let encryptionDisabled =
-        field_map json "encryptionDisabled" WrapperBoolean.of_json in
+        field_map json__ "encryptionDisabled" WrapperBoolean.of_json in
       let overrideArtifactName =
-        field_map json "overrideArtifactName" WrapperBoolean.of_json in
-      let packaging = field_map json "packaging" ArtifactPackaging.of_json in
-      let name = field_map json "name" String_.of_json in
+        field_map json__ "overrideArtifactName" WrapperBoolean.of_json in
+      let packaging = field_map json__ "packaging" ArtifactPackaging.of_json in
+      let name = field_map json__ "name" String_.of_json in
       let namespaceType =
-        field_map json "namespaceType" ArtifactNamespace.of_json in
-      let path = field_map json "path" String_.of_json in
-      let location = field_map json "location" String_.of_json in
-      let type_ = field_map_exn json "type" ArtifactsType.of_json in
+        field_map json__ "namespaceType" ArtifactNamespace.of_json in
+      let path = field_map json__ "path" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let type_ = field_map_exn json__ "type" ArtifactsType.of_json in
       make ?bucketOwnerAccess ?artifactIdentifier ?encryptionDisabled
         ?overrideArtifactName ?packaging ?name ?namespaceType ?path ?location
         ~type_ ()
@@ -1695,32 +3001,44 @@ module BatchRestrictions =
         [@ocaml.doc "Specifies the maximum number of builds allowed."];
       computeTypesAllowed: ComputeTypesAllowed.t option
         [@ocaml.doc
-          "An array of strings that specify the compute types that are allowed for the batch build. See Build environment compute types in the CodeBuild User Guide for these values."]}
+          "An array of strings that specify the compute types that are allowed for the batch build. See Build environment compute types in the CodeBuild User Guide for these values."];
+      fleetsAllowed: FleetsAllowed.t option
+        [@ocaml.doc
+          "An array of strings that specify the fleets that are allowed for the batch build. See Run builds on reserved capacity fleets in the CodeBuild User Guide for more information."]}
     let make ?maximumBuildsAllowed =
       fun ?computeTypesAllowed ->
-        fun () -> { maximumBuildsAllowed; computeTypesAllowed }
+        fun ?fleetsAllowed ->
+          fun () ->
+            { maximumBuildsAllowed; computeTypesAllowed; fleetsAllowed }
     let to_value x =
       structure_to_value
         [("maximumBuildsAllowed",
            (Option.map x.maximumBuildsAllowed ~f:WrapperInt.to_value));
         ("computeTypesAllowed",
-          (Option.map x.computeTypesAllowed ~f:ComputeTypesAllowed.to_value))]
+          (Option.map x.computeTypesAllowed ~f:ComputeTypesAllowed.to_value));
+        ("fleetsAllowed",
+          (Option.map x.fleetsAllowed ~f:FleetsAllowed.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fleetsAllowed =
+        (Option.map ~f:FleetsAllowed.of_xml)
+          (Xml.child xml_arg0 "fleetsAllowed") in
       let computeTypesAllowed =
         (Option.map ~f:ComputeTypesAllowed.of_xml)
           (Xml.child xml_arg0 "computeTypesAllowed") in
       let maximumBuildsAllowed =
         (Option.map ~f:WrapperInt.of_xml)
           (Xml.child xml_arg0 "maximumBuildsAllowed") in
-      make ?computeTypesAllowed ?maximumBuildsAllowed ()
+      make ?fleetsAllowed ?computeTypesAllowed ?maximumBuildsAllowed ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let fleetsAllowed =
+        field_map json__ "fleetsAllowed" FleetsAllowed.of_json in
       let computeTypesAllowed =
-        field_map json "computeTypesAllowed" ComputeTypesAllowed.of_json in
+        field_map json__ "computeTypesAllowed" ComputeTypesAllowed.of_json in
       let maximumBuildsAllowed =
-        field_map json "maximumBuildsAllowed" WrapperInt.of_json in
-      make ?computeTypesAllowed ?maximumBuildsAllowed ()
+        field_map json__ "maximumBuildsAllowed" WrapperInt.of_json in
+      make ?fleetsAllowed ?computeTypesAllowed ?maximumBuildsAllowed ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies restrictions for the batch build."]
 module CacheType =
@@ -1755,6 +3073,9 @@ module ProjectCacheModes =
   struct
     type nonrec t = CacheMode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CacheMode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1775,436 +3096,13 @@ module ProjectCacheModes =
       list_of_json ~kind:"ProjectCacheModes" ~of_json:CacheMode.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ComputeType =
-  struct
-    type nonrec t =
-      | BUILD_GENERAL1_SMALL 
-      | BUILD_GENERAL1_MEDIUM 
-      | BUILD_GENERAL1_LARGE 
-      | BUILD_GENERAL1_2XLARGE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | BUILD_GENERAL1_SMALL -> "BUILD_GENERAL1_SMALL"
-      | BUILD_GENERAL1_MEDIUM -> "BUILD_GENERAL1_MEDIUM"
-      | BUILD_GENERAL1_LARGE -> "BUILD_GENERAL1_LARGE"
-      | BUILD_GENERAL1_2XLARGE -> "BUILD_GENERAL1_2XLARGE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "BUILD_GENERAL1_SMALL" -> BUILD_GENERAL1_SMALL
-      | "BUILD_GENERAL1_MEDIUM" -> BUILD_GENERAL1_MEDIUM
-      | "BUILD_GENERAL1_LARGE" -> BUILD_GENERAL1_LARGE
-      | "BUILD_GENERAL1_2XLARGE" -> BUILD_GENERAL1_2XLARGE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ComputeType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ComputeType" j)
-    let to_json = simple_to_json to_value
-  end
-module EnvironmentType =
-  struct
-    type nonrec t =
-      | WINDOWS_CONTAINER 
-      | LINUX_CONTAINER 
-      | LINUX_GPU_CONTAINER 
-      | ARM_CONTAINER 
-      | WINDOWS_SERVER_2019_CONTAINER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | WINDOWS_CONTAINER -> "WINDOWS_CONTAINER"
-      | LINUX_CONTAINER -> "LINUX_CONTAINER"
-      | LINUX_GPU_CONTAINER -> "LINUX_GPU_CONTAINER"
-      | ARM_CONTAINER -> "ARM_CONTAINER"
-      | WINDOWS_SERVER_2019_CONTAINER -> "WINDOWS_SERVER_2019_CONTAINER"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "WINDOWS_CONTAINER" -> WINDOWS_CONTAINER
-      | "LINUX_CONTAINER" -> LINUX_CONTAINER
-      | "LINUX_GPU_CONTAINER" -> LINUX_GPU_CONTAINER
-      | "ARM_CONTAINER" -> ARM_CONTAINER
-      | "WINDOWS_SERVER_2019_CONTAINER" -> WINDOWS_SERVER_2019_CONTAINER
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EnvironmentType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EnvironmentType" j)
-    let to_json = simple_to_json to_value
-  end
-module EnvironmentVariables =
-  struct
-    type nonrec t = EnvironmentVariable.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:EnvironmentVariable.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:EnvironmentVariable.of_xml)
-    let of_json j =
-      list_of_json ~kind:"EnvironmentVariables"
-        ~of_json:EnvironmentVariable.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ImagePullCredentialsType =
-  struct
-    type nonrec t =
-      | CODEBUILD 
-      | SERVICE_ROLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | CODEBUILD -> "CODEBUILD"
-      | SERVICE_ROLE -> "SERVICE_ROLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "CODEBUILD" -> CODEBUILD
-      | "SERVICE_ROLE" -> SERVICE_ROLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration ImagePullCredentialsType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"ImagePullCredentialsType" j)
-    let to_json = simple_to_json to_value
-  end
-module RegistryCredential =
-  struct
-    type nonrec t =
-      {
-      credential: NonEmptyString.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) or name of credentials created using Secrets Manager. The credential can use the name of the credentials only if they exist in your current Amazon Web Services Region."];
-      credentialProvider: CredentialProviderType.t
-        [@ocaml.doc
-          "The service that created the credentials to access a private Docker registry. The valid value, SECRETS_MANAGER, is for Secrets Manager."]}
-    let context_ = "RegistryCredential"
-    let make ~credential =
-      fun ~credentialProvider -> fun () -> { credential; credentialProvider }
-    let to_value x =
-      structure_to_value
-        [("credential", (Some (NonEmptyString.to_value x.credential)));
-        ("credentialProvider",
-          (Some (CredentialProviderType.to_value x.credentialProvider)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let credentialProvider =
-        CredentialProviderType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "credentialProvider") in
-      let credential =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "credential") in
-      make ~credentialProvider ~credential ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let credentialProvider =
-        field_map_exn json "credentialProvider"
-          CredentialProviderType.of_json in
-      let credential = field_map_exn json "credential" NonEmptyString.of_json in
-      make ~credentialProvider ~credential ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about credentials that provide access to a private Docker registry. When this is set: imagePullCredentialsType must be set to SERVICE_ROLE. images cannot be curated or an Amazon ECR image. For more information, see Private Registry with Secrets Manager Sample for CodeBuild."]
-module ProjectFileSystemLocation =
-  struct
-    type nonrec t =
-      {
-      type_: FileSystemType.t option
-        [@ocaml.doc
-          "The type of the file system. The one supported type is EFS."];
-      location: String_.t option
-        [@ocaml.doc
-          "A string that specifies the location of the file system created by Amazon EFS. Its format is efs-dns-name:/directory-path. You can find the DNS name of file system when you view it in the Amazon EFS console. The directory path is a path to a directory in the file system that CodeBuild mounts. For example, if the DNS name of a file system is fs-abcd1234.efs.us-west-2.amazonaws.com, and its mount directory is my-efs-mount-directory, then the location is fs-abcd1234.efs.us-west-2.amazonaws.com:/my-efs-mount-directory. The directory path in the format efs-dns-name:/directory-path is optional. If you do not specify a directory path, the location is only the DNS name and CodeBuild mounts the entire file system."];
-      mountPoint: String_.t option
-        [@ocaml.doc
-          "The location in the container where you mount the file system."];
-      identifier: String_.t option
-        [@ocaml.doc
-          "The name used to access a file system created by Amazon EFS. CodeBuild creates an environment variable by appending the identifier in all capital letters to CODEBUILD_. For example, if you specify my_efs for identifier, a new environment variable is create named CODEBUILD_MY_EFS. The identifier is used to mount your file system."];
-      mountOptions: String_.t option
-        [@ocaml.doc
-          "The mount options for a file system created by Amazon EFS. The default mount options used by CodeBuild are nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2. For more information, see Recommended NFS Mount Options."]}
-    let make ?type_ =
-      fun ?location ->
-        fun ?mountPoint ->
-          fun ?identifier ->
-            fun ?mountOptions ->
-              fun () ->
-                { type_; location; mountPoint; identifier; mountOptions }
-    let to_value x =
-      structure_to_value
-        [("type", (Option.map x.type_ ~f:FileSystemType.to_value));
-        ("location", (Option.map x.location ~f:String_.to_value));
-        ("mountPoint", (Option.map x.mountPoint ~f:String_.to_value));
-        ("identifier", (Option.map x.identifier ~f:String_.to_value));
-        ("mountOptions", (Option.map x.mountOptions ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let mountOptions =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountOptions") in
-      let identifier =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "identifier") in
-      let mountPoint =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountPoint") in
-      let location =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
-      let type_ =
-        (Option.map ~f:FileSystemType.of_xml) (Xml.child xml_arg0 "type") in
-      make ?mountOptions ?identifier ?mountPoint ?location ?type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mountOptions = field_map json "mountOptions" String_.of_json in
-      let identifier = field_map json "identifier" String_.of_json in
-      let mountPoint = field_map json "mountPoint" String_.of_json in
-      let location = field_map json "location" String_.of_json in
-      let type_ = field_map json "type" FileSystemType.of_json in
-      make ?mountOptions ?identifier ?mountPoint ?location ?type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about a file system created by Amazon Elastic File System (EFS). For more information, see What Is Amazon Elastic File System?"]
-module ProjectSourceVersion =
-  struct
-    type nonrec t =
-      {
-      sourceIdentifier: String_.t
-        [@ocaml.doc
-          "An identifier for a source in the build project. The identifier can only contain alphanumeric characters and underscores, and must be less than 128 characters in length."];
-      sourceVersion: String_.t
-        [@ocaml.doc
-          "The source version for the corresponding source identifier. If specified, must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example, pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."]}
-    let context_ = "ProjectSourceVersion"
-    let make ~sourceIdentifier =
-      fun ~sourceVersion -> fun () -> { sourceIdentifier; sourceVersion }
-    let to_value x =
-      structure_to_value
-        [("sourceIdentifier", (Some (String_.to_value x.sourceIdentifier)));
-        ("sourceVersion", (Some (String_.to_value x.sourceVersion)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sourceVersion =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceVersion") in
-      let sourceIdentifier =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceIdentifier") in
-      make ~sourceVersion ~sourceIdentifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceVersion = field_map_exn json "sourceVersion" String_.of_json in
-      let sourceIdentifier =
-        field_map_exn json "sourceIdentifier" String_.of_json in
-      make ~sourceVersion ~sourceIdentifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A source identifier and its corresponding version."]
-module ProjectSource =
-  struct
-    type nonrec t =
-      {
-      type_: SourceType.t
-        [@ocaml.doc
-          "The type of repository that contains the source code to be built. Valid values include: BITBUCKET: The source code is in a Bitbucket repository. CODECOMMIT: The source code is in an CodeCommit repository. CODEPIPELINE: The source code settings are specified in the source action of a pipeline in CodePipeline. GITHUB: The source code is in a GitHub or GitHub Enterprise Cloud repository. GITHUB_ENTERPRISE: The source code is in a GitHub Enterprise Server repository. NO_SOURCE: The project does not have input source code. S3: The source code is in an Amazon S3 bucket."];
-      location: String_.t option
-        [@ocaml.doc
-          "Information about the location of the source code to be built. Valid values include: For source code settings that are specified in the source action of a pipeline in CodePipeline, location should not be specified. If it is specified, CodePipeline ignores it. This is because CodePipeline uses the settings in a pipeline's source action instead of this value. For source code in an CodeCommit repository, the HTTPS clone URL to the repository that contains the source code and the buildspec file (for example, https://git-codecommit.<region-ID>.amazonaws.com/v1/repos/<repo-name>). For source code in an Amazon S3 input bucket, one of the following. The path to the ZIP file that contains the source code (for example, <bucket-name>/<path>/<object-name>.zip). The path to the folder that contains the source code (for example, <bucket-name>/<path-to-source-code>/<folder>/). For source code in a GitHub repository, the HTTPS clone URL to the repository that contains the source and the buildspec file. You must connect your Amazon Web Services account to your GitHub account. Use the CodeBuild console to start creating a build project. When you use the console to connect (or reconnect) with GitHub, on the GitHub Authorize application page, for Organization access, choose Request access next to each repository you want to allow CodeBuild to have access to, and then choose Authorize application. (After you have connected to your GitHub account, you do not need to finish creating the build project. You can leave the CodeBuild console.) To instruct CodeBuild to use this connection, in the source object, set the auth object's type value to OAUTH. For source code in a Bitbucket repository, the HTTPS clone URL to the repository that contains the source and the buildspec file. You must connect your Amazon Web Services account to your Bitbucket account. Use the CodeBuild console to start creating a build project. When you use the console to connect (or reconnect) with Bitbucket, on the Bitbucket Confirm access to your account page, choose Grant access. (After you have connected to your Bitbucket account, you do not need to finish creating the build project. You can leave the CodeBuild console.) To instruct CodeBuild to use this connection, in the source object, set the auth object's type value to OAUTH. If you specify CODEPIPELINE for the Type property, don't specify this property. For all of the other types, you must specify Location."];
-      gitCloneDepth: GitCloneDepth.t option
-        [@ocaml.doc
-          "Information about the Git clone depth for the build project."];
-      gitSubmodulesConfig: GitSubmodulesConfig.t option
-        [@ocaml.doc
-          "Information about the Git submodules configuration for the build project."];
-      buildspec: String_.t option
-        [@ocaml.doc
-          "The buildspec file declaration to use for the builds in this build project. If this value is set, it can be either an inline buildspec definition, the path to an alternate buildspec file relative to the value of the built-in CODEBUILD_SRC_DIR environment variable, or the path to an S3 bucket. The bucket must be in the same Amazon Web Services Region as the build project. Specify the buildspec file using its ARN (for example, arn:aws:s3:::my-codebuild-sample2/buildspec.yml). If this value is not provided or is set to an empty string, the source code must contain a buildspec file in its root directory. For more information, see Buildspec File Name and Storage Location."];
-      auth: SourceAuth.t option
-        [@ocaml.doc
-          "Information about the authorization settings for CodeBuild to access the source code to be built. This information is for the CodeBuild console's use only. Your code should not get or set this information directly."];
-      reportBuildStatus: WrapperBoolean.t option
-        [@ocaml.doc
-          "Set to true to report the status of a build's start and finish to your source provider. This option is valid only when your source provider is GitHub, GitHub Enterprise, or Bitbucket. If this is set and you use a different source provider, an invalidInputException is thrown. To be able to report the build status to the source provider, the user associated with the source provider must have write access to the repo. If the user does not have write access, the build status cannot be updated. For more information, see Source provider access in the CodeBuild User Guide. The status of a build triggered by a webhook is always reported to your source provider. If your project's builds are triggered by a webhook, you must push a new commit to the repo for a change to this property to take effect."];
-      buildStatusConfig: BuildStatusConfig.t option
-        [@ocaml.doc
-          "Contains information that defines how the build project reports the build status to the source provider. This option is only used when the source provider is GITHUB, GITHUB_ENTERPRISE, or BITBUCKET."];
-      insecureSsl: WrapperBoolean.t option
-        [@ocaml.doc
-          "Enable this flag to ignore SSL warnings while connecting to the project source code."];
-      sourceIdentifier: String_.t option
-        [@ocaml.doc
-          "An identifier for this project source. The identifier can only contain alphanumeric characters and underscores, and must be less than 128 characters in length."]}
-    let context_ = "ProjectSource"
-    let make ?location =
-      fun ?gitCloneDepth ->
-        fun ?gitSubmodulesConfig ->
-          fun ?buildspec ->
-            fun ?auth ->
-              fun ?reportBuildStatus ->
-                fun ?buildStatusConfig ->
-                  fun ?insecureSsl ->
-                    fun ?sourceIdentifier ->
-                      fun ~type_ ->
-                        fun () ->
-                          {
-                            location;
-                            gitCloneDepth;
-                            gitSubmodulesConfig;
-                            buildspec;
-                            auth;
-                            reportBuildStatus;
-                            buildStatusConfig;
-                            insecureSsl;
-                            sourceIdentifier;
-                            type_
-                          }
-    let to_value x =
-      structure_to_value
-        [("type", (Some (SourceType.to_value x.type_)));
-        ("location", (Option.map x.location ~f:String_.to_value));
-        ("gitCloneDepth",
-          (Option.map x.gitCloneDepth ~f:GitCloneDepth.to_value));
-        ("gitSubmodulesConfig",
-          (Option.map x.gitSubmodulesConfig ~f:GitSubmodulesConfig.to_value));
-        ("buildspec", (Option.map x.buildspec ~f:String_.to_value));
-        ("auth", (Option.map x.auth ~f:SourceAuth.to_value));
-        ("reportBuildStatus",
-          (Option.map x.reportBuildStatus ~f:WrapperBoolean.to_value));
-        ("buildStatusConfig",
-          (Option.map x.buildStatusConfig ~f:BuildStatusConfig.to_value));
-        ("insecureSsl",
-          (Option.map x.insecureSsl ~f:WrapperBoolean.to_value));
-        ("sourceIdentifier",
-          (Option.map x.sourceIdentifier ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sourceIdentifier =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "sourceIdentifier") in
-      let insecureSsl =
-        (Option.map ~f:WrapperBoolean.of_xml)
-          (Xml.child xml_arg0 "insecureSsl") in
-      let buildStatusConfig =
-        (Option.map ~f:BuildStatusConfig.of_xml)
-          (Xml.child xml_arg0 "buildStatusConfig") in
-      let reportBuildStatus =
-        (Option.map ~f:WrapperBoolean.of_xml)
-          (Xml.child xml_arg0 "reportBuildStatus") in
-      let auth =
-        (Option.map ~f:SourceAuth.of_xml) (Xml.child xml_arg0 "auth") in
-      let buildspec =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "buildspec") in
-      let gitSubmodulesConfig =
-        (Option.map ~f:GitSubmodulesConfig.of_xml)
-          (Xml.child xml_arg0 "gitSubmodulesConfig") in
-      let gitCloneDepth =
-        (Option.map ~f:GitCloneDepth.of_xml)
-          (Xml.child xml_arg0 "gitCloneDepth") in
-      let location =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
-      let type_ =
-        SourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      make ?sourceIdentifier ?insecureSsl ?buildStatusConfig
-        ?reportBuildStatus ?auth ?buildspec ?gitSubmodulesConfig
-        ?gitCloneDepth ?location ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceIdentifier =
-        field_map json "sourceIdentifier" String_.of_json in
-      let insecureSsl = field_map json "insecureSsl" WrapperBoolean.of_json in
-      let buildStatusConfig =
-        field_map json "buildStatusConfig" BuildStatusConfig.of_json in
-      let reportBuildStatus =
-        field_map json "reportBuildStatus" WrapperBoolean.of_json in
-      let auth = field_map json "auth" SourceAuth.of_json in
-      let buildspec = field_map json "buildspec" String_.of_json in
-      let gitSubmodulesConfig =
-        field_map json "gitSubmodulesConfig" GitSubmodulesConfig.of_json in
-      let gitCloneDepth =
-        field_map json "gitCloneDepth" GitCloneDepth.of_json in
-      let location = field_map json "location" String_.of_json in
-      let type_ = field_map_exn json "type" SourceType.of_json in
-      make ?sourceIdentifier ?insecureSsl ?buildStatusConfig
-        ?reportBuildStatus ?auth ?buildspec ?gitSubmodulesConfig
-        ?gitCloneDepth ?location ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the build input source code for the build project."]
-module SecurityGroupIds =
-  struct
-    type nonrec t = NonEmptyString.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:5); i
-    let to_value xs =
-      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:NonEmptyString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"SecurityGroupIds" ~of_json:NonEmptyString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Subnets =
-  struct
-    type nonrec t = NonEmptyString.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_max i ~max:16); i
-    let to_value xs =
-      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:NonEmptyString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"Subnets" ~of_json:NonEmptyString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module FilterGroups =
   struct
     type nonrec t = FilterGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2225,22 +3123,109 @@ module FilterGroups =
       list_of_json ~kind:"FilterGroups" ~of_json:FilterGroup.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PullRequestBuildPolicy =
+  struct
+    type nonrec t =
+      {
+      requiresCommentApproval: PullRequestBuildCommentApproval.t
+        [@ocaml.doc
+          "Specifies when comment-based approval is required before triggering a build on pull requests. This setting determines whether builds run automatically or require explicit approval through comments. DISABLED: Builds trigger automatically without requiring comment approval ALL_PULL_REQUESTS: All pull requests require comment approval before builds execute (unless contributor is one of the approver roles) FORK_PULL_REQUESTS: Only pull requests from forked repositories require comment approval (unless contributor is one of the approver roles)"];
+      approverRoles: PullRequestBuildApproverRoles.t option
+        [@ocaml.doc
+          "List of repository roles that have approval privileges for pull request builds when comment approval is required. Only users with these roles can provide valid comment approvals. If a pull request contributor is one of these roles, their pull request builds will trigger automatically. This field is only applicable when requiresCommentApproval is not DISABLED."]}
+    let context_ = "PullRequestBuildPolicy"
+    let make ?approverRoles =
+      fun ~requiresCommentApproval ->
+        fun () -> { approverRoles; requiresCommentApproval }
+    let to_value x =
+      structure_to_value
+        [("requiresCommentApproval",
+           (Some
+              (PullRequestBuildCommentApproval.to_value
+                 x.requiresCommentApproval)));
+        ("approverRoles",
+          (Option.map x.approverRoles
+             ~f:PullRequestBuildApproverRoles.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approverRoles =
+        (Option.map ~f:PullRequestBuildApproverRoles.of_xml)
+          (Xml.child xml_arg0 "approverRoles") in
+      let requiresCommentApproval =
+        PullRequestBuildCommentApproval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "requiresCommentApproval") in
+      make ?approverRoles ~requiresCommentApproval ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approverRoles =
+        field_map json__ "approverRoles"
+          PullRequestBuildApproverRoles.of_json in
+      let requiresCommentApproval =
+        field_map_exn json__ "requiresCommentApproval"
+          PullRequestBuildCommentApproval.of_json in
+      make ?approverRoles ~requiresCommentApproval ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A PullRequestBuildPolicy object that defines comment-based approval requirements for triggering builds on pull requests. This policy helps control when automated builds are executed based on contributor permissions and approval workflows."]
+module ScopeConfiguration =
+  struct
+    type nonrec t =
+      {
+      name: String_.t
+        [@ocaml.doc
+          "The name of either the group, enterprise, or organization that will send webhook events to CodeBuild, depending on the type of webhook."];
+      domain: String_.t option
+        [@ocaml.doc
+          "The domain of the GitHub Enterprise organization or the GitLab Self Managed group. Note that this parameter is only required if your project's source type is GITHUB_ENTERPRISE or GITLAB_SELF_MANAGED."];
+      scope: WebhookScopeType.t
+        [@ocaml.doc
+          "The type of scope for a GitHub or GitLab webhook. The scope default is GITHUB_ORGANIZATION."]}
+    let context_ = "ScopeConfiguration"
+    let make ?domain =
+      fun ~name -> fun ~scope -> fun () -> { domain; name; scope }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.name)));
+        ("domain", (Option.map x.domain ~f:String_.to_value));
+        ("scope", (Some (WebhookScopeType.to_value x.scope)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope =
+        WebhookScopeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scope") in
+      let domain =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "domain") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~scope ?domain ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map_exn json__ "scope" WebhookScopeType.of_json in
+      let domain = field_map json__ "domain" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ~scope ?domain ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains configuration information about the scope for a webhook."]
 module WebhookBuildType =
   struct
     type nonrec t =
       | BUILD 
       | BUILD_BATCH 
+      | RUNNER_BUILDKITE_BUILD 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | BUILD -> "BUILD"
       | BUILD_BATCH -> "BUILD_BATCH"
+      | RUNNER_BUILDKITE_BUILD -> "RUNNER_BUILDKITE_BUILD"
       | Non_static_id s -> s
     let of_string =
       function
       | "BUILD" -> BUILD
       | "BUILD_BATCH" -> BUILD_BATCH
+      | "RUNNER_BUILDKITE_BUILD" -> RUNNER_BUILDKITE_BUILD
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2249,6 +3234,235 @@ module WebhookBuildType =
       of_string (string_of_xml ~kind:"enumeration WebhookBuildType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"WebhookBuildType" j)
     let to_json = simple_to_json to_value
+  end
+module WebhookStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATE_FAILED 
+      | ACTIVE 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "ACTIVE" -> ACTIVE
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration WebhookStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WebhookStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetContextCode =
+  struct
+    type nonrec t =
+      | CREATE_FAILED 
+      | UPDATE_FAILED 
+      | ACTION_REQUIRED 
+      | PENDING_DELETION 
+      | INSUFFICIENT_CAPACITY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | ACTION_REQUIRED -> "ACTION_REQUIRED"
+      | PENDING_DELETION -> "PENDING_DELETION"
+      | INSUFFICIENT_CAPACITY -> "INSUFFICIENT_CAPACITY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "ACTION_REQUIRED" -> ACTION_REQUIRED
+      | "PENDING_DELETION" -> PENDING_DELETION
+      | "INSUFFICIENT_CAPACITY" -> INSUFFICIENT_CAPACITY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FleetContextCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FleetContextCode" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetStatusCode =
+  struct
+    type nonrec t =
+      | CREATING 
+      | UPDATING 
+      | ROTATING 
+      | PENDING_DELETION 
+      | DELETING 
+      | CREATE_FAILED 
+      | UPDATE_ROLLBACK_FAILED 
+      | ACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | ROTATING -> "ROTATING"
+      | PENDING_DELETION -> "PENDING_DELETION"
+      | DELETING -> "DELETING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | UPDATE_ROLLBACK_FAILED -> "UPDATE_ROLLBACK_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "ROTATING" -> ROTATING
+      | "PENDING_DELETION" -> PENDING_DELETION
+      | "DELETING" -> DELETING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "UPDATE_ROLLBACK_FAILED" -> UPDATE_ROLLBACK_FAILED
+      | "ACTIVE" -> ACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FleetStatusCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FleetStatusCode" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetProxyRuleBehavior =
+  struct
+    type nonrec t =
+      | ALLOW_ALL 
+      | DENY_ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALLOW_ALL -> "ALLOW_ALL"
+      | DENY_ALL -> "DENY_ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALLOW_ALL" -> ALLOW_ALL
+      | "DENY_ALL" -> DENY_ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FleetProxyRuleBehavior" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FleetProxyRuleBehavior" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetProxyRules =
+  struct
+    type nonrec t = FleetProxyRule.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FleetProxyRule.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FleetProxyRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FleetProxyRules" ~of_json:FleetProxyRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FleetCapacity =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FleetCapacity" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetScalingType =
+  struct
+    type nonrec t =
+      | TARGET_TRACKING_SCALING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TARGET_TRACKING_SCALING -> "TARGET_TRACKING_SCALING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TARGET_TRACKING_SCALING" -> TARGET_TRACKING_SCALING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FleetScalingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FleetScalingType" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingScalingConfigurations =
+  struct
+    type nonrec t = TargetTrackingScalingConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetTrackingScalingConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:TargetTrackingScalingConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetTrackingScalingConfigurations"
+        ~of_json:TargetTrackingScalingConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module BuildArtifacts =
   struct
@@ -2324,18 +3538,18 @@ module BuildArtifacts =
       make ?bucketOwnerAccess ?artifactIdentifier ?encryptionDisabled
         ?overrideArtifactName ?md5sum ?sha256sum ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bucketOwnerAccess =
-        field_map json "bucketOwnerAccess" BucketOwnerAccess.of_json in
+        field_map json__ "bucketOwnerAccess" BucketOwnerAccess.of_json in
       let artifactIdentifier =
-        field_map json "artifactIdentifier" String_.of_json in
+        field_map json__ "artifactIdentifier" String_.of_json in
       let encryptionDisabled =
-        field_map json "encryptionDisabled" WrapperBoolean.of_json in
+        field_map json__ "encryptionDisabled" WrapperBoolean.of_json in
       let overrideArtifactName =
-        field_map json "overrideArtifactName" WrapperBoolean.of_json in
-      let md5sum = field_map json "md5sum" String_.of_json in
-      let sha256sum = field_map json "sha256sum" String_.of_json in
-      let location = field_map json "location" String_.of_json in
+        field_map json__ "overrideArtifactName" WrapperBoolean.of_json in
+      let md5sum = field_map json__ "md5sum" String_.of_json in
+      let sha256sum = field_map json__ "sha256sum" String_.of_json in
+      let location = field_map json__ "location" String_.of_json in
       make ?bucketOwnerAccess ?artifactIdentifier ?encryptionDisabled
         ?overrideArtifactName ?md5sum ?sha256sum ?location ()
     let to_json v = composed_to_json to_value v
@@ -2405,14 +3619,14 @@ module BuildPhase =
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contexts = field_map json "contexts" PhaseContexts.of_json in
+    let of_json json__ =
+      let contexts = field_map json__ "contexts" PhaseContexts.of_json in
       let durationInSeconds =
-        field_map json "durationInSeconds" WrapperLong.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let phaseStatus = field_map json "phaseStatus" StatusType.of_json in
-      let phaseType = field_map json "phaseType" BuildPhaseType.of_json in
+        field_map json__ "durationInSeconds" WrapperLong.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let phaseStatus = field_map json__ "phaseStatus" StatusType.of_json in
+      let phaseType = field_map json__ "phaseType" BuildPhaseType.of_json in
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
     let to_json v = composed_to_json to_value v
@@ -2438,9 +3652,9 @@ module ExportedEnvironmentVariable =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let name = field_map json "name" NonEmptyString.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let name = field_map json__ "name" NonEmptyString.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2511,14 +3725,15 @@ module BuildBatchPhase =
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contexts = field_map json "contexts" PhaseContexts.of_json in
+    let of_json json__ =
+      let contexts = field_map json__ "contexts" PhaseContexts.of_json in
       let durationInSeconds =
-        field_map json "durationInSeconds" WrapperLong.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let phaseStatus = field_map json "phaseStatus" StatusType.of_json in
-      let phaseType = field_map json "phaseType" BuildBatchPhaseType.of_json in
+        field_map json__ "durationInSeconds" WrapperLong.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let phaseStatus = field_map json__ "phaseStatus" StatusType.of_json in
+      let phaseType =
+        field_map json__ "phaseType" BuildBatchPhaseType.of_json in
       make ?contexts ?durationInSeconds ?endTime ?startTime ?phaseStatus
         ?phaseType ()
     let to_json v = composed_to_json to_value v
@@ -2580,14 +3795,14 @@ module BuildGroup =
       make ?priorBuildSummaryList ?currentBuildSummary ?ignoreFailure
         ?dependsOn ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let priorBuildSummaryList =
-        field_map json "priorBuildSummaryList" BuildSummaries.of_json in
+        field_map json__ "priorBuildSummaryList" BuildSummaries.of_json in
       let currentBuildSummary =
-        field_map json "currentBuildSummary" BuildSummary.of_json in
-      let ignoreFailure = field_map json "ignoreFailure" Boolean.of_json in
-      let dependsOn = field_map json "dependsOn" Identifiers.of_json in
-      let identifier = field_map json "identifier" String_.of_json in
+        field_map json__ "currentBuildSummary" BuildSummary.of_json in
+      let ignoreFailure = field_map json__ "ignoreFailure" Boolean.of_json in
+      let dependsOn = field_map json__ "dependsOn" Identifiers.of_json in
+      let identifier = field_map json__ "identifier" String_.of_json in
       make ?priorBuildSummaryList ?currentBuildSummary ?ignoreFailure
         ?dependsOn ?identifier ()
     let to_json v = composed_to_json to_value v
@@ -2599,6 +3814,8 @@ module AuthType =
       | OAUTH 
       | BASIC_AUTH 
       | PERSONAL_ACCESS_TOKEN 
+      | CODECONNECTIONS 
+      | SECRETS_MANAGER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2606,12 +3823,16 @@ module AuthType =
       | OAUTH -> "OAUTH"
       | BASIC_AUTH -> "BASIC_AUTH"
       | PERSONAL_ACCESS_TOKEN -> "PERSONAL_ACCESS_TOKEN"
+      | CODECONNECTIONS -> "CODECONNECTIONS"
+      | SECRETS_MANAGER -> "SECRETS_MANAGER"
       | Non_static_id s -> s
     let of_string =
       function
       | "OAUTH" -> OAUTH
       | "BASIC_AUTH" -> BASIC_AUTH
       | "PERSONAL_ACCESS_TOKEN" -> PERSONAL_ACCESS_TOKEN
+      | "CODECONNECTIONS" -> CODECONNECTIONS
+      | "SECRETS_MANAGER" -> SECRETS_MANAGER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2627,6 +3848,8 @@ module ServerType =
       | GITHUB 
       | BITBUCKET 
       | GITHUB_ENTERPRISE 
+      | GITLAB 
+      | GITLAB_SELF_MANAGED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2634,12 +3857,16 @@ module ServerType =
       | GITHUB -> "GITHUB"
       | BITBUCKET -> "BITBUCKET"
       | GITHUB_ENTERPRISE -> "GITHUB_ENTERPRISE"
+      | GITLAB -> "GITLAB"
+      | GITLAB_SELF_MANAGED -> "GITLAB_SELF_MANAGED"
       | Non_static_id s -> s
     let of_string =
       function
       | "GITHUB" -> GITHUB
       | "BITBUCKET" -> BITBUCKET
       | "GITHUB_ENTERPRISE" -> GITHUB_ENTERPRISE
+      | "GITLAB" -> GITLAB
+      | "GITLAB_SELF_MANAGED" -> GITLAB_SELF_MANAGED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2653,6 +3880,9 @@ module EnvironmentLanguages =
   struct
     type nonrec t = EnvironmentLanguage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentLanguage.to_value)) |>
         (fun x -> `List x)
@@ -2706,6 +3936,444 @@ module PlatformType =
     let of_json j = of_string (string_of_json ~kind:"PlatformType" j)
     let to_json = simple_to_json to_value
   end
+module CommandType =
+  struct
+    type nonrec t =
+      | SHELL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | SHELL -> "SHELL" | Non_static_id s -> s
+    let of_string = function | "SHELL" -> SHELL | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CommandType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CommandType" j)
+    let to_json = simple_to_json to_value
+  end
+module SensitiveNonEmptyString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveNonEmptyString"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveNonEmptyString" j
+    let to_json = simple_to_json to_value
+  end
+module LogsConfig =
+  struct
+    type nonrec t =
+      {
+      cloudWatchLogs: CloudWatchLogsConfig.t option
+        [@ocaml.doc
+          "Information about CloudWatch Logs for a build project. CloudWatch Logs are enabled by default."];
+      s3Logs: S3LogsConfig.t option
+        [@ocaml.doc
+          "Information about logs built to an S3 bucket for a build project. S3 logs are not enabled by default."]}
+    let make ?cloudWatchLogs =
+      fun ?s3Logs -> fun () -> { cloudWatchLogs; s3Logs }
+    let to_value x =
+      structure_to_value
+        [("cloudWatchLogs",
+           (Option.map x.cloudWatchLogs ~f:CloudWatchLogsConfig.to_value));
+        ("s3Logs", (Option.map x.s3Logs ~f:S3LogsConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Logs =
+        (Option.map ~f:S3LogsConfig.of_xml) (Xml.child xml_arg0 "s3Logs") in
+      let cloudWatchLogs =
+        (Option.map ~f:CloudWatchLogsConfig.of_xml)
+          (Xml.child xml_arg0 "cloudWatchLogs") in
+      make ?s3Logs ?cloudWatchLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Logs = field_map json__ "s3Logs" S3LogsConfig.of_json in
+      let cloudWatchLogs =
+        field_map json__ "cloudWatchLogs" CloudWatchLogsConfig.of_json in
+      make ?s3Logs ?cloudWatchLogs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about logs for a build project. These can be logs in CloudWatch Logs, built in a specified S3 bucket, or both."]
+module ProjectEnvironment =
+  struct
+    type nonrec t =
+      {
+      type_: EnvironmentType.t
+        [@ocaml.doc
+          "The type of build environment to use for related builds. If you're using compute fleets during project creation, type will be ignored. For more information, see Build environment compute types in the CodeBuild user guide."];
+      image: NonEmptyString.t
+        [@ocaml.doc
+          "The image tag or image digest that identifies the Docker image to use for this build project. Use the following formats: For an image tag: <registry>/<repository>:<tag>. For example, in the Docker repository that CodeBuild uses to manage its Docker images, this would be aws/codebuild/standard:4.0. For an image digest: <registry>/<repository>\\@<digest>. For example, to specify an image with the digest \"sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf,\" use <registry>/<repository>\\@sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf. For more information, see Docker images provided by CodeBuild in the CodeBuild user guide."];
+      computeType: ComputeType.t
+        [@ocaml.doc
+          "Information about the compute resources the build project uses. Available values include: ATTRIBUTE_BASED_COMPUTE: Specify the amount of vCPUs, memory, disk space, and the type of machine. If you use ATTRIBUTE_BASED_COMPUTE, you must define your attributes by using computeConfiguration. CodeBuild will select the cheapest instance that satisfies your specified attributes. For more information, see Reserved capacity environment types in the CodeBuild User Guide. BUILD_GENERAL1_SMALL: Use up to 4 GiB memory and 2 vCPUs for builds. BUILD_GENERAL1_MEDIUM: Use up to 8 GiB memory and 4 vCPUs for builds. BUILD_GENERAL1_LARGE: Use up to 16 GiB memory and 8 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_XLARGE: Use up to 72 GiB memory and 36 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_2XLARGE: Use up to 144 GiB memory, 72 vCPUs, and 824 GB of SSD storage for builds. This compute type supports Docker images up to 100 GB uncompressed. BUILD_LAMBDA_1GB: Use up to 1 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_2GB: Use up to 2 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_4GB: Use up to 4 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_8GB: Use up to 8 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_10GB: Use up to 10 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. If you use BUILD_GENERAL1_SMALL: For environment type LINUX_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 16 GiB memory, 4 vCPUs, and 1 NVIDIA A10G Tensor Core GPU for builds. For environment type ARM_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs on ARM-based processors for builds. If you use BUILD_GENERAL1_LARGE: For environment type LINUX_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 255 GiB memory, 32 vCPUs, and 4 NVIDIA Tesla V100 GPUs for builds. For environment type ARM_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs on ARM-based processors for builds. For more information, see On-demand environment types in the CodeBuild User Guide."];
+      computeConfiguration: ComputeConfiguration.t option
+        [@ocaml.doc
+          "The compute configuration of the build project. This is only required if computeType is set to ATTRIBUTE_BASED_COMPUTE."];
+      fleet: ProjectFleet.t option
+        [@ocaml.doc "A ProjectFleet object to use for this build project."];
+      environmentVariables: EnvironmentVariables.t option
+        [@ocaml.doc
+          "A set of environment variables to make available to builds for this build project."];
+      privilegedMode: WrapperBoolean.t option
+        [@ocaml.doc
+          "Enables running the Docker daemon inside a Docker container. Set to true only if the build project is used to build Docker images. Otherwise, a build that attempts to interact with the Docker daemon fails. The default setting is false. You can initialize the Docker daemon during the install phase of your build by adding one of the following sets of commands to the install phase of your buildspec file: If the operating system's base image is Ubuntu Linux: - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=overlay& - timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\" If the operating system's base image is Alpine Linux and the previous command does not work, add the -t argument to timeout: - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=overlay& - timeout -t 15 sh -c \"until docker info; do echo .; sleep 1; done\""];
+      certificate: String_.t option
+        [@ocaml.doc
+          "The ARN of the Amazon S3 bucket, path prefix, and object key that contains the PEM-encoded certificate for the build project. For more information, see certificate in the CodeBuild User Guide."];
+      registryCredential: RegistryCredential.t option
+        [@ocaml.doc "The credentials for access to a private registry."];
+      imagePullCredentialsType: ImagePullCredentialsType.t option
+        [@ocaml.doc
+          "The type of credentials CodeBuild uses to pull images in your build. There are two valid values: CODEBUILD specifies that CodeBuild uses its own credentials. This requires that you modify your ECR repository policy to trust CodeBuild service principal. SERVICE_ROLE specifies that CodeBuild uses your build project's service role. When you use a cross-account or private registry image, you must use SERVICE_ROLE credentials. When you use an CodeBuild curated image, you must use CODEBUILD credentials."];
+      dockerServer: DockerServer.t option
+        [@ocaml.doc "A DockerServer object to use for this build project."]}
+    let context_ = "ProjectEnvironment"
+    let make ?computeConfiguration =
+      fun ?fleet ->
+        fun ?environmentVariables ->
+          fun ?privilegedMode ->
+            fun ?certificate ->
+              fun ?registryCredential ->
+                fun ?imagePullCredentialsType ->
+                  fun ?dockerServer ->
+                    fun ~type_ ->
+                      fun ~image ->
+                        fun ~computeType ->
+                          fun () ->
+                            {
+                              computeConfiguration;
+                              fleet;
+                              environmentVariables;
+                              privilegedMode;
+                              certificate;
+                              registryCredential;
+                              imagePullCredentialsType;
+                              dockerServer;
+                              type_;
+                              image;
+                              computeType
+                            }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (EnvironmentType.to_value x.type_)));
+        ("image", (Some (NonEmptyString.to_value x.image)));
+        ("computeType", (Some (ComputeType.to_value x.computeType)));
+        ("computeConfiguration",
+          (Option.map x.computeConfiguration ~f:ComputeConfiguration.to_value));
+        ("fleet", (Option.map x.fleet ~f:ProjectFleet.to_value));
+        ("environmentVariables",
+          (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
+        ("privilegedMode",
+          (Option.map x.privilegedMode ~f:WrapperBoolean.to_value));
+        ("certificate", (Option.map x.certificate ~f:String_.to_value));
+        ("registryCredential",
+          (Option.map x.registryCredential ~f:RegistryCredential.to_value));
+        ("imagePullCredentialsType",
+          (Option.map x.imagePullCredentialsType
+             ~f:ImagePullCredentialsType.to_value));
+        ("dockerServer",
+          (Option.map x.dockerServer ~f:DockerServer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dockerServer =
+        (Option.map ~f:DockerServer.of_xml)
+          (Xml.child xml_arg0 "dockerServer") in
+      let imagePullCredentialsType =
+        (Option.map ~f:ImagePullCredentialsType.of_xml)
+          (Xml.child xml_arg0 "imagePullCredentialsType") in
+      let registryCredential =
+        (Option.map ~f:RegistryCredential.of_xml)
+          (Xml.child xml_arg0 "registryCredential") in
+      let certificate =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "certificate") in
+      let privilegedMode =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "privilegedMode") in
+      let environmentVariables =
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environmentVariables") in
+      let fleet =
+        (Option.map ~f:ProjectFleet.of_xml) (Xml.child xml_arg0 "fleet") in
+      let computeConfiguration =
+        (Option.map ~f:ComputeConfiguration.of_xml)
+          (Xml.child xml_arg0 "computeConfiguration") in
+      let computeType =
+        ComputeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "computeType") in
+      let image =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "image") in
+      let type_ =
+        EnvironmentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?dockerServer ?imagePullCredentialsType ?registryCredential
+        ?certificate ?privilegedMode ?environmentVariables ?fleet
+        ?computeConfiguration ~computeType ~image ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dockerServer = field_map json__ "dockerServer" DockerServer.of_json in
+      let imagePullCredentialsType =
+        field_map json__ "imagePullCredentialsType"
+          ImagePullCredentialsType.of_json in
+      let registryCredential =
+        field_map json__ "registryCredential" RegistryCredential.of_json in
+      let certificate = field_map json__ "certificate" String_.of_json in
+      let privilegedMode =
+        field_map json__ "privilegedMode" WrapperBoolean.of_json in
+      let environmentVariables =
+        field_map json__ "environmentVariables" EnvironmentVariables.of_json in
+      let fleet = field_map json__ "fleet" ProjectFleet.of_json in
+      let computeConfiguration =
+        field_map json__ "computeConfiguration" ComputeConfiguration.of_json in
+      let computeType =
+        field_map_exn json__ "computeType" ComputeType.of_json in
+      let image = field_map_exn json__ "image" NonEmptyString.of_json in
+      let type_ = field_map_exn json__ "type" EnvironmentType.of_json in
+      make ?dockerServer ?imagePullCredentialsType ?registryCredential
+        ?certificate ?privilegedMode ?environmentVariables ?fleet
+        ?computeConfiguration ~computeType ~image ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the build environment of the build project."]
+module ProjectFileSystemLocations =
+  struct
+    type nonrec t = ProjectFileSystemLocation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProjectFileSystemLocation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProjectFileSystemLocation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProjectFileSystemLocations"
+        ~of_json:ProjectFileSystemLocation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProjectSecondarySourceVersions =
+  struct
+    type nonrec t = ProjectSourceVersion.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProjectSourceVersion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProjectSourceVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProjectSecondarySourceVersions"
+        ~of_json:ProjectSourceVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProjectSources =
+  struct
+    type nonrec t = ProjectSource.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProjectSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProjectSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProjectSources" ~of_json:ProjectSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SandboxSession =
+  struct
+    type nonrec t =
+      {
+      id: NonEmptyString.t option
+        [@ocaml.doc "The ID of the sandbox session."];
+      status: String_.t option
+        [@ocaml.doc "The status of the sandbox session."];
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox session started, expressed in Unix time format."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox session ended, expressed in Unix time format."];
+      currentPhase: String_.t option
+        [@ocaml.doc "The current phase for the sandbox."];
+      phases: SandboxSessionPhases.t option
+        [@ocaml.doc "An array of SandboxSessionPhase objects."];
+      resolvedSourceVersion: NonEmptyString.t option
+        [@ocaml.doc
+          "An identifier for the version of this sandbox's source code."];
+      logs: LogsLocation.t option ;
+      networkInterface: NetworkInterface.t option }
+    let make ?id =
+      fun ?status ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?currentPhase ->
+              fun ?phases ->
+                fun ?resolvedSourceVersion ->
+                  fun ?logs ->
+                    fun ?networkInterface ->
+                      fun () ->
+                        {
+                          id;
+                          status;
+                          startTime;
+                          endTime;
+                          currentPhase;
+                          phases;
+                          resolvedSourceVersion;
+                          logs;
+                          networkInterface
+                        }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:NonEmptyString.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("currentPhase", (Option.map x.currentPhase ~f:String_.to_value));
+        ("phases", (Option.map x.phases ~f:SandboxSessionPhases.to_value));
+        ("resolvedSourceVersion",
+          (Option.map x.resolvedSourceVersion ~f:NonEmptyString.to_value));
+        ("logs", (Option.map x.logs ~f:LogsLocation.to_value));
+        ("networkInterface",
+          (Option.map x.networkInterface ~f:NetworkInterface.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkInterface =
+        (Option.map ~f:NetworkInterface.of_xml)
+          (Xml.child xml_arg0 "networkInterface") in
+      let logs =
+        (Option.map ~f:LogsLocation.of_xml) (Xml.child xml_arg0 "logs") in
+      let resolvedSourceVersion =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "resolvedSourceVersion") in
+      let phases =
+        (Option.map ~f:SandboxSessionPhases.of_xml)
+          (Xml.child xml_arg0 "phases") in
+      let currentPhase =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "currentPhase") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let id =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?networkInterface ?logs ?resolvedSourceVersion ?phases
+        ?currentPhase ?endTime ?startTime ?status ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkInterface =
+        field_map json__ "networkInterface" NetworkInterface.of_json in
+      let logs = field_map json__ "logs" LogsLocation.of_json in
+      let resolvedSourceVersion =
+        field_map json__ "resolvedSourceVersion" NonEmptyString.of_json in
+      let phases = field_map json__ "phases" SandboxSessionPhases.of_json in
+      let currentPhase = field_map json__ "currentPhase" String_.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      make ?networkInterface ?logs ?resolvedSourceVersion ?phases
+        ?currentPhase ?endTime ?startTime ?status ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the sandbox session."]
+module VpcConfig =
+  struct
+    type nonrec t =
+      {
+      vpcId: NonEmptyString.t option [@ocaml.doc "The ID of the Amazon VPC."];
+      subnets: Subnets.t option
+        [@ocaml.doc "A list of one or more subnet IDs in your Amazon VPC."];
+      securityGroupIds: SecurityGroupIds.t option
+        [@ocaml.doc
+          "A list of one or more security groups IDs in your Amazon VPC."]}
+    let make ?vpcId =
+      fun ?subnets ->
+        fun ?securityGroupIds ->
+          fun () -> { vpcId; subnets; securityGroupIds }
+    let to_value x =
+      structure_to_value
+        [("vpcId", (Option.map x.vpcId ~f:NonEmptyString.to_value));
+        ("subnets", (Option.map x.subnets ~f:Subnets.to_value));
+        ("securityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIds.of_xml)
+          (Xml.child xml_arg0 "securityGroupIds") in
+      let subnets =
+        (Option.map ~f:Subnets.of_xml) (Xml.child xml_arg0 "subnets") in
+      let vpcId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "vpcId") in
+      make ?securityGroupIds ?subnets ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityGroupIds =
+        field_map json__ "securityGroupIds" SecurityGroupIds.of_json in
+      let subnets = field_map json__ "subnets" Subnets.of_json in
+      let vpcId = field_map json__ "vpcId" NonEmptyString.of_json in
+      make ?securityGroupIds ?subnets ?vpcId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the VPC configuration that CodeBuild accesses."]
 module CodeCoverageReportSummary =
   struct
     type nonrec t =
@@ -2779,17 +4447,18 @@ module CodeCoverageReportSummary =
       make ?branchesMissed ?branchesCovered ?branchCoveragePercentage
         ?linesMissed ?linesCovered ?lineCoveragePercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let branchesMissed =
-        field_map json "branchesMissed" NonNegativeInt.of_json in
+        field_map json__ "branchesMissed" NonNegativeInt.of_json in
       let branchesCovered =
-        field_map json "branchesCovered" NonNegativeInt.of_json in
+        field_map json__ "branchesCovered" NonNegativeInt.of_json in
       let branchCoveragePercentage =
-        field_map json "branchCoveragePercentage" Percentage.of_json in
-      let linesMissed = field_map json "linesMissed" NonNegativeInt.of_json in
-      let linesCovered = field_map json "linesCovered" NonNegativeInt.of_json in
+        field_map json__ "branchCoveragePercentage" Percentage.of_json in
+      let linesMissed = field_map json__ "linesMissed" NonNegativeInt.of_json in
+      let linesCovered =
+        field_map json__ "linesCovered" NonNegativeInt.of_json in
       let lineCoveragePercentage =
-        field_map json "lineCoveragePercentage" Percentage.of_json in
+        field_map json__ "lineCoveragePercentage" Percentage.of_json in
       make ?branchesMissed ?branchesCovered ?branchCoveragePercentage
         ?linesMissed ?linesCovered ?lineCoveragePercentage ()
     let to_json v = composed_to_json to_value v
@@ -2823,11 +4492,11 @@ module ReportExportConfig =
           (Xml.child xml_arg0 "exportConfigType") in
       make ?s3Destination ?exportConfigType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Destination =
-        field_map json "s3Destination" S3ReportExportConfig.of_json in
+        field_map json__ "s3Destination" S3ReportExportConfig.of_json in
       let exportConfigType =
-        field_map json "exportConfigType" ReportExportConfigType.of_json in
+        field_map json__ "exportConfigType" ReportExportConfigType.of_json in
       make ?s3Destination ?exportConfigType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2895,45 +4564,45 @@ module TestReportSummary =
   struct
     type nonrec t =
       {
-      total: WrapperInt.t
+      total: WrapperInt.t option
         [@ocaml.doc
           "The number of test cases in this TestReportSummary. The total includes truncated test cases."];
-      statusCounts: ReportStatusCounts.t
+      statusCounts: ReportStatusCounts.t option
         [@ocaml.doc
           "A map that contains the number of each type of status returned by the test results in this TestReportSummary."];
-      durationInNanoSeconds: WrapperLong.t
+      durationInNanoSeconds: WrapperLong.t option
         [@ocaml.doc
           "The number of nanoseconds it took to run all of the test cases in this report."]}
-    let context_ = "TestReportSummary"
-    let make ~total =
-      fun ~statusCounts ->
-        fun ~durationInNanoSeconds ->
+    let make ?total =
+      fun ?statusCounts ->
+        fun ?durationInNanoSeconds ->
           fun () -> { total; statusCounts; durationInNanoSeconds }
     let to_value x =
       structure_to_value
-        [("total", (Some (WrapperInt.to_value x.total)));
-        ("statusCounts", (Some (ReportStatusCounts.to_value x.statusCounts)));
+        [("total", (Option.map x.total ~f:WrapperInt.to_value));
+        ("statusCounts",
+          (Option.map x.statusCounts ~f:ReportStatusCounts.to_value));
         ("durationInNanoSeconds",
-          (Some (WrapperLong.to_value x.durationInNanoSeconds)))]
+          (Option.map x.durationInNanoSeconds ~f:WrapperLong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let durationInNanoSeconds =
-        WrapperLong.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "durationInNanoSeconds") in
+        (Option.map ~f:WrapperLong.of_xml)
+          (Xml.child xml_arg0 "durationInNanoSeconds") in
       let statusCounts =
-        ReportStatusCounts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statusCounts") in
+        (Option.map ~f:ReportStatusCounts.of_xml)
+          (Xml.child xml_arg0 "statusCounts") in
       let total =
-        WrapperInt.of_xml (Xml.child_exn ~context:context_ xml_arg0 "total") in
-      make ~durationInNanoSeconds ~statusCounts ~total ()
+        (Option.map ~f:WrapperInt.of_xml) (Xml.child xml_arg0 "total") in
+      make ?durationInNanoSeconds ?statusCounts ?total ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInNanoSeconds =
-        field_map_exn json "durationInNanoSeconds" WrapperLong.of_json in
+        field_map json__ "durationInNanoSeconds" WrapperLong.of_json in
       let statusCounts =
-        field_map_exn json "statusCounts" ReportStatusCounts.of_json in
-      let total = field_map_exn json "total" WrapperInt.of_json in
-      make ~durationInNanoSeconds ~statusCounts ~total ()
+        field_map json__ "statusCounts" ReportStatusCounts.of_json in
+      let total = field_map json__ "total" WrapperInt.of_json in
+      make ?durationInNanoSeconds ?statusCounts ?total ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a test report."]
 module ReportGroupName =
@@ -2989,6 +4658,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3008,40 +4680,24 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LogsConfig =
+module BuildTimeOut =
   struct
-    type nonrec t =
-      {
-      cloudWatchLogs: CloudWatchLogsConfig.t option
-        [@ocaml.doc
-          "Information about CloudWatch Logs for a build project. CloudWatch Logs are enabled by default."];
-      s3Logs: S3LogsConfig.t option
-        [@ocaml.doc
-          "Information about logs built to an S3 bucket for a build project. S3 logs are not enabled by default."]}
-    let make ?cloudWatchLogs =
-      fun ?s3Logs -> fun () -> { cloudWatchLogs; s3Logs }
-    let to_value x =
-      structure_to_value
-        [("cloudWatchLogs",
-           (Option.map x.cloudWatchLogs ~f:CloudWatchLogsConfig.to_value));
-        ("s3Logs", (Option.map x.s3Logs ~f:S3LogsConfig.to_value))]
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2160) >>= (fun () -> check_int_min i ~min:5));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      let s3Logs =
-        (Option.map ~f:S3LogsConfig.of_xml) (Xml.child xml_arg0 "s3Logs") in
-      let cloudWatchLogs =
-        (Option.map ~f:CloudWatchLogsConfig.of_xml)
-          (Xml.child xml_arg0 "cloudWatchLogs") in
-      make ?s3Logs ?cloudWatchLogs ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Logs = field_map json "s3Logs" S3LogsConfig.of_json in
-      let cloudWatchLogs =
-        field_map json "cloudWatchLogs" CloudWatchLogsConfig.of_json in
-      make ?s3Logs ?cloudWatchLogs ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about logs for a build project. These can be logs in CloudWatch Logs, built in a specified S3 bucket, or both."]
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BuildTimeOut" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ProjectArtifactsList =
   struct
     type nonrec t = ProjectArtifacts.t list
@@ -3050,6 +4706,9 @@ module ProjectArtifactsList =
         ok_or_failwith
           ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProjectArtifacts.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3096,9 +4755,10 @@ module ProjectBadge =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "badgeEnabled") in
       make ?badgeRequestUrl ?badgeEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let badgeRequestUrl = field_map json "badgeRequestUrl" String_.of_json in
-      let badgeEnabled = field_map json "badgeEnabled" Boolean.of_json in
+    let of_json json__ =
+      let badgeRequestUrl =
+        field_map json__ "badgeRequestUrl" String_.of_json in
+      let badgeEnabled = field_map json__ "badgeEnabled" Boolean.of_json in
       make ?badgeRequestUrl ?badgeEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the build badge for the build project."]
@@ -3166,15 +4826,15 @@ module ProjectBuildBatchConfig =
       make ?batchReportMode ?timeoutInMins ?restrictions ?combineArtifacts
         ?serviceRole ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchReportMode =
-        field_map json "batchReportMode" BatchReportModeType.of_json in
-      let timeoutInMins = field_map json "timeoutInMins" WrapperInt.of_json in
+        field_map json__ "batchReportMode" BatchReportModeType.of_json in
+      let timeoutInMins = field_map json__ "timeoutInMins" WrapperInt.of_json in
       let restrictions =
-        field_map json "restrictions" BatchRestrictions.of_json in
+        field_map json__ "restrictions" BatchRestrictions.of_json in
       let combineArtifacts =
-        field_map json "combineArtifacts" WrapperBoolean.of_json in
-      let serviceRole = field_map json "serviceRole" NonEmptyString.of_json in
+        field_map json__ "combineArtifacts" WrapperBoolean.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
       make ?batchReportMode ?timeoutInMins ?restrictions ?combineArtifacts
         ?serviceRole ()
     let to_json v = composed_to_json to_value v
@@ -3192,30 +4852,39 @@ module ProjectCache =
           "Information about the cache location: NO_CACHE or LOCAL: This value is ignored. S3: This is the S3 bucket name/prefix."];
       modes: ProjectCacheModes.t option
         [@ocaml.doc
-          "An array of strings that specify the local cache modes. You can use one or more local cache modes at the same time. This is only used for LOCAL cache types. Possible values are: LOCAL_SOURCE_CACHE Caches Git metadata for primary and secondary sources. After the cache is created, subsequent builds pull only the change between commits. This mode is a good choice for projects with a clean working directory and a source that is a large Git repository. If you choose this option and your project does not use a Git repository (GitHub, GitHub Enterprise, or Bitbucket), the option is ignored. LOCAL_DOCKER_LAYER_CACHE Caches existing Docker layers. This mode is a good choice for projects that build or pull large Docker images. It can prevent the performance issues caused by pulling large Docker images down from the network. You can use a Docker layer cache in the Linux environment only. The privileged flag must be set so that your project has the required Docker permissions. You should consider the security implications before you use a Docker layer cache. LOCAL_CUSTOM_CACHE Caches directories you specify in the buildspec file. This mode is a good choice if your build scenario is not suited to one of the other three local cache modes. If you use a custom cache: Only directories can be specified for caching. You cannot specify individual files. Symlinks are used to reference cached directories. Cached directories are linked to your build before it downloads its project sources. Cached items are overridden if a source item has the same name. Directories are specified using cache paths in the buildspec file."]}
+          "An array of strings that specify the local cache modes. You can use one or more local cache modes at the same time. This is only used for LOCAL cache types. Possible values are: LOCAL_SOURCE_CACHE Caches Git metadata for primary and secondary sources. After the cache is created, subsequent builds pull only the change between commits. This mode is a good choice for projects with a clean working directory and a source that is a large Git repository. If you choose this option and your project does not use a Git repository (GitHub, GitHub Enterprise, or Bitbucket), the option is ignored. LOCAL_DOCKER_LAYER_CACHE Caches existing Docker layers. This mode is a good choice for projects that build or pull large Docker images. It can prevent the performance issues caused by pulling large Docker images down from the network. You can use a Docker layer cache in the Linux environment only. The privileged flag must be set so that your project has the required Docker permissions. You should consider the security implications before you use a Docker layer cache. LOCAL_CUSTOM_CACHE Caches directories you specify in the buildspec file. This mode is a good choice if your build scenario is not suited to one of the other three local cache modes. If you use a custom cache: Only directories can be specified for caching. You cannot specify individual files. Symlinks are used to reference cached directories. Cached directories are linked to your build before it downloads its project sources. Cached items are overridden if a source item has the same name. Directories are specified using cache paths in the buildspec file."];
+      cacheNamespace: String_.t option
+        [@ocaml.doc
+          "Defines the scope of the cache. You can use this namespace to share a cache across multiple projects. For more information, see Cache sharing between projects in the CodeBuild User Guide."]}
     let context_ = "ProjectCache"
     let make ?location =
-      fun ?modes -> fun ~type_ -> fun () -> { location; modes; type_ }
+      fun ?modes ->
+        fun ?cacheNamespace ->
+          fun ~type_ -> fun () -> { location; modes; cacheNamespace; type_ }
     let to_value x =
       structure_to_value
         [("type", (Some (CacheType.to_value x.type_)));
         ("location", (Option.map x.location ~f:String_.to_value));
-        ("modes", (Option.map x.modes ~f:ProjectCacheModes.to_value))]
+        ("modes", (Option.map x.modes ~f:ProjectCacheModes.to_value));
+        ("cacheNamespace", (Option.map x.cacheNamespace ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let cacheNamespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cacheNamespace") in
       let modes =
         (Option.map ~f:ProjectCacheModes.of_xml) (Xml.child xml_arg0 "modes") in
       let location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "location") in
       let type_ =
         CacheType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      make ?modes ?location ~type_ ()
+      make ?cacheNamespace ?modes ?location ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modes = field_map json "modes" ProjectCacheModes.of_json in
-      let location = field_map json "location" String_.of_json in
-      let type_ = field_map_exn json "type" CacheType.of_json in
-      make ?modes ?location ~type_ ()
+    let of_json json__ =
+      let cacheNamespace = field_map json__ "cacheNamespace" String_.of_json in
+      let modes = field_map json__ "modes" ProjectCacheModes.of_json in
+      let location = field_map json__ "location" String_.of_json in
+      let type_ = field_map_exn json__ "type" CacheType.of_json in
+      make ?cacheNamespace ?modes ?location ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the cache for the build project."]
 module ProjectDescription =
@@ -3236,141 +4905,6 @@ module ProjectDescription =
     let of_json j = string_of_json ~kind:"ProjectDescription" j
     let to_json = simple_to_json to_value
   end
-module ProjectEnvironment =
-  struct
-    type nonrec t =
-      {
-      type_: EnvironmentType.t
-        [@ocaml.doc
-          "The type of build environment to use for related builds. The environment type ARM_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), Asia Pacific (Mumbai), Asia Pacific (Tokyo), Asia Pacific (Sydney), and EU (Frankfurt). The environment type LINUX_CONTAINER with compute type build.general1.2xlarge is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Canada (Central), EU (Ireland), EU (London), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Seoul), Asia Pacific (Singapore), Asia Pacific (Sydney), China (Beijing), and China (Ningxia). The environment type LINUX_GPU_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Canada (Central), EU (Ireland), EU (London), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Seoul), Asia Pacific (Singapore), Asia Pacific (Sydney) , China (Beijing), and China (Ningxia). The environment types WINDOWS_CONTAINER and WINDOWS_SERVER_2019_CONTAINER are available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), and EU (Ireland). For more information, see Build environment compute types in the CodeBuild user guide."];
-      image: NonEmptyString.t
-        [@ocaml.doc
-          "The image tag or image digest that identifies the Docker image to use for this build project. Use the following formats: For an image tag: <registry>/<repository>:<tag>. For example, in the Docker repository that CodeBuild uses to manage its Docker images, this would be aws/codebuild/standard:4.0. For an image digest: <registry>/<repository>\\@<digest>. For example, to specify an image with the digest \"sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf,\" use <registry>/<repository>\\@sha256:cbbf2f9a99b47fc460d422812b6a5adff7dfee951d8fa2e4a98caa0382cfbdbf. For more information, see Docker images provided by CodeBuild in the CodeBuild user guide."];
-      computeType: ComputeType.t
-        [@ocaml.doc
-          "Information about the compute resources the build project uses. Available values include: BUILD_GENERAL1_SMALL: Use up to 3 GB memory and 2 vCPUs for builds. BUILD_GENERAL1_MEDIUM: Use up to 7 GB memory and 4 vCPUs for builds. BUILD_GENERAL1_LARGE: Use up to 16 GB memory and 8 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_2XLARGE: Use up to 145 GB memory, 72 vCPUs, and 824 GB of SSD storage for builds. This compute type supports Docker images up to 100 GB uncompressed. If you use BUILD_GENERAL1_LARGE: For environment type LINUX_CONTAINER, you can use up to 15 GB memory and 8 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 255 GB memory, 32 vCPUs, and 4 NVIDIA Tesla V100 GPUs for builds. For environment type ARM_CONTAINER, you can use up to 16 GB memory and 8 vCPUs on ARM-based processors for builds. For more information, see Build Environment Compute Types in the CodeBuild User Guide."];
-      environmentVariables: EnvironmentVariables.t option
-        [@ocaml.doc
-          "A set of environment variables to make available to builds for this build project."];
-      privilegedMode: WrapperBoolean.t option
-        [@ocaml.doc
-          "Enables running the Docker daemon inside a Docker container. Set to true only if the build project is used to build Docker images. Otherwise, a build that attempts to interact with the Docker daemon fails. The default setting is false. You can initialize the Docker daemon during the install phase of your build by adding one of the following sets of commands to the install phase of your buildspec file: If the operating system's base image is Ubuntu Linux: - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=overlay& - timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\" If the operating system's base image is Alpine Linux and the previous command does not work, add the -t argument to timeout: - nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 --storage-driver=overlay& - timeout -t 15 sh -c \"until docker info; do echo .; sleep 1; done\""];
-      certificate: String_.t option
-        [@ocaml.doc
-          "The ARN of the Amazon S3 bucket, path prefix, and object key that contains the PEM-encoded certificate for the build project. For more information, see certificate in the CodeBuild User Guide."];
-      registryCredential: RegistryCredential.t option
-        [@ocaml.doc "The credentials for access to a private registry."];
-      imagePullCredentialsType: ImagePullCredentialsType.t option
-        [@ocaml.doc
-          "The type of credentials CodeBuild uses to pull images in your build. There are two valid values: CODEBUILD specifies that CodeBuild uses its own credentials. This requires that you modify your ECR repository policy to trust CodeBuild service principal. SERVICE_ROLE specifies that CodeBuild uses your build project's service role. When you use a cross-account or private registry image, you must use SERVICE_ROLE credentials. When you use an CodeBuild curated image, you must use CODEBUILD credentials."]}
-    let context_ = "ProjectEnvironment"
-    let make ?environmentVariables =
-      fun ?privilegedMode ->
-        fun ?certificate ->
-          fun ?registryCredential ->
-            fun ?imagePullCredentialsType ->
-              fun ~type_ ->
-                fun ~image ->
-                  fun ~computeType ->
-                    fun () ->
-                      {
-                        environmentVariables;
-                        privilegedMode;
-                        certificate;
-                        registryCredential;
-                        imagePullCredentialsType;
-                        type_;
-                        image;
-                        computeType
-                      }
-    let to_value x =
-      structure_to_value
-        [("type", (Some (EnvironmentType.to_value x.type_)));
-        ("image", (Some (NonEmptyString.to_value x.image)));
-        ("computeType", (Some (ComputeType.to_value x.computeType)));
-        ("environmentVariables",
-          (Option.map x.environmentVariables ~f:EnvironmentVariables.to_value));
-        ("privilegedMode",
-          (Option.map x.privilegedMode ~f:WrapperBoolean.to_value));
-        ("certificate", (Option.map x.certificate ~f:String_.to_value));
-        ("registryCredential",
-          (Option.map x.registryCredential ~f:RegistryCredential.to_value));
-        ("imagePullCredentialsType",
-          (Option.map x.imagePullCredentialsType
-             ~f:ImagePullCredentialsType.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let imagePullCredentialsType =
-        (Option.map ~f:ImagePullCredentialsType.of_xml)
-          (Xml.child xml_arg0 "imagePullCredentialsType") in
-      let registryCredential =
-        (Option.map ~f:RegistryCredential.of_xml)
-          (Xml.child xml_arg0 "registryCredential") in
-      let certificate =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "certificate") in
-      let privilegedMode =
-        (Option.map ~f:WrapperBoolean.of_xml)
-          (Xml.child xml_arg0 "privilegedMode") in
-      let environmentVariables =
-        (Option.map ~f:EnvironmentVariables.of_xml)
-          (Xml.child xml_arg0 "environmentVariables") in
-      let computeType =
-        ComputeType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "computeType") in
-      let image =
-        NonEmptyString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "image") in
-      let type_ =
-        EnvironmentType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      make ?imagePullCredentialsType ?registryCredential ?certificate
-        ?privilegedMode ?environmentVariables ~computeType ~image ~type_ ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let imagePullCredentialsType =
-        field_map json "imagePullCredentialsType"
-          ImagePullCredentialsType.of_json in
-      let registryCredential =
-        field_map json "registryCredential" RegistryCredential.of_json in
-      let certificate = field_map json "certificate" String_.of_json in
-      let privilegedMode =
-        field_map json "privilegedMode" WrapperBoolean.of_json in
-      let environmentVariables =
-        field_map json "environmentVariables" EnvironmentVariables.of_json in
-      let computeType = field_map_exn json "computeType" ComputeType.of_json in
-      let image = field_map_exn json "image" NonEmptyString.of_json in
-      let type_ = field_map_exn json "type" EnvironmentType.of_json in
-      make ?imagePullCredentialsType ?registryCredential ?certificate
-        ?privilegedMode ?environmentVariables ~computeType ~image ~type_ ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the build environment of the build project."]
-module ProjectFileSystemLocations =
-  struct
-    type nonrec t = ProjectFileSystemLocation.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ProjectFileSystemLocation.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ProjectFileSystemLocation.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ProjectFileSystemLocations"
-        ~of_json:ProjectFileSystemLocation.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module ProjectName =
   struct
     type nonrec t = string
@@ -3380,10 +4914,10 @@ module ProjectName =
         ok_or_failwith
           ((check_string_min i ~min:2) >>=
              (fun () ->
-                (check_string_max i ~max:255) >>=
+                (check_string_max i ~max:150) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"[A-Za-z0-9][A-Za-z0-9\\-_]{1,254}")));
+                       ~pattern:"[A-Za-z0-9][A-Za-z0-9\\-_]{1,149}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3392,64 +4926,6 @@ module ProjectName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ProjectName" j
     let to_json = simple_to_json to_value
-  end
-module ProjectSecondarySourceVersions =
-  struct
-    type nonrec t = ProjectSourceVersion.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:ProjectSourceVersion.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ProjectSourceVersion.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ProjectSecondarySourceVersions"
-        ~of_json:ProjectSourceVersion.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ProjectSources =
-  struct
-    type nonrec t = ProjectSource.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:ProjectSource.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ProjectSource.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ProjectSources" ~of_json:ProjectSource.of_json j
-    let to_json v = composed_to_json to_value v
   end
 module ProjectVisibilityType =
   struct
@@ -3495,46 +4971,6 @@ module TimeOut =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module VpcConfig =
-  struct
-    type nonrec t =
-      {
-      vpcId: NonEmptyString.t option [@ocaml.doc "The ID of the Amazon VPC."];
-      subnets: Subnets.t option
-        [@ocaml.doc "A list of one or more subnet IDs in your Amazon VPC."];
-      securityGroupIds: SecurityGroupIds.t option
-        [@ocaml.doc
-          "A list of one or more security groups IDs in your Amazon VPC."]}
-    let make ?vpcId =
-      fun ?subnets ->
-        fun ?securityGroupIds ->
-          fun () -> { vpcId; subnets; securityGroupIds }
-    let to_value x =
-      structure_to_value
-        [("vpcId", (Option.map x.vpcId ~f:NonEmptyString.to_value));
-        ("subnets", (Option.map x.subnets ~f:Subnets.to_value));
-        ("securityGroupIds",
-          (Option.map x.securityGroupIds ~f:SecurityGroupIds.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let securityGroupIds =
-        (Option.map ~f:SecurityGroupIds.of_xml)
-          (Xml.child xml_arg0 "securityGroupIds") in
-      let subnets =
-        (Option.map ~f:Subnets.of_xml) (Xml.child xml_arg0 "subnets") in
-      let vpcId =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "vpcId") in
-      make ?securityGroupIds ?subnets ?vpcId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let securityGroupIds =
-        field_map json "securityGroupIds" SecurityGroupIds.of_json in
-      let subnets = field_map json "subnets" Subnets.of_json in
-      let vpcId = field_map json "vpcId" NonEmptyString.of_json in
-      make ?securityGroupIds ?subnets ?vpcId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Information about the VPC configuration that CodeBuild accesses."]
 module Webhook =
   struct
     type nonrec t =
@@ -3552,27 +4988,50 @@ module Webhook =
         [@ocaml.doc
           "An array of arrays of WebhookFilter objects used to determine which webhooks are triggered. At least one WebhookFilter in the array must specify EVENT as its type. For a build to be triggered, at least one filter group in the filterGroups array must pass. For a filter group to pass, each of its filters must pass."];
       buildType: WebhookBuildType.t option
-        [@ocaml.doc "Specifies the type of build this webhook will trigger."];
+        [@ocaml.doc
+          "Specifies the type of build this webhook will trigger. RUNNER_BUILDKITE_BUILD is only available for NO_SOURCE source type projects configured for Buildkite runner builds. For more information about CodeBuild-hosted Buildkite runner builds, see Tutorial: Configure a CodeBuild-hosted Buildkite runner in the CodeBuild user guide."];
+      manualCreation: WrapperBoolean.t option
+        [@ocaml.doc
+          "If manualCreation is true, CodeBuild doesn't create a webhook in GitHub and instead returns payloadUrl and secret values for the webhook. The payloadUrl and secret values in the output can be used to manually create a webhook within GitHub. manualCreation is only available for GitHub webhooks."];
       lastModifiedSecret: Timestamp.t option
         [@ocaml.doc
-          "A timestamp that indicates the last time a repository's secret token was modified."]}
+          "A timestamp that indicates the last time a repository's secret token was modified."];
+      scopeConfiguration: ScopeConfiguration.t option
+        [@ocaml.doc
+          "The scope configuration for global or organization webhooks. Global or organization webhooks are only available for GitHub and Github Enterprise webhooks."];
+      status: WebhookStatus.t option
+        [@ocaml.doc
+          "The status of the webhook. Valid values include: CREATING: The webhook is being created. CREATE_FAILED: The webhook has failed to create. ACTIVE: The webhook has succeeded and is active. DELETING: The webhook is being deleted."];
+      statusMessage: String_.t option
+        [@ocaml.doc "A message associated with the status of a webhook."];
+      pullRequestBuildPolicy: PullRequestBuildPolicy.t option }
     let make ?url =
       fun ?payloadUrl ->
         fun ?secret ->
           fun ?branchFilter ->
             fun ?filterGroups ->
               fun ?buildType ->
-                fun ?lastModifiedSecret ->
-                  fun () ->
-                    {
-                      url;
-                      payloadUrl;
-                      secret;
-                      branchFilter;
-                      filterGroups;
-                      buildType;
-                      lastModifiedSecret
-                    }
+                fun ?manualCreation ->
+                  fun ?lastModifiedSecret ->
+                    fun ?scopeConfiguration ->
+                      fun ?status ->
+                        fun ?statusMessage ->
+                          fun ?pullRequestBuildPolicy ->
+                            fun () ->
+                              {
+                                url;
+                                payloadUrl;
+                                secret;
+                                branchFilter;
+                                filterGroups;
+                                buildType;
+                                manualCreation;
+                                lastModifiedSecret;
+                                scopeConfiguration;
+                                status;
+                                statusMessage;
+                                pullRequestBuildPolicy
+                              }
     let to_value x =
       structure_to_value
         [("url", (Option.map x.url ~f:NonEmptyString.to_value));
@@ -3582,13 +5041,35 @@ module Webhook =
         ("filterGroups",
           (Option.map x.filterGroups ~f:FilterGroups.to_value));
         ("buildType", (Option.map x.buildType ~f:WebhookBuildType.to_value));
+        ("manualCreation",
+          (Option.map x.manualCreation ~f:WrapperBoolean.to_value));
         ("lastModifiedSecret",
-          (Option.map x.lastModifiedSecret ~f:Timestamp.to_value))]
+          (Option.map x.lastModifiedSecret ~f:Timestamp.to_value));
+        ("scopeConfiguration",
+          (Option.map x.scopeConfiguration ~f:ScopeConfiguration.to_value));
+        ("status", (Option.map x.status ~f:WebhookStatus.to_value));
+        ("statusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("pullRequestBuildPolicy",
+          (Option.map x.pullRequestBuildPolicy
+             ~f:PullRequestBuildPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pullRequestBuildPolicy =
+        (Option.map ~f:PullRequestBuildPolicy.of_xml)
+          (Xml.child xml_arg0 "pullRequestBuildPolicy") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusMessage") in
+      let status =
+        (Option.map ~f:WebhookStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let scopeConfiguration =
+        (Option.map ~f:ScopeConfiguration.of_xml)
+          (Xml.child xml_arg0 "scopeConfiguration") in
       let lastModifiedSecret =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "lastModifiedSecret") in
+      let manualCreation =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "manualCreation") in
       let buildType =
         (Option.map ~f:WebhookBuildType.of_xml)
           (Xml.child xml_arg0 "buildType") in
@@ -3604,23 +5085,292 @@ module Webhook =
           (Xml.child xml_arg0 "payloadUrl") in
       let url =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "url") in
-      make ?lastModifiedSecret ?buildType ?filterGroups ?branchFilter ?secret
-        ?payloadUrl ?url ()
+      make ?pullRequestBuildPolicy ?statusMessage ?status ?scopeConfiguration
+        ?lastModifiedSecret ?manualCreation ?buildType ?filterGroups
+        ?branchFilter ?secret ?payloadUrl ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let pullRequestBuildPolicy =
+        field_map json__ "pullRequestBuildPolicy"
+          PullRequestBuildPolicy.of_json in
+      let statusMessage = field_map json__ "statusMessage" String_.of_json in
+      let status = field_map json__ "status" WebhookStatus.of_json in
+      let scopeConfiguration =
+        field_map json__ "scopeConfiguration" ScopeConfiguration.of_json in
       let lastModifiedSecret =
-        field_map json "lastModifiedSecret" Timestamp.of_json in
-      let buildType = field_map json "buildType" WebhookBuildType.of_json in
-      let filterGroups = field_map json "filterGroups" FilterGroups.of_json in
-      let branchFilter = field_map json "branchFilter" String_.of_json in
-      let secret = field_map json "secret" NonEmptyString.of_json in
-      let payloadUrl = field_map json "payloadUrl" NonEmptyString.of_json in
-      let url = field_map json "url" NonEmptyString.of_json in
-      make ?lastModifiedSecret ?buildType ?filterGroups ?branchFilter ?secret
-        ?payloadUrl ?url ()
+        field_map json__ "lastModifiedSecret" Timestamp.of_json in
+      let manualCreation =
+        field_map json__ "manualCreation" WrapperBoolean.of_json in
+      let buildType = field_map json__ "buildType" WebhookBuildType.of_json in
+      let filterGroups = field_map json__ "filterGroups" FilterGroups.of_json in
+      let branchFilter = field_map json__ "branchFilter" String_.of_json in
+      let secret = field_map json__ "secret" NonEmptyString.of_json in
+      let payloadUrl = field_map json__ "payloadUrl" NonEmptyString.of_json in
+      let url = field_map json__ "url" NonEmptyString.of_json in
+      make ?pullRequestBuildPolicy ?statusMessage ?status ?scopeConfiguration
+        ?lastModifiedSecret ?manualCreation ?buildType ?filterGroups
+        ?branchFilter ?secret ?payloadUrl ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a webhook that connects repository events to a build project in CodeBuild."]
+module FleetName =
+  struct
+    type nonrec t = string
+    let context_ = "FleetName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9][A-Za-z0-9\\-_]{1,127}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FleetName" j
+    let to_json = simple_to_json to_value
+  end
+module FleetOverflowBehavior =
+  struct
+    type nonrec t =
+      | QUEUE 
+      | ON_DEMAND 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | QUEUE -> "QUEUE"
+      | ON_DEMAND -> "ON_DEMAND"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "QUEUE" -> QUEUE
+      | "ON_DEMAND" -> ON_DEMAND
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FleetOverflowBehavior" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FleetOverflowBehavior" j)
+    let to_json = simple_to_json to_value
+  end
+module FleetStatus =
+  struct
+    type nonrec t =
+      {
+      statusCode: FleetStatusCode.t option
+        [@ocaml.doc
+          "The status code of the compute fleet. Valid values include: CREATING: The compute fleet is being created. UPDATING: The compute fleet is being updated. ROTATING: The compute fleet is being rotated. PENDING_DELETION: The compute fleet is pending deletion. DELETING: The compute fleet is being deleted. CREATE_FAILED: The compute fleet has failed to create. UPDATE_ROLLBACK_FAILED: The compute fleet has failed to update and could not rollback to previous state. ACTIVE: The compute fleet has succeeded and is active."];
+      context: FleetContextCode.t option
+        [@ocaml.doc
+          "Additional information about a compute fleet. Valid values include: CREATE_FAILED: The compute fleet has failed to create. UPDATE_FAILED: The compute fleet has failed to update."];
+      message: String_.t option
+        [@ocaml.doc
+          "A message associated with the status of a compute fleet."]}
+    let make ?statusCode =
+      fun ?context ->
+        fun ?message -> fun () -> { statusCode; context; message }
+    let to_value x =
+      structure_to_value
+        [("statusCode",
+           (Option.map x.statusCode ~f:FleetStatusCode.to_value));
+        ("context", (Option.map x.context ~f:FleetContextCode.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let context =
+        (Option.map ~f:FleetContextCode.of_xml)
+          (Xml.child xml_arg0 "context") in
+      let statusCode =
+        (Option.map ~f:FleetStatusCode.of_xml)
+          (Xml.child xml_arg0 "statusCode") in
+      make ?message ?context ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let context = field_map json__ "context" FleetContextCode.of_json in
+      let statusCode = field_map json__ "statusCode" FleetStatusCode.of_json in
+      make ?message ?context ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The status of the compute fleet."]
+module ProxyConfiguration =
+  struct
+    type nonrec t =
+      {
+      defaultBehavior: FleetProxyRuleBehavior.t option
+        [@ocaml.doc "The default behavior of outgoing traffic."];
+      orderedProxyRules: FleetProxyRules.t option
+        [@ocaml.doc
+          "An array of FleetProxyRule objects that represent the specified destination domains or IPs to allow or deny network access control to."]}
+    let make ?defaultBehavior =
+      fun ?orderedProxyRules ->
+        fun () -> { defaultBehavior; orderedProxyRules }
+    let to_value x =
+      structure_to_value
+        [("defaultBehavior",
+           (Option.map x.defaultBehavior ~f:FleetProxyRuleBehavior.to_value));
+        ("orderedProxyRules",
+          (Option.map x.orderedProxyRules ~f:FleetProxyRules.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let orderedProxyRules =
+        (Option.map ~f:FleetProxyRules.of_xml)
+          (Xml.child xml_arg0 "orderedProxyRules") in
+      let defaultBehavior =
+        (Option.map ~f:FleetProxyRuleBehavior.of_xml)
+          (Xml.child xml_arg0 "defaultBehavior") in
+      make ?orderedProxyRules ?defaultBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let orderedProxyRules =
+        field_map json__ "orderedProxyRules" FleetProxyRules.of_json in
+      let defaultBehavior =
+        field_map json__ "defaultBehavior" FleetProxyRuleBehavior.of_json in
+      make ?orderedProxyRules ?defaultBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the proxy configurations that apply network access control to your reserved capacity instances."]
+module ScalingConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      scalingType: FleetScalingType.t option
+        [@ocaml.doc "The scaling type for a compute fleet."];
+      targetTrackingScalingConfigs:
+        TargetTrackingScalingConfigurations.t option
+        [@ocaml.doc "A list of TargetTrackingScalingConfiguration objects."];
+      maxCapacity: FleetCapacity.t option
+        [@ocaml.doc
+          "The maximum number of instances in the \239\172\130eet when auto-scaling."];
+      desiredCapacity: FleetCapacity.t option
+        [@ocaml.doc
+          "The desired number of instances in the \239\172\130eet when auto-scaling."]}
+    let make ?scalingType =
+      fun ?targetTrackingScalingConfigs ->
+        fun ?maxCapacity ->
+          fun ?desiredCapacity ->
+            fun () ->
+              {
+                scalingType;
+                targetTrackingScalingConfigs;
+                maxCapacity;
+                desiredCapacity
+              }
+    let to_value x =
+      structure_to_value
+        [("scalingType",
+           (Option.map x.scalingType ~f:FleetScalingType.to_value));
+        ("targetTrackingScalingConfigs",
+          (Option.map x.targetTrackingScalingConfigs
+             ~f:TargetTrackingScalingConfigurations.to_value));
+        ("maxCapacity", (Option.map x.maxCapacity ~f:FleetCapacity.to_value));
+        ("desiredCapacity",
+          (Option.map x.desiredCapacity ~f:FleetCapacity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let desiredCapacity =
+        (Option.map ~f:FleetCapacity.of_xml)
+          (Xml.child xml_arg0 "desiredCapacity") in
+      let maxCapacity =
+        (Option.map ~f:FleetCapacity.of_xml)
+          (Xml.child xml_arg0 "maxCapacity") in
+      let targetTrackingScalingConfigs =
+        (Option.map ~f:TargetTrackingScalingConfigurations.of_xml)
+          (Xml.child xml_arg0 "targetTrackingScalingConfigs") in
+      let scalingType =
+        (Option.map ~f:FleetScalingType.of_xml)
+          (Xml.child xml_arg0 "scalingType") in
+      make ?desiredCapacity ?maxCapacity ?targetTrackingScalingConfigs
+        ?scalingType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let desiredCapacity =
+        field_map json__ "desiredCapacity" FleetCapacity.of_json in
+      let maxCapacity = field_map json__ "maxCapacity" FleetCapacity.of_json in
+      let targetTrackingScalingConfigs =
+        field_map json__ "targetTrackingScalingConfigs"
+          TargetTrackingScalingConfigurations.of_json in
+      let scalingType =
+        field_map json__ "scalingType" FleetScalingType.of_json in
+      make ?desiredCapacity ?maxCapacity ?targetTrackingScalingConfigs
+        ?scalingType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The scaling configuration output of a compute fleet."]
+module AutoRetryConfig =
+  struct
+    type nonrec t =
+      {
+      autoRetryLimit: WrapperInt.t option
+        [@ocaml.doc
+          "The maximum number of additional automatic retries after a failed build. For example, if the auto-retry limit is set to 2, CodeBuild will call the RetryBuild API to automatically retry your build for up to 2 additional times."];
+      autoRetryNumber: WrapperInt.t option
+        [@ocaml.doc
+          "The number of times that the build has been retried. The initial build will have an auto-retry number of 0."];
+      nextAutoRetry: String_.t option
+        [@ocaml.doc
+          "The build ARN of the auto-retried build triggered by the current build. The next auto-retry will be null for builds that don't trigger an auto-retry."];
+      previousAutoRetry: String_.t option
+        [@ocaml.doc
+          "The build ARN of the build that triggered the current auto-retry build. The previous auto-retry will be null for the initial build."]}
+    let make ?autoRetryLimit =
+      fun ?autoRetryNumber ->
+        fun ?nextAutoRetry ->
+          fun ?previousAutoRetry ->
+            fun () ->
+              {
+                autoRetryLimit;
+                autoRetryNumber;
+                nextAutoRetry;
+                previousAutoRetry
+              }
+    let to_value x =
+      structure_to_value
+        [("autoRetryLimit",
+           (Option.map x.autoRetryLimit ~f:WrapperInt.to_value));
+        ("autoRetryNumber",
+          (Option.map x.autoRetryNumber ~f:WrapperInt.to_value));
+        ("nextAutoRetry", (Option.map x.nextAutoRetry ~f:String_.to_value));
+        ("previousAutoRetry",
+          (Option.map x.previousAutoRetry ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let previousAutoRetry =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "previousAutoRetry") in
+      let nextAutoRetry =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextAutoRetry") in
+      let autoRetryNumber =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryNumber") in
+      let autoRetryLimit =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryLimit") in
+      make ?previousAutoRetry ?nextAutoRetry ?autoRetryNumber ?autoRetryLimit
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let previousAutoRetry =
+        field_map json__ "previousAutoRetry" String_.of_json in
+      let nextAutoRetry = field_map json__ "nextAutoRetry" String_.of_json in
+      let autoRetryNumber =
+        field_map json__ "autoRetryNumber" WrapperInt.of_json in
+      let autoRetryLimit =
+        field_map json__ "autoRetryLimit" WrapperInt.of_json in
+      make ?previousAutoRetry ?nextAutoRetry ?autoRetryNumber ?autoRetryLimit
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the auto-retry configuration for the build."]
 module BuildArtifactsList =
   struct
     type nonrec t = BuildArtifacts.t list
@@ -3629,6 +5379,9 @@ module BuildArtifactsList =
         ok_or_failwith
           ((check_list_max i ~max:12) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildArtifacts.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3654,6 +5407,9 @@ module BuildPhases =
   struct
     type nonrec t = BuildPhase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildPhase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3678,6 +5434,9 @@ module BuildReportArns =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3726,11 +5485,11 @@ module DebugSession =
           (Xml.child xml_arg0 "sessionEnabled") in
       make ?sessionTarget ?sessionEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionTarget =
-        field_map json "sessionTarget" NonEmptyString.of_json in
+        field_map json__ "sessionTarget" NonEmptyString.of_json in
       let sessionEnabled =
-        field_map json "sessionEnabled" WrapperBoolean.of_json in
+        field_map json__ "sessionEnabled" WrapperBoolean.of_json in
       make ?sessionTarget ?sessionEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3739,6 +5498,9 @@ module ExportedEnvironmentVariables =
   struct
     type nonrec t = ExportedEnvironmentVariable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExportedEnvironmentVariable.to_value)) |>
         (fun x -> `List x)
@@ -3761,133 +5523,13 @@ module ExportedEnvironmentVariables =
         ~of_json:ExportedEnvironmentVariable.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LogsLocation =
-  struct
-    type nonrec t =
-      {
-      groupName: String_.t option
-        [@ocaml.doc
-          "The name of the CloudWatch Logs group for the build logs."];
-      streamName: String_.t option
-        [@ocaml.doc
-          "The name of the CloudWatch Logs stream for the build logs."];
-      deepLink: String_.t option
-        [@ocaml.doc "The URL to an individual build log in CloudWatch Logs."];
-      s3DeepLink: String_.t option
-        [@ocaml.doc "The URL to a build log in an S3 bucket."];
-      cloudWatchLogsArn: String_.t option
-        [@ocaml.doc
-          "The ARN of CloudWatch Logs for a build project. Its format is arn:$\\{Partition\\}:logs:$\\{Region\\}:$\\{Account\\}:log-group:$\\{LogGroupName\\}:log-stream:$\\{LogStreamName\\}. For more information, see Resources Defined by CloudWatch Logs."];
-      s3LogsArn: String_.t option
-        [@ocaml.doc
-          "The ARN of S3 logs for a build project. Its format is arn:$\\{Partition\\}:s3:::$\\{BucketName\\}/$\\{ObjectName\\}. For more information, see Resources Defined by Amazon S3."];
-      cloudWatchLogs: CloudWatchLogsConfig.t option
-        [@ocaml.doc "Information about CloudWatch Logs for a build project."];
-      s3Logs: S3LogsConfig.t option
-        [@ocaml.doc "Information about S3 logs for a build project."]}
-    let make ?groupName =
-      fun ?streamName ->
-        fun ?deepLink ->
-          fun ?s3DeepLink ->
-            fun ?cloudWatchLogsArn ->
-              fun ?s3LogsArn ->
-                fun ?cloudWatchLogs ->
-                  fun ?s3Logs ->
-                    fun () ->
-                      {
-                        groupName;
-                        streamName;
-                        deepLink;
-                        s3DeepLink;
-                        cloudWatchLogsArn;
-                        s3LogsArn;
-                        cloudWatchLogs;
-                        s3Logs
-                      }
-    let to_value x =
-      structure_to_value
-        [("groupName", (Option.map x.groupName ~f:String_.to_value));
-        ("streamName", (Option.map x.streamName ~f:String_.to_value));
-        ("deepLink", (Option.map x.deepLink ~f:String_.to_value));
-        ("s3DeepLink", (Option.map x.s3DeepLink ~f:String_.to_value));
-        ("cloudWatchLogsArn",
-          (Option.map x.cloudWatchLogsArn ~f:String_.to_value));
-        ("s3LogsArn", (Option.map x.s3LogsArn ~f:String_.to_value));
-        ("cloudWatchLogs",
-          (Option.map x.cloudWatchLogs ~f:CloudWatchLogsConfig.to_value));
-        ("s3Logs", (Option.map x.s3Logs ~f:S3LogsConfig.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let s3Logs =
-        (Option.map ~f:S3LogsConfig.of_xml) (Xml.child xml_arg0 "s3Logs") in
-      let cloudWatchLogs =
-        (Option.map ~f:CloudWatchLogsConfig.of_xml)
-          (Xml.child xml_arg0 "cloudWatchLogs") in
-      let s3LogsArn =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3LogsArn") in
-      let cloudWatchLogsArn =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "cloudWatchLogsArn") in
-      let s3DeepLink =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "s3DeepLink") in
-      let deepLink =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "deepLink") in
-      let streamName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "streamName") in
-      let groupName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "groupName") in
-      make ?s3Logs ?cloudWatchLogs ?s3LogsArn ?cloudWatchLogsArn ?s3DeepLink
-        ?deepLink ?streamName ?groupName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Logs = field_map json "s3Logs" S3LogsConfig.of_json in
-      let cloudWatchLogs =
-        field_map json "cloudWatchLogs" CloudWatchLogsConfig.of_json in
-      let s3LogsArn = field_map json "s3LogsArn" String_.of_json in
-      let cloudWatchLogsArn =
-        field_map json "cloudWatchLogsArn" String_.of_json in
-      let s3DeepLink = field_map json "s3DeepLink" String_.of_json in
-      let deepLink = field_map json "deepLink" String_.of_json in
-      let streamName = field_map json "streamName" String_.of_json in
-      let groupName = field_map json "groupName" String_.of_json in
-      make ?s3Logs ?cloudWatchLogs ?s3LogsArn ?cloudWatchLogsArn ?s3DeepLink
-        ?deepLink ?streamName ?groupName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about build logs in CloudWatch Logs."]
-module NetworkInterface =
-  struct
-    type nonrec t =
-      {
-      subnetId: NonEmptyString.t option [@ocaml.doc "The ID of the subnet."];
-      networkInterfaceId: NonEmptyString.t option
-        [@ocaml.doc "The ID of the network interface."]}
-    let make ?subnetId =
-      fun ?networkInterfaceId -> fun () -> { subnetId; networkInterfaceId }
-    let to_value x =
-      structure_to_value
-        [("subnetId", (Option.map x.subnetId ~f:NonEmptyString.to_value));
-        ("networkInterfaceId",
-          (Option.map x.networkInterfaceId ~f:NonEmptyString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let networkInterfaceId =
-        (Option.map ~f:NonEmptyString.of_xml)
-          (Xml.child xml_arg0 "networkInterfaceId") in
-      let subnetId =
-        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "subnetId") in
-      make ?networkInterfaceId ?subnetId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let networkInterfaceId =
-        field_map json "networkInterfaceId" NonEmptyString.of_json in
-      let subnetId = field_map json "subnetId" NonEmptyString.of_json in
-      make ?networkInterfaceId ?subnetId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes a network interface."]
 module BuildBatchPhases =
   struct
     type nonrec t = BuildBatchPhase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildBatchPhase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3913,6 +5555,9 @@ module BuildGroups =
   struct
     type nonrec t = BuildGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3941,36 +5586,44 @@ module SourceCredentialsInfo =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the token."];
       serverType: ServerType.t option
         [@ocaml.doc
-          "The type of source provider. The valid options are GITHUB, GITHUB_ENTERPRISE, or BITBUCKET."];
+          "The type of source provider. The valid options are GITHUB, GITHUB_ENTERPRISE, GITLAB, GITLAB_SELF_MANAGED, or BITBUCKET."];
       authType: AuthType.t option
         [@ocaml.doc
-          "The type of authentication used by the credentials. Valid options are OAUTH, BASIC_AUTH, or PERSONAL_ACCESS_TOKEN."]}
+          "The type of authentication used by the credentials. Valid options are OAUTH, BASIC_AUTH, PERSONAL_ACCESS_TOKEN, CODECONNECTIONS, or SECRETS_MANAGER."];
+      resource: String_.t option
+        [@ocaml.doc
+          "The connection ARN if your authType is CODECONNECTIONS or SECRETS_MANAGER."]}
     let make ?arn =
       fun ?serverType ->
-        fun ?authType -> fun () -> { arn; serverType; authType }
+        fun ?authType ->
+          fun ?resource -> fun () -> { arn; serverType; authType; resource }
     let to_value x =
       structure_to_value
         [("arn", (Option.map x.arn ~f:NonEmptyString.to_value));
         ("serverType", (Option.map x.serverType ~f:ServerType.to_value));
-        ("authType", (Option.map x.authType ~f:AuthType.to_value))]
+        ("authType", (Option.map x.authType ~f:AuthType.to_value));
+        ("resource", (Option.map x.resource ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let resource =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resource") in
       let authType =
         (Option.map ~f:AuthType.of_xml) (Xml.child xml_arg0 "authType") in
       let serverType =
         (Option.map ~f:ServerType.of_xml) (Xml.child xml_arg0 "serverType") in
       let arn =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
-      make ?authType ?serverType ?arn ()
+      make ?resource ?authType ?serverType ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authType = field_map json "authType" AuthType.of_json in
-      let serverType = field_map json "serverType" ServerType.of_json in
-      let arn = field_map json "arn" NonEmptyString.of_json in
-      make ?authType ?serverType ?arn ()
+    let of_json json__ =
+      let resource = field_map json__ "resource" String_.of_json in
+      let authType = field_map json__ "authType" AuthType.of_json in
+      let serverType = field_map json__ "serverType" ServerType.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
+      make ?resource ?authType ?serverType ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the credentials for a GitHub, GitHub Enterprise, or Bitbucket repository."]
+       "Information about the credentials for a GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket repository."]
 module EnvironmentPlatform =
   struct
     type nonrec t =
@@ -3994,13 +5647,152 @@ module EnvironmentPlatform =
         (Option.map ~f:PlatformType.of_xml) (Xml.child xml_arg0 "platform") in
       make ?languages ?platform ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languages = field_map json "languages" EnvironmentLanguages.of_json in
-      let platform = field_map json "platform" PlatformType.of_json in
+    let of_json json__ =
+      let languages =
+        field_map json__ "languages" EnvironmentLanguages.of_json in
+      let platform = field_map json__ "platform" PlatformType.of_json in
       make ?languages ?platform ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of Docker images that are related by platform and are managed by CodeBuild."]
+module CommandExecution =
+  struct
+    type nonrec t =
+      {
+      id: NonEmptyString.t option
+        [@ocaml.doc "The ID of the command execution."];
+      sandboxId: NonEmptyString.t option [@ocaml.doc "A sandboxId."];
+      submitTime: Timestamp.t option
+        [@ocaml.doc
+          "When the command execution process was initially submitted, expressed in Unix time format."];
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "When the command execution process started, expressed in Unix time format."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "When the command execution process ended, expressed in Unix time format."];
+      status: NonEmptyString.t option
+        [@ocaml.doc "The status of the command execution."];
+      command: SensitiveNonEmptyString.t option
+        [@ocaml.doc "The command that needs to be executed."];
+      type_: CommandType.t option [@ocaml.doc "The command type."];
+      exitCode: NonEmptyString.t option
+        [@ocaml.doc "The exit code to return upon completion."];
+      standardOutputContent: SensitiveNonEmptyString.t option
+        [@ocaml.doc "The text written by the command to stdout."];
+      standardErrContent: SensitiveNonEmptyString.t option
+        [@ocaml.doc "The text written by the command to stderr."];
+      logs: LogsLocation.t option ;
+      sandboxArn: NonEmptyString.t option [@ocaml.doc "A sandboxArn."]}
+    let make ?id =
+      fun ?sandboxId ->
+        fun ?submitTime ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?status ->
+                fun ?command ->
+                  fun ?type_ ->
+                    fun ?exitCode ->
+                      fun ?standardOutputContent ->
+                        fun ?standardErrContent ->
+                          fun ?logs ->
+                            fun ?sandboxArn ->
+                              fun () ->
+                                {
+                                  id;
+                                  sandboxId;
+                                  submitTime;
+                                  startTime;
+                                  endTime;
+                                  status;
+                                  command;
+                                  type_;
+                                  exitCode;
+                                  standardOutputContent;
+                                  standardErrContent;
+                                  logs;
+                                  sandboxArn
+                                }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:NonEmptyString.to_value));
+        ("sandboxId", (Option.map x.sandboxId ~f:NonEmptyString.to_value));
+        ("submitTime", (Option.map x.submitTime ~f:Timestamp.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:NonEmptyString.to_value));
+        ("command",
+          (Option.map x.command ~f:SensitiveNonEmptyString.to_value));
+        ("type", (Option.map x.type_ ~f:CommandType.to_value));
+        ("exitCode", (Option.map x.exitCode ~f:NonEmptyString.to_value));
+        ("standardOutputContent",
+          (Option.map x.standardOutputContent
+             ~f:SensitiveNonEmptyString.to_value));
+        ("standardErrContent",
+          (Option.map x.standardErrContent
+             ~f:SensitiveNonEmptyString.to_value));
+        ("logs", (Option.map x.logs ~f:LogsLocation.to_value));
+        ("sandboxArn", (Option.map x.sandboxArn ~f:NonEmptyString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandboxArn =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "sandboxArn") in
+      let logs =
+        (Option.map ~f:LogsLocation.of_xml) (Xml.child xml_arg0 "logs") in
+      let standardErrContent =
+        (Option.map ~f:SensitiveNonEmptyString.of_xml)
+          (Xml.child xml_arg0 "standardErrContent") in
+      let standardOutputContent =
+        (Option.map ~f:SensitiveNonEmptyString.of_xml)
+          (Xml.child xml_arg0 "standardOutputContent") in
+      let exitCode =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "exitCode") in
+      let type_ =
+        (Option.map ~f:CommandType.of_xml) (Xml.child xml_arg0 "type") in
+      let command =
+        (Option.map ~f:SensitiveNonEmptyString.of_xml)
+          (Xml.child xml_arg0 "command") in
+      let status =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "status") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let submitTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "submitTime") in
+      let sandboxId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "sandboxId") in
+      let id =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?sandboxArn ?logs ?standardErrContent ?standardOutputContent
+        ?exitCode ?type_ ?command ?status ?endTime ?startTime ?submitTime
+        ?sandboxId ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandboxArn = field_map json__ "sandboxArn" NonEmptyString.of_json in
+      let logs = field_map json__ "logs" LogsLocation.of_json in
+      let standardErrContent =
+        field_map json__ "standardErrContent" SensitiveNonEmptyString.of_json in
+      let standardOutputContent =
+        field_map json__ "standardOutputContent"
+          SensitiveNonEmptyString.of_json in
+      let exitCode = field_map json__ "exitCode" NonEmptyString.of_json in
+      let type_ = field_map json__ "type" CommandType.of_json in
+      let command =
+        field_map json__ "command" SensitiveNonEmptyString.of_json in
+      let status = field_map json__ "status" NonEmptyString.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let submitTime = field_map json__ "submitTime" Timestamp.of_json in
+      let sandboxId = field_map json__ "sandboxId" NonEmptyString.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      make ?sandboxArn ?logs ?standardErrContent ?standardOutputContent
+        ?exitCode ?type_ ?command ?status ?endTime ?startTime ?submitTime
+        ?sandboxId ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains command execution information."]
 module ReportWithRawData =
   struct
     type nonrec t =
@@ -4022,9 +5814,9 @@ module ReportWithRawData =
           (Xml.child xml_arg0 "reportArn") in
       make ?data ?reportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "data" String_.of_json in
-      let reportArn = field_map json "reportArn" NonEmptyString.of_json in
+    let of_json json__ =
+      let data = field_map json__ "data" String_.of_json in
+      let reportArn = field_map json__ "reportArn" NonEmptyString.of_json in
       make ?data ?reportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4053,7 +5845,10 @@ module TestCase =
           "A message associated with a test case. For example, an error message or stack trace."];
       expired: Timestamp.t option
         [@ocaml.doc
-          "The date and time a test case expires. A test case expires 30 days after it is created. An expired test case is not available to view in CodeBuild."]}
+          "The date and time a test case expires. A test case expires 30 days after it is created. An expired test case is not available to view in CodeBuild."];
+      testSuiteName: String_.t option
+        [@ocaml.doc
+          "The name of the test suite that the test case is a part of."]}
     let make ?reportArn =
       fun ?testRawDataPath ->
         fun ?prefix ->
@@ -4062,17 +5857,19 @@ module TestCase =
               fun ?durationInNanoSeconds ->
                 fun ?message ->
                   fun ?expired ->
-                    fun () ->
-                      {
-                        reportArn;
-                        testRawDataPath;
-                        prefix;
-                        name;
-                        status;
-                        durationInNanoSeconds;
-                        message;
-                        expired
-                      }
+                    fun ?testSuiteName ->
+                      fun () ->
+                        {
+                          reportArn;
+                          testRawDataPath;
+                          prefix;
+                          name;
+                          status;
+                          durationInNanoSeconds;
+                          message;
+                          expired;
+                          testSuiteName
+                        }
     let to_value x =
       structure_to_value
         [("reportArn", (Option.map x.reportArn ~f:NonEmptyString.to_value));
@@ -4084,9 +5881,12 @@ module TestCase =
         ("durationInNanoSeconds",
           (Option.map x.durationInNanoSeconds ~f:WrapperLong.to_value));
         ("message", (Option.map x.message ~f:String_.to_value));
-        ("expired", (Option.map x.expired ~f:Timestamp.to_value))]
+        ("expired", (Option.map x.expired ~f:Timestamp.to_value));
+        ("testSuiteName", (Option.map x.testSuiteName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let testSuiteName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "testSuiteName") in
       let expired =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "expired") in
       let message =
@@ -4104,21 +5904,23 @@ module TestCase =
       let reportArn =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "reportArn") in
-      make ?expired ?message ?durationInNanoSeconds ?status ?name ?prefix
-        ?testRawDataPath ?reportArn ()
+      make ?testSuiteName ?expired ?message ?durationInNanoSeconds ?status
+        ?name ?prefix ?testRawDataPath ?reportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expired = field_map json "expired" Timestamp.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let testSuiteName = field_map json__ "testSuiteName" String_.of_json in
+      let expired = field_map json__ "expired" Timestamp.of_json in
+      let message = field_map json__ "message" String_.of_json in
       let durationInNanoSeconds =
-        field_map json "durationInNanoSeconds" WrapperLong.of_json in
-      let status = field_map json "status" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let prefix = field_map json "prefix" String_.of_json in
-      let testRawDataPath = field_map json "testRawDataPath" String_.of_json in
-      let reportArn = field_map json "reportArn" NonEmptyString.of_json in
-      make ?expired ?message ?durationInNanoSeconds ?status ?name ?prefix
-        ?testRawDataPath ?reportArn ()
+        field_map json__ "durationInNanoSeconds" WrapperLong.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let prefix = field_map json__ "prefix" String_.of_json in
+      let testRawDataPath =
+        field_map json__ "testRawDataPath" String_.of_json in
+      let reportArn = field_map json__ "reportArn" NonEmptyString.of_json in
+      make ?testSuiteName ?expired ?message ?durationInNanoSeconds ?status
+        ?name ?prefix ?testRawDataPath ?reportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a test case created using a framework such as NUnit or Cucumber. A test case might be a unit test or a configuration test."]
@@ -4225,21 +6027,22 @@ module CodeCoverage =
         ?branchCoveragePercentage ?linesMissed ?linesCovered
         ?lineCoveragePercentage ?filePath ?reportARN ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expired = field_map json "expired" Timestamp.of_json in
+    let of_json json__ =
+      let expired = field_map json__ "expired" Timestamp.of_json in
       let branchesMissed =
-        field_map json "branchesMissed" NonNegativeInt.of_json in
+        field_map json__ "branchesMissed" NonNegativeInt.of_json in
       let branchesCovered =
-        field_map json "branchesCovered" NonNegativeInt.of_json in
+        field_map json__ "branchesCovered" NonNegativeInt.of_json in
       let branchCoveragePercentage =
-        field_map json "branchCoveragePercentage" Percentage.of_json in
-      let linesMissed = field_map json "linesMissed" NonNegativeInt.of_json in
-      let linesCovered = field_map json "linesCovered" NonNegativeInt.of_json in
+        field_map json__ "branchCoveragePercentage" Percentage.of_json in
+      let linesMissed = field_map json__ "linesMissed" NonNegativeInt.of_json in
+      let linesCovered =
+        field_map json__ "linesCovered" NonNegativeInt.of_json in
       let lineCoveragePercentage =
-        field_map json "lineCoveragePercentage" Percentage.of_json in
-      let filePath = field_map json "filePath" NonEmptyString.of_json in
-      let reportARN = field_map json "reportARN" NonEmptyString.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
+        field_map json__ "lineCoveragePercentage" Percentage.of_json in
+      let filePath = field_map json__ "filePath" NonEmptyString.of_json in
+      let reportARN = field_map json__ "reportARN" NonEmptyString.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
       make ?expired ?branchesMissed ?branchesCovered
         ?branchCoveragePercentage ?linesMissed ?linesCovered
         ?lineCoveragePercentage ?filePath ?reportARN ?id ()
@@ -4269,13 +6072,234 @@ module BuildNotDeleted =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?statusCode ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusCode = field_map json "statusCode" String_.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
+    let of_json json__ =
+      let statusCode = field_map json__ "statusCode" String_.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
       make ?statusCode ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a build that could not be successfully deleted."]
+module Sandbox =
+  struct
+    type nonrec t =
+      {
+      id: NonEmptyString.t option [@ocaml.doc "The ID of the sandbox."];
+      arn: NonEmptyString.t option [@ocaml.doc "The ARN of the sandbox."];
+      projectName: NonEmptyString.t option
+        [@ocaml.doc "The CodeBuild project name."];
+      requestTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox process was initially requested, expressed in Unix time format."];
+      startTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox process started, expressed in Unix time format."];
+      endTime: Timestamp.t option
+        [@ocaml.doc
+          "When the sandbox process ended, expressed in Unix time format."];
+      status: String_.t option [@ocaml.doc "The status of the sandbox."];
+      source: ProjectSource.t option ;
+      sourceVersion: NonEmptyString.t option
+        [@ocaml.doc
+          "Any version identifier for the version of the sandbox to be built."];
+      secondarySources: ProjectSources.t option
+        [@ocaml.doc "An array of ProjectSource objects."];
+      secondarySourceVersions: ProjectSecondarySourceVersions.t option
+        [@ocaml.doc "An array of ProjectSourceVersion objects."];
+      environment: ProjectEnvironment.t option ;
+      fileSystemLocations: ProjectFileSystemLocations.t option
+        [@ocaml.doc
+          "An array of ProjectFileSystemLocation objects for a CodeBuild build project. A ProjectFileSystemLocation object specifies the identifier, location, mountOptions, mountPoint, and type of a file system created using Amazon Elastic File System."];
+      timeoutInMinutes: WrapperInt.t option
+        [@ocaml.doc
+          "How long, in minutes, from 5 to 2160 (36 hours), for CodeBuild to wait before timing out this sandbox if it does not get marked as completed."];
+      queuedTimeoutInMinutes: WrapperInt.t option
+        [@ocaml.doc
+          "The number of minutes a sandbox is allowed to be queued before it times out."];
+      vpcConfig: VpcConfig.t option ;
+      logConfig: LogsConfig.t option ;
+      encryptionKey: NonEmptyString.t option
+        [@ocaml.doc
+          "The Key Management Service customer master key (CMK) to be used for encrypting the sandbox output artifacts."];
+      serviceRole: NonEmptyString.t option
+        [@ocaml.doc "The name of a service role used for this sandbox."];
+      currentSession: SandboxSession.t option
+        [@ocaml.doc "The current session for the sandbox."]}
+    let make ?id =
+      fun ?arn ->
+        fun ?projectName ->
+          fun ?requestTime ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?status ->
+                  fun ?source ->
+                    fun ?sourceVersion ->
+                      fun ?secondarySources ->
+                        fun ?secondarySourceVersions ->
+                          fun ?environment ->
+                            fun ?fileSystemLocations ->
+                              fun ?timeoutInMinutes ->
+                                fun ?queuedTimeoutInMinutes ->
+                                  fun ?vpcConfig ->
+                                    fun ?logConfig ->
+                                      fun ?encryptionKey ->
+                                        fun ?serviceRole ->
+                                          fun ?currentSession ->
+                                            fun () ->
+                                              {
+                                                id;
+                                                arn;
+                                                projectName;
+                                                requestTime;
+                                                startTime;
+                                                endTime;
+                                                status;
+                                                source;
+                                                sourceVersion;
+                                                secondarySources;
+                                                secondarySourceVersions;
+                                                environment;
+                                                fileSystemLocations;
+                                                timeoutInMinutes;
+                                                queuedTimeoutInMinutes;
+                                                vpcConfig;
+                                                logConfig;
+                                                encryptionKey;
+                                                serviceRole;
+                                                currentSession
+                                              }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:NonEmptyString.to_value));
+        ("arn", (Option.map x.arn ~f:NonEmptyString.to_value));
+        ("projectName",
+          (Option.map x.projectName ~f:NonEmptyString.to_value));
+        ("requestTime", (Option.map x.requestTime ~f:Timestamp.to_value));
+        ("startTime", (Option.map x.startTime ~f:Timestamp.to_value));
+        ("endTime", (Option.map x.endTime ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
+        ("source", (Option.map x.source ~f:ProjectSource.to_value));
+        ("sourceVersion",
+          (Option.map x.sourceVersion ~f:NonEmptyString.to_value));
+        ("secondarySources",
+          (Option.map x.secondarySources ~f:ProjectSources.to_value));
+        ("secondarySourceVersions",
+          (Option.map x.secondarySourceVersions
+             ~f:ProjectSecondarySourceVersions.to_value));
+        ("environment",
+          (Option.map x.environment ~f:ProjectEnvironment.to_value));
+        ("fileSystemLocations",
+          (Option.map x.fileSystemLocations
+             ~f:ProjectFileSystemLocations.to_value));
+        ("timeoutInMinutes",
+          (Option.map x.timeoutInMinutes ~f:WrapperInt.to_value));
+        ("queuedTimeoutInMinutes",
+          (Option.map x.queuedTimeoutInMinutes ~f:WrapperInt.to_value));
+        ("vpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("logConfig", (Option.map x.logConfig ~f:LogsConfig.to_value));
+        ("encryptionKey",
+          (Option.map x.encryptionKey ~f:NonEmptyString.to_value));
+        ("serviceRole",
+          (Option.map x.serviceRole ~f:NonEmptyString.to_value));
+        ("currentSession",
+          (Option.map x.currentSession ~f:SandboxSession.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let currentSession =
+        (Option.map ~f:SandboxSession.of_xml)
+          (Xml.child xml_arg0 "currentSession") in
+      let serviceRole =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "serviceRole") in
+      let encryptionKey =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "encryptionKey") in
+      let logConfig =
+        (Option.map ~f:LogsConfig.of_xml) (Xml.child xml_arg0 "logConfig") in
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "vpcConfig") in
+      let queuedTimeoutInMinutes =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "queuedTimeoutInMinutes") in
+      let timeoutInMinutes =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "timeoutInMinutes") in
+      let fileSystemLocations =
+        (Option.map ~f:ProjectFileSystemLocations.of_xml)
+          (Xml.child xml_arg0 "fileSystemLocations") in
+      let environment =
+        (Option.map ~f:ProjectEnvironment.of_xml)
+          (Xml.child xml_arg0 "environment") in
+      let secondarySourceVersions =
+        (Option.map ~f:ProjectSecondarySourceVersions.of_xml)
+          (Xml.child xml_arg0 "secondarySourceVersions") in
+      let secondarySources =
+        (Option.map ~f:ProjectSources.of_xml)
+          (Xml.child xml_arg0 "secondarySources") in
+      let sourceVersion =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "sourceVersion") in
+      let source =
+        (Option.map ~f:ProjectSource.of_xml) (Xml.child xml_arg0 "source") in
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      let endTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "startTime") in
+      let requestTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "requestTime") in
+      let projectName =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "projectName") in
+      let arn =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
+      let id =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?currentSession ?serviceRole ?encryptionKey ?logConfig ?vpcConfig
+        ?queuedTimeoutInMinutes ?timeoutInMinutes ?fileSystemLocations
+        ?environment ?secondarySourceVersions ?secondarySources
+        ?sourceVersion ?source ?status ?endTime ?startTime ?requestTime
+        ?projectName ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currentSession =
+        field_map json__ "currentSession" SandboxSession.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
+      let encryptionKey =
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
+      let logConfig = field_map json__ "logConfig" LogsConfig.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let queuedTimeoutInMinutes =
+        field_map json__ "queuedTimeoutInMinutes" WrapperInt.of_json in
+      let timeoutInMinutes =
+        field_map json__ "timeoutInMinutes" WrapperInt.of_json in
+      let fileSystemLocations =
+        field_map json__ "fileSystemLocations"
+          ProjectFileSystemLocations.of_json in
+      let environment =
+        field_map json__ "environment" ProjectEnvironment.of_json in
+      let secondarySourceVersions =
+        field_map json__ "secondarySourceVersions"
+          ProjectSecondarySourceVersions.of_json in
+      let secondarySources =
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let sourceVersion =
+        field_map json__ "sourceVersion" NonEmptyString.of_json in
+      let source = field_map json__ "source" ProjectSource.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let requestTime = field_map json__ "requestTime" Timestamp.of_json in
+      let projectName = field_map json__ "projectName" NonEmptyString.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      make ?currentSession ?serviceRole ?encryptionKey ?logConfig ?vpcConfig
+        ?queuedTimeoutInMinutes ?timeoutInMinutes ?fileSystemLocations
+        ?environment ?secondarySourceVersions ?secondarySources
+        ?sourceVersion ?source ?status ?endTime ?startTime ?requestTime
+        ?projectName ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains sandbox information."]
 module Report =
   struct
     type nonrec t =
@@ -4390,24 +6414,24 @@ module Report =
         ?expired ?created ?status ?executionId ?reportGroupArn ?name ?type_
         ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeCoverageSummary =
-        field_map json "codeCoverageSummary"
+        field_map json__ "codeCoverageSummary"
           CodeCoverageReportSummary.of_json in
       let testSummary =
-        field_map json "testSummary" TestReportSummary.of_json in
-      let truncated = field_map json "truncated" WrapperBoolean.of_json in
+        field_map json__ "testSummary" TestReportSummary.of_json in
+      let truncated = field_map json__ "truncated" WrapperBoolean.of_json in
       let exportConfig =
-        field_map json "exportConfig" ReportExportConfig.of_json in
-      let expired = field_map json "expired" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
-      let status = field_map json "status" ReportStatusType.of_json in
-      let executionId = field_map json "executionId" String_.of_json in
+        field_map json__ "exportConfig" ReportExportConfig.of_json in
+      let expired = field_map json__ "expired" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let status = field_map json__ "status" ReportStatusType.of_json in
+      let executionId = field_map json__ "executionId" String_.of_json in
       let reportGroupArn =
-        field_map json "reportGroupArn" NonEmptyString.of_json in
-      let name = field_map json "name" String_.of_json in
-      let type_ = field_map json "type" ReportType.of_json in
-      let arn = field_map json "arn" NonEmptyString.of_json in
+        field_map json__ "reportGroupArn" NonEmptyString.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let type_ = field_map json__ "type" ReportType.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
       make ?codeCoverageSummary ?testSummary ?truncated ?exportConfig
         ?expired ?created ?status ?executionId ?reportGroupArn ?name ?type_
         ?arn ()
@@ -4489,16 +6513,16 @@ module ReportGroup =
       make ?status ?tags ?lastModified ?created ?exportConfig ?type_ ?name
         ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ReportGroupStatusType.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let lastModified = field_map json "lastModified" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ReportGroupStatusType.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let lastModified = field_map json__ "lastModified" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
       let exportConfig =
-        field_map json "exportConfig" ReportExportConfig.of_json in
-      let type_ = field_map json "type" ReportType.of_json in
-      let name = field_map json "name" ReportGroupName.of_json in
-      let arn = field_map json "arn" NonEmptyString.of_json in
+        field_map json__ "exportConfig" ReportExportConfig.of_json in
+      let type_ = field_map json__ "type" ReportType.of_json in
+      let name = field_map json__ "name" ReportGroupName.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
       make ?status ?tags ?lastModified ?created ?exportConfig ?type_ ?name
         ?arn ()
     let to_json v = composed_to_json to_value v
@@ -4522,7 +6546,7 @@ module Project =
         [@ocaml.doc "An array of ProjectSource objects."];
       sourceVersion: String_.t option
         [@ocaml.doc
-          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
+          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For GitLab: the commit ID, branch, or Git tag to use. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
       secondarySourceVersions: ProjectSecondarySourceVersions.t option
         [@ocaml.doc
           "An array of ProjectSourceVersion objects. If secondarySourceVersions is specified at the build level, then they take over these secondarySourceVersions (at the project level)."];
@@ -4539,9 +6563,9 @@ module Project =
       serviceRole: NonEmptyString.t option
         [@ocaml.doc
           "The ARN of the IAM role that enables CodeBuild to interact with dependent Amazon Web Services services on behalf of the Amazon Web Services account."];
-      timeoutInMinutes: TimeOut.t option
+      timeoutInMinutes: BuildTimeOut.t option
         [@ocaml.doc
-          "How long, in minutes, from 5 to 480 (8 hours), for CodeBuild to wait before timing out any related build that did not get marked as completed. The default is 60 minutes."];
+          "How long, in minutes, from 5 to 2160 (36 hours), for CodeBuild to wait before timing out any related build that did not get marked as completed. The default is 60 minutes."];
       queuedTimeoutInMinutes: TimeOut.t option
         [@ocaml.doc
           "The number of minutes a build is allowed to be queued before it times out."];
@@ -4584,7 +6608,10 @@ module Project =
           "Contains the project identifier used with the public build APIs."];
       resourceAccessRole: NonEmptyString.t option
         [@ocaml.doc
-          "The ARN of the IAM role that enables CodeBuild to access the CloudWatch Logs and Amazon S3 artifacts for the project's builds."]}
+          "The ARN of the IAM role that enables CodeBuild to access the CloudWatch Logs and Amazon S3 artifacts for the project's builds."];
+      autoRetryLimit: WrapperInt.t option
+        [@ocaml.doc
+          "The maximum number of additional automatic retries after a failed build. For example, if the auto-retry limit is set to 2, CodeBuild will call the RetryBuild API to automatically retry your build for up to 2 additional times."]}
     let make ?name =
       fun ?arn ->
         fun ?description ->
@@ -4619,37 +6646,41 @@ module Project =
                                                           fun
                                                             ?resourceAccessRole
                                                             ->
-                                                            fun () ->
-                                                              {
-                                                                name;
-                                                                arn;
-                                                                description;
-                                                                source;
-                                                                secondarySources;
-                                                                sourceVersion;
-                                                                secondarySourceVersions;
-                                                                artifacts;
-                                                                secondaryArtifacts;
-                                                                cache;
-                                                                environment;
-                                                                serviceRole;
-                                                                timeoutInMinutes;
-                                                                queuedTimeoutInMinutes;
-                                                                encryptionKey;
-                                                                tags;
-                                                                created;
-                                                                lastModified;
-                                                                webhook;
-                                                                vpcConfig;
-                                                                badge;
-                                                                logsConfig;
-                                                                fileSystemLocations;
-                                                                buildBatchConfig;
-                                                                concurrentBuildLimit;
-                                                                projectVisibility;
-                                                                publicProjectAlias;
-                                                                resourceAccessRole
-                                                              }
+                                                            fun
+                                                              ?autoRetryLimit
+                                                              ->
+                                                              fun () ->
+                                                                {
+                                                                  name;
+                                                                  arn;
+                                                                  description;
+                                                                  source;
+                                                                  secondarySources;
+                                                                  sourceVersion;
+                                                                  secondarySourceVersions;
+                                                                  artifacts;
+                                                                  secondaryArtifacts;
+                                                                  cache;
+                                                                  environment;
+                                                                  serviceRole;
+                                                                  timeoutInMinutes;
+                                                                  queuedTimeoutInMinutes;
+                                                                  encryptionKey;
+                                                                  tags;
+                                                                  created;
+                                                                  lastModified;
+                                                                  webhook;
+                                                                  vpcConfig;
+                                                                  badge;
+                                                                  logsConfig;
+                                                                  fileSystemLocations;
+                                                                  buildBatchConfig;
+                                                                  concurrentBuildLimit;
+                                                                  projectVisibility;
+                                                                  publicProjectAlias;
+                                                                  resourceAccessRole;
+                                                                  autoRetryLimit
+                                                                }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ProjectName.to_value));
@@ -4672,7 +6703,7 @@ module Project =
         ("serviceRole",
           (Option.map x.serviceRole ~f:NonEmptyString.to_value));
         ("timeoutInMinutes",
-          (Option.map x.timeoutInMinutes ~f:TimeOut.to_value));
+          (Option.map x.timeoutInMinutes ~f:BuildTimeOut.to_value));
         ("queuedTimeoutInMinutes",
           (Option.map x.queuedTimeoutInMinutes ~f:TimeOut.to_value));
         ("encryptionKey",
@@ -4696,9 +6727,14 @@ module Project =
         ("publicProjectAlias",
           (Option.map x.publicProjectAlias ~f:NonEmptyString.to_value));
         ("resourceAccessRole",
-          (Option.map x.resourceAccessRole ~f:NonEmptyString.to_value))]
+          (Option.map x.resourceAccessRole ~f:NonEmptyString.to_value));
+        ("autoRetryLimit",
+          (Option.map x.autoRetryLimit ~f:WrapperInt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoRetryLimit =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryLimit") in
       let resourceAccessRole =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "resourceAccessRole") in
@@ -4737,7 +6773,7 @@ module Project =
         (Option.map ~f:TimeOut.of_xml)
           (Xml.child xml_arg0 "queuedTimeoutInMinutes") in
       let timeoutInMinutes =
-        (Option.map ~f:TimeOut.of_xml)
+        (Option.map ~f:BuildTimeOut.of_xml)
           (Xml.child xml_arg0 "timeoutInMinutes") in
       let serviceRole =
         (Option.map ~f:NonEmptyString.of_xml)
@@ -4769,68 +6805,254 @@ module Project =
       let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
       let name =
         (Option.map ~f:ProjectName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?resourceAccessRole ?publicProjectAlias ?projectVisibility
-        ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badge ?vpcConfig ?webhook ?lastModified ?created ?tags
-        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole
-        ?environment ?cache ?secondaryArtifacts ?artifacts
-        ?secondarySourceVersions ?sourceVersion ?secondarySources ?source
-        ?description ?arn ?name ()
+      make ?autoRetryLimit ?resourceAccessRole ?publicProjectAlias
+        ?projectVisibility ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badge ?vpcConfig ?webhook
+        ?lastModified ?created ?tags ?encryptionKey ?queuedTimeoutInMinutes
+        ?timeoutInMinutes ?serviceRole ?environment ?cache
+        ?secondaryArtifacts ?artifacts ?secondarySourceVersions
+        ?sourceVersion ?secondarySources ?source ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoRetryLimit =
+        field_map json__ "autoRetryLimit" WrapperInt.of_json in
       let resourceAccessRole =
-        field_map json "resourceAccessRole" NonEmptyString.of_json in
+        field_map json__ "resourceAccessRole" NonEmptyString.of_json in
       let publicProjectAlias =
-        field_map json "publicProjectAlias" NonEmptyString.of_json in
+        field_map json__ "publicProjectAlias" NonEmptyString.of_json in
       let projectVisibility =
-        field_map json "projectVisibility" ProjectVisibilityType.of_json in
+        field_map json__ "projectVisibility" ProjectVisibilityType.of_json in
       let concurrentBuildLimit =
-        field_map json "concurrentBuildLimit" WrapperInt.of_json in
+        field_map json__ "concurrentBuildLimit" WrapperInt.of_json in
       let buildBatchConfig =
-        field_map json "buildBatchConfig" ProjectBuildBatchConfig.of_json in
+        field_map json__ "buildBatchConfig" ProjectBuildBatchConfig.of_json in
       let fileSystemLocations =
-        field_map json "fileSystemLocations"
+        field_map json__ "fileSystemLocations"
           ProjectFileSystemLocations.of_json in
-      let logsConfig = field_map json "logsConfig" LogsConfig.of_json in
-      let badge = field_map json "badge" ProjectBadge.of_json in
-      let vpcConfig = field_map json "vpcConfig" VpcConfig.of_json in
-      let webhook = field_map json "webhook" Webhook.of_json in
-      let lastModified = field_map json "lastModified" Timestamp.of_json in
-      let created = field_map json "created" Timestamp.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+      let logsConfig = field_map json__ "logsConfig" LogsConfig.of_json in
+      let badge = field_map json__ "badge" ProjectBadge.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let webhook = field_map json__ "webhook" Webhook.of_json in
+      let lastModified = field_map json__ "lastModified" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
       let queuedTimeoutInMinutes =
-        field_map json "queuedTimeoutInMinutes" TimeOut.of_json in
+        field_map json__ "queuedTimeoutInMinutes" TimeOut.of_json in
       let timeoutInMinutes =
-        field_map json "timeoutInMinutes" TimeOut.of_json in
-      let serviceRole = field_map json "serviceRole" NonEmptyString.of_json in
+        field_map json__ "timeoutInMinutes" BuildTimeOut.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
       let environment =
-        field_map json "environment" ProjectEnvironment.of_json in
-      let cache = field_map json "cache" ProjectCache.of_json in
+        field_map json__ "environment" ProjectEnvironment.of_json in
+      let cache = field_map json__ "cache" ProjectCache.of_json in
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts" ProjectArtifactsList.of_json in
-      let artifacts = field_map json "artifacts" ProjectArtifacts.of_json in
+        field_map json__ "secondaryArtifacts" ProjectArtifactsList.of_json in
+      let artifacts = field_map json__ "artifacts" ProjectArtifacts.of_json in
       let secondarySourceVersions =
-        field_map json "secondarySourceVersions"
+        field_map json__ "secondarySourceVersions"
           ProjectSecondarySourceVersions.of_json in
-      let sourceVersion = field_map json "sourceVersion" String_.of_json in
+      let sourceVersion = field_map json__ "sourceVersion" String_.of_json in
       let secondarySources =
-        field_map json "secondarySources" ProjectSources.of_json in
-      let source = field_map json "source" ProjectSource.of_json in
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let source = field_map json__ "source" ProjectSource.of_json in
       let description =
-        field_map json "description" ProjectDescription.of_json in
-      let arn = field_map json "arn" String_.of_json in
-      let name = field_map json "name" ProjectName.of_json in
-      make ?resourceAccessRole ?publicProjectAlias ?projectVisibility
-        ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badge ?vpcConfig ?webhook ?lastModified ?created ?tags
-        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole
-        ?environment ?cache ?secondaryArtifacts ?artifacts
-        ?secondarySourceVersions ?sourceVersion ?secondarySources ?source
-        ?description ?arn ?name ()
+        field_map json__ "description" ProjectDescription.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" ProjectName.of_json in
+      make ?autoRetryLimit ?resourceAccessRole ?publicProjectAlias
+        ?projectVisibility ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badge ?vpcConfig ?webhook
+        ?lastModified ?created ?tags ?encryptionKey ?queuedTimeoutInMinutes
+        ?timeoutInMinutes ?serviceRole ?environment ?cache
+        ?secondaryArtifacts ?artifacts ?secondarySourceVersions
+        ?sourceVersion ?secondarySources ?source ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a build project."]
+module Fleet =
+  struct
+    type nonrec t =
+      {
+      arn: NonEmptyString.t option
+        [@ocaml.doc "The ARN of the compute fleet."];
+      name: FleetName.t option [@ocaml.doc "The name of the compute fleet."];
+      id: NonEmptyString.t option [@ocaml.doc "The ID of the compute fleet."];
+      created: Timestamp.t option
+        [@ocaml.doc "The time at which the compute fleet was created."];
+      lastModified: Timestamp.t option
+        [@ocaml.doc "The time at which the compute fleet was last modified."];
+      status: FleetStatus.t option
+        [@ocaml.doc "The status of the compute fleet."];
+      baseCapacity: FleetCapacity.t option
+        [@ocaml.doc
+          "The initial number of machines allocated to the compute \239\172\130eet, which de\239\172\129nes the number of builds that can run in parallel."];
+      environmentType: EnvironmentType.t option
+        [@ocaml.doc
+          "The environment type of the compute fleet. The environment type ARM_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), Asia Pacific (Mumbai), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), EU (Frankfurt), and South America (S\195\163o Paulo). The environment type ARM_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_GPU_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), and Asia Pacific (Sydney). The environment type MAC_ARM is available for Medium fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), and EU (Frankfurt) The environment type MAC_ARM is available for Large fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), and Asia Pacific (Sydney). The environment type WINDOWS_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type WINDOWS_SERVER_2019_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), Asia Pacific (Tokyo), Asia Pacific (Mumbai) and EU (Ireland). The environment type WINDOWS_SERVER_2022_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Sydney), Asia Pacific (Singapore), Asia Pacific (Tokyo), South America (S\195\163o Paulo) and Asia Pacific (Mumbai). For more information, see Build environment compute types in the CodeBuild user guide."];
+      computeType: ComputeType.t option
+        [@ocaml.doc
+          "Information about the compute resources the compute fleet uses. Available values include: ATTRIBUTE_BASED_COMPUTE: Specify the amount of vCPUs, memory, disk space, and the type of machine. If you use ATTRIBUTE_BASED_COMPUTE, you must define your attributes by using computeConfiguration. CodeBuild will select the cheapest instance that satisfies your specified attributes. For more information, see Reserved capacity environment types in the CodeBuild User Guide. CUSTOM_INSTANCE_TYPE: Specify the instance type for your compute fleet. For a list of supported instance types, see Supported instance families in the CodeBuild User Guide. BUILD_GENERAL1_SMALL: Use up to 4 GiB memory and 2 vCPUs for builds. BUILD_GENERAL1_MEDIUM: Use up to 8 GiB memory and 4 vCPUs for builds. BUILD_GENERAL1_LARGE: Use up to 16 GiB memory and 8 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_XLARGE: Use up to 72 GiB memory and 36 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_2XLARGE: Use up to 144 GiB memory, 72 vCPUs, and 824 GB of SSD storage for builds. This compute type supports Docker images up to 100 GB uncompressed. BUILD_LAMBDA_1GB: Use up to 1 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_2GB: Use up to 2 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_4GB: Use up to 4 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_8GB: Use up to 8 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_10GB: Use up to 10 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. If you use BUILD_GENERAL1_SMALL: For environment type LINUX_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 16 GiB memory, 4 vCPUs, and 1 NVIDIA A10G Tensor Core GPU for builds. For environment type ARM_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs on ARM-based processors for builds. If you use BUILD_GENERAL1_LARGE: For environment type LINUX_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 255 GiB memory, 32 vCPUs, and 4 NVIDIA Tesla V100 GPUs for builds. For environment type ARM_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs on ARM-based processors for builds. For more information, see On-demand environment types in the CodeBuild User Guide."];
+      computeConfiguration: ComputeConfiguration.t option
+        [@ocaml.doc
+          "The compute configuration of the compute fleet. This is only required if computeType is set to ATTRIBUTE_BASED_COMPUTE or CUSTOM_INSTANCE_TYPE."];
+      scalingConfiguration: ScalingConfigurationOutput.t option
+        [@ocaml.doc "The scaling configuration of the compute fleet."];
+      overflowBehavior: FleetOverflowBehavior.t option
+        [@ocaml.doc
+          "The compute fleet overflow behavior. For overflow behavior QUEUE, your overflow builds need to wait on the existing fleet instance to become available. For overflow behavior ON_DEMAND, your overflow builds run on CodeBuild on-demand. If you choose to set your overflow behavior to on-demand while creating a VPC-connected fleet, make sure that you add the required VPC permissions to your project service role. For more information, see Example policy statement to allow CodeBuild access to Amazon Web Services services required to create a VPC network interface."];
+      vpcConfig: VpcConfig.t option ;
+      proxyConfiguration: ProxyConfiguration.t option
+        [@ocaml.doc "The proxy configuration of the compute fleet."];
+      imageId: NonEmptyString.t option
+        [@ocaml.doc "The Amazon Machine Image (AMI) of the compute fleet."];
+      fleetServiceRole: NonEmptyString.t option
+        [@ocaml.doc
+          "The service role associated with the compute fleet. For more information, see Allow a user to add a permission policy for a fleet service role in the CodeBuild User Guide."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tag key and value pairs associated with this compute fleet. These tags are available for use by Amazon Web Services services that support CodeBuild build project tags."]}
+    let make ?arn =
+      fun ?name ->
+        fun ?id ->
+          fun ?created ->
+            fun ?lastModified ->
+              fun ?status ->
+                fun ?baseCapacity ->
+                  fun ?environmentType ->
+                    fun ?computeType ->
+                      fun ?computeConfiguration ->
+                        fun ?scalingConfiguration ->
+                          fun ?overflowBehavior ->
+                            fun ?vpcConfig ->
+                              fun ?proxyConfiguration ->
+                                fun ?imageId ->
+                                  fun ?fleetServiceRole ->
+                                    fun ?tags ->
+                                      fun () ->
+                                        {
+                                          arn;
+                                          name;
+                                          id;
+                                          created;
+                                          lastModified;
+                                          status;
+                                          baseCapacity;
+                                          environmentType;
+                                          computeType;
+                                          computeConfiguration;
+                                          scalingConfiguration;
+                                          overflowBehavior;
+                                          vpcConfig;
+                                          proxyConfiguration;
+                                          imageId;
+                                          fleetServiceRole;
+                                          tags
+                                        }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:NonEmptyString.to_value));
+        ("name", (Option.map x.name ~f:FleetName.to_value));
+        ("id", (Option.map x.id ~f:NonEmptyString.to_value));
+        ("created", (Option.map x.created ~f:Timestamp.to_value));
+        ("lastModified", (Option.map x.lastModified ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:FleetStatus.to_value));
+        ("baseCapacity",
+          (Option.map x.baseCapacity ~f:FleetCapacity.to_value));
+        ("environmentType",
+          (Option.map x.environmentType ~f:EnvironmentType.to_value));
+        ("computeType", (Option.map x.computeType ~f:ComputeType.to_value));
+        ("computeConfiguration",
+          (Option.map x.computeConfiguration ~f:ComputeConfiguration.to_value));
+        ("scalingConfiguration",
+          (Option.map x.scalingConfiguration
+             ~f:ScalingConfigurationOutput.to_value));
+        ("overflowBehavior",
+          (Option.map x.overflowBehavior ~f:FleetOverflowBehavior.to_value));
+        ("vpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("proxyConfiguration",
+          (Option.map x.proxyConfiguration ~f:ProxyConfiguration.to_value));
+        ("imageId", (Option.map x.imageId ~f:NonEmptyString.to_value));
+        ("fleetServiceRole",
+          (Option.map x.fleetServiceRole ~f:NonEmptyString.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let fleetServiceRole =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "fleetServiceRole") in
+      let imageId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "imageId") in
+      let proxyConfiguration =
+        (Option.map ~f:ProxyConfiguration.of_xml)
+          (Xml.child xml_arg0 "proxyConfiguration") in
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "vpcConfig") in
+      let overflowBehavior =
+        (Option.map ~f:FleetOverflowBehavior.of_xml)
+          (Xml.child xml_arg0 "overflowBehavior") in
+      let scalingConfiguration =
+        (Option.map ~f:ScalingConfigurationOutput.of_xml)
+          (Xml.child xml_arg0 "scalingConfiguration") in
+      let computeConfiguration =
+        (Option.map ~f:ComputeConfiguration.of_xml)
+          (Xml.child xml_arg0 "computeConfiguration") in
+      let computeType =
+        (Option.map ~f:ComputeType.of_xml) (Xml.child xml_arg0 "computeType") in
+      let environmentType =
+        (Option.map ~f:EnvironmentType.of_xml)
+          (Xml.child xml_arg0 "environmentType") in
+      let baseCapacity =
+        (Option.map ~f:FleetCapacity.of_xml)
+          (Xml.child xml_arg0 "baseCapacity") in
+      let status =
+        (Option.map ~f:FleetStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModified =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "lastModified") in
+      let created =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "created") in
+      let id =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
+      let name = (Option.map ~f:FleetName.of_xml) (Xml.child xml_arg0 "name") in
+      let arn =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ?computeType ?environmentType ?baseCapacity ?status ?lastModified
+        ?created ?id ?name ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let fleetServiceRole =
+        field_map json__ "fleetServiceRole" NonEmptyString.of_json in
+      let imageId = field_map json__ "imageId" NonEmptyString.of_json in
+      let proxyConfiguration =
+        field_map json__ "proxyConfiguration" ProxyConfiguration.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let overflowBehavior =
+        field_map json__ "overflowBehavior" FleetOverflowBehavior.of_json in
+      let scalingConfiguration =
+        field_map json__ "scalingConfiguration"
+          ScalingConfigurationOutput.of_json in
+      let computeConfiguration =
+        field_map json__ "computeConfiguration" ComputeConfiguration.of_json in
+      let computeType = field_map json__ "computeType" ComputeType.of_json in
+      let environmentType =
+        field_map json__ "environmentType" EnvironmentType.of_json in
+      let baseCapacity =
+        field_map json__ "baseCapacity" FleetCapacity.of_json in
+      let status = field_map json__ "status" FleetStatus.of_json in
+      let lastModified = field_map json__ "lastModified" Timestamp.of_json in
+      let created = field_map json__ "created" Timestamp.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      let name = field_map json__ "name" FleetName.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ?computeType ?environmentType ?baseCapacity ?status ?lastModified
+        ?created ?id ?name ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A set of dedicated instances for your build environment."]
 module Build =
   struct
     type nonrec t =
@@ -4884,7 +7106,7 @@ module Build =
         [@ocaml.doc "Information about the build's logs in CloudWatch Logs."];
       timeoutInMinutes: WrapperInt.t option
         [@ocaml.doc
-          "How long, in minutes, for CodeBuild to wait before timing out this build if it does not get marked as completed."];
+          "How long, in minutes, from 5 to 2160 (36 hours), for CodeBuild to wait before timing out this build if it does not get marked as completed."];
       queuedTimeoutInMinutes: WrapperInt.t option
         [@ocaml.doc
           "The number of minutes a build is allowed to be queued before it times out."];
@@ -4893,7 +7115,7 @@ module Build =
           "Whether the build is complete. True if complete; otherwise, false."];
       initiator: String_.t option
         [@ocaml.doc
-          "The entity that started the build. Valid values include: If CodePipeline started the build, the pipeline's name (for example, codepipeline/my-demo-pipeline). If an IAM user started the build, the user's name (for example, MyUserName). If the Jenkins plugin for CodeBuild started the build, the string CodeBuild-Jenkins-Plugin."];
+          "The entity that started the build. Valid values include: If CodePipeline started the build, the pipeline's name (for example, codepipeline/my-demo-pipeline). If a user started the build, the user's name (for example, MyUserName). If the Jenkins plugin for CodeBuild started the build, the string CodeBuild-Jenkins-Plugin."];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
           "If your CodeBuild project accesses resources in an Amazon VPC, you provide this parameter that identifies the VPC ID and the list of security group IDs and subnet IDs. The security groups and subnets must belong to the same VPC. You must provide at least one security group and one subnet ID."];
@@ -4916,7 +7138,10 @@ module Build =
           "Contains information about the debug session for this build."];
       buildBatchArn: String_.t option
         [@ocaml.doc
-          "The ARN of the batch build that this build is a member of, if applicable."]}
+          "The ARN of the batch build that this build is a member of, if applicable."];
+      autoRetryConfig: AutoRetryConfig.t option
+        [@ocaml.doc
+          "Information about the auto-retry configuration for the build."]}
     let make ?id =
       fun ?arn ->
         fun ?buildNumber ->
@@ -4959,6 +7184,9 @@ module Build =
                                                                   fun
                                                                     ?buildBatchArn
                                                                     ->
+                                                                    fun
+                                                                    ?autoRetryConfig
+                                                                    ->
                                                                     fun () ->
                                                                     {
                                                                     id;
@@ -4992,7 +7220,8 @@ module Build =
                                                                     reportArns;
                                                                     fileSystemLocations;
                                                                     debugSession;
-                                                                    buildBatchArn
+                                                                    buildBatchArn;
+                                                                    autoRetryConfig
                                                                     }
     let to_value x =
       structure_to_value
@@ -5045,9 +7274,14 @@ module Build =
              ~f:ProjectFileSystemLocations.to_value));
         ("debugSession",
           (Option.map x.debugSession ~f:DebugSession.to_value));
-        ("buildBatchArn", (Option.map x.buildBatchArn ~f:String_.to_value))]
+        ("buildBatchArn", (Option.map x.buildBatchArn ~f:String_.to_value));
+        ("autoRetryConfig",
+          (Option.map x.autoRetryConfig ~f:AutoRetryConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoRetryConfig =
+        (Option.map ~f:AutoRetryConfig.of_xml)
+          (Xml.child xml_arg0 "autoRetryConfig") in
       let buildBatchArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "buildBatchArn") in
       let debugSession =
@@ -5129,71 +7363,73 @@ module Build =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
-      make ?buildBatchArn ?debugSession ?fileSystemLocations ?reportArns
-        ?exportedEnvironmentVariables ?encryptionKey ?networkInterface
-        ?vpcConfig ?initiator ?buildComplete ?queuedTimeoutInMinutes
-        ?timeoutInMinutes ?logs ?serviceRole ?environment ?cache
-        ?secondaryArtifacts ?artifacts ?secondarySourceVersions
-        ?secondarySources ?source ?phases ?projectName ?resolvedSourceVersion
-        ?sourceVersion ?buildStatus ?currentPhase ?endTime ?startTime
-        ?buildNumber ?arn ?id ()
+      make ?autoRetryConfig ?buildBatchArn ?debugSession ?fileSystemLocations
+        ?reportArns ?exportedEnvironmentVariables ?encryptionKey
+        ?networkInterface ?vpcConfig ?initiator ?buildComplete
+        ?queuedTimeoutInMinutes ?timeoutInMinutes ?logs ?serviceRole
+        ?environment ?cache ?secondaryArtifacts ?artifacts
+        ?secondarySourceVersions ?secondarySources ?source ?phases
+        ?projectName ?resolvedSourceVersion ?sourceVersion ?buildStatus
+        ?currentPhase ?endTime ?startTime ?buildNumber ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildBatchArn = field_map json "buildBatchArn" String_.of_json in
-      let debugSession = field_map json "debugSession" DebugSession.of_json in
+    let of_json json__ =
+      let autoRetryConfig =
+        field_map json__ "autoRetryConfig" AutoRetryConfig.of_json in
+      let buildBatchArn = field_map json__ "buildBatchArn" String_.of_json in
+      let debugSession = field_map json__ "debugSession" DebugSession.of_json in
       let fileSystemLocations =
-        field_map json "fileSystemLocations"
+        field_map json__ "fileSystemLocations"
           ProjectFileSystemLocations.of_json in
-      let reportArns = field_map json "reportArns" BuildReportArns.of_json in
+      let reportArns = field_map json__ "reportArns" BuildReportArns.of_json in
       let exportedEnvironmentVariables =
-        field_map json "exportedEnvironmentVariables"
+        field_map json__ "exportedEnvironmentVariables"
           ExportedEnvironmentVariables.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
       let networkInterface =
-        field_map json "networkInterface" NetworkInterface.of_json in
-      let vpcConfig = field_map json "vpcConfig" VpcConfig.of_json in
-      let initiator = field_map json "initiator" String_.of_json in
-      let buildComplete = field_map json "buildComplete" Boolean.of_json in
+        field_map json__ "networkInterface" NetworkInterface.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let initiator = field_map json__ "initiator" String_.of_json in
+      let buildComplete = field_map json__ "buildComplete" Boolean.of_json in
       let queuedTimeoutInMinutes =
-        field_map json "queuedTimeoutInMinutes" WrapperInt.of_json in
+        field_map json__ "queuedTimeoutInMinutes" WrapperInt.of_json in
       let timeoutInMinutes =
-        field_map json "timeoutInMinutes" WrapperInt.of_json in
-      let logs = field_map json "logs" LogsLocation.of_json in
-      let serviceRole = field_map json "serviceRole" NonEmptyString.of_json in
+        field_map json__ "timeoutInMinutes" WrapperInt.of_json in
+      let logs = field_map json__ "logs" LogsLocation.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
       let environment =
-        field_map json "environment" ProjectEnvironment.of_json in
-      let cache = field_map json "cache" ProjectCache.of_json in
+        field_map json__ "environment" ProjectEnvironment.of_json in
+      let cache = field_map json__ "cache" ProjectCache.of_json in
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts" BuildArtifactsList.of_json in
-      let artifacts = field_map json "artifacts" BuildArtifacts.of_json in
+        field_map json__ "secondaryArtifacts" BuildArtifactsList.of_json in
+      let artifacts = field_map json__ "artifacts" BuildArtifacts.of_json in
       let secondarySourceVersions =
-        field_map json "secondarySourceVersions"
+        field_map json__ "secondarySourceVersions"
           ProjectSecondarySourceVersions.of_json in
       let secondarySources =
-        field_map json "secondarySources" ProjectSources.of_json in
-      let source = field_map json "source" ProjectSource.of_json in
-      let phases = field_map json "phases" BuildPhases.of_json in
-      let projectName = field_map json "projectName" NonEmptyString.of_json in
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let source = field_map json__ "source" ProjectSource.of_json in
+      let phases = field_map json__ "phases" BuildPhases.of_json in
+      let projectName = field_map json__ "projectName" NonEmptyString.of_json in
       let resolvedSourceVersion =
-        field_map json "resolvedSourceVersion" NonEmptyString.of_json in
+        field_map json__ "resolvedSourceVersion" NonEmptyString.of_json in
       let sourceVersion =
-        field_map json "sourceVersion" NonEmptyString.of_json in
-      let buildStatus = field_map json "buildStatus" StatusType.of_json in
-      let currentPhase = field_map json "currentPhase" String_.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let buildNumber = field_map json "buildNumber" WrapperLong.of_json in
-      let arn = field_map json "arn" NonEmptyString.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
-      make ?buildBatchArn ?debugSession ?fileSystemLocations ?reportArns
-        ?exportedEnvironmentVariables ?encryptionKey ?networkInterface
-        ?vpcConfig ?initiator ?buildComplete ?queuedTimeoutInMinutes
-        ?timeoutInMinutes ?logs ?serviceRole ?environment ?cache
-        ?secondaryArtifacts ?artifacts ?secondarySourceVersions
-        ?secondarySources ?source ?phases ?projectName ?resolvedSourceVersion
-        ?sourceVersion ?buildStatus ?currentPhase ?endTime ?startTime
-        ?buildNumber ?arn ?id ()
+        field_map json__ "sourceVersion" NonEmptyString.of_json in
+      let buildStatus = field_map json__ "buildStatus" StatusType.of_json in
+      let currentPhase = field_map json__ "currentPhase" String_.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let buildNumber = field_map json__ "buildNumber" WrapperLong.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      make ?autoRetryConfig ?buildBatchArn ?debugSession ?fileSystemLocations
+        ?reportArns ?exportedEnvironmentVariables ?encryptionKey
+        ?networkInterface ?vpcConfig ?initiator ?buildComplete
+        ?queuedTimeoutInMinutes ?timeoutInMinutes ?logs ?serviceRole
+        ?environment ?cache ?secondaryArtifacts ?artifacts
+        ?secondarySourceVersions ?secondarySources ?source ?phases
+        ?projectName ?resolvedSourceVersion ?sourceVersion ?buildStatus
+        ?currentPhase ?endTime ?startTime ?buildNumber ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a build."]
 module BuildBatch =
@@ -5251,7 +7487,7 @@ module BuildBatch =
         [@ocaml.doc "Indicates if the batch build is complete."];
       initiator: String_.t option
         [@ocaml.doc
-          "The entity that started the batch build. Valid values include: If CodePipeline started the build, the pipeline's name (for example, codepipeline/my-demo-pipeline). If an IAM user started the build, the user's name. If the Jenkins plugin for CodeBuild started the build, the string CodeBuild-Jenkins-Plugin."];
+          "The entity that started the batch build. Valid values include: If CodePipeline started the build, the pipeline's name (for example, codepipeline/my-demo-pipeline). If a user started the build, the user's name. If the Jenkins plugin for CodeBuild started the build, the string CodeBuild-Jenkins-Plugin."];
       vpcConfig: VpcConfig.t option ;
       encryptionKey: NonEmptyString.t option
         [@ocaml.doc
@@ -5268,7 +7504,10 @@ module BuildBatch =
           "An array of BuildGroup objects that define the build groups for the batch build."];
       debugSessionEnabled: WrapperBoolean.t option
         [@ocaml.doc
-          "Specifies if session debugging is enabled for this batch build. For more information, see Viewing a running build in Session Manager. Batch session debugging is not supported for matrix batch builds."]}
+          "Specifies if session debugging is enabled for this batch build. For more information, see Viewing a running build in Session Manager. Batch session debugging is not supported for matrix batch builds."];
+      reportArns: BuildReportArns.t option
+        [@ocaml.doc
+          "An array that contains the ARNs of reports created by merging reports from builds associated with this batch build."]}
     let make ?id =
       fun ?arn ->
         fun ?startTime ->
@@ -5307,8 +7546,11 @@ module BuildBatch =
                                                               fun
                                                                 ?debugSessionEnabled
                                                                 ->
-                                                                fun () ->
-                                                                  {
+                                                                fun
+                                                                  ?reportArns
+                                                                  ->
+                                                                  fun () ->
+                                                                    {
                                                                     id;
                                                                     arn;
                                                                     startTime;
@@ -5338,8 +7580,9 @@ module BuildBatch =
                                                                     fileSystemLocations;
                                                                     buildBatchConfig;
                                                                     buildGroups;
-                                                                    debugSessionEnabled
-                                                                  }
+                                                                    debugSessionEnabled;
+                                                                    reportArns
+                                                                    }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:NonEmptyString.to_value));
@@ -5389,9 +7632,13 @@ module BuildBatch =
           (Option.map x.buildBatchConfig ~f:ProjectBuildBatchConfig.to_value));
         ("buildGroups", (Option.map x.buildGroups ~f:BuildGroups.to_value));
         ("debugSessionEnabled",
-          (Option.map x.debugSessionEnabled ~f:WrapperBoolean.to_value))]
+          (Option.map x.debugSessionEnabled ~f:WrapperBoolean.to_value));
+        ("reportArns", (Option.map x.reportArns ~f:BuildReportArns.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reportArns =
+        (Option.map ~f:BuildReportArns.of_xml)
+          (Xml.child xml_arg0 "reportArns") in
       let debugSessionEnabled =
         (Option.map ~f:WrapperBoolean.of_xml)
           (Xml.child xml_arg0 "debugSessionEnabled") in
@@ -5469,7 +7716,7 @@ module BuildBatch =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
-      make ?debugSessionEnabled ?buildGroups ?buildBatchConfig
+      make ?reportArns ?debugSessionEnabled ?buildGroups ?buildBatchConfig
         ?fileSystemLocations ?buildBatchNumber ?encryptionKey ?vpcConfig
         ?initiator ?complete ?queuedTimeoutInMinutes ?buildTimeoutInMinutes
         ?logConfig ?serviceRole ?environment ?cache ?secondaryArtifacts
@@ -5477,54 +7724,55 @@ module BuildBatch =
         ?projectName ?resolvedSourceVersion ?sourceVersion ?buildBatchStatus
         ?currentPhase ?endTime ?startTime ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let reportArns = field_map json__ "reportArns" BuildReportArns.of_json in
       let debugSessionEnabled =
-        field_map json "debugSessionEnabled" WrapperBoolean.of_json in
-      let buildGroups = field_map json "buildGroups" BuildGroups.of_json in
+        field_map json__ "debugSessionEnabled" WrapperBoolean.of_json in
+      let buildGroups = field_map json__ "buildGroups" BuildGroups.of_json in
       let buildBatchConfig =
-        field_map json "buildBatchConfig" ProjectBuildBatchConfig.of_json in
+        field_map json__ "buildBatchConfig" ProjectBuildBatchConfig.of_json in
       let fileSystemLocations =
-        field_map json "fileSystemLocations"
+        field_map json__ "fileSystemLocations"
           ProjectFileSystemLocations.of_json in
       let buildBatchNumber =
-        field_map json "buildBatchNumber" WrapperLong.of_json in
+        field_map json__ "buildBatchNumber" WrapperLong.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
-      let vpcConfig = field_map json "vpcConfig" VpcConfig.of_json in
-      let initiator = field_map json "initiator" String_.of_json in
-      let complete = field_map json "complete" Boolean.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let initiator = field_map json__ "initiator" String_.of_json in
+      let complete = field_map json__ "complete" Boolean.of_json in
       let queuedTimeoutInMinutes =
-        field_map json "queuedTimeoutInMinutes" WrapperInt.of_json in
+        field_map json__ "queuedTimeoutInMinutes" WrapperInt.of_json in
       let buildTimeoutInMinutes =
-        field_map json "buildTimeoutInMinutes" WrapperInt.of_json in
-      let logConfig = field_map json "logConfig" LogsConfig.of_json in
-      let serviceRole = field_map json "serviceRole" NonEmptyString.of_json in
+        field_map json__ "buildTimeoutInMinutes" WrapperInt.of_json in
+      let logConfig = field_map json__ "logConfig" LogsConfig.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
       let environment =
-        field_map json "environment" ProjectEnvironment.of_json in
-      let cache = field_map json "cache" ProjectCache.of_json in
+        field_map json__ "environment" ProjectEnvironment.of_json in
+      let cache = field_map json__ "cache" ProjectCache.of_json in
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts" BuildArtifactsList.of_json in
-      let artifacts = field_map json "artifacts" BuildArtifacts.of_json in
+        field_map json__ "secondaryArtifacts" BuildArtifactsList.of_json in
+      let artifacts = field_map json__ "artifacts" BuildArtifacts.of_json in
       let secondarySourceVersions =
-        field_map json "secondarySourceVersions"
+        field_map json__ "secondarySourceVersions"
           ProjectSecondarySourceVersions.of_json in
       let secondarySources =
-        field_map json "secondarySources" ProjectSources.of_json in
-      let source = field_map json "source" ProjectSource.of_json in
-      let phases = field_map json "phases" BuildBatchPhases.of_json in
-      let projectName = field_map json "projectName" NonEmptyString.of_json in
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let source = field_map json__ "source" ProjectSource.of_json in
+      let phases = field_map json__ "phases" BuildBatchPhases.of_json in
+      let projectName = field_map json__ "projectName" NonEmptyString.of_json in
       let resolvedSourceVersion =
-        field_map json "resolvedSourceVersion" NonEmptyString.of_json in
+        field_map json__ "resolvedSourceVersion" NonEmptyString.of_json in
       let sourceVersion =
-        field_map json "sourceVersion" NonEmptyString.of_json in
+        field_map json__ "sourceVersion" NonEmptyString.of_json in
       let buildBatchStatus =
-        field_map json "buildBatchStatus" StatusType.of_json in
-      let currentPhase = field_map json "currentPhase" String_.of_json in
-      let endTime = field_map json "endTime" Timestamp.of_json in
-      let startTime = field_map json "startTime" Timestamp.of_json in
-      let arn = field_map json "arn" NonEmptyString.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
-      make ?debugSessionEnabled ?buildGroups ?buildBatchConfig
+        field_map json__ "buildBatchStatus" StatusType.of_json in
+      let currentPhase = field_map json__ "currentPhase" String_.of_json in
+      let endTime = field_map json__ "endTime" Timestamp.of_json in
+      let startTime = field_map json__ "startTime" Timestamp.of_json in
+      let arn = field_map json__ "arn" NonEmptyString.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
+      make ?reportArns ?debugSessionEnabled ?buildGroups ?buildBatchConfig
         ?fileSystemLocations ?buildBatchNumber ?encryptionKey ?vpcConfig
         ?initiator ?complete ?queuedTimeoutInMinutes ?buildTimeoutInMinutes
         ?logConfig ?serviceRole ?environment ?cache ?secondaryArtifacts
@@ -5583,6 +7831,116 @@ module AccountLimitExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An Amazon Web Services service limit was exceeded for the calling Amazon Web Services account."]
+module ScalingConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      scalingType: FleetScalingType.t option
+        [@ocaml.doc "The scaling type for a compute fleet."];
+      targetTrackingScalingConfigs:
+        TargetTrackingScalingConfigurations.t option
+        [@ocaml.doc "A list of TargetTrackingScalingConfiguration objects."];
+      maxCapacity: FleetCapacity.t option
+        [@ocaml.doc
+          "The maximum number of instances in the \239\172\130eet when auto-scaling."]}
+    let make ?scalingType =
+      fun ?targetTrackingScalingConfigs ->
+        fun ?maxCapacity ->
+          fun () ->
+            { scalingType; targetTrackingScalingConfigs; maxCapacity }
+    let to_value x =
+      structure_to_value
+        [("scalingType",
+           (Option.map x.scalingType ~f:FleetScalingType.to_value));
+        ("targetTrackingScalingConfigs",
+          (Option.map x.targetTrackingScalingConfigs
+             ~f:TargetTrackingScalingConfigurations.to_value));
+        ("maxCapacity", (Option.map x.maxCapacity ~f:FleetCapacity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxCapacity =
+        (Option.map ~f:FleetCapacity.of_xml)
+          (Xml.child xml_arg0 "maxCapacity") in
+      let targetTrackingScalingConfigs =
+        (Option.map ~f:TargetTrackingScalingConfigurations.of_xml)
+          (Xml.child xml_arg0 "targetTrackingScalingConfigs") in
+      let scalingType =
+        (Option.map ~f:FleetScalingType.of_xml)
+          (Xml.child xml_arg0 "scalingType") in
+      make ?maxCapacity ?targetTrackingScalingConfigs ?scalingType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxCapacity = field_map json__ "maxCapacity" FleetCapacity.of_json in
+      let targetTrackingScalingConfigs =
+        field_map json__ "targetTrackingScalingConfigs"
+          TargetTrackingScalingConfigurations.of_json in
+      let scalingType =
+        field_map json__ "scalingType" FleetScalingType.of_json in
+      make ?maxCapacity ?targetTrackingScalingConfigs ?scalingType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The scaling configuration input of a compute fleet."]
+module AccountSuspendedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CodeBuild access has been suspended for the calling Amazon Web Services account."]
+module SensitiveString =
+  struct
+    type nonrec t = string
+    let context_ = "SensitiveString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SensitiveString" j
+    let to_json = simple_to_json to_value
+  end
+module SSMSession =
+  struct
+    type nonrec t =
+      {
+      sessionId: String_.t option [@ocaml.doc "The ID of the session."];
+      tokenValue: String_.t option
+        [@ocaml.doc
+          "An encrypted token value containing session and caller information."];
+      streamUrl: String_.t option
+        [@ocaml.doc
+          "A URL back to SSM Agent on the managed node that the Session Manager client uses to send commands and receive output from the node."]}
+    let make ?sessionId =
+      fun ?tokenValue ->
+        fun ?streamUrl -> fun () -> { sessionId; tokenValue; streamUrl }
+    let to_value x =
+      structure_to_value
+        [("sessionId", (Option.map x.sessionId ~f:String_.to_value));
+        ("tokenValue", (Option.map x.tokenValue ~f:String_.to_value));
+        ("streamUrl", (Option.map x.streamUrl ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamUrl =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "streamUrl") in
+      let tokenValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tokenValue") in
+      let sessionId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sessionId") in
+      make ?streamUrl ?tokenValue ?sessionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamUrl = field_map json__ "streamUrl" String_.of_json in
+      let tokenValue = field_map json__ "tokenValue" String_.of_json in
+      let sessionId = field_map json__ "sessionId" String_.of_json in
+      make ?streamUrl ?tokenValue ?sessionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about the Session Manager session."]
 module RetryBuildBatchType =
   struct
     type nonrec t =
@@ -5613,6 +7971,9 @@ module SourceCredentialsInfos =
   struct
     type nonrec t = SourceCredentialsInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceCredentialsInfo.to_value)) |>
         (fun x -> `List x)
@@ -5644,6 +8005,9 @@ module ReportGroupArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5742,6 +8106,9 @@ module ProjectArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5762,6 +8129,33 @@ module ProjectArns =
       list_of_json ~kind:"ProjectArns" ~of_json:NonEmptyString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SandboxIds =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SandboxIds" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReportArns =
   struct
     type nonrec t = NonEmptyString.t list
@@ -5771,6 +8165,9 @@ module ReportArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5808,8 +8205,8 @@ module ReportFilter =
         (Option.map ~f:ReportStatusType.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ReportStatusType.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ReportStatusType.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5853,6 +8250,9 @@ module ProjectNames =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5902,10 +8302,73 @@ module ProjectSortByType =
     let of_json j = of_string (string_of_json ~kind:"ProjectSortByType" j)
     let to_json = simple_to_json to_value
   end
+module FleetArns =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FleetArns" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FleetSortByType =
+  struct
+    type nonrec t =
+      | NAME 
+      | CREATED_TIME 
+      | LAST_MODIFIED_TIME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NAME -> "NAME"
+      | CREATED_TIME -> "CREATED_TIME"
+      | LAST_MODIFIED_TIME -> "LAST_MODIFIED_TIME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NAME" -> NAME
+      | "CREATED_TIME" -> CREATED_TIME
+      | "LAST_MODIFIED_TIME" -> LAST_MODIFIED_TIME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FleetSortByType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FleetSortByType" j)
+    let to_json = simple_to_json to_value
+  end
 module EnvironmentPlatforms =
   struct
     type nonrec t = EnvironmentPlatform.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnvironmentPlatform.to_value)) |>
         (fun x -> `List x)
@@ -5928,6 +8391,34 @@ module EnvironmentPlatforms =
         ~of_json:EnvironmentPlatform.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CommandExecutions =
+  struct
+    type nonrec t = CommandExecution.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CommandExecution.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CommandExecution.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CommandExecutions"
+        ~of_json:CommandExecution.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BuildIds =
   struct
     type nonrec t = NonEmptyString.t list
@@ -5937,6 +8428,9 @@ module BuildIds =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5966,6 +8460,9 @@ module BuildBatchIds =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6003,8 +8500,8 @@ module BuildBatchFilter =
         (Option.map ~f:StatusType.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" StatusType.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" StatusType.of_json in
       make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies filters when retrieving batch builds."]
@@ -6021,24 +8518,13 @@ module ResourceAlreadyExistsException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified Amazon Web Services resource cannot be created, because an Amazon Web Services resource with the same settings already exists."]
-module SensitiveNonEmptyString =
-  struct
-    type nonrec t = string
-    let context_ = "SensitiveNonEmptyString"
-    let make i =
-      let open Result in ok_or_failwith (check_string_min i ~min:1); i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SensitiveNonEmptyString" j
-    let to_json = simple_to_json to_value
-  end
 module ReportGroupTrendRawDataList =
   struct
     type nonrec t = ReportWithRawData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportWithRawData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6085,10 +8571,10 @@ module ReportGroupTrendStats =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "average") in
       make ?min ?max ?average ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let min = field_map json "min" String_.of_json in
-      let max = field_map json "max" String_.of_json in
-      let average = field_map json "average" String_.of_json in
+    let of_json json__ =
+      let min = field_map json__ "min" String_.of_json in
+      let max = field_map json__ "max" String_.of_json in
+      let average = field_map json__ "average" String_.of_json in
       make ?min ?max ?average ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6145,6 +8631,9 @@ module TestCases =
   struct
     type nonrec t = TestCase.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TestCase.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6188,9 +8677,9 @@ module TestCaseFilter =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       make ?keyword ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyword = field_map json "keyword" String_.of_json in
-      let status = field_map json "status" String_.of_json in
+    let of_json json__ =
+      let keyword = field_map json__ "keyword" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
       make ?keyword ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6199,6 +8688,9 @@ module CodeCoverages =
   struct
     type nonrec t = CodeCoverage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CodeCoverage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6251,6 +8743,9 @@ module BuildsNotDeleted =
   struct
     type nonrec t = BuildNotDeleted.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildNotDeleted.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6272,6 +8767,32 @@ module BuildsNotDeleted =
         j
     let to_json v = composed_to_json to_value v
   end
+module Sandboxes =
+  struct
+    type nonrec t = Sandbox.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Sandbox.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Sandbox.of_xml)
+    let of_json j = list_of_json ~kind:"Sandboxes" ~of_json:Sandbox.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Reports =
   struct
     type nonrec t = Report.t list
@@ -6281,6 +8802,9 @@ module Reports =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Report.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6309,6 +8833,9 @@ module ReportGroups =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6333,6 +8860,9 @@ module Projects =
   struct
     type nonrec t = Project.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Project.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6352,10 +8882,109 @@ module Projects =
     let of_json j = list_of_json ~kind:"Projects" ~of_json:Project.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FleetNames =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FleetNames" ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Fleets =
+  struct
+    type nonrec t = Fleet.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Fleet.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Fleet.of_xml)
+    let of_json j = list_of_json ~kind:"Fleets" ~of_json:Fleet.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CommandExecutionIds =
+  struct
+    type nonrec t = NonEmptyString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NonEmptyString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CommandExecutionIds"
+        ~of_json:NonEmptyString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Builds =
   struct
     type nonrec t = Build.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Build.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6384,6 +9013,9 @@ module BuildBatches =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BuildBatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6466,8 +9098,8 @@ module UpdateWebhookOutput =
         (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map json "webhook" Webhook.of_json in
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
       make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6488,21 +9120,27 @@ module UpdateWebhookInput =
         [@ocaml.doc
           "An array of arrays of WebhookFilter objects used to determine if a webhook event can trigger a build. A filter group must contain at least one EVENT WebhookFilter."];
       buildType: WebhookBuildType.t option
-        [@ocaml.doc "Specifies the type of build this webhook will trigger."]}
+        [@ocaml.doc
+          "Specifies the type of build this webhook will trigger. RUNNER_BUILDKITE_BUILD is only available for NO_SOURCE source type projects configured for Buildkite runner builds. For more information about CodeBuild-hosted Buildkite runner builds, see Tutorial: Configure a CodeBuild-hosted Buildkite runner in the CodeBuild user guide."];
+      pullRequestBuildPolicy: PullRequestBuildPolicy.t option
+        [@ocaml.doc
+          "A PullRequestBuildPolicy object that defines comment-based approval requirements for triggering builds on pull requests. This policy helps control when automated builds are executed based on contributor permissions and approval workflows."]}
     let context_ = "UpdateWebhookInput"
     let make ?branchFilter =
       fun ?rotateSecret ->
         fun ?filterGroups ->
           fun ?buildType ->
-            fun ~projectName ->
-              fun () ->
-                {
-                  branchFilter;
-                  rotateSecret;
-                  filterGroups;
-                  buildType;
-                  projectName
-                }
+            fun ?pullRequestBuildPolicy ->
+              fun ~projectName ->
+                fun () ->
+                  {
+                    branchFilter;
+                    rotateSecret;
+                    filterGroups;
+                    buildType;
+                    pullRequestBuildPolicy;
+                    projectName
+                  }
     let to_value x =
       structure_to_value
         [("projectName", (Some (ProjectName.to_value x.projectName)));
@@ -6510,9 +9148,15 @@ module UpdateWebhookInput =
         ("rotateSecret", (Option.map x.rotateSecret ~f:Boolean.to_value));
         ("filterGroups",
           (Option.map x.filterGroups ~f:FilterGroups.to_value));
-        ("buildType", (Option.map x.buildType ~f:WebhookBuildType.to_value))]
+        ("buildType", (Option.map x.buildType ~f:WebhookBuildType.to_value));
+        ("pullRequestBuildPolicy",
+          (Option.map x.pullRequestBuildPolicy
+             ~f:PullRequestBuildPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pullRequestBuildPolicy =
+        (Option.map ~f:PullRequestBuildPolicy.of_xml)
+          (Xml.child xml_arg0 "pullRequestBuildPolicy") in
       let buildType =
         (Option.map ~f:WebhookBuildType.of_xml)
           (Xml.child xml_arg0 "buildType") in
@@ -6526,17 +9170,21 @@ module UpdateWebhookInput =
       let projectName =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
-      make ?buildType ?filterGroups ?rotateSecret ?branchFilter ~projectName
-        ()
+      make ?pullRequestBuildPolicy ?buildType ?filterGroups ?rotateSecret
+        ?branchFilter ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildType = field_map json "buildType" WebhookBuildType.of_json in
-      let filterGroups = field_map json "filterGroups" FilterGroups.of_json in
-      let rotateSecret = field_map json "rotateSecret" Boolean.of_json in
-      let branchFilter = field_map json "branchFilter" String_.of_json in
-      let projectName = field_map_exn json "projectName" ProjectName.of_json in
-      make ?buildType ?filterGroups ?rotateSecret ?branchFilter ~projectName
-        ()
+    let of_json json__ =
+      let pullRequestBuildPolicy =
+        field_map json__ "pullRequestBuildPolicy"
+          PullRequestBuildPolicy.of_json in
+      let buildType = field_map json__ "buildType" WebhookBuildType.of_json in
+      let filterGroups = field_map json__ "filterGroups" FilterGroups.of_json in
+      let rotateSecret = field_map json__ "rotateSecret" Boolean.of_json in
+      let branchFilter = field_map json__ "branchFilter" String_.of_json in
+      let projectName =
+        field_map_exn json__ "projectName" ProjectName.of_json in
+      make ?pullRequestBuildPolicy ?buildType ?filterGroups ?rotateSecret
+        ?branchFilter ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the webhook associated with an CodeBuild build project. If you use Bitbucket for your repository, rotateSecret is ignored."]
@@ -6592,8 +9240,8 @@ module UpdateReportGroupOutput =
         (Option.map ~f:ReportGroup.of_xml) (Xml.child xml_arg0 "reportGroup") in
       make ?reportGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportGroup = field_map json "reportGroup" ReportGroup.of_json in
+    let of_json json__ =
+      let reportGroup = field_map json__ "reportGroup" ReportGroup.of_json in
       make ?reportGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a report group."]
@@ -6629,11 +9277,11 @@ module UpdateReportGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?tags ?exportConfig ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let exportConfig =
-        field_map json "exportConfig" ReportExportConfig.of_json in
-      let arn = field_map_exn json "arn" NonEmptyString.of_json in
+        field_map json__ "exportConfig" ReportExportConfig.of_json in
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
       make ?tags ?exportConfig ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a report group."]
@@ -6707,16 +9355,16 @@ module UpdateProjectVisibilityOutput =
           (Xml.child xml_arg0 "projectArn") in
       make ?projectVisibility ?publicProjectAlias ?projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectVisibility =
-        field_map json "projectVisibility" ProjectVisibilityType.of_json in
+        field_map json__ "projectVisibility" ProjectVisibilityType.of_json in
       let publicProjectAlias =
-        field_map json "publicProjectAlias" NonEmptyString.of_json in
-      let projectArn = field_map json "projectArn" NonEmptyString.of_json in
+        field_map json__ "publicProjectAlias" NonEmptyString.of_json in
+      let projectArn = field_map json__ "projectArn" NonEmptyString.of_json in
       make ?projectVisibility ?publicProjectAlias ?projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the public visibility for a project. The project's build results, logs, and artifacts are available to the general public. For more information, see Public build projects in the CodeBuild User Guide. The following should be kept in mind when making your projects public: All of a project's build results, logs, and artifacts, including builds that were run when the project was private, are available to the general public. All build logs and artifacts are available to the public. Environment variables, source code, and other sensitive information may have been output to the build logs and artifacts. You must be careful about what information is output to the build logs. Some best practice are: Do not store sensitive values, especially Amazon Web Services access key IDs and secret access keys, in environment variables. We recommend that you use an Amazon EC2 Systems Manager Parameter Store or Secrets Manager to store sensitive values. Follow Best practices for using webhooks in the CodeBuild User Guide to limit which entities can trigger a build, and do not store the buildspec in the project itself, to ensure that your webhooks are as secure as possible. A malicious user can use public builds to distribute malicious artifacts. We recommend that you review all pull requests to verify that the pull request is a legitimate change. We also recommend that you validate any artifacts with their checksums to make sure that the correct artifacts are being downloaded."]
+       "Changes the public visibility for a project. The project's build results, logs, and artifacts are available to the general public. For more information, see Public build projects in the CodeBuild User Guide. The following should be kept in mind when making your projects public: All of a project's build results, logs, and artifacts, including builds that were run when the project was private, are available to the general public. All build logs and artifacts are available to the public. Environment variables, source code, and other sensitive information may have been output to the build logs and artifacts. You must be careful about what information is output to the build logs. Some best practice are: Do not store sensitive values in environment variables. We recommend that you use an Amazon EC2 Systems Manager Parameter Store or Secrets Manager to store sensitive values. Follow Best practices for using webhooks in the CodeBuild User Guide to limit which entities can trigger a build, and do not store the buildspec in the project itself, to ensure that your webhooks are as secure as possible. A malicious user can use public builds to distribute malicious artifacts. We recommend that you review all pull requests to verify that the pull request is a legitimate change. We also recommend that you validate any artifacts with their checksums to make sure that the correct artifacts are being downloaded."]
 module UpdateProjectVisibilityInput =
   struct
     type nonrec t =
@@ -6752,16 +9400,18 @@ module UpdateProjectVisibilityInput =
           (Xml.child_exn ~context:context_ xml_arg0 "projectArn") in
       make ?resourceAccessRole ~projectVisibility ~projectArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceAccessRole =
-        field_map json "resourceAccessRole" NonEmptyString.of_json in
+        field_map json__ "resourceAccessRole" NonEmptyString.of_json in
       let projectVisibility =
-        field_map_exn json "projectVisibility" ProjectVisibilityType.of_json in
-      let projectArn = field_map_exn json "projectArn" NonEmptyString.of_json in
+        field_map_exn json__ "projectVisibility"
+          ProjectVisibilityType.of_json in
+      let projectArn =
+        field_map_exn json__ "projectArn" NonEmptyString.of_json in
       make ?resourceAccessRole ~projectVisibility ~projectArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the public visibility for a project. The project's build results, logs, and artifacts are available to the general public. For more information, see Public build projects in the CodeBuild User Guide. The following should be kept in mind when making your projects public: All of a project's build results, logs, and artifacts, including builds that were run when the project was private, are available to the general public. All build logs and artifacts are available to the public. Environment variables, source code, and other sensitive information may have been output to the build logs and artifacts. You must be careful about what information is output to the build logs. Some best practice are: Do not store sensitive values, especially Amazon Web Services access key IDs and secret access keys, in environment variables. We recommend that you use an Amazon EC2 Systems Manager Parameter Store or Secrets Manager to store sensitive values. Follow Best practices for using webhooks in the CodeBuild User Guide to limit which entities can trigger a build, and do not store the buildspec in the project itself, to ensure that your webhooks are as secure as possible. A malicious user can use public builds to distribute malicious artifacts. We recommend that you review all pull requests to verify that the pull request is a legitimate change. We also recommend that you validate any artifacts with their checksums to make sure that the correct artifacts are being downloaded."]
+       "Changes the public visibility for a project. The project's build results, logs, and artifacts are available to the general public. For more information, see Public build projects in the CodeBuild User Guide. The following should be kept in mind when making your projects public: All of a project's build results, logs, and artifacts, including builds that were run when the project was private, are available to the general public. All build logs and artifacts are available to the public. Environment variables, source code, and other sensitive information may have been output to the build logs and artifacts. You must be careful about what information is output to the build logs. Some best practice are: Do not store sensitive values in environment variables. We recommend that you use an Amazon EC2 Systems Manager Parameter Store or Secrets Manager to store sensitive values. Follow Best practices for using webhooks in the CodeBuild User Guide to limit which entities can trigger a build, and do not store the buildspec in the project itself, to ensure that your webhooks are as secure as possible. A malicious user can use public builds to distribute malicious artifacts. We recommend that you review all pull requests to verify that the pull request is a legitimate change. We also recommend that you validate any artifacts with their checksums to make sure that the correct artifacts are being downloaded."]
 module UpdateProjectOutput =
   struct
     type nonrec t =
@@ -6814,8 +9464,8 @@ module UpdateProjectOutput =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let project = field_map json "project" Project.of_json in
+    let of_json json__ =
+      let project = field_map json__ "project" Project.of_json in
       make ?project ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes the settings of a build project."]
@@ -6835,7 +9485,7 @@ module UpdateProjectInput =
         [@ocaml.doc "An array of ProjectSource objects."];
       sourceVersion: String_.t option
         [@ocaml.doc
-          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
+          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For GitLab: the commit ID, branch, or Git tag to use. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
       secondarySourceVersions: ProjectSecondarySourceVersions.t option
         [@ocaml.doc
           "An array of ProjectSourceVersion objects. If secondarySourceVersions is specified at the build level, then they take over these secondarySourceVersions (at the project level)."];
@@ -6853,9 +9503,9 @@ module UpdateProjectInput =
       serviceRole: NonEmptyString.t option
         [@ocaml.doc
           "The replacement ARN of the IAM role that enables CodeBuild to interact with dependent Amazon Web Services services on behalf of the Amazon Web Services account."];
-      timeoutInMinutes: TimeOut.t option
+      timeoutInMinutes: BuildTimeOut.t option
         [@ocaml.doc
-          "The replacement value in minutes, from 5 to 480 (8 hours), for CodeBuild to wait before timing out any related build that did not get marked as completed."];
+          "The replacement value in minutes, from 5 to 2160 (36 hours), for CodeBuild to wait before timing out any related build that did not get marked as completed."];
       queuedTimeoutInMinutes: TimeOut.t option
         [@ocaml.doc
           "The number of minutes a build is allowed to be queued before it times out."];
@@ -6880,7 +9530,10 @@ module UpdateProjectInput =
       buildBatchConfig: ProjectBuildBatchConfig.t option ;
       concurrentBuildLimit: WrapperInt.t option
         [@ocaml.doc
-          "The maximum number of concurrent builds that are allowed for this project. New builds are only started if the current number of builds is less than or equal to this limit. If the current build count meets this limit, new builds are throttled and are not run. To remove this limit, set this value to -1."]}
+          "The maximum number of concurrent builds that are allowed for this project. New builds are only started if the current number of builds is less than or equal to this limit. If the current build count meets this limit, new builds are throttled and are not run. To remove this limit, set this value to -1."];
+      autoRetryLimit: WrapperInt.t option
+        [@ocaml.doc
+          "The maximum number of additional automatic retries after a failed build. For example, if the auto-retry limit is set to 2, CodeBuild will call the RetryBuild API to automatically retry your build for up to 2 additional times."]}
     let context_ = "UpdateProjectInput"
     let make ?description =
       fun ?source ->
@@ -6902,31 +9555,33 @@ module UpdateProjectInput =
                                       fun ?fileSystemLocations ->
                                         fun ?buildBatchConfig ->
                                           fun ?concurrentBuildLimit ->
-                                            fun ~name ->
-                                              fun () ->
-                                                {
-                                                  description;
-                                                  source;
-                                                  secondarySources;
-                                                  sourceVersion;
-                                                  secondarySourceVersions;
-                                                  artifacts;
-                                                  secondaryArtifacts;
-                                                  cache;
-                                                  environment;
-                                                  serviceRole;
-                                                  timeoutInMinutes;
-                                                  queuedTimeoutInMinutes;
-                                                  encryptionKey;
-                                                  tags;
-                                                  vpcConfig;
-                                                  badgeEnabled;
-                                                  logsConfig;
-                                                  fileSystemLocations;
-                                                  buildBatchConfig;
-                                                  concurrentBuildLimit;
-                                                  name
-                                                }
+                                            fun ?autoRetryLimit ->
+                                              fun ~name ->
+                                                fun () ->
+                                                  {
+                                                    description;
+                                                    source;
+                                                    secondarySources;
+                                                    sourceVersion;
+                                                    secondarySourceVersions;
+                                                    artifacts;
+                                                    secondaryArtifacts;
+                                                    cache;
+                                                    environment;
+                                                    serviceRole;
+                                                    timeoutInMinutes;
+                                                    queuedTimeoutInMinutes;
+                                                    encryptionKey;
+                                                    tags;
+                                                    vpcConfig;
+                                                    badgeEnabled;
+                                                    logsConfig;
+                                                    fileSystemLocations;
+                                                    buildBatchConfig;
+                                                    concurrentBuildLimit;
+                                                    autoRetryLimit;
+                                                    name
+                                                  }
     let to_value x =
       structure_to_value
         [("name", (Some (NonEmptyString.to_value x.name)));
@@ -6948,7 +9603,7 @@ module UpdateProjectInput =
         ("serviceRole",
           (Option.map x.serviceRole ~f:NonEmptyString.to_value));
         ("timeoutInMinutes",
-          (Option.map x.timeoutInMinutes ~f:TimeOut.to_value));
+          (Option.map x.timeoutInMinutes ~f:BuildTimeOut.to_value));
         ("queuedTimeoutInMinutes",
           (Option.map x.queuedTimeoutInMinutes ~f:TimeOut.to_value));
         ("encryptionKey",
@@ -6964,9 +9619,14 @@ module UpdateProjectInput =
         ("buildBatchConfig",
           (Option.map x.buildBatchConfig ~f:ProjectBuildBatchConfig.to_value));
         ("concurrentBuildLimit",
-          (Option.map x.concurrentBuildLimit ~f:WrapperInt.to_value))]
+          (Option.map x.concurrentBuildLimit ~f:WrapperInt.to_value));
+        ("autoRetryLimit",
+          (Option.map x.autoRetryLimit ~f:WrapperInt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoRetryLimit =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryLimit") in
       let concurrentBuildLimit =
         (Option.map ~f:WrapperInt.of_xml)
           (Xml.child xml_arg0 "concurrentBuildLimit") in
@@ -6991,7 +9651,7 @@ module UpdateProjectInput =
         (Option.map ~f:TimeOut.of_xml)
           (Xml.child xml_arg0 "queuedTimeoutInMinutes") in
       let timeoutInMinutes =
-        (Option.map ~f:TimeOut.of_xml)
+        (Option.map ~f:BuildTimeOut.of_xml)
           (Xml.child xml_arg0 "timeoutInMinutes") in
       let serviceRole =
         (Option.map ~f:NonEmptyString.of_xml)
@@ -7023,54 +9683,346 @@ module UpdateProjectInput =
       let name =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badgeEnabled ?vpcConfig ?tags ?encryptionKey
-        ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole ?environment
-        ?cache ?secondaryArtifacts ?artifacts ?secondarySourceVersions
-        ?sourceVersion ?secondarySources ?source ?description ~name ()
+      make ?autoRetryLimit ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badgeEnabled ?vpcConfig ?tags
+        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole
+        ?environment ?cache ?secondaryArtifacts ?artifacts
+        ?secondarySourceVersions ?sourceVersion ?secondarySources ?source
+        ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoRetryLimit =
+        field_map json__ "autoRetryLimit" WrapperInt.of_json in
       let concurrentBuildLimit =
-        field_map json "concurrentBuildLimit" WrapperInt.of_json in
+        field_map json__ "concurrentBuildLimit" WrapperInt.of_json in
       let buildBatchConfig =
-        field_map json "buildBatchConfig" ProjectBuildBatchConfig.of_json in
+        field_map json__ "buildBatchConfig" ProjectBuildBatchConfig.of_json in
       let fileSystemLocations =
-        field_map json "fileSystemLocations"
+        field_map json__ "fileSystemLocations"
           ProjectFileSystemLocations.of_json in
-      let logsConfig = field_map json "logsConfig" LogsConfig.of_json in
-      let badgeEnabled = field_map json "badgeEnabled" WrapperBoolean.of_json in
-      let vpcConfig = field_map json "vpcConfig" VpcConfig.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+      let logsConfig = field_map json__ "logsConfig" LogsConfig.of_json in
+      let badgeEnabled =
+        field_map json__ "badgeEnabled" WrapperBoolean.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
       let queuedTimeoutInMinutes =
-        field_map json "queuedTimeoutInMinutes" TimeOut.of_json in
+        field_map json__ "queuedTimeoutInMinutes" TimeOut.of_json in
       let timeoutInMinutes =
-        field_map json "timeoutInMinutes" TimeOut.of_json in
-      let serviceRole = field_map json "serviceRole" NonEmptyString.of_json in
+        field_map json__ "timeoutInMinutes" BuildTimeOut.of_json in
+      let serviceRole = field_map json__ "serviceRole" NonEmptyString.of_json in
       let environment =
-        field_map json "environment" ProjectEnvironment.of_json in
-      let cache = field_map json "cache" ProjectCache.of_json in
+        field_map json__ "environment" ProjectEnvironment.of_json in
+      let cache = field_map json__ "cache" ProjectCache.of_json in
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts" ProjectArtifactsList.of_json in
-      let artifacts = field_map json "artifacts" ProjectArtifacts.of_json in
+        field_map json__ "secondaryArtifacts" ProjectArtifactsList.of_json in
+      let artifacts = field_map json__ "artifacts" ProjectArtifacts.of_json in
       let secondarySourceVersions =
-        field_map json "secondarySourceVersions"
+        field_map json__ "secondarySourceVersions"
           ProjectSecondarySourceVersions.of_json in
-      let sourceVersion = field_map json "sourceVersion" String_.of_json in
+      let sourceVersion = field_map json__ "sourceVersion" String_.of_json in
       let secondarySources =
-        field_map json "secondarySources" ProjectSources.of_json in
-      let source = field_map json "source" ProjectSource.of_json in
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let source = field_map json__ "source" ProjectSource.of_json in
       let description =
-        field_map json "description" ProjectDescription.of_json in
-      let name = field_map_exn json "name" NonEmptyString.of_json in
-      make ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badgeEnabled ?vpcConfig ?tags ?encryptionKey
-        ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole ?environment
-        ?cache ?secondaryArtifacts ?artifacts ?secondarySourceVersions
-        ?sourceVersion ?secondarySources ?source ?description ~name ()
+        field_map json__ "description" ProjectDescription.of_json in
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
+      make ?autoRetryLimit ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badgeEnabled ?vpcConfig ?tags
+        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ?serviceRole
+        ?environment ?cache ?secondaryArtifacts ?artifacts
+        ?secondarySourceVersions ?sourceVersion ?secondarySources ?source
+        ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Changes the settings of a build project."]
+module UpdateFleetOutput =
+  struct
+    type nonrec t = {
+      fleet: Fleet.t option [@ocaml.doc "A Fleet object."]}
+    type nonrec error =
+      [ `AccountLimitExceededException of AccountLimitExceededException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fleet = fun () -> { fleet }
+    let error_of_json name json =
+      match name with
+      | "AccountLimitExceededException" ->
+          `AccountLimitExceededException
+            (AccountLimitExceededException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountLimitExceededException" ->
+          `AccountLimitExceededException
+            (AccountLimitExceededException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountLimitExceededException e ->
+          `Assoc
+            [("error", (`String "AccountLimitExceededException"));
+            ("details", (AccountLimitExceededException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("fleet", (Option.map x.fleet ~f:Fleet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fleet = (Option.map ~f:Fleet.of_xml) (Xml.child xml_arg0 "fleet") in
+      make ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fleet = field_map json__ "fleet" Fleet.of_json in make ?fleet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a compute fleet."]
+module UpdateFleetInput =
+  struct
+    type nonrec t =
+      {
+      arn: NonEmptyString.t [@ocaml.doc "The ARN of the compute fleet."];
+      baseCapacity: FleetCapacity.t option
+        [@ocaml.doc
+          "The initial number of machines allocated to the compute \239\172\130eet, which de\239\172\129nes the number of builds that can run in parallel."];
+      environmentType: EnvironmentType.t option
+        [@ocaml.doc
+          "The environment type of the compute fleet. The environment type ARM_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), Asia Pacific (Mumbai), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), EU (Frankfurt), and South America (S\195\163o Paulo). The environment type ARM_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_GPU_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), and Asia Pacific (Sydney). The environment type MAC_ARM is available for Medium fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), and EU (Frankfurt) The environment type MAC_ARM is available for Large fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), and Asia Pacific (Sydney). The environment type WINDOWS_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type WINDOWS_SERVER_2019_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), Asia Pacific (Tokyo), Asia Pacific (Mumbai) and EU (Ireland). The environment type WINDOWS_SERVER_2022_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Sydney), Asia Pacific (Singapore), Asia Pacific (Tokyo), South America (S\195\163o Paulo) and Asia Pacific (Mumbai). For more information, see Build environment compute types in the CodeBuild user guide."];
+      computeType: ComputeType.t option
+        [@ocaml.doc
+          "Information about the compute resources the compute fleet uses. Available values include: ATTRIBUTE_BASED_COMPUTE: Specify the amount of vCPUs, memory, disk space, and the type of machine. If you use ATTRIBUTE_BASED_COMPUTE, you must define your attributes by using computeConfiguration. CodeBuild will select the cheapest instance that satisfies your specified attributes. For more information, see Reserved capacity environment types in the CodeBuild User Guide. CUSTOM_INSTANCE_TYPE: Specify the instance type for your compute fleet. For a list of supported instance types, see Supported instance families in the CodeBuild User Guide. BUILD_GENERAL1_SMALL: Use up to 4 GiB memory and 2 vCPUs for builds. BUILD_GENERAL1_MEDIUM: Use up to 8 GiB memory and 4 vCPUs for builds. BUILD_GENERAL1_LARGE: Use up to 16 GiB memory and 8 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_XLARGE: Use up to 72 GiB memory and 36 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_2XLARGE: Use up to 144 GiB memory, 72 vCPUs, and 824 GB of SSD storage for builds. This compute type supports Docker images up to 100 GB uncompressed. BUILD_LAMBDA_1GB: Use up to 1 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_2GB: Use up to 2 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_4GB: Use up to 4 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_8GB: Use up to 8 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_10GB: Use up to 10 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. If you use BUILD_GENERAL1_SMALL: For environment type LINUX_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 16 GiB memory, 4 vCPUs, and 1 NVIDIA A10G Tensor Core GPU for builds. For environment type ARM_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs on ARM-based processors for builds. If you use BUILD_GENERAL1_LARGE: For environment type LINUX_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 255 GiB memory, 32 vCPUs, and 4 NVIDIA Tesla V100 GPUs for builds. For environment type ARM_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs on ARM-based processors for builds. For more information, see On-demand environment types in the CodeBuild User Guide."];
+      computeConfiguration: ComputeConfiguration.t option
+        [@ocaml.doc
+          "The compute configuration of the compute fleet. This is only required if computeType is set to ATTRIBUTE_BASED_COMPUTE or CUSTOM_INSTANCE_TYPE."];
+      scalingConfiguration: ScalingConfigurationInput.t option
+        [@ocaml.doc "The scaling configuration of the compute fleet."];
+      overflowBehavior: FleetOverflowBehavior.t option
+        [@ocaml.doc
+          "The compute fleet overflow behavior. For overflow behavior QUEUE, your overflow builds need to wait on the existing fleet instance to become available. For overflow behavior ON_DEMAND, your overflow builds run on CodeBuild on-demand. If you choose to set your overflow behavior to on-demand while creating a VPC-connected fleet, make sure that you add the required VPC permissions to your project service role. For more information, see Example policy statement to allow CodeBuild access to Amazon Web Services services required to create a VPC network interface."];
+      vpcConfig: VpcConfig.t option ;
+      proxyConfiguration: ProxyConfiguration.t option
+        [@ocaml.doc "The proxy configuration of the compute fleet."];
+      imageId: NonEmptyString.t option
+        [@ocaml.doc "The Amazon Machine Image (AMI) of the compute fleet."];
+      fleetServiceRole: NonEmptyString.t option
+        [@ocaml.doc
+          "The service role associated with the compute fleet. For more information, see Allow a user to add a permission policy for a fleet service role in the CodeBuild User Guide."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tag key and value pairs associated with this compute fleet. These tags are available for use by Amazon Web Services services that support CodeBuild build project tags."]}
+    let context_ = "UpdateFleetInput"
+    let make ?baseCapacity =
+      fun ?environmentType ->
+        fun ?computeType ->
+          fun ?computeConfiguration ->
+            fun ?scalingConfiguration ->
+              fun ?overflowBehavior ->
+                fun ?vpcConfig ->
+                  fun ?proxyConfiguration ->
+                    fun ?imageId ->
+                      fun ?fleetServiceRole ->
+                        fun ?tags ->
+                          fun ~arn ->
+                            fun () ->
+                              {
+                                baseCapacity;
+                                environmentType;
+                                computeType;
+                                computeConfiguration;
+                                scalingConfiguration;
+                                overflowBehavior;
+                                vpcConfig;
+                                proxyConfiguration;
+                                imageId;
+                                fleetServiceRole;
+                                tags;
+                                arn
+                              }
+    let to_value x =
+      structure_to_value
+        [("arn", (Some (NonEmptyString.to_value x.arn)));
+        ("baseCapacity",
+          (Option.map x.baseCapacity ~f:FleetCapacity.to_value));
+        ("environmentType",
+          (Option.map x.environmentType ~f:EnvironmentType.to_value));
+        ("computeType", (Option.map x.computeType ~f:ComputeType.to_value));
+        ("computeConfiguration",
+          (Option.map x.computeConfiguration ~f:ComputeConfiguration.to_value));
+        ("scalingConfiguration",
+          (Option.map x.scalingConfiguration
+             ~f:ScalingConfigurationInput.to_value));
+        ("overflowBehavior",
+          (Option.map x.overflowBehavior ~f:FleetOverflowBehavior.to_value));
+        ("vpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("proxyConfiguration",
+          (Option.map x.proxyConfiguration ~f:ProxyConfiguration.to_value));
+        ("imageId", (Option.map x.imageId ~f:NonEmptyString.to_value));
+        ("fleetServiceRole",
+          (Option.map x.fleetServiceRole ~f:NonEmptyString.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let fleetServiceRole =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "fleetServiceRole") in
+      let imageId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "imageId") in
+      let proxyConfiguration =
+        (Option.map ~f:ProxyConfiguration.of_xml)
+          (Xml.child xml_arg0 "proxyConfiguration") in
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "vpcConfig") in
+      let overflowBehavior =
+        (Option.map ~f:FleetOverflowBehavior.of_xml)
+          (Xml.child xml_arg0 "overflowBehavior") in
+      let scalingConfiguration =
+        (Option.map ~f:ScalingConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "scalingConfiguration") in
+      let computeConfiguration =
+        (Option.map ~f:ComputeConfiguration.of_xml)
+          (Xml.child xml_arg0 "computeConfiguration") in
+      let computeType =
+        (Option.map ~f:ComputeType.of_xml) (Xml.child xml_arg0 "computeType") in
+      let environmentType =
+        (Option.map ~f:EnvironmentType.of_xml)
+          (Xml.child xml_arg0 "environmentType") in
+      let baseCapacity =
+        (Option.map ~f:FleetCapacity.of_xml)
+          (Xml.child xml_arg0 "baseCapacity") in
+      let arn =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ?computeType ?environmentType ?baseCapacity ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let fleetServiceRole =
+        field_map json__ "fleetServiceRole" NonEmptyString.of_json in
+      let imageId = field_map json__ "imageId" NonEmptyString.of_json in
+      let proxyConfiguration =
+        field_map json__ "proxyConfiguration" ProxyConfiguration.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let overflowBehavior =
+        field_map json__ "overflowBehavior" FleetOverflowBehavior.of_json in
+      let scalingConfiguration =
+        field_map json__ "scalingConfiguration"
+          ScalingConfigurationInput.of_json in
+      let computeConfiguration =
+        field_map json__ "computeConfiguration" ComputeConfiguration.of_json in
+      let computeType = field_map json__ "computeType" ComputeType.of_json in
+      let environmentType =
+        field_map json__ "environmentType" EnvironmentType.of_json in
+      let baseCapacity =
+        field_map json__ "baseCapacity" FleetCapacity.of_json in
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ?computeType ?environmentType ?baseCapacity ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a compute fleet."]
+module StopSandboxOutput =
+  struct
+    type nonrec t =
+      {
+      sandbox: Sandbox.t option
+        [@ocaml.doc "Information about the requested sandbox."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sandbox = fun () -> { sandbox }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sandbox", (Option.map x.sandbox ~f:Sandbox.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandbox =
+        (Option.map ~f:Sandbox.of_xml) (Xml.child xml_arg0 "sandbox") in
+      make ?sandbox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandbox = field_map json__ "sandbox" Sandbox.of_json in
+      make ?sandbox ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a sandbox."]
+module StopSandboxInput =
+  struct
+    type nonrec t =
+      {
+      id: NonEmptyString.t
+        [@ocaml.doc "Information about the requested sandbox ID."]}
+    let context_ = "StopSandboxInput"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (NonEmptyString.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" NonEmptyString.of_json in
+      make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Stops a sandbox."]
 module StopBuildOutput =
   struct
     type nonrec t =
@@ -7120,8 +10072,8 @@ module StopBuildOutput =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let build = field_map json "build" Build.of_json in make ?build ()
+    let of_json json__ =
+      let build = field_map json__ "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attempts to stop running a build."]
 module StopBuildInput =
@@ -7139,8 +10091,9 @@ module StopBuildInput =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" NonEmptyString.of_json in
+      make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Attempts to stop running a build."]
 module StopBuildBatchOutput =
@@ -7193,8 +10146,8 @@ module StopBuildBatchOutput =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
+    let of_json json__ =
+      let buildBatch = field_map json__ "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a running batch build."]
@@ -7214,10 +10167,286 @@ module StopBuildBatchInput =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" NonEmptyString.of_json in
+      make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a running batch build."]
+module StartSandboxOutput =
+  struct
+    type nonrec t =
+      {
+      sandbox: Sandbox.t option
+        [@ocaml.doc "Information about the requested sandbox."]}
+    type nonrec error =
+      [ `AccountSuspendedException of AccountSuspendedException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sandbox = fun () -> { sandbox }
+    let error_of_json name json =
+      match name with
+      | "AccountSuspendedException" ->
+          `AccountSuspendedException (AccountSuspendedException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountSuspendedException" ->
+          `AccountSuspendedException (AccountSuspendedException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountSuspendedException e ->
+          `Assoc
+            [("error", (`String "AccountSuspendedException"));
+            ("details", (AccountSuspendedException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sandbox", (Option.map x.sandbox ~f:Sandbox.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandbox =
+        (Option.map ~f:Sandbox.of_xml) (Xml.child xml_arg0 "sandbox") in
+      make ?sandbox ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandbox = field_map json__ "sandbox" Sandbox.of_json in
+      make ?sandbox ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a sandbox."]
+module StartSandboxInput =
+  struct
+    type nonrec t =
+      {
+      projectName: NonEmptyString.t option
+        [@ocaml.doc "The CodeBuild project name."];
+      idempotencyToken: SensitiveString.t option
+        [@ocaml.doc "A unique client token."]}
+    let make ?projectName =
+      fun ?idempotencyToken -> fun () -> { projectName; idempotencyToken }
+    let to_value x =
+      structure_to_value
+        [("projectName",
+           (Option.map x.projectName ~f:NonEmptyString.to_value));
+        ("idempotencyToken",
+          (Option.map x.idempotencyToken ~f:SensitiveString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let idempotencyToken =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "idempotencyToken") in
+      let projectName =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "projectName") in
+      make ?idempotencyToken ?projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idempotencyToken =
+        field_map json__ "idempotencyToken" SensitiveString.of_json in
+      let projectName = field_map json__ "projectName" NonEmptyString.of_json in
+      make ?idempotencyToken ?projectName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a sandbox."]
+module StartSandboxConnectionOutput =
+  struct
+    type nonrec t =
+      {
+      ssmSession: SSMSession.t option
+        [@ocaml.doc "Information about the Session Manager session."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ssmSession = fun () -> { ssmSession }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ssmSession", (Option.map x.ssmSession ~f:SSMSession.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ssmSession =
+        (Option.map ~f:SSMSession.of_xml) (Xml.child xml_arg0 "ssmSession") in
+      make ?ssmSession ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ssmSession = field_map json__ "ssmSession" SSMSession.of_json in
+      make ?ssmSession ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a sandbox connection."]
+module StartSandboxConnectionInput =
+  struct
+    type nonrec t =
+      {
+      sandboxId: NonEmptyString.t [@ocaml.doc "A sandboxId or sandboxArn."]}
+    let context_ = "StartSandboxConnectionInput"
+    let make ~sandboxId = fun () -> { sandboxId }
+    let to_value x =
+      structure_to_value
+        [("sandboxId", (Some (NonEmptyString.to_value x.sandboxId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandboxId =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sandboxId") in
+      make ~sandboxId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandboxId = field_map_exn json__ "sandboxId" NonEmptyString.of_json in
+      make ~sandboxId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a sandbox connection."]
+module StartCommandExecutionOutput =
+  struct
+    type nonrec t =
+      {
+      commandExecution: CommandExecution.t option
+        [@ocaml.doc "Information about the requested command executions."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?commandExecution = fun () -> { commandExecution }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("commandExecution",
+           (Option.map x.commandExecution ~f:CommandExecution.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commandExecution =
+        (Option.map ~f:CommandExecution.of_xml)
+          (Xml.child xml_arg0 "commandExecution") in
+      make ?commandExecution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commandExecution =
+        field_map json__ "commandExecution" CommandExecution.of_json in
+      make ?commandExecution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a command execution."]
+module StartCommandExecutionInput =
+  struct
+    type nonrec t =
+      {
+      sandboxId: NonEmptyString.t [@ocaml.doc "A sandboxId or sandboxArn."];
+      command: SensitiveNonEmptyString.t
+        [@ocaml.doc "The command that needs to be executed."];
+      type_: CommandType.t option [@ocaml.doc "The command type."]}
+    let context_ = "StartCommandExecutionInput"
+    let make ?type_ =
+      fun ~sandboxId ->
+        fun ~command -> fun () -> { type_; sandboxId; command }
+    let to_value x =
+      structure_to_value
+        [("sandboxId", (Some (NonEmptyString.to_value x.sandboxId)));
+        ("command", (Some (SensitiveNonEmptyString.to_value x.command)));
+        ("type", (Option.map x.type_ ~f:CommandType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:CommandType.of_xml) (Xml.child xml_arg0 "type") in
+      let command =
+        SensitiveNonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "command") in
+      let sandboxId =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sandboxId") in
+      make ?type_ ~command ~sandboxId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "type" CommandType.of_json in
+      let command =
+        field_map_exn json__ "command" SensitiveNonEmptyString.of_json in
+      let sandboxId = field_map_exn json__ "sandboxId" NonEmptyString.of_json in
+      make ?type_ ~command ~sandboxId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Starts a command execution."]
 module StartBuildOutput =
   struct
     type nonrec t =
@@ -7279,10 +10508,11 @@ module StartBuildOutput =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let build = field_map json "build" Build.of_json in make ?build ()
+    let of_json json__ =
+      let build = field_map json__ "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts running a build."]
+  end[@@ocaml.doc
+       "Starts running a build with the settings defined in the project. These setting include: how to run a build, where to get the source code, which build environment to use, which build commands to run, and where to store the build output. You can also start a build run by overriding some of the build settings in the project. The overrides only apply for that specific start build request. The settings in the project are unaltered."]
 module StartBuildInput =
   struct
     type nonrec t =
@@ -7298,7 +10528,7 @@ module StartBuildInput =
           "An array of ProjectSourceVersion objects that specify one or more versions of the project's secondary sources to be used for this build only."];
       sourceVersion: String_.t option
         [@ocaml.doc
-          "The version of the build input to be built, for this build only. If not specified, the latest version is used. If specified, the contents depends on the source provider: CodeCommit The commit ID, branch, or Git tag to use. GitHub The commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. Bitbucket The commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. Amazon S3 The version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the project level, then this sourceVersion (at the build level) takes precedence. For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
+          "The version of the build input to be built, for this build only. If not specified, the latest version is used. If specified, the contents depends on the source provider: CodeCommit The commit ID, branch, or Git tag to use. GitHub The commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. GitLab The commit ID, branch, or Git tag to use. Bitbucket The commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. Amazon S3 The version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the project level, then this sourceVersion (at the build level) takes precedence. For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
       artifactsOverride: ProjectArtifacts.t option
         [@ocaml.doc
           "Build output artifact settings that override, for this build only, the latest ones already defined in the build project."];
@@ -7315,7 +10545,7 @@ module StartBuildInput =
           "A location that overrides, for this build, the source location for the one defined in the build project."];
       sourceAuthOverride: SourceAuth.t option
         [@ocaml.doc
-          "An authorization type for this build that overrides the one defined in the build project. This override applies only if the build project's source is BitBucket or GitHub."];
+          "An authorization type for this build that overrides the one defined in the build project. This override applies only if the build project's source is BitBucket, GitHub, GitLab, or GitLab Self Managed."];
       gitCloneDepthOverride: GitCloneDepth.t option
         [@ocaml.doc
           "The user-defined depth of history, with a minimum value of 0, that overrides, for this build only, any previous depth of history defined in the build project."];
@@ -7324,13 +10554,13 @@ module StartBuildInput =
           "Information about the Git submodules configuration for this build of an CodeBuild build project."];
       buildspecOverride: String_.t option
         [@ocaml.doc
-          "A buildspec file declaration that overrides, for this build only, the latest one already defined in the build project. If this value is set, it can be either an inline buildspec definition, the path to an alternate buildspec file relative to the value of the built-in CODEBUILD_SRC_DIR environment variable, or the path to an S3 bucket. The bucket must be in the same Amazon Web Services Region as the build project. Specify the buildspec file using its ARN (for example, arn:aws:s3:::my-codebuild-sample2/buildspec.yml). If this value is not provided or is set to an empty string, the source code must contain a buildspec file in its root directory. For more information, see Buildspec File Name and Storage Location."];
+          "A buildspec file declaration that overrides the latest one defined in the build project, for this build only. The buildspec defined on the project is not changed. If this value is set, it can be either an inline buildspec definition, the path to an alternate buildspec file relative to the value of the built-in CODEBUILD_SRC_DIR environment variable, or the path to an S3 bucket. The bucket must be in the same Amazon Web Services Region as the build project. Specify the buildspec file using its ARN (for example, arn:aws:s3:::my-codebuild-sample2/buildspec.yml). If this value is not provided or is set to an empty string, the source code must contain a buildspec file in its root directory. For more information, see Buildspec File Name and Storage Location. Since this property allows you to change the build commands that will run in the container, you should note that an IAM principal with the ability to call this API and set this parameter can override the default settings. Moreover, we encourage that you use a trustworthy buildspec location like a file in your source repository or a Amazon S3 bucket. Alternatively, you can restrict overrides to the buildspec by using a condition key: Prevent unauthorized modifications to project buildspec."];
       insecureSslOverride: WrapperBoolean.t option
         [@ocaml.doc
           "Enable this flag to override the insecure SSL setting that is specified in the build project. The insecure SSL setting determines whether to ignore SSL warnings while connecting to the project source code. This override applies only if the build's source is GitHub Enterprise."];
       reportBuildStatusOverride: WrapperBoolean.t option
         [@ocaml.doc
-          "Set to true to report to your source provider the status of a build's start and completion. If you use this option with a source provider other than GitHub, GitHub Enterprise, or Bitbucket, an invalidInputException is thrown. To be able to report the build status to the source provider, the user associated with the source provider must have write access to the repo. If the user does not have write access, the build status cannot be updated. For more information, see Source provider access in the CodeBuild User Guide. The status of a build triggered by a webhook is always reported to your source provider."];
+          "Set to true to report to your source provider the status of a build's start and completion. If you use this option with a source provider other than GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket, an invalidInputException is thrown. To be able to report the build status to the source provider, the user associated with the source provider must have write access to the repo. If the user does not have write access, the build status cannot be updated. For more information, see Source provider access in the CodeBuild User Guide. The status of a build triggered by a webhook is always reported to your source provider."];
       buildStatusConfigOverride: BuildStatusConfig.t option
         [@ocaml.doc
           "Contains information that defines how the build project reports the build status to the source provider. This option is only used when the source provider is GITHUB, GITHUB_ENTERPRISE, or BITBUCKET."];
@@ -7355,9 +10585,9 @@ module StartBuildInput =
       privilegedModeOverride: WrapperBoolean.t option
         [@ocaml.doc
           "Enable this flag to override privileged mode in the build project."];
-      timeoutInMinutesOverride: TimeOut.t option
+      timeoutInMinutesOverride: BuildTimeOut.t option
         [@ocaml.doc
-          "The number of build timeout minutes, from 5 to 480 (8 hours), that overrides, for this build only, the latest setting already defined in the build project."];
+          "The number of build timeout minutes, from 5 to 2160 (36 hours), that overrides, for this build only, the latest setting already defined in the build project."];
       queuedTimeoutInMinutesOverride: TimeOut.t option
         [@ocaml.doc
           "The number of minutes a build is allowed to be queued before it times out."];
@@ -7377,7 +10607,13 @@ module StartBuildInput =
           "The type of credentials CodeBuild uses to pull images in your build. There are two valid values: CODEBUILD Specifies that CodeBuild uses its own credentials. This requires that you modify your ECR repository policy to trust CodeBuild's service principal. SERVICE_ROLE Specifies that CodeBuild uses your build project's service role. When using a cross-account or private registry image, you must use SERVICE_ROLE credentials. When using an CodeBuild curated image, you must use CODEBUILD credentials."];
       debugSessionEnabled: WrapperBoolean.t option
         [@ocaml.doc
-          "Specifies if session debugging is enabled for this build. For more information, see Viewing a running build in Session Manager."]}
+          "Specifies if session debugging is enabled for this build. For more information, see Viewing a running build in Session Manager."];
+      fleetOverride: ProjectFleet.t option
+        [@ocaml.doc
+          "A ProjectFleet object specified for this build that overrides the one defined in the build project."];
+      autoRetryLimitOverride: WrapperInt.t option
+        [@ocaml.doc
+          "The maximum number of additional automatic retries after a failed build. For example, if the auto-retry limit is set to 2, CodeBuild will call the RetryBuild API to automatically retry your build for up to 2 additional times."]}
     let context_ = "StartBuildInput"
     let make ?secondarySourcesOverride =
       fun ?secondarySourcesVersionOverride ->
@@ -7424,9 +10660,15 @@ module StartBuildInput =
                                                                 ?debugSessionEnabled
                                                                 ->
                                                                 fun
-                                                                  ~projectName
+                                                                  ?fleetOverride
                                                                   ->
-                                                                  fun () ->
+                                                                  fun
+                                                                    ?autoRetryLimitOverride
+                                                                    ->
+                                                                    fun
+                                                                    ~projectName
+                                                                    ->
+                                                                    fun () ->
                                                                     {
                                                                     secondarySourcesOverride;
                                                                     secondarySourcesVersionOverride;
@@ -7458,6 +10700,8 @@ module StartBuildInput =
                                                                     registryCredentialOverride;
                                                                     imagePullCredentialsTypeOverride;
                                                                     debugSessionEnabled;
+                                                                    fleetOverride;
+                                                                    autoRetryLimitOverride;
                                                                     projectName
                                                                     }
     let to_value x =
@@ -7512,7 +10756,7 @@ module StartBuildInput =
         ("privilegedModeOverride",
           (Option.map x.privilegedModeOverride ~f:WrapperBoolean.to_value));
         ("timeoutInMinutesOverride",
-          (Option.map x.timeoutInMinutesOverride ~f:TimeOut.to_value));
+          (Option.map x.timeoutInMinutesOverride ~f:BuildTimeOut.to_value));
         ("queuedTimeoutInMinutesOverride",
           (Option.map x.queuedTimeoutInMinutesOverride ~f:TimeOut.to_value));
         ("encryptionKeyOverride",
@@ -7528,9 +10772,19 @@ module StartBuildInput =
           (Option.map x.imagePullCredentialsTypeOverride
              ~f:ImagePullCredentialsType.to_value));
         ("debugSessionEnabled",
-          (Option.map x.debugSessionEnabled ~f:WrapperBoolean.to_value))]
+          (Option.map x.debugSessionEnabled ~f:WrapperBoolean.to_value));
+        ("fleetOverride",
+          (Option.map x.fleetOverride ~f:ProjectFleet.to_value));
+        ("autoRetryLimitOverride",
+          (Option.map x.autoRetryLimitOverride ~f:WrapperInt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoRetryLimitOverride =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryLimitOverride") in
+      let fleetOverride =
+        (Option.map ~f:ProjectFleet.of_xml)
+          (Xml.child xml_arg0 "fleetOverride") in
       let debugSessionEnabled =
         (Option.map ~f:WrapperBoolean.of_xml)
           (Xml.child xml_arg0 "debugSessionEnabled") in
@@ -7553,7 +10807,7 @@ module StartBuildInput =
         (Option.map ~f:TimeOut.of_xml)
           (Xml.child xml_arg0 "queuedTimeoutInMinutesOverride") in
       let timeoutInMinutesOverride =
-        (Option.map ~f:TimeOut.of_xml)
+        (Option.map ~f:BuildTimeOut.of_xml)
           (Xml.child xml_arg0 "timeoutInMinutesOverride") in
       let privilegedModeOverride =
         (Option.map ~f:WrapperBoolean.of_xml)
@@ -7623,102 +10877,109 @@ module StartBuildInput =
       let projectName =
         NonEmptyString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
-      make ?debugSessionEnabled ?imagePullCredentialsTypeOverride
-        ?registryCredentialOverride ?logsConfigOverride ?idempotencyToken
-        ?encryptionKeyOverride ?queuedTimeoutInMinutesOverride
-        ?timeoutInMinutesOverride ?privilegedModeOverride
-        ?serviceRoleOverride ?cacheOverride ?certificateOverride
-        ?computeTypeOverride ?imageOverride ?environmentTypeOverride
-        ?buildStatusConfigOverride ?reportBuildStatusOverride
-        ?insecureSslOverride ?buildspecOverride ?gitSubmodulesConfigOverride
-        ?gitCloneDepthOverride ?sourceAuthOverride ?sourceLocationOverride
-        ?sourceTypeOverride ?environmentVariablesOverride
-        ?secondaryArtifactsOverride ?artifactsOverride ?sourceVersion
-        ?secondarySourcesVersionOverride ?secondarySourcesOverride
-        ~projectName ()
+      make ?autoRetryLimitOverride ?fleetOverride ?debugSessionEnabled
+        ?imagePullCredentialsTypeOverride ?registryCredentialOverride
+        ?logsConfigOverride ?idempotencyToken ?encryptionKeyOverride
+        ?queuedTimeoutInMinutesOverride ?timeoutInMinutesOverride
+        ?privilegedModeOverride ?serviceRoleOverride ?cacheOverride
+        ?certificateOverride ?computeTypeOverride ?imageOverride
+        ?environmentTypeOverride ?buildStatusConfigOverride
+        ?reportBuildStatusOverride ?insecureSslOverride ?buildspecOverride
+        ?gitSubmodulesConfigOverride ?gitCloneDepthOverride
+        ?sourceAuthOverride ?sourceLocationOverride ?sourceTypeOverride
+        ?environmentVariablesOverride ?secondaryArtifactsOverride
+        ?artifactsOverride ?sourceVersion ?secondarySourcesVersionOverride
+        ?secondarySourcesOverride ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoRetryLimitOverride =
+        field_map json__ "autoRetryLimitOverride" WrapperInt.of_json in
+      let fleetOverride =
+        field_map json__ "fleetOverride" ProjectFleet.of_json in
       let debugSessionEnabled =
-        field_map json "debugSessionEnabled" WrapperBoolean.of_json in
+        field_map json__ "debugSessionEnabled" WrapperBoolean.of_json in
       let imagePullCredentialsTypeOverride =
-        field_map json "imagePullCredentialsTypeOverride"
+        field_map json__ "imagePullCredentialsTypeOverride"
           ImagePullCredentialsType.of_json in
       let registryCredentialOverride =
-        field_map json "registryCredentialOverride"
+        field_map json__ "registryCredentialOverride"
           RegistryCredential.of_json in
       let logsConfigOverride =
-        field_map json "logsConfigOverride" LogsConfig.of_json in
+        field_map json__ "logsConfigOverride" LogsConfig.of_json in
       let idempotencyToken =
-        field_map json "idempotencyToken" String_.of_json in
+        field_map json__ "idempotencyToken" String_.of_json in
       let encryptionKeyOverride =
-        field_map json "encryptionKeyOverride" NonEmptyString.of_json in
+        field_map json__ "encryptionKeyOverride" NonEmptyString.of_json in
       let queuedTimeoutInMinutesOverride =
-        field_map json "queuedTimeoutInMinutesOverride" TimeOut.of_json in
+        field_map json__ "queuedTimeoutInMinutesOverride" TimeOut.of_json in
       let timeoutInMinutesOverride =
-        field_map json "timeoutInMinutesOverride" TimeOut.of_json in
+        field_map json__ "timeoutInMinutesOverride" BuildTimeOut.of_json in
       let privilegedModeOverride =
-        field_map json "privilegedModeOverride" WrapperBoolean.of_json in
+        field_map json__ "privilegedModeOverride" WrapperBoolean.of_json in
       let serviceRoleOverride =
-        field_map json "serviceRoleOverride" NonEmptyString.of_json in
-      let cacheOverride = field_map json "cacheOverride" ProjectCache.of_json in
+        field_map json__ "serviceRoleOverride" NonEmptyString.of_json in
+      let cacheOverride =
+        field_map json__ "cacheOverride" ProjectCache.of_json in
       let certificateOverride =
-        field_map json "certificateOverride" String_.of_json in
+        field_map json__ "certificateOverride" String_.of_json in
       let computeTypeOverride =
-        field_map json "computeTypeOverride" ComputeType.of_json in
+        field_map json__ "computeTypeOverride" ComputeType.of_json in
       let imageOverride =
-        field_map json "imageOverride" NonEmptyString.of_json in
+        field_map json__ "imageOverride" NonEmptyString.of_json in
       let environmentTypeOverride =
-        field_map json "environmentTypeOverride" EnvironmentType.of_json in
+        field_map json__ "environmentTypeOverride" EnvironmentType.of_json in
       let buildStatusConfigOverride =
-        field_map json "buildStatusConfigOverride" BuildStatusConfig.of_json in
+        field_map json__ "buildStatusConfigOverride"
+          BuildStatusConfig.of_json in
       let reportBuildStatusOverride =
-        field_map json "reportBuildStatusOverride" WrapperBoolean.of_json in
+        field_map json__ "reportBuildStatusOverride" WrapperBoolean.of_json in
       let insecureSslOverride =
-        field_map json "insecureSslOverride" WrapperBoolean.of_json in
+        field_map json__ "insecureSslOverride" WrapperBoolean.of_json in
       let buildspecOverride =
-        field_map json "buildspecOverride" String_.of_json in
+        field_map json__ "buildspecOverride" String_.of_json in
       let gitSubmodulesConfigOverride =
-        field_map json "gitSubmodulesConfigOverride"
+        field_map json__ "gitSubmodulesConfigOverride"
           GitSubmodulesConfig.of_json in
       let gitCloneDepthOverride =
-        field_map json "gitCloneDepthOverride" GitCloneDepth.of_json in
+        field_map json__ "gitCloneDepthOverride" GitCloneDepth.of_json in
       let sourceAuthOverride =
-        field_map json "sourceAuthOverride" SourceAuth.of_json in
+        field_map json__ "sourceAuthOverride" SourceAuth.of_json in
       let sourceLocationOverride =
-        field_map json "sourceLocationOverride" String_.of_json in
+        field_map json__ "sourceLocationOverride" String_.of_json in
       let sourceTypeOverride =
-        field_map json "sourceTypeOverride" SourceType.of_json in
+        field_map json__ "sourceTypeOverride" SourceType.of_json in
       let environmentVariablesOverride =
-        field_map json "environmentVariablesOverride"
+        field_map json__ "environmentVariablesOverride"
           EnvironmentVariables.of_json in
       let secondaryArtifactsOverride =
-        field_map json "secondaryArtifactsOverride"
+        field_map json__ "secondaryArtifactsOverride"
           ProjectArtifactsList.of_json in
       let artifactsOverride =
-        field_map json "artifactsOverride" ProjectArtifacts.of_json in
-      let sourceVersion = field_map json "sourceVersion" String_.of_json in
+        field_map json__ "artifactsOverride" ProjectArtifacts.of_json in
+      let sourceVersion = field_map json__ "sourceVersion" String_.of_json in
       let secondarySourcesVersionOverride =
-        field_map json "secondarySourcesVersionOverride"
+        field_map json__ "secondarySourcesVersionOverride"
           ProjectSecondarySourceVersions.of_json in
       let secondarySourcesOverride =
-        field_map json "secondarySourcesOverride" ProjectSources.of_json in
+        field_map json__ "secondarySourcesOverride" ProjectSources.of_json in
       let projectName =
-        field_map_exn json "projectName" NonEmptyString.of_json in
-      make ?debugSessionEnabled ?imagePullCredentialsTypeOverride
-        ?registryCredentialOverride ?logsConfigOverride ?idempotencyToken
-        ?encryptionKeyOverride ?queuedTimeoutInMinutesOverride
-        ?timeoutInMinutesOverride ?privilegedModeOverride
-        ?serviceRoleOverride ?cacheOverride ?certificateOverride
-        ?computeTypeOverride ?imageOverride ?environmentTypeOverride
-        ?buildStatusConfigOverride ?reportBuildStatusOverride
-        ?insecureSslOverride ?buildspecOverride ?gitSubmodulesConfigOverride
-        ?gitCloneDepthOverride ?sourceAuthOverride ?sourceLocationOverride
-        ?sourceTypeOverride ?environmentVariablesOverride
-        ?secondaryArtifactsOverride ?artifactsOverride ?sourceVersion
-        ?secondarySourcesVersionOverride ?secondarySourcesOverride
-        ~projectName ()
+        field_map_exn json__ "projectName" NonEmptyString.of_json in
+      make ?autoRetryLimitOverride ?fleetOverride ?debugSessionEnabled
+        ?imagePullCredentialsTypeOverride ?registryCredentialOverride
+        ?logsConfigOverride ?idempotencyToken ?encryptionKeyOverride
+        ?queuedTimeoutInMinutesOverride ?timeoutInMinutesOverride
+        ?privilegedModeOverride ?serviceRoleOverride ?cacheOverride
+        ?certificateOverride ?computeTypeOverride ?imageOverride
+        ?environmentTypeOverride ?buildStatusConfigOverride
+        ?reportBuildStatusOverride ?insecureSslOverride ?buildspecOverride
+        ?gitSubmodulesConfigOverride ?gitCloneDepthOverride
+        ?sourceAuthOverride ?sourceLocationOverride ?sourceTypeOverride
+        ?environmentVariablesOverride ?secondaryArtifactsOverride
+        ?artifactsOverride ?sourceVersion ?secondarySourcesVersionOverride
+        ?secondarySourcesOverride ~projectName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts running a build."]
+  end[@@ocaml.doc
+       "Starts running a build with the settings defined in the project. These setting include: how to run a build, where to get the source code, which build environment to use, which build commands to run, and where to store the build output. You can also start a build run by overriding some of the build settings in the project. The overrides only apply for that specific start build request. The settings in the project are unaltered."]
 module StartBuildBatchOutput =
   struct
     type nonrec t =
@@ -7772,8 +11033,8 @@ module StartBuildBatchOutput =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
+    let of_json json__ =
+      let buildBatch = field_map json__ "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a batch build for a project."]
@@ -7845,7 +11106,7 @@ module StartBuildBatchInput =
       privilegedModeOverride: WrapperBoolean.t option
         [@ocaml.doc
           "Enable this flag to override privileged mode in the batch build project."];
-      buildTimeoutInMinutesOverride: TimeOut.t option
+      buildTimeoutInMinutesOverride: BuildTimeOut.t option
         [@ocaml.doc
           "Overrides the build timeout specified in the batch build project."];
       queuedTimeoutInMinutesOverride: TimeOut.t option
@@ -8004,7 +11265,8 @@ module StartBuildBatchInput =
         ("privilegedModeOverride",
           (Option.map x.privilegedModeOverride ~f:WrapperBoolean.to_value));
         ("buildTimeoutInMinutesOverride",
-          (Option.map x.buildTimeoutInMinutesOverride ~f:TimeOut.to_value));
+          (Option.map x.buildTimeoutInMinutesOverride
+             ~f:BuildTimeOut.to_value));
         ("queuedTimeoutInMinutesOverride",
           (Option.map x.queuedTimeoutInMinutesOverride ~f:TimeOut.to_value));
         ("encryptionKeyOverride",
@@ -8051,7 +11313,7 @@ module StartBuildBatchInput =
         (Option.map ~f:TimeOut.of_xml)
           (Xml.child xml_arg0 "queuedTimeoutInMinutesOverride") in
       let buildTimeoutInMinutesOverride =
-        (Option.map ~f:TimeOut.of_xml)
+        (Option.map ~f:BuildTimeOut.of_xml)
           (Xml.child xml_arg0 "buildTimeoutInMinutesOverride") in
       let privilegedModeOverride =
         (Option.map ~f:WrapperBoolean.of_xml)
@@ -8132,75 +11394,76 @@ module StartBuildBatchInput =
         ?secondarySourcesVersionOverride ?secondarySourcesOverride
         ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let debugSessionEnabled =
-        field_map json "debugSessionEnabled" WrapperBoolean.of_json in
+        field_map json__ "debugSessionEnabled" WrapperBoolean.of_json in
       let buildBatchConfigOverride =
-        field_map json "buildBatchConfigOverride"
+        field_map json__ "buildBatchConfigOverride"
           ProjectBuildBatchConfig.of_json in
       let imagePullCredentialsTypeOverride =
-        field_map json "imagePullCredentialsTypeOverride"
+        field_map json__ "imagePullCredentialsTypeOverride"
           ImagePullCredentialsType.of_json in
       let registryCredentialOverride =
-        field_map json "registryCredentialOverride"
+        field_map json__ "registryCredentialOverride"
           RegistryCredential.of_json in
       let logsConfigOverride =
-        field_map json "logsConfigOverride" LogsConfig.of_json in
+        field_map json__ "logsConfigOverride" LogsConfig.of_json in
       let idempotencyToken =
-        field_map json "idempotencyToken" String_.of_json in
+        field_map json__ "idempotencyToken" String_.of_json in
       let encryptionKeyOverride =
-        field_map json "encryptionKeyOverride" NonEmptyString.of_json in
+        field_map json__ "encryptionKeyOverride" NonEmptyString.of_json in
       let queuedTimeoutInMinutesOverride =
-        field_map json "queuedTimeoutInMinutesOverride" TimeOut.of_json in
+        field_map json__ "queuedTimeoutInMinutesOverride" TimeOut.of_json in
       let buildTimeoutInMinutesOverride =
-        field_map json "buildTimeoutInMinutesOverride" TimeOut.of_json in
+        field_map json__ "buildTimeoutInMinutesOverride" BuildTimeOut.of_json in
       let privilegedModeOverride =
-        field_map json "privilegedModeOverride" WrapperBoolean.of_json in
+        field_map json__ "privilegedModeOverride" WrapperBoolean.of_json in
       let serviceRoleOverride =
-        field_map json "serviceRoleOverride" NonEmptyString.of_json in
-      let cacheOverride = field_map json "cacheOverride" ProjectCache.of_json in
+        field_map json__ "serviceRoleOverride" NonEmptyString.of_json in
+      let cacheOverride =
+        field_map json__ "cacheOverride" ProjectCache.of_json in
       let certificateOverride =
-        field_map json "certificateOverride" String_.of_json in
+        field_map json__ "certificateOverride" String_.of_json in
       let computeTypeOverride =
-        field_map json "computeTypeOverride" ComputeType.of_json in
+        field_map json__ "computeTypeOverride" ComputeType.of_json in
       let imageOverride =
-        field_map json "imageOverride" NonEmptyString.of_json in
+        field_map json__ "imageOverride" NonEmptyString.of_json in
       let environmentTypeOverride =
-        field_map json "environmentTypeOverride" EnvironmentType.of_json in
+        field_map json__ "environmentTypeOverride" EnvironmentType.of_json in
       let reportBuildBatchStatusOverride =
-        field_map json "reportBuildBatchStatusOverride"
+        field_map json__ "reportBuildBatchStatusOverride"
           WrapperBoolean.of_json in
       let insecureSslOverride =
-        field_map json "insecureSslOverride" WrapperBoolean.of_json in
+        field_map json__ "insecureSslOverride" WrapperBoolean.of_json in
       let buildspecOverride =
-        field_map json "buildspecOverride" String_.of_json in
+        field_map json__ "buildspecOverride" String_.of_json in
       let gitSubmodulesConfigOverride =
-        field_map json "gitSubmodulesConfigOverride"
+        field_map json__ "gitSubmodulesConfigOverride"
           GitSubmodulesConfig.of_json in
       let gitCloneDepthOverride =
-        field_map json "gitCloneDepthOverride" GitCloneDepth.of_json in
+        field_map json__ "gitCloneDepthOverride" GitCloneDepth.of_json in
       let sourceAuthOverride =
-        field_map json "sourceAuthOverride" SourceAuth.of_json in
+        field_map json__ "sourceAuthOverride" SourceAuth.of_json in
       let sourceLocationOverride =
-        field_map json "sourceLocationOverride" String_.of_json in
+        field_map json__ "sourceLocationOverride" String_.of_json in
       let sourceTypeOverride =
-        field_map json "sourceTypeOverride" SourceType.of_json in
+        field_map json__ "sourceTypeOverride" SourceType.of_json in
       let environmentVariablesOverride =
-        field_map json "environmentVariablesOverride"
+        field_map json__ "environmentVariablesOverride"
           EnvironmentVariables.of_json in
       let secondaryArtifactsOverride =
-        field_map json "secondaryArtifactsOverride"
+        field_map json__ "secondaryArtifactsOverride"
           ProjectArtifactsList.of_json in
       let artifactsOverride =
-        field_map json "artifactsOverride" ProjectArtifacts.of_json in
-      let sourceVersion = field_map json "sourceVersion" String_.of_json in
+        field_map json__ "artifactsOverride" ProjectArtifacts.of_json in
+      let sourceVersion = field_map json__ "sourceVersion" String_.of_json in
       let secondarySourcesVersionOverride =
-        field_map json "secondarySourcesVersionOverride"
+        field_map json__ "secondarySourcesVersionOverride"
           ProjectSecondarySourceVersions.of_json in
       let secondarySourcesOverride =
-        field_map json "secondarySourcesOverride" ProjectSources.of_json in
+        field_map json__ "secondarySourcesOverride" ProjectSources.of_json in
       let projectName =
-        field_map_exn json "projectName" NonEmptyString.of_json in
+        field_map_exn json__ "projectName" NonEmptyString.of_json in
       make ?debugSessionEnabled ?buildBatchConfigOverride
         ?imagePullCredentialsTypeOverride ?registryCredentialOverride
         ?logsConfigOverride ?idempotencyToken ?encryptionKeyOverride
@@ -8275,8 +11538,8 @@ module RetryBuildOutput =
       let build = (Option.map ~f:Build.of_xml) (Xml.child xml_arg0 "build") in
       make ?build ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let build = field_map json "build" Build.of_json in make ?build ()
+    let of_json json__ =
+      let build = field_map json__ "build" Build.of_json in make ?build ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Restarts a build."]
 module RetryBuildInput =
@@ -8304,10 +11567,10 @@ module RetryBuildInput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?idempotencyToken ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let idempotencyToken =
-        field_map json "idempotencyToken" String_.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
+        field_map json__ "idempotencyToken" String_.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
       make ?idempotencyToken ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Restarts a build."]
@@ -8361,8 +11624,8 @@ module RetryBuildBatchOutput =
         (Option.map ~f:BuildBatch.of_xml) (Xml.child xml_arg0 "buildBatch") in
       make ?buildBatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildBatch = field_map json "buildBatch" BuildBatch.of_json in
+    let of_json json__ =
+      let buildBatch = field_map json__ "buildBatch" BuildBatch.of_json in
       make ?buildBatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8401,11 +11664,12 @@ module RetryBuildBatchInput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "id") in
       make ?retryType ?idempotencyToken ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryType = field_map json "retryType" RetryBuildBatchType.of_json in
+    let of_json json__ =
+      let retryType =
+        field_map json__ "retryType" RetryBuildBatchType.of_json in
       let idempotencyToken =
-        field_map json "idempotencyToken" String_.of_json in
-      let id = field_map json "id" NonEmptyString.of_json in
+        field_map json__ "idempotencyToken" String_.of_json in
+      let id = field_map json__ "id" NonEmptyString.of_json in
       make ?retryType ?idempotencyToken ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8465,8 +11729,8 @@ module PutResourcePolicyOutput =
           (Xml.child xml_arg0 "resourceArn") in
       make ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "resourceArn" NonEmptyString.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" NonEmptyString.of_json in
       make ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8497,10 +11761,10 @@ module PutResourcePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "policy") in
       make ~resourceArn ~policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" NonEmptyString.of_json in
-      let policy = field_map_exn json "policy" NonEmptyString.of_json in
+        field_map_exn json__ "resourceArn" NonEmptyString.of_json in
+      let policy = field_map_exn json__ "policy" NonEmptyString.of_json in
       make ~resourceArn ~policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8552,9 +11816,9 @@ module ListSourceCredentialsOutput =
           (Xml.child xml_arg0 "sourceCredentialsInfos") in
       make ?sourceCredentialsInfos ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceCredentialsInfos =
-        field_map json "sourceCredentialsInfos"
+        field_map json__ "sourceCredentialsInfos"
           SourceCredentialsInfos.of_json in
       make ?sourceCredentialsInfos ()
     let to_json v = composed_to_json to_value v
@@ -8624,10 +11888,10 @@ module ListSharedReportGroupsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reportGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportGroups =
-        field_map json "reportGroups" ReportGroupArns.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "reportGroups" ReportGroupArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?reportGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8673,11 +11937,11 @@ module ListSharedReportGroupsInput =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortBy = field_map json "sortBy" SharedResourceSortByType.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortBy = field_map json__ "sortBy" SharedResourceSortByType.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8732,9 +11996,9 @@ module ListSharedProjectsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?projects ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projects = field_map json "projects" ProjectArns.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let projects = field_map json__ "projects" ProjectArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?projects ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8781,15 +12045,218 @@ module ListSharedProjectsInput =
           (Xml.child xml_arg0 "sortBy") in
       make ?nextToken ?maxResults ?sortOrder ?sortBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let sortBy = field_map json "sortBy" SharedResourceSortByType.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let sortBy = field_map json__ "sortBy" SharedResourceSortByType.of_json in
       make ?nextToken ?maxResults ?sortOrder ?sortBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a list of projects that are shared with other Amazon Web Services accounts or users."]
+module ListSandboxesOutput =
+  struct
+    type nonrec t =
+      {
+      ids: SandboxIds.t option
+        [@ocaml.doc "Information about the requested sandbox IDs."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Information about the next token to get paginated results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ids = fun ?nextToken -> fun () -> { ids; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ids", (Option.map x.ids ~f:SandboxIds.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let ids = (Option.map ~f:SandboxIds.of_xml) (Xml.child xml_arg0 "ids") in
+      make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" SandboxIds.of_json in
+      make ?nextToken ?ids ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of sandboxes."]
+module ListSandboxesInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: PageSize.t option
+        [@ocaml.doc "The maximum number of sandbox records to be retrieved."];
+      sortOrder: SortOrderType.t option
+        [@ocaml.doc
+          "The order in which sandbox records should be retrieved."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The next token, if any, to get paginated results. You will get this value from previous execution of list sandboxes."]}
+    let make ?maxResults =
+      fun ?sortOrder ->
+        fun ?nextToken -> fun () -> { maxResults; sortOrder; nextToken }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("sortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let sortOrder =
+        (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ?nextToken ?sortOrder ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      make ?nextToken ?sortOrder ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of sandboxes."]
+module ListSandboxesForProjectOutput =
+  struct
+    type nonrec t =
+      {
+      ids: SandboxIds.t option
+        [@ocaml.doc "Information about the requested sandbox IDs."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Information about the next token to get paginated results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?ids = fun ?nextToken -> fun () -> { ids; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ids", (Option.map x.ids ~f:SandboxIds.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let ids = (Option.map ~f:SandboxIds.of_xml) (Xml.child xml_arg0 "ids") in
+      make ?nextToken ?ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" SandboxIds.of_json in
+      make ?nextToken ?ids ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of sandboxes for a given project."]
+module ListSandboxesForProjectInput =
+  struct
+    type nonrec t =
+      {
+      projectName: NonEmptyString.t
+        [@ocaml.doc "The CodeBuild project name."];
+      maxResults: PageSize.t option
+        [@ocaml.doc "The maximum number of sandbox records to be retrieved."];
+      sortOrder: SortOrderType.t option
+        [@ocaml.doc
+          "The order in which sandbox records should be retrieved."];
+      nextToken: SensitiveString.t option
+        [@ocaml.doc
+          "The next token, if any, to get paginated results. You will get this value from previous execution of list sandboxes."]}
+    let context_ = "ListSandboxesForProjectInput"
+    let make ?maxResults =
+      fun ?sortOrder ->
+        fun ?nextToken ->
+          fun ~projectName ->
+            fun () -> { maxResults; sortOrder; nextToken; projectName }
+    let to_value x =
+      structure_to_value
+        [("projectName", (Some (NonEmptyString.to_value x.projectName)));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("sortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:SensitiveString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let sortOrder =
+        (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let projectName =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
+      make ?nextToken ?sortOrder ?maxResults ~projectName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" SensitiveString.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let projectName =
+        field_map_exn json__ "projectName" NonEmptyString.of_json in
+      make ?nextToken ?sortOrder ?maxResults ~projectName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of sandboxes for a given project."]
 module ListReportsOutput =
   struct
     type nonrec t =
@@ -8840,9 +12307,9 @@ module ListReportsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reports ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reports = field_map json "reports" ReportArns.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let reports = field_map json__ "reports" ReportArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?reports ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8886,11 +12353,11 @@ module ListReportsInput =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?filter ?maxResults ?nextToken ?sortOrder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" ReportFilter.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "filter" ReportFilter.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
       make ?filter ?maxResults ?nextToken ?sortOrder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8952,9 +12419,9 @@ module ListReportsForReportGroupOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reports ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reports = field_map json "reports" ReportArns.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let reports = field_map json__ "reports" ReportArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?reports ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9008,13 +12475,13 @@ module ListReportsForReportGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArn") in
       make ?filter ?maxResults ?sortOrder ?nextToken ~reportGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" ReportFilter.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "filter" ReportFilter.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let reportGroupArn =
-        field_map_exn json "reportGroupArn" String_.of_json in
+        field_map_exn json__ "reportGroupArn" String_.of_json in
       make ?filter ?maxResults ?sortOrder ?nextToken ~reportGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9072,10 +12539,10 @@ module ListReportGroupsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?reportGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportGroups =
-        field_map json "reportGroups" ReportGroupArns.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "reportGroups" ReportGroupArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?reportGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9120,11 +12587,11 @@ module ListReportGroupsInput =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortBy = field_map json "sortBy" ReportGroupSortByType.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortBy = field_map json__ "sortBy" ReportGroupSortByType.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
       make ?maxResults ?nextToken ?sortBy ?sortOrder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9179,9 +12646,9 @@ module ListProjectsOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?projects ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projects = field_map json "projects" ProjectNames.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let projects = field_map json__ "projects" ProjectNames.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?projects ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9219,14 +12686,119 @@ module ListProjectsInput =
           (Xml.child xml_arg0 "sortBy") in
       make ?nextToken ?sortOrder ?sortBy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NonEmptyString.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let sortBy = field_map json "sortBy" ProjectSortByType.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NonEmptyString.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let sortBy = field_map json__ "sortBy" ProjectSortByType.of_json in
       make ?nextToken ?sortOrder ?sortBy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a list of build project names, with each build project name representing a single build project."]
+module ListFleetsOutput =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If there are more than 100 items in the list, only the first 100 items are returned, along with a unique string called a nextToken. To get the next batch of items in the list, call this operation again, adding the next token to the call."];
+      fleets: FleetArns.t option
+        [@ocaml.doc "The list of compute fleet names."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?fleets -> fun () -> { nextToken; fleets }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("fleets", (Option.map x.fleets ~f:FleetArns.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fleets =
+        (Option.map ~f:FleetArns.of_xml) (Xml.child xml_arg0 "fleets") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?fleets ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fleets = field_map json__ "fleets" FleetArns.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      make ?fleets ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a list of compute fleet names with each compute fleet name representing a single compute fleet."]
+module ListFleetsInput =
+  struct
+    type nonrec t =
+      {
+      nextToken: SensitiveString.t option
+        [@ocaml.doc
+          "During a previous call, if there are more than 100 items in the list, only the first 100 items are returned, along with a unique string called a nextToken. To get the next batch of items in the list, call this operation again, adding the next token to the call. To get all of the items in the list, keep calling this operation with each subsequent next token that is returned, until no more next tokens are returned."];
+      maxResults: PageSize.t option
+        [@ocaml.doc
+          "The maximum number of paginated compute fleets returned per response. Use nextToken to iterate pages in the list of returned compute fleets."];
+      sortOrder: SortOrderType.t option
+        [@ocaml.doc
+          "The order in which to list compute fleets. Valid values include: ASCENDING: List in ascending order. DESCENDING: List in descending order. Use sortBy to specify the criterion to be used to list compute fleet names."];
+      sortBy: FleetSortByType.t option
+        [@ocaml.doc
+          "The criterion to be used to list compute fleet names. Valid values include: CREATED_TIME: List based on when each compute fleet was created. LAST_MODIFIED_TIME: List based on when information about each compute fleet was last changed. NAME: List based on each compute fleet's name. Use sortOrder to specify in what order to list the compute fleet names based on the preceding criteria."]}
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?sortOrder ->
+          fun ?sortBy ->
+            fun () -> { nextToken; maxResults; sortOrder; sortBy }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:SensitiveString.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("sortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value));
+        ("sortBy", (Option.map x.sortBy ~f:FleetSortByType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sortBy =
+        (Option.map ~f:FleetSortByType.of_xml) (Xml.child xml_arg0 "sortBy") in
+      let sortOrder =
+        (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?sortBy ?sortOrder ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sortBy = field_map json__ "sortBy" FleetSortByType.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" SensitiveString.of_json in
+      make ?sortBy ?sortOrder ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets a list of compute fleet names with each compute fleet name representing a single compute fleet."]
 module ListCuratedEnvironmentImagesOutput =
   struct
     type nonrec t =
@@ -9264,8 +12836,9 @@ module ListCuratedEnvironmentImagesOutput =
           (Xml.child xml_arg0 "platforms") in
       make ?platforms ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let platforms = field_map json "platforms" EnvironmentPlatforms.of_json in
+    let of_json json__ =
+      let platforms =
+        field_map json__ "platforms" EnvironmentPlatforms.of_json in
       make ?platforms ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9283,6 +12856,121 @@ module ListCuratedEnvironmentImagesInput =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about Docker images that are managed by CodeBuild."]
+module ListCommandExecutionsForSandboxOutput =
+  struct
+    type nonrec t =
+      {
+      commandExecutions: CommandExecutions.t option
+        [@ocaml.doc "Information about the requested command executions."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Information about the next token to get paginated results."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?commandExecutions =
+      fun ?nextToken -> fun () -> { commandExecutions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("commandExecutions",
+           (Option.map x.commandExecutions ~f:CommandExecutions.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let commandExecutions =
+        (Option.map ~f:CommandExecutions.of_xml)
+          (Xml.child xml_arg0 "commandExecutions") in
+      make ?nextToken ?commandExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let commandExecutions =
+        field_map json__ "commandExecutions" CommandExecutions.of_json in
+      make ?nextToken ?commandExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of command executions for a sandbox."]
+module ListCommandExecutionsForSandboxInput =
+  struct
+    type nonrec t =
+      {
+      sandboxId: NonEmptyString.t [@ocaml.doc "A sandboxId or sandboxArn."];
+      maxResults: PageSize.t option
+        [@ocaml.doc "The maximum number of sandbox records to be retrieved."];
+      sortOrder: SortOrderType.t option
+        [@ocaml.doc
+          "The order in which sandbox records should be retrieved."];
+      nextToken: SensitiveString.t option
+        [@ocaml.doc
+          "The next token, if any, to get paginated results. You will get this value from previous execution of list sandboxes."]}
+    let context_ = "ListCommandExecutionsForSandboxInput"
+    let make ?maxResults =
+      fun ?sortOrder ->
+        fun ?nextToken ->
+          fun ~sandboxId ->
+            fun () -> { maxResults; sortOrder; nextToken; sandboxId }
+    let to_value x =
+      structure_to_value
+        [("sandboxId", (Some (NonEmptyString.to_value x.sandboxId)));
+        ("maxResults", (Option.map x.maxResults ~f:PageSize.to_value));
+        ("sortOrder", (Option.map x.sortOrder ~f:SortOrderType.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:SensitiveString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SensitiveString.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let sortOrder =
+        (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
+      let maxResults =
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let sandboxId =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sandboxId") in
+      make ?nextToken ?sortOrder ?maxResults ~sandboxId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" SensitiveString.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let sandboxId = field_map_exn json__ "sandboxId" NonEmptyString.of_json in
+      make ?nextToken ?sortOrder ?maxResults ~sandboxId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a list of command executions for a sandbox."]
 module ListBuildsOutput =
   struct
     type nonrec t =
@@ -9332,9 +13020,9 @@ module ListBuildsOutput =
       let ids = (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let ids = field_map json "ids" BuildIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" BuildIds.of_json in
       make ?nextToken ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9363,9 +13051,9 @@ module ListBuildsInput =
         (Option.map ~f:SortOrderType.of_xml) (Xml.child xml_arg0 "sortOrder") in
       make ?nextToken ?sortOrder ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
       make ?nextToken ?sortOrder ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9428,9 +13116,9 @@ module ListBuildsForProjectOutput =
       let ids = (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let ids = field_map json "ids" BuildIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" BuildIds.of_json in
       make ?nextToken ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9467,11 +13155,11 @@ module ListBuildsForProjectInput =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ?nextToken ?sortOrder ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
       let projectName =
-        field_map_exn json "projectName" NonEmptyString.of_json in
+        field_map_exn json__ "projectName" NonEmptyString.of_json in
       make ?nextToken ?sortOrder ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9526,9 +13214,9 @@ module ListBuildBatchesOutput =
         (Option.map ~f:BuildBatchIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let ids = field_map json "ids" BuildBatchIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" BuildBatchIds.of_json in
       make ?nextToken ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9571,11 +13259,11 @@ module ListBuildBatchesInput =
         (Option.map ~f:BuildBatchFilter.of_xml) (Xml.child xml_arg0 "filter") in
       make ?nextToken ?sortOrder ?maxResults ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let filter = field_map json "filter" BuildBatchFilter.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let filter = field_map json__ "filter" BuildBatchFilter.of_json in
       make ?nextToken ?sortOrder ?maxResults ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9639,9 +13327,9 @@ module ListBuildBatchesForProjectOutput =
         (Option.map ~f:BuildBatchIds.of_xml) (Xml.child xml_arg0 "ids") in
       make ?nextToken ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let ids = field_map json "ids" BuildBatchIds.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let ids = field_map json__ "ids" BuildBatchIds.of_json in
       make ?nextToken ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9693,12 +13381,12 @@ module ListBuildBatchesForProjectInput =
           (Xml.child xml_arg0 "projectName") in
       make ?nextToken ?sortOrder ?maxResults ?filter ?projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let filter = field_map json "filter" BuildBatchFilter.of_json in
-      let projectName = field_map json "projectName" NonEmptyString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let filter = field_map json__ "filter" BuildBatchFilter.of_json in
+      let projectName = field_map json__ "projectName" NonEmptyString.of_json in
       make ?nextToken ?sortOrder ?maxResults ?filter ?projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9770,9 +13458,9 @@ module InvalidateProjectCacheInput =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectName =
-        field_map_exn json "projectName" NonEmptyString.of_json in
+        field_map_exn json__ "projectName" NonEmptyString.of_json in
       make ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resets the cache for a project."]
@@ -9841,11 +13529,11 @@ module ImportSourceCredentialsOutput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" NonEmptyString.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" NonEmptyString.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports the source repository credentials for an CodeBuild project that has its source code stored in a GitHub, GitHub Enterprise, or Bitbucket repository."]
+       "Imports the source repository credentials for an CodeBuild project that has its source code stored in a GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket repository."]
 module ImportSourceCredentialsInput =
   struct
     type nonrec t =
@@ -9855,12 +13543,12 @@ module ImportSourceCredentialsInput =
           "The Bitbucket username when the authType is BASIC_AUTH. This parameter is not valid for other types of source providers or connections."];
       token: SensitiveNonEmptyString.t
         [@ocaml.doc
-          "For GitHub or GitHub Enterprise, this is the personal access token. For Bitbucket, this is the app password."];
+          "For GitHub or GitHub Enterprise, this is the personal access token. For Bitbucket, this is either the access token or the app password. For the authType CODECONNECTIONS, this is the connectionArn. For the authType SECRETS_MANAGER, this is the secretArn."];
       serverType: ServerType.t
         [@ocaml.doc "The source provider used for this project."];
       authType: AuthType.t
         [@ocaml.doc
-          "The type of authentication used to connect to a GitHub, GitHub Enterprise, or Bitbucket repository. An OAUTH connection is not supported by the API and must be created using the CodeBuild console."];
+          "The type of authentication used to connect to a GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket repository. An OAUTH connection is not supported by the API and must be created using the CodeBuild console."];
       shouldOverwrite: WrapperBoolean.t option
         [@ocaml.doc
           "Set to false to prevent overwriting the repository source credentials. Set to true to overwrite the repository source credentials. The default value is true."]}
@@ -9897,17 +13585,18 @@ module ImportSourceCredentialsInput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "username") in
       make ?shouldOverwrite ~authType ~serverType ~token ?username ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shouldOverwrite =
-        field_map json "shouldOverwrite" WrapperBoolean.of_json in
-      let authType = field_map_exn json "authType" AuthType.of_json in
-      let serverType = field_map_exn json "serverType" ServerType.of_json in
-      let token = field_map_exn json "token" SensitiveNonEmptyString.of_json in
-      let username = field_map json "username" NonEmptyString.of_json in
+        field_map json__ "shouldOverwrite" WrapperBoolean.of_json in
+      let authType = field_map_exn json__ "authType" AuthType.of_json in
+      let serverType = field_map_exn json__ "serverType" ServerType.of_json in
+      let token =
+        field_map_exn json__ "token" SensitiveNonEmptyString.of_json in
+      let username = field_map json__ "username" NonEmptyString.of_json in
       make ?shouldOverwrite ~authType ~serverType ~token ?username ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Imports the source repository credentials for an CodeBuild project that has its source code stored in a GitHub, GitHub Enterprise, or Bitbucket repository."]
+       "Imports the source repository credentials for an CodeBuild project that has its source code stored in a GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket repository."]
 module GetResourcePolicyOutput =
   struct
     type nonrec t =
@@ -9961,8 +13650,8 @@ module GetResourcePolicyOutput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" NonEmptyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" NonEmptyString.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9986,9 +13675,9 @@ module GetResourcePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" NonEmptyString.of_json in
+        field_map_exn json__ "resourceArn" NonEmptyString.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10053,10 +13742,10 @@ module GetReportGroupTrendOutput =
           (Xml.child xml_arg0 "stats") in
       make ?rawData ?stats ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rawData =
-        field_map json "rawData" ReportGroupTrendRawDataList.of_json in
-      let stats = field_map json "stats" ReportGroupTrendStats.of_json in
+        field_map json__ "rawData" ReportGroupTrendRawDataList.of_json in
+      let stats = field_map json__ "stats" ReportGroupTrendStats.of_json in
       make ?rawData ?stats ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10098,12 +13787,12 @@ module GetReportGroupTrendInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArn") in
       make ~trendField ?numOfReports ~reportGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let trendField =
-        field_map_exn json "trendField" ReportGroupTrendFieldType.of_json in
-      let numOfReports = field_map json "numOfReports" PageSize.of_json in
+        field_map_exn json__ "trendField" ReportGroupTrendFieldType.of_json in
+      let numOfReports = field_map json__ "numOfReports" PageSize.of_json in
       let reportGroupArn =
-        field_map_exn json "reportGroupArn" NonEmptyString.of_json in
+        field_map_exn json__ "reportGroupArn" NonEmptyString.of_json in
       make ~trendField ?numOfReports ~reportGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10167,9 +13856,9 @@ module DescribeTestCasesOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?testCases ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let testCases = field_map json "testCases" TestCases.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let testCases = field_map json__ "testCases" TestCases.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?testCases ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of details about test cases for a report."]
@@ -10213,11 +13902,11 @@ module DescribeTestCasesInput =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reportArn") in
       make ?filter ?maxResults ?nextToken ~reportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "filter" TestCaseFilter.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let reportArn = field_map_exn json "reportArn" String_.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "filter" TestCaseFilter.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let reportArn = field_map_exn json__ "reportArn" String_.of_json in
       make ?filter ?maxResults ?nextToken ~reportArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a list of details about test cases for a report."]
@@ -10274,10 +13963,10 @@ module DescribeCodeCoveragesOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?codeCoverages ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeCoverages =
-        field_map json "codeCoverages" CodeCoverages.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
+        field_map json__ "codeCoverages" CodeCoverages.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       make ?codeCoverages ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves one or more code coverage reports."]
@@ -10356,17 +14045,17 @@ module DescribeCodeCoveragesInput =
       make ?maxLineCoveragePercentage ?minLineCoveragePercentage ?sortBy
         ?sortOrder ?maxResults ?nextToken ~reportArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxLineCoveragePercentage =
-        field_map json "maxLineCoveragePercentage" Percentage.of_json in
+        field_map json__ "maxLineCoveragePercentage" Percentage.of_json in
       let minLineCoveragePercentage =
-        field_map json "minLineCoveragePercentage" Percentage.of_json in
+        field_map json__ "minLineCoveragePercentage" Percentage.of_json in
       let sortBy =
-        field_map json "sortBy" ReportCodeCoverageSortByType.of_json in
-      let sortOrder = field_map json "sortOrder" SortOrderType.of_json in
-      let maxResults = field_map json "maxResults" PageSize.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let reportArn = field_map_exn json "reportArn" NonEmptyString.of_json in
+        field_map json__ "sortBy" ReportCodeCoverageSortByType.of_json in
+      let sortOrder = field_map json__ "sortOrder" SortOrderType.of_json in
+      let maxResults = field_map json__ "maxResults" PageSize.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let reportArn = field_map_exn json__ "reportArn" NonEmptyString.of_json in
       make ?maxLineCoveragePercentage ?minLineCoveragePercentage ?sortBy
         ?sortOrder ?maxResults ?nextToken ~reportArn ()
     let to_json v = composed_to_json to_value v
@@ -10447,8 +14136,9 @@ module DeleteWebhookInput =
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
       make ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectName = field_map_exn json "projectName" ProjectName.of_json in
+    let of_json json__ =
+      let projectName =
+        field_map_exn json__ "projectName" ProjectName.of_json in
       make ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10505,8 +14195,8 @@ module DeleteSourceCredentialsOutput =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" NonEmptyString.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" NonEmptyString.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a set of GitHub, GitHub Enterprise, or Bitbucket source credentials."]
@@ -10527,8 +14217,8 @@ module DeleteSourceCredentialsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" NonEmptyString.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10592,9 +14282,9 @@ module DeleteResourcePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" NonEmptyString.of_json in
+        field_map_exn json__ "resourceArn" NonEmptyString.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10654,8 +14344,8 @@ module DeleteReportInput =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" NonEmptyString.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a report."]
@@ -10723,9 +14413,9 @@ module DeleteReportGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ?deleteReports ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deleteReports = field_map json "deleteReports" Boolean.of_json in
-      let arn = field_map_exn json "arn" NonEmptyString.of_json in
+    let of_json json__ =
+      let deleteReports = field_map json__ "deleteReports" Boolean.of_json in
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
       make ?deleteReports ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10786,12 +14476,74 @@ module DeleteProjectInput =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" NonEmptyString.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" NonEmptyString.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a build project. When you delete a project, its builds are not deleted."]
+module DeleteFleetOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a compute fleet. When you delete a compute fleet, its builds are not deleted."]
+module DeleteFleetInput =
+  struct
+    type nonrec t =
+      {
+      arn: NonEmptyString.t [@ocaml.doc "The ARN of the compute fleet."]}
+    let context_ = "DeleteFleetInput"
+    let make ~arn = fun () -> { arn }
+    let to_value x =
+      structure_to_value [("arn", (Some (NonEmptyString.to_value x.arn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "arn") in
+      make ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" NonEmptyString.of_json in
+      make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a compute fleet. When you delete a compute fleet, its builds are not deleted."]
 module DeleteBuildBatchOutput =
   struct
     type nonrec t =
@@ -10851,11 +14603,11 @@ module DeleteBuildBatchOutput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusCode") in
       make ?buildsNotDeleted ?buildsDeleted ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let buildsNotDeleted =
-        field_map json "buildsNotDeleted" BuildsNotDeleted.of_json in
-      let buildsDeleted = field_map json "buildsDeleted" BuildIds.of_json in
-      let statusCode = field_map json "statusCode" String_.of_json in
+        field_map json__ "buildsNotDeleted" BuildsNotDeleted.of_json in
+      let buildsDeleted = field_map json__ "buildsDeleted" BuildIds.of_json in
+      let statusCode = field_map json__ "statusCode" String_.of_json in
       make ?buildsNotDeleted ?buildsDeleted ?statusCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a batch build."]
@@ -10875,8 +14627,9 @@ module DeleteBuildBatchInput =
         NonEmptyString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" NonEmptyString.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" NonEmptyString.of_json in
+      make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a batch build."]
 module CreateWebhookOutput =
@@ -10952,8 +14705,8 @@ module CreateWebhookOutput =
         (Option.map ~f:Webhook.of_xml) (Xml.child xml_arg0 "webhook") in
       make ?webhook ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webhook = field_map json "webhook" Webhook.of_json in
+    let of_json json__ =
+      let webhook = field_map json__ "webhook" Webhook.of_json in
       make ?webhook ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10971,22 +14724,60 @@ module CreateWebhookInput =
         [@ocaml.doc
           "An array of arrays of WebhookFilter objects used to determine which webhooks are triggered. At least one WebhookFilter in the array must specify EVENT as its type. For a build to be triggered, at least one filter group in the filterGroups array must pass. For a filter group to pass, each of its filters must pass."];
       buildType: WebhookBuildType.t option
-        [@ocaml.doc "Specifies the type of build this webhook will trigger."]}
+        [@ocaml.doc
+          "Specifies the type of build this webhook will trigger. RUNNER_BUILDKITE_BUILD is only available for NO_SOURCE source type projects configured for Buildkite runner builds. For more information about CodeBuild-hosted Buildkite runner builds, see Tutorial: Configure a CodeBuild-hosted Buildkite runner in the CodeBuild user guide."];
+      manualCreation: WrapperBoolean.t option
+        [@ocaml.doc
+          "If manualCreation is true, CodeBuild doesn't create a webhook in GitHub and instead returns payloadUrl and secret values for the webhook. The payloadUrl and secret values in the output can be used to manually create a webhook within GitHub. manualCreation is only available for GitHub webhooks."];
+      scopeConfiguration: ScopeConfiguration.t option
+        [@ocaml.doc
+          "The scope configuration for global or organization webhooks. Global or organization webhooks are only available for GitHub and Github Enterprise webhooks."];
+      pullRequestBuildPolicy: PullRequestBuildPolicy.t option
+        [@ocaml.doc
+          "A PullRequestBuildPolicy object that defines comment-based approval requirements for triggering builds on pull requests. This policy helps control when automated builds are executed based on contributor permissions and approval workflows."]}
     let context_ = "CreateWebhookInput"
     let make ?branchFilter =
       fun ?filterGroups ->
         fun ?buildType ->
-          fun ~projectName ->
-            fun () -> { branchFilter; filterGroups; buildType; projectName }
+          fun ?manualCreation ->
+            fun ?scopeConfiguration ->
+              fun ?pullRequestBuildPolicy ->
+                fun ~projectName ->
+                  fun () ->
+                    {
+                      branchFilter;
+                      filterGroups;
+                      buildType;
+                      manualCreation;
+                      scopeConfiguration;
+                      pullRequestBuildPolicy;
+                      projectName
+                    }
     let to_value x =
       structure_to_value
         [("projectName", (Some (ProjectName.to_value x.projectName)));
         ("branchFilter", (Option.map x.branchFilter ~f:String_.to_value));
         ("filterGroups",
           (Option.map x.filterGroups ~f:FilterGroups.to_value));
-        ("buildType", (Option.map x.buildType ~f:WebhookBuildType.to_value))]
+        ("buildType", (Option.map x.buildType ~f:WebhookBuildType.to_value));
+        ("manualCreation",
+          (Option.map x.manualCreation ~f:WrapperBoolean.to_value));
+        ("scopeConfiguration",
+          (Option.map x.scopeConfiguration ~f:ScopeConfiguration.to_value));
+        ("pullRequestBuildPolicy",
+          (Option.map x.pullRequestBuildPolicy
+             ~f:PullRequestBuildPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let pullRequestBuildPolicy =
+        (Option.map ~f:PullRequestBuildPolicy.of_xml)
+          (Xml.child xml_arg0 "pullRequestBuildPolicy") in
+      let scopeConfiguration =
+        (Option.map ~f:ScopeConfiguration.of_xml)
+          (Xml.child xml_arg0 "scopeConfiguration") in
+      let manualCreation =
+        (Option.map ~f:WrapperBoolean.of_xml)
+          (Xml.child xml_arg0 "manualCreation") in
       let buildType =
         (Option.map ~f:WebhookBuildType.of_xml)
           (Xml.child xml_arg0 "buildType") in
@@ -10998,14 +14789,24 @@ module CreateWebhookInput =
       let projectName =
         ProjectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "projectName") in
-      make ?buildType ?filterGroups ?branchFilter ~projectName ()
+      make ?pullRequestBuildPolicy ?scopeConfiguration ?manualCreation
+        ?buildType ?filterGroups ?branchFilter ~projectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildType = field_map json "buildType" WebhookBuildType.of_json in
-      let filterGroups = field_map json "filterGroups" FilterGroups.of_json in
-      let branchFilter = field_map json "branchFilter" String_.of_json in
-      let projectName = field_map_exn json "projectName" ProjectName.of_json in
-      make ?buildType ?filterGroups ?branchFilter ~projectName ()
+    let of_json json__ =
+      let pullRequestBuildPolicy =
+        field_map json__ "pullRequestBuildPolicy"
+          PullRequestBuildPolicy.of_json in
+      let scopeConfiguration =
+        field_map json__ "scopeConfiguration" ScopeConfiguration.of_json in
+      let manualCreation =
+        field_map json__ "manualCreation" WrapperBoolean.of_json in
+      let buildType = field_map json__ "buildType" WebhookBuildType.of_json in
+      let filterGroups = field_map json__ "filterGroups" FilterGroups.of_json in
+      let branchFilter = field_map json__ "branchFilter" String_.of_json in
+      let projectName =
+        field_map_exn json__ "projectName" ProjectName.of_json in
+      make ?pullRequestBuildPolicy ?scopeConfiguration ?manualCreation
+        ?buildType ?filterGroups ?branchFilter ~projectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For an existing CodeBuild build project that has its source code stored in a GitHub or Bitbucket repository, enables CodeBuild to start rebuilding the source code every time a code change is pushed to the repository. If you enable webhooks for an CodeBuild project, and the project is used as a build step in CodePipeline, then two identical builds are created for each commit. One build is triggered through webhooks, and one through CodePipeline. Because billing is on a per-build basis, you are billed for both builds. Therefore, if you are using CodePipeline, we recommend that you disable webhooks in CodeBuild. In the CodeBuild console, clear the Webhook box. For more information, see step 5 in Change a Build Project's Settings."]
@@ -11074,8 +14875,8 @@ module CreateReportGroupOutput =
         (Option.map ~f:ReportGroup.of_xml) (Xml.child xml_arg0 "reportGroup") in
       make ?reportGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportGroup = field_map json "reportGroup" ReportGroup.of_json in
+    let of_json json__ =
+      let reportGroup = field_map json__ "reportGroup" ReportGroup.of_json in
       make ?reportGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11116,12 +14917,12 @@ module CreateReportGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ~exportConfig ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let exportConfig =
-        field_map_exn json "exportConfig" ReportExportConfig.of_json in
-      let type_ = field_map_exn json "type" ReportType.of_json in
-      let name = field_map_exn json "name" ReportGroupName.of_json in
+        field_map_exn json__ "exportConfig" ReportExportConfig.of_json in
+      let type_ = field_map_exn json__ "type" ReportType.of_json in
+      let name = field_map_exn json__ "name" ReportGroupName.of_json in
       make ?tags ~exportConfig ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11191,8 +14992,8 @@ module CreateProjectOutput =
         (Option.map ~f:Project.of_xml) (Xml.child xml_arg0 "project") in
       make ?project ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let project = field_map json "project" Project.of_json in
+    let of_json json__ =
+      let project = field_map json__ "project" Project.of_json in
       make ?project ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a build project."]
@@ -11211,7 +15012,7 @@ module CreateProjectInput =
         [@ocaml.doc "An array of ProjectSource objects."];
       sourceVersion: String_.t option
         [@ocaml.doc
-          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
+          "A version of the build input to be built for this project. If not specified, the latest version is used. If specified, it must be one of: For CodeCommit: the commit ID, branch, or Git tag to use. For GitHub: the commit ID, pull request ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a pull request ID is specified, it must use the format pr/pull-request-ID (for example pr/25). If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For GitLab: the commit ID, branch, or Git tag to use. For Bitbucket: the commit ID, branch name, or tag name that corresponds to the version of the source code you want to build. If a branch name is specified, the branch's HEAD commit ID is used. If not specified, the default branch's HEAD commit ID is used. For Amazon S3: the version ID of the object that represents the build input ZIP file to use. If sourceVersion is specified at the build level, then that version takes precedence over this sourceVersion (at the project level). For more information, see Source Version Sample with CodeBuild in the CodeBuild User Guide."];
       secondarySourceVersions: ProjectSecondarySourceVersions.t option
         [@ocaml.doc
           "An array of ProjectSourceVersion objects. If secondarySourceVersions is specified at the build level, then they take precedence over these secondarySourceVersions (at the project level)."];
@@ -11229,9 +15030,9 @@ module CreateProjectInput =
       serviceRole: NonEmptyString.t
         [@ocaml.doc
           "The ARN of the IAM role that enables CodeBuild to interact with dependent Amazon Web Services services on behalf of the Amazon Web Services account."];
-      timeoutInMinutes: TimeOut.t option
+      timeoutInMinutes: BuildTimeOut.t option
         [@ocaml.doc
-          "How long, in minutes, from 5 to 480 (8 hours), for CodeBuild to wait before it times out any build that has not been marked as completed. The default is 60 minutes."];
+          "How long, in minutes, from 5 to 2160 (36 hours), for CodeBuild to wait before it times out any build that has not been marked as completed. The default is 60 minutes."];
       queuedTimeoutInMinutes: TimeOut.t option
         [@ocaml.doc
           "The number of minutes a build is allowed to be queued before it times out."];
@@ -11243,7 +15044,7 @@ module CreateProjectInput =
           "A list of tag key and value pairs associated with this build project. These tags are available for use by Amazon Web Services services that support CodeBuild build project tags."];
       vpcConfig: VpcConfig.t option
         [@ocaml.doc
-          "VpcConfig enables CodeBuild to access resources in an Amazon VPC."];
+          "VpcConfig enables CodeBuild to access resources in an Amazon VPC. If you're using compute fleets during project creation, do not provide vpcConfig."];
       badgeEnabled: WrapperBoolean.t option
         [@ocaml.doc
           "Set this to true to generate a publicly accessible URL for your project's build badge."];
@@ -11258,7 +15059,10 @@ module CreateProjectInput =
           "A ProjectBuildBatchConfig object that defines the batch build options for the project."];
       concurrentBuildLimit: WrapperInt.t option
         [@ocaml.doc
-          "The maximum number of concurrent builds that are allowed for this project. New builds are only started if the current number of builds is less than or equal to this limit. If the current build count meets this limit, new builds are throttled and are not run."]}
+          "The maximum number of concurrent builds that are allowed for this project. New builds are only started if the current number of builds is less than or equal to this limit. If the current build count meets this limit, new builds are throttled and are not run."];
+      autoRetryLimit: WrapperInt.t option
+        [@ocaml.doc
+          "The maximum number of additional automatic retries after a failed build. For example, if the auto-retry limit is set to 2, CodeBuild will call the RetryBuild API to automatically retry your build for up to 2 additional times."]}
     let context_ = "CreateProjectInput"
     let make ?description =
       fun ?secondarySources ->
@@ -11276,35 +15080,37 @@ module CreateProjectInput =
                               fun ?fileSystemLocations ->
                                 fun ?buildBatchConfig ->
                                   fun ?concurrentBuildLimit ->
-                                    fun ~name ->
-                                      fun ~source ->
-                                        fun ~artifacts ->
-                                          fun ~environment ->
-                                            fun ~serviceRole ->
-                                              fun () ->
-                                                {
-                                                  description;
-                                                  secondarySources;
-                                                  sourceVersion;
-                                                  secondarySourceVersions;
-                                                  secondaryArtifacts;
-                                                  cache;
-                                                  timeoutInMinutes;
-                                                  queuedTimeoutInMinutes;
-                                                  encryptionKey;
-                                                  tags;
-                                                  vpcConfig;
-                                                  badgeEnabled;
-                                                  logsConfig;
-                                                  fileSystemLocations;
-                                                  buildBatchConfig;
-                                                  concurrentBuildLimit;
-                                                  name;
-                                                  source;
-                                                  artifacts;
-                                                  environment;
-                                                  serviceRole
-                                                }
+                                    fun ?autoRetryLimit ->
+                                      fun ~name ->
+                                        fun ~source ->
+                                          fun ~artifacts ->
+                                            fun ~environment ->
+                                              fun ~serviceRole ->
+                                                fun () ->
+                                                  {
+                                                    description;
+                                                    secondarySources;
+                                                    sourceVersion;
+                                                    secondarySourceVersions;
+                                                    secondaryArtifacts;
+                                                    cache;
+                                                    timeoutInMinutes;
+                                                    queuedTimeoutInMinutes;
+                                                    encryptionKey;
+                                                    tags;
+                                                    vpcConfig;
+                                                    badgeEnabled;
+                                                    logsConfig;
+                                                    fileSystemLocations;
+                                                    buildBatchConfig;
+                                                    concurrentBuildLimit;
+                                                    autoRetryLimit;
+                                                    name;
+                                                    source;
+                                                    artifacts;
+                                                    environment;
+                                                    serviceRole
+                                                  }
     let to_value x =
       structure_to_value
         [("name", (Some (ProjectName.to_value x.name)));
@@ -11324,7 +15130,7 @@ module CreateProjectInput =
         ("environment", (Some (ProjectEnvironment.to_value x.environment)));
         ("serviceRole", (Some (NonEmptyString.to_value x.serviceRole)));
         ("timeoutInMinutes",
-          (Option.map x.timeoutInMinutes ~f:TimeOut.to_value));
+          (Option.map x.timeoutInMinutes ~f:BuildTimeOut.to_value));
         ("queuedTimeoutInMinutes",
           (Option.map x.queuedTimeoutInMinutes ~f:TimeOut.to_value));
         ("encryptionKey",
@@ -11340,9 +15146,14 @@ module CreateProjectInput =
         ("buildBatchConfig",
           (Option.map x.buildBatchConfig ~f:ProjectBuildBatchConfig.to_value));
         ("concurrentBuildLimit",
-          (Option.map x.concurrentBuildLimit ~f:WrapperInt.to_value))]
+          (Option.map x.concurrentBuildLimit ~f:WrapperInt.to_value));
+        ("autoRetryLimit",
+          (Option.map x.autoRetryLimit ~f:WrapperInt.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let autoRetryLimit =
+        (Option.map ~f:WrapperInt.of_xml)
+          (Xml.child xml_arg0 "autoRetryLimit") in
       let concurrentBuildLimit =
         (Option.map ~f:WrapperInt.of_xml)
           (Xml.child xml_arg0 "concurrentBuildLimit") in
@@ -11367,7 +15178,7 @@ module CreateProjectInput =
         (Option.map ~f:TimeOut.of_xml)
           (Xml.child xml_arg0 "queuedTimeoutInMinutes") in
       let timeoutInMinutes =
-        (Option.map ~f:TimeOut.of_xml)
+        (Option.map ~f:BuildTimeOut.of_xml)
           (Xml.child xml_arg0 "timeoutInMinutes") in
       let serviceRole =
         NonEmptyString.of_xml
@@ -11399,55 +15210,353 @@ module CreateProjectInput =
           (Xml.child xml_arg0 "description") in
       let name =
         ProjectName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badgeEnabled ?vpcConfig ?tags ?encryptionKey
-        ?queuedTimeoutInMinutes ?timeoutInMinutes ~serviceRole ~environment
-        ?cache ?secondaryArtifacts ~artifacts ?secondarySourceVersions
-        ?sourceVersion ?secondarySources ~source ?description ~name ()
+      make ?autoRetryLimit ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badgeEnabled ?vpcConfig ?tags
+        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ~serviceRole
+        ~environment ?cache ?secondaryArtifacts ~artifacts
+        ?secondarySourceVersions ?sourceVersion ?secondarySources ~source
+        ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let autoRetryLimit =
+        field_map json__ "autoRetryLimit" WrapperInt.of_json in
       let concurrentBuildLimit =
-        field_map json "concurrentBuildLimit" WrapperInt.of_json in
+        field_map json__ "concurrentBuildLimit" WrapperInt.of_json in
       let buildBatchConfig =
-        field_map json "buildBatchConfig" ProjectBuildBatchConfig.of_json in
+        field_map json__ "buildBatchConfig" ProjectBuildBatchConfig.of_json in
       let fileSystemLocations =
-        field_map json "fileSystemLocations"
+        field_map json__ "fileSystemLocations"
           ProjectFileSystemLocations.of_json in
-      let logsConfig = field_map json "logsConfig" LogsConfig.of_json in
-      let badgeEnabled = field_map json "badgeEnabled" WrapperBoolean.of_json in
-      let vpcConfig = field_map json "vpcConfig" VpcConfig.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+      let logsConfig = field_map json__ "logsConfig" LogsConfig.of_json in
+      let badgeEnabled =
+        field_map json__ "badgeEnabled" WrapperBoolean.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let encryptionKey =
-        field_map json "encryptionKey" NonEmptyString.of_json in
+        field_map json__ "encryptionKey" NonEmptyString.of_json in
       let queuedTimeoutInMinutes =
-        field_map json "queuedTimeoutInMinutes" TimeOut.of_json in
+        field_map json__ "queuedTimeoutInMinutes" TimeOut.of_json in
       let timeoutInMinutes =
-        field_map json "timeoutInMinutes" TimeOut.of_json in
+        field_map json__ "timeoutInMinutes" BuildTimeOut.of_json in
       let serviceRole =
-        field_map_exn json "serviceRole" NonEmptyString.of_json in
+        field_map_exn json__ "serviceRole" NonEmptyString.of_json in
       let environment =
-        field_map_exn json "environment" ProjectEnvironment.of_json in
-      let cache = field_map json "cache" ProjectCache.of_json in
+        field_map_exn json__ "environment" ProjectEnvironment.of_json in
+      let cache = field_map json__ "cache" ProjectCache.of_json in
       let secondaryArtifacts =
-        field_map json "secondaryArtifacts" ProjectArtifactsList.of_json in
-      let artifacts = field_map_exn json "artifacts" ProjectArtifacts.of_json in
+        field_map json__ "secondaryArtifacts" ProjectArtifactsList.of_json in
+      let artifacts =
+        field_map_exn json__ "artifacts" ProjectArtifacts.of_json in
       let secondarySourceVersions =
-        field_map json "secondarySourceVersions"
+        field_map json__ "secondarySourceVersions"
           ProjectSecondarySourceVersions.of_json in
-      let sourceVersion = field_map json "sourceVersion" String_.of_json in
+      let sourceVersion = field_map json__ "sourceVersion" String_.of_json in
       let secondarySources =
-        field_map json "secondarySources" ProjectSources.of_json in
-      let source = field_map_exn json "source" ProjectSource.of_json in
+        field_map json__ "secondarySources" ProjectSources.of_json in
+      let source = field_map_exn json__ "source" ProjectSource.of_json in
       let description =
-        field_map json "description" ProjectDescription.of_json in
-      let name = field_map_exn json "name" ProjectName.of_json in
-      make ?concurrentBuildLimit ?buildBatchConfig ?fileSystemLocations
-        ?logsConfig ?badgeEnabled ?vpcConfig ?tags ?encryptionKey
-        ?queuedTimeoutInMinutes ?timeoutInMinutes ~serviceRole ~environment
-        ?cache ?secondaryArtifacts ~artifacts ?secondarySourceVersions
-        ?sourceVersion ?secondarySources ~source ?description ~name ()
+        field_map json__ "description" ProjectDescription.of_json in
+      let name = field_map_exn json__ "name" ProjectName.of_json in
+      make ?autoRetryLimit ?concurrentBuildLimit ?buildBatchConfig
+        ?fileSystemLocations ?logsConfig ?badgeEnabled ?vpcConfig ?tags
+        ?encryptionKey ?queuedTimeoutInMinutes ?timeoutInMinutes ~serviceRole
+        ~environment ?cache ?secondaryArtifacts ~artifacts
+        ?secondarySourceVersions ?sourceVersion ?secondarySources ~source
+        ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a build project."]
+module CreateFleetOutput =
+  struct
+    type nonrec t =
+      {
+      fleet: Fleet.t option
+        [@ocaml.doc "Information about the compute fleet"]}
+    type nonrec error =
+      [ `AccountLimitExceededException of AccountLimitExceededException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fleet = fun () -> { fleet }
+    let error_of_json name json =
+      match name with
+      | "AccountLimitExceededException" ->
+          `AccountLimitExceededException
+            (AccountLimitExceededException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccountLimitExceededException" ->
+          `AccountLimitExceededException
+            (AccountLimitExceededException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccountLimitExceededException e ->
+          `Assoc
+            [("error", (`String "AccountLimitExceededException"));
+            ("details", (AccountLimitExceededException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("fleet", (Option.map x.fleet ~f:Fleet.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fleet = (Option.map ~f:Fleet.of_xml) (Xml.child xml_arg0 "fleet") in
+      make ?fleet ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fleet = field_map json__ "fleet" Fleet.of_json in make ?fleet ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a compute fleet."]
+module CreateFleetInput =
+  struct
+    type nonrec t =
+      {
+      name: FleetName.t [@ocaml.doc "The name of the compute fleet."];
+      baseCapacity: FleetCapacity.t
+        [@ocaml.doc
+          "The initial number of machines allocated to the \239\172\130eet, which de\239\172\129nes the number of builds that can run in parallel."];
+      environmentType: EnvironmentType.t
+        [@ocaml.doc
+          "The environment type of the compute fleet. The environment type ARM_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), Asia Pacific (Mumbai), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), EU (Frankfurt), and South America (S\195\163o Paulo). The environment type ARM_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type LINUX_GPU_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), and Asia Pacific (Sydney). The environment type MAC_ARM is available for Medium fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), and EU (Frankfurt) The environment type MAC_ARM is available for Large fleets only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), and Asia Pacific (Sydney). The environment type WINDOWS_EC2 is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Tokyo), Asia Pacific (Singapore), Asia Pacific (Sydney), South America (S\195\163o Paulo), and Asia Pacific (Mumbai). The environment type WINDOWS_SERVER_2019_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), Asia Pacific (Sydney), Asia Pacific (Tokyo), Asia Pacific (Mumbai) and EU (Ireland). The environment type WINDOWS_SERVER_2022_CONTAINER is available only in regions US East (N. Virginia), US East (Ohio), US West (Oregon), EU (Ireland), EU (Frankfurt), Asia Pacific (Sydney), Asia Pacific (Singapore), Asia Pacific (Tokyo), South America (S\195\163o Paulo) and Asia Pacific (Mumbai). For more information, see Build environment compute types in the CodeBuild user guide."];
+      computeType: ComputeType.t
+        [@ocaml.doc
+          "Information about the compute resources the compute fleet uses. Available values include: ATTRIBUTE_BASED_COMPUTE: Specify the amount of vCPUs, memory, disk space, and the type of machine. If you use ATTRIBUTE_BASED_COMPUTE, you must define your attributes by using computeConfiguration. CodeBuild will select the cheapest instance that satisfies your specified attributes. For more information, see Reserved capacity environment types in the CodeBuild User Guide. CUSTOM_INSTANCE_TYPE: Specify the instance type for your compute fleet. For a list of supported instance types, see Supported instance families in the CodeBuild User Guide. BUILD_GENERAL1_SMALL: Use up to 4 GiB memory and 2 vCPUs for builds. BUILD_GENERAL1_MEDIUM: Use up to 8 GiB memory and 4 vCPUs for builds. BUILD_GENERAL1_LARGE: Use up to 16 GiB memory and 8 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_XLARGE: Use up to 72 GiB memory and 36 vCPUs for builds, depending on your environment type. BUILD_GENERAL1_2XLARGE: Use up to 144 GiB memory, 72 vCPUs, and 824 GB of SSD storage for builds. This compute type supports Docker images up to 100 GB uncompressed. BUILD_LAMBDA_1GB: Use up to 1 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_2GB: Use up to 2 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_4GB: Use up to 4 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_8GB: Use up to 8 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. BUILD_LAMBDA_10GB: Use up to 10 GiB memory for builds. Only available for environment type LINUX_LAMBDA_CONTAINER and ARM_LAMBDA_CONTAINER. If you use BUILD_GENERAL1_SMALL: For environment type LINUX_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 16 GiB memory, 4 vCPUs, and 1 NVIDIA A10G Tensor Core GPU for builds. For environment type ARM_CONTAINER, you can use up to 4 GiB memory and 2 vCPUs on ARM-based processors for builds. If you use BUILD_GENERAL1_LARGE: For environment type LINUX_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs for builds. For environment type LINUX_GPU_CONTAINER, you can use up to 255 GiB memory, 32 vCPUs, and 4 NVIDIA Tesla V100 GPUs for builds. For environment type ARM_CONTAINER, you can use up to 16 GiB memory and 8 vCPUs on ARM-based processors for builds. For more information, see On-demand environment types in the CodeBuild User Guide."];
+      computeConfiguration: ComputeConfiguration.t option
+        [@ocaml.doc
+          "The compute configuration of the compute fleet. This is only required if computeType is set to ATTRIBUTE_BASED_COMPUTE or CUSTOM_INSTANCE_TYPE."];
+      scalingConfiguration: ScalingConfigurationInput.t option
+        [@ocaml.doc "The scaling configuration of the compute fleet."];
+      overflowBehavior: FleetOverflowBehavior.t option
+        [@ocaml.doc
+          "The compute fleet overflow behavior. For overflow behavior QUEUE, your overflow builds need to wait on the existing fleet instance to become available. For overflow behavior ON_DEMAND, your overflow builds run on CodeBuild on-demand. If you choose to set your overflow behavior to on-demand while creating a VPC-connected fleet, make sure that you add the required VPC permissions to your project service role. For more information, see Example policy statement to allow CodeBuild access to Amazon Web Services services required to create a VPC network interface."];
+      vpcConfig: VpcConfig.t option ;
+      proxyConfiguration: ProxyConfiguration.t option
+        [@ocaml.doc "The proxy configuration of the compute fleet."];
+      imageId: NonEmptyString.t option
+        [@ocaml.doc "The Amazon Machine Image (AMI) of the compute fleet."];
+      fleetServiceRole: NonEmptyString.t option
+        [@ocaml.doc
+          "The service role associated with the compute fleet. For more information, see Allow a user to add a permission policy for a fleet service role in the CodeBuild User Guide."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A list of tag key and value pairs associated with this compute fleet. These tags are available for use by Amazon Web Services services that support CodeBuild build project tags."]}
+    let context_ = "CreateFleetInput"
+    let make ?computeConfiguration =
+      fun ?scalingConfiguration ->
+        fun ?overflowBehavior ->
+          fun ?vpcConfig ->
+            fun ?proxyConfiguration ->
+              fun ?imageId ->
+                fun ?fleetServiceRole ->
+                  fun ?tags ->
+                    fun ~name ->
+                      fun ~baseCapacity ->
+                        fun ~environmentType ->
+                          fun ~computeType ->
+                            fun () ->
+                              {
+                                computeConfiguration;
+                                scalingConfiguration;
+                                overflowBehavior;
+                                vpcConfig;
+                                proxyConfiguration;
+                                imageId;
+                                fleetServiceRole;
+                                tags;
+                                name;
+                                baseCapacity;
+                                environmentType;
+                                computeType
+                              }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (FleetName.to_value x.name)));
+        ("baseCapacity", (Some (FleetCapacity.to_value x.baseCapacity)));
+        ("environmentType",
+          (Some (EnvironmentType.to_value x.environmentType)));
+        ("computeType", (Some (ComputeType.to_value x.computeType)));
+        ("computeConfiguration",
+          (Option.map x.computeConfiguration ~f:ComputeConfiguration.to_value));
+        ("scalingConfiguration",
+          (Option.map x.scalingConfiguration
+             ~f:ScalingConfigurationInput.to_value));
+        ("overflowBehavior",
+          (Option.map x.overflowBehavior ~f:FleetOverflowBehavior.to_value));
+        ("vpcConfig", (Option.map x.vpcConfig ~f:VpcConfig.to_value));
+        ("proxyConfiguration",
+          (Option.map x.proxyConfiguration ~f:ProxyConfiguration.to_value));
+        ("imageId", (Option.map x.imageId ~f:NonEmptyString.to_value));
+        ("fleetServiceRole",
+          (Option.map x.fleetServiceRole ~f:NonEmptyString.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let fleetServiceRole =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "fleetServiceRole") in
+      let imageId =
+        (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "imageId") in
+      let proxyConfiguration =
+        (Option.map ~f:ProxyConfiguration.of_xml)
+          (Xml.child xml_arg0 "proxyConfiguration") in
+      let vpcConfig =
+        (Option.map ~f:VpcConfig.of_xml) (Xml.child xml_arg0 "vpcConfig") in
+      let overflowBehavior =
+        (Option.map ~f:FleetOverflowBehavior.of_xml)
+          (Xml.child xml_arg0 "overflowBehavior") in
+      let scalingConfiguration =
+        (Option.map ~f:ScalingConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "scalingConfiguration") in
+      let computeConfiguration =
+        (Option.map ~f:ComputeConfiguration.of_xml)
+          (Xml.child xml_arg0 "computeConfiguration") in
+      let computeType =
+        ComputeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "computeType") in
+      let environmentType =
+        EnvironmentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentType") in
+      let baseCapacity =
+        FleetCapacity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "baseCapacity") in
+      let name =
+        FleetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ~computeType ~environmentType ~baseCapacity ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let fleetServiceRole =
+        field_map json__ "fleetServiceRole" NonEmptyString.of_json in
+      let imageId = field_map json__ "imageId" NonEmptyString.of_json in
+      let proxyConfiguration =
+        field_map json__ "proxyConfiguration" ProxyConfiguration.of_json in
+      let vpcConfig = field_map json__ "vpcConfig" VpcConfig.of_json in
+      let overflowBehavior =
+        field_map json__ "overflowBehavior" FleetOverflowBehavior.of_json in
+      let scalingConfiguration =
+        field_map json__ "scalingConfiguration"
+          ScalingConfigurationInput.of_json in
+      let computeConfiguration =
+        field_map json__ "computeConfiguration" ComputeConfiguration.of_json in
+      let computeType =
+        field_map_exn json__ "computeType" ComputeType.of_json in
+      let environmentType =
+        field_map_exn json__ "environmentType" EnvironmentType.of_json in
+      let baseCapacity =
+        field_map_exn json__ "baseCapacity" FleetCapacity.of_json in
+      let name = field_map_exn json__ "name" FleetName.of_json in
+      make ?tags ?fleetServiceRole ?imageId ?proxyConfiguration ?vpcConfig
+        ?overflowBehavior ?scalingConfiguration ?computeConfiguration
+        ~computeType ~environmentType ~baseCapacity ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a compute fleet."]
+module BatchGetSandboxesOutput =
+  struct
+    type nonrec t =
+      {
+      sandboxes: Sandboxes.t option
+        [@ocaml.doc "Information about the requested sandboxes."];
+      sandboxesNotFound: SandboxIds.t option
+        [@ocaml.doc
+          "The IDs of sandboxes for which information could not be found."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?sandboxes =
+      fun ?sandboxesNotFound -> fun () -> { sandboxes; sandboxesNotFound }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("sandboxes", (Option.map x.sandboxes ~f:Sandboxes.to_value));
+        ("sandboxesNotFound",
+          (Option.map x.sandboxesNotFound ~f:SandboxIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sandboxesNotFound =
+        (Option.map ~f:SandboxIds.of_xml)
+          (Xml.child xml_arg0 "sandboxesNotFound") in
+      let sandboxes =
+        (Option.map ~f:Sandboxes.of_xml) (Xml.child xml_arg0 "sandboxes") in
+      make ?sandboxesNotFound ?sandboxes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sandboxesNotFound =
+        field_map json__ "sandboxesNotFound" SandboxIds.of_json in
+      let sandboxes = field_map json__ "sandboxes" Sandboxes.of_json in
+      make ?sandboxesNotFound ?sandboxes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the sandbox status."]
+module BatchGetSandboxesInput =
+  struct
+    type nonrec t =
+      {
+      ids: SandboxIds.t
+        [@ocaml.doc "A comma separated list of sandboxIds or sandboxArns."]}
+    let context_ = "BatchGetSandboxesInput"
+    let make ~ids = fun () -> { ids }
+    let to_value x =
+      structure_to_value [("ids", (Some (SandboxIds.to_value x.ids)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ids =
+        SandboxIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
+      make ~ids ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ids = field_map_exn json__ "ids" SandboxIds.of_json in make ~ids ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the sandbox status."]
 module BatchGetReportsOutput =
   struct
     type nonrec t =
@@ -11501,10 +15610,10 @@ module BatchGetReportsOutput =
         (Option.map ~f:Reports.of_xml) (Xml.child xml_arg0 "reports") in
       make ?reportsNotFound ?reports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportsNotFound =
-        field_map json "reportsNotFound" ReportArns.of_json in
-      let reports = field_map json "reports" Reports.of_json in
+        field_map json__ "reportsNotFound" ReportArns.of_json in
+      let reports = field_map json__ "reports" Reports.of_json in
       make ?reportsNotFound ?reports ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of reports."]
@@ -11527,8 +15636,8 @@ module BatchGetReportsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportArns") in
       make ~reportArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportArns = field_map_exn json "reportArns" ReportArns.of_json in
+    let of_json json__ =
+      let reportArns = field_map_exn json__ "reportArns" ReportArns.of_json in
       make ~reportArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of reports."]
@@ -11588,10 +15697,10 @@ module BatchGetReportGroupsOutput =
           (Xml.child xml_arg0 "reportGroups") in
       make ?reportGroupsNotFound ?reportGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportGroupsNotFound =
-        field_map json "reportGroupsNotFound" ReportGroupArns.of_json in
-      let reportGroups = field_map json "reportGroups" ReportGroups.of_json in
+        field_map json__ "reportGroupsNotFound" ReportGroupArns.of_json in
+      let reportGroups = field_map json__ "reportGroups" ReportGroups.of_json in
       make ?reportGroupsNotFound ?reportGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of report groups."]
@@ -11615,9 +15724,9 @@ module BatchGetReportGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "reportGroupArns") in
       make ~reportGroupArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportGroupArns =
-        field_map_exn json "reportGroupArns" ReportGroupArns.of_json in
+        field_map_exn json__ "reportGroupArns" ReportGroupArns.of_json in
       make ~reportGroupArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of report groups."]
@@ -11673,10 +15782,10 @@ module BatchGetProjectsOutput =
         (Option.map ~f:Projects.of_xml) (Xml.child xml_arg0 "projects") in
       make ?projectsNotFound ?projects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let projectsNotFound =
-        field_map json "projectsNotFound" ProjectNames.of_json in
-      let projects = field_map json "projects" Projects.of_json in
+        field_map json__ "projectsNotFound" ProjectNames.of_json in
+      let projects = field_map json__ "projects" Projects.of_json in
       make ?projectsNotFound ?projects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about one or more build projects."]
@@ -11698,11 +15807,190 @@ module BatchGetProjectsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "names") in
       make ~names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let names = field_map_exn json "names" ProjectNames.of_json in
+    let of_json json__ =
+      let names = field_map_exn json__ "names" ProjectNames.of_json in
       make ~names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about one or more build projects."]
+module BatchGetFleetsOutput =
+  struct
+    type nonrec t =
+      {
+      fleets: Fleets.t option
+        [@ocaml.doc "Information about the requested compute fleets."];
+      fleetsNotFound: FleetNames.t option
+        [@ocaml.doc
+          "The names of compute fleets for which information could not be found."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fleets =
+      fun ?fleetsNotFound -> fun () -> { fleets; fleetsNotFound }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("fleets", (Option.map x.fleets ~f:Fleets.to_value));
+        ("fleetsNotFound",
+          (Option.map x.fleetsNotFound ~f:FleetNames.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fleetsNotFound =
+        (Option.map ~f:FleetNames.of_xml)
+          (Xml.child xml_arg0 "fleetsNotFound") in
+      let fleets =
+        (Option.map ~f:Fleets.of_xml) (Xml.child xml_arg0 "fleets") in
+      make ?fleetsNotFound ?fleets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fleetsNotFound =
+        field_map json__ "fleetsNotFound" FleetNames.of_json in
+      let fleets = field_map json__ "fleets" Fleets.of_json in
+      make ?fleetsNotFound ?fleets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about one or more compute fleets."]
+module BatchGetFleetsInput =
+  struct
+    type nonrec t =
+      {
+      names: FleetNames.t
+        [@ocaml.doc "The names or ARNs of the compute fleets."]}
+    let context_ = "BatchGetFleetsInput"
+    let make ~names = fun () -> { names }
+    let to_value x =
+      structure_to_value [("names", (Some (FleetNames.to_value x.names)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let names =
+        FleetNames.of_xml (Xml.child_exn ~context:context_ xml_arg0 "names") in
+      make ~names ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let names = field_map_exn json__ "names" FleetNames.of_json in
+      make ~names ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about one or more compute fleets."]
+module BatchGetCommandExecutionsOutput =
+  struct
+    type nonrec t =
+      {
+      commandExecutions: CommandExecutions.t option
+        [@ocaml.doc "Information about the requested command executions."];
+      commandExecutionsNotFound: CommandExecutionIds.t option
+        [@ocaml.doc
+          "The IDs of command executions for which information could not be found."]}
+    type nonrec error =
+      [ `InvalidInputException of InvalidInputException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?commandExecutions =
+      fun ?commandExecutionsNotFound ->
+        fun () -> { commandExecutions; commandExecutionsNotFound }
+    let error_of_json name json =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("commandExecutions",
+           (Option.map x.commandExecutions ~f:CommandExecutions.to_value));
+        ("commandExecutionsNotFound",
+          (Option.map x.commandExecutionsNotFound
+             ~f:CommandExecutionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commandExecutionsNotFound =
+        (Option.map ~f:CommandExecutionIds.of_xml)
+          (Xml.child xml_arg0 "commandExecutionsNotFound") in
+      let commandExecutions =
+        (Option.map ~f:CommandExecutions.of_xml)
+          (Xml.child xml_arg0 "commandExecutions") in
+      make ?commandExecutionsNotFound ?commandExecutions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commandExecutionsNotFound =
+        field_map json__ "commandExecutionsNotFound"
+          CommandExecutionIds.of_json in
+      let commandExecutions =
+        field_map json__ "commandExecutions" CommandExecutions.of_json in
+      make ?commandExecutionsNotFound ?commandExecutions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the command executions."]
+module BatchGetCommandExecutionsInput =
+  struct
+    type nonrec t =
+      {
+      sandboxId: NonEmptyString.t [@ocaml.doc "A sandboxId or sandboxArn."];
+      commandExecutionIds: CommandExecutionIds.t
+        [@ocaml.doc "A comma separated list of commandExecutionIds."]}
+    let context_ = "BatchGetCommandExecutionsInput"
+    let make ~sandboxId =
+      fun ~commandExecutionIds ->
+        fun () -> { sandboxId; commandExecutionIds }
+    let to_value x =
+      structure_to_value
+        [("sandboxId", (Some (NonEmptyString.to_value x.sandboxId)));
+        ("commandExecutionIds",
+          (Some (CommandExecutionIds.to_value x.commandExecutionIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commandExecutionIds =
+        CommandExecutionIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "commandExecutionIds") in
+      let sandboxId =
+        NonEmptyString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sandboxId") in
+      make ~commandExecutionIds ~sandboxId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commandExecutionIds =
+        field_map_exn json__ "commandExecutionIds"
+          CommandExecutionIds.of_json in
+      let sandboxId = field_map_exn json__ "sandboxId" NonEmptyString.of_json in
+      make ~commandExecutionIds ~sandboxId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the command executions."]
 module BatchGetBuildsOutput =
   struct
     type nonrec t =
@@ -11754,9 +16042,9 @@ module BatchGetBuildsOutput =
         (Option.map ~f:Builds.of_xml) (Xml.child xml_arg0 "builds") in
       make ?buildsNotFound ?builds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let buildsNotFound = field_map json "buildsNotFound" BuildIds.of_json in
-      let builds = field_map json "builds" Builds.of_json in
+    let of_json json__ =
+      let buildsNotFound = field_map json__ "buildsNotFound" BuildIds.of_json in
+      let builds = field_map json__ "builds" Builds.of_json in
       make ?buildsNotFound ?builds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about one or more builds."]
@@ -11774,8 +16062,8 @@ module BatchGetBuildsInput =
         BuildIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ids = field_map_exn json "ids" BuildIds.of_json in make ~ids ()
+    let of_json json__ =
+      let ids = field_map_exn json__ "ids" BuildIds.of_json in make ~ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about one or more builds."]
 module BatchGetBuildBatchesOutput =
@@ -11834,10 +16122,10 @@ module BatchGetBuildBatchesOutput =
           (Xml.child xml_arg0 "buildBatches") in
       make ?buildBatchesNotFound ?buildBatches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let buildBatchesNotFound =
-        field_map json "buildBatchesNotFound" BuildBatchIds.of_json in
-      let buildBatches = field_map json "buildBatches" BuildBatches.of_json in
+        field_map json__ "buildBatchesNotFound" BuildBatchIds.of_json in
+      let buildBatches = field_map json__ "buildBatches" BuildBatches.of_json in
       make ?buildBatchesNotFound ?buildBatches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about one or more batch builds."]
@@ -11858,8 +16146,8 @@ module BatchGetBuildBatchesInput =
         BuildBatchIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ids = field_map_exn json "ids" BuildBatchIds.of_json in
+    let of_json json__ =
+      let ids = field_map_exn json__ "ids" BuildBatchIds.of_json in
       make ~ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about one or more batch builds."]
@@ -11915,10 +16203,10 @@ module BatchDeleteBuildsOutput =
         (Option.map ~f:BuildIds.of_xml) (Xml.child xml_arg0 "buildsDeleted") in
       make ?buildsNotDeleted ?buildsDeleted ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let buildsNotDeleted =
-        field_map json "buildsNotDeleted" BuildsNotDeleted.of_json in
-      let buildsDeleted = field_map json "buildsDeleted" BuildIds.of_json in
+        field_map json__ "buildsNotDeleted" BuildsNotDeleted.of_json in
+      let buildsDeleted = field_map json__ "buildsDeleted" BuildIds.of_json in
       make ?buildsNotDeleted ?buildsDeleted ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes one or more builds."]
@@ -11937,7 +16225,7 @@ module BatchDeleteBuildsInput =
         BuildIds.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ids") in
       make ~ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ids = field_map_exn json "ids" BuildIds.of_json in make ~ids ()
+    let of_json json__ =
+      let ids = field_map_exn json__ "ids" BuildIds.of_json in make ~ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes one or more builds."]

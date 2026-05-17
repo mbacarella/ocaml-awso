@@ -96,6 +96,8 @@ let associate_data_share_consumer =
          flag "consumer-arn" (optional string) ~doc:"STRING String"
        and consumerRegion =
          flag "consumer-region" (optional string) ~doc:"STRING String"
+       and allowWrites =
+         flag "allow-writes" (optional bool) ~doc:"BOOL BooleanOptional"
        and dataShareArn =
          flag "data-share-arn" (required string) ~doc:"STRING String" in
        fun () ->
@@ -103,7 +105,7 @@ let associate_data_share_consumer =
            Io.associate_data_share_consumer
            (Values.AssociateDataShareConsumerMessage.make
               ?associateEntireAccount ?consumerArn ?consumerRegion
-              ~dataShareArn ()) (Some Values.DataShare.to_json)
+              ?allowWrites ~dataShareArn ()) (Some Values.DataShare.to_json)
            (Some Values.DataShare.error_to_json)])
 let authorize_cluster_security_group_ingress =
   Command.async ~summary:""
@@ -144,6 +146,8 @@ let authorize_data_share =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and allowWrites =
+         flag "allow-writes" (optional bool) ~doc:"BOOL BooleanOptional"
        and dataShareArn =
          flag "data-share-arn" (required string) ~doc:"STRING String"
        and consumerIdentifier =
@@ -151,7 +155,7 @@ let authorize_data_share =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.authorize_data_share
-           (Values.AuthorizeDataShareMessage.make ~dataShareArn
+           (Values.AuthorizeDataShareMessage.make ?allowWrites ~dataShareArn
               ~consumerIdentifier ()) (Some Values.DataShare.to_json)
            (Some Values.DataShare.error_to_json)])
 let authorize_endpoint_access =
@@ -186,19 +190,21 @@ let authorize_snapshot_access =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and snapshotIdentifier =
+         flag "snapshot-identifier" (optional string) ~doc:"STRING String"
+       and snapshotArn =
+         flag "snapshot-arn" (optional string) ~doc:"STRING String"
        and snapshotClusterIdentifier =
          flag "snapshot-cluster-identifier" (optional string)
            ~doc:"STRING String"
-       and snapshotIdentifier =
-         flag "snapshot-identifier" (required string) ~doc:"STRING String"
        and accountWithRestoreAccess =
          flag "account-with-restore-access" (required string)
            ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.authorize_snapshot_access
-           (Values.AuthorizeSnapshotAccessMessage.make
-              ?snapshotClusterIdentifier ~snapshotIdentifier
+           (Values.AuthorizeSnapshotAccessMessage.make ?snapshotIdentifier
+              ?snapshotArn ?snapshotClusterIdentifier
               ~accountWithRestoreAccess ())
            (Some Values.AuthorizeSnapshotAccessResult.to_json)
            (Some Values.AuthorizeSnapshotAccessResult.error_to_json)])
@@ -334,6 +340,9 @@ let create_cluster =
        and dBName = flag "d-b-name" (optional string) ~doc:"STRING String"
        and clusterType =
          flag "cluster-type" (optional string) ~doc:"STRING String"
+       and masterUserPassword =
+         flag "master-user-password" (optional string)
+           ~doc:"STRING SensitiveString"
        and clusterSecurityGroups =
          flag "cluster-security-groups" (optional json_arg)
            ~doc:"JSON ClusterSecurityGroupNameList"
@@ -401,17 +410,37 @@ let create_cluster =
            ~doc:"JSON AquaConfigurationStatus"
        and defaultIamRoleArn =
          flag "default-iam-role-arn" (optional string) ~doc:"STRING String"
+       and loadSampleData =
+         flag "load-sample-data" (optional string) ~doc:"STRING String"
+       and manageMasterPassword =
+         flag "manage-master-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterPasswordSecretKmsKeyId =
+         flag "master-password-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and ipAddressType =
+         flag "ip-address-type" (optional string) ~doc:"STRING String"
+       and multiAZ =
+         flag "multi-a-z" (optional bool) ~doc:"BOOL BooleanOptional"
+       and redshiftIdcApplicationArn =
+         flag "redshift-idc-application-arn" (optional string)
+           ~doc:"STRING String"
+       and catalogName =
+         flag "catalog-name" (optional string)
+           ~doc:"STRING CatalogNameString"
+       and extraComputeForAutomaticOptimization =
+         flag "extra-compute-for-automatic-optimization" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and clusterIdentifier =
          flag "cluster-identifier" (required string) ~doc:"STRING String"
        and nodeType = flag "node-type" (required string) ~doc:"STRING String"
        and masterUsername =
-         flag "master-username" (required string) ~doc:"STRING String"
-       and masterUserPassword =
-         flag "master-user-password" (required string) ~doc:"STRING String" in
+         flag "master-username" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cluster
            (Values.CreateClusterMessage.make ?dBName ?clusterType
+              ?masterUserPassword
               ?clusterSecurityGroups:(Option.map
                                         ~f:Values.ClusterSecurityGroupNameList.of_json
                                         clusterSecurityGroups)
@@ -433,8 +462,11 @@ let create_cluster =
               ?aquaConfigurationStatus:(Option.map
                                           ~f:Values.AquaConfigurationStatus.of_json
                                           aquaConfigurationStatus)
-              ?defaultIamRoleArn ~clusterIdentifier ~nodeType ~masterUsername
-              ~masterUserPassword ())
+              ?defaultIamRoleArn ?loadSampleData ?manageMasterPassword
+              ?masterPasswordSecretKmsKeyId ?ipAddressType ?multiAZ
+              ?redshiftIdcApplicationArn ?catalogName
+              ?extraComputeForAutomaticOptimization ~clusterIdentifier
+              ~nodeType ~masterUsername ())
            (Some Values.CreateClusterResult.to_json)
            (Some Values.CreateClusterResult.error_to_json)])
 let create_cluster_parameter_group =
@@ -541,6 +573,32 @@ let create_cluster_subnet_group =
               ~subnetIds:(Values.SubnetIdentifierList.of_json subnetIds) ())
            (Some Values.CreateClusterSubnetGroupResult.to_json)
            (Some Values.CreateClusterSubnetGroupResult.error_to_json)])
+let create_custom_domain_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and customDomainName =
+         flag "custom-domain-name" (required string)
+           ~doc:"STRING CustomDomainNameString"
+       and customDomainCertificateArn =
+         flag "custom-domain-certificate-arn" (required string)
+           ~doc:"STRING CustomDomainCertificateArnString"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_custom_domain_association
+           (Values.CreateCustomDomainAssociationMessage.make
+              ~customDomainName ~customDomainCertificateArn
+              ~clusterIdentifier ())
+           (Some Values.CreateCustomDomainAssociationResult.to_json)
+           (Some Values.CreateCustomDomainAssociationResult.error_to_json)])
 let create_endpoint_access =
   Command.async ~summary:""
     ([%map_open.Command
@@ -667,6 +725,97 @@ let create_hsm_configuration =
               ~hsmServerPublicCertificate ())
            (Some Values.CreateHsmConfigurationResult.to_json)
            (Some Values.CreateHsmConfigurationResult.error_to_json)])
+let create_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kMSKeyId =
+         flag "k-m-s-key-id" (optional string) ~doc:"STRING String"
+       and tagList = flag "tag-list" (optional json_arg) ~doc:"JSON TagList"
+       and additionalEncryptionContext =
+         flag "additional-encryption-context" (optional json_arg)
+           ~doc:"JSON EncryptionContextMap"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING IntegrationDescription"
+       and sourceArn =
+         flag "source-arn" (required string) ~doc:"STRING SourceArn"
+       and targetArn =
+         flag "target-arn" (required string) ~doc:"STRING TargetArn"
+       and integrationName =
+         flag "integration-name" (required string)
+           ~doc:"STRING IntegrationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_integration
+           (Values.CreateIntegrationMessage.make ?kMSKeyId
+              ?tagList:(Option.map ~f:Values.TagList.of_json tagList)
+              ?additionalEncryptionContext:(Option.map
+                                              ~f:Values.EncryptionContextMap.of_json
+                                              additionalEncryptionContext)
+              ?description ~sourceArn ~targetArn ~integrationName ())
+           (Some Values.Integration.to_json)
+           (Some Values.Integration.error_to_json)])
+let create_redshift_idc_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityNamespace =
+         flag "identity-namespace" (optional string)
+           ~doc:"STRING IdentityNamespaceString"
+       and authorizedTokenIssuerList =
+         flag "authorized-token-issuer-list" (optional json_arg)
+           ~doc:"JSON AuthorizedTokenIssuerList"
+       and serviceIntegrations =
+         flag "service-integrations" (optional json_arg)
+           ~doc:"JSON ServiceIntegrationList"
+       and applicationType =
+         flag "application-type" (optional json_arg)
+           ~doc:"JSON ApplicationType"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and ssoTagKeys =
+         flag "sso-tag-keys" (optional json_arg) ~doc:"JSON TagKeyList"
+       and idcInstanceArn =
+         flag "idc-instance-arn" (required string) ~doc:"STRING String"
+       and redshiftIdcApplicationName =
+         flag "redshift-idc-application-name" (required string)
+           ~doc:"STRING RedshiftIdcApplicationName"
+       and idcDisplayName =
+         flag "idc-display-name" (required string)
+           ~doc:"STRING IdcDisplayNameString"
+       and iamRoleArn =
+         flag "iam-role-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_redshift_idc_application
+           (Values.CreateRedshiftIdcApplicationMessage.make
+              ?identityNamespace
+              ?authorizedTokenIssuerList:(Option.map
+                                            ~f:Values.AuthorizedTokenIssuerList.of_json
+                                            authorizedTokenIssuerList)
+              ?serviceIntegrations:(Option.map
+                                      ~f:Values.ServiceIntegrationList.of_json
+                                      serviceIntegrations)
+              ?applicationType:(Option.map ~f:Values.ApplicationType.of_json
+                                  applicationType)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?ssoTagKeys:(Option.map ~f:Values.TagKeyList.of_json ssoTagKeys)
+              ~idcInstanceArn ~redshiftIdcApplicationName ~idcDisplayName
+              ~iamRoleArn ())
+           (Some Values.CreateRedshiftIdcApplicationResult.to_json)
+           (Some Values.CreateRedshiftIdcApplicationResult.error_to_json)])
 let create_scheduled_action =
   Command.async ~summary:""
     ([%map_open.Command
@@ -961,6 +1110,26 @@ let delete_cluster_subnet_group =
            Io.delete_cluster_subnet_group
            (Values.DeleteClusterSubnetGroupMessage.make
               ~clusterSubnetGroupName ()) None None])
+let delete_custom_domain_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String"
+       and customDomainName =
+         flag "custom-domain-name" (required string)
+           ~doc:"STRING CustomDomainNameString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_custom_domain_association
+           (Values.DeleteCustomDomainAssociationMessage.make
+              ~clusterIdentifier ~customDomainName ()) None None])
 let delete_endpoint_access =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1032,6 +1201,25 @@ let delete_hsm_configuration =
            Io.delete_hsm_configuration
            (Values.DeleteHsmConfigurationMessage.make
               ~hsmConfigurationIdentifier ()) None None])
+let delete_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (required string)
+           ~doc:"STRING IntegrationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_integration
+           (Values.DeleteIntegrationMessage.make ~integrationArn ())
+           (Some Values.Integration.to_json)
+           (Some Values.Integration.error_to_json)])
 let delete_partner =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1061,6 +1249,41 @@ let delete_partner =
               ~clusterIdentifier ~databaseName ~partnerName ())
            (Some Values.PartnerIntegrationOutputMessage.to_json)
            (Some Values.PartnerIntegrationOutputMessage.error_to_json)])
+let delete_redshift_idc_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and redshiftIdcApplicationArn =
+         flag "redshift-idc-application-arn" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_redshift_idc_application
+           (Values.DeleteRedshiftIdcApplicationMessage.make
+              ~redshiftIdcApplicationArn ()) None None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyMessage.make ~resourceArn ()) None
+           None])
 let delete_scheduled_action =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1148,6 +1371,32 @@ let delete_usage_limit =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_usage_limit
            (Values.DeleteUsageLimitMessage.make ~usageLimitId ()) None None])
+let deregister_namespace =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and namespaceIdentifier =
+         flag "namespace-identifier" (required json_arg)
+           ~doc:"JSON NamespaceIdentifierUnion"
+       and consumerIdentifiers =
+         flag "consumer-identifiers" (required json_arg)
+           ~doc:"JSON ConsumerIdentifierList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_namespace
+           (Values.DeregisterNamespaceInputMessage.make
+              ~namespaceIdentifier:(Values.NamespaceIdentifierUnion.of_json
+                                      namespaceIdentifier)
+              ~consumerIdentifiers:(Values.ConsumerIdentifierList.of_json
+                                      consumerIdentifiers) ())
+           (Some Values.DeregisterNamespaceOutputMessage.to_json)
+           (Some Values.DeregisterNamespaceOutputMessage.error_to_json)])
 let describe_account_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1305,6 +1554,8 @@ let describe_cluster_snapshots =
          flag "cluster-identifier" (optional string) ~doc:"STRING String"
        and snapshotIdentifier =
          flag "snapshot-identifier" (optional string) ~doc:"STRING String"
+       and snapshotArn =
+         flag "snapshot-arn" (optional string) ~doc:"STRING String"
        and snapshotType =
          flag "snapshot-type" (optional string) ~doc:"STRING String"
        and startTime =
@@ -1328,7 +1579,7 @@ let describe_cluster_snapshots =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_cluster_snapshots
            (Values.DescribeClusterSnapshotsMessage.make ?clusterIdentifier
-              ?snapshotIdentifier ?snapshotType
+              ?snapshotIdentifier ?snapshotArn ?snapshotType
               ?startTime:(Option.map ~f:Values.TStamp.of_json startTime)
               ?endTime:(Option.map ~f:Values.TStamp.of_json endTime)
               ?maxRecords ?marker ?ownerAccount
@@ -1443,6 +1694,33 @@ let describe_clusters =
               ?tagValues:(Option.map ~f:Values.TagValueList.of_json tagValues)
               ()) (Some Values.ClustersMessage.to_json)
            (Some Values.ClustersMessage.error_to_json)])
+let describe_custom_domain_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and customDomainName =
+         flag "custom-domain-name" (optional string)
+           ~doc:"STRING CustomDomainNameString"
+       and customDomainCertificateArn =
+         flag "custom-domain-certificate-arn" (optional string)
+           ~doc:"STRING CustomDomainCertificateArnString"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_custom_domain_associations
+           (Values.DescribeCustomDomainAssociationsMessage.make
+              ?customDomainName ?customDomainCertificateArn ?maxRecords
+              ?marker ())
+           (Some Values.CustomDomainAssociationsMessage.to_json)
+           (Some Values.CustomDomainAssociationsMessage.error_to_json)])
 let describe_data_shares =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1728,6 +2006,60 @@ let describe_hsm_configurations =
               ?tagValues:(Option.map ~f:Values.TagValueList.of_json tagValues)
               ()) (Some Values.HsmConfigurationMessage.to_json)
            (Some Values.HsmConfigurationMessage.error_to_json)])
+let describe_inbound_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (optional string)
+           ~doc:"STRING InboundIntegrationArn"
+       and targetArn =
+         flag "target-arn" (optional string) ~doc:"STRING TargetArn"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_inbound_integrations
+           (Values.DescribeInboundIntegrationsMessage.make ?integrationArn
+              ?targetArn ?maxRecords ?marker ())
+           (Some Values.InboundIntegrationsMessage.to_json)
+           (Some Values.InboundIntegrationsMessage.error_to_json)])
+let describe_integrations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and integrationArn =
+         flag "integration-arn" (optional string)
+           ~doc:"STRING IntegrationArn"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeIntegrationsFilterList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_integrations
+           (Values.DescribeIntegrationsMessage.make ?integrationArn
+              ?maxRecords ?marker
+              ?filters:(Option.map
+                          ~f:Values.DescribeIntegrationsFilterList.of_json
+                          filters) ())
+           (Some Values.IntegrationsMessage.to_json)
+           (Some Values.IntegrationsMessage.error_to_json)])
 let describe_logging_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1760,6 +2092,8 @@ let describe_node_configuration_options =
          flag "cluster-identifier" (optional string) ~doc:"STRING String"
        and snapshotIdentifier =
          flag "snapshot-identifier" (optional string) ~doc:"STRING String"
+       and snapshotArn =
+         flag "snapshot-arn" (optional string) ~doc:"STRING String"
        and ownerAccount =
          flag "owner-account" (optional string) ~doc:"STRING String"
        and filters =
@@ -1774,7 +2108,8 @@ let describe_node_configuration_options =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_node_configuration_options
            (Values.DescribeNodeConfigurationOptionsMessage.make
-              ?clusterIdentifier ?snapshotIdentifier ?ownerAccount
+              ?clusterIdentifier ?snapshotIdentifier ?snapshotArn
+              ?ownerAccount
               ?filters:(Option.map
                           ~f:Values.NodeConfigurationOptionsFilterList.of_json
                           filters) ?marker ?maxRecords
@@ -1833,6 +2168,29 @@ let describe_partners =
               ?partnerName ~accountId ~clusterIdentifier ())
            (Some Values.DescribePartnersOutputMessage.to_json)
            (Some Values.DescribePartnersOutputMessage.error_to_json)])
+let describe_redshift_idc_applications =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and redshiftIdcApplicationArn =
+         flag "redshift-idc-application-arn" (optional string)
+           ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_redshift_idc_applications
+           (Values.DescribeRedshiftIdcApplicationsMessage.make
+              ?redshiftIdcApplicationArn ?maxRecords ?marker ())
+           (Some Values.DescribeRedshiftIdcApplicationsResult.to_json)
+           (Some Values.DescribeRedshiftIdcApplicationsResult.error_to_json)])
 let describe_reserved_node_exchange_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2202,17 +2560,28 @@ let enable_logging =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and s3KeyPrefix =
-         flag "s3-key-prefix" (optional string) ~doc:"STRING String"
-       and clusterIdentifier =
-         flag "cluster-identifier" (required string) ~doc:"STRING String"
        and bucketName =
-         flag "bucket-name" (required string) ~doc:"STRING String" in
+         flag "bucket-name" (optional string) ~doc:"STRING String"
+       and s3KeyPrefix =
+         flag "s3-key-prefix" (optional string)
+           ~doc:"STRING S3KeyPrefixValue"
+       and logDestinationType =
+         flag "log-destination-type" (optional json_arg)
+           ~doc:"JSON LogDestinationType"
+       and logExports =
+         flag "log-exports" (optional json_arg) ~doc:"JSON LogTypeList"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.enable_logging
-           (Values.EnableLoggingMessage.make ?s3KeyPrefix ~clusterIdentifier
-              ~bucketName ()) (Some Values.LoggingStatus.to_json)
+           (Values.EnableLoggingMessage.make ?bucketName ?s3KeyPrefix
+              ?logDestinationType:(Option.map
+                                     ~f:Values.LogDestinationType.of_json
+                                     logDestinationType)
+              ?logExports:(Option.map ~f:Values.LogTypeList.of_json
+                             logExports) ~clusterIdentifier ())
+           (Some Values.LoggingStatus.to_json)
            (Some Values.LoggingStatus.error_to_json)])
 let enable_snapshot_copy =
   Command.async ~summary:""
@@ -2244,6 +2613,24 @@ let enable_snapshot_copy =
               ~clusterIdentifier ~destinationRegion ())
            (Some Values.EnableSnapshotCopyResult.to_json)
            (Some Values.EnableSnapshotCopyResult.error_to_json)])
+let failover_primary_compute =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.failover_primary_compute
+           (Values.FailoverPrimaryComputeInputMessage.make ~clusterIdentifier
+              ()) (Some Values.FailoverPrimaryComputeResult.to_json)
+           (Some Values.FailoverPrimaryComputeResult.error_to_json)])
 let get_cluster_credentials =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2255,24 +2642,70 @@ let get_cluster_credentials =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dbName = flag "db-name" (optional string) ~doc:"STRING String"
+       and clusterIdentifier =
+         flag "cluster-identifier" (optional string) ~doc:"STRING String"
        and durationSeconds =
          flag "duration-seconds" (optional int) ~doc:"INT IntegerOptional"
        and autoCreate =
          flag "auto-create" (optional bool) ~doc:"BOOL BooleanOptional"
        and dbGroups =
          flag "db-groups" (optional json_arg) ~doc:"JSON DbGroupList"
-       and dbUser = flag "db-user" (required string) ~doc:"STRING String"
-       and clusterIdentifier =
-         flag "cluster-identifier" (required string) ~doc:"STRING String" in
+       and customDomainName =
+         flag "custom-domain-name" (optional string) ~doc:"STRING String"
+       and dbUser = flag "db-user" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_cluster_credentials
-           (Values.GetClusterCredentialsMessage.make ?dbName ?durationSeconds
-              ?autoCreate
+           (Values.GetClusterCredentialsMessage.make ?dbName
+              ?clusterIdentifier ?durationSeconds ?autoCreate
               ?dbGroups:(Option.map ~f:Values.DbGroupList.of_json dbGroups)
-              ~dbUser ~clusterIdentifier ())
+              ?customDomainName ~dbUser ())
            (Some Values.ClusterCredentials.to_json)
            (Some Values.ClusterCredentials.error_to_json)])
+let get_cluster_credentials_with_i_a_m =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dbName = flag "db-name" (optional string) ~doc:"STRING String"
+       and clusterIdentifier =
+         flag "cluster-identifier" (optional string) ~doc:"STRING String"
+       and durationSeconds =
+         flag "duration-seconds" (optional int) ~doc:"INT IntegerOptional"
+       and customDomainName =
+         flag "custom-domain-name" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cluster_credentials_with_i_a_m
+           (Values.GetClusterCredentialsWithIAMMessage.make ?dbName
+              ?clusterIdentifier ?durationSeconds ?customDomainName ())
+           (Some Values.ClusterExtendedCredentials.to_json)
+           (Some Values.ClusterExtendedCredentials.error_to_json)])
+let get_identity_center_auth_token =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterIds =
+         flag "cluster-ids" (required json_arg)
+           ~doc:"JSON ClusterIdentifierList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_identity_center_auth_token
+           (Values.GetIdentityCenterAuthTokenRequest.make
+              ~clusterIds:(Values.ClusterIdentifierList.of_json clusterIds)
+              ()) (Some Values.GetIdentityCenterAuthTokenResponse.to_json)
+           (Some Values.GetIdentityCenterAuthTokenResponse.error_to_json)])
 let get_reserved_node_exchange_configuration_options =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2327,6 +2760,48 @@ let get_reserved_node_exchange_offerings =
            (Some Values.GetReservedNodeExchangeOfferingsOutputMessage.to_json)
            (Some
               Values.GetReservedNodeExchangeOfferingsOutputMessage.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyMessage.make ~resourceArn ())
+           (Some Values.GetResourcePolicyResult.to_json)
+           (Some Values.GetResourcePolicyResult.error_to_json)])
+let list_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterIdentifier =
+         flag "cluster-identifier" (optional string) ~doc:"STRING String"
+       and namespaceArn =
+         flag "namespace-arn" (optional string) ~doc:"STRING String"
+       and maxRecords =
+         flag "max-records" (optional int) ~doc:"INT IntegerOptional"
+       and marker = flag "marker" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommendations
+           (Values.ListRecommendationsMessage.make ?clusterIdentifier
+              ?namespaceArn ?maxRecords ?marker ())
+           (Some Values.ListRecommendationsResult.to_json)
+           (Some Values.ListRecommendationsResult.error_to_json)])
 let modify_aqua_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2397,7 +2872,8 @@ let modify_cluster =
          flag "vpc-security-group-ids" (optional json_arg)
            ~doc:"JSON VpcSecurityGroupIdList"
        and masterUserPassword =
-         flag "master-user-password" (optional string) ~doc:"STRING String"
+         flag "master-user-password" (optional string)
+           ~doc:"STRING SensitiveString"
        and clusterParameterGroupName =
          flag "cluster-parameter-group-name" (optional string)
            ~doc:"STRING String"
@@ -2443,6 +2919,19 @@ let modify_cluster =
        and availabilityZone =
          flag "availability-zone" (optional string) ~doc:"STRING String"
        and port = flag "port" (optional int) ~doc:"INT IntegerOptional"
+       and manageMasterPassword =
+         flag "manage-master-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterPasswordSecretKmsKeyId =
+         flag "master-password-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and ipAddressType =
+         flag "ip-address-type" (optional string) ~doc:"STRING String"
+       and multiAZ =
+         flag "multi-a-z" (optional bool) ~doc:"BOOL BooleanOptional"
+       and extraComputeForAutomaticOptimization =
+         flag "extra-compute-for-automatic-optimization" (optional bool)
+           ~doc:"BOOL BooleanOptional"
        and clusterIdentifier =
          flag "cluster-identifier" (required string) ~doc:"STRING String" in
        fun () ->
@@ -2464,6 +2953,8 @@ let modify_cluster =
               ?newClusterIdentifier ?publiclyAccessible ?elasticIp
               ?enhancedVpcRouting ?maintenanceTrackName ?encrypted ?kmsKeyId
               ?availabilityZoneRelocation ?availabilityZone ?port
+              ?manageMasterPassword ?masterPasswordSecretKmsKeyId
+              ?ipAddressType ?multiAZ ?extraComputeForAutomaticOptimization
               ~clusterIdentifier ())
            (Some Values.ModifyClusterResult.to_json)
            (Some Values.ModifyClusterResult.error_to_json)])
@@ -2650,6 +3141,32 @@ let modify_cluster_subnet_group =
               ~subnetIds:(Values.SubnetIdentifierList.of_json subnetIds) ())
            (Some Values.ModifyClusterSubnetGroupResult.to_json)
            (Some Values.ModifyClusterSubnetGroupResult.error_to_json)])
+let modify_custom_domain_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and customDomainName =
+         flag "custom-domain-name" (required string)
+           ~doc:"STRING CustomDomainNameString"
+       and customDomainCertificateArn =
+         flag "custom-domain-certificate-arn" (required string)
+           ~doc:"STRING CustomDomainCertificateArnString"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_custom_domain_association
+           (Values.ModifyCustomDomainAssociationMessage.make
+              ~customDomainName ~customDomainCertificateArn
+              ~clusterIdentifier ())
+           (Some Values.ModifyCustomDomainAssociationResult.to_json)
+           (Some Values.ModifyCustomDomainAssociationResult.error_to_json)])
 let modify_endpoint_access =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2711,6 +3228,112 @@ let modify_event_subscription =
               ~subscriptionName ())
            (Some Values.ModifyEventSubscriptionResult.to_json)
            (Some Values.ModifyEventSubscriptionResult.error_to_json)])
+let modify_integration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING IntegrationDescription"
+       and integrationName =
+         flag "integration-name" (optional string)
+           ~doc:"STRING IntegrationName"
+       and integrationArn =
+         flag "integration-arn" (required string)
+           ~doc:"STRING IntegrationArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_integration
+           (Values.ModifyIntegrationMessage.make ?description
+              ?integrationName ~integrationArn ())
+           (Some Values.Integration.to_json)
+           (Some Values.Integration.error_to_json)])
+let modify_lakehouse_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lakehouseRegistration =
+         flag "lakehouse-registration" (optional json_arg)
+           ~doc:"JSON LakehouseRegistration"
+       and catalogName =
+         flag "catalog-name" (optional string)
+           ~doc:"STRING CatalogNameString"
+       and lakehouseIdcRegistration =
+         flag "lakehouse-idc-registration" (optional json_arg)
+           ~doc:"JSON LakehouseIdcRegistration"
+       and lakehouseIdcApplicationArn =
+         flag "lakehouse-idc-application-arn" (optional string)
+           ~doc:"STRING String"
+       and dryRun =
+         flag "dry-run" (optional bool) ~doc:"BOOL BooleanOptional"
+       and clusterIdentifier =
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_lakehouse_configuration
+           (Values.ModifyLakehouseConfigurationMessage.make
+              ?lakehouseRegistration:(Option.map
+                                        ~f:Values.LakehouseRegistration.of_json
+                                        lakehouseRegistration) ?catalogName
+              ?lakehouseIdcRegistration:(Option.map
+                                           ~f:Values.LakehouseIdcRegistration.of_json
+                                           lakehouseIdcRegistration)
+              ?lakehouseIdcApplicationArn ?dryRun ~clusterIdentifier ())
+           (Some Values.LakehouseConfiguration.to_json)
+           (Some Values.LakehouseConfiguration.error_to_json)])
+let modify_redshift_idc_application =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityNamespace =
+         flag "identity-namespace" (optional string)
+           ~doc:"STRING IdentityNamespaceString"
+       and iamRoleArn =
+         flag "iam-role-arn" (optional string) ~doc:"STRING String"
+       and idcDisplayName =
+         flag "idc-display-name" (optional string)
+           ~doc:"STRING IdcDisplayNameString"
+       and authorizedTokenIssuerList =
+         flag "authorized-token-issuer-list" (optional json_arg)
+           ~doc:"JSON AuthorizedTokenIssuerList"
+       and serviceIntegrations =
+         flag "service-integrations" (optional json_arg)
+           ~doc:"JSON ServiceIntegrationList"
+       and redshiftIdcApplicationArn =
+         flag "redshift-idc-application-arn" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_redshift_idc_application
+           (Values.ModifyRedshiftIdcApplicationMessage.make
+              ?identityNamespace ?iamRoleArn ?idcDisplayName
+              ?authorizedTokenIssuerList:(Option.map
+                                            ~f:Values.AuthorizedTokenIssuerList.of_json
+                                            authorizedTokenIssuerList)
+              ?serviceIntegrations:(Option.map
+                                      ~f:Values.ServiceIntegrationList.of_json
+                                      serviceIntegrations)
+              ~redshiftIdcApplicationArn ())
+           (Some Values.ModifyRedshiftIdcApplicationResult.to_json)
+           (Some Values.ModifyRedshiftIdcApplicationResult.error_to_json)])
 let modify_scheduled_action =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2858,6 +3481,25 @@ let purchase_reserved_node_offering =
               ~reservedNodeOfferingId ())
            (Some Values.PurchaseReservedNodeOfferingResult.to_json)
            (Some Values.PurchaseReservedNodeOfferingResult.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING String"
+       and policy = flag "policy" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyMessage.make ~resourceArn ~policy ())
+           (Some Values.PutResourcePolicyResult.to_json)
+           (Some Values.PutResourcePolicyResult.error_to_json)])
 let reboot_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2876,6 +3518,32 @@ let reboot_cluster =
            (Values.RebootClusterMessage.make ~clusterIdentifier ())
            (Some Values.RebootClusterResult.to_json)
            (Some Values.RebootClusterResult.error_to_json)])
+let register_namespace =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and namespaceIdentifier =
+         flag "namespace-identifier" (required json_arg)
+           ~doc:"JSON NamespaceIdentifierUnion"
+       and consumerIdentifiers =
+         flag "consumer-identifiers" (required json_arg)
+           ~doc:"JSON ConsumerIdentifierList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_namespace
+           (Values.RegisterNamespaceInputMessage.make
+              ~namespaceIdentifier:(Values.NamespaceIdentifierUnion.of_json
+                                      namespaceIdentifier)
+              ~consumerIdentifiers:(Values.ConsumerIdentifierList.of_json
+                                      consumerIdentifiers) ())
+           (Some Values.RegisterNamespaceOutputMessage.to_json)
+           (Some Values.RegisterNamespaceOutputMessage.error_to_json)])
 let reject_data_share =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2960,6 +3628,10 @@ let restore_from_cluster_snapshot =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and snapshotIdentifier =
+         flag "snapshot-identifier" (optional string) ~doc:"STRING String"
+       and snapshotArn =
+         flag "snapshot-arn" (optional string) ~doc:"STRING String"
        and snapshotClusterIdentifier =
          flag "snapshot-cluster-identifier" (optional string)
            ~doc:"STRING String"
@@ -3035,15 +3707,29 @@ let restore_from_cluster_snapshot =
            ~doc:"STRING String"
        and encrypted =
          flag "encrypted" (optional bool) ~doc:"BOOL BooleanOptional"
+       and manageMasterPassword =
+         flag "manage-master-password" (optional bool)
+           ~doc:"BOOL BooleanOptional"
+       and masterPasswordSecretKmsKeyId =
+         flag "master-password-secret-kms-key-id" (optional string)
+           ~doc:"STRING String"
+       and ipAddressType =
+         flag "ip-address-type" (optional string) ~doc:"STRING String"
+       and multiAZ =
+         flag "multi-a-z" (optional bool) ~doc:"BOOL BooleanOptional"
+       and catalogName =
+         flag "catalog-name" (optional string)
+           ~doc:"STRING CatalogNameString"
+       and redshiftIdcApplicationArn =
+         flag "redshift-idc-application-arn" (optional string)
+           ~doc:"STRING String"
        and clusterIdentifier =
-         flag "cluster-identifier" (required string) ~doc:"STRING String"
-       and snapshotIdentifier =
-         flag "snapshot-identifier" (required string) ~doc:"STRING String" in
+         flag "cluster-identifier" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.restore_from_cluster_snapshot
-           (Values.RestoreFromClusterSnapshotMessage.make
-              ?snapshotClusterIdentifier ?port ?availabilityZone
+           (Values.RestoreFromClusterSnapshotMessage.make ?snapshotIdentifier
+              ?snapshotArn ?snapshotClusterIdentifier ?port ?availabilityZone
               ?allowVersionUpgrade ?clusterSubnetGroupName
               ?publiclyAccessible ?ownerAccount
               ?hsmClientCertificateIdentifier ?hsmConfigurationIdentifier
@@ -3064,8 +3750,9 @@ let restore_from_cluster_snapshot =
                                           ~f:Values.AquaConfigurationStatus.of_json
                                           aquaConfigurationStatus)
               ?defaultIamRoleArn ?reservedNodeId
-              ?targetReservedNodeOfferingId ?encrypted ~clusterIdentifier
-              ~snapshotIdentifier ())
+              ?targetReservedNodeOfferingId ?encrypted ?manageMasterPassword
+              ?masterPasswordSecretKmsKeyId ?ipAddressType ?multiAZ
+              ?catalogName ?redshiftIdcApplicationArn ~clusterIdentifier ())
            (Some Values.RestoreFromClusterSnapshotResult.to_json)
            (Some Values.RestoreFromClusterSnapshotResult.error_to_json)])
 let restore_table_from_cluster_snapshot =
@@ -3187,19 +3874,21 @@ let revoke_snapshot_access =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and snapshotIdentifier =
+         flag "snapshot-identifier" (optional string) ~doc:"STRING String"
+       and snapshotArn =
+         flag "snapshot-arn" (optional string) ~doc:"STRING String"
        and snapshotClusterIdentifier =
          flag "snapshot-cluster-identifier" (optional string)
            ~doc:"STRING String"
-       and snapshotIdentifier =
-         flag "snapshot-identifier" (required string) ~doc:"STRING String"
        and accountWithRestoreAccess =
          flag "account-with-restore-access" (required string)
            ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.revoke_snapshot_access
-           (Values.RevokeSnapshotAccessMessage.make
-              ?snapshotClusterIdentifier ~snapshotIdentifier
+           (Values.RevokeSnapshotAccessMessage.make ?snapshotIdentifier
+              ?snapshotArn ?snapshotClusterIdentifier
               ~accountWithRestoreAccess ())
            (Some Values.RevokeSnapshotAccessResult.to_json)
            (Some Values.RevokeSnapshotAccessResult.error_to_json)])
@@ -3278,10 +3967,13 @@ let main =
     ("create-cluster-security-group", create_cluster_security_group);
     ("create-cluster-snapshot", create_cluster_snapshot);
     ("create-cluster-subnet-group", create_cluster_subnet_group);
+    ("create-custom-domain-association", create_custom_domain_association);
     ("create-endpoint-access", create_endpoint_access);
     ("create-event-subscription", create_event_subscription);
     ("create-hsm-client-certificate", create_hsm_client_certificate);
     ("create-hsm-configuration", create_hsm_configuration);
+    ("create-integration", create_integration);
+    ("create-redshift-idc-application", create_redshift_idc_application);
     ("create-scheduled-action", create_scheduled_action);
     ("create-snapshot-copy-grant", create_snapshot_copy_grant);
     ("create-snapshot-schedule", create_snapshot_schedule);
@@ -3294,16 +3986,21 @@ let main =
     ("delete-cluster-security-group", delete_cluster_security_group);
     ("delete-cluster-snapshot", delete_cluster_snapshot);
     ("delete-cluster-subnet-group", delete_cluster_subnet_group);
+    ("delete-custom-domain-association", delete_custom_domain_association);
     ("delete-endpoint-access", delete_endpoint_access);
     ("delete-event-subscription", delete_event_subscription);
     ("delete-hsm-client-certificate", delete_hsm_client_certificate);
     ("delete-hsm-configuration", delete_hsm_configuration);
+    ("delete-integration", delete_integration);
     ("delete-partner", delete_partner);
+    ("delete-redshift-idc-application", delete_redshift_idc_application);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-scheduled-action", delete_scheduled_action);
     ("delete-snapshot-copy-grant", delete_snapshot_copy_grant);
     ("delete-snapshot-schedule", delete_snapshot_schedule);
     ("delete-tags", delete_tags);
     ("delete-usage-limit", delete_usage_limit);
+    ("deregister-namespace", deregister_namespace);
     ("describe-account-attributes", describe_account_attributes);
     ("describe-authentication-profiles", describe_authentication_profiles);
     ("describe-cluster-db-revisions", describe_cluster_db_revisions);
@@ -3315,6 +4012,8 @@ let main =
     ("describe-cluster-tracks", describe_cluster_tracks);
     ("describe-cluster-versions", describe_cluster_versions);
     ("describe-clusters", describe_clusters);
+    ("describe-custom-domain-associations",
+      describe_custom_domain_associations);
     ("describe-data-shares", describe_data_shares);
     ("describe-data-shares-for-consumer", describe_data_shares_for_consumer);
     ("describe-data-shares-for-producer", describe_data_shares_for_producer);
@@ -3327,12 +4026,16 @@ let main =
     ("describe-events", describe_events);
     ("describe-hsm-client-certificates", describe_hsm_client_certificates);
     ("describe-hsm-configurations", describe_hsm_configurations);
+    ("describe-inbound-integrations", describe_inbound_integrations);
+    ("describe-integrations", describe_integrations);
     ("describe-logging-status", describe_logging_status);
     ("describe-node-configuration-options",
       describe_node_configuration_options);
     ("describe-orderable-cluster-options",
       describe_orderable_cluster_options);
     ("describe-partners", describe_partners);
+    ("describe-redshift-idc-applications",
+      describe_redshift_idc_applications);
     ("describe-reserved-node-exchange-status",
       describe_reserved_node_exchange_status);
     ("describe-reserved-node-offerings", describe_reserved_node_offerings);
@@ -3350,11 +4053,17 @@ let main =
     ("disassociate-data-share-consumer", disassociate_data_share_consumer);
     ("enable-logging", enable_logging);
     ("enable-snapshot-copy", enable_snapshot_copy);
+    ("failover-primary-compute", failover_primary_compute);
     ("get-cluster-credentials", get_cluster_credentials);
+    ("get-cluster-credentials-with-i-a-m",
+      get_cluster_credentials_with_i_a_m);
+    ("get-identity-center-auth-token", get_identity_center_auth_token);
     ("get-reserved-node-exchange-configuration-options",
       get_reserved_node_exchange_configuration_options);
     ("get-reserved-node-exchange-offerings",
       get_reserved_node_exchange_offerings);
+    ("get-resource-policy", get_resource_policy);
+    ("list-recommendations", list_recommendations);
     ("modify-aqua-configuration", modify_aqua_configuration);
     ("modify-authentication-profile", modify_authentication_profile);
     ("modify-cluster", modify_cluster);
@@ -3365,8 +4074,12 @@ let main =
     ("modify-cluster-snapshot", modify_cluster_snapshot);
     ("modify-cluster-snapshot-schedule", modify_cluster_snapshot_schedule);
     ("modify-cluster-subnet-group", modify_cluster_subnet_group);
+    ("modify-custom-domain-association", modify_custom_domain_association);
     ("modify-endpoint-access", modify_endpoint_access);
     ("modify-event-subscription", modify_event_subscription);
+    ("modify-integration", modify_integration);
+    ("modify-lakehouse-configuration", modify_lakehouse_configuration);
+    ("modify-redshift-idc-application", modify_redshift_idc_application);
     ("modify-scheduled-action", modify_scheduled_action);
     ("modify-snapshot-copy-retention-period",
       modify_snapshot_copy_retention_period);
@@ -3374,7 +4087,9 @@ let main =
     ("modify-usage-limit", modify_usage_limit);
     ("pause-cluster", pause_cluster);
     ("purchase-reserved-node-offering", purchase_reserved_node_offering);
+    ("put-resource-policy", put_resource_policy);
     ("reboot-cluster", reboot_cluster);
+    ("register-namespace", register_namespace);
     ("reject-data-share", reject_data_share);
     ("reset-cluster-parameter-group", reset_cluster_parameter_group);
     ("resize-cluster", resize_cluster);

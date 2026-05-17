@@ -55,6 +55,8 @@ let create_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDomain input
 let create_domain_entry ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDomainEntry input
+let create_g_u_i_session_access_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateGUISessionAccessDetails input
 let create_instance_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInstanceSnapshot input
 let create_instances ?endpoint_url ?cfg input =
@@ -170,6 +172,8 @@ let get_container_service_powers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContainerServicePowers input
 let get_container_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContainerServices input
+let get_cost_estimate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCostEstimate input
 let get_disk ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDisk input
 let get_disk_snapshot ?endpoint_url ?cfg input =
@@ -218,6 +222,8 @@ let get_load_balancer_metric_data ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLoadBalancerMetricData input
 let get_load_balancer_tls_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLoadBalancerTlsCertificates input
+let get_load_balancer_tls_policies ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLoadBalancerTlsPolicies input
 let get_load_balancers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLoadBalancers input
 let get_operation ?endpoint_url ?cfg input =
@@ -253,6 +259,8 @@ let get_relational_database_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRelationalDatabaseSnapshots input
 let get_relational_databases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRelationalDatabases input
+let get_setup_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSetupHistory input
 let get_static_ip ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStaticIp input
 let get_static_ips ?endpoint_url ?cfg input =
@@ -285,10 +293,16 @@ let set_ip_address_type ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetIpAddressType input
 let set_resource_access_for_bucket ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetResourceAccessForBucket input
+let setup_instance_https ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SetupInstanceHttps input
+let start_g_u_i_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartGUISession input
 let start_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartInstance input
 let start_relational_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartRelationalDatabase input
+let stop_g_u_i_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopGUISession input
 let stop_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopInstance input
 let stop_relational_database ?endpoint_url ?cfg input =
@@ -313,6 +327,8 @@ let update_distribution_bundle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDistributionBundle input
 let update_domain_entry ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDomainEntry input
+let update_instance_metadata_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateInstanceMetadataOptions input
 let update_load_balancer_attribute ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLoadBalancerAttribute input
 let update_relational_database ?endpoint_url ?cfg input =

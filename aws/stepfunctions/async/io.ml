@@ -15,16 +15,26 @@ let create_activity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateActivity input
 let create_state_machine ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStateMachine input
+let create_state_machine_alias ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateStateMachineAlias input
 let delete_activity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteActivity input
 let delete_state_machine ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStateMachine input
+let delete_state_machine_alias ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteStateMachineAlias input
+let delete_state_machine_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteStateMachineVersion input
 let describe_activity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeActivity input
 let describe_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExecution input
+let describe_map_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMapRun input
 let describe_state_machine ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStateMachine input
+let describe_state_machine_alias ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeStateMachineAlias input
 let describe_state_machine_for_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStateMachineForExecution input
 let get_activity_task ?endpoint_url ?cfg input =
@@ -35,10 +45,20 @@ let list_activities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListActivities input
 let list_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExecutions input
+let list_map_runs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMapRuns input
+let list_state_machine_aliases ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStateMachineAliases input
+let list_state_machine_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStateMachineVersions input
 let list_state_machines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStateMachines input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let publish_state_machine_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PublishStateMachineVersion input
+let redrive_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RedriveExecution input
 let send_task_failure ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendTaskFailure input
 let send_task_heartbeat ?endpoint_url ?cfg input =
@@ -53,7 +73,15 @@ let stop_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopExecution input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let test_state ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TestState input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_map_run ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMapRun input
 let update_state_machine ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateStateMachine input
+let update_state_machine_alias ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateStateMachineAlias input
+let validate_state_machine_definition ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ValidateStateMachineDefinition input

@@ -12,6 +12,8 @@ type ('i, 'o, 'e) t =
   GetTagKeysOutput.error) t 
   | GetTagValues: (GetTagValuesInput.t, GetTagValuesOutput.t,
   GetTagValuesOutput.error) t 
+  | ListRequiredTags: (ListRequiredTagsInput.t, ListRequiredTagsOutput.t,
+  ListRequiredTagsOutput.error) t 
   | StartReportCreation: (StartReportCreationInput.t,
   StartReportCreationOutput.t, StartReportCreationOutput.error) t 
   | TagResources: (TagResourcesInput.t, TagResourcesOutput.t,
@@ -25,6 +27,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetResources -> `POST
   | GetTagKeys -> `POST
   | GetTagValues -> `POST
+  | ListRequiredTags -> `POST
   | StartReportCreation -> `POST
   | TagResources -> `POST
   | UntagResources -> `POST
@@ -36,6 +39,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetResources -> (Format.kasprintf Uri.of_string) "/"
       | GetTagKeys -> (Format.kasprintf Uri.of_string) "/"
       | GetTagValues -> (Format.kasprintf Uri.of_string) "/"
+      | ListRequiredTags -> (Format.kasprintf Uri.of_string) "/"
       | StartReportCreation -> (Format.kasprintf Uri.of_string) "/"
       | TagResources -> (Format.kasprintf Uri.of_string) "/"
       | UntagResources -> (Format.kasprintf Uri.of_string) "/")
@@ -83,6 +87,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "ResourceGroupsTaggingAPI_20170126.GetTagValues")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListRequiredTags ->
+      let json = ListRequiredTagsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "ResourceGroupsTaggingAPI_20170126.ListRequiredTags")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartReportCreation ->
       let json = StartReportCreationInput.to_json req in
@@ -167,6 +180,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetTagValuesOutput.of_json json)
       else Error (parse_aws_error (Some GetTagValuesOutput.error_of_json))
+  | ListRequiredTags ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListRequiredTagsOutput.of_json json)
+      else
+        Error (parse_aws_error (Some ListRequiredTagsOutput.error_of_json))
   | StartReportCreation ->
       if is_success
       then

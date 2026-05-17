@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let delete_alarm_mute_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAlarmMuteRule input
 let delete_alarms ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAlarms input
 let delete_anomaly_detector ?endpoint_url ?cfg input =
@@ -21,6 +23,8 @@ let delete_insight_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteInsightRules input
 let delete_metric_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMetricStream input
+let describe_alarm_contributors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAlarmContributors input
 let describe_alarm_history ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAlarmHistory input
 let describe_alarms ?endpoint_url ?cfg input =
@@ -39,6 +43,8 @@ let enable_alarm_actions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableAlarmActions input
 let enable_insight_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableInsightRules input
+let get_alarm_mute_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAlarmMuteRule input
 let get_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDashboard input
 let get_insight_rule_report ?endpoint_url ?cfg input =
@@ -51,14 +57,22 @@ let get_metric_stream ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMetricStream input
 let get_metric_widget_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMetricWidgetImage input
+let get_o_tel_enrichment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetOTelEnrichment input
+let list_alarm_mute_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAlarmMuteRules input
 let list_dashboards ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDashboards input
+let list_managed_insight_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListManagedInsightRules input
 let list_metric_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMetricStreams input
 let list_metrics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMetrics input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_alarm_mute_rule ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAlarmMuteRule input
 let put_anomaly_detector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAnomalyDetector input
 let put_composite_alarm ?endpoint_url ?cfg input =
@@ -67,6 +81,8 @@ let put_dashboard ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDashboard input
 let put_insight_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutInsightRule input
+let put_managed_insight_rules ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutManagedInsightRules input
 let put_metric_alarm ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutMetricAlarm input
 let put_metric_data ?endpoint_url ?cfg input =
@@ -77,8 +93,12 @@ let set_alarm_state ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetAlarmState input
 let start_metric_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMetricStreams input
+let start_o_tel_enrichment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartOTelEnrichment input
 let stop_metric_streams ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopMetricStreams input
+let stop_o_tel_enrichment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopOTelEnrichment input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

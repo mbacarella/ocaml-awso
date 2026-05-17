@@ -2,6 +2,8 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateAccessPolicy: (AssociateAccessPolicyRequest.t,
+  AssociateAccessPolicyResponse.t, AssociateAccessPolicyResponse.error) t 
   | AssociateEncryptionConfig: (AssociateEncryptionConfigRequest.t,
   AssociateEncryptionConfigResponse.t,
   AssociateEncryptionConfigResponse.error) t 
@@ -9,113 +11,222 @@ type ('i, 'o, 'e) t =
   (AssociateIdentityProviderConfigRequest.t,
   AssociateIdentityProviderConfigResponse.t,
   AssociateIdentityProviderConfigResponse.error) t 
+  | CreateAccessEntry: (CreateAccessEntryRequest.t,
+  CreateAccessEntryResponse.t, CreateAccessEntryResponse.error) t 
   | CreateAddon: (CreateAddonRequest.t, CreateAddonResponse.t,
   CreateAddonResponse.error) t 
+  | CreateCapability: (CreateCapabilityRequest.t, CreateCapabilityResponse.t,
+  CreateCapabilityResponse.error) t 
   | CreateCluster: (CreateClusterRequest.t, CreateClusterResponse.t,
   CreateClusterResponse.error) t 
+  | CreateEksAnywhereSubscription: (CreateEksAnywhereSubscriptionRequest.t,
+  CreateEksAnywhereSubscriptionResponse.t,
+  CreateEksAnywhereSubscriptionResponse.error) t 
   | CreateFargateProfile: (CreateFargateProfileRequest.t,
   CreateFargateProfileResponse.t, CreateFargateProfileResponse.error) t 
   | CreateNodegroup: (CreateNodegroupRequest.t, CreateNodegroupResponse.t,
   CreateNodegroupResponse.error) t 
+  | CreatePodIdentityAssociation: (CreatePodIdentityAssociationRequest.t,
+  CreatePodIdentityAssociationResponse.t,
+  CreatePodIdentityAssociationResponse.error) t 
+  | DeleteAccessEntry: (DeleteAccessEntryRequest.t,
+  DeleteAccessEntryResponse.t, DeleteAccessEntryResponse.error) t 
   | DeleteAddon: (DeleteAddonRequest.t, DeleteAddonResponse.t,
   DeleteAddonResponse.error) t 
+  | DeleteCapability: (DeleteCapabilityRequest.t, DeleteCapabilityResponse.t,
+  DeleteCapabilityResponse.error) t 
   | DeleteCluster: (DeleteClusterRequest.t, DeleteClusterResponse.t,
   DeleteClusterResponse.error) t 
+  | DeleteEksAnywhereSubscription: (DeleteEksAnywhereSubscriptionRequest.t,
+  DeleteEksAnywhereSubscriptionResponse.t,
+  DeleteEksAnywhereSubscriptionResponse.error) t 
   | DeleteFargateProfile: (DeleteFargateProfileRequest.t,
   DeleteFargateProfileResponse.t, DeleteFargateProfileResponse.error) t 
   | DeleteNodegroup: (DeleteNodegroupRequest.t, DeleteNodegroupResponse.t,
   DeleteNodegroupResponse.error) t 
+  | DeletePodIdentityAssociation: (DeletePodIdentityAssociationRequest.t,
+  DeletePodIdentityAssociationResponse.t,
+  DeletePodIdentityAssociationResponse.error) t 
   | DeregisterCluster: (DeregisterClusterRequest.t,
   DeregisterClusterResponse.t, DeregisterClusterResponse.error) t 
+  | DescribeAccessEntry: (DescribeAccessEntryRequest.t,
+  DescribeAccessEntryResponse.t, DescribeAccessEntryResponse.error) t 
   | DescribeAddon: (DescribeAddonRequest.t, DescribeAddonResponse.t,
   DescribeAddonResponse.error) t 
+  | DescribeAddonConfiguration: (DescribeAddonConfigurationRequest.t,
+  DescribeAddonConfigurationResponse.t,
+  DescribeAddonConfigurationResponse.error) t 
   | DescribeAddonVersions: (DescribeAddonVersionsRequest.t,
   DescribeAddonVersionsResponse.t, DescribeAddonVersionsResponse.error) t 
+  | DescribeCapability: (DescribeCapabilityRequest.t,
+  DescribeCapabilityResponse.t, DescribeCapabilityResponse.error) t 
   | DescribeCluster: (DescribeClusterRequest.t, DescribeClusterResponse.t,
   DescribeClusterResponse.error) t 
+  | DescribeClusterVersions: (DescribeClusterVersionsRequest.t,
+  DescribeClusterVersionsResponse.t, DescribeClusterVersionsResponse.error) t
+  
+  | DescribeEksAnywhereSubscription:
+  (DescribeEksAnywhereSubscriptionRequest.t,
+  DescribeEksAnywhereSubscriptionResponse.t,
+  DescribeEksAnywhereSubscriptionResponse.error) t 
   | DescribeFargateProfile: (DescribeFargateProfileRequest.t,
   DescribeFargateProfileResponse.t, DescribeFargateProfileResponse.error) t 
   | DescribeIdentityProviderConfig: (DescribeIdentityProviderConfigRequest.t,
   DescribeIdentityProviderConfigResponse.t,
   DescribeIdentityProviderConfigResponse.error) t 
+  | DescribeInsight: (DescribeInsightRequest.t, DescribeInsightResponse.t,
+  DescribeInsightResponse.error) t 
+  | DescribeInsightsRefresh: (DescribeInsightsRefreshRequest.t,
+  DescribeInsightsRefreshResponse.t, DescribeInsightsRefreshResponse.error) t
+  
   | DescribeNodegroup: (DescribeNodegroupRequest.t,
   DescribeNodegroupResponse.t, DescribeNodegroupResponse.error) t 
+  | DescribePodIdentityAssociation: (DescribePodIdentityAssociationRequest.t,
+  DescribePodIdentityAssociationResponse.t,
+  DescribePodIdentityAssociationResponse.error) t 
   | DescribeUpdate: (DescribeUpdateRequest.t, DescribeUpdateResponse.t,
   DescribeUpdateResponse.error) t 
+  | DisassociateAccessPolicy: (DisassociateAccessPolicyRequest.t,
+  DisassociateAccessPolicyResponse.t, DisassociateAccessPolicyResponse.error)
+  t 
   | DisassociateIdentityProviderConfig:
   (DisassociateIdentityProviderConfigRequest.t,
   DisassociateIdentityProviderConfigResponse.t,
   DisassociateIdentityProviderConfigResponse.error) t 
+  | ListAccessEntries: (ListAccessEntriesRequest.t,
+  ListAccessEntriesResponse.t, ListAccessEntriesResponse.error) t 
+  | ListAccessPolicies: (ListAccessPoliciesRequest.t,
+  ListAccessPoliciesResponse.t, ListAccessPoliciesResponse.error) t 
   | ListAddons: (ListAddonsRequest.t, ListAddonsResponse.t,
   ListAddonsResponse.error) t 
+  | ListAssociatedAccessPolicies: (ListAssociatedAccessPoliciesRequest.t,
+  ListAssociatedAccessPoliciesResponse.t,
+  ListAssociatedAccessPoliciesResponse.error) t 
+  | ListCapabilities: (ListCapabilitiesRequest.t, ListCapabilitiesResponse.t,
+  ListCapabilitiesResponse.error) t 
   | ListClusters: (ListClustersRequest.t, ListClustersResponse.t,
   ListClustersResponse.error) t 
+  | ListEksAnywhereSubscriptions: (ListEksAnywhereSubscriptionsRequest.t,
+  ListEksAnywhereSubscriptionsResponse.t,
+  ListEksAnywhereSubscriptionsResponse.error) t 
   | ListFargateProfiles: (ListFargateProfilesRequest.t,
   ListFargateProfilesResponse.t, ListFargateProfilesResponse.error) t 
   | ListIdentityProviderConfigs: (ListIdentityProviderConfigsRequest.t,
   ListIdentityProviderConfigsResponse.t,
   ListIdentityProviderConfigsResponse.error) t 
+  | ListInsights: (ListInsightsRequest.t, ListInsightsResponse.t,
+  ListInsightsResponse.error) t 
   | ListNodegroups: (ListNodegroupsRequest.t, ListNodegroupsResponse.t,
   ListNodegroupsResponse.error) t 
+  | ListPodIdentityAssociations: (ListPodIdentityAssociationsRequest.t,
+  ListPodIdentityAssociationsResponse.t,
+  ListPodIdentityAssociationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListUpdates: (ListUpdatesRequest.t, ListUpdatesResponse.t,
   ListUpdatesResponse.error) t 
   | RegisterCluster: (RegisterClusterRequest.t, RegisterClusterResponse.t,
   RegisterClusterResponse.error) t 
+  | StartInsightsRefresh: (StartInsightsRefreshRequest.t,
+  StartInsightsRefreshResponse.t, StartInsightsRefreshResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAccessEntry: (UpdateAccessEntryRequest.t,
+  UpdateAccessEntryResponse.t, UpdateAccessEntryResponse.error) t 
   | UpdateAddon: (UpdateAddonRequest.t, UpdateAddonResponse.t,
   UpdateAddonResponse.error) t 
+  | UpdateCapability: (UpdateCapabilityRequest.t, UpdateCapabilityResponse.t,
+  UpdateCapabilityResponse.error) t 
   | UpdateClusterConfig: (UpdateClusterConfigRequest.t,
   UpdateClusterConfigResponse.t, UpdateClusterConfigResponse.error) t 
   | UpdateClusterVersion: (UpdateClusterVersionRequest.t,
   UpdateClusterVersionResponse.t, UpdateClusterVersionResponse.error) t 
+  | UpdateEksAnywhereSubscription: (UpdateEksAnywhereSubscriptionRequest.t,
+  UpdateEksAnywhereSubscriptionResponse.t,
+  UpdateEksAnywhereSubscriptionResponse.error) t 
   | UpdateNodegroupConfig: (UpdateNodegroupConfigRequest.t,
   UpdateNodegroupConfigResponse.t, UpdateNodegroupConfigResponse.error) t 
   | UpdateNodegroupVersion: (UpdateNodegroupVersionRequest.t,
   UpdateNodegroupVersionResponse.t, UpdateNodegroupVersionResponse.error) t 
+  | UpdatePodIdentityAssociation: (UpdatePodIdentityAssociationRequest.t,
+  UpdatePodIdentityAssociationResponse.t,
+  UpdatePodIdentityAssociationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateAccessPolicy -> `POST
   | AssociateEncryptionConfig -> `POST
   | AssociateIdentityProviderConfig -> `POST
+  | CreateAccessEntry -> `POST
   | CreateAddon -> `POST
+  | CreateCapability -> `POST
   | CreateCluster -> `POST
+  | CreateEksAnywhereSubscription -> `POST
   | CreateFargateProfile -> `POST
   | CreateNodegroup -> `POST
+  | CreatePodIdentityAssociation -> `POST
+  | DeleteAccessEntry -> `DELETE
   | DeleteAddon -> `DELETE
+  | DeleteCapability -> `DELETE
   | DeleteCluster -> `DELETE
+  | DeleteEksAnywhereSubscription -> `DELETE
   | DeleteFargateProfile -> `DELETE
   | DeleteNodegroup -> `DELETE
+  | DeletePodIdentityAssociation -> `DELETE
   | DeregisterCluster -> `DELETE
+  | DescribeAccessEntry -> `GET
   | DescribeAddon -> `GET
+  | DescribeAddonConfiguration -> `GET
   | DescribeAddonVersions -> `GET
+  | DescribeCapability -> `GET
   | DescribeCluster -> `GET
+  | DescribeClusterVersions -> `GET
+  | DescribeEksAnywhereSubscription -> `GET
   | DescribeFargateProfile -> `GET
   | DescribeIdentityProviderConfig -> `POST
+  | DescribeInsight -> `GET
+  | DescribeInsightsRefresh -> `GET
   | DescribeNodegroup -> `GET
+  | DescribePodIdentityAssociation -> `GET
   | DescribeUpdate -> `GET
+  | DisassociateAccessPolicy -> `DELETE
   | DisassociateIdentityProviderConfig -> `POST
+  | ListAccessEntries -> `GET
+  | ListAccessPolicies -> `GET
   | ListAddons -> `GET
+  | ListAssociatedAccessPolicies -> `GET
+  | ListCapabilities -> `GET
   | ListClusters -> `GET
+  | ListEksAnywhereSubscriptions -> `GET
   | ListFargateProfiles -> `GET
   | ListIdentityProviderConfigs -> `GET
+  | ListInsights -> `POST
   | ListNodegroups -> `GET
+  | ListPodIdentityAssociations -> `GET
   | ListTagsForResource -> `GET
   | ListUpdates -> `GET
   | RegisterCluster -> `POST
+  | StartInsightsRefresh -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateAccessEntry -> `POST
   | UpdateAddon -> `POST
+  | UpdateCapability -> `POST
   | UpdateClusterConfig -> `POST
   | UpdateClusterVersion -> `POST
+  | UpdateEksAnywhereSubscription -> `POST
   | UpdateNodegroupConfig -> `POST
   | UpdateNodegroupVersion -> `POST
+  | UpdatePodIdentityAssociation -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateAccessPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/access-entries/%s/access-policies"
+            (String_.to_header x.AssociateAccessPolicyRequest.clusterName)
+            (String_.to_header x.AssociateAccessPolicyRequest.principalArn)
       | AssociateEncryptionConfig ->
           (Format.kasprintf Uri.of_string)
             "/clusters/%s/encryption-config/associate"
@@ -125,16 +236,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/clusters/%s/identity-provider-configs/associate"
             (String_.to_header
                x.AssociateIdentityProviderConfigRequest.clusterName)
+      | CreateAccessEntry ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/access-entries"
+            (String_.to_header x.CreateAccessEntryRequest.clusterName)
       | CreateAddon ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/addons"
             (ClusterName.to_header x.CreateAddonRequest.clusterName)
+      | CreateCapability ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/capabilities"
+            (String_.to_header x.CreateCapabilityRequest.clusterName)
       | CreateCluster -> (Format.kasprintf Uri.of_string) "/clusters"
+      | CreateEksAnywhereSubscription ->
+          (Format.kasprintf Uri.of_string) "/eks-anywhere-subscriptions"
       | CreateFargateProfile ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/fargate-profiles"
             (String_.to_header x.CreateFargateProfileRequest.clusterName)
       | CreateNodegroup ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/node-groups"
             (String_.to_header x.CreateNodegroupRequest.clusterName)
+      | CreatePodIdentityAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/pod-identity-associations"
+            (String_.to_header
+               x.CreatePodIdentityAssociationRequest.clusterName)
+      | DeleteAccessEntry ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/access-entries/%s"
+            (String_.to_header x.DeleteAccessEntryRequest.clusterName)
+            (String_.to_header x.DeleteAccessEntryRequest.principalArn)
       | DeleteAddon ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters/%s/addons/%s"
@@ -143,9 +271,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Option.map ~f:(fun v -> ("preserve", (Boolean.to_header v)))
                   x.preserve])
+      | DeleteCapability ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/capabilities/%s"
+            (String_.to_header x.DeleteCapabilityRequest.clusterName)
+            (String_.to_header x.DeleteCapabilityRequest.capabilityName)
       | DeleteCluster ->
           (Format.kasprintf Uri.of_string) "/clusters/%s"
             (String_.to_header x.DeleteClusterRequest.name)
+      | DeleteEksAnywhereSubscription ->
+          (Format.kasprintf Uri.of_string) "/eks-anywhere-subscriptions/%s"
+            (String_.to_header x.DeleteEksAnywhereSubscriptionRequest.id)
       | DeleteFargateProfile ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/fargate-profiles/%s"
             (String_.to_header x.DeleteFargateProfileRequest.clusterName)
@@ -155,13 +290,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/clusters/%s/node-groups/%s"
             (String_.to_header x.DeleteNodegroupRequest.clusterName)
             (String_.to_header x.DeleteNodegroupRequest.nodegroupName)
+      | DeletePodIdentityAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/pod-identity-associations/%s"
+            (String_.to_header
+               x.DeletePodIdentityAssociationRequest.clusterName)
+            (String_.to_header
+               x.DeletePodIdentityAssociationRequest.associationId)
       | DeregisterCluster ->
           (Format.kasprintf Uri.of_string) "/cluster-registrations/%s"
             (String_.to_header x.DeregisterClusterRequest.name)
+      | DescribeAccessEntry ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/access-entries/%s"
+            (String_.to_header x.DescribeAccessEntryRequest.clusterName)
+            (String_.to_header x.DescribeAccessEntryRequest.principalArn)
       | DescribeAddon ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/addons/%s"
             (ClusterName.to_header x.DescribeAddonRequest.clusterName)
             (String_.to_header x.DescribeAddonRequest.addonName)
+      | DescribeAddonConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/addons/configuration-schemas")
+            (List.filter_opt
+               [Some ("addonName", (String_.to_header x.addonName));
+               Some ("addonVersion", (String_.to_header x.addonVersion))])
       | DescribeAddonVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/addons/supported-versions")
@@ -177,10 +329,53 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken;
                Option.map ~f:(fun v -> ("addonName", (String_.to_header v)))
-                 x.addonName])
+                 x.addonName;
+               Option.map ~f:(fun v -> ("types", (StringList.to_header v)))
+                 x.types;
+               Option.map
+                 ~f:(fun v -> ("publishers", (StringList.to_header v)))
+                 x.publishers;
+               Option.map ~f:(fun v -> ("owners", (StringList.to_header v)))
+                 x.owners])
+      | DescribeCapability ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/capabilities/%s"
+            (String_.to_header x.DescribeCapabilityRequest.clusterName)
+            (String_.to_header x.DescribeCapabilityRequest.capabilityName)
       | DescribeCluster ->
           (Format.kasprintf Uri.of_string) "/clusters/%s"
             (String_.to_header x.DescribeClusterRequest.name)
+      | DescribeClusterVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/cluster-versions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("clusterType", (String_.to_header v)))
+                  x.clusterType;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (DescribeClusterVersionMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("defaultOnly", (BoxedBoolean.to_header v)))
+                 x.defaultOnly;
+               Option.map
+                 ~f:(fun v -> ("includeAll", (BoxedBoolean.to_header v)))
+                 x.includeAll;
+               Option.map
+                 ~f:(fun v -> ("clusterVersions", (StringList.to_header v)))
+                 x.clusterVersions;
+               Option.map
+                 ~f:(fun v -> ("status", (ClusterVersionStatus.to_header v)))
+                 x.status;
+               Option.map
+                 ~f:(fun v -> ("versionStatus", (VersionStatus.to_header v)))
+                 x.versionStatus])
+      | DescribeEksAnywhereSubscription ->
+          (Format.kasprintf Uri.of_string) "/eks-anywhere-subscriptions/%s"
+            (String_.to_header x.DescribeEksAnywhereSubscriptionRequest.id)
       | DescribeFargateProfile ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/fargate-profiles/%s"
             (String_.to_header x.DescribeFargateProfileRequest.clusterName)
@@ -191,10 +386,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/clusters/%s/identity-provider-configs/describe"
             (String_.to_header
                x.DescribeIdentityProviderConfigRequest.clusterName)
+      | DescribeInsight ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/insights/%s"
+            (String_.to_header x.DescribeInsightRequest.clusterName)
+            (String_.to_header x.DescribeInsightRequest.id)
+      | DescribeInsightsRefresh ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/insights-refresh"
+            (String_.to_header x.DescribeInsightsRefreshRequest.clusterName)
       | DescribeNodegroup ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/node-groups/%s"
             (String_.to_header x.DescribeNodegroupRequest.clusterName)
             (String_.to_header x.DescribeNodegroupRequest.nodegroupName)
+      | DescribePodIdentityAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/pod-identity-associations/%s"
+            (String_.to_header
+               x.DescribePodIdentityAssociationRequest.clusterName)
+            (String_.to_header
+               x.DescribePodIdentityAssociationRequest.associationId)
       | DescribeUpdate ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters/%s/updates/%s"
@@ -205,12 +414,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v -> ("nodegroupName", (String_.to_header v)))
                   x.nodegroupName;
                Option.map ~f:(fun v -> ("addonName", (String_.to_header v)))
-                 x.addonName])
+                 x.addonName;
+               Option.map
+                 ~f:(fun v -> ("capabilityName", (String_.to_header v)))
+                 x.capabilityName])
+      | DisassociateAccessPolicy ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/access-entries/%s/access-policies/%s"
+            (String_.to_header x.DisassociateAccessPolicyRequest.clusterName)
+            (String_.to_header x.DisassociateAccessPolicyRequest.principalArn)
+            (String_.to_header x.DisassociateAccessPolicyRequest.policyArn)
       | DisassociateIdentityProviderConfig ->
           (Format.kasprintf Uri.of_string)
             "/clusters/%s/identity-provider-configs/disassociate"
             (String_.to_header
                x.DisassociateIdentityProviderConfigRequest.clusterName)
+      | ListAccessEntries ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/clusters/%s/access-entries"
+               (String_.to_header x.ListAccessEntriesRequest.clusterName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("associatedPolicyArn", (String_.to_header v)))
+                  x.associatedPolicyArn;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListAccessEntriesRequestMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListAccessPolicies ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/access-policies")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListAccessPoliciesRequestMaxResults.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
       | ListAddons ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters/%s/addons"
@@ -223,6 +467,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken])
+      | ListAssociatedAccessPolicies ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/clusters/%s/access-entries/%s/access-policies"
+               (String_.to_header
+                  x.ListAssociatedAccessPoliciesRequest.clusterName)
+               (String_.to_header
+                  x.ListAssociatedAccessPoliciesRequest.principalArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListAssociatedAccessPoliciesRequestMaxResults.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListCapabilities ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/clusters/%s/capabilities"
+               (String_.to_header x.ListCapabilitiesRequest.clusterName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListCapabilitiesRequestMaxResults.to_header v)))
+                 x.maxResults])
       | ListClusters ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters")
@@ -237,6 +509,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("include", (IncludeClustersList.to_header v)))
                  x.include_])
+      | ListEksAnywhereSubscriptions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/eks-anywhere-subscriptions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults",
+                          (ListEksAnywhereSubscriptionsRequestMaxResults.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("includeStatus",
+                         (EksAnywhereSubscriptionStatusValues.to_header v)))
+                 x.includeStatus])
       | ListFargateProfiles ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters/%s/fargate-profiles"
@@ -263,6 +551,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                              v))) x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken])
+      | ListInsights ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/insights"
+            (String_.to_header x.ListInsightsRequest.clusterName)
       | ListNodegroups ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/clusters/%s/node-groups"
@@ -273,6 +564,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                         ("maxResults",
                           (ListNodegroupsRequestMaxResults.to_header v)))
                   x.maxResults;
+               Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListPodIdentityAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/clusters/%s/pod-identity-associations"
+               (String_.to_header
+                  x.ListPodIdentityAssociationsRequest.clusterName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("namespace", (String_.to_header v)))
+                  x.namespace;
+               Option.map
+                 ~f:(fun v -> ("serviceAccount", (String_.to_header v)))
+                 x.serviceAccount;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListPodIdentityAssociationsMaxResults.to_header v)))
+                 x.maxResults;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken])
       | ListTagsForResource ->
@@ -288,6 +598,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.nodegroupName;
                Option.map ~f:(fun v -> ("addonName", (String_.to_header v)))
                  x.addonName;
+               Option.map
+                 ~f:(fun v -> ("capabilityName", (String_.to_header v)))
+                 x.capabilityName;
                Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
                  x.nextToken;
                Option.map
@@ -297,6 +610,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults])
       | RegisterCluster ->
           (Format.kasprintf Uri.of_string) "/cluster-registrations"
+      | StartInsightsRefresh ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/insights-refresh"
+            (String_.to_header x.StartInsightsRefreshRequest.clusterName)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.TagResourceRequest.resourceArn)
@@ -306,16 +622,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateAccessEntry ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/access-entries/%s"
+            (String_.to_header x.UpdateAccessEntryRequest.clusterName)
+            (String_.to_header x.UpdateAccessEntryRequest.principalArn)
       | UpdateAddon ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/addons/%s/update"
             (ClusterName.to_header x.UpdateAddonRequest.clusterName)
             (String_.to_header x.UpdateAddonRequest.addonName)
+      | UpdateCapability ->
+          (Format.kasprintf Uri.of_string) "/clusters/%s/capabilities/%s"
+            (String_.to_header x.UpdateCapabilityRequest.clusterName)
+            (String_.to_header x.UpdateCapabilityRequest.capabilityName)
       | UpdateClusterConfig ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/update-config"
             (String_.to_header x.UpdateClusterConfigRequest.name)
       | UpdateClusterVersion ->
           (Format.kasprintf Uri.of_string) "/clusters/%s/updates"
             (String_.to_header x.UpdateClusterVersionRequest.name)
+      | UpdateEksAnywhereSubscription ->
+          (Format.kasprintf Uri.of_string) "/eks-anywhere-subscriptions/%s"
+            (String_.to_header x.UpdateEksAnywhereSubscriptionRequest.id)
       | UpdateNodegroupConfig ->
           (Format.kasprintf Uri.of_string)
             "/clusters/%s/node-groups/%s/update-config"
@@ -325,11 +652,42 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/clusters/%s/node-groups/%s/update-version"
             (String_.to_header x.UpdateNodegroupVersionRequest.clusterName)
-            (String_.to_header x.UpdateNodegroupVersionRequest.nodegroupName))
+            (String_.to_header x.UpdateNodegroupVersionRequest.nodegroupName)
+      | UpdatePodIdentityAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/clusters/%s/pod-identity-associations/%s"
+            (String_.to_header
+               x.UpdatePodIdentityAssociationRequest.clusterName)
+            (String_.to_header
+               x.UpdatePodIdentityAssociationRequest.associationId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AssociateAccessPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("policyArn",
+                           (String_.to_value
+                              req.AssociateAccessPolicyRequest.policyArn));
+                      Some
+                        ("accessScope",
+                          (AccessScope.to_value
+                             req.AssociateAccessPolicyRequest.accessScope))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | AssociateEncryptionConfig ->
       let (headers, body) =
         let headers =
@@ -381,6 +739,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAccessEntry ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("principalArn",
+                           (String_.to_value
+                              req.CreateAccessEntryRequest.principalArn));
+                      Option.map
+                        req.CreateAccessEntryRequest.kubernetesGroups
+                        ~f:(fun x ->
+                              ("kubernetesGroups", (StringList.to_value x)));
+                      Option.map req.CreateAccessEntryRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateAccessEntryRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.CreateAccessEntryRequest.username
+                        ~f:(fun x -> ("username", (String_.to_value x)));
+                      Option.map req.CreateAccessEntryRequest.type_
+                        ~f:(fun x -> ("type", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateAddon ->
       let (headers, body) =
         let headers =
@@ -406,7 +798,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("clientRequestToken", (String_.to_value x)));
                       Option.map req.CreateAddonRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateAddonRequest.configurationValues
+                        ~f:(fun x ->
+                              ("configurationValues", (String_.to_value x)));
+                      Option.map
+                        req.CreateAddonRequest.podIdentityAssociations
+                        ~f:(fun x ->
+                              ("podIdentityAssociations",
+                                (AddonPodIdentityAssociationsList.to_value x)));
+                      Option.map req.CreateAddonRequest.namespaceConfig
+                        ~f:(fun x ->
+                              ("namespaceConfig",
+                                (AddonNamespaceConfigRequest.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCapability ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("capabilityName",
+                           (String_.to_value
+                              req.CreateCapabilityRequest.capabilityName));
+                      Option.map
+                        req.CreateCapabilityRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Some
+                        ("type",
+                          (CapabilityType.to_value
+                             req.CreateCapabilityRequest.type_));
+                      Some
+                        ("roleArn",
+                          (String_.to_value
+                             req.CreateCapabilityRequest.roleArn));
+                      Option.map req.CreateCapabilityRequest.configuration
+                        ~f:(fun x ->
+                              ("configuration",
+                                (CapabilityConfigurationRequest.to_value x)));
+                      Option.map req.CreateCapabilityRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Some
+                        ("deletePropagationPolicy",
+                          (CapabilityDeletePropagationPolicy.to_value
+                             req.CreateCapabilityRequest.deletePropagationPolicy))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -451,7 +897,93 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateClusterRequest.encryptionConfig
                         ~f:(fun x ->
                               ("encryptionConfig",
-                                (EncryptionConfigList.to_value x)))])
+                                (EncryptionConfigList.to_value x)));
+                      Option.map req.CreateClusterRequest.outpostConfig
+                        ~f:(fun x ->
+                              ("outpostConfig",
+                                (OutpostConfigRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.accessConfig
+                        ~f:(fun x ->
+                              ("accessConfig",
+                                (CreateAccessConfigRequest.to_value x)));
+                      Option.map
+                        req.CreateClusterRequest.bootstrapSelfManagedAddons
+                        ~f:(fun x ->
+                              ("bootstrapSelfManagedAddons",
+                                (BoxedBoolean.to_value x)));
+                      Option.map req.CreateClusterRequest.upgradePolicy
+                        ~f:(fun x ->
+                              ("upgradePolicy",
+                                (UpgradePolicyRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.zonalShiftConfig
+                        ~f:(fun x ->
+                              ("zonalShiftConfig",
+                                (ZonalShiftConfigRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.remoteNetworkConfig
+                        ~f:(fun x ->
+                              ("remoteNetworkConfig",
+                                (RemoteNetworkConfigRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.computeConfig
+                        ~f:(fun x ->
+                              ("computeConfig",
+                                (ComputeConfigRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.storageConfig
+                        ~f:(fun x ->
+                              ("storageConfig",
+                                (StorageConfigRequest.to_value x)));
+                      Option.map req.CreateClusterRequest.deletionProtection
+                        ~f:(fun x ->
+                              ("deletionProtection",
+                                (BoxedBoolean.to_value x)));
+                      Option.map
+                        req.CreateClusterRequest.controlPlaneScalingConfig
+                        ~f:(fun x ->
+                              ("controlPlaneScalingConfig",
+                                (ControlPlaneScalingConfig.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateEksAnywhereSubscription ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (EksAnywhereSubscriptionName.to_value
+                              req.CreateEksAnywhereSubscriptionRequest.name));
+                      Some
+                        ("term",
+                          (EksAnywhereSubscriptionTerm.to_value
+                             req.CreateEksAnywhereSubscriptionRequest.term));
+                      Option.map
+                        req.CreateEksAnywhereSubscriptionRequest.licenseQuantity
+                        ~f:(fun x ->
+                              ("licenseQuantity", (Integer.to_value x)));
+                      Option.map
+                        req.CreateEksAnywhereSubscriptionRequest.licenseType
+                        ~f:(fun x ->
+                              ("licenseType",
+                                (EksAnywhereSubscriptionLicenseType.to_value
+                                   x)));
+                      Option.map
+                        req.CreateEksAnywhereSubscriptionRequest.autoRenew
+                        ~f:(fun x -> ("autoRenew", (Boolean.to_value x)));
+                      Option.map
+                        req.CreateEksAnywhereSubscriptionRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map
+                        req.CreateEksAnywhereSubscriptionRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -549,13 +1081,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("updateConfig",
                                 (NodegroupUpdateConfig.to_value x)));
+                      Option.map req.CreateNodegroupRequest.nodeRepairConfig
+                        ~f:(fun x ->
+                              ("nodeRepairConfig",
+                                (NodeRepairConfig.to_value x)));
                       Option.map req.CreateNodegroupRequest.capacityType
                         ~f:(fun x ->
                               ("capacityType", (CapacityTypes.to_value x)));
                       Option.map req.CreateNodegroupRequest.version
                         ~f:(fun x -> ("version", (String_.to_value x)));
                       Option.map req.CreateNodegroupRequest.releaseVersion
-                        ~f:(fun x -> ("releaseVersion", (String_.to_value x)))])
+                        ~f:(fun x -> ("releaseVersion", (String_.to_value x)));
+                      Option.map req.CreateNodegroupRequest.warmPoolConfig
+                        ~f:(fun x ->
+                              ("warmPoolConfig", (WarmPoolConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -563,18 +1102,84 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreatePodIdentityAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("namespace",
+                           (String_.to_value
+                              req.CreatePodIdentityAssociationRequest.namespace));
+                      Some
+                        ("serviceAccount",
+                          (String_.to_value
+                             req.CreatePodIdentityAssociationRequest.serviceAccount));
+                      Some
+                        ("roleArn",
+                          (String_.to_value
+                             req.CreatePodIdentityAssociationRequest.roleArn));
+                      Option.map
+                        req.CreatePodIdentityAssociationRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.CreatePodIdentityAssociationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreatePodIdentityAssociationRequest.disableSessionTags
+                        ~f:(fun x ->
+                              ("disableSessionTags",
+                                (BoxedBoolean.to_value x)));
+                      Option.map
+                        req.CreatePodIdentityAssociationRequest.targetRoleArn
+                        ~f:(fun x -> ("targetRoleArn", (String_.to_value x)));
+                      Option.map
+                        req.CreatePodIdentityAssociationRequest.policy
+                        ~f:(fun x -> ("policy", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteAccessEntry -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteAddon -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCapability -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCluster -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEksAnywhereSubscription ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFargateProfile -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteNodegroup -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeletePodIdentityAssociation ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeregisterCluster -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DescribeAccessEntry ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAddon ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAddonConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeAddonVersions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeCapability ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeCluster ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeClusterVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeEksAnywhereSubscription ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeFargateProfile ->
@@ -600,12 +1205,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeInsight ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeInsightsRefresh ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeNodegroup ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribePodIdentityAssociation ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeUpdate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateAccessPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateIdentityProviderConfig ->
       let (headers, body) =
         let headers =
@@ -630,10 +1246,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAccessEntries ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAccessPolicies ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAddons ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssociatedAccessPolicies ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCapabilities ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListClusters ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEksAnywhereSubscriptions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFargateProfiles ->
@@ -642,7 +1273,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListIdentityProviderConfigs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListInsights ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListInsightsRequest.filter
+                         ~f:(fun x -> ("filter", (InsightsFilter.to_value x)));
+                      Option.map req.ListInsightsRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (ListInsightsMaxResults.to_value x)));
+                      Option.map req.ListInsightsRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListNodegroups ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListPodIdentityAssociations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -681,6 +1339,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartInsightsRefresh ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -701,6 +1362,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAccessEntry ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateAccessEntryRequest.kubernetesGroups
+                         ~f:(fun x ->
+                               ("kubernetesGroups", (StringList.to_value x)));
+                      Option.map
+                        req.UpdateAccessEntryRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.UpdateAccessEntryRequest.username
+                        ~f:(fun x -> ("username", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateAddon ->
       let (headers, body) =
         let headers =
@@ -721,7 +1408,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                 (ResolveConflicts.to_value x)));
                       Option.map req.UpdateAddonRequest.clientRequestToken
                         ~f:(fun x ->
-                              ("clientRequestToken", (String_.to_value x)))])
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.UpdateAddonRequest.configurationValues
+                        ~f:(fun x ->
+                              ("configurationValues", (String_.to_value x)));
+                      Option.map
+                        req.UpdateAddonRequest.podIdentityAssociations
+                        ~f:(fun x ->
+                              ("podIdentityAssociations",
+                                (AddonPodIdentityAssociationsList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateCapability ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateCapabilityRequest.roleArn
+                         ~f:(fun x -> ("roleArn", (String_.to_value x)));
+                      Option.map req.UpdateCapabilityRequest.configuration
+                        ~f:(fun x ->
+                              ("configuration",
+                                (UpdateCapabilityConfiguration.to_value x)));
+                      Option.map
+                        req.UpdateCapabilityRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map
+                        req.UpdateCapabilityRequest.deletePropagationPolicy
+                        ~f:(fun x ->
+                              ("deletePropagationPolicy",
+                                (CapabilityDeletePropagationPolicy.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -748,7 +1474,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map
                         req.UpdateClusterConfigRequest.clientRequestToken
                         ~f:(fun x ->
-                              ("clientRequestToken", (String_.to_value x)))])
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.UpdateClusterConfigRequest.accessConfig
+                        ~f:(fun x ->
+                              ("accessConfig",
+                                (UpdateAccessConfigRequest.to_value x)));
+                      Option.map req.UpdateClusterConfigRequest.upgradePolicy
+                        ~f:(fun x ->
+                              ("upgradePolicy",
+                                (UpgradePolicyRequest.to_value x)));
+                      Option.map
+                        req.UpdateClusterConfigRequest.zonalShiftConfig
+                        ~f:(fun x ->
+                              ("zonalShiftConfig",
+                                (ZonalShiftConfigRequest.to_value x)));
+                      Option.map req.UpdateClusterConfigRequest.computeConfig
+                        ~f:(fun x ->
+                              ("computeConfig",
+                                (ComputeConfigRequest.to_value x)));
+                      Option.map
+                        req.UpdateClusterConfigRequest.kubernetesNetworkConfig
+                        ~f:(fun x ->
+                              ("kubernetesNetworkConfig",
+                                (KubernetesNetworkConfigRequest.to_value x)));
+                      Option.map req.UpdateClusterConfigRequest.storageConfig
+                        ~f:(fun x ->
+                              ("storageConfig",
+                                (StorageConfigRequest.to_value x)));
+                      Option.map
+                        req.UpdateClusterConfigRequest.remoteNetworkConfig
+                        ~f:(fun x ->
+                              ("remoteNetworkConfig",
+                                (RemoteNetworkConfigRequest.to_value x)));
+                      Option.map
+                        req.UpdateClusterConfigRequest.deletionProtection
+                        ~f:(fun x ->
+                              ("deletionProtection",
+                                (BoxedBoolean.to_value x)));
+                      Option.map
+                        req.UpdateClusterConfigRequest.controlPlaneScalingConfig
+                        ~f:(fun x ->
+                              ("controlPlaneScalingConfig",
+                                (ControlPlaneScalingConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -771,6 +1538,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               req.UpdateClusterVersionRequest.version));
                       Option.map
                         req.UpdateClusterVersionRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map req.UpdateClusterVersionRequest.force
+                        ~f:(fun x -> ("force", (Boolean.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateEksAnywhereSubscription ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("autoRenew",
+                           (Boolean.to_value
+                              req.UpdateEksAnywhereSubscriptionRequest.autoRenew));
+                      Option.map
+                        req.UpdateEksAnywhereSubscriptionRequest.clientRequestToken
                         ~f:(fun x ->
                               ("clientRequestToken", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -805,6 +1598,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("updateConfig",
                                 (NodegroupUpdateConfig.to_value x)));
+                      Option.map
+                        req.UpdateNodegroupConfigRequest.nodeRepairConfig
+                        ~f:(fun x ->
+                              ("nodeRepairConfig",
+                                (NodeRepairConfig.to_value x)));
+                      Option.map
+                        req.UpdateNodegroupConfigRequest.warmPoolConfig
+                        ~f:(fun x ->
+                              ("warmPoolConfig", (WarmPoolConfig.to_value x)));
                       Option.map
                         req.UpdateNodegroupConfigRequest.clientRequestToken
                         ~f:(fun x ->
@@ -841,6 +1643,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.UpdateNodegroupVersionRequest.clientRequestToken
                         ~f:(fun x ->
                               ("clientRequestToken", (String_.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdatePodIdentityAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdatePodIdentityAssociationRequest.roleArn
+                         ~f:(fun x -> ("roleArn", (String_.to_value x)));
+                      Option.map
+                        req.UpdatePodIdentityAssociationRequest.clientRequestToken
+                        ~f:(fun x ->
+                              ("clientRequestToken", (String_.to_value x)));
+                      Option.map
+                        req.UpdatePodIdentityAssociationRequest.disableSessionTags
+                        ~f:(fun x ->
+                              ("disableSessionTags",
+                                (BoxedBoolean.to_value x)));
+                      Option.map
+                        req.UpdatePodIdentityAssociationRequest.targetRoleArn
+                        ~f:(fun x -> ("targetRoleArn", (String_.to_value x)));
+                      Option.map
+                        req.UpdatePodIdentityAssociationRequest.policy
+                        ~f:(fun x -> ("policy", (String_.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -896,6 +1732,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AssociateAccessPolicy ->
+      if is_success
+      then Ok (AssociateAccessPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some AssociateAccessPolicyResponse.error_of_json))
   | AssociateEncryptionConfig ->
       if is_success
       then
@@ -915,14 +1757,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateIdentityProviderConfigResponse.error_of_json))
+  | CreateAccessEntry ->
+      if is_success
+      then Ok (CreateAccessEntryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAccessEntryResponse.error_of_json))
   | CreateAddon ->
       if is_success
       then Ok (CreateAddonResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateAddonResponse.error_of_json))
+  | CreateCapability ->
+      if is_success
+      then Ok (CreateCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateCapabilityResponse.error_of_json))
   | CreateCluster ->
       if is_success
       then Ok (CreateClusterResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
+  | CreateEksAnywhereSubscription ->
+      if is_success
+      then
+        Ok
+          (CreateEksAnywhereSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateEksAnywhereSubscriptionResponse.error_of_json))
   | CreateFargateProfile ->
       if is_success
       then Ok (CreateFargateProfileResponse.of_json (response_to_json resp))
@@ -934,14 +1797,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (CreateNodegroupResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateNodegroupResponse.error_of_json))
+  | CreatePodIdentityAssociation ->
+      if is_success
+      then
+        Ok
+          (CreatePodIdentityAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePodIdentityAssociationResponse.error_of_json))
+  | DeleteAccessEntry ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAccessEntryResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteAccessEntryResponse.error_of_json))
   | DeleteAddon ->
       if is_success
       then Ok (DeleteAddonResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteAddonResponse.error_of_json))
+  | DeleteCapability ->
+      if is_success
+      then Ok (DeleteCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteCapabilityResponse.error_of_json))
   | DeleteCluster ->
       if is_success
       then Ok (DeleteClusterResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
+  | DeleteEksAnywhereSubscription ->
+      if is_success
+      then
+        Ok
+          (DeleteEksAnywhereSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteEksAnywhereSubscriptionResponse.error_of_json))
   | DeleteFargateProfile ->
       if is_success
       then Ok (DeleteFargateProfileResponse.of_json (response_to_json resp))
@@ -953,27 +1850,76 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DeleteNodegroupResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DeleteNodegroupResponse.error_of_json))
+  | DeletePodIdentityAssociation ->
+      if is_success
+      then
+        Ok
+          (DeletePodIdentityAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePodIdentityAssociationResponse.error_of_json))
   | DeregisterCluster ->
       if is_success
       then Ok (DeregisterClusterResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DeregisterClusterResponse.error_of_json))
+  | DescribeAccessEntry ->
+      if is_success
+      then Ok (DescribeAccessEntryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeAccessEntryResponse.error_of_json))
   | DescribeAddon ->
       if is_success
       then Ok (DescribeAddonResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DescribeAddonResponse.error_of_json))
+  | DescribeAddonConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeAddonConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAddonConfigurationResponse.error_of_json))
   | DescribeAddonVersions ->
       if is_success
       then Ok (DescribeAddonVersionsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeAddonVersionsResponse.error_of_json))
+  | DescribeCapability ->
+      if is_success
+      then Ok (DescribeCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeCapabilityResponse.error_of_json))
   | DescribeCluster ->
       if is_success
       then Ok (DescribeClusterResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeClusterResponse.error_of_json))
+  | DescribeClusterVersions ->
+      if is_success
+      then
+        Ok (DescribeClusterVersionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeClusterVersionsResponse.error_of_json))
+  | DescribeEksAnywhereSubscription ->
+      if is_success
+      then
+        Ok
+          (DescribeEksAnywhereSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeEksAnywhereSubscriptionResponse.error_of_json))
   | DescribeFargateProfile ->
       if is_success
       then
@@ -992,17 +1938,51 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeIdentityProviderConfigResponse.error_of_json))
+  | DescribeInsight ->
+      if is_success
+      then Ok (DescribeInsightResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeInsightResponse.error_of_json))
+  | DescribeInsightsRefresh ->
+      if is_success
+      then
+        Ok (DescribeInsightsRefreshResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeInsightsRefreshResponse.error_of_json))
   | DescribeNodegroup ->
       if is_success
       then Ok (DescribeNodegroupResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeNodegroupResponse.error_of_json))
+  | DescribePodIdentityAssociation ->
+      if is_success
+      then
+        Ok
+          (DescribePodIdentityAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribePodIdentityAssociationResponse.error_of_json))
   | DescribeUpdate ->
       if is_success
       then Ok (DescribeUpdateResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeUpdateResponse.error_of_json))
+  | DisassociateAccessPolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateAccessPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateAccessPolicyResponse.error_of_json))
   | DisassociateIdentityProviderConfig ->
       if is_success
       then
@@ -1013,14 +1993,51 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateIdentityProviderConfigResponse.error_of_json))
+  | ListAccessEntries ->
+      if is_success
+      then Ok (ListAccessEntriesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAccessEntriesResponse.error_of_json))
+  | ListAccessPolicies ->
+      if is_success
+      then Ok (ListAccessPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAccessPoliciesResponse.error_of_json))
   | ListAddons ->
       if is_success
       then Ok (ListAddonsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAddonsResponse.error_of_json))
+  | ListAssociatedAccessPolicies ->
+      if is_success
+      then
+        Ok
+          (ListAssociatedAccessPoliciesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListAssociatedAccessPoliciesResponse.error_of_json))
+  | ListCapabilities ->
+      if is_success
+      then Ok (ListCapabilitiesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCapabilitiesResponse.error_of_json))
   | ListClusters ->
       if is_success
       then Ok (ListClustersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListClustersResponse.error_of_json))
+  | ListEksAnywhereSubscriptions ->
+      if is_success
+      then
+        Ok
+          (ListEksAnywhereSubscriptionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListEksAnywhereSubscriptionsResponse.error_of_json))
   | ListFargateProfiles ->
       if is_success
       then Ok (ListFargateProfilesResponse.of_json (response_to_json resp))
@@ -1037,11 +2054,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListIdentityProviderConfigsResponse.error_of_json))
+  | ListInsights ->
+      if is_success
+      then Ok (ListInsightsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListInsightsResponse.error_of_json))
   | ListNodegroups ->
       if is_success
       then Ok (ListNodegroupsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListNodegroupsResponse.error_of_json))
+  | ListPodIdentityAssociations ->
+      if is_success
+      then
+        Ok
+          (ListPodIdentityAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListPodIdentityAssociationsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -1057,6 +2088,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (RegisterClusterResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some RegisterClusterResponse.error_of_json))
+  | StartInsightsRefresh ->
+      if is_success
+      then Ok (StartInsightsRefreshResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartInsightsRefreshResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1071,10 +2108,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAccessEntry ->
+      if is_success
+      then Ok (UpdateAccessEntryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAccessEntryResponse.error_of_json))
   | UpdateAddon ->
       if is_success
       then Ok (UpdateAddonResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateAddonResponse.error_of_json))
+  | UpdateCapability ->
+      if is_success
+      then Ok (UpdateCapabilityResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some UpdateCapabilityResponse.error_of_json))
   | UpdateClusterConfig ->
       if is_success
       then Ok (UpdateClusterConfigResponse.of_json (response_to_json resp))
@@ -1087,6 +2135,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateClusterVersionResponse.error_of_json))
+  | UpdateEksAnywhereSubscription ->
+      if is_success
+      then
+        Ok
+          (UpdateEksAnywhereSubscriptionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateEksAnywhereSubscriptionResponse.error_of_json))
   | UpdateNodegroupConfig ->
       if is_success
       then Ok (UpdateNodegroupConfigResponse.of_json (response_to_json resp))
@@ -1101,3 +2159,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateNodegroupVersionResponse.error_of_json))
+  | UpdatePodIdentityAssociation ->
+      if is_success
+      then
+        Ok
+          (UpdatePodIdentityAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePodIdentityAssociationResponse.error_of_json))

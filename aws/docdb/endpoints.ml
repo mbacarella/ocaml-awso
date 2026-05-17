@@ -87,6 +87,8 @@ type ('i, 'o, 'e) t =
   t 
   | FailoverDBCluster: (FailoverDBClusterMessage.t,
   FailoverDBClusterResult.t, FailoverDBClusterResult.error) t 
+  | FailoverGlobalCluster: (FailoverGlobalClusterMessage.t,
+  FailoverGlobalClusterResult.t, FailoverGlobalClusterResult.error) t 
   | ListTagsForResource: (ListTagsForResourceMessage.t, TagListMessage.t,
   TagListMessage.error) t 
   | ModifyDBCluster: (ModifyDBClusterMessage.t, ModifyDBClusterResult.t,
@@ -128,6 +130,8 @@ type ('i, 'o, 'e) t =
   StartDBClusterResult.error) t 
   | StopDBCluster: (StopDBClusterMessage.t, StopDBClusterResult.t,
   StopDBClusterResult.error) t 
+  | SwitchoverGlobalCluster: (SwitchoverGlobalClusterMessage.t,
+  SwitchoverGlobalClusterResult.t, SwitchoverGlobalClusterResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddSourceIdentifierToSubscription -> `POST
@@ -166,6 +170,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeOrderableDBInstanceOptions -> `POST
   | DescribePendingMaintenanceActions -> `POST
   | FailoverDBCluster -> `POST
+  | FailoverGlobalCluster -> `POST
   | ListTagsForResource -> `POST
   | ModifyDBCluster -> `POST
   | ModifyDBClusterParameterGroup -> `POST
@@ -183,6 +188,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RestoreDBClusterToPointInTime -> `POST
   | StartDBCluster -> `POST
   | StopDBCluster -> `POST
+  | SwitchoverGlobalCluster -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -228,6 +234,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribePendingMaintenanceActions ->
           (Format.kasprintf Uri.of_string) "/"
       | FailoverDBCluster -> (Format.kasprintf Uri.of_string) "/"
+      | FailoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBCluster -> (Format.kasprintf Uri.of_string) "/"
       | ModifyDBClusterParameterGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -246,7 +253,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RestoreDBClusterFromSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | RestoreDBClusterToPointInTime -> (Format.kasprintf Uri.of_string) "/"
       | StartDBCluster -> (Format.kasprintf Uri.of_string) "/"
-      | StopDBCluster -> (Format.kasprintf Uri.of_string) "/")
+      | StopDBCluster -> (Format.kasprintf Uri.of_string) "/"
+      | SwitchoverGlobalCluster -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -731,6 +739,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (FailoverDBClusterMessage.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | FailoverGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["FailoverGlobalCluster"]); ("Version", [apiVersion])] in
+        let query =
+          (FailoverGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let headers =
         Awso.Http.Headers.of_list
@@ -952,6 +973,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["StopDBCluster"]); ("Version", [apiVersion])] in
         let query =
           (StopDBClusterMessage.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | SwitchoverGlobalCluster ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["SwitchoverGlobalCluster"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (SwitchoverGlobalClusterMessage.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -1228,6 +1263,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (FailoverDBClusterResult.of_xml xml)
       else
         Error (parse_aws_error (Some FailoverDBClusterResult.error_of_xml))
+  | FailoverGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (FailoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some FailoverGlobalClusterResult.error_of_xml))
   | ListTagsForResource ->
       if is_success
       then
@@ -1350,3 +1393,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
         Ok (StopDBClusterResult.of_xml xml)
       else Error (parse_aws_error (Some StopDBClusterResult.error_of_xml))
+  | SwitchoverGlobalCluster ->
+      if is_success
+      then
+        let xml = Awso.Xml.parse_response (Awso.Http.Response.body resp) in
+        Ok (SwitchoverGlobalClusterResult.of_xml xml)
+      else
+        Error
+          (parse_aws_error (Some SwitchoverGlobalClusterResult.error_of_xml))

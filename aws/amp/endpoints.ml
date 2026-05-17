@@ -5,27 +5,76 @@ type ('i, 'o, 'e) t =
   | CreateAlertManagerDefinition: (CreateAlertManagerDefinitionRequest.t,
   CreateAlertManagerDefinitionResponse.t,
   CreateAlertManagerDefinitionResponse.error) t 
+  | CreateAnomalyDetector: (CreateAnomalyDetectorRequest.t,
+  CreateAnomalyDetectorResponse.t, CreateAnomalyDetectorResponse.error) t 
+  | CreateLoggingConfiguration: (CreateLoggingConfigurationRequest.t,
+  CreateLoggingConfigurationResponse.t,
+  CreateLoggingConfigurationResponse.error) t 
+  | CreateQueryLoggingConfiguration:
+  (CreateQueryLoggingConfigurationRequest.t,
+  CreateQueryLoggingConfigurationResponse.t,
+  CreateQueryLoggingConfigurationResponse.error) t 
   | CreateRuleGroupsNamespace: (CreateRuleGroupsNamespaceRequest.t,
   CreateRuleGroupsNamespaceResponse.t,
   CreateRuleGroupsNamespaceResponse.error) t 
+  | CreateScraper: (CreateScraperRequest.t, CreateScraperResponse.t,
+  CreateScraperResponse.error) t 
   | CreateWorkspace: (CreateWorkspaceRequest.t, CreateWorkspaceResponse.t,
   CreateWorkspaceResponse.error) t 
   | DeleteAlertManagerDefinition: (DeleteAlertManagerDefinitionRequest.t,
   unit, unit) t 
+  | DeleteAnomalyDetector: (DeleteAnomalyDetectorRequest.t, unit, unit) t 
+  | DeleteLoggingConfiguration: (DeleteLoggingConfigurationRequest.t, 
+  unit, unit) t 
+  | DeleteQueryLoggingConfiguration:
+  (DeleteQueryLoggingConfigurationRequest.t, unit, unit) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t, unit, unit) t 
   | DeleteRuleGroupsNamespace: (DeleteRuleGroupsNamespaceRequest.t, unit,
   unit) t 
+  | DeleteScraper: (DeleteScraperRequest.t, DeleteScraperResponse.t,
+  DeleteScraperResponse.error) t 
+  | DeleteScraperLoggingConfiguration:
+  (DeleteScraperLoggingConfigurationRequest.t, unit, unit) t 
   | DeleteWorkspace: (DeleteWorkspaceRequest.t, unit, unit) t 
   | DescribeAlertManagerDefinition: (DescribeAlertManagerDefinitionRequest.t,
   DescribeAlertManagerDefinitionResponse.t,
   DescribeAlertManagerDefinitionResponse.error) t 
+  | DescribeAnomalyDetector: (DescribeAnomalyDetectorRequest.t,
+  DescribeAnomalyDetectorResponse.t, DescribeAnomalyDetectorResponse.error) t
+  
+  | DescribeLoggingConfiguration: (DescribeLoggingConfigurationRequest.t,
+  DescribeLoggingConfigurationResponse.t,
+  DescribeLoggingConfigurationResponse.error) t 
+  | DescribeQueryLoggingConfiguration:
+  (DescribeQueryLoggingConfigurationRequest.t,
+  DescribeQueryLoggingConfigurationResponse.t,
+  DescribeQueryLoggingConfigurationResponse.error) t 
+  | DescribeResourcePolicy: (DescribeResourcePolicyRequest.t,
+  DescribeResourcePolicyResponse.t, DescribeResourcePolicyResponse.error) t 
   | DescribeRuleGroupsNamespace: (DescribeRuleGroupsNamespaceRequest.t,
   DescribeRuleGroupsNamespaceResponse.t,
   DescribeRuleGroupsNamespaceResponse.error) t 
+  | DescribeScraper: (DescribeScraperRequest.t, DescribeScraperResponse.t,
+  DescribeScraperResponse.error) t 
+  | DescribeScraperLoggingConfiguration:
+  (DescribeScraperLoggingConfigurationRequest.t,
+  DescribeScraperLoggingConfigurationResponse.t,
+  DescribeScraperLoggingConfigurationResponse.error) t 
   | DescribeWorkspace: (DescribeWorkspaceRequest.t,
   DescribeWorkspaceResponse.t, DescribeWorkspaceResponse.error) t 
+  | DescribeWorkspaceConfiguration: (DescribeWorkspaceConfigurationRequest.t,
+  DescribeWorkspaceConfigurationResponse.t,
+  DescribeWorkspaceConfigurationResponse.error) t 
+  | GetDefaultScraperConfiguration: (GetDefaultScraperConfigurationRequest.t,
+  GetDefaultScraperConfigurationResponse.t,
+  GetDefaultScraperConfigurationResponse.error) t 
+  | ListAnomalyDetectors: (ListAnomalyDetectorsRequest.t,
+  ListAnomalyDetectorsResponse.t, ListAnomalyDetectorsResponse.error) t 
   | ListRuleGroupsNamespaces: (ListRuleGroupsNamespacesRequest.t,
   ListRuleGroupsNamespacesResponse.t, ListRuleGroupsNamespacesResponse.error)
   t 
+  | ListScrapers: (ListScrapersRequest.t, ListScrapersResponse.t,
+  ListScrapersResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListWorkspaces: (ListWorkspacesRequest.t, ListWorkspacesResponse.t,
@@ -33,32 +82,79 @@ type ('i, 'o, 'e) t =
   | PutAlertManagerDefinition: (PutAlertManagerDefinitionRequest.t,
   PutAlertManagerDefinitionResponse.t,
   PutAlertManagerDefinitionResponse.error) t 
+  | PutAnomalyDetector: (PutAnomalyDetectorRequest.t,
+  PutAnomalyDetectorResponse.t, PutAnomalyDetectorResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | PutRuleGroupsNamespace: (PutRuleGroupsNamespaceRequest.t,
   PutRuleGroupsNamespaceResponse.t, PutRuleGroupsNamespaceResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateLoggingConfiguration: (UpdateLoggingConfigurationRequest.t,
+  UpdateLoggingConfigurationResponse.t,
+  UpdateLoggingConfigurationResponse.error) t 
+  | UpdateQueryLoggingConfiguration:
+  (UpdateQueryLoggingConfigurationRequest.t,
+  UpdateQueryLoggingConfigurationResponse.t,
+  UpdateQueryLoggingConfigurationResponse.error) t 
+  | UpdateScraper: (UpdateScraperRequest.t, UpdateScraperResponse.t,
+  UpdateScraperResponse.error) t 
+  | UpdateScraperLoggingConfiguration:
+  (UpdateScraperLoggingConfigurationRequest.t,
+  UpdateScraperLoggingConfigurationResponse.t,
+  UpdateScraperLoggingConfigurationResponse.error) t 
   | UpdateWorkspaceAlias: (UpdateWorkspaceAliasRequest.t, unit, unit) t 
+  | UpdateWorkspaceConfiguration: (UpdateWorkspaceConfigurationRequest.t,
+  UpdateWorkspaceConfigurationResponse.t,
+  UpdateWorkspaceConfigurationResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CreateAlertManagerDefinition -> `POST
+  | CreateAnomalyDetector -> `POST
+  | CreateLoggingConfiguration -> `POST
+  | CreateQueryLoggingConfiguration -> `POST
   | CreateRuleGroupsNamespace -> `POST
+  | CreateScraper -> `POST
   | CreateWorkspace -> `POST
   | DeleteAlertManagerDefinition -> `DELETE
+  | DeleteAnomalyDetector -> `DELETE
+  | DeleteLoggingConfiguration -> `DELETE
+  | DeleteQueryLoggingConfiguration -> `DELETE
+  | DeleteResourcePolicy -> `DELETE
   | DeleteRuleGroupsNamespace -> `DELETE
+  | DeleteScraper -> `DELETE
+  | DeleteScraperLoggingConfiguration -> `DELETE
   | DeleteWorkspace -> `DELETE
   | DescribeAlertManagerDefinition -> `GET
+  | DescribeAnomalyDetector -> `GET
+  | DescribeLoggingConfiguration -> `GET
+  | DescribeQueryLoggingConfiguration -> `GET
+  | DescribeResourcePolicy -> `GET
   | DescribeRuleGroupsNamespace -> `GET
+  | DescribeScraper -> `GET
+  | DescribeScraperLoggingConfiguration -> `GET
   | DescribeWorkspace -> `GET
+  | DescribeWorkspaceConfiguration -> `GET
+  | GetDefaultScraperConfiguration -> `GET
+  | ListAnomalyDetectors -> `GET
   | ListRuleGroupsNamespaces -> `GET
+  | ListScrapers -> `GET
   | ListTagsForResource -> `GET
   | ListWorkspaces -> `GET
   | PutAlertManagerDefinition -> `PUT
+  | PutAnomalyDetector -> `PUT
+  | PutResourcePolicy -> `PUT
   | PutRuleGroupsNamespace -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateLoggingConfiguration -> `PUT
+  | UpdateQueryLoggingConfiguration -> `PUT
+  | UpdateScraper -> `PUT
+  | UpdateScraperLoggingConfiguration -> `PUT
   | UpdateWorkspaceAlias -> `POST
+  | UpdateWorkspaceConfiguration -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -67,11 +163,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/workspaces/%s/alertmanager/definition"
             (WorkspaceId.to_header
                x.CreateAlertManagerDefinitionRequest.workspaceId)
+      | CreateAnomalyDetector ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/anomalydetectors"
+            (WorkspaceId.to_header x.CreateAnomalyDetectorRequest.workspaceId)
+      | CreateLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging"
+            (WorkspaceId.to_header
+               x.CreateLoggingConfigurationRequest.workspaceId)
+      | CreateQueryLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging/query"
+            (WorkspaceId.to_header
+               x.CreateQueryLoggingConfigurationRequest.workspaceId)
       | CreateRuleGroupsNamespace ->
           (Format.kasprintf Uri.of_string)
             "/workspaces/%s/rulegroupsnamespaces"
             (WorkspaceId.to_header
                x.CreateRuleGroupsNamespaceRequest.workspaceId)
+      | CreateScraper -> (Format.kasprintf Uri.of_string) "/scrapers"
       | CreateWorkspace -> (Format.kasprintf Uri.of_string) "/workspaces"
       | DeleteAlertManagerDefinition ->
           Uri.add_query_params'
@@ -84,6 +192,51 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v ->
                         ("clientToken", (IdempotencyToken.to_header v)))
                   x.clientToken])
+      | DeleteAnomalyDetector ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/workspaces/%s/anomalydetectors/%s"
+               (WorkspaceId.to_header
+                  x.DeleteAnomalyDetectorRequest.workspaceId)
+               (AnomalyDetectorId.to_header
+                  x.DeleteAnomalyDetectorRequest.anomalyDetectorId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken])
+      | DeleteLoggingConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s/logging"
+               (WorkspaceId.to_header
+                  x.DeleteLoggingConfigurationRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken])
+      | DeleteQueryLoggingConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s/logging/query"
+               (WorkspaceId.to_header
+                  x.DeleteQueryLoggingConfigurationRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken])
+      | DeleteResourcePolicy ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/workspaces/%s/policy"
+               (WorkspaceId.to_header
+                  x.DeleteResourcePolicyRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken;
+               Option.map ~f:(fun v -> ("revisionId", (String_.to_header v)))
+                 x.revisionId])
       | DeleteRuleGroupsNamespace ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -92,6 +245,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.DeleteRuleGroupsNamespaceRequest.workspaceId)
                (RuleGroupsNamespaceName.to_header
                   x.DeleteRuleGroupsNamespaceRequest.name))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken])
+      | DeleteScraper ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/scrapers/%s"
+               (ScraperId.to_header x.DeleteScraperRequest.scraperId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("clientToken", (IdempotencyToken.to_header v)))
+                  x.clientToken])
+      | DeleteScraperLoggingConfiguration ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/scrapers/%s/logging-configuration"
+               (ScraperId.to_header
+                  x.DeleteScraperLoggingConfigurationRequest.scraperId))
             (List.filter_opt
                [Option.map
                   ~f:(fun v ->
@@ -111,6 +284,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/workspaces/%s/alertmanager/definition"
             (WorkspaceId.to_header
                x.DescribeAlertManagerDefinitionRequest.workspaceId)
+      | DescribeAnomalyDetector ->
+          (Format.kasprintf Uri.of_string)
+            "/workspaces/%s/anomalydetectors/%s"
+            (WorkspaceId.to_header
+               x.DescribeAnomalyDetectorRequest.workspaceId)
+            (AnomalyDetectorId.to_header
+               x.DescribeAnomalyDetectorRequest.anomalyDetectorId)
+      | DescribeLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging"
+            (WorkspaceId.to_header
+               x.DescribeLoggingConfigurationRequest.workspaceId)
+      | DescribeQueryLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging/query"
+            (WorkspaceId.to_header
+               x.DescribeQueryLoggingConfigurationRequest.workspaceId)
+      | DescribeResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/policy"
+            (WorkspaceId.to_header
+               x.DescribeResourcePolicyRequest.workspaceId)
       | DescribeRuleGroupsNamespace ->
           (Format.kasprintf Uri.of_string)
             "/workspaces/%s/rulegroupsnamespaces/%s"
@@ -118,9 +310,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                x.DescribeRuleGroupsNamespaceRequest.workspaceId)
             (RuleGroupsNamespaceName.to_header
                x.DescribeRuleGroupsNamespaceRequest.name)
+      | DescribeScraper ->
+          (Format.kasprintf Uri.of_string) "/scrapers/%s"
+            (ScraperId.to_header x.DescribeScraperRequest.scraperId)
+      | DescribeScraperLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/scrapers/%s/logging-configuration"
+            (ScraperId.to_header
+               x.DescribeScraperLoggingConfigurationRequest.scraperId)
       | DescribeWorkspace ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s"
             (WorkspaceId.to_header x.DescribeWorkspaceRequest.workspaceId)
+      | DescribeWorkspaceConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/configuration"
+            (WorkspaceId.to_header
+               x.DescribeWorkspaceConfigurationRequest.workspaceId)
+      | GetDefaultScraperConfiguration ->
+          (Format.kasprintf Uri.of_string) "/scraperconfiguration"
+      | ListAnomalyDetectors ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/workspaces/%s/anomalydetectors"
+               (WorkspaceId.to_header
+                  x.ListAnomalyDetectorsRequest.workspaceId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("alias", (AnomalyDetectorAlias.to_header v)))
+                  x.alias;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListAnomalyDetectorsRequestMaxResultsInteger.to_header
+                            v))) x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken])
       | ListRuleGroupsNamespaces ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -130,15 +354,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Option.map
                   ~f:(fun v ->
-                        ("maxResults",
-                          (ListRuleGroupsNamespacesRequestMaxResultsInteger.to_header
-                             v))) x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("name", (RuleGroupsNamespaceName.to_header v)))
-                 x.name;
+                        ("name", (RuleGroupsNamespaceName.to_header v)))
+                  x.name;
                Option.map
                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListRuleGroupsNamespacesRequestMaxResultsInteger.to_header
+                            v))) x.maxResults])
+      | ListScrapers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/scrapers")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("ScraperFilters", (ScraperFilters.to_header v)))
+                  x.filters;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults",
+                         (ListScrapersRequestMaxResultsInteger.to_header v)))
+                 x.maxResults])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (String_.to_header x.ListTagsForResourceRequest.resourceArn)
@@ -147,21 +388,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/workspaces")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("alias", (WorkspaceAlias.to_header v)))
-                  x.alias;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("alias", (WorkspaceAlias.to_header v)))
+                 x.alias;
                Option.map
                  ~f:(fun v ->
                        ("maxResults",
                          (ListWorkspacesRequestMaxResultsInteger.to_header v)))
-                 x.maxResults;
-               Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 x.maxResults])
       | PutAlertManagerDefinition ->
           (Format.kasprintf Uri.of_string)
             "/workspaces/%s/alertmanager/definition"
             (WorkspaceId.to_header
                x.PutAlertManagerDefinitionRequest.workspaceId)
+      | PutAnomalyDetector ->
+          (Format.kasprintf Uri.of_string)
+            "/workspaces/%s/anomalydetectors/%s"
+            (WorkspaceId.to_header x.PutAnomalyDetectorRequest.workspaceId)
+            (AnomalyDetectorId.to_header
+               x.PutAnomalyDetectorRequest.anomalyDetectorId)
+      | PutResourcePolicy ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/policy"
+            (WorkspaceId.to_header x.PutResourcePolicyRequest.workspaceId)
       | PutRuleGroupsNamespace ->
           (Format.kasprintf Uri.of_string)
             "/workspaces/%s/rulegroupsnamespaces/%s"
@@ -178,9 +428,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (String_.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeys.to_header x.tagKeys))])
+      | UpdateLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging"
+            (WorkspaceId.to_header
+               x.UpdateLoggingConfigurationRequest.workspaceId)
+      | UpdateQueryLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/logging/query"
+            (WorkspaceId.to_header
+               x.UpdateQueryLoggingConfigurationRequest.workspaceId)
+      | UpdateScraper ->
+          (Format.kasprintf Uri.of_string) "/scrapers/%s"
+            (ScraperId.to_header x.UpdateScraperRequest.scraperId)
+      | UpdateScraperLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/scrapers/%s/logging-configuration"
+            (ScraperId.to_header
+               x.UpdateScraperLoggingConfigurationRequest.scraperId)
       | UpdateWorkspaceAlias ->
           (Format.kasprintf Uri.of_string) "/workspaces/%s/alias"
-            (WorkspaceId.to_header x.UpdateWorkspaceAliasRequest.workspaceId))
+            (WorkspaceId.to_header x.UpdateWorkspaceAliasRequest.workspaceId)
+      | UpdateWorkspaceConfiguration ->
+          (Format.kasprintf Uri.of_string) "/workspaces/%s/configuration"
+            (WorkspaceId.to_header
+               x.UpdateWorkspaceConfigurationRequest.workspaceId))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -194,14 +464,106 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateAlertManagerDefinitionRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (IdempotencyToken.to_value x)));
+                      [Some
+                         ("data",
+                           (AlertManagerDefinitionData.to_value
+                              req.CreateAlertManagerDefinitionRequest.data));
+                      Option.map
+                        req.CreateAlertManagerDefinitionRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAnomalyDetector ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("alias",
+                           (AnomalyDetectorAlias.to_value
+                              req.CreateAnomalyDetectorRequest.alias));
+                      Option.map
+                        req.CreateAnomalyDetectorRequest.evaluationIntervalInSeconds
+                        ~f:(fun x ->
+                              ("evaluationIntervalInSeconds",
+                                (AnomalyDetectorEvaluationInterval.to_value x)));
+                      Option.map
+                        req.CreateAnomalyDetectorRequest.missingDataAction
+                        ~f:(fun x ->
+                              ("missingDataAction",
+                                (AnomalyDetectorMissingDataAction.to_value x)));
                       Some
-                        ("data",
-                          (AlertManagerDefinitionData.to_value
-                             req.CreateAlertManagerDefinitionRequest.data))])
+                        ("configuration",
+                          (AnomalyDetectorConfiguration.to_value
+                             req.CreateAnomalyDetectorRequest.configuration));
+                      Option.map req.CreateAnomalyDetectorRequest.labels
+                        ~f:(fun x ->
+                              ("labels",
+                                (CreateAnomalyDetectorRequestLabelsMap.to_value
+                                   x)));
+                      Option.map req.CreateAnomalyDetectorRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)));
+                      Option.map req.CreateAnomalyDetectorRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLoggingConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("logGroupArn",
+                           (LogGroupArn.to_value
+                              req.CreateLoggingConfigurationRequest.logGroupArn));
+                      Option.map
+                        req.CreateLoggingConfigurationRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateQueryLoggingConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("destinations",
+                           (LoggingDestinations.to_value
+                              req.CreateQueryLoggingConfigurationRequest.destinations));
+                      Option.map
+                        req.CreateQueryLoggingConfigurationRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -218,19 +580,57 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateRuleGroupsNamespaceRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (IdempotencyToken.to_value x)));
+                      [Some
+                         ("name",
+                           (RuleGroupsNamespaceName.to_value
+                              req.CreateRuleGroupsNamespaceRequest.name));
                       Some
                         ("data",
                           (RuleGroupsNamespaceData.to_value
                              req.CreateRuleGroupsNamespaceRequest.data));
-                      Some
-                        ("name",
-                          (RuleGroupsNamespaceName.to_value
-                             req.CreateRuleGroupsNamespaceRequest.name));
+                      Option.map
+                        req.CreateRuleGroupsNamespaceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)));
                       Option.map req.CreateRuleGroupsNamespaceRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateScraper ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateScraperRequest.alias
+                         ~f:(fun x -> ("alias", (ScraperAlias.to_value x)));
+                      Some
+                        ("scrapeConfiguration",
+                          (ScrapeConfiguration.to_value
+                             req.CreateScraperRequest.scrapeConfiguration));
+                      Some
+                        ("source",
+                          (Source.to_value req.CreateScraperRequest.source));
+                      Some
+                        ("destination",
+                          (Destination.to_value
+                             req.CreateScraperRequest.destination));
+                      Option.map req.CreateScraperRequest.roleConfiguration
+                        ~f:(fun x ->
+                              ("roleConfiguration",
+                                (RoleConfiguration.to_value x)));
+                      Option.map req.CreateScraperRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (IdempotencyToken.to_value x)));
+                      Option.map req.CreateScraperRequest.tags
                         ~f:(fun x -> ("tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -254,7 +654,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("clientToken", (IdempotencyToken.to_value x)));
                       Option.map req.CreateWorkspaceRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateWorkspaceRequest.kmsKeyArn
+                        ~f:(fun x -> ("kmsKeyArn", (KmsKeyArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -264,19 +666,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteAlertManagerDefinition ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAnomalyDetector -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteLoggingConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteQueryLoggingConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRuleGroupsNamespace ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteScraper -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteScraperLoggingConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWorkspace -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeAlertManagerDefinition ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeAnomalyDetector ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeLoggingConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeQueryLoggingConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeResourcePolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeRuleGroupsNamespace ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeScraper ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeScraperLoggingConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeWorkspace ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeWorkspaceConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDefaultScraperConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAnomalyDetectors ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRuleGroupsNamespaces ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListScrapers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -287,6 +728,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutAlertManagerDefinition ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | PutAnomalyDetector -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PutResourcePolicy -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutRuleGroupsNamespace ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
@@ -309,6 +752,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateLoggingConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateQueryLoggingConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateScraper -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateScraperLoggingConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateWorkspaceAlias ->
       let (headers, body) =
         let headers =
@@ -330,6 +780,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateWorkspaceConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -388,6 +840,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateAlertManagerDefinitionResponse.error_of_json))
+  | CreateAnomalyDetector ->
+      if is_success
+      then Ok (CreateAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAnomalyDetectorResponse.error_of_json))
+  | CreateLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateLoggingConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLoggingConfigurationResponse.error_of_json))
+  | CreateQueryLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateQueryLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateQueryLoggingConfigurationResponse.error_of_json))
   | CreateRuleGroupsNamespace ->
       if is_success
       then
@@ -397,6 +874,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateRuleGroupsNamespaceResponse.error_of_json))
+  | CreateScraper ->
+      if is_success
+      then Ok (CreateScraperResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateScraperResponse.error_of_json))
   | CreateWorkspace ->
       if is_success
       then Ok (CreateWorkspaceResponse.of_json (response_to_json resp))
@@ -404,7 +885,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some CreateWorkspaceResponse.error_of_json))
   | DeleteAlertManagerDefinition ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteAnomalyDetector ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteLoggingConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteQueryLoggingConfiguration ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteRuleGroupsNamespace ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteScraper ->
+      if is_success
+      then Ok (DeleteScraperResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DeleteScraperResponse.error_of_json))
+  | DeleteScraperLoggingConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteWorkspace ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -418,6 +913,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeAlertManagerDefinitionResponse.error_of_json))
+  | DescribeAnomalyDetector ->
+      if is_success
+      then
+        Ok (DescribeAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAnomalyDetectorResponse.error_of_json))
+  | DescribeLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeLoggingConfigurationResponse.error_of_json))
+  | DescribeQueryLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeQueryLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeQueryLoggingConfigurationResponse.error_of_json))
+  | DescribeResourcePolicy ->
+      if is_success
+      then
+        Ok (DescribeResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResourcePolicyResponse.error_of_json))
   | DescribeRuleGroupsNamespace ->
       if is_success
       then
@@ -428,12 +959,56 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRuleGroupsNamespaceResponse.error_of_json))
+  | DescribeScraper ->
+      if is_success
+      then Ok (DescribeScraperResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DescribeScraperResponse.error_of_json))
+  | DescribeScraperLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeScraperLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeScraperLoggingConfigurationResponse.error_of_json))
   | DescribeWorkspace ->
       if is_success
       then Ok (DescribeWorkspaceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some DescribeWorkspaceResponse.error_of_json))
+  | DescribeWorkspaceConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeWorkspaceConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeWorkspaceConfigurationResponse.error_of_json))
+  | GetDefaultScraperConfiguration ->
+      if is_success
+      then
+        let body = Blob.of_string (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GetDefaultScraperConfigurationResponse.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDefaultScraperConfigurationResponse.error_of_json))
+  | ListAnomalyDetectors ->
+      if is_success
+      then Ok (ListAnomalyDetectorsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAnomalyDetectorsResponse.error_of_json))
   | ListRuleGroupsNamespaces ->
       if is_success
       then
@@ -442,6 +1017,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListRuleGroupsNamespacesResponse.error_of_json))
+  | ListScrapers ->
+      if is_success
+      then Ok (ListScrapersResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListScrapersResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -462,6 +1041,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutAlertManagerDefinitionResponse.error_of_json))
+  | PutAnomalyDetector ->
+      if is_success
+      then Ok (PutAnomalyDetectorResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutAnomalyDetectorResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then Ok (PutResourcePolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | PutRuleGroupsNamespace ->
       if is_success
       then
@@ -484,5 +1075,48 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateLoggingConfigurationResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateLoggingConfigurationResponse.error_of_json))
+  | UpdateQueryLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateQueryLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateQueryLoggingConfigurationResponse.error_of_json))
+  | UpdateScraper ->
+      if is_success
+      then Ok (UpdateScraperResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateScraperResponse.error_of_json))
+  | UpdateScraperLoggingConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateScraperLoggingConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateScraperLoggingConfigurationResponse.error_of_json))
   | UpdateWorkspaceAlias ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateWorkspaceConfiguration ->
+      if is_success
+      then
+        Ok
+          (UpdateWorkspaceConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateWorkspaceConfigurationResponse.error_of_json))

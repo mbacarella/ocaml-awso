@@ -42,6 +42,12 @@ val create_firewall_rule_group :
       CreateFirewallRuleGroupRequest.t ->
         (CreateFirewallRuleGroupResponse.t,
           CreateFirewallRuleGroupResponse.error) Result.t Lwt.t
+val create_outpost_resolver :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateOutpostResolverRequest.t ->
+        (CreateOutpostResolverResponse.t,
+          CreateOutpostResolverResponse.error) Result.t Lwt.t
 val create_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -78,6 +84,12 @@ val delete_firewall_rule_group :
       DeleteFirewallRuleGroupRequest.t ->
         (DeleteFirewallRuleGroupResponse.t,
           DeleteFirewallRuleGroupResponse.error) Result.t Lwt.t
+val delete_outpost_resolver :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteOutpostResolverRequest.t ->
+        (DeleteOutpostResolverResponse.t,
+          DeleteOutpostResolverResponse.error) Result.t Lwt.t
 val delete_resolver_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -150,6 +162,12 @@ val get_firewall_rule_group_policy :
       GetFirewallRuleGroupPolicyRequest.t ->
         (GetFirewallRuleGroupPolicyResponse.t,
           GetFirewallRuleGroupPolicyResponse.error) Result.t Lwt.t
+val get_outpost_resolver :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetOutpostResolverRequest.t ->
+        (GetOutpostResolverResponse.t, GetOutpostResolverResponse.error)
+          Result.t Lwt.t
 val get_resolver_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -245,6 +263,12 @@ val list_firewall_rules :
     ?cfg:Awso.Cfg.t ->
       ListFirewallRulesRequest.t ->
         (ListFirewallRulesResponse.t, ListFirewallRulesResponse.error)
+          Result.t Lwt.t
+val list_outpost_resolvers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListOutpostResolversRequest.t ->
+        (ListOutpostResolversResponse.t, ListOutpostResolversResponse.error)
           Result.t Lwt.t
 val list_resolver_configs :
   ?endpoint_url:string ->
@@ -353,6 +377,12 @@ val update_firewall_rule_group_association :
       UpdateFirewallRuleGroupAssociationRequest.t ->
         (UpdateFirewallRuleGroupAssociationResponse.t,
           UpdateFirewallRuleGroupAssociationResponse.error) Result.t Lwt.t
+val update_outpost_resolver :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateOutpostResolverRequest.t ->
+        (UpdateOutpostResolverResponse.t,
+          UpdateOutpostResolverResponse.error) Result.t Lwt.t
 val update_resolver_config :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

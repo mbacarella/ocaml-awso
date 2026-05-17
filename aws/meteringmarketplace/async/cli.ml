@@ -38,16 +38,16 @@ let batch_meter_usage =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and usageRecords =
-         flag "usage-records" (required json_arg) ~doc:"JSON UsageRecordList"
        and productCode =
-         flag "product-code" (required string) ~doc:"STRING ProductCode" in
+         flag "product-code" (optional string) ~doc:"STRING ProductCode"
+       and usageRecords =
+         flag "usage-records" (required json_arg) ~doc:"JSON UsageRecordList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.batch_meter_usage
-           (Values.BatchMeterUsageRequest.make
-              ~usageRecords:(Values.UsageRecordList.of_json usageRecords)
-              ~productCode ()) (Some Values.BatchMeterUsageResult.to_json)
+           (Values.BatchMeterUsageRequest.make ?productCode
+              ~usageRecords:(Values.UsageRecordList.of_json usageRecords) ())
+           (Some Values.BatchMeterUsageResult.to_json)
            (Some Values.BatchMeterUsageResult.error_to_json)])
 let meter_usage =
   Command.async ~summary:""
@@ -65,6 +65,8 @@ let meter_usage =
        and usageAllocations =
          flag "usage-allocations" (optional json_arg)
            ~doc:"JSON UsageAllocations"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and productCode =
          flag "product-code" (required string) ~doc:"STRING ProductCode"
        and timestamp =
@@ -78,9 +80,9 @@ let meter_usage =
            (Values.MeterUsageRequest.make ?usageQuantity ?dryRun
               ?usageAllocations:(Option.map
                                    ~f:Values.UsageAllocations.of_json
-                                   usageAllocations) ~productCode
-              ~timestamp:(Values.Timestamp.of_json timestamp) ~usageDimension
-              ()) (Some Values.MeterUsageResult.to_json)
+                                   usageAllocations) ?clientToken
+              ~productCode ~timestamp:(Values.Timestamp.of_json timestamp)
+              ~usageDimension ()) (Some Values.MeterUsageResult.to_json)
            (Some Values.MeterUsageResult.error_to_json)])
 let register_usage =
   Command.async ~summary:""

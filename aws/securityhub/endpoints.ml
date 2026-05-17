@@ -7,16 +7,53 @@ type ('i, 'o, 'e) t =
   AcceptAdministratorInvitationResponse.error) t 
   | AcceptInvitation: (AcceptInvitationRequest.t, AcceptInvitationResponse.t,
   AcceptInvitationResponse.error) t 
+  | BatchDeleteAutomationRules: (BatchDeleteAutomationRulesRequest.t,
+  BatchDeleteAutomationRulesResponse.t,
+  BatchDeleteAutomationRulesResponse.error) t 
   | BatchDisableStandards: (BatchDisableStandardsRequest.t,
   BatchDisableStandardsResponse.t, BatchDisableStandardsResponse.error) t 
   | BatchEnableStandards: (BatchEnableStandardsRequest.t,
   BatchEnableStandardsResponse.t, BatchEnableStandardsResponse.error) t 
+  | BatchGetAutomationRules: (BatchGetAutomationRulesRequest.t,
+  BatchGetAutomationRulesResponse.t, BatchGetAutomationRulesResponse.error) t
+  
+  | BatchGetConfigurationPolicyAssociations:
+  (BatchGetConfigurationPolicyAssociationsRequest.t,
+  BatchGetConfigurationPolicyAssociationsResponse.t,
+  BatchGetConfigurationPolicyAssociationsResponse.error) t 
+  | BatchGetSecurityControls: (BatchGetSecurityControlsRequest.t,
+  BatchGetSecurityControlsResponse.t, BatchGetSecurityControlsResponse.error)
+  t 
+  | BatchGetStandardsControlAssociations:
+  (BatchGetStandardsControlAssociationsRequest.t,
+  BatchGetStandardsControlAssociationsResponse.t,
+  BatchGetStandardsControlAssociationsResponse.error) t 
   | BatchImportFindings: (BatchImportFindingsRequest.t,
   BatchImportFindingsResponse.t, BatchImportFindingsResponse.error) t 
+  | BatchUpdateAutomationRules: (BatchUpdateAutomationRulesRequest.t,
+  BatchUpdateAutomationRulesResponse.t,
+  BatchUpdateAutomationRulesResponse.error) t 
   | BatchUpdateFindings: (BatchUpdateFindingsRequest.t,
   BatchUpdateFindingsResponse.t, BatchUpdateFindingsResponse.error) t 
+  | BatchUpdateFindingsV2: (BatchUpdateFindingsV2Request.t,
+  BatchUpdateFindingsV2Response.t, BatchUpdateFindingsV2Response.error) t 
+  | BatchUpdateStandardsControlAssociations:
+  (BatchUpdateStandardsControlAssociationsRequest.t,
+  BatchUpdateStandardsControlAssociationsResponse.t,
+  BatchUpdateStandardsControlAssociationsResponse.error) t 
   | CreateActionTarget: (CreateActionTargetRequest.t,
   CreateActionTargetResponse.t, CreateActionTargetResponse.error) t 
+  | CreateAggregatorV2: (CreateAggregatorV2Request.t,
+  CreateAggregatorV2Response.t, CreateAggregatorV2Response.error) t 
+  | CreateAutomationRule: (CreateAutomationRuleRequest.t,
+  CreateAutomationRuleResponse.t, CreateAutomationRuleResponse.error) t 
+  | CreateAutomationRuleV2: (CreateAutomationRuleV2Request.t,
+  CreateAutomationRuleV2Response.t, CreateAutomationRuleV2Response.error) t 
+  | CreateConfigurationPolicy: (CreateConfigurationPolicyRequest.t,
+  CreateConfigurationPolicyResponse.t,
+  CreateConfigurationPolicyResponse.error) t 
+  | CreateConnectorV2: (CreateConnectorV2Request.t,
+  CreateConnectorV2Response.t, CreateConnectorV2Response.error) t 
   | CreateFindingAggregator: (CreateFindingAggregatorRequest.t,
   CreateFindingAggregatorResponse.t, CreateFindingAggregatorResponse.error) t
   
@@ -24,10 +61,21 @@ type ('i, 'o, 'e) t =
   CreateInsightResponse.error) t 
   | CreateMembers: (CreateMembersRequest.t, CreateMembersResponse.t,
   CreateMembersResponse.error) t 
+  | CreateTicketV2: (CreateTicketV2Request.t, CreateTicketV2Response.t,
+  CreateTicketV2Response.error) t 
   | DeclineInvitations: (DeclineInvitationsRequest.t,
   DeclineInvitationsResponse.t, DeclineInvitationsResponse.error) t 
   | DeleteActionTarget: (DeleteActionTargetRequest.t,
   DeleteActionTargetResponse.t, DeleteActionTargetResponse.error) t 
+  | DeleteAggregatorV2: (DeleteAggregatorV2Request.t,
+  DeleteAggregatorV2Response.t, DeleteAggregatorV2Response.error) t 
+  | DeleteAutomationRuleV2: (DeleteAutomationRuleV2Request.t,
+  DeleteAutomationRuleV2Response.t, DeleteAutomationRuleV2Response.error) t 
+  | DeleteConfigurationPolicy: (DeleteConfigurationPolicyRequest.t,
+  DeleteConfigurationPolicyResponse.t,
+  DeleteConfigurationPolicyResponse.error) t 
+  | DeleteConnectorV2: (DeleteConnectorV2Request.t,
+  DeleteConnectorV2Response.t, DeleteConnectorV2Response.error) t 
   | DeleteFindingAggregator: (DeleteFindingAggregatorRequest.t,
   DeleteFindingAggregatorResponse.t, DeleteFindingAggregatorResponse.error) t
   
@@ -47,6 +95,10 @@ type ('i, 'o, 'e) t =
   DescribeOrganizationConfigurationResponse.error) t 
   | DescribeProducts: (DescribeProductsRequest.t, DescribeProductsResponse.t,
   DescribeProductsResponse.error) t 
+  | DescribeProductsV2: (DescribeProductsV2Request.t,
+  DescribeProductsV2Response.t, DescribeProductsV2Response.error) t 
+  | DescribeSecurityHubV2: (DescribeSecurityHubV2Request.t,
+  DescribeSecurityHubV2Response.t, DescribeSecurityHubV2Response.error) t 
   | DescribeStandards: (DescribeStandardsRequest.t,
   DescribeStandardsResponse.t, DescribeStandardsResponse.error) t 
   | DescribeStandardsControls: (DescribeStandardsControlsRequest.t,
@@ -62,6 +114,8 @@ type ('i, 'o, 'e) t =
   DisableOrganizationAdminAccountResponse.error) t 
   | DisableSecurityHub: (DisableSecurityHubRequest.t,
   DisableSecurityHubResponse.t, DisableSecurityHubResponse.error) t 
+  | DisableSecurityHubV2: (DisableSecurityHubV2Request.t,
+  DisableSecurityHubV2Response.t, DisableSecurityHubV2Response.error) t 
   | DisassociateFromAdministratorAccount:
   (DisassociateFromAdministratorAccountRequest.t,
   DisassociateFromAdministratorAccountResponse.t,
@@ -79,15 +133,40 @@ type ('i, 'o, 'e) t =
   EnableOrganizationAdminAccountResponse.error) t 
   | EnableSecurityHub: (EnableSecurityHubRequest.t,
   EnableSecurityHubResponse.t, EnableSecurityHubResponse.error) t 
+  | EnableSecurityHubV2: (EnableSecurityHubV2Request.t,
+  EnableSecurityHubV2Response.t, EnableSecurityHubV2Response.error) t 
+  | GenerateRecommendedPolicyV2: (GenerateRecommendedPolicyV2Request.t,
+  GenerateRecommendedPolicyV2Response.t,
+  GenerateRecommendedPolicyV2Response.error) t 
   | GetAdministratorAccount: (GetAdministratorAccountRequest.t,
   GetAdministratorAccountResponse.t, GetAdministratorAccountResponse.error) t
   
+  | GetAggregatorV2: (GetAggregatorV2Request.t, GetAggregatorV2Response.t,
+  GetAggregatorV2Response.error) t 
+  | GetAutomationRuleV2: (GetAutomationRuleV2Request.t,
+  GetAutomationRuleV2Response.t, GetAutomationRuleV2Response.error) t 
+  | GetConfigurationPolicy: (GetConfigurationPolicyRequest.t,
+  GetConfigurationPolicyResponse.t, GetConfigurationPolicyResponse.error) t 
+  | GetConfigurationPolicyAssociation:
+  (GetConfigurationPolicyAssociationRequest.t,
+  GetConfigurationPolicyAssociationResponse.t,
+  GetConfigurationPolicyAssociationResponse.error) t 
+  | GetConnectorV2: (GetConnectorV2Request.t, GetConnectorV2Response.t,
+  GetConnectorV2Response.error) t 
   | GetEnabledStandards: (GetEnabledStandardsRequest.t,
   GetEnabledStandardsResponse.t, GetEnabledStandardsResponse.error) t 
   | GetFindingAggregator: (GetFindingAggregatorRequest.t,
   GetFindingAggregatorResponse.t, GetFindingAggregatorResponse.error) t 
+  | GetFindingHistory: (GetFindingHistoryRequest.t,
+  GetFindingHistoryResponse.t, GetFindingHistoryResponse.error) t 
+  | GetFindingStatisticsV2: (GetFindingStatisticsV2Request.t,
+  GetFindingStatisticsV2Response.t, GetFindingStatisticsV2Response.error) t 
   | GetFindings: (GetFindingsRequest.t, GetFindingsResponse.t,
   GetFindingsResponse.error) t 
+  | GetFindingsTrendsV2: (GetFindingsTrendsV2Request.t,
+  GetFindingsTrendsV2Response.t, GetFindingsTrendsV2Response.error) t 
+  | GetFindingsV2: (GetFindingsV2Request.t, GetFindingsV2Response.t,
+  GetFindingsV2Response.error) t 
   | GetInsightResults: (GetInsightResultsRequest.t,
   GetInsightResultsResponse.t, GetInsightResultsResponse.error) t 
   | GetInsights: (GetInsightsRequest.t, GetInsightsResponse.t,
@@ -98,8 +177,35 @@ type ('i, 'o, 'e) t =
   GetMasterAccountResponse.error) t 
   | GetMembers: (GetMembersRequest.t, GetMembersResponse.t,
   GetMembersResponse.error) t 
+  | GetRecommendedPolicyV2: (GetRecommendedPolicyV2Request.t,
+  GetRecommendedPolicyV2Response.t, GetRecommendedPolicyV2Response.error) t 
+  | GetResourcesStatisticsV2: (GetResourcesStatisticsV2Request.t,
+  GetResourcesStatisticsV2Response.t, GetResourcesStatisticsV2Response.error)
+  t 
+  | GetResourcesTrendsV2: (GetResourcesTrendsV2Request.t,
+  GetResourcesTrendsV2Response.t, GetResourcesTrendsV2Response.error) t 
+  | GetResourcesV2: (GetResourcesV2Request.t, GetResourcesV2Response.t,
+  GetResourcesV2Response.error) t 
+  | GetSecurityControlDefinition: (GetSecurityControlDefinitionRequest.t,
+  GetSecurityControlDefinitionResponse.t,
+  GetSecurityControlDefinitionResponse.error) t 
   | InviteMembers: (InviteMembersRequest.t, InviteMembersResponse.t,
   InviteMembersResponse.error) t 
+  | ListAggregatorsV2: (ListAggregatorsV2Request.t,
+  ListAggregatorsV2Response.t, ListAggregatorsV2Response.error) t 
+  | ListAutomationRules: (ListAutomationRulesRequest.t,
+  ListAutomationRulesResponse.t, ListAutomationRulesResponse.error) t 
+  | ListAutomationRulesV2: (ListAutomationRulesV2Request.t,
+  ListAutomationRulesV2Response.t, ListAutomationRulesV2Response.error) t 
+  | ListConfigurationPolicies: (ListConfigurationPoliciesRequest.t,
+  ListConfigurationPoliciesResponse.t,
+  ListConfigurationPoliciesResponse.error) t 
+  | ListConfigurationPolicyAssociations:
+  (ListConfigurationPolicyAssociationsRequest.t,
+  ListConfigurationPolicyAssociationsResponse.t,
+  ListConfigurationPolicyAssociationsResponse.error) t 
+  | ListConnectorsV2: (ListConnectorsV2Request.t, ListConnectorsV2Response.t,
+  ListConnectorsV2Response.error) t 
   | ListEnabledProductsForImport: (ListEnabledProductsForImportRequest.t,
   ListEnabledProductsForImportResponse.t,
   ListEnabledProductsForImportResponse.error) t 
@@ -112,14 +218,40 @@ type ('i, 'o, 'e) t =
   | ListOrganizationAdminAccounts: (ListOrganizationAdminAccountsRequest.t,
   ListOrganizationAdminAccountsResponse.t,
   ListOrganizationAdminAccountsResponse.error) t 
+  | ListSecurityControlDefinitions: (ListSecurityControlDefinitionsRequest.t,
+  ListSecurityControlDefinitionsResponse.t,
+  ListSecurityControlDefinitionsResponse.error) t 
+  | ListStandardsControlAssociations:
+  (ListStandardsControlAssociationsRequest.t,
+  ListStandardsControlAssociationsResponse.t,
+  ListStandardsControlAssociationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | RegisterConnectorV2: (RegisterConnectorV2Request.t,
+  RegisterConnectorV2Response.t, RegisterConnectorV2Response.error) t 
+  | StartConfigurationPolicyAssociation:
+  (StartConfigurationPolicyAssociationRequest.t,
+  StartConfigurationPolicyAssociationResponse.t,
+  StartConfigurationPolicyAssociationResponse.error) t 
+  | StartConfigurationPolicyDisassociation:
+  (StartConfigurationPolicyDisassociationRequest.t,
+  StartConfigurationPolicyDisassociationResponse.t,
+  StartConfigurationPolicyDisassociationResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
   | UpdateActionTarget: (UpdateActionTargetRequest.t,
   UpdateActionTargetResponse.t, UpdateActionTargetResponse.error) t 
+  | UpdateAggregatorV2: (UpdateAggregatorV2Request.t,
+  UpdateAggregatorV2Response.t, UpdateAggregatorV2Response.error) t 
+  | UpdateAutomationRuleV2: (UpdateAutomationRuleV2Request.t,
+  UpdateAutomationRuleV2Response.t, UpdateAutomationRuleV2Response.error) t 
+  | UpdateConfigurationPolicy: (UpdateConfigurationPolicyRequest.t,
+  UpdateConfigurationPolicyResponse.t,
+  UpdateConfigurationPolicyResponse.error) t 
+  | UpdateConnectorV2: (UpdateConnectorV2Request.t,
+  UpdateConnectorV2Response.t, UpdateConnectorV2Response.error) t 
   | UpdateFindingAggregator: (UpdateFindingAggregatorRequest.t,
   UpdateFindingAggregatorResponse.t, UpdateFindingAggregatorResponse.error) t
   
@@ -131,6 +263,8 @@ type ('i, 'o, 'e) t =
   (UpdateOrganizationConfigurationRequest.t,
   UpdateOrganizationConfigurationResponse.t,
   UpdateOrganizationConfigurationResponse.error) t 
+  | UpdateSecurityControl: (UpdateSecurityControlRequest.t,
+  UpdateSecurityControlResponse.t, UpdateSecurityControlResponse.error) t 
   | UpdateSecurityHubConfiguration: (UpdateSecurityHubConfigurationRequest.t,
   UpdateSecurityHubConfigurationResponse.t,
   UpdateSecurityHubConfigurationResponse.error) t 
@@ -140,16 +274,34 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptAdministratorInvitation -> `POST
   | AcceptInvitation -> `POST
+  | BatchDeleteAutomationRules -> `POST
   | BatchDisableStandards -> `POST
   | BatchEnableStandards -> `POST
+  | BatchGetAutomationRules -> `POST
+  | BatchGetConfigurationPolicyAssociations -> `POST
+  | BatchGetSecurityControls -> `POST
+  | BatchGetStandardsControlAssociations -> `POST
   | BatchImportFindings -> `POST
+  | BatchUpdateAutomationRules -> `PATCH
   | BatchUpdateFindings -> `PATCH
+  | BatchUpdateFindingsV2 -> `PATCH
+  | BatchUpdateStandardsControlAssociations -> `PATCH
   | CreateActionTarget -> `POST
+  | CreateAggregatorV2 -> `POST
+  | CreateAutomationRule -> `POST
+  | CreateAutomationRuleV2 -> `POST
+  | CreateConfigurationPolicy -> `POST
+  | CreateConnectorV2 -> `POST
   | CreateFindingAggregator -> `POST
   | CreateInsight -> `POST
   | CreateMembers -> `POST
+  | CreateTicketV2 -> `POST
   | DeclineInvitations -> `POST
   | DeleteActionTarget -> `DELETE
+  | DeleteAggregatorV2 -> `DELETE
+  | DeleteAutomationRuleV2 -> `DELETE
+  | DeleteConfigurationPolicy -> `DELETE
+  | DeleteConnectorV2 -> `DELETE
   | DeleteFindingAggregator -> `DELETE
   | DeleteInsight -> `DELETE
   | DeleteInvitations -> `POST
@@ -158,40 +310,75 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeHub -> `GET
   | DescribeOrganizationConfiguration -> `GET
   | DescribeProducts -> `GET
+  | DescribeProductsV2 -> `GET
+  | DescribeSecurityHubV2 -> `GET
   | DescribeStandards -> `GET
   | DescribeStandardsControls -> `GET
   | DisableImportFindingsForProduct -> `DELETE
   | DisableOrganizationAdminAccount -> `POST
   | DisableSecurityHub -> `DELETE
+  | DisableSecurityHubV2 -> `DELETE
   | DisassociateFromAdministratorAccount -> `POST
   | DisassociateFromMasterAccount -> `POST
   | DisassociateMembers -> `POST
   | EnableImportFindingsForProduct -> `POST
   | EnableOrganizationAdminAccount -> `POST
   | EnableSecurityHub -> `POST
+  | EnableSecurityHubV2 -> `POST
+  | GenerateRecommendedPolicyV2 -> `POST
   | GetAdministratorAccount -> `GET
+  | GetAggregatorV2 -> `GET
+  | GetAutomationRuleV2 -> `GET
+  | GetConfigurationPolicy -> `GET
+  | GetConfigurationPolicyAssociation -> `POST
+  | GetConnectorV2 -> `GET
   | GetEnabledStandards -> `POST
   | GetFindingAggregator -> `GET
+  | GetFindingHistory -> `POST
+  | GetFindingStatisticsV2 -> `POST
   | GetFindings -> `POST
+  | GetFindingsTrendsV2 -> `POST
+  | GetFindingsV2 -> `POST
   | GetInsightResults -> `GET
   | GetInsights -> `POST
   | GetInvitationsCount -> `GET
   | GetMasterAccount -> `GET
   | GetMembers -> `POST
+  | GetRecommendedPolicyV2 -> `GET
+  | GetResourcesStatisticsV2 -> `POST
+  | GetResourcesTrendsV2 -> `POST
+  | GetResourcesV2 -> `POST
+  | GetSecurityControlDefinition -> `GET
   | InviteMembers -> `POST
+  | ListAggregatorsV2 -> `GET
+  | ListAutomationRules -> `GET
+  | ListAutomationRulesV2 -> `GET
+  | ListConfigurationPolicies -> `GET
+  | ListConfigurationPolicyAssociations -> `POST
+  | ListConnectorsV2 -> `GET
   | ListEnabledProductsForImport -> `GET
   | ListFindingAggregators -> `GET
   | ListInvitations -> `GET
   | ListMembers -> `GET
   | ListOrganizationAdminAccounts -> `GET
+  | ListSecurityControlDefinitions -> `GET
+  | ListStandardsControlAssociations -> `GET
   | ListTagsForResource -> `GET
+  | RegisterConnectorV2 -> `POST
+  | StartConfigurationPolicyAssociation -> `POST
+  | StartConfigurationPolicyDisassociation -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateActionTarget -> `PATCH
+  | UpdateAggregatorV2 -> `PATCH
+  | UpdateAutomationRuleV2 -> `PATCH
+  | UpdateConfigurationPolicy -> `PATCH
+  | UpdateConnectorV2 -> `PATCH
   | UpdateFindingAggregator -> `PATCH
   | UpdateFindings -> `PATCH
   | UpdateInsight -> `PATCH
   | UpdateOrganizationConfiguration -> `POST
+  | UpdateSecurityControl -> `PATCH
   | UpdateSecurityHubConfiguration -> `PATCH
   | UpdateStandardsControl -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -200,26 +387,68 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AcceptAdministratorInvitation ->
           (Format.kasprintf Uri.of_string) "/administrator"
       | AcceptInvitation -> (Format.kasprintf Uri.of_string) "/master"
+      | BatchDeleteAutomationRules ->
+          (Format.kasprintf Uri.of_string) "/automationrules/delete"
       | BatchDisableStandards ->
           (Format.kasprintf Uri.of_string) "/standards/deregister"
       | BatchEnableStandards ->
           (Format.kasprintf Uri.of_string) "/standards/register"
+      | BatchGetAutomationRules ->
+          (Format.kasprintf Uri.of_string) "/automationrules/get"
+      | BatchGetConfigurationPolicyAssociations ->
+          (Format.kasprintf Uri.of_string)
+            "/configurationPolicyAssociation/batchget"
+      | BatchGetSecurityControls ->
+          (Format.kasprintf Uri.of_string) "/securityControls/batchGet"
+      | BatchGetStandardsControlAssociations ->
+          (Format.kasprintf Uri.of_string) "/associations/batchGet"
       | BatchImportFindings ->
           (Format.kasprintf Uri.of_string) "/findings/import"
+      | BatchUpdateAutomationRules ->
+          (Format.kasprintf Uri.of_string) "/automationrules/update"
       | BatchUpdateFindings ->
           (Format.kasprintf Uri.of_string) "/findings/batchupdate"
+      | BatchUpdateFindingsV2 ->
+          (Format.kasprintf Uri.of_string) "/findingsv2/batchupdatev2"
+      | BatchUpdateStandardsControlAssociations ->
+          (Format.kasprintf Uri.of_string) "/associations"
       | CreateActionTarget ->
           (Format.kasprintf Uri.of_string) "/actionTargets"
+      | CreateAggregatorV2 ->
+          (Format.kasprintf Uri.of_string) "/aggregatorv2/create"
+      | CreateAutomationRule ->
+          (Format.kasprintf Uri.of_string) "/automationrules/create"
+      | CreateAutomationRuleV2 ->
+          (Format.kasprintf Uri.of_string) "/automationrulesv2/create"
+      | CreateConfigurationPolicy ->
+          (Format.kasprintf Uri.of_string) "/configurationPolicy/create"
+      | CreateConnectorV2 -> (Format.kasprintf Uri.of_string) "/connectorsv2"
       | CreateFindingAggregator ->
           (Format.kasprintf Uri.of_string) "/findingAggregator/create"
       | CreateInsight -> (Format.kasprintf Uri.of_string) "/insights"
       | CreateMembers -> (Format.kasprintf Uri.of_string) "/members"
+      | CreateTicketV2 -> (Format.kasprintf Uri.of_string) "/ticketsv2"
       | DeclineInvitations ->
           (Format.kasprintf Uri.of_string) "/invitations/decline"
       | DeleteActionTarget ->
           (Format.kasprintf Uri.of_string) "/actionTargets/%s"
             (NonEmptyString.to_header
                x.DeleteActionTargetRequest.actionTargetArn)
+      | DeleteAggregatorV2 ->
+          (Format.kasprintf Uri.of_string) "/aggregatorv2/delete/%s"
+            (NonEmptyString.to_header
+               x.DeleteAggregatorV2Request.aggregatorV2Arn)
+      | DeleteAutomationRuleV2 ->
+          (Format.kasprintf Uri.of_string) "/automationrulesv2/%s"
+            (NonEmptyString.to_header
+               x.DeleteAutomationRuleV2Request.identifier)
+      | DeleteConfigurationPolicy ->
+          (Format.kasprintf Uri.of_string) "/configurationPolicy/%s"
+            (NonEmptyString.to_header
+               x.DeleteConfigurationPolicyRequest.identifier)
+      | DeleteConnectorV2 ->
+          (Format.kasprintf Uri.of_string) "/connectorsv2/%s"
+            (NonEmptyString.to_header x.DeleteConnectorV2Request.connectorId)
       | DeleteFindingAggregator ->
           (Format.kasprintf Uri.of_string) "/findingAggregator/delete/%s"
             (NonEmptyString.to_header
@@ -254,6 +483,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("ProductArn", (NonEmptyString.to_header v)))
                  x.productArn])
+      | DescribeProductsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/productsV2")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | DescribeSecurityHubV2 -> (Format.kasprintf Uri.of_string) "/hubv2"
       | DescribeStandards ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/standards")
@@ -283,6 +523,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/organization/admin/disable"
       | DisableSecurityHub -> (Format.kasprintf Uri.of_string) "/accounts"
+      | DisableSecurityHubV2 -> (Format.kasprintf Uri.of_string) "/hubv2"
       | DisassociateFromAdministratorAccount ->
           (Format.kasprintf Uri.of_string) "/administrator/disassociate"
       | DisassociateFromMasterAccount ->
@@ -294,15 +535,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | EnableOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/organization/admin/enable"
       | EnableSecurityHub -> (Format.kasprintf Uri.of_string) "/accounts"
+      | EnableSecurityHubV2 -> (Format.kasprintf Uri.of_string) "/hubv2"
+      | GenerateRecommendedPolicyV2 ->
+          (Format.kasprintf Uri.of_string) "/recommendedPolicyV2/%s"
+            (NonEmptyString.to_header
+               x.GenerateRecommendedPolicyV2Request.metadataUid)
       | GetAdministratorAccount ->
           (Format.kasprintf Uri.of_string) "/administrator"
+      | GetAggregatorV2 ->
+          (Format.kasprintf Uri.of_string) "/aggregatorv2/get/%s"
+            (NonEmptyString.to_header
+               x.GetAggregatorV2Request.aggregatorV2Arn)
+      | GetAutomationRuleV2 ->
+          (Format.kasprintf Uri.of_string) "/automationrulesv2/%s"
+            (NonEmptyString.to_header x.GetAutomationRuleV2Request.identifier)
+      | GetConfigurationPolicy ->
+          (Format.kasprintf Uri.of_string) "/configurationPolicy/get/%s"
+            (NonEmptyString.to_header
+               x.GetConfigurationPolicyRequest.identifier)
+      | GetConfigurationPolicyAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/configurationPolicyAssociation/get"
+      | GetConnectorV2 ->
+          (Format.kasprintf Uri.of_string) "/connectorsv2/%s"
+            (NonEmptyString.to_header x.GetConnectorV2Request.connectorId)
       | GetEnabledStandards ->
           (Format.kasprintf Uri.of_string) "/standards/get"
       | GetFindingAggregator ->
           (Format.kasprintf Uri.of_string) "/findingAggregator/get/%s"
             (NonEmptyString.to_header
                x.GetFindingAggregatorRequest.findingAggregatorArn)
+      | GetFindingHistory ->
+          (Format.kasprintf Uri.of_string) "/findingHistory/get"
+      | GetFindingStatisticsV2 ->
+          (Format.kasprintf Uri.of_string) "/findingsv2/statistics"
       | GetFindings -> (Format.kasprintf Uri.of_string) "/findings"
+      | GetFindingsTrendsV2 ->
+          (Format.kasprintf Uri.of_string) "/findingsTrendsv2"
+      | GetFindingsV2 -> (Format.kasprintf Uri.of_string) "/findingsv2"
       | GetInsightResults ->
           (Format.kasprintf Uri.of_string) "/insights/results/%s"
             (NonEmptyString.to_header x.GetInsightResultsRequest.insightArn)
@@ -311,7 +581,92 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/invitations/count"
       | GetMasterAccount -> (Format.kasprintf Uri.of_string) "/master"
       | GetMembers -> (Format.kasprintf Uri.of_string) "/members/get"
+      | GetRecommendedPolicyV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/recommendedPolicyV2/%s"
+               (NonEmptyString.to_header
+                  x.GetRecommendedPolicyV2Request.metadataUid))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | GetResourcesStatisticsV2 ->
+          (Format.kasprintf Uri.of_string) "/resourcesv2/statistics"
+      | GetResourcesTrendsV2 ->
+          (Format.kasprintf Uri.of_string) "/resourcesTrendsv2"
+      | GetResourcesV2 -> (Format.kasprintf Uri.of_string) "/resourcesv2"
+      | GetSecurityControlDefinition ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/securityControl/definition")
+            (List.filter_opt
+               [Some
+                  ("SecurityControlId",
+                    (NonEmptyString.to_header x.securityControlId))])
       | InviteMembers -> (Format.kasprintf Uri.of_string) "/members/invite"
+      | ListAggregatorsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/aggregatorv2/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListAutomationRules ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/automationrules/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListAutomationRulesV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/automationrulesv2/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListConfigurationPolicies ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/configurationPolicy/list")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListConfigurationPolicyAssociations ->
+          (Format.kasprintf Uri.of_string)
+            "/configurationPolicyAssociation/list"
+      | ListConnectorsV2 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/connectorsv2")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("ProviderName", (ConnectorProviderName.to_header v)))
+                 x.providerName;
+               Option.map
+                 ~f:(fun v ->
+                       ("ConnectorStatus", (ConnectorStatus.to_header v)))
+                 x.connectorStatus])
       | ListEnabledProductsForImport ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/productSubscriptions")
@@ -365,10 +720,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.maxResults;
                Option.map
                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("Feature", (SecurityHubFeature.to_header v)))
+                 x.feature])
+      | ListSecurityControlDefinitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/securityControls/definitions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("StandardsArn", (NonEmptyString.to_header v)))
+                  x.standardsArn;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListStandardsControlAssociations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/associations")
+            (List.filter_opt
+               [Some
+                  ("SecurityControlId",
+                    (NonEmptyString.to_header x.securityControlId));
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | RegisterConnectorV2 ->
+          (Format.kasprintf Uri.of_string) "/connectorsv2/register"
+      | StartConfigurationPolicyAssociation ->
+          (Format.kasprintf Uri.of_string)
+            "/configurationPolicyAssociation/associate"
+      | StartConfigurationPolicyDisassociation ->
+          (Format.kasprintf Uri.of_string)
+            "/configurationPolicyAssociation/disassociate"
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ResourceArn.to_header x.TagResourceRequest.resourceArn)
@@ -382,6 +774,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/actionTargets/%s"
             (NonEmptyString.to_header
                x.UpdateActionTargetRequest.actionTargetArn)
+      | UpdateAggregatorV2 ->
+          (Format.kasprintf Uri.of_string) "/aggregatorv2/update/%s"
+            (NonEmptyString.to_header
+               x.UpdateAggregatorV2Request.aggregatorV2Arn)
+      | UpdateAutomationRuleV2 ->
+          (Format.kasprintf Uri.of_string) "/automationrulesv2/%s"
+            (NonEmptyString.to_header
+               x.UpdateAutomationRuleV2Request.identifier)
+      | UpdateConfigurationPolicy ->
+          (Format.kasprintf Uri.of_string) "/configurationPolicy/%s"
+            (NonEmptyString.to_header
+               x.UpdateConfigurationPolicyRequest.identifier)
+      | UpdateConnectorV2 ->
+          (Format.kasprintf Uri.of_string) "/connectorsv2/%s"
+            (NonEmptyString.to_header x.UpdateConnectorV2Request.connectorId)
       | UpdateFindingAggregator ->
           (Format.kasprintf Uri.of_string) "/findingAggregator/update"
       | UpdateFindings -> (Format.kasprintf Uri.of_string) "/findings"
@@ -390,6 +797,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (NonEmptyString.to_header x.UpdateInsightRequest.insightArn)
       | UpdateOrganizationConfiguration ->
           (Format.kasprintf Uri.of_string) "/organization/configuration"
+      | UpdateSecurityControl ->
+          (Format.kasprintf Uri.of_string) "/securityControl/update"
       | UpdateSecurityHubConfiguration ->
           (Format.kasprintf Uri.of_string) "/accounts"
       | UpdateStandardsControl ->
@@ -448,6 +857,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchDeleteAutomationRules ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AutomationRulesArns",
+                           (AutomationRulesArnsList.to_value
+                              req.BatchDeleteAutomationRulesRequest.automationRulesArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | BatchDisableStandards ->
       let (headers, body) =
         let headers =
@@ -488,6 +917,86 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetAutomationRules ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AutomationRulesArns",
+                           (AutomationRulesArnsList.to_value
+                              req.BatchGetAutomationRulesRequest.automationRulesArns))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetConfigurationPolicyAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ConfigurationPolicyAssociationIdentifiers",
+                           (ConfigurationPolicyAssociationsList.to_value
+                              req.BatchGetConfigurationPolicyAssociationsRequest.configurationPolicyAssociationIdentifiers))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetSecurityControls ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SecurityControlIds",
+                           (StringList.to_value
+                              req.BatchGetSecurityControlsRequest.securityControlIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetStandardsControlAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("StandardsControlAssociationIds",
+                           (StandardsControlAssociationIds.to_value
+                              req.BatchGetStandardsControlAssociationsRequest.standardsControlAssociationIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | BatchImportFindings ->
       let (headers, body) =
         let headers =
@@ -508,7 +1017,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchUpdateAutomationRules ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | BatchUpdateFindings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchUpdateFindingsV2 -> Awso.Http.Request.make (method_of_endpoint endp)
+  | BatchUpdateStandardsControlAssociations ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateActionTarget ->
       let (headers, body) =
         let headers =
@@ -530,6 +1044,186 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Id",
                           (NonEmptyString.to_value
                              req.CreateActionTargetRequest.id))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAggregatorV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RegionLinkingMode",
+                           (NonEmptyString.to_value
+                              req.CreateAggregatorV2Request.regionLinkingMode));
+                      Option.map req.CreateAggregatorV2Request.linkedRegions
+                        ~f:(fun x ->
+                              ("LinkedRegions", (StringList.to_value x)));
+                      Option.map req.CreateAggregatorV2Request.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateAggregatorV2Request.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAutomationRule ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.CreateAutomationRuleRequest.tags
+                         ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateAutomationRuleRequest.ruleStatus
+                        ~f:(fun x -> ("RuleStatus", (RuleStatus.to_value x)));
+                      Some
+                        ("RuleOrder",
+                          (RuleOrderValue.to_value
+                             req.CreateAutomationRuleRequest.ruleOrder));
+                      Some
+                        ("RuleName",
+                          (NonEmptyString.to_value
+                             req.CreateAutomationRuleRequest.ruleName));
+                      Some
+                        ("Description",
+                          (NonEmptyString.to_value
+                             req.CreateAutomationRuleRequest.description));
+                      Option.map req.CreateAutomationRuleRequest.isTerminal
+                        ~f:(fun x -> ("IsTerminal", (Boolean.to_value x)));
+                      Some
+                        ("Criteria",
+                          (AutomationRulesFindingFilters.to_value
+                             req.CreateAutomationRuleRequest.criteria));
+                      Some
+                        ("Actions",
+                          (ActionList.to_value
+                             req.CreateAutomationRuleRequest.actions))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateAutomationRuleV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RuleName",
+                           (NonEmptyString.to_value
+                              req.CreateAutomationRuleV2Request.ruleName));
+                      Option.map req.CreateAutomationRuleV2Request.ruleStatus
+                        ~f:(fun x ->
+                              ("RuleStatus", (RuleStatusV2.to_value x)));
+                      Some
+                        ("Description",
+                          (NonEmptyString.to_value
+                             req.CreateAutomationRuleV2Request.description));
+                      Some
+                        ("RuleOrder",
+                          (RuleOrderValueV2.to_value
+                             req.CreateAutomationRuleV2Request.ruleOrder));
+                      Some
+                        ("Criteria",
+                          (Criteria.to_value
+                             req.CreateAutomationRuleV2Request.criteria));
+                      Some
+                        ("Actions",
+                          (AutomationRulesActionListV2.to_value
+                             req.CreateAutomationRuleV2Request.actions));
+                      Option.map req.CreateAutomationRuleV2Request.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateAutomationRuleV2Request.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateConfigurationPolicy ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NonEmptyString.to_value
+                              req.CreateConfigurationPolicyRequest.name));
+                      Option.map
+                        req.CreateConfigurationPolicyRequest.description
+                        ~f:(fun x ->
+                              ("Description", (NonEmptyString.to_value x)));
+                      Some
+                        ("ConfigurationPolicy",
+                          (Policy.to_value
+                             req.CreateConfigurationPolicyRequest.configurationPolicy));
+                      Option.map req.CreateConfigurationPolicyRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateConnectorV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NonEmptyString.to_value
+                              req.CreateConnectorV2Request.name));
+                      Option.map req.CreateConnectorV2Request.description
+                        ~f:(fun x ->
+                              ("Description", (NonEmptyString.to_value x)));
+                      Some
+                        ("Provider",
+                          (ProviderConfiguration.to_value
+                             req.CreateConnectorV2Request.provider));
+                      Option.map req.CreateConnectorV2Request.kmsKeyArn
+                        ~f:(fun x ->
+                              ("KmsKeyArn", (NonEmptyString.to_value x)));
+                      Option.map req.CreateConnectorV2Request.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateConnectorV2Request.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -607,6 +1301,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTicketV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ConnectorId",
+                           (NonEmptyString.to_value
+                              req.CreateTicketV2Request.connectorId));
+                      Some
+                        ("FindingMetadataUid",
+                          (NonEmptyString.to_value
+                             req.CreateTicketV2Request.findingMetadataUid));
+                      Option.map req.CreateTicketV2Request.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateTicketV2Request.mode
+                        ~f:(fun x ->
+                              ("Mode", (TicketCreationMode.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeclineInvitations ->
       let (headers, body) =
         let headers =
@@ -628,6 +1352,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteActionTarget -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAggregatorV2 -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteAutomationRuleV2 ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteConfigurationPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteConnectorV2 -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteFindingAggregator ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteInsight -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -704,6 +1434,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeProducts ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeProductsV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeSecurityHubV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeStandards ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -724,7 +1460,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("AdminAccountId",
                            (NonEmptyString.to_value
-                              req.DisableOrganizationAdminAccountRequest.adminAccountId))])
+                              req.DisableOrganizationAdminAccountRequest.adminAccountId));
+                      Option.map
+                        req.DisableOrganizationAdminAccountRequest.feature
+                        ~f:(fun x ->
+                              ("Feature", (SecurityHubFeature.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -733,6 +1473,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisableSecurityHub -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DisableSecurityHubV2 -> Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateFromAdministratorAccount ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -791,7 +1532,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("AdminAccountId",
                            (NonEmptyString.to_value
-                              req.EnableOrganizationAdminAccountRequest.adminAccountId))])
+                              req.EnableOrganizationAdminAccountRequest.adminAccountId));
+                      Option.map
+                        req.EnableOrganizationAdminAccountRequest.feature
+                        ~f:(fun x ->
+                              ("Feature", (SecurityHubFeature.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -814,7 +1559,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.EnableSecurityHubRequest.enableDefaultStandards
                         ~f:(fun x ->
                               ("EnableDefaultStandards",
-                                (Boolean.to_value x)))])
+                                (Boolean.to_value x)));
+                      Option.map
+                        req.EnableSecurityHubRequest.controlFindingGenerator
+                        ~f:(fun x ->
+                              ("ControlFindingGenerator",
+                                (ControlFindingGenerator.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -822,7 +1572,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | EnableSecurityHubV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.EnableSecurityHubV2Request.tags
+                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GenerateRecommendedPolicyV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAdministratorAccount ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAggregatorV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetAutomationRuleV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConfigurationPolicy ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConfigurationPolicyAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Target",
+                           (Target.to_value
+                              req.GetConfigurationPolicyAssociationRequest.target))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConnectorV2 ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEnabledStandards ->
@@ -853,6 +1656,63 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetFindingAggregator ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingHistory ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("FindingIdentifier",
+                           (AwsSecurityFindingIdentifier.to_value
+                              req.GetFindingHistoryRequest.findingIdentifier));
+                      Option.map req.GetFindingHistoryRequest.startTime
+                        ~f:(fun x -> ("StartTime", (Timestamp.to_value x)));
+                      Option.map req.GetFindingHistoryRequest.endTime
+                        ~f:(fun x -> ("EndTime", (Timestamp.to_value x)));
+                      Option.map req.GetFindingHistoryRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetFindingHistoryRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingStatisticsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GroupByRules",
+                           (GroupByRules.to_value
+                              req.GetFindingStatisticsV2Request.groupByRules));
+                      Option.map req.GetFindingStatisticsV2Request.scopes
+                        ~f:(fun x -> ("Scopes", (FindingScopes.to_value x)));
+                      Option.map req.GetFindingStatisticsV2Request.sortOrder
+                        ~f:(fun x -> ("SortOrder", (SortOrder.to_value x)));
+                      Option.map
+                        req.GetFindingStatisticsV2Request.maxStatisticResults
+                        ~f:(fun x ->
+                              ("MaxStatisticResults",
+                                (MaxStatisticResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFindings ->
       let (headers, body) =
         let headers =
@@ -872,6 +1732,66 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.GetFindingsRequest.nextToken
                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
                       Option.map req.GetFindingsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingsTrendsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetFindingsTrendsV2Request.filters
+                         ~f:(fun x ->
+                               ("Filters",
+                                 (FindingsTrendsFilters.to_value x)));
+                      Some
+                        ("StartTime",
+                          (Timestamp.to_value
+                             req.GetFindingsTrendsV2Request.startTime));
+                      Some
+                        ("EndTime",
+                          (Timestamp.to_value
+                             req.GetFindingsTrendsV2Request.endTime));
+                      Option.map req.GetFindingsTrendsV2Request.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetFindingsTrendsV2Request.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFindingsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetFindingsV2Request.filters
+                         ~f:(fun x ->
+                               ("Filters", (OcsfFindingFilters.to_value x)));
+                      Option.map req.GetFindingsV2Request.scopes
+                        ~f:(fun x -> ("Scopes", (FindingScopes.to_value x)));
+                      Option.map req.GetFindingsV2Request.sortCriteria
+                        ~f:(fun x ->
+                              ("SortCriteria", (SortCriteria.to_value x)));
+                      Option.map req.GetFindingsV2Request.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetFindingsV2Request.maxResults
                         ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -931,6 +1851,102 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRecommendedPolicyV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcesStatisticsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("GroupByRules",
+                           (ResourceGroupByRules.to_value
+                              req.GetResourcesStatisticsV2Request.groupByRules));
+                      Option.map req.GetResourcesStatisticsV2Request.scopes
+                        ~f:(fun x -> ("Scopes", (ResourceScopes.to_value x)));
+                      Option.map
+                        req.GetResourcesStatisticsV2Request.sortOrder
+                        ~f:(fun x -> ("SortOrder", (SortOrder.to_value x)));
+                      Option.map
+                        req.GetResourcesStatisticsV2Request.maxStatisticResults
+                        ~f:(fun x ->
+                              ("MaxStatisticResults",
+                                (MaxStatisticResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcesTrendsV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetResourcesTrendsV2Request.filters
+                         ~f:(fun x ->
+                               ("Filters",
+                                 (ResourcesTrendsFilters.to_value x)));
+                      Some
+                        ("StartTime",
+                          (Timestamp.to_value
+                             req.GetResourcesTrendsV2Request.startTime));
+                      Some
+                        ("EndTime",
+                          (Timestamp.to_value
+                             req.GetResourcesTrendsV2Request.endTime));
+                      Option.map req.GetResourcesTrendsV2Request.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetResourcesTrendsV2Request.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetResourcesV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetResourcesV2Request.filters
+                         ~f:(fun x ->
+                               ("Filters", (ResourcesFilters.to_value x)));
+                      Option.map req.GetResourcesV2Request.scopes
+                        ~f:(fun x -> ("Scopes", (ResourceScopes.to_value x)));
+                      Option.map req.GetResourcesV2Request.sortCriteria
+                        ~f:(fun x ->
+                              ("SortCriteria", (SortCriteria.to_value x)));
+                      Option.map req.GetResourcesV2Request.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.GetResourcesV2Request.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSecurityControlDefinition ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | InviteMembers ->
       let (headers, body) =
         let headers =
@@ -951,6 +1967,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAggregatorsV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAutomationRules ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAutomationRulesV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConfigurationPolicies ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConfigurationPolicyAssociations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListConfigurationPolicyAssociationsRequest.nextToken
+                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map
+                        req.ListConfigurationPolicyAssociationsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Option.map
+                        req.ListConfigurationPolicyAssociationsRequest.filters
+                        ~f:(fun x ->
+                              ("Filters", (AssociationFilters.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConnectorsV2 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListEnabledProductsForImport ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -966,8 +2023,85 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListOrganizationAdminAccounts ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSecurityControlDefinitions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListStandardsControlAssociations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | RegisterConnectorV2 ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("AuthCode",
+                           (NonEmptyString.to_value
+                              req.RegisterConnectorV2Request.authCode));
+                      Some
+                        ("AuthState",
+                          (NonEmptyString.to_value
+                             req.RegisterConnectorV2Request.authState))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartConfigurationPolicyAssociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ConfigurationPolicyIdentifier",
+                           (NonEmptyString.to_value
+                              req.StartConfigurationPolicyAssociationRequest.configurationPolicyIdentifier));
+                      Some
+                        ("Target",
+                          (Target.to_value
+                             req.StartConfigurationPolicyAssociationRequest.target))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartConfigurationPolicyDisassociation ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.StartConfigurationPolicyDisassociationRequest.target
+                         ~f:(fun x -> ("Target", (Target.to_value x)));
+                      Some
+                        ("ConfigurationPolicyIdentifier",
+                          (NonEmptyString.to_value
+                             req.StartConfigurationPolicyDisassociationRequest.configurationPolicyIdentifier))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
@@ -990,6 +2124,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateActionTarget -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAggregatorV2 -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateAutomationRuleV2 ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateConfigurationPolicy ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateConnectorV2 -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFindingAggregator ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateFindings -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -1006,7 +2146,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Some
                          ("AutoEnable",
                            (Boolean.to_value
-                              req.UpdateOrganizationConfigurationRequest.autoEnable))])
+                              req.UpdateOrganizationConfigurationRequest.autoEnable));
+                      Option.map
+                        req.UpdateOrganizationConfigurationRequest.autoEnableStandards
+                        ~f:(fun x ->
+                              ("AutoEnableStandards",
+                                (AutoEnableStandards.to_value x)));
+                      Option.map
+                        req.UpdateOrganizationConfigurationRequest.organizationConfiguration
+                        ~f:(fun x ->
+                              ("OrganizationConfiguration",
+                                (OrganizationConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1014,6 +2164,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateSecurityControl -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSecurityHubConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateStandardsControl ->
@@ -1086,6 +2237,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (AcceptInvitationResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some AcceptInvitationResponse.error_of_json))
+  | BatchDeleteAutomationRules ->
+      if is_success
+      then
+        Ok
+          (BatchDeleteAutomationRulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDeleteAutomationRulesResponse.error_of_json))
   | BatchDisableStandards ->
       if is_success
       then Ok (BatchDisableStandardsResponse.of_json (response_to_json resp))
@@ -1098,24 +2258,122 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchEnableStandardsResponse.error_of_json))
+  | BatchGetAutomationRules ->
+      if is_success
+      then
+        Ok (BatchGetAutomationRulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetAutomationRulesResponse.error_of_json))
+  | BatchGetConfigurationPolicyAssociations ->
+      if is_success
+      then
+        Ok
+          (BatchGetConfigurationPolicyAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchGetConfigurationPolicyAssociationsResponse.error_of_json))
+  | BatchGetSecurityControls ->
+      if is_success
+      then
+        Ok (BatchGetSecurityControlsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetSecurityControlsResponse.error_of_json))
+  | BatchGetStandardsControlAssociations ->
+      if is_success
+      then
+        Ok
+          (BatchGetStandardsControlAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetStandardsControlAssociationsResponse.error_of_json))
   | BatchImportFindings ->
       if is_success
       then Ok (BatchImportFindingsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some BatchImportFindingsResponse.error_of_json))
+  | BatchUpdateAutomationRules ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateAutomationRulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some BatchUpdateAutomationRulesResponse.error_of_json))
   | BatchUpdateFindings ->
       if is_success
       then Ok (BatchUpdateFindingsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some BatchUpdateFindingsResponse.error_of_json))
+  | BatchUpdateFindingsV2 ->
+      if is_success
+      then Ok (BatchUpdateFindingsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some BatchUpdateFindingsV2Response.error_of_json))
+  | BatchUpdateStandardsControlAssociations ->
+      if is_success
+      then
+        Ok
+          (BatchUpdateStandardsControlAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchUpdateStandardsControlAssociationsResponse.error_of_json))
   | CreateActionTarget ->
       if is_success
       then Ok (CreateActionTargetResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateActionTargetResponse.error_of_json))
+  | CreateAggregatorV2 ->
+      if is_success
+      then Ok (CreateAggregatorV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAggregatorV2Response.error_of_json))
+  | CreateAutomationRule ->
+      if is_success
+      then Ok (CreateAutomationRuleResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateAutomationRuleResponse.error_of_json))
+  | CreateAutomationRuleV2 ->
+      if is_success
+      then
+        Ok (CreateAutomationRuleV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAutomationRuleV2Response.error_of_json))
+  | CreateConfigurationPolicy ->
+      if is_success
+      then
+        Ok
+          (CreateConfigurationPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateConfigurationPolicyResponse.error_of_json))
+  | CreateConnectorV2 ->
+      if is_success
+      then Ok (CreateConnectorV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateConnectorV2Response.error_of_json))
   | CreateFindingAggregator ->
       if is_success
       then
@@ -1132,6 +2390,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateMembersResponse.error_of_json))
+  | CreateTicketV2 ->
+      if is_success
+      then Ok (CreateTicketV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateTicketV2Response.error_of_json))
   | DeclineInvitations ->
       if is_success
       then Ok (DeclineInvitationsResponse.of_json (response_to_json resp))
@@ -1144,6 +2407,45 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteActionTargetResponse.error_of_json))
+  | DeleteAggregatorV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAggregatorV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteAggregatorV2Response.error_of_json))
+  | DeleteAutomationRuleV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteAutomationRuleV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAutomationRuleV2Response.error_of_json))
+  | DeleteConfigurationPolicy ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteConfigurationPolicyResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteConfigurationPolicyResponse.error_of_json))
+  | DeleteConnectorV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteConnectorV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteConnectorV2Response.error_of_json))
   | DeleteFindingAggregator ->
       if is_success
       then
@@ -1193,6 +2495,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeProductsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeProductsResponse.error_of_json))
+  | DescribeProductsV2 ->
+      if is_success
+      then Ok (DescribeProductsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeProductsV2Response.error_of_json))
+  | DescribeSecurityHubV2 ->
+      if is_success
+      then Ok (DescribeSecurityHubV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeSecurityHubV2Response.error_of_json))
   | DescribeStandards ->
       if is_success
       then Ok (DescribeStandardsResponse.of_json (response_to_json resp))
@@ -1241,6 +2555,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DisableSecurityHubResponse.error_of_json))
+  | DisableSecurityHubV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DisableSecurityHubV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DisableSecurityHubV2Response.error_of_json))
   | DisassociateFromAdministratorAccount ->
       if is_success
       then
@@ -1287,11 +2610,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | EnableOrganizationAdminAccount ->
       if is_success
       then
-        let headers =
-          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok
-          (EnableOrganizationAdminAccountResponse.of_header_and_body
-             (headers, ()))
+          (EnableOrganizationAdminAccountResponse.of_json
+             (response_to_json resp))
       else
         Error
           (parse_aws_error
@@ -1305,6 +2626,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some EnableSecurityHubResponse.error_of_json))
+  | EnableSecurityHubV2 ->
+      if is_success
+      then Ok (EnableSecurityHubV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some EnableSecurityHubV2Response.error_of_json))
+  | GenerateRecommendedPolicyV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (GenerateRecommendedPolicyV2Response.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some GenerateRecommendedPolicyV2Response.error_of_json))
   | GetAdministratorAccount ->
       if is_success
       then
@@ -1313,6 +2652,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetAdministratorAccountResponse.error_of_json))
+  | GetAggregatorV2 ->
+      if is_success
+      then Ok (GetAggregatorV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetAggregatorV2Response.error_of_json))
+  | GetAutomationRuleV2 ->
+      if is_success
+      then Ok (GetAutomationRuleV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetAutomationRuleV2Response.error_of_json))
+  | GetConfigurationPolicy ->
+      if is_success
+      then
+        Ok (GetConfigurationPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetConfigurationPolicyResponse.error_of_json))
+  | GetConfigurationPolicyAssociation ->
+      if is_success
+      then
+        Ok
+          (GetConfigurationPolicyAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetConfigurationPolicyAssociationResponse.error_of_json))
+  | GetConnectorV2 ->
+      if is_success
+      then Ok (GetConnectorV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetConnectorV2Response.error_of_json))
   | GetEnabledStandards ->
       if is_success
       then Ok (GetEnabledStandardsResponse.of_json (response_to_json resp))
@@ -1325,10 +2698,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetFindingAggregatorResponse.error_of_json))
+  | GetFindingHistory ->
+      if is_success
+      then Ok (GetFindingHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetFindingHistoryResponse.error_of_json))
+  | GetFindingStatisticsV2 ->
+      if is_success
+      then
+        Ok (GetFindingStatisticsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFindingStatisticsV2Response.error_of_json))
   | GetFindings ->
       if is_success
       then Ok (GetFindingsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetFindingsResponse.error_of_json))
+  | GetFindingsTrendsV2 ->
+      if is_success
+      then Ok (GetFindingsTrendsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetFindingsTrendsV2Response.error_of_json))
+  | GetFindingsV2 ->
+      if is_success
+      then Ok (GetFindingsV2Response.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetFindingsV2Response.error_of_json))
   | GetInsightResults ->
       if is_success
       then Ok (GetInsightResultsResponse.of_json (response_to_json resp))
@@ -1354,10 +2751,89 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMembersResponse.error_of_json))
+  | GetRecommendedPolicyV2 ->
+      if is_success
+      then
+        Ok (GetRecommendedPolicyV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecommendedPolicyV2Response.error_of_json))
+  | GetResourcesStatisticsV2 ->
+      if is_success
+      then
+        Ok (GetResourcesStatisticsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetResourcesStatisticsV2Response.error_of_json))
+  | GetResourcesTrendsV2 ->
+      if is_success
+      then Ok (GetResourcesTrendsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetResourcesTrendsV2Response.error_of_json))
+  | GetResourcesV2 ->
+      if is_success
+      then Ok (GetResourcesV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetResourcesV2Response.error_of_json))
+  | GetSecurityControlDefinition ->
+      if is_success
+      then
+        Ok
+          (GetSecurityControlDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetSecurityControlDefinitionResponse.error_of_json))
   | InviteMembers ->
       if is_success
       then Ok (InviteMembersResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some InviteMembersResponse.error_of_json))
+  | ListAggregatorsV2 ->
+      if is_success
+      then Ok (ListAggregatorsV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAggregatorsV2Response.error_of_json))
+  | ListAutomationRules ->
+      if is_success
+      then Ok (ListAutomationRulesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAutomationRulesResponse.error_of_json))
+  | ListAutomationRulesV2 ->
+      if is_success
+      then Ok (ListAutomationRulesV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAutomationRulesV2Response.error_of_json))
+  | ListConfigurationPolicies ->
+      if is_success
+      then
+        Ok
+          (ListConfigurationPoliciesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListConfigurationPoliciesResponse.error_of_json))
+  | ListConfigurationPolicyAssociations ->
+      if is_success
+      then
+        Ok
+          (ListConfigurationPolicyAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListConfigurationPolicyAssociationsResponse.error_of_json))
+  | ListConnectorsV2 ->
+      if is_success
+      then Ok (ListConnectorsV2Response.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListConnectorsV2Response.error_of_json))
   | ListEnabledProductsForImport ->
       if is_success
       then
@@ -1395,12 +2871,61 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListOrganizationAdminAccountsResponse.error_of_json))
+  | ListSecurityControlDefinitions ->
+      if is_success
+      then
+        Ok
+          (ListSecurityControlDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSecurityControlDefinitionsResponse.error_of_json))
+  | ListStandardsControlAssociations ->
+      if is_success
+      then
+        Ok
+          (ListStandardsControlAssociationsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListStandardsControlAssociationsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | RegisterConnectorV2 ->
+      if is_success
+      then Ok (RegisterConnectorV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some RegisterConnectorV2Response.error_of_json))
+  | StartConfigurationPolicyAssociation ->
+      if is_success
+      then
+        Ok
+          (StartConfigurationPolicyAssociationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some StartConfigurationPolicyAssociationResponse.error_of_json))
+  | StartConfigurationPolicyDisassociation ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (StartConfigurationPolicyDisassociationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                StartConfigurationPolicyDisassociationResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1424,6 +2949,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateActionTargetResponse.error_of_json))
+  | UpdateAggregatorV2 ->
+      if is_success
+      then Ok (UpdateAggregatorV2Response.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateAggregatorV2Response.error_of_json))
+  | UpdateAutomationRuleV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateAutomationRuleV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAutomationRuleV2Response.error_of_json))
+  | UpdateConfigurationPolicy ->
+      if is_success
+      then
+        Ok
+          (UpdateConfigurationPolicyResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateConfigurationPolicyResponse.error_of_json))
+  | UpdateConnectorV2 ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateConnectorV2Response.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateConnectorV2Response.error_of_json))
   | UpdateFindingAggregator ->
       if is_success
       then
@@ -1459,6 +3018,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateOrganizationConfigurationResponse.error_of_json))
+  | UpdateSecurityControl ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateSecurityControlResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateSecurityControlResponse.error_of_json))
   | UpdateSecurityHubConfiguration ->
       if is_success
       then

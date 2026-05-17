@@ -537,6 +537,28 @@ let describe_application =
               ~applicationName ())
            (Some Values.DescribeApplicationResponse.to_json)
            (Some Values.DescribeApplicationResponse.error_to_json)])
+let describe_application_operation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applicationName =
+         flag "application-name" (required string)
+           ~doc:"STRING ApplicationName"
+       and operationId =
+         flag "operation-id" (required string) ~doc:"STRING OperationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_application_operation
+           (Values.DescribeApplicationOperationRequest.make ~applicationName
+              ~operationId ())
+           (Some Values.DescribeApplicationOperationResponse.to_json)
+           (Some Values.DescribeApplicationOperationResponse.error_to_json)])
 let describe_application_snapshot =
   Command.async ~summary:""
     ([%map_open.Command
@@ -622,6 +644,38 @@ let discover_input_schema =
               ~serviceExecutionRole ())
            (Some Values.DiscoverInputSchemaResponse.to_json)
            (Some Values.DiscoverInputSchemaResponse.error_to_json)])
+let list_application_operations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and limit =
+         flag "limit" (optional int)
+           ~doc:"INT ListApplicationOperationsInputLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and operation =
+         flag "operation" (optional string) ~doc:"STRING Operation"
+       and operationStatus =
+         flag "operation-status" (optional json_arg)
+           ~doc:"JSON OperationStatus"
+       and applicationName =
+         flag "application-name" (required string)
+           ~doc:"STRING ApplicationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_application_operations
+           (Values.ListApplicationOperationsRequest.make ?limit ?nextToken
+              ?operation
+              ?operationStatus:(Option.map ~f:Values.OperationStatus.of_json
+                                  operationStatus) ~applicationName ())
+           (Some Values.ListApplicationOperationsResponse.to_json)
+           (Some Values.ListApplicationOperationsResponse.error_to_json)])
 let list_application_snapshots =
   Command.async ~summary:""
     ([%map_open.Command
@@ -849,6 +903,9 @@ let update_application =
        and conditionalToken =
          flag "conditional-token" (optional string)
            ~doc:"STRING ConditionalToken"
+       and runtimeEnvironmentUpdate =
+         flag "runtime-environment-update" (optional json_arg)
+           ~doc:"JSON RuntimeEnvironment"
        and applicationName =
          flag "application-name" (required string)
            ~doc:"STRING ApplicationName" in
@@ -869,7 +926,11 @@ let update_application =
               ?cloudWatchLoggingOptionUpdates:(Option.map
                                                  ~f:Values.CloudWatchLoggingOptionUpdates.of_json
                                                  cloudWatchLoggingOptionUpdates)
-              ?conditionalToken ~applicationName ())
+              ?conditionalToken
+              ?runtimeEnvironmentUpdate:(Option.map
+                                           ~f:Values.RuntimeEnvironment.of_json
+                                           runtimeEnvironmentUpdate)
+              ~applicationName ())
            (Some Values.UpdateApplicationResponse.to_json)
            (Some Values.UpdateApplicationResponse.error_to_json)])
 let update_application_maintenance_configuration =
@@ -928,9 +989,11 @@ let main =
     ("delete-application-vpc-configuration",
       delete_application_vpc_configuration);
     ("describe-application", describe_application);
+    ("describe-application-operation", describe_application_operation);
     ("describe-application-snapshot", describe_application_snapshot);
     ("describe-application-version", describe_application_version);
     ("discover-input-schema", discover_input_schema);
+    ("list-application-operations", list_application_operations);
     ("list-application-snapshots", list_application_snapshots);
     ("list-application-versions", list_application_versions);
     ("list-applications", list_applications);

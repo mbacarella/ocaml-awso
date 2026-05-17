@@ -20,6 +20,18 @@ val create_build :
     ?cfg:Awso.Cfg.t ->
       CreateBuildInput.t ->
         (CreateBuildOutput.t, CreateBuildOutput.error) Result.t
+val create_container_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateContainerFleetInput.t ->
+        (CreateContainerFleetOutput.t, CreateContainerFleetOutput.error)
+          Result.t
+val create_container_group_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateContainerGroupDefinitionInput.t ->
+        (CreateContainerGroupDefinitionOutput.t,
+          CreateContainerGroupDefinitionOutput.error) Result.t
 val create_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -48,6 +60,11 @@ val create_game_session_queue :
       CreateGameSessionQueueInput.t ->
         (CreateGameSessionQueueOutput.t, CreateGameSessionQueueOutput.error)
           Result.t
+val create_location :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLocationInput.t ->
+        (CreateLocationOutput.t, CreateLocationOutput.error) Result.t
 val create_matchmaking_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -95,6 +112,18 @@ val delete_alias :
 val delete_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteBuildInput.t -> (unit, unit) Result.t
+val delete_container_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteContainerFleetInput.t ->
+        (DeleteContainerFleetOutput.t, DeleteContainerFleetOutput.error)
+          Result.t
+val delete_container_group_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteContainerGroupDefinitionInput.t ->
+        (DeleteContainerGroupDefinitionOutput.t,
+          DeleteContainerGroupDefinitionOutput.error) Result.t
 val delete_fleet :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteFleetInput.t -> (unit, unit) Result.t
@@ -116,6 +145,11 @@ val delete_game_session_queue :
       DeleteGameSessionQueueInput.t ->
         (DeleteGameSessionQueueOutput.t, DeleteGameSessionQueueOutput.error)
           Result.t
+val delete_location :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLocationInput.t ->
+        (DeleteLocationOutput.t, DeleteLocationOutput.error) Result.t
 val delete_matchmaking_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -146,6 +180,11 @@ val delete_vpc_peering_connection :
       DeleteVpcPeeringConnectionInput.t ->
         (DeleteVpcPeeringConnectionOutput.t,
           DeleteVpcPeeringConnectionOutput.error) Result.t
+val deregister_compute :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterComputeInput.t ->
+        (DeregisterComputeOutput.t, DeregisterComputeOutput.error) Result.t
 val deregister_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeregisterGameServerInput.t -> (unit, unit) Result.t
@@ -159,6 +198,29 @@ val describe_build :
     ?cfg:Awso.Cfg.t ->
       DescribeBuildInput.t ->
         (DescribeBuildOutput.t, DescribeBuildOutput.error) Result.t
+val describe_compute :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeComputeInput.t ->
+        (DescribeComputeOutput.t, DescribeComputeOutput.error) Result.t
+val describe_container_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeContainerFleetInput.t ->
+        (DescribeContainerFleetOutput.t, DescribeContainerFleetOutput.error)
+          Result.t
+val describe_container_group_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeContainerGroupDefinitionInput.t ->
+        (DescribeContainerGroupDefinitionOutput.t,
+          DescribeContainerGroupDefinitionOutput.error) Result.t
+val describe_container_group_port_mappings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeContainerGroupPortMappingsInput.t ->
+        (DescribeContainerGroupPortMappingsOutput.t,
+          DescribeContainerGroupPortMappingsOutput.error) Result.t
 val describe_e_c2_instance_limits :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -177,6 +239,12 @@ val describe_fleet_capacity :
       DescribeFleetCapacityInput.t ->
         (DescribeFleetCapacityOutput.t, DescribeFleetCapacityOutput.error)
           Result.t
+val describe_fleet_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeFleetDeploymentInput.t ->
+        (DescribeFleetDeploymentOutput.t,
+          DescribeFleetDeploymentOutput.error) Result.t
 val describe_fleet_events :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -312,6 +380,17 @@ val describe_vpc_peering_connections :
       DescribeVpcPeeringConnectionsInput.t ->
         (DescribeVpcPeeringConnectionsOutput.t,
           DescribeVpcPeeringConnectionsOutput.error) Result.t
+val get_compute_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetComputeAccessInput.t ->
+        (GetComputeAccessOutput.t, GetComputeAccessOutput.error) Result.t
+val get_compute_auth_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetComputeAuthTokenInput.t ->
+        (GetComputeAuthTokenOutput.t, GetComputeAuthTokenOutput.error)
+          Result.t
 val get_game_session_log_url :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -323,6 +402,12 @@ val get_instance_access :
     ?cfg:Awso.Cfg.t ->
       GetInstanceAccessInput.t ->
         (GetInstanceAccessOutput.t, GetInstanceAccessOutput.error) Result.t
+val get_player_connection_details :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPlayerConnectionDetailsInput.t ->
+        (GetPlayerConnectionDetailsOutput.t,
+          GetPlayerConnectionDetailsOutput.error) Result.t
 val list_aliases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -333,6 +418,35 @@ val list_builds :
     ?cfg:Awso.Cfg.t ->
       ListBuildsInput.t ->
         (ListBuildsOutput.t, ListBuildsOutput.error) Result.t
+val list_compute :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComputeInput.t ->
+        (ListComputeOutput.t, ListComputeOutput.error) Result.t
+val list_container_fleets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListContainerFleetsInput.t ->
+        (ListContainerFleetsOutput.t, ListContainerFleetsOutput.error)
+          Result.t
+val list_container_group_definition_versions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListContainerGroupDefinitionVersionsInput.t ->
+        (ListContainerGroupDefinitionVersionsOutput.t,
+          ListContainerGroupDefinitionVersionsOutput.error) Result.t
+val list_container_group_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListContainerGroupDefinitionsInput.t ->
+        (ListContainerGroupDefinitionsOutput.t,
+          ListContainerGroupDefinitionsOutput.error) Result.t
+val list_fleet_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFleetDeploymentsInput.t ->
+        (ListFleetDeploymentsOutput.t, ListFleetDeploymentsOutput.error)
+          Result.t
 val list_fleets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -349,6 +463,11 @@ val list_game_servers :
     ?cfg:Awso.Cfg.t ->
       ListGameServersInput.t ->
         (ListGameServersOutput.t, ListGameServersOutput.error) Result.t
+val list_locations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLocationsInput.t ->
+        (ListLocationsOutput.t, ListLocationsOutput.error) Result.t
 val list_scripts :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -365,6 +484,11 @@ val put_scaling_policy :
     ?cfg:Awso.Cfg.t ->
       PutScalingPolicyInput.t ->
         (PutScalingPolicyOutput.t, PutScalingPolicyOutput.error) Result.t
+val register_compute :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterComputeInput.t ->
+        (RegisterComputeOutput.t, RegisterComputeOutput.error) Result.t
 val register_game_server :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -440,6 +564,12 @@ val tag_resource :
     ?cfg:Awso.Cfg.t ->
       TagResourceRequest.t ->
         (TagResourceResponse.t, TagResourceResponse.error) Result.t
+val terminate_game_session :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TerminateGameSessionInput.t ->
+        (TerminateGameSessionOutput.t, TerminateGameSessionOutput.error)
+          Result.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -455,6 +585,18 @@ val update_build :
     ?cfg:Awso.Cfg.t ->
       UpdateBuildInput.t ->
         (UpdateBuildOutput.t, UpdateBuildOutput.error) Result.t
+val update_container_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateContainerFleetInput.t ->
+        (UpdateContainerFleetOutput.t, UpdateContainerFleetOutput.error)
+          Result.t
+val update_container_group_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateContainerGroupDefinitionInput.t ->
+        (UpdateContainerGroupDefinitionOutput.t,
+          UpdateContainerGroupDefinitionOutput.error) Result.t
 val update_fleet_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

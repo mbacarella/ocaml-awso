@@ -12,6 +12,12 @@ val associate_discovered_resource :
       AssociateDiscoveredResourceRequest.t ->
         (AssociateDiscoveredResourceResult.t,
           AssociateDiscoveredResourceResult.error) Result.t Async.Deferred.t
+val associate_source_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssociateSourceResourceRequest.t ->
+        (AssociateSourceResourceResult.t,
+          AssociateSourceResourceResult.error) Result.t Async.Deferred.t
 val create_progress_update_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -49,6 +55,12 @@ val disassociate_discovered_resource :
         (DisassociateDiscoveredResourceResult.t,
           DisassociateDiscoveredResourceResult.error) Result.t
           Async.Deferred.t
+val disassociate_source_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisassociateSourceResourceRequest.t ->
+        (DisassociateSourceResourceResult.t,
+          DisassociateSourceResourceResult.error) Result.t Async.Deferred.t
 val import_migration_task :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -73,6 +85,12 @@ val list_discovered_resources :
       ListDiscoveredResourcesRequest.t ->
         (ListDiscoveredResourcesResult.t,
           ListDiscoveredResourcesResult.error) Result.t Async.Deferred.t
+val list_migration_task_updates :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMigrationTaskUpdatesRequest.t ->
+        (ListMigrationTaskUpdatesResult.t,
+          ListMigrationTaskUpdatesResult.error) Result.t Async.Deferred.t
 val list_migration_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -85,6 +103,12 @@ val list_progress_update_streams :
       ListProgressUpdateStreamsRequest.t ->
         (ListProgressUpdateStreamsResult.t,
           ListProgressUpdateStreamsResult.error) Result.t Async.Deferred.t
+val list_source_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSourceResourcesRequest.t ->
+        (ListSourceResourcesResult.t, ListSourceResourcesResult.error)
+          Result.t Async.Deferred.t
 val notify_application_state :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

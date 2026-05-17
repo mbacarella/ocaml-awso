@@ -21,6 +21,8 @@ let get_tag_keys ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTagKeys input
 let get_tag_values ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTagValues input
+let list_required_tags ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRequiredTags input
 let start_report_creation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartReportCreation input
 let tag_resources ?endpoint_url ?cfg input =

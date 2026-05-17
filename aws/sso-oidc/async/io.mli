@@ -6,6 +6,12 @@ val create_token :
       CreateTokenRequest.t ->
         (CreateTokenResponse.t, CreateTokenResponse.error) Result.t
           Async.Deferred.t
+val create_token_with_i_a_m :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTokenWithIAMRequest.t ->
+        (CreateTokenWithIAMResponse.t, CreateTokenWithIAMResponse.error)
+          Result.t Async.Deferred.t
 val register_client :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

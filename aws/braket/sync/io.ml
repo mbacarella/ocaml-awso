@@ -19,6 +19,10 @@ let create_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateJob input
 let create_quantum_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateQuantumTask input
+let create_spending_limit ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSpendingLimit input
+let delete_spending_limit ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSpendingLimit input
 let get_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDevice input
 let get_job ?endpoint_url ?cfg input =
@@ -33,7 +37,11 @@ let search_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchJobs input
 let search_quantum_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchQuantumTasks input
+let search_spending_limits ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchSpendingLimits input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_spending_limit ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSpendingLimit input

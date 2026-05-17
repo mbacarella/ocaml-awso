@@ -15,6 +15,10 @@ let associate_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateAdminAccount input
 let associate_third_party_firewall ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateThirdPartyFirewall input
+let batch_associate_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchAssociateResource input
+let batch_disassociate_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDisassociateResource input
 let delete_apps_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppsList input
 let delete_notification_channel ?endpoint_url ?cfg input =
@@ -23,12 +27,16 @@ let delete_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePolicy input
 let delete_protocols_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProtocolsList input
+let delete_resource_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourceSet input
 let disassociate_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateAdminAccount input
 let disassociate_third_party_firewall ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateThirdPartyFirewall input
 let get_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAdminAccount input
+let get_admin_scope ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAdminScope input
 let get_apps_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAppsList input
 let get_compliance_detail ?endpoint_url ?cfg input =
@@ -41,26 +49,40 @@ let get_protection_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProtectionStatus input
 let get_protocols_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProtocolsList input
+let get_resource_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourceSet input
 let get_third_party_firewall_association_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetThirdPartyFirewallAssociationStatus
     input
 let get_violation_details ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetViolationDetails input
+let list_admin_accounts_for_organization ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAdminAccountsForOrganization input
+let list_admins_managing_account ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAdminsManagingAccount input
 let list_apps_lists ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAppsLists input
 let list_compliance_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListComplianceStatus input
+let list_discovered_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDiscoveredResources input
 let list_member_accounts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMemberAccounts input
 let list_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPolicies input
 let list_protocols_lists ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProtocolsLists input
+let list_resource_set_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceSetResources input
+let list_resource_sets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceSets input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_third_party_firewall_firewall_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListThirdPartyFirewallFirewallPolicies
     input
+let put_admin_account ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAdminAccount input
 let put_apps_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAppsList input
 let put_notification_channel ?endpoint_url ?cfg input =
@@ -69,6 +91,8 @@ let put_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutPolicy input
 let put_protocols_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutProtocolsList input
+let put_resource_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourceSet input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

@@ -137,12 +137,12 @@ module CSVMappingParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordRowDelimiter") in
       make ~recordColumnDelimiter ~recordRowDelimiter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumnDelimiter =
-        field_map_exn json "RecordColumnDelimiter"
+        field_map_exn json__ "RecordColumnDelimiter"
           RecordColumnDelimiter.of_json in
       let recordRowDelimiter =
-        field_map_exn json "RecordRowDelimiter" RecordRowDelimiter.of_json in
+        field_map_exn json__ "RecordRowDelimiter" RecordRowDelimiter.of_json in
       make ~recordColumnDelimiter ~recordRowDelimiter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -166,9 +166,9 @@ module JSONMappingParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordRowPath") in
       make ~recordRowPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordRowPath =
-        field_map_exn json "RecordRowPath" RecordRowPath.of_json in
+        field_map_exn json__ "RecordRowPath" RecordRowPath.of_json in
       make ~recordRowPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -249,10 +249,11 @@ module RecordColumn =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~sqlType ?mapping ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sqlType = field_map_exn json "SqlType" RecordColumnSqlType.of_json in
-      let mapping = field_map json "Mapping" RecordColumnMapping.of_json in
-      let name = field_map_exn json "Name" RecordColumnName.of_json in
+    let of_json json__ =
+      let sqlType =
+        field_map_exn json__ "SqlType" RecordColumnSqlType.of_json in
+      let mapping = field_map json__ "Mapping" RecordColumnMapping.of_json in
+      let name = field_map_exn json__ "Name" RecordColumnName.of_json in
       make ~sqlType ?mapping ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -287,11 +288,12 @@ module MappingParameters =
           (Xml.child xml_arg0 "JSONMappingParameters") in
       make ?cSVMappingParameters ?jSONMappingParameters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cSVMappingParameters =
-        field_map json "CSVMappingParameters" CSVMappingParameters.of_json in
+        field_map json__ "CSVMappingParameters" CSVMappingParameters.of_json in
       let jSONMappingParameters =
-        field_map json "JSONMappingParameters" JSONMappingParameters.of_json in
+        field_map json__ "JSONMappingParameters"
+          JSONMappingParameters.of_json in
       make ?cSVMappingParameters ?jSONMappingParameters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -359,10 +361,10 @@ module InputLambdaProcessorUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -376,6 +378,9 @@ module RecordColumns =
           ((check_list_max i ~max:1000) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecordColumn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -439,11 +444,11 @@ module RecordFormat =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormatType") in
       make ?mappingParameters ~recordFormatType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mappingParameters =
-        field_map json "MappingParameters" MappingParameters.of_json in
+        field_map json__ "MappingParameters" MappingParameters.of_json in
       let recordFormatType =
-        field_map_exn json "RecordFormatType" RecordFormatType.of_json in
+        field_map_exn json__ "RecordFormatType" RecordFormatType.of_json in
       make ?mappingParameters ~recordFormatType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -528,9 +533,9 @@ module InputLambdaProcessorDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -624,9 +629,9 @@ module InputParallelismUpdate =
           (Xml.child xml_arg0 "CountUpdate") in
       make ?countUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let countUpdate =
-        field_map json "CountUpdate" InputParallelismCount.of_json in
+        field_map json__ "CountUpdate" InputParallelismCount.of_json in
       make ?countUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides updates to the parallelism count."]
@@ -654,9 +659,9 @@ module InputProcessingConfigurationUpdate =
              "InputLambdaProcessorUpdate") in
       make ~inputLambdaProcessorUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessorUpdate =
-        field_map_exn json "InputLambdaProcessorUpdate"
+        field_map_exn json__ "InputLambdaProcessorUpdate"
           InputLambdaProcessorUpdate.of_json in
       make ~inputLambdaProcessorUpdate ()
     let to_json v = composed_to_json to_value v
@@ -700,13 +705,13 @@ module InputSchemaUpdate =
           (Xml.child xml_arg0 "RecordFormatUpdate") in
       make ?recordColumnUpdates ?recordEncodingUpdate ?recordFormatUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumnUpdates =
-        field_map json "RecordColumnUpdates" RecordColumns.of_json in
+        field_map json__ "RecordColumnUpdates" RecordColumns.of_json in
       let recordEncodingUpdate =
-        field_map json "RecordEncodingUpdate" RecordEncoding.of_json in
+        field_map json__ "RecordEncodingUpdate" RecordEncoding.of_json in
       let recordFormatUpdate =
-        field_map json "RecordFormatUpdate" RecordFormat.of_json in
+        field_map json__ "RecordFormatUpdate" RecordFormat.of_json in
       make ?recordColumnUpdates ?recordEncodingUpdate ?recordFormatUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes updates for the application's input schema."]
@@ -736,10 +741,10 @@ module KinesisFirehoseInputUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -770,10 +775,10 @@ module KinesisStreamsInputUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -798,9 +803,9 @@ module DestinationSchema =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormatType") in
       make ~recordFormatType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordFormatType =
-        field_map_exn json "RecordFormatType" RecordFormatType.of_json in
+        field_map_exn json__ "RecordFormatType" RecordFormatType.of_json in
       make ~recordFormatType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -831,10 +836,10 @@ module KinesisFirehoseOutputUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -865,10 +870,10 @@ module KinesisStreamsOutputUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -899,10 +904,10 @@ module LambdaOutputUpdate =
           (Xml.child xml_arg0 "ResourceARNUpdate") in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let resourceARNUpdate =
-        field_map json "ResourceARNUpdate" ResourceARN.of_json in
+        field_map json__ "ResourceARNUpdate" ResourceARN.of_json in
       make ?roleARNUpdate ?resourceARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -959,12 +964,12 @@ module S3ReferenceDataSourceUpdate =
           (Xml.child xml_arg0 "BucketARNUpdate") in
       make ?referenceRoleARNUpdate ?fileKeyUpdate ?bucketARNUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceRoleARNUpdate =
-        field_map json "ReferenceRoleARNUpdate" RoleARN.of_json in
-      let fileKeyUpdate = field_map json "FileKeyUpdate" FileKey.of_json in
+        field_map json__ "ReferenceRoleARNUpdate" RoleARN.of_json in
+      let fileKeyUpdate = field_map json__ "FileKeyUpdate" FileKey.of_json in
       let bucketARNUpdate =
-        field_map json "BucketARNUpdate" BucketARN.of_json in
+        field_map json__ "BucketARNUpdate" BucketARN.of_json in
       make ?referenceRoleARNUpdate ?fileKeyUpdate ?bucketARNUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1005,13 +1010,13 @@ module SourceSchema =
           (Xml.child_exn ~context:context_ xml_arg0 "RecordFormat") in
       make ~recordColumns ?recordEncoding ~recordFormat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recordColumns =
-        field_map_exn json "RecordColumns" RecordColumns.of_json in
+        field_map_exn json__ "RecordColumns" RecordColumns.of_json in
       let recordEncoding =
-        field_map json "RecordEncoding" RecordEncoding.of_json in
+        field_map json__ "RecordEncoding" RecordEncoding.of_json in
       let recordFormat =
-        field_map_exn json "RecordFormat" RecordFormat.of_json in
+        field_map_exn json__ "RecordFormat" RecordFormat.of_json in
       make ~recordColumns ?recordEncoding ~recordFormat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1020,6 +1025,9 @@ module InAppStreamNames =
   struct
     type nonrec t = InAppStreamName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InAppStreamName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1059,8 +1067,8 @@ module InputParallelism =
           (Xml.child xml_arg0 "Count") in
       make ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "Count" InputParallelismCount.of_json in
+    let of_json json__ =
+      let count = field_map json__ "Count" InputParallelismCount.of_json in
       make ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1087,9 +1095,9 @@ module InputProcessingConfigurationDescription =
           (Xml.child xml_arg0 "InputLambdaProcessorDescription") in
       make ?inputLambdaProcessorDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessorDescription =
-        field_map json "InputLambdaProcessorDescription"
+        field_map json__ "InputLambdaProcessorDescription"
           InputLambdaProcessorDescription.of_json in
       make ?inputLambdaProcessorDescription ()
     let to_json v = composed_to_json to_value v
@@ -1115,9 +1123,10 @@ module InputStartingPositionConfiguration =
           (Xml.child xml_arg0 "InputStartingPosition") in
       make ?inputStartingPosition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPosition =
-        field_map json "InputStartingPosition" InputStartingPosition.of_json in
+        field_map json__ "InputStartingPosition"
+          InputStartingPosition.of_json in
       make ?inputStartingPosition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1146,9 +1155,9 @@ module KinesisFirehoseInputDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1177,9 +1186,9 @@ module KinesisStreamsInputDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1208,9 +1217,9 @@ module KinesisFirehoseOutputDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1239,9 +1248,9 @@ module KinesisStreamsOutputDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1270,9 +1279,9 @@ module LambdaOutputDescription =
         (Option.map ~f:ResourceARN.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1281,40 +1290,39 @@ module S3ReferenceDataSourceDescription =
   struct
     type nonrec t =
       {
-      bucketARN: BucketARN.t
+      bucketARN: BucketARN.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of the S3 bucket."];
-      fileKey: FileKey.t [@ocaml.doc "Amazon S3 object key name."];
-      referenceRoleARN: RoleARN.t
+      fileKey: FileKey.t option [@ocaml.doc "Amazon S3 object key name."];
+      referenceRoleARN: RoleARN.t option
         [@ocaml.doc
           "ARN of the IAM role that Amazon Kinesis Analytics can assume to read the Amazon S3 object on your behalf to populate the in-application reference table."]}
-    let context_ = "S3ReferenceDataSourceDescription"
-    let make ~bucketARN =
-      fun ~fileKey ->
-        fun ~referenceRoleARN ->
+    let make ?bucketARN =
+      fun ?fileKey ->
+        fun ?referenceRoleARN ->
           fun () -> { bucketARN; fileKey; referenceRoleARN }
     let to_value x =
       structure_to_value
-        [("BucketARN", (Some (BucketARN.to_value x.bucketARN)));
-        ("FileKey", (Some (FileKey.to_value x.fileKey)));
-        ("ReferenceRoleARN", (Some (RoleARN.to_value x.referenceRoleARN)))]
+        [("BucketARN", (Option.map x.bucketARN ~f:BucketARN.to_value));
+        ("FileKey", (Option.map x.fileKey ~f:FileKey.to_value));
+        ("ReferenceRoleARN",
+          (Option.map x.referenceRoleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let referenceRoleARN =
-        RoleARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReferenceRoleARN") in
+        (Option.map ~f:RoleARN.of_xml)
+          (Xml.child xml_arg0 "ReferenceRoleARN") in
       let fileKey =
-        FileKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "FileKey") in
+        (Option.map ~f:FileKey.of_xml) (Xml.child xml_arg0 "FileKey") in
       let bucketARN =
-        BucketARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
-      make ~referenceRoleARN ~fileKey ~bucketARN ()
+        (Option.map ~f:BucketARN.of_xml) (Xml.child xml_arg0 "BucketARN") in
+      make ?referenceRoleARN ?fileKey ?bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceRoleARN =
-        field_map_exn json "ReferenceRoleARN" RoleARN.of_json in
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      make ~referenceRoleARN ~fileKey ~bucketARN ()
+        field_map json__ "ReferenceRoleARN" RoleARN.of_json in
+      let fileKey = field_map json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map json__ "BucketARN" BucketARN.of_json in
+      make ?referenceRoleARN ?fileKey ?bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the bucket name and object key name that stores the reference data."]
@@ -1344,9 +1352,10 @@ module InputLambdaProcessor =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1389,12 +1398,12 @@ module CloudWatchLoggingOptionUpdate =
              "CloudWatchLoggingOptionId") in
       make ?roleARNUpdate ?logStreamARNUpdate ~cloudWatchLoggingOptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARNUpdate = field_map json "RoleARNUpdate" RoleARN.of_json in
+    let of_json json__ =
+      let roleARNUpdate = field_map json__ "RoleARNUpdate" RoleARN.of_json in
       let logStreamARNUpdate =
-        field_map json "LogStreamARNUpdate" LogStreamARN.of_json in
+        field_map json__ "LogStreamARNUpdate" LogStreamARN.of_json in
       let cloudWatchLoggingOptionId =
-        field_map_exn json "CloudWatchLoggingOptionId" Id.of_json in
+        field_map_exn json__ "CloudWatchLoggingOptionId" Id.of_json in
       make ?roleARNUpdate ?logStreamARNUpdate ~cloudWatchLoggingOptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes CloudWatch logging option updates."]
@@ -1486,24 +1495,24 @@ module InputUpdate =
         ?kinesisFirehoseInputUpdate ?kinesisStreamsInputUpdate
         ?inputProcessingConfigurationUpdate ?namePrefixUpdate ~inputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputParallelismUpdate =
-        field_map json "InputParallelismUpdate"
+        field_map json__ "InputParallelismUpdate"
           InputParallelismUpdate.of_json in
       let inputSchemaUpdate =
-        field_map json "InputSchemaUpdate" InputSchemaUpdate.of_json in
+        field_map json__ "InputSchemaUpdate" InputSchemaUpdate.of_json in
       let kinesisFirehoseInputUpdate =
-        field_map json "KinesisFirehoseInputUpdate"
+        field_map json__ "KinesisFirehoseInputUpdate"
           KinesisFirehoseInputUpdate.of_json in
       let kinesisStreamsInputUpdate =
-        field_map json "KinesisStreamsInputUpdate"
+        field_map json__ "KinesisStreamsInputUpdate"
           KinesisStreamsInputUpdate.of_json in
       let inputProcessingConfigurationUpdate =
-        field_map json "InputProcessingConfigurationUpdate"
+        field_map json__ "InputProcessingConfigurationUpdate"
           InputProcessingConfigurationUpdate.of_json in
       let namePrefixUpdate =
-        field_map json "NamePrefixUpdate" InAppStreamName.of_json in
-      let inputId = field_map_exn json "InputId" Id.of_json in
+        field_map json__ "NamePrefixUpdate" InAppStreamName.of_json in
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       make ?inputParallelismUpdate ?inputSchemaUpdate
         ?kinesisFirehoseInputUpdate ?kinesisStreamsInputUpdate
         ?inputProcessingConfigurationUpdate ?namePrefixUpdate ~inputId ()
@@ -1585,19 +1594,19 @@ module OutputUpdate =
         ?kinesisFirehoseOutputUpdate ?kinesisStreamsOutputUpdate ?nameUpdate
         ~outputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchemaUpdate =
-        field_map json "DestinationSchemaUpdate" DestinationSchema.of_json in
+        field_map json__ "DestinationSchemaUpdate" DestinationSchema.of_json in
       let lambdaOutputUpdate =
-        field_map json "LambdaOutputUpdate" LambdaOutputUpdate.of_json in
+        field_map json__ "LambdaOutputUpdate" LambdaOutputUpdate.of_json in
       let kinesisFirehoseOutputUpdate =
-        field_map json "KinesisFirehoseOutputUpdate"
+        field_map json__ "KinesisFirehoseOutputUpdate"
           KinesisFirehoseOutputUpdate.of_json in
       let kinesisStreamsOutputUpdate =
-        field_map json "KinesisStreamsOutputUpdate"
+        field_map json__ "KinesisStreamsOutputUpdate"
           KinesisStreamsOutputUpdate.of_json in
-      let nameUpdate = field_map json "NameUpdate" InAppStreamName.of_json in
-      let outputId = field_map_exn json "OutputId" Id.of_json in
+      let nameUpdate = field_map json__ "NameUpdate" InAppStreamName.of_json in
+      let outputId = field_map_exn json__ "OutputId" Id.of_json in
       make ?destinationSchemaUpdate ?lambdaOutputUpdate
         ?kinesisFirehoseOutputUpdate ?kinesisStreamsOutputUpdate ?nameUpdate
         ~outputId ()
@@ -1658,15 +1667,15 @@ module ReferenceDataSourceUpdate =
       make ?referenceSchemaUpdate ?s3ReferenceDataSourceUpdate
         ?tableNameUpdate ~referenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchemaUpdate =
-        field_map json "ReferenceSchemaUpdate" SourceSchema.of_json in
+        field_map json__ "ReferenceSchemaUpdate" SourceSchema.of_json in
       let s3ReferenceDataSourceUpdate =
-        field_map json "S3ReferenceDataSourceUpdate"
+        field_map json__ "S3ReferenceDataSourceUpdate"
           S3ReferenceDataSourceUpdate.of_json in
       let tableNameUpdate =
-        field_map json "TableNameUpdate" InAppTableName.of_json in
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
+        field_map json__ "TableNameUpdate" InAppTableName.of_json in
+      let referenceId = field_map_exn json__ "ReferenceId" Id.of_json in
       make ?referenceSchemaUpdate ?s3ReferenceDataSourceUpdate
         ?tableNameUpdate ~referenceId ()
     let to_json v = composed_to_json to_value v
@@ -1811,42 +1820,41 @@ module CloudWatchLoggingOptionDescription =
       {
       cloudWatchLoggingOptionId: Id.t option
         [@ocaml.doc "ID of the CloudWatch logging option description."];
-      logStreamARN: LogStreamARN.t
+      logStreamARN: LogStreamARN.t option
         [@ocaml.doc
           "ARN of the CloudWatch log to receive application messages."];
-      roleARN: RoleARN.t
+      roleARN: RoleARN.t option
         [@ocaml.doc
           "IAM ARN of the role to use to send application messages. Note: To write application messages to CloudWatch, the IAM role used must have the PutLogEvents policy action enabled."]}
-    let context_ = "CloudWatchLoggingOptionDescription"
     let make ?cloudWatchLoggingOptionId =
-      fun ~logStreamARN ->
-        fun ~roleARN ->
+      fun ?logStreamARN ->
+        fun ?roleARN ->
           fun () -> { cloudWatchLoggingOptionId; logStreamARN; roleARN }
     let to_value x =
       structure_to_value
         [("CloudWatchLoggingOptionId",
            (Option.map x.cloudWatchLoggingOptionId ~f:Id.to_value));
-        ("LogStreamARN", (Some (LogStreamARN.to_value x.logStreamARN)));
-        ("RoleARN", (Some (RoleARN.to_value x.roleARN)))]
+        ("LogStreamARN",
+          (Option.map x.logStreamARN ~f:LogStreamARN.to_value));
+        ("RoleARN", (Option.map x.roleARN ~f:RoleARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let roleARN =
-        RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
+        (Option.map ~f:RoleARN.of_xml) (Xml.child xml_arg0 "RoleARN") in
       let logStreamARN =
-        LogStreamARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LogStreamARN") in
+        (Option.map ~f:LogStreamARN.of_xml)
+          (Xml.child xml_arg0 "LogStreamARN") in
       let cloudWatchLoggingOptionId =
         (Option.map ~f:Id.of_xml)
           (Xml.child xml_arg0 "CloudWatchLoggingOptionId") in
-      make ~roleARN ~logStreamARN ?cloudWatchLoggingOptionId ()
+      make ?roleARN ?logStreamARN ?cloudWatchLoggingOptionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let logStreamARN =
-        field_map_exn json "LogStreamARN" LogStreamARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let logStreamARN = field_map json__ "LogStreamARN" LogStreamARN.of_json in
       let cloudWatchLoggingOptionId =
-        field_map json "CloudWatchLoggingOptionId" Id.of_json in
-      make ~roleARN ~logStreamARN ?cloudWatchLoggingOptionId ()
+        field_map json__ "CloudWatchLoggingOptionId" Id.of_json in
+      make ?roleARN ?logStreamARN ?cloudWatchLoggingOptionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Description of the CloudWatch logging option."]
 module InputDescription =
@@ -1956,26 +1964,26 @@ module InputDescription =
         ?inputProcessingConfigurationDescription ?inAppStreamNames
         ?namePrefix ?inputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPositionConfiguration =
-        field_map json "InputStartingPositionConfiguration"
+        field_map json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
       let inputParallelism =
-        field_map json "InputParallelism" InputParallelism.of_json in
-      let inputSchema = field_map json "InputSchema" SourceSchema.of_json in
+        field_map json__ "InputParallelism" InputParallelism.of_json in
+      let inputSchema = field_map json__ "InputSchema" SourceSchema.of_json in
       let kinesisFirehoseInputDescription =
-        field_map json "KinesisFirehoseInputDescription"
+        field_map json__ "KinesisFirehoseInputDescription"
           KinesisFirehoseInputDescription.of_json in
       let kinesisStreamsInputDescription =
-        field_map json "KinesisStreamsInputDescription"
+        field_map json__ "KinesisStreamsInputDescription"
           KinesisStreamsInputDescription.of_json in
       let inputProcessingConfigurationDescription =
-        field_map json "InputProcessingConfigurationDescription"
+        field_map json__ "InputProcessingConfigurationDescription"
           InputProcessingConfigurationDescription.of_json in
       let inAppStreamNames =
-        field_map json "InAppStreamNames" InAppStreamNames.of_json in
-      let namePrefix = field_map json "NamePrefix" InAppStreamName.of_json in
-      let inputId = field_map json "InputId" Id.of_json in
+        field_map json__ "InAppStreamNames" InAppStreamNames.of_json in
+      let namePrefix = field_map json__ "NamePrefix" InAppStreamName.of_json in
+      let inputId = field_map json__ "InputId" Id.of_json in
       make ?inputStartingPositionConfiguration ?inputParallelism ?inputSchema
         ?kinesisFirehoseInputDescription ?kinesisStreamsInputDescription
         ?inputProcessingConfigurationDescription ?inAppStreamNames
@@ -2057,20 +2065,20 @@ module OutputDescription =
         ?kinesisFirehoseOutputDescription ?kinesisStreamsOutputDescription
         ?name ?outputId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchema =
-        field_map json "DestinationSchema" DestinationSchema.of_json in
+        field_map json__ "DestinationSchema" DestinationSchema.of_json in
       let lambdaOutputDescription =
-        field_map json "LambdaOutputDescription"
+        field_map json__ "LambdaOutputDescription"
           LambdaOutputDescription.of_json in
       let kinesisFirehoseOutputDescription =
-        field_map json "KinesisFirehoseOutputDescription"
+        field_map json__ "KinesisFirehoseOutputDescription"
           KinesisFirehoseOutputDescription.of_json in
       let kinesisStreamsOutputDescription =
-        field_map json "KinesisStreamsOutputDescription"
+        field_map json__ "KinesisStreamsOutputDescription"
           KinesisStreamsOutputDescription.of_json in
-      let name = field_map json "Name" InAppStreamName.of_json in
-      let outputId = field_map json "OutputId" Id.of_json in
+      let name = field_map json__ "Name" InAppStreamName.of_json in
+      let outputId = field_map json__ "OutputId" Id.of_json in
       make ?destinationSchema ?lambdaOutputDescription
         ?kinesisFirehoseOutputDescription ?kinesisStreamsOutputDescription
         ?name ?outputId ()
@@ -2081,38 +2089,37 @@ module ReferenceDataSourceDescription =
   struct
     type nonrec t =
       {
-      referenceId: Id.t
+      referenceId: Id.t option
         [@ocaml.doc
           "ID of the reference data source. This is the ID that Amazon Kinesis Analytics assigns when you add the reference data source to your application using the AddApplicationReferenceDataSource operation."];
-      tableName: InAppTableName.t
+      tableName: InAppTableName.t option
         [@ocaml.doc
           "The in-application table name created by the specific reference data source configuration."];
-      s3ReferenceDataSourceDescription: S3ReferenceDataSourceDescription.t
+      s3ReferenceDataSourceDescription:
+        S3ReferenceDataSourceDescription.t option
         [@ocaml.doc
           "Provides the S3 bucket name, the object key name that contains the reference data. It also provides the Amazon Resource Name (ARN) of the IAM role that Amazon Kinesis Analytics can assume to read the Amazon S3 object and populate the in-application reference table."];
       referenceSchema: SourceSchema.t option
         [@ocaml.doc
           "Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream."]}
-    let context_ = "ReferenceDataSourceDescription"
-    let make ?referenceSchema =
-      fun ~referenceId ->
-        fun ~tableName ->
-          fun ~s3ReferenceDataSourceDescription ->
+    let make ?referenceId =
+      fun ?tableName ->
+        fun ?s3ReferenceDataSourceDescription ->
+          fun ?referenceSchema ->
             fun () ->
               {
-                referenceSchema;
                 referenceId;
                 tableName;
-                s3ReferenceDataSourceDescription
+                s3ReferenceDataSourceDescription;
+                referenceSchema
               }
     let to_value x =
       structure_to_value
-        [("ReferenceId", (Some (Id.to_value x.referenceId)));
-        ("TableName", (Some (InAppTableName.to_value x.tableName)));
+        [("ReferenceId", (Option.map x.referenceId ~f:Id.to_value));
+        ("TableName", (Option.map x.tableName ~f:InAppTableName.to_value));
         ("S3ReferenceDataSourceDescription",
-          (Some
-             (S3ReferenceDataSourceDescription.to_value
-                x.s3ReferenceDataSourceDescription)));
+          (Option.map x.s3ReferenceDataSourceDescription
+             ~f:S3ReferenceDataSourceDescription.to_value));
         ("ReferenceSchema",
           (Option.map x.referenceSchema ~f:SourceSchema.to_value))]
     let to_query v = to_query to_value v
@@ -2121,27 +2128,26 @@ module ReferenceDataSourceDescription =
         (Option.map ~f:SourceSchema.of_xml)
           (Xml.child xml_arg0 "ReferenceSchema") in
       let s3ReferenceDataSourceDescription =
-        S3ReferenceDataSourceDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "S3ReferenceDataSourceDescription") in
+        (Option.map ~f:S3ReferenceDataSourceDescription.of_xml)
+          (Xml.child xml_arg0 "S3ReferenceDataSourceDescription") in
       let tableName =
-        InAppTableName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
+        (Option.map ~f:InAppTableName.of_xml)
+          (Xml.child xml_arg0 "TableName") in
       let referenceId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReferenceId") in
-      make ?referenceSchema ~s3ReferenceDataSourceDescription ~tableName
-        ~referenceId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "ReferenceId") in
+      make ?referenceSchema ?s3ReferenceDataSourceDescription ?tableName
+        ?referenceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchema =
-        field_map json "ReferenceSchema" SourceSchema.of_json in
+        field_map json__ "ReferenceSchema" SourceSchema.of_json in
       let s3ReferenceDataSourceDescription =
-        field_map_exn json "S3ReferenceDataSourceDescription"
+        field_map json__ "S3ReferenceDataSourceDescription"
           S3ReferenceDataSourceDescription.of_json in
-      let tableName = field_map_exn json "TableName" InAppTableName.of_json in
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
-      make ?referenceSchema ~s3ReferenceDataSourceDescription ~tableName
-        ~referenceId ()
+      let tableName = field_map json__ "TableName" InAppTableName.of_json in
+      let referenceId = field_map json__ "ReferenceId" Id.of_json in
+      make ?referenceSchema ?s3ReferenceDataSourceDescription ?tableName
+        ?referenceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the reference data source configured for an application."]
@@ -2165,9 +2171,9 @@ module InputProcessingConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "InputLambdaProcessor") in
       make ~inputLambdaProcessor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputLambdaProcessor =
-        field_map_exn json "InputLambdaProcessor"
+        field_map_exn json__ "InputLambdaProcessor"
           InputLambdaProcessor.of_json in
       make ~inputLambdaProcessor ()
     let to_json v = composed_to_json to_value v
@@ -2198,9 +2204,10 @@ module KinesisFirehoseInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2230,9 +2237,10 @@ module KinesisStreamsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2263,9 +2271,10 @@ module KinesisFirehoseOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2296,9 +2305,10 @@ module KinesisStreamsOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2329,9 +2339,10 @@ module LambdaOutput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~roleARN ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceARN.of_json in
       make ~roleARN ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2371,6 +2382,9 @@ module CloudWatchLoggingOptionUpdates =
   struct
     type nonrec t = CloudWatchLoggingOptionUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOptionUpdate.to_value)) |>
         (fun x -> `List x)
@@ -2397,6 +2411,9 @@ module InputUpdates =
   struct
     type nonrec t = InputUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2421,6 +2438,9 @@ module OutputUpdates =
   struct
     type nonrec t = OutputUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputUpdate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2445,6 +2465,9 @@ module ReferenceDataSourceUpdates =
   struct
     type nonrec t = ReferenceDataSourceUpdate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReferenceDataSourceUpdate.to_value)) |>
         (fun x -> `List x)
@@ -2488,9 +2511,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2526,11 +2549,11 @@ module InputConfiguration =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~inputStartingPositionConfiguration ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputStartingPositionConfiguration =
-        field_map_exn json "InputStartingPositionConfiguration"
+        field_map_exn json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
-      let id = field_map_exn json "Id" Id.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
       make ~inputStartingPositionConfiguration ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2539,44 +2562,45 @@ module ApplicationSummary =
   struct
     type nonrec t =
       {
-      applicationName: ApplicationName.t
+      applicationName: ApplicationName.t option
         [@ocaml.doc "Name of the application."];
-      applicationARN: ResourceARN.t [@ocaml.doc "ARN of the application."];
-      applicationStatus: ApplicationStatus.t
+      applicationARN: ResourceARN.t option
+        [@ocaml.doc "ARN of the application."];
+      applicationStatus: ApplicationStatus.t option
         [@ocaml.doc "Status of the application."]}
-    let context_ = "ApplicationSummary"
-    let make ~applicationName =
-      fun ~applicationARN ->
-        fun ~applicationStatus ->
+    let make ?applicationName =
+      fun ?applicationARN ->
+        fun ?applicationStatus ->
           fun () -> { applicationName; applicationARN; applicationStatus }
     let to_value x =
       structure_to_value
         [("ApplicationName",
-           (Some (ApplicationName.to_value x.applicationName)));
-        ("ApplicationARN", (Some (ResourceARN.to_value x.applicationARN)));
+           (Option.map x.applicationName ~f:ApplicationName.to_value));
+        ("ApplicationARN",
+          (Option.map x.applicationARN ~f:ResourceARN.to_value));
         ("ApplicationStatus",
-          (Some (ApplicationStatus.to_value x.applicationStatus)))]
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationStatus =
-        ApplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationStatus") in
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
       let applicationARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationARN") in
+        (Option.map ~f:ResourceARN.of_xml)
+          (Xml.child xml_arg0 "ApplicationARN") in
       let applicationName =
-        ApplicationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
-      make ~applicationStatus ~applicationARN ~applicationName ()
+        (Option.map ~f:ApplicationName.of_xml)
+          (Xml.child xml_arg0 "ApplicationName") in
+      make ?applicationStatus ?applicationARN ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationStatus =
-        field_map_exn json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let applicationARN =
-        field_map_exn json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
-      make ~applicationStatus ~applicationARN ~applicationName ()
+        field_map json__ "ApplicationName" ApplicationName.of_json in
+      make ?applicationStatus ?applicationARN ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This documentation is for version 1 of the Amazon Kinesis Data Analytics API, which only supports SQL applications. Version 2 of the API supports SQL and Java applications. For more information about version 2, see Amazon Kinesis Data Analytics API V2 Documentation. Provides application summary information, including the application Amazon Resource Name (ARN), name, and status."]
@@ -2584,6 +2608,9 @@ module ParsedInputRecord =
   struct
     type nonrec t = ParsedInputRecordField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParsedInputRecordField.to_value)) |>
         (fun x -> `List x)
@@ -2610,6 +2637,9 @@ module ProcessedInputRecords =
   struct
     type nonrec t = ProcessedInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProcessedInputRecord.to_value)) |>
         (fun x -> `List x)
@@ -2636,6 +2666,9 @@ module RawInputRecords =
   struct
     type nonrec t = RawInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RawInputRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2696,6 +2729,9 @@ module CloudWatchLoggingOptionDescriptions =
   struct
     type nonrec t = CloudWatchLoggingOptionDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOptionDescription.to_value)) |>
         (fun x -> `List x)
@@ -2723,6 +2759,9 @@ module InputDescriptions =
   struct
     type nonrec t = InputDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2748,6 +2787,9 @@ module OutputDescriptions =
   struct
     type nonrec t = OutputDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutputDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2773,6 +2815,9 @@ module ReferenceDataSourceDescriptions =
   struct
     type nonrec t = ReferenceDataSourceDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReferenceDataSourceDescription.to_value)) |>
         (fun x -> `List x)
@@ -2833,10 +2878,10 @@ module CloudWatchLoggingOption =
           (Xml.child_exn ~context:context_ xml_arg0 "LogStreamARN") in
       make ~roleARN ~logStreamARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
+    let of_json json__ =
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
       let logStreamARN =
-        field_map_exn json "LogStreamARN" LogStreamARN.of_json in
+        field_map_exn json__ "LogStreamARN" LogStreamARN.of_json in
       make ~roleARN ~logStreamARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2915,19 +2960,20 @@ module Input =
       make ~inputSchema ?inputParallelism ?kinesisFirehoseInput
         ?kinesisStreamsInput ?inputProcessingConfiguration ~namePrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let inputSchema = field_map_exn json "InputSchema" SourceSchema.of_json in
+    let of_json json__ =
+      let inputSchema =
+        field_map_exn json__ "InputSchema" SourceSchema.of_json in
       let inputParallelism =
-        field_map json "InputParallelism" InputParallelism.of_json in
+        field_map json__ "InputParallelism" InputParallelism.of_json in
       let kinesisFirehoseInput =
-        field_map json "KinesisFirehoseInput" KinesisFirehoseInput.of_json in
+        field_map json__ "KinesisFirehoseInput" KinesisFirehoseInput.of_json in
       let kinesisStreamsInput =
-        field_map json "KinesisStreamsInput" KinesisStreamsInput.of_json in
+        field_map json__ "KinesisStreamsInput" KinesisStreamsInput.of_json in
       let inputProcessingConfiguration =
-        field_map json "InputProcessingConfiguration"
+        field_map json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
       let namePrefix =
-        field_map_exn json "NamePrefix" InAppStreamName.of_json in
+        field_map_exn json__ "NamePrefix" InAppStreamName.of_json in
       make ~inputSchema ?inputParallelism ?kinesisFirehoseInput
         ?kinesisStreamsInput ?inputProcessingConfiguration ~namePrefix ()
     let to_json v = composed_to_json to_value v
@@ -2996,15 +3042,16 @@ module Output =
       make ~destinationSchema ?lambdaOutput ?kinesisFirehoseOutput
         ?kinesisStreamsOutput ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationSchema =
-        field_map_exn json "DestinationSchema" DestinationSchema.of_json in
-      let lambdaOutput = field_map json "LambdaOutput" LambdaOutput.of_json in
+        field_map_exn json__ "DestinationSchema" DestinationSchema.of_json in
+      let lambdaOutput = field_map json__ "LambdaOutput" LambdaOutput.of_json in
       let kinesisFirehoseOutput =
-        field_map json "KinesisFirehoseOutput" KinesisFirehoseOutput.of_json in
+        field_map json__ "KinesisFirehoseOutput"
+          KinesisFirehoseOutput.of_json in
       let kinesisStreamsOutput =
-        field_map json "KinesisStreamsOutput" KinesisStreamsOutput.of_json in
-      let name = field_map_exn json "Name" InAppStreamName.of_json in
+        field_map json__ "KinesisStreamsOutput" KinesisStreamsOutput.of_json in
+      let name = field_map_exn json__ "Name" InAppStreamName.of_json in
       make ~destinationSchema ?lambdaOutput ?kinesisFirehoseOutput
         ?kinesisStreamsOutput ~name ()
     let to_json v = composed_to_json to_value v
@@ -3043,11 +3090,11 @@ module S3ReferenceDataSource =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketARN") in
       make ~referenceRoleARN ~fileKey ~bucketARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceRoleARN =
-        field_map_exn json "ReferenceRoleARN" RoleARN.of_json in
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
+        field_map_exn json__ "ReferenceRoleARN" RoleARN.of_json in
+      let fileKey = field_map_exn json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
       make ~referenceRoleARN ~fileKey ~bucketARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3066,8 +3113,8 @@ module CodeValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3086,8 +3133,8 @@ module ConcurrentModificationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3106,8 +3153,8 @@ module InvalidArgumentException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specified input parameter value is invalid."]
@@ -3125,8 +3172,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Application is not available for this operation."]
@@ -3144,8 +3191,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specified application can't be found."]
@@ -3163,8 +3210,8 @@ module UnsupportedOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3231,18 +3278,18 @@ module ApplicationUpdate =
       make ?cloudWatchLoggingOptionUpdates ?referenceDataSourceUpdates
         ?outputUpdates ?applicationCodeUpdate ?inputUpdates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLoggingOptionUpdates =
-        field_map json "CloudWatchLoggingOptionUpdates"
+        field_map json__ "CloudWatchLoggingOptionUpdates"
           CloudWatchLoggingOptionUpdates.of_json in
       let referenceDataSourceUpdates =
-        field_map json "ReferenceDataSourceUpdates"
+        field_map json__ "ReferenceDataSourceUpdates"
           ReferenceDataSourceUpdates.of_json in
       let outputUpdates =
-        field_map json "OutputUpdates" OutputUpdates.of_json in
+        field_map json__ "OutputUpdates" OutputUpdates.of_json in
       let applicationCodeUpdate =
-        field_map json "ApplicationCodeUpdate" ApplicationCode.of_json in
-      let inputUpdates = field_map json "InputUpdates" InputUpdates.of_json in
+        field_map json__ "ApplicationCodeUpdate" ApplicationCode.of_json in
+      let inputUpdates = field_map json__ "InputUpdates" InputUpdates.of_json in
       make ?cloudWatchLoggingOptionUpdates ?referenceDataSourceUpdates
         ?outputUpdates ?applicationCodeUpdate ?inputUpdates ()
     let to_json v = composed_to_json to_value v
@@ -3262,8 +3309,8 @@ module TooManyTagsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3299,6 +3346,9 @@ module TagKeys =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3327,6 +3377,9 @@ module Tags =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3360,8 +3413,8 @@ module InvalidApplicationConfigurationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "User-provided application configuration is not valid."]
@@ -3369,6 +3422,9 @@ module InputConfigurations =
   struct
     type nonrec t = InputConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InputConfiguration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3394,6 +3450,9 @@ module ApplicationSummaries =
   struct
     type nonrec t = ApplicationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3451,6 +3510,9 @@ module ParsedInputRecords =
   struct
     type nonrec t = ParsedInputRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParsedInputRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3486,8 +3548,8 @@ module ResourceProvisionedThroughputExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3506,8 +3568,8 @@ module ServiceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3543,12 +3605,13 @@ module UnableToDetectSchemaException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?processedInputRecords ?rawInputRecords ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let processedInputRecords =
-        field_map json "ProcessedInputRecords" ProcessedInputRecords.of_json in
+        field_map json__ "ProcessedInputRecords"
+          ProcessedInputRecords.of_json in
       let rawInputRecords =
-        field_map json "RawInputRecords" RawInputRecords.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+        field_map json__ "RawInputRecords" RawInputRecords.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?processedInputRecords ?rawInputRecords ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3583,10 +3646,10 @@ module S3Configuration =
         RoleARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleARN") in
       make ~fileKey ~bucketARN ~roleARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileKey = field_map_exn json "FileKey" FileKey.of_json in
-      let bucketARN = field_map_exn json "BucketARN" BucketARN.of_json in
-      let roleARN = field_map_exn json "RoleARN" RoleARN.of_json in
+    let of_json json__ =
+      let fileKey = field_map_exn json__ "FileKey" FileKey.of_json in
+      let bucketARN = field_map_exn json__ "BucketARN" BucketARN.of_json in
+      let roleARN = field_map_exn json__ "RoleARN" RoleARN.of_json in
       make ~fileKey ~bucketARN ~roleARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3595,12 +3658,13 @@ module ApplicationDetail =
   struct
     type nonrec t =
       {
-      applicationName: ApplicationName.t
+      applicationName: ApplicationName.t option
         [@ocaml.doc "Name of the application."];
       applicationDescription: ApplicationDescription.t option
         [@ocaml.doc "Description of the application."];
-      applicationARN: ResourceARN.t [@ocaml.doc "ARN of the application."];
-      applicationStatus: ApplicationStatus.t
+      applicationARN: ResourceARN.t option
+        [@ocaml.doc "ARN of the application."];
+      applicationStatus: ApplicationStatus.t option
         [@ocaml.doc "Status of the application."];
       createTimestamp: Timestamp.t option
         [@ocaml.doc "Time stamp when the application version was created."];
@@ -3623,24 +3687,26 @@ module ApplicationDetail =
       applicationCode: ApplicationCode.t option
         [@ocaml.doc
           "Returns the application code that you provided to perform data analysis on any of the in-application streams in your application."];
-      applicationVersionId: ApplicationVersionId.t
+      applicationVersionId: ApplicationVersionId.t option
         [@ocaml.doc "Provides the current application version."]}
-    let context_ = "ApplicationDetail"
-    let make ?applicationDescription =
-      fun ?createTimestamp ->
-        fun ?lastUpdateTimestamp ->
-          fun ?inputDescriptions ->
-            fun ?outputDescriptions ->
-              fun ?referenceDataSourceDescriptions ->
-                fun ?cloudWatchLoggingOptionDescriptions ->
-                  fun ?applicationCode ->
-                    fun ~applicationName ->
-                      fun ~applicationARN ->
-                        fun ~applicationStatus ->
-                          fun ~applicationVersionId ->
+    let make ?applicationName =
+      fun ?applicationDescription ->
+        fun ?applicationARN ->
+          fun ?applicationStatus ->
+            fun ?createTimestamp ->
+              fun ?lastUpdateTimestamp ->
+                fun ?inputDescriptions ->
+                  fun ?outputDescriptions ->
+                    fun ?referenceDataSourceDescriptions ->
+                      fun ?cloudWatchLoggingOptionDescriptions ->
+                        fun ?applicationCode ->
+                          fun ?applicationVersionId ->
                             fun () ->
                               {
+                                applicationName;
                                 applicationDescription;
+                                applicationARN;
+                                applicationStatus;
                                 createTimestamp;
                                 lastUpdateTimestamp;
                                 inputDescriptions;
@@ -3648,21 +3714,19 @@ module ApplicationDetail =
                                 referenceDataSourceDescriptions;
                                 cloudWatchLoggingOptionDescriptions;
                                 applicationCode;
-                                applicationName;
-                                applicationARN;
-                                applicationStatus;
                                 applicationVersionId
                               }
     let to_value x =
       structure_to_value
         [("ApplicationName",
-           (Some (ApplicationName.to_value x.applicationName)));
+           (Option.map x.applicationName ~f:ApplicationName.to_value));
         ("ApplicationDescription",
           (Option.map x.applicationDescription
              ~f:ApplicationDescription.to_value));
-        ("ApplicationARN", (Some (ResourceARN.to_value x.applicationARN)));
+        ("ApplicationARN",
+          (Option.map x.applicationARN ~f:ResourceARN.to_value));
         ("ApplicationStatus",
-          (Some (ApplicationStatus.to_value x.applicationStatus)));
+          (Option.map x.applicationStatus ~f:ApplicationStatus.to_value));
         ("CreateTimestamp",
           (Option.map x.createTimestamp ~f:Timestamp.to_value));
         ("LastUpdateTimestamp",
@@ -3680,12 +3744,12 @@ module ApplicationDetail =
         ("ApplicationCode",
           (Option.map x.applicationCode ~f:ApplicationCode.to_value));
         ("ApplicationVersionId",
-          (Some (ApplicationVersionId.to_value x.applicationVersionId)))]
+          (Option.map x.applicationVersionId ~f:ApplicationVersionId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationVersionId =
-        ApplicationVersionId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationVersionId") in
+        (Option.map ~f:ApplicationVersionId.of_xml)
+          (Xml.child xml_arg0 "ApplicationVersionId") in
       let applicationCode =
         (Option.map ~f:ApplicationCode.of_xml)
           (Xml.child xml_arg0 "ApplicationCode") in
@@ -3708,57 +3772,56 @@ module ApplicationDetail =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "CreateTimestamp") in
       let applicationStatus =
-        ApplicationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationStatus") in
+        (Option.map ~f:ApplicationStatus.of_xml)
+          (Xml.child xml_arg0 "ApplicationStatus") in
       let applicationARN =
-        ResourceARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationARN") in
+        (Option.map ~f:ResourceARN.of_xml)
+          (Xml.child xml_arg0 "ApplicationARN") in
       let applicationDescription =
         (Option.map ~f:ApplicationDescription.of_xml)
           (Xml.child xml_arg0 "ApplicationDescription") in
       let applicationName =
-        ApplicationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
-      make ~applicationVersionId ?applicationCode
+        (Option.map ~f:ApplicationName.of_xml)
+          (Xml.child xml_arg0 "ApplicationName") in
+      make ?applicationVersionId ?applicationCode
         ?cloudWatchLoggingOptionDescriptions ?referenceDataSourceDescriptions
         ?outputDescriptions ?inputDescriptions ?lastUpdateTimestamp
-        ?createTimestamp ~applicationStatus ~applicationARN
-        ?applicationDescription ~applicationName ()
+        ?createTimestamp ?applicationStatus ?applicationARN
+        ?applicationDescription ?applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationVersionId =
-        field_map_exn json "ApplicationVersionId"
-          ApplicationVersionId.of_json in
+        field_map json__ "ApplicationVersionId" ApplicationVersionId.of_json in
       let applicationCode =
-        field_map json "ApplicationCode" ApplicationCode.of_json in
+        field_map json__ "ApplicationCode" ApplicationCode.of_json in
       let cloudWatchLoggingOptionDescriptions =
-        field_map json "CloudWatchLoggingOptionDescriptions"
+        field_map json__ "CloudWatchLoggingOptionDescriptions"
           CloudWatchLoggingOptionDescriptions.of_json in
       let referenceDataSourceDescriptions =
-        field_map json "ReferenceDataSourceDescriptions"
+        field_map json__ "ReferenceDataSourceDescriptions"
           ReferenceDataSourceDescriptions.of_json in
       let outputDescriptions =
-        field_map json "OutputDescriptions" OutputDescriptions.of_json in
+        field_map json__ "OutputDescriptions" OutputDescriptions.of_json in
       let inputDescriptions =
-        field_map json "InputDescriptions" InputDescriptions.of_json in
+        field_map json__ "InputDescriptions" InputDescriptions.of_json in
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdateTimestamp" Timestamp.of_json in
       let createTimestamp =
-        field_map json "CreateTimestamp" Timestamp.of_json in
+        field_map json__ "CreateTimestamp" Timestamp.of_json in
       let applicationStatus =
-        field_map_exn json "ApplicationStatus" ApplicationStatus.of_json in
+        field_map json__ "ApplicationStatus" ApplicationStatus.of_json in
       let applicationARN =
-        field_map_exn json "ApplicationARN" ResourceARN.of_json in
+        field_map json__ "ApplicationARN" ResourceARN.of_json in
       let applicationDescription =
-        field_map json "ApplicationDescription"
+        field_map json__ "ApplicationDescription"
           ApplicationDescription.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
-      make ~applicationVersionId ?applicationCode
+        field_map json__ "ApplicationName" ApplicationName.of_json in
+      make ?applicationVersionId ?applicationCode
         ?cloudWatchLoggingOptionDescriptions ?referenceDataSourceDescriptions
         ?outputDescriptions ?inputDescriptions ?lastUpdateTimestamp
-        ?createTimestamp ~applicationStatus ~applicationARN
-        ?applicationDescription ~applicationName ()
+        ?createTimestamp ?applicationStatus ?applicationARN
+        ?applicationDescription ?applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This documentation is for version 1 of the Amazon Kinesis Data Analytics API, which only supports SQL applications. Version 2 of the API supports SQL and Java applications. For more information about version 2, see Amazon Kinesis Data Analytics API V2 Documentation. Provides a description of the application, including the application Amazon Resource Name (ARN), status, latest version, and input and output configuration."]
@@ -3776,8 +3839,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Exceeded the number of applications allowed."]
@@ -3785,6 +3848,9 @@ module CloudWatchLoggingOptions =
   struct
     type nonrec t = CloudWatchLoggingOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchLoggingOption.to_value)) |>
         (fun x -> `List x)
@@ -3811,6 +3877,9 @@ module Inputs =
   struct
     type nonrec t = Input.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Input.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3834,6 +3903,9 @@ module Outputs =
   struct
     type nonrec t = Output.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Output.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3890,12 +3962,13 @@ module ReferenceDataSource =
           (Xml.child_exn ~context:context_ xml_arg0 "TableName") in
       make ~referenceSchema ?s3ReferenceDataSource ~tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceSchema =
-        field_map_exn json "ReferenceSchema" SourceSchema.of_json in
+        field_map_exn json__ "ReferenceSchema" SourceSchema.of_json in
       let s3ReferenceDataSource =
-        field_map json "S3ReferenceDataSource" S3ReferenceDataSource.of_json in
-      let tableName = field_map_exn json "TableName" InAppTableName.of_json in
+        field_map json__ "S3ReferenceDataSource"
+          S3ReferenceDataSource.of_json in
+      let tableName = field_map_exn json__ "TableName" InAppTableName.of_json in
       make ~referenceSchema ?s3ReferenceDataSource ~tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4031,14 +4104,14 @@ module UpdateApplicationRequest =
       make ~applicationUpdate ~currentApplicationVersionId ~applicationName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationUpdate =
-        field_map_exn json "ApplicationUpdate" ApplicationUpdate.of_json in
+        field_map_exn json__ "ApplicationUpdate" ApplicationUpdate.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~applicationUpdate ~currentApplicationVersionId ~applicationName
         ()
     let to_json v = composed_to_json to_value v
@@ -4149,10 +4222,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4259,10 +4332,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4345,9 +4418,9 @@ module StopApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -4461,11 +4534,12 @@ module StartApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~inputConfigurations ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputConfigurations =
-        field_map_exn json "InputConfigurations" InputConfigurations.of_json in
+        field_map_exn json__ "InputConfigurations"
+          InputConfigurations.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~inputConfigurations ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -4531,8 +4605,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the list of key-value tags assigned to the application. For more information, see Using Tagging."]
@@ -4554,9 +4628,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" KinesisAnalyticsARN.of_json in
+        field_map_exn json__ "ResourceARN" KinesisAnalyticsARN.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4565,16 +4639,15 @@ module ListApplicationsResponse =
   struct
     type nonrec t =
       {
-      applicationSummaries: ApplicationSummaries.t
+      applicationSummaries: ApplicationSummaries.t option
         [@ocaml.doc "List of ApplicationSummary objects."];
-      hasMoreApplications: BooleanObject.t
+      hasMoreApplications: BooleanObject.t option
         [@ocaml.doc
           "Returns true if there are more applications to retrieve."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListApplicationsResponse"
-    let make ~applicationSummaries =
-      fun ~hasMoreApplications ->
+    let make ?applicationSummaries =
+      fun ?hasMoreApplications ->
         fun () -> { applicationSummaries; hasMoreApplications }
     let error_of_json name json =
       match name with
@@ -4595,26 +4668,26 @@ module ListApplicationsResponse =
     let to_value x =
       structure_to_value
         [("ApplicationSummaries",
-           (Some (ApplicationSummaries.to_value x.applicationSummaries)));
+           (Option.map x.applicationSummaries
+              ~f:ApplicationSummaries.to_value));
         ("HasMoreApplications",
-          (Some (BooleanObject.to_value x.hasMoreApplications)))]
+          (Option.map x.hasMoreApplications ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hasMoreApplications =
-        BooleanObject.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HasMoreApplications") in
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HasMoreApplications") in
       let applicationSummaries =
-        ApplicationSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationSummaries") in
-      make ~hasMoreApplications ~applicationSummaries ()
+        (Option.map ~f:ApplicationSummaries.of_xml)
+          (Xml.child xml_arg0 "ApplicationSummaries") in
+      make ?hasMoreApplications ?applicationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hasMoreApplications =
-        field_map_exn json "HasMoreApplications" BooleanObject.of_json in
+        field_map json__ "HasMoreApplications" BooleanObject.of_json in
       let applicationSummaries =
-        field_map_exn json "ApplicationSummaries"
-          ApplicationSummaries.of_json in
-      make ~hasMoreApplications ~applicationSummaries ()
+        field_map json__ "ApplicationSummaries" ApplicationSummaries.of_json in
+      make ?hasMoreApplications ?applicationSummaries ()
     let to_json v = composed_to_json to_value v
   end
 module ListApplicationsRequest =
@@ -4646,11 +4719,11 @@ module ListApplicationsRequest =
           (Xml.child xml_arg0 "Limit") in
       make ?exclusiveStartApplicationName ?limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exclusiveStartApplicationName =
-        field_map json "ExclusiveStartApplicationName"
+        field_map json__ "ExclusiveStartApplicationName"
           ApplicationName.of_json in
-      let limit = field_map json "Limit" ListApplicationsInputLimit.of_json in
+      let limit = field_map json__ "Limit" ListApplicationsInputLimit.of_json in
       make ?exclusiveStartApplicationName ?limit ()
     let to_json v = composed_to_json to_value v
   end
@@ -4770,14 +4843,15 @@ module DiscoverInputSchemaResponse =
       make ?rawInputRecords ?processedInputRecords ?parsedInputRecords
         ?inputSchema ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rawInputRecords =
-        field_map json "RawInputRecords" RawInputRecords.of_json in
+        field_map json__ "RawInputRecords" RawInputRecords.of_json in
       let processedInputRecords =
-        field_map json "ProcessedInputRecords" ProcessedInputRecords.of_json in
+        field_map json__ "ProcessedInputRecords"
+          ProcessedInputRecords.of_json in
       let parsedInputRecords =
-        field_map json "ParsedInputRecords" ParsedInputRecords.of_json in
-      let inputSchema = field_map json "InputSchema" SourceSchema.of_json in
+        field_map json__ "ParsedInputRecords" ParsedInputRecords.of_json in
+      let inputSchema = field_map json__ "InputSchema" SourceSchema.of_json in
       make ?rawInputRecords ?processedInputRecords ?parsedInputRecords
         ?inputSchema ()
     let to_json v = composed_to_json to_value v
@@ -4844,17 +4918,17 @@ module DiscoverInputSchemaRequest =
       make ?inputProcessingConfiguration ?s3Configuration
         ?inputStartingPositionConfiguration ?roleARN ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputProcessingConfiguration =
-        field_map json "InputProcessingConfiguration"
+        field_map json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
       let s3Configuration =
-        field_map json "S3Configuration" S3Configuration.of_json in
+        field_map json__ "S3Configuration" S3Configuration.of_json in
       let inputStartingPositionConfiguration =
-        field_map json "InputStartingPositionConfiguration"
+        field_map json__ "InputStartingPositionConfiguration"
           InputStartingPositionConfiguration.of_json in
-      let roleARN = field_map json "RoleARN" RoleARN.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceARN.of_json in
+      let roleARN = field_map json__ "RoleARN" RoleARN.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceARN.of_json in
       make ?inputProcessingConfiguration ?s3Configuration
         ?inputStartingPositionConfiguration ?roleARN ?resourceARN ()
     let to_json v = composed_to_json to_value v
@@ -4864,15 +4938,14 @@ module DescribeApplicationResponse =
   struct
     type nonrec t =
       {
-      applicationDetail: ApplicationDetail.t
+      applicationDetail: ApplicationDetail.t option
         [@ocaml.doc
           "Provides a description of the application, such as the application Amazon Resource Name (ARN), status, latest version, and input and output configuration details."]}
     type nonrec error =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeApplicationResponse"
-    let make ~applicationDetail = fun () -> { applicationDetail }
+    let make ?applicationDetail = fun () -> { applicationDetail }
     let error_of_json name json =
       match name with
       | "ResourceNotFoundException" ->
@@ -4910,18 +4983,18 @@ module DescribeApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationDetail",
-           (Some (ApplicationDetail.to_value x.applicationDetail)))]
+           (Option.map x.applicationDetail ~f:ApplicationDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationDetail =
-        ApplicationDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationDetail") in
-      make ~applicationDetail ()
+        (Option.map ~f:ApplicationDetail.of_xml)
+          (Xml.child xml_arg0 "ApplicationDetail") in
+      make ?applicationDetail ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationDetail =
-        field_map_exn json "ApplicationDetail" ApplicationDetail.of_json in
-      make ~applicationDetail ()
+        field_map json__ "ApplicationDetail" ApplicationDetail.of_json in
+      make ?applicationDetail ()
     let to_json v = composed_to_json to_value v
   end
 module DescribeApplicationRequest =
@@ -4943,9 +5016,9 @@ module DescribeApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -5048,11 +5121,11 @@ module DeleteApplicationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~createTimestamp ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createTimestamp =
-        field_map_exn json "CreateTimestamp" Timestamp.of_json in
+        field_map_exn json__ "CreateTimestamp" Timestamp.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~createTimestamp ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -5175,13 +5248,13 @@ module DeleteApplicationReferenceDataSourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~referenceId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let referenceId = field_map_exn json "ReferenceId" Id.of_json in
+    let of_json json__ =
+      let referenceId = field_map_exn json__ "ReferenceId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~referenceId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5304,13 +5377,13 @@ module DeleteApplicationOutputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~outputId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputId = field_map_exn json "OutputId" Id.of_json in
+    let of_json json__ =
+      let outputId = field_map_exn json__ "OutputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~outputId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -5431,13 +5504,13 @@ module DeleteApplicationInputProcessingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~inputId ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let inputId = field_map_exn json "InputId" Id.of_json in
+    let of_json json__ =
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~inputId ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5568,14 +5641,14 @@ module DeleteApplicationCloudWatchLoggingOptionRequest =
       make ~cloudWatchLoggingOptionId ~currentApplicationVersionId
         ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLoggingOptionId =
-        field_map_exn json "CloudWatchLoggingOptionId" Id.of_json in
+        field_map_exn json__ "CloudWatchLoggingOptionId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~cloudWatchLoggingOptionId ~currentApplicationVersionId
         ~applicationName ()
     let to_json v = composed_to_json to_value v
@@ -5585,7 +5658,7 @@ module CreateApplicationResponse =
   struct
     type nonrec t =
       {
-      applicationSummary: ApplicationSummary.t
+      applicationSummary: ApplicationSummary.t option
         [@ocaml.doc
           "In response to your CreateApplication request, Amazon Kinesis Analytics returns a response with a summary of the application it created, including the application Amazon Resource Name (ARN), name, and status."]}
     type nonrec error =
@@ -5596,8 +5669,7 @@ module CreateApplicationResponse =
       | `ResourceInUseException of ResourceInUseException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateApplicationResponse"
-    let make ~applicationSummary = fun () -> { applicationSummary }
+    let make ?applicationSummary = fun () -> { applicationSummary }
     let error_of_json name json =
       match name with
       | "CodeValidationException" ->
@@ -5667,18 +5739,18 @@ module CreateApplicationResponse =
     let to_value x =
       structure_to_value
         [("ApplicationSummary",
-           (Some (ApplicationSummary.to_value x.applicationSummary)))]
+           (Option.map x.applicationSummary ~f:ApplicationSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let applicationSummary =
-        ApplicationSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationSummary") in
-      make ~applicationSummary ()
+        (Option.map ~f:ApplicationSummary.of_xml)
+          (Xml.child xml_arg0 "ApplicationSummary") in
+      make ?applicationSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationSummary =
-        field_map_exn json "ApplicationSummary" ApplicationSummary.of_json in
-      make ~applicationSummary ()
+        field_map json__ "ApplicationSummary" ApplicationSummary.of_json in
+      make ?applicationSummary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "TBD"]
 module CreateApplicationRequest =
@@ -5760,20 +5832,20 @@ module CreateApplicationRequest =
       make ?tags ?applicationCode ?cloudWatchLoggingOptions ?outputs ?inputs
         ?applicationDescription ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let applicationCode =
-        field_map json "ApplicationCode" ApplicationCode.of_json in
+        field_map json__ "ApplicationCode" ApplicationCode.of_json in
       let cloudWatchLoggingOptions =
-        field_map json "CloudWatchLoggingOptions"
+        field_map json__ "CloudWatchLoggingOptions"
           CloudWatchLoggingOptions.of_json in
-      let outputs = field_map json "Outputs" Outputs.of_json in
-      let inputs = field_map json "Inputs" Inputs.of_json in
+      let outputs = field_map json__ "Outputs" Outputs.of_json in
+      let inputs = field_map json__ "Inputs" Inputs.of_json in
       let applicationDescription =
-        field_map json "ApplicationDescription"
+        field_map json__ "ApplicationDescription"
           ApplicationDescription.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ?tags ?applicationCode ?cloudWatchLoggingOptions ?outputs ?inputs
         ?applicationDescription ~applicationName ()
     let to_json v = composed_to_json to_value v
@@ -5903,14 +5975,15 @@ module AddApplicationReferenceDataSourceRequest =
       make ~referenceDataSource ~currentApplicationVersionId ~applicationName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let referenceDataSource =
-        field_map_exn json "ReferenceDataSource" ReferenceDataSource.of_json in
+        field_map_exn json__ "ReferenceDataSource"
+          ReferenceDataSource.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~referenceDataSource ~currentApplicationVersionId ~applicationName
         ()
     let to_json v = composed_to_json to_value v
@@ -6033,13 +6106,13 @@ module AddApplicationOutputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~output ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let output = field_map_exn json "Output" Output.of_json in
+    let of_json json__ =
+      let output = field_map_exn json__ "Output" Output.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~output ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -6167,13 +6240,13 @@ module AddApplicationInputRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ApplicationName") in
       make ~input ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let input = field_map_exn json "Input" Input.of_json in
+    let of_json json__ =
+      let input = field_map_exn json__ "Input" Input.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~input ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
   end
@@ -6315,16 +6388,16 @@ module AddApplicationInputProcessingConfigurationRequest =
       make ~inputProcessingConfiguration ~inputId
         ~currentApplicationVersionId ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputProcessingConfiguration =
-        field_map_exn json "InputProcessingConfiguration"
+        field_map_exn json__ "InputProcessingConfiguration"
           InputProcessingConfiguration.of_json in
-      let inputId = field_map_exn json "InputId" Id.of_json in
+      let inputId = field_map_exn json__ "InputId" Id.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~inputProcessingConfiguration ~inputId
         ~currentApplicationVersionId ~applicationName ()
     let to_json v = composed_to_json to_value v
@@ -6455,15 +6528,15 @@ module AddApplicationCloudWatchLoggingOptionRequest =
       make ~cloudWatchLoggingOption ~currentApplicationVersionId
         ~applicationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchLoggingOption =
-        field_map_exn json "CloudWatchLoggingOption"
+        field_map_exn json__ "CloudWatchLoggingOption"
           CloudWatchLoggingOption.of_json in
       let currentApplicationVersionId =
-        field_map_exn json "CurrentApplicationVersionId"
+        field_map_exn json__ "CurrentApplicationVersionId"
           ApplicationVersionId.of_json in
       let applicationName =
-        field_map_exn json "ApplicationName" ApplicationName.of_json in
+        field_map_exn json__ "ApplicationName" ApplicationName.of_json in
       make ~cloudWatchLoggingOption ~currentApplicationVersionId
         ~applicationName ()
     let to_json v = composed_to_json to_value v

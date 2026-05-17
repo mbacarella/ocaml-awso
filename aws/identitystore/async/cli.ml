@@ -28,6 +28,181 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let create_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING GroupDisplayName"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING SensitiveStringType"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_group
+           (Values.CreateGroupRequest.make ?displayName ?description
+              ~identityStoreId ()) (Some Values.CreateGroupResponse.to_json)
+           (Some Values.CreateGroupResponse.error_to_json)])
+let create_group_membership =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING ResourceId"
+       and memberId =
+         flag "member-id" (required json_arg) ~doc:"JSON MemberId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_group_membership
+           (Values.CreateGroupMembershipRequest.make ~identityStoreId
+              ~groupId ~memberId:(Values.MemberId.of_json memberId) ())
+           (Some Values.CreateGroupMembershipResponse.to_json)
+           (Some Values.CreateGroupMembershipResponse.error_to_json)])
+let create_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and userName =
+         flag "user-name" (optional string) ~doc:"STRING UserName"
+       and name = flag "name" (optional json_arg) ~doc:"JSON Name"
+       and displayName =
+         flag "display-name" (optional string)
+           ~doc:"STRING SensitiveStringType"
+       and nickName =
+         flag "nick-name" (optional string) ~doc:"STRING SensitiveStringType"
+       and profileUrl =
+         flag "profile-url" (optional string)
+           ~doc:"STRING SensitiveStringType"
+       and emails = flag "emails" (optional json_arg) ~doc:"JSON Emails"
+       and addresses =
+         flag "addresses" (optional json_arg) ~doc:"JSON Addresses"
+       and phoneNumbers =
+         flag "phone-numbers" (optional json_arg) ~doc:"JSON PhoneNumbers"
+       and userType =
+         flag "user-type" (optional string) ~doc:"STRING SensitiveStringType"
+       and title =
+         flag "title" (optional string) ~doc:"STRING SensitiveStringType"
+       and preferredLanguage =
+         flag "preferred-language" (optional string)
+           ~doc:"STRING SensitiveStringType"
+       and locale =
+         flag "locale" (optional string) ~doc:"STRING SensitiveStringType"
+       and timezone =
+         flag "timezone" (optional string) ~doc:"STRING SensitiveStringType"
+       and photos = flag "photos" (optional json_arg) ~doc:"JSON Photos"
+       and website =
+         flag "website" (optional string) ~doc:"STRING SensitiveStringType"
+       and birthdate =
+         flag "birthdate" (optional string) ~doc:"STRING SensitiveStringType"
+       and roles = flag "roles" (optional json_arg) ~doc:"JSON Roles"
+       and extensions =
+         flag "extensions" (optional json_arg) ~doc:"JSON Extensions"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_user
+           (Values.CreateUserRequest.make ?userName
+              ?name:(Option.map ~f:Values.Name.of_json name) ?displayName
+              ?nickName ?profileUrl
+              ?emails:(Option.map ~f:Values.Emails.of_json emails)
+              ?addresses:(Option.map ~f:Values.Addresses.of_json addresses)
+              ?phoneNumbers:(Option.map ~f:Values.PhoneNumbers.of_json
+                               phoneNumbers) ?userType ?title
+              ?preferredLanguage ?locale ?timezone
+              ?photos:(Option.map ~f:Values.Photos.of_json photos) ?website
+              ?birthdate ?roles:(Option.map ~f:Values.Roles.of_json roles)
+              ?extensions:(Option.map ~f:Values.Extensions.of_json extensions)
+              ~identityStoreId ()) (Some Values.CreateUserResponse.to_json)
+           (Some Values.CreateUserResponse.error_to_json)])
+let delete_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_group
+           (Values.DeleteGroupRequest.make ~identityStoreId ~groupId ())
+           (Some Values.DeleteGroupResponse.to_json)
+           (Some Values.DeleteGroupResponse.error_to_json)])
+let delete_group_membership =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and membershipId =
+         flag "membership-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_group_membership
+           (Values.DeleteGroupMembershipRequest.make ~identityStoreId
+              ~membershipId ())
+           (Some Values.DeleteGroupMembershipResponse.to_json)
+           (Some Values.DeleteGroupMembershipResponse.error_to_json)])
+let delete_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and userId = flag "user-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_user
+           (Values.DeleteUserRequest.make ~identityStoreId ~userId ())
+           (Some Values.DeleteUserResponse.to_json)
+           (Some Values.DeleteUserResponse.error_to_json)])
 let describe_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -49,7 +224,7 @@ let describe_group =
            (Values.DescribeGroupRequest.make ~identityStoreId ~groupId ())
            (Some Values.DescribeGroupResponse.to_json)
            (Some Values.DescribeGroupResponse.error_to_json)])
-let describe_user =
+let describe_group_membership =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -62,13 +237,189 @@ let describe_user =
        and identityStoreId =
          flag "identity-store-id" (required string)
            ~doc:"STRING IdentityStoreId"
+       and membershipId =
+         flag "membership-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_group_membership
+           (Values.DescribeGroupMembershipRequest.make ~identityStoreId
+              ~membershipId ())
+           (Some Values.DescribeGroupMembershipResponse.to_json)
+           (Some Values.DescribeGroupMembershipResponse.error_to_json)])
+let describe_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and extensions =
+         flag "extensions" (optional json_arg) ~doc:"JSON ExtensionNames"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
        and userId = flag "user-id" (required string) ~doc:"STRING ResourceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_user
-           (Values.DescribeUserRequest.make ~identityStoreId ~userId ())
+           (Values.DescribeUserRequest.make
+              ?extensions:(Option.map ~f:Values.ExtensionNames.of_json
+                             extensions) ~identityStoreId ~userId ())
            (Some Values.DescribeUserResponse.to_json)
            (Some Values.DescribeUserResponse.error_to_json)])
+let get_group_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and alternateIdentifier =
+         flag "alternate-identifier" (required json_arg)
+           ~doc:"JSON AlternateIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_group_id
+           (Values.GetGroupIdRequest.make ~identityStoreId
+              ~alternateIdentifier:(Values.AlternateIdentifier.of_json
+                                      alternateIdentifier) ())
+           (Some Values.GetGroupIdResponse.to_json)
+           (Some Values.GetGroupIdResponse.error_to_json)])
+let get_group_membership_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING ResourceId"
+       and memberId =
+         flag "member-id" (required json_arg) ~doc:"JSON MemberId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_group_membership_id
+           (Values.GetGroupMembershipIdRequest.make ~identityStoreId ~groupId
+              ~memberId:(Values.MemberId.of_json memberId) ())
+           (Some Values.GetGroupMembershipIdResponse.to_json)
+           (Some Values.GetGroupMembershipIdResponse.error_to_json)])
+let get_user_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and alternateIdentifier =
+         flag "alternate-identifier" (required json_arg)
+           ~doc:"JSON AlternateIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_user_id
+           (Values.GetUserIdRequest.make ~identityStoreId
+              ~alternateIdentifier:(Values.AlternateIdentifier.of_json
+                                      alternateIdentifier) ())
+           (Some Values.GetUserIdResponse.to_json)
+           (Some Values.GetUserIdResponse.error_to_json)])
+let is_member_in_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and memberId =
+         flag "member-id" (required json_arg) ~doc:"JSON MemberId"
+       and groupIds =
+         flag "group-ids" (required json_arg) ~doc:"JSON GroupIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.is_member_in_groups
+           (Values.IsMemberInGroupsRequest.make ~identityStoreId
+              ~memberId:(Values.MemberId.of_json memberId)
+              ~groupIds:(Values.GroupIds.of_json groupIds) ())
+           (Some Values.IsMemberInGroupsResponse.to_json)
+           (Some Values.IsMemberInGroupsResponse.error_to_json)])
+let list_group_memberships =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING ResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_group_memberships
+           (Values.ListGroupMembershipsRequest.make ?maxResults ?nextToken
+              ~identityStoreId ~groupId ())
+           (Some Values.ListGroupMembershipsResponse.to_json)
+           (Some Values.ListGroupMembershipsResponse.error_to_json)])
+let list_group_memberships_for_member =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and memberId =
+         flag "member-id" (required json_arg) ~doc:"JSON MemberId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_group_memberships_for_member
+           (Values.ListGroupMembershipsForMemberRequest.make ?maxResults
+              ?nextToken ~identityStoreId
+              ~memberId:(Values.MemberId.of_json memberId) ())
+           (Some Values.ListGroupMembershipsForMemberResponse.to_json)
+           (Some Values.ListGroupMembershipsForMemberResponse.error_to_json)])
 let list_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -104,6 +455,8 @@ let list_users =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and extensions =
+         flag "extensions" (optional json_arg) ~doc:"JSON ExtensionNames"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextToken =
@@ -115,14 +468,80 @@ let list_users =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_users
-           (Values.ListUsersRequest.make ?maxResults ?nextToken
+           (Values.ListUsersRequest.make
+              ?extensions:(Option.map ~f:Values.ExtensionNames.of_json
+                             extensions) ?maxResults ?nextToken
               ?filters:(Option.map ~f:Values.Filters.of_json filters)
               ~identityStoreId ()) (Some Values.ListUsersResponse.to_json)
            (Some Values.ListUsersResponse.error_to_json)])
+let update_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and groupId =
+         flag "group-id" (required string) ~doc:"STRING ResourceId"
+       and operations =
+         flag "operations" (required json_arg)
+           ~doc:"JSON AttributeOperations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_group
+           (Values.UpdateGroupRequest.make ~identityStoreId ~groupId
+              ~operations:(Values.AttributeOperations.of_json operations) ())
+           (Some Values.UpdateGroupResponse.to_json)
+           (Some Values.UpdateGroupResponse.error_to_json)])
+let update_user =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityStoreId =
+         flag "identity-store-id" (required string)
+           ~doc:"STRING IdentityStoreId"
+       and userId = flag "user-id" (required string) ~doc:"STRING ResourceId"
+       and operations =
+         flag "operations" (required json_arg)
+           ~doc:"JSON AttributeOperations" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_user
+           (Values.UpdateUserRequest.make ~identityStoreId ~userId
+              ~operations:(Values.AttributeOperations.of_json operations) ())
+           (Some Values.UpdateUserResponse.to_json)
+           (Some Values.UpdateUserResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("describe-group", describe_group);
+    [("create-group", create_group);
+    ("create-group-membership", create_group_membership);
+    ("create-user", create_user);
+    ("delete-group", delete_group);
+    ("delete-group-membership", delete_group_membership);
+    ("delete-user", delete_user);
+    ("describe-group", describe_group);
+    ("describe-group-membership", describe_group_membership);
     ("describe-user", describe_user);
+    ("get-group-id", get_group_id);
+    ("get-group-membership-id", get_group_membership_id);
+    ("get-user-id", get_user_id);
+    ("is-member-in-groups", is_member_in_groups);
+    ("list-group-memberships", list_group_memberships);
+    ("list-group-memberships-for-member", list_group_memberships_for_member);
     ("list-groups", list_groups);
-    ("list-users", list_users)]
+    ("list-users", list_users);
+    ("update-group", update_group);
+    ("update-user", update_user)]

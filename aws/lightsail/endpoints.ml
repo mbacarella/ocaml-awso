@@ -56,6 +56,9 @@ type ('i, 'o, 'e) t =
   CreateDomainResult.error) t 
   | CreateDomainEntry: (CreateDomainEntryRequest.t,
   CreateDomainEntryResult.t, CreateDomainEntryResult.error) t 
+  | CreateGUISessionAccessDetails: (CreateGUISessionAccessDetailsRequest.t,
+  CreateGUISessionAccessDetailsResult.t,
+  CreateGUISessionAccessDetailsResult.error) t 
   | CreateInstanceSnapshot: (CreateInstanceSnapshotRequest.t,
   CreateInstanceSnapshotResult.t, CreateInstanceSnapshotResult.error) t 
   | CreateInstances: (CreateInstancesRequest.t, CreateInstancesResult.t,
@@ -189,6 +192,8 @@ type ('i, 'o, 'e) t =
   
   | GetContainerServices: (GetContainerServicesRequest.t,
   ContainerServicesListResult.t, ContainerServicesListResult.error) t 
+  | GetCostEstimate: (GetCostEstimateRequest.t, GetCostEstimateResult.t,
+  GetCostEstimateResult.error) t 
   | GetDisk: (GetDiskRequest.t, GetDiskResult.t, GetDiskResult.error) t 
   | GetDiskSnapshot: (GetDiskSnapshotRequest.t, GetDiskSnapshotResult.t,
   GetDiskSnapshotResult.error) t 
@@ -240,6 +245,9 @@ type ('i, 'o, 'e) t =
   | GetLoadBalancerTlsCertificates: (GetLoadBalancerTlsCertificatesRequest.t,
   GetLoadBalancerTlsCertificatesResult.t,
   GetLoadBalancerTlsCertificatesResult.error) t 
+  | GetLoadBalancerTlsPolicies: (GetLoadBalancerTlsPoliciesRequest.t,
+  GetLoadBalancerTlsPoliciesResult.t, GetLoadBalancerTlsPoliciesResult.error)
+  t 
   | GetLoadBalancers: (GetLoadBalancersRequest.t, GetLoadBalancersResult.t,
   GetLoadBalancersResult.error) t 
   | GetOperation: (GetOperationRequest.t, GetOperationResult.t,
@@ -289,6 +297,8 @@ type ('i, 'o, 'e) t =
   GetRelationalDatabaseSnapshotsResult.error) t 
   | GetRelationalDatabases: (GetRelationalDatabasesRequest.t,
   GetRelationalDatabasesResult.t, GetRelationalDatabasesResult.error) t 
+  | GetSetupHistory: (GetSetupHistoryRequest.t, GetSetupHistoryResult.t,
+  GetSetupHistoryResult.error) t 
   | GetStaticIp: (GetStaticIpRequest.t, GetStaticIpResult.t,
   GetStaticIpResult.error) t 
   | GetStaticIps: (GetStaticIpsRequest.t, GetStaticIpsResult.t,
@@ -321,10 +331,16 @@ type ('i, 'o, 'e) t =
   | SetResourceAccessForBucket: (SetResourceAccessForBucketRequest.t,
   SetResourceAccessForBucketResult.t, SetResourceAccessForBucketResult.error)
   t 
+  | SetupInstanceHttps: (SetupInstanceHttpsRequest.t,
+  SetupInstanceHttpsResult.t, SetupInstanceHttpsResult.error) t 
+  | StartGUISession: (StartGUISessionRequest.t, StartGUISessionResult.t,
+  StartGUISessionResult.error) t 
   | StartInstance: (StartInstanceRequest.t, StartInstanceResult.t,
   StartInstanceResult.error) t 
   | StartRelationalDatabase: (StartRelationalDatabaseRequest.t,
   StartRelationalDatabaseResult.t, StartRelationalDatabaseResult.error) t 
+  | StopGUISession: (StopGUISessionRequest.t, StopGUISessionResult.t,
+  StopGUISessionResult.error) t 
   | StopInstance: (StopInstanceRequest.t, StopInstanceResult.t,
   StopInstanceResult.error) t 
   | StopRelationalDatabase: (StopRelationalDatabaseRequest.t,
@@ -349,6 +365,9 @@ type ('i, 'o, 'e) t =
   UpdateDistributionBundleResult.t, UpdateDistributionBundleResult.error) t 
   | UpdateDomainEntry: (UpdateDomainEntryRequest.t,
   UpdateDomainEntryResult.t, UpdateDomainEntryResult.error) t 
+  | UpdateInstanceMetadataOptions: (UpdateInstanceMetadataOptionsRequest.t,
+  UpdateInstanceMetadataOptionsResult.t,
+  UpdateInstanceMetadataOptionsResult.error) t 
   | UpdateLoadBalancerAttribute: (UpdateLoadBalancerAttributeRequest.t,
   UpdateLoadBalancerAttributeResult.t,
   UpdateLoadBalancerAttributeResult.error) t 
@@ -382,6 +401,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateDistribution -> `POST
   | CreateDomain -> `POST
   | CreateDomainEntry -> `POST
+  | CreateGUISessionAccessDetails -> `POST
   | CreateInstanceSnapshot -> `POST
   | CreateInstances -> `POST
   | CreateInstancesFromSnapshot -> `POST
@@ -439,6 +459,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetContainerServiceMetricData -> `POST
   | GetContainerServicePowers -> `POST
   | GetContainerServices -> `POST
+  | GetCostEstimate -> `POST
   | GetDisk -> `POST
   | GetDiskSnapshot -> `POST
   | GetDiskSnapshots -> `POST
@@ -463,6 +484,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetLoadBalancer -> `POST
   | GetLoadBalancerMetricData -> `POST
   | GetLoadBalancerTlsCertificates -> `POST
+  | GetLoadBalancerTlsPolicies -> `POST
   | GetLoadBalancers -> `POST
   | GetOperation -> `POST
   | GetOperations -> `POST
@@ -480,6 +502,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetRelationalDatabaseSnapshot -> `POST
   | GetRelationalDatabaseSnapshots -> `POST
   | GetRelationalDatabases -> `POST
+  | GetSetupHistory -> `POST
   | GetStaticIp -> `POST
   | GetStaticIps -> `POST
   | ImportKeyPair -> `POST
@@ -496,8 +519,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SendContactMethodVerification -> `POST
   | SetIpAddressType -> `POST
   | SetResourceAccessForBucket -> `POST
+  | SetupInstanceHttps -> `POST
+  | StartGUISession -> `POST
   | StartInstance -> `POST
   | StartRelationalDatabase -> `POST
+  | StopGUISession -> `POST
   | StopInstance -> `POST
   | StopRelationalDatabase -> `POST
   | TagResource -> `POST
@@ -510,6 +536,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateDistribution -> `POST
   | UpdateDistributionBundle -> `POST
   | UpdateDomainEntry -> `POST
+  | UpdateInstanceMetadataOptions -> `POST
   | UpdateLoadBalancerAttribute -> `POST
   | UpdateRelationalDatabase -> `POST
   | UpdateRelationalDatabaseParameters -> `POST
@@ -542,6 +569,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateDistribution -> (Format.kasprintf Uri.of_string) "/"
       | CreateDomain -> (Format.kasprintf Uri.of_string) "/"
       | CreateDomainEntry -> (Format.kasprintf Uri.of_string) "/"
+      | CreateGUISessionAccessDetails -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstanceSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstances -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstancesFromSnapshot -> (Format.kasprintf Uri.of_string) "/"
@@ -607,6 +635,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetContainerServiceMetricData -> (Format.kasprintf Uri.of_string) "/"
       | GetContainerServicePowers -> (Format.kasprintf Uri.of_string) "/"
       | GetContainerServices -> (Format.kasprintf Uri.of_string) "/"
+      | GetCostEstimate -> (Format.kasprintf Uri.of_string) "/"
       | GetDisk -> (Format.kasprintf Uri.of_string) "/"
       | GetDiskSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | GetDiskSnapshots -> (Format.kasprintf Uri.of_string) "/"
@@ -633,6 +662,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetLoadBalancerMetricData -> (Format.kasprintf Uri.of_string) "/"
       | GetLoadBalancerTlsCertificates ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetLoadBalancerTlsPolicies -> (Format.kasprintf Uri.of_string) "/"
       | GetLoadBalancers -> (Format.kasprintf Uri.of_string) "/"
       | GetOperation -> (Format.kasprintf Uri.of_string) "/"
       | GetOperations -> (Format.kasprintf Uri.of_string) "/"
@@ -657,6 +687,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetRelationalDatabaseSnapshots ->
           (Format.kasprintf Uri.of_string) "/"
       | GetRelationalDatabases -> (Format.kasprintf Uri.of_string) "/"
+      | GetSetupHistory -> (Format.kasprintf Uri.of_string) "/"
       | GetStaticIp -> (Format.kasprintf Uri.of_string) "/"
       | GetStaticIps -> (Format.kasprintf Uri.of_string) "/"
       | ImportKeyPair -> (Format.kasprintf Uri.of_string) "/"
@@ -673,8 +704,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | SendContactMethodVerification -> (Format.kasprintf Uri.of_string) "/"
       | SetIpAddressType -> (Format.kasprintf Uri.of_string) "/"
       | SetResourceAccessForBucket -> (Format.kasprintf Uri.of_string) "/"
+      | SetupInstanceHttps -> (Format.kasprintf Uri.of_string) "/"
+      | StartGUISession -> (Format.kasprintf Uri.of_string) "/"
       | StartInstance -> (Format.kasprintf Uri.of_string) "/"
       | StartRelationalDatabase -> (Format.kasprintf Uri.of_string) "/"
+      | StopGUISession -> (Format.kasprintf Uri.of_string) "/"
       | StopInstance -> (Format.kasprintf Uri.of_string) "/"
       | StopRelationalDatabase -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -687,6 +721,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateDistribution -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDistributionBundle -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDomainEntry -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateInstanceMetadataOptions -> (Format.kasprintf Uri.of_string) "/"
       | UpdateLoadBalancerAttribute -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRelationalDatabase -> (Format.kasprintf Uri.of_string) "/"
       | UpdateRelationalDatabaseParameters ->
@@ -874,6 +909,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.CreateDomainEntry")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateGUISessionAccessDetails ->
+      let json = CreateGUISessionAccessDetailsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Lightsail_20161128.CreateGUISessionAccessDetails")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateInstanceSnapshot ->
       let json = CreateInstanceSnapshotRequest.to_json req in
@@ -1341,6 +1385,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.GetContainerServices")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCostEstimate ->
+      let json = GetCostEstimateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.GetCostEstimate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDisk ->
       let json = GetDiskRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1535,6 +1587,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "Lightsail_20161128.GetLoadBalancerTlsCertificates")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLoadBalancerTlsPolicies ->
+      let json = GetLoadBalancerTlsPoliciesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.GetLoadBalancerTlsPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLoadBalancers ->
       let json = GetLoadBalancersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1679,6 +1739,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.GetRelationalDatabases")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSetupHistory ->
+      let json = GetSetupHistoryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.GetSetupHistory")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetStaticIp ->
       let json = GetStaticIpRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1808,6 +1876,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.SetResourceAccessForBucket")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SetupInstanceHttps ->
+      let json = SetupInstanceHttpsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.SetupInstanceHttps")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartGUISession ->
+      let json = StartGUISessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.StartGUISession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartInstance ->
       let json = StartInstanceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -1823,6 +1907,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.StartRelationalDatabase")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopGUISession ->
+      let json = StopGUISessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Lightsail_20161128.StopGUISession")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopInstance ->
       let json = StopInstanceRequest.to_json req in
@@ -1919,6 +2011,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Lightsail_20161128.UpdateDomainEntry")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateInstanceMetadataOptions ->
+      let json = UpdateInstanceMetadataOptionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "Lightsail_20161128.UpdateInstanceMetadataOptions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateLoadBalancerAttribute ->
       let json = UpdateLoadBalancerAttributeRequest.to_json req in
@@ -2134,6 +2235,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateDomainEntryResult.of_json json)
       else
         Error (parse_aws_error (Some CreateDomainEntryResult.error_of_json))
+  | CreateGUISessionAccessDetails ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateGUISessionAccessDetailsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateGUISessionAccessDetailsResult.error_of_json))
   | CreateInstanceSnapshot ->
       if is_success
       then
@@ -2553,6 +2663,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ContainerServicesListResult.error_of_json))
+  | GetCostEstimate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCostEstimateResult.of_json json)
+      else Error (parse_aws_error (Some GetCostEstimateResult.error_of_json))
   | GetDisk ->
       if is_success
       then
@@ -2728,6 +2844,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetLoadBalancerTlsCertificatesResult.error_of_json))
+  | GetLoadBalancerTlsPolicies ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLoadBalancerTlsPoliciesResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLoadBalancerTlsPoliciesResult.error_of_json))
   | GetLoadBalancers ->
       if is_success
       then
@@ -2869,6 +2994,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetRelationalDatabasesResult.error_of_json))
+  | GetSetupHistory ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSetupHistoryResult.of_json json)
+      else Error (parse_aws_error (Some GetSetupHistoryResult.error_of_json))
   | GetStaticIp ->
       if is_success
       then
@@ -2983,6 +3114,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some SetResourceAccessForBucketResult.error_of_json))
+  | SetupInstanceHttps ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SetupInstanceHttpsResult.of_json json)
+      else
+        Error (parse_aws_error (Some SetupInstanceHttpsResult.error_of_json))
+  | StartGUISession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartGUISessionResult.of_json json)
+      else Error (parse_aws_error (Some StartGUISessionResult.error_of_json))
   | StartInstance ->
       if is_success
       then
@@ -2997,6 +3141,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartRelationalDatabaseResult.error_of_json))
+  | StopGUISession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopGUISessionResult.of_json json)
+      else Error (parse_aws_error (Some StopGUISessionResult.error_of_json))
   | StopInstance ->
       if is_success
       then
@@ -3079,6 +3229,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateDomainEntryResult.of_json json)
       else
         Error (parse_aws_error (Some UpdateDomainEntryResult.error_of_json))
+  | UpdateInstanceMetadataOptions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateInstanceMetadataOptionsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateInstanceMetadataOptionsResult.error_of_json))
   | UpdateLoadBalancerAttribute ->
       if is_success
       then

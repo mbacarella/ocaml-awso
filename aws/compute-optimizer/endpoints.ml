@@ -21,10 +21,24 @@ type ('i, 'o, 'e) t =
   (ExportEC2InstanceRecommendationsRequest.t,
   ExportEC2InstanceRecommendationsResponse.t,
   ExportEC2InstanceRecommendationsResponse.error) t 
+  | ExportECSServiceRecommendations:
+  (ExportECSServiceRecommendationsRequest.t,
+  ExportECSServiceRecommendationsResponse.t,
+  ExportECSServiceRecommendationsResponse.error) t 
+  | ExportIdleRecommendations: (ExportIdleRecommendationsRequest.t,
+  ExportIdleRecommendationsResponse.t,
+  ExportIdleRecommendationsResponse.error) t 
   | ExportLambdaFunctionRecommendations:
   (ExportLambdaFunctionRecommendationsRequest.t,
   ExportLambdaFunctionRecommendationsResponse.t,
   ExportLambdaFunctionRecommendationsResponse.error) t 
+  | ExportLicenseRecommendations: (ExportLicenseRecommendationsRequest.t,
+  ExportLicenseRecommendationsResponse.t,
+  ExportLicenseRecommendationsResponse.error) t 
+  | ExportRDSDatabaseRecommendations:
+  (ExportRDSDatabaseRecommendationsRequest.t,
+  ExportRDSDatabaseRecommendationsResponse.t,
+  ExportRDSDatabaseRecommendationsResponse.error) t 
   | GetAutoScalingGroupRecommendations:
   (GetAutoScalingGroupRecommendationsRequest.t,
   GetAutoScalingGroupRecommendationsResponse.t,
@@ -39,6 +53,13 @@ type ('i, 'o, 'e) t =
   (GetEC2RecommendationProjectedMetricsRequest.t,
   GetEC2RecommendationProjectedMetricsResponse.t,
   GetEC2RecommendationProjectedMetricsResponse.error) t 
+  | GetECSServiceRecommendationProjectedMetrics:
+  (GetECSServiceRecommendationProjectedMetricsRequest.t,
+  GetECSServiceRecommendationProjectedMetricsResponse.t,
+  GetECSServiceRecommendationProjectedMetricsResponse.error) t 
+  | GetECSServiceRecommendations: (GetECSServiceRecommendationsRequest.t,
+  GetECSServiceRecommendationsResponse.t,
+  GetECSServiceRecommendationsResponse.error) t 
   | GetEffectiveRecommendationPreferences:
   (GetEffectiveRecommendationPreferencesRequest.t,
   GetEffectiveRecommendationPreferencesResponse.t,
@@ -49,10 +70,22 @@ type ('i, 'o, 'e) t =
   (GetEnrollmentStatusesForOrganizationRequest.t,
   GetEnrollmentStatusesForOrganizationResponse.t,
   GetEnrollmentStatusesForOrganizationResponse.error) t 
+  | GetIdleRecommendations: (GetIdleRecommendationsRequest.t,
+  GetIdleRecommendationsResponse.t, GetIdleRecommendationsResponse.error) t 
   | GetLambdaFunctionRecommendations:
   (GetLambdaFunctionRecommendationsRequest.t,
   GetLambdaFunctionRecommendationsResponse.t,
   GetLambdaFunctionRecommendationsResponse.error) t 
+  | GetLicenseRecommendations: (GetLicenseRecommendationsRequest.t,
+  GetLicenseRecommendationsResponse.t,
+  GetLicenseRecommendationsResponse.error) t 
+  | GetRDSDatabaseRecommendationProjectedMetrics:
+  (GetRDSDatabaseRecommendationProjectedMetricsRequest.t,
+  GetRDSDatabaseRecommendationProjectedMetricsResponse.t,
+  GetRDSDatabaseRecommendationProjectedMetricsResponse.error) t 
+  | GetRDSDatabaseRecommendations: (GetRDSDatabaseRecommendationsRequest.t,
+  GetRDSDatabaseRecommendationsResponse.t,
+  GetRDSDatabaseRecommendationsResponse.error) t 
   | GetRecommendationPreferences: (GetRecommendationPreferencesRequest.t,
   GetRecommendationPreferencesResponse.t,
   GetRecommendationPreferencesResponse.error) t 
@@ -71,15 +104,25 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ExportAutoScalingGroupRecommendations -> `POST
   | ExportEBSVolumeRecommendations -> `POST
   | ExportEC2InstanceRecommendations -> `POST
+  | ExportECSServiceRecommendations -> `POST
+  | ExportIdleRecommendations -> `POST
   | ExportLambdaFunctionRecommendations -> `POST
+  | ExportLicenseRecommendations -> `POST
+  | ExportRDSDatabaseRecommendations -> `POST
   | GetAutoScalingGroupRecommendations -> `POST
   | GetEBSVolumeRecommendations -> `POST
   | GetEC2InstanceRecommendations -> `POST
   | GetEC2RecommendationProjectedMetrics -> `POST
+  | GetECSServiceRecommendationProjectedMetrics -> `POST
+  | GetECSServiceRecommendations -> `POST
   | GetEffectiveRecommendationPreferences -> `POST
   | GetEnrollmentStatus -> `POST
   | GetEnrollmentStatusesForOrganization -> `POST
+  | GetIdleRecommendations -> `POST
   | GetLambdaFunctionRecommendations -> `POST
+  | GetLicenseRecommendations -> `POST
+  | GetRDSDatabaseRecommendationProjectedMetrics -> `POST
+  | GetRDSDatabaseRecommendations -> `POST
   | GetRecommendationPreferences -> `POST
   | GetRecommendationSummaries -> `POST
   | PutRecommendationPreferences -> `POST
@@ -97,7 +140,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | ExportEC2InstanceRecommendations ->
           (Format.kasprintf Uri.of_string) "/"
+      | ExportECSServiceRecommendations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ExportIdleRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | ExportLambdaFunctionRecommendations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ExportLicenseRecommendations -> (Format.kasprintf Uri.of_string) "/"
+      | ExportRDSDatabaseRecommendations ->
           (Format.kasprintf Uri.of_string) "/"
       | GetAutoScalingGroupRecommendations ->
           (Format.kasprintf Uri.of_string) "/"
@@ -105,13 +154,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetEC2InstanceRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | GetEC2RecommendationProjectedMetrics ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetECSServiceRecommendationProjectedMetrics ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetECSServiceRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | GetEffectiveRecommendationPreferences ->
           (Format.kasprintf Uri.of_string) "/"
       | GetEnrollmentStatus -> (Format.kasprintf Uri.of_string) "/"
       | GetEnrollmentStatusesForOrganization ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetIdleRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | GetLambdaFunctionRecommendations ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetLicenseRecommendations -> (Format.kasprintf Uri.of_string) "/"
+      | GetRDSDatabaseRecommendationProjectedMetrics ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetRDSDatabaseRecommendations -> (Format.kasprintf Uri.of_string) "/"
       | GetRecommendationPreferences -> (Format.kasprintf Uri.of_string) "/"
       | GetRecommendationSummaries -> (Format.kasprintf Uri.of_string) "/"
       | PutRecommendationPreferences -> (Format.kasprintf Uri.of_string) "/"
@@ -164,6 +221,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "ComputeOptimizerService.ExportEC2InstanceRecommendations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportECSServiceRecommendations ->
+      let json = ExportECSServiceRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.ExportECSServiceRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportIdleRecommendations ->
+      let json = ExportIdleRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.ExportIdleRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ExportLambdaFunctionRecommendations ->
       let json = ExportLambdaFunctionRecommendationsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -172,6 +247,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "ComputeOptimizerService.ExportLambdaFunctionRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportLicenseRecommendations ->
+      let json = ExportLicenseRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.ExportLicenseRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportRDSDatabaseRecommendations ->
+      let json = ExportRDSDatabaseRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.ExportRDSDatabaseRecommendations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAutoScalingGroupRecommendations ->
       let json = GetAutoScalingGroupRecommendationsRequest.to_json req in
@@ -209,6 +302,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "ComputeOptimizerService.GetEC2RecommendationProjectedMetrics")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetECSServiceRecommendationProjectedMetrics ->
+      let json =
+        GetECSServiceRecommendationProjectedMetricsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.GetECSServiceRecommendationProjectedMetrics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetECSServiceRecommendations ->
+      let json = GetECSServiceRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.GetECSServiceRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetEffectiveRecommendationPreferences ->
       let json = GetEffectiveRecommendationPreferencesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -235,6 +347,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "ComputeOptimizerService.GetEnrollmentStatusesForOrganization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetIdleRecommendations ->
+      let json = GetIdleRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "ComputeOptimizerService.GetIdleRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetLambdaFunctionRecommendations ->
       let json = GetLambdaFunctionRecommendationsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -243,6 +363,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "ComputeOptimizerService.GetLambdaFunctionRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetLicenseRecommendations ->
+      let json = GetLicenseRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.GetLicenseRecommendations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRDSDatabaseRecommendationProjectedMetrics ->
+      let json =
+        GetRDSDatabaseRecommendationProjectedMetricsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.GetRDSDatabaseRecommendationProjectedMetrics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetRDSDatabaseRecommendations ->
+      let json = GetRDSDatabaseRecommendationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "ComputeOptimizerService.GetRDSDatabaseRecommendations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetRecommendationPreferences ->
       let json = GetRecommendationPreferencesRequest.to_json req in
@@ -348,6 +496,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ExportEC2InstanceRecommendationsResponse.error_of_json))
+  | ExportECSServiceRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportECSServiceRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportECSServiceRecommendationsResponse.error_of_json))
+  | ExportIdleRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportIdleRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportIdleRecommendationsResponse.error_of_json))
   | ExportLambdaFunctionRecommendations ->
       if is_success
       then
@@ -357,6 +523,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ExportLambdaFunctionRecommendationsResponse.error_of_json))
+  | ExportLicenseRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportLicenseRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportLicenseRecommendationsResponse.error_of_json))
+  | ExportRDSDatabaseRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportRDSDatabaseRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ExportRDSDatabaseRecommendationsResponse.error_of_json))
   | GetAutoScalingGroupRecommendations ->
       if is_success
       then
@@ -393,6 +577,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetEC2RecommendationProjectedMetricsResponse.error_of_json))
+  | GetECSServiceRecommendationProjectedMetrics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetECSServiceRecommendationProjectedMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetECSServiceRecommendationProjectedMetricsResponse.error_of_json))
+  | GetECSServiceRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetECSServiceRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetECSServiceRecommendationsResponse.error_of_json))
   | GetEffectiveRecommendationPreferences ->
       if is_success
       then
@@ -420,6 +623,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetEnrollmentStatusesForOrganizationResponse.error_of_json))
+  | GetIdleRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetIdleRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetIdleRecommendationsResponse.error_of_json))
   | GetLambdaFunctionRecommendations ->
       if is_success
       then
@@ -429,6 +641,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetLambdaFunctionRecommendationsResponse.error_of_json))
+  | GetLicenseRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetLicenseRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetLicenseRecommendationsResponse.error_of_json))
+  | GetRDSDatabaseRecommendationProjectedMetrics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok
+          (GetRDSDatabaseRecommendationProjectedMetricsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                GetRDSDatabaseRecommendationProjectedMetricsResponse.error_of_json))
+  | GetRDSDatabaseRecommendations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetRDSDatabaseRecommendationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetRDSDatabaseRecommendationsResponse.error_of_json))
   | GetRecommendationPreferences ->
       if is_success
       then

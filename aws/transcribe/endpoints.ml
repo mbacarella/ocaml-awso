@@ -20,6 +20,7 @@ type ('i, 'o, 'e) t =
   | DeleteCallAnalyticsJob: (DeleteCallAnalyticsJobRequest.t,
   DeleteCallAnalyticsJobResponse.t, DeleteCallAnalyticsJobResponse.error) t 
   | DeleteLanguageModel: (DeleteLanguageModelRequest.t, unit, unit) t 
+  | DeleteMedicalScribeJob: (DeleteMedicalScribeJobRequest.t, unit, unit) t 
   | DeleteMedicalTranscriptionJob: (DeleteMedicalTranscriptionJobRequest.t,
   unit, unit) t 
   | DeleteMedicalVocabulary: (DeleteMedicalVocabularyRequest.t, unit, 
@@ -34,6 +35,8 @@ type ('i, 'o, 'e) t =
   t 
   | GetCallAnalyticsJob: (GetCallAnalyticsJobRequest.t,
   GetCallAnalyticsJobResponse.t, GetCallAnalyticsJobResponse.error) t 
+  | GetMedicalScribeJob: (GetMedicalScribeJobRequest.t,
+  GetMedicalScribeJobResponse.t, GetMedicalScribeJobResponse.error) t 
   | GetMedicalTranscriptionJob: (GetMedicalTranscriptionJobRequest.t,
   GetMedicalTranscriptionJobResponse.t,
   GetMedicalTranscriptionJobResponse.error) t 
@@ -52,6 +55,8 @@ type ('i, 'o, 'e) t =
   ListCallAnalyticsJobsResponse.t, ListCallAnalyticsJobsResponse.error) t 
   | ListLanguageModels: (ListLanguageModelsRequest.t,
   ListLanguageModelsResponse.t, ListLanguageModelsResponse.error) t 
+  | ListMedicalScribeJobs: (ListMedicalScribeJobsRequest.t,
+  ListMedicalScribeJobsResponse.t, ListMedicalScribeJobsResponse.error) t 
   | ListMedicalTranscriptionJobs: (ListMedicalTranscriptionJobsRequest.t,
   ListMedicalTranscriptionJobsResponse.t,
   ListMedicalTranscriptionJobsResponse.error) t 
@@ -68,6 +73,8 @@ type ('i, 'o, 'e) t =
   ListVocabularyFiltersResponse.t, ListVocabularyFiltersResponse.error) t 
   | StartCallAnalyticsJob: (StartCallAnalyticsJobRequest.t,
   StartCallAnalyticsJobResponse.t, StartCallAnalyticsJobResponse.error) t 
+  | StartMedicalScribeJob: (StartMedicalScribeJobRequest.t,
+  StartMedicalScribeJobResponse.t, StartMedicalScribeJobResponse.error) t 
   | StartMedicalTranscriptionJob: (StartMedicalTranscriptionJobRequest.t,
   StartMedicalTranscriptionJobResponse.t,
   StartMedicalTranscriptionJobResponse.error) t 
@@ -97,6 +104,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteCallAnalyticsCategory -> `POST
   | DeleteCallAnalyticsJob -> `POST
   | DeleteLanguageModel -> `POST
+  | DeleteMedicalScribeJob -> `POST
   | DeleteMedicalTranscriptionJob -> `POST
   | DeleteMedicalVocabulary -> `POST
   | DeleteTranscriptionJob -> `POST
@@ -105,6 +113,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeLanguageModel -> `POST
   | GetCallAnalyticsCategory -> `POST
   | GetCallAnalyticsJob -> `POST
+  | GetMedicalScribeJob -> `POST
   | GetMedicalTranscriptionJob -> `POST
   | GetMedicalVocabulary -> `POST
   | GetTranscriptionJob -> `POST
@@ -113,6 +122,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListCallAnalyticsCategories -> `POST
   | ListCallAnalyticsJobs -> `POST
   | ListLanguageModels -> `POST
+  | ListMedicalScribeJobs -> `POST
   | ListMedicalTranscriptionJobs -> `POST
   | ListMedicalVocabularies -> `POST
   | ListTagsForResource -> `POST
@@ -120,6 +130,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListVocabularies -> `POST
   | ListVocabularyFilters -> `POST
   | StartCallAnalyticsJob -> `POST
+  | StartMedicalScribeJob -> `POST
   | StartMedicalTranscriptionJob -> `POST
   | StartTranscriptionJob -> `POST
   | TagResource -> `POST
@@ -139,6 +150,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteCallAnalyticsCategory -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCallAnalyticsJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLanguageModel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMedicalScribeJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMedicalTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMedicalVocabulary -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
@@ -147,6 +159,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeLanguageModel -> (Format.kasprintf Uri.of_string) "/"
       | GetCallAnalyticsCategory -> (Format.kasprintf Uri.of_string) "/"
       | GetCallAnalyticsJob -> (Format.kasprintf Uri.of_string) "/"
+      | GetMedicalScribeJob -> (Format.kasprintf Uri.of_string) "/"
       | GetMedicalTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
       | GetMedicalVocabulary -> (Format.kasprintf Uri.of_string) "/"
       | GetTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
@@ -155,6 +168,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListCallAnalyticsCategories -> (Format.kasprintf Uri.of_string) "/"
       | ListCallAnalyticsJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListLanguageModels -> (Format.kasprintf Uri.of_string) "/"
+      | ListMedicalScribeJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListMedicalTranscriptionJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListMedicalVocabularies -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
@@ -162,6 +176,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListVocabularies -> (Format.kasprintf Uri.of_string) "/"
       | ListVocabularyFilters -> (Format.kasprintf Uri.of_string) "/"
       | StartCallAnalyticsJob -> (Format.kasprintf Uri.of_string) "/"
+      | StartMedicalScribeJob -> (Format.kasprintf Uri.of_string) "/"
       | StartMedicalTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
       | StartTranscriptionJob -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -237,6 +252,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Transcribe.DeleteLanguageModel")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMedicalScribeJob ->
+      let json = DeleteMedicalScribeJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Transcribe.DeleteMedicalScribeJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMedicalTranscriptionJob ->
       let json = DeleteMedicalTranscriptionJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -300,6 +323,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Transcribe.GetCallAnalyticsJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetMedicalScribeJob ->
+      let json = GetMedicalScribeJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Transcribe.GetMedicalScribeJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetMedicalTranscriptionJob ->
       let json = GetMedicalTranscriptionJobRequest.to_json req in
@@ -365,6 +396,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Transcribe.ListLanguageModels")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListMedicalScribeJobs ->
+      let json = ListMedicalScribeJobsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Transcribe.ListMedicalScribeJobs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListMedicalTranscriptionJobs ->
       let json = ListMedicalTranscriptionJobsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -420,6 +459,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Transcribe.StartCallAnalyticsJob")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMedicalScribeJob ->
+      let json = StartMedicalScribeJobRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Transcribe.StartMedicalScribeJob")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartMedicalTranscriptionJob ->
       let json = StartMedicalTranscriptionJobRequest.to_json req in
@@ -570,6 +617,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
              (Some DeleteCallAnalyticsJobResponse.error_of_json))
   | DeleteLanguageModel ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteMedicalScribeJob ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMedicalTranscriptionJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteMedicalVocabulary ->
@@ -605,6 +654,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetCallAnalyticsJobResponse.error_of_json))
+  | GetMedicalScribeJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetMedicalScribeJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetMedicalScribeJobResponse.error_of_json))
   | GetMedicalTranscriptionJob ->
       if is_success
       then
@@ -669,6 +726,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListLanguageModelsResponse.error_of_json))
+  | ListMedicalScribeJobs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListMedicalScribeJobsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListMedicalScribeJobsResponse.error_of_json))
   | ListMedicalTranscriptionJobs ->
       if is_success
       then
@@ -726,6 +791,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartCallAnalyticsJobResponse.error_of_json))
+  | StartMedicalScribeJob ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMedicalScribeJobResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartMedicalScribeJobResponse.error_of_json))
   | StartMedicalTranscriptionJob ->
       if is_success
       then

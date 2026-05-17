@@ -13,70 +13,140 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let batch_get_named_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetNamedQuery input
+let batch_get_prepared_statement ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetPreparedStatement input
 let batch_get_query_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetQueryExecution input
+let cancel_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelCapacityReservation input
+let create_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCapacityReservation input
 let create_data_catalog ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataCatalog input
 let create_named_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateNamedQuery input
+let create_notebook ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateNotebook input
 let create_prepared_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePreparedStatement input
+let create_presigned_notebook_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePresignedNotebookUrl input
 let create_work_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkGroup input
+let delete_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCapacityReservation input
 let delete_data_catalog ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDataCatalog input
 let delete_named_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteNamedQuery input
+let delete_notebook ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteNotebook input
 let delete_prepared_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePreparedStatement input
 let delete_work_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkGroup input
+let export_notebook ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportNotebook input
+let get_calculation_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCalculationExecution input
+let get_calculation_execution_code ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCalculationExecutionCode input
+let get_calculation_execution_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCalculationExecutionStatus input
+let get_capacity_assignment_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityAssignmentConfiguration input
+let get_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCapacityReservation input
 let get_data_catalog ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataCatalog input
 let get_database ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDatabase input
 let get_named_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetNamedQuery input
+let get_notebook_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetNotebookMetadata input
 let get_prepared_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPreparedStatement input
 let get_query_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQueryExecution input
 let get_query_results ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQueryResults input
+let get_query_runtime_statistics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetQueryRuntimeStatistics input
+let get_resource_dashboard ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourceDashboard input
+let get_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSession input
+let get_session_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSessionEndpoint input
+let get_session_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSessionStatus input
 let get_table_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTableMetadata input
 let get_work_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWorkGroup input
+let import_notebook ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportNotebook input
+let list_application_d_p_u_sizes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListApplicationDPUSizes input
+let list_calculation_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCalculationExecutions input
+let list_capacity_reservations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCapacityReservations input
 let list_data_catalogs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDataCatalogs input
 let list_databases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatabases input
 let list_engine_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEngineVersions input
+let list_executors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExecutors input
 let list_named_queries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListNamedQueries input
+let list_notebook_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNotebookMetadata input
+let list_notebook_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNotebookSessions input
 let list_prepared_statements ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPreparedStatements input
 let list_query_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListQueryExecutions input
+let list_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSessions input
 let list_table_metadata ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTableMetadata input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_work_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWorkGroups input
+let put_capacity_assignment_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutCapacityAssignmentConfiguration input
+let start_calculation_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCalculationExecution input
 let start_query_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartQueryExecution input
+let start_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSession input
+let stop_calculation_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopCalculationExecution input
 let stop_query_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopQueryExecution input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
+let terminate_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateSession input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_capacity_reservation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCapacityReservation input
 let update_data_catalog ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDataCatalog input
 let update_named_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateNamedQuery input
+let update_notebook ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateNotebook input
+let update_notebook_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateNotebookMetadata input
 let update_prepared_statement ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePreparedStatement input
 let update_work_group ?endpoint_url ?cfg input =

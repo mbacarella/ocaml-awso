@@ -25,7 +25,7 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module Float =
+module Float_ =
   struct
     type nonrec t = float
     let make i = i
@@ -59,6 +59,11 @@ module SNOMEDCTTraitName =
       | DIAGNOSIS 
       | SIGN 
       | SYMPTOM 
+      | PERTAINS_TO_FAMILY 
+      | HYPOTHETICAL 
+      | LOW_CONFIDENCE 
+      | PAST_HISTORY 
+      | FUTURE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -67,6 +72,11 @@ module SNOMEDCTTraitName =
       | DIAGNOSIS -> "DIAGNOSIS"
       | SIGN -> "SIGN"
       | SYMPTOM -> "SYMPTOM"
+      | PERTAINS_TO_FAMILY -> "PERTAINS_TO_FAMILY"
+      | HYPOTHETICAL -> "HYPOTHETICAL"
+      | LOW_CONFIDENCE -> "LOW_CONFIDENCE"
+      | PAST_HISTORY -> "PAST_HISTORY"
+      | FUTURE -> "FUTURE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -74,6 +84,11 @@ module SNOMEDCTTraitName =
       | "DIAGNOSIS" -> DIAGNOSIS
       | "SIGN" -> SIGN
       | "SYMPTOM" -> SYMPTOM
+      | "PERTAINS_TO_FAMILY" -> PERTAINS_TO_FAMILY
+      | "HYPOTHETICAL" -> HYPOTHETICAL
+      | "LOW_CONFIDENCE" -> LOW_CONFIDENCE
+      | "PAST_HISTORY" -> PAST_HISTORY
+      | "FUTURE" -> FUTURE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -88,10 +103,19 @@ module RxNormTraitName =
   struct
     type nonrec t =
       | NEGATION 
+      | PAST_HISTORY 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | NEGATION -> "NEGATION" | Non_static_id s -> s
-    let of_string = function | "NEGATION" -> NEGATION | x -> Non_static_id x
+    let to_string =
+      function
+      | NEGATION -> "NEGATION"
+      | PAST_HISTORY -> "PAST_HISTORY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NEGATION" -> NEGATION
+      | "PAST_HISTORY" -> PAST_HISTORY
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -107,6 +131,9 @@ module ICD10CMTraitName =
       | DIAGNOSIS 
       | SIGN 
       | SYMPTOM 
+      | PERTAINS_TO_FAMILY 
+      | HYPOTHETICAL 
+      | LOW_CONFIDENCE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -115,6 +142,9 @@ module ICD10CMTraitName =
       | DIAGNOSIS -> "DIAGNOSIS"
       | SIGN -> "SIGN"
       | SYMPTOM -> "SYMPTOM"
+      | PERTAINS_TO_FAMILY -> "PERTAINS_TO_FAMILY"
+      | HYPOTHETICAL -> "HYPOTHETICAL"
+      | LOW_CONFIDENCE -> "LOW_CONFIDENCE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -122,6 +152,9 @@ module ICD10CMTraitName =
       | "DIAGNOSIS" -> DIAGNOSIS
       | "SIGN" -> SIGN
       | "SYMPTOM" -> SYMPTOM
+      | "PERTAINS_TO_FAMILY" -> PERTAINS_TO_FAMILY
+      | "HYPOTHETICAL" -> HYPOTHETICAL
+      | "LOW_CONFIDENCE" -> LOW_CONFIDENCE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -138,6 +171,11 @@ module AttributeName =
       | SYMPTOM 
       | DIAGNOSIS 
       | NEGATION 
+      | PERTAINS_TO_FAMILY 
+      | HYPOTHETICAL 
+      | LOW_CONFIDENCE 
+      | PAST_HISTORY 
+      | FUTURE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -146,6 +184,11 @@ module AttributeName =
       | SYMPTOM -> "SYMPTOM"
       | DIAGNOSIS -> "DIAGNOSIS"
       | NEGATION -> "NEGATION"
+      | PERTAINS_TO_FAMILY -> "PERTAINS_TO_FAMILY"
+      | HYPOTHETICAL -> "HYPOTHETICAL"
+      | LOW_CONFIDENCE -> "LOW_CONFIDENCE"
+      | PAST_HISTORY -> "PAST_HISTORY"
+      | FUTURE -> "FUTURE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -153,6 +196,11 @@ module AttributeName =
       | "SYMPTOM" -> SYMPTOM
       | "DIAGNOSIS" -> DIAGNOSIS
       | "NEGATION" -> NEGATION
+      | "PERTAINS_TO_FAMILY" -> PERTAINS_TO_FAMILY
+      | "HYPOTHETICAL" -> HYPOTHETICAL
+      | "LOW_CONFIDENCE" -> LOW_CONFIDENCE
+      | "PAST_HISTORY" -> PAST_HISTORY
+      | "FUTURE" -> FUTURE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -170,28 +218,28 @@ module SNOMEDCTConcept =
         [@ocaml.doc "The description of the SNOMED-CT concept."];
       code: String_.t option
         [@ocaml.doc "The numeric ID for the SNOMED-CT concept."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence Comprehend Medical has that the entity should be linked to the identified SNOMED-CT concept."]}
+          "The level of confidence Amazon Comprehend Medical has that the entity should be linked to the identified SNOMED-CT concept."]}
     let make ?description =
       fun ?code -> fun ?score -> fun () -> { description; code; score }
     let to_value x =
       structure_to_value
         [("Description", (Option.map x.description ~f:String_.to_value));
         ("Code", (Option.map x.code ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let code = field_map json "Code" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?score ?code ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -203,24 +251,24 @@ module SNOMEDCTTrait =
       name: SNOMEDCTTraitName.t option
         [@ocaml.doc
           "The name or contextual description of a detected trait."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical has in the accuracy of a detected trait."]}
+          "The level of confidence that Amazon Comprehend Medical has in the accuracy of a detected trait."]}
     let make ?name = fun ?score -> fun () -> { name; score }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:SNOMEDCTTraitName.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name =
         (Option.map ~f:SNOMEDCTTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" SNOMEDCTTraitName.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" SNOMEDCTTraitName.of_json in
       make ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contextual information for an entity."]
@@ -231,24 +279,24 @@ module RxNormTrait =
       name: RxNormTraitName.t option
         [@ocaml.doc
           "Provides a name or contextual description about the trait."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has in the accuracy of the detected trait."]}
     let make ?name = fun ?score -> fun () -> { name; score }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:RxNormTraitName.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name =
         (Option.map ~f:RxNormTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" RxNormTraitName.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" RxNormTraitName.of_json in
       make ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -260,24 +308,24 @@ module ICD10CMTrait =
       name: ICD10CMTraitName.t option
         [@ocaml.doc
           "Provides a name or contextual description about the trait."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical; has that the segment of text is correctly recognized as a trait."]}
+          "The level of confidence that Amazon Comprehend Medical has that the segment of text is correctly recognized as a trait."]}
     let make ?name = fun ?score -> fun () -> { name; score }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:ICD10CMTraitName.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name =
         (Option.map ~f:ICD10CMTraitName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" ICD10CMTraitName.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" ICD10CMTraitName.of_json in
       make ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -289,24 +337,24 @@ module Trait =
       name: AttributeName.t option
         [@ocaml.doc
           "Provides a name or contextual description about the trait."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical; has in the accuracy of this trait."]}
+          "The level of confidence that Amazon Comprehend Medical has in the accuracy of this trait."]}
     let make ?name = fun ?score -> fun () -> { name; score }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:AttributeName.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let name =
         (Option.map ~f:AttributeName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?score ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let name = field_map json "Name" AttributeName.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let name = field_map json__ "Name" AttributeName.of_json in
       make ?score ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -367,6 +415,9 @@ module SNOMEDCTConceptList =
   struct
     type nonrec t = SNOMEDCTConcept.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SNOMEDCTConcept.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -427,6 +478,7 @@ module SNOMEDCTRelationshipType =
       | TEST_UNITS 
       | DIRECTION 
       | SYSTEM_ORGAN_SITE 
+      | TEST_UNIT 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -437,6 +489,7 @@ module SNOMEDCTRelationshipType =
       | TEST_UNITS -> "TEST_UNITS"
       | DIRECTION -> "DIRECTION"
       | SYSTEM_ORGAN_SITE -> "SYSTEM_ORGAN_SITE"
+      | TEST_UNIT -> "TEST_UNIT"
       | Non_static_id s -> s
     let of_string =
       function
@@ -446,6 +499,7 @@ module SNOMEDCTRelationshipType =
       | "TEST_UNITS" -> TEST_UNITS
       | "DIRECTION" -> DIRECTION
       | "SYSTEM_ORGAN_SITE" -> SYSTEM_ORGAN_SITE
+      | "TEST_UNIT" -> TEST_UNIT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -461,6 +515,9 @@ module SNOMEDCTTraitList =
   struct
     type nonrec t = SNOMEDCTTrait.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SNOMEDCTTrait.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -526,6 +583,9 @@ module RxNormTraitList =
   struct
     type nonrec t = RxNormTrait.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RxNormTrait.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -618,17 +678,20 @@ module ICD10CMRelationshipType =
     type nonrec t =
       | OVERLAP 
       | SYSTEM_ORGAN_SITE 
+      | QUALITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | OVERLAP -> "OVERLAP"
       | SYSTEM_ORGAN_SITE -> "SYSTEM_ORGAN_SITE"
+      | QUALITY -> "QUALITY"
       | Non_static_id s -> s
     let of_string =
       function
       | "OVERLAP" -> OVERLAP
       | "SYSTEM_ORGAN_SITE" -> SYSTEM_ORGAN_SITE
+      | "QUALITY" -> QUALITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -644,6 +707,9 @@ module ICD10CMTraitList =
   struct
     type nonrec t = ICD10CMTrait.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ICD10CMTrait.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -705,6 +771,13 @@ module EntitySubType =
       | TIME_TO_TEST_NAME 
       | TIME_TO_PROCEDURE_NAME 
       | TIME_TO_TREATMENT_NAME 
+      | AMOUNT 
+      | GENDER 
+      | RACE_ETHNICITY 
+      | ALLERGIES 
+      | TOBACCO_USE 
+      | ALCOHOL_CONSUMPTION 
+      | REC_DRUG_USE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -747,6 +820,13 @@ module EntitySubType =
       | TIME_TO_TEST_NAME -> "TIME_TO_TEST_NAME"
       | TIME_TO_PROCEDURE_NAME -> "TIME_TO_PROCEDURE_NAME"
       | TIME_TO_TREATMENT_NAME -> "TIME_TO_TREATMENT_NAME"
+      | AMOUNT -> "AMOUNT"
+      | GENDER -> "GENDER"
+      | RACE_ETHNICITY -> "RACE_ETHNICITY"
+      | ALLERGIES -> "ALLERGIES"
+      | TOBACCO_USE -> "TOBACCO_USE"
+      | ALCOHOL_CONSUMPTION -> "ALCOHOL_CONSUMPTION"
+      | REC_DRUG_USE -> "REC_DRUG_USE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -788,6 +868,13 @@ module EntitySubType =
       | "TIME_TO_TEST_NAME" -> TIME_TO_TEST_NAME
       | "TIME_TO_PROCEDURE_NAME" -> TIME_TO_PROCEDURE_NAME
       | "TIME_TO_TREATMENT_NAME" -> TIME_TO_TREATMENT_NAME
+      | "AMOUNT" -> AMOUNT
+      | "GENDER" -> GENDER
+      | "RACE_ETHNICITY" -> RACE_ETHNICITY
+      | "ALLERGIES" -> ALLERGIES
+      | "TOBACCO_USE" -> TOBACCO_USE
+      | "ALCOHOL_CONSUMPTION" -> ALCOHOL_CONSUMPTION
+      | "REC_DRUG_USE" -> REC_DRUG_USE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -806,6 +893,7 @@ module EntityType =
       | TEST_TREATMENT_PROCEDURE 
       | ANATOMY 
       | TIME_EXPRESSION 
+      | BEHAVIORAL_ENVIRONMENTAL_SOCIAL 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -816,6 +904,7 @@ module EntityType =
       | TEST_TREATMENT_PROCEDURE -> "TEST_TREATMENT_PROCEDURE"
       | ANATOMY -> "ANATOMY"
       | TIME_EXPRESSION -> "TIME_EXPRESSION"
+      | BEHAVIORAL_ENVIRONMENTAL_SOCIAL -> "BEHAVIORAL_ENVIRONMENTAL_SOCIAL"
       | Non_static_id s -> s
     let of_string =
       function
@@ -825,6 +914,7 @@ module EntityType =
       | "TEST_TREATMENT_PROCEDURE" -> TEST_TREATMENT_PROCEDURE
       | "ANATOMY" -> ANATOMY
       | "TIME_EXPRESSION" -> TIME_EXPRESSION
+      | "BEHAVIORAL_ENVIRONMENTAL_SOCIAL" -> BEHAVIORAL_ENVIRONMENTAL_SOCIAL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -856,6 +946,9 @@ module RelationshipType =
       | TEST_UNIT 
       | DIRECTION 
       | SYSTEM_ORGAN_SITE 
+      | AMOUNT 
+      | USAGE 
+      | QUALITY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -879,6 +972,9 @@ module RelationshipType =
       | TEST_UNIT -> "TEST_UNIT"
       | DIRECTION -> "DIRECTION"
       | SYSTEM_ORGAN_SITE -> "SYSTEM_ORGAN_SITE"
+      | AMOUNT -> "AMOUNT"
+      | USAGE -> "USAGE"
+      | QUALITY -> "QUALITY"
       | Non_static_id s -> s
     let of_string =
       function
@@ -901,6 +997,9 @@ module RelationshipType =
       | "TEST_UNIT" -> TEST_UNIT
       | "DIRECTION" -> DIRECTION
       | "SYSTEM_ORGAN_SITE" -> SYSTEM_ORGAN_SITE
+      | "AMOUNT" -> AMOUNT
+      | "USAGE" -> USAGE
+      | "QUALITY" -> QUALITY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -914,6 +1013,9 @@ module TraitList =
   struct
     type nonrec t = Trait.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Trait.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -982,12 +1084,12 @@ module SNOMEDCTAttribute =
       type_: SNOMEDCTAttributeType.t option
         [@ocaml.doc
           "The type of attribute. Possible types include DX_NAME, ACUITY, DIRECTION, SYSTEM_ORGAN_SITE,TEST_NAME, TEST_VALUE, TEST_UNIT, PROCEDURE_NAME, and TREATMENT_NAME."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
-      relationshipScore: Float.t option
+          "The level of confidence that Amazon Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
+      relationshipScore: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical has that this attribute is correctly related to this entity."];
+          "The level of confidence that Amazon Comprehend Medical has that this attribute is correctly related to this entity."];
       relationshipType: SNOMEDCTRelationshipType.t option
         [@ocaml.doc
           "The type of relationship that exists between the entity and the related attribute."];
@@ -1038,9 +1140,9 @@ module SNOMEDCTAttribute =
         [("Category",
            (Option.map x.category ~f:SNOMEDCTEntityCategory.to_value));
         ("Type", (Option.map x.type_ ~f:SNOMEDCTAttributeType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("RelationshipScore",
-          (Option.map x.relationshipScore ~f:Float.to_value));
+          (Option.map x.relationshipScore ~f:Float_.to_value));
         ("RelationshipType",
           (Option.map x.relationshipType ~f:SNOMEDCTRelationshipType.to_value));
         ("Id", (Option.map x.id ~f:Integer.to_value));
@@ -1068,8 +1170,9 @@ module SNOMEDCTAttribute =
         (Option.map ~f:SNOMEDCTRelationshipType.of_xml)
           (Xml.child xml_arg0 "RelationshipType") in
       let relationshipScore =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "RelationshipScore") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+        (Option.map ~f:Float_.of_xml)
+          (Xml.child xml_arg0 "RelationshipScore") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:SNOMEDCTAttributeType.of_xml)
           (Xml.child xml_arg0 "Type") in
@@ -1079,21 +1182,22 @@ module SNOMEDCTAttribute =
       make ?sNOMEDCTConcepts ?traits ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ?category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sNOMEDCTConcepts =
-        field_map json "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
-      let traits = field_map json "Traits" SNOMEDCTTraitList.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let id = field_map json "Id" Integer.of_json in
+        field_map json__ "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
+      let traits = field_map json__ "Traits" SNOMEDCTTraitList.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       let relationshipType =
-        field_map json "RelationshipType" SNOMEDCTRelationshipType.of_json in
+        field_map json__ "RelationshipType" SNOMEDCTRelationshipType.of_json in
       let relationshipScore =
-        field_map json "RelationshipScore" Float.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" SNOMEDCTAttributeType.of_json in
-      let category = field_map json "Category" SNOMEDCTEntityCategory.of_json in
+        field_map json__ "RelationshipScore" Float_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" SNOMEDCTAttributeType.of_json in
+      let category =
+        field_map json__ "Category" SNOMEDCTEntityCategory.of_json in
       make ?sNOMEDCTConcepts ?traits ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ?category ()
     let to_json v = composed_to_json to_value v
@@ -1106,10 +1210,10 @@ module RxNormAttribute =
       type_: RxNormAttributeType.t option
         [@ocaml.doc
           "The type of attribute. The types of attributes recognized by InferRxNorm are BRAND_NAME and GENERIC_NAME."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
-      relationshipScore: Float.t option
+          "The level of confidence that Amazon Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
+      relationshipScore: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has that the attribute is accurately linked to an entity."];
       id: Integer.t option
@@ -1149,9 +1253,9 @@ module RxNormAttribute =
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:RxNormAttributeType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("RelationshipScore",
-          (Option.map x.relationshipScore ~f:Float.to_value));
+          (Option.map x.relationshipScore ~f:Float_.to_value));
         ("Id", (Option.map x.id ~f:Integer.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
@@ -1168,24 +1272,25 @@ module RxNormAttribute =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       let relationshipScore =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "RelationshipScore") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+        (Option.map ~f:Float_.of_xml)
+          (Xml.child xml_arg0 "RelationshipScore") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:RxNormAttributeType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?traits ?text ?endOffset ?beginOffset ?id ?relationshipScore
         ?score ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traits = field_map json "Traits" RxNormTraitList.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let id = field_map json "Id" Integer.of_json in
+    let of_json json__ =
+      let traits = field_map json__ "Traits" RxNormTraitList.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       let relationshipScore =
-        field_map json "RelationshipScore" Float.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" RxNormAttributeType.of_json in
+        field_map json__ "RelationshipScore" Float_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" RxNormAttributeType.of_json in
       make ?traits ?text ?endOffset ?beginOffset ?id ?relationshipScore
         ?score ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -1199,7 +1304,7 @@ module RxNormConcept =
         [@ocaml.doc "The description of the RxNorm concept."];
       code: String_.t option
         [@ocaml.doc "RxNorm concept ID, also known as the RxCUI."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has that the entity is accurately linked to the reported RxNorm concept."]}
     let make ?description =
@@ -1208,19 +1313,19 @@ module RxNormConcept =
       structure_to_value
         [("Description", (Option.map x.description ~f:String_.to_value));
         ("Code", (Option.map x.code ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let code = field_map json "Code" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?score ?code ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1232,10 +1337,10 @@ module ICD10CMAttribute =
       type_: ICD10CMAttributeType.t option
         [@ocaml.doc
           "The type of attribute. InferICD10CM detects entities of the type DX_NAME."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
-      relationshipScore: Float.t option
+      relationshipScore: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has that this attribute is correctly related to this entity."];
       id: Integer.t option
@@ -1285,9 +1390,9 @@ module ICD10CMAttribute =
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:ICD10CMAttributeType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("RelationshipScore",
-          (Option.map x.relationshipScore ~f:Float.to_value));
+          (Option.map x.relationshipScore ~f:Float_.to_value));
         ("Id", (Option.map x.id ~f:Integer.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
@@ -1313,27 +1418,28 @@ module ICD10CMAttribute =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
       let id = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Id") in
       let relationshipScore =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "RelationshipScore") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+        (Option.map ~f:Float_.of_xml)
+          (Xml.child xml_arg0 "RelationshipScore") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:ICD10CMAttributeType.of_xml)
           (Xml.child xml_arg0 "Type") in
       make ?relationshipType ?category ?traits ?text ?endOffset ?beginOffset
         ?id ?relationshipScore ?score ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relationshipType =
-        field_map json "RelationshipType" ICD10CMRelationshipType.of_json in
-      let category = field_map json "Category" ICD10CMEntityType.of_json in
-      let traits = field_map json "Traits" ICD10CMTraitList.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let id = field_map json "Id" Integer.of_json in
+        field_map json__ "RelationshipType" ICD10CMRelationshipType.of_json in
+      let category = field_map json__ "Category" ICD10CMEntityType.of_json in
+      let traits = field_map json__ "Traits" ICD10CMTraitList.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       let relationshipScore =
-        field_map json "RelationshipScore" Float.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" ICD10CMAttributeType.of_json in
+        field_map json__ "RelationshipScore" Float_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" ICD10CMAttributeType.of_json in
       make ?relationshipType ?category ?traits ?text ?endOffset ?beginOffset
         ?id ?relationshipScore ?score ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -1349,7 +1455,7 @@ module ICD10CMConcept =
       code: String_.t option
         [@ocaml.doc
           "The ICD-10-CM code that identifies the concept found in the knowledge base from the Centers for Disease Control."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has that the entity is accurately linked to an ICD-10-CM concept."]}
     let make ?description =
@@ -1358,19 +1464,19 @@ module ICD10CMConcept =
       structure_to_value
         [("Description", (Option.map x.description ~f:String_.to_value));
         ("Code", (Option.map x.code ~f:String_.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value))]
+        ("Score", (Option.map x.score ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let code = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Code") in
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       make ?score ?code ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Float.of_json in
-      let code = field_map json "Code" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Float_.of_json in
+      let code = field_map json__ "Code" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       make ?score ?code ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1380,12 +1486,12 @@ module Attribute =
     type nonrec t =
       {
       type_: EntitySubType.t option [@ocaml.doc "The type of attribute."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical; has that the segment of text is correctly recognized as an attribute."];
-      relationshipScore: Float.t option
+          "The level of confidence that Amazon Comprehend Medical has that the segment of text is correctly recognized as an attribute."];
+      relationshipScore: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical; has that this attribute is correctly related to this entity."];
+          "The level of confidence that Amazon Comprehend Medical has that this attribute is correctly related to this entity."];
       relationshipType: RelationshipType.t option
         [@ocaml.doc
           "The type of relationship between the entity and attribute. Type for the relationship is OVERLAP, indicating that the entity occurred at the same time as the Date_Expression."];
@@ -1429,9 +1535,9 @@ module Attribute =
     let to_value x =
       structure_to_value
         [("Type", (Option.map x.type_ ~f:EntitySubType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("RelationshipScore",
-          (Option.map x.relationshipScore ~f:Float.to_value));
+          (Option.map x.relationshipScore ~f:Float_.to_value));
         ("RelationshipType",
           (Option.map x.relationshipType ~f:RelationshipType.to_value));
         ("Id", (Option.map x.id ~f:Integer.to_value));
@@ -1456,26 +1562,27 @@ module Attribute =
         (Option.map ~f:RelationshipType.of_xml)
           (Xml.child xml_arg0 "RelationshipType") in
       let relationshipScore =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "RelationshipScore") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+        (Option.map ~f:Float_.of_xml)
+          (Xml.child xml_arg0 "RelationshipScore") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:EntitySubType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?traits ?category ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let traits = field_map json "Traits" TraitList.of_json in
-      let category = field_map json "Category" EntityType.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let id = field_map json "Id" Integer.of_json in
+    let of_json json__ =
+      let traits = field_map json__ "Traits" TraitList.of_json in
+      let category = field_map json__ "Category" EntityType.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       let relationshipType =
-        field_map json "RelationshipType" RelationshipType.of_json in
+        field_map json__ "RelationshipType" RelationshipType.of_json in
       let relationshipScore =
-        field_map json "RelationshipScore" Float.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" EntitySubType.of_json in
+        field_map json__ "RelationshipScore" Float_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" EntitySubType.of_json in
       make ?traits ?category ?text ?endOffset ?beginOffset ?id
         ?relationshipType ?relationshipScore ?score ?type_ ()
     let to_json v = composed_to_json to_value v
@@ -1522,7 +1629,7 @@ module InputDataConfig =
       {
       s3Bucket: S3Bucket.t
         [@ocaml.doc
-          "The URI of the S3 bucket that contains the input data. The bucket must be in the same region as the API endpoint that you are calling. Each file in the document collection must be less than 40 KB. You can store a maximum of 30 GB in the bucket."];
+          "The URI of the S3 bucket that contains the input data. The bucket must be in the same region as the API endpoint that you are calling."];
       s3Key: S3Key.t option
         [@ocaml.doc "The path to the input data files in the S3 bucket."]}
     let context_ = "InputDataConfig"
@@ -1538,9 +1645,9 @@ module InputDataConfig =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Key ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Key = field_map json "S3Key" S3Key.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
       make ?s3Key ~s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1705,7 +1812,7 @@ module OutputDataConfig =
           "When you use the OutputDataConfig object with asynchronous operations, you specify the Amazon S3 location where you want to write the output data. The URI must be in the same region as the API endpoint that you are calling. The location is used as the prefix for the actual location of the output."];
       s3Key: S3Key.t option
         [@ocaml.doc
-          "The path to the output data files in the S3 bucket. Comprehend Medical; creates an output directory using the job ID so that the output from one job does not overwrite the output of another."]}
+          "The path to the output data files in the S3 bucket. Amazon Comprehend Medical creates an output directory using the job ID so that the output from one job does not overwrite the output of another."]}
     let context_ = "OutputDataConfig"
     let make ?s3Key = fun ~s3Bucket -> fun () -> { s3Key; s3Bucket }
     let to_value x =
@@ -1719,9 +1826,9 @@ module OutputDataConfig =
         S3Bucket.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Bucket") in
       make ?s3Key ~s3Bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Key = field_map json "S3Key" S3Key.of_json in
-      let s3Bucket = field_map_exn json "S3Bucket" S3Bucket.of_json in
+    let of_json json__ =
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
+      let s3Bucket = field_map_exn json__ "S3Bucket" S3Bucket.of_json in
       make ?s3Key ~s3Bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output properties for a detection job."]
@@ -1760,6 +1867,9 @@ module SNOMEDCTAttributeList =
   struct
     type nonrec t = SNOMEDCTAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SNOMEDCTAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1817,6 +1927,9 @@ module RxNormAttributeList =
   struct
     type nonrec t = RxNormAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RxNormAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1842,6 +1955,9 @@ module RxNormConceptList =
   struct
     type nonrec t = RxNormConcept.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RxNormConcept.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1910,6 +2026,9 @@ module ICD10CMAttributeList =
   struct
     type nonrec t = ICD10CMAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ICD10CMAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1935,6 +2054,9 @@ module ICD10CMConceptList =
   struct
     type nonrec t = ICD10CMConcept.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ICD10CMConcept.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1984,6 +2106,9 @@ module AttributeList =
   struct
     type nonrec t = Attribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2035,7 +2160,7 @@ module ComprehendMedicalAsyncJobProperties =
         [@ocaml.doc "The language code of the input documents."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that gives Comprehend Medical; read access to your input data."];
+          "The Amazon Resource Name (ARN) that gives Amazon Comprehend Medical read access to your input data."];
       manifestFilePath: ManifestFilePath.t option
         [@ocaml.doc
           "The path to the file that describes the results of a batch job."];
@@ -2139,25 +2264,26 @@ module ComprehendMedicalAsyncJobProperties =
         ?languageCode ?outputDataConfig ?inputDataConfig ?expirationTime
         ?endTime ?submitTime ?message ?jobStatus ?jobName ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map json "ModelVersion" ModelVersion.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" ModelVersion.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let manifestFilePath =
-        field_map json "ManifestFilePath" ManifestFilePath.of_json in
+        field_map json__ "ManifestFilePath" ManifestFilePath.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let expirationTime = field_map json "ExpirationTime" Timestamp.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let message = field_map json "Message" AnyLengthString.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let expirationTime =
+        field_map json__ "ExpirationTime" Timestamp.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let message = field_map json__ "Message" AnyLengthString.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?modelVersion ?kMSKey ?manifestFilePath ?dataAccessRoleArn
         ?languageCode ?outputDataConfig ?inputDataConfig ?expirationTime
         ?endTime ?submitTime ?message ?jobStatus ?jobName ?jobId ()
@@ -2178,9 +2304,9 @@ module SNOMEDCTEntity =
       type_: SNOMEDCTEntityType.t option
         [@ocaml.doc
           "Describes the specific type of entity with category of entities. Possible types include DX_NAME, ACUITY, DIRECTION, SYSTEM_ORGAN_SITE, TEST_NAME, TEST_VALUE, TEST_UNIT, PROCEDURE_NAME, or TREATMENT_NAME."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical has in the accuracy of the detected entity."];
+          "The level of confidence that Amazon Comprehend Medical has in the accuracy of the detected entity."];
       beginOffset: Integer.t option
         [@ocaml.doc
           "The 0-based character offset in the input text that shows where the entity begins. The offset returns the UTF-8 code point in the string."];
@@ -2226,7 +2352,7 @@ module SNOMEDCTEntity =
         ("Category",
           (Option.map x.category ~f:SNOMEDCTEntityCategory.to_value));
         ("Type", (Option.map x.type_ ~f:SNOMEDCTEntityType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
         ("Attributes",
@@ -2249,7 +2375,7 @@ module SNOMEDCTEntity =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:SNOMEDCTEntityType.of_xml) (Xml.child xml_arg0 "Type") in
       let category =
@@ -2262,25 +2388,26 @@ module SNOMEDCTEntity =
       make ?sNOMEDCTConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sNOMEDCTConcepts =
-        field_map json "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
-      let traits = field_map json "Traits" SNOMEDCTTraitList.of_json in
+        field_map json__ "SNOMEDCTConcepts" SNOMEDCTConceptList.of_json in
+      let traits = field_map json__ "Traits" SNOMEDCTTraitList.of_json in
       let attributes =
-        field_map json "Attributes" SNOMEDCTAttributeList.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" SNOMEDCTEntityType.of_json in
-      let category = field_map json "Category" SNOMEDCTEntityCategory.of_json in
+        field_map json__ "Attributes" SNOMEDCTAttributeList.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" SNOMEDCTEntityType.of_json in
+      let category =
+        field_map json__ "Category" SNOMEDCTEntityCategory.of_json in
       let text =
-        field_map json "Text" OntologyLinkingBoundedLengthString.of_json in
-      let id = field_map json "Id" Integer.of_json in
+        field_map json__ "Text" OntologyLinkingBoundedLengthString.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       make ?sNOMEDCTConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The collection of medical entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Comprehend Medical has in the detection and analysis. Attributes and traits of the entity are also returned."]
+       "The collection of medical entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Amazon Comprehend Medical has in the detection and analysis. Attributes and traits of the entity are also returned."]
 module RxNormEntity =
   struct
     type nonrec t =
@@ -2297,7 +2424,7 @@ module RxNormEntity =
       type_: RxNormEntityType.t option
         [@ocaml.doc
           "Describes the specific type of entity. For InferRxNorm, the recognized entity type is MEDICATION."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has in the accuracy of the detected entity."];
       beginOffset: Integer.t option
@@ -2345,7 +2472,7 @@ module RxNormEntity =
         ("Category",
           (Option.map x.category ~f:RxNormEntityCategory.to_value));
         ("Type", (Option.map x.type_ ~f:RxNormEntityType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
         ("Attributes",
@@ -2367,7 +2494,7 @@ module RxNormEntity =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:RxNormEntityType.of_xml) (Xml.child xml_arg0 "Type") in
       let category =
@@ -2380,20 +2507,20 @@ module RxNormEntity =
       make ?rxNormConcepts ?traits ?attributes ?endOffset ?beginOffset ?score
         ?type_ ?category ?text ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let rxNormConcepts =
-        field_map json "RxNormConcepts" RxNormConceptList.of_json in
-      let traits = field_map json "Traits" RxNormTraitList.of_json in
+        field_map json__ "RxNormConcepts" RxNormConceptList.of_json in
+      let traits = field_map json__ "Traits" RxNormTraitList.of_json in
       let attributes =
-        field_map json "Attributes" RxNormAttributeList.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" RxNormEntityType.of_json in
-      let category = field_map json "Category" RxNormEntityCategory.of_json in
+        field_map json__ "Attributes" RxNormAttributeList.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" RxNormEntityType.of_json in
+      let category = field_map json__ "Category" RxNormEntityCategory.of_json in
       let text =
-        field_map json "Text" OntologyLinkingBoundedLengthString.of_json in
-      let id = field_map json "Id" Integer.of_json in
+        field_map json__ "Text" OntologyLinkingBoundedLengthString.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       make ?rxNormConcepts ?traits ?attributes ?endOffset ?beginOffset ?score
         ?type_ ?category ?text ?id ()
     let to_json v = composed_to_json to_value v
@@ -2415,7 +2542,7 @@ module ICD10CMEntity =
       type_: ICD10CMEntityType.t option
         [@ocaml.doc
           "Describes the specific type of entity with category of entities. InferICD10CM detects entities of the type DX_NAME and TIME_EXPRESSION."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
           "The level of confidence that Amazon Comprehend Medical has in the accuracy of the detection."];
       beginOffset: Integer.t option
@@ -2464,7 +2591,7 @@ module ICD10CMEntity =
         ("Category",
           (Option.map x.category ~f:ICD10CMEntityCategory.to_value));
         ("Type", (Option.map x.type_ ~f:ICD10CMEntityType.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
         ("Attributes",
@@ -2486,7 +2613,7 @@ module ICD10CMEntity =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "BeginOffset") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let type_ =
         (Option.map ~f:ICD10CMEntityType.of_xml) (Xml.child xml_arg0 "Type") in
       let category =
@@ -2499,20 +2626,21 @@ module ICD10CMEntity =
       make ?iCD10CMConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let iCD10CMConcepts =
-        field_map json "ICD10CMConcepts" ICD10CMConceptList.of_json in
-      let traits = field_map json "Traits" ICD10CMTraitList.of_json in
+        field_map json__ "ICD10CMConcepts" ICD10CMConceptList.of_json in
+      let traits = field_map json__ "Traits" ICD10CMTraitList.of_json in
       let attributes =
-        field_map json "Attributes" ICD10CMAttributeList.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let type_ = field_map json "Type" ICD10CMEntityType.of_json in
-      let category = field_map json "Category" ICD10CMEntityCategory.of_json in
+        field_map json__ "Attributes" ICD10CMAttributeList.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let type_ = field_map json__ "Type" ICD10CMEntityType.of_json in
+      let category =
+        field_map json__ "Category" ICD10CMEntityCategory.of_json in
       let text =
-        field_map json "Text" OntologyLinkingBoundedLengthString.of_json in
-      let id = field_map json "Id" Integer.of_json in
+        field_map json__ "Text" OntologyLinkingBoundedLengthString.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       make ?iCD10CMConcepts ?traits ?attributes ?endOffset ?beginOffset
         ?score ?type_ ?category ?text ?id ()
     let to_json v = composed_to_json to_value v
@@ -2531,9 +2659,9 @@ module Entity =
       endOffset: Integer.t option
         [@ocaml.doc
           "The 0-based character offset in the input text that shows where the entity ends. The offset returns the UTF-8 code point in the string."];
-      score: Float.t option
+      score: Float_.t option
         [@ocaml.doc
-          "The level of confidence that Comprehend Medical; has in the accuracy of the detection."];
+          "The level of confidence that Amazon Comprehend Medical has in the accuracy of the detection."];
       text: String_.t option
         [@ocaml.doc "The segment of input text extracted as this entity."];
       category: EntityType.t option
@@ -2571,7 +2699,7 @@ module Entity =
         [("Id", (Option.map x.id ~f:Integer.to_value));
         ("BeginOffset", (Option.map x.beginOffset ~f:Integer.to_value));
         ("EndOffset", (Option.map x.endOffset ~f:Integer.to_value));
-        ("Score", (Option.map x.score ~f:Float.to_value));
+        ("Score", (Option.map x.score ~f:Float_.to_value));
         ("Text", (Option.map x.text ~f:String_.to_value));
         ("Category", (Option.map x.category ~f:EntityType.to_value));
         ("Type", (Option.map x.type_ ~f:EntitySubType.to_value));
@@ -2589,7 +2717,7 @@ module Entity =
       let category =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "Category") in
       let text = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Text") in
-      let score = (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "Score") in
+      let score = (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "Score") in
       let endOffset =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "EndOffset") in
       let beginOffset =
@@ -2598,16 +2726,16 @@ module Entity =
       make ?attributes ?traits ?type_ ?category ?text ?score ?endOffset
         ?beginOffset ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" AttributeList.of_json in
-      let traits = field_map json "Traits" TraitList.of_json in
-      let type_ = field_map json "Type" EntitySubType.of_json in
-      let category = field_map json "Category" EntityType.of_json in
-      let text = field_map json "Text" String_.of_json in
-      let score = field_map json "Score" Float.of_json in
-      let endOffset = field_map json "EndOffset" Integer.of_json in
-      let beginOffset = field_map json "BeginOffset" Integer.of_json in
-      let id = field_map json "Id" Integer.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" AttributeList.of_json in
+      let traits = field_map json__ "Traits" TraitList.of_json in
+      let type_ = field_map json__ "Type" EntitySubType.of_json in
+      let category = field_map json__ "Category" EntityType.of_json in
+      let text = field_map json__ "Text" String_.of_json in
+      let score = field_map json__ "Score" Float_.of_json in
+      let endOffset = field_map json__ "EndOffset" Integer.of_json in
+      let beginOffset = field_map json__ "BeginOffset" Integer.of_json in
+      let id = field_map json__ "Id" Integer.of_json in
       make ?attributes ?traits ?type_ ?category ?text ?score ?endOffset
         ?beginOffset ?id ()
     let to_json v = composed_to_json to_value v
@@ -2635,13 +2763,13 @@ module UnmappedAttribute =
         (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?attribute ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attribute = field_map json "Attribute" Attribute.of_json in
-      let type_ = field_map json "Type" EntityType.of_json in
+    let of_json json__ =
+      let attribute = field_map json__ "Attribute" Attribute.of_json in
+      let type_ = field_map json__ "Type" EntityType.of_json in
       make ?attribute ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An attribute that was extracted, but Comprehend Medical; was unable to relate to an entity."]
+       "An attribute that was extracted, but Amazon Comprehend Medical was unable to relate to an entity."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -2656,8 +2784,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred. Retry your request."]
@@ -2675,8 +2803,8 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2695,8 +2823,8 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2715,8 +2843,8 @@ module TooManyRequestsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2745,6 +2873,9 @@ module ComprehendMedicalAsyncJobPropertiesList =
   struct
     type nonrec t = ComprehendMedicalAsyncJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComprehendMedicalAsyncJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -2782,8 +2913,8 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2831,13 +2962,13 @@ module ComprehendMedicalAsyncJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submitTimeAfter =
-        field_map json "SubmitTimeAfter" Timestamp.of_json in
+        field_map json__ "SubmitTimeAfter" Timestamp.of_json in
       let submitTimeBefore =
-        field_map json "SubmitTimeBefore" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmitTimeBefore" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submitTimeAfter ?submitTimeBefore ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2866,7 +2997,7 @@ module Characters =
       {
       originalTextCharacters: Integer.t option
         [@ocaml.doc
-          "The number of characters present in the input text document as processed by Comprehend Medical."]}
+          "The number of characters present in the input text document as processed by Amazon Comprehend Medical."]}
     let make ?originalTextCharacters = fun () -> { originalTextCharacters }
     let to_value x =
       structure_to_value
@@ -2879,9 +3010,9 @@ module Characters =
           (Xml.child xml_arg0 "OriginalTextCharacters") in
       make ?originalTextCharacters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originalTextCharacters =
-        field_map json "OriginalTextCharacters" Integer.of_json in
+        field_map json__ "OriginalTextCharacters" Integer.of_json in
       make ?originalTextCharacters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2900,8 +3031,8 @@ module InvalidEncodingException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2936,10 +3067,10 @@ module SNOMEDCTDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Edition") in
       make ?versionDate ?language ?edition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionDate = field_map json "VersionDate" String_.of_json in
-      let language = field_map json "Language" String_.of_json in
-      let edition = field_map json "Edition" String_.of_json in
+    let of_json json__ =
+      let versionDate = field_map json__ "VersionDate" String_.of_json in
+      let language = field_map json__ "Language" String_.of_json in
+      let edition = field_map json__ "Edition" String_.of_json in
       make ?versionDate ?language ?edition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2948,6 +3079,9 @@ module SNOMEDCTEntityList =
   struct
     type nonrec t = SNOMEDCTEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SNOMEDCTEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2983,12 +3117,12 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Comprehend Medical; service is temporarily unavailable. Please wait and then retry your request."]
+       "The Amazon Comprehend Medical service is temporarily unavailable. Please wait and then retry your request."]
 module TextSizeLimitExceededException =
   struct
     type nonrec t = {
@@ -3003,8 +3137,8 @@ module TextSizeLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3013,6 +3147,9 @@ module RxNormEntityList =
   struct
     type nonrec t = RxNormEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RxNormEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3037,6 +3174,9 @@ module ICD10CMEntityList =
   struct
     type nonrec t = ICD10CMEntity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ICD10CMEntity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3061,6 +3201,9 @@ module EntityList =
   struct
     type nonrec t = Entity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Entity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3102,6 +3245,9 @@ module UnmappedAttributeList =
   struct
     type nonrec t = UnmappedAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UnmappedAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3192,8 +3338,8 @@ module StopSNOMEDCTInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferSNOMEDCT inference job in progress."]
 module StopSNOMEDCTInferenceJobRequest =
@@ -3213,8 +3359,9 @@ module StopSNOMEDCTInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferSNOMEDCT inference job in progress."]
 module StopRxNormInferenceJobResponse =
@@ -3277,8 +3424,8 @@ module StopRxNormInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferRxNorm inference job in progress."]
 module StopRxNormInferenceJobRequest =
@@ -3296,8 +3443,9 @@ module StopRxNormInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferRxNorm inference job in progress."]
 module StopPHIDetectionJobResponse =
@@ -3360,8 +3508,8 @@ module StopPHIDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops a protected health information (PHI) detection job in progress."]
@@ -3381,8 +3529,9 @@ module StopPHIDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops a protected health information (PHI) detection job in progress."]
@@ -3446,8 +3595,8 @@ module StopICD10CMInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferICD10CM inference job in progress."]
 module StopICD10CMInferenceJobRequest =
@@ -3465,8 +3614,9 @@ module StopICD10CMInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops an InferICD10CM inference job in progress."]
 module StopEntitiesDetectionV2JobResponse =
@@ -3529,8 +3679,8 @@ module StopEntitiesDetectionV2JobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a medical entities detection job in progress."]
 module StopEntitiesDetectionV2JobRequest =
@@ -3549,8 +3699,9 @@ module StopEntitiesDetectionV2JobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a medical entities detection job in progress."]
 module StartSNOMEDCTInferenceJobResponse =
@@ -3622,8 +3773,8 @@ module StartSNOMEDCTInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous job to detect medical concepts and link them to the SNOMED-CT ontology. Use the DescribeSNOMEDCTInferenceJob operation to track the status of a job."]
@@ -3704,19 +3855,20 @@ module StartSNOMEDCTInferenceJobRequest =
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -3789,8 +3941,8 @@ module StartRxNormInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous job to detect medication entities and link them to the RxNorm ontology. Use the DescribeRxNormInferenceJob operation to track the status of a job."]
@@ -3805,11 +3957,11 @@ module StartRxNormInferenceJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Comprehend Medical; read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
+          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend Medical read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
-          "A unique identifier for the request. If you don't set the client request token, Comprehend Medical; generates one."];
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend Medical generates one."];
       kMSKey: KMSKey.t option
         [@ocaml.doc
           "An AWS Key Management Service key to encrypt your output files. If you do not specify a key, the files are written in plain text."];
@@ -3872,19 +4024,20 @@ module StartRxNormInferenceJobRequest =
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -3959,8 +4112,8 @@ module StartPHIDetectionJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous job to detect protected health information (PHI). Use the DescribePHIDetectionJob operation to track the status of a job."]
@@ -3975,11 +4128,11 @@ module StartPHIDetectionJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Comprehend Medical; read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
+          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend Medical read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
-          "A unique identifier for the request. If you don't set the client request token, Comprehend Medical; generates one."];
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend Medical generates one."];
       kMSKey: KMSKey.t option
         [@ocaml.doc
           "An AWS Key Management Service key to encrypt your output files. If you do not specify a key, the files are written in plain text."];
@@ -4042,19 +4195,20 @@ module StartPHIDetectionJobRequest =
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -4129,8 +4283,8 @@ module StartICD10CMInferenceJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous job to detect medical conditions and link them to the ICD-10-CM ontology. Use the DescribeICD10CMInferenceJob operation to track the status of a job."]
@@ -4145,11 +4299,11 @@ module StartICD10CMInferenceJobRequest =
         [@ocaml.doc "Specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Comprehend Medical; read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
+          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend Medical read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
-          "A unique identifier for the request. If you don't set the client request token, Comprehend Medical; generates one."];
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend Medical generates one."];
       kMSKey: KMSKey.t option
         [@ocaml.doc
           "An AWS Key Management Service key to encrypt your output files. If you do not specify a key, the files are written in plain text."];
@@ -4212,19 +4366,20 @@ module StartICD10CMInferenceJobRequest =
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -4299,8 +4454,8 @@ module StartEntitiesDetectionV2JobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts an asynchronous medical entity detection job for a collection of documents. Use the DescribeEntitiesDetectionV2Job operation to track the status of a job."]
@@ -4316,17 +4471,17 @@ module StartEntitiesDetectionV2JobRequest =
           "The output configuration that specifies where to send the output files."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Comprehend Medical; read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
+          "The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that grants Amazon Comprehend Medical read access to your input data. For more information, see Role-Based Permissions Required for Asynchronous Operations."];
       jobName: JobName.t option [@ocaml.doc "The identifier of the job."];
       clientRequestToken: ClientRequestTokenString.t option
         [@ocaml.doc
-          "A unique identifier for the request. If you don't set the client request token, Comprehend Medical; generates one for you."];
+          "A unique identifier for the request. If you don't set the client request token, Amazon Comprehend Medical generates one for you."];
       kMSKey: KMSKey.t option
         [@ocaml.doc
           "An AWS Key Management Service key to encrypt your output files. If you do not specify a key, the files are written in plain text."];
       languageCode: LanguageCode.t
         [@ocaml.doc
-          "The language of the input documents. All documents must be in the same language. Comprehend Medical; processes files in US English (en)."]}
+          "The language of the input documents. All documents must be in the same language. Amazon Comprehend Medical processes files in US English (en)."]}
     let context_ = "StartEntitiesDetectionV2JobRequest"
     let make ?jobName =
       fun ?clientRequestToken ->
@@ -4383,19 +4538,20 @@ module StartEntitiesDetectionV2JobRequest =
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let languageCode =
-        field_map_exn json "LanguageCode" LanguageCode.of_json in
-      let kMSKey = field_map json "KMSKey" KMSKey.of_json in
+        field_map_exn json__ "LanguageCode" LanguageCode.of_json in
+      let kMSKey = field_map json__ "KMSKey" KMSKey.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestTokenString.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "ClientRequestToken"
+          ClientRequestTokenString.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       make ~languageCode ?kMSKey ?clientRequestToken ?jobName
         ~dataAccessRoleArn ~outputDataConfig ~inputDataConfig ()
     let to_json v = composed_to_json to_value v
@@ -4483,10 +4639,10 @@ module ListSNOMEDCTInferenceJobsResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
-        field_map json "ComprehendMedicalAsyncJobPropertiesList"
+        field_map json__ "ComprehendMedicalAsyncJobPropertiesList"
           ComprehendMedicalAsyncJobPropertiesList.of_json in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -4524,11 +4680,12 @@ module ListSNOMEDCTInferenceJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" ComprehendMedicalAsyncJobFilter.of_json in
+        field_map json__ "Filter" ComprehendMedicalAsyncJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a list of InferSNOMEDCT jobs a user has submitted."]
@@ -4614,10 +4771,10 @@ module ListRxNormInferenceJobsResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
-        field_map json "ComprehendMedicalAsyncJobPropertiesList"
+        field_map json__ "ComprehendMedicalAsyncJobPropertiesList"
           ComprehendMedicalAsyncJobPropertiesList.of_json in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -4655,11 +4812,12 @@ module ListRxNormInferenceJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" ComprehendMedicalAsyncJobFilter.of_json in
+        field_map json__ "Filter" ComprehendMedicalAsyncJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets a list of InferRxNorm jobs that you have submitted."]
@@ -4744,15 +4902,15 @@ module ListPHIDetectionJobsResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
-        field_map json "ComprehendMedicalAsyncJobPropertiesList"
+        field_map json__ "ComprehendMedicalAsyncJobPropertiesList"
           ComprehendMedicalAsyncJobPropertiesList.of_json in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of protected health information (PHI) detection jobs that you have submitted."]
+       "Gets a list of protected health information (PHI) detection jobs you have submitted."]
 module ListPHIDetectionJobsRequest =
   struct
     type nonrec t =
@@ -4787,15 +4945,16 @@ module ListPHIDetectionJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" ComprehendMedicalAsyncJobFilter.of_json in
+        field_map json__ "Filter" ComprehendMedicalAsyncJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets a list of protected health information (PHI) detection jobs that you have submitted."]
+       "Gets a list of protected health information (PHI) detection jobs you have submitted."]
 module ListICD10CMInferenceJobsResponse =
   struct
     type nonrec t =
@@ -4878,10 +5037,10 @@ module ListICD10CMInferenceJobsResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
-        field_map json "ComprehendMedicalAsyncJobPropertiesList"
+        field_map json__ "ComprehendMedicalAsyncJobPropertiesList"
           ComprehendMedicalAsyncJobPropertiesList.of_json in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -4921,11 +5080,12 @@ module ListICD10CMInferenceJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" ComprehendMedicalAsyncJobFilter.of_json in
+        field_map json__ "Filter" ComprehendMedicalAsyncJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5011,10 +5171,10 @@ module ListEntitiesDetectionV2JobsResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobPropertiesList") in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let comprehendMedicalAsyncJobPropertiesList =
-        field_map json "ComprehendMedicalAsyncJobPropertiesList"
+        field_map json__ "ComprehendMedicalAsyncJobPropertiesList"
           ComprehendMedicalAsyncJobPropertiesList.of_json in
       make ?nextToken ?comprehendMedicalAsyncJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -5054,11 +5214,12 @@ module ListEntitiesDetectionV2JobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let filter =
-        field_map json "Filter" ComprehendMedicalAsyncJobFilter.of_json in
+        field_map json__ "Filter" ComprehendMedicalAsyncJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5067,9 +5228,9 @@ module InferSNOMEDCTResponse =
   struct
     type nonrec t =
       {
-      entities: SNOMEDCTEntityList.t
+      entities: SNOMEDCTEntityList.t option
         [@ocaml.doc
-          "The collection of medical concept entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Comprehend Medical has in the detection and analysis. Attributes and traits of the entity are also returned."];
+          "The collection of medical concept entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Amazon Comprehend Medical has in the detection and analysis. Attributes and traits of the entity are also returned."];
       paginationToken: String_.t option
         [@ocaml.doc
           "If the result of the request is truncated, the pagination token can be used to fetch the next page of entities."];
@@ -5090,19 +5251,18 @@ module InferSNOMEDCTResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "InferSNOMEDCTResponse"
-    let make ?paginationToken =
-      fun ?modelVersion ->
-        fun ?sNOMEDCTDetails ->
-          fun ?characters ->
-            fun ~entities ->
+    let make ?entities =
+      fun ?paginationToken ->
+        fun ?modelVersion ->
+          fun ?sNOMEDCTDetails ->
+            fun ?characters ->
               fun () ->
                 {
+                  entities;
                   paginationToken;
                   modelVersion;
                   sNOMEDCTDetails;
-                  characters;
-                  entities
+                  characters
                 }
     let error_of_json name json =
       match name with
@@ -5174,7 +5334,7 @@ module InferSNOMEDCTResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (SNOMEDCTEntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:SNOMEDCTEntityList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
         ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value));
@@ -5193,20 +5353,21 @@ module InferSNOMEDCTResponse =
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let entities =
-        SNOMEDCTEntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
+        (Option.map ~f:SNOMEDCTEntityList.of_xml)
+          (Xml.child xml_arg0 "Entities") in
       make ?characters ?sNOMEDCTDetails ?modelVersion ?paginationToken
-        ~entities ()
+        ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let characters = field_map json "Characters" Characters.of_json in
+    let of_json json__ =
+      let characters = field_map json__ "Characters" Characters.of_json in
       let sNOMEDCTDetails =
-        field_map json "SNOMEDCTDetails" SNOMEDCTDetails.of_json in
-      let modelVersion = field_map json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
-      let entities = field_map_exn json "Entities" SNOMEDCTEntityList.of_json in
+        field_map json__ "SNOMEDCTDetails" SNOMEDCTDetails.of_json in
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
+      let entities = field_map json__ "Entities" SNOMEDCTEntityList.of_json in
       make ?characters ?sNOMEDCTDetails ?modelVersion ?paginationToken
-        ~entities ()
+        ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "InferSNOMEDCT detects possible medical concepts as entities and links them to codes from the Systematized Nomenclature of Medicine, Clinical Terms (SNOMED-CT) ontology"]
@@ -5215,8 +5376,7 @@ module InferSNOMEDCTRequest =
     type nonrec t =
       {
       text: OntologyLinkingBoundedLengthString.t
-        [@ocaml.doc
-          "The input text to be analyzed using InferSNOMEDCT. The text should be a string with 1 to 10000 characters."]}
+        [@ocaml.doc "The input text to be analyzed using InferSNOMEDCT."]}
     let context_ = "InferSNOMEDCTRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5230,9 +5390,10 @@ module InferSNOMEDCTRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let text =
-        field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
+        field_map_exn json__ "Text"
+          OntologyLinkingBoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5241,7 +5402,7 @@ module InferRxNormResponse =
   struct
     type nonrec t =
       {
-      entities: RxNormEntityList.t
+      entities: RxNormEntityList.t option
         [@ocaml.doc
           "The medication entities detected in the text linked to RxNorm concepts. If the action is successful, the service sends back an HTTP 200 response, as well as the entities detected."];
       paginationToken: String_.t option
@@ -5258,11 +5419,10 @@ module InferRxNormResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "InferRxNormResponse"
-    let make ?paginationToken =
-      fun ?modelVersion ->
-        fun ~entities ->
-          fun () -> { paginationToken; modelVersion; entities }
+    let make ?entities =
+      fun ?paginationToken ->
+        fun ?modelVersion ->
+          fun () -> { entities; paginationToken; modelVersion }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5333,7 +5493,7 @@ module InferRxNormResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (RxNormEntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:RxNormEntityList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
         ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value))]
@@ -5344,15 +5504,16 @@ module InferRxNormResponse =
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let entities =
-        RxNormEntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
-      make ?modelVersion ?paginationToken ~entities ()
+        (Option.map ~f:RxNormEntityList.of_xml)
+          (Xml.child xml_arg0 "Entities") in
+      make ?modelVersion ?paginationToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
-      let entities = field_map_exn json "Entities" RxNormEntityList.of_json in
-      make ?modelVersion ?paginationToken ~entities ()
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
+      let entities = field_map json__ "Entities" RxNormEntityList.of_json in
+      make ?modelVersion ?paginationToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "InferRxNorm detects medications as entities listed in a patient record and links to the normalized concept identifiers in the RxNorm database from the National Library of Medicine. Amazon Comprehend Medical only detects medical entities in English language texts."]
@@ -5361,8 +5522,7 @@ module InferRxNormRequest =
     type nonrec t =
       {
       text: OntologyLinkingBoundedLengthString.t
-        [@ocaml.doc
-          "The input text used for analysis. The input for InferRxNorm is a string from 1 to 10000 characters."]}
+        [@ocaml.doc "The input text used for analysis."]}
     let context_ = "InferRxNormRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5376,9 +5536,10 @@ module InferRxNormRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let text =
-        field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
+        field_map_exn json__ "Text"
+          OntologyLinkingBoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5387,7 +5548,7 @@ module InferICD10CMResponse =
   struct
     type nonrec t =
       {
-      entities: ICD10CMEntityList.t
+      entities: ICD10CMEntityList.t option
         [@ocaml.doc
           "The medical conditions detected in the text linked to ICD-10-CM concepts. If the action is successful, the service sends back an HTTP 200 response, as well as the entities detected."];
       paginationToken: String_.t option
@@ -5404,11 +5565,10 @@ module InferICD10CMResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "InferICD10CMResponse"
-    let make ?paginationToken =
-      fun ?modelVersion ->
-        fun ~entities ->
-          fun () -> { paginationToken; modelVersion; entities }
+    let make ?entities =
+      fun ?paginationToken ->
+        fun ?modelVersion ->
+          fun () -> { entities; paginationToken; modelVersion }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5479,7 +5639,7 @@ module InferICD10CMResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (ICD10CMEntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:ICD10CMEntityList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
         ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value))]
@@ -5490,15 +5650,16 @@ module InferICD10CMResponse =
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let entities =
-        ICD10CMEntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
-      make ?modelVersion ?paginationToken ~entities ()
+        (Option.map ~f:ICD10CMEntityList.of_xml)
+          (Xml.child xml_arg0 "Entities") in
+      make ?modelVersion ?paginationToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
-      let entities = field_map_exn json "Entities" ICD10CMEntityList.of_json in
-      make ?modelVersion ?paginationToken ~entities ()
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
+      let entities = field_map json__ "Entities" ICD10CMEntityList.of_json in
+      make ?modelVersion ?paginationToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "InferICD10CM detects medical conditions as entities listed in a patient record and links those entities to normalized concept identifiers in the ICD-10-CM knowledge base from the Centers for Disease Control. Amazon Comprehend Medical only detects medical entities in English language texts."]
@@ -5507,8 +5668,7 @@ module InferICD10CMRequest =
     type nonrec t =
       {
       text: OntologyLinkingBoundedLengthString.t
-        [@ocaml.doc
-          "The input text used for analysis. The input for InferICD10CM is a string from 1 to 10000 characters."]}
+        [@ocaml.doc "The input text used for analysis."]}
     let context_ = "InferICD10CMRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5522,9 +5682,10 @@ module InferICD10CMRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let text =
-        field_map_exn json "Text" OntologyLinkingBoundedLengthString.of_json in
+        field_map_exn json__ "Text"
+          OntologyLinkingBoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5533,13 +5694,13 @@ module DetectPHIResponse =
   struct
     type nonrec t =
       {
-      entities: EntityList.t
+      entities: EntityList.t option
         [@ocaml.doc
-          "The collection of PHI entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Comprehend Medical; has in its detection."];
+          "The collection of PHI entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Amazon Comprehend Medical has in its detection."];
       paginationToken: String_.t option
         [@ocaml.doc
           "If the result of the previous request to DetectPHI was truncated, include the PaginationToken to fetch the next page of PHI entities."];
-      modelVersion: String_.t
+      modelVersion: String_.t option
         [@ocaml.doc
           "The version of the model used to analyze the documents. The version number looks like X.X.X. You can use this information to track the model used for a particular batch of documents."]}
     type nonrec error =
@@ -5550,11 +5711,10 @@ module DetectPHIResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DetectPHIResponse"
-    let make ?paginationToken =
-      fun ~entities ->
-        fun ~modelVersion ->
-          fun () -> { paginationToken; entities; modelVersion }
+    let make ?entities =
+      fun ?paginationToken ->
+        fun ?modelVersion ->
+          fun () -> { entities; paginationToken; modelVersion }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5625,27 +5785,26 @@ module DetectPHIResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (EntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:EntityList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
-        ("ModelVersion", (Some (String_.to_value x.modelVersion)))]
+        ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let modelVersion =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ModelVersion") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ModelVersion") in
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let entities =
-        EntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
-      make ~modelVersion ?paginationToken ~entities ()
+        (Option.map ~f:EntityList.of_xml) (Xml.child xml_arg0 "Entities") in
+      make ?modelVersion ?paginationToken ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
-      let entities = field_map_exn json "Entities" EntityList.of_json in
-      make ~modelVersion ?paginationToken ~entities ()
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
+      let entities = field_map json__ "Entities" EntityList.of_json in
+      make ?modelVersion ?paginationToken ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Inspects the clinical text for protected health information (PHI) entities and returns the entity category, location, and confidence score for each entity. Amazon Comprehend Medical only detects entities in English language texts."]
@@ -5655,7 +5814,7 @@ module DetectPHIRequest =
       {
       text: BoundedLengthString.t
         [@ocaml.doc
-          "A UTF-8 text string containing the clinical content being examined for PHI entities. Each string must contain fewer than 20,000 bytes of characters."]}
+          "A UTF-8 text string containing the clinical content being examined for PHI entities."]}
     let context_ = "DetectPHIRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5668,8 +5827,8 @@ module DetectPHIRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map_exn json "Text" BoundedLengthString.of_json in
+    let of_json json__ =
+      let text = field_map_exn json__ "Text" BoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5678,7 +5837,7 @@ module DetectEntitiesV2Response =
   struct
     type nonrec t =
       {
-      entities: EntityList.t
+      entities: EntityList.t option
         [@ocaml.doc
           "The collection of medical entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence in the detection and analysis. Attributes and traits of the entity are also returned."];
       unmappedAttributes: UnmappedAttributeList.t option
@@ -5687,7 +5846,7 @@ module DetectEntitiesV2Response =
       paginationToken: String_.t option
         [@ocaml.doc
           "If the result to the DetectEntitiesV2 operation was truncated, include the PaginationToken to fetch the next page of entities."];
-      modelVersion: String_.t
+      modelVersion: String_.t option
         [@ocaml.doc
           "The version of the model used to analyze the documents. The version number looks like X.X.X. You can use this information to track the model used for a particular batch of documents."]}
     type nonrec error =
@@ -5698,13 +5857,12 @@ module DetectEntitiesV2Response =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DetectEntitiesV2Response"
-    let make ?unmappedAttributes =
-      fun ?paginationToken ->
-        fun ~entities ->
-          fun ~modelVersion ->
+    let make ?entities =
+      fun ?unmappedAttributes ->
+        fun ?paginationToken ->
+          fun ?modelVersion ->
             fun () ->
-              { unmappedAttributes; paginationToken; entities; modelVersion }
+              { entities; unmappedAttributes; paginationToken; modelVersion }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5775,34 +5933,33 @@ module DetectEntitiesV2Response =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (EntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:EntityList.to_value));
         ("UnmappedAttributes",
           (Option.map x.unmappedAttributes ~f:UnmappedAttributeList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
-        ("ModelVersion", (Some (String_.to_value x.modelVersion)))]
+        ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let modelVersion =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ModelVersion") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ModelVersion") in
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let unmappedAttributes =
         (Option.map ~f:UnmappedAttributeList.of_xml)
           (Xml.child xml_arg0 "UnmappedAttributes") in
       let entities =
-        EntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
-      make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+        (Option.map ~f:EntityList.of_xml) (Xml.child xml_arg0 "Entities") in
+      make ?modelVersion ?paginationToken ?unmappedAttributes ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
       let unmappedAttributes =
-        field_map json "UnmappedAttributes" UnmappedAttributeList.of_json in
-      let entities = field_map_exn json "Entities" EntityList.of_json in
-      make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+        field_map json__ "UnmappedAttributes" UnmappedAttributeList.of_json in
+      let entities = field_map json__ "Entities" EntityList.of_json in
+      make ?modelVersion ?paginationToken ?unmappedAttributes ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Inspects the clinical text for a variety of medical entities and returns specific information about them such as entity category, location, and confidence score on that information. Amazon Comprehend Medical only detects medical entities in English language texts. The DetectEntitiesV2 operation replaces the DetectEntities operation. This new action uses a different model for determining the entities in your medical text and changes the way that some entities are returned in the output. You should use the DetectEntitiesV2 operation in all new applications. The DetectEntitiesV2 operation returns the Acuity and Direction entities as attributes instead of types."]
@@ -5812,7 +5969,7 @@ module DetectEntitiesV2Request =
       {
       text: BoundedLengthString.t
         [@ocaml.doc
-          "A UTF-8 string containing the clinical content being examined for entities. Each string must contain fewer than 20,000 bytes of characters."]}
+          "A UTF-8 string containing the clinical content being examined for entities."]}
     let context_ = "DetectEntitiesV2Request"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5825,8 +5982,8 @@ module DetectEntitiesV2Request =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map_exn json "Text" BoundedLengthString.of_json in
+    let of_json json__ =
+      let text = field_map_exn json__ "Text" BoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5835,16 +5992,16 @@ module DetectEntitiesResponse =
   struct
     type nonrec t =
       {
-      entities: EntityList.t
+      entities: EntityList.t option
         [@ocaml.doc
-          "The collection of medical entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Comprehend Medical; has in the detection and analysis. Attributes and traits of the entity are also returned."];
+          "The collection of medical entities extracted from the input text and their associated information. For each entity, the response provides the entity text, the entity category, where the entity text begins and ends, and the level of confidence that Amazon Comprehend Medical has in the detection and analysis. Attributes and traits of the entity are also returned."];
       unmappedAttributes: UnmappedAttributeList.t option
         [@ocaml.doc
           "Attributes extracted from the input text that we were unable to relate to an entity."];
       paginationToken: String_.t option
         [@ocaml.doc
           "If the result of the previous request to DetectEntities was truncated, include the PaginationToken to fetch the next page of entities."];
-      modelVersion: String_.t
+      modelVersion: String_.t option
         [@ocaml.doc
           "The version of the model used to analyze the documents. The version number looks like X.X.X. You can use this information to track the model used for a particular batch of documents."]}
     type nonrec error =
@@ -5855,13 +6012,12 @@ module DetectEntitiesResponse =
       | `TextSizeLimitExceededException of TextSizeLimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DetectEntitiesResponse"
-    let make ?unmappedAttributes =
-      fun ?paginationToken ->
-        fun ~entities ->
-          fun ~modelVersion ->
+    let make ?entities =
+      fun ?unmappedAttributes ->
+        fun ?paginationToken ->
+          fun ?modelVersion ->
             fun () ->
-              { unmappedAttributes; paginationToken; entities; modelVersion }
+              { entities; unmappedAttributes; paginationToken; modelVersion }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -5932,44 +6088,43 @@ module DetectEntitiesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Entities", (Some (EntityList.to_value x.entities)));
+        [("Entities", (Option.map x.entities ~f:EntityList.to_value));
         ("UnmappedAttributes",
           (Option.map x.unmappedAttributes ~f:UnmappedAttributeList.to_value));
         ("PaginationToken",
           (Option.map x.paginationToken ~f:String_.to_value));
-        ("ModelVersion", (Some (String_.to_value x.modelVersion)))]
+        ("ModelVersion", (Option.map x.modelVersion ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let modelVersion =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ModelVersion") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ModelVersion") in
       let paginationToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PaginationToken") in
       let unmappedAttributes =
         (Option.map ~f:UnmappedAttributeList.of_xml)
           (Xml.child xml_arg0 "UnmappedAttributes") in
       let entities =
-        EntityList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Entities") in
-      make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+        (Option.map ~f:EntityList.of_xml) (Xml.child xml_arg0 "Entities") in
+      make ?modelVersion ?paginationToken ?unmappedAttributes ?entities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let modelVersion = field_map_exn json "ModelVersion" String_.of_json in
-      let paginationToken = field_map json "PaginationToken" String_.of_json in
+    let of_json json__ =
+      let modelVersion = field_map json__ "ModelVersion" String_.of_json in
+      let paginationToken =
+        field_map json__ "PaginationToken" String_.of_json in
       let unmappedAttributes =
-        field_map json "UnmappedAttributes" UnmappedAttributeList.of_json in
-      let entities = field_map_exn json "Entities" EntityList.of_json in
-      make ~modelVersion ?paginationToken ?unmappedAttributes ~entities ()
+        field_map json__ "UnmappedAttributes" UnmappedAttributeList.of_json in
+      let entities = field_map json__ "Entities" EntityList.of_json in
+      make ?modelVersion ?paginationToken ?unmappedAttributes ?entities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The DetectEntities operation is deprecated. You should use the DetectEntitiesV2 operation instead. Inspects the clinical text for a variety of medical entities and returns specific information about them such as entity category, location, and confidence score on that information ."]
+       "The DetectEntities operation is deprecated. You should use the DetectEntitiesV2 operation instead. Inspects the clinical text for a variety of medical entities and returns specific information about them such as entity category, location, and confidence score on that information."]
 module DetectEntitiesRequest =
   struct
     type nonrec t =
       {
       text: BoundedLengthString.t
         [@ocaml.doc
-          "A UTF-8 text string containing the clinical content being examined for entities. Each string must contain fewer than 20,000 bytes of characters."]}
+          "A UTF-8 text string containing the clinical content being examined for entities."]}
     let context_ = "DetectEntitiesRequest"
     let make ~text = fun () -> { text }
     let to_value x =
@@ -5982,12 +6137,12 @@ module DetectEntitiesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Text") in
       make ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let text = field_map_exn json "Text" BoundedLengthString.of_json in
+    let of_json json__ =
+      let text = field_map_exn json__ "Text" BoundedLengthString.of_json in
       make ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The DetectEntities operation is deprecated. You should use the DetectEntitiesV2 operation instead. Inspects the clinical text for a variety of medical entities and returns specific information about them such as entity category, location, and confidence score on that information ."]
+       "The DetectEntities operation is deprecated. You should use the DetectEntitiesV2 operation instead. Inspects the clinical text for a variety of medical entities and returns specific information about them such as entity category, location, and confidence score on that information."]
 module DescribeSNOMEDCTInferenceJobResponse =
   struct
     type nonrec t =
@@ -6062,9 +6217,9 @@ module DescribeSNOMEDCTInferenceJobResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comprehendMedicalAsyncJobProperties =
-        field_map json "ComprehendMedicalAsyncJobProperties"
+        field_map json__ "ComprehendMedicalAsyncJobProperties"
           ComprehendMedicalAsyncJobProperties.of_json in
       make ?comprehendMedicalAsyncJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -6087,8 +6242,9 @@ module DescribeSNOMEDCTInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with an InferSNOMEDCT job. Use this operation to get the status of an inference job."]
@@ -6168,9 +6324,9 @@ module DescribeRxNormInferenceJobResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comprehendMedicalAsyncJobProperties =
-        field_map json "ComprehendMedicalAsyncJobProperties"
+        field_map json__ "ComprehendMedicalAsyncJobProperties"
           ComprehendMedicalAsyncJobProperties.of_json in
       make ?comprehendMedicalAsyncJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -6193,8 +6349,9 @@ module DescribeRxNormInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with an InferRxNorm job. Use this operation to get the status of an inference job."]
@@ -6274,9 +6431,9 @@ module DescribePHIDetectionJobResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comprehendMedicalAsyncJobProperties =
-        field_map json "ComprehendMedicalAsyncJobProperties"
+        field_map json__ "ComprehendMedicalAsyncJobProperties"
           ComprehendMedicalAsyncJobProperties.of_json in
       make ?comprehendMedicalAsyncJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -6288,7 +6445,7 @@ module DescribePHIDetectionJobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Comprehend Medical; generated for the job. The StartPHIDetectionJob operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend Medical generated for the job. The StartPHIDetectionJob operation returns this identifier in its response."]}
     let context_ = "DescribePHIDetectionJobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -6299,8 +6456,9 @@ module DescribePHIDetectionJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a protected health information (PHI) detection job. Use this operation to get the status of a detection job."]
@@ -6380,9 +6538,9 @@ module DescribeICD10CMInferenceJobResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comprehendMedicalAsyncJobProperties =
-        field_map json "ComprehendMedicalAsyncJobProperties"
+        field_map json__ "ComprehendMedicalAsyncJobProperties"
           ComprehendMedicalAsyncJobProperties.of_json in
       make ?comprehendMedicalAsyncJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -6405,8 +6563,9 @@ module DescribeICD10CMInferenceJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with an InferICD10CM job. Use this operation to get the status of an inference job."]
@@ -6486,9 +6645,9 @@ module DescribeEntitiesDetectionV2JobResponse =
           (Xml.child xml_arg0 "ComprehendMedicalAsyncJobProperties") in
       make ?comprehendMedicalAsyncJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let comprehendMedicalAsyncJobProperties =
-        field_map json "ComprehendMedicalAsyncJobProperties"
+        field_map json__ "ComprehendMedicalAsyncJobProperties"
           ComprehendMedicalAsyncJobProperties.of_json in
       make ?comprehendMedicalAsyncJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -6500,7 +6659,7 @@ module DescribeEntitiesDetectionV2JobRequest =
       {
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier that Comprehend Medical; generated for the job. The StartEntitiesDetectionV2Job operation returns this identifier in its response."]}
+          "The identifier that Amazon Comprehend Medical generated for the job. The StartEntitiesDetectionV2Job operation returns this identifier in its response."]}
     let context_ = "DescribeEntitiesDetectionV2JobRequest"
     let make ~jobId = fun () -> { jobId }
     let to_value x =
@@ -6511,8 +6670,9 @@ module DescribeEntitiesDetectionV2JobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with a medical entities detection job. Use this operation to get the status of a detection job."]

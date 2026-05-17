@@ -106,13 +106,13 @@ module SummarizedCounter =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?unit ?n ?sum ?average ?max ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" String_.of_json in
-      let n = field_map json "N" Integer.of_json in
-      let sum = field_map json "Sum" Double.of_json in
-      let average = field_map json "Average" Double.of_json in
-      let max = field_map json "Max" Double.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" String_.of_json in
+      let n = field_map json__ "N" Integer.of_json in
+      let sum = field_map json__ "Sum" Double.of_json in
+      let average = field_map json__ "Average" Double.of_json in
+      let max = field_map json__ "Max" Double.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?unit ?n ?sum ?average ?max ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The counter that describes a DDoS attack."]
@@ -133,6 +133,9 @@ module SummarizedCounterList =
   struct
     type nonrec t = SummarizedCounter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SummarizedCounter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -184,23 +187,22 @@ module ProtectionGroupArbitraryPatternLimits =
   struct
     type nonrec t =
       {
-      maxMembers: Long.t
+      maxMembers: Long.t option
         [@ocaml.doc
           "The maximum number of resources you can specify for a single arbitrary pattern in a protection group."]}
-    let context_ = "ProtectionGroupArbitraryPatternLimits"
-    let make ~maxMembers = fun () -> { maxMembers }
+    let make ?maxMembers = fun () -> { maxMembers }
     let to_value x =
       structure_to_value
-        [("MaxMembers", (Some (Long.to_value x.maxMembers)))]
+        [("MaxMembers", (Option.map x.maxMembers ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxMembers =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MaxMembers") in
-      make ~maxMembers ()
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "MaxMembers") in
+      make ?maxMembers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxMembers = field_map_exn json "MaxMembers" Long.of_json in
-      make ~maxMembers ()
+    let of_json json__ =
+      let maxMembers = field_map json__ "MaxMembers" Long.of_json in
+      make ?maxMembers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Limits settings on protection groups with arbitrary pattern type."]
@@ -223,9 +225,9 @@ module Limit =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       make ?max ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map json "Max" Long.of_json in
-      let type_ = field_map json "Type" String_.of_json in
+    let of_json json__ =
+      let max = field_map json__ "Max" Long.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
       make ?max ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -251,9 +253,9 @@ module Contributor =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Long.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" Long.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A contributor to the attack and their contribution."]
@@ -261,18 +263,17 @@ module SummarizedAttackVector =
   struct
     type nonrec t =
       {
-      vectorType: String_.t
+      vectorType: String_.t option
         [@ocaml.doc
           "The attack type, for example, SNMP reflection or SYN flood."];
       vectorCounters: SummarizedCounterList.t option
         [@ocaml.doc
           "The list of counters that describe the details of the attack."]}
-    let context_ = "SummarizedAttackVector"
-    let make ?vectorCounters =
-      fun ~vectorType -> fun () -> { vectorCounters; vectorType }
+    let make ?vectorType =
+      fun ?vectorCounters -> fun () -> { vectorType; vectorCounters }
     let to_value x =
       structure_to_value
-        [("VectorType", (Some (String_.to_value x.vectorType)));
+        [("VectorType", (Option.map x.vectorType ~f:String_.to_value));
         ("VectorCounters",
           (Option.map x.vectorCounters ~f:SummarizedCounterList.to_value))]
     let to_query v = to_query to_value v
@@ -281,15 +282,14 @@ module SummarizedAttackVector =
         (Option.map ~f:SummarizedCounterList.of_xml)
           (Xml.child xml_arg0 "VectorCounters") in
       let vectorType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VectorType") in
-      make ?vectorCounters ~vectorType ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VectorType") in
+      make ?vectorCounters ?vectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vectorCounters =
-        field_map json "VectorCounters" SummarizedCounterList.of_json in
-      let vectorType = field_map_exn json "VectorType" String_.of_json in
-      make ?vectorCounters ~vectorType ()
+        field_map json__ "VectorCounters" SummarizedCounterList.of_json in
+      let vectorType = field_map json__ "VectorType" String_.of_json in
+      make ?vectorCounters ?vectorType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of information about the attack."]
 module ApplicationLayerAutomaticResponseStatus =
@@ -345,9 +345,9 @@ module ResponseAction =
         (Option.map ~f:BlockAction.of_xml) (Xml.child xml_arg0 "Block") in
       make ?count ?block ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let count = field_map json "Count" CountAction.of_json in
-      let block = field_map json "Block" BlockAction.of_json in
+    let of_json json__ =
+      let count = field_map json__ "Count" CountAction.of_json in
+      let block = field_map json__ "Block" BlockAction.of_json in
       make ?count ?block ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -389,53 +389,49 @@ module AttackVectorDescription =
   struct
     type nonrec t =
       {
-      vectorType: String_.t
+      vectorType: String_.t option
         [@ocaml.doc
           "The attack type. Valid values: UDP_TRAFFIC UDP_FRAGMENT GENERIC_UDP_REFLECTION DNS_REFLECTION NTP_REFLECTION CHARGEN_REFLECTION SSDP_REFLECTION PORT_MAPPER RIP_REFLECTION SNMP_REFLECTION MSSQL_REFLECTION NET_BIOS_REFLECTION SYN_FLOOD ACK_FLOOD REQUEST_FLOOD HTTP_REFLECTION UDS_REFLECTION MEMCACHED_REFLECTION"]}
-    let context_ = "AttackVectorDescription"
-    let make ~vectorType = fun () -> { vectorType }
+    let make ?vectorType = fun () -> { vectorType }
     let to_value x =
       structure_to_value
-        [("VectorType", (Some (String_.to_value x.vectorType)))]
+        [("VectorType", (Option.map x.vectorType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vectorType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VectorType") in
-      make ~vectorType ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VectorType") in
+      make ?vectorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vectorType = field_map_exn json "VectorType" String_.of_json in
-      make ~vectorType ()
+    let of_json json__ =
+      let vectorType = field_map json__ "VectorType" String_.of_json in
+      make ?vectorType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the attack."]
 module ProtectionGroupPatternTypeLimits =
   struct
     type nonrec t =
       {
-      arbitraryPatternLimits: ProtectionGroupArbitraryPatternLimits.t
+      arbitraryPatternLimits: ProtectionGroupArbitraryPatternLimits.t option
         [@ocaml.doc
           "Limits settings on protection groups with arbitrary pattern type."]}
-    let context_ = "ProtectionGroupPatternTypeLimits"
-    let make ~arbitraryPatternLimits = fun () -> { arbitraryPatternLimits }
+    let make ?arbitraryPatternLimits = fun () -> { arbitraryPatternLimits }
     let to_value x =
       structure_to_value
         [("ArbitraryPatternLimits",
-           (Some
-              (ProtectionGroupArbitraryPatternLimits.to_value
-                 x.arbitraryPatternLimits)))]
+           (Option.map x.arbitraryPatternLimits
+              ~f:ProtectionGroupArbitraryPatternLimits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let arbitraryPatternLimits =
-        ProtectionGroupArbitraryPatternLimits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ArbitraryPatternLimits") in
-      make ~arbitraryPatternLimits ()
+        (Option.map ~f:ProtectionGroupArbitraryPatternLimits.of_xml)
+          (Xml.child xml_arg0 "ArbitraryPatternLimits") in
+      make ?arbitraryPatternLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let arbitraryPatternLimits =
-        field_map_exn json "ArbitraryPatternLimits"
+        field_map json__ "ArbitraryPatternLimits"
           ProtectionGroupArbitraryPatternLimits.of_json in
-      make ~arbitraryPatternLimits ()
+      make ?arbitraryPatternLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Limits settings by pattern type in the protection groups for your subscription."]
@@ -443,6 +439,9 @@ module Limits =
   struct
     type nonrec t = Limit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Limit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -466,20 +465,18 @@ module AttackVolumeStatistics =
   struct
     type nonrec t =
       {
-      max: Double.t
+      max: Double.t option
         [@ocaml.doc "The maximum attack volume observed for the given unit."]}
-    let context_ = "AttackVolumeStatistics"
-    let make ~max = fun () -> { max }
+    let make ?max = fun () -> { max }
     let to_value x =
-      structure_to_value [("Max", (Some (Double.to_value x.max)))]
+      structure_to_value [("Max", (Option.map x.max ~f:Double.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let max =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Max") in
-      make ~max ()
+      let max = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Max") in
+      make ?max ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let max = field_map_exn json "Max" Double.of_json in make ~max ()
+    let of_json json__ =
+      let max = field_map json__ "Max" Double.of_json in make ?max ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Statistics objects for the various data types in AttackVolume."]
@@ -557,6 +554,9 @@ module TopContributors =
   struct
     type nonrec t = Contributor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Contributor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -631,6 +631,9 @@ module SummarizedAttackVectorList =
   struct
     type nonrec t = SummarizedAttackVector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SummarizedAttackVector.to_value)) |>
         (fun x -> `List x)
@@ -657,29 +660,27 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: String_.t
+      name: String_.t option
         [@ocaml.doc "The name of the parameter that failed validation."];
-      message: String_.t
+      message: String_.t option
         [@ocaml.doc
           "The message describing why the parameter failed validation."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("message", (Some (String_.to_value x.message)))]
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~message ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about a particular parameter passed inside a request that resulted in an exception."]
@@ -784,33 +785,34 @@ module ApplicationLayerAutomaticResponseConfiguration =
   struct
     type nonrec t =
       {
-      status: ApplicationLayerAutomaticResponseStatus.t
+      status: ApplicationLayerAutomaticResponseStatus.t option
         [@ocaml.doc
           "Indicates whether automatic application layer DDoS mitigation is enabled for the protection."];
-      action: ResponseAction.t }
-    let context_ = "ApplicationLayerAutomaticResponseConfiguration"
-    let make ~status = fun ~action -> fun () -> { status; action }
+      action: ResponseAction.t option
+        [@ocaml.doc
+          "Specifies the action setting that Shield Advanced should use in the WAF rules that it creates on behalf of the protected resource in response to DDoS attacks. You specify this as part of the configuration for the automatic application layer DDoS mitigation feature, when you enable or update automatic mitigation. Shield Advanced creates the WAF rules in a Shield Advanced-managed rule group, inside the web ACL that you have associated with the resource."]}
+    let make ?status = fun ?action -> fun () -> { status; action }
     let to_value x =
       structure_to_value
         [("Status",
-           (Some (ApplicationLayerAutomaticResponseStatus.to_value x.status)));
-        ("Action", (Some (ResponseAction.to_value x.action)))]
+           (Option.map x.status
+              ~f:ApplicationLayerAutomaticResponseStatus.to_value));
+        ("Action", (Option.map x.action ~f:ResponseAction.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let action =
-        ResponseAction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Action") in
+        (Option.map ~f:ResponseAction.of_xml) (Xml.child xml_arg0 "Action") in
       let status =
-        ApplicationLayerAutomaticResponseStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      make ~action ~status ()
+        (Option.map ~f:ApplicationLayerAutomaticResponseStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?action ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" ResponseAction.of_json in
+    let of_json json__ =
+      let action = field_map json__ "Action" ResponseAction.of_json in
       let status =
-        field_map_exn json "Status"
+        field_map json__ "Status"
           ApplicationLayerAutomaticResponseStatus.of_json in
-      make ~action ~status ()
+      make ?action ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The automatic application layer DDoS mitigation settings for a Protection. This configuration determines whether Shield Advanced automatically manages rules in the web ACL in order to respond to application layer events that Shield Advanced determines to be DDoS attacks."]
@@ -818,6 +820,9 @@ module HealthCheckIds =
   struct
     type nonrec t = HealthCheckId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HealthCheckId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -978,6 +983,9 @@ module ProtectionGroupMembers =
           ((check_list_max i ~max:10000) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1045,6 +1053,9 @@ module AttackVectorDescriptionList =
   struct
     type nonrec t = AttackVectorDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttackVectorDescription.to_value)) |>
         (fun x -> `List x)
@@ -1071,40 +1082,39 @@ module ProtectionGroupLimits =
   struct
     type nonrec t =
       {
-      maxProtectionGroups: Long.t
+      maxProtectionGroups: Long.t option
         [@ocaml.doc
           "The maximum number of protection groups that you can have at one time."];
-      patternTypeLimits: ProtectionGroupPatternTypeLimits.t
+      patternTypeLimits: ProtectionGroupPatternTypeLimits.t option
         [@ocaml.doc
           "Limits settings by pattern type in the protection groups for your subscription."]}
-    let context_ = "ProtectionGroupLimits"
-    let make ~maxProtectionGroups =
-      fun ~patternTypeLimits ->
+    let make ?maxProtectionGroups =
+      fun ?patternTypeLimits ->
         fun () -> { maxProtectionGroups; patternTypeLimits }
     let to_value x =
       structure_to_value
         [("MaxProtectionGroups",
-           (Some (Long.to_value x.maxProtectionGroups)));
+           (Option.map x.maxProtectionGroups ~f:Long.to_value));
         ("PatternTypeLimits",
-          (Some
-             (ProtectionGroupPatternTypeLimits.to_value x.patternTypeLimits)))]
+          (Option.map x.patternTypeLimits
+             ~f:ProtectionGroupPatternTypeLimits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let patternTypeLimits =
-        ProtectionGroupPatternTypeLimits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PatternTypeLimits") in
+        (Option.map ~f:ProtectionGroupPatternTypeLimits.of_xml)
+          (Xml.child xml_arg0 "PatternTypeLimits") in
       let maxProtectionGroups =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxProtectionGroups") in
-      make ~patternTypeLimits ~maxProtectionGroups ()
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "MaxProtectionGroups") in
+      make ?patternTypeLimits ?maxProtectionGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let patternTypeLimits =
-        field_map_exn json "PatternTypeLimits"
+        field_map json__ "PatternTypeLimits"
           ProtectionGroupPatternTypeLimits.of_json in
       let maxProtectionGroups =
-        field_map_exn json "MaxProtectionGroups" Long.of_json in
-      make ~patternTypeLimits ~maxProtectionGroups ()
+        field_map json__ "MaxProtectionGroups" Long.of_json in
+      make ?patternTypeLimits ?maxProtectionGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Limits settings on protection groups for your subscription."]
@@ -1112,28 +1122,26 @@ module ProtectionLimits =
   struct
     type nonrec t =
       {
-      protectedResourceTypeLimits: Limits.t
+      protectedResourceTypeLimits: Limits.t option
         [@ocaml.doc
           "The maximum number of resource types that you can specify in a protection."]}
-    let context_ = "ProtectionLimits"
-    let make ~protectedResourceTypeLimits =
+    let make ?protectedResourceTypeLimits =
       fun () -> { protectedResourceTypeLimits }
     let to_value x =
       structure_to_value
         [("ProtectedResourceTypeLimits",
-           (Some (Limits.to_value x.protectedResourceTypeLimits)))]
+           (Option.map x.protectedResourceTypeLimits ~f:Limits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let protectedResourceTypeLimits =
-        Limits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ProtectedResourceTypeLimits") in
-      make ~protectedResourceTypeLimits ()
+        (Option.map ~f:Limits.of_xml)
+          (Xml.child xml_arg0 "ProtectedResourceTypeLimits") in
+      make ?protectedResourceTypeLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectedResourceTypeLimits =
-        field_map_exn json "ProtectedResourceTypeLimits" Limits.of_json in
-      make ~protectedResourceTypeLimits ()
+        field_map json__ "ProtectedResourceTypeLimits" Limits.of_json in
+      make ?protectedResourceTypeLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Limits settings on protections for your subscription."]
 module AttackVolume =
@@ -1174,13 +1182,13 @@ module AttackVolume =
           (Xml.child xml_arg0 "BitsPerSecond") in
       make ?requestsPerSecond ?packetsPerSecond ?bitsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestsPerSecond =
-        field_map json "RequestsPerSecond" AttackVolumeStatistics.of_json in
+        field_map json__ "RequestsPerSecond" AttackVolumeStatistics.of_json in
       let packetsPerSecond =
-        field_map json "PacketsPerSecond" AttackVolumeStatistics.of_json in
+        field_map json__ "PacketsPerSecond" AttackVolumeStatistics.of_json in
       let bitsPerSecond =
-        field_map json "BitsPerSecond" AttackVolumeStatistics.of_json in
+        field_map json__ "BitsPerSecond" AttackVolumeStatistics.of_json in
       make ?requestsPerSecond ?packetsPerSecond ?bitsPerSecond ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1241,15 +1249,15 @@ module AttackProperty =
       make ?total ?unit ?topContributors ?attackPropertyIdentifier
         ?attackLayer ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let total = field_map json "Total" Long.of_json in
-      let unit = field_map json "Unit" Unit.of_json in
+    let of_json json__ =
+      let total = field_map json__ "Total" Long.of_json in
+      let unit = field_map json__ "Unit" Unit.of_json in
       let topContributors =
-        field_map json "TopContributors" TopContributors.of_json in
+        field_map json__ "TopContributors" TopContributors.of_json in
       let attackPropertyIdentifier =
-        field_map json "AttackPropertyIdentifier"
+        field_map json__ "AttackPropertyIdentifier"
           AttackPropertyIdentifier.of_json in
-      let attackLayer = field_map json "AttackLayer" AttackLayer.of_json in
+      let attackLayer = field_map json__ "AttackLayer" AttackLayer.of_json in
       make ?total ?unit ?topContributors ?attackPropertyIdentifier
         ?attackLayer ()
     let to_json v = composed_to_json to_value v
@@ -1272,8 +1280,8 @@ module Mitigation =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MitigationName") in
       make ?mitigationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mitigationName = field_map json "MitigationName" String_.of_json in
+    let of_json json__ =
+      let mitigationName = field_map json__ "MitigationName" String_.of_json in
       make ?mitigationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The mitigation applied to a DDoS attack."]
@@ -1313,12 +1321,13 @@ module SubResourceSummary =
         (Option.map ~f:SubResourceType.of_xml) (Xml.child xml_arg0 "Type") in
       make ?counters ?attackVectors ?id ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let counters = field_map json "Counters" SummarizedCounterList.of_json in
+    let of_json json__ =
+      let counters =
+        field_map json__ "Counters" SummarizedCounterList.of_json in
       let attackVectors =
-        field_map json "AttackVectors" SummarizedAttackVectorList.of_json in
-      let id = field_map json "Id" String_.of_json in
-      let type_ = field_map json "Type" SubResourceType.of_json in
+        field_map json__ "AttackVectors" SummarizedAttackVectorList.of_json in
+      let id = field_map json__ "Id" String_.of_json in
+      let type_ = field_map json__ "Type" SubResourceType.of_json in
       make ?counters ?attackVectors ?id ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The attack information for the specified SubResource."]
@@ -1339,6 +1348,9 @@ module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -1421,11 +1433,11 @@ module EmergencyContact =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?contactNotes ?phoneNumber ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contactNotes = field_map json "ContactNotes" ContactNotes.of_json in
-      let phoneNumber = field_map json "PhoneNumber" PhoneNumber.of_json in
+    let of_json json__ =
+      let contactNotes = field_map json__ "ContactNotes" ContactNotes.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" PhoneNumber.of_json in
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       make ?contactNotes ?phoneNumber ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1452,9 +1464,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A tag associated with an Amazon Web Services resource. Tags are key:value pairs that you can use to categorize and manage your resources, for purposes like billing or other management. Typically, the tag key represents a category, such as \"environment\", and the tag value represents a specific value within that category, such as \"test,\" \"development,\" or \"production\". Or you might set the tag key to \"customer\" and the value to the customer name or ID. You can specify one or more tags to add to each Amazon Web Services resource, up to 50 tags for a resource."]
@@ -1526,69 +1538,167 @@ module Protection =
       make ?applicationLayerAutomaticResponseConfiguration ?protectionArn
         ?healthCheckIds ?resourceArn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationLayerAutomaticResponseConfiguration =
-        field_map json "ApplicationLayerAutomaticResponseConfiguration"
+        field_map json__ "ApplicationLayerAutomaticResponseConfiguration"
           ApplicationLayerAutomaticResponseConfiguration.of_json in
-      let protectionArn = field_map json "ProtectionArn" ResourceArn.of_json in
+      let protectionArn =
+        field_map json__ "ProtectionArn" ResourceArn.of_json in
       let healthCheckIds =
-        field_map json "HealthCheckIds" HealthCheckIds.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let name = field_map json "Name" ProtectionName.of_json in
-      let id = field_map json "Id" ProtectionId.of_json in
+        field_map json__ "HealthCheckIds" HealthCheckIds.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let name = field_map json__ "Name" ProtectionName.of_json in
+      let id = field_map json__ "Id" ProtectionId.of_json in
       make ?applicationLayerAutomaticResponseConfiguration ?protectionArn
         ?healthCheckIds ?resourceArn ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents a resource that is under DDoS protection."]
+module ProtectedResourceTypeFilters =
+  struct
+    type nonrec t = ProtectedResourceType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProtectedResourceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProtectedResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtectedResourceTypeFilters"
+        ~of_json:ProtectedResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProtectionNameFilters =
+  struct
+    type nonrec t = ProtectionName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProtectionName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProtectionName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtectionNameFilters"
+        ~of_json:ProtectionName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceArnFilters =
+  struct
+    type nonrec t = ResourceArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceArnFilters" ~of_json:ResourceArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ProtectionGroup =
   struct
     type nonrec t =
       {
-      protectionGroupId: ProtectionGroupId.t
+      protectionGroupId: ProtectionGroupId.t option
         [@ocaml.doc
           "The name of the protection group. You use this to identify the protection group in lists and to manage the protection group, for example to update, delete, or describe it."];
-      aggregation: ProtectionGroupAggregation.t
+      aggregation: ProtectionGroupAggregation.t option
         [@ocaml.doc
           "Defines how Shield combines resource data for the group in order to detect, mitigate, and report events. Sum - Use the total traffic across the group. This is a good choice for most cases. Examples include Elastic IP addresses for EC2 instances that scale manually or automatically. Mean - Use the average of the traffic across the group. This is a good choice for resources that share traffic uniformly. Examples include accelerators and load balancers. Max - Use the highest traffic from each resource. This is useful for resources that don't share traffic and for resources that share that traffic in a non-uniform way. Examples include Amazon CloudFront distributions and origin resources for CloudFront distributions."];
-      pattern: ProtectionGroupPattern.t
+      pattern: ProtectionGroupPattern.t option
         [@ocaml.doc
-          "The criteria to use to choose the protected resources for inclusion in the group. You can include all resources that have protections, provide a list of resource Amazon Resource Names (ARNs), or include all resources of a specified resource type."];
+          "The criteria to use to choose the protected resources for inclusion in the group. You can include all resources that have protections, provide a list of resource ARNs (Amazon Resource Names), or include all resources of a specified resource type."];
       resourceType: ProtectedResourceType.t option
         [@ocaml.doc
           "The resource type to include in the protection group. All protected resources of this type are included in the protection group. You must set this when you set Pattern to BY_RESOURCE_TYPE and you must not set it for any other Pattern setting."];
-      members: ProtectionGroupMembers.t
+      members: ProtectionGroupMembers.t option
         [@ocaml.doc
-          "The Amazon Resource Names (ARNs) of the resources to include in the protection group. You must set this when you set Pattern to ARBITRARY and you must not set it for any other Pattern setting."];
+          "The ARNs (Amazon Resource Names) of the resources to include in the protection group. You must set this when you set Pattern to ARBITRARY and you must not set it for any other Pattern setting."];
       protectionGroupArn: ResourceArn.t option
         [@ocaml.doc
           "The ARN (Amazon Resource Name) of the protection group."]}
-    let context_ = "ProtectionGroup"
-    let make ?resourceType =
-      fun ?protectionGroupArn ->
-        fun ~protectionGroupId ->
-          fun ~aggregation ->
-            fun ~pattern ->
-              fun ~members ->
+    let make ?protectionGroupId =
+      fun ?aggregation ->
+        fun ?pattern ->
+          fun ?resourceType ->
+            fun ?members ->
+              fun ?protectionGroupArn ->
                 fun () ->
                   {
-                    resourceType;
-                    protectionGroupArn;
                     protectionGroupId;
                     aggregation;
                     pattern;
-                    members
+                    resourceType;
+                    members;
+                    protectionGroupArn
                   }
     let to_value x =
       structure_to_value
         [("ProtectionGroupId",
-           (Some (ProtectionGroupId.to_value x.protectionGroupId)));
+           (Option.map x.protectionGroupId ~f:ProtectionGroupId.to_value));
         ("Aggregation",
-          (Some (ProtectionGroupAggregation.to_value x.aggregation)));
-        ("Pattern", (Some (ProtectionGroupPattern.to_value x.pattern)));
+          (Option.map x.aggregation ~f:ProtectionGroupAggregation.to_value));
+        ("Pattern",
+          (Option.map x.pattern ~f:ProtectionGroupPattern.to_value));
         ("ResourceType",
           (Option.map x.resourceType ~f:ProtectedResourceType.to_value));
-        ("Members", (Some (ProtectionGroupMembers.to_value x.members)));
+        ("Members",
+          (Option.map x.members ~f:ProtectionGroupMembers.to_value));
         ("ProtectionGroupArn",
           (Option.map x.protectionGroupArn ~f:ResourceArn.to_value))]
     let to_query v = to_query to_value v
@@ -1597,41 +1707,137 @@ module ProtectionGroup =
         (Option.map ~f:ResourceArn.of_xml)
           (Xml.child xml_arg0 "ProtectionGroupArn") in
       let members =
-        ProtectionGroupMembers.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Members") in
+        (Option.map ~f:ProtectionGroupMembers.of_xml)
+          (Xml.child xml_arg0 "Members") in
       let resourceType =
         (Option.map ~f:ProtectedResourceType.of_xml)
           (Xml.child xml_arg0 "ResourceType") in
       let pattern =
-        ProtectionGroupPattern.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Pattern") in
+        (Option.map ~f:ProtectionGroupPattern.of_xml)
+          (Xml.child xml_arg0 "Pattern") in
       let aggregation =
-        ProtectionGroupAggregation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Aggregation") in
+        (Option.map ~f:ProtectionGroupAggregation.of_xml)
+          (Xml.child xml_arg0 "Aggregation") in
       let protectionGroupId =
-        ProtectionGroupId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
-      make ?protectionGroupArn ~members ?resourceType ~pattern ~aggregation
-        ~protectionGroupId ()
+        (Option.map ~f:ProtectionGroupId.of_xml)
+          (Xml.child xml_arg0 "ProtectionGroupId") in
+      make ?protectionGroupArn ?members ?resourceType ?pattern ?aggregation
+        ?protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionGroupArn =
-        field_map json "ProtectionGroupArn" ResourceArn.of_json in
-      let members =
-        field_map_exn json "Members" ProtectionGroupMembers.of_json in
+        field_map json__ "ProtectionGroupArn" ResourceArn.of_json in
+      let members = field_map json__ "Members" ProtectionGroupMembers.of_json in
       let resourceType =
-        field_map json "ResourceType" ProtectedResourceType.of_json in
-      let pattern =
-        field_map_exn json "Pattern" ProtectionGroupPattern.of_json in
+        field_map json__ "ResourceType" ProtectedResourceType.of_json in
+      let pattern = field_map json__ "Pattern" ProtectionGroupPattern.of_json in
       let aggregation =
-        field_map_exn json "Aggregation" ProtectionGroupAggregation.of_json in
+        field_map json__ "Aggregation" ProtectionGroupAggregation.of_json in
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
-      make ?protectionGroupArn ~members ?resourceType ~pattern ~aggregation
-        ~protectionGroupId ()
+        field_map json__ "ProtectionGroupId" ProtectionGroupId.of_json in
+      make ?protectionGroupArn ?members ?resourceType ?pattern ?aggregation
+        ?protectionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A grouping of protected resources that you and Shield Advanced can monitor as a collective. This resource grouping improves the accuracy of detection and reduces false positives."]
+module ProtectionGroupAggregationFilters =
+  struct
+    type nonrec t = ProtectionGroupAggregation.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProtectionGroupAggregation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProtectionGroupAggregation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtectionGroupAggregationFilters"
+        ~of_json:ProtectionGroupAggregation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProtectionGroupIdFilters =
+  struct
+    type nonrec t = ProtectionGroupId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProtectionGroupId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProtectionGroupId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtectionGroupIdFilters"
+        ~of_json:ProtectionGroupId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ProtectionGroupPatternFilters =
+  struct
+    type nonrec t = ProtectionGroupPattern.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProtectionGroupPattern.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProtectionGroupPattern.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtectionGroupPatternFilters"
+        ~of_json:ProtectionGroupPattern.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AttackSummary =
   struct
     type nonrec t =
@@ -1678,13 +1884,13 @@ module AttackSummary =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AttackId") in
       make ?attackVectors ?endTime ?startTime ?resourceArn ?attackId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attackVectors =
-        field_map json "AttackVectors" AttackVectorDescriptionList.of_json in
-      let endTime = field_map json "EndTime" AttackTimestamp.of_json in
-      let startTime = field_map json "StartTime" AttackTimestamp.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
-      let attackId = field_map json "AttackId" String_.of_json in
+        field_map json__ "AttackVectors" AttackVectorDescriptionList.of_json in
+      let endTime = field_map json__ "EndTime" AttackTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" AttackTimestamp.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
+      let attackId = field_map json__ "AttackId" String_.of_json in
       make ?attackVectors ?endTime ?startTime ?resourceArn ?attackId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summarizes all DDoS attacks for a specified time period."]
@@ -1799,38 +2005,38 @@ module SubscriptionLimits =
   struct
     type nonrec t =
       {
-      protectionLimits: ProtectionLimits.t
+      protectionLimits: ProtectionLimits.t option
         [@ocaml.doc "Limits settings on protections for your subscription."];
-      protectionGroupLimits: ProtectionGroupLimits.t
+      protectionGroupLimits: ProtectionGroupLimits.t option
         [@ocaml.doc
           "Limits settings on protection groups for your subscription."]}
-    let context_ = "SubscriptionLimits"
-    let make ~protectionLimits =
-      fun ~protectionGroupLimits ->
+    let make ?protectionLimits =
+      fun ?protectionGroupLimits ->
         fun () -> { protectionLimits; protectionGroupLimits }
     let to_value x =
       structure_to_value
         [("ProtectionLimits",
-           (Some (ProtectionLimits.to_value x.protectionLimits)));
+           (Option.map x.protectionLimits ~f:ProtectionLimits.to_value));
         ("ProtectionGroupLimits",
-          (Some (ProtectionGroupLimits.to_value x.protectionGroupLimits)))]
+          (Option.map x.protectionGroupLimits
+             ~f:ProtectionGroupLimits.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let protectionGroupLimits =
-        ProtectionGroupLimits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupLimits") in
+        (Option.map ~f:ProtectionGroupLimits.of_xml)
+          (Xml.child xml_arg0 "ProtectionGroupLimits") in
       let protectionLimits =
-        ProtectionLimits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectionLimits") in
-      make ~protectionGroupLimits ~protectionLimits ()
+        (Option.map ~f:ProtectionLimits.of_xml)
+          (Xml.child xml_arg0 "ProtectionLimits") in
+      make ?protectionGroupLimits ?protectionLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionGroupLimits =
-        field_map_exn json "ProtectionGroupLimits"
+        field_map json__ "ProtectionGroupLimits"
           ProtectionGroupLimits.of_json in
       let protectionLimits =
-        field_map_exn json "ProtectionLimits" ProtectionLimits.of_json in
-      make ~protectionGroupLimits ~protectionLimits ()
+        field_map json__ "ProtectionLimits" ProtectionLimits.of_json in
+      make ?protectionGroupLimits ?protectionLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Limits settings for your subscription."]
 module LogBucket =
@@ -1862,30 +2068,29 @@ module AttackStatisticsDataItem =
       attackVolume: AttackVolume.t option
         [@ocaml.doc
           "Information about the volume of attacks during the time period. If the accompanying AttackCount is zero, this setting might be empty."];
-      attackCount: Long.t
+      attackCount: Long.t option
         [@ocaml.doc
           "The number of attacks detected during the time period. This is always present, but might be zero."]}
-    let context_ = "AttackStatisticsDataItem"
     let make ?attackVolume =
-      fun ~attackCount -> fun () -> { attackVolume; attackCount }
+      fun ?attackCount -> fun () -> { attackVolume; attackCount }
     let to_value x =
       structure_to_value
         [("AttackVolume",
            (Option.map x.attackVolume ~f:AttackVolume.to_value));
-        ("AttackCount", (Some (Long.to_value x.attackCount)))]
+        ("AttackCount", (Option.map x.attackCount ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let attackCount =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AttackCount") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "AttackCount") in
       let attackVolume =
         (Option.map ~f:AttackVolume.of_xml)
           (Xml.child xml_arg0 "AttackVolume") in
-      make ~attackCount ?attackVolume ()
+      make ?attackCount ?attackVolume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attackCount = field_map_exn json "AttackCount" Long.of_json in
-      let attackVolume = field_map json "AttackVolume" AttackVolume.of_json in
-      make ~attackCount ?attackVolume ()
+    let of_json json__ =
+      let attackCount = field_map json__ "AttackCount" Long.of_json in
+      let attackVolume = field_map json__ "AttackVolume" AttackVolume.of_json in
+      make ?attackCount ?attackVolume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A single attack statistics data record. This is returned by DescribeAttackStatistics along with a time range indicating the time period that the attack statistics apply to."]
@@ -1913,6 +2118,9 @@ module AttackProperties =
   struct
     type nonrec t = AttackProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttackProperty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1937,6 +2145,9 @@ module MitigationList =
   struct
     type nonrec t = Mitigation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Mitigation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1961,6 +2172,9 @@ module SubResourceSummaryList =
   struct
     type nonrec t = SubResourceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubResourceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1996,8 +2210,8 @@ module InternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2032,11 +2246,12 @@ module InvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+        field_map json__ "fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2055,8 +2270,8 @@ module LockedSubscriptionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2075,8 +2290,8 @@ module OptimisticLockException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2101,9 +2316,9 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2116,6 +2331,9 @@ module EmergencyContactList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EmergencyContact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2151,8 +2369,8 @@ module InvalidOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2171,8 +2389,8 @@ module InvalidResourceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2186,6 +2404,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2214,6 +2435,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2247,8 +2471,8 @@ module InvalidPaginationTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2257,6 +2481,9 @@ module ResourceArnList =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2320,6 +2547,9 @@ module Protections =
   struct
     type nonrec t = Protection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Protection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2340,10 +2570,62 @@ module Protections =
       list_of_json ~kind:"Protections" ~of_json:Protection.of_json j
     let to_json v = composed_to_json to_value v
   end
+module InclusionProtectionFilters =
+  struct
+    type nonrec t =
+      {
+      resourceArns: ResourceArnFilters.t option
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the resource whose protection you want to retrieve."];
+      protectionNames: ProtectionNameFilters.t option
+        [@ocaml.doc "The name of the protection that you want to retrieve."];
+      resourceTypes: ProtectedResourceTypeFilters.t option
+        [@ocaml.doc
+          "The type of protected resource whose protections you want to retrieve."]}
+    let make ?resourceArns =
+      fun ?protectionNames ->
+        fun ?resourceTypes ->
+          fun () -> { resourceArns; protectionNames; resourceTypes }
+    let to_value x =
+      structure_to_value
+        [("ResourceArns",
+           (Option.map x.resourceArns ~f:ResourceArnFilters.to_value));
+        ("ProtectionNames",
+          (Option.map x.protectionNames ~f:ProtectionNameFilters.to_value));
+        ("ResourceTypes",
+          (Option.map x.resourceTypes
+             ~f:ProtectedResourceTypeFilters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceTypes =
+        (Option.map ~f:ProtectedResourceTypeFilters.of_xml)
+          (Xml.child xml_arg0 "ResourceTypes") in
+      let protectionNames =
+        (Option.map ~f:ProtectionNameFilters.of_xml)
+          (Xml.child xml_arg0 "ProtectionNames") in
+      let resourceArns =
+        (Option.map ~f:ResourceArnFilters.of_xml)
+          (Xml.child xml_arg0 "ResourceArns") in
+      make ?resourceTypes ?protectionNames ?resourceArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceTypes =
+        field_map json__ "ResourceTypes" ProtectedResourceTypeFilters.of_json in
+      let protectionNames =
+        field_map json__ "ProtectionNames" ProtectionNameFilters.of_json in
+      let resourceArns =
+        field_map json__ "ResourceArns" ResourceArnFilters.of_json in
+      make ?resourceTypes ?protectionNames ?resourceArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Narrows the set of protections that the call retrieves. You can retrieve a single protection by providing its name or the ARN (Amazon Resource Name) of its protected resource. You can also retrieve all protections for a specific resource type. You can provide up to one criteria per filter type. Shield Advanced returns protections that exactly match all of the filter criteria that you provide."]
 module ProtectionGroups =
   struct
     type nonrec t = ProtectionGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProtectionGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2365,10 +2647,79 @@ module ProtectionGroups =
         j
     let to_json v = composed_to_json to_value v
   end
+module InclusionProtectionGroupFilters =
+  struct
+    type nonrec t =
+      {
+      protectionGroupIds: ProtectionGroupIdFilters.t option
+        [@ocaml.doc
+          "The ID of the protection group that you want to retrieve."];
+      patterns: ProtectionGroupPatternFilters.t option
+        [@ocaml.doc
+          "The pattern specification of the protection groups that you want to retrieve."];
+      resourceTypes: ProtectedResourceTypeFilters.t option
+        [@ocaml.doc
+          "The resource type configuration of the protection groups that you want to retrieve. In the protection group configuration, you specify the resource type when you set the group's Pattern to BY_RESOURCE_TYPE."];
+      aggregations: ProtectionGroupAggregationFilters.t option
+        [@ocaml.doc
+          "The aggregation setting of the protection groups that you want to retrieve."]}
+    let make ?protectionGroupIds =
+      fun ?patterns ->
+        fun ?resourceTypes ->
+          fun ?aggregations ->
+            fun () ->
+              { protectionGroupIds; patterns; resourceTypes; aggregations }
+    let to_value x =
+      structure_to_value
+        [("ProtectionGroupIds",
+           (Option.map x.protectionGroupIds
+              ~f:ProtectionGroupIdFilters.to_value));
+        ("Patterns",
+          (Option.map x.patterns ~f:ProtectionGroupPatternFilters.to_value));
+        ("ResourceTypes",
+          (Option.map x.resourceTypes
+             ~f:ProtectedResourceTypeFilters.to_value));
+        ("Aggregations",
+          (Option.map x.aggregations
+             ~f:ProtectionGroupAggregationFilters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregations =
+        (Option.map ~f:ProtectionGroupAggregationFilters.of_xml)
+          (Xml.child xml_arg0 "Aggregations") in
+      let resourceTypes =
+        (Option.map ~f:ProtectedResourceTypeFilters.of_xml)
+          (Xml.child xml_arg0 "ResourceTypes") in
+      let patterns =
+        (Option.map ~f:ProtectionGroupPatternFilters.of_xml)
+          (Xml.child xml_arg0 "Patterns") in
+      let protectionGroupIds =
+        (Option.map ~f:ProtectionGroupIdFilters.of_xml)
+          (Xml.child xml_arg0 "ProtectionGroupIds") in
+      make ?aggregations ?resourceTypes ?patterns ?protectionGroupIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregations =
+        field_map json__ "Aggregations"
+          ProtectionGroupAggregationFilters.of_json in
+      let resourceTypes =
+        field_map json__ "ResourceTypes" ProtectedResourceTypeFilters.of_json in
+      let patterns =
+        field_map json__ "Patterns" ProtectionGroupPatternFilters.of_json in
+      let protectionGroupIds =
+        field_map json__ "ProtectionGroupIds"
+          ProtectionGroupIdFilters.of_json in
+      make ?aggregations ?resourceTypes ?patterns ?protectionGroupIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Narrows the set of protection groups that the call retrieves. You can retrieve a single protection group by its name and you can retrieve all protection groups that are configured with a specific pattern, aggregation, or resource type. You can provide up to one criteria per filter type. Shield Advanced returns the protection groups that exactly match all of the search criteria that you provide."]
 module AttackSummaries =
   struct
     type nonrec t = AttackSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttackSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2393,6 +2744,9 @@ module ResourceArnFilterList =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2437,9 +2791,9 @@ module TimeRange =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "FromInclusive") in
       make ?toExclusive ?fromInclusive ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let toExclusive = field_map json "ToExclusive" Timestamp.of_json in
-      let fromInclusive = field_map json "FromInclusive" Timestamp.of_json in
+    let of_json json__ =
+      let toExclusive = field_map json__ "ToExclusive" Timestamp.of_json in
+      let fromInclusive = field_map json__ "FromInclusive" Timestamp.of_json in
       make ?toExclusive ?fromInclusive ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The time range."]
@@ -2495,10 +2849,10 @@ module LimitsExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?limit ?type_ ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" LimitNumber.of_json in
-      let type_ = field_map json "Type" LimitType.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" LimitNumber.of_json in
+      let type_ = field_map json__ "Type" LimitType.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?limit ?type_ ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2539,8 +2893,8 @@ module AccessDeniedForDependencyException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2559,11 +2913,11 @@ module NoAssociatedRoleException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The ARN of the role that you specifed does not exist."]
+  end[@@ocaml.doc "The ARN of the role that you specified does not exist."]
 module Subscription =
   struct
     type nonrec t =
@@ -2585,19 +2939,18 @@ module Subscription =
       proactiveEngagementStatus: ProactiveEngagementStatus.t option
         [@ocaml.doc
           "If ENABLED, the Shield Response Team (SRT) will use email and phone to notify contacts about escalations to the SRT and to initiate proactive customer support. If PENDING, you have requested proactive engagement and the request is pending. The status changes to ENABLED when your request is fully processed. If DISABLED, the SRT will not proactively notify contacts about escalations or to initiate proactive customer support."];
-      subscriptionLimits: SubscriptionLimits.t
+      subscriptionLimits: SubscriptionLimits.t option
         [@ocaml.doc "Limits settings for your subscription."];
       subscriptionArn: ResourceArn.t option
         [@ocaml.doc "The ARN (Amazon Resource Name) of the subscription."]}
-    let context_ = "Subscription"
     let make ?startTime =
       fun ?endTime ->
         fun ?timeCommitmentInSeconds ->
           fun ?autoRenew ->
             fun ?limits ->
               fun ?proactiveEngagementStatus ->
-                fun ?subscriptionArn ->
-                  fun ~subscriptionLimits ->
+                fun ?subscriptionLimits ->
+                  fun ?subscriptionArn ->
                     fun () ->
                       {
                         startTime;
@@ -2606,8 +2959,8 @@ module Subscription =
                         autoRenew;
                         limits;
                         proactiveEngagementStatus;
-                        subscriptionArn;
-                        subscriptionLimits
+                        subscriptionLimits;
+                        subscriptionArn
                       }
     let to_value x =
       structure_to_value
@@ -2621,7 +2974,7 @@ module Subscription =
           (Option.map x.proactiveEngagementStatus
              ~f:ProactiveEngagementStatus.to_value));
         ("SubscriptionLimits",
-          (Some (SubscriptionLimits.to_value x.subscriptionLimits)));
+          (Option.map x.subscriptionLimits ~f:SubscriptionLimits.to_value));
         ("SubscriptionArn",
           (Option.map x.subscriptionArn ~f:ResourceArn.to_value))]
     let to_query v = to_query to_value v
@@ -2630,8 +2983,8 @@ module Subscription =
         (Option.map ~f:ResourceArn.of_xml)
           (Xml.child xml_arg0 "SubscriptionArn") in
       let subscriptionLimits =
-        SubscriptionLimits.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionLimits") in
+        (Option.map ~f:SubscriptionLimits.of_xml)
+          (Xml.child xml_arg0 "SubscriptionLimits") in
       let proactiveEngagementStatus =
         (Option.map ~f:ProactiveEngagementStatus.of_xml)
           (Xml.child xml_arg0 "ProactiveEngagementStatus") in
@@ -2646,24 +2999,24 @@ module Subscription =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
-      make ?subscriptionArn ~subscriptionLimits ?proactiveEngagementStatus
+      make ?subscriptionArn ?subscriptionLimits ?proactiveEngagementStatus
         ?limits ?autoRenew ?timeCommitmentInSeconds ?endTime ?startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map json "SubscriptionArn" ResourceArn.of_json in
+        field_map json__ "SubscriptionArn" ResourceArn.of_json in
       let subscriptionLimits =
-        field_map_exn json "SubscriptionLimits" SubscriptionLimits.of_json in
+        field_map json__ "SubscriptionLimits" SubscriptionLimits.of_json in
       let proactiveEngagementStatus =
-        field_map json "ProactiveEngagementStatus"
+        field_map json__ "ProactiveEngagementStatus"
           ProactiveEngagementStatus.of_json in
-      let limits = field_map json "Limits" Limits.of_json in
-      let autoRenew = field_map json "AutoRenew" AutoRenew.of_json in
+      let limits = field_map json__ "Limits" Limits.of_json in
+      let autoRenew = field_map json__ "AutoRenew" AutoRenew.of_json in
       let timeCommitmentInSeconds =
-        field_map json "TimeCommitmentInSeconds" DurationInSeconds.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
-      make ?subscriptionArn ~subscriptionLimits ?proactiveEngagementStatus
+        field_map json__ "TimeCommitmentInSeconds" DurationInSeconds.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      make ?subscriptionArn ?subscriptionLimits ?proactiveEngagementStatus
         ?limits ?autoRenew ?timeCommitmentInSeconds ?endTime ?startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2676,6 +3029,9 @@ module LogBucketList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LogBucket.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2722,6 +3078,9 @@ module AttackStatisticsDataList =
   struct
     type nonrec t = AttackStatisticsDataItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttackStatisticsDataItem.to_value)) |>
         (fun x -> `List x)
@@ -2758,8 +3117,8 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2847,18 +3206,18 @@ module AttackDetail =
       make ?mitigations ?attackProperties ?attackCounters ?endTime ?startTime
         ?subResources ?resourceArn ?attackId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mitigations = field_map json "Mitigations" MitigationList.of_json in
+    let of_json json__ =
+      let mitigations = field_map json__ "Mitigations" MitigationList.of_json in
       let attackProperties =
-        field_map json "AttackProperties" AttackProperties.of_json in
+        field_map json__ "AttackProperties" AttackProperties.of_json in
       let attackCounters =
-        field_map json "AttackCounters" SummarizedCounterList.of_json in
-      let endTime = field_map json "EndTime" AttackTimestamp.of_json in
-      let startTime = field_map json "StartTime" AttackTimestamp.of_json in
+        field_map json__ "AttackCounters" SummarizedCounterList.of_json in
+      let endTime = field_map json__ "EndTime" AttackTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" AttackTimestamp.of_json in
       let subResources =
-        field_map json "SubResources" SubResourceSummaryList.of_json in
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let attackId = field_map json "AttackId" AttackId.of_json in
+        field_map json__ "SubResources" SubResourceSummaryList.of_json in
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let attackId = field_map json__ "AttackId" AttackId.of_json in
       make ?mitigations ?attackProperties ?attackCounters ?endTime ?startTime
         ?subResources ?resourceArn ?attackId ()
     let to_json v = composed_to_json to_value v
@@ -2884,9 +3243,9 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2968,7 +3327,7 @@ module UpdateSubscriptionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the details of an existing subscription. Only enter values for parameters you want to change. Empty parameters are not updated."]
+       "Updates the details of an existing subscription. Only enter values for parameters you want to change. Empty parameters are not updated. For accounts that are members of an Organizations organization, Shield Advanced subscriptions are billed against the organization's payer account, regardless of whether the payer account itself is subscribed."]
 module UpdateSubscriptionRequest =
   struct
     type nonrec t =
@@ -2986,12 +3345,12 @@ module UpdateSubscriptionRequest =
         (Option.map ~f:AutoRenew.of_xml) (Xml.child xml_arg0 "AutoRenew") in
       make ?autoRenew ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let autoRenew = field_map json "AutoRenew" AutoRenew.of_json in
+    let of_json json__ =
+      let autoRenew = field_map json__ "AutoRenew" AutoRenew.of_json in
       make ?autoRenew ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the details of an existing subscription. Only enter values for parameters you want to change. Empty parameters are not updated."]
+       "Updates the details of an existing subscription. Only enter values for parameters you want to change. Empty parameters are not updated. For accounts that are members of an Organizations organization, Shield Advanced subscriptions are billed against the organization's payer account, regardless of whether the payer account itself is subscribed."]
 module UpdateProtectionGroupResponse =
   struct
     type nonrec t = unit
@@ -3122,16 +3481,16 @@ module UpdateProtectionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?members ?resourceType ~pattern ~aggregation ~protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let members = field_map json "Members" ProtectionGroupMembers.of_json in
+    let of_json json__ =
+      let members = field_map json__ "Members" ProtectionGroupMembers.of_json in
       let resourceType =
-        field_map json "ResourceType" ProtectedResourceType.of_json in
+        field_map json__ "ResourceType" ProtectedResourceType.of_json in
       let pattern =
-        field_map_exn json "Pattern" ProtectionGroupPattern.of_json in
+        field_map_exn json__ "Pattern" ProtectionGroupPattern.of_json in
       let aggregation =
-        field_map_exn json "Aggregation" ProtectionGroupAggregation.of_json in
+        field_map_exn json__ "Aggregation" ProtectionGroupAggregation.of_json in
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
+        field_map_exn json__ "ProtectionGroupId" ProtectionGroupId.of_json in
       make ?members ?resourceType ~pattern ~aggregation ~protectionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3223,9 +3582,9 @@ module UpdateEmergencyContactSettingsRequest =
           (Xml.child xml_arg0 "EmergencyContactList") in
       make ?emergencyContactList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emergencyContactList =
-        field_map json "EmergencyContactList" EmergencyContactList.of_json in
+        field_map json__ "EmergencyContactList" EmergencyContactList.of_json in
       make ?emergencyContactList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3331,9 +3690,10 @@ module UpdateApplicationLayerAutomaticResponseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~action ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" ResponseAction.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "Action" ResponseAction.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~action ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3431,9 +3791,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from a resource in Shield."]
@@ -3528,9 +3889,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds or updates tags for a resource in Shield."]
@@ -3594,8 +3956,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about Amazon Web Services tags for a specified Amazon Resource Name (ARN) in Shield."]
@@ -3618,8 +3980,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3628,7 +3991,7 @@ module ListResourcesInProtectionGroupResponse =
   struct
     type nonrec t =
       {
-      resourceArns: ResourceArnList.t
+      resourceArns: ResourceArnList.t option
         [@ocaml.doc
           "The Amazon Resource Names (ARNs) of the resources that are included in the protection group."];
       nextToken: Token.t option
@@ -3639,9 +4002,8 @@ module ListResourcesInProtectionGroupResponse =
       | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListResourcesInProtectionGroupResponse"
-    let make ?nextToken =
-      fun ~resourceArns -> fun () -> { nextToken; resourceArns }
+    let make ?resourceArns =
+      fun ?nextToken -> fun () -> { resourceArns; nextToken }
     let error_of_json name json =
       match name with
       | "InternalErrorException" ->
@@ -3686,22 +4048,23 @@ module ListResourcesInProtectionGroupResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ResourceArns", (Some (ResourceArnList.to_value x.resourceArns)));
+        [("ResourceArns",
+           (Option.map x.resourceArns ~f:ResourceArnList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let resourceArns =
-        ResourceArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArns") in
-      make ?nextToken ~resourceArns ()
+        (Option.map ~f:ResourceArnList.of_xml)
+          (Xml.child xml_arg0 "ResourceArns") in
+      make ?nextToken ?resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let resourceArns =
-        field_map_exn json "ResourceArns" ResourceArnList.of_json in
-      make ?nextToken ~resourceArns ()
+        field_map json__ "ResourceArns" ResourceArnList.of_json in
+      make ?nextToken ?resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the resources that are included in the protection group."]
@@ -3740,11 +4103,11 @@ module ListResourcesInProtectionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ?maxResults ?nextToken ~protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
+        field_map_exn json__ "ProtectionGroupId" ProtectionGroupId.of_json in
       make ?maxResults ?nextToken ~protectionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3819,12 +4182,13 @@ module ListProtectionsResponse =
         (Option.map ~f:Protections.of_xml) (Xml.child xml_arg0 "Protections") in
       make ?nextToken ?protections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let protections = field_map json "Protections" Protections.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let protections = field_map json__ "Protections" Protections.of_json in
       make ?nextToken ?protections ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all Protection objects for the account."]
+  end[@@ocaml.doc
+       "Retrieves Protection objects for the account. You can retrieve all protections or you can provide filtering criteria and retrieve just the subset of protections that match the criteria."]
 module ListProtectionsRequest =
   struct
     type nonrec t =
@@ -3834,32 +4198,47 @@ module ListProtectionsRequest =
           "When you request a list of objects from Shield Advanced, if the response does not include all of the remaining available objects, Shield Advanced includes a NextToken value in the response. You can retrieve the next batch of objects by requesting the list again and providing the token that was returned by the prior call in your request. You can indicate the maximum number of objects that you want Shield Advanced to return for a single call with the MaxResults setting. Shield Advanced will not return more than MaxResults objects, but may return fewer, even if more objects are still available. Whenever more objects remain that Shield Advanced has not yet returned to you, the response will include a NextToken value. On your first call to a list operation, leave this setting empty."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The greatest number of objects that you want Shield Advanced to return to the list request. Shield Advanced might return fewer objects than you indicate in this setting, even if more objects are available. If there are more objects remaining, Shield Advanced will always also return a NextToken value in the response. The default setting is 20."]}
+          "The greatest number of objects that you want Shield Advanced to return to the list request. Shield Advanced might return fewer objects than you indicate in this setting, even if more objects are available. If there are more objects remaining, Shield Advanced will always also return a NextToken value in the response. The default setting is 20."];
+      inclusionFilters: InclusionProtectionFilters.t option
+        [@ocaml.doc
+          "Narrows the set of protections that the call retrieves. You can retrieve a single protection by providing its name or the ARN (Amazon Resource Name) of its protected resource. You can also retrieve all protections for a specific resource type. You can provide up to one criteria per filter type. Shield Advanced returns protections that exactly match all of the filter criteria that you provide."]}
     let make ?nextToken =
-      fun ?maxResults -> fun () -> { nextToken; maxResults }
+      fun ?maxResults ->
+        fun ?inclusionFilters ->
+          fun () -> { nextToken; maxResults; inclusionFilters }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("InclusionFilters",
+          (Option.map x.inclusionFilters
+             ~f:InclusionProtectionFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inclusionFilters =
+        (Option.map ~f:InclusionProtectionFilters.of_xml)
+          (Xml.child xml_arg0 "InclusionFilters") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?maxResults ?nextToken ()
+      make ?inclusionFilters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?maxResults ?nextToken ()
+    let of_json json__ =
+      let inclusionFilters =
+        field_map json__ "InclusionFilters"
+          InclusionProtectionFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?inclusionFilters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all Protection objects for the account."]
+  end[@@ocaml.doc
+       "Retrieves Protection objects for the account. You can retrieve all protections or you can provide filtering criteria and retrieve just the subset of protections that match the criteria."]
 module ListProtectionGroupsResponse =
   struct
     type nonrec t =
       {
-      protectionGroups: ProtectionGroups.t ;
+      protectionGroups: ProtectionGroups.t option ;
       nextToken: Token.t option
         [@ocaml.doc
           "When you request a list of objects from Shield Advanced, if the response does not include all of the remaining available objects, Shield Advanced includes a NextToken value in the response. You can retrieve the next batch of objects by requesting the list again and providing the token that was returned by the prior call in your request. You can indicate the maximum number of objects that you want Shield Advanced to return for a single call with the MaxResults setting. Shield Advanced will not return more than MaxResults objects, but may return fewer, even if more objects are still available. Whenever more objects remain that Shield Advanced has not yet returned to you, the response will include a NextToken value."]}
@@ -3868,9 +4247,8 @@ module ListProtectionGroupsResponse =
       | `InvalidPaginationTokenException of InvalidPaginationTokenException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListProtectionGroupsResponse"
-    let make ?nextToken =
-      fun ~protectionGroups -> fun () -> { nextToken; protectionGroups }
+    let make ?protectionGroups =
+      fun ?nextToken -> fun () -> { protectionGroups; nextToken }
     let error_of_json name json =
       match name with
       | "InternalErrorException" ->
@@ -3916,24 +4294,25 @@ module ListProtectionGroupsResponse =
     let to_value x =
       structure_to_value
         [("ProtectionGroups",
-           (Some (ProtectionGroups.to_value x.protectionGroups)));
+           (Option.map x.protectionGroups ~f:ProtectionGroups.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let protectionGroups =
-        ProtectionGroups.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroups") in
-      make ?nextToken ~protectionGroups ()
+        (Option.map ~f:ProtectionGroups.of_xml)
+          (Xml.child xml_arg0 "ProtectionGroups") in
+      make ?nextToken ?protectionGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let protectionGroups =
-        field_map_exn json "ProtectionGroups" ProtectionGroups.of_json in
-      make ?nextToken ~protectionGroups ()
+        field_map json__ "ProtectionGroups" ProtectionGroups.of_json in
+      make ?nextToken ?protectionGroups ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the ProtectionGroup objects for the account."]
+  end[@@ocaml.doc
+       "Retrieves ProtectionGroup objects for the account. You can retrieve all protection groups or you can provide filtering criteria and retrieve just the subset of protection groups that match the criteria."]
 module ListProtectionGroupsRequest =
   struct
     type nonrec t =
@@ -3943,27 +4322,42 @@ module ListProtectionGroupsRequest =
           "When you request a list of objects from Shield Advanced, if the response does not include all of the remaining available objects, Shield Advanced includes a NextToken value in the response. You can retrieve the next batch of objects by requesting the list again and providing the token that was returned by the prior call in your request. You can indicate the maximum number of objects that you want Shield Advanced to return for a single call with the MaxResults setting. Shield Advanced will not return more than MaxResults objects, but may return fewer, even if more objects are still available. Whenever more objects remain that Shield Advanced has not yet returned to you, the response will include a NextToken value. On your first call to a list operation, leave this setting empty."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The greatest number of objects that you want Shield Advanced to return to the list request. Shield Advanced might return fewer objects than you indicate in this setting, even if more objects are available. If there are more objects remaining, Shield Advanced will always also return a NextToken value in the response. The default setting is 20."]}
+          "The greatest number of objects that you want Shield Advanced to return to the list request. Shield Advanced might return fewer objects than you indicate in this setting, even if more objects are available. If there are more objects remaining, Shield Advanced will always also return a NextToken value in the response. The default setting is 20."];
+      inclusionFilters: InclusionProtectionGroupFilters.t option
+        [@ocaml.doc
+          "Narrows the set of protection groups that the call retrieves. You can retrieve a single protection group by its name and you can retrieve all protection groups that are configured with specific pattern or aggregation settings. You can provide up to one criteria per filter type. Shield Advanced returns the protection groups that exactly match all of the search criteria that you provide."]}
     let make ?nextToken =
-      fun ?maxResults -> fun () -> { nextToken; maxResults }
+      fun ?maxResults ->
+        fun ?inclusionFilters ->
+          fun () -> { nextToken; maxResults; inclusionFilters }
     let to_value x =
       structure_to_value
         [("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("InclusionFilters",
+          (Option.map x.inclusionFilters
+             ~f:InclusionProtectionGroupFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let inclusionFilters =
+        (Option.map ~f:InclusionProtectionGroupFilters.of_xml)
+          (Xml.child xml_arg0 "InclusionFilters") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      make ?maxResults ?nextToken ()
+      make ?inclusionFilters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      make ?maxResults ?nextToken ()
+    let of_json json__ =
+      let inclusionFilters =
+        field_map json__ "InclusionFilters"
+          InclusionProtectionGroupFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      make ?inclusionFilters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the ProtectionGroup objects for the account."]
+  end[@@ocaml.doc
+       "Retrieves ProtectionGroup objects for the account. You can retrieve all protection groups or you can provide filtering criteria and retrieve just the subset of protection groups that match the criteria."]
 module ListAttacksResponse =
   struct
     type nonrec t =
@@ -4034,10 +4428,10 @@ module ListAttacksResponse =
           (Xml.child xml_arg0 "AttackSummaries") in
       make ?nextToken ?attackSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let attackSummaries =
-        field_map json "AttackSummaries" AttackSummaries.of_json in
+        field_map json__ "AttackSummaries" AttackSummaries.of_json in
       make ?nextToken ?attackSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4091,13 +4485,13 @@ module ListAttacksRequest =
           (Xml.child xml_arg0 "ResourceArns") in
       make ?maxResults ?nextToken ?endTime ?startTime ?resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let endTime = field_map json "EndTime" TimeRange.of_json in
-      let startTime = field_map json "StartTime" TimeRange.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let endTime = field_map json__ "EndTime" TimeRange.of_json in
+      let startTime = field_map json__ "StartTime" TimeRange.of_json in
       let resourceArns =
-        field_map json "ResourceArns" ResourceArnFilterList.of_json in
+        field_map json__ "ResourceArns" ResourceArnFilterList.of_json in
       make ?maxResults ?nextToken ?endTime ?startTime ?resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4106,13 +4500,12 @@ module GetSubscriptionStateResponse =
   struct
     type nonrec t =
       {
-      subscriptionState: SubscriptionState.t
+      subscriptionState: SubscriptionState.t option
         [@ocaml.doc "The status of the subscription."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetSubscriptionStateResponse"
-    let make ~subscriptionState = fun () -> { subscriptionState }
+    let make ?subscriptionState = fun () -> { subscriptionState }
     let error_of_json name json =
       match name with
       | "InternalErrorException" ->
@@ -4140,18 +4533,18 @@ module GetSubscriptionStateResponse =
     let to_value x =
       structure_to_value
         [("SubscriptionState",
-           (Some (SubscriptionState.to_value x.subscriptionState)))]
+           (Option.map x.subscriptionState ~f:SubscriptionState.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let subscriptionState =
-        SubscriptionState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionState") in
-      make ~subscriptionState ()
+        (Option.map ~f:SubscriptionState.of_xml)
+          (Xml.child xml_arg0 "SubscriptionState") in
+      make ?subscriptionState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionState =
-        field_map_exn json "SubscriptionState" SubscriptionState.of_json in
-      make ~subscriptionState ()
+        field_map json__ "SubscriptionState" SubscriptionState.of_json in
+      make ?subscriptionState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the SubscriptionState, either Active or Inactive."]
@@ -4341,13 +4734,14 @@ module EnableApplicationLayerAutomaticResponseResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enable the Shield Advanced automatic application layer DDoS mitigation for the resource. This feature is available for Amazon CloudFront distributions only. This causes Shield Advanced to create, verify, and apply WAF rules for DDoS attacks that it detects for the resource. Shield Advanced applies the rules in a Shield rule group inside the web ACL that you've associated with the resource. For information about how automatic mitigation works and the requirements for using it, see Shield Advanced automatic application layer DDoS mitigation. Don't use this action to make changes to automatic mitigation settings when it's already enabled for a resource. Instead, use UpdateApplicationLayerAutomaticResponse. To use this feature, you must associate a web ACL with the protected resource. The web ACL must be created using the latest version of WAF (v2). You can associate the web ACL through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information, see Getting Started with Shield Advanced. You can also do this through the WAF console or the WAF API, but you must manage Shield Advanced automatic mitigation through Shield Advanced. For information about WAF, see WAF Developer Guide."]
+       "Enable the Shield Advanced automatic application layer DDoS mitigation for the protected resource. This feature is available for Amazon CloudFront distributions and Application Load Balancers only. This causes Shield Advanced to create, verify, and apply WAF rules for DDoS attacks that it detects for the resource. Shield Advanced applies the rules in a Shield rule group inside the web ACL that you've associated with the resource. For information about how automatic mitigation works and the requirements for using it, see Shield Advanced automatic application layer DDoS mitigation. Don't use this action to make changes to automatic mitigation settings when it's already enabled for a resource. Instead, use UpdateApplicationLayerAutomaticResponse. To use this feature, you must associate a web ACL with the protected resource. The web ACL must be created using the latest version of WAF (v2). You can associate the web ACL through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information, see Getting Started with Shield Advanced. You can also associate the web ACL to the resource through the WAF console or the WAF API, but you must manage Shield Advanced automatic mitigation through Shield Advanced. For information about WAF, see WAF Developer Guide."]
 module EnableApplicationLayerAutomaticResponseRequest =
   struct
     type nonrec t =
       {
       resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN (Amazon Resource Name) of the resource."];
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the protected resource."];
       action: ResponseAction.t
         [@ocaml.doc
           "Specifies the action setting that Shield Advanced should use in the WAF rules that it creates on behalf of the protected resource in response to DDoS attacks. You specify this as part of the configuration for the automatic application layer DDoS mitigation feature, when you enable or update automatic mitigation. Shield Advanced creates the WAF rules in a Shield Advanced-managed rule group, inside the web ACL that you have associated with the resource."]}
@@ -4367,13 +4761,14 @@ module EnableApplicationLayerAutomaticResponseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~action ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" ResponseAction.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "Action" ResponseAction.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~action ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enable the Shield Advanced automatic application layer DDoS mitigation for the resource. This feature is available for Amazon CloudFront distributions only. This causes Shield Advanced to create, verify, and apply WAF rules for DDoS attacks that it detects for the resource. Shield Advanced applies the rules in a Shield rule group inside the web ACL that you've associated with the resource. For information about how automatic mitigation works and the requirements for using it, see Shield Advanced automatic application layer DDoS mitigation. Don't use this action to make changes to automatic mitigation settings when it's already enabled for a resource. Instead, use UpdateApplicationLayerAutomaticResponse. To use this feature, you must associate a web ACL with the protected resource. The web ACL must be created using the latest version of WAF (v2). You can associate the web ACL through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information, see Getting Started with Shield Advanced. You can also do this through the WAF console or the WAF API, but you must manage Shield Advanced automatic mitigation through Shield Advanced. For information about WAF, see WAF Developer Guide."]
+       "Enable the Shield Advanced automatic application layer DDoS mitigation for the protected resource. This feature is available for Amazon CloudFront distributions and Application Load Balancers only. This causes Shield Advanced to create, verify, and apply WAF rules for DDoS attacks that it detects for the resource. Shield Advanced applies the rules in a Shield rule group inside the web ACL that you've associated with the resource. For information about how automatic mitigation works and the requirements for using it, see Shield Advanced automatic application layer DDoS mitigation. Don't use this action to make changes to automatic mitigation settings when it's already enabled for a resource. Instead, use UpdateApplicationLayerAutomaticResponse. To use this feature, you must associate a web ACL with the protected resource. The web ACL must be created using the latest version of WAF (v2). You can associate the web ACL through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information, see Getting Started with Shield Advanced. You can also associate the web ACL to the resource through the WAF console or the WAF API, but you must manage Shield Advanced automatic mitigation through Shield Advanced. For information about WAF, see WAF Developer Guide."]
 module DisassociateHealthCheckResponse =
   struct
     type nonrec t = unit
@@ -4477,11 +4872,11 @@ module DisassociateHealthCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~healthCheckArn ~protectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckArn =
-        field_map_exn json "HealthCheckArn" HealthCheckArn.of_json in
+        field_map_exn json__ "HealthCheckArn" HealthCheckArn.of_json in
       let protectionId =
-        field_map_exn json "ProtectionId" ProtectionId.of_json in
+        field_map_exn json__ "ProtectionId" ProtectionId.of_json in
       make ~healthCheckArn ~protectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4674,8 +5069,8 @@ module DisassociateDRTLogBucketRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LogBucket") in
       make ~logBucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logBucket = field_map_exn json "LogBucket" LogBucket.of_json in
+    let of_json json__ =
+      let logBucket = field_map_exn json__ "LogBucket" LogBucket.of_json in
       make ~logBucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4844,13 +5239,14 @@ module DisableApplicationLayerAutomaticResponseResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disable the Shield Advanced automatic application layer DDoS mitigation feature for the resource. This stops Shield Advanced from creating, verifying, and applying WAF rules for attacks that it detects for the resource."]
+       "Disable the Shield Advanced automatic application layer DDoS mitigation feature for the protected resource. This stops Shield Advanced from creating, verifying, and applying WAF rules for attacks that it detects for the resource."]
 module DisableApplicationLayerAutomaticResponseRequest =
   struct
     type nonrec t =
       {
       resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN (Amazon Resource Name) of the resource."]}
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the protected resource."]}
     let context_ = "DisableApplicationLayerAutomaticResponseRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -4863,12 +5259,13 @@ module DisableApplicationLayerAutomaticResponseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disable the Shield Advanced automatic application layer DDoS mitigation feature for the resource. This stops Shield Advanced from creating, verifying, and applying WAF rules for attacks that it detects for the resource."]
+       "Disable the Shield Advanced automatic application layer DDoS mitigation feature for the protected resource. This stops Shield Advanced from creating, verifying, and applying WAF rules for attacks that it detects for the resource."]
 module DescribeSubscriptionResponse =
   struct
     type nonrec t =
@@ -4924,8 +5321,8 @@ module DescribeSubscriptionResponse =
           (Xml.child xml_arg0 "Subscription") in
       make ?subscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subscription = field_map json "Subscription" Subscription.of_json in
+    let of_json json__ =
+      let subscription = field_map json__ "Subscription" Subscription.of_json in
       make ?subscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4948,7 +5345,7 @@ module DescribeProtectionResponse =
     type nonrec t =
       {
       protection: Protection.t option
-        [@ocaml.doc "The Protection object that is described."]}
+        [@ocaml.doc "The Protection that you requested."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -5004,8 +5401,8 @@ module DescribeProtectionResponse =
         (Option.map ~f:Protection.of_xml) (Xml.child xml_arg0 "Protection") in
       make ?protection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protection = field_map json "Protection" Protection.of_json in
+    let of_json json__ =
+      let protection = field_map json__ "Protection" Protection.of_json in
       make ?protection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the details of a Protection object."]
@@ -5015,10 +5412,10 @@ module DescribeProtectionRequest =
       {
       protectionId: ProtectionId.t option
         [@ocaml.doc
-          "The unique identifier (ID) for the Protection object that is described. When submitting the DescribeProtection request you must provide either the ResourceArn or the ProtectionID, but not both."];
+          "The unique identifier (ID) for the Protection object to describe. You must provide either the ResourceArn of the protected resource or the ProtectionID of the protection, but not both."];
       resourceArn: ResourceArn.t option
         [@ocaml.doc
-          "The ARN (Amazon Resource Name) of the Amazon Web Services resource for the Protection object that is described. When submitting the DescribeProtection request you must provide either the ResourceArn or the ProtectionID, but not both."]}
+          "The ARN (Amazon Resource Name) of the protected Amazon Web Services resource. You must provide either the ResourceArn of the protected resource or the ProtectionID of the protection, but not both."]}
     let make ?protectionId =
       fun ?resourceArn -> fun () -> { protectionId; resourceArn }
     let to_value x =
@@ -5035,9 +5432,9 @@ module DescribeProtectionRequest =
           (Xml.child xml_arg0 "ProtectionId") in
       make ?resourceArn ?protectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" ResourceArn.of_json in
-      let protectionId = field_map json "ProtectionId" ProtectionId.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let protectionId = field_map json__ "ProtectionId" ProtectionId.of_json in
       make ?resourceArn ?protectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the details of a Protection object."]
@@ -5045,15 +5442,14 @@ module DescribeProtectionGroupResponse =
   struct
     type nonrec t =
       {
-      protectionGroup: ProtectionGroup.t
+      protectionGroup: ProtectionGroup.t option
         [@ocaml.doc
           "A grouping of protected resources that you and Shield Advanced can monitor as a collective. This resource grouping improves the accuracy of detection and reduces false positives."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeProtectionGroupResponse"
-    let make ~protectionGroup = fun () -> { protectionGroup }
+    let make ?protectionGroup = fun () -> { protectionGroup }
     let error_of_json name json =
       match name with
       | "InternalErrorException" ->
@@ -5089,18 +5485,18 @@ module DescribeProtectionGroupResponse =
     let to_value x =
       structure_to_value
         [("ProtectionGroup",
-           (Some (ProtectionGroup.to_value x.protectionGroup)))]
+           (Option.map x.protectionGroup ~f:ProtectionGroup.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let protectionGroup =
-        ProtectionGroup.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroup") in
-      make ~protectionGroup ()
+        (Option.map ~f:ProtectionGroup.of_xml)
+          (Xml.child xml_arg0 "ProtectionGroup") in
+      make ?protectionGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionGroup =
-        field_map_exn json "ProtectionGroup" ProtectionGroup.of_json in
-      make ~protectionGroup ()
+        field_map json__ "ProtectionGroup" ProtectionGroup.of_json in
+      make ?protectionGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the specification for the specified protection group."]
@@ -5124,9 +5520,9 @@ module DescribeProtectionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ~protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
+        field_map_exn json__ "ProtectionGroupId" ProtectionGroupId.of_json in
       make ~protectionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5187,9 +5583,9 @@ module DescribeEmergencyContactSettingsResponse =
           (Xml.child xml_arg0 "EmergencyContactList") in
       make ?emergencyContactList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emergencyContactList =
-        field_map json "EmergencyContactList" EmergencyContactList.of_json in
+        field_map json__ "EmergencyContactList" EmergencyContactList.of_json in
       make ?emergencyContactList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5268,10 +5664,10 @@ module DescribeDRTAccessResponse =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?logBucketList ?roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logBucketList =
-        field_map json "LogBucketList" LogBucketList.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+        field_map json__ "LogBucketList" LogBucketList.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       make ?logBucketList ?roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5293,16 +5689,16 @@ module DescribeAttackStatisticsResponse =
   struct
     type nonrec t =
       {
-      timeRange: TimeRange.t ;
-      dataItems: AttackStatisticsDataList.t
+      timeRange: TimeRange.t option
+        [@ocaml.doc "The time range of the attack."];
+      dataItems: AttackStatisticsDataList.t option
         [@ocaml.doc
           "The data that describes the attacks detected during the time period."]}
     type nonrec error =
       [ `InternalErrorException of InternalErrorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAttackStatisticsResponse"
-    let make ~timeRange =
-      fun ~dataItems -> fun () -> { timeRange; dataItems }
+    let make ?timeRange =
+      fun ?dataItems -> fun () -> { timeRange; dataItems }
     let error_of_json name json =
       match name with
       | "InternalErrorException" ->
@@ -5329,23 +5725,23 @@ module DescribeAttackStatisticsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TimeRange", (Some (TimeRange.to_value x.timeRange)));
-        ("DataItems", (Some (AttackStatisticsDataList.to_value x.dataItems)))]
+        [("TimeRange", (Option.map x.timeRange ~f:TimeRange.to_value));
+        ("DataItems",
+          (Option.map x.dataItems ~f:AttackStatisticsDataList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dataItems =
-        AttackStatisticsDataList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DataItems") in
+        (Option.map ~f:AttackStatisticsDataList.of_xml)
+          (Xml.child xml_arg0 "DataItems") in
       let timeRange =
-        TimeRange.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimeRange") in
-      make ~dataItems ~timeRange ()
+        (Option.map ~f:TimeRange.of_xml) (Xml.child xml_arg0 "TimeRange") in
+      make ?dataItems ?timeRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataItems =
-        field_map_exn json "DataItems" AttackStatisticsDataList.of_json in
-      let timeRange = field_map_exn json "TimeRange" TimeRange.of_json in
-      make ~dataItems ~timeRange ()
+        field_map json__ "DataItems" AttackStatisticsDataList.of_json in
+      let timeRange = field_map json__ "TimeRange" TimeRange.of_json in
+      make ?dataItems ?timeRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides information about the number and type of attacks Shield has detected in the last year for all resources that belong to your account, regardless of whether you've defined Shield protections for them. This operation is available to Shield customers as well as to Shield Advanced customers. The operation returns data for the time range of midnight UTC, one year ago, to midnight UTC, today. For example, if the current time is 2020-10-26 15:39:32 PDT, equal to 2020-10-26 22:39:32 UTC, then the time range for the attack data returned is from 2019-10-26 00:00:00 UTC to 2020-10-26 00:00:00 UTC. The time range indicates the period covered by the attack statistics data items."]
@@ -5367,7 +5763,7 @@ module DescribeAttackResponse =
     type nonrec t =
       {
       attack: AttackDetail.t option
-        [@ocaml.doc "The attack that is described."]}
+        [@ocaml.doc "The attack that you requested."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalErrorException of InternalErrorException.t 
@@ -5414,8 +5810,8 @@ module DescribeAttackResponse =
         (Option.map ~f:AttackDetail.of_xml) (Xml.child xml_arg0 "Attack") in
       make ?attack ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attack = field_map json "Attack" AttackDetail.of_json in
+    let of_json json__ =
+      let attack = field_map json__ "Attack" AttackDetail.of_json in
       make ?attack ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the details of a DDoS attack."]
@@ -5436,8 +5832,8 @@ module DescribeAttackRequest =
         AttackId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AttackId") in
       make ~attackId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attackId = field_map_exn json "AttackId" AttackId.of_json in
+    let of_json json__ =
+      let attackId = field_map_exn json__ "AttackId" AttackId.of_json in
       make ~attackId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the details of a DDoS attack."]
@@ -5590,9 +5986,9 @@ module DeleteProtectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~protectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionId =
-        field_map_exn json "ProtectionId" ProtectionId.of_json in
+        field_map_exn json__ "ProtectionId" ProtectionId.of_json in
       make ~protectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes an Shield Advanced Protection."]
@@ -5673,9 +6069,9 @@ module DeleteProtectionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionGroupId") in
       make ~protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
+        field_map_exn json__ "ProtectionGroupId" ProtectionGroupId.of_json in
       make ~protectionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified protection group."]
@@ -5729,7 +6125,7 @@ module CreateSubscriptionResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Activates Shield Advanced for an account. When you initally create a subscription, your subscription is set to be automatically renewed at the end of the existing subscription period. You can change this by submitting an UpdateSubscription request."]
+       "Activates Shield Advanced for an account. For accounts that are members of an Organizations organization, Shield Advanced subscriptions are billed against the organization's payer account, regardless of whether the payer account itself is subscribed. When you initially create a subscription, your subscription is set to be automatically renewed at the end of the existing subscription period. You can change this by submitting an UpdateSubscription request."]
 module CreateSubscriptionRequest =
   struct
     type nonrec t = unit
@@ -5742,7 +6138,7 @@ module CreateSubscriptionRequest =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Activates Shield Advanced for an account. When you initally create a subscription, your subscription is set to be automatically renewed at the end of the existing subscription period. You can change this by submitting an UpdateSubscription request."]
+       "Activates Shield Advanced for an account. For accounts that are members of an Organizations organization, Shield Advanced subscriptions are billed against the organization's payer account, regardless of whether the payer account itself is subscribed. When you initially create a subscription, your subscription is set to be automatically renewed at the end of the existing subscription period. You can change this by submitting an UpdateSubscription request."]
 module CreateProtectionResponse =
   struct
     type nonrec t =
@@ -5854,12 +6250,12 @@ module CreateProtectionResponse =
           (Xml.child xml_arg0 "ProtectionId") in
       make ?protectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let protectionId = field_map json "ProtectionId" ProtectionId.of_json in
+    let of_json json__ =
+      let protectionId = field_map json__ "ProtectionId" ProtectionId.of_json in
       make ?protectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables Shield Advanced for a specific Amazon Web Services resource. The resource can be an Amazon CloudFront distribution, Elastic Load Balancing load balancer, Global Accelerator accelerator, Elastic IP Address, or an Amazon Route\194\16053 hosted zone. You can add protection to only a single resource with each CreateProtection request. You can add protection to multiple resources at once through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information see Getting Started with Shield Advanced and Adding Shield Advanced protection to Amazon Web Services resources."]
+       "Enables Shield Advanced for a specific Amazon Web Services resource. The resource can be an Amazon CloudFront distribution, Amazon Route\194\16053 hosted zone, Global Accelerator standard accelerator, Elastic IP Address, Application Load Balancer, or a Classic Load Balancer. You can protect Amazon EC2 instances and Network Load Balancers by association with protected Amazon EC2 Elastic IP addresses. You can add protection to only a single resource with each CreateProtection request. You can add protection to multiple resources at once through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information see Getting Started with Shield Advanced and Adding Shield Advanced protection to Amazon Web Services resources."]
 module CreateProtectionRequest =
   struct
     type nonrec t =
@@ -5868,7 +6264,7 @@ module CreateProtectionRequest =
         [@ocaml.doc "Friendly name for the Protection you are creating."];
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The ARN (Amazon Resource Name) of the resource to be protected. The ARN should be in one of the following formats: For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Elastic Load Balancer (Classic Load Balancer): arn:aws:elasticloadbalancing:region:account-id:loadbalancer/load-balancer-name For an Amazon CloudFront distribution: arn:aws:cloudfront::account-id:distribution/distribution-id For an Global Accelerator accelerator: arn:aws:globalaccelerator::account-id:accelerator/accelerator-id For Amazon Route\194\16053: arn:aws:route53:::hostedzone/hosted-zone-id For an Elastic IP address: arn:aws:ec2:region:account-id:eip-allocation/allocation-id"];
+          "The ARN (Amazon Resource Name) of the resource to be protected. The ARN should be in one of the following formats: For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Elastic Load Balancer (Classic Load Balancer): arn:aws:elasticloadbalancing:region:account-id:loadbalancer/load-balancer-name For an Amazon CloudFront distribution: arn:aws:cloudfront::account-id:distribution/distribution-id For an Global Accelerator standard accelerator: arn:aws:globalaccelerator::account-id:accelerator/accelerator-id For Amazon Route\194\16053: arn:aws:route53:::hostedzone/hosted-zone-id For an Elastic IP address: arn:aws:ec2:region:account-id:eip-allocation/allocation-id"];
       tags: TagList.t option
         [@ocaml.doc
           "One or more tag key-value pairs for the Protection object that is created."]}
@@ -5891,14 +6287,15 @@ module CreateProtectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~resourceArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      let name = field_map_exn json "Name" ProtectionName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      let name = field_map_exn json__ "Name" ProtectionName.of_json in
       make ?tags ~resourceArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables Shield Advanced for a specific Amazon Web Services resource. The resource can be an Amazon CloudFront distribution, Elastic Load Balancing load balancer, Global Accelerator accelerator, Elastic IP Address, or an Amazon Route\194\16053 hosted zone. You can add protection to only a single resource with each CreateProtection request. You can add protection to multiple resources at once through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information see Getting Started with Shield Advanced and Adding Shield Advanced protection to Amazon Web Services resources."]
+       "Enables Shield Advanced for a specific Amazon Web Services resource. The resource can be an Amazon CloudFront distribution, Amazon Route\194\16053 hosted zone, Global Accelerator standard accelerator, Elastic IP Address, Application Load Balancer, or a Classic Load Balancer. You can protect Amazon EC2 instances and Network Load Balancers by association with protected Amazon EC2 Elastic IP addresses. You can add protection to only a single resource with each CreateProtection request. You can add protection to multiple resources at once through the Shield Advanced console at https://console.aws.amazon.com/wafv2/shieldv2#/. For more information see Getting Started with Shield Advanced and Adding Shield Advanced protection to Amazon Web Services resources."]
 module CreateProtectionGroupResponse =
   struct
     type nonrec t = unit
@@ -6057,17 +6454,17 @@ module CreateProtectionGroupRequest =
       make ?tags ?members ?resourceType ~pattern ~aggregation
         ~protectionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let members = field_map json "Members" ProtectionGroupMembers.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let members = field_map json__ "Members" ProtectionGroupMembers.of_json in
       let resourceType =
-        field_map json "ResourceType" ProtectedResourceType.of_json in
+        field_map json__ "ResourceType" ProtectedResourceType.of_json in
       let pattern =
-        field_map_exn json "Pattern" ProtectionGroupPattern.of_json in
+        field_map_exn json__ "Pattern" ProtectionGroupPattern.of_json in
       let aggregation =
-        field_map_exn json "Aggregation" ProtectionGroupAggregation.of_json in
+        field_map_exn json__ "Aggregation" ProtectionGroupAggregation.of_json in
       let protectionGroupId =
-        field_map_exn json "ProtectionGroupId" ProtectionGroupId.of_json in
+        field_map_exn json__ "ProtectionGroupId" ProtectionGroupId.of_json in
       make ?tags ?members ?resourceType ~pattern ~aggregation
         ~protectionGroupId ()
     let to_json v = composed_to_json to_value v
@@ -6169,9 +6566,9 @@ module AssociateProactiveEngagementDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmergencyContactList") in
       make ~emergencyContactList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emergencyContactList =
-        field_map_exn json "EmergencyContactList"
+        field_map_exn json__ "EmergencyContactList"
           EmergencyContactList.of_json in
       make ~emergencyContactList ()
     let to_json v = composed_to_json to_value v
@@ -6289,11 +6686,11 @@ module AssociateHealthCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProtectionId") in
       make ~healthCheckArn ~protectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckArn =
-        field_map_exn json "HealthCheckArn" HealthCheckArn.of_json in
+        field_map_exn json__ "HealthCheckArn" HealthCheckArn.of_json in
       let protectionId =
-        field_map_exn json "ProtectionId" ProtectionId.of_json in
+        field_map_exn json__ "ProtectionId" ProtectionId.of_json in
       make ~healthCheckArn ~protectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6404,8 +6801,8 @@ module AssociateDRTRoleRequest =
         RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
       make ~roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
       make ~roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6536,8 +6933,8 @@ module AssociateDRTLogBucketRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LogBucket") in
       make ~logBucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logBucket = field_map_exn json "LogBucket" LogBucket.of_json in
+    let of_json json__ =
+      let logBucket = field_map_exn json__ "LogBucket" LogBucket.of_json in
       make ~logBucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

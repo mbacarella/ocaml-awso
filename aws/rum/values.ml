@@ -23,6 +23,44 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module DimensionKey =
+  struct
+    type nonrec t = string
+    let context_ = "DimensionKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:280) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DimensionKey" j
+    let to_json = simple_to_json to_value
+  end
+module DimensionName =
+  struct
+    type nonrec t = string
+    let context_ = "DimensionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"(?!:).*[^\\s].*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DimensionName" j
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -48,7 +86,7 @@ module Url =
                 (check_string_max i ~max:1260) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)")));
+                       ~pattern:".*https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&*//=]*).*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -99,6 +137,54 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module DeobfuscationS3Uri =
+  struct
+    type nonrec t = string
+    let context_ = "DeobfuscationS3Uri"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"s3://[a-z0-9][-.a-z0-9]{1,62}(?:/[-!_*'().a-z0-9A-Z]+(?:/[-!_*'().a-z0-9A-Z]+)*)?/?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeobfuscationS3Uri" j
+    let to_json = simple_to_json to_value
+  end
+module DeobfuscationStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeobfuscationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeobfuscationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module QueryFilterValue =
   struct
     type nonrec t = string
@@ -110,6 +196,132 @@ module QueryFilterValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"QueryFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module DimensionKeysMap =
+  struct
+    type nonrec t = (DimensionKey.t * DimensionName.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:29) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((DimensionKey.of_string chopped),
+                              (DimensionName.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DimensionKey.to_value x) |>
+                    (fun x -> (DimensionName.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DimensionKey.of_string
+        ~of_json:DimensionName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EventPattern =
+  struct
+    type nonrec t = string
+    let context_ = "EventPattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:4000) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventPattern" j
+    let to_json = simple_to_json to_value
+  end
+module MetricName =
+  struct
+    type nonrec t = string
+    let context_ = "MetricName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricName" j
+    let to_json = simple_to_json to_value
+  end
+module Namespace =
+  struct
+    type nonrec t = string
+    let context_ = "Namespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:237) >>=
+                  (fun () -> check_pattern i ~pattern:".*[a-zA-Z0-9-._/#:]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Namespace" j
+    let to_json = simple_to_json to_value
+  end
+module UnitLabel =
+  struct
+    type nonrec t = string
+    let context_ = "UnitLabel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UnitLabel" j
+    let to_json = simple_to_json to_value
+  end
+module ValueKey =
+  struct
+    type nonrec t = string
+    let context_ = "ValueKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:280) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValueKey" j
     let to_json = simple_to_json to_value
   end
 module JsonValue =
@@ -125,6 +337,28 @@ module JsonValue =
     let of_json j = string_of_json ~kind:"JsonValue" j
     let to_json = simple_to_json to_value
   end
+module RumEventIdString =
+  struct
+    type nonrec t = string
+    let context_ = "RumEventIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RumEventIdString" j
+    let to_json = simple_to_json to_value
+  end
 module Timestamp =
   struct
     type nonrec t = string
@@ -135,6 +369,71 @@ module Timestamp =
     let to_header x = x
     let of_xml = string_of_xml ~kind:"a timestamp"
     let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module DestinationArn =
+  struct
+    type nonrec t = string
+    let context_ = "DestinationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:".*arn:[^:]*:[^:]*:[^:]*:[^:]*:.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DestinationArn" j
+    let to_json = simple_to_json to_value
+  end
+module IamRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IamRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:".*arn:[^:]*:[^:]*:[^:]*:[^:]*:.*");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module MetricDestination =
+  struct
+    type nonrec t =
+      | CloudWatch 
+      | Evidently 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CloudWatch -> "CloudWatch"
+      | Evidently -> "Evidently"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CloudWatch" -> CloudWatch
+      | "Evidently" -> Evidently
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricDestination" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricDestination" j)
     let to_json = simple_to_json to_value
   end
 module AppMonitorId =
@@ -149,7 +448,7 @@ module AppMonitorId =
                 (check_string_max i ~max:36) >>=
                   (fun () ->
                      check_pattern i
-                       ~pattern:"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$")));
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -170,7 +469,7 @@ module AppMonitorName =
              (fun () ->
                 (check_string_max i ~max:255) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^(?!\\.)[\\.\\-_#A-Za-z0-9]+$")));
+                     check_pattern i ~pattern:"(?!\\.)[\\.\\-_#A-Za-z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -180,6 +479,35 @@ module AppMonitorName =
     let of_json j = string_of_json ~kind:"AppMonitorName" j
     let to_json = simple_to_json to_value
   end
+module AppMonitorPlatform =
+  struct
+    type nonrec t =
+      | Web 
+      | Android 
+      | IOS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Web -> "Web"
+      | Android -> "Android"
+      | IOS -> "iOS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Web" -> Web
+      | "Android" -> Android
+      | "iOS" -> IOS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AppMonitorPlatform" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AppMonitorPlatform" j)
+    let to_json = simple_to_json to_value
+  end
 module ISOTimestampString =
   struct
     type nonrec t = string
@@ -187,12 +515,8 @@ module ISOTimestampString =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:19) >>=
-             (fun () ->
-                (check_string_max i ~max:19) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"/d{4}-[01]/d-[0-3]/dT[0-2]/d:[0-5]/d:[0-5]/d/./d+([+-][0-2]/d:[0-5]/d|Z)")));
+          ((check_string_max i ~max:19) >>=
+             (fun () -> check_string_min i ~min:19));
         i
     let of_string x = x
     let to_value x = `String x
@@ -237,7 +561,7 @@ module Arn =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i ~pattern:"arn:[^:]*:[^:]*:[^:]*:[^:]*:.*");
+          (check_pattern i ~pattern:".*arn:[^:]*:[^:]*:[^:]*:[^:]*:.*");
         i
     let of_string x = x
     let to_value x = `String x
@@ -255,6 +579,9 @@ module FavoritePages =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -285,7 +612,8 @@ module IdentityPoolId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:55) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\w-]+:[0-9a-f-]+")));
+                  (fun () ->
+                     check_pattern i ~pattern:".*[\\w-]+:[0-9a-f-]+.*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -303,6 +631,9 @@ module Pages =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Url.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -344,6 +675,9 @@ module Telemetries =
   struct
     type nonrec t = Telemetry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Telemetry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -363,6 +697,54 @@ module Telemetries =
     let of_json j =
       list_of_json ~kind:"Telemetries" ~of_json:Telemetry.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module AppMonitorDomain =
+  struct
+    type nonrec t = string
+    let context_ = "AppMonitorDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(localhost)$|^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|(?=^[a-zA-Z0-9\\.\\*-]{4,253}$)(?!.*\\.-)(?!.*-\\.)(?!.*\\.\\.)(?!.*[^\\.]{64,})^(\\*\\.)?(?![-\\.\\*])[^\\*]{1,}\\.(\\*|(?!.*--)(?=.*[a-zA-Z])[^\\*]{1,}[^\\*-])")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AppMonitorDomain" j
+    let to_json = simple_to_json to_value
+  end
+module CustomEventsStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CustomEventsStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CustomEventsStatus" j)
+    let to_json = simple_to_json to_value
   end
 module CwLog =
   struct
@@ -387,13 +769,46 @@ module CwLog =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CwLogEnabled") in
       make ?cwLogGroup ?cwLogEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cwLogGroup = field_map json "CwLogGroup" String_.of_json in
-      let cwLogEnabled = field_map json "CwLogEnabled" Boolean.of_json in
+    let of_json json__ =
+      let cwLogGroup = field_map json__ "CwLogGroup" String_.of_json in
+      let cwLogEnabled = field_map json__ "CwLogEnabled" Boolean.of_json in
       make ?cwLogGroup ?cwLogEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the information about whether the app monitor stores copies of the data that RUM collects in CloudWatch Logs. If it does, this structure also contains the name of the log group."]
+module JavaScriptSourceMaps =
+  struct
+    type nonrec t =
+      {
+      status: DeobfuscationStatus.t
+        [@ocaml.doc
+          "Specifies whether JavaScript error stack traces should be unminified for this app monitor. The default is for JavaScript error stack trace unminification to be DISABLED."];
+      s3Uri: DeobfuscationS3Uri.t option
+        [@ocaml.doc
+          "The S3Uri of the bucket or folder that stores the source map files. It is required if status is ENABLED."]}
+    let context_ = "JavaScriptSourceMaps"
+    let make ?s3Uri = fun ~status -> fun () -> { s3Uri; status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Some (DeobfuscationStatus.to_value x.status)));
+        ("S3Uri", (Option.map x.s3Uri ~f:DeobfuscationS3Uri.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Uri =
+        (Option.map ~f:DeobfuscationS3Uri.of_xml)
+          (Xml.child xml_arg0 "S3Uri") in
+      let status =
+        DeobfuscationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ?s3Uri ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Uri = field_map json__ "S3Uri" DeobfuscationS3Uri.of_json in
+      let status = field_map_exn json__ "Status" DeobfuscationStatus.of_json in
+      make ?s3Uri ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the configuration for how an app monitor can unminify JavaScript error stack traces using source maps."]
 module TagKey =
   struct
     type nonrec t = string
@@ -405,7 +820,7 @@ module TagKey =
              (fun () ->
                 (check_string_max i ~max:128) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"^(?!aws:)[a-zA-Z+-=._:/]+$")));
+                     check_pattern i ~pattern:"(?!aws:)[a-zA-Z+-=._:/]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -450,6 +865,9 @@ module QueryFilterValueList =
   struct
     type nonrec t = QueryFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryFilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -471,6 +889,104 @@ module QueryFilterValueList =
         ~of_json:QueryFilterValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MetricDefinitionId =
+  struct
+    type nonrec t = string
+    let context_ = "MetricDefinitionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricDefinitionId" j
+    let to_json = simple_to_json to_value
+  end
+module MetricDefinitionRequest =
+  struct
+    type nonrec t =
+      {
+      name: MetricName.t
+        [@ocaml.doc
+          "The name for the metric that is defined in this structure. For custom metrics, you can specify any name that you like. For extended metrics, valid values are the following: PerformanceNavigationDuration PerformanceResourceDuration NavigationSatisfiedTransaction NavigationToleratedTransaction NavigationFrustratedTransaction WebVitalsCumulativeLayoutShift WebVitalsFirstInputDelay WebVitalsLargestContentfulPaint JsErrorCount HttpErrorCount SessionCount"];
+      valueKey: ValueKey.t option
+        [@ocaml.doc
+          "The field within the event object that the metric value is sourced from. If you omit this field, a hardcoded value of 1 is pushed as the metric value. This is useful if you want to count the number of events that the filter catches. If this metric is sent to CloudWatch Evidently, this field will be passed to Evidently raw. Evidently will handle data extraction from the event."];
+      unitLabel: UnitLabel.t option
+        [@ocaml.doc
+          "The CloudWatch metric unit to use for this metric. If you omit this field, the metric is recorded with no unit."];
+      dimensionKeys: DimensionKeysMap.t option
+        [@ocaml.doc
+          "Use this field only if you are sending the metric to CloudWatch. This field is a map of field paths to dimension names. It defines the dimensions to associate with this metric in CloudWatch. For extended metrics, valid values for the entries in this field are the following: \"metadata.pageId\": \"PageId\" \"metadata.browserName\": \"BrowserName\" \"metadata.deviceType\": \"DeviceType\" \"metadata.osName\": \"OSName\" \"metadata.countryCode\": \"CountryCode\" \"event_details.fileType\": \"FileType\" For both extended metrics and custom metrics, all dimensions listed in this field must also be included in EventPattern."];
+      eventPattern: EventPattern.t option
+        [@ocaml.doc
+          "The pattern that defines the metric, specified as a JSON object. RUM checks events that happen in a user's session against the pattern, and events that match the pattern are sent to the metric destination. When you define extended metrics, the metric definition is not valid if EventPattern is omitted. Example event patterns: '\\{ \"event_type\": \\[\"com.amazon.rum.js_error_event\"\\], \"metadata\": \\{ \"browserName\": \\[ \"Chrome\", \"Safari\" \\], \\} \\}' '\\{ \"event_type\": \\[\"com.amazon.rum.performance_navigation_event\"\\], \"metadata\": \\{ \"browserName\": \\[ \"Chrome\", \"Firefox\" \\] \\}, \"event_details\": \\{ \"duration\": \\[\\{ \"numeric\": \\[ \"<\", 2000 \\] \\}\\] \\} \\}' '\\{ \"event_type\": \\[\"com.amazon.rum.performance_navigation_event\"\\], \"metadata\": \\{ \"browserName\": \\[ \"Chrome\", \"Safari\" \\], \"countryCode\": \\[ \"US\" \\] \\}, \"event_details\": \\{ \"duration\": \\[\\{ \"numeric\": \\[ \">=\", 2000, \"<\", 8000 \\] \\}\\] \\} \\}' If the metrics destination is CloudWatch and the event also matches a value in DimensionKeys, then the metric is published with the specified dimensions."];
+      namespace: Namespace.t option
+        [@ocaml.doc
+          "If this structure is for a custom metric instead of an extended metrics, use this parameter to define the metric namespace for that custom metric. Do not specify this parameter if this structure is for an extended metric. You cannot use any string that starts with AWS/ for your namespace."]}
+    let context_ = "MetricDefinitionRequest"
+    let make ?valueKey =
+      fun ?unitLabel ->
+        fun ?dimensionKeys ->
+          fun ?eventPattern ->
+            fun ?namespace ->
+              fun ~name ->
+                fun () ->
+                  {
+                    valueKey;
+                    unitLabel;
+                    dimensionKeys;
+                    eventPattern;
+                    namespace;
+                    name
+                  }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (MetricName.to_value x.name)));
+        ("ValueKey", (Option.map x.valueKey ~f:ValueKey.to_value));
+        ("UnitLabel", (Option.map x.unitLabel ~f:UnitLabel.to_value));
+        ("DimensionKeys",
+          (Option.map x.dimensionKeys ~f:DimensionKeysMap.to_value));
+        ("EventPattern",
+          (Option.map x.eventPattern ~f:EventPattern.to_value));
+        ("Namespace", (Option.map x.namespace ~f:Namespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
+      let eventPattern =
+        (Option.map ~f:EventPattern.of_xml)
+          (Xml.child xml_arg0 "EventPattern") in
+      let dimensionKeys =
+        (Option.map ~f:DimensionKeysMap.of_xml)
+          (Xml.child xml_arg0 "DimensionKeys") in
+      let unitLabel =
+        (Option.map ~f:UnitLabel.of_xml) (Xml.child xml_arg0 "UnitLabel") in
+      let valueKey =
+        (Option.map ~f:ValueKey.of_xml) (Xml.child xml_arg0 "ValueKey") in
+      let name =
+        MetricName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?namespace ?eventPattern ?dimensionKeys ?unitLabel ?valueKey ~name
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
+      let dimensionKeys =
+        field_map json__ "DimensionKeys" DimensionKeysMap.of_json in
+      let unitLabel = field_map json__ "UnitLabel" UnitLabel.of_json in
+      let valueKey = field_map json__ "ValueKey" ValueKey.of_json in
+      let name = field_map_exn json__ "Name" MetricName.of_json in
+      make ?namespace ?eventPattern ?dimensionKeys ?unitLabel ?valueKey ~name
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this structure to define one extended metric or custom metric that RUM will send to CloudWatch or CloudWatch Evidently. For more information, see Custom metrics and extended metrics that you can send to CloudWatch and CloudWatch Evidently. This structure is validated differently for extended metrics and custom metrics. For extended metrics that are sent to the AWS/RUM namespace, the following validations apply: The Namespace parameter must be omitted or set to AWS/RUM. Only certain combinations of values for Name, ValueKey, and EventPattern are valid. In addition to what is displayed in the following list, the EventPattern can also include information used by the DimensionKeys field. If Name is PerformanceNavigationDuration, then ValueKeymust be event_details.duration and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.performance_navigation_event\"\\]\\} If Name is PerformanceResourceDuration, then ValueKeymust be event_details.duration and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.performance_resource_event\"\\]\\} If Name is NavigationSatisfiedTransaction, then ValueKeymust be null and the EventPattern must include \\{ \"event_type\": \\[\"com.amazon.rum.performance_navigation_event\"\\], \"event_details\": \\{ \"duration\": \\[\\{ \"numeric\": \\[\">\",2000\\] \\}\\] \\} \\} If Name is NavigationToleratedTransaction, then ValueKeymust be null and the EventPattern must include \\{ \"event_type\": \\[\"com.amazon.rum.performance_navigation_event\"\\], \"event_details\": \\{ \"duration\": \\[\\{ \"numeric\": \\[\">=\",2000,\"<\"8000\\] \\}\\] \\} \\} If Name is NavigationFrustratedTransaction, then ValueKeymust be null and the EventPattern must include \\{ \"event_type\": \\[\"com.amazon.rum.performance_navigation_event\"\\], \"event_details\": \\{ \"duration\": \\[\\{ \"numeric\": \\[\">=\",8000\\] \\}\\] \\} \\} If Name is WebVitalsCumulativeLayoutShift, then ValueKeymust be event_details.value and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.cumulative_layout_shift_event\"\\]\\} If Name is WebVitalsFirstInputDelay, then ValueKeymust be event_details.value and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.first_input_delay_event\"\\]\\} If Name is WebVitalsLargestContentfulPaint, then ValueKeymust be event_details.value and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.largest_contentful_paint_event\"\\]\\} If Name is JsErrorCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.js_error_event\"\\]\\} If Name is HttpErrorCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.http_event\"\\]\\} If Name is SessionCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.session_start_event\"\\]\\} If Name is PageViewCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\":\\[\"com.amazon.rum.page_view_event\"\\]\\} If Name is Http4xxCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\": \\[\"com.amazon.rum.http_event\"\\],\"event_details\":\\{\"response\":\\{\"status\":\\[\\{\"numeric\":\\[\">=\",400,\"<\",500\\]\\}\\]\\}\\}\\} \\} If Name is Http5xxCount, then ValueKeymust be null and the EventPattern must include \\{\"event_type\": \\[\"com.amazon.rum.http_event\"\\],\"event_details\":\\{\"response\":\\{\"status\":\\[\\{\"numeric\":\\[\">=\",500,\"<=\",599\\]\\}\\]\\}\\}\\} \\} For custom metrics, the following validation rules apply: The namespace can't be omitted and can't be AWS/RUM. You can use the AWS/RUM namespace only for extended metrics. All dimensions listed in the DimensionKeys field must be present in the value of EventPattern. The values that you specify for ValueKey, EventPattern, and DimensionKeys must be fields in RUM events, so all first-level keys in these fields must be one of the keys in the list later in this section. If you set a value for EventPattern, it must be a JSON object. For every non-empty event_details, there must be a non-empty event_type. If EventPattern contains an event_details field, it must also contain an event_type. For every built-in event_type that you use, you must use a value for event_details that corresponds to that event_type. For information about event details that correspond to event types, see RUM event details. In EventPattern, any JSON array must contain only one value. Valid key values for first-level keys in the ValueKey, EventPattern, and DimensionKeys fields: account_id application_Id application_version application_name batch_id event_details event_id event_interaction event_timestamp event_type event_version log_stream metadata sessionId user_details userId"]
 module Integer =
   struct
     type nonrec t = int
@@ -488,107 +1004,209 @@ module RumEvent =
   struct
     type nonrec t =
       {
-      details: JsonValue.t
-        [@ocaml.doc "A string containing details about the event."];
-      id: String_.t [@ocaml.doc "A unique ID for this event."];
-      metadata: JsonValue.t option
-        [@ocaml.doc
-          "Metadata about this event, which contains a JSON serialization of the identity of the user for this session. The user information comes from information such as the HTTP user-agent request header and document interface."];
+      id: RumEventIdString.t [@ocaml.doc "A unique ID for this event."];
       timestamp: Timestamp.t
         [@ocaml.doc "The exact time that this event occurred."];
       type_: String_.t
         [@ocaml.doc
-          "The JSON schema that denotes the type of event this is, such as a page load or a new session."]}
+          "The JSON schema that denotes the type of event this is, such as a page load or a new session."];
+      metadata: JsonValue.t option
+        [@ocaml.doc
+          "Metadata about this event, which contains a JSON serialization of the identity of the user for this session. The user information comes from information such as the HTTP user-agent request header and document interface."];
+      details: JsonValue.t
+        [@ocaml.doc "A string containing details about the event."]}
     let context_ = "RumEvent"
     let make ?metadata =
-      fun ~details ->
-        fun ~id ->
-          fun ~timestamp ->
-            fun ~type_ ->
-              fun () -> { metadata; details; id; timestamp; type_ }
+      fun ~id ->
+        fun ~timestamp ->
+          fun ~type_ ->
+            fun ~details ->
+              fun () -> { metadata; id; timestamp; type_; details }
     let to_value x =
       structure_to_value
-        [("details", (Some (JsonValue.to_value x.details)));
-        ("id", (Some (String_.to_value x.id)));
-        ("metadata", (Option.map x.metadata ~f:JsonValue.to_value));
+        [("id", (Some (RumEventIdString.to_value x.id)));
         ("timestamp", (Some (Timestamp.to_value x.timestamp)));
-        ("type", (Some (String_.to_value x.type_)))]
+        ("type", (Some (String_.to_value x.type_)));
+        ("metadata", (Option.map x.metadata ~f:JsonValue.to_value));
+        ("details", (Some (JsonValue.to_value x.details)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let details =
+        JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "details") in
+      let metadata =
+        (Option.map ~f:JsonValue.of_xml) (Xml.child xml_arg0 "metadata") in
       let type_ =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
       let timestamp =
         Timestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
-      let metadata =
-        (Option.map ~f:JsonValue.of_xml) (Xml.child xml_arg0 "metadata") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      let details =
-        JsonValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "details") in
-      make ~type_ ~timestamp ?metadata ~id ~details ()
+      let id =
+        RumEventIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~details ?metadata ~type_ ~timestamp ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" String_.of_json in
-      let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
-      let metadata = field_map json "metadata" JsonValue.of_json in
-      let id = field_map_exn json "id" String_.of_json in
-      let details = field_map_exn json "details" JsonValue.of_json in
-      make ~type_ ~timestamp ?metadata ~id ~details ()
+    let of_json json__ =
+      let details = field_map_exn json__ "details" JsonValue.of_json in
+      let metadata = field_map json__ "metadata" JsonValue.of_json in
+      let type_ = field_map_exn json__ "type" String_.of_json in
+      let timestamp = field_map_exn json__ "timestamp" Timestamp.of_json in
+      let id = field_map_exn json__ "id" RumEventIdString.of_json in
+      make ~details ?metadata ~type_ ~timestamp ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains the information for one performance event that RUM collects from a user session with your application."]
+module UserDetailsSessionIdString =
+  struct
+    type nonrec t = string
+    let context_ = "UserDetailsSessionIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserDetailsSessionIdString" j
+    let to_json = simple_to_json to_value
+  end
+module UserDetailsUserIdString =
+  struct
+    type nonrec t = string
+    let context_ = "UserDetailsUserIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserDetailsUserIdString" j
+    let to_json = simple_to_json to_value
+  end
+module MetricDestinationSummary =
+  struct
+    type nonrec t =
+      {
+      destination: MetricDestination.t option
+        [@ocaml.doc
+          "Specifies whether the destination is CloudWatch or Evidently."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "If the destination is Evidently, this specifies the ARN of the Evidently experiment that receives the metrics."];
+      iamRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "This field appears only when the destination is Evidently. It specifies the ARN of the IAM role that is used to write to the Evidently experiment that receives the metrics."]}
+    let make ?destination =
+      fun ?destinationArn ->
+        fun ?iamRoleArn ->
+          fun () -> { destination; destinationArn; iamRoleArn }
+    let to_value x =
+      structure_to_value
+        [("Destination",
+           (Option.map x.destination ~f:MetricDestination.to_value));
+        ("DestinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:IamRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "DestinationArn") in
+      let destination =
+        (Option.map ~f:MetricDestination.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      make ?iamRoleArn ?destinationArn ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRoleArn = field_map json__ "IamRoleArn" IamRoleArn.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map json__ "Destination" MetricDestination.of_json in
+      make ?iamRoleArn ?destinationArn ?destination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that displays information about one destination that CloudWatch RUM sends extended metrics to."]
 module AppMonitorSummary =
   struct
     type nonrec t =
       {
-      created: ISOTimestampString.t option
-        [@ocaml.doc "The date and time that the app monitor was created."];
+      name: AppMonitorName.t option
+        [@ocaml.doc "The name of this app monitor."];
       id: AppMonitorId.t option
         [@ocaml.doc "The unique ID of this app monitor."];
+      created: ISOTimestampString.t option
+        [@ocaml.doc "The date and time that the app monitor was created."];
       lastModified: ISOTimestampString.t option
         [@ocaml.doc
           "The date and time of the most recent changes to this app monitor's configuration."];
-      name: AppMonitorName.t option
-        [@ocaml.doc "The name of this app monitor."];
       state: StateEnum.t option
-        [@ocaml.doc "The current state of this app monitor."]}
-    let make ?created =
+        [@ocaml.doc "The current state of this app monitor."];
+      platform: AppMonitorPlatform.t option
+        [@ocaml.doc
+          "The platform type for this app monitor. Valid values are Web for web applications, Android for Android applications, and iOS for IOS applications."]}
+    let make ?name =
       fun ?id ->
-        fun ?lastModified ->
-          fun ?name ->
+        fun ?created ->
+          fun ?lastModified ->
             fun ?state ->
-              fun () -> { created; id; lastModified; name; state }
+              fun ?platform ->
+                fun () ->
+                  { name; id; created; lastModified; state; platform }
     let to_value x =
       structure_to_value
-        [("Created", (Option.map x.created ~f:ISOTimestampString.to_value));
+        [("Name", (Option.map x.name ~f:AppMonitorName.to_value));
         ("Id", (Option.map x.id ~f:AppMonitorId.to_value));
+        ("Created", (Option.map x.created ~f:ISOTimestampString.to_value));
         ("LastModified",
           (Option.map x.lastModified ~f:ISOTimestampString.to_value));
-        ("Name", (Option.map x.name ~f:AppMonitorName.to_value));
-        ("State", (Option.map x.state ~f:StateEnum.to_value))]
+        ("State", (Option.map x.state ~f:StateEnum.to_value));
+        ("Platform", (Option.map x.platform ~f:AppMonitorPlatform.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let platform =
+        (Option.map ~f:AppMonitorPlatform.of_xml)
+          (Xml.child xml_arg0 "Platform") in
       let state =
         (Option.map ~f:StateEnum.of_xml) (Xml.child xml_arg0 "State") in
-      let name =
-        (Option.map ~f:AppMonitorName.of_xml) (Xml.child xml_arg0 "Name") in
       let lastModified =
         (Option.map ~f:ISOTimestampString.of_xml)
           (Xml.child xml_arg0 "LastModified") in
-      let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
       let created =
         (Option.map ~f:ISOTimestampString.of_xml)
           (Xml.child xml_arg0 "Created") in
-      make ?state ?name ?lastModified ?id ?created ()
+      let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
+      let name =
+        (Option.map ~f:AppMonitorName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?platform ?state ?lastModified ?created ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" StateEnum.of_json in
-      let name = field_map json "Name" AppMonitorName.of_json in
+    let of_json json__ =
+      let platform = field_map json__ "Platform" AppMonitorPlatform.of_json in
+      let state = field_map json__ "State" StateEnum.of_json in
       let lastModified =
-        field_map json "LastModified" ISOTimestampString.of_json in
-      let id = field_map json "Id" AppMonitorId.of_json in
-      let created = field_map json "Created" ISOTimestampString.of_json in
-      make ?state ?name ?lastModified ?id ?created ()
+        field_map json__ "LastModified" ISOTimestampString.of_json in
+      let created = field_map json__ "Created" ISOTimestampString.of_json in
+      let id = field_map json__ "Id" AppMonitorId.of_json in
+      let name = field_map json__ "Name" AppMonitorName.of_json in
+      make ?platform ?state ?lastModified ?created ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that includes some data about app monitors and their settings."]
@@ -596,136 +1214,170 @@ module AppMonitorConfiguration =
   struct
     type nonrec t =
       {
-      allowCookies: Boolean.t option
-        [@ocaml.doc
-          "If you set this to true, the RUM web client sets two cookies, a session cookie and a user cookie. The cookies allow the RUM web client to collect data relating to the number of users an application has and the behavior of the application across a sequence of events. Cookies are stored in the top-level domain of the current page."];
-      enableXRay: Boolean.t option
-        [@ocaml.doc
-          "If you set this to true, RUM enables X-Ray tracing for the user sessions that RUM samples. RUM adds an X-Ray trace header to allowed HTTP requests. It also records an X-Ray segment for allowed HTTP requests. You can see traces and segments from these user sessions in the X-Ray console and the CloudWatch ServiceLens console. For more information, see What is X-Ray?"];
-      excludedPages: Pages.t option
-        [@ocaml.doc
-          "A list of URLs in your website or application to exclude from RUM data collection. You can't include both ExcludedPages and IncludedPages in the same operation."];
-      favoritePages: FavoritePages.t option
-        [@ocaml.doc
-          "A list of pages in the CloudWatch RUM console that are to be displayed with a \"favorite\" icon."];
-      guestRoleArn: Arn.t option
-        [@ocaml.doc
-          "The ARN of the guest IAM role that is attached to the Amazon Cognito identity pool that is used to authorize the sending of data to RUM."];
       identityPoolId: IdentityPoolId.t option
         [@ocaml.doc
           "The ID of the Amazon Cognito identity pool that is used to authorize the sending of data to RUM."];
+      excludedPages: Pages.t option
+        [@ocaml.doc
+          "A list of URLs in your website or application to exclude from RUM data collection. You can't include both ExcludedPages and IncludedPages in the same operation."];
       includedPages: Pages.t option
         [@ocaml.doc
-          "If this app monitor is to collect data from only certain pages in your application, this structure lists those pages. <p>You can't include both <code>ExcludedPages</code> and <code>IncludedPages</code> in the same operation.</p>"];
+          "If this app monitor is to collect data from only certain pages in your application, this structure lists those pages. You can't include both ExcludedPages and IncludedPages in the same operation."];
+      favoritePages: FavoritePages.t option
+        [@ocaml.doc
+          "A list of pages in your application that are to be displayed with a \"favorite\" icon in the CloudWatch RUM console."];
       sessionSampleRate: SessionSampleRate.t option
         [@ocaml.doc
-          "Specifies the percentage of user sessions to use for RUM data collection. Choosing a higher percentage gives you more data but also incurs more costs. The number you specify is the percentage of user sessions that will be used. If you omit this parameter, the default of 10 is used."];
+          "Specifies the portion of user sessions to use for RUM data collection. Choosing a higher portion gives you more data but also incurs more costs. The range for this value is 0 to 1 inclusive. Setting this to 1 means that 100% of user sessions are sampled, and setting it to 0.1 means that 10% of user sessions are sampled. If you omit this parameter, the default of 0.1 is used, and 10% of sessions will be sampled."];
+      guestRoleArn: Arn.t option
+        [@ocaml.doc
+          "The ARN of the guest IAM role that is attached to the Amazon Cognito identity pool that is used to authorize the sending of data to RUM. It is possible that an app monitor does not have a value for GuestRoleArn. For example, this can happen when you use the console to create an app monitor and you allow CloudWatch RUM to create a new identity pool for Authorization. In this case, GuestRoleArn is not present in the GetAppMonitor response because it is not stored by the service. If this issue affects you, you can take one of the following steps: Use the Cloud Development Kit (CDK) to create an identity pool and the associated IAM role, and use that for your app monitor. Make a separate GetIdentityPoolRoles call to Amazon Cognito to retrieve the GuestRoleArn."];
+      allowCookies: Boolean.t option
+        [@ocaml.doc
+          "If you set this to true, the RUM web client sets two cookies, a session cookie and a user cookie. The cookies allow the RUM web client to collect data relating to the number of users an application has and the behavior of the application across a sequence of events. Cookies are stored in the top-level domain of the current page."];
       telemetries: Telemetries.t option
         [@ocaml.doc
-          "An array that lists the types of telemetry data that this app monitor is to collect. errors indicates that RUM collects data about unhandled JavaScript errors raised by your application. performance indicates that RUM collects performance data about how your application and its resources are loaded and rendered. This includes Core Web Vitals. http indicates that RUM collects data about HTTP errors thrown by your application."]}
-    let make ?allowCookies =
-      fun ?enableXRay ->
-        fun ?excludedPages ->
+          "An array that lists the types of telemetry data that this app monitor is to collect. errors indicates that RUM collects data about unhandled JavaScript errors raised by your application. performance indicates that RUM collects performance data about how your application and its resources are loaded and rendered. This includes Core Web Vitals. http indicates that RUM collects data about HTTP errors thrown by your application."];
+      enableXRay: Boolean.t option
+        [@ocaml.doc
+          "If you set this to true, RUM enables X-Ray tracing for the user sessions that RUM samples. RUM adds an X-Ray trace header to allowed HTTP requests. It also records an X-Ray segment for allowed HTTP requests. You can see traces and segments from these user sessions in the X-Ray console and the CloudWatch ServiceLens console. For more information, see What is X-Ray?"]}
+    let make ?identityPoolId =
+      fun ?excludedPages ->
+        fun ?includedPages ->
           fun ?favoritePages ->
-            fun ?guestRoleArn ->
-              fun ?identityPoolId ->
-                fun ?includedPages ->
-                  fun ?sessionSampleRate ->
-                    fun ?telemetries ->
+            fun ?sessionSampleRate ->
+              fun ?guestRoleArn ->
+                fun ?allowCookies ->
+                  fun ?telemetries ->
+                    fun ?enableXRay ->
                       fun () ->
                         {
-                          allowCookies;
-                          enableXRay;
-                          excludedPages;
-                          favoritePages;
-                          guestRoleArn;
                           identityPoolId;
+                          excludedPages;
                           includedPages;
+                          favoritePages;
                           sessionSampleRate;
-                          telemetries
+                          guestRoleArn;
+                          allowCookies;
+                          telemetries;
+                          enableXRay
                         }
     let to_value x =
       structure_to_value
-        [("AllowCookies", (Option.map x.allowCookies ~f:Boolean.to_value));
-        ("EnableXRay", (Option.map x.enableXRay ~f:Boolean.to_value));
+        [("IdentityPoolId",
+           (Option.map x.identityPoolId ~f:IdentityPoolId.to_value));
         ("ExcludedPages", (Option.map x.excludedPages ~f:Pages.to_value));
+        ("IncludedPages", (Option.map x.includedPages ~f:Pages.to_value));
         ("FavoritePages",
           (Option.map x.favoritePages ~f:FavoritePages.to_value));
-        ("GuestRoleArn", (Option.map x.guestRoleArn ~f:Arn.to_value));
-        ("IdentityPoolId",
-          (Option.map x.identityPoolId ~f:IdentityPoolId.to_value));
-        ("IncludedPages", (Option.map x.includedPages ~f:Pages.to_value));
         ("SessionSampleRate",
           (Option.map x.sessionSampleRate ~f:SessionSampleRate.to_value));
-        ("Telemetries", (Option.map x.telemetries ~f:Telemetries.to_value))]
+        ("GuestRoleArn", (Option.map x.guestRoleArn ~f:Arn.to_value));
+        ("AllowCookies", (Option.map x.allowCookies ~f:Boolean.to_value));
+        ("Telemetries", (Option.map x.telemetries ~f:Telemetries.to_value));
+        ("EnableXRay", (Option.map x.enableXRay ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableXRay =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EnableXRay") in
       let telemetries =
         (Option.map ~f:Telemetries.of_xml) (Xml.child xml_arg0 "Telemetries") in
+      let allowCookies =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AllowCookies") in
+      let guestRoleArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GuestRoleArn") in
       let sessionSampleRate =
         (Option.map ~f:SessionSampleRate.of_xml)
           (Xml.child xml_arg0 "SessionSampleRate") in
-      let includedPages =
-        (Option.map ~f:Pages.of_xml) (Xml.child xml_arg0 "IncludedPages") in
-      let identityPoolId =
-        (Option.map ~f:IdentityPoolId.of_xml)
-          (Xml.child xml_arg0 "IdentityPoolId") in
-      let guestRoleArn =
-        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GuestRoleArn") in
       let favoritePages =
         (Option.map ~f:FavoritePages.of_xml)
           (Xml.child xml_arg0 "FavoritePages") in
+      let includedPages =
+        (Option.map ~f:Pages.of_xml) (Xml.child xml_arg0 "IncludedPages") in
       let excludedPages =
         (Option.map ~f:Pages.of_xml) (Xml.child xml_arg0 "ExcludedPages") in
-      let enableXRay =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EnableXRay") in
-      let allowCookies =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AllowCookies") in
-      make ?telemetries ?sessionSampleRate ?includedPages ?identityPoolId
-        ?guestRoleArn ?favoritePages ?excludedPages ?enableXRay ?allowCookies
-        ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let telemetries = field_map json "Telemetries" Telemetries.of_json in
-      let sessionSampleRate =
-        field_map json "SessionSampleRate" SessionSampleRate.of_json in
-      let includedPages = field_map json "IncludedPages" Pages.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
-      let guestRoleArn = field_map json "GuestRoleArn" Arn.of_json in
+        (Option.map ~f:IdentityPoolId.of_xml)
+          (Xml.child xml_arg0 "IdentityPoolId") in
+      make ?enableXRay ?telemetries ?allowCookies ?guestRoleArn
+        ?sessionSampleRate ?favoritePages ?includedPages ?excludedPages
+        ?identityPoolId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableXRay = field_map json__ "EnableXRay" Boolean.of_json in
+      let telemetries = field_map json__ "Telemetries" Telemetries.of_json in
+      let allowCookies = field_map json__ "AllowCookies" Boolean.of_json in
+      let guestRoleArn = field_map json__ "GuestRoleArn" Arn.of_json in
+      let sessionSampleRate =
+        field_map json__ "SessionSampleRate" SessionSampleRate.of_json in
       let favoritePages =
-        field_map json "FavoritePages" FavoritePages.of_json in
-      let excludedPages = field_map json "ExcludedPages" Pages.of_json in
-      let enableXRay = field_map json "EnableXRay" Boolean.of_json in
-      let allowCookies = field_map json "AllowCookies" Boolean.of_json in
-      make ?telemetries ?sessionSampleRate ?includedPages ?identityPoolId
-        ?guestRoleArn ?favoritePages ?excludedPages ?enableXRay ?allowCookies
-        ()
+        field_map json__ "FavoritePages" FavoritePages.of_json in
+      let includedPages = field_map json__ "IncludedPages" Pages.of_json in
+      let excludedPages = field_map json__ "ExcludedPages" Pages.of_json in
+      let identityPoolId =
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
+      make ?enableXRay ?telemetries ?allowCookies ?guestRoleArn
+        ?sessionSampleRate ?favoritePages ?includedPages ?excludedPages
+        ?identityPoolId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This structure contains much of the configuration data for the app monitor."]
-module AppMonitorDomain =
+module AppMonitorDomainList =
   struct
-    type nonrec t = string
-    let context_ = "AppMonitorDomain"
+    type nonrec t = AppMonitorDomain.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:253) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^(localhost)|^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$|^(?![-.])([A-Za-z0-9-\\.\\-]{0,63})((?![-])([a-zA-Z0-9]{1}|^[a-zA-Z0-9]{0,1}))\\.(?![-])[A-Za-z-0-9]{1,63}((?![-])([a-zA-Z0-9]{1}|^[a-zA-Z0-9]{0,1}))|^(\\*\\.)(?![-.])([A-Za-z0-9-\\.\\-]{0,63})((?![-])([a-zA-Z0-9]{1}|^[a-zA-Z0-9]{0,1}))\\.(?![-])[A-Za-z-0-9]{1,63}((?![-])([a-zA-Z0-9]{1}|^[a-zA-Z0-9]{0,1}))")));
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AppMonitorDomain.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AppMonitorDomain" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AppMonitorDomain.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AppMonitorDomainList"
+        ~of_json:AppMonitorDomain.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module CustomEvents =
+  struct
+    type nonrec t =
+      {
+      status: CustomEventsStatus.t option
+        [@ocaml.doc
+          "Specifies whether this app monitor allows the web client to define and send custom events. The default is for custom events to be DISABLED."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:CustomEventsStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:CustomEventsStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" CustomEventsStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains information about custom events for this app monitor."]
 module DataStorage =
   struct
     type nonrec t =
@@ -741,11 +1393,38 @@ module DataStorage =
       let cwLog = (Option.map ~f:CwLog.of_xml) (Xml.child xml_arg0 "CwLog") in
       make ?cwLog ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cwLog = field_map json "CwLog" CwLog.of_json in make ?cwLog ()
+    let of_json json__ =
+      let cwLog = field_map json__ "CwLog" CwLog.of_json in make ?cwLog ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about whether this app monitor stores a copy of the telemetry data that RUM collects using CloudWatch Logs."]
+module DeobfuscationConfiguration =
+  struct
+    type nonrec t =
+      {
+      javaScriptSourceMaps: JavaScriptSourceMaps.t option
+        [@ocaml.doc
+          "A structure that contains the configuration for how an app monitor can unminify JavaScript error stack traces using source maps."]}
+    let make ?javaScriptSourceMaps = fun () -> { javaScriptSourceMaps }
+    let to_value x =
+      structure_to_value
+        [("JavaScriptSourceMaps",
+           (Option.map x.javaScriptSourceMaps
+              ~f:JavaScriptSourceMaps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let javaScriptSourceMaps =
+        (Option.map ~f:JavaScriptSourceMaps.of_xml)
+          (Xml.child xml_arg0 "JavaScriptSourceMaps") in
+      make ?javaScriptSourceMaps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let javaScriptSourceMaps =
+        field_map json__ "JavaScriptSourceMaps" JavaScriptSourceMaps.of_json in
+      make ?javaScriptSourceMaps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains the configuration for how an app monitor can deobfuscate stack traces."]
 module TagMap =
   struct
     type nonrec t = (TagKey.t * TagValue.t) list
@@ -767,6 +1446,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -811,9 +1492,9 @@ module QueryFilter =
         (Option.map ~f:QueryFilterKey.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" QueryFilterValueList.of_json in
-      let name = field_map json "Name" QueryFilterKey.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" QueryFilterValueList.of_json in
+      let name = field_map json__ "Name" QueryFilterKey.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -831,23 +1512,192 @@ module QueryTimestamp =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module MetricDefinition =
+  struct
+    type nonrec t =
+      {
+      metricDefinitionId: MetricDefinitionId.t option
+        [@ocaml.doc "The ID of this metric definition."];
+      name: MetricName.t option
+        [@ocaml.doc
+          "The name of the metric that is defined in this structure."];
+      valueKey: ValueKey.t option
+        [@ocaml.doc
+          "The field within the event object that the metric value is sourced from."];
+      unitLabel: UnitLabel.t option
+        [@ocaml.doc
+          "Use this field only if you are sending this metric to CloudWatch. It defines the CloudWatch metric unit that this metric is measured in."];
+      dimensionKeys: DimensionKeysMap.t option
+        [@ocaml.doc
+          "This field is a map of field paths to dimension names. It defines the dimensions to associate with this metric in CloudWatch The value of this field is used only if the metric destination is CloudWatch. If the metric destination is Evidently, the value of DimensionKeys is ignored."];
+      eventPattern: EventPattern.t option
+        [@ocaml.doc
+          "The pattern that defines the metric. RUM checks events that happen in a user's session against the pattern, and events that match the pattern are sent to the metric destination. If the metrics destination is CloudWatch and the event also matches a value in DimensionKeys, then the metric is published with the specified dimensions."];
+      namespace: Namespace.t option
+        [@ocaml.doc
+          "If this metric definition is for a custom metric instead of an extended metric, this field displays the metric namespace that the custom metric is published to."]}
+    let make ?metricDefinitionId =
+      fun ?name ->
+        fun ?valueKey ->
+          fun ?unitLabel ->
+            fun ?dimensionKeys ->
+              fun ?eventPattern ->
+                fun ?namespace ->
+                  fun () ->
+                    {
+                      metricDefinitionId;
+                      name;
+                      valueKey;
+                      unitLabel;
+                      dimensionKeys;
+                      eventPattern;
+                      namespace
+                    }
+    let to_value x =
+      structure_to_value
+        [("MetricDefinitionId",
+           (Option.map x.metricDefinitionId ~f:MetricDefinitionId.to_value));
+        ("Name", (Option.map x.name ~f:MetricName.to_value));
+        ("ValueKey", (Option.map x.valueKey ~f:ValueKey.to_value));
+        ("UnitLabel", (Option.map x.unitLabel ~f:UnitLabel.to_value));
+        ("DimensionKeys",
+          (Option.map x.dimensionKeys ~f:DimensionKeysMap.to_value));
+        ("EventPattern",
+          (Option.map x.eventPattern ~f:EventPattern.to_value));
+        ("Namespace", (Option.map x.namespace ~f:Namespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
+      let eventPattern =
+        (Option.map ~f:EventPattern.of_xml)
+          (Xml.child xml_arg0 "EventPattern") in
+      let dimensionKeys =
+        (Option.map ~f:DimensionKeysMap.of_xml)
+          (Xml.child xml_arg0 "DimensionKeys") in
+      let unitLabel =
+        (Option.map ~f:UnitLabel.of_xml) (Xml.child xml_arg0 "UnitLabel") in
+      let valueKey =
+        (Option.map ~f:ValueKey.of_xml) (Xml.child xml_arg0 "ValueKey") in
+      let name =
+        (Option.map ~f:MetricName.of_xml) (Xml.child xml_arg0 "Name") in
+      let metricDefinitionId =
+        (Option.map ~f:MetricDefinitionId.of_xml)
+          (Xml.child xml_arg0 "MetricDefinitionId") in
+      make ?namespace ?eventPattern ?dimensionKeys ?unitLabel ?valueKey ?name
+        ?metricDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
+      let eventPattern = field_map json__ "EventPattern" EventPattern.of_json in
+      let dimensionKeys =
+        field_map json__ "DimensionKeys" DimensionKeysMap.of_json in
+      let unitLabel = field_map json__ "UnitLabel" UnitLabel.of_json in
+      let valueKey = field_map json__ "ValueKey" ValueKey.of_json in
+      let name = field_map json__ "Name" MetricName.of_json in
+      let metricDefinitionId =
+        field_map json__ "MetricDefinitionId" MetricDefinitionId.of_json in
+      make ?namespace ?eventPattern ?dimensionKeys ?unitLabel ?valueKey ?name
+        ?metricDefinitionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that displays the definition of one extended metric that RUM sends to CloudWatch or CloudWatch Evidently. For more information, see Additional metrics that you can send to CloudWatch and CloudWatch Evidently."]
+module BatchDeleteRumMetricDefinitionsError =
+  struct
+    type nonrec t =
+      {
+      metricDefinitionId: MetricDefinitionId.t option
+        [@ocaml.doc
+          "The ID of the metric definition that caused this error."];
+      errorCode: String_.t option [@ocaml.doc "The error code."];
+      errorMessage: String_.t option
+        [@ocaml.doc "The error message for this metric definition."]}
+    let make ?metricDefinitionId =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { metricDefinitionId; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("MetricDefinitionId",
+           (Option.map x.metricDefinitionId ~f:MetricDefinitionId.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let metricDefinitionId =
+        (Option.map ~f:MetricDefinitionId.of_xml)
+          (Xml.child xml_arg0 "MetricDefinitionId") in
+      make ?errorMessage ?errorCode ?metricDefinitionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let metricDefinitionId =
+        field_map json__ "MetricDefinitionId" MetricDefinitionId.of_json in
+      make ?errorMessage ?errorCode ?metricDefinitionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that defines one error caused by a BatchCreateRumMetricsDefinitions operation."]
+module BatchCreateRumMetricDefinitionsError =
+  struct
+    type nonrec t =
+      {
+      metricDefinition: MetricDefinitionRequest.t option
+        [@ocaml.doc "The metric definition that caused this error."];
+      errorCode: String_.t option [@ocaml.doc "The error code."];
+      errorMessage: String_.t option
+        [@ocaml.doc "The error message for this metric definition."]}
+    let make ?metricDefinition =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { metricDefinition; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("MetricDefinition",
+           (Option.map x.metricDefinition ~f:MetricDefinitionRequest.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let metricDefinition =
+        (Option.map ~f:MetricDefinitionRequest.of_xml)
+          (Xml.child xml_arg0 "MetricDefinition") in
+      make ?errorMessage ?errorCode ?metricDefinition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let metricDefinition =
+        field_map json__ "MetricDefinition" MetricDefinitionRequest.of_json in
+      make ?errorMessage ?errorCode ?metricDefinition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that defines one error caused by a BatchCreateRumMetricsDefinitions operation."]
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You don't have sufficient permissions to perform this action."]
@@ -855,39 +1705,37 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceName: String_.t
+      message: String_.t option ;
+      resourceName: String_.t option
         [@ocaml.doc
           "The name of the resource that is associated with the error."];
       resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that is associated with the error."]}
-    let context_ = "ConflictException"
-    let make ?resourceType =
-      fun ~message ->
-        fun ~resourceName ->
-          fun () -> { resourceType; message; resourceName }
+    let make ?message =
+      fun ?resourceName ->
+        fun ?resourceType ->
+          fun () -> { message; resourceName; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceName", (Some (String_.to_value x.resourceName)));
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:String_.to_value));
         ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceName") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?resourceType ~resourceName ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let resourceName = field_map_exn json "resourceName" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?resourceType ~resourceName ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceName = field_map json__ "resourceName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This operation attempted to create a resource that already exists."]
@@ -895,134 +1743,149 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: Integer.t option
         [@ocaml.doc
           "The value of a parameter in the request caused an error."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Internal service exception."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceName: String_.t
+      message: String_.t option ;
+      resourceName: String_.t option
         [@ocaml.doc
           "The name of the resource that is associated with the error."];
       resourceType: String_.t option
         [@ocaml.doc
           "The type of the resource that is associated with the error."]}
-    let context_ = "ResourceNotFoundException"
-    let make ?resourceType =
-      fun ~message ->
-        fun ~resourceName ->
-          fun () -> { resourceType; message; resourceName }
+    let make ?message =
+      fun ?resourceName ->
+        fun ?resourceType ->
+          fun () -> { message; resourceName; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
-        ("resourceName", (Some (String_.to_value x.resourceName)));
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("resourceName", (Option.map x.resourceName ~f:String_.to_value));
         ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
       let resourceName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceName") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?resourceType ~resourceName ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" String_.of_json in
-      let resourceName = field_map_exn json "resourceName" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?resourceType ~resourceName ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let resourceName = field_map json__ "resourceName" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Resource not found."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "This request exceeds a service quota."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
+      serviceCode: String_.t option
+        [@ocaml.doc
+          "The ID of the service that is associated with the error."];
       quotaCode: String_.t option
         [@ocaml.doc "The ID of the service quota that was exceeded."];
       retryAfterSeconds: Integer.t option
         [@ocaml.doc
-          "The value of a parameter in the request caused an error."];
-      serviceCode: String_.t option
-        [@ocaml.doc
-          "The ID of the service that is associated with the error."]}
-    let context_ = "ThrottlingException"
-    let make ?quotaCode =
-      fun ?retryAfterSeconds ->
-        fun ?serviceCode ->
-          fun ~message ->
-            fun () -> { quotaCode; retryAfterSeconds; serviceCode; message }
+          "The value of a parameter in the request caused an error."]}
+    let make ?message =
+      fun ?serviceCode ->
+        fun ?quotaCode ->
+          fun ?retryAfterSeconds ->
+            fun () -> { message; serviceCode; quotaCode; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value));
         ("quotaCode", (Option.map x.quotaCode ~f:String_.to_value));
-        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value));
-        ("serviceCode", (Option.map x.serviceCode ~f:String_.to_value))]
+        ("Retry-After", (Option.map x.retryAfterSeconds ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let serviceCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let retryAfterSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Retry-After") in
       let quotaCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let serviceCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceCode") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map json "serviceCode" String_.of_json in
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" Integer.of_json in
-      let quotaCode = field_map json "quotaCode" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?serviceCode ?retryAfterSeconds ?quotaCode ~message ()
+        field_map json__ "retryAfterSeconds" Integer.of_json in
+      let quotaCode = field_map json__ "quotaCode" String_.of_json in
+      let serviceCode = field_map json__ "serviceCode" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?quotaCode ?serviceCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was throttled because of quota limits."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One of the arguments for the request is not valid."]
 module TagKeyList =
@@ -1033,6 +1896,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1052,41 +1918,106 @@ module TagKeyList =
     let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Alias =
+  struct
+    type nonrec t = string
+    let context_ = "Alias"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Alias" j
+    let to_json = simple_to_json to_value
+  end
 module AppMonitorDetails =
   struct
     type nonrec t =
       {
-      id: String_.t option [@ocaml.doc "The unique ID of the app monitor."];
       name: String_.t option [@ocaml.doc "The name of the app monitor."];
+      id: String_.t option [@ocaml.doc "The unique ID of the app monitor."];
       version: String_.t option
         [@ocaml.doc "The version of the app monitor."]}
-    let make ?id =
-      fun ?name -> fun ?version -> fun () -> { id; name; version }
+    let make ?name =
+      fun ?id -> fun ?version -> fun () -> { name; id; version }
     let to_value x =
       structure_to_value
-        [("id", (Option.map x.id ~f:String_.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("id", (Option.map x.id ~f:String_.to_value));
         ("version", (Option.map x.version ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let version =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
-      make ?version ?name ?id ()
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?version ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" String_.of_json in
-      let name = field_map json "name" String_.of_json in
-      let id = field_map json "id" String_.of_json in
-      make ?version ?name ?id ()
+    let of_json json__ =
+      let version = field_map json__ "version" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?version ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about the RUM app monitor."]
+module PutRumEventsRequestBatchIdString =
+  struct
+    type nonrec t = string
+    let context_ = "PutRumEventsRequestBatchIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PutRumEventsRequestBatchIdString" j
+    let to_json = simple_to_json to_value
+  end
+module PutRumEventsRequestIdString =
+  struct
+    type nonrec t = string
+    let context_ = "PutRumEventsRequestIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PutRumEventsRequestIdString" j
+    let to_json = simple_to_json to_value
+  end
 module RumEventList =
   struct
     type nonrec t = RumEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RumEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1111,35 +2042,167 @@ module UserDetails =
   struct
     type nonrec t =
       {
-      sessionId: String_.t option
-        [@ocaml.doc "The session ID that the performance events are from."];
-      userId: String_.t option
+      userId: UserDetailsUserIdString.t option
         [@ocaml.doc
-          "The ID of the user for this user session. This ID is generated by RUM and does not include any personally identifiable information about the user."]}
-    let make ?sessionId = fun ?userId -> fun () -> { sessionId; userId }
+          "The ID of the user for this user session. This ID is generated by RUM and does not include any personally identifiable information about the user."];
+      sessionId: UserDetailsSessionIdString.t option
+        [@ocaml.doc "The session ID that the performance events are from."]}
+    let make ?userId = fun ?sessionId -> fun () -> { userId; sessionId }
     let to_value x =
       structure_to_value
-        [("sessionId", (Option.map x.sessionId ~f:String_.to_value));
-        ("userId", (Option.map x.userId ~f:String_.to_value))]
+        [("userId",
+           (Option.map x.userId ~f:UserDetailsUserIdString.to_value));
+        ("sessionId",
+          (Option.map x.sessionId ~f:UserDetailsSessionIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "userId") in
       let sessionId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sessionId") in
-      make ?userId ?sessionId ()
+        (Option.map ~f:UserDetailsSessionIdString.of_xml)
+          (Xml.child xml_arg0 "sessionId") in
+      let userId =
+        (Option.map ~f:UserDetailsUserIdString.of_xml)
+          (Xml.child xml_arg0 "userId") in
+      make ?sessionId ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "userId" String_.of_json in
-      let sessionId = field_map json "sessionId" String_.of_json in
-      make ?userId ?sessionId ()
+    let of_json json__ =
+      let sessionId =
+        field_map json__ "sessionId" UserDetailsSessionIdString.of_json in
+      let userId = field_map json__ "userId" UserDetailsUserIdString.of_json in
+      make ?sessionId ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that contains information about the user session that this batch of events was collected from."]
+module InvalidPolicyRevisionIdException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The policy revision ID that you provided doeesn't match the latest policy revision ID."]
+module MalformedPolicyDocumentException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The policy document that you specified is not formatted correctly."]
+module PolicyRevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "PolicyRevisionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PolicyRevisionId" j
+    let to_json = simple_to_json to_value
+  end
+module PolicySizeLimitExceededException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The policy document is too large. The limit is 4 KB."]
+module MetricDestinationSummaryList =
+  struct
+    type nonrec t = MetricDestinationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDestinationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDestinationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDestinationSummaryList"
+        ~of_json:MetricDestinationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResultsInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResultsInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AppMonitorSummaryList =
   struct
     type nonrec t = AppMonitorSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppMonitorSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1161,107 +2224,176 @@ module AppMonitorSummaryList =
         ~of_json:AppMonitorSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PolicyNotFoundException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resource-based policy doesn't exist on this app monitor."]
 module AppMonitor =
   struct
     type nonrec t =
       {
-      appMonitorConfiguration: AppMonitorConfiguration.t option
-        [@ocaml.doc
-          "A structure that contains much of the configuration data for the app monitor."];
-      created: ISOTimestampString.t option
-        [@ocaml.doc "The date and time that this app monitor was created."];
-      dataStorage: DataStorage.t option
-        [@ocaml.doc
-          "A structure that contains information about whether this app monitor stores a copy of the telemetry data that RUM collects using CloudWatch Logs."];
+      name: AppMonitorName.t option
+        [@ocaml.doc "The name of the app monitor."];
       domain: AppMonitorDomain.t option
         [@ocaml.doc
           "The top-level internet domain name for which your application has administrative authority."];
+      domainList: AppMonitorDomainList.t option
+        [@ocaml.doc
+          "List the domain names for which your application has administrative authority."];
       id: AppMonitorId.t option
         [@ocaml.doc "The unique ID of this app monitor."];
+      created: ISOTimestampString.t option
+        [@ocaml.doc "The date and time that this app monitor was created."];
       lastModified: ISOTimestampString.t option
         [@ocaml.doc
           "The date and time of the most recent changes to this app monitor's configuration."];
-      name: AppMonitorName.t option
-        [@ocaml.doc "The name of the app monitor."];
-      state: StateEnum.t option
-        [@ocaml.doc "The current state of the app monitor."];
       tags: TagMap.t option
         [@ocaml.doc
-          "The list of tag keys and values associated with this app monitor."]}
-    let make ?appMonitorConfiguration =
-      fun ?created ->
-        fun ?dataStorage ->
-          fun ?domain ->
-            fun ?id ->
+          "The list of tag keys and values associated with this app monitor."];
+      state: StateEnum.t option
+        [@ocaml.doc "The current state of the app monitor."];
+      appMonitorConfiguration: AppMonitorConfiguration.t option
+        [@ocaml.doc
+          "A structure that contains much of the configuration data for the app monitor."];
+      dataStorage: DataStorage.t option
+        [@ocaml.doc
+          "A structure that contains information about whether this app monitor stores a copy of the telemetry data that RUM collects using CloudWatch Logs."];
+      customEvents: CustomEvents.t option
+        [@ocaml.doc
+          "Specifies whether this app monitor allows the web client to define and send custom events. For more information about custom events, see Send custom events."];
+      deobfuscationConfiguration: DeobfuscationConfiguration.t option
+        [@ocaml.doc
+          "A structure that contains the configuration for how an app monitor can deobfuscate stack traces."];
+      platform: AppMonitorPlatform.t option
+        [@ocaml.doc
+          "The platform type for this app monitor. Valid values are Web for web applications , Android for Android applications, and iOS for IOS applications."]}
+    let make ?name =
+      fun ?domain ->
+        fun ?domainList ->
+          fun ?id ->
+            fun ?created ->
               fun ?lastModified ->
-                fun ?name ->
+                fun ?tags ->
                   fun ?state ->
-                    fun ?tags ->
-                      fun () ->
-                        {
-                          appMonitorConfiguration;
-                          created;
-                          dataStorage;
-                          domain;
-                          id;
-                          lastModified;
-                          name;
-                          state;
-                          tags
-                        }
+                    fun ?appMonitorConfiguration ->
+                      fun ?dataStorage ->
+                        fun ?customEvents ->
+                          fun ?deobfuscationConfiguration ->
+                            fun ?platform ->
+                              fun () ->
+                                {
+                                  name;
+                                  domain;
+                                  domainList;
+                                  id;
+                                  created;
+                                  lastModified;
+                                  tags;
+                                  state;
+                                  appMonitorConfiguration;
+                                  dataStorage;
+                                  customEvents;
+                                  deobfuscationConfiguration;
+                                  platform
+                                }
     let to_value x =
       structure_to_value
-        [("AppMonitorConfiguration",
-           (Option.map x.appMonitorConfiguration
-              ~f:AppMonitorConfiguration.to_value));
-        ("Created", (Option.map x.created ~f:ISOTimestampString.to_value));
-        ("DataStorage", (Option.map x.dataStorage ~f:DataStorage.to_value));
+        [("Name", (Option.map x.name ~f:AppMonitorName.to_value));
         ("Domain", (Option.map x.domain ~f:AppMonitorDomain.to_value));
+        ("DomainList",
+          (Option.map x.domainList ~f:AppMonitorDomainList.to_value));
         ("Id", (Option.map x.id ~f:AppMonitorId.to_value));
+        ("Created", (Option.map x.created ~f:ISOTimestampString.to_value));
         ("LastModified",
           (Option.map x.lastModified ~f:ISOTimestampString.to_value));
-        ("Name", (Option.map x.name ~f:AppMonitorName.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("State", (Option.map x.state ~f:StateEnum.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("AppMonitorConfiguration",
+          (Option.map x.appMonitorConfiguration
+             ~f:AppMonitorConfiguration.to_value));
+        ("DataStorage", (Option.map x.dataStorage ~f:DataStorage.to_value));
+        ("CustomEvents",
+          (Option.map x.customEvents ~f:CustomEvents.to_value));
+        ("DeobfuscationConfiguration",
+          (Option.map x.deobfuscationConfiguration
+             ~f:DeobfuscationConfiguration.to_value));
+        ("Platform", (Option.map x.platform ~f:AppMonitorPlatform.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let state =
-        (Option.map ~f:StateEnum.of_xml) (Xml.child xml_arg0 "State") in
-      let name =
-        (Option.map ~f:AppMonitorName.of_xml) (Xml.child xml_arg0 "Name") in
-      let lastModified =
-        (Option.map ~f:ISOTimestampString.of_xml)
-          (Xml.child xml_arg0 "LastModified") in
-      let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
-      let domain =
-        (Option.map ~f:AppMonitorDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let platform =
+        (Option.map ~f:AppMonitorPlatform.of_xml)
+          (Xml.child xml_arg0 "Platform") in
+      let deobfuscationConfiguration =
+        (Option.map ~f:DeobfuscationConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeobfuscationConfiguration") in
+      let customEvents =
+        (Option.map ~f:CustomEvents.of_xml)
+          (Xml.child xml_arg0 "CustomEvents") in
       let dataStorage =
         (Option.map ~f:DataStorage.of_xml) (Xml.child xml_arg0 "DataStorage") in
-      let created =
-        (Option.map ~f:ISOTimestampString.of_xml)
-          (Xml.child xml_arg0 "Created") in
       let appMonitorConfiguration =
         (Option.map ~f:AppMonitorConfiguration.of_xml)
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
-      make ?tags ?state ?name ?lastModified ?id ?domain ?dataStorage ?created
-        ?appMonitorConfiguration ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let state = field_map json "State" StateEnum.of_json in
-      let name = field_map json "Name" AppMonitorName.of_json in
+      let state =
+        (Option.map ~f:StateEnum.of_xml) (Xml.child xml_arg0 "State") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let lastModified =
-        field_map json "LastModified" ISOTimestampString.of_json in
-      let id = field_map json "Id" AppMonitorId.of_json in
-      let domain = field_map json "Domain" AppMonitorDomain.of_json in
-      let dataStorage = field_map json "DataStorage" DataStorage.of_json in
-      let created = field_map json "Created" ISOTimestampString.of_json in
+        (Option.map ~f:ISOTimestampString.of_xml)
+          (Xml.child xml_arg0 "LastModified") in
+      let created =
+        (Option.map ~f:ISOTimestampString.of_xml)
+          (Xml.child xml_arg0 "Created") in
+      let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
+      let domainList =
+        (Option.map ~f:AppMonitorDomainList.of_xml)
+          (Xml.child xml_arg0 "DomainList") in
+      let domain =
+        (Option.map ~f:AppMonitorDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let name =
+        (Option.map ~f:AppMonitorName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?platform ?deobfuscationConfiguration ?customEvents ?dataStorage
+        ?appMonitorConfiguration ?state ?tags ?lastModified ?created ?id
+        ?domainList ?domain ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let platform = field_map json__ "Platform" AppMonitorPlatform.of_json in
+      let deobfuscationConfiguration =
+        field_map json__ "DeobfuscationConfiguration"
+          DeobfuscationConfiguration.of_json in
+      let customEvents = field_map json__ "CustomEvents" CustomEvents.of_json in
+      let dataStorage = field_map json__ "DataStorage" DataStorage.of_json in
       let appMonitorConfiguration =
-        field_map json "AppMonitorConfiguration"
+        field_map json__ "AppMonitorConfiguration"
           AppMonitorConfiguration.of_json in
-      make ?tags ?state ?name ?lastModified ?id ?domain ?dataStorage ?created
-        ?appMonitorConfiguration ()
+      let state = field_map json__ "State" StateEnum.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let lastModified =
+        field_map json__ "LastModified" ISOTimestampString.of_json in
+      let created = field_map json__ "Created" ISOTimestampString.of_json in
+      let id = field_map json__ "Id" AppMonitorId.of_json in
+      let domainList =
+        field_map json__ "DomainList" AppMonitorDomainList.of_json in
+      let domain = field_map json__ "Domain" AppMonitorDomain.of_json in
+      let name = field_map json__ "Name" AppMonitorName.of_json in
+      make ?platform ?deobfuscationConfiguration ?customEvents ?dataStorage
+        ?appMonitorConfiguration ?state ?tags ?lastModified ?created ?id
+        ?domainList ?domain ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A RUM app monitor collects telemetry data from your application and sends that data to RUM. The data includes performance and reliability information such as page load time, client-side errors, and user behavior."]
@@ -1269,6 +2401,9 @@ module EventDataList =
   struct
     type nonrec t = EventData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1324,6 +2459,9 @@ module QueryFilters =
   struct
     type nonrec t = QueryFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QueryFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1369,32 +2507,334 @@ module TimeRange =
           (Xml.child_exn ~context:context_ xml_arg0 "After") in
       make ?before ~after ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let before = field_map json "Before" QueryTimestamp.of_json in
-      let after = field_map_exn json "After" QueryTimestamp.of_json in
+    let of_json json__ =
+      let before = field_map json__ "Before" QueryTimestamp.of_json in
+      let after = field_map_exn json__ "After" QueryTimestamp.of_json in
       make ?before ~after ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A structure that defines the time range that you want to retrieve results from."]
-module ServiceQuotaExceededException =
+module MetricDefinitions =
   struct
-    type nonrec t = {
-      message: String_.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+    type nonrec t = MetricDefinition.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDefinition.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDefinition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDefinitions"
+        ~of_json:MetricDefinition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchDeleteRumMetricDefinitionsErrors =
+  struct
+    type nonrec t = BatchDeleteRumMetricDefinitionsError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchDeleteRumMetricDefinitionsError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchDeleteRumMetricDefinitionsError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchDeleteRumMetricDefinitionsErrors"
+        ~of_json:BatchDeleteRumMetricDefinitionsError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDefinitionIds =
+  struct
+    type nonrec t = MetricDefinitionId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDefinitionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDefinitionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDefinitionIds"
+        ~of_json:MetricDefinitionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchCreateRumMetricDefinitionsErrors =
+  struct
+    type nonrec t = BatchCreateRumMetricDefinitionsError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchCreateRumMetricDefinitionsError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BatchCreateRumMetricDefinitionsError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchCreateRumMetricDefinitionsErrors"
+        ~of_json:BatchCreateRumMetricDefinitionsError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDefinitionsRequest =
+  struct
+    type nonrec t = MetricDefinitionRequest.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDefinitionRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDefinitionRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDefinitionsRequest"
+        ~of_json:MetricDefinitionRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateRumMetricDefinitionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies one existing metric definition for CloudWatch RUM extended metrics. For more information about extended metrics, see BatchCreateRumMetricsDefinitions."]
+module UpdateRumMetricDefinitionRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the CloudWatch RUM app monitor that sends these metrics."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "The destination to send the metrics to. Valid values are CloudWatch and Evidently. If you specify Evidently, you must also specify the ARN of the CloudWatchEvidently experiment that will receive the metrics and an IAM role that has permission to write to the experiment."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, do not use this parameter. This parameter specifies the ARN of the Evidently experiment that is to receive the metrics. You must have already defined this experiment as a valid destination. For more information, see PutRumMetricsDestination."];
+      metricDefinition: MetricDefinitionRequest.t
+        [@ocaml.doc
+          "A structure that contains the new definition that you want to use for this metric."];
+      metricDefinitionId: MetricDefinitionId.t
+        [@ocaml.doc "The ID of the metric definition to update."]}
+    let context_ = "UpdateRumMetricDefinitionRequest"
+    let make ?destinationArn =
+      fun ~appMonitorName ->
+        fun ~destination ->
+          fun ~metricDefinition ->
+            fun ~metricDefinitionId ->
+              fun () ->
+                {
+                  destinationArn;
+                  appMonitorName;
+                  destination;
+                  metricDefinition;
+                  metricDefinitionId
+                }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("Destination", (Some (MetricDestination.to_value x.destination)));
+        ("DestinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("MetricDefinition",
+          (Some (MetricDefinitionRequest.to_value x.metricDefinition)));
+        ("MetricDefinitionId",
+          (Some (MetricDefinitionId.to_value x.metricDefinitionId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+      let metricDefinitionId =
+        MetricDefinitionId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricDefinitionId") in
+      let metricDefinition =
+        MetricDefinitionRequest.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricDefinition") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "DestinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ~metricDefinitionId ~metricDefinition ?destinationArn ~destination
+        ~appMonitorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let metricDefinitionId =
+        field_map_exn json__ "MetricDefinitionId" MetricDefinitionId.of_json in
+      let metricDefinition =
+        field_map_exn json__ "MetricDefinition"
+          MetricDefinitionRequest.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ~metricDefinitionId ~metricDefinition ?destinationArn ~destination
+        ~appMonitorName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "This request exceeds a service quota."]
+  end[@@ocaml.doc
+       "Modifies one existing metric definition for CloudWatch RUM extended metrics. For more information about extended metrics, see BatchCreateRumMetricsDefinitions."]
 module UpdateAppMonitorResponse =
   struct
     type nonrec t = unit
@@ -1484,53 +2924,98 @@ module UpdateAppMonitorRequest =
   struct
     type nonrec t =
       {
+      name: AppMonitorName.t
+        [@ocaml.doc "The name of the app monitor to update."];
+      domain: AppMonitorDomain.t option
+        [@ocaml.doc
+          "The top-level internet domain name for which your application has administrative authority."];
+      domainList: AppMonitorDomainList.t option
+        [@ocaml.doc
+          "List the domain names for which your application has administrative authority. The UpdateAppMonitor allows either the domain or the domain list."];
       appMonitorConfiguration: AppMonitorConfiguration.t option
         [@ocaml.doc
           "A structure that contains much of the configuration data for the app monitor. If you are using Amazon Cognito for authorization, you must include this structure in your request, and it must include the ID of the Amazon Cognito identity pool to use for authorization. If you don't include AppMonitorConfiguration, you must set up your own authorization method. For more information, see Authorize your application to send data to Amazon Web Services."];
       cwLogEnabled: Boolean.t option
         [@ocaml.doc
           "Data collected by RUM is kept by RUM for 30 days and then deleted. This parameter specifies whether RUM sends a copy of this telemetry data to Amazon CloudWatch Logs in your account. This enables you to keep the telemetry data for more than 30 days, but it does incur Amazon CloudWatch Logs charges."];
-      domain: AppMonitorDomain.t option
+      customEvents: CustomEvents.t option
         [@ocaml.doc
-          "The top-level internet domain name for which your application has administrative authority."];
-      name: AppMonitorName.t
-        [@ocaml.doc "The name of the app monitor to update."]}
+          "Specifies whether this app monitor allows the web client to define and send custom events. The default is for custom events to be DISABLED. For more information about custom events, see Send custom events."];
+      deobfuscationConfiguration: DeobfuscationConfiguration.t option
+        [@ocaml.doc
+          "A structure that contains the configuration for how an app monitor can deobfuscate stack traces."]}
     let context_ = "UpdateAppMonitorRequest"
-    let make ?appMonitorConfiguration =
-      fun ?cwLogEnabled ->
-        fun ?domain ->
-          fun ~name ->
-            fun () -> { appMonitorConfiguration; cwLogEnabled; domain; name }
+    let make ?domain =
+      fun ?domainList ->
+        fun ?appMonitorConfiguration ->
+          fun ?cwLogEnabled ->
+            fun ?customEvents ->
+              fun ?deobfuscationConfiguration ->
+                fun ~name ->
+                  fun () ->
+                    {
+                      domain;
+                      domainList;
+                      appMonitorConfiguration;
+                      cwLogEnabled;
+                      customEvents;
+                      deobfuscationConfiguration;
+                      name
+                    }
     let to_value x =
       structure_to_value
-        [("AppMonitorConfiguration",
-           (Option.map x.appMonitorConfiguration
-              ~f:AppMonitorConfiguration.to_value));
-        ("CwLogEnabled", (Option.map x.cwLogEnabled ~f:Boolean.to_value));
+        [("Name", (Some (AppMonitorName.to_value x.name)));
         ("Domain", (Option.map x.domain ~f:AppMonitorDomain.to_value));
-        ("Name", (Some (AppMonitorName.to_value x.name)))]
+        ("DomainList",
+          (Option.map x.domainList ~f:AppMonitorDomainList.to_value));
+        ("AppMonitorConfiguration",
+          (Option.map x.appMonitorConfiguration
+             ~f:AppMonitorConfiguration.to_value));
+        ("CwLogEnabled", (Option.map x.cwLogEnabled ~f:Boolean.to_value));
+        ("CustomEvents",
+          (Option.map x.customEvents ~f:CustomEvents.to_value));
+        ("DeobfuscationConfiguration",
+          (Option.map x.deobfuscationConfiguration
+             ~f:DeobfuscationConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let name =
-        AppMonitorName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let domain =
-        (Option.map ~f:AppMonitorDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let deobfuscationConfiguration =
+        (Option.map ~f:DeobfuscationConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeobfuscationConfiguration") in
+      let customEvents =
+        (Option.map ~f:CustomEvents.of_xml)
+          (Xml.child xml_arg0 "CustomEvents") in
       let cwLogEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CwLogEnabled") in
       let appMonitorConfiguration =
         (Option.map ~f:AppMonitorConfiguration.of_xml)
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
-      make ~name ?domain ?cwLogEnabled ?appMonitorConfiguration ()
+      let domainList =
+        (Option.map ~f:AppMonitorDomainList.of_xml)
+          (Xml.child xml_arg0 "DomainList") in
+      let domain =
+        (Option.map ~f:AppMonitorDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?deobfuscationConfiguration ?customEvents ?cwLogEnabled
+        ?appMonitorConfiguration ?domainList ?domain ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AppMonitorName.of_json in
-      let domain = field_map json "Domain" AppMonitorDomain.of_json in
-      let cwLogEnabled = field_map json "CwLogEnabled" Boolean.of_json in
+    let of_json json__ =
+      let deobfuscationConfiguration =
+        field_map json__ "DeobfuscationConfiguration"
+          DeobfuscationConfiguration.of_json in
+      let customEvents = field_map json__ "CustomEvents" CustomEvents.of_json in
+      let cwLogEnabled = field_map json__ "CwLogEnabled" Boolean.of_json in
       let appMonitorConfiguration =
-        field_map json "AppMonitorConfiguration"
+        field_map json__ "AppMonitorConfiguration"
           AppMonitorConfiguration.of_json in
-      make ~name ?domain ?cwLogEnabled ?appMonitorConfiguration ()
+      let domainList =
+        field_map json__ "DomainList" AppMonitorDomainList.of_json in
+      let domain = field_map json__ "Domain" AppMonitorDomain.of_json in
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ?deobfuscationConfiguration ?customEvents ?cwLogEnabled
+        ?appMonitorConfiguration ?domainList ?domain ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the configuration of an existing app monitor. When you use this operation, only the parts of the app monitor configuration that you specify in this operation are changed. For any parameters that you omit, the existing values are kept. You can't use this operation to change the tags of an existing app monitor. To change the tags of an existing app monitor, use TagResource. To create a new app monitor, use CreateAppMonitor. After you update an app monitor, sign in to the CloudWatch RUM console to get the updated JavaScript code snippet to add to your web application. For more information, see How do I find a code snippet that I've already generated?"]
@@ -1616,9 +3101,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -1704,13 +3189,156 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Assigns one or more tags (key-value pairs) to the specified CloudWatch RUM resource. Currently, the only resources that can be tagged app monitors. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can use the TagResource action with a resource that already has tags. If you specify a new tag key for the resource, this tag is appended to the list of tags associated with the alarm. If you specify a tag key that is already associated with the resource, the new tag value that you specify replaces the previous value for that tag. You can associate as many as 50 tags with a resource. For more information, see Tagging Amazon Web Services resources."]
+module PutRumMetricsDestinationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a destination to receive extended metrics from CloudWatch RUM. You can send extended metrics to CloudWatch or to a CloudWatch Evidently experiment. For more information about extended metrics, see BatchCreateRumMetricDefinitions."]
+module PutRumMetricsDestinationRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the CloudWatch RUM app monitor that will send the metrics."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "Defines the destination to send the metrics to. Valid values are CloudWatch and Evidently. If you specify Evidently, you must also specify the ARN of the CloudWatchEvidently experiment that is to be the destination and an IAM role that has permission to write to the experiment."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "Use this parameter only if Destination is Evidently. This parameter specifies the ARN of the Evidently experiment that will receive the extended metrics."];
+      iamRoleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, don't use this parameter. This parameter specifies the ARN of an IAM role that RUM will assume to write to the Evidently experiment that you are sending metrics to. This role must have permission to write to that experiment. If you specify this parameter, you must be signed on to a role that has PassRole permissions attached to it, to allow the role to be passed. The CloudWatchAmazonCloudWatchRUMFullAccess policy doesn't include PassRole permissions."]}
+    let context_ = "PutRumMetricsDestinationRequest"
+    let make ?destinationArn =
+      fun ?iamRoleArn ->
+        fun ~appMonitorName ->
+          fun ~destination ->
+            fun () ->
+              { destinationArn; iamRoleArn; appMonitorName; destination }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("Destination", (Some (MetricDestination.to_value x.destination)));
+        ("DestinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("IamRoleArn", (Option.map x.iamRoleArn ~f:IamRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRoleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "IamRoleArn") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "DestinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ?iamRoleArn ?destinationArn ~destination ~appMonitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRoleArn = field_map json__ "IamRoleArn" IamRoleArn.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ?iamRoleArn ?destinationArn ~destination ~appMonitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates or updates a destination to receive extended metrics from CloudWatch RUM. You can send extended metrics to CloudWatch or to a CloudWatch Evidently experiment. For more information about extended metrics, see BatchCreateRumMetricDefinitions."]
 module PutRumEventsResponse =
   struct
     type nonrec t = unit
@@ -1791,70 +3419,278 @@ module PutRumEventsRequest =
   struct
     type nonrec t =
       {
+      id: PutRumEventsRequestIdString.t
+        [@ocaml.doc "The ID of the app monitor that is sending this data."];
+      batchId: PutRumEventsRequestBatchIdString.t
+        [@ocaml.doc "A unique identifier for this batch of RUM event data."];
       appMonitorDetails: AppMonitorDetails.t
         [@ocaml.doc
           "A structure that contains information about the app monitor that collected this telemetry information."];
-      batchId: String_.t
-        [@ocaml.doc "A unique identifier for this batch of RUM event data."];
-      id: AppMonitorId.t
-        [@ocaml.doc "The ID of the app monitor that is sending this data."];
+      userDetails: UserDetails.t
+        [@ocaml.doc
+          "A structure that contains information about the user session that this batch of events was collected from."];
       rumEvents: RumEventList.t
         [@ocaml.doc
           "An array of structures that contain the telemetry event data."];
-      userDetails: UserDetails.t
+      alias: Alias.t option
         [@ocaml.doc
-          "A structure that contains information about the user session that this batch of events was collected from."]}
+          "If the app monitor uses a resource-based policy that requires PutRumEvents requests to specify a certain alias, specify that alias here. This alias will be compared to the rum:alias context key in the resource-based policy. For more information, see Using resource-based policies with CloudWatch RUM."]}
     let context_ = "PutRumEventsRequest"
-    let make ~appMonitorDetails =
-      fun ~batchId ->
-        fun ~id ->
-          fun ~rumEvents ->
+    let make ?alias =
+      fun ~id ->
+        fun ~batchId ->
+          fun ~appMonitorDetails ->
             fun ~userDetails ->
-              fun () ->
-                { appMonitorDetails; batchId; id; rumEvents; userDetails }
+              fun ~rumEvents ->
+                fun () ->
+                  {
+                    alias;
+                    id;
+                    batchId;
+                    appMonitorDetails;
+                    userDetails;
+                    rumEvents
+                  }
     let to_value x =
       structure_to_value
-        [("AppMonitorDetails",
-           (Some (AppMonitorDetails.to_value x.appMonitorDetails)));
-        ("BatchId", (Some (String_.to_value x.batchId)));
-        ("Id", (Some (AppMonitorId.to_value x.id)));
+        [("Id", (Some (PutRumEventsRequestIdString.to_value x.id)));
+        ("BatchId",
+          (Some (PutRumEventsRequestBatchIdString.to_value x.batchId)));
+        ("AppMonitorDetails",
+          (Some (AppMonitorDetails.to_value x.appMonitorDetails)));
+        ("UserDetails", (Some (UserDetails.to_value x.userDetails)));
         ("RumEvents", (Some (RumEventList.to_value x.rumEvents)));
-        ("UserDetails", (Some (UserDetails.to_value x.userDetails)))]
+        ("Alias", (Option.map x.alias ~f:Alias.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let userDetails =
-        UserDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserDetails") in
+      let alias = (Option.map ~f:Alias.of_xml) (Xml.child xml_arg0 "Alias") in
       let rumEvents =
         RumEventList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RumEvents") in
-      let id =
-        AppMonitorId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      let batchId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "BatchId") in
+      let userDetails =
+        UserDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UserDetails") in
       let appMonitorDetails =
         AppMonitorDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorDetails") in
-      make ~userDetails ~rumEvents ~id ~batchId ~appMonitorDetails ()
+      let batchId =
+        PutRumEventsRequestBatchIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BatchId") in
+      let id =
+        PutRumEventsRequestIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?alias ~rumEvents ~userDetails ~appMonitorDetails ~batchId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userDetails = field_map_exn json "UserDetails" UserDetails.of_json in
-      let rumEvents = field_map_exn json "RumEvents" RumEventList.of_json in
-      let id = field_map_exn json "Id" AppMonitorId.of_json in
-      let batchId = field_map_exn json "BatchId" String_.of_json in
+    let of_json json__ =
+      let alias = field_map json__ "Alias" Alias.of_json in
+      let rumEvents = field_map_exn json__ "RumEvents" RumEventList.of_json in
+      let userDetails =
+        field_map_exn json__ "UserDetails" UserDetails.of_json in
       let appMonitorDetails =
-        field_map_exn json "AppMonitorDetails" AppMonitorDetails.of_json in
-      make ~userDetails ~rumEvents ~id ~batchId ~appMonitorDetails ()
+        field_map_exn json__ "AppMonitorDetails" AppMonitorDetails.of_json in
+      let batchId =
+        field_map_exn json__ "BatchId"
+          PutRumEventsRequestBatchIdString.of_json in
+      let id = field_map_exn json__ "Id" PutRumEventsRequestIdString.of_json in
+      make ?alias ~rumEvents ~userDetails ~appMonitorDetails ~batchId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sends telemetry events about your application performance and user behavior to CloudWatch RUM. The code snippet that RUM generates for you to add to your application includes PutRumEvents operations to send this data to RUM. Each PutRumEvents operation can send a batch of events from one user session."]
+module PutResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyDocument: String_.t option
+        [@ocaml.doc "The JSON policy document that you specified."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc "The policy revision ID information that you specified."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidPolicyRevisionIdException of
+          InvalidPolicyRevisionIdException.t 
+      | `MalformedPolicyDocumentException of
+          MalformedPolicyDocumentException.t 
+      | `PolicySizeLimitExceededException of
+          PolicySizeLimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyDocument =
+      fun ?policyRevisionId -> fun () -> { policyDocument; policyRevisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_json json)
+      | "MalformedPolicyDocumentException" ->
+          `MalformedPolicyDocumentException
+            (MalformedPolicyDocumentException.of_json json)
+      | "PolicySizeLimitExceededException" ->
+          `PolicySizeLimitExceededException
+            (PolicySizeLimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_xml xml)
+      | "MalformedPolicyDocumentException" ->
+          `MalformedPolicyDocumentException
+            (MalformedPolicyDocumentException.of_xml xml)
+      | "PolicySizeLimitExceededException" ->
+          `PolicySizeLimitExceededException
+            (PolicySizeLimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidPolicyRevisionIdException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyRevisionIdException"));
+            ("details", (InvalidPolicyRevisionIdException.to_json e))]
+      | `MalformedPolicyDocumentException e ->
+          `Assoc
+            [("error", (`String "MalformedPolicyDocumentException"));
+            ("details", (MalformedPolicyDocumentException.to_json e))]
+      | `PolicySizeLimitExceededException e ->
+          `Assoc
+            [("error", (`String "PolicySizeLimitExceededException"));
+            ("details", (PolicySizeLimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyDocument",
+           (Option.map x.policyDocument ~f:String_.to_value));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyDocument =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PolicyDocument") in
+      make ?policyRevisionId ?policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let policyDocument = field_map json__ "PolicyDocument" String_.of_json in
+      make ?policyRevisionId ?policyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to assign a resource-based policy to a CloudWatch RUM app monitor to control access to it. Each app monitor can have one resource-based policy. The maximum size of the policy is 4 KB. To learn more about using resource policies with RUM, see Using resource-based policies with CloudWatch RUM."]
+module PutResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      name: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the app monitor that you want to apply this resource-based policy to. To find the names of your app monitors, you can use the ListAppMonitors operation."];
+      policyDocument: String_.t
+        [@ocaml.doc
+          "The JSON to use as the resource policy. The document can be up to 4 KB in size. For more information about the contents and syntax for this policy, see Using resource-based policies with CloudWatch RUM."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "A string value that you can use to conditionally update your policy. You can provide the revision ID of your existing policy to make mutating requests against that policy. When you assign a policy revision ID, then later requests about that policy will be rejected with an InvalidPolicyRevisionIdException error if they don't provide the correct current revision ID."]}
+    let context_ = "PutResourcePolicyRequest"
+    let make ?policyRevisionId =
+      fun ~name ->
+        fun ~policyDocument ->
+          fun () -> { policyRevisionId; name; policyDocument }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (AppMonitorName.to_value x.name)));
+        ("PolicyDocument", (Some (String_.to_value x.policyDocument)));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyDocument =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PolicyDocument") in
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?policyRevisionId ~policyDocument ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let policyDocument =
+        field_map_exn json__ "PolicyDocument" String_.of_json in
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ?policyRevisionId ~policyDocument ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to assign a resource-based policy to a CloudWatch RUM app monitor to control access to it. Each app monitor can have one resource-based policy. The maximum size of the policy is 4 KB. To learn more about using resource policies with RUM, see Using resource-based policies with CloudWatch RUM."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      resourceArn: Arn.t
+      resourceArn: Arn.t option
         [@ocaml.doc "The ARN of the resource that you are viewing."];
-      tags: TagMap.t
+      tags: TagMap.t option
         [@ocaml.doc
           "The list of tag keys and values associated with the resource you specified."]}
     type nonrec error =
@@ -1862,8 +3698,7 @@ module ListTagsForResourceResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
+    let make ?resourceArn = fun ?tags -> fun () -> { resourceArn; tags }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -1906,20 +3741,19 @@ module ListTagsForResourceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ResourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("Tags", (Some (TagMap.to_value x.tags)))]
+        [("ResourceArn", (Option.map x.resourceArn ~f:Arn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let resourceArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
-      make ~tags ~resourceArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
-      make ~tags ~resourceArn ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Arn.of_json in
+      make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the tags associated with a CloudWatch RUM resource."]
@@ -1941,30 +3775,167 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the tags associated with a CloudWatch RUM resource."]
-module ListAppMonitorsResponse =
+module ListRumMetricsDestinationsResponse =
   struct
     type nonrec t =
       {
-      appMonitorSummaries: AppMonitorSummaryList.t option
+      destinations: MetricDestinationSummaryList.t option
         [@ocaml.doc
-          "An array of structures that contain information about the returned app monitors."];
+          "The list of CloudWatch RUM extended metrics destinations associated with the app monitor that you specified."];
       nextToken: String_.t option
         [@ocaml.doc
           "A token that you can use in a subsequent operation to retrieve the next set of results."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?destinations =
+      fun ?nextToken -> fun () -> { destinations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Destinations",
+           (Option.map x.destinations
+              ~f:MetricDestinationSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let destinations =
+        (Option.map ~f:MetricDestinationSummaryList.of_xml)
+          (Xml.child xml_arg0 "Destinations") in
+      make ?nextToken ?destinations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let destinations =
+        field_map json__ "Destinations" MetricDestinationSummaryList.of_json in
+      make ?nextToken ?destinations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of destinations that you have created to receive RUM extended metrics, for the specified app monitor. For more information about extended metrics, see AddRumMetrics."]
+module ListRumMetricsDestinationsRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the app monitor associated with the destinations that you want to retrieve."];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in one operation. The default is 50. The maximum that you can specify is 100. To retrieve the remaining results, make another call with the returned NextToken value."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Use the token returned by the previous operation to request the next page of results."]}
+    let context_ = "ListRumMetricsDestinationsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~appMonitorName ->
+          fun () -> { maxResults; nextToken; appMonitorName }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ?nextToken ?maxResults ~appMonitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ?nextToken ?maxResults ~appMonitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of destinations that you have created to receive RUM extended metrics, for the specified app monitor. For more information about extended metrics, see AddRumMetrics."]
+module ListAppMonitorsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token that you can use in a subsequent operation to retrieve the next set of results."];
+      appMonitorSummaries: AppMonitorSummaryList.t option
+        [@ocaml.doc
+          "An array of structures that contain information about the returned app monitors."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?appMonitorSummaries =
-      fun ?nextToken -> fun () -> { appMonitorSummaries; nextToken }
+    let make ?nextToken =
+      fun ?appMonitorSummaries ->
+        fun () -> { nextToken; appMonitorSummaries }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2015,24 +3986,23 @@ module ListAppMonitorsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AppMonitorSummaries",
-           (Option.map x.appMonitorSummaries
-              ~f:AppMonitorSummaryList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("AppMonitorSummaries",
+          (Option.map x.appMonitorSummaries ~f:AppMonitorSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let appMonitorSummaries =
         (Option.map ~f:AppMonitorSummaryList.of_xml)
           (Xml.child xml_arg0 "AppMonitorSummaries") in
-      make ?nextToken ?appMonitorSummaries ()
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?appMonitorSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
       let appMonitorSummaries =
-        field_map json "AppMonitorSummaries" AppMonitorSummaryList.of_json in
-      make ?nextToken ?appMonitorSummaries ()
+        field_map json__ "AppMonitorSummaries" AppMonitorSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?appMonitorSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the Amazon CloudWatch RUM app monitors in the account."]
@@ -2040,9 +4010,9 @@ module ListAppMonitorsRequest =
   struct
     type nonrec t =
       {
-      maxResults: Integer.t option
+      maxResults: MaxResultsInteger.t option
         [@ocaml.doc
-          "The maximum number of results to return in one operation."];
+          "The maximum number of results to return in one operation. The default is 50. The maximum that you can specify is 100."];
       nextToken: String_.t option
         [@ocaml.doc
           "Use the token returned by the previous operation to request the next page of results."]}
@@ -2050,23 +4020,165 @@ module ListAppMonitorsRequest =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
       structure_to_value
-        [("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        [("maxResults",
+           (Option.map x.maxResults ~f:MaxResultsInteger.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the Amazon CloudWatch RUM app monitors in the account."]
+module GetResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyDocument: String_.t option
+        [@ocaml.doc "The JSON policy document that you requested."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "The revision ID information for this version of the policy document that you requested."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `PolicyNotFoundException of PolicyNotFoundException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyDocument =
+      fun ?policyRevisionId -> fun () -> { policyDocument; policyRevisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `PolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "PolicyNotFoundException"));
+            ("details", (PolicyNotFoundException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyDocument",
+           (Option.map x.policyDocument ~f:String_.to_value));
+        ("PolicyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      let policyDocument =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PolicyDocument") in
+      make ?policyRevisionId ?policyDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let policyDocument = field_map json__ "PolicyDocument" String_.of_json in
+      make ?policyRevisionId ?policyDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to retrieve information about a resource-based policy that is attached to an app monitor."]
+module GetResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      name: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the app monitor that is associated with the resource-based policy that you want to view."]}
+    let context_ = "GetResourcePolicyRequest"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("Name", (Some (AppMonitorName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use this operation to retrieve information about a resource-based policy that is attached to an app monitor."]
 module GetAppMonitorResponse =
   struct
     type nonrec t =
@@ -2147,8 +4259,8 @@ module GetAppMonitorResponse =
         (Option.map ~f:AppMonitor.of_xml) (Xml.child xml_arg0 "AppMonitor") in
       make ?appMonitor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let appMonitor = field_map json "AppMonitor" AppMonitor.of_json in
+    let of_json json__ =
+      let appMonitor = field_map json__ "AppMonitor" AppMonitor.of_json in
       make ?appMonitor ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2170,8 +4282,8 @@ module GetAppMonitorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AppMonitorName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2261,9 +4373,9 @@ module GetAppMonitorDataResponse =
         (Option.map ~f:EventDataList.of_xml) (Xml.child xml_arg0 "Events") in
       make ?nextToken ?events ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let events = field_map json "Events" EventDataList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let events = field_map json__ "Events" EventDataList.of_json in
       make ?nextToken ?events ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2272,21 +4384,21 @@ module GetAppMonitorDataRequest =
   struct
     type nonrec t =
       {
+      name: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the app monitor that collected the data that you want to retrieve."];
+      timeRange: TimeRange.t
+        [@ocaml.doc
+          "A structure that defines the time range that you want to retrieve results from."];
       filters: QueryFilters.t option
         [@ocaml.doc
           "An array of structures that you can use to filter the results to those that match one or more sets of key-value pairs that you specify."];
       maxResults: MaxQueryResults.t option
         [@ocaml.doc
           "The maximum number of results to return in one operation."];
-      name: AppMonitorName.t
-        [@ocaml.doc
-          "The name of the app monitor that collected the data that you want to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "Use the token returned by the previous operation to request the next page of results."];
-      timeRange: TimeRange.t
-        [@ocaml.doc
-          "A structure that defines the time range that you want to retrieve results from."]}
+          "Use the token returned by the previous operation to request the next page of results."]}
     let context_ = "GetAppMonitorDataRequest"
     let make ?filters =
       fun ?maxResults ->
@@ -2296,38 +4408,327 @@ module GetAppMonitorDataRequest =
               fun () -> { filters; maxResults; nextToken; name; timeRange }
     let to_value x =
       structure_to_value
-        [("Filters", (Option.map x.filters ~f:QueryFilters.to_value));
+        [("Name", (Some (AppMonitorName.to_value x.name)));
+        ("TimeRange", (Some (TimeRange.to_value x.timeRange)));
+        ("Filters", (Option.map x.filters ~f:QueryFilters.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxQueryResults.to_value));
-        ("Name", (Some (AppMonitorName.to_value x.name)));
-        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
-        ("TimeRange", (Some (TimeRange.to_value x.timeRange)))]
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let timeRange =
-        TimeRange.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimeRange") in
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let name =
-        AppMonitorName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let maxResults =
         (Option.map ~f:MaxQueryResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let filters =
         (Option.map ~f:QueryFilters.of_xml) (Xml.child xml_arg0 "Filters") in
-      make ~timeRange ?nextToken ~name ?maxResults ?filters ()
+      let timeRange =
+        TimeRange.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TimeRange") in
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?nextToken ?maxResults ?filters ~timeRange ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeRange = field_map_exn json "TimeRange" TimeRange.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
-      let name = field_map_exn json "Name" AppMonitorName.of_json in
-      let maxResults = field_map json "MaxResults" MaxQueryResults.of_json in
-      let filters = field_map json "Filters" QueryFilters.of_json in
-      make ~timeRange ?nextToken ~name ?maxResults ?filters ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxQueryResults.of_json in
+      let filters = field_map json__ "Filters" QueryFilters.of_json in
+      let timeRange = field_map_exn json__ "TimeRange" TimeRange.of_json in
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ?nextToken ?maxResults ?filters ~timeRange ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the raw performance events that RUM has collected from your web application, so that you can do your own processing or analysis of this data."]
+module DeleteRumMetricsDestinationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a destination for CloudWatch RUM extended metrics, so that the specified app monitor stops sending extended metrics to that destination."]
+module DeleteRumMetricsDestinationRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the app monitor that is sending metrics to the destination that you want to delete."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "The type of destination to delete. Valid values are CloudWatch and Evidently."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, do not use this parameter. This parameter specifies the ARN of the Evidently experiment that corresponds to the destination to delete."]}
+    let context_ = "DeleteRumMetricsDestinationRequest"
+    let make ?destinationArn =
+      fun ~appMonitorName ->
+        fun ~destination ->
+          fun () -> { destinationArn; appMonitorName; destination }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("destination", (Some (MetricDestination.to_value x.destination)));
+        ("destinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "destinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ?destinationArn ~destination ~appMonitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ?destinationArn ~destination ~appMonitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a destination for CloudWatch RUM extended metrics, so that the specified app monitor stops sending extended metrics to that destination."]
+module DeleteResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "The revision ID of the policy that was removed, if it had one."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidPolicyRevisionIdException of
+          InvalidPolicyRevisionIdException.t 
+      | `PolicyNotFoundException of PolicyNotFoundException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policyRevisionId = fun () -> { policyRevisionId }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_json json)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidPolicyRevisionIdException" ->
+          `InvalidPolicyRevisionIdException
+            (InvalidPolicyRevisionIdException.of_xml xml)
+      | "PolicyNotFoundException" ->
+          `PolicyNotFoundException (PolicyNotFoundException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidPolicyRevisionIdException e ->
+          `Assoc
+            [("error", (`String "InvalidPolicyRevisionIdException"));
+            ("details", (InvalidPolicyRevisionIdException.to_json e))]
+      | `PolicyNotFoundException e ->
+          `Assoc
+            [("error", (`String "PolicyNotFoundException"));
+            ("details", (PolicyNotFoundException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PolicyRevisionId",
+           (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "PolicyRevisionId") in
+      make ?policyRevisionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      make ?policyRevisionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association of a resource-based policy from an app monitor."]
+module DeleteResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      name: AppMonitorName.t
+        [@ocaml.doc
+          "The app monitor that you want to remove the resource policy from."];
+      policyRevisionId: PolicyRevisionId.t option
+        [@ocaml.doc
+          "Specifies a specific policy revision to delete. Provide a PolicyRevisionId to ensure an atomic delete operation. If the revision ID that you provide doesn't match the latest policy revision ID, the request will be rejected with an InvalidPolicyRevisionIdException error."]}
+    let context_ = "DeleteResourcePolicyRequest"
+    let make ?policyRevisionId =
+      fun ~name -> fun () -> { policyRevisionId; name }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (AppMonitorName.to_value x.name)));
+        ("policyRevisionId",
+          (Option.map x.policyRevisionId ~f:PolicyRevisionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policyRevisionId =
+        (Option.map ~f:PolicyRevisionId.of_xml)
+          (Xml.child xml_arg0 "policyRevisionId") in
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?policyRevisionId ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policyRevisionId =
+        field_map json__ "PolicyRevisionId" PolicyRevisionId.of_json in
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ?policyRevisionId ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the association of a resource-based policy from an app monitor."]
 module DeleteAppMonitorResponse =
   struct
     type nonrec t = unit
@@ -2430,8 +4831,8 @@ module DeleteAppMonitorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AppMonitorName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2446,6 +4847,7 @@ module CreateAppMonitorResponse =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
@@ -2459,6 +4861,8 @@ module CreateAppMonitorResponse =
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_json json)
@@ -2477,6 +4881,8 @@ module CreateAppMonitorResponse =
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ServiceQuotaExceededException" ->
           `ServiceQuotaExceededException
             (ServiceQuotaExceededException.of_xml xml)
@@ -2500,6 +4906,10 @@ module CreateAppMonitorResponse =
           `Assoc
             [("error", (`String "InternalServerException"));
             ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `ServiceQuotaExceededException e ->
           `Assoc
             [("error", (`String "ServiceQuotaExceededException"));
@@ -2524,8 +4934,8 @@ module CreateAppMonitorResponse =
       let id = (Option.map ~f:AppMonitorId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "Id" AppMonitorId.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "Id" AppMonitorId.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Amazon CloudWatch RUM app monitor, which collects telemetry data from your application and sends that data to RUM. The data includes performance and reliability information such as page load time, client-side errors, and user behavior. You use this operation only to create a new app monitor. To update an existing app monitor, use UpdateAppMonitor instead. After you create an app monitor, sign in to the CloudWatch RUM console to get the JavaScript code snippet to add to your web application. For more information, see How do I find a code snippet that I've already generated?"]
@@ -2533,61 +4943,648 @@ module CreateAppMonitorRequest =
   struct
     type nonrec t =
       {
+      name: AppMonitorName.t [@ocaml.doc "A name for the app monitor."];
+      domain: AppMonitorDomain.t option
+        [@ocaml.doc
+          "The top-level internet domain name for which your application has administrative authority."];
+      domainList: AppMonitorDomainList.t option
+        [@ocaml.doc
+          "List the domain names for which your application has administrative authority. The CreateAppMonitor requires either the domain or the domain list."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "Assigns one or more tags (key-value pairs) to the app monitor. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. You can associate as many as 50 tags with an app monitor. For more information, see Tagging Amazon Web Services resources."];
       appMonitorConfiguration: AppMonitorConfiguration.t option
         [@ocaml.doc
           "A structure that contains much of the configuration data for the app monitor. If you are using Amazon Cognito for authorization, you must include this structure in your request, and it must include the ID of the Amazon Cognito identity pool to use for authorization. If you don't include AppMonitorConfiguration, you must set up your own authorization method. For more information, see Authorize your application to send data to Amazon Web Services. If you omit this argument, the sample rate used for RUM is set to 10% of the user sessions."];
       cwLogEnabled: Boolean.t option
         [@ocaml.doc
           "Data collected by RUM is kept by RUM for 30 days and then deleted. This parameter specifies whether RUM sends a copy of this telemetry data to Amazon CloudWatch Logs in your account. This enables you to keep the telemetry data for more than 30 days, but it does incur Amazon CloudWatch Logs charges. If you omit this parameter, the default is false."];
-      domain: AppMonitorDomain.t
+      customEvents: CustomEvents.t option
         [@ocaml.doc
-          "The top-level internet domain name for which your application has administrative authority."];
-      name: AppMonitorName.t [@ocaml.doc "A name for the app monitor."];
-      tags: TagMap.t option
+          "Specifies whether this app monitor allows the web client to define and send custom events. If you omit this parameter, custom events are DISABLED. For more information about custom events, see Send custom events."];
+      deobfuscationConfiguration: DeobfuscationConfiguration.t option
         [@ocaml.doc
-          "Assigns one or more tags (key-value pairs) to the app monitor. Tags can help you organize and categorize your resources. You can also use them to scope user permissions by granting a user permission to access or change only resources with certain tag values. Tags don't have any semantic meaning to Amazon Web Services and are interpreted strictly as strings of characters. <p>You can associate as many as 50 tags with an app monitor.</p> <p>For more information, see <a href=\"https://docs.aws.amazon.com/general/latest/gr/aws_tagging.html\">Tagging Amazon Web Services resources</a>.</p>"]}
+          "A structure that contains the configuration for how an app monitor can deobfuscate stack traces."];
+      platform: AppMonitorPlatform.t option
+        [@ocaml.doc
+          "The platform type for the app monitor. Valid values are Web for web applications, Android for Android applications, and iOS for IOS applications. If you omit this parameter, the default is Web."]}
     let context_ = "CreateAppMonitorRequest"
-    let make ?appMonitorConfiguration =
-      fun ?cwLogEnabled ->
+    let make ?domain =
+      fun ?domainList ->
         fun ?tags ->
-          fun ~domain ->
-            fun ~name ->
-              fun () ->
-                { appMonitorConfiguration; cwLogEnabled; tags; domain; name }
+          fun ?appMonitorConfiguration ->
+            fun ?cwLogEnabled ->
+              fun ?customEvents ->
+                fun ?deobfuscationConfiguration ->
+                  fun ?platform ->
+                    fun ~name ->
+                      fun () ->
+                        {
+                          domain;
+                          domainList;
+                          tags;
+                          appMonitorConfiguration;
+                          cwLogEnabled;
+                          customEvents;
+                          deobfuscationConfiguration;
+                          platform;
+                          name
+                        }
     let to_value x =
       structure_to_value
-        [("AppMonitorConfiguration",
-           (Option.map x.appMonitorConfiguration
-              ~f:AppMonitorConfiguration.to_value));
+        [("Name", (Some (AppMonitorName.to_value x.name)));
+        ("Domain", (Option.map x.domain ~f:AppMonitorDomain.to_value));
+        ("DomainList",
+          (Option.map x.domainList ~f:AppMonitorDomainList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("AppMonitorConfiguration",
+          (Option.map x.appMonitorConfiguration
+             ~f:AppMonitorConfiguration.to_value));
         ("CwLogEnabled", (Option.map x.cwLogEnabled ~f:Boolean.to_value));
-        ("Domain", (Some (AppMonitorDomain.to_value x.domain)));
-        ("Name", (Some (AppMonitorName.to_value x.name)));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("CustomEvents",
+          (Option.map x.customEvents ~f:CustomEvents.to_value));
+        ("DeobfuscationConfiguration",
+          (Option.map x.deobfuscationConfiguration
+             ~f:DeobfuscationConfiguration.to_value));
+        ("Platform", (Option.map x.platform ~f:AppMonitorPlatform.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
-      let name =
-        AppMonitorName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let domain =
-        AppMonitorDomain.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
+      let platform =
+        (Option.map ~f:AppMonitorPlatform.of_xml)
+          (Xml.child xml_arg0 "Platform") in
+      let deobfuscationConfiguration =
+        (Option.map ~f:DeobfuscationConfiguration.of_xml)
+          (Xml.child xml_arg0 "DeobfuscationConfiguration") in
+      let customEvents =
+        (Option.map ~f:CustomEvents.of_xml)
+          (Xml.child xml_arg0 "CustomEvents") in
       let cwLogEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "CwLogEnabled") in
       let appMonitorConfiguration =
         (Option.map ~f:AppMonitorConfiguration.of_xml)
           (Xml.child xml_arg0 "AppMonitorConfiguration") in
-      make ?tags ~name ~domain ?cwLogEnabled ?appMonitorConfiguration ()
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
+      let domainList =
+        (Option.map ~f:AppMonitorDomainList.of_xml)
+          (Xml.child xml_arg0 "DomainList") in
+      let domain =
+        (Option.map ~f:AppMonitorDomain.of_xml) (Xml.child xml_arg0 "Domain") in
+      let name =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?platform ?deobfuscationConfiguration ?customEvents ?cwLogEnabled
+        ?appMonitorConfiguration ?tags ?domainList ?domain ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let name = field_map_exn json "Name" AppMonitorName.of_json in
-      let domain = field_map_exn json "Domain" AppMonitorDomain.of_json in
-      let cwLogEnabled = field_map json "CwLogEnabled" Boolean.of_json in
+    let of_json json__ =
+      let platform = field_map json__ "Platform" AppMonitorPlatform.of_json in
+      let deobfuscationConfiguration =
+        field_map json__ "DeobfuscationConfiguration"
+          DeobfuscationConfiguration.of_json in
+      let customEvents = field_map json__ "CustomEvents" CustomEvents.of_json in
+      let cwLogEnabled = field_map json__ "CwLogEnabled" Boolean.of_json in
       let appMonitorConfiguration =
-        field_map json "AppMonitorConfiguration"
+        field_map json__ "AppMonitorConfiguration"
           AppMonitorConfiguration.of_json in
-      make ?tags ~name ~domain ?cwLogEnabled ?appMonitorConfiguration ()
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let domainList =
+        field_map json__ "DomainList" AppMonitorDomainList.of_json in
+      let domain = field_map json__ "Domain" AppMonitorDomain.of_json in
+      let name = field_map_exn json__ "Name" AppMonitorName.of_json in
+      make ?platform ?deobfuscationConfiguration ?customEvents ?cwLogEnabled
+        ?appMonitorConfiguration ?tags ?domainList ?domain ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Amazon CloudWatch RUM app monitor, which collects telemetry data from your application and sends that data to RUM. The data includes performance and reliability information such as page load time, client-side errors, and user behavior. You use this operation only to create a new app monitor. To update an existing app monitor, use UpdateAppMonitor instead. After you create an app monitor, sign in to the CloudWatch RUM console to get the JavaScript code snippet to add to your web application. For more information, see How do I find a code snippet that I've already generated?"]
+module BatchGetRumMetricDefinitionsResponse =
+  struct
+    type nonrec t =
+      {
+      metricDefinitions: MetricDefinitions.t option
+        [@ocaml.doc
+          "An array of structures that display information about the metrics that are sent by the specified app monitor to the specified destination."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "A token that you can use in a subsequent operation to retrieve the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricDefinitions =
+      fun ?nextToken -> fun () -> { metricDefinitions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MetricDefinitions",
+           (Option.map x.metricDefinitions ~f:MetricDefinitions.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metricDefinitions =
+        (Option.map ~f:MetricDefinitions.of_xml)
+          (Xml.child xml_arg0 "MetricDefinitions") in
+      make ?nextToken ?metricDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let metricDefinitions =
+        field_map json__ "MetricDefinitions" MetricDefinitions.of_json in
+      make ?nextToken ?metricDefinitions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the list of metrics and dimensions that a RUM app monitor is sending to a single destination."]
+module BatchGetRumMetricDefinitionsRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the CloudWatch RUM app monitor that is sending the metrics."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "The type of destination that you want to view metrics for. Valid values are CloudWatch and Evidently."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, do not use this parameter. This parameter specifies the ARN of the Evidently experiment that corresponds to the destination."];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in one operation. The default is 50. The maximum that you can specify is 100. To retrieve the remaining results, make another call with the returned NextToken value."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "Use the token returned by the previous operation to request the next page of results."]}
+    let context_ = "BatchGetRumMetricDefinitionsRequest"
+    let make ?destinationArn =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~appMonitorName ->
+            fun ~destination ->
+              fun () ->
+                {
+                  destinationArn;
+                  maxResults;
+                  nextToken;
+                  appMonitorName;
+                  destination
+                }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("destination", (Some (MetricDestination.to_value x.destination)));
+        ("destinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "destinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ?nextToken ?maxResults ?destinationArn ~destination
+        ~appMonitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ?nextToken ?maxResults ?destinationArn ~destination
+        ~appMonitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the list of metrics and dimensions that a RUM app monitor is sending to a single destination."]
+module BatchDeleteRumMetricDefinitionsResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchDeleteRumMetricDefinitionsErrors.t option
+        [@ocaml.doc
+          "An array of error objects, if the operation caused any errors."];
+      metricDefinitionIds: MetricDefinitionIds.t option
+        [@ocaml.doc "The IDs of the metric definitions that were deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors =
+      fun ?metricDefinitionIds -> fun () -> { errors; metricDefinitionIds }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors
+              ~f:BatchDeleteRumMetricDefinitionsErrors.to_value));
+        ("MetricDefinitionIds",
+          (Option.map x.metricDefinitionIds ~f:MetricDefinitionIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricDefinitionIds =
+        (Option.map ~f:MetricDefinitionIds.of_xml)
+          (Xml.child xml_arg0 "MetricDefinitionIds") in
+      let errors =
+        (Option.map ~f:BatchDeleteRumMetricDefinitionsErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?metricDefinitionIds ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricDefinitionIds =
+        field_map json__ "MetricDefinitionIds" MetricDefinitionIds.of_json in
+      let errors =
+        field_map json__ "Errors"
+          BatchDeleteRumMetricDefinitionsErrors.of_json in
+      make ?metricDefinitionIds ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified metrics from being sent to an extended metrics destination. If some metric definition IDs specified in a BatchDeleteRumMetricDefinitions operations are not valid, those metric definitions fail and return errors, but all valid metric definition IDs in the same operation are still deleted. The maximum number of metric definitions that you can specify in one BatchDeleteRumMetricDefinitions operation is 200."]
+module BatchDeleteRumMetricDefinitionsRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the CloudWatch RUM app monitor that is sending these metrics."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "Defines the destination where you want to stop sending the specified metrics. Valid values are CloudWatch and Evidently. If you specify Evidently, you must also specify the ARN of the CloudWatchEvidently experiment that is to be the destination and an IAM role that has permission to write to the experiment."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, do not use this parameter. This parameter specifies the ARN of the Evidently experiment that was receiving the metrics that are being deleted."];
+      metricDefinitionIds: MetricDefinitionIds.t
+        [@ocaml.doc
+          "An array of structures which define the metrics that you want to stop sending."]}
+    let context_ = "BatchDeleteRumMetricDefinitionsRequest"
+    let make ?destinationArn =
+      fun ~appMonitorName ->
+        fun ~destination ->
+          fun ~metricDefinitionIds ->
+            fun () ->
+              {
+                destinationArn;
+                appMonitorName;
+                destination;
+                metricDefinitionIds
+              }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("destination", (Some (MetricDestination.to_value x.destination)));
+        ("destinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("metricDefinitionIds",
+          (Some (MetricDefinitionIds.to_value x.metricDefinitionIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricDefinitionIds =
+        MetricDefinitionIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "metricDefinitionIds") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "destinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ~metricDefinitionIds ?destinationArn ~destination ~appMonitorName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricDefinitionIds =
+        field_map_exn json__ "MetricDefinitionIds"
+          MetricDefinitionIds.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ~metricDefinitionIds ?destinationArn ~destination ~appMonitorName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes the specified metrics from being sent to an extended metrics destination. If some metric definition IDs specified in a BatchDeleteRumMetricDefinitions operations are not valid, those metric definitions fail and return errors, but all valid metric definition IDs in the same operation are still deleted. The maximum number of metric definitions that you can specify in one BatchDeleteRumMetricDefinitions operation is 200."]
+module BatchCreateRumMetricDefinitionsResponse =
+  struct
+    type nonrec t =
+      {
+      errors: BatchCreateRumMetricDefinitionsErrors.t option
+        [@ocaml.doc
+          "An array of error objects, if the operation caused any errors."];
+      metricDefinitions: MetricDefinitions.t option
+        [@ocaml.doc
+          "An array of structures that define the extended metrics."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors =
+      fun ?metricDefinitions -> fun () -> { errors; metricDefinitions }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors
+              ~f:BatchCreateRumMetricDefinitionsErrors.to_value));
+        ("MetricDefinitions",
+          (Option.map x.metricDefinitions ~f:MetricDefinitions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricDefinitions =
+        (Option.map ~f:MetricDefinitions.of_xml)
+          (Xml.child xml_arg0 "MetricDefinitions") in
+      let errors =
+        (Option.map ~f:BatchCreateRumMetricDefinitionsErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?metricDefinitions ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricDefinitions =
+        field_map json__ "MetricDefinitions" MetricDefinitions.of_json in
+      let errors =
+        field_map json__ "Errors"
+          BatchCreateRumMetricDefinitionsErrors.of_json in
+      make ?metricDefinitions ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the extended metrics and custom metrics that you want a CloudWatch RUM app monitor to send to a destination. Valid destinations include CloudWatch and Evidently. By default, RUM app monitors send some metrics to CloudWatch. These default metrics are listed in CloudWatch metrics that you can collect with CloudWatch RUM. In addition to these default metrics, you can choose to send extended metrics, custom metrics, or both. Extended metrics let you send metrics with additional dimensions that aren't included in the default metrics. You can also send extended metrics to both Evidently and CloudWatch. The valid dimension names for the additional dimensions for extended metrics are BrowserName, CountryCode, DeviceType, FileType, OSName, and PageId. For more information, see Extended metrics that you can send to CloudWatch and CloudWatch Evidently. Custom metrics are metrics that you define. You can send custom metrics to CloudWatch. CloudWatch Evidently, or both. With custom metrics, you can use any metric name and namespace. To derive the metrics, you can use any custom events, built-in events, custom attributes, or default attributes. You can't send custom metrics to the AWS/RUM namespace. You must send custom metrics to a custom namespace that you define. The namespace that you use can't start with AWS/. CloudWatch RUM prepends RUM/CustomMetrics/ to the custom namespace that you define, so the final namespace for your metrics in CloudWatch is RUM/CustomMetrics/your-custom-namespace . The maximum number of metric definitions that you can specify in one BatchCreateRumMetricDefinitions operation is 200. The maximum number of metric definitions that one destination can contain is 2000. Extended metrics sent to CloudWatch and RUM custom metrics are charged as CloudWatch custom metrics. Each combination of additional dimension name and dimension value counts as a custom metric. For more information, see Amazon CloudWatch Pricing. You must have already created a destination for the metrics before you send them. For more information, see PutRumMetricsDestination. If some metric definitions specified in a BatchCreateRumMetricDefinitions operations are not valid, those metric definitions fail and return errors, but all valid metric definitions in the same operation still succeed."]
+module BatchCreateRumMetricDefinitionsRequest =
+  struct
+    type nonrec t =
+      {
+      appMonitorName: AppMonitorName.t
+        [@ocaml.doc
+          "The name of the CloudWatch RUM app monitor that is to send the metrics."];
+      destination: MetricDestination.t
+        [@ocaml.doc
+          "The destination to send the metrics to. Valid values are CloudWatch and Evidently. If you specify Evidently, you must also specify the Amazon Resource Name (ARN) of the CloudWatchEvidently experiment that will receive the metrics and an IAM role that has permission to write to the experiment."];
+      destinationArn: DestinationArn.t option
+        [@ocaml.doc
+          "This parameter is required if Destination is Evidently. If Destination is CloudWatch, do not use this parameter. This parameter specifies the ARN of the Evidently experiment that is to receive the metrics. You must have already defined this experiment as a valid destination. For more information, see PutRumMetricsDestination."];
+      metricDefinitions: MetricDefinitionsRequest.t
+        [@ocaml.doc
+          "An array of structures which define the metrics that you want to send."]}
+    let context_ = "BatchCreateRumMetricDefinitionsRequest"
+    let make ?destinationArn =
+      fun ~appMonitorName ->
+        fun ~destination ->
+          fun ~metricDefinitions ->
+            fun () ->
+              {
+                destinationArn;
+                appMonitorName;
+                destination;
+                metricDefinitions
+              }
+    let to_value x =
+      structure_to_value
+        [("AppMonitorName",
+           (Some (AppMonitorName.to_value x.appMonitorName)));
+        ("Destination", (Some (MetricDestination.to_value x.destination)));
+        ("DestinationArn",
+          (Option.map x.destinationArn ~f:DestinationArn.to_value));
+        ("MetricDefinitions",
+          (Some (MetricDefinitionsRequest.to_value x.metricDefinitions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricDefinitions =
+        MetricDefinitionsRequest.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricDefinitions") in
+      let destinationArn =
+        (Option.map ~f:DestinationArn.of_xml)
+          (Xml.child xml_arg0 "DestinationArn") in
+      let destination =
+        MetricDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
+      let appMonitorName =
+        AppMonitorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AppMonitorName") in
+      make ~metricDefinitions ?destinationArn ~destination ~appMonitorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricDefinitions =
+        field_map_exn json__ "MetricDefinitions"
+          MetricDefinitionsRequest.of_json in
+      let destinationArn =
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let destination =
+        field_map_exn json__ "Destination" MetricDestination.of_json in
+      let appMonitorName =
+        field_map_exn json__ "AppMonitorName" AppMonitorName.of_json in
+      make ~metricDefinitions ?destinationArn ~destination ~appMonitorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the extended metrics and custom metrics that you want a CloudWatch RUM app monitor to send to a destination. Valid destinations include CloudWatch and Evidently. By default, RUM app monitors send some metrics to CloudWatch. These default metrics are listed in CloudWatch metrics that you can collect with CloudWatch RUM. In addition to these default metrics, you can choose to send extended metrics, custom metrics, or both. Extended metrics let you send metrics with additional dimensions that aren't included in the default metrics. You can also send extended metrics to both Evidently and CloudWatch. The valid dimension names for the additional dimensions for extended metrics are BrowserName, CountryCode, DeviceType, FileType, OSName, and PageId. For more information, see Extended metrics that you can send to CloudWatch and CloudWatch Evidently. Custom metrics are metrics that you define. You can send custom metrics to CloudWatch. CloudWatch Evidently, or both. With custom metrics, you can use any metric name and namespace. To derive the metrics, you can use any custom events, built-in events, custom attributes, or default attributes. You can't send custom metrics to the AWS/RUM namespace. You must send custom metrics to a custom namespace that you define. The namespace that you use can't start with AWS/. CloudWatch RUM prepends RUM/CustomMetrics/ to the custom namespace that you define, so the final namespace for your metrics in CloudWatch is RUM/CustomMetrics/your-custom-namespace . The maximum number of metric definitions that you can specify in one BatchCreateRumMetricDefinitions operation is 200. The maximum number of metric definitions that one destination can contain is 2000. Extended metrics sent to CloudWatch and RUM custom metrics are charged as CloudWatch custom metrics. Each combination of additional dimension name and dimension value counts as a custom metric. For more information, see Amazon CloudWatch Pricing. You must have already created a destination for the metrics before you send them. For more information, see PutRumMetricsDestination. If some metric definitions specified in a BatchCreateRumMetricDefinitions operations are not valid, those metric definitions fail and return errors, but all valid metric definitions in the same operation still succeed."]

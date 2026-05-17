@@ -28,6 +28,32 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_access_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String"
+       and policyArn =
+         flag "policy-arn" (required string) ~doc:"STRING String"
+       and accessScope =
+         flag "access-scope" (required json_arg) ~doc:"JSON AccessScope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_access_policy
+           (Values.AssociateAccessPolicyRequest.make ~clusterName
+              ~principalArn ~policyArn
+              ~accessScope:(Values.AccessScope.of_json accessScope) ())
+           (Some Values.AssociateAccessPolicyResponse.to_json)
+           (Some Values.AssociateAccessPolicyResponse.error_to_json)])
 let associate_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -82,6 +108,37 @@ let associate_identity_provider_config =
               ())
            (Some Values.AssociateIdentityProviderConfigResponse.to_json)
            (Some Values.AssociateIdentityProviderConfigResponse.error_to_json)])
+let create_access_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kubernetesGroups =
+         flag "kubernetes-groups" (optional json_arg) ~doc:"JSON StringList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and username = flag "username" (optional string) ~doc:"STRING String"
+       and type_ = flag "type-" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_access_entry
+           (Values.CreateAccessEntryRequest.make
+              ?kubernetesGroups:(Option.map ~f:Values.StringList.of_json
+                                   kubernetesGroups)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?clientRequestToken ?username ?type_ ~clusterName ~principalArn
+              ()) (Some Values.CreateAccessEntryResponse.to_json)
+           (Some Values.CreateAccessEntryResponse.error_to_json)])
 let create_addon =
   Command.async ~summary:""
     ([%map_open.Command
@@ -103,6 +160,14 @@ let create_addon =
        and clientRequestToken =
          flag "client-request-token" (optional string) ~doc:"STRING String"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and configurationValues =
+         flag "configuration-values" (optional string) ~doc:"STRING String"
+       and podIdentityAssociations =
+         flag "pod-identity-associations" (optional json_arg)
+           ~doc:"JSON AddonPodIdentityAssociationsList"
+       and namespaceConfig =
+         flag "namespace-config" (optional json_arg)
+           ~doc:"JSON AddonNamespaceConfigRequest"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING ClusterName"
        and addonName =
@@ -115,9 +180,56 @@ let create_addon =
               ?resolveConflicts:(Option.map
                                    ~f:Values.ResolveConflicts.of_json
                                    resolveConflicts) ?clientRequestToken
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~clusterName
-              ~addonName ()) (Some Values.CreateAddonResponse.to_json)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?configurationValues
+              ?podIdentityAssociations:(Option.map
+                                          ~f:Values.AddonPodIdentityAssociationsList.of_json
+                                          podIdentityAssociations)
+              ?namespaceConfig:(Option.map
+                                  ~f:Values.AddonNamespaceConfigRequest.of_json
+                                  namespaceConfig) ~clusterName ~addonName ())
+           (Some Values.CreateAddonResponse.to_json)
            (Some Values.CreateAddonResponse.error_to_json)])
+let create_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and configuration =
+         flag "configuration" (optional json_arg)
+           ~doc:"JSON CapabilityConfigurationRequest"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and capabilityName =
+         flag "capability-name" (required string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and type_ =
+         flag "type-" (required json_arg) ~doc:"JSON CapabilityType"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING String"
+       and deletePropagationPolicy =
+         flag "delete-propagation-policy" (required json_arg)
+           ~doc:"JSON CapabilityDeletePropagationPolicy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_capability
+           (Values.CreateCapabilityRequest.make ?clientRequestToken
+              ?configuration:(Option.map
+                                ~f:Values.CapabilityConfigurationRequest.of_json
+                                configuration)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~capabilityName ~clusterName
+              ~type_:(Values.CapabilityType.of_json type_) ~roleArn
+              ~deletePropagationPolicy:(Values.CapabilityDeletePropagationPolicy.of_json
+                                          deletePropagationPolicy) ())
+           (Some Values.CreateCapabilityResponse.to_json)
+           (Some Values.CreateCapabilityResponse.error_to_json)])
 let create_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -139,6 +251,35 @@ let create_cluster =
        and encryptionConfig =
          flag "encryption-config" (optional json_arg)
            ~doc:"JSON EncryptionConfigList"
+       and outpostConfig =
+         flag "outpost-config" (optional json_arg)
+           ~doc:"JSON OutpostConfigRequest"
+       and accessConfig =
+         flag "access-config" (optional json_arg)
+           ~doc:"JSON CreateAccessConfigRequest"
+       and bootstrapSelfManagedAddons =
+         flag "bootstrap-self-managed-addons" (optional bool)
+           ~doc:"BOOL BoxedBoolean"
+       and upgradePolicy =
+         flag "upgrade-policy" (optional json_arg)
+           ~doc:"JSON UpgradePolicyRequest"
+       and zonalShiftConfig =
+         flag "zonal-shift-config" (optional json_arg)
+           ~doc:"JSON ZonalShiftConfigRequest"
+       and remoteNetworkConfig =
+         flag "remote-network-config" (optional json_arg)
+           ~doc:"JSON RemoteNetworkConfigRequest"
+       and computeConfig =
+         flag "compute-config" (optional json_arg)
+           ~doc:"JSON ComputeConfigRequest"
+       and storageConfig =
+         flag "storage-config" (optional json_arg)
+           ~doc:"JSON StorageConfigRequest"
+       and deletionProtection =
+         flag "deletion-protection" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and controlPlaneScalingConfig =
+         flag "control-plane-scaling-config" (optional json_arg)
+           ~doc:"JSON ControlPlaneScalingConfig"
        and name = flag "name" (required string) ~doc:"STRING ClusterName"
        and roleArn = flag "role-arn" (required string) ~doc:"STRING String"
        and resourcesVpcConfig =
@@ -156,11 +297,72 @@ let create_cluster =
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?encryptionConfig:(Option.map
                                    ~f:Values.EncryptionConfigList.of_json
-                                   encryptionConfig) ~name ~roleArn
+                                   encryptionConfig)
+              ?outpostConfig:(Option.map
+                                ~f:Values.OutpostConfigRequest.of_json
+                                outpostConfig)
+              ?accessConfig:(Option.map
+                               ~f:Values.CreateAccessConfigRequest.of_json
+                               accessConfig) ?bootstrapSelfManagedAddons
+              ?upgradePolicy:(Option.map
+                                ~f:Values.UpgradePolicyRequest.of_json
+                                upgradePolicy)
+              ?zonalShiftConfig:(Option.map
+                                   ~f:Values.ZonalShiftConfigRequest.of_json
+                                   zonalShiftConfig)
+              ?remoteNetworkConfig:(Option.map
+                                      ~f:Values.RemoteNetworkConfigRequest.of_json
+                                      remoteNetworkConfig)
+              ?computeConfig:(Option.map
+                                ~f:Values.ComputeConfigRequest.of_json
+                                computeConfig)
+              ?storageConfig:(Option.map
+                                ~f:Values.StorageConfigRequest.of_json
+                                storageConfig) ?deletionProtection
+              ?controlPlaneScalingConfig:(Option.map
+                                            ~f:Values.ControlPlaneScalingConfig.of_json
+                                            controlPlaneScalingConfig) ~name
+              ~roleArn
               ~resourcesVpcConfig:(Values.VpcConfigRequest.of_json
                                      resourcesVpcConfig) ())
            (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
+let create_eks_anywhere_subscription =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and licenseQuantity =
+         flag "license-quantity" (optional int) ~doc:"INT Integer"
+       and licenseType =
+         flag "license-type" (optional json_arg)
+           ~doc:"JSON EksAnywhereSubscriptionLicenseType"
+       and autoRenew = flag "auto-renew" (optional bool) ~doc:"BOOL Boolean"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING EksAnywhereSubscriptionName"
+       and term =
+         flag "term" (required json_arg)
+           ~doc:"JSON EksAnywhereSubscriptionTerm" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_eks_anywhere_subscription
+           (Values.CreateEksAnywhereSubscriptionRequest.make ?licenseQuantity
+              ?licenseType:(Option.map
+                              ~f:Values.EksAnywhereSubscriptionLicenseType.of_json
+                              licenseType) ?autoRenew ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ~term:(Values.EksAnywhereSubscriptionTerm.of_json term) ())
+           (Some Values.CreateEksAnywhereSubscriptionResponse.to_json)
+           (Some Values.CreateEksAnywhereSubscriptionResponse.error_to_json)])
 let create_fargate_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -228,11 +430,17 @@ let create_nodegroup =
        and updateConfig =
          flag "update-config" (optional json_arg)
            ~doc:"JSON NodegroupUpdateConfig"
+       and nodeRepairConfig =
+         flag "node-repair-config" (optional json_arg)
+           ~doc:"JSON NodeRepairConfig"
        and capacityType =
          flag "capacity-type" (optional json_arg) ~doc:"JSON CapacityTypes"
        and version = flag "version" (optional string) ~doc:"STRING String"
        and releaseVersion =
          flag "release-version" (optional string) ~doc:"STRING String"
+       and warmPoolConfig =
+         flag "warm-pool-config" (optional json_arg)
+           ~doc:"JSON WarmPoolConfig"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING String"
        and nodegroupName =
@@ -262,12 +470,71 @@ let create_nodegroup =
               ?updateConfig:(Option.map
                                ~f:Values.NodegroupUpdateConfig.of_json
                                updateConfig)
+              ?nodeRepairConfig:(Option.map
+                                   ~f:Values.NodeRepairConfig.of_json
+                                   nodeRepairConfig)
               ?capacityType:(Option.map ~f:Values.CapacityTypes.of_json
                                capacityType) ?version ?releaseVersion
-              ~clusterName ~nodegroupName
+              ?warmPoolConfig:(Option.map ~f:Values.WarmPoolConfig.of_json
+                                 warmPoolConfig) ~clusterName ~nodegroupName
               ~subnets:(Values.StringList.of_json subnets) ~nodeRole ())
            (Some Values.CreateNodegroupResponse.to_json)
            (Some Values.CreateNodegroupResponse.error_to_json)])
+let create_pod_identity_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and disableSessionTags =
+         flag "disable-session-tags" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and targetRoleArn =
+         flag "target-role-arn" (optional string) ~doc:"STRING String"
+       and policy = flag "policy" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and namespace =
+         flag "namespace" (required string) ~doc:"STRING String"
+       and serviceAccount =
+         flag "service-account" (required string) ~doc:"STRING String"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_pod_identity_association
+           (Values.CreatePodIdentityAssociationRequest.make
+              ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?disableSessionTags ?targetRoleArn ?policy ~clusterName
+              ~namespace ~serviceAccount ~roleArn ())
+           (Some Values.CreatePodIdentityAssociationResponse.to_json)
+           (Some Values.CreatePodIdentityAssociationResponse.error_to_json)])
+let delete_access_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_access_entry
+           (Values.DeleteAccessEntryRequest.make ~clusterName ~principalArn
+              ()) (Some Values.DeleteAccessEntryResponse.to_json)
+           (Some Values.DeleteAccessEntryResponse.error_to_json)])
 let delete_addon =
   Command.async ~summary:""
     ([%map_open.Command
@@ -289,6 +556,26 @@ let delete_addon =
            (Values.DeleteAddonRequest.make ?preserve ~clusterName ~addonName
               ()) (Some Values.DeleteAddonResponse.to_json)
            (Some Values.DeleteAddonResponse.error_to_json)])
+let delete_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and capabilityName =
+         flag "capability-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_capability
+           (Values.DeleteCapabilityRequest.make ~clusterName ~capabilityName
+              ()) (Some Values.DeleteCapabilityResponse.to_json)
+           (Some Values.DeleteCapabilityResponse.error_to_json)])
 let delete_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -305,6 +592,23 @@ let delete_cluster =
            Io.delete_cluster (Values.DeleteClusterRequest.make ~name ())
            (Some Values.DeleteClusterResponse.to_json)
            (Some Values.DeleteClusterResponse.error_to_json)])
+let delete_eks_anywhere_subscription =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_eks_anywhere_subscription
+           (Values.DeleteEksAnywhereSubscriptionRequest.make ~id ())
+           (Some Values.DeleteEksAnywhereSubscriptionResponse.to_json)
+           (Some Values.DeleteEksAnywhereSubscriptionResponse.error_to_json)])
 let delete_fargate_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -346,6 +650,27 @@ let delete_nodegroup =
            (Values.DeleteNodegroupRequest.make ~clusterName ~nodegroupName ())
            (Some Values.DeleteNodegroupResponse.to_json)
            (Some Values.DeleteNodegroupResponse.error_to_json)])
+let delete_pod_identity_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and associationId =
+         flag "association-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_pod_identity_association
+           (Values.DeletePodIdentityAssociationRequest.make ~clusterName
+              ~associationId ())
+           (Some Values.DeletePodIdentityAssociationResponse.to_json)
+           (Some Values.DeletePodIdentityAssociationResponse.error_to_json)])
 let deregister_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -363,6 +688,26 @@ let deregister_cluster =
            (Values.DeregisterClusterRequest.make ~name ())
            (Some Values.DeregisterClusterResponse.to_json)
            (Some Values.DeregisterClusterResponse.error_to_json)])
+let describe_access_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_access_entry
+           (Values.DescribeAccessEntryRequest.make ~clusterName ~principalArn
+              ()) (Some Values.DescribeAccessEntryResponse.to_json)
+           (Some Values.DescribeAccessEntryResponse.error_to_json)])
 let describe_addon =
   Command.async ~summary:""
     ([%map_open.Command
@@ -383,6 +728,27 @@ let describe_addon =
            (Values.DescribeAddonRequest.make ~clusterName ~addonName ())
            (Some Values.DescribeAddonResponse.to_json)
            (Some Values.DescribeAddonResponse.error_to_json)])
+let describe_addon_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and addonName =
+         flag "addon-name" (required string) ~doc:"STRING String"
+       and addonVersion =
+         flag "addon-version" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_addon_configuration
+           (Values.DescribeAddonConfigurationRequest.make ~addonName
+              ~addonVersion ())
+           (Some Values.DescribeAddonConfigurationResponse.to_json)
+           (Some Values.DescribeAddonConfigurationResponse.error_to_json)])
 let describe_addon_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -401,14 +767,42 @@ let describe_addon_versions =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and addonName =
-         flag "addon-name" (optional string) ~doc:"STRING String" in
+         flag "addon-name" (optional string) ~doc:"STRING String"
+       and types = flag "types" (optional json_arg) ~doc:"JSON StringList"
+       and publishers =
+         flag "publishers" (optional json_arg) ~doc:"JSON StringList"
+       and owners = flag "owners" (optional json_arg) ~doc:"JSON StringList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_addon_versions
            (Values.DescribeAddonVersionsRequest.make ?kubernetesVersion
-              ?maxResults ?nextToken ?addonName ())
+              ?maxResults ?nextToken ?addonName
+              ?types:(Option.map ~f:Values.StringList.of_json types)
+              ?publishers:(Option.map ~f:Values.StringList.of_json publishers)
+              ?owners:(Option.map ~f:Values.StringList.of_json owners) ())
            (Some Values.DescribeAddonVersionsResponse.to_json)
            (Some Values.DescribeAddonVersionsResponse.error_to_json)])
+let describe_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and capabilityName =
+         flag "capability-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_capability
+           (Values.DescribeCapabilityRequest.make ~clusterName
+              ~capabilityName ())
+           (Some Values.DescribeCapabilityResponse.to_json)
+           (Some Values.DescribeCapabilityResponse.error_to_json)])
 let describe_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -425,6 +819,63 @@ let describe_cluster =
            Io.describe_cluster (Values.DescribeClusterRequest.make ~name ())
            (Some Values.DescribeClusterResponse.to_json)
            (Some Values.DescribeClusterResponse.error_to_json)])
+let describe_cluster_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterType =
+         flag "cluster-type" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT DescribeClusterVersionMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and defaultOnly =
+         flag "default-only" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and includeAll =
+         flag "include-all" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and clusterVersions =
+         flag "cluster-versions" (optional json_arg) ~doc:"JSON StringList"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON ClusterVersionStatus"
+       and versionStatus =
+         flag "version-status" (optional json_arg) ~doc:"JSON VersionStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_cluster_versions
+           (Values.DescribeClusterVersionsRequest.make ?clusterType
+              ?maxResults ?nextToken ?defaultOnly ?includeAll
+              ?clusterVersions:(Option.map ~f:Values.StringList.of_json
+                                  clusterVersions)
+              ?status:(Option.map ~f:Values.ClusterVersionStatus.of_json
+                         status)
+              ?versionStatus:(Option.map ~f:Values.VersionStatus.of_json
+                                versionStatus) ())
+           (Some Values.DescribeClusterVersionsResponse.to_json)
+           (Some Values.DescribeClusterVersionsResponse.error_to_json)])
+let describe_eks_anywhere_subscription =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_eks_anywhere_subscription
+           (Values.DescribeEksAnywhereSubscriptionRequest.make ~id ())
+           (Some Values.DescribeEksAnywhereSubscriptionResponse.to_json)
+           (Some Values.DescribeEksAnywhereSubscriptionResponse.error_to_json)])
 let describe_fargate_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -469,6 +920,43 @@ let describe_identity_provider_config =
                                          identityProviderConfig) ())
            (Some Values.DescribeIdentityProviderConfigResponse.to_json)
            (Some Values.DescribeIdentityProviderConfigResponse.error_to_json)])
+let describe_insight =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_insight
+           (Values.DescribeInsightRequest.make ~clusterName ~id ())
+           (Some Values.DescribeInsightResponse.to_json)
+           (Some Values.DescribeInsightResponse.error_to_json)])
+let describe_insights_refresh =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_insights_refresh
+           (Values.DescribeInsightsRefreshRequest.make ~clusterName ())
+           (Some Values.DescribeInsightsRefreshResponse.to_json)
+           (Some Values.DescribeInsightsRefreshResponse.error_to_json)])
 let describe_nodegroup =
   Command.async ~summary:""
     ([%map_open.Command
@@ -489,6 +977,27 @@ let describe_nodegroup =
            (Values.DescribeNodegroupRequest.make ~clusterName ~nodegroupName
               ()) (Some Values.DescribeNodegroupResponse.to_json)
            (Some Values.DescribeNodegroupResponse.error_to_json)])
+let describe_pod_identity_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and associationId =
+         flag "association-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_pod_identity_association
+           (Values.DescribePodIdentityAssociationRequest.make ~clusterName
+              ~associationId ())
+           (Some Values.DescribePodIdentityAssociationResponse.to_json)
+           (Some Values.DescribePodIdentityAssociationResponse.error_to_json)])
 let describe_update =
   Command.async ~summary:""
     ([%map_open.Command
@@ -503,14 +1012,40 @@ let describe_update =
          flag "nodegroup-name" (optional string) ~doc:"STRING String"
        and addonName =
          flag "addon-name" (optional string) ~doc:"STRING String"
+       and capabilityName =
+         flag "capability-name" (optional string) ~doc:"STRING String"
        and name = flag "name" (required string) ~doc:"STRING String"
        and updateId = flag "update-id" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_update
-           (Values.DescribeUpdateRequest.make ?nodegroupName ?addonName ~name
-              ~updateId ()) (Some Values.DescribeUpdateResponse.to_json)
+           (Values.DescribeUpdateRequest.make ?nodegroupName ?addonName
+              ?capabilityName ~name ~updateId ())
+           (Some Values.DescribeUpdateResponse.to_json)
            (Some Values.DescribeUpdateResponse.error_to_json)])
+let disassociate_access_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String"
+       and policyArn =
+         flag "policy-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_access_policy
+           (Values.DisassociateAccessPolicyRequest.make ~clusterName
+              ~principalArn ~policyArn ())
+           (Some Values.DisassociateAccessPolicyResponse.to_json)
+           (Some Values.DisassociateAccessPolicyResponse.error_to_json)])
 let disassociate_identity_provider_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -538,6 +1073,53 @@ let disassociate_identity_provider_config =
            (Some Values.DisassociateIdentityProviderConfigResponse.to_json)
            (Some
               Values.DisassociateIdentityProviderConfigResponse.error_to_json)])
+let list_access_entries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and associatedPolicyArn =
+         flag "associated-policy-arn" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAccessEntriesRequestMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_access_entries
+           (Values.ListAccessEntriesRequest.make ?associatedPolicyArn
+              ?maxResults ?nextToken ~clusterName ())
+           (Some Values.ListAccessEntriesResponse.to_json)
+           (Some Values.ListAccessEntriesResponse.error_to_json)])
+let list_access_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAccessPoliciesRequestMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_access_policies
+           (Values.ListAccessPoliciesRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListAccessPoliciesResponse.to_json)
+           (Some Values.ListAccessPoliciesResponse.error_to_json)])
 let list_addons =
   Command.async ~summary:""
     ([%map_open.Command
@@ -561,6 +1143,55 @@ let list_addons =
            (Values.ListAddonsRequest.make ?maxResults ?nextToken ~clusterName
               ()) (Some Values.ListAddonsResponse.to_json)
            (Some Values.ListAddonsResponse.error_to_json)])
+let list_associated_access_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListAssociatedAccessPoliciesRequestMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_associated_access_policies
+           (Values.ListAssociatedAccessPoliciesRequest.make ?maxResults
+              ?nextToken ~clusterName ~principalArn ())
+           (Some Values.ListAssociatedAccessPoliciesResponse.to_json)
+           (Some Values.ListAssociatedAccessPoliciesResponse.error_to_json)])
+let list_capabilities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListCapabilitiesRequestMaxResults"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_capabilities
+           (Values.ListCapabilitiesRequest.make ?nextToken ?maxResults
+              ~clusterName ()) (Some Values.ListCapabilitiesResponse.to_json)
+           (Some Values.ListCapabilitiesResponse.error_to_json)])
 let list_clusters =
   Command.async ~summary:""
     ([%map_open.Command
@@ -586,6 +1217,34 @@ let list_clusters =
                            include_) ())
            (Some Values.ListClustersResponse.to_json)
            (Some Values.ListClustersResponse.error_to_json)])
+let list_eks_anywhere_subscriptions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListEksAnywhereSubscriptionsRequestMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and includeStatus =
+         flag "include-status" (optional json_arg)
+           ~doc:"JSON EksAnywhereSubscriptionStatusValues" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_eks_anywhere_subscriptions
+           (Values.ListEksAnywhereSubscriptionsRequest.make ?maxResults
+              ?nextToken
+              ?includeStatus:(Option.map
+                                ~f:Values.EksAnywhereSubscriptionStatusValues.of_json
+                                includeStatus) ())
+           (Some Values.ListEksAnywhereSubscriptionsResponse.to_json)
+           (Some Values.ListEksAnywhereSubscriptionsResponse.error_to_json)])
 let list_fargate_profiles =
   Command.async ~summary:""
     ([%map_open.Command
@@ -634,6 +1293,32 @@ let list_identity_provider_configs =
               ?nextToken ~clusterName ())
            (Some Values.ListIdentityProviderConfigsResponse.to_json)
            (Some Values.ListIdentityProviderConfigsResponse.error_to_json)])
+let list_insights =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter =
+         flag "filter" (optional json_arg) ~doc:"JSON InsightsFilter"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListInsightsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_insights
+           (Values.ListInsightsRequest.make
+              ?filter:(Option.map ~f:Values.InsightsFilter.of_json filter)
+              ?maxResults ?nextToken ~clusterName ())
+           (Some Values.ListInsightsResponse.to_json)
+           (Some Values.ListInsightsResponse.error_to_json)])
 let list_nodegroups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -657,6 +1342,34 @@ let list_nodegroups =
            (Values.ListNodegroupsRequest.make ?maxResults ?nextToken
               ~clusterName ()) (Some Values.ListNodegroupsResponse.to_json)
            (Some Values.ListNodegroupsResponse.error_to_json)])
+let list_pod_identity_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and namespace =
+         flag "namespace" (optional string) ~doc:"STRING String"
+       and serviceAccount =
+         flag "service-account" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListPodIdentityAssociationsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_pod_identity_associations
+           (Values.ListPodIdentityAssociationsRequest.make ?namespace
+              ?serviceAccount ?maxResults ?nextToken ~clusterName ())
+           (Some Values.ListPodIdentityAssociationsResponse.to_json)
+           (Some Values.ListPodIdentityAssociationsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -689,6 +1402,8 @@ let list_updates =
          flag "nodegroup-name" (optional string) ~doc:"STRING String"
        and addonName =
          flag "addon-name" (optional string) ~doc:"STRING String"
+       and capabilityName =
+         flag "capability-name" (optional string) ~doc:"STRING String"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
        and maxResults =
@@ -699,7 +1414,7 @@ let list_updates =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_updates
            (Values.ListUpdatesRequest.make ?nodegroupName ?addonName
-              ?nextToken ?maxResults ~name ())
+              ?capabilityName ?nextToken ?maxResults ~name ())
            (Some Values.ListUpdatesResponse.to_json)
            (Some Values.ListUpdatesResponse.error_to_json)])
 let register_cluster =
@@ -728,6 +1443,24 @@ let register_cluster =
                                   connectorConfig) ())
            (Some Values.RegisterClusterResponse.to_json)
            (Some Values.RegisterClusterResponse.error_to_json)])
+let start_insights_refresh =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_insights_refresh
+           (Values.StartInsightsRefreshRequest.make ~clusterName ())
+           (Some Values.StartInsightsRefreshResponse.to_json)
+           (Some Values.StartInsightsRefreshResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -769,6 +1502,34 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_access_entry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and kubernetesGroups =
+         flag "kubernetes-groups" (optional json_arg) ~doc:"JSON StringList"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and username = flag "username" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_access_entry
+           (Values.UpdateAccessEntryRequest.make
+              ?kubernetesGroups:(Option.map ~f:Values.StringList.of_json
+                                   kubernetesGroups) ?clientRequestToken
+              ?username ~clusterName ~principalArn ())
+           (Some Values.UpdateAccessEntryResponse.to_json)
+           (Some Values.UpdateAccessEntryResponse.error_to_json)])
 let update_addon =
   Command.async ~summary:""
     ([%map_open.Command
@@ -789,6 +1550,11 @@ let update_addon =
            ~doc:"JSON ResolveConflicts"
        and clientRequestToken =
          flag "client-request-token" (optional string) ~doc:"STRING String"
+       and configurationValues =
+         flag "configuration-values" (optional string) ~doc:"STRING String"
+       and podIdentityAssociations =
+         flag "pod-identity-associations" (optional json_arg)
+           ~doc:"JSON AddonPodIdentityAssociationsList"
        and clusterName =
          flag "cluster-name" (required string) ~doc:"STRING ClusterName"
        and addonName =
@@ -801,9 +1567,49 @@ let update_addon =
               ?resolveConflicts:(Option.map
                                    ~f:Values.ResolveConflicts.of_json
                                    resolveConflicts) ?clientRequestToken
+              ?configurationValues
+              ?podIdentityAssociations:(Option.map
+                                          ~f:Values.AddonPodIdentityAssociationsList.of_json
+                                          podIdentityAssociations)
               ~clusterName ~addonName ())
            (Some Values.UpdateAddonResponse.to_json)
            (Some Values.UpdateAddonResponse.error_to_json)])
+let update_capability =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING String"
+       and configuration =
+         flag "configuration" (optional json_arg)
+           ~doc:"JSON UpdateCapabilityConfiguration"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and deletePropagationPolicy =
+         flag "delete-propagation-policy" (optional json_arg)
+           ~doc:"JSON CapabilityDeletePropagationPolicy"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and capabilityName =
+         flag "capability-name" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_capability
+           (Values.UpdateCapabilityRequest.make ?roleArn
+              ?configuration:(Option.map
+                                ~f:Values.UpdateCapabilityConfiguration.of_json
+                                configuration) ?clientRequestToken
+              ?deletePropagationPolicy:(Option.map
+                                          ~f:Values.CapabilityDeletePropagationPolicy.of_json
+                                          deletePropagationPolicy)
+              ~clusterName ~capabilityName ())
+           (Some Values.UpdateCapabilityResponse.to_json)
+           (Some Values.UpdateCapabilityResponse.error_to_json)])
 let update_cluster_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -820,6 +1626,32 @@ let update_cluster_config =
        and logging = flag "logging" (optional json_arg) ~doc:"JSON Logging"
        and clientRequestToken =
          flag "client-request-token" (optional string) ~doc:"STRING String"
+       and accessConfig =
+         flag "access-config" (optional json_arg)
+           ~doc:"JSON UpdateAccessConfigRequest"
+       and upgradePolicy =
+         flag "upgrade-policy" (optional json_arg)
+           ~doc:"JSON UpgradePolicyRequest"
+       and zonalShiftConfig =
+         flag "zonal-shift-config" (optional json_arg)
+           ~doc:"JSON ZonalShiftConfigRequest"
+       and computeConfig =
+         flag "compute-config" (optional json_arg)
+           ~doc:"JSON ComputeConfigRequest"
+       and kubernetesNetworkConfig =
+         flag "kubernetes-network-config" (optional json_arg)
+           ~doc:"JSON KubernetesNetworkConfigRequest"
+       and storageConfig =
+         flag "storage-config" (optional json_arg)
+           ~doc:"JSON StorageConfigRequest"
+       and remoteNetworkConfig =
+         flag "remote-network-config" (optional json_arg)
+           ~doc:"JSON RemoteNetworkConfigRequest"
+       and deletionProtection =
+         flag "deletion-protection" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and controlPlaneScalingConfig =
+         flag "control-plane-scaling-config" (optional json_arg)
+           ~doc:"JSON ControlPlaneScalingConfig"
        and name = flag "name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -829,8 +1661,33 @@ let update_cluster_config =
                                      ~f:Values.VpcConfigRequest.of_json
                                      resourcesVpcConfig)
               ?logging:(Option.map ~f:Values.Logging.of_json logging)
-              ?clientRequestToken ~name ())
-           (Some Values.UpdateClusterConfigResponse.to_json)
+              ?clientRequestToken
+              ?accessConfig:(Option.map
+                               ~f:Values.UpdateAccessConfigRequest.of_json
+                               accessConfig)
+              ?upgradePolicy:(Option.map
+                                ~f:Values.UpgradePolicyRequest.of_json
+                                upgradePolicy)
+              ?zonalShiftConfig:(Option.map
+                                   ~f:Values.ZonalShiftConfigRequest.of_json
+                                   zonalShiftConfig)
+              ?computeConfig:(Option.map
+                                ~f:Values.ComputeConfigRequest.of_json
+                                computeConfig)
+              ?kubernetesNetworkConfig:(Option.map
+                                          ~f:Values.KubernetesNetworkConfigRequest.of_json
+                                          kubernetesNetworkConfig)
+              ?storageConfig:(Option.map
+                                ~f:Values.StorageConfigRequest.of_json
+                                storageConfig)
+              ?remoteNetworkConfig:(Option.map
+                                      ~f:Values.RemoteNetworkConfigRequest.of_json
+                                      remoteNetworkConfig)
+              ?deletionProtection
+              ?controlPlaneScalingConfig:(Option.map
+                                            ~f:Values.ControlPlaneScalingConfig.of_json
+                                            controlPlaneScalingConfig) ~name
+              ()) (Some Values.UpdateClusterConfigResponse.to_json)
            (Some Values.UpdateClusterConfigResponse.error_to_json)])
 let update_cluster_version =
   Command.async ~summary:""
@@ -844,14 +1701,37 @@ let update_cluster_version =
            ~doc:"URL override endpoint url"
        and clientRequestToken =
          flag "client-request-token" (optional string) ~doc:"STRING String"
+       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
        and name = flag "name" (required string) ~doc:"STRING String"
        and version = flag "version" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_cluster_version
-           (Values.UpdateClusterVersionRequest.make ?clientRequestToken ~name
-              ~version ()) (Some Values.UpdateClusterVersionResponse.to_json)
+           (Values.UpdateClusterVersionRequest.make ?clientRequestToken
+              ?force ~name ~version ())
+           (Some Values.UpdateClusterVersionResponse.to_json)
            (Some Values.UpdateClusterVersionResponse.error_to_json)])
+let update_eks_anywhere_subscription =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and id = flag "id" (required string) ~doc:"STRING String"
+       and autoRenew = flag "auto-renew" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_eks_anywhere_subscription
+           (Values.UpdateEksAnywhereSubscriptionRequest.make
+              ?clientRequestToken ~id ~autoRenew ())
+           (Some Values.UpdateEksAnywhereSubscriptionResponse.to_json)
+           (Some Values.UpdateEksAnywhereSubscriptionResponse.error_to_json)])
 let update_nodegroup_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -872,6 +1752,12 @@ let update_nodegroup_config =
        and updateConfig =
          flag "update-config" (optional json_arg)
            ~doc:"JSON NodegroupUpdateConfig"
+       and nodeRepairConfig =
+         flag "node-repair-config" (optional json_arg)
+           ~doc:"JSON NodeRepairConfig"
+       and warmPoolConfig =
+         flag "warm-pool-config" (optional json_arg)
+           ~doc:"JSON WarmPoolConfig"
        and clientRequestToken =
          flag "client-request-token" (optional string) ~doc:"STRING String"
        and clusterName =
@@ -891,8 +1777,13 @@ let update_nodegroup_config =
                                 scalingConfig)
               ?updateConfig:(Option.map
                                ~f:Values.NodegroupUpdateConfig.of_json
-                               updateConfig) ?clientRequestToken ~clusterName
-              ~nodegroupName ())
+                               updateConfig)
+              ?nodeRepairConfig:(Option.map
+                                   ~f:Values.NodeRepairConfig.of_json
+                                   nodeRepairConfig)
+              ?warmPoolConfig:(Option.map ~f:Values.WarmPoolConfig.of_json
+                                 warmPoolConfig) ?clientRequestToken
+              ~clusterName ~nodegroupName ())
            (Some Values.UpdateNodegroupConfigResponse.to_json)
            (Some Values.UpdateNodegroupConfigResponse.error_to_json)])
 let update_nodegroup_version =
@@ -929,42 +1820,103 @@ let update_nodegroup_version =
               ~clusterName ~nodegroupName ())
            (Some Values.UpdateNodegroupVersionResponse.to_json)
            (Some Values.UpdateNodegroupVersionResponse.error_to_json)])
+let update_pod_identity_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING String"
+       and clientRequestToken =
+         flag "client-request-token" (optional string) ~doc:"STRING String"
+       and disableSessionTags =
+         flag "disable-session-tags" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and targetRoleArn =
+         flag "target-role-arn" (optional string) ~doc:"STRING String"
+       and policy = flag "policy" (optional string) ~doc:"STRING String"
+       and clusterName =
+         flag "cluster-name" (required string) ~doc:"STRING String"
+       and associationId =
+         flag "association-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_pod_identity_association
+           (Values.UpdatePodIdentityAssociationRequest.make ?roleArn
+              ?clientRequestToken ?disableSessionTags ?targetRoleArn ?policy
+              ~clusterName ~associationId ())
+           (Some Values.UpdatePodIdentityAssociationResponse.to_json)
+           (Some Values.UpdatePodIdentityAssociationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("associate-encryption-config", associate_encryption_config);
+    [("associate-access-policy", associate_access_policy);
+    ("associate-encryption-config", associate_encryption_config);
     ("associate-identity-provider-config",
       associate_identity_provider_config);
+    ("create-access-entry", create_access_entry);
     ("create-addon", create_addon);
+    ("create-capability", create_capability);
     ("create-cluster", create_cluster);
+    ("create-eks-anywhere-subscription", create_eks_anywhere_subscription);
     ("create-fargate-profile", create_fargate_profile);
     ("create-nodegroup", create_nodegroup);
+    ("create-pod-identity-association", create_pod_identity_association);
+    ("delete-access-entry", delete_access_entry);
     ("delete-addon", delete_addon);
+    ("delete-capability", delete_capability);
     ("delete-cluster", delete_cluster);
+    ("delete-eks-anywhere-subscription", delete_eks_anywhere_subscription);
     ("delete-fargate-profile", delete_fargate_profile);
     ("delete-nodegroup", delete_nodegroup);
+    ("delete-pod-identity-association", delete_pod_identity_association);
     ("deregister-cluster", deregister_cluster);
+    ("describe-access-entry", describe_access_entry);
     ("describe-addon", describe_addon);
+    ("describe-addon-configuration", describe_addon_configuration);
     ("describe-addon-versions", describe_addon_versions);
+    ("describe-capability", describe_capability);
     ("describe-cluster", describe_cluster);
+    ("describe-cluster-versions", describe_cluster_versions);
+    ("describe-eks-anywhere-subscription",
+      describe_eks_anywhere_subscription);
     ("describe-fargate-profile", describe_fargate_profile);
     ("describe-identity-provider-config", describe_identity_provider_config);
+    ("describe-insight", describe_insight);
+    ("describe-insights-refresh", describe_insights_refresh);
     ("describe-nodegroup", describe_nodegroup);
+    ("describe-pod-identity-association", describe_pod_identity_association);
     ("describe-update", describe_update);
+    ("disassociate-access-policy", disassociate_access_policy);
     ("disassociate-identity-provider-config",
       disassociate_identity_provider_config);
+    ("list-access-entries", list_access_entries);
+    ("list-access-policies", list_access_policies);
     ("list-addons", list_addons);
+    ("list-associated-access-policies", list_associated_access_policies);
+    ("list-capabilities", list_capabilities);
     ("list-clusters", list_clusters);
+    ("list-eks-anywhere-subscriptions", list_eks_anywhere_subscriptions);
     ("list-fargate-profiles", list_fargate_profiles);
     ("list-identity-provider-configs", list_identity_provider_configs);
+    ("list-insights", list_insights);
     ("list-nodegroups", list_nodegroups);
+    ("list-pod-identity-associations", list_pod_identity_associations);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-updates", list_updates);
     ("register-cluster", register_cluster);
+    ("start-insights-refresh", start_insights_refresh);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-access-entry", update_access_entry);
     ("update-addon", update_addon);
+    ("update-capability", update_capability);
     ("update-cluster-config", update_cluster_config);
     ("update-cluster-version", update_cluster_version);
+    ("update-eks-anywhere-subscription", update_eks_anywhere_subscription);
     ("update-nodegroup-config", update_nodegroup_config);
-    ("update-nodegroup-version", update_nodegroup_version)]
+    ("update-nodegroup-version", update_nodegroup_version);
+    ("update-pod-identity-association", update_pod_identity_association)]

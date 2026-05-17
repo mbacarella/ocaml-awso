@@ -23,6 +23,239 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "AttributeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module LineItemFilterValue =
+  struct
+    type nonrec t =
+      | SAVINGS_PLAN_NEGATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SAVINGS_PLAN_NEGATION -> "SAVINGS_PLAN_NEGATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SAVINGS_PLAN_NEGATION" -> SAVINGS_PLAN_NEGATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LineItemFilterValue" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LineItemFilterValue" j)
+    let to_json = simple_to_json to_value
+  end
+module AttributeValueList =
+  struct
+    type nonrec t = AttributeValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttributeValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributeValueList" ~of_json:AttributeValue.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module LineItemFilterAttributeName =
+  struct
+    type nonrec t =
+      | LINE_ITEM_TYPE 
+      | SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LINE_ITEM_TYPE -> "LINE_ITEM_TYPE"
+      | SERVICE -> "SERVICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LINE_ITEM_TYPE" -> LINE_ITEM_TYPE
+      | "SERVICE" -> SERVICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LineItemFilterAttributeName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LineItemFilterAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
+module LineItemFilterValuesList =
+  struct
+    type nonrec t = LineItemFilterValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LineItemFilterValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LineItemFilterValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LineItemFilterValuesList"
+        ~of_json:LineItemFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MatchOption =
+  struct
+    type nonrec t =
+      | NOT_EQUAL 
+      | EQUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NOT_EQUAL -> "NOT_EQUAL"
+      | EQUAL -> "EQUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NOT_EQUAL" -> NOT_EQUAL
+      | "EQUAL" -> EQUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MatchOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MatchOption" j)
+    let to_json = simple_to_json to_value
+  end
+module TieringActivated =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module LineItemFilter =
+  struct
+    type nonrec t =
+      {
+      attribute: LineItemFilterAttributeName.t
+        [@ocaml.doc
+          "The attribute of the line item filter. This specifies what attribute that you can filter on."];
+      matchOption: MatchOption.t
+        [@ocaml.doc
+          "The match criteria of the line item filter. This parameter specifies whether not to include the resource value from the billing group total cost."];
+      values: LineItemFilterValuesList.t option
+        [@ocaml.doc
+          "The values of the line item filter. This specifies the values to filter on. Currently, you can only exclude Savings Plans discounts."];
+      attributeValues: AttributeValueList.t option
+        [@ocaml.doc
+          "The values of the line item filter. This specifies the values to filter on."]}
+    let context_ = "LineItemFilter"
+    let make ?values =
+      fun ?attributeValues ->
+        fun ~attribute ->
+          fun ~matchOption ->
+            fun () -> { values; attributeValues; attribute; matchOption }
+    let to_value x =
+      structure_to_value
+        [("Attribute",
+           (Some (LineItemFilterAttributeName.to_value x.attribute)));
+        ("MatchOption", (Some (MatchOption.to_value x.matchOption)));
+        ("Values",
+          (Option.map x.values ~f:LineItemFilterValuesList.to_value));
+        ("AttributeValues",
+          (Option.map x.attributeValues ~f:AttributeValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributeValues =
+        (Option.map ~f:AttributeValueList.of_xml)
+          (Xml.child xml_arg0 "AttributeValues") in
+      let values =
+        (Option.map ~f:LineItemFilterValuesList.of_xml)
+          (Xml.child xml_arg0 "Values") in
+      let matchOption =
+        MatchOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MatchOption") in
+      let attribute =
+        LineItemFilterAttributeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Attribute") in
+      make ?attributeValues ?values ~matchOption ~attribute ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributeValues =
+        field_map json__ "AttributeValues" AttributeValueList.of_json in
+      let values = field_map json__ "Values" LineItemFilterValuesList.of_json in
+      let matchOption =
+        field_map_exn json__ "MatchOption" MatchOption.of_json in
+      let attribute =
+        field_map_exn json__ "Attribute" LineItemFilterAttributeName.of_json in
+      make ?attributeValues ?values ~matchOption ~attribute ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A representation of the line item filter for your custom line item. You can use line item filters to include or exclude specific resource values from the billing group's total cost. For example, if you create a custom line item and you want to filter out a value, such as Savings Plans discounts, you can update LineItemFilter to exclude it."]
 module CustomLineItemChargeValue =
   struct
     type nonrec t = float
@@ -72,6 +305,30 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module FreeTierConfig =
+  struct
+    type nonrec t =
+      {
+      activated: TieringActivated.t option
+        [@ocaml.doc
+          "Activate or deactivate Amazon Web Services Free Tier application."]}
+    let make ?activated = fun () -> { activated }
+    let to_value x =
+      structure_to_value
+        [("Activated", (Option.map x.activated ~f:TieringActivated.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activated =
+        (Option.map ~f:TieringActivated.of_xml)
+          (Xml.child xml_arg0 "Activated") in
+      make ?activated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activated = field_map json__ "Activated" TieringActivated.of_json in
+      make ?activated ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The possible Amazon Web Services Free Tier configurations."]
 module CustomLineItemType =
   struct
     type nonrec t =
@@ -92,61 +349,111 @@ module CustomLineItemType =
     let of_json j = of_string (string_of_json ~kind:"CustomLineItemType" j)
     let to_json = simple_to_json to_value
   end
+module LineItemFiltersList =
+  struct
+    type nonrec t = LineItemFilter.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LineItemFilter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LineItemFilter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LineItemFiltersList"
+        ~of_json:LineItemFilter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListCustomLineItemFlatChargeDetails =
   struct
     type nonrec t =
       {
-      chargeValue: CustomLineItemChargeValue.t
+      chargeValue: CustomLineItemChargeValue.t option
         [@ocaml.doc "The custom line item's fixed charge value in USD."]}
-    let context_ = "ListCustomLineItemFlatChargeDetails"
-    let make ~chargeValue = fun () -> { chargeValue }
+    let make ?chargeValue = fun () -> { chargeValue }
     let to_value x =
       structure_to_value
         [("ChargeValue",
-           (Some (CustomLineItemChargeValue.to_value x.chargeValue)))]
+           (Option.map x.chargeValue ~f:CustomLineItemChargeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let chargeValue =
-        CustomLineItemChargeValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
-      make ~chargeValue ()
+        (Option.map ~f:CustomLineItemChargeValue.of_xml)
+          (Xml.child xml_arg0 "ChargeValue") in
+      make ?chargeValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let chargeValue =
-        field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
-      make ~chargeValue ()
+        field_map json__ "ChargeValue" CustomLineItemChargeValue.of_json in
+      make ?chargeValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the charge details associated with a flat custom line item."]
+       "A representation of the charge details that are associated with a flat custom line item."]
 module ListCustomLineItemPercentageChargeDetails =
   struct
     type nonrec t =
       {
-      percentageValue: CustomLineItemPercentageChargeValue.t
+      percentageValue: CustomLineItemPercentageChargeValue.t option
         [@ocaml.doc
           "The custom line item's percentage value. This will be multiplied against the combined value of its associated resources to determine its charge value."]}
-    let context_ = "ListCustomLineItemPercentageChargeDetails"
-    let make ~percentageValue = fun () -> { percentageValue }
+    let make ?percentageValue = fun () -> { percentageValue }
     let to_value x =
       structure_to_value
         [("PercentageValue",
-           (Some
-              (CustomLineItemPercentageChargeValue.to_value x.percentageValue)))]
+           (Option.map x.percentageValue
+              ~f:CustomLineItemPercentageChargeValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let percentageValue =
-        CustomLineItemPercentageChargeValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
-      make ~percentageValue ()
+        (Option.map ~f:CustomLineItemPercentageChargeValue.of_xml)
+          (Xml.child xml_arg0 "PercentageValue") in
+      make ?percentageValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let percentageValue =
-        field_map_exn json "PercentageValue"
+        field_map json__ "PercentageValue"
           CustomLineItemPercentageChargeValue.of_json in
-      make ~percentageValue ()
+      make ?percentageValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the charge details associated with a percentage custom line item."]
+       "A representation of the charge details that are associated with a percentage custom line item."]
+module Service =
+  struct
+    type nonrec t = string
+    let context_ = "Service"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Service" j
+    let to_json = simple_to_json to_value
+  end
 module PricingPlanFullArn =
   struct
     type nonrec t = string
@@ -155,7 +462,7 @@ module PricingPlanFullArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws:billingconductor::[0-9]{12}:pricingplan/[a-zA-Z0-9]{10}");
+             ~pattern:"arn:aws(-cn)?:billingconductor::(aws|[0-9]{12}):pricingplan/(BasicPricingPlan|Passthrough|[a-zA-Z0-9]{10})");
         i
     let of_string x = x
     let to_value x = `String x
@@ -165,6 +472,103 @@ module PricingPlanFullArn =
     let of_json j = string_of_json ~kind:"PricingPlanFullArn" j
     let to_json = simple_to_json to_value
   end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module ResponsibilityTransferArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResponsibilityTransferArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"arn:[a-z0-9][a-z0-9-.]{0,62}:organizations::\\d{12}:transfer/o-[a-z0-9]{10,32}/(billing)/(inbound|outbound)/rt-[0-9a-z]{8,32}");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponsibilityTransferArn" j
+    let to_json = simple_to_json to_value
+  end
+module SearchOption =
+  struct
+    type nonrec t =
+      | STARTS_WITH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | STARTS_WITH -> "STARTS_WITH" | Non_static_id s -> s
+    let of_string =
+      function | "STARTS_WITH" -> STARTS_WITH | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SearchOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SearchOption" j)
+    let to_json = simple_to_json to_value
+  end
+module SearchValue =
+  struct
+    type nonrec t = string
+    let context_ = "SearchValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-zA-Z0-9_\\+=\\.\\-@ ]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SearchValue" j
+    let to_json = simple_to_json to_value
+  end
+module Attribute =
+  struct
+    type nonrec t =
+      {
+      key: String_.t option
+        [@ocaml.doc
+          "The key in a key-value pair that describes the margin summary."];
+      value: String_.t option
+        [@ocaml.doc
+          "The value in a key-value pair that describes the margin summary."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:String_.to_value));
+        ("Value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The key-value pair that represents the attribute by which the BillingGroupCostReportResults are grouped. For example, if you want a service-level breakdown for Amazon Simple Storage Service (Amazon S3) of the billing group, the attribute will be a key-value pair of \"PRODUCT_NAME\" and \"S3\"."]
 module CustomLineItemAssociationElement =
   struct
     type nonrec t = string
@@ -173,7 +577,7 @@ module CustomLineItemAssociationElement =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"(arn:aws:billingconductor::[0-9]{12}:(customlineitem|billinggroup)/)?[a-zA-Z0-9]{10,12}");
+             ~pattern:"(arn:aws(-cn)?:billingconductor::[0-9]{12}:(customlineitem|billinggroup)/)?[a-zA-Z0-9]{10,12}");
         i
     let of_string x = x
     let to_value x = `String x
@@ -190,6 +594,7 @@ module AssociateResourceErrorReason =
       | SERVICE_LIMIT_EXCEEDED 
       | ILLEGAL_CUSTOMLINEITEM 
       | INTERNAL_SERVER_EXCEPTION 
+      | INVALID_BILLING_PERIOD_RANGE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -198,6 +603,7 @@ module AssociateResourceErrorReason =
       | SERVICE_LIMIT_EXCEEDED -> "SERVICE_LIMIT_EXCEEDED"
       | ILLEGAL_CUSTOMLINEITEM -> "ILLEGAL_CUSTOMLINEITEM"
       | INTERNAL_SERVER_EXCEPTION -> "INTERNAL_SERVER_EXCEPTION"
+      | INVALID_BILLING_PERIOD_RANGE -> "INVALID_BILLING_PERIOD_RANGE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -205,6 +611,7 @@ module AssociateResourceErrorReason =
       | "SERVICE_LIMIT_EXCEEDED" -> SERVICE_LIMIT_EXCEEDED
       | "ILLEGAL_CUSTOMLINEITEM" -> ILLEGAL_CUSTOMLINEITEM
       | "INTERNAL_SERVER_EXCEPTION" -> INTERNAL_SERVER_EXCEPTION
+      | "INVALID_BILLING_PERIOD_RANGE" -> INVALID_BILLING_PERIOD_RANGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -221,31 +628,45 @@ module ValidationExceptionField =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The field name."];
-      message: String_.t
+      name: String_.t option [@ocaml.doc "The field name."];
+      message: String_.t option
         [@ocaml.doc
           "The message describing why the field failed validation."]}
-    let context_ = "ValidationExceptionField"
-    let make ~name = fun ~message -> fun () -> { name; message }
+    let make ?name = fun ?message -> fun () -> { name; message }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
-        ("Message", (Some (String_.to_value x.message)))]
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~message ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?message ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ~message ~name ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?message ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The field's information of a request that resulted in an exception."]
+module BillingPeriod =
+  struct
+    type nonrec t = string
+    let context_ = "BillingPeriod"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"\\d{4}-(0?[1-9]|1[012])");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BillingPeriod" j
+    let to_json = simple_to_json to_value
+  end
 module CustomLineItemRelationship =
   struct
     type nonrec t =
@@ -266,6 +687,21 @@ module CustomLineItemRelationship =
            xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"CustomLineItemRelationship" j)
+    let to_json = simple_to_json to_value
+  end
+module BillingEntity =
+  struct
+    type nonrec t = string
+    let context_ = "BillingEntity"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[a-zA-Z0-9() ]+"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BillingEntity" j
     let to_json = simple_to_json to_value
   end
 module Instant =
@@ -309,6 +745,26 @@ module NumberOfPricingPlansAssociatedWith =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module Operation =
+  struct
+    type nonrec t = string
+    let context_ = "Operation"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Operation" j
+    let to_json = simple_to_json to_value
+  end
 module PricingRuleArn =
   struct
     type nonrec t = string
@@ -317,7 +773,7 @@ module PricingRuleArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"(arn:aws:billingconductor::[0-9]{12}:pricingrule/)?[a-zA-Z0-9]{10}");
+             ~pattern:"(arn:aws(-cn)?:billingconductor::[0-9]{12}:pricingrule/)?[a-zA-Z0-9]{10}");
         i
     let of_string x = x
     let to_value x = `String x
@@ -371,17 +827,23 @@ module PricingRuleScope =
     type nonrec t =
       | GLOBAL 
       | SERVICE 
+      | BILLING_ENTITY 
+      | SKU 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | GLOBAL -> "GLOBAL"
       | SERVICE -> "SERVICE"
+      | BILLING_ENTITY -> "BILLING_ENTITY"
+      | SKU -> "SKU"
       | Non_static_id s -> s
     let of_string =
       function
       | "GLOBAL" -> GLOBAL
       | "SERVICE" -> SERVICE
+      | "BILLING_ENTITY" -> BILLING_ENTITY
+      | "SKU" -> SKU
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -396,17 +858,20 @@ module PricingRuleType =
     type nonrec t =
       | MARKUP 
       | DISCOUNT 
+      | TIERING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | MARKUP -> "MARKUP"
       | DISCOUNT -> "DISCOUNT"
+      | TIERING -> "TIERING"
       | Non_static_id s -> s
     let of_string =
       function
       | "MARKUP" -> MARKUP
       | "DISCOUNT" -> DISCOUNT
+      | "TIERING" -> TIERING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -416,24 +881,46 @@ module PricingRuleType =
     let of_json j = of_string (string_of_json ~kind:"PricingRuleType" j)
     let to_json = simple_to_json to_value
   end
-module Service =
+module Tiering =
+  struct
+    type nonrec t =
+      {
+      freeTier: FreeTierConfig.t option
+        [@ocaml.doc
+          "The possible Amazon Web Services Free Tier configurations."]}
+    let make ?freeTier = fun () -> { freeTier }
+    let to_value x =
+      structure_to_value
+        [("FreeTier", (Option.map x.freeTier ~f:FreeTierConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let freeTier =
+        (Option.map ~f:FreeTierConfig.of_xml) (Xml.child xml_arg0 "FreeTier") in
+      make ?freeTier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let freeTier = field_map json__ "FreeTier" FreeTierConfig.of_json in
+      make ?freeTier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The set of tiering configurations for the pricing rule."]
+module UsageType =
   struct
     type nonrec t = string
-    let context_ = "Service"
+    let context_ = "UsageType"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9]+")));
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Service" j
+    let of_json j = string_of_json ~kind:"UsageType" j
     let to_json = simple_to_json to_value
   end
 module NumberOfAssociatedPricingRules =
@@ -458,7 +945,7 @@ module PricingPlanArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"(arn:aws:billingconductor::[0-9]{12}:pricingplan/)?[a-zA-Z0-9]{10}");
+             ~pattern:"(arn:aws(-cn)?:billingconductor::(aws|[0-9]{12}):pricingplan/)?(BasicPricingPlan|Passthrough|[a-zA-Z0-9]{10})");
         i
     let of_string x = x
     let to_value x = `String x
@@ -507,6 +994,21 @@ module PricingPlanName =
     let of_json j = string_of_json ~kind:"PricingPlanName" j
     let to_json = simple_to_json to_value
   end
+module AccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end
 module BillingGroupArn =
   struct
     type nonrec t = string
@@ -515,7 +1017,7 @@ module BillingGroupArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"(arn:aws:billingconductor::[0-9]{12}:billinggroup/)?[0-9]{12}");
+             ~pattern:"(arn:aws(-cn)?:billingconductor::[0-9]{12}:billinggroup/)?[a-zA-Z0-9]{10,12}");
         i
     let of_string x = x
     let to_value x = `String x
@@ -523,6 +1025,32 @@ module BillingGroupArn =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"BillingGroupArn" j
+    let to_json = simple_to_json to_value
+  end
+module ComputationRuleEnum =
+  struct
+    type nonrec t =
+      | ITEMIZED 
+      | CONSOLIDATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ITEMIZED -> "ITEMIZED"
+      | CONSOLIDATED -> "CONSOLIDATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ITEMIZED" -> ITEMIZED
+      | "CONSOLIDATED" -> CONSOLIDATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ComputationRuleEnum" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComputationRuleEnum" j)
     let to_json = simple_to_json to_value
   end
 module CurrencyCode =
@@ -552,7 +1080,7 @@ module CustomLineItemArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"(arn:aws:billingconductor::[0-9]{12}:customlineitem/)?[a-zA-Z0-9]{10}");
+             ~pattern:"(arn:aws(-cn)?:billingconductor::[0-9]{12}:customlineitem/)?[a-zA-Z0-9]{10}");
         i
     let of_string x = x
     let to_value x = `String x
@@ -629,12 +1157,16 @@ module ListCustomLineItemChargeDetails =
       percentage: ListCustomLineItemPercentageChargeDetails.t option
         [@ocaml.doc
           "A ListCustomLineItemPercentageChargeDetails that describes the charge details of a percentage custom line item."];
-      type_: CustomLineItemType.t
+      type_: CustomLineItemType.t option
         [@ocaml.doc
-          "The type of the custom line item that indicates whether the charge is a fee or credit."]}
-    let context_ = "ListCustomLineItemChargeDetails"
+          "The type of the custom line item that indicates whether the charge is a fee or credit."];
+      lineItemFilters: LineItemFiltersList.t option
+        [@ocaml.doc "A representation of the line item filter."]}
     let make ?flat =
-      fun ?percentage -> fun ~type_ -> fun () -> { flat; percentage; type_ }
+      fun ?percentage ->
+        fun ?type_ ->
+          fun ?lineItemFilters ->
+            fun () -> { flat; percentage; type_; lineItemFilters }
     let to_value x =
       structure_to_value
         [("Flat",
@@ -642,28 +1174,34 @@ module ListCustomLineItemChargeDetails =
         ("Percentage",
           (Option.map x.percentage
              ~f:ListCustomLineItemPercentageChargeDetails.to_value));
-        ("Type", (Some (CustomLineItemType.to_value x.type_)))]
+        ("Type", (Option.map x.type_ ~f:CustomLineItemType.to_value));
+        ("LineItemFilters",
+          (Option.map x.lineItemFilters ~f:LineItemFiltersList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lineItemFilters =
+        (Option.map ~f:LineItemFiltersList.of_xml)
+          (Xml.child xml_arg0 "LineItemFilters") in
       let type_ =
-        CustomLineItemType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:CustomLineItemType.of_xml) (Xml.child xml_arg0 "Type") in
       let percentage =
         (Option.map ~f:ListCustomLineItemPercentageChargeDetails.of_xml)
           (Xml.child xml_arg0 "Percentage") in
       let flat =
         (Option.map ~f:ListCustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
-      make ~type_ ?percentage ?flat ()
+      make ?lineItemFilters ?type_ ?percentage ?flat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" CustomLineItemType.of_json in
+    let of_json json__ =
+      let lineItemFilters =
+        field_map json__ "LineItemFilters" LineItemFiltersList.of_json in
+      let type_ = field_map json__ "Type" CustomLineItemType.of_json in
       let percentage =
-        field_map json "Percentage"
+        field_map json__ "Percentage"
           ListCustomLineItemPercentageChargeDetails.of_json in
       let flat =
-        field_map json "Flat" ListCustomLineItemFlatChargeDetails.of_json in
-      make ~type_ ?percentage ?flat ()
+        field_map json__ "Flat" ListCustomLineItemFlatChargeDetails.of_json in
+      make ?lineItemFilters ?type_ ?percentage ?flat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A representation of the charge details of a custom line item."]
@@ -681,21 +1219,29 @@ module NumberOfAssociations =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module AccountId =
+module PresentationObject =
   struct
-    type nonrec t = string
-    let context_ = "AccountId"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"[0-9]{12}"); i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      service: Service.t
+        [@ocaml.doc
+          "The service under which the custom line item charges will be presented. Must be a string between 1 and 128 characters matching the pattern \"^\\[a-zA-Z0-9\\]+$\"."]}
+    let context_ = "PresentationObject"
+    let make ~service = fun () -> { service }
+    let to_value x =
+      structure_to_value [("Service", (Some (Service.to_value x.service)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AccountId" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let service =
+        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
+      make ~service ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let service = field_map_exn json__ "Service" Service.of_json in
+      make ~service ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that defines how custom line item charges are presented in the bill, containing specifications for service presentation."]
 module BillingGroupDescription =
   struct
     type nonrec t = string
@@ -740,17 +1286,20 @@ module BillingGroupStatus =
     type nonrec t =
       | ACTIVE 
       | PRIMARY_ACCOUNT_MISSING 
+      | PENDING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ACTIVE -> "ACTIVE"
       | PRIMARY_ACCOUNT_MISSING -> "PRIMARY_ACCOUNT_MISSING"
+      | PENDING -> "PENDING"
       | Non_static_id s -> s
     let of_string =
       function
       | "ACTIVE" -> ACTIVE
       | "PRIMARY_ACCOUNT_MISSING" -> PRIMARY_ACCOUNT_MISSING
+      | "PENDING" -> PENDING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -774,13 +1323,38 @@ module BillingGroupStatusReason =
     let of_json j = string_of_json ~kind:"BillingGroupStatusReason" j
     let to_json = simple_to_json to_value
   end
+module BillingGroupType =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | TRANSFER_BILLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | TRANSFER_BILLING -> "TRANSFER_BILLING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "TRANSFER_BILLING" -> TRANSFER_BILLING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BillingGroupType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BillingGroupType" j)
+    let to_json = simple_to_json to_value
+  end
 module ComputationPreference =
   struct
     type nonrec t =
       {
       pricingPlanArn: PricingPlanFullArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pricing plan used to compute the Amazon Web Services charges for a billing group."]}
+          "The Amazon Resource Name (ARN) of the pricing plan that's used to compute the Amazon Web Services charges for a billing group."]}
     let context_ = "ComputationPreference"
     let make ~pricingPlanArn = fun () -> { pricingPlanArn }
     let to_value x =
@@ -794,13 +1368,50 @@ module ComputationPreference =
           (Xml.child_exn ~context:context_ xml_arg0 "PricingPlanArn") in
       make ~pricingPlanArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pricingPlanArn =
-        field_map_exn json "PricingPlanArn" PricingPlanFullArn.of_json in
+        field_map_exn json__ "PricingPlanArn" PricingPlanFullArn.of_json in
       make ~pricingPlanArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The preferences and settings that will be used to compute the Amazon Web Services charges for a billing group."]
+module ListBillingGroupAccountGrouping =
+  struct
+    type nonrec t =
+      {
+      autoAssociate: Boolean.t option
+        [@ocaml.doc
+          "Specifies if this billing group will automatically associate newly added Amazon Web Services accounts that join your consolidated billing family."];
+      responsibilityTransferArn: ResponsibilityTransferArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the transfer relationship for the billing group."]}
+    let make ?autoAssociate =
+      fun ?responsibilityTransferArn ->
+        fun () -> { autoAssociate; responsibilityTransferArn }
+    let to_value x =
+      structure_to_value
+        [("AutoAssociate", (Option.map x.autoAssociate ~f:Boolean.to_value));
+        ("ResponsibilityTransferArn",
+          (Option.map x.responsibilityTransferArn
+             ~f:ResponsibilityTransferArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responsibilityTransferArn =
+        (Option.map ~f:ResponsibilityTransferArn.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransferArn") in
+      let autoAssociate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoAssociate") in
+      make ?responsibilityTransferArn ?autoAssociate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responsibilityTransferArn =
+        field_map json__ "ResponsibilityTransferArn"
+          ResponsibilityTransferArn.of_json in
+      let autoAssociate = field_map json__ "AutoAssociate" Boolean.of_json in
+      make ?responsibilityTransferArn ?autoAssociate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies if the billing group has the following features enabled."]
 module NumberOfAccounts =
   struct
     type nonrec t = Int64.t
@@ -815,6 +1426,41 @@ module NumberOfAccounts =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module StringSearch =
+  struct
+    type nonrec t =
+      {
+      searchOption: SearchOption.t
+        [@ocaml.doc
+          "The search option to be applied when performing the string search."];
+      searchValue: SearchValue.t
+        [@ocaml.doc
+          "The value to search for within the specified string field."]}
+    let context_ = "StringSearch"
+    let make ~searchOption =
+      fun ~searchValue -> fun () -> { searchOption; searchValue }
+    let to_value x =
+      structure_to_value
+        [("SearchOption", (Some (SearchOption.to_value x.searchOption)));
+        ("SearchValue", (Some (SearchValue.to_value x.searchValue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let searchValue =
+        SearchValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SearchValue") in
+      let searchOption =
+        SearchOption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SearchOption") in
+      make ~searchValue ~searchOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let searchValue =
+        field_map_exn json__ "SearchValue" SearchValue.of_json in
+      let searchOption =
+        field_map_exn json__ "SearchOption" SearchOption.of_json in
+      make ~searchValue ~searchOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure that defines string search parameters."]
 module AWSCost =
   struct
     type nonrec t = string
@@ -906,6 +1552,33 @@ module AccountName =
     let of_json j = string_of_json ~kind:"AccountName" j
     let to_json = simple_to_json to_value
   end
+module AttributesList =
+  struct
+    type nonrec t = Attribute.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Attribute.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Attribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributesList" ~of_json:Attribute.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CustomLineItemAssociationsList =
   struct
     type nonrec t = CustomLineItemAssociationElement.t list
@@ -914,6 +1587,9 @@ module CustomLineItemAssociationsList =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemAssociationElement.to_value)) |>
         (fun x -> `List x)
@@ -942,10 +1618,10 @@ module AssociateResourceError =
     type nonrec t =
       {
       message: String_.t option
-        [@ocaml.doc "The reason the resource association failed."];
+        [@ocaml.doc "The reason why the resource association failed."];
       reason: AssociateResourceErrorReason.t option
         [@ocaml.doc
-          "A static error code that used to classify the type of failure."]}
+          "A static error code that's used to classify the type of failure."]}
     let make ?message = fun ?reason -> fun () -> { message; reason }
     let to_value x =
       structure_to_value
@@ -961,13 +1637,55 @@ module AssociateResourceError =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" AssociateResourceErrorReason.of_json in
-      let message = field_map json "Message" String_.of_json in
+        field_map json__ "Reason" AssociateResourceErrorReason.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A representation of a resource association error."]
+module ConflictExceptionReason =
+  struct
+    type nonrec t =
+      | RESOURCE_NAME_CONFLICT 
+      | PRICING_RULE_IN_PRICING_PLAN_CONFLICT 
+      | PRICING_PLAN_ATTACHED_TO_BILLING_GROUP_DELETE_CONFLICT 
+      | PRICING_RULE_ATTACHED_TO_PRICING_PLAN_DELETE_CONFLICT 
+      | WRITE_CONFLICT_RETRY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RESOURCE_NAME_CONFLICT -> "RESOURCE_NAME_CONFLICT"
+      | PRICING_RULE_IN_PRICING_PLAN_CONFLICT ->
+          "PRICING_RULE_IN_PRICING_PLAN_CONFLICT"
+      | PRICING_PLAN_ATTACHED_TO_BILLING_GROUP_DELETE_CONFLICT ->
+          "PRICING_PLAN_ATTACHED_TO_BILLING_GROUP_DELETE_CONFLICT"
+      | PRICING_RULE_ATTACHED_TO_PRICING_PLAN_DELETE_CONFLICT ->
+          "PRICING_RULE_ATTACHED_TO_PRICING_PLAN_DELETE_CONFLICT"
+      | WRITE_CONFLICT_RETRY -> "WRITE_CONFLICT_RETRY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RESOURCE_NAME_CONFLICT" -> RESOURCE_NAME_CONFLICT
+      | "PRICING_RULE_IN_PRICING_PLAN_CONFLICT" ->
+          PRICING_RULE_IN_PRICING_PLAN_CONFLICT
+      | "PRICING_PLAN_ATTACHED_TO_BILLING_GROUP_DELETE_CONFLICT" ->
+          PRICING_PLAN_ATTACHED_TO_BILLING_GROUP_DELETE_CONFLICT
+      | "PRICING_RULE_ATTACHED_TO_PRICING_PLAN_DELETE_CONFLICT" ->
+          PRICING_RULE_ATTACHED_TO_PRICING_PLAN_DELETE_CONFLICT
+      | "WRITE_CONFLICT_RETRY" -> WRITE_CONFLICT_RETRY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConflictExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ConflictExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
 module RetryAfterSeconds =
   struct
     type nonrec t = int
@@ -982,10 +1700,39 @@ module RetryAfterSeconds =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module UpdateFreeTierConfig =
+  struct
+    type nonrec t =
+      {
+      activated: TieringActivated.t
+        [@ocaml.doc
+          "Activate or deactivate application of Amazon Web Services Free Tier."]}
+    let context_ = "UpdateFreeTierConfig"
+    let make ~activated = fun () -> { activated }
+    let to_value x =
+      structure_to_value
+        [("Activated", (Some (TieringActivated.to_value x.activated)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activated =
+        TieringActivated.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Activated") in
+      make ~activated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activated =
+        field_map_exn json__ "Activated" TieringActivated.of_json in
+      make ~activated ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The possible Amazon Web Services Free Tier configurations."]
 module ValidationExceptionFieldList =
   struct
     type nonrec t = ValidationExceptionField.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
         (fun x -> `List x)
@@ -1033,6 +1780,7 @@ module ValidationExceptionReason =
       | MISSING_PRICINGPLAN 
       | MISMATCHED_PRICINGRULE_ARN 
       | DUPLICATE_PRICINGRULE_ARNS 
+      | MISSING_COSTCATEGORY 
       | ILLEGAL_EXPRESSION 
       | ILLEGAL_SCOPE 
       | ILLEGAL_SERVICE 
@@ -1055,6 +1803,27 @@ module ValidationExceptionReason =
       | MULTIPLE_LINKED_ACCOUNT_IDS 
       | MISSING_PRICING_PLAN_ARN 
       | MULTIPLE_PRICING_PLAN_ARN 
+      | ILLEGAL_CHILD_ASSOCIATE_RESOURCE 
+      | CUSTOM_LINE_ITEM_ASSOCIATION_EXISTS 
+      | INVALID_BILLING_GROUP 
+      | INVALID_BILLING_PERIOD_FOR_OPERATION 
+      | ILLEGAL_BILLING_ENTITY 
+      | ILLEGAL_MODIFIER_PERCENTAGE 
+      | ILLEGAL_TYPE 
+      | ILLEGAL_BILLING_GROUP_TYPE 
+      | ILLEGAL_BILLING_GROUP_PRICING_PLAN 
+      | ILLEGAL_ENDED_BILLINGGROUP 
+      | ILLEGAL_TIERING_INPUT 
+      | ILLEGAL_OPERATION 
+      | ILLEGAL_USAGE_TYPE 
+      | INVALID_SKU_COMBO 
+      | INVALID_FILTER 
+      | TOO_MANY_AUTO_ASSOCIATE_BILLING_GROUPS 
+      | CANNOT_DELETE_AUTO_ASSOCIATE_BILLING_GROUP 
+      | ILLEGAL_ACCOUNT_ID 
+      | BILLING_GROUP_ALREADY_EXIST_IN_CURRENT_BILLING_PERIOD 
+      | ILLEGAL_COMPUTATION_RULE 
+      | ILLEGAL_LINE_ITEM_FILTER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1081,6 +1850,7 @@ module ValidationExceptionReason =
       | MISSING_PRICINGPLAN -> "MISSING_PRICINGPLAN"
       | MISMATCHED_PRICINGRULE_ARN -> "MISMATCHED_PRICINGRULE_ARN"
       | DUPLICATE_PRICINGRULE_ARNS -> "DUPLICATE_PRICINGRULE_ARNS"
+      | MISSING_COSTCATEGORY -> "MISSING_COSTCATEGORY"
       | ILLEGAL_EXPRESSION -> "ILLEGAL_EXPRESSION"
       | ILLEGAL_SCOPE -> "ILLEGAL_SCOPE"
       | ILLEGAL_SERVICE -> "ILLEGAL_SERVICE"
@@ -1105,6 +1875,34 @@ module ValidationExceptionReason =
       | MULTIPLE_LINKED_ACCOUNT_IDS -> "MULTIPLE_LINKED_ACCOUNT_IDS"
       | MISSING_PRICING_PLAN_ARN -> "MISSING_PRICING_PLAN_ARN"
       | MULTIPLE_PRICING_PLAN_ARN -> "MULTIPLE_PRICING_PLAN_ARN"
+      | ILLEGAL_CHILD_ASSOCIATE_RESOURCE ->
+          "ILLEGAL_CHILD_ASSOCIATE_RESOURCE"
+      | CUSTOM_LINE_ITEM_ASSOCIATION_EXISTS ->
+          "CUSTOM_LINE_ITEM_ASSOCIATION_EXISTS"
+      | INVALID_BILLING_GROUP -> "INVALID_BILLING_GROUP"
+      | INVALID_BILLING_PERIOD_FOR_OPERATION ->
+          "INVALID_BILLING_PERIOD_FOR_OPERATION"
+      | ILLEGAL_BILLING_ENTITY -> "ILLEGAL_BILLING_ENTITY"
+      | ILLEGAL_MODIFIER_PERCENTAGE -> "ILLEGAL_MODIFIER_PERCENTAGE"
+      | ILLEGAL_TYPE -> "ILLEGAL_TYPE"
+      | ILLEGAL_BILLING_GROUP_TYPE -> "ILLEGAL_BILLING_GROUP_TYPE"
+      | ILLEGAL_BILLING_GROUP_PRICING_PLAN ->
+          "ILLEGAL_BILLING_GROUP_PRICING_PLAN"
+      | ILLEGAL_ENDED_BILLINGGROUP -> "ILLEGAL_ENDED_BILLINGGROUP"
+      | ILLEGAL_TIERING_INPUT -> "ILLEGAL_TIERING_INPUT"
+      | ILLEGAL_OPERATION -> "ILLEGAL_OPERATION"
+      | ILLEGAL_USAGE_TYPE -> "ILLEGAL_USAGE_TYPE"
+      | INVALID_SKU_COMBO -> "INVALID_SKU_COMBO"
+      | INVALID_FILTER -> "INVALID_FILTER"
+      | TOO_MANY_AUTO_ASSOCIATE_BILLING_GROUPS ->
+          "TOO_MANY_AUTO_ASSOCIATE_BILLING_GROUPS"
+      | CANNOT_DELETE_AUTO_ASSOCIATE_BILLING_GROUP ->
+          "CANNOT_DELETE_AUTO_ASSOCIATE_BILLING_GROUP"
+      | ILLEGAL_ACCOUNT_ID -> "ILLEGAL_ACCOUNT_ID"
+      | BILLING_GROUP_ALREADY_EXIST_IN_CURRENT_BILLING_PERIOD ->
+          "BILLING_GROUP_ALREADY_EXIST_IN_CURRENT_BILLING_PERIOD"
+      | ILLEGAL_COMPUTATION_RULE -> "ILLEGAL_COMPUTATION_RULE"
+      | ILLEGAL_LINE_ITEM_FILTER -> "ILLEGAL_LINE_ITEM_FILTER"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1130,6 +1928,7 @@ module ValidationExceptionReason =
       | "MISSING_PRICINGPLAN" -> MISSING_PRICINGPLAN
       | "MISMATCHED_PRICINGRULE_ARN" -> MISMATCHED_PRICINGRULE_ARN
       | "DUPLICATE_PRICINGRULE_ARNS" -> DUPLICATE_PRICINGRULE_ARNS
+      | "MISSING_COSTCATEGORY" -> MISSING_COSTCATEGORY
       | "ILLEGAL_EXPRESSION" -> ILLEGAL_EXPRESSION
       | "ILLEGAL_SCOPE" -> ILLEGAL_SCOPE
       | "ILLEGAL_SERVICE" -> ILLEGAL_SERVICE
@@ -1154,6 +1953,34 @@ module ValidationExceptionReason =
       | "MULTIPLE_LINKED_ACCOUNT_IDS" -> MULTIPLE_LINKED_ACCOUNT_IDS
       | "MISSING_PRICING_PLAN_ARN" -> MISSING_PRICING_PLAN_ARN
       | "MULTIPLE_PRICING_PLAN_ARN" -> MULTIPLE_PRICING_PLAN_ARN
+      | "ILLEGAL_CHILD_ASSOCIATE_RESOURCE" ->
+          ILLEGAL_CHILD_ASSOCIATE_RESOURCE
+      | "CUSTOM_LINE_ITEM_ASSOCIATION_EXISTS" ->
+          CUSTOM_LINE_ITEM_ASSOCIATION_EXISTS
+      | "INVALID_BILLING_GROUP" -> INVALID_BILLING_GROUP
+      | "INVALID_BILLING_PERIOD_FOR_OPERATION" ->
+          INVALID_BILLING_PERIOD_FOR_OPERATION
+      | "ILLEGAL_BILLING_ENTITY" -> ILLEGAL_BILLING_ENTITY
+      | "ILLEGAL_MODIFIER_PERCENTAGE" -> ILLEGAL_MODIFIER_PERCENTAGE
+      | "ILLEGAL_TYPE" -> ILLEGAL_TYPE
+      | "ILLEGAL_BILLING_GROUP_TYPE" -> ILLEGAL_BILLING_GROUP_TYPE
+      | "ILLEGAL_BILLING_GROUP_PRICING_PLAN" ->
+          ILLEGAL_BILLING_GROUP_PRICING_PLAN
+      | "ILLEGAL_ENDED_BILLINGGROUP" -> ILLEGAL_ENDED_BILLINGGROUP
+      | "ILLEGAL_TIERING_INPUT" -> ILLEGAL_TIERING_INPUT
+      | "ILLEGAL_OPERATION" -> ILLEGAL_OPERATION
+      | "ILLEGAL_USAGE_TYPE" -> ILLEGAL_USAGE_TYPE
+      | "INVALID_SKU_COMBO" -> INVALID_SKU_COMBO
+      | "INVALID_FILTER" -> INVALID_FILTER
+      | "TOO_MANY_AUTO_ASSOCIATE_BILLING_GROUPS" ->
+          TOO_MANY_AUTO_ASSOCIATE_BILLING_GROUPS
+      | "CANNOT_DELETE_AUTO_ASSOCIATE_BILLING_GROUP" ->
+          CANNOT_DELETE_AUTO_ASSOCIATE_BILLING_GROUP
+      | "ILLEGAL_ACCOUNT_ID" -> ILLEGAL_ACCOUNT_ID
+      | "BILLING_GROUP_ALREADY_EXIST_IN_CURRENT_BILLING_PERIOD" ->
+          BILLING_GROUP_ALREADY_EXIST_IN_CURRENT_BILLING_PERIOD
+      | "ILLEGAL_COMPUTATION_RULE" -> ILLEGAL_COMPUTATION_RULE
+      | "ILLEGAL_LINE_ITEM_FILTER" -> ILLEGAL_LINE_ITEM_FILTER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1163,22 +1990,6 @@ module ValidationExceptionReason =
         (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ValidationExceptionReason" j)
-    let to_json = simple_to_json to_value
-  end
-module BillingPeriod =
-  struct
-    type nonrec t = string
-    let context_ = "BillingPeriod"
-    let make i =
-      let open Result in
-        ok_or_failwith (check_pattern i ~pattern:"\\d{4}-(0?[1-9]|1[012])");
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"BillingPeriod" j
     let to_json = simple_to_json to_value
   end
 module UpdateCustomLineItemFlatChargeDetails =
@@ -1200,13 +2011,13 @@ module UpdateCustomLineItemFlatChargeDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
       make ~chargeValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let chargeValue =
-        field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
+        field_map_exn json__ "ChargeValue" CustomLineItemChargeValue.of_json in
       make ~chargeValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the new charge details associated with a flat custom line item."]
+       "A representation of the new charge details that are associated with a flat custom line item."]
 module UpdateCustomLineItemPercentageChargeDetails =
   struct
     type nonrec t =
@@ -1228,14 +2039,14 @@ module UpdateCustomLineItemPercentageChargeDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
       make ~percentageValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let percentageValue =
-        field_map_exn json "PercentageValue"
+        field_map_exn json__ "PercentageValue"
           CustomLineItemPercentageChargeValue.of_json in
       make ~percentageValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the new charge details associated with a percentage custom line item."]
+       "A representation of the new charge details that are associated with a percentage custom line item."]
 module TagKey =
   struct
     type nonrec t = string
@@ -1280,29 +2091,42 @@ module ListResourcesAssociatedToCustomLineItemResponseElement =
         [@ocaml.doc "The ARN of the associated resource."];
       relationship: CustomLineItemRelationship.t option
         [@ocaml.doc
-          "The type of relationship between the custom line item and the associated resource."]}
-    let make ?arn = fun ?relationship -> fun () -> { arn; relationship }
+          "The type of relationship between the custom line item and the associated resource."];
+      endBillingPeriod: BillingPeriod.t option
+        [@ocaml.doc "The end billing period of the associated resource."]}
+    let make ?arn =
+      fun ?relationship ->
+        fun ?endBillingPeriod ->
+          fun () -> { arn; relationship; endBillingPeriod }
     let to_value x =
       structure_to_value
         [("Arn",
            (Option.map x.arn ~f:CustomLineItemAssociationElement.to_value));
         ("Relationship",
-          (Option.map x.relationship ~f:CustomLineItemRelationship.to_value))]
+          (Option.map x.relationship ~f:CustomLineItemRelationship.to_value));
+        ("EndBillingPeriod",
+          (Option.map x.endBillingPeriod ~f:BillingPeriod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endBillingPeriod =
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "EndBillingPeriod") in
       let relationship =
         (Option.map ~f:CustomLineItemRelationship.of_xml)
           (Xml.child xml_arg0 "Relationship") in
       let arn =
         (Option.map ~f:CustomLineItemAssociationElement.of_xml)
           (Xml.child xml_arg0 "Arn") in
-      make ?relationship ?arn ()
+      make ?endBillingPeriod ?relationship ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let endBillingPeriod =
+        field_map json__ "EndBillingPeriod" BillingPeriod.of_json in
       let relationship =
-        field_map json "Relationship" CustomLineItemRelationship.of_json in
-      let arn = field_map json "Arn" CustomLineItemAssociationElement.of_json in
-      make ?relationship ?arn ()
+        field_map json__ "Relationship" CustomLineItemRelationship.of_json in
+      let arn =
+        field_map json__ "Arn" CustomLineItemAssociationElement.of_json in
+      make ?endBillingPeriod ?relationship ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A representation of a resource association for a custom line item."]
@@ -1332,9 +2156,22 @@ module PricingRuleListElement =
         [@ocaml.doc
           "The pricing plans count that this pricing rule is associated with."];
       creationTime: Instant.t option
-        [@ocaml.doc "The time the pricing rule was created."];
+        [@ocaml.doc "The time when the pricing rule was created."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the pricing rule was modified."]}
+        [@ocaml.doc
+          "The most recent time when the pricing rule was modified."];
+      billingEntity: BillingEntity.t option
+        [@ocaml.doc
+          "The seller of services provided by Amazon Web Services, their affiliates, or third-party providers selling services via Amazon Web Services Marketplace."];
+      tiering: Tiering.t option
+        [@ocaml.doc
+          "The set of tiering configurations for the pricing rule."];
+      usageType: UsageType.t option
+        [@ocaml.doc
+          "Usage type is the unit that each service uses to measure the usage of a specific type of resource. If the Scope attribute is set to SKU, this attribute indicates which usage type the PricingRule is modifying. For example, USW2-BoxUsage:m2.2xlarge describes an M2 High Memory Double Extra Large instance in the US West (Oregon) Region."];
+      operation: Operation.t option
+        [@ocaml.doc
+          "Operation is the specific Amazon Web Services action covered by this line item. This describes the specific usage of the line item. If the Scope attribute is set to SKU, this attribute indicates which operation the PricingRule is modifying. For example, a value of RunInstances:0202 indicates the operation of running an Amazon EC2 instance."]}
     let make ?name =
       fun ?arn ->
         fun ?description ->
@@ -1345,19 +2182,27 @@ module PricingRuleListElement =
                   fun ?associatedPricingPlanCount ->
                     fun ?creationTime ->
                       fun ?lastModifiedTime ->
-                        fun () ->
-                          {
-                            name;
-                            arn;
-                            description;
-                            scope;
-                            type_;
-                            modifierPercentage;
-                            service;
-                            associatedPricingPlanCount;
-                            creationTime;
-                            lastModifiedTime
-                          }
+                        fun ?billingEntity ->
+                          fun ?tiering ->
+                            fun ?usageType ->
+                              fun ?operation ->
+                                fun () ->
+                                  {
+                                    name;
+                                    arn;
+                                    description;
+                                    scope;
+                                    type_;
+                                    modifierPercentage;
+                                    service;
+                                    associatedPricingPlanCount;
+                                    creationTime;
+                                    lastModifiedTime;
+                                    billingEntity;
+                                    tiering;
+                                    usageType;
+                                    operation
+                                  }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:PricingRuleName.to_value));
@@ -1374,9 +2219,23 @@ module PricingRuleListElement =
              ~f:NumberOfPricingPlansAssociatedWith.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Instant.to_value));
         ("LastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:Instant.to_value))]
+          (Option.map x.lastModifiedTime ~f:Instant.to_value));
+        ("BillingEntity",
+          (Option.map x.billingEntity ~f:BillingEntity.to_value));
+        ("Tiering", (Option.map x.tiering ~f:Tiering.to_value));
+        ("UsageType", (Option.map x.usageType ~f:UsageType.to_value));
+        ("Operation", (Option.map x.operation ~f:Operation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      let usageType =
+        (Option.map ~f:UsageType.of_xml) (Xml.child xml_arg0 "UsageType") in
+      let tiering =
+        (Option.map ~f:Tiering.of_xml) (Xml.child xml_arg0 "Tiering") in
+      let billingEntity =
+        (Option.map ~f:BillingEntity.of_xml)
+          (Xml.child xml_arg0 "BillingEntity") in
       let lastModifiedTime =
         (Option.map ~f:Instant.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
@@ -1401,27 +2260,34 @@ module PricingRuleListElement =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let name =
         (Option.map ~f:PricingRuleName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?lastModifiedTime ?creationTime ?associatedPricingPlanCount
-        ?service ?modifierPercentage ?type_ ?scope ?description ?arn ?name ()
+      make ?operation ?usageType ?tiering ?billingEntity ?lastModifiedTime
+        ?creationTime ?associatedPricingPlanCount ?service
+        ?modifierPercentage ?type_ ?scope ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operation = field_map json__ "Operation" Operation.of_json in
+      let usageType = field_map json__ "UsageType" UsageType.of_json in
+      let tiering = field_map json__ "Tiering" Tiering.of_json in
+      let billingEntity =
+        field_map json__ "BillingEntity" BillingEntity.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let creationTime = field_map json "CreationTime" Instant.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let creationTime = field_map json__ "CreationTime" Instant.of_json in
       let associatedPricingPlanCount =
-        field_map json "AssociatedPricingPlanCount"
+        field_map json__ "AssociatedPricingPlanCount"
           NumberOfPricingPlansAssociatedWith.of_json in
-      let service = field_map json "Service" Service.of_json in
+      let service = field_map json__ "Service" Service.of_json in
       let modifierPercentage =
-        field_map json "ModifierPercentage" ModifierPercentage.of_json in
-      let type_ = field_map json "Type" PricingRuleType.of_json in
-      let scope = field_map json "Scope" PricingRuleScope.of_json in
+        field_map json__ "ModifierPercentage" ModifierPercentage.of_json in
+      let type_ = field_map json__ "Type" PricingRuleType.of_json in
+      let scope = field_map json__ "Scope" PricingRuleScope.of_json in
       let description =
-        field_map json "Description" PricingRuleDescription.of_json in
-      let arn = field_map json "Arn" PricingRuleArn.of_json in
-      let name = field_map json "Name" PricingRuleName.of_json in
-      make ?lastModifiedTime ?creationTime ?associatedPricingPlanCount
-        ?service ?modifierPercentage ?type_ ?scope ?description ?arn ?name ()
+        field_map json__ "Description" PricingRuleDescription.of_json in
+      let arn = field_map json__ "Arn" PricingRuleArn.of_json in
+      let name = field_map json__ "Name" PricingRuleName.of_json in
+      make ?operation ?usageType ?tiering ?billingEntity ?lastModifiedTime
+        ?creationTime ?associatedPricingPlanCount ?service
+        ?modifierPercentage ?type_ ?scope ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A representation of a pricing rule."]
 module PricingRuleArns =
@@ -1433,6 +2299,9 @@ module PricingRuleArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingRuleArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1466,11 +2335,12 @@ module PricingPlanListElement =
         [@ocaml.doc "The pricing plan description."];
       size: NumberOfAssociatedPricingRules.t option
         [@ocaml.doc
-          "The pricing rules count currently associated with this pricing plan list element."];
+          "The pricing rules count that's currently associated with this pricing plan list element."];
       creationTime: Instant.t option
-        [@ocaml.doc "The time the pricing plan was created."];
+        [@ocaml.doc "The time when the pricing plan was created."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the pricing plan was modified."]}
+        [@ocaml.doc
+          "The most recent time when the pricing plan was modified."]}
     let make ?name =
       fun ?arn ->
         fun ?description ->
@@ -1516,15 +2386,16 @@ module PricingPlanListElement =
         (Option.map ~f:PricingPlanName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lastModifiedTime ?creationTime ?size ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let creationTime = field_map json "CreationTime" Instant.of_json in
-      let size = field_map json "Size" NumberOfAssociatedPricingRules.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let creationTime = field_map json__ "CreationTime" Instant.of_json in
+      let size =
+        field_map json__ "Size" NumberOfAssociatedPricingRules.of_json in
       let description =
-        field_map json "Description" PricingPlanDescription.of_json in
-      let arn = field_map json "Arn" PricingPlanArn.of_json in
-      let name = field_map json "Name" PricingPlanName.of_json in
+        field_map json__ "Description" PricingPlanDescription.of_json in
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in
+      let name = field_map json__ "Name" PricingPlanName.of_json in
       make ?lastModifiedTime ?creationTime ?size ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A representation of a pricing plan."]
@@ -1537,6 +2408,9 @@ module PricingPlanArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingPlanArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1576,17 +2450,27 @@ module CustomLineItemListElement =
         [@ocaml.doc
           "The custom line item's description. This is shown on the Bills page in association with the charge value."];
       productCode: CustomLineItemProductCode.t option
-        [@ocaml.doc "The product code associated with the custom line item."];
+        [@ocaml.doc
+          "The product code that's associated with the custom line item."];
       billingGroupArn: BillingGroupArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that references the billing group where the custom line item applies to."];
       creationTime: Instant.t option [@ocaml.doc "The time created."];
       lastModifiedTime: Instant.t option
         [@ocaml.doc
-          "The most recent time the custom line item was modified."];
+          "The most recent time when the custom line item was modified."];
       associationSize: NumberOfAssociations.t option
         [@ocaml.doc
-          "The number of resources that are associated to the custom line item."]}
+          "The number of resources that are associated to the custom line item."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account in which this custom line item will be applied to."];
+      computationRule: ComputationRuleEnum.t option
+        [@ocaml.doc
+          "The computation rule that determines how the custom line item charges are computed and reflected in the bill."];
+      presentationDetails: PresentationObject.t option
+        [@ocaml.doc
+          "Configuration details specifying how the custom line item charges are presented, including which service the charges are shown under."]}
     let make ?arn =
       fun ?name ->
         fun ?chargeDetails ->
@@ -1597,19 +2481,25 @@ module CustomLineItemListElement =
                   fun ?creationTime ->
                     fun ?lastModifiedTime ->
                       fun ?associationSize ->
-                        fun () ->
-                          {
-                            arn;
-                            name;
-                            chargeDetails;
-                            currencyCode;
-                            description;
-                            productCode;
-                            billingGroupArn;
-                            creationTime;
-                            lastModifiedTime;
-                            associationSize
-                          }
+                        fun ?accountId ->
+                          fun ?computationRule ->
+                            fun ?presentationDetails ->
+                              fun () ->
+                                {
+                                  arn;
+                                  name;
+                                  chargeDetails;
+                                  currencyCode;
+                                  description;
+                                  productCode;
+                                  billingGroupArn;
+                                  creationTime;
+                                  lastModifiedTime;
+                                  associationSize;
+                                  accountId;
+                                  computationRule;
+                                  presentationDetails
+                                }
     let to_value x =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:CustomLineItemArn.to_value));
@@ -1629,9 +2519,22 @@ module CustomLineItemListElement =
         ("LastModifiedTime",
           (Option.map x.lastModifiedTime ~f:Instant.to_value));
         ("AssociationSize",
-          (Option.map x.associationSize ~f:NumberOfAssociations.to_value))]
+          (Option.map x.associationSize ~f:NumberOfAssociations.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("ComputationRule",
+          (Option.map x.computationRule ~f:ComputationRuleEnum.to_value));
+        ("PresentationDetails",
+          (Option.map x.presentationDetails ~f:PresentationObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let presentationDetails =
+        (Option.map ~f:PresentationObject.of_xml)
+          (Xml.child xml_arg0 "PresentationDetails") in
+      let computationRule =
+        (Option.map ~f:ComputationRuleEnum.of_xml)
+          (Xml.child xml_arg0 "ComputationRule") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let associationSize =
         (Option.map ~f:NumberOfAssociations.of_xml)
           (Xml.child xml_arg0 "AssociationSize") in
@@ -1659,31 +2562,69 @@ module CustomLineItemListElement =
         (Option.map ~f:CustomLineItemName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?associationSize ?lastModifiedTime ?creationTime ?billingGroupArn
-        ?productCode ?description ?currencyCode ?chargeDetails ?name ?arn ()
+      make ?presentationDetails ?computationRule ?accountId ?associationSize
+        ?lastModifiedTime ?creationTime ?billingGroupArn ?productCode
+        ?description ?currencyCode ?chargeDetails ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let presentationDetails =
+        field_map json__ "PresentationDetails" PresentationObject.of_json in
+      let computationRule =
+        field_map json__ "ComputationRule" ComputationRuleEnum.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let associationSize =
-        field_map json "AssociationSize" NumberOfAssociations.of_json in
+        field_map json__ "AssociationSize" NumberOfAssociations.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let creationTime = field_map json "CreationTime" Instant.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let creationTime = field_map json__ "CreationTime" Instant.of_json in
       let billingGroupArn =
-        field_map json "BillingGroupArn" BillingGroupArn.of_json in
+        field_map json__ "BillingGroupArn" BillingGroupArn.of_json in
       let productCode =
-        field_map json "ProductCode" CustomLineItemProductCode.of_json in
+        field_map json__ "ProductCode" CustomLineItemProductCode.of_json in
       let description =
-        field_map json "Description" CustomLineItemDescription.of_json in
-      let currencyCode = field_map json "CurrencyCode" CurrencyCode.of_json in
+        field_map json__ "Description" CustomLineItemDescription.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" CurrencyCode.of_json in
       let chargeDetails =
-        field_map json "ChargeDetails"
+        field_map json__ "ChargeDetails"
           ListCustomLineItemChargeDetails.of_json in
-      let name = field_map json "Name" CustomLineItemName.of_json in
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
-      make ?associationSize ?lastModifiedTime ?creationTime ?billingGroupArn
-        ?productCode ?description ?currencyCode ?chargeDetails ?name ?arn ()
+      let name = field_map json__ "Name" CustomLineItemName.of_json in
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
+      make ?presentationDetails ?computationRule ?accountId ?associationSize
+        ?lastModifiedTime ?creationTime ?billingGroupArn ?productCode
+        ?description ?currencyCode ?chargeDetails ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A representation of a custom line item."]
+module AccountIdList =
+  struct
+    type nonrec t = AccountId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdList" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BillingGroupArnList =
   struct
     type nonrec t = BillingGroupArn.t list
@@ -1693,6 +2634,9 @@ module BillingGroupArnList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BillingGroupArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1723,6 +2667,9 @@ module CustomLineItemArns =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1753,6 +2700,9 @@ module CustomLineItemNameList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1774,17 +2724,249 @@ module CustomLineItemNameList =
         ~of_json:CustomLineItemName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CustomLineItemVersionListElement =
+  struct
+    type nonrec t =
+      {
+      name: CustomLineItemName.t option
+        [@ocaml.doc "The name of the custom line item."];
+      chargeDetails: ListCustomLineItemChargeDetails.t option ;
+      currencyCode: CurrencyCode.t option
+        [@ocaml.doc "The charge value currency of the custom line item."];
+      description: CustomLineItemDescription.t option
+        [@ocaml.doc "The description of the custom line item."];
+      productCode: CustomLineItemProductCode.t option
+        [@ocaml.doc
+          "The product code that\226\128\153s associated with the custom line item."];
+      billingGroupArn: BillingGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the billing group that the custom line item applies to."];
+      creationTime: Instant.t option
+        [@ocaml.doc
+          "The time when the custom line item version was created."];
+      lastModifiedTime: Instant.t option
+        [@ocaml.doc
+          "The most recent time that the custom line item version was modified."];
+      associationSize: NumberOfAssociations.t option
+        [@ocaml.doc
+          "The number of resources that are associated with the custom line item."];
+      startBillingPeriod: BillingPeriod.t option
+        [@ocaml.doc
+          "The start billing period of the custom line item version."];
+      endBillingPeriod: BillingPeriod.t option
+        [@ocaml.doc
+          "The end billing period of the custom line item version."];
+      arn: CustomLineItemArn.t option
+        [@ocaml.doc
+          "A list of custom line item Amazon Resource Names (ARNs) to retrieve information."];
+      startTime: Instant.t option [@ocaml.doc "The inclusive start time."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account in which this custom line item will be applied to."];
+      computationRule: ComputationRuleEnum.t option
+        [@ocaml.doc
+          "The computation rule for a specific version of a custom line item, determining how charges are computed and reflected in the bill."];
+      presentationDetails: PresentationObject.t option
+        [@ocaml.doc
+          "Presentation configuration for a specific version of a custom line item, specifying how charges are displayed in the bill."]}
+    let make ?name =
+      fun ?chargeDetails ->
+        fun ?currencyCode ->
+          fun ?description ->
+            fun ?productCode ->
+              fun ?billingGroupArn ->
+                fun ?creationTime ->
+                  fun ?lastModifiedTime ->
+                    fun ?associationSize ->
+                      fun ?startBillingPeriod ->
+                        fun ?endBillingPeriod ->
+                          fun ?arn ->
+                            fun ?startTime ->
+                              fun ?accountId ->
+                                fun ?computationRule ->
+                                  fun ?presentationDetails ->
+                                    fun () ->
+                                      {
+                                        name;
+                                        chargeDetails;
+                                        currencyCode;
+                                        description;
+                                        productCode;
+                                        billingGroupArn;
+                                        creationTime;
+                                        lastModifiedTime;
+                                        associationSize;
+                                        startBillingPeriod;
+                                        endBillingPeriod;
+                                        arn;
+                                        startTime;
+                                        accountId;
+                                        computationRule;
+                                        presentationDetails
+                                      }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:CustomLineItemName.to_value));
+        ("ChargeDetails",
+          (Option.map x.chargeDetails
+             ~f:ListCustomLineItemChargeDetails.to_value));
+        ("CurrencyCode",
+          (Option.map x.currencyCode ~f:CurrencyCode.to_value));
+        ("Description",
+          (Option.map x.description ~f:CustomLineItemDescription.to_value));
+        ("ProductCode",
+          (Option.map x.productCode ~f:CustomLineItemProductCode.to_value));
+        ("BillingGroupArn",
+          (Option.map x.billingGroupArn ~f:BillingGroupArn.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Instant.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Instant.to_value));
+        ("AssociationSize",
+          (Option.map x.associationSize ~f:NumberOfAssociations.to_value));
+        ("StartBillingPeriod",
+          (Option.map x.startBillingPeriod ~f:BillingPeriod.to_value));
+        ("EndBillingPeriod",
+          (Option.map x.endBillingPeriod ~f:BillingPeriod.to_value));
+        ("Arn", (Option.map x.arn ~f:CustomLineItemArn.to_value));
+        ("StartTime", (Option.map x.startTime ~f:Instant.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("ComputationRule",
+          (Option.map x.computationRule ~f:ComputationRuleEnum.to_value));
+        ("PresentationDetails",
+          (Option.map x.presentationDetails ~f:PresentationObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let presentationDetails =
+        (Option.map ~f:PresentationObject.of_xml)
+          (Xml.child xml_arg0 "PresentationDetails") in
+      let computationRule =
+        (Option.map ~f:ComputationRuleEnum.of_xml)
+          (Xml.child xml_arg0 "ComputationRule") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let startTime =
+        (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let arn =
+        (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      let endBillingPeriod =
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "EndBillingPeriod") in
+      let startBillingPeriod =
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "StartBillingPeriod") in
+      let associationSize =
+        (Option.map ~f:NumberOfAssociations.of_xml)
+          (Xml.child xml_arg0 "AssociationSize") in
+      let lastModifiedTime =
+        (Option.map ~f:Instant.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Instant.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let billingGroupArn =
+        (Option.map ~f:BillingGroupArn.of_xml)
+          (Xml.child xml_arg0 "BillingGroupArn") in
+      let productCode =
+        (Option.map ~f:CustomLineItemProductCode.of_xml)
+          (Xml.child xml_arg0 "ProductCode") in
+      let description =
+        (Option.map ~f:CustomLineItemDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let currencyCode =
+        (Option.map ~f:CurrencyCode.of_xml)
+          (Xml.child xml_arg0 "CurrencyCode") in
+      let chargeDetails =
+        (Option.map ~f:ListCustomLineItemChargeDetails.of_xml)
+          (Xml.child xml_arg0 "ChargeDetails") in
+      let name =
+        (Option.map ~f:CustomLineItemName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?presentationDetails ?computationRule ?accountId ?startTime ?arn
+        ?endBillingPeriod ?startBillingPeriod ?associationSize
+        ?lastModifiedTime ?creationTime ?billingGroupArn ?productCode
+        ?description ?currencyCode ?chargeDetails ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let presentationDetails =
+        field_map json__ "PresentationDetails" PresentationObject.of_json in
+      let computationRule =
+        field_map json__ "ComputationRule" ComputationRuleEnum.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let startTime = field_map json__ "StartTime" Instant.of_json in
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
+      let endBillingPeriod =
+        field_map json__ "EndBillingPeriod" BillingPeriod.of_json in
+      let startBillingPeriod =
+        field_map json__ "StartBillingPeriod" BillingPeriod.of_json in
+      let associationSize =
+        field_map json__ "AssociationSize" NumberOfAssociations.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let creationTime = field_map json__ "CreationTime" Instant.of_json in
+      let billingGroupArn =
+        field_map json__ "BillingGroupArn" BillingGroupArn.of_json in
+      let productCode =
+        field_map json__ "ProductCode" CustomLineItemProductCode.of_json in
+      let description =
+        field_map json__ "Description" CustomLineItemDescription.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" CurrencyCode.of_json in
+      let chargeDetails =
+        field_map json__ "ChargeDetails"
+          ListCustomLineItemChargeDetails.of_json in
+      let name = field_map json__ "Name" CustomLineItemName.of_json in
+      make ?presentationDetails ?computationRule ?accountId ?startTime ?arn
+        ?endBillingPeriod ?startBillingPeriod ?associationSize
+        ?lastModifiedTime ?creationTime ?billingGroupArn ?productCode
+        ?description ?currencyCode ?chargeDetails ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A representation of a custom line item version."]
+module ListCustomLineItemVersionsBillingPeriodRangeFilter =
+  struct
+    type nonrec t =
+      {
+      startBillingPeriod: BillingPeriod.t option
+        [@ocaml.doc
+          "The inclusive start billing period that defines a billing period range where a custom line item version is applied."];
+      endBillingPeriod: BillingPeriod.t option
+        [@ocaml.doc
+          "The exclusive end billing period that defines a billing period range where a custom line item version is applied."]}
+    let make ?startBillingPeriod =
+      fun ?endBillingPeriod ->
+        fun () -> { startBillingPeriod; endBillingPeriod }
+    let to_value x =
+      structure_to_value
+        [("StartBillingPeriod",
+           (Option.map x.startBillingPeriod ~f:BillingPeriod.to_value));
+        ("EndBillingPeriod",
+          (Option.map x.endBillingPeriod ~f:BillingPeriod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endBillingPeriod =
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "EndBillingPeriod") in
+      let startBillingPeriod =
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "StartBillingPeriod") in
+      make ?endBillingPeriod ?startBillingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endBillingPeriod =
+        field_map json__ "EndBillingPeriod" BillingPeriod.of_json in
+      let startBillingPeriod =
+        field_map json__ "StartBillingPeriod" BillingPeriod.of_json in
+      make ?endBillingPeriod ?startBillingPeriod ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A billing period filter that specifies the custom line item versions to retrieve."]
 module BillingGroupListElement =
   struct
     type nonrec t =
       {
       name: BillingGroupName.t option
-        [@ocaml.doc "The billing group's name."];
+        [@ocaml.doc "The name of the billing group."];
       arn: BillingGroupArn.t option
         [@ocaml.doc
           "The Amazon Resource Number (ARN) that can be used to uniquely identify the billing group."];
       description: BillingGroupDescription.t option
-        [@ocaml.doc "The billing group description."];
+        [@ocaml.doc "The description of the billing group."];
       primaryAccountId: AccountId.t option
         [@ocaml.doc
           "The account ID that serves as the main account in a billing group."];
@@ -1793,15 +2975,21 @@ module BillingGroupListElement =
         [@ocaml.doc
           "The number of accounts in the particular billing group."];
       creationTime: Instant.t option
-        [@ocaml.doc "The time the billing group was created."];
+        [@ocaml.doc "The time when the billing group was created."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the billing group was modified."];
+        [@ocaml.doc
+          "The most recent time when the billing group was modified."];
       status: BillingGroupStatus.t option
         [@ocaml.doc
           "The billing group status. Only one of the valid values can be used."];
       statusReason: BillingGroupStatusReason.t option
         [@ocaml.doc
-          "The reason why the billing group is in its current status."]}
+          "The reason why the billing group is in its current status."];
+      accountGrouping: ListBillingGroupAccountGrouping.t option
+        [@ocaml.doc
+          "Specifies if the billing group has automatic account association (AutoAssociate) enabled."];
+      billingGroupType: BillingGroupType.t option
+        [@ocaml.doc "The type of billing group."]}
     let make ?name =
       fun ?arn ->
         fun ?description ->
@@ -1812,19 +3000,23 @@ module BillingGroupListElement =
                   fun ?lastModifiedTime ->
                     fun ?status ->
                       fun ?statusReason ->
-                        fun () ->
-                          {
-                            name;
-                            arn;
-                            description;
-                            primaryAccountId;
-                            computationPreference;
-                            size;
-                            creationTime;
-                            lastModifiedTime;
-                            status;
-                            statusReason
-                          }
+                        fun ?accountGrouping ->
+                          fun ?billingGroupType ->
+                            fun () ->
+                              {
+                                name;
+                                arn;
+                                description;
+                                primaryAccountId;
+                                computationPreference;
+                                size;
+                                creationTime;
+                                lastModifiedTime;
+                                status;
+                                statusReason;
+                                accountGrouping;
+                                billingGroupType
+                              }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:BillingGroupName.to_value));
@@ -1842,9 +3034,20 @@ module BillingGroupListElement =
           (Option.map x.lastModifiedTime ~f:Instant.to_value));
         ("Status", (Option.map x.status ~f:BillingGroupStatus.to_value));
         ("StatusReason",
-          (Option.map x.statusReason ~f:BillingGroupStatusReason.to_value))]
+          (Option.map x.statusReason ~f:BillingGroupStatusReason.to_value));
+        ("AccountGrouping",
+          (Option.map x.accountGrouping
+             ~f:ListBillingGroupAccountGrouping.to_value));
+        ("BillingGroupType",
+          (Option.map x.billingGroupType ~f:BillingGroupType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingGroupType =
+        (Option.map ~f:BillingGroupType.of_xml)
+          (Xml.child xml_arg0 "BillingGroupType") in
+      let accountGrouping =
+        (Option.map ~f:ListBillingGroupAccountGrouping.of_xml)
+          (Xml.child xml_arg0 "AccountGrouping") in
       let statusReason =
         (Option.map ~f:BillingGroupStatusReason.of_xml)
           (Xml.child xml_arg0 "StatusReason") in
@@ -1871,29 +3074,197 @@ module BillingGroupListElement =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       let name =
         (Option.map ~f:BillingGroupName.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?statusReason ?status ?lastModifiedTime ?creationTime ?size
-        ?computationPreference ?primaryAccountId ?description ?arn ?name ()
+      make ?billingGroupType ?accountGrouping ?statusReason ?status
+        ?lastModifiedTime ?creationTime ?size ?computationPreference
+        ?primaryAccountId ?description ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let billingGroupType =
+        field_map json__ "BillingGroupType" BillingGroupType.of_json in
+      let accountGrouping =
+        field_map json__ "AccountGrouping"
+          ListBillingGroupAccountGrouping.of_json in
       let statusReason =
-        field_map json "StatusReason" BillingGroupStatusReason.of_json in
-      let status = field_map json "Status" BillingGroupStatus.of_json in
+        field_map json__ "StatusReason" BillingGroupStatusReason.of_json in
+      let status = field_map json__ "Status" BillingGroupStatus.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let creationTime = field_map json "CreationTime" Instant.of_json in
-      let size = field_map json "Size" NumberOfAccounts.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let creationTime = field_map json__ "CreationTime" Instant.of_json in
+      let size = field_map json__ "Size" NumberOfAccounts.of_json in
       let computationPreference =
-        field_map json "ComputationPreference" ComputationPreference.of_json in
+        field_map json__ "ComputationPreference"
+          ComputationPreference.of_json in
       let primaryAccountId =
-        field_map json "PrimaryAccountId" AccountId.of_json in
+        field_map json__ "PrimaryAccountId" AccountId.of_json in
       let description =
-        field_map json "Description" BillingGroupDescription.of_json in
-      let arn = field_map json "Arn" BillingGroupArn.of_json in
-      let name = field_map json "Name" BillingGroupName.of_json in
-      make ?statusReason ?status ?lastModifiedTime ?creationTime ?size
-        ?computationPreference ?primaryAccountId ?description ?arn ?name ()
+        field_map json__ "Description" BillingGroupDescription.of_json in
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      let name = field_map json__ "Name" BillingGroupName.of_json in
+      make ?billingGroupType ?accountGrouping ?statusReason ?status
+        ?lastModifiedTime ?creationTime ?size ?computationPreference
+        ?primaryAccountId ?description ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A representation of a billing group."]
+module BillingGroupStatusList =
+  struct
+    type nonrec t = BillingGroupStatus.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BillingGroupStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BillingGroupStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BillingGroupStatusList"
+        ~of_json:BillingGroupStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BillingGroupTypeList =
+  struct
+    type nonrec t = BillingGroupType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BillingGroupType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BillingGroupType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BillingGroupTypeList"
+        ~of_json:BillingGroupType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PrimaryAccountIdList =
+  struct
+    type nonrec t = AccountId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PrimaryAccountIdList" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponsibilityTransferArnsList =
+  struct
+    type nonrec t = ResponsibilityTransferArn.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResponsibilityTransferArn.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResponsibilityTransferArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponsibilityTransferArnsList"
+        ~of_json:ResponsibilityTransferArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module StringSearches =
+  struct
+    type nonrec t = StringSearch.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StringSearch.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StringSearch.of_xml)
+    let of_json j =
+      list_of_json ~kind:"StringSearches" ~of_json:StringSearch.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module BillingGroupCostReportElement =
   struct
     type nonrec t =
@@ -1953,14 +3324,14 @@ module BillingGroupCostReportElement =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?currency ?marginPercentage ?margin ?proformaCost ?aWSCost ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currency = field_map json "Currency" Currency.of_json in
+    let of_json json__ =
+      let currency = field_map json__ "Currency" Currency.of_json in
       let marginPercentage =
-        field_map json "MarginPercentage" MarginPercentage.of_json in
-      let margin = field_map json "Margin" Margin.of_json in
-      let proformaCost = field_map json "ProformaCost" ProformaCost.of_json in
-      let aWSCost = field_map json "AWSCost" AWSCost.of_json in
-      let arn = field_map json "Arn" BillingGroupArn.of_json in
+        field_map json__ "MarginPercentage" MarginPercentage.of_json in
+      let margin = field_map json__ "Margin" Margin.of_json in
+      let proformaCost = field_map json__ "ProformaCost" ProformaCost.of_json in
+      let aWSCost = field_map json__ "AWSCost" AWSCost.of_json in
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
       make ?currency ?marginPercentage ?margin ?proformaCost ?aWSCost ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2006,16 +3377,46 @@ module AccountAssociationsListElement =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       make ?accountEmail ?accountName ?billingGroupArn ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountEmail = field_map json "AccountEmail" AccountEmail.of_json in
-      let accountName = field_map json "AccountName" AccountName.of_json in
+    let of_json json__ =
+      let accountEmail = field_map json__ "AccountEmail" AccountEmail.of_json in
+      let accountName = field_map json__ "AccountName" AccountName.of_json in
       let billingGroupArn =
-        field_map json "BillingGroupArn" BillingGroupArn.of_json in
-      let accountId = field_map json "AccountId" AccountId.of_json in
+        field_map json__ "BillingGroupArn" BillingGroupArn.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       make ?accountEmail ?accountName ?billingGroupArn ?accountId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Amazon Web Services Billing Conductor is in beta release and is subject to change. Your use of Amazon Web Services Billing Conductor is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). A representation of a linked account."]
+  end[@@ocaml.doc "A representation of a linked account."]
+module AccountIdFilterList =
+  struct
+    type nonrec t = AccountId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AccountId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AccountIdFilterList" ~of_json:AccountId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Association =
   struct
     type nonrec t = string
@@ -2024,7 +3425,7 @@ module Association =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"((arn:aws:billingconductor::[0-9]{12}:billinggroup/)?[0-9]{12}|MONITORED|UNMONITORED)");
+             ~pattern:"((arn:aws(-cn)?:billingconductor::[0-9]{12}:billinggroup/)?[a-zA-Z0-9]{10,12}|MONITORED|UNMONITORED)");
         i
     let of_string x = x
     let to_value x = `String x
@@ -2034,6 +3435,141 @@ module Association =
     let of_json j = string_of_json ~kind:"Association" j
     let to_json = simple_to_json to_value
   end
+module BillingGroupCostReportResultElement =
+  struct
+    type nonrec t =
+      {
+      arn: BillingGroupArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) that uniquely identifies the billing group."];
+      aWSCost: AWSCost.t option
+        [@ocaml.doc
+          "The actual Amazon Web Services charges for the billing group."];
+      proformaCost: ProformaCost.t option
+        [@ocaml.doc
+          "The hypothetical Amazon Web Services charges based on the associated pricing plan of a billing group."];
+      margin: Margin.t option [@ocaml.doc "The billing group margin."];
+      marginPercentage: MarginPercentage.t option
+        [@ocaml.doc "The percentage of the billing group margin."];
+      currency: Currency.t option [@ocaml.doc "The displayed currency."];
+      attributes: AttributesList.t option
+        [@ocaml.doc
+          "The list of key-value pairs that represent the attributes by which the BillingGroupCostReportResults are grouped. For example, if you want the Amazon S3 service-level breakdown of a billing group for November 2023, the attributes list will contain a key-value pair of \"PRODUCT_NAME\" and \"S3\" and a key-value pair of \"BILLING_PERIOD\" and \"Nov 2023\"."]}
+    let make ?arn =
+      fun ?aWSCost ->
+        fun ?proformaCost ->
+          fun ?margin ->
+            fun ?marginPercentage ->
+              fun ?currency ->
+                fun ?attributes ->
+                  fun () ->
+                    {
+                      arn;
+                      aWSCost;
+                      proformaCost;
+                      margin;
+                      marginPercentage;
+                      currency;
+                      attributes
+                    }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:BillingGroupArn.to_value));
+        ("AWSCost", (Option.map x.aWSCost ~f:AWSCost.to_value));
+        ("ProformaCost",
+          (Option.map x.proformaCost ~f:ProformaCost.to_value));
+        ("Margin", (Option.map x.margin ~f:Margin.to_value));
+        ("MarginPercentage",
+          (Option.map x.marginPercentage ~f:MarginPercentage.to_value));
+        ("Currency", (Option.map x.currency ~f:Currency.to_value));
+        ("Attributes", (Option.map x.attributes ~f:AttributesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        (Option.map ~f:AttributesList.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      let currency =
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "Currency") in
+      let marginPercentage =
+        (Option.map ~f:MarginPercentage.of_xml)
+          (Xml.child xml_arg0 "MarginPercentage") in
+      let margin =
+        (Option.map ~f:Margin.of_xml) (Xml.child xml_arg0 "Margin") in
+      let proformaCost =
+        (Option.map ~f:ProformaCost.of_xml)
+          (Xml.child xml_arg0 "ProformaCost") in
+      let aWSCost =
+        (Option.map ~f:AWSCost.of_xml) (Xml.child xml_arg0 "AWSCost") in
+      let arn =
+        (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?attributes ?currency ?marginPercentage ?margin ?proformaCost
+        ?aWSCost ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" AttributesList.of_json in
+      let currency = field_map json__ "Currency" Currency.of_json in
+      let marginPercentage =
+        field_map json__ "MarginPercentage" MarginPercentage.of_json in
+      let margin = field_map json__ "Margin" Margin.of_json in
+      let proformaCost = field_map json__ "ProformaCost" ProformaCost.of_json in
+      let aWSCost = field_map json__ "AWSCost" AWSCost.of_json in
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?attributes ?currency ?marginPercentage ?margin ?proformaCost
+        ?aWSCost ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A paginated call to retrieve a list of summary reports of actual Amazon Web Services charges and the calculated Amazon Web Services charges, broken down by attributes."]
+module GroupByAttributeName =
+  struct
+    type nonrec t =
+      | PRODUCT_NAME 
+      | BILLING_PERIOD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRODUCT_NAME -> "PRODUCT_NAME"
+      | BILLING_PERIOD -> "BILLING_PERIOD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRODUCT_NAME" -> PRODUCT_NAME
+      | "BILLING_PERIOD" -> BILLING_PERIOD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration GroupByAttributeName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GroupByAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
+module CreateFreeTierConfig =
+  struct
+    type nonrec t =
+      {
+      activated: TieringActivated.t
+        [@ocaml.doc "Activate or deactivate Amazon Web Services Free Tier."]}
+    let context_ = "CreateFreeTierConfig"
+    let make ~activated = fun () -> { activated }
+    let to_value x =
+      structure_to_value
+        [("Activated", (Some (TieringActivated.to_value x.activated)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activated =
+        TieringActivated.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Activated") in
+      make ~activated ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activated =
+        field_map_exn json__ "Activated" TieringActivated.of_json in
+      make ~activated ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The possible Amazon Web Services Free Tier configurations."]
 module CustomLineItemFlatChargeDetails =
   struct
     type nonrec t =
@@ -2053,13 +3589,13 @@ module CustomLineItemFlatChargeDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeValue") in
       make ~chargeValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let chargeValue =
-        field_map_exn json "ChargeValue" CustomLineItemChargeValue.of_json in
+        field_map_exn json__ "ChargeValue" CustomLineItemChargeValue.of_json in
       make ~chargeValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the charge details associated with a flat custom line item."]
+       "A representation of the charge details that are associated with a flat custom line item."]
 module CustomLineItemPercentageChargeDetails =
   struct
     type nonrec t =
@@ -2091,59 +3627,32 @@ module CustomLineItemPercentageChargeDetails =
           (Xml.child_exn ~context:context_ xml_arg0 "PercentageValue") in
       make ?associatedValues ~percentageValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associatedValues =
-        field_map json "AssociatedValues"
+        field_map json__ "AssociatedValues"
           CustomLineItemAssociationsList.of_json in
       let percentageValue =
-        field_map_exn json "PercentageValue"
+        field_map_exn json__ "PercentageValue"
           CustomLineItemPercentageChargeValue.of_json in
       make ?associatedValues ~percentageValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A representation of the charge details associated with a percentage custom line item."]
-module AccountIdList =
-  struct
-    type nonrec t = AccountId.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:AccountId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:AccountId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AccountIdList" ~of_json:AccountId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
+       "A representation of the charge details that are associated with a percentage custom line item."]
 module DisassociateResourceResponseElement =
   struct
     type nonrec t =
       {
-      arn: CustomLineItemArn.t option
+      arn: CustomLineItemAssociationElement.t option
         [@ocaml.doc
           "The resource ARN that was disassociated from the custom line item."];
       error: AssociateResourceError.t option
         [@ocaml.doc
-          "An AssociateResourceError shown if the resource disassociation fails."]}
+          "An AssociateResourceError that's shown if the resource disassociation fails."]}
     let make ?arn = fun ?error -> fun () -> { arn; error }
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:CustomLineItemArn.to_value));
+        [("Arn",
+           (Option.map x.arn ~f:CustomLineItemAssociationElement.to_value));
         ("Error", (Option.map x.error ~f:AssociateResourceError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2151,12 +3660,14 @@ module DisassociateResourceResponseElement =
         (Option.map ~f:AssociateResourceError.of_xml)
           (Xml.child xml_arg0 "Error") in
       let arn =
-        (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
+        (Option.map ~f:CustomLineItemAssociationElement.of_xml)
+          (Xml.child xml_arg0 "Arn") in
       make ?error ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" AssociateResourceError.of_json in
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" AssociateResourceError.of_json in
+      let arn =
+        field_map json__ "Arn" CustomLineItemAssociationElement.of_json in
       make ?error ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2165,7 +3676,7 @@ module AssociateResourceResponseElement =
   struct
     type nonrec t =
       {
-      arn: CustomLineItemArn.t option
+      arn: CustomLineItemAssociationElement.t option
         [@ocaml.doc
           "The resource ARN that was associated to the custom line item."];
       error: AssociateResourceError.t option
@@ -2174,7 +3685,8 @@ module AssociateResourceResponseElement =
     let make ?arn = fun ?error -> fun () -> { arn; error }
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:CustomLineItemArn.to_value));
+        [("Arn",
+           (Option.map x.arn ~f:CustomLineItemAssociationElement.to_value));
         ("Error", (Option.map x.error ~f:AssociateResourceError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -2182,12 +3694,14 @@ module AssociateResourceResponseElement =
         (Option.map ~f:AssociateResourceError.of_xml)
           (Xml.child xml_arg0 "Error") in
       let arn =
-        (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
+        (Option.map ~f:CustomLineItemAssociationElement.of_xml)
+          (Xml.child xml_arg0 "Arn") in
       make ?error ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let error = field_map json "Error" AssociateResourceError.of_json in
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+    let of_json json__ =
+      let error = field_map json__ "Error" AssociateResourceError.of_json in
+      let arn =
+        field_map json__ "Arn" CustomLineItemAssociationElement.of_json in
       make ?error ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2195,20 +3709,20 @@ module AssociateResourceResponseElement =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("Message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -2216,35 +3730,43 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t [@ocaml.doc "Identifier of the resource in use."];
-      resourceType: String_.t [@ocaml.doc "Type of the resource in use."]}
-    let context_ = "ConflictException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+      message: String_.t option ;
+      resourceId: String_.t option
+        [@ocaml.doc "Identifier of the resource in use."];
+      resourceType: String_.t option
+        [@ocaml.doc "Type of the resource in use."];
+      reason: ConflictExceptionReason.t option
+        [@ocaml.doc "Reason for the inconsistent state."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?reason ->
+            fun () -> { message; resourceId; resourceType; reason }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("ResourceId", (Some (String_.to_value x.resourceId)));
-        ("ResourceType", (Some (String_.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("Reason", (Option.map x.reason ~f:ConflictExceptionReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ConflictExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?reason ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ConflictExceptionReason.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?reason ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You can cause an inconsistent state by updating or deleting a resource."]
@@ -2252,15 +3774,14 @@ module InternalServerException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc "Number of seconds you can retry after the call."]}
-    let context_ = "InternalServerException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
+        [("Message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -2269,66 +3790,62 @@ module InternalServerException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred while processing a request."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
-      resourceId: String_.t
+      message: String_.t option ;
+      resourceId: String_.t option
         [@ocaml.doc "Resource identifier that was not found."];
-      resourceType: String_.t
+      resourceType: String_.t option
         [@ocaml.doc "Resource type that was not found."]}
-    let context_ = "ResourceNotFoundException"
-    let make ~message =
-      fun ~resourceId ->
-        fun ~resourceType -> fun () -> { message; resourceId; resourceType }
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
-        ("ResourceId", (Some (String_.to_value x.resourceId)));
-        ("ResourceType", (Some (String_.to_value x.resourceType)))]
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
+        ("ResourceType", (Option.map x.resourceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~resourceType ~resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
-      let resourceId = field_map_exn json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~resourceType ~resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request references a resource that doesn't exist."]
 module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc "Number of seconds you can safely retry after the call."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
+        [("Message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -2337,31 +3854,55 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "RetryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "RetryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
+module UpdateTieringInput =
+  struct
+    type nonrec t =
+      {
+      freeTier: UpdateFreeTierConfig.t
+        [@ocaml.doc
+          "The possible Amazon Web Services Free Tier configurations."]}
+    let context_ = "UpdateTieringInput"
+    let make ~freeTier = fun () -> { freeTier }
+    let to_value x =
+      structure_to_value
+        [("FreeTier", (Some (UpdateFreeTierConfig.to_value x.freeTier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let freeTier =
+        UpdateFreeTierConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FreeTier") in
+      make ~freeTier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let freeTier =
+        field_map_exn json__ "FreeTier" UpdateFreeTierConfig.of_json in
+      make ~freeTier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The set of tiering configurations for the pricing rule."]
 module ValidationException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       reason: ValidationExceptionReason.t option
         [@ocaml.doc "The reason the request's validation failed."];
       fields: ValidationExceptionFieldList.t option
         [@ocaml.doc "The fields that caused the error, if applicable."]}
-    let context_ = "ValidationException"
-    let make ?reason =
-      fun ?fields -> fun ~message -> fun () -> { reason; fields; message }
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
+        [("Message", (Option.map x.message ~f:String_.to_value));
         ("Reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value));
         ("Fields",
@@ -2375,15 +3916,16 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "Reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?fields ?reason ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?fields ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fields =
-        field_map json "Fields" ValidationExceptionFieldList.of_json in
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ?fields ?reason ~message ()
+        field_map json__ "Fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?fields ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input doesn't match with the constraints specified by Amazon Web Services services."]
@@ -2395,7 +3937,7 @@ module BillingGroupFullArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"arn:aws:billingconductor::[0-9]{12}:billinggroup/[0-9]{12}");
+             ~pattern:"arn:aws(-cn)?:billingconductor::[0-9]{12}:billinggroup/[a-zA-Z0-9]{10,12}");
         i
     let of_string x = x
     let to_value x = `String x
@@ -2412,38 +3954,37 @@ module CustomLineItemBillingPeriodRange =
       inclusiveStartBillingPeriod: BillingPeriod.t
         [@ocaml.doc
           "The inclusive start billing period that defines a billing period range where a custom line is applied."];
-      exclusiveEndBillingPeriod: BillingPeriod.t
+      exclusiveEndBillingPeriod: BillingPeriod.t option
         [@ocaml.doc
           "The inclusive end billing period that defines a billing period range where a custom line is applied."]}
     let context_ = "CustomLineItemBillingPeriodRange"
-    let make ~inclusiveStartBillingPeriod =
-      fun ~exclusiveEndBillingPeriod ->
-        fun () -> { inclusiveStartBillingPeriod; exclusiveEndBillingPeriod }
+    let make ?exclusiveEndBillingPeriod =
+      fun ~inclusiveStartBillingPeriod ->
+        fun () -> { exclusiveEndBillingPeriod; inclusiveStartBillingPeriod }
     let to_value x =
       structure_to_value
         [("InclusiveStartBillingPeriod",
            (Some (BillingPeriod.to_value x.inclusiveStartBillingPeriod)));
         ("ExclusiveEndBillingPeriod",
-          (Some (BillingPeriod.to_value x.exclusiveEndBillingPeriod)))]
+          (Option.map x.exclusiveEndBillingPeriod ~f:BillingPeriod.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let exclusiveEndBillingPeriod =
-        BillingPeriod.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ExclusiveEndBillingPeriod") in
+        (Option.map ~f:BillingPeriod.of_xml)
+          (Xml.child xml_arg0 "ExclusiveEndBillingPeriod") in
       let inclusiveStartBillingPeriod =
         BillingPeriod.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "InclusiveStartBillingPeriod") in
-      make ~exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
+      make ?exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exclusiveEndBillingPeriod =
-        field_map_exn json "ExclusiveEndBillingPeriod" BillingPeriod.of_json in
+        field_map json__ "ExclusiveEndBillingPeriod" BillingPeriod.of_json in
       let inclusiveStartBillingPeriod =
-        field_map_exn json "InclusiveStartBillingPeriod"
+        field_map_exn json__ "InclusiveStartBillingPeriod"
           BillingPeriod.of_json in
-      make ~exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
+      make ?exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The billing period range in which the custom line item request will be applied."]
@@ -2456,8 +3997,13 @@ module UpdateCustomLineItemChargeDetails =
           "An UpdateCustomLineItemFlatChargeDetails that describes the new charge details of a flat custom line item."];
       percentage: UpdateCustomLineItemPercentageChargeDetails.t option
         [@ocaml.doc
-          "An UpdateCustomLineItemPercentageChargeDetails that describes the new charge details of a percentage custom line item."]}
-    let make ?flat = fun ?percentage -> fun () -> { flat; percentage }
+          "An UpdateCustomLineItemPercentageChargeDetails that describes the new charge details of a percentage custom line item."];
+      lineItemFilters: LineItemFiltersList.t option
+        [@ocaml.doc "A representation of the line item filter."]}
+    let make ?flat =
+      fun ?percentage ->
+        fun ?lineItemFilters ->
+          fun () -> { flat; percentage; lineItemFilters }
     let to_value x =
       structure_to_value
         [("Flat",
@@ -2465,27 +4011,71 @@ module UpdateCustomLineItemChargeDetails =
               ~f:UpdateCustomLineItemFlatChargeDetails.to_value));
         ("Percentage",
           (Option.map x.percentage
-             ~f:UpdateCustomLineItemPercentageChargeDetails.to_value))]
+             ~f:UpdateCustomLineItemPercentageChargeDetails.to_value));
+        ("LineItemFilters",
+          (Option.map x.lineItemFilters ~f:LineItemFiltersList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lineItemFilters =
+        (Option.map ~f:LineItemFiltersList.of_xml)
+          (Xml.child xml_arg0 "LineItemFilters") in
       let percentage =
         (Option.map ~f:UpdateCustomLineItemPercentageChargeDetails.of_xml)
           (Xml.child xml_arg0 "Percentage") in
       let flat =
         (Option.map ~f:UpdateCustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
-      make ?percentage ?flat ()
+      make ?lineItemFilters ?percentage ?flat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let lineItemFilters =
+        field_map json__ "LineItemFilters" LineItemFiltersList.of_json in
       let percentage =
-        field_map json "Percentage"
+        field_map json__ "Percentage"
           UpdateCustomLineItemPercentageChargeDetails.of_json in
       let flat =
-        field_map json "Flat" UpdateCustomLineItemFlatChargeDetails.of_json in
-      make ?percentage ?flat ()
+        field_map json__ "Flat" UpdateCustomLineItemFlatChargeDetails.of_json in
+      make ?lineItemFilters ?percentage ?flat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A representation of the new charge details of a custom line item. This should contain only one of Flat or Percentage."]
+module UpdateBillingGroupAccountGrouping =
+  struct
+    type nonrec t =
+      {
+      autoAssociate: Boolean.t option
+        [@ocaml.doc
+          "Specifies if this billing group will automatically associate newly added Amazon Web Services accounts that join your consolidated billing family."];
+      responsibilityTransferArn: ResponsibilityTransferArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the transfer relationship. Note: Modifications to the ResponsibilityTransferArn are not permitted for existing billing groups."]}
+    let make ?autoAssociate =
+      fun ?responsibilityTransferArn ->
+        fun () -> { autoAssociate; responsibilityTransferArn }
+    let to_value x =
+      structure_to_value
+        [("AutoAssociate", (Option.map x.autoAssociate ~f:Boolean.to_value));
+        ("ResponsibilityTransferArn",
+          (Option.map x.responsibilityTransferArn
+             ~f:ResponsibilityTransferArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responsibilityTransferArn =
+        (Option.map ~f:ResponsibilityTransferArn.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransferArn") in
+      let autoAssociate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoAssociate") in
+      make ?responsibilityTransferArn ?autoAssociate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responsibilityTransferArn =
+        field_map json__ "ResponsibilityTransferArn"
+          ResponsibilityTransferArn.of_json in
+      let autoAssociate = field_map json__ "AutoAssociate" Boolean.of_json in
+      make ?responsibilityTransferArn ?autoAssociate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies if the billing group has the following features enabled."]
 module Arn =
   struct
     type nonrec t = string
@@ -2517,6 +4107,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2562,6 +4155,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2574,6 +4169,9 @@ module ListResourcesAssociatedToCustomLineItemResponseList =
     type nonrec t =
       ListResourcesAssociatedToCustomLineItemResponseElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -2633,9 +4231,9 @@ module ListResourcesAssociatedToCustomLineItemFilter =
           (Xml.child xml_arg0 "Relationship") in
       make ?relationship ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relationship =
-        field_map json "Relationship" CustomLineItemRelationship.of_json in
+        field_map json__ "Relationship" CustomLineItemRelationship.of_json in
       make ?relationship ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2663,6 +4261,9 @@ module PricingRuleList =
   struct
     type nonrec t = PricingRuleListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingRuleListElement.to_value)) |>
         (fun x -> `List x)
@@ -2702,8 +4303,8 @@ module ListPricingRulesFilter =
         (Option.map ~f:PricingRuleArns.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map json "Arns" PricingRuleArns.of_json in
+    let of_json json__ =
+      let arns = field_map json__ "Arns" PricingRuleArns.of_json in
       make ?arns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2748,6 +4349,9 @@ module PricingPlanList =
   struct
     type nonrec t = PricingPlanListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingPlanListElement.to_value)) |>
         (fun x -> `List x)
@@ -2787,8 +4391,8 @@ module ListPricingPlansFilter =
         (Option.map ~f:PricingPlanArns.of_xml) (Xml.child xml_arg0 "Arns") in
       make ?arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map json "Arns" PricingPlanArns.of_json in
+    let of_json json__ =
+      let arns = field_map json__ "Arns" PricingPlanArns.of_json in
       make ?arns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2797,6 +4401,9 @@ module CustomLineItemList =
   struct
     type nonrec t = CustomLineItemListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemListElement.to_value)) |>
         (fun x -> `List x)
@@ -2830,18 +4437,27 @@ module ListCustomLineItemsFilter =
           "The billing group Amazon Resource Names (ARNs) to retrieve information."];
       arns: CustomLineItemArns.t option
         [@ocaml.doc
-          "A list of custom line item ARNs to retrieve information."]}
+          "A list of custom line item ARNs to retrieve information."];
+      accountIds: AccountIdList.t option
+        [@ocaml.doc
+          "The Amazon Web Services accounts in which this custom line item will be applied to."]}
     let make ?names =
       fun ?billingGroups ->
-        fun ?arns -> fun () -> { names; billingGroups; arns }
+        fun ?arns ->
+          fun ?accountIds ->
+            fun () -> { names; billingGroups; arns; accountIds }
     let to_value x =
       structure_to_value
         [("Names", (Option.map x.names ~f:CustomLineItemNameList.to_value));
         ("BillingGroups",
           (Option.map x.billingGroups ~f:BillingGroupArnList.to_value));
-        ("Arns", (Option.map x.arns ~f:CustomLineItemArns.to_value))]
+        ("Arns", (Option.map x.arns ~f:CustomLineItemArns.to_value));
+        ("AccountIds", (Option.map x.accountIds ~f:AccountIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:AccountIdList.of_xml)
+          (Xml.child xml_arg0 "AccountIds") in
       let arns =
         (Option.map ~f:CustomLineItemArns.of_xml) (Xml.child xml_arg0 "Arns") in
       let billingGroups =
@@ -2850,39 +4466,85 @@ module ListCustomLineItemsFilter =
       let names =
         (Option.map ~f:CustomLineItemNameList.of_xml)
           (Xml.child xml_arg0 "Names") in
-      make ?arns ?billingGroups ?names ()
+      make ?accountIds ?arns ?billingGroups ?names ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map json "Arns" CustomLineItemArns.of_json in
+    let of_json json__ =
+      let accountIds = field_map json__ "AccountIds" AccountIdList.of_json in
+      let arns = field_map json__ "Arns" CustomLineItemArns.of_json in
       let billingGroups =
-        field_map json "BillingGroups" BillingGroupArnList.of_json in
-      let names = field_map json "Names" CustomLineItemNameList.of_json in
-      make ?arns ?billingGroups ?names ()
+        field_map json__ "BillingGroups" BillingGroupArnList.of_json in
+      let names = field_map json__ "Names" CustomLineItemNameList.of_json in
+      make ?accountIds ?arns ?billingGroups ?names ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A filter that specifies the custom line items and billing groups to retrieve FFLI information."]
-module MaxBillingGroupResults =
+module CustomLineItemVersionList =
   struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = CustomLineItemVersionListElement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomLineItemVersionListElement.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxBillingGroupResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:CustomLineItemVersionListElement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomLineItemVersionList"
+        ~of_json:CustomLineItemVersionListElement.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module ListCustomLineItemVersionsFilter =
+  struct
+    type nonrec t =
+      {
+      billingPeriodRange:
+        ListCustomLineItemVersionsBillingPeriodRangeFilter.t option
+        [@ocaml.doc
+          "The billing period range in which the custom line item version is applied."]}
+    let make ?billingPeriodRange = fun () -> { billingPeriodRange }
+    let to_value x =
+      structure_to_value
+        [("BillingPeriodRange",
+           (Option.map x.billingPeriodRange
+              ~f:ListCustomLineItemVersionsBillingPeriodRangeFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let billingPeriodRange =
+        (Option.map
+           ~f:ListCustomLineItemVersionsBillingPeriodRangeFilter.of_xml)
+          (Xml.child xml_arg0 "BillingPeriodRange") in
+      make ?billingPeriodRange ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let billingPeriodRange =
+        field_map json__ "BillingPeriodRange"
+          ListCustomLineItemVersionsBillingPeriodRangeFilter.of_json in
+      make ?billingPeriodRange ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter that specifies the billing period range where the custom line item versions reside."]
 module BillingGroupList =
   struct
     type nonrec t = BillingGroupListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BillingGroupListElement.to_value)) |>
         (fun x -> `List x)
@@ -2914,35 +4576,130 @@ module ListBillingGroupsFilter =
           "The list of billing group Amazon Resource Names (ARNs) to retrieve information."];
       pricingPlan: PricingPlanFullArn.t option
         [@ocaml.doc
-          "The pricing plan Amazon Resource Names (ARNs) to retrieve information."]}
-    let make ?arns = fun ?pricingPlan -> fun () -> { arns; pricingPlan }
+          "The pricing plan Amazon Resource Names (ARNs) to retrieve information."];
+      statuses: BillingGroupStatusList.t option
+        [@ocaml.doc
+          "A list of billing groups to retrieve their current status for a specific time range"];
+      autoAssociate: Boolean.t option
+        [@ocaml.doc
+          "Specifies if this billing group will automatically associate newly added Amazon Web Services accounts that join your consolidated billing family."];
+      primaryAccountIds: PrimaryAccountIdList.t option
+        [@ocaml.doc
+          "A list of primary account IDs to filter the billing groups."];
+      billingGroupTypes: BillingGroupTypeList.t option
+        [@ocaml.doc "Filter billing groups by their type."];
+      names: StringSearches.t option
+        [@ocaml.doc "Filter billing groups by their names."];
+      responsibilityTransferArns: ResponsibilityTransferArnsList.t option
+        [@ocaml.doc
+          "Filter billing groups by their responsibility transfer ARNs."]}
+    let make ?arns =
+      fun ?pricingPlan ->
+        fun ?statuses ->
+          fun ?autoAssociate ->
+            fun ?primaryAccountIds ->
+              fun ?billingGroupTypes ->
+                fun ?names ->
+                  fun ?responsibilityTransferArns ->
+                    fun () ->
+                      {
+                        arns;
+                        pricingPlan;
+                        statuses;
+                        autoAssociate;
+                        primaryAccountIds;
+                        billingGroupTypes;
+                        names;
+                        responsibilityTransferArns
+                      }
     let to_value x =
       structure_to_value
         [("Arns", (Option.map x.arns ~f:BillingGroupArnList.to_value));
         ("PricingPlan",
-          (Option.map x.pricingPlan ~f:PricingPlanFullArn.to_value))]
+          (Option.map x.pricingPlan ~f:PricingPlanFullArn.to_value));
+        ("Statuses",
+          (Option.map x.statuses ~f:BillingGroupStatusList.to_value));
+        ("AutoAssociate", (Option.map x.autoAssociate ~f:Boolean.to_value));
+        ("PrimaryAccountIds",
+          (Option.map x.primaryAccountIds ~f:PrimaryAccountIdList.to_value));
+        ("BillingGroupTypes",
+          (Option.map x.billingGroupTypes ~f:BillingGroupTypeList.to_value));
+        ("Names", (Option.map x.names ~f:StringSearches.to_value));
+        ("ResponsibilityTransferArns",
+          (Option.map x.responsibilityTransferArns
+             ~f:ResponsibilityTransferArnsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let responsibilityTransferArns =
+        (Option.map ~f:ResponsibilityTransferArnsList.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransferArns") in
+      let names =
+        (Option.map ~f:StringSearches.of_xml) (Xml.child xml_arg0 "Names") in
+      let billingGroupTypes =
+        (Option.map ~f:BillingGroupTypeList.of_xml)
+          (Xml.child xml_arg0 "BillingGroupTypes") in
+      let primaryAccountIds =
+        (Option.map ~f:PrimaryAccountIdList.of_xml)
+          (Xml.child xml_arg0 "PrimaryAccountIds") in
+      let autoAssociate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoAssociate") in
+      let statuses =
+        (Option.map ~f:BillingGroupStatusList.of_xml)
+          (Xml.child xml_arg0 "Statuses") in
       let pricingPlan =
         (Option.map ~f:PricingPlanFullArn.of_xml)
           (Xml.child xml_arg0 "PricingPlan") in
       let arns =
         (Option.map ~f:BillingGroupArnList.of_xml)
           (Xml.child xml_arg0 "Arns") in
-      make ?pricingPlan ?arns ()
+      make ?responsibilityTransferArns ?names ?billingGroupTypes
+        ?primaryAccountIds ?autoAssociate ?statuses ?pricingPlan ?arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let responsibilityTransferArns =
+        field_map json__ "ResponsibilityTransferArns"
+          ResponsibilityTransferArnsList.of_json in
+      let names = field_map json__ "Names" StringSearches.of_json in
+      let billingGroupTypes =
+        field_map json__ "BillingGroupTypes" BillingGroupTypeList.of_json in
+      let primaryAccountIds =
+        field_map json__ "PrimaryAccountIds" PrimaryAccountIdList.of_json in
+      let autoAssociate = field_map json__ "AutoAssociate" Boolean.of_json in
+      let statuses =
+        field_map json__ "Statuses" BillingGroupStatusList.of_json in
       let pricingPlan =
-        field_map json "PricingPlan" PricingPlanFullArn.of_json in
-      let arns = field_map json "Arns" BillingGroupArnList.of_json in
-      make ?pricingPlan ?arns ()
+        field_map json__ "PricingPlan" PricingPlanFullArn.of_json in
+      let arns = field_map json__ "Arns" BillingGroupArnList.of_json in
+      make ?responsibilityTransferArns ?names ?billingGroupTypes
+        ?primaryAccountIds ?autoAssociate ?statuses ?pricingPlan ?arns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The filter that specifies the billing groups and pricing plans to retrieve billing group information."]
+module MaxBillingGroupResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxBillingGroupResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module BillingGroupCostReportList =
   struct
     type nonrec t = BillingGroupCostReportElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BillingGroupCostReportElement.to_value)) |>
         (fun x -> `List x)
@@ -2984,9 +4741,9 @@ module ListBillingGroupCostReportsFilter =
           (Xml.child xml_arg0 "BillingGroupArns") in
       make ?billingGroupArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingGroupArns =
-        field_map json "BillingGroupArns" BillingGroupArnList.of_json in
+        field_map json__ "BillingGroupArns" BillingGroupArnList.of_json in
       make ?billingGroupArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2995,6 +4752,9 @@ module AccountAssociationsList =
   struct
     type nonrec t = AccountAssociationsListElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccountAssociationsListElement.to_value)) |>
         (fun x -> `List x)
@@ -3025,28 +4785,161 @@ module ListAccountAssociationsFilter =
         [@ocaml.doc
           "MONITORED: linked accounts that are associated to billing groups. UNMONITORED: linked accounts that are not associated to billing groups. Billing Group Arn: linked accounts that are associated to the provided Billing Group Arn."];
       accountId: AccountId.t option
-        [@ocaml.doc "The Amazon Web Services account ID to filter on."]}
+        [@ocaml.doc "The Amazon Web Services account ID to filter on."];
+      accountIds: AccountIdFilterList.t option
+        [@ocaml.doc
+          "The list of Amazon Web Services IDs to retrieve their associated billing group for a given time range."]}
     let make ?association =
-      fun ?accountId -> fun () -> { association; accountId }
+      fun ?accountId ->
+        fun ?accountIds -> fun () -> { association; accountId; accountIds }
     let to_value x =
       structure_to_value
         [("Association", (Option.map x.association ~f:Association.to_value));
-        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value))]
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("AccountIds",
+          (Option.map x.accountIds ~f:AccountIdFilterList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountIds =
+        (Option.map ~f:AccountIdFilterList.of_xml)
+          (Xml.child xml_arg0 "AccountIds") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let association =
         (Option.map ~f:Association.of_xml) (Xml.child xml_arg0 "Association") in
-      make ?accountId ?association ()
+      make ?accountIds ?accountId ?association ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map json "AccountId" AccountId.of_json in
-      let association = field_map json "Association" Association.of_json in
-      make ?accountId ?association ()
+    let of_json json__ =
+      let accountIds =
+        field_map json__ "AccountIds" AccountIdFilterList.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let association = field_map json__ "Association" Association.of_json in
+      make ?accountIds ?accountId ?association ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The filter on the account ID of the linked account, or any of the following: MONITORED: linked accounts that are associated to billing groups. UNMONITORED: linked accounts that are not associated to billing groups. Billing Group Arn: linked accounts that are associated to the provided Billing Group Arn."]
+module BillingGroupCostReportResultsList =
+  struct
+    type nonrec t = BillingGroupCostReportResultElement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BillingGroupCostReportResultElement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:BillingGroupCostReportResultElement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BillingGroupCostReportResultsList"
+        ~of_json:BillingGroupCostReportResultElement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BillingPeriodRange =
+  struct
+    type nonrec t =
+      {
+      inclusiveStartBillingPeriod: BillingPeriod.t
+        [@ocaml.doc
+          "The inclusive start billing period that defines a billing period range for the margin summary."];
+      exclusiveEndBillingPeriod: BillingPeriod.t
+        [@ocaml.doc
+          "The exclusive end billing period that defines a billing period range for the margin summary. For example, if you choose a billing period that starts in October 2023 and ends in December 2023, the margin summary will only include data from October 2023 and November 2023."]}
+    let context_ = "BillingPeriodRange"
+    let make ~inclusiveStartBillingPeriod =
+      fun ~exclusiveEndBillingPeriod ->
+        fun () -> { inclusiveStartBillingPeriod; exclusiveEndBillingPeriod }
+    let to_value x =
+      structure_to_value
+        [("InclusiveStartBillingPeriod",
+           (Some (BillingPeriod.to_value x.inclusiveStartBillingPeriod)));
+        ("ExclusiveEndBillingPeriod",
+          (Some (BillingPeriod.to_value x.exclusiveEndBillingPeriod)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exclusiveEndBillingPeriod =
+        BillingPeriod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ExclusiveEndBillingPeriod") in
+      let inclusiveStartBillingPeriod =
+        BillingPeriod.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "InclusiveStartBillingPeriod") in
+      make ~exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exclusiveEndBillingPeriod =
+        field_map_exn json__ "ExclusiveEndBillingPeriod"
+          BillingPeriod.of_json in
+      let inclusiveStartBillingPeriod =
+        field_map_exn json__ "InclusiveStartBillingPeriod"
+          BillingPeriod.of_json in
+      make ~exclusiveEndBillingPeriod ~inclusiveStartBillingPeriod ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A time range for which the margin summary is effective. The time range can be up to 12 months."]
+module GroupByAttributesList =
+  struct
+    type nonrec t = GroupByAttributeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupByAttributeName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupByAttributeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupByAttributesList"
+        ~of_json:GroupByAttributeName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxBillingGroupCostReportResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:300) >>=
+             (fun () -> check_int_min i ~min:200));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for MaxBillingGroupCostReportResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PricingRuleArnsNonEmptyInput =
   struct
     type nonrec t = PricingRuleArn.t list
@@ -3055,6 +4948,9 @@ module PricingRuleArnsNonEmptyInput =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingRuleArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3080,54 +4976,52 @@ module ServiceLimitExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option
         [@ocaml.doc "Identifier of the resource affected."];
       resourceType: String_.t option
         [@ocaml.doc "Type of the resource affected."];
-      limitCode: String_.t
+      limitCode: String_.t option
         [@ocaml.doc
           "The unique code identifier of the service limit that is being exceeded."];
-      serviceCode: String_.t
+      serviceCode: String_.t option
         [@ocaml.doc
           "The unique code for the service of the limit that is being exceeded."]}
-    let context_ = "ServiceLimitExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message ->
-          fun ~limitCode ->
-            fun ~serviceCode ->
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType ->
+          fun ?limitCode ->
+            fun ?serviceCode ->
               fun () ->
-                { resourceId; resourceType; message; limitCode; serviceCode }
+                { message; resourceId; resourceType; limitCode; serviceCode }
     let to_value x =
       structure_to_value
-        [("Message", (Some (String_.to_value x.message)));
+        [("Message", (Option.map x.message ~f:String_.to_value));
         ("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("ResourceType", (Option.map x.resourceType ~f:String_.to_value));
-        ("LimitCode", (Some (String_.to_value x.limitCode)));
-        ("ServiceCode", (Some (String_.to_value x.serviceCode)))]
+        ("LimitCode", (Option.map x.limitCode ~f:String_.to_value));
+        ("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let serviceCode =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       let limitCode =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LimitCode") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LimitCode") in
       let resourceType =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
-      let limitCode = field_map_exn json "LimitCode" String_.of_json in
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      let message = field_map_exn json "Message" String_.of_json in
-      make ~serviceCode ~limitCode ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
+      let limitCode = field_map json__ "LimitCode" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?serviceCode ?limitCode ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request would cause a service limit to exceed."]
 module ClientToken =
@@ -3150,6 +5044,31 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module CreateTieringInput =
+  struct
+    type nonrec t =
+      {
+      freeTier: CreateFreeTierConfig.t
+        [@ocaml.doc
+          "The possible Amazon Web Services Free Tier configurations."]}
+    let context_ = "CreateTieringInput"
+    let make ~freeTier = fun () -> { freeTier }
+    let to_value x =
+      structure_to_value
+        [("FreeTier", (Some (CreateFreeTierConfig.to_value x.freeTier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let freeTier =
+        CreateFreeTierConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FreeTier") in
+      make ~freeTier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let freeTier =
+        field_map_exn json__ "FreeTier" CreateFreeTierConfig.of_json in
+      make ~freeTier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The set of tiering configurations for the pricing rule."]
 module PricingRuleArnsInput =
   struct
     type nonrec t = PricingRuleArn.t list
@@ -3158,6 +5077,9 @@ module PricingRuleArnsInput =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PricingRuleArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3191,10 +5113,15 @@ module CustomLineItemChargeDetails =
           "A CustomLineItemPercentageChargeDetails that describes the charge details of a percentage custom line item."];
       type_: CustomLineItemType.t
         [@ocaml.doc
-          "The type of the custom line item that indicates whether the charge is a fee or credit."]}
+          "The type of the custom line item that indicates whether the charge is a fee or credit."];
+      lineItemFilters: LineItemFiltersList.t option
+        [@ocaml.doc "A representation of the line item filter."]}
     let context_ = "CustomLineItemChargeDetails"
     let make ?flat =
-      fun ?percentage -> fun ~type_ -> fun () -> { flat; percentage; type_ }
+      fun ?percentage ->
+        fun ?lineItemFilters ->
+          fun ~type_ ->
+            fun () -> { flat; percentage; lineItemFilters; type_ }
     let to_value x =
       structure_to_value
         [("Flat",
@@ -3202,9 +5129,14 @@ module CustomLineItemChargeDetails =
         ("Percentage",
           (Option.map x.percentage
              ~f:CustomLineItemPercentageChargeDetails.to_value));
-        ("Type", (Some (CustomLineItemType.to_value x.type_)))]
+        ("Type", (Some (CustomLineItemType.to_value x.type_)));
+        ("LineItemFilters",
+          (Option.map x.lineItemFilters ~f:LineItemFiltersList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lineItemFilters =
+        (Option.map ~f:LineItemFiltersList.of_xml)
+          (Xml.child xml_arg0 "LineItemFilters") in
       let type_ =
         CustomLineItemType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
@@ -3214,16 +5146,18 @@ module CustomLineItemChargeDetails =
       let flat =
         (Option.map ~f:CustomLineItemFlatChargeDetails.of_xml)
           (Xml.child xml_arg0 "Flat") in
-      make ~type_ ?percentage ?flat ()
+      make ?lineItemFilters ~type_ ?percentage ?flat ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" CustomLineItemType.of_json in
+    let of_json json__ =
+      let lineItemFilters =
+        field_map json__ "LineItemFilters" LineItemFiltersList.of_json in
+      let type_ = field_map_exn json__ "Type" CustomLineItemType.of_json in
       let percentage =
-        field_map json "Percentage"
+        field_map json__ "Percentage"
           CustomLineItemPercentageChargeDetails.of_json in
       let flat =
-        field_map json "Flat" CustomLineItemFlatChargeDetails.of_json in
-      make ~type_ ?percentage ?flat ()
+        field_map json__ "Flat" CustomLineItemFlatChargeDetails.of_json in
+      make ?lineItemFilters ~type_ ?percentage ?flat ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The charge details of a custom line item. It should contain only one of Flat or Percentage."]
@@ -3231,33 +5165,58 @@ module AccountGrouping =
   struct
     type nonrec t =
       {
-      linkedAccountIds: AccountIdList.t
+      linkedAccountIds: AccountIdList.t option
         [@ocaml.doc
-          "The account IDs that make up the billing group. Account IDs must be a part of the consolidated billing family, and not associated with another billing group."]}
-    let context_ = "AccountGrouping"
-    let make ~linkedAccountIds = fun () -> { linkedAccountIds }
+          "The account IDs that make up the billing group. Account IDs must be a part of the consolidated billing family, and not associated with another billing group."];
+      autoAssociate: Boolean.t option
+        [@ocaml.doc
+          "Specifies if this billing group will automatically associate newly added Amazon Web Services accounts that join your consolidated billing family."];
+      responsibilityTransferArn: ResponsibilityTransferArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the transfer relationship owned by the Bill Transfer account (caller account). When specified, the PrimaryAccountId is no longer required."]}
+    let make ?linkedAccountIds =
+      fun ?autoAssociate ->
+        fun ?responsibilityTransferArn ->
+          fun () ->
+            { linkedAccountIds; autoAssociate; responsibilityTransferArn }
     let to_value x =
       structure_to_value
         [("LinkedAccountIds",
-           (Some (AccountIdList.to_value x.linkedAccountIds)))]
+           (Option.map x.linkedAccountIds ~f:AccountIdList.to_value));
+        ("AutoAssociate", (Option.map x.autoAssociate ~f:Boolean.to_value));
+        ("ResponsibilityTransferArn",
+          (Option.map x.responsibilityTransferArn
+             ~f:ResponsibilityTransferArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let responsibilityTransferArn =
+        (Option.map ~f:ResponsibilityTransferArn.of_xml)
+          (Xml.child xml_arg0 "ResponsibilityTransferArn") in
+      let autoAssociate =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoAssociate") in
       let linkedAccountIds =
-        AccountIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LinkedAccountIds") in
-      make ~linkedAccountIds ()
+        (Option.map ~f:AccountIdList.of_xml)
+          (Xml.child xml_arg0 "LinkedAccountIds") in
+      make ?responsibilityTransferArn ?autoAssociate ?linkedAccountIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let responsibilityTransferArn =
+        field_map json__ "ResponsibilityTransferArn"
+          ResponsibilityTransferArn.of_json in
+      let autoAssociate = field_map json__ "AutoAssociate" Boolean.of_json in
       let linkedAccountIds =
-        field_map_exn json "LinkedAccountIds" AccountIdList.of_json in
-      make ~linkedAccountIds ()
+        field_map json__ "LinkedAccountIds" AccountIdList.of_json in
+      make ?responsibilityTransferArn ?autoAssociate ?linkedAccountIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The set of accounts that will be under the billing group. The set of accounts resemble the linked accounts in a consolidated family."]
+       "The set of accounts that will be under the billing group. The set of accounts resemble the linked accounts in a consolidated billing family."]
 module DisassociateResourcesResponseList =
   struct
     type nonrec t = DisassociateResourceResponseElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DisassociateResourceResponseElement.to_value)) |>
         (fun x -> `List x)
@@ -3289,6 +5248,9 @@ module CustomLineItemBatchDisassociationsList =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemAssociationElement.to_value)) |>
         (fun x -> `List x)
@@ -3316,6 +5278,9 @@ module AssociateResourcesResponseList =
   struct
     type nonrec t = AssociateResourceResponseElement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssociateResourceResponseElement.to_value)) |>
         (fun x -> `List x)
@@ -3347,6 +5312,9 @@ module CustomLineItemBatchAssociationsList =
         ok_or_failwith
           ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomLineItemAssociationElement.to_value)) |>
         (fun x -> `List x)
@@ -3384,7 +5352,7 @@ module UpdatePricingRuleOutput =
         [@ocaml.doc "The new description for the pricing rule."];
       scope: PricingRuleScope.t option
         [@ocaml.doc
-          "The scope of pricing rule that indicates if it is globally applicable, or is service-specific."];
+          "The scope of pricing rule that indicates if it's globally applicable, or it's service-specific."];
       type_: PricingRuleType.t option
         [@ocaml.doc "The new pricing rule type."];
       modifierPercentage: ModifierPercentage.t option
@@ -3397,7 +5365,19 @@ module UpdatePricingRuleOutput =
         [@ocaml.doc
           "The pricing plans count that this pricing rule is associated with."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the pricing rule was modified."]}
+        [@ocaml.doc "The most recent time the pricing rule was modified."];
+      billingEntity: BillingEntity.t option
+        [@ocaml.doc
+          "The seller of services provided by Amazon Web Services, their affiliates, or third-party providers selling services via Amazon Web Services Marketplace."];
+      tiering: UpdateTieringInput.t option
+        [@ocaml.doc
+          "The set of tiering configurations for the pricing rule."];
+      usageType: UsageType.t option
+        [@ocaml.doc
+          "Usage type is the unit that each service uses to measure the usage of a specific type of resource. If the Scope attribute is set to SKU, this attribute indicates which usage type the PricingRule is modifying. For example, USW2-BoxUsage:m2.2xlarge describes an M2 High Memory Double Extra Large instance in the US West (Oregon) Region."];
+      operation: Operation.t option
+        [@ocaml.doc
+          "Operation refers to the specific Amazon Web Services covered by this line item. This describes the specific usage of the line item. If the Scope attribute is set to SKU, this attribute indicates which operation the PricingRule is modifying. For example, a value of RunInstances:0202 indicates the operation of running an Amazon EC2 instance."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3415,18 +5395,26 @@ module UpdatePricingRuleOutput =
                 fun ?service ->
                   fun ?associatedPricingPlanCount ->
                     fun ?lastModifiedTime ->
-                      fun () ->
-                        {
-                          arn;
-                          name;
-                          description;
-                          scope;
-                          type_;
-                          modifierPercentage;
-                          service;
-                          associatedPricingPlanCount;
-                          lastModifiedTime
-                        }
+                      fun ?billingEntity ->
+                        fun ?tiering ->
+                          fun ?usageType ->
+                            fun ?operation ->
+                              fun () ->
+                                {
+                                  arn;
+                                  name;
+                                  description;
+                                  scope;
+                                  type_;
+                                  modifierPercentage;
+                                  service;
+                                  associatedPricingPlanCount;
+                                  lastModifiedTime;
+                                  billingEntity;
+                                  tiering;
+                                  usageType;
+                                  operation
+                                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3506,9 +5494,24 @@ module UpdatePricingRuleOutput =
           (Option.map x.associatedPricingPlanCount
              ~f:NumberOfPricingPlansAssociatedWith.to_value));
         ("LastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:Instant.to_value))]
+          (Option.map x.lastModifiedTime ~f:Instant.to_value));
+        ("BillingEntity",
+          (Option.map x.billingEntity ~f:BillingEntity.to_value));
+        ("Tiering", (Option.map x.tiering ~f:UpdateTieringInput.to_value));
+        ("UsageType", (Option.map x.usageType ~f:UsageType.to_value));
+        ("Operation", (Option.map x.operation ~f:Operation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      let usageType =
+        (Option.map ~f:UsageType.of_xml) (Xml.child xml_arg0 "UsageType") in
+      let tiering =
+        (Option.map ~f:UpdateTieringInput.of_xml)
+          (Xml.child xml_arg0 "Tiering") in
+      let billingEntity =
+        (Option.map ~f:BillingEntity.of_xml)
+          (Xml.child xml_arg0 "BillingEntity") in
       let lastModifiedTime =
         (Option.map ~f:Instant.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
@@ -3531,26 +5534,33 @@ module UpdatePricingRuleOutput =
         (Option.map ~f:PricingRuleName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?lastModifiedTime ?associatedPricingPlanCount ?service
-        ?modifierPercentage ?type_ ?scope ?description ?name ?arn ()
+      make ?operation ?usageType ?tiering ?billingEntity ?lastModifiedTime
+        ?associatedPricingPlanCount ?service ?modifierPercentage ?type_
+        ?scope ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let operation = field_map json__ "Operation" Operation.of_json in
+      let usageType = field_map json__ "UsageType" UsageType.of_json in
+      let tiering = field_map json__ "Tiering" UpdateTieringInput.of_json in
+      let billingEntity =
+        field_map json__ "BillingEntity" BillingEntity.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
       let associatedPricingPlanCount =
-        field_map json "AssociatedPricingPlanCount"
+        field_map json__ "AssociatedPricingPlanCount"
           NumberOfPricingPlansAssociatedWith.of_json in
-      let service = field_map json "Service" Service.of_json in
+      let service = field_map json__ "Service" Service.of_json in
       let modifierPercentage =
-        field_map json "ModifierPercentage" ModifierPercentage.of_json in
-      let type_ = field_map json "Type" PricingRuleType.of_json in
-      let scope = field_map json "Scope" PricingRuleScope.of_json in
+        field_map json__ "ModifierPercentage" ModifierPercentage.of_json in
+      let type_ = field_map json__ "Type" PricingRuleType.of_json in
+      let scope = field_map json__ "Scope" PricingRuleScope.of_json in
       let description =
-        field_map json "Description" PricingRuleDescription.of_json in
-      let name = field_map json "Name" PricingRuleName.of_json in
-      let arn = field_map json "Arn" PricingRuleArn.of_json in
-      make ?lastModifiedTime ?associatedPricingPlanCount ?service
-        ?modifierPercentage ?type_ ?scope ?description ?name ?arn ()
+        field_map json__ "Description" PricingRuleDescription.of_json in
+      let name = field_map json__ "Name" PricingRuleName.of_json in
+      let arn = field_map json__ "Arn" PricingRuleArn.of_json in
+      make ?operation ?usageType ?tiering ?billingEntity ?lastModifiedTime
+        ?associatedPricingPlanCount ?service ?modifierPercentage ?type_
+        ?scope ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing pricing rule."]
 module UpdatePricingRuleInput =
@@ -3569,14 +5579,26 @@ module UpdatePricingRuleInput =
         [@ocaml.doc "The new pricing rule type."];
       modifierPercentage: ModifierPercentage.t option
         [@ocaml.doc
-          "The new modifier to show pricing plan rates as a percentage."]}
+          "The new modifier to show pricing plan rates as a percentage. Your entry will be rounded to the nearest 2 decimal places."];
+      tiering: UpdateTieringInput.t option
+        [@ocaml.doc
+          "The set of tiering configurations for the pricing rule."]}
     let context_ = "UpdatePricingRuleInput"
     let make ?name =
       fun ?description ->
         fun ?type_ ->
           fun ?modifierPercentage ->
-            fun ~arn ->
-              fun () -> { name; description; type_; modifierPercentage; arn }
+            fun ?tiering ->
+              fun ~arn ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    type_;
+                    modifierPercentage;
+                    tiering;
+                    arn
+                  }
     let to_value x =
       structure_to_value
         [("Arn", (Some (PricingRuleArn.to_value x.arn)));
@@ -3585,9 +5607,13 @@ module UpdatePricingRuleInput =
           (Option.map x.description ~f:PricingRuleDescription.to_value));
         ("Type", (Option.map x.type_ ~f:PricingRuleType.to_value));
         ("ModifierPercentage",
-          (Option.map x.modifierPercentage ~f:ModifierPercentage.to_value))]
+          (Option.map x.modifierPercentage ~f:ModifierPercentage.to_value));
+        ("Tiering", (Option.map x.tiering ~f:UpdateTieringInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tiering =
+        (Option.map ~f:UpdateTieringInput.of_xml)
+          (Xml.child xml_arg0 "Tiering") in
       let modifierPercentage =
         (Option.map ~f:ModifierPercentage.of_xml)
           (Xml.child xml_arg0 "ModifierPercentage") in
@@ -3601,17 +5627,18 @@ module UpdatePricingRuleInput =
       let arn =
         PricingRuleArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?modifierPercentage ?type_ ?description ?name ~arn ()
+      make ?tiering ?modifierPercentage ?type_ ?description ?name ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tiering = field_map json__ "Tiering" UpdateTieringInput.of_json in
       let modifierPercentage =
-        field_map json "ModifierPercentage" ModifierPercentage.of_json in
-      let type_ = field_map json "Type" PricingRuleType.of_json in
+        field_map json__ "ModifierPercentage" ModifierPercentage.of_json in
+      let type_ = field_map json__ "Type" PricingRuleType.of_json in
       let description =
-        field_map json "Description" PricingRuleDescription.of_json in
-      let name = field_map json "Name" PricingRuleName.of_json in
-      let arn = field_map_exn json "Arn" PricingRuleArn.of_json in
-      make ?modifierPercentage ?type_ ?description ?name ~arn ()
+        field_map json__ "Description" PricingRuleDescription.of_json in
+      let name = field_map json__ "Name" PricingRuleName.of_json in
+      let arn = field_map_exn json__ "Arn" PricingRuleArn.of_json in
+      make ?tiering ?modifierPercentage ?type_ ?description ?name ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an existing pricing rule."]
 module UpdatePricingPlanOutput =
@@ -3628,9 +5655,10 @@ module UpdatePricingPlanOutput =
         [@ocaml.doc "The new description for the pricing rule."];
       size: NumberOfAssociatedPricingRules.t option
         [@ocaml.doc
-          "The pricing rules count currently associated with this pricing plan list."];
+          "The pricing rules count that's currently associated with this pricing plan list."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the pricing plan was modified."]}
+        [@ocaml.doc
+          "The most recent time when the pricing plan was modified."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3736,14 +5764,15 @@ module UpdatePricingPlanOutput =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastModifiedTime ?size ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let size = field_map json "Size" NumberOfAssociatedPricingRules.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let size =
+        field_map json__ "Size" NumberOfAssociatedPricingRules.of_json in
       let description =
-        field_map json "Description" PricingPlanDescription.of_json in
-      let name = field_map json "Name" PricingPlanName.of_json in
-      let arn = field_map json "Arn" PricingPlanArn.of_json in
+        field_map json__ "Description" PricingPlanDescription.of_json in
+      let name = field_map json__ "Name" PricingPlanName.of_json in
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in
       make ?lastModifiedTime ?size ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This updates an existing pricing plan."]
@@ -3753,12 +5782,12 @@ module UpdatePricingPlanInput =
       {
       arn: PricingPlanArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pricing plan you're updating."];
+          "The Amazon Resource Name (ARN) of the pricing plan that you're updating."];
       name: PricingPlanName.t option
         [@ocaml.doc
           "The name of the pricing plan. The name must be unique to each pricing plan."];
       description: PricingPlanDescription.t option
-        [@ocaml.doc "The pricing plan description."]}
+        [@ocaml.doc "The description of the pricing plan."]}
     let context_ = "UpdatePricingPlanInput"
     let make ?name =
       fun ?description -> fun ~arn -> fun () -> { name; description; arn }
@@ -3780,11 +5809,11 @@ module UpdatePricingPlanInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?description ?name ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" PricingPlanDescription.of_json in
-      let name = field_map json "Name" PricingPlanName.of_json in
-      let arn = field_map_exn json "Arn" PricingPlanArn.of_json in
+        field_map json__ "Description" PricingPlanDescription.of_json in
+      let name = field_map json__ "Name" PricingPlanName.of_json in
+      let arn = field_map_exn json__ "Arn" PricingPlanArn.of_json in
       make ?description ?name ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This updates an existing pricing plan."]
@@ -3807,12 +5836,13 @@ module UpdateCustomLineItemOutput =
           "A ListCustomLineItemChargeDetails containing the charge details of the successfully updated custom line item."];
       lastModifiedTime: Instant.t option
         [@ocaml.doc
-          "The most recent time the custom line item was modified."];
+          "The most recent time when the custom line item was modified."];
       associationSize: NumberOfAssociations.t option
         [@ocaml.doc
           "The number of resources that are associated to the custom line item."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -3839,6 +5869,8 @@ module UpdateCustomLineItemOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -3854,6 +5886,8 @@ module UpdateCustomLineItemOutput =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -3870,6 +5904,10 @@ module UpdateCustomLineItemOutput =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -3930,20 +5968,20 @@ module UpdateCustomLineItemOutput =
       make ?associationSize ?lastModifiedTime ?chargeDetails ?description
         ?name ?billingGroupArn ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationSize =
-        field_map json "AssociationSize" NumberOfAssociations.of_json in
+        field_map json__ "AssociationSize" NumberOfAssociations.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
       let chargeDetails =
-        field_map json "ChargeDetails"
+        field_map json__ "ChargeDetails"
           ListCustomLineItemChargeDetails.of_json in
       let description =
-        field_map json "Description" CustomLineItemDescription.of_json in
-      let name = field_map json "Name" CustomLineItemName.of_json in
+        field_map json__ "Description" CustomLineItemDescription.of_json in
+      let name = field_map json__ "Name" CustomLineItemName.of_json in
       let billingGroupArn =
-        field_map json "BillingGroupArn" BillingGroupFullArn.of_json in
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+        field_map json__ "BillingGroupArn" BillingGroupFullArn.of_json in
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
       make ?associationSize ?lastModifiedTime ?chargeDetails ?description
         ?name ?billingGroupArn ?arn ()
     let to_json v = composed_to_json to_value v
@@ -3955,7 +5993,7 @@ module UpdateCustomLineItemInput =
       {
       arn: CustomLineItemArn.t
         [@ocaml.doc "The ARN of the custom line item to be updated."];
-      name: BillingGroupName.t option
+      name: CustomLineItemName.t option
         [@ocaml.doc "The new name for the custom line item."];
       description: CustomLineItemDescription.t option
         [@ocaml.doc "The new line item description of the custom line item."];
@@ -3974,7 +6012,7 @@ module UpdateCustomLineItemInput =
     let to_value x =
       structure_to_value
         [("Arn", (Some (CustomLineItemArn.to_value x.arn)));
-        ("Name", (Option.map x.name ~f:BillingGroupName.to_value));
+        ("Name", (Option.map x.name ~f:CustomLineItemName.to_value));
         ("Description",
           (Option.map x.description ~f:CustomLineItemDescription.to_value));
         ("ChargeDetails",
@@ -3995,23 +6033,23 @@ module UpdateCustomLineItemInput =
         (Option.map ~f:CustomLineItemDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let name =
-        (Option.map ~f:BillingGroupName.of_xml) (Xml.child xml_arg0 "Name") in
+        (Option.map ~f:CustomLineItemName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         CustomLineItemArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?billingPeriodRange ?chargeDetails ?description ?name ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingPeriodRange =
-        field_map json "BillingPeriodRange"
+        field_map json__ "BillingPeriodRange"
           CustomLineItemBillingPeriodRange.of_json in
       let chargeDetails =
-        field_map json "ChargeDetails"
+        field_map json__ "ChargeDetails"
           UpdateCustomLineItemChargeDetails.of_json in
       let description =
-        field_map json "Description" CustomLineItemDescription.of_json in
-      let name = field_map json "Name" BillingGroupName.of_json in
-      let arn = field_map_exn json "Arn" CustomLineItemArn.of_json in
+        field_map json__ "Description" CustomLineItemDescription.of_json in
+      let name = field_map json__ "Name" CustomLineItemName.of_json in
+      let arn = field_map_exn json__ "Arn" CustomLineItemArn.of_json in
       make ?billingPeriodRange ?chargeDetails ?description ?name ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4038,13 +6076,17 @@ module UpdateBillingGroupOutput =
         [@ocaml.doc
           "The number of accounts in the particular billing group."];
       lastModifiedTime: Instant.t option
-        [@ocaml.doc "The most recent time the billing group was modified."];
+        [@ocaml.doc
+          "The most recent time when the billing group was modified."];
       status: BillingGroupStatus.t option
         [@ocaml.doc
           "The status of the billing group. Only one of the valid values can be used."];
       statusReason: BillingGroupStatusReason.t option
         [@ocaml.doc
-          "The reason why the billing group is in its current status."]}
+          "The reason why the billing group is in its current status."];
+      accountGrouping: UpdateBillingGroupAccountGrouping.t option
+        [@ocaml.doc
+          "Specifies if the billing group has automatic account association (AutoAssociate) enabled."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -4062,18 +6104,20 @@ module UpdateBillingGroupOutput =
                 fun ?lastModifiedTime ->
                   fun ?status ->
                     fun ?statusReason ->
-                      fun () ->
-                        {
-                          arn;
-                          name;
-                          description;
-                          primaryAccountId;
-                          pricingPlanArn;
-                          size;
-                          lastModifiedTime;
-                          status;
-                          statusReason
-                        }
+                      fun ?accountGrouping ->
+                        fun () ->
+                          {
+                            arn;
+                            name;
+                            description;
+                            primaryAccountId;
+                            pricingPlanArn;
+                            size;
+                            lastModifiedTime;
+                            status;
+                            statusReason;
+                            accountGrouping
+                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4153,9 +6197,15 @@ module UpdateBillingGroupOutput =
           (Option.map x.lastModifiedTime ~f:Instant.to_value));
         ("Status", (Option.map x.status ~f:BillingGroupStatus.to_value));
         ("StatusReason",
-          (Option.map x.statusReason ~f:BillingGroupStatusReason.to_value))]
+          (Option.map x.statusReason ~f:BillingGroupStatusReason.to_value));
+        ("AccountGrouping",
+          (Option.map x.accountGrouping
+             ~f:UpdateBillingGroupAccountGrouping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountGrouping =
+        (Option.map ~f:UpdateBillingGroupAccountGrouping.of_xml)
+          (Xml.child xml_arg0 "AccountGrouping") in
       let statusReason =
         (Option.map ~f:BillingGroupStatusReason.of_xml)
           (Xml.child xml_arg0 "StatusReason") in
@@ -4180,26 +6230,29 @@ module UpdateBillingGroupOutput =
         (Option.map ~f:BillingGroupName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?statusReason ?status ?lastModifiedTime ?size ?pricingPlanArn
-        ?primaryAccountId ?description ?name ?arn ()
+      make ?accountGrouping ?statusReason ?status ?lastModifiedTime ?size
+        ?pricingPlanArn ?primaryAccountId ?description ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountGrouping =
+        field_map json__ "AccountGrouping"
+          UpdateBillingGroupAccountGrouping.of_json in
       let statusReason =
-        field_map json "StatusReason" BillingGroupStatusReason.of_json in
-      let status = field_map json "Status" BillingGroupStatus.of_json in
+        field_map json__ "StatusReason" BillingGroupStatusReason.of_json in
+      let status = field_map json__ "Status" BillingGroupStatus.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Instant.of_json in
-      let size = field_map json "Size" NumberOfAccounts.of_json in
+        field_map json__ "LastModifiedTime" Instant.of_json in
+      let size = field_map json__ "Size" NumberOfAccounts.of_json in
       let pricingPlanArn =
-        field_map json "PricingPlanArn" PricingPlanArn.of_json in
+        field_map json__ "PricingPlanArn" PricingPlanArn.of_json in
       let primaryAccountId =
-        field_map json "PrimaryAccountId" AccountId.of_json in
+        field_map json__ "PrimaryAccountId" AccountId.of_json in
       let description =
-        field_map json "Description" BillingGroupDescription.of_json in
-      let name = field_map json "Name" BillingGroupName.of_json in
-      let arn = field_map json "Arn" BillingGroupArn.of_json in
-      make ?statusReason ?status ?lastModifiedTime ?size ?pricingPlanArn
-        ?primaryAccountId ?description ?name ?arn ()
+        field_map json__ "Description" BillingGroupDescription.of_json in
+      let name = field_map json__ "Name" BillingGroupName.of_json in
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?accountGrouping ?statusReason ?status ?lastModifiedTime ?size
+        ?pricingPlanArn ?primaryAccountId ?description ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This updates an existing billing group."]
 module UpdateBillingGroupInput =
@@ -4219,15 +6272,26 @@ module UpdateBillingGroupInput =
         [@ocaml.doc
           "The preferences and settings that will be used to compute the Amazon Web Services charges for a billing group."];
       description: BillingGroupDescription.t option
-        [@ocaml.doc "A description of the billing group."]}
+        [@ocaml.doc "A description of the billing group."];
+      accountGrouping: UpdateBillingGroupAccountGrouping.t option
+        [@ocaml.doc
+          "Specifies if the billing group has automatic account association (AutoAssociate) enabled."]}
     let context_ = "UpdateBillingGroupInput"
     let make ?name =
       fun ?status ->
         fun ?computationPreference ->
           fun ?description ->
-            fun ~arn ->
-              fun () ->
-                { name; status; computationPreference; description; arn }
+            fun ?accountGrouping ->
+              fun ~arn ->
+                fun () ->
+                  {
+                    name;
+                    status;
+                    computationPreference;
+                    description;
+                    accountGrouping;
+                    arn
+                  }
     let to_value x =
       structure_to_value
         [("Arn", (Some (BillingGroupArn.to_value x.arn)));
@@ -4237,9 +6301,15 @@ module UpdateBillingGroupInput =
           (Option.map x.computationPreference
              ~f:ComputationPreference.to_value));
         ("Description",
-          (Option.map x.description ~f:BillingGroupDescription.to_value))]
+          (Option.map x.description ~f:BillingGroupDescription.to_value));
+        ("AccountGrouping",
+          (Option.map x.accountGrouping
+             ~f:UpdateBillingGroupAccountGrouping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let accountGrouping =
+        (Option.map ~f:UpdateBillingGroupAccountGrouping.of_xml)
+          (Xml.child xml_arg0 "AccountGrouping") in
       let description =
         (Option.map ~f:BillingGroupDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
@@ -4254,17 +6324,23 @@ module UpdateBillingGroupInput =
       let arn =
         BillingGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?description ?computationPreference ?status ?name ~arn ()
+      make ?accountGrouping ?description ?computationPreference ?status ?name
+        ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let accountGrouping =
+        field_map json__ "AccountGrouping"
+          UpdateBillingGroupAccountGrouping.of_json in
       let description =
-        field_map json "Description" BillingGroupDescription.of_json in
+        field_map json__ "Description" BillingGroupDescription.of_json in
       let computationPreference =
-        field_map json "ComputationPreference" ComputationPreference.of_json in
-      let status = field_map json "Status" BillingGroupStatus.of_json in
-      let name = field_map json "Name" BillingGroupName.of_json in
-      let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
-      make ?description ?computationPreference ?status ?name ~arn ()
+        field_map json__ "ComputationPreference"
+          ComputationPreference.of_json in
+      let status = field_map json__ "Status" BillingGroupStatus.of_json in
+      let name = field_map json__ "Name" BillingGroupName.of_json in
+      let arn = field_map_exn json__ "Arn" BillingGroupArn.of_json in
+      make ?accountGrouping ?description ?computationPreference ?status ?name
+        ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This updates an existing billing group."]
 module UntagResourceResponse =
@@ -4368,9 +6444,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes specified tags from a resource."]
@@ -4474,9 +6550,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4557,8 +6633,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list the tags for a resource."]
 module ListTagsForResourceRequest =
@@ -4579,8 +6655,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list the tags for a resource."]
@@ -4683,15 +6759,16 @@ module ListResourcesAssociatedToCustomLineItemOutput =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?nextToken ?associatedResources ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let associatedResources =
-        field_map json "AssociatedResources"
+        field_map json__ "AssociatedResources"
           ListResourcesAssociatedToCustomLineItemResponseList.of_json in
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
       make ?nextToken ?associatedResources ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the resources associated to a custom line item."]
+  end[@@ocaml.doc
+       "List the resources that are associated to a custom line item."]
 module ListResourcesAssociatedToCustomLineItemInput =
   struct
     type nonrec t =
@@ -4707,7 +6784,7 @@ module ListResourcesAssociatedToCustomLineItemInput =
           "(Optional) The maximum number of resource associations to be retrieved."];
       nextToken: Token.t option
         [@ocaml.doc
-          "(Optional) The pagination token returned by a previous request."];
+          "(Optional) The pagination token that's returned by a previous request."];
       filters: ListResourcesAssociatedToCustomLineItemFilter.t option
         [@ocaml.doc
           "(Optional) A ListResourcesAssociatedToCustomLineItemFilter that can specify the types of resources that should be retrieved."]}
@@ -4748,19 +6825,20 @@ module ListResourcesAssociatedToCustomLineItemInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ~arn ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filters =
-        field_map json "Filters"
+        field_map json__ "Filters"
           ListResourcesAssociatedToCustomLineItemFilter.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxCustomLineItemResults.of_json in
-      let arn = field_map_exn json "Arn" CustomLineItemArn.of_json in
+        field_map json__ "MaxResults" MaxCustomLineItemResults.of_json in
+      let arn = field_map_exn json__ "Arn" CustomLineItemArn.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?filters ?nextToken ?maxResults ~arn ?billingPeriod ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "List the resources associated to a custom line item."]
+  end[@@ocaml.doc
+       "List the resources that are associated to a custom line item."]
 module ListPricingRulesOutput =
   struct
     type nonrec t =
@@ -4772,7 +6850,7 @@ module ListPricingRulesOutput =
         [@ocaml.doc "A list containing the described pricing rules."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get pricing rules."]}
+          "The pagination token that's used on subsequent calls to get pricing rules."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -4850,12 +6928,12 @@ module ListPricingRulesOutput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingRules ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let pricingRules =
-        field_map json "PricingRules" PricingRuleList.of_json in
+        field_map json__ "PricingRules" PricingRuleList.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?pricingRules ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4873,7 +6951,7 @@ module ListPricingRulesInput =
         [@ocaml.doc "The maximum number of pricing rules to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent call to get pricing rules."]}
+          "The pagination token that's used on subsequent call to get pricing rules."]}
     let make ?billingPeriod =
       fun ?filters ->
         fun ?maxResults ->
@@ -4903,13 +6981,13 @@ module ListPricingRulesInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxPricingRuleResults.of_json in
-      let filters = field_map json "Filters" ListPricingRulesFilter.of_json in
+        field_map json__ "MaxResults" MaxPricingRuleResults.of_json in
+      let filters = field_map json__ "Filters" ListPricingRulesFilter.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4926,7 +7004,7 @@ module ListPricingRulesAssociatedToPricingPlanOutput =
           "The Amazon Resource Name (ARN) of the pricing plan for which associations are listed."];
       pricingRuleArns: PricingRuleArns.t option
         [@ocaml.doc
-          "A list containing pricing rules associated with the requested pricing plan."];
+          "A list containing pricing rules that are associated with the requested pricing plan."];
       nextToken: Token.t option
         [@ocaml.doc "The pagination token to be used on subsequent calls."]}
     type nonrec error =
@@ -5022,17 +7100,18 @@ module ListPricingRulesAssociatedToPricingPlanOutput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingRuleArns ?pricingPlanArn ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let pricingRuleArns =
-        field_map json "PricingRuleArns" PricingRuleArns.of_json in
+        field_map json__ "PricingRuleArns" PricingRuleArns.of_json in
       let pricingPlanArn =
-        field_map json "PricingPlanArn" PricingPlanArn.of_json in
+        field_map json__ "PricingPlanArn" PricingPlanArn.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?pricingRuleArns ?pricingPlanArn ?billingPeriod ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the pricing rules associated with a pricing plan."]
+  end[@@ocaml.doc
+       "Lists the pricing rules that are associated with a pricing plan."]
 module ListPricingRulesAssociatedToPricingPlanInput =
   struct
     type nonrec t =
@@ -5079,17 +7158,18 @@ module ListPricingRulesAssociatedToPricingPlanInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ~pricingPlanArn ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxPricingPlanResults.of_json in
+        field_map json__ "MaxResults" MaxPricingPlanResults.of_json in
       let pricingPlanArn =
-        field_map_exn json "PricingPlanArn" PricingPlanArn.of_json in
+        field_map_exn json__ "PricingPlanArn" PricingPlanArn.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?maxResults ~pricingPlanArn ?billingPeriod ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the pricing rules associated with a pricing plan."]
+  end[@@ocaml.doc
+       "Lists the pricing rules that are associated with a pricing plan."]
 module ListPricingPlansOutput =
   struct
     type nonrec t =
@@ -5101,7 +7181,7 @@ module ListPricingPlansOutput =
         [@ocaml.doc "A list of PricingPlanListElement retrieved."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get pricing plans."]}
+          "The pagination token that's used on subsequent calls to get pricing plans."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5179,12 +7259,12 @@ module ListPricingPlansOutput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingPlans ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let pricingPlans =
-        field_map json "PricingPlans" PricingPlanList.of_json in
+        field_map json__ "PricingPlans" PricingPlanList.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?pricingPlans ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5202,7 +7282,7 @@ module ListPricingPlansInput =
         [@ocaml.doc "The maximum number of pricing plans to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent call to get pricing plans."]}
+          "The pagination token that's used on subsequent call to get pricing plans."]}
     let make ?billingPeriod =
       fun ?filters ->
         fun ?maxResults ->
@@ -5232,13 +7312,13 @@ module ListPricingPlansInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxPricingPlanResults.of_json in
-      let filters = field_map json "Filters" ListPricingPlansFilter.of_json in
+        field_map json__ "MaxResults" MaxPricingPlanResults.of_json in
+      let filters = field_map json__ "Filters" ListPricingPlansFilter.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?maxResults ?filters ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5255,7 +7335,7 @@ module ListPricingPlansAssociatedWithPricingRuleOutput =
           "The pricing rule Amazon Resource Name (ARN) for which associations will be listed."];
       pricingPlanArns: PricingPlanArns.t option
         [@ocaml.doc
-          "The list containing pricing plans associated with the requested pricing rule."];
+          "The list containing pricing plans that are associated with the requested pricing rule."];
       nextToken: Token.t option
         [@ocaml.doc "The pagination token to be used on subsequent calls."]}
     type nonrec error =
@@ -5351,18 +7431,18 @@ module ListPricingPlansAssociatedWithPricingRuleOutput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?pricingPlanArns ?pricingRuleArn ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let pricingPlanArns =
-        field_map json "PricingPlanArns" PricingPlanArns.of_json in
+        field_map json__ "PricingPlanArns" PricingPlanArns.of_json in
       let pricingRuleArn =
-        field_map json "PricingRuleArn" PricingRuleArn.of_json in
+        field_map json__ "PricingRuleArn" PricingRuleArn.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?pricingPlanArns ?pricingRuleArn ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of the pricing plans associated with a pricing rule."]
+       "A list of the pricing plans that are associated with a pricing rule."]
 module ListPricingPlansAssociatedWithPricingRuleInput =
   struct
     type nonrec t =
@@ -5409,18 +7489,18 @@ module ListPricingPlansAssociatedWithPricingRuleInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?maxResults ~pricingRuleArn ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxPricingRuleResults.of_json in
+        field_map json__ "MaxResults" MaxPricingRuleResults.of_json in
       let pricingRuleArn =
-        field_map_exn json "PricingRuleArn" PricingRuleArn.of_json in
+        field_map_exn json__ "PricingRuleArn" PricingRuleArn.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?maxResults ~pricingRuleArn ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A list of the pricing plans associated with a pricing rule."]
+       "A list of the pricing plans that are associated with a pricing rule."]
 module ListCustomLineItemsOutput =
   struct
     type nonrec t =
@@ -5429,7 +7509,7 @@ module ListCustomLineItemsOutput =
         [@ocaml.doc "A list of FreeFormLineItemListElements received."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get custom line items (FFLIs)."]}
+          "The pagination token that's used on subsequent calls to get custom line items (FFLIs)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5509,10 +7589,10 @@ module ListCustomLineItemsOutput =
           (Xml.child xml_arg0 "CustomLineItems") in
       make ?nextToken ?customLineItems ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let customLineItems =
-        field_map json "CustomLineItems" CustomLineItemList.of_json in
+        field_map json__ "CustomLineItems" CustomLineItemList.of_json in
       make ?nextToken ?customLineItems ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5524,11 +7604,11 @@ module ListCustomLineItemsInput =
       billingPeriod: BillingPeriod.t option
         [@ocaml.doc
           "The preferred billing period to get custom line items (FFLIs)."];
-      maxResults: MaxBillingGroupResults.t option
+      maxResults: MaxCustomLineItemResults.t option
         [@ocaml.doc "The maximum number of billing groups to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get custom line items (FFLIs)."];
+          "The pagination token that's used on subsequent calls to get custom line items (FFLIs)."];
       filters: ListCustomLineItemsFilter.t option
         [@ocaml.doc
           "A ListCustomLineItemsFilter that specifies the custom line item names and/or billing group Amazon Resource Names (ARNs) to retrieve FFLI information."]}
@@ -5542,7 +7622,7 @@ module ListCustomLineItemsInput =
         [("BillingPeriod",
            (Option.map x.billingPeriod ~f:BillingPeriod.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:MaxBillingGroupResults.to_value));
+          (Option.map x.maxResults ~f:MaxCustomLineItemResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
         ("Filters",
           (Option.map x.filters ~f:ListCustomLineItemsFilter.to_value))]
@@ -5554,25 +7634,170 @@ module ListCustomLineItemsInput =
       let nextToken =
         (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
-        (Option.map ~f:MaxBillingGroupResults.of_xml)
+        (Option.map ~f:MaxCustomLineItemResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
       let billingPeriod =
         (Option.map ~f:BillingPeriod.of_xml)
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filters =
-        field_map json "Filters" ListCustomLineItemsFilter.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "Filters" ListCustomLineItemsFilter.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxBillingGroupResults.of_json in
+        field_map json__ "MaxResults" MaxCustomLineItemResults.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A paginated call to get a list of all custom line items (FFLIs) for the given billing period. If you don't provide a billing period, the current billing period is used."]
+module ListCustomLineItemVersionsOutput =
+  struct
+    type nonrec t =
+      {
+      customLineItemVersions: CustomLineItemVersionList.t option
+        [@ocaml.doc
+          "A list of CustomLineItemVersionListElements that are received."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "The pagination token that's used on subsequent calls to retrieve custom line item versions."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?customLineItemVersions =
+      fun ?nextToken -> fun () -> { customLineItemVersions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CustomLineItemVersions",
+           (Option.map x.customLineItemVersions
+              ~f:CustomLineItemVersionList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let customLineItemVersions =
+        (Option.map ~f:CustomLineItemVersionList.of_xml)
+          (Xml.child xml_arg0 "CustomLineItemVersions") in
+      make ?nextToken ?customLineItemVersions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let customLineItemVersions =
+        field_map json__ "CustomLineItemVersions"
+          CustomLineItemVersionList.of_json in
+      make ?nextToken ?customLineItemVersions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A paginated call to get a list of all custom line item versions."]
+module ListCustomLineItemVersionsInput =
+  struct
+    type nonrec t =
+      {
+      arn: CustomLineItemArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for the custom line item."];
+      maxResults: MaxCustomLineItemResults.t option
+        [@ocaml.doc
+          "The maximum number of custom line item versions to retrieve."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "The pagination token that's used on subsequent calls to retrieve custom line item versions."];
+      filters: ListCustomLineItemVersionsFilter.t option
+        [@ocaml.doc
+          "A ListCustomLineItemVersionsFilter that specifies the billing period range in which the custom line item versions are applied."]}
+    let context_ = "ListCustomLineItemVersionsInput"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?filters ->
+          fun ~arn -> fun () -> { maxResults; nextToken; filters; arn }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Some (CustomLineItemArn.to_value x.arn)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxCustomLineItemResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value));
+        ("Filters",
+          (Option.map x.filters ~f:ListCustomLineItemVersionsFilter.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListCustomLineItemVersionsFilter.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxCustomLineItemResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let arn =
+        CustomLineItemArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      make ?filters ?nextToken ?maxResults ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" ListCustomLineItemVersionsFilter.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxCustomLineItemResults.of_json in
+      let arn = field_map_exn json__ "Arn" CustomLineItemArn.of_json in
+      make ?filters ?nextToken ?maxResults ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A paginated call to get a list of all custom line item versions."]
 module ListBillingGroupsOutput =
   struct
     type nonrec t =
@@ -5581,7 +7806,7 @@ module ListBillingGroupsOutput =
         [@ocaml.doc "A list of BillingGroupListElement retrieved."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get billing groups."]}
+          "The pagination token that's used on subsequent calls to get billing groups."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5661,10 +7886,10 @@ module ListBillingGroupsOutput =
           (Xml.child xml_arg0 "BillingGroups") in
       make ?nextToken ?billingGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let billingGroups =
-        field_map json "BillingGroups" BillingGroupList.of_json in
+        field_map json__ "BillingGroups" BillingGroupList.of_json in
       make ?nextToken ?billingGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5679,7 +7904,7 @@ module ListBillingGroupsInput =
         [@ocaml.doc "The maximum number of billing groups to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get billing groups."];
+          "The pagination token that's used on subsequent calls to get billing groups."];
       filters: ListBillingGroupsFilter.t option
         [@ocaml.doc
           "A ListBillingGroupsFilter that specifies the billing group and pricing plan to retrieve billing group information."]}
@@ -5712,13 +7937,14 @@ module ListBillingGroupsInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" ListBillingGroupsFilter.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let filters =
+        field_map json__ "Filters" ListBillingGroupsFilter.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxBillingGroupResults.of_json in
+        field_map json__ "MaxResults" MaxBillingGroupResults.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5731,7 +7957,7 @@ module ListBillingGroupCostReportsOutput =
         [@ocaml.doc "A list of BillingGroupCostReportElement retrieved."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get reports."]}
+          "The pagination token that's used on subsequent calls to get reports."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5812,10 +8038,10 @@ module ListBillingGroupCostReportsOutput =
           (Xml.child xml_arg0 "BillingGroupCostReports") in
       make ?nextToken ?billingGroupCostReports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let billingGroupCostReports =
-        field_map json "BillingGroupCostReports"
+        field_map json__ "BillingGroupCostReports"
           BillingGroupCostReportList.of_json in
       make ?nextToken ?billingGroupCostReports ()
     let to_json v = composed_to_json to_value v
@@ -5831,7 +8057,7 @@ module ListBillingGroupCostReportsInput =
         [@ocaml.doc "The maximum number of reports to retrieve."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get reports."];
+          "The pagination token that's used on subsequent calls to get reports."];
       filters: ListBillingGroupCostReportsFilter.t option
         [@ocaml.doc
           "A ListBillingGroupCostReportsFilter to specify billing groups to retrieve reports from."]}
@@ -5864,14 +8090,14 @@ module ListBillingGroupCostReportsInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let filters =
-        field_map json "Filters" ListBillingGroupCostReportsFilter.of_json in
-      let nextToken = field_map json "NextToken" Token.of_json in
+        field_map json__ "Filters" ListBillingGroupCostReportsFilter.of_json in
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxBillingGroupResults.of_json in
+        field_map json__ "MaxResults" MaxBillingGroupResults.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?filters ?nextToken ?maxResults ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5884,7 +8110,7 @@ module ListAccountAssociationsOutput =
         [@ocaml.doc "The list of linked accounts in the payer account."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to get accounts."]}
+          "The pagination token that's used on subsequent calls to get accounts."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -5964,14 +8190,14 @@ module ListAccountAssociationsOutput =
           (Xml.child xml_arg0 "LinkedAccounts") in
       make ?nextToken ?linkedAccounts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let linkedAccounts =
-        field_map json "LinkedAccounts" AccountAssociationsList.of_json in
+        field_map json__ "LinkedAccounts" AccountAssociationsList.of_json in
       make ?nextToken ?linkedAccounts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Web Services Billing Conductor is in beta release and is subject to change. Your use of Amazon Web Services Billing Conductor is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This is a paginated call to list linked accounts that are linked to the payer account for the specified time period. If no information is provided, the current billing period is used. The response will optionally include the billing group associated with the linked account."]
+       "This is a paginated call to list linked accounts that are linked to the payer account for the specified time period. If no information is provided, the current billing period is used. The response will optionally include the billing group that's associated with the linked account."]
 module ListAccountAssociationsInput =
   struct
     type nonrec t =
@@ -5981,10 +8207,10 @@ module ListAccountAssociationsInput =
           "The preferred billing period to get account associations."];
       filters: ListAccountAssociationsFilter.t option
         [@ocaml.doc
-          "The filter on the account ID of the linked account, or any of the following: MONITORED: linked accounts that are associated to billing groups. UNMONITORED: linked accounts that are not associated to billing groups. Billing Group Arn: linked accounts that are associated to the provided billing group Arn."];
+          "The filter on the account ID of the linked account, or any of the following: MONITORED: linked accounts that are associated to billing groups. UNMONITORED: linked accounts that aren't associated to billing groups. Billing Group Arn: linked accounts that are associated to the provided billing group Arn."];
       nextToken: Token.t option
         [@ocaml.doc
-          "The pagination token used on subsequent calls to retrieve accounts."]}
+          "The pagination token that's used on subsequent calls to retrieve accounts."]}
     let make ?billingPeriod =
       fun ?filters ->
         fun ?nextToken -> fun () -> { billingPeriod; filters; nextToken }
@@ -6007,16 +8233,184 @@ module ListAccountAssociationsInput =
           (Xml.child xml_arg0 "BillingPeriod") in
       make ?nextToken ?filters ?billingPeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Token.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
       let filters =
-        field_map json "Filters" ListAccountAssociationsFilter.of_json in
+        field_map json__ "Filters" ListAccountAssociationsFilter.of_json in
       let billingPeriod =
-        field_map json "BillingPeriod" BillingPeriod.of_json in
+        field_map json__ "BillingPeriod" BillingPeriod.of_json in
       make ?nextToken ?filters ?billingPeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Web Services Billing Conductor is in beta release and is subject to change. Your use of Amazon Web Services Billing Conductor is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This is a paginated call to list linked accounts that are linked to the payer account for the specified time period. If no information is provided, the current billing period is used. The response will optionally include the billing group associated with the linked account."]
+       "This is a paginated call to list linked accounts that are linked to the payer account for the specified time period. If no information is provided, the current billing period is used. The response will optionally include the billing group that's associated with the linked account."]
+module GetBillingGroupCostReportOutput =
+  struct
+    type nonrec t =
+      {
+      billingGroupCostReportResults:
+        BillingGroupCostReportResultsList.t option
+        [@ocaml.doc "The list of margin summary reports."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "The pagination token used on subsequent calls to get reports."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?billingGroupCostReportResults =
+      fun ?nextToken ->
+        fun () -> { billingGroupCostReportResults; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BillingGroupCostReportResults",
+           (Option.map x.billingGroupCostReportResults
+              ~f:BillingGroupCostReportResultsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let billingGroupCostReportResults =
+        (Option.map ~f:BillingGroupCostReportResultsList.of_xml)
+          (Xml.child xml_arg0 "BillingGroupCostReportResults") in
+      make ?nextToken ?billingGroupCostReportResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let billingGroupCostReportResults =
+        field_map json__ "BillingGroupCostReportResults"
+          BillingGroupCostReportResultsList.of_json in
+      make ?nextToken ?billingGroupCostReportResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the margin summary report, which includes the Amazon Web Services cost and charged amount (pro forma cost) by Amazon Web Services service for a specific billing group."]
+module GetBillingGroupCostReportInput =
+  struct
+    type nonrec t =
+      {
+      arn: BillingGroupArn.t
+        [@ocaml.doc
+          "The Amazon Resource Number (ARN) that uniquely identifies the billing group."];
+      billingPeriodRange: BillingPeriodRange.t option
+        [@ocaml.doc
+          "A time range for which the margin summary is effective. You can specify up to 12 months."];
+      groupBy: GroupByAttributesList.t option
+        [@ocaml.doc
+          "A list of strings that specify the attributes that are used to break down costs in the margin summary reports for the billing group. For example, you can view your costs by the Amazon Web Services service name or the billing period."];
+      maxResults: MaxBillingGroupCostReportResults.t option
+        [@ocaml.doc
+          "The maximum number of margin summary reports to retrieve."];
+      nextToken: Token.t option
+        [@ocaml.doc
+          "The pagination token used on subsequent calls to get reports."]}
+    let context_ = "GetBillingGroupCostReportInput"
+    let make ?billingPeriodRange =
+      fun ?groupBy ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ~arn ->
+              fun () ->
+                { billingPeriodRange; groupBy; maxResults; nextToken; arn }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Some (BillingGroupArn.to_value x.arn)));
+        ("BillingPeriodRange",
+          (Option.map x.billingPeriodRange ~f:BillingPeriodRange.to_value));
+        ("GroupBy", (Option.map x.groupBy ~f:GroupByAttributesList.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MaxBillingGroupCostReportResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxBillingGroupCostReportResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let groupBy =
+        (Option.map ~f:GroupByAttributesList.of_xml)
+          (Xml.child xml_arg0 "GroupBy") in
+      let billingPeriodRange =
+        (Option.map ~f:BillingPeriodRange.of_xml)
+          (Xml.child xml_arg0 "BillingPeriodRange") in
+      let arn =
+        BillingGroupArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      make ?nextToken ?maxResults ?groupBy ?billingPeriodRange ~arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Token.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          MaxBillingGroupCostReportResults.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupByAttributesList.of_json in
+      let billingPeriodRange =
+        field_map json__ "BillingPeriodRange" BillingPeriodRange.of_json in
+      let arn = field_map_exn json__ "Arn" BillingGroupArn.of_json in
+      make ?nextToken ?maxResults ?groupBy ?billingPeriodRange ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the margin summary report, which includes the Amazon Web Services cost and charged amount (pro forma cost) by Amazon Web Services service for a specific billing group."]
 module DisassociatePricingRulesOutput =
   struct
     type nonrec t =
@@ -6106,8 +8500,8 @@ module DisassociatePricingRulesOutput =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociates a list of pricing rules from a pricing plan."]
@@ -6139,11 +8533,11 @@ module DisassociatePricingRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~pricingRuleArns ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pricingRuleArns =
-        field_map_exn json "PricingRuleArns"
+        field_map_exn json__ "PricingRuleArns"
           PricingRuleArnsNonEmptyInput.of_json in
-      let arn = field_map_exn json "Arn" PricingPlanArn.of_json in
+      let arn = field_map_exn json__ "Arn" PricingPlanArn.of_json in
       make ~pricingRuleArns ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6237,8 +8631,9 @@ module DisassociateAccountsOutput =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the specified list of account IDs from the given billing group."]
@@ -6267,9 +8662,10 @@ module DisassociateAccountsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~accountIds ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
-      let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
+    let of_json json__ =
+      let accountIds =
+        field_map_exn json__ "AccountIds" AccountIdList.of_json in
+      let arn = field_map_exn json__ "Arn" BillingGroupArn.of_json in
       make ~accountIds ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6354,18 +8750,18 @@ module DeletePricingRuleOutput =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingRuleArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingRuleArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the pricing rule identified by the input Amazon Resource Name (ARN)."]
+       "Deletes the pricing rule that's identified by the input Amazon Resource Name (ARN)."]
 module DeletePricingRuleInput =
   struct
     type nonrec t =
       {
       arn: PricingRuleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pricing rule you are deleting."]}
+          "The Amazon Resource Name (ARN) of the pricing rule that you are deleting."]}
     let context_ = "DeletePricingRuleInput"
     let make ~arn = fun () -> { arn }
     let to_value x =
@@ -6377,12 +8773,12 @@ module DeletePricingRuleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" PricingRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" PricingRuleArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the pricing rule identified by the input Amazon Resource Name (ARN)."]
+       "Deletes the pricing rule that's identified by the input Amazon Resource Name (ARN)."]
 module DeletePricingPlanOutput =
   struct
     type nonrec t =
@@ -6463,8 +8859,8 @@ module DeletePricingPlanOutput =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a pricing plan. The pricing plan must not be associated with any billing groups to delete successfully."]
@@ -6474,7 +8870,7 @@ module DeletePricingPlanInput =
       {
       arn: PricingPlanArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the pricing plan you're deleting."]}
+          "The Amazon Resource Name (ARN) of the pricing plan that you're deleting."]}
     let context_ = "DeletePricingPlanInput"
     let make ~arn = fun () -> { arn }
     let to_value x =
@@ -6486,8 +8882,8 @@ module DeletePricingPlanInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" PricingPlanArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" PricingPlanArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6497,7 +8893,7 @@ module DeleteCustomLineItemOutput =
     type nonrec t =
       {
       arn: CustomLineItemArn.t option
-        [@ocaml.doc "Then ARN of the deleted custom line item."]}
+        [@ocaml.doc "The ARN of the deleted custom line item."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -6571,8 +8967,8 @@ module DeleteCustomLineItemOutput =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6603,11 +8999,11 @@ module DeleteCustomLineItemInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?billingPeriodRange ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingPeriodRange =
-        field_map json "BillingPeriodRange"
+        field_map json__ "BillingPeriodRange"
           CustomLineItemBillingPeriodRange.of_json in
-      let arn = field_map_exn json "Arn" CustomLineItemArn.of_json in
+      let arn = field_map_exn json__ "Arn" CustomLineItemArn.of_json in
       make ?billingPeriodRange ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6683,8 +9079,9 @@ module DeleteBillingGroupOutput =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a billing group."]
 module DeleteBillingGroupInput =
@@ -6693,7 +9090,7 @@ module DeleteBillingGroupInput =
       {
       arn: BillingGroupArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the billing group you're deleting."]}
+          "The Amazon Resource Name (ARN) of the billing group that you're deleting."]}
     let context_ = "DeleteBillingGroupInput"
     let make ~arn = fun () -> { arn }
     let to_value x =
@@ -6705,8 +9102,8 @@ module DeleteBillingGroupInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" BillingGroupArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a billing group."]
@@ -6801,8 +9198,8 @@ module CreatePricingRuleOutput =
         (Option.map ~f:PricingRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingRuleArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingRuleArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a pricing rule can be associated to a pricing plan, or a set of pricing plans."]
@@ -6812,7 +9209,7 @@ module CreatePricingRuleInput =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "The token that is needed to support idempotency. Idempotency isn't currently supported, but will be implemented in a future update."];
+          "A unique, case-sensitive identifier that you specify to ensure idempotency of the request. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries complete successfully without performing any further actions."];
       name: PricingRuleName.t
         [@ocaml.doc
           "The pricing rule name. The names must be unique to each pricing rule."];
@@ -6820,37 +9217,57 @@ module CreatePricingRuleInput =
         [@ocaml.doc "The pricing rule description."];
       scope: PricingRuleScope.t
         [@ocaml.doc
-          "The scope of pricing rule that indicates if it is globally applicable, or is service-specific."];
+          "The scope of pricing rule that indicates if it's globally applicable, or it's service-specific."];
       type_: PricingRuleType.t [@ocaml.doc "The type of pricing rule."];
-      modifierPercentage: ModifierPercentage.t
+      modifierPercentage: ModifierPercentage.t option
         [@ocaml.doc
-          "A percentage modifier applied on the public pricing rates."];
+          "A percentage modifier that's applied on the public pricing rates. Your entry will be rounded to the nearest 2 decimal places."];
       service: Service.t option
         [@ocaml.doc
-          "If the Scope attribute is set to SERVICE, the attribute indicates which service the PricingRule is applicable for."];
+          "If the Scope attribute is set to SERVICE or SKU, the attribute indicates which service the PricingRule is applicable for."];
       tags: TagMap.t option
         [@ocaml.doc
-          "A map that contains tag keys and tag values that are attached to a pricing rule."]}
+          "A map that contains tag keys and tag values that are attached to a pricing rule."];
+      billingEntity: BillingEntity.t option
+        [@ocaml.doc
+          "The seller of services provided by Amazon Web Services, their affiliates, or third-party providers selling services via Amazon Web Services Marketplace."];
+      tiering: CreateTieringInput.t option
+        [@ocaml.doc
+          "The set of tiering configurations for the pricing rule."];
+      usageType: UsageType.t option
+        [@ocaml.doc
+          "Usage type is the unit that each service uses to measure the usage of a specific type of resource. If the Scope attribute is set to SKU, this attribute indicates which usage type the PricingRule is modifying. For example, USW2-BoxUsage:m2.2xlarge describes an M2 High Memory Double Extra Large instance in the US West (Oregon) Region."];
+      operation: Operation.t option
+        [@ocaml.doc
+          "Operation is the specific Amazon Web Services action covered by this line item. This describes the specific usage of the line item. If the Scope attribute is set to SKU, this attribute indicates which operation the PricingRule is modifying. For example, a value of RunInstances:0202 indicates the operation of running an Amazon EC2 instance."]}
     let context_ = "CreatePricingRuleInput"
     let make ?clientToken =
       fun ?description ->
-        fun ?service ->
-          fun ?tags ->
-            fun ~name ->
-              fun ~scope ->
-                fun ~type_ ->
-                  fun ~modifierPercentage ->
-                    fun () ->
-                      {
-                        clientToken;
-                        description;
-                        service;
-                        tags;
-                        name;
-                        scope;
-                        type_;
-                        modifierPercentage
-                      }
+        fun ?modifierPercentage ->
+          fun ?service ->
+            fun ?tags ->
+              fun ?billingEntity ->
+                fun ?tiering ->
+                  fun ?usageType ->
+                    fun ?operation ->
+                      fun ~name ->
+                        fun ~scope ->
+                          fun ~type_ ->
+                            fun () ->
+                              {
+                                clientToken;
+                                description;
+                                modifierPercentage;
+                                service;
+                                tags;
+                                billingEntity;
+                                tiering;
+                                usageType;
+                                operation;
+                                name;
+                                scope;
+                                type_
+                              }
     let to_value x =
       structure_to_value
         [("X-Amzn-Client-Token",
@@ -6861,17 +9278,32 @@ module CreatePricingRuleInput =
         ("Scope", (Some (PricingRuleScope.to_value x.scope)));
         ("Type", (Some (PricingRuleType.to_value x.type_)));
         ("ModifierPercentage",
-          (Some (ModifierPercentage.to_value x.modifierPercentage)));
+          (Option.map x.modifierPercentage ~f:ModifierPercentage.to_value));
         ("Service", (Option.map x.service ~f:Service.to_value));
-        ("Tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("BillingEntity",
+          (Option.map x.billingEntity ~f:BillingEntity.to_value));
+        ("Tiering", (Option.map x.tiering ~f:CreateTieringInput.to_value));
+        ("UsageType", (Option.map x.usageType ~f:UsageType.to_value));
+        ("Operation", (Option.map x.operation ~f:Operation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let operation =
+        (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      let usageType =
+        (Option.map ~f:UsageType.of_xml) (Xml.child xml_arg0 "UsageType") in
+      let tiering =
+        (Option.map ~f:CreateTieringInput.of_xml)
+          (Xml.child xml_arg0 "Tiering") in
+      let billingEntity =
+        (Option.map ~f:BillingEntity.of_xml)
+          (Xml.child xml_arg0 "BillingEntity") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "Tags") in
       let service =
         (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
       let modifierPercentage =
-        ModifierPercentage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ModifierPercentage") in
+        (Option.map ~f:ModifierPercentage.of_xml)
+          (Xml.child xml_arg0 "ModifierPercentage") in
       let type_ =
         PricingRuleType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
@@ -6887,22 +9319,27 @@ module CreatePricingRuleInput =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
-      make ?tags ?service ~modifierPercentage ~type_ ~scope ?description
-        ~name ?clientToken ()
+      make ?operation ?usageType ?tiering ?billingEntity ?tags ?service
+        ?modifierPercentage ~type_ ~scope ?description ~name ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
-      let service = field_map json "Service" Service.of_json in
+    let of_json json__ =
+      let operation = field_map json__ "Operation" Operation.of_json in
+      let usageType = field_map json__ "UsageType" UsageType.of_json in
+      let tiering = field_map json__ "Tiering" CreateTieringInput.of_json in
+      let billingEntity =
+        field_map json__ "BillingEntity" BillingEntity.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
+      let service = field_map json__ "Service" Service.of_json in
       let modifierPercentage =
-        field_map_exn json "ModifierPercentage" ModifierPercentage.of_json in
-      let type_ = field_map_exn json "Type" PricingRuleType.of_json in
-      let scope = field_map_exn json "Scope" PricingRuleScope.of_json in
+        field_map json__ "ModifierPercentage" ModifierPercentage.of_json in
+      let type_ = field_map_exn json__ "Type" PricingRuleType.of_json in
+      let scope = field_map_exn json__ "Scope" PricingRuleScope.of_json in
       let description =
-        field_map json "Description" PricingRuleDescription.of_json in
-      let name = field_map_exn json "Name" PricingRuleName.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      make ?tags ?service ~modifierPercentage ~type_ ~scope ?description
-        ~name ?clientToken ()
+        field_map json__ "Description" PricingRuleDescription.of_json in
+      let name = field_map_exn json__ "Name" PricingRuleName.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      make ?operation ?usageType ?tiering ?billingEntity ?tags ?service
+        ?modifierPercentage ~type_ ~scope ?description ~name ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a pricing rule can be associated to a pricing plan, or a set of pricing plans."]
@@ -7006,8 +9443,8 @@ module CreatePricingPlanOutput =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a pricing plan that is used for computing Amazon Web Services charges for billing groups."]
@@ -7017,12 +9454,12 @@ module CreatePricingPlanInput =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "The token that is needed to support idempotency. Idempotency isn't currently supported, but will be implemented in a future update."];
+          "A unique, case-sensitive identifier that you specify to ensure idempotency of the request. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries complete successfully without performing any further actions."];
       name: PricingPlanName.t
         [@ocaml.doc
-          "The pricing plan name. The names must be unique to each pricing plan."];
+          "The name of the pricing plan. The names must be unique to each pricing plan."];
       description: PricingPlanDescription.t option
-        [@ocaml.doc "The pricing plan description."];
+        [@ocaml.doc "The description of the pricing plan."];
       pricingRuleArns: PricingRuleArnsInput.t option
         [@ocaml.doc
           "A list of Amazon Resource Names (ARNs) that define the pricing plan parameters."];
@@ -7064,14 +9501,14 @@ module CreatePricingPlanInput =
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
       make ?tags ?pricingRuleArns ?description ~name ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let pricingRuleArns =
-        field_map json "PricingRuleArns" PricingRuleArnsInput.of_json in
+        field_map json__ "PricingRuleArns" PricingRuleArnsInput.of_json in
       let description =
-        field_map json "Description" PricingPlanDescription.of_json in
-      let name = field_map_exn json "Name" PricingPlanName.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map json__ "Description" PricingPlanDescription.of_json in
+      let name = field_map_exn json__ "Name" PricingPlanName.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       make ?tags ?pricingRuleArns ?description ~name ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7167,8 +9604,8 @@ module CreateCustomLineItemOutput =
         (Option.map ~f:CustomLineItemArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" CustomLineItemArn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" CustomLineItemArn.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7179,7 +9616,7 @@ module CreateCustomLineItemInput =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "The token that is needed to support idempotency. Idempotency isn't currently supported, but will be implemented in a future update."];
+          "A unique, case-sensitive identifier that you specify to ensure idempotency of the request. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries complete successfully without performing any further actions."];
       name: CustomLineItemName.t
         [@ocaml.doc "The name of the custom line item."];
       description: CustomLineItemDescription.t
@@ -7196,25 +9633,40 @@ module CreateCustomLineItemInput =
           "A map that contains tag keys and tag values that are attached to a custom line item."];
       chargeDetails: CustomLineItemChargeDetails.t
         [@ocaml.doc
-          "A CustomLineItemChargeDetails that describes the charge details for a custom line item."]}
+          "A CustomLineItemChargeDetails that describes the charge details for a custom line item."];
+      accountId: AccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account in which this custom line item will be applied to."];
+      computationRule: ComputationRuleEnum.t option
+        [@ocaml.doc
+          "Specifies how the custom line item charges are computed."];
+      presentationDetails: PresentationObject.t option
+        [@ocaml.doc
+          "Details controlling how the custom line item charges are presented in the bill. Contains specifications for which service the charges will be shown under."]}
     let context_ = "CreateCustomLineItemInput"
     let make ?clientToken =
       fun ?billingPeriodRange ->
         fun ?tags ->
-          fun ~name ->
-            fun ~description ->
-              fun ~billingGroupArn ->
-                fun ~chargeDetails ->
-                  fun () ->
-                    {
-                      clientToken;
-                      billingPeriodRange;
-                      tags;
-                      name;
-                      description;
-                      billingGroupArn;
-                      chargeDetails
-                    }
+          fun ?accountId ->
+            fun ?computationRule ->
+              fun ?presentationDetails ->
+                fun ~name ->
+                  fun ~description ->
+                    fun ~billingGroupArn ->
+                      fun ~chargeDetails ->
+                        fun () ->
+                          {
+                            clientToken;
+                            billingPeriodRange;
+                            tags;
+                            accountId;
+                            computationRule;
+                            presentationDetails;
+                            name;
+                            description;
+                            billingGroupArn;
+                            chargeDetails
+                          }
     let to_value x =
       structure_to_value
         [("X-Amzn-Client-Token",
@@ -7229,9 +9681,22 @@ module CreateCustomLineItemInput =
              ~f:CustomLineItemBillingPeriodRange.to_value));
         ("Tags", (Option.map x.tags ~f:TagMap.to_value));
         ("ChargeDetails",
-          (Some (CustomLineItemChargeDetails.to_value x.chargeDetails)))]
+          (Some (CustomLineItemChargeDetails.to_value x.chargeDetails)));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("ComputationRule",
+          (Option.map x.computationRule ~f:ComputationRuleEnum.to_value));
+        ("PresentationDetails",
+          (Option.map x.presentationDetails ~f:PresentationObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let presentationDetails =
+        (Option.map ~f:PresentationObject.of_xml)
+          (Xml.child xml_arg0 "PresentationDetails") in
+      let computationRule =
+        (Option.map ~f:ComputationRuleEnum.of_xml)
+          (Xml.child xml_arg0 "ComputationRule") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
       let chargeDetails =
         CustomLineItemChargeDetails.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ChargeDetails") in
@@ -7251,25 +9716,32 @@ module CreateCustomLineItemInput =
       let clientToken =
         (Option.map ~f:ClientToken.of_xml)
           (Xml.child xml_arg0 "X-Amzn-Client-Token") in
-      make ~chargeDetails ?tags ?billingPeriodRange ~billingGroupArn
-        ~description ~name ?clientToken ()
+      make ?presentationDetails ?computationRule ?accountId ~chargeDetails
+        ?tags ?billingPeriodRange ~billingGroupArn ~description ~name
+        ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let presentationDetails =
+        field_map json__ "PresentationDetails" PresentationObject.of_json in
+      let computationRule =
+        field_map json__ "ComputationRule" ComputationRuleEnum.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
       let chargeDetails =
-        field_map_exn json "ChargeDetails"
+        field_map_exn json__ "ChargeDetails"
           CustomLineItemChargeDetails.of_json in
-      let tags = field_map json "Tags" TagMap.of_json in
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let billingPeriodRange =
-        field_map json "BillingPeriodRange"
+        field_map json__ "BillingPeriodRange"
           CustomLineItemBillingPeriodRange.of_json in
       let billingGroupArn =
-        field_map_exn json "BillingGroupArn" BillingGroupArn.of_json in
+        field_map_exn json__ "BillingGroupArn" BillingGroupArn.of_json in
       let description =
-        field_map_exn json "Description" CustomLineItemDescription.of_json in
-      let name = field_map_exn json "Name" CustomLineItemName.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      make ~chargeDetails ?tags ?billingPeriodRange ~billingGroupArn
-        ~description ~name ?clientToken ()
+        field_map_exn json__ "Description" CustomLineItemDescription.of_json in
+      let name = field_map_exn json__ "Name" CustomLineItemName.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      make ?presentationDetails ?computationRule ?accountId ~chargeDetails
+        ?tags ?billingPeriodRange ~billingGroupArn ~description ~name
+        ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a custom line item that can be used to create a one-time fixed charge that can be applied to a single billing group for the current or previous billing period. The one-time fixed charge is either a fee or discount."]
@@ -7364,8 +9836,9 @@ module CreateBillingGroupOutput =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a billing group that resembles a consolidated billing family that Amazon Web Services charges, based off of the predefined pricing plan computation."]
@@ -7375,12 +9848,12 @@ module CreateBillingGroupInput =
       {
       clientToken: ClientToken.t option
         [@ocaml.doc
-          "The token that is needed to support idempotency. Idempotency isn't currently supported, but will be implemented in a future update."];
+          "A unique, case-sensitive identifier that you specify to ensure idempotency of the request. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries complete successfully without performing any further actions."];
       name: BillingGroupName.t
         [@ocaml.doc "The billing group name. The names must be unique."];
       accountGrouping: AccountGrouping.t
         [@ocaml.doc
-          "The set of accounts that will be under the billing group. The set of accounts resemble the linked accounts in a consolidated family."];
+          "The set of accounts that will be under the billing group. The set of accounts resemble the linked accounts in a consolidated billing family."];
       computationPreference: ComputationPreference.t
         [@ocaml.doc
           "The preferences and settings that will be used to compute the Amazon Web Services charges for a billing group."];
@@ -7388,7 +9861,7 @@ module CreateBillingGroupInput =
         [@ocaml.doc
           "The account ID that serves as the main account in a billing group."];
       description: BillingGroupDescription.t option
-        [@ocaml.doc "The billing group description."];
+        [@ocaml.doc "The description of the billing group."];
       tags: TagMap.t option
         [@ocaml.doc
           "A map that contains tag keys and tag values that are attached to a billing group. This feature isn't available during the beta."]}
@@ -7448,19 +9921,19 @@ module CreateBillingGroupInput =
       make ?tags ?description ?primaryAccountId ~computationPreference
         ~accountGrouping ~name ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagMap.of_json in
       let description =
-        field_map json "Description" BillingGroupDescription.of_json in
+        field_map json__ "Description" BillingGroupDescription.of_json in
       let primaryAccountId =
-        field_map json "PrimaryAccountId" AccountId.of_json in
+        field_map json__ "PrimaryAccountId" AccountId.of_json in
       let computationPreference =
-        field_map_exn json "ComputationPreference"
+        field_map_exn json__ "ComputationPreference"
           ComputationPreference.of_json in
       let accountGrouping =
-        field_map_exn json "AccountGrouping" AccountGrouping.of_json in
-      let name = field_map_exn json "Name" BillingGroupName.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+        field_map_exn json__ "AccountGrouping" AccountGrouping.of_json in
+      let name = field_map_exn json__ "Name" BillingGroupName.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       make ?tags ?description ?primaryAccountId ~computationPreference
         ~accountGrouping ~name ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -7574,12 +10047,12 @@ module BatchDisassociateResourcesFromCustomLineItemOutput =
       make ?failedDisassociatedResources ?successfullyDisassociatedResources
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedDisassociatedResources =
-        field_map json "FailedDisassociatedResources"
+        field_map json__ "FailedDisassociatedResources"
           DisassociateResourcesResponseList.of_json in
       let successfullyDisassociatedResources =
-        field_map json "SuccessfullyDisassociatedResources"
+        field_map json__ "SuccessfullyDisassociatedResources"
           DisassociateResourcesResponseList.of_json in
       make ?failedDisassociatedResources ?successfullyDisassociatedResources
         ()
@@ -7624,15 +10097,15 @@ module BatchDisassociateResourcesFromCustomLineItemInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingPeriodRange =
-        field_map json "BillingPeriodRange"
+        field_map json__ "BillingPeriodRange"
           CustomLineItemBillingPeriodRange.of_json in
       let resourceArns =
-        field_map_exn json "ResourceArns"
+        field_map_exn json__ "ResourceArns"
           CustomLineItemBatchDisassociationsList.of_json in
       let targetArn =
-        field_map_exn json "TargetArn" CustomLineItemArn.of_json in
+        field_map_exn json__ "TargetArn" CustomLineItemArn.of_json in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7753,12 +10226,12 @@ module BatchAssociateResourcesToCustomLineItemOutput =
           (Xml.child xml_arg0 "SuccessfullyAssociatedResources") in
       make ?failedAssociatedResources ?successfullyAssociatedResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedAssociatedResources =
-        field_map json "FailedAssociatedResources"
+        field_map json__ "FailedAssociatedResources"
           AssociateResourcesResponseList.of_json in
       let successfullyAssociatedResources =
-        field_map json "SuccessfullyAssociatedResources"
+        field_map json__ "SuccessfullyAssociatedResources"
           AssociateResourcesResponseList.of_json in
       make ?failedAssociatedResources ?successfullyAssociatedResources ()
     let to_json v = composed_to_json to_value v
@@ -7801,15 +10274,15 @@ module BatchAssociateResourcesToCustomLineItemInput =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetArn") in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingPeriodRange =
-        field_map json "BillingPeriodRange"
+        field_map json__ "BillingPeriodRange"
           CustomLineItemBillingPeriodRange.of_json in
       let resourceArns =
-        field_map_exn json "ResourceArns"
+        field_map_exn json__ "ResourceArns"
           CustomLineItemBatchAssociationsList.of_json in
       let targetArn =
-        field_map_exn json "TargetArn" CustomLineItemArn.of_json in
+        field_map_exn json__ "TargetArn" CustomLineItemArn.of_json in
       make ?billingPeriodRange ~resourceArns ~targetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7914,8 +10387,8 @@ module AssociatePricingRulesOutput =
         (Option.map ~f:PricingPlanArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" PricingPlanArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" PricingPlanArn.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Connects an array of PricingRuleArns to a defined PricingPlan. The maximum number PricingRuleArn that can be associated in one call is 30."]
@@ -7947,11 +10420,11 @@ module AssociatePricingRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~pricingRuleArns ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pricingRuleArns =
-        field_map_exn json "PricingRuleArns"
+        field_map_exn json__ "PricingRuleArns"
           PricingRuleArnsNonEmptyInput.of_json in
-      let arn = field_map_exn json "Arn" PricingPlanArn.of_json in
+      let arn = field_map_exn json__ "Arn" PricingPlanArn.of_json in
       make ~pricingRuleArns ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8056,8 +10529,9 @@ module AssociateAccountsOutput =
         (Option.map ~f:BillingGroupArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" BillingGroupArn.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" BillingGroupArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Connects an array of account IDs in a consolidated billing family to a predefined billing group. The account IDs must be a part of the consolidated billing family during the current month, and not already associated with another billing group. The maximum number of accounts that can be associated in one call is 30."]
@@ -8086,9 +10560,10 @@ module AssociateAccountsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~accountIds ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountIds = field_map_exn json "AccountIds" AccountIdList.of_json in
-      let arn = field_map_exn json "Arn" BillingGroupArn.of_json in
+    let of_json json__ =
+      let accountIds =
+        field_map_exn json__ "AccountIds" AccountIdList.of_json in
+      let arn = field_map_exn json__ "Arn" BillingGroupArn.of_json in
       make ~accountIds ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

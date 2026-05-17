@@ -146,3 +146,9 @@ val update_file_system :
     ?cfg:Awso.Cfg.t ->
       UpdateFileSystemRequest.t ->
         (FileSystemDescription.t, FileSystemDescription.error) Result.t
+val update_file_system_protection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFileSystemProtectionRequest.t ->
+        (FileSystemProtectionDescription.t,
+          FileSystemProtectionDescription.error) Result.t

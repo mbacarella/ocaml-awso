@@ -42,6 +42,18 @@ val create_license :
       CreateLicenseRequest.t ->
         (CreateLicenseResponse.t, CreateLicenseResponse.error) Result.t
           Async.Deferred.t
+val create_license_asset_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLicenseAssetGroupRequest.t ->
+        (CreateLicenseAssetGroupResponse.t,
+          CreateLicenseAssetGroupResponse.error) Result.t Async.Deferred.t
+val create_license_asset_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateLicenseAssetRulesetRequest.t ->
+        (CreateLicenseAssetRulesetResponse.t,
+          CreateLicenseAssetRulesetResponse.error) Result.t Async.Deferred.t
 val create_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -86,6 +98,18 @@ val delete_license :
       DeleteLicenseRequest.t ->
         (DeleteLicenseResponse.t, DeleteLicenseResponse.error) Result.t
           Async.Deferred.t
+val delete_license_asset_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLicenseAssetGroupRequest.t ->
+        (DeleteLicenseAssetGroupResponse.t,
+          DeleteLicenseAssetGroupResponse.error) Result.t Async.Deferred.t
+val delete_license_asset_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteLicenseAssetRulesetRequest.t ->
+        (DeleteLicenseAssetRulesetResponse.t,
+          DeleteLicenseAssetRulesetResponse.error) Result.t Async.Deferred.t
 val delete_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -129,6 +153,18 @@ val get_license :
       GetLicenseRequest.t ->
         (GetLicenseResponse.t, GetLicenseResponse.error) Result.t
           Async.Deferred.t
+val get_license_asset_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLicenseAssetGroupRequest.t ->
+        (GetLicenseAssetGroupResponse.t, GetLicenseAssetGroupResponse.error)
+          Result.t Async.Deferred.t
+val get_license_asset_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetLicenseAssetRulesetRequest.t ->
+        (GetLicenseAssetRulesetResponse.t,
+          GetLicenseAssetRulesetResponse.error) Result.t Async.Deferred.t
 val get_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -160,6 +196,13 @@ val get_service_settings :
       GetServiceSettingsRequest.t ->
         (GetServiceSettingsResponse.t, GetServiceSettingsResponse.error)
           Result.t Async.Deferred.t
+val list_assets_for_license_asset_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAssetsForLicenseAssetGroupRequest.t ->
+        (ListAssetsForLicenseAssetGroupResponse.t,
+          ListAssetsForLicenseAssetGroupResponse.error) Result.t
+          Async.Deferred.t
 val list_associations_for_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -180,12 +223,31 @@ val list_failures_for_license_configuration_operations :
         (ListFailuresForLicenseConfigurationOperationsResponse.t,
           ListFailuresForLicenseConfigurationOperationsResponse.error)
           Result.t Async.Deferred.t
+val list_license_asset_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLicenseAssetGroupsRequest.t ->
+        (ListLicenseAssetGroupsResponse.t,
+          ListLicenseAssetGroupsResponse.error) Result.t Async.Deferred.t
+val list_license_asset_rulesets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLicenseAssetRulesetsRequest.t ->
+        (ListLicenseAssetRulesetsResponse.t,
+          ListLicenseAssetRulesetsResponse.error) Result.t Async.Deferred.t
 val list_license_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListLicenseConfigurationsRequest.t ->
         (ListLicenseConfigurationsResponse.t,
           ListLicenseConfigurationsResponse.error) Result.t Async.Deferred.t
+val list_license_configurations_for_organization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListLicenseConfigurationsForOrganizationRequest.t ->
+        (ListLicenseConfigurationsForOrganizationResponse.t,
+          ListLicenseConfigurationsForOrganizationResponse.error) Result.t
+          Async.Deferred.t
 val list_license_conversion_tasks :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -224,12 +286,26 @@ val list_received_grants :
       ListReceivedGrantsRequest.t ->
         (ListReceivedGrantsResponse.t, ListReceivedGrantsResponse.error)
           Result.t Async.Deferred.t
+val list_received_grants_for_organization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReceivedGrantsForOrganizationRequest.t ->
+        (ListReceivedGrantsForOrganizationResponse.t,
+          ListReceivedGrantsForOrganizationResponse.error) Result.t
+          Async.Deferred.t
 val list_received_licenses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListReceivedLicensesRequest.t ->
         (ListReceivedLicensesResponse.t, ListReceivedLicensesResponse.error)
           Result.t Async.Deferred.t
+val list_received_licenses_for_organization :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListReceivedLicensesForOrganizationRequest.t ->
+        (ListReceivedLicensesForOrganizationResponse.t,
+          ListReceivedLicensesForOrganizationResponse.error) Result.t
+          Async.Deferred.t
 val list_resource_inventory :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -273,6 +349,18 @@ val untag_resource :
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
           Async.Deferred.t
+val update_license_asset_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLicenseAssetGroupRequest.t ->
+        (UpdateLicenseAssetGroupResponse.t,
+          UpdateLicenseAssetGroupResponse.error) Result.t Async.Deferred.t
+val update_license_asset_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateLicenseAssetRulesetRequest.t ->
+        (UpdateLicenseAssetRulesetResponse.t,
+          UpdateLicenseAssetRulesetResponse.error) Result.t Async.Deferred.t
 val update_license_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

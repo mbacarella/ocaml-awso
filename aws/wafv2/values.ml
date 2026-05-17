@@ -25,6 +25,1730 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module APIKey =
+  struct
+    type nonrec t = string
+    let context_ = "APIKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"APIKey" j
+    let to_json = simple_to_json to_value
+  end
+module TokenDomain =
+  struct
+    type nonrec t = string
+    let context_ = "TokenDomain"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:253) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\.\\-/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TokenDomain" j
+    let to_json = simple_to_json to_value
+  end
+module TokenDomains =
+  struct
+    type nonrec t = TokenDomain.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TokenDomain.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TokenDomain.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TokenDomains" ~of_json:TokenDomain.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module APIKeyVersion =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for APIKeyVersion" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module APIKeySummary =
+  struct
+    type nonrec t =
+      {
+      tokenDomains: TokenDomains.t option
+        [@ocaml.doc "The token domains that are defined in this API key."];
+      aPIKey: APIKey.t option
+        [@ocaml.doc
+          "The generated, encrypted API key. You can copy this for use in your JavaScript CAPTCHA integration."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time that the key was created."];
+      version: APIKeyVersion.t option
+        [@ocaml.doc "Internal value used by WAF to manage the key."]}
+    let make ?tokenDomains =
+      fun ?aPIKey ->
+        fun ?creationTimestamp ->
+          fun ?version ->
+            fun () -> { tokenDomains; aPIKey; creationTimestamp; version }
+    let to_value x =
+      structure_to_value
+        [("TokenDomains",
+           (Option.map x.tokenDomains ~f:TokenDomains.to_value));
+        ("APIKey", (Option.map x.aPIKey ~f:APIKey.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("Version", (Option.map x.version ~f:APIKeyVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let version =
+        (Option.map ~f:APIKeyVersion.of_xml) (Xml.child xml_arg0 "Version") in
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimestamp") in
+      let aPIKey =
+        (Option.map ~f:APIKey.of_xml) (Xml.child xml_arg0 "APIKey") in
+      let tokenDomains =
+        (Option.map ~f:TokenDomains.of_xml)
+          (Xml.child xml_arg0 "TokenDomains") in
+      make ?version ?creationTimestamp ?aPIKey ?tokenDomains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let version = field_map json__ "Version" APIKeyVersion.of_json in
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" Timestamp.of_json in
+      let aPIKey = field_map json__ "APIKey" APIKey.of_json in
+      let tokenDomains = field_map json__ "TokenDomains" TokenDomains.of_json in
+      make ?version ?creationTimestamp ?aPIKey ?tokenDomains ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information for a single API key. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide."]
+module APIKeySummaries =
+  struct
+    type nonrec t = APIKeySummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:APIKeySummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:APIKeySummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"APIKeySummaries" ~of_json:APIKeySummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module APIKeyTokenDomains =
+  struct
+    type nonrec t = TokenDomain.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TokenDomain.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TokenDomain.of_xml)
+    let of_json j =
+      list_of_json ~kind:"APIKeyTokenDomains" ~of_json:TokenDomain.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ASN =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:4294967295L) >>=
+             (fun () -> check_int64_min i ~min:0L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module SuccessCode =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for SuccessCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionStatusCodeSuccessCodes =
+  struct
+    type nonrec t = SuccessCode.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuccessCode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuccessCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionStatusCodeSuccessCodes"
+        ~of_json:SuccessCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FailureCode =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:999) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FailureCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionStatusCodeFailureCodes =
+  struct
+    type nonrec t = FailureCode.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailureCode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailureCode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionStatusCodeFailureCodes"
+        ~of_json:FailureCode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponseInspectionStatusCode =
+  struct
+    type nonrec t =
+      {
+      successCodes: ResponseInspectionStatusCodeSuccessCodes.t
+        [@ocaml.doc
+          "Status codes in the response that indicate a successful login or account creation attempt. To be counted as a success, the response status code must match one of these. Each code must be unique among the success and failure status codes. JSON example: \"SuccessCodes\": \\[ 200, 201 \\]"];
+      failureCodes: ResponseInspectionStatusCodeFailureCodes.t
+        [@ocaml.doc
+          "Status codes in the response that indicate a failed login or account creation attempt. To be counted as a failure, the response status code must match one of these. Each code must be unique among the success and failure status codes. JSON example: \"FailureCodes\": \\[ 400, 404 \\]"]}
+    let context_ = "ResponseInspectionStatusCode"
+    let make ~successCodes =
+      fun ~failureCodes -> fun () -> { successCodes; failureCodes }
+    let to_value x =
+      structure_to_value
+        [("SuccessCodes",
+           (Some
+              (ResponseInspectionStatusCodeSuccessCodes.to_value
+                 x.successCodes)));
+        ("FailureCodes",
+          (Some
+             (ResponseInspectionStatusCodeFailureCodes.to_value
+                x.failureCodes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureCodes =
+        ResponseInspectionStatusCodeFailureCodes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FailureCodes") in
+      let successCodes =
+        ResponseInspectionStatusCodeSuccessCodes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SuccessCodes") in
+      make ~failureCodes ~successCodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureCodes =
+        field_map_exn json__ "FailureCodes"
+          ResponseInspectionStatusCodeFailureCodes.of_json in
+      let successCodes =
+        field_map_exn json__ "SuccessCodes"
+          ResponseInspectionStatusCodeSuccessCodes.of_json in
+      make ~failureCodes ~successCodes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures inspection of the response status code. This is part of the ResponseInspection configuration for AWSManagedRulesATPRuleSet and AWSManagedRulesACFPRuleSet. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions."]
+module SuccessValue =
+  struct
+    type nonrec t = string
+    let context_ = "SuccessValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SuccessValue" j
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionJsonSuccessValues =
+  struct
+    type nonrec t = SuccessValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuccessValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuccessValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionJsonSuccessValues"
+        ~of_json:SuccessValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FailureValue =
+  struct
+    type nonrec t = string
+    let context_ = "FailureValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FailureValue" j
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionJsonFailureValues =
+  struct
+    type nonrec t = FailureValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailureValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailureValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionJsonFailureValues"
+        ~of_json:FailureValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FieldIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "FieldIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FieldIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionJson =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The identifier for the value to match against in the JSON. The identifier must be an exact match, including case. JSON examples: \"Identifier\": \\[ \"/login/success\" \\] and \"Identifier\": \\[ \"/sign-up/success\" \\]"];
+      successValues: ResponseInspectionJsonSuccessValues.t
+        [@ocaml.doc
+          "Values for the specified identifier in the response JSON that indicate a successful login or account creation attempt. To be counted as a success, the value must be an exact match, including case. Each value must be unique among the success and failure values. JSON example: \"SuccessValues\": \\[ \"True\", \"Succeeded\" \\]"];
+      failureValues: ResponseInspectionJsonFailureValues.t
+        [@ocaml.doc
+          "Values for the specified identifier in the response JSON that indicate a failed login or account creation attempt. To be counted as a failure, the value must be an exact match, including case. Each value must be unique among the success and failure values. JSON example: \"FailureValues\": \\[ \"False\", \"Failed\" \\]"]}
+    let context_ = "ResponseInspectionJson"
+    let make ~identifier =
+      fun ~successValues ->
+        fun ~failureValues ->
+          fun () -> { identifier; successValues; failureValues }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)));
+        ("SuccessValues",
+          (Some
+             (ResponseInspectionJsonSuccessValues.to_value x.successValues)));
+        ("FailureValues",
+          (Some
+             (ResponseInspectionJsonFailureValues.to_value x.failureValues)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureValues =
+        ResponseInspectionJsonFailureValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FailureValues") in
+      let successValues =
+        ResponseInspectionJsonSuccessValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SuccessValues") in
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~failureValues ~successValues ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureValues =
+        field_map_exn json__ "FailureValues"
+          ResponseInspectionJsonFailureValues.of_json in
+      let successValues =
+        field_map_exn json__ "SuccessValues"
+          ResponseInspectionJsonSuccessValues.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~failureValues ~successValues ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures inspection of the response JSON. WAF can inspect the first 65,536 bytes (64 KB) of the response JSON. This is part of the ResponseInspection configuration for AWSManagedRulesATPRuleSet and AWSManagedRulesACFPRuleSet. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions."]
+module ResponseInspectionHeaderSuccessValues =
+  struct
+    type nonrec t = SuccessValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuccessValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuccessValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionHeaderSuccessValues"
+        ~of_json:SuccessValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponseInspectionHeaderName =
+  struct
+    type nonrec t = string
+    let context_ = "ResponseInspectionHeaderName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:200) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResponseInspectionHeaderName" j
+    let to_json = simple_to_json to_value
+  end
+module ResponseInspectionHeaderFailureValues =
+  struct
+    type nonrec t = FailureValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailureValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailureValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionHeaderFailureValues"
+        ~of_json:FailureValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponseInspectionHeader =
+  struct
+    type nonrec t =
+      {
+      name: ResponseInspectionHeaderName.t
+        [@ocaml.doc
+          "The name of the header to match against. The name must be an exact match, including case. JSON example: \"Name\": \\[ \"RequestResult\" \\]"];
+      successValues: ResponseInspectionHeaderSuccessValues.t
+        [@ocaml.doc
+          "Values in the response header with the specified name that indicate a successful login or account creation attempt. To be counted as a success, the value must be an exact match, including case. Each value must be unique among the success and failure values. JSON examples: \"SuccessValues\": \\[ \"LoginPassed\", \"Successful login\" \\] and \"SuccessValues\": \\[ \"AccountCreated\", \"Successful account creation\" \\]"];
+      failureValues: ResponseInspectionHeaderFailureValues.t
+        [@ocaml.doc
+          "Values in the response header with the specified name that indicate a failed login or account creation attempt. To be counted as a failure, the value must be an exact match, including case. Each value must be unique among the success and failure values. JSON examples: \"FailureValues\": \\[ \"LoginFailed\", \"Failed login\" \\] and \"FailureValues\": \\[ \"AccountCreationFailed\" \\]"]}
+    let context_ = "ResponseInspectionHeader"
+    let make ~name =
+      fun ~successValues ->
+        fun ~failureValues ->
+          fun () -> { name; successValues; failureValues }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (ResponseInspectionHeaderName.to_value x.name)));
+        ("SuccessValues",
+          (Some
+             (ResponseInspectionHeaderSuccessValues.to_value x.successValues)));
+        ("FailureValues",
+          (Some
+             (ResponseInspectionHeaderFailureValues.to_value x.failureValues)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureValues =
+        ResponseInspectionHeaderFailureValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FailureValues") in
+      let successValues =
+        ResponseInspectionHeaderSuccessValues.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SuccessValues") in
+      let name =
+        ResponseInspectionHeaderName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~failureValues ~successValues ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureValues =
+        field_map_exn json__ "FailureValues"
+          ResponseInspectionHeaderFailureValues.of_json in
+      let successValues =
+        field_map_exn json__ "SuccessValues"
+          ResponseInspectionHeaderSuccessValues.of_json in
+      let name =
+        field_map_exn json__ "Name" ResponseInspectionHeaderName.of_json in
+      make ~failureValues ~successValues ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures inspection of the response header. This is part of the ResponseInspection configuration for AWSManagedRulesATPRuleSet and AWSManagedRulesACFPRuleSet. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions."]
+module ResponseInspectionBodyContainsSuccessStrings =
+  struct
+    type nonrec t = SuccessValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SuccessValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SuccessValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionBodyContainsSuccessStrings"
+        ~of_json:SuccessValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponseInspectionBodyContainsFailureStrings =
+  struct
+    type nonrec t = FailureValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FailureValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FailureValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseInspectionBodyContainsFailureStrings"
+        ~of_json:FailureValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponseInspectionBodyContains =
+  struct
+    type nonrec t =
+      {
+      successStrings: ResponseInspectionBodyContainsSuccessStrings.t
+        [@ocaml.doc
+          "Strings in the body of the response that indicate a successful login or account creation attempt. To be counted as a success, the string can be anywhere in the body and must be an exact match, including case. Each string must be unique among the success and failure strings. JSON examples: \"SuccessStrings\": \\[ \"Login successful\" \\] and \"SuccessStrings\": \\[ \"Account creation successful\", \"Welcome to our site!\" \\]"];
+      failureStrings: ResponseInspectionBodyContainsFailureStrings.t
+        [@ocaml.doc
+          "Strings in the body of the response that indicate a failed login or account creation attempt. To be counted as a failure, the string can be anywhere in the body and must be an exact match, including case. Each string must be unique among the success and failure strings. JSON example: \"FailureStrings\": \\[ \"Request failed\" \\]"]}
+    let context_ = "ResponseInspectionBodyContains"
+    let make ~successStrings =
+      fun ~failureStrings -> fun () -> { successStrings; failureStrings }
+    let to_value x =
+      structure_to_value
+        [("SuccessStrings",
+           (Some
+              (ResponseInspectionBodyContainsSuccessStrings.to_value
+                 x.successStrings)));
+        ("FailureStrings",
+          (Some
+             (ResponseInspectionBodyContainsFailureStrings.to_value
+                x.failureStrings)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureStrings =
+        ResponseInspectionBodyContainsFailureStrings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FailureStrings") in
+      let successStrings =
+        ResponseInspectionBodyContainsSuccessStrings.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SuccessStrings") in
+      make ~failureStrings ~successStrings ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureStrings =
+        field_map_exn json__ "FailureStrings"
+          ResponseInspectionBodyContainsFailureStrings.of_json in
+      let successStrings =
+        field_map_exn json__ "SuccessStrings"
+          ResponseInspectionBodyContainsSuccessStrings.of_json in
+      make ~failureStrings ~successStrings ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures inspection of the response body. WAF can inspect the first 65,536 bytes (64 KB) of the response body. This is part of the ResponseInspection configuration for AWSManagedRulesATPRuleSet and AWSManagedRulesACFPRuleSet. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions."]
+module ResponseInspection =
+  struct
+    type nonrec t =
+      {
+      statusCode: ResponseInspectionStatusCode.t option
+        [@ocaml.doc
+          "Configures inspection of the response status code for success and failure indicators."];
+      header: ResponseInspectionHeader.t option
+        [@ocaml.doc
+          "Configures inspection of the response header for success and failure indicators."];
+      bodyContains: ResponseInspectionBodyContains.t option
+        [@ocaml.doc
+          "Configures inspection of the response body for success and failure indicators. WAF can inspect the first 65,536 bytes (64 KB) of the response body."];
+      json: ResponseInspectionJson.t option
+        [@ocaml.doc
+          "Configures inspection of the response JSON for success and failure indicators. WAF can inspect the first 65,536 bytes (64 KB) of the response JSON."]}
+    let make ?statusCode =
+      fun ?header ->
+        fun ?bodyContains ->
+          fun ?json -> fun () -> { statusCode; header; bodyContains; json }
+    let to_value x =
+      structure_to_value
+        [("StatusCode",
+           (Option.map x.statusCode ~f:ResponseInspectionStatusCode.to_value));
+        ("Header",
+          (Option.map x.header ~f:ResponseInspectionHeader.to_value));
+        ("BodyContains",
+          (Option.map x.bodyContains
+             ~f:ResponseInspectionBodyContains.to_value));
+        ("Json", (Option.map x.json ~f:ResponseInspectionJson.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let json =
+        (Option.map ~f:ResponseInspectionJson.of_xml)
+          (Xml.child xml_arg0 "Json") in
+      let bodyContains =
+        (Option.map ~f:ResponseInspectionBodyContains.of_xml)
+          (Xml.child xml_arg0 "BodyContains") in
+      let header =
+        (Option.map ~f:ResponseInspectionHeader.of_xml)
+          (Xml.child xml_arg0 "Header") in
+      let statusCode =
+        (Option.map ~f:ResponseInspectionStatusCode.of_xml)
+          (Xml.child xml_arg0 "StatusCode") in
+      make ?json ?bodyContains ?header ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let json = field_map json__ "Json" ResponseInspectionJson.of_json in
+      let bodyContains =
+        field_map json__ "BodyContains"
+          ResponseInspectionBodyContains.of_json in
+      let header = field_map json__ "Header" ResponseInspectionHeader.of_json in
+      let statusCode =
+        field_map json__ "StatusCode" ResponseInspectionStatusCode.of_json in
+      make ?json ?bodyContains ?header ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria for inspecting responses to login requests and account creation requests, used by the ATP and ACFP rule groups to track login and account creation success and failure rates. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions. The rule groups evaluates the responses that your protected resources send back to client login and account creation attempts, keeping count of successful and failed attempts from each IP address and client session. Using this information, the rule group labels and mitigates requests from client sessions and IP addresses with too much suspicious activity in a short amount of time. This is part of the AWSManagedRulesATPRuleSet and AWSManagedRulesACFPRuleSet configurations in ManagedRuleGroupConfig. Enable response inspection by configuring exactly one component of the response to inspect, for example, Header or StatusCode. You can't configure more than one component for inspection. If you don't configure any of the response inspection options, response inspection is disabled."]
+module UsernameField =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The name of the username field. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"username\": \"THE_USERNAME\" \\} \\}, the username field specification is /form/username. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named username1, the username field specification is username1"]}
+    let context_ = "UsernameField"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of the field in the request payload that contains your customer's username. This data type is used in the RequestInspection and RequestInspectionACFP data types."]
+module PhoneNumberField =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The name of a single primary phone number field. How you specify the phone number fields depends on the request inspection payload type. For JSON payloads, specify the field identifiers in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"primaryphoneline1\": \"THE_PHONE1\", \"primaryphoneline2\": \"THE_PHONE2\", \"primaryphoneline3\": \"THE_PHONE3\" \\} \\}, the phone number field identifiers are /form/primaryphoneline1, /form/primaryphoneline2, and /form/primaryphoneline3. For form encoded payload types, use the HTML form names. For example, for an HTML form with input elements named primaryphoneline1, primaryphoneline2, and primaryphoneline3, the phone number field identifiers are primaryphoneline1, primaryphoneline2, and primaryphoneline3."]}
+    let context_ = "PhoneNumberField"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of a field in the request payload that contains part or all of your customer's primary phone number. This data type is used in the RequestInspectionACFP data type."]
+module PhoneNumberFields =
+  struct
+    type nonrec t = PhoneNumberField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PhoneNumberField.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PhoneNumberField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PhoneNumberFields"
+        ~of_json:PhoneNumberField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PayloadType =
+  struct
+    type nonrec t =
+      | JSON 
+      | FORM_ENCODED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | JSON -> "JSON"
+      | FORM_ENCODED -> "FORM_ENCODED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "JSON" -> JSON
+      | "FORM_ENCODED" -> FORM_ENCODED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PayloadType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PayloadType" j)
+    let to_json = simple_to_json to_value
+  end
+module PasswordField =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The name of the password field. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"password\": \"THE_PASSWORD\" \\} \\}, the password field specification is /form/password. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named password1, the password field specification is password1."]}
+    let context_ = "PasswordField"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of the field in the request payload that contains your customer's password. This data type is used in the RequestInspection and RequestInspectionACFP data types."]
+module EmailField =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The name of the email field. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"email\": \"THE_EMAIL\" \\} \\}, the email field specification is /form/email. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named email1, the email field specification is email1."]}
+    let context_ = "EmailField"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of the field in the request payload that contains your customer's email. This data type is used in the RequestInspectionACFP data type."]
+module AddressField =
+  struct
+    type nonrec t =
+      {
+      identifier: FieldIdentifier.t
+        [@ocaml.doc
+          "The name of a single primary address field. How you specify the address fields depends on the request inspection payload type. For JSON payloads, specify the field identifiers in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"primaryaddressline1\": \"THE_ADDRESS1\", \"primaryaddressline2\": \"THE_ADDRESS2\", \"primaryaddressline3\": \"THE_ADDRESS3\" \\} \\}, the address field idenfiers are /form/primaryaddressline1, /form/primaryaddressline2, and /form/primaryaddressline3. For form encoded payload types, use the HTML form names. For example, for an HTML form with input elements named primaryaddressline1, primaryaddressline2, and primaryaddressline3, the address fields identifiers are primaryaddressline1, primaryaddressline2, and primaryaddressline3."]}
+    let context_ = "AddressField"
+    let make ~identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        FieldIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      make ~identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" FieldIdentifier.of_json in
+      make ~identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The name of a field in the request payload that contains part or all of your customer's primary physical address. This data type is used in the RequestInspectionACFP data type."]
+module AddressFields =
+  struct
+    type nonrec t = AddressField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AddressField.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AddressField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AddressFields" ~of_json:AddressField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RequestInspectionACFP =
+  struct
+    type nonrec t =
+      {
+      payloadType: PayloadType.t
+        [@ocaml.doc
+          "The payload type for your account creation endpoint, either JSON or form encoded."];
+      usernameField: UsernameField.t option
+        [@ocaml.doc
+          "The name of the field in the request payload that contains your customer's username. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"username\": \"THE_USERNAME\" \\} \\}, the username field specification is /form/username. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named username1, the username field specification is username1"];
+      passwordField: PasswordField.t option
+        [@ocaml.doc
+          "The name of the field in the request payload that contains your customer's password. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"password\": \"THE_PASSWORD\" \\} \\}, the password field specification is /form/password. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named password1, the password field specification is password1."];
+      emailField: EmailField.t option
+        [@ocaml.doc
+          "The name of the field in the request payload that contains your customer's email. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"email\": \"THE_EMAIL\" \\} \\}, the email field specification is /form/email. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named email1, the email field specification is email1."];
+      phoneNumberFields: PhoneNumberFields.t option
+        [@ocaml.doc
+          "The names of the fields in the request payload that contain your customer's primary phone number. Order the phone number fields in the array exactly as they are ordered in the request payload. How you specify the phone number fields depends on the request inspection payload type. For JSON payloads, specify the field identifiers in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"primaryphoneline1\": \"THE_PHONE1\", \"primaryphoneline2\": \"THE_PHONE2\", \"primaryphoneline3\": \"THE_PHONE3\" \\} \\}, the phone number field identifiers are /form/primaryphoneline1, /form/primaryphoneline2, and /form/primaryphoneline3. For form encoded payload types, use the HTML form names. For example, for an HTML form with input elements named primaryphoneline1, primaryphoneline2, and primaryphoneline3, the phone number field identifiers are primaryphoneline1, primaryphoneline2, and primaryphoneline3."];
+      addressFields: AddressFields.t option
+        [@ocaml.doc
+          "The names of the fields in the request payload that contain your customer's primary physical address. Order the address fields in the array exactly as they are ordered in the request payload. How you specify the address fields depends on the request inspection payload type. For JSON payloads, specify the field identifiers in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"primaryaddressline1\": \"THE_ADDRESS1\", \"primaryaddressline2\": \"THE_ADDRESS2\", \"primaryaddressline3\": \"THE_ADDRESS3\" \\} \\}, the address field idenfiers are /form/primaryaddressline1, /form/primaryaddressline2, and /form/primaryaddressline3. For form encoded payload types, use the HTML form names. For example, for an HTML form with input elements named primaryaddressline1, primaryaddressline2, and primaryaddressline3, the address fields identifiers are primaryaddressline1, primaryaddressline2, and primaryaddressline3."]}
+    let context_ = "RequestInspectionACFP"
+    let make ?usernameField =
+      fun ?passwordField ->
+        fun ?emailField ->
+          fun ?phoneNumberFields ->
+            fun ?addressFields ->
+              fun ~payloadType ->
+                fun () ->
+                  {
+                    usernameField;
+                    passwordField;
+                    emailField;
+                    phoneNumberFields;
+                    addressFields;
+                    payloadType
+                  }
+    let to_value x =
+      structure_to_value
+        [("PayloadType", (Some (PayloadType.to_value x.payloadType)));
+        ("UsernameField",
+          (Option.map x.usernameField ~f:UsernameField.to_value));
+        ("PasswordField",
+          (Option.map x.passwordField ~f:PasswordField.to_value));
+        ("EmailField", (Option.map x.emailField ~f:EmailField.to_value));
+        ("PhoneNumberFields",
+          (Option.map x.phoneNumberFields ~f:PhoneNumberFields.to_value));
+        ("AddressFields",
+          (Option.map x.addressFields ~f:AddressFields.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let addressFields =
+        (Option.map ~f:AddressFields.of_xml)
+          (Xml.child xml_arg0 "AddressFields") in
+      let phoneNumberFields =
+        (Option.map ~f:PhoneNumberFields.of_xml)
+          (Xml.child xml_arg0 "PhoneNumberFields") in
+      let emailField =
+        (Option.map ~f:EmailField.of_xml) (Xml.child xml_arg0 "EmailField") in
+      let passwordField =
+        (Option.map ~f:PasswordField.of_xml)
+          (Xml.child xml_arg0 "PasswordField") in
+      let usernameField =
+        (Option.map ~f:UsernameField.of_xml)
+          (Xml.child xml_arg0 "UsernameField") in
+      let payloadType =
+        PayloadType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PayloadType") in
+      make ?addressFields ?phoneNumberFields ?emailField ?passwordField
+        ?usernameField ~payloadType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let addressFields =
+        field_map json__ "AddressFields" AddressFields.of_json in
+      let phoneNumberFields =
+        field_map json__ "PhoneNumberFields" PhoneNumberFields.of_json in
+      let emailField = field_map json__ "EmailField" EmailField.of_json in
+      let passwordField =
+        field_map json__ "PasswordField" PasswordField.of_json in
+      let usernameField =
+        field_map json__ "UsernameField" UsernameField.of_json in
+      let payloadType =
+        field_map_exn json__ "PayloadType" PayloadType.of_json in
+      make ?addressFields ?phoneNumberFields ?emailField ?passwordField
+        ?usernameField ~payloadType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria for inspecting account creation requests, used by the ACFP rule group to validate and track account creation attempts. This is part of the AWSManagedRulesACFPRuleSet configuration in ManagedRuleGroupConfig. In these settings, you specify how your application accepts account creation attempts by providing the request payload type and the names of the fields within the request body where the username, password, email, and primary address and phone number fields are provided."]
+module RegistrationPagePathString =
+  struct
+    type nonrec t = string
+    let context_ = "RegistrationPagePathString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RegistrationPagePathString" j
+    let to_json = simple_to_json to_value
+  end
+module CreationPathString =
+  struct
+    type nonrec t = string
+    let context_ = "CreationPathString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CreationPathString" j
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module AWSManagedRulesACFPRuleSet =
+  struct
+    type nonrec t =
+      {
+      creationPath: CreationPathString.t
+        [@ocaml.doc
+          "The path of the account creation endpoint for your application. This is the page on your website that accepts the completed registration form for a new user. This page must accept POST requests. For example, for the URL https://example.com/web/newaccount, you would provide the path /web/newaccount. Account creation page paths that start with the path that you provide are considered a match. For example /web/newaccount matches the account creation paths /web/newaccount, /web/newaccount/, /web/newaccountPage, and /web/newaccount/thisPage, but doesn't match the path /home/web/newaccount or /website/newaccount."];
+      registrationPagePath: RegistrationPagePathString.t
+        [@ocaml.doc
+          "The path of the account registration endpoint for your application. This is the page on your website that presents the registration form to new users. This page must accept GET text/html requests. For example, for the URL https://example.com/web/registration, you would provide the path /web/registration. Registration page paths that start with the path that you provide are considered a match. For example /web/registration matches the registration paths /web/registration, /web/registration/, /web/registrationPage, and /web/registration/thisPage, but doesn't match the path /home/web/registration or /website/registration."];
+      requestInspection: RequestInspectionACFP.t
+        [@ocaml.doc
+          "The criteria for inspecting account creation requests, used by the ACFP rule group to validate and track account creation attempts."];
+      responseInspection: ResponseInspection.t option
+        [@ocaml.doc
+          "The criteria for inspecting responses to account creation requests, used by the ACFP rule group to track account creation success rates. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions. The ACFP rule group evaluates the responses that your protected resources send back to client account creation attempts, keeping count of successful and failed attempts from each IP address and client session. Using this information, the rule group labels and mitigates requests from client sessions and IP addresses that have had too many successful account creation attempts in a short amount of time."];
+      enableRegexInPath: Boolean.t option
+        [@ocaml.doc
+          "Allow the use of regular expressions in the registration page path and the account creation path."]}
+    let context_ = "AWSManagedRulesACFPRuleSet"
+    let make ?responseInspection =
+      fun ?enableRegexInPath ->
+        fun ~creationPath ->
+          fun ~registrationPagePath ->
+            fun ~requestInspection ->
+              fun () ->
+                {
+                  responseInspection;
+                  enableRegexInPath;
+                  creationPath;
+                  registrationPagePath;
+                  requestInspection
+                }
+    let to_value x =
+      structure_to_value
+        [("CreationPath",
+           (Some (CreationPathString.to_value x.creationPath)));
+        ("RegistrationPagePath",
+          (Some (RegistrationPagePathString.to_value x.registrationPagePath)));
+        ("RequestInspection",
+          (Some (RequestInspectionACFP.to_value x.requestInspection)));
+        ("ResponseInspection",
+          (Option.map x.responseInspection ~f:ResponseInspection.to_value));
+        ("EnableRegexInPath",
+          (Option.map x.enableRegexInPath ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableRegexInPath =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EnableRegexInPath") in
+      let responseInspection =
+        (Option.map ~f:ResponseInspection.of_xml)
+          (Xml.child xml_arg0 "ResponseInspection") in
+      let requestInspection =
+        RequestInspectionACFP.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RequestInspection") in
+      let registrationPagePath =
+        RegistrationPagePathString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RegistrationPagePath") in
+      let creationPath =
+        CreationPathString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CreationPath") in
+      make ?enableRegexInPath ?responseInspection ~requestInspection
+        ~registrationPagePath ~creationPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableRegexInPath =
+        field_map json__ "EnableRegexInPath" Boolean.of_json in
+      let responseInspection =
+        field_map json__ "ResponseInspection" ResponseInspection.of_json in
+      let requestInspection =
+        field_map_exn json__ "RequestInspection"
+          RequestInspectionACFP.of_json in
+      let registrationPagePath =
+        field_map_exn json__ "RegistrationPagePath"
+          RegistrationPagePathString.of_json in
+      let creationPath =
+        field_map_exn json__ "CreationPath" CreationPathString.of_json in
+      make ?enableRegexInPath ?responseInspection ~requestInspection
+        ~registrationPagePath ~creationPath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details for your use of the account creation fraud prevention managed rule group, AWSManagedRulesACFPRuleSet. This configuration is used in ManagedRuleGroupConfig. For additional information about this and the other intelligent threat mitigation rule groups, see Intelligent threat mitigation in WAF and Amazon Web Services Managed Rules rule groups list in the WAF Developer Guide."]
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module RequestInspection =
+  struct
+    type nonrec t =
+      {
+      payloadType: PayloadType.t
+        [@ocaml.doc
+          "The payload type for your login endpoint, either JSON or form encoded."];
+      usernameField: UsernameField.t
+        [@ocaml.doc
+          "The name of the field in the request payload that contains your customer's username. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"username\": \"THE_USERNAME\" \\} \\}, the username field specification is /form/username. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named username1, the username field specification is username1"];
+      passwordField: PasswordField.t
+        [@ocaml.doc
+          "The name of the field in the request payload that contains your customer's password. How you specify this depends on the request inspection payload type. For JSON payloads, specify the field name in JSON pointer syntax. For information about the JSON Pointer syntax, see the Internet Engineering Task Force (IETF) documentation JavaScript Object Notation (JSON) Pointer. For example, for the JSON payload \\{ \"form\": \\{ \"password\": \"THE_PASSWORD\" \\} \\}, the password field specification is /form/password. For form encoded payload types, use the HTML form names. For example, for an HTML form with the input element named password1, the password field specification is password1."]}
+    let context_ = "RequestInspection"
+    let make ~payloadType =
+      fun ~usernameField ->
+        fun ~passwordField ->
+          fun () -> { payloadType; usernameField; passwordField }
+    let to_value x =
+      structure_to_value
+        [("PayloadType", (Some (PayloadType.to_value x.payloadType)));
+        ("UsernameField", (Some (UsernameField.to_value x.usernameField)));
+        ("PasswordField", (Some (PasswordField.to_value x.passwordField)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let passwordField =
+        PasswordField.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PasswordField") in
+      let usernameField =
+        UsernameField.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UsernameField") in
+      let payloadType =
+        PayloadType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PayloadType") in
+      make ~passwordField ~usernameField ~payloadType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let passwordField =
+        field_map_exn json__ "PasswordField" PasswordField.of_json in
+      let usernameField =
+        field_map_exn json__ "UsernameField" UsernameField.of_json in
+      let payloadType =
+        field_map_exn json__ "PayloadType" PayloadType.of_json in
+      make ~passwordField ~usernameField ~payloadType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The criteria for inspecting login requests, used by the ATP rule group to validate credentials usage. This is part of the AWSManagedRulesATPRuleSet configuration in ManagedRuleGroupConfig. In these settings, you specify how your application accepts login attempts by providing the request payload type and the names of the fields within the request body where the username and password are provided."]
+module AWSManagedRulesATPRuleSet =
+  struct
+    type nonrec t =
+      {
+      loginPath: String_.t
+        [@ocaml.doc
+          "The path of the login endpoint for your application. For example, for the URL https://example.com/web/login, you would provide the path /web/login. Login paths that start with the path that you provide are considered a match. For example /web/login matches the login paths /web/login, /web/login/, /web/loginPage, and /web/login/thisPage, but doesn't match the login path /home/web/login or /website/login. The rule group inspects only HTTP POST requests to your specified login endpoint."];
+      requestInspection: RequestInspection.t option
+        [@ocaml.doc
+          "The criteria for inspecting login requests, used by the ATP rule group to validate credentials usage."];
+      responseInspection: ResponseInspection.t option
+        [@ocaml.doc
+          "The criteria for inspecting responses to login requests, used by the ATP rule group to track login failure rates. Response inspection is available only in web ACLs that protect Amazon CloudFront distributions. The ATP rule group evaluates the responses that your protected resources send back to client login attempts, keeping count of successful and failed attempts for each IP address and client session. Using this information, the rule group labels and mitigates requests from client sessions and IP addresses that have had too many failed login attempts in a short amount of time."];
+      enableRegexInPath: Boolean.t option
+        [@ocaml.doc
+          "Allow the use of regular expressions in the login page path."]}
+    let context_ = "AWSManagedRulesATPRuleSet"
+    let make ?requestInspection =
+      fun ?responseInspection ->
+        fun ?enableRegexInPath ->
+          fun ~loginPath ->
+            fun () ->
+              {
+                requestInspection;
+                responseInspection;
+                enableRegexInPath;
+                loginPath
+              }
+    let to_value x =
+      structure_to_value
+        [("LoginPath", (Some (String_.to_value x.loginPath)));
+        ("RequestInspection",
+          (Option.map x.requestInspection ~f:RequestInspection.to_value));
+        ("ResponseInspection",
+          (Option.map x.responseInspection ~f:ResponseInspection.to_value));
+        ("EnableRegexInPath",
+          (Option.map x.enableRegexInPath ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableRegexInPath =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EnableRegexInPath") in
+      let responseInspection =
+        (Option.map ~f:ResponseInspection.of_xml)
+          (Xml.child xml_arg0 "ResponseInspection") in
+      let requestInspection =
+        (Option.map ~f:RequestInspection.of_xml)
+          (Xml.child xml_arg0 "RequestInspection") in
+      let loginPath =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LoginPath") in
+      make ?enableRegexInPath ?responseInspection ?requestInspection
+        ~loginPath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableRegexInPath =
+        field_map json__ "EnableRegexInPath" Boolean.of_json in
+      let responseInspection =
+        field_map json__ "ResponseInspection" ResponseInspection.of_json in
+      let requestInspection =
+        field_map json__ "RequestInspection" RequestInspection.of_json in
+      let loginPath = field_map_exn json__ "LoginPath" String_.of_json in
+      make ?enableRegexInPath ?responseInspection ?requestInspection
+        ~loginPath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details for your use of the account takeover prevention managed rule group, AWSManagedRulesATPRuleSet. This configuration is used in ManagedRuleGroupConfig. For additional information about this and the other intelligent threat mitigation rule groups, see Intelligent threat mitigation in WAF and Amazon Web Services Managed Rules rule groups list in the WAF Developer Guide."]
+module SensitivityToAct =
+  struct
+    type nonrec t =
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SensitivityToAct" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SensitivityToAct" j)
+    let to_json = simple_to_json to_value
+  end
+module UsageOfAction =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UsageOfAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UsageOfAction" j)
+    let to_json = simple_to_json to_value
+  end
+module RegexPatternString =
+  struct
+    type nonrec t = string
+    let context_ = "RegexPatternString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:".*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RegexPatternString" j
+    let to_json = simple_to_json to_value
+  end
+module Regex =
+  struct
+    type nonrec t =
+      {
+      regexString: RegexPatternString.t option
+        [@ocaml.doc "The string representing the regular expression."]}
+    let make ?regexString = fun () -> { regexString }
+    let to_value x =
+      structure_to_value
+        [("RegexString",
+           (Option.map x.regexString ~f:RegexPatternString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regexString =
+        (Option.map ~f:RegexPatternString.of_xml)
+          (Xml.child xml_arg0 "RegexString") in
+      make ?regexString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regexString =
+        field_map json__ "RegexString" RegexPatternString.of_json in
+      make ?regexString ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A single regular expression. This is used in a RegexPatternSet and also in the configuration for the Amazon Web Services Managed Rules rule group AWSManagedRulesAntiDDoSRuleSet."]
+module RegularExpressionList =
+  struct
+    type nonrec t = Regex.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Regex.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Regex.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegularExpressionList" ~of_json:Regex.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ClientSideAction =
+  struct
+    type nonrec t =
+      {
+      usageOfAction: UsageOfAction.t
+        [@ocaml.doc
+          "Determines whether to use the AWSManagedRulesAntiDDoSRuleSet rules ChallengeAllDuringEvent and ChallengeDDoSRequests in the rule group evaluation and the related label awswaf:managed:aws:anti-ddos:challengeable-request. If usage is enabled: The managed rule group adds the label awswaf:managed:aws:anti-ddos:challengeable-request to any web request whose URL does NOT match the regular expressions provided in the ClientSideAction setting ExemptUriRegularExpressions. The two rules are evaluated against web requests for protected resources that are experiencing a DDoS attack. The two rules only apply their action to matching requests that have the label awswaf:managed:aws:anti-ddos:challengeable-request. If usage is disabled: The managed rule group doesn't add the label awswaf:managed:aws:anti-ddos:challengeable-request to any web requests. The two rules are not evaluated. None of the other ClientSideAction settings have any effect. This setting only enables or disables the use of the two anti-DDOS rules ChallengeAllDuringEvent and ChallengeDDoSRequests in the anti-DDoS managed rule group. This setting doesn't alter the action setting in the two rules. To override the actions used by the rules ChallengeAllDuringEvent and ChallengeDDoSRequests, enable this setting, and then override the rule actions in the usual way, in your managed rule group configuration."];
+      sensitivity: SensitivityToAct.t option
+        [@ocaml.doc
+          "The sensitivity that the rule group rule ChallengeDDoSRequests uses when matching against the DDoS suspicion labeling on a request. The managed rule group adds the labeling during DDoS events, before the ChallengeDDoSRequests rule runs. The higher the sensitivity, the more levels of labeling that the rule matches: Low sensitivity is less sensitive, causing the rule to match only on the most likely participants in an attack, which are the requests with the high suspicion label awswaf:managed:aws:anti-ddos:high-suspicion-ddos-request. Medium sensitivity causes the rule to match on the medium and high suspicion labels. High sensitivity causes the rule to match on all of the suspicion labels: low, medium, and high. Default: HIGH"];
+      exemptUriRegularExpressions: RegularExpressionList.t option
+        [@ocaml.doc
+          "The regular expression to match against the web request URI, used to identify requests that can't handle a silent browser challenge. When the ClientSideAction setting UsageOfAction is enabled, the managed rule group uses this setting to determine which requests to label with awswaf:managed:aws:anti-ddos:challengeable-request. If UsageOfAction is disabled, this setting has no effect and the managed rule group doesn't add the label to any requests. The anti-DDoS managed rule group doesn't evaluate the rules ChallengeDDoSRequests or ChallengeAllDuringEvent for web requests whose URIs match this regex. This is true regardless of whether you override the rule action for either of the rules in your web ACL configuration. Amazon Web Services recommends using a regular expression. This setting is required if UsageOfAction is set to ENABLED. If required, you can provide between 1 and 5 regex objects in the array of settings. Amazon Web Services recommends starting with the following setting. Review and update it for your application's needs: \\/api\\/|\\.(acc|avi|css|gif|jpe?g|js|mp\\[34\\]|ogg|otf|pdf|png|tiff?|ttf|webm|webp|woff2?)$"]}
+    let context_ = "ClientSideAction"
+    let make ?sensitivity =
+      fun ?exemptUriRegularExpressions ->
+        fun ~usageOfAction ->
+          fun () ->
+            { sensitivity; exemptUriRegularExpressions; usageOfAction }
+    let to_value x =
+      structure_to_value
+        [("UsageOfAction", (Some (UsageOfAction.to_value x.usageOfAction)));
+        ("Sensitivity",
+          (Option.map x.sensitivity ~f:SensitivityToAct.to_value));
+        ("ExemptUriRegularExpressions",
+          (Option.map x.exemptUriRegularExpressions
+             ~f:RegularExpressionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exemptUriRegularExpressions =
+        (Option.map ~f:RegularExpressionList.of_xml)
+          (Xml.child xml_arg0 "ExemptUriRegularExpressions") in
+      let sensitivity =
+        (Option.map ~f:SensitivityToAct.of_xml)
+          (Xml.child xml_arg0 "Sensitivity") in
+      let usageOfAction =
+        UsageOfAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UsageOfAction") in
+      make ?exemptUriRegularExpressions ?sensitivity ~usageOfAction ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exemptUriRegularExpressions =
+        field_map json__ "ExemptUriRegularExpressions"
+          RegularExpressionList.of_json in
+      let sensitivity =
+        field_map json__ "Sensitivity" SensitivityToAct.of_json in
+      let usageOfAction =
+        field_map_exn json__ "UsageOfAction" UsageOfAction.of_json in
+      make ?exemptUriRegularExpressions ?sensitivity ~usageOfAction ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is part of the AWSManagedRulesAntiDDoSRuleSet ClientSideActionConfig configuration in ManagedRuleGroupConfig."]
+module ClientSideActionConfig =
+  struct
+    type nonrec t =
+      {
+      challenge: ClientSideAction.t
+        [@ocaml.doc
+          "Configuration for the use of the AWSManagedRulesAntiDDoSRuleSet rules ChallengeAllDuringEvent and ChallengeDDoSRequests. This setting isn't related to the configuration of the Challenge action itself. It only configures the use of the two anti-DDoS rules named here. You can enable or disable the use of these rules, and you can configure how to use them when they are enabled."]}
+    let context_ = "ClientSideActionConfig"
+    let make ~challenge = fun () -> { challenge }
+    let to_value x =
+      structure_to_value
+        [("Challenge", (Some (ClientSideAction.to_value x.challenge)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let challenge =
+        ClientSideAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Challenge") in
+      make ~challenge ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let challenge =
+        field_map_exn json__ "Challenge" ClientSideAction.of_json in
+      make ~challenge ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is part of the configuration for the managed rules AWSManagedRulesAntiDDoSRuleSet in ManagedRuleGroupConfig."]
+module AWSManagedRulesAntiDDoSRuleSet =
+  struct
+    type nonrec t =
+      {
+      clientSideActionConfig: ClientSideActionConfig.t
+        [@ocaml.doc
+          "Configures the request handling that's applied by the managed rule group rules ChallengeAllDuringEvent and ChallengeDDoSRequests during a distributed denial of service (DDoS) attack."];
+      sensitivityToBlock: SensitivityToAct.t option
+        [@ocaml.doc
+          "The sensitivity that the rule group rule DDoSRequests uses when matching against the DDoS suspicion labeling on a request. The managed rule group adds the labeling during DDoS events, before the DDoSRequests rule runs. The higher the sensitivity, the more levels of labeling that the rule matches: Low sensitivity is less sensitive, causing the rule to match only on the most likely participants in an attack, which are the requests with the high suspicion label awswaf:managed:aws:anti-ddos:high-suspicion-ddos-request. Medium sensitivity causes the rule to match on the medium and high suspicion labels. High sensitivity causes the rule to match on all of the suspicion labels: low, medium, and high. Default: LOW"]}
+    let context_ = "AWSManagedRulesAntiDDoSRuleSet"
+    let make ?sensitivityToBlock =
+      fun ~clientSideActionConfig ->
+        fun () -> { sensitivityToBlock; clientSideActionConfig }
+    let to_value x =
+      structure_to_value
+        [("ClientSideActionConfig",
+           (Some (ClientSideActionConfig.to_value x.clientSideActionConfig)));
+        ("SensitivityToBlock",
+          (Option.map x.sensitivityToBlock ~f:SensitivityToAct.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sensitivityToBlock =
+        (Option.map ~f:SensitivityToAct.of_xml)
+          (Xml.child xml_arg0 "SensitivityToBlock") in
+      let clientSideActionConfig =
+        ClientSideActionConfig.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientSideActionConfig") in
+      make ?sensitivityToBlock ~clientSideActionConfig ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sensitivityToBlock =
+        field_map json__ "SensitivityToBlock" SensitivityToAct.of_json in
+      let clientSideActionConfig =
+        field_map_exn json__ "ClientSideActionConfig"
+          ClientSideActionConfig.of_json in
+      make ?sensitivityToBlock ~clientSideActionConfig ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures the use of the anti-DDoS managed rule group, AWSManagedRulesAntiDDoSRuleSet. This configuration is used in ManagedRuleGroupConfig. The configuration that you provide here determines whether and how the rules in the rule group are used. For additional information about this and the other intelligent threat mitigation rule groups, see Intelligent threat mitigation in WAF and Amazon Web Services Managed Rules rule groups list in the WAF Developer Guide."]
+module InspectionLevel =
+  struct
+    type nonrec t =
+      | COMMON 
+      | TARGETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMMON -> "COMMON"
+      | TARGETED -> "TARGETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMMON" -> COMMON
+      | "TARGETED" -> TARGETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InspectionLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InspectionLevel" j)
+    let to_json = simple_to_json to_value
+  end
+module EnableMachineLearning =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module AWSManagedRulesBotControlRuleSet =
+  struct
+    type nonrec t =
+      {
+      inspectionLevel: InspectionLevel.t
+        [@ocaml.doc
+          "The inspection level to use for the Bot Control rule group. The common level is the least expensive. The targeted level includes all common level rules and adds rules with more advanced inspection criteria. For details, see WAF Bot Control rule group in the WAF Developer Guide."];
+      enableMachineLearning: EnableMachineLearning.t option
+        [@ocaml.doc
+          "Applies only to the targeted inspection level. Determines whether to use machine learning (ML) to analyze your web traffic for bot-related activity. Machine learning is required for the Bot Control rules TGT_ML_CoordinatedActivityLow and TGT_ML_CoordinatedActivityMedium, which inspect for anomalous behavior that might indicate distributed, coordinated bot activity. For more information about this choice, see the listing for these rules in the table at Bot Control rules listing in the WAF Developer Guide. Default: TRUE"]}
+    let context_ = "AWSManagedRulesBotControlRuleSet"
+    let make ?enableMachineLearning =
+      fun ~inspectionLevel ->
+        fun () -> { enableMachineLearning; inspectionLevel }
+    let to_value x =
+      structure_to_value
+        [("InspectionLevel",
+           (Some (InspectionLevel.to_value x.inspectionLevel)));
+        ("EnableMachineLearning",
+          (Option.map x.enableMachineLearning
+             ~f:EnableMachineLearning.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableMachineLearning =
+        (Option.map ~f:EnableMachineLearning.of_xml)
+          (Xml.child xml_arg0 "EnableMachineLearning") in
+      let inspectionLevel =
+        InspectionLevel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InspectionLevel") in
+      make ?enableMachineLearning ~inspectionLevel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableMachineLearning =
+        field_map json__ "EnableMachineLearning"
+          EnableMachineLearning.of_json in
+      let inspectionLevel =
+        field_map_exn json__ "InspectionLevel" InspectionLevel.of_json in
+      make ?enableMachineLearning ~inspectionLevel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details for your use of the Bot Control managed rule group, AWSManagedRulesBotControlRuleSet. This configuration is used in ManagedRuleGroupConfig. For additional information about this and the other intelligent threat mitigation rule groups, see Intelligent threat mitigation in WAF and Amazon Web Services Managed Rules rule groups list in the WAF Developer Guide."]
 module Action =
   struct
     type nonrec t = string
@@ -45,6 +1769,7 @@ module ActionValue =
       | BLOCK 
       | COUNT 
       | CAPTCHA 
+      | CHALLENGE 
       | EXCLUDED_AS_COUNT 
       | Non_static_id of string 
     let make i = i
@@ -54,6 +1779,7 @@ module ActionValue =
       | BLOCK -> "BLOCK"
       | COUNT -> "COUNT"
       | CAPTCHA -> "CAPTCHA"
+      | CHALLENGE -> "CHALLENGE"
       | EXCLUDED_AS_COUNT -> "EXCLUDED_AS_COUNT"
       | Non_static_id s -> s
     let of_string =
@@ -62,6 +1788,7 @@ module ActionValue =
       | "BLOCK" -> BLOCK
       | "COUNT" -> COUNT
       | "CAPTCHA" -> CAPTCHA
+      | "CHALLENGE" -> CHALLENGE
       | "EXCLUDED_AS_COUNT" -> EXCLUDED_AS_COUNT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
@@ -78,7 +1805,7 @@ module ActionCondition =
       {
       action: ActionValue.t
         [@ocaml.doc
-          "The action setting that a log record must contain in order to meet the condition."]}
+          "The action setting that a log record must contain in order to meet the condition. This is the action that WAF applied to the web request. For rule groups, this is either the configured rule action setting, or if you've applied a rule action override to the rule, it's the override action. The value EXCLUDED_AS_COUNT matches on excluded rules and also on rules that have a rule action override of Count."]}
     let context_ = "ActionCondition"
     let make ~action = fun () -> { action }
     let to_value x =
@@ -90,8 +1817,8 @@ module ActionCondition =
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
       make ~action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "Action" ActionValue.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "Action" ActionValue.of_json in
       make ~action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -108,7 +1835,7 @@ module All =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Inspect all of the elements that WAF has parsed and extracted from the web request JSON body that are within the JsonBody MatchScope. This is used with the FieldToMatch option JsonBody. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"All\": \\{\\}"]
+       "Inspect all of the elements that WAF has parsed and extracted from the web request component that you've identified in your FieldToMatch specifications. This is used in the FieldToMatch specification for some web request component types. JSON specification: \"All\": \\{\\}"]
 module AllQueryArguments =
   struct
     type nonrec t = unit
@@ -121,7 +1848,7 @@ module AllQueryArguments =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "All query arguments of a web request. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"AllQueryArguments\": \\{\\}"]
+       "Inspect all query arguments of the web request. This is used in the FieldToMatch specification for some web request component types. JSON specification: \"AllQueryArguments\": \\{\\}"]
 module CustomHTTPHeaderValue =
   struct
     type nonrec t = string
@@ -187,9 +1914,9 @@ module CustomHTTPHeader =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" CustomHTTPHeaderValue.of_json in
-      let name = field_map_exn json "Name" CustomHTTPHeaderName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" CustomHTTPHeaderValue.of_json in
+      let name = field_map_exn json__ "Name" CustomHTTPHeaderName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -199,6 +1926,9 @@ module CustomHTTPHeaders =
     type nonrec t = CustomHTTPHeader.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomHTTPHeader.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -240,13 +1970,13 @@ module CustomRequestHandling =
           (Xml.child_exn ~context:context_ xml_arg0 "InsertHeaders") in
       make ~insertHeaders ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let insertHeaders =
-        field_map_exn json "InsertHeaders" CustomHTTPHeaders.of_json in
+        field_map_exn json__ "InsertHeaders" CustomHTTPHeaders.of_json in
       make ~insertHeaders ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Custom request handling behavior that inserts custom headers into a web request. You can add custom request handling for the rule actions allow and count. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]
+       "Custom request handling behavior that inserts custom headers into a web request. You can add custom request handling for WAF to use when the rule action doesn't block the request. For example, CaptchaAction for requests with valid t okens, and AllowAction. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]
 module AllowAction =
   struct
     type nonrec t =
@@ -267,9 +1997,10 @@ module AllowAction =
           (Xml.child xml_arg0 "CustomRequestHandling") in
       make ?customRequestHandling ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customRequestHandling =
-        field_map json "CustomRequestHandling" CustomRequestHandling.of_json in
+        field_map json__ "CustomRequestHandling"
+          CustomRequestHandling.of_json in
       make ?customRequestHandling ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -380,10 +2111,10 @@ module TextTransformation =
       {
       priority: TextTransformationPriority.t
         [@ocaml.doc
-          "Sets the relative processing order for multiple transformations that are defined for a rule statement. WAF processes all transformations, from lowest priority to highest, before inspecting the transformed content. The priorities don't need to be consecutive, but they must all be different."];
+          "Sets the relative processing order for multiple transformations. WAF processes all transformations, from lowest priority to highest, before inspecting the transformed content. The priorities don't need to be consecutive, but they must all be different."];
       type_: TextTransformationType.t
         [@ocaml.doc
-          "You can specify the following transformation types: BASE64_DECODE - Decode a Base64-encoded string. BASE64_DECODE_EXT - Decode a Base64-encoded string, but use a forgiving implementation that ignores characters that aren't valid. CMD_LINE - Command-line transformations. These are helpful in reducing effectiveness of attackers who inject an operating system command-line command and use unusual formatting to disguise some or all of the command. Delete the following characters: \\ \" ' ^ Delete spaces before the following characters: / ( Replace the following characters with a space: , ; Replace multiple spaces with one space Convert uppercase letters (A-Z) to lowercase (a-z) COMPRESS_WHITE_SPACE - Replace these characters with a space character (decimal 32): \\f, formfeed, decimal 12 \\t, tab, decimal 9 \\n, newline, decimal 10 \\r, carriage return, decimal 13 \\v, vertical tab, decimal 11 Non-breaking space, decimal 160 COMPRESS_WHITE_SPACE also replaces multiple spaces with one space. CSS_DECODE - Decode characters that were encoded using CSS 2.x escape rules syndata.html#characters. This function uses up to two bytes in the decoding process, so it can help to uncover ASCII characters that were encoded using CSS encoding that wouldn\226\128\153t typically be encoded. It's also useful in countering evasion, which is a combination of a backslash and non-hexadecimal characters. For example, ja\\vascript for javascript. ESCAPE_SEQ_DECODE - Decode the following ANSI C escape sequences: \\a, \\b, \\f, \\n, \\r, \\t, \\v, \\\\, \\?, \\', \\\", \\xHH (hexadecimal), \\0OOO (octal). Encodings that aren't valid remain in the output. HEX_DECODE - Decode a string of hexadecimal characters into a binary. HTML_ENTITY_DECODE - Replace HTML-encoded characters with unencoded characters. HTML_ENTITY_DECODE performs these operations: Replaces (ampersand)quot; with \" Replaces (ampersand)nbsp; with a non-breaking space, decimal 160 Replaces (ampersand)lt; with a \"less than\" symbol Replaces (ampersand)gt; with > Replaces characters that are represented in hexadecimal format, (ampersand)#xhhhh;, with the corresponding characters Replaces characters that are represented in decimal format, (ampersand)#nnnn;, with the corresponding characters JS_DECODE - Decode JavaScript escape sequences. If a \\ u HHHH code is in the full-width ASCII code range of FF01-FF5E, then the higher byte is used to detect and adjust the lower byte. If not, only the lower byte is used and the higher byte is zeroed, causing a possible loss of information. LOWERCASE - Convert uppercase letters (A-Z) to lowercase (a-z). MD5 - Calculate an MD5 hash from the data in the input. The computed hash is in a raw binary form. NONE - Specify NONE if you don't want any text transformations. NORMALIZE_PATH - Remove multiple slashes, directory self-references, and directory back-references that are not at the beginning of the input from an input string. NORMALIZE_PATH_WIN - This is the same as NORMALIZE_PATH, but first converts backslash characters to forward slashes. REMOVE_NULLS - Remove all NULL bytes from the input. REPLACE_COMMENTS - Replace each occurrence of a C-style comment (/* ... */) with a single space. Multiple consecutive occurrences are not compressed. Unterminated comments are also replaced with a space (ASCII 0x20). However, a standalone termination of a comment (*/) is not acted upon. REPLACE_NULLS - Replace NULL bytes in the input with space characters (ASCII 0x20). SQL_HEX_DECODE - Decode SQL hex data. Example (0x414243) will be decoded to (ABC). URL_DECODE - Decode a URL-encoded value. URL_DECODE_UNI - Like URL_DECODE, but with support for Microsoft-specific %u encoding. If the code is in the full-width ASCII code range of FF01-FF5E, the higher byte is used to detect and adjust the lower byte. Otherwise, only the lower byte is used and the higher byte is zeroed. UTF8_TO_UNICODE - Convert all UTF-8 character sequences to Unicode. This helps input normalization, and minimizing false-positives and false-negatives for non-English languages."]}
+          "For detailed descriptions of each of the transformation types, see Text transformations in the WAF Developer Guide."]}
     let context_ = "TextTransformation"
     let make ~priority = fun ~type_ -> fun () -> { priority; type_ }
     let to_value x =
@@ -401,10 +2132,10 @@ module TextTransformation =
           (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
       make ~type_ ~priority ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" TextTransformationType.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" TextTransformationType.of_json in
       let priority =
-        field_map_exn json "Priority" TextTransformationPriority.of_json in
+        field_map_exn json__ "Priority" TextTransformationPriority.of_json in
       make ~type_ ~priority ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -414,6 +2145,9 @@ module TextTransformations =
     type nonrec t = TextTransformation.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TextTransformation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -447,7 +2181,58 @@ module UriPath =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The path component of the URI of a web request. This is the part of a web request that identifies a resource. For example, /images/daily-ad.jpg. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"UriPath\": \\{\\}"]
+       "Inspect the path component of the URI of the web request. This is the part of the web request that identifies a resource. For example, /images/daily-ad.jpg. This is used in the FieldToMatch specification for some web request component types. JSON specification: \"UriPath\": \\{\\}"]
+module FallbackBehavior =
+  struct
+    type nonrec t =
+      | MATCH 
+      | NO_MATCH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MATCH -> "MATCH"
+      | NO_MATCH -> "NO_MATCH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MATCH" -> MATCH
+      | "NO_MATCH" -> NO_MATCH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FallbackBehavior" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FallbackBehavior" j)
+    let to_json = simple_to_json to_value
+  end
+module UriFragment =
+  struct
+    type nonrec t =
+      {
+      fallbackBehavior: FallbackBehavior.t option
+        [@ocaml.doc
+          "What WAF should do if it fails to completely parse the JSON body. The options are the following: EVALUATE_AS_STRING - Inspect the body as plain text. WAF applies the text transformations and inspection criteria that you defined for the JSON inspection to the body text string. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. If you don't provide this setting, WAF parses and evaluates the content only up to the first parsing failure that it encounters. Example JSON: \\{ \"UriFragment\": \\{ \"FallbackBehavior\": \"MATCH\"\\} \\} WAF parsing doesn't fully validate the input JSON string, so parsing can succeed even for invalid JSON. When parsing succeeds, WAF doesn't apply the fallback behavior. For more information, see JSON body in the WAF Developer Guide."]}
+    let make ?fallbackBehavior = fun () -> { fallbackBehavior }
+    let to_value x =
+      structure_to_value
+        [("FallbackBehavior",
+           (Option.map x.fallbackBehavior ~f:FallbackBehavior.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fallbackBehavior =
+        (Option.map ~f:FallbackBehavior.of_xml)
+          (Xml.child xml_arg0 "FallbackBehavior") in
+      make ?fallbackBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fallbackBehavior =
+        field_map json__ "FallbackBehavior" FallbackBehavior.of_json in
+      make ?fallbackBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspect fragments of the request URI. You can specify the parts of the URI fragment to inspect and you can narrow the set of URI fragments to inspect by including or excluding specific keys. This is used to indicate the web request component to inspect, in the FieldToMatch specification. Example JSON: \"UriFragment\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"KEY\", \"OversizeHandling\": \"MATCH\" \\}"]
 module FieldToMatchData =
   struct
     type nonrec t = string
@@ -486,12 +2271,12 @@ module SingleQueryArgument =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" FieldToMatchData.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" FieldToMatchData.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One query argument in a web request, identified by name, for example UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"]
+       "Inspect one query argument in the web request, identified by name, for example UserName or SalesRegion. The name isn't case sensitive. This is used to indicate the web request component to inspect, in the FieldToMatch specification. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"]
 module SingleHeader =
   struct
     type nonrec t =
@@ -510,12 +2295,12 @@ module SingleHeader =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" FieldToMatchData.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" FieldToMatchData.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "One of the headers in a web request, identified by name, for example, User-Agent or Referer. This setting isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\}"]
+       "Inspect one of the headers in the web request, identified by name, for example, User-Agent or Referer. The name isn't case sensitive. You can filter and inspect all headers with the FieldToMatch setting Headers. This is used to indicate the web request component to inspect, in the FieldToMatch specification. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\}"]
 module QueryString =
   struct
     type nonrec t = unit
@@ -528,7 +2313,7 @@ module QueryString =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The query string of a web request. This is the part of a URL that appears after a ? character, if any. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"QueryString\": \\{\\}"]
+       "Inspect the query string of the web request. This is the part of a URL that appears after a ? character, if any. This is used in the FieldToMatch specification for some web request component types. JSON specification: \"QueryString\": \\{\\}"]
 module Method =
   struct
     type nonrec t = unit
@@ -541,7 +2326,35 @@ module Method =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The HTTP method of a web request. The method indicates the type of operation that the request is asking the origin to perform. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Method\": \\{\\}"]
+       "Inspect the HTTP method of the web request. The method indicates the type of operation that the request is asking the origin to perform. This is used in the FieldToMatch specification for some web request component types. JSON specification: \"Method\": \\{\\}"]
+module OversizeHandling =
+  struct
+    type nonrec t =
+      | CONTINUE 
+      | MATCH 
+      | NO_MATCH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CONTINUE -> "CONTINUE"
+      | MATCH -> "MATCH"
+      | NO_MATCH -> "NO_MATCH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CONTINUE" -> CONTINUE
+      | "MATCH" -> MATCH
+      | "NO_MATCH" -> NO_MATCH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration OversizeHandling" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OversizeHandling" j)
+    let to_json = simple_to_json to_value
+  end
 module JsonMatchScope =
   struct
     type nonrec t =
@@ -596,6 +2409,9 @@ module JsonPointerPaths =
     type nonrec t = JsonPointerPath.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JsonPointerPath.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -641,10 +2457,10 @@ module JsonMatchPattern =
       let all = (Option.map ~f:All.of_xml) (Xml.child xml_arg0 "All") in
       make ?includedPaths ?all ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includedPaths =
-        field_map json "IncludedPaths" JsonPointerPaths.of_json in
-      let all = field_map json "All" All.of_json in
+        field_map json__ "IncludedPaths" JsonPointerPaths.of_json in
+      let all = field_map json__ "All" All.of_json in
       make ?includedPaths ?all ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -689,24 +2505,39 @@ module JsonBody =
           "The patterns to look for in the JSON body. WAF inspects the results of these pattern matches against the rule inspection criteria."];
       matchScope: JsonMatchScope.t
         [@ocaml.doc
-          "The parts of the JSON to match against using the MatchPattern. If you specify All, WAF matches against keys and values."];
+          "The parts of the JSON to match against using the MatchPattern. If you specify ALL, WAF matches against keys and values. All does not require a match to be found in the keys and a match to be found in the values. It requires a match to be found in the keys or the values or both. To require a match in the keys and in the values, use a logical AND statement to combine two match rules, one that inspects the keys and another that inspects the values."];
       invalidFallbackBehavior: BodyParsingFallbackBehavior.t option
         [@ocaml.doc
-          "What WAF should do if it fails to completely parse the JSON body. The options are the following: EVALUATE_AS_STRING - Inspect the body as plain text. WAF applies the text transformations and inspection criteria that you defined for the JSON inspection to the body text string. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. If you don't provide this setting, WAF parses and evaluates the content only up to the first parsing failure that it encounters. WAF does its best to parse the entire JSON body, but might be forced to stop for reasons such as invalid characters, duplicate keys, truncation, and any content whose root node isn't an object or an array. WAF parses the JSON in the following examples as two valid key, value pairs: Missing comma: \\{\"key1\":\"value1\"\"key2\":\"value2\"\\} Missing colon: \\{\"key1\":\"value1\",\"key2\"\"value2\"\\} Extra colons: \\{\"key1\"::\"value1\",\"key2\"\"value2\"\\}"]}
+          "What WAF should do if it fails to completely parse the JSON body. The options are the following: EVALUATE_AS_STRING - Inspect the body as plain text. WAF applies the text transformations and inspection criteria that you defined for the JSON inspection to the body text string. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. If you don't provide this setting, WAF parses and evaluates the content only up to the first parsing failure that it encounters. WAF parsing doesn't fully validate the input JSON string, so parsing can succeed even for invalid JSON. When parsing succeeds, WAF doesn't apply the fallback behavior. For more information, see JSON body in the WAF Developer Guide."];
+      oversizeHandling: OversizeHandling.t option
+        [@ocaml.doc
+          "What WAF should do if the body is larger than WAF can inspect. WAF does not support inspecting the entire contents of the web request body if the body exceeds the limit for the resource type. When a web request body is larger than the limit, the underlying host service only forwards the contents that are within the limit to WAF for inspection. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes). For CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access, the default limit is 16 KB (16,384 bytes), and you can increase the limit for each resource type in the web ACL AssociationConfig, for additional processing fees. For Amplify, use the CloudFront limit. The options for oversize handling are the following: CONTINUE - Inspect the available body contents normally, according to the rule inspection criteria. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. You can combine the MATCH or NO_MATCH settings for oversize handling with your rule and web ACL action settings, so that you block any request whose body is over the limit. Default: CONTINUE"]}
     let context_ = "JsonBody"
     let make ?invalidFallbackBehavior =
-      fun ~matchPattern ->
-        fun ~matchScope ->
-          fun () -> { invalidFallbackBehavior; matchPattern; matchScope }
+      fun ?oversizeHandling ->
+        fun ~matchPattern ->
+          fun ~matchScope ->
+            fun () ->
+              {
+                invalidFallbackBehavior;
+                oversizeHandling;
+                matchPattern;
+                matchScope
+              }
     let to_value x =
       structure_to_value
         [("MatchPattern", (Some (JsonMatchPattern.to_value x.matchPattern)));
         ("MatchScope", (Some (JsonMatchScope.to_value x.matchScope)));
         ("InvalidFallbackBehavior",
           (Option.map x.invalidFallbackBehavior
-             ~f:BodyParsingFallbackBehavior.to_value))]
+             ~f:BodyParsingFallbackBehavior.to_value));
+        ("OversizeHandling",
+          (Option.map x.oversizeHandling ~f:OversizeHandling.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let oversizeHandling =
+        (Option.map ~f:OversizeHandling.of_xml)
+          (Xml.child xml_arg0 "OversizeHandling") in
       let invalidFallbackBehavior =
         (Option.map ~f:BodyParsingFallbackBehavior.of_xml)
           (Xml.child xml_arg0 "InvalidFallbackBehavior") in
@@ -716,59 +2547,472 @@ module JsonBody =
       let matchPattern =
         JsonMatchPattern.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MatchPattern") in
-      make ?invalidFallbackBehavior ~matchScope ~matchPattern ()
+      make ?oversizeHandling ?invalidFallbackBehavior ~matchScope
+        ~matchPattern ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let oversizeHandling =
+        field_map json__ "OversizeHandling" OversizeHandling.of_json in
       let invalidFallbackBehavior =
-        field_map json "InvalidFallbackBehavior"
+        field_map json__ "InvalidFallbackBehavior"
           BodyParsingFallbackBehavior.of_json in
-      let matchScope = field_map_exn json "MatchScope" JsonMatchScope.of_json in
+      let matchScope =
+        field_map_exn json__ "MatchScope" JsonMatchScope.of_json in
       let matchPattern =
-        field_map_exn json "MatchPattern" JsonMatchPattern.of_json in
-      make ?invalidFallbackBehavior ~matchScope ~matchPattern ()
+        field_map_exn json__ "MatchPattern" JsonMatchPattern.of_json in
+      make ?oversizeHandling ?invalidFallbackBehavior ~matchScope
+        ~matchPattern ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The body of a web request, inspected as JSON. The body immediately follows the request headers. This is used in the FieldToMatch specification. Use the specifications in this object to indicate which parts of the JSON body to inspect using the rule's inspection criteria. WAF inspects only the parts of the JSON that result from the matches that you indicate. Example JSON: \"JsonBody\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"ALL\" \\}"]
+       "Inspect the body of the web request as JSON. The body immediately follows the request headers. This is used to indicate the web request component to inspect, in the FieldToMatch specification. Use the specifications in this object to indicate which parts of the JSON body to inspect using the rule's inspection criteria. WAF inspects only the parts of the JSON that result from the matches that you indicate. Example JSON: \"JsonBody\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"ALL\" \\} For additional information about this request component option, see JSON body in the WAF Developer Guide."]
+module JA4Fingerprint =
+  struct
+    type nonrec t =
+      {
+      fallbackBehavior: FallbackBehavior.t
+        [@ocaml.doc
+          "The match status to assign to the web request if the request doesn't have a JA4 fingerprint. You can specify the following fallback behaviors: MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "JA4Fingerprint"
+    let make ~fallbackBehavior = fun () -> { fallbackBehavior }
+    let to_value x =
+      structure_to_value
+        [("FallbackBehavior",
+           (Some (FallbackBehavior.to_value x.fallbackBehavior)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fallbackBehavior =
+        FallbackBehavior.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FallbackBehavior") in
+      make ~fallbackBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fallbackBehavior =
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
+      make ~fallbackBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Available for use with Amazon CloudFront distributions and Application Load Balancers. Match against the request's JA4 fingerprint. The JA4 fingerprint is a 36-character hash derived from the TLS Client Hello of an incoming request. This fingerprint serves as a unique identifier for the client's TLS configuration. WAF calculates and logs this fingerprint for each request that has enough TLS Client Hello information for the calculation. Almost all web requests include this information. You can use this choice only with a string match ByteMatchStatement with the PositionalConstraint set to EXACTLY. You can obtain the JA4 fingerprint for client requests from the web ACL logs. If WAF is able to calculate the fingerprint, it includes it in the logs. For information about the logging fields, see Log fields in the WAF Developer Guide. Provide the JA4 fingerprint string from the logs in your string match statement specification, to match with any future requests that have the same TLS configuration."]
+module JA3Fingerprint =
+  struct
+    type nonrec t =
+      {
+      fallbackBehavior: FallbackBehavior.t
+        [@ocaml.doc
+          "The match status to assign to the web request if the request doesn't have a JA3 fingerprint. You can specify the following fallback behaviors: MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "JA3Fingerprint"
+    let make ~fallbackBehavior = fun () -> { fallbackBehavior }
+    let to_value x =
+      structure_to_value
+        [("FallbackBehavior",
+           (Some (FallbackBehavior.to_value x.fallbackBehavior)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fallbackBehavior =
+        FallbackBehavior.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FallbackBehavior") in
+      make ~fallbackBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fallbackBehavior =
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
+      make ~fallbackBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Available for use with Amazon CloudFront distributions and Application Load Balancers. Match against the request's JA3 fingerprint. The JA3 fingerprint is a 32-character hash derived from the TLS Client Hello of an incoming request. This fingerprint serves as a unique identifier for the client's TLS configuration. WAF calculates and logs this fingerprint for each request that has enough TLS Client Hello information for the calculation. Almost all web requests include this information. You can use this choice only with a string match ByteMatchStatement with the PositionalConstraint set to EXACTLY. You can obtain the JA3 fingerprint for client requests from the web ACL logs. If WAF is able to calculate the fingerprint, it includes it in the logs. For information about the logging fields, see Log fields in the WAF Developer Guide. Provide the JA3 fingerprint string from the logs in your string match statement specification, to match with any future requests that have the same TLS configuration."]
+module MapMatchScope =
+  struct
+    type nonrec t =
+      | ALL 
+      | KEY 
+      | VALUE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALL -> "ALL"
+      | KEY -> "KEY"
+      | VALUE -> "VALUE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALL" -> ALL
+      | "KEY" -> KEY
+      | "VALUE" -> VALUE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MapMatchScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MapMatchScope" j)
+    let to_json = simple_to_json to_value
+  end
+module HeaderNames =
+  struct
+    type nonrec t = FieldToMatchData.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:199) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FieldToMatchData.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FieldToMatchData.of_xml)
+    let of_json j =
+      list_of_json ~kind:"HeaderNames" ~of_json:FieldToMatchData.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module HeaderMatchPattern =
+  struct
+    type nonrec t =
+      {
+      all: All.t option [@ocaml.doc "Inspect all headers."];
+      includedHeaders: HeaderNames.t option
+        [@ocaml.doc
+          "Inspect only the headers that have a key that matches one of the strings specified here."];
+      excludedHeaders: HeaderNames.t option
+        [@ocaml.doc
+          "Inspect only the headers whose keys don't match any of the strings specified here."]}
+    let make ?all =
+      fun ?includedHeaders ->
+        fun ?excludedHeaders ->
+          fun () -> { all; includedHeaders; excludedHeaders }
+    let to_value x =
+      structure_to_value
+        [("All", (Option.map x.all ~f:All.to_value));
+        ("IncludedHeaders",
+          (Option.map x.includedHeaders ~f:HeaderNames.to_value));
+        ("ExcludedHeaders",
+          (Option.map x.excludedHeaders ~f:HeaderNames.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludedHeaders =
+        (Option.map ~f:HeaderNames.of_xml)
+          (Xml.child xml_arg0 "ExcludedHeaders") in
+      let includedHeaders =
+        (Option.map ~f:HeaderNames.of_xml)
+          (Xml.child xml_arg0 "IncludedHeaders") in
+      let all = (Option.map ~f:All.of_xml) (Xml.child xml_arg0 "All") in
+      make ?excludedHeaders ?includedHeaders ?all ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludedHeaders =
+        field_map json__ "ExcludedHeaders" HeaderNames.of_json in
+      let includedHeaders =
+        field_map json__ "IncludedHeaders" HeaderNames.of_json in
+      let all = field_map json__ "All" All.of_json in
+      make ?excludedHeaders ?includedHeaders ?all ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filter to use to identify the subset of headers to inspect in a web request. You must specify exactly one setting: either All, IncludedHeaders, or ExcludedHeaders. Example JSON: \"MatchPattern\": \\{ \"ExcludedHeaders\": \\[ \"KeyToExclude1\", \"KeyToExclude2\" \\] \\}"]
+module Headers =
+  struct
+    type nonrec t =
+      {
+      matchPattern: HeaderMatchPattern.t
+        [@ocaml.doc
+          "The filter to use to identify the subset of headers to inspect in a web request. You must specify exactly one setting: either All, IncludedHeaders, or ExcludedHeaders. Example JSON: \"MatchPattern\": \\{ \"ExcludedHeaders\": \\[ \"KeyToExclude1\", \"KeyToExclude2\" \\] \\}"];
+      matchScope: MapMatchScope.t
+        [@ocaml.doc
+          "The parts of the headers to match with the rule inspection criteria. If you specify ALL, WAF inspects both keys and values. All does not require a match to be found in the keys and a match to be found in the values. It requires a match to be found in the keys or the values or both. To require a match in the keys and in the values, use a logical AND statement to combine two match rules, one that inspects the keys and another that inspects the values."];
+      oversizeHandling: OversizeHandling.t
+        [@ocaml.doc
+          "What WAF should do if the headers determined by your match scope are more numerous or larger than WAF can inspect. WAF does not support inspecting the entire contents of request headers when they exceed 8 KB (8192 bytes) or 200 total headers. The underlying host service forwards a maximum of 200 headers and at most 8 KB of header contents to WAF. The options for oversize handling are the following: CONTINUE - Inspect the available headers normally, according to the rule inspection criteria. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "Headers"
+    let make ~matchPattern =
+      fun ~matchScope ->
+        fun ~oversizeHandling ->
+          fun () -> { matchPattern; matchScope; oversizeHandling }
+    let to_value x =
+      structure_to_value
+        [("MatchPattern",
+           (Some (HeaderMatchPattern.to_value x.matchPattern)));
+        ("MatchScope", (Some (MapMatchScope.to_value x.matchScope)));
+        ("OversizeHandling",
+          (Some (OversizeHandling.to_value x.oversizeHandling)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oversizeHandling =
+        OversizeHandling.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OversizeHandling") in
+      let matchScope =
+        MapMatchScope.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MatchScope") in
+      let matchPattern =
+        HeaderMatchPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MatchPattern") in
+      make ~oversizeHandling ~matchScope ~matchPattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oversizeHandling =
+        field_map_exn json__ "OversizeHandling" OversizeHandling.of_json in
+      let matchScope =
+        field_map_exn json__ "MatchScope" MapMatchScope.of_json in
+      let matchPattern =
+        field_map_exn json__ "MatchPattern" HeaderMatchPattern.of_json in
+      make ~oversizeHandling ~matchScope ~matchPattern ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspect all headers in the web request. You can specify the parts of the headers to inspect and you can narrow the set of headers to inspect by including or excluding specific keys. This is used to indicate the web request component to inspect, in the FieldToMatch specification. If you want to inspect just the value of a single header, use the SingleHeader FieldToMatch setting instead. Example JSON: \"Headers\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"KEY\", \"OversizeHandling\": \"MATCH\" \\}"]
+module HeaderOrder =
+  struct
+    type nonrec t =
+      {
+      oversizeHandling: OversizeHandling.t
+        [@ocaml.doc
+          "What WAF should do if the headers determined by your match scope are more numerous or larger than WAF can inspect. WAF does not support inspecting the entire contents of request headers when they exceed 8 KB (8192 bytes) or 200 total headers. The underlying host service forwards a maximum of 200 headers and at most 8 KB of header contents to WAF. The options for oversize handling are the following: CONTINUE - Inspect the available headers normally, according to the rule inspection criteria. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "HeaderOrder"
+    let make ~oversizeHandling = fun () -> { oversizeHandling }
+    let to_value x =
+      structure_to_value
+        [("OversizeHandling",
+           (Some (OversizeHandling.to_value x.oversizeHandling)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oversizeHandling =
+        OversizeHandling.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OversizeHandling") in
+      make ~oversizeHandling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oversizeHandling =
+        field_map_exn json__ "OversizeHandling" OversizeHandling.of_json in
+      make ~oversizeHandling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspect a string containing the list of the request's header names, ordered as they appear in the web request that WAF receives for inspection. WAF generates the string and then uses that as the field to match component in its inspection. WAF separates the header names in the string using colons and no added spaces, for example host:user-agent:accept:authorization:referer."]
+module SingleCookieName =
+  struct
+    type nonrec t = string
+    let context_ = "SingleCookieName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:60) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SingleCookieName" j
+    let to_json = simple_to_json to_value
+  end
+module CookieNames =
+  struct
+    type nonrec t = SingleCookieName.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:199) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SingleCookieName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SingleCookieName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CookieNames" ~of_json:SingleCookieName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CookieMatchPattern =
+  struct
+    type nonrec t =
+      {
+      all: All.t option [@ocaml.doc "Inspect all cookies."];
+      includedCookies: CookieNames.t option
+        [@ocaml.doc
+          "Inspect only the cookies that have a key that matches one of the strings specified here."];
+      excludedCookies: CookieNames.t option
+        [@ocaml.doc
+          "Inspect only the cookies whose keys don't match any of the strings specified here."]}
+    let make ?all =
+      fun ?includedCookies ->
+        fun ?excludedCookies ->
+          fun () -> { all; includedCookies; excludedCookies }
+    let to_value x =
+      structure_to_value
+        [("All", (Option.map x.all ~f:All.to_value));
+        ("IncludedCookies",
+          (Option.map x.includedCookies ~f:CookieNames.to_value));
+        ("ExcludedCookies",
+          (Option.map x.excludedCookies ~f:CookieNames.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludedCookies =
+        (Option.map ~f:CookieNames.of_xml)
+          (Xml.child xml_arg0 "ExcludedCookies") in
+      let includedCookies =
+        (Option.map ~f:CookieNames.of_xml)
+          (Xml.child xml_arg0 "IncludedCookies") in
+      let all = (Option.map ~f:All.of_xml) (Xml.child xml_arg0 "All") in
+      make ?excludedCookies ?includedCookies ?all ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludedCookies =
+        field_map json__ "ExcludedCookies" CookieNames.of_json in
+      let includedCookies =
+        field_map json__ "IncludedCookies" CookieNames.of_json in
+      let all = field_map json__ "All" All.of_json in
+      make ?excludedCookies ?includedCookies ?all ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The filter to use to identify the subset of cookies to inspect in a web request. You must specify exactly one setting: either All, IncludedCookies, or ExcludedCookies. Example JSON: \"MatchPattern\": \\{ \"IncludedCookies\": \\[ \"session-id-time\", \"session-id\" \\] \\}"]
+module Cookies =
+  struct
+    type nonrec t =
+      {
+      matchPattern: CookieMatchPattern.t
+        [@ocaml.doc
+          "The filter to use to identify the subset of cookies to inspect in a web request. You must specify exactly one setting: either All, IncludedCookies, or ExcludedCookies. Example JSON: \"MatchPattern\": \\{ \"IncludedCookies\": \\[ \"session-id-time\", \"session-id\" \\] \\}"];
+      matchScope: MapMatchScope.t
+        [@ocaml.doc
+          "The parts of the cookies to inspect with the rule inspection criteria. If you specify ALL, WAF inspects both keys and values. All does not require a match to be found in the keys and a match to be found in the values. It requires a match to be found in the keys or the values or both. To require a match in the keys and in the values, use a logical AND statement to combine two match rules, one that inspects the keys and another that inspects the values."];
+      oversizeHandling: OversizeHandling.t
+        [@ocaml.doc
+          "What WAF should do if the cookies of the request are more numerous or larger than WAF can inspect. WAF does not support inspecting the entire contents of request cookies when they exceed 8 KB (8192 bytes) or 200 total cookies. The underlying host service forwards a maximum of 200 cookies and at most 8 KB of cookie contents to WAF. The options for oversize handling are the following: CONTINUE - Inspect the available cookies normally, according to the rule inspection criteria. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "Cookies"
+    let make ~matchPattern =
+      fun ~matchScope ->
+        fun ~oversizeHandling ->
+          fun () -> { matchPattern; matchScope; oversizeHandling }
+    let to_value x =
+      structure_to_value
+        [("MatchPattern",
+           (Some (CookieMatchPattern.to_value x.matchPattern)));
+        ("MatchScope", (Some (MapMatchScope.to_value x.matchScope)));
+        ("OversizeHandling",
+          (Some (OversizeHandling.to_value x.oversizeHandling)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let oversizeHandling =
+        OversizeHandling.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OversizeHandling") in
+      let matchScope =
+        MapMatchScope.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MatchScope") in
+      let matchPattern =
+        CookieMatchPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MatchPattern") in
+      make ~oversizeHandling ~matchScope ~matchPattern ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let oversizeHandling =
+        field_map_exn json__ "OversizeHandling" OversizeHandling.of_json in
+      let matchScope =
+        field_map_exn json__ "MatchScope" MapMatchScope.of_json in
+      let matchPattern =
+        field_map_exn json__ "MatchPattern" CookieMatchPattern.of_json in
+      make ~oversizeHandling ~matchScope ~matchPattern ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inspect the cookies in the web request. You can specify the parts of the cookies to inspect and you can narrow the set of cookies to inspect by including or excluding specific keys. This is used to indicate the web request component to inspect, in the FieldToMatch specification. Example JSON: \"Cookies\": \\{ \"MatchPattern\": \\{ \"All\": \\{\\} \\}, \"MatchScope\": \"KEY\", \"OversizeHandling\": \"MATCH\" \\}"]
 module Body =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t =
+      {
+      oversizeHandling: OversizeHandling.t option
+        [@ocaml.doc
+          "What WAF should do if the body is larger than WAF can inspect. WAF does not support inspecting the entire contents of the web request body if the body exceeds the limit for the resource type. When a web request body is larger than the limit, the underlying host service only forwards the contents that are within the limit to WAF for inspection. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes). For CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access, the default limit is 16 KB (16,384 bytes), and you can increase the limit for each resource type in the web ACL AssociationConfig, for additional processing fees. For Amplify, use the CloudFront limit. The options for oversize handling are the following: CONTINUE - Inspect the available body contents normally, according to the rule inspection criteria. MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement. You can combine the MATCH or NO_MATCH settings for oversize handling with your rule and web ACL action settings, so that you block any request whose body is over the limit. Default: CONTINUE"]}
+    let make ?oversizeHandling = fun () -> { oversizeHandling }
+    let to_value x =
+      structure_to_value
+        [("OversizeHandling",
+           (Option.map x.oversizeHandling ~f:OversizeHandling.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let oversizeHandling =
+        (Option.map ~f:OversizeHandling.of_xml)
+          (Xml.child xml_arg0 "OversizeHandling") in
+      make ?oversizeHandling ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let oversizeHandling =
+        field_map json__ "OversizeHandling" OversizeHandling.of_json in
+      make ?oversizeHandling ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The body of a web request. This immediately follows the request headers. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. JSON specification: \"Body\": \\{\\}"]
+       "Inspect the body of the web request. The body immediately follows the request headers. This is used to indicate the web request component to inspect, in the FieldToMatch specification."]
 module FieldToMatch =
   struct
     type nonrec t =
       {
       singleHeader: SingleHeader.t option
         [@ocaml.doc
-          "Inspect a single header. Provide the name of the header to inspect, for example, User-Agent or Referer. This setting isn't case sensitive. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\}"];
+          "Inspect a single header. Provide the name of the header to inspect, for example, User-Agent or Referer. This setting isn't case sensitive. Example JSON: \"SingleHeader\": \\{ \"Name\": \"haystack\" \\} Alternately, you can filter and inspect all headers with the Headers FieldToMatch setting."];
       singleQueryArgument: SingleQueryArgument.t option
         [@ocaml.doc
-          "Inspect a single query argument. Provide the name of the query argument to inspect, such as UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. This is used only to indicate the web request component for WAF to inspect, in the FieldToMatch specification. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"];
+          "Inspect a single query argument. Provide the name of the query argument to inspect, such as UserName or SalesRegion. The name can be up to 30 characters long and isn't case sensitive. Example JSON: \"SingleQueryArgument\": \\{ \"Name\": \"myArgument\" \\}"];
       allQueryArguments: AllQueryArguments.t option
         [@ocaml.doc "Inspect all query arguments."];
       uriPath: UriPath.t option
         [@ocaml.doc
-          "Inspect the request URI path. This is the part of a web request that identifies a resource, for example, /images/daily-ad.jpg."];
+          "Inspect the request URI path. This is the part of the web request that identifies a resource, for example, /images/daily-ad.jpg."];
       queryString: QueryString.t option
         [@ocaml.doc
           "Inspect the query string. This is the part of a URL that appears after a ? character, if any."];
       body: Body.t option
         [@ocaml.doc
-          "Inspect the request body as plain text. The request body immediately follows the request headers. This is the part of a request that contains any additional data that you want to send to your web server as the HTTP request body, such as data from a form. Note that only the first 8 KB (8192 bytes) of the request body are forwarded to WAF for inspection by the underlying host service. If you don't need to inspect more than 8 KB, you can guarantee that you don't allow additional bytes in by combining a statement that inspects the body of the web request, such as ByteMatchStatement or RegexPatternSetReferenceStatement, with a SizeConstraintStatement that enforces an 8 KB size limit on the body of the request. WAF doesn't support inspecting the entire contents of web requests whose bodies exceed the 8 KB limit."];
+          "Inspect the request body as plain text. The request body immediately follows the request headers. This is the part of a request that contains any additional data that you want to send to your web server as the HTTP request body, such as data from a form. WAF does not support inspecting the entire contents of the web request body if the body exceeds the limit for the resource type. When a web request body is larger than the limit, the underlying host service only forwards the contents that are within the limit to WAF for inspection. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes). For CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access, the default limit is 16 KB (16,384 bytes), and you can increase the limit for each resource type in the web ACL AssociationConfig, for additional processing fees. For Amplify, use the CloudFront limit. For information about how to handle oversized request bodies, see the Body object configuration."];
       method_: Method.t option
         [@ocaml.doc
           "Inspect the HTTP method. The method indicates the type of operation that the request is asking the origin to perform."];
       jsonBody: JsonBody.t option
         [@ocaml.doc
-          "Inspect the request body as JSON. The request body immediately follows the request headers. This is the part of a request that contains any additional data that you want to send to your web server as the HTTP request body, such as data from a form. Note that only the first 8 KB (8192 bytes) of the request body are forwarded to WAF for inspection by the underlying host service. If you don't need to inspect more than 8 KB, you can guarantee that you don't allow additional bytes in by combining a statement that inspects the body of the web request, such as ByteMatchStatement or RegexPatternSetReferenceStatement, with a SizeConstraintStatement that enforces an 8 KB size limit on the body of the request. WAF doesn't support inspecting the entire contents of web requests whose bodies exceed the 8 KB limit."]}
+          "Inspect the request body as JSON. The request body immediately follows the request headers. This is the part of a request that contains any additional data that you want to send to your web server as the HTTP request body, such as data from a form. WAF does not support inspecting the entire contents of the web request body if the body exceeds the limit for the resource type. When a web request body is larger than the limit, the underlying host service only forwards the contents that are within the limit to WAF for inspection. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes). For CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access, the default limit is 16 KB (16,384 bytes), and you can increase the limit for each resource type in the web ACL AssociationConfig, for additional processing fees. For Amplify, use the CloudFront limit. For information about how to handle oversized request bodies, see the JsonBody object configuration."];
+      headers: Headers.t option
+        [@ocaml.doc
+          "Inspect the request headers. You must configure scope and pattern matching filters in the Headers object, to define the set of headers to and the parts of the headers that WAF inspects. Only the first 8 KB (8192 bytes) of a request's headers and only the first 200 headers are forwarded to WAF for inspection by the underlying host service. You must configure how to handle any oversize header content in the Headers object. WAF applies the pattern matching filters to the headers that it receives from the underlying host service."];
+      cookies: Cookies.t option
+        [@ocaml.doc
+          "Inspect the request cookies. You must configure scope and pattern matching filters in the Cookies object, to define the set of cookies and the parts of the cookies that WAF inspects. Only the first 8 KB (8192 bytes) of a request's cookies and only the first 200 cookies are forwarded to WAF for inspection by the underlying host service. You must configure how to handle any oversize cookie content in the Cookies object. WAF applies the pattern matching filters to the cookies that it receives from the underlying host service."];
+      headerOrder: HeaderOrder.t option
+        [@ocaml.doc
+          "Inspect a string containing the list of the request's header names, ordered as they appear in the web request that WAF receives for inspection. WAF generates the string and then uses that as the field to match component in its inspection. WAF separates the header names in the string using colons and no added spaces, for example host:user-agent:accept:authorization:referer."];
+      jA3Fingerprint: JA3Fingerprint.t option
+        [@ocaml.doc
+          "Available for use with Amazon CloudFront distributions and Application Load Balancers. Match against the request's JA3 fingerprint. The JA3 fingerprint is a 32-character hash derived from the TLS Client Hello of an incoming request. This fingerprint serves as a unique identifier for the client's TLS configuration. WAF calculates and logs this fingerprint for each request that has enough TLS Client Hello information for the calculation. Almost all web requests include this information. You can use this choice only with a string match ByteMatchStatement with the PositionalConstraint set to EXACTLY. You can obtain the JA3 fingerprint for client requests from the web ACL logs. If WAF is able to calculate the fingerprint, it includes it in the logs. For information about the logging fields, see Log fields in the WAF Developer Guide. Provide the JA3 fingerprint string from the logs in your string match statement specification, to match with any future requests that have the same TLS configuration."];
+      jA4Fingerprint: JA4Fingerprint.t option
+        [@ocaml.doc
+          "Available for use with Amazon CloudFront distributions and Application Load Balancers. Match against the request's JA4 fingerprint. The JA4 fingerprint is a 36-character hash derived from the TLS Client Hello of an incoming request. This fingerprint serves as a unique identifier for the client's TLS configuration. WAF calculates and logs this fingerprint for each request that has enough TLS Client Hello information for the calculation. Almost all web requests include this information. You can use this choice only with a string match ByteMatchStatement with the PositionalConstraint set to EXACTLY. You can obtain the JA4 fingerprint for client requests from the web ACL logs. If WAF is able to calculate the fingerprint, it includes it in the logs. For information about the logging fields, see Log fields in the WAF Developer Guide. Provide the JA4 fingerprint string from the logs in your string match statement specification, to match with any future requests that have the same TLS configuration."];
+      uriFragment: UriFragment.t option
+        [@ocaml.doc
+          "Inspect fragments of the request URI. You must configure scope and pattern matching filters in the UriFragment object, to define the fragment of a URI that WAF inspects. Only the first 8 KB (8192 bytes) of a request's URI fragments and only the first 200 URI fragments are forwarded to WAF for inspection by the underlying host service. You must configure how to handle any oversize URI fragment content in the UriFragment object. WAF applies the pattern matching filters to the cookies that it receives from the underlying host service."]}
     let make ?singleHeader =
       fun ?singleQueryArgument ->
         fun ?allQueryArguments ->
@@ -777,17 +3021,29 @@ module FieldToMatch =
               fun ?body ->
                 fun ?method_ ->
                   fun ?jsonBody ->
-                    fun () ->
-                      {
-                        singleHeader;
-                        singleQueryArgument;
-                        allQueryArguments;
-                        uriPath;
-                        queryString;
-                        body;
-                        method_;
-                        jsonBody
-                      }
+                    fun ?headers ->
+                      fun ?cookies ->
+                        fun ?headerOrder ->
+                          fun ?jA3Fingerprint ->
+                            fun ?jA4Fingerprint ->
+                              fun ?uriFragment ->
+                                fun () ->
+                                  {
+                                    singleHeader;
+                                    singleQueryArgument;
+                                    allQueryArguments;
+                                    uriPath;
+                                    queryString;
+                                    body;
+                                    method_;
+                                    jsonBody;
+                                    headers;
+                                    cookies;
+                                    headerOrder;
+                                    jA3Fingerprint;
+                                    jA4Fingerprint;
+                                    uriFragment
+                                  }
     let to_value x =
       structure_to_value
         [("SingleHeader",
@@ -800,9 +3056,31 @@ module FieldToMatch =
         ("QueryString", (Option.map x.queryString ~f:QueryString.to_value));
         ("Body", (Option.map x.body ~f:Body.to_value));
         ("Method", (Option.map x.method_ ~f:Method.to_value));
-        ("JsonBody", (Option.map x.jsonBody ~f:JsonBody.to_value))]
+        ("JsonBody", (Option.map x.jsonBody ~f:JsonBody.to_value));
+        ("Headers", (Option.map x.headers ~f:Headers.to_value));
+        ("Cookies", (Option.map x.cookies ~f:Cookies.to_value));
+        ("HeaderOrder", (Option.map x.headerOrder ~f:HeaderOrder.to_value));
+        ("JA3Fingerprint",
+          (Option.map x.jA3Fingerprint ~f:JA3Fingerprint.to_value));
+        ("JA4Fingerprint",
+          (Option.map x.jA4Fingerprint ~f:JA4Fingerprint.to_value));
+        ("UriFragment", (Option.map x.uriFragment ~f:UriFragment.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let uriFragment =
+        (Option.map ~f:UriFragment.of_xml) (Xml.child xml_arg0 "UriFragment") in
+      let jA4Fingerprint =
+        (Option.map ~f:JA4Fingerprint.of_xml)
+          (Xml.child xml_arg0 "JA4Fingerprint") in
+      let jA3Fingerprint =
+        (Option.map ~f:JA3Fingerprint.of_xml)
+          (Xml.child xml_arg0 "JA3Fingerprint") in
+      let headerOrder =
+        (Option.map ~f:HeaderOrder.of_xml) (Xml.child xml_arg0 "HeaderOrder") in
+      let cookies =
+        (Option.map ~f:Cookies.of_xml) (Xml.child xml_arg0 "Cookies") in
+      let headers =
+        (Option.map ~f:Headers.of_xml) (Xml.child xml_arg0 "Headers") in
       let jsonBody =
         (Option.map ~f:JsonBody.of_xml) (Xml.child xml_arg0 "JsonBody") in
       let method_ =
@@ -821,35 +3099,45 @@ module FieldToMatch =
       let singleHeader =
         (Option.map ~f:SingleHeader.of_xml)
           (Xml.child xml_arg0 "SingleHeader") in
-      make ?jsonBody ?method_ ?body ?queryString ?uriPath ?allQueryArguments
-        ?singleQueryArgument ?singleHeader ()
+      make ?uriFragment ?jA4Fingerprint ?jA3Fingerprint ?headerOrder ?cookies
+        ?headers ?jsonBody ?method_ ?body ?queryString ?uriPath
+        ?allQueryArguments ?singleQueryArgument ?singleHeader ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jsonBody = field_map json "JsonBody" JsonBody.of_json in
-      let method_ = field_map json "Method" Method.of_json in
-      let body = field_map json "Body" Body.of_json in
-      let queryString = field_map json "QueryString" QueryString.of_json in
-      let uriPath = field_map json "UriPath" UriPath.of_json in
+    let of_json json__ =
+      let uriFragment = field_map json__ "UriFragment" UriFragment.of_json in
+      let jA4Fingerprint =
+        field_map json__ "JA4Fingerprint" JA4Fingerprint.of_json in
+      let jA3Fingerprint =
+        field_map json__ "JA3Fingerprint" JA3Fingerprint.of_json in
+      let headerOrder = field_map json__ "HeaderOrder" HeaderOrder.of_json in
+      let cookies = field_map json__ "Cookies" Cookies.of_json in
+      let headers = field_map json__ "Headers" Headers.of_json in
+      let jsonBody = field_map json__ "JsonBody" JsonBody.of_json in
+      let method_ = field_map json__ "Method" Method.of_json in
+      let body = field_map json__ "Body" Body.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let uriPath = field_map json__ "UriPath" UriPath.of_json in
       let allQueryArguments =
-        field_map json "AllQueryArguments" AllQueryArguments.of_json in
+        field_map json__ "AllQueryArguments" AllQueryArguments.of_json in
       let singleQueryArgument =
-        field_map json "SingleQueryArgument" SingleQueryArgument.of_json in
-      let singleHeader = field_map json "SingleHeader" SingleHeader.of_json in
-      make ?jsonBody ?method_ ?body ?queryString ?uriPath ?allQueryArguments
-        ?singleQueryArgument ?singleHeader ()
+        field_map json__ "SingleQueryArgument" SingleQueryArgument.of_json in
+      let singleHeader = field_map json__ "SingleHeader" SingleHeader.of_json in
+      make ?uriFragment ?jA4Fingerprint ?jA3Fingerprint ?headerOrder ?cookies
+        ?headers ?jsonBody ?method_ ?body ?queryString ?uriPath
+        ?allQueryArguments ?singleQueryArgument ?singleHeader ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The part of a web request that you want WAF to inspect. Include the single FieldToMatch type that you want to inspect, with additional specifications as needed, according to the type. You specify a single request component in FieldToMatch for each rule statement that requires it. To inspect more than one component of a web request, create a separate rule statement for each component. JSON specification for a QueryString field to match: \"FieldToMatch\": \\{ \"QueryString\": \\{\\} \\} Example JSON for a Method field to match specification: \"FieldToMatch\": \\{ \"Method\": \\{ \"Name\": \"DELETE\" \\} \\}"]
+       "Specifies a web request component to be used in a rule match statement or in a logging configuration. In a rule statement, this is the part of the web request that you want WAF to inspect. Include the single FieldToMatch type that you want to inspect, with additional specifications as needed, according to the type. You specify a single request component in FieldToMatch for each rule statement that requires it. To inspect more than one component of the web request, create a separate rule statement for each component. Example JSON for a QueryString field to match: \"FieldToMatch\": \\{ \"QueryString\": \\{\\} \\} Example JSON for a Method field to match specification: \"FieldToMatch\": \\{ \"Method\": \\{ \"Name\": \"DELETE\" \\} \\} In a logging configuration, this is used in the RedactedFields property to specify a field to redact from the logging records. For this use case, note the following: Even though all FieldToMatch settings are available, the only valid settings for field redaction are UriPath, QueryString, SingleHeader, and Method. In this documentation, the descriptions of the individual fields talk about specifying the web request component to inspect, but for field redaction, you are specifying the component type to redact from the logs. If you have request sampling enabled, the redacted fields configuration for logging has no impact on sampling. You can only exclude fields from request sampling by disabling sampling in the web ACL visibility configuration or by configuring data protection for the web ACL."]
 module XssMatchStatement =
   struct
     type nonrec t =
       {
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."]}
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
     let context_ = "XssMatchStatement"
     let make ~fieldToMatch =
       fun ~textTransformations ->
@@ -869,53 +3157,85 @@ module XssMatchStatement =
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~textTransformations ~fieldToMatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
       make ~textTransformations ~fieldToMatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement that defines a cross-site scripting (XSS) match search for WAF to apply to web requests. XSS attacks are those where the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers. The XSS match statement provides the location in requests that you want WAF to search and text transformations to use on the search area before WAF searches for character sequences that are likely to be malicious strings."]
+       "A rule statement that inspects for cross-site scripting (XSS) attacks. In XSS attacks, the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers."]
+module SensitivityLevel =
+  struct
+    type nonrec t =
+      | LOW 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | LOW -> "LOW" | HIGH -> "HIGH" | Non_static_id s -> s
+    let of_string =
+      function | "LOW" -> LOW | "HIGH" -> HIGH | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SensitivityLevel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SensitivityLevel" j)
+    let to_json = simple_to_json to_value
+  end
 module SqliMatchStatement =
   struct
     type nonrec t =
       {
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."]}
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."];
+      sensitivityLevel: SensitivityLevel.t option
+        [@ocaml.doc
+          "The sensitivity that you want WAF to use to inspect for SQL injection attacks. HIGH detects more attacks, but might generate more false positives, especially if your web requests frequently contain unusual strings. For information about identifying and mitigating false positives, see Testing and tuning in the WAF Developer Guide. LOW is generally a better choice for resources that already have other protections against SQL injection attacks or that have a low tolerance for false positives. Default: LOW"]}
     let context_ = "SqliMatchStatement"
-    let make ~fieldToMatch =
-      fun ~textTransformations ->
-        fun () -> { fieldToMatch; textTransformations }
+    let make ?sensitivityLevel =
+      fun ~fieldToMatch ->
+        fun ~textTransformations ->
+          fun () -> { sensitivityLevel; fieldToMatch; textTransformations }
     let to_value x =
       structure_to_value
         [("FieldToMatch", (Some (FieldToMatch.to_value x.fieldToMatch)));
         ("TextTransformations",
-          (Some (TextTransformations.to_value x.textTransformations)))]
+          (Some (TextTransformations.to_value x.textTransformations)));
+        ("SensitivityLevel",
+          (Option.map x.sensitivityLevel ~f:SensitivityLevel.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sensitivityLevel =
+        (Option.map ~f:SensitivityLevel.of_xml)
+          (Xml.child xml_arg0 "SensitivityLevel") in
       let textTransformations =
         TextTransformations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
       let fieldToMatch =
         FieldToMatch.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
-      make ~textTransformations ~fieldToMatch ()
+      make ?sensitivityLevel ~textTransformations ~fieldToMatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sensitivityLevel =
+        field_map json__ "SensitivityLevel" SensitivityLevel.of_json in
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
-      make ~textTransformations ~fieldToMatch ()
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
+      make ?sensitivityLevel ~textTransformations ~fieldToMatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attackers sometimes insert malicious SQL code into web requests in an effort to extract data from your database. To allow or block web requests that appear to contain malicious SQL code, create one or more SQL injection match conditions. An SQL injection match condition identifies the part of web requests, such as the URI or the query string, that you want WAF to inspect. Later in the process, when you create a web ACL, you specify whether to allow or block requests that appear to contain malicious SQL code."]
+       "A rule statement that inspects for malicious SQL code. Attackers insert malicious SQL code into web requests to do things like modify your database or extract data from it."]
 module Size =
   struct
     type nonrec t = Int64.t
@@ -978,7 +3298,7 @@ module SizeConstraintStatement =
       {
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       comparisonOperator: ComparisonOperator.t
         [@ocaml.doc
           "The operator to use to compare the request part to the size setting."];
@@ -987,7 +3307,7 @@ module SizeConstraintStatement =
           "The size, in byte, to compare to the request part, after any transformations."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."]}
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
     let context_ = "SizeConstraintStatement"
     let make ~fieldToMatch =
       fun ~comparisonOperator ->
@@ -1018,36 +3338,120 @@ module SizeConstraintStatement =
           (Xml.child_exn ~context:context_ xml_arg0 "FieldToMatch") in
       make ~textTransformations ~size ~comparisonOperator ~fieldToMatch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
-      let size = field_map_exn json "Size" Size.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      let size = field_map_exn json__ "Size" Size.of_json in
       let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
       make ~textTransformations ~size ~comparisonOperator ~fieldToMatch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the first 8192 bytes (8 KB). If the request body for your web requests never exceeds 8192 bytes, you can create a size constraint condition and block requests that have a request body greater than 8192 bytes. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."]
-module ResourceArn =
+       "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the number of bytes in the body up to the limit for the web ACL and protected resource type. If you know that the request body for your web requests should never exceed the inspection limit, you can use a size constraint statement to block requests that have a larger request body size. For more information about the inspection limits, see Body and JsonBody settings for the FieldToMatch data type. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."]
+module CountAction =
   struct
-    type nonrec t = string
-    let context_ = "ResourceArn"
+    type nonrec t =
+      {
+      customRequestHandling: CustomRequestHandling.t option
+        [@ocaml.doc
+          "Defines custom handling for the web request. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
+    let make ?customRequestHandling = fun () -> { customRequestHandling }
+    let to_value x =
+      structure_to_value
+        [("CustomRequestHandling",
+           (Option.map x.customRequestHandling
+              ~f:CustomRequestHandling.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRequestHandling =
+        (Option.map ~f:CustomRequestHandling.of_xml)
+          (Xml.child xml_arg0 "CustomRequestHandling") in
+      make ?customRequestHandling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRequestHandling =
+        field_map json__ "CustomRequestHandling"
+          CustomRequestHandling.of_json in
+      make ?customRequestHandling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that WAF should count the request. Optionally defines additional custom handling for the request. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction."]
+module ChallengeAction =
+  struct
+    type nonrec t =
+      {
+      customRequestHandling: CustomRequestHandling.t option
+        [@ocaml.doc
+          "Defines custom handling for the web request, used when the challenge inspection determines that the request's token is valid and unexpired. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
+    let make ?customRequestHandling = fun () -> { customRequestHandling }
+    let to_value x =
+      structure_to_value
+        [("CustomRequestHandling",
+           (Option.map x.customRequestHandling
+              ~f:CustomRequestHandling.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRequestHandling =
+        (Option.map ~f:CustomRequestHandling.of_xml)
+          (Xml.child xml_arg0 "CustomRequestHandling") in
+      make ?customRequestHandling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRequestHandling =
+        field_map json__ "CustomRequestHandling"
+          CustomRequestHandling.of_json in
+      make ?customRequestHandling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that WAF should run a Challenge check against the request to verify that the request is coming from a legitimate client session: If the request includes a valid, unexpired challenge token, WAF applies any custom request handling and labels that you've configured and then allows the web request inspection to proceed to the next rule, similar to a CountAction. If the request doesn't include a valid, unexpired challenge token, WAF discontinues the web ACL evaluation of the request and blocks it from going to its intended destination. WAF then generates a challenge response that it sends back to the client, which includes the following: The header x-amzn-waf-action with a value of challenge. The HTTP status code 202 Request Accepted. If the request contains an Accept header with a value of text/html, the response includes a JavaScript page interstitial with a challenge script. Challenges run silent browser interrogations in the background, and don't generally affect the end user experience. A challenge enforces token acquisition using an interstitial JavaScript challenge that inspects the client session for legitimate behavior. The challenge blocks bots or at least increases the cost of operating sophisticated bots. After the client session successfully responds to the challenge, it receives a new token from WAF, which the challenge script uses to resubmit the original request. You can configure the expiration time in the ChallengeConfig ImmunityTimeProperty setting at the rule and web ACL level. The rule setting overrides the web ACL setting. This action option is available for rules. It isn't available for web ACL default actions."]
+module CaptchaAction =
+  struct
+    type nonrec t =
+      {
+      customRequestHandling: CustomRequestHandling.t option
+        [@ocaml.doc
+          "Defines custom handling for the web request, used when the CAPTCHA inspection determines that the request's token is valid and unexpired. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
+    let make ?customRequestHandling = fun () -> { customRequestHandling }
+    let to_value x =
+      structure_to_value
+        [("CustomRequestHandling",
+           (Option.map x.customRequestHandling
+              ~f:CustomRequestHandling.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customRequestHandling =
+        (Option.map ~f:CustomRequestHandling.of_xml)
+          (Xml.child xml_arg0 "CustomRequestHandling") in
+      make ?customRequestHandling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customRequestHandling =
+        field_map json__ "CustomRequestHandling"
+          CustomRequestHandling.of_json in
+      make ?customRequestHandling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that WAF should run a CAPTCHA check against the request: If the request includes a valid, unexpired CAPTCHA token, WAF applies any custom request handling and labels that you've configured and then allows the web request inspection to proceed to the next rule, similar to a CountAction. If the request doesn't include a valid, unexpired token, WAF discontinues the web ACL evaluation of the request and blocks it from going to its intended destination. WAF generates a response that it sends back to the client, which includes the following: The header x-amzn-waf-action with a value of captcha. The HTTP status code 405 Method Not Allowed. If the request contains an Accept header with a value of text/html, the response includes a CAPTCHA JavaScript page interstitial. You can configure the expiration time in the CaptchaConfig ImmunityTimeProperty setting at the rule and web ACL level. The rule setting overrides the web ACL setting. This action option is available for rules. It isn't available for web ACL default actions."]
+module ResponseStatusCode =
+  struct
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+          ((check_int_max i ~max:599) >>=
+             (fun () -> check_int_min i ~min:200));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ResponseStatusCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module EntityName =
@@ -1070,6 +3474,218 @@ module EntityName =
     let of_json j = string_of_json ~kind:"EntityName" j
     let to_json = simple_to_json to_value
   end
+module CustomResponse =
+  struct
+    type nonrec t =
+      {
+      responseCode: ResponseStatusCode.t
+        [@ocaml.doc
+          "The HTTP status code to return to the client. For a list of status codes that you can use in your custom responses, see Supported status codes for custom response in the WAF Developer Guide."];
+      customResponseBodyKey: EntityName.t option
+        [@ocaml.doc
+          "References the response body that you want WAF to return to the web request client. You can define a custom response for a rule action or a default web ACL action that is set to block. To do this, you first define the response body key and value in the CustomResponseBodies setting for the WebACL or RuleGroup where you want to use it. Then, in the rule action or web ACL default action BlockAction setting, you reference the response body using this key."];
+      responseHeaders: CustomHTTPHeaders.t option
+        [@ocaml.doc
+          "The HTTP headers to use in the response. You can specify any header name except for content-type. Duplicate header names are not allowed. For information about the limits on count and size for custom request and response settings, see WAF quotas in the WAF Developer Guide."]}
+    let context_ = "CustomResponse"
+    let make ?customResponseBodyKey =
+      fun ?responseHeaders ->
+        fun ~responseCode ->
+          fun () -> { customResponseBodyKey; responseHeaders; responseCode }
+    let to_value x =
+      structure_to_value
+        [("ResponseCode",
+           (Some (ResponseStatusCode.to_value x.responseCode)));
+        ("CustomResponseBodyKey",
+          (Option.map x.customResponseBodyKey ~f:EntityName.to_value));
+        ("ResponseHeaders",
+          (Option.map x.responseHeaders ~f:CustomHTTPHeaders.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let responseHeaders =
+        (Option.map ~f:CustomHTTPHeaders.of_xml)
+          (Xml.child xml_arg0 "ResponseHeaders") in
+      let customResponseBodyKey =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "CustomResponseBodyKey") in
+      let responseCode =
+        ResponseStatusCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResponseCode") in
+      make ?responseHeaders ?customResponseBodyKey ~responseCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let responseHeaders =
+        field_map json__ "ResponseHeaders" CustomHTTPHeaders.of_json in
+      let customResponseBodyKey =
+        field_map json__ "CustomResponseBodyKey" EntityName.of_json in
+      let responseCode =
+        field_map_exn json__ "ResponseCode" ResponseStatusCode.of_json in
+      make ?responseHeaders ?customResponseBodyKey ~responseCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A custom response to send to the client. You can define a custom response for rule actions and default web ACL actions that are set to BlockAction. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]
+module BlockAction =
+  struct
+    type nonrec t =
+      {
+      customResponse: CustomResponse.t option
+        [@ocaml.doc
+          "Defines a custom response for the web request. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
+    let make ?customResponse = fun () -> { customResponse }
+    let to_value x =
+      structure_to_value
+        [("CustomResponse",
+           (Option.map x.customResponse ~f:CustomResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customResponse =
+        (Option.map ~f:CustomResponse.of_xml)
+          (Xml.child xml_arg0 "CustomResponse") in
+      make ?customResponse ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customResponse =
+        field_map json__ "CustomResponse" CustomResponse.of_json in
+      make ?customResponse ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies that WAF should block the request and optionally defines additional custom handling for the response to the web request. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction."]
+module RuleAction =
+  struct
+    type nonrec t =
+      {
+      block: BlockAction.t option
+        [@ocaml.doc "Instructs WAF to block the web request."];
+      allow: AllowAction.t option
+        [@ocaml.doc "Instructs WAF to allow the web request."];
+      count: CountAction.t option
+        [@ocaml.doc
+          "Instructs WAF to count the web request and then continue evaluating the request using the remaining rules in the web ACL."];
+      captcha: CaptchaAction.t option
+        [@ocaml.doc
+          "Instructs WAF to run a CAPTCHA check against the web request."];
+      challenge: ChallengeAction.t option
+        [@ocaml.doc
+          "Instructs WAF to run a Challenge check against the web request."]}
+    let make ?block =
+      fun ?allow ->
+        fun ?count ->
+          fun ?captcha ->
+            fun ?challenge ->
+              fun () -> { block; allow; count; captcha; challenge }
+    let to_value x =
+      structure_to_value
+        [("Block", (Option.map x.block ~f:BlockAction.to_value));
+        ("Allow", (Option.map x.allow ~f:AllowAction.to_value));
+        ("Count", (Option.map x.count ~f:CountAction.to_value));
+        ("Captcha", (Option.map x.captcha ~f:CaptchaAction.to_value));
+        ("Challenge", (Option.map x.challenge ~f:ChallengeAction.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let challenge =
+        (Option.map ~f:ChallengeAction.of_xml)
+          (Xml.child xml_arg0 "Challenge") in
+      let captcha =
+        (Option.map ~f:CaptchaAction.of_xml) (Xml.child xml_arg0 "Captcha") in
+      let count =
+        (Option.map ~f:CountAction.of_xml) (Xml.child xml_arg0 "Count") in
+      let allow =
+        (Option.map ~f:AllowAction.of_xml) (Xml.child xml_arg0 "Allow") in
+      let block =
+        (Option.map ~f:BlockAction.of_xml) (Xml.child xml_arg0 "Block") in
+      make ?challenge ?captcha ?count ?allow ?block ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let challenge = field_map json__ "Challenge" ChallengeAction.of_json in
+      let captcha = field_map json__ "Captcha" CaptchaAction.of_json in
+      let count = field_map json__ "Count" CountAction.of_json in
+      let allow = field_map json__ "Allow" AllowAction.of_json in
+      let block = field_map json__ "Block" BlockAction.of_json in
+      make ?challenge ?captcha ?count ?allow ?block ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The action that WAF should take on a web request when it matches a rule's statement. Settings at the web ACL level can override the rule action setting."]
+module RuleActionOverride =
+  struct
+    type nonrec t =
+      {
+      name: EntityName.t
+        [@ocaml.doc
+          "The name of the rule to override. Verify the rule names in your overrides carefully. With managed rule groups, WAF silently ignores any override that uses an invalid rule name. With customer-owned rule groups, invalid rule names in your overrides will cause web ACL updates to fail. An invalid rule name is any name that doesn't exactly match the case-sensitive name of an existing rule in the rule group."];
+      actionToUse: RuleAction.t
+        [@ocaml.doc
+          "The override action to use, in place of the configured action of the rule in the rule group."]}
+    let context_ = "RuleActionOverride"
+    let make ~name = fun ~actionToUse -> fun () -> { name; actionToUse }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (EntityName.to_value x.name)));
+        ("ActionToUse", (Some (RuleAction.to_value x.actionToUse)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionToUse =
+        RuleAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ActionToUse") in
+      let name =
+        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~actionToUse ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionToUse = field_map_exn json__ "ActionToUse" RuleAction.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      make ~actionToUse ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Action setting to use in the place of a rule action that is configured inside the rule group. You specify one override for each rule whose action you want to change. Verify the rule names in your overrides carefully. With managed rule groups, WAF silently ignores any override that uses an invalid rule name. With customer-owned rule groups, invalid rule names in your overrides will cause web ACL updates to fail. An invalid rule name is any name that doesn't exactly match the case-sensitive name of an existing rule in the rule group. You can use overrides for testing, for example you can override all of rule actions to Count and then monitor the resulting count metrics to understand how the rule group would handle your web traffic. You can also permanently override some or all actions, to modify how the rule group manages your web traffic."]
+module RuleActionOverrides =
+  struct
+    type nonrec t = RuleActionOverride.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RuleActionOverride.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RuleActionOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RuleActionOverrides"
+        ~of_json:RuleActionOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
 module ExcludedRule =
   struct
     type nonrec t =
@@ -1087,17 +3703,20 @@ module ExcludedRule =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a single rule in a rule group whose action you want to override to Count. When you exclude a rule, WAF evaluates it exactly as it would if the rule action setting were Count. This is a useful option for testing the rules in a rule group without modifying how they handle your web traffic."]
+       "Specifies a single rule in a rule group whose action you want to override to Count. Instead of this option, use RuleActionOverrides. It accepts any valid action setting, including Count."]
 module ExcludedRules =
   struct
     type nonrec t = ExcludedRule.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExcludedRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1126,31 +3745,43 @@ module RuleGroupReferenceStatement =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the entity."];
       excludedRules: ExcludedRules.t option
         [@ocaml.doc
-          "The rules in the referenced rule group whose actions are set to Count. When you exclude a rule, WAF evaluates it exactly as it would if the rule action setting were Count. This is a useful option for testing the rules in a rule group without modifying how they handle your web traffic."]}
+          "Rules in the referenced rule group whose actions are set to Count. Instead of this option, use RuleActionOverrides. It accepts any valid action setting, including Count."];
+      ruleActionOverrides: RuleActionOverrides.t option
+        [@ocaml.doc
+          "Action settings to use in the place of the rule actions that are configured inside the rule group. You specify one override for each rule whose action you want to change. Verify the rule names in your overrides carefully. With managed rule groups, WAF silently ignores any override that uses an invalid rule name. With customer-owned rule groups, invalid rule names in your overrides will cause web ACL updates to fail. An invalid rule name is any name that doesn't exactly match the case-sensitive name of an existing rule in the rule group. You can use overrides for testing, for example you can override all of rule actions to Count and then monitor the resulting count metrics to understand how the rule group would handle your web traffic. You can also permanently override some or all actions, to modify how the rule group manages your web traffic."]}
     let context_ = "RuleGroupReferenceStatement"
-    let make ?excludedRules = fun ~aRN -> fun () -> { excludedRules; aRN }
+    let make ?excludedRules =
+      fun ?ruleActionOverrides ->
+        fun ~aRN -> fun () -> { excludedRules; ruleActionOverrides; aRN }
     let to_value x =
       structure_to_value
         [("ARN", (Some (ResourceArn.to_value x.aRN)));
         ("ExcludedRules",
-          (Option.map x.excludedRules ~f:ExcludedRules.to_value))]
+          (Option.map x.excludedRules ~f:ExcludedRules.to_value));
+        ("RuleActionOverrides",
+          (Option.map x.ruleActionOverrides ~f:RuleActionOverrides.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ruleActionOverrides =
+        (Option.map ~f:RuleActionOverrides.of_xml)
+          (Xml.child xml_arg0 "RuleActionOverrides") in
       let excludedRules =
         (Option.map ~f:ExcludedRules.of_xml)
           (Xml.child xml_arg0 "ExcludedRules") in
       let aRN =
         ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
-      make ?excludedRules ~aRN ()
+      make ?ruleActionOverrides ?excludedRules ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ruleActionOverrides =
+        field_map json__ "RuleActionOverrides" RuleActionOverrides.of_json in
       let excludedRules =
-        field_map json "ExcludedRules" ExcludedRules.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
-      make ?excludedRules ~aRN ()
+        field_map json__ "ExcludedRules" ExcludedRules.of_json in
+      let aRN = field_map_exn json__ "ARN" ResourceArn.of_json in
+      make ?ruleActionOverrides ?excludedRules ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You can only use a rule group reference statement at the top level inside a web ACL."]
+       "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You cannot use a rule group reference statement inside another rule group. You can only reference a rule group as a top-level statement within a rule that you define in a web ACL."]
 module RegexPatternSetReferenceStatement =
   struct
     type nonrec t =
@@ -1160,10 +3791,10 @@ module RegexPatternSetReferenceStatement =
           "The Amazon Resource Name (ARN) of the RegexPatternSet that this statement references."];
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."]}
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
     let context_ = "RegexPatternSetReferenceStatement"
     let make ~aRN =
       fun ~fieldToMatch ->
@@ -1187,36 +3818,17 @@ module RegexPatternSetReferenceStatement =
         ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
       make ~textTransformations ~fieldToMatch ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
+      let aRN = field_map_exn json__ "ARN" ResourceArn.of_json in
       make ~textTransformations ~fieldToMatch ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A rule statement used to search web request components for matches with regular expressions. To use this, create a RegexPatternSet that specifies the expressions that you want to detect, then use the ARN of that set in this statement. A web request matches the pattern set rule statement if the request component matches any of the patterns in the set. To create a regex pattern set, see CreateRegexPatternSet. Each regex pattern set rule statement references a regex pattern set. You create and maintain the set independent of your rules. This allows you to use the single set in multiple rules. When you update the referenced set, WAF automatically updates all rules that reference it."]
-module RegexPatternString =
-  struct
-    type nonrec t = string
-    let context_ = "RegexPatternString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RegexPatternString" j
-    let to_json = simple_to_json to_value
-  end
 module RegexMatchStatement =
   struct
     type nonrec t =
@@ -1225,10 +3837,10 @@ module RegexMatchStatement =
         [@ocaml.doc "The string representing the regular expression."];
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."]}
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
     let context_ = "RegexMatchStatement"
     let make ~regexString =
       fun ~fieldToMatch ->
@@ -1253,13 +3865,14 @@ module RegexMatchStatement =
           (Xml.child_exn ~context:context_ xml_arg0 "RegexString") in
       make ~textTransformations ~fieldToMatch ~regexString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
       let regexString =
-        field_map_exn json "RegexString" RegexPatternString.of_json in
+        field_map_exn json__ "RegexString" RegexPatternString.of_json in
       make ~textTransformations ~fieldToMatch ~regexString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1271,7 +3884,7 @@ module RateLimit =
       let open Result in
         ok_or_failwith
           ((check_int64_max i ~max:2000000000L) >>=
-             (fun () -> check_int64_min i ~min:100L));
+             (fun () -> check_int64_min i ~min:10L));
         i
     let of_string = Int64.of_string
     let to_value x = `Long x
@@ -1282,22 +3895,521 @@ module RateLimit =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
+module RateLimitUriPath =
+  struct
+    type nonrec t =
+      {
+      textTransformations: TextTransformations.t
+        [@ocaml.doc
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
+    let context_ = "RateLimitUriPath"
+    let make ~textTransformations = fun () -> { textTransformations }
+    let to_value x =
+      structure_to_value
+        [("TextTransformations",
+           (Some (TextTransformations.to_value x.textTransformations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let textTransformations =
+        TextTransformations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
+      make ~textTransformations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let textTransformations =
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      make ~textTransformations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the request's URI path as an aggregate key for a rate-based rule. Each distinct URI path contributes to the aggregation instance. If you use just the URI path as your custom key, then each URI path fully defines an aggregation instance."]
+module RateLimitQueryString =
+  struct
+    type nonrec t =
+      {
+      textTransformations: TextTransformations.t
+        [@ocaml.doc
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
+    let context_ = "RateLimitQueryString"
+    let make ~textTransformations = fun () -> { textTransformations }
+    let to_value x =
+      structure_to_value
+        [("TextTransformations",
+           (Some (TextTransformations.to_value x.textTransformations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let textTransformations =
+        TextTransformations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
+      make ~textTransformations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let textTransformations =
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      make ~textTransformations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the request's query string as an aggregate key for a rate-based rule. Each distinct string contributes to the aggregation instance. If you use just the query string as your custom key, then each string fully defines an aggregation instance."]
+module RateLimitQueryArgument =
+  struct
+    type nonrec t =
+      {
+      name: FieldToMatchData.t
+        [@ocaml.doc "The name of the query argument to use."];
+      textTransformations: TextTransformations.t
+        [@ocaml.doc
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
+    let context_ = "RateLimitQueryArgument"
+    let make ~name =
+      fun ~textTransformations -> fun () -> { name; textTransformations }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (FieldToMatchData.to_value x.name)));
+        ("TextTransformations",
+          (Some (TextTransformations.to_value x.textTransformations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let textTransformations =
+        TextTransformations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
+      let name =
+        FieldToMatchData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~textTransformations ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let textTransformations =
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      let name = field_map_exn json__ "Name" FieldToMatchData.of_json in
+      make ~textTransformations ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a query argument in the request as an aggregate key for a rate-based rule. Each distinct value for the named query argument contributes to the aggregation instance. If you use a single query argument as your custom key, then each value fully defines an aggregation instance."]
+module LabelNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "LabelNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9A-Za-z_\\-:]+:$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LabelNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module RateLimitLabelNamespace =
+  struct
+    type nonrec t =
+      {
+      namespace: LabelNamespace.t
+        [@ocaml.doc "The namespace to use for aggregation."]}
+    let context_ = "RateLimitLabelNamespace"
+    let make ~namespace = fun () -> { namespace }
+    let to_value x =
+      structure_to_value
+        [("Namespace", (Some (LabelNamespace.to_value x.namespace)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        LabelNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+      make ~namespace ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map_exn json__ "Namespace" LabelNamespace.of_json in
+      make ~namespace ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a label namespace to use as an aggregate key for a rate-based rule. Each distinct fully qualified label name that has the specified label namespace contributes to the aggregation instance. If you use just one label namespace as your custom key, then each label name fully defines an aggregation instance. This uses only labels that have been added to the request by rules that are evaluated before this rate-based rule in the web ACL. For information about label namespaces and names, see Label syntax and naming requirements in the WAF Developer Guide."]
+module RateLimitJA4Fingerprint =
+  struct
+    type nonrec t =
+      {
+      fallbackBehavior: FallbackBehavior.t
+        [@ocaml.doc
+          "The match status to assign to the web request if there is insufficient TSL Client Hello information to compute the JA4 fingerprint. You can specify the following fallback behaviors: MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "RateLimitJA4Fingerprint"
+    let make ~fallbackBehavior = fun () -> { fallbackBehavior }
+    let to_value x =
+      structure_to_value
+        [("FallbackBehavior",
+           (Some (FallbackBehavior.to_value x.fallbackBehavior)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fallbackBehavior =
+        FallbackBehavior.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FallbackBehavior") in
+      make ~fallbackBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fallbackBehavior =
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
+      make ~fallbackBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use the request's JA4 fingerprint derived from the TLS Client Hello of an incoming request as an aggregate key. If you use a single JA4 fingerprint as your custom key, then each value fully defines an aggregation instance."]
+module RateLimitJA3Fingerprint =
+  struct
+    type nonrec t =
+      {
+      fallbackBehavior: FallbackBehavior.t
+        [@ocaml.doc
+          "The match status to assign to the web request if there is insufficient TSL Client Hello information to compute the JA3 fingerprint. You can specify the following fallback behaviors: MATCH - Treat the web request as matching the rule statement. WAF applies the rule action to the request. NO_MATCH - Treat the web request as not matching the rule statement."]}
+    let context_ = "RateLimitJA3Fingerprint"
+    let make ~fallbackBehavior = fun () -> { fallbackBehavior }
+    let to_value x =
+      structure_to_value
+        [("FallbackBehavior",
+           (Some (FallbackBehavior.to_value x.fallbackBehavior)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fallbackBehavior =
+        FallbackBehavior.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FallbackBehavior") in
+      make ~fallbackBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fallbackBehavior =
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
+      make ~fallbackBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Use the request's JA3 fingerprint derived from the TLS Client Hello of an incoming request as an aggregate key. If you use a single JA3 fingerprint as your custom key, then each value fully defines an aggregation instance."]
+module RateLimitIP =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the IP address in the web request as an aggregate key for a rate-based rule. Each distinct IP address contributes to the aggregation instance. This setting is used only in the RateBasedStatementCustomKey specification of a rate-based rule statement. To use this in the custom key settings, you must specify at least one other key to use, along with the IP address. To aggregate on only the IP address, in your rate-based statement's AggregateKeyType, specify IP. JSON specification: \"RateLimitIP\": \\{\\}"]
+module RateLimitHeader =
+  struct
+    type nonrec t =
+      {
+      name: FieldToMatchData.t [@ocaml.doc "The name of the header to use."];
+      textTransformations: TextTransformations.t
+        [@ocaml.doc
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
+    let context_ = "RateLimitHeader"
+    let make ~name =
+      fun ~textTransformations -> fun () -> { name; textTransformations }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (FieldToMatchData.to_value x.name)));
+        ("TextTransformations",
+          (Some (TextTransformations.to_value x.textTransformations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let textTransformations =
+        TextTransformations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
+      let name =
+        FieldToMatchData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~textTransformations ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let textTransformations =
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      let name = field_map_exn json__ "Name" FieldToMatchData.of_json in
+      make ~textTransformations ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a header as an aggregate key for a rate-based rule. Each distinct value in the header contributes to the aggregation instance. If you use a single header as your custom key, then each value fully defines an aggregation instance."]
+module RateLimitHTTPMethod =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the request's HTTP method as an aggregate key for a rate-based rule. Each distinct HTTP method contributes to the aggregation instance. If you use just the HTTP method as your custom key, then each method fully defines an aggregation instance. JSON specification: \"RateLimitHTTPMethod\": \\{\\}"]
+module RateLimitForwardedIP =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the first IP address in an HTTP header as an aggregate key for a rate-based rule. Each distinct forwarded IP address contributes to the aggregation instance. This setting is used only in the RateBasedStatementCustomKey specification of a rate-based rule statement. When you specify an IP or forwarded IP in the custom key settings, you must also specify at least one other key to use. You can aggregate on only the forwarded IP address by specifying FORWARDED_IP in your rate-based statement's AggregateKeyType. This data type supports using the forwarded IP address in the web request aggregation for a rate-based rule, in RateBasedStatementCustomKey. The JSON specification for using the forwarded IP address doesn't explicitly use this data type. JSON specification: \"ForwardedIP\": \\{\\} When you use this specification, you must also configure the forwarded IP address in the rate-based statement's ForwardedIPConfig."]
+module RateLimitCookie =
+  struct
+    type nonrec t =
+      {
+      name: FieldToMatchData.t [@ocaml.doc "The name of the cookie to use."];
+      textTransformations: TextTransformations.t
+        [@ocaml.doc
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."]}
+    let context_ = "RateLimitCookie"
+    let make ~name =
+      fun ~textTransformations -> fun () -> { name; textTransformations }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (FieldToMatchData.to_value x.name)));
+        ("TextTransformations",
+          (Some (TextTransformations.to_value x.textTransformations)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let textTransformations =
+        TextTransformations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TextTransformations") in
+      let name =
+        FieldToMatchData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~textTransformations ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let textTransformations =
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
+      let name = field_map_exn json__ "Name" FieldToMatchData.of_json in
+      make ~textTransformations ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a cookie as an aggregate key for a rate-based rule. Each distinct value in the cookie contributes to the aggregation instance. If you use a single cookie as your custom key, then each value fully defines an aggregation instance."]
+module RateLimitAsn =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies an Autonomous System Number (ASN) derived from the request's originating or forwarded IP address as an aggregate key for a rate-based rule. Each distinct ASN contributes to the aggregation instance. If you use a single ASN as your custom key, then each ASN fully defines an aggregation instance."]
+module RateBasedStatementCustomKey =
+  struct
+    type nonrec t =
+      {
+      header: RateLimitHeader.t option
+        [@ocaml.doc
+          "Use the value of a header in the request as an aggregate key. Each distinct value in the header contributes to the aggregation instance. If you use a single header as your custom key, then each value fully defines an aggregation instance."];
+      cookie: RateLimitCookie.t option
+        [@ocaml.doc
+          "Use the value of a cookie in the request as an aggregate key. Each distinct value in the cookie contributes to the aggregation instance. If you use a single cookie as your custom key, then each value fully defines an aggregation instance."];
+      queryArgument: RateLimitQueryArgument.t option
+        [@ocaml.doc
+          "Use the specified query argument as an aggregate key. Each distinct value for the named query argument contributes to the aggregation instance. If you use a single query argument as your custom key, then each value fully defines an aggregation instance."];
+      queryString: RateLimitQueryString.t option
+        [@ocaml.doc
+          "Use the request's query string as an aggregate key. Each distinct string contributes to the aggregation instance. If you use just the query string as your custom key, then each string fully defines an aggregation instance."];
+      hTTPMethod: RateLimitHTTPMethod.t option
+        [@ocaml.doc
+          "Use the request's HTTP method as an aggregate key. Each distinct HTTP method contributes to the aggregation instance. If you use just the HTTP method as your custom key, then each method fully defines an aggregation instance."];
+      forwardedIP: RateLimitForwardedIP.t option
+        [@ocaml.doc
+          "Use the first IP address in an HTTP header as an aggregate key. Each distinct forwarded IP address contributes to the aggregation instance. When you specify an IP or forwarded IP in the custom key settings, you must also specify at least one other key to use. You can aggregate on only the forwarded IP address by specifying FORWARDED_IP in your rate-based statement's AggregateKeyType. With this option, you must specify the header to use in the rate-based rule's ForwardedIPConfig property."];
+      iP: RateLimitIP.t option
+        [@ocaml.doc
+          "Use the request's originating IP address as an aggregate key. Each distinct IP address contributes to the aggregation instance. When you specify an IP or forwarded IP in the custom key settings, you must also specify at least one other key to use. You can aggregate on only the IP address by specifying IP in your rate-based statement's AggregateKeyType."];
+      labelNamespace: RateLimitLabelNamespace.t option
+        [@ocaml.doc
+          "Use the specified label namespace as an aggregate key. Each distinct fully qualified label name that has the specified label namespace contributes to the aggregation instance. If you use just one label namespace as your custom key, then each label name fully defines an aggregation instance. This uses only labels that have been added to the request by rules that are evaluated before this rate-based rule in the web ACL. For information about label namespaces and names, see Label syntax and naming requirements in the WAF Developer Guide."];
+      uriPath: RateLimitUriPath.t option
+        [@ocaml.doc
+          "Use the request's URI path as an aggregate key. Each distinct URI path contributes to the aggregation instance. If you use just the URI path as your custom key, then each URI path fully defines an aggregation instance."];
+      jA3Fingerprint: RateLimitJA3Fingerprint.t option
+        [@ocaml.doc
+          "Use the request's JA3 fingerprint as an aggregate key. If you use a single JA3 fingerprint as your custom key, then each value fully defines an aggregation instance."];
+      jA4Fingerprint: RateLimitJA4Fingerprint.t option
+        [@ocaml.doc
+          "Use the request's JA4 fingerprint as an aggregate key. If you use a single JA4 fingerprint as your custom key, then each value fully defines an aggregation instance."];
+      aSN: RateLimitAsn.t option
+        [@ocaml.doc
+          "Use an Autonomous System Number (ASN) derived from the request's originating or forwarded IP address as an aggregate key. Each distinct ASN contributes to the aggregation instance."]}
+    let make ?header =
+      fun ?cookie ->
+        fun ?queryArgument ->
+          fun ?queryString ->
+            fun ?hTTPMethod ->
+              fun ?forwardedIP ->
+                fun ?iP ->
+                  fun ?labelNamespace ->
+                    fun ?uriPath ->
+                      fun ?jA3Fingerprint ->
+                        fun ?jA4Fingerprint ->
+                          fun ?aSN ->
+                            fun () ->
+                              {
+                                header;
+                                cookie;
+                                queryArgument;
+                                queryString;
+                                hTTPMethod;
+                                forwardedIP;
+                                iP;
+                                labelNamespace;
+                                uriPath;
+                                jA3Fingerprint;
+                                jA4Fingerprint;
+                                aSN
+                              }
+    let to_value x =
+      structure_to_value
+        [("Header", (Option.map x.header ~f:RateLimitHeader.to_value));
+        ("Cookie", (Option.map x.cookie ~f:RateLimitCookie.to_value));
+        ("QueryArgument",
+          (Option.map x.queryArgument ~f:RateLimitQueryArgument.to_value));
+        ("QueryString",
+          (Option.map x.queryString ~f:RateLimitQueryString.to_value));
+        ("HTTPMethod",
+          (Option.map x.hTTPMethod ~f:RateLimitHTTPMethod.to_value));
+        ("ForwardedIP",
+          (Option.map x.forwardedIP ~f:RateLimitForwardedIP.to_value));
+        ("IP", (Option.map x.iP ~f:RateLimitIP.to_value));
+        ("LabelNamespace",
+          (Option.map x.labelNamespace ~f:RateLimitLabelNamespace.to_value));
+        ("UriPath", (Option.map x.uriPath ~f:RateLimitUriPath.to_value));
+        ("JA3Fingerprint",
+          (Option.map x.jA3Fingerprint ~f:RateLimitJA3Fingerprint.to_value));
+        ("JA4Fingerprint",
+          (Option.map x.jA4Fingerprint ~f:RateLimitJA4Fingerprint.to_value));
+        ("ASN", (Option.map x.aSN ~f:RateLimitAsn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aSN =
+        (Option.map ~f:RateLimitAsn.of_xml) (Xml.child xml_arg0 "ASN") in
+      let jA4Fingerprint =
+        (Option.map ~f:RateLimitJA4Fingerprint.of_xml)
+          (Xml.child xml_arg0 "JA4Fingerprint") in
+      let jA3Fingerprint =
+        (Option.map ~f:RateLimitJA3Fingerprint.of_xml)
+          (Xml.child xml_arg0 "JA3Fingerprint") in
+      let uriPath =
+        (Option.map ~f:RateLimitUriPath.of_xml)
+          (Xml.child xml_arg0 "UriPath") in
+      let labelNamespace =
+        (Option.map ~f:RateLimitLabelNamespace.of_xml)
+          (Xml.child xml_arg0 "LabelNamespace") in
+      let iP = (Option.map ~f:RateLimitIP.of_xml) (Xml.child xml_arg0 "IP") in
+      let forwardedIP =
+        (Option.map ~f:RateLimitForwardedIP.of_xml)
+          (Xml.child xml_arg0 "ForwardedIP") in
+      let hTTPMethod =
+        (Option.map ~f:RateLimitHTTPMethod.of_xml)
+          (Xml.child xml_arg0 "HTTPMethod") in
+      let queryString =
+        (Option.map ~f:RateLimitQueryString.of_xml)
+          (Xml.child xml_arg0 "QueryString") in
+      let queryArgument =
+        (Option.map ~f:RateLimitQueryArgument.of_xml)
+          (Xml.child xml_arg0 "QueryArgument") in
+      let cookie =
+        (Option.map ~f:RateLimitCookie.of_xml) (Xml.child xml_arg0 "Cookie") in
+      let header =
+        (Option.map ~f:RateLimitHeader.of_xml) (Xml.child xml_arg0 "Header") in
+      make ?aSN ?jA4Fingerprint ?jA3Fingerprint ?uriPath ?labelNamespace ?iP
+        ?forwardedIP ?hTTPMethod ?queryString ?queryArgument ?cookie ?header
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aSN = field_map json__ "ASN" RateLimitAsn.of_json in
+      let jA4Fingerprint =
+        field_map json__ "JA4Fingerprint" RateLimitJA4Fingerprint.of_json in
+      let jA3Fingerprint =
+        field_map json__ "JA3Fingerprint" RateLimitJA3Fingerprint.of_json in
+      let uriPath = field_map json__ "UriPath" RateLimitUriPath.of_json in
+      let labelNamespace =
+        field_map json__ "LabelNamespace" RateLimitLabelNamespace.of_json in
+      let iP = field_map json__ "IP" RateLimitIP.of_json in
+      let forwardedIP =
+        field_map json__ "ForwardedIP" RateLimitForwardedIP.of_json in
+      let hTTPMethod =
+        field_map json__ "HTTPMethod" RateLimitHTTPMethod.of_json in
+      let queryString =
+        field_map json__ "QueryString" RateLimitQueryString.of_json in
+      let queryArgument =
+        field_map json__ "QueryArgument" RateLimitQueryArgument.of_json in
+      let cookie = field_map json__ "Cookie" RateLimitCookie.of_json in
+      let header = field_map json__ "Header" RateLimitHeader.of_json in
+      make ?aSN ?jA4Fingerprint ?jA3Fingerprint ?uriPath ?labelNamespace ?iP
+        ?forwardedIP ?hTTPMethod ?queryString ?queryArgument ?cookie ?header
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a single custom aggregate key for a rate-base rule. Web requests that are missing any of the components specified in the aggregation keys are omitted from the rate-based rule evaluation and handling."]
+module RateBasedStatementCustomKeys =
+  struct
+    type nonrec t = RateBasedStatementCustomKey.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RateBasedStatementCustomKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RateBasedStatementCustomKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RateBasedStatementCustomKeys"
+        ~of_json:RateBasedStatementCustomKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RateBasedStatementAggregateKeyType =
   struct
     type nonrec t =
       | IP 
       | FORWARDED_IP 
+      | CUSTOM_KEYS 
+      | CONSTANT 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | IP -> "IP"
       | FORWARDED_IP -> "FORWARDED_IP"
+      | CUSTOM_KEYS -> "CUSTOM_KEYS"
+      | CONSTANT -> "CONSTANT"
       | Non_static_id s -> s
     let of_string =
       function
       | "IP" -> IP
       | "FORWARDED_IP" -> FORWARDED_IP
+      | "CUSTOM_KEYS" -> CUSTOM_KEYS
+      | "CONSTANT" -> CONSTANT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1330,31 +4442,6 @@ module ForwardedIPHeaderName =
     let of_json j = string_of_json ~kind:"ForwardedIPHeaderName" j
     let to_json = simple_to_json to_value
   end
-module FallbackBehavior =
-  struct
-    type nonrec t =
-      | MATCH 
-      | NO_MATCH 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | MATCH -> "MATCH"
-      | NO_MATCH -> "NO_MATCH"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "MATCH" -> MATCH
-      | "NO_MATCH" -> NO_MATCH
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration FallbackBehavior" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FallbackBehavior" j)
-    let to_json = simple_to_json to_value
-  end
 module ForwardedIPConfig =
   struct
     type nonrec t =
@@ -1383,15 +4470,28 @@ module ForwardedIPConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderName") in
       make ~fallbackBehavior ~headerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fallbackBehavior =
-        field_map_exn json "FallbackBehavior" FallbackBehavior.of_json in
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
       let headerName =
-        field_map_exn json "HeaderName" ForwardedIPHeaderName.of_json in
+        field_map_exn json__ "HeaderName" ForwardedIPHeaderName.of_json in
       make ~fallbackBehavior ~headerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This configuration is used for GeoMatchStatement and RateBasedStatement. For IPSetReferenceStatement, use IPSetForwardedIPConfig instead. WAF only evaluates the first IP address found in the specified HTTP header."]
+       "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This configuration is used for GeoMatchStatement, AsnMatchStatement, and RateBasedStatement. For IPSetReferenceStatement, use IPSetForwardedIPConfig instead. WAF only evaluates the first IP address found in the specified HTTP header."]
+module EvaluationWindowSec =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module VersionKeyString =
   struct
     type nonrec t = string
@@ -1432,103 +4532,6 @@ module VendorName =
     let of_json j = string_of_json ~kind:"VendorName" j
     let to_json = simple_to_json to_value
   end
-module FieldIdentifier =
-  struct
-    type nonrec t = string
-    let context_ = "FieldIdentifier"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:512) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"FieldIdentifier" j
-    let to_json = simple_to_json to_value
-  end
-module UsernameField =
-  struct
-    type nonrec t =
-      {
-      identifier: FieldIdentifier.t
-        [@ocaml.doc
-          "The name of the username field. For example /form/username."]}
-    let context_ = "UsernameField"
-    let make ~identifier = fun () -> { identifier }
-    let to_value x =
-      structure_to_value
-        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let identifier =
-        FieldIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      make ~identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier =
-        field_map_exn json "Identifier" FieldIdentifier.of_json in
-      make ~identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Details about your login page username field, used in a ManagedRuleGroupConfig."]
-module PayloadType =
-  struct
-    type nonrec t =
-      | JSON 
-      | FORM_ENCODED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | JSON -> "JSON"
-      | FORM_ENCODED -> "FORM_ENCODED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "JSON" -> JSON
-      | "FORM_ENCODED" -> FORM_ENCODED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration PayloadType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"PayloadType" j)
-    let to_json = simple_to_json to_value
-  end
-module PasswordField =
-  struct
-    type nonrec t =
-      {
-      identifier: FieldIdentifier.t
-        [@ocaml.doc
-          "The name of the password field. For example /form/password."]}
-    let context_ = "PasswordField"
-    let make ~identifier = fun () -> { identifier }
-    let to_value x =
-      structure_to_value
-        [("Identifier", (Some (FieldIdentifier.to_value x.identifier)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let identifier =
-        FieldIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      make ~identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier =
-        field_map_exn json "Identifier" FieldIdentifier.of_json in
-      make ~identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Details about your login page password field, used in a ManagedRuleGroupConfig."]
 module LoginPathString =
   struct
     type nonrec t = string
@@ -1555,20 +4558,48 @@ module ManagedRuleGroupConfig =
       {
       loginPath: LoginPathString.t option
         [@ocaml.doc
-          "The path of the login endpoint for your application. For example, for the URL https://example.com/web/login, you would provide the path /web/login."];
+          "Instead of this setting, provide your configuration under AWSManagedRulesATPRuleSet."];
       payloadType: PayloadType.t option
         [@ocaml.doc
-          "The payload type for your login endpoint, either JSON or form encoded."];
+          "Instead of this setting, provide your configuration under the request inspection configuration for AWSManagedRulesATPRuleSet or AWSManagedRulesACFPRuleSet."];
       usernameField: UsernameField.t option
-        [@ocaml.doc "Details about your login page username field."];
+        [@ocaml.doc
+          "Instead of this setting, provide your configuration under the request inspection configuration for AWSManagedRulesATPRuleSet or AWSManagedRulesACFPRuleSet."];
       passwordField: PasswordField.t option
-        [@ocaml.doc "Details about your login page password field."]}
+        [@ocaml.doc
+          "Instead of this setting, provide your configuration under the request inspection configuration for AWSManagedRulesATPRuleSet or AWSManagedRulesACFPRuleSet."];
+      aWSManagedRulesBotControlRuleSet:
+        AWSManagedRulesBotControlRuleSet.t option
+        [@ocaml.doc
+          "Additional configuration for using the Bot Control managed rule group. Use this to specify the inspection level that you want to use. For information about using the Bot Control managed rule group, see WAF Bot Control rule group and WAF Bot Control in the WAF Developer Guide."];
+      aWSManagedRulesATPRuleSet: AWSManagedRulesATPRuleSet.t option
+        [@ocaml.doc
+          "Additional configuration for using the account takeover prevention (ATP) managed rule group, AWSManagedRulesATPRuleSet. Use this to provide login request information to the rule group. For web ACLs that protect CloudFront distributions, use this to also provide the information about how your distribution responds to login requests. This configuration replaces the individual configuration fields in ManagedRuleGroupConfig and provides additional feature configuration. For information about using the ATP managed rule group, see WAF Fraud Control account takeover prevention (ATP) rule group and WAF Fraud Control account takeover prevention (ATP) in the WAF Developer Guide."];
+      aWSManagedRulesACFPRuleSet: AWSManagedRulesACFPRuleSet.t option
+        [@ocaml.doc
+          "Additional configuration for using the account creation fraud prevention (ACFP) managed rule group, AWSManagedRulesACFPRuleSet. Use this to provide account creation request information to the rule group. For web ACLs that protect CloudFront distributions, use this to also provide the information about how your distribution responds to account creation requests. For information about using the ACFP managed rule group, see WAF Fraud Control account creation fraud prevention (ACFP) rule group and WAF Fraud Control account creation fraud prevention (ACFP) in the WAF Developer Guide."];
+      aWSManagedRulesAntiDDoSRuleSet: AWSManagedRulesAntiDDoSRuleSet.t option
+        [@ocaml.doc
+          "Additional configuration for using the anti-DDoS managed rule group, AWSManagedRulesAntiDDoSRuleSet. Use this to configure anti-DDoS behavior for the rule group. For information about using the anti-DDoS managed rule group, see WAF Anti-DDoS rule group and Distributed Denial of Service (DDoS) prevention in the WAF Developer Guide."]}
     let make ?loginPath =
       fun ?payloadType ->
         fun ?usernameField ->
           fun ?passwordField ->
-            fun () ->
-              { loginPath; payloadType; usernameField; passwordField }
+            fun ?aWSManagedRulesBotControlRuleSet ->
+              fun ?aWSManagedRulesATPRuleSet ->
+                fun ?aWSManagedRulesACFPRuleSet ->
+                  fun ?aWSManagedRulesAntiDDoSRuleSet ->
+                    fun () ->
+                      {
+                        loginPath;
+                        payloadType;
+                        usernameField;
+                        passwordField;
+                        aWSManagedRulesBotControlRuleSet;
+                        aWSManagedRulesATPRuleSet;
+                        aWSManagedRulesACFPRuleSet;
+                        aWSManagedRulesAntiDDoSRuleSet
+                      }
     let to_value x =
       structure_to_value
         [("LoginPath", (Option.map x.loginPath ~f:LoginPathString.to_value));
@@ -1576,9 +4607,33 @@ module ManagedRuleGroupConfig =
         ("UsernameField",
           (Option.map x.usernameField ~f:UsernameField.to_value));
         ("PasswordField",
-          (Option.map x.passwordField ~f:PasswordField.to_value))]
+          (Option.map x.passwordField ~f:PasswordField.to_value));
+        ("AWSManagedRulesBotControlRuleSet",
+          (Option.map x.aWSManagedRulesBotControlRuleSet
+             ~f:AWSManagedRulesBotControlRuleSet.to_value));
+        ("AWSManagedRulesATPRuleSet",
+          (Option.map x.aWSManagedRulesATPRuleSet
+             ~f:AWSManagedRulesATPRuleSet.to_value));
+        ("AWSManagedRulesACFPRuleSet",
+          (Option.map x.aWSManagedRulesACFPRuleSet
+             ~f:AWSManagedRulesACFPRuleSet.to_value));
+        ("AWSManagedRulesAntiDDoSRuleSet",
+          (Option.map x.aWSManagedRulesAntiDDoSRuleSet
+             ~f:AWSManagedRulesAntiDDoSRuleSet.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let aWSManagedRulesAntiDDoSRuleSet =
+        (Option.map ~f:AWSManagedRulesAntiDDoSRuleSet.of_xml)
+          (Xml.child xml_arg0 "AWSManagedRulesAntiDDoSRuleSet") in
+      let aWSManagedRulesACFPRuleSet =
+        (Option.map ~f:AWSManagedRulesACFPRuleSet.of_xml)
+          (Xml.child xml_arg0 "AWSManagedRulesACFPRuleSet") in
+      let aWSManagedRulesATPRuleSet =
+        (Option.map ~f:AWSManagedRulesATPRuleSet.of_xml)
+          (Xml.child xml_arg0 "AWSManagedRulesATPRuleSet") in
+      let aWSManagedRulesBotControlRuleSet =
+        (Option.map ~f:AWSManagedRulesBotControlRuleSet.of_xml)
+          (Xml.child xml_arg0 "AWSManagedRulesBotControlRuleSet") in
       let passwordField =
         (Option.map ~f:PasswordField.of_xml)
           (Xml.child xml_arg0 "PasswordField") in
@@ -1590,24 +4645,42 @@ module ManagedRuleGroupConfig =
       let loginPath =
         (Option.map ~f:LoginPathString.of_xml)
           (Xml.child xml_arg0 "LoginPath") in
-      make ?passwordField ?usernameField ?payloadType ?loginPath ()
+      make ?aWSManagedRulesAntiDDoSRuleSet ?aWSManagedRulesACFPRuleSet
+        ?aWSManagedRulesATPRuleSet ?aWSManagedRulesBotControlRuleSet
+        ?passwordField ?usernameField ?payloadType ?loginPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let aWSManagedRulesAntiDDoSRuleSet =
+        field_map json__ "AWSManagedRulesAntiDDoSRuleSet"
+          AWSManagedRulesAntiDDoSRuleSet.of_json in
+      let aWSManagedRulesACFPRuleSet =
+        field_map json__ "AWSManagedRulesACFPRuleSet"
+          AWSManagedRulesACFPRuleSet.of_json in
+      let aWSManagedRulesATPRuleSet =
+        field_map json__ "AWSManagedRulesATPRuleSet"
+          AWSManagedRulesATPRuleSet.of_json in
+      let aWSManagedRulesBotControlRuleSet =
+        field_map json__ "AWSManagedRulesBotControlRuleSet"
+          AWSManagedRulesBotControlRuleSet.of_json in
       let passwordField =
-        field_map json "PasswordField" PasswordField.of_json in
+        field_map json__ "PasswordField" PasswordField.of_json in
       let usernameField =
-        field_map json "UsernameField" UsernameField.of_json in
-      let payloadType = field_map json "PayloadType" PayloadType.of_json in
-      let loginPath = field_map json "LoginPath" LoginPathString.of_json in
-      make ?passwordField ?usernameField ?payloadType ?loginPath ()
+        field_map json__ "UsernameField" UsernameField.of_json in
+      let payloadType = field_map json__ "PayloadType" PayloadType.of_json in
+      let loginPath = field_map json__ "LoginPath" LoginPathString.of_json in
+      make ?aWSManagedRulesAntiDDoSRuleSet ?aWSManagedRulesACFPRuleSet
+        ?aWSManagedRulesATPRuleSet ?aWSManagedRulesBotControlRuleSet
+        ?passwordField ?usernameField ?payloadType ?loginPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Additional information that's used by a managed rule group. Most managed rule groups don't require this. Use this for the account takeover prevention managed rule group AWSManagedRulesATPRuleSet, to provide information about the sign-in page of your application. You can provide multiple individual ManagedRuleGroupConfig objects for any rule group configuration, for example UsernameField and PasswordField. The configuration that you provide depends on the needs of the managed rule group. For the ATP managed rule group, you provide the following individual configuration objects: LoginPath, PasswordField, PayloadType and UsernameField."]
+       "Additional information that's used by a managed rule group. Many managed rule groups don't require this. The rule groups used for intelligent threat mitigation require additional configuration: Use the AWSManagedRulesACFPRuleSet configuration object to configure the account creation fraud prevention managed rule group. The configuration includes the registration and sign-up pages of your application and the locations in the account creation request payload of data, such as the user email and phone number fields. Use the AWSManagedRulesAntiDDoSRuleSet configuration object to configure the anti-DDoS managed rule group. The configuration includes the sensitivity levels to use in the rules that typically block and challenge requests that might be participating in DDoS attacks and the specification to use to indicate whether a request can handle a silent browser challenge. Use the AWSManagedRulesATPRuleSet configuration object to configure the account takeover prevention managed rule group. The configuration includes the sign-in page of your application and the locations in the login request payload of data such as the username and password. Use the AWSManagedRulesBotControlRuleSet configuration object to configure the protection level that you want the Bot Control rule group to use. For example specifications, see the examples section of CreateWebACL."]
 module ManagedRuleGroupConfigs =
   struct
     type nonrec t = ManagedRuleGroupConfig.t list
-    let make i =
-      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedRuleGroupConfig.to_value)) |>
         (fun x -> `List x)
@@ -1700,13 +4773,13 @@ module LabelMatchStatement =
           (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ~key ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map_exn json "Key" LabelMatchKey.of_json in
-      let scope = field_map_exn json "Scope" LabelMatchScope.of_json in
+    let of_json json__ =
+      let key = field_map_exn json__ "Key" LabelMatchKey.of_json in
+      let scope = field_map_exn json__ "Scope" LabelMatchScope.of_json in
       make ~key ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement that defines a string match search against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."]
+       "A rule statement to match against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."]
 module ForwardedIPPosition =
   struct
     type nonrec t =
@@ -1772,13 +4845,13 @@ module IPSetForwardedIPConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "HeaderName") in
       make ~position ~fallbackBehavior ~headerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let position =
-        field_map_exn json "Position" ForwardedIPPosition.of_json in
+        field_map_exn json__ "Position" ForwardedIPPosition.of_json in
       let fallbackBehavior =
-        field_map_exn json "FallbackBehavior" FallbackBehavior.of_json in
+        field_map_exn json__ "FallbackBehavior" FallbackBehavior.of_json in
       let headerName =
-        field_map_exn json "HeaderName" ForwardedIPHeaderName.of_json in
+        field_map_exn json__ "HeaderName" ForwardedIPHeaderName.of_json in
       make ~position ~fallbackBehavior ~headerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1811,11 +4884,11 @@ module IPSetReferenceStatement =
         ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
       make ?iPSetForwardedIPConfig ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let iPSetForwardedIPConfig =
-        field_map json "IPSetForwardedIPConfig"
+        field_map json__ "IPSetForwardedIPConfig"
           IPSetForwardedIPConfig.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
+      let aRN = field_map_exn json__ "ARN" ResourceArn.of_json in
       make ?iPSetForwardedIPConfig ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2072,6 +5145,7 @@ module CountryCode =
       | YE 
       | ZM 
       | ZW 
+      | XK 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2325,6 +5399,7 @@ module CountryCode =
       | YE -> "YE"
       | ZM -> "ZM"
       | ZW -> "ZW"
+      | XK -> "XK"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2577,6 +5652,7 @@ module CountryCode =
       | "YE" -> YE
       | "ZM" -> ZM
       | "ZW" -> ZW
+      | "XK" -> XK
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2591,6 +5667,9 @@ module CountryCodes =
     type nonrec t = CountryCode.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CountryCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2617,7 +5696,7 @@ module GeoMatchStatement =
       {
       countryCodes: CountryCodes.t option
         [@ocaml.doc
-          "An array of two-character country codes, for example, \\[ \"US\", \"CN\" \\], from the alpha-2 country ISO codes of the ISO 3166 international standard."];
+          "An array of two-character country codes that you want to match against, for example, \\[ \"US\", \"CN\" \\], from the alpha-2 country ISO codes of the ISO 3166 international standard. When you use a geo match statement just for the region and country labels that it adds to requests, you still have to supply a country code for the rule to evaluate. In this case, you configure the rule to only count matching requests, but it will still generate logging and count metrics for any matches. You can reduce the logging and metrics that the rule produces by specifying a country that's unlikely to be a source of traffic to your site."];
       forwardedIPConfig: ForwardedIPConfig.t option
         [@ocaml.doc
           "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all."]}
@@ -2639,14 +5718,14 @@ module GeoMatchStatement =
           (Xml.child xml_arg0 "CountryCodes") in
       make ?forwardedIPConfig ?countryCodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forwardedIPConfig =
-        field_map json "ForwardedIPConfig" ForwardedIPConfig.of_json in
-      let countryCodes = field_map json "CountryCodes" CountryCodes.of_json in
+        field_map json__ "ForwardedIPConfig" ForwardedIPConfig.of_json in
+      let countryCodes = field_map json__ "CountryCodes" CountryCodes.of_json in
       make ?forwardedIPConfig ?countryCodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement used to identify web requests based on country of origin."]
+       "A rule statement that labels web requests by country and region and that matches against web requests based on country code. A geo match rule labels every request that it inspects regardless of whether it finds a match. To manage requests only by country, you can use this statement by itself and specify the countries that you want to match against in the CountryCodes array. Otherwise, configure your geo match rule with Count action so that it only labels requests. Then, add one or more label match rules to run after the geo match rule and configure them to match against the geographic labels and handle the requests as needed. WAF labels requests using the alpha-2 country and region codes from the International Organization for Standardization (ISO) 3166 standard. WAF determines the codes using either the IP address in the web request origin or, if you specify it, the address in the geo match ForwardedIPConfig. If you use the web request origin, the label formats are awswaf:clientip:geo:region:<ISO country code>-<ISO region code> and awswaf:clientip:geo:country:<ISO country code>. If you use a forwarded IP address, the label formats are awswaf:forwardedip:geo:region:<ISO country code>-<ISO region code> and awswaf:forwardedip:geo:country:<ISO country code>. For additional details, see Geographic match rule statement in the WAF Developer Guide."]
 module SearchString =
   struct
     type nonrec t = string
@@ -2700,16 +5779,16 @@ module ByteMatchStatement =
       {
       searchString: SearchString.t
         [@ocaml.doc
-          "A string value that you want WAF to search for. WAF searches only in the part of web requests that you designate for inspection in FieldToMatch. The maximum length of the value is 50 bytes. Valid values depend on the component that you specify for inspection in FieldToMatch: Method: The HTTP method that you want WAF to search for. This indicates the type of operation specified in the request. UriPath: The value that you want WAF to search for in the URI path, for example, /images/daily-ad.jpg. If SearchString includes alphabetic characters A-Z and a-z, note that the value is case sensitive. If you're using the WAF API Specify a base64-encoded version of the value. The maximum length of the value before you base64-encode it is 50 bytes. For example, suppose the value of Type is HEADER and the value of Data is User-Agent. If you want to search the User-Agent header for the value BadBot, you base64-encode BadBot using MIME base64-encoding and include the resulting value, QmFkQm90, in the value of SearchString. If you're using the CLI or one of the Amazon Web Services SDKs The value that you want WAF to search for. The SDK automatically base64 encodes the value."];
+          "A string value that you want WAF to search for. WAF searches only in the part of web requests that you designate for inspection in FieldToMatch. The maximum length of the value is 200 bytes. Valid values depend on the component that you specify for inspection in FieldToMatch: Method: The HTTP method that you want WAF to search for. This indicates the type of operation specified in the request. UriPath: The value that you want WAF to search for in the URI path, for example, /images/daily-ad.jpg. JA3Fingerprint: Available for use with Amazon CloudFront distributions and Application Load Balancers. Match against the request's JA3 fingerprint. The JA3 fingerprint is a 32-character hash derived from the TLS Client Hello of an incoming request. This fingerprint serves as a unique identifier for the client's TLS configuration. You can use this choice only with a string match ByteMatchStatement with the PositionalConstraint set to EXACTLY. You can obtain the JA3 fingerprint for client requests from the web ACL logs. If WAF is able to calculate the fingerprint, it includes it in the logs. For information about the logging fields, see Log fields in the WAF Developer Guide. HeaderOrder: The list of header names to match for. WAF creates a string that contains the ordered list of header names, from the headers in the web request, and then matches against that string. If SearchString includes alphabetic characters A-Z and a-z, note that the value is case sensitive. If you're using the WAF API Specify a base64-encoded version of the value. The maximum length of the value before you base64-encode it is 200 bytes. For example, suppose the value of Type is HEADER and the value of Data is User-Agent. If you want to search the User-Agent header for the value BadBot, you base64-encode BadBot using MIME base64-encoding and include the resulting value, QmFkQm90, in the value of SearchString. If you're using the CLI or one of the Amazon Web Services SDKs The value that you want WAF to search for. The SDK automatically base64 encodes the value."];
       fieldToMatch: FieldToMatch.t
         [@ocaml.doc
-          "The part of a web request that you want WAF to inspect. For more information, see FieldToMatch."];
+          "The part of the web request that you want WAF to inspect."];
       textTransformations: TextTransformations.t
         [@ocaml.doc
-          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. If you specify one or more transformations in a rule statement, WAF performs all transformations on the content of the request component identified by FieldToMatch, starting from the lowest priority setting, before inspecting the content for a match."];
+          "Text transformations eliminate some of the unusual formatting that attackers use in web requests in an effort to bypass detection. Text transformations are used in rule match statements, to transform the FieldToMatch request component before inspecting it, and they're used in rate-based rule statements, to transform request components before using them as custom aggregation keys. If you specify one or more transformations to apply, WAF performs all transformations on the specified content, starting from the lowest priority setting, and then uses the transformed component contents."];
       positionalConstraint: PositionalConstraint.t
         [@ocaml.doc
-          "The area within the portion of a web request that you want WAF to search for SearchString. Valid values include the following: CONTAINS The specified part of the web request must include the value of SearchString, but the location doesn't matter. CONTAINS_WORD The specified part of the web request must include the value of SearchString, and SearchString must contain only alphanumeric characters or underscore (A-Z, a-z, 0-9, or _). In addition, SearchString must be a word, which means that both of the following are true: SearchString is at the beginning of the specified part of the web request or is preceded by a character other than an alphanumeric character or underscore (_). Examples include the value of a header and ;BadBot. SearchString is at the end of the specified part of the web request or is followed by a character other than an alphanumeric character or underscore (_), for example, BadBot; and -BadBot;. EXACTLY The value of the specified part of the web request must exactly match the value of SearchString. STARTS_WITH The value of SearchString must appear at the beginning of the specified part of the web request. ENDS_WITH The value of SearchString must appear at the end of the specified part of the web request."]}
+          "The area within the portion of the web request that you want WAF to search for SearchString. Valid values include the following: CONTAINS The specified part of the web request must include the value of SearchString, but the location doesn't matter. CONTAINS_WORD The specified part of the web request must include the value of SearchString, and SearchString must contain only alphanumeric characters or underscore (A-Z, a-z, 0-9, or _). In addition, SearchString must be a word, which means that both of the following are true: SearchString is at the beginning of the specified part of the web request or is preceded by a character other than an alphanumeric character or underscore (_). Examples include the value of a header and ;BadBot. SearchString is at the end of the specified part of the web request or is followed by a character other than an alphanumeric character or underscore (_), for example, BadBot; and -BadBot;. EXACTLY The value of the specified part of the web request must exactly match the value of SearchString. STARTS_WITH The value of SearchString must appear at the beginning of the specified part of the web request. ENDS_WITH The value of SearchString must appear at the end of the specified part of the web request."]}
     let context_ = "ByteMatchStatement"
     let make ~searchString =
       fun ~fieldToMatch ->
@@ -2747,21 +5826,88 @@ module ByteMatchStatement =
       make ~positionalConstraint ~textTransformations ~fieldToMatch
         ~searchString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let positionalConstraint =
-        field_map_exn json "PositionalConstraint"
+        field_map_exn json__ "PositionalConstraint"
           PositionalConstraint.of_json in
       let textTransformations =
-        field_map_exn json "TextTransformations" TextTransformations.of_json in
+        field_map_exn json__ "TextTransformations"
+          TextTransformations.of_json in
       let fieldToMatch =
-        field_map_exn json "FieldToMatch" FieldToMatch.of_json in
+        field_map_exn json__ "FieldToMatch" FieldToMatch.of_json in
       let searchString =
-        field_map_exn json "SearchString" SearchString.of_json in
+        field_map_exn json__ "SearchString" SearchString.of_json in
       make ~positionalConstraint ~textTransformations ~fieldToMatch
         ~searchString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is refered to as a string match statement."]
+       "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is called a string match statement."]
+module AsnList =
+  struct
+    type nonrec t = ASN.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ASN.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ASN.of_xml)
+    let of_json j = list_of_json ~kind:"AsnList" ~of_json:ASN.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AsnMatchStatement =
+  struct
+    type nonrec t =
+      {
+      asnList: AsnList.t
+        [@ocaml.doc
+          "Contains one or more Autonomous System Numbers (ASNs). ASNs are unique identifiers assigned to large internet networks managed by organizations such as internet service providers, enterprises, universities, or government agencies."];
+      forwardedIPConfig: ForwardedIPConfig.t option
+        [@ocaml.doc
+          "The configuration for inspecting IP addresses to match against an ASN in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name."]}
+    let context_ = "AsnMatchStatement"
+    let make ?forwardedIPConfig =
+      fun ~asnList -> fun () -> { forwardedIPConfig; asnList }
+    let to_value x =
+      structure_to_value
+        [("AsnList", (Some (AsnList.to_value x.asnList)));
+        ("ForwardedIPConfig",
+          (Option.map x.forwardedIPConfig ~f:ForwardedIPConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let forwardedIPConfig =
+        (Option.map ~f:ForwardedIPConfig.of_xml)
+          (Xml.child xml_arg0 "ForwardedIPConfig") in
+      let asnList =
+        AsnList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AsnList") in
+      make ?forwardedIPConfig ~asnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let forwardedIPConfig =
+        field_map json__ "ForwardedIPConfig" ForwardedIPConfig.of_json in
+      let asnList = field_map_exn json__ "AsnList" AsnList.of_json in
+      make ?forwardedIPConfig ~asnList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A rule statement that inspects web traffic based on the Autonomous System Number (ASN) associated with the request's IP address. For additional details, see ASN match rule statement in the WAF Developer Guide."]
 module rec
   AndStatement:sig
                  type nonrec t =
@@ -2794,8 +5940,8 @@ module rec
           (Xml.child_exn ~context:context_ xml_arg0 "Statements") in
       make ~statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statements = field_map_exn json "Statements" Statements.of_json in
+    let of_json json__ =
+      let statements = field_map_exn json__ "Statements" Statements.of_json in
       make ~statements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2806,7 +5952,7 @@ module rec
                                 {
                                 vendorName: VendorName.t
                                   [@ocaml.doc
-                                    "The name of the managed rule group vendor. You use this, along with the rule group name, to identify the rule group."];
+                                    "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
                                 name: EntityName.t
                                   [@ocaml.doc
                                     "The name of the managed rule group. You use this, along with the vendor name, to identify the rule group."];
@@ -2815,22 +5961,28 @@ module rec
                                     "The version of the managed rule group to use. If you specify this, the version setting is fixed until you change it. If you don't specify this, WAF uses the vendor's default version, and then keeps the version at the vendor's default when the vendor updates the managed rule group settings."];
                                 excludedRules: ExcludedRules.t option
                                   [@ocaml.doc
-                                    "The rules in the referenced rule group whose actions are set to Count. When you exclude a rule, WAF evaluates it exactly as it would if the rule action setting were Count. This is a useful option for testing the rules in a rule group without modifying how they handle your web traffic."];
+                                    "Rules in the referenced rule group whose actions are set to Count. Instead of this option, use RuleActionOverrides. It accepts any valid action setting, including Count."];
                                 scopeDownStatement: Statement.t option
                                   [@ocaml.doc
                                     "An optional nested statement that narrows the scope of the web requests that are evaluated by the managed rule group. Requests are only evaluated by the rule group if they match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
                                 managedRuleGroupConfigs:
                                   ManagedRuleGroupConfigs.t option
                                   [@ocaml.doc
-                                    "Additional information that's used by a managed rule group. Most managed rule groups don't require this. Use this for the account takeover prevention managed rule group AWSManagedRulesATPRuleSet, to provide information about the sign-in page of your application. You can provide multiple individual ManagedRuleGroupConfig objects for any rule group configuration, for example UsernameField and PasswordField. The configuration that you provide depends on the needs of the managed rule group. For the ATP managed rule group, you provide the following individual configuration objects: LoginPath, PasswordField, PayloadType and UsernameField."]}
+                                    "Additional information that's used by a managed rule group. Many managed rule groups don't require this. The rule groups used for intelligent threat mitigation require additional configuration: Use the AWSManagedRulesACFPRuleSet configuration object to configure the account creation fraud prevention managed rule group. The configuration includes the registration and sign-up pages of your application and the locations in the account creation request payload of data, such as the user email and phone number fields. Use the AWSManagedRulesAntiDDoSRuleSet configuration object to configure the anti-DDoS managed rule group. The configuration includes the sensitivity levels to use in the rules that typically block and challenge requests that might be participating in DDoS attacks and the specification to use to indicate whether a request can handle a silent browser challenge. Use the AWSManagedRulesATPRuleSet configuration object to configure the account takeover prevention managed rule group. The configuration includes the sign-in page of your application and the locations in the login request payload of data such as the username and password. Use the AWSManagedRulesBotControlRuleSet configuration object to configure the protection level that you want the Bot Control rule group to use."];
+                                ruleActionOverrides:
+                                  RuleActionOverrides.t option
+                                  [@ocaml.doc
+                                    "Action settings to use in the place of the rule actions that are configured inside the rule group. You specify one override for each rule whose action you want to change. Verify the rule names in your overrides carefully. With managed rule groups, WAF silently ignores any override that uses an invalid rule name. With customer-owned rule groups, invalid rule names in your overrides will cause web ACL updates to fail. An invalid rule name is any name that doesn't exactly match the case-sensitive name of an existing rule in the rule group. You can use overrides for testing, for example you can override all of rule actions to Count and then monitor the resulting count metrics to understand how the rule group would handle your web traffic. You can also permanently override some or all actions, to modify how the rule group manages your web traffic."]}
                               val make :
                                 ?version:VersionKeyString.t ->
                                   ?excludedRules:ExcludedRules.t ->
                                     ?scopeDownStatement:Statement.t ->
                                       ?managedRuleGroupConfigs:ManagedRuleGroupConfigs.t
                                         ->
-                                        vendorName:VendorName.t ->
-                                          name:EntityName.t -> unit -> t
+                                        ?ruleActionOverrides:RuleActionOverrides.t
+                                          ->
+                                          vendorName:VendorName.t ->
+                                            name:EntityName.t -> unit -> t
                               val to_value : t -> Botodata.value
                               val to_query : t -> Client.Query.t
                               val of_xml : Xml.t -> t
@@ -2842,7 +5994,7 @@ module rec
       {
       vendorName: VendorName.t
         [@ocaml.doc
-          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify the rule group."];
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
       name: EntityName.t
         [@ocaml.doc
           "The name of the managed rule group. You use this, along with the vendor name, to identify the rule group."];
@@ -2851,29 +6003,34 @@ module rec
           "The version of the managed rule group to use. If you specify this, the version setting is fixed until you change it. If you don't specify this, WAF uses the vendor's default version, and then keeps the version at the vendor's default when the vendor updates the managed rule group settings."];
       excludedRules: ExcludedRules.t option
         [@ocaml.doc
-          "The rules in the referenced rule group whose actions are set to Count. When you exclude a rule, WAF evaluates it exactly as it would if the rule action setting were Count. This is a useful option for testing the rules in a rule group without modifying how they handle your web traffic."];
+          "Rules in the referenced rule group whose actions are set to Count. Instead of this option, use RuleActionOverrides. It accepts any valid action setting, including Count."];
       scopeDownStatement: Statement.t option
         [@ocaml.doc
           "An optional nested statement that narrows the scope of the web requests that are evaluated by the managed rule group. Requests are only evaluated by the rule group if they match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
       managedRuleGroupConfigs: ManagedRuleGroupConfigs.t option
         [@ocaml.doc
-          "Additional information that's used by a managed rule group. Most managed rule groups don't require this. Use this for the account takeover prevention managed rule group AWSManagedRulesATPRuleSet, to provide information about the sign-in page of your application. You can provide multiple individual ManagedRuleGroupConfig objects for any rule group configuration, for example UsernameField and PasswordField. The configuration that you provide depends on the needs of the managed rule group. For the ATP managed rule group, you provide the following individual configuration objects: LoginPath, PasswordField, PayloadType and UsernameField."]}
+          "Additional information that's used by a managed rule group. Many managed rule groups don't require this. The rule groups used for intelligent threat mitigation require additional configuration: Use the AWSManagedRulesACFPRuleSet configuration object to configure the account creation fraud prevention managed rule group. The configuration includes the registration and sign-up pages of your application and the locations in the account creation request payload of data, such as the user email and phone number fields. Use the AWSManagedRulesAntiDDoSRuleSet configuration object to configure the anti-DDoS managed rule group. The configuration includes the sensitivity levels to use in the rules that typically block and challenge requests that might be participating in DDoS attacks and the specification to use to indicate whether a request can handle a silent browser challenge. Use the AWSManagedRulesATPRuleSet configuration object to configure the account takeover prevention managed rule group. The configuration includes the sign-in page of your application and the locations in the login request payload of data such as the username and password. Use the AWSManagedRulesBotControlRuleSet configuration object to configure the protection level that you want the Bot Control rule group to use."];
+      ruleActionOverrides: RuleActionOverrides.t option
+        [@ocaml.doc
+          "Action settings to use in the place of the rule actions that are configured inside the rule group. You specify one override for each rule whose action you want to change. Verify the rule names in your overrides carefully. With managed rule groups, WAF silently ignores any override that uses an invalid rule name. With customer-owned rule groups, invalid rule names in your overrides will cause web ACL updates to fail. An invalid rule name is any name that doesn't exactly match the case-sensitive name of an existing rule in the rule group. You can use overrides for testing, for example you can override all of rule actions to Count and then monitor the resulting count metrics to understand how the rule group would handle your web traffic. You can also permanently override some or all actions, to modify how the rule group manages your web traffic."]}
     let context_ = "ManagedRuleGroupStatement"
     let make ?version =
       fun ?excludedRules ->
         fun ?scopeDownStatement ->
           fun ?managedRuleGroupConfigs ->
-            fun ~vendorName ->
-              fun ~name ->
-                fun () ->
-                  {
-                    version;
-                    excludedRules;
-                    scopeDownStatement;
-                    managedRuleGroupConfigs;
-                    vendorName;
-                    name
-                  }
+            fun ?ruleActionOverrides ->
+              fun ~vendorName ->
+                fun ~name ->
+                  fun () ->
+                    {
+                      version;
+                      excludedRules;
+                      scopeDownStatement;
+                      managedRuleGroupConfigs;
+                      ruleActionOverrides;
+                      vendorName;
+                      name
+                    }
     let to_value x =
       structure_to_value
         [("VendorName", (Some (VendorName.to_value x.vendorName)));
@@ -2885,9 +6042,14 @@ module rec
           (Option.map x.scopeDownStatement ~f:Statement.to_value));
         ("ManagedRuleGroupConfigs",
           (Option.map x.managedRuleGroupConfigs
-             ~f:ManagedRuleGroupConfigs.to_value))]
+             ~f:ManagedRuleGroupConfigs.to_value));
+        ("RuleActionOverrides",
+          (Option.map x.ruleActionOverrides ~f:RuleActionOverrides.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ruleActionOverrides =
+        (Option.map ~f:RuleActionOverrides.of_xml)
+          (Xml.child xml_arg0 "RuleActionOverrides") in
       let managedRuleGroupConfigs =
         (Option.map ~f:ManagedRuleGroupConfigs.of_xml)
           (Xml.child xml_arg0 "ManagedRuleGroupConfigs") in
@@ -2905,25 +6067,27 @@ module rec
       let vendorName =
         VendorName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VendorName") in
-      make ?managedRuleGroupConfigs ?scopeDownStatement ?excludedRules
-        ?version ~name ~vendorName ()
+      make ?ruleActionOverrides ?managedRuleGroupConfigs ?scopeDownStatement
+        ?excludedRules ?version ~name ~vendorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ruleActionOverrides =
+        field_map json__ "RuleActionOverrides" RuleActionOverrides.of_json in
       let managedRuleGroupConfigs =
-        field_map json "ManagedRuleGroupConfigs"
+        field_map json__ "ManagedRuleGroupConfigs"
           ManagedRuleGroupConfigs.of_json in
       let scopeDownStatement =
-        field_map json "ScopeDownStatement" Statement.of_json in
+        field_map json__ "ScopeDownStatement" Statement.of_json in
       let excludedRules =
-        field_map json "ExcludedRules" ExcludedRules.of_json in
-      let version = field_map json "Version" VersionKeyString.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      let vendorName = field_map_exn json "VendorName" VendorName.of_json in
-      make ?managedRuleGroupConfigs ?scopeDownStatement ?excludedRules
-        ?version ~name ~vendorName ()
+        field_map json__ "ExcludedRules" ExcludedRules.of_json in
+      let version = field_map json__ "Version" VersionKeyString.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      let vendorName = field_map_exn json__ "VendorName" VendorName.of_json in
+      make ?ruleActionOverrides ?managedRuleGroupConfigs ?scopeDownStatement
+        ?excludedRules ?version ~name ~vendorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. It can only be referenced as a top-level statement within a rule."]
+       "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. You cannot use a managed rule group inside another rule group. You can only reference a managed rule group as a top-level statement within a rule that you define in a web ACL. You are charged additional fees when you use the WAF Bot Control managed rule group AWSManagedRulesBotControlRuleSet, the WAF Fraud Control account takeover prevention (ATP) managed rule group AWSManagedRulesATPRuleSet, or the WAF Fraud Control account creation fraud prevention (ACFP) managed rule group AWSManagedRulesACFPRuleSet. For more information, see WAF Pricing."]
  and
   NotStatement:sig
                  type nonrec t =
@@ -2956,8 +6120,8 @@ module rec
           (Xml.child_exn ~context:context_ xml_arg0 "Statement") in
       make ~statement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statement = field_map_exn json "Statement" Statement.of_json in
+    let of_json json__ =
+      let statement = field_map_exn json__ "Statement" Statement.of_json in
       make ~statement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2994,8 +6158,8 @@ module rec
           (Xml.child_exn ~context:context_ xml_arg0 "Statements") in
       make ~statements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statements = field_map_exn json "Statements" Statements.of_json in
+    let of_json json__ =
+      let statements = field_map_exn json__ "Statements" Statements.of_json in
       make ~statements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3006,23 +6170,31 @@ module rec
                          {
                          limit: RateLimit.t
                            [@ocaml.doc
-                             "The limit on requests per 5-minute period for a single originating IP address. If the statement includes a ScopeDownStatement, this limit is applied only to the requests that match the statement."];
+                             "The limit on requests during the specified evaluation window for a single aggregation instance for the rate-based rule. If the rate-based statement includes a ScopeDownStatement, this limit is applied only to the requests that match the statement. Examples: If you aggregate on just the IP address, this is the limit on requests from any single IP address. If you aggregate on the HTTP method and the query argument name \"city\", then this is the limit on requests for any single method, city pair."];
+                         evaluationWindowSec: EvaluationWindowSec.t option
+                           [@ocaml.doc
+                             "The amount of time, in seconds, that WAF should include in its request counts, looking back from the current time. For example, for a setting of 120, when WAF checks the rate, it counts the requests for the 2 minutes immediately preceding the current time. Valid settings are 60, 120, 300, and 600. This setting doesn't determine how often WAF checks the rate, but how far back it looks each time it checks. WAF checks the rate about every 10 seconds. Default: 300 (5 minutes)"];
                          aggregateKeyType:
                            RateBasedStatementAggregateKeyType.t
                            [@ocaml.doc
-                             "Setting that indicates how to aggregate the request counts. The options are the following: IP - Aggregate the request counts on the IP address from the web request origin. FORWARDED_IP - Aggregate the request counts on the first IP address in an HTTP header. If you use this, configure the ForwardedIPConfig, to specify the header to use."];
+                             "Setting that indicates how to aggregate the request counts. Web requests that are missing any of the components specified in the aggregation keys are omitted from the rate-based rule evaluation and handling. CONSTANT - Count and limit the requests that match the rate-based rule's scope-down statement. With this option, the counted requests aren't further aggregated. The scope-down statement is the only specification used. When the count of all requests that satisfy the scope-down statement goes over the limit, WAF applies the rule action to all requests that satisfy the scope-down statement. With this option, you must configure the ScopeDownStatement property. CUSTOM_KEYS - Aggregate the request counts using one or more web request components as the aggregate keys. With this option, you must specify the aggregate keys in the CustomKeys property. To aggregate on only the IP address or only the forwarded IP address, don't use custom keys. Instead, set the aggregate key type to IP or FORWARDED_IP. FORWARDED_IP - Aggregate the request counts on the first IP address in an HTTP header. With this option, you must specify the header to use in the ForwardedIPConfig property. To aggregate on a combination of the forwarded IP address with other aggregate keys, use CUSTOM_KEYS. IP - Aggregate the request counts on the IP address from the web request origin. To aggregate on a combination of the IP address with other aggregate keys, use CUSTOM_KEYS."];
                          scopeDownStatement: Statement.t option
                            [@ocaml.doc
-                             "An optional nested statement that narrows the scope of the web requests that are evaluated by the rate-based statement. Requests are only tracked by the rate-based statement if they match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
+                             "An optional nested statement that narrows the scope of the web requests that are evaluated and managed by the rate-based statement. When you use a scope-down statement, the rate-based rule only tracks and rate limits requests that match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
                          forwardedIPConfig: ForwardedIPConfig.t option
                            [@ocaml.doc
-                             "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This is required if AggregateKeyType is set to FORWARDED_IP."]}
+                             "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This is required if you specify a forwarded IP in the rule's aggregate key settings."];
+                         customKeys: RateBasedStatementCustomKeys.t option
+                           [@ocaml.doc
+                             "Specifies the aggregate keys to use in a rate-base rule."]}
                        val make :
-                         ?scopeDownStatement:Statement.t ->
-                           ?forwardedIPConfig:ForwardedIPConfig.t ->
-                             limit:RateLimit.t ->
-                               aggregateKeyType:RateBasedStatementAggregateKeyType.t
-                                 -> unit -> t
+                         ?evaluationWindowSec:EvaluationWindowSec.t ->
+                           ?scopeDownStatement:Statement.t ->
+                             ?forwardedIPConfig:ForwardedIPConfig.t ->
+                               ?customKeys:RateBasedStatementCustomKeys.t ->
+                                 limit:RateLimit.t ->
+                                   aggregateKeyType:RateBasedStatementAggregateKeyType.t
+                                     -> unit -> t
                        val to_value : t -> Botodata.value
                        val to_query : t -> Client.Query.t
                        val of_xml : Xml.t -> t
@@ -3034,40 +6206,57 @@ module rec
       {
       limit: RateLimit.t
         [@ocaml.doc
-          "The limit on requests per 5-minute period for a single originating IP address. If the statement includes a ScopeDownStatement, this limit is applied only to the requests that match the statement."];
+          "The limit on requests during the specified evaluation window for a single aggregation instance for the rate-based rule. If the rate-based statement includes a ScopeDownStatement, this limit is applied only to the requests that match the statement. Examples: If you aggregate on just the IP address, this is the limit on requests from any single IP address. If you aggregate on the HTTP method and the query argument name \"city\", then this is the limit on requests for any single method, city pair."];
+      evaluationWindowSec: EvaluationWindowSec.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, that WAF should include in its request counts, looking back from the current time. For example, for a setting of 120, when WAF checks the rate, it counts the requests for the 2 minutes immediately preceding the current time. Valid settings are 60, 120, 300, and 600. This setting doesn't determine how often WAF checks the rate, but how far back it looks each time it checks. WAF checks the rate about every 10 seconds. Default: 300 (5 minutes)"];
       aggregateKeyType: RateBasedStatementAggregateKeyType.t
         [@ocaml.doc
-          "Setting that indicates how to aggregate the request counts. The options are the following: IP - Aggregate the request counts on the IP address from the web request origin. FORWARDED_IP - Aggregate the request counts on the first IP address in an HTTP header. If you use this, configure the ForwardedIPConfig, to specify the header to use."];
+          "Setting that indicates how to aggregate the request counts. Web requests that are missing any of the components specified in the aggregation keys are omitted from the rate-based rule evaluation and handling. CONSTANT - Count and limit the requests that match the rate-based rule's scope-down statement. With this option, the counted requests aren't further aggregated. The scope-down statement is the only specification used. When the count of all requests that satisfy the scope-down statement goes over the limit, WAF applies the rule action to all requests that satisfy the scope-down statement. With this option, you must configure the ScopeDownStatement property. CUSTOM_KEYS - Aggregate the request counts using one or more web request components as the aggregate keys. With this option, you must specify the aggregate keys in the CustomKeys property. To aggregate on only the IP address or only the forwarded IP address, don't use custom keys. Instead, set the aggregate key type to IP or FORWARDED_IP. FORWARDED_IP - Aggregate the request counts on the first IP address in an HTTP header. With this option, you must specify the header to use in the ForwardedIPConfig property. To aggregate on a combination of the forwarded IP address with other aggregate keys, use CUSTOM_KEYS. IP - Aggregate the request counts on the IP address from the web request origin. To aggregate on a combination of the IP address with other aggregate keys, use CUSTOM_KEYS."];
       scopeDownStatement: Statement.t option
         [@ocaml.doc
-          "An optional nested statement that narrows the scope of the web requests that are evaluated by the rate-based statement. Requests are only tracked by the rate-based statement if they match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
+          "An optional nested statement that narrows the scope of the web requests that are evaluated and managed by the rate-based statement. When you use a scope-down statement, the rate-based rule only tracks and rate limits requests that match the scope-down statement. You can use any nestable Statement in the scope-down statement, and you can nest statements at any level, the same as you can for a rule statement."];
       forwardedIPConfig: ForwardedIPConfig.t option
         [@ocaml.doc
-          "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This is required if AggregateKeyType is set to FORWARDED_IP."]}
+          "The configuration for inspecting IP addresses in an HTTP header that you specify, instead of using the IP address that's reported by the web request origin. Commonly, this is the X-Forwarded-For (XFF) header, but you can specify any header name. If the specified header isn't present in the request, WAF doesn't apply the rule to the web request at all. This is required if you specify a forwarded IP in the rule's aggregate key settings."];
+      customKeys: RateBasedStatementCustomKeys.t option
+        [@ocaml.doc
+          "Specifies the aggregate keys to use in a rate-base rule."]}
     let context_ = "RateBasedStatement"
-    let make ?scopeDownStatement =
-      fun ?forwardedIPConfig ->
-        fun ~limit ->
-          fun ~aggregateKeyType ->
-            fun () ->
-              {
-                scopeDownStatement;
-                forwardedIPConfig;
-                limit;
-                aggregateKeyType
-              }
+    let make ?evaluationWindowSec =
+      fun ?scopeDownStatement ->
+        fun ?forwardedIPConfig ->
+          fun ?customKeys ->
+            fun ~limit ->
+              fun ~aggregateKeyType ->
+                fun () ->
+                  {
+                    evaluationWindowSec;
+                    scopeDownStatement;
+                    forwardedIPConfig;
+                    customKeys;
+                    limit;
+                    aggregateKeyType
+                  }
     let to_value x =
       structure_to_value
         [("Limit", (Some (RateLimit.to_value x.limit)));
+        ("EvaluationWindowSec",
+          (Option.map x.evaluationWindowSec ~f:EvaluationWindowSec.to_value));
         ("AggregateKeyType",
           (Some
              (RateBasedStatementAggregateKeyType.to_value x.aggregateKeyType)));
         ("ScopeDownStatement",
           (Option.map x.scopeDownStatement ~f:Statement.to_value));
         ("ForwardedIPConfig",
-          (Option.map x.forwardedIPConfig ~f:ForwardedIPConfig.to_value))]
+          (Option.map x.forwardedIPConfig ~f:ForwardedIPConfig.to_value));
+        ("CustomKeys",
+          (Option.map x.customKeys ~f:RateBasedStatementCustomKeys.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let customKeys =
+        (Option.map ~f:RateBasedStatementCustomKeys.of_xml)
+          (Xml.child xml_arg0 "CustomKeys") in
       let forwardedIPConfig =
         (Option.map ~f:ForwardedIPConfig.of_xml)
           (Xml.child xml_arg0 "ForwardedIPConfig") in
@@ -3077,46 +6266,55 @@ module rec
       let aggregateKeyType =
         RateBasedStatementAggregateKeyType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AggregateKeyType") in
+      let evaluationWindowSec =
+        (Option.map ~f:EvaluationWindowSec.of_xml)
+          (Xml.child xml_arg0 "EvaluationWindowSec") in
       let limit =
         RateLimit.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
-      make ?forwardedIPConfig ?scopeDownStatement ~aggregateKeyType ~limit ()
+      make ?customKeys ?forwardedIPConfig ?scopeDownStatement
+        ~aggregateKeyType ?evaluationWindowSec ~limit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let customKeys =
+        field_map json__ "CustomKeys" RateBasedStatementCustomKeys.of_json in
       let forwardedIPConfig =
-        field_map json "ForwardedIPConfig" ForwardedIPConfig.of_json in
+        field_map json__ "ForwardedIPConfig" ForwardedIPConfig.of_json in
       let scopeDownStatement =
-        field_map json "ScopeDownStatement" Statement.of_json in
+        field_map json__ "ScopeDownStatement" Statement.of_json in
       let aggregateKeyType =
-        field_map_exn json "AggregateKeyType"
+        field_map_exn json__ "AggregateKeyType"
           RateBasedStatementAggregateKeyType.of_json in
-      let limit = field_map_exn json "Limit" RateLimit.of_json in
-      make ?forwardedIPConfig ?scopeDownStatement ~aggregateKeyType ~limit ()
+      let evaluationWindowSec =
+        field_map json__ "EvaluationWindowSec" EvaluationWindowSec.of_json in
+      let limit = field_map_exn json__ "Limit" RateLimit.of_json in
+      make ?customKeys ?forwardedIPConfig ?scopeDownStatement
+        ~aggregateKeyType ?evaluationWindowSec ~limit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rate-based rule tracks the rate of requests for each originating IP address, and triggers the rule action when the rate exceeds a limit that you specify on the number of requests in any 5-minute time span. You can use this to put a temporary block on requests from an IP address that is sending excessive requests. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF. When the rule action triggers, WAF blocks additional requests from the IP address until the request rate falls below the limit. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts requests that match the nested statement. For example, based on recent requests that you have seen from an attacker, you might create a rate-based rule with a nested AND rule statement that contains the following nested statements: An IP match statement with an IP set that specified the address 192.0.2.44. A string match statement that searches in the User-Agent header for the string BadBot. In this rate-based rule, you also define a rate limit. For this example, the rate limit is 1,000. Requests that meet both of the conditions in the statements are counted. If the count exceeds 1,000 requests per five minutes, the rule action triggers. Requests that do not meet both conditions are not counted towards the rate limit and are not affected by this rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group."]
+       "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate. The rule categorizes requests according to your aggregation criteria, collects them into aggregation instances, and counts and rate limits the requests for each instance. If you change any of these settings in a rule that's currently in use, the change resets the rule's rate limiting counts. This can pause the rule's rate limiting activities for up to a minute. You can specify individual aggregation keys, like IP address or HTTP method. You can also specify aggregation key combinations, like IP address and HTTP method, or HTTP method, query argument, and cookie. Each unique set of values for the aggregation keys that you specify is a separate aggregation instance, with the value from each key contributing to the aggregation instance definition. For example, assume the rule evaluates web requests with the following IP address and HTTP method values: IP address 10.1.1.1, HTTP method POST IP address 10.1.1.1, HTTP method GET IP address 127.0.0.0, HTTP method POST IP address 10.1.1.1, HTTP method GET The rule would create different aggregation instances according to your aggregation criteria, for example: If the aggregation criteria is just the IP address, then each individual address is an aggregation instance, and WAF counts requests separately for each. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1: count 3 IP address 127.0.0.0: count 1 If the aggregation criteria is HTTP method, then each individual HTTP method is an aggregation instance. The aggregation instances and request counts for our example would be the following: HTTP method POST: count 2 HTTP method GET: count 2 If the aggregation criteria is IP address and HTTP method, then each IP address and each HTTP method would contribute to the combined aggregation instance. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1, HTTP method POST: count 1 IP address 10.1.1.1, HTTP method GET: count 2 IP address 127.0.0.0, HTTP method POST: count 1 For any n-tuple of aggregation keys, each unique combination of values for the keys defines a separate aggregation instance, which WAF counts and rate-limits individually. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts and rate limits requests that match the nested statement. You can use this nested scope-down statement in conjunction with your aggregation key specifications or you can just count and rate limit all requests that match the scope-down statement, without additional aggregation. When you choose to just manage all requests that match a scope-down statement, the aggregation instance is singular for the rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group. For additional information about the options, see Rate limiting web requests using rate-based rules in the WAF Developer Guide. If you only aggregate on the individual IP address or forwarded IP address, you can retrieve the list of IP addresses that WAF is currently rate limiting for a rule through the API call GetRateBasedStatementManagedKeys. This option is not available for other aggregation configurations. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF."]
  and
   Statement:sig
               type nonrec t =
                 {
                 byteMatchStatement: ByteMatchStatement.t option
                   [@ocaml.doc
-                    "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is refered to as a string match statement."];
+                    "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is called a string match statement."];
                 sqliMatchStatement: SqliMatchStatement.t option
                   [@ocaml.doc
-                    "Attackers sometimes insert malicious SQL code into web requests in an effort to extract data from your database. To allow or block web requests that appear to contain malicious SQL code, create one or more SQL injection match conditions. An SQL injection match condition identifies the part of web requests, such as the URI or the query string, that you want WAF to inspect. Later in the process, when you create a web ACL, you specify whether to allow or block requests that appear to contain malicious SQL code."];
+                    "A rule statement that inspects for malicious SQL code. Attackers insert malicious SQL code into web requests to do things like modify your database or extract data from it."];
                 xssMatchStatement: XssMatchStatement.t option
                   [@ocaml.doc
-                    "A rule statement that defines a cross-site scripting (XSS) match search for WAF to apply to web requests. XSS attacks are those where the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers. The XSS match statement provides the location in requests that you want WAF to search and text transformations to use on the search area before WAF searches for character sequences that are likely to be malicious strings."];
+                    "A rule statement that inspects for cross-site scripting (XSS) attacks. In XSS attacks, the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers."];
                 sizeConstraintStatement: SizeConstraintStatement.t option
                   [@ocaml.doc
-                    "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the first 8192 bytes (8 KB). If the request body for your web requests never exceeds 8192 bytes, you can create a size constraint condition and block requests that have a request body greater than 8192 bytes. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."];
+                    "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the number of bytes in the body up to the limit for the web ACL and protected resource type. If you know that the request body for your web requests should never exceed the inspection limit, you can use a size constraint statement to block requests that have a larger request body size. For more information about the inspection limits, see Body and JsonBody settings for the FieldToMatch data type. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."];
                 geoMatchStatement: GeoMatchStatement.t option
                   [@ocaml.doc
-                    "A rule statement used to identify web requests based on country of origin."];
+                    "A rule statement that labels web requests by country and region and that matches against web requests based on country code. A geo match rule labels every request that it inspects regardless of whether it finds a match. To manage requests only by country, you can use this statement by itself and specify the countries that you want to match against in the CountryCodes array. Otherwise, configure your geo match rule with Count action so that it only labels requests. Then, add one or more label match rules to run after the geo match rule and configure them to match against the geographic labels and handle the requests as needed. WAF labels requests using the alpha-2 country and region codes from the International Organization for Standardization (ISO) 3166 standard. WAF determines the codes using either the IP address in the web request origin or, if you specify it, the address in the geo match ForwardedIPConfig. If you use the web request origin, the label formats are awswaf:clientip:geo:region:<ISO country code>-<ISO region code> and awswaf:clientip:geo:country:<ISO country code>. If you use a forwarded IP address, the label formats are awswaf:forwardedip:geo:region:<ISO country code>-<ISO region code> and awswaf:forwardedip:geo:country:<ISO country code>. For additional details, see Geographic match rule statement in the WAF Developer Guide."];
                 ruleGroupReferenceStatement:
                   RuleGroupReferenceStatement.t option
                   [@ocaml.doc
-                    "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You can only use a rule group reference statement at the top level inside a web ACL."];
+                    "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You cannot use a rule group reference statement inside another rule group. You can only reference a rule group as a top-level statement within a rule that you define in a web ACL."];
                 iPSetReferenceStatement: IPSetReferenceStatement.t option
                   [@ocaml.doc
                     "A rule statement used to detect web requests coming from particular IP addresses or address ranges. To use this, create an IPSet that specifies the addresses you want to detect, then use the ARN of that set in this statement. To create an IP set, see CreateIPSet. Each IP set rule statement references an IP set. You create and maintain the set independent of your rules. This allows you to use the single set in multiple rules. When you update the referenced set, WAF automatically updates all rules that reference it."];
@@ -3126,7 +6324,7 @@ module rec
                     "A rule statement used to search web request components for matches with regular expressions. To use this, create a RegexPatternSet that specifies the expressions that you want to detect, then use the ARN of that set in this statement. A web request matches the pattern set rule statement if the request component matches any of the patterns in the set. To create a regex pattern set, see CreateRegexPatternSet. Each regex pattern set rule statement references a regex pattern set. You create and maintain the set independent of your rules. This allows you to use the single set in multiple rules. When you update the referenced set, WAF automatically updates all rules that reference it."];
                 rateBasedStatement: RateBasedStatement.t option
                   [@ocaml.doc
-                    "A rate-based rule tracks the rate of requests for each originating IP address, and triggers the rule action when the rate exceeds a limit that you specify on the number of requests in any 5-minute time span. You can use this to put a temporary block on requests from an IP address that is sending excessive requests. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF. When the rule action triggers, WAF blocks additional requests from the IP address until the request rate falls below the limit. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts requests that match the nested statement. For example, based on recent requests that you have seen from an attacker, you might create a rate-based rule with a nested AND rule statement that contains the following nested statements: An IP match statement with an IP set that specified the address 192.0.2.44. A string match statement that searches in the User-Agent header for the string BadBot. In this rate-based rule, you also define a rate limit. For this example, the rate limit is 1,000. Requests that meet both of the conditions in the statements are counted. If the count exceeds 1,000 requests per five minutes, the rule action triggers. Requests that do not meet both conditions are not counted towards the rate limit and are not affected by this rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group."];
+                    "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate. The rule categorizes requests according to your aggregation criteria, collects them into aggregation instances, and counts and rate limits the requests for each instance. If you change any of these settings in a rule that's currently in use, the change resets the rule's rate limiting counts. This can pause the rule's rate limiting activities for up to a minute. You can specify individual aggregation keys, like IP address or HTTP method. You can also specify aggregation key combinations, like IP address and HTTP method, or HTTP method, query argument, and cookie. Each unique set of values for the aggregation keys that you specify is a separate aggregation instance, with the value from each key contributing to the aggregation instance definition. For example, assume the rule evaluates web requests with the following IP address and HTTP method values: IP address 10.1.1.1, HTTP method POST IP address 10.1.1.1, HTTP method GET IP address 127.0.0.0, HTTP method POST IP address 10.1.1.1, HTTP method GET The rule would create different aggregation instances according to your aggregation criteria, for example: If the aggregation criteria is just the IP address, then each individual address is an aggregation instance, and WAF counts requests separately for each. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1: count 3 IP address 127.0.0.0: count 1 If the aggregation criteria is HTTP method, then each individual HTTP method is an aggregation instance. The aggregation instances and request counts for our example would be the following: HTTP method POST: count 2 HTTP method GET: count 2 If the aggregation criteria is IP address and HTTP method, then each IP address and each HTTP method would contribute to the combined aggregation instance. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1, HTTP method POST: count 1 IP address 10.1.1.1, HTTP method GET: count 2 IP address 127.0.0.0, HTTP method POST: count 1 For any n-tuple of aggregation keys, each unique combination of values for the keys defines a separate aggregation instance, which WAF counts and rate-limits individually. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts and rate limits requests that match the nested statement. You can use this nested scope-down statement in conjunction with your aggregation key specifications or you can just count and rate limit all requests that match the scope-down statement, without additional aggregation. When you choose to just manage all requests that match a scope-down statement, the aggregation instance is singular for the rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group. For additional information about the options, see Rate limiting web requests using rate-based rules in the WAF Developer Guide. If you only aggregate on the individual IP address or forwarded IP address, you can retrieve the list of IP addresses that WAF is currently rate limiting for a rule through the API call GetRateBasedStatementManagedKeys. This option is not available for other aggregation configurations. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF."];
                 andStatement: AndStatement.t option
                   [@ocaml.doc
                     "A logical rule statement used to combine other rule statements with AND logic. You provide more than one Statement within the AndStatement."];
@@ -3138,13 +6336,16 @@ module rec
                     "A logical rule statement used to negate the results of another rule statement. You provide one Statement within the NotStatement."];
                 managedRuleGroupStatement: ManagedRuleGroupStatement.t option
                   [@ocaml.doc
-                    "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. It can only be referenced as a top-level statement within a rule."];
+                    "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. You cannot use a managed rule group inside another rule group. You can only reference a managed rule group as a top-level statement within a rule that you define in a web ACL. You are charged additional fees when you use the WAF Bot Control managed rule group AWSManagedRulesBotControlRuleSet, the WAF Fraud Control account takeover prevention (ATP) managed rule group AWSManagedRulesATPRuleSet, or the WAF Fraud Control account creation fraud prevention (ACFP) managed rule group AWSManagedRulesACFPRuleSet. For more information, see WAF Pricing."];
                 labelMatchStatement: LabelMatchStatement.t option
                   [@ocaml.doc
-                    "A rule statement that defines a string match search against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."];
+                    "A rule statement to match against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."];
                 regexMatchStatement: RegexMatchStatement.t option
                   [@ocaml.doc
-                    "A rule statement used to search web request components for a match against a single regular expression."]}
+                    "A rule statement used to search web request components for a match against a single regular expression."];
+                asnMatchStatement: AsnMatchStatement.t option
+                  [@ocaml.doc
+                    "A rule statement that inspects web traffic based on the Autonomous System Number (ASN) associated with the request's IP address. For additional details, see ASN match rule statement in the WAF Developer Guide."]}
               val make :
                 ?byteMatchStatement:ByteMatchStatement.t ->
                   ?sqliMatchStatement:SqliMatchStatement.t ->
@@ -3166,7 +6367,9 @@ module rec
                                           ?labelMatchStatement:LabelMatchStatement.t
                                             ->
                                             ?regexMatchStatement:RegexMatchStatement.t
-                                              -> unit -> t
+                                              ->
+                                              ?asnMatchStatement:AsnMatchStatement.t
+                                                -> unit -> t
               val to_value : t -> Botodata.value
               val to_query : t -> Client.Query.t
               val of_xml : Xml.t -> t
@@ -3178,22 +6381,22 @@ module rec
       {
       byteMatchStatement: ByteMatchStatement.t option
         [@ocaml.doc
-          "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is refered to as a string match statement."];
+          "A rule statement that defines a string match search for WAF to apply to web requests. The byte match statement provides the bytes to search for, the location in requests that you want WAF to search, and other settings. The bytes to search for are typically a string that corresponds with ASCII characters. In the WAF console and the developer guide, this is called a string match statement."];
       sqliMatchStatement: SqliMatchStatement.t option
         [@ocaml.doc
-          "Attackers sometimes insert malicious SQL code into web requests in an effort to extract data from your database. To allow or block web requests that appear to contain malicious SQL code, create one or more SQL injection match conditions. An SQL injection match condition identifies the part of web requests, such as the URI or the query string, that you want WAF to inspect. Later in the process, when you create a web ACL, you specify whether to allow or block requests that appear to contain malicious SQL code."];
+          "A rule statement that inspects for malicious SQL code. Attackers insert malicious SQL code into web requests to do things like modify your database or extract data from it."];
       xssMatchStatement: XssMatchStatement.t option
         [@ocaml.doc
-          "A rule statement that defines a cross-site scripting (XSS) match search for WAF to apply to web requests. XSS attacks are those where the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers. The XSS match statement provides the location in requests that you want WAF to search and text transformations to use on the search area before WAF searches for character sequences that are likely to be malicious strings."];
+          "A rule statement that inspects for cross-site scripting (XSS) attacks. In XSS attacks, the attacker uses vulnerabilities in a benign website as a vehicle to inject malicious client-site scripts into other legitimate web browsers."];
       sizeConstraintStatement: SizeConstraintStatement.t option
         [@ocaml.doc
-          "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the first 8192 bytes (8 KB). If the request body for your web requests never exceeds 8192 bytes, you can create a size constraint condition and block requests that have a request body greater than 8192 bytes. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."];
+          "A rule statement that compares a number of bytes against the size of a request component, using a comparison operator, such as greater than (>) or less than (<). For example, you can use a size constraint statement to look for query strings that are longer than 100 bytes. If you configure WAF to inspect the request body, WAF inspects only the number of bytes in the body up to the limit for the web ACL and protected resource type. If you know that the request body for your web requests should never exceed the inspection limit, you can use a size constraint statement to block requests that have a larger request body size. For more information about the inspection limits, see Body and JsonBody settings for the FieldToMatch data type. If you choose URI for the value of Part of the request to filter on, the slash (/) in the URI counts as one character. For example, the URI /logo.jpg is nine characters long."];
       geoMatchStatement: GeoMatchStatement.t option
         [@ocaml.doc
-          "A rule statement used to identify web requests based on country of origin."];
+          "A rule statement that labels web requests by country and region and that matches against web requests based on country code. A geo match rule labels every request that it inspects regardless of whether it finds a match. To manage requests only by country, you can use this statement by itself and specify the countries that you want to match against in the CountryCodes array. Otherwise, configure your geo match rule with Count action so that it only labels requests. Then, add one or more label match rules to run after the geo match rule and configure them to match against the geographic labels and handle the requests as needed. WAF labels requests using the alpha-2 country and region codes from the International Organization for Standardization (ISO) 3166 standard. WAF determines the codes using either the IP address in the web request origin or, if you specify it, the address in the geo match ForwardedIPConfig. If you use the web request origin, the label formats are awswaf:clientip:geo:region:<ISO country code>-<ISO region code> and awswaf:clientip:geo:country:<ISO country code>. If you use a forwarded IP address, the label formats are awswaf:forwardedip:geo:region:<ISO country code>-<ISO region code> and awswaf:forwardedip:geo:country:<ISO country code>. For additional details, see Geographic match rule statement in the WAF Developer Guide."];
       ruleGroupReferenceStatement: RuleGroupReferenceStatement.t option
         [@ocaml.doc
-          "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You can only use a rule group reference statement at the top level inside a web ACL."];
+          "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You cannot use a rule group reference statement inside another rule group. You can only reference a rule group as a top-level statement within a rule that you define in a web ACL."];
       iPSetReferenceStatement: IPSetReferenceStatement.t option
         [@ocaml.doc
           "A rule statement used to detect web requests coming from particular IP addresses or address ranges. To use this, create an IPSet that specifies the addresses you want to detect, then use the ARN of that set in this statement. To create an IP set, see CreateIPSet. Each IP set rule statement references an IP set. You create and maintain the set independent of your rules. This allows you to use the single set in multiple rules. When you update the referenced set, WAF automatically updates all rules that reference it."];
@@ -3203,7 +6406,7 @@ module rec
           "A rule statement used to search web request components for matches with regular expressions. To use this, create a RegexPatternSet that specifies the expressions that you want to detect, then use the ARN of that set in this statement. A web request matches the pattern set rule statement if the request component matches any of the patterns in the set. To create a regex pattern set, see CreateRegexPatternSet. Each regex pattern set rule statement references a regex pattern set. You create and maintain the set independent of your rules. This allows you to use the single set in multiple rules. When you update the referenced set, WAF automatically updates all rules that reference it."];
       rateBasedStatement: RateBasedStatement.t option
         [@ocaml.doc
-          "A rate-based rule tracks the rate of requests for each originating IP address, and triggers the rule action when the rate exceeds a limit that you specify on the number of requests in any 5-minute time span. You can use this to put a temporary block on requests from an IP address that is sending excessive requests. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF. When the rule action triggers, WAF blocks additional requests from the IP address until the request rate falls below the limit. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts requests that match the nested statement. For example, based on recent requests that you have seen from an attacker, you might create a rate-based rule with a nested AND rule statement that contains the following nested statements: An IP match statement with an IP set that specified the address 192.0.2.44. A string match statement that searches in the User-Agent header for the string BadBot. In this rate-based rule, you also define a rate limit. For this example, the rate limit is 1,000. Requests that meet both of the conditions in the statements are counted. If the count exceeds 1,000 requests per five minutes, the rule action triggers. Requests that do not meet both conditions are not counted towards the rate limit and are not affected by this rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group."];
+          "A rate-based rule counts incoming requests and rate limits requests when they are coming at too fast a rate. The rule categorizes requests according to your aggregation criteria, collects them into aggregation instances, and counts and rate limits the requests for each instance. If you change any of these settings in a rule that's currently in use, the change resets the rule's rate limiting counts. This can pause the rule's rate limiting activities for up to a minute. You can specify individual aggregation keys, like IP address or HTTP method. You can also specify aggregation key combinations, like IP address and HTTP method, or HTTP method, query argument, and cookie. Each unique set of values for the aggregation keys that you specify is a separate aggregation instance, with the value from each key contributing to the aggregation instance definition. For example, assume the rule evaluates web requests with the following IP address and HTTP method values: IP address 10.1.1.1, HTTP method POST IP address 10.1.1.1, HTTP method GET IP address 127.0.0.0, HTTP method POST IP address 10.1.1.1, HTTP method GET The rule would create different aggregation instances according to your aggregation criteria, for example: If the aggregation criteria is just the IP address, then each individual address is an aggregation instance, and WAF counts requests separately for each. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1: count 3 IP address 127.0.0.0: count 1 If the aggregation criteria is HTTP method, then each individual HTTP method is an aggregation instance. The aggregation instances and request counts for our example would be the following: HTTP method POST: count 2 HTTP method GET: count 2 If the aggregation criteria is IP address and HTTP method, then each IP address and each HTTP method would contribute to the combined aggregation instance. The aggregation instances and request counts for our example would be the following: IP address 10.1.1.1, HTTP method POST: count 1 IP address 10.1.1.1, HTTP method GET: count 2 IP address 127.0.0.0, HTTP method POST: count 1 For any n-tuple of aggregation keys, each unique combination of values for the keys defines a separate aggregation instance, which WAF counts and rate-limits individually. You can optionally nest another statement inside the rate-based statement, to narrow the scope of the rule so that it only counts and rate limits requests that match the nested statement. You can use this nested scope-down statement in conjunction with your aggregation key specifications or you can just count and rate limit all requests that match the scope-down statement, without additional aggregation. When you choose to just manage all requests that match a scope-down statement, the aggregation instance is singular for the rule. You cannot nest a RateBasedStatement inside another statement, for example inside a NotStatement or OrStatement. You can define a RateBasedStatement inside a web ACL and inside a rule group. For additional information about the options, see Rate limiting web requests using rate-based rules in the WAF Developer Guide. If you only aggregate on the individual IP address or forwarded IP address, you can retrieve the list of IP addresses that WAF is currently rate limiting for a rule through the API call GetRateBasedStatementManagedKeys. This option is not available for other aggregation configurations. WAF tracks and manages web requests separately for each instance of a rate-based rule that you use. For example, if you provide the same rate-based rule settings in two web ACLs, each of the two rule statements represents a separate instance of the rate-based rule and gets its own tracking and management by WAF. If you define a rate-based rule inside a rule group, and then use that rule group in multiple places, each use creates a separate instance of the rate-based rule that gets its own tracking and management by WAF."];
       andStatement: AndStatement.t option
         [@ocaml.doc
           "A logical rule statement used to combine other rule statements with AND logic. You provide more than one Statement within the AndStatement."];
@@ -3215,13 +6418,16 @@ module rec
           "A logical rule statement used to negate the results of another rule statement. You provide one Statement within the NotStatement."];
       managedRuleGroupStatement: ManagedRuleGroupStatement.t option
         [@ocaml.doc
-          "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. It can only be referenced as a top-level statement within a rule."];
+          "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. You cannot use a managed rule group inside another rule group. You can only reference a managed rule group as a top-level statement within a rule that you define in a web ACL. You are charged additional fees when you use the WAF Bot Control managed rule group AWSManagedRulesBotControlRuleSet, the WAF Fraud Control account takeover prevention (ATP) managed rule group AWSManagedRulesATPRuleSet, or the WAF Fraud Control account creation fraud prevention (ACFP) managed rule group AWSManagedRulesACFPRuleSet. For more information, see WAF Pricing."];
       labelMatchStatement: LabelMatchStatement.t option
         [@ocaml.doc
-          "A rule statement that defines a string match search against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."];
+          "A rule statement to match against labels that have been added to the web request by rules that have already run in the web ACL. The label match statement provides the label or namespace string to search for. The label string can represent a part or all of the fully qualified label name that had been added to the web request. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label. If you do not provide the fully qualified name in your label match string, WAF performs the search for labels that were added in the same context as the label match statement."];
       regexMatchStatement: RegexMatchStatement.t option
         [@ocaml.doc
-          "A rule statement used to search web request components for a match against a single regular expression."]}
+          "A rule statement used to search web request components for a match against a single regular expression."];
+      asnMatchStatement: AsnMatchStatement.t option
+        [@ocaml.doc
+          "A rule statement that inspects web traffic based on the Autonomous System Number (ASN) associated with the request's IP address. For additional details, see ASN match rule statement in the WAF Developer Guide."]}
     let make ?byteMatchStatement =
       fun ?sqliMatchStatement ->
         fun ?xssMatchStatement ->
@@ -3237,24 +6443,26 @@ module rec
                             fun ?managedRuleGroupStatement ->
                               fun ?labelMatchStatement ->
                                 fun ?regexMatchStatement ->
-                                  fun () ->
-                                    {
-                                      byteMatchStatement;
-                                      sqliMatchStatement;
-                                      xssMatchStatement;
-                                      sizeConstraintStatement;
-                                      geoMatchStatement;
-                                      ruleGroupReferenceStatement;
-                                      iPSetReferenceStatement;
-                                      regexPatternSetReferenceStatement;
-                                      rateBasedStatement;
-                                      andStatement;
-                                      orStatement;
-                                      notStatement;
-                                      managedRuleGroupStatement;
-                                      labelMatchStatement;
-                                      regexMatchStatement
-                                    }
+                                  fun ?asnMatchStatement ->
+                                    fun () ->
+                                      {
+                                        byteMatchStatement;
+                                        sqliMatchStatement;
+                                        xssMatchStatement;
+                                        sizeConstraintStatement;
+                                        geoMatchStatement;
+                                        ruleGroupReferenceStatement;
+                                        iPSetReferenceStatement;
+                                        regexPatternSetReferenceStatement;
+                                        rateBasedStatement;
+                                        andStatement;
+                                        orStatement;
+                                        notStatement;
+                                        managedRuleGroupStatement;
+                                        labelMatchStatement;
+                                        regexMatchStatement;
+                                        asnMatchStatement
+                                      }
     let to_value x =
       structure_to_value
         [("ByteMatchStatement",
@@ -3290,9 +6498,14 @@ module rec
         ("LabelMatchStatement",
           (Option.map x.labelMatchStatement ~f:LabelMatchStatement.to_value));
         ("RegexMatchStatement",
-          (Option.map x.regexMatchStatement ~f:RegexMatchStatement.to_value))]
+          (Option.map x.regexMatchStatement ~f:RegexMatchStatement.to_value));
+        ("AsnMatchStatement",
+          (Option.map x.asnMatchStatement ~f:AsnMatchStatement.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let asnMatchStatement =
+        (Option.map ~f:AsnMatchStatement.of_xml)
+          (Xml.child xml_arg0 "AsnMatchStatement") in
       let regexMatchStatement =
         (Option.map ~f:RegexMatchStatement.of_xml)
           (Xml.child xml_arg0 "RegexMatchStatement") in
@@ -3337,47 +6550,49 @@ module rec
       let byteMatchStatement =
         (Option.map ~f:ByteMatchStatement.of_xml)
           (Xml.child xml_arg0 "ByteMatchStatement") in
-      make ?regexMatchStatement ?labelMatchStatement
+      make ?asnMatchStatement ?regexMatchStatement ?labelMatchStatement
         ?managedRuleGroupStatement ?notStatement ?orStatement ?andStatement
         ?rateBasedStatement ?regexPatternSetReferenceStatement
         ?iPSetReferenceStatement ?ruleGroupReferenceStatement
         ?geoMatchStatement ?sizeConstraintStatement ?xssMatchStatement
         ?sqliMatchStatement ?byteMatchStatement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let asnMatchStatement =
+        field_map json__ "AsnMatchStatement" AsnMatchStatement.of_json in
       let regexMatchStatement =
-        field_map json "RegexMatchStatement" RegexMatchStatement.of_json in
+        field_map json__ "RegexMatchStatement" RegexMatchStatement.of_json in
       let labelMatchStatement =
-        field_map json "LabelMatchStatement" LabelMatchStatement.of_json in
+        field_map json__ "LabelMatchStatement" LabelMatchStatement.of_json in
       let managedRuleGroupStatement =
-        field_map json "ManagedRuleGroupStatement"
+        field_map json__ "ManagedRuleGroupStatement"
           ManagedRuleGroupStatement.of_json in
-      let notStatement = field_map json "NotStatement" NotStatement.of_json in
-      let orStatement = field_map json "OrStatement" OrStatement.of_json in
-      let andStatement = field_map json "AndStatement" AndStatement.of_json in
+      let notStatement = field_map json__ "NotStatement" NotStatement.of_json in
+      let orStatement = field_map json__ "OrStatement" OrStatement.of_json in
+      let andStatement = field_map json__ "AndStatement" AndStatement.of_json in
       let rateBasedStatement =
-        field_map json "RateBasedStatement" RateBasedStatement.of_json in
+        field_map json__ "RateBasedStatement" RateBasedStatement.of_json in
       let regexPatternSetReferenceStatement =
-        field_map json "RegexPatternSetReferenceStatement"
+        field_map json__ "RegexPatternSetReferenceStatement"
           RegexPatternSetReferenceStatement.of_json in
       let iPSetReferenceStatement =
-        field_map json "IPSetReferenceStatement"
+        field_map json__ "IPSetReferenceStatement"
           IPSetReferenceStatement.of_json in
       let ruleGroupReferenceStatement =
-        field_map json "RuleGroupReferenceStatement"
+        field_map json__ "RuleGroupReferenceStatement"
           RuleGroupReferenceStatement.of_json in
       let geoMatchStatement =
-        field_map json "GeoMatchStatement" GeoMatchStatement.of_json in
+        field_map json__ "GeoMatchStatement" GeoMatchStatement.of_json in
       let sizeConstraintStatement =
-        field_map json "SizeConstraintStatement"
+        field_map json__ "SizeConstraintStatement"
           SizeConstraintStatement.of_json in
       let xssMatchStatement =
-        field_map json "XssMatchStatement" XssMatchStatement.of_json in
+        field_map json__ "XssMatchStatement" XssMatchStatement.of_json in
       let sqliMatchStatement =
-        field_map json "SqliMatchStatement" SqliMatchStatement.of_json in
+        field_map json__ "SqliMatchStatement" SqliMatchStatement.of_json in
       let byteMatchStatement =
-        field_map json "ByteMatchStatement" ByteMatchStatement.of_json in
-      make ?regexMatchStatement ?labelMatchStatement
+        field_map json__ "ByteMatchStatement" ByteMatchStatement.of_json in
+      make ?asnMatchStatement ?regexMatchStatement ?labelMatchStatement
         ?managedRuleGroupStatement ?notStatement ?orStatement ?andStatement
         ?rateBasedStatement ?regexPatternSetReferenceStatement
         ?iPSetReferenceStatement ?ruleGroupReferenceStatement
@@ -3385,7 +6600,7 @@ module rec
         ?sqliMatchStatement ?byteMatchStatement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The processing guidance for a Rule, used by WAF to determine whether a web request matches the rule."]
+       "The processing guidance for a Rule, used by WAF to determine whether a web request matches the rule. For example specifications, see the examples section of CreateWebACL."]
  and
   Statements:sig
                type nonrec t = Statement.t list
@@ -3400,6 +6615,9 @@ module rec
   struct
     type nonrec t = Statement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Statement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3420,6 +6638,162 @@ module rec
       list_of_json ~kind:"Statements" ~of_json:Statement.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "AttributeValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttributeValue" j
+    let to_json = simple_to_json to_value
+  end
+module AttributeValues =
+  struct
+    type nonrec t = AttributeValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttributeValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttributeValues" ~of_json:AttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AttributeName =
+  struct
+    type nonrec t = string
+    let context_ = "AttributeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttributeName" j
+    let to_json = simple_to_json to_value
+  end
+module ApplicationAttribute =
+  struct
+    type nonrec t =
+      {
+      name: AttributeName.t option
+        [@ocaml.doc "Specifies the attribute name."];
+      values: AttributeValues.t option
+        [@ocaml.doc "Specifies the attribute value."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:AttributeName.to_value));
+        ("Values", (Option.map x.values ~f:AttributeValues.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:AttributeValues.of_xml) (Xml.child xml_arg0 "Values") in
+      let name =
+        (Option.map ~f:AttributeName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "Values" AttributeValues.of_json in
+      let name = field_map json__ "Name" AttributeName.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Application details defined during the web ACL creation process. Application attributes help WAF give recommendations for protection packs."]
+module ApplicationAttributes =
+  struct
+    type nonrec t = ApplicationAttribute.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ApplicationAttribute.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ApplicationAttribute.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ApplicationAttributes"
+        ~of_json:ApplicationAttribute.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApplicationConfig =
+  struct
+    type nonrec t =
+      {
+      attributes: ApplicationAttributes.t option
+        [@ocaml.doc
+          "Contains the attribute name and a list of values for that attribute."]}
+    let make ?attributes = fun () -> { attributes }
+    let to_value x =
+      structure_to_value
+        [("Attributes",
+           (Option.map x.attributes ~f:ApplicationAttributes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        (Option.map ~f:ApplicationAttributes.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      make ?attributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" ApplicationAttributes.of_json in
+      make ?attributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of ApplicationAttributes that contains information about the application."]
 module AssociateWebACLRequest =
   struct
     type nonrec t =
@@ -3429,7 +6803,7 @@ module AssociateWebACLRequest =
           "The Amazon Resource Name (ARN) of the web ACL that you want to associate with the resource."];
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to associate with the web ACL. The ARN must be in one of the following formats: For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Amazon API Gateway REST API: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name For an AppSync GraphQL API: arn:aws:appsync:region:account-id:apis/GraphQLApiId"]}
+          "The Amazon Resource Name (ARN) of the resource to associate with the web ACL. The ARN must be in one of the following formats: For an Application Load Balancer: arn:partition:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Amazon API Gateway REST API: arn:partition:apigateway:region::/restapis/api-id/stages/stage-name For an AppSync GraphQL API: arn:partition:appsync:region:account-id:apis/GraphQLApiId For an Amazon Cognito user pool: arn:partition:cognito-idp:region:account-id:userpool/user-pool-id For an App Runner service: arn:partition:apprunner:region:account-id:service/apprunner-service-name/apprunner-service-id For an Amazon Web Services Verified Access instance: arn:partition:ec2:region:account-id:verified-access-instance/instance-id For an Amplify application: arn:partition:amplify:region:account-id:apps/app-id"]}
     let context_ = "AssociateWebACLRequest"
     let make ~webACLArn =
       fun ~resourceArn -> fun () -> { webACLArn; resourceArn }
@@ -3447,13 +6821,14 @@ module AssociateWebACLRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLArn") in
       make ~resourceArn ~webACLArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      let webACLArn = field_map_exn json "WebACLArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      let webACLArn = field_map_exn json__ "WebACLArn" ResourceArn.of_json in
       make ~resourceArn ~webACLArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a web ACL with a regional application resource, to protect the resource. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. For Amazon CloudFront, don't use this call. Instead, use your CloudFront distribution configuration. To associate a web ACL, in the CloudFront call UpdateDistribution, set the web ACL ID to the Amazon Resource Name (ARN) of the web ACL. For information, see UpdateDistribution."]
+       "Associates a web ACL with a resource, to protect the resource. Use this for all resource types except for Amazon CloudFront distributions. For Amazon CloudFront, call UpdateDistribution for the distribution and provide the Amazon Resource Name (ARN) of the web ACL in the web ACL ID. For information, see UpdateDistribution in the Amazon CloudFront Developer Guide. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for AssociateWebACL in the WAF Developer Guide. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -3481,12 +6856,12 @@ module WAFUnavailableEntityException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "WAF couldn\226\128\153t retrieve the resource that you requested. Retry your request."]
+       "WAF couldn\226\128\153t retrieve a resource that you specified for this operation. If you've just created a resource that you're using in this operation, you might just need to wait a few minutes. It can take from a few seconds to a number of minutes for changes to propagate. Verify the resource specifications in your request parameters and then retry the operation."]
 module WAFNonexistentItemException =
   struct
     type nonrec t = {
@@ -3501,12 +6876,52 @@ module WAFNonexistentItemException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "WAF couldn\226\128\153t perform the operation because your resource doesn\226\128\153t exist."]
+       "WAF couldn\226\128\153t perform the operation because your resource doesn't exist. If you've just created a resource that you're using in this operation, you might just need to wait a few minutes. It can take from a few seconds to a number of minutes for changes to propagate."]
+module SourceType =
+  struct
+    type nonrec t = string
+    let context_ = "SourceType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceType" j
+    let to_json = simple_to_json to_value
+  end
+module WAFLimitsExceededException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      sourceType: SourceType.t option
+        [@ocaml.doc "Source type for the exception."]}
+    let make ?message = fun ?sourceType -> fun () -> { message; sourceType }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("SourceType", (Option.map x.sourceType ~f:SourceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceType =
+        (Option.map ~f:SourceType.of_xml) (Xml.child xml_arg0 "SourceType") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?sourceType ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceType = field_map json__ "SourceType" SourceType.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?sourceType ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "WAF couldn\226\128\153t perform the operation because you exceeded your resource limit. For example, the maximum number of WebACL objects that you can create for an Amazon Web Services account. For more information, see WAF quotas in the WAF Developer Guide."]
 module ParameterExceptionParameter =
   struct
     type nonrec t = string
@@ -3583,6 +6998,19 @@ module ParameterExceptionField =
       | LOG_DESTINATION 
       | MANAGED_RULE_GROUP_CONFIG 
       | PAYLOAD_TYPE 
+      | HEADER_MATCH_PATTERN 
+      | COOKIE_MATCH_PATTERN 
+      | MAP_MATCH_SCOPE 
+      | OVERSIZE_HANDLING 
+      | CHALLENGE_CONFIG 
+      | TOKEN_DOMAIN 
+      | ATP_RULE_SET_RESPONSE_INSPECTION 
+      | ASSOCIATED_RESOURCE_TYPE 
+      | SCOPE_DOWN 
+      | CUSTOM_KEYS 
+      | ACP_RULE_SET_RESPONSE_INSPECTION 
+      | DATA_PROTECTION_CONFIG 
+      | LOW_REPUTATION_MODE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -3647,6 +7075,21 @@ module ParameterExceptionField =
       | LOG_DESTINATION -> "LOG_DESTINATION"
       | MANAGED_RULE_GROUP_CONFIG -> "MANAGED_RULE_GROUP_CONFIG"
       | PAYLOAD_TYPE -> "PAYLOAD_TYPE"
+      | HEADER_MATCH_PATTERN -> "HEADER_MATCH_PATTERN"
+      | COOKIE_MATCH_PATTERN -> "COOKIE_MATCH_PATTERN"
+      | MAP_MATCH_SCOPE -> "MAP_MATCH_SCOPE"
+      | OVERSIZE_HANDLING -> "OVERSIZE_HANDLING"
+      | CHALLENGE_CONFIG -> "CHALLENGE_CONFIG"
+      | TOKEN_DOMAIN -> "TOKEN_DOMAIN"
+      | ATP_RULE_SET_RESPONSE_INSPECTION ->
+          "ATP_RULE_SET_RESPONSE_INSPECTION"
+      | ASSOCIATED_RESOURCE_TYPE -> "ASSOCIATED_RESOURCE_TYPE"
+      | SCOPE_DOWN -> "SCOPE_DOWN"
+      | CUSTOM_KEYS -> "CUSTOM_KEYS"
+      | ACP_RULE_SET_RESPONSE_INSPECTION ->
+          "ACP_RULE_SET_RESPONSE_INSPECTION"
+      | DATA_PROTECTION_CONFIG -> "DATA_PROTECTION_CONFIG"
+      | LOW_REPUTATION_MODE -> "LOW_REPUTATION_MODE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -3710,6 +7153,21 @@ module ParameterExceptionField =
       | "LOG_DESTINATION" -> LOG_DESTINATION
       | "MANAGED_RULE_GROUP_CONFIG" -> MANAGED_RULE_GROUP_CONFIG
       | "PAYLOAD_TYPE" -> PAYLOAD_TYPE
+      | "HEADER_MATCH_PATTERN" -> HEADER_MATCH_PATTERN
+      | "COOKIE_MATCH_PATTERN" -> COOKIE_MATCH_PATTERN
+      | "MAP_MATCH_SCOPE" -> MAP_MATCH_SCOPE
+      | "OVERSIZE_HANDLING" -> OVERSIZE_HANDLING
+      | "CHALLENGE_CONFIG" -> CHALLENGE_CONFIG
+      | "TOKEN_DOMAIN" -> TOKEN_DOMAIN
+      | "ATP_RULE_SET_RESPONSE_INSPECTION" ->
+          ATP_RULE_SET_RESPONSE_INSPECTION
+      | "ASSOCIATED_RESOURCE_TYPE" -> ASSOCIATED_RESOURCE_TYPE
+      | "SCOPE_DOWN" -> SCOPE_DOWN
+      | "CUSTOM_KEYS" -> CUSTOM_KEYS
+      | "ACP_RULE_SET_RESPONSE_INSPECTION" ->
+          ACP_RULE_SET_RESPONSE_INSPECTION
+      | "DATA_PROTECTION_CONFIG" -> DATA_PROTECTION_CONFIG
+      | "LOW_REPUTATION_MODE" -> LOW_REPUTATION_MODE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -3770,12 +7228,12 @@ module WAFInvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?reason ?parameter ?field ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" ErrorReason.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" ErrorReason.of_json in
       let parameter =
-        field_map json "Parameter" ParameterExceptionParameter.of_json in
-      let field = field_map json "Field" ParameterExceptionField.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+        field_map json__ "Parameter" ParameterExceptionParameter.of_json in
+      let field = field_map json__ "Field" ParameterExceptionField.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?reason ?parameter ?field ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3794,8 +7252,8 @@ module WAFInvalidOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation isn't valid."]
@@ -3813,25 +7271,169 @@ module WAFInternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Your request is valid, but WAF couldn\226\128\153t perform the operation because of a system problem. Retry your request."]
+module RequiredPricingPlanName =
+  struct
+    type nonrec t = string
+    let context_ = "RequiredPricingPlanName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RequiredPricingPlanName" j
+    let to_json = simple_to_json to_value
+  end
+module PricingPlanFeatureName =
+  struct
+    type nonrec t = string
+    let context_ = "PricingPlanFeatureName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PricingPlanFeatureName" j
+    let to_json = simple_to_json to_value
+  end
+module DisallowedFeature =
+  struct
+    type nonrec t =
+      {
+      feature: PricingPlanFeatureName.t option
+        [@ocaml.doc "The name of the disallowed WAF feature."];
+      requiredPricingPlan: RequiredPricingPlanName.t option
+        [@ocaml.doc
+          "The name of the CloudFront pricing plan required to use the WAF feature."]}
+    let make ?feature =
+      fun ?requiredPricingPlan -> fun () -> { feature; requiredPricingPlan }
+    let to_value x =
+      structure_to_value
+        [("Feature",
+           (Option.map x.feature ~f:PricingPlanFeatureName.to_value));
+        ("RequiredPricingPlan",
+          (Option.map x.requiredPricingPlan
+             ~f:RequiredPricingPlanName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requiredPricingPlan =
+        (Option.map ~f:RequiredPricingPlanName.of_xml)
+          (Xml.child xml_arg0 "RequiredPricingPlan") in
+      let feature =
+        (Option.map ~f:PricingPlanFeatureName.of_xml)
+          (Xml.child xml_arg0 "Feature") in
+      make ?requiredPricingPlan ?feature ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requiredPricingPlan =
+        field_map json__ "RequiredPricingPlan"
+          RequiredPricingPlanName.of_json in
+      let feature = field_map json__ "Feature" PricingPlanFeatureName.of_json in
+      make ?requiredPricingPlan ?feature ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A WAF feature that is not supported by the CloudFront pricing plan associated with the web ACL."]
+module DisallowedFeatures =
+  struct
+    type nonrec t = DisallowedFeature.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DisallowedFeature.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DisallowedFeature.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DisallowedFeatures"
+        ~of_json:DisallowedFeature.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WAFFeatureNotIncludedInPricingPlanException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      disallowedFeatures: DisallowedFeatures.t option
+        [@ocaml.doc "The names of the disallowed WAF features."]}
+    let make ?message =
+      fun ?disallowedFeatures -> fun () -> { message; disallowedFeatures }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("DisallowedFeatures",
+          (Option.map x.disallowedFeatures ~f:DisallowedFeatures.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let disallowedFeatures =
+        (Option.map ~f:DisallowedFeatures.of_xml)
+          (Xml.child xml_arg0 "DisallowedFeatures") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?disallowedFeatures ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let disallowedFeatures =
+        field_map json__ "DisallowedFeatures" DisallowedFeatures.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?disallowedFeatures ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because the specified WAF feature isn't supported by the CloudFront pricing plan associated with the web ACL."]
 module AssociateWebACLResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      [
+        `WAFFeatureNotIncludedInPricingPlanException of
+          WAFFeatureNotIncludedInPricingPlanException.t 
+      | `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFLimitsExceededException of WAFLimitsExceededException.t 
       | `WAFNonexistentItemException of WAFNonexistentItemException.t 
       | `WAFUnavailableEntityException of WAFUnavailableEntityException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_json json)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_json json)
       | "WAFInvalidOperationException" ->
@@ -3840,6 +7442,9 @@ module AssociateWebACLResponse =
       | "WAFInvalidParameterException" ->
           `WAFInvalidParameterException
             (WAFInvalidParameterException.of_json json)
+      | "WAFLimitsExceededException" ->
+          `WAFLimitsExceededException
+            (WAFLimitsExceededException.of_json json)
       | "WAFNonexistentItemException" ->
           `WAFNonexistentItemException
             (WAFNonexistentItemException.of_json json)
@@ -3851,6 +7456,9 @@ module AssociateWebACLResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_xml xml)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
       | "WAFInvalidOperationException" ->
@@ -3859,6 +7467,8 @@ module AssociateWebACLResponse =
       | "WAFInvalidParameterException" ->
           `WAFInvalidParameterException
             (WAFInvalidParameterException.of_xml xml)
+      | "WAFLimitsExceededException" ->
+          `WAFLimitsExceededException (WAFLimitsExceededException.of_xml xml)
       | "WAFNonexistentItemException" ->
           `WAFNonexistentItemException
             (WAFNonexistentItemException.of_xml xml)
@@ -3869,6 +7479,12 @@ module AssociateWebACLResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `WAFFeatureNotIncludedInPricingPlanException e ->
+          `Assoc
+            [("error",
+               (`String "WAFFeatureNotIncludedInPricingPlanException"));
+            ("details",
+              (WAFFeatureNotIncludedInPricingPlanException.to_json e))]
       | `WAFInternalErrorException e ->
           `Assoc
             [("error", (`String "WAFInternalErrorException"));
@@ -3881,6 +7497,10 @@ module AssociateWebACLResponse =
           `Assoc
             [("error", (`String "WAFInvalidParameterException"));
             ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFLimitsExceededException e ->
+          `Assoc
+            [("error", (`String "WAFLimitsExceededException"));
+            ("details", (WAFLimitsExceededException.to_json e))]
       | `WAFNonexistentItemException e ->
           `Assoc
             [("error", (`String "WAFNonexistentItemException"));
@@ -3902,114 +7522,283 @@ module AssociateWebACLResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a web ACL with a regional application resource, to protect the resource. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. For Amazon CloudFront, don't use this call. Instead, use your CloudFront distribution configuration. To associate a web ACL, in the CloudFront call UpdateDistribution, set the web ACL ID to the Amazon Resource Name (ARN) of the web ACL. For information, see UpdateDistribution."]
-module ResponseStatusCode =
+       "Associates a web ACL with a resource, to protect the resource. Use this for all resource types except for Amazon CloudFront distributions. For Amazon CloudFront, call UpdateDistribution for the distribution and provide the Amazon Resource Name (ARN) of the web ACL in the web ACL ID. For information, see UpdateDistribution in the Amazon CloudFront Developer Guide. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for AssociateWebACL in the WAF Developer Guide. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
+module AssociatedResourceType =
   struct
-    type nonrec t = int
+    type nonrec t =
+      | CLOUDFRONT 
+      | API_GATEWAY 
+      | COGNITO_USER_POOL 
+      | APP_RUNNER_SERVICE 
+      | VERIFIED_ACCESS_INSTANCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CLOUDFRONT -> "CLOUDFRONT"
+      | API_GATEWAY -> "API_GATEWAY"
+      | COGNITO_USER_POOL -> "COGNITO_USER_POOL"
+      | APP_RUNNER_SERVICE -> "APP_RUNNER_SERVICE"
+      | VERIFIED_ACCESS_INSTANCE -> "VERIFIED_ACCESS_INSTANCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CLOUDFRONT" -> CLOUDFRONT
+      | "API_GATEWAY" -> API_GATEWAY
+      | "COGNITO_USER_POOL" -> COGNITO_USER_POOL
+      | "APP_RUNNER_SERVICE" -> APP_RUNNER_SERVICE
+      | "VERIFIED_ACCESS_INSTANCE" -> VERIFIED_ACCESS_INSTANCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AssociatedResourceType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AssociatedResourceType" j)
+    let to_json = simple_to_json to_value
+  end
+module SizeInspectionLimit =
+  struct
+    type nonrec t =
+      | KB_16 
+      | KB_32 
+      | KB_48 
+      | KB_64 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | KB_16 -> "KB_16"
+      | KB_32 -> "KB_32"
+      | KB_48 -> "KB_48"
+      | KB_64 -> "KB_64"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "KB_16" -> KB_16
+      | "KB_32" -> KB_32
+      | "KB_48" -> KB_48
+      | "KB_64" -> KB_64
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SizeInspectionLimit" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SizeInspectionLimit" j)
+    let to_json = simple_to_json to_value
+  end
+module RequestBodyAssociatedResourceTypeConfig =
+  struct
+    type nonrec t =
+      {
+      defaultSizeInspectionLimit: SizeInspectionLimit.t
+        [@ocaml.doc
+          "Specifies the maximum size of the web request body component that an associated CloudFront, API Gateway, Amazon Cognito, App Runner, or Verified Access resource should send to WAF for inspection. This applies to statements in the web ACL that inspect the body or JSON body. Default: 16 KB (16,384 bytes)"]}
+    let context_ = "RequestBodyAssociatedResourceTypeConfig"
+    let make ~defaultSizeInspectionLimit =
+      fun () -> { defaultSizeInspectionLimit }
+    let to_value x =
+      structure_to_value
+        [("DefaultSizeInspectionLimit",
+           (Some (SizeInspectionLimit.to_value x.defaultSizeInspectionLimit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let defaultSizeInspectionLimit =
+        SizeInspectionLimit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "DefaultSizeInspectionLimit") in
+      make ~defaultSizeInspectionLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let defaultSizeInspectionLimit =
+        field_map_exn json__ "DefaultSizeInspectionLimit"
+          SizeInspectionLimit.of_json in
+      make ~defaultSizeInspectionLimit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Customizes the maximum size of the request body that your protected CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access resources forward to WAF for inspection. The default size is 16 KB (16,384 bytes). You can change the setting for any of the available resource types. You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. Example JSON: \\{ \"API_GATEWAY\": \"KB_48\", \"APP_RUNNER_SERVICE\": \"KB_32\" \\} For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes). This is used in the AssociationConfig of the web ACL."]
+module RequestBody =
+  struct
+    type nonrec t =
+      (AssociatedResourceType.t * RequestBodyAssociatedResourceTypeConfig.t)
+        list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types AssociatedResourceType RequestBodyAssociatedResourceTypeConfig"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (AssociatedResourceType.to_value x) |>
+                    (fun x ->
+                       (RequestBodyAssociatedResourceTypeConfig.to_value y)
+                         |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:AssociatedResourceType.of_string
+        ~of_json:RequestBodyAssociatedResourceTypeConfig.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AssociationConfig =
+  struct
+    type nonrec t =
+      {
+      requestBody: RequestBody.t option
+        [@ocaml.doc
+          "Customizes the maximum size of the request body that your protected CloudFront, API Gateway, Amazon Cognito, App Runner, and Verified Access resources forward to WAF for inspection. The default size is 16 KB (16,384 bytes). You can change the setting for any of the available resource types. You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. Example JSON: \\{ \"API_GATEWAY\": \"KB_48\", \"APP_RUNNER_SERVICE\": \"KB_32\" \\} For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes)."]}
+    let make ?requestBody = fun () -> { requestBody }
+    let to_value x =
+      structure_to_value
+        [("RequestBody", (Option.map x.requestBody ~f:RequestBody.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestBody =
+        (Option.map ~f:RequestBody.of_xml) (Xml.child xml_arg0 "RequestBody") in
+      make ?requestBody ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestBody = field_map json__ "RequestBody" RequestBody.of_json in
+      make ?requestBody ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies custom configurations for the associations between the web ACL and protected resources. Use this to customize the maximum size of the request body that your protected resources forward to WAF for inspection. You can customize this setting for CloudFront, API Gateway, Amazon Cognito, App Runner, or Verified Access resources. The default setting is 16 KB (16,384 bytes). You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes)."]
+module RequestCount =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module PercentageValue =
+  struct
+    type nonrec t = float
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int_max i ~max:599) >>=
-             (fun () -> check_int_min i ~min:200));
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:0.));
         i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string = Float.of_string
+    let to_value x = `Double x
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
+    let to_header x = Stdlib.Float.to_string x
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ResponseStatusCode" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
-module CustomResponse =
+module FilterString =
   struct
-    type nonrec t =
-      {
-      responseCode: ResponseStatusCode.t
-        [@ocaml.doc
-          "The HTTP status code to return to the client. For a list of status codes that you can use in your custom reqponses, see Supported status codes for custom response in the WAF Developer Guide."];
-      customResponseBodyKey: EntityName.t option
-        [@ocaml.doc
-          "References the response body that you want WAF to return to the web request client. You can define a custom response for a rule action or a default web ACL action that is set to block. To do this, you first define the response body key and value in the CustomResponseBodies setting for the WebACL or RuleGroup where you want to use it. Then, in the rule action or web ACL default action BlockAction setting, you reference the response body using this key."];
-      responseHeaders: CustomHTTPHeaders.t option
-        [@ocaml.doc
-          "The HTTP headers to use in the response. Duplicate header names are not allowed. For information about the limits on count and size for custom request and response settings, see WAF quotas in the WAF Developer Guide."]}
-    let context_ = "CustomResponse"
-    let make ?customResponseBodyKey =
-      fun ?responseHeaders ->
-        fun ~responseCode ->
-          fun () -> { customResponseBodyKey; responseHeaders; responseCode }
-    let to_value x =
-      structure_to_value
-        [("ResponseCode",
-           (Some (ResponseStatusCode.to_value x.responseCode)));
-        ("CustomResponseBodyKey",
-          (Option.map x.customResponseBodyKey ~f:EntityName.to_value));
-        ("ResponseHeaders",
-          (Option.map x.responseHeaders ~f:CustomHTTPHeaders.to_value))]
+    type nonrec t = string
+    let context_ = "FilterString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let responseHeaders =
-        (Option.map ~f:CustomHTTPHeaders.of_xml)
-          (Xml.child xml_arg0 "ResponseHeaders") in
-      let customResponseBodyKey =
-        (Option.map ~f:EntityName.of_xml)
-          (Xml.child xml_arg0 "CustomResponseBodyKey") in
-      let responseCode =
-        ResponseStatusCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResponseCode") in
-      make ?responseHeaders ?customResponseBodyKey ~responseCode ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let responseHeaders =
-        field_map json "ResponseHeaders" CustomHTTPHeaders.of_json in
-      let customResponseBodyKey =
-        field_map json "CustomResponseBodyKey" EntityName.of_json in
-      let responseCode =
-        field_map_exn json "ResponseCode" ResponseStatusCode.of_json in
-      make ?responseHeaders ?customResponseBodyKey ~responseCode ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A custom response to send to the client. You can define a custom response for rule actions and default web ACL actions that are set to BlockAction. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]
-module BlockAction =
-  struct
-    type nonrec t =
-      {
-      customResponse: CustomResponse.t option
-        [@ocaml.doc
-          "Defines a custom response for the web request. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
-    let make ?customResponse = fun () -> { customResponse }
-    let to_value x =
-      structure_to_value
-        [("CustomResponse",
-           (Option.map x.customResponse ~f:CustomResponse.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let customResponse =
-        (Option.map ~f:CustomResponse.of_xml)
-          (Xml.child xml_arg0 "CustomResponse") in
-      make ?customResponse ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customResponse =
-        field_map json "CustomResponse" CustomResponse.of_json in
-      make ?customResponse ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Specifies that WAF should block the request and optionally defines additional custom handling for the response to the web request. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction."]
-module Boolean =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FilterString" j
     let to_json = simple_to_json to_value
+  end
+module BotStatistics =
+  struct
+    type nonrec t =
+      {
+      botName: FilterString.t option
+        [@ocaml.doc "The name of the bot. For example, gptbot or googlebot."];
+      requestCount: RequestCount.t option
+        [@ocaml.doc
+          "The number of requests from this bot to the associated path within the specified time window."];
+      percentage: PercentageValue.t option
+        [@ocaml.doc
+          "The percentage of total requests to the associated path that came from this bot."]}
+    let make ?botName =
+      fun ?requestCount ->
+        fun ?percentage -> fun () -> { botName; requestCount; percentage }
+    let to_value x =
+      structure_to_value
+        [("BotName", (Option.map x.botName ~f:FilterString.to_value));
+        ("RequestCount",
+          (Option.map x.requestCount ~f:RequestCount.to_value));
+        ("Percentage", (Option.map x.percentage ~f:PercentageValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let percentage =
+        (Option.map ~f:PercentageValue.of_xml)
+          (Xml.child xml_arg0 "Percentage") in
+      let requestCount =
+        (Option.map ~f:RequestCount.of_xml)
+          (Xml.child xml_arg0 "RequestCount") in
+      let botName =
+        (Option.map ~f:FilterString.of_xml) (Xml.child xml_arg0 "BotName") in
+      make ?percentage ?requestCount ?botName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let percentage = field_map json__ "Percentage" PercentageValue.of_json in
+      let requestCount = field_map json__ "RequestCount" RequestCount.of_json in
+      let botName = field_map json__ "BotName" FilterString.of_json in
+      make ?percentage ?requestCount ?botName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Statistics about a specific bot's traffic to a path, including the bot name, request count, and percentage of traffic."]
+module BotStatisticsList =
+  struct
+    type nonrec t = BotStatistics.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BotStatistics.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BotStatistics.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BotStatisticsList" ~of_json:BotStatistics.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module CapacityUnit =
   struct
@@ -4025,33 +7814,6 @@ module CapacityUnit =
     let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
-module CaptchaAction =
-  struct
-    type nonrec t =
-      {
-      customRequestHandling: CustomRequestHandling.t option
-        [@ocaml.doc
-          "Defines custom handling for the web request. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
-    let make ?customRequestHandling = fun () -> { customRequestHandling }
-    let to_value x =
-      structure_to_value
-        [("CustomRequestHandling",
-           (Option.map x.customRequestHandling
-              ~f:CustomRequestHandling.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let customRequestHandling =
-        (Option.map ~f:CustomRequestHandling.of_xml)
-          (Xml.child xml_arg0 "CustomRequestHandling") in
-      make ?customRequestHandling ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customRequestHandling =
-        field_map json "CustomRequestHandling" CustomRequestHandling.of_json in
-      make ?customRequestHandling ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Specifies that WAF should run a CAPTCHA check against the request: If the request includes a valid, unexpired CAPTCHA token, WAF allows the web request inspection to proceed to the next rule, similar to a CountAction. If the request doesn't include a valid, unexpired CAPTCHA token, WAF discontinues the web ACL evaluation of the request and blocks it from going to its intended destination. WAF generates a response that it sends back to the client, which includes the following: The header x-amzn-waf-action with a value of captcha. The HTTP status code 405 Method Not Allowed. If the request contains an Accept header with a value of text/html, the response includes a CAPTCHA challenge. You can configure the expiration time in the CaptchaConfig ImmunityTimeProperty setting at the rule and web ACL level. The rule setting overrides the web ACL setting. This action option is available for rules. It isn't available for web ACL default actions. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction."]
 module TimeWindowSecond =
   struct
     type nonrec t = Int64.t
@@ -4076,7 +7838,7 @@ module ImmunityTimeProperty =
       {
       immunityTime: TimeWindowSecond.t
         [@ocaml.doc
-          "The amount of time, in seconds, that a CAPTCHA token is valid. The default setting is 300."]}
+          "The amount of time, in seconds, that a CAPTCHA or challenge timestamp is considered valid by WAF. The default setting is 300. For the Challenge action, the minimum setting is 300."]}
     let context_ = "ImmunityTimeProperty"
     let make ~immunityTime = fun () -> { immunityTime }
     let to_value x =
@@ -4089,20 +7851,20 @@ module ImmunityTimeProperty =
           (Xml.child_exn ~context:context_ xml_arg0 "ImmunityTime") in
       make ~immunityTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let immunityTime =
-        field_map_exn json "ImmunityTime" TimeWindowSecond.of_json in
+        field_map_exn json__ "ImmunityTime" TimeWindowSecond.of_json in
       make ~immunityTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Determines how long a CAPTCHA token remains valid after the client successfully solves a CAPTCHA puzzle."]
+       "Used for CAPTCHA and challenge token settings. Determines how long a CAPTCHA or challenge timestamp remains valid after WAF updates it for a successful CAPTCHA or challenge response."]
 module CaptchaConfig =
   struct
     type nonrec t =
       {
       immunityTimeProperty: ImmunityTimeProperty.t option
         [@ocaml.doc
-          "Determines how long a CAPTCHA token remains valid after the client successfully solves a CAPTCHA puzzle."]}
+          "Determines how long a CAPTCHA timestamp in the token remains valid after the client successfully solves a CAPTCHA puzzle."]}
     let make ?immunityTimeProperty = fun () -> { immunityTimeProperty }
     let to_value x =
       structure_to_value
@@ -4116,9 +7878,9 @@ module CaptchaConfig =
           (Xml.child xml_arg0 "ImmunityTimeProperty") in
       make ?immunityTimeProperty ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let immunityTimeProperty =
-        field_map json "ImmunityTimeProperty" ImmunityTimeProperty.of_json in
+        field_map json__ "ImmunityTimeProperty" ImmunityTimeProperty.of_json in
       make ?immunityTimeProperty ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4155,17 +7917,23 @@ module FailureReason =
     type nonrec t =
       | TOKEN_MISSING 
       | TOKEN_EXPIRED 
+      | TOKEN_INVALID 
+      | TOKEN_DOMAIN_MISMATCH 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | TOKEN_MISSING -> "TOKEN_MISSING"
       | TOKEN_EXPIRED -> "TOKEN_EXPIRED"
+      | TOKEN_INVALID -> "TOKEN_INVALID"
+      | TOKEN_DOMAIN_MISMATCH -> "TOKEN_DOMAIN_MISMATCH"
       | Non_static_id s -> s
     let of_string =
       function
       | "TOKEN_MISSING" -> TOKEN_MISSING
       | "TOKEN_EXPIRED" -> TOKEN_EXPIRED
+      | "TOKEN_INVALID" -> TOKEN_INVALID
+      | "TOKEN_DOMAIN_MISMATCH" -> TOKEN_DOMAIN_MISMATCH
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -4184,7 +7952,7 @@ module CaptchaResponse =
           "The HTTP response code indicating the status of the CAPTCHA token in the web request. If the token is missing, invalid, or expired, this code is 405 Method Not Allowed."];
       solveTimestamp: SolveTimestamp.t option
         [@ocaml.doc
-          "The time that the CAPTCHA puzzle was solved for the supplied token."];
+          "The time that the CAPTCHA was last solved for the supplied token."];
       failureReason: FailureReason.t option
         [@ocaml.doc
           "The reason for failure, populated when the evaluation of the token fails."]}
@@ -4213,16 +7981,91 @@ module CaptchaResponse =
           (Xml.child xml_arg0 "ResponseCode") in
       make ?failureReason ?solveTimestamp ?responseCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
       let solveTimestamp =
-        field_map json "SolveTimestamp" SolveTimestamp.of_json in
-      let responseCode = field_map json "ResponseCode" ResponseCode.of_json in
+        field_map json__ "SolveTimestamp" SolveTimestamp.of_json in
+      let responseCode = field_map json__ "ResponseCode" ResponseCode.of_json in
       make ?failureReason ?solveTimestamp ?responseCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result from the inspection of the web request for a valid CAPTCHA token."]
+module ChallengeConfig =
+  struct
+    type nonrec t =
+      {
+      immunityTimeProperty: ImmunityTimeProperty.t option
+        [@ocaml.doc
+          "Determines how long a challenge timestamp in the token remains valid after the client successfully responds to a challenge."]}
+    let make ?immunityTimeProperty = fun () -> { immunityTimeProperty }
+    let to_value x =
+      structure_to_value
+        [("ImmunityTimeProperty",
+           (Option.map x.immunityTimeProperty
+              ~f:ImmunityTimeProperty.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let immunityTimeProperty =
+        (Option.map ~f:ImmunityTimeProperty.of_xml)
+          (Xml.child xml_arg0 "ImmunityTimeProperty") in
+      make ?immunityTimeProperty ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let immunityTimeProperty =
+        field_map json__ "ImmunityTimeProperty" ImmunityTimeProperty.of_json in
+      make ?immunityTimeProperty ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies how WAF should handle Challenge evaluations. This is available at the web ACL level and in each rule."]
+module ChallengeResponse =
+  struct
+    type nonrec t =
+      {
+      responseCode: ResponseCode.t option
+        [@ocaml.doc
+          "The HTTP response code indicating the status of the challenge token in the web request. If the token is missing, invalid, or expired, this code is 202 Request Accepted."];
+      solveTimestamp: SolveTimestamp.t option
+        [@ocaml.doc
+          "The time that the challenge was last solved for the supplied token."];
+      failureReason: FailureReason.t option
+        [@ocaml.doc
+          "The reason for failure, populated when the evaluation of the token fails."]}
+    let make ?responseCode =
+      fun ?solveTimestamp ->
+        fun ?failureReason ->
+          fun () -> { responseCode; solveTimestamp; failureReason }
+    let to_value x =
+      structure_to_value
+        [("ResponseCode",
+           (Option.map x.responseCode ~f:ResponseCode.to_value));
+        ("SolveTimestamp",
+          (Option.map x.solveTimestamp ~f:SolveTimestamp.to_value));
+        ("FailureReason",
+          (Option.map x.failureReason ~f:FailureReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:FailureReason.of_xml)
+          (Xml.child xml_arg0 "FailureReason") in
+      let solveTimestamp =
+        (Option.map ~f:SolveTimestamp.of_xml)
+          (Xml.child xml_arg0 "SolveTimestamp") in
+      let responseCode =
+        (Option.map ~f:ResponseCode.of_xml)
+          (Xml.child xml_arg0 "ResponseCode") in
+      make ?failureReason ?solveTimestamp ?responseCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let solveTimestamp =
+        field_map json__ "SolveTimestamp" SolveTimestamp.of_json in
+      let responseCode = field_map json__ "ResponseCode" ResponseCode.of_json in
+      make ?failureReason ?solveTimestamp ?responseCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The result from the inspection of the web request for a valid challenge token."]
 module Scope =
   struct
     type nonrec t =
@@ -4274,13 +8117,13 @@ module VisibilityConfig =
       {
       sampledRequestsEnabled: Boolean.t
         [@ocaml.doc
-          "A boolean indicating whether WAF should store a sampling of the web requests that match the rules. You can view the sampled requests through the WAF console."];
+          "Indicates whether WAF should store a sampling of the web requests that match the rules. You can view the sampled requests through the WAF console. If you configure data protection for the web ACL, the protection applies to the web ACL's sampled web request data. Request sampling doesn't provide a field redaction option, and any field redaction that you specify in your logging configuration doesn't affect sampling. You can only exclude fields from request sampling by disabling sampling in the web ACL visibility configuration or by configuring data protection for the web ACL."];
       cloudWatchMetricsEnabled: Boolean.t
         [@ocaml.doc
-          "A boolean indicating whether the associated resource sends metrics to Amazon CloudWatch. For the list of available metrics, see WAF Metrics."];
+          "Indicates whether the associated resource sends metrics to Amazon CloudWatch. For the list of available metrics, see WAF Metrics in the WAF Developer Guide. For web ACLs, the metrics are for web requests that have the web ACL default action applied. WAF applies the default action to web requests that pass the inspection of all rules in the web ACL without being either allowed or blocked. For more information, see The web ACL default action in the WAF Developer Guide."];
       metricName: MetricName.t
         [@ocaml.doc
-          "A name of the Amazon CloudWatch metric. The name can contain only the characters: A-Z, a-z, 0-9, - (hyphen), and _ (underscore). The name can be from one to 128 characters long. It can't contain whitespace or metric names reserved for WAF, for example \"All\" and \"Default_Action.\""]}
+          "A name of the Amazon CloudWatch metric dimension. The name can contain only the characters: A-Z, a-z, 0-9, - (hyphen), and _ (underscore). The name can be from one to 128 characters long. It can't contain whitespace or metric names that are reserved for WAF, for example All and Default_Action."]}
     let context_ = "VisibilityConfig"
     let make ~sampledRequestsEnabled =
       fun ~cloudWatchMetricsEnabled ->
@@ -4308,12 +8151,12 @@ module VisibilityConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "SampledRequestsEnabled") in
       make ~metricName ~cloudWatchMetricsEnabled ~sampledRequestsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricName = field_map_exn json "MetricName" MetricName.of_json in
+    let of_json json__ =
+      let metricName = field_map_exn json__ "MetricName" MetricName.of_json in
       let cloudWatchMetricsEnabled =
-        field_map_exn json "CloudWatchMetricsEnabled" Boolean.of_json in
+        field_map_exn json__ "CloudWatchMetricsEnabled" Boolean.of_json in
       let sampledRequestsEnabled =
-        field_map_exn json "SampledRequestsEnabled" Boolean.of_json in
+        field_map_exn json__ "SampledRequestsEnabled" Boolean.of_json in
       make ~metricName ~cloudWatchMetricsEnabled ~sampledRequestsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4333,77 +8176,6 @@ module RulePriority =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module CountAction =
-  struct
-    type nonrec t =
-      {
-      customRequestHandling: CustomRequestHandling.t option
-        [@ocaml.doc
-          "Defines custom handling for the web request. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide."]}
-    let make ?customRequestHandling = fun () -> { customRequestHandling }
-    let to_value x =
-      structure_to_value
-        [("CustomRequestHandling",
-           (Option.map x.customRequestHandling
-              ~f:CustomRequestHandling.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let customRequestHandling =
-        (Option.map ~f:CustomRequestHandling.of_xml)
-          (Xml.child xml_arg0 "CustomRequestHandling") in
-      make ?customRequestHandling ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customRequestHandling =
-        field_map json "CustomRequestHandling" CustomRequestHandling.of_json in
-      make ?customRequestHandling ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Specifies that WAF should count the request. Optionally defines additional custom handling for the request. This is used in the context of other settings, for example to specify values for RuleAction and web ACL DefaultAction."]
-module RuleAction =
-  struct
-    type nonrec t =
-      {
-      block: BlockAction.t option
-        [@ocaml.doc "Instructs WAF to block the web request."];
-      allow: AllowAction.t option
-        [@ocaml.doc "Instructs WAF to allow the web request."];
-      count: CountAction.t option
-        [@ocaml.doc "Instructs WAF to count the web request and allow it."];
-      captcha: CaptchaAction.t option
-        [@ocaml.doc
-          "Instructs WAF to run a CAPTCHA check against the web request."]}
-    let make ?block =
-      fun ?allow ->
-        fun ?count ->
-          fun ?captcha -> fun () -> { block; allow; count; captcha }
-    let to_value x =
-      structure_to_value
-        [("Block", (Option.map x.block ~f:BlockAction.to_value));
-        ("Allow", (Option.map x.allow ~f:AllowAction.to_value));
-        ("Count", (Option.map x.count ~f:CountAction.to_value));
-        ("Captcha", (Option.map x.captcha ~f:CaptchaAction.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let captcha =
-        (Option.map ~f:CaptchaAction.of_xml) (Xml.child xml_arg0 "Captcha") in
-      let count =
-        (Option.map ~f:CountAction.of_xml) (Xml.child xml_arg0 "Count") in
-      let allow =
-        (Option.map ~f:AllowAction.of_xml) (Xml.child xml_arg0 "Allow") in
-      let block =
-        (Option.map ~f:BlockAction.of_xml) (Xml.child xml_arg0 "Block") in
-      make ?captcha ?count ?allow ?block ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let captcha = field_map json "Captcha" CaptchaAction.of_json in
-      let count = field_map json "Count" CountAction.of_json in
-      let allow = field_map json "Allow" AllowAction.of_json in
-      let block = field_map json "Block" BlockAction.of_json in
-      make ?captcha ?count ?allow ?block ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The action that WAF should take on a web request when it matches a rule's statement. Settings at the web ACL level can override the rule action setting."]
 module NoneAction =
   struct
     type nonrec t = unit
@@ -4423,7 +8195,7 @@ module OverrideAction =
       {
       count: CountAction.t option
         [@ocaml.doc
-          "Override the rule group evaluation result to count only. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead exclude those rules in your rule group reference statement settings."];
+          "Override the rule group evaluation result to count only. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead use the rule action override option, with Count action, in your rule group reference statement settings."];
       none: NoneAction.t option
         [@ocaml.doc
           "Don't override the rule group evaluation result. This is the most common setting."]}
@@ -4440,13 +8212,13 @@ module OverrideAction =
         (Option.map ~f:CountAction.of_xml) (Xml.child xml_arg0 "Count") in
       make ?none ?count ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let none = field_map json "None" NoneAction.of_json in
-      let count = field_map json "Count" CountAction.of_json in
+    let of_json json__ =
+      let none = field_map json__ "None" NoneAction.of_json in
+      let count = field_map json__ "Count" CountAction.of_json in
       make ?none ?count ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead exclude those rules in your rule group reference statement settings."]
+       "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead use the rule action override option, with Count action, in your rule group reference statement settings."]
 module LabelName =
   struct
     type nonrec t = string
@@ -4481,8 +8253,9 @@ module Label =
         LabelName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" LabelName.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" LabelName.of_json in
+      make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A single label container. This is used as an element of a label array in multiple contexts, for example, in RuleLabels inside a Rule and in Labels inside a SampledHTTPRequest."]
@@ -4490,6 +8263,9 @@ module Labels =
   struct
     type nonrec t = Label.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Label.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4515,7 +8291,7 @@ module Rule =
       {
       name: EntityName.t
         [@ocaml.doc
-          "The name of the rule. You can't change the name of a Rule after you create it."];
+          "The name of the rule. If you change the name of a Rule after you create it and you want the rule's metric name to reflect the change, update the metric name in the rule's VisibilityConfig settings. WAF doesn't automatically update the metric name when you update the rule name."];
       priority: RulePriority.t
         [@ocaml.doc
           "If you define more than one Rule in a WebACL, WAF evaluates each request against the Rules in order based on the value of Priority. WAF processes rules with lower priority first. The priorities don't need to be consecutive, but they must all be different."];
@@ -4527,36 +8303,41 @@ module Rule =
           "The action that WAF should take on a web request when it matches the rule statement. Settings at the web ACL level can override the rule action setting. This is used only for rules whose statements do not reference a rule group. Rule statements that reference a rule group include RuleGroupReferenceStatement and ManagedRuleGroupStatement. You must specify either this Action setting or the rule OverrideAction setting, but not both: If the rule statement does not reference a rule group, use this rule action setting and not the rule override action setting. If the rule statement references a rule group, use the override action setting and not this action setting."];
       overrideAction: OverrideAction.t option
         [@ocaml.doc
-          "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead exclude those rules in your rule group reference statement settings."];
+          "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead use the rule action override option, with Count action, in your rule group reference statement settings."];
       ruleLabels: Labels.t option
         [@ocaml.doc
-          "Labels to apply to web requests that match the rule match statement. WAF applies fully qualified labels to matching web requests. A fully qualified label is the concatenation of a label namespace and a rule label. The rule's rule group or web ACL defines the label namespace. Rules that run after this rule in the web ACL can match against these labels using a LabelMatchStatement. For each label, provide a case-sensitive string containing optional namespaces and a label name, according to the following guidelines: Separate each component of the label with a colon. Each namespace or name can have up to 128 characters. You can specify up to 5 namespaces in a label. Don't use the following reserved words in your label specification: aws, waf, managed, rulegroup, webacl, regexpatternset, or ipset. For example, myLabelName or nameSpace1:nameSpace2:myLabelName."];
+          "Labels to apply to web requests that match the rule match statement. WAF applies fully qualified labels to matching web requests. A fully qualified label is the concatenation of a label namespace and a rule label. The rule's rule group or web ACL defines the label namespace. Any rule that isn't a rule group reference statement or managed rule group statement can add labels to matching web requests. Rules that run after this rule in the web ACL can match against these labels using a LabelMatchStatement. For each label, provide a case-sensitive string containing optional namespaces and a label name, according to the following guidelines: Separate each component of the label with a colon. Each namespace or name can have up to 128 characters. You can specify up to 5 namespaces in a label. Don't use the following reserved words in your label specification: aws, waf, managed, rulegroup, webacl, regexpatternset, or ipset. For example, myLabelName or nameSpace1:nameSpace2:myLabelName."];
       visibilityConfig: VisibilityConfig.t
         [@ocaml.doc
-          "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
+          "Defines and enables Amazon CloudWatch metrics and web request sample collection. If you change the name of a Rule after you create it and you want the rule's metric name to reflect the change, update the metric name as well. WAF doesn't automatically update the metric name."];
       captchaConfig: CaptchaConfig.t option
         [@ocaml.doc
-          "Specifies how WAF should handle CAPTCHA evaluations. If you don't specify this, WAF uses the CAPTCHA configuration that's defined for the web ACL."]}
+          "Specifies how WAF should handle CAPTCHA evaluations. If you don't specify this, WAF uses the CAPTCHA configuration that's defined for the web ACL."];
+      challengeConfig: ChallengeConfig.t option
+        [@ocaml.doc
+          "Specifies how WAF should handle Challenge evaluations. If you don't specify this, WAF uses the challenge configuration that's defined for the web ACL."]}
     let context_ = "Rule"
     let make ?action =
       fun ?overrideAction ->
         fun ?ruleLabels ->
           fun ?captchaConfig ->
-            fun ~name ->
-              fun ~priority ->
-                fun ~statement ->
-                  fun ~visibilityConfig ->
-                    fun () ->
-                      {
-                        action;
-                        overrideAction;
-                        ruleLabels;
-                        captchaConfig;
-                        name;
-                        priority;
-                        statement;
-                        visibilityConfig
-                      }
+            fun ?challengeConfig ->
+              fun ~name ->
+                fun ~priority ->
+                  fun ~statement ->
+                    fun ~visibilityConfig ->
+                      fun () ->
+                        {
+                          action;
+                          overrideAction;
+                          ruleLabels;
+                          captchaConfig;
+                          challengeConfig;
+                          name;
+                          priority;
+                          statement;
+                          visibilityConfig
+                        }
     let to_value x =
       structure_to_value
         [("Name", (Some (EntityName.to_value x.name)));
@@ -4569,9 +8350,14 @@ module Rule =
         ("VisibilityConfig",
           (Some (VisibilityConfig.to_value x.visibilityConfig)));
         ("CaptchaConfig",
-          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value))]
+          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value));
+        ("ChallengeConfig",
+          (Option.map x.challengeConfig ~f:ChallengeConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let challengeConfig =
+        (Option.map ~f:ChallengeConfig.of_xml)
+          (Xml.child xml_arg0 "ChallengeConfig") in
       let captchaConfig =
         (Option.map ~f:CaptchaConfig.of_xml)
           (Xml.child xml_arg0 "CaptchaConfig") in
@@ -4593,30 +8379,35 @@ module Rule =
           (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
       let name =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?captchaConfig ~visibilityConfig ?ruleLabels ?overrideAction
-        ?action ~statement ~priority ~name ()
+      make ?challengeConfig ?captchaConfig ~visibilityConfig ?ruleLabels
+        ?overrideAction ?action ~statement ~priority ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let challengeConfig =
+        field_map json__ "ChallengeConfig" ChallengeConfig.of_json in
       let captchaConfig =
-        field_map json "CaptchaConfig" CaptchaConfig.of_json in
+        field_map json__ "CaptchaConfig" CaptchaConfig.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let ruleLabels = field_map json "RuleLabels" Labels.of_json in
+        field_map_exn json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let ruleLabels = field_map json__ "RuleLabels" Labels.of_json in
       let overrideAction =
-        field_map json "OverrideAction" OverrideAction.of_json in
-      let action = field_map json "Action" RuleAction.of_json in
-      let statement = field_map_exn json "Statement" Statement.of_json in
-      let priority = field_map_exn json "Priority" RulePriority.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ?captchaConfig ~visibilityConfig ?ruleLabels ?overrideAction
-        ?action ~statement ~priority ~name ()
+        field_map json__ "OverrideAction" OverrideAction.of_json in
+      let action = field_map json__ "Action" RuleAction.of_json in
+      let statement = field_map_exn json__ "Statement" Statement.of_json in
+      let priority = field_map_exn json__ "Priority" RulePriority.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      make ?challengeConfig ?captchaConfig ~visibilityConfig ?ruleLabels
+        ?overrideAction ?action ~statement ~priority ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A single rule, which you can use in a WebACL or RuleGroup to identify web requests that you want to allow, block, or count. Each rule includes one top-level Statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."]
+       "A single rule, which you can use in a WebACL or RuleGroup to identify web requests that you want to manage in some way. Each rule includes one top-level Statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."]
 module Rules =
   struct
     type nonrec t = Rule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4642,7 +8433,7 @@ module CheckCapacityRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       rules: Rules.t
         [@ocaml.doc
           "An array of Rule that you're configuring to use in a rule group or web ACL."]}
@@ -4660,13 +8451,13 @@ module CheckCapacityRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ~rules ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "Rules" Rules.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let rules = field_map_exn json__ "Rules" Rules.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ~rules ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the web ACL capacity unit (WCU) requirements for a specified scope and set of rules. You can use this to check the capacity requirements for the rules you want to use in a RuleGroup or WebACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."]
+       "Returns the web ACL capacity unit (WCU) requirements for a specified scope and set of rules. You can use this to check the capacity requirements for the rules you want to use in a RuleGroup or WebACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."]
 module WAFSubscriptionNotFoundException =
   struct
     type nonrec t = {
@@ -4681,32 +8472,12 @@ module WAFSubscriptionNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You tried to use a managed rule group that's available by subscription, but you aren't subscribed to it yet."]
-module WAFLimitsExceededException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "WAF couldn\226\128\153t perform the operation because you exceeded your resource limit. For example, the maximum number of WebACL objects that you can create for an Amazon Web Services account. For more information, see WAF quotas in the WAF Developer Guide."]
 module WAFInvalidResourceException =
   struct
     type nonrec t = {
@@ -4721,8 +8492,8 @@ module WAFInvalidResourceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4741,8 +8512,8 @@ module WAFExpiredManagedRuleGroupVersionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4772,6 +8543,7 @@ module CheckCapacityResponse =
         `WAFExpiredManagedRuleGroupVersionException of
           WAFExpiredManagedRuleGroupVersionException.t 
       | `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
       | `WAFInvalidResourceException of WAFInvalidResourceException.t 
       | `WAFLimitsExceededException of WAFLimitsExceededException.t 
@@ -4788,6 +8560,9 @@ module CheckCapacityResponse =
             (WAFExpiredManagedRuleGroupVersionException.of_json json)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
       | "WAFInvalidParameterException" ->
           `WAFInvalidParameterException
             (WAFInvalidParameterException.of_json json)
@@ -4816,6 +8591,9 @@ module CheckCapacityResponse =
             (WAFExpiredManagedRuleGroupVersionException.of_xml xml)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
       | "WAFInvalidParameterException" ->
           `WAFInvalidParameterException
             (WAFInvalidParameterException.of_xml xml)
@@ -4847,6 +8625,10 @@ module CheckCapacityResponse =
           `Assoc
             [("error", (`String "WAFInternalErrorException"));
             ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
       | `WAFInvalidParameterException e ->
           `Assoc
             [("error", (`String "WAFInvalidParameterException"));
@@ -4886,12 +8668,12 @@ module CheckCapacityResponse =
           (Xml.child xml_arg0 "Capacity") in
       make ?capacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let capacity = field_map json "Capacity" ConsumedCapacity.of_json in
+    let of_json json__ =
+      let capacity = field_map json__ "Capacity" ConsumedCapacity.of_json in
       make ?capacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the web ACL capacity unit (WCU) requirements for a specified scope and set of rules. You can use this to check the capacity requirements for the rules you want to use in a RuleGroup or WebACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."]
+       "Returns the web ACL capacity unit (WCU) requirements for a specified scope and set of rules. You can use this to check the capacity requirements for the rules you want to use in a RuleGroup or WebACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."]
 module LabelNameCondition =
   struct
     type nonrec t =
@@ -4911,8 +8693,8 @@ module LabelNameCondition =
           (Xml.child_exn ~context:context_ xml_arg0 "LabelName") in
       make ~labelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labelName = field_map_exn json "LabelName" LabelName.of_json in
+    let of_json json__ =
+      let labelName = field_map_exn json__ "LabelName" LabelName.of_json in
       make ~labelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4922,9 +8704,11 @@ module Condition =
     type nonrec t =
       {
       actionCondition: ActionCondition.t option
-        [@ocaml.doc "A single action condition."];
+        [@ocaml.doc
+          "A single action condition. This is the action setting that a log record must contain in order to meet the condition."];
       labelNameCondition: LabelNameCondition.t option
-        [@ocaml.doc "A single label name condition."]}
+        [@ocaml.doc
+          "A single label name condition. This is the fully qualified label name that a log record must contain in order to meet the condition. Fully qualified labels have a prefix, optional namespaces, and label name. The prefix identifies the rule group or web ACL context of the rule that added the label."]}
     let make ?actionCondition =
       fun ?labelNameCondition ->
         fun () -> { actionCondition; labelNameCondition }
@@ -4944,11 +8728,11 @@ module Condition =
           (Xml.child xml_arg0 "ActionCondition") in
       make ?labelNameCondition ?actionCondition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let labelNameCondition =
-        field_map json "LabelNameCondition" LabelNameCondition.of_json in
+        field_map json__ "LabelNameCondition" LabelNameCondition.of_json in
       let actionCondition =
-        field_map json "ActionCondition" ActionCondition.of_json in
+        field_map json__ "ActionCondition" ActionCondition.of_json in
       make ?labelNameCondition ?actionCondition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A single match condition for a Filter."]
@@ -4957,6 +8741,9 @@ module Conditions =
     type nonrec t = Condition.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Condition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4990,6 +8777,121 @@ module Country =
     let of_json j = string_of_json ~kind:"Country" j
     let to_json = simple_to_json to_value
   end
+module CreateAPIKeyRequest =
+  struct
+    type nonrec t =
+      {
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+      tokenDomains: APIKeyTokenDomains.t
+        [@ocaml.doc
+          "The client application domains that you want to use this API key for. Example JSON: \"TokenDomains\": \\[\"abc.com\", \"store.abc.com\"\\] Public suffixes aren't allowed. For example, you can't use gov.au or co.uk as token domains."]}
+    let context_ = "CreateAPIKeyRequest"
+    let make ~scope = fun ~tokenDomains -> fun () -> { scope; tokenDomains }
+    let to_value x =
+      structure_to_value
+        [("Scope", (Some (Scope.to_value x.scope)));
+        ("TokenDomains", (Some (APIKeyTokenDomains.to_value x.tokenDomains)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tokenDomains =
+        APIKeyTokenDomains.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TokenDomains") in
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      make ~tokenDomains ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tokenDomains =
+        field_map_exn json__ "TokenDomains" APIKeyTokenDomains.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ~tokenDomains ~scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an API key that contains a set of token domains. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide. You can use a single key for up to 5 domains. After you generate a key, you can copy it for use in your JavaScript integration."]
+module CreateAPIKeyResponse =
+  struct
+    type nonrec t =
+      {
+      aPIKey: APIKey.t option
+        [@ocaml.doc
+          "The generated, encrypted API key. You can copy this for use in your JavaScript CAPTCHA integration."]}
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFLimitsExceededException of WAFLimitsExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?aPIKey = fun () -> { aPIKey }
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | "WAFLimitsExceededException" ->
+          `WAFLimitsExceededException
+            (WAFLimitsExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | "WAFLimitsExceededException" ->
+          `WAFLimitsExceededException (WAFLimitsExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFLimitsExceededException e ->
+          `Assoc
+            [("error", (`String "WAFLimitsExceededException"));
+            ("details", (WAFLimitsExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("APIKey", (Option.map x.aPIKey ~f:APIKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aPIKey =
+        (Option.map ~f:APIKey.of_xml) (Xml.child xml_arg0 "APIKey") in
+      make ?aPIKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aPIKey = field_map json__ "APIKey" APIKey.of_json in
+      make ?aPIKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an API key that contains a set of token domains. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide. You can use a single key for up to 5 domains. After you generate a key, you can copy it for use in your JavaScript integration."]
 module TagValue =
   struct
     type nonrec t = string
@@ -5058,9 +8960,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5070,6 +8972,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5113,6 +9018,9 @@ module IPAddresses =
   struct
     type nonrec t = IPAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IPAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5183,7 +9091,7 @@ module CreateIPSetRequest =
           "The name of the IP set. You cannot change the name of an IPSet after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       description: EntityDescription.t option
         [@ocaml.doc
           "A description of the IP set that helps with identification."];
@@ -5191,7 +9099,7 @@ module CreateIPSetRequest =
         [@ocaml.doc "The version of the IP addresses, either IPV4 or IPV6."];
       addresses: IPAddresses.t
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses that you want WAF to inspect for in incoming requests. All addresses must be specified using Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: For requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. For requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. For requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. For requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
       tags: TagList.t option
         [@ocaml.doc
           "An array of key:value pairs to associate with the resource."]}
@@ -5239,15 +9147,15 @@ module CreateIPSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~addresses ~iPAddressVersion ?description ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let addresses = field_map_exn json "Addresses" IPAddresses.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let addresses = field_map_exn json__ "Addresses" IPAddresses.of_json in
       let iPAddressVersion =
-        field_map_exn json "IPAddressVersion" IPAddressVersion.of_json in
+        field_map_exn json__ "IPAddressVersion" IPAddressVersion.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ?tags ~addresses ~iPAddressVersion ?description ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5266,8 +9174,8 @@ module WAFTagOperationInternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5286,8 +9194,8 @@ module WAFTagOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5306,8 +9214,8 @@ module WAFOptimisticLockException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5326,8 +9234,8 @@ module WAFDuplicateItemException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5420,13 +9328,13 @@ module IPSetSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?lockToken ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?aRN ?lockToken ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5547,61 +9455,12 @@ module CreateIPSetResponse =
         (Option.map ~f:IPSetSummary.of_xml) (Xml.child xml_arg0 "Summary") in
       make ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary = field_map json "Summary" IPSetSummary.of_json in
+    let of_json json__ =
+      let summary = field_map json__ "Summary" IPSetSummary.of_json in
       make ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an IPSet, which you use to identify web requests that originate from specific IP addresses or ranges of IP addresses. For example, if you're receiving a lot of requests from a ranges of IP addresses, you can configure WAF to block them using an IPSet that lists those IP addresses."]
-module Regex =
-  struct
-    type nonrec t =
-      {
-      regexString: RegexPatternString.t option
-        [@ocaml.doc "The string representing the regular expression."]}
-    let make ?regexString = fun () -> { regexString }
-    let to_value x =
-      structure_to_value
-        [("RegexString",
-           (Option.map x.regexString ~f:RegexPatternString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let regexString =
-        (Option.map ~f:RegexPatternString.of_xml)
-          (Xml.child xml_arg0 "RegexString") in
-      make ?regexString ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let regexString =
-        field_map json "RegexString" RegexPatternString.of_json in
-      make ?regexString ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A single regular expression. This is used in a RegexPatternSet."]
-module RegularExpressionList =
-  struct
-    type nonrec t = Regex.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Regex.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Regex.of_xml)
-    let of_json j =
-      list_of_json ~kind:"RegularExpressionList" ~of_json:Regex.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module CreateRegexPatternSetRequest =
   struct
     type nonrec t =
@@ -5611,7 +9470,7 @@ module CreateRegexPatternSetRequest =
           "The name of the set. You cannot change the name after you create the set."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       description: EntityDescription.t option
         [@ocaml.doc
           "A description of the set that helps with identification."];
@@ -5652,15 +9511,15 @@ module CreateRegexPatternSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~regularExpressionList ?description ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let regularExpressionList =
-        field_map_exn json "RegularExpressionList"
+        field_map_exn json__ "RegularExpressionList"
           RegularExpressionList.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ?tags ~regularExpressionList ?description ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5709,13 +9568,13 @@ module RegexPatternSetSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?lockToken ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?aRN ?lockToken ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5838,8 +9697,8 @@ module CreateRegexPatternSetResponse =
           (Xml.child xml_arg0 "Summary") in
       make ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary = field_map json "Summary" RegexPatternSetSummary.of_json in
+    let of_json json__ =
+      let summary = field_map json__ "Summary" RegexPatternSetSummary.of_json in
       make ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5920,10 +9779,10 @@ module CustomResponseBody =
           (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
       make ~content ~contentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map_exn json "Content" ResponseContent.of_json in
+    let of_json json__ =
+      let content = field_map_exn json__ "Content" ResponseContent.of_json in
       let contentType =
-        field_map_exn json "ContentType" ResponseContentType.of_json in
+        field_map_exn json__ "ContentType" ResponseContentType.of_json in
       make ~content ~contentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5953,6 +9812,8 @@ module CustomResponseBodies =
                        (CustomResponseBody.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5969,16 +9830,16 @@ module CreateRuleGroupRequest =
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       capacity: CapacityUnit.t
         [@ocaml.doc
-          "The web ACL capacity units (WCUs) required for this rule group. When you create your own rule group, you define this, and you cannot change it after creation. When you add or modify the rules in a rule group, WAF enforces this limit. You can check the capacity for a set of rules using CheckCapacity. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."];
+          "The web ACL capacity units (WCUs) required for this rule group. When you create your own rule group, you define this, and you cannot change it after creation. When you add or modify the rules in a rule group, WAF enforces this limit. You can check the capacity for a set of rules using CheckCapacity. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."];
       description: EntityDescription.t option
         [@ocaml.doc
           "A description of the rule group that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
       visibilityConfig: VisibilityConfig.t
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
@@ -6044,18 +9905,18 @@ module CreateRuleGroupRequest =
       make ?customResponseBodies ?tags ~visibilityConfig ?rules ?description
         ~capacity ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map_exn json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let capacity = field_map_exn json "Capacity" CapacityUnit.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let capacity = field_map_exn json__ "Capacity" CapacityUnit.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ?customResponseBodies ?tags ~visibilityConfig ?rules ?description
         ~capacity ~scope ~name ()
     let to_json v = composed_to_json to_value v
@@ -6105,13 +9966,13 @@ module RuleGroupSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?lockToken ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?aRN ?lockToken ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6267,12 +10128,65 @@ module CreateRuleGroupResponse =
           (Xml.child xml_arg0 "Summary") in
       make ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary = field_map json "Summary" RuleGroupSummary.of_json in
+    let of_json json__ =
+      let summary = field_map json__ "Summary" RuleGroupSummary.of_json in
       make ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a RuleGroup per the specifications provided. A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements."]
+module LowReputationMode =
+  struct
+    type nonrec t =
+      | ACTIVE_UNDER_DDOS 
+      | ALWAYS_ON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE_UNDER_DDOS -> "ACTIVE_UNDER_DDOS"
+      | ALWAYS_ON -> "ALWAYS_ON"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE_UNDER_DDOS" -> ACTIVE_UNDER_DDOS
+      | "ALWAYS_ON" -> ALWAYS_ON
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LowReputationMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LowReputationMode" j)
+    let to_json = simple_to_json to_value
+  end
+module OnSourceDDoSProtectionConfig =
+  struct
+    type nonrec t =
+      {
+      aLBLowReputationMode: LowReputationMode.t
+        [@ocaml.doc
+          "The level of DDoS protection that applies to web ACLs associated with Application Load Balancers. ACTIVE_UNDER_DDOS protection is enabled by default whenever a web ACL is associated with an Application Load Balancer. In the event that an Application Load Balancer experiences high-load conditions or suspected DDoS attacks, the ACTIVE_UNDER_DDOS protection automatically rate limits traffic from known low reputation sources without disrupting Application Load Balancer availability. ALWAYS_ON protection provides constant, always-on monitoring of known low reputation sources for suspected DDoS attacks. While this provides a higher level of protection, there may be potential impacts on legitimate traffic."]}
+    let context_ = "OnSourceDDoSProtectionConfig"
+    let make ~aLBLowReputationMode = fun () -> { aLBLowReputationMode }
+    let to_value x =
+      structure_to_value
+        [("ALBLowReputationMode",
+           (Some (LowReputationMode.to_value x.aLBLowReputationMode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aLBLowReputationMode =
+        LowReputationMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ALBLowReputationMode") in
+      make ~aLBLowReputationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aLBLowReputationMode =
+        field_map_exn json__ "ALBLowReputationMode" LowReputationMode.of_json in
+      make ~aLBLowReputationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configures the level of DDoS protection that applies to web ACLs associated with Application Load Balancers."]
 module DefaultAction =
   struct
     type nonrec t =
@@ -6294,13 +10208,282 @@ module DefaultAction =
         (Option.map ~f:BlockAction.of_xml) (Xml.child xml_arg0 "Block") in
       make ?allow ?block ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let allow = field_map json "Allow" AllowAction.of_json in
-      let block = field_map json "Block" BlockAction.of_json in
+    let of_json json__ =
+      let allow = field_map json__ "Allow" AllowAction.of_json in
+      let block = field_map json__ "Block" BlockAction.of_json in
       make ?allow ?block ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In a WebACL, this is the action that you want WAF to perform when a web request doesn't match any of the rules in the WebACL. The default action must be a terminating action, so you can't use count."]
+       "In a WebACL, this is the action that you want WAF to perform when a web request doesn't match any of the rules in the WebACL. The default action must be a terminating action."]
+module FieldToProtectType =
+  struct
+    type nonrec t =
+      | SINGLE_HEADER 
+      | SINGLE_COOKIE 
+      | SINGLE_QUERY_ARGUMENT 
+      | QUERY_STRING 
+      | BODY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SINGLE_HEADER -> "SINGLE_HEADER"
+      | SINGLE_COOKIE -> "SINGLE_COOKIE"
+      | SINGLE_QUERY_ARGUMENT -> "SINGLE_QUERY_ARGUMENT"
+      | QUERY_STRING -> "QUERY_STRING"
+      | BODY -> "BODY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SINGLE_HEADER" -> SINGLE_HEADER
+      | "SINGLE_COOKIE" -> SINGLE_COOKIE
+      | "SINGLE_QUERY_ARGUMENT" -> SINGLE_QUERY_ARGUMENT
+      | "QUERY_STRING" -> QUERY_STRING
+      | "BODY" -> BODY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FieldToProtectType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FieldToProtectType" j)
+    let to_json = simple_to_json to_value
+  end
+module FieldToProtectKeyName =
+  struct
+    type nonrec t = string
+    let context_ = "FieldToProtectKeyName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FieldToProtectKeyName" j
+    let to_json = simple_to_json to_value
+  end
+module FieldToProtectKeys =
+  struct
+    type nonrec t = FieldToProtectKeyName.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FieldToProtectKeyName.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FieldToProtectKeyName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FieldToProtectKeys"
+        ~of_json:FieldToProtectKeyName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FieldToProtect =
+  struct
+    type nonrec t =
+      {
+      fieldType: FieldToProtectType.t
+        [@ocaml.doc "Specifies the web request component type to protect."];
+      fieldKeys: FieldToProtectKeys.t option
+        [@ocaml.doc
+          "Specifies the keys to protect for the specified field type. If you don't specify any key, then all keys for the field type are protected."]}
+    let context_ = "FieldToProtect"
+    let make ?fieldKeys =
+      fun ~fieldType -> fun () -> { fieldKeys; fieldType }
+    let to_value x =
+      structure_to_value
+        [("FieldType", (Some (FieldToProtectType.to_value x.fieldType)));
+        ("FieldKeys",
+          (Option.map x.fieldKeys ~f:FieldToProtectKeys.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldKeys =
+        (Option.map ~f:FieldToProtectKeys.of_xml)
+          (Xml.child xml_arg0 "FieldKeys") in
+      let fieldType =
+        FieldToProtectType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FieldType") in
+      make ?fieldKeys ~fieldType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldKeys = field_map json__ "FieldKeys" FieldToProtectKeys.of_json in
+      let fieldType =
+        field_map_exn json__ "FieldType" FieldToProtectType.of_json in
+      make ?fieldKeys ~fieldType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies a field type and keys to protect in stored web request data. This is part of the data protection configuration for a web ACL."]
+module DataProtectionAction =
+  struct
+    type nonrec t =
+      | SUBSTITUTION 
+      | HASH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUBSTITUTION -> "SUBSTITUTION"
+      | HASH -> "HASH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUBSTITUTION" -> SUBSTITUTION
+      | "HASH" -> HASH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DataProtectionAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DataProtectionAction" j)
+    let to_json = simple_to_json to_value
+  end
+module DataProtection =
+  struct
+    type nonrec t =
+      {
+      field: FieldToProtect.t
+        [@ocaml.doc
+          "Specifies the field type and optional keys to apply the protection behavior to."];
+      action: DataProtectionAction.t
+        [@ocaml.doc
+          "Specifies how to protect the field. WAF can apply a one-way hash to the field or hard code a string substitution. One-way hash example: ade099751dEXAMPLEHASH2ea9f3393f80dd5d3bEXAMPLEHASH966ae0d3cd5a1e Substitution example: REDACTED"];
+      excludeRuleMatchDetails: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to also exclude any rule match details from the data protection you have enabled for a given field. WAF logs these details for non-terminating matching rules and for the terminating matching rule. For additional information, see Log fields for web ACL traffic in the WAF Developer Guide. Default: FALSE"];
+      excludeRateBasedDetails: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to also exclude any rate-based rule details from the data protection you have enabled for a given field. If you specify this exception, RateBasedDetails will show the value of the field. For additional information, see the log field rateBasedRuleList at Log fields for web ACL traffic in the WAF Developer Guide. Default: FALSE"]}
+    let context_ = "DataProtection"
+    let make ?excludeRuleMatchDetails =
+      fun ?excludeRateBasedDetails ->
+        fun ~field ->
+          fun ~action ->
+            fun () ->
+              {
+                excludeRuleMatchDetails;
+                excludeRateBasedDetails;
+                field;
+                action
+              }
+    let to_value x =
+      structure_to_value
+        [("Field", (Some (FieldToProtect.to_value x.field)));
+        ("Action", (Some (DataProtectionAction.to_value x.action)));
+        ("ExcludeRuleMatchDetails",
+          (Option.map x.excludeRuleMatchDetails ~f:Boolean.to_value));
+        ("ExcludeRateBasedDetails",
+          (Option.map x.excludeRateBasedDetails ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeRateBasedDetails =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ExcludeRateBasedDetails") in
+      let excludeRuleMatchDetails =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ExcludeRuleMatchDetails") in
+      let action =
+        DataProtectionAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Action") in
+      let field =
+        FieldToProtect.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Field") in
+      make ?excludeRateBasedDetails ?excludeRuleMatchDetails ~action ~field
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeRateBasedDetails =
+        field_map json__ "ExcludeRateBasedDetails" Boolean.of_json in
+      let excludeRuleMatchDetails =
+        field_map json__ "ExcludeRuleMatchDetails" Boolean.of_json in
+      let action = field_map_exn json__ "Action" DataProtectionAction.of_json in
+      let field = field_map_exn json__ "Field" FieldToProtect.of_json in
+      make ?excludeRateBasedDetails ?excludeRuleMatchDetails ~action ~field
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the protection behavior for a field type. This is part of the data protection configuration for a web ACL."]
+module DataProtections =
+  struct
+    type nonrec t = DataProtection.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:26) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataProtection.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataProtection.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataProtections" ~of_json:DataProtection.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DataProtectionConfig =
+  struct
+    type nonrec t =
+      {
+      dataProtections: DataProtections.t
+        [@ocaml.doc
+          "An array of data protection configurations for specific web request field types. This is defined for each web ACL. WAF applies the specified protection to all web requests that the web ACL inspects."]}
+    let context_ = "DataProtectionConfig"
+    let make ~dataProtections = fun () -> { dataProtections }
+    let to_value x =
+      structure_to_value
+        [("DataProtections",
+           (Some (DataProtections.to_value x.dataProtections)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataProtections =
+        DataProtections.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataProtections") in
+      make ~dataProtections ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataProtections =
+        field_map_exn json__ "DataProtections" DataProtections.of_json in
+      make ~dataProtections ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies data protection to apply to the web request data for the web ACL. This is a web ACL level data protection option. The data protection that you configure for the web ACL alters the data that's available for any other data collection activity, including your WAF logging destinations, web ACL request sampling, and Amazon Security Lake data collection and management. Your other option for data protection is in the logging configuration, which only affects logging. This is part of the data protection configuration for a web ACL."]
 module CreateWebACLRequest =
   struct
     type nonrec t =
@@ -6310,7 +10493,7 @@ module CreateWebACLRequest =
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       defaultAction: DefaultAction.t
         [@ocaml.doc
           "The action to perform if none of the Rules contained in the WebACL match."];
@@ -6319,10 +10502,13 @@ module CreateWebACLRequest =
           "A description of the web ACL that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
       visibilityConfig: VisibilityConfig.t
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
+      dataProtectionConfig: DataProtectionConfig.t option
+        [@ocaml.doc
+          "Specifies data protection to apply to the web request data for the web ACL. This is a web ACL level data protection option. The data protection that you configure for the web ACL alters the data that's available for any other data collection activity, including your WAF logging destinations, web ACL request sampling, and Amazon Security Lake data collection and management. Your other option for data protection is in the logging configuration, which only affects logging."];
       tags: TagList.t option
         [@ocaml.doc
           "An array of key:value pairs to associate with the resource."];
@@ -6331,29 +10517,56 @@ module CreateWebACLRequest =
           "A map of custom response keys and content bodies. When you create a rule with a block action, you can send a custom response to the web request. You define these for the web ACL, and then use them in the rules and default actions that you define in the web ACL. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide. For information about the limits on count and size for custom request and response settings, see WAF quotas in the WAF Developer Guide."];
       captchaConfig: CaptchaConfig.t option
         [@ocaml.doc
-          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."]}
+          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."];
+      challengeConfig: ChallengeConfig.t option
+        [@ocaml.doc
+          "Specifies how WAF should handle challenge evaluations for rules that don't have their own ChallengeConfig settings. If you don't specify this, WAF uses its default settings for ChallengeConfig."];
+      tokenDomains: TokenDomains.t option
+        [@ocaml.doc
+          "Specifies the domains that WAF should accept in a web request token. This enables the use of tokens across multiple protected websites. When WAF provides a token, it uses the domain of the Amazon Web Services resource that the web ACL is protecting. If you don't specify a list of token domains, WAF accepts tokens only for the domain of the protected resource. With a token domain list, WAF accepts the resource's host domain plus all domains in the token domain list, including their prefixed subdomains. Example JSON: \"TokenDomains\": \\{ \"mywebsite.com\", \"myotherwebsite.com\" \\} Public suffixes aren't allowed. For example, you can't use gov.au or co.uk as token domains."];
+      associationConfig: AssociationConfig.t option
+        [@ocaml.doc
+          "Specifies custom configurations for the associations between the web ACL and protected resources. Use this to customize the maximum size of the request body that your protected resources forward to WAF for inspection. You can customize this setting for CloudFront, API Gateway, Amazon Cognito, App Runner, or Verified Access resources. The default setting is 16 KB (16,384 bytes). You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes)."];
+      onSourceDDoSProtectionConfig: OnSourceDDoSProtectionConfig.t option
+        [@ocaml.doc
+          "Specifies the type of DDoS protection to apply to web request data for a web ACL. For most scenarios, it is recommended to use the default protection level, ACTIVE_UNDER_DDOS. If a web ACL is associated with multiple Application Load Balancers, the changes you make to DDoS protection in that web ACL will apply to all associated Application Load Balancers."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc
+          "Configures the ability for the WAF console to store and retrieve application attributes during the web ACL creation process. Application attributes help WAF give recommendations for protection packs."]}
     let context_ = "CreateWebACLRequest"
     let make ?description =
       fun ?rules ->
-        fun ?tags ->
-          fun ?customResponseBodies ->
-            fun ?captchaConfig ->
-              fun ~name ->
-                fun ~scope ->
-                  fun ~defaultAction ->
-                    fun ~visibilityConfig ->
-                      fun () ->
-                        {
-                          description;
-                          rules;
-                          tags;
-                          customResponseBodies;
-                          captchaConfig;
-                          name;
-                          scope;
-                          defaultAction;
-                          visibilityConfig
-                        }
+        fun ?dataProtectionConfig ->
+          fun ?tags ->
+            fun ?customResponseBodies ->
+              fun ?captchaConfig ->
+                fun ?challengeConfig ->
+                  fun ?tokenDomains ->
+                    fun ?associationConfig ->
+                      fun ?onSourceDDoSProtectionConfig ->
+                        fun ?applicationConfig ->
+                          fun ~name ->
+                            fun ~scope ->
+                              fun ~defaultAction ->
+                                fun ~visibilityConfig ->
+                                  fun () ->
+                                    {
+                                      description;
+                                      rules;
+                                      dataProtectionConfig;
+                                      tags;
+                                      customResponseBodies;
+                                      captchaConfig;
+                                      challengeConfig;
+                                      tokenDomains;
+                                      associationConfig;
+                                      onSourceDDoSProtectionConfig;
+                                      applicationConfig;
+                                      name;
+                                      scope;
+                                      defaultAction;
+                                      visibilityConfig
+                                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (EntityName.to_value x.name)));
@@ -6364,13 +10577,41 @@ module CreateWebACLRequest =
         ("Rules", (Option.map x.rules ~f:Rules.to_value));
         ("VisibilityConfig",
           (Some (VisibilityConfig.to_value x.visibilityConfig)));
+        ("DataProtectionConfig",
+          (Option.map x.dataProtectionConfig ~f:DataProtectionConfig.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("CustomResponseBodies",
           (Option.map x.customResponseBodies ~f:CustomResponseBodies.to_value));
         ("CaptchaConfig",
-          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value))]
+          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value));
+        ("ChallengeConfig",
+          (Option.map x.challengeConfig ~f:ChallengeConfig.to_value));
+        ("TokenDomains",
+          (Option.map x.tokenDomains ~f:TokenDomains.to_value));
+        ("AssociationConfig",
+          (Option.map x.associationConfig ~f:AssociationConfig.to_value));
+        ("OnSourceDDoSProtectionConfig",
+          (Option.map x.onSourceDDoSProtectionConfig
+             ~f:OnSourceDDoSProtectionConfig.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let onSourceDDoSProtectionConfig =
+        (Option.map ~f:OnSourceDDoSProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "OnSourceDDoSProtectionConfig") in
+      let associationConfig =
+        (Option.map ~f:AssociationConfig.of_xml)
+          (Xml.child xml_arg0 "AssociationConfig") in
+      let tokenDomains =
+        (Option.map ~f:TokenDomains.of_xml)
+          (Xml.child xml_arg0 "TokenDomains") in
+      let challengeConfig =
+        (Option.map ~f:ChallengeConfig.of_xml)
+          (Xml.child xml_arg0 "ChallengeConfig") in
       let captchaConfig =
         (Option.map ~f:CaptchaConfig.of_xml)
           (Xml.child xml_arg0 "CaptchaConfig") in
@@ -6378,6 +10619,9 @@ module CreateWebACLRequest =
         (Option.map ~f:CustomResponseBodies.of_xml)
           (Xml.child xml_arg0 "CustomResponseBodies") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let dataProtectionConfig =
+        (Option.map ~f:DataProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "DataProtectionConfig") in
       let visibilityConfig =
         VisibilityConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VisibilityConfig") in
@@ -6392,29 +10636,45 @@ module CreateWebACLRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       let name =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?captchaConfig ?customResponseBodies ?tags ~visibilityConfig
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?associationConfig ?tokenDomains ?challengeConfig ?captchaConfig
+        ?customResponseBodies ?tags ?dataProtectionConfig ~visibilityConfig
         ?rules ?description ~defaultAction ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let onSourceDDoSProtectionConfig =
+        field_map json__ "OnSourceDDoSProtectionConfig"
+          OnSourceDDoSProtectionConfig.of_json in
+      let associationConfig =
+        field_map json__ "AssociationConfig" AssociationConfig.of_json in
+      let tokenDomains = field_map json__ "TokenDomains" TokenDomains.of_json in
+      let challengeConfig =
+        field_map json__ "ChallengeConfig" ChallengeConfig.of_json in
       let captchaConfig =
-        field_map json "CaptchaConfig" CaptchaConfig.of_json in
+        field_map json__ "CaptchaConfig" CaptchaConfig.of_json in
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let dataProtectionConfig =
+        field_map json__ "DataProtectionConfig" DataProtectionConfig.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map_exn json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
       let defaultAction =
-        field_map_exn json "DefaultAction" DefaultAction.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ?captchaConfig ?customResponseBodies ?tags ~visibilityConfig
+        field_map_exn json__ "DefaultAction" DefaultAction.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?associationConfig ?tokenDomains ?challengeConfig ?captchaConfig
+        ?customResponseBodies ?tags ?dataProtectionConfig ~visibilityConfig
         ?rules ?description ~defaultAction ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a WebACL per the specifications provided. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has an action defined (allow, block, or count) for requests that match the statement of the rule. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resources can be an Amazon CloudFront distribution, an Amazon API Gateway REST API, an Application Load Balancer, or an AppSync GraphQL API."]
+       "Creates a WebACL per the specifications provided. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has a statement that defines what to look for in web requests and an action that WAF applies to requests that match the statement. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resource types include Amazon CloudFront distribution, Amazon API Gateway REST API, Application Load Balancer, AppSync GraphQL API, Amazon Cognito user pool, App Runner service, Amplify application, and Amazon Web Services Verified Access instance."]
 module WebACLSummary =
   struct
     type nonrec t =
@@ -6459,17 +10719,37 @@ module WebACLSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?lockToken ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?aRN ?lockToken ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "High-level information about a WebACL, returned by operations like create and list. This provides information like the ID, that you can use to retrieve and manage a WebACL, and the ARN, that you provide to operations like AssociateWebACL."]
+module WAFConfigurationWarningException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation failed because you are inspecting the web request body, headers, or cookies without specifying how to handle oversize components. Rules that inspect the body must either provide an OversizeHandling configuration or they must be preceded by a SizeConstraintStatement that blocks the body content from being too large. Rules that inspect the headers or cookies must provide an OversizeHandling configuration. Provide the handling configuration and retry your operation. Alternately, you can suppress this warning by adding the following tag to the resource that you provide to this operation: Tag (key:WAF:OversizeFieldsHandlingConstraintOptOut, value:true)."]
 module CreateWebACLResponse =
   struct
     type nonrec t =
@@ -6478,7 +10758,12 @@ module CreateWebACLResponse =
         [@ocaml.doc
           "High-level information about a WebACL, returned by operations like create and list. This provides information like the ID, that you can use to retrieve and manage a WebACL, and the ARN, that you provide to operations like AssociateWebACL."]}
     type nonrec error =
-      [ `WAFDuplicateItemException of WAFDuplicateItemException.t 
+      [
+        `WAFConfigurationWarningException of
+          WAFConfigurationWarningException.t 
+      | `WAFDuplicateItemException of WAFDuplicateItemException.t 
+      | `WAFExpiredManagedRuleGroupVersionException of
+          WAFExpiredManagedRuleGroupVersionException.t 
       | `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
@@ -6496,8 +10781,14 @@ module CreateWebACLResponse =
     let make ?summary = fun () -> { summary }
     let error_of_json name json =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_json json)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_json json)
+      | "WAFExpiredManagedRuleGroupVersionException" ->
+          `WAFExpiredManagedRuleGroupVersionException
+            (WAFExpiredManagedRuleGroupVersionException.of_json json)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_json json)
       | "WAFInvalidOperationException" ->
@@ -6534,8 +10825,14 @@ module CreateWebACLResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_xml xml)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_xml xml)
+      | "WAFExpiredManagedRuleGroupVersionException" ->
+          `WAFExpiredManagedRuleGroupVersionException
+            (WAFExpiredManagedRuleGroupVersionException.of_xml xml)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
       | "WAFInvalidOperationException" ->
@@ -6569,10 +10866,20 @@ module CreateWebACLResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `WAFConfigurationWarningException e ->
+          `Assoc
+            [("error", (`String "WAFConfigurationWarningException"));
+            ("details", (WAFConfigurationWarningException.to_json e))]
       | `WAFDuplicateItemException e ->
           `Assoc
             [("error", (`String "WAFDuplicateItemException"));
             ("details", (WAFDuplicateItemException.to_json e))]
+      | `WAFExpiredManagedRuleGroupVersionException e ->
+          `Assoc
+            [("error",
+               (`String "WAFExpiredManagedRuleGroupVersionException"));
+            ("details",
+              (WAFExpiredManagedRuleGroupVersionException.to_json e))]
       | `WAFInternalErrorException e ->
           `Assoc
             [("error", (`String "WAFInternalErrorException"));
@@ -6631,12 +10938,125 @@ module CreateWebACLResponse =
         (Option.map ~f:WebACLSummary.of_xml) (Xml.child xml_arg0 "Summary") in
       make ?summary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let summary = field_map json "Summary" WebACLSummary.of_json in
+    let of_json json__ =
+      let summary = field_map json__ "Summary" WebACLSummary.of_json in
       make ?summary ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a WebACL per the specifications provided. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has an action defined (allow, block, or count) for requests that match the statement of the rule. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resources can be an Amazon CloudFront distribution, an Amazon API Gateway REST API, an Application Load Balancer, or an AppSync GraphQL API."]
+       "Creates a WebACL per the specifications provided. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has a statement that defines what to look for in web requests and an action that WAF applies to requests that match the statement. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resource types include Amazon CloudFront distribution, Amazon API Gateway REST API, Application Load Balancer, AppSync GraphQL API, Amazon Cognito user pool, App Runner service, Amplify application, and Amazon Web Services Verified Access instance."]
+module DeleteAPIKeyRequest =
+  struct
+    type nonrec t =
+      {
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+      aPIKey: APIKey.t
+        [@ocaml.doc "The encrypted API key that you want to delete."]}
+    let context_ = "DeleteAPIKeyRequest"
+    let make ~scope = fun ~aPIKey -> fun () -> { scope; aPIKey }
+    let to_value x =
+      structure_to_value
+        [("Scope", (Some (Scope.to_value x.scope)));
+        ("APIKey", (Some (APIKey.to_value x.aPIKey)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aPIKey =
+        APIKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "APIKey") in
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      make ~aPIKey ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aPIKey = field_map_exn json__ "APIKey" APIKey.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ~aPIKey ~scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified API key. After you delete a key, it can take up to 24 hours for WAF to disallow use of the key in all regions."]
+module DeleteAPIKeyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFNonexistentItemException of WAFNonexistentItemException.t 
+      | `WAFOptimisticLockException of WAFOptimisticLockException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_json json)
+      | "WAFOptimisticLockException" ->
+          `WAFOptimisticLockException
+            (WAFOptimisticLockException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_xml xml)
+      | "WAFOptimisticLockException" ->
+          `WAFOptimisticLockException (WAFOptimisticLockException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFNonexistentItemException e ->
+          `Assoc
+            [("error", (`String "WAFNonexistentItemException"));
+            ("details", (WAFNonexistentItemException.to_json e))]
+      | `WAFOptimisticLockException e ->
+          `Assoc
+            [("error", (`String "WAFOptimisticLockException"));
+            ("details", (WAFOptimisticLockException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified API key. After you delete a key, it can take up to 24 hours for WAF to disallow use of the key in all regions."]
 module DeleteFirewallManagerRuleGroupsRequest =
   struct
     type nonrec t =
@@ -6663,14 +11083,14 @@ module DeleteFirewallManagerRuleGroupsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLArn") in
       make ~webACLLockToken ~webACLArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let webACLLockToken =
-        field_map_exn json "WebACLLockToken" LockToken.of_json in
-      let webACLArn = field_map_exn json "WebACLArn" ResourceArn.of_json in
+        field_map_exn json__ "WebACLLockToken" LockToken.of_json in
+      let webACLArn = field_map_exn json__ "WebACLArn" ResourceArn.of_json in
       make ~webACLLockToken ~webACLArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes all rule groups that are managed by Firewall Manager for the specified web ACL. You can only use this if ManagedByFirewallManager is false in the specified WebACL."]
+       "Deletes all rule groups that are managed by Firewall Manager from the specified WebACL. You can only use this if ManagedByFirewallManager and RetrofittedByFirewallManager are both false in the web ACL."]
 module DeleteFirewallManagerRuleGroupsResponse =
   struct
     type nonrec t =
@@ -6760,13 +11180,13 @@ module DeleteFirewallManagerRuleGroupsResponse =
           (Xml.child xml_arg0 "NextWebACLLockToken") in
       make ?nextWebACLLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextWebACLLockToken =
-        field_map json "NextWebACLLockToken" LockToken.of_json in
+        field_map json__ "NextWebACLLockToken" LockToken.of_json in
       make ?nextWebACLLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes all rule groups that are managed by Firewall Manager for the specified web ACL. You can only use this if ManagedByFirewallManager is false in the specified WebACL."]
+       "Deletes all rule groups that are managed by Firewall Manager from the specified WebACL. You can only use this if ManagedByFirewallManager and RetrofittedByFirewallManager are both false in the web ACL."]
 module DeleteIPSetRequest =
   struct
     type nonrec t =
@@ -6776,7 +11196,7 @@ module DeleteIPSetRequest =
           "The name of the IP set. You cannot change the name of an IPSet after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -6806,11 +11226,11 @@ module DeleteIPSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified IPSet."]
@@ -6828,8 +11248,8 @@ module WAFAssociatedItemException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6947,28 +11367,91 @@ module DeleteIPSetResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified IPSet."]
+module LogType =
+  struct
+    type nonrec t =
+      | WAF_LOGS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | WAF_LOGS -> "WAF_LOGS" | Non_static_id s -> s
+    let of_string = function | "WAF_LOGS" -> WAF_LOGS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogType" j)
+    let to_json = simple_to_json to_value
+  end
+module LogScope =
+  struct
+    type nonrec t =
+      | CUSTOMER 
+      | SECURITY_LAKE 
+      | CLOUDWATCH_TELEMETRY_RULE_MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER -> "CUSTOMER"
+      | SECURITY_LAKE -> "SECURITY_LAKE"
+      | CLOUDWATCH_TELEMETRY_RULE_MANAGED ->
+          "CLOUDWATCH_TELEMETRY_RULE_MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER" -> CUSTOMER
+      | "SECURITY_LAKE" -> SECURITY_LAKE
+      | "CLOUDWATCH_TELEMETRY_RULE_MANAGED" ->
+          CLOUDWATCH_TELEMETRY_RULE_MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogScope" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogScope" j)
+    let to_json = simple_to_json to_value
+  end
 module DeleteLoggingConfigurationRequest =
   struct
     type nonrec t =
       {
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the web ACL from which you want to delete the LoggingConfiguration."]}
+          "The Amazon Resource Name (ARN) of the web ACL from which you want to delete the LoggingConfiguration."];
+      logType: LogType.t option
+        [@ocaml.doc
+          "Used to distinguish between various logging options. Currently, there is one option. Default: WAF_LOGS"];
+      logScope: LogScope.t option
+        [@ocaml.doc
+          "The owner of the logging configuration, which must be set to CUSTOMER for the configurations that you manage. The log scope SECURITY_LAKE indicates a configuration that is managed through Amazon Security Lake. You can use Security Lake to collect log and event data from various sources for normalization, analysis, and management. For information, see Collecting data from Amazon Web Services services in the Amazon Security Lake user guide. The log scope CLOUDWATCH_TELEMETRY_RULE_MANAGED indicates a configuration that is managed through Amazon CloudWatch Logs for telemetry data collection and analysis. For information, see What is Amazon CloudWatch Logs ? in the Amazon CloudWatch Logs user guide. Default: CUSTOMER"]}
     let context_ = "DeleteLoggingConfigurationRequest"
-    let make ~resourceArn = fun () -> { resourceArn }
+    let make ?logType =
+      fun ?logScope ->
+        fun ~resourceArn -> fun () -> { logType; logScope; resourceArn }
     let to_value x =
       structure_to_value
-        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("LogType", (Option.map x.logType ~f:LogType.to_value));
+        ("LogScope", (Option.map x.logScope ~f:LogScope.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logScope =
+        (Option.map ~f:LogScope.of_xml) (Xml.child xml_arg0 "LogScope") in
+      let logType =
+        (Option.map ~f:LogType.of_xml) (Xml.child xml_arg0 "LogType") in
       let resourceArn =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
-      make ~resourceArn ()
+      make ?logScope ?logType ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let logScope = field_map json__ "LogScope" LogScope.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ?logScope ?logType ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the LoggingConfiguration from the specified web ACL."]
@@ -7074,8 +11557,9 @@ module DeletePermissionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7151,7 +11635,7 @@ module DeleteRegexPatternSetRequest =
           "The name of the set. You cannot change the name after you create the set."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -7181,11 +11665,11 @@ module DeleteRegexPatternSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified RegexPatternSet."]
@@ -7311,7 +11795,7 @@ module DeleteRuleGroupRequest =
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the rule group. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -7341,11 +11825,11 @@ module DeleteRuleGroupRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified RuleGroup."]
@@ -7471,7 +11955,7 @@ module DeleteWebACLRequest =
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "The unique identifier for the web ACL. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -7501,15 +11985,15 @@ module DeleteWebACLRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified WebACL. You can only use this if ManagedByFirewallManager is false in the specified WebACL."]
+       "Deletes the specified WebACL. You can only use this if ManagedByFirewallManager is false in the web ACL. Before deleting any web ACL, first disassociate it from all resources. To retrieve a list of the resources that are associated with a web ACL, use the following calls: For Amazon CloudFront distributions, use the CloudFront call ListDistributionsByWebACLId. For information, see ListDistributionsByWebACLId in the Amazon CloudFront API Reference. For all other resources, call ListResourcesForWebACL. To disassociate a resource from a web ACL, use the following calls: For Amazon CloudFront distributions, provide an empty web ACL ID in the CloudFront call UpdateDistribution. For information, see UpdateDistribution in the Amazon CloudFront API Reference. For all other resources, call DisassociateWebACL."]
 module DeleteWebACLResponse =
   struct
     type nonrec t = unit
@@ -7623,20 +12107,447 @@ module DeleteWebACLResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified WebACL. You can only use this if ManagedByFirewallManager is false in the specified WebACL."]
+       "Deletes the specified WebACL. You can only use this if ManagedByFirewallManager is false in the web ACL. Before deleting any web ACL, first disassociate it from all resources. To retrieve a list of the resources that are associated with a web ACL, use the following calls: For Amazon CloudFront distributions, use the CloudFront call ListDistributionsByWebACLId. For information, see ListDistributionsByWebACLId in the Amazon CloudFront API Reference. For all other resources, call ListResourcesForWebACL. To disassociate a resource from a web ACL, use the following calls: For Amazon CloudFront distributions, provide an empty web ACL ID in the CloudFront call UpdateDistribution. For information, see UpdateDistribution in the Amazon CloudFront API Reference. For all other resources, call DisassociateWebACL."]
+module DescribeAllManagedProductsRequest =
+  struct
+    type nonrec t =
+      {
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."]}
+    let context_ = "DescribeAllManagedProductsRequest"
+    let make ~scope = fun () -> { scope }
+    let to_value x =
+      structure_to_value [("Scope", (Some (Scope.to_value x.scope)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      make ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ~scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides high-level information for the Amazon Web Services Managed Rules rule groups and Amazon Web Services Marketplace managed rule groups."]
+module ProductTitle =
+  struct
+    type nonrec t = string
+    let context_ = "ProductTitle"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:".*\\S.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductTitle" j
+    let to_json = simple_to_json to_value
+  end
+module ProductLink =
+  struct
+    type nonrec t = string
+    let context_ = "ProductLink"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductLink" j
+    let to_json = simple_to_json to_value
+  end
+module ProductId =
+  struct
+    type nonrec t = string
+    let context_ = "ProductId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductId" j
+    let to_json = simple_to_json to_value
+  end
+module ProductDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ProductDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:".*\\S.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ManagedProductDescriptor =
+  struct
+    type nonrec t =
+      {
+      vendorName: VendorName.t option
+        [@ocaml.doc
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
+      managedRuleSetName: EntityName.t option
+        [@ocaml.doc
+          "The name of the managed rule group. For example, AWSManagedRulesAnonymousIpList or AWSManagedRulesATPRuleSet."];
+      productId: ProductId.t option
+        [@ocaml.doc
+          "A unique identifier for the rule group. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
+      productLink: ProductLink.t option
+        [@ocaml.doc
+          "For Amazon Web Services Marketplace managed rule groups only, the link to the rule group product page."];
+      productTitle: ProductTitle.t option
+        [@ocaml.doc
+          "The display name for the managed rule group. For example, Anonymous IP list or Account takeover prevention."];
+      productDescription: ProductDescription.t option
+        [@ocaml.doc "A short description of the managed rule group."];
+      snsTopicArn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the Amazon Simple Notification Service SNS topic that's used to provide notification of changes to the managed rule group. You can subscribe to the SNS topic to receive notifications when the managed rule group is modified, such as for new versions and for version expiration. For more information, see the Amazon Simple Notification Service Developer Guide."];
+      isVersioningSupported: Boolean.t option
+        [@ocaml.doc "Indicates whether the rule group is versioned."];
+      isAdvancedManagedRuleSet: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the rule group provides an advanced set of protections, such as the the Amazon Web Services Managed Rules rule groups that are used for WAF intelligent threat mitigation."]}
+    let make ?vendorName =
+      fun ?managedRuleSetName ->
+        fun ?productId ->
+          fun ?productLink ->
+            fun ?productTitle ->
+              fun ?productDescription ->
+                fun ?snsTopicArn ->
+                  fun ?isVersioningSupported ->
+                    fun ?isAdvancedManagedRuleSet ->
+                      fun () ->
+                        {
+                          vendorName;
+                          managedRuleSetName;
+                          productId;
+                          productLink;
+                          productTitle;
+                          productDescription;
+                          snsTopicArn;
+                          isVersioningSupported;
+                          isAdvancedManagedRuleSet
+                        }
+    let to_value x =
+      structure_to_value
+        [("VendorName", (Option.map x.vendorName ~f:VendorName.to_value));
+        ("ManagedRuleSetName",
+          (Option.map x.managedRuleSetName ~f:EntityName.to_value));
+        ("ProductId", (Option.map x.productId ~f:ProductId.to_value));
+        ("ProductLink", (Option.map x.productLink ~f:ProductLink.to_value));
+        ("ProductTitle",
+          (Option.map x.productTitle ~f:ProductTitle.to_value));
+        ("ProductDescription",
+          (Option.map x.productDescription ~f:ProductDescription.to_value));
+        ("SnsTopicArn", (Option.map x.snsTopicArn ~f:ResourceArn.to_value));
+        ("IsVersioningSupported",
+          (Option.map x.isVersioningSupported ~f:Boolean.to_value));
+        ("IsAdvancedManagedRuleSet",
+          (Option.map x.isAdvancedManagedRuleSet ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isAdvancedManagedRuleSet =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsAdvancedManagedRuleSet") in
+      let isVersioningSupported =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsVersioningSupported") in
+      let snsTopicArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "SnsTopicArn") in
+      let productDescription =
+        (Option.map ~f:ProductDescription.of_xml)
+          (Xml.child xml_arg0 "ProductDescription") in
+      let productTitle =
+        (Option.map ~f:ProductTitle.of_xml)
+          (Xml.child xml_arg0 "ProductTitle") in
+      let productLink =
+        (Option.map ~f:ProductLink.of_xml) (Xml.child xml_arg0 "ProductLink") in
+      let productId =
+        (Option.map ~f:ProductId.of_xml) (Xml.child xml_arg0 "ProductId") in
+      let managedRuleSetName =
+        (Option.map ~f:EntityName.of_xml)
+          (Xml.child xml_arg0 "ManagedRuleSetName") in
+      let vendorName =
+        (Option.map ~f:VendorName.of_xml) (Xml.child xml_arg0 "VendorName") in
+      make ?isAdvancedManagedRuleSet ?isVersioningSupported ?snsTopicArn
+        ?productDescription ?productTitle ?productLink ?productId
+        ?managedRuleSetName ?vendorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isAdvancedManagedRuleSet =
+        field_map json__ "IsAdvancedManagedRuleSet" Boolean.of_json in
+      let isVersioningSupported =
+        field_map json__ "IsVersioningSupported" Boolean.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" ResourceArn.of_json in
+      let productDescription =
+        field_map json__ "ProductDescription" ProductDescription.of_json in
+      let productTitle = field_map json__ "ProductTitle" ProductTitle.of_json in
+      let productLink = field_map json__ "ProductLink" ProductLink.of_json in
+      let productId = field_map json__ "ProductId" ProductId.of_json in
+      let managedRuleSetName =
+        field_map json__ "ManagedRuleSetName" EntityName.of_json in
+      let vendorName = field_map json__ "VendorName" VendorName.of_json in
+      make ?isAdvancedManagedRuleSet ?isVersioningSupported ?snsTopicArn
+        ?productDescription ?productTitle ?productLink ?productId
+        ?managedRuleSetName ?vendorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The properties of a managed product, such as an Amazon Web Services Managed Rules rule group or an Amazon Web Services Marketplace managed rule group."]
+module ManagedProductDescriptors =
+  struct
+    type nonrec t = ManagedProductDescriptor.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ManagedProductDescriptor.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ManagedProductDescriptor.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ManagedProductDescriptors"
+        ~of_json:ManagedProductDescriptor.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DescribeAllManagedProductsResponse =
+  struct
+    type nonrec t =
+      {
+      managedProducts: ManagedProductDescriptors.t option
+        [@ocaml.doc
+          "High-level information for the Amazon Web Services Managed Rules rule groups and Amazon Web Services Marketplace managed rule groups."]}
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?managedProducts = fun () -> { managedProducts }
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ManagedProducts",
+           (Option.map x.managedProducts
+              ~f:ManagedProductDescriptors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedProducts =
+        (Option.map ~f:ManagedProductDescriptors.of_xml)
+          (Xml.child xml_arg0 "ManagedProducts") in
+      make ?managedProducts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedProducts =
+        field_map json__ "ManagedProducts" ManagedProductDescriptors.of_json in
+      make ?managedProducts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides high-level information for the Amazon Web Services Managed Rules rule groups and Amazon Web Services Marketplace managed rule groups."]
+module DescribeManagedProductsByVendorRequest =
+  struct
+    type nonrec t =
+      {
+      vendorName: VendorName.t
+        [@ocaml.doc
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."]}
+    let context_ = "DescribeManagedProductsByVendorRequest"
+    let make ~vendorName = fun ~scope -> fun () -> { vendorName; scope }
+    let to_value x =
+      structure_to_value
+        [("VendorName", (Some (VendorName.to_value x.vendorName)));
+        ("Scope", (Some (Scope.to_value x.scope)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      let vendorName =
+        VendorName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VendorName") in
+      make ~scope ~vendorName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let vendorName = field_map_exn json__ "VendorName" VendorName.of_json in
+      make ~scope ~vendorName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides high-level information for the managed rule groups owned by a specific vendor."]
+module DescribeManagedProductsByVendorResponse =
+  struct
+    type nonrec t =
+      {
+      managedProducts: ManagedProductDescriptors.t option
+        [@ocaml.doc
+          "High-level information for the managed rule groups owned by the specified vendor."]}
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?managedProducts = fun () -> { managedProducts }
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ManagedProducts",
+           (Option.map x.managedProducts
+              ~f:ManagedProductDescriptors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let managedProducts =
+        (Option.map ~f:ManagedProductDescriptors.of_xml)
+          (Xml.child xml_arg0 "ManagedProducts") in
+      make ?managedProducts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let managedProducts =
+        field_map json__ "ManagedProducts" ManagedProductDescriptors.of_json in
+      make ?managedProducts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides high-level information for the managed rule groups owned by a specific vendor."]
 module DescribeManagedRuleGroupRequest =
   struct
     type nonrec t =
       {
       vendorName: VendorName.t
         [@ocaml.doc
-          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify the rule group."];
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
       name: EntityName.t
         [@ocaml.doc
           "The name of the managed rule group. You use this, along with the vendor name, to identify the rule group."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       versionName: VersionKeyString.t option
         [@ocaml.doc
           "The version of the rule group. You can only use a version that is not scheduled for expiration. If you don't provide this, WAF uses the vendor's default version."]}
@@ -7666,11 +12577,12 @@ module DescribeManagedRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VendorName") in
       make ?versionName ~scope ~name ~vendorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let versionName = field_map json "VersionName" VersionKeyString.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      let vendorName = field_map_exn json "VendorName" VendorName.of_json in
+    let of_json json__ =
+      let versionName =
+        field_map json__ "VersionName" VersionKeyString.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      let vendorName = field_map_exn json__ "VendorName" VendorName.of_json in
       make ?versionName ~scope ~name ~vendorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7696,9 +12608,9 @@ module RuleSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?action ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map json "Action" RuleAction.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+    let of_json json__ =
+      let action = field_map json__ "Action" RuleAction.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?action ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7707,6 +12619,9 @@ module RuleSummaries =
   struct
     type nonrec t = RuleSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7742,8 +12657,8 @@ module LabelSummary =
       let name = (Option.map ~f:LabelName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" LabelName.of_json in make ?name ()
+    let of_json json__ =
+      let name = field_map json__ "Name" LabelName.of_json in make ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List of labels used by one or more of the rules of a RuleGroup. This summary object is used for the following rule group lists: AvailableLabels - Labels that rules add to matching requests. These labels are defined in the RuleLabels for a Rule. ConsumedLabels - Labels that rules match against. These labels are defined in a LabelMatchStatement specification, in the Statement definition of a rule."]
@@ -7751,6 +12666,9 @@ module LabelSummaries =
   struct
     type nonrec t = LabelSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LabelSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7779,10 +12697,10 @@ module DescribeManagedRuleGroupResponse =
         [@ocaml.doc "The managed rule group's version."];
       snsTopicArn: ResourceArn.t option
         [@ocaml.doc
-          "The Amazon resource name (ARN) of the Amazon Simple Notification Service SNS topic that's used to record changes to the managed rule group. You can subscribe to the SNS topic to receive notifications when the managed rule group is modified, such as for new versions and for version expiration. For more information, see the Amazon Simple Notification Service Developer Guide."];
+          "The Amazon resource name (ARN) of the Amazon Simple Notification Service SNS topic that's used to provide notification of changes to the managed rule group. You can subscribe to the SNS topic to receive notifications when the managed rule group is modified, such as for new versions and for version expiration. For more information, see the Amazon Simple Notification Service Developer Guide."];
       capacity: CapacityUnit.t option
         [@ocaml.doc
-          "The web ACL capacity units (WCUs) required for this rule group. WAF uses web ACL capacity units (WCU) to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect each rule's relative cost. Rule group capacity is fixed at creation, so users can plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."];
+          "The web ACL capacity units (WCUs) required for this rule group. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."];
       rules: RuleSummaries.t option ;
       labelNamespace: LabelName.t option
         [@ocaml.doc
@@ -7932,16 +12850,18 @@ module DescribeManagedRuleGroupResponse =
       make ?consumedLabels ?availableLabels ?labelNamespace ?rules ?capacity
         ?snsTopicArn ?versionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedLabels =
-        field_map json "ConsumedLabels" LabelSummaries.of_json in
+        field_map json__ "ConsumedLabels" LabelSummaries.of_json in
       let availableLabels =
-        field_map json "AvailableLabels" LabelSummaries.of_json in
-      let labelNamespace = field_map json "LabelNamespace" LabelName.of_json in
-      let rules = field_map json "Rules" RuleSummaries.of_json in
-      let capacity = field_map json "Capacity" CapacityUnit.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" ResourceArn.of_json in
-      let versionName = field_map json "VersionName" VersionKeyString.of_json in
+        field_map json__ "AvailableLabels" LabelSummaries.of_json in
+      let labelNamespace =
+        field_map json__ "LabelNamespace" LabelName.of_json in
+      let rules = field_map json__ "Rules" RuleSummaries.of_json in
+      let capacity = field_map json__ "Capacity" CapacityUnit.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" ResourceArn.of_json in
+      let versionName =
+        field_map json__ "VersionName" VersionKeyString.of_json in
       make ?consumedLabels ?availableLabels ?labelNamespace ?rules ?capacity
         ?snsTopicArn ?versionName ()
     let to_json v = composed_to_json to_value v
@@ -7953,7 +12873,7 @@ module DisassociateWebACLRequest =
       {
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to disassociate from the web ACL. The ARN must be in one of the following formats: For an Application Load Balancer: arn:aws:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Amazon API Gateway REST API: arn:aws:apigateway:region::/restapis/api-id/stages/stage-name For an AppSync GraphQL API: arn:aws:appsync:region:account-id:apis/GraphQLApiId"]}
+          "The Amazon Resource Name (ARN) of the resource to disassociate from the web ACL. The ARN must be in one of the following formats: For an Application Load Balancer: arn:partition:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Amazon API Gateway REST API: arn:partition:apigateway:region::/restapis/api-id/stages/stage-name For an AppSync GraphQL API: arn:partition:appsync:region:account-id:apis/GraphQLApiId For an Amazon Cognito user pool: arn:partition:cognito-idp:region:account-id:userpool/user-pool-id For an App Runner service: arn:partition:apprunner:region:account-id:service/apprunner-service-name/apprunner-service-id For an Amazon Web Services Verified Access instance: arn:partition:ec2:region:account-id:verified-access-instance/instance-id For an Amplify application: arn:partition:amplify:region:account-id:apps/app-id"]}
     let context_ = "DisassociateWebACLRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -7966,12 +12886,13 @@ module DisassociateWebACLRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a web ACL from a regional application resource. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. For Amazon CloudFront, don't use this call. Instead, use your CloudFront distribution configuration. To disassociate a web ACL, provide an empty web ACL ID in the CloudFront call UpdateDistribution. For information, see UpdateDistribution."]
+       "Disassociates the specified resource from its web ACL association, if it has one. Use this for all resource types except for Amazon CloudFront distributions. For Amazon CloudFront, call UpdateDistribution for the distribution and provide an empty web ACL ID. For information, see UpdateDistribution in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for DisassociateWebACL in the WAF Developer Guide."]
 module DisassociateWebACLResponse =
   struct
     type nonrec t = unit
@@ -8044,7 +12965,7 @@ module DisassociateWebACLResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Disassociates a web ACL from a regional application resource. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. For Amazon CloudFront, don't use this call. Instead, use your CloudFront distribution configuration. To disassociate a web ACL, provide an empty web ACL ID in the CloudFront call UpdateDistribution. For information, see UpdateDistribution."]
+       "Disassociates the specified resource from its web ACL association, if it has one. Use this for all resource types except for Amazon CloudFront distributions. For Amazon CloudFront, call UpdateDistribution for the distribution and provide an empty web ACL ID. For information, see UpdateDistribution in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for DisassociateWebACL in the WAF Developer Guide."]
 module DownloadUrl =
   struct
     type nonrec t = string
@@ -8137,19 +13058,65 @@ module Filter =
           (Xml.child_exn ~context:context_ xml_arg0 "Behavior") in
       make ~conditions ~requirement ~behavior ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let conditions = field_map_exn json "Conditions" Conditions.of_json in
+    let of_json json__ =
+      let conditions = field_map_exn json__ "Conditions" Conditions.of_json in
       let requirement =
-        field_map_exn json "Requirement" FilterRequirement.of_json in
-      let behavior = field_map_exn json "Behavior" FilterBehavior.of_json in
+        field_map_exn json__ "Requirement" FilterRequirement.of_json in
+      let behavior = field_map_exn json__ "Behavior" FilterBehavior.of_json in
       make ~conditions ~requirement ~behavior ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A single logging filter, used in LoggingFilter."]
+module FilterSource =
+  struct
+    type nonrec t =
+      {
+      botCategory: FilterString.t option
+        [@ocaml.doc
+          "The bot category that was used to filter the results. For example, ai or search_engine."];
+      botOrganization: FilterString.t option
+        [@ocaml.doc
+          "The bot organization that was used to filter the results. For example, OpenAI or Google."];
+      botName: FilterString.t option
+        [@ocaml.doc
+          "The bot name that was used to filter the results. For example, gptbot or googlebot."]}
+    let make ?botCategory =
+      fun ?botOrganization ->
+        fun ?botName -> fun () -> { botCategory; botOrganization; botName }
+    let to_value x =
+      structure_to_value
+        [("BotCategory", (Option.map x.botCategory ~f:FilterString.to_value));
+        ("BotOrganization",
+          (Option.map x.botOrganization ~f:FilterString.to_value));
+        ("BotName", (Option.map x.botName ~f:FilterString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let botName =
+        (Option.map ~f:FilterString.of_xml) (Xml.child xml_arg0 "BotName") in
+      let botOrganization =
+        (Option.map ~f:FilterString.of_xml)
+          (Xml.child xml_arg0 "BotOrganization") in
+      let botCategory =
+        (Option.map ~f:FilterString.of_xml)
+          (Xml.child xml_arg0 "BotCategory") in
+      make ?botName ?botOrganization ?botCategory ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let botName = field_map json__ "BotName" FilterString.of_json in
+      let botOrganization =
+        field_map json__ "BotOrganization" FilterString.of_json in
+      let botCategory = field_map json__ "BotCategory" FilterString.of_json in
+      make ?botName ?botOrganization ?botCategory ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the bot filter that was applied to the request. This structure is populated in the response when you filter by bot category, organization, or name."]
 module Filters =
   struct
     type nonrec t = Filter.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8175,10 +13142,10 @@ module FirewallManagerStatement =
       {
       managedRuleGroupStatement: ManagedRuleGroupStatement.t option
         [@ocaml.doc
-          "A rule statement used to run the rules that are defined in a managed rule group. To use this, provide the vendor name and the name of the rule group in this statement. You can retrieve the required names by calling ListAvailableManagedRuleGroups. You cannot nest a ManagedRuleGroupStatement, for example for use inside a NotStatement or OrStatement. It can only be referenced as a top-level statement within a rule."];
+          "A statement used by Firewall Manager to run the rules that are defined in a managed rule group. This is managed by Firewall Manager for an Firewall Manager WAF policy."];
       ruleGroupReferenceStatement: RuleGroupReferenceStatement.t option
         [@ocaml.doc
-          "A rule statement used to run the rules that are defined in a RuleGroup. To use this, create a rule group with your rules, then provide the ARN of the rule group in this statement. You cannot nest a RuleGroupReferenceStatement, for example for use inside a NotStatement or OrStatement. You can only use a rule group reference statement at the top level inside a web ACL."]}
+          "A statement used by Firewall Manager to run the rules that are defined in a rule group. This is managed by Firewall Manager for an Firewall Manager WAF policy."]}
     let make ?managedRuleGroupStatement =
       fun ?ruleGroupReferenceStatement ->
         fun () -> { managedRuleGroupStatement; ruleGroupReferenceStatement }
@@ -8200,42 +13167,41 @@ module FirewallManagerStatement =
           (Xml.child xml_arg0 "ManagedRuleGroupStatement") in
       make ?ruleGroupReferenceStatement ?managedRuleGroupStatement ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ruleGroupReferenceStatement =
-        field_map json "RuleGroupReferenceStatement"
+        field_map json__ "RuleGroupReferenceStatement"
           RuleGroupReferenceStatement.of_json in
       let managedRuleGroupStatement =
-        field_map json "ManagedRuleGroupStatement"
+        field_map json__ "ManagedRuleGroupStatement"
           ManagedRuleGroupStatement.of_json in
       make ?ruleGroupReferenceStatement ?managedRuleGroupStatement ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The processing guidance for an Firewall Manager rule. This is like a regular rule Statement, but it can only contain a rule group reference."]
+       "The processing guidance for an Firewall Manager rule. This is like a regular rule Statement, but it can only contain a single rule group reference."]
 module FirewallManagerRuleGroup =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
-      priority: RulePriority.t
+      priority: RulePriority.t option
         [@ocaml.doc
           "If you define more than one rule group in the first or last Firewall Manager rule groups, WAF evaluates each request against the rule groups in order, starting from the lowest priority setting. The priorities don't need to be consecutive, but they must all be different."];
-      firewallManagerStatement: FirewallManagerStatement.t
+      firewallManagerStatement: FirewallManagerStatement.t option
         [@ocaml.doc
           "The processing guidance for an Firewall Manager rule. This is like a regular rule Statement, but it can only contain a rule group reference."];
-      overrideAction: OverrideAction.t
+      overrideAction: OverrideAction.t option
         [@ocaml.doc
-          "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead exclude those rules in your rule group reference statement settings."];
-      visibilityConfig: VisibilityConfig.t
+          "The action to use in the place of the action that results from the rule group evaluation. Set the override action to none to leave the result of the rule group alone. Set it to count to override the result to count only. You can only use this for rule statements that reference a rule group, like RuleGroupReferenceStatement and ManagedRuleGroupStatement. This option is usually set to none. It does not affect how the rules in the rule group are evaluated. If you want the rules in the rule group to only count matches, do not use this and instead use the rule action override option, with Count action, in your rule group reference statement settings."];
+      visibilityConfig: VisibilityConfig.t option
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."]}
-    let context_ = "FirewallManagerRuleGroup"
-    let make ~name =
-      fun ~priority ->
-        fun ~firewallManagerStatement ->
-          fun ~overrideAction ->
-            fun ~visibilityConfig ->
+    let make ?name =
+      fun ?priority ->
+        fun ?firewallManagerStatement ->
+          fun ?overrideAction ->
+            fun ?visibilityConfig ->
               fun () ->
                 {
                   name;
@@ -8246,46 +13212,45 @@ module FirewallManagerRuleGroup =
                 }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Priority", (Some (RulePriority.to_value x.priority)));
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Priority", (Option.map x.priority ~f:RulePriority.to_value));
         ("FirewallManagerStatement",
-          (Some
-             (FirewallManagerStatement.to_value x.firewallManagerStatement)));
-        ("OverrideAction", (Some (OverrideAction.to_value x.overrideAction)));
+          (Option.map x.firewallManagerStatement
+             ~f:FirewallManagerStatement.to_value));
+        ("OverrideAction",
+          (Option.map x.overrideAction ~f:OverrideAction.to_value));
         ("VisibilityConfig",
-          (Some (VisibilityConfig.to_value x.visibilityConfig)))]
+          (Option.map x.visibilityConfig ~f:VisibilityConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let visibilityConfig =
-        VisibilityConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VisibilityConfig") in
+        (Option.map ~f:VisibilityConfig.of_xml)
+          (Xml.child xml_arg0 "VisibilityConfig") in
       let overrideAction =
-        OverrideAction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OverrideAction") in
+        (Option.map ~f:OverrideAction.of_xml)
+          (Xml.child xml_arg0 "OverrideAction") in
       let firewallManagerStatement =
-        FirewallManagerStatement.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "FirewallManagerStatement") in
+        (Option.map ~f:FirewallManagerStatement.of_xml)
+          (Xml.child xml_arg0 "FirewallManagerStatement") in
       let priority =
-        RulePriority.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
+        (Option.map ~f:RulePriority.of_xml) (Xml.child xml_arg0 "Priority") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~visibilityConfig ~overrideAction ~firewallManagerStatement
-        ~priority ~name ()
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?visibilityConfig ?overrideAction ?firewallManagerStatement
+        ?priority ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
+        field_map json__ "VisibilityConfig" VisibilityConfig.of_json in
       let overrideAction =
-        field_map_exn json "OverrideAction" OverrideAction.of_json in
+        field_map json__ "OverrideAction" OverrideAction.of_json in
       let firewallManagerStatement =
-        field_map_exn json "FirewallManagerStatement"
+        field_map json__ "FirewallManagerStatement"
           FirewallManagerStatement.of_json in
-      let priority = field_map_exn json "Priority" RulePriority.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ~visibilityConfig ~overrideAction ~firewallManagerStatement
-        ~priority ~name ()
+      let priority = field_map json__ "Priority" RulePriority.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      make ?visibilityConfig ?overrideAction ?firewallManagerStatement
+        ?priority ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A rule group that's defined for an Firewall Manager WAF policy."]
@@ -8293,6 +13258,9 @@ module FirewallManagerRuleGroups =
   struct
     type nonrec t = FirewallManagerRuleGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallManagerRuleGroup.to_value)) |>
         (fun x -> `List x)
@@ -8359,14 +13327,14 @@ module GenerateMobileSdkReleaseUrlRequest =
         Platform.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Platform") in
       make ~releaseVersion ~platform ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let releaseVersion =
-        field_map_exn json "ReleaseVersion" VersionKeyString.of_json in
-      let platform = field_map_exn json "Platform" Platform.of_json in
+        field_map_exn json__ "ReleaseVersion" VersionKeyString.of_json in
+      let platform = field_map_exn json__ "Platform" Platform.of_json in
       make ~releaseVersion ~platform ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a presigned download URL for the specified release of the mobile SDK. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Generates a presigned download URL for the specified release of the mobile SDK. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module GenerateMobileSdkReleaseUrlResponse =
   struct
     type nonrec t =
@@ -8443,11 +13411,145 @@ module GenerateMobileSdkReleaseUrlResponse =
       let url = (Option.map ~f:DownloadUrl.of_xml) (Xml.child xml_arg0 "Url") in
       make ?url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" DownloadUrl.of_json in make ?url ()
+    let of_json json__ =
+      let url = field_map json__ "Url" DownloadUrl.of_json in make ?url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a presigned download URL for the specified release of the mobile SDK. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Generates a presigned download URL for the specified release of the mobile SDK. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+module GetDecryptedAPIKeyRequest =
+  struct
+    type nonrec t =
+      {
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+      aPIKey: APIKey.t [@ocaml.doc "The encrypted API key."]}
+    let context_ = "GetDecryptedAPIKeyRequest"
+    let make ~scope = fun ~aPIKey -> fun () -> { scope; aPIKey }
+    let to_value x =
+      structure_to_value
+        [("Scope", (Some (Scope.to_value x.scope)));
+        ("APIKey", (Some (APIKey.to_value x.aPIKey)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aPIKey =
+        APIKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "APIKey") in
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      make ~aPIKey ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aPIKey = field_map_exn json__ "APIKey" APIKey.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ~aPIKey ~scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns your API key in decrypted form. Use this to check the token domains that you have defined for the key. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide."]
+module GetDecryptedAPIKeyResponse =
+  struct
+    type nonrec t =
+      {
+      tokenDomains: TokenDomains.t option
+        [@ocaml.doc "The token domains that are defined in this API key."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time that the key was created."]}
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFInvalidResourceException of WAFInvalidResourceException.t 
+      | `WAFNonexistentItemException of WAFNonexistentItemException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tokenDomains =
+      fun ?creationTimestamp -> fun () -> { tokenDomains; creationTimestamp }
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | "WAFInvalidResourceException" ->
+          `WAFInvalidResourceException
+            (WAFInvalidResourceException.of_json json)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | "WAFInvalidResourceException" ->
+          `WAFInvalidResourceException
+            (WAFInvalidResourceException.of_xml xml)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFInvalidResourceException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidResourceException"));
+            ("details", (WAFInvalidResourceException.to_json e))]
+      | `WAFNonexistentItemException e ->
+          `Assoc
+            [("error", (`String "WAFNonexistentItemException"));
+            ("details", (WAFNonexistentItemException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TokenDomains",
+           (Option.map x.tokenDomains ~f:TokenDomains.to_value));
+        ("CreationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreationTimestamp") in
+      let tokenDomains =
+        (Option.map ~f:TokenDomains.of_xml)
+          (Xml.child xml_arg0 "TokenDomains") in
+      make ?creationTimestamp ?tokenDomains ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimestamp =
+        field_map json__ "CreationTimestamp" Timestamp.of_json in
+      let tokenDomains = field_map json__ "TokenDomains" TokenDomains.of_json in
+      make ?creationTimestamp ?tokenDomains ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns your API key in decrypted form. Use this to check the token domains that you have defined for the key. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide."]
 module GetIPSetRequest =
   struct
     type nonrec t =
@@ -8457,7 +13559,7 @@ module GetIPSetRequest =
           "The name of the IP set. You cannot change the name of an IPSet after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."]}
@@ -8478,10 +13580,10 @@ module GetIPSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified IPSet."]
@@ -8489,70 +13591,66 @@ module IPSet =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the IP set. You cannot change the name of an IPSet after you create it."];
-      id: EntityId.t
+      id: EntityId.t option
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
-      aRN: ResourceArn.t
+      aRN: ResourceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the entity."];
       description: EntityDescription.t option
         [@ocaml.doc
           "A description of the IP set that helps with identification."];
-      iPAddressVersion: IPAddressVersion.t
+      iPAddressVersion: IPAddressVersion.t option
         [@ocaml.doc "The version of the IP addresses, either IPV4 or IPV6."];
-      addresses: IPAddresses.t
+      addresses: IPAddresses.t option
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"]}
-    let context_ = "IPSet"
-    let make ?description =
-      fun ~name ->
-        fun ~id ->
-          fun ~aRN ->
-            fun ~iPAddressVersion ->
-              fun ~addresses ->
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses that you want WAF to inspect for in incoming requests. All addresses must be specified using Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: For requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. For requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. For requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. For requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"]}
+    let make ?name =
+      fun ?id ->
+        fun ?aRN ->
+          fun ?description ->
+            fun ?iPAddressVersion ->
+              fun ?addresses ->
                 fun () ->
-                  { description; name; id; aRN; iPAddressVersion; addresses }
+                  { name; id; aRN; description; iPAddressVersion; addresses }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Id", (Some (EntityId.to_value x.id)));
-        ("ARN", (Some (ResourceArn.to_value x.aRN)));
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Id", (Option.map x.id ~f:EntityId.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceArn.to_value));
         ("Description",
           (Option.map x.description ~f:EntityDescription.to_value));
         ("IPAddressVersion",
-          (Some (IPAddressVersion.to_value x.iPAddressVersion)));
-        ("Addresses", (Some (IPAddresses.to_value x.addresses)))]
+          (Option.map x.iPAddressVersion ~f:IPAddressVersion.to_value));
+        ("Addresses", (Option.map x.addresses ~f:IPAddresses.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let addresses =
-        IPAddresses.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Addresses") in
+        (Option.map ~f:IPAddresses.of_xml) (Xml.child xml_arg0 "Addresses") in
       let iPAddressVersion =
-        IPAddressVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IPAddressVersion") in
+        (Option.map ~f:IPAddressVersion.of_xml)
+          (Xml.child xml_arg0 "IPAddressVersion") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      let aRN =
-        ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
-      let id =
-        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let aRN = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ARN") in
+      let id = (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "Id") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~addresses ~iPAddressVersion ?description ~aRN ~id ~name ()
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?addresses ?iPAddressVersion ?description ?aRN ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addresses = field_map_exn json "Addresses" IPAddresses.of_json in
+    let of_json json__ =
+      let addresses = field_map json__ "Addresses" IPAddresses.of_json in
       let iPAddressVersion =
-        field_map_exn json "IPAddressVersion" IPAddressVersion.of_json in
+        field_map json__ "IPAddressVersion" IPAddressVersion.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ~addresses ~iPAddressVersion ?description ~aRN ~id ~name ()
+        field_map json__ "Description" EntityDescription.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      make ?addresses ?iPAddressVersion ?description ?aRN ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains zero or more IP addresses or blocks of IP addresses specified in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. For information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. WAF assigns an ARN to each IPSet that you create. To use an IP set in a rule, you provide the ARN to the Rule statement IPSetReferenceStatement."]
@@ -8636,9 +13734,9 @@ module GetIPSetResponse =
       let iPSet = (Option.map ~f:IPSet.of_xml) (Xml.child xml_arg0 "IPSet") in
       make ?lockToken ?iPSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map json "LockToken" LockToken.of_json in
-      let iPSet = field_map json "IPSet" IPSet.of_json in
+    let of_json json__ =
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
+      let iPSet = field_map json__ "IPSet" IPSet.of_json in
       make ?lockToken ?iPSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified IPSet."]
@@ -8648,22 +13746,39 @@ module GetLoggingConfigurationRequest =
       {
       resourceArn: ResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the web ACL for which you want to get the LoggingConfiguration."]}
+          "The Amazon Resource Name (ARN) of the web ACL for which you want to get the LoggingConfiguration."];
+      logType: LogType.t option
+        [@ocaml.doc
+          "Used to distinguish between various logging options. Currently, there is one option. Default: WAF_LOGS"];
+      logScope: LogScope.t option
+        [@ocaml.doc
+          "The owner of the logging configuration, which must be set to CUSTOMER for the configurations that you manage. The log scope SECURITY_LAKE indicates a configuration that is managed through Amazon Security Lake. You can use Security Lake to collect log and event data from various sources for normalization, analysis, and management. For information, see Collecting data from Amazon Web Services services in the Amazon Security Lake user guide. The log scope CLOUDWATCH_TELEMETRY_RULE_MANAGED indicates a configuration that is managed through Amazon CloudWatch Logs for telemetry data collection and analysis. For information, see What is Amazon CloudWatch Logs ? in the Amazon CloudWatch Logs user guide. Default: CUSTOMER"]}
     let context_ = "GetLoggingConfigurationRequest"
-    let make ~resourceArn = fun () -> { resourceArn }
+    let make ?logType =
+      fun ?logScope ->
+        fun ~resourceArn -> fun () -> { logType; logScope; resourceArn }
     let to_value x =
       structure_to_value
-        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("LogType", (Option.map x.logType ~f:LogType.to_value));
+        ("LogScope", (Option.map x.logScope ~f:LogScope.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logScope =
+        (Option.map ~f:LogScope.of_xml) (Xml.child xml_arg0 "LogScope") in
+      let logType =
+        (Option.map ~f:LogType.of_xml) (Xml.child xml_arg0 "LogType") in
       let resourceArn =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
-      make ~resourceArn ()
+      make ?logScope ?logType ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let logScope = field_map json__ "LogScope" LogScope.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ?logScope ?logType ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the LoggingConfiguration for the specified web ACL."]
@@ -8672,6 +13787,9 @@ module RedactedFields =
     type nonrec t = FieldToMatch.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FieldToMatch.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8718,10 +13836,10 @@ module LoggingFilter =
         Filters.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Filters") in
       make ~defaultBehavior ~filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultBehavior =
-        field_map_exn json "DefaultBehavior" FilterBehavior.of_json in
-      let filters = field_map_exn json "Filters" Filters.of_json in
+        field_map_exn json__ "DefaultBehavior" FilterBehavior.of_json in
+      let filters = field_map_exn json__ "Filters" Filters.of_json in
       make ~defaultBehavior ~filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8735,6 +13853,9 @@ module LogDestinationConfigs =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8768,27 +13889,37 @@ module LoggingConfiguration =
           "The logging destination configuration that you want to associate with the web ACL. You can associate one logging destination to a web ACL."];
       redactedFields: RedactedFields.t option
         [@ocaml.doc
-          "The parts of the request that you want to keep out of the logs. For example, if you redact the SingleHeader field, the HEADER field in the logs will be xxx. You can specify only the following fields for redaction: UriPath, QueryString, SingleHeader, Method, and JsonBody."];
+          "The parts of the request that you want to keep out of the logs. For example, if you redact the SingleHeader field, the HEADER field in the logs will be REDACTED for all rules that use the SingleHeader FieldToMatch setting. If you configure data protection for the web ACL, the protection applies to the data that WAF sends to the logs. Redaction applies only to the component that's specified in the rule's FieldToMatch setting, so the SingleHeader redaction doesn't apply to rules that use the Headers FieldToMatch. You can specify only the following fields for redaction: UriPath, QueryString, SingleHeader, and Method. This setting has no impact on request sampling. You can only exclude fields from request sampling by disabling sampling in the web ACL visibility configuration or by configuring data protection for the web ACL."];
       managedByFirewallManager: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the logging configuration was created by Firewall Manager, as part of an WAF policy configuration. If true, only Firewall Manager can modify or delete the configuration."];
+          "Indicates whether the logging configuration was created by Firewall Manager, as part of an WAF policy configuration. If true, only Firewall Manager can modify or delete the configuration. The logging configuration can be created by Firewall Manager for use with any web ACL that Firewall Manager is using for an WAF policy. Web ACLs that Firewall Manager creates and uses have their ManagedByFirewallManager property set to true. Web ACLs that were created by a customer account and then retrofitted by Firewall Manager for use by a policy have their RetrofittedByFirewallManager property set to true. For either case, any corresponding logging configuration will indicate ManagedByFirewallManager."];
       loggingFilter: LoggingFilter.t option
         [@ocaml.doc
-          "Filtering that specifies which web requests are kept in the logs and which are dropped. You can filter on the rule action and on the web request labels that were applied by matching rules during web ACL evaluation."]}
+          "Filtering that specifies which web requests are kept in the logs and which are dropped. You can filter on the rule action and on the web request labels that were applied by matching rules during web ACL evaluation."];
+      logType: LogType.t option
+        [@ocaml.doc
+          "Used to distinguish between various logging options. Currently, there is one option. Default: WAF_LOGS"];
+      logScope: LogScope.t option
+        [@ocaml.doc
+          "The owner of the logging configuration, which must be set to CUSTOMER for the configurations that you manage. The log scope SECURITY_LAKE indicates a configuration that is managed through Amazon Security Lake. You can use Security Lake to collect log and event data from various sources for normalization, analysis, and management. For information, see Collecting data from Amazon Web Services services in the Amazon Security Lake user guide. The log scope CLOUDWATCH_TELEMETRY_RULE_MANAGED indicates a configuration that is managed through Amazon CloudWatch Logs for telemetry data collection and analysis. For information, see What is Amazon CloudWatch Logs ? in the Amazon CloudWatch Logs user guide. Default: CUSTOMER"]}
     let context_ = "LoggingConfiguration"
     let make ?redactedFields =
       fun ?managedByFirewallManager ->
         fun ?loggingFilter ->
-          fun ~resourceArn ->
-            fun ~logDestinationConfigs ->
-              fun () ->
-                {
-                  redactedFields;
-                  managedByFirewallManager;
-                  loggingFilter;
-                  resourceArn;
-                  logDestinationConfigs
-                }
+          fun ?logType ->
+            fun ?logScope ->
+              fun ~resourceArn ->
+                fun ~logDestinationConfigs ->
+                  fun () ->
+                    {
+                      redactedFields;
+                      managedByFirewallManager;
+                      loggingFilter;
+                      logType;
+                      logScope;
+                      resourceArn;
+                      logDestinationConfigs
+                    }
     let to_value x =
       structure_to_value
         [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
@@ -8799,9 +13930,15 @@ module LoggingConfiguration =
         ("ManagedByFirewallManager",
           (Option.map x.managedByFirewallManager ~f:Boolean.to_value));
         ("LoggingFilter",
-          (Option.map x.loggingFilter ~f:LoggingFilter.to_value))]
+          (Option.map x.loggingFilter ~f:LoggingFilter.to_value));
+        ("LogType", (Option.map x.logType ~f:LogType.to_value));
+        ("LogScope", (Option.map x.logScope ~f:LogScope.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logScope =
+        (Option.map ~f:LogScope.of_xml) (Xml.child xml_arg0 "LogScope") in
+      let logType =
+        (Option.map ~f:LogType.of_xml) (Xml.child xml_arg0 "LogType") in
       let loggingFilter =
         (Option.map ~f:LoggingFilter.of_xml)
           (Xml.child xml_arg0 "LoggingFilter") in
@@ -8817,25 +13954,28 @@ module LoggingConfiguration =
       let resourceArn =
         ResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
-      make ?loggingFilter ?managedByFirewallManager ?redactedFields
-        ~logDestinationConfigs ~resourceArn ()
+      make ?logScope ?logType ?loggingFilter ?managedByFirewallManager
+        ?redactedFields ~logDestinationConfigs ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let logScope = field_map json__ "LogScope" LogScope.of_json in
+      let logType = field_map json__ "LogType" LogType.of_json in
       let loggingFilter =
-        field_map json "LoggingFilter" LoggingFilter.of_json in
+        field_map json__ "LoggingFilter" LoggingFilter.of_json in
       let managedByFirewallManager =
-        field_map json "ManagedByFirewallManager" Boolean.of_json in
+        field_map json__ "ManagedByFirewallManager" Boolean.of_json in
       let redactedFields =
-        field_map json "RedactedFields" RedactedFields.of_json in
+        field_map json__ "RedactedFields" RedactedFields.of_json in
       let logDestinationConfigs =
-        field_map_exn json "LogDestinationConfigs"
+        field_map_exn json__ "LogDestinationConfigs"
           LogDestinationConfigs.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
-      make ?loggingFilter ?managedByFirewallManager ?redactedFields
-        ~logDestinationConfigs ~resourceArn ()
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ?logScope ?logType ?loggingFilter ?managedByFirewallManager
+        ?redactedFields ~logDestinationConfigs ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Defines an association between logging destinations and a web ACL resource, for logging from WAF. As part of the association, you can specify parts of the standard logging fields to keep out of the logs and you can specify filters so that you log only a subset of the logging records. You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. For information about configuring logging destinations and the permissions that are required for each, see Logging web ACL traffic information in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide."]
+       "Defines an association between logging destinations and a web ACL resource, for logging from WAF. As part of the association, you can specify parts of the standard logging fields to keep out of the logs and you can specify filters so that you log only a subset of the logging records. If you configure data protection for the web ACL, the protection applies to the data that WAF sends to the logs. You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. The name that you give the destination must start with aws-waf-logs-. Depending on the type of destination, you might need to configure additional settings or permissions. For configuration requirements and pricing information for each destination type, see Logging web ACL traffic in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide."]
 module GetLoggingConfigurationResponse =
   struct
     type nonrec t =
@@ -8915,9 +14055,9 @@ module GetLoggingConfigurationResponse =
           (Xml.child xml_arg0 "LoggingConfiguration") in
       make ?loggingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loggingConfiguration =
-        field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
+        field_map json__ "LoggingConfiguration" LoggingConfiguration.of_json in
       make ?loggingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8931,7 +14071,7 @@ module GetManagedRuleSetRequest =
           "The name of the managed rule set. You use this, along with the rule set ID, to identify the rule set. This name is assigned to the corresponding managed rule group, which your customers can access and use."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the managed rule set. The ID is returned in the responses to commands like list. You provide it to operations like get and update."]}
@@ -8952,26 +14092,14 @@ module GetManagedRuleSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the specified managed rule set. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module TimeWindowDay =
   struct
     type nonrec t = int
@@ -8996,7 +14124,7 @@ module ManagedRuleSetVersion =
           "The Amazon Resource Name (ARN) of the vendor rule group that's used to define the published version of your managed rule group."];
       capacity: CapacityUnit.t option
         [@ocaml.doc
-          "The web ACL capacity units (WCUs) required for this rule group. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."];
+          "The web ACL capacity units (WCUs) required for this rule group. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."];
       forecastedLifetime: TimeWindowDay.t option
         [@ocaml.doc
           "The amount of time you expect this version of your managed rule group to last, in days."];
@@ -9059,18 +14187,18 @@ module ManagedRuleSetVersion =
       make ?expiryTimestamp ?lastUpdateTimestamp ?publishTimestamp
         ?forecastedLifetime ?capacity ?associatedRuleGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expiryTimestamp =
-        field_map json "ExpiryTimestamp" Timestamp.of_json in
+        field_map json__ "ExpiryTimestamp" Timestamp.of_json in
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdateTimestamp" Timestamp.of_json in
       let publishTimestamp =
-        field_map json "PublishTimestamp" Timestamp.of_json in
+        field_map json__ "PublishTimestamp" Timestamp.of_json in
       let forecastedLifetime =
-        field_map json "ForecastedLifetime" TimeWindowDay.of_json in
-      let capacity = field_map json "Capacity" CapacityUnit.of_json in
+        field_map json__ "ForecastedLifetime" TimeWindowDay.of_json in
+      let capacity = field_map json__ "Capacity" CapacityUnit.of_json in
       let associatedRuleGroupArn =
-        field_map json "AssociatedRuleGroupArn" ResourceArn.of_json in
+        field_map json__ "AssociatedRuleGroupArn" ResourceArn.of_json in
       make ?expiryTimestamp ?lastUpdateTimestamp ?publishTimestamp
         ?forecastedLifetime ?capacity ?associatedRuleGroupArn ()
     let to_json v = composed_to_json to_value v
@@ -9101,6 +14229,8 @@ module PublishedVersions =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -9112,13 +14242,13 @@ module ManagedRuleSet =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the managed rule set. You use this, along with the rule set ID, to identify the rule set. This name is assigned to the corresponding managed rule group, which your customers can access and use."];
-      id: EntityId.t
+      id: EntityId.t option
         [@ocaml.doc
           "A unique identifier for the managed rule set. The ID is returned in the responses to commands like list. You provide it to operations like get and update."];
-      aRN: ResourceArn.t
+      aRN: ResourceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the entity."];
       description: EntityDescription.t option
         [@ocaml.doc
@@ -9131,29 +14261,28 @@ module ManagedRuleSet =
       labelNamespace: LabelName.t option
         [@ocaml.doc
           "The label namespace prefix for the managed rule groups that are offered to customers from this managed rule set. All labels that are added by rules in the managed rule group have this prefix. The syntax for the label namespace prefix for a managed rule group is the following: awswaf:managed:<vendor>:<rule group name>: When a rule with a label matches a web request, WAF adds the fully qualified label to the request. A fully qualified label is made up of the label namespace from the rule group or web ACL where the rule is defined and the label from the rule, separated by a colon: <label namespace>:<label from rule>"]}
-    let context_ = "ManagedRuleSet"
-    let make ?description =
-      fun ?publishedVersions ->
-        fun ?recommendedVersion ->
-          fun ?labelNamespace ->
-            fun ~name ->
-              fun ~id ->
-                fun ~aRN ->
+    let make ?name =
+      fun ?id ->
+        fun ?aRN ->
+          fun ?description ->
+            fun ?publishedVersions ->
+              fun ?recommendedVersion ->
+                fun ?labelNamespace ->
                   fun () ->
                     {
+                      name;
+                      id;
+                      aRN;
                       description;
                       publishedVersions;
                       recommendedVersion;
-                      labelNamespace;
-                      name;
-                      id;
-                      aRN
+                      labelNamespace
                     }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Id", (Some (EntityId.to_value x.id)));
-        ("ARN", (Some (ResourceArn.to_value x.aRN)));
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Id", (Option.map x.id ~f:EntityId.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceArn.to_value));
         ("Description",
           (Option.map x.description ~f:EntityDescription.to_value));
         ("PublishedVersions",
@@ -9176,28 +14305,27 @@ module ManagedRuleSet =
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      let aRN =
-        ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
-      let id =
-        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let aRN = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ARN") in
+      let id = (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "Id") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?labelNamespace ?recommendedVersion ?publishedVersions
-        ?description ~aRN ~id ~name ()
+        ?description ?aRN ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labelNamespace = field_map json "LabelNamespace" LabelName.of_json in
+    let of_json json__ =
+      let labelNamespace =
+        field_map json__ "LabelNamespace" LabelName.of_json in
       let recommendedVersion =
-        field_map json "RecommendedVersion" VersionKeyString.of_json in
+        field_map json__ "RecommendedVersion" VersionKeyString.of_json in
       let publishedVersions =
-        field_map json "PublishedVersions" PublishedVersions.of_json in
+        field_map json__ "PublishedVersions" PublishedVersions.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?labelNamespace ?recommendedVersion ?publishedVersions
-        ?description ~aRN ~id ~name ()
+        ?description ?aRN ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of rules that is managed by Amazon Web Services and Amazon Web Services Marketplace sellers to provide versioned managed rule groups for customers of WAF. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
@@ -9286,10 +14414,10 @@ module GetManagedRuleSetResponse =
           (Xml.child xml_arg0 "ManagedRuleSet") in
       make ?lockToken ?managedRuleSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let managedRuleSet =
-        field_map json "ManagedRuleSet" ManagedRuleSet.of_json in
+        field_map json__ "ManagedRuleSet" ManagedRuleSet.of_json in
       make ?lockToken ?managedRuleSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9319,14 +14447,14 @@ module GetMobileSdkReleaseRequest =
         Platform.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Platform") in
       make ~releaseVersion ~platform ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let releaseVersion =
-        field_map_exn json "ReleaseVersion" VersionKeyString.of_json in
-      let platform = field_map_exn json "Platform" Platform.of_json in
+        field_map_exn json__ "ReleaseVersion" VersionKeyString.of_json in
+      let platform = field_map_exn json__ "Platform" Platform.of_json in
       make ~releaseVersion ~platform ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information for the specified mobile SDK release, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Retrieves information for the specified mobile SDK release, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module ReleaseNotes =
   struct
     type nonrec t = string
@@ -9378,16 +14506,16 @@ module MobileSdkRelease =
           (Xml.child xml_arg0 "ReleaseVersion") in
       make ?tags ?releaseNotes ?timestamp ?releaseVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let releaseNotes = field_map json "ReleaseNotes" ReleaseNotes.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let releaseNotes = field_map json__ "ReleaseNotes" ReleaseNotes.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       let releaseVersion =
-        field_map json "ReleaseVersion" VersionKeyString.of_json in
+        field_map json__ "ReleaseVersion" VersionKeyString.of_json in
       make ?tags ?releaseNotes ?timestamp ?releaseVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information for a release of the mobile SDK, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Information for a release of the mobile SDK, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module GetMobileSdkReleaseResponse =
   struct
     type nonrec t =
@@ -9467,13 +14595,13 @@ module GetMobileSdkReleaseResponse =
           (Xml.child xml_arg0 "MobileSdkRelease") in
       make ?mobileSdkRelease ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mobileSdkRelease =
-        field_map json "MobileSdkRelease" MobileSdkRelease.of_json in
+        field_map json__ "MobileSdkRelease" MobileSdkRelease.of_json in
       make ?mobileSdkRelease ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves information for the specified mobile SDK release, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Retrieves information for the specified mobile SDK release, including release notes and tags. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module GetPermissionPolicyRequest =
   struct
     type nonrec t =
@@ -9493,8 +14621,9 @@ module GetPermissionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9585,8 +14714,8 @@ module GetPermissionPolicyResponse =
         (Option.map ~f:PolicyString.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" PolicyString.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" PolicyString.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9597,7 +14726,7 @@ module GetRateBasedStatementManagedKeysRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       webACLName: EntityName.t
         [@ocaml.doc
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
@@ -9643,17 +14772,37 @@ module GetRateBasedStatementManagedKeysRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ~ruleName ?ruleGroupRuleName ~webACLId ~webACLName ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleName = field_map_exn json "RuleName" EntityName.of_json in
+    let of_json json__ =
+      let ruleName = field_map_exn json__ "RuleName" EntityName.of_json in
       let ruleGroupRuleName =
-        field_map json "RuleGroupRuleName" EntityName.of_json in
-      let webACLId = field_map_exn json "WebACLId" EntityId.of_json in
-      let webACLName = field_map_exn json "WebACLName" EntityName.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+        field_map json__ "RuleGroupRuleName" EntityName.of_json in
+      let webACLId = field_map_exn json__ "WebACLId" EntityId.of_json in
+      let webACLName = field_map_exn json__ "WebACLName" EntityName.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ~ruleName ?ruleGroupRuleName ~webACLId ~webACLName ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the keys that are currently blocked by a rate-based rule instance. The maximum number of managed keys that can be blocked for a single rate-based rule instance is 10,000. If more than 10,000 addresses exceed the rate limit, those with the highest rates are blocked. For a rate-based rule that you've defined inside a rule group, provide the name of the rule group reference statement in your request, in addition to the rate-based rule name and the web ACL name. WAF monitors web requests and manages keys independently for each unique combination of web ACL, optional rule group, and rate-based rule. For example, if you define a rate-based rule inside a rule group, and then use the rule group in a web ACL, WAF monitors web requests and manages keys for that web ACL, rule group reference statement, and rate-based rule instance. If you use the same rule group in a second web ACL, WAF monitors web requests and manages keys for this second usage completely independent of your first."]
+       "Retrieves the IP addresses that are currently blocked by a rate-based rule instance. This is only available for rate-based rules that aggregate solely on the IP address or on the forwarded IP address. The maximum number of addresses that can be blocked for a single rate-based rule instance is 10,000. If more than 10,000 addresses exceed the rate limit, those with the highest rates are blocked. For a rate-based rule that you've defined inside a rule group, provide the name of the rule group reference statement in your request, in addition to the rate-based rule name and the web ACL name. WAF monitors web requests and manages keys independently for each unique combination of web ACL, optional rule group, and rate-based rule. For example, if you define a rate-based rule inside a rule group, and then use the rule group in a web ACL, WAF monitors web requests and manages keys for that web ACL, rule group reference statement, and rate-based rule instance. If you use the same rule group in a second web ACL, WAF monitors web requests and manages keys for this second usage completely independent of your first."]
+module WAFUnsupportedAggregateKeyTypeException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The rule that you've named doesn't aggregate solely on the IP address or solely on the forwarded IP address. This call is only available for rate-based rules with an AggregateKeyType setting of IP or FORWARDED_IP."]
 module RateBasedStatementManagedKeysIPSet =
   struct
     type nonrec t =
@@ -9678,14 +14827,14 @@ module RateBasedStatementManagedKeysIPSet =
           (Xml.child xml_arg0 "IPAddressVersion") in
       make ?addresses ?iPAddressVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let addresses = field_map json "Addresses" IPAddresses.of_json in
+    let of_json json__ =
+      let addresses = field_map json__ "Addresses" IPAddresses.of_json in
       let iPAddressVersion =
-        field_map json "IPAddressVersion" IPAddressVersion.of_json in
+        field_map json__ "IPAddressVersion" IPAddressVersion.of_json in
       make ?addresses ?iPAddressVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The set of IP addresses that are currently blocked for a RateBasedStatement."]
+       "The set of IP addresses that are currently blocked for a RateBasedStatement. This is only available for rate-based rules that aggregate on just the IP address, with the AggregateKeyType set to IP or FORWARDED_IP. A rate-based rule applies its rule action to requests from IP addresses that are in the rule's managed keys list and that match the rule's scope-down statement. When a rule has no scope-down statement, it applies the action to all requests from the IP addresses that are in the list. The rule applies its rule action to rate limit the matching requests. The action is usually Block but it can be any valid rule action except for Allow. The maximum number of IP addresses that can be rate limited by a single rate-based rule instance is 10,000. If more than 10,000 addresses exceed the rate limit, WAF limits those with the highest rates."]
 module GetRateBasedStatementManagedKeysResponse =
   struct
     type nonrec t =
@@ -9701,6 +14850,8 @@ module GetRateBasedStatementManagedKeysResponse =
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
       | `WAFNonexistentItemException of WAFNonexistentItemException.t 
+      | `WAFUnsupportedAggregateKeyTypeException of
+          WAFUnsupportedAggregateKeyTypeException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?managedKeysIPV4 =
       fun ?managedKeysIPV6 -> fun () -> { managedKeysIPV4; managedKeysIPV6 }
@@ -9717,6 +14868,9 @@ module GetRateBasedStatementManagedKeysResponse =
       | "WAFNonexistentItemException" ->
           `WAFNonexistentItemException
             (WAFNonexistentItemException.of_json json)
+      | "WAFUnsupportedAggregateKeyTypeException" ->
+          `WAFUnsupportedAggregateKeyTypeException
+            (WAFUnsupportedAggregateKeyTypeException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -9733,6 +14887,9 @@ module GetRateBasedStatementManagedKeysResponse =
       | "WAFNonexistentItemException" ->
           `WAFNonexistentItemException
             (WAFNonexistentItemException.of_xml xml)
+      | "WAFUnsupportedAggregateKeyTypeException" ->
+          `WAFUnsupportedAggregateKeyTypeException
+            (WAFUnsupportedAggregateKeyTypeException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -9753,6 +14910,10 @@ module GetRateBasedStatementManagedKeysResponse =
           `Assoc
             [("error", (`String "WAFNonexistentItemException"));
             ("details", (WAFNonexistentItemException.to_json e))]
+      | `WAFUnsupportedAggregateKeyTypeException e ->
+          `Assoc
+            [("error", (`String "WAFUnsupportedAggregateKeyTypeException"));
+            ("details", (WAFUnsupportedAggregateKeyTypeException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -9776,17 +14937,17 @@ module GetRateBasedStatementManagedKeysResponse =
           (Xml.child xml_arg0 "ManagedKeysIPV4") in
       make ?managedKeysIPV6 ?managedKeysIPV4 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedKeysIPV6 =
-        field_map json "ManagedKeysIPV6"
+        field_map json__ "ManagedKeysIPV6"
           RateBasedStatementManagedKeysIPSet.of_json in
       let managedKeysIPV4 =
-        field_map json "ManagedKeysIPV4"
+        field_map json__ "ManagedKeysIPV4"
           RateBasedStatementManagedKeysIPSet.of_json in
       make ?managedKeysIPV6 ?managedKeysIPV4 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the keys that are currently blocked by a rate-based rule instance. The maximum number of managed keys that can be blocked for a single rate-based rule instance is 10,000. If more than 10,000 addresses exceed the rate limit, those with the highest rates are blocked. For a rate-based rule that you've defined inside a rule group, provide the name of the rule group reference statement in your request, in addition to the rate-based rule name and the web ACL name. WAF monitors web requests and manages keys independently for each unique combination of web ACL, optional rule group, and rate-based rule. For example, if you define a rate-based rule inside a rule group, and then use the rule group in a web ACL, WAF monitors web requests and manages keys for that web ACL, rule group reference statement, and rate-based rule instance. If you use the same rule group in a second web ACL, WAF monitors web requests and manages keys for this second usage completely independent of your first."]
+       "Retrieves the IP addresses that are currently blocked by a rate-based rule instance. This is only available for rate-based rules that aggregate solely on the IP address or on the forwarded IP address. The maximum number of addresses that can be blocked for a single rate-based rule instance is 10,000. If more than 10,000 addresses exceed the rate limit, those with the highest rates are blocked. For a rate-based rule that you've defined inside a rule group, provide the name of the rule group reference statement in your request, in addition to the rate-based rule name and the web ACL name. WAF monitors web requests and manages keys independently for each unique combination of web ACL, optional rule group, and rate-based rule. For example, if you define a rate-based rule inside a rule group, and then use the rule group in a web ACL, WAF monitors web requests and manages keys for that web ACL, rule group reference statement, and rate-based rule instance. If you use the same rule group in a second web ACL, WAF monitors web requests and manages keys for this second usage completely independent of your first."]
 module GetRegexPatternSetRequest =
   struct
     type nonrec t =
@@ -9796,7 +14957,7 @@ module GetRegexPatternSetRequest =
           "The name of the set. You cannot change the name after you create the set."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."]}
@@ -9817,10 +14978,10 @@ module GetRegexPatternSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified RegexPatternSet."]
@@ -9871,14 +15032,15 @@ module RegexPatternSet =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?regularExpressionList ?description ?aRN ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let regularExpressionList =
-        field_map json "RegularExpressionList" RegularExpressionList.of_json in
+        field_map json__ "RegularExpressionList"
+          RegularExpressionList.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?regularExpressionList ?description ?aRN ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9967,10 +15129,10 @@ module GetRegexPatternSetResponse =
           (Xml.child xml_arg0 "RegexPatternSet") in
       make ?lockToken ?regexPatternSet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let regexPatternSet =
-        field_map json "RegexPatternSet" RegexPatternSet.of_json in
+        field_map json__ "RegexPatternSet" RegexPatternSet.of_json in
       make ?lockToken ?regexPatternSet ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified RegexPatternSet."]
@@ -9983,7 +15145,7 @@ module GetRuleGroupRequest =
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
       scope: Scope.t option
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t option
         [@ocaml.doc
           "A unique identifier for the rule group. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -10006,11 +15168,11 @@ module GetRuleGroupRequest =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aRN ?id ?scope ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let scope = field_map json "Scope" Scope.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let scope = field_map json__ "Scope" Scope.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?aRN ?id ?scope ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified RuleGroup."]
@@ -10018,24 +15180,24 @@ module RuleGroup =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
-      id: EntityId.t
+      id: EntityId.t option
         [@ocaml.doc
           "A unique identifier for the rule group. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
-      capacity: CapacityUnit.t
+      capacity: CapacityUnit.t option
         [@ocaml.doc
-          "The web ACL capacity units (WCUs) required for this rule group. When you create your own rule group, you define this, and you cannot change it after creation. When you add or modify the rules in a rule group, WAF enforces this limit. You can check the capacity for a set of rules using CheckCapacity. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."];
-      aRN: ResourceArn.t
+          "The web ACL capacity units (WCUs) required for this rule group. When you create your own rule group, you define this, and you cannot change it after creation. When you add or modify the rules in a rule group, WAF enforces this limit. You can check the capacity for a set of rules using CheckCapacity. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."];
+      aRN: ResourceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the entity."];
       description: EntityDescription.t option
         [@ocaml.doc
           "A description of the rule group that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
-      visibilityConfig: VisibilityConfig.t
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+      visibilityConfig: VisibilityConfig.t option
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
       labelNamespace: LabelName.t option
@@ -10050,43 +15212,42 @@ module RuleGroup =
       consumedLabels: LabelSummaries.t option
         [@ocaml.doc
           "The labels that one or more rules in this rule group match against in label match statements. These labels are defined in a LabelMatchStatement specification, in the Statement definition of a rule."]}
-    let context_ = "RuleGroup"
-    let make ?description =
-      fun ?rules ->
-        fun ?labelNamespace ->
-          fun ?customResponseBodies ->
-            fun ?availableLabels ->
-              fun ?consumedLabels ->
-                fun ~name ->
-                  fun ~id ->
-                    fun ~capacity ->
-                      fun ~aRN ->
-                        fun ~visibilityConfig ->
+    let make ?name =
+      fun ?id ->
+        fun ?capacity ->
+          fun ?aRN ->
+            fun ?description ->
+              fun ?rules ->
+                fun ?visibilityConfig ->
+                  fun ?labelNamespace ->
+                    fun ?customResponseBodies ->
+                      fun ?availableLabels ->
+                        fun ?consumedLabels ->
                           fun () ->
                             {
-                              description;
-                              rules;
-                              labelNamespace;
-                              customResponseBodies;
-                              availableLabels;
-                              consumedLabels;
                               name;
                               id;
                               capacity;
                               aRN;
-                              visibilityConfig
+                              description;
+                              rules;
+                              visibilityConfig;
+                              labelNamespace;
+                              customResponseBodies;
+                              availableLabels;
+                              consumedLabels
                             }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Id", (Some (EntityId.to_value x.id)));
-        ("Capacity", (Some (CapacityUnit.to_value x.capacity)));
-        ("ARN", (Some (ResourceArn.to_value x.aRN)));
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Id", (Option.map x.id ~f:EntityId.to_value));
+        ("Capacity", (Option.map x.capacity ~f:CapacityUnit.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceArn.to_value));
         ("Description",
           (Option.map x.description ~f:EntityDescription.to_value));
         ("Rules", (Option.map x.rules ~f:Rules.to_value));
         ("VisibilityConfig",
-          (Some (VisibilityConfig.to_value x.visibilityConfig)));
+          (Option.map x.visibilityConfig ~f:VisibilityConfig.to_value));
         ("LabelNamespace",
           (Option.map x.labelNamespace ~f:LabelName.to_value));
         ("CustomResponseBodies",
@@ -10110,45 +15271,43 @@ module RuleGroup =
         (Option.map ~f:LabelName.of_xml)
           (Xml.child xml_arg0 "LabelNamespace") in
       let visibilityConfig =
-        VisibilityConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VisibilityConfig") in
+        (Option.map ~f:VisibilityConfig.of_xml)
+          (Xml.child xml_arg0 "VisibilityConfig") in
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
-      let aRN =
-        ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
+      let aRN = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ARN") in
       let capacity =
-        CapacityUnit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Capacity") in
-      let id =
-        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+        (Option.map ~f:CapacityUnit.of_xml) (Xml.child xml_arg0 "Capacity") in
+      let id = (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "Id") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?consumedLabels ?availableLabels ?customResponseBodies
-        ?labelNamespace ~visibilityConfig ?rules ?description ~aRN ~capacity
-        ~id ~name ()
+        ?labelNamespace ?visibilityConfig ?rules ?description ?aRN ?capacity
+        ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedLabels =
-        field_map json "ConsumedLabels" LabelSummaries.of_json in
+        field_map json__ "ConsumedLabels" LabelSummaries.of_json in
       let availableLabels =
-        field_map json "AvailableLabels" LabelSummaries.of_json in
+        field_map json__ "AvailableLabels" LabelSummaries.of_json in
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let labelNamespace = field_map json "LabelNamespace" LabelName.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let labelNamespace =
+        field_map json__ "LabelNamespace" LabelName.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
-      let capacity = field_map_exn json "Capacity" CapacityUnit.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let capacity = field_map json__ "Capacity" CapacityUnit.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?consumedLabels ?availableLabels ?customResponseBodies
-        ?labelNamespace ~visibilityConfig ?rules ?description ~aRN ~capacity
-        ~id ~name ()
+        ?labelNamespace ?visibilityConfig ?rules ?description ?aRN ?capacity
+        ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements."]
@@ -10234,9 +15393,9 @@ module GetRuleGroupResponse =
         (Option.map ~f:RuleGroup.of_xml) (Xml.child xml_arg0 "RuleGroup") in
       make ?lockToken ?ruleGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map json "LockToken" LockToken.of_json in
-      let ruleGroup = field_map json "RuleGroup" RuleGroup.of_json in
+    let of_json json__ =
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
+      let ruleGroup = field_map json__ "RuleGroup" RuleGroup.of_json in
       make ?lockToken ?ruleGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified RuleGroup."]
@@ -10265,9 +15424,9 @@ module TimeWindow =
           (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
       make ~endTime ~startTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map_exn json "EndTime" Timestamp.of_json in
-      let startTime = field_map_exn json "StartTime" Timestamp.of_json in
+    let of_json json__ =
+      let endTime = field_map_exn json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" Timestamp.of_json in
       make ~endTime ~startTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10299,10 +15458,10 @@ module GetSampledRequestsRequest =
           "The Amazon resource name (ARN) of the WebACL for which you want a sample of requests."];
       ruleMetricName: MetricName.t
         [@ocaml.doc
-          "The metric name assigned to the Rule or RuleGroup for which you want a sample of requests."];
+          "The metric name assigned to the Rule or RuleGroup dimension for which you want a sample of requests."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       timeWindow: TimeWindow.t
         [@ocaml.doc
           "The start date and time and the end date and time of the range for which you want GetSampledRequests to return a sample of requests. You must specify the times in Coordinated Universal Time (UTC) format. UTC format includes the special designator, Z. For example, \"2016-09-27T14:50Z\". You can specify any time range in the previous three hours. If you specify a start time that's earlier than three hours ago, WAF sets it to three hours ago."];
@@ -10342,13 +15501,13 @@ module GetSampledRequestsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WebAclArn") in
       make ~maxItems ~timeWindow ~scope ~ruleMetricName ~webAclArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map_exn json "MaxItems" ListMaxItems.of_json in
-      let timeWindow = field_map_exn json "TimeWindow" TimeWindow.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let maxItems = field_map_exn json__ "MaxItems" ListMaxItems.of_json in
+      let timeWindow = field_map_exn json__ "TimeWindow" TimeWindow.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       let ruleMetricName =
-        field_map_exn json "RuleMetricName" MetricName.of_json in
-      let webAclArn = field_map_exn json "WebAclArn" ResourceArn.of_json in
+        field_map_exn json__ "RuleMetricName" MetricName.of_json in
+      let webAclArn = field_map_exn json__ "WebAclArn" ResourceArn.of_json in
       make ~maxItems ~timeWindow ~scope ~ruleMetricName ~webAclArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10465,9 +15624,9 @@ module HTTPHeader =
         (Option.map ~f:HeaderName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" HeaderValue.of_json in
-      let name = field_map json "Name" HeaderName.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" HeaderValue.of_json in
+      let name = field_map json__ "Name" HeaderName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10476,6 +15635,9 @@ module HTTPHeaders =
   struct
     type nonrec t = HTTPHeader.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HTTPHeader.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10548,13 +15710,13 @@ module HTTPRequest =
         (Option.map ~f:IPString.of_xml) (Xml.child xml_arg0 "ClientIP") in
       make ?headers ?hTTPVersion ?method_ ?uRI ?country ?clientIP ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let headers = field_map json "Headers" HTTPHeaders.of_json in
-      let hTTPVersion = field_map json "HTTPVersion" HTTPVersion.of_json in
-      let method_ = field_map json "Method" HTTPMethod.of_json in
-      let uRI = field_map json "URI" URIString.of_json in
-      let country = field_map json "Country" Country.of_json in
-      let clientIP = field_map json "ClientIP" IPString.of_json in
+    let of_json json__ =
+      let headers = field_map json__ "Headers" HTTPHeaders.of_json in
+      let hTTPVersion = field_map json__ "HTTPVersion" HTTPVersion.of_json in
+      let method_ = field_map json__ "Method" HTTPMethod.of_json in
+      let uRI = field_map json__ "URI" URIString.of_json in
+      let country = field_map json__ "Country" Country.of_json in
+      let clientIP = field_map json__ "ClientIP" IPString.of_json in
       make ?headers ?hTTPVersion ?method_ ?uRI ?country ?clientIP ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10563,18 +15725,17 @@ module SampledHTTPRequest =
   struct
     type nonrec t =
       {
-      request: HTTPRequest.t
+      request: HTTPRequest.t option
         [@ocaml.doc
           "A complex type that contains detailed information about the request."];
-      weight: SampleWeight.t
+      weight: SampleWeight.t option
         [@ocaml.doc
           "A value that indicates how one result in the response relates proportionally to other results in the response. For example, a result that has a weight of 2 represents roughly twice as many web requests as a result that has a weight of 1."];
       timestamp: Timestamp.t option
         [@ocaml.doc
           "The time at which WAF received the request from your Amazon Web Services resource, in Unix time format (in seconds)."];
       action: Action.t option
-        [@ocaml.doc
-          "The action for the Rule that the request matched: Allow, Block, or Count."];
+        [@ocaml.doc "The action that WAF applied to the request."];
       ruleNameWithinRuleGroup: EntityName.t option
         [@ocaml.doc
           "The name of the Rule that the request matched. For managed rule groups, the format for this name is <vendor name>#<managed rule group name>#<rule name>. For your own rule groups, the format for this name is <rule group name>#<rule name>. If the rule is not in a rule group, this field is absent."];
@@ -10587,33 +15748,41 @@ module SampledHTTPRequest =
         [@ocaml.doc
           "Labels applied to the web request by matching rules. WAF applies fully qualified labels to matching web requests. A fully qualified label is the concatenation of a label namespace and a rule label. The rule's rule group or web ACL defines the label namespace. For example, awswaf:111122223333:myRuleGroup:testRules:testNS1:testNS2:labelNameA or awswaf:managed:aws:managed-rule-set:header:encoding:utf8."];
       captchaResponse: CaptchaResponse.t option
-        [@ocaml.doc "The CAPTCHA response for the request."]}
-    let context_ = "SampledHTTPRequest"
-    let make ?timestamp =
-      fun ?action ->
-        fun ?ruleNameWithinRuleGroup ->
-          fun ?requestHeadersInserted ->
-            fun ?responseCodeSent ->
-              fun ?labels ->
-                fun ?captchaResponse ->
-                  fun ~request ->
-                    fun ~weight ->
-                      fun () ->
-                        {
-                          timestamp;
-                          action;
-                          ruleNameWithinRuleGroup;
-                          requestHeadersInserted;
-                          responseCodeSent;
-                          labels;
-                          captchaResponse;
-                          request;
-                          weight
-                        }
+        [@ocaml.doc "The CAPTCHA response for the request."];
+      challengeResponse: ChallengeResponse.t option
+        [@ocaml.doc "The Challenge response for the request."];
+      overriddenAction: Action.t option
+        [@ocaml.doc
+          "Used only for rule group rules that have a rule action override in place in the web ACL. This is the action that the rule group rule is configured for, and not the action that was applied to the request. The action that WAF applied is the Action value."]}
+    let make ?request =
+      fun ?weight ->
+        fun ?timestamp ->
+          fun ?action ->
+            fun ?ruleNameWithinRuleGroup ->
+              fun ?requestHeadersInserted ->
+                fun ?responseCodeSent ->
+                  fun ?labels ->
+                    fun ?captchaResponse ->
+                      fun ?challengeResponse ->
+                        fun ?overriddenAction ->
+                          fun () ->
+                            {
+                              request;
+                              weight;
+                              timestamp;
+                              action;
+                              ruleNameWithinRuleGroup;
+                              requestHeadersInserted;
+                              responseCodeSent;
+                              labels;
+                              captchaResponse;
+                              challengeResponse;
+                              overriddenAction
+                            }
     let to_value x =
       structure_to_value
-        [("Request", (Some (HTTPRequest.to_value x.request)));
-        ("Weight", (Some (SampleWeight.to_value x.weight)));
+        [("Request", (Option.map x.request ~f:HTTPRequest.to_value));
+        ("Weight", (Option.map x.weight ~f:SampleWeight.to_value));
         ("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
         ("Action", (Option.map x.action ~f:Action.to_value));
         ("RuleNameWithinRuleGroup",
@@ -10624,9 +15793,18 @@ module SampledHTTPRequest =
           (Option.map x.responseCodeSent ~f:ResponseStatusCode.to_value));
         ("Labels", (Option.map x.labels ~f:Labels.to_value));
         ("CaptchaResponse",
-          (Option.map x.captchaResponse ~f:CaptchaResponse.to_value))]
+          (Option.map x.captchaResponse ~f:CaptchaResponse.to_value));
+        ("ChallengeResponse",
+          (Option.map x.challengeResponse ~f:ChallengeResponse.to_value));
+        ("OverriddenAction",
+          (Option.map x.overriddenAction ~f:Action.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let overriddenAction =
+        (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "OverriddenAction") in
+      let challengeResponse =
+        (Option.map ~f:ChallengeResponse.of_xml)
+          (Xml.child xml_arg0 "ChallengeResponse") in
       let captchaResponse =
         (Option.map ~f:CaptchaResponse.of_xml)
           (Xml.child xml_arg0 "CaptchaResponse") in
@@ -10646,30 +15824,34 @@ module SampledHTTPRequest =
       let timestamp =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
       let weight =
-        SampleWeight.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Weight") in
+        (Option.map ~f:SampleWeight.of_xml) (Xml.child xml_arg0 "Weight") in
       let request =
-        HTTPRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Request") in
-      make ?captchaResponse ?labels ?responseCodeSent ?requestHeadersInserted
-        ?ruleNameWithinRuleGroup ?action ?timestamp ~weight ~request ()
+        (Option.map ~f:HTTPRequest.of_xml) (Xml.child xml_arg0 "Request") in
+      make ?overriddenAction ?challengeResponse ?captchaResponse ?labels
+        ?responseCodeSent ?requestHeadersInserted ?ruleNameWithinRuleGroup
+        ?action ?timestamp ?weight ?request ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let overriddenAction =
+        field_map json__ "OverriddenAction" Action.of_json in
+      let challengeResponse =
+        field_map json__ "ChallengeResponse" ChallengeResponse.of_json in
       let captchaResponse =
-        field_map json "CaptchaResponse" CaptchaResponse.of_json in
-      let labels = field_map json "Labels" Labels.of_json in
+        field_map json__ "CaptchaResponse" CaptchaResponse.of_json in
+      let labels = field_map json__ "Labels" Labels.of_json in
       let responseCodeSent =
-        field_map json "ResponseCodeSent" ResponseStatusCode.of_json in
+        field_map json__ "ResponseCodeSent" ResponseStatusCode.of_json in
       let requestHeadersInserted =
-        field_map json "RequestHeadersInserted" HTTPHeaders.of_json in
+        field_map json__ "RequestHeadersInserted" HTTPHeaders.of_json in
       let ruleNameWithinRuleGroup =
-        field_map json "RuleNameWithinRuleGroup" EntityName.of_json in
-      let action = field_map json "Action" Action.of_json in
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
-      let weight = field_map_exn json "Weight" SampleWeight.of_json in
-      let request = field_map_exn json "Request" HTTPRequest.of_json in
-      make ?captchaResponse ?labels ?responseCodeSent ?requestHeadersInserted
-        ?ruleNameWithinRuleGroup ?action ?timestamp ~weight ~request ()
+        field_map json__ "RuleNameWithinRuleGroup" EntityName.of_json in
+      let action = field_map json__ "Action" Action.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      let weight = field_map json__ "Weight" SampleWeight.of_json in
+      let request = field_map json__ "Request" HTTPRequest.of_json in
+      make ?overriddenAction ?challengeResponse ?captchaResponse ?labels
+        ?responseCodeSent ?requestHeadersInserted ?ruleNameWithinRuleGroup
+        ?action ?timestamp ?weight ?request ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a single sampled web request. The response from GetSampledRequests includes a SampledHTTPRequests complex type that appears as SampledRequests in the response syntax. SampledHTTPRequests contains an array of SampledHTTPRequest objects."]
@@ -10677,6 +15859,9 @@ module SampledHTTPRequests =
   struct
     type nonrec t = SampledHTTPRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SampledHTTPRequest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10796,22 +15981,469 @@ module GetSampledRequestsResponse =
           (Xml.child xml_arg0 "SampledRequests") in
       make ?timeWindow ?populationSize ?sampledRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeWindow = field_map json "TimeWindow" TimeWindow.of_json in
+    let of_json json__ =
+      let timeWindow = field_map json__ "TimeWindow" TimeWindow.of_json in
       let populationSize =
-        field_map json "PopulationSize" PopulationSize.of_json in
+        field_map json__ "PopulationSize" PopulationSize.of_json in
       let sampledRequests =
-        field_map json "SampledRequests" SampledHTTPRequests.of_json in
+        field_map json__ "SampledRequests" SampledHTTPRequests.of_json in
       make ?timeWindow ?populationSize ?sampledRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets detailed information about a specified number of requests--a sample--that WAF randomly selects from among the first 5,000 requests that your Amazon Web Services resource received during a time range that you choose. You can specify a sample size of up to 500 requests, and you can specify any time range in the previous three hours. GetSampledRequests returns a time range, which is usually the time range that you specified. However, if your resource (such as a CloudFront distribution) received 5,000 requests before the specified time range elapsed, GetSampledRequests returns an updated time range. This new time range indicates the actual period during which WAF selected the requests in the sample."]
+module UriPathPrefixString =
+  struct
+    type nonrec t = string
+    let context_ = "UriPathPrefixString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\/[^ ]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UriPathPrefixString" j
+    let to_json = simple_to_json to_value
+  end
+module PathStatisticsLimit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PathStatisticsLimit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NumberOfTopTrafficBotsPerPath =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NumberOfTopTrafficBotsPerPath"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NextMarker =
+  struct
+    type nonrec t = string
+    let context_ = "NextMarker"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextMarker" j
+    let to_json = simple_to_json to_value
+  end
+module GetTopPathStatisticsByTrafficRequest =
+  struct
+    type nonrec t =
+      {
+      webAclArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the web ACL for which you want to retrieve path statistics."];
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether the web ACL is for an Amazon Web Services CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer, an AppSync GraphQL API, an Amazon Cognito user pool, an Amazon Web Services App Runner service, or an Amazon Web Services Verified Access instance."];
+      uriPathPrefix: UriPathPrefixString.t option
+        [@ocaml.doc
+          "A URI path prefix to filter the results. When you specify this parameter, the operation returns statistics for individual URIs within the specified path prefix. For example, if you specify /api, the response includes statistics for paths like /api/v1/users and /api/v2/orders. If you don't specify this parameter, the operation returns top-level path statistics."];
+      timeWindow: TimeWindow.t
+        [@ocaml.doc
+          "The time window for which you want to retrieve path statistics. The time window must be within the data retention period for your web ACL."];
+      botCategory: FilterString.t option
+        [@ocaml.doc
+          "Filters the results to include only traffic from bots in the specified category. For example, you can filter by ai to see only AI crawler traffic, or search_engine to see only search engine bot traffic. When you apply this filter, the Source field is populated in the response."];
+      botOrganization: FilterString.t option
+        [@ocaml.doc
+          "Filters the results to include only traffic from bots belonging to the specified organization. For example, you can filter by openai or google. When you apply this filter, the Source field is populated in the response."];
+      botName: FilterString.t option
+        [@ocaml.doc
+          "Filters the results to include only traffic from the specified bot. For example, you can filter by gptbot or googlebot. When you apply this filter, the Source field is populated in the response."];
+      limit: PathStatisticsLimit.t
+        [@ocaml.doc
+          "The maximum number of path statistics to return. Valid values are 1 to 100."];
+      numberOfTopTrafficBotsPerPath: NumberOfTopTrafficBotsPerPath.t
+        [@ocaml.doc
+          "The maximum number of top bots to include in the statistics for each path. Valid values are 1 to 10."];
+      nextMarker: NextMarker.t option
+        [@ocaml.doc
+          "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."]}
+    let context_ = "GetTopPathStatisticsByTrafficRequest"
+    let make ?uriPathPrefix =
+      fun ?botCategory ->
+        fun ?botOrganization ->
+          fun ?botName ->
+            fun ?nextMarker ->
+              fun ~webAclArn ->
+                fun ~scope ->
+                  fun ~timeWindow ->
+                    fun ~limit ->
+                      fun ~numberOfTopTrafficBotsPerPath ->
+                        fun () ->
+                          {
+                            uriPathPrefix;
+                            botCategory;
+                            botOrganization;
+                            botName;
+                            nextMarker;
+                            webAclArn;
+                            scope;
+                            timeWindow;
+                            limit;
+                            numberOfTopTrafficBotsPerPath
+                          }
+    let to_value x =
+      structure_to_value
+        [("WebAclArn", (Some (ResourceArn.to_value x.webAclArn)));
+        ("Scope", (Some (Scope.to_value x.scope)));
+        ("UriPathPrefix",
+          (Option.map x.uriPathPrefix ~f:UriPathPrefixString.to_value));
+        ("TimeWindow", (Some (TimeWindow.to_value x.timeWindow)));
+        ("BotCategory", (Option.map x.botCategory ~f:FilterString.to_value));
+        ("BotOrganization",
+          (Option.map x.botOrganization ~f:FilterString.to_value));
+        ("BotName", (Option.map x.botName ~f:FilterString.to_value));
+        ("Limit", (Some (PathStatisticsLimit.to_value x.limit)));
+        ("NumberOfTopTrafficBotsPerPath",
+          (Some
+             (NumberOfTopTrafficBotsPerPath.to_value
+                x.numberOfTopTrafficBotsPerPath)));
+        ("NextMarker", (Option.map x.nextMarker ~f:NextMarker.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextMarker =
+        (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let numberOfTopTrafficBotsPerPath =
+        NumberOfTopTrafficBotsPerPath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "NumberOfTopTrafficBotsPerPath") in
+      let limit =
+        PathStatisticsLimit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Limit") in
+      let botName =
+        (Option.map ~f:FilterString.of_xml) (Xml.child xml_arg0 "BotName") in
+      let botOrganization =
+        (Option.map ~f:FilterString.of_xml)
+          (Xml.child xml_arg0 "BotOrganization") in
+      let botCategory =
+        (Option.map ~f:FilterString.of_xml)
+          (Xml.child xml_arg0 "BotCategory") in
+      let timeWindow =
+        TimeWindow.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TimeWindow") in
+      let uriPathPrefix =
+        (Option.map ~f:UriPathPrefixString.of_xml)
+          (Xml.child xml_arg0 "UriPathPrefix") in
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      let webAclArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WebAclArn") in
+      make ?nextMarker ~numberOfTopTrafficBotsPerPath ~limit ?botName
+        ?botOrganization ?botCategory ~timeWindow ?uriPathPrefix ~scope
+        ~webAclArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let numberOfTopTrafficBotsPerPath =
+        field_map_exn json__ "NumberOfTopTrafficBotsPerPath"
+          NumberOfTopTrafficBotsPerPath.of_json in
+      let limit = field_map_exn json__ "Limit" PathStatisticsLimit.of_json in
+      let botName = field_map json__ "BotName" FilterString.of_json in
+      let botOrganization =
+        field_map json__ "BotOrganization" FilterString.of_json in
+      let botCategory = field_map json__ "BotCategory" FilterString.of_json in
+      let timeWindow = field_map_exn json__ "TimeWindow" TimeWindow.of_json in
+      let uriPathPrefix =
+        field_map json__ "UriPathPrefix" UriPathPrefixString.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let webAclArn = field_map_exn json__ "WebAclArn" ResourceArn.of_json in
+      make ?nextMarker ~numberOfTopTrafficBotsPerPath ~limit ?botName
+        ?botOrganization ?botCategory ~timeWindow ?uriPathPrefix ~scope
+        ~webAclArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves aggregated statistics about the top URI paths accessed by bot traffic for a specified web ACL and time window. You can use this operation to analyze which paths on your web application receive the most bot traffic and identify the specific bots accessing those paths. The operation supports filtering by bot category, organization, or name, and allows you to drill down into specific path prefixes to view detailed URI-level statistics."]
+module PathString =
+  struct
+    type nonrec t = string
+    let context_ = "PathString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PathString" j
+    let to_json = simple_to_json to_value
+  end
+module PathStatistics =
+  struct
+    type nonrec t =
+      {
+      source: FilterSource.t option
+        [@ocaml.doc
+          "Information about the bot filter that was applied to generate these statistics. This field is only populated when you filter by bot category, organization, or name."];
+      path: PathString.t option
+        [@ocaml.doc "The URI path. For example, /api/ or /api/v1/users."];
+      requestCount: RequestCount.t option
+        [@ocaml.doc
+          "The number of requests to this path within the specified time window."];
+      percentage: PercentageValue.t option
+        [@ocaml.doc
+          "The percentage of total requests that were made to this path."];
+      topBots: BotStatisticsList.t option
+        [@ocaml.doc
+          "The list of top bots accessing this path, ordered by request count. The number of bots included is determined by the NumberOfTopTrafficBotsPerPath parameter in the request."]}
+    let make ?source =
+      fun ?path ->
+        fun ?requestCount ->
+          fun ?percentage ->
+            fun ?topBots ->
+              fun () -> { source; path; requestCount; percentage; topBots }
+    let to_value x =
+      structure_to_value
+        [("Source", (Option.map x.source ~f:FilterSource.to_value));
+        ("Path", (Option.map x.path ~f:PathString.to_value));
+        ("RequestCount",
+          (Option.map x.requestCount ~f:RequestCount.to_value));
+        ("Percentage", (Option.map x.percentage ~f:PercentageValue.to_value));
+        ("TopBots", (Option.map x.topBots ~f:BotStatisticsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topBots =
+        (Option.map ~f:BotStatisticsList.of_xml)
+          (Xml.child xml_arg0 "TopBots") in
+      let percentage =
+        (Option.map ~f:PercentageValue.of_xml)
+          (Xml.child xml_arg0 "Percentage") in
+      let requestCount =
+        (Option.map ~f:RequestCount.of_xml)
+          (Xml.child xml_arg0 "RequestCount") in
+      let path =
+        (Option.map ~f:PathString.of_xml) (Xml.child xml_arg0 "Path") in
+      let source =
+        (Option.map ~f:FilterSource.of_xml) (Xml.child xml_arg0 "Source") in
+      make ?topBots ?percentage ?requestCount ?path ?source ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topBots = field_map json__ "TopBots" BotStatisticsList.of_json in
+      let percentage = field_map json__ "Percentage" PercentageValue.of_json in
+      let requestCount = field_map json__ "RequestCount" RequestCount.of_json in
+      let path = field_map json__ "Path" PathString.of_json in
+      let source = field_map json__ "Source" FilterSource.of_json in
+      make ?topBots ?percentage ?requestCount ?path ?source ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Statistics about bot traffic to a specific URI path, including the path, request count, percentage of total traffic, and the top bots accessing that path."]
+module PathStatisticsList =
+  struct
+    type nonrec t = PathStatistics.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PathStatistics.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PathStatistics.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PathStatisticsList" ~of_json:PathStatistics.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module GetTopPathStatisticsByTrafficResponse =
+  struct
+    type nonrec t =
+      {
+      pathStatistics: PathStatisticsList.t option
+        [@ocaml.doc
+          "The list of path statistics, ordered by request count. Each entry includes the path, request count, percentage of total traffic, and the top bots accessing that path."];
+      totalRequestCount: RequestCount.t option
+        [@ocaml.doc
+          "The total number of requests that match the query criteria within the specified time window."];
+      nextMarker: NextMarker.t option
+        [@ocaml.doc
+          "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
+      topCategories: PathStatisticsList.t option
+        [@ocaml.doc
+          "Category-level aggregations for visualizing bot category to path relationships. This field is only populated when no bot filters are applied to the request. Each entry includes the bot category and the paths accessed by bots in that category."]}
+    type nonrec error =
+      [
+        `WAFFeatureNotIncludedInPricingPlanException of
+          WAFFeatureNotIncludedInPricingPlanException.t 
+      | `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFNonexistentItemException of WAFNonexistentItemException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?pathStatistics =
+      fun ?totalRequestCount ->
+        fun ?nextMarker ->
+          fun ?topCategories ->
+            fun () ->
+              { pathStatistics; totalRequestCount; nextMarker; topCategories
+              }
+    let error_of_json name json =
+      match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_json json)
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_xml xml)
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | "WAFNonexistentItemException" ->
+          `WAFNonexistentItemException
+            (WAFNonexistentItemException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFFeatureNotIncludedInPricingPlanException e ->
+          `Assoc
+            [("error",
+               (`String "WAFFeatureNotIncludedInPricingPlanException"));
+            ("details",
+              (WAFFeatureNotIncludedInPricingPlanException.to_json e))]
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFNonexistentItemException e ->
+          `Assoc
+            [("error", (`String "WAFNonexistentItemException"));
+            ("details", (WAFNonexistentItemException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PathStatistics",
+           (Option.map x.pathStatistics ~f:PathStatisticsList.to_value));
+        ("TotalRequestCount",
+          (Option.map x.totalRequestCount ~f:RequestCount.to_value));
+        ("NextMarker", (Option.map x.nextMarker ~f:NextMarker.to_value));
+        ("TopCategories",
+          (Option.map x.topCategories ~f:PathStatisticsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topCategories =
+        (Option.map ~f:PathStatisticsList.of_xml)
+          (Xml.child xml_arg0 "TopCategories") in
+      let nextMarker =
+        (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let totalRequestCount =
+        (Option.map ~f:RequestCount.of_xml)
+          (Xml.child xml_arg0 "TotalRequestCount") in
+      let pathStatistics =
+        (Option.map ~f:PathStatisticsList.of_xml)
+          (Xml.child xml_arg0 "PathStatistics") in
+      make ?topCategories ?nextMarker ?totalRequestCount ?pathStatistics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topCategories =
+        field_map json__ "TopCategories" PathStatisticsList.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let totalRequestCount =
+        field_map json__ "TotalRequestCount" RequestCount.of_json in
+      let pathStatistics =
+        field_map json__ "PathStatistics" PathStatisticsList.of_json in
+      make ?topCategories ?nextMarker ?totalRequestCount ?pathStatistics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves aggregated statistics about the top URI paths accessed by bot traffic for a specified web ACL and time window. You can use this operation to analyze which paths on your web application receive the most bot traffic and identify the specific bots accessing those paths. The operation supports filtering by bot category, organization, or name, and allows you to drill down into specific path prefixes to view detailed URI-level statistics."]
 module GetWebACLForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: ResourceArn.t
-        [@ocaml.doc "The ARN (Amazon Resource Name) of the resource."]}
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource whose web ACL you want to retrieve. The ARN must be in one of the following formats: For an Application Load Balancer: arn:partition:elasticloadbalancing:region:account-id:loadbalancer/app/load-balancer-name/load-balancer-id For an Amazon API Gateway REST API: arn:partition:apigateway:region::/restapis/api-id/stages/stage-name For an AppSync GraphQL API: arn:partition:appsync:region:account-id:apis/GraphQLApiId For an Amazon Cognito user pool: arn:partition:cognito-idp:region:account-id:userpool/user-pool-id For an App Runner service: arn:partition:apprunner:region:account-id:service/apprunner-service-name/apprunner-service-id For an Amazon Web Services Verified Access instance: arn:partition:ec2:region:account-id:verified-access-instance/instance-id For an Amplify application: arn:partition:amplify:region:account-id:apps/app-id"]}
     let context_ = "GetWebACLForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -10824,25 +16456,27 @@ module GetWebACLForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the WebACL for the specified resource."]
+  end[@@ocaml.doc
+       "Retrieves the WebACL for the specified resource. This call uses GetWebACL, to verify that your account has permission to access the retrieved web ACL. If you get an error that indicates that your account isn't authorized to perform wafv2:GetWebACL on the resource, that error won't be included in your CloudTrail event history. For Amazon CloudFront, don't use this call. Instead, call the CloudFront action GetDistributionConfig. For information, see GetDistributionConfig in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for GetWebACLForResource in the WAF Developer Guide."]
 module WebACL =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
-      id: EntityId.t
+      id: EntityId.t option
         [@ocaml.doc
           "A unique identifier for the WebACL. This ID is returned in the responses to create and list commands. You use this ID to do things like get, update, and delete a WebACL."];
-      aRN: ResourceArn.t
+      aRN: ResourceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the web ACL that you want to associate with the resource."];
-      defaultAction: DefaultAction.t
+      defaultAction: DefaultAction.t option
         [@ocaml.doc
           "The action to perform if none of the Rules contained in the WebACL match."];
       description: EntityDescription.t option
@@ -10850,13 +16484,16 @@ module WebACL =
           "A description of the web ACL that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
-      visibilityConfig: VisibilityConfig.t
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+      visibilityConfig: VisibilityConfig.t option
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
+      dataProtectionConfig: DataProtectionConfig.t option
+        [@ocaml.doc
+          "Specifies data protection to apply to the web request data for the web ACL. This is a web ACL level data protection option. The data protection that you configure for the web ACL alters the data that's available for any other data collection activity, including your WAF logging destinations, web ACL request sampling, and Amazon Security Lake data collection and management. Your other option for data protection is in the logging configuration, which only affects logging."];
       capacity: ConsumedCapacity.t option
         [@ocaml.doc
-          "The web ACL capacity units (WCUs) currently being used by this web ACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. The WCU limit for web ACLs is 1,500."];
+          "The web ACL capacity units (WCUs) currently being used by this web ACL. WAF uses WCUs to calculate and control the operating resources that are used to run your rules, rule groups, and web ACLs. WAF calculates capacity differently for each rule type, to reflect the relative cost of each rule. Simple rules that cost little to run use fewer WCUs than more complex rules that use more processing power. Rule group capacity is fixed at creation, which helps users plan their web ACL WCU usage when they use a rule group. For more information, see WAF web ACL capacity units (WCU) in the WAF Developer Guide."];
       preProcessFirewallManagerRuleGroups: FirewallManagerRuleGroups.t option
         [@ocaml.doc
           "The first set of rules for WAF to process in the web ACL. This is defined in an Firewall Manager WAF policy and contains only rule group references. You can't alter these. Any rules and rule groups that you define for the web ACL are prioritized after these. In the Firewall Manager WAF policy, the Firewall Manager administrator can define a set of rule groups to run first in the web ACL and a set of rule groups to run last. Within each set, the administrator prioritizes the rule groups, to determine their relative processing order."];
@@ -10866,7 +16503,7 @@ module WebACL =
           "The last set of rules for WAF to process in the web ACL. This is defined in an Firewall Manager WAF policy and contains only rule group references. You can't alter these. Any rules and rule groups that you define for the web ACL are prioritized before these. In the Firewall Manager WAF policy, the Firewall Manager administrator can define a set of rule groups to run first in the web ACL and a set of rule groups to run last. Within each set, the administrator prioritizes the rule groups, to determine their relative processing order."];
       managedByFirewallManager: Boolean.t option
         [@ocaml.doc
-          "Indicates whether this web ACL is managed by Firewall Manager. If true, then only Firewall Manager can delete the web ACL or any Firewall Manager rule groups in the web ACL."];
+          "Indicates whether this web ACL was created by Firewall Manager and is being managed by Firewall Manager. If true, then only Firewall Manager can delete the web ACL or any Firewall Manager rule groups in the web ACL. See also the properties RetrofittedByFirewallManager, PreProcessFirewallManagerRuleGroups, and PostProcessFirewallManagerRuleGroups."];
       labelNamespace: LabelName.t option
         [@ocaml.doc
           "The label namespace prefix for this web ACL. All labels added by rules in this web ACL have this prefix. The syntax for the label namespace prefix for a web ACL is the following: awswaf:<account ID>:webacl:<web ACL name>: When a rule with a label matches a web request, WAF adds the fully qualified label to the request. A fully qualified label is made up of the label namespace from the rule group or web ACL where the rule is defined and the label from the rule, separated by a colon: <label namespace>:<label from rule>"];
@@ -10875,50 +16512,84 @@ module WebACL =
           "A map of custom response keys and content bodies. When you create a rule with a block action, you can send a custom response to the web request. You define these for the web ACL, and then use them in the rules and default actions that you define in the web ACL. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide. For information about the limits on count and size for custom request and response settings, see WAF quotas in the WAF Developer Guide."];
       captchaConfig: CaptchaConfig.t option
         [@ocaml.doc
-          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."]}
-    let context_ = "WebACL"
-    let make ?description =
-      fun ?rules ->
-        fun ?capacity ->
-          fun ?preProcessFirewallManagerRuleGroups ->
-            fun ?postProcessFirewallManagerRuleGroups ->
-              fun ?managedByFirewallManager ->
-                fun ?labelNamespace ->
-                  fun ?customResponseBodies ->
-                    fun ?captchaConfig ->
-                      fun ~name ->
-                        fun ~id ->
-                          fun ~aRN ->
-                            fun ~defaultAction ->
-                              fun ~visibilityConfig ->
-                                fun () ->
-                                  {
-                                    description;
-                                    rules;
-                                    capacity;
-                                    preProcessFirewallManagerRuleGroups;
-                                    postProcessFirewallManagerRuleGroups;
-                                    managedByFirewallManager;
-                                    labelNamespace;
-                                    customResponseBodies;
-                                    captchaConfig;
-                                    name;
-                                    id;
-                                    aRN;
-                                    defaultAction;
-                                    visibilityConfig
-                                  }
+          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."];
+      challengeConfig: ChallengeConfig.t option
+        [@ocaml.doc
+          "Specifies how WAF should handle challenge evaluations for rules that don't have their own ChallengeConfig settings. If you don't specify this, WAF uses its default settings for ChallengeConfig."];
+      tokenDomains: TokenDomains.t option
+        [@ocaml.doc
+          "Specifies the domains that WAF should accept in a web request token. This enables the use of tokens across multiple protected websites. When WAF provides a token, it uses the domain of the Amazon Web Services resource that the web ACL is protecting. If you don't specify a list of token domains, WAF accepts tokens only for the domain of the protected resource. With a token domain list, WAF accepts the resource's host domain plus all domains in the token domain list, including their prefixed subdomains."];
+      associationConfig: AssociationConfig.t option
+        [@ocaml.doc
+          "Specifies custom configurations for the associations between the web ACL and protected resources. Use this to customize the maximum size of the request body that your protected resources forward to WAF for inspection. You can customize this setting for CloudFront, API Gateway, Amazon Cognito, App Runner, or Verified Access resources. The default setting is 16 KB (16,384 bytes). You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes)."];
+      retrofittedByFirewallManager: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether this web ACL was created by a customer account and then retrofitted by Firewall Manager. If true, then the web ACL is currently being managed by a Firewall Manager WAF policy, and only Firewall Manager can manage any Firewall Manager rule groups in the web ACL. See also the properties ManagedByFirewallManager, PreProcessFirewallManagerRuleGroups, and PostProcessFirewallManagerRuleGroups."];
+      onSourceDDoSProtectionConfig: OnSourceDDoSProtectionConfig.t option
+        [@ocaml.doc
+          "Configures the level of DDoS protection that applies to web ACLs associated with Application Load Balancers."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc "Returns a list of ApplicationAttributes."]}
+    let make ?name =
+      fun ?id ->
+        fun ?aRN ->
+          fun ?defaultAction ->
+            fun ?description ->
+              fun ?rules ->
+                fun ?visibilityConfig ->
+                  fun ?dataProtectionConfig ->
+                    fun ?capacity ->
+                      fun ?preProcessFirewallManagerRuleGroups ->
+                        fun ?postProcessFirewallManagerRuleGroups ->
+                          fun ?managedByFirewallManager ->
+                            fun ?labelNamespace ->
+                              fun ?customResponseBodies ->
+                                fun ?captchaConfig ->
+                                  fun ?challengeConfig ->
+                                    fun ?tokenDomains ->
+                                      fun ?associationConfig ->
+                                        fun ?retrofittedByFirewallManager ->
+                                          fun ?onSourceDDoSProtectionConfig
+                                            ->
+                                            fun ?applicationConfig ->
+                                              fun () ->
+                                                {
+                                                  name;
+                                                  id;
+                                                  aRN;
+                                                  defaultAction;
+                                                  description;
+                                                  rules;
+                                                  visibilityConfig;
+                                                  dataProtectionConfig;
+                                                  capacity;
+                                                  preProcessFirewallManagerRuleGroups;
+                                                  postProcessFirewallManagerRuleGroups;
+                                                  managedByFirewallManager;
+                                                  labelNamespace;
+                                                  customResponseBodies;
+                                                  captchaConfig;
+                                                  challengeConfig;
+                                                  tokenDomains;
+                                                  associationConfig;
+                                                  retrofittedByFirewallManager;
+                                                  onSourceDDoSProtectionConfig;
+                                                  applicationConfig
+                                                }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Id", (Some (EntityId.to_value x.id)));
-        ("ARN", (Some (ResourceArn.to_value x.aRN)));
-        ("DefaultAction", (Some (DefaultAction.to_value x.defaultAction)));
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Id", (Option.map x.id ~f:EntityId.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceArn.to_value));
+        ("DefaultAction",
+          (Option.map x.defaultAction ~f:DefaultAction.to_value));
         ("Description",
           (Option.map x.description ~f:EntityDescription.to_value));
         ("Rules", (Option.map x.rules ~f:Rules.to_value));
         ("VisibilityConfig",
-          (Some (VisibilityConfig.to_value x.visibilityConfig)));
+          (Option.map x.visibilityConfig ~f:VisibilityConfig.to_value));
+        ("DataProtectionConfig",
+          (Option.map x.dataProtectionConfig ~f:DataProtectionConfig.to_value));
         ("Capacity", (Option.map x.capacity ~f:ConsumedCapacity.to_value));
         ("PreProcessFirewallManagerRuleGroups",
           (Option.map x.preProcessFirewallManagerRuleGroups
@@ -10933,9 +16604,40 @@ module WebACL =
         ("CustomResponseBodies",
           (Option.map x.customResponseBodies ~f:CustomResponseBodies.to_value));
         ("CaptchaConfig",
-          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value))]
+          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value));
+        ("ChallengeConfig",
+          (Option.map x.challengeConfig ~f:ChallengeConfig.to_value));
+        ("TokenDomains",
+          (Option.map x.tokenDomains ~f:TokenDomains.to_value));
+        ("AssociationConfig",
+          (Option.map x.associationConfig ~f:AssociationConfig.to_value));
+        ("RetrofittedByFirewallManager",
+          (Option.map x.retrofittedByFirewallManager ~f:Boolean.to_value));
+        ("OnSourceDDoSProtectionConfig",
+          (Option.map x.onSourceDDoSProtectionConfig
+             ~f:OnSourceDDoSProtectionConfig.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let onSourceDDoSProtectionConfig =
+        (Option.map ~f:OnSourceDDoSProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "OnSourceDDoSProtectionConfig") in
+      let retrofittedByFirewallManager =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "RetrofittedByFirewallManager") in
+      let associationConfig =
+        (Option.map ~f:AssociationConfig.of_xml)
+          (Xml.child xml_arg0 "AssociationConfig") in
+      let tokenDomains =
+        (Option.map ~f:TokenDomains.of_xml)
+          (Xml.child xml_arg0 "TokenDomains") in
+      let challengeConfig =
+        (Option.map ~f:ChallengeConfig.of_xml)
+          (Xml.child xml_arg0 "ChallengeConfig") in
       let captchaConfig =
         (Option.map ~f:CaptchaConfig.of_xml)
           (Xml.child xml_arg0 "CaptchaConfig") in
@@ -10957,59 +16659,81 @@ module WebACL =
       let capacity =
         (Option.map ~f:ConsumedCapacity.of_xml)
           (Xml.child xml_arg0 "Capacity") in
+      let dataProtectionConfig =
+        (Option.map ~f:DataProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "DataProtectionConfig") in
       let visibilityConfig =
-        VisibilityConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VisibilityConfig") in
+        (Option.map ~f:VisibilityConfig.of_xml)
+          (Xml.child xml_arg0 "VisibilityConfig") in
       let rules = (Option.map ~f:Rules.of_xml) (Xml.child xml_arg0 "Rules") in
       let description =
         (Option.map ~f:EntityDescription.of_xml)
           (Xml.child xml_arg0 "Description") in
       let defaultAction =
-        DefaultAction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DefaultAction") in
-      let aRN =
-        ResourceArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
-      let id =
-        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+        (Option.map ~f:DefaultAction.of_xml)
+          (Xml.child xml_arg0 "DefaultAction") in
+      let aRN = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ARN") in
+      let id = (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "Id") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?captchaConfig ?customResponseBodies ?labelNamespace
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?retrofittedByFirewallManager ?associationConfig ?tokenDomains
+        ?challengeConfig ?captchaConfig ?customResponseBodies ?labelNamespace
         ?managedByFirewallManager ?postProcessFirewallManagerRuleGroups
-        ?preProcessFirewallManagerRuleGroups ?capacity ~visibilityConfig
-        ?rules ?description ~defaultAction ~aRN ~id ~name ()
+        ?preProcessFirewallManagerRuleGroups ?capacity ?dataProtectionConfig
+        ?visibilityConfig ?rules ?description ?defaultAction ?aRN ?id ?name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let onSourceDDoSProtectionConfig =
+        field_map json__ "OnSourceDDoSProtectionConfig"
+          OnSourceDDoSProtectionConfig.of_json in
+      let retrofittedByFirewallManager =
+        field_map json__ "RetrofittedByFirewallManager" Boolean.of_json in
+      let associationConfig =
+        field_map json__ "AssociationConfig" AssociationConfig.of_json in
+      let tokenDomains = field_map json__ "TokenDomains" TokenDomains.of_json in
+      let challengeConfig =
+        field_map json__ "ChallengeConfig" ChallengeConfig.of_json in
       let captchaConfig =
-        field_map json "CaptchaConfig" CaptchaConfig.of_json in
+        field_map json__ "CaptchaConfig" CaptchaConfig.of_json in
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let labelNamespace = field_map json "LabelNamespace" LabelName.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let labelNamespace =
+        field_map json__ "LabelNamespace" LabelName.of_json in
       let managedByFirewallManager =
-        field_map json "ManagedByFirewallManager" Boolean.of_json in
+        field_map json__ "ManagedByFirewallManager" Boolean.of_json in
       let postProcessFirewallManagerRuleGroups =
-        field_map json "PostProcessFirewallManagerRuleGroups"
+        field_map json__ "PostProcessFirewallManagerRuleGroups"
           FirewallManagerRuleGroups.of_json in
       let preProcessFirewallManagerRuleGroups =
-        field_map json "PreProcessFirewallManagerRuleGroups"
+        field_map json__ "PreProcessFirewallManagerRuleGroups"
           FirewallManagerRuleGroups.of_json in
-      let capacity = field_map json "Capacity" ConsumedCapacity.of_json in
+      let capacity = field_map json__ "Capacity" ConsumedCapacity.of_json in
+      let dataProtectionConfig =
+        field_map json__ "DataProtectionConfig" DataProtectionConfig.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
       let defaultAction =
-        field_map_exn json "DefaultAction" DefaultAction.of_json in
-      let aRN = field_map_exn json "ARN" ResourceArn.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ?captchaConfig ?customResponseBodies ?labelNamespace
+        field_map json__ "DefaultAction" DefaultAction.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?retrofittedByFirewallManager ?associationConfig ?tokenDomains
+        ?challengeConfig ?captchaConfig ?customResponseBodies ?labelNamespace
         ?managedByFirewallManager ?postProcessFirewallManagerRuleGroups
-        ?preProcessFirewallManagerRuleGroups ?capacity ~visibilityConfig
-        ?rules ?description ~defaultAction ~aRN ~id ~name ()
+        ?preProcessFirewallManagerRuleGroups ?capacity ?dataProtectionConfig
+        ?visibilityConfig ?rules ?description ?defaultAction ?aRN ?id ?name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has an action defined (allow, block, or count) for requests that match the statement of the rule. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resources can be an Amazon CloudFront distribution, an Amazon API Gateway REST API, an Application Load Balancer, or an AppSync GraphQL API."]
+       "A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has a statement that defines what to look for in web requests and an action that WAF applies to requests that match the statement. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resource types include Amazon CloudFront distribution, Amazon API Gateway REST API, Application Load Balancer, AppSync GraphQL API, Amazon Cognito user pool, App Runner service, Amplify application, and Amazon Web Services Verified Access instance."]
 module GetWebACLForResourceResponse =
   struct
     type nonrec t =
@@ -11098,45 +16822,51 @@ module GetWebACLForResourceResponse =
         (Option.map ~f:WebACL.of_xml) (Xml.child xml_arg0 "WebACL") in
       make ?webACL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webACL = field_map json "WebACL" WebACL.of_json in make ?webACL ()
+    let of_json json__ =
+      let webACL = field_map json__ "WebACL" WebACL.of_json in
+      make ?webACL ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the WebACL for the specified resource."]
+  end[@@ocaml.doc
+       "Retrieves the WebACL for the specified resource. This call uses GetWebACL, to verify that your account has permission to access the retrieved web ACL. If you get an error that indicates that your account isn't authorized to perform wafv2:GetWebACL on the resource, that error won't be included in your CloudTrail event history. For Amazon CloudFront, don't use this call. Instead, call the CloudFront action GetDistributionConfig. For information, see GetDistributionConfig in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for GetWebACLForResource in the WAF Developer Guide."]
 module GetWebACLRequest =
   struct
     type nonrec t =
       {
-      name: EntityName.t
+      name: EntityName.t option
         [@ocaml.doc
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
-      scope: Scope.t
+      scope: Scope.t option
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
-      id: EntityId.t
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+      id: EntityId.t option
         [@ocaml.doc
-          "The unique identifier for the web ACL. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."]}
-    let context_ = "GetWebACLRequest"
-    let make ~name = fun ~scope -> fun ~id -> fun () -> { name; scope; id }
+          "The unique identifier for the web ACL. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
+      aRN: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the web ACL that you want to retrieve."]}
+    let make ?name =
+      fun ?scope -> fun ?id -> fun ?aRN -> fun () -> { name; scope; id; aRN }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EntityName.to_value x.name)));
-        ("Scope", (Some (Scope.to_value x.scope)));
-        ("Id", (Some (EntityId.to_value x.id)))]
+        [("Name", (Option.map x.name ~f:EntityName.to_value));
+        ("Scope", (Option.map x.scope ~f:Scope.to_value));
+        ("Id", (Option.map x.id ~f:EntityId.to_value));
+        ("ARN", (Option.map x.aRN ~f:ResourceArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      let scope =
-        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      let aRN = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ARN") in
+      let id = (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "Id") in
+      let scope = (Option.map ~f:Scope.of_xml) (Xml.child xml_arg0 "Scope") in
       let name =
-        EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~id ~scope ~name ()
+        (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?aRN ?id ?scope ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ~id ~scope ~name ()
+    let of_json json__ =
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let scope = field_map json__ "Scope" Scope.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      make ?aRN ?id ?scope ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified WebACL."]
 module OutputUrl =
@@ -11164,7 +16894,7 @@ module GetWebACLResponse =
           "A token used for optimistic locking. WAF returns a token to your get and list requests, to mark the state of the entity at the time of the request. To make changes to the entity associated with the token, you provide the token to operations like update and delete. WAF uses the token to ensure that no changes have been made to the entity since you last retrieved it. If a change has been made, the update fails with a WAFOptimisticLockException. If this happens, perform another get, and use the new token returned by that operation."];
       applicationIntegrationURL: OutputUrl.t option
         [@ocaml.doc
-          "The URL to use in SDK integrations with Amazon Web Services managed rule groups. For example, you can use the integration SDKs with the account takeover prevention managed rule group AWSManagedRulesATPRuleSet. This is only populated if you are using a rule group in your web ACL that integrates with your applications in this way. For more information, see WAF client application integration in the WAF Developer Guide."]}
+          "The URL to use in SDK integrations with Amazon Web Services managed rule groups. For example, you can use the integration SDKs with the account takeover prevention managed rule group AWSManagedRulesATPRuleSet and the account creation fraud prevention managed rule group AWSManagedRulesACFPRuleSet. This is only populated if you are using a rule group in your web ACL that integrates with your applications in this way. For more information, see WAF client application integration in the WAF Developer Guide."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -11246,11 +16976,11 @@ module GetWebACLResponse =
         (Option.map ~f:WebACL.of_xml) (Xml.child xml_arg0 "WebACL") in
       make ?applicationIntegrationURL ?lockToken ?webACL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationIntegrationURL =
-        field_map json "ApplicationIntegrationURL" OutputUrl.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
-      let webACL = field_map json "WebACL" WebACL.of_json in
+        field_map json__ "ApplicationIntegrationURL" OutputUrl.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
+      let webACL = field_map json__ "WebACL" WebACL.of_json in
       make ?applicationIntegrationURL ?lockToken ?webACL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified WebACL."]
@@ -11258,6 +16988,9 @@ module IPSetSummaries =
   struct
     type nonrec t = IPSetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IPSetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11296,39 +17029,165 @@ module PaginationLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module NextMarker =
+module ListAPIKeysRequest =
   struct
-    type nonrec t = string
-    let context_ = "NextMarker"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      scope: Scope.t
+        [@ocaml.doc
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+      nextMarker: NextMarker.t option
+        [@ocaml.doc
+          "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
+      limit: PaginationLimit.t option
+        [@ocaml.doc
+          "The maximum number of objects that you want WAF to return for this request. If more objects are available, in the response, WAF provides a NextMarker value that you can use in a subsequent call to get the next batch of objects."]}
+    let context_ = "ListAPIKeysRequest"
+    let make ?nextMarker =
+      fun ?limit -> fun ~scope -> fun () -> { nextMarker; limit; scope }
+    let to_value x =
+      structure_to_value
+        [("Scope", (Some (Scope.to_value x.scope)));
+        ("NextMarker", (Option.map x.nextMarker ~f:NextMarker.to_value));
+        ("Limit", (Option.map x.limit ~f:PaginationLimit.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextMarker" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let limit =
+        (Option.map ~f:PaginationLimit.of_xml) (Xml.child xml_arg0 "Limit") in
+      let nextMarker =
+        (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      let scope =
+        Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
+      make ?limit ?nextMarker ~scope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ?limit ?nextMarker ~scope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of the API keys that you've defined for the specified scope. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide."]
+module ListAPIKeysResponse =
+  struct
+    type nonrec t =
+      {
+      nextMarker: NextMarker.t option
+        [@ocaml.doc
+          "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
+      aPIKeySummaries: APIKeySummaries.t option
+        [@ocaml.doc
+          "The array of key summaries. If you specified a Limit in your request, this might not be the full list."];
+      applicationIntegrationURL: OutputUrl.t option
+        [@ocaml.doc
+          "The CAPTCHA application integration URL, for use in your JavaScript implementation."]}
+    type nonrec error =
+      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      | `WAFInvalidOperationException of WAFInvalidOperationException.t 
+      | `WAFInvalidParameterException of WAFInvalidParameterException.t 
+      | `WAFInvalidResourceException of WAFInvalidResourceException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextMarker =
+      fun ?aPIKeySummaries ->
+        fun ?applicationIntegrationURL ->
+          fun () ->
+            { nextMarker; aPIKeySummaries; applicationIntegrationURL }
+    let error_of_json name json =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_json json)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_json json)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_json json)
+      | "WAFInvalidResourceException" ->
+          `WAFInvalidResourceException
+            (WAFInvalidResourceException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "WAFInternalErrorException" ->
+          `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
+      | "WAFInvalidOperationException" ->
+          `WAFInvalidOperationException
+            (WAFInvalidOperationException.of_xml xml)
+      | "WAFInvalidParameterException" ->
+          `WAFInvalidParameterException
+            (WAFInvalidParameterException.of_xml xml)
+      | "WAFInvalidResourceException" ->
+          `WAFInvalidResourceException
+            (WAFInvalidResourceException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `WAFInternalErrorException e ->
+          `Assoc
+            [("error", (`String "WAFInternalErrorException"));
+            ("details", (WAFInternalErrorException.to_json e))]
+      | `WAFInvalidOperationException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidOperationException"));
+            ("details", (WAFInvalidOperationException.to_json e))]
+      | `WAFInvalidParameterException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidParameterException"));
+            ("details", (WAFInvalidParameterException.to_json e))]
+      | `WAFInvalidResourceException e ->
+          `Assoc
+            [("error", (`String "WAFInvalidResourceException"));
+            ("details", (WAFInvalidResourceException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextMarker", (Option.map x.nextMarker ~f:NextMarker.to_value));
+        ("APIKeySummaries",
+          (Option.map x.aPIKeySummaries ~f:APIKeySummaries.to_value));
+        ("ApplicationIntegrationURL",
+          (Option.map x.applicationIntegrationURL ~f:OutputUrl.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationIntegrationURL =
+        (Option.map ~f:OutputUrl.of_xml)
+          (Xml.child xml_arg0 "ApplicationIntegrationURL") in
+      let aPIKeySummaries =
+        (Option.map ~f:APIKeySummaries.of_xml)
+          (Xml.child xml_arg0 "APIKeySummaries") in
+      let nextMarker =
+        (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
+      make ?applicationIntegrationURL ?aPIKeySummaries ?nextMarker ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationIntegrationURL =
+        field_map json__ "ApplicationIntegrationURL" OutputUrl.of_json in
+      let aPIKeySummaries =
+        field_map json__ "APIKeySummaries" APIKeySummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      make ?applicationIntegrationURL ?aPIKeySummaries ?nextMarker ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of the API keys that you've defined for the specified scope. API keys are required for the integration of the CAPTCHA API in your JavaScript client applications. The API lets you customize the placement and characteristics of the CAPTCHA puzzle for your end users. For more information about the CAPTCHA JavaScript integration, see WAF client application integration in the WAF Developer Guide."]
 module ListAvailableManagedRuleGroupVersionsRequest =
   struct
     type nonrec t =
       {
       vendorName: VendorName.t
         [@ocaml.doc
-          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify the rule group."];
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
       name: EntityName.t
         [@ocaml.doc
           "The name of the managed rule group. You use this, along with the vendor name, to identify the rule group."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -11364,12 +17223,12 @@ module ListAvailableManagedRuleGroupVersionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VendorName") in
       make ?limit ?nextMarker ~scope ~name ~vendorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      let vendorName = field_map_exn json "VendorName" VendorName.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      let vendorName = field_map_exn json__ "VendorName" VendorName.of_json in
       make ?limit ?nextMarker ~scope ~name ~vendorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11398,10 +17257,10 @@ module ManagedRuleGroupVersion =
         (Option.map ~f:VersionKeyString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?lastUpdateTimestamp ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdateTimestamp =
-        field_map json "LastUpdateTimestamp" Timestamp.of_json in
-      let name = field_map json "Name" VersionKeyString.of_json in
+        field_map json__ "LastUpdateTimestamp" Timestamp.of_json in
+      let name = field_map json__ "Name" VersionKeyString.of_json in
       make ?lastUpdateTimestamp ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a single version of a managed rule group."]
@@ -11409,6 +17268,9 @@ module ManagedRuleGroupVersions =
   struct
     type nonrec t = ManagedRuleGroupVersion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedRuleGroupVersion.to_value)) |>
         (fun x -> `List x)
@@ -11440,7 +17302,7 @@ module ListAvailableManagedRuleGroupVersionsResponse =
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       versions: ManagedRuleGroupVersions.t option
         [@ocaml.doc
-          "The versions that are currently available for the specified managed rule group."];
+          "The versions that are currently available for the specified managed rule group. If you specified a Limit in your request, this might not be the full list."];
       currentDefaultVersion: VersionKeyString.t option
         [@ocaml.doc
           "The name of the version that's currently set as the default."]}
@@ -11527,12 +17389,12 @@ module ListAvailableManagedRuleGroupVersionsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?currentDefaultVersion ?versions ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentDefaultVersion =
-        field_map json "CurrentDefaultVersion" VersionKeyString.of_json in
+        field_map json__ "CurrentDefaultVersion" VersionKeyString.of_json in
       let versions =
-        field_map json "Versions" ManagedRuleGroupVersions.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+        field_map json__ "Versions" ManagedRuleGroupVersions.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?currentDefaultVersion ?versions ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11543,7 +17405,7 @@ module ListAvailableManagedRuleGroupsRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -11568,10 +17430,10 @@ module ListAvailableManagedRuleGroupsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11582,7 +17444,7 @@ module ManagedRuleGroupSummary =
       {
       vendorName: VendorName.t option
         [@ocaml.doc
-          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify the rule group."];
+          "The name of the managed rule group vendor. You use this, along with the rule group name, to identify a rule group."];
       name: EntityName.t option
         [@ocaml.doc
           "The name of the managed rule group. You use this, along with the vendor name, to identify the rule group."];
@@ -11619,21 +17481,24 @@ module ManagedRuleGroupSummary =
         (Option.map ~f:VendorName.of_xml) (Xml.child xml_arg0 "VendorName") in
       make ?description ?versioningSupported ?name ?vendorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" EntityDescription.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
       let versioningSupported =
-        field_map json "VersioningSupported" Boolean.of_json in
-      let name = field_map json "Name" EntityName.of_json in
-      let vendorName = field_map json "VendorName" VendorName.of_json in
+        field_map json__ "VersioningSupported" Boolean.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
+      let vendorName = field_map json__ "VendorName" VendorName.of_json in
       make ?description ?versioningSupported ?name ?vendorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "High-level information about a managed rule group, returned by ListAvailableManagedRuleGroups. This provides information like the name and vendor name, that you provide when you add a ManagedRuleGroupStatement to a web ACL. Managed rule groups include Amazon Web Services Managed Rules rule groups, which are free of charge to WAF customers, and Amazon Web Services Marketplace managed rule groups, which you can subscribe to through Amazon Web Services Marketplace."]
+       "High-level information about a managed rule group, returned by ListAvailableManagedRuleGroups. This provides information like the name and vendor name, that you provide when you add a ManagedRuleGroupStatement to a web ACL. Managed rule groups include Amazon Web Services Managed Rules rule groups and Amazon Web Services Marketplace managed rule groups. To use any Amazon Web Services Marketplace managed rule group, first subscribe to the rule group through Amazon Web Services Marketplace."]
 module ManagedRuleGroupSummaries =
   struct
     type nonrec t = ManagedRuleGroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedRuleGroupSummary.to_value)) |>
         (fun x -> `List x)
@@ -11663,7 +17528,9 @@ module ListAvailableManagedRuleGroupsResponse =
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
-      managedRuleGroups: ManagedRuleGroupSummaries.t option }
+      managedRuleGroups: ManagedRuleGroupSummaries.t option
+        [@ocaml.doc
+          "Array of managed rule groups that you can use. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -11730,10 +17597,11 @@ module ListAvailableManagedRuleGroupsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?managedRuleGroups ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedRuleGroups =
-        field_map json "ManagedRuleGroups" ManagedRuleGroupSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+        field_map json__ "ManagedRuleGroups"
+          ManagedRuleGroupSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?managedRuleGroups ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11744,7 +17612,7 @@ module ListIPSetsRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -11769,10 +17637,10 @@ module ListIPSetsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11786,7 +17654,7 @@ module ListIPSetsResponse =
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       iPSets: IPSetSummaries.t option
         [@ocaml.doc
-          "Array of IPSets. This may not be the full list of IPSets that you have defined. See the Limit specification for this request."]}
+          "Array of IPSets. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -11849,9 +17717,9 @@ module ListIPSetsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?iPSets ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iPSets = field_map json "IPSets" IPSetSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let iPSets = field_map json__ "IPSets" IPSetSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?iPSets ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11862,42 +17730,54 @@ module ListLoggingConfigurationsRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       limit: PaginationLimit.t option
         [@ocaml.doc
-          "The maximum number of objects that you want WAF to return for this request. If more objects are available, in the response, WAF provides a NextMarker value that you can use in a subsequent call to get the next batch of objects."]}
+          "The maximum number of objects that you want WAF to return for this request. If more objects are available, in the response, WAF provides a NextMarker value that you can use in a subsequent call to get the next batch of objects."];
+      logScope: LogScope.t option
+        [@ocaml.doc
+          "The owner of the logging configuration, which must be set to CUSTOMER for the configurations that you manage. The log scope SECURITY_LAKE indicates a configuration that is managed through Amazon Security Lake. You can use Security Lake to collect log and event data from various sources for normalization, analysis, and management. For information, see Collecting data from Amazon Web Services services in the Amazon Security Lake user guide. The log scope CLOUDWATCH_TELEMETRY_RULE_MANAGED indicates a configuration that is managed through Amazon CloudWatch Logs for telemetry data collection and analysis. For information, see What is Amazon CloudWatch Logs ? in the Amazon CloudWatch Logs user guide. Default: CUSTOMER"]}
     let context_ = "ListLoggingConfigurationsRequest"
     let make ?nextMarker =
-      fun ?limit -> fun ~scope -> fun () -> { nextMarker; limit; scope }
+      fun ?limit ->
+        fun ?logScope ->
+          fun ~scope -> fun () -> { nextMarker; limit; logScope; scope }
     let to_value x =
       structure_to_value
         [("Scope", (Some (Scope.to_value x.scope)));
         ("NextMarker", (Option.map x.nextMarker ~f:NextMarker.to_value));
-        ("Limit", (Option.map x.limit ~f:PaginationLimit.to_value))]
+        ("Limit", (Option.map x.limit ~f:PaginationLimit.to_value));
+        ("LogScope", (Option.map x.logScope ~f:LogScope.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let logScope =
+        (Option.map ~f:LogScope.of_xml) (Xml.child xml_arg0 "LogScope") in
       let limit =
         (Option.map ~f:PaginationLimit.of_xml) (Xml.child xml_arg0 "Limit") in
       let nextMarker =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       let scope =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
-      make ?limit ?nextMarker ~scope ()
+      make ?logScope ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      make ?limit ?nextMarker ~scope ()
+    let of_json json__ =
+      let logScope = field_map json__ "LogScope" LogScope.of_json in
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      make ?logScope ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves an array of your LoggingConfiguration objects."]
 module LoggingConfigurations =
   struct
     type nonrec t = LoggingConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LoggingConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -11924,7 +17804,9 @@ module ListLoggingConfigurationsResponse =
   struct
     type nonrec t =
       {
-      loggingConfigurations: LoggingConfigurations.t option ;
+      loggingConfigurations: LoggingConfigurations.t option
+        [@ocaml.doc
+          "Array of logging configurations. If you specified a Limit in your request, this might not be the full list."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."]}
@@ -11994,10 +17876,11 @@ module ListLoggingConfigurationsResponse =
           (Xml.child xml_arg0 "LoggingConfigurations") in
       make ?nextMarker ?loggingConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       let loggingConfigurations =
-        field_map json "LoggingConfigurations" LoggingConfigurations.of_json in
+        field_map json__ "LoggingConfigurations"
+          LoggingConfigurations.of_json in
       make ?nextMarker ?loggingConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves an array of your LoggingConfiguration objects."]
@@ -12007,7 +17890,7 @@ module ListManagedRuleSetsRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -12032,10 +17915,10 @@ module ListManagedRuleSetsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12095,14 +17978,15 @@ module ManagedRuleSetSummary =
         (Option.map ~f:EntityName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?labelNamespace ?aRN ?lockToken ?description ?id ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let labelNamespace = field_map json "LabelNamespace" LabelName.of_json in
-      let aRN = field_map json "ARN" ResourceArn.of_json in
-      let lockToken = field_map json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let labelNamespace =
+        field_map json__ "LabelNamespace" LabelName.of_json in
+      let aRN = field_map json__ "ARN" ResourceArn.of_json in
+      let lockToken = field_map json__ "LockToken" LockToken.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map json "Id" EntityId.of_json in
-      let name = field_map json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map json__ "Id" EntityId.of_json in
+      let name = field_map json__ "Name" EntityName.of_json in
       make ?labelNamespace ?aRN ?lockToken ?description ?id ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12111,6 +17995,9 @@ module ManagedRuleSetSummaries =
   struct
     type nonrec t = ManagedRuleSetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedRuleSetSummary.to_value)) |>
         (fun x -> `List x)
@@ -12141,7 +18028,8 @@ module ListManagedRuleSetsResponse =
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       managedRuleSets: ManagedRuleSetSummaries.t option
-        [@ocaml.doc "Your managed rule sets."]}
+        [@ocaml.doc
+          "Your managed rule sets. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -12207,10 +18095,10 @@ module ListManagedRuleSetsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?managedRuleSets ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedRuleSets =
-        field_map json "ManagedRuleSets" ManagedRuleSetSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+        field_map json__ "ManagedRuleSets" ManagedRuleSetSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?managedRuleSets ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12246,14 +18134,14 @@ module ListMobileSdkReleasesRequest =
         Platform.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Platform") in
       make ?limit ?nextMarker ~platform ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let platform = field_map_exn json "Platform" Platform.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let platform = field_map_exn json__ "Platform" Platform.of_json in
       make ?limit ?nextMarker ~platform ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of the available releases for the mobile SDK and the specified device platform. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Retrieves a list of the available releases for the mobile SDK and the specified device platform. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module ReleaseSummary =
   struct
     type nonrec t =
@@ -12278,10 +18166,10 @@ module ReleaseSummary =
           (Xml.child xml_arg0 "ReleaseVersion") in
       make ?timestamp ?releaseVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "Timestamp" Timestamp.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
       let releaseVersion =
-        field_map json "ReleaseVersion" VersionKeyString.of_json in
+        field_map json__ "ReleaseVersion" VersionKeyString.of_json in
       make ?timestamp ?releaseVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "High level information for an SDK release."]
@@ -12289,6 +18177,9 @@ module ReleaseSummaries =
   struct
     type nonrec t = ReleaseSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReleaseSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12314,7 +18205,8 @@ module ListMobileSdkReleasesResponse =
     type nonrec t =
       {
       releaseSummaries: ReleaseSummaries.t option
-        [@ocaml.doc "High level information for the available SDK releases."];
+        [@ocaml.doc
+          "The high level information for the available SDK releases. If you specified a Limit in your request, this might not be the full list."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."]}
@@ -12383,21 +18275,21 @@ module ListMobileSdkReleasesResponse =
           (Xml.child xml_arg0 "ReleaseSummaries") in
       make ?nextMarker ?releaseSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       let releaseSummaries =
-        field_map json "ReleaseSummaries" ReleaseSummaries.of_json in
+        field_map json__ "ReleaseSummaries" ReleaseSummaries.of_json in
       make ?nextMarker ?releaseSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of the available releases for the mobile SDK and the specified device platform. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage Security Token Service (STS) security tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
+       "Retrieves a list of the available releases for the mobile SDK and the specified device platform. The mobile SDK is not generally available. Customers who have access to the mobile SDK can use it to establish and manage WAF tokens for use in HTTP(S) requests from a mobile device to WAF. For more information, see WAF client application integration in the WAF Developer Guide."]
 module ListRegexPatternSetsRequest =
   struct
     type nonrec t =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -12422,10 +18314,10 @@ module ListRegexPatternSetsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12434,6 +18326,9 @@ module RegexPatternSetSummaries =
   struct
     type nonrec t = RegexPatternSetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RegexPatternSetSummary.to_value)) |>
         (fun x -> `List x)
@@ -12463,7 +18358,9 @@ module ListRegexPatternSetsResponse =
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
-      regexPatternSets: RegexPatternSetSummaries.t option }
+      regexPatternSets: RegexPatternSetSummaries.t option
+        [@ocaml.doc
+          "Array of regex pattern sets. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -12529,10 +18426,10 @@ module ListRegexPatternSetsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?regexPatternSets ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let regexPatternSets =
-        field_map json "RegexPatternSets" RegexPatternSetSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+        field_map json__ "RegexPatternSets" RegexPatternSetSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?regexPatternSets ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12543,6 +18440,10 @@ module ResourceType =
       | APPLICATION_LOAD_BALANCER 
       | API_GATEWAY 
       | APPSYNC 
+      | COGNITO_USER_POOL 
+      | APP_RUNNER_SERVICE 
+      | VERIFIED_ACCESS_INSTANCE 
+      | AMPLIFY 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -12550,12 +18451,20 @@ module ResourceType =
       | APPLICATION_LOAD_BALANCER -> "APPLICATION_LOAD_BALANCER"
       | API_GATEWAY -> "API_GATEWAY"
       | APPSYNC -> "APPSYNC"
+      | COGNITO_USER_POOL -> "COGNITO_USER_POOL"
+      | APP_RUNNER_SERVICE -> "APP_RUNNER_SERVICE"
+      | VERIFIED_ACCESS_INSTANCE -> "VERIFIED_ACCESS_INSTANCE"
+      | AMPLIFY -> "AMPLIFY"
       | Non_static_id s -> s
     let of_string =
       function
       | "APPLICATION_LOAD_BALANCER" -> APPLICATION_LOAD_BALANCER
       | "API_GATEWAY" -> API_GATEWAY
       | "APPSYNC" -> APPSYNC
+      | "COGNITO_USER_POOL" -> COGNITO_USER_POOL
+      | "APP_RUNNER_SERVICE" -> APP_RUNNER_SERVICE
+      | "VERIFIED_ACCESS_INSTANCE" -> VERIFIED_ACCESS_INSTANCE
+      | "AMPLIFY" -> AMPLIFY
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -12573,7 +18482,7 @@ module ListResourcesForWebACLRequest =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the web ACL."];
       resourceType: ResourceType.t option
         [@ocaml.doc
-          "Used for web ACLs that are scoped for regional applications. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API."]}
+          "Retrieves the web ACLs that are used by the specified resource type. For Amazon CloudFront, don't use this call. Instead, use the CloudFront call ListDistributionsByWebACLId. For information, see ListDistributionsByWebACLId in the Amazon CloudFront API Reference. If you don't provide a resource type, the call uses the resource type APPLICATION_LOAD_BALANCER. Default: APPLICATION_LOAD_BALANCER"]}
     let context_ = "ListResourcesForWebACLRequest"
     let make ?resourceType =
       fun ~webACLArn -> fun () -> { resourceType; webACLArn }
@@ -12592,17 +18501,20 @@ module ListResourcesForWebACLRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WebACLArn") in
       make ?resourceType ~webACLArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let webACLArn = field_map_exn json "WebACLArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let webACLArn = field_map_exn json__ "WebACLArn" ResourceArn.of_json in
       make ?resourceType ~webACLArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an array of the Amazon Resource Names (ARNs) for the regional resources that are associated with the specified web ACL. If you want the list of Amazon CloudFront resources, use the CloudFront call ListDistributionsByWebACLId."]
+       "Retrieves an array of the Amazon Resource Names (ARNs) for the resources that are associated with the specified web ACL. For Amazon CloudFront, don't use this call. Instead, use the CloudFront call ListDistributionsByWebACLId. For information, see ListDistributionsByWebACLId in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for ListResourcesForWebACL in the WAF Developer Guide."]
 module ResourceArns =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12702,19 +18614,19 @@ module ListResourcesForWebACLResponse =
           (Xml.child xml_arg0 "ResourceArns") in
       make ?resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArns = field_map json "ResourceArns" ResourceArns.of_json in
+    let of_json json__ =
+      let resourceArns = field_map json__ "ResourceArns" ResourceArns.of_json in
       make ?resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an array of the Amazon Resource Names (ARNs) for the regional resources that are associated with the specified web ACL. If you want the list of Amazon CloudFront resources, use the CloudFront call ListDistributionsByWebACLId."]
+       "Retrieves an array of the Amazon Resource Names (ARNs) for the resources that are associated with the specified web ACL. For Amazon CloudFront, don't use this call. Instead, use the CloudFront call ListDistributionsByWebACLId. For information, see ListDistributionsByWebACLId in the Amazon CloudFront API Reference. Required permissions for customer-managed IAM policies This call requires permissions that are specific to the protected resource type. For details, see Permissions for ListResourcesForWebACL in the WAF Developer Guide."]
 module ListRuleGroupsRequest =
   struct
     type nonrec t =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -12739,10 +18651,10 @@ module ListRuleGroupsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12751,6 +18663,9 @@ module RuleGroupSummaries =
   struct
     type nonrec t = RuleGroupSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleGroupSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12779,7 +18694,9 @@ module ListRuleGroupsResponse =
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
-      ruleGroups: RuleGroupSummaries.t option }
+      ruleGroups: RuleGroupSummaries.t option
+        [@ocaml.doc
+          "Array of rule groups. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -12845,9 +18762,10 @@ module ListRuleGroupsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?ruleGroups ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleGroups = field_map json "RuleGroups" RuleGroupSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let ruleGroups =
+        field_map json__ "RuleGroups" RuleGroupSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?ruleGroups ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12884,10 +18802,11 @@ module ListTagsForResourceRequest =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ~resourceARN ?limit ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ~resourceARN ?limit ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12914,9 +18833,9 @@ module TagInfoForResource =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceARN") in
       make ?tagList ?resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
-      let resourceARN = field_map json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      let resourceARN = field_map json__ "ResourceARN" ResourceArn.of_json in
       make ?tagList ?resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12930,7 +18849,7 @@ module ListTagsForResourceResponse =
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       tagInfoForResource: TagInfoForResource.t option
         [@ocaml.doc
-          "The collection of tagging definitions for the resource."]}
+          "The collection of tagging definitions for the resource. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -13028,10 +18947,10 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?tagInfoForResource ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tagInfoForResource =
-        field_map json "TagInfoForResource" TagInfoForResource.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+        field_map json__ "TagInfoForResource" TagInfoForResource.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?tagInfoForResource ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13042,7 +18961,7 @@ module ListWebACLsRequest =
       {
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
@@ -13067,10 +18986,10 @@ module ListWebACLsRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       make ?limit ?nextMarker ~scope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PaginationLimit.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PaginationLimit.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
       make ?limit ?nextMarker ~scope ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13079,6 +18998,9 @@ module WebACLSummaries =
   struct
     type nonrec t = WebACLSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WebACLSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13106,7 +19028,9 @@ module ListWebACLsResponse =
       nextMarker: NextMarker.t option
         [@ocaml.doc
           "When you request a list of objects with a Limit setting, if the number of objects that are still available for retrieval exceeds the limit, WAF returns a NextMarker value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
-      webACLs: WebACLSummaries.t option }
+      webACLs: WebACLSummaries.t option
+        [@ocaml.doc
+          "Array of web ACLs. If you specified a Limit in your request, this might not be the full list."]}
     type nonrec error =
       [ `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
@@ -13169,9 +19093,9 @@ module ListWebACLsResponse =
         (Option.map ~f:NextMarker.of_xml) (Xml.child xml_arg0 "NextMarker") in
       make ?webACLs ?nextMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let webACLs = field_map json "WebACLs" WebACLSummaries.of_json in
-      let nextMarker = field_map json "NextMarker" NextMarker.of_json in
+    let of_json json__ =
+      let webACLs = field_map json__ "WebACLs" WebACLSummaries.of_json in
+      let nextMarker = field_map json__ "NextMarker" NextMarker.of_json in
       make ?webACLs ?nextMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13193,14 +19117,14 @@ module PutLoggingConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LoggingConfiguration") in
       make ~loggingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loggingConfiguration =
-        field_map_exn json "LoggingConfiguration"
+        field_map_exn json__ "LoggingConfiguration"
           LoggingConfiguration.of_json in
       make ~loggingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the specified LoggingConfiguration, to start logging from a web ACL, according to the configuration provided. You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. For information about configuring logging destinations and the permissions that are required for each, see Logging web ACL traffic information in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide. This operation completely replaces the mutable specifications that you already have for the logging configuration with the ones that you provide to this call. To modify the logging configuration, retrieve it by calling GetLoggingConfiguration, update the settings as needed, and then provide the complete logging configuration specification to this call."]
+       "Enables the specified LoggingConfiguration, to start logging from a web ACL, according to the configuration provided. If you configure data protection for the web ACL, the protection applies to the data that WAF sends to the logs. This operation completely replaces any mutable specifications that you already have for a logging configuration with the ones that you provide to this call. To modify an existing logging configuration, do the following: Retrieve it by calling GetLoggingConfiguration Update its settings as needed Provide the complete logging configuration specification to this call You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. The name that you give the destination must start with aws-waf-logs-. Depending on the type of destination, you might need to configure additional settings or permissions. For configuration requirements and pricing information for each destination type, see Logging web ACL traffic in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide."]
 module WAFServiceLinkedRoleErrorException =
   struct
     type nonrec t = {
@@ -13215,8 +19139,8 @@ module WAFServiceLinkedRoleErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13235,8 +19159,8 @@ module WAFLogDestinationPermissionIssueException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13246,7 +19170,10 @@ module PutLoggingConfigurationResponse =
     type nonrec t = {
       loggingConfiguration: LoggingConfiguration.t option }
     type nonrec error =
-      [ `WAFInternalErrorException of WAFInternalErrorException.t 
+      [
+        `WAFFeatureNotIncludedInPricingPlanException of
+          WAFFeatureNotIncludedInPricingPlanException.t 
+      | `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
       | `WAFLimitsExceededException of WAFLimitsExceededException.t 
@@ -13260,6 +19187,9 @@ module PutLoggingConfigurationResponse =
     let make ?loggingConfiguration = fun () -> { loggingConfiguration }
     let error_of_json name json =
       match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_json json)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_json json)
       | "WAFInvalidOperationException" ->
@@ -13288,6 +19218,9 @@ module PutLoggingConfigurationResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_xml xml)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
       | "WAFInvalidOperationException" ->
@@ -13313,6 +19246,12 @@ module PutLoggingConfigurationResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `WAFFeatureNotIncludedInPricingPlanException e ->
+          `Assoc
+            [("error",
+               (`String "WAFFeatureNotIncludedInPricingPlanException"));
+            ("details",
+              (WAFFeatureNotIncludedInPricingPlanException.to_json e))]
       | `WAFInternalErrorException e ->
           `Assoc
             [("error", (`String "WAFInternalErrorException"));
@@ -13363,13 +19302,13 @@ module PutLoggingConfigurationResponse =
           (Xml.child xml_arg0 "LoggingConfiguration") in
       make ?loggingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loggingConfiguration =
-        field_map json "LoggingConfiguration" LoggingConfiguration.of_json in
+        field_map json__ "LoggingConfiguration" LoggingConfiguration.of_json in
       make ?loggingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Enables the specified LoggingConfiguration, to start logging from a web ACL, according to the configuration provided. You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. For information about configuring logging destinations and the permissions that are required for each, see Logging web ACL traffic information in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide. This operation completely replaces the mutable specifications that you already have for the logging configuration with the ones that you provide to this call. To modify the logging configuration, retrieve it by calling GetLoggingConfiguration, update the settings as needed, and then provide the complete logging configuration specification to this call."]
+       "Enables the specified LoggingConfiguration, to start logging from a web ACL, according to the configuration provided. If you configure data protection for the web ACL, the protection applies to the data that WAF sends to the logs. This operation completely replaces any mutable specifications that you already have for a logging configuration with the ones that you provide to this call. To modify an existing logging configuration, do the following: Retrieve it by calling GetLoggingConfiguration Update its settings as needed Provide the complete logging configuration specification to this call You can define one logging destination per web ACL. You can access information about the traffic that WAF inspects using the following steps: Create your logging destination. You can use an Amazon CloudWatch Logs log group, an Amazon Simple Storage Service (Amazon S3) bucket, or an Amazon Kinesis Data Firehose. The name that you give the destination must start with aws-waf-logs-. Depending on the type of destination, you might need to configure additional settings or permissions. For configuration requirements and pricing information for each destination type, see Logging web ACL traffic in the WAF Developer Guide. Associate your logging destination to your web ACL using a PutLoggingConfiguration request. When you successfully enable logging using a PutLoggingConfiguration request, WAF creates an additional role or policy that is required to write logs to the logging destination. For an Amazon CloudWatch Logs log group, WAF creates a resource policy on the log group. For an Amazon S3 bucket, WAF creates a bucket policy. For an Amazon Kinesis Data Firehose, WAF creates a service-linked role. For additional information about web ACL logging, see Logging web ACL traffic information in the WAF Developer Guide."]
 module VersionToPublish =
   struct
     type nonrec t =
@@ -13399,11 +19338,11 @@ module VersionToPublish =
           (Xml.child xml_arg0 "AssociatedRuleGroupArn") in
       make ?forecastedLifetime ?associatedRuleGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastedLifetime =
-        field_map json "ForecastedLifetime" TimeWindowDay.of_json in
+        field_map json__ "ForecastedLifetime" TimeWindowDay.of_json in
       let associatedRuleGroupArn =
-        field_map json "AssociatedRuleGroupArn" ResourceArn.of_json in
+        field_map json__ "AssociatedRuleGroupArn" ResourceArn.of_json in
       make ?forecastedLifetime ?associatedRuleGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13432,6 +19371,8 @@ module VersionsToPublish =
                        (VersionToPublish.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -13448,7 +19389,7 @@ module PutManagedRuleSetVersionsRequest =
           "The name of the managed rule set. You use this, along with the rule set ID, to identify the rule set. This name is assigned to the corresponding managed rule group, which your customers can access and use."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the managed rule set. The ID is returned in the responses to commands like list. You provide it to operations like get and update."];
@@ -13507,15 +19448,15 @@ module PutManagedRuleSetVersionsRequest =
       make ?versionsToPublish ?recommendedVersion ~lockToken ~id ~scope ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionsToPublish =
-        field_map json "VersionsToPublish" VersionsToPublish.of_json in
+        field_map json__ "VersionsToPublish" VersionsToPublish.of_json in
       let recommendedVersion =
-        field_map json "RecommendedVersion" VersionKeyString.of_json in
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "RecommendedVersion" VersionKeyString.of_json in
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ?versionsToPublish ?recommendedVersion ~lockToken ~id ~scope ~name
         ()
     let to_json v = composed_to_json to_value v
@@ -13609,8 +19550,8 @@ module PutManagedRuleSetVersionsResponse =
         (Option.map ~f:LockToken.of_xml) (Xml.child xml_arg0 "NextLockToken") in
       make ?nextLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       make ?nextLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13624,7 +19565,7 @@ module PutPermissionPolicyRequest =
           "The Amazon Resource Name (ARN) of the RuleGroup to which you want to attach the policy."];
       policy: PolicyString.t
         [@ocaml.doc
-          "The policy to attach to the specified rule group. The policy specifications must conform to the following: The policy must be composed using IAM Policy version 2012-10-17 or version 2015-01-01. The policy must include specifications for Effect, Action, and Principal. Effect must specify Allow. Action must specify wafv2:CreateWebACL, wafv2:UpdateWebACL, and wafv2:PutFirewallManagerRuleGroups and may optionally specify wafv2:GetRuleGroup. WAF rejects any extra actions or wildcard actions in the policy. The policy must not include a Resource parameter. For more information, see IAM Policies."]}
+          "The policy to attach to the specified rule group. The policy specifications must conform to the following: The policy must be composed using IAM Policy version 2012-10-17. The policy must include specifications for Effect, Action, and Principal. Effect must specify Allow. Action must specify wafv2:CreateWebACL, wafv2:UpdateWebACL, and wafv2:PutFirewallManagerRuleGroups and may optionally specify wafv2:GetRuleGroup. WAF rejects any extra actions or wildcard actions in the policy. The policy must not include a Resource parameter. For more information, see IAM Policies."]}
     let context_ = "PutPermissionPolicyRequest"
     let make ~resourceArn = fun ~policy -> fun () -> { resourceArn; policy }
     let to_value x =
@@ -13641,13 +19582,14 @@ module PutPermissionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~policy ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" PolicyString.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" PolicyString.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
       make ~policy ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches an IAM policy to the specified resource. Use this to share a rule group across accounts. You must be the owner of the rule group to perform this operation. This action is subject to the following restrictions: You can attach only one policy with each PutPermissionPolicy request. The ARN in the request must be a valid WAF RuleGroup ARN and the rule group must exist in the same Region. The user making the request must be the owner of the rule group."]
+       "Use this to share a rule group with other accounts. This action attaches an IAM policy to the specified resource. You must be the owner of the rule group to perform this operation. This action is subject to the following restrictions: You can attach only one policy with each PutPermissionPolicy request. The ARN in the request must be a valid WAF RuleGroup ARN and the rule group must exist in the same Region. The user making the request must be the owner of the rule group. If a rule group has been shared with your account, you can access it through the call GetRuleGroup, and you can reference it in CreateWebACL and UpdateWebACL. Rule groups that are shared with you don't appear in your WAF console rule groups listing."]
 module WAFInvalidPermissionPolicyException =
   struct
     type nonrec t = {
@@ -13662,12 +19604,12 @@ module WAFInvalidPermissionPolicyException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation failed because the specified policy isn't in the proper format. The policy specifications must conform to the following: The policy must be composed using IAM Policy version 2012-10-17 or version 2015-01-01. The policy must include specifications for Effect, Action, and Principal. Effect must specify Allow. Action must specify wafv2:CreateWebACL, wafv2:UpdateWebACL, and wafv2:PutFirewallManagerRuleGroups and may optionally specify wafv2:GetRuleGroup. WAF rejects any extra actions or wildcard actions in the policy. The policy must not include a Resource parameter. For more information, see IAM Policies."]
+       "The operation failed because the specified policy isn't in the proper format. The policy specifications must conform to the following: The policy must be composed using IAM Policy version 2012-10-17. The policy must include specifications for Effect, Action, and Principal. Effect must specify Allow. Action must specify wafv2:CreateWebACL, wafv2:UpdateWebACL, and wafv2:PutFirewallManagerRuleGroups and may optionally specify wafv2:GetRuleGroup. WAF rejects any extra actions or wildcard actions in the policy. The policy must not include a Resource parameter. For more information, see IAM Policies."]
 module PutPermissionPolicyResponse =
   struct
     type nonrec t = unit
@@ -13741,12 +19683,15 @@ module PutPermissionPolicyResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Attaches an IAM policy to the specified resource. Use this to share a rule group across accounts. You must be the owner of the rule group to perform this operation. This action is subject to the following restrictions: You can attach only one policy with each PutPermissionPolicy request. The ARN in the request must be a valid WAF RuleGroup ARN and the rule group must exist in the same Region. The user making the request must be the owner of the rule group."]
+       "Use this to share a rule group with other accounts. This action attaches an IAM policy to the specified resource. You must be the owner of the rule group to perform this operation. This action is subject to the following restrictions: You can attach only one policy with each PutPermissionPolicy request. The ARN in the request must be a valid WAF RuleGroup ARN and the rule group must exist in the same Region. The user making the request must be the owner of the rule group. If a rule group has been shared with your account, you can access it through the call GetRuleGroup, and you can reference it in CreateWebACL and UpdateWebACL. Rule groups that are shared with you don't appear in your WAF console rule groups listing."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -13790,9 +19735,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13927,9 +19873,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceARN = field_map_exn json "ResourceARN" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" ResourceArn.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14037,7 +19984,7 @@ module UpdateIPSetRequest =
           "The name of the IP set. You cannot change the name of an IPSet after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -14046,7 +19993,7 @@ module UpdateIPSetRequest =
           "A description of the IP set that helps with identification."];
       addresses: IPAddresses.t
         [@ocaml.doc
-          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses in Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: To configure WAF to allow, block, or count requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. To configure WAF to allow, block, or count requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. To configure WAF to allow, block, or count requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. To configure WAF to allow, block, or count requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
+          "Contains an array of strings that specifies zero or more IP addresses or blocks of IP addresses that you want WAF to inspect for in incoming requests. All addresses must be specified using Classless Inter-Domain Routing (CIDR) notation. WAF supports all IPv4 and IPv6 CIDR ranges except for /0. Example address strings: For requests that originated from the IP address 192.0.2.44, specify 192.0.2.44/32. For requests that originated from IP addresses from 192.0.2.0 to 192.0.2.255, specify 192.0.2.0/24. For requests that originated from the IP address 1111:0000:0000:0000:0000:0000:0000:0111, specify 1111:0000:0000:0000:0000:0000:0000:0111/128. For requests that originated from IP addresses 1111:0000:0000:0000:0000:0000:0000:0000 to 1111:0000:0000:0000:ffff:ffff:ffff:ffff, specify 1111:0000:0000:0000:0000:0000:0000:0000/64. For more information about CIDR notation, see the Wikipedia entry Classless Inter-Domain Routing. Example JSON Addresses specifications: Empty array: \"Addresses\": \\[\\] Array with one address: \"Addresses\": \\[\"192.0.2.44/32\"\\] Array with three addresses: \"Addresses\": \\[\"192.0.2.44/32\", \"192.0.2.0/24\", \"192.0.0.0/16\"\\] INVALID specification: \"Addresses\": \\[\"\"\\] INVALID"];
       lockToken: LockToken.t
         [@ocaml.doc
           "A token used for optimistic locking. WAF returns a token to your get and list requests, to mark the state of the entity at the time of the request. To make changes to the entity associated with the token, you provide the token to operations like update and delete. WAF uses the token to ensure that no changes have been made to the entity since you last retrieved it. If a change has been made, the update fails with a WAFOptimisticLockException. If this happens, perform another get, and use the new token returned by that operation."]}
@@ -14087,18 +20034,18 @@ module UpdateIPSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~addresses ?description ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let addresses = field_map_exn json "Addresses" IPAddresses.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let addresses = field_map_exn json__ "Addresses" IPAddresses.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~addresses ?description ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified IPSet. This operation completely replaces the mutable specifications that you already have for the IP set with the ones that you provide to this call. To modify the IP set, retrieve it by calling GetIPSet, update the settings as needed, and then provide the complete IP set specification to this call."]
+       "Updates the specified IPSet. This operation completely replaces the mutable specifications that you already have for the IP set with the ones that you provide to this call. To modify an IP set, do the following: Retrieve it by calling GetIPSet Update its settings as needed Provide the complete IP set specification to this call Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateIPSetResponse =
   struct
     type nonrec t =
@@ -14206,12 +20153,12 @@ module UpdateIPSetResponse =
         (Option.map ~f:LockToken.of_xml) (Xml.child xml_arg0 "NextLockToken") in
       make ?nextLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       make ?nextLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified IPSet. This operation completely replaces the mutable specifications that you already have for the IP set with the ones that you provide to this call. To modify the IP set, retrieve it by calling GetIPSet, update the settings as needed, and then provide the complete IP set specification to this call."]
+       "Updates the specified IPSet. This operation completely replaces the mutable specifications that you already have for the IP set with the ones that you provide to this call. To modify an IP set, do the following: Retrieve it by calling GetIPSet Update its settings as needed Provide the complete IP set specification to this call Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateManagedRuleSetVersionExpiryDateRequest =
   struct
     type nonrec t =
@@ -14221,7 +20168,7 @@ module UpdateManagedRuleSetVersionExpiryDateRequest =
           "The name of the managed rule set. You use this, along with the rule set ID, to identify the rule set. This name is assigned to the corresponding managed rule group, which your customers can access and use."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the managed rule set. The ID is returned in the responses to commands like list. You provide it to operations like get and update."];
@@ -14278,19 +20225,19 @@ module UpdateManagedRuleSetVersionExpiryDateRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~expiryTimestamp ~versionToExpire ~lockToken ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expiryTimestamp =
-        field_map_exn json "ExpiryTimestamp" Timestamp.of_json in
+        field_map_exn json__ "ExpiryTimestamp" Timestamp.of_json in
       let versionToExpire =
-        field_map_exn json "VersionToExpire" VersionKeyString.of_json in
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map_exn json__ "VersionToExpire" VersionKeyString.of_json in
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~expiryTimestamp ~versionToExpire ~lockToken ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the expiration information for your managed rule set. Use this to initiate the expiration of a managed rule group version. After you initiate expiration for a version, WAF excludes it from the reponse to ListAvailableManagedRuleGroupVersions for the managed rule group. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
+       "Updates the expiration information for your managed rule set. Use this to initiate the expiration of a managed rule group version. After you initiate expiration for a version, WAF excludes it from the response to ListAvailableManagedRuleGroupVersions for the managed rule group. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
 module UpdateManagedRuleSetVersionExpiryDateResponse =
   struct
     type nonrec t =
@@ -14396,16 +20343,16 @@ module UpdateManagedRuleSetVersionExpiryDateResponse =
           (Xml.child xml_arg0 "ExpiringVersion") in
       make ?nextLockToken ?expiryTimestamp ?expiringVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       let expiryTimestamp =
-        field_map json "ExpiryTimestamp" Timestamp.of_json in
+        field_map json__ "ExpiryTimestamp" Timestamp.of_json in
       let expiringVersion =
-        field_map json "ExpiringVersion" VersionKeyString.of_json in
+        field_map json__ "ExpiringVersion" VersionKeyString.of_json in
       make ?nextLockToken ?expiryTimestamp ?expiringVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the expiration information for your managed rule set. Use this to initiate the expiration of a managed rule group version. After you initiate expiration for a version, WAF excludes it from the reponse to ListAvailableManagedRuleGroupVersions for the managed rule group. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
+       "Updates the expiration information for your managed rule set. Use this to initiate the expiration of a managed rule group version. After you initiate expiration for a version, WAF excludes it from the response to ListAvailableManagedRuleGroupVersions for the managed rule group. This is intended for use only by vendors of managed rule sets. Vendors are Amazon Web Services and Amazon Web Services Marketplace sellers. Vendors, you can use the managed rule set APIs to provide controlled rollout of your versioned managed rule group offerings for your customers. The APIs are ListManagedRuleSets, GetManagedRuleSet, PutManagedRuleSetVersions, and UpdateManagedRuleSetVersionExpiryDate."]
 module UpdateRegexPatternSetRequest =
   struct
     type nonrec t =
@@ -14415,7 +20362,7 @@ module UpdateRegexPatternSetRequest =
           "The name of the set. You cannot change the name after you create the set."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the set. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -14471,20 +20418,20 @@ module UpdateRegexPatternSetRequest =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~lockToken ~regularExpressionList ?description ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
+    let of_json json__ =
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
       let regularExpressionList =
-        field_map_exn json "RegularExpressionList"
+        field_map_exn json__ "RegularExpressionList"
           RegularExpressionList.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ~lockToken ~regularExpressionList ?description ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified RegexPatternSet. This operation completely replaces the mutable specifications that you already have for the regex pattern set with the ones that you provide to this call. To modify the regex pattern set, retrieve it by calling GetRegexPatternSet, update the settings as needed, and then provide the complete regex pattern set specification to this call."]
+       "Updates the specified RegexPatternSet. This operation completely replaces the mutable specifications that you already have for the regex pattern set with the ones that you provide to this call. To modify a regex pattern set, do the following: Retrieve it by calling GetRegexPatternSet Update its settings as needed Provide the complete regex pattern set specification to this call Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateRegexPatternSetResponse =
   struct
     type nonrec t =
@@ -14592,12 +20539,12 @@ module UpdateRegexPatternSetResponse =
         (Option.map ~f:LockToken.of_xml) (Xml.child xml_arg0 "NextLockToken") in
       make ?nextLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       make ?nextLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified RegexPatternSet. This operation completely replaces the mutable specifications that you already have for the regex pattern set with the ones that you provide to this call. To modify the regex pattern set, retrieve it by calling GetRegexPatternSet, update the settings as needed, and then provide the complete regex pattern set specification to this call."]
+       "Updates the specified RegexPatternSet. This operation completely replaces the mutable specifications that you already have for the regex pattern set with the ones that you provide to this call. To modify a regex pattern set, do the following: Retrieve it by calling GetRegexPatternSet Update its settings as needed Provide the complete regex pattern set specification to this call Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateRuleGroupRequest =
   struct
     type nonrec t =
@@ -14607,7 +20554,7 @@ module UpdateRuleGroupRequest =
           "The name of the rule group. You cannot change the name of a rule group after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "A unique identifier for the rule group. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -14616,7 +20563,7 @@ module UpdateRuleGroupRequest =
           "A description of the rule group that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
       visibilityConfig: VisibilityConfig.t
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
@@ -14683,23 +20630,23 @@ module UpdateRuleGroupRequest =
       make ?customResponseBodies ~lockToken ~visibilityConfig ?rules
         ?description ~id ~scope ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map_exn json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
       make ?customResponseBodies ~lockToken ~visibilityConfig ?rules
         ?description ~id ~scope ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified RuleGroup. This operation completely replaces the mutable specifications that you already have for the rule group with the ones that you provide to this call. To modify the rule group, retrieve it by calling GetRuleGroup, update the settings as needed, and then provide the complete rule group specification to this call. A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements."]
+       "Updates the specified RuleGroup. This operation completely replaces the mutable specifications that you already have for the rule group with the ones that you provide to this call. To modify a rule group, do the following: Retrieve it by calling GetRuleGroup Update its settings as needed Provide the complete rule group specification to this call A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateRuleGroupResponse =
   struct
     type nonrec t =
@@ -14708,7 +20655,10 @@ module UpdateRuleGroupResponse =
         [@ocaml.doc
           "A token used for optimistic locking. WAF returns this token to your update requests. You use NextLockToken in the same manner as you use LockToken."]}
     type nonrec error =
-      [ `WAFDuplicateItemException of WAFDuplicateItemException.t 
+      [
+        `WAFConfigurationWarningException of
+          WAFConfigurationWarningException.t 
+      | `WAFDuplicateItemException of WAFDuplicateItemException.t 
       | `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
@@ -14722,6 +20672,9 @@ module UpdateRuleGroupResponse =
     let make ?nextLockToken = fun () -> { nextLockToken }
     let error_of_json name json =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_json json)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_json json)
       | "WAFInternalErrorException" ->
@@ -14752,6 +20705,9 @@ module UpdateRuleGroupResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_xml xml)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_xml xml)
       | "WAFInternalErrorException" ->
@@ -14779,6 +20735,10 @@ module UpdateRuleGroupResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `WAFConfigurationWarningException e ->
+          `Assoc
+            [("error", (`String "WAFConfigurationWarningException"));
+            ("details", (WAFConfigurationWarningException.to_json e))]
       | `WAFDuplicateItemException e ->
           `Assoc
             [("error", (`String "WAFDuplicateItemException"));
@@ -14830,12 +20790,12 @@ module UpdateRuleGroupResponse =
         (Option.map ~f:LockToken.of_xml) (Xml.child xml_arg0 "NextLockToken") in
       make ?nextLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       make ?nextLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified RuleGroup. This operation completely replaces the mutable specifications that you already have for the rule group with the ones that you provide to this call. To modify the rule group, retrieve it by calling GetRuleGroup, update the settings as needed, and then provide the complete rule group specification to this call. A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements."]
+       "Updates the specified RuleGroup. This operation completely replaces the mutable specifications that you already have for the rule group with the ones that you provide to this call. To modify a rule group, do the following: Retrieve it by calling GetRuleGroup Update its settings as needed Provide the complete rule group specification to this call A rule group defines a collection of rules to inspect and control web requests that you can use in a WebACL. When you create a rule group, you define an immutable capacity limit. If you update a rule group, you must stay within the capacity. This allows others to reuse the rule group with confidence in its capacity requirements. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateWebACLRequest =
   struct
     type nonrec t =
@@ -14845,7 +20805,7 @@ module UpdateWebACLRequest =
           "The name of the web ACL. You cannot change the name of a web ACL after you create it."];
       scope: Scope.t
         [@ocaml.doc
-          "Specifies whether this is for an Amazon CloudFront distribution or for a regional application. A regional application can be an Application Load Balancer (ALB), an Amazon API Gateway REST API, or an AppSync GraphQL API. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
+          "Specifies whether this is for a global resource type, such as a Amazon CloudFront distribution. For an Amplify application, use CLOUDFRONT. To work with CloudFront, you must also specify the Region US East (N. Virginia) as follows: CLI - Specify the Region when you use the CloudFront scope: --scope=CLOUDFRONT --region=us-east-1. API and SDKs - For all calls, use the Region endpoint us-east-1."];
       id: EntityId.t
         [@ocaml.doc
           "The unique identifier for the web ACL. This ID is returned in the responses to create and list commands. You provide it to operations like update and delete."];
@@ -14857,10 +20817,13 @@ module UpdateWebACLRequest =
           "A description of the web ACL that helps with identification."];
       rules: Rules.t option
         [@ocaml.doc
-          "The Rule statements used to identify the web requests that you want to allow, block, or count. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
+          "The Rule statements used to identify the web requests that you want to manage. Each rule includes one top-level statement that WAF uses to identify matching web requests, and parameters that govern how WAF handles them."];
       visibilityConfig: VisibilityConfig.t
         [@ocaml.doc
           "Defines and enables Amazon CloudWatch metrics and web request sample collection."];
+      dataProtectionConfig: DataProtectionConfig.t option
+        [@ocaml.doc
+          "Specifies data protection to apply to the web request data for the web ACL. This is a web ACL level data protection option. The data protection that you configure for the web ACL alters the data that's available for any other data collection activity, including your WAF logging destinations, web ACL request sampling, and Amazon Security Lake data collection and management. Your other option for data protection is in the logging configuration, which only affects logging."];
       lockToken: LockToken.t
         [@ocaml.doc
           "A token used for optimistic locking. WAF returns a token to your get and list requests, to mark the state of the entity at the time of the request. To make changes to the entity associated with the token, you provide the token to operations like update and delete. WAF uses the token to ensure that no changes have been made to the entity since you last retrieved it. If a change has been made, the update fails with a WAFOptimisticLockException. If this happens, perform another get, and use the new token returned by that operation."];
@@ -14869,31 +20832,58 @@ module UpdateWebACLRequest =
           "A map of custom response keys and content bodies. When you create a rule with a block action, you can send a custom response to the web request. You define these for the web ACL, and then use them in the rules and default actions that you define in the web ACL. For information about customizing web requests and responses, see Customizing web requests and responses in WAF in the WAF Developer Guide. For information about the limits on count and size for custom request and response settings, see WAF quotas in the WAF Developer Guide."];
       captchaConfig: CaptchaConfig.t option
         [@ocaml.doc
-          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."]}
+          "Specifies how WAF should handle CAPTCHA evaluations for rules that don't have their own CaptchaConfig settings. If you don't specify this, WAF uses its default settings for CaptchaConfig."];
+      challengeConfig: ChallengeConfig.t option
+        [@ocaml.doc
+          "Specifies how WAF should handle challenge evaluations for rules that don't have their own ChallengeConfig settings. If you don't specify this, WAF uses its default settings for ChallengeConfig."];
+      tokenDomains: TokenDomains.t option
+        [@ocaml.doc
+          "Specifies the domains that WAF should accept in a web request token. This enables the use of tokens across multiple protected websites. When WAF provides a token, it uses the domain of the Amazon Web Services resource that the web ACL is protecting. If you don't specify a list of token domains, WAF accepts tokens only for the domain of the protected resource. With a token domain list, WAF accepts the resource's host domain plus all domains in the token domain list, including their prefixed subdomains. Example JSON: \"TokenDomains\": \\{ \"mywebsite.com\", \"myotherwebsite.com\" \\} Public suffixes aren't allowed. For example, you can't use gov.au or co.uk as token domains."];
+      associationConfig: AssociationConfig.t option
+        [@ocaml.doc
+          "Specifies custom configurations for the associations between the web ACL and protected resources. Use this to customize the maximum size of the request body that your protected resources forward to WAF for inspection. You can customize this setting for CloudFront, API Gateway, Amazon Cognito, App Runner, or Verified Access resources. The default setting is 16 KB (16,384 bytes). You are charged additional fees when your protected resources forward body sizes that are larger than the default. For more information, see WAF Pricing. For Application Load Balancer and AppSync, the limit is fixed at 8 KB (8,192 bytes)."];
+      onSourceDDoSProtectionConfig: OnSourceDDoSProtectionConfig.t option
+        [@ocaml.doc
+          "Specifies the type of DDoS protection to apply to web request data for a web ACL. For most scenarios, it is recommended to use the default protection level, ACTIVE_UNDER_DDOS. If a web ACL is associated with multiple Application Load Balancers, the changes you make to DDoS protection in that web ACL will apply to all associated Application Load Balancers."];
+      applicationConfig: ApplicationConfig.t option
+        [@ocaml.doc
+          "Configures the ability for the WAF console to store and retrieve application attributes. Application attributes help WAF give recommendations for protection packs. When using UpdateWebACL, ApplicationConfig follows these rules: If you omit ApplicationConfig from the request, all existing entries in the web ACL are retained. If you include ApplicationConfig, entries must match the existing values exactly. Any attempt to modify existing entries will result in an error."]}
     let context_ = "UpdateWebACLRequest"
     let make ?description =
       fun ?rules ->
-        fun ?customResponseBodies ->
-          fun ?captchaConfig ->
-            fun ~name ->
-              fun ~scope ->
-                fun ~id ->
-                  fun ~defaultAction ->
-                    fun ~visibilityConfig ->
-                      fun ~lockToken ->
-                        fun () ->
-                          {
-                            description;
-                            rules;
-                            customResponseBodies;
-                            captchaConfig;
-                            name;
-                            scope;
-                            id;
-                            defaultAction;
-                            visibilityConfig;
-                            lockToken
-                          }
+        fun ?dataProtectionConfig ->
+          fun ?customResponseBodies ->
+            fun ?captchaConfig ->
+              fun ?challengeConfig ->
+                fun ?tokenDomains ->
+                  fun ?associationConfig ->
+                    fun ?onSourceDDoSProtectionConfig ->
+                      fun ?applicationConfig ->
+                        fun ~name ->
+                          fun ~scope ->
+                            fun ~id ->
+                              fun ~defaultAction ->
+                                fun ~visibilityConfig ->
+                                  fun ~lockToken ->
+                                    fun () ->
+                                      {
+                                        description;
+                                        rules;
+                                        dataProtectionConfig;
+                                        customResponseBodies;
+                                        captchaConfig;
+                                        challengeConfig;
+                                        tokenDomains;
+                                        associationConfig;
+                                        onSourceDDoSProtectionConfig;
+                                        applicationConfig;
+                                        name;
+                                        scope;
+                                        id;
+                                        defaultAction;
+                                        visibilityConfig;
+                                        lockToken
+                                      }
     let to_value x =
       structure_to_value
         [("Name", (Some (EntityName.to_value x.name)));
@@ -14905,13 +20895,41 @@ module UpdateWebACLRequest =
         ("Rules", (Option.map x.rules ~f:Rules.to_value));
         ("VisibilityConfig",
           (Some (VisibilityConfig.to_value x.visibilityConfig)));
+        ("DataProtectionConfig",
+          (Option.map x.dataProtectionConfig ~f:DataProtectionConfig.to_value));
         ("LockToken", (Some (LockToken.to_value x.lockToken)));
         ("CustomResponseBodies",
           (Option.map x.customResponseBodies ~f:CustomResponseBodies.to_value));
         ("CaptchaConfig",
-          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value))]
+          (Option.map x.captchaConfig ~f:CaptchaConfig.to_value));
+        ("ChallengeConfig",
+          (Option.map x.challengeConfig ~f:ChallengeConfig.to_value));
+        ("TokenDomains",
+          (Option.map x.tokenDomains ~f:TokenDomains.to_value));
+        ("AssociationConfig",
+          (Option.map x.associationConfig ~f:AssociationConfig.to_value));
+        ("OnSourceDDoSProtectionConfig",
+          (Option.map x.onSourceDDoSProtectionConfig
+             ~f:OnSourceDDoSProtectionConfig.to_value));
+        ("ApplicationConfig",
+          (Option.map x.applicationConfig ~f:ApplicationConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let applicationConfig =
+        (Option.map ~f:ApplicationConfig.of_xml)
+          (Xml.child xml_arg0 "ApplicationConfig") in
+      let onSourceDDoSProtectionConfig =
+        (Option.map ~f:OnSourceDDoSProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "OnSourceDDoSProtectionConfig") in
+      let associationConfig =
+        (Option.map ~f:AssociationConfig.of_xml)
+          (Xml.child xml_arg0 "AssociationConfig") in
+      let tokenDomains =
+        (Option.map ~f:TokenDomains.of_xml)
+          (Xml.child xml_arg0 "TokenDomains") in
+      let challengeConfig =
+        (Option.map ~f:ChallengeConfig.of_xml)
+          (Xml.child xml_arg0 "ChallengeConfig") in
       let captchaConfig =
         (Option.map ~f:CaptchaConfig.of_xml)
           (Xml.child xml_arg0 "CaptchaConfig") in
@@ -14921,6 +20939,9 @@ module UpdateWebACLRequest =
       let lockToken =
         LockToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LockToken") in
+      let dataProtectionConfig =
+        (Option.map ~f:DataProtectionConfig.of_xml)
+          (Xml.child xml_arg0 "DataProtectionConfig") in
       let visibilityConfig =
         VisibilityConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VisibilityConfig") in
@@ -14937,30 +20958,48 @@ module UpdateWebACLRequest =
         Scope.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Scope") in
       let name =
         EntityName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?captchaConfig ?customResponseBodies ~lockToken ~visibilityConfig
-        ?rules ?description ~defaultAction ~id ~scope ~name ()
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?associationConfig ?tokenDomains ?challengeConfig ?captchaConfig
+        ?customResponseBodies ~lockToken ?dataProtectionConfig
+        ~visibilityConfig ?rules ?description ~defaultAction ~id ~scope ~name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let applicationConfig =
+        field_map json__ "ApplicationConfig" ApplicationConfig.of_json in
+      let onSourceDDoSProtectionConfig =
+        field_map json__ "OnSourceDDoSProtectionConfig"
+          OnSourceDDoSProtectionConfig.of_json in
+      let associationConfig =
+        field_map json__ "AssociationConfig" AssociationConfig.of_json in
+      let tokenDomains = field_map json__ "TokenDomains" TokenDomains.of_json in
+      let challengeConfig =
+        field_map json__ "ChallengeConfig" ChallengeConfig.of_json in
       let captchaConfig =
-        field_map json "CaptchaConfig" CaptchaConfig.of_json in
+        field_map json__ "CaptchaConfig" CaptchaConfig.of_json in
       let customResponseBodies =
-        field_map json "CustomResponseBodies" CustomResponseBodies.of_json in
-      let lockToken = field_map_exn json "LockToken" LockToken.of_json in
+        field_map json__ "CustomResponseBodies" CustomResponseBodies.of_json in
+      let lockToken = field_map_exn json__ "LockToken" LockToken.of_json in
+      let dataProtectionConfig =
+        field_map json__ "DataProtectionConfig" DataProtectionConfig.of_json in
       let visibilityConfig =
-        field_map_exn json "VisibilityConfig" VisibilityConfig.of_json in
-      let rules = field_map json "Rules" Rules.of_json in
+        field_map_exn json__ "VisibilityConfig" VisibilityConfig.of_json in
+      let rules = field_map json__ "Rules" Rules.of_json in
       let description =
-        field_map json "Description" EntityDescription.of_json in
+        field_map json__ "Description" EntityDescription.of_json in
       let defaultAction =
-        field_map_exn json "DefaultAction" DefaultAction.of_json in
-      let id = field_map_exn json "Id" EntityId.of_json in
-      let scope = field_map_exn json "Scope" Scope.of_json in
-      let name = field_map_exn json "Name" EntityName.of_json in
-      make ?captchaConfig ?customResponseBodies ~lockToken ~visibilityConfig
-        ?rules ?description ~defaultAction ~id ~scope ~name ()
+        field_map_exn json__ "DefaultAction" DefaultAction.of_json in
+      let id = field_map_exn json__ "Id" EntityId.of_json in
+      let scope = field_map_exn json__ "Scope" Scope.of_json in
+      let name = field_map_exn json__ "Name" EntityName.of_json in
+      make ?applicationConfig ?onSourceDDoSProtectionConfig
+        ?associationConfig ?tokenDomains ?challengeConfig ?captchaConfig
+        ?customResponseBodies ~lockToken ?dataProtectionConfig
+        ~visibilityConfig ?rules ?description ~defaultAction ~id ~scope ~name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified WebACL. This operation completely replaces the mutable specifications that you already have for the web ACL with the ones that you provide to this call. To modify the web ACL, retrieve it by calling GetWebACL, update the settings as needed, and then provide the complete web ACL specification to this call. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has an action defined (allow, block, or count) for requests that match the statement of the rule. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resources can be an Amazon CloudFront distribution, an Amazon API Gateway REST API, an Application Load Balancer, or an AppSync GraphQL API."]
+       "Updates the specified WebACL. While updating a web ACL, WAF provides continuous coverage to the resources that you have associated with the web ACL. This operation completely replaces the mutable specifications that you already have for the web ACL with the ones that you provide to this call. To modify a web ACL, do the following: Retrieve it by calling GetWebACL Update its settings as needed Provide the complete web ACL specification to this call A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has a statement that defines what to look for in web requests and an action that WAF applies to requests that match the statement. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resource types include Amazon CloudFront distribution, Amazon API Gateway REST API, Application Load Balancer, AppSync GraphQL API, Amazon Cognito user pool, App Runner service, Amplify application, and Amazon Web Services Verified Access instance. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]
 module UpdateWebACLResponse =
   struct
     type nonrec t =
@@ -14969,9 +21008,14 @@ module UpdateWebACLResponse =
         [@ocaml.doc
           "A token used for optimistic locking. WAF returns this token to your update requests. You use NextLockToken in the same manner as you use LockToken."]}
     type nonrec error =
-      [ `WAFDuplicateItemException of WAFDuplicateItemException.t 
+      [
+        `WAFConfigurationWarningException of
+          WAFConfigurationWarningException.t 
+      | `WAFDuplicateItemException of WAFDuplicateItemException.t 
       | `WAFExpiredManagedRuleGroupVersionException of
           WAFExpiredManagedRuleGroupVersionException.t 
+      | `WAFFeatureNotIncludedInPricingPlanException of
+          WAFFeatureNotIncludedInPricingPlanException.t 
       | `WAFInternalErrorException of WAFInternalErrorException.t 
       | `WAFInvalidOperationException of WAFInvalidOperationException.t 
       | `WAFInvalidParameterException of WAFInvalidParameterException.t 
@@ -14986,11 +21030,17 @@ module UpdateWebACLResponse =
     let make ?nextLockToken = fun () -> { nextLockToken }
     let error_of_json name json =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_json json)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_json json)
       | "WAFExpiredManagedRuleGroupVersionException" ->
           `WAFExpiredManagedRuleGroupVersionException
             (WAFExpiredManagedRuleGroupVersionException.of_json json)
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_json json)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_json json)
       | "WAFInvalidOperationException" ->
@@ -15022,11 +21072,17 @@ module UpdateWebACLResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "WAFConfigurationWarningException" ->
+          `WAFConfigurationWarningException
+            (WAFConfigurationWarningException.of_xml xml)
       | "WAFDuplicateItemException" ->
           `WAFDuplicateItemException (WAFDuplicateItemException.of_xml xml)
       | "WAFExpiredManagedRuleGroupVersionException" ->
           `WAFExpiredManagedRuleGroupVersionException
             (WAFExpiredManagedRuleGroupVersionException.of_xml xml)
+      | "WAFFeatureNotIncludedInPricingPlanException" ->
+          `WAFFeatureNotIncludedInPricingPlanException
+            (WAFFeatureNotIncludedInPricingPlanException.of_xml xml)
       | "WAFInternalErrorException" ->
           `WAFInternalErrorException (WAFInternalErrorException.of_xml xml)
       | "WAFInvalidOperationException" ->
@@ -15055,6 +21111,10 @@ module UpdateWebACLResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `WAFConfigurationWarningException e ->
+          `Assoc
+            [("error", (`String "WAFConfigurationWarningException"));
+            ("details", (WAFConfigurationWarningException.to_json e))]
       | `WAFDuplicateItemException e ->
           `Assoc
             [("error", (`String "WAFDuplicateItemException"));
@@ -15065,6 +21125,12 @@ module UpdateWebACLResponse =
                (`String "WAFExpiredManagedRuleGroupVersionException"));
             ("details",
               (WAFExpiredManagedRuleGroupVersionException.to_json e))]
+      | `WAFFeatureNotIncludedInPricingPlanException e ->
+          `Assoc
+            [("error",
+               (`String "WAFFeatureNotIncludedInPricingPlanException"));
+            ("details",
+              (WAFFeatureNotIncludedInPricingPlanException.to_json e))]
       | `WAFInternalErrorException e ->
           `Assoc
             [("error", (`String "WAFInternalErrorException"));
@@ -15116,9 +21182,9 @@ module UpdateWebACLResponse =
         (Option.map ~f:LockToken.of_xml) (Xml.child xml_arg0 "NextLockToken") in
       make ?nextLockToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextLockToken = field_map json "NextLockToken" LockToken.of_json in
+    let of_json json__ =
+      let nextLockToken = field_map json__ "NextLockToken" LockToken.of_json in
       make ?nextLockToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified WebACL. This operation completely replaces the mutable specifications that you already have for the web ACL with the ones that you provide to this call. To modify the web ACL, retrieve it by calling GetWebACL, update the settings as needed, and then provide the complete web ACL specification to this call. A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has an action defined (allow, block, or count) for requests that match the statement of the rule. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resources can be an Amazon CloudFront distribution, an Amazon API Gateway REST API, an Application Load Balancer, or an AppSync GraphQL API."]
+       "Updates the specified WebACL. While updating a web ACL, WAF provides continuous coverage to the resources that you have associated with the web ACL. This operation completely replaces the mutable specifications that you already have for the web ACL with the ones that you provide to this call. To modify a web ACL, do the following: Retrieve it by calling GetWebACL Update its settings as needed Provide the complete web ACL specification to this call A web ACL defines a collection of rules to use to inspect and control web requests. Each rule has a statement that defines what to look for in web requests and an action that WAF applies to requests that match the statement. In the web ACL, you assign a default action to take (allow, block) for any request that does not match any of the rules. The rules in a web ACL can be a combination of the types Rule, RuleGroup, and managed rule group. You can associate a web ACL with one or more Amazon Web Services resources to protect. The resource types include Amazon CloudFront distribution, Amazon API Gateway REST API, Application Load Balancer, AppSync GraphQL API, Amazon Cognito user pool, App Runner service, Amplify application, and Amazon Web Services Verified Access instance. Temporary inconsistencies during updates When you create or change a web ACL or other WAF resources, the changes take a small amount of time to propagate to all areas where the resources are stored. The propagation time can be from a few seconds to a number of minutes. The following are examples of the temporary inconsistencies that you might notice during change propagation: After you create a web ACL, if you try to associate it with a resource, you might get an exception indicating that the web ACL is unavailable. After you add a rule group to a web ACL, the new rule group rules might be in effect in one area where the web ACL is used and not in another. After you change a rule action setting, you might see the old action in some places and the new action in others. After you add an IP address to an IP set that is in use in a blocking rule, the new address might be blocked in one area while still allowed in another."]

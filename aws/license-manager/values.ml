@@ -41,6 +41,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -60,6 +63,246 @@ module StringList =
     let of_json j =
       list_of_json ~kind:"StringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module MatchingRuleStatement =
+  struct
+    type nonrec t =
+      {
+      keyToMatch: String_.t
+        [@ocaml.doc
+          "Key to match. The following keys and are supported when the RuleStatement type is Instance: Platform - The name of the platform. Logical operators are EQUALS and NOT_EQUALS. EC2BillingProduct - The billing product code. Logical operators are EQUALS and NOT_EQUALS. Possible values are: windows-server-enterprise | windows-byol | rhel | rhel-byol | rhel-high-availability | ubuntu-pro | suse-linux | sql-server-standard | sql-server-enterprise. MarketPlaceProductCode - The Marketplace product code. Logical operators are EQUALS and NOT_EQUALS. AMIId - The ID of the AMI. Logical operators are EQUALS and NOT_EQUALS. InstanceType - The instance type. Logical operators are EQUALS and NOT_EQUALS. InstanceId - The ID of the instance. Logical operators are EQUALS and NOT_EQUALS. HostId - The ID of the host. Logical operators are EQUALS and NOT_EQUALS. AccountId - The ID of the account. Logical operators are EQUALS and NOT_EQUALS. The following keys and are supported when the RuleStatement type is License: LicenseArn - The ARN of a Managed Entitlement License. Logical operators are EQUALS and NOT_EQUALS. ProductSKU - The productSKU of the license. Logical operators are EQUALS and NOT_EQUALS. Issuer - The issuer of the license. Logical operators are EQUALS and NOT_EQUALS. Beneficiary - The beneficiary of the license. Logical operators are EQUALS and NOT_EQUALS. LicenseStatus - The status of the license. Logical operators are EQUALS and NOT_EQUALS. HomeRegion - The home region of the license. Logical operators are EQUALS and NOT_EQUALS. The following keys and are supported when the RuleStatement type is License Configuration: LicenseConfigurationArn - The ARN of a self-managed license configuration. Logical operators are EQUALS and NOT_EQUALS. AccountId - The account of the license configuration. Logical operators are EQUALS and NOT_EQUALS."];
+      constraint_: String_.t [@ocaml.doc "Constraint."];
+      valueToMatch: StringList.t [@ocaml.doc "Value to match."]}
+    let context_ = "MatchingRuleStatement"
+    let make ~keyToMatch =
+      fun ~constraint_ ->
+        fun ~valueToMatch ->
+          fun () -> { keyToMatch; constraint_; valueToMatch }
+    let to_value x =
+      structure_to_value
+        [("KeyToMatch", (Some (String_.to_value x.keyToMatch)));
+        ("Constraint", (Some (String_.to_value x.constraint_)));
+        ("ValueToMatch", (Some (StringList.to_value x.valueToMatch)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueToMatch =
+        StringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ValueToMatch") in
+      let constraint_ =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Constraint") in
+      let keyToMatch =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyToMatch") in
+      make ~valueToMatch ~constraint_ ~keyToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueToMatch =
+        field_map_exn json__ "ValueToMatch" StringList.of_json in
+      let constraint_ = field_map_exn json__ "Constraint" String_.of_json in
+      let keyToMatch = field_map_exn json__ "KeyToMatch" String_.of_json in
+      make ~valueToMatch ~constraint_ ~keyToMatch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Matching rule statement."]
+module ScriptRuleStatement =
+  struct
+    type nonrec t =
+      {
+      keyToMatch: String_.t
+        [@ocaml.doc
+          "Key name to match against in the script rule evaluation."];
+      script: String_.t
+        [@ocaml.doc "Script code used to evaluate the rule condition."]}
+    let context_ = "ScriptRuleStatement"
+    let make ~keyToMatch = fun ~script -> fun () -> { keyToMatch; script }
+    let to_value x =
+      structure_to_value
+        [("KeyToMatch", (Some (String_.to_value x.keyToMatch)));
+        ("Script", (Some (String_.to_value x.script)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let script =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Script") in
+      let keyToMatch =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "KeyToMatch") in
+      make ~script ~keyToMatch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let script = field_map_exn json__ "Script" String_.of_json in
+      let keyToMatch = field_map_exn json__ "KeyToMatch" String_.of_json in
+      make ~script ~keyToMatch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Rule statement that uses a script to evaluate license asset conditions."]
+module MatchingRuleStatementList =
+  struct
+    type nonrec t = MatchingRuleStatement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MatchingRuleStatement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MatchingRuleStatement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MatchingRuleStatementList"
+        ~of_json:MatchingRuleStatement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ScriptRuleStatementList =
+  struct
+    type nonrec t = ScriptRuleStatement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ScriptRuleStatement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ScriptRuleStatement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ScriptRuleStatementList"
+        ~of_json:ScriptRuleStatement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AndRuleStatement =
+  struct
+    type nonrec t =
+      {
+      matchingRuleStatements: MatchingRuleStatementList.t option
+        [@ocaml.doc "Matching rule statements."];
+      scriptRuleStatements: ScriptRuleStatementList.t option
+        [@ocaml.doc "Script rule statements."]}
+    let make ?matchingRuleStatements =
+      fun ?scriptRuleStatements ->
+        fun () -> { matchingRuleStatements; scriptRuleStatements }
+    let to_value x =
+      structure_to_value
+        [("MatchingRuleStatements",
+           (Option.map x.matchingRuleStatements
+              ~f:MatchingRuleStatementList.to_value));
+        ("ScriptRuleStatements",
+          (Option.map x.scriptRuleStatements
+             ~f:ScriptRuleStatementList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scriptRuleStatements =
+        (Option.map ~f:ScriptRuleStatementList.of_xml)
+          (Xml.child xml_arg0 "ScriptRuleStatements") in
+      let matchingRuleStatements =
+        (Option.map ~f:MatchingRuleStatementList.of_xml)
+          (Xml.child xml_arg0 "MatchingRuleStatements") in
+      make ?scriptRuleStatements ?matchingRuleStatements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scriptRuleStatements =
+        field_map json__ "ScriptRuleStatements"
+          ScriptRuleStatementList.of_json in
+      let matchingRuleStatements =
+        field_map json__ "MatchingRuleStatements"
+          MatchingRuleStatementList.of_json in
+      make ?scriptRuleStatements ?matchingRuleStatements ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "AND rule statement."]
+module OrRuleStatement =
+  struct
+    type nonrec t =
+      {
+      matchingRuleStatements: MatchingRuleStatementList.t option
+        [@ocaml.doc "Matching rule statements."];
+      scriptRuleStatements: ScriptRuleStatementList.t option
+        [@ocaml.doc "Script rule statements."]}
+    let make ?matchingRuleStatements =
+      fun ?scriptRuleStatements ->
+        fun () -> { matchingRuleStatements; scriptRuleStatements }
+    let to_value x =
+      structure_to_value
+        [("MatchingRuleStatements",
+           (Option.map x.matchingRuleStatements
+              ~f:MatchingRuleStatementList.to_value));
+        ("ScriptRuleStatements",
+          (Option.map x.scriptRuleStatements
+             ~f:ScriptRuleStatementList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scriptRuleStatements =
+        (Option.map ~f:ScriptRuleStatementList.of_xml)
+          (Xml.child xml_arg0 "ScriptRuleStatements") in
+      let matchingRuleStatements =
+        (Option.map ~f:MatchingRuleStatementList.of_xml)
+          (Xml.child xml_arg0 "MatchingRuleStatements") in
+      make ?scriptRuleStatements ?matchingRuleStatements ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scriptRuleStatements =
+        field_map json__ "ScriptRuleStatements"
+          ScriptRuleStatementList.of_json in
+      let matchingRuleStatements =
+        field_map json__ "MatchingRuleStatements"
+          MatchingRuleStatementList.of_json in
+      make ?scriptRuleStatements ?matchingRuleStatements ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "OR rule statement."]
+module ProductCodeId =
+  struct
+    type nonrec t = string
+    let context_ = "ProductCodeId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[A-Za-z0-9]{1,25}$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ProductCodeId" j
+    let to_json = simple_to_json to_value
+  end
+module ProductCodeType =
+  struct
+    type nonrec t =
+      | Marketplace 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Marketplace -> "marketplace" | Non_static_id s -> s
+    let of_string =
+      function | "marketplace" -> Marketplace | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProductCodeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProductCodeType" j)
+    let to_json = simple_to_json to_value
   end
 module ProductInformationFilter =
   struct
@@ -104,18 +347,179 @@ module ProductInformationFilter =
       make ~productInformationFilterComparator ?productInformationFilterValue
         ~productInformationFilterName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let productInformationFilterComparator =
-        field_map_exn json "ProductInformationFilterComparator"
+        field_map_exn json__ "ProductInformationFilterComparator"
           String_.of_json in
       let productInformationFilterValue =
-        field_map json "ProductInformationFilterValue" StringList.of_json in
+        field_map json__ "ProductInformationFilterValue" StringList.of_json in
       let productInformationFilterName =
-        field_map_exn json "ProductInformationFilterName" String_.of_json in
+        field_map_exn json__ "ProductInformationFilterName" String_.of_json in
       make ~productInformationFilterComparator ?productInformationFilterValue
         ~productInformationFilterName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes product information filters."]
+module InstanceRuleStatement =
+  struct
+    type nonrec t =
+      {
+      andRuleStatement: AndRuleStatement.t option
+        [@ocaml.doc "AND rule statement."];
+      orRuleStatement: OrRuleStatement.t option
+        [@ocaml.doc "OR rule statement."];
+      matchingRuleStatement: MatchingRuleStatement.t option
+        [@ocaml.doc "Matching rule statement."];
+      scriptRuleStatement: ScriptRuleStatement.t option
+        [@ocaml.doc "Script rule statement."]}
+    let make ?andRuleStatement =
+      fun ?orRuleStatement ->
+        fun ?matchingRuleStatement ->
+          fun ?scriptRuleStatement ->
+            fun () ->
+              {
+                andRuleStatement;
+                orRuleStatement;
+                matchingRuleStatement;
+                scriptRuleStatement
+              }
+    let to_value x =
+      structure_to_value
+        [("AndRuleStatement",
+           (Option.map x.andRuleStatement ~f:AndRuleStatement.to_value));
+        ("OrRuleStatement",
+          (Option.map x.orRuleStatement ~f:OrRuleStatement.to_value));
+        ("MatchingRuleStatement",
+          (Option.map x.matchingRuleStatement
+             ~f:MatchingRuleStatement.to_value));
+        ("ScriptRuleStatement",
+          (Option.map x.scriptRuleStatement ~f:ScriptRuleStatement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scriptRuleStatement =
+        (Option.map ~f:ScriptRuleStatement.of_xml)
+          (Xml.child xml_arg0 "ScriptRuleStatement") in
+      let matchingRuleStatement =
+        (Option.map ~f:MatchingRuleStatement.of_xml)
+          (Xml.child xml_arg0 "MatchingRuleStatement") in
+      let orRuleStatement =
+        (Option.map ~f:OrRuleStatement.of_xml)
+          (Xml.child xml_arg0 "OrRuleStatement") in
+      let andRuleStatement =
+        (Option.map ~f:AndRuleStatement.of_xml)
+          (Xml.child xml_arg0 "AndRuleStatement") in
+      make ?scriptRuleStatement ?matchingRuleStatement ?orRuleStatement
+        ?andRuleStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scriptRuleStatement =
+        field_map json__ "ScriptRuleStatement" ScriptRuleStatement.of_json in
+      let matchingRuleStatement =
+        field_map json__ "MatchingRuleStatement"
+          MatchingRuleStatement.of_json in
+      let orRuleStatement =
+        field_map json__ "OrRuleStatement" OrRuleStatement.of_json in
+      let andRuleStatement =
+        field_map json__ "AndRuleStatement" AndRuleStatement.of_json in
+      make ?scriptRuleStatement ?matchingRuleStatement ?orRuleStatement
+        ?andRuleStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Instance rule statement."]
+module LicenseConfigurationRuleStatement =
+  struct
+    type nonrec t =
+      {
+      andRuleStatement: AndRuleStatement.t option
+        [@ocaml.doc "AND rule statement."];
+      orRuleStatement: OrRuleStatement.t option
+        [@ocaml.doc "OR rule statement."];
+      matchingRuleStatement: MatchingRuleStatement.t option
+        [@ocaml.doc "Matching rule statement."]}
+    let make ?andRuleStatement =
+      fun ?orRuleStatement ->
+        fun ?matchingRuleStatement ->
+          fun () ->
+            { andRuleStatement; orRuleStatement; matchingRuleStatement }
+    let to_value x =
+      structure_to_value
+        [("AndRuleStatement",
+           (Option.map x.andRuleStatement ~f:AndRuleStatement.to_value));
+        ("OrRuleStatement",
+          (Option.map x.orRuleStatement ~f:OrRuleStatement.to_value));
+        ("MatchingRuleStatement",
+          (Option.map x.matchingRuleStatement
+             ~f:MatchingRuleStatement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchingRuleStatement =
+        (Option.map ~f:MatchingRuleStatement.of_xml)
+          (Xml.child xml_arg0 "MatchingRuleStatement") in
+      let orRuleStatement =
+        (Option.map ~f:OrRuleStatement.of_xml)
+          (Xml.child xml_arg0 "OrRuleStatement") in
+      let andRuleStatement =
+        (Option.map ~f:AndRuleStatement.of_xml)
+          (Xml.child xml_arg0 "AndRuleStatement") in
+      make ?matchingRuleStatement ?orRuleStatement ?andRuleStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchingRuleStatement =
+        field_map json__ "MatchingRuleStatement"
+          MatchingRuleStatement.of_json in
+      let orRuleStatement =
+        field_map json__ "OrRuleStatement" OrRuleStatement.of_json in
+      let andRuleStatement =
+        field_map json__ "AndRuleStatement" AndRuleStatement.of_json in
+      make ?matchingRuleStatement ?orRuleStatement ?andRuleStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License configuration rule statement."]
+module LicenseRuleStatement =
+  struct
+    type nonrec t =
+      {
+      andRuleStatement: AndRuleStatement.t option
+        [@ocaml.doc "AND rule statement."];
+      orRuleStatement: OrRuleStatement.t option
+        [@ocaml.doc "OR rule statement."];
+      matchingRuleStatement: MatchingRuleStatement.t option
+        [@ocaml.doc "Matching rule statement."]}
+    let make ?andRuleStatement =
+      fun ?orRuleStatement ->
+        fun ?matchingRuleStatement ->
+          fun () ->
+            { andRuleStatement; orRuleStatement; matchingRuleStatement }
+    let to_value x =
+      structure_to_value
+        [("AndRuleStatement",
+           (Option.map x.andRuleStatement ~f:AndRuleStatement.to_value));
+        ("OrRuleStatement",
+          (Option.map x.orRuleStatement ~f:OrRuleStatement.to_value));
+        ("MatchingRuleStatement",
+          (Option.map x.matchingRuleStatement
+             ~f:MatchingRuleStatement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchingRuleStatement =
+        (Option.map ~f:MatchingRuleStatement.of_xml)
+          (Xml.child xml_arg0 "MatchingRuleStatement") in
+      let orRuleStatement =
+        (Option.map ~f:OrRuleStatement.of_xml)
+          (Xml.child xml_arg0 "OrRuleStatement") in
+      let andRuleStatement =
+        (Option.map ~f:AndRuleStatement.of_xml)
+          (Xml.child xml_arg0 "AndRuleStatement") in
+      make ?matchingRuleStatement ?orRuleStatement ?andRuleStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchingRuleStatement =
+        field_map json__ "MatchingRuleStatement"
+          MatchingRuleStatement.of_json in
+      let orRuleStatement =
+        field_map json__ "OrRuleStatement" OrRuleStatement.of_json in
+      let andRuleStatement =
+        field_map json__ "AndRuleStatement" AndRuleStatement.of_json in
+      make ?matchingRuleStatement ?orRuleStatement ?andRuleStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License rule statement."]
 module BoxBoolean =
   struct
     type nonrec t = bool
@@ -306,7 +710,7 @@ module Arn =
           ((check_string_max i ~max:2048) >>=
              (fun () ->
                 check_pattern i
-                  ~pattern:"^arn:aws(-(cn|us-gov|iso-b|iso-c|iso-d))?:[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}$"));
+                  ~pattern:"^arn:aws[a-zA-Z-]*:[A-Za-z0-9][A-Za-z0-9_/.-]{0,62}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9_/.-]{0,63}:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -316,6 +720,38 @@ module Arn =
     let of_json j = string_of_json ~kind:"Arn" j
     let to_json = simple_to_json to_value
   end
+module ProductCodeListItem =
+  struct
+    type nonrec t =
+      {
+      productCodeId: ProductCodeId.t [@ocaml.doc "The product code ID"];
+      productCodeType: ProductCodeType.t [@ocaml.doc "The product code type"]}
+    let context_ = "ProductCodeListItem"
+    let make ~productCodeId =
+      fun ~productCodeType -> fun () -> { productCodeId; productCodeType }
+    let to_value x =
+      structure_to_value
+        [("ProductCodeId", (Some (ProductCodeId.to_value x.productCodeId)));
+        ("ProductCodeType",
+          (Some (ProductCodeType.to_value x.productCodeType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let productCodeType =
+        ProductCodeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProductCodeType") in
+      let productCodeId =
+        ProductCodeId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProductCodeId") in
+      make ~productCodeType ~productCodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let productCodeType =
+        field_map_exn json__ "ProductCodeType" ProductCodeType.of_json in
+      let productCodeId =
+        field_map_exn json__ "ProductCodeId" ProductCodeId.of_json in
+      make ~productCodeType ~productCodeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list item that contains a product code."]
 module BoxLong =
   struct
     type nonrec t = Int64.t
@@ -369,6 +805,9 @@ module ProductInformationFilterList =
   struct
     type nonrec t = ProductInformationFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductInformationFilter.to_value)) |>
         (fun x -> `List x)
@@ -391,6 +830,63 @@ module ProductInformationFilterList =
         ~of_json:ProductInformationFilter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RuleStatement =
+  struct
+    type nonrec t =
+      {
+      licenseConfigurationRuleStatement:
+        LicenseConfigurationRuleStatement.t option
+        [@ocaml.doc "License configuration rule statement."];
+      licenseRuleStatement: LicenseRuleStatement.t option
+        [@ocaml.doc "License rule statement."];
+      instanceRuleStatement: InstanceRuleStatement.t option
+        [@ocaml.doc "Instance rule statement."]}
+    let make ?licenseConfigurationRuleStatement =
+      fun ?licenseRuleStatement ->
+        fun ?instanceRuleStatement ->
+          fun () ->
+            {
+              licenseConfigurationRuleStatement;
+              licenseRuleStatement;
+              instanceRuleStatement
+            }
+    let to_value x =
+      structure_to_value
+        [("LicenseConfigurationRuleStatement",
+           (Option.map x.licenseConfigurationRuleStatement
+              ~f:LicenseConfigurationRuleStatement.to_value));
+        ("LicenseRuleStatement",
+          (Option.map x.licenseRuleStatement ~f:LicenseRuleStatement.to_value));
+        ("InstanceRuleStatement",
+          (Option.map x.instanceRuleStatement
+             ~f:InstanceRuleStatement.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instanceRuleStatement =
+        (Option.map ~f:InstanceRuleStatement.of_xml)
+          (Xml.child xml_arg0 "InstanceRuleStatement") in
+      let licenseRuleStatement =
+        (Option.map ~f:LicenseRuleStatement.of_xml)
+          (Xml.child xml_arg0 "LicenseRuleStatement") in
+      let licenseConfigurationRuleStatement =
+        (Option.map ~f:LicenseConfigurationRuleStatement.of_xml)
+          (Xml.child xml_arg0 "LicenseConfigurationRuleStatement") in
+      make ?instanceRuleStatement ?licenseRuleStatement
+        ?licenseConfigurationRuleStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instanceRuleStatement =
+        field_map json__ "InstanceRuleStatement"
+          InstanceRuleStatement.of_json in
+      let licenseRuleStatement =
+        field_map json__ "LicenseRuleStatement" LicenseRuleStatement.of_json in
+      let licenseConfigurationRuleStatement =
+        field_map json__ "LicenseConfigurationRuleStatement"
+          LicenseConfigurationRuleStatement.of_json in
+      make ?instanceRuleStatement ?licenseRuleStatement
+        ?licenseConfigurationRuleStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Rule statement."]
 module FilterValue =
   struct
     type nonrec t = string
@@ -432,11 +928,11 @@ module BorrowConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "AllowEarlyCheckIn") in
       make ~maxTimeToLiveInMinutes ~allowEarlyCheckIn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxTimeToLiveInMinutes =
-        field_map_exn json "MaxTimeToLiveInMinutes" BoxInteger.of_json in
+        field_map_exn json__ "MaxTimeToLiveInMinutes" BoxInteger.of_json in
       let allowEarlyCheckIn =
-        field_map_exn json "AllowEarlyCheckIn" BoxBoolean.of_json in
+        field_map_exn json__ "AllowEarlyCheckIn" BoxBoolean.of_json in
       make ~maxTimeToLiveInMinutes ~allowEarlyCheckIn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a borrow configuration."]
@@ -460,9 +956,9 @@ module ProvisionalConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "MaxTimeToLiveInMinutes") in
       make ~maxTimeToLiveInMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxTimeToLiveInMinutes =
-        field_map_exn json "MaxTimeToLiveInMinutes" BoxInteger.of_json in
+        field_map_exn json__ "MaxTimeToLiveInMinutes" BoxInteger.of_json in
       make ~maxTimeToLiveInMinutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a provisional configuration."]
@@ -562,13 +1058,13 @@ module Entitlement =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?allowCheckIn ~unit ?overage ?maxCount ?value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let allowCheckIn = field_map json "AllowCheckIn" BoxBoolean.of_json in
-      let unit = field_map_exn json "Unit" EntitlementUnit.of_json in
-      let overage = field_map json "Overage" BoxBoolean.of_json in
-      let maxCount = field_map json "MaxCount" Long.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let allowCheckIn = field_map json__ "AllowCheckIn" BoxBoolean.of_json in
+      let unit = field_map_exn json__ "Unit" EntitlementUnit.of_json in
+      let overage = field_map json__ "Overage" BoxBoolean.of_json in
+      let maxCount = field_map json__ "MaxCount" Long.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?allowCheckIn ~unit ?overage ?maxCount ?value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource entitled for use with a license."]
@@ -589,9 +1085,9 @@ module Metadata =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes key/value pairs."]
@@ -601,8 +1097,11 @@ module AllowedOperationList =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:7) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:8) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AllowedOperation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -685,10 +1184,41 @@ module StatusReasonMessage =
     let of_json j = string_of_json ~kind:"StatusReasonMessage" j
     let to_json = simple_to_json to_value
   end
+module ActivationOverrideBehavior =
+  struct
+    type nonrec t =
+      | DISTRIBUTED_GRANTS_ONLY 
+      | ALL_GRANTS_PERMITTED_BY_ISSUER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DISTRIBUTED_GRANTS_ONLY -> "DISTRIBUTED_GRANTS_ONLY"
+      | ALL_GRANTS_PERMITTED_BY_ISSUER -> "ALL_GRANTS_PERMITTED_BY_ISSUER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DISTRIBUTED_GRANTS_ONLY" -> DISTRIBUTED_GRANTS_ONLY
+      | "ALL_GRANTS_PERMITTED_BY_ISSUER" -> ALL_GRANTS_PERMITTED_BY_ISSUER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ActivationOverrideBehavior"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ActivationOverrideBehavior" j)
+    let to_json = simple_to_json to_value
+  end
 module ArnList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -707,6 +1237,18 @@ module ArnList =
                      | _ -> true))) ~f:Arn.of_xml)
     let of_json j = list_of_json ~kind:"ArnList" ~of_json:Arn.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module DateTime =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
   end
 module Integer =
   struct
@@ -727,6 +1269,7 @@ module ReportFrequencyType =
       | DAY 
       | WEEK 
       | MONTH 
+      | ONE_TIME 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -734,12 +1277,14 @@ module ReportFrequencyType =
       | DAY -> "DAY"
       | WEEK -> "WEEK"
       | MONTH -> "MONTH"
+      | ONE_TIME -> "ONE_TIME"
       | Non_static_id s -> s
     let of_string =
       function
       | "DAY" -> DAY
       | "WEEK" -> WEEK
       | "MONTH" -> MONTH
+      | "ONE_TIME" -> ONE_TIME
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -755,6 +1300,7 @@ module ReportType =
     type nonrec t =
       | LicenseConfigurationSummaryReport 
       | LicenseConfigurationUsageReport 
+      | LicenseAssetGroupUsageReport 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -762,12 +1308,14 @@ module ReportType =
       | LicenseConfigurationSummaryReport ->
           "LicenseConfigurationSummaryReport"
       | LicenseConfigurationUsageReport -> "LicenseConfigurationUsageReport"
+      | LicenseAssetGroupUsageReport -> "LicenseAssetGroupUsageReport"
       | Non_static_id s -> s
     let of_string =
       function
       | "LicenseConfigurationSummaryReport" ->
           LicenseConfigurationSummaryReport
       | "LicenseConfigurationUsageReport" -> LicenseConfigurationUsageReport
+      | "LicenseAssetGroupUsageReport" -> LicenseAssetGroupUsageReport
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -781,8 +1329,8 @@ module Tag =
   struct
     type nonrec t =
       {
-      key: String_.t option [@ocaml.doc "Tag key."];
-      value: String_.t option [@ocaml.doc "Tag value."]}
+      key: String_.t option [@ocaml.doc "The tag key."];
+      value: String_.t option [@ocaml.doc "The tag value."]}
     let make ?key = fun ?value -> fun () -> { key; value }
     let to_value x =
       structure_to_value
@@ -794,11 +1342,41 @@ module Tag =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Details about a tag for a license configuration."]
+  end[@@ocaml.doc
+       "Details about the tags for a resource. For more information about tagging support in License Manager, see the TagResource operation."]
+module ProductCodeList =
+  struct
+    type nonrec t = ProductCodeListItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ProductCodeListItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ProductCodeListItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProductCodeList"
+        ~of_json:ProductCodeListItem.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UsageOperation =
   struct
     type nonrec t = string
@@ -811,18 +1389,6 @@ module UsageOperation =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"UsageOperation" j
-    let to_json = simple_to_json to_value
-  end
-module DateTime =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module ConsumedLicenseSummary =
@@ -851,10 +1417,10 @@ module ConsumedLicenseSummary =
           (Xml.child xml_arg0 "ResourceType") in
       make ?consumedLicenses ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedLicenses =
-        field_map json "ConsumedLicenses" BoxLong.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+        field_map json__ "ConsumedLicenses" BoxLong.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       make ?consumedLicenses ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about license consumption."]
@@ -884,10 +1450,10 @@ module ManagedResourceSummary =
           (Xml.child xml_arg0 "ResourceType") in
       make ?associationCount ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let associationCount =
-        field_map json "AssociationCount" BoxLong.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+        field_map json__ "AssociationCount" BoxLong.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       make ?associationCount ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about a managed resource."]
@@ -900,7 +1466,7 @@ module ProductInformation =
           "Resource type. The possible values are SSM_MANAGED | RDS."];
       productInformationFilterList: ProductInformationFilterList.t
         [@ocaml.doc
-          "A Product information filter consists of a ProductInformationFilterComparator which is a logical operator, a ProductInformationFilterName which specifies the type of filter being declared, and a ProductInformationFilterValue that specifies the value to filter on. Accepted values for ProductInformationFilterName are listed here along with descriptions and valid options for ProductInformationFilterComparator. The following filters and are supported when the resource type is SSM_MANAGED: Application Name - The name of the application. Logical operator is EQUALS. Application Publisher - The publisher of the application. Logical operator is EQUALS. Application Version - The version of the application. Logical operator is EQUALS. Platform Name - The name of the platform. Logical operator is EQUALS. Platform Type - The platform type. Logical operator is EQUALS. Tag:key - The key of a tag attached to an Amazon Web Services resource you wish to exclude from automated discovery. Logical operator is NOT_EQUALS. The key for your tag must be appended to Tag: following the example: Tag:name-of-your-key. ProductInformationFilterValue is optional if you are not using values for the key. AccountId - The 12-digit ID of an Amazon Web Services account you wish to exclude from automated discovery. Logical operator is NOT_EQUALS. License Included - The type of license included. Logical operators are EQUALS and NOT_EQUALS. Possible values are: sql-server-enterprise | sql-server-standard | sql-server-web | windows-server-datacenter. The following filters and logical operators are supported when the resource type is RDS: Engine Edition - The edition of the database engine. Logical operator is EQUALS. Possible values are: oracle-ee | oracle-se | oracle-se1 | oracle-se2. License Pack - The license pack. Logical operator is EQUALS. Possible values are: data guard | diagnostic pack sqlt | tuning pack sqlt | ols | olap."]}
+          "A Product information filter consists of a ProductInformationFilterComparator which is a logical operator, a ProductInformationFilterName which specifies the type of filter being declared, and a ProductInformationFilterValue that specifies the value to filter on. Accepted values for ProductInformationFilterName are listed here along with descriptions and valid options for ProductInformationFilterComparator. The following filters and are supported when the resource type is SSM_MANAGED: Application Name - The name of the application. Logical operator is EQUALS. Application Publisher - The publisher of the application. Logical operator is EQUALS. Application Version - The version of the application. Logical operator is EQUALS. Platform Name - The name of the platform. Logical operator is EQUALS. Platform Type - The platform type. Logical operator is EQUALS. Tag:key - The key of a tag attached to an Amazon Web Services resource you wish to exclude from automated discovery. Logical operator is NOT_EQUALS. The key for your tag must be appended to Tag: following the example: Tag:name-of-your-key. ProductInformationFilterValue is optional if you are not using values for the key. AccountId - The 12-digit ID of an Amazon Web Services account you wish to exclude from automated discovery. Logical operator is NOT_EQUALS. License Included - The type of license included. Logical operators are EQUALS and NOT_EQUALS. Possible values are: sql-server-enterprise | sql-server-standard | sql-server-web | windows-server-datacenter. The following filters and logical operators are supported when the resource type is RDS: Engine Edition - The edition of the database engine. Logical operator is EQUALS. Possible values are: oracle-ee | oracle-se | oracle-se1 | oracle-se2 | db2-se | db2-ae. License Pack - The license pack. Logical operator is EQUALS. Possible values are: data guard | diagnostic pack sqlt | tuning pack sqlt | ols | olap."]}
     let context_ = "ProductInformation"
     let make ~resourceType =
       fun ~productInformationFilterList ->
@@ -923,15 +1489,106 @@ module ProductInformation =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceType") in
       make ~productInformationFilterList ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let productInformationFilterList =
-        field_map_exn json "ProductInformationFilterList"
+        field_map_exn json__ "ProductInformationFilterList"
           ProductInformationFilterList.of_json in
-      let resourceType = field_map_exn json "ResourceType" String_.of_json in
+      let resourceType = field_map_exn json__ "ResourceType" String_.of_json in
       make ~productInformationFilterList ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes product information for a license configuration."]
+module LicenseAssetRule =
+  struct
+    type nonrec t =
+      {
+      ruleStatement: RuleStatement.t [@ocaml.doc "Rule statement."]}
+    let context_ = "LicenseAssetRule"
+    let make ~ruleStatement = fun () -> { ruleStatement }
+    let to_value x =
+      structure_to_value
+        [("RuleStatement", (Some (RuleStatement.to_value x.ruleStatement)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ruleStatement =
+        RuleStatement.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RuleStatement") in
+      make ~ruleStatement ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ruleStatement =
+        field_map_exn json__ "RuleStatement" RuleStatement.of_json in
+      make ~ruleStatement ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License asset rule."]
+module LicenseAssetGroupConfiguration =
+  struct
+    type nonrec t =
+      {
+      usageDimension: String_.t option
+        [@ocaml.doc "License Asset Group Configuration Usage dimension."]}
+    let make ?usageDimension = fun () -> { usageDimension }
+    let to_value x =
+      structure_to_value
+        [("UsageDimension",
+           (Option.map x.usageDimension ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let usageDimension =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UsageDimension") in
+      make ?usageDimension ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let usageDimension = field_map json__ "UsageDimension" String_.of_json in
+      make ?usageDimension ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License asset group configuration."]
+module LicenseAssetGroupProperty =
+  struct
+    type nonrec t =
+      {
+      key: String_.t [@ocaml.doc "Property key."];
+      value: String_.t [@ocaml.doc "Property value."]}
+    let context_ = "LicenseAssetGroupProperty"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (String_.to_value x.key)));
+        ("Value", (Some (String_.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let key = field_map_exn json__ "Key" String_.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License asset group property."]
+module RegionStatus =
+  struct
+    type nonrec t =
+      {
+      status: String_.t option [@ocaml.doc "Status value for the region."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Status information for a specific region."]
 module EntitlementDataUnit =
   struct
     type nonrec t =
@@ -1050,6 +1707,9 @@ module FilterValues =
   struct
     type nonrec t = FilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1075,6 +1735,9 @@ module MaxSize3StringList =
     type nonrec t = String_.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:3); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1162,13 +1825,13 @@ module ConsumptionConfiguration =
         (Option.map ~f:RenewType.of_xml) (Xml.child xml_arg0 "RenewType") in
       make ?borrowConfiguration ?provisionalConfiguration ?renewType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let borrowConfiguration =
-        field_map json "BorrowConfiguration" BorrowConfiguration.of_json in
+        field_map json__ "BorrowConfiguration" BorrowConfiguration.of_json in
       let provisionalConfiguration =
-        field_map json "ProvisionalConfiguration"
+        field_map json__ "ProvisionalConfiguration"
           ProvisionalConfiguration.of_json in
-      let renewType = field_map json "RenewType" RenewType.of_json in
+      let renewType = field_map json__ "RenewType" RenewType.of_json in
       make ?borrowConfiguration ?provisionalConfiguration ?renewType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a consumption configuration."]
@@ -1193,9 +1856,9 @@ module DatetimeRange =
           (Xml.child_exn ~context:context_ xml_arg0 "Begin") in
       make ?end_ ~begin_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let end_ = field_map json "End" ISO8601DateTime.of_json in
-      let begin_ = field_map_exn json "Begin" ISO8601DateTime.of_json in
+    let of_json json__ =
+      let end_ = field_map json__ "End" ISO8601DateTime.of_json in
+      let begin_ = field_map_exn json__ "Begin" ISO8601DateTime.of_json in
       make ?end_ ~begin_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a time range, in ISO8601-UTC format."]
@@ -1203,6 +1866,9 @@ module EntitlementList =
   struct
     type nonrec t = Entitlement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Entitlement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1249,10 +1915,10 @@ module IssuerDetails =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?keyFingerprint ?signKey ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyFingerprint = field_map json "KeyFingerprint" String_.of_json in
-      let signKey = field_map json "SignKey" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let keyFingerprint = field_map json__ "KeyFingerprint" String_.of_json in
+      let signKey = field_map json__ "SignKey" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?keyFingerprint ?signKey ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details associated with the issuer of a license."]
@@ -1300,6 +1966,9 @@ module MetadataList =
   struct
     type nonrec t = Metadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Metadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1355,13 +2024,13 @@ module ReceivedMetadata =
           (Xml.child xml_arg0 "ReceivedStatus") in
       make ?allowedOperations ?receivedStatusReason ?receivedStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allowedOperations =
-        field_map json "AllowedOperations" AllowedOperationList.of_json in
+        field_map json__ "AllowedOperations" AllowedOperationList.of_json in
       let receivedStatusReason =
-        field_map json "ReceivedStatusReason" StatusReasonMessage.of_json in
+        field_map json__ "ReceivedStatusReason" StatusReasonMessage.of_json in
       let receivedStatus =
-        field_map json "ReceivedStatus" ReceivedStatus.of_json in
+        field_map json__ "ReceivedStatus" ReceivedStatus.of_json in
       make ?allowedOperations ?receivedStatusReason ?receivedStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Metadata associated with received licenses and grants."]
@@ -1411,32 +2080,95 @@ module GrantStatus =
     let of_json j = of_string (string_of_json ~kind:"GrantStatus" j)
     let to_json = simple_to_json to_value
   end
+module Options =
+  struct
+    type nonrec t =
+      {
+      activationOverrideBehavior: ActivationOverrideBehavior.t option
+        [@ocaml.doc
+          "An activation option for your grant that determines the behavior of activating a grant. Activation options can only be used with granted licenses sourced from the Amazon Web Services Marketplace. Additionally, the operation must specify the value of ACTIVE for the Status parameter. As a license administrator, you can optionally specify an ActivationOverrideBehavior when activating a grant. As a grantor, you can optionally specify an ActivationOverrideBehavior when you activate a grant for a grantee account in your organization. As a grantee, if the grantor creating the distributed grant doesn\226\128\153t specify an ActivationOverrideBehavior, you can optionally specify one when you are activating the grant. DISTRIBUTED_GRANTS_ONLY Use this value to activate a grant without replacing any member account\226\128\153s active grants for the same product. ALL_GRANTS_PERMITTED_BY_ISSUER Use this value to activate a grant and disable other active grants in any member accounts for the same product. This action will also replace their previously activated grants with this activated grant."]}
+    let make ?activationOverrideBehavior =
+      fun () -> { activationOverrideBehavior }
+    let to_value x =
+      structure_to_value
+        [("ActivationOverrideBehavior",
+           (Option.map x.activationOverrideBehavior
+              ~f:ActivationOverrideBehavior.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activationOverrideBehavior =
+        (Option.map ~f:ActivationOverrideBehavior.of_xml)
+          (Xml.child xml_arg0 "ActivationOverrideBehavior") in
+      make ?activationOverrideBehavior ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activationOverrideBehavior =
+        field_map json__ "ActivationOverrideBehavior"
+          ActivationOverrideBehavior.of_json in
+      make ?activationOverrideBehavior ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The options you can specify when you create a new version of a grant, such as activation override behavior. For more information, see Granted licenses in License Manager in the License Manager User Guide."]
 module ReportContext =
   struct
     type nonrec t =
       {
-      licenseConfigurationArns: ArnList.t
+      licenseConfigurationArns: ArnList.t option
         [@ocaml.doc
-          "Amazon Resource Name (ARN) of the license configuration that this generator reports on."]}
-    let context_ = "ReportContext"
-    let make ~licenseConfigurationArns =
-      fun () -> { licenseConfigurationArns }
+          "Amazon Resource Name (ARN) of the license configuration that this generator reports on."];
+      licenseAssetGroupArns: ArnList.t option
+        [@ocaml.doc
+          "Amazon Resource Names (ARNs) of the license asset groups to include in the report."];
+      reportStartDate: DateTime.t option
+        [@ocaml.doc "Start date for the report data collection period."];
+      reportEndDate: DateTime.t option
+        [@ocaml.doc "End date for the report data collection period."]}
+    let make ?licenseConfigurationArns =
+      fun ?licenseAssetGroupArns ->
+        fun ?reportStartDate ->
+          fun ?reportEndDate ->
+            fun () ->
+              {
+                licenseConfigurationArns;
+                licenseAssetGroupArns;
+                reportStartDate;
+                reportEndDate
+              }
     let to_value x =
       structure_to_value
         [("licenseConfigurationArns",
-           (Some (ArnList.to_value x.licenseConfigurationArns)))]
+           (Option.map x.licenseConfigurationArns ~f:ArnList.to_value));
+        ("licenseAssetGroupArns",
+          (Option.map x.licenseAssetGroupArns ~f:ArnList.to_value));
+        ("reportStartDate",
+          (Option.map x.reportStartDate ~f:DateTime.to_value));
+        ("reportEndDate", (Option.map x.reportEndDate ~f:DateTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let reportEndDate =
+        (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "reportEndDate") in
+      let reportStartDate =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "reportStartDate") in
+      let licenseAssetGroupArns =
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "licenseAssetGroupArns") in
       let licenseConfigurationArns =
-        ArnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "licenseConfigurationArns") in
-      make ~licenseConfigurationArns ()
+        (Option.map ~f:ArnList.of_xml)
+          (Xml.child xml_arg0 "licenseConfigurationArns") in
+      make ?reportEndDate ?reportStartDate ?licenseAssetGroupArns
+        ?licenseConfigurationArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let reportEndDate = field_map json__ "reportEndDate" DateTime.of_json in
+      let reportStartDate =
+        field_map json__ "reportStartDate" DateTime.of_json in
+      let licenseAssetGroupArns =
+        field_map json__ "licenseAssetGroupArns" ArnList.of_json in
       let licenseConfigurationArns =
-        field_map_exn json "licenseConfigurationArns" ArnList.of_json in
-      make ~licenseConfigurationArns ()
+        field_map json__ "licenseConfigurationArns" ArnList.of_json in
+      make ?reportEndDate ?reportStartDate ?licenseAssetGroupArns
+        ?licenseConfigurationArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details of the license configuration that this generator reports on."]
@@ -1463,9 +2195,9 @@ module ReportFrequency =
       let value = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "value") in
       make ?period ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let period = field_map json "period" ReportFrequencyType.of_json in
-      let value = field_map json "value" Integer.of_json in
+    let of_json json__ =
+      let period = field_map json__ "period" ReportFrequencyType.of_json in
+      let value = field_map json__ "value" Integer.of_json in
       make ?period ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about how frequently reports are generated."]
@@ -1473,6 +2205,9 @@ module ReportTypeList =
   struct
     type nonrec t = ReportType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1514,9 +2249,9 @@ module S3Location =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "bucket") in
       make ?keyPrefix ?bucket ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyPrefix = field_map json "keyPrefix" String_.of_json in
-      let bucket = field_map json "bucket" String_.of_json in
+    let of_json json__ =
+      let keyPrefix = field_map json__ "keyPrefix" String_.of_json in
+      let bucket = field_map json__ "bucket" String_.of_json in
       make ?keyPrefix ?bucket ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1525,6 +2260,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1550,23 +2288,34 @@ module LicenseConversionContext =
       {
       usageOperation: UsageOperation.t option
         [@ocaml.doc
-          "The Usage operation value that corresponds to the license type you are converting your resource from. For more information about which platforms correspond to which usage operation values see Sample data: usage operation by platform"]}
-    let make ?usageOperation = fun () -> { usageOperation }
+          "The Usage operation value that corresponds to the license type you are converting your resource from. For more information about which platforms correspond to which usage operation values see Sample data: usage operation by platform"];
+      productCodes: ProductCodeList.t option
+        [@ocaml.doc
+          "Product codes referred to in the license conversion process."]}
+    let make ?usageOperation =
+      fun ?productCodes -> fun () -> { usageOperation; productCodes }
     let to_value x =
       structure_to_value
         [("UsageOperation",
-           (Option.map x.usageOperation ~f:UsageOperation.to_value))]
+           (Option.map x.usageOperation ~f:UsageOperation.to_value));
+        ("ProductCodes",
+          (Option.map x.productCodes ~f:ProductCodeList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let productCodes =
+        (Option.map ~f:ProductCodeList.of_xml)
+          (Xml.child xml_arg0 "ProductCodes") in
       let usageOperation =
         (Option.map ~f:UsageOperation.of_xml)
           (Xml.child xml_arg0 "UsageOperation") in
-      make ?usageOperation ()
+      make ?productCodes ?usageOperation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let productCodes =
+        field_map json__ "ProductCodes" ProductCodeList.of_json in
       let usageOperation =
-        field_map json "UsageOperation" UsageOperation.of_json in
-      make ?usageOperation ()
+        field_map json__ "UsageOperation" UsageOperation.of_json in
+      make ?productCodes ?usageOperation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a license type conversion task."]
 module LicenseConversionTaskId =
@@ -1634,8 +2383,8 @@ module AutomatedDiscoveryInformation =
         (Option.map ~f:DateTime.of_xml) (Xml.child xml_arg0 "LastRunTime") in
       make ?lastRunTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastRunTime = field_map json "LastRunTime" DateTime.of_json in
+    let of_json json__ =
+      let lastRunTime = field_map json__ "LastRunTime" DateTime.of_json in
       make ?lastRunTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes automated discovery."]
@@ -1643,6 +2392,9 @@ module ConsumedLicenseSummaryList =
   struct
     type nonrec t = ConsumedLicenseSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConsumedLicenseSummary.to_value)) |>
         (fun x -> `List x)
@@ -1701,6 +2453,9 @@ module ManagedResourceSummaryList =
   struct
     type nonrec t = ManagedResourceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ManagedResourceSummary.to_value)) |>
         (fun x -> `List x)
@@ -1727,6 +2482,9 @@ module ProductInformationList =
   struct
     type nonrec t = ProductInformation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProductInformation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1748,46 +2506,219 @@ module ProductInformationList =
         ~of_json:ProductInformation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LicenseAssetRuleList =
+  struct
+    type nonrec t = LicenseAssetRule.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseAssetRule.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseAssetRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetRuleList"
+        ~of_json:LicenseAssetRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseAssetGroupConfigurationList =
+  struct
+    type nonrec t = LicenseAssetGroupConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseAssetGroupConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseAssetGroupConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetGroupConfigurationList"
+        ~of_json:LicenseAssetGroupConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseAssetGroupPropertyList =
+  struct
+    type nonrec t = LicenseAssetGroupProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseAssetGroupProperty.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseAssetGroupProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetGroupPropertyList"
+        ~of_json:LicenseAssetGroupProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseAssetGroupStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | DISABLED 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | DISABLED -> "DISABLED"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "DISABLED" -> DISABLED
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LicenseAssetGroupStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"LicenseAssetGroupStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LicenseAssetRulesetArnList =
+  struct
+    type nonrec t = Arn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Arn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetRulesetArnList" ~of_json:Arn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RegionStatusMap =
+  struct
+    type nonrec t = (String_.t * RegionStatus.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String RegionStatus"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (RegionStatus.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:RegionStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EntitlementUsage =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "Entitlement usage name."];
-      consumedValue: String_.t [@ocaml.doc "Resource usage consumed."];
+      name: String_.t option [@ocaml.doc "Entitlement usage name."];
+      consumedValue: String_.t option [@ocaml.doc "Resource usage consumed."];
       maxCount: String_.t option
         [@ocaml.doc "Maximum entitlement usage count."];
-      unit: EntitlementDataUnit.t [@ocaml.doc "Entitlement usage unit."]}
-    let context_ = "EntitlementUsage"
-    let make ?maxCount =
-      fun ~name ->
-        fun ~consumedValue ->
-          fun ~unit -> fun () -> { maxCount; name; consumedValue; unit }
+      unit: EntitlementDataUnit.t option
+        [@ocaml.doc "Entitlement usage unit."]}
+    let make ?name =
+      fun ?consumedValue ->
+        fun ?maxCount ->
+          fun ?unit -> fun () -> { name; consumedValue; maxCount; unit }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
-        ("ConsumedValue", (Some (String_.to_value x.consumedValue)));
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("ConsumedValue", (Option.map x.consumedValue ~f:String_.to_value));
         ("MaxCount", (Option.map x.maxCount ~f:String_.to_value));
-        ("Unit", (Some (EntitlementDataUnit.to_value x.unit)))]
+        ("Unit", (Option.map x.unit ~f:EntitlementDataUnit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let unit =
-        EntitlementDataUnit.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Unit") in
+        (Option.map ~f:EntitlementDataUnit.of_xml)
+          (Xml.child xml_arg0 "Unit") in
       let maxCount =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "MaxCount") in
       let consumedValue =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConsumedValue") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~unit ?maxCount ~consumedValue ~name ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ConsumedValue") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?unit ?maxCount ?consumedValue ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map_exn json "Unit" EntitlementDataUnit.of_json in
-      let maxCount = field_map json "MaxCount" String_.of_json in
-      let consumedValue = field_map_exn json "ConsumedValue" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ~unit ?maxCount ~consumedValue ~name ()
+    let of_json json__ =
+      let unit = field_map json__ "Unit" EntitlementDataUnit.of_json in
+      let maxCount = field_map json__ "MaxCount" String_.of_json in
+      let consumedValue = field_map json__ "ConsumedValue" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?unit ?maxCount ?consumedValue ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Usage associated with an entitlement resource."]
 module Message =
@@ -1846,11 +2777,11 @@ module LicenseSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?amiAssociationScope ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amiAssociationScope =
-        field_map json "AmiAssociationScope" String_.of_json in
+        field_map json__ "AmiAssociationScope" String_.of_json in
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ?amiAssociationScope ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1917,14 +2848,16 @@ module LicenseConfigurationUsage =
       make ?consumedLicenses ?associationTime ?resourceOwnerId
         ?resourceStatus ?resourceType ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let consumedLicenses =
-        field_map json "ConsumedLicenses" BoxLong.of_json in
-      let associationTime = field_map json "AssociationTime" DateTime.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
-      let resourceStatus = field_map json "ResourceStatus" String_.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
+        field_map json__ "ConsumedLicenses" BoxLong.of_json in
+      let associationTime =
+        field_map json__ "AssociationTime" DateTime.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
+      let resourceStatus = field_map json__ "ResourceStatus" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
       make ?consumedLicenses ?associationTime ?resourceOwnerId
         ?resourceStatus ?resourceType ?resourceArn ()
     let to_json v = composed_to_json to_value v
@@ -1937,7 +2870,8 @@ module Filter =
       name: FilterName.t option
         [@ocaml.doc "Name of the filter. Filter names are case-sensitive."];
       values: FilterValues.t option
-        [@ocaml.doc "Filter values. Filter values are case-sensitive."]}
+        [@ocaml.doc
+          "The value of the filter, which is case-sensitive. You can only specify one value for the filter."]}
     let make ?name = fun ?values -> fun () -> { name; values }
     let to_value x =
       structure_to_value
@@ -1951,9 +2885,9 @@ module Filter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" FilterValues.of_json in
-      let name = field_map json "Name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" FilterValues.of_json in
+      let name = field_map json__ "Name" FilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2027,16 +2961,16 @@ module TokenData =
       make ?status ?roleArns ?tokenProperties ?expirationTime ?licenseArn
         ?tokenType ?tokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" String_.of_json in
-      let roleArns = field_map json "RoleArns" ArnList.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let roleArns = field_map json__ "RoleArns" ArnList.of_json in
       let tokenProperties =
-        field_map json "TokenProperties" MaxSize3StringList.of_json in
+        field_map json__ "TokenProperties" MaxSize3StringList.of_json in
       let expirationTime =
-        field_map json "ExpirationTime" ISO8601DateTime.of_json in
-      let licenseArn = field_map json "LicenseArn" String_.of_json in
-      let tokenType = field_map json "TokenType" String_.of_json in
-      let tokenId = field_map json "TokenId" String_.of_json in
+        field_map json__ "ExpirationTime" ISO8601DateTime.of_json in
+      let licenseArn = field_map json__ "LicenseArn" String_.of_json in
+      let tokenType = field_map json__ "TokenType" String_.of_json in
+      let tokenId = field_map json__ "TokenId" String_.of_json in
       make ?status ?roleArns ?tokenProperties ?expirationTime ?licenseArn
         ?tokenType ?tokenId ()
     let to_json v = composed_to_json to_value v
@@ -2053,22 +2987,49 @@ module ResourceInventory =
       platformVersion: String_.t option
         [@ocaml.doc "Platform version of the resource in the inventory."];
       resourceOwningAccountId: String_.t option
-        [@ocaml.doc "ID of the account that owns the resource."]}
+        [@ocaml.doc "ID of the account that owns the resource."];
+      marketplaceProductCodes: StringList.t option
+        [@ocaml.doc
+          "List of Marketplace product codes associated with the resource."];
+      usageOperation: String_.t option
+        [@ocaml.doc
+          "Usage operation value that corresponds to the license type for billing purposes."];
+      amiId: String_.t option
+        [@ocaml.doc
+          "Amazon Machine Image (AMI) ID associated with the resource."];
+      hostId: String_.t option
+        [@ocaml.doc "Dedicated Host ID where the resource is running."];
+      region: String_.t option
+        [@ocaml.doc "Region where the resource is located."];
+      instanceType: String_.t option
+        [@ocaml.doc "EC2 instance type of the resource."]}
     let make ?resourceId =
       fun ?resourceType ->
         fun ?resourceArn ->
           fun ?platform ->
             fun ?platformVersion ->
               fun ?resourceOwningAccountId ->
-                fun () ->
-                  {
-                    resourceId;
-                    resourceType;
-                    resourceArn;
-                    platform;
-                    platformVersion;
-                    resourceOwningAccountId
-                  }
+                fun ?marketplaceProductCodes ->
+                  fun ?usageOperation ->
+                    fun ?amiId ->
+                      fun ?hostId ->
+                        fun ?region ->
+                          fun ?instanceType ->
+                            fun () ->
+                              {
+                                resourceId;
+                                resourceType;
+                                resourceArn;
+                                platform;
+                                platformVersion;
+                                resourceOwningAccountId;
+                                marketplaceProductCodes;
+                                usageOperation;
+                                amiId;
+                                hostId;
+                                region;
+                                instanceType
+                              }
     let to_value x =
       structure_to_value
         [("ResourceId", (Option.map x.resourceId ~f:String_.to_value));
@@ -2079,9 +3040,28 @@ module ResourceInventory =
         ("PlatformVersion",
           (Option.map x.platformVersion ~f:String_.to_value));
         ("ResourceOwningAccountId",
-          (Option.map x.resourceOwningAccountId ~f:String_.to_value))]
+          (Option.map x.resourceOwningAccountId ~f:String_.to_value));
+        ("MarketplaceProductCodes",
+          (Option.map x.marketplaceProductCodes ~f:StringList.to_value));
+        ("UsageOperation", (Option.map x.usageOperation ~f:String_.to_value));
+        ("AmiId", (Option.map x.amiId ~f:String_.to_value));
+        ("HostId", (Option.map x.hostId ~f:String_.to_value));
+        ("Region", (Option.map x.region ~f:String_.to_value));
+        ("InstanceType", (Option.map x.instanceType ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instanceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "InstanceType") in
+      let region =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Region") in
+      let hostId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HostId") in
+      let amiId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AmiId") in
+      let usageOperation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UsageOperation") in
+      let marketplaceProductCodes =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "MarketplaceProductCodes") in
       let resourceOwningAccountId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "ResourceOwningAccountId") in
@@ -2096,19 +3076,29 @@ module ResourceInventory =
           (Xml.child xml_arg0 "ResourceType") in
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ResourceId") in
-      make ?resourceOwningAccountId ?platformVersion ?platform ?resourceArn
-        ?resourceType ?resourceId ()
+      make ?instanceType ?region ?hostId ?amiId ?usageOperation
+        ?marketplaceProductCodes ?resourceOwningAccountId ?platformVersion
+        ?platform ?resourceArn ?resourceType ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instanceType = field_map json__ "InstanceType" String_.of_json in
+      let region = field_map json__ "Region" String_.of_json in
+      let hostId = field_map json__ "HostId" String_.of_json in
+      let amiId = field_map json__ "AmiId" String_.of_json in
+      let usageOperation = field_map json__ "UsageOperation" String_.of_json in
+      let marketplaceProductCodes =
+        field_map json__ "MarketplaceProductCodes" StringList.of_json in
       let resourceOwningAccountId =
-        field_map json "ResourceOwningAccountId" String_.of_json in
-      let platformVersion = field_map json "PlatformVersion" String_.of_json in
-      let platform = field_map json "Platform" String_.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceId = field_map json "ResourceId" String_.of_json in
-      make ?resourceOwningAccountId ?platformVersion ?platform ?resourceArn
-        ?resourceType ?resourceId ()
+        field_map json__ "ResourceOwningAccountId" String_.of_json in
+      let platformVersion =
+        field_map json__ "PlatformVersion" String_.of_json in
+      let platform = field_map json__ "Platform" String_.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "ResourceId" String_.of_json in
+      make ?instanceType ?region ?hostId ?amiId ?usageOperation
+        ?marketplaceProductCodes ?resourceOwningAccountId ?platformVersion
+        ?platform ?resourceArn ?resourceType ?resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a resource."]
 module InventoryFilter =
@@ -2137,11 +3127,11 @@ module InventoryFilter =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?value ~condition ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
       let condition =
-        field_map_exn json "Condition" InventoryFilterCondition.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+        field_map_exn json__ "Condition" InventoryFilterCondition.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?value ~condition ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An inventory filter."]
@@ -2272,27 +3262,27 @@ module GrantedLicense =
         ?status ?homeRegion ?issuer ?productSKU ?productName ?licenseName
         ?licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let receivedMetadata =
-        field_map json "ReceivedMetadata" ReceivedMetadata.of_json in
-      let version = field_map json "Version" String_.of_json in
-      let createTime = field_map json "CreateTime" ISO8601DateTime.of_json in
+        field_map json__ "ReceivedMetadata" ReceivedMetadata.of_json in
+      let version = field_map json__ "Version" String_.of_json in
+      let createTime = field_map json__ "CreateTime" ISO8601DateTime.of_json in
       let licenseMetadata =
-        field_map json "LicenseMetadata" MetadataList.of_json in
+        field_map json__ "LicenseMetadata" MetadataList.of_json in
       let consumptionConfiguration =
-        field_map json "ConsumptionConfiguration"
+        field_map json__ "ConsumptionConfiguration"
           ConsumptionConfiguration.of_json in
       let entitlements =
-        field_map json "Entitlements" EntitlementList.of_json in
-      let beneficiary = field_map json "Beneficiary" String_.of_json in
-      let validity = field_map json "Validity" DatetimeRange.of_json in
-      let status = field_map json "Status" LicenseStatus.of_json in
-      let homeRegion = field_map json "HomeRegion" String_.of_json in
-      let issuer = field_map json "Issuer" IssuerDetails.of_json in
-      let productSKU = field_map json "ProductSKU" String_.of_json in
-      let productName = field_map json "ProductName" String_.of_json in
-      let licenseName = field_map json "LicenseName" String_.of_json in
-      let licenseArn = field_map json "LicenseArn" Arn.of_json in
+        field_map json__ "Entitlements" EntitlementList.of_json in
+      let beneficiary = field_map json__ "Beneficiary" String_.of_json in
+      let validity = field_map json__ "Validity" DatetimeRange.of_json in
+      let status = field_map json__ "Status" LicenseStatus.of_json in
+      let homeRegion = field_map json__ "HomeRegion" String_.of_json in
+      let issuer = field_map json__ "Issuer" IssuerDetails.of_json in
+      let productSKU = field_map json__ "ProductSKU" String_.of_json in
+      let productName = field_map json__ "ProductName" String_.of_json in
+      let licenseName = field_map json__ "LicenseName" String_.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
       make ?receivedMetadata ?version ?createTime ?licenseMetadata
         ?consumptionConfiguration ?entitlements ?beneficiary ?validity
         ?status ?homeRegion ?issuer ?productSKU ?productName ?licenseName
@@ -2303,102 +3293,111 @@ module Grant =
   struct
     type nonrec t =
       {
-      grantArn: Arn.t [@ocaml.doc "Amazon Resource Name (ARN) of the grant."];
-      grantName: String_.t [@ocaml.doc "Grant name."];
-      parentArn: Arn.t [@ocaml.doc "Parent ARN."];
-      licenseArn: Arn.t [@ocaml.doc "License ARN."];
-      granteePrincipalArn: Arn.t [@ocaml.doc "The grantee principal ARN."];
-      homeRegion: String_.t [@ocaml.doc "Home Region of the grant."];
-      grantStatus: GrantStatus.t [@ocaml.doc "Grant status."];
+      grantArn: Arn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the grant."];
+      grantName: String_.t option [@ocaml.doc "Grant name."];
+      parentArn: Arn.t option [@ocaml.doc "Parent ARN."];
+      licenseArn: Arn.t option [@ocaml.doc "License ARN."];
+      granteePrincipalArn: Arn.t option
+        [@ocaml.doc "The grantee principal ARN."];
+      homeRegion: String_.t option [@ocaml.doc "Home Region of the grant."];
+      grantStatus: GrantStatus.t option [@ocaml.doc "Grant status."];
       statusReason: StatusReasonMessage.t option
         [@ocaml.doc "Grant status reason."];
-      version: String_.t [@ocaml.doc "Grant version."];
-      grantedOperations: AllowedOperationList.t
-        [@ocaml.doc "Granted operations."]}
-    let context_ = "Grant"
-    let make ?statusReason =
-      fun ~grantArn ->
-        fun ~grantName ->
-          fun ~parentArn ->
-            fun ~licenseArn ->
-              fun ~granteePrincipalArn ->
-                fun ~homeRegion ->
-                  fun ~grantStatus ->
-                    fun ~version ->
-                      fun ~grantedOperations ->
-                        fun () ->
-                          {
-                            statusReason;
-                            grantArn;
-                            grantName;
-                            parentArn;
-                            licenseArn;
-                            granteePrincipalArn;
-                            homeRegion;
-                            grantStatus;
-                            version;
-                            grantedOperations
-                          }
+      version: String_.t option [@ocaml.doc "Grant version."];
+      grantedOperations: AllowedOperationList.t option
+        [@ocaml.doc "Granted operations."];
+      options: Options.t option
+        [@ocaml.doc "The options specified for the grant."]}
+    let make ?grantArn =
+      fun ?grantName ->
+        fun ?parentArn ->
+          fun ?licenseArn ->
+            fun ?granteePrincipalArn ->
+              fun ?homeRegion ->
+                fun ?grantStatus ->
+                  fun ?statusReason ->
+                    fun ?version ->
+                      fun ?grantedOperations ->
+                        fun ?options ->
+                          fun () ->
+                            {
+                              grantArn;
+                              grantName;
+                              parentArn;
+                              licenseArn;
+                              granteePrincipalArn;
+                              homeRegion;
+                              grantStatus;
+                              statusReason;
+                              version;
+                              grantedOperations;
+                              options
+                            }
     let to_value x =
       structure_to_value
-        [("GrantArn", (Some (Arn.to_value x.grantArn)));
-        ("GrantName", (Some (String_.to_value x.grantName)));
-        ("ParentArn", (Some (Arn.to_value x.parentArn)));
-        ("LicenseArn", (Some (Arn.to_value x.licenseArn)));
-        ("GranteePrincipalArn", (Some (Arn.to_value x.granteePrincipalArn)));
-        ("HomeRegion", (Some (String_.to_value x.homeRegion)));
-        ("GrantStatus", (Some (GrantStatus.to_value x.grantStatus)));
+        [("GrantArn", (Option.map x.grantArn ~f:Arn.to_value));
+        ("GrantName", (Option.map x.grantName ~f:String_.to_value));
+        ("ParentArn", (Option.map x.parentArn ~f:Arn.to_value));
+        ("LicenseArn", (Option.map x.licenseArn ~f:Arn.to_value));
+        ("GranteePrincipalArn",
+          (Option.map x.granteePrincipalArn ~f:Arn.to_value));
+        ("HomeRegion", (Option.map x.homeRegion ~f:String_.to_value));
+        ("GrantStatus", (Option.map x.grantStatus ~f:GrantStatus.to_value));
         ("StatusReason",
           (Option.map x.statusReason ~f:StatusReasonMessage.to_value));
-        ("Version", (Some (String_.to_value x.version)));
+        ("Version", (Option.map x.version ~f:String_.to_value));
         ("GrantedOperations",
-          (Some (AllowedOperationList.to_value x.grantedOperations)))]
+          (Option.map x.grantedOperations ~f:AllowedOperationList.to_value));
+        ("Options", (Option.map x.options ~f:Options.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "Options") in
       let grantedOperations =
-        AllowedOperationList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GrantedOperations") in
+        (Option.map ~f:AllowedOperationList.of_xml)
+          (Xml.child xml_arg0 "GrantedOperations") in
       let version =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Version") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Version") in
       let statusReason =
         (Option.map ~f:StatusReasonMessage.of_xml)
           (Xml.child xml_arg0 "StatusReason") in
       let grantStatus =
-        GrantStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GrantStatus") in
+        (Option.map ~f:GrantStatus.of_xml) (Xml.child xml_arg0 "GrantStatus") in
       let homeRegion =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HomeRegion") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "HomeRegion") in
       let granteePrincipalArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GranteePrincipalArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GranteePrincipalArn") in
       let licenseArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       let parentArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ParentArn") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ParentArn") in
       let grantName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "GrantName") in
       let grantArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
-      make ~grantedOperations ~version ?statusReason ~grantStatus ~homeRegion
-        ~granteePrincipalArn ~licenseArn ~parentArn ~grantName ~grantArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
+      make ?options ?grantedOperations ?version ?statusReason ?grantStatus
+        ?homeRegion ?granteePrincipalArn ?licenseArn ?parentArn ?grantName
+        ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let options = field_map json__ "Options" Options.of_json in
       let grantedOperations =
-        field_map_exn json "GrantedOperations" AllowedOperationList.of_json in
-      let version = field_map_exn json "Version" String_.of_json in
+        field_map json__ "GrantedOperations" AllowedOperationList.of_json in
+      let version = field_map json__ "Version" String_.of_json in
       let statusReason =
-        field_map json "StatusReason" StatusReasonMessage.of_json in
-      let grantStatus = field_map_exn json "GrantStatus" GrantStatus.of_json in
-      let homeRegion = field_map_exn json "HomeRegion" String_.of_json in
+        field_map json__ "StatusReason" StatusReasonMessage.of_json in
+      let grantStatus = field_map json__ "GrantStatus" GrantStatus.of_json in
+      let homeRegion = field_map json__ "HomeRegion" String_.of_json in
       let granteePrincipalArn =
-        field_map_exn json "GranteePrincipalArn" Arn.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
-      let parentArn = field_map_exn json "ParentArn" Arn.of_json in
-      let grantName = field_map_exn json "GrantName" String_.of_json in
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
-      make ~grantedOperations ~version ?statusReason ~grantStatus ~homeRegion
-        ~granteePrincipalArn ~licenseArn ~parentArn ~grantName ~grantArn ()
+        field_map json__ "GranteePrincipalArn" Arn.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
+      let parentArn = field_map json__ "ParentArn" Arn.of_json in
+      let grantName = field_map json__ "GrantName" String_.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
+      make ?options ?grantedOperations ?version ?statusReason ?grantStatus
+        ?homeRegion ?granteePrincipalArn ?licenseArn ?parentArn ?grantName
+        ?grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a grant."]
 module License =
@@ -2514,25 +3513,25 @@ module License =
         ?entitlements ?beneficiary ?validity ?status ?homeRegion ?issuer
         ?productSKU ?productName ?licenseName ?licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let createTime = field_map json "CreateTime" ISO8601DateTime.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let createTime = field_map json__ "CreateTime" ISO8601DateTime.of_json in
       let licenseMetadata =
-        field_map json "LicenseMetadata" MetadataList.of_json in
+        field_map json__ "LicenseMetadata" MetadataList.of_json in
       let consumptionConfiguration =
-        field_map json "ConsumptionConfiguration"
+        field_map json__ "ConsumptionConfiguration"
           ConsumptionConfiguration.of_json in
       let entitlements =
-        field_map json "Entitlements" EntitlementList.of_json in
-      let beneficiary = field_map json "Beneficiary" String_.of_json in
-      let validity = field_map json "Validity" DatetimeRange.of_json in
-      let status = field_map json "Status" LicenseStatus.of_json in
-      let homeRegion = field_map json "HomeRegion" String_.of_json in
-      let issuer = field_map json "Issuer" IssuerDetails.of_json in
-      let productSKU = field_map json "ProductSKU" String_.of_json in
-      let productName = field_map json "ProductName" String_.of_json in
-      let licenseName = field_map json "LicenseName" String_.of_json in
-      let licenseArn = field_map json "LicenseArn" Arn.of_json in
+        field_map json__ "Entitlements" EntitlementList.of_json in
+      let beneficiary = field_map json__ "Beneficiary" String_.of_json in
+      let validity = field_map json__ "Validity" DatetimeRange.of_json in
+      let status = field_map json__ "Status" LicenseStatus.of_json in
+      let homeRegion = field_map json__ "HomeRegion" String_.of_json in
+      let issuer = field_map json__ "Issuer" IssuerDetails.of_json in
+      let productSKU = field_map json__ "ProductSKU" String_.of_json in
+      let productName = field_map json__ "ProductName" String_.of_json in
+      let licenseName = field_map json__ "LicenseName" String_.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
       make ?version ?createTime ?licenseMetadata ?consumptionConfiguration
         ?entitlements ?beneficiary ?validity ?status ?homeRegion ?issuer
         ?productSKU ?productName ?licenseName ?licenseArn ()
@@ -2662,27 +3661,27 @@ module ReportGenerator =
         ?licenseManagerReportGeneratorArn ?reportFrequency ?reportContext
         ?reportType ?reportGeneratorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let createTime = field_map json "CreateTime" String_.of_json in
-      let s3Location = field_map json "S3Location" S3Location.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let createTime = field_map json__ "CreateTime" String_.of_json in
+      let s3Location = field_map json__ "S3Location" S3Location.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let reportCreatorAccount =
-        field_map json "ReportCreatorAccount" String_.of_json in
+        field_map json__ "ReportCreatorAccount" String_.of_json in
       let lastReportGenerationTime =
-        field_map json "LastReportGenerationTime" String_.of_json in
+        field_map json__ "LastReportGenerationTime" String_.of_json in
       let lastRunFailureReason =
-        field_map json "LastRunFailureReason" String_.of_json in
-      let lastRunStatus = field_map json "LastRunStatus" String_.of_json in
+        field_map json__ "LastRunFailureReason" String_.of_json in
+      let lastRunStatus = field_map json__ "LastRunStatus" String_.of_json in
       let licenseManagerReportGeneratorArn =
-        field_map json "LicenseManagerReportGeneratorArn" String_.of_json in
+        field_map json__ "LicenseManagerReportGeneratorArn" String_.of_json in
       let reportFrequency =
-        field_map json "ReportFrequency" ReportFrequency.of_json in
+        field_map json__ "ReportFrequency" ReportFrequency.of_json in
       let reportContext =
-        field_map json "ReportContext" ReportContext.of_json in
-      let reportType = field_map json "ReportType" ReportTypeList.of_json in
+        field_map json__ "ReportContext" ReportContext.of_json in
+      let reportType = field_map json__ "ReportType" ReportTypeList.of_json in
       let reportGeneratorName =
-        field_map json "ReportGeneratorName" String_.of_json in
+        field_map json__ "ReportGeneratorName" String_.of_json in
       make ?tags ?createTime ?s3Location ?description ?reportCreatorAccount
         ?lastReportGenerationTime ?lastRunFailureReason ?lastRunStatus
         ?licenseManagerReportGeneratorArn ?reportFrequency ?reportContext
@@ -2784,23 +3783,23 @@ module LicenseConversionTask =
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
         ?licenseConversionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
       let licenseConversionTime =
-        field_map json "LicenseConversionTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
+        field_map json__ "LicenseConversionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
       let status =
-        field_map json "Status" LicenseConversionTaskStatus.of_json in
+        field_map json__ "Status" LicenseConversionTaskStatus.of_json in
       let destinationLicenseContext =
-        field_map json "DestinationLicenseContext"
+        field_map json__ "DestinationLicenseContext"
           LicenseConversionContext.of_json in
       let sourceLicenseContext =
-        field_map json "SourceLicenseContext"
+        field_map json__ "SourceLicenseContext"
           LicenseConversionContext.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
       let licenseConversionTaskId =
-        field_map json "LicenseConversionTaskId"
+        field_map json__ "LicenseConversionTaskId"
           LicenseConversionTaskId.of_json in
       make ?endTime ?licenseConversionTime ?startTime ?statusMessage ?status
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
@@ -2844,7 +3843,10 @@ module LicenseConfiguration =
       productInformationList: ProductInformationList.t option
         [@ocaml.doc "Product information."];
       automatedDiscoveryInformation: AutomatedDiscoveryInformation.t option
-        [@ocaml.doc "Automated discovery information."]}
+        [@ocaml.doc "Automated discovery information."];
+      licenseExpiry: BoxLong.t option
+        [@ocaml.doc
+          "License configuration expiry time in Unix timestamp format."]}
     let make ?licenseConfigurationId =
       fun ?licenseConfigurationArn ->
         fun ?name ->
@@ -2861,25 +3863,27 @@ module LicenseConfiguration =
                               fun ?managedResourceSummaryList ->
                                 fun ?productInformationList ->
                                   fun ?automatedDiscoveryInformation ->
-                                    fun () ->
-                                      {
-                                        licenseConfigurationId;
-                                        licenseConfigurationArn;
-                                        name;
-                                        description;
-                                        licenseCountingType;
-                                        licenseRules;
-                                        licenseCount;
-                                        licenseCountHardLimit;
-                                        disassociateWhenNotFound;
-                                        consumedLicenses;
-                                        status;
-                                        ownerAccountId;
-                                        consumedLicenseSummaryList;
-                                        managedResourceSummaryList;
-                                        productInformationList;
-                                        automatedDiscoveryInformation
-                                      }
+                                    fun ?licenseExpiry ->
+                                      fun () ->
+                                        {
+                                          licenseConfigurationId;
+                                          licenseConfigurationArn;
+                                          name;
+                                          description;
+                                          licenseCountingType;
+                                          licenseRules;
+                                          licenseCount;
+                                          licenseCountHardLimit;
+                                          disassociateWhenNotFound;
+                                          consumedLicenses;
+                                          status;
+                                          ownerAccountId;
+                                          consumedLicenseSummaryList;
+                                          managedResourceSummaryList;
+                                          productInformationList;
+                                          automatedDiscoveryInformation;
+                                          licenseExpiry
+                                        }
     let to_value x =
       structure_to_value
         [("LicenseConfigurationId",
@@ -2911,9 +3915,12 @@ module LicenseConfiguration =
              ~f:ProductInformationList.to_value));
         ("AutomatedDiscoveryInformation",
           (Option.map x.automatedDiscoveryInformation
-             ~f:AutomatedDiscoveryInformation.to_value))]
+             ~f:AutomatedDiscoveryInformation.to_value));
+        ("LicenseExpiry", (Option.map x.licenseExpiry ~f:BoxLong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseExpiry =
+        (Option.map ~f:BoxLong.of_xml) (Xml.child xml_arg0 "LicenseExpiry") in
       let automatedDiscoveryInformation =
         (Option.map ~f:AutomatedDiscoveryInformation.of_xml)
           (Xml.child xml_arg0 "AutomatedDiscoveryInformation") in
@@ -2955,53 +3962,225 @@ module LicenseConfiguration =
       let licenseConfigurationId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationId") in
-      make ?automatedDiscoveryInformation ?productInformationList
-        ?managedResourceSummaryList ?consumedLicenseSummaryList
-        ?ownerAccountId ?status ?consumedLicenses ?disassociateWhenNotFound
-        ?licenseCountHardLimit ?licenseCount ?licenseRules
-        ?licenseCountingType ?description ?name ?licenseConfigurationArn
-        ?licenseConfigurationId ()
+      make ?licenseExpiry ?automatedDiscoveryInformation
+        ?productInformationList ?managedResourceSummaryList
+        ?consumedLicenseSummaryList ?ownerAccountId ?status ?consumedLicenses
+        ?disassociateWhenNotFound ?licenseCountHardLimit ?licenseCount
+        ?licenseRules ?licenseCountingType ?description ?name
+        ?licenseConfigurationArn ?licenseConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseExpiry = field_map json__ "LicenseExpiry" BoxLong.of_json in
       let automatedDiscoveryInformation =
-        field_map json "AutomatedDiscoveryInformation"
+        field_map json__ "AutomatedDiscoveryInformation"
           AutomatedDiscoveryInformation.of_json in
       let productInformationList =
-        field_map json "ProductInformationList"
+        field_map json__ "ProductInformationList"
           ProductInformationList.of_json in
       let managedResourceSummaryList =
-        field_map json "ManagedResourceSummaryList"
+        field_map json__ "ManagedResourceSummaryList"
           ManagedResourceSummaryList.of_json in
       let consumedLicenseSummaryList =
-        field_map json "ConsumedLicenseSummaryList"
+        field_map json__ "ConsumedLicenseSummaryList"
           ConsumedLicenseSummaryList.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+      let ownerAccountId = field_map json__ "OwnerAccountId" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let consumedLicenses =
-        field_map json "ConsumedLicenses" BoxLong.of_json in
+        field_map json__ "ConsumedLicenses" BoxLong.of_json in
       let disassociateWhenNotFound =
-        field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
+        field_map json__ "DisassociateWhenNotFound" BoxBoolean.of_json in
       let licenseCountHardLimit =
-        field_map json "LicenseCountHardLimit" BoxBoolean.of_json in
-      let licenseCount = field_map json "LicenseCount" BoxLong.of_json in
-      let licenseRules = field_map json "LicenseRules" StringList.of_json in
+        field_map json__ "LicenseCountHardLimit" BoxBoolean.of_json in
+      let licenseCount = field_map json__ "LicenseCount" BoxLong.of_json in
+      let licenseRules = field_map json__ "LicenseRules" StringList.of_json in
       let licenseCountingType =
-        field_map json "LicenseCountingType" LicenseCountingType.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "LicenseCountingType" LicenseCountingType.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       let licenseConfigurationId =
-        field_map json "LicenseConfigurationId" String_.of_json in
-      make ?automatedDiscoveryInformation ?productInformationList
-        ?managedResourceSummaryList ?consumedLicenseSummaryList
-        ?ownerAccountId ?status ?consumedLicenses ?disassociateWhenNotFound
-        ?licenseCountHardLimit ?licenseCount ?licenseRules
-        ?licenseCountingType ?description ?name ?licenseConfigurationArn
-        ?licenseConfigurationId ()
+        field_map json__ "LicenseConfigurationId" String_.of_json in
+      make ?licenseExpiry ?automatedDiscoveryInformation
+        ?productInformationList ?managedResourceSummaryList
+        ?consumedLicenseSummaryList ?ownerAccountId ?status ?consumedLicenses
+        ?disassociateWhenNotFound ?licenseCountHardLimit ?licenseCount
+        ?licenseRules ?licenseCountingType ?description ?name
+        ?licenseConfigurationArn ?licenseConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A license configuration is an abstraction of a customer license agreement that can be consumed and enforced by License Manager. Components include specifications for the license type (licensing by instance, socket, CPU, or vCPU), allowed tenancy (shared tenancy, Dedicated Instance, Dedicated Host, or all of these), host affinity (how long a VM must be associated with a host), and the number of licenses purchased and used."]
+module LicenseAssetRuleset =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "License asset ruleset name."];
+      description: String_.t option
+        [@ocaml.doc "License asset ruleset description."];
+      rules: LicenseAssetRuleList.t option
+        [@ocaml.doc "License asset rules."];
+      licenseAssetRulesetArn: Arn.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."]}
+    let make ?name =
+      fun ?description ->
+        fun ?rules ->
+          fun ?licenseAssetRulesetArn ->
+            fun () -> { name; description; rules; licenseAssetRulesetArn }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("Rules", (Option.map x.rules ~f:LicenseAssetRuleList.to_value));
+        ("LicenseAssetRulesetArn",
+          (Option.map x.licenseAssetRulesetArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRulesetArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetRulesetArn") in
+      let rules =
+        (Option.map ~f:LicenseAssetRuleList.of_xml)
+          (Xml.child xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?licenseAssetRulesetArn ?rules ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRulesetArn =
+        field_map json__ "LicenseAssetRulesetArn" Arn.of_json in
+      let rules = field_map json__ "Rules" LicenseAssetRuleList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?licenseAssetRulesetArn ?rules ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License asset ruleset."]
+module LicenseAssetGroup =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "License asset group name."];
+      description: String_.t option
+        [@ocaml.doc "License asset group description."];
+      licenseAssetGroupConfigurations:
+        LicenseAssetGroupConfigurationList.t option
+        [@ocaml.doc "License asset group configurations."];
+      associatedLicenseAssetRulesetARNs: LicenseAssetRulesetArnList.t option
+        [@ocaml.doc "ARNs of associated license asset rulesets."];
+      properties: LicenseAssetGroupPropertyList.t option
+        [@ocaml.doc "License asset group properties."];
+      licenseAssetGroupArn: Arn.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."];
+      status: LicenseAssetGroupStatus.t option
+        [@ocaml.doc "License asset group status."];
+      statusMessage: String_.t option
+        [@ocaml.doc "License asset group status message."];
+      latestUsageAnalysisTime: DateTime.t option
+        [@ocaml.doc "Latest usage analysis time."];
+      latestResourceDiscoveryTime: DateTime.t option
+        [@ocaml.doc "Latest resource discovery time."]}
+    let make ?name =
+      fun ?description ->
+        fun ?licenseAssetGroupConfigurations ->
+          fun ?associatedLicenseAssetRulesetARNs ->
+            fun ?properties ->
+              fun ?licenseAssetGroupArn ->
+                fun ?status ->
+                  fun ?statusMessage ->
+                    fun ?latestUsageAnalysisTime ->
+                      fun ?latestResourceDiscoveryTime ->
+                        fun () ->
+                          {
+                            name;
+                            description;
+                            licenseAssetGroupConfigurations;
+                            associatedLicenseAssetRulesetARNs;
+                            properties;
+                            licenseAssetGroupArn;
+                            status;
+                            statusMessage;
+                            latestUsageAnalysisTime;
+                            latestResourceDiscoveryTime
+                          }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:String_.to_value));
+        ("LicenseAssetGroupConfigurations",
+          (Option.map x.licenseAssetGroupConfigurations
+             ~f:LicenseAssetGroupConfigurationList.to_value));
+        ("AssociatedLicenseAssetRulesetARNs",
+          (Option.map x.associatedLicenseAssetRulesetARNs
+             ~f:LicenseAssetRulesetArnList.to_value));
+        ("Properties",
+          (Option.map x.properties ~f:LicenseAssetGroupPropertyList.to_value));
+        ("LicenseAssetGroupArn",
+          (Option.map x.licenseAssetGroupArn ~f:Arn.to_value));
+        ("Status", (Option.map x.status ~f:LicenseAssetGroupStatus.to_value));
+        ("StatusMessage", (Option.map x.statusMessage ~f:String_.to_value));
+        ("LatestUsageAnalysisTime",
+          (Option.map x.latestUsageAnalysisTime ~f:DateTime.to_value));
+        ("LatestResourceDiscoveryTime",
+          (Option.map x.latestResourceDiscoveryTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestResourceDiscoveryTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LatestResourceDiscoveryTime") in
+      let latestUsageAnalysisTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LatestUsageAnalysisTime") in
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:LicenseAssetGroupStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let licenseAssetGroupArn =
+        (Option.map ~f:Arn.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroupArn") in
+      let properties =
+        (Option.map ~f:LicenseAssetGroupPropertyList.of_xml)
+          (Xml.child xml_arg0 "Properties") in
+      let associatedLicenseAssetRulesetARNs =
+        (Option.map ~f:LicenseAssetRulesetArnList.of_xml)
+          (Xml.child xml_arg0 "AssociatedLicenseAssetRulesetARNs") in
+      let licenseAssetGroupConfigurations =
+        (Option.map ~f:LicenseAssetGroupConfigurationList.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroupConfigurations") in
+      let description =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?latestResourceDiscoveryTime ?latestUsageAnalysisTime
+        ?statusMessage ?status ?licenseAssetGroupArn ?properties
+        ?associatedLicenseAssetRulesetARNs ?licenseAssetGroupConfigurations
+        ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestResourceDiscoveryTime =
+        field_map json__ "LatestResourceDiscoveryTime" DateTime.of_json in
+      let latestUsageAnalysisTime =
+        field_map json__ "LatestUsageAnalysisTime" DateTime.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" LicenseAssetGroupStatus.of_json in
+      let licenseAssetGroupArn =
+        field_map json__ "LicenseAssetGroupArn" Arn.of_json in
+      let properties =
+        field_map json__ "Properties" LicenseAssetGroupPropertyList.of_json in
+      let associatedLicenseAssetRulesetARNs =
+        field_map json__ "AssociatedLicenseAssetRulesetARNs"
+          LicenseAssetRulesetArnList.of_json in
+      let licenseAssetGroupConfigurations =
+        field_map json__ "LicenseAssetGroupConfigurations"
+          LicenseAssetGroupConfigurationList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?latestResourceDiscoveryTime ?latestUsageAnalysisTime
+        ?statusMessage ?status ?licenseAssetGroupArn ?properties
+        ?associatedLicenseAssetRulesetARNs ?licenseAssetGroupConfigurations
+        ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "License asset group."]
 module LicenseOperationFailure =
   struct
     type nonrec t =
@@ -3077,16 +4256,17 @@ module LicenseOperationFailure =
         ?operationName ?failureTime ?errorMessage ?resourceType ?resourceArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadataList = field_map json "MetadataList" MetadataList.of_json in
+    let of_json json__ =
+      let metadataList = field_map json__ "MetadataList" MetadataList.of_json in
       let operationRequestedBy =
-        field_map json "OperationRequestedBy" String_.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
-      let operationName = field_map json "OperationName" String_.of_json in
-      let failureTime = field_map json "FailureTime" DateTime.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
+        field_map json__ "OperationRequestedBy" String_.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
+      let operationName = field_map json__ "OperationName" String_.of_json in
+      let failureTime = field_map json__ "FailureTime" DateTime.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
       make ?metadataList ?operationRequestedBy ?resourceOwnerId
         ?operationName ?failureTime ?errorMessage ?resourceType ?resourceArn
         ()
@@ -3151,21 +4331,101 @@ module LicenseConfigurationAssociation =
       make ?amiAssociationScope ?associationTime ?resourceOwnerId
         ?resourceType ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amiAssociationScope =
-        field_map json "AmiAssociationScope" String_.of_json in
-      let associationTime = field_map json "AssociationTime" DateTime.of_json in
-      let resourceOwnerId = field_map json "ResourceOwnerId" String_.of_json in
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
+        field_map json__ "AmiAssociationScope" String_.of_json in
+      let associationTime =
+        field_map json__ "AssociationTime" DateTime.of_json in
+      let resourceOwnerId =
+        field_map json__ "ResourceOwnerId" String_.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
       make ?amiAssociationScope ?associationTime ?resourceOwnerId
         ?resourceType ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an association with a license configuration."]
+module Asset =
+  struct
+    type nonrec t =
+      {
+      assetArn: String_.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the asset."];
+      latestAssetDiscoveryTime: DateTime.t option
+        [@ocaml.doc "Latest asset discovery time."]}
+    let make ?assetArn =
+      fun ?latestAssetDiscoveryTime ->
+        fun () -> { assetArn; latestAssetDiscoveryTime }
+    let to_value x =
+      structure_to_value
+        [("AssetArn", (Option.map x.assetArn ~f:String_.to_value));
+        ("LatestAssetDiscoveryTime",
+          (Option.map x.latestAssetDiscoveryTime ~f:DateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestAssetDiscoveryTime =
+        (Option.map ~f:DateTime.of_xml)
+          (Xml.child xml_arg0 "LatestAssetDiscoveryTime") in
+      let assetArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "AssetArn") in
+      make ?latestAssetDiscoveryTime ?assetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestAssetDiscoveryTime =
+        field_map json__ "LatestAssetDiscoveryTime" DateTime.of_json in
+      let assetArn = field_map json__ "AssetArn" String_.of_json in
+      make ?latestAssetDiscoveryTime ?assetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Asset."]
+module CrossAccountDiscoveryServiceStatus =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc "Status message for cross-account discovery service."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Status information for cross-account discovery service."]
+module CrossRegionDiscoveryStatus =
+  struct
+    type nonrec t =
+      {
+      message: RegionStatusMap.t option
+        [@ocaml.doc
+          "Map of region status messages for cross-region discovery."]}
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:RegionStatusMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:RegionStatusMap.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" RegionStatusMap.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Status information for cross-region discovery."]
 module EntitlementUsageList =
   struct
     type nonrec t = EntitlementUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntitlementUsage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3225,10 +4485,10 @@ module EntitlementData =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~unit ?value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map_exn json "Unit" EntitlementDataUnit.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let unit = field_map_exn json__ "Unit" EntitlementDataUnit.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~unit ?value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Data associated with an entitlement resource."]
@@ -3246,8 +4506,8 @@ module AccessDeniedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access to resource denied."]
@@ -3265,12 +4525,32 @@ module AuthorizationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Amazon Web Services user account does not have permission to perform the action. Check the IAM policy associated with this account."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was a conflict processing the request. Try your request again."]
 module InvalidParameterValueException =
   struct
     type nonrec t = {
@@ -3285,8 +4565,8 @@ module InvalidParameterValueException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameter values are not valid."]
@@ -3304,8 +4584,8 @@ module RateLimitExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3324,11 +4604,30 @@ module ServerInternalException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The server experienced an internal error. Try again."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The provided input is not valid. Try your request again."]
 module OrganizationConfiguration =
   struct
     type nonrec t =
@@ -3347,9 +4646,9 @@ module OrganizationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "EnableIntegration") in
       make ~enableIntegration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableIntegration =
-        field_map_exn json "EnableIntegration" Boolean.of_json in
+        field_map_exn json__ "EnableIntegration" Boolean.of_json in
       make ~enableIntegration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration information for Organizations."]
@@ -3367,8 +4666,8 @@ module InvalidResourceStateException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3387,8 +4686,8 @@ module LicenseUsageException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3397,6 +4696,9 @@ module LicenseSpecifications =
   struct
     type nonrec t = LicenseSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseSpecification.to_value)) |>
         (fun x -> `List x)
@@ -3433,8 +4735,8 @@ module ResourceLimitExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Your resource limits have been exceeded."]
@@ -3452,30 +4754,11 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource cannot be found."]
-module ValidationException =
-  struct
-    type nonrec t = {
-      message: Message.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The provided input is not valid. Try your request again."]
 module ClientRequestToken =
   struct
     type nonrec t = string
@@ -3540,10 +4823,41 @@ module LicenseConfigurationStatus =
       of_string (string_of_json ~kind:"LicenseConfigurationStatus" j)
     let to_json = simple_to_json to_value
   end
+module LicenseAssetResourceDescription =
+  struct
+    type nonrec t = string
+    let context_ = "LicenseAssetResourceDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LicenseAssetResourceDescription" j
+    let to_json = simple_to_json to_value
+  end
+module LicenseAssetResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "LicenseAssetResourceName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:128); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LicenseAssetResourceName" j
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3578,8 +4892,8 @@ module FilterLimitExceededException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3588,6 +4902,9 @@ module LicenseConfigurationUsageList =
   struct
     type nonrec t = LicenseConfigurationUsage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseConfigurationUsage.to_value)) |>
         (fun x -> `List x)
@@ -3614,6 +4931,9 @@ module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3637,6 +4957,9 @@ module TokenList =
   struct
     type nonrec t = TokenData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TokenData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3661,6 +4984,9 @@ module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3716,9 +5042,9 @@ module FailedDependencyException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?errorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorCode = field_map json "ErrorCode" String_.of_json in
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let message = field_map json__ "Message" Message.of_json in
       make ?errorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A dependency required to run the API is missing."]
@@ -3726,6 +5052,9 @@ module ResourceInventoryList =
   struct
     type nonrec t = ResourceInventory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceInventory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3751,6 +5080,9 @@ module InventoryFilterList =
   struct
     type nonrec t = InventoryFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InventoryFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3776,6 +5108,9 @@ module GrantedLicenseList =
   struct
     type nonrec t = GrantedLicense.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GrantedLicense.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3801,6 +5136,9 @@ module GrantList =
   struct
     type nonrec t = Grant.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Grant.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3824,6 +5162,9 @@ module LicenseList =
   struct
     type nonrec t = License.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:License.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3848,6 +5189,9 @@ module ReportGeneratorList =
   struct
     type nonrec t = ReportGenerator.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReportGenerator.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3873,6 +5217,9 @@ module LicenseConversionTasks =
   struct
     type nonrec t = LicenseConversionTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseConversionTask.to_value)) |>
         (fun x -> `List x)
@@ -3899,6 +5246,9 @@ module LicenseConfigurations =
   struct
     type nonrec t = LicenseConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -3921,10 +5271,70 @@ module LicenseConfigurations =
         ~of_json:LicenseConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
+module LicenseAssetRulesetList =
+  struct
+    type nonrec t = LicenseAssetRuleset.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseAssetRuleset.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseAssetRuleset.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetRulesetList"
+        ~of_json:LicenseAssetRuleset.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LicenseAssetGroupList =
+  struct
+    type nonrec t = LicenseAssetGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LicenseAssetGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LicenseAssetGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LicenseAssetGroupList"
+        ~of_json:LicenseAssetGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module LicenseOperationFailureList =
   struct
     type nonrec t = LicenseOperationFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseOperationFailure.to_value)) |>
         (fun x -> `List x)
@@ -3951,6 +5361,9 @@ module LicenseConfigurationAssociations =
   struct
     type nonrec t = LicenseConfigurationAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseConfigurationAssociation.to_value)) |>
         (fun x -> `List x)
@@ -3973,6 +5386,71 @@ module LicenseConfigurationAssociations =
         ~of_json:LicenseConfigurationAssociation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AssetList =
+  struct
+    type nonrec t = Asset.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Asset.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Asset.of_xml)
+    let of_json j = list_of_json ~kind:"AssetList" ~of_json:Asset.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceStatus =
+  struct
+    type nonrec t =
+      {
+      crossAccountDiscovery: CrossAccountDiscoveryServiceStatus.t option
+        [@ocaml.doc "Status of cross-account discovery service."];
+      crossRegionDiscovery: CrossRegionDiscoveryStatus.t option
+        [@ocaml.doc "Status of cross-region discovery service."]}
+    let make ?crossAccountDiscovery =
+      fun ?crossRegionDiscovery ->
+        fun () -> { crossAccountDiscovery; crossRegionDiscovery }
+    let to_value x =
+      structure_to_value
+        [("CrossAccountDiscovery",
+           (Option.map x.crossAccountDiscovery
+              ~f:CrossAccountDiscoveryServiceStatus.to_value));
+        ("CrossRegionDiscovery",
+          (Option.map x.crossRegionDiscovery
+             ~f:CrossRegionDiscoveryStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let crossRegionDiscovery =
+        (Option.map ~f:CrossRegionDiscoveryStatus.of_xml)
+          (Xml.child xml_arg0 "CrossRegionDiscovery") in
+      let crossAccountDiscovery =
+        (Option.map ~f:CrossAccountDiscoveryServiceStatus.of_xml)
+          (Xml.child xml_arg0 "CrossAccountDiscovery") in
+      make ?crossRegionDiscovery ?crossAccountDiscovery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let crossRegionDiscovery =
+        field_map json__ "CrossRegionDiscovery"
+          CrossRegionDiscoveryStatus.of_json in
+      let crossAccountDiscovery =
+        field_map json__ "CrossAccountDiscovery"
+          CrossAccountDiscoveryServiceStatus.of_json in
+      make ?crossRegionDiscovery ?crossAccountDiscovery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Overall service status information for License Manager."]
 module LicenseUsage =
   struct
     type nonrec t =
@@ -3991,9 +5469,9 @@ module LicenseUsage =
           (Xml.child xml_arg0 "EntitlementUsages") in
       make ?entitlementUsages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let entitlementUsages =
-        field_map json "EntitlementUsages" EntitlementUsageList.of_json in
+        field_map json__ "EntitlementUsages" EntitlementUsageList.of_json in
       make ?entitlementUsages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4034,33 +5512,13 @@ module RedirectException =
         (Option.map ~f:Location.of_xml) (Xml.child xml_arg0 "Location") in
       make ?message ?location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      let location = field_map json "Location" Location.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      let location = field_map json__ "Location" Location.of_json in
       make ?message ?location ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This is not the correct Region for the resource. Try again."]
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: Message.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "There was a conflict processing the request. Try your request again."]
 module LicenseDeletionStatus =
   struct
     type nonrec t =
@@ -4146,9 +5604,9 @@ module Issuer =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?signKey ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signKey = field_map json "SignKey" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let signKey = field_map json__ "SignKey" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?signKey ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about the issuer of a license."]
@@ -4160,6 +5618,9 @@ module PrincipalArnList =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4209,6 +5670,9 @@ module EntitlementDataList =
   struct
     type nonrec t = EntitlementData.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EntitlementData.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4244,8 +5708,8 @@ module NoEntitlementsAllowedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4278,8 +5742,8 @@ module UnsupportedDigitalSignatureMethodException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4298,8 +5762,8 @@ module EntitlementNotAllowedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The entitlement is not allowed."]
@@ -4329,9 +5793,11 @@ module UpdateServiceSettingsResponse =
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
+      | `ConflictException of ConflictException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `RateLimitExceededException of RateLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -4340,6 +5806,8 @@ module UpdateServiceSettingsResponse =
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_json json)
@@ -4348,6 +5816,8 @@ module UpdateServiceSettingsResponse =
             (RateLimitExceededException.of_json json)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4357,6 +5827,8 @@ module UpdateServiceSettingsResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_xml xml)
@@ -4364,6 +5836,8 @@ module UpdateServiceSettingsResponse =
           `RateLimitExceededException (RateLimitExceededException.of_xml xml)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4376,6 +5850,10 @@ module UpdateServiceSettingsResponse =
           `Assoc
             [("error", (`String "AuthorizationException"));
             ("details", (AuthorizationException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidParameterValueException e ->
           `Assoc
             [("error", (`String "InvalidParameterValueException"));
@@ -4388,6 +5866,10 @@ module UpdateServiceSettingsResponse =
           `Assoc
             [("error", (`String "ServerInternalException"));
             ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4415,18 +5897,22 @@ module UpdateServiceSettingsRequest =
         [@ocaml.doc
           "Enables integration with Organizations for cross-account discovery."];
       enableCrossAccountsDiscovery: BoxBoolean.t option
-        [@ocaml.doc "Activates cross-account discovery."]}
+        [@ocaml.doc "Activates cross-account discovery."];
+      enabledDiscoverySourceRegions: StringList.t option
+        [@ocaml.doc "Cross region discovery enabled source regions."]}
     let make ?s3BucketArn =
       fun ?snsTopicArn ->
         fun ?organizationConfiguration ->
           fun ?enableCrossAccountsDiscovery ->
-            fun () ->
-              {
-                s3BucketArn;
-                snsTopicArn;
-                organizationConfiguration;
-                enableCrossAccountsDiscovery
-              }
+            fun ?enabledDiscoverySourceRegions ->
+              fun () ->
+                {
+                  s3BucketArn;
+                  snsTopicArn;
+                  organizationConfiguration;
+                  enableCrossAccountsDiscovery;
+                  enabledDiscoverySourceRegions
+                }
     let to_value x =
       structure_to_value
         [("S3BucketArn", (Option.map x.s3BucketArn ~f:String_.to_value));
@@ -4435,9 +5921,14 @@ module UpdateServiceSettingsRequest =
           (Option.map x.organizationConfiguration
              ~f:OrganizationConfiguration.to_value));
         ("EnableCrossAccountsDiscovery",
-          (Option.map x.enableCrossAccountsDiscovery ~f:BoxBoolean.to_value))]
+          (Option.map x.enableCrossAccountsDiscovery ~f:BoxBoolean.to_value));
+        ("EnabledDiscoverySourceRegions",
+          (Option.map x.enabledDiscoverySourceRegions ~f:StringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enabledDiscoverySourceRegions =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "EnabledDiscoverySourceRegions") in
       let enableCrossAccountsDiscovery =
         (Option.map ~f:BoxBoolean.of_xml)
           (Xml.child xml_arg0 "EnableCrossAccountsDiscovery") in
@@ -4448,19 +5939,21 @@ module UpdateServiceSettingsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnsTopicArn") in
       let s3BucketArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketArn") in
-      make ?enableCrossAccountsDiscovery ?organizationConfiguration
-        ?snsTopicArn ?s3BucketArn ()
+      make ?enabledDiscoverySourceRegions ?enableCrossAccountsDiscovery
+        ?organizationConfiguration ?snsTopicArn ?s3BucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enabledDiscoverySourceRegions =
+        field_map json__ "EnabledDiscoverySourceRegions" StringList.of_json in
       let enableCrossAccountsDiscovery =
-        field_map json "EnableCrossAccountsDiscovery" BoxBoolean.of_json in
+        field_map json__ "EnableCrossAccountsDiscovery" BoxBoolean.of_json in
       let organizationConfiguration =
-        field_map json "OrganizationConfiguration"
+        field_map json__ "OrganizationConfiguration"
           OrganizationConfiguration.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
-      let s3BucketArn = field_map json "S3BucketArn" String_.of_json in
-      make ?enableCrossAccountsDiscovery ?organizationConfiguration
-        ?snsTopicArn ?s3BucketArn ()
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
+      let s3BucketArn = field_map json__ "S3BucketArn" String_.of_json in
+      make ?enabledDiscoverySourceRegions ?enableCrossAccountsDiscovery
+        ?organizationConfiguration ?snsTopicArn ?s3BucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates License Manager settings for the current Region."]
 module UpdateLicenseSpecificationsForResourceResponse =
@@ -4469,6 +5962,7 @@ module UpdateLicenseSpecificationsForResourceResponse =
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
+      | `ConflictException of ConflictException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `InvalidResourceStateException of InvalidResourceStateException.t 
       | `LicenseUsageException of LicenseUsageException.t 
@@ -4482,6 +5976,8 @@ module UpdateLicenseSpecificationsForResourceResponse =
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_json json)
@@ -4504,6 +6000,8 @@ module UpdateLicenseSpecificationsForResourceResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_xml xml)
@@ -4528,6 +6026,10 @@ module UpdateLicenseSpecificationsForResourceResponse =
           `Assoc
             [("error", (`String "AuthorizationException"));
             ("details", (AuthorizationException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidParameterValueException e ->
           `Assoc
             [("error", (`String "InvalidParameterValueException"));
@@ -4606,14 +6108,14 @@ module UpdateLicenseSpecificationsForResourceRequest =
       make ?removeLicenseSpecifications ?addLicenseSpecifications
         ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let removeLicenseSpecifications =
-        field_map json "RemoveLicenseSpecifications"
+        field_map json__ "RemoveLicenseSpecifications"
           LicenseSpecifications.of_json in
       let addLicenseSpecifications =
-        field_map json "AddLicenseSpecifications"
+        field_map json__ "AddLicenseSpecifications"
           LicenseSpecifications.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ?removeLicenseSpecifications ?addLicenseSpecifications
         ~resourceArn ()
     let to_json v = composed_to_json to_value v
@@ -4803,19 +6305,21 @@ module UpdateLicenseManagerReportGeneratorRequest =
       make ?description ~clientToken ~reportFrequency ~reportContext ~type_
         ~reportGeneratorName ~licenseManagerReportGeneratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" String_.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientToken" ClientRequestToken.of_json in
       let reportFrequency =
-        field_map_exn json "ReportFrequency" ReportFrequency.of_json in
+        field_map_exn json__ "ReportFrequency" ReportFrequency.of_json in
       let reportContext =
-        field_map_exn json "ReportContext" ReportContext.of_json in
-      let type_ = field_map_exn json "Type" ReportTypeList.of_json in
+        field_map_exn json__ "ReportContext" ReportContext.of_json in
+      let type_ = field_map_exn json__ "Type" ReportTypeList.of_json in
       let reportGeneratorName =
-        field_map_exn json "ReportGeneratorName" ReportGeneratorName.of_json in
+        field_map_exn json__ "ReportGeneratorName"
+          ReportGeneratorName.of_json in
       let licenseManagerReportGeneratorArn =
-        field_map_exn json "LicenseManagerReportGeneratorArn" String_.of_json in
+        field_map_exn json__ "LicenseManagerReportGeneratorArn"
+          String_.of_json in
       make ?description ~clientToken ~reportFrequency ~reportContext ~type_
         ~reportGeneratorName ~licenseManagerReportGeneratorArn ()
     let to_json v = composed_to_json to_value v
@@ -4827,6 +6331,7 @@ module UpdateLicenseConfigurationResponse =
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
+      | `ConflictException of ConflictException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `RateLimitExceededException of RateLimitExceededException.t 
       | `ResourceLimitExceededException of ResourceLimitExceededException.t 
@@ -4839,6 +6344,8 @@ module UpdateLicenseConfigurationResponse =
           `AccessDeniedException (AccessDeniedException.of_json json)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_json json)
@@ -4859,6 +6366,8 @@ module UpdateLicenseConfigurationResponse =
           `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "AuthorizationException" ->
           `AuthorizationException (AuthorizationException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InvalidParameterValueException" ->
           `InvalidParameterValueException
             (InvalidParameterValueException.of_xml xml)
@@ -4881,6 +6390,10 @@ module UpdateLicenseConfigurationResponse =
           `Assoc
             [("error", (`String "AuthorizationException"));
             ("details", (AuthorizationException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InvalidParameterValueException e ->
           `Assoc
             [("error", (`String "InvalidParameterValueException"));
@@ -4936,7 +6449,9 @@ module UpdateLicenseConfigurationRequest =
         [@ocaml.doc "New product information."];
       disassociateWhenNotFound: BoxBoolean.t option
         [@ocaml.doc
-          "When true, disassociates a resource when software is uninstalled."]}
+          "When true, disassociates a resource when software is uninstalled."];
+      licenseExpiry: BoxLong.t option
+        [@ocaml.doc "License configuration expiry time."]}
     let context_ = "UpdateLicenseConfigurationRequest"
     let make ?licenseConfigurationStatus =
       fun ?licenseRules ->
@@ -4946,19 +6461,21 @@ module UpdateLicenseConfigurationRequest =
               fun ?description ->
                 fun ?productInformationList ->
                   fun ?disassociateWhenNotFound ->
-                    fun ~licenseConfigurationArn ->
-                      fun () ->
-                        {
-                          licenseConfigurationStatus;
-                          licenseRules;
-                          licenseCount;
-                          licenseCountHardLimit;
-                          name;
-                          description;
-                          productInformationList;
-                          disassociateWhenNotFound;
-                          licenseConfigurationArn
-                        }
+                    fun ?licenseExpiry ->
+                      fun ~licenseConfigurationArn ->
+                        fun () ->
+                          {
+                            licenseConfigurationStatus;
+                            licenseRules;
+                            licenseCount;
+                            licenseCountHardLimit;
+                            name;
+                            description;
+                            productInformationList;
+                            disassociateWhenNotFound;
+                            licenseExpiry;
+                            licenseConfigurationArn
+                          }
     let to_value x =
       structure_to_value
         [("LicenseConfigurationArn",
@@ -4976,9 +6493,12 @@ module UpdateLicenseConfigurationRequest =
           (Option.map x.productInformationList
              ~f:ProductInformationList.to_value));
         ("DisassociateWhenNotFound",
-          (Option.map x.disassociateWhenNotFound ~f:BoxBoolean.to_value))]
+          (Option.map x.disassociateWhenNotFound ~f:BoxBoolean.to_value));
+        ("LicenseExpiry", (Option.map x.licenseExpiry ~f:BoxLong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseExpiry =
+        (Option.map ~f:BoxLong.of_xml) (Xml.child xml_arg0 "LicenseExpiry") in
       let disassociateWhenNotFound =
         (Option.map ~f:BoxBoolean.of_xml)
           (Xml.child xml_arg0 "DisassociateWhenNotFound") in
@@ -5001,44 +6521,50 @@ module UpdateLicenseConfigurationRequest =
       let licenseConfigurationArn =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
-      make ?disassociateWhenNotFound ?productInformationList ?description
-        ?name ?licenseCountHardLimit ?licenseCount ?licenseRules
+      make ?licenseExpiry ?disassociateWhenNotFound ?productInformationList
+        ?description ?name ?licenseCountHardLimit ?licenseCount ?licenseRules
         ?licenseConfigurationStatus ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseExpiry = field_map json__ "LicenseExpiry" BoxLong.of_json in
       let disassociateWhenNotFound =
-        field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
+        field_map json__ "DisassociateWhenNotFound" BoxBoolean.of_json in
       let productInformationList =
-        field_map json "ProductInformationList"
+        field_map json__ "ProductInformationList"
           ProductInformationList.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       let licenseCountHardLimit =
-        field_map json "LicenseCountHardLimit" BoxBoolean.of_json in
-      let licenseCount = field_map json "LicenseCount" BoxLong.of_json in
-      let licenseRules = field_map json "LicenseRules" StringList.of_json in
+        field_map json__ "LicenseCountHardLimit" BoxBoolean.of_json in
+      let licenseCount = field_map json__ "LicenseCount" BoxLong.of_json in
+      let licenseRules = field_map json__ "LicenseRules" StringList.of_json in
       let licenseConfigurationStatus =
-        field_map json "LicenseConfigurationStatus"
+        field_map json__ "LicenseConfigurationStatus"
           LicenseConfigurationStatus.of_json in
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
-      make ?disassociateWhenNotFound ?productInformationList ?description
-        ?name ?licenseCountHardLimit ?licenseCount ?licenseRules
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
+      make ?licenseExpiry ?disassociateWhenNotFound ?productInformationList
+        ?description ?name ?licenseCountHardLimit ?licenseCount ?licenseRules
         ?licenseConfigurationStatus ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the attributes of an existing license configuration."]
-module UntagResourceResponse =
+module UpdateLicenseAssetRulesetResponse =
   struct
-    type nonrec t = unit
+    type nonrec t =
+      {
+      licenseAssetRulesetArn: String_.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `RateLimitExceededException of RateLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make () = ()
+    let make ?licenseAssetRulesetArn = fun () -> { licenseAssetRulesetArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -5053,6 +6579,8 @@ module UntagResourceResponse =
             (RateLimitExceededException.of_json json)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5069,6 +6597,8 @@ module UntagResourceResponse =
           `RateLimitExceededException (RateLimitExceededException.of_xml xml)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5093,6 +6623,396 @@ module UntagResourceResponse =
           `Assoc
             [("error", (`String "ServerInternalException"));
             ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRulesetArn",
+           (Option.map x.licenseAssetRulesetArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRulesetArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetRulesetArn") in
+      make ?licenseAssetRulesetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRulesetArn =
+        field_map json__ "LicenseAssetRulesetArn" String_.of_json in
+      make ?licenseAssetRulesetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a license asset ruleset."]
+module UpdateLicenseAssetRulesetRequest =
+  struct
+    type nonrec t =
+      {
+      name: LicenseAssetResourceName.t option
+        [@ocaml.doc "License asset ruleset name."];
+      description: LicenseAssetResourceDescription.t option
+        [@ocaml.doc "License asset ruleset description."];
+      rules: LicenseAssetRuleList.t [@ocaml.doc "License asset rules."];
+      licenseAssetRulesetArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."];
+      clientToken: String_.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "UpdateLicenseAssetRulesetRequest"
+    let make ?name =
+      fun ?description ->
+        fun ~rules ->
+          fun ~licenseAssetRulesetArn ->
+            fun ~clientToken ->
+              fun () ->
+                {
+                  name;
+                  description;
+                  rules;
+                  licenseAssetRulesetArn;
+                  clientToken
+                }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:LicenseAssetResourceName.to_value));
+        ("Description",
+          (Option.map x.description
+             ~f:LicenseAssetResourceDescription.to_value));
+        ("Rules", (Some (LicenseAssetRuleList.to_value x.rules)));
+        ("LicenseAssetRulesetArn",
+          (Some (Arn.to_value x.licenseAssetRulesetArn)));
+        ("ClientToken", (Some (String_.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let licenseAssetRulesetArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetRulesetArn") in
+      let rules =
+        LicenseAssetRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:LicenseAssetResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:LicenseAssetResourceName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ~clientToken ~licenseAssetRulesetArn ~rules ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map_exn json__ "ClientToken" String_.of_json in
+      let licenseAssetRulesetArn =
+        field_map_exn json__ "LicenseAssetRulesetArn" Arn.of_json in
+      let rules = field_map_exn json__ "Rules" LicenseAssetRuleList.of_json in
+      let description =
+        field_map json__ "Description"
+          LicenseAssetResourceDescription.of_json in
+      let name = field_map json__ "Name" LicenseAssetResourceName.of_json in
+      make ~clientToken ~licenseAssetRulesetArn ~rules ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a license asset ruleset."]
+module UpdateLicenseAssetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroupArn: String_.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."];
+      status: String_.t option [@ocaml.doc "License asset group status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetGroupArn =
+      fun ?status -> fun () -> { licenseAssetGroupArn; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroupArn",
+           (Option.map x.licenseAssetGroupArn ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let licenseAssetGroupArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroupArn") in
+      make ?status ?licenseAssetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let licenseAssetGroupArn =
+        field_map json__ "LicenseAssetGroupArn" String_.of_json in
+      make ?status ?licenseAssetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a license asset group."]
+module UpdateLicenseAssetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      name: LicenseAssetResourceName.t option
+        [@ocaml.doc "License asset group name."];
+      description: LicenseAssetResourceDescription.t option
+        [@ocaml.doc "License asset group description."];
+      licenseAssetGroupConfigurations:
+        LicenseAssetGroupConfigurationList.t option
+        [@ocaml.doc "License asset group configurations."];
+      associatedLicenseAssetRulesetARNs: LicenseAssetRulesetArnList.t
+        [@ocaml.doc "ARNs of associated license asset rulesets."];
+      properties: LicenseAssetGroupPropertyList.t option
+        [@ocaml.doc "License asset group properties."];
+      licenseAssetGroupArn: Arn.t
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."];
+      status: LicenseAssetGroupStatus.t option
+        [@ocaml.doc
+          "License asset group status. The possible values are ACTIVE | DISABLED."];
+      clientToken: String_.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "UpdateLicenseAssetGroupRequest"
+    let make ?name =
+      fun ?description ->
+        fun ?licenseAssetGroupConfigurations ->
+          fun ?properties ->
+            fun ?status ->
+              fun ~associatedLicenseAssetRulesetARNs ->
+                fun ~licenseAssetGroupArn ->
+                  fun ~clientToken ->
+                    fun () ->
+                      {
+                        name;
+                        description;
+                        licenseAssetGroupConfigurations;
+                        properties;
+                        status;
+                        associatedLicenseAssetRulesetARNs;
+                        licenseAssetGroupArn;
+                        clientToken
+                      }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:LicenseAssetResourceName.to_value));
+        ("Description",
+          (Option.map x.description
+             ~f:LicenseAssetResourceDescription.to_value));
+        ("LicenseAssetGroupConfigurations",
+          (Option.map x.licenseAssetGroupConfigurations
+             ~f:LicenseAssetGroupConfigurationList.to_value));
+        ("AssociatedLicenseAssetRulesetARNs",
+          (Some
+             (LicenseAssetRulesetArnList.to_value
+                x.associatedLicenseAssetRulesetARNs)));
+        ("Properties",
+          (Option.map x.properties ~f:LicenseAssetGroupPropertyList.to_value));
+        ("LicenseAssetGroupArn",
+          (Some (Arn.to_value x.licenseAssetGroupArn)));
+        ("Status", (Option.map x.status ~f:LicenseAssetGroupStatus.to_value));
+        ("ClientToken", (Some (String_.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let status =
+        (Option.map ~f:LicenseAssetGroupStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let licenseAssetGroupArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetGroupArn") in
+      let properties =
+        (Option.map ~f:LicenseAssetGroupPropertyList.of_xml)
+          (Xml.child xml_arg0 "Properties") in
+      let associatedLicenseAssetRulesetARNs =
+        LicenseAssetRulesetArnList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "AssociatedLicenseAssetRulesetARNs") in
+      let licenseAssetGroupConfigurations =
+        (Option.map ~f:LicenseAssetGroupConfigurationList.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroupConfigurations") in
+      let description =
+        (Option.map ~f:LicenseAssetResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:LicenseAssetResourceName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ~clientToken ?status ~licenseAssetGroupArn ?properties
+        ~associatedLicenseAssetRulesetARNs ?licenseAssetGroupConfigurations
+        ?description ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map_exn json__ "ClientToken" String_.of_json in
+      let status = field_map json__ "Status" LicenseAssetGroupStatus.of_json in
+      let licenseAssetGroupArn =
+        field_map_exn json__ "LicenseAssetGroupArn" Arn.of_json in
+      let properties =
+        field_map json__ "Properties" LicenseAssetGroupPropertyList.of_json in
+      let associatedLicenseAssetRulesetARNs =
+        field_map_exn json__ "AssociatedLicenseAssetRulesetARNs"
+          LicenseAssetRulesetArnList.of_json in
+      let licenseAssetGroupConfigurations =
+        field_map json__ "LicenseAssetGroupConfigurations"
+          LicenseAssetGroupConfigurationList.of_json in
+      let description =
+        field_map json__ "Description"
+          LicenseAssetResourceDescription.of_json in
+      let name = field_map json__ "Name" LicenseAssetResourceName.of_json in
+      make ~clientToken ?status ~licenseAssetGroupArn ?properties
+        ~associatedLicenseAssetRulesetARNs ?licenseAssetGroupConfigurations
+        ?description ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a license asset group."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5105,15 +7025,13 @@ module UntagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Removes the specified tags from the specified license configuration."]
+  end[@@ocaml.doc "Removes the specified tags from the specified resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
-        [@ocaml.doc
-          "Amazon Resource Name (ARN) of the license configuration."];
+        [@ocaml.doc "Amazon Resource Name (ARN) of the resource."];
       tagKeys: TagKeyList.t
         [@ocaml.doc "Keys identifying the tags to remove."]}
     let context_ = "UntagResourceRequest"
@@ -5133,13 +7051,12 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Removes the specified tags from the specified license configuration."]
+  end[@@ocaml.doc "Removes the specified tags from the specified resource."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -5149,6 +7066,7 @@ module TagResourceResponse =
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `RateLimitExceededException of RateLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -5165,6 +7083,8 @@ module TagResourceResponse =
             (RateLimitExceededException.of_json json)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5181,6 +7101,8 @@ module TagResourceResponse =
           `RateLimitExceededException (RateLimitExceededException.of_xml xml)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5205,6 +7127,10 @@ module TagResourceResponse =
           `Assoc
             [("error", (`String "ServerInternalException"));
             ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5218,14 +7144,14 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tags to the specified license configuration."]
+       "Adds the specified tags to the specified resource. The following resources support tagging in License Manager: Licenses Grants License configurations Report generators"]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "Amazon Resource Name (ARN) of the license configuration."];
+          "Amazon Resource Name (ARN) of the resource. The following examples provide an example ARN for each supported resource in License Manager: Licenses - arn:aws:license-manager::111122223333:license:l-EXAMPLE2da7646d6861033667f20e895 Grants - arn:aws:license-manager::111122223333:grant:g-EXAMPLE7b19f4a0ab73679b0beb52707 License configurations - arn:aws:license-manager:us-east-1:111122223333:license-configuration:lic-EXAMPLE6a788d4c8acd4264ff0ecf2ed2d Report generators - arn:aws:license-manager:us-east-1:111122223333:report-generator:r-EXAMPLE825b4a4f8fe5a3e0c88824e5fc6"];
       tags: TagList.t [@ocaml.doc "One or more tags."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
@@ -5242,13 +7168,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds the specified tags to the specified license configuration."]
+       "Adds the specified tags to the specified resource. The following resources support tagging in License Manager: Licenses Grants License configurations Report generators"]
 module RejectGrantResponse =
   struct
     type nonrec t =
@@ -5359,10 +7285,10 @@ module RejectGrantResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
-      let grantArn = field_map json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
       make ?version ?status ?grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects the specified grant."]
@@ -5381,8 +7307,8 @@ module RejectGrantRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let grantArn = field_map_exn json__ "GrantArn" Arn.of_json in
       make ~grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Rejects the specified grant."]
@@ -5489,10 +7415,10 @@ module ListUsageForLicenseConfigurationResponse =
           (Xml.child xml_arg0 "LicenseConfigurationUsageList") in
       make ?nextToken ?licenseConfigurationUsageList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseConfigurationUsageList =
-        field_map json "LicenseConfigurationUsageList"
+        field_map json__ "LicenseConfigurationUsageList"
           LicenseConfigurationUsageList.of_json in
       make ?nextToken ?licenseConfigurationUsageList ()
     let to_json v = composed_to_json to_value v
@@ -5511,7 +7437,7 @@ module ListUsageForLicenseConfigurationRequest =
         [@ocaml.doc "Token for the next set of results."];
       filters: Filters.t option
         [@ocaml.doc
-          "Filters to scope the results. The following filters and logical operators are supported: resourceArn - The ARN of the license configuration resource. Logical operators are EQUALS | NOT_EQUALS. resourceType - The resource type (EC2_INSTANCE | EC2_HOST | EC2_AMI | SYSTEMS_MANAGER_MANAGED_INSTANCE). Logical operators are EQUALS | NOT_EQUALS. resourceAccount - The ID of the account that owns the resource. Logical operators are EQUALS | NOT_EQUALS."]}
+          "Filters to scope the results. The following filters and logical operators are supported: resourceArn - The ARN of the license configuration resource. resourceType - The resource type (EC2_INSTANCE | EC2_HOST | EC2_AMI | SYSTEMS_MANAGER_MANAGED_INSTANCE). resourceAccount - The ID of the account that owns the resource."]}
     let context_ = "ListUsageForLicenseConfigurationRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -5539,12 +7465,12 @@ module ListUsageForLicenseConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?filters ?nextToken ?maxResults ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ?filters ?nextToken ?maxResults ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5633,9 +7559,9 @@ module ListTokensResponse =
         (Option.map ~f:TokenList.of_xml) (Xml.child xml_arg0 "Tokens") in
       make ?nextToken ?tokens ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let tokens = field_map json "Tokens" TokenList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let tokens = field_map json__ "Tokens" TokenList.of_json in
       make ?nextToken ?tokens ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your tokens."]
@@ -5674,11 +7600,11 @@ module ListTokensRequest =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "TokenIds") in
       make ?maxResults ?nextToken ?filters ?tokenIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let tokenIds = field_map json "TokenIds" StringList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let tokenIds = field_map json__ "TokenIds" StringList.of_json in
       make ?maxResults ?nextToken ?filters ?tokenIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your tokens."]
@@ -5693,6 +7619,7 @@ module ListTagsForResourceResponse =
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `RateLimitExceededException of RateLimitExceededException.t 
       | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?tags = fun () -> { tags }
     let error_of_json name json =
@@ -5709,6 +7636,8 @@ module ListTagsForResourceResponse =
             (RateLimitExceededException.of_json json)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5725,6 +7654,8 @@ module ListTagsForResourceResponse =
           `RateLimitExceededException (RateLimitExceededException.of_xml xml)
       | "ServerInternalException" ->
           `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5749,6 +7680,10 @@ module ListTagsForResourceResponse =
           `Assoc
             [("error", (`String "ServerInternalException"));
             ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5761,17 +7696,17 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the tags for the specified license configuration."]
+  end[@@ocaml.doc
+       "Lists the tags for the specified resource. For more information about tagging support in License Manager, see the TagResource operation."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
-        [@ocaml.doc
-          "Amazon Resource Name (ARN) of the license configuration."]}
+        [@ocaml.doc "Amazon Resource Name (ARN) of the resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -5784,11 +7719,12 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists the tags for the specified license configuration."]
+  end[@@ocaml.doc
+       "Lists the tags for the specified resource. For more information about tagging support in License Manager, see the TagResource operation."]
 module ListResourceInventoryResponse =
   struct
     type nonrec t =
@@ -5900,10 +7836,11 @@ module ListResourceInventoryResponse =
           (Xml.child xml_arg0 "ResourceInventoryList") in
       make ?nextToken ?resourceInventoryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let resourceInventoryList =
-        field_map json "ResourceInventoryList" ResourceInventoryList.of_json in
+        field_map json__ "ResourceInventoryList"
+          ResourceInventoryList.of_json in
       make ?nextToken ?resourceInventoryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists resources managed using Systems Manager inventory."]
@@ -5937,10 +7874,10 @@ module ListResourceInventoryRequest =
         (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" InventoryFilterList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" InventoryFilterList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists resources managed using Systems Manager inventory."]
@@ -6052,9 +7989,9 @@ module ListReceivedLicensesResponse =
           (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let licenses = field_map json "Licenses" GrantedLicenseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenses = field_map json__ "Licenses" GrantedLicenseList.of_json in
       make ?nextToken ?licenses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists received licenses."]
@@ -6094,14 +8031,166 @@ module ListReceivedLicensesRequest =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "LicenseArns") in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let licenseArns = field_map json "LicenseArns" ArnList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let licenseArns = field_map json__ "LicenseArns" ArnList.of_json in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists received licenses."]
+module ListReceivedLicensesForOrganizationResponse =
+  struct
+    type nonrec t =
+      {
+      licenses: GrantedLicenseList.t option
+        [@ocaml.doc "Lists the licenses the organization has received."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenses = fun ?nextToken -> fun () -> { licenses; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Licenses", (Option.map x.licenses ~f:GrantedLicenseList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let licenses =
+        (Option.map ~f:GrantedLicenseList.of_xml)
+          (Xml.child xml_arg0 "Licenses") in
+      make ?nextToken ?licenses ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenses = field_map json__ "Licenses" GrantedLicenseList.of_json in
+      make ?nextToken ?licenses ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the licenses received for all accounts in the organization."]
+module ListReceivedLicensesForOrganizationRequest =
+  struct
+    type nonrec t =
+      {
+      filters: FilterList.t option
+        [@ocaml.doc
+          "Filters to scope the results. The following filters are supported: Beneficiary ProductSKU"];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."];
+      maxResults: MaxSize100.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."]}
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults -> fun () -> { filters; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("Filters", (Option.map x.filters ~f:FilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxSize100.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxSize100.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
+      make ?maxResults ?nextToken ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      make ?maxResults ?nextToken ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the licenses received for all accounts in the organization."]
 module ListReceivedGrantsResponse =
   struct
     type nonrec t =
@@ -6208,12 +8297,13 @@ module ListReceivedGrantsResponse =
         (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
       make ?nextToken ?grants ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let grants = field_map json "Grants" GrantList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let grants = field_map json__ "Grants" GrantList.of_json in
       make ?nextToken ?grants ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists grants that are received but not accepted."]
+  end[@@ocaml.doc
+       "Lists grants that are received. Received grants are grants created while specifying the recipient as this Amazon Web Services account, your organization, or an organizational unit (OU) to which this member account belongs."]
 module ListReceivedGrantsRequest =
   struct
     type nonrec t =
@@ -6250,14 +8340,176 @@ module ListReceivedGrantsRequest =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "GrantArns") in
       make ?maxResults ?nextToken ?filters ?grantArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let grantArns = field_map json "GrantArns" ArnList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let grantArns = field_map json__ "GrantArns" ArnList.of_json in
       make ?maxResults ?nextToken ?filters ?grantArns ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists grants that are received but not accepted."]
+  end[@@ocaml.doc
+       "Lists grants that are received. Received grants are grants created while specifying the recipient as this Amazon Web Services account, your organization, or an organizational unit (OU) to which this member account belongs."]
+module ListReceivedGrantsForOrganizationResponse =
+  struct
+    type nonrec t =
+      {
+      grants: GrantList.t option
+        [@ocaml.doc "Lists the grants the organization has received."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ResourceLimitExceededException of ResourceLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?grants = fun ?nextToken -> fun () -> { grants; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ResourceLimitExceededException" ->
+          `ResourceLimitExceededException
+            (ResourceLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ResourceLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ResourceLimitExceededException"));
+            ("details", (ResourceLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Grants", (Option.map x.grants ~f:GrantList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let grants =
+        (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
+      make ?nextToken ?grants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let grants = field_map json__ "Grants" GrantList.of_json in
+      make ?nextToken ?grants ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the grants received for all accounts in the organization."]
+module ListReceivedGrantsForOrganizationRequest =
+  struct
+    type nonrec t =
+      {
+      licenseArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the received license."];
+      filters: FilterList.t option
+        [@ocaml.doc
+          "Filters to scope the results. The following filters are supported: ParentArn GranteePrincipalArn"];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."];
+      maxResults: MaxSize100.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."]}
+    let context_ = "ListReceivedGrantsForOrganizationRequest"
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~licenseArn ->
+            fun () -> { filters; nextToken; maxResults; licenseArn }
+    let to_value x =
+      structure_to_value
+        [("LicenseArn", (Some (Arn.to_value x.licenseArn)));
+        ("Filters", (Option.map x.filters ~f:FilterList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxSize100.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxSize100.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
+      let licenseArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
+      make ?maxResults ?nextToken ?filters ~licenseArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
+      make ?maxResults ?nextToken ?filters ~licenseArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the grants received for all accounts in the organization."]
 module ListLicensesResponse =
   struct
     type nonrec t =
@@ -6353,9 +8605,9 @@ module ListLicensesResponse =
         (Option.map ~f:LicenseList.of_xml) (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let licenses = field_map json "Licenses" LicenseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenses = field_map json__ "Licenses" LicenseList.of_json in
       make ?nextToken ?licenses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the licenses for your account."]
@@ -6395,11 +8647,11 @@ module ListLicensesRequest =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "LicenseArns") in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let licenseArns = field_map json "LicenseArns" ArnList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let licenseArns = field_map json__ "LicenseArns" ArnList.of_json in
       make ?maxResults ?nextToken ?filters ?licenseArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the licenses for your account."]
@@ -6489,9 +8741,9 @@ module ListLicenseVersionsResponse =
         (Option.map ~f:LicenseList.of_xml) (Xml.child xml_arg0 "Licenses") in
       make ?nextToken ?licenses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let licenses = field_map json "Licenses" LicenseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenses = field_map json__ "Licenses" LicenseList.of_json in
       make ?nextToken ?licenses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all versions of the specified license."]
@@ -6524,10 +8776,10 @@ module ListLicenseVersionsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ?maxResults ?nextToken ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ?maxResults ?nextToken ~licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all versions of the specified license."]
@@ -6622,10 +8874,11 @@ module ListLicenseSpecificationsForResourceResponse =
           (Xml.child xml_arg0 "LicenseSpecifications") in
       make ?nextToken ?licenseSpecifications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseSpecifications =
-        field_map json "LicenseSpecifications" LicenseSpecifications.of_json in
+        field_map json__ "LicenseSpecifications"
+          LicenseSpecifications.of_json in
       make ?nextToken ?licenseSpecifications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6661,10 +8914,10 @@ module ListLicenseSpecificationsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" String_.of_json in
       make ?nextToken ?maxResults ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6789,10 +9042,10 @@ module ListLicenseManagerReportGeneratorsResponse =
           (Xml.child xml_arg0 "ReportGenerators") in
       make ?nextToken ?reportGenerators ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let reportGenerators =
-        field_map json "ReportGenerators" ReportGeneratorList.of_json in
+        field_map json__ "ReportGenerators" ReportGeneratorList.of_json in
       make ?nextToken ?reportGenerators ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the report generators for your account."]
@@ -6825,10 +9078,10 @@ module ListLicenseManagerReportGeneratorsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the report generators for your account."]
@@ -6924,10 +9177,10 @@ module ListLicenseConversionTasksResponse =
           (Xml.child xml_arg0 "LicenseConversionTasks") in
       make ?nextToken ?licenseConversionTasks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseConversionTasks =
-        field_map json "LicenseConversionTasks"
+        field_map json__ "LicenseConversionTasks"
           LicenseConversionTasks.of_json in
       make ?nextToken ?licenseConversionTasks ()
     let to_json v = composed_to_json to_value v
@@ -6962,10 +9215,10 @@ module ListLicenseConversionTasksRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7072,10 +9325,11 @@ module ListLicenseConfigurationsResponse =
           (Xml.child xml_arg0 "LicenseConfigurations") in
       make ?nextToken ?licenseConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseConfigurations =
-        field_map json "LicenseConfigurations" LicenseConfigurations.of_json in
+        field_map json__ "LicenseConfigurations"
+          LicenseConfigurations.of_json in
       make ?nextToken ?licenseConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the license configurations for your account."]
@@ -7092,7 +9346,7 @@ module ListLicenseConfigurationsRequest =
         [@ocaml.doc "Token for the next set of results."];
       filters: Filters.t option
         [@ocaml.doc
-          "Filters to scope the results. The following filters and logical operators are supported: licenseCountingType - The dimension for which licenses are counted. Possible values are vCPU | Instance | Core | Socket. Logical operators are EQUALS | NOT_EQUALS. enforceLicenseCount - A Boolean value that indicates whether hard license enforcement is used. Logical operators are EQUALS | NOT_EQUALS. usagelimitExceeded - A Boolean value that indicates whether the available licenses have been exceeded. Logical operators are EQUALS | NOT_EQUALS."]}
+          "Filters to scope the results. The following filters and logical operators are supported: licenseCountingType - The dimension for which licenses are counted. Possible values are vCPU | Instance | Core | Socket. enforceLicenseCount - A Boolean value that indicates whether hard license enforcement is used. usagelimitExceeded - A Boolean value that indicates whether the available licenses have been exceeded."]}
     let make ?licenseConfigurationArns =
       fun ?maxResults ->
         fun ?nextToken ->
@@ -7119,15 +9373,478 @@ module ListLicenseConfigurationsRequest =
           (Xml.child xml_arg0 "LicenseConfigurationArns") in
       make ?filters ?nextToken ?maxResults ?licenseConfigurationArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
       let licenseConfigurationArns =
-        field_map json "LicenseConfigurationArns" StringList.of_json in
+        field_map json__ "LicenseConfigurationArns" StringList.of_json in
       make ?filters ?nextToken ?maxResults ?licenseConfigurationArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the license configurations for your account."]
+module ListLicenseConfigurationsForOrganizationResponse =
+  struct
+    type nonrec t =
+      {
+      licenseConfigurations: LicenseConfigurations.t option
+        [@ocaml.doc "License configurations."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `FilterLimitExceededException of FilterLimitExceededException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseConfigurations =
+      fun ?nextToken -> fun () -> { licenseConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "FilterLimitExceededException" ->
+          `FilterLimitExceededException
+            (FilterLimitExceededException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "FilterLimitExceededException" ->
+          `FilterLimitExceededException
+            (FilterLimitExceededException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `FilterLimitExceededException e ->
+          `Assoc
+            [("error", (`String "FilterLimitExceededException"));
+            ("details", (FilterLimitExceededException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseConfigurations",
+           (Option.map x.licenseConfigurations
+              ~f:LicenseConfigurations.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let licenseConfigurations =
+        (Option.map ~f:LicenseConfigurations.of_xml)
+          (Xml.child xml_arg0 "LicenseConfigurations") in
+      make ?nextToken ?licenseConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenseConfigurations =
+        field_map json__ "LicenseConfigurations"
+          LicenseConfigurations.of_json in
+      make ?nextToken ?licenseConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license configurations for an organization."]
+module ListLicenseConfigurationsForOrganizationRequest =
+  struct
+    type nonrec t =
+      {
+      licenseConfigurationArns: StringList.t option
+        [@ocaml.doc "License configuration ARNs."];
+      maxResults: BoxInteger.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."];
+      filters: Filters.t option [@ocaml.doc "Filters to scope the results."]}
+    let make ?licenseConfigurationArns =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?filters ->
+            fun () ->
+              { licenseConfigurationArns; maxResults; nextToken; filters }
+    let to_value x =
+      structure_to_value
+        [("LicenseConfigurationArns",
+           (Option.map x.licenseConfigurationArns ~f:StringList.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:BoxInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("Filters", (Option.map x.filters ~f:Filters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let licenseConfigurationArns =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "LicenseConfigurationArns") in
+      make ?filters ?nextToken ?maxResults ?licenseConfigurationArns ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let licenseConfigurationArns =
+        field_map json__ "LicenseConfigurationArns" StringList.of_json in
+      make ?filters ?nextToken ?maxResults ?licenseConfigurationArns ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license configurations for an organization."]
+module ListLicenseAssetRulesetsResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetRulesets: LicenseAssetRulesetList.t option
+        [@ocaml.doc "License asset rulesets."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetRulesets =
+      fun ?nextToken -> fun () -> { licenseAssetRulesets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRulesets",
+           (Option.map x.licenseAssetRulesets
+              ~f:LicenseAssetRulesetList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let licenseAssetRulesets =
+        (Option.map ~f:LicenseAssetRulesetList.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetRulesets") in
+      make ?nextToken ?licenseAssetRulesets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenseAssetRulesets =
+        field_map json__ "LicenseAssetRulesets"
+          LicenseAssetRulesetList.of_json in
+      make ?nextToken ?licenseAssetRulesets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license asset rulesets."]
+module ListLicenseAssetRulesetsRequest =
+  struct
+    type nonrec t =
+      {
+      filters: Filters.t option
+        [@ocaml.doc
+          "Filters to scope the results. Following filters are supported Name"];
+      showAWSManagedLicenseAssetRulesets: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether to show License Manager managed license asset rulesets."];
+      maxResults: BoxInteger.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    let make ?filters =
+      fun ?showAWSManagedLicenseAssetRulesets ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              {
+                filters;
+                showAWSManagedLicenseAssetRulesets;
+                maxResults;
+                nextToken
+              }
+    let to_value x =
+      structure_to_value
+        [("Filters", (Option.map x.filters ~f:Filters.to_value));
+        ("ShowAWSManagedLicenseAssetRulesets",
+          (Option.map x.showAWSManagedLicenseAssetRulesets
+             ~f:Boolean.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:BoxInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let showAWSManagedLicenseAssetRulesets =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "ShowAWSManagedLicenseAssetRulesets") in
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?maxResults ?showAWSManagedLicenseAssetRulesets
+        ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let showAWSManagedLicenseAssetRulesets =
+        field_map json__ "ShowAWSManagedLicenseAssetRulesets" Boolean.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      make ?nextToken ?maxResults ?showAWSManagedLicenseAssetRulesets
+        ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license asset rulesets."]
+module ListLicenseAssetGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroups: LicenseAssetGroupList.t option
+        [@ocaml.doc "License asset groups."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetGroups =
+      fun ?nextToken -> fun () -> { licenseAssetGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroups",
+           (Option.map x.licenseAssetGroups ~f:LicenseAssetGroupList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let licenseAssetGroups =
+        (Option.map ~f:LicenseAssetGroupList.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroups") in
+      make ?nextToken ?licenseAssetGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let licenseAssetGroups =
+        field_map json__ "LicenseAssetGroups" LicenseAssetGroupList.of_json in
+      make ?nextToken ?licenseAssetGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license asset groups."]
+module ListLicenseAssetGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      filters: Filters.t option
+        [@ocaml.doc
+          "Filters to scope the results. Following filters are supported LicenseAssetRulesetArn"];
+      maxResults: BoxInteger.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filters", (Option.map x.filters ~f:Filters.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:BoxInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filters =
+        (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists license asset groups."]
 module ListFailuresForLicenseConfigurationOperationsResponse =
   struct
     type nonrec t =
@@ -7219,10 +9936,10 @@ module ListFailuresForLicenseConfigurationOperationsResponse =
           (Xml.child xml_arg0 "LicenseOperationFailureList") in
       make ?nextToken ?licenseOperationFailureList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseOperationFailureList =
-        field_map json "LicenseOperationFailureList"
+        field_map json__ "LicenseOperationFailureList"
           LicenseOperationFailureList.of_json in
       make ?nextToken ?licenseOperationFailureList ()
     let to_json v = composed_to_json to_value v
@@ -7259,11 +9976,11 @@ module ListFailuresForLicenseConfigurationOperationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the license configuration operations that failed."]
@@ -7373,9 +10090,9 @@ module ListDistributedGrantsResponse =
         (Option.map ~f:GrantList.of_xml) (Xml.child xml_arg0 "Grants") in
       make ?nextToken ?grants ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let grants = field_map json "Grants" GrantList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let grants = field_map json__ "Grants" GrantList.of_json in
       make ?nextToken ?grants ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the grants distributed for the specified license."]
@@ -7415,11 +10132,11 @@ module ListDistributedGrantsRequest =
         (Option.map ~f:ArnList.of_xml) (Xml.child xml_arg0 "GrantArns") in
       make ?maxResults ?nextToken ?filters ?grantArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxSize100.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
-      let grantArns = field_map json "GrantArns" ArnList.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxSize100.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
+      let grantArns = field_map json__ "GrantArns" ArnList.of_json in
       make ?maxResults ?nextToken ?filters ?grantArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the grants distributed for the specified license."]
@@ -7528,10 +10245,10 @@ module ListAssociationsForLicenseConfigurationResponse =
           (Xml.child xml_arg0 "LicenseConfigurationAssociations") in
       make ?nextToken ?licenseConfigurationAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let licenseConfigurationAssociations =
-        field_map json "LicenseConfigurationAssociations"
+        field_map json__ "LicenseConfigurationAssociations"
           LicenseConfigurationAssociations.of_json in
       make ?nextToken ?licenseConfigurationAssociations ()
     let to_json v = composed_to_json to_value v
@@ -7569,15 +10286,165 @@ module ListAssociationsForLicenseConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let maxResults = field_map json "MaxResults" BoxInteger.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ?nextToken ?maxResults ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the resource associations for the specified license configuration. Resource associations need not consume licenses from a license configuration. For example, an AMI or a stopped instance might not consume a license (depending on the license rules)."]
+module ListAssetsForLicenseAssetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      assets: AssetList.t option [@ocaml.doc "Assets."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?assets = fun ?nextToken -> fun () -> { assets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Assets", (Option.map x.assets ~f:AssetList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let assets =
+        (Option.map ~f:AssetList.of_xml) (Xml.child xml_arg0 "Assets") in
+      make ?nextToken ?assets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let assets = field_map json__ "Assets" AssetList.of_json in
+      make ?nextToken ?assets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists assets for a license asset group."]
+module ListAssetsForLicenseAssetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroupArn: String_.t
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."];
+      assetType: String_.t
+        [@ocaml.doc
+          "Asset type. The possible values are Instance | License | LicenseConfiguration."];
+      maxResults: BoxInteger.t option
+        [@ocaml.doc "Maximum number of results to return in a single call."];
+      nextToken: String_.t option
+        [@ocaml.doc "Token for the next set of results."]}
+    let context_ = "ListAssetsForLicenseAssetGroupRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~licenseAssetGroupArn ->
+          fun ~assetType ->
+            fun () ->
+              { maxResults; nextToken; licenseAssetGroupArn; assetType }
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroupArn",
+           (Some (String_.to_value x.licenseAssetGroupArn)));
+        ("AssetType", (Some (String_.to_value x.assetType)));
+        ("MaxResults", (Option.map x.maxResults ~f:BoxInteger.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:BoxInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let assetType =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "AssetType") in
+      let licenseAssetGroupArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetGroupArn") in
+      make ?nextToken ?maxResults ~assetType ~licenseAssetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let maxResults = field_map json__ "MaxResults" BoxInteger.of_json in
+      let assetType = field_map_exn json__ "AssetType" String_.of_json in
+      let licenseAssetGroupArn =
+        field_map_exn json__ "LicenseAssetGroupArn" String_.of_json in
+      make ?nextToken ?maxResults ~assetType ~licenseAssetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists assets for a license asset group."]
 module GetServiceSettingsResponse =
   struct
     type nonrec t =
@@ -7595,7 +10462,12 @@ module GetServiceSettingsResponse =
         [@ocaml.doc "Indicates whether cross-account discovery is enabled."];
       licenseManagerResourceShareArn: String_.t option
         [@ocaml.doc
-          "Amazon Resource Name (ARN) of the resource share. The License Manager management account provides member accounts with access to this share."]}
+          "Amazon Resource Name (ARN) of the resource share. The License Manager management account provides member accounts with access to this share."];
+      crossRegionDiscoveryHomeRegion: String_.t option
+        [@ocaml.doc "Cross region discovery home region."];
+      crossRegionDiscoverySourceRegions: StringList.t option
+        [@ocaml.doc "Cross region discovery source regions."];
+      serviceStatus: ServiceStatus.t option [@ocaml.doc "Service status."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
@@ -7607,14 +10479,20 @@ module GetServiceSettingsResponse =
         fun ?organizationConfiguration ->
           fun ?enableCrossAccountsDiscovery ->
             fun ?licenseManagerResourceShareArn ->
-              fun () ->
-                {
-                  s3BucketArn;
-                  snsTopicArn;
-                  organizationConfiguration;
-                  enableCrossAccountsDiscovery;
-                  licenseManagerResourceShareArn
-                }
+              fun ?crossRegionDiscoveryHomeRegion ->
+                fun ?crossRegionDiscoverySourceRegions ->
+                  fun ?serviceStatus ->
+                    fun () ->
+                      {
+                        s3BucketArn;
+                        snsTopicArn;
+                        organizationConfiguration;
+                        enableCrossAccountsDiscovery;
+                        licenseManagerResourceShareArn;
+                        crossRegionDiscoveryHomeRegion;
+                        crossRegionDiscoverySourceRegions;
+                        serviceStatus
+                      }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -7674,9 +10552,25 @@ module GetServiceSettingsResponse =
         ("EnableCrossAccountsDiscovery",
           (Option.map x.enableCrossAccountsDiscovery ~f:BoxBoolean.to_value));
         ("LicenseManagerResourceShareArn",
-          (Option.map x.licenseManagerResourceShareArn ~f:String_.to_value))]
+          (Option.map x.licenseManagerResourceShareArn ~f:String_.to_value));
+        ("CrossRegionDiscoveryHomeRegion",
+          (Option.map x.crossRegionDiscoveryHomeRegion ~f:String_.to_value));
+        ("CrossRegionDiscoverySourceRegions",
+          (Option.map x.crossRegionDiscoverySourceRegions
+             ~f:StringList.to_value));
+        ("ServiceStatus",
+          (Option.map x.serviceStatus ~f:ServiceStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serviceStatus =
+        (Option.map ~f:ServiceStatus.of_xml)
+          (Xml.child xml_arg0 "ServiceStatus") in
+      let crossRegionDiscoverySourceRegions =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "CrossRegionDiscoverySourceRegions") in
+      let crossRegionDiscoveryHomeRegion =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "CrossRegionDiscoveryHomeRegion") in
       let licenseManagerResourceShareArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseManagerResourceShareArn") in
@@ -7690,21 +10584,32 @@ module GetServiceSettingsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SnsTopicArn") in
       let s3BucketArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "S3BucketArn") in
-      make ?licenseManagerResourceShareArn ?enableCrossAccountsDiscovery
-        ?organizationConfiguration ?snsTopicArn ?s3BucketArn ()
+      make ?serviceStatus ?crossRegionDiscoverySourceRegions
+        ?crossRegionDiscoveryHomeRegion ?licenseManagerResourceShareArn
+        ?enableCrossAccountsDiscovery ?organizationConfiguration ?snsTopicArn
+        ?s3BucketArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let serviceStatus =
+        field_map json__ "ServiceStatus" ServiceStatus.of_json in
+      let crossRegionDiscoverySourceRegions =
+        field_map json__ "CrossRegionDiscoverySourceRegions"
+          StringList.of_json in
+      let crossRegionDiscoveryHomeRegion =
+        field_map json__ "CrossRegionDiscoveryHomeRegion" String_.of_json in
       let licenseManagerResourceShareArn =
-        field_map json "LicenseManagerResourceShareArn" String_.of_json in
+        field_map json__ "LicenseManagerResourceShareArn" String_.of_json in
       let enableCrossAccountsDiscovery =
-        field_map json "EnableCrossAccountsDiscovery" BoxBoolean.of_json in
+        field_map json__ "EnableCrossAccountsDiscovery" BoxBoolean.of_json in
       let organizationConfiguration =
-        field_map json "OrganizationConfiguration"
+        field_map json__ "OrganizationConfiguration"
           OrganizationConfiguration.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" String_.of_json in
-      let s3BucketArn = field_map json "S3BucketArn" String_.of_json in
-      make ?licenseManagerResourceShareArn ?enableCrossAccountsDiscovery
-        ?organizationConfiguration ?snsTopicArn ?s3BucketArn ()
+      let snsTopicArn = field_map json__ "SnsTopicArn" String_.of_json in
+      let s3BucketArn = field_map json__ "S3BucketArn" String_.of_json in
+      make ?serviceStatus ?crossRegionDiscoverySourceRegions
+        ?crossRegionDiscoveryHomeRegion ?licenseManagerResourceShareArn
+        ?enableCrossAccountsDiscovery ?organizationConfiguration ?snsTopicArn
+        ?s3BucketArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the License Manager settings for the current Region."]
@@ -7814,8 +10719,8 @@ module GetLicenseUsageResponse =
           (Xml.child xml_arg0 "LicenseUsage") in
       make ?licenseUsage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let licenseUsage = field_map json "LicenseUsage" LicenseUsage.of_json in
+    let of_json json__ =
+      let licenseUsage = field_map json__ "LicenseUsage" LicenseUsage.of_json in
       make ?licenseUsage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7836,8 +10741,8 @@ module GetLicenseUsageRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ~licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7932,8 +10837,8 @@ module GetLicenseResponse =
         (Option.map ~f:License.of_xml) (Xml.child xml_arg0 "License") in
       make ?license ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let license = field_map json "License" License.of_json in
+    let of_json json__ =
+      let license = field_map json__ "License" License.of_json in
       make ?license ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets detailed information about the specified license."]
@@ -7958,9 +10863,9 @@ module GetLicenseRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ?version ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ?version ~licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets detailed information about the specified license."]
@@ -8078,9 +10983,9 @@ module GetLicenseManagerReportGeneratorResponse =
           (Xml.child xml_arg0 "ReportGenerator") in
       make ?reportGenerator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reportGenerator =
-        field_map json "ReportGenerator" ReportGenerator.of_json in
+        field_map json__ "ReportGenerator" ReportGenerator.of_json in
       make ?reportGenerator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified report generator."]
@@ -8105,9 +11010,10 @@ module GetLicenseManagerReportGeneratorRequest =
              "LicenseManagerReportGeneratorArn") in
       make ~licenseManagerReportGeneratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseManagerReportGeneratorArn =
-        field_map_exn json "LicenseManagerReportGeneratorArn" String_.of_json in
+        field_map_exn json__ "LicenseManagerReportGeneratorArn"
+          String_.of_json in
       make ~licenseManagerReportGeneratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified report generator."]
@@ -8272,23 +11178,23 @@ module GetLicenseConversionTaskResponse =
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
         ?licenseConversionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" DateTime.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" DateTime.of_json in
       let licenseConversionTime =
-        field_map json "LicenseConversionTime" DateTime.of_json in
-      let startTime = field_map json "StartTime" DateTime.of_json in
+        field_map json__ "LicenseConversionTime" DateTime.of_json in
+      let startTime = field_map json__ "StartTime" DateTime.of_json in
       let status =
-        field_map json "Status" LicenseConversionTaskStatus.of_json in
-      let statusMessage = field_map json "StatusMessage" String_.of_json in
+        field_map json__ "Status" LicenseConversionTaskStatus.of_json in
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
       let destinationLicenseContext =
-        field_map json "DestinationLicenseContext"
+        field_map json__ "DestinationLicenseContext"
           LicenseConversionContext.of_json in
       let sourceLicenseContext =
-        field_map json "SourceLicenseContext"
+        field_map json__ "SourceLicenseContext"
           LicenseConversionContext.of_json in
-      let resourceArn = field_map json "ResourceArn" String_.of_json in
+      let resourceArn = field_map json__ "ResourceArn" String_.of_json in
       let licenseConversionTaskId =
-        field_map json "LicenseConversionTaskId"
+        field_map json__ "LicenseConversionTaskId"
           LicenseConversionTaskId.of_json in
       make ?endTime ?licenseConversionTime ?startTime ?status ?statusMessage
         ?destinationLicenseContext ?sourceLicenseContext ?resourceArn
@@ -8316,9 +11222,9 @@ module GetLicenseConversionTaskRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConversionTaskId") in
       make ~licenseConversionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConversionTaskId =
-        field_map_exn json "LicenseConversionTaskId"
+        field_map_exn json__ "LicenseConversionTaskId"
           LicenseConversionTaskId.of_json in
       make ~licenseConversionTaskId ()
     let to_json v = composed_to_json to_value v
@@ -8361,7 +11267,8 @@ module GetLicenseConfigurationResponse =
         [@ocaml.doc "Automated discovery information."];
       disassociateWhenNotFound: BoxBoolean.t option
         [@ocaml.doc
-          "When true, disassociates a resource when software is uninstalled."]}
+          "When true, disassociates a resource when software is uninstalled."];
+      licenseExpiry: BoxLong.t option [@ocaml.doc "License Expiry."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `AuthorizationException of AuthorizationException.t 
@@ -8386,26 +11293,28 @@ module GetLicenseConfigurationResponse =
                                 fun ?productInformationList ->
                                   fun ?automatedDiscoveryInformation ->
                                     fun ?disassociateWhenNotFound ->
-                                      fun () ->
-                                        {
-                                          licenseConfigurationId;
-                                          licenseConfigurationArn;
-                                          name;
-                                          description;
-                                          licenseCountingType;
-                                          licenseRules;
-                                          licenseCount;
-                                          licenseCountHardLimit;
-                                          consumedLicenses;
-                                          status;
-                                          ownerAccountId;
-                                          consumedLicenseSummaryList;
-                                          managedResourceSummaryList;
-                                          tags;
-                                          productInformationList;
-                                          automatedDiscoveryInformation;
-                                          disassociateWhenNotFound
-                                        }
+                                      fun ?licenseExpiry ->
+                                        fun () ->
+                                          {
+                                            licenseConfigurationId;
+                                            licenseConfigurationArn;
+                                            name;
+                                            description;
+                                            licenseCountingType;
+                                            licenseRules;
+                                            licenseCount;
+                                            licenseCountHardLimit;
+                                            consumedLicenses;
+                                            status;
+                                            ownerAccountId;
+                                            consumedLicenseSummaryList;
+                                            managedResourceSummaryList;
+                                            tags;
+                                            productInformationList;
+                                            automatedDiscoveryInformation;
+                                            disassociateWhenNotFound;
+                                            licenseExpiry
+                                          }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -8497,9 +11406,12 @@ module GetLicenseConfigurationResponse =
           (Option.map x.automatedDiscoveryInformation
              ~f:AutomatedDiscoveryInformation.to_value));
         ("DisassociateWhenNotFound",
-          (Option.map x.disassociateWhenNotFound ~f:BoxBoolean.to_value))]
+          (Option.map x.disassociateWhenNotFound ~f:BoxBoolean.to_value));
+        ("LicenseExpiry", (Option.map x.licenseExpiry ~f:BoxLong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseExpiry =
+        (Option.map ~f:BoxLong.of_xml) (Xml.child xml_arg0 "LicenseExpiry") in
       let disassociateWhenNotFound =
         (Option.map ~f:BoxBoolean.of_xml)
           (Xml.child xml_arg0 "DisassociateWhenNotFound") in
@@ -8542,51 +11454,52 @@ module GetLicenseConfigurationResponse =
       let licenseConfigurationId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "LicenseConfigurationId") in
-      make ?disassociateWhenNotFound ?automatedDiscoveryInformation
-        ?productInformationList ?tags ?managedResourceSummaryList
-        ?consumedLicenseSummaryList ?ownerAccountId ?status ?consumedLicenses
-        ?licenseCountHardLimit ?licenseCount ?licenseRules
-        ?licenseCountingType ?description ?name ?licenseConfigurationArn
-        ?licenseConfigurationId ()
+      make ?licenseExpiry ?disassociateWhenNotFound
+        ?automatedDiscoveryInformation ?productInformationList ?tags
+        ?managedResourceSummaryList ?consumedLicenseSummaryList
+        ?ownerAccountId ?status ?consumedLicenses ?licenseCountHardLimit
+        ?licenseCount ?licenseRules ?licenseCountingType ?description ?name
+        ?licenseConfigurationArn ?licenseConfigurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseExpiry = field_map json__ "LicenseExpiry" BoxLong.of_json in
       let disassociateWhenNotFound =
-        field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
+        field_map json__ "DisassociateWhenNotFound" BoxBoolean.of_json in
       let automatedDiscoveryInformation =
-        field_map json "AutomatedDiscoveryInformation"
+        field_map json__ "AutomatedDiscoveryInformation"
           AutomatedDiscoveryInformation.of_json in
       let productInformationList =
-        field_map json "ProductInformationList"
+        field_map json__ "ProductInformationList"
           ProductInformationList.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let managedResourceSummaryList =
-        field_map json "ManagedResourceSummaryList"
+        field_map json__ "ManagedResourceSummaryList"
           ManagedResourceSummaryList.of_json in
       let consumedLicenseSummaryList =
-        field_map json "ConsumedLicenseSummaryList"
+        field_map json__ "ConsumedLicenseSummaryList"
           ConsumedLicenseSummaryList.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" String_.of_json in
-      let status = field_map json "Status" String_.of_json in
+      let ownerAccountId = field_map json__ "OwnerAccountId" String_.of_json in
+      let status = field_map json__ "Status" String_.of_json in
       let consumedLicenses =
-        field_map json "ConsumedLicenses" BoxLong.of_json in
+        field_map json__ "ConsumedLicenses" BoxLong.of_json in
       let licenseCountHardLimit =
-        field_map json "LicenseCountHardLimit" BoxBoolean.of_json in
-      let licenseCount = field_map json "LicenseCount" BoxLong.of_json in
-      let licenseRules = field_map json "LicenseRules" StringList.of_json in
+        field_map json__ "LicenseCountHardLimit" BoxBoolean.of_json in
+      let licenseCount = field_map json__ "LicenseCount" BoxLong.of_json in
+      let licenseRules = field_map json__ "LicenseRules" StringList.of_json in
       let licenseCountingType =
-        field_map json "LicenseCountingType" LicenseCountingType.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "LicenseCountingType" LicenseCountingType.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       let licenseConfigurationId =
-        field_map json "LicenseConfigurationId" String_.of_json in
-      make ?disassociateWhenNotFound ?automatedDiscoveryInformation
-        ?productInformationList ?tags ?managedResourceSummaryList
-        ?consumedLicenseSummaryList ?ownerAccountId ?status ?consumedLicenses
-        ?licenseCountHardLimit ?licenseCount ?licenseRules
-        ?licenseCountingType ?description ?name ?licenseConfigurationArn
-        ?licenseConfigurationId ()
+        field_map json__ "LicenseConfigurationId" String_.of_json in
+      make ?licenseExpiry ?disassociateWhenNotFound
+        ?automatedDiscoveryInformation ?productInformationList ?tags
+        ?managedResourceSummaryList ?consumedLicenseSummaryList
+        ?ownerAccountId ?status ?consumedLicenses ?licenseCountHardLimit
+        ?licenseCount ?licenseRules ?licenseCountingType ?description ?name
+        ?licenseConfigurationArn ?licenseConfigurationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets detailed information about the specified license configuration."]
@@ -8610,13 +11523,262 @@ module GetLicenseConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets detailed information about the specified license configuration."]
+module GetLicenseAssetRulesetResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetRuleset: LicenseAssetRuleset.t option
+        [@ocaml.doc "License asset ruleset."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetRuleset = fun () -> { licenseAssetRuleset }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRuleset",
+           (Option.map x.licenseAssetRuleset ~f:LicenseAssetRuleset.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRuleset =
+        (Option.map ~f:LicenseAssetRuleset.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetRuleset") in
+      make ?licenseAssetRuleset ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRuleset =
+        field_map json__ "LicenseAssetRuleset" LicenseAssetRuleset.of_json in
+      make ?licenseAssetRuleset ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a license asset ruleset."]
+module GetLicenseAssetRulesetRequest =
+  struct
+    type nonrec t =
+      {
+      licenseAssetRulesetArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."]}
+    let context_ = "GetLicenseAssetRulesetRequest"
+    let make ~licenseAssetRulesetArn = fun () -> { licenseAssetRulesetArn }
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRulesetArn",
+           (Some (Arn.to_value x.licenseAssetRulesetArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRulesetArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetRulesetArn") in
+      make ~licenseAssetRulesetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRulesetArn =
+        field_map_exn json__ "LicenseAssetRulesetArn" Arn.of_json in
+      make ~licenseAssetRulesetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a license asset ruleset."]
+module GetLicenseAssetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroup: LicenseAssetGroup.t option
+        [@ocaml.doc "License asset group."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetGroup = fun () -> { licenseAssetGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroup",
+           (Option.map x.licenseAssetGroup ~f:LicenseAssetGroup.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetGroup =
+        (Option.map ~f:LicenseAssetGroup.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroup") in
+      make ?licenseAssetGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetGroup =
+        field_map json__ "LicenseAssetGroup" LicenseAssetGroup.of_json in
+      make ?licenseAssetGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a license asset group."]
+module GetLicenseAssetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroupArn: Arn.t
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."]}
+    let context_ = "GetLicenseAssetGroupRequest"
+    let make ~licenseAssetGroupArn = fun () -> { licenseAssetGroupArn }
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroupArn",
+           (Some (Arn.to_value x.licenseAssetGroupArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetGroupArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetGroupArn") in
+      make ~licenseAssetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetGroupArn =
+        field_map_exn json__ "LicenseAssetGroupArn" Arn.of_json in
+      make ~licenseAssetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets a license asset group."]
 module GetGrantResponse =
   struct
     type nonrec t = {
@@ -8715,8 +11877,8 @@ module GetGrantResponse =
       let grant = (Option.map ~f:Grant.of_xml) (Xml.child xml_arg0 "Grant") in
       make ?grant ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let grant = field_map json "Grant" Grant.of_json in make ?grant ()
+    let of_json json__ =
+      let grant = field_map json__ "Grant" Grant.of_json in make ?grant ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets detailed information about the specified grant."]
 module GetGrantRequest =
@@ -8739,9 +11901,9 @@ module GetGrantRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ?version ~grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let grantArn = field_map_exn json__ "GrantArn" Arn.of_json in
       make ?version ~grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets detailed information about the specified grant."]
@@ -8825,8 +11987,8 @@ module GetAccessTokenResponse =
         (Option.map ~f:TokenString.of_xml) (Xml.child xml_arg0 "AccessToken") in
       make ?accessToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessToken = field_map json "AccessToken" TokenString.of_json in
+    let of_json json__ =
+      let accessToken = field_map json__ "AccessToken" TokenString.of_json in
       make ?accessToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8857,10 +12019,10 @@ module GetAccessTokenRequest =
         TokenString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Token") in
       make ?tokenProperties ~token ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tokenProperties =
-        field_map json "TokenProperties" MaxSize3StringList.of_json in
-      let token = field_map_exn json "Token" TokenString.of_json in
+        field_map json__ "TokenProperties" MaxSize3StringList.of_json in
+      let token = field_map_exn json__ "Token" TokenString.of_json in
       make ?tokenProperties ~token ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8975,10 +12137,10 @@ module ExtendLicenseConsumptionResponse =
           (Xml.child xml_arg0 "LicenseConsumptionToken") in
       make ?expiration ?licenseConsumptionToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiration = field_map json "Expiration" ISO8601DateTime.of_json in
+    let of_json json__ =
+      let expiration = field_map json__ "Expiration" ISO8601DateTime.of_json in
       let licenseConsumptionToken =
-        field_map json "LicenseConsumptionToken" String_.of_json in
+        field_map json__ "LicenseConsumptionToken" String_.of_json in
       make ?expiration ?licenseConsumptionToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Extends the expiration date for license consumption."]
@@ -9009,10 +12171,10 @@ module ExtendLicenseConsumptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConsumptionToken") in
       make ?dryRun ~licenseConsumptionToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" Boolean.of_json in
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" Boolean.of_json in
       let licenseConsumptionToken =
-        field_map_exn json "LicenseConsumptionToken" String_.of_json in
+        field_map_exn json__ "LicenseConsumptionToken" String_.of_json in
       make ?dryRun ~licenseConsumptionToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Extends the expiration date for license consumption."]
@@ -9125,8 +12287,8 @@ module DeleteTokenRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TokenId") in
       make ~tokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tokenId = field_map_exn json "TokenId" String_.of_json in
+    let of_json json__ =
+      let tokenId = field_map_exn json__ "TokenId" String_.of_json in
       make ~tokenId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9248,10 +12410,10 @@ module DeleteLicenseResponse =
           (Xml.child xml_arg0 "Status") in
       make ?deletionDate ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deletionDate =
-        field_map json "DeletionDate" ISO8601DateTime.of_json in
-      let status = field_map json "Status" LicenseDeletionStatus.of_json in
+        field_map json__ "DeletionDate" ISO8601DateTime.of_json in
+      let status = field_map json__ "Status" LicenseDeletionStatus.of_json in
       make ?deletionDate ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified license."]
@@ -9278,9 +12440,10 @@ module DeleteLicenseRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LicenseArn") in
       make ~sourceVersion ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceVersion = field_map_exn json "SourceVersion" String_.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let sourceVersion =
+        field_map_exn json__ "SourceVersion" String_.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ~sourceVersion ~licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified license."]
@@ -9414,9 +12577,10 @@ module DeleteLicenseManagerReportGeneratorRequest =
              "LicenseManagerReportGeneratorArn") in
       make ~licenseManagerReportGeneratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseManagerReportGeneratorArn =
-        field_map_exn json "LicenseManagerReportGeneratorArn" String_.of_json in
+        field_map_exn json__ "LicenseManagerReportGeneratorArn"
+          String_.of_json in
       make ~licenseManagerReportGeneratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9519,13 +12683,249 @@ module DeleteLicenseConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConfigurationArn") in
       make ~licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map_exn json "LicenseConfigurationArn" String_.of_json in
+        field_map_exn json__ "LicenseConfigurationArn" String_.of_json in
       make ~licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified license configuration. You cannot delete a license configuration that is in use."]
+module DeleteLicenseAssetRulesetResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a license asset ruleset."]
+module DeleteLicenseAssetRulesetRequest =
+  struct
+    type nonrec t =
+      {
+      licenseAssetRulesetArn: Arn.t
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."]}
+    let context_ = "DeleteLicenseAssetRulesetRequest"
+    let make ~licenseAssetRulesetArn = fun () -> { licenseAssetRulesetArn }
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRulesetArn",
+           (Some (Arn.to_value x.licenseAssetRulesetArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRulesetArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetRulesetArn") in
+      make ~licenseAssetRulesetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRulesetArn =
+        field_map_exn json__ "LicenseAssetRulesetArn" Arn.of_json in
+      make ~licenseAssetRulesetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a license asset ruleset."]
+module DeleteLicenseAssetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      status: LicenseAssetGroupStatus.t option
+        [@ocaml.doc "License asset group status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:LicenseAssetGroupStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:LicenseAssetGroupStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" LicenseAssetGroupStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a license asset group."]
+module DeleteLicenseAssetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroupArn: Arn.t
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."]}
+    let context_ = "DeleteLicenseAssetGroupRequest"
+    let make ~licenseAssetGroupArn = fun () -> { licenseAssetGroupArn }
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroupArn",
+           (Some (Arn.to_value x.licenseAssetGroupArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetGroupArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LicenseAssetGroupArn") in
+      make ~licenseAssetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetGroupArn =
+        field_map_exn json__ "LicenseAssetGroupArn" Arn.of_json in
+      make ~licenseAssetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a license asset group."]
 module DeleteGrantResponse =
   struct
     type nonrec t =
@@ -9636,10 +13036,10 @@ module DeleteGrantResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
-      let grantArn = field_map json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
       make ?version ?status ?grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified grant."]
@@ -9672,11 +13072,11 @@ module DeleteGrantRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~version ?statusReason ~grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "Version" String_.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "Version" String_.of_json in
       let statusReason =
-        field_map json "StatusReason" StatusReasonMessage.of_json in
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
+        field_map json__ "StatusReason" StatusReasonMessage.of_json in
+      let grantArn = field_map_exn json__ "GrantArn" Arn.of_json in
       make ~version ?statusReason ~grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified grant."]
@@ -9798,10 +13198,10 @@ module CreateTokenResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "TokenId") in
       make ?token ?tokenType ?tokenId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let token = field_map json "Token" TokenString.of_json in
-      let tokenType = field_map json "TokenType" TokenType.of_json in
-      let tokenId = field_map json "TokenId" String_.of_json in
+    let of_json json__ =
+      let token = field_map json__ "Token" TokenString.of_json in
+      let tokenType = field_map json__ "TokenType" TokenType.of_json in
+      let tokenId = field_map json__ "TokenId" String_.of_json in
       make ?token ?tokenType ?tokenId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9865,14 +13265,15 @@ module CreateTokenRequest =
       make ~clientToken ?tokenProperties ?expirationInDays ?roleArns
         ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let tokenProperties =
-        field_map json "TokenProperties" MaxSize3StringList.of_json in
+        field_map json__ "TokenProperties" MaxSize3StringList.of_json in
       let expirationInDays =
-        field_map json "ExpirationInDays" Integer.of_json in
-      let roleArns = field_map json "RoleArns" ArnList.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+        field_map json__ "ExpirationInDays" Integer.of_json in
+      let roleArns = field_map json__ "RoleArns" ArnList.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ~clientToken ?tokenProperties ?expirationInDays ?roleArns
         ~licenseArn ()
     let to_json v = composed_to_json to_value v
@@ -9994,10 +13395,10 @@ module CreateLicenseVersionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       make ?status ?version ?licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" LicenseStatus.of_json in
-      let version = field_map json "Version" String_.of_json in
-      let licenseArn = field_map json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" LicenseStatus.of_json in
+      let version = field_map json__ "Version" String_.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
       make ?status ?version ?licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new version of the specified license."]
@@ -10111,23 +13512,24 @@ module CreateLicenseVersionRequest =
         ~entitlements ?licenseMetadata ~validity ~homeRegion ~issuer
         ~productName ~licenseName ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceVersion = field_map json "SourceVersion" String_.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
-      let status = field_map_exn json "Status" LicenseStatus.of_json in
+    let of_json json__ =
+      let sourceVersion = field_map json__ "SourceVersion" String_.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      let status = field_map_exn json__ "Status" LicenseStatus.of_json in
       let consumptionConfiguration =
-        field_map_exn json "ConsumptionConfiguration"
+        field_map_exn json__ "ConsumptionConfiguration"
           ConsumptionConfiguration.of_json in
       let entitlements =
-        field_map_exn json "Entitlements" EntitlementList.of_json in
+        field_map_exn json__ "Entitlements" EntitlementList.of_json in
       let licenseMetadata =
-        field_map json "LicenseMetadata" MetadataList.of_json in
-      let validity = field_map_exn json "Validity" DatetimeRange.of_json in
-      let homeRegion = field_map_exn json "HomeRegion" String_.of_json in
-      let issuer = field_map_exn json "Issuer" Issuer.of_json in
-      let productName = field_map_exn json "ProductName" String_.of_json in
-      let licenseName = field_map_exn json "LicenseName" String_.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+        field_map json__ "LicenseMetadata" MetadataList.of_json in
+      let validity = field_map_exn json__ "Validity" DatetimeRange.of_json in
+      let homeRegion = field_map_exn json__ "HomeRegion" String_.of_json in
+      let issuer = field_map_exn json__ "Issuer" Issuer.of_json in
+      let productName = field_map_exn json__ "ProductName" String_.of_json in
+      let licenseName = field_map_exn json__ "LicenseName" String_.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ?sourceVersion ~clientToken ~status ~consumptionConfiguration
         ~entitlements ?licenseMetadata ~validity ~homeRegion ~issuer
         ~productName ~licenseName ~licenseArn ()
@@ -10243,10 +13645,10 @@ module CreateLicenseResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       make ?version ?status ?licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" LicenseStatus.of_json in
-      let licenseArn = field_map json "LicenseArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" LicenseStatus.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
       make ?version ?status ?licenseArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a license."]
@@ -10271,33 +13673,38 @@ module CreateLicenseRequest =
         [@ocaml.doc "Information about the license."];
       clientToken: ClientToken.t
         [@ocaml.doc
-          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags to add to the license. For more information about tagging support in License Manager, see the TagResource operation."]}
     let context_ = "CreateLicenseRequest"
     let make ?licenseMetadata =
-      fun ~licenseName ->
-        fun ~productName ->
-          fun ~productSKU ->
-            fun ~issuer ->
-              fun ~homeRegion ->
-                fun ~validity ->
-                  fun ~entitlements ->
-                    fun ~beneficiary ->
-                      fun ~consumptionConfiguration ->
-                        fun ~clientToken ->
-                          fun () ->
-                            {
-                              licenseMetadata;
-                              licenseName;
-                              productName;
-                              productSKU;
-                              issuer;
-                              homeRegion;
-                              validity;
-                              entitlements;
-                              beneficiary;
-                              consumptionConfiguration;
-                              clientToken
-                            }
+      fun ?tags ->
+        fun ~licenseName ->
+          fun ~productName ->
+            fun ~productSKU ->
+              fun ~issuer ->
+                fun ~homeRegion ->
+                  fun ~validity ->
+                    fun ~entitlements ->
+                      fun ~beneficiary ->
+                        fun ~consumptionConfiguration ->
+                          fun ~clientToken ->
+                            fun () ->
+                              {
+                                licenseMetadata;
+                                tags;
+                                licenseName;
+                                productName;
+                                productSKU;
+                                issuer;
+                                homeRegion;
+                                validity;
+                                entitlements;
+                                beneficiary;
+                                consumptionConfiguration;
+                                clientToken
+                              }
     let to_value x =
       structure_to_value
         [("LicenseName", (Some (String_.to_value x.licenseName)));
@@ -10313,9 +13720,11 @@ module CreateLicenseRequest =
              (ConsumptionConfiguration.to_value x.consumptionConfiguration)));
         ("LicenseMetadata",
           (Option.map x.licenseMetadata ~f:MetadataList.to_value));
-        ("ClientToken", (Some (ClientToken.to_value x.clientToken)))]
+        ("ClientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
@@ -10349,27 +13758,29 @@ module CreateLicenseRequest =
       let licenseName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseName") in
-      make ~clientToken ?licenseMetadata ~consumptionConfiguration
+      make ?tags ~clientToken ?licenseMetadata ~consumptionConfiguration
         ~beneficiary ~entitlements ~validity ~homeRegion ~issuer ~productSKU
         ~productName ~licenseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let licenseMetadata =
-        field_map json "LicenseMetadata" MetadataList.of_json in
+        field_map json__ "LicenseMetadata" MetadataList.of_json in
       let consumptionConfiguration =
-        field_map_exn json "ConsumptionConfiguration"
+        field_map_exn json__ "ConsumptionConfiguration"
           ConsumptionConfiguration.of_json in
-      let beneficiary = field_map_exn json "Beneficiary" String_.of_json in
+      let beneficiary = field_map_exn json__ "Beneficiary" String_.of_json in
       let entitlements =
-        field_map_exn json "Entitlements" EntitlementList.of_json in
-      let validity = field_map_exn json "Validity" DatetimeRange.of_json in
-      let homeRegion = field_map_exn json "HomeRegion" String_.of_json in
-      let issuer = field_map_exn json "Issuer" Issuer.of_json in
-      let productSKU = field_map_exn json "ProductSKU" String_.of_json in
-      let productName = field_map_exn json "ProductName" String_.of_json in
-      let licenseName = field_map_exn json "LicenseName" String_.of_json in
-      make ~clientToken ?licenseMetadata ~consumptionConfiguration
+        field_map_exn json__ "Entitlements" EntitlementList.of_json in
+      let validity = field_map_exn json__ "Validity" DatetimeRange.of_json in
+      let homeRegion = field_map_exn json__ "HomeRegion" String_.of_json in
+      let issuer = field_map_exn json__ "Issuer" Issuer.of_json in
+      let productSKU = field_map_exn json__ "ProductSKU" String_.of_json in
+      let productName = field_map_exn json__ "ProductName" String_.of_json in
+      let licenseName = field_map_exn json__ "LicenseName" String_.of_json in
+      make ?tags ~clientToken ?licenseMetadata ~consumptionConfiguration
         ~beneficiary ~entitlements ~validity ~homeRegion ~issuer ~productSKU
         ~productName ~licenseName ()
     let to_json v = composed_to_json to_value v
@@ -10489,9 +13900,9 @@ module CreateLicenseManagerReportGeneratorResponse =
           (Xml.child xml_arg0 "LicenseManagerReportGeneratorArn") in
       make ?licenseManagerReportGeneratorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseManagerReportGeneratorArn =
-        field_map json "LicenseManagerReportGeneratorArn" String_.of_json in
+        field_map json__ "LicenseManagerReportGeneratorArn" String_.of_json in
       make ?licenseManagerReportGeneratorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a report generator."]
@@ -10569,18 +13980,19 @@ module CreateLicenseManagerReportGeneratorRequest =
       make ?tags ?description ~clientToken ~reportFrequency ~reportContext
         ~type_ ~reportGeneratorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" String_.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" ClientRequestToken.of_json in
+        field_map_exn json__ "ClientToken" ClientRequestToken.of_json in
       let reportFrequency =
-        field_map_exn json "ReportFrequency" ReportFrequency.of_json in
+        field_map_exn json__ "ReportFrequency" ReportFrequency.of_json in
       let reportContext =
-        field_map_exn json "ReportContext" ReportContext.of_json in
-      let type_ = field_map_exn json "Type" ReportTypeList.of_json in
+        field_map_exn json__ "ReportContext" ReportContext.of_json in
+      let type_ = field_map_exn json__ "Type" ReportTypeList.of_json in
       let reportGeneratorName =
-        field_map_exn json "ReportGeneratorName" ReportGeneratorName.of_json in
+        field_map_exn json__ "ReportGeneratorName"
+          ReportGeneratorName.of_json in
       make ?tags ?description ~clientToken ~reportFrequency ~reportContext
         ~type_ ~reportGeneratorName ()
     let to_json v = composed_to_json to_value v
@@ -10679,9 +14091,9 @@ module CreateLicenseConversionTaskForResourceResponse =
           (Xml.child xml_arg0 "LicenseConversionTaskId") in
       make ?licenseConversionTaskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConversionTaskId =
-        field_map json "LicenseConversionTaskId"
+        field_map json__ "LicenseConversionTaskId"
           LicenseConversionTaskId.of_json in
       make ?licenseConversionTaskId ()
     let to_json v = composed_to_json to_value v
@@ -10695,10 +14107,10 @@ module CreateLicenseConversionTaskForResourceRequest =
           "Amazon Resource Name (ARN) of the resource you are converting the license type for."];
       sourceLicenseContext: LicenseConversionContext.t
         [@ocaml.doc
-          "Information that identifies the license type you are converting from. For the structure of the source license, see Convert a license type using the AWS CLI in the License Manager User Guide."];
+          "Information that identifies the license type you are converting from. For the structure of the source license, see Convert a license type using the CLI in the License Manager User Guide."];
       destinationLicenseContext: LicenseConversionContext.t
         [@ocaml.doc
-          "Information that identifies the license type you are converting to. For the structure of the destination license, see Convert a license type using the AWS CLI in the License Manager User Guide."]}
+          "Information that identifies the license type you are converting to. For the structure of the destination license, see Convert a license type using the CLI in the License Manager User Guide."]}
     let context_ = "CreateLicenseConversionTaskForResourceRequest"
     let make ~resourceArn =
       fun ~sourceLicenseContext ->
@@ -10726,14 +14138,14 @@ module CreateLicenseConversionTaskForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~destinationLicenseContext ~sourceLicenseContext ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationLicenseContext =
-        field_map_exn json "DestinationLicenseContext"
+        field_map_exn json__ "DestinationLicenseContext"
           LicenseConversionContext.of_json in
       let sourceLicenseContext =
-        field_map_exn json "SourceLicenseContext"
+        field_map_exn json__ "SourceLicenseContext"
           LicenseConversionContext.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~destinationLicenseContext ~sourceLicenseContext ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new license conversion task."]
@@ -10833,9 +14245,9 @@ module CreateLicenseConfigurationResponse =
           (Xml.child xml_arg0 "LicenseConfigurationArn") in
       make ?licenseConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let licenseConfigurationArn =
-        field_map json "LicenseConfigurationArn" String_.of_json in
+        field_map json__ "LicenseConfigurationArn" String_.of_json in
       make ?licenseConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10857,14 +14269,16 @@ module CreateLicenseConfigurationRequest =
           "Indicates whether hard or soft license enforcement is used. Exceeding a hard limit blocks the launch of new instances."];
       licenseRules: StringList.t option
         [@ocaml.doc
-          "License rules. The syntax is #name=value (for example, #allowedTenancy=EC2-DedicatedHost). The available rules vary by dimension, as follows. Cores dimension: allowedTenancy | licenseAffinityToHost | maximumCores | minimumCores Instances dimension: allowedTenancy | maximumCores | minimumCores | maximumSockets | minimumSockets | maximumVcpus | minimumVcpus Sockets dimension: allowedTenancy | licenseAffinityToHost | maximumSockets | minimumSockets vCPUs dimension: allowedTenancy | honorVcpuOptimization | maximumVcpus | minimumVcpus The unit for licenseAffinityToHost is days and the range is 1 to 180. The possible values for allowedTenancy are EC2-Default, EC2-DedicatedHost, and EC2-DedicatedInstance. The possible values for honorVcpuOptimization are True and False."];
+          "License rules. The syntax is #name=value (for example, #allowedTenancy=EC2-DedicatedHost). The available rules vary by dimension, as follows. Cores dimension: allowedTenancy | licenseAffinityToHost | maximumCores | minimumCores Instances dimension: allowedTenancy | maximumVcpus | minimumVcpus Sockets dimension: allowedTenancy | licenseAffinityToHost | maximumSockets | minimumSockets vCPUs dimension: allowedTenancy | honorVcpuOptimization | maximumVcpus | minimumVcpus The unit for licenseAffinityToHost is days and the range is 1 to 180. The possible values for allowedTenancy are EC2-Default, EC2-DedicatedHost, and EC2-DedicatedInstance. The possible values for honorVcpuOptimization are True and False."];
       tags: TagList.t option
         [@ocaml.doc "Tags to add to the license configuration."];
       disassociateWhenNotFound: BoxBoolean.t option
         [@ocaml.doc
           "When true, disassociates a resource when software is uninstalled."];
       productInformationList: ProductInformationList.t option
-        [@ocaml.doc "Product information."]}
+        [@ocaml.doc "Product information."];
+      licenseExpiry: BoxLong.t option
+        [@ocaml.doc "License configuration expiry."]}
     let context_ = "CreateLicenseConfigurationRequest"
     let make ?description =
       fun ?licenseCount ->
@@ -10873,20 +14287,22 @@ module CreateLicenseConfigurationRequest =
             fun ?tags ->
               fun ?disassociateWhenNotFound ->
                 fun ?productInformationList ->
-                  fun ~name ->
-                    fun ~licenseCountingType ->
-                      fun () ->
-                        {
-                          description;
-                          licenseCount;
-                          licenseCountHardLimit;
-                          licenseRules;
-                          tags;
-                          disassociateWhenNotFound;
-                          productInformationList;
-                          name;
-                          licenseCountingType
-                        }
+                  fun ?licenseExpiry ->
+                    fun ~name ->
+                      fun ~licenseCountingType ->
+                        fun () ->
+                          {
+                            description;
+                            licenseCount;
+                            licenseCountHardLimit;
+                            licenseRules;
+                            tags;
+                            disassociateWhenNotFound;
+                            productInformationList;
+                            licenseExpiry;
+                            name;
+                            licenseCountingType
+                          }
     let to_value x =
       structure_to_value
         [("Name", (Some (String_.to_value x.name)));
@@ -10902,9 +14318,12 @@ module CreateLicenseConfigurationRequest =
           (Option.map x.disassociateWhenNotFound ~f:BoxBoolean.to_value));
         ("ProductInformationList",
           (Option.map x.productInformationList
-             ~f:ProductInformationList.to_value))]
+             ~f:ProductInformationList.to_value));
+        ("LicenseExpiry", (Option.map x.licenseExpiry ~f:BoxLong.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseExpiry =
+        (Option.map ~f:BoxLong.of_xml) (Xml.child xml_arg0 "LicenseExpiry") in
       let productInformationList =
         (Option.map ~f:ProductInformationList.of_xml)
           (Xml.child xml_arg0 "ProductInformationList") in
@@ -10926,31 +14345,396 @@ module CreateLicenseConfigurationRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Description") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?productInformationList ?disassociateWhenNotFound ?tags
-        ?licenseRules ?licenseCountHardLimit ?licenseCount
+      make ?licenseExpiry ?productInformationList ?disassociateWhenNotFound
+        ?tags ?licenseRules ?licenseCountHardLimit ?licenseCount
         ~licenseCountingType ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let licenseExpiry = field_map json__ "LicenseExpiry" BoxLong.of_json in
       let productInformationList =
-        field_map json "ProductInformationList"
+        field_map json__ "ProductInformationList"
           ProductInformationList.of_json in
       let disassociateWhenNotFound =
-        field_map json "DisassociateWhenNotFound" BoxBoolean.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let licenseRules = field_map json "LicenseRules" StringList.of_json in
+        field_map json__ "DisassociateWhenNotFound" BoxBoolean.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let licenseRules = field_map json__ "LicenseRules" StringList.of_json in
       let licenseCountHardLimit =
-        field_map json "LicenseCountHardLimit" BoxBoolean.of_json in
-      let licenseCount = field_map json "LicenseCount" BoxLong.of_json in
+        field_map json__ "LicenseCountHardLimit" BoxBoolean.of_json in
+      let licenseCount = field_map json__ "LicenseCount" BoxLong.of_json in
       let licenseCountingType =
-        field_map_exn json "LicenseCountingType" LicenseCountingType.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ?productInformationList ?disassociateWhenNotFound ?tags
-        ?licenseRules ?licenseCountHardLimit ?licenseCount
+        field_map_exn json__ "LicenseCountingType"
+          LicenseCountingType.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
+      make ?licenseExpiry ?productInformationList ?disassociateWhenNotFound
+        ?tags ?licenseRules ?licenseCountHardLimit ?licenseCount
         ~licenseCountingType ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a license configuration. A license configuration is an abstraction of a customer license agreement that can be consumed and enforced by License Manager. Components include specifications for the license type (licensing by instance, socket, CPU, or vCPU), allowed tenancy (shared tenancy, Dedicated Instance, Dedicated Host, or all of these), license affinity to host (how long a license must be associated with a host), and the number of licenses purchased and used."]
+module CreateLicenseAssetRulesetResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetRulesetArn: String_.t option
+        [@ocaml.doc
+          "Amazon Resource Name (ARN) of the license asset ruleset."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetRulesetArn = fun () -> { licenseAssetRulesetArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetRulesetArn",
+           (Option.map x.licenseAssetRulesetArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let licenseAssetRulesetArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetRulesetArn") in
+      make ?licenseAssetRulesetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let licenseAssetRulesetArn =
+        field_map json__ "LicenseAssetRulesetArn" String_.of_json in
+      make ?licenseAssetRulesetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a license asset ruleset."]
+module CreateLicenseAssetRulesetRequest =
+  struct
+    type nonrec t =
+      {
+      name: LicenseAssetResourceName.t
+        [@ocaml.doc "License asset ruleset name."];
+      description: LicenseAssetResourceDescription.t option
+        [@ocaml.doc "License asset ruleset description."];
+      rules: LicenseAssetRuleList.t [@ocaml.doc "License asset rules."];
+      tags: TagList.t option
+        [@ocaml.doc "Tags to add to the license asset ruleset."];
+      clientToken: String_.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "CreateLicenseAssetRulesetRequest"
+    let make ?description =
+      fun ?tags ->
+        fun ~name ->
+          fun ~rules ->
+            fun ~clientToken ->
+              fun () -> { description; tags; name; rules; clientToken }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (LicenseAssetResourceName.to_value x.name)));
+        ("Description",
+          (Option.map x.description
+             ~f:LicenseAssetResourceDescription.to_value));
+        ("Rules", (Some (LicenseAssetRuleList.to_value x.rules)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientToken", (Some (String_.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let rules =
+        LicenseAssetRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:LicenseAssetResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        LicenseAssetResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~clientToken ?tags ~rules ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map_exn json__ "ClientToken" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let rules = field_map_exn json__ "Rules" LicenseAssetRuleList.of_json in
+      let description =
+        field_map json__ "Description"
+          LicenseAssetResourceDescription.of_json in
+      let name = field_map_exn json__ "Name" LicenseAssetResourceName.of_json in
+      make ~clientToken ?tags ~rules ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a license asset ruleset."]
+module CreateLicenseAssetGroupResponse =
+  struct
+    type nonrec t =
+      {
+      licenseAssetGroupArn: String_.t option
+        [@ocaml.doc "Amazon Resource Name (ARN) of the license asset group."];
+      status: String_.t option [@ocaml.doc "License asset group status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `AuthorizationException of AuthorizationException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `RateLimitExceededException of RateLimitExceededException.t 
+      | `ServerInternalException of ServerInternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?licenseAssetGroupArn =
+      fun ?status -> fun () -> { licenseAssetGroupArn; status }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException
+            (RateLimitExceededException.of_json json)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "AuthorizationException" ->
+          `AuthorizationException (AuthorizationException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "RateLimitExceededException" ->
+          `RateLimitExceededException (RateLimitExceededException.of_xml xml)
+      | "ServerInternalException" ->
+          `ServerInternalException (ServerInternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `AuthorizationException e ->
+          `Assoc
+            [("error", (`String "AuthorizationException"));
+            ("details", (AuthorizationException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `RateLimitExceededException e ->
+          `Assoc
+            [("error", (`String "RateLimitExceededException"));
+            ("details", (RateLimitExceededException.to_json e))]
+      | `ServerInternalException e ->
+          `Assoc
+            [("error", (`String "ServerInternalException"));
+            ("details", (ServerInternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LicenseAssetGroupArn",
+           (Option.map x.licenseAssetGroupArn ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Status") in
+      let licenseAssetGroupArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "LicenseAssetGroupArn") in
+      make ?status ?licenseAssetGroupArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" String_.of_json in
+      let licenseAssetGroupArn =
+        field_map json__ "LicenseAssetGroupArn" String_.of_json in
+      make ?status ?licenseAssetGroupArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a license asset group."]
+module CreateLicenseAssetGroupRequest =
+  struct
+    type nonrec t =
+      {
+      name: LicenseAssetResourceName.t
+        [@ocaml.doc "License asset group name."];
+      description: LicenseAssetResourceDescription.t option
+        [@ocaml.doc "License asset group description."];
+      licenseAssetGroupConfigurations: LicenseAssetGroupConfigurationList.t
+        [@ocaml.doc "License asset group configurations."];
+      associatedLicenseAssetRulesetARNs: LicenseAssetRulesetArnList.t
+        [@ocaml.doc "ARNs of associated license asset rulesets."];
+      properties: LicenseAssetGroupPropertyList.t option
+        [@ocaml.doc "License asset group properties."];
+      tags: TagList.t option
+        [@ocaml.doc "Tags to add to the license asset group."];
+      clientToken: String_.t
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."]}
+    let context_ = "CreateLicenseAssetGroupRequest"
+    let make ?description =
+      fun ?properties ->
+        fun ?tags ->
+          fun ~name ->
+            fun ~licenseAssetGroupConfigurations ->
+              fun ~associatedLicenseAssetRulesetARNs ->
+                fun ~clientToken ->
+                  fun () ->
+                    {
+                      description;
+                      properties;
+                      tags;
+                      name;
+                      licenseAssetGroupConfigurations;
+                      associatedLicenseAssetRulesetARNs;
+                      clientToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (LicenseAssetResourceName.to_value x.name)));
+        ("Description",
+          (Option.map x.description
+             ~f:LicenseAssetResourceDescription.to_value));
+        ("LicenseAssetGroupConfigurations",
+          (Some
+             (LicenseAssetGroupConfigurationList.to_value
+                x.licenseAssetGroupConfigurations)));
+        ("AssociatedLicenseAssetRulesetARNs",
+          (Some
+             (LicenseAssetRulesetArnList.to_value
+                x.associatedLicenseAssetRulesetARNs)));
+        ("Properties",
+          (Option.map x.properties ~f:LicenseAssetGroupPropertyList.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ClientToken", (Some (String_.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let properties =
+        (Option.map ~f:LicenseAssetGroupPropertyList.of_xml)
+          (Xml.child xml_arg0 "Properties") in
+      let associatedLicenseAssetRulesetARNs =
+        LicenseAssetRulesetArnList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "AssociatedLicenseAssetRulesetARNs") in
+      let licenseAssetGroupConfigurations =
+        LicenseAssetGroupConfigurationList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "LicenseAssetGroupConfigurations") in
+      let description =
+        (Option.map ~f:LicenseAssetResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        LicenseAssetResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~clientToken ?tags ?properties ~associatedLicenseAssetRulesetARNs
+        ~licenseAssetGroupConfigurations ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map_exn json__ "ClientToken" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let properties =
+        field_map json__ "Properties" LicenseAssetGroupPropertyList.of_json in
+      let associatedLicenseAssetRulesetARNs =
+        field_map_exn json__ "AssociatedLicenseAssetRulesetARNs"
+          LicenseAssetRulesetArnList.of_json in
+      let licenseAssetGroupConfigurations =
+        field_map_exn json__ "LicenseAssetGroupConfigurations"
+          LicenseAssetGroupConfigurationList.of_json in
+      let description =
+        field_map json__ "Description"
+          LicenseAssetResourceDescription.of_json in
+      let name = field_map_exn json__ "Name" LicenseAssetResourceName.of_json in
+      make ~clientToken ?tags ?properties ~associatedLicenseAssetRulesetARNs
+        ~licenseAssetGroupConfigurations ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a license asset group."]
 module CreateGrantVersionResponse =
   struct
     type nonrec t =
@@ -11061,13 +14845,14 @@ module CreateGrantVersionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
-      let grantArn = field_map json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
       make ?version ?status ?grantArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new version of the specified grant."]
+  end[@@ocaml.doc
+       "Creates a new version of the specified grant. For more information, see Granted licenses in License Manager in the License Manager User Guide."]
 module CreateGrantVersionRequest =
   struct
     type nonrec t =
@@ -11083,25 +14868,29 @@ module CreateGrantVersionRequest =
       statusReason: StatusReasonMessage.t option
         [@ocaml.doc "Grant status reason."];
       sourceVersion: String_.t option
-        [@ocaml.doc "Current version of the grant."]}
+        [@ocaml.doc "Current version of the grant."];
+      options: Options.t option
+        [@ocaml.doc "The options specified for the grant."]}
     let context_ = "CreateGrantVersionRequest"
     let make ?grantName =
       fun ?allowedOperations ->
         fun ?status ->
           fun ?statusReason ->
             fun ?sourceVersion ->
-              fun ~clientToken ->
-                fun ~grantArn ->
-                  fun () ->
-                    {
-                      grantName;
-                      allowedOperations;
-                      status;
-                      statusReason;
-                      sourceVersion;
-                      clientToken;
-                      grantArn
-                    }
+              fun ?options ->
+                fun ~clientToken ->
+                  fun ~grantArn ->
+                    fun () ->
+                      {
+                        grantName;
+                        allowedOperations;
+                        status;
+                        statusReason;
+                        sourceVersion;
+                        options;
+                        clientToken;
+                        grantArn
+                      }
     let to_value x =
       structure_to_value
         [("ClientToken", (Some (ClientToken.to_value x.clientToken)));
@@ -11112,9 +14901,12 @@ module CreateGrantVersionRequest =
         ("Status", (Option.map x.status ~f:GrantStatus.to_value));
         ("StatusReason",
           (Option.map x.statusReason ~f:StatusReasonMessage.to_value));
-        ("SourceVersion", (Option.map x.sourceVersion ~f:String_.to_value))]
+        ("SourceVersion", (Option.map x.sourceVersion ~f:String_.to_value));
+        ("Options", (Option.map x.options ~f:Options.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let options =
+        (Option.map ~f:Options.of_xml) (Xml.child xml_arg0 "Options") in
       let sourceVersion =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceVersion") in
       let statusReason =
@@ -11132,23 +14924,26 @@ module CreateGrantVersionRequest =
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
-      make ?sourceVersion ?statusReason ?status ?allowedOperations ?grantName
-        ~grantArn ~clientToken ()
+      make ?options ?sourceVersion ?statusReason ?status ?allowedOperations
+        ?grantName ~grantArn ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceVersion = field_map json "SourceVersion" String_.of_json in
+    let of_json json__ =
+      let options = field_map json__ "Options" Options.of_json in
+      let sourceVersion = field_map json__ "SourceVersion" String_.of_json in
       let statusReason =
-        field_map json "StatusReason" StatusReasonMessage.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
+        field_map json__ "StatusReason" StatusReasonMessage.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
       let allowedOperations =
-        field_map json "AllowedOperations" AllowedOperationList.of_json in
-      let grantName = field_map json "GrantName" String_.of_json in
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
-      make ?sourceVersion ?statusReason ?status ?allowedOperations ?grantName
-        ~grantArn ~clientToken ()
+        field_map json__ "AllowedOperations" AllowedOperationList.of_json in
+      let grantName = field_map json__ "GrantName" String_.of_json in
+      let grantArn = field_map_exn json__ "GrantArn" Arn.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      make ?options ?sourceVersion ?statusReason ?status ?allowedOperations
+        ?grantName ~grantArn ~clientToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new version of the specified grant."]
+  end[@@ocaml.doc
+       "Creates a new version of the specified grant. For more information, see Granted licenses in License Manager in the License Manager User Guide."]
 module CreateGrantResponse =
   struct
     type nonrec t =
@@ -11259,14 +15054,14 @@ module CreateGrantResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
-      let grantArn = field_map json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
       make ?version ?status ?grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a grant for the specified license. A grant shares the use of license entitlements with specific Amazon Web Services accounts."]
+       "Creates a grant for the specified license. A grant shares the use of license entitlements with a specific Amazon Web Services account, an organization, or an organizational unit (OU). For more information, see Granted licenses in License Manager in the License Manager User Guide."]
 module CreateGrantRequest =
   struct
     type nonrec t =
@@ -11277,26 +15072,33 @@ module CreateGrantRequest =
       grantName: String_.t [@ocaml.doc "Grant name."];
       licenseArn: Arn.t
         [@ocaml.doc "Amazon Resource Name (ARN) of the license."];
-      principals: PrincipalArnList.t [@ocaml.doc "The grant principals."];
+      principals: PrincipalArnList.t
+        [@ocaml.doc
+          "The grant principals. You can specify one of the following as an Amazon Resource Name (ARN): An Amazon Web Services account, which includes only the account specified. An organizational unit (OU), which includes all accounts in the OU. An organization, which will include all accounts across your organization."];
       homeRegion: String_.t [@ocaml.doc "Home Region of the grant."];
       allowedOperations: AllowedOperationList.t
-        [@ocaml.doc "Allowed operations for the grant."]}
+        [@ocaml.doc "Allowed operations for the grant."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags to add to the grant. For more information about tagging support in License Manager, see the TagResource operation."]}
     let context_ = "CreateGrantRequest"
-    let make ~clientToken =
-      fun ~grantName ->
-        fun ~licenseArn ->
-          fun ~principals ->
-            fun ~homeRegion ->
-              fun ~allowedOperations ->
-                fun () ->
-                  {
-                    clientToken;
-                    grantName;
-                    licenseArn;
-                    principals;
-                    homeRegion;
-                    allowedOperations
-                  }
+    let make ?tags =
+      fun ~clientToken ->
+        fun ~grantName ->
+          fun ~licenseArn ->
+            fun ~principals ->
+              fun ~homeRegion ->
+                fun ~allowedOperations ->
+                  fun () ->
+                    {
+                      tags;
+                      clientToken;
+                      grantName;
+                      licenseArn;
+                      principals;
+                      homeRegion;
+                      allowedOperations
+                    }
     let to_value x =
       structure_to_value
         [("ClientToken", (Some (ClientToken.to_value x.clientToken)));
@@ -11305,9 +15107,11 @@ module CreateGrantRequest =
         ("Principals", (Some (PrincipalArnList.to_value x.principals)));
         ("HomeRegion", (Some (String_.to_value x.homeRegion)));
         ("AllowedOperations",
-          (Some (AllowedOperationList.to_value x.allowedOperations)))]
+          (Some (AllowedOperationList.to_value x.allowedOperations)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let allowedOperations =
         AllowedOperationList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "AllowedOperations") in
@@ -11324,23 +15128,25 @@ module CreateGrantRequest =
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
-      make ~allowedOperations ~homeRegion ~principals ~licenseArn ~grantName
-        ~clientToken ()
+      make ?tags ~allowedOperations ~homeRegion ~principals ~licenseArn
+        ~grantName ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let allowedOperations =
-        field_map_exn json "AllowedOperations" AllowedOperationList.of_json in
-      let homeRegion = field_map_exn json "HomeRegion" String_.of_json in
+        field_map_exn json__ "AllowedOperations" AllowedOperationList.of_json in
+      let homeRegion = field_map_exn json__ "HomeRegion" String_.of_json in
       let principals =
-        field_map_exn json "Principals" PrincipalArnList.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
-      let grantName = field_map_exn json "GrantName" String_.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
-      make ~allowedOperations ~homeRegion ~principals ~licenseArn ~grantName
-        ~clientToken ()
+        field_map_exn json__ "Principals" PrincipalArnList.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
+      let grantName = field_map_exn json__ "GrantName" String_.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
+      make ?tags ~allowedOperations ~homeRegion ~principals ~licenseArn
+        ~grantName ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a grant for the specified license. A grant shares the use of license entitlements with specific Amazon Web Services accounts."]
+       "Creates a grant for the specified license. A grant shares the use of license entitlements with a specific Amazon Web Services account, an organization, or an organizational unit (OU). For more information, see Granted licenses in License Manager in the License Manager User Guide."]
 module CheckoutLicenseResponse =
   struct
     type nonrec t =
@@ -11534,21 +15340,22 @@ module CheckoutLicenseResponse =
       make ?licenseArn ?expiration ?issuedAt ?nodeId ?signedToken
         ?entitlementsAllowed ?licenseConsumptionToken ?checkoutType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let licenseArn = field_map json "LicenseArn" String_.of_json in
-      let expiration = field_map json "Expiration" ISO8601DateTime.of_json in
-      let issuedAt = field_map json "IssuedAt" ISO8601DateTime.of_json in
-      let nodeId = field_map json "NodeId" String_.of_json in
-      let signedToken = field_map json "SignedToken" SignedToken.of_json in
+    let of_json json__ =
+      let licenseArn = field_map json__ "LicenseArn" String_.of_json in
+      let expiration = field_map json__ "Expiration" ISO8601DateTime.of_json in
+      let issuedAt = field_map json__ "IssuedAt" ISO8601DateTime.of_json in
+      let nodeId = field_map json__ "NodeId" String_.of_json in
+      let signedToken = field_map json__ "SignedToken" SignedToken.of_json in
       let entitlementsAllowed =
-        field_map json "EntitlementsAllowed" EntitlementDataList.of_json in
+        field_map json__ "EntitlementsAllowed" EntitlementDataList.of_json in
       let licenseConsumptionToken =
-        field_map json "LicenseConsumptionToken" String_.of_json in
-      let checkoutType = field_map json "CheckoutType" CheckoutType.of_json in
+        field_map json__ "LicenseConsumptionToken" String_.of_json in
+      let checkoutType = field_map json__ "CheckoutType" CheckoutType.of_json in
       make ?licenseArn ?expiration ?issuedAt ?nodeId ?signedToken
         ?entitlementsAllowed ?licenseConsumptionToken ?checkoutType ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Checks out the specified license."]
+  end[@@ocaml.doc
+       "Checks out the specified license. If the account that created the license is the same that is performing the check out, you must specify the account as the beneficiary."]
 module CheckoutLicenseRequest =
   struct
     type nonrec t =
@@ -11616,21 +15423,23 @@ module CheckoutLicenseRequest =
       make ?nodeId ?beneficiary ~clientToken ~entitlements ~keyFingerprint
         ~checkoutType ~productSKU ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeId = field_map json "NodeId" String_.of_json in
-      let beneficiary = field_map json "Beneficiary" String_.of_json in
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let nodeId = field_map json__ "NodeId" String_.of_json in
+      let beneficiary = field_map json__ "Beneficiary" String_.of_json in
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let entitlements =
-        field_map_exn json "Entitlements" EntitlementDataList.of_json in
+        field_map_exn json__ "Entitlements" EntitlementDataList.of_json in
       let keyFingerprint =
-        field_map_exn json "KeyFingerprint" String_.of_json in
+        field_map_exn json__ "KeyFingerprint" String_.of_json in
       let checkoutType =
-        field_map_exn json "CheckoutType" CheckoutType.of_json in
-      let productSKU = field_map_exn json "ProductSKU" String_.of_json in
+        field_map_exn json__ "CheckoutType" CheckoutType.of_json in
+      let productSKU = field_map_exn json__ "ProductSKU" String_.of_json in
       make ?nodeId ?beneficiary ~clientToken ~entitlements ~keyFingerprint
         ~checkoutType ~productSKU ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Checks out the specified license."]
+  end[@@ocaml.doc
+       "Checks out the specified license. If the account that created the license is the same that is performing the check out, you must specify the account as the beneficiary."]
 module CheckoutBorrowLicenseResponse =
   struct
     type nonrec t =
@@ -11836,18 +15645,18 @@ module CheckoutBorrowLicenseResponse =
       make ?checkoutMetadata ?expiration ?issuedAt ?signedToken ?nodeId
         ?entitlementsAllowed ?licenseConsumptionToken ?licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checkoutMetadata =
-        field_map json "CheckoutMetadata" MetadataList.of_json in
-      let expiration = field_map json "Expiration" ISO8601DateTime.of_json in
-      let issuedAt = field_map json "IssuedAt" ISO8601DateTime.of_json in
-      let signedToken = field_map json "SignedToken" SignedToken.of_json in
-      let nodeId = field_map json "NodeId" String_.of_json in
+        field_map json__ "CheckoutMetadata" MetadataList.of_json in
+      let expiration = field_map json__ "Expiration" ISO8601DateTime.of_json in
+      let issuedAt = field_map json__ "IssuedAt" ISO8601DateTime.of_json in
+      let signedToken = field_map json__ "SignedToken" SignedToken.of_json in
+      let nodeId = field_map json__ "NodeId" String_.of_json in
       let entitlementsAllowed =
-        field_map json "EntitlementsAllowed" EntitlementDataList.of_json in
+        field_map json__ "EntitlementsAllowed" EntitlementDataList.of_json in
       let licenseConsumptionToken =
-        field_map json "LicenseConsumptionToken" String_.of_json in
-      let licenseArn = field_map json "LicenseArn" Arn.of_json in
+        field_map json__ "LicenseConsumptionToken" String_.of_json in
+      let licenseArn = field_map json__ "LicenseArn" Arn.of_json in
       make ?checkoutMetadata ?expiration ?issuedAt ?signedToken ?nodeId
         ?entitlementsAllowed ?licenseConsumptionToken ?licenseArn ()
     let to_json v = composed_to_json to_value v
@@ -11919,17 +15728,18 @@ module CheckoutBorrowLicenseRequest =
       make ~clientToken ?checkoutMetadata ?nodeId ~digitalSignatureMethod
         ~entitlements ~licenseArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map_exn json "ClientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "ClientToken" ClientToken.of_json in
       let checkoutMetadata =
-        field_map json "CheckoutMetadata" MetadataList.of_json in
-      let nodeId = field_map json "NodeId" String_.of_json in
+        field_map json__ "CheckoutMetadata" MetadataList.of_json in
+      let nodeId = field_map json__ "NodeId" String_.of_json in
       let digitalSignatureMethod =
-        field_map_exn json "DigitalSignatureMethod"
+        field_map_exn json__ "DigitalSignatureMethod"
           DigitalSignatureMethod.of_json in
       let entitlements =
-        field_map_exn json "Entitlements" EntitlementDataList.of_json in
-      let licenseArn = field_map_exn json "LicenseArn" Arn.of_json in
+        field_map_exn json__ "Entitlements" EntitlementDataList.of_json in
+      let licenseArn = field_map_exn json__ "LicenseArn" Arn.of_json in
       make ~clientToken ?checkoutMetadata ?nodeId ~digitalSignatureMethod
         ~entitlements ~licenseArn ()
     let to_json v = composed_to_json to_value v
@@ -12065,10 +15875,10 @@ module CheckInLicenseRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "LicenseConsumptionToken") in
       make ?beneficiary ~licenseConsumptionToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let beneficiary = field_map json "Beneficiary" String_.of_json in
+    let of_json json__ =
+      let beneficiary = field_map json__ "Beneficiary" String_.of_json in
       let licenseConsumptionToken =
-        field_map_exn json "LicenseConsumptionToken" String_.of_json in
+        field_map_exn json__ "LicenseConsumptionToken" String_.of_json in
       make ?beneficiary ~licenseConsumptionToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12183,10 +15993,10 @@ module AcceptGrantResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "GrantArn") in
       make ?version ?status ?grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let status = field_map json "Status" GrantStatus.of_json in
-      let grantArn = field_map json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let status = field_map json__ "Status" GrantStatus.of_json in
+      let grantArn = field_map json__ "GrantArn" Arn.of_json in
       make ?version ?status ?grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Accepts the specified grant."]
@@ -12205,8 +16015,8 @@ module AcceptGrantRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "GrantArn") in
       make ~grantArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let grantArn = field_map_exn json "GrantArn" Arn.of_json in
+    let of_json json__ =
+      let grantArn = field_map_exn json__ "GrantArn" Arn.of_json in
       make ~grantArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Accepts the specified grant."]

@@ -21,9 +21,7 @@ let get ?profile ?aws_access_key_id ?aws_secret_access_key ?region ?output () =
   >>= function
   | Error e -> Lwt.return (Error e)
   | Ok config_file -> (
-    file
-      Awso.Cfg.Shared_credentials_file.path
-      Awso.Cfg.Shared_credentials_file.of_string
+    file Awso.Cfg.Shared_credentials_file.path Awso.Cfg.Shared_credentials_file.of_string
     >|= function
     | Error e -> Error e
     | Ok shared_credentials_file ->

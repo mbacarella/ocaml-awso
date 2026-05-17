@@ -20,6 +20,10 @@ type ('i, 'o, 'e) t =
   CreatePullThroughCacheRuleResponse.error) t 
   | CreateRepository: (CreateRepositoryRequest.t, CreateRepositoryResponse.t,
   CreateRepositoryResponse.error) t 
+  | CreateRepositoryCreationTemplate:
+  (CreateRepositoryCreationTemplateRequest.t,
+  CreateRepositoryCreationTemplateResponse.t,
+  CreateRepositoryCreationTemplateResponse.error) t 
   | DeleteLifecyclePolicy: (DeleteLifecyclePolicyRequest.t,
   DeleteLifecyclePolicyResponse.t, DeleteLifecyclePolicyResponse.error) t 
   | DeletePullThroughCacheRule: (DeletePullThroughCacheRuleRequest.t,
@@ -29,14 +33,28 @@ type ('i, 'o, 'e) t =
   DeleteRegistryPolicyResponse.t, DeleteRegistryPolicyResponse.error) t 
   | DeleteRepository: (DeleteRepositoryRequest.t, DeleteRepositoryResponse.t,
   DeleteRepositoryResponse.error) t 
+  | DeleteRepositoryCreationTemplate:
+  (DeleteRepositoryCreationTemplateRequest.t,
+  DeleteRepositoryCreationTemplateResponse.t,
+  DeleteRepositoryCreationTemplateResponse.error) t 
   | DeleteRepositoryPolicy: (DeleteRepositoryPolicyRequest.t,
   DeleteRepositoryPolicyResponse.t, DeleteRepositoryPolicyResponse.error) t 
+  | DeleteSigningConfiguration: (DeleteSigningConfigurationRequest.t,
+  DeleteSigningConfigurationResponse.t,
+  DeleteSigningConfigurationResponse.error) t 
+  | DeregisterPullTimeUpdateExclusion:
+  (DeregisterPullTimeUpdateExclusionRequest.t,
+  DeregisterPullTimeUpdateExclusionResponse.t,
+  DeregisterPullTimeUpdateExclusionResponse.error) t 
   | DescribeImageReplicationStatus: (DescribeImageReplicationStatusRequest.t,
   DescribeImageReplicationStatusResponse.t,
   DescribeImageReplicationStatusResponse.error) t 
   | DescribeImageScanFindings: (DescribeImageScanFindingsRequest.t,
   DescribeImageScanFindingsResponse.t,
   DescribeImageScanFindingsResponse.error) t 
+  | DescribeImageSigningStatus: (DescribeImageSigningStatusRequest.t,
+  DescribeImageSigningStatusResponse.t,
+  DescribeImageSigningStatusResponse.error) t 
   | DescribeImages: (DescribeImagesRequest.t, DescribeImagesResponse.t,
   DescribeImagesResponse.error) t 
   | DescribePullThroughCacheRules: (DescribePullThroughCacheRulesRequest.t,
@@ -46,6 +64,12 @@ type ('i, 'o, 'e) t =
   DescribeRegistryResponse.error) t 
   | DescribeRepositories: (DescribeRepositoriesRequest.t,
   DescribeRepositoriesResponse.t, DescribeRepositoriesResponse.error) t 
+  | DescribeRepositoryCreationTemplates:
+  (DescribeRepositoryCreationTemplatesRequest.t,
+  DescribeRepositoryCreationTemplatesResponse.t,
+  DescribeRepositoryCreationTemplatesResponse.error) t 
+  | GetAccountSetting: (GetAccountSettingRequest.t,
+  GetAccountSettingResponse.t, GetAccountSettingResponse.error) t 
   | GetAuthorizationToken: (GetAuthorizationTokenRequest.t,
   GetAuthorizationTokenResponse.t, GetAuthorizationTokenResponse.error) t 
   | GetDownloadUrlForLayer: (GetDownloadUrlForLayerRequest.t,
@@ -63,12 +87,22 @@ type ('i, 'o, 'e) t =
   GetRegistryScanningConfigurationResponse.error) t 
   | GetRepositoryPolicy: (GetRepositoryPolicyRequest.t,
   GetRepositoryPolicyResponse.t, GetRepositoryPolicyResponse.error) t 
+  | GetSigningConfiguration: (GetSigningConfigurationRequest.t,
+  GetSigningConfigurationResponse.t, GetSigningConfigurationResponse.error) t
+  
   | InitiateLayerUpload: (InitiateLayerUploadRequest.t,
   InitiateLayerUploadResponse.t, InitiateLayerUploadResponse.error) t 
+  | ListImageReferrers: (ListImageReferrersRequest.t,
+  ListImageReferrersResponse.t, ListImageReferrersResponse.error) t 
   | ListImages: (ListImagesRequest.t, ListImagesResponse.t,
   ListImagesResponse.error) t 
+  | ListPullTimeUpdateExclusions: (ListPullTimeUpdateExclusionsRequest.t,
+  ListPullTimeUpdateExclusionsResponse.t,
+  ListPullTimeUpdateExclusionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | PutAccountSetting: (PutAccountSettingRequest.t,
+  PutAccountSettingResponse.t, PutAccountSettingResponse.error) t 
   | PutImage: (PutImageRequest.t, PutImageResponse.t, PutImageResponse.error)
   t 
   | PutImageScanningConfiguration: (PutImageScanningConfigurationRequest.t,
@@ -87,6 +121,13 @@ type ('i, 'o, 'e) t =
   | PutReplicationConfiguration: (PutReplicationConfigurationRequest.t,
   PutReplicationConfigurationResponse.t,
   PutReplicationConfigurationResponse.error) t 
+  | PutSigningConfiguration: (PutSigningConfigurationRequest.t,
+  PutSigningConfigurationResponse.t, PutSigningConfigurationResponse.error) t
+  
+  | RegisterPullTimeUpdateExclusion:
+  (RegisterPullTimeUpdateExclusionRequest.t,
+  RegisterPullTimeUpdateExclusionResponse.t,
+  RegisterPullTimeUpdateExclusionResponse.error) t 
   | SetRepositoryPolicy: (SetRepositoryPolicyRequest.t,
   SetRepositoryPolicyResponse.t, SetRepositoryPolicyResponse.error) t 
   | StartImageScan: (StartImageScanRequest.t, StartImageScanResponse.t,
@@ -98,8 +139,21 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateImageStorageClass: (UpdateImageStorageClassRequest.t,
+  UpdateImageStorageClassResponse.t, UpdateImageStorageClassResponse.error) t
+  
+  | UpdatePullThroughCacheRule: (UpdatePullThroughCacheRuleRequest.t,
+  UpdatePullThroughCacheRuleResponse.t,
+  UpdatePullThroughCacheRuleResponse.error) t 
+  | UpdateRepositoryCreationTemplate:
+  (UpdateRepositoryCreationTemplateRequest.t,
+  UpdateRepositoryCreationTemplateResponse.t,
+  UpdateRepositoryCreationTemplateResponse.error) t 
   | UploadLayerPart: (UploadLayerPartRequest.t, UploadLayerPartResponse.t,
   UploadLayerPartResponse.error) t 
+  | ValidatePullThroughCacheRule: (ValidatePullThroughCacheRuleRequest.t,
+  ValidatePullThroughCacheRuleResponse.t,
+  ValidatePullThroughCacheRuleResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchCheckLayerAvailability -> `POST
@@ -109,17 +163,24 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CompleteLayerUpload -> `POST
   | CreatePullThroughCacheRule -> `POST
   | CreateRepository -> `POST
+  | CreateRepositoryCreationTemplate -> `POST
   | DeleteLifecyclePolicy -> `POST
   | DeletePullThroughCacheRule -> `POST
   | DeleteRegistryPolicy -> `POST
   | DeleteRepository -> `POST
+  | DeleteRepositoryCreationTemplate -> `POST
   | DeleteRepositoryPolicy -> `POST
+  | DeleteSigningConfiguration -> `POST
+  | DeregisterPullTimeUpdateExclusion -> `POST
   | DescribeImageReplicationStatus -> `POST
   | DescribeImageScanFindings -> `POST
+  | DescribeImageSigningStatus -> `POST
   | DescribeImages -> `POST
   | DescribePullThroughCacheRules -> `POST
   | DescribeRegistry -> `POST
   | DescribeRepositories -> `POST
+  | DescribeRepositoryCreationTemplates -> `POST
+  | GetAccountSetting -> `POST
   | GetAuthorizationToken -> `POST
   | GetDownloadUrlForLayer -> `POST
   | GetLifecyclePolicy -> `POST
@@ -127,9 +188,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetRegistryPolicy -> `POST
   | GetRegistryScanningConfiguration -> `POST
   | GetRepositoryPolicy -> `POST
+  | GetSigningConfiguration -> `POST
   | InitiateLayerUpload -> `POST
+  | ListImageReferrers -> `POST
   | ListImages -> `POST
+  | ListPullTimeUpdateExclusions -> `POST
   | ListTagsForResource -> `POST
+  | PutAccountSetting -> `POST
   | PutImage -> `POST
   | PutImageScanningConfiguration -> `POST
   | PutImageTagMutability -> `POST
@@ -137,12 +202,18 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutRegistryPolicy -> `POST
   | PutRegistryScanningConfiguration -> `POST
   | PutReplicationConfiguration -> `POST
+  | PutSigningConfiguration -> `POST
+  | RegisterPullTimeUpdateExclusion -> `POST
   | SetRepositoryPolicy -> `POST
   | StartImageScan -> `POST
   | StartLifecyclePolicyPreview -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateImageStorageClass -> `POST
+  | UpdatePullThroughCacheRule -> `POST
+  | UpdateRepositoryCreationTemplate -> `POST
   | UploadLayerPart -> `POST
+  | ValidatePullThroughCacheRule -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -154,18 +225,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CompleteLayerUpload -> (Format.kasprintf Uri.of_string) "/"
       | CreatePullThroughCacheRule -> (Format.kasprintf Uri.of_string) "/"
       | CreateRepository -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRepositoryCreationTemplate ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteLifecyclePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeletePullThroughCacheRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRegistryPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRepository -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRepositoryCreationTemplate ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteRepositoryPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSigningConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | DeregisterPullTimeUpdateExclusion ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeImageReplicationStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeImageScanFindings -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImageSigningStatus -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImages -> (Format.kasprintf Uri.of_string) "/"
       | DescribePullThroughCacheRules -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRegistry -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRepositories -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRepositoryCreationTemplates ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetAccountSetting -> (Format.kasprintf Uri.of_string) "/"
       | GetAuthorizationToken -> (Format.kasprintf Uri.of_string) "/"
       | GetDownloadUrlForLayer -> (Format.kasprintf Uri.of_string) "/"
       | GetLifecyclePolicy -> (Format.kasprintf Uri.of_string) "/"
@@ -174,9 +256,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetRegistryScanningConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | GetRepositoryPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetSigningConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | InitiateLayerUpload -> (Format.kasprintf Uri.of_string) "/"
+      | ListImageReferrers -> (Format.kasprintf Uri.of_string) "/"
       | ListImages -> (Format.kasprintf Uri.of_string) "/"
+      | ListPullTimeUpdateExclusions -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | PutAccountSetting -> (Format.kasprintf Uri.of_string) "/"
       | PutImage -> (Format.kasprintf Uri.of_string) "/"
       | PutImageScanningConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | PutImageTagMutability -> (Format.kasprintf Uri.of_string) "/"
@@ -185,12 +271,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutRegistryScanningConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | PutReplicationConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | PutSigningConfiguration -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterPullTimeUpdateExclusion ->
+          (Format.kasprintf Uri.of_string) "/"
       | SetRepositoryPolicy -> (Format.kasprintf Uri.of_string) "/"
       | StartImageScan -> (Format.kasprintf Uri.of_string) "/"
       | StartLifecyclePolicyPreview -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
-      | UploadLayerPart -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateImageStorageClass -> (Format.kasprintf Uri.of_string) "/"
+      | UpdatePullThroughCacheRule -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateRepositoryCreationTemplate ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UploadLayerPart -> (Format.kasprintf Uri.of_string) "/"
+      | ValidatePullThroughCacheRule -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -257,6 +351,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.CreateRepository")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateRepositoryCreationTemplate ->
+      let json = CreateRepositoryCreationTemplateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.CreateRepositoryCreationTemplate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteLifecyclePolicy ->
       let json = DeleteLifecyclePolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -293,6 +396,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.DeleteRepository")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteRepositoryCreationTemplate ->
+      let json = DeleteRepositoryCreationTemplateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.DeleteRepositoryCreationTemplate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteRepositoryPolicy ->
       let json = DeleteRepositoryPolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -301,6 +413,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.DeleteRepositoryPolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteSigningConfiguration ->
+      let json = DeleteSigningConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.DeleteSigningConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeregisterPullTimeUpdateExclusion ->
+      let json = DeregisterPullTimeUpdateExclusionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.DeregisterPullTimeUpdateExclusion")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeImageReplicationStatus ->
       let json = DescribeImageReplicationStatusRequest.to_json req in
@@ -319,6 +449,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.DescribeImageScanFindings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeImageSigningStatus ->
+      let json = DescribeImageSigningStatusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.DescribeImageSigningStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeImages ->
       let json = DescribeImagesRequest.to_json req in
@@ -355,6 +494,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.DescribeRepositories")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeRepositoryCreationTemplates ->
+      let json = DescribeRepositoryCreationTemplatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.DescribeRepositoryCreationTemplates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAccountSetting ->
+      let json = GetAccountSettingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.GetAccountSetting")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAuthorizationToken ->
       let json = GetAuthorizationTokenRequest.to_json req in
@@ -419,6 +576,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.GetRepositoryPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSigningConfiguration ->
+      let json = GetSigningConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.GetSigningConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | InitiateLayerUpload ->
       let json = InitiateLayerUploadRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -428,6 +594,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.InitiateLayerUpload")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListImageReferrers ->
+      let json = ListImageReferrersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.ListImageReferrers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListImages ->
       let json = ListImagesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -435,6 +610,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonEC2ContainerRegistry_V20150921.ListImages")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPullTimeUpdateExclusions ->
+      let json = ListPullTimeUpdateExclusionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.ListPullTimeUpdateExclusions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
@@ -444,6 +628,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutAccountSetting ->
+      let json = PutAccountSettingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.PutAccountSetting")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutImage ->
       let json = PutImageRequest.to_json req in
@@ -507,6 +700,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.PutReplicationConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutSigningConfiguration ->
+      let json = PutSigningConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.PutSigningConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RegisterPullTimeUpdateExclusion ->
+      let json = RegisterPullTimeUpdateExclusionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.RegisterPullTimeUpdateExclusion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | SetRepositoryPolicy ->
       let json = SetRepositoryPolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -552,6 +763,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateImageStorageClass ->
+      let json = UpdateImageStorageClassRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.UpdateImageStorageClass")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdatePullThroughCacheRule ->
+      let json = UpdatePullThroughCacheRuleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.UpdatePullThroughCacheRule")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateRepositoryCreationTemplate ->
+      let json = UpdateRepositoryCreationTemplateRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.UpdateRepositoryCreationTemplate")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UploadLayerPart ->
       let json = UploadLayerPartRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -560,6 +798,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AmazonEC2ContainerRegistry_V20150921.UploadLayerPart")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ValidatePullThroughCacheRule ->
+      let json = ValidatePullThroughCacheRuleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonEC2ContainerRegistry_V20150921.ValidatePullThroughCacheRule")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -640,6 +887,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateRepositoryResponse.of_json json)
       else
         Error (parse_aws_error (Some CreateRepositoryResponse.error_of_json))
+  | CreateRepositoryCreationTemplate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateRepositoryCreationTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRepositoryCreationTemplateResponse.error_of_json))
   | DeleteLifecyclePolicy ->
       if is_success
       then
@@ -672,6 +928,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteRepositoryResponse.of_json json)
       else
         Error (parse_aws_error (Some DeleteRepositoryResponse.error_of_json))
+  | DeleteRepositoryCreationTemplate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteRepositoryCreationTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRepositoryCreationTemplateResponse.error_of_json))
   | DeleteRepositoryPolicy ->
       if is_success
       then
@@ -681,6 +946,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteRepositoryPolicyResponse.error_of_json))
+  | DeleteSigningConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteSigningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSigningConfigurationResponse.error_of_json))
+  | DeregisterPullTimeUpdateExclusion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterPullTimeUpdateExclusionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterPullTimeUpdateExclusionResponse.error_of_json))
   | DescribeImageReplicationStatus ->
       if is_success
       then
@@ -699,6 +982,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeImageScanFindingsResponse.error_of_json))
+  | DescribeImageSigningStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeImageSigningStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeImageSigningStatusResponse.error_of_json))
   | DescribeImages ->
       if is_success
       then
@@ -730,6 +1022,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeRepositoriesResponse.error_of_json))
+  | DescribeRepositoryCreationTemplates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeRepositoryCreationTemplatesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeRepositoryCreationTemplatesResponse.error_of_json))
+  | GetAccountSetting ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAccountSettingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetAccountSettingResponse.error_of_json))
   | GetAuthorizationToken ->
       if is_success
       then
@@ -789,6 +1098,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetRepositoryPolicyResponse.error_of_json))
+  | GetSigningConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSigningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetSigningConfigurationResponse.error_of_json))
   | InitiateLayerUpload ->
       if is_success
       then
@@ -797,12 +1115,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some InitiateLayerUploadResponse.error_of_json))
+  | ListImageReferrers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImageReferrersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListImageReferrersResponse.error_of_json))
   | ListImages ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListImagesResponse.of_json json)
       else Error (parse_aws_error (Some ListImagesResponse.error_of_json))
+  | ListPullTimeUpdateExclusions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPullTimeUpdateExclusionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPullTimeUpdateExclusionsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -811,6 +1146,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | PutAccountSetting ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutAccountSettingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutAccountSettingResponse.error_of_json))
   | PutImage ->
       if is_success
       then
@@ -868,6 +1211,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutReplicationConfigurationResponse.error_of_json))
+  | PutSigningConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutSigningConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutSigningConfigurationResponse.error_of_json))
+  | RegisterPullTimeUpdateExclusion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterPullTimeUpdateExclusionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterPullTimeUpdateExclusionResponse.error_of_json))
   | SetRepositoryPolicy ->
       if is_success
       then
@@ -904,6 +1265,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateImageStorageClass ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateImageStorageClassResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateImageStorageClassResponse.error_of_json))
+  | UpdatePullThroughCacheRule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdatePullThroughCacheRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdatePullThroughCacheRuleResponse.error_of_json))
+  | UpdateRepositoryCreationTemplate ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateRepositoryCreationTemplateResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRepositoryCreationTemplateResponse.error_of_json))
   | UploadLayerPart ->
       if is_success
       then
@@ -911,3 +1299,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UploadLayerPartResponse.of_json json)
       else
         Error (parse_aws_error (Some UploadLayerPartResponse.error_of_json))
+  | ValidatePullThroughCacheRule ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ValidatePullThroughCacheRuleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ValidatePullThroughCacheRuleResponse.error_of_json))

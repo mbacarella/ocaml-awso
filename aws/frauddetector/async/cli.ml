@@ -206,6 +206,34 @@ let create_detector_version =
               ~rules:(Values.RuleList.of_json rules) ())
            (Some Values.CreateDetectorVersionResult.to_json)
            (Some Values.CreateDetectorVersionResult.error_to_json)])
+let create_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and elements =
+         flag "elements" (optional json_arg) ~doc:"JSON ElementsList"
+       and variableType =
+         flag "variable-type" (optional string) ~doc:"STRING variableType"
+       and description =
+         flag "description" (optional string) ~doc:"STRING description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON tagList"
+       and name =
+         flag "name" (required string) ~doc:"STRING noDashIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_list
+           (Values.CreateListRequest.make
+              ?elements:(Option.map ~f:Values.ElementsList.of_json elements)
+              ?variableType ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
+           (Some Values.CreateListResult.to_json)
+           (Some Values.CreateListResult.error_to_json)])
 let create_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -525,6 +553,23 @@ let delete_label =
            Io.delete_label (Values.DeleteLabelRequest.make ~name ())
            (Some Values.DeleteLabelResult.to_json)
            (Some Values.DeleteLabelResult.error_to_json)])
+let delete_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING noDashIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_list (Values.DeleteListRequest.make ~name ())
+           (Some Values.DeleteListResult.to_json)
+           (Some Values.DeleteListResult.error_to_json)])
 let delete_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -972,6 +1017,50 @@ let get_labels =
            (Values.GetLabelsRequest.make ?name ?nextToken ?maxResults ())
            (Some Values.GetLabelsResult.to_json)
            (Some Values.GetLabelsResult.error_to_json)])
+let get_list_elements =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING nextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListsElementsMaxResults"
+       and name =
+         flag "name" (required string) ~doc:"STRING noDashIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_list_elements
+           (Values.GetListElementsRequest.make ?nextToken ?maxResults ~name
+              ()) (Some Values.GetListElementsResult.to_json)
+           (Some Values.GetListElementsResult.error_to_json)])
+let get_lists_metadata =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING noDashIdentifier"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING nextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListsMetadataMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lists_metadata
+           (Values.GetListsMetadataRequest.make ?name ?nextToken ?maxResults
+              ()) (Some Values.GetListsMetadataResult.to_json)
+           (Some Values.GetListsMetadataResult.error_to_json)])
 let get_model_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1224,6 +1313,9 @@ let put_event_type =
          flag "event-ingestion" (optional json_arg)
            ~doc:"JSON EventIngestion"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON tagList"
+       and eventOrchestration =
+         flag "event-orchestration" (optional json_arg)
+           ~doc:"JSON EventOrchestration"
        and name = flag "name" (required string) ~doc:"STRING identifier"
        and eventVariables =
          flag "event-variables" (required json_arg)
@@ -1238,7 +1330,10 @@ let put_event_type =
               ?labels:(Option.map ~f:Values.ListOfStrings.of_json labels)
               ?eventIngestion:(Option.map ~f:Values.EventIngestion.of_json
                                  eventIngestion)
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?eventOrchestration:(Option.map
+                                     ~f:Values.EventOrchestration.of_json
+                                     eventOrchestration) ~name
               ~eventVariables:(Values.NonEmptyListOfStrings.of_json
                                  eventVariables)
               ~entityTypes:(Values.NonEmptyListOfStrings.of_json entityTypes)
@@ -1546,6 +1641,36 @@ let update_event_label =
               ~assignedLabel ~labelTimestamp ())
            (Some Values.UpdateEventLabelResult.to_json)
            (Some Values.UpdateEventLabelResult.error_to_json)])
+let update_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and elements =
+         flag "elements" (optional json_arg) ~doc:"JSON ElementsList"
+       and description =
+         flag "description" (optional string) ~doc:"STRING description"
+       and updateMode =
+         flag "update-mode" (optional json_arg) ~doc:"JSON ListUpdateMode"
+       and variableType =
+         flag "variable-type" (optional string) ~doc:"STRING variableType"
+       and name =
+         flag "name" (required string) ~doc:"STRING noDashIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_list
+           (Values.UpdateListRequest.make
+              ?elements:(Option.map ~f:Values.ElementsList.of_json elements)
+              ?description
+              ?updateMode:(Option.map ~f:Values.ListUpdateMode.of_json
+                             updateMode) ?variableType ~name ())
+           (Some Values.UpdateListResult.to_json)
+           (Some Values.UpdateListResult.error_to_json)])
 let update_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1721,6 +1846,7 @@ let main =
     ("create-batch-import-job", create_batch_import_job);
     ("create-batch-prediction-job", create_batch_prediction_job);
     ("create-detector-version", create_detector_version);
+    ("create-list", create_list);
     ("create-model", create_model);
     ("create-model-version", create_model_version);
     ("create-rule", create_rule);
@@ -1735,6 +1861,7 @@ let main =
     ("delete-events-by-event-type", delete_events_by_event_type);
     ("delete-external-model", delete_external_model);
     ("delete-label", delete_label);
+    ("delete-list", delete_list);
     ("delete-model", delete_model);
     ("delete-model-version", delete_model_version);
     ("delete-outcome", delete_outcome);
@@ -1756,6 +1883,8 @@ let main =
     ("get-external-models", get_external_models);
     ("get-k-m-s-encryption-key", get_k_m_s_encryption_key);
     ("get-labels", get_labels);
+    ("get-list-elements", get_list_elements);
+    ("get-lists-metadata", get_lists_metadata);
     ("get-model-version", get_model_version);
     ("get-models", get_models);
     ("get-outcomes", get_outcomes);
@@ -1777,6 +1906,7 @@ let main =
     ("update-detector-version-metadata", update_detector_version_metadata);
     ("update-detector-version-status", update_detector_version_status);
     ("update-event-label", update_event_label);
+    ("update-list", update_list);
     ("update-model", update_model);
     ("update-model-version", update_model_version);
     ("update-model-version-status", update_model_version_status);

@@ -17,12 +17,18 @@ let copy_package_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyPackageVersions input
 let create_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDomain input
+let create_package_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePackageGroup input
 let create_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateRepository input
 let delete_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDomain input
 let delete_domain_permissions_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDomainPermissionsPolicy input
+let delete_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePackage input
+let delete_package_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePackageGroup input
 let delete_package_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePackageVersions input
 let delete_repository ?endpoint_url ?cfg input =
@@ -31,6 +37,10 @@ let delete_repository_permissions_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRepositoryPermissionsPolicy input
 let describe_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDomain input
+let describe_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribePackage input
+let describe_package_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribePackageGroup input
 let describe_package_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePackageVersion input
 let describe_repository ?endpoint_url ?cfg input =
@@ -39,6 +49,8 @@ let disassociate_external_connection ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateExternalConnection input
 let dispose_package_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisposePackageVersions input
+let get_associated_package_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAssociatedPackageGroup input
 let get_authorization_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAuthorizationToken input
 let get_domain_permissions_policy ?endpoint_url ?cfg input =
@@ -51,8 +63,14 @@ let get_repository_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRepositoryEndpoint input
 let get_repository_permissions_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRepositoryPermissionsPolicy input
+let list_allowed_repositories_for_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAllowedRepositoriesForGroup input
+let list_associated_packages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAssociatedPackages input
 let list_domains ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDomains input
+let list_package_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPackageGroups input
 let list_package_version_assets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPackageVersionAssets input
 let list_package_version_dependencies ?endpoint_url ?cfg input =
@@ -65,16 +83,27 @@ let list_repositories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRepositories input
 let list_repositories_in_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRepositoriesInDomain input
+let list_sub_package_groups ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSubPackageGroups input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let publish_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PublishPackageVersion input
 let put_domain_permissions_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDomainPermissionsPolicy input
+let put_package_origin_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutPackageOriginConfiguration input
 let put_repository_permissions_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRepositoryPermissionsPolicy input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_package_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePackageGroup input
+let update_package_group_origin_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePackageGroupOriginConfiguration
+    input
 let update_package_versions_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePackageVersionsStatus input
 let update_repository ?endpoint_url ?cfg input =

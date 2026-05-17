@@ -213,10 +213,11 @@ module MetricPolicyRule =
           (Xml.child_exn ~context:context_ xml_arg0 "ObjectGroup") in
       make ~objectGroupName ~objectGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let objectGroupName =
-        field_map_exn json "ObjectGroupName" ObjectGroupName.of_json in
-      let objectGroup = field_map_exn json "ObjectGroup" ObjectGroup.of_json in
+        field_map_exn json__ "ObjectGroupName" ObjectGroupName.of_json in
+      let objectGroup =
+        field_map_exn json__ "ObjectGroup" ObjectGroup.of_json in
       make ~objectGroupName ~objectGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -230,6 +231,9 @@ module AllowedHeaders =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Header.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -258,6 +262,9 @@ module AllowedMethods =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MethodName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -287,6 +294,9 @@ module AllowedOrigins =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Origin.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -316,6 +326,9 @@ module ExposeHeaders =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Header.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -516,9 +529,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -559,6 +572,9 @@ module MetricPolicyRules =
           ((check_list_max i ~max:300) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricPolicyRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -644,17 +660,17 @@ module CorsRule =
       make ?exposeHeaders ?maxAgeSeconds ~allowedHeaders ?allowedMethods
         ~allowedOrigins ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exposeHeaders =
-        field_map json "ExposeHeaders" ExposeHeaders.of_json in
+        field_map json__ "ExposeHeaders" ExposeHeaders.of_json in
       let maxAgeSeconds =
-        field_map json "MaxAgeSeconds" MaxAgeSeconds.of_json in
+        field_map json__ "MaxAgeSeconds" MaxAgeSeconds.of_json in
       let allowedHeaders =
-        field_map_exn json "AllowedHeaders" AllowedHeaders.of_json in
+        field_map_exn json__ "AllowedHeaders" AllowedHeaders.of_json in
       let allowedMethods =
-        field_map json "AllowedMethods" AllowedMethods.of_json in
+        field_map json__ "AllowedMethods" AllowedMethods.of_json in
       let allowedOrigins =
-        field_map_exn json "AllowedOrigins" AllowedOrigins.of_json in
+        field_map_exn json__ "AllowedOrigins" AllowedOrigins.of_json in
       make ?exposeHeaders ?maxAgeSeconds ~allowedHeaders ?allowedMethods
         ~allowedOrigins ()
     let to_json v = composed_to_json to_value v
@@ -721,15 +737,15 @@ module Container =
       make ?accessLoggingEnabled ?status ?name ?aRN ?creationTime ?endpoint
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let accessLoggingEnabled =
-        field_map json "AccessLoggingEnabled"
+        field_map json__ "AccessLoggingEnabled"
           ContainerAccessLoggingEnabled.of_json in
-      let status = field_map json "Status" ContainerStatus.of_json in
-      let name = field_map json "Name" ContainerName.of_json in
-      let aRN = field_map json "ARN" ContainerARN.of_json in
-      let creationTime = field_map json "CreationTime" TimeStamp.of_json in
-      let endpoint = field_map json "Endpoint" Endpoint.of_json in
+      let status = field_map json__ "Status" ContainerStatus.of_json in
+      let name = field_map json__ "Name" ContainerName.of_json in
+      let aRN = field_map json__ "ARN" ContainerARN.of_json in
+      let creationTime = field_map json__ "CreationTime" TimeStamp.of_json in
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
       make ?accessLoggingEnabled ?status ?name ?aRN ?creationTime ?endpoint
         ()
     let to_json v = composed_to_json to_value v
@@ -749,8 +765,8 @@ module ContainerInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -769,8 +785,8 @@ module ContainerNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -789,8 +805,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is temporarily unavailable."]
@@ -798,6 +814,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -826,6 +845,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -875,11 +897,11 @@ module MetricPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerLevelMetrics") in
       make ?metricPolicyRules ~containerLevelMetrics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricPolicyRules =
-        field_map json "MetricPolicyRules" MetricPolicyRules.of_json in
+        field_map json__ "MetricPolicyRules" MetricPolicyRules.of_json in
       let containerLevelMetrics =
-        field_map_exn json "ContainerLevelMetrics"
+        field_map_exn json__ "ContainerLevelMetrics"
           ContainerLevelMetrics.of_json in
       make ?metricPolicyRules ~containerLevelMetrics ()
     let to_json v = composed_to_json to_value v
@@ -916,6 +938,9 @@ module CorsPolicy =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CorsRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -960,6 +985,9 @@ module ContainerList =
   struct
     type nonrec t = Container.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Container.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1032,8 +1060,8 @@ module PolicyNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1052,8 +1080,8 @@ module CorsPolicyNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1072,8 +1100,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A service limit has been exceeded."]
@@ -1161,9 +1189,9 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~tagKeys ~resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resource = field_map_exn json "Resource" ContainerARN.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resource = field_map_exn json__ "Resource" ContainerARN.of_json in
       make ~tagKeys ~resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1251,9 +1279,9 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~tags ~resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resource = field_map_exn json "Resource" ContainerARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resource = field_map_exn json__ "Resource" ContainerARN.of_json in
       make ~tags ~resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1336,9 +1364,9 @@ module StopAccessLoggingInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1421,9 +1449,9 @@ module StartAccessLoggingInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1514,11 +1542,11 @@ module PutMetricPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~metricPolicy ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let metricPolicy =
-        field_map_exn json "MetricPolicy" MetricPolicy.of_json in
+        field_map_exn json__ "MetricPolicy" MetricPolicy.of_json in
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~metricPolicy ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1609,11 +1637,11 @@ module PutLifecyclePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~lifecyclePolicy ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicy =
-        field_map_exn json "LifecyclePolicy" LifecyclePolicy.of_json in
+        field_map_exn json__ "LifecyclePolicy" LifecyclePolicy.of_json in
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~lifecyclePolicy ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1703,10 +1731,10 @@ module PutCorsPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~corsPolicy ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let corsPolicy = field_map_exn json "CorsPolicy" CorsPolicy.of_json in
+    let of_json json__ =
+      let corsPolicy = field_map_exn json__ "CorsPolicy" CorsPolicy.of_json in
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~corsPolicy ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1796,10 +1824,10 @@ module PutContainerPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~policy ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" ContainerPolicy.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" ContainerPolicy.of_json in
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~policy ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1865,8 +1893,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the tags assigned to the specified container."]
@@ -1888,8 +1916,8 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "Resource") in
       make ~resource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resource = field_map_exn json "Resource" ContainerARN.of_json in
+    let of_json json__ =
+      let resource = field_map_exn json__ "Resource" ContainerARN.of_json in
       make ~resource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1898,16 +1926,16 @@ module ListContainersOutput =
   struct
     type nonrec t =
       {
-      containers: ContainerList.t [@ocaml.doc "The names of the containers."];
+      containers: ContainerList.t option
+        [@ocaml.doc "The names of the containers."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "NextToken is the token to use in the next call to ListContainers. This token is returned only if you included the MaxResults tag in the original command, and only if there are still containers to return."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListContainersOutput"
-    let make ?nextToken =
-      fun ~containers -> fun () -> { nextToken; containers }
+    let make ?containers =
+      fun ?nextToken -> fun () -> { containers; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -1934,7 +1962,7 @@ module ListContainersOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Containers", (Some (ContainerList.to_value x.containers)));
+        [("Containers", (Option.map x.containers ~f:ContainerList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -1942,14 +1970,14 @@ module ListContainersOutput =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let containers =
-        ContainerList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Containers") in
-      make ?nextToken ~containers ()
+        (Option.map ~f:ContainerList.of_xml)
+          (Xml.child xml_arg0 "Containers") in
+      make ?nextToken ?containers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let containers = field_map_exn json "Containers" ContainerList.of_json in
-      make ?nextToken ~containers ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let containers = field_map json__ "Containers" ContainerList.of_json in
+      make ?nextToken ?containers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the properties of all containers in AWS Elemental MediaStore. You can query to receive all the containers in one response. Or you can include the MaxResults parameter to receive a limited number of containers in each response. In this case, the response includes a token. To get the next set of containers, send the command again, this time with the NextToken parameter (with the returned token as its value). The next set of responses appears, with a token if there are still more containers to receive. See also DescribeContainer, which gets the properties of one container."]
@@ -1980,9 +2008,10 @@ module ListContainersInput =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ContainerListLimit.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ContainerListLimit.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1991,7 +2020,7 @@ module GetMetricPolicyOutput =
   struct
     type nonrec t =
       {
-      metricPolicy: MetricPolicy.t
+      metricPolicy: MetricPolicy.t option
         [@ocaml.doc
           "The metric policy that is associated with the specific container."]}
     type nonrec error =
@@ -2000,8 +2029,7 @@ module GetMetricPolicyOutput =
       | `InternalServerError of InternalServerError.t 
       | `PolicyNotFoundException of PolicyNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetMetricPolicyOutput"
-    let make ~metricPolicy = fun () -> { metricPolicy }
+    let make ?metricPolicy = fun () -> { metricPolicy }
     let error_of_json name json =
       match name with
       | "ContainerInUseException" ->
@@ -2053,18 +2081,18 @@ module GetMetricPolicyOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("MetricPolicy", (Some (MetricPolicy.to_value x.metricPolicy)))]
+        [("MetricPolicy",
+           (Option.map x.metricPolicy ~f:MetricPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let metricPolicy =
-        MetricPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricPolicy") in
-      make ~metricPolicy ()
+        (Option.map ~f:MetricPolicy.of_xml)
+          (Xml.child xml_arg0 "MetricPolicy") in
+      make ?metricPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metricPolicy =
-        field_map_exn json "MetricPolicy" MetricPolicy.of_json in
-      make ~metricPolicy ()
+    let of_json json__ =
+      let metricPolicy = field_map json__ "MetricPolicy" MetricPolicy.of_json in
+      make ?metricPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the metric policy for the specified container."]
 module GetMetricPolicyInput =
@@ -2086,9 +2114,9 @@ module GetMetricPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the metric policy for the specified container."]
@@ -2096,7 +2124,7 @@ module GetLifecyclePolicyOutput =
   struct
     type nonrec t =
       {
-      lifecyclePolicy: LifecyclePolicy.t
+      lifecyclePolicy: LifecyclePolicy.t option
         [@ocaml.doc
           "The object lifecycle policy that is assigned to the container."]}
     type nonrec error =
@@ -2105,8 +2133,7 @@ module GetLifecyclePolicyOutput =
       | `InternalServerError of InternalServerError.t 
       | `PolicyNotFoundException of PolicyNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetLifecyclePolicyOutput"
-    let make ~lifecyclePolicy = fun () -> { lifecyclePolicy }
+    let make ?lifecyclePolicy = fun () -> { lifecyclePolicy }
     let error_of_json name json =
       match name with
       | "ContainerInUseException" ->
@@ -2159,18 +2186,18 @@ module GetLifecyclePolicyOutput =
     let to_value x =
       structure_to_value
         [("LifecyclePolicy",
-           (Some (LifecyclePolicy.to_value x.lifecyclePolicy)))]
+           (Option.map x.lifecyclePolicy ~f:LifecyclePolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lifecyclePolicy =
-        LifecyclePolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LifecyclePolicy") in
-      make ~lifecyclePolicy ()
+        (Option.map ~f:LifecyclePolicy.of_xml)
+          (Xml.child xml_arg0 "LifecyclePolicy") in
+      make ?lifecyclePolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lifecyclePolicy =
-        field_map_exn json "LifecyclePolicy" LifecyclePolicy.of_json in
-      make ~lifecyclePolicy ()
+        field_map json__ "LifecyclePolicy" LifecyclePolicy.of_json in
+      make ?lifecyclePolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the object lifecycle policy that is assigned to a container."]
@@ -2193,9 +2220,9 @@ module GetLifecyclePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2204,7 +2231,7 @@ module GetCorsPolicyOutput =
   struct
     type nonrec t =
       {
-      corsPolicy: CorsPolicy.t
+      corsPolicy: CorsPolicy.t option
         [@ocaml.doc "The CORS policy assigned to the container."]}
     type nonrec error =
       [ `ContainerInUseException of ContainerInUseException.t 
@@ -2212,8 +2239,7 @@ module GetCorsPolicyOutput =
       | `CorsPolicyNotFoundException of CorsPolicyNotFoundException.t 
       | `InternalServerError of InternalServerError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetCorsPolicyOutput"
-    let make ~corsPolicy = fun () -> { corsPolicy }
+    let make ?corsPolicy = fun () -> { corsPolicy }
     let error_of_json name json =
       match name with
       | "ContainerInUseException" ->
@@ -2267,17 +2293,16 @@ module GetCorsPolicyOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CorsPolicy", (Some (CorsPolicy.to_value x.corsPolicy)))]
+        [("CorsPolicy", (Option.map x.corsPolicy ~f:CorsPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let corsPolicy =
-        CorsPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CorsPolicy") in
-      make ~corsPolicy ()
+        (Option.map ~f:CorsPolicy.of_xml) (Xml.child xml_arg0 "CorsPolicy") in
+      make ?corsPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let corsPolicy = field_map_exn json "CorsPolicy" CorsPolicy.of_json in
-      make ~corsPolicy ()
+    let of_json json__ =
+      let corsPolicy = field_map json__ "CorsPolicy" CorsPolicy.of_json in
+      make ?corsPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the cross-origin resource sharing (CORS) configuration information that is set for the container. To use this operation, you must have permission to perform the MediaStore:GetCorsPolicy action. By default, the container owner has this permission and can grant it to others."]
@@ -2300,9 +2325,9 @@ module GetCorsPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2311,7 +2336,7 @@ module GetContainerPolicyOutput =
   struct
     type nonrec t =
       {
-      policy: ContainerPolicy.t
+      policy: ContainerPolicy.t option
         [@ocaml.doc "The contents of the access policy."]}
     type nonrec error =
       [ `ContainerInUseException of ContainerInUseException.t 
@@ -2319,8 +2344,7 @@ module GetContainerPolicyOutput =
       | `InternalServerError of InternalServerError.t 
       | `PolicyNotFoundException of PolicyNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetContainerPolicyOutput"
-    let make ~policy = fun () -> { policy }
+    let make ?policy = fun () -> { policy }
     let error_of_json name json =
       match name with
       | "ContainerInUseException" ->
@@ -2372,17 +2396,16 @@ module GetContainerPolicyOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Policy", (Some (ContainerPolicy.to_value x.policy)))]
+        [("Policy", (Option.map x.policy ~f:ContainerPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let policy =
-        ContainerPolicy.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
-      make ~policy ()
+        (Option.map ~f:ContainerPolicy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" ContainerPolicy.of_json in
-      make ~policy ()
+    let of_json json__ =
+      let policy = field_map json__ "Policy" ContainerPolicy.of_json in
+      make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the access policy for the specified container. For information about the data that is included in an access policy, see the AWS Identity and Access Management User Guide."]
@@ -2404,9 +2427,9 @@ module GetContainerPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2464,8 +2487,8 @@ module DescribeContainerOutput =
         (Option.map ~f:Container.of_xml) (Xml.child xml_arg0 "Container") in
       make ?container ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let container = field_map json "Container" Container.of_json in
+    let of_json json__ =
+      let container = field_map json__ "Container" Container.of_json in
       make ?container ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2488,9 +2511,9 @@ module DescribeContainerInput =
           (Xml.child xml_arg0 "ContainerName") in
       make ?containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map json "ContainerName" ContainerName.of_json in
+        field_map json__ "ContainerName" ContainerName.of_json in
       make ?containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2582,9 +2605,9 @@ module DeleteMetricPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2676,9 +2699,9 @@ module DeleteLifecyclePolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2771,9 +2794,9 @@ module DeleteCorsPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2864,9 +2887,9 @@ module DeleteContainerPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2948,9 +2971,9 @@ module DeleteContainerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2959,7 +2982,7 @@ module CreateContainerOutput =
   struct
     type nonrec t =
       {
-      container: Container.t
+      container: Container.t option
         [@ocaml.doc
           "ContainerARN: The Amazon Resource Name (ARN) of the newly created container. The ARN has the following format: arn:aws:<region>:<account that owns this container>:container/<name of container>. For example: arn:aws:mediastore:us-west-2:111122223333:container/movies ContainerName: The container name as specified in the request. CreationTime: Unix time stamp. Status: The status of container creation or deletion. The status is one of the following: CREATING, ACTIVE, or DELETING. While the service is creating the container, the status is CREATING. When an endpoint is available, the status changes to ACTIVE. The return value does not include the container's endpoint. To make downstream requests, you must obtain this value by using DescribeContainer or ListContainers."]}
     type nonrec error =
@@ -2967,8 +2990,7 @@ module CreateContainerOutput =
       | `InternalServerError of InternalServerError.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateContainerOutput"
-    let make ~container = fun () -> { container }
+    let make ?container = fun () -> { container }
     let error_of_json name json =
       match name with
       | "ContainerInUseException" ->
@@ -3011,17 +3033,16 @@ module CreateContainerOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Container", (Some (Container.to_value x.container)))]
+        [("Container", (Option.map x.container ~f:Container.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let container =
-        Container.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Container") in
-      make ~container ()
+        (Option.map ~f:Container.of_xml) (Xml.child xml_arg0 "Container") in
+      make ?container ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let container = field_map_exn json "Container" Container.of_json in
-      make ~container ()
+    let of_json json__ =
+      let container = field_map json__ "Container" Container.of_json in
+      make ?container ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a storage container to hold objects. A container is similar to a bucket in the Amazon S3 service."]
@@ -3049,10 +3070,10 @@ module CreateContainerInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ContainerName") in
       make ?tags ~containerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let containerName =
-        field_map_exn json "ContainerName" ContainerName.of_json in
+        field_map_exn json__ "ContainerName" ContainerName.of_json in
       make ?tags ~containerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

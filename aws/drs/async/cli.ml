@@ -28,6 +28,97 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_source_network_stack =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceNetworkID =
+         flag "source-network-i-d" (required string)
+           ~doc:"STRING SourceNetworkID"
+       and cfnStackName =
+         flag "cfn-stack-name" (required string) ~doc:"STRING CfnStackName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_source_network_stack
+           (Values.AssociateSourceNetworkStackRequest.make ~sourceNetworkID
+              ~cfnStackName ())
+           (Some Values.AssociateSourceNetworkStackResponse.to_json)
+           (Some Values.AssociateSourceNetworkStackResponse.error_to_json)])
+let create_extended_source_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and sourceServerArn =
+         flag "source-server-arn" (required string)
+           ~doc:"STRING SourceServerARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_extended_source_server
+           (Values.CreateExtendedSourceServerRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~sourceServerArn ())
+           (Some Values.CreateExtendedSourceServerResponse.to_json)
+           (Some Values.CreateExtendedSourceServerResponse.error_to_json)])
+let create_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and launchDisposition =
+         flag "launch-disposition" (optional json_arg)
+           ~doc:"JSON LaunchDisposition"
+       and targetInstanceTypeRightSizingMethod =
+         flag "target-instance-type-right-sizing-method" (optional json_arg)
+           ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and exportBucketArn =
+         flag "export-bucket-arn" (optional string) ~doc:"STRING ARN"
+       and postLaunchEnabled =
+         flag "post-launch-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and launchIntoSourceInstance =
+         flag "launch-into-source-instance" (optional bool)
+           ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_launch_configuration_template
+           (Values.CreateLaunchConfigurationTemplateRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?launchDisposition:(Option.map
+                                    ~f:Values.LaunchDisposition.of_json
+                                    launchDisposition)
+              ?targetInstanceTypeRightSizingMethod:(Option.map
+                                                      ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
+                                                      targetInstanceTypeRightSizingMethod)
+              ?copyPrivateIp ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?exportBucketArn ?postLaunchEnabled ?launchIntoSourceInstance
+              ())
+           (Some Values.CreateLaunchConfigurationTemplateResponse.to_json)
+           (Some
+              Values.CreateLaunchConfigurationTemplateResponse.error_to_json)])
 let create_replication_configuration_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -38,66 +129,99 @@ let create_replication_configuration_template =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and associateDefaultSecurityGroup =
+         flag "associate-default-security-group" (optional bool)
+           ~doc:"BOOL Boolean"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (optional string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (optional bool)
+           ~doc:"BOOL Boolean"
+       and defaultLargeStagingDiskType =
+         flag "default-large-staging-disk-type" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and associateDefaultSecurityGroup =
-         flag "associate-default-security-group" (required bool)
-           ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (required json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (required bool) ~doc:"BOOL Boolean"
        and dataPlaneRouting =
-         flag "data-plane-routing" (required json_arg)
+         flag "data-plane-routing" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
-       and defaultLargeStagingDiskType =
-         flag "default-large-staging-disk-type" (required json_arg)
-           ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
-       and ebsEncryption =
-         flag "ebs-encryption" (required json_arg)
-           ~doc:"JSON ReplicationConfigurationEbsEncryption"
-       and pitPolicy =
-         flag "pit-policy" (required json_arg) ~doc:"JSON PITPolicy"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (required string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (required json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and createPublicIP =
+         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and autoReplicateNewDisks =
+         flag "auto-replicate-new-disks" (optional bool) ~doc:"BOOL Boolean"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
        and stagingAreaSubnetId =
          flag "staging-area-subnet-id" (required string)
            ~doc:"STRING SubnetID"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (required json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and ebsEncryption =
+         flag "ebs-encryption" (required json_arg)
+           ~doc:"JSON ReplicationConfigurationEbsEncryption"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (required json_arg)
+           ~doc:"JSON PositiveInteger"
        and stagingAreaTags =
          flag "staging-area-tags" (required json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (required bool)
-           ~doc:"BOOL Boolean" in
+       and pitPolicy =
+         flag "pit-policy" (required json_arg) ~doc:"JSON PITPolicy" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_replication_configuration_template
            (Values.CreateReplicationConfigurationTemplateRequest.make
-              ?ebsEncryptionKeyArn
-              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
-              ~associateDefaultSecurityGroup
-              ~bandwidthThrottling:(Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ~createPublicIP
-              ~dataPlaneRouting:(Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
-              ~defaultLargeStagingDiskType:(Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
+              ?associateDefaultSecurityGroup ?replicationServerInstanceType
+              ?useDedicatedReplicationServer
+              ?defaultLargeStagingDiskType:(Option.map
+                                              ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
                                               defaultLargeStagingDiskType)
-              ~ebsEncryption:(Values.ReplicationConfigurationEbsEncryption.of_json
-                                ebsEncryption)
-              ~pitPolicy:(Values.PITPolicy.of_json pitPolicy)
-              ~replicationServerInstanceType
+              ?ebsEncryptionKeyArn
+              ?dataPlaneRouting:(Option.map
+                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ?createPublicIP
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ?autoReplicateNewDisks
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol) ~stagingAreaSubnetId
               ~replicationServersSecurityGroupsIDs:(Values.ReplicationServersSecurityGroupsIDs.of_json
                                                       replicationServersSecurityGroupsIDs)
-              ~stagingAreaSubnetId
+              ~ebsEncryption:(Values.ReplicationConfigurationEbsEncryption.of_json
+                                ebsEncryption)
+              ~bandwidthThrottling:(Values.PositiveInteger.of_json
+                                      bandwidthThrottling)
               ~stagingAreaTags:(Values.TagsMap.of_json stagingAreaTags)
-              ~useDedicatedReplicationServer ())
+              ~pitPolicy:(Values.PITPolicy.of_json pitPolicy) ())
            (Some Values.ReplicationConfigurationTemplate.to_json)
            (Some Values.ReplicationConfigurationTemplate.error_to_json)])
+let create_source_network =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and vpcID = flag "vpc-i-d" (required string) ~doc:"STRING VpcID"
+       and originAccountID =
+         flag "origin-account-i-d" (required string) ~doc:"STRING AccountID"
+       and originRegion =
+         flag "origin-region" (required string) ~doc:"STRING AwsRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_source_network
+           (Values.CreateSourceNetworkRequest.make
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags) ~vpcID
+              ~originAccountID ~originRegion ())
+           (Some Values.CreateSourceNetworkResponse.to_json)
+           (Some Values.CreateSourceNetworkResponse.error_to_json)])
 let delete_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -114,6 +238,48 @@ let delete_job =
            Io.delete_job (Values.DeleteJobRequest.make ~jobID ())
            (Some Values.DeleteJobResponse.to_json)
            (Some Values.DeleteJobResponse.error_to_json)])
+let delete_launch_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceId =
+         flag "resource-id" (required string)
+           ~doc:"STRING LaunchActionResourceId"
+       and actionId =
+         flag "action-id" (required string) ~doc:"STRING LaunchActionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_launch_action
+           (Values.DeleteLaunchActionRequest.make ~resourceId ~actionId ())
+           (Some Values.DeleteLaunchActionResponse.to_json)
+           (Some Values.DeleteLaunchActionResponse.error_to_json)])
+let delete_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_launch_configuration_template
+           (Values.DeleteLaunchConfigurationTemplateRequest.make
+              ~launchConfigurationTemplateID ())
+           (Some Values.DeleteLaunchConfigurationTemplateResponse.to_json)
+           (Some
+              Values.DeleteLaunchConfigurationTemplateResponse.error_to_json)])
 let delete_recovery_instance =
   Command.async ~summary:""
     ([%map_open.Command
@@ -154,6 +320,25 @@ let delete_replication_configuration_template =
               Values.DeleteReplicationConfigurationTemplateResponse.to_json)
            (Some
               Values.DeleteReplicationConfigurationTemplateResponse.error_to_json)])
+let delete_source_network =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceNetworkID =
+         flag "source-network-i-d" (required string)
+           ~doc:"STRING SourceNetworkID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_source_network
+           (Values.DeleteSourceNetworkRequest.make ~sourceNetworkID ())
+           (Some Values.DeleteSourceNetworkResponse.to_json)
+           (Some Values.DeleteSourceNetworkResponse.error_to_json)])
 let delete_source_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -204,20 +389,50 @@ let describe_jobs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeJobsRequestFilters"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and filters =
-         flag "filters" (required json_arg)
-           ~doc:"JSON DescribeJobsRequestFilters" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_jobs
-           (Values.DescribeJobsRequest.make ?maxResults ?nextToken
-              ~filters:(Values.DescribeJobsRequestFilters.of_json filters) ())
+           (Values.DescribeJobsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeJobsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ())
            (Some Values.DescribeJobsResponse.to_json)
            (Some Values.DescribeJobsResponse.error_to_json)])
+let describe_launch_configuration_templates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchConfigurationTemplateIDs =
+         flag "launch-configuration-template-i-ds" (optional json_arg)
+           ~doc:"JSON LaunchConfigurationTemplateIDs"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_launch_configuration_templates
+           (Values.DescribeLaunchConfigurationTemplatesRequest.make
+              ?launchConfigurationTemplateIDs:(Option.map
+                                                 ~f:Values.LaunchConfigurationTemplateIDs.of_json
+                                                 launchConfigurationTemplateIDs)
+              ?maxResults ?nextToken ())
+           (Some Values.DescribeLaunchConfigurationTemplatesResponse.to_json)
+           (Some
+              Values.DescribeLaunchConfigurationTemplatesResponse.error_to_json)])
 let describe_recovery_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -228,20 +443,20 @@ let describe_recovery_instances =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeRecoveryInstancesRequestFilters"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and filters =
-         flag "filters" (required json_arg)
-           ~doc:"JSON DescribeRecoveryInstancesRequestFilters" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_recovery_instances
-           (Values.DescribeRecoveryInstancesRequest.make ?maxResults
-              ?nextToken
-              ~filters:(Values.DescribeRecoveryInstancesRequestFilters.of_json
-                          filters) ())
+           (Values.DescribeRecoveryInstancesRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeRecoveryInstancesRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ())
            (Some Values.DescribeRecoveryInstancesResponse.to_json)
            (Some Values.DescribeRecoveryInstancesResponse.error_to_json)])
 let describe_recovery_snapshots =
@@ -257,12 +472,12 @@ let describe_recovery_snapshots =
        and filters =
          flag "filters" (optional json_arg)
            ~doc:"JSON DescribeRecoverySnapshotsRequestFilters"
+       and order =
+         flag "order" (optional json_arg) ~doc:"JSON RecoverySnapshotsOrder"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and order =
-         flag "order" (optional json_arg) ~doc:"JSON RecoverySnapshotsOrder"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
@@ -272,9 +487,9 @@ let describe_recovery_snapshots =
            (Values.DescribeRecoverySnapshotsRequest.make
               ?filters:(Option.map
                           ~f:Values.DescribeRecoverySnapshotsRequestFilters.of_json
-                          filters) ?maxResults ?nextToken
+                          filters)
               ?order:(Option.map ~f:Values.RecoverySnapshotsOrder.of_json
-                        order) ~sourceServerID ())
+                        order) ?maxResults ?nextToken ~sourceServerID ())
            (Some Values.DescribeRecoverySnapshotsResponse.to_json)
            (Some Values.DescribeRecoverySnapshotsResponse.error_to_json)])
 let describe_replication_configuration_templates =
@@ -287,25 +502,51 @@ let describe_replication_configuration_templates =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and replicationConfigurationTemplateIDs =
+         flag "replication-configuration-template-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationTemplateIDs"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and replicationConfigurationTemplateIDs =
-         flag "replication-configuration-template-i-ds" (required json_arg)
-           ~doc:"JSON ReplicationConfigurationTemplateIDs" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_replication_configuration_templates
            (Values.DescribeReplicationConfigurationTemplatesRequest.make
-              ?maxResults ?nextToken
-              ~replicationConfigurationTemplateIDs:(Values.ReplicationConfigurationTemplateIDs.of_json
+              ?replicationConfigurationTemplateIDs:(Option.map
+                                                      ~f:Values.ReplicationConfigurationTemplateIDs.of_json
                                                       replicationConfigurationTemplateIDs)
-              ())
+              ?maxResults ?nextToken ())
            (Some
               Values.DescribeReplicationConfigurationTemplatesResponse.to_json)
            (Some
               Values.DescribeReplicationConfigurationTemplatesResponse.error_to_json)])
+let describe_source_networks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeSourceNetworksRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_source_networks
+           (Values.DescribeSourceNetworksRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeSourceNetworksRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.DescribeSourceNetworksResponse.to_json)
+           (Some Values.DescribeSourceNetworksResponse.error_to_json)])
 let describe_source_servers =
   Command.async ~summary:""
     ([%map_open.Command
@@ -316,19 +557,20 @@ let describe_source_servers =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON DescribeSourceServersRequestFilters"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT StrictlyPositiveInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and filters =
-         flag "filters" (required json_arg)
-           ~doc:"JSON DescribeSourceServersRequestFilters" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_source_servers
-           (Values.DescribeSourceServersRequest.make ?maxResults ?nextToken
-              ~filters:(Values.DescribeSourceServersRequestFilters.of_json
-                          filters) ())
+           (Values.DescribeSourceServersRequest.make
+              ?filters:(Option.map
+                          ~f:Values.DescribeSourceServersRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ())
            (Some Values.DescribeSourceServersResponse.to_json)
            (Some Values.DescribeSourceServersResponse.error_to_json)])
 let disconnect_recovery_instance =
@@ -368,6 +610,26 @@ let disconnect_source_server =
            (Values.DisconnectSourceServerRequest.make ~sourceServerID ())
            (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
+let export_source_network_cfn_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceNetworkID =
+         flag "source-network-i-d" (required string)
+           ~doc:"STRING SourceNetworkID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_source_network_cfn_template
+           (Values.ExportSourceNetworkCfnTemplateRequest.make
+              ~sourceNetworkID ())
+           (Some Values.ExportSourceNetworkCfnTemplateResponse.to_json)
+           (Some Values.ExportSourceNetworkCfnTemplateResponse.error_to_json)])
 let get_failback_replication_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -443,6 +705,80 @@ let initialize_service =
            Io.initialize_service (Values.InitializeServiceRequest.make ())
            (Some Values.InitializeServiceResponse.to_json)
            (Some Values.InitializeServiceResponse.error_to_json)])
+let list_extensible_source_servers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsReplicatingSourceServers"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and stagingAccountID =
+         flag "staging-account-i-d" (required string) ~doc:"STRING AccountID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_extensible_source_servers
+           (Values.ListExtensibleSourceServersRequest.make ?maxResults
+              ?nextToken ~stagingAccountID ())
+           (Some Values.ListExtensibleSourceServersResponse.to_json)
+           (Some Values.ListExtensibleSourceServersResponse.error_to_json)])
+let list_launch_actions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON LaunchActionsRequestFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and resourceId =
+         flag "resource-id" (required string)
+           ~doc:"STRING LaunchActionResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_launch_actions
+           (Values.ListLaunchActionsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.LaunchActionsRequestFilters.of_json
+                          filters) ?maxResults ?nextToken ~resourceId ())
+           (Some Values.ListLaunchActionsResponse.to_json)
+           (Some Values.ListLaunchActionsResponse.error_to_json)])
+let list_staging_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListStagingAccountsRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_staging_accounts
+           (Values.ListStagingAccountsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListStagingAccountsResponse.to_json)
+           (Some Values.ListStagingAccountsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -461,6 +797,50 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_launch_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and parameters =
+         flag "parameters" (optional json_arg)
+           ~doc:"JSON LaunchActionParameters"
+       and resourceId =
+         flag "resource-id" (required string)
+           ~doc:"STRING LaunchActionResourceId"
+       and actionCode =
+         flag "action-code" (required string) ~doc:"STRING SsmDocumentName"
+       and order = flag "order" (required int) ~doc:"INT LaunchActionOrder"
+       and actionId =
+         flag "action-id" (required string) ~doc:"STRING LaunchActionId"
+       and optional = flag "optional" (required bool) ~doc:"BOOL Boolean"
+       and active = flag "active" (required bool) ~doc:"BOOL Boolean"
+       and name =
+         flag "name" (required string) ~doc:"STRING LaunchActionName"
+       and actionVersion =
+         flag "action-version" (required string)
+           ~doc:"STRING LaunchActionVersion"
+       and category =
+         flag "category" (required json_arg) ~doc:"JSON LaunchActionCategory"
+       and description =
+         flag "description" (required string)
+           ~doc:"STRING LaunchActionDescription" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_launch_action
+           (Values.PutLaunchActionRequest.make
+              ?parameters:(Option.map
+                             ~f:Values.LaunchActionParameters.of_json
+                             parameters) ~resourceId ~actionCode ~order
+              ~actionId ~optional ~active ~name ~actionVersion
+              ~category:(Values.LaunchActionCategory.of_json category)
+              ~description ()) (Some Values.PutLaunchActionResponse.to_json)
+           (Some Values.PutLaunchActionResponse.error_to_json)])
 let retry_data_replication =
   Command.async ~summary:""
     ([%map_open.Command
@@ -480,6 +860,25 @@ let retry_data_replication =
            (Values.RetryDataReplicationRequest.make ~sourceServerID ())
            (Some Values.SourceServer.to_json)
            (Some Values.SourceServer.error_to_json)])
+let reverse_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recoveryInstanceID =
+         flag "recovery-instance-i-d" (required string)
+           ~doc:"STRING RecoveryInstanceID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reverse_replication
+           (Values.ReverseReplicationRequest.make ~recoveryInstanceID ())
+           (Some Values.ReverseReplicationResponse.to_json)
+           (Some Values.ReverseReplicationResponse.error_to_json)])
 let start_failback_launch =
   Command.async ~summary:""
     ([%map_open.Command
@@ -527,6 +926,69 @@ let start_recovery =
                                 sourceServers) ())
            (Some Values.StartRecoveryResponse.to_json)
            (Some Values.StartRecoveryResponse.error_to_json)])
+let start_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_replication
+           (Values.StartReplicationRequest.make ~sourceServerID ())
+           (Some Values.StartReplicationResponse.to_json)
+           (Some Values.StartReplicationResponse.error_to_json)])
+let start_source_network_recovery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deployAsNew =
+         flag "deploy-as-new" (optional bool) ~doc:"BOOL Boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagsMap"
+       and sourceNetworks =
+         flag "source-networks" (required json_arg)
+           ~doc:"JSON StartSourceNetworkRecoveryRequestNetworkEntries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_source_network_recovery
+           (Values.StartSourceNetworkRecoveryRequest.make ?deployAsNew
+              ?tags:(Option.map ~f:Values.TagsMap.of_json tags)
+              ~sourceNetworks:(Values.StartSourceNetworkRecoveryRequestNetworkEntries.of_json
+                                 sourceNetworks) ())
+           (Some Values.StartSourceNetworkRecoveryResponse.to_json)
+           (Some Values.StartSourceNetworkRecoveryResponse.error_to_json)])
+let start_source_network_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceNetworkID =
+         flag "source-network-i-d" (required string)
+           ~doc:"STRING SourceNetworkID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_source_network_replication
+           (Values.StartSourceNetworkReplicationRequest.make ~sourceNetworkID
+              ()) (Some Values.StartSourceNetworkReplicationResponse.to_json)
+           (Some Values.StartSourceNetworkReplicationResponse.error_to_json)])
 let stop_failback =
   Command.async ~summary:""
     ([%map_open.Command
@@ -544,6 +1006,44 @@ let stop_failback =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_failback
            (Values.StopFailbackRequest.make ~recoveryInstanceID ()) None None])
+let stop_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceServerID =
+         flag "source-server-i-d" (required string)
+           ~doc:"STRING SourceServerID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_replication
+           (Values.StopReplicationRequest.make ~sourceServerID ())
+           (Some Values.StopReplicationResponse.to_json)
+           (Some Values.StopReplicationResponse.error_to_json)])
+let stop_source_network_replication =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sourceNetworkID =
+         flag "source-network-i-d" (required string)
+           ~doc:"STRING SourceNetworkID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_source_network_replication
+           (Values.StopSourceNetworkReplicationRequest.make ~sourceNetworkID
+              ()) (Some Values.StopSourceNetworkReplicationResponse.to_json)
+           (Some Values.StopSourceNetworkReplicationResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -611,23 +1111,29 @@ let update_failback_replication_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING BoundedString"
        and bandwidthThrottling =
          flag "bandwidth-throttling" (optional json_arg)
            ~doc:"JSON PositiveInteger"
-       and name = flag "name" (optional string) ~doc:"STRING BoundedString"
        and usePrivateIP =
          flag "use-private-i-p" (optional bool) ~doc:"BOOL Boolean"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
        and recoveryInstanceID =
          flag "recovery-instance-i-d" (required string)
            ~doc:"STRING RecoveryInstanceID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_failback_replication_configuration
-           (Values.UpdateFailbackReplicationConfigurationRequest.make
+           (Values.UpdateFailbackReplicationConfigurationRequest.make ?name
               ?bandwidthThrottling:(Option.map
                                       ~f:Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ?name
-              ?usePrivateIP ~recoveryInstanceID ()) None None])
+                                      bandwidthThrottling) ?usePrivateIP
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol) ~recoveryInstanceID ())
+           None None])
 let update_launch_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -638,37 +1144,93 @@ let update_launch_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and copyPrivateIp =
-         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
-       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and name =
+         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
        and launchDisposition =
          flag "launch-disposition" (optional json_arg)
            ~doc:"JSON LaunchDisposition"
-       and licensing =
-         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
-       and name =
-         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
        and targetInstanceTypeRightSizingMethod =
          flag "target-instance-type-right-sizing-method" (optional json_arg)
            ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and postLaunchEnabled =
+         flag "post-launch-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and launchIntoInstanceProperties =
+         flag "launch-into-instance-properties" (optional json_arg)
+           ~doc:"JSON LaunchIntoInstanceProperties"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_launch_configuration
-           (Values.UpdateLaunchConfigurationRequest.make ?copyPrivateIp
-              ?copyTags
+           (Values.UpdateLaunchConfigurationRequest.make ?name
               ?launchDisposition:(Option.map
                                     ~f:Values.LaunchDisposition.of_json
                                     launchDisposition)
-              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
-              ?name
               ?targetInstanceTypeRightSizingMethod:(Option.map
                                                       ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
                                                       targetInstanceTypeRightSizingMethod)
+              ?copyPrivateIp ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?postLaunchEnabled
+              ?launchIntoInstanceProperties:(Option.map
+                                               ~f:Values.LaunchIntoInstanceProperties.of_json
+                                               launchIntoInstanceProperties)
               ~sourceServerID ()) (Some Values.LaunchConfiguration.to_json)
            (Some Values.LaunchConfiguration.error_to_json)])
+let update_launch_configuration_template =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and launchDisposition =
+         flag "launch-disposition" (optional json_arg)
+           ~doc:"JSON LaunchDisposition"
+       and targetInstanceTypeRightSizingMethod =
+         flag "target-instance-type-right-sizing-method" (optional json_arg)
+           ~doc:"JSON TargetInstanceTypeRightSizingMethod"
+       and copyPrivateIp =
+         flag "copy-private-ip" (optional bool) ~doc:"BOOL Boolean"
+       and copyTags = flag "copy-tags" (optional bool) ~doc:"BOOL Boolean"
+       and licensing =
+         flag "licensing" (optional json_arg) ~doc:"JSON Licensing"
+       and exportBucketArn =
+         flag "export-bucket-arn" (optional string) ~doc:"STRING ARN"
+       and postLaunchEnabled =
+         flag "post-launch-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and launchIntoSourceInstance =
+         flag "launch-into-source-instance" (optional bool)
+           ~doc:"BOOL Boolean"
+       and launchConfigurationTemplateID =
+         flag "launch-configuration-template-i-d" (required string)
+           ~doc:"STRING LaunchConfigurationTemplateID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_launch_configuration_template
+           (Values.UpdateLaunchConfigurationTemplateRequest.make
+              ?launchDisposition:(Option.map
+                                    ~f:Values.LaunchDisposition.of_json
+                                    launchDisposition)
+              ?targetInstanceTypeRightSizingMethod:(Option.map
+                                                      ~f:Values.TargetInstanceTypeRightSizingMethod.of_json
+                                                      targetInstanceTypeRightSizingMethod)
+              ?copyPrivateIp ?copyTags
+              ?licensing:(Option.map ~f:Values.Licensing.of_json licensing)
+              ?exportBucketArn ?postLaunchEnabled ?launchIntoSourceInstance
+              ~launchConfigurationTemplateID ())
+           (Some Values.UpdateLaunchConfigurationTemplateResponse.to_json)
+           (Some
+              Values.UpdateLaunchConfigurationTemplateResponse.error_to_json)])
 let update_replication_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -679,78 +1241,85 @@ let update_replication_configuration =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
+       and stagingAreaSubnetId =
+         flag "staging-area-subnet-id" (optional string)
+           ~doc:"STRING SubnetID"
        and associateDefaultSecurityGroup =
          flag "associate-default-security-group" (optional bool)
            ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (optional json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
-       and dataPlaneRouting =
-         flag "data-plane-routing" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (optional string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (optional bool)
+           ~doc:"BOOL Boolean"
        and defaultLargeStagingDiskType =
          flag "default-large-staging-disk-type" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
+       and replicatedDisks =
+         flag "replicated-disks" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationReplicatedDisks"
        and ebsEncryption =
          flag "ebs-encryption" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationEbsEncryption"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
-       and name =
-         flag "name" (optional string) ~doc:"STRING SmallBoundedString"
-       and pitPolicy =
-         flag "pit-policy" (optional json_arg) ~doc:"JSON PITPolicy"
-       and replicatedDisks =
-         flag "replicated-disks" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationReplicatedDisks"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (optional string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (optional json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
-       and stagingAreaSubnetId =
-         flag "staging-area-subnet-id" (optional string)
-           ~doc:"STRING SubnetID"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (optional json_arg)
+           ~doc:"JSON PositiveInteger"
+       and dataPlaneRouting =
+         flag "data-plane-routing" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and createPublicIP =
+         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
        and stagingAreaTags =
          flag "staging-area-tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (optional bool)
-           ~doc:"BOOL Boolean"
+       and pitPolicy =
+         flag "pit-policy" (optional json_arg) ~doc:"JSON PITPolicy"
+       and autoReplicateNewDisks =
+         flag "auto-replicate-new-disks" (optional bool) ~doc:"BOOL Boolean"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
        and sourceServerID =
          flag "source-server-i-d" (required string)
            ~doc:"STRING SourceServerID" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_replication_configuration
-           (Values.UpdateReplicationConfigurationRequest.make
-              ?associateDefaultSecurityGroup
-              ?bandwidthThrottling:(Option.map
-                                      ~f:Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ?createPublicIP
-              ?dataPlaneRouting:(Option.map
-                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
-              ?defaultLargeStagingDiskType:(Option.map
-                                              ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
-                                              defaultLargeStagingDiskType)
-              ?ebsEncryption:(Option.map
-                                ~f:Values.ReplicationConfigurationEbsEncryption.of_json
-                                ebsEncryption) ?ebsEncryptionKeyArn ?name
-              ?pitPolicy:(Option.map ~f:Values.PITPolicy.of_json pitPolicy)
-              ?replicatedDisks:(Option.map
-                                  ~f:Values.ReplicationConfigurationReplicatedDisks.of_json
-                                  replicatedDisks)
-              ?replicationServerInstanceType
+           (Values.UpdateReplicationConfigurationRequest.make ?name
+              ?stagingAreaSubnetId ?associateDefaultSecurityGroup
               ?replicationServersSecurityGroupsIDs:(Option.map
                                                       ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
                                                       replicationServersSecurityGroupsIDs)
-              ?stagingAreaSubnetId
+              ?replicationServerInstanceType ?useDedicatedReplicationServer
+              ?defaultLargeStagingDiskType:(Option.map
+                                              ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
+                                              defaultLargeStagingDiskType)
+              ?replicatedDisks:(Option.map
+                                  ~f:Values.ReplicationConfigurationReplicatedDisks.of_json
+                                  replicatedDisks)
+              ?ebsEncryption:(Option.map
+                                ~f:Values.ReplicationConfigurationEbsEncryption.of_json
+                                ebsEncryption) ?ebsEncryptionKeyArn
+              ?bandwidthThrottling:(Option.map
+                                      ~f:Values.PositiveInteger.of_json
+                                      bandwidthThrottling)
+              ?dataPlaneRouting:(Option.map
+                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ?createPublicIP
               ?stagingAreaTags:(Option.map ~f:Values.TagsMap.of_json
                                   stagingAreaTags)
-              ?useDedicatedReplicationServer ~sourceServerID ())
+              ?pitPolicy:(Option.map ~f:Values.PITPolicy.of_json pitPolicy)
+              ?autoReplicateNewDisks
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol) ~sourceServerID ())
            (Some Values.ReplicationConfiguration.to_json)
            (Some Values.ReplicationConfiguration.error_to_json)])
 let update_replication_configuration_template =
@@ -764,17 +1333,21 @@ let update_replication_configuration_template =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and arn = flag "arn" (optional string) ~doc:"STRING ARN"
+       and stagingAreaSubnetId =
+         flag "staging-area-subnet-id" (optional string)
+           ~doc:"STRING SubnetID"
        and associateDefaultSecurityGroup =
          flag "associate-default-security-group" (optional bool)
            ~doc:"BOOL Boolean"
-       and bandwidthThrottling =
-         flag "bandwidth-throttling" (optional json_arg)
-           ~doc:"JSON PositiveInteger"
-       and createPublicIP =
-         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
-       and dataPlaneRouting =
-         flag "data-plane-routing" (optional json_arg)
-           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and replicationServersSecurityGroupsIDs =
+         flag "replication-servers-security-groups-i-ds" (optional json_arg)
+           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
+       and replicationServerInstanceType =
+         flag "replication-server-instance-type" (optional string)
+           ~doc:"STRING EC2InstanceType"
+       and useDedicatedReplicationServer =
+         flag "use-dedicated-replication-server" (optional bool)
+           ~doc:"BOOL Boolean"
        and defaultLargeStagingDiskType =
          flag "default-large-staging-disk-type" (optional json_arg)
            ~doc:"JSON ReplicationConfigurationDefaultLargeStagingDiskType"
@@ -783,22 +1356,23 @@ let update_replication_configuration_template =
            ~doc:"JSON ReplicationConfigurationEbsEncryption"
        and ebsEncryptionKeyArn =
          flag "ebs-encryption-key-arn" (optional string) ~doc:"STRING ARN"
-       and pitPolicy =
-         flag "pit-policy" (optional json_arg) ~doc:"JSON PITPolicy"
-       and replicationServerInstanceType =
-         flag "replication-server-instance-type" (optional string)
-           ~doc:"STRING EC2InstanceType"
-       and replicationServersSecurityGroupsIDs =
-         flag "replication-servers-security-groups-i-ds" (optional json_arg)
-           ~doc:"JSON ReplicationServersSecurityGroupsIDs"
-       and stagingAreaSubnetId =
-         flag "staging-area-subnet-id" (optional string)
-           ~doc:"STRING SubnetID"
+       and bandwidthThrottling =
+         flag "bandwidth-throttling" (optional json_arg)
+           ~doc:"JSON PositiveInteger"
+       and dataPlaneRouting =
+         flag "data-plane-routing" (optional json_arg)
+           ~doc:"JSON ReplicationConfigurationDataPlaneRouting"
+       and createPublicIP =
+         flag "create-public-i-p" (optional bool) ~doc:"BOOL Boolean"
        and stagingAreaTags =
          flag "staging-area-tags" (optional json_arg) ~doc:"JSON TagsMap"
-       and useDedicatedReplicationServer =
-         flag "use-dedicated-replication-server" (optional bool)
-           ~doc:"BOOL Boolean"
+       and pitPolicy =
+         flag "pit-policy" (optional json_arg) ~doc:"JSON PITPolicy"
+       and autoReplicateNewDisks =
+         flag "auto-replicate-new-disks" (optional bool) ~doc:"BOOL Boolean"
+       and internetProtocol =
+         flag "internet-protocol" (optional json_arg)
+           ~doc:"JSON InternetProtocol"
        and replicationConfigurationTemplateID =
          flag "replication-configuration-template-i-d" (required string)
            ~doc:"STRING ReplicationConfigurationTemplateID" in
@@ -806,66 +1380,94 @@ let update_replication_configuration_template =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_replication_configuration_template
            (Values.UpdateReplicationConfigurationTemplateRequest.make ?arn
-              ?associateDefaultSecurityGroup
-              ?bandwidthThrottling:(Option.map
-                                      ~f:Values.PositiveInteger.of_json
-                                      bandwidthThrottling) ?createPublicIP
-              ?dataPlaneRouting:(Option.map
-                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
-                                   dataPlaneRouting)
+              ?stagingAreaSubnetId ?associateDefaultSecurityGroup
+              ?replicationServersSecurityGroupsIDs:(Option.map
+                                                      ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
+                                                      replicationServersSecurityGroupsIDs)
+              ?replicationServerInstanceType ?useDedicatedReplicationServer
               ?defaultLargeStagingDiskType:(Option.map
                                               ~f:Values.ReplicationConfigurationDefaultLargeStagingDiskType.of_json
                                               defaultLargeStagingDiskType)
               ?ebsEncryption:(Option.map
                                 ~f:Values.ReplicationConfigurationEbsEncryption.of_json
                                 ebsEncryption) ?ebsEncryptionKeyArn
-              ?pitPolicy:(Option.map ~f:Values.PITPolicy.of_json pitPolicy)
-              ?replicationServerInstanceType
-              ?replicationServersSecurityGroupsIDs:(Option.map
-                                                      ~f:Values.ReplicationServersSecurityGroupsIDs.of_json
-                                                      replicationServersSecurityGroupsIDs)
-              ?stagingAreaSubnetId
+              ?bandwidthThrottling:(Option.map
+                                      ~f:Values.PositiveInteger.of_json
+                                      bandwidthThrottling)
+              ?dataPlaneRouting:(Option.map
+                                   ~f:Values.ReplicationConfigurationDataPlaneRouting.of_json
+                                   dataPlaneRouting) ?createPublicIP
               ?stagingAreaTags:(Option.map ~f:Values.TagsMap.of_json
                                   stagingAreaTags)
-              ?useDedicatedReplicationServer
+              ?pitPolicy:(Option.map ~f:Values.PITPolicy.of_json pitPolicy)
+              ?autoReplicateNewDisks
+              ?internetProtocol:(Option.map
+                                   ~f:Values.InternetProtocol.of_json
+                                   internetProtocol)
               ~replicationConfigurationTemplateID ())
            (Some Values.ReplicationConfigurationTemplate.to_json)
            (Some Values.ReplicationConfigurationTemplate.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-replication-configuration-template",
-       create_replication_configuration_template);
+    [("associate-source-network-stack", associate_source_network_stack);
+    ("create-extended-source-server", create_extended_source_server);
+    ("create-launch-configuration-template",
+      create_launch_configuration_template);
+    ("create-replication-configuration-template",
+      create_replication_configuration_template);
+    ("create-source-network", create_source_network);
     ("delete-job", delete_job);
+    ("delete-launch-action", delete_launch_action);
+    ("delete-launch-configuration-template",
+      delete_launch_configuration_template);
     ("delete-recovery-instance", delete_recovery_instance);
     ("delete-replication-configuration-template",
       delete_replication_configuration_template);
+    ("delete-source-network", delete_source_network);
     ("delete-source-server", delete_source_server);
     ("describe-job-log-items", describe_job_log_items);
     ("describe-jobs", describe_jobs);
+    ("describe-launch-configuration-templates",
+      describe_launch_configuration_templates);
     ("describe-recovery-instances", describe_recovery_instances);
     ("describe-recovery-snapshots", describe_recovery_snapshots);
     ("describe-replication-configuration-templates",
       describe_replication_configuration_templates);
+    ("describe-source-networks", describe_source_networks);
     ("describe-source-servers", describe_source_servers);
     ("disconnect-recovery-instance", disconnect_recovery_instance);
     ("disconnect-source-server", disconnect_source_server);
+    ("export-source-network-cfn-template",
+      export_source_network_cfn_template);
     ("get-failback-replication-configuration",
       get_failback_replication_configuration);
     ("get-launch-configuration", get_launch_configuration);
     ("get-replication-configuration", get_replication_configuration);
     ("initialize-service", initialize_service);
+    ("list-extensible-source-servers", list_extensible_source_servers);
+    ("list-launch-actions", list_launch_actions);
+    ("list-staging-accounts", list_staging_accounts);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-launch-action", put_launch_action);
     ("retry-data-replication", retry_data_replication);
+    ("reverse-replication", reverse_replication);
     ("start-failback-launch", start_failback_launch);
     ("start-recovery", start_recovery);
+    ("start-replication", start_replication);
+    ("start-source-network-recovery", start_source_network_recovery);
+    ("start-source-network-replication", start_source_network_replication);
     ("stop-failback", stop_failback);
+    ("stop-replication", stop_replication);
+    ("stop-source-network-replication", stop_source_network_replication);
     ("tag-resource", tag_resource);
     ("terminate-recovery-instances", terminate_recovery_instances);
     ("untag-resource", untag_resource);
     ("update-failback-replication-configuration",
       update_failback_replication_configuration);
     ("update-launch-configuration", update_launch_configuration);
+    ("update-launch-configuration-template",
+      update_launch_configuration_template);
     ("update-replication-configuration", update_replication_configuration);
     ("update-replication-configuration-template",
       update_replication_configuration_template)]

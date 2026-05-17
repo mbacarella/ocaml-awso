@@ -12,6 +12,12 @@ val accept_invitation :
       AcceptInvitationRequest.t ->
         (AcceptInvitationResponse.t, AcceptInvitationResponse.error) Result.t
           Lwt.t
+val batch_delete_automation_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchDeleteAutomationRulesRequest.t ->
+        (BatchDeleteAutomationRulesResponse.t,
+          BatchDeleteAutomationRulesResponse.error) Result.t Lwt.t
 val batch_disable_standards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -24,23 +30,97 @@ val batch_enable_standards :
       BatchEnableStandardsRequest.t ->
         (BatchEnableStandardsResponse.t, BatchEnableStandardsResponse.error)
           Result.t Lwt.t
+val batch_get_automation_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetAutomationRulesRequest.t ->
+        (BatchGetAutomationRulesResponse.t,
+          BatchGetAutomationRulesResponse.error) Result.t Lwt.t
+val batch_get_configuration_policy_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetConfigurationPolicyAssociationsRequest.t ->
+        (BatchGetConfigurationPolicyAssociationsResponse.t,
+          BatchGetConfigurationPolicyAssociationsResponse.error) Result.t
+          Lwt.t
+val batch_get_security_controls :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetSecurityControlsRequest.t ->
+        (BatchGetSecurityControlsResponse.t,
+          BatchGetSecurityControlsResponse.error) Result.t Lwt.t
+val batch_get_standards_control_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetStandardsControlAssociationsRequest.t ->
+        (BatchGetStandardsControlAssociationsResponse.t,
+          BatchGetStandardsControlAssociationsResponse.error) Result.t Lwt.t
 val batch_import_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchImportFindingsRequest.t ->
         (BatchImportFindingsResponse.t, BatchImportFindingsResponse.error)
           Result.t Lwt.t
+val batch_update_automation_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateAutomationRulesRequest.t ->
+        (BatchUpdateAutomationRulesResponse.t,
+          BatchUpdateAutomationRulesResponse.error) Result.t Lwt.t
 val batch_update_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       BatchUpdateFindingsRequest.t ->
         (BatchUpdateFindingsResponse.t, BatchUpdateFindingsResponse.error)
           Result.t Lwt.t
+val batch_update_findings_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateFindingsV2Request.t ->
+        (BatchUpdateFindingsV2Response.t,
+          BatchUpdateFindingsV2Response.error) Result.t Lwt.t
+val batch_update_standards_control_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchUpdateStandardsControlAssociationsRequest.t ->
+        (BatchUpdateStandardsControlAssociationsResponse.t,
+          BatchUpdateStandardsControlAssociationsResponse.error) Result.t
+          Lwt.t
 val create_action_target :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateActionTargetRequest.t ->
         (CreateActionTargetResponse.t, CreateActionTargetResponse.error)
+          Result.t Lwt.t
+val create_aggregator_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAggregatorV2Request.t ->
+        (CreateAggregatorV2Response.t, CreateAggregatorV2Response.error)
+          Result.t Lwt.t
+val create_automation_rule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAutomationRuleRequest.t ->
+        (CreateAutomationRuleResponse.t, CreateAutomationRuleResponse.error)
+          Result.t Lwt.t
+val create_automation_rule_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAutomationRuleV2Request.t ->
+        (CreateAutomationRuleV2Response.t,
+          CreateAutomationRuleV2Response.error) Result.t Lwt.t
+val create_configuration_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConfigurationPolicyRequest.t ->
+        (CreateConfigurationPolicyResponse.t,
+          CreateConfigurationPolicyResponse.error) Result.t Lwt.t
+val create_connector_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConnectorV2Request.t ->
+        (CreateConnectorV2Response.t, CreateConnectorV2Response.error)
           Result.t Lwt.t
 val create_finding_aggregator :
   ?endpoint_url:string ->
@@ -58,6 +138,12 @@ val create_members :
     ?cfg:Awso.Cfg.t ->
       CreateMembersRequest.t ->
         (CreateMembersResponse.t, CreateMembersResponse.error) Result.t Lwt.t
+val create_ticket_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTicketV2Request.t ->
+        (CreateTicketV2Response.t, CreateTicketV2Response.error) Result.t
+          Lwt.t
 val decline_invitations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -69,6 +155,30 @@ val delete_action_target :
     ?cfg:Awso.Cfg.t ->
       DeleteActionTargetRequest.t ->
         (DeleteActionTargetResponse.t, DeleteActionTargetResponse.error)
+          Result.t Lwt.t
+val delete_aggregator_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAggregatorV2Request.t ->
+        (DeleteAggregatorV2Response.t, DeleteAggregatorV2Response.error)
+          Result.t Lwt.t
+val delete_automation_rule_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAutomationRuleV2Request.t ->
+        (DeleteAutomationRuleV2Response.t,
+          DeleteAutomationRuleV2Response.error) Result.t Lwt.t
+val delete_configuration_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConfigurationPolicyRequest.t ->
+        (DeleteConfigurationPolicyResponse.t,
+          DeleteConfigurationPolicyResponse.error) Result.t Lwt.t
+val delete_connector_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConnectorV2Request.t ->
+        (DeleteConnectorV2Response.t, DeleteConnectorV2Response.error)
           Result.t Lwt.t
 val delete_finding_aggregator :
   ?endpoint_url:string ->
@@ -115,6 +225,18 @@ val describe_products :
       DescribeProductsRequest.t ->
         (DescribeProductsResponse.t, DescribeProductsResponse.error) Result.t
           Lwt.t
+val describe_products_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeProductsV2Request.t ->
+        (DescribeProductsV2Response.t, DescribeProductsV2Response.error)
+          Result.t Lwt.t
+val describe_security_hub_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSecurityHubV2Request.t ->
+        (DescribeSecurityHubV2Response.t,
+          DescribeSecurityHubV2Response.error) Result.t Lwt.t
 val describe_standards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -144,6 +266,12 @@ val disable_security_hub :
     ?cfg:Awso.Cfg.t ->
       DisableSecurityHubRequest.t ->
         (DisableSecurityHubResponse.t, DisableSecurityHubResponse.error)
+          Result.t Lwt.t
+val disable_security_hub_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisableSecurityHubV2Request.t ->
+        (DisableSecurityHubV2Response.t, DisableSecurityHubV2Response.error)
           Result.t Lwt.t
 val disassociate_from_administrator_account :
   ?endpoint_url:string ->
@@ -181,12 +309,54 @@ val enable_security_hub :
       EnableSecurityHubRequest.t ->
         (EnableSecurityHubResponse.t, EnableSecurityHubResponse.error)
           Result.t Lwt.t
+val enable_security_hub_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EnableSecurityHubV2Request.t ->
+        (EnableSecurityHubV2Response.t, EnableSecurityHubV2Response.error)
+          Result.t Lwt.t
+val generate_recommended_policy_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GenerateRecommendedPolicyV2Request.t ->
+        (GenerateRecommendedPolicyV2Response.t,
+          GenerateRecommendedPolicyV2Response.error) Result.t Lwt.t
 val get_administrator_account :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAdministratorAccountRequest.t ->
         (GetAdministratorAccountResponse.t,
           GetAdministratorAccountResponse.error) Result.t Lwt.t
+val get_aggregator_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAggregatorV2Request.t ->
+        (GetAggregatorV2Response.t, GetAggregatorV2Response.error) Result.t
+          Lwt.t
+val get_automation_rule_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAutomationRuleV2Request.t ->
+        (GetAutomationRuleV2Response.t, GetAutomationRuleV2Response.error)
+          Result.t Lwt.t
+val get_configuration_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConfigurationPolicyRequest.t ->
+        (GetConfigurationPolicyResponse.t,
+          GetConfigurationPolicyResponse.error) Result.t Lwt.t
+val get_configuration_policy_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConfigurationPolicyAssociationRequest.t ->
+        (GetConfigurationPolicyAssociationResponse.t,
+          GetConfigurationPolicyAssociationResponse.error) Result.t Lwt.t
+val get_connector_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetConnectorV2Request.t ->
+        (GetConnectorV2Response.t, GetConnectorV2Response.error) Result.t
+          Lwt.t
 val get_enabled_standards :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -199,11 +369,34 @@ val get_finding_aggregator :
       GetFindingAggregatorRequest.t ->
         (GetFindingAggregatorResponse.t, GetFindingAggregatorResponse.error)
           Result.t Lwt.t
+val get_finding_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingHistoryRequest.t ->
+        (GetFindingHistoryResponse.t, GetFindingHistoryResponse.error)
+          Result.t Lwt.t
+val get_finding_statistics_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingStatisticsV2Request.t ->
+        (GetFindingStatisticsV2Response.t,
+          GetFindingStatisticsV2Response.error) Result.t Lwt.t
 val get_findings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetFindingsRequest.t ->
         (GetFindingsResponse.t, GetFindingsResponse.error) Result.t Lwt.t
+val get_findings_trends_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingsTrendsV2Request.t ->
+        (GetFindingsTrendsV2Response.t, GetFindingsTrendsV2Response.error)
+          Result.t Lwt.t
+val get_findings_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetFindingsV2Request.t ->
+        (GetFindingsV2Response.t, GetFindingsV2Response.error) Result.t Lwt.t
 val get_insight_results :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -232,11 +425,77 @@ val get_members :
     ?cfg:Awso.Cfg.t ->
       GetMembersRequest.t ->
         (GetMembersResponse.t, GetMembersResponse.error) Result.t Lwt.t
+val get_recommended_policy_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRecommendedPolicyV2Request.t ->
+        (GetRecommendedPolicyV2Response.t,
+          GetRecommendedPolicyV2Response.error) Result.t Lwt.t
+val get_resources_statistics_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcesStatisticsV2Request.t ->
+        (GetResourcesStatisticsV2Response.t,
+          GetResourcesStatisticsV2Response.error) Result.t Lwt.t
+val get_resources_trends_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcesTrendsV2Request.t ->
+        (GetResourcesTrendsV2Response.t, GetResourcesTrendsV2Response.error)
+          Result.t Lwt.t
+val get_resources_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcesV2Request.t ->
+        (GetResourcesV2Response.t, GetResourcesV2Response.error) Result.t
+          Lwt.t
+val get_security_control_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSecurityControlDefinitionRequest.t ->
+        (GetSecurityControlDefinitionResponse.t,
+          GetSecurityControlDefinitionResponse.error) Result.t Lwt.t
 val invite_members :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       InviteMembersRequest.t ->
         (InviteMembersResponse.t, InviteMembersResponse.error) Result.t Lwt.t
+val list_aggregators_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAggregatorsV2Request.t ->
+        (ListAggregatorsV2Response.t, ListAggregatorsV2Response.error)
+          Result.t Lwt.t
+val list_automation_rules :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAutomationRulesRequest.t ->
+        (ListAutomationRulesResponse.t, ListAutomationRulesResponse.error)
+          Result.t Lwt.t
+val list_automation_rules_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAutomationRulesV2Request.t ->
+        (ListAutomationRulesV2Response.t,
+          ListAutomationRulesV2Response.error) Result.t Lwt.t
+val list_configuration_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConfigurationPoliciesRequest.t ->
+        (ListConfigurationPoliciesResponse.t,
+          ListConfigurationPoliciesResponse.error) Result.t Lwt.t
+val list_configuration_policy_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConfigurationPolicyAssociationsRequest.t ->
+        (ListConfigurationPolicyAssociationsResponse.t,
+          ListConfigurationPolicyAssociationsResponse.error) Result.t Lwt.t
+val list_connectors_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectorsV2Request.t ->
+        (ListConnectorsV2Response.t, ListConnectorsV2Response.error) Result.t
+          Lwt.t
 val list_enabled_products_for_import :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -266,12 +525,43 @@ val list_organization_admin_accounts :
       ListOrganizationAdminAccountsRequest.t ->
         (ListOrganizationAdminAccountsResponse.t,
           ListOrganizationAdminAccountsResponse.error) Result.t Lwt.t
+val list_security_control_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSecurityControlDefinitionsRequest.t ->
+        (ListSecurityControlDefinitionsResponse.t,
+          ListSecurityControlDefinitionsResponse.error) Result.t Lwt.t
+val list_standards_control_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListStandardsControlAssociationsRequest.t ->
+        (ListStandardsControlAssociationsResponse.t,
+          ListStandardsControlAssociationsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val register_connector_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterConnectorV2Request.t ->
+        (RegisterConnectorV2Response.t, RegisterConnectorV2Response.error)
+          Result.t Lwt.t
+val start_configuration_policy_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartConfigurationPolicyAssociationRequest.t ->
+        (StartConfigurationPolicyAssociationResponse.t,
+          StartConfigurationPolicyAssociationResponse.error) Result.t Lwt.t
+val start_configuration_policy_disassociation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartConfigurationPolicyDisassociationRequest.t ->
+        (StartConfigurationPolicyDisassociationResponse.t,
+          StartConfigurationPolicyDisassociationResponse.error) Result.t
+          Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -287,6 +577,30 @@ val update_action_target :
     ?cfg:Awso.Cfg.t ->
       UpdateActionTargetRequest.t ->
         (UpdateActionTargetResponse.t, UpdateActionTargetResponse.error)
+          Result.t Lwt.t
+val update_aggregator_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAggregatorV2Request.t ->
+        (UpdateAggregatorV2Response.t, UpdateAggregatorV2Response.error)
+          Result.t Lwt.t
+val update_automation_rule_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAutomationRuleV2Request.t ->
+        (UpdateAutomationRuleV2Response.t,
+          UpdateAutomationRuleV2Response.error) Result.t Lwt.t
+val update_configuration_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConfigurationPolicyRequest.t ->
+        (UpdateConfigurationPolicyResponse.t,
+          UpdateConfigurationPolicyResponse.error) Result.t Lwt.t
+val update_connector_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConnectorV2Request.t ->
+        (UpdateConnectorV2Response.t, UpdateConnectorV2Response.error)
           Result.t Lwt.t
 val update_finding_aggregator :
   ?endpoint_url:string ->
@@ -311,6 +625,12 @@ val update_organization_configuration :
       UpdateOrganizationConfigurationRequest.t ->
         (UpdateOrganizationConfigurationResponse.t,
           UpdateOrganizationConfigurationResponse.error) Result.t Lwt.t
+val update_security_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSecurityControlRequest.t ->
+        (UpdateSecurityControlResponse.t,
+          UpdateSecurityControlResponse.error) Result.t Lwt.t
 val update_security_hub_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

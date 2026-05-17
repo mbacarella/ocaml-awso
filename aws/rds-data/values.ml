@@ -23,6 +23,38 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You don't have sufficient access to perform this action."]
 module Arn =
   struct
     type nonrec t = string
@@ -58,6 +90,9 @@ module StringArray =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -95,6 +130,9 @@ module LongArray =
   struct
     type nonrec t = BoxedLong.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BoxedLong.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -132,6 +170,9 @@ module DoubleArray =
   struct
     type nonrec t = BoxedDouble.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BoxedDouble.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -169,6 +210,9 @@ module BooleanArray =
   struct
     type nonrec t = BoxedBoolean.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BoxedBoolean.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -203,6 +247,9 @@ module rec
   struct
     type nonrec t = ArrayValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ArrayValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -227,22 +274,22 @@ module rec
   ArrayValue:sig
                type nonrec t =
                  {
-                 arrayValues: ArrayOfArray.t option
-                   [@ocaml.doc "An array of arrays."];
                  booleanValues: BooleanArray.t option
                    [@ocaml.doc "An array of Boolean values."];
-                 doubleValues: DoubleArray.t option
-                   [@ocaml.doc "An array of integers."];
                  longValues: LongArray.t option
-                   [@ocaml.doc "An array of floating point numbers."];
+                   [@ocaml.doc "An array of integers."];
+                 doubleValues: DoubleArray.t option
+                   [@ocaml.doc "An array of floating-point numbers."];
                  stringValues: StringArray.t option
-                   [@ocaml.doc "An array of strings."]}
+                   [@ocaml.doc "An array of strings."];
+                 arrayValues: ArrayOfArray.t option
+                   [@ocaml.doc "An array of arrays."]}
                val make :
-                 ?arrayValues:ArrayOfArray.t ->
-                   ?booleanValues:BooleanArray.t ->
+                 ?booleanValues:BooleanArray.t ->
+                   ?longValues:LongArray.t ->
                      ?doubleValues:DoubleArray.t ->
-                       ?longValues:LongArray.t ->
-                         ?stringValues:StringArray.t -> unit -> t
+                       ?stringValues:StringArray.t ->
+                         ?arrayValues:ArrayOfArray.t -> unit -> t
                val to_value : t -> Botodata.value
                val to_query : t -> Client.Query.t
                val of_xml : Xml.t -> t
@@ -252,61 +299,62 @@ module rec
   struct
     type nonrec t =
       {
-      arrayValues: ArrayOfArray.t option [@ocaml.doc "An array of arrays."];
       booleanValues: BooleanArray.t option
         [@ocaml.doc "An array of Boolean values."];
-      doubleValues: DoubleArray.t option [@ocaml.doc "An array of integers."];
-      longValues: LongArray.t option
-        [@ocaml.doc "An array of floating point numbers."];
-      stringValues: StringArray.t option [@ocaml.doc "An array of strings."]}
-    let make ?arrayValues =
-      fun ?booleanValues ->
+      longValues: LongArray.t option [@ocaml.doc "An array of integers."];
+      doubleValues: DoubleArray.t option
+        [@ocaml.doc "An array of floating-point numbers."];
+      stringValues: StringArray.t option [@ocaml.doc "An array of strings."];
+      arrayValues: ArrayOfArray.t option [@ocaml.doc "An array of arrays."]}
+    let make ?booleanValues =
+      fun ?longValues ->
         fun ?doubleValues ->
-          fun ?longValues ->
-            fun ?stringValues ->
+          fun ?stringValues ->
+            fun ?arrayValues ->
               fun () ->
                 {
-                  arrayValues;
                   booleanValues;
-                  doubleValues;
                   longValues;
-                  stringValues
+                  doubleValues;
+                  stringValues;
+                  arrayValues
                 }
     let to_value x =
       structure_to_value
-        [("arrayValues", (Option.map x.arrayValues ~f:ArrayOfArray.to_value));
-        ("booleanValues",
-          (Option.map x.booleanValues ~f:BooleanArray.to_value));
-        ("doubleValues", (Option.map x.doubleValues ~f:DoubleArray.to_value));
+        [("booleanValues",
+           (Option.map x.booleanValues ~f:BooleanArray.to_value));
         ("longValues", (Option.map x.longValues ~f:LongArray.to_value));
-        ("stringValues", (Option.map x.stringValues ~f:StringArray.to_value))]
+        ("doubleValues", (Option.map x.doubleValues ~f:DoubleArray.to_value));
+        ("stringValues", (Option.map x.stringValues ~f:StringArray.to_value));
+        ("arrayValues", (Option.map x.arrayValues ~f:ArrayOfArray.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let stringValues =
-        (Option.map ~f:StringArray.of_xml)
-          (Xml.child xml_arg0 "stringValues") in
-      let longValues =
-        (Option.map ~f:LongArray.of_xml) (Xml.child xml_arg0 "longValues") in
-      let doubleValues =
-        (Option.map ~f:DoubleArray.of_xml)
-          (Xml.child xml_arg0 "doubleValues") in
-      let booleanValues =
-        (Option.map ~f:BooleanArray.of_xml)
-          (Xml.child xml_arg0 "booleanValues") in
       let arrayValues =
         (Option.map ~f:ArrayOfArray.of_xml)
           (Xml.child xml_arg0 "arrayValues") in
-      make ?stringValues ?longValues ?doubleValues ?booleanValues
-        ?arrayValues ()
+      let stringValues =
+        (Option.map ~f:StringArray.of_xml)
+          (Xml.child xml_arg0 "stringValues") in
+      let doubleValues =
+        (Option.map ~f:DoubleArray.of_xml)
+          (Xml.child xml_arg0 "doubleValues") in
+      let longValues =
+        (Option.map ~f:LongArray.of_xml) (Xml.child xml_arg0 "longValues") in
+      let booleanValues =
+        (Option.map ~f:BooleanArray.of_xml)
+          (Xml.child xml_arg0 "booleanValues") in
+      make ?arrayValues ?stringValues ?doubleValues ?longValues
+        ?booleanValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stringValues = field_map json "stringValues" StringArray.of_json in
-      let longValues = field_map json "longValues" LongArray.of_json in
-      let doubleValues = field_map json "doubleValues" DoubleArray.of_json in
-      let booleanValues = field_map json "booleanValues" BooleanArray.of_json in
-      let arrayValues = field_map json "arrayValues" ArrayOfArray.of_json in
-      make ?stringValues ?longValues ?doubleValues ?booleanValues
-        ?arrayValues ()
+    let of_json json__ =
+      let arrayValues = field_map json__ "arrayValues" ArrayOfArray.of_json in
+      let stringValues = field_map json__ "stringValues" StringArray.of_json in
+      let doubleValues = field_map json__ "doubleValues" DoubleArray.of_json in
+      let longValues = field_map json__ "longValues" LongArray.of_json in
+      let booleanValues =
+        field_map json__ "booleanValues" BooleanArray.of_json in
+      make ?arrayValues ?stringValues ?doubleValues ?longValues
+        ?booleanValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains an array."]
 module BoxedInteger =
@@ -362,6 +410,9 @@ module rec
   struct
     type nonrec t = Value.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -411,454 +462,152 @@ module rec
           (Xml.child xml_arg0 "attributes") in
       make ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "attributes" ArrayValueList.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "attributes" ArrayValueList.of_json in
       make ?attributes ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A structure value returned by a call."] and
-                                                            Value:sig
-                                                                    type nonrec t =
-                                                                    {
-                                                                    arrayValues:
-                                                                    ArrayValueList.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "An array of column values."];
-                                                                    bigIntValue:
-                                                                    BoxedLong.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of big integer data type."];
-                                                                    bitValue:
-                                                                    BoxedBoolean.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of BIT data type."];
-                                                                    blobValue:
-                                                                    Blob.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of BLOB data type."];
-                                                                    doubleValue:
-                                                                    BoxedDouble.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of double data type."];
-                                                                    intValue:
-                                                                    BoxedInteger.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of integer data type."];
-                                                                    isNull:
-                                                                    BoxedBoolean.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A NULL value."];
-                                                                    realValue:
-                                                                    BoxedFloat.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of real data type."];
-                                                                    stringValue:
-                                                                    String_.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of string data type."];
-                                                                    structValue:
-                                                                    StructValue.t
-                                                                    option
-                                                                    [@ocaml.doc
-                                                                    "A value for a column of STRUCT data type."]}
-                                                                    val make
-                                                                    :
-                                                                    ?arrayValues:ArrayValueList.t
-                                                                    ->
-                                                                    ?bigIntValue:BoxedLong.t
-                                                                    ->
-                                                                    ?bitValue:BoxedBoolean.t
-                                                                    ->
-                                                                    ?blobValue:Blob.t
-                                                                    ->
-                                                                    ?doubleValue:BoxedDouble.t
-                                                                    ->
-                                                                    ?intValue:BoxedInteger.t
-                                                                    ->
-                                                                    ?isNull:BoxedBoolean.t
-                                                                    ->
-                                                                    ?realValue:BoxedFloat.t
-                                                                    ->
-                                                                    ?stringValue:String_.t
-                                                                    ->
-                                                                    ?structValue:StructValue.t
-                                                                    ->
-                                                                    unit -> t
-                                                                    val
-                                                                    to_value
-                                                                    :
-                                                                    t ->
-                                                                    Botodata.value
-                                                                    val
-                                                                    to_query
-                                                                    :
-                                                                    t ->
-                                                                    Client.Query.t
-                                                                    val
-                                                                    of_xml :
-                                                                    Xml.t ->
-                                                                    t
-                                                                    val
-                                                                    of_json :
-                                                                    Yojson.Safe.t
-                                                                    -> 
-                                                                    t
-                                                                    val
-                                                                    to_json :
-                                                                    t ->
-                                                                    Yojson.Safe.t
-                                                                  end =
-                                                            struct
-                                                              type nonrec t =
-                                                                {
-                                                                arrayValues:
-                                                                  ArrayValueList.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "An array of column values."];
-                                                                bigIntValue:
-                                                                  BoxedLong.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of big integer data type."];
-                                                                bitValue:
-                                                                  BoxedBoolean.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of BIT data type."];
-                                                                blobValue:
-                                                                  Blob.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of BLOB data type."];
-                                                                doubleValue:
-                                                                  BoxedDouble.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of double data type."];
-                                                                intValue:
-                                                                  BoxedInteger.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of integer data type."];
-                                                                isNull:
-                                                                  BoxedBoolean.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A NULL value."];
-                                                                realValue:
-                                                                  BoxedFloat.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of real data type."];
-                                                                stringValue:
-                                                                  String_.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of string data type."];
-                                                                structValue:
-                                                                  StructValue.t
-                                                                    option
-                                                                  [@ocaml.doc
-                                                                    "A value for a column of STRUCT data type."]}
-                                                              let make
-                                                                ?arrayValues
-                                                                =
-                                                                fun
-                                                                  ?bigIntValue
-                                                                  ->
-                                                                  fun
-                                                                    ?bitValue
-                                                                    ->
-                                                                    fun
-                                                                    ?blobValue
-                                                                    ->
-                                                                    fun
-                                                                    ?doubleValue
-                                                                    ->
-                                                                    fun
-                                                                    ?intValue
-                                                                    ->
-                                                                    fun
-                                                                    ?isNull
-                                                                    ->
-                                                                    fun
-                                                                    ?realValue
-                                                                    ->
-                                                                    fun
-                                                                    ?stringValue
-                                                                    ->
-                                                                    fun
-                                                                    ?structValue
-                                                                    ->
-                                                                    fun () ->
-                                                                    {
-                                                                    arrayValues;
-                                                                    bigIntValue;
-                                                                    bitValue;
-                                                                    blobValue;
-                                                                    doubleValue;
-                                                                    intValue;
-                                                                    isNull;
-                                                                    realValue;
-                                                                    stringValue;
-                                                                    structValue
-                                                                    }
-                                                              let to_value x
-                                                                =
-                                                                structure_to_value
-                                                                  [("arrayValues",
-                                                                    (Option.map
-                                                                    x.arrayValues
-                                                                    ~f:ArrayValueList.to_value));
-                                                                  ("bigIntValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.bigIntValue
-                                                                    ~f:BoxedLong.to_value));
-                                                                  ("bitValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.bitValue
-                                                                    ~f:BoxedBoolean.to_value));
-                                                                  ("blobValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.blobValue
-                                                                    ~f:Blob.to_value));
-                                                                  ("doubleValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.doubleValue
-                                                                    ~f:BoxedDouble.to_value));
-                                                                  ("intValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.intValue
-                                                                    ~f:BoxedInteger.to_value));
-                                                                  ("isNull",
-                                                                    (
-                                                                    Option.map
-                                                                    x.isNull
-                                                                    ~f:BoxedBoolean.to_value));
-                                                                  ("realValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.realValue
-                                                                    ~f:BoxedFloat.to_value));
-                                                                  ("stringValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.stringValue
-                                                                    ~f:String_.to_value));
-                                                                  ("structValue",
-                                                                    (
-                                                                    Option.map
-                                                                    x.structValue
-                                                                    ~f:StructValue.to_value))]
-                                                              let to_query v
-                                                                =
-                                                                to_query
-                                                                  to_value v
-                                                              let of_xml
-                                                                xml_arg0 =
-                                                                let structValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:StructValue.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "structValue") in
-                                                                let stringValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:String_.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "stringValue") in
-                                                                let realValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:BoxedFloat.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "realValue") in
-                                                                let isNull =
-                                                                  (Option.map
-                                                                    ~f:BoxedBoolean.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "isNull") in
-                                                                let intValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:BoxedInteger.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "intValue") in
-                                                                let doubleValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:BoxedDouble.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "doubleValue") in
-                                                                let blobValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:Blob.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "blobValue") in
-                                                                let bitValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:BoxedBoolean.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "bitValue") in
-                                                                let bigIntValue
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:BoxedLong.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "bigIntValue") in
-                                                                let arrayValues
-                                                                  =
-                                                                  (Option.map
-                                                                    ~f:ArrayValueList.of_xml)
-                                                                    (
-                                                                    Xml.child
-                                                                    xml_arg0
-                                                                    "arrayValues") in
-                                                                make
-                                                                  ?structValue
-                                                                  ?stringValue
-                                                                  ?realValue
-                                                                  ?isNull
-                                                                  ?intValue
-                                                                  ?doubleValue
-                                                                  ?blobValue
-                                                                  ?bitValue
-                                                                  ?bigIntValue
-                                                                  ?arrayValues
-                                                                  ()
-                                                              let of_string s
-                                                                =
-                                                                of_xml
-                                                                  (Awso.Xml.parse_response
-                                                                    s)
-                                                                [@@warning
-                                                                  "-32"]
-                                                              let of_json
-                                                                json =
-                                                                let structValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "structValue"
-                                                                    StructValue.of_json in
-                                                                let stringValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "stringValue"
-                                                                    String_.of_json in
-                                                                let realValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "realValue"
-                                                                    BoxedFloat.of_json in
-                                                                let isNull =
-                                                                  field_map
-                                                                    json
-                                                                    "isNull"
-                                                                    BoxedBoolean.of_json in
-                                                                let intValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "intValue"
-                                                                    BoxedInteger.of_json in
-                                                                let doubleValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "doubleValue"
-                                                                    BoxedDouble.of_json in
-                                                                let blobValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "blobValue"
-                                                                    Blob.of_json in
-                                                                let bitValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "bitValue"
-                                                                    BoxedBoolean.of_json in
-                                                                let bigIntValue
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "bigIntValue"
-                                                                    BoxedLong.of_json in
-                                                                let arrayValues
-                                                                  =
-                                                                  field_map
-                                                                    json
-                                                                    "arrayValues"
-                                                                    ArrayValueList.of_json in
-                                                                make
-                                                                  ?structValue
-                                                                  ?stringValue
-                                                                  ?realValue
-                                                                  ?isNull
-                                                                  ?intValue
-                                                                  ?doubleValue
-                                                                  ?blobValue
-                                                                  ?bitValue
-                                                                  ?bigIntValue
-                                                                  ?arrayValues
-                                                                  ()
-                                                              let to_json v =
-                                                                composed_to_json
-                                                                  to_value v
-                                                            end[@@ocaml.doc
-                                                                 "Contains the value of a column. <important> <p>This data type is deprecated.</p> </important>"]
-module ErrorMessage =
+  end[@@ocaml.doc
+       "A structure value returned by a call. This data structure is only used with the deprecated ExecuteSql operation. Use the BatchExecuteStatement or ExecuteStatement operation instead."]
+ and
+  Value:sig
+          type nonrec t =
+            {
+            isNull: BoxedBoolean.t option [@ocaml.doc "A NULL value."];
+            bitValue: BoxedBoolean.t option
+              [@ocaml.doc "A value for a column of BIT data type."];
+            bigIntValue: BoxedLong.t option
+              [@ocaml.doc "A value for a column of big integer data type."];
+            intValue: BoxedInteger.t option
+              [@ocaml.doc "A value for a column of integer data type."];
+            doubleValue: BoxedDouble.t option
+              [@ocaml.doc "A value for a column of double data type."];
+            realValue: BoxedFloat.t option
+              [@ocaml.doc "A value for a column of real data type."];
+            stringValue: String_.t option
+              [@ocaml.doc "A value for a column of string data type."];
+            blobValue: Blob.t option
+              [@ocaml.doc "A value for a column of BLOB data type."];
+            arrayValues: ArrayValueList.t option
+              [@ocaml.doc "An array of column values."];
+            structValue: StructValue.t option
+              [@ocaml.doc "A value for a column of STRUCT data type."]}
+          val make :
+            ?isNull:BoxedBoolean.t ->
+              ?bitValue:BoxedBoolean.t ->
+                ?bigIntValue:BoxedLong.t ->
+                  ?intValue:BoxedInteger.t ->
+                    ?doubleValue:BoxedDouble.t ->
+                      ?realValue:BoxedFloat.t ->
+                        ?stringValue:String_.t ->
+                          ?blobValue:Blob.t ->
+                            ?arrayValues:ArrayValueList.t ->
+                              ?structValue:StructValue.t -> unit -> t
+          val to_value : t -> Botodata.value
+          val to_query : t -> Client.Query.t
+          val of_xml : Xml.t -> t
+          val of_json : Yojson.Safe.t -> t
+          val to_json : t -> Yojson.Safe.t
+        end =
   struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      isNull: BoxedBoolean.t option [@ocaml.doc "A NULL value."];
+      bitValue: BoxedBoolean.t option
+        [@ocaml.doc "A value for a column of BIT data type."];
+      bigIntValue: BoxedLong.t option
+        [@ocaml.doc "A value for a column of big integer data type."];
+      intValue: BoxedInteger.t option
+        [@ocaml.doc "A value for a column of integer data type."];
+      doubleValue: BoxedDouble.t option
+        [@ocaml.doc "A value for a column of double data type."];
+      realValue: BoxedFloat.t option
+        [@ocaml.doc "A value for a column of real data type."];
+      stringValue: String_.t option
+        [@ocaml.doc "A value for a column of string data type."];
+      blobValue: Blob.t option
+        [@ocaml.doc "A value for a column of BLOB data type."];
+      arrayValues: ArrayValueList.t option
+        [@ocaml.doc "An array of column values."];
+      structValue: StructValue.t option
+        [@ocaml.doc "A value for a column of STRUCT data type."]}
+    let make ?isNull =
+      fun ?bitValue ->
+        fun ?bigIntValue ->
+          fun ?intValue ->
+            fun ?doubleValue ->
+              fun ?realValue ->
+                fun ?stringValue ->
+                  fun ?blobValue ->
+                    fun ?arrayValues ->
+                      fun ?structValue ->
+                        fun () ->
+                          {
+                            isNull;
+                            bitValue;
+                            bigIntValue;
+                            intValue;
+                            doubleValue;
+                            realValue;
+                            stringValue;
+                            blobValue;
+                            arrayValues;
+                            structValue
+                          }
+    let to_value x =
+      structure_to_value
+        [("isNull", (Option.map x.isNull ~f:BoxedBoolean.to_value));
+        ("bitValue", (Option.map x.bitValue ~f:BoxedBoolean.to_value));
+        ("bigIntValue", (Option.map x.bigIntValue ~f:BoxedLong.to_value));
+        ("intValue", (Option.map x.intValue ~f:BoxedInteger.to_value));
+        ("doubleValue", (Option.map x.doubleValue ~f:BoxedDouble.to_value));
+        ("realValue", (Option.map x.realValue ~f:BoxedFloat.to_value));
+        ("stringValue", (Option.map x.stringValue ~f:String_.to_value));
+        ("blobValue", (Option.map x.blobValue ~f:Blob.to_value));
+        ("arrayValues",
+          (Option.map x.arrayValues ~f:ArrayValueList.to_value));
+        ("structValue", (Option.map x.structValue ~f:StructValue.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let structValue =
+        (Option.map ~f:StructValue.of_xml) (Xml.child xml_arg0 "structValue") in
+      let arrayValues =
+        (Option.map ~f:ArrayValueList.of_xml)
+          (Xml.child xml_arg0 "arrayValues") in
+      let blobValue =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
+      let stringValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "stringValue") in
+      let realValue =
+        (Option.map ~f:BoxedFloat.of_xml) (Xml.child xml_arg0 "realValue") in
+      let doubleValue =
+        (Option.map ~f:BoxedDouble.of_xml) (Xml.child xml_arg0 "doubleValue") in
+      let intValue =
+        (Option.map ~f:BoxedInteger.of_xml) (Xml.child xml_arg0 "intValue") in
+      let bigIntValue =
+        (Option.map ~f:BoxedLong.of_xml) (Xml.child xml_arg0 "bigIntValue") in
+      let bitValue =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "bitValue") in
+      let isNull =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "isNull") in
+      make ?structValue ?arrayValues ?blobValue ?stringValue ?realValue
+        ?doubleValue ?intValue ?bigIntValue ?bitValue ?isNull ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let structValue = field_map json__ "structValue" StructValue.of_json in
+      let arrayValues = field_map json__ "arrayValues" ArrayValueList.of_json in
+      let blobValue = field_map json__ "blobValue" Blob.of_json in
+      let stringValue = field_map json__ "stringValue" String_.of_json in
+      let realValue = field_map json__ "realValue" BoxedFloat.of_json in
+      let doubleValue = field_map json__ "doubleValue" BoxedDouble.of_json in
+      let intValue = field_map json__ "intValue" BoxedInteger.of_json in
+      let bigIntValue = field_map json__ "bigIntValue" BoxedLong.of_json in
+      let bitValue = field_map json__ "bitValue" BoxedBoolean.of_json in
+      let isNull = field_map json__ "isNull" BoxedBoolean.of_json in
+      make ?structValue ?arrayValues ?blobValue ?stringValue ?realValue
+        ?doubleValue ?intValue ?bigIntValue ?bitValue ?isNull ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the value of a column. This data structure is only used with the deprecated ExecuteSql operation. Use the BatchExecuteStatement or ExecuteStatement operation instead."]
 module BadRequestException =
   struct
     type nonrec t =
@@ -876,11 +625,12 @@ module BadRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "There is an error in the call or in a SQL statement."]
+  end[@@ocaml.doc
+       "There is an error in the call or in a SQL statement. (This error only appears in calls from Aurora Serverless v1 databases.)"]
 module SqlStatement =
   struct
     type nonrec t = string
@@ -953,73 +703,73 @@ module Field =
   struct
     type nonrec t =
       {
-      arrayValue: ArrayValue.t option [@ocaml.doc "An array of values."];
-      blobValue: Blob.t option [@ocaml.doc "A value of BLOB data type."];
+      isNull: BoxedBoolean.t option [@ocaml.doc "A NULL value."];
       booleanValue: BoxedBoolean.t option
         [@ocaml.doc "A value of Boolean data type."];
+      longValue: BoxedLong.t option [@ocaml.doc "A value of long data type."];
       doubleValue: BoxedDouble.t option
         [@ocaml.doc "A value of double data type."];
-      isNull: BoxedBoolean.t option [@ocaml.doc "A NULL value."];
-      longValue: BoxedLong.t option [@ocaml.doc "A value of long data type."];
       stringValue: String_.t option
-        [@ocaml.doc "A value of string data type."]}
-    let make ?arrayValue =
-      fun ?blobValue ->
-        fun ?booleanValue ->
+        [@ocaml.doc "A value of string data type."];
+      blobValue: Blob.t option [@ocaml.doc "A value of BLOB data type."];
+      arrayValue: ArrayValue.t option [@ocaml.doc "An array of values."]}
+    let make ?isNull =
+      fun ?booleanValue ->
+        fun ?longValue ->
           fun ?doubleValue ->
-            fun ?isNull ->
-              fun ?longValue ->
-                fun ?stringValue ->
+            fun ?stringValue ->
+              fun ?blobValue ->
+                fun ?arrayValue ->
                   fun () ->
                     {
-                      arrayValue;
-                      blobValue;
-                      booleanValue;
-                      doubleValue;
                       isNull;
+                      booleanValue;
                       longValue;
-                      stringValue
+                      doubleValue;
+                      stringValue;
+                      blobValue;
+                      arrayValue
                     }
     let to_value x =
       structure_to_value
-        [("arrayValue", (Option.map x.arrayValue ~f:ArrayValue.to_value));
-        ("blobValue", (Option.map x.blobValue ~f:Blob.to_value));
+        [("isNull", (Option.map x.isNull ~f:BoxedBoolean.to_value));
         ("booleanValue",
           (Option.map x.booleanValue ~f:BoxedBoolean.to_value));
-        ("doubleValue", (Option.map x.doubleValue ~f:BoxedDouble.to_value));
-        ("isNull", (Option.map x.isNull ~f:BoxedBoolean.to_value));
         ("longValue", (Option.map x.longValue ~f:BoxedLong.to_value));
-        ("stringValue", (Option.map x.stringValue ~f:String_.to_value))]
+        ("doubleValue", (Option.map x.doubleValue ~f:BoxedDouble.to_value));
+        ("stringValue", (Option.map x.stringValue ~f:String_.to_value));
+        ("blobValue", (Option.map x.blobValue ~f:Blob.to_value));
+        ("arrayValue", (Option.map x.arrayValue ~f:ArrayValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let arrayValue =
+        (Option.map ~f:ArrayValue.of_xml) (Xml.child xml_arg0 "arrayValue") in
+      let blobValue =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
       let stringValue =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "stringValue") in
-      let longValue =
-        (Option.map ~f:BoxedLong.of_xml) (Xml.child xml_arg0 "longValue") in
-      let isNull =
-        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "isNull") in
       let doubleValue =
         (Option.map ~f:BoxedDouble.of_xml) (Xml.child xml_arg0 "doubleValue") in
+      let longValue =
+        (Option.map ~f:BoxedLong.of_xml) (Xml.child xml_arg0 "longValue") in
       let booleanValue =
         (Option.map ~f:BoxedBoolean.of_xml)
           (Xml.child xml_arg0 "booleanValue") in
-      let blobValue =
-        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "blobValue") in
-      let arrayValue =
-        (Option.map ~f:ArrayValue.of_xml) (Xml.child xml_arg0 "arrayValue") in
-      make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
-        ?blobValue ?arrayValue ()
+      let isNull =
+        (Option.map ~f:BoxedBoolean.of_xml) (Xml.child xml_arg0 "isNull") in
+      make ?arrayValue ?blobValue ?stringValue ?doubleValue ?longValue
+        ?booleanValue ?isNull ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stringValue = field_map json "stringValue" String_.of_json in
-      let longValue = field_map json "longValue" BoxedLong.of_json in
-      let isNull = field_map json "isNull" BoxedBoolean.of_json in
-      let doubleValue = field_map json "doubleValue" BoxedDouble.of_json in
-      let booleanValue = field_map json "booleanValue" BoxedBoolean.of_json in
-      let blobValue = field_map json "blobValue" Blob.of_json in
-      let arrayValue = field_map json "arrayValue" ArrayValue.of_json in
-      make ?stringValue ?longValue ?isNull ?doubleValue ?booleanValue
-        ?blobValue ?arrayValue ()
+    let of_json json__ =
+      let arrayValue = field_map json__ "arrayValue" ArrayValue.of_json in
+      let blobValue = field_map json__ "blobValue" Blob.of_json in
+      let stringValue = field_map json__ "stringValue" String_.of_json in
+      let doubleValue = field_map json__ "doubleValue" BoxedDouble.of_json in
+      let longValue = field_map json__ "longValue" BoxedLong.of_json in
+      let booleanValue = field_map json__ "booleanValue" BoxedBoolean.of_json in
+      let isNull = field_map json__ "isNull" BoxedBoolean.of_json in
+      make ?arrayValue ?blobValue ?stringValue ?doubleValue ?longValue
+        ?booleanValue ?isNull ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a value."]
 module SqlParameter =
@@ -1027,37 +777,40 @@ module SqlParameter =
     type nonrec t =
       {
       name: ParameterName.t option [@ocaml.doc "The name of the parameter."];
+      value: Field.t option [@ocaml.doc "The value of the parameter."];
       typeHint: TypeHint.t option
         [@ocaml.doc
-          "A hint that specifies the correct object type for data type mapping. Possible values are as follows: DATE - The corresponding String parameter value is sent as an object of DATE type to the database. The accepted format is YYYY-MM-DD. DECIMAL - The corresponding String parameter value is sent as an object of DECIMAL type to the database. JSON - The corresponding String parameter value is sent as an object of JSON type to the database. TIME - The corresponding String parameter value is sent as an object of TIME type to the database. The accepted format is HH:MM:SS\\[.FFF\\]. TIMESTAMP - The corresponding String parameter value is sent as an object of TIMESTAMP type to the database. The accepted format is YYYY-MM-DD HH:MM:SS\\[.FFF\\]. UUID - The corresponding String parameter value is sent as an object of UUID type to the database."];
-      value: Field.t option [@ocaml.doc "The value of the parameter."]}
+          "A hint that specifies the correct object type for data type mapping. Possible values are as follows: DATE - The corresponding String parameter value is sent as an object of DATE type to the database. The accepted format is YYYY-MM-DD. DECIMAL - The corresponding String parameter value is sent as an object of DECIMAL type to the database. JSON - The corresponding String parameter value is sent as an object of JSON type to the database. TIME - The corresponding String parameter value is sent as an object of TIME type to the database. The accepted format is HH:MM:SS\\[.FFF\\]. TIMESTAMP - The corresponding String parameter value is sent as an object of TIMESTAMP type to the database. The accepted format is YYYY-MM-DD HH:MM:SS\\[.FFF\\]. UUID - The corresponding String parameter value is sent as an object of UUID type to the database."]}
     let make ?name =
-      fun ?typeHint -> fun ?value -> fun () -> { name; typeHint; value }
+      fun ?value -> fun ?typeHint -> fun () -> { name; value; typeHint }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ParameterName.to_value));
-        ("typeHint", (Option.map x.typeHint ~f:TypeHint.to_value));
-        ("value", (Option.map x.value ~f:Field.to_value))]
+        ("value", (Option.map x.value ~f:Field.to_value));
+        ("typeHint", (Option.map x.typeHint ~f:TypeHint.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value = (Option.map ~f:Field.of_xml) (Xml.child xml_arg0 "value") in
       let typeHint =
         (Option.map ~f:TypeHint.of_xml) (Xml.child xml_arg0 "typeHint") in
+      let value = (Option.map ~f:Field.of_xml) (Xml.child xml_arg0 "value") in
       let name =
         (Option.map ~f:ParameterName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?value ?typeHint ?name ()
+      make ?typeHint ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" Field.of_json in
-      let typeHint = field_map json "typeHint" TypeHint.of_json in
-      let name = field_map json "name" ParameterName.of_json in
-      make ?value ?typeHint ?name ()
+    let of_json json__ =
+      let typeHint = field_map json__ "typeHint" TypeHint.of_json in
+      let value = field_map json__ "value" Field.of_json in
+      let name = field_map json__ "name" ParameterName.of_json in
+      make ?typeHint ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A parameter used in a SQL statement."]
 module SqlParametersList =
   struct
     type nonrec t = SqlParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SqlParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1082,6 +835,9 @@ module SqlParameterSets =
   struct
     type nonrec t = SqlParametersList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SqlParametersList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1143,25 +899,29 @@ module BatchExecuteStatementRequest =
   struct
     type nonrec t =
       {
-      database: DbName.t option [@ocaml.doc "The name of the database."];
-      parameterSets: SqlParameterSets.t option
-        [@ocaml.doc
-          "The parameter set for the batch operation. The SQL statement is executed as many times as the number of parameter sets provided. To execute a SQL statement with no parameters, use one of the following options: Specify one or more empty parameter sets. Use the ExecuteStatement operation instead of the BatchExecuteStatement operation. Array parameters are not supported."];
       resourceArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Aurora Serverless DB cluster."];
-      schema: DbName.t option [@ocaml.doc "The name of the database schema."];
       secretArn: Arn.t
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the DB cluster."];
-      sql: SqlStatement.t [@ocaml.doc "The SQL statement to run."];
+          "The ARN of the secret that enables access to the DB cluster. Enter the database user name and password for the credentials in the secret. For information about creating the secret, see Create a database secret."];
+      sql: SqlStatement.t
+        [@ocaml.doc
+          "The SQL statement to run. Don't include a semicolon (;) at the end of the SQL statement."];
+      database: DbName.t option [@ocaml.doc "The name of the database."];
+      schema: DbName.t option
+        [@ocaml.doc
+          "The name of the database schema. Currently, the schema parameter isn't supported."];
+      parameterSets: SqlParameterSets.t option
+        [@ocaml.doc
+          "The parameter set for the batch operation. The SQL statement is executed as many times as the number of parameter sets provided. To execute a SQL statement with no parameters, use one of the following options: Specify one or more empty parameter sets. Use the ExecuteStatement operation instead of the BatchExecuteStatement operation. Array parameters are not supported."];
       transactionId: Id.t option
         [@ocaml.doc
           "The identifier of a transaction that was started by using the BeginTransaction operation. Specify the transaction ID of the transaction that you want to include the SQL statement in. If the SQL statement is not part of a transaction, don't set this parameter."]}
     let context_ = "BatchExecuteStatementRequest"
     let make ?database =
-      fun ?parameterSets ->
-        fun ?schema ->
+      fun ?schema ->
+        fun ?parameterSets ->
           fun ?transactionId ->
             fun ~resourceArn ->
               fun ~secretArn ->
@@ -1169,8 +929,8 @@ module BatchExecuteStatementRequest =
                   fun () ->
                     {
                       database;
-                      parameterSets;
                       schema;
+                      parameterSets;
                       transactionId;
                       resourceArn;
                       secretArn;
@@ -1178,45 +938,45 @@ module BatchExecuteStatementRequest =
                     }
     let to_value x =
       structure_to_value
-        [("database", (Option.map x.database ~f:DbName.to_value));
-        ("parameterSets",
-          (Option.map x.parameterSets ~f:SqlParameterSets.to_value));
-        ("resourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("schema", (Option.map x.schema ~f:DbName.to_value));
+        [("resourceArn", (Some (Arn.to_value x.resourceArn)));
         ("secretArn", (Some (Arn.to_value x.secretArn)));
         ("sql", (Some (SqlStatement.to_value x.sql)));
+        ("database", (Option.map x.database ~f:DbName.to_value));
+        ("schema", (Option.map x.schema ~f:DbName.to_value));
+        ("parameterSets",
+          (Option.map x.parameterSets ~f:SqlParameterSets.to_value));
         ("transactionId", (Option.map x.transactionId ~f:Id.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let transactionId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "transactionId") in
+      let parameterSets =
+        (Option.map ~f:SqlParameterSets.of_xml)
+          (Xml.child xml_arg0 "parameterSets") in
+      let schema =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
+      let database =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       let sql =
         SqlStatement.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sql") in
       let secretArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "secretArn") in
-      let schema =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      let parameterSets =
-        (Option.map ~f:SqlParameterSets.of_xml)
-          (Xml.child xml_arg0 "parameterSets") in
-      let database =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
-      make ?transactionId ~sql ~secretArn ?schema ~resourceArn ?parameterSets
-        ?database ()
+      make ?transactionId ?parameterSets ?schema ?database ~sql ~secretArn
+        ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transactionId = field_map json "transactionId" Id.of_json in
-      let sql = field_map_exn json "sql" SqlStatement.of_json in
-      let secretArn = field_map_exn json "secretArn" Arn.of_json in
-      let schema = field_map json "schema" DbName.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let transactionId = field_map json__ "transactionId" Id.of_json in
       let parameterSets =
-        field_map json "parameterSets" SqlParameterSets.of_json in
-      let database = field_map json "database" DbName.of_json in
-      make ?transactionId ~sql ~secretArn ?schema ~resourceArn ?parameterSets
-        ?database ()
+        field_map json__ "parameterSets" SqlParameterSets.of_json in
+      let schema = field_map json__ "schema" DbName.of_json in
+      let database = field_map json__ "database" DbName.of_json in
+      let sql = field_map_exn json__ "sql" SqlStatement.of_json in
+      let secretArn = field_map_exn json__ "secretArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
+      make ?transactionId ?parameterSets ?schema ?database ~sql ~secretArn
+        ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request parameters represent the input of a SQL statement over an array of data."]
@@ -1224,6 +984,9 @@ module FieldList =
   struct
     type nonrec t = Field.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Field.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1261,9 +1024,9 @@ module UpdateResult =
           (Xml.child xml_arg0 "generatedFields") in
       make ?generatedFields ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let generatedFields =
-        field_map json "generatedFields" FieldList.of_json in
+        field_map json__ "generatedFields" FieldList.of_json in
       make ?generatedFields ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1272,6 +1035,9 @@ module UpdateResults =
   struct
     type nonrec t = UpdateResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1292,6 +1058,25 @@ module UpdateResults =
       list_of_json ~kind:"UpdateResults" ~of_json:UpdateResult.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TransactionNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The transaction ID wasn't found."]
 module Long =
   struct
     type nonrec t = Int64.t
@@ -1309,30 +1094,30 @@ module StatementTimeoutException =
   struct
     type nonrec t =
       {
-      dbConnectionId: Long.t option
-        [@ocaml.doc
-          "The database connection ID that executed the SQL statement."];
       message: ErrorMessage.t option
         [@ocaml.doc
-          "The error message returned by this StatementTimeoutException error."]}
-    let make ?dbConnectionId =
-      fun ?message -> fun () -> { dbConnectionId; message }
+          "The error message returned by this StatementTimeoutException error."];
+      dbConnectionId: Long.t option
+        [@ocaml.doc
+          "The database connection ID that executed the SQL statement."]}
+    let make ?message =
+      fun ?dbConnectionId -> fun () -> { message; dbConnectionId }
     let to_value x =
       structure_to_value
-        [("dbConnectionId", (Option.map x.dbConnectionId ~f:Long.to_value));
-        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("dbConnectionId", (Option.map x.dbConnectionId ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       let dbConnectionId =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "dbConnectionId") in
-      make ?message ?dbConnectionId ()
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?dbConnectionId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      let dbConnectionId = field_map json "dbConnectionId" Long.of_json in
-      make ?message ?dbConnectionId ()
+    let of_json json__ =
+      let dbConnectionId = field_map json__ "dbConnectionId" Long.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?dbConnectionId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The execution of the SQL statement timed out."]
 module ServiceUnavailableError =
@@ -1347,7 +1132,66 @@ module ServiceUnavailableError =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The service specified by the resourceArn parameter is not available."]
+       "The service specified by the resourceArn parameter isn't available."]
+module SecretsErrorException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was a problem with the Secrets Manager secret used with the request, caused by one of the following conditions: RDS Data API timed out retrieving the secret. The secret provided wasn't found. The secret couldn't be decrypted."]
+module InvalidSecretException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Secrets Manager secret used with the request isn't valid."]
+module InvalidResourceStateException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The resource is in an invalid state."]
 module InternalServerErrorException =
   struct
     type nonrec t = unit
@@ -1360,6 +1204,26 @@ module InternalServerErrorException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal error occurred."]
+module HttpEndpointNotEnabledException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The HTTP endpoint for using RDS Data API isn't enabled for the DB cluster."]
 module ForbiddenException =
   struct
     type nonrec t =
@@ -1377,11 +1241,81 @@ module ForbiddenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There are insufficient privileges to make the call."]
+module DatabaseUnavailableException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The writer instance in the DB cluster isn't available."]
+module DatabaseResumingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request was cancelled because the Aurora Serverless v2 DB instance was paused. The Data API request automatically resumes the DB instance. Wait a few seconds and try again."]
+module DatabaseNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The DB cluster doesn't have a DB instance."]
+module DatabaseErrorException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "There was an error in processing the SQL statement."]
 module BatchExecuteStatementResponse =
   struct
     type nonrec t =
@@ -1389,58 +1323,152 @@ module BatchExecuteStatementResponse =
       updateResults: UpdateResults.t option
         [@ocaml.doc "The execution results of each batch entry."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `DatabaseErrorException of DatabaseErrorException.t 
+      | `DatabaseNotFoundException of DatabaseNotFoundException.t 
+      | `DatabaseResumingException of DatabaseResumingException.t 
+      | `DatabaseUnavailableException of DatabaseUnavailableException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `HttpEndpointNotEnabledException of HttpEndpointNotEnabledException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `InvalidSecretException of InvalidSecretException.t 
+      | `SecretsErrorException of SecretsErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
       | `StatementTimeoutException of StatementTimeoutException.t 
+      | `TransactionNotFoundException of TransactionNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?updateResults = fun () -> { updateResults }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_json json)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_json json)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_json json)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_json json)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_json json)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_json json)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_json json)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_json json)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_xml xml)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_xml xml)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_xml xml)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_xml xml)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_xml xml)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_xml xml)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_xml xml)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_xml xml)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `DatabaseErrorException e ->
+          `Assoc
+            [("error", (`String "DatabaseErrorException"));
+            ("details", (DatabaseErrorException.to_json e))]
+      | `DatabaseNotFoundException e ->
+          `Assoc
+            [("error", (`String "DatabaseNotFoundException"));
+            ("details", (DatabaseNotFoundException.to_json e))]
+      | `DatabaseResumingException e ->
+          `Assoc
+            [("error", (`String "DatabaseResumingException"));
+            ("details", (DatabaseResumingException.to_json e))]
+      | `DatabaseUnavailableException e ->
+          `Assoc
+            [("error", (`String "DatabaseUnavailableException"));
+            ("details", (DatabaseUnavailableException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `HttpEndpointNotEnabledException e ->
+          `Assoc
+            [("error", (`String "HttpEndpointNotEnabledException"));
+            ("details", (HttpEndpointNotEnabledException.to_json e))]
       | `InternalServerErrorException e ->
           `Assoc
             [("error", (`String "InternalServerErrorException"));
             ("details", (InternalServerErrorException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `InvalidSecretException e ->
+          `Assoc
+            [("error", (`String "InvalidSecretException"));
+            ("details", (InvalidSecretException.to_json e))]
+      | `SecretsErrorException e ->
+          `Assoc
+            [("error", (`String "SecretsErrorException"));
+            ("details", (SecretsErrorException.to_json e))]
       | `ServiceUnavailableError e ->
           `Assoc
             [("error", (`String "ServiceUnavailableError"));
@@ -1449,6 +1477,10 @@ module BatchExecuteStatementResponse =
           `Assoc
             [("error", (`String "StatementTimeoutException"));
             ("details", (StatementTimeoutException.to_json e))]
+      | `TransactionNotFoundException e ->
+          `Assoc
+            [("error", (`String "TransactionNotFoundException"));
+            ("details", (TransactionNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1465,9 +1497,9 @@ module BatchExecuteStatementResponse =
           (Xml.child xml_arg0 "updateResults") in
       make ?updateResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updateResults =
-        field_map json "updateResults" UpdateResults.of_json in
+        field_map json__ "updateResults" UpdateResults.of_json in
       make ?updateResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1476,14 +1508,14 @@ module BeginTransactionRequest =
   struct
     type nonrec t =
       {
-      database: DbName.t option [@ocaml.doc "The name of the database."];
       resourceArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Aurora Serverless DB cluster."];
-      schema: DbName.t option [@ocaml.doc "The name of the database schema."];
       secretArn: Arn.t
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the DB cluster."]}
+          "The name or ARN of the secret that enables access to the DB cluster."];
+      database: DbName.t option [@ocaml.doc "The name of the database."];
+      schema: DbName.t option [@ocaml.doc "The name of the database schema."]}
     let context_ = "BeginTransactionRequest"
     let make ?database =
       fun ?schema ->
@@ -1492,28 +1524,28 @@ module BeginTransactionRequest =
             fun () -> { database; schema; resourceArn; secretArn }
     let to_value x =
       structure_to_value
-        [("database", (Option.map x.database ~f:DbName.to_value));
-        ("resourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("schema", (Option.map x.schema ~f:DbName.to_value));
-        ("secretArn", (Some (Arn.to_value x.secretArn)))]
+        [("resourceArn", (Some (Arn.to_value x.resourceArn)));
+        ("secretArn", (Some (Arn.to_value x.secretArn)));
+        ("database", (Option.map x.database ~f:DbName.to_value));
+        ("schema", (Option.map x.schema ~f:DbName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let secretArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "secretArn") in
       let schema =
         (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
-      let resourceArn =
-        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       let database =
         (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
-      make ~secretArn ?schema ~resourceArn ?database ()
+      let secretArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "secretArn") in
+      let resourceArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+      make ?schema ?database ~secretArn ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretArn = field_map_exn json "secretArn" Arn.of_json in
-      let schema = field_map json "schema" DbName.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
-      let database = field_map json "database" DbName.of_json in
-      make ~secretArn ?schema ~resourceArn ?database ()
+    let of_json json__ =
+      let schema = field_map json__ "schema" DbName.of_json in
+      let database = field_map json__ "database" DbName.of_json in
+      let secretArn = field_map_exn json__ "secretArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
+      make ?schema ?database ~secretArn ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request parameters represent the input of a request to start a SQL transaction."]
@@ -1525,58 +1557,152 @@ module BeginTransactionResponse =
         [@ocaml.doc
           "The transaction ID of the transaction started by the call."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `DatabaseErrorException of DatabaseErrorException.t 
+      | `DatabaseNotFoundException of DatabaseNotFoundException.t 
+      | `DatabaseResumingException of DatabaseResumingException.t 
+      | `DatabaseUnavailableException of DatabaseUnavailableException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `HttpEndpointNotEnabledException of HttpEndpointNotEnabledException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `InvalidSecretException of InvalidSecretException.t 
+      | `SecretsErrorException of SecretsErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
       | `StatementTimeoutException of StatementTimeoutException.t 
+      | `TransactionNotFoundException of TransactionNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?transactionId = fun () -> { transactionId }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_json json)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_json json)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_json json)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_json json)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_json json)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_json json)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_json json)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_json json)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_xml xml)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_xml xml)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_xml xml)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_xml xml)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_xml xml)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_xml xml)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_xml xml)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_xml xml)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `DatabaseErrorException e ->
+          `Assoc
+            [("error", (`String "DatabaseErrorException"));
+            ("details", (DatabaseErrorException.to_json e))]
+      | `DatabaseNotFoundException e ->
+          `Assoc
+            [("error", (`String "DatabaseNotFoundException"));
+            ("details", (DatabaseNotFoundException.to_json e))]
+      | `DatabaseResumingException e ->
+          `Assoc
+            [("error", (`String "DatabaseResumingException"));
+            ("details", (DatabaseResumingException.to_json e))]
+      | `DatabaseUnavailableException e ->
+          `Assoc
+            [("error", (`String "DatabaseUnavailableException"));
+            ("details", (DatabaseUnavailableException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `HttpEndpointNotEnabledException e ->
+          `Assoc
+            [("error", (`String "HttpEndpointNotEnabledException"));
+            ("details", (HttpEndpointNotEnabledException.to_json e))]
       | `InternalServerErrorException e ->
           `Assoc
             [("error", (`String "InternalServerErrorException"));
             ("details", (InternalServerErrorException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `InvalidSecretException e ->
+          `Assoc
+            [("error", (`String "InvalidSecretException"));
+            ("details", (InvalidSecretException.to_json e))]
+      | `SecretsErrorException e ->
+          `Assoc
+            [("error", (`String "SecretsErrorException"));
+            ("details", (SecretsErrorException.to_json e))]
       | `ServiceUnavailableError e ->
           `Assoc
             [("error", (`String "ServiceUnavailableError"));
@@ -1585,6 +1711,10 @@ module BeginTransactionResponse =
           `Assoc
             [("error", (`String "StatementTimeoutException"));
             ("details", (StatementTimeoutException.to_json e))]
+      | `TransactionNotFoundException e ->
+          `Assoc
+            [("error", (`String "TransactionNotFoundException"));
+            ("details", (TransactionNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1599,8 +1729,8 @@ module BeginTransactionResponse =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "transactionId") in
       make ?transactionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transactionId = field_map json "transactionId" Id.of_json in
+    let of_json json__ =
+      let transactionId = field_map json__ "transactionId" Id.of_json in
       make ?transactionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1635,136 +1765,138 @@ module ColumnMetadata =
   struct
     type nonrec t =
       {
-      arrayBaseColumnType: Integer.t option
-        [@ocaml.doc "The type of the column."];
+      name: String_.t option [@ocaml.doc "The name of the column."];
+      type_: Integer.t option [@ocaml.doc "The type of the column."];
+      typeName: String_.t option
+        [@ocaml.doc "The database-specific data type of the column."];
+      label: String_.t option [@ocaml.doc "The label for the column."];
+      schemaName: String_.t option
+        [@ocaml.doc
+          "The name of the schema that owns the table that includes the column."];
+      tableName: String_.t option
+        [@ocaml.doc "The name of the table that includes the column."];
       isAutoIncrement: Boolean.t option
         [@ocaml.doc
           "A value that indicates whether the column increments automatically."];
-      isCaseSensitive: Boolean.t option
-        [@ocaml.doc
-          "A value that indicates whether the column is case-sensitive."];
-      isCurrency: Boolean.t option
-        [@ocaml.doc
-          "A value that indicates whether the column contains currency values."];
       isSigned: Boolean.t option
         [@ocaml.doc
           "A value that indicates whether an integer column is signed."];
-      label: String_.t option [@ocaml.doc "The label for the column."];
-      name: String_.t option [@ocaml.doc "The name of the column."];
+      isCurrency: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether the column contains currency values."];
+      isCaseSensitive: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether the column is case-sensitive."];
       nullable: Integer.t option
         [@ocaml.doc "A value that indicates whether the column is nullable."];
       precision: Integer.t option
         [@ocaml.doc "The precision value of a decimal number column."];
       scale: Integer.t option
         [@ocaml.doc "The scale value of a decimal number column."];
-      schemaName: String_.t option
-        [@ocaml.doc
-          "The name of the schema that owns the table that includes the column."];
-      tableName: String_.t option
-        [@ocaml.doc "The name of the table that includes the column."];
-      type_: Integer.t option [@ocaml.doc "The type of the column."];
-      typeName: String_.t option
-        [@ocaml.doc "The database-specific data type of the column."]}
-    let make ?arrayBaseColumnType =
-      fun ?isAutoIncrement ->
-        fun ?isCaseSensitive ->
-          fun ?isCurrency ->
-            fun ?isSigned ->
-              fun ?label ->
-                fun ?name ->
-                  fun ?nullable ->
-                    fun ?precision ->
-                      fun ?scale ->
-                        fun ?schemaName ->
-                          fun ?tableName ->
-                            fun ?type_ ->
-                              fun ?typeName ->
+      arrayBaseColumnType: Integer.t option
+        [@ocaml.doc "The type of the column."]}
+    let make ?name =
+      fun ?type_ ->
+        fun ?typeName ->
+          fun ?label ->
+            fun ?schemaName ->
+              fun ?tableName ->
+                fun ?isAutoIncrement ->
+                  fun ?isSigned ->
+                    fun ?isCurrency ->
+                      fun ?isCaseSensitive ->
+                        fun ?nullable ->
+                          fun ?precision ->
+                            fun ?scale ->
+                              fun ?arrayBaseColumnType ->
                                 fun () ->
                                   {
-                                    arrayBaseColumnType;
-                                    isAutoIncrement;
-                                    isCaseSensitive;
-                                    isCurrency;
-                                    isSigned;
-                                    label;
                                     name;
+                                    type_;
+                                    typeName;
+                                    label;
+                                    schemaName;
+                                    tableName;
+                                    isAutoIncrement;
+                                    isSigned;
+                                    isCurrency;
+                                    isCaseSensitive;
                                     nullable;
                                     precision;
                                     scale;
-                                    schemaName;
-                                    tableName;
-                                    type_;
-                                    typeName
+                                    arrayBaseColumnType
                                   }
     let to_value x =
       structure_to_value
-        [("arrayBaseColumnType",
-           (Option.map x.arrayBaseColumnType ~f:Integer.to_value));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("type", (Option.map x.type_ ~f:Integer.to_value));
+        ("typeName", (Option.map x.typeName ~f:String_.to_value));
+        ("label", (Option.map x.label ~f:String_.to_value));
+        ("schemaName", (Option.map x.schemaName ~f:String_.to_value));
+        ("tableName", (Option.map x.tableName ~f:String_.to_value));
         ("isAutoIncrement",
           (Option.map x.isAutoIncrement ~f:Boolean.to_value));
+        ("isSigned", (Option.map x.isSigned ~f:Boolean.to_value));
+        ("isCurrency", (Option.map x.isCurrency ~f:Boolean.to_value));
         ("isCaseSensitive",
           (Option.map x.isCaseSensitive ~f:Boolean.to_value));
-        ("isCurrency", (Option.map x.isCurrency ~f:Boolean.to_value));
-        ("isSigned", (Option.map x.isSigned ~f:Boolean.to_value));
-        ("label", (Option.map x.label ~f:String_.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
         ("nullable", (Option.map x.nullable ~f:Integer.to_value));
         ("precision", (Option.map x.precision ~f:Integer.to_value));
         ("scale", (Option.map x.scale ~f:Integer.to_value));
-        ("schemaName", (Option.map x.schemaName ~f:String_.to_value));
-        ("tableName", (Option.map x.tableName ~f:String_.to_value));
-        ("type", (Option.map x.type_ ~f:Integer.to_value));
-        ("typeName", (Option.map x.typeName ~f:String_.to_value))]
+        ("arrayBaseColumnType",
+          (Option.map x.arrayBaseColumnType ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let typeName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "typeName") in
-      let type_ = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "type") in
-      let tableName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tableName") in
-      let schemaName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaName") in
+      let arrayBaseColumnType =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "arrayBaseColumnType") in
       let scale = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "scale") in
       let precision =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "precision") in
       let nullable =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "nullable") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "label") in
-      let isSigned =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isSigned") in
-      let isCurrency =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isCurrency") in
       let isCaseSensitive =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isCaseSensitive") in
+      let isCurrency =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isCurrency") in
+      let isSigned =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isSigned") in
       let isAutoIncrement =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isAutoIncrement") in
-      let arrayBaseColumnType =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "arrayBaseColumnType") in
-      make ?typeName ?type_ ?tableName ?schemaName ?scale ?precision
-        ?nullable ?name ?label ?isSigned ?isCurrency ?isCaseSensitive
-        ?isAutoIncrement ?arrayBaseColumnType ()
+      let tableName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "tableName") in
+      let schemaName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "schemaName") in
+      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "label") in
+      let typeName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "typeName") in
+      let type_ = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "type") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?arrayBaseColumnType ?scale ?precision ?nullable ?isCaseSensitive
+        ?isCurrency ?isSigned ?isAutoIncrement ?tableName ?schemaName ?label
+        ?typeName ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let typeName = field_map json "typeName" String_.of_json in
-      let type_ = field_map json "type" Integer.of_json in
-      let tableName = field_map json "tableName" String_.of_json in
-      let schemaName = field_map json "schemaName" String_.of_json in
-      let scale = field_map json "scale" Integer.of_json in
-      let precision = field_map json "precision" Integer.of_json in
-      let nullable = field_map json "nullable" Integer.of_json in
-      let name = field_map json "name" String_.of_json in
-      let label = field_map json "label" String_.of_json in
-      let isSigned = field_map json "isSigned" Boolean.of_json in
-      let isCurrency = field_map json "isCurrency" Boolean.of_json in
-      let isCaseSensitive = field_map json "isCaseSensitive" Boolean.of_json in
-      let isAutoIncrement = field_map json "isAutoIncrement" Boolean.of_json in
+    let of_json json__ =
       let arrayBaseColumnType =
-        field_map json "arrayBaseColumnType" Integer.of_json in
-      make ?typeName ?type_ ?tableName ?schemaName ?scale ?precision
-        ?nullable ?name ?label ?isSigned ?isCurrency ?isCaseSensitive
-        ?isAutoIncrement ?arrayBaseColumnType ()
+        field_map json__ "arrayBaseColumnType" Integer.of_json in
+      let scale = field_map json__ "scale" Integer.of_json in
+      let precision = field_map json__ "precision" Integer.of_json in
+      let nullable = field_map json__ "nullable" Integer.of_json in
+      let isCaseSensitive =
+        field_map json__ "isCaseSensitive" Boolean.of_json in
+      let isCurrency = field_map json__ "isCurrency" Boolean.of_json in
+      let isSigned = field_map json__ "isSigned" Boolean.of_json in
+      let isAutoIncrement =
+        field_map json__ "isAutoIncrement" Boolean.of_json in
+      let tableName = field_map json__ "tableName" String_.of_json in
+      let schemaName = field_map json__ "schemaName" String_.of_json in
+      let label = field_map json__ "label" String_.of_json in
+      let typeName = field_map json__ "typeName" String_.of_json in
+      let type_ = field_map json__ "type" Integer.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?arrayBaseColumnType ?scale ?precision ?nullable ?isCaseSensitive
+        ?isCurrency ?isSigned ?isAutoIncrement ?tableName ?schemaName ?label
+        ?typeName ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the metadata for a column."]
 module CommitTransactionRequest =
@@ -1799,10 +1931,10 @@ module CommitTransactionRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~transactionId ~secretArn ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transactionId = field_map_exn json "transactionId" Id.of_json in
-      let secretArn = field_map_exn json "secretArn" Arn.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let transactionId = field_map_exn json__ "transactionId" Id.of_json in
+      let secretArn = field_map_exn json__ "secretArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~transactionId ~secretArn ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1842,8 +1974,8 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1855,67 +1987,152 @@ module CommitTransactionResponse =
       transactionStatus: TransactionStatus.t option
         [@ocaml.doc "The status of the commit operation."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `DatabaseErrorException of DatabaseErrorException.t 
+      | `DatabaseNotFoundException of DatabaseNotFoundException.t 
+      | `DatabaseUnavailableException of DatabaseUnavailableException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `HttpEndpointNotEnabledException of HttpEndpointNotEnabledException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `InvalidSecretException of InvalidSecretException.t 
       | `NotFoundException of NotFoundException.t 
+      | `SecretsErrorException of SecretsErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
       | `StatementTimeoutException of StatementTimeoutException.t 
+      | `TransactionNotFoundException of TransactionNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?transactionStatus = fun () -> { transactionStatus }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_json json)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_json json)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_json json)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_json json)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_json json)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_json json)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_xml xml)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_xml xml)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_xml xml)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_xml xml)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_xml xml)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_xml xml)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `DatabaseErrorException e ->
+          `Assoc
+            [("error", (`String "DatabaseErrorException"));
+            ("details", (DatabaseErrorException.to_json e))]
+      | `DatabaseNotFoundException e ->
+          `Assoc
+            [("error", (`String "DatabaseNotFoundException"));
+            ("details", (DatabaseNotFoundException.to_json e))]
+      | `DatabaseUnavailableException e ->
+          `Assoc
+            [("error", (`String "DatabaseUnavailableException"));
+            ("details", (DatabaseUnavailableException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `HttpEndpointNotEnabledException e ->
+          `Assoc
+            [("error", (`String "HttpEndpointNotEnabledException"));
+            ("details", (HttpEndpointNotEnabledException.to_json e))]
       | `InternalServerErrorException e ->
           `Assoc
             [("error", (`String "InternalServerErrorException"));
             ("details", (InternalServerErrorException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `InvalidSecretException e ->
+          `Assoc
+            [("error", (`String "InvalidSecretException"));
+            ("details", (InvalidSecretException.to_json e))]
       | `NotFoundException e ->
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `SecretsErrorException e ->
+          `Assoc
+            [("error", (`String "SecretsErrorException"));
+            ("details", (SecretsErrorException.to_json e))]
       | `ServiceUnavailableError e ->
           `Assoc
             [("error", (`String "ServiceUnavailableError"));
@@ -1924,6 +2141,10 @@ module CommitTransactionResponse =
           `Assoc
             [("error", (`String "StatementTimeoutException"));
             ("details", (StatementTimeoutException.to_json e))]
+      | `TransactionNotFoundException e ->
+          `Assoc
+            [("error", (`String "TransactionNotFoundException"));
+            ("details", (TransactionNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1940,9 +2161,9 @@ module CommitTransactionResponse =
           (Xml.child xml_arg0 "transactionStatus") in
       make ?transactionStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionStatus =
-        field_map json "transactionStatus" TransactionStatus.of_json in
+        field_map json__ "transactionStatus" TransactionStatus.of_json in
       make ?transactionStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1977,67 +2198,67 @@ module ExecuteSqlRequest =
   struct
     type nonrec t =
       {
-      awsSecretStoreArn: Arn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the secret that enables access to the DB cluster."];
-      database: DbName.t option [@ocaml.doc "The name of the database."];
       dbClusterOrInstanceArn: Arn.t
         [@ocaml.doc "The ARN of the Aurora Serverless DB cluster."];
-      schema: DbName.t option [@ocaml.doc "The name of the database schema."];
+      awsSecretStoreArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the secret that enables access to the DB cluster. Enter the database user name and password for the credentials in the secret. For information about creating the secret, see Create a database secret."];
       sqlStatements: SqlStatement.t
         [@ocaml.doc
-          "One or more SQL statements to run on the DB cluster. You can separate SQL statements from each other with a semicolon (;). Any valid SQL statement is permitted, including data definition, data manipulation, and commit statements."]}
+          "One or more SQL statements to run on the DB cluster. You can separate SQL statements from each other with a semicolon (;). Any valid SQL statement is permitted, including data definition, data manipulation, and commit statements."];
+      database: DbName.t option [@ocaml.doc "The name of the database."];
+      schema: DbName.t option [@ocaml.doc "The name of the database schema."]}
     let context_ = "ExecuteSqlRequest"
     let make ?database =
       fun ?schema ->
-        fun ~awsSecretStoreArn ->
-          fun ~dbClusterOrInstanceArn ->
+        fun ~dbClusterOrInstanceArn ->
+          fun ~awsSecretStoreArn ->
             fun ~sqlStatements ->
               fun () ->
                 {
                   database;
                   schema;
-                  awsSecretStoreArn;
                   dbClusterOrInstanceArn;
+                  awsSecretStoreArn;
                   sqlStatements
                 }
     let to_value x =
       structure_to_value
-        [("awsSecretStoreArn", (Some (Arn.to_value x.awsSecretStoreArn)));
+        [("dbClusterOrInstanceArn",
+           (Some (Arn.to_value x.dbClusterOrInstanceArn)));
+        ("awsSecretStoreArn", (Some (Arn.to_value x.awsSecretStoreArn)));
+        ("sqlStatements", (Some (SqlStatement.to_value x.sqlStatements)));
         ("database", (Option.map x.database ~f:DbName.to_value));
-        ("dbClusterOrInstanceArn",
-          (Some (Arn.to_value x.dbClusterOrInstanceArn)));
-        ("schema", (Option.map x.schema ~f:DbName.to_value));
-        ("sqlStatements", (Some (SqlStatement.to_value x.sqlStatements)))]
+        ("schema", (Option.map x.schema ~f:DbName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let schema =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
+      let database =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       let sqlStatements =
         SqlStatement.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sqlStatements") in
-      let schema =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
-      let dbClusterOrInstanceArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "dbClusterOrInstanceArn") in
-      let database =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       let awsSecretStoreArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "awsSecretStoreArn") in
-      make ~sqlStatements ?schema ~dbClusterOrInstanceArn ?database
-        ~awsSecretStoreArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sqlStatements =
-        field_map_exn json "sqlStatements" SqlStatement.of_json in
-      let schema = field_map json "schema" DbName.of_json in
       let dbClusterOrInstanceArn =
-        field_map_exn json "dbClusterOrInstanceArn" Arn.of_json in
-      let database = field_map json "database" DbName.of_json in
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dbClusterOrInstanceArn") in
+      make ?schema ?database ~sqlStatements ~awsSecretStoreArn
+        ~dbClusterOrInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schema = field_map json__ "schema" DbName.of_json in
+      let database = field_map json__ "database" DbName.of_json in
+      let sqlStatements =
+        field_map_exn json__ "sqlStatements" SqlStatement.of_json in
       let awsSecretStoreArn =
-        field_map_exn json "awsSecretStoreArn" Arn.of_json in
-      make ~sqlStatements ?schema ~dbClusterOrInstanceArn ?database
-        ~awsSecretStoreArn ()
+        field_map_exn json__ "awsSecretStoreArn" Arn.of_json in
+      let dbClusterOrInstanceArn =
+        field_map_exn json__ "dbClusterOrInstanceArn" Arn.of_json in
+      make ?schema ?database ~sqlStatements ~awsSecretStoreArn
+        ~dbClusterOrInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request parameters represent the input of a request to run one or more SQL statements."]
@@ -2045,6 +2266,9 @@ module Metadata =
   struct
     type nonrec t = ColumnMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2088,9 +2312,9 @@ module ResultSetMetadata =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "columnCount") in
       make ?columnMetadata ?columnCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let columnMetadata = field_map json "columnMetadata" Metadata.of_json in
-      let columnCount = field_map json "columnCount" Long.of_json in
+    let of_json json__ =
+      let columnMetadata = field_map json__ "columnMetadata" Metadata.of_json in
+      let columnCount = field_map json__ "columnCount" Long.of_json in
       make ?columnMetadata ?columnCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2099,6 +2323,9 @@ module Row =
   struct
     type nonrec t = Value.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2131,14 +2358,18 @@ module Record =
       let values = (Option.map ~f:Row.of_xml) (Xml.child xml_arg0 "values") in
       make ?values ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" Row.of_json in make ?values ()
+    let of_json json__ =
+      let values = field_map json__ "values" Row.of_json in make ?values ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A record returned by a call."]
+  end[@@ocaml.doc
+       "A record returned by a call. This data structure is only used with the deprecated ExecuteSql operation. Use the BatchExecuteStatement or ExecuteStatement operation instead."]
 module Records =
   struct
     type nonrec t = Record.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2162,32 +2393,33 @@ module ResultFrame =
   struct
     type nonrec t =
       {
-      records: Records.t option [@ocaml.doc "The records in the result set."];
       resultSetMetadata: ResultSetMetadata.t option
-        [@ocaml.doc "The result-set metadata in the result set."]}
-    let make ?records =
-      fun ?resultSetMetadata -> fun () -> { records; resultSetMetadata }
+        [@ocaml.doc "The result-set metadata in the result set."];
+      records: Records.t option [@ocaml.doc "The records in the result set."]}
+    let make ?resultSetMetadata =
+      fun ?records -> fun () -> { resultSetMetadata; records }
     let to_value x =
       structure_to_value
-        [("records", (Option.map x.records ~f:Records.to_value));
-        ("resultSetMetadata",
-          (Option.map x.resultSetMetadata ~f:ResultSetMetadata.to_value))]
+        [("resultSetMetadata",
+           (Option.map x.resultSetMetadata ~f:ResultSetMetadata.to_value));
+        ("records", (Option.map x.records ~f:Records.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let records =
+        (Option.map ~f:Records.of_xml) (Xml.child xml_arg0 "records") in
       let resultSetMetadata =
         (Option.map ~f:ResultSetMetadata.of_xml)
           (Xml.child xml_arg0 "resultSetMetadata") in
-      let records =
-        (Option.map ~f:Records.of_xml) (Xml.child xml_arg0 "records") in
-      make ?resultSetMetadata ?records ()
+      make ?records ?resultSetMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let records = field_map json__ "records" Records.of_json in
       let resultSetMetadata =
-        field_map json "resultSetMetadata" ResultSetMetadata.of_json in
-      let records = field_map json "records" Records.of_json in
-      make ?resultSetMetadata ?records ()
+        field_map json__ "resultSetMetadata" ResultSetMetadata.of_json in
+      make ?records ?resultSetMetadata ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The result set returned by a SQL statement."]
+  end[@@ocaml.doc
+       "The result set returned by a SQL statement. This data structure is only used with the deprecated ExecuteSql operation. Use the BatchExecuteStatement or ExecuteStatement operation instead."]
 module RecordsUpdated =
   struct
     type nonrec t = Int64.t
@@ -2205,38 +2437,42 @@ module SqlStatementResult =
   struct
     type nonrec t =
       {
-      numberOfRecordsUpdated: RecordsUpdated.t option
-        [@ocaml.doc "The number of records updated by a SQL statement."];
       resultFrame: ResultFrame.t option
-        [@ocaml.doc "The result set of the SQL statement."]}
-    let make ?numberOfRecordsUpdated =
-      fun ?resultFrame -> fun () -> { numberOfRecordsUpdated; resultFrame }
+        [@ocaml.doc "The result set of the SQL statement."];
+      numberOfRecordsUpdated: RecordsUpdated.t option
+        [@ocaml.doc "The number of records updated by a SQL statement."]}
+    let make ?resultFrame =
+      fun ?numberOfRecordsUpdated ->
+        fun () -> { resultFrame; numberOfRecordsUpdated }
     let to_value x =
       structure_to_value
-        [("numberOfRecordsUpdated",
-           (Option.map x.numberOfRecordsUpdated ~f:RecordsUpdated.to_value));
-        ("resultFrame", (Option.map x.resultFrame ~f:ResultFrame.to_value))]
+        [("resultFrame", (Option.map x.resultFrame ~f:ResultFrame.to_value));
+        ("numberOfRecordsUpdated",
+          (Option.map x.numberOfRecordsUpdated ~f:RecordsUpdated.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let resultFrame =
-        (Option.map ~f:ResultFrame.of_xml) (Xml.child xml_arg0 "resultFrame") in
       let numberOfRecordsUpdated =
         (Option.map ~f:RecordsUpdated.of_xml)
           (Xml.child xml_arg0 "numberOfRecordsUpdated") in
-      make ?resultFrame ?numberOfRecordsUpdated ()
+      let resultFrame =
+        (Option.map ~f:ResultFrame.of_xml) (Xml.child xml_arg0 "resultFrame") in
+      make ?numberOfRecordsUpdated ?resultFrame ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resultFrame = field_map json "resultFrame" ResultFrame.of_json in
+    let of_json json__ =
       let numberOfRecordsUpdated =
-        field_map json "numberOfRecordsUpdated" RecordsUpdated.of_json in
-      make ?resultFrame ?numberOfRecordsUpdated ()
+        field_map json__ "numberOfRecordsUpdated" RecordsUpdated.of_json in
+      let resultFrame = field_map json__ "resultFrame" ResultFrame.of_json in
+      make ?numberOfRecordsUpdated ?resultFrame ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The result of a SQL statement. <important> <p>This data type is deprecated.</p> </important>"]
+       "The result of a SQL statement. This data structure is only used with the deprecated ExecuteSql operation. Use the BatchExecuteStatement or ExecuteStatement operation instead."]
 module SqlStatementResults =
   struct
     type nonrec t = SqlStatementResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SqlStatementResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2265,7 +2501,8 @@ module ExecuteSqlResponse =
       sqlStatementResults: SqlStatementResults.t option
         [@ocaml.doc "The results of the SQL statement or statements."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
       | `ForbiddenException of ForbiddenException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
@@ -2273,6 +2510,8 @@ module ExecuteSqlResponse =
     let make ?sqlStatementResults = fun () -> { sqlStatementResults }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
       | "ForbiddenException" ->
@@ -2287,6 +2526,8 @@ module ExecuteSqlResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
       | "ForbiddenException" ->
@@ -2300,6 +2541,10 @@ module ExecuteSqlResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
@@ -2332,161 +2577,247 @@ module ExecuteSqlResponse =
           (Xml.child xml_arg0 "sqlStatementResults") in
       make ?sqlStatementResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sqlStatementResults =
-        field_map json "sqlStatementResults" SqlStatementResults.of_json in
+        field_map json__ "sqlStatementResults" SqlStatementResults.of_json in
       make ?sqlStatementResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The response elements represent the output of a request to run one or more SQL statements."]
+module LongReturnType =
+  struct
+    type nonrec t =
+      | STRING 
+      | LONG 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | STRING -> "STRING" | LONG -> "LONG" | Non_static_id s -> s
+    let of_string =
+      function | "STRING" -> STRING | "LONG" -> LONG | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LongReturnType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LongReturnType" j)
+    let to_json = simple_to_json to_value
+  end
 module ResultSetOptions =
   struct
     type nonrec t =
       {
       decimalReturnType: DecimalReturnType.t option
         [@ocaml.doc
-          "A value that indicates how a field of DECIMAL type is represented in the response. The value of STRING, the default, specifies that it is converted to a String value. The value of DOUBLE_OR_LONG specifies that it is converted to a Long value if its scale is 0, or to a Double value otherwise. Conversion to Double or Long can result in roundoff errors due to precision loss. We recommend converting to String, especially when working with currency values."]}
-    let make ?decimalReturnType = fun () -> { decimalReturnType }
+          "A value that indicates how a field of DECIMAL type is represented in the response. The value of STRING, the default, specifies that it is converted to a String value. The value of DOUBLE_OR_LONG specifies that it is converted to a Long value if its scale is 0, or to a Double value otherwise. Conversion to Double or Long can result in roundoff errors due to precision loss. We recommend converting to String, especially when working with currency values."];
+      longReturnType: LongReturnType.t option
+        [@ocaml.doc
+          "A value that indicates how a field of LONG type is represented. Allowed values are LONG and STRING. The default is LONG. Specify STRING if the length or precision of numeric values might cause truncation or rounding errors."]}
+    let make ?decimalReturnType =
+      fun ?longReturnType -> fun () -> { decimalReturnType; longReturnType }
     let to_value x =
       structure_to_value
         [("decimalReturnType",
-           (Option.map x.decimalReturnType ~f:DecimalReturnType.to_value))]
+           (Option.map x.decimalReturnType ~f:DecimalReturnType.to_value));
+        ("longReturnType",
+          (Option.map x.longReturnType ~f:LongReturnType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let longReturnType =
+        (Option.map ~f:LongReturnType.of_xml)
+          (Xml.child xml_arg0 "longReturnType") in
       let decimalReturnType =
         (Option.map ~f:DecimalReturnType.of_xml)
           (Xml.child xml_arg0 "decimalReturnType") in
-      make ?decimalReturnType ()
+      make ?longReturnType ?decimalReturnType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let longReturnType =
+        field_map json__ "longReturnType" LongReturnType.of_json in
       let decimalReturnType =
-        field_map json "decimalReturnType" DecimalReturnType.of_json in
-      make ?decimalReturnType ()
+        field_map json__ "decimalReturnType" DecimalReturnType.of_json in
+      make ?longReturnType ?decimalReturnType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Options that control how the result set is returned."]
+module RecordsFormatType =
+  struct
+    type nonrec t =
+      | NONE 
+      | JSON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NONE -> "NONE" | JSON -> "JSON" | Non_static_id s -> s
+    let of_string =
+      function | "NONE" -> NONE | "JSON" -> JSON | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecordsFormatType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecordsFormatType" j)
+    let to_json = simple_to_json to_value
+  end
 module ExecuteStatementRequest =
   struct
     type nonrec t =
       {
-      continueAfterTimeout: Boolean.t option
-        [@ocaml.doc
-          "A value that indicates whether to continue running the statement after the call times out. By default, the statement stops running when the call times out. For DDL statements, we recommend continuing to run the statement after the call times out. When a DDL statement terminates before it is finished running, it can result in errors and possibly corrupted data structures."];
-      database: DbName.t option [@ocaml.doc "The name of the database."];
-      includeResultMetadata: Boolean.t option
-        [@ocaml.doc
-          "A value that indicates whether to include metadata in the results."];
-      parameters: SqlParametersList.t option
-        [@ocaml.doc
-          "The parameters for the SQL statement. Array parameters are not supported."];
       resourceArn: Arn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the Aurora Serverless DB cluster."];
-      resultSetOptions: ResultSetOptions.t option
-        [@ocaml.doc "Options that control how the result set is returned."];
+      secretArn: Arn.t
+        [@ocaml.doc
+          "The ARN of the secret that enables access to the DB cluster. Enter the database user name and password for the credentials in the secret. For information about creating the secret, see Create a database secret."];
+      sql: SqlStatement.t [@ocaml.doc "The SQL statement to run."];
+      database: DbName.t option [@ocaml.doc "The name of the database."];
       schema: DbName.t option
         [@ocaml.doc
           "The name of the database schema. Currently, the schema parameter isn't supported."];
-      secretArn: Arn.t
+      parameters: SqlParametersList.t option
         [@ocaml.doc
-          "The name or ARN of the secret that enables access to the DB cluster."];
-      sql: SqlStatement.t [@ocaml.doc "The SQL statement to run."];
+          "The parameters for the SQL statement. Array parameters are not supported."];
       transactionId: Id.t option
         [@ocaml.doc
-          "The identifier of a transaction that was started by using the BeginTransaction operation. Specify the transaction ID of the transaction that you want to include the SQL statement in. If the SQL statement is not part of a transaction, don't set this parameter."]}
+          "The identifier of a transaction that was started by using the BeginTransaction operation. Specify the transaction ID of the transaction that you want to include the SQL statement in. If the SQL statement is not part of a transaction, don't set this parameter."];
+      includeResultMetadata: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether to include metadata in the results."];
+      continueAfterTimeout: Boolean.t option
+        [@ocaml.doc
+          "A value that indicates whether to continue running the statement after the call times out. By default, the statement stops running when the call times out. For DDL statements, we recommend continuing to run the statement after the call times out. When a DDL statement terminates before it is finished running, it can result in errors and possibly corrupted data structures."];
+      resultSetOptions: ResultSetOptions.t option
+        [@ocaml.doc "Options that control how the result set is returned."];
+      formatRecordsAs: RecordsFormatType.t option
+        [@ocaml.doc
+          "A value that indicates whether to format the result set as a single JSON string. This parameter only applies to SELECT statements and is ignored for other types of statements. Allowed values are NONE and JSON. The default value is NONE. The result is returned in the formattedRecords field. For usage information about the JSON format for result sets, see Using the Data API in the Amazon Aurora User Guide."]}
     let context_ = "ExecuteStatementRequest"
-    let make ?continueAfterTimeout =
-      fun ?database ->
-        fun ?includeResultMetadata ->
-          fun ?parameters ->
-            fun ?resultSetOptions ->
-              fun ?schema ->
-                fun ?transactionId ->
-                  fun ~resourceArn ->
-                    fun ~secretArn ->
-                      fun ~sql ->
-                        fun () ->
-                          {
-                            continueAfterTimeout;
-                            database;
-                            includeResultMetadata;
-                            parameters;
-                            resultSetOptions;
-                            schema;
-                            transactionId;
-                            resourceArn;
-                            secretArn;
-                            sql
-                          }
+    let make ?database =
+      fun ?schema ->
+        fun ?parameters ->
+          fun ?transactionId ->
+            fun ?includeResultMetadata ->
+              fun ?continueAfterTimeout ->
+                fun ?resultSetOptions ->
+                  fun ?formatRecordsAs ->
+                    fun ~resourceArn ->
+                      fun ~secretArn ->
+                        fun ~sql ->
+                          fun () ->
+                            {
+                              database;
+                              schema;
+                              parameters;
+                              transactionId;
+                              includeResultMetadata;
+                              continueAfterTimeout;
+                              resultSetOptions;
+                              formatRecordsAs;
+                              resourceArn;
+                              secretArn;
+                              sql
+                            }
     let to_value x =
       structure_to_value
-        [("continueAfterTimeout",
-           (Option.map x.continueAfterTimeout ~f:Boolean.to_value));
-        ("database", (Option.map x.database ~f:DbName.to_value));
-        ("includeResultMetadata",
-          (Option.map x.includeResultMetadata ~f:Boolean.to_value));
-        ("parameters",
-          (Option.map x.parameters ~f:SqlParametersList.to_value));
-        ("resourceArn", (Some (Arn.to_value x.resourceArn)));
-        ("resultSetOptions",
-          (Option.map x.resultSetOptions ~f:ResultSetOptions.to_value));
-        ("schema", (Option.map x.schema ~f:DbName.to_value));
+        [("resourceArn", (Some (Arn.to_value x.resourceArn)));
         ("secretArn", (Some (Arn.to_value x.secretArn)));
         ("sql", (Some (SqlStatement.to_value x.sql)));
-        ("transactionId", (Option.map x.transactionId ~f:Id.to_value))]
+        ("database", (Option.map x.database ~f:DbName.to_value));
+        ("schema", (Option.map x.schema ~f:DbName.to_value));
+        ("parameters",
+          (Option.map x.parameters ~f:SqlParametersList.to_value));
+        ("transactionId", (Option.map x.transactionId ~f:Id.to_value));
+        ("includeResultMetadata",
+          (Option.map x.includeResultMetadata ~f:Boolean.to_value));
+        ("continueAfterTimeout",
+          (Option.map x.continueAfterTimeout ~f:Boolean.to_value));
+        ("resultSetOptions",
+          (Option.map x.resultSetOptions ~f:ResultSetOptions.to_value));
+        ("formatRecordsAs",
+          (Option.map x.formatRecordsAs ~f:RecordsFormatType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let formatRecordsAs =
+        (Option.map ~f:RecordsFormatType.of_xml)
+          (Xml.child xml_arg0 "formatRecordsAs") in
+      let resultSetOptions =
+        (Option.map ~f:ResultSetOptions.of_xml)
+          (Xml.child xml_arg0 "resultSetOptions") in
+      let continueAfterTimeout =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "continueAfterTimeout") in
+      let includeResultMetadata =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "includeResultMetadata") in
       let transactionId =
         (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "transactionId") in
+      let parameters =
+        (Option.map ~f:SqlParametersList.of_xml)
+          (Xml.child xml_arg0 "parameters") in
+      let schema =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
+      let database =
+        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
       let sql =
         SqlStatement.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sql") in
       let secretArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "secretArn") in
-      let schema =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "schema") in
-      let resultSetOptions =
-        (Option.map ~f:ResultSetOptions.of_xml)
-          (Xml.child xml_arg0 "resultSetOptions") in
       let resourceArn =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      let parameters =
-        (Option.map ~f:SqlParametersList.of_xml)
-          (Xml.child xml_arg0 "parameters") in
-      let includeResultMetadata =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "includeResultMetadata") in
-      let database =
-        (Option.map ~f:DbName.of_xml) (Xml.child xml_arg0 "database") in
-      let continueAfterTimeout =
-        (Option.map ~f:Boolean.of_xml)
-          (Xml.child xml_arg0 "continueAfterTimeout") in
-      make ?transactionId ~sql ~secretArn ?schema ?resultSetOptions
-        ~resourceArn ?parameters ?includeResultMetadata ?database
-        ?continueAfterTimeout ()
+      make ?formatRecordsAs ?resultSetOptions ?continueAfterTimeout
+        ?includeResultMetadata ?transactionId ?parameters ?schema ?database
+        ~sql ~secretArn ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transactionId = field_map json "transactionId" Id.of_json in
-      let sql = field_map_exn json "sql" SqlStatement.of_json in
-      let secretArn = field_map_exn json "secretArn" Arn.of_json in
-      let schema = field_map json "schema" DbName.of_json in
+    let of_json json__ =
+      let formatRecordsAs =
+        field_map json__ "formatRecordsAs" RecordsFormatType.of_json in
       let resultSetOptions =
-        field_map json "resultSetOptions" ResultSetOptions.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
-      let parameters = field_map json "parameters" SqlParametersList.of_json in
-      let includeResultMetadata =
-        field_map json "includeResultMetadata" Boolean.of_json in
-      let database = field_map json "database" DbName.of_json in
+        field_map json__ "resultSetOptions" ResultSetOptions.of_json in
       let continueAfterTimeout =
-        field_map json "continueAfterTimeout" Boolean.of_json in
-      make ?transactionId ~sql ~secretArn ?schema ?resultSetOptions
-        ~resourceArn ?parameters ?includeResultMetadata ?database
-        ?continueAfterTimeout ()
+        field_map json__ "continueAfterTimeout" Boolean.of_json in
+      let includeResultMetadata =
+        field_map json__ "includeResultMetadata" Boolean.of_json in
+      let transactionId = field_map json__ "transactionId" Id.of_json in
+      let parameters =
+        field_map json__ "parameters" SqlParametersList.of_json in
+      let schema = field_map json__ "schema" DbName.of_json in
+      let database = field_map json__ "database" DbName.of_json in
+      let sql = field_map_exn json__ "sql" SqlStatement.of_json in
+      let secretArn = field_map_exn json__ "secretArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
+      make ?formatRecordsAs ?resultSetOptions ?continueAfterTimeout
+        ?includeResultMetadata ?transactionId ?parameters ?schema ?database
+        ~sql ~secretArn ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request parameters represent the input of a request to run a SQL statement against a database."]
+module UnsupportedResultException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was a problem with the result because of one of the following conditions: It contained an unsupported data type. It contained a multidimensional array. The size was too large."]
 module SqlRecords =
   struct
     type nonrec t = FieldList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FieldList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2507,82 +2838,202 @@ module SqlRecords =
       list_of_json ~kind:"SqlRecords" ~of_json:FieldList.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FormattedSqlRecords =
+  struct
+    type nonrec t = string
+    let context_ = "FormattedSqlRecords"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FormattedSqlRecords" j
+    let to_json = simple_to_json to_value
+  end
 module ExecuteStatementResponse =
   struct
     type nonrec t =
       {
-      columnMetadata: Metadata.t option
-        [@ocaml.doc "Metadata for the columns included in the results."];
-      generatedFields: FieldList.t option
+      records: SqlRecords.t option
         [@ocaml.doc
-          "Values for fields generated during the request. <note> <p>The <code>generatedFields</code> data isn't supported by Aurora PostgreSQL. To get the values of generated fields, use the <code>RETURNING</code> clause. For more information, see <a href=\"https://www.postgresql.org/docs/10/dml-returning.html\">Returning Data From Modified Rows</a> in the PostgreSQL documentation.</p> </note>"];
+          "The records returned by the SQL statement. This field is blank if the formatRecordsAs parameter is set to JSON."];
+      columnMetadata: Metadata.t option
+        [@ocaml.doc
+          "Metadata for the columns included in the results. This field is blank if the formatRecordsAs parameter is set to JSON."];
       numberOfRecordsUpdated: RecordsUpdated.t option
         [@ocaml.doc "The number of records updated by the request."];
-      records: SqlRecords.t option
-        [@ocaml.doc "The records returned by the SQL statement."]}
+      generatedFields: FieldList.t option
+        [@ocaml.doc
+          "Values for fields generated during a DML request. The generatedFields data isn't supported by Aurora PostgreSQL. To get the values of generated fields, use the RETURNING clause. For more information, see Returning Data From Modified Rows in the PostgreSQL documentation."];
+      formattedRecords: FormattedSqlRecords.t option
+        [@ocaml.doc
+          "A string value that represents the result set of a SELECT statement in JSON format. This value is only present when the formatRecordsAs parameter is set to JSON. The size limit for this field is currently 10 MB. If the JSON-formatted string representing the result set requires more than 10 MB, the call returns an error."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `DatabaseErrorException of DatabaseErrorException.t 
+      | `DatabaseNotFoundException of DatabaseNotFoundException.t 
+      | `DatabaseResumingException of DatabaseResumingException.t 
+      | `DatabaseUnavailableException of DatabaseUnavailableException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `HttpEndpointNotEnabledException of HttpEndpointNotEnabledException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `InvalidSecretException of InvalidSecretException.t 
+      | `SecretsErrorException of SecretsErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
       | `StatementTimeoutException of StatementTimeoutException.t 
+      | `TransactionNotFoundException of TransactionNotFoundException.t 
+      | `UnsupportedResultException of UnsupportedResultException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?columnMetadata =
-      fun ?generatedFields ->
+    let make ?records =
+      fun ?columnMetadata ->
         fun ?numberOfRecordsUpdated ->
-          fun ?records ->
-            fun () ->
-              {
-                columnMetadata;
-                generatedFields;
-                numberOfRecordsUpdated;
-                records
-              }
+          fun ?generatedFields ->
+            fun ?formattedRecords ->
+              fun () ->
+                {
+                  records;
+                  columnMetadata;
+                  numberOfRecordsUpdated;
+                  generatedFields;
+                  formattedRecords
+                }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_json json)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_json json)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_json json)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_json json)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_json json)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_json json)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_json json)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_json json)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_json json)
+      | "UnsupportedResultException" ->
+          `UnsupportedResultException
+            (UnsupportedResultException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_xml xml)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_xml xml)
+      | "DatabaseResumingException" ->
+          `DatabaseResumingException (DatabaseResumingException.of_xml xml)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_xml xml)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_xml xml)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_xml xml)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_xml xml)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_xml xml)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_xml xml)
+      | "UnsupportedResultException" ->
+          `UnsupportedResultException (UnsupportedResultException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `DatabaseErrorException e ->
+          `Assoc
+            [("error", (`String "DatabaseErrorException"));
+            ("details", (DatabaseErrorException.to_json e))]
+      | `DatabaseNotFoundException e ->
+          `Assoc
+            [("error", (`String "DatabaseNotFoundException"));
+            ("details", (DatabaseNotFoundException.to_json e))]
+      | `DatabaseResumingException e ->
+          `Assoc
+            [("error", (`String "DatabaseResumingException"));
+            ("details", (DatabaseResumingException.to_json e))]
+      | `DatabaseUnavailableException e ->
+          `Assoc
+            [("error", (`String "DatabaseUnavailableException"));
+            ("details", (DatabaseUnavailableException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `HttpEndpointNotEnabledException e ->
+          `Assoc
+            [("error", (`String "HttpEndpointNotEnabledException"));
+            ("details", (HttpEndpointNotEnabledException.to_json e))]
       | `InternalServerErrorException e ->
           `Assoc
             [("error", (`String "InternalServerErrorException"));
             ("details", (InternalServerErrorException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `InvalidSecretException e ->
+          `Assoc
+            [("error", (`String "InvalidSecretException"));
+            ("details", (InvalidSecretException.to_json e))]
+      | `SecretsErrorException e ->
+          `Assoc
+            [("error", (`String "SecretsErrorException"));
+            ("details", (SecretsErrorException.to_json e))]
       | `ServiceUnavailableError e ->
           `Assoc
             [("error", (`String "ServiceUnavailableError"));
@@ -2591,6 +3042,14 @@ module ExecuteStatementResponse =
           `Assoc
             [("error", (`String "StatementTimeoutException"));
             ("details", (StatementTimeoutException.to_json e))]
+      | `TransactionNotFoundException e ->
+          `Assoc
+            [("error", (`String "TransactionNotFoundException"));
+            ("details", (TransactionNotFoundException.to_json e))]
+      | `UnsupportedResultException e ->
+          `Assoc
+            [("error", (`String "UnsupportedResultException"));
+            ("details", (UnsupportedResultException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2598,37 +3057,44 @@ module ExecuteStatementResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("columnMetadata",
-           (Option.map x.columnMetadata ~f:Metadata.to_value));
-        ("generatedFields",
-          (Option.map x.generatedFields ~f:FieldList.to_value));
+        [("records", (Option.map x.records ~f:SqlRecords.to_value));
+        ("columnMetadata",
+          (Option.map x.columnMetadata ~f:Metadata.to_value));
         ("numberOfRecordsUpdated",
           (Option.map x.numberOfRecordsUpdated ~f:RecordsUpdated.to_value));
-        ("records", (Option.map x.records ~f:SqlRecords.to_value))]
+        ("generatedFields",
+          (Option.map x.generatedFields ~f:FieldList.to_value));
+        ("formattedRecords",
+          (Option.map x.formattedRecords ~f:FormattedSqlRecords.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let records =
-        (Option.map ~f:SqlRecords.of_xml) (Xml.child xml_arg0 "records") in
-      let numberOfRecordsUpdated =
-        (Option.map ~f:RecordsUpdated.of_xml)
-          (Xml.child xml_arg0 "numberOfRecordsUpdated") in
+      let formattedRecords =
+        (Option.map ~f:FormattedSqlRecords.of_xml)
+          (Xml.child xml_arg0 "formattedRecords") in
       let generatedFields =
         (Option.map ~f:FieldList.of_xml)
           (Xml.child xml_arg0 "generatedFields") in
+      let numberOfRecordsUpdated =
+        (Option.map ~f:RecordsUpdated.of_xml)
+          (Xml.child xml_arg0 "numberOfRecordsUpdated") in
       let columnMetadata =
         (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "columnMetadata") in
-      make ?records ?numberOfRecordsUpdated ?generatedFields ?columnMetadata
-        ()
+      let records =
+        (Option.map ~f:SqlRecords.of_xml) (Xml.child xml_arg0 "records") in
+      make ?formattedRecords ?generatedFields ?numberOfRecordsUpdated
+        ?columnMetadata ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let records = field_map json "records" SqlRecords.of_json in
-      let numberOfRecordsUpdated =
-        field_map json "numberOfRecordsUpdated" RecordsUpdated.of_json in
+    let of_json json__ =
+      let formattedRecords =
+        field_map json__ "formattedRecords" FormattedSqlRecords.of_json in
       let generatedFields =
-        field_map json "generatedFields" FieldList.of_json in
-      let columnMetadata = field_map json "columnMetadata" Metadata.of_json in
-      make ?records ?numberOfRecordsUpdated ?generatedFields ?columnMetadata
-        ()
+        field_map json__ "generatedFields" FieldList.of_json in
+      let numberOfRecordsUpdated =
+        field_map json__ "numberOfRecordsUpdated" RecordsUpdated.of_json in
+      let columnMetadata = field_map json__ "columnMetadata" Metadata.of_json in
+      let records = field_map json__ "records" SqlRecords.of_json in
+      make ?formattedRecords ?generatedFields ?numberOfRecordsUpdated
+        ?columnMetadata ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The response elements represent the output of a request to run a SQL statement against a database."]
@@ -2664,10 +3130,10 @@ module RollbackTransactionRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~transactionId ~secretArn ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transactionId = field_map_exn json "transactionId" Id.of_json in
-      let secretArn = field_map_exn json "secretArn" Arn.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let transactionId = field_map_exn json__ "transactionId" Id.of_json in
+      let secretArn = field_map_exn json__ "secretArn" Arn.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~transactionId ~secretArn ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2679,67 +3145,152 @@ module RollbackTransactionResponse =
       transactionStatus: TransactionStatus.t option
         [@ocaml.doc "The status of the rollback operation."]}
     type nonrec error =
-      [ `BadRequestException of BadRequestException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `DatabaseErrorException of DatabaseErrorException.t 
+      | `DatabaseNotFoundException of DatabaseNotFoundException.t 
+      | `DatabaseUnavailableException of DatabaseUnavailableException.t 
       | `ForbiddenException of ForbiddenException.t 
+      | `HttpEndpointNotEnabledException of HttpEndpointNotEnabledException.t 
       | `InternalServerErrorException of InternalServerErrorException.t 
+      | `InvalidResourceStateException of InvalidResourceStateException.t 
+      | `InvalidSecretException of InvalidSecretException.t 
       | `NotFoundException of NotFoundException.t 
+      | `SecretsErrorException of SecretsErrorException.t 
       | `ServiceUnavailableError of ServiceUnavailableError.t 
       | `StatementTimeoutException of StatementTimeoutException.t 
+      | `TransactionNotFoundException of TransactionNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?transactionStatus = fun () -> { transactionStatus }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_json json)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_json json)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_json json)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_json json)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_json json)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_json json)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_json json)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_json json)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_json json)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_json json)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_json json)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "BadRequestException" ->
           `BadRequestException (BadRequestException.of_xml xml)
+      | "DatabaseErrorException" ->
+          `DatabaseErrorException (DatabaseErrorException.of_xml xml)
+      | "DatabaseNotFoundException" ->
+          `DatabaseNotFoundException (DatabaseNotFoundException.of_xml xml)
+      | "DatabaseUnavailableException" ->
+          `DatabaseUnavailableException
+            (DatabaseUnavailableException.of_xml xml)
       | "ForbiddenException" ->
           `ForbiddenException (ForbiddenException.of_xml xml)
+      | "HttpEndpointNotEnabledException" ->
+          `HttpEndpointNotEnabledException
+            (HttpEndpointNotEnabledException.of_xml xml)
       | "InternalServerErrorException" ->
           `InternalServerErrorException
             (InternalServerErrorException.of_xml xml)
+      | "InvalidResourceStateException" ->
+          `InvalidResourceStateException
+            (InvalidResourceStateException.of_xml xml)
+      | "InvalidSecretException" ->
+          `InvalidSecretException (InvalidSecretException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "SecretsErrorException" ->
+          `SecretsErrorException (SecretsErrorException.of_xml xml)
       | "ServiceUnavailableError" ->
           `ServiceUnavailableError (ServiceUnavailableError.of_xml xml)
       | "StatementTimeoutException" ->
           `StatementTimeoutException (StatementTimeoutException.of_xml xml)
+      | "TransactionNotFoundException" ->
+          `TransactionNotFoundException
+            (TransactionNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `BadRequestException e ->
           `Assoc
             [("error", (`String "BadRequestException"));
             ("details", (BadRequestException.to_json e))]
+      | `DatabaseErrorException e ->
+          `Assoc
+            [("error", (`String "DatabaseErrorException"));
+            ("details", (DatabaseErrorException.to_json e))]
+      | `DatabaseNotFoundException e ->
+          `Assoc
+            [("error", (`String "DatabaseNotFoundException"));
+            ("details", (DatabaseNotFoundException.to_json e))]
+      | `DatabaseUnavailableException e ->
+          `Assoc
+            [("error", (`String "DatabaseUnavailableException"));
+            ("details", (DatabaseUnavailableException.to_json e))]
       | `ForbiddenException e ->
           `Assoc
             [("error", (`String "ForbiddenException"));
             ("details", (ForbiddenException.to_json e))]
+      | `HttpEndpointNotEnabledException e ->
+          `Assoc
+            [("error", (`String "HttpEndpointNotEnabledException"));
+            ("details", (HttpEndpointNotEnabledException.to_json e))]
       | `InternalServerErrorException e ->
           `Assoc
             [("error", (`String "InternalServerErrorException"));
             ("details", (InternalServerErrorException.to_json e))]
+      | `InvalidResourceStateException e ->
+          `Assoc
+            [("error", (`String "InvalidResourceStateException"));
+            ("details", (InvalidResourceStateException.to_json e))]
+      | `InvalidSecretException e ->
+          `Assoc
+            [("error", (`String "InvalidSecretException"));
+            ("details", (InvalidSecretException.to_json e))]
       | `NotFoundException e ->
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `SecretsErrorException e ->
+          `Assoc
+            [("error", (`String "SecretsErrorException"));
+            ("details", (SecretsErrorException.to_json e))]
       | `ServiceUnavailableError e ->
           `Assoc
             [("error", (`String "ServiceUnavailableError"));
@@ -2748,6 +3299,10 @@ module RollbackTransactionResponse =
           `Assoc
             [("error", (`String "StatementTimeoutException"));
             ("details", (StatementTimeoutException.to_json e))]
+      | `TransactionNotFoundException e ->
+          `Assoc
+            [("error", (`String "TransactionNotFoundException"));
+            ("details", (TransactionNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2764,9 +3319,9 @@ module RollbackTransactionResponse =
           (Xml.child xml_arg0 "transactionStatus") in
       make ?transactionStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let transactionStatus =
-        field_map json "transactionStatus" TransactionStatus.of_json in
+        field_map json__ "transactionStatus" TransactionStatus.of_json in
       make ?transactionStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

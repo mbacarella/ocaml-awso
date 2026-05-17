@@ -82,6 +82,8 @@ let create_job =
        and hopDestinations =
          flag "hop-destinations" (optional json_arg)
            ~doc:"JSON __listOfHopDestination"
+       and jobEngineVersion =
+         flag "job-engine-version" (optional string) ~doc:"STRING __string"
        and jobTemplate =
          flag "job-template" (optional string) ~doc:"STRING __string"
        and priority =
@@ -112,8 +114,8 @@ let create_job =
                                     billingTagsSource) ?clientRequestToken
               ?hopDestinations:(Option.map
                                   ~f:Values.Zz__listOfHopDestination.of_json
-                                  hopDestinations) ?jobTemplate ?priority
-              ?queue
+                                  hopDestinations) ?jobEngineVersion
+              ?jobTemplate ?priority ?queue
               ?simulateReservedQueue:(Option.map
                                         ~f:Values.SimulateReservedQueue.of_json
                                         simulateReservedQueue)
@@ -211,8 +213,13 @@ let create_queue =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and concurrentJobs =
+         flag "concurrent-jobs" (optional int) ~doc:"INT __integer"
        and description =
          flag "description" (optional string) ~doc:"STRING __string"
+       and maximumConcurrentFeeds =
+         flag "maximum-concurrent-feeds" (optional int)
+           ~doc:"INT __integerMin0"
        and pricingPlan =
          flag "pricing-plan" (optional json_arg) ~doc:"JSON PricingPlan"
        and reservationPlanSettings =
@@ -224,7 +231,8 @@ let create_queue =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_queue
-           (Values.CreateQueueRequest.make ?description
+           (Values.CreateQueueRequest.make ?concurrentJobs ?description
+              ?maximumConcurrentFeeds
               ?pricingPlan:(Option.map ~f:Values.PricingPlan.of_json
                               pricingPlan)
               ?reservationPlanSettings:(Option.map
@@ -234,6 +242,25 @@ let create_queue =
               ?tags:(Option.map ~f:Values.Zz__mapOf__string.of_json tags)
               ~name ()) (Some Values.CreateQueueResponse.to_json)
            (Some Values.CreateQueueResponse.error_to_json)])
+let create_resource_share =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobId = flag "job-id" (required string) ~doc:"STRING __string"
+       and supportCaseId =
+         flag "support-case-id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_resource_share
+           (Values.CreateResourceShareRequest.make ~jobId ~supportCaseId ())
+           (Some Values.CreateResourceShareResponse.to_json)
+           (Some Values.CreateResourceShareResponse.error_to_json)])
 let delete_job_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -371,6 +398,23 @@ let get_job_template =
            Io.get_job_template (Values.GetJobTemplateRequest.make ~name ())
            (Some Values.GetJobTemplateResponse.to_json)
            (Some Values.GetJobTemplateResponse.error_to_json)])
+let get_jobs_query_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_jobs_query_results
+           (Values.GetJobsQueryResultsRequest.make ~id ())
+           (Some Values.GetJobsQueryResultsResponse.to_json)
+           (Some Values.GetJobsQueryResultsResponse.error_to_json)])
 let get_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -543,6 +587,47 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~arn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT __integerMin1Max20"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_versions
+           (Values.ListVersionsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListVersionsResponse.to_json)
+           (Some Values.ListVersionsResponse.error_to_json)])
+let probe =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and inputFiles =
+         flag "input-files" (optional json_arg)
+           ~doc:"JSON __listOfProbeInputFile" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.probe
+           (Values.ProbeRequest.make
+              ?inputFiles:(Option.map
+                             ~f:Values.Zz__listOfProbeInputFile.of_json
+                             inputFiles) ())
+           (Some Values.ProbeResponse.to_json)
+           (Some Values.ProbeResponse.error_to_json)])
 let put_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -561,6 +646,61 @@ let put_policy =
               ~policy:(Values.Policy.of_json policy) ())
            (Some Values.PutPolicyResponse.to_json)
            (Some Values.PutPolicyResponse.error_to_json)])
+let search_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and inputFile =
+         flag "input-file" (optional string) ~doc:"STRING __string"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT __integerMin1Max20"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and order = flag "order" (optional json_arg) ~doc:"JSON Order"
+       and queue = flag "queue" (optional string) ~doc:"STRING __string"
+       and status = flag "status" (optional json_arg) ~doc:"JSON JobStatus" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.search_jobs
+           (Values.SearchJobsRequest.make ?inputFile ?maxResults ?nextToken
+              ?order:(Option.map ~f:Values.Order.of_json order) ?queue
+              ?status:(Option.map ~f:Values.JobStatus.of_json status) ())
+           (Some Values.SearchJobsResponse.to_json)
+           (Some Values.SearchJobsResponse.error_to_json)])
+let start_jobs_query =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterList =
+         flag "filter-list" (optional json_arg)
+           ~doc:"JSON __listOfJobsQueryFilter"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT __integerMin1Max20"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING __string"
+       and order = flag "order" (optional json_arg) ~doc:"JSON Order" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_jobs_query
+           (Values.StartJobsQueryRequest.make
+              ?filterList:(Option.map
+                             ~f:Values.Zz__listOfJobsQueryFilter.of_json
+                             filterList) ?maxResults ?nextToken
+              ?order:(Option.map ~f:Values.Order.of_json order) ())
+           (Some Values.StartJobsQueryResponse.to_json)
+           (Some Values.StartJobsQueryResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -683,8 +823,13 @@ let update_queue =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and concurrentJobs =
+         flag "concurrent-jobs" (optional int) ~doc:"INT __integer"
        and description =
          flag "description" (optional string) ~doc:"STRING __string"
+       and maximumConcurrentFeeds =
+         flag "maximum-concurrent-feeds" (optional int)
+           ~doc:"INT __integerMin0"
        and reservationPlanSettings =
          flag "reservation-plan-settings" (optional json_arg)
            ~doc:"JSON ReservationPlanSettings"
@@ -693,7 +838,8 @@ let update_queue =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_queue
-           (Values.UpdateQueueRequest.make ?description
+           (Values.UpdateQueueRequest.make ?concurrentJobs ?description
+              ?maximumConcurrentFeeds
               ?reservationPlanSettings:(Option.map
                                           ~f:Values.ReservationPlanSettings.of_json
                                           reservationPlanSettings)
@@ -709,6 +855,7 @@ let main =
     ("create-job-template", create_job_template);
     ("create-preset", create_preset);
     ("create-queue", create_queue);
+    ("create-resource-share", create_resource_share);
     ("delete-job-template", delete_job_template);
     ("delete-policy", delete_policy);
     ("delete-preset", delete_preset);
@@ -717,6 +864,7 @@ let main =
     ("disassociate-certificate", disassociate_certificate);
     ("get-job", get_job);
     ("get-job-template", get_job_template);
+    ("get-jobs-query-results", get_jobs_query_results);
     ("get-policy", get_policy);
     ("get-preset", get_preset);
     ("get-queue", get_queue);
@@ -725,7 +873,11 @@ let main =
     ("list-presets", list_presets);
     ("list-queues", list_queues);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-versions", list_versions);
+    ("probe", probe);
     ("put-policy", put_policy);
+    ("search-jobs", search_jobs);
+    ("start-jobs-query", start_jobs_query);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-job-template", update_job_template);

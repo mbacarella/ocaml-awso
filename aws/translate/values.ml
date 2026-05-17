@@ -105,9 +105,9 @@ module Term =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "SourceText") in
       make ?targetText ?sourceText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetText = field_map json "TargetText" String_.of_json in
-      let sourceText = field_map json "SourceText" String_.of_json in
+    let of_json json__ =
+      let targetText = field_map json__ "TargetText" String_.of_json in
+      let sourceText = field_map json__ "SourceText" String_.of_json in
       make ?targetText ?sourceText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The term being translated by the custom terminology."]
@@ -188,9 +188,9 @@ module EncryptionKey =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~id ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" EncryptionKeyID.of_json in
-      let type_ = field_map_exn json "Type" EncryptionKeyType.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" EncryptionKeyID.of_json in
+      let type_ = field_map_exn json__ "Type" EncryptionKeyType.of_json in
       make ~id ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The encryption key used to encrypt this object."]
@@ -230,6 +230,22 @@ module LanguageCodeString =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"LanguageCodeString" j
+    let to_json = simple_to_json to_value
+  end
+module Brevity =
+  struct
+    type nonrec t =
+      | ON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | ON -> "ON" | Non_static_id s -> s
+    let of_string = function | "ON" -> ON | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Brevity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Brevity" j)
     let to_json = simple_to_json to_value
   end
 module Formality =
@@ -306,6 +322,9 @@ module TermList =
   struct
     type nonrec t = Term.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Term.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -324,6 +343,42 @@ module TermList =
                      | _ -> true))) ~f:Term.of_xml)
     let of_json j = list_of_json ~kind:"TermList" ~of_json:Term.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
   end
 module IamRoleArn =
   struct
@@ -353,7 +408,7 @@ module InputDataConfig =
       {
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "The URI of the AWS S3 folder that contains the input file. The folder must be in the same Region as the API endpoint you are calling."];
+          "The URI of the AWS S3 folder that contains the input files. Amazon Translate translates all the files in the folder and all its sub-folders. The folder must be in the same Region as the API endpoint you are calling."];
       contentType: ContentType.t
         [@ocaml.doc
           "Describes the format of the data that you submit to Amazon Translate as input. You can specify one of the following multipurpose internet mail extension (MIME) types: text/html: The input data consists of one or more HTML files. Amazon Translate translates only the text that resides in the html element in each file. text/plain: The input data consists of one or more unformatted text files. Amazon Translate translates every character in this type of input. application/vnd.openxmlformats-officedocument.wordprocessingml.document: The input data consists of one or more Word documents (.docx). application/vnd.openxmlformats-officedocument.presentationml.presentation: The input data consists of one or more PowerPoint Presentation files (.pptx). application/vnd.openxmlformats-officedocument.spreadsheetml.sheet: The input data consists of one or more Excel Workbook files (.xlsx). application/x-xliff+xml: The input data consists of one or more XML Localization Interchange File Format (XLIFF) files (.xlf). Amazon Translate supports only XLIFF version 1.2. If you structure your input data as HTML, ensure that you set this parameter to text/html. By doing so, you cut costs by limiting the translation to the contents of the html element in each file. Otherwise, if you set this parameter to text/plain, your costs will cover the translation of every character."]}
@@ -372,9 +427,10 @@ module InputDataConfig =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~contentType ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let contentType = field_map_exn json "ContentType" ContentType.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+    let of_json json__ =
+      let contentType =
+        field_map_exn json__ "ContentType" ContentType.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ~contentType ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -423,13 +479,13 @@ module JobDetails =
       make ?inputDocumentsCount ?documentsWithErrorsCount
         ?translatedDocumentsCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputDocumentsCount =
-        field_map json "InputDocumentsCount" Integer.of_json in
+        field_map json__ "InputDocumentsCount" Integer.of_json in
       let documentsWithErrorsCount =
-        field_map json "DocumentsWithErrorsCount" Integer.of_json in
+        field_map json__ "DocumentsWithErrorsCount" Integer.of_json in
       let translatedDocumentsCount =
-        field_map json "TranslatedDocumentsCount" Integer.of_json in
+        field_map json__ "TranslatedDocumentsCount" Integer.of_json in
       make ?inputDocumentsCount ?documentsWithErrorsCount
         ?translatedDocumentsCount ()
     let to_json v = composed_to_json to_value v
@@ -544,10 +600,10 @@ module OutputDataConfig =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ?encryptionKey ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionKey =
-        field_map json "EncryptionKey" EncryptionKey.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
+        field_map json__ "EncryptionKey" EncryptionKey.of_json in
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
       make ?encryptionKey ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -556,6 +612,9 @@ module ResourceNameList =
   struct
     type nonrec t = ResourceName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -580,10 +639,10 @@ module TargetLanguageCodeStringList =
   struct
     type nonrec t = LanguageCodeString.t list
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LanguageCodeString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -621,30 +680,41 @@ module TranslationSettings =
   struct
     type nonrec t =
       {
-      formality: Formality.t option ;
+      formality: Formality.t option
+        [@ocaml.doc
+          "You can specify the desired level of formality for translations to supported target languages. The formality setting controls the level of formal language usage (also known as register) in the translation output. You can set the value to informal or formal. If you don't specify a value for formality, or if the target language doesn't support formality, the translation will ignore the formality setting. If you specify multiple target languages for the job, translate ignores the formality setting for any unsupported target language. For a list of target languages that support formality, see Supported languages in the Amazon Translate Developer Guide."];
       profanity: Profanity.t option
         [@ocaml.doc
-          "Enable the profanity setting if you want Amazon Translate to mask profane words and phrases in your translation output. To mask profane words and phrases, Amazon Translate replaces them with the grawlix string \226\128\156?$#\\@$\226\128\156. This 5-character sequence is used for each profane word or phrase, regardless of the length or number of words. Amazon Translate does not detect profanity in all of its supported languages. For languages that support profanity detection, see Supported Languages and Language Codes in the Amazon Translate Developer Guide."]}
+          "You can enable the profanity setting if you want to mask profane words and phrases in your translation output. To mask profane words and phrases, Amazon Translate replaces them with the grawlix string \226\128\156?$#\\@$\226\128\156. This 5-character sequence is used for each profane word or phrase, regardless of the length or number of words. Amazon Translate doesn't detect profanity in all of its supported languages. For languages that don't support profanity detection, see Unsupported languages in the Amazon Translate Developer Guide. If you specify multiple target languages for the job, all the target languages must support profanity masking. If any of the target languages don't support profanity masking, the translation job won't mask profanity for any target language."];
+      brevity: Brevity.t option
+        [@ocaml.doc
+          "When you turn on brevity, Amazon Translate reduces the length of the translation output for most translations (when compared with the same translation with brevity turned off). By default, brevity is turned off. If you turn on brevity for a translation request with an unsupported language pair, the translation proceeds with the brevity setting turned off. For the language pairs that brevity supports, see Using brevity in the Amazon Translate Developer Guide."]}
     let make ?formality =
-      fun ?profanity -> fun () -> { formality; profanity }
+      fun ?profanity ->
+        fun ?brevity -> fun () -> { formality; profanity; brevity }
     let to_value x =
       structure_to_value
         [("Formality", (Option.map x.formality ~f:Formality.to_value));
-        ("Profanity", (Option.map x.profanity ~f:Profanity.to_value))]
+        ("Profanity", (Option.map x.profanity ~f:Profanity.to_value));
+        ("Brevity", (Option.map x.brevity ~f:Brevity.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let brevity =
+        (Option.map ~f:Brevity.of_xml) (Xml.child xml_arg0 "Brevity") in
       let profanity =
         (Option.map ~f:Profanity.of_xml) (Xml.child xml_arg0 "Profanity") in
       let formality =
         (Option.map ~f:Formality.of_xml) (Xml.child xml_arg0 "Formality") in
-      make ?profanity ?formality ()
+      make ?brevity ?profanity ?formality ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let profanity = field_map json "Profanity" Profanity.of_json in
-      let formality = field_map json "Formality" Formality.of_json in
-      make ?profanity ?formality ()
+    let of_json json__ =
+      let brevity = field_map json__ "Brevity" Brevity.of_json in
+      let profanity = field_map json__ "Profanity" Profanity.of_json in
+      let formality = field_map json__ "Formality" Formality.of_json in
+      make ?brevity ?profanity ?formality ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Settings that configure the translation output."]
+  end[@@ocaml.doc
+       "Settings to configure your translation output. You can configure the following options: Brevity: reduces the length of the translation output for most translations. Available for TranslateText only. Formality: sets the formality level of the translation output. Profanity: masks profane words and phrases in the translation output."]
 module UnboundedLengthString =
   struct
     type nonrec t = string
@@ -699,6 +769,9 @@ module LanguageCodeStringList =
   struct
     type nonrec t = LanguageCodeString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LanguageCodeString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -803,30 +876,28 @@ module ParallelDataConfig =
   struct
     type nonrec t =
       {
-      s3Uri: S3Uri.t
+      s3Uri: S3Uri.t option
         [@ocaml.doc
           "The URI of the Amazon S3 folder that contains the parallel data input file. The folder must be in the same Region as the API endpoint you are calling."];
-      format: ParallelDataFormat.t
+      format: ParallelDataFormat.t option
         [@ocaml.doc "The format of the parallel data input file."]}
-    let context_ = "ParallelDataConfig"
-    let make ~s3Uri = fun ~format -> fun () -> { s3Uri; format }
+    let make ?s3Uri = fun ?format -> fun () -> { s3Uri; format }
     let to_value x =
       structure_to_value
-        [("S3Uri", (Some (S3Uri.to_value x.s3Uri)));
-        ("Format", (Some (ParallelDataFormat.to_value x.format)))]
+        [("S3Uri", (Option.map x.s3Uri ~f:S3Uri.to_value));
+        ("Format", (Option.map x.format ~f:ParallelDataFormat.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let format =
-        ParallelDataFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Format") in
-      let s3Uri =
-        S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
-      make ~format ~s3Uri ()
+        (Option.map ~f:ParallelDataFormat.of_xml)
+          (Xml.child xml_arg0 "Format") in
+      let s3Uri = (Option.map ~f:S3Uri.of_xml) (Xml.child xml_arg0 "S3Uri") in
+      make ?format ?s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let format = field_map_exn json "Format" ParallelDataFormat.of_json in
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
-      make ~format ~s3Uri ()
+    let of_json json__ =
+      let format = field_map json__ "Format" ParallelDataFormat.of_json in
+      let s3Uri = field_map json__ "S3Uri" S3Uri.of_json in
+      make ?format ?s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the format and S3 location of the parallel data input file."]
@@ -865,6 +936,24 @@ module ParallelDataStatus =
     let of_json j = of_string (string_of_json ~kind:"ParallelDataStatus" j)
     let to_json = simple_to_json to_value
   end
+module LocalizedNameString =
+  struct
+    type nonrec t = string
+    let context_ = "LocalizedNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LocalizedNameString" j
+    let to_json = simple_to_json to_value
+  end
 module AppliedTerminology =
   struct
     type nonrec t =
@@ -888,13 +977,86 @@ module AppliedTerminology =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?terms ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let terms = field_map json "Terms" TermList.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let terms = field_map json__ "Terms" TermList.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?terms ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The custom terminology applied to the input text by Amazon Translate for the translated text response. This is optional in the response and will only be present if you specified terminology input in the request. Currently, only one terminology can be applied per TranslateText request."]
+module TranslatedDocumentContent =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module DocumentContent =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceArn =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceArn" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "The initial part of a key-value pair that forms a tag associated with a given resource."];
+      value: TagValue.t
+        [@ocaml.doc
+          "The second part of a key-value pair that forms a tag associated with a given resource."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A key-value pair that adds as a metadata to a resource used by Amazon Translate."]
 module TextTranslationJobProperties =
   struct
     type nonrec t =
@@ -936,7 +1098,7 @@ module TextTranslationJobProperties =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of an AWS Identity Access and Management (IAM) role that granted Amazon Translate read access to the job's input data."];
       settings: TranslationSettings.t option
-        [@ocaml.doc "Settings that configure the translation output."]}
+        [@ocaml.doc "Settings that modify the translation output."]}
     let make ?jobId =
       fun ?jobName ->
         fun ?jobStatus ->
@@ -1040,30 +1202,30 @@ module TextTranslationJobProperties =
         ?targetLanguageCodes ?sourceLanguageCode ?jobDetails ?jobStatus
         ?jobName ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "Settings" TranslationSettings.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "Settings" TranslationSettings.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let submittedTime = field_map json "SubmittedTime" Timestamp.of_json in
-      let message = field_map json "Message" UnboundedLengthString.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let submittedTime = field_map json__ "SubmittedTime" Timestamp.of_json in
+      let message = field_map json__ "Message" UnboundedLengthString.of_json in
       let parallelDataNames =
-        field_map json "ParallelDataNames" ResourceNameList.of_json in
+        field_map json__ "ParallelDataNames" ResourceNameList.of_json in
       let terminologyNames =
-        field_map json "TerminologyNames" ResourceNameList.of_json in
+        field_map json__ "TerminologyNames" ResourceNameList.of_json in
       let targetLanguageCodes =
-        field_map json "TargetLanguageCodes"
+        field_map json__ "TargetLanguageCodes"
           TargetLanguageCodeStringList.of_json in
       let sourceLanguageCode =
-        field_map json "SourceLanguageCode" LanguageCodeString.of_json in
-      let jobDetails = field_map json "JobDetails" JobDetails.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let jobDetails = field_map json__ "JobDetails" JobDetails.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?settings ?dataAccessRoleArn ?outputDataConfig ?inputDataConfig
         ?endTime ?submittedTime ?message ?parallelDataNames ?terminologyNames
         ?targetLanguageCodes ?sourceLanguageCode ?jobDetails ?jobStatus
@@ -1206,26 +1368,26 @@ module TerminologyProperties =
         ?createdAt ?termCount ?sizeBytes ?encryptionKey ?targetLanguageCodes
         ?sourceLanguageCode ?arn ?description ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let format = field_map json "Format" TerminologyDataFormat.of_json in
+    let of_json json__ =
+      let format = field_map json__ "Format" TerminologyDataFormat.of_json in
       let skippedTermCount =
-        field_map json "SkippedTermCount" Integer.of_json in
-      let message = field_map json "Message" UnboundedLengthString.of_json in
+        field_map json__ "SkippedTermCount" Integer.of_json in
+      let message = field_map json__ "Message" UnboundedLengthString.of_json in
       let directionality =
-        field_map json "Directionality" Directionality.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let termCount = field_map json "TermCount" Integer.of_json in
-      let sizeBytes = field_map json "SizeBytes" Integer.of_json in
+        field_map json__ "Directionality" Directionality.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let termCount = field_map json__ "TermCount" Integer.of_json in
+      let sizeBytes = field_map json__ "SizeBytes" Integer.of_json in
       let encryptionKey =
-        field_map json "EncryptionKey" EncryptionKey.of_json in
+        field_map json__ "EncryptionKey" EncryptionKey.of_json in
       let targetLanguageCodes =
-        field_map json "TargetLanguageCodes" LanguageCodeStringList.of_json in
+        field_map json__ "TargetLanguageCodes" LanguageCodeStringList.of_json in
       let sourceLanguageCode =
-        field_map json "SourceLanguageCode" LanguageCodeString.of_json in
-      let arn = field_map json "Arn" TerminologyArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let arn = field_map json__ "Arn" TerminologyArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?format ?skippedTermCount ?message ?directionality ?lastUpdatedAt
         ?createdAt ?termCount ?sizeBytes ?encryptionKey ?targetLanguageCodes
         ?sourceLanguageCode ?arn ?description ?name ()
@@ -1402,32 +1564,34 @@ module ParallelDataProperties =
         ?targetLanguageCodes ?sourceLanguageCode ?status ?description ?arn
         ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestUpdateAttemptAt =
-        field_map json "LatestUpdateAttemptAt" Timestamp.of_json in
+        field_map json__ "LatestUpdateAttemptAt" Timestamp.of_json in
       let latestUpdateAttemptStatus =
-        field_map json "LatestUpdateAttemptStatus" ParallelDataStatus.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "LatestUpdateAttemptStatus"
+          ParallelDataStatus.of_json in
+      let lastUpdatedAt = field_map json__ "LastUpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let encryptionKey =
-        field_map json "EncryptionKey" EncryptionKey.of_json in
+        field_map json__ "EncryptionKey" EncryptionKey.of_json in
       let skippedRecordCount =
-        field_map json "SkippedRecordCount" Long.of_json in
-      let failedRecordCount = field_map json "FailedRecordCount" Long.of_json in
+        field_map json__ "SkippedRecordCount" Long.of_json in
+      let failedRecordCount =
+        field_map json__ "FailedRecordCount" Long.of_json in
       let importedRecordCount =
-        field_map json "ImportedRecordCount" Long.of_json in
-      let importedDataSize = field_map json "ImportedDataSize" Long.of_json in
-      let message = field_map json "Message" UnboundedLengthString.of_json in
+        field_map json__ "ImportedRecordCount" Long.of_json in
+      let importedDataSize = field_map json__ "ImportedDataSize" Long.of_json in
+      let message = field_map json__ "Message" UnboundedLengthString.of_json in
       let parallelDataConfig =
-        field_map json "ParallelDataConfig" ParallelDataConfig.of_json in
+        field_map json__ "ParallelDataConfig" ParallelDataConfig.of_json in
       let targetLanguageCodes =
-        field_map json "TargetLanguageCodes" LanguageCodeStringList.of_json in
+        field_map json__ "TargetLanguageCodes" LanguageCodeStringList.of_json in
       let sourceLanguageCode =
-        field_map json "SourceLanguageCode" LanguageCodeString.of_json in
-      let status = field_map json "Status" ParallelDataStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let arn = field_map json "Arn" ParallelDataArn.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let status = field_map json__ "Status" ParallelDataStatus.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let arn = field_map json__ "Arn" ParallelDataArn.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?latestUpdateAttemptAt ?latestUpdateAttemptStatus ?lastUpdatedAt
         ?createdAt ?encryptionKey ?skippedRecordCount ?failedRecordCount
         ?importedRecordCount ?importedDataSize ?message ?parallelDataConfig
@@ -1435,6 +1599,40 @@ module ParallelDataProperties =
         ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The properties of a parallel data resource."]
+module Language =
+  struct
+    type nonrec t =
+      {
+      languageName: LocalizedNameString.t option
+        [@ocaml.doc "Language name of the supported language."];
+      languageCode: LanguageCodeString.t option
+        [@ocaml.doc "Language code for the supported language."]}
+    let make ?languageName =
+      fun ?languageCode -> fun () -> { languageName; languageCode }
+    let to_value x =
+      structure_to_value
+        [("LanguageName",
+           (Option.map x.languageName ~f:LocalizedNameString.to_value));
+        ("LanguageCode",
+          (Option.map x.languageCode ~f:LanguageCodeString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let languageCode =
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "LanguageCode") in
+      let languageName =
+        (Option.map ~f:LocalizedNameString.of_xml)
+          (Xml.child xml_arg0 "LanguageName") in
+      make ?languageCode ?languageName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let languageCode =
+        field_map json__ "LanguageCode" LanguageCodeString.of_json in
+      let languageName =
+        field_map json__ "LanguageName" LocalizedNameString.of_json in
+      make ?languageCode ?languageName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A supported language."]
 module TerminologyFile =
   struct
     type nonrec t = string
@@ -1461,8 +1659,8 @@ module ConcurrentModificationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1481,8 +1679,8 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1501,8 +1699,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred. Retry your request."]
@@ -1520,12 +1718,12 @@ module InvalidParameterValueException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The value of the parameter is invalid. Review the value of the parameter you are using to correct it, and then retry your operation."]
+       "The value of the parameter is not valid. Review the value of the parameter you are using to correct it, and then retry your operation."]
 module InvalidRequestException =
   struct
     type nonrec t = {
@@ -1540,12 +1738,12 @@ module InvalidRequestException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The request that you made is invalid. Check your request to determine why it's invalid and then retry the request."]
+       "The request that you made is not valid. Check your request to determine why it's not valid and then retry the request."]
 module LimitExceededException =
   struct
     type nonrec t = {
@@ -1560,8 +1758,8 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1580,8 +1778,8 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1600,8 +1798,8 @@ module TooManyRequestsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1626,10 +1824,44 @@ module ClientTokenString =
     let of_json j = string_of_json ~kind:"ClientTokenString" j
     let to_json = simple_to_json to_value
   end
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AppliedTerminologyList =
   struct
     type nonrec t = AppliedTerminology.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AppliedTerminology.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1676,10 +1908,10 @@ module DetectedLanguageLowConfidenceException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?detectedLanguageCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detectedLanguageCode =
-        field_map json "DetectedLanguageCode" LanguageCodeString.of_json in
-      let message = field_map json "Message" String_.of_json in
+        field_map json__ "DetectedLanguageCode" LanguageCodeString.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?detectedLanguageCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1698,12 +1930,12 @@ module ServiceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The Amazon Translate service is temporarily unavailable. Please wait a bit and then retry your request."]
+       "The Amazon Translate service is temporarily unavailable. Wait a bit and then retry your request."]
 module TextSizeLimitExceededException =
   struct
     type nonrec t = {
@@ -1718,12 +1950,30 @@ module TextSizeLimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The size of the text you submitted exceeds the size limit. Reduce the size of the text or use a smaller document and then retry your request."]
+module TranslatedTextString =
+  struct
+    type nonrec t = string
+    let context_ = "TranslatedTextString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:20000) >>=
+             (fun () -> check_pattern i ~pattern:"[\\P{M}\\p{M}]{0,20000}"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TranslatedTextString" j
+    let to_json = simple_to_json to_value
+  end
 module UnsupportedLanguagePairException =
   struct
     type nonrec t =
@@ -1757,16 +2007,16 @@ module UnsupportedLanguagePairException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?targetLanguageCode ?sourceLanguageCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetLanguageCode =
-        field_map json "TargetLanguageCode" LanguageCodeString.of_json in
+        field_map json__ "TargetLanguageCode" LanguageCodeString.of_json in
       let sourceLanguageCode =
-        field_map json "SourceLanguageCode" LanguageCodeString.of_json in
-      let message = field_map json "Message" String_.of_json in
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?targetLanguageCode ?sourceLanguageCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Translate does not support translation from the language of the source text into the requested target language. For more information, see how-to-error-msg."]
+       "Amazon Translate does not support translation from the language of the source text into the requested target language. For more information, see Supported languages."]
 module BoundedLengthString =
   struct
     type nonrec t = string
@@ -1776,9 +2026,9 @@ module BoundedLengthString =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:5000) >>=
+                (check_string_max i ~max:10000) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"[\\P{M}\\p{M}]{1,5000}")));
+                     check_pattern i ~pattern:"[\\P{M}\\p{M}]{1,10000}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1787,6 +2037,124 @@ module BoundedLengthString =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"BoundedLengthString" j
     let to_json = simple_to_json to_value
+  end
+module TranslatedDocument =
+  struct
+    type nonrec t =
+      {
+      content: TranslatedDocumentContent.t option
+        [@ocaml.doc "The document containing the translated content."]}
+    let make ?content = fun () -> { content }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?content:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("Content",
+           (Option.map x.content ~f:TranslatedDocumentContent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let content =
+        (Option.map ~f:TranslatedDocumentContent.of_xml)
+          (Xml.child xml_arg0 "Content") in
+      make ?content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let content =
+        field_map json__ "Content" TranslatedDocumentContent.of_json in
+      make ?content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The translated content."]
+module Document =
+  struct
+    type nonrec t =
+      {
+      content: DocumentContent.t
+        [@ocaml.doc
+          "The Contentfield type is Binary large object (blob). This object contains the document content converted into base64-encoded binary data. If you use one of the AWS SDKs, the SDK performs the Base64-encoding on this field before sending the request."];
+      contentType: ContentType.t
+        [@ocaml.doc
+          "Describes the format of the document. You can specify one of the following: text/html - The input data consists of HTML content. Amazon Translate translates only the text in the HTML element. text/plain - The input data consists of unformatted text. Amazon Translate translates every character in the content. application/vnd.openxmlformats-officedocument.wordprocessingml.document - The input data consists of a Word document (.docx)."]}
+    let context_ = "Document"
+    let make ~content =
+      fun ~contentType -> fun () -> { content; contentType }
+    let to_value x =
+      structure_to_value
+        [("Content", (Some (DocumentContent.to_value x.content)));
+        ("ContentType", (Some (ContentType.to_value x.contentType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contentType =
+        ContentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ContentType") in
+      let content =
+        DocumentContent.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Content") in
+      make ~contentType ~content ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contentType =
+        field_map_exn json__ "ContentType" ContentType.of_json in
+      let content = field_map_exn json__ "Content" DocumentContent.of_json in
+      make ~contentType ~content ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The content and content type of a document."]
+module TooManyTagsException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      resourceArn: ResourceArn.t option }
+    let make ?message =
+      fun ?resourceArn -> fun () -> { message; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:ResourceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceArn ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" ResourceArn.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceArn ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have added too many tags to this resource. The maximum is 50 tags."]
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module InvalidFilterException =
   struct
@@ -1802,12 +2170,12 @@ module InvalidFilterException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The filter specified for the operation is invalid. Specify a different filter."]
+       "The filter specified for the operation is not valid. Specify a different filter."]
 module NextToken =
   struct
     type nonrec t = string
@@ -1830,6 +2198,9 @@ module TextTranslationJobPropertiesList =
   struct
     type nonrec t = TextTranslationJobProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TextTranslationJobProperties.to_value)) |>
         (fun x -> `List x)
@@ -1912,13 +2283,13 @@ module TextTranslationJobFilter =
         (Option.map ~f:JobName.of_xml) (Xml.child xml_arg0 "JobName") in
       make ?submittedAfterTime ?submittedBeforeTime ?jobStatus ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let submittedAfterTime =
-        field_map json "SubmittedAfterTime" Timestamp.of_json in
+        field_map json__ "SubmittedAfterTime" Timestamp.of_json in
       let submittedBeforeTime =
-        field_map json "SubmittedBeforeTime" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map json__ "SubmittedBeforeTime" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?submittedAfterTime ?submittedBeforeTime ?jobStatus ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1927,6 +2298,9 @@ module TerminologyPropertiesList =
   struct
     type nonrec t = TerminologyProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TerminologyProperties.to_value)) |>
         (fun x -> `List x)
@@ -1953,6 +2327,9 @@ module ParallelDataPropertiesList =
   struct
     type nonrec t = ParallelDataProperties.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParallelDataProperties.to_value)) |>
         (fun x -> `List x)
@@ -1975,36 +2352,141 @@ module ParallelDataPropertiesList =
         ~of_json:ParallelDataProperties.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DisplayLanguageCode =
+  struct
+    type nonrec t =
+      | De 
+      | En 
+      | Es 
+      | Fr 
+      | It 
+      | Ja 
+      | Ko 
+      | Pt 
+      | Zh 
+      | Zh_TW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | De -> "de"
+      | En -> "en"
+      | Es -> "es"
+      | Fr -> "fr"
+      | It -> "it"
+      | Ja -> "ja"
+      | Ko -> "ko"
+      | Pt -> "pt"
+      | Zh -> "zh"
+      | Zh_TW -> "zh-TW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "de" -> De
+      | "en" -> En
+      | "es" -> Es
+      | "fr" -> Fr
+      | "it" -> It
+      | "ja" -> Ja
+      | "ko" -> Ko
+      | "pt" -> Pt
+      | "zh" -> Zh
+      | "zh-TW" -> Zh_TW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DisplayLanguageCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DisplayLanguageCode" j)
+    let to_json = simple_to_json to_value
+  end
+module LanguagesList =
+  struct
+    type nonrec t = Language.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Language.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Language.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LanguagesList" ~of_json:Language.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UnsupportedDisplayLanguageCodeException =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option ;
+      displayLanguageCode: LanguageCodeString.t option
+        [@ocaml.doc "Language code passed in with the request."]}
+    let make ?message =
+      fun ?displayLanguageCode -> fun () -> { message; displayLanguageCode }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("DisplayLanguageCode",
+          (Option.map x.displayLanguageCode ~f:LanguageCodeString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let displayLanguageCode =
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "DisplayLanguageCode") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?displayLanguageCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let displayLanguageCode =
+        field_map json__ "DisplayLanguageCode" LanguageCodeString.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?displayLanguageCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Requested display language code is not supported."]
 module TerminologyDataLocation =
   struct
     type nonrec t =
       {
-      repositoryType: String_.t
+      repositoryType: String_.t option
         [@ocaml.doc "The repository type for the custom terminology data."];
-      location: String_.t
+      location: String_.t option
         [@ocaml.doc
-          "The Amazon S3 location of the most recent custom terminology input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30 minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."]}
-    let context_ = "TerminologyDataLocation"
-    let make ~repositoryType =
-      fun ~location -> fun () -> { repositoryType; location }
+          "The Amazon S3 location of the most recent custom terminology input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30-minute expiration . Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."]}
+    let make ?repositoryType =
+      fun ?location -> fun () -> { repositoryType; location }
     let to_value x =
       structure_to_value
-        [("RepositoryType", (Some (String_.to_value x.repositoryType)));
-        ("Location", (Some (String_.to_value x.location)))]
+        [("RepositoryType",
+           (Option.map x.repositoryType ~f:String_.to_value));
+        ("Location", (Option.map x.location ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       let repositoryType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryType") in
-      make ~location ~repositoryType ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RepositoryType") in
+      make ?location ?repositoryType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" String_.of_json in
-      let repositoryType =
-        field_map_exn json "RepositoryType" String_.of_json in
-      make ~location ~repositoryType ()
+    let of_json json__ =
+      let location = field_map json__ "Location" String_.of_json in
+      let repositoryType = field_map json__ "RepositoryType" String_.of_json in
+      make ?location ?repositoryType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The location of the custom terminology data."]
 module MergeStrategy =
@@ -2036,7 +2518,7 @@ module TerminologyData =
         [@ocaml.doc "The data format of the custom terminology."];
       directionality: Directionality.t option
         [@ocaml.doc
-          "The directionality of your terminology resource indicates whether it has one source language (uni-directional) or multiple (multi-directional). UNI The terminology resource has one source language (for example, the first column in a CSV file), and all of its other languages are target languages. MULTI Any language in the terminology resource can be the source language or a target language. A single multi-directional terminology resource can be used for jobs that translate different language pairs. For example, if the terminology contains terms in English and Spanish, then it can be used for jobs that translate English to Spanish and jobs that translate Spanish to English. When you create a custom terminology resource without specifying the directionality, it behaves as uni-directional terminology, although this parameter will have a null value."]}
+          "The directionality of your terminology resource indicates whether it has one source language (uni-directional) or multiple (multi-directional). UNI The terminology resource has one source language (for example, the first column in a CSV file), and all of its other languages are target languages. MULTI Any language in the terminology resource can be the source language or a target language. A single multi-directional terminology resource can be used for jobs that translate different language pairs. For example, if the terminology contains English and Spanish terms, it can be used for jobs that translate English to Spanish and Spanish to English. When you create a custom terminology resource without specifying the directionality, it behaves as uni-directional terminology, although this parameter will have a null value."]}
     let context_ = "TerminologyData"
     let make ?directionality =
       fun ~file -> fun ~format -> fun () -> { directionality; file; format }
@@ -2059,45 +2541,45 @@ module TerminologyData =
           (Xml.child_exn ~context:context_ xml_arg0 "File") in
       make ?directionality ~format ~file ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directionality =
-        field_map json "Directionality" Directionality.of_json in
-      let format = field_map_exn json "Format" TerminologyDataFormat.of_json in
-      let file = field_map_exn json "File" TerminologyFile.of_json in
+        field_map json__ "Directionality" Directionality.of_json in
+      let format =
+        field_map_exn json__ "Format" TerminologyDataFormat.of_json in
+      let file = field_map_exn json__ "File" TerminologyFile.of_json in
       make ?directionality ~format ~file ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The data associated with the custom terminology."]
+  end[@@ocaml.doc
+       "The data associated with the custom terminology. For information about the custom terminology file, see Creating a Custom Terminology."]
 module ParallelDataDataLocation =
   struct
     type nonrec t =
       {
-      repositoryType: String_.t
+      repositoryType: String_.t option
         [@ocaml.doc
           "Describes the repository that contains the parallel data input file."];
-      location: String_.t
+      location: String_.t option
         [@ocaml.doc
-          "The Amazon S3 location of the parallel data input file. The location is returned as a presigned URL to that has a 30 minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."]}
-    let context_ = "ParallelDataDataLocation"
-    let make ~repositoryType =
-      fun ~location -> fun () -> { repositoryType; location }
+          "The Amazon S3 location of the parallel data input file. The location is returned as a presigned URL to that has a 30-minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."]}
+    let make ?repositoryType =
+      fun ?location -> fun () -> { repositoryType; location }
     let to_value x =
       structure_to_value
-        [("RepositoryType", (Some (String_.to_value x.repositoryType)));
-        ("Location", (Some (String_.to_value x.location)))]
+        [("RepositoryType",
+           (Option.map x.repositoryType ~f:String_.to_value));
+        ("Location", (Option.map x.location ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let location =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Location") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Location") in
       let repositoryType =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryType") in
-      make ~location ~repositoryType ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "RepositoryType") in
+      make ?location ?repositoryType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let location = field_map_exn json "Location" String_.of_json in
-      let repositoryType =
-        field_map_exn json "RepositoryType" String_.of_json in
-      make ~location ~repositoryType ()
+    let of_json json__ =
+      let location = field_map json__ "Location" String_.of_json in
+      let repositoryType = field_map json__ "RepositoryType" String_.of_json in
+      make ?location ?repositoryType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The location of the most recent parallel data input file that was successfully imported into Amazon Translate."]
@@ -2245,13 +2727,14 @@ module UpdateParallelDataResponse =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?latestUpdateAttemptAt ?latestUpdateAttemptStatus ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestUpdateAttemptAt =
-        field_map json "LatestUpdateAttemptAt" Timestamp.of_json in
+        field_map json__ "LatestUpdateAttemptAt" Timestamp.of_json in
       let latestUpdateAttemptStatus =
-        field_map json "LatestUpdateAttemptStatus" ParallelDataStatus.of_json in
-      let status = field_map json "Status" ParallelDataStatus.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+        field_map json__ "LatestUpdateAttemptStatus"
+          ParallelDataStatus.of_json in
+      let status = field_map json__ "Status" ParallelDataStatus.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?latestUpdateAttemptAt ?latestUpdateAttemptStatus ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2298,31 +2781,139 @@ module UpdateParallelDataRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~clientToken ~parallelDataConfig ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientToken =
-        field_map_exn json "ClientToken" ClientTokenString.of_json in
+        field_map_exn json__ "ClientToken" ClientTokenString.of_json in
       let parallelDataConfig =
-        field_map_exn json "ParallelDataConfig" ParallelDataConfig.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" ResourceName.of_json in
+        field_map_exn json__ "ParallelDataConfig" ParallelDataConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       make ~clientToken ~parallelDataConfig ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a previously created parallel data resource by importing a new input file from Amazon S3."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a specific tag associated with an Amazon Translate resource. For more information, see Tagging your resources."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the given Amazon Translate resource from which you want to remove the tags."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "The initial part of a key-value pair that forms a tag being removed from a given resource. Keys must be unique and cannot be duplicated for a particular resource."]}
+    let context_ = "UntagResourceRequest"
+    let make ~resourceArn =
+      fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~tagKeys ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~tagKeys ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Removes a specific tag associated with an Amazon Translate resource. For more information, see Tagging your resources."]
 module TranslateTextResponse =
   struct
     type nonrec t =
       {
-      translatedText: String_.t [@ocaml.doc "The translated text."];
-      sourceLanguageCode: LanguageCodeString.t
+      translatedText: TranslatedTextString.t option
+        [@ocaml.doc "The translated text."];
+      sourceLanguageCode: LanguageCodeString.t option
         [@ocaml.doc "The language code for the language of the source text."];
-      targetLanguageCode: LanguageCodeString.t
+      targetLanguageCode: LanguageCodeString.t option
         [@ocaml.doc "The language code for the language of the target text."];
       appliedTerminologies: AppliedTerminologyList.t option
         [@ocaml.doc
           "The names of the custom terminologies applied to the input text by Amazon Translate for the translated text response."];
       appliedSettings: TranslationSettings.t option
-        [@ocaml.doc "Settings that configure the translation output."]}
+        [@ocaml.doc "Optional settings that modify the translation output."]}
     type nonrec error =
       [
         `DetectedLanguageLowConfidenceException of
@@ -2336,19 +2927,18 @@ module TranslateTextResponse =
       | `UnsupportedLanguagePairException of
           UnsupportedLanguagePairException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "TranslateTextResponse"
-    let make ?appliedTerminologies =
-      fun ?appliedSettings ->
-        fun ~translatedText ->
-          fun ~sourceLanguageCode ->
-            fun ~targetLanguageCode ->
+    let make ?translatedText =
+      fun ?sourceLanguageCode ->
+        fun ?targetLanguageCode ->
+          fun ?appliedTerminologies ->
+            fun ?appliedSettings ->
               fun () ->
                 {
-                  appliedTerminologies;
-                  appliedSettings;
                   translatedText;
                   sourceLanguageCode;
-                  targetLanguageCode
+                  targetLanguageCode;
+                  appliedTerminologies;
+                  appliedSettings
                 }
     let error_of_json name json =
       match name with
@@ -2440,11 +3030,12 @@ module TranslateTextResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TranslatedText", (Some (String_.to_value x.translatedText)));
+        [("TranslatedText",
+           (Option.map x.translatedText ~f:TranslatedTextString.to_value));
         ("SourceLanguageCode",
-          (Some (LanguageCodeString.to_value x.sourceLanguageCode)));
+          (Option.map x.sourceLanguageCode ~f:LanguageCodeString.to_value));
         ("TargetLanguageCode",
-          (Some (LanguageCodeString.to_value x.targetLanguageCode)));
+          (Option.map x.targetLanguageCode ~f:LanguageCodeString.to_value));
         ("AppliedTerminologies",
           (Option.map x.appliedTerminologies
              ~f:AppliedTerminologyList.to_value));
@@ -2459,52 +3050,53 @@ module TranslateTextResponse =
         (Option.map ~f:AppliedTerminologyList.of_xml)
           (Xml.child xml_arg0 "AppliedTerminologies") in
       let targetLanguageCode =
-        LanguageCodeString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TargetLanguageCode") in
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "TargetLanguageCode") in
       let sourceLanguageCode =
-        LanguageCodeString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceLanguageCode") in
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "SourceLanguageCode") in
       let translatedText =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TranslatedText") in
-      make ?appliedSettings ?appliedTerminologies ~targetLanguageCode
-        ~sourceLanguageCode ~translatedText ()
+        (Option.map ~f:TranslatedTextString.of_xml)
+          (Xml.child xml_arg0 "TranslatedText") in
+      make ?appliedSettings ?appliedTerminologies ?targetLanguageCode
+        ?sourceLanguageCode ?translatedText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let appliedSettings =
-        field_map json "AppliedSettings" TranslationSettings.of_json in
+        field_map json__ "AppliedSettings" TranslationSettings.of_json in
       let appliedTerminologies =
-        field_map json "AppliedTerminologies" AppliedTerminologyList.of_json in
+        field_map json__ "AppliedTerminologies"
+          AppliedTerminologyList.of_json in
       let targetLanguageCode =
-        field_map_exn json "TargetLanguageCode" LanguageCodeString.of_json in
+        field_map json__ "TargetLanguageCode" LanguageCodeString.of_json in
       let sourceLanguageCode =
-        field_map_exn json "SourceLanguageCode" LanguageCodeString.of_json in
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
       let translatedText =
-        field_map_exn json "TranslatedText" String_.of_json in
-      make ?appliedSettings ?appliedTerminologies ~targetLanguageCode
-        ~sourceLanguageCode ~translatedText ()
+        field_map json__ "TranslatedText" TranslatedTextString.of_json in
+      make ?appliedSettings ?appliedTerminologies ?targetLanguageCode
+        ?sourceLanguageCode ?translatedText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Translates input text from the source language to the target language. For a list of available languages and language codes, see what-is-languages."]
+       "Translates input text from the source language to the target language. For a list of available languages and language codes, see Supported languages."]
 module TranslateTextRequest =
   struct
     type nonrec t =
       {
       text: BoundedLengthString.t
         [@ocaml.doc
-          "The text to translate. The text string can be a maximum of 5,000 bytes long. Depending on your character set, this may be fewer than 5,000 characters."];
+          "The text to translate. The text string can be a maximum of 10,000 bytes long. Depending on your character set, this may be fewer than 10,000 characters."];
       terminologyNames: ResourceNameList.t option
         [@ocaml.doc
-          "The name of the terminology list file to be used in the TranslateText request. You can use 1 terminology list at most in a TranslateText request. Terminology lists can contain a maximum of 256 terms."];
+          "The name of a terminology list file to add to the translation job. This file provides source terms and the desired translation for each term. A terminology list can contain a maximum of 256 terms. You can use one custom terminology resource in your translation request. Use the ListTerminologies operation to get the available terminology lists. For more information about custom terminology lists, see Custom terminology."];
       sourceLanguageCode: LanguageCodeString.t
         [@ocaml.doc
-          "The language code for the language of the source text. The language must be a language supported by Amazon Translate. For a list of language codes, see what-is-languages. To have Amazon Translate determine the source language of your text, you can specify auto in the SourceLanguageCode field. If you specify auto, Amazon Translate will call Amazon Comprehend to determine the source language."];
+          "The language code for the language of the source text. For a list of language codes, see Supported languages. To have Amazon Translate determine the source language of your text, you can specify auto in the SourceLanguageCode field. If you specify auto, Amazon Translate will call Amazon Comprehend to determine the source language. If you specify auto, you must send the TranslateText request in a region that supports Amazon Comprehend. Otherwise, the request returns an error indicating that autodetect is not supported."];
       targetLanguageCode: LanguageCodeString.t
         [@ocaml.doc
-          "The language code requested for the language of the target text. The language must be a language supported by Amazon Translate."];
+          "The language code requested for the language of the target text. For a list of language codes, see Supported languages."];
       settings: TranslationSettings.t option
         [@ocaml.doc
-          "Settings to configure your translation output, including the option to mask profane words and phrases."]}
+          "Settings to configure your translation output. You can configure the following options: Brevity: reduces the length of the translated output for most translations. Formality: sets the formality level of the output text. Profanity: masks profane words and phrases in your translation output."]}
     let context_ = "TranslateTextRequest"
     let make ?terminologyNames =
       fun ?settings ->
@@ -2549,20 +3141,374 @@ module TranslateTextRequest =
       make ?settings ~targetLanguageCode ~sourceLanguageCode
         ?terminologyNames ~text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "Settings" TranslationSettings.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "Settings" TranslationSettings.of_json in
       let targetLanguageCode =
-        field_map_exn json "TargetLanguageCode" LanguageCodeString.of_json in
+        field_map_exn json__ "TargetLanguageCode" LanguageCodeString.of_json in
       let sourceLanguageCode =
-        field_map_exn json "SourceLanguageCode" LanguageCodeString.of_json in
+        field_map_exn json__ "SourceLanguageCode" LanguageCodeString.of_json in
       let terminologyNames =
-        field_map json "TerminologyNames" ResourceNameList.of_json in
-      let text = field_map_exn json "Text" BoundedLengthString.of_json in
+        field_map json__ "TerminologyNames" ResourceNameList.of_json in
+      let text = field_map_exn json__ "Text" BoundedLengthString.of_json in
       make ?settings ~targetLanguageCode ~sourceLanguageCode
         ?terminologyNames ~text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Translates input text from the source language to the target language. For a list of available languages and language codes, see what-is-languages."]
+       "Translates input text from the source language to the target language. For a list of available languages and language codes, see Supported languages."]
+module TranslateDocumentResponse =
+  struct
+    type nonrec t =
+      {
+      translatedDocument: TranslatedDocument.t option
+        [@ocaml.doc
+          "The document containing the translated content. The document format matches the source document format."];
+      sourceLanguageCode: LanguageCodeString.t option
+        [@ocaml.doc "The language code of the source document."];
+      targetLanguageCode: LanguageCodeString.t option
+        [@ocaml.doc "The language code of the translated document."];
+      appliedTerminologies: AppliedTerminologyList.t option
+        [@ocaml.doc
+          "The names of the custom terminologies applied to the input text by Amazon Translate to produce the translated text document."];
+      appliedSettings: TranslationSettings.t option }
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedLanguagePairException of
+          UnsupportedLanguagePairException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?translatedDocument =
+      fun ?sourceLanguageCode ->
+        fun ?targetLanguageCode ->
+          fun ?appliedTerminologies ->
+            fun ?appliedSettings ->
+              fun () ->
+                {
+                  translatedDocument;
+                  sourceLanguageCode;
+                  targetLanguageCode;
+                  appliedTerminologies;
+                  appliedSettings
+                }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedLanguagePairException" ->
+          `UnsupportedLanguagePairException
+            (UnsupportedLanguagePairException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedLanguagePairException" ->
+          `UnsupportedLanguagePairException
+            (UnsupportedLanguagePairException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedLanguagePairException e ->
+          `Assoc
+            [("error", (`String "UnsupportedLanguagePairException"));
+            ("details", (UnsupportedLanguagePairException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TranslatedDocument",
+           (Option.map x.translatedDocument ~f:TranslatedDocument.to_value));
+        ("SourceLanguageCode",
+          (Option.map x.sourceLanguageCode ~f:LanguageCodeString.to_value));
+        ("TargetLanguageCode",
+          (Option.map x.targetLanguageCode ~f:LanguageCodeString.to_value));
+        ("AppliedTerminologies",
+          (Option.map x.appliedTerminologies
+             ~f:AppliedTerminologyList.to_value));
+        ("AppliedSettings",
+          (Option.map x.appliedSettings ~f:TranslationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let appliedSettings =
+        (Option.map ~f:TranslationSettings.of_xml)
+          (Xml.child xml_arg0 "AppliedSettings") in
+      let appliedTerminologies =
+        (Option.map ~f:AppliedTerminologyList.of_xml)
+          (Xml.child xml_arg0 "AppliedTerminologies") in
+      let targetLanguageCode =
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "TargetLanguageCode") in
+      let sourceLanguageCode =
+        (Option.map ~f:LanguageCodeString.of_xml)
+          (Xml.child xml_arg0 "SourceLanguageCode") in
+      let translatedDocument =
+        (Option.map ~f:TranslatedDocument.of_xml)
+          (Xml.child xml_arg0 "TranslatedDocument") in
+      make ?appliedSettings ?appliedTerminologies ?targetLanguageCode
+        ?sourceLanguageCode ?translatedDocument ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let appliedSettings =
+        field_map json__ "AppliedSettings" TranslationSettings.of_json in
+      let appliedTerminologies =
+        field_map json__ "AppliedTerminologies"
+          AppliedTerminologyList.of_json in
+      let targetLanguageCode =
+        field_map json__ "TargetLanguageCode" LanguageCodeString.of_json in
+      let sourceLanguageCode =
+        field_map json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let translatedDocument =
+        field_map json__ "TranslatedDocument" TranslatedDocument.of_json in
+      make ?appliedSettings ?appliedTerminologies ?targetLanguageCode
+        ?sourceLanguageCode ?translatedDocument ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Translates the input document from the source language to the target language. This synchronous operation supports text, HTML, or Word documents as the input document. TranslateDocument supports translations from English to any supported language, and from any supported language to English. Therefore, specify either the source language code or the target language code as \226\128\156en\226\128\157 (English). If you set the Formality parameter, the request will fail if the target language does not support formality. For a list of target languages that support formality, see Setting formality."]
+module TranslateDocumentRequest =
+  struct
+    type nonrec t =
+      {
+      document: Document.t
+        [@ocaml.doc
+          "The content and content type for the document to be translated. The document size must not exceed 100 KB."];
+      terminologyNames: ResourceNameList.t option
+        [@ocaml.doc
+          "The name of a terminology list file to add to the translation job. This file provides source terms and the desired translation for each term. A terminology list can contain a maximum of 256 terms. You can use one custom terminology resource in your translation request. Use the ListTerminologies operation to get the available terminology lists. For more information about custom terminology lists, see Custom terminology."];
+      sourceLanguageCode: LanguageCodeString.t
+        [@ocaml.doc
+          "The language code for the language of the source text. For a list of supported language codes, see Supported languages. To have Amazon Translate determine the source language of your text, you can specify auto in the SourceLanguageCode field. If you specify auto, Amazon Translate will call Amazon Comprehend to determine the source language. If you specify auto, you must send the TranslateDocument request in a region that supports Amazon Comprehend. Otherwise, the request returns an error indicating that autodetect is not supported."];
+      targetLanguageCode: LanguageCodeString.t
+        [@ocaml.doc
+          "The language code requested for the translated document. For a list of supported language codes, see Supported languages."];
+      settings: TranslationSettings.t option
+        [@ocaml.doc
+          "Settings to configure your translation output. You can configure the following options: Brevity: not supported. Formality: sets the formality level of the output text. Profanity: masks profane words and phrases in your translation output."]}
+    let context_ = "TranslateDocumentRequest"
+    let make ?terminologyNames =
+      fun ?settings ->
+        fun ~document ->
+          fun ~sourceLanguageCode ->
+            fun ~targetLanguageCode ->
+              fun () ->
+                {
+                  terminologyNames;
+                  settings;
+                  document;
+                  sourceLanguageCode;
+                  targetLanguageCode
+                }
+    let to_value x =
+      structure_to_value
+        [("Document", (Some (Document.to_value x.document)));
+        ("TerminologyNames",
+          (Option.map x.terminologyNames ~f:ResourceNameList.to_value));
+        ("SourceLanguageCode",
+          (Some (LanguageCodeString.to_value x.sourceLanguageCode)));
+        ("TargetLanguageCode",
+          (Some (LanguageCodeString.to_value x.targetLanguageCode)));
+        ("Settings", (Option.map x.settings ~f:TranslationSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let settings =
+        (Option.map ~f:TranslationSettings.of_xml)
+          (Xml.child xml_arg0 "Settings") in
+      let targetLanguageCode =
+        LanguageCodeString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetLanguageCode") in
+      let sourceLanguageCode =
+        LanguageCodeString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLanguageCode") in
+      let terminologyNames =
+        (Option.map ~f:ResourceNameList.of_xml)
+          (Xml.child xml_arg0 "TerminologyNames") in
+      let document =
+        Document.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Document") in
+      make ?settings ~targetLanguageCode ~sourceLanguageCode
+        ?terminologyNames ~document ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let settings = field_map json__ "Settings" TranslationSettings.of_json in
+      let targetLanguageCode =
+        field_map_exn json__ "TargetLanguageCode" LanguageCodeString.of_json in
+      let sourceLanguageCode =
+        field_map_exn json__ "SourceLanguageCode" LanguageCodeString.of_json in
+      let terminologyNames =
+        field_map json__ "TerminologyNames" ResourceNameList.of_json in
+      let document = field_map_exn json__ "Document" Document.of_json in
+      make ?settings ~targetLanguageCode ~sourceLanguageCode
+        ?terminologyNames ~document ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Translates the input document from the source language to the target language. This synchronous operation supports text, HTML, or Word documents as the input document. TranslateDocument supports translations from English to any supported language, and from any supported language to English. Therefore, specify either the source language code or the target language code as \226\128\156en\226\128\157 (English). If you set the Formality parameter, the request will fail if the target language does not support formality. For a list of target languages that support formality, see Setting formality."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a specific tag with a resource. A tag is a key-value pair that adds as a metadata to a resource. For more information, see Tagging your resources."]
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the given Amazon Translate resource to which you want to associate the tags."];
+      tags: TagList.t
+        [@ocaml.doc
+          "Tags being associated with a specific Amazon Translate resource. There can be a maximum of 50 tags (both existing and pending) associated with a specific resource."]}
+    let context_ = "TagResourceRequest"
+    let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~tags ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~tags ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates a specific tag with a resource. A tag is a key-value pair that adds as a metadata to a resource. For more information, see Tagging your resources."]
 module StopTextTranslationJobResponse =
   struct
     type nonrec t =
@@ -2629,9 +3575,9 @@ module StopTextTranslationJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2651,8 +3597,9 @@ module StopTextTranslationJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Stops an asynchronous batch translation job that is in progress. If the job's state is IN_PROGRESS, the job will be marked for termination and put into the STOP_REQUESTED state. If the job completes before it can be stopped, it is put into the COMPLETED state. Otherwise, the job is put into the STOPPED state. Asynchronous batch translation jobs are started with the StartTextTranslationJob operation. You can use the DescribeTextTranslationJob or ListTextTranslationJobs operations to get a batch translation job's JobId."]
@@ -2755,13 +3702,13 @@ module StartTextTranslationJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobStatus ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?jobStatus ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous batch translation job. Batch translation jobs can be used to translate large volumes of text across multiple documents at once. For more information, see async. Batch translation jobs can be described with the DescribeTextTranslationJob operation, listed with the ListTextTranslationJobs operation, and stopped with the StopTextTranslationJob operation. Amazon Translate does not support batch translation of multiple source languages at once."]
+       "Starts an asynchronous batch translation job. Use batch translation jobs to translate large volumes of text across multiple documents at once. For batch translation, you can input documents with different source languages (specify auto as the source language). You can specify one or more target languages. Batch translation translates each input document into each of the target languages. For more information, see Asynchronous batch processing. Batch translation jobs can be described with the DescribeTextTranslationJob operation, listed with the ListTextTranslationJobs operation, and stopped with the StopTextTranslationJob operation."]
 module StartTextTranslationJobRequest =
   struct
     type nonrec t =
@@ -2770,30 +3717,31 @@ module StartTextTranslationJobRequest =
         [@ocaml.doc "The name of the batch translation job to be performed."];
       inputDataConfig: InputDataConfig.t
         [@ocaml.doc
-          "Specifies the format and S3 location of the input documents for the translation job."];
+          "Specifies the format and location of the input documents for the translation job."];
       outputDataConfig: OutputDataConfig.t
         [@ocaml.doc
           "Specifies the S3 folder to which your job output will be saved."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of an AWS Identity Access and Management (IAM) role that grants Amazon Translate read access to your input data. For more information, see identity-and-access-management."];
+          "The Amazon Resource Name (ARN) of an AWS Identity Access and Management (IAM) role that grants Amazon Translate read access to your input data. For more information, see Identity and access management ."];
       sourceLanguageCode: LanguageCodeString.t
         [@ocaml.doc
-          "The language code of the input language. For a list of language codes, see what-is-languages. Amazon Translate does not automatically detect a source language during batch translation jobs."];
+          "The language code of the input language. Specify the language if all input documents share the same language. If you don't know the language of the source files, or your input documents contains different source languages, select auto. Amazon Translate auto detects the source language for each input document. For a list of supported language codes, see Supported languages."];
       targetLanguageCodes: TargetLanguageCodeStringList.t
-        [@ocaml.doc "The language code of the output language."];
+        [@ocaml.doc
+          "The target languages of the translation job. Enter up to 10 language codes. Each input file is translated into each target language. Each language code is 2 or 5 characters long. For a list of language codes, see Supported languages."];
       terminologyNames: ResourceNameList.t option
         [@ocaml.doc
-          "The name of a custom terminology resource to add to the translation job. This resource lists examples source terms and the desired translation for each term. This parameter accepts only one custom terminology resource. For a list of available custom terminology resources, use the ListTerminologies operation. For more information, see how-custom-terminology."];
+          "The name of a custom terminology resource to add to the translation job. This resource lists examples source terms and the desired translation for each term. This parameter accepts only one custom terminology resource. If you specify multiple target languages for the job, translate uses the designated terminology for each requested target language that has an entry for the source term in the terminology file. For a list of available custom terminology resources, use the ListTerminologies operation. For more information, see Custom terminology."];
       parallelDataNames: ResourceNameList.t option
         [@ocaml.doc
-          "The name of a parallel data resource to add to the translation job. This resource consists of examples that show how you want segments of text to be translated. When you add parallel data to a translation job, you create an Active Custom Translation job. This parameter accepts only one parallel data resource. Active Custom Translation jobs are priced at a higher rate than other jobs that don't use parallel data. For more information, see Amazon Translate pricing. For a list of available parallel data resources, use the ListParallelData operation. For more information, see customizing-translations-parallel-data."];
+          "The name of a parallel data resource to add to the translation job. This resource consists of examples that show how you want segments of text to be translated. If you specify multiple target languages for the job, the parallel data file must include translations for all the target languages. When you add parallel data to a translation job, you create an Active Custom Translation job. This parameter accepts only one parallel data resource. Active Custom Translation jobs are priced at a higher rate than other jobs that don't use parallel data. For more information, see Amazon Translate pricing. For a list of available parallel data resources, use the ListParallelData operation. For more information, see Customizing your translations with parallel data."];
       clientToken: ClientTokenString.t
         [@ocaml.doc
-          "A unique identifier for the request. This token is auto-generated when using the Amazon Translate SDK."];
+          "A unique identifier for the request. This token is generated for you when using the Amazon Translate SDK."];
       settings: TranslationSettings.t option
         [@ocaml.doc
-          "Settings to configure your translation output, including the option to mask profane words and phrases."]}
+          "Settings to configure your translation output. You can configure the following options: Brevity: not supported. Formality: sets the formality level of the output text. Profanity: masks profane words and phrases in your translation output."]}
     let context_ = "StartTextTranslationJobRequest"
     let make ?jobName =
       fun ?terminologyNames ->
@@ -2872,32 +3820,32 @@ module StartTextTranslationJobRequest =
         ~targetLanguageCodes ~sourceLanguageCode ~dataAccessRoleArn
         ~outputDataConfig ~inputDataConfig ?jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let settings = field_map json "Settings" TranslationSettings.of_json in
+    let of_json json__ =
+      let settings = field_map json__ "Settings" TranslationSettings.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" ClientTokenString.of_json in
+        field_map_exn json__ "ClientToken" ClientTokenString.of_json in
       let parallelDataNames =
-        field_map json "ParallelDataNames" ResourceNameList.of_json in
+        field_map json__ "ParallelDataNames" ResourceNameList.of_json in
       let terminologyNames =
-        field_map json "TerminologyNames" ResourceNameList.of_json in
+        field_map json__ "TerminologyNames" ResourceNameList.of_json in
       let targetLanguageCodes =
-        field_map_exn json "TargetLanguageCodes"
+        field_map_exn json__ "TargetLanguageCodes"
           TargetLanguageCodeStringList.of_json in
       let sourceLanguageCode =
-        field_map_exn json "SourceLanguageCode" LanguageCodeString.of_json in
+        field_map_exn json__ "SourceLanguageCode" LanguageCodeString.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       make ?settings ~clientToken ?parallelDataNames ?terminologyNames
         ~targetLanguageCodes ~sourceLanguageCode ~dataAccessRoleArn
         ~outputDataConfig ~inputDataConfig ?jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts an asynchronous batch translation job. Batch translation jobs can be used to translate large volumes of text across multiple documents at once. For more information, see async. Batch translation jobs can be described with the DescribeTextTranslationJob operation, listed with the ListTextTranslationJobs operation, and stopped with the StopTextTranslationJob operation. Amazon Translate does not support batch translation of multiple source languages at once."]
+       "Starts an asynchronous batch translation job. Use batch translation jobs to translate large volumes of text across multiple documents at once. For batch translation, you can input documents with different source languages (specify auto as the source language). You can specify one or more target languages. Batch translation translates each input document into each of the target languages. For more information, see Asynchronous batch processing. Batch translation jobs can be described with the DescribeTextTranslationJob operation, listed with the ListTextTranslationJobs operation, and stopped with the StopTextTranslationJob operation."]
 module ListTextTranslationJobsResponse =
   struct
     type nonrec t =
@@ -2981,10 +3929,10 @@ module ListTextTranslationJobsResponse =
           (Xml.child xml_arg0 "TextTranslationJobPropertiesList") in
       make ?nextToken ?textTranslationJobPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let textTranslationJobPropertiesList =
-        field_map json "TextTranslationJobPropertiesList"
+        field_map json__ "TextTranslationJobPropertiesList"
           TextTranslationJobPropertiesList.of_json in
       make ?nextToken ?textTranslationJobPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -3024,10 +3972,11 @@ module ListTextTranslationJobsRequest =
           (Xml.child xml_arg0 "Filter") in
       make ?maxResults ?nextToken ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filter = field_map json "Filter" TextTranslationJobFilter.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map json__ "Filter" TextTranslationJobFilter.of_json in
       make ?maxResults ?nextToken ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3106,10 +4055,10 @@ module ListTerminologiesResponse =
           (Xml.child xml_arg0 "TerminologyPropertiesList") in
       make ?nextToken ?terminologyPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let terminologyPropertiesList =
-        field_map json "TerminologyPropertiesList"
+        field_map json__ "TerminologyPropertiesList"
           TerminologyPropertiesList.of_json in
       make ?nextToken ?terminologyPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -3141,13 +4090,107 @@ module ListTerminologiesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a list of custom terminologies associated with your account."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags associated with the Amazon Translate resource being queried. A tag is a key-value pair that adds as a metadata to a resource used by Amazon Translate. For example, a tag with \"Sales\" as the key might be added to a resource to indicate its use by the sales department."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all tags associated with a given Amazon Translate resource. For more information, see Tagging your resources."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the given Amazon Translate resource you are querying."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (ResourceArn.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        ResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" ResourceArn.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all tags associated with a given Amazon Translate resource. For more information, see Tagging your resources."]
 module ListParallelDataResponse =
   struct
     type nonrec t =
@@ -3222,10 +4265,10 @@ module ListParallelDataResponse =
           (Xml.child xml_arg0 "ParallelDataPropertiesList") in
       make ?nextToken ?parallelDataPropertiesList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let parallelDataPropertiesList =
-        field_map json "ParallelDataPropertiesList"
+        field_map json__ "ParallelDataPropertiesList"
           ParallelDataPropertiesList.of_json in
       make ?nextToken ?parallelDataPropertiesList ()
     let to_json v = composed_to_json to_value v
@@ -3257,13 +4300,160 @@ module ListParallelDataRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsInteger.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides a list of your parallel data resources in Amazon Translate."]
+module ListLanguagesResponse =
+  struct
+    type nonrec t =
+      {
+      languages: LanguagesList.t option
+        [@ocaml.doc "The list of supported languages."];
+      displayLanguageCode: DisplayLanguageCode.t option
+        [@ocaml.doc "The language code passed in with the request."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If the response does not include all remaining results, use the NextToken in the next request to fetch the next group of supported languages."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidParameterValueException of InvalidParameterValueException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `UnsupportedDisplayLanguageCodeException of
+          UnsupportedDisplayLanguageCodeException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?languages =
+      fun ?displayLanguageCode ->
+        fun ?nextToken ->
+          fun () -> { languages; displayLanguageCode; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "UnsupportedDisplayLanguageCodeException" ->
+          `UnsupportedDisplayLanguageCodeException
+            (UnsupportedDisplayLanguageCodeException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidParameterValueException" ->
+          `InvalidParameterValueException
+            (InvalidParameterValueException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "UnsupportedDisplayLanguageCodeException" ->
+          `UnsupportedDisplayLanguageCodeException
+            (UnsupportedDisplayLanguageCodeException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidParameterValueException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterValueException"));
+            ("details", (InvalidParameterValueException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `UnsupportedDisplayLanguageCodeException e ->
+          `Assoc
+            [("error", (`String "UnsupportedDisplayLanguageCodeException"));
+            ("details", (UnsupportedDisplayLanguageCodeException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Languages", (Option.map x.languages ~f:LanguagesList.to_value));
+        ("DisplayLanguageCode",
+          (Option.map x.displayLanguageCode ~f:DisplayLanguageCode.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let displayLanguageCode =
+        (Option.map ~f:DisplayLanguageCode.of_xml)
+          (Xml.child xml_arg0 "DisplayLanguageCode") in
+      let languages =
+        (Option.map ~f:LanguagesList.of_xml) (Xml.child xml_arg0 "Languages") in
+      make ?nextToken ?displayLanguageCode ?languages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let displayLanguageCode =
+        field_map json__ "DisplayLanguageCode" DisplayLanguageCode.of_json in
+      let languages = field_map json__ "Languages" LanguagesList.of_json in
+      make ?nextToken ?displayLanguageCode ?languages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of languages (RFC-5646 codes and names) that Amazon Translate supports."]
+module ListLanguagesRequest =
+  struct
+    type nonrec t =
+      {
+      displayLanguageCode: DisplayLanguageCode.t option
+        [@ocaml.doc
+          "The language code for the language to use to display the language names in the response. The language code is en by default."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Include the NextToken value to fetch the next group of supported languages."];
+      maxResults: MaxResultsInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in each response."]}
+    let make ?displayLanguageCode =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { displayLanguageCode; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("DisplayLanguageCode",
+           (Option.map x.displayLanguageCode ~f:DisplayLanguageCode.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResultsInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let displayLanguageCode =
+        (Option.map ~f:DisplayLanguageCode.of_xml)
+          (Xml.child xml_arg0 "DisplayLanguageCode") in
+      make ?maxResults ?nextToken ?displayLanguageCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let displayLanguageCode =
+        field_map json__ "DisplayLanguageCode" DisplayLanguageCode.of_json in
+      make ?maxResults ?nextToken ?displayLanguageCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a list of languages (RFC-5646 codes and names) that Amazon Translate supports."]
 module ImportTerminologyResponse =
   struct
     type nonrec t =
@@ -3275,16 +4465,22 @@ module ImportTerminologyResponse =
         [@ocaml.doc
           "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to create a terminology resource. The location is returned as a presigned URL to that has a 30 minute expiration."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?terminologyProperties =
       fun ?auxiliaryDataLocation ->
         fun () -> { terminologyProperties; auxiliaryDataLocation }
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "InvalidParameterValueException" ->
@@ -3294,11 +4490,16 @@ module ImportTerminologyResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "InvalidParameterValueException" ->
@@ -3308,10 +4509,16 @@ module ImportTerminologyResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -3328,6 +4535,10 @@ module ImportTerminologyResponse =
           `Assoc
             [("error", (`String "TooManyRequestsException"));
             ("details", (TooManyRequestsException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3351,16 +4562,17 @@ module ImportTerminologyResponse =
           (Xml.child xml_arg0 "TerminologyProperties") in
       make ?auxiliaryDataLocation ?terminologyProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auxiliaryDataLocation =
-        field_map json "AuxiliaryDataLocation"
+        field_map json__ "AuxiliaryDataLocation"
           TerminologyDataLocation.of_json in
       let terminologyProperties =
-        field_map json "TerminologyProperties" TerminologyProperties.of_json in
+        field_map json__ "TerminologyProperties"
+          TerminologyProperties.of_json in
       make ?auxiliaryDataLocation ?terminologyProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a custom terminology, depending on whether or not one already exists for the given terminology name. Importing a terminology with the same name as an existing one will merge the terminologies based on the chosen merge strategy. Currently, the only supported merge strategy is OVERWRITE, and so the imported terminology will overwrite an existing terminology of the same name. If you import a terminology that overwrites an existing one, the new terminology take up to 10 minutes to fully propagate and be available for use in a translation due to cache policies with the DataPlane service that performs the translations."]
+       "Creates or updates a custom terminology, depending on whether one already exists for the given terminology name. Importing a terminology with the same name as an existing one will merge the terminologies based on the chosen merge strategy. The only supported merge strategy is OVERWRITE, where the imported terminology overwrites the existing terminology of the same name. If you import a terminology that overwrites an existing one, the new terminology takes up to 10 minutes to fully propagate. After that, translations have access to the new terminology."]
 module ImportTerminologyRequest =
   struct
     type nonrec t =
@@ -3378,21 +4590,26 @@ module ImportTerminologyRequest =
           "The terminology data for the custom terminology being imported."];
       encryptionKey: EncryptionKey.t option
         [@ocaml.doc
-          "The encryption key for the custom terminology being imported."]}
+          "The encryption key for the custom terminology being imported."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags to be associated with this resource. A tag is a key-value pair that adds metadata to a resource. Each tag key for the resource must be unique. For more information, see Tagging your resources."]}
     let context_ = "ImportTerminologyRequest"
     let make ?description =
       fun ?encryptionKey ->
-        fun ~name ->
-          fun ~mergeStrategy ->
-            fun ~terminologyData ->
-              fun () ->
-                {
-                  description;
-                  encryptionKey;
-                  name;
-                  mergeStrategy;
-                  terminologyData
-                }
+        fun ?tags ->
+          fun ~name ->
+            fun ~mergeStrategy ->
+              fun ~terminologyData ->
+                fun () ->
+                  {
+                    description;
+                    encryptionKey;
+                    tags;
+                    name;
+                    mergeStrategy;
+                    terminologyData
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Some (ResourceName.to_value x.name)));
@@ -3401,9 +4618,11 @@ module ImportTerminologyRequest =
         ("TerminologyData",
           (Some (TerminologyData.to_value x.terminologyData)));
         ("EncryptionKey",
-          (Option.map x.encryptionKey ~f:EncryptionKey.to_value))]
+          (Option.map x.encryptionKey ~f:EncryptionKey.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let encryptionKey =
         (Option.map ~f:EncryptionKey.of_xml)
           (Xml.child xml_arg0 "EncryptionKey") in
@@ -3417,23 +4636,24 @@ module ImportTerminologyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MergeStrategy") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?encryptionKey ~terminologyData ?description ~mergeStrategy ~name
-        ()
+      make ?tags ?encryptionKey ~terminologyData ?description ~mergeStrategy
+        ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let encryptionKey =
-        field_map json "EncryptionKey" EncryptionKey.of_json in
+        field_map json__ "EncryptionKey" EncryptionKey.of_json in
       let terminologyData =
-        field_map_exn json "TerminologyData" TerminologyData.of_json in
-      let description = field_map json "Description" Description.of_json in
+        field_map_exn json__ "TerminologyData" TerminologyData.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let mergeStrategy =
-        field_map_exn json "MergeStrategy" MergeStrategy.of_json in
-      let name = field_map_exn json "Name" ResourceName.of_json in
-      make ?encryptionKey ~terminologyData ?description ~mergeStrategy ~name
-        ()
+        field_map_exn json__ "MergeStrategy" MergeStrategy.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
+      make ?tags ?encryptionKey ~terminologyData ?description ~mergeStrategy
+        ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a custom terminology, depending on whether or not one already exists for the given terminology name. Importing a terminology with the same name as an existing one will merge the terminologies based on the chosen merge strategy. Currently, the only supported merge strategy is OVERWRITE, and so the imported terminology will overwrite an existing terminology of the same name. If you import a terminology that overwrites an existing one, the new terminology take up to 10 minutes to fully propagate and be available for use in a translation due to cache policies with the DataPlane service that performs the translations."]
+       "Creates or updates a custom terminology, depending on whether one already exists for the given terminology name. Importing a terminology with the same name as an existing one will merge the terminologies based on the chosen merge strategy. The only supported merge strategy is OVERWRITE, where the imported terminology overwrites the existing terminology of the same name. If you import a terminology that overwrites an existing one, the new terminology takes up to 10 minutes to fully propagate. After that, translations have access to the new terminology."]
 module GetTerminologyResponse =
   struct
     type nonrec t =
@@ -3443,10 +4663,10 @@ module GetTerminologyResponse =
           "The properties of the custom terminology being retrieved."];
       terminologyDataLocation: TerminologyDataLocation.t option
         [@ocaml.doc
-          "The Amazon S3 location of the most recent custom terminology input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30 minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."];
+          "The Amazon S3 location of the most recent custom terminology input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30-minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."];
       auxiliaryDataLocation: TerminologyDataLocation.t option
         [@ocaml.doc
-          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to create a terminology resource. The location is returned as a presigned URL to that has a 30 minute expiration."]}
+          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to create a terminology resource. The location is returned as a presigned URL to that has a 30-minute expiration."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
@@ -3537,15 +4757,16 @@ module GetTerminologyResponse =
       make ?auxiliaryDataLocation ?terminologyDataLocation
         ?terminologyProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let auxiliaryDataLocation =
-        field_map json "AuxiliaryDataLocation"
+        field_map json__ "AuxiliaryDataLocation"
           TerminologyDataLocation.of_json in
       let terminologyDataLocation =
-        field_map json "TerminologyDataLocation"
+        field_map json__ "TerminologyDataLocation"
           TerminologyDataLocation.of_json in
       let terminologyProperties =
-        field_map json "TerminologyProperties" TerminologyProperties.of_json in
+        field_map json__ "TerminologyProperties"
+          TerminologyProperties.of_json in
       make ?auxiliaryDataLocation ?terminologyDataLocation
         ?terminologyProperties ()
     let to_json v = composed_to_json to_value v
@@ -3558,7 +4779,7 @@ module GetTerminologyRequest =
         [@ocaml.doc "The name of the custom terminology being retrieved."];
       terminologyDataFormat: TerminologyDataFormat.t option
         [@ocaml.doc
-          "The data format of the custom terminology being retrieved. If you don't specify this parameter, Amazon Translate returns a file that has the same format as the file that was imported to create the terminology. If you specify this parameter when you retrieve a multi-directional terminology resource, you must specify the same format as that of the input file that was imported to create it. Otherwise, Amazon Translate throws an error."]}
+          "The data format of the custom terminology being retrieved. If you don't specify this parameter, Amazon Translate returns a file with the same format as the file that was imported to create the terminology. If you specify this parameter when you retrieve a multi-directional terminology resource, you must specify the same format as the input file that was imported to create it. Otherwise, Amazon Translate throws an error."]}
     let context_ = "GetTerminologyRequest"
     let make ?terminologyDataFormat =
       fun ~name -> fun () -> { terminologyDataFormat; name }
@@ -3577,10 +4798,11 @@ module GetTerminologyRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?terminologyDataFormat ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let terminologyDataFormat =
-        field_map json "TerminologyDataFormat" TerminologyDataFormat.of_json in
-      let name = field_map_exn json "Name" ResourceName.of_json in
+        field_map json__ "TerminologyDataFormat"
+          TerminologyDataFormat.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       make ?terminologyDataFormat ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves a custom terminology."]
@@ -3593,14 +4815,14 @@ module GetParallelDataResponse =
           "The properties of the parallel data resource that is being retrieved."];
       dataLocation: ParallelDataDataLocation.t option
         [@ocaml.doc
-          "The Amazon S3 location of the most recent parallel data input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30 minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."];
+          "The Amazon S3 location of the most recent parallel data input file that was successfully imported into Amazon Translate. The location is returned as a presigned URL that has a 30-minute expiration. Amazon Translate doesn't scan all input files for the risk of CSV injection attacks. CSV injection occurs when a .csv or .tsv file is altered so that a record contains malicious code. The record begins with a special character, such as =, +, -, or \\@. When the file is opened in a spreadsheet program, the program might interpret the record as a formula and run the code within it. Before you download an input file from Amazon S3, ensure that you recognize the file and trust its creator."];
       auxiliaryDataLocation: ParallelDataDataLocation.t option
         [@ocaml.doc
-          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to create a parallel data resource. The location is returned as a presigned URL to that has a 30 minute expiration."];
+          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to create a parallel data resource. The location is returned as a presigned URL to that has a 30-minute expiration."];
       latestUpdateAttemptAuxiliaryDataLocation:
         ParallelDataDataLocation.t option
         [@ocaml.doc
-          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to update a parallel data resource. The location is returned as a presigned URL to that has a 30 minute expiration."]}
+          "The Amazon S3 location of a file that provides any errors or warnings that were produced by your input file. This file was created when Amazon Translate attempted to update a parallel data resource. The location is returned as a presigned URL to that has a 30-minute expiration."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
@@ -3698,17 +4920,17 @@ module GetParallelDataResponse =
       make ?latestUpdateAttemptAuxiliaryDataLocation ?auxiliaryDataLocation
         ?dataLocation ?parallelDataProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let latestUpdateAttemptAuxiliaryDataLocation =
-        field_map json "LatestUpdateAttemptAuxiliaryDataLocation"
+        field_map json__ "LatestUpdateAttemptAuxiliaryDataLocation"
           ParallelDataDataLocation.of_json in
       let auxiliaryDataLocation =
-        field_map json "AuxiliaryDataLocation"
+        field_map json__ "AuxiliaryDataLocation"
           ParallelDataDataLocation.of_json in
       let dataLocation =
-        field_map json "DataLocation" ParallelDataDataLocation.of_json in
+        field_map json__ "DataLocation" ParallelDataDataLocation.of_json in
       let parallelDataProperties =
-        field_map json "ParallelDataProperties"
+        field_map json__ "ParallelDataProperties"
           ParallelDataProperties.of_json in
       make ?latestUpdateAttemptAuxiliaryDataLocation ?auxiliaryDataLocation
         ?dataLocation ?parallelDataProperties ()
@@ -3731,8 +4953,8 @@ module GetParallelDataRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information about a parallel data resource."]
@@ -3802,9 +5024,9 @@ module DescribeTextTranslationJobResponse =
           (Xml.child xml_arg0 "TextTranslationJobProperties") in
       make ?textTranslationJobProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let textTranslationJobProperties =
-        field_map json "TextTranslationJobProperties"
+        field_map json__ "TextTranslationJobProperties"
           TextTranslationJobProperties.of_json in
       make ?textTranslationJobProperties ()
     let to_json v = composed_to_json to_value v
@@ -3827,8 +5049,9 @@ module DescribeTextTranslationJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the properties associated with an asynchronous batch translation job including name, ID, status, source and target languages, input/output S3 buckets, and so on."]
@@ -3848,8 +5071,8 @@ module DeleteTerminologyRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A synchronous action that deletes a custom terminology."]
@@ -3933,9 +5156,9 @@ module DeleteParallelDataResponse =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ParallelDataStatus.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ParallelDataStatus.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a parallel data resource in Amazon Translate."]
@@ -3956,8 +5179,8 @@ module DeleteParallelDataRequest =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a parallel data resource in Amazon Translate."]
@@ -3972,16 +5195,22 @@ module CreateParallelDataResponse =
         [@ocaml.doc
           "The status of the parallel data resource. When the resource is ready for you to use, the status is ACTIVE."]}
     type nonrec error =
-      [ `ConflictException of ConflictException.t 
+      [
+        `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `InvalidParameterValueException of InvalidParameterValueException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
+      | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?name = fun ?status -> fun () -> { name; status }
     let error_of_json name json =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
@@ -3995,11 +5224,16 @@ module CreateParallelDataResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
       | "ConflictException" ->
           `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
@@ -4013,10 +5247,16 @@ module CreateParallelDataResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "TooManyRequestsException" ->
           `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "TooManyTagsException" ->
+          `TooManyTagsException (TooManyTagsException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
       | `ConflictException e ->
           `Assoc
             [("error", (`String "ConflictException"));
@@ -4041,6 +5281,10 @@ module CreateParallelDataResponse =
           `Assoc
             [("error", (`String "TooManyRequestsException"));
             ("details", (TooManyRequestsException.to_json e))]
+      | `TooManyTagsException e ->
+          `Assoc
+            [("error", (`String "TooManyTagsException"));
+            ("details", (TooManyTagsException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4059,9 +5303,9 @@ module CreateParallelDataResponse =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ParallelDataStatus.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ParallelDataStatus.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
       make ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4082,21 +5326,26 @@ module CreateParallelDataRequest =
       encryptionKey: EncryptionKey.t option ;
       clientToken: ClientTokenString.t
         [@ocaml.doc
-          "A unique identifier for the request. This token is automatically generated when you use Amazon Translate through an AWS SDK."]}
+          "A unique identifier for the request. This token is automatically generated when you use Amazon Translate through an AWS SDK."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "Tags to be associated with this resource. A tag is a key-value pair that adds metadata to a resource. Each tag key for the resource must be unique. For more information, see Tagging your resources."]}
     let context_ = "CreateParallelDataRequest"
     let make ?description =
       fun ?encryptionKey ->
-        fun ~name ->
-          fun ~parallelDataConfig ->
-            fun ~clientToken ->
-              fun () ->
-                {
-                  description;
-                  encryptionKey;
-                  name;
-                  parallelDataConfig;
-                  clientToken
-                }
+        fun ?tags ->
+          fun ~name ->
+            fun ~parallelDataConfig ->
+              fun ~clientToken ->
+                fun () ->
+                  {
+                    description;
+                    encryptionKey;
+                    tags;
+                    name;
+                    parallelDataConfig;
+                    clientToken
+                  }
     let to_value x =
       structure_to_value
         [("Name", (Some (ResourceName.to_value x.name)));
@@ -4105,9 +5354,11 @@ module CreateParallelDataRequest =
           (Some (ParallelDataConfig.to_value x.parallelDataConfig)));
         ("EncryptionKey",
           (Option.map x.encryptionKey ~f:EncryptionKey.to_value));
-        ("ClientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+        ("ClientToken", (Some (ClientTokenString.to_value x.clientToken)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let clientToken =
         ClientTokenString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
@@ -4121,20 +5372,21 @@ module CreateParallelDataRequest =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let name =
         ResourceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~clientToken ?encryptionKey ~parallelDataConfig ?description ~name
-        ()
+      make ?tags ~clientToken ?encryptionKey ~parallelDataConfig ?description
+        ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" ClientTokenString.of_json in
+        field_map_exn json__ "ClientToken" ClientTokenString.of_json in
       let encryptionKey =
-        field_map json "EncryptionKey" EncryptionKey.of_json in
+        field_map json__ "EncryptionKey" EncryptionKey.of_json in
       let parallelDataConfig =
-        field_map_exn json "ParallelDataConfig" ParallelDataConfig.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let name = field_map_exn json "Name" ResourceName.of_json in
-      make ~clientToken ?encryptionKey ~parallelDataConfig ?description ~name
-        ()
+        field_map_exn json__ "ParallelDataConfig" ParallelDataConfig.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
+      make ?tags ~clientToken ?encryptionKey ~parallelDataConfig ?description
+        ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a parallel data resource in Amazon Translate by importing an input file from Amazon S3. Parallel data files contain examples that show how you want segments of text to be translated. By adding parallel data, you can influence the style, tone, and word choice in your translation output."]

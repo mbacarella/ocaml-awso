@@ -41,6 +41,8 @@ let create_budget =
        and notificationsWithSubscribers =
          flag "notifications-with-subscribers" (optional json_arg)
            ~doc:"JSON NotificationWithSubscribersList"
+       and resourceTags =
+         flag "resource-tags" (optional json_arg) ~doc:"JSON ResourceTagList"
        and accountId =
          flag "account-id" (required string) ~doc:"STRING AccountId"
        and budget = flag "budget" (required json_arg) ~doc:"JSON Budget" in
@@ -51,7 +53,9 @@ let create_budget =
               ?notificationsWithSubscribers:(Option.map
                                                ~f:Values.NotificationWithSubscribersList.of_json
                                                notificationsWithSubscribers)
-              ~accountId ~budget:(Values.Budget.of_json budget) ())
+              ?resourceTags:(Option.map ~f:Values.ResourceTagList.of_json
+                               resourceTags) ~accountId
+              ~budget:(Values.Budget.of_json budget) ())
            (Some Values.CreateBudgetResponse.to_json)
            (Some Values.CreateBudgetResponse.error_to_json)])
 let create_budget_action =
@@ -64,6 +68,8 @@ let create_budget_action =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and resourceTags =
+         flag "resource-tags" (optional json_arg) ~doc:"JSON ResourceTagList"
        and accountId =
          flag "account-id" (required string) ~doc:"STRING AccountId"
        and budgetName =
@@ -87,7 +93,9 @@ let create_budget_action =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_budget_action
-           (Values.CreateBudgetActionRequest.make ~accountId ~budgetName
+           (Values.CreateBudgetActionRequest.make
+              ?resourceTags:(Option.map ~f:Values.ResourceTagList.of_json
+                               resourceTags) ~accountId ~budgetName
               ~notificationType:(Values.NotificationType.of_json
                                    notificationType)
               ~actionType:(Values.ActionType.of_json actionType)
@@ -252,6 +260,9 @@ let describe_budget =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and showFilterExpression =
+         flag "show-filter-expression" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and accountId =
          flag "account-id" (required string) ~doc:"STRING AccountId"
        and budgetName =
@@ -259,7 +270,8 @@ let describe_budget =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_budget
-           (Values.DescribeBudgetRequest.make ~accountId ~budgetName ())
+           (Values.DescribeBudgetRequest.make ?showFilterExpression
+              ~accountId ~budgetName ())
            (Some Values.DescribeBudgetResponse.to_json)
            (Some Values.DescribeBudgetResponse.error_to_json)])
 let describe_budget_action =
@@ -428,16 +440,21 @@ let describe_budgets =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults"
+         flag "max-results" (optional int)
+           ~doc:"INT MaxResultsDescribeBudgets"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING GenericString"
+       and showFilterExpression =
+         flag "show-filter-expression" (optional bool)
+           ~doc:"BOOL NullableBoolean"
        and accountId =
          flag "account-id" (required string) ~doc:"STRING AccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_budgets
            (Values.DescribeBudgetsRequest.make ?maxResults ?nextToken
-              ~accountId ()) (Some Values.DescribeBudgetsResponse.to_json)
+              ?showFilterExpression ~accountId ())
+           (Some Values.DescribeBudgetsResponse.to_json)
            (Some Values.DescribeBudgetsResponse.error_to_json)])
 let describe_notifications_for_budget =
   Command.async ~summary:""
@@ -519,6 +536,71 @@ let execute_budget_action =
               ~executionType:(Values.ExecutionType.of_json executionType) ())
            (Some Values.ExecuteBudgetActionResponse.to_json)
            (Some Values.ExecuteBudgetActionResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceARN ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and resourceTags =
+         flag "resource-tags" (required json_arg) ~doc:"JSON ResourceTagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceARN
+              ~resourceTags:(Values.ResourceTagList.of_json resourceTags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceARN =
+         flag "resource-a-r-n" (required string)
+           ~doc:"STRING AmazonResourceName"
+       and resourceTagKeys =
+         flag "resource-tag-keys" (required json_arg)
+           ~doc:"JSON ResourceTagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceARN
+              ~resourceTagKeys:(Values.ResourceTagKeyList.of_json
+                                  resourceTagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let update_budget =
   Command.async ~summary:""
     ([%map_open.Command
@@ -669,6 +751,9 @@ let main =
     ("describe-subscribers-for-notification",
       describe_subscribers_for_notification);
     ("execute-budget-action", execute_budget_action);
+    ("list-tags-for-resource", list_tags_for_resource);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
     ("update-budget", update_budget);
     ("update-budget-action", update_budget_action);
     ("update-notification", update_notification);

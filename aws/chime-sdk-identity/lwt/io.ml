@@ -15,12 +15,16 @@ let create_app_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAppInstance input
 let create_app_instance_admin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAppInstanceAdmin input
+let create_app_instance_bot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAppInstanceBot input
 let create_app_instance_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAppInstanceUser input
 let delete_app_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppInstance input
 let delete_app_instance_admin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppInstanceAdmin input
+let delete_app_instance_bot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAppInstanceBot input
 let delete_app_instance_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAppInstanceUser input
 let deregister_app_instance_user_endpoint ?endpoint_url ?cfg input =
@@ -29,6 +33,8 @@ let describe_app_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAppInstance input
 let describe_app_instance_admin ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAppInstanceAdmin input
+let describe_app_instance_bot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAppInstanceBot input
 let describe_app_instance_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAppInstanceUser input
 let describe_app_instance_user_endpoint ?endpoint_url ?cfg input =
@@ -37,6 +43,8 @@ let get_app_instance_retention_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAppInstanceRetentionSettings input
 let list_app_instance_admins ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAppInstanceAdmins input
+let list_app_instance_bots ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAppInstanceBots input
 let list_app_instance_user_endpoints ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAppInstanceUserEndpoints input
 let list_app_instance_users ?endpoint_url ?cfg input =
@@ -47,6 +55,9 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let put_app_instance_retention_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAppInstanceRetentionSettings input
+let put_app_instance_user_expiration_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAppInstanceUserExpirationSettings
+    input
 let register_app_instance_user_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterAppInstanceUserEndpoint input
 let tag_resource ?endpoint_url ?cfg input =
@@ -55,6 +66,8 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_app_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAppInstance input
+let update_app_instance_bot ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAppInstanceBot input
 let update_app_instance_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAppInstanceUser input
 let update_app_instance_user_endpoint ?endpoint_url ?cfg input =

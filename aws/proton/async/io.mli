@@ -7,6 +7,12 @@ val accept_environment_account_connection :
         (AcceptEnvironmentAccountConnectionOutput.t,
           AcceptEnvironmentAccountConnectionOutput.error) Result.t
           Async.Deferred.t
+val cancel_component_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelComponentDeploymentInput.t ->
+        (CancelComponentDeploymentOutput.t,
+          CancelComponentDeploymentOutput.error) Result.t Async.Deferred.t
 val cancel_environment_deployment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -26,6 +32,12 @@ val cancel_service_pipeline_deployment :
       CancelServicePipelineDeploymentInput.t ->
         (CancelServicePipelineDeploymentOutput.t,
           CancelServicePipelineDeploymentOutput.error) Result.t
+          Async.Deferred.t
+val create_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateComponentInput.t ->
+        (CreateComponentOutput.t, CreateComponentOutput.error) Result.t
           Async.Deferred.t
 val create_environment :
   ?endpoint_url:string ->
@@ -65,6 +77,18 @@ val create_service :
       CreateServiceInput.t ->
         (CreateServiceOutput.t, CreateServiceOutput.error) Result.t
           Async.Deferred.t
+val create_service_instance :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateServiceInstanceInput.t ->
+        (CreateServiceInstanceOutput.t, CreateServiceInstanceOutput.error)
+          Result.t Async.Deferred.t
+val create_service_sync_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateServiceSyncConfigInput.t ->
+        (CreateServiceSyncConfigOutput.t,
+          CreateServiceSyncConfigOutput.error) Result.t Async.Deferred.t
 val create_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -83,6 +107,18 @@ val create_template_sync_config :
       CreateTemplateSyncConfigInput.t ->
         (CreateTemplateSyncConfigOutput.t,
           CreateTemplateSyncConfigOutput.error) Result.t Async.Deferred.t
+val delete_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteComponentInput.t ->
+        (DeleteComponentOutput.t, DeleteComponentOutput.error) Result.t
+          Async.Deferred.t
+val delete_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDeploymentInput.t ->
+        (DeleteDeploymentOutput.t, DeleteDeploymentOutput.error) Result.t
+          Async.Deferred.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -121,6 +157,12 @@ val delete_service :
       DeleteServiceInput.t ->
         (DeleteServiceOutput.t, DeleteServiceOutput.error) Result.t
           Async.Deferred.t
+val delete_service_sync_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteServiceSyncConfigInput.t ->
+        (DeleteServiceSyncConfigOutput.t,
+          DeleteServiceSyncConfigOutput.error) Result.t Async.Deferred.t
 val delete_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -144,6 +186,18 @@ val get_account_settings :
     ?cfg:Awso.Cfg.t ->
       GetAccountSettingsInput.t ->
         (GetAccountSettingsOutput.t, GetAccountSettingsOutput.error) Result.t
+          Async.Deferred.t
+val get_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetComponentInput.t ->
+        (GetComponentOutput.t, GetComponentOutput.error) Result.t
+          Async.Deferred.t
+val get_deployment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDeploymentInput.t ->
+        (GetDeploymentOutput.t, GetDeploymentOutput.error) Result.t
           Async.Deferred.t
 val get_environment :
   ?endpoint_url:string ->
@@ -183,6 +237,12 @@ val get_repository_sync_status :
       GetRepositorySyncStatusInput.t ->
         (GetRepositorySyncStatusOutput.t,
           GetRepositorySyncStatusOutput.error) Result.t Async.Deferred.t
+val get_resources_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcesSummaryInput.t ->
+        (GetResourcesSummaryOutput.t, GetResourcesSummaryOutput.error)
+          Result.t Async.Deferred.t
 val get_service :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -195,6 +255,24 @@ val get_service_instance :
       GetServiceInstanceInput.t ->
         (GetServiceInstanceOutput.t, GetServiceInstanceOutput.error) Result.t
           Async.Deferred.t
+val get_service_instance_sync_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetServiceInstanceSyncStatusInput.t ->
+        (GetServiceInstanceSyncStatusOutput.t,
+          GetServiceInstanceSyncStatusOutput.error) Result.t Async.Deferred.t
+val get_service_sync_blocker_summary :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetServiceSyncBlockerSummaryInput.t ->
+        (GetServiceSyncBlockerSummaryOutput.t,
+          GetServiceSyncBlockerSummaryOutput.error) Result.t Async.Deferred.t
+val get_service_sync_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetServiceSyncConfigInput.t ->
+        (GetServiceSyncConfigOutput.t, GetServiceSyncConfigOutput.error)
+          Result.t Async.Deferred.t
 val get_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -219,6 +297,31 @@ val get_template_sync_status :
       GetTemplateSyncStatusInput.t ->
         (GetTemplateSyncStatusOutput.t, GetTemplateSyncStatusOutput.error)
           Result.t Async.Deferred.t
+val list_component_outputs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComponentOutputsInput.t ->
+        (ListComponentOutputsOutput.t, ListComponentOutputsOutput.error)
+          Result.t Async.Deferred.t
+val list_component_provisioned_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComponentProvisionedResourcesInput.t ->
+        (ListComponentProvisionedResourcesOutput.t,
+          ListComponentProvisionedResourcesOutput.error) Result.t
+          Async.Deferred.t
+val list_components :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListComponentsInput.t ->
+        (ListComponentsOutput.t, ListComponentsOutput.error) Result.t
+          Async.Deferred.t
+val list_deployments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDeploymentsInput.t ->
+        (ListDeploymentsOutput.t, ListDeploymentsOutput.error) Result.t
+          Async.Deferred.t
 val list_environment_account_connections :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -359,6 +462,12 @@ val update_account_settings :
       UpdateAccountSettingsInput.t ->
         (UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error)
           Result.t Async.Deferred.t
+val update_component :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateComponentInput.t ->
+        (UpdateComponentOutput.t, UpdateComponentOutput.error) Result.t
+          Async.Deferred.t
 val update_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -403,6 +512,18 @@ val update_service_pipeline :
       UpdateServicePipelineInput.t ->
         (UpdateServicePipelineOutput.t, UpdateServicePipelineOutput.error)
           Result.t Async.Deferred.t
+val update_service_sync_blocker :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateServiceSyncBlockerInput.t ->
+        (UpdateServiceSyncBlockerOutput.t,
+          UpdateServiceSyncBlockerOutput.error) Result.t Async.Deferred.t
+val update_service_sync_config :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateServiceSyncConfigInput.t ->
+        (UpdateServiceSyncConfigOutput.t,
+          UpdateServiceSyncConfigOutput.error) Result.t Async.Deferred.t
 val update_service_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

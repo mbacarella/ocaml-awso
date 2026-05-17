@@ -24,36 +24,154 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module GenericString =
+module BooleanObject =
   struct
-    type nonrec t = string
-    let context_ = "GenericString"
+    type nonrec t = bool
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GenericString" j
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module SortOrder =
+module DoubleObject =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module IntegerObject =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IntegerObject" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TargetTrackingScalingPolicyConfiguration =
   struct
     type nonrec t =
-      | ASC 
-      | DESC 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | ASC -> "ASC" | DESC -> "DESC" | Non_static_id s -> s
-    let of_string =
-      function | "ASC" -> ASC | "DESC" -> DESC | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      disableScaleIn: BooleanObject.t option
+        [@ocaml.doc
+          "Specifies if scale-in is enabled. When auto scaling automatically decreases capacity for a table, the table scales in. When scaling policies are set, they can't scale in the table lower than its minimum capacity."];
+      scaleInCooldown: IntegerObject.t option
+        [@ocaml.doc
+          "Specifies a scale-in cool down period. A cooldown period in seconds between scaling activities that lets the table stabilize before another scaling activity starts."];
+      scaleOutCooldown: IntegerObject.t option
+        [@ocaml.doc
+          "Specifies a scale out cool down period. A cooldown period in seconds between scaling activities that lets the table stabilize before another scaling activity starts."];
+      targetValue: DoubleObject.t
+        [@ocaml.doc
+          "Specifies the target value for the target tracking auto scaling policy. Amazon Keyspaces auto scaling scales up capacity automatically when traffic exceeds this target utilization rate, and then back down when it falls below the target. This ensures that the ratio of consumed capacity to provisioned capacity stays at or near this value. You define targetValue as a percentage. A double between 20 and 90."]}
+    let context_ = "TargetTrackingScalingPolicyConfiguration"
+    let make ?disableScaleIn =
+      fun ?scaleInCooldown ->
+        fun ?scaleOutCooldown ->
+          fun ~targetValue ->
+            fun () ->
+              {
+                disableScaleIn;
+                scaleInCooldown;
+                scaleOutCooldown;
+                targetValue
+              }
+    let to_value x =
+      structure_to_value
+        [("disableScaleIn",
+           (Option.map x.disableScaleIn ~f:BooleanObject.to_value));
+        ("scaleInCooldown",
+          (Option.map x.scaleInCooldown ~f:IntegerObject.to_value));
+        ("scaleOutCooldown",
+          (Option.map x.scaleOutCooldown ~f:IntegerObject.to_value));
+        ("targetValue", (Some (DoubleObject.to_value x.targetValue)))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+      let targetValue =
+        DoubleObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "targetValue") in
+      let scaleOutCooldown =
+        (Option.map ~f:IntegerObject.of_xml)
+          (Xml.child xml_arg0 "scaleOutCooldown") in
+      let scaleInCooldown =
+        (Option.map ~f:IntegerObject.of_xml)
+          (Xml.child xml_arg0 "scaleInCooldown") in
+      let disableScaleIn =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "disableScaleIn") in
+      make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetValue =
+        field_map_exn json__ "targetValue" DoubleObject.of_json in
+      let scaleOutCooldown =
+        field_map json__ "scaleOutCooldown" IntegerObject.of_json in
+      let scaleInCooldown =
+        field_map json__ "scaleInCooldown" IntegerObject.of_json in
+      let disableScaleIn =
+        field_map json__ "disableScaleIn" BooleanObject.of_json in
+      make ~targetValue ?scaleOutCooldown ?scaleInCooldown ?disableScaleIn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The auto scaling policy that scales a table based on the ratio of consumed to provisioned capacity."]
+module AutoScalingPolicy =
+  struct
+    type nonrec t =
+      {
+      targetTrackingScalingPolicyConfiguration:
+        TargetTrackingScalingPolicyConfiguration.t option
+        [@ocaml.doc
+          "Auto scaling scales up capacity automatically when traffic exceeds this target utilization rate, and then back down when it falls below the target. A double between 20 and 90."]}
+    let make ?targetTrackingScalingPolicyConfiguration =
+      fun () -> { targetTrackingScalingPolicyConfiguration }
+    let to_value x =
+      structure_to_value
+        [("targetTrackingScalingPolicyConfiguration",
+           (Option.map x.targetTrackingScalingPolicyConfiguration
+              ~f:TargetTrackingScalingPolicyConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetTrackingScalingPolicyConfiguration =
+        (Option.map ~f:TargetTrackingScalingPolicyConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetTrackingScalingPolicyConfiguration") in
+      make ?targetTrackingScalingPolicyConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetTrackingScalingPolicyConfiguration =
+        field_map json__ "targetTrackingScalingPolicyConfiguration"
+          TargetTrackingScalingPolicyConfiguration.of_json in
+      make ?targetTrackingScalingPolicyConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon Keyspaces supports the target tracking auto scaling policy. With this policy, Amazon Keyspaces auto scaling ensures that the table's ratio of consumed to provisioned capacity stays at or near the target value that you specify. You define the target value as a percentage between 20 and 90."]
+module CapacityUnits =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -92,6 +210,229 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module Region =
+  struct
+    type nonrec t = string
+    let context_ = "region"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:25) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"region" j
+    let to_json = simple_to_json to_value
+  end
+module ThroughputMode =
+  struct
+    type nonrec t =
+      | PAY_PER_REQUEST 
+      | PROVISIONED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PAY_PER_REQUEST -> "PAY_PER_REQUEST"
+      | PROVISIONED -> "PROVISIONED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PAY_PER_REQUEST" -> PAY_PER_REQUEST
+      | "PROVISIONED" -> PROVISIONED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ThroughputMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ThroughputMode" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module WarmThroughputStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | UPDATING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | UPDATING -> "UPDATING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "UPDATING" -> UPDATING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration WarmThroughputStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"WarmThroughputStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module GenericString =
+  struct
+    type nonrec t = string
+    let context_ = "GenericString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GenericString" j
+    let to_json = simple_to_json to_value
+  end
+module SortOrder =
+  struct
+    type nonrec t =
+      | ASC 
+      | DESC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ASC -> "ASC" | DESC -> "DESC" | Non_static_id s -> s
+    let of_string =
+      function | "ASC" -> ASC | "DESC" -> DESC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SortOrder" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SortOrder" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoScalingSettings =
+  struct
+    type nonrec t =
+      {
+      autoScalingDisabled: BooleanObject.t option
+        [@ocaml.doc
+          "This optional parameter enables auto scaling for the table if set to false."];
+      minimumUnits: CapacityUnits.t option
+        [@ocaml.doc
+          "The minimum level of throughput the table should always be ready to support. The value must be between 1 and the max throughput per second quota for your account (40,000 by default)."];
+      maximumUnits: CapacityUnits.t option
+        [@ocaml.doc
+          "Manage costs by specifying the maximum amount of throughput to provision. The value must be between 1 and the max throughput per second quota for your account (40,000 by default)."];
+      scalingPolicy: AutoScalingPolicy.t option
+        [@ocaml.doc
+          "Amazon Keyspaces supports the target tracking auto scaling policy. With this policy, Amazon Keyspaces auto scaling ensures that the table's ratio of consumed to provisioned capacity stays at or near the target value that you specify. You define the target value as a percentage between 20 and 90."]}
+    let make ?autoScalingDisabled =
+      fun ?minimumUnits ->
+        fun ?maximumUnits ->
+          fun ?scalingPolicy ->
+            fun () ->
+              {
+                autoScalingDisabled;
+                minimumUnits;
+                maximumUnits;
+                scalingPolicy
+              }
+    let to_value x =
+      structure_to_value
+        [("autoScalingDisabled",
+           (Option.map x.autoScalingDisabled ~f:BooleanObject.to_value));
+        ("minimumUnits",
+          (Option.map x.minimumUnits ~f:CapacityUnits.to_value));
+        ("maximumUnits",
+          (Option.map x.maximumUnits ~f:CapacityUnits.to_value));
+        ("scalingPolicy",
+          (Option.map x.scalingPolicy ~f:AutoScalingPolicy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingPolicy =
+        (Option.map ~f:AutoScalingPolicy.of_xml)
+          (Xml.child xml_arg0 "scalingPolicy") in
+      let maximumUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "maximumUnits") in
+      let minimumUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "minimumUnits") in
+      let autoScalingDisabled =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "autoScalingDisabled") in
+      make ?scalingPolicy ?maximumUnits ?minimumUnits ?autoScalingDisabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingPolicy =
+        field_map json__ "scalingPolicy" AutoScalingPolicy.of_json in
+      let maximumUnits =
+        field_map json__ "maximumUnits" CapacityUnits.of_json in
+      let minimumUnits =
+        field_map json__ "minimumUnits" CapacityUnits.of_json in
+      let autoScalingDisabled =
+        field_map json__ "autoScalingDisabled" BooleanObject.of_json in
+      make ?scalingPolicy ?maximumUnits ?minimumUnits ?autoScalingDisabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The optional auto scaling settings for a table with provisioned throughput capacity. To turn on auto scaling for a table in throughputMode:PROVISIONED, you must specify the following parameters. Configure the minimum and maximum capacity units. The auto scaling policy ensures that capacity never goes below the minimum or above the maximum range. minimumUnits: The minimum level of throughput the table should always be ready to support. The value must be between 1 and the max throughput per second quota for your account (40,000 by default). maximumUnits: The maximum level of throughput the table should always be ready to support. The value must be between 1 and the max throughput per second quota for your account (40,000 by default). scalingPolicy: Amazon Keyspaces supports the target tracking scaling policy. The auto scaling target is the provisioned capacity of the table. targetTrackingScalingPolicyConfiguration: To define the target tracking policy, you must define the target value. targetValue: The target utilization rate of the table. Amazon Keyspaces auto scaling ensures that the ratio of consumed capacity to provisioned capacity stays at or near this value. You define targetValue as a percentage. A double between 20 and 90. (Required) disableScaleIn: A boolean that specifies if scale-in is disabled or enabled for the table. This parameter is disabled by default. To turn on scale-in, set the boolean value to FALSE. This means that capacity for a table can be automatically scaled down on your behalf. (Optional) scaleInCooldown: A cooldown period in seconds between scaling activities that lets the table stabilize before another scale in activity starts. If no value is provided, the default is 0. (Optional) scaleOutCooldown: A cooldown period in seconds between scaling activities that lets the table stabilize before another scale out activity starts. If no value is provided, the default is 0. (Optional) For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide."]
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "The key of the tag. Tag keys are case sensitive. Each Amazon Keyspaces resource can only have up to one tag with the same key. If you try to add an existing tag (same key), the existing tag value will be updated to the new value."];
+      value: TagValue.t
+        [@ocaml.doc
+          "The value of the tag. Tag values are case-sensitive and can be null."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Some (TagKey.to_value x.key)));
+        ("value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a tag. A tag is a key-value pair. You can add up to 50 tags to a single Amazon Keyspaces resource. Amazon Web Services-assigned tag names and values are automatically assigned the aws: prefix, which the user cannot assign. Amazon Web Services-assigned tag names do not count towards the tag limit of 50. User-assigned tag names have the prefix user: in the Cost Allocation Report. You cannot backdate the application of a tag. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."]
 module ARN =
   struct
     type nonrec t = string
@@ -125,7 +466,7 @@ module KeyspaceName =
              (fun () ->
                 (check_string_max i ~max:48) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_]{1,47}")));
+                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_]{0,47}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -146,7 +487,7 @@ module TableName =
              (fun () ->
                 (check_string_max i ~max:48) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_]{1,47}")));
+                     check_pattern i ~pattern:"[a-zA-Z0-9][a-zA-Z0-9_]{0,47}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -156,6 +497,234 @@ module TableName =
     let of_json j = string_of_json ~kind:"TableName" j
     let to_json = simple_to_json to_value
   end
+module RegionList =
+  struct
+    type nonrec t = Region.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Region.of_xml)
+    let of_json j = list_of_json ~kind:"RegionList" ~of_json:Region.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Rs =
+  struct
+    type nonrec t =
+      | SINGLE_REGION 
+      | MULTI_REGION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SINGLE_REGION -> "SINGLE_REGION"
+      | MULTI_REGION -> "MULTI_REGION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SINGLE_REGION" -> SINGLE_REGION
+      | "MULTI_REGION" -> MULTI_REGION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration rs" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"rs" j)
+    let to_json = simple_to_json to_value
+  end
+module FieldDefinitionNameString =
+  struct
+    type nonrec t = string
+    let context_ = "FieldDefinitionNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FieldDefinitionNameString" j
+    let to_json = simple_to_json to_value
+  end
+module CapacitySpecificationSummary =
+  struct
+    type nonrec t =
+      {
+      throughputMode: ThroughputMode.t option
+        [@ocaml.doc
+          "The read/write throughput capacity mode for a table. The options are: throughputMode:PAY_PER_REQUEST and throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
+      readCapacityUnits: CapacityUnits.t option
+        [@ocaml.doc
+          "The throughput capacity specified for read operations defined in read capacity units (RCUs)."];
+      writeCapacityUnits: CapacityUnits.t option
+        [@ocaml.doc
+          "The throughput capacity specified for write operations defined in write capacity units (WCUs)."];
+      lastUpdateToPayPerRequestTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of the last operation that changed the provisioned throughput capacity of a table."]}
+    let make ?throughputMode =
+      fun ?readCapacityUnits ->
+        fun ?writeCapacityUnits ->
+          fun ?lastUpdateToPayPerRequestTimestamp ->
+            fun () ->
+              {
+                throughputMode;
+                readCapacityUnits;
+                writeCapacityUnits;
+                lastUpdateToPayPerRequestTimestamp
+              }
+    let to_value x =
+      structure_to_value
+        [("throughputMode",
+           (Option.map x.throughputMode ~f:ThroughputMode.to_value));
+        ("readCapacityUnits",
+          (Option.map x.readCapacityUnits ~f:CapacityUnits.to_value));
+        ("writeCapacityUnits",
+          (Option.map x.writeCapacityUnits ~f:CapacityUnits.to_value));
+        ("lastUpdateToPayPerRequestTimestamp",
+          (Option.map x.lastUpdateToPayPerRequestTimestamp
+             ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdateToPayPerRequestTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastUpdateToPayPerRequestTimestamp") in
+      let writeCapacityUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "writeCapacityUnits") in
+      let readCapacityUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "readCapacityUnits") in
+      let throughputMode =
+        (Option.map ~f:ThroughputMode.of_xml)
+          (Xml.child xml_arg0 "throughputMode") in
+      make ?lastUpdateToPayPerRequestTimestamp ?writeCapacityUnits
+        ?readCapacityUnits ?throughputMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdateToPayPerRequestTimestamp =
+        field_map json__ "lastUpdateToPayPerRequestTimestamp"
+          Timestamp.of_json in
+      let writeCapacityUnits =
+        field_map json__ "writeCapacityUnits" CapacityUnits.of_json in
+      let readCapacityUnits =
+        field_map json__ "readCapacityUnits" CapacityUnits.of_json in
+      let throughputMode =
+        field_map json__ "throughputMode" ThroughputMode.of_json in
+      make ?lastUpdateToPayPerRequestTimestamp ?writeCapacityUnits
+        ?readCapacityUnits ?throughputMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The read/write throughput capacity mode for a table. The options are: throughputMode:PAY_PER_REQUEST and throughputMode:PROVISIONED. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."]
+module TableStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | CREATING 
+      | UPDATING 
+      | DELETING 
+      | DELETED 
+      | RESTORING 
+      | INACCESSIBLE_ENCRYPTION_CREDENTIALS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | RESTORING -> "RESTORING"
+      | INACCESSIBLE_ENCRYPTION_CREDENTIALS ->
+          "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | "RESTORING" -> RESTORING
+      | "INACCESSIBLE_ENCRYPTION_CREDENTIALS" ->
+          INACCESSIBLE_ENCRYPTION_CREDENTIALS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TableStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TableStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module WarmThroughputSpecificationSummary =
+  struct
+    type nonrec t =
+      {
+      readUnitsPerSecond: Long.t option
+        [@ocaml.doc
+          "The number of read capacity units per second currently configured for warm throughput."];
+      writeUnitsPerSecond: Long.t option
+        [@ocaml.doc
+          "The number of write capacity units per second currently configured for warm throughput."];
+      status: WarmThroughputStatus.t option
+        [@ocaml.doc
+          "The current status of the warm throughput configuration. Valid values are AVAILABLE when the configuration is active, and UPDATING when changes are being applied."]}
+    let make ?readUnitsPerSecond =
+      fun ?writeUnitsPerSecond ->
+        fun ?status ->
+          fun () -> { readUnitsPerSecond; writeUnitsPerSecond; status }
+    let to_value x =
+      structure_to_value
+        [("readUnitsPerSecond",
+           (Option.map x.readUnitsPerSecond ~f:Long.to_value));
+        ("writeUnitsPerSecond",
+          (Option.map x.writeUnitsPerSecond ~f:Long.to_value));
+        ("status", (Option.map x.status ~f:WarmThroughputStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:WarmThroughputStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let writeUnitsPerSecond =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "writeUnitsPerSecond") in
+      let readUnitsPerSecond =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "readUnitsPerSecond") in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" WarmThroughputStatus.of_json in
+      let writeUnitsPerSecond =
+        field_map json__ "writeUnitsPerSecond" Long.of_json in
+      let readUnitsPerSecond =
+        field_map json__ "readUnitsPerSecond" Long.of_json in
+      make ?status ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the current warm throughput settings for a table, including the configured capacity units and the current status of the warm throughput configuration."]
 module ClusteringKey =
   struct
     type nonrec t =
@@ -180,9 +749,9 @@ module ClusteringKey =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~orderBy ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let orderBy = field_map_exn json "orderBy" SortOrder.of_json in
-      let name = field_map_exn json "name" GenericString.of_json in
+    let of_json json__ =
+      let orderBy = field_map_exn json__ "orderBy" SortOrder.of_json in
+      let name = field_map_exn json__ "name" GenericString.of_json in
       make ~orderBy ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -211,9 +780,9 @@ module ColumnDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~type_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" GenericString.of_json in
-      let name = field_map_exn json "name" GenericString.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" GenericString.of_json in
+      let name = field_map_exn json__ "name" GenericString.of_json in
       make ~type_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The names and data types of regular columns."]
@@ -234,8 +803,8 @@ module PartitionKey =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" GenericString.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" GenericString.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -256,12 +825,106 @@ module StaticColumn =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "name" GenericString.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "name" GenericString.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The static columns of the table. Static columns store values that are shared by all rows in the same partition."]
+module AutoScalingSpecification =
+  struct
+    type nonrec t =
+      {
+      writeCapacityAutoScaling: AutoScalingSettings.t option
+        [@ocaml.doc
+          "The auto scaling settings for the table's write capacity."];
+      readCapacityAutoScaling: AutoScalingSettings.t option
+        [@ocaml.doc
+          "The auto scaling settings for the table's read capacity."]}
+    let make ?writeCapacityAutoScaling =
+      fun ?readCapacityAutoScaling ->
+        fun () -> { writeCapacityAutoScaling; readCapacityAutoScaling }
+    let to_value x =
+      structure_to_value
+        [("writeCapacityAutoScaling",
+           (Option.map x.writeCapacityAutoScaling
+              ~f:AutoScalingSettings.to_value));
+        ("readCapacityAutoScaling",
+          (Option.map x.readCapacityAutoScaling
+             ~f:AutoScalingSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readCapacityAutoScaling =
+        (Option.map ~f:AutoScalingSettings.of_xml)
+          (Xml.child xml_arg0 "readCapacityAutoScaling") in
+      let writeCapacityAutoScaling =
+        (Option.map ~f:AutoScalingSettings.of_xml)
+          (Xml.child xml_arg0 "writeCapacityAutoScaling") in
+      make ?readCapacityAutoScaling ?writeCapacityAutoScaling ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readCapacityAutoScaling =
+        field_map json__ "readCapacityAutoScaling"
+          AutoScalingSettings.of_json in
+      let writeCapacityAutoScaling =
+        field_map json__ "writeCapacityAutoScaling"
+          AutoScalingSettings.of_json in
+      make ?readCapacityAutoScaling ?writeCapacityAutoScaling ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The optional auto scaling capacity settings for a table in provisioned capacity mode."]
+module KeyspaceStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | CREATING 
+      | UPDATING 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KeyspaceStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KeyspaceStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TablesReplicationProgress =
+  struct
+    type nonrec t = string
+    let context_ = "TablesReplicationProgress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:7) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[0-9]{1,3}(?:[.][0-9]{1,2})?%")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TablesReplicationProgress" j
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -275,43 +938,134 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
-module CapacityUnits =
-  struct
-    type nonrec t = Int64.t
-    let make i =
-      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
-module ThroughputMode =
+module CdcPropagateTags =
   struct
     type nonrec t =
-      | PAY_PER_REQUEST 
-      | PROVISIONED 
+      | TABLE 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TABLE -> "TABLE" | NONE -> "NONE" | Non_static_id s -> s
+    let of_string =
+      function | "TABLE" -> TABLE | "NONE" -> NONE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration CdcPropagateTags" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CdcPropagateTags" j)
+    let to_json = simple_to_json to_value
+  end
+module CdcStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | ENABLING 
+      | DISABLED 
+      | DISABLING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
-      | PAY_PER_REQUEST -> "PAY_PER_REQUEST"
-      | PROVISIONED -> "PROVISIONED"
+      | ENABLED -> "ENABLED"
+      | ENABLING -> "ENABLING"
+      | DISABLED -> "DISABLED"
+      | DISABLING -> "DISABLING"
       | Non_static_id s -> s
     let of_string =
       function
-      | "PAY_PER_REQUEST" -> PAY_PER_REQUEST
-      | "PROVISIONED" -> PROVISIONED
+      | "ENABLED" -> ENABLED
+      | "ENABLING" -> ENABLING
+      | "DISABLED" -> DISABLED
+      | "DISABLING" -> DISABLING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ThroughputMode" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ThroughputMode" j)
+      of_string (string_of_xml ~kind:"enumeration CdcStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CdcStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ViewType =
+  struct
+    type nonrec t =
+      | NEW_IMAGE 
+      | OLD_IMAGE 
+      | KEYS_ONLY 
+      | NEW_AND_OLD_IMAGES 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NEW_IMAGE -> "NEW_IMAGE"
+      | OLD_IMAGE -> "OLD_IMAGE"
+      | KEYS_ONLY -> "KEYS_ONLY"
+      | NEW_AND_OLD_IMAGES -> "NEW_AND_OLD_IMAGES"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NEW_IMAGE" -> NEW_IMAGE
+      | "OLD_IMAGE" -> OLD_IMAGE
+      | "KEYS_ONLY" -> KEYS_ONLY
+      | "NEW_AND_OLD_IMAGES" -> NEW_AND_OLD_IMAGES
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ViewType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ViewType" j)
+    let to_json = simple_to_json to_value
+  end
+module ClientSideTimestampsStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | ENABLED -> "ENABLED" | Non_static_id s -> s
+    let of_string = function | "ENABLED" -> ENABLED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ClientSideTimestampsStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ClientSideTimestampsStatus" j)
     let to_json = simple_to_json to_value
   end
 module EncryptionType =
@@ -384,6 +1138,53 @@ module PointInTimeRecoveryStatus =
       of_string (string_of_json ~kind:"PointInTimeRecoveryStatus" j)
     let to_json = simple_to_json to_value
   end
+module ReplicaSpecification =
+  struct
+    type nonrec t =
+      {
+      region: Region.t [@ocaml.doc "The Amazon Web Services Region."];
+      readCapacityUnits: CapacityUnits.t option
+        [@ocaml.doc
+          "The provisioned read capacity units for the multi-Region table in the specified Amazon Web Services Region."];
+      readCapacityAutoScaling: AutoScalingSettings.t option
+        [@ocaml.doc
+          "The read capacity auto scaling settings for the multi-Region table in the specified Amazon Web Services Region."]}
+    let context_ = "ReplicaSpecification"
+    let make ?readCapacityUnits =
+      fun ?readCapacityAutoScaling ->
+        fun ~region ->
+          fun () -> { readCapacityUnits; readCapacityAutoScaling; region }
+    let to_value x =
+      structure_to_value
+        [("region", (Some (Region.to_value x.region)));
+        ("readCapacityUnits",
+          (Option.map x.readCapacityUnits ~f:CapacityUnits.to_value));
+        ("readCapacityAutoScaling",
+          (Option.map x.readCapacityAutoScaling
+             ~f:AutoScalingSettings.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readCapacityAutoScaling =
+        (Option.map ~f:AutoScalingSettings.of_xml)
+          (Xml.child xml_arg0 "readCapacityAutoScaling") in
+      let readCapacityUnits =
+        (Option.map ~f:CapacityUnits.of_xml)
+          (Xml.child xml_arg0 "readCapacityUnits") in
+      let region =
+        Region.of_xml (Xml.child_exn ~context:context_ xml_arg0 "region") in
+      make ?readCapacityAutoScaling ?readCapacityUnits ~region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readCapacityAutoScaling =
+        field_map json__ "readCapacityAutoScaling"
+          AutoScalingSettings.of_json in
+      let readCapacityUnits =
+        field_map json__ "readCapacityUnits" CapacityUnits.of_json in
+      let region = field_map_exn json__ "region" Region.of_json in
+      make ?readCapacityAutoScaling ?readCapacityUnits ~region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Web Services Region specific settings of a multi-Region table. For a multi-Region table, you can configure the table's read capacity differently per Amazon Web Services Region. You can do this by configuring the following parameters. region: The Region where these settings are applied. (Required) readCapacityUnits: The provisioned read capacity units. (Optional) readCapacityAutoScaling: The read capacity auto scaling settings for the table. (Optional)"]
 module TimeToLiveStatus =
   struct
     type nonrec t =
@@ -400,75 +1201,88 @@ module TimeToLiveStatus =
     let of_json j = of_string (string_of_json ~kind:"TimeToLiveStatus" j)
     let to_json = simple_to_json to_value
   end
-module Tag =
+module WarmThroughputSpecificationReadUnitsPerSecondLong =
   struct
-    type nonrec t =
-      {
-      key: TagKey.t
-        [@ocaml.doc
-          "The key of the tag. Tag keys are case sensitive. Each Amazon Keyspaces resource can only have up to one tag with the same key. If you try to add an existing tag (same key), the existing tag value will be updated to the new value."];
-      value: TagValue.t
-        [@ocaml.doc
-          "The value of the tag. Tag values are case-sensitive and can be null."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("key", (Some (TagKey.to_value x.key)));
-        ("value", (Some (TagValue.to_value x.value)))]
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
     let of_xml xml_arg0 =
-      let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
-      make ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
-      make ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes a tag. A tag is a key-value pair. You can add up to 50 tags to a single Amazon Keyspaces resource. Amazon Web Services-assigned tag names and values are automatically assigned the aws: prefix, which the user cannot assign. Amazon Web Services-assigned tag names do not count towards the tag limit of 50. User-assigned tag names have the prefix user: in the Cost Allocation Report. You cannot backdate the application of a tag. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."]
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module WarmThroughputSpecificationWriteUnitsPerSecondLong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:1L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module TypeName =
+  struct
+    type nonrec t = string
+    let context_ = "TypeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:48) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TypeName" j
+    let to_json = simple_to_json to_value
+  end
 module TableSummary =
   struct
     type nonrec t =
       {
-      keyspaceName: KeyspaceName.t
+      keyspaceName: KeyspaceName.t option
         [@ocaml.doc "The name of the keyspace that the table is stored in."];
-      tableName: TableName.t [@ocaml.doc "The name of the table."];
-      resourceArn: ARN.t
+      tableName: TableName.t option [@ocaml.doc "The name of the table."];
+      resourceArn: ARN.t option
         [@ocaml.doc
           "The unique identifier of the table in the format of an Amazon Resource Name (ARN)."]}
-    let context_ = "TableSummary"
-    let make ~keyspaceName =
-      fun ~tableName ->
-        fun ~resourceArn ->
+    let make ?keyspaceName =
+      fun ?tableName ->
+        fun ?resourceArn ->
           fun () -> { keyspaceName; tableName; resourceArn }
     let to_value x =
       structure_to_value
-        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
-        ("tableName", (Some (TableName.to_value x.tableName)));
-        ("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("tableName", (Option.map x.tableName ~f:TableName.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let tableName =
-        TableName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "tableName") in
+        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "tableName") in
       let keyspaceName =
-        KeyspaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ~resourceArn ~tableName ~keyspaceName ()
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?resourceArn ?tableName ?keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      let tableName = field_map_exn json "tableName" TableName.of_json in
-      let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ~resourceArn ~tableName ~keyspaceName ()
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let tableName = field_map json__ "tableName" TableName.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?resourceArn ?tableName ?keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the name of the specified table, the keyspace it is stored in, and the unique identifier in the format of an Amazon Resource Name (ARN)."]
@@ -476,49 +1290,164 @@ module KeyspaceSummary =
   struct
     type nonrec t =
       {
-      keyspaceName: KeyspaceName.t [@ocaml.doc "The name of the keyspace."];
-      resourceArn: ARN.t
+      keyspaceName: KeyspaceName.t option
+        [@ocaml.doc "The name of the keyspace."];
+      resourceArn: ARN.t option
         [@ocaml.doc
-          "The unique identifier of the keyspace in the format of an Amazon Resource Name (ARN)."]}
-    let context_ = "KeyspaceSummary"
-    let make ~keyspaceName =
-      fun ~resourceArn -> fun () -> { keyspaceName; resourceArn }
+          "The unique identifier of the keyspace in the format of an Amazon Resource Name (ARN)."];
+      replicationStrategy: Rs.t option
+        [@ocaml.doc
+          "This property specifies if a keyspace is a single Region keyspace or a multi-Region keyspace. The available values are SINGLE_REGION or MULTI_REGION."];
+      replicationRegions: RegionList.t option
+        [@ocaml.doc
+          "If the replicationStrategy of the keyspace is MULTI_REGION, a list of replication Regions is returned."]}
+    let make ?keyspaceName =
+      fun ?resourceArn ->
+        fun ?replicationStrategy ->
+          fun ?replicationRegions ->
+            fun () ->
+              {
+                keyspaceName;
+                resourceArn;
+                replicationStrategy;
+                replicationRegions
+              }
     let to_value x =
       structure_to_value
-        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
-        ("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value));
+        ("replicationStrategy",
+          (Option.map x.replicationStrategy ~f:Rs.to_value));
+        ("replicationRegions",
+          (Option.map x.replicationRegions ~f:RegionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let replicationRegions =
+        (Option.map ~f:RegionList.of_xml)
+          (Xml.child xml_arg0 "replicationRegions") in
+      let replicationStrategy =
+        (Option.map ~f:Rs.of_xml) (Xml.child xml_arg0 "replicationStrategy") in
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let keyspaceName =
-        KeyspaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ~resourceArn ~keyspaceName ()
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?replicationRegions ?replicationStrategy ?resourceArn
+        ?keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ~resourceArn ~keyspaceName ()
+    let of_json json__ =
+      let replicationRegions =
+        field_map json__ "replicationRegions" RegionList.of_json in
+      let replicationStrategy =
+        field_map json__ "replicationStrategy" Rs.of_json in
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?replicationRegions ?replicationStrategy ?resourceArn
+        ?keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the properties of a keyspace."]
-module Timestamp =
+module FieldDefinition =
   struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    type nonrec t =
+      {
+      name: FieldDefinitionNameString.t [@ocaml.doc "The identifier."];
+      type_: GenericString.t
+        [@ocaml.doc
+          "Any supported Cassandra data type, including collections and other user-defined types that are contained in the same keyspace. For more information, see Cassandra data type support in the Amazon Keyspaces Developer Guide."]}
+    let context_ = "FieldDefinition"
+    let make ~name = fun ~type_ -> fun () -> { name; type_ }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (FieldDefinitionNameString.to_value x.name)));
+        ("type", (Some (GenericString.to_value x.type_)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let type_ =
+        GenericString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let name =
+        FieldDefinitionNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~type_ ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" GenericString.of_json in
+      let name =
+        field_map_exn json__ "name" FieldDefinitionNameString.of_json in
+      make ~type_ ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A field definition consists out of a name and a type."]
+module ReplicaSpecificationSummary =
+  struct
+    type nonrec t =
+      {
+      region: Region.t option [@ocaml.doc "The Amazon Web Services Region."];
+      status: TableStatus.t option
+        [@ocaml.doc
+          "The status of the multi-Region table in the specified Amazon Web Services Region."];
+      capacitySpecification: CapacitySpecificationSummary.t option ;
+      warmThroughputSpecification:
+        WarmThroughputSpecificationSummary.t option
+        [@ocaml.doc
+          "The warm throughput settings for this replica, including the current status and configured read and write capacity units."]}
+    let make ?region =
+      fun ?status ->
+        fun ?capacitySpecification ->
+          fun ?warmThroughputSpecification ->
+            fun () ->
+              {
+                region;
+                status;
+                capacitySpecification;
+                warmThroughputSpecification
+              }
+    let to_value x =
+      structure_to_value
+        [("region", (Option.map x.region ~f:Region.to_value));
+        ("status", (Option.map x.status ~f:TableStatus.to_value));
+        ("capacitySpecification",
+          (Option.map x.capacitySpecification
+             ~f:CapacitySpecificationSummary.to_value));
+        ("warmThroughputSpecification",
+          (Option.map x.warmThroughputSpecification
+             ~f:WarmThroughputSpecificationSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let warmThroughputSpecification =
+        (Option.map ~f:WarmThroughputSpecificationSummary.of_xml)
+          (Xml.child xml_arg0 "warmThroughputSpecification") in
+      let capacitySpecification =
+        (Option.map ~f:CapacitySpecificationSummary.of_xml)
+          (Xml.child xml_arg0 "capacitySpecification") in
+      let status =
+        (Option.map ~f:TableStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let region =
+        (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "region") in
+      make ?warmThroughputSpecification ?capacitySpecification ?status
+        ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let warmThroughputSpecification =
+        field_map json__ "warmThroughputSpecification"
+          WarmThroughputSpecificationSummary.of_json in
+      let capacitySpecification =
+        field_map json__ "capacitySpecification"
+          CapacitySpecificationSummary.of_json in
+      let status = field_map json__ "status" TableStatus.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      make ?warmThroughputSpecification ?capacitySpecification ?status
+        ?region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Region-specific settings of a multi-Region table in the specified Amazon Web Services Region. If the multi-Region table is using provisioned capacity and has optional auto scaling policies configured, note that the Region specific summary returns both read and write capacity settings. But only Region specific read capacity settings can be configured for a multi-Region table. In a multi-Region table, your write capacity units will be synced across all Amazon Web Services Regions to ensure that there is enough capacity to replicate write events across Regions."]
 module ClusteringKeyList =
   struct
     type nonrec t = ClusteringKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusteringKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -544,6 +1473,9 @@ module ColumnDefinitionList =
     type nonrec t = ColumnDefinition.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -570,6 +1502,9 @@ module PartitionKeyList =
     type nonrec t = PartitionKey.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PartitionKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -594,6 +1529,9 @@ module StaticColumnList =
   struct
     type nonrec t = StaticColumn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StaticColumn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -614,10 +1552,94 @@ module StaticColumnList =
       list_of_json ~kind:"StaticColumnList" ~of_json:StaticColumn.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReplicaAutoScalingSpecification =
+  struct
+    type nonrec t =
+      {
+      region: Region.t option [@ocaml.doc "The Amazon Web Services Region."];
+      autoScalingSpecification: AutoScalingSpecification.t option
+        [@ocaml.doc
+          "The auto scaling settings for a multi-Region table in the specified Amazon Web Services Region."]}
+    let make ?region =
+      fun ?autoScalingSpecification ->
+        fun () -> { region; autoScalingSpecification }
+    let to_value x =
+      structure_to_value
+        [("region", (Option.map x.region ~f:Region.to_value));
+        ("autoScalingSpecification",
+          (Option.map x.autoScalingSpecification
+             ~f:AutoScalingSpecification.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoScalingSpecification =
+        (Option.map ~f:AutoScalingSpecification.of_xml)
+          (Xml.child xml_arg0 "autoScalingSpecification") in
+      let region =
+        (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "region") in
+      make ?autoScalingSpecification ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoScalingSpecification =
+        field_map json__ "autoScalingSpecification"
+          AutoScalingSpecification.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      make ?autoScalingSpecification ?region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The auto scaling settings of a multi-Region table in the specified Amazon Web Services Region."]
+module ReplicationGroupStatus =
+  struct
+    type nonrec t =
+      {
+      region: Region.t option
+        [@ocaml.doc "The name of the Region that was added to the keyspace."];
+      keyspaceStatus: KeyspaceStatus.t option
+        [@ocaml.doc "The status of the keyspace."];
+      tablesReplicationProgress: TablesReplicationProgress.t option
+        [@ocaml.doc
+          "This shows the replication progress of tables in the keyspace. The value is expressed as a percentage of the newly replicated tables with status Active compared to the total number of tables in the keyspace."]}
+    let make ?region =
+      fun ?keyspaceStatus ->
+        fun ?tablesReplicationProgress ->
+          fun () -> { region; keyspaceStatus; tablesReplicationProgress }
+    let to_value x =
+      structure_to_value
+        [("region", (Option.map x.region ~f:Region.to_value));
+        ("keyspaceStatus",
+          (Option.map x.keyspaceStatus ~f:KeyspaceStatus.to_value));
+        ("tablesReplicationProgress",
+          (Option.map x.tablesReplicationProgress
+             ~f:TablesReplicationProgress.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tablesReplicationProgress =
+        (Option.map ~f:TablesReplicationProgress.of_xml)
+          (Xml.child xml_arg0 "tablesReplicationProgress") in
+      let keyspaceStatus =
+        (Option.map ~f:KeyspaceStatus.of_xml)
+          (Xml.child xml_arg0 "keyspaceStatus") in
+      let region =
+        (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "region") in
+      make ?tablesReplicationProgress ?keyspaceStatus ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tablesReplicationProgress =
+        field_map json__ "tablesReplicationProgress"
+          TablesReplicationProgress.of_json in
+      let keyspaceStatus =
+        field_map json__ "keyspaceStatus" KeyspaceStatus.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      make ?tablesReplicationProgress ?keyspaceStatus ?region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This shows the summary status of the keyspace after a new Amazon Web Services Region was added."]
 module AccessDeniedException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "You don't have the required permissions to perform this operation. Verify your IAM permissions and try again."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -628,16 +1650,19 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You do not have sufficient access to perform this action."]
+       "You don't have sufficient access permissions to perform this action."]
 module ConflictException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The requested operation conflicts with the current state of the resource or another concurrent operation."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -648,16 +1673,19 @@ module ConflictException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Keyspaces could not complete the requested action. This error may occur if you try to perform an action and the same or a different action is already in progress, or if you try to create a resource that already exists."]
+       "Amazon Keyspaces couldn't complete the requested action. This error may occur if you try to perform an action and the same or a different action is already in progress, or if you try to create a resource that already exists."]
 module InternalServerException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "An internal service error occurred. Retry your request. If the problem persists, contact Amazon Web Services Support."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -668,8 +1696,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -678,10 +1706,12 @@ module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t option ;
+      message: String_.t option
+        [@ocaml.doc
+          "The specified resource was not found. Verify the resource identifier and ensure the resource exists and is in an ACTIVE state."];
       resourceArn: ARN.t option
         [@ocaml.doc
-          "The unique identifier in the format of Amazon Resource Name (ARN), for the resource not found."]}
+          "The unique identifier in the format of Amazon Resource Name (ARN) for the resource couldn't be found."]}
     let make ?message =
       fun ?resourceArn -> fun () -> { message; resourceArn }
     let to_value x =
@@ -696,17 +1726,20 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?resourceArn ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "resourceArn" ARN.of_json in
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let message = field_map json__ "message" String_.of_json in
       make ?resourceArn ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation tried to access a keyspace or table that doesn't exist. The resource might not be specified correctly, or its status might not be ACTIVE."]
+       "The operation tried to access a keyspace, table, or type that doesn't exist. The resource might not be specified correctly, or its status might not be ACTIVE."]
 module ServiceQuotaExceededException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The requested operation would exceed the service quota for this resource. Review the service quotas and adjust your request accordingly."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -717,16 +1750,19 @@ module ServiceQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation exceeded the service quota for this resource. For more information on service quotas, see Quotas in the Amazon Keyspaces Developer Guide."]
 module ValidationException =
   struct
-    type nonrec t = {
-      message: String_.t option }
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "The request parameters are invalid or malformed. Review the API documentation and correct the request format."]}
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
@@ -737,8 +1773,8 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -749,7 +1785,7 @@ module CapacitySpecification =
       {
       throughputMode: ThroughputMode.t
         [@ocaml.doc
-          "The read/write throughput capacity mode for a table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST and \226\128\162 throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
+          "The read/write throughput capacity mode for a table. The options are: throughputMode:PAY_PER_REQUEST and throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
       readCapacityUnits: CapacityUnits.t option
         [@ocaml.doc
           "The throughput capacity specified for read operations defined in read capacity units (RCUs)."];
@@ -782,17 +1818,93 @@ module CapacitySpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "throughputMode") in
       make ?writeCapacityUnits ?readCapacityUnits ~throughputMode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let writeCapacityUnits =
-        field_map json "writeCapacityUnits" CapacityUnits.of_json in
+        field_map json__ "writeCapacityUnits" CapacityUnits.of_json in
       let readCapacityUnits =
-        field_map json "readCapacityUnits" CapacityUnits.of_json in
+        field_map json__ "readCapacityUnits" CapacityUnits.of_json in
       let throughputMode =
-        field_map_exn json "throughputMode" ThroughputMode.of_json in
+        field_map_exn json__ "throughputMode" ThroughputMode.of_json in
       make ?writeCapacityUnits ?readCapacityUnits ~throughputMode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Keyspaces has two read/write capacity modes for processing reads and writes on your tables: \226\128\162 On-demand (default) \226\128\162 Provisioned The read/write capacity mode that you choose controls how you are charged for read and write throughput and how table throughput capacity is managed. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."]
+       "Amazon Keyspaces has two read/write capacity modes for processing reads and writes on your tables: On-demand (default) Provisioned The read/write capacity mode that you choose controls how you are charged for read and write throughput and how table throughput capacity is managed. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."]
+module CdcSpecification =
+  struct
+    type nonrec t =
+      {
+      status: CdcStatus.t
+        [@ocaml.doc
+          "The status of the CDC stream. You can enable or disable a stream for a table."];
+      viewType: ViewType.t option
+        [@ocaml.doc
+          "The view type specifies the changes Amazon Keyspaces records for each changed row in the stream. After you create the stream, you can't make changes to this selection. The options are: NEW_AND_OLD_IMAGES - both versions of the row, before and after the change. This is the default. NEW_IMAGE - the version of the row after the change. OLD_IMAGE - the version of the row before the change. KEYS_ONLY - the partition and clustering keys of the row that was changed."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags (key-value pairs) that you want to apply to the stream."];
+      propagateTags: CdcPropagateTags.t option
+        [@ocaml.doc
+          "Specifies that the stream inherits the tags from the table."]}
+    let context_ = "CdcSpecification"
+    let make ?viewType =
+      fun ?tags ->
+        fun ?propagateTags ->
+          fun ~status -> fun () -> { viewType; tags; propagateTags; status }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (CdcStatus.to_value x.status)));
+        ("viewType", (Option.map x.viewType ~f:ViewType.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("propagateTags",
+          (Option.map x.propagateTags ~f:CdcPropagateTags.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let propagateTags =
+        (Option.map ~f:CdcPropagateTags.of_xml)
+          (Xml.child xml_arg0 "propagateTags") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let viewType =
+        (Option.map ~f:ViewType.of_xml) (Xml.child xml_arg0 "viewType") in
+      let status =
+        CdcStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ?propagateTags ?tags ?viewType ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let propagateTags =
+        field_map json__ "propagateTags" CdcPropagateTags.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let viewType = field_map json__ "viewType" ViewType.of_json in
+      let status = field_map_exn json__ "status" CdcStatus.of_json in
+      make ?propagateTags ?tags ?viewType ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The settings for the CDC stream of a table. For more information about CDC streams, see Working with change data capture (CDC) streams in Amazon Keyspaces in the Amazon Keyspaces Developer Guide."]
+module ClientSideTimestamps =
+  struct
+    type nonrec t =
+      {
+      status: ClientSideTimestampsStatus.t
+        [@ocaml.doc
+          "Shows how to enable client-side timestamps settings for the specified table."]}
+    let context_ = "ClientSideTimestamps"
+    let make ~status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (ClientSideTimestampsStatus.to_value x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        ClientSideTimestampsStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map_exn json__ "status" ClientSideTimestampsStatus.of_json in
+      make ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The client-side timestamp setting of the table. For more information, see How it works: Amazon Keyspaces client-side timestamps in the Amazon Keyspaces Developer Guide."]
 module DefaultTimeToLive =
   struct
     type nonrec t = int
@@ -800,7 +1912,7 @@ module DefaultTimeToLive =
       let open Result in
         ok_or_failwith
           ((check_int_max i ~max:630720000) >>=
-             (fun () -> check_int_min i ~min:1));
+             (fun () -> check_int_min i ~min:0));
         i
     let of_string = Int.of_string
     let to_value x = `Integer x
@@ -818,7 +1930,7 @@ module EncryptionSpecification =
       {
       type_: EncryptionType.t
         [@ocaml.doc
-          "The encryption option specified for the table. You can choose one of the following KMS keys (KMS keys): \226\128\162 type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. \226\128\162 type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
+          "The encryption option specified for the table. You can choose one of the following KMS keys (KMS keys): type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
       kmsKeyIdentifier: KmsKeyARN.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the customer managed KMS key, for example kms_key_identifier:ARN."]}
@@ -840,21 +1952,20 @@ module EncryptionSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?kmsKeyIdentifier ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let kmsKeyIdentifier =
-        field_map json "kmsKeyIdentifier" KmsKeyARN.of_json in
-      let type_ = field_map_exn json "type" EncryptionType.of_json in
+        field_map json__ "kmsKeyIdentifier" KmsKeyARN.of_json in
+      let type_ = field_map_exn json__ "type" EncryptionType.of_json in
       make ?kmsKeyIdentifier ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Amazon Keyspaces encrypts and decrypts the table data at rest transparently and integrates with Key Management Service for storing and managing the encryption key. You can choose one of the following KMS keys (KMS keys): \226\128\162 Amazon Web Services owned key - This is the default encryption type. The key is owned by Amazon Keyspaces (no additional charge). \226\128\162 Customer managed key - This key is stored in your account and is created, owned, and managed by you. You have full control over the customer managed key (KMS charges apply). For more information about encryption at rest in Amazon Keyspaces, see Encryption at rest in the Amazon Keyspaces Developer Guide. For more information about KMS, see KMS management service concepts in the Key Management Service Developer Guide."]
+       "Amazon Keyspaces encrypts and decrypts the table data at rest transparently and integrates with Key Management Service for storing and managing the encryption key. You can choose one of the following KMS keys (KMS keys): Amazon Web Services owned key - This is the default encryption type. The key is owned by Amazon Keyspaces (no additional charge). Customer managed key - This key is stored in your account and is created, owned, and managed by you. You have full control over the customer managed key (KMS charges apply). For more information about encryption at rest in Amazon Keyspaces, see Encryption at rest in the Amazon Keyspaces Developer Guide. For more information about KMS, see KMS management service concepts in the Key Management Service Developer Guide."]
 module PointInTimeRecovery =
   struct
     type nonrec t =
       {
       status: PointInTimeRecoveryStatus.t
-        [@ocaml.doc
-          "The options are: \226\128\162 ENABLED \226\128\162 DISABLED"]}
+        [@ocaml.doc "The options are: status=ENABLED status=DISABLED"]}
     let context_ = "PointInTimeRecovery"
     let make ~status = fun () -> { status }
     let to_value x =
@@ -867,13 +1978,43 @@ module PointInTimeRecovery =
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" PointInTimeRecoveryStatus.of_json in
+        field_map_exn json__ "status" PointInTimeRecoveryStatus.of_json in
       make ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Point-in-time recovery (PITR) helps protect your Amazon Keyspaces tables from accidental write or delete operations by providing you continuous backups of your table data. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."]
+module ReplicaSpecificationList =
+  struct
+    type nonrec t = ReplicaSpecification.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReplicaSpecification.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReplicaSpecification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplicaSpecificationList"
+        ~of_json:ReplicaSpecification.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TimeToLive =
   struct
     type nonrec t =
@@ -893,39 +2034,93 @@ module TimeToLive =
           (Xml.child_exn ~context:context_ xml_arg0 "status") in
       make ~status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" TimeToLiveStatus.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" TimeToLiveStatus.of_json in
       make ~status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enable custom Time to Live (TTL) settings for rows and columns without setting a TTL default for the specified table. For more information, see Enabling TTL on tables in the Amazon Keyspaces Developer Guide."]
-module TagList =
+module WarmThroughputSpecification =
   struct
-    type nonrec t = Tag.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:60) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    type nonrec t =
+      {
+      readUnitsPerSecond:
+        WarmThroughputSpecificationReadUnitsPerSecondLong.t option
+        [@ocaml.doc
+          "The number of read capacity units per second to pre-warm the table for read capacity throughput. The minimum value is 1."];
+      writeUnitsPerSecond:
+        WarmThroughputSpecificationWriteUnitsPerSecondLong.t option
+        [@ocaml.doc
+          "The number of write capacity units per second to pre-warm the table for write capacity throughput. The minimum value is 1."]}
+    let make ?readUnitsPerSecond =
+      fun ?writeUnitsPerSecond ->
+        fun () -> { readUnitsPerSecond; writeUnitsPerSecond }
+    let to_value x =
+      structure_to_value
+        [("readUnitsPerSecond",
+           (Option.map x.readUnitsPerSecond
+              ~f:WarmThroughputSpecificationReadUnitsPerSecondLong.to_value));
+        ("writeUnitsPerSecond",
+          (Option.map x.writeUnitsPerSecond
+             ~f:WarmThroughputSpecificationWriteUnitsPerSecondLong.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let of_xml xml_arg0 =
+      let writeUnitsPerSecond =
+        (Option.map
+           ~f:WarmThroughputSpecificationWriteUnitsPerSecondLong.of_xml)
+          (Xml.child xml_arg0 "writeUnitsPerSecond") in
+      let readUnitsPerSecond =
+        (Option.map
+           ~f:WarmThroughputSpecificationReadUnitsPerSecondLong.of_xml)
+          (Xml.child xml_arg0 "readUnitsPerSecond") in
+      make ?writeUnitsPerSecond ?readUnitsPerSecond ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let writeUnitsPerSecond =
+        field_map json__ "writeUnitsPerSecond"
+          WarmThroughputSpecificationWriteUnitsPerSecondLong.of_json in
+      let readUnitsPerSecond =
+        field_map json__ "readUnitsPerSecond"
+          WarmThroughputSpecificationReadUnitsPerSecondLong.of_json in
+      make ?writeUnitsPerSecond ?readUnitsPerSecond ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Specifies the warm throughput settings for a table. Pre-warming a table by specifying warm throughput pre-provisions read and write capacity units to help avoid capacity exceeded exceptions and reduce latency when your table starts receiving traffic. For more information about pre-warming in Amazon Keyspaces, see Pre-warm a table in Amazon Keyspaces in the Amazon Keyspaces Developer Guide."]
+module ReplicationSpecification =
+  struct
+    type nonrec t =
+      {
+      replicationStrategy: Rs.t
+        [@ocaml.doc
+          "The replicationStrategy of a keyspace, the required value is SINGLE_REGION or MULTI_REGION."];
+      regionList: RegionList.t option
+        [@ocaml.doc
+          "The regionList contains the Amazon Web Services Regions where the keyspace is replicated in."]}
+    let context_ = "ReplicationSpecification"
+    let make ?regionList =
+      fun ~replicationStrategy ->
+        fun () -> { regionList; replicationStrategy }
+    let to_value x =
+      structure_to_value
+        [("replicationStrategy", (Some (Rs.to_value x.replicationStrategy)));
+        ("regionList", (Option.map x.regionList ~f:RegionList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let regionList =
+        (Option.map ~f:RegionList.of_xml) (Xml.child xml_arg0 "regionList") in
+      let replicationStrategy =
+        Rs.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "replicationStrategy") in
+      make ?regionList ~replicationStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let regionList = field_map json__ "regionList" RegionList.of_json in
+      let replicationStrategy =
+        field_map_exn json__ "replicationStrategy" Rs.of_json in
+      make ?regionList ~replicationStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The replication specification of the keyspace includes: regionList - the Amazon Web Services Regions where the keyspace is replicated in. replicationStrategy - the required value is SINGLE_REGION or MULTI_REGION."]
 module NextToken =
   struct
     type nonrec t = string
@@ -943,6 +2138,33 @@ module NextToken =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
+  end
+module TypeNameList =
+  struct
+    type nonrec t = TypeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TypeName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TypeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TypeNameList" ~of_json:TypeName.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module MaxResults =
   struct
@@ -966,6 +2188,9 @@ module TableSummaryList =
   struct
     type nonrec t = TableSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TableSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -990,6 +2215,9 @@ module KeyspaceSummaryList =
   struct
     type nonrec t = KeyspaceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyspaceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1011,76 +2239,135 @@ module KeyspaceSummaryList =
         ~of_json:KeyspaceSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module CapacitySpecificationSummary =
+module Depth =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Depth" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module FieldList =
+  struct
+    type nonrec t = FieldDefinition.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FieldDefinition.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FieldDefinition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FieldList" ~of_json:FieldDefinition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TableNameList =
+  struct
+    type nonrec t = TableName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TableName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TableName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TableNameList" ~of_json:TableName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TypeStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | CREATING 
+      | DELETING 
+      | RESTORING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | CREATING -> "CREATING"
+      | DELETING -> "DELETING"
+      | RESTORING -> "RESTORING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "CREATING" -> CREATING
+      | "DELETING" -> DELETING
+      | "RESTORING" -> RESTORING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TypeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TypeStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CdcSpecificationSummary =
   struct
     type nonrec t =
       {
-      throughputMode: ThroughputMode.t
+      status: CdcStatus.t option
         [@ocaml.doc
-          "The read/write throughput capacity mode for a table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST and \226\128\162 throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
-      readCapacityUnits: CapacityUnits.t option
+          "The status of the CDC stream. Specifies if the table has a CDC stream."];
+      viewType: ViewType.t option
         [@ocaml.doc
-          "The throughput capacity specified for read operations defined in read capacity units (RCUs)."];
-      writeCapacityUnits: CapacityUnits.t option
-        [@ocaml.doc
-          "The throughput capacity specified for write operations defined in write capacity units (WCUs)."];
-      lastUpdateToPayPerRequestTimestamp: Timestamp.t option
-        [@ocaml.doc
-          "The timestamp of the last operation that changed the provisioned throughput capacity of a table."]}
-    let context_ = "CapacitySpecificationSummary"
-    let make ?readCapacityUnits =
-      fun ?writeCapacityUnits ->
-        fun ?lastUpdateToPayPerRequestTimestamp ->
-          fun ~throughputMode ->
-            fun () ->
-              {
-                readCapacityUnits;
-                writeCapacityUnits;
-                lastUpdateToPayPerRequestTimestamp;
-                throughputMode
-              }
+          "The view type specifies the changes Amazon Keyspaces records for each changed row in the stream. This setting can't be changed, after the stream has been created. The options are: NEW_AND_OLD_IMAGES - both versions of the row, before and after the change. This is the default. NEW_IMAGE - the version of the row after the change. OLD_IMAGE - the version of the row before the change. KEYS_ONLY - the partition and clustering keys of the row that was changed."]}
+    let make ?status = fun ?viewType -> fun () -> { status; viewType }
     let to_value x =
       structure_to_value
-        [("throughputMode",
-           (Some (ThroughputMode.to_value x.throughputMode)));
-        ("readCapacityUnits",
-          (Option.map x.readCapacityUnits ~f:CapacityUnits.to_value));
-        ("writeCapacityUnits",
-          (Option.map x.writeCapacityUnits ~f:CapacityUnits.to_value));
-        ("lastUpdateToPayPerRequestTimestamp",
-          (Option.map x.lastUpdateToPayPerRequestTimestamp
-             ~f:Timestamp.to_value))]
+        [("status", (Option.map x.status ~f:CdcStatus.to_value));
+        ("viewType", (Option.map x.viewType ~f:ViewType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let lastUpdateToPayPerRequestTimestamp =
-        (Option.map ~f:Timestamp.of_xml)
-          (Xml.child xml_arg0 "lastUpdateToPayPerRequestTimestamp") in
-      let writeCapacityUnits =
-        (Option.map ~f:CapacityUnits.of_xml)
-          (Xml.child xml_arg0 "writeCapacityUnits") in
-      let readCapacityUnits =
-        (Option.map ~f:CapacityUnits.of_xml)
-          (Xml.child xml_arg0 "readCapacityUnits") in
-      let throughputMode =
-        ThroughputMode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "throughputMode") in
-      make ?lastUpdateToPayPerRequestTimestamp ?writeCapacityUnits
-        ?readCapacityUnits ~throughputMode ()
+      let viewType =
+        (Option.map ~f:ViewType.of_xml) (Xml.child xml_arg0 "viewType") in
+      let status =
+        (Option.map ~f:CdcStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?viewType ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateToPayPerRequestTimestamp =
-        field_map json "lastUpdateToPayPerRequestTimestamp" Timestamp.of_json in
-      let writeCapacityUnits =
-        field_map json "writeCapacityUnits" CapacityUnits.of_json in
-      let readCapacityUnits =
-        field_map json "readCapacityUnits" CapacityUnits.of_json in
-      let throughputMode =
-        field_map_exn json "throughputMode" ThroughputMode.of_json in
-      make ?lastUpdateToPayPerRequestTimestamp ?writeCapacityUnits
-        ?readCapacityUnits ~throughputMode ()
+    let of_json json__ =
+      let viewType = field_map json__ "viewType" ViewType.of_json in
+      let status = field_map json__ "status" CdcStatus.of_json in
+      make ?viewType ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The read/write throughput capacity mode for a table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST and \226\128\162 throughputMode:PROVISIONED. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."]
+       "The settings of the CDC stream of the table. For more information about CDC streams, see Working with change data capture (CDC) streams in Amazon Keyspaces in the Amazon Keyspaces Developer Guide."]
 module Comment =
   struct
     type nonrec t =
@@ -1096,8 +2383,8 @@ module Comment =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
       make ~message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map_exn json__ "message" String_.of_json in
       make ~message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An optional comment that describes the table."]
@@ -1105,18 +2392,19 @@ module PointInTimeRecoverySummary =
   struct
     type nonrec t =
       {
-      status: PointInTimeRecoveryStatus.t
+      status: PointInTimeRecoveryStatus.t option
         [@ocaml.doc
           "Shows if point-in-time recovery is enabled or disabled for the specified table."];
       earliestRestorableTimestamp: Timestamp.t option
         [@ocaml.doc
           "Specifies the earliest possible restore point of the table in ISO 8601 format."]}
-    let context_ = "PointInTimeRecoverySummary"
-    let make ?earliestRestorableTimestamp =
-      fun ~status -> fun () -> { earliestRestorableTimestamp; status }
+    let make ?status =
+      fun ?earliestRestorableTimestamp ->
+        fun () -> { status; earliestRestorableTimestamp }
     let to_value x =
       structure_to_value
-        [("status", (Some (PointInTimeRecoveryStatus.to_value x.status)));
+        [("status",
+           (Option.map x.status ~f:PointInTimeRecoveryStatus.to_value));
         ("earliestRestorableTimestamp",
           (Option.map x.earliestRestorableTimestamp ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -1125,19 +2413,49 @@ module PointInTimeRecoverySummary =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "earliestRestorableTimestamp") in
       let status =
-        PointInTimeRecoveryStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ?earliestRestorableTimestamp ~status ()
+        (Option.map ~f:PointInTimeRecoveryStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?earliestRestorableTimestamp ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let earliestRestorableTimestamp =
-        field_map json "earliestRestorableTimestamp" Timestamp.of_json in
+        field_map json__ "earliestRestorableTimestamp" Timestamp.of_json in
       let status =
-        field_map_exn json "status" PointInTimeRecoveryStatus.of_json in
-      make ?earliestRestorableTimestamp ~status ()
+        field_map json__ "status" PointInTimeRecoveryStatus.of_json in
+      make ?earliestRestorableTimestamp ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The point-in-time recovery status of the specified table."]
+module ReplicaSpecificationSummaryList =
+  struct
+    type nonrec t = ReplicaSpecificationSummary.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReplicaSpecificationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReplicaSpecificationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplicaSpecificationSummaryList"
+        ~of_json:ReplicaSpecificationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SchemaDefinition =
   struct
     type nonrec t =
@@ -1184,65 +2502,105 @@ module SchemaDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "allColumns") in
       make ?staticColumns ?clusteringKeys ~partitionKeys ~allColumns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let staticColumns =
-        field_map json "staticColumns" StaticColumnList.of_json in
+        field_map json__ "staticColumns" StaticColumnList.of_json in
       let clusteringKeys =
-        field_map json "clusteringKeys" ClusteringKeyList.of_json in
+        field_map json__ "clusteringKeys" ClusteringKeyList.of_json in
       let partitionKeys =
-        field_map_exn json "partitionKeys" PartitionKeyList.of_json in
+        field_map_exn json__ "partitionKeys" PartitionKeyList.of_json in
       let allColumns =
-        field_map_exn json "allColumns" ColumnDefinitionList.of_json in
+        field_map_exn json__ "allColumns" ColumnDefinitionList.of_json in
       make ?staticColumns ?clusteringKeys ~partitionKeys ~allColumns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the schema of the table."]
-module TableStatus =
+module StreamArn =
   struct
-    type nonrec t =
-      | ACTIVE 
-      | CREATING 
-      | UPDATING 
-      | DELETING 
-      | DELETED 
-      | RESTORING 
-      | INACCESSIBLE_ENCRYPTION_CREDENTIALS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ACTIVE -> "ACTIVE"
-      | CREATING -> "CREATING"
-      | UPDATING -> "UPDATING"
-      | DELETING -> "DELETING"
-      | DELETED -> "DELETED"
-      | RESTORING -> "RESTORING"
-      | INACCESSIBLE_ENCRYPTION_CREDENTIALS ->
-          "INACCESSIBLE_ENCRYPTION_CREDENTIALS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ACTIVE" -> ACTIVE
-      | "CREATING" -> CREATING
-      | "UPDATING" -> UPDATING
-      | "DELETING" -> DELETING
-      | "DELETED" -> DELETED
-      | "RESTORING" -> RESTORING
-      | "INACCESSIBLE_ENCRYPTION_CREDENTIALS" ->
-          INACCESSIBLE_ENCRYPTION_CREDENTIALS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = string
+    let context_ = "StreamArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws[a-zA-Z0-9-]*):cassandra:.+.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TableStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TableStatus" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StreamArn" j
     let to_json = simple_to_json to_value
+  end
+module ReplicaAutoScalingSpecificationList =
+  struct
+    type nonrec t = ReplicaAutoScalingSpecification.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReplicaAutoScalingSpecification.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReplicaAutoScalingSpecification.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplicaAutoScalingSpecificationList"
+        ~of_json:ReplicaAutoScalingSpecification.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReplicationGroupStatusList =
+  struct
+    type nonrec t = ReplicationGroupStatus.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReplicationGroupStatus.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReplicationGroupStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReplicationGroupStatusList"
+        ~of_json:ReplicationGroupStatus.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module UpdateTableResponse =
   struct
     type nonrec t =
       {
-      resourceArn: ARN.t
+      resourceArn: ARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the modified table."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -1252,8 +2610,7 @@ module UpdateTableResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateTableResponse"
-    let make ~resourceArn = fun () -> { resourceArn }
+    let make ?resourceArn = fun () -> { resourceArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1322,19 +2679,19 @@ module UpdateTableResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~resourceArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      make ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds new columns to the table or updates one of the table's settings, for example capacity mode, encryption, point-in-time recovery, or ttl settings. Note that you can only update one specific table setting per update operation."]
+       "Adds new columns to the table or updates one of the table's settings, for example capacity mode, auto scaling, encryption, point-in-time recovery, or ttl settings. Note that you can only update one specific table setting per update operation."]
 module UpdateTableRequest =
   struct
     type nonrec t =
@@ -1345,22 +2702,36 @@ module UpdateTableRequest =
       tableName: TableName.t [@ocaml.doc "The name of the table."];
       addColumns: ColumnDefinitionList.t option
         [@ocaml.doc
-          "For each column to be added to the specified table: \226\128\162 name - The name of the column. \226\128\162 type - An Amazon Keyspaces data type. For more information, see Data types in the Amazon Keyspaces Developer Guide."];
+          "For each column to be added to the specified table: name - The name of the column. type - An Amazon Keyspaces data type. For more information, see Data types in the Amazon Keyspaces Developer Guide."];
       capacitySpecification: CapacitySpecification.t option
         [@ocaml.doc
-          "Modifies the read/write throughput capacity mode for the table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST and \226\128\162 throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
+          "Modifies the read/write throughput capacity mode for the table. The options are: throughputMode:PAY_PER_REQUEST and throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
       encryptionSpecification: EncryptionSpecification.t option
         [@ocaml.doc
-          "Modifies the encryption settings of the table. You can choose one of the following KMS key (KMS key): \226\128\162 type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. \226\128\162 type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
+          "Modifies the encryption settings of the table. You can choose one of the following KMS key (KMS key): type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
       pointInTimeRecovery: PointInTimeRecovery.t option
         [@ocaml.doc
-          "Modifies the pointInTimeRecovery settings of the table. The options are: \226\128\162 ENABLED \226\128\162 DISABLED If it's not specified, the default is DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
+          "Modifies the pointInTimeRecovery settings of the table. The options are: status=ENABLED status=DISABLED If it's not specified, the default is status=DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
       ttl: TimeToLive.t option
         [@ocaml.doc
-          "Modifies Time to Live custom settings for the table. The options are: \226\128\162 status:enabled \226\128\162 status:disabled The default is status:disabled. After ttl is enabled, you can't disable it for the table. For more information, see Expiring data by using Amazon Keyspaces Time to Live (TTL) in the Amazon Keyspaces Developer Guide."];
+          "Modifies Time to Live custom settings for the table. The options are: status:enabled status:disabled The default is status:disabled. After ttl is enabled, you can't disable it for the table. For more information, see Expiring data by using Amazon Keyspaces Time to Live (TTL) in the Amazon Keyspaces Developer Guide."];
       defaultTimeToLive: DefaultTimeToLive.t option
         [@ocaml.doc
-          "The default Time to Live setting in seconds for the table. For more information, see Setting the default TTL value for a table in the Amazon Keyspaces Developer Guide."]}
+          "The default Time to Live setting in seconds for the table. For more information, see Setting the default TTL value for a table in the Amazon Keyspaces Developer Guide."];
+      clientSideTimestamps: ClientSideTimestamps.t option
+        [@ocaml.doc
+          "Enables client-side timestamps for the table. By default, the setting is disabled. You can enable client-side timestamps with the following option: status: \"enabled\" Once client-side timestamps are enabled for a table, this setting cannot be disabled."];
+      autoScalingSpecification: AutoScalingSpecification.t option
+        [@ocaml.doc
+          "The optional auto scaling settings to update for a table in provisioned capacity mode. Specifies if the service can manage throughput capacity of a provisioned table automatically on your behalf. Amazon Keyspaces auto scaling helps you provision throughput capacity for variable workloads efficiently by increasing and decreasing your table's read and write capacity automatically in response to application traffic. If auto scaling is already enabled for the table, you can use UpdateTable to update the minimum and maximum values or the auto scaling policy settings independently. For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide."];
+      replicaSpecifications: ReplicaSpecificationList.t option
+        [@ocaml.doc
+          "The Region specific settings of a multi-Regional table."];
+      cdcSpecification: CdcSpecification.t option
+        [@ocaml.doc "The CDC stream settings of the table."];
+      warmThroughputSpecification: WarmThroughputSpecification.t option
+        [@ocaml.doc
+          "Modifies the warm throughput settings for the table. You can update the read and write capacity units to adjust the pre-provisioned throughput."]}
     let context_ = "UpdateTableRequest"
     let make ?addColumns =
       fun ?capacitySpecification ->
@@ -1368,19 +2739,29 @@ module UpdateTableRequest =
           fun ?pointInTimeRecovery ->
             fun ?ttl ->
               fun ?defaultTimeToLive ->
-                fun ~keyspaceName ->
-                  fun ~tableName ->
-                    fun () ->
-                      {
-                        addColumns;
-                        capacitySpecification;
-                        encryptionSpecification;
-                        pointInTimeRecovery;
-                        ttl;
-                        defaultTimeToLive;
-                        keyspaceName;
-                        tableName
-                      }
+                fun ?clientSideTimestamps ->
+                  fun ?autoScalingSpecification ->
+                    fun ?replicaSpecifications ->
+                      fun ?cdcSpecification ->
+                        fun ?warmThroughputSpecification ->
+                          fun ~keyspaceName ->
+                            fun ~tableName ->
+                              fun () ->
+                                {
+                                  addColumns;
+                                  capacitySpecification;
+                                  encryptionSpecification;
+                                  pointInTimeRecovery;
+                                  ttl;
+                                  defaultTimeToLive;
+                                  clientSideTimestamps;
+                                  autoScalingSpecification;
+                                  replicaSpecifications;
+                                  cdcSpecification;
+                                  warmThroughputSpecification;
+                                  keyspaceName;
+                                  tableName
+                                }
     let to_value x =
       structure_to_value
         [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
@@ -1397,9 +2778,37 @@ module UpdateTableRequest =
           (Option.map x.pointInTimeRecovery ~f:PointInTimeRecovery.to_value));
         ("ttl", (Option.map x.ttl ~f:TimeToLive.to_value));
         ("defaultTimeToLive",
-          (Option.map x.defaultTimeToLive ~f:DefaultTimeToLive.to_value))]
+          (Option.map x.defaultTimeToLive ~f:DefaultTimeToLive.to_value));
+        ("clientSideTimestamps",
+          (Option.map x.clientSideTimestamps ~f:ClientSideTimestamps.to_value));
+        ("autoScalingSpecification",
+          (Option.map x.autoScalingSpecification
+             ~f:AutoScalingSpecification.to_value));
+        ("replicaSpecifications",
+          (Option.map x.replicaSpecifications
+             ~f:ReplicaSpecificationList.to_value));
+        ("cdcSpecification",
+          (Option.map x.cdcSpecification ~f:CdcSpecification.to_value));
+        ("warmThroughputSpecification",
+          (Option.map x.warmThroughputSpecification
+             ~f:WarmThroughputSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughputSpecification =
+        (Option.map ~f:WarmThroughputSpecification.of_xml)
+          (Xml.child xml_arg0 "warmThroughputSpecification") in
+      let cdcSpecification =
+        (Option.map ~f:CdcSpecification.of_xml)
+          (Xml.child xml_arg0 "cdcSpecification") in
+      let replicaSpecifications =
+        (Option.map ~f:ReplicaSpecificationList.of_xml)
+          (Xml.child xml_arg0 "replicaSpecifications") in
+      let autoScalingSpecification =
+        (Option.map ~f:AutoScalingSpecification.of_xml)
+          (Xml.child xml_arg0 "autoScalingSpecification") in
+      let clientSideTimestamps =
+        (Option.map ~f:ClientSideTimestamps.of_xml)
+          (Xml.child xml_arg0 "clientSideTimestamps") in
       let defaultTimeToLive =
         (Option.map ~f:DefaultTimeToLive.of_xml)
           (Xml.child xml_arg0 "defaultTimeToLive") in
@@ -1422,32 +2831,194 @@ module UpdateTableRequest =
       let keyspaceName =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ?defaultTimeToLive ?ttl ?pointInTimeRecovery
+      make ?warmThroughputSpecification ?cdcSpecification
+        ?replicaSpecifications ?autoScalingSpecification
+        ?clientSideTimestamps ?defaultTimeToLive ?ttl ?pointInTimeRecovery
         ?encryptionSpecification ?capacitySpecification ?addColumns
         ~tableName ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let warmThroughputSpecification =
+        field_map json__ "warmThroughputSpecification"
+          WarmThroughputSpecification.of_json in
+      let cdcSpecification =
+        field_map json__ "cdcSpecification" CdcSpecification.of_json in
+      let replicaSpecifications =
+        field_map json__ "replicaSpecifications"
+          ReplicaSpecificationList.of_json in
+      let autoScalingSpecification =
+        field_map json__ "autoScalingSpecification"
+          AutoScalingSpecification.of_json in
+      let clientSideTimestamps =
+        field_map json__ "clientSideTimestamps" ClientSideTimestamps.of_json in
       let defaultTimeToLive =
-        field_map json "defaultTimeToLive" DefaultTimeToLive.of_json in
-      let ttl = field_map json "ttl" TimeToLive.of_json in
+        field_map json__ "defaultTimeToLive" DefaultTimeToLive.of_json in
+      let ttl = field_map json__ "ttl" TimeToLive.of_json in
       let pointInTimeRecovery =
-        field_map json "pointInTimeRecovery" PointInTimeRecovery.of_json in
+        field_map json__ "pointInTimeRecovery" PointInTimeRecovery.of_json in
       let encryptionSpecification =
-        field_map json "encryptionSpecification"
+        field_map json__ "encryptionSpecification"
           EncryptionSpecification.of_json in
       let capacitySpecification =
-        field_map json "capacitySpecification" CapacitySpecification.of_json in
+        field_map json__ "capacitySpecification"
+          CapacitySpecification.of_json in
       let addColumns =
-        field_map json "addColumns" ColumnDefinitionList.of_json in
-      let tableName = field_map_exn json "tableName" TableName.of_json in
+        field_map json__ "addColumns" ColumnDefinitionList.of_json in
+      let tableName = field_map_exn json__ "tableName" TableName.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ?defaultTimeToLive ?ttl ?pointInTimeRecovery
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ?warmThroughputSpecification ?cdcSpecification
+        ?replicaSpecifications ?autoScalingSpecification
+        ?clientSideTimestamps ?defaultTimeToLive ?ttl ?pointInTimeRecovery
         ?encryptionSpecification ?capacitySpecification ?addColumns
         ~tableName ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds new columns to the table or updates one of the table's settings, for example capacity mode, encryption, point-in-time recovery, or ttl settings. Note that you can only update one specific table setting per update operation."]
+       "Adds new columns to the table or updates one of the table's settings, for example capacity mode, auto scaling, encryption, point-in-time recovery, or ttl settings. Note that you can only update one specific table setting per update operation."]
+module UpdateKeyspaceResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ARN.t option
+        [@ocaml.doc
+          "The unique identifier of the keyspace in the format of an Amazon Resource Name (ARN)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun () -> { resourceArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      make ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a new Amazon Web Services Region to the keyspace. You can add a new Region to a keyspace that is either a single or a multi-Region keyspace. Amazon Keyspaces is going to replicate all tables in the keyspace to the new Region. To successfully replicate all tables to the new Region, they must use client-side timestamps for conflict resolution. To enable client-side timestamps, specify clientSideTimestamps.status = enabled when invoking the API. For more information about client-side timestamps, see Client-side timestamps in Amazon Keyspaces in the Amazon Keyspaces Developer Guide. To add a Region to a keyspace using the UpdateKeyspace API, the IAM principal needs permissions for the following IAM actions: cassandra:Alter cassandra:AlterMultiRegionResource cassandra:Create cassandra:CreateMultiRegionResource cassandra:Select cassandra:SelectMultiRegionResource cassandra:Modify cassandra:ModifyMultiRegionResource If the keyspace contains a table that is configured in provisioned mode with auto scaling enabled, the following additional IAM actions need to be allowed. application-autoscaling:RegisterScalableTarget application-autoscaling:DeregisterScalableTarget application-autoscaling:DescribeScalableTargets application-autoscaling:PutScalingPolicy application-autoscaling:DescribeScalingPolicies To use the UpdateKeyspace API, the IAM principal also needs permissions to create a service-linked role with the following elements: iam:CreateServiceLinkedRole - The action the principal can perform. arn:aws:iam::*:role/aws-service-role/replication.cassandra.amazonaws.com/AWSServiceRoleForKeyspacesReplication - The resource that the action can be performed on. iam:AWSServiceName: replication.cassandra.amazonaws.com - The only Amazon Web Services service that this role can be attached to is Amazon Keyspaces. For more information, see Configure the IAM permissions required to add an Amazon Web Services Region to a keyspace in the Amazon Keyspaces Developer Guide."]
+module UpdateKeyspaceRequest =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t [@ocaml.doc "The name of the keyspace."];
+      replicationSpecification: ReplicationSpecification.t ;
+      clientSideTimestamps: ClientSideTimestamps.t option }
+    let context_ = "UpdateKeyspaceRequest"
+    let make ?clientSideTimestamps =
+      fun ~keyspaceName ->
+        fun ~replicationSpecification ->
+          fun () ->
+            { clientSideTimestamps; keyspaceName; replicationSpecification }
+    let to_value x =
+      structure_to_value
+        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
+        ("replicationSpecification",
+          (Some
+             (ReplicationSpecification.to_value x.replicationSpecification)));
+        ("clientSideTimestamps",
+          (Option.map x.clientSideTimestamps ~f:ClientSideTimestamps.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientSideTimestamps =
+        (Option.map ~f:ClientSideTimestamps.of_xml)
+          (Xml.child xml_arg0 "clientSideTimestamps") in
+      let replicationSpecification =
+        ReplicationSpecification.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "replicationSpecification") in
+      let keyspaceName =
+        KeyspaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
+      make ?clientSideTimestamps ~replicationSpecification ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientSideTimestamps =
+        field_map json__ "clientSideTimestamps" ClientSideTimestamps.of_json in
+      let replicationSpecification =
+        field_map_exn json__ "replicationSpecification"
+          ReplicationSpecification.of_json in
+      let keyspaceName =
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ?clientSideTimestamps ~replicationSpecification ~keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a new Amazon Web Services Region to the keyspace. You can add a new Region to a keyspace that is either a single or a multi-Region keyspace. Amazon Keyspaces is going to replicate all tables in the keyspace to the new Region. To successfully replicate all tables to the new Region, they must use client-side timestamps for conflict resolution. To enable client-side timestamps, specify clientSideTimestamps.status = enabled when invoking the API. For more information about client-side timestamps, see Client-side timestamps in Amazon Keyspaces in the Amazon Keyspaces Developer Guide. To add a Region to a keyspace using the UpdateKeyspace API, the IAM principal needs permissions for the following IAM actions: cassandra:Alter cassandra:AlterMultiRegionResource cassandra:Create cassandra:CreateMultiRegionResource cassandra:Select cassandra:SelectMultiRegionResource cassandra:Modify cassandra:ModifyMultiRegionResource If the keyspace contains a table that is configured in provisioned mode with auto scaling enabled, the following additional IAM actions need to be allowed. application-autoscaling:RegisterScalableTarget application-autoscaling:DeregisterScalableTarget application-autoscaling:DescribeScalableTargets application-autoscaling:PutScalingPolicy application-autoscaling:DescribeScalingPolicies To use the UpdateKeyspace API, the IAM principal also needs permissions to create a service-linked role with the following elements: iam:CreateServiceLinkedRole - The action the principal can perform. arn:aws:iam::*:role/aws-service-role/replication.cassandra.amazonaws.com/AWSServiceRoleForKeyspacesReplication - The resource that the action can be performed on. iam:AWSServiceName: replication.cassandra.amazonaws.com - The only Amazon Web Services service that this role can be attached to is Amazon Keyspaces. For more information, see Configure the IAM permissions required to add an Amazon Web Services Region to a keyspace in the Amazon Keyspaces Developer Guide."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1559,9 +3130,9 @@ module UntagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1571,6 +3142,7 @@ module TagResourceResponse =
     type nonrec t = unit
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
@@ -1581,6 +3153,8 @@ module TagResourceResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1597,6 +3171,8 @@ module TagResourceResponse =
       match name with
       | "AccessDeniedException" ->
           `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1614,6 +3190,10 @@ module TagResourceResponse =
           `Assoc
             [("error", (`String "AccessDeniedException"));
             ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1668,9 +3248,9 @@ module TagResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1679,7 +3259,7 @@ module RestoreTableResponse =
   struct
     type nonrec t =
       {
-      restoredTableARN: ARN.t
+      restoredTableARN: ARN.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the restored table."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -1689,8 +3269,7 @@ module RestoreTableResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RestoreTableResponse"
-    let make ~restoredTableARN = fun () -> { restoredTableARN }
+    let make ?restoredTableARN = fun () -> { restoredTableARN }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1759,21 +3338,20 @@ module RestoreTableResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("restoredTableARN", (Some (ARN.to_value x.restoredTableARN)))]
+        [("restoredTableARN",
+           (Option.map x.restoredTableARN ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let restoredTableARN =
-        ARN.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "restoredTableARN") in
-      make ~restoredTableARN ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "restoredTableARN") in
+      make ?restoredTableARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let restoredTableARN =
-        field_map_exn json "restoredTableARN" ARN.of_json in
-      make ~restoredTableARN ()
+    let of_json json__ =
+      let restoredTableARN = field_map json__ "restoredTableARN" ARN.of_json in
+      make ?restoredTableARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores the specified table to the specified point in time within the earliest_restorable_timestamp and the current time. For more information about restore points, see Time window for PITR continuous backups in the Amazon Keyspaces Developer Guide. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, Amazon Keyspaces restores your source table's schema and data to the state based on the selected timestamp (day:hour:minute:second) to a new table. The Time to Live (TTL) settings are also restored to the state based on the selected timestamp. In addition to the table's schema, data, and TTL settings, RestoreTable restores the capacity mode, encryption, and point-in-time recovery settings from the source table. Unlike the table's schema data and TTL settings, which are restored based on the selected timestamp, these settings are always restored based on the table's settings as of the current time or when the table was deleted. You can also overwrite these settings during restore: \226\128\162 Read/write capacity mode \226\128\162 Provisioned throughput capacity settings \226\128\162 Point-in-time (PITR) settings \226\128\162 Tags For more information, see PITR restore settings in the Amazon Keyspaces Developer Guide. Note that the following settings are not restored, and you must configure them manually for the new table: \226\128\162 Automatic scaling policies (for tables that use provisioned capacity mode) \226\128\162 Identity and Access Management (IAM) policies \226\128\162 Amazon CloudWatch metrics and alarms"]
+       "Restores the table to the specified point in time within the earliest_restorable_timestamp and the current time. For more information about restore points, see Time window for PITR continuous backups in the Amazon Keyspaces Developer Guide. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, Amazon Keyspaces restores your source table's schema and data to the state based on the selected timestamp (day:hour:minute:second) to a new table. The Time to Live (TTL) settings are also restored to the state based on the selected timestamp. In addition to the table's schema, data, and TTL settings, RestoreTable restores the capacity mode, auto scaling settings, encryption settings, and point-in-time recovery settings from the source table. Unlike the table's schema data and TTL settings, which are restored based on the selected timestamp, these settings are always restored based on the table's settings as of the current time or when the table was deleted. You can also overwrite these settings during restore: Read/write capacity mode Provisioned throughput capacity units Auto scaling settings Point-in-time (PITR) settings Tags For more information, see PITR restore settings in the Amazon Keyspaces Developer Guide. Note that the following settings are not restored, and you must configure them manually for the new table: Identity and Access Management (IAM) policies Amazon CloudWatch metrics and alarms"]
 module RestoreTableRequest =
   struct
     type nonrec t =
@@ -1790,38 +3368,48 @@ module RestoreTableRequest =
         [@ocaml.doc "The restore timestamp in ISO 8601 format."];
       capacitySpecificationOverride: CapacitySpecification.t option
         [@ocaml.doc
-          "Specifies the read/write throughput capacity mode for the target table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST \226\128\162 throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
+          "Specifies the read/write throughput capacity mode for the target table. The options are: throughputMode:PAY_PER_REQUEST throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
       encryptionSpecificationOverride: EncryptionSpecification.t option
         [@ocaml.doc
-          "Specifies the encryption settings for the target table. You can choose one of the following KMS key (KMS key): \226\128\162 type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. \226\128\162 type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
+          "Specifies the encryption settings for the target table. You can choose one of the following KMS key (KMS key): type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
       pointInTimeRecoveryOverride: PointInTimeRecovery.t option
         [@ocaml.doc
-          "Specifies the pointInTimeRecovery settings for the target table. The options are: \226\128\162 ENABLED \226\128\162 DISABLED If it's not specified, the default is DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
+          "Specifies the pointInTimeRecovery settings for the target table. The options are: status=ENABLED status=DISABLED If it's not specified, the default is status=DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
       tagsOverride: TagList.t option
         [@ocaml.doc
-          "A list of key-value pair tags to be attached to the restored table. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."]}
+          "A list of key-value pair tags to be attached to the restored table. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."];
+      autoScalingSpecification: AutoScalingSpecification.t option
+        [@ocaml.doc
+          "The optional auto scaling settings for the restored table in provisioned capacity mode. Specifies if the service can manage throughput capacity of a provisioned table automatically on your behalf. Amazon Keyspaces auto scaling helps you provision throughput capacity for variable workloads efficiently by increasing and decreasing your table's read and write capacity automatically in response to application traffic. For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide."];
+      replicaSpecifications: ReplicaSpecificationList.t option
+        [@ocaml.doc
+          "The optional Region specific settings of a multi-Regional table."]}
     let context_ = "RestoreTableRequest"
     let make ?restoreTimestamp =
       fun ?capacitySpecificationOverride ->
         fun ?encryptionSpecificationOverride ->
           fun ?pointInTimeRecoveryOverride ->
             fun ?tagsOverride ->
-              fun ~sourceKeyspaceName ->
-                fun ~sourceTableName ->
-                  fun ~targetKeyspaceName ->
-                    fun ~targetTableName ->
-                      fun () ->
-                        {
-                          restoreTimestamp;
-                          capacitySpecificationOverride;
-                          encryptionSpecificationOverride;
-                          pointInTimeRecoveryOverride;
-                          tagsOverride;
-                          sourceKeyspaceName;
-                          sourceTableName;
-                          targetKeyspaceName;
-                          targetTableName
-                        }
+              fun ?autoScalingSpecification ->
+                fun ?replicaSpecifications ->
+                  fun ~sourceKeyspaceName ->
+                    fun ~sourceTableName ->
+                      fun ~targetKeyspaceName ->
+                        fun ~targetTableName ->
+                          fun () ->
+                            {
+                              restoreTimestamp;
+                              capacitySpecificationOverride;
+                              encryptionSpecificationOverride;
+                              pointInTimeRecoveryOverride;
+                              tagsOverride;
+                              autoScalingSpecification;
+                              replicaSpecifications;
+                              sourceKeyspaceName;
+                              sourceTableName;
+                              targetKeyspaceName;
+                              targetTableName
+                            }
     let to_value x =
       structure_to_value
         [("sourceKeyspaceName",
@@ -1841,9 +3429,21 @@ module RestoreTableRequest =
         ("pointInTimeRecoveryOverride",
           (Option.map x.pointInTimeRecoveryOverride
              ~f:PointInTimeRecovery.to_value));
-        ("tagsOverride", (Option.map x.tagsOverride ~f:TagList.to_value))]
+        ("tagsOverride", (Option.map x.tagsOverride ~f:TagList.to_value));
+        ("autoScalingSpecification",
+          (Option.map x.autoScalingSpecification
+             ~f:AutoScalingSpecification.to_value));
+        ("replicaSpecifications",
+          (Option.map x.replicaSpecifications
+             ~f:ReplicaSpecificationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let replicaSpecifications =
+        (Option.map ~f:ReplicaSpecificationList.of_xml)
+          (Xml.child xml_arg0 "replicaSpecifications") in
+      let autoScalingSpecification =
+        (Option.map ~f:AutoScalingSpecification.of_xml)
+          (Xml.child xml_arg0 "autoScalingSpecification") in
       let tagsOverride =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tagsOverride") in
       let pointInTimeRecoveryOverride =
@@ -1870,39 +3470,182 @@ module RestoreTableRequest =
       let sourceKeyspaceName =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "sourceKeyspaceName") in
-      make ?tagsOverride ?pointInTimeRecoveryOverride
-        ?encryptionSpecificationOverride ?capacitySpecificationOverride
-        ?restoreTimestamp ~targetTableName ~targetKeyspaceName
-        ~sourceTableName ~sourceKeyspaceName ()
+      make ?replicaSpecifications ?autoScalingSpecification ?tagsOverride
+        ?pointInTimeRecoveryOverride ?encryptionSpecificationOverride
+        ?capacitySpecificationOverride ?restoreTimestamp ~targetTableName
+        ~targetKeyspaceName ~sourceTableName ~sourceKeyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsOverride = field_map json "tagsOverride" TagList.of_json in
+    let of_json json__ =
+      let replicaSpecifications =
+        field_map json__ "replicaSpecifications"
+          ReplicaSpecificationList.of_json in
+      let autoScalingSpecification =
+        field_map json__ "autoScalingSpecification"
+          AutoScalingSpecification.of_json in
+      let tagsOverride = field_map json__ "tagsOverride" TagList.of_json in
       let pointInTimeRecoveryOverride =
-        field_map json "pointInTimeRecoveryOverride"
+        field_map json__ "pointInTimeRecoveryOverride"
           PointInTimeRecovery.of_json in
       let encryptionSpecificationOverride =
-        field_map json "encryptionSpecificationOverride"
+        field_map json__ "encryptionSpecificationOverride"
           EncryptionSpecification.of_json in
       let capacitySpecificationOverride =
-        field_map json "capacitySpecificationOverride"
+        field_map json__ "capacitySpecificationOverride"
           CapacitySpecification.of_json in
       let restoreTimestamp =
-        field_map json "restoreTimestamp" Timestamp.of_json in
+        field_map json__ "restoreTimestamp" Timestamp.of_json in
       let targetTableName =
-        field_map_exn json "targetTableName" TableName.of_json in
+        field_map_exn json__ "targetTableName" TableName.of_json in
       let targetKeyspaceName =
-        field_map_exn json "targetKeyspaceName" KeyspaceName.of_json in
+        field_map_exn json__ "targetKeyspaceName" KeyspaceName.of_json in
       let sourceTableName =
-        field_map_exn json "sourceTableName" TableName.of_json in
+        field_map_exn json__ "sourceTableName" TableName.of_json in
       let sourceKeyspaceName =
-        field_map_exn json "sourceKeyspaceName" KeyspaceName.of_json in
-      make ?tagsOverride ?pointInTimeRecoveryOverride
-        ?encryptionSpecificationOverride ?capacitySpecificationOverride
-        ?restoreTimestamp ~targetTableName ~targetKeyspaceName
-        ~sourceTableName ~sourceKeyspaceName ()
+        field_map_exn json__ "sourceKeyspaceName" KeyspaceName.of_json in
+      make ?replicaSpecifications ?autoScalingSpecification ?tagsOverride
+        ?pointInTimeRecoveryOverride ?encryptionSpecificationOverride
+        ?capacitySpecificationOverride ?restoreTimestamp ~targetTableName
+        ~targetKeyspaceName ~sourceTableName ~sourceKeyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Restores the specified table to the specified point in time within the earliest_restorable_timestamp and the current time. For more information about restore points, see Time window for PITR continuous backups in the Amazon Keyspaces Developer Guide. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, Amazon Keyspaces restores your source table's schema and data to the state based on the selected timestamp (day:hour:minute:second) to a new table. The Time to Live (TTL) settings are also restored to the state based on the selected timestamp. In addition to the table's schema, data, and TTL settings, RestoreTable restores the capacity mode, encryption, and point-in-time recovery settings from the source table. Unlike the table's schema data and TTL settings, which are restored based on the selected timestamp, these settings are always restored based on the table's settings as of the current time or when the table was deleted. You can also overwrite these settings during restore: \226\128\162 Read/write capacity mode \226\128\162 Provisioned throughput capacity settings \226\128\162 Point-in-time (PITR) settings \226\128\162 Tags For more information, see PITR restore settings in the Amazon Keyspaces Developer Guide. Note that the following settings are not restored, and you must configure them manually for the new table: \226\128\162 Automatic scaling policies (for tables that use provisioned capacity mode) \226\128\162 Identity and Access Management (IAM) policies \226\128\162 Amazon CloudWatch metrics and alarms"]
+       "Restores the table to the specified point in time within the earliest_restorable_timestamp and the current time. For more information about restore points, see Time window for PITR continuous backups in the Amazon Keyspaces Developer Guide. Any number of users can execute up to 4 concurrent restores (any type of restore) in a given account. When you restore using point in time recovery, Amazon Keyspaces restores your source table's schema and data to the state based on the selected timestamp (day:hour:minute:second) to a new table. The Time to Live (TTL) settings are also restored to the state based on the selected timestamp. In addition to the table's schema, data, and TTL settings, RestoreTable restores the capacity mode, auto scaling settings, encryption settings, and point-in-time recovery settings from the source table. Unlike the table's schema data and TTL settings, which are restored based on the selected timestamp, these settings are always restored based on the table's settings as of the current time or when the table was deleted. You can also overwrite these settings during restore: Read/write capacity mode Provisioned throughput capacity units Auto scaling settings Point-in-time (PITR) settings Tags For more information, see PITR restore settings in the Amazon Keyspaces Developer Guide. Note that the following settings are not restored, and you must configure them manually for the new table: Identity and Access Management (IAM) policies Amazon CloudWatch metrics and alarms"]
+module ListTypesResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token. To resume pagination, provide the NextToken value as an argument of a subsequent API invocation."];
+      types: TypeNameList.t option
+        [@ocaml.doc "The list of types contained in the specified keyspace."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken = fun ?types -> fun () -> { nextToken; types }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("types", (Option.map x.types ~f:TypeNameList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let types =
+        (Option.map ~f:TypeNameList.of_xml) (Xml.child xml_arg0 "types") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?types ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let types = field_map json__ "types" TypeNameList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?types ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ListTypes operation returns a list of types for a specified keyspace. To read keyspace metadata using ListTypes, the IAM principal needs Select action permissions for the system keyspace. To configure the required permissions, see Permissions to view a UDT in the Amazon Keyspaces Developer Guide."]
+module ListTypesRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token. To resume pagination, provide the NextToken value as an argument of a subsequent API invocation."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The total number of types to return in the output. If the total number of types available is more than the value specified, a NextToken is provided in the output. To resume pagination, provide the NextToken value as an argument of a subsequent API invocation."];
+      keyspaceName: KeyspaceName.t
+        [@ocaml.doc
+          "The name of the keyspace that contains the listed types."]}
+    let context_ = "ListTypesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~keyspaceName ->
+          fun () -> { nextToken; maxResults; keyspaceName }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyspaceName =
+        KeyspaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ~keyspaceName ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyspaceName =
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ~keyspaceName ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ListTypes operation returns a list of types for a specified keyspace. To read keyspace metadata using ListTypes, the IAM principal needs Select action permissions for the system keyspace. To configure the required permissions, see Permissions to view a UDT in the Amazon Keyspaces Developer Guide."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -1988,13 +3731,13 @@ module ListTagsForResourceResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tags ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?tags ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all tags associated with the specified Amazon Keyspaces resource."]
+       "Returns a list of all tags associated with the specified Amazon Keyspaces resource. To read keyspace metadata using ListTagsForResource, the IAM principal needs Select action permissions for the specified resource and the system keyspace."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -2027,14 +3770,14 @@ module ListTagsForResourceRequest =
         ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?maxResults ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" ARN.of_json in
       make ?maxResults ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of all tags associated with the specified Amazon Keyspaces resource."]
+       "Returns a list of all tags associated with the specified Amazon Keyspaces resource. To read keyspace metadata using ListTagsForResource, the IAM principal needs Select action permissions for the specified resource and the system keyspace."]
 module ListTablesResponse =
   struct
     type nonrec t =
@@ -2121,12 +3864,13 @@ module ListTablesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?tables ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tables = field_map json "tables" TableSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let tables = field_map json__ "tables" TableSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?tables ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of tables for a specified keyspace."]
+  end[@@ocaml.doc
+       "The ListTables operation returns a list of tables for a specified keyspace. To read keyspace metadata using ListTables, the IAM principal needs Select action permissions for the system keyspace."]
 module ListTablesRequest =
   struct
     type nonrec t =
@@ -2159,14 +3903,15 @@ module ListTablesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ~keyspaceName ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ~keyspaceName ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of tables for a specified keyspace."]
+  end[@@ocaml.doc
+       "The ListTables operation returns a list of tables for a specified keyspace. To read keyspace metadata using ListTables, the IAM principal needs Select action permissions for the system keyspace."]
 module ListKeyspacesResponse =
   struct
     type nonrec t =
@@ -2174,7 +3919,8 @@ module ListKeyspacesResponse =
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token to specify where to start paginating. This is the NextToken from a previously truncated response."];
-      keyspaces: KeyspaceSummaryList.t [@ocaml.doc "A list of keyspaces."]}
+      keyspaces: KeyspaceSummaryList.t option
+        [@ocaml.doc "A list of keyspaces."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2182,9 +3928,8 @@ module ListKeyspacesResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListKeyspacesResponse"
     let make ?nextToken =
-      fun ~keyspaces -> fun () -> { nextToken; keyspaces }
+      fun ?keyspaces -> fun () -> { nextToken; keyspaces }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2246,23 +3991,24 @@ module ListKeyspacesResponse =
     let to_value x =
       structure_to_value
         [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("keyspaces", (Some (KeyspaceSummaryList.to_value x.keyspaces)))]
+        ("keyspaces",
+          (Option.map x.keyspaces ~f:KeyspaceSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let keyspaces =
-        KeyspaceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "keyspaces") in
+        (Option.map ~f:KeyspaceSummaryList.of_xml)
+          (Xml.child xml_arg0 "keyspaces") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
-      make ~keyspaces ?nextToken ()
+      make ?keyspaces ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keyspaces =
-        field_map_exn json "keyspaces" KeyspaceSummaryList.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      make ~keyspaces ?nextToken ()
+        field_map json__ "keyspaces" KeyspaceSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      make ?keyspaces ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of keyspaces."]
+  end[@@ocaml.doc "The ListKeyspaces operation returns a list of keyspaces."]
 module ListKeyspacesRequest =
   struct
     type nonrec t =
@@ -2287,44 +4033,34 @@ module ListKeyspacesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of keyspaces."]
-module GetTableResponse =
+  end[@@ocaml.doc "The ListKeyspaces operation returns a list of keyspaces."]
+module GetTypeResponse =
   struct
     type nonrec t =
       {
-      keyspaceName: KeyspaceName.t
+      keyspaceName: KeyspaceName.t option
+        [@ocaml.doc "The name of the keyspace that contains this type."];
+      typeName: TypeName.t option [@ocaml.doc "The name of the type."];
+      fieldDefinitions: FieldList.t option
+        [@ocaml.doc "The names and types that define this type."];
+      lastModifiedTimestamp: Timestamp.t option
         [@ocaml.doc
-          "The name of the keyspace that the specified table is stored in."];
-      tableName: TableName.t [@ocaml.doc "The name of the specified table."];
-      resourceArn: ARN.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the specified table."];
-      creationTimestamp: Timestamp.t option
-        [@ocaml.doc "The creation timestamp of the specified table."];
-      status: TableStatus.t option
-        [@ocaml.doc "The current status of the specified table."];
-      schemaDefinition: SchemaDefinition.t option
-        [@ocaml.doc "The schema definition of the specified table."];
-      capacitySpecification: CapacitySpecificationSummary.t option
+          "The timestamp that shows when this type was last modified."];
+      status: TypeStatus.t option [@ocaml.doc "The status of this type."];
+      directReferringTables: TableNameList.t option
+        [@ocaml.doc "The tables that use this type."];
+      directParentTypes: TypeNameList.t option
+        [@ocaml.doc "The types that use this type."];
+      maxNestingDepth: Depth.t option
+        [@ocaml.doc "The level of nesting implemented for this type."];
+      keyspaceArn: ARN.t option
         [@ocaml.doc
-          "The read/write throughput capacity mode for a table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST \226\128\162 throughputMode:PROVISIONED"];
-      encryptionSpecification: EncryptionSpecification.t option
-        [@ocaml.doc "The encryption settings of the specified table."];
-      pointInTimeRecovery: PointInTimeRecoverySummary.t option
-        [@ocaml.doc
-          "The point-in-time recovery status of the specified table."];
-      ttl: TimeToLive.t option
-        [@ocaml.doc
-          "The custom Time to Live settings of the specified table."];
-      defaultTimeToLive: DefaultTimeToLive.t option
-        [@ocaml.doc
-          "The default Time to Live settings of the specified table."];
-      comment: Comment.t option
-        [@ocaml.doc "The the description of the specified table."]}
+          "The unique identifier of the keyspace that contains this type in the format of an Amazon Resource Name (ARN)."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2332,34 +4068,27 @@ module GetTableResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTableResponse"
-    let make ?creationTimestamp =
-      fun ?status ->
-        fun ?schemaDefinition ->
-          fun ?capacitySpecification ->
-            fun ?encryptionSpecification ->
-              fun ?pointInTimeRecovery ->
-                fun ?ttl ->
-                  fun ?defaultTimeToLive ->
-                    fun ?comment ->
-                      fun ~keyspaceName ->
-                        fun ~tableName ->
-                          fun ~resourceArn ->
-                            fun () ->
-                              {
-                                creationTimestamp;
-                                status;
-                                schemaDefinition;
-                                capacitySpecification;
-                                encryptionSpecification;
-                                pointInTimeRecovery;
-                                ttl;
-                                defaultTimeToLive;
-                                comment;
-                                keyspaceName;
-                                tableName;
-                                resourceArn
-                              }
+    let make ?keyspaceName =
+      fun ?typeName ->
+        fun ?fieldDefinitions ->
+          fun ?lastModifiedTimestamp ->
+            fun ?status ->
+              fun ?directReferringTables ->
+                fun ?directParentTypes ->
+                  fun ?maxNestingDepth ->
+                    fun ?keyspaceArn ->
+                      fun () ->
+                        {
+                          keyspaceName;
+                          typeName;
+                          fieldDefinitions;
+                          lastModifiedTimestamp;
+                          status;
+                          directReferringTables;
+                          directParentTypes;
+                          maxNestingDepth;
+                          keyspaceArn
+                        }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2420,9 +4149,256 @@ module GetTableResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("typeName", (Option.map x.typeName ~f:TypeName.to_value));
+        ("fieldDefinitions",
+          (Option.map x.fieldDefinitions ~f:FieldList.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:TypeStatus.to_value));
+        ("directReferringTables",
+          (Option.map x.directReferringTables ~f:TableNameList.to_value));
+        ("directParentTypes",
+          (Option.map x.directParentTypes ~f:TypeNameList.to_value));
+        ("maxNestingDepth", (Option.map x.maxNestingDepth ~f:Depth.to_value));
+        ("keyspaceArn", (Option.map x.keyspaceArn ~f:ARN.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyspaceArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "keyspaceArn") in
+      let maxNestingDepth =
+        (Option.map ~f:Depth.of_xml) (Xml.child xml_arg0 "maxNestingDepth") in
+      let directParentTypes =
+        (Option.map ~f:TypeNameList.of_xml)
+          (Xml.child xml_arg0 "directParentTypes") in
+      let directReferringTables =
+        (Option.map ~f:TableNameList.of_xml)
+          (Xml.child xml_arg0 "directReferringTables") in
+      let status =
+        (Option.map ~f:TypeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let fieldDefinitions =
+        (Option.map ~f:FieldList.of_xml)
+          (Xml.child xml_arg0 "fieldDefinitions") in
+      let typeName =
+        (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "typeName") in
+      let keyspaceName =
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?keyspaceArn ?maxNestingDepth ?directParentTypes
+        ?directReferringTables ?status ?lastModifiedTimestamp
+        ?fieldDefinitions ?typeName ?keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyspaceArn = field_map json__ "keyspaceArn" ARN.of_json in
+      let maxNestingDepth = field_map json__ "maxNestingDepth" Depth.of_json in
+      let directParentTypes =
+        field_map json__ "directParentTypes" TypeNameList.of_json in
+      let directReferringTables =
+        field_map json__ "directReferringTables" TableNameList.of_json in
+      let status = field_map json__ "status" TypeStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let fieldDefinitions =
+        field_map json__ "fieldDefinitions" FieldList.of_json in
+      let typeName = field_map json__ "typeName" TypeName.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?keyspaceArn ?maxNestingDepth ?directParentTypes
+        ?directReferringTables ?status ?lastModifiedTimestamp
+        ?fieldDefinitions ?typeName ?keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The GetType operation returns information about the type, for example the field definitions, the timestamp when the type was last modified, the level of nesting, the status, and details about if the type is used in other types and tables. To read keyspace metadata using GetType, the IAM principal needs Select action permissions for the system keyspace. To configure the required permissions, see Permissions to view a UDT in the Amazon Keyspaces Developer Guide."]
+module GetTypeRequest =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t
+        [@ocaml.doc "The name of the keyspace that contains this type."];
+      typeName: TypeName.t
+        [@ocaml.doc
+          "The formatted name of the type. For example, if the name of the type was created without double quotes, Amazon Keyspaces saved the name in lower-case characters. If the name was created in double quotes, you must use double quotes to specify the type name."]}
+    let context_ = "GetTypeRequest"
+    let make ~keyspaceName =
+      fun ~typeName -> fun () -> { keyspaceName; typeName }
+    let to_value x =
+      structure_to_value
         [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
-        ("tableName", (Some (TableName.to_value x.tableName)));
-        ("resourceArn", (Some (ARN.to_value x.resourceArn)));
+        ("typeName", (Some (TypeName.to_value x.typeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let typeName =
+        TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "typeName") in
+      let keyspaceName =
+        KeyspaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
+      make ~typeName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let typeName = field_map_exn json__ "typeName" TypeName.of_json in
+      let keyspaceName =
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ~typeName ~keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The GetType operation returns information about the type, for example the field definitions, the timestamp when the type was last modified, the level of nesting, the status, and details about if the type is used in other types and tables. To read keyspace metadata using GetType, the IAM principal needs Select action permissions for the system keyspace. To configure the required permissions, see Permissions to view a UDT in the Amazon Keyspaces Developer Guide."]
+module GetTableResponse =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t option
+        [@ocaml.doc
+          "The name of the keyspace that the specified table is stored in."];
+      tableName: TableName.t option
+        [@ocaml.doc "The name of the specified table."];
+      resourceArn: ARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the specified table."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc "The creation timestamp of the specified table."];
+      status: TableStatus.t option
+        [@ocaml.doc "The current status of the specified table."];
+      schemaDefinition: SchemaDefinition.t option
+        [@ocaml.doc "The schema definition of the specified table."];
+      capacitySpecification: CapacitySpecificationSummary.t option
+        [@ocaml.doc
+          "The read/write throughput capacity mode for a table. The options are: throughputMode:PAY_PER_REQUEST throughputMode:PROVISIONED"];
+      encryptionSpecification: EncryptionSpecification.t option
+        [@ocaml.doc "The encryption settings of the specified table."];
+      pointInTimeRecovery: PointInTimeRecoverySummary.t option
+        [@ocaml.doc
+          "The point-in-time recovery status of the specified table."];
+      ttl: TimeToLive.t option
+        [@ocaml.doc
+          "The custom Time to Live settings of the specified table."];
+      defaultTimeToLive: DefaultTimeToLive.t option
+        [@ocaml.doc
+          "The default Time to Live settings in seconds of the specified table."];
+      comment: Comment.t option
+        [@ocaml.doc "The the description of the specified table."];
+      clientSideTimestamps: ClientSideTimestamps.t option
+        [@ocaml.doc "The client-side timestamps setting of the table."];
+      replicaSpecifications: ReplicaSpecificationSummaryList.t option
+        [@ocaml.doc
+          "Returns the Amazon Web Services Region specific settings of all Regions a multi-Region table is replicated in."];
+      latestStreamArn: StreamArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the stream."];
+      cdcSpecification: CdcSpecificationSummary.t option
+        [@ocaml.doc "The CDC stream settings of the table."];
+      warmThroughputSpecification:
+        WarmThroughputSpecificationSummary.t option
+        [@ocaml.doc
+          "The warm throughput settings for the table, including the current status and configured read and write capacity units."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyspaceName =
+      fun ?tableName ->
+        fun ?resourceArn ->
+          fun ?creationTimestamp ->
+            fun ?status ->
+              fun ?schemaDefinition ->
+                fun ?capacitySpecification ->
+                  fun ?encryptionSpecification ->
+                    fun ?pointInTimeRecovery ->
+                      fun ?ttl ->
+                        fun ?defaultTimeToLive ->
+                          fun ?comment ->
+                            fun ?clientSideTimestamps ->
+                              fun ?replicaSpecifications ->
+                                fun ?latestStreamArn ->
+                                  fun ?cdcSpecification ->
+                                    fun ?warmThroughputSpecification ->
+                                      fun () ->
+                                        {
+                                          keyspaceName;
+                                          tableName;
+                                          resourceArn;
+                                          creationTimestamp;
+                                          status;
+                                          schemaDefinition;
+                                          capacitySpecification;
+                                          encryptionSpecification;
+                                          pointInTimeRecovery;
+                                          ttl;
+                                          defaultTimeToLive;
+                                          comment;
+                                          clientSideTimestamps;
+                                          replicaSpecifications;
+                                          latestStreamArn;
+                                          cdcSpecification;
+                                          warmThroughputSpecification
+                                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("tableName", (Option.map x.tableName ~f:TableName.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value));
         ("creationTimestamp",
           (Option.map x.creationTimestamp ~f:Timestamp.to_value));
         ("status", (Option.map x.status ~f:TableStatus.to_value));
@@ -2440,9 +4416,36 @@ module GetTableResponse =
         ("ttl", (Option.map x.ttl ~f:TimeToLive.to_value));
         ("defaultTimeToLive",
           (Option.map x.defaultTimeToLive ~f:DefaultTimeToLive.to_value));
-        ("comment", (Option.map x.comment ~f:Comment.to_value))]
+        ("comment", (Option.map x.comment ~f:Comment.to_value));
+        ("clientSideTimestamps",
+          (Option.map x.clientSideTimestamps ~f:ClientSideTimestamps.to_value));
+        ("replicaSpecifications",
+          (Option.map x.replicaSpecifications
+             ~f:ReplicaSpecificationSummaryList.to_value));
+        ("latestStreamArn",
+          (Option.map x.latestStreamArn ~f:StreamArn.to_value));
+        ("cdcSpecification",
+          (Option.map x.cdcSpecification ~f:CdcSpecificationSummary.to_value));
+        ("warmThroughputSpecification",
+          (Option.map x.warmThroughputSpecification
+             ~f:WarmThroughputSpecificationSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughputSpecification =
+        (Option.map ~f:WarmThroughputSpecificationSummary.of_xml)
+          (Xml.child xml_arg0 "warmThroughputSpecification") in
+      let cdcSpecification =
+        (Option.map ~f:CdcSpecificationSummary.of_xml)
+          (Xml.child xml_arg0 "cdcSpecification") in
+      let latestStreamArn =
+        (Option.map ~f:StreamArn.of_xml)
+          (Xml.child xml_arg0 "latestStreamArn") in
+      let replicaSpecifications =
+        (Option.map ~f:ReplicaSpecificationSummaryList.of_xml)
+          (Xml.child xml_arg0 "replicaSpecifications") in
+      let clientSideTimestamps =
+        (Option.map ~f:ClientSideTimestamps.of_xml)
+          (Xml.child xml_arg0 "clientSideTimestamps") in
       let comment =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       let defaultTimeToLive =
@@ -2467,46 +4470,60 @@ module GetTableResponse =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "creationTimestamp") in
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let tableName =
-        TableName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "tableName") in
+        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "tableName") in
       let keyspaceName =
-        KeyspaceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ?comment ?defaultTimeToLive ?ttl ?pointInTimeRecovery
-        ?encryptionSpecification ?capacitySpecification ?schemaDefinition
-        ?status ?creationTimestamp ~resourceArn ~tableName ~keyspaceName ()
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?warmThroughputSpecification ?cdcSpecification ?latestStreamArn
+        ?replicaSpecifications ?clientSideTimestamps ?comment
+        ?defaultTimeToLive ?ttl ?pointInTimeRecovery ?encryptionSpecification
+        ?capacitySpecification ?schemaDefinition ?status ?creationTimestamp
+        ?resourceArn ?tableName ?keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
+    let of_json json__ =
+      let warmThroughputSpecification =
+        field_map json__ "warmThroughputSpecification"
+          WarmThroughputSpecificationSummary.of_json in
+      let cdcSpecification =
+        field_map json__ "cdcSpecification" CdcSpecificationSummary.of_json in
+      let latestStreamArn =
+        field_map json__ "latestStreamArn" StreamArn.of_json in
+      let replicaSpecifications =
+        field_map json__ "replicaSpecifications"
+          ReplicaSpecificationSummaryList.of_json in
+      let clientSideTimestamps =
+        field_map json__ "clientSideTimestamps" ClientSideTimestamps.of_json in
+      let comment = field_map json__ "comment" Comment.of_json in
       let defaultTimeToLive =
-        field_map json "defaultTimeToLive" DefaultTimeToLive.of_json in
-      let ttl = field_map json "ttl" TimeToLive.of_json in
+        field_map json__ "defaultTimeToLive" DefaultTimeToLive.of_json in
+      let ttl = field_map json__ "ttl" TimeToLive.of_json in
       let pointInTimeRecovery =
-        field_map json "pointInTimeRecovery"
+        field_map json__ "pointInTimeRecovery"
           PointInTimeRecoverySummary.of_json in
       let encryptionSpecification =
-        field_map json "encryptionSpecification"
+        field_map json__ "encryptionSpecification"
           EncryptionSpecification.of_json in
       let capacitySpecification =
-        field_map json "capacitySpecification"
+        field_map json__ "capacitySpecification"
           CapacitySpecificationSummary.of_json in
       let schemaDefinition =
-        field_map json "schemaDefinition" SchemaDefinition.of_json in
-      let status = field_map json "status" TableStatus.of_json in
+        field_map json__ "schemaDefinition" SchemaDefinition.of_json in
+      let status = field_map json__ "status" TableStatus.of_json in
       let creationTimestamp =
-        field_map json "creationTimestamp" Timestamp.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      let tableName = field_map_exn json "tableName" TableName.of_json in
-      let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ?comment ?defaultTimeToLive ?ttl ?pointInTimeRecovery
-        ?encryptionSpecification ?capacitySpecification ?schemaDefinition
-        ?status ?creationTimestamp ~resourceArn ~tableName ~keyspaceName ()
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let tableName = field_map json__ "tableName" TableName.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?warmThroughputSpecification ?cdcSpecification ?latestStreamArn
+        ?replicaSpecifications ?clientSideTimestamps ?comment
+        ?defaultTimeToLive ?ttl ?pointInTimeRecovery ?encryptionSpecification
+        ?capacitySpecification ?schemaDefinition ?status ?creationTimestamp
+        ?resourceArn ?tableName ?keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the table, including the table's name and current status, the keyspace name, configuration settings, and metadata. To read table metadata using GetTable, Select action permissions for the table and system tables are required to complete the operation."]
+       "Returns information about the table, including the table's name and current status, the keyspace name, configuration settings, and metadata. To read table metadata using GetTable, the IAM principal needs Select action permissions for the table and the system keyspace."]
 module GetTableRequest =
   struct
     type nonrec t =
@@ -2531,20 +4548,28 @@ module GetTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~tableName ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "tableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "tableName" TableName.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
       make ~tableName ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the table, including the table's name and current status, the keyspace name, configuration settings, and metadata. To read table metadata using GetTable, Select action permissions for the table and system tables are required to complete the operation."]
-module GetKeyspaceResponse =
+       "Returns information about the table, including the table's name and current status, the keyspace name, configuration settings, and metadata. To read table metadata using GetTable, the IAM principal needs Select action permissions for the table and the system keyspace."]
+module GetTableAutoScalingSettingsResponse =
   struct
     type nonrec t =
       {
-      keyspaceName: KeyspaceName.t [@ocaml.doc "The name of the keyspace."];
-      resourceArn: ARN.t [@ocaml.doc "The ARN of the keyspace."]}
+      keyspaceName: KeyspaceName.t option
+        [@ocaml.doc "The name of the keyspace."];
+      tableName: TableName.t option [@ocaml.doc "The name of the table."];
+      resourceArn: ARN.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the table."];
+      autoScalingSpecification: AutoScalingSpecification.t option
+        [@ocaml.doc "The auto scaling settings of the table."];
+      replicaSpecifications: ReplicaAutoScalingSpecificationList.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region specific settings of a multi-Region table. Returns the settings for all Regions the table is replicated in."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -2552,9 +4577,19 @@ module GetKeyspaceResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetKeyspaceResponse"
-    let make ~keyspaceName =
-      fun ~resourceArn -> fun () -> { keyspaceName; resourceArn }
+    let make ?keyspaceName =
+      fun ?tableName ->
+        fun ?resourceArn ->
+          fun ?autoScalingSpecification ->
+            fun ?replicaSpecifications ->
+              fun () ->
+                {
+                  keyspaceName;
+                  tableName;
+                  resourceArn;
+                  autoScalingSpecification;
+                  replicaSpecifications
+                }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2615,25 +4650,220 @@ module GetKeyspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
-        ("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("tableName", (Option.map x.tableName ~f:TableName.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value));
+        ("autoScalingSpecification",
+          (Option.map x.autoScalingSpecification
+             ~f:AutoScalingSpecification.to_value));
+        ("replicaSpecifications",
+          (Option.map x.replicaSpecifications
+             ~f:ReplicaAutoScalingSpecificationList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let replicaSpecifications =
+        (Option.map ~f:ReplicaAutoScalingSpecificationList.of_xml)
+          (Xml.child xml_arg0 "replicaSpecifications") in
+      let autoScalingSpecification =
+        (Option.map ~f:AutoScalingSpecification.of_xml)
+          (Xml.child xml_arg0 "autoScalingSpecification") in
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      let tableName =
+        (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "tableName") in
+      let keyspaceName =
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?replicaSpecifications ?autoScalingSpecification ?resourceArn
+        ?tableName ?keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replicaSpecifications =
+        field_map json__ "replicaSpecifications"
+          ReplicaAutoScalingSpecificationList.of_json in
+      let autoScalingSpecification =
+        field_map json__ "autoScalingSpecification"
+          AutoScalingSpecification.of_json in
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let tableName = field_map json__ "tableName" TableName.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?replicaSpecifications ?autoScalingSpecification ?resourceArn
+        ?tableName ?keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns auto scaling related settings of the specified table in JSON format. If the table is a multi-Region table, the Amazon Web Services Region specific auto scaling settings of the table are included. Amazon Keyspaces auto scaling helps you provision throughput capacity for variable workloads efficiently by increasing and decreasing your table's read and write capacity automatically in response to application traffic. For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide. GetTableAutoScalingSettings can't be used as an action in an IAM policy. To define permissions for GetTableAutoScalingSettings, you must allow the following two actions in the IAM policy statement's Action element: application-autoscaling:DescribeScalableTargets application-autoscaling:DescribeScalingPolicies"]
+module GetTableAutoScalingSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t [@ocaml.doc "The name of the keyspace."];
+      tableName: TableName.t [@ocaml.doc "The name of the table."]}
+    let context_ = "GetTableAutoScalingSettingsRequest"
+    let make ~keyspaceName =
+      fun ~tableName -> fun () -> { keyspaceName; tableName }
+    let to_value x =
+      structure_to_value
+        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
+        ("tableName", (Some (TableName.to_value x.tableName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tableName =
+        TableName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "tableName") in
       let keyspaceName =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ~resourceArn ~keyspaceName ()
+      make ~tableName ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "tableName" TableName.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ~resourceArn ~keyspaceName ()
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ~tableName ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name and the Amazon Resource Name (ARN) of the specified table."]
+       "Returns auto scaling related settings of the specified table in JSON format. If the table is a multi-Region table, the Amazon Web Services Region specific auto scaling settings of the table are included. Amazon Keyspaces auto scaling helps you provision throughput capacity for variable workloads efficiently by increasing and decreasing your table's read and write capacity automatically in response to application traffic. For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide. GetTableAutoScalingSettings can't be used as an action in an IAM policy. To define permissions for GetTableAutoScalingSettings, you must allow the following two actions in the IAM policy statement's Action element: application-autoscaling:DescribeScalableTargets application-autoscaling:DescribeScalingPolicies"]
+module GetKeyspaceResponse =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t option
+        [@ocaml.doc "The name of the keyspace."];
+      resourceArn: ARN.t option
+        [@ocaml.doc "Returns the ARN of the keyspace."];
+      replicationStrategy: Rs.t option
+        [@ocaml.doc
+          "Returns the replication strategy of the keyspace. The options are SINGLE_REGION or MULTI_REGION."];
+      replicationRegions: RegionList.t option
+        [@ocaml.doc
+          "If the replicationStrategy of the keyspace is MULTI_REGION, a list of replication Regions is returned."];
+      replicationGroupStatuses: ReplicationGroupStatusList.t option
+        [@ocaml.doc
+          "A list of all Regions the keyspace is replicated in after the update keyspace operation and their status."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyspaceName =
+      fun ?resourceArn ->
+        fun ?replicationStrategy ->
+          fun ?replicationRegions ->
+            fun ?replicationGroupStatuses ->
+              fun () ->
+                {
+                  keyspaceName;
+                  resourceArn;
+                  replicationStrategy;
+                  replicationRegions;
+                  replicationGroupStatuses
+                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("keyspaceName",
+           (Option.map x.keyspaceName ~f:KeyspaceName.to_value));
+        ("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value));
+        ("replicationStrategy",
+          (Option.map x.replicationStrategy ~f:Rs.to_value));
+        ("replicationRegions",
+          (Option.map x.replicationRegions ~f:RegionList.to_value));
+        ("replicationGroupStatuses",
+          (Option.map x.replicationGroupStatuses
+             ~f:ReplicationGroupStatusList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let replicationGroupStatuses =
+        (Option.map ~f:ReplicationGroupStatusList.of_xml)
+          (Xml.child xml_arg0 "replicationGroupStatuses") in
+      let replicationRegions =
+        (Option.map ~f:RegionList.of_xml)
+          (Xml.child xml_arg0 "replicationRegions") in
+      let replicationStrategy =
+        (Option.map ~f:Rs.of_xml) (Xml.child xml_arg0 "replicationStrategy") in
+      let resourceArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      let keyspaceName =
+        (Option.map ~f:KeyspaceName.of_xml)
+          (Xml.child xml_arg0 "keyspaceName") in
+      make ?replicationGroupStatuses ?replicationRegions ?replicationStrategy
+        ?resourceArn ?keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let replicationGroupStatuses =
+        field_map json__ "replicationGroupStatuses"
+          ReplicationGroupStatusList.of_json in
+      let replicationRegions =
+        field_map json__ "replicationRegions" RegionList.of_json in
+      let replicationStrategy =
+        field_map json__ "replicationStrategy" Rs.of_json in
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      let keyspaceName = field_map json__ "keyspaceName" KeyspaceName.of_json in
+      make ?replicationGroupStatuses ?replicationRegions ?replicationStrategy
+        ?resourceArn ?keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the name of the specified keyspace, the Amazon Resource Name (ARN), the replication strategy, the Amazon Web Services Regions of a multi-Region keyspace, and the status of newly added Regions after an UpdateKeyspace operation."]
 module GetKeyspaceRequest =
   struct
     type nonrec t =
@@ -2651,13 +4881,148 @@ module GetKeyspaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
       make ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name and the Amazon Resource Name (ARN) of the specified table."]
+       "Returns the name of the specified keyspace, the Amazon Resource Name (ARN), the replication strategy, the Amazon Web Services Regions of a multi-Region keyspace, and the status of newly added Regions after an UpdateKeyspace operation."]
+module DeleteTypeResponse =
+  struct
+    type nonrec t =
+      {
+      keyspaceArn: ARN.t option
+        [@ocaml.doc
+          "The unique identifier of the keyspace from which the type was deleted in the format of an Amazon Resource Name (ARN)."];
+      typeName: TypeName.t option
+        [@ocaml.doc "The name of the type that was deleted."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?keyspaceArn =
+      fun ?typeName -> fun () -> { keyspaceArn; typeName }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("keyspaceArn", (Option.map x.keyspaceArn ~f:ARN.to_value));
+        ("typeName", (Option.map x.typeName ~f:TypeName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let typeName =
+        (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "typeName") in
+      let keyspaceArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "keyspaceArn") in
+      make ?typeName ?keyspaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let typeName = field_map json__ "typeName" TypeName.of_json in
+      let keyspaceArn = field_map json__ "keyspaceArn" ARN.of_json in
+      make ?typeName ?keyspaceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The DeleteType operation deletes a user-defined type (UDT). You can only delete a type that is not used in a table or another UDT. To configure the required permissions, see Permissions to delete a UDT in the Amazon Keyspaces Developer Guide."]
+module DeleteTypeRequest =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t
+        [@ocaml.doc "The name of the keyspace of the to be deleted type."];
+      typeName: TypeName.t [@ocaml.doc "The name of the type to be deleted."]}
+    let context_ = "DeleteTypeRequest"
+    let make ~keyspaceName =
+      fun ~typeName -> fun () -> { keyspaceName; typeName }
+    let to_value x =
+      structure_to_value
+        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
+        ("typeName", (Some (TypeName.to_value x.typeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let typeName =
+        TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "typeName") in
+      let keyspaceName =
+        KeyspaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
+      make ~typeName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let typeName = field_map_exn json__ "typeName" TypeName.of_json in
+      let keyspaceName =
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ~typeName ~keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The DeleteType operation deletes a user-defined type (UDT). You can only delete a type that is not used in a table or another UDT. To configure the required permissions, see Permissions to delete a UDT in the Amazon Keyspaces Developer Guide."]
 module DeleteTableResponse =
   struct
     type nonrec t = unit
@@ -2770,10 +5135,10 @@ module DeleteTableRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~tableName ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map_exn json "tableName" TableName.of_json in
+    let of_json json__ =
+      let tableName = field_map_exn json__ "tableName" TableName.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
       make ~tableName ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2883,20 +5248,23 @@ module DeleteKeyspaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
       make ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
       make ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The DeleteKeyspace operation deletes a keyspace and all of its tables."]
-module CreateTableResponse =
+module CreateTypeResponse =
   struct
     type nonrec t =
       {
-      resourceArn: ARN.t
+      keyspaceArn: ARN.t option
         [@ocaml.doc
-          "The unique identifier of the table in the format of an Amazon Resource Name (ARN)."]}
+          "The unique identifier of the keyspace that contains the new type in the format of an Amazon Resource Name (ARN)."];
+      typeName: TypeName.t option
+        [@ocaml.doc
+          "The formatted name of the user-defined type that was created. Note that Amazon Keyspaces requires the formatted name of the type for other operations, for example GetType."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2905,8 +5273,8 @@ module CreateTableResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateTableResponse"
-    let make ~resourceArn = fun () -> { resourceArn }
+    let make ?keyspaceArn =
+      fun ?typeName -> fun () -> { keyspaceArn; typeName }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2975,19 +5343,163 @@ module CreateTableResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("keyspaceArn", (Option.map x.keyspaceArn ~f:ARN.to_value));
+        ("typeName", (Option.map x.typeName ~f:TypeName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let typeName =
+        (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "typeName") in
+      let keyspaceArn =
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "keyspaceArn") in
+      make ?typeName ?keyspaceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let typeName = field_map json__ "typeName" TypeName.of_json in
+      let keyspaceArn = field_map json__ "keyspaceArn" ARN.of_json in
+      make ?typeName ?keyspaceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CreateType operation creates a new user-defined type in the specified keyspace. To configure the required permissions, see Permissions to create a UDT in the Amazon Keyspaces Developer Guide. For more information, see User-defined types (UDTs) in the Amazon Keyspaces Developer Guide."]
+module CreateTypeRequest =
+  struct
+    type nonrec t =
+      {
+      keyspaceName: KeyspaceName.t [@ocaml.doc "The name of the keyspace."];
+      typeName: TypeName.t
+        [@ocaml.doc
+          "The name of the user-defined type. UDT names must contain 48 characters or less, must begin with an alphabetic character, and can only contain alpha-numeric characters and underscores. Amazon Keyspaces converts upper case characters automatically into lower case characters. Alternatively, you can declare a UDT name in double quotes. When declaring a UDT name inside double quotes, Amazon Keyspaces preserves upper casing and allows special characters. You can also use double quotes as part of the name when you create the UDT, but you must escape each double quote character with an additional double quote character."];
+      fieldDefinitions: FieldList.t
+        [@ocaml.doc
+          "The field definitions, consisting of names and types, that define this type."]}
+    let context_ = "CreateTypeRequest"
+    let make ~keyspaceName =
+      fun ~typeName ->
+        fun ~fieldDefinitions ->
+          fun () -> { keyspaceName; typeName; fieldDefinitions }
+    let to_value x =
+      structure_to_value
+        [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
+        ("typeName", (Some (TypeName.to_value x.typeName)));
+        ("fieldDefinitions", (Some (FieldList.to_value x.fieldDefinitions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fieldDefinitions =
+        FieldList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fieldDefinitions") in
+      let typeName =
+        TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "typeName") in
+      let keyspaceName =
+        KeyspaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
+      make ~fieldDefinitions ~typeName ~keyspaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fieldDefinitions =
+        field_map_exn json__ "fieldDefinitions" FieldList.of_json in
+      let typeName = field_map_exn json__ "typeName" TypeName.of_json in
+      let keyspaceName =
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ~fieldDefinitions ~typeName ~keyspaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CreateType operation creates a new user-defined type in the specified keyspace. To configure the required permissions, see Permissions to create a UDT in the Amazon Keyspaces Developer Guide. For more information, see User-defined types (UDTs) in the Amazon Keyspaces Developer Guide."]
+module CreateTableResponse =
+  struct
+    type nonrec t =
+      {
+      resourceArn: ARN.t option
+        [@ocaml.doc
+          "The unique identifier of the table in the format of an Amazon Resource Name (ARN)."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceArn = fun () -> { resourceArn }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~resourceArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      make ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateTable operation adds a new table to the specified keyspace. Within a keyspace, table names must be unique. CreateTable is an asynchronous operation. When the request is received, the status of the table is set to CREATING. You can monitor the creation status of the new table by using the GetTable operation, which returns the current status of the table. You can start using a table when the status is ACTIVE. For more information, see Creating tables in the Amazon Keyspaces Developer Guide."]
+       "The CreateTable operation adds a new table to the specified keyspace. Within a keyspace, table names must be unique. CreateTable is an asynchronous operation. When the request is received, the status of the table is set to CREATING. You can monitor the creation status of the new table by using the GetTable operation, which returns the current status of the table. You can start using a table when the status is ACTIVE. For more information, see Create a table in the Amazon Keyspaces Developer Guide."]
 module CreateTableRequest =
   struct
     type nonrec t =
@@ -2998,28 +5510,42 @@ module CreateTableRequest =
       tableName: TableName.t [@ocaml.doc "The name of the table."];
       schemaDefinition: SchemaDefinition.t
         [@ocaml.doc
-          "The schemaDefinition consists of the following parameters. For each column to be created: \226\128\162 name - The name of the column. \226\128\162 type - An Amazon Keyspaces data type. For more information, see Data types in the Amazon Keyspaces Developer Guide. The primary key of the table consists of the following columns: \226\128\162 partitionKeys - The partition key can be a single column, or it can be a compound value composed of two or more columns. The partition key portion of the primary key is required and determines how Amazon Keyspaces stores your data. \226\128\162 name - The name of each partition key column. \226\128\162 clusteringKeys - The optional clustering column portion of your primary key determines how the data is clustered and sorted within each partition. \226\128\162 name - The name of the clustering column. \226\128\162 orderBy - Sets the ascendant (ASC) or descendant (DESC) order modifier. To define a column as static use staticColumns - Static columns store values that are shared by all rows in the same partition: \226\128\162 name - The name of the column. \226\128\162 type - An Amazon Keyspaces data type."];
+          "The schemaDefinition consists of the following parameters. For each column to be created: name - The name of the column. type - An Amazon Keyspaces data type. For more information, see Data types in the Amazon Keyspaces Developer Guide. The primary key of the table consists of the following columns: partitionKeys - The partition key can be a single column, or it can be a compound value composed of two or more columns. The partition key portion of the primary key is required and determines how Amazon Keyspaces stores your data. name - The name of each partition key column. clusteringKeys - The optional clustering column portion of your primary key determines how the data is clustered and sorted within each partition. name - The name of the clustering column. orderBy - Sets the ascendant (ASC) or descendant (DESC) order modifier. To define a column as static use staticColumns - Static columns store values that are shared by all rows in the same partition: name - The name of the column. type - An Amazon Keyspaces data type."];
       comment: Comment.t option
         [@ocaml.doc
           "This parameter allows to enter a description of the table."];
       capacitySpecification: CapacitySpecification.t option
         [@ocaml.doc
-          "Specifies the read/write throughput capacity mode for the table. The options are: \226\128\162 throughputMode:PAY_PER_REQUEST and \226\128\162 throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
+          "Specifies the read/write throughput capacity mode for the table. The options are: throughputMode:PAY_PER_REQUEST and throughputMode:PROVISIONED - Provisioned capacity mode requires readCapacityUnits and writeCapacityUnits as input. The default is throughput_mode:PAY_PER_REQUEST. For more information, see Read/write capacity modes in the Amazon Keyspaces Developer Guide."];
       encryptionSpecification: EncryptionSpecification.t option
         [@ocaml.doc
-          "Specifies how the encryption key for encryption at rest is managed for the table. You can choose one of the following KMS key (KMS key): \226\128\162 type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. \226\128\162 type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
+          "Specifies how the encryption key for encryption at rest is managed for the table. You can choose one of the following KMS key (KMS key): type:AWS_OWNED_KMS_KEY - This key is owned by Amazon Keyspaces. type:CUSTOMER_MANAGED_KMS_KEY - This key is stored in your account and is created, owned, and managed by you. This option requires the kms_key_identifier of the KMS key in Amazon Resource Name (ARN) format as input. The default is type:AWS_OWNED_KMS_KEY. For more information, see Encryption at rest in the Amazon Keyspaces Developer Guide."];
       pointInTimeRecovery: PointInTimeRecovery.t option
         [@ocaml.doc
-          "Specifies if pointInTimeRecovery is enabled or disabled for the table. The options are: \226\128\162 ENABLED \226\128\162 DISABLED If it's not specified, the default is DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
+          "Specifies if pointInTimeRecovery is enabled or disabled for the table. The options are: status=ENABLED status=DISABLED If it's not specified, the default is status=DISABLED. For more information, see Point-in-time recovery in the Amazon Keyspaces Developer Guide."];
       ttl: TimeToLive.t option
         [@ocaml.doc
-          "Enables Time to Live custom settings for the table. The options are: \226\128\162 status:enabled \226\128\162 status:disabled The default is status:disabled. After ttl is enabled, you can't disable it for the table. For more information, see Expiring data by using Amazon Keyspaces Time to Live (TTL) in the Amazon Keyspaces Developer Guide."];
+          "Enables Time to Live custom settings for the table. The options are: status:enabled status:disabled The default is status:disabled. After ttl is enabled, you can't disable it for the table. For more information, see Expiring data by using Amazon Keyspaces Time to Live (TTL) in the Amazon Keyspaces Developer Guide."];
       defaultTimeToLive: DefaultTimeToLive.t option
         [@ocaml.doc
           "The default Time to Live setting in seconds for the table. For more information, see Setting the default TTL value for a table in the Amazon Keyspaces Developer Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pair tags to be attached to the resource. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."]}
+          "A list of key-value pair tags to be attached to the resource. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."];
+      clientSideTimestamps: ClientSideTimestamps.t option
+        [@ocaml.doc
+          "Enables client-side timestamps for the table. By default, the setting is disabled. You can enable client-side timestamps with the following option: status: \"enabled\" Once client-side timestamps are enabled for a table, this setting cannot be disabled."];
+      autoScalingSpecification: AutoScalingSpecification.t option
+        [@ocaml.doc
+          "The optional auto scaling settings for a table in provisioned capacity mode. Specifies if the service can manage throughput capacity automatically on your behalf. Auto scaling helps you provision throughput capacity for variable workloads efficiently by increasing and decreasing your table's read and write capacity automatically in response to application traffic. For more information, see Managing throughput capacity automatically with Amazon Keyspaces auto scaling in the Amazon Keyspaces Developer Guide. By default, auto scaling is disabled for a table."];
+      replicaSpecifications: ReplicaSpecificationList.t option
+        [@ocaml.doc
+          "The optional Amazon Web Services Region specific settings of a multi-Region table. These settings overwrite the general settings of the table for the specified Region. For a multi-Region table in provisioned capacity mode, you can configure the table's read capacity differently for each Region's replica. The write capacity, however, remains synchronized between all replicas to ensure that there's enough capacity to replicate writes across all Regions. To define the read capacity for a table replica in a specific Region, you can do so by configuring the following parameters. region: The Region where these settings are applied. (Required) readCapacityUnits: The provisioned read capacity units. (Optional) readCapacityAutoScaling: The read capacity auto scaling settings for the table. (Optional)"];
+      cdcSpecification: CdcSpecification.t option
+        [@ocaml.doc "The CDC stream settings of the table."];
+      warmThroughputSpecification: WarmThroughputSpecification.t option
+        [@ocaml.doc
+          "Specifies the warm throughput settings for the table. Pre-warming a table helps you avoid capacity exceeded exceptions by pre-provisioning read and write capacity units to reduce cold start latency when your table receives traffic. For more information about pre-warming in Amazon Keyspaces, see Pre-warm a table in Amazon Keyspaces in the Amazon Keyspaces Developer Guide."]}
     let context_ = "CreateTableRequest"
     let make ?comment =
       fun ?capacitySpecification ->
@@ -3028,22 +5554,32 @@ module CreateTableRequest =
             fun ?ttl ->
               fun ?defaultTimeToLive ->
                 fun ?tags ->
-                  fun ~keyspaceName ->
-                    fun ~tableName ->
-                      fun ~schemaDefinition ->
-                        fun () ->
-                          {
-                            comment;
-                            capacitySpecification;
-                            encryptionSpecification;
-                            pointInTimeRecovery;
-                            ttl;
-                            defaultTimeToLive;
-                            tags;
-                            keyspaceName;
-                            tableName;
-                            schemaDefinition
-                          }
+                  fun ?clientSideTimestamps ->
+                    fun ?autoScalingSpecification ->
+                      fun ?replicaSpecifications ->
+                        fun ?cdcSpecification ->
+                          fun ?warmThroughputSpecification ->
+                            fun ~keyspaceName ->
+                              fun ~tableName ->
+                                fun ~schemaDefinition ->
+                                  fun () ->
+                                    {
+                                      comment;
+                                      capacitySpecification;
+                                      encryptionSpecification;
+                                      pointInTimeRecovery;
+                                      ttl;
+                                      defaultTimeToLive;
+                                      tags;
+                                      clientSideTimestamps;
+                                      autoScalingSpecification;
+                                      replicaSpecifications;
+                                      cdcSpecification;
+                                      warmThroughputSpecification;
+                                      keyspaceName;
+                                      tableName;
+                                      schemaDefinition
+                                    }
     let to_value x =
       structure_to_value
         [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
@@ -3062,9 +5598,37 @@ module CreateTableRequest =
         ("ttl", (Option.map x.ttl ~f:TimeToLive.to_value));
         ("defaultTimeToLive",
           (Option.map x.defaultTimeToLive ~f:DefaultTimeToLive.to_value));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("clientSideTimestamps",
+          (Option.map x.clientSideTimestamps ~f:ClientSideTimestamps.to_value));
+        ("autoScalingSpecification",
+          (Option.map x.autoScalingSpecification
+             ~f:AutoScalingSpecification.to_value));
+        ("replicaSpecifications",
+          (Option.map x.replicaSpecifications
+             ~f:ReplicaSpecificationList.to_value));
+        ("cdcSpecification",
+          (Option.map x.cdcSpecification ~f:CdcSpecification.to_value));
+        ("warmThroughputSpecification",
+          (Option.map x.warmThroughputSpecification
+             ~f:WarmThroughputSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let warmThroughputSpecification =
+        (Option.map ~f:WarmThroughputSpecification.of_xml)
+          (Xml.child xml_arg0 "warmThroughputSpecification") in
+      let cdcSpecification =
+        (Option.map ~f:CdcSpecification.of_xml)
+          (Xml.child xml_arg0 "cdcSpecification") in
+      let replicaSpecifications =
+        (Option.map ~f:ReplicaSpecificationList.of_xml)
+          (Xml.child xml_arg0 "replicaSpecifications") in
+      let autoScalingSpecification =
+        (Option.map ~f:AutoScalingSpecification.of_xml)
+          (Xml.child xml_arg0 "autoScalingSpecification") in
+      let clientSideTimestamps =
+        (Option.map ~f:ClientSideTimestamps.of_xml)
+          (Xml.child xml_arg0 "clientSideTimestamps") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let defaultTimeToLive =
         (Option.map ~f:DefaultTimeToLive.of_xml)
@@ -3090,39 +5654,57 @@ module CreateTableRequest =
       let keyspaceName =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ?tags ?defaultTimeToLive ?ttl ?pointInTimeRecovery
-        ?encryptionSpecification ?capacitySpecification ?comment
-        ~schemaDefinition ~tableName ~keyspaceName ()
+      make ?warmThroughputSpecification ?cdcSpecification
+        ?replicaSpecifications ?autoScalingSpecification
+        ?clientSideTimestamps ?tags ?defaultTimeToLive ?ttl
+        ?pointInTimeRecovery ?encryptionSpecification ?capacitySpecification
+        ?comment ~schemaDefinition ~tableName ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let warmThroughputSpecification =
+        field_map json__ "warmThroughputSpecification"
+          WarmThroughputSpecification.of_json in
+      let cdcSpecification =
+        field_map json__ "cdcSpecification" CdcSpecification.of_json in
+      let replicaSpecifications =
+        field_map json__ "replicaSpecifications"
+          ReplicaSpecificationList.of_json in
+      let autoScalingSpecification =
+        field_map json__ "autoScalingSpecification"
+          AutoScalingSpecification.of_json in
+      let clientSideTimestamps =
+        field_map json__ "clientSideTimestamps" ClientSideTimestamps.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let defaultTimeToLive =
-        field_map json "defaultTimeToLive" DefaultTimeToLive.of_json in
-      let ttl = field_map json "ttl" TimeToLive.of_json in
+        field_map json__ "defaultTimeToLive" DefaultTimeToLive.of_json in
+      let ttl = field_map json__ "ttl" TimeToLive.of_json in
       let pointInTimeRecovery =
-        field_map json "pointInTimeRecovery" PointInTimeRecovery.of_json in
+        field_map json__ "pointInTimeRecovery" PointInTimeRecovery.of_json in
       let encryptionSpecification =
-        field_map json "encryptionSpecification"
+        field_map json__ "encryptionSpecification"
           EncryptionSpecification.of_json in
       let capacitySpecification =
-        field_map json "capacitySpecification" CapacitySpecification.of_json in
-      let comment = field_map json "comment" Comment.of_json in
+        field_map json__ "capacitySpecification"
+          CapacitySpecification.of_json in
+      let comment = field_map json__ "comment" Comment.of_json in
       let schemaDefinition =
-        field_map_exn json "schemaDefinition" SchemaDefinition.of_json in
-      let tableName = field_map_exn json "tableName" TableName.of_json in
+        field_map_exn json__ "schemaDefinition" SchemaDefinition.of_json in
+      let tableName = field_map_exn json__ "tableName" TableName.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ?tags ?defaultTimeToLive ?ttl ?pointInTimeRecovery
-        ?encryptionSpecification ?capacitySpecification ?comment
-        ~schemaDefinition ~tableName ~keyspaceName ()
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ?warmThroughputSpecification ?cdcSpecification
+        ?replicaSpecifications ?autoScalingSpecification
+        ?clientSideTimestamps ?tags ?defaultTimeToLive ?ttl
+        ?pointInTimeRecovery ?encryptionSpecification ?capacitySpecification
+        ?comment ~schemaDefinition ~tableName ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateTable operation adds a new table to the specified keyspace. Within a keyspace, table names must be unique. CreateTable is an asynchronous operation. When the request is received, the status of the table is set to CREATING. You can monitor the creation status of the new table by using the GetTable operation, which returns the current status of the table. You can start using a table when the status is ACTIVE. For more information, see Creating tables in the Amazon Keyspaces Developer Guide."]
+       "The CreateTable operation adds a new table to the specified keyspace. Within a keyspace, table names must be unique. CreateTable is an asynchronous operation. When the request is received, the status of the table is set to CREATING. You can monitor the creation status of the new table by using the GetTable operation, which returns the current status of the table. You can start using a table when the status is ACTIVE. For more information, see Create a table in the Amazon Keyspaces Developer Guide."]
 module CreateKeyspaceResponse =
   struct
     type nonrec t =
       {
-      resourceArn: ARN.t
+      resourceArn: ARN.t option
         [@ocaml.doc
           "The unique identifier of the keyspace in the format of an Amazon Resource Name (ARN)."]}
     type nonrec error =
@@ -3132,8 +5714,7 @@ module CreateKeyspaceResponse =
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateKeyspaceResponse"
-    let make ~resourceArn = fun () -> { resourceArn }
+    let make ?resourceArn = fun () -> { resourceArn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3194,19 +5775,19 @@ module CreateKeyspaceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (ARN.to_value x.resourceArn)))]
+        [("resourceArn", (Option.map x.resourceArn ~f:ARN.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
-      make ~resourceArn ()
+        (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "resourceArn") in
+      make ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ARN.of_json in
-      make ~resourceArn ()
+    let of_json json__ =
+      let resourceArn = field_map json__ "resourceArn" ARN.of_json in
+      make ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateKeyspace operation adds a new keyspace to your account. In an Amazon Web Services account, keyspace names must be unique within each Region. CreateKeyspace is an asynchronous operation. You can monitor the creation status of the new keyspace by using the GetKeyspace operation. For more information, see Creating keyspaces in the Amazon Keyspaces Developer Guide."]
+       "The CreateKeyspace operation adds a new keyspace to your account. In an Amazon Web Services account, keyspace names must be unique within each Region. CreateKeyspace is an asynchronous operation. You can monitor the creation status of the new keyspace by using the GetKeyspace operation. For more information, see Create a keyspace in the Amazon Keyspaces Developer Guide."]
 module CreateKeyspaceRequest =
   struct
     type nonrec t =
@@ -3215,26 +5796,41 @@ module CreateKeyspaceRequest =
         [@ocaml.doc "The name of the keyspace to be created."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of key-value pair tags to be attached to the keyspace. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."]}
+          "A list of key-value pair tags to be attached to the keyspace. For more information, see Adding tags and labels to Amazon Keyspaces resources in the Amazon Keyspaces Developer Guide."];
+      replicationSpecification: ReplicationSpecification.t option
+        [@ocaml.doc
+          "The replication specification of the keyspace includes: replicationStrategy - the required value is SINGLE_REGION or MULTI_REGION. regionList - if the replicationStrategy is MULTI_REGION, the regionList requires the current Region and at least one additional Amazon Web Services Region where the keyspace is going to be replicated in."]}
     let context_ = "CreateKeyspaceRequest"
-    let make ?tags = fun ~keyspaceName -> fun () -> { tags; keyspaceName }
+    let make ?tags =
+      fun ?replicationSpecification ->
+        fun ~keyspaceName ->
+          fun () -> { tags; replicationSpecification; keyspaceName }
     let to_value x =
       structure_to_value
         [("keyspaceName", (Some (KeyspaceName.to_value x.keyspaceName)));
-        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
+        ("replicationSpecification",
+          (Option.map x.replicationSpecification
+             ~f:ReplicationSpecification.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let replicationSpecification =
+        (Option.map ~f:ReplicationSpecification.of_xml)
+          (Xml.child xml_arg0 "replicationSpecification") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let keyspaceName =
         KeyspaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "keyspaceName") in
-      make ?tags ~keyspaceName ()
+      make ?replicationSpecification ?tags ~keyspaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let replicationSpecification =
+        field_map json__ "replicationSpecification"
+          ReplicationSpecification.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let keyspaceName =
-        field_map_exn json "keyspaceName" KeyspaceName.of_json in
-      make ?tags ~keyspaceName ()
+        field_map_exn json__ "keyspaceName" KeyspaceName.of_json in
+      make ?replicationSpecification ?tags ~keyspaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The CreateKeyspace operation adds a new keyspace to your account. In an Amazon Web Services account, keyspace names must be unique within each Region. CreateKeyspace is an asynchronous operation. You can monitor the creation status of the new keyspace by using the GetKeyspace operation. For more information, see Creating keyspaces in the Amazon Keyspaces Developer Guide."]
+       "The CreateKeyspace operation adds a new keyspace to your account. In an Amazon Web Services account, keyspace names must be unique within each Region. CreateKeyspace is an asynchronous operation. You can monitor the creation status of the new keyspace by using the GetKeyspace operation. For more information, see Create a keyspace in the Amazon Keyspaces Developer Guide."]

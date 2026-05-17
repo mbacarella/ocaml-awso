@@ -24,6 +24,58 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module WatchlistId =
+  struct
+    type nonrec t = string
+    let context_ = "WatchlistId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:22) >>=
+             (fun () ->
+                (check_string_max i ~max:22) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9]{22}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WatchlistId" j
+    let to_json = simple_to_json to_value
+  end
+module EnrollmentJobFraudDetectionConfigWatchlistIds =
+  struct
+    type nonrec t = WatchlistId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WatchlistId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WatchlistId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EnrollmentJobFraudDetectionConfigWatchlistIds"
+        ~of_json:WatchlistId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FraudDetectionAction =
   struct
     type nonrec t =
@@ -106,6 +158,37 @@ module KmsKeyId =
     let of_json j = string_of_json ~kind:"KmsKeyId" j
     let to_json = simple_to_json to_value
   end
+module ServerSideEncryptionUpdateStatus =
+  struct
+    type nonrec t =
+      | IN_PROGRESS 
+      | COMPLETED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | COMPLETED -> "COMPLETED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "COMPLETED" -> COMPLETED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServerSideEncryptionUpdateStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServerSideEncryptionUpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module GeneratedFraudsterId =
   struct
     type nonrec t = string
@@ -179,32 +262,46 @@ module EnrollmentJobFraudDetectionConfig =
           "The action to take when the given speaker is flagged by the fraud detection system. The default value is FAIL, which fails the speaker enrollment. Changing this value to IGNORE results in the speaker being enrolled even if they are flagged by the fraud detection system."];
       riskThreshold: Score.t option
         [@ocaml.doc
-          "Threshold value for determining whether the speaker is a high risk to be fraudulent. If the detected risk score calculated by Voice ID is greater than or equal to the threshold, the speaker is considered a fraudster."]}
+          "Threshold value for determining whether the speaker is a high risk to be fraudulent. If the detected risk score calculated by Voice ID is greater than or equal to the threshold, the speaker is considered a fraudster."];
+      watchlistIds: EnrollmentJobFraudDetectionConfigWatchlistIds.t option
+        [@ocaml.doc
+          "The identifier of watchlists against which fraud detection is performed."]}
     let make ?fraudDetectionAction =
-      fun ?riskThreshold -> fun () -> { fraudDetectionAction; riskThreshold }
+      fun ?riskThreshold ->
+        fun ?watchlistIds ->
+          fun () -> { fraudDetectionAction; riskThreshold; watchlistIds }
     let to_value x =
       structure_to_value
         [("FraudDetectionAction",
            (Option.map x.fraudDetectionAction
               ~f:FraudDetectionAction.to_value));
-        ("RiskThreshold", (Option.map x.riskThreshold ~f:Score.to_value))]
+        ("RiskThreshold", (Option.map x.riskThreshold ~f:Score.to_value));
+        ("WatchlistIds",
+          (Option.map x.watchlistIds
+             ~f:EnrollmentJobFraudDetectionConfigWatchlistIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let watchlistIds =
+        (Option.map ~f:EnrollmentJobFraudDetectionConfigWatchlistIds.of_xml)
+          (Xml.child xml_arg0 "WatchlistIds") in
       let riskThreshold =
         (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "RiskThreshold") in
       let fraudDetectionAction =
         (Option.map ~f:FraudDetectionAction.of_xml)
           (Xml.child xml_arg0 "FraudDetectionAction") in
-      make ?riskThreshold ?fraudDetectionAction ()
+      make ?watchlistIds ?riskThreshold ?fraudDetectionAction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskThreshold = field_map json "RiskThreshold" Score.of_json in
+    let of_json json__ =
+      let watchlistIds =
+        field_map json__ "WatchlistIds"
+          EnrollmentJobFraudDetectionConfigWatchlistIds.of_json in
+      let riskThreshold = field_map json__ "RiskThreshold" Score.of_json in
       let fraudDetectionAction =
-        field_map json "FraudDetectionAction" FraudDetectionAction.of_json in
-      make ?riskThreshold ?fraudDetectionAction ()
+        field_map json__ "FraudDetectionAction" FraudDetectionAction.of_json in
+      make ?watchlistIds ?riskThreshold ?fraudDetectionAction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration defining the action to take when a speaker is flagged by the fraud detection system during a batch speaker enrollment job, and the risk threshold to use for identification."]
+       "The fraud detection configuration to be used during the batch speaker enrollment job."]
 module ExistingEnrollmentAction =
   struct
     type nonrec t =
@@ -282,25 +379,49 @@ module DuplicateRegistrationAction =
       of_string (string_of_json ~kind:"DuplicateRegistrationAction" j)
     let to_json = simple_to_json to_value
   end
-module CustomerSpeakerId =
+module RegistrationConfigWatchlistIds =
   struct
-    type nonrec t = string
-    let context_ = "CustomerSpeakerId"
+    type nonrec t = WatchlistId.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")));
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WatchlistId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CustomerSpeakerId" j
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WatchlistId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RegistrationConfigWatchlistIds"
+        ~of_json:WatchlistId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module DomainId =
@@ -321,6 +442,82 @@ module DomainId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"DomainId" j
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module WatchlistDescription =
+  struct
+    type nonrec t = string
+    let context_ = "WatchlistDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-%@]*)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WatchlistDescription" j
+    let to_json = simple_to_json to_value
+  end
+module WatchlistName =
+  struct
+    type nonrec t = string
+    let context_ = "WatchlistName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WatchlistName" j
+    let to_json = simple_to_json to_value
+  end
+module CustomerSpeakerId =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerSpeakerId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9_-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerSpeakerId" j
     let to_json = simple_to_json to_value
   end
 module GeneratedSpeakerId =
@@ -374,18 +571,6 @@ module SpeakerStatus =
     let of_json j = of_string (string_of_json ~kind:"SpeakerStatus" j)
     let to_json = simple_to_json to_value
   end
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
-  end
 module FailureDetails =
   struct
     type nonrec t =
@@ -409,9 +594,9 @@ module FailureDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?statusCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusCode = field_map json "StatusCode" Integer.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let statusCode = field_map json__ "StatusCode" Integer.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?statusCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains error details for a failed batch job."]
@@ -474,8 +659,8 @@ module JobProgress =
         (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "PercentComplete") in
       make ?percentComplete ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let percentComplete = field_map json "PercentComplete" Score.of_json in
+    let of_json json__ =
+      let percentComplete = field_map json__ "PercentComplete" Score.of_json in
       make ?percentComplete ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Indicates the completion progress for a batch job."]
@@ -515,6 +700,34 @@ module SpeakerEnrollmentJobStatus =
     let of_json j =
       of_string (string_of_json ~kind:"SpeakerEnrollmentJobStatus" j)
     let to_json = simple_to_json to_value
+  end
+module ResponseWatchlistIds =
+  struct
+    type nonrec t = WatchlistId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:WatchlistId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:WatchlistId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseWatchlistIds" ~of_json:WatchlistId.of_json
+        j
+    let to_json v = composed_to_json to_value v
   end
 module FraudsterRegistrationJobStatus =
   struct
@@ -648,7 +861,7 @@ module ServerSideEncryptionConfiguration =
       {
       kmsKeyId: KmsKeyId.t
         [@ocaml.doc
-          "The identifier of the KMS Key you want Voice ID to use to encrypt your data."]}
+          "The identifier of the KMS key to use to encrypt data stored by Voice ID. Voice ID doesn't support asymmetric customer managed keys."]}
     let context_ = "ServerSideEncryptionConfiguration"
     let make ~kmsKeyId = fun () -> { kmsKeyId }
     let to_value x =
@@ -660,22 +873,97 @@ module ServerSideEncryptionConfiguration =
         KmsKeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKeyId") in
       make ~kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map_exn json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map_exn json__ "KmsKeyId" KmsKeyId.of_json in
       make ~kmsKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration containing information about the customer-managed KMS Key used for encrypting customer data."]
+       "The configuration containing information about the customer managed key used for encrypting customer data."]
+module ServerSideEncryptionUpdateDetails =
+  struct
+    type nonrec t =
+      {
+      message: String_.t option
+        [@ocaml.doc
+          "Message explaining the current UpdateStatus. When the UpdateStatus is FAILED, this message explains the cause of the failure."];
+      oldKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The previous KMS key ID the domain was encrypted with, before ServerSideEncryptionConfiguration was updated to a new KMS key ID."];
+      updateStatus: ServerSideEncryptionUpdateStatus.t option
+        [@ocaml.doc
+          "Status of the server-side encryption update. During an update, if there is an issue with the domain's current or old KMS key ID, such as an inaccessible or disabled key, then the status is FAILED. In order to resolve this, the key needs to be made accessible, and then an UpdateDomain call with the existing server-side encryption configuration will re-attempt this update process."]}
+    let make ?message =
+      fun ?oldKmsKeyId ->
+        fun ?updateStatus -> fun () -> { message; oldKmsKeyId; updateStatus }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value));
+        ("OldKmsKeyId", (Option.map x.oldKmsKeyId ~f:KmsKeyId.to_value));
+        ("UpdateStatus",
+          (Option.map x.updateStatus
+             ~f:ServerSideEncryptionUpdateStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateStatus =
+        (Option.map ~f:ServerSideEncryptionUpdateStatus.of_xml)
+          (Xml.child xml_arg0 "UpdateStatus") in
+      let oldKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "OldKmsKeyId") in
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?updateStatus ?oldKmsKeyId ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateStatus =
+        field_map json__ "UpdateStatus"
+          ServerSideEncryptionUpdateStatus.of_json in
+      let oldKmsKeyId = field_map json__ "OldKmsKeyId" KmsKeyId.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      make ?updateStatus ?oldKmsKeyId ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the most recent server-side encryption configuration update. When the server-side encryption configuration is changed, dependency on the old KMS key is removed through an asynchronous process. When this update is complete, the domain\226\128\153s data can only be accessed using the new KMS key."]
+module WatchlistDetails =
+  struct
+    type nonrec t =
+      {
+      defaultWatchlistId: WatchlistId.t option
+        [@ocaml.doc "The identifier of the default watchlist."]}
+    let make ?defaultWatchlistId = fun () -> { defaultWatchlistId }
+    let to_value x =
+      structure_to_value
+        [("DefaultWatchlistId",
+           (Option.map x.defaultWatchlistId ~f:WatchlistId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let defaultWatchlistId =
+        (Option.map ~f:WatchlistId.of_xml)
+          (Xml.child xml_arg0 "DefaultWatchlistId") in
+      make ?defaultWatchlistId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let defaultWatchlistId =
+        field_map json__ "DefaultWatchlistId" WatchlistId.of_json in
+      make ?defaultWatchlistId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of the watchlists in a domain."]
 module FraudDetectionReason =
   struct
     type nonrec t =
       | KNOWN_FRAUDSTER 
+      | VOICE_SPOOFING 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | KNOWN_FRAUDSTER -> "KNOWN_FRAUDSTER" | Non_static_id s -> s
+      function
+      | KNOWN_FRAUDSTER -> "KNOWN_FRAUDSTER"
+      | VOICE_SPOOFING -> "VOICE_SPOOFING"
+      | Non_static_id s -> s
     let of_string =
-      function | "KNOWN_FRAUDSTER" -> KNOWN_FRAUDSTER | x -> Non_static_id x
+      function
+      | "KNOWN_FRAUDSTER" -> KNOWN_FRAUDSTER
+      | "VOICE_SPOOFING" -> VOICE_SPOOFING
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -692,35 +980,57 @@ module KnownFraudsterRisk =
       generatedFraudsterId: GeneratedFraudsterId.t option
         [@ocaml.doc
           "The identifier of the fraudster that is the closest match to the speaker. If there are no fraudsters registered in a given domain, or if there are no fraudsters with a non-zero RiskScore, this value is null."];
-      riskScore: Score.t
+      riskScore: Score.t option
         [@ocaml.doc
           "The score indicating the likelihood the speaker is a known fraudster."]}
-    let context_ = "KnownFraudsterRisk"
     let make ?generatedFraudsterId =
-      fun ~riskScore -> fun () -> { generatedFraudsterId; riskScore }
+      fun ?riskScore -> fun () -> { generatedFraudsterId; riskScore }
     let to_value x =
       structure_to_value
         [("GeneratedFraudsterId",
            (Option.map x.generatedFraudsterId
               ~f:GeneratedFraudsterId.to_value));
-        ("RiskScore", (Some (Score.to_value x.riskScore)))]
+        ("RiskScore", (Option.map x.riskScore ~f:Score.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let riskScore =
-        Score.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RiskScore") in
+        (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "RiskScore") in
       let generatedFraudsterId =
         (Option.map ~f:GeneratedFraudsterId.of_xml)
           (Xml.child xml_arg0 "GeneratedFraudsterId") in
-      make ~riskScore ?generatedFraudsterId ()
+      make ?riskScore ?generatedFraudsterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskScore = field_map_exn json "RiskScore" Score.of_json in
+    let of_json json__ =
+      let riskScore = field_map json__ "RiskScore" Score.of_json in
       let generatedFraudsterId =
-        field_map json "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
-      make ~riskScore ?generatedFraudsterId ()
+        field_map json__ "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
+      make ?riskScore ?generatedFraudsterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains details produced as a result of performing known fraudster risk analysis on a speaker."]
+module VoiceSpoofingRisk =
+  struct
+    type nonrec t =
+      {
+      riskScore: Score.t option
+        [@ocaml.doc
+          "The score indicating the likelihood of speaker\226\128\153s voice being spoofed."]}
+    let make ?riskScore = fun () -> { riskScore }
+    let to_value x =
+      structure_to_value
+        [("RiskScore", (Option.map x.riskScore ~f:Score.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let riskScore =
+        (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "RiskScore") in
+      make ?riskScore ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let riskScore = field_map json__ "RiskScore" Score.of_json in
+      make ?riskScore ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details resulting from 'Voice Spoofing Risk' analysis of the speaker."]
 module ConflictType =
   struct
     type nonrec t =
@@ -731,6 +1041,9 @@ module ConflictType =
       | SPEAKER_NOT_SET 
       | SPEAKER_OPTED_OUT 
       | CONCURRENT_CHANGES 
+      | DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES 
+      | CANNOT_DELETE_NON_EMPTY_WATCHLIST 
+      | FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -743,6 +1056,12 @@ module ConflictType =
       | SPEAKER_NOT_SET -> "SPEAKER_NOT_SET"
       | SPEAKER_OPTED_OUT -> "SPEAKER_OPTED_OUT"
       | CONCURRENT_CHANGES -> "CONCURRENT_CHANGES"
+      | DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES ->
+          "DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES"
+      | CANNOT_DELETE_NON_EMPTY_WATCHLIST ->
+          "CANNOT_DELETE_NON_EMPTY_WATCHLIST"
+      | FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST ->
+          "FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST"
       | Non_static_id s -> s
     let of_string =
       function
@@ -754,6 +1073,12 @@ module ConflictType =
       | "SPEAKER_NOT_SET" -> SPEAKER_NOT_SET
       | "SPEAKER_OPTED_OUT" -> SPEAKER_OPTED_OUT
       | "CONCURRENT_CHANGES" -> CONCURRENT_CHANGES
+      | "DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES" ->
+          DOMAIN_LOCKED_FROM_ENCRYPTION_UPDATES
+      | "CANNOT_DELETE_NON_EMPTY_WATCHLIST" ->
+          CANNOT_DELETE_NON_EMPTY_WATCHLIST
+      | "FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST" ->
+          FRAUDSTER_MUST_BELONG_TO_AT_LEAST_ONE_WATCHLIST
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -772,6 +1097,7 @@ module ResourceType =
       | FRAUDSTER 
       | SESSION 
       | SPEAKER 
+      | WATCHLIST 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -782,6 +1108,7 @@ module ResourceType =
       | FRAUDSTER -> "FRAUDSTER"
       | SESSION -> "SESSION"
       | SPEAKER -> "SPEAKER"
+      | WATCHLIST -> "WATCHLIST"
       | Non_static_id s -> s
     let of_string =
       function
@@ -791,6 +1118,7 @@ module ResourceType =
       | "FRAUDSTER" -> FRAUDSTER
       | "SESSION" -> SESSION
       | "SPEAKER" -> SPEAKER
+      | "WATCHLIST" -> WATCHLIST
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -806,10 +1134,10 @@ module Tag =
       {
       key: TagKey.t
         [@ocaml.doc
-          "The first part of a key:value pair that forms a tag associated with a given resource. For example, in the tag \226\128\152Department\226\128\153:\226\128\153Sales\226\128\153, the key is 'Department'."];
+          "The first part of a key:value pair that forms a tag associated with a given resource. For example, in the tag 'Department':'Sales', the key is 'Department'."];
       value: TagValue.t
         [@ocaml.doc
-          "The second part of a key:value pair that forms a tag associated with a given resource. For example, in the tag \226\128\152Department\226\128\153:\226\128\153Sales\226\128\153, the value is 'Sales'."]}
+          "The second part of a key:value pair that forms a tag associated with a given resource. For example, in the tag 'Department':'Sales', the value is 'Sales'."]}
     let context_ = "Tag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -824,12 +1152,13 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A tag that can be assigned to a Voice ID resource."]
+  end[@@ocaml.doc
+       "The tags used to organize, track, or control access for this resource. For example, \\{ \"tags\": \\{\"key1\":\"value1\", \"key2\":\"value2\"\\} \\}."]
 module EnrollmentConfig =
   struct
     type nonrec t =
@@ -861,12 +1190,12 @@ module EnrollmentConfig =
           (Xml.child xml_arg0 "ExistingEnrollmentAction") in
       make ?fraudDetectionConfig ?existingEnrollmentAction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fraudDetectionConfig =
-        field_map json "FraudDetectionConfig"
+        field_map json__ "FraudDetectionConfig"
           EnrollmentJobFraudDetectionConfig.of_json in
       let existingEnrollmentAction =
-        field_map json "ExistingEnrollmentAction"
+        field_map json__ "ExistingEnrollmentAction"
           ExistingEnrollmentAction.of_json in
       make ?fraudDetectionConfig ?existingEnrollmentAction ()
     let to_json v = composed_to_json to_value v
@@ -911,8 +1240,9 @@ module InputDataConfig =
         S3Uri.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Uri") in
       make ~s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in make ~s3Uri ()
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      make ~s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration containing input file information for a batch job."]
@@ -922,10 +1252,10 @@ module OutputDataConfig =
       {
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
-          "the identifier of the KMS key you want Voice ID to use to encrypt the output file of the fraudster registration job."];
+          "The identifier of the KMS key you want Voice ID to use to encrypt the output file of a speaker enrollment job/fraudster registration job."];
       s3Uri: S3Uri.t
         [@ocaml.doc
-          "The S3 path of the folder to which Voice ID writes the job output file, which has a *.out extension. For example, if the input file name is input-file.json and the output folder path is s3://output-bucket/output-folder, the full output file path is s3://output-bucket/output-folder/job-Id/input-file.json.out."]}
+          "The S3 path of the folder where Voice ID writes the job output file. It has a *.out extension. For example, if the input file name is input-file.json and the output folder path is s3://output-bucket/output-folder, the full output file path is s3://output-bucket/output-folder/job-Id/input-file.json.out."]}
     let context_ = "OutputDataConfig"
     let make ?kmsKeyId = fun ~s3Uri -> fun () -> { kmsKeyId; s3Uri }
     let to_value x =
@@ -940,9 +1270,9 @@ module OutputDataConfig =
         (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "KmsKeyId") in
       make ~s3Uri ?kmsKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Uri = field_map_exn json "S3Uri" S3Uri.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
+    let of_json json__ =
+      let s3Uri = field_map_exn json__ "S3Uri" S3Uri.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
       make ~s3Uri ?kmsKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -956,38 +1286,139 @@ module RegistrationConfig =
           "The action to take when a fraudster is identified as a duplicate. The default action is SKIP, which skips registering the duplicate fraudster. Setting the value to REGISTER_AS_NEW always registers a new fraudster into the specified domain."];
       fraudsterSimilarityThreshold: Score.t option
         [@ocaml.doc
-          "The minimum similarity score between the new and old fraudsters in order to consider the new fraudster a duplicate."]}
+          "The minimum similarity score between the new and old fraudsters in order to consider the new fraudster a duplicate."];
+      watchlistIds: RegistrationConfigWatchlistIds.t option
+        [@ocaml.doc
+          "The identifiers of watchlists that a fraudster is registered to. If a watchlist isn't provided, the fraudsters are registered to the default watchlist."]}
     let make ?duplicateRegistrationAction =
       fun ?fraudsterSimilarityThreshold ->
-        fun () ->
-          { duplicateRegistrationAction; fraudsterSimilarityThreshold }
+        fun ?watchlistIds ->
+          fun () ->
+            {
+              duplicateRegistrationAction;
+              fraudsterSimilarityThreshold;
+              watchlistIds
+            }
     let to_value x =
       structure_to_value
         [("DuplicateRegistrationAction",
            (Option.map x.duplicateRegistrationAction
               ~f:DuplicateRegistrationAction.to_value));
         ("FraudsterSimilarityThreshold",
-          (Option.map x.fraudsterSimilarityThreshold ~f:Score.to_value))]
+          (Option.map x.fraudsterSimilarityThreshold ~f:Score.to_value));
+        ("WatchlistIds",
+          (Option.map x.watchlistIds
+             ~f:RegistrationConfigWatchlistIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let watchlistIds =
+        (Option.map ~f:RegistrationConfigWatchlistIds.of_xml)
+          (Xml.child xml_arg0 "WatchlistIds") in
       let fraudsterSimilarityThreshold =
         (Option.map ~f:Score.of_xml)
           (Xml.child xml_arg0 "FraudsterSimilarityThreshold") in
       let duplicateRegistrationAction =
         (Option.map ~f:DuplicateRegistrationAction.of_xml)
           (Xml.child xml_arg0 "DuplicateRegistrationAction") in
-      make ?fraudsterSimilarityThreshold ?duplicateRegistrationAction ()
+      make ?watchlistIds ?fraudsterSimilarityThreshold
+        ?duplicateRegistrationAction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let watchlistIds =
+        field_map json__ "WatchlistIds"
+          RegistrationConfigWatchlistIds.of_json in
       let fraudsterSimilarityThreshold =
-        field_map json "FraudsterSimilarityThreshold" Score.of_json in
+        field_map json__ "FraudsterSimilarityThreshold" Score.of_json in
       let duplicateRegistrationAction =
-        field_map json "DuplicateRegistrationAction"
+        field_map json__ "DuplicateRegistrationAction"
           DuplicateRegistrationAction.of_json in
-      make ?fraudsterSimilarityThreshold ?duplicateRegistrationAction ()
+      make ?watchlistIds ?fraudsterSimilarityThreshold
+        ?duplicateRegistrationAction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration definining the action to take when a duplicate fraudster is detected, and the similarity threshold to use for detecting a duplicate fraudster during a batch fraudster registration job."]
+       "The registration configuration to be used during the batch fraudster registration job."]
+module WatchlistSummary =
+  struct
+    type nonrec t =
+      {
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the watchlist was created."];
+      defaultWatchlist: Boolean.t option
+        [@ocaml.doc
+          "Whether the specified watchlist is the default watchlist of a domain."];
+      description: WatchlistDescription.t option
+        [@ocaml.doc "The description of the watchlist."];
+      domainId: DomainId.t option
+        [@ocaml.doc
+          "The identifier of the domain that contains the watchlist."];
+      name: WatchlistName.t option [@ocaml.doc "The name for the watchlist."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the watchlist was last updated."];
+      watchlistId: WatchlistId.t option
+        [@ocaml.doc "The identifier of the watchlist."]}
+    let make ?createdAt =
+      fun ?defaultWatchlist ->
+        fun ?description ->
+          fun ?domainId ->
+            fun ?name ->
+              fun ?updatedAt ->
+                fun ?watchlistId ->
+                  fun () ->
+                    {
+                      createdAt;
+                      defaultWatchlist;
+                      description;
+                      domainId;
+                      name;
+                      updatedAt;
+                      watchlistId
+                    }
+    let to_value x =
+      structure_to_value
+        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("DefaultWatchlist",
+          (Option.map x.defaultWatchlist ~f:Boolean.to_value));
+        ("Description",
+          (Option.map x.description ~f:WatchlistDescription.to_value));
+        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("Name", (Option.map x.name ~f:WatchlistName.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("WatchlistId", (Option.map x.watchlistId ~f:WatchlistId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        (Option.map ~f:WatchlistId.of_xml) (Xml.child xml_arg0 "WatchlistId") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let name =
+        (Option.map ~f:WatchlistName.of_xml) (Xml.child xml_arg0 "Name") in
+      let domainId =
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      let description =
+        (Option.map ~f:WatchlistDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let defaultWatchlist =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DefaultWatchlist") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      make ?watchlistId ?updatedAt ?name ?domainId ?description
+        ?defaultWatchlist ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId = field_map json__ "WatchlistId" WatchlistId.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let name = field_map json__ "Name" WatchlistName.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let description =
+        field_map json__ "Description" WatchlistDescription.of_json in
+      let defaultWatchlist =
+        field_map json__ "DefaultWatchlist" Boolean.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?watchlistId ?updatedAt ?name ?domainId ?description
+        ?defaultWatchlist ?createdAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains a summary of information about a watchlist."]
 module SpeakerSummary =
   struct
     type nonrec t =
@@ -1001,6 +1432,9 @@ module SpeakerSummary =
           "The identifier of the domain that contains the speaker."];
       generatedSpeakerId: GeneratedSpeakerId.t option
         [@ocaml.doc "The service-generated identifier for the speaker."];
+      lastAccessedAt: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp when the speaker was last accessed for enrollment, re-enrollment or a successful authentication. This timestamp is accurate to one hour."];
       status: SpeakerStatus.t option
         [@ocaml.doc "The current status of the speaker."];
       updatedAt: Timestamp.t option
@@ -1009,17 +1443,19 @@ module SpeakerSummary =
       fun ?customerSpeakerId ->
         fun ?domainId ->
           fun ?generatedSpeakerId ->
-            fun ?status ->
-              fun ?updatedAt ->
-                fun () ->
-                  {
-                    createdAt;
-                    customerSpeakerId;
-                    domainId;
-                    generatedSpeakerId;
-                    status;
-                    updatedAt
-                  }
+            fun ?lastAccessedAt ->
+              fun ?status ->
+                fun ?updatedAt ->
+                  fun () ->
+                    {
+                      createdAt;
+                      customerSpeakerId;
+                      domainId;
+                      generatedSpeakerId;
+                      lastAccessedAt;
+                      status;
+                      updatedAt
+                    }
     let to_value x =
       structure_to_value
         [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
@@ -1028,6 +1464,8 @@ module SpeakerSummary =
         ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
         ("GeneratedSpeakerId",
           (Option.map x.generatedSpeakerId ~f:GeneratedSpeakerId.to_value));
+        ("LastAccessedAt",
+          (Option.map x.lastAccessedAt ~f:Timestamp.to_value));
         ("Status", (Option.map x.status ~f:SpeakerStatus.to_value));
         ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -1036,6 +1474,9 @@ module SpeakerSummary =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let status =
         (Option.map ~f:SpeakerStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let lastAccessedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastAccessedAt") in
       let generatedSpeakerId =
         (Option.map ~f:GeneratedSpeakerId.of_xml)
           (Xml.child xml_arg0 "GeneratedSpeakerId") in
@@ -1046,19 +1487,21 @@ module SpeakerSummary =
           (Xml.child xml_arg0 "CustomerSpeakerId") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      make ?updatedAt ?status ?generatedSpeakerId ?domainId
+      make ?updatedAt ?status ?lastAccessedAt ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let status = field_map json "Status" SpeakerStatus.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" SpeakerStatus.of_json in
+      let lastAccessedAt =
+        field_map json__ "LastAccessedAt" Timestamp.of_json in
       let generatedSpeakerId =
-        field_map json "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
+        field_map json__ "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
       let customerSpeakerId =
-        field_map json "CustomerSpeakerId" CustomerSpeakerId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      make ?updatedAt ?status ?generatedSpeakerId ?domainId
+        field_map json__ "CustomerSpeakerId" CustomerSpeakerId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?updatedAt ?status ?lastAccessedAt ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a summary of information about a speaker."]
@@ -1068,13 +1511,12 @@ module SpeakerEnrollmentJobSummary =
       {
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing the creation time of the speaker enrollment job."];
+          "A timestamp of when of the speaker enrollment job was created."];
       domainId: DomainId.t option
         [@ocaml.doc
           "The identifier of the domain that contains the speaker enrollment job."];
       endedAt: Timestamp.t option
-        [@ocaml.doc
-          "A timestamp showing when the speaker enrollment job ended."];
+        [@ocaml.doc "A timestamp of when the speaker enrollment job ended."];
       failureDetails: FailureDetails.t option
         [@ocaml.doc
           "Contains details that are populated when an entire batch job fails. In cases of individual registration job failures, the batch job as a whole doesn't fail; it is completed with a JobStatus of COMPLETED_WITH_ERRORS. You can use the job output file to identify the individual registration requests that failed."];
@@ -1142,35 +1584,88 @@ module SpeakerEnrollmentJobSummary =
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobStatus =
-        field_map json "JobStatus" SpeakerEnrollmentJobStatus.of_json in
-      let jobProgress = field_map json "JobProgress" JobProgress.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "JobStatus" SpeakerEnrollmentJobStatus.of_json in
+      let jobProgress = field_map json__ "JobProgress" JobProgress.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let failureDetails =
-        field_map json "FailureDetails" FailureDetails.of_json in
-      let endedAt = field_map json "EndedAt" Timestamp.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "FailureDetails" FailureDetails.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains a summary of information about a speaker enrollment job."]
+module FraudsterSummary =
+  struct
+    type nonrec t =
+      {
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the fraudster summary was created."];
+      domainId: DomainId.t option
+        [@ocaml.doc
+          "The identifier of the domain that contains the fraudster summary."];
+      generatedFraudsterId: GeneratedFraudsterId.t option
+        [@ocaml.doc "The service-generated identifier for the fraudster."];
+      watchlistIds: ResponseWatchlistIds.t option
+        [@ocaml.doc
+          "The identifier of the watchlists the fraudster is a part of."]}
+    let make ?createdAt =
+      fun ?domainId ->
+        fun ?generatedFraudsterId ->
+          fun ?watchlistIds ->
+            fun () ->
+              { createdAt; domainId; generatedFraudsterId; watchlistIds }
+    let to_value x =
+      structure_to_value
+        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("GeneratedFraudsterId",
+          (Option.map x.generatedFraudsterId ~f:GeneratedFraudsterId.to_value));
+        ("WatchlistIds",
+          (Option.map x.watchlistIds ~f:ResponseWatchlistIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistIds =
+        (Option.map ~f:ResponseWatchlistIds.of_xml)
+          (Xml.child xml_arg0 "WatchlistIds") in
+      let generatedFraudsterId =
+        (Option.map ~f:GeneratedFraudsterId.of_xml)
+          (Xml.child xml_arg0 "GeneratedFraudsterId") in
+      let domainId =
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      make ?watchlistIds ?generatedFraudsterId ?domainId ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistIds =
+        field_map json__ "WatchlistIds" ResponseWatchlistIds.of_json in
+      let generatedFraudsterId =
+        field_map json__ "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?watchlistIds ?generatedFraudsterId ?domainId ?createdAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains a summary of information about a fraudster."]
 module FraudsterRegistrationJobSummary =
   struct
     type nonrec t =
       {
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing when the fraudster registration job is created."];
+          "A timestamp of when the fraudster registration job was created."];
       domainId: DomainId.t option
         [@ocaml.doc
-          "The identifier of the domain containing the fraudster registration job."];
+          "The identifier of the domain that contains the fraudster registration job."];
       endedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing when the fraudster registration job ended."];
+          "A timestamp of when the fraudster registration job ended."];
       failureDetails: FailureDetails.t option
         [@ocaml.doc
           "Contains details that are populated when an entire batch job fails. In cases of individual registration job failures, the batch job as a whole doesn't fail; it is completed with a JobStatus of COMPLETED_WITH_ERRORS. You can use the job output file to identify the individual registration requests that failed."];
@@ -1179,7 +1674,7 @@ module FraudsterRegistrationJobSummary =
           "The service-generated identifier for the fraudster registration job."];
       jobName: JobName.t option
         [@ocaml.doc
-          "The client-provied name for the fraudster registration job."];
+          "The client-provided name for the fraudster registration job."];
       jobProgress: JobProgress.t option
         [@ocaml.doc
           "Shows the completed percentage of registration requests listed in the input file."];
@@ -1238,17 +1733,17 @@ module FraudsterRegistrationJobSummary =
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobStatus =
-        field_map json "JobStatus" FraudsterRegistrationJobStatus.of_json in
-      let jobProgress = field_map json "JobProgress" JobProgress.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "JobStatus" FraudsterRegistrationJobStatus.of_json in
+      let jobProgress = field_map json__ "JobProgress" JobProgress.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let failureDetails =
-        field_map json "FailureDetails" FailureDetails.of_json in
-      let endedAt = field_map json "EndedAt" Timestamp.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "FailureDetails" FailureDetails.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       make ?jobStatus ?jobProgress ?jobName ?jobId ?failureDetails ?endedAt
         ?domainId ?createdAt ()
     let to_json v = composed_to_json to_value v
@@ -1261,11 +1756,11 @@ module DomainSummary =
       arn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the domain."];
       createdAt: Timestamp.t option
-        [@ocaml.doc "The timestamp showing when the domain is created."];
+        [@ocaml.doc "The timestamp of when the domain was created."];
       description: Description.t option
-        [@ocaml.doc "The client-provided description of the domain."];
+        [@ocaml.doc "The description of the domain."];
       domainId: DomainId.t option
-        [@ocaml.doc "The service-generated identifier for the domain."];
+        [@ocaml.doc "The identifier of the domain."];
       domainStatus: DomainStatus.t option
         [@ocaml.doc "The current status of the domain."];
       name: DomainName.t option
@@ -1273,9 +1768,16 @@ module DomainSummary =
       serverSideEncryptionConfiguration:
         ServerSideEncryptionConfiguration.t option
         [@ocaml.doc
-          "The server-side encryption configuration containing the KMS Key Identifier you want Voice ID to use to encrypt your data.."];
+          "The server-side encryption configuration containing the KMS key identifier you want Voice ID to use to encrypt your data."];
+      serverSideEncryptionUpdateDetails:
+        ServerSideEncryptionUpdateDetails.t option
+        [@ocaml.doc
+          "Details about the most recent server-side encryption configuration update. When the server-side encryption configuration is changed, dependency on the old KMS key is removed through an asynchronous process. When this update is complete, the domain's data can only be accessed using the new KMS key."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "The timestamp showing the domain's last update."]}
+        [@ocaml.doc "The timestamp of when the domain was last updated."];
+      watchlistDetails: WatchlistDetails.t option
+        [@ocaml.doc
+          "Provides information about watchlistDetails and DefaultWatchlistID."]}
     let make ?arn =
       fun ?createdAt ->
         fun ?description ->
@@ -1283,18 +1785,22 @@ module DomainSummary =
             fun ?domainStatus ->
               fun ?name ->
                 fun ?serverSideEncryptionConfiguration ->
-                  fun ?updatedAt ->
-                    fun () ->
-                      {
-                        arn;
-                        createdAt;
-                        description;
-                        domainId;
-                        domainStatus;
-                        name;
-                        serverSideEncryptionConfiguration;
-                        updatedAt
-                      }
+                  fun ?serverSideEncryptionUpdateDetails ->
+                    fun ?updatedAt ->
+                      fun ?watchlistDetails ->
+                        fun () ->
+                          {
+                            arn;
+                            createdAt;
+                            description;
+                            domainId;
+                            domainStatus;
+                            name;
+                            serverSideEncryptionConfiguration;
+                            serverSideEncryptionUpdateDetails;
+                            updatedAt;
+                            watchlistDetails
+                          }
     let to_value x =
       structure_to_value
         [("Arn", (Option.map x.arn ~f:Arn.to_value));
@@ -1307,11 +1813,22 @@ module DomainSummary =
         ("ServerSideEncryptionConfiguration",
           (Option.map x.serverSideEncryptionConfiguration
              ~f:ServerSideEncryptionConfiguration.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
+        ("ServerSideEncryptionUpdateDetails",
+          (Option.map x.serverSideEncryptionUpdateDetails
+             ~f:ServerSideEncryptionUpdateDetails.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("WatchlistDetails",
+          (Option.map x.watchlistDetails ~f:WatchlistDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let watchlistDetails =
+        (Option.map ~f:WatchlistDetails.of_xml)
+          (Xml.child xml_arg0 "WatchlistDetails") in
       let updatedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let serverSideEncryptionUpdateDetails =
+        (Option.map ~f:ServerSideEncryptionUpdateDetails.of_xml)
+          (Xml.child xml_arg0 "ServerSideEncryptionUpdateDetails") in
       let serverSideEncryptionConfiguration =
         (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "ServerSideEncryptionConfiguration") in
@@ -1327,48 +1844,54 @@ module DomainSummary =
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
-        ?domainId ?description ?createdAt ?arn ()
+      make ?watchlistDetails ?updatedAt ?serverSideEncryptionUpdateDetails
+        ?serverSideEncryptionConfiguration ?name ?domainStatus ?domainId
+        ?description ?createdAt ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let watchlistDetails =
+        field_map json__ "WatchlistDetails" WatchlistDetails.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let serverSideEncryptionUpdateDetails =
+        field_map json__ "ServerSideEncryptionUpdateDetails"
+          ServerSideEncryptionUpdateDetails.of_json in
       let serverSideEncryptionConfiguration =
-        field_map json "ServerSideEncryptionConfiguration"
+        field_map json__ "ServerSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map json "Name" DomainName.of_json in
-      let domainStatus = field_map json "DomainStatus" DomainStatus.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
-        ?domainId ?description ?createdAt ?arn ()
+      let name = field_map json__ "Name" DomainName.of_json in
+      let domainStatus = field_map json__ "DomainStatus" DomainStatus.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?watchlistDetails ?updatedAt ?serverSideEncryptionUpdateDetails
+        ?serverSideEncryptionConfiguration ?name ?domainStatus ?domainId
+        ?description ?createdAt ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains a summary of information about a domain."]
 module AuthenticationConfiguration =
   struct
     type nonrec t =
       {
-      acceptanceThreshold: Score.t
+      acceptanceThreshold: Score.t option
         [@ocaml.doc
           "The minimum threshold needed to successfully authenticate a speaker."]}
-    let context_ = "AuthenticationConfiguration"
-    let make ~acceptanceThreshold = fun () -> { acceptanceThreshold }
+    let make ?acceptanceThreshold = fun () -> { acceptanceThreshold }
     let to_value x =
       structure_to_value
         [("AcceptanceThreshold",
-           (Some (Score.to_value x.acceptanceThreshold)))]
+           (Option.map x.acceptanceThreshold ~f:Score.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let acceptanceThreshold =
-        Score.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AcceptanceThreshold") in
-      make ~acceptanceThreshold ()
+        (Option.map ~f:Score.of_xml)
+          (Xml.child xml_arg0 "AcceptanceThreshold") in
+      make ?acceptanceThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acceptanceThreshold =
-        field_map_exn json "AcceptanceThreshold" Score.of_json in
-      make ~acceptanceThreshold ()
+        field_map json__ "AcceptanceThreshold" Score.of_json in
+      make ?acceptanceThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration used to authenticate a speaker during a session."]
@@ -1381,6 +1904,7 @@ module AuthenticationDecision =
       | SPEAKER_NOT_ENROLLED 
       | SPEAKER_OPTED_OUT 
       | SPEAKER_ID_NOT_PROVIDED 
+      | SPEAKER_EXPIRED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1391,6 +1915,7 @@ module AuthenticationDecision =
       | SPEAKER_NOT_ENROLLED -> "SPEAKER_NOT_ENROLLED"
       | SPEAKER_OPTED_OUT -> "SPEAKER_OPTED_OUT"
       | SPEAKER_ID_NOT_PROVIDED -> "SPEAKER_ID_NOT_PROVIDED"
+      | SPEAKER_EXPIRED -> "SPEAKER_EXPIRED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1400,6 +1925,7 @@ module AuthenticationDecision =
       | "SPEAKER_NOT_ENROLLED" -> SPEAKER_NOT_ENROLLED
       | "SPEAKER_OPTED_OUT" -> SPEAKER_OPTED_OUT
       | "SPEAKER_ID_NOT_PROVIDED" -> SPEAKER_ID_NOT_PROVIDED
+      | "SPEAKER_EXPIRED" -> SPEAKER_EXPIRED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1435,24 +1961,30 @@ module FraudDetectionConfiguration =
   struct
     type nonrec t =
       {
-      riskThreshold: Score.t
+      riskThreshold: Score.t option
         [@ocaml.doc
-          "Threshold value for determining whether the speaker is a fraudster. If the detected risk score calculated by Voice ID is higher than the threshold, the speaker is considered a fraudster."]}
-    let context_ = "FraudDetectionConfiguration"
-    let make ~riskThreshold = fun () -> { riskThreshold }
+          "Threshold value for determining whether the speaker is a fraudster. If the detected risk score calculated by Voice ID is higher than the threshold, the speaker is considered a fraudster."];
+      watchlistId: WatchlistId.t option
+        [@ocaml.doc
+          "The identifier of the watchlist against which fraud detection is performed."]}
+    let make ?riskThreshold =
+      fun ?watchlistId -> fun () -> { riskThreshold; watchlistId }
     let to_value x =
       structure_to_value
-        [("RiskThreshold", (Some (Score.to_value x.riskThreshold)))]
+        [("RiskThreshold", (Option.map x.riskThreshold ~f:Score.to_value));
+        ("WatchlistId", (Option.map x.watchlistId ~f:WatchlistId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let watchlistId =
+        (Option.map ~f:WatchlistId.of_xml) (Xml.child xml_arg0 "WatchlistId") in
       let riskThreshold =
-        Score.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RiskThreshold") in
-      make ~riskThreshold ()
+        (Option.map ~f:Score.of_xml) (Xml.child xml_arg0 "RiskThreshold") in
+      make ?watchlistId ?riskThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskThreshold = field_map_exn json "RiskThreshold" Score.of_json in
-      make ~riskThreshold ()
+    let of_json json__ =
+      let watchlistId = field_map json__ "WatchlistId" WatchlistId.of_json in
+      let riskThreshold = field_map json__ "RiskThreshold" Score.of_json in
+      make ?watchlistId ?riskThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration used for performing fraud detection over a speaker during a session."]
@@ -1494,6 +2026,9 @@ module FraudDetectionReasons =
         ok_or_failwith
           ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FraudDetectionReason.to_value)) |>
         (fun x -> `List x)
@@ -1520,26 +2055,37 @@ module FraudRiskDetails =
   struct
     type nonrec t =
       {
-      knownFraudsterRisk: KnownFraudsterRisk.t
+      knownFraudsterRisk: KnownFraudsterRisk.t option
         [@ocaml.doc
-          "The details resulting from 'Known Fraudster Risk' analysis of the speaker."]}
-    let context_ = "FraudRiskDetails"
-    let make ~knownFraudsterRisk = fun () -> { knownFraudsterRisk }
+          "The details resulting from 'Known Fraudster Risk' analysis of the speaker."];
+      voiceSpoofingRisk: VoiceSpoofingRisk.t option
+        [@ocaml.doc
+          "The details resulting from 'Voice Spoofing Risk' analysis of the speaker."]}
+    let make ?knownFraudsterRisk =
+      fun ?voiceSpoofingRisk ->
+        fun () -> { knownFraudsterRisk; voiceSpoofingRisk }
     let to_value x =
       structure_to_value
         [("KnownFraudsterRisk",
-           (Some (KnownFraudsterRisk.to_value x.knownFraudsterRisk)))]
+           (Option.map x.knownFraudsterRisk ~f:KnownFraudsterRisk.to_value));
+        ("VoiceSpoofingRisk",
+          (Option.map x.voiceSpoofingRisk ~f:VoiceSpoofingRisk.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let voiceSpoofingRisk =
+        (Option.map ~f:VoiceSpoofingRisk.of_xml)
+          (Xml.child xml_arg0 "VoiceSpoofingRisk") in
       let knownFraudsterRisk =
-        KnownFraudsterRisk.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "KnownFraudsterRisk") in
-      make ~knownFraudsterRisk ()
+        (Option.map ~f:KnownFraudsterRisk.of_xml)
+          (Xml.child xml_arg0 "KnownFraudsterRisk") in
+      make ?voiceSpoofingRisk ?knownFraudsterRisk ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let voiceSpoofingRisk =
+        field_map json__ "VoiceSpoofingRisk" VoiceSpoofingRisk.of_json in
       let knownFraudsterRisk =
-        field_map_exn json "KnownFraudsterRisk" KnownFraudsterRisk.of_json in
-      make ~knownFraudsterRisk ()
+        field_map json__ "KnownFraudsterRisk" KnownFraudsterRisk.of_json in
+      make ?voiceSpoofingRisk ?knownFraudsterRisk ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details regarding various fraud risk analyses performed against the current session state and streamed audio of the speaker."]
@@ -1557,8 +2103,8 @@ module AccessDeniedException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1587,104 +2133,13 @@ module ConflictException =
           (Xml.child xml_arg0 "ConflictType") in
       make ?message ?conflictType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let conflictType = field_map json "ConflictType" ConflictType.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let conflictType = field_map json__ "ConflictType" ConflictType.of_json in
       make ?message ?conflictType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request failed due to a conflict. Check the ConflictType and error message for more details."]
-module Domain =
-  struct
-    type nonrec t =
-      {
-      arn: Arn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) for the domain."];
-      createdAt: Timestamp.t option
-        [@ocaml.doc "The timestamp at which the domain is created."];
-      description: Description.t option
-        [@ocaml.doc "The client-provided description of the domain."];
-      domainId: DomainId.t option
-        [@ocaml.doc "The service-generated identifier for the domain."];
-      domainStatus: DomainStatus.t option
-        [@ocaml.doc "The current status of the domain."];
-      name: DomainName.t option
-        [@ocaml.doc "The client-provided name for the domain."];
-      serverSideEncryptionConfiguration:
-        ServerSideEncryptionConfiguration.t option
-        [@ocaml.doc
-          "The server-side encryption configuration containing the KMS Key Identifier you want Voice ID to use to encrypt your data."];
-      updatedAt: Timestamp.t option
-        [@ocaml.doc "The timestamp showing the domain's last update."]}
-    let make ?arn =
-      fun ?createdAt ->
-        fun ?description ->
-          fun ?domainId ->
-            fun ?domainStatus ->
-              fun ?name ->
-                fun ?serverSideEncryptionConfiguration ->
-                  fun ?updatedAt ->
-                    fun () ->
-                      {
-                        arn;
-                        createdAt;
-                        description;
-                        domainId;
-                        domainStatus;
-                        name;
-                        serverSideEncryptionConfiguration;
-                        updatedAt
-                      }
-    let to_value x =
-      structure_to_value
-        [("Arn", (Option.map x.arn ~f:Arn.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("Description", (Option.map x.description ~f:Description.to_value));
-        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
-        ("DomainStatus",
-          (Option.map x.domainStatus ~f:DomainStatus.to_value));
-        ("Name", (Option.map x.name ~f:DomainName.to_value));
-        ("ServerSideEncryptionConfiguration",
-          (Option.map x.serverSideEncryptionConfiguration
-             ~f:ServerSideEncryptionConfiguration.to_value));
-        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let updatedAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
-      let serverSideEncryptionConfiguration =
-        (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
-          (Xml.child xml_arg0 "ServerSideEncryptionConfiguration") in
-      let name =
-        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "Name") in
-      let domainStatus =
-        (Option.map ~f:DomainStatus.of_xml)
-          (Xml.child xml_arg0 "DomainStatus") in
-      let domainId =
-        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
-      let description =
-        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
-        ?domainId ?description ?createdAt ?arn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let serverSideEncryptionConfiguration =
-        field_map json "ServerSideEncryptionConfiguration"
-          ServerSideEncryptionConfiguration.of_json in
-      let name = field_map json "Name" DomainName.of_json in
-      let domainStatus = field_map json "DomainStatus" DomainStatus.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      make ?updatedAt ?serverSideEncryptionConfiguration ?name ?domainStatus
-        ?domainId ?description ?createdAt ?arn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Contains all the information about a domain."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -1699,8 +2154,8 @@ module InternalServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1729,9 +2184,9 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1750,8 +2205,8 @@ module ThrottlingException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1770,12 +2225,213 @@ module ValidationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request failed one or more validations; check the error message for more details."]
+module Watchlist =
+  struct
+    type nonrec t =
+      {
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the watchlist was created."];
+      defaultWatchlist: Boolean.t option
+        [@ocaml.doc
+          "Whether the specified watchlist is the default watchlist of a domain."];
+      description: WatchlistDescription.t option
+        [@ocaml.doc "The description of the watchlist."];
+      domainId: DomainId.t option
+        [@ocaml.doc
+          "The identifier of the domain that contains the watchlist."];
+      name: WatchlistName.t option [@ocaml.doc "The name for the watchlist."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the watchlist was updated."];
+      watchlistId: WatchlistId.t option
+        [@ocaml.doc "The identifier of the watchlist."]}
+    let make ?createdAt =
+      fun ?defaultWatchlist ->
+        fun ?description ->
+          fun ?domainId ->
+            fun ?name ->
+              fun ?updatedAt ->
+                fun ?watchlistId ->
+                  fun () ->
+                    {
+                      createdAt;
+                      defaultWatchlist;
+                      description;
+                      domainId;
+                      name;
+                      updatedAt;
+                      watchlistId
+                    }
+    let to_value x =
+      structure_to_value
+        [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("DefaultWatchlist",
+          (Option.map x.defaultWatchlist ~f:Boolean.to_value));
+        ("Description",
+          (Option.map x.description ~f:WatchlistDescription.to_value));
+        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("Name", (Option.map x.name ~f:WatchlistName.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("WatchlistId", (Option.map x.watchlistId ~f:WatchlistId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        (Option.map ~f:WatchlistId.of_xml) (Xml.child xml_arg0 "WatchlistId") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let name =
+        (Option.map ~f:WatchlistName.of_xml) (Xml.child xml_arg0 "Name") in
+      let domainId =
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      let description =
+        (Option.map ~f:WatchlistDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let defaultWatchlist =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DefaultWatchlist") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      make ?watchlistId ?updatedAt ?name ?domainId ?description
+        ?defaultWatchlist ?createdAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId = field_map json__ "WatchlistId" WatchlistId.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let name = field_map json__ "Name" WatchlistName.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let description =
+        field_map json__ "Description" WatchlistDescription.of_json in
+      let defaultWatchlist =
+        field_map json__ "DefaultWatchlist" Boolean.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?watchlistId ?updatedAt ?name ?domainId ?description
+        ?defaultWatchlist ?createdAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains all the information about a watchlist."]
+module Domain =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the domain."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the domain was created."];
+      description: Description.t option
+        [@ocaml.doc "The description of the domain."];
+      domainId: DomainId.t option
+        [@ocaml.doc "The identifier of the domain."];
+      domainStatus: DomainStatus.t option
+        [@ocaml.doc "The current status of the domain."];
+      name: DomainName.t option [@ocaml.doc "The name for the domain."];
+      serverSideEncryptionConfiguration:
+        ServerSideEncryptionConfiguration.t option
+        [@ocaml.doc
+          "The server-side encryption configuration containing the KMS key identifier you want Voice ID to use to encrypt your data."];
+      serverSideEncryptionUpdateDetails:
+        ServerSideEncryptionUpdateDetails.t option
+        [@ocaml.doc
+          "Details about the most recent server-side encryption configuration update. When the server-side encryption configuration is changed, dependency on the old KMS key is removed through an asynchronous process. When this update is complete, the domain's data can only be accessed using the new KMS key."];
+      updatedAt: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the domain was last update."];
+      watchlistDetails: WatchlistDetails.t option
+        [@ocaml.doc
+          "The watchlist details of a domain. Contains the default watchlist ID of the domain."]}
+    let make ?arn =
+      fun ?createdAt ->
+        fun ?description ->
+          fun ?domainId ->
+            fun ?domainStatus ->
+              fun ?name ->
+                fun ?serverSideEncryptionConfiguration ->
+                  fun ?serverSideEncryptionUpdateDetails ->
+                    fun ?updatedAt ->
+                      fun ?watchlistDetails ->
+                        fun () ->
+                          {
+                            arn;
+                            createdAt;
+                            description;
+                            domainId;
+                            domainStatus;
+                            name;
+                            serverSideEncryptionConfiguration;
+                            serverSideEncryptionUpdateDetails;
+                            updatedAt;
+                            watchlistDetails
+                          }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("DomainStatus",
+          (Option.map x.domainStatus ~f:DomainStatus.to_value));
+        ("Name", (Option.map x.name ~f:DomainName.to_value));
+        ("ServerSideEncryptionConfiguration",
+          (Option.map x.serverSideEncryptionConfiguration
+             ~f:ServerSideEncryptionConfiguration.to_value));
+        ("ServerSideEncryptionUpdateDetails",
+          (Option.map x.serverSideEncryptionUpdateDetails
+             ~f:ServerSideEncryptionUpdateDetails.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
+        ("WatchlistDetails",
+          (Option.map x.watchlistDetails ~f:WatchlistDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistDetails =
+        (Option.map ~f:WatchlistDetails.of_xml)
+          (Xml.child xml_arg0 "WatchlistDetails") in
+      let updatedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
+      let serverSideEncryptionUpdateDetails =
+        (Option.map ~f:ServerSideEncryptionUpdateDetails.of_xml)
+          (Xml.child xml_arg0 "ServerSideEncryptionUpdateDetails") in
+      let serverSideEncryptionConfiguration =
+        (Option.map ~f:ServerSideEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "ServerSideEncryptionConfiguration") in
+      let name =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "Name") in
+      let domainStatus =
+        (Option.map ~f:DomainStatus.of_xml)
+          (Xml.child xml_arg0 "DomainStatus") in
+      let domainId =
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?watchlistDetails ?updatedAt ?serverSideEncryptionUpdateDetails
+        ?serverSideEncryptionConfiguration ?name ?domainStatus ?domainId
+        ?description ?createdAt ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistDetails =
+        field_map json__ "WatchlistDetails" WatchlistDetails.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let serverSideEncryptionUpdateDetails =
+        field_map json__ "ServerSideEncryptionUpdateDetails"
+          ServerSideEncryptionUpdateDetails.of_json in
+      let serverSideEncryptionConfiguration =
+        field_map json__ "ServerSideEncryptionConfiguration"
+          ServerSideEncryptionConfiguration.of_json in
+      let name = field_map json__ "Name" DomainName.of_json in
+      let domainStatus = field_map json__ "DomainStatus" DomainStatus.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?watchlistDetails ?updatedAt ?serverSideEncryptionUpdateDetails
+        ?serverSideEncryptionConfiguration ?name ?domainStatus ?domainId
+        ?description ?createdAt ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains all the information about a domain."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -1807,6 +2463,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1835,6 +2494,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1868,8 +2530,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1880,7 +2542,7 @@ module SpeakerEnrollmentJob =
       {
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing the creation of the speaker enrollment job."];
+          "A timestamp of when the speaker enrollment job was created."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
           "The IAM role Amazon Resource Name (ARN) that grants Voice ID permissions to access customer's buckets to read the input manifest file and write the job output file."];
@@ -1888,8 +2550,7 @@ module SpeakerEnrollmentJob =
         [@ocaml.doc
           "The identifier of the domain that contains the speaker enrollment job."];
       endedAt: Timestamp.t option
-        [@ocaml.doc
-          "A timestamp showing when the speaker enrollment job ended."];
+        [@ocaml.doc "A timestamp of when the speaker enrollment job ended."];
       enrollmentConfig: EnrollmentConfig.t option
         [@ocaml.doc
           "The configuration that defines the action to take when the speaker is already enrolled in Voice ID, and the FraudDetectionConfig to use."];
@@ -1912,7 +2573,7 @@ module SpeakerEnrollmentJob =
         [@ocaml.doc "The current status of the speaker enrollment job."];
       outputDataConfig: OutputDataConfig.t option
         [@ocaml.doc
-          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS Key ID to encrypt the file."]}
+          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS key ID to encrypt the file."]}
     let make ?createdAt =
       fun ?dataAccessRoleArn ->
         fun ?domainId ->
@@ -1995,25 +2656,25 @@ module SpeakerEnrollmentJob =
         ?inputDataConfig ?failureDetails ?enrollmentConfig ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let jobStatus =
-        field_map json "JobStatus" SpeakerEnrollmentJobStatus.of_json in
-      let jobProgress = field_map json "JobProgress" JobProgress.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "JobStatus" SpeakerEnrollmentJobStatus.of_json in
+      let jobProgress = field_map json__ "JobProgress" JobProgress.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let failureDetails =
-        field_map json "FailureDetails" FailureDetails.of_json in
+        field_map json__ "FailureDetails" FailureDetails.of_json in
       let enrollmentConfig =
-        field_map json "EnrollmentConfig" EnrollmentConfig.of_json in
-      let endedAt = field_map json "EndedAt" Timestamp.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
+        field_map json__ "EnrollmentConfig" EnrollmentConfig.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       make ?outputDataConfig ?jobStatus ?jobProgress ?jobName ?jobId
         ?inputDataConfig ?failureDetails ?enrollmentConfig ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
@@ -2046,16 +2707,16 @@ module FraudsterRegistrationJob =
       {
       createdAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing the creation time of the fraudster registration job."];
+          "A timestamp of when the fraudster registration job was created."];
       dataAccessRoleArn: IamRoleArn.t option
         [@ocaml.doc
           "The IAM role Amazon Resource Name (ARN) that grants Voice ID permissions to access customer's buckets to read the input manifest file and write the job output file."];
       domainId: DomainId.t option
         [@ocaml.doc
-          "The identifier of the domain containing the fraudster registration job."];
+          "The identifier of the domain that contains the fraudster registration job."];
       endedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp showing when the fraudster registration job ended."];
+          "A timestamp of when the fraudster registration job ended."];
       failureDetails: FailureDetails.t option
         [@ocaml.doc
           "Contains details that are populated when an entire batch job fails. In cases of individual registration job failures, the batch job as a whole doesn't fail; it is completed with a JobStatus of COMPLETED_WITH_ERRORS. You can use the job output file to identify the individual registration requests that failed."];
@@ -2067,7 +2728,7 @@ module FraudsterRegistrationJob =
           "The service-generated identifier for the fraudster registration job."];
       jobName: JobName.t option
         [@ocaml.doc
-          "The client-provied name for the fraudster registration job."];
+          "The client-provided name for the fraudster registration job."];
       jobProgress: JobProgress.t option
         [@ocaml.doc
           "Shows the completed percentage of registration requests listed in the input file."];
@@ -2075,7 +2736,7 @@ module FraudsterRegistrationJob =
         [@ocaml.doc "The current status of the fraudster registration job."];
       outputDataConfig: OutputDataConfig.t option
         [@ocaml.doc
-          "The output data config containing the S3 location where you want Voice ID to write your job output file; you must also include a KMS Key ID in order to encrypt the file."];
+          "The output data config containing the S3 location where you want Voice ID to write your job output file; you must also include a KMS key ID in order to encrypt the file."];
       registrationConfig: RegistrationConfig.t option
         [@ocaml.doc
           "The registration config containing details such as the action to take when a duplicate fraudster is detected, and the similarity threshold to use for detecting a duplicate fraudster."]}
@@ -2161,25 +2822,25 @@ module FraudsterRegistrationJob =
         ?jobName ?jobId ?inputDataConfig ?failureDetails ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registrationConfig =
-        field_map json "RegistrationConfig" RegistrationConfig.of_json in
+        field_map json__ "RegistrationConfig" RegistrationConfig.of_json in
       let outputDataConfig =
-        field_map json "OutputDataConfig" OutputDataConfig.of_json in
+        field_map json__ "OutputDataConfig" OutputDataConfig.of_json in
       let jobStatus =
-        field_map json "JobStatus" FraudsterRegistrationJobStatus.of_json in
-      let jobProgress = field_map json "JobProgress" JobProgress.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "JobStatus" FraudsterRegistrationJobStatus.of_json in
+      let jobProgress = field_map json__ "JobProgress" JobProgress.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       let inputDataConfig =
-        field_map json "InputDataConfig" InputDataConfig.of_json in
+        field_map json__ "InputDataConfig" InputDataConfig.of_json in
       let failureDetails =
-        field_map json "FailureDetails" FailureDetails.of_json in
-      let endedAt = field_map json "EndedAt" Timestamp.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
+        field_map json__ "FailureDetails" FailureDetails.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
       let dataAccessRoleArn =
-        field_map json "DataAccessRoleArn" IamRoleArn.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+        field_map json__ "DataAccessRoleArn" IamRoleArn.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       make ?registrationConfig ?outputDataConfig ?jobStatus ?jobProgress
         ?jobName ?jobId ?inputDataConfig ?failureDetails ?endedAt ?domainId
         ?dataAccessRoleArn ?createdAt ()
@@ -2191,7 +2852,7 @@ module Speaker =
     type nonrec t =
       {
       createdAt: Timestamp.t option
-        [@ocaml.doc "A timestamp showing when the speaker is created."];
+        [@ocaml.doc "A timestamp of when the speaker was created."];
       customerSpeakerId: CustomerSpeakerId.t option
         [@ocaml.doc "The client-provided identifier for the speaker."];
       domainId: DomainId.t option
@@ -2199,25 +2860,30 @@ module Speaker =
           "The identifier of the domain that contains the speaker."];
       generatedSpeakerId: GeneratedSpeakerId.t option
         [@ocaml.doc "The service-generated identifier for the speaker."];
+      lastAccessedAt: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp of when the speaker was last accessed for enrollment, re-enrollment or a successful authentication. This timestamp is accurate to one hour."];
       status: SpeakerStatus.t option
         [@ocaml.doc "The current status of the speaker."];
       updatedAt: Timestamp.t option
-        [@ocaml.doc "A timestamp showing the speaker's last update."]}
+        [@ocaml.doc "A timestamp of the speaker's last update."]}
     let make ?createdAt =
       fun ?customerSpeakerId ->
         fun ?domainId ->
           fun ?generatedSpeakerId ->
-            fun ?status ->
-              fun ?updatedAt ->
-                fun () ->
-                  {
-                    createdAt;
-                    customerSpeakerId;
-                    domainId;
-                    generatedSpeakerId;
-                    status;
-                    updatedAt
-                  }
+            fun ?lastAccessedAt ->
+              fun ?status ->
+                fun ?updatedAt ->
+                  fun () ->
+                    {
+                      createdAt;
+                      customerSpeakerId;
+                      domainId;
+                      generatedSpeakerId;
+                      lastAccessedAt;
+                      status;
+                      updatedAt
+                    }
     let to_value x =
       structure_to_value
         [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
@@ -2226,6 +2892,8 @@ module Speaker =
         ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
         ("GeneratedSpeakerId",
           (Option.map x.generatedSpeakerId ~f:GeneratedSpeakerId.to_value));
+        ("LastAccessedAt",
+          (Option.map x.lastAccessedAt ~f:Timestamp.to_value));
         ("Status", (Option.map x.status ~f:SpeakerStatus.to_value));
         ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
@@ -2234,6 +2902,9 @@ module Speaker =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let status =
         (Option.map ~f:SpeakerStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let lastAccessedAt =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastAccessedAt") in
       let generatedSpeakerId =
         (Option.map ~f:GeneratedSpeakerId.of_xml)
           (Xml.child xml_arg0 "GeneratedSpeakerId") in
@@ -2244,19 +2915,21 @@ module Speaker =
           (Xml.child xml_arg0 "CustomerSpeakerId") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      make ?updatedAt ?status ?generatedSpeakerId ?domainId
+      make ?updatedAt ?status ?lastAccessedAt ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let status = field_map json "Status" SpeakerStatus.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" SpeakerStatus.of_json in
+      let lastAccessedAt =
+        field_map json__ "LastAccessedAt" Timestamp.of_json in
       let generatedSpeakerId =
-        field_map json "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
+        field_map json__ "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
       let customerSpeakerId =
-        field_map json "CustomerSpeakerId" CustomerSpeakerId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      make ?updatedAt ?status ?generatedSpeakerId ?domainId
+        field_map json__ "CustomerSpeakerId" CustomerSpeakerId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?updatedAt ?status ?lastAccessedAt ?generatedSpeakerId ?domainId
         ?customerSpeakerId ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains all the information about a speaker."]
@@ -2282,12 +2955,15 @@ module SpeakerId =
     let of_json j = string_of_json ~kind:"SpeakerId" j
     let to_json = simple_to_json to_value
   end
-module SpeakerSummaries =
+module WatchlistSummaries =
   struct
-    type nonrec t = SpeakerSummary.t list
+    type nonrec t = WatchlistSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:SpeakerSummary.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:WatchlistSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2301,9 +2977,10 @@ module SpeakerSummaries =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:SpeakerSummary.of_xml)
+                     | _ -> true))) ~f:WatchlistSummary.of_xml)
     let of_json j =
-      list_of_json ~kind:"SpeakerSummaries" ~of_json:SpeakerSummary.of_json j
+      list_of_json ~kind:"WatchlistSummaries"
+        ~of_json:WatchlistSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module MaxResultsForList =
@@ -2344,10 +3021,40 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module SpeakerSummaries =
+  struct
+    type nonrec t = SpeakerSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SpeakerSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SpeakerSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SpeakerSummaries" ~of_json:SpeakerSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SpeakerEnrollmentJobSummaries =
   struct
     type nonrec t = SpeakerEnrollmentJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpeakerEnrollmentJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -2370,10 +3077,41 @@ module SpeakerEnrollmentJobSummaries =
         ~of_json:SpeakerEnrollmentJobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module FraudsterSummaries =
+  struct
+    type nonrec t = FraudsterSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FraudsterSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FraudsterSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FraudsterSummaries"
+        ~of_json:FraudsterSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FraudsterRegistrationJobSummaries =
   struct
     type nonrec t = FraudsterRegistrationJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FraudsterRegistrationJobSummary.to_value)) |>
         (fun x -> `List x)
@@ -2400,6 +3138,9 @@ module DomainSummaries =
   struct
     type nonrec t = DomainSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2445,10 +3186,10 @@ module AuthenticationResult =
       {
       audioAggregationEndedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp indicating when audio aggregation ended for this authentication result."];
+          "A timestamp of when audio aggregation ended for this authentication result."];
       audioAggregationStartedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp indicating when audio aggregation started for this authentication result."];
+          "A timestamp of when audio aggregation started for this authentication result."];
       authenticationResultId: UniqueIdLarge.t option
         [@ocaml.doc
           "The unique identifier for this authentication result. Because there can be multiple authentications for a given session, this field helps to identify if the returned result is from a previous streaming activity or a new result. Note that in absence of any new streaming activity, AcceptanceThreshold changes, or SpeakerId changes, Voice ID always returns cached Authentication Result for this API."];
@@ -2531,21 +3272,22 @@ module AuthenticationResult =
         ?configuration ?authenticationResultId ?audioAggregationStartedAt
         ?audioAggregationEndedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let score = field_map json "Score" Score.of_json in
+    let of_json json__ =
+      let score = field_map json__ "Score" Score.of_json in
       let generatedSpeakerId =
-        field_map json "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
-      let decision = field_map json "Decision" AuthenticationDecision.of_json in
+        field_map json__ "GeneratedSpeakerId" GeneratedSpeakerId.of_json in
+      let decision =
+        field_map json__ "Decision" AuthenticationDecision.of_json in
       let customerSpeakerId =
-        field_map json "CustomerSpeakerId" CustomerSpeakerId.of_json in
+        field_map json__ "CustomerSpeakerId" CustomerSpeakerId.of_json in
       let configuration =
-        field_map json "Configuration" AuthenticationConfiguration.of_json in
+        field_map json__ "Configuration" AuthenticationConfiguration.of_json in
       let authenticationResultId =
-        field_map json "AuthenticationResultId" UniqueIdLarge.of_json in
+        field_map json__ "AuthenticationResultId" UniqueIdLarge.of_json in
       let audioAggregationStartedAt =
-        field_map json "AudioAggregationStartedAt" Timestamp.of_json in
+        field_map json__ "AudioAggregationStartedAt" Timestamp.of_json in
       let audioAggregationEndedAt =
-        field_map json "AudioAggregationEndedAt" Timestamp.of_json in
+        field_map json__ "AudioAggregationEndedAt" Timestamp.of_json in
       make ?score ?generatedSpeakerId ?decision ?customerSpeakerId
         ?configuration ?authenticationResultId ?audioAggregationStartedAt
         ?audioAggregationEndedAt ()
@@ -2558,10 +3300,10 @@ module FraudDetectionResult =
       {
       audioAggregationEndedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp indicating when audio aggregation ended for this fraud detection result."];
+          "A timestamp of when audio aggregation ended for this fraud detection result."];
       audioAggregationStartedAt: Timestamp.t option
         [@ocaml.doc
-          "A timestamp indicating when audio aggregation started for this fraud detection result."];
+          "A timestamp of when audio aggregation started for this fraud detection result."];
       configuration: FraudDetectionConfiguration.t option
         [@ocaml.doc
           "The FraudDetectionConfiguration used to generate this fraud detection result."];
@@ -2573,9 +3315,10 @@ module FraudDetectionResult =
           "The unique identifier for this fraud detection result. Given there can be multiple fraud detections for a given session, this field helps in identifying if the returned result is from previous streaming activity or a new result. Note that in the absence of any new streaming activity or risk threshold changes, Voice ID always returns cached Fraud Detection result for this API."];
       reasons: FraudDetectionReasons.t option
         [@ocaml.doc
-          "The reason speaker was flagged by the fraud detection system. This is only be populated if fraud detection Decision is HIGH_RISK, and only has one possible value: KNOWN_FRAUDSTER."];
+          "The reason speaker was flagged by the fraud detection system. This is only be populated if fraud detection Decision is HIGH_RISK, and the following possible values: KNOWN_FRAUDSTER and VOICE_SPOOFING."];
       riskDetails: FraudRiskDetails.t option
-        [@ocaml.doc "Details about each risk analyzed for this speaker."]}
+        [@ocaml.doc
+          "Details about each risk analyzed for this speaker. Currently, this contains KnownFraudsterRisk and VoiceSpoofingRisk details."]}
     let make ?audioAggregationEndedAt =
       fun ?audioAggregationStartedAt ->
         fun ?configuration ->
@@ -2634,18 +3377,20 @@ module FraudDetectionResult =
       make ?riskDetails ?reasons ?fraudDetectionResultId ?decision
         ?configuration ?audioAggregationStartedAt ?audioAggregationEndedAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let riskDetails = field_map json "RiskDetails" FraudRiskDetails.of_json in
-      let reasons = field_map json "Reasons" FraudDetectionReasons.of_json in
+    let of_json json__ =
+      let riskDetails =
+        field_map json__ "RiskDetails" FraudRiskDetails.of_json in
+      let reasons = field_map json__ "Reasons" FraudDetectionReasons.of_json in
       let fraudDetectionResultId =
-        field_map json "FraudDetectionResultId" UniqueIdLarge.of_json in
-      let decision = field_map json "Decision" FraudDetectionDecision.of_json in
+        field_map json__ "FraudDetectionResultId" UniqueIdLarge.of_json in
+      let decision =
+        field_map json__ "Decision" FraudDetectionDecision.of_json in
       let configuration =
-        field_map json "Configuration" FraudDetectionConfiguration.of_json in
+        field_map json__ "Configuration" FraudDetectionConfiguration.of_json in
       let audioAggregationStartedAt =
-        field_map json "AudioAggregationStartedAt" Timestamp.of_json in
+        field_map json__ "AudioAggregationStartedAt" Timestamp.of_json in
       let audioAggregationEndedAt =
-        field_map json "AudioAggregationEndedAt" Timestamp.of_json in
+        field_map json__ "AudioAggregationEndedAt" Timestamp.of_json in
       make ?riskDetails ?reasons ?fraudDetectionResultId ?decision
         ?configuration ?audioAggregationStartedAt ?audioAggregationEndedAt ()
     let to_json v = composed_to_json to_value v
@@ -2747,24 +3492,35 @@ module Fraudster =
     type nonrec t =
       {
       createdAt: Timestamp.t option
-        [@ocaml.doc "The timestamp when Voice ID identified the fraudster."];
+        [@ocaml.doc
+          "The timestamp of when Voice ID identified the fraudster."];
       domainId: DomainId.t option
         [@ocaml.doc
-          "The identifier for the domain containing the fraudster."];
+          "The identifier of the domain that contains the fraudster."];
       generatedFraudsterId: GeneratedFraudsterId.t option
-        [@ocaml.doc "The service-generated identifier for the fraudster."]}
+        [@ocaml.doc "The service-generated identifier for the fraudster."];
+      watchlistIds: ResponseWatchlistIds.t option
+        [@ocaml.doc
+          "The identifier of the watchlists the fraudster is a part of."]}
     let make ?createdAt =
       fun ?domainId ->
         fun ?generatedFraudsterId ->
-          fun () -> { createdAt; domainId; generatedFraudsterId }
+          fun ?watchlistIds ->
+            fun () ->
+              { createdAt; domainId; generatedFraudsterId; watchlistIds }
     let to_value x =
       structure_to_value
         [("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
         ("GeneratedFraudsterId",
-          (Option.map x.generatedFraudsterId ~f:GeneratedFraudsterId.to_value))]
+          (Option.map x.generatedFraudsterId ~f:GeneratedFraudsterId.to_value));
+        ("WatchlistIds",
+          (Option.map x.watchlistIds ~f:ResponseWatchlistIds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let watchlistIds =
+        (Option.map ~f:ResponseWatchlistIds.of_xml)
+          (Xml.child xml_arg0 "WatchlistIds") in
       let generatedFraudsterId =
         (Option.map ~f:GeneratedFraudsterId.of_xml)
           (Xml.child xml_arg0 "GeneratedFraudsterId") in
@@ -2772,14 +3528,16 @@ module Fraudster =
         (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
       let createdAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      make ?generatedFraudsterId ?domainId ?createdAt ()
+      make ?watchlistIds ?generatedFraudsterId ?domainId ?createdAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let watchlistIds =
+        field_map json__ "WatchlistIds" ResponseWatchlistIds.of_json in
       let generatedFraudsterId =
-        field_map json "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      make ?generatedFraudsterId ?domainId ?createdAt ()
+        field_map json__ "GeneratedFraudsterId" GeneratedFraudsterId.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      make ?watchlistIds ?generatedFraudsterId ?domainId ?createdAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains all the information about a fraudster."]
 module FraudsterId =
@@ -2802,6 +3560,150 @@ module FraudsterId =
     let of_json j = string_of_json ~kind:"FraudsterId" j
     let to_json = simple_to_json to_value
   end
+module UpdateWatchlistResponse =
+  struct
+    type nonrec t =
+      {
+      watchlist: Watchlist.t option
+        [@ocaml.doc "Details about the updated watchlist."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?watchlist = fun () -> { watchlist }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Watchlist", (Option.map x.watchlist ~f:Watchlist.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlist =
+        (Option.map ~f:Watchlist.of_xml) (Xml.child xml_arg0 "Watchlist") in
+      make ?watchlist ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlist = field_map json__ "Watchlist" Watchlist.of_json in
+      make ?watchlist ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified watchlist. Every domain has a default watchlist which cannot be updated."]
+module UpdateWatchlistRequest =
+  struct
+    type nonrec t =
+      {
+      description: WatchlistDescription.t option
+        [@ocaml.doc "A brief description about this watchlist."];
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain that contains the watchlist."];
+      name: WatchlistName.t option [@ocaml.doc "The name of the watchlist."];
+      watchlistId: WatchlistId.t
+        [@ocaml.doc "The identifier of the watchlist to be updated."]}
+    let context_ = "UpdateWatchlistRequest"
+    let make ?description =
+      fun ?name ->
+        fun ~domainId ->
+          fun ~watchlistId ->
+            fun () -> { description; name; domainId; watchlistId }
+    let to_value x =
+      structure_to_value
+        [("Description",
+           (Option.map x.description ~f:WatchlistDescription.to_value));
+        ("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("Name", (Option.map x.name ~f:WatchlistName.to_value));
+        ("WatchlistId", (Some (WatchlistId.to_value x.watchlistId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        WatchlistId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WatchlistId") in
+      let name =
+        (Option.map ~f:WatchlistName.of_xml) (Xml.child xml_arg0 "Name") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      let description =
+        (Option.map ~f:WatchlistDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      make ~watchlistId ?name ~domainId ?description ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId =
+        field_map_exn json__ "WatchlistId" WatchlistId.of_json in
+      let name = field_map json__ "Name" WatchlistName.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      let description =
+        field_map json__ "Description" WatchlistDescription.of_json in
+      make ~watchlistId ?name ~domainId ?description ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified watchlist. Every domain has a default watchlist which cannot be updated."]
 module UpdateDomainResponse =
   struct
     type nonrec t =
@@ -2889,8 +3791,9 @@ module UpdateDomainResponse =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "Domain" Domain.of_json in make ?domain ()
+    let of_json json__ =
+      let domain = field_map json__ "Domain" Domain.of_json in
+      make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the specified domain. This API has clobber behavior, and clears and replaces all attributes. If an optional field, such as 'Description' is not provided, it is removed from the domain."]
@@ -2905,7 +3808,7 @@ module UpdateDomainRequest =
       name: DomainName.t [@ocaml.doc "The name of the domain."];
       serverSideEncryptionConfiguration: ServerSideEncryptionConfiguration.t
         [@ocaml.doc
-          "The configuration, containing the KMS Key Identifier, to be used by Voice ID for the server-side encryption of your data. Note that all the existing data in the domain are still encrypted using the existing key, only the data added to domain after updating the key is encrypted using the new key."]}
+          "The configuration, containing the KMS key identifier, to be used by Voice ID for the server-side encryption of your data. Changing the domain's associated KMS key immediately triggers an asynchronous process to remove dependency on the old KMS key, such that the domain's data can only be accessed using the new KMS key. The domain's ServerSideEncryptionUpdateDetails contains the details for this process."]}
     let context_ = "UpdateDomainRequest"
     let make ?description =
       fun ~domainId ->
@@ -2941,13 +3844,13 @@ module UpdateDomainRequest =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       make ~serverSideEncryptionConfiguration ~name ~domainId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serverSideEncryptionConfiguration =
-        field_map_exn json "ServerSideEncryptionConfiguration"
+        field_map_exn json__ "ServerSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map_exn json "Name" DomainName.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" DomainName.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       make ~serverSideEncryptionConfiguration ~name ~domainId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3064,10 +3967,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3155,8 +4058,7 @@ module TagResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Tags an Amazon Connect Voice ID resource with the provided list of tags."]
+  end[@@ocaml.doc "Tags a Voice ID resource with the provided list of tags."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -3181,14 +4083,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Tags an Amazon Connect Voice ID resource with the provided list of tags."]
+  end[@@ocaml.doc "Tags a Voice ID resource with the provided list of tags."]
 module StartSpeakerEnrollmentJobResponse =
   struct
     type nonrec t =
@@ -3289,8 +4190,8 @@ module StartSpeakerEnrollmentJobResponse =
           (Xml.child xml_arg0 "Job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "Job" SpeakerEnrollmentJob.of_json in
+    let of_json json__ =
+      let job = field_map json__ "Job" SpeakerEnrollmentJob.of_json in
       make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3301,16 +4202,16 @@ module StartSpeakerEnrollmentJobRequest =
       {
       clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "The idempotency token for starting a new speaker enrollment Job. If not provided, Amazon Web Services SDK populates this field."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
-          "The IAM role Amazon Resource Name (ARN) that grants Voice ID permissions to access customer's buckets to read the input manifest file and write the job output file. Refer to Batch enrollment using audio data from prior calls documentation for the permissions needed in this role."];
+          "The IAM role Amazon Resource Name (ARN) that grants Voice ID permissions to access customer's buckets to read the input manifest file and write the job output file. Refer to Batch enrollment using audio data from prior calls for the permissions needed in this role."];
       domainId: DomainId.t
         [@ocaml.doc
           "The identifier of the domain that contains the speaker enrollment job and in which the speakers are enrolled."];
       enrollmentConfig: EnrollmentConfig.t option
         [@ocaml.doc
-          "The enrollment config that contains details such as the action to take when a speaker is already enrolled in the Voice ID system or when a speaker is identified as a fraudster."];
+          "The enrollment config that contains details such as the action to take when a speaker is already enrolled in Voice ID or when a speaker is identified as a fraudster."];
       inputDataConfig: InputDataConfig.t
         [@ocaml.doc
           "The input data config containing the S3 location for the input manifest file that contains the list of speaker enrollment requests."];
@@ -3318,7 +4219,7 @@ module StartSpeakerEnrollmentJobRequest =
         [@ocaml.doc "A name for your speaker enrollment job."];
       outputDataConfig: OutputDataConfig.t
         [@ocaml.doc
-          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS Key ID to encrypt the file."]}
+          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS key ID to encrypt the file."]}
     let context_ = "StartSpeakerEnrollmentJobRequest"
     let make ?clientToken =
       fun ?enrollmentConfig ->
@@ -3375,19 +4276,19 @@ module StartSpeakerEnrollmentJobRequest =
       make ~outputDataConfig ?jobName ~inputDataConfig ?enrollmentConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
       let enrollmentConfig =
-        field_map json "EnrollmentConfig" EnrollmentConfig.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+        field_map json__ "EnrollmentConfig" EnrollmentConfig.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let clientToken =
-        field_map json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       make ~outputDataConfig ?jobName ~inputDataConfig ?enrollmentConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -3493,8 +4394,8 @@ module StartFraudsterRegistrationJobResponse =
           (Xml.child xml_arg0 "Job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "Job" FraudsterRegistrationJob.of_json in
+    let of_json json__ =
+      let job = field_map json__ "Job" FraudsterRegistrationJob.of_json in
       make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3505,13 +4406,13 @@ module StartFraudsterRegistrationJobRequest =
       {
       clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "The idempotency token for starting a new fraudster registration job. If not provided, Amazon Web Services SDK populates this field."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       dataAccessRoleArn: IamRoleArn.t
         [@ocaml.doc
           "The IAM role Amazon Resource Name (ARN) that grants Voice ID permissions to access customer's buckets to read the input manifest file and write the Job output file. Refer to the Create and edit a fraudster watchlist documentation for the permissions needed in this role."];
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier of the domain containing the fraudster registration job and in which the fraudsters are registered."];
+          "The identifier of the domain that contains the fraudster registration job and in which the fraudsters are registered."];
       inputDataConfig: InputDataConfig.t
         [@ocaml.doc
           "The input data config containing an S3 URI for the input manifest file that contains the list of fraudster registration requests."];
@@ -3519,7 +4420,7 @@ module StartFraudsterRegistrationJobRequest =
         [@ocaml.doc "The name of the new fraudster registration job."];
       outputDataConfig: OutputDataConfig.t
         [@ocaml.doc
-          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS Key ID to encrypt the file."];
+          "The output data config containing the S3 location where Voice ID writes the job output file; you must also include a KMS key ID to encrypt the file."];
       registrationConfig: RegistrationConfig.t option
         [@ocaml.doc
           "The registration config containing details such as the action to take when a duplicate fraudster is detected, and the similarity threshold to use for detecting a duplicate fraudster."]}
@@ -3579,19 +4480,19 @@ module StartFraudsterRegistrationJobRequest =
       make ?registrationConfig ~outputDataConfig ?jobName ~inputDataConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let registrationConfig =
-        field_map json "RegistrationConfig" RegistrationConfig.of_json in
+        field_map json__ "RegistrationConfig" RegistrationConfig.of_json in
       let outputDataConfig =
-        field_map_exn json "OutputDataConfig" OutputDataConfig.of_json in
-      let jobName = field_map json "JobName" JobName.of_json in
+        field_map_exn json__ "OutputDataConfig" OutputDataConfig.of_json in
+      let jobName = field_map json__ "JobName" JobName.of_json in
       let inputDataConfig =
-        field_map_exn json "InputDataConfig" InputDataConfig.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+        field_map_exn json__ "InputDataConfig" InputDataConfig.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       let dataAccessRoleArn =
-        field_map_exn json "DataAccessRoleArn" IamRoleArn.of_json in
+        field_map_exn json__ "DataAccessRoleArn" IamRoleArn.of_json in
       let clientToken =
-        field_map json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       make ?registrationConfig ~outputDataConfig ?jobName ~inputDataConfig
         ~domainId ~dataAccessRoleArn ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -3608,6 +4509,7 @@ module OptOutSpeakerResponse =
       | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -3622,6 +4524,9 @@ module OptOutSpeakerResponse =
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
       | "ValidationException" ->
@@ -3639,6 +4544,9 @@ module OptOutSpeakerResponse =
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
       | "ValidationException" ->
@@ -3663,6 +4571,10 @@ module OptOutSpeakerResponse =
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
             ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
       | `ThrottlingException e ->
           `Assoc
             [("error", (`String "ThrottlingException"));
@@ -3685,18 +4597,19 @@ module OptOutSpeakerResponse =
         (Option.map ~f:Speaker.of_xml) (Xml.child xml_arg0 "Speaker") in
       make ?speaker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let speaker = field_map json "Speaker" Speaker.of_json in
+    let of_json json__ =
+      let speaker = field_map json__ "Speaker" Speaker.of_json in
       make ?speaker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Opts out a speaker from Voice ID system. A speaker can be opted out regardless of whether or not they already exist in the system. If they don't yet exist, a new speaker is created in an opted out state. If they already exist, their existing status is overridden and they are opted out. Enrollment and evaluation authentication requests are rejected for opted out speakers, and opted out speakers have no voice embeddings stored in the system."]
+       "Opts out a speaker from Voice ID. A speaker can be opted out regardless of whether or not they already exist in Voice ID. If they don't yet exist, a new speaker is created in an opted out state. If they already exist, their existing status is overridden and they are opted out. Enrollment and evaluation authentication requests are rejected for opted out speakers, and opted out speakers have no voice embeddings stored in Voice ID."]
 module OptOutSpeakerRequest =
   struct
     type nonrec t =
       {
       domainId: DomainId.t
-        [@ocaml.doc "The identifier of the domain containing the speaker."];
+        [@ocaml.doc
+          "The identifier of the domain that contains the speaker."];
       speakerId: SpeakerId.t
         [@ocaml.doc "The identifier of the speaker you want opted-out."]}
     let context_ = "OptOutSpeakerRequest"
@@ -3714,13 +4627,149 @@ module OptOutSpeakerRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let speakerId = field_map_exn json__ "SpeakerId" SpeakerId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~speakerId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Opts out a speaker from Voice ID system. A speaker can be opted out regardless of whether or not they already exist in the system. If they don't yet exist, a new speaker is created in an opted out state. If they already exist, their existing status is overridden and they are opted out. Enrollment and evaluation authentication requests are rejected for opted out speakers, and opted out speakers have no voice embeddings stored in the system."]
+       "Opts out a speaker from Voice ID. A speaker can be opted out regardless of whether or not they already exist in Voice ID. If they don't yet exist, a new speaker is created in an opted out state. If they already exist, their existing status is overridden and they are opted out. Enrollment and evaluation authentication requests are rejected for opted out speakers, and opted out speakers have no voice embeddings stored in Voice ID."]
+module ListWatchlistsResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."];
+      watchlistSummaries: WatchlistSummaries.t option
+        [@ocaml.doc
+          "A list that contains details about each watchlist in the Amazon Web Services account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?watchlistSummaries -> fun () -> { nextToken; watchlistSummaries }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("WatchlistSummaries",
+          (Option.map x.watchlistSummaries ~f:WatchlistSummaries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistSummaries =
+        (Option.map ~f:WatchlistSummaries.of_xml)
+          (Xml.child xml_arg0 "WatchlistSummaries") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?watchlistSummaries ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistSummaries =
+        field_map json__ "WatchlistSummaries" WatchlistSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      make ?watchlistSummaries ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all watchlists in a specified domain."]
+module ListWatchlistsRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t [@ocaml.doc "The identifier of the domain."];
+      maxResults: MaxResultsForList.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
+    let context_ = "ListWatchlistsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~domainId -> fun () -> { maxResults; nextToken; domainId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsForList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsForList.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ?nextToken ?maxResults ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForList.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ?nextToken ?maxResults ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all watchlists in a specified domain."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -3799,8 +4848,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all tags associated with a specified Voice ID resource."]
@@ -3823,9 +4872,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3919,10 +4968,10 @@ module ListSpeakersResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?speakerSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let speakerSummaries =
-        field_map json "SpeakerSummaries" SpeakerSummaries.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "SpeakerSummaries" SpeakerSummaries.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?speakerSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all speakers in a specified domain."]
@@ -3933,7 +4982,7 @@ module ListSpeakersRequest =
       domainId: DomainId.t [@ocaml.doc "The identifier of the domain."];
       maxResults: MaxResultsForList.t option
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use NextToken to obtain further pages of results. The default is 100; the maximum allowed page size is also 100."];
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
@@ -3958,10 +5007,11 @@ module ListSpeakersRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForList.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ?nextToken ?maxResults ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all speakers in a specified domain."]
@@ -4055,10 +5105,10 @@ module ListSpeakerEnrollmentJobsResponse =
           (Xml.child xml_arg0 "JobSummaries") in
       make ?nextToken ?jobSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let jobSummaries =
-        field_map json "JobSummaries" SpeakerEnrollmentJobSummaries.of_json in
+        field_map json__ "JobSummaries" SpeakerEnrollmentJobSummaries.of_json in
       make ?nextToken ?jobSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4069,12 +5119,12 @@ module ListSpeakerEnrollmentJobsRequest =
       {
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier of the domain containing the speaker enrollment jobs."];
+          "The identifier of the domain that contains the speaker enrollment jobs."];
       jobStatus: SpeakerEnrollmentJobStatus.t option
         [@ocaml.doc "Provides the status of your speaker enrollment Job."];
       maxResults: MaxResultsForList.t option
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use NextToken to obtain further pages of results. The default is 100; the maximum allowed page size is also 100."];
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
@@ -4106,16 +5156,162 @@ module ListSpeakerEnrollmentJobsRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForList.of_json in
       let jobStatus =
-        field_map json "JobStatus" SpeakerEnrollmentJobStatus.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+        field_map json__ "JobStatus" SpeakerEnrollmentJobStatus.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the speaker enrollment jobs in the domain with the specified JobStatus. If JobStatus is not provided, this lists all jobs with all possible speaker enrollment job statuses."]
+module ListFraudstersResponse =
+  struct
+    type nonrec t =
+      {
+      fraudsterSummaries: FraudsterSummaries.t option
+        [@ocaml.doc
+          "A list that contains details about each fraudster in the Amazon Web Services account."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fraudsterSummaries =
+      fun ?nextToken -> fun () -> { fraudsterSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FraudsterSummaries",
+           (Option.map x.fraudsterSummaries ~f:FraudsterSummaries.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let fraudsterSummaries =
+        (Option.map ~f:FraudsterSummaries.of_xml)
+          (Xml.child xml_arg0 "FraudsterSummaries") in
+      make ?nextToken ?fraudsterSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let fraudsterSummaries =
+        field_map json__ "FraudsterSummaries" FraudsterSummaries.of_json in
+      make ?nextToken ?fraudsterSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all fraudsters in a specified watchlist or domain."]
+module ListFraudstersRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t [@ocaml.doc "The identifier of the domain."];
+      maxResults: MaxResultsForList.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."];
+      watchlistId: WatchlistId.t option
+        [@ocaml.doc
+          "The identifier of the watchlist. If provided, all fraudsters in the watchlist are listed. If not provided, all fraudsters in the domain are listed."]}
+    let context_ = "ListFraudstersRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?watchlistId ->
+          fun ~domainId ->
+            fun () -> { maxResults; nextToken; watchlistId; domainId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:MaxResultsForList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("WatchlistId", (Option.map x.watchlistId ~f:WatchlistId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        (Option.map ~f:WatchlistId.of_xml) (Xml.child xml_arg0 "WatchlistId") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultsForList.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ?watchlistId ?nextToken ?maxResults ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId = field_map json__ "WatchlistId" WatchlistId.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForList.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ?watchlistId ?nextToken ?maxResults ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all fraudsters in a specified watchlist or domain."]
 module ListFraudsterRegistrationJobsResponse =
   struct
     type nonrec t =
@@ -4206,10 +5402,10 @@ module ListFraudsterRegistrationJobsResponse =
           (Xml.child xml_arg0 "JobSummaries") in
       make ?nextToken ?jobSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let jobSummaries =
-        field_map json "JobSummaries"
+        field_map json__ "JobSummaries"
           FraudsterRegistrationJobSummaries.of_json in
       make ?nextToken ?jobSummaries ()
     let to_json v = composed_to_json to_value v
@@ -4221,13 +5417,13 @@ module ListFraudsterRegistrationJobsRequest =
       {
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier of the domain containing the fraudster registration Jobs."];
+          "The identifier of the domain that contains the fraudster registration Jobs."];
       jobStatus: FraudsterRegistrationJobStatus.t option
         [@ocaml.doc
           "Provides the status of your fraudster registration job."];
       maxResults: MaxResultsForList.t option
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use NextToken to obtain further pages of results. The default is 100; the maximum allowed page size is also 100."];
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
@@ -4259,12 +5455,13 @@ module ListFraudsterRegistrationJobsRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResultsForList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" MaxResultsForList.of_json in
       let jobStatus =
-        field_map json "JobStatus" FraudsterRegistrationJobStatus.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+        field_map json__ "JobStatus" FraudsterRegistrationJobStatus.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ?nextToken ?maxResults ?jobStatus ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4349,10 +5546,10 @@ module ListDomainsResponse =
           (Xml.child xml_arg0 "DomainSummaries") in
       make ?nextToken ?domainSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let domainSummaries =
-        field_map json "DomainSummaries" DomainSummaries.of_json in
+        field_map json__ "DomainSummaries" DomainSummaries.of_json in
       make ?nextToken ?domainSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4363,7 +5560,7 @@ module ListDomainsRequest =
       {
       maxResults: MaxResultsForListDomainFe.t option
         [@ocaml.doc
-          "The maximum number of results that are returned per call. You can use NextToken to obtain further pages of results. The default is 100; the maximum allowed page size is also 100."];
+          "The maximum number of results that are returned per call. You can use NextToken to obtain more pages of results. The default is 100; the maximum allowed page size is also 100."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "If NextToken is returned, there are more results available. The value of NextToken is a unique pagination token for each page. Make the call again using the returned token to retrieve the next page. Keep all other arguments unchanged. Each pagination token expires after 24 hours."]}
@@ -4383,10 +5580,10 @@ module ListDomainsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxResultsForListDomainFe.of_json in
+        field_map json__ "MaxResults" MaxResultsForListDomainFe.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4399,7 +5596,8 @@ module EvaluateSessionResponse =
         [@ocaml.doc
           "Details resulting from the authentication process, such as authentication decision and authentication score."];
       domainId: DomainId.t option
-        [@ocaml.doc "The identifier of the domain containing the session."];
+        [@ocaml.doc
+          "The identifier of the domain that contains the session."];
       fraudDetectionResult: FraudDetectionResult.t option
         [@ocaml.doc
           "Details resulting from the fraud detection process, such as fraud detection decision and risk score."];
@@ -4409,9 +5607,10 @@ module EvaluateSessionResponse =
         [@ocaml.doc "The client-provided name of the session."];
       streamingStatus: StreamingStatus.t option
         [@ocaml.doc
-          "The current status of audio streaming for this session. This field is useful to infer next steps when the Authentication or Fraud Detection results are empty or the decision is NOT_ENOUGH_SPEECH. In this situation, if the StreamingStatus is ONGOING/PENDING_CONFIGURATION, it can mean that the client should call the API again later, once Voice ID has enough audio to produce a result. If the decision remains NOT_ENOUGH_SPEECH even after StreamingStatus is ENDED, it means that the previously streamed session did not have enough speech to perform evaluation, and a new streaming session is needed to try again."]}
+          "The current status of audio streaming for this session. This field is useful to infer next steps when the Authentication or Fraud Detection results are empty or the decision is NOT_ENOUGH_SPEECH. In this situation, if the StreamingStatus is ONGOING/PENDING_CONFIGURATION, it can mean that the client should call the API again later, after Voice ID has enough audio to produce a result. If the decision remains NOT_ENOUGH_SPEECH even after StreamingStatus is ENDED, it means that the previously streamed session did not have enough speech to perform evaluation, and a new streaming session is needed to try again."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
       | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -4432,6 +5631,302 @@ module EvaluateSessionResponse =
                     sessionName;
                     streamingStatus
                   }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AuthenticationResult",
+           (Option.map x.authenticationResult
+              ~f:AuthenticationResult.to_value));
+        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("FraudDetectionResult",
+          (Option.map x.fraudDetectionResult ~f:FraudDetectionResult.to_value));
+        ("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
+        ("SessionName", (Option.map x.sessionName ~f:SessionName.to_value));
+        ("StreamingStatus",
+          (Option.map x.streamingStatus ~f:StreamingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamingStatus =
+        (Option.map ~f:StreamingStatus.of_xml)
+          (Xml.child xml_arg0 "StreamingStatus") in
+      let sessionName =
+        (Option.map ~f:SessionName.of_xml) (Xml.child xml_arg0 "SessionName") in
+      let sessionId =
+        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
+      let fraudDetectionResult =
+        (Option.map ~f:FraudDetectionResult.of_xml)
+          (Xml.child xml_arg0 "FraudDetectionResult") in
+      let domainId =
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      let authenticationResult =
+        (Option.map ~f:AuthenticationResult.of_xml)
+          (Xml.child xml_arg0 "AuthenticationResult") in
+      make ?streamingStatus ?sessionName ?sessionId ?fraudDetectionResult
+        ?domainId ?authenticationResult ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamingStatus =
+        field_map json__ "StreamingStatus" StreamingStatus.of_json in
+      let sessionName = field_map json__ "SessionName" SessionName.of_json in
+      let sessionId = field_map json__ "SessionId" SessionId.of_json in
+      let fraudDetectionResult =
+        field_map json__ "FraudDetectionResult" FraudDetectionResult.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      let authenticationResult =
+        field_map json__ "AuthenticationResult" AuthenticationResult.of_json in
+      make ?streamingStatus ?sessionName ?sessionId ?fraudDetectionResult
+        ?domainId ?authenticationResult ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Evaluates a specified session based on audio data accumulated during a streaming Amazon Connect Voice ID call."]
+module EvaluateSessionRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain where the session started."];
+      sessionNameOrId: SessionNameOrId.t
+        [@ocaml.doc
+          "The session identifier, or name of the session, that you want to evaluate. In Voice ID integration, this is the Contact-Id."]}
+    let context_ = "EvaluateSessionRequest"
+    let make ~domainId =
+      fun ~sessionNameOrId -> fun () -> { domainId; sessionNameOrId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("SessionNameOrId",
+          (Some (SessionNameOrId.to_value x.sessionNameOrId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sessionNameOrId =
+        SessionNameOrId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SessionNameOrId") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ~sessionNameOrId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sessionNameOrId =
+        field_map_exn json__ "SessionNameOrId" SessionNameOrId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ~sessionNameOrId ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Evaluates a specified session based on audio data accumulated during a streaming Amazon Connect Voice ID call."]
+module DisassociateFraudsterResponse =
+  struct
+    type nonrec t = {
+      fraudster: Fraudster.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fraudster = fun () -> { fraudster }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Fraudster", (Option.map x.fraudster ~f:Fraudster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fraudster =
+        (Option.map ~f:Fraudster.of_xml) (Xml.child xml_arg0 "Fraudster") in
+      make ?fraudster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fraudster = field_map json__ "Fraudster" Fraudster.of_json in
+      make ?fraudster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates the fraudsters from the watchlist specified. Voice ID always expects a fraudster to be a part of at least one watchlist. If you try to disassociate a fraudster from its only watchlist, a ValidationException is thrown."]
+module DisassociateFraudsterRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain that contains the fraudster."];
+      fraudsterId: FraudsterId.t
+        [@ocaml.doc
+          "The identifier of the fraudster to be disassociated from the watchlist."];
+      watchlistId: WatchlistId.t
+        [@ocaml.doc
+          "The identifier of the watchlist that you want to disassociate from the fraudster."]}
+    let context_ = "DisassociateFraudsterRequest"
+    let make ~domainId =
+      fun ~fraudsterId ->
+        fun ~watchlistId -> fun () -> { domainId; fraudsterId; watchlistId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("FraudsterId", (Some (FraudsterId.to_value x.fraudsterId)));
+        ("WatchlistId", (Some (WatchlistId.to_value x.watchlistId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        WatchlistId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WatchlistId") in
+      let fraudsterId =
+        FraudsterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FraudsterId") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ~watchlistId ~fraudsterId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId =
+        field_map_exn json__ "WatchlistId" WatchlistId.of_json in
+      let fraudsterId =
+        field_map_exn json__ "FraudsterId" FraudsterId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ~watchlistId ~fraudsterId ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disassociates the fraudsters from the watchlist specified. Voice ID always expects a fraudster to be a part of at least one watchlist. If you try to disassociate a fraudster from its only watchlist, a ValidationException is thrown."]
+module DescribeWatchlistResponse =
+  struct
+    type nonrec t =
+      {
+      watchlist: Watchlist.t option
+        [@ocaml.doc "Information about the specified watchlist."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?watchlist = fun () -> { watchlist }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4490,86 +5985,51 @@ module EvaluateSessionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AuthenticationResult",
-           (Option.map x.authenticationResult
-              ~f:AuthenticationResult.to_value));
-        ("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
-        ("FraudDetectionResult",
-          (Option.map x.fraudDetectionResult ~f:FraudDetectionResult.to_value));
-        ("SessionId", (Option.map x.sessionId ~f:SessionId.to_value));
-        ("SessionName", (Option.map x.sessionName ~f:SessionName.to_value));
-        ("StreamingStatus",
-          (Option.map x.streamingStatus ~f:StreamingStatus.to_value))]
+        [("Watchlist", (Option.map x.watchlist ~f:Watchlist.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let streamingStatus =
-        (Option.map ~f:StreamingStatus.of_xml)
-          (Xml.child xml_arg0 "StreamingStatus") in
-      let sessionName =
-        (Option.map ~f:SessionName.of_xml) (Xml.child xml_arg0 "SessionName") in
-      let sessionId =
-        (Option.map ~f:SessionId.of_xml) (Xml.child xml_arg0 "SessionId") in
-      let fraudDetectionResult =
-        (Option.map ~f:FraudDetectionResult.of_xml)
-          (Xml.child xml_arg0 "FraudDetectionResult") in
-      let domainId =
-        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
-      let authenticationResult =
-        (Option.map ~f:AuthenticationResult.of_xml)
-          (Xml.child xml_arg0 "AuthenticationResult") in
-      make ?streamingStatus ?sessionName ?sessionId ?fraudDetectionResult
-        ?domainId ?authenticationResult ()
+      let watchlist =
+        (Option.map ~f:Watchlist.of_xml) (Xml.child xml_arg0 "Watchlist") in
+      make ?watchlist ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamingStatus =
-        field_map json "StreamingStatus" StreamingStatus.of_json in
-      let sessionName = field_map json "SessionName" SessionName.of_json in
-      let sessionId = field_map json "SessionId" SessionId.of_json in
-      let fraudDetectionResult =
-        field_map json "FraudDetectionResult" FraudDetectionResult.of_json in
-      let domainId = field_map json "DomainId" DomainId.of_json in
-      let authenticationResult =
-        field_map json "AuthenticationResult" AuthenticationResult.of_json in
-      make ?streamingStatus ?sessionName ?sessionId ?fraudDetectionResult
-        ?domainId ?authenticationResult ()
+    let of_json json__ =
+      let watchlist = field_map json__ "Watchlist" Watchlist.of_json in
+      make ?watchlist ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Evaluates a specified session based on audio data accumulated during a streaming Amazon Connect Voice ID call."]
-module EvaluateSessionRequest =
+  end[@@ocaml.doc "Describes the specified watchlist."]
+module DescribeWatchlistRequest =
   struct
     type nonrec t =
       {
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier of the domain where the session started."];
-      sessionNameOrId: SessionNameOrId.t
+          "The identifier of the domain that contains the watchlist."];
+      watchlistId: WatchlistId.t
         [@ocaml.doc
-          "The session identifier, or name of the session, that you want to evaluate. In Voice ID integration, this is the Contact-Id."]}
-    let context_ = "EvaluateSessionRequest"
+          "The identifier of the watchlist that you are describing."]}
+    let context_ = "DescribeWatchlistRequest"
     let make ~domainId =
-      fun ~sessionNameOrId -> fun () -> { domainId; sessionNameOrId }
+      fun ~watchlistId -> fun () -> { domainId; watchlistId }
     let to_value x =
       structure_to_value
         [("DomainId", (Some (DomainId.to_value x.domainId)));
-        ("SessionNameOrId",
-          (Some (SessionNameOrId.to_value x.sessionNameOrId)))]
+        ("WatchlistId", (Some (WatchlistId.to_value x.watchlistId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let sessionNameOrId =
-        SessionNameOrId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SessionNameOrId") in
+      let watchlistId =
+        WatchlistId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WatchlistId") in
       let domainId =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
-      make ~sessionNameOrId ~domainId ()
+      make ~watchlistId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sessionNameOrId =
-        field_map_exn json "SessionNameOrId" SessionNameOrId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
-      make ~sessionNameOrId ~domainId ()
+    let of_json json__ =
+      let watchlistId =
+        field_map_exn json__ "WatchlistId" WatchlistId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ~watchlistId ~domainId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Evaluates a specified session based on audio data accumulated during a streaming Amazon Connect Voice ID call."]
+  end[@@ocaml.doc "Describes the specified watchlist."]
 module DescribeSpeakerResponse =
   struct
     type nonrec t =
@@ -4649,8 +6109,8 @@ module DescribeSpeakerResponse =
         (Option.map ~f:Speaker.of_xml) (Xml.child xml_arg0 "Speaker") in
       make ?speaker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let speaker = field_map json "Speaker" Speaker.of_json in
+    let of_json json__ =
+      let speaker = field_map json__ "Speaker" Speaker.of_json in
       make ?speaker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified speaker."]
@@ -4678,9 +6138,9 @@ module DescribeSpeakerRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let speakerId = field_map_exn json__ "SpeakerId" SpeakerId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~speakerId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified speaker."]
@@ -4765,8 +6225,8 @@ module DescribeSpeakerEnrollmentJobResponse =
           (Xml.child xml_arg0 "Job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "Job" SpeakerEnrollmentJob.of_json in
+    let of_json json__ =
+      let job = field_map json__ "Job" SpeakerEnrollmentJob.of_json in
       make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified speaker enrollment job."]
@@ -4776,7 +6236,7 @@ module DescribeSpeakerEnrollmentJobRequest =
       {
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier of the domain containing the speaker enrollment job."];
+          "The identifier of the domain that contains the speaker enrollment job."];
       jobId: JobId.t
         [@ocaml.doc
           "The identifier of the speaker enrollment job you are describing."]}
@@ -4794,9 +6254,9 @@ module DescribeSpeakerEnrollmentJobRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~jobId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~jobId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified speaker enrollment job."]
@@ -4879,8 +6339,8 @@ module DescribeFraudsterResponse =
         (Option.map ~f:Fraudster.of_xml) (Xml.child xml_arg0 "Fraudster") in
       make ?fraudster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fraudster = field_map json "Fraudster" Fraudster.of_json in
+    let of_json json__ =
+      let fraudster = field_map json__ "Fraudster" Fraudster.of_json in
       make ?fraudster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified fraudster."]
@@ -4889,7 +6349,8 @@ module DescribeFraudsterRequest =
     type nonrec t =
       {
       domainId: DomainId.t
-        [@ocaml.doc "The identifier of the domain containing the fraudster."];
+        [@ocaml.doc
+          "The identifier of the domain that contains the fraudster."];
       fraudsterId: FraudsterId.t
         [@ocaml.doc "The identifier of the fraudster you are describing."]}
     let context_ = "DescribeFraudsterRequest"
@@ -4908,9 +6369,10 @@ module DescribeFraudsterRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~fraudsterId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fraudsterId = field_map_exn json "FraudsterId" FraudsterId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let fraudsterId =
+        field_map_exn json__ "FraudsterId" FraudsterId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~fraudsterId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified fraudster."]
@@ -4995,8 +6457,8 @@ module DescribeFraudsterRegistrationJobResponse =
           (Xml.child xml_arg0 "Job") in
       make ?job ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let job = field_map json "Job" FraudsterRegistrationJob.of_json in
+    let of_json json__ =
+      let job = field_map json__ "Job" FraudsterRegistrationJob.of_json in
       make ?job ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified fraudster registration job."]
@@ -5006,10 +6468,10 @@ module DescribeFraudsterRegistrationJobRequest =
       {
       domainId: DomainId.t
         [@ocaml.doc
-          "The identifier for the domain containing the fraudster registration job."];
+          "The identifier of the domain that contains the fraudster registration job."];
       jobId: JobId.t
         [@ocaml.doc
-          "The identifier for the fraudster registration job you are describing."]}
+          "The identifier of the fraudster registration job you are describing."]}
     let context_ = "DescribeFraudsterRegistrationJobRequest"
     let make ~domainId = fun ~jobId -> fun () -> { domainId; jobId }
     let to_value x =
@@ -5024,9 +6486,9 @@ module DescribeFraudsterRegistrationJobRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~jobId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~jobId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified fraudster registration job."]
@@ -5109,8 +6571,9 @@ module DescribeDomainResponse =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "Domain" Domain.of_json in make ?domain ()
+    let of_json json__ =
+      let domain = field_map json__ "Domain" Domain.of_json in
+      make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified domain."]
 module DescribeDomainRequest =
@@ -5118,7 +6581,7 @@ module DescribeDomainRequest =
     type nonrec t =
       {
       domainId: DomainId.t
-        [@ocaml.doc "The identifier of the domain you are describing."]}
+        [@ocaml.doc "The identifier of the domain that you are describing."]}
     let context_ = "DescribeDomainRequest"
     let make ~domainId = fun () -> { domainId }
     let to_value x =
@@ -5130,17 +6593,51 @@ module DescribeDomainRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the specified domain."]
+module DeleteWatchlistRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain that contains the watchlist."];
+      watchlistId: WatchlistId.t
+        [@ocaml.doc "The identifier of the watchlist to be deleted."]}
+    let context_ = "DeleteWatchlistRequest"
+    let make ~domainId =
+      fun ~watchlistId -> fun () -> { domainId; watchlistId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("WatchlistId", (Some (WatchlistId.to_value x.watchlistId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        WatchlistId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WatchlistId") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ~watchlistId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId =
+        field_map_exn json__ "WatchlistId" WatchlistId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ~watchlistId ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified watchlist from Voice ID. This API throws an exception when there are fraudsters in the watchlist that you are trying to delete. You must delete the fraudsters, and then delete the watchlist. Every domain has a default watchlist which cannot be deleted."]
 module DeleteSpeakerRequest =
   struct
     type nonrec t =
       {
       domainId: DomainId.t
-        [@ocaml.doc "The identifier of the domain containing the speaker."];
+        [@ocaml.doc
+          "The identifier of the domain that contains the speaker."];
       speakerId: SpeakerId.t
         [@ocaml.doc "The identifier of the speaker you want to delete."]}
     let context_ = "DeleteSpeakerRequest"
@@ -5158,19 +6655,19 @@ module DeleteSpeakerRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~speakerId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let speakerId = field_map_exn json "SpeakerId" SpeakerId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let speakerId = field_map_exn json__ "SpeakerId" SpeakerId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~speakerId ~domainId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes the specified speaker from the Amazon Connect Voice ID system."]
+  end[@@ocaml.doc "Deletes the specified speaker from Voice ID."]
 module DeleteFraudsterRequest =
   struct
     type nonrec t =
       {
       domainId: DomainId.t
-        [@ocaml.doc "The identifier of the domain containing the fraudster."];
+        [@ocaml.doc
+          "The identifier of the domain that contains the fraudster."];
       fraudsterId: FraudsterId.t
         [@ocaml.doc "The identifier of the fraudster you want to delete."]}
     let context_ = "DeleteFraudsterRequest"
@@ -5189,13 +6686,14 @@ module DeleteFraudsterRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~fraudsterId ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fraudsterId = field_map_exn json "FraudsterId" FraudsterId.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let fraudsterId =
+        field_map_exn json__ "FraudsterId" FraudsterId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~fraudsterId ~domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified fraudster from the Amazon Connect Voice ID system."]
+       "Deletes the specified fraudster from Voice ID. This action disassociates the fraudster from any watchlists it is a part of."]
 module DeleteDomainRequest =
   struct
     type nonrec t =
@@ -5213,12 +6711,166 @@ module DeleteDomainRequest =
         DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
       make ~domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
+    let of_json json__ =
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
       make ~domainId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes the specified domain from the Amazon Connect Voice ID system."]
+  end[@@ocaml.doc "Deletes the specified domain from Voice ID."]
+module CreateWatchlistResponse =
+  struct
+    type nonrec t =
+      {
+      watchlist: Watchlist.t option
+        [@ocaml.doc "Information about the newly created watchlist."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?watchlist = fun () -> { watchlist }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Watchlist", (Option.map x.watchlist ~f:Watchlist.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlist =
+        (Option.map ~f:Watchlist.of_xml) (Xml.child xml_arg0 "Watchlist") in
+      make ?watchlist ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlist = field_map json__ "Watchlist" Watchlist.of_json in
+      make ?watchlist ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a watchlist that fraudsters can be a part of."]
+module CreateWatchlistRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
+      description: WatchlistDescription.t option
+        [@ocaml.doc "A brief description of this watchlist."];
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain that contains the watchlist."];
+      name: WatchlistName.t [@ocaml.doc "The name of the watchlist."]}
+    let context_ = "CreateWatchlistRequest"
+    let make ?clientToken =
+      fun ?description ->
+        fun ~domainId ->
+          fun ~name -> fun () -> { clientToken; description; domainId; name }
+    let to_value x =
+      structure_to_value
+        [("ClientToken",
+           (Option.map x.clientToken ~f:ClientTokenString.to_value));
+        ("Description",
+          (Option.map x.description ~f:WatchlistDescription.to_value));
+        ("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("Name", (Some (WatchlistName.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        WatchlistName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      let description =
+        (Option.map ~f:WatchlistDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      make ~name ~domainId ?description ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" WatchlistName.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      let description =
+        field_map json__ "Description" WatchlistDescription.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" ClientTokenString.of_json in
+      make ~name ~domainId ?description ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a watchlist that fraudsters can be a part of."]
 module CreateDomainResponse =
   struct
     type nonrec t =
@@ -5318,24 +6970,25 @@ module CreateDomainResponse =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "Domain" Domain.of_json in make ?domain ()
+    let of_json json__ =
+      let domain = field_map json__ "Domain" Domain.of_json in
+      make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a domain that contains all Amazon Connect Voice ID data, such as speakers, fraudsters, customer audio, and voiceprints."]
+       "Creates a domain that contains all Amazon Connect Voice ID data, such as speakers, fraudsters, customer audio, and voiceprints. Every domain is created with a default watchlist that fraudsters can be a part of."]
 module CreateDomainRequest =
   struct
     type nonrec t =
       {
       clientToken: ClientTokenString.t option
         [@ocaml.doc
-          "The idempotency token for creating a new domain. If not provided, Amazon Web Services SDK populates this field."];
+          "A unique, case-sensitive identifier that you provide to ensure the idempotency of the request. If not provided, the Amazon Web Services SDK populates this field. For more information about idempotency, see Making retries safe with idempotent APIs."];
       description: Description.t option
         [@ocaml.doc "A brief description of this domain."];
       name: DomainName.t [@ocaml.doc "The name of the domain."];
       serverSideEncryptionConfiguration: ServerSideEncryptionConfiguration.t
         [@ocaml.doc
-          "The configuration, containing the KMS Key Identifier, to be used by Voice ID for the server-side encryption of your data. Refer to Amazon Connect VoiceID encryption at rest for more details on how the KMS Key is used."];
+          "The configuration, containing the KMS key identifier, to be used by Voice ID for the server-side encryption of your data. Refer to Amazon Connect Voice ID encryption at rest for more details on how the KMS key is used."];
       tags: TagList.t option
         [@ocaml.doc "A list of tags you want added to the domain."]}
     let context_ = "CreateDomainRequest"
@@ -5380,17 +7033,164 @@ module CreateDomainRequest =
       make ?tags ~serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let serverSideEncryptionConfiguration =
-        field_map_exn json "ServerSideEncryptionConfiguration"
+        field_map_exn json__ "ServerSideEncryptionConfiguration"
           ServerSideEncryptionConfiguration.of_json in
-      let name = field_map_exn json "Name" DomainName.of_json in
-      let description = field_map json "Description" Description.of_json in
+      let name = field_map_exn json__ "Name" DomainName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
       let clientToken =
-        field_map json "ClientToken" ClientTokenString.of_json in
+        field_map json__ "ClientToken" ClientTokenString.of_json in
       make ?tags ~serverSideEncryptionConfiguration ~name ?description
         ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a domain that contains all Amazon Connect Voice ID data, such as speakers, fraudsters, customer audio, and voiceprints."]
+       "Creates a domain that contains all Amazon Connect Voice ID data, such as speakers, fraudsters, customer audio, and voiceprints. Every domain is created with a default watchlist that fraudsters can be a part of."]
+module AssociateFraudsterResponse =
+  struct
+    type nonrec t = {
+      fraudster: Fraudster.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?fraudster = fun () -> { fraudster }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Fraudster", (Option.map x.fraudster ~f:Fraudster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fraudster =
+        (Option.map ~f:Fraudster.of_xml) (Xml.child xml_arg0 "Fraudster") in
+      make ?fraudster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fraudster = field_map json__ "Fraudster" Fraudster.of_json in
+      make ?fraudster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates the fraudsters with the watchlist specified in the same domain."]
+module AssociateFraudsterRequest =
+  struct
+    type nonrec t =
+      {
+      domainId: DomainId.t
+        [@ocaml.doc
+          "The identifier of the domain that contains the fraudster."];
+      fraudsterId: FraudsterId.t
+        [@ocaml.doc
+          "The identifier of the fraudster to be associated with the watchlist."];
+      watchlistId: WatchlistId.t
+        [@ocaml.doc
+          "The identifier of the watchlist you want to associate with the fraudster."]}
+    let context_ = "AssociateFraudsterRequest"
+    let make ~domainId =
+      fun ~fraudsterId ->
+        fun ~watchlistId -> fun () -> { domainId; fraudsterId; watchlistId }
+    let to_value x =
+      structure_to_value
+        [("DomainId", (Some (DomainId.to_value x.domainId)));
+        ("FraudsterId", (Some (FraudsterId.to_value x.fraudsterId)));
+        ("WatchlistId", (Some (WatchlistId.to_value x.watchlistId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let watchlistId =
+        WatchlistId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "WatchlistId") in
+      let fraudsterId =
+        FraudsterId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FraudsterId") in
+      let domainId =
+        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
+      make ~watchlistId ~fraudsterId ~domainId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let watchlistId =
+        field_map_exn json__ "WatchlistId" WatchlistId.of_json in
+      let fraudsterId =
+        field_map_exn json__ "FraudsterId" FraudsterId.of_json in
+      let domainId = field_map_exn json__ "DomainId" DomainId.of_json in
+      make ~watchlistId ~fraudsterId ~domainId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Associates the fraudsters with the watchlist specified in the same domain."]

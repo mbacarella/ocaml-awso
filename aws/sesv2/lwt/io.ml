@@ -11,6 +11,10 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let batch_get_metric_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetMetricData input
+let cancel_export_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelExportJob input
 let create_configuration_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConfigurationSet input
 let create_configuration_set_event_destination ?endpoint_url ?cfg input =
@@ -33,8 +37,16 @@ let create_email_identity_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEmailIdentityPolicy input
 let create_email_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEmailTemplate input
+let create_export_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateExportJob input
 let create_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImportJob input
+let create_multi_region_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateMultiRegionEndpoint input
+let create_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTenant input
+let create_tenant_resource_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTenantResourceAssociation input
 let delete_configuration_set ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteConfigurationSet input
 let delete_configuration_set_event_destination ?endpoint_url ?cfg input =
@@ -55,8 +67,14 @@ let delete_email_identity_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEmailIdentityPolicy input
 let delete_email_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEmailTemplate input
+let delete_multi_region_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMultiRegionEndpoint input
 let delete_suppressed_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSuppressedDestination input
+let delete_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTenant input
+let delete_tenant_resource_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTenantResourceAssociation input
 let get_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAccount input
 let get_blacklist_reports ?endpoint_url ?cfg input =
@@ -74,6 +92,8 @@ let get_custom_verification_email_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCustomVerificationEmailTemplate input
 let get_dedicated_ip ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDedicatedIp input
+let get_dedicated_ip_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDedicatedIpPool input
 let get_dedicated_ips ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDedicatedIps input
 let get_deliverability_dashboard_options ?endpoint_url ?cfg input =
@@ -84,16 +104,28 @@ let get_domain_deliverability_campaign ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDomainDeliverabilityCampaign input
 let get_domain_statistics_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDomainStatisticsReport input
+let get_email_address_insights ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEmailAddressInsights input
 let get_email_identity ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEmailIdentity input
 let get_email_identity_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEmailIdentityPolicies input
 let get_email_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEmailTemplate input
+let get_export_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetExportJob input
 let get_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetImportJob input
+let get_message_insights ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMessageInsights input
+let get_multi_region_endpoint ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMultiRegionEndpoint input
+let get_reputation_entity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetReputationEntity input
 let get_suppressed_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSuppressedDestination input
+let get_tenant ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTenant input
 let list_configuration_sets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListConfigurationSets input
 let list_contact_lists ?endpoint_url ?cfg input =
@@ -113,12 +145,26 @@ let list_email_identities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEmailIdentities input
 let list_email_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEmailTemplates input
+let list_export_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExportJobs input
 let list_import_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImportJobs input
+let list_multi_region_endpoints ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMultiRegionEndpoints input
+let list_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommendations input
+let list_reputation_entities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListReputationEntities input
+let list_resource_tenants ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceTenants input
 let list_suppressed_destinations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListSuppressedDestinations input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_tenant_resources ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTenantResources input
+let list_tenants ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTenants input
 let put_account_dedicated_ip_warmup_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAccountDedicatedIpWarmupAttributes
     input
@@ -128,6 +174,10 @@ let put_account_sending_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAccountSendingAttributes input
 let put_account_suppression_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutAccountSuppressionAttributes input
+let put_account_vdm_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutAccountVdmAttributes input
+let put_configuration_set_archiving_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutConfigurationSetArchivingOptions input
 let put_configuration_set_delivery_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutConfigurationSetDeliveryOptions input
 let put_configuration_set_reputation_options ?endpoint_url ?cfg input =
@@ -140,8 +190,12 @@ let put_configuration_set_suppression_options ?endpoint_url ?cfg input =
     input
 let put_configuration_set_tracking_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutConfigurationSetTrackingOptions input
+let put_configuration_set_vdm_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutConfigurationSetVdmOptions input
 let put_dedicated_ip_in_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDedicatedIpInPool input
+let put_dedicated_ip_pool_scaling_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDedicatedIpPoolScalingAttributes input
 let put_dedicated_ip_warmup_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutDedicatedIpWarmupAttributes input
 let put_deliverability_dashboard_option ?endpoint_url ?cfg input =
@@ -187,3 +241,9 @@ let update_email_identity_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEmailIdentityPolicy input
 let update_email_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEmailTemplate input
+let update_reputation_entity_customer_managed_status ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.UpdateReputationEntityCustomerManagedStatus input
+let update_reputation_entity_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateReputationEntityPolicy input

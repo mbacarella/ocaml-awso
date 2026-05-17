@@ -23,6 +23,8 @@ let create_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateService input
 let create_vpc_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateVpcConnector input
+let create_vpc_ingress_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateVpcIngressConnection input
 let delete_auto_scaling_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAutoScalingConfiguration input
 let delete_connection ?endpoint_url ?cfg input =
@@ -33,6 +35,8 @@ let delete_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteService input
 let delete_vpc_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteVpcConnector input
+let delete_vpc_ingress_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteVpcIngressConnection input
 let describe_auto_scaling_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAutoScalingConfiguration input
 let describe_custom_domains ?endpoint_url ?cfg input =
@@ -43,6 +47,8 @@ let describe_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeService input
 let describe_vpc_connector ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeVpcConnector input
+let describe_vpc_ingress_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeVpcIngressConnection input
 let disassociate_custom_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateCustomDomain input
 let list_auto_scaling_configurations ?endpoint_url ?cfg input =
@@ -55,10 +61,15 @@ let list_operations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOperations input
 let list_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListServices input
+let list_services_for_auto_scaling_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListServicesForAutoScalingConfiguration
+    input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_vpc_connectors ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListVpcConnectors input
+let list_vpc_ingress_connections ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListVpcIngressConnections input
 let pause_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PauseService input
 let resume_service ?endpoint_url ?cfg input =
@@ -69,5 +80,10 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_default_auto_scaling_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDefaultAutoScalingConfiguration
+    input
 let update_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateService input
+let update_vpc_ingress_connection ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateVpcIngressConnection input

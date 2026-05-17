@@ -268,6 +268,12 @@ val list_branches :
       ListBranchesInput.t ->
         (ListBranchesOutput.t, ListBranchesOutput.error) Result.t
           Async.Deferred.t
+val list_file_commit_history :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFileCommitHistoryRequest.t ->
+        (ListFileCommitHistoryResponse.t,
+          ListFileCommitHistoryResponse.error) Result.t Async.Deferred.t
 val list_pull_requests :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -448,6 +454,13 @@ val update_repository_description :
     ?cfg:Awso.Cfg.t ->
       UpdateRepositoryDescriptionInput.t ->
         (unit, unit) Result.t Async.Deferred.t
+val update_repository_encryption_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRepositoryEncryptionKeyInput.t ->
+        (UpdateRepositoryEncryptionKeyOutput.t,
+          UpdateRepositoryEncryptionKeyOutput.error) Result.t
+          Async.Deferred.t
 val update_repository_name :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

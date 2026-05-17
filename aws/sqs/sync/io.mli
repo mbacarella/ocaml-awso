@@ -3,6 +3,12 @@ open Awso_sqs.Values
 val add_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> AddPermissionRequest.t -> (unit, unit) Result.t
+val cancel_message_move_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelMessageMoveTaskRequest.t ->
+        (CancelMessageMoveTaskResult.t, CancelMessageMoveTaskResult.error)
+          Result.t
 val change_message_visibility :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -45,6 +51,12 @@ val list_dead_letter_source_queues :
       ListDeadLetterSourceQueuesRequest.t ->
         (ListDeadLetterSourceQueuesResult.t,
           ListDeadLetterSourceQueuesResult.error) Result.t
+val list_message_move_tasks :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMessageMoveTasksRequest.t ->
+        (ListMessageMoveTasksResult.t, ListMessageMoveTasksResult.error)
+          Result.t
 val list_queue_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -79,6 +91,12 @@ val send_message_batch :
 val set_queue_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> SetQueueAttributesRequest.t -> (unit, unit) Result.t
+val start_message_move_task :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMessageMoveTaskRequest.t ->
+        (StartMessageMoveTaskResult.t, StartMessageMoveTaskResult.error)
+          Result.t
 val tag_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> TagQueueRequest.t -> (unit, unit) Result.t

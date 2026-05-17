@@ -24,6 +24,48 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module EntityIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "EntityIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9._%+@-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntityIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module PersonalAccessTokenScope =
+  struct
+    type nonrec t = string
+    let context_ = "PersonalAccessTokenScope"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PersonalAccessTokenScope" j
+    let to_json = simple_to_json to_value
+  end
 module DeviceModel =
   struct
     type nonrec t = string
@@ -132,6 +174,66 @@ module PermissionType =
     let of_json j = of_string (string_of_json ~kind:"PermissionType" j)
     let to_json = simple_to_json to_value
   end
+module LambdaArn =
+  struct
+    type nonrec t = string
+    let context_ = "LambdaArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:49) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:lambda:[a-z]{2}-[a-z]+-\\d{1}:\\d{12}:function:[a-zA-Z0-9\\-_\\.]+(:(\\$LATEST|[a-zA-Z0-9\\-_]+))?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LambdaArn" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalUserName =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalUserName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"[\\u0020-\\u00FF]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExternalUserName" j
+    let to_json = simple_to_json to_value
+  end
+module Url =
+  struct
+    type nonrec t = string
+    let context_ = "Url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"https?://[A-Za-z0-9.-]+(:[0-9]+)?/.*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Url" j
+    let to_json = simple_to_json to_value
+  end
 module AccessControlRuleAction =
   struct
     type nonrec t = string
@@ -150,6 +252,26 @@ module AccessControlRuleAction =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AccessControlRuleAction" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRoleId =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRoleId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRoleId" j
     let to_json = simple_to_json to_value
   end
 module IpRange =
@@ -191,6 +313,120 @@ module WorkMailIdentifier =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"WorkMailIdentifier" j
     let to_json = simple_to_json to_value
+  end
+module AccessEffect =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | DENY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALLOW -> "ALLOW" | DENY -> "DENY" | Non_static_id s -> s
+    let of_string =
+      function | "ALLOW" -> ALLOW | "DENY" -> DENY | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccessEffect" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccessEffect" j)
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRuleDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRuleDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRuleDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRuleId =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRuleId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRuleId" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRuleName =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRuleName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRuleName" j
+    let to_json = simple_to_json to_value
+  end
+module TargetUsers =
+  struct
+    type nonrec t = EntityIdentifier.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntityIdentifier.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntityIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetUsers" ~of_json:EntityIdentifier.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module TagKey =
   struct
@@ -358,6 +594,50 @@ module EntityState =
     let of_json j = of_string (string_of_json ~kind:"EntityState" j)
     let to_json = simple_to_json to_value
   end
+module IdentityProviderIdentityStoreId =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityProviderIdentityStoreId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^d-[0-9a-f]{10}$|^[0-9a-f]{8}\\\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\\\b[0-9a-f]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityProviderIdentityStoreId" j
+    let to_json = simple_to_json to_value
+  end
+module IdentityProviderUserId =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityProviderUserId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:47) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([0-9a-f]{10}-|)[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityProviderUserId" j
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -412,6 +692,7 @@ module UserRole =
       | USER 
       | RESOURCE 
       | SYSTEM_USER 
+      | REMOTE_USER 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -419,12 +700,14 @@ module UserRole =
       | USER -> "USER"
       | RESOURCE -> "RESOURCE"
       | SYSTEM_USER -> "SYSTEM_USER"
+      | REMOTE_USER -> "REMOTE_USER"
       | Non_static_id s -> s
     let of_string =
       function
       | "USER" -> USER
       | "RESOURCE" -> RESOURCE
       | "SYSTEM_USER" -> SYSTEM_USER
+      | "REMOTE_USER" -> REMOTE_USER
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -432,6 +715,24 @@ module UserRole =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration UserRole" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"UserRole" j)
+    let to_json = simple_to_json to_value
+  end
+module ResourceDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceDescription" j
     let to_json = simple_to_json to_value
   end
 module ResourceName =
@@ -500,6 +801,81 @@ module MemberType =
     let of_json j = of_string (string_of_json ~kind:"MemberType" j)
     let to_json = simple_to_json to_value
   end
+module PersonalAccessTokenId =
+  struct
+    type nonrec t = string
+    let context_ = "PersonalAccessTokenId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PersonalAccessTokenId" j
+    let to_json = simple_to_json to_value
+  end
+module PersonalAccessTokenName =
+  struct
+    type nonrec t = string
+    let context_ = "PersonalAccessTokenName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PersonalAccessTokenName" j
+    let to_json = simple_to_json to_value
+  end
+module PersonalAccessTokenScopeList =
+  struct
+    type nonrec t = PersonalAccessTokenScope.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PersonalAccessTokenScope.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PersonalAccessTokenScope.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PersonalAccessTokenScopeList"
+        ~of_json:PersonalAccessTokenScope.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DomainName =
   struct
     type nonrec t = string
@@ -510,9 +886,7 @@ module DomainName =
           ((check_string_min i ~min:3) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[a-zA-Z0-9.-]+\\.[a-zA-Z-]{2,}")));
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9.-]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -572,6 +946,9 @@ module DeviceModelList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceModel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -600,6 +977,9 @@ module DeviceOperatingSystemList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceOperatingSystem.to_value)) |>
         (fun x -> `List x)
@@ -630,6 +1010,9 @@ module DeviceTypeList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -658,6 +1041,9 @@ module DeviceUserAgentList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceUserAgent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -786,6 +1172,9 @@ module PermissionValues =
   struct
     type nonrec t = PermissionType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PermissionType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -950,6 +1339,55 @@ module Boolean =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module ImpersonationRoleName =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRoleName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRoleName" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRoleType =
+  struct
+    type nonrec t =
+      | FULL_ACCESS 
+      | READ_ONLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL_ACCESS -> "FULL_ACCESS"
+      | READ_ONLY -> "READ_ONLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL_ACCESS" -> FULL_ACCESS
+      | "READ_ONLY" -> READ_ONLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ImpersonationRoleType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ImpersonationRoleType" j)
+    let to_json = simple_to_json to_value
+  end
 module GroupName =
   struct
     type nonrec t = string
@@ -970,6 +1408,84 @@ module GroupName =
     let of_json j = string_of_json ~kind:"GroupName" j
     let to_json = simple_to_json to_value
   end
+module AvailabilityProviderType =
+  struct
+    type nonrec t =
+      | EWS 
+      | LAMBDA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | EWS -> "EWS" | LAMBDA -> "LAMBDA" | Non_static_id s -> s
+    let of_string =
+      function | "EWS" -> EWS | "LAMBDA" -> LAMBDA | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AvailabilityProviderType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AvailabilityProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module LambdaAvailabilityProvider =
+  struct
+    type nonrec t =
+      {
+      lambdaArn: LambdaArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Lambda that acts as the availability provider."]}
+    let context_ = "LambdaAvailabilityProvider"
+    let make ~lambdaArn = fun () -> { lambdaArn }
+    let to_value x =
+      structure_to_value
+        [("LambdaArn", (Some (LambdaArn.to_value x.lambdaArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lambdaArn =
+        LambdaArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LambdaArn") in
+      make ~lambdaArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lambdaArn = field_map_exn json__ "LambdaArn" LambdaArn.of_json in
+      make ~lambdaArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a Lambda based availability provider."]
+module RedactedEwsAvailabilityProvider =
+  struct
+    type nonrec t =
+      {
+      ewsEndpoint: Url.t option
+        [@ocaml.doc "The endpoint of the remote EWS server."];
+      ewsUsername: ExternalUserName.t option
+        [@ocaml.doc
+          "The username used to authenticate the remote EWS server."]}
+    let make ?ewsEndpoint =
+      fun ?ewsUsername -> fun () -> { ewsEndpoint; ewsUsername }
+    let to_value x =
+      structure_to_value
+        [("EwsEndpoint", (Option.map x.ewsEndpoint ~f:Url.to_value));
+        ("EwsUsername",
+          (Option.map x.ewsUsername ~f:ExternalUserName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ewsUsername =
+        (Option.map ~f:ExternalUserName.of_xml)
+          (Xml.child xml_arg0 "EwsUsername") in
+      let ewsEndpoint =
+        (Option.map ~f:Url.of_xml) (Xml.child xml_arg0 "EwsEndpoint") in
+      make ?ewsUsername ?ewsEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ewsUsername =
+        field_map json__ "EwsUsername" ExternalUserName.of_json in
+      let ewsEndpoint = field_map json__ "EwsEndpoint" Url.of_json in
+      make ?ewsUsername ?ewsEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an EWS based availability provider when returned from the service. It does not contain the password of the endpoint."]
 module AccessControlRuleDescription =
   struct
     type nonrec t = string
@@ -1039,6 +1555,9 @@ module ActionsList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessControlRuleAction.to_value)) |>
         (fun x -> `List x)
@@ -1061,6 +1580,39 @@ module ActionsList =
         ~of_json:AccessControlRuleAction.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ImpersonationRoleIdList =
+  struct
+    type nonrec t = ImpersonationRoleId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImpersonationRoleId.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImpersonationRoleId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImpersonationRoleIdList"
+        ~of_json:ImpersonationRoleId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module IpRangeList =
   struct
     type nonrec t = IpRange.t list
@@ -1070,6 +1622,9 @@ module IpRangeList =
           ((check_list_max i ~max:1024) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1098,6 +1653,9 @@ module UserIdList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkMailIdentifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1128,7 +1686,7 @@ module HostedZoneId =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:32) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+                  (fun () -> check_pattern i ~pattern:"[^/\\\\]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1136,6 +1694,104 @@ module HostedZoneId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"HostedZoneId" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRule =
+  struct
+    type nonrec t =
+      {
+      impersonationRuleId: ImpersonationRuleId.t
+        [@ocaml.doc "The identifier of the rule."];
+      name: ImpersonationRuleName.t option [@ocaml.doc "The rule name."];
+      description: ImpersonationRuleDescription.t option
+        [@ocaml.doc "The rule description."];
+      effect_: AccessEffect.t
+        [@ocaml.doc
+          "The effect of the rule when it matches the input. Allowed effect values are ALLOW or DENY."];
+      targetUsers: TargetUsers.t option
+        [@ocaml.doc "A list of user IDs that match the rule."];
+      notTargetUsers: TargetUsers.t option
+        [@ocaml.doc "A list of user IDs that don't match the rule."]}
+    let context_ = "ImpersonationRule"
+    let make ?name =
+      fun ?description ->
+        fun ?targetUsers ->
+          fun ?notTargetUsers ->
+            fun ~impersonationRuleId ->
+              fun ~effect_ ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    targetUsers;
+                    notTargetUsers;
+                    impersonationRuleId;
+                    effect_
+                  }
+    let to_value x =
+      structure_to_value
+        [("ImpersonationRuleId",
+           (Some (ImpersonationRuleId.to_value x.impersonationRuleId)));
+        ("Name", (Option.map x.name ~f:ImpersonationRuleName.to_value));
+        ("Description",
+          (Option.map x.description ~f:ImpersonationRuleDescription.to_value));
+        ("Effect", (Some (AccessEffect.to_value x.effect_)));
+        ("TargetUsers", (Option.map x.targetUsers ~f:TargetUsers.to_value));
+        ("NotTargetUsers",
+          (Option.map x.notTargetUsers ~f:TargetUsers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notTargetUsers =
+        (Option.map ~f:TargetUsers.of_xml)
+          (Xml.child xml_arg0 "NotTargetUsers") in
+      let targetUsers =
+        (Option.map ~f:TargetUsers.of_xml) (Xml.child xml_arg0 "TargetUsers") in
+      let effect_ =
+        AccessEffect.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Effect") in
+      let description =
+        (Option.map ~f:ImpersonationRuleDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let name =
+        (Option.map ~f:ImpersonationRuleName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let impersonationRuleId =
+        ImpersonationRuleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRuleId") in
+      make ?notTargetUsers ?targetUsers ~effect_ ?description ?name
+        ~impersonationRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notTargetUsers =
+        field_map json__ "NotTargetUsers" TargetUsers.of_json in
+      let targetUsers = field_map json__ "TargetUsers" TargetUsers.of_json in
+      let effect_ = field_map_exn json__ "Effect" AccessEffect.of_json in
+      let description =
+        field_map json__ "Description" ImpersonationRuleDescription.of_json in
+      let name = field_map json__ "Name" ImpersonationRuleName.of_json in
+      let impersonationRuleId =
+        field_map_exn json__ "ImpersonationRuleId"
+          ImpersonationRuleId.of_json in
+      make ?notTargetUsers ?targetUsers ~effect_ ?description ?name
+        ~impersonationRuleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The rules for the given impersonation role."]
+module Password =
+  struct
+    type nonrec t = string
+    let context_ = "Password"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"[\\u0020-\\u00FF]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Password" j
     let to_json = simple_to_json to_value
   end
 module Tag =
@@ -1158,9 +1814,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a tag applied to a resource."]
@@ -1194,14 +1850,107 @@ module FolderConfiguration =
         FolderName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?period ~action ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let period = field_map json "Period" RetentionPeriod.of_json in
-      let action = field_map_exn json "Action" RetentionAction.of_json in
-      let name = field_map_exn json "Name" FolderName.of_json in
+    let of_json json__ =
+      let period = field_map json__ "Period" RetentionPeriod.of_json in
+      let action = field_map_exn json__ "Action" RetentionAction.of_json in
+      let name = field_map_exn json__ "Name" FolderName.of_json in
       make ?period ~action ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration applied to an organization's folders by its retention policy."]
+module ApplicationArn =
+  struct
+    type nonrec t = string
+    let context_ = "ApplicationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:1224) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso::\\d{12}:application/(sso)?ins-[a-zA-Z0-9-.]{16}/apl-[a-zA-Z0-9]{16}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ApplicationArn" j
+    let to_json = simple_to_json to_value
+  end
+module InstanceArn =
+  struct
+    type nonrec t = string
+    let context_ = "InstanceArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:10) >>=
+             (fun () ->
+                (check_string_max i ~max:1124) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws|aws-us-gov|aws-cn|aws-iso|aws-iso-b):sso:::instance/(sso)?ins-[a-zA-Z0-9-.]{16}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InstanceArn" j
+    let to_json = simple_to_json to_value
+  end
+module PersonalAccessTokenConfigurationStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration PersonalAccessTokenConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"PersonalAccessTokenConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module PersonalAccessTokenLifetimeInDays =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:3653) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for PersonalAccessTokenLifetimeInDays" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module User =
   struct
     type nonrec t =
@@ -1218,10 +1967,17 @@ module User =
       userRole: UserRole.t option [@ocaml.doc "The role of the user."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the user was enabled for Amazon WorkMail use."];
+          "The date indicating when the user was enabled for WorkMail use."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the user was disabled from Amazon WorkMail use."]}
+          "The date indicating when the user was disabled from WorkMail use."];
+      identityProviderUserId: IdentityProviderUserId.t option
+        [@ocaml.doc
+          "User ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."];
+      identityProviderIdentityStoreId:
+        IdentityProviderIdentityStoreId.t option
+        [@ocaml.doc
+          "Identity store ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."]}
     let make ?id =
       fun ?email ->
         fun ?name ->
@@ -1230,17 +1986,21 @@ module User =
               fun ?userRole ->
                 fun ?enabledDate ->
                   fun ?disabledDate ->
-                    fun () ->
-                      {
-                        id;
-                        email;
-                        name;
-                        displayName;
-                        state;
-                        userRole;
-                        enabledDate;
-                        disabledDate
-                      }
+                    fun ?identityProviderUserId ->
+                      fun ?identityProviderIdentityStoreId ->
+                        fun () ->
+                          {
+                            id;
+                            email;
+                            name;
+                            displayName;
+                            state;
+                            userRole;
+                            enabledDate;
+                            disabledDate;
+                            identityProviderUserId;
+                            identityProviderIdentityStoreId
+                          }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:WorkMailIdentifier.to_value));
@@ -1250,9 +2010,21 @@ module User =
         ("State", (Option.map x.state ~f:EntityState.to_value));
         ("UserRole", (Option.map x.userRole ~f:UserRole.to_value));
         ("EnabledDate", (Option.map x.enabledDate ~f:Timestamp.to_value));
-        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value))]
+        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value));
+        ("IdentityProviderUserId",
+          (Option.map x.identityProviderUserId
+             ~f:IdentityProviderUserId.to_value));
+        ("IdentityProviderIdentityStoreId",
+          (Option.map x.identityProviderIdentityStoreId
+             ~f:IdentityProviderIdentityStoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderIdentityStoreId =
+        (Option.map ~f:IdentityProviderIdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderIdentityStoreId") in
+      let identityProviderUserId =
+        (Option.map ~f:IdentityProviderUserId.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderUserId") in
       let disabledDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DisabledDate") in
       let enabledDate =
@@ -1268,22 +2040,64 @@ module User =
         (Option.map ~f:EmailAddress.of_xml) (Xml.child xml_arg0 "Email") in
       let id =
         (Option.map ~f:WorkMailIdentifier.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?disabledDate ?enabledDate ?userRole ?state ?displayName ?name
-        ?email ?id ()
+      make ?identityProviderIdentityStoreId ?identityProviderUserId
+        ?disabledDate ?enabledDate ?userRole ?state ?displayName ?name ?email
+        ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let userRole = field_map json "UserRole" UserRole.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let displayName = field_map json "DisplayName" String_.of_json in
-      let name = field_map json "Name" UserName.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let id = field_map json "Id" WorkMailIdentifier.of_json in
-      make ?disabledDate ?enabledDate ?userRole ?state ?displayName ?name
-        ?email ?id ()
+    let of_json json__ =
+      let identityProviderIdentityStoreId =
+        field_map json__ "IdentityProviderIdentityStoreId"
+          IdentityProviderIdentityStoreId.of_json in
+      let identityProviderUserId =
+        field_map json__ "IdentityProviderUserId"
+          IdentityProviderUserId.of_json in
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let userRole = field_map json__ "UserRole" UserRole.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let displayName = field_map json__ "DisplayName" String_.of_json in
+      let name = field_map json__ "Name" UserName.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let id = field_map json__ "Id" WorkMailIdentifier.of_json in
+      make ?identityProviderIdentityStoreId ?identityProviderUserId
+        ?disabledDate ?enabledDate ?userRole ?state ?displayName ?name ?email
+        ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The representation of an Amazon WorkMail user."]
+  end[@@ocaml.doc "The representation of an WorkMail user."]
+module IdentityProviderUserIdPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityProviderUserIdPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:47) >>=
+                  (fun () -> check_pattern i ~pattern:"^[A-Fa-f0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityProviderUserIdPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module UserAttribute =
+  struct
+    type nonrec t = string
+    let context_ = "UserAttribute"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:256); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserAttribute" j
+    let to_json = simple_to_json to_value
+  end
 module Resource =
   struct
     type nonrec t =
@@ -1299,10 +2113,12 @@ module Resource =
           "The state of the resource, which can be ENABLED, DISABLED, or DELETED."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the resource was enabled for Amazon WorkMail use."];
+          "The date indicating when the resource was enabled for WorkMail use."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the resource was disabled from Amazon WorkMail use."]}
+          "The date indicating when the resource was disabled from WorkMail use."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Resource description."]}
     let make ?id =
       fun ?email ->
         fun ?name ->
@@ -1310,16 +2126,18 @@ module Resource =
             fun ?state ->
               fun ?enabledDate ->
                 fun ?disabledDate ->
-                  fun () ->
-                    {
-                      id;
-                      email;
-                      name;
-                      type_;
-                      state;
-                      enabledDate;
-                      disabledDate
-                    }
+                  fun ?description ->
+                    fun () ->
+                      {
+                        id;
+                        email;
+                        name;
+                        type_;
+                        state;
+                        enabledDate;
+                        disabledDate;
+                        description
+                      }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:WorkMailIdentifier.to_value));
@@ -1328,9 +2146,14 @@ module Resource =
         ("Type", (Option.map x.type_ ~f:ResourceType.to_value));
         ("State", (Option.map x.state ~f:EntityState.to_value));
         ("EnabledDate", (Option.map x.enabledDate ~f:Timestamp.to_value));
-        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value))]
+        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let disabledDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DisabledDate") in
       let enabledDate =
@@ -1345,47 +2168,137 @@ module Resource =
         (Option.map ~f:EmailAddress.of_xml) (Xml.child xml_arg0 "Email") in
       let id =
         (Option.map ~f:WorkMailIdentifier.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?disabledDate ?enabledDate ?state ?type_ ?name ?email ?id ()
+      make ?description ?disabledDate ?enabledDate ?state ?type_ ?name ?email
+        ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let type_ = field_map json "Type" ResourceType.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let id = field_map json "Id" WorkMailIdentifier.of_json in
-      make ?disabledDate ?enabledDate ?state ?type_ ?name ?email ?id ()
+    let of_json json__ =
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let id = field_map json__ "Id" WorkMailIdentifier.of_json in
+      make ?description ?disabledDate ?enabledDate ?state ?type_ ?name ?email
+        ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The representation of a resource."]
 module Delegate =
   struct
     type nonrec t =
       {
-      id: String_.t
+      id: String_.t option
         [@ocaml.doc
           "The identifier for the user or group associated as the resource's delegate."];
-      type_: MemberType.t
+      type_: MemberType.t option
         [@ocaml.doc "The type of the delegate: user or group."]}
-    let context_ = "Delegate"
-    let make ~id = fun ~type_ -> fun () -> { id; type_ }
+    let make ?id = fun ?type_ -> fun () -> { id; type_ }
     let to_value x =
       structure_to_value
-        [("Id", (Some (String_.to_value x.id)));
-        ("Type", (Some (MemberType.to_value x.type_)))]
+        [("Id", (Option.map x.id ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:MemberType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let type_ =
-        MemberType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ~type_ ~id ()
+        (Option.map ~f:MemberType.of_xml) (Xml.child xml_arg0 "Type") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" MemberType.of_json in
-      let id = field_map_exn json "Id" String_.of_json in make ~type_ ~id ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" MemberType.of_json in
+      let id = field_map json__ "Id" String_.of_json in make ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The name of the attribute, which is one of the values defined in the UserAttribute enumeration."]
+module PersonalAccessTokenSummary =
+  struct
+    type nonrec t =
+      {
+      personalAccessTokenId: PersonalAccessTokenId.t option
+        [@ocaml.doc "The ID of the Personal Access Token."];
+      userId: WorkMailIdentifier.t option
+        [@ocaml.doc
+          "The user ID of the WorkMail user associated with the Personal Access Token."];
+      name: PersonalAccessTokenName.t option
+        [@ocaml.doc "The name of the Personal Access Token."];
+      dateCreated: Timestamp.t option
+        [@ocaml.doc "The date when the Personal Access Token was created."];
+      dateLastUsed: Timestamp.t option
+        [@ocaml.doc "The date when the Personal Access Token was last used."];
+      expiresTime: Timestamp.t option
+        [@ocaml.doc "The date when the Personal Access Token will expire."];
+      scopes: PersonalAccessTokenScopeList.t option
+        [@ocaml.doc
+          "Lists all the Personal Access Token permissions for a mailbox."]}
+    let make ?personalAccessTokenId =
+      fun ?userId ->
+        fun ?name ->
+          fun ?dateCreated ->
+            fun ?dateLastUsed ->
+              fun ?expiresTime ->
+                fun ?scopes ->
+                  fun () ->
+                    {
+                      personalAccessTokenId;
+                      userId;
+                      name;
+                      dateCreated;
+                      dateLastUsed;
+                      expiresTime;
+                      scopes
+                    }
+    let to_value x =
+      structure_to_value
+        [("PersonalAccessTokenId",
+           (Option.map x.personalAccessTokenId
+              ~f:PersonalAccessTokenId.to_value));
+        ("UserId", (Option.map x.userId ~f:WorkMailIdentifier.to_value));
+        ("Name", (Option.map x.name ~f:PersonalAccessTokenName.to_value));
+        ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
+        ("DateLastUsed", (Option.map x.dateLastUsed ~f:Timestamp.to_value));
+        ("ExpiresTime", (Option.map x.expiresTime ~f:Timestamp.to_value));
+        ("Scopes",
+          (Option.map x.scopes ~f:PersonalAccessTokenScopeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scopes =
+        (Option.map ~f:PersonalAccessTokenScopeList.of_xml)
+          (Xml.child xml_arg0 "Scopes") in
+      let expiresTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpiresTime") in
+      let dateLastUsed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateLastUsed") in
+      let dateCreated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateCreated") in
+      let name =
+        (Option.map ~f:PersonalAccessTokenName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let userId =
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "UserId") in
+      let personalAccessTokenId =
+        (Option.map ~f:PersonalAccessTokenId.of_xml)
+          (Xml.child xml_arg0 "PersonalAccessTokenId") in
+      make ?scopes ?expiresTime ?dateLastUsed ?dateCreated ?name ?userId
+        ?personalAccessTokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scopes =
+        field_map json__ "Scopes" PersonalAccessTokenScopeList.of_json in
+      let expiresTime = field_map json__ "ExpiresTime" Timestamp.of_json in
+      let dateLastUsed = field_map json__ "DateLastUsed" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let name = field_map json__ "Name" PersonalAccessTokenName.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
+      let personalAccessTokenId =
+        field_map json__ "PersonalAccessTokenId"
+          PersonalAccessTokenId.of_json in
+      make ?scopes ?expiresTime ?dateLastUsed ?dateCreated ?name ?userId
+        ?personalAccessTokenId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The summary of the Personal Access Token."]
 module OrganizationSummary =
   struct
     type nonrec t =
@@ -1439,14 +2352,14 @@ module OrganizationSummary =
           (Xml.child xml_arg0 "OrganizationId") in
       make ?state ?errorMessage ?defaultMailDomain ?alias ?organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" String_.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" String_.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
       let defaultMailDomain =
-        field_map json "DefaultMailDomain" DomainName.of_json in
-      let alias = field_map json "Alias" OrganizationName.of_json in
+        field_map json__ "DefaultMailDomain" DomainName.of_json in
+      let alias = field_map json__ "Alias" OrganizationName.of_json in
       let organizationId =
-        field_map json "OrganizationId" OrganizationId.of_json in
+        field_map json__ "OrganizationId" OrganizationId.of_json in
       make ?state ?errorMessage ?defaultMailDomain ?alias ?organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The representation of an organization."]
@@ -1597,34 +2510,34 @@ module MobileDeviceAccessRule =
         ?deviceModels ?notDeviceTypes ?deviceTypes ?effect_ ?description
         ?name ?mobileDeviceAccessRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateModified = field_map json "DateModified" Timestamp.of_json in
-      let dateCreated = field_map json "DateCreated" Timestamp.of_json in
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
       let notDeviceUserAgents =
-        field_map json "NotDeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "NotDeviceUserAgents" DeviceUserAgentList.of_json in
       let deviceUserAgents =
-        field_map json "DeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "DeviceUserAgents" DeviceUserAgentList.of_json in
       let notDeviceOperatingSystems =
-        field_map json "NotDeviceOperatingSystems"
+        field_map json__ "NotDeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let deviceOperatingSystems =
-        field_map json "DeviceOperatingSystems"
+        field_map json__ "DeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let notDeviceModels =
-        field_map json "NotDeviceModels" DeviceModelList.of_json in
+        field_map json__ "NotDeviceModels" DeviceModelList.of_json in
       let deviceModels =
-        field_map json "DeviceModels" DeviceModelList.of_json in
+        field_map json__ "DeviceModels" DeviceModelList.of_json in
       let notDeviceTypes =
-        field_map json "NotDeviceTypes" DeviceTypeList.of_json in
-      let deviceTypes = field_map json "DeviceTypes" DeviceTypeList.of_json in
+        field_map json__ "NotDeviceTypes" DeviceTypeList.of_json in
+      let deviceTypes = field_map json__ "DeviceTypes" DeviceTypeList.of_json in
       let effect_ =
-        field_map json "Effect" MobileDeviceAccessRuleEffect.of_json in
+        field_map json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
-      let name = field_map json "Name" MobileDeviceAccessRuleName.of_json in
+      let name = field_map json__ "Name" MobileDeviceAccessRuleName.of_json in
       let mobileDeviceAccessRuleId =
-        field_map json "MobileDeviceAccessRuleId"
+        field_map json__ "MobileDeviceAccessRuleId"
           MobileDeviceAccessRuleId.of_json in
       make ?dateModified ?dateCreated ?notDeviceUserAgents ?deviceUserAgents
         ?notDeviceOperatingSystems ?deviceOperatingSystems ?notDeviceModels
@@ -1632,7 +2545,7 @@ module MobileDeviceAccessRule =
         ?name ?mobileDeviceAccessRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A rule that controls access to mobile devices for an Amazon WorkMail group."]
+       "A rule that controls access to mobile devices for an WorkMail group."]
 module MobileDeviceAccessOverride =
   struct
     type nonrec t =
@@ -1696,16 +2609,16 @@ module MobileDeviceAccessOverride =
       make ?dateModified ?dateCreated ?description ?effect_ ?deviceId ?userId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateModified = field_map json "DateModified" Timestamp.of_json in
-      let dateCreated = field_map json "DateCreated" Timestamp.of_json in
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
       let effect_ =
-        field_map json "Effect" MobileDeviceAccessRuleEffect.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
-      let userId = field_map json "UserId" WorkMailIdentifier.of_json in
+        field_map json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
       make ?dateModified ?dateCreated ?description ?effect_ ?deviceId ?userId
         ()
     let to_json v = composed_to_json to_value v
@@ -1714,46 +2627,44 @@ module Permission =
   struct
     type nonrec t =
       {
-      granteeId: WorkMailIdentifier.t
+      granteeId: WorkMailIdentifier.t option
         [@ocaml.doc
           "The identifier of the user, group, or resource to which the permissions are granted."];
-      granteeType: MemberType.t
+      granteeType: MemberType.t option
         [@ocaml.doc
           "The type of user, group, or resource referred to in GranteeId."];
-      permissionValues: PermissionValues.t
+      permissionValues: PermissionValues.t option
         [@ocaml.doc
           "The permissions granted to the grantee. SEND_AS allows the grantee to send email as the owner of the mailbox (the grantee is not mentioned on these emails). SEND_ON_BEHALF allows the grantee to send email on behalf of the owner of the mailbox (the grantee is not mentioned as the physical sender of these emails). FULL_ACCESS allows the grantee full access to the mailbox, irrespective of other folder-level permissions set on the mailbox."]}
-    let context_ = "Permission"
-    let make ~granteeId =
-      fun ~granteeType ->
-        fun ~permissionValues ->
+    let make ?granteeId =
+      fun ?granteeType ->
+        fun ?permissionValues ->
           fun () -> { granteeId; granteeType; permissionValues }
     let to_value x =
       structure_to_value
-        [("GranteeId", (Some (WorkMailIdentifier.to_value x.granteeId)));
-        ("GranteeType", (Some (MemberType.to_value x.granteeType)));
+        [("GranteeId",
+           (Option.map x.granteeId ~f:WorkMailIdentifier.to_value));
+        ("GranteeType", (Option.map x.granteeType ~f:MemberType.to_value));
         ("PermissionValues",
-          (Some (PermissionValues.to_value x.permissionValues)))]
+          (Option.map x.permissionValues ~f:PermissionValues.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let permissionValues =
-        PermissionValues.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PermissionValues") in
+        (Option.map ~f:PermissionValues.of_xml)
+          (Xml.child xml_arg0 "PermissionValues") in
       let granteeType =
-        MemberType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GranteeType") in
+        (Option.map ~f:MemberType.of_xml) (Xml.child xml_arg0 "GranteeType") in
       let granteeId =
-        WorkMailIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GranteeId") in
-      make ~permissionValues ~granteeType ~granteeId ()
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "GranteeId") in
+      make ?permissionValues ?granteeType ?granteeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionValues =
-        field_map_exn json "PermissionValues" PermissionValues.of_json in
-      let granteeType = field_map_exn json "GranteeType" MemberType.of_json in
-      let granteeId =
-        field_map_exn json "GranteeId" WorkMailIdentifier.of_json in
-      make ~permissionValues ~granteeType ~granteeId ()
+        field_map json__ "PermissionValues" PermissionValues.of_json in
+      let granteeType = field_map json__ "GranteeType" MemberType.of_json in
+      let granteeId = field_map json__ "GranteeId" WorkMailIdentifier.of_json in
+      make ?permissionValues ?granteeType ?granteeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Permission granted to a user, group, or resource to access a certain aspect of another user, group, or resource mailbox."]
@@ -1844,17 +2755,17 @@ module MailboxExportJob =
       make ?endTime ?startTime ?state ?estimatedProgress ?s3Path
         ?s3BucketName ?description ?entityId ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
-      let state = field_map json "State" MailboxExportJobState.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
+      let state = field_map json__ "State" MailboxExportJobState.of_json in
       let estimatedProgress =
-        field_map json "EstimatedProgress" Percentage.of_json in
-      let s3Path = field_map json "S3Path" S3ObjectKey.of_json in
-      let s3BucketName = field_map json "S3BucketName" S3BucketName.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let entityId = field_map json "EntityId" WorkMailIdentifier.of_json in
-      let jobId = field_map json "JobId" MailboxExportJobId.of_json in
+        field_map json__ "EstimatedProgress" Percentage.of_json in
+      let s3Path = field_map json__ "S3Path" S3ObjectKey.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" S3BucketName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let entityId = field_map json__ "EntityId" WorkMailIdentifier.of_json in
+      let jobId = field_map json__ "JobId" MailboxExportJobId.of_json in
       make ?endTime ?startTime ?state ?estimatedProgress ?s3Path
         ?s3BucketName ?description ?entityId ?jobId ()
     let to_json v = composed_to_json to_value v
@@ -1881,12 +2792,71 @@ module MailDomainSummary =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?defaultDomain ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let defaultDomain = field_map json "DefaultDomain" Boolean.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let defaultDomain = field_map json__ "DefaultDomain" Boolean.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?defaultDomain ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The data for a given domain."]
+module ImpersonationRole =
+  struct
+    type nonrec t =
+      {
+      impersonationRoleId: ImpersonationRoleId.t option
+        [@ocaml.doc "The identifier of the impersonation role."];
+      name: ImpersonationRoleName.t option
+        [@ocaml.doc "The impersonation role name."];
+      type_: ImpersonationRoleType.t option
+        [@ocaml.doc "The impersonation role type."];
+      dateCreated: Timestamp.t option
+        [@ocaml.doc "The date when the impersonation role was created."];
+      dateModified: Timestamp.t option
+        [@ocaml.doc
+          "The date when the impersonation role was last modified."]}
+    let make ?impersonationRoleId =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?dateCreated ->
+            fun ?dateModified ->
+              fun () ->
+                { impersonationRoleId; name; type_; dateCreated; dateModified
+                }
+    let to_value x =
+      structure_to_value
+        [("ImpersonationRoleId",
+           (Option.map x.impersonationRoleId ~f:ImpersonationRoleId.to_value));
+        ("Name", (Option.map x.name ~f:ImpersonationRoleName.to_value));
+        ("Type", (Option.map x.type_ ~f:ImpersonationRoleType.to_value));
+        ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
+        ("DateModified", (Option.map x.dateModified ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateModified =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateModified") in
+      let dateCreated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateCreated") in
+      let type_ =
+        (Option.map ~f:ImpersonationRoleType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:ImpersonationRoleName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let impersonationRoleId =
+        (Option.map ~f:ImpersonationRoleId.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleId") in
+      make ?dateModified ?dateCreated ?type_ ?name ?impersonationRoleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let type_ = field_map json__ "Type" ImpersonationRoleType.of_json in
+      let name = field_map json__ "Name" ImpersonationRoleName.of_json in
+      let impersonationRoleId =
+        field_map json__ "ImpersonationRoleId" ImpersonationRoleId.of_json in
+      make ?dateModified ?dateCreated ?type_ ?name ?impersonationRoleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An impersonation role for the given WorkMail organization."]
 module Group =
   struct
     type nonrec t =
@@ -1900,10 +2870,10 @@ module Group =
           "The state of the group, which can be ENABLED, DISABLED, or DELETED."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the group was enabled for Amazon WorkMail use."];
+          "The date indicating when the group was enabled for WorkMail use."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the group was disabled from Amazon WorkMail use."]}
+          "The date indicating when the group was disabled from WorkMail use."]}
     let make ?id =
       fun ?email ->
         fun ?name ->
@@ -1935,16 +2905,45 @@ module Group =
         (Option.map ~f:WorkMailIdentifier.of_xml) (Xml.child xml_arg0 "Id") in
       make ?disabledDate ?enabledDate ?state ?name ?email ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let name = field_map json "Name" GroupName.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let id = field_map json "Id" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let name = field_map json__ "Name" GroupName.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let id = field_map json__ "Id" WorkMailIdentifier.of_json in
       make ?disabledDate ?enabledDate ?state ?name ?email ?id ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The representation of an Amazon WorkMail group."]
+  end[@@ocaml.doc "The representation of an WorkMail group."]
+module GroupIdentifier =
+  struct
+    type nonrec t =
+      {
+      groupId: WorkMailIdentifier.t option
+        [@ocaml.doc "Group ID that matched the group."];
+      groupName: GroupName.t option
+        [@ocaml.doc "Group name that matched the group."]}
+    let make ?groupId = fun ?groupName -> fun () -> { groupId; groupName }
+    let to_value x =
+      structure_to_value
+        [("GroupId", (Option.map x.groupId ~f:WorkMailIdentifier.to_value));
+        ("GroupName", (Option.map x.groupName ~f:GroupName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupName =
+        (Option.map ~f:GroupName.of_xml) (Xml.child xml_arg0 "GroupName") in
+      let groupId =
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "GroupId") in
+      make ?groupName ?groupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupName = field_map json__ "GroupName" GroupName.of_json in
+      let groupId = field_map json__ "GroupId" WorkMailIdentifier.of_json in
+      make ?groupName ?groupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The identifier that contains the Group ID and name of a group."]
 module Member =
   struct
     type nonrec t =
@@ -1958,10 +2957,10 @@ module Member =
           "The state of the member, which can be ENABLED, DISABLED, or DELETED."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the member was enabled for Amazon WorkMail use."];
+          "The date indicating when the member was enabled for WorkMail use."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date indicating when the member was disabled from Amazon WorkMail use."]}
+          "The date indicating when the member was disabled from WorkMail use."]}
     let make ?id =
       fun ?name ->
         fun ?type_ ->
@@ -1992,16 +2991,100 @@ module Member =
       let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
       make ?disabledDate ?enabledDate ?state ?type_ ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let type_ = field_map json "Type" MemberType.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" String_.of_json in
+    let of_json json__ =
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let type_ = field_map json__ "Type" MemberType.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" String_.of_json in
       make ?disabledDate ?enabledDate ?state ?type_ ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The representation of a user or group."]
+module AvailabilityConfiguration =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t option
+        [@ocaml.doc "Displays the domain to which the provider applies."];
+      providerType: AvailabilityProviderType.t option
+        [@ocaml.doc
+          "Displays the provider type that applies to this domain."];
+      ewsProvider: RedactedEwsAvailabilityProvider.t option
+        [@ocaml.doc
+          "If ProviderType is EWS, then this field contains RedactedEwsAvailabilityProvider. Otherwise, it is not required."];
+      lambdaProvider: LambdaAvailabilityProvider.t option
+        [@ocaml.doc
+          "If ProviderType is LAMBDA then this field contains LambdaAvailabilityProvider. Otherwise, it is not required."];
+      dateCreated: Timestamp.t option
+        [@ocaml.doc
+          "The date and time at which the availability configuration was created."];
+      dateModified: Timestamp.t option
+        [@ocaml.doc
+          "The date and time at which the availability configuration was last modified."]}
+    let make ?domainName =
+      fun ?providerType ->
+        fun ?ewsProvider ->
+          fun ?lambdaProvider ->
+            fun ?dateCreated ->
+              fun ?dateModified ->
+                fun () ->
+                  {
+                    domainName;
+                    providerType;
+                    ewsProvider;
+                    lambdaProvider;
+                    dateCreated;
+                    dateModified
+                  }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("ProviderType",
+          (Option.map x.providerType ~f:AvailabilityProviderType.to_value));
+        ("EwsProvider",
+          (Option.map x.ewsProvider
+             ~f:RedactedEwsAvailabilityProvider.to_value));
+        ("LambdaProvider",
+          (Option.map x.lambdaProvider ~f:LambdaAvailabilityProvider.to_value));
+        ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
+        ("DateModified", (Option.map x.dateModified ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateModified =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateModified") in
+      let dateCreated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateCreated") in
+      let lambdaProvider =
+        (Option.map ~f:LambdaAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "LambdaProvider") in
+      let ewsProvider =
+        (Option.map ~f:RedactedEwsAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "EwsProvider") in
+      let providerType =
+        (Option.map ~f:AvailabilityProviderType.of_xml)
+          (Xml.child xml_arg0 "ProviderType") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      make ?dateModified ?dateCreated ?lambdaProvider ?ewsProvider
+        ?providerType ?domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let lambdaProvider =
+        field_map json__ "LambdaProvider" LambdaAvailabilityProvider.of_json in
+      let ewsProvider =
+        field_map json__ "EwsProvider"
+          RedactedEwsAvailabilityProvider.of_json in
+      let providerType =
+        field_map json__ "ProviderType" AvailabilityProviderType.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      make ?dateModified ?dateCreated ?lambdaProvider ?ewsProvider
+        ?providerType ?domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all the AvailabilityConfiguration's for the given WorkMail organization."]
 module AccessControlRule =
   struct
     type nonrec t =
@@ -2028,7 +3111,11 @@ module AccessControlRule =
       dateCreated: Timestamp.t option
         [@ocaml.doc "The date that the rule was created."];
       dateModified: Timestamp.t option
-        [@ocaml.doc "The date that the rule was modified."]}
+        [@ocaml.doc "The date that the rule was modified."];
+      impersonationRoleIds: ImpersonationRoleIdList.t option
+        [@ocaml.doc "Impersonation role IDs to include in the rule."];
+      notImpersonationRoleIds: ImpersonationRoleIdList.t option
+        [@ocaml.doc "Impersonation role IDs to exclude from the rule."]}
     let make ?name =
       fun ?effect_ ->
         fun ?description ->
@@ -2040,20 +3127,24 @@ module AccessControlRule =
                     fun ?notUserIds ->
                       fun ?dateCreated ->
                         fun ?dateModified ->
-                          fun () ->
-                            {
-                              name;
-                              effect_;
-                              description;
-                              ipRanges;
-                              notIpRanges;
-                              actions;
-                              notActions;
-                              userIds;
-                              notUserIds;
-                              dateCreated;
-                              dateModified
-                            }
+                          fun ?impersonationRoleIds ->
+                            fun ?notImpersonationRoleIds ->
+                              fun () ->
+                                {
+                                  name;
+                                  effect_;
+                                  description;
+                                  ipRanges;
+                                  notIpRanges;
+                                  actions;
+                                  notActions;
+                                  userIds;
+                                  notUserIds;
+                                  dateCreated;
+                                  dateModified;
+                                  impersonationRoleIds;
+                                  notImpersonationRoleIds
+                                }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:AccessControlRuleName.to_value));
@@ -2068,9 +3159,21 @@ module AccessControlRule =
         ("UserIds", (Option.map x.userIds ~f:UserIdList.to_value));
         ("NotUserIds", (Option.map x.notUserIds ~f:UserIdList.to_value));
         ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
-        ("DateModified", (Option.map x.dateModified ~f:Timestamp.to_value))]
+        ("DateModified", (Option.map x.dateModified ~f:Timestamp.to_value));
+        ("ImpersonationRoleIds",
+          (Option.map x.impersonationRoleIds
+             ~f:ImpersonationRoleIdList.to_value));
+        ("NotImpersonationRoleIds",
+          (Option.map x.notImpersonationRoleIds
+             ~f:ImpersonationRoleIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let notImpersonationRoleIds =
+        (Option.map ~f:ImpersonationRoleIdList.of_xml)
+          (Xml.child xml_arg0 "NotImpersonationRoleIds") in
+      let impersonationRoleIds =
+        (Option.map ~f:ImpersonationRoleIdList.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleIds") in
       let dateModified =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateModified") in
       let dateCreated =
@@ -2096,27 +3199,34 @@ module AccessControlRule =
       let name =
         (Option.map ~f:AccessControlRuleName.of_xml)
           (Xml.child xml_arg0 "Name") in
-      make ?dateModified ?dateCreated ?notUserIds ?userIds ?notActions
-        ?actions ?notIpRanges ?ipRanges ?description ?effect_ ?name ()
+      make ?notImpersonationRoleIds ?impersonationRoleIds ?dateModified
+        ?dateCreated ?notUserIds ?userIds ?notActions ?actions ?notIpRanges
+        ?ipRanges ?description ?effect_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateModified = field_map json "DateModified" Timestamp.of_json in
-      let dateCreated = field_map json "DateCreated" Timestamp.of_json in
-      let notUserIds = field_map json "NotUserIds" UserIdList.of_json in
-      let userIds = field_map json "UserIds" UserIdList.of_json in
-      let notActions = field_map json "NotActions" ActionsList.of_json in
-      let actions = field_map json "Actions" ActionsList.of_json in
-      let notIpRanges = field_map json "NotIpRanges" IpRangeList.of_json in
-      let ipRanges = field_map json "IpRanges" IpRangeList.of_json in
+    let of_json json__ =
+      let notImpersonationRoleIds =
+        field_map json__ "NotImpersonationRoleIds"
+          ImpersonationRoleIdList.of_json in
+      let impersonationRoleIds =
+        field_map json__ "ImpersonationRoleIds"
+          ImpersonationRoleIdList.of_json in
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let notUserIds = field_map json__ "NotUserIds" UserIdList.of_json in
+      let userIds = field_map json__ "UserIds" UserIdList.of_json in
+      let notActions = field_map json__ "NotActions" ActionsList.of_json in
+      let actions = field_map json__ "Actions" ActionsList.of_json in
+      let notIpRanges = field_map json__ "NotIpRanges" IpRangeList.of_json in
+      let ipRanges = field_map json__ "IpRanges" IpRangeList.of_json in
       let description =
-        field_map json "Description" AccessControlRuleDescription.of_json in
-      let effect_ = field_map json "Effect" AccessControlRuleEffect.of_json in
-      let name = field_map json "Name" AccessControlRuleName.of_json in
-      make ?dateModified ?dateCreated ?notUserIds ?userIds ?notActions
-        ?actions ?notIpRanges ?ipRanges ?description ?effect_ ?name ()
+        field_map json__ "Description" AccessControlRuleDescription.of_json in
+      let effect_ = field_map json__ "Effect" AccessControlRuleEffect.of_json in
+      let name = field_map json__ "Name" AccessControlRuleName.of_json in
+      make ?notImpersonationRoleIds ?impersonationRoleIds ?dateModified
+        ?dateCreated ?notUserIds ?userIds ?notActions ?actions ?notIpRanges
+        ?ipRanges ?description ?effect_ ?name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A rule that controls access to an Amazon WorkMail organization."]
+  end[@@ocaml.doc "A rule that controls access to an WorkMail organization."]
 module MobileDeviceAccessMatchedRule =
   struct
     type nonrec t =
@@ -2143,10 +3253,10 @@ module MobileDeviceAccessMatchedRule =
           (Xml.child xml_arg0 "MobileDeviceAccessRuleId") in
       make ?name ?mobileDeviceAccessRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" MobileDeviceAccessRuleName.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" MobileDeviceAccessRuleName.of_json in
       let mobileDeviceAccessRuleId =
-        field_map json "MobileDeviceAccessRuleId"
+        field_map json__ "MobileDeviceAccessRuleId"
           MobileDeviceAccessRuleId.of_json in
       make ?name ?mobileDeviceAccessRuleId ()
     let to_json v = composed_to_json to_value v
@@ -2178,27 +3288,60 @@ module DnsRecord =
       let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
       make ?value ?hostname ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let hostname = field_map json "Hostname" String_.of_json in
-      let type_ = field_map json "Type" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let hostname = field_map json__ "Hostname" String_.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
       make ?value ?hostname ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A DNS record uploaded to your DNS provider."]
+module ImpersonationMatchedRule =
+  struct
+    type nonrec t =
+      {
+      impersonationRuleId: ImpersonationRuleId.t option
+        [@ocaml.doc "The ID of the rule that matched the input"];
+      name: ImpersonationRuleName.t option
+        [@ocaml.doc "The name of the rule that matched the input."]}
+    let make ?impersonationRuleId =
+      fun ?name -> fun () -> { impersonationRuleId; name }
+    let to_value x =
+      structure_to_value
+        [("ImpersonationRuleId",
+           (Option.map x.impersonationRuleId ~f:ImpersonationRuleId.to_value));
+        ("Name", (Option.map x.name ~f:ImpersonationRuleName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        (Option.map ~f:ImpersonationRuleName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let impersonationRuleId =
+        (Option.map ~f:ImpersonationRuleId.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRuleId") in
+      make ?name ?impersonationRuleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map json__ "Name" ImpersonationRuleName.of_json in
+      let impersonationRuleId =
+        field_map json__ "ImpersonationRuleId" ImpersonationRuleId.of_json in
+      make ?name ?impersonationRuleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The impersonation rule that matched the input."]
 module Domain =
   struct
     type nonrec t =
       {
-      domainName: DomainName.t option
+      domainName: DomainName.t
         [@ocaml.doc "The fully qualified domain name."];
       hostedZoneId: HostedZoneId.t option
         [@ocaml.doc
           "The hosted zone ID for a domain hosted in Route 53. Required when configuring a domain hosted in Route 53."]}
-    let make ?domainName =
-      fun ?hostedZoneId -> fun () -> { domainName; hostedZoneId }
+    let context_ = "Domain"
+    let make ?hostedZoneId =
+      fun ~domainName -> fun () -> { hostedZoneId; domainName }
     let to_value x =
       structure_to_value
-        [("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
         ("HostedZoneId",
           (Option.map x.hostedZoneId ~f:HostedZoneId.to_value))]
     let to_query v = to_query to_value v
@@ -2207,16 +3350,37 @@ module Domain =
         (Option.map ~f:HostedZoneId.of_xml)
           (Xml.child xml_arg0 "HostedZoneId") in
       let domainName =
-        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
-      make ?hostedZoneId ?domainName ()
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ?hostedZoneId ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostedZoneId = field_map json "HostedZoneId" HostedZoneId.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
-      make ?hostedZoneId ?domainName ()
+    let of_json json__ =
+      let hostedZoneId = field_map json__ "HostedZoneId" HostedZoneId.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?hostedZoneId ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The domain to associate with an Amazon WorkMail organization. When you configure a domain hosted in Amazon Route 53 (Route 53), all recommended DNS records are added to the organization when you create it. For more information, see Adding a domain in the Amazon WorkMail Administrator Guide."]
+       "The domain to associate with an WorkMail organization. When you configure a domain hosted in Amazon Route 53 (Route 53), all recommended DNS records are added to the organization when you create it. For more information, see Adding a domain in the WorkMail Administrator Guide."]
+module DirectoryServiceAuthenticationFailedException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The directory service doesn't recognize the credentials supplied by WorkMail."]
 module DirectoryUnavailableException =
   struct
     type nonrec t = {
@@ -2231,32 +3395,12 @@ module DirectoryUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The directory is unavailable. It might be located in another Region or deleted."]
-module EmailAddressInUseException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The email address that you're trying to assign is already created for a different user, group, or resource."]
 module EntityNotFoundException =
   struct
     type nonrec t = {
@@ -2271,8 +3415,8 @@ module EntityNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2291,13 +3435,13 @@ module EntityStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You are performing an operation on a user, group, or resource that isn't in the expected state, such as trying to delete an active user."]
-module InvalidConfigurationException =
+module InvalidParameterException =
   struct
     type nonrec t = {
       message: String_.t option }
@@ -2311,71 +3455,12 @@ module InvalidConfigurationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration for a resource isn't valid. A resource must either be able to auto-respond to requests or have at least one delegate associated that can do so on its behalf."]
-module MailDomainNotFoundException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The domain specified is not found in your organization."]
-module MailDomainStateException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "After a domain has been added to the organization, it must be verified. The domain is not yet verified."]
-module NameAvailabilityException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The user, group, or resource name isn't unique in Amazon WorkMail."]
+       "One or more of the input parameters don't match the service's restrictions."]
 module OrganizationNotFoundException =
   struct
     type nonrec t = {
@@ -2390,8 +3475,8 @@ module OrganizationNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2410,12 +3495,166 @@ module OrganizationStateException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The organization must have a valid state to perform certain operations on the organization or its members."]
+module UnsupportedOperationException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can't perform a write operation against a read-only directory."]
+module BooleanObject =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module IdentityProviderUserIdForUpdate =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityProviderUserIdForUpdate"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:47) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^$|^([0-9a-f]{10}-|)[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityProviderUserIdForUpdate" j
+    let to_json = simple_to_json to_value
+  end
+module EmailAddressInUseException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The email address that you're trying to assign is already created for a different user, group, or resource."]
+module InvalidConfigurationException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a resource isn't valid. A resource must either be able to auto-respond to requests or have at least one delegate associated that can do so on its behalf."]
+module MailDomainNotFoundException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The domain specified is not found in your organization."]
+module MailDomainStateException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "After a domain has been added to the organization, it must be verified. The domain is not yet verified."]
+module NameAvailabilityException =
+  struct
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The user, group, or resource name isn't unique in WorkMail."]
 module BookingOptions =
   struct
     type nonrec t =
@@ -2460,98 +3699,36 @@ module BookingOptions =
       make ?autoDeclineConflictingRequests ?autoDeclineRecurringRequests
         ?autoAcceptRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoDeclineConflictingRequests =
-        field_map json "AutoDeclineConflictingRequests" Boolean.of_json in
+        field_map json__ "AutoDeclineConflictingRequests" Boolean.of_json in
       let autoDeclineRecurringRequests =
-        field_map json "AutoDeclineRecurringRequests" Boolean.of_json in
+        field_map json__ "AutoDeclineRecurringRequests" Boolean.of_json in
       let autoAcceptRequests =
-        field_map json "AutoAcceptRequests" Boolean.of_json in
+        field_map json__ "AutoAcceptRequests" Boolean.of_json in
       make ?autoDeclineConflictingRequests ?autoDeclineRecurringRequests
         ?autoAcceptRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "At least one delegate must be associated to the resource to disable automatic replies from the resource."]
-module ResourceId =
+module NewResourceDescription =
   struct
     type nonrec t = string
-    let context_ = "ResourceId"
+    let context_ = "NewResourceDescription"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:34) >>=
-             (fun () ->
-                (check_string_max i ~max:34) >>=
-                  (fun () -> check_pattern i ~pattern:"^r-[0-9a-f]{32}$")));
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:0));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceId" j
+    let of_json j = string_of_json ~kind:"NewResourceDescription" j
     let to_json = simple_to_json to_value
   end
-module DirectoryServiceAuthenticationFailedException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The directory service doesn't recognize the credentials supplied by WorkMail."]
-module InvalidParameterException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One or more of the input parameters don't match the service's restrictions."]
-module UnsupportedOperationException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You can't perform a write operation against a read-only directory."]
 module MailboxQuota =
   struct
     type nonrec t = int
@@ -2567,28 +3744,25 @@ module MailboxQuota =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module WorkMailDomainName =
+module LimitExceededException =
   struct
-    type nonrec t = string
-    let context_ = "WorkMailDomainName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:3) >>=
-             (fun () ->
-                (check_string_max i ~max:209) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[a-zA-Z0-9.-]+\\.[a-zA-Z-]{2,}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = {
+      message: String_.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"WorkMailDomainName" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request exceeds the limit of the resource."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -2603,11 +3777,128 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource cannot be found."]
+module ImpersonationRoleDescription =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationRoleDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[^\\x00-\\x09\\x0B\\x0C\\x0E-\\x1F\\x7F\\x3C\\x3E\\x5C]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationRoleDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationRuleList =
+  struct
+    type nonrec t = ImpersonationRule.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImpersonationRule.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImpersonationRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImpersonationRuleList"
+        ~of_json:ImpersonationRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module WorkMailDomainName =
+  struct
+    type nonrec t = string
+    let context_ = "WorkMailDomainName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:209) >>=
+                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9.-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"WorkMailDomainName" j
+    let to_json = simple_to_json to_value
+  end
+module EwsAvailabilityProvider =
+  struct
+    type nonrec t =
+      {
+      ewsEndpoint: Url.t
+        [@ocaml.doc "The endpoint of the remote EWS server."];
+      ewsUsername: ExternalUserName.t
+        [@ocaml.doc
+          "The username used to authenticate the remote EWS server."];
+      ewsPassword: Password.t
+        [@ocaml.doc
+          "The password used to authenticate the remote EWS server."]}
+    let context_ = "EwsAvailabilityProvider"
+    let make ~ewsEndpoint =
+      fun ~ewsUsername ->
+        fun ~ewsPassword ->
+          fun () -> { ewsEndpoint; ewsUsername; ewsPassword }
+    let to_value x =
+      structure_to_value
+        [("EwsEndpoint", (Some (Url.to_value x.ewsEndpoint)));
+        ("EwsUsername", (Some (ExternalUserName.to_value x.ewsUsername)));
+        ("EwsPassword", (Some (Password.to_value x.ewsPassword)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ewsPassword =
+        Password.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EwsPassword") in
+      let ewsUsername =
+        ExternalUserName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EwsUsername") in
+      let ewsEndpoint =
+        Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EwsEndpoint") in
+      make ~ewsPassword ~ewsUsername ~ewsEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ewsPassword = field_map_exn json__ "EwsPassword" Password.of_json in
+      let ewsUsername =
+        field_map_exn json__ "EwsUsername" ExternalUserName.of_json in
+      let ewsEndpoint = field_map_exn json__ "EwsEndpoint" Url.of_json in
+      make ~ewsPassword ~ewsUsername ~ewsEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an EWS based availability provider. This is only used as input to the service."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -2615,8 +3906,12 @@ module AmazonResourceName =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1011) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:workmail:[a-z0-9-]*:[a-z0-9-]+:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2634,6 +3929,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2667,8 +3965,8 @@ module TooManyTagsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource can have up to 50 user-applied tags."]
@@ -2680,6 +3978,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2699,25 +4000,6 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
-module LimitExceededException =
-  struct
-    type nonrec t = {
-      message: String_.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request exceeds the limit of the resource."]
 module IdempotencyClientToken =
   struct
     type nonrec t = string
@@ -2767,8 +4049,12 @@ module RoleArn =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:20));
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws:iam:[a-z0-9-]*:[a-z0-9-]+:[A-Za-z0-9][A-Za-z0-9:_/+=,@.-]{0,1023}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -2792,30 +4078,12 @@ module InvalidPasswordException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The supplied password doesn't match the minimum security constraints, such as length or use of special characters."]
-module Password =
-  struct
-    type nonrec t = string
-    let context_ = "Password"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_pattern i ~pattern:"[\\u0020-\\u00FF]+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Password" j
-    let to_json = simple_to_json to_value
-  end
 module EntityAlreadyRegisteredException =
   struct
     type nonrec t = {
@@ -2830,8 +4098,8 @@ module EntityAlreadyRegisteredException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2850,8 +4118,8 @@ module MailDomainInUseException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2860,6 +4128,9 @@ module FolderConfigurations =
   struct
     type nonrec t = FolderConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FolderConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2921,39 +4192,109 @@ module ShortString =
     let of_json j = string_of_json ~kind:"ShortString" j
     let to_json = simple_to_json to_value
   end
-module EntityIdentifier =
+module IdentityCenterConfiguration =
   struct
-    type nonrec t = string
-    let context_ = "EntityIdentifier"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9._%+@-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      instanceArn: InstanceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the of IAM Identity Center instance. Must be in the same AWS account and region as WorkMail organization."];
+      applicationArn: ApplicationArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of IAMIdentity Center Application for WorkMail. Must be created by the WorkMail API, see CreateIdentityCenterApplication."]}
+    let context_ = "IdentityCenterConfiguration"
+    let make ~instanceArn =
+      fun ~applicationArn -> fun () -> { instanceArn; applicationArn }
+    let to_value x =
+      structure_to_value
+        [("InstanceArn", (Some (InstanceArn.to_value x.instanceArn)));
+        ("ApplicationArn", (Some (ApplicationArn.to_value x.applicationArn)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntityIdentifier" j
-    let to_json = simple_to_json to_value
-  end
-module BooleanObject =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+      let applicationArn =
+        ApplicationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationArn") in
+      let instanceArn =
+        InstanceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
+      make ~applicationArn ~instanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationArn =
+        field_map_exn json__ "ApplicationArn" ApplicationArn.of_json in
+      let instanceArn =
+        field_map_exn json__ "InstanceArn" InstanceArn.of_json in
+      make ~applicationArn ~instanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The IAM Identity Center configuration."]
+module IdentityProviderAuthenticationMode =
+  struct
+    type nonrec t =
+      | IDENTITY_PROVIDER_ONLY 
+      | IDENTITY_PROVIDER_AND_DIRECTORY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IDENTITY_PROVIDER_ONLY -> "IDENTITY_PROVIDER_ONLY"
+      | IDENTITY_PROVIDER_AND_DIRECTORY -> "IDENTITY_PROVIDER_AND_DIRECTORY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IDENTITY_PROVIDER_ONLY" -> IDENTITY_PROVIDER_ONLY
+      | "IDENTITY_PROVIDER_AND_DIRECTORY" -> IDENTITY_PROVIDER_AND_DIRECTORY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IdentityProviderAuthenticationMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"IdentityProviderAuthenticationMode" j)
     let to_json = simple_to_json to_value
   end
+module PersonalAccessTokenConfiguration =
+  struct
+    type nonrec t =
+      {
+      status: PersonalAccessTokenConfigurationStatus.t
+        [@ocaml.doc
+          "The status of the Personal Access Token allowed for the organization. Active - Mailbox users can login to the web application and choose Settings to see the new Personal Access Tokens page to create and delete the Personal Access Tokens. Mailbox users can use the Personal Access Tokens to set up mailbox connection from desktop or mobile email clients. Inactive - Personal Access Tokens are disabled for your organization. Mailbox users can\226\128\153t create, list, or delete Personal Access Tokens and can\226\128\153t use them to connect to their mailboxes from desktop or mobile email clients."];
+      lifetimeInDays: PersonalAccessTokenLifetimeInDays.t option
+        [@ocaml.doc
+          "The validity of the Personal Access Token status in days."]}
+    let context_ = "PersonalAccessTokenConfiguration"
+    let make ?lifetimeInDays =
+      fun ~status -> fun () -> { lifetimeInDays; status }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Some (PersonalAccessTokenConfigurationStatus.to_value x.status)));
+        ("LifetimeInDays",
+          (Option.map x.lifetimeInDays
+             ~f:PersonalAccessTokenLifetimeInDays.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lifetimeInDays =
+        (Option.map ~f:PersonalAccessTokenLifetimeInDays.of_xml)
+          (Xml.child xml_arg0 "LifetimeInDays") in
+      let status =
+        PersonalAccessTokenConfigurationStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      make ?lifetimeInDays ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lifetimeInDays =
+        field_map json__ "LifetimeInDays"
+          PersonalAccessTokenLifetimeInDays.of_json in
+      let status =
+        field_map_exn json__ "Status"
+          PersonalAccessTokenConfigurationStatus.of_json in
+      make ?lifetimeInDays ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Displays the Personal Access Token status."]
 module LogGroupArn =
   struct
     type nonrec t = string
@@ -3002,6 +4343,9 @@ module Users =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3021,6 +4365,80 @@ module Users =
     let of_json j = list_of_json ~kind:"Users" ~of_json:User.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListUsersFilters =
+  struct
+    type nonrec t =
+      {
+      usernamePrefix: String_.t option
+        [@ocaml.doc "Filters only users with the provided username prefix."];
+      displayNamePrefix: UserAttribute.t option
+        [@ocaml.doc
+          "Filters only users with the provided display name prefix."];
+      primaryEmailPrefix: String_.t option
+        [@ocaml.doc "Filters only users with the provided email prefix."];
+      state: EntityState.t option
+        [@ocaml.doc "Filters only users with the provided state."];
+      identityProviderUserIdPrefix: IdentityProviderUserIdPrefix.t option
+        [@ocaml.doc
+          "Filters only users with the ID from the IAM Identity Center."]}
+    let make ?usernamePrefix =
+      fun ?displayNamePrefix ->
+        fun ?primaryEmailPrefix ->
+          fun ?state ->
+            fun ?identityProviderUserIdPrefix ->
+              fun () ->
+                {
+                  usernamePrefix;
+                  displayNamePrefix;
+                  primaryEmailPrefix;
+                  state;
+                  identityProviderUserIdPrefix
+                }
+    let to_value x =
+      structure_to_value
+        [("UsernamePrefix",
+           (Option.map x.usernamePrefix ~f:String_.to_value));
+        ("DisplayNamePrefix",
+          (Option.map x.displayNamePrefix ~f:UserAttribute.to_value));
+        ("PrimaryEmailPrefix",
+          (Option.map x.primaryEmailPrefix ~f:String_.to_value));
+        ("State", (Option.map x.state ~f:EntityState.to_value));
+        ("IdentityProviderUserIdPrefix",
+          (Option.map x.identityProviderUserIdPrefix
+             ~f:IdentityProviderUserIdPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityProviderUserIdPrefix =
+        (Option.map ~f:IdentityProviderUserIdPrefix.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderUserIdPrefix") in
+      let state =
+        (Option.map ~f:EntityState.of_xml) (Xml.child xml_arg0 "State") in
+      let primaryEmailPrefix =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PrimaryEmailPrefix") in
+      let displayNamePrefix =
+        (Option.map ~f:UserAttribute.of_xml)
+          (Xml.child xml_arg0 "DisplayNamePrefix") in
+      let usernamePrefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "UsernamePrefix") in
+      make ?identityProviderUserIdPrefix ?state ?primaryEmailPrefix
+        ?displayNamePrefix ?usernamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityProviderUserIdPrefix =
+        field_map json__ "IdentityProviderUserIdPrefix"
+          IdentityProviderUserIdPrefix.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let primaryEmailPrefix =
+        field_map json__ "PrimaryEmailPrefix" String_.of_json in
+      let displayNamePrefix =
+        field_map json__ "DisplayNamePrefix" UserAttribute.of_json in
+      let usernamePrefix = field_map json__ "UsernamePrefix" String_.of_json in
+      make ?identityProviderUserIdPrefix ?state ?primaryEmailPrefix
+        ?displayNamePrefix ?usernamePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filtering options for ListUsers operation. This is only used as input to Operation."]
 module MaxResults =
   struct
     type nonrec t = int
@@ -3043,6 +4461,9 @@ module Resources =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3063,10 +4484,54 @@ module Resources =
       list_of_json ~kind:"Resources" ~of_json:Resource.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListResourcesFilters =
+  struct
+    type nonrec t =
+      {
+      namePrefix: String_.t option
+        [@ocaml.doc
+          "Filters only resource that start with the entered name prefix ."];
+      primaryEmailPrefix: String_.t option
+        [@ocaml.doc
+          "Filters only resource with the provided primary email prefix."];
+      state: EntityState.t option
+        [@ocaml.doc "Filters only resource with the provided state."]}
+    let make ?namePrefix =
+      fun ?primaryEmailPrefix ->
+        fun ?state -> fun () -> { namePrefix; primaryEmailPrefix; state }
+    let to_value x =
+      structure_to_value
+        [("NamePrefix", (Option.map x.namePrefix ~f:String_.to_value));
+        ("PrimaryEmailPrefix",
+          (Option.map x.primaryEmailPrefix ~f:String_.to_value));
+        ("State", (Option.map x.state ~f:EntityState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:EntityState.of_xml) (Xml.child xml_arg0 "State") in
+      let primaryEmailPrefix =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PrimaryEmailPrefix") in
+      let namePrefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NamePrefix") in
+      make ?state ?primaryEmailPrefix ?namePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" EntityState.of_json in
+      let primaryEmailPrefix =
+        field_map json__ "PrimaryEmailPrefix" String_.of_json in
+      let namePrefix = field_map json__ "NamePrefix" String_.of_json in
+      make ?state ?primaryEmailPrefix ?namePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filtering options for ListResources operation. This is only used as input to Operation."]
 module ResourceDelegates =
   struct
     type nonrec t = Delegate.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Delegate.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3087,10 +4552,42 @@ module ResourceDelegates =
       list_of_json ~kind:"ResourceDelegates" ~of_json:Delegate.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PersonalAccessTokenSummaryList =
+  struct
+    type nonrec t = PersonalAccessTokenSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PersonalAccessTokenSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PersonalAccessTokenSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PersonalAccessTokenSummaryList"
+        ~of_json:PersonalAccessTokenSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module OrganizationSummaries =
   struct
     type nonrec t = OrganizationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OrganizationSummary.to_value)) |>
         (fun x -> `List x)
@@ -3121,6 +4618,9 @@ module MobileDeviceAccessRulesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MobileDeviceAccessRule.to_value)) |>
         (fun x -> `List x)
@@ -3147,6 +4647,9 @@ module MobileDeviceAccessOverridesList =
   struct
     type nonrec t = MobileDeviceAccessOverride.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MobileDeviceAccessOverride.to_value)) |>
         (fun x -> `List x)
@@ -3173,6 +4676,9 @@ module Permissions =
   struct
     type nonrec t = Permission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Permission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3197,6 +4703,9 @@ module Jobs =
   struct
     type nonrec t = MailboxExportJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MailboxExportJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3221,6 +4730,9 @@ module MailDomains =
   struct
     type nonrec t = MailDomainSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MailDomainSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3241,10 +4753,45 @@ module MailDomains =
       list_of_json ~kind:"MailDomains" ~of_json:MailDomainSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ImpersonationRoleList =
+  struct
+    type nonrec t = ImpersonationRole.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImpersonationRole.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImpersonationRole.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImpersonationRoleList"
+        ~of_json:ImpersonationRole.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Groups =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3264,10 +4811,106 @@ module Groups =
     let of_json j = list_of_json ~kind:"Groups" ~of_json:Group.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListGroupsFilters =
+  struct
+    type nonrec t =
+      {
+      namePrefix: String_.t option
+        [@ocaml.doc "Filters only groups with the provided name prefix."];
+      primaryEmailPrefix: String_.t option
+        [@ocaml.doc
+          "Filters only groups with the provided primary email prefix."];
+      state: EntityState.t option
+        [@ocaml.doc "Filters only groups with the provided state."]}
+    let make ?namePrefix =
+      fun ?primaryEmailPrefix ->
+        fun ?state -> fun () -> { namePrefix; primaryEmailPrefix; state }
+    let to_value x =
+      structure_to_value
+        [("NamePrefix", (Option.map x.namePrefix ~f:String_.to_value));
+        ("PrimaryEmailPrefix",
+          (Option.map x.primaryEmailPrefix ~f:String_.to_value));
+        ("State", (Option.map x.state ~f:EntityState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:EntityState.of_xml) (Xml.child xml_arg0 "State") in
+      let primaryEmailPrefix =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "PrimaryEmailPrefix") in
+      let namePrefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NamePrefix") in
+      make ?state ?primaryEmailPrefix ?namePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" EntityState.of_json in
+      let primaryEmailPrefix =
+        field_map json__ "PrimaryEmailPrefix" String_.of_json in
+      let namePrefix = field_map json__ "NamePrefix" String_.of_json in
+      make ?state ?primaryEmailPrefix ?namePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filtering options for ListGroups operation. This is only used as input to Operation."]
+module GroupIdentifiers =
+  struct
+    type nonrec t = GroupIdentifier.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GroupIdentifier.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GroupIdentifier.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GroupIdentifiers" ~of_json:GroupIdentifier.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListGroupsForEntityFilters =
+  struct
+    type nonrec t =
+      {
+      groupNamePrefix: String_.t option
+        [@ocaml.doc
+          "Filters only group names that start with the provided name prefix."]}
+    let make ?groupNamePrefix = fun () -> { groupNamePrefix }
+    let to_value x =
+      structure_to_value
+        [("GroupNamePrefix",
+           (Option.map x.groupNamePrefix ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groupNamePrefix =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "GroupNamePrefix") in
+      make ?groupNamePrefix ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groupNamePrefix =
+        field_map json__ "GroupNamePrefix" String_.of_json in
+      make ?groupNamePrefix ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Filtering options for ListGroupsForEntity operation. This is only used as input to Operation."]
 module Members =
   struct
     type nonrec t = Member.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Member.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3287,10 +4930,42 @@ module Members =
     let of_json j = list_of_json ~kind:"Members" ~of_json:Member.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AvailabilityConfigurationList =
+  struct
+    type nonrec t = AvailabilityConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityConfigurationList"
+        ~of_json:AvailabilityConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Aliases =
   struct
     type nonrec t = EmailAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EmailAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3319,6 +4994,9 @@ module AccessControlRulesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessControlRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3348,6 +5026,9 @@ module MobileDeviceAccessMatchedRuleList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MobileDeviceAccessMatchedRule.to_value)) |>
         (fun x -> `List x)
@@ -3419,6 +5100,9 @@ module DnsRecords =
   struct
     type nonrec t = DnsRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DnsRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3439,6 +5123,39 @@ module DnsRecords =
       list_of_json ~kind:"DnsRecords" ~of_json:DnsRecord.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ImpersonationMatchedRuleList =
+  struct
+    type nonrec t = ImpersonationMatchedRule.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImpersonationMatchedRule.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImpersonationMatchedRule.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImpersonationMatchedRuleList"
+        ~of_json:ImpersonationMatchedRule.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AccessControlRuleNameList =
   struct
     type nonrec t = AccessControlRuleName.t list
@@ -3447,6 +5164,9 @@ module AccessControlRuleNameList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AccessControlRuleName.to_value)) |>
         (fun x -> `List x)
@@ -3491,6 +5211,26 @@ module IpAddress =
     let of_json j = string_of_json ~kind:"IpAddress" j
     let to_json = simple_to_json to_value
   end
+module ResourceId =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:34) >>=
+             (fun () ->
+                (check_string_max i ~max:34) >>=
+                  (fun () -> check_pattern i ~pattern:"^r-[0-9a-f]{32}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceId" j
+    let to_json = simple_to_json to_value
+  end
 module MailboxExportErrorInfo =
   struct
     type nonrec t = string
@@ -3511,6 +5251,34 @@ module MailboxExportErrorInfo =
     let of_json j = string_of_json ~kind:"MailboxExportErrorInfo" j
     let to_json = simple_to_json to_value
   end
+module EntityType =
+  struct
+    type nonrec t =
+      | GROUP 
+      | USER 
+      | RESOURCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GROUP -> "GROUP"
+      | USER -> "USER"
+      | RESOURCE -> "RESOURCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GROUP" -> GROUP
+      | "USER" -> USER
+      | "RESOURCE" -> RESOURCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EntityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EntityType" j)
+    let to_json = simple_to_json to_value
+  end
 module InvalidCustomSesConfigurationException =
   struct
     type nonrec t = {
@@ -3525,12 +5293,12 @@ module InvalidCustomSesConfigurationException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You SES configuration has customizations that Amazon WorkMail cannot save. The error message lists the invalid setting. For examples of invalid settings, refer to CreateReceiptRule."]
+       "You SES configuration has customizations that WorkMail cannot save. The error message lists the invalid setting. For examples of invalid settings, refer to CreateReceiptRule."]
 module ReservedNameException =
   struct
     type nonrec t = {
@@ -3545,12 +5313,12 @@ module ReservedNameException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This user, group, or resource name is not allowed in Amazon WorkMail."]
+       "This user, group, or resource name is not allowed in WorkMail."]
 module DirectoryInUseException =
   struct
     type nonrec t = {
@@ -3565,8 +5333,8 @@ module DirectoryInUseException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3599,6 +5367,9 @@ module Domains =
         ok_or_failwith
           ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Domain.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3618,6 +5389,361 @@ module Domains =
     let of_json j = list_of_json ~kind:"Domains" ~of_json:Domain.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IdentityCenterApplicationName =
+  struct
+    type nonrec t = string
+    let context_ = "IdentityCenterApplicationName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w+=,.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentityCenterApplicationName" j
+    let to_json = simple_to_json to_value
+  end
+module ExpiresIn =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ImpersonationToken =
+  struct
+    type nonrec t = string
+    let context_ = "ImpersonationToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\x21-\\x7e]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ImpersonationToken" j
+    let to_json = simple_to_json to_value
+  end
+module UpdateUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [
+        `DirectoryServiceAuthenticationFailedException of
+          DirectoryServiceAuthenticationFailedException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "DirectoryServiceAuthenticationFailedException" ->
+          `DirectoryServiceAuthenticationFailedException
+            (DirectoryServiceAuthenticationFailedException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DirectoryServiceAuthenticationFailedException" ->
+          `DirectoryServiceAuthenticationFailedException
+            (DirectoryServiceAuthenticationFailedException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DirectoryServiceAuthenticationFailedException e ->
+          `Assoc
+            [("error",
+               (`String "DirectoryServiceAuthenticationFailedException"));
+            ("details",
+              (DirectoryServiceAuthenticationFailedException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates data for the user. To have the latest information, it must be preceded by a DescribeUser call. The dataset in the request should be the one expected when performing another DescribeUser call."]
+module UpdateUserRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier for the organization under which the user exists."];
+      userId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the user to be updated. The identifier can be the UserId, Username, or email. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
+      role: UserRole.t option
+        [@ocaml.doc
+          "Updates the user role. You cannot pass SYSTEM_USER or RESOURCE."];
+      displayName: UserAttribute.t option
+        [@ocaml.doc "Updates the display name of the user."];
+      firstName: UserAttribute.t option
+        [@ocaml.doc "Updates the user's first name."];
+      lastName: UserAttribute.t option
+        [@ocaml.doc "Updates the user's last name."];
+      hiddenFromGlobalAddressList: BooleanObject.t option
+        [@ocaml.doc
+          "If enabled, the user is hidden from the global address list."];
+      initials: UserAttribute.t option
+        [@ocaml.doc "Updates the user's initials."];
+      telephone: UserAttribute.t option
+        [@ocaml.doc "Updates the user's contact details."];
+      street: UserAttribute.t option
+        [@ocaml.doc "Updates the user's street address."];
+      jobTitle: UserAttribute.t option
+        [@ocaml.doc "Updates the user's job title."];
+      city: UserAttribute.t option [@ocaml.doc "Updates the user's city."];
+      company: UserAttribute.t option
+        [@ocaml.doc "Updates the user's company."];
+      zipCode: UserAttribute.t option
+        [@ocaml.doc "Updates the user's zip code."];
+      department: UserAttribute.t option
+        [@ocaml.doc "Updates the user's department."];
+      country: UserAttribute.t option
+        [@ocaml.doc "Updates the user's country."];
+      office: UserAttribute.t option
+        [@ocaml.doc "Updates the user's office."];
+      identityProviderUserId: IdentityProviderUserIdForUpdate.t option
+        [@ocaml.doc
+          "User ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."]}
+    let context_ = "UpdateUserRequest"
+    let make ?role =
+      fun ?displayName ->
+        fun ?firstName ->
+          fun ?lastName ->
+            fun ?hiddenFromGlobalAddressList ->
+              fun ?initials ->
+                fun ?telephone ->
+                  fun ?street ->
+                    fun ?jobTitle ->
+                      fun ?city ->
+                        fun ?company ->
+                          fun ?zipCode ->
+                            fun ?department ->
+                              fun ?country ->
+                                fun ?office ->
+                                  fun ?identityProviderUserId ->
+                                    fun ~organizationId ->
+                                      fun ~userId ->
+                                        fun () ->
+                                          {
+                                            role;
+                                            displayName;
+                                            firstName;
+                                            lastName;
+                                            hiddenFromGlobalAddressList;
+                                            initials;
+                                            telephone;
+                                            street;
+                                            jobTitle;
+                                            city;
+                                            company;
+                                            zipCode;
+                                            department;
+                                            country;
+                                            office;
+                                            identityProviderUserId;
+                                            organizationId;
+                                            userId
+                                          }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("UserId", (Some (EntityIdentifier.to_value x.userId)));
+        ("Role", (Option.map x.role ~f:UserRole.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:UserAttribute.to_value));
+        ("FirstName", (Option.map x.firstName ~f:UserAttribute.to_value));
+        ("LastName", (Option.map x.lastName ~f:UserAttribute.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:BooleanObject.to_value));
+        ("Initials", (Option.map x.initials ~f:UserAttribute.to_value));
+        ("Telephone", (Option.map x.telephone ~f:UserAttribute.to_value));
+        ("Street", (Option.map x.street ~f:UserAttribute.to_value));
+        ("JobTitle", (Option.map x.jobTitle ~f:UserAttribute.to_value));
+        ("City", (Option.map x.city ~f:UserAttribute.to_value));
+        ("Company", (Option.map x.company ~f:UserAttribute.to_value));
+        ("ZipCode", (Option.map x.zipCode ~f:UserAttribute.to_value));
+        ("Department", (Option.map x.department ~f:UserAttribute.to_value));
+        ("Country", (Option.map x.country ~f:UserAttribute.to_value));
+        ("Office", (Option.map x.office ~f:UserAttribute.to_value));
+        ("IdentityProviderUserId",
+          (Option.map x.identityProviderUserId
+             ~f:IdentityProviderUserIdForUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identityProviderUserId =
+        (Option.map ~f:IdentityProviderUserIdForUpdate.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderUserId") in
+      let office =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Office") in
+      let country =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Country") in
+      let department =
+        (Option.map ~f:UserAttribute.of_xml)
+          (Xml.child xml_arg0 "Department") in
+      let zipCode =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "ZipCode") in
+      let company =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Company") in
+      let city =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "City") in
+      let jobTitle =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "JobTitle") in
+      let street =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Street") in
+      let telephone =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Telephone") in
+      let initials =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Initials") in
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let lastName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "LastName") in
+      let firstName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "FirstName") in
+      let displayName =
+        (Option.map ~f:UserAttribute.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let role = (Option.map ~f:UserRole.of_xml) (Xml.child xml_arg0 "Role") in
+      let userId =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?identityProviderUserId ?office ?country ?department ?zipCode
+        ?company ?city ?jobTitle ?street ?telephone ?initials
+        ?hiddenFromGlobalAddressList ?lastName ?firstName ?displayName ?role
+        ~userId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identityProviderUserId =
+        field_map json__ "IdentityProviderUserId"
+          IdentityProviderUserIdForUpdate.of_json in
+      let office = field_map json__ "Office" UserAttribute.of_json in
+      let country = field_map json__ "Country" UserAttribute.of_json in
+      let department = field_map json__ "Department" UserAttribute.of_json in
+      let zipCode = field_map json__ "ZipCode" UserAttribute.of_json in
+      let company = field_map json__ "Company" UserAttribute.of_json in
+      let city = field_map json__ "City" UserAttribute.of_json in
+      let jobTitle = field_map json__ "JobTitle" UserAttribute.of_json in
+      let street = field_map json__ "Street" UserAttribute.of_json in
+      let telephone = field_map json__ "Telephone" UserAttribute.of_json in
+      let initials = field_map json__ "Initials" UserAttribute.of_json in
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" BooleanObject.of_json in
+      let lastName = field_map json__ "LastName" UserAttribute.of_json in
+      let firstName = field_map json__ "FirstName" UserAttribute.of_json in
+      let displayName = field_map json__ "DisplayName" UserAttribute.of_json in
+      let role = field_map json__ "Role" UserRole.of_json in
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?identityProviderUserId ?office ?country ?department ?zipCode
+        ?company ?city ?jobTitle ?street ?telephone ?initials
+        ?hiddenFromGlobalAddressList ?lastName ?firstName ?displayName ?role
+        ~userId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates data for the user. To have the latest information, it must be preceded by a DescribeUser call. The dataset in the request should be the one expected when performing another DescribeUser call."]
 module UpdateResourceResponse =
   struct
     type nonrec t = unit
@@ -3627,11 +5753,13 @@ module UpdateResourceResponse =
       | `EntityNotFoundException of EntityNotFoundException.t 
       | `EntityStateException of EntityStateException.t 
       | `InvalidConfigurationException of InvalidConfigurationException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `MailDomainNotFoundException of MailDomainNotFoundException.t 
       | `MailDomainStateException of MailDomainStateException.t 
       | `NameAvailabilityException of NameAvailabilityException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -3649,6 +5777,8 @@ module UpdateResourceResponse =
       | "InvalidConfigurationException" ->
           `InvalidConfigurationException
             (InvalidConfigurationException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "MailDomainNotFoundException" ->
           `MailDomainNotFoundException
             (MailDomainNotFoundException.of_json json)
@@ -3662,6 +5792,9 @@ module UpdateResourceResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -3679,6 +5812,8 @@ module UpdateResourceResponse =
       | "InvalidConfigurationException" ->
           `InvalidConfigurationException
             (InvalidConfigurationException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "MailDomainNotFoundException" ->
           `MailDomainNotFoundException
             (MailDomainNotFoundException.of_xml xml)
@@ -3691,6 +5826,9 @@ module UpdateResourceResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -3715,6 +5853,10 @@ module UpdateResourceResponse =
           `Assoc
             [("error", (`String "InvalidConfigurationException"));
             ("details", (InvalidConfigurationException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `MailDomainNotFoundException e ->
           `Assoc
             [("error", (`String "MailDomainNotFoundException"));
@@ -3735,6 +5877,10 @@ module UpdateResourceResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -3756,49 +5902,89 @@ module UpdateResourceRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier associated with the organization for which the resource is updated."];
-      resourceId: ResourceId.t
-        [@ocaml.doc "The identifier of the resource to be updated."];
+      resourceId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier of the resource to be updated. The identifier can accept ResourceId, Resourcename, or email. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Email address: resource\\@domain.tld Resource name: resource"];
       name: ResourceName.t option
         [@ocaml.doc "The name of the resource to be updated."];
       bookingOptions: BookingOptions.t option
-        [@ocaml.doc "The resource's booking options to be updated."]}
+        [@ocaml.doc "The resource's booking options to be updated."];
+      description: NewResourceDescription.t option
+        [@ocaml.doc "Updates the resource description."];
+      type_: ResourceType.t option [@ocaml.doc "Updates the resource type."];
+      hiddenFromGlobalAddressList: BooleanObject.t option
+        [@ocaml.doc
+          "If enabled, the resource is hidden from the global address list."]}
     let context_ = "UpdateResourceRequest"
     let make ?name =
       fun ?bookingOptions ->
-        fun ~organizationId ->
-          fun ~resourceId ->
-            fun () -> { name; bookingOptions; organizationId; resourceId }
+        fun ?description ->
+          fun ?type_ ->
+            fun ?hiddenFromGlobalAddressList ->
+              fun ~organizationId ->
+                fun ~resourceId ->
+                  fun () ->
+                    {
+                      name;
+                      bookingOptions;
+                      description;
+                      type_;
+                      hiddenFromGlobalAddressList;
+                      organizationId;
+                      resourceId
+                    }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)));
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)));
         ("Name", (Option.map x.name ~f:ResourceName.to_value));
         ("BookingOptions",
-          (Option.map x.bookingOptions ~f:BookingOptions.to_value))]
+          (Option.map x.bookingOptions ~f:BookingOptions.to_value));
+        ("Description",
+          (Option.map x.description ~f:NewResourceDescription.to_value));
+        ("Type", (Option.map x.type_ ~f:ResourceType.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let type_ =
+        (Option.map ~f:ResourceType.of_xml) (Xml.child xml_arg0 "Type") in
+      let description =
+        (Option.map ~f:NewResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let bookingOptions =
         (Option.map ~f:BookingOptions.of_xml)
           (Xml.child xml_arg0 "BookingOptions") in
       let name =
         (Option.map ~f:ResourceName.of_xml) (Xml.child xml_arg0 "Name") in
       let resourceId =
-        ResourceId.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ?bookingOptions ?name ~resourceId ~organizationId ()
+      make ?hiddenFromGlobalAddressList ?type_ ?description ?bookingOptions
+        ?name ~resourceId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" BooleanObject.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let description =
+        field_map json__ "Description" NewResourceDescription.of_json in
       let bookingOptions =
-        field_map json "BookingOptions" BookingOptions.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+        field_map json__ "BookingOptions" BookingOptions.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ?bookingOptions ?name ~resourceId ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?hiddenFromGlobalAddressList ?type_ ?description ?bookingOptions
+        ?name ~resourceId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates data for the resource. To have the latest information, it must be preceded by a DescribeResource call. The dataset in the request should be the one expected when performing another DescribeResource call."]
@@ -3955,8 +6141,9 @@ module UpdatePrimaryEmailAddressRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The organization that contains the user, group, or resource to update."];
-      entityId: WorkMailIdentifier.t
-        [@ocaml.doc "The user, group, or resource to update."];
+      entityId: EntityIdentifier.t
+        [@ocaml.doc
+          "The user, group, or resource to update. The identifier can accept UseriD, ResourceId, or GroupId, Username, Resourcename, or Groupname, or email. The following identity formats are available: Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"];
       email: EmailAddress.t
         [@ocaml.doc "The value of the email to be updated as primary."]}
     let context_ = "UpdatePrimaryEmailAddressRequest"
@@ -3967,7 +6154,7 @@ module UpdatePrimaryEmailAddressRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
         ("Email", (Some (EmailAddress.to_value x.email)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -3975,18 +6162,18 @@ module UpdatePrimaryEmailAddressRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~email ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map_exn json "Email" EmailAddress.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let email = field_map_exn json__ "Email" EmailAddress.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~email ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4060,14 +6247,14 @@ module UpdateMobileDeviceAccessRuleResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a mobile device access rule for the specified Amazon WorkMail organization."]
+       "Updates a mobile device access rule for the specified WorkMail organization."]
 module UpdateMobileDeviceAccessRuleRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization under which the rule will be updated."];
+          "The WorkMail organization under which the rule will be updated."];
       mobileDeviceAccessRuleId: MobileDeviceAccessRuleId.t
         [@ocaml.doc "The identifier of the rule to be updated."];
       name: MobileDeviceAccessRuleName.t
@@ -4205,42 +6392,43 @@ module UpdateMobileDeviceAccessRuleRequest =
         ?notDeviceTypes ?deviceTypes ~effect_ ?description ~name
         ~mobileDeviceAccessRuleId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notDeviceUserAgents =
-        field_map json "NotDeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "NotDeviceUserAgents" DeviceUserAgentList.of_json in
       let deviceUserAgents =
-        field_map json "DeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "DeviceUserAgents" DeviceUserAgentList.of_json in
       let notDeviceOperatingSystems =
-        field_map json "NotDeviceOperatingSystems"
+        field_map json__ "NotDeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let deviceOperatingSystems =
-        field_map json "DeviceOperatingSystems"
+        field_map json__ "DeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let notDeviceModels =
-        field_map json "NotDeviceModels" DeviceModelList.of_json in
+        field_map json__ "NotDeviceModels" DeviceModelList.of_json in
       let deviceModels =
-        field_map json "DeviceModels" DeviceModelList.of_json in
+        field_map json__ "DeviceModels" DeviceModelList.of_json in
       let notDeviceTypes =
-        field_map json "NotDeviceTypes" DeviceTypeList.of_json in
-      let deviceTypes = field_map json "DeviceTypes" DeviceTypeList.of_json in
+        field_map json__ "NotDeviceTypes" DeviceTypeList.of_json in
+      let deviceTypes = field_map json__ "DeviceTypes" DeviceTypeList.of_json in
       let effect_ =
-        field_map_exn json "Effect" MobileDeviceAccessRuleEffect.of_json in
+        field_map_exn json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
-      let name = field_map_exn json "Name" MobileDeviceAccessRuleName.of_json in
+      let name =
+        field_map_exn json__ "Name" MobileDeviceAccessRuleName.of_json in
       let mobileDeviceAccessRuleId =
-        field_map_exn json "MobileDeviceAccessRuleId"
+        field_map_exn json__ "MobileDeviceAccessRuleId"
           MobileDeviceAccessRuleId.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?notDeviceUserAgents ?deviceUserAgents ?notDeviceOperatingSystems
         ?deviceOperatingSystems ?notDeviceModels ?deviceModels
         ?notDeviceTypes ?deviceTypes ~effect_ ?description ~name
         ~mobileDeviceAccessRuleId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a mobile device access rule for the specified Amazon WorkMail organization."]
+       "Updates a mobile device access rule for the specified WorkMail organization."]
 module UpdateMailboxQuotaResponse =
   struct
     type nonrec t = unit
@@ -4327,9 +6515,9 @@ module UpdateMailboxQuotaRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization that contains the user for whom to update the mailbox quota."];
-      userId: WorkMailIdentifier.t
+      userId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifer for the user for whom to update the mailbox quota."];
+          "The identifer for the user for whom to update the mailbox quota. The identifier can be the UserId, Username, or email. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
       mailboxQuota: MailboxQuota.t
         [@ocaml.doc
           "The updated mailbox quota, in MB, for the specified user."]}
@@ -4342,7 +6530,7 @@ module UpdateMailboxQuotaRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("UserId", (Some (WorkMailIdentifier.to_value x.userId)));
+        ("UserId", (Some (EntityIdentifier.to_value x.userId)));
         ("MailboxQuota", (Some (MailboxQuota.to_value x.mailboxQuota)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4350,23 +6538,339 @@ module UpdateMailboxQuotaRequest =
         MailboxQuota.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MailboxQuota") in
       let userId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~mailboxQuota ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mailboxQuota =
-        field_map_exn json "MailboxQuota" MailboxQuota.of_json in
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+        field_map_exn json__ "MailboxQuota" MailboxQuota.of_json in
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~mailboxQuota ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates a user's current mailbox quota for a specified organization and user."]
+module UpdateImpersonationRoleResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an impersonation role for the given WorkMail organization."]
+module UpdateImpersonationRoleRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization that contains the impersonation role to update."];
+      impersonationRoleId: ImpersonationRoleId.t
+        [@ocaml.doc "The ID of the impersonation role to update."];
+      name: ImpersonationRoleName.t
+        [@ocaml.doc "The updated impersonation role name."];
+      type_: ImpersonationRoleType.t
+        [@ocaml.doc "The updated impersonation role type."];
+      description: ImpersonationRoleDescription.t option
+        [@ocaml.doc "The updated impersonation role description."];
+      rules: ImpersonationRuleList.t
+        [@ocaml.doc "The updated list of rules."]}
+    let context_ = "UpdateImpersonationRoleRequest"
+    let make ?description =
+      fun ~organizationId ->
+        fun ~impersonationRoleId ->
+          fun ~name ->
+            fun ~type_ ->
+              fun ~rules ->
+                fun () ->
+                  {
+                    description;
+                    organizationId;
+                    impersonationRoleId;
+                    name;
+                    type_;
+                    rules
+                  }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleId",
+          (Some (ImpersonationRoleId.to_value x.impersonationRoleId)));
+        ("Name", (Some (ImpersonationRoleName.to_value x.name)));
+        ("Type", (Some (ImpersonationRoleType.to_value x.type_)));
+        ("Description",
+          (Option.map x.description ~f:ImpersonationRoleDescription.to_value));
+        ("Rules", (Some (ImpersonationRuleList.to_value x.rules)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rules =
+        ImpersonationRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:ImpersonationRoleDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let type_ =
+        ImpersonationRoleType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let name =
+        ImpersonationRoleName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let impersonationRoleId =
+        ImpersonationRoleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRoleId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~rules ?description ~type_ ~name ~impersonationRoleId
+        ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rules = field_map_exn json__ "Rules" ImpersonationRuleList.of_json in
+      let description =
+        field_map json__ "Description" ImpersonationRoleDescription.of_json in
+      let type_ = field_map_exn json__ "Type" ImpersonationRoleType.of_json in
+      let name = field_map_exn json__ "Name" ImpersonationRoleName.of_json in
+      let impersonationRoleId =
+        field_map_exn json__ "ImpersonationRoleId"
+          ImpersonationRoleId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~rules ?description ~type_ ~name ~impersonationRoleId
+        ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an impersonation role for the given WorkMail organization."]
+module UpdateGroupResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates attributes in a group."]
+module UpdateGroupRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier for the organization under which the group exists."];
+      groupId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the group to be updated. The identifier can accept GroupId, Groupname, or email. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: group\\@domain.tld Group name: group"];
+      hiddenFromGlobalAddressList: BooleanObject.t option
+        [@ocaml.doc
+          "If enabled, the group is hidden from the global address list."]}
+    let context_ = "UpdateGroupRequest"
+    let make ?hiddenFromGlobalAddressList =
+      fun ~organizationId ->
+        fun ~groupId ->
+          fun () -> { hiddenFromGlobalAddressList; organizationId; groupId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:BooleanObject.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let groupId =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?hiddenFromGlobalAddressList ~groupId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" BooleanObject.of_json in
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?hiddenFromGlobalAddressList ~groupId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates attributes in a group."]
 module UpdateDefaultMailDomainResponse =
   struct
     type nonrec t = unit
@@ -4453,8 +6957,7 @@ module UpdateDefaultMailDomainRequest =
     type nonrec t =
       {
       organizationId: OrganizationId.t
-        [@ocaml.doc
-          "The Amazon WorkMail organization for which to list domains."];
+        [@ocaml.doc "The WorkMail organization for which to list domains."];
       domainName: WorkMailDomainName.t
         [@ocaml.doc "The domain name that will become the default domain."]}
     let context_ = "UpdateDefaultMailDomainRequest"
@@ -4475,15 +6978,145 @@ module UpdateDefaultMailDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~domainName ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainName =
-        field_map_exn json "DomainName" WorkMailDomainName.of_json in
+        field_map_exn json__ "DomainName" WorkMailDomainName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~domainName ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the default mail domain for an organization. The default mail domain is used by the WorkMail AWS Console to suggest an email address when enabling a mail user. You can only have one default domain."]
+module UpdateAvailabilityConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing AvailabilityConfiguration for the given WorkMail organization and domain."]
+module UpdateAvailabilityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization for which the AvailabilityConfiguration will be updated."];
+      domainName: DomainName.t
+        [@ocaml.doc
+          "The domain to which the provider applies the availability configuration."];
+      ewsProvider: EwsAvailabilityProvider.t option
+        [@ocaml.doc
+          "The EWS availability provider definition. The request must contain exactly one provider definition, either EwsProvider or LambdaProvider. The previously stored provider will be overridden by the one provided."];
+      lambdaProvider: LambdaAvailabilityProvider.t option
+        [@ocaml.doc
+          "The Lambda availability provider definition. The request must contain exactly one provider definition, either EwsProvider or LambdaProvider. The previously stored provider will be overridden by the one provided."]}
+    let context_ = "UpdateAvailabilityConfigurationRequest"
+    let make ?ewsProvider =
+      fun ?lambdaProvider ->
+        fun ~organizationId ->
+          fun ~domainName ->
+            fun () ->
+              { ewsProvider; lambdaProvider; organizationId; domainName }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("EwsProvider",
+          (Option.map x.ewsProvider ~f:EwsAvailabilityProvider.to_value));
+        ("LambdaProvider",
+          (Option.map x.lambdaProvider ~f:LambdaAvailabilityProvider.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lambdaProvider =
+        (Option.map ~f:LambdaAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "LambdaProvider") in
+      let ewsProvider =
+        (Option.map ~f:EwsAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "EwsProvider") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?lambdaProvider ?ewsProvider ~domainName ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lambdaProvider =
+        field_map json__ "LambdaProvider" LambdaAvailabilityProvider.of_json in
+      let ewsProvider =
+        field_map json__ "EwsProvider" EwsAvailabilityProvider.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?lambdaProvider ?ewsProvider ~domainName ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing AvailabilityConfiguration for the given WorkMail organization and domain."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -4523,7 +7156,7 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Untags the specified tags from the specified Amazon WorkMail organization resource."]
+       "Untags the specified tags from the specified WorkMail organization resource."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -4547,25 +7180,170 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Untags the specified tags from the specified Amazon WorkMail organization resource."]
+       "Untags the specified tags from the specified WorkMail organization resource."]
+module TestAvailabilityConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      testPassed: Boolean.t option
+        [@ocaml.doc "Boolean indicating whether the test passed or failed."];
+      failureReason: String_.t option
+        [@ocaml.doc
+          "String containing the reason for a failed test if TestPassed is false."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?testPassed =
+      fun ?failureReason -> fun () -> { testPassed; failureReason }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TestPassed", (Option.map x.testPassed ~f:Boolean.to_value));
+        ("FailureReason", (Option.map x.failureReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureReason") in
+      let testPassed =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "TestPassed") in
+      make ?failureReason ?testPassed ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureReason = field_map json__ "FailureReason" String_.of_json in
+      let testPassed = field_map json__ "TestPassed" Boolean.of_json in
+      make ?failureReason ?testPassed ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs a test on an availability provider to ensure that access is allowed. For EWS, it verifies the provided credentials can be used to successfully log in. For Lambda, it verifies that the Lambda function can be invoked and that the resource access policy was configured to deny anonymous access. An anonymous invocation is one done without providing either a SourceArn or SourceAccount header. The request must contain either one provider definition (EwsProvider or LambdaProvider) or the DomainName parameter. If the DomainName parameter is provided, the configuration stored under the DomainName will be tested."]
+module TestAvailabilityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization where the availability provider will be tested."];
+      domainName: DomainName.t option
+        [@ocaml.doc
+          "The domain to which the provider applies. If this field is provided, a stored availability provider associated to this domain name will be tested."];
+      ewsProvider: EwsAvailabilityProvider.t option ;
+      lambdaProvider: LambdaAvailabilityProvider.t option }
+    let context_ = "TestAvailabilityConfigurationRequest"
+    let make ?domainName =
+      fun ?ewsProvider ->
+        fun ?lambdaProvider ->
+          fun ~organizationId ->
+            fun () ->
+              { domainName; ewsProvider; lambdaProvider; organizationId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("EwsProvider",
+          (Option.map x.ewsProvider ~f:EwsAvailabilityProvider.to_value));
+        ("LambdaProvider",
+          (Option.map x.lambdaProvider ~f:LambdaAvailabilityProvider.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lambdaProvider =
+        (Option.map ~f:LambdaAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "LambdaProvider") in
+      let ewsProvider =
+        (Option.map ~f:EwsAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "EwsProvider") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?lambdaProvider ?ewsProvider ?domainName ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lambdaProvider =
+        field_map json__ "LambdaProvider" LambdaAvailabilityProvider.of_json in
+      let ewsProvider =
+        field_map json__ "EwsProvider" EwsAvailabilityProvider.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?lambdaProvider ?ewsProvider ?domainName ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Performs a test on an availability provider to ensure that access is allowed. For EWS, it verifies the provided credentials can be used to successfully log in. For Lambda, it verifies that the Lambda function can be invoked and that the resource access policy was configured to deny anonymous access. An anonymous invocation is one done without providing either a SourceArn or SourceAccount header. The request must contain either one provider definition (EwsProvider or LambdaProvider) or the DomainName parameter. If the DomainName parameter is provided, the configuration stored under the DomainName will be tested."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `OrganizationStateException of OrganizationStateException.t 
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `TooManyTagsException of TooManyTagsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
@@ -4578,6 +7356,8 @@ module TagResourceResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -4588,6 +7368,10 @@ module TagResourceResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `OrganizationStateException e ->
           `Assoc
             [("error", (`String "OrganizationStateException"));
@@ -4613,7 +7397,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies the specified tags to the specified Amazon WorkMail organization resource."]
+       "Applies the specified tags to the specified WorkMailorganization resource."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -4635,14 +7419,14 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Applies the specified tags to the specified Amazon WorkMail organization resource."]
+       "Applies the specified tags to the specified WorkMailorganization resource."]
 module StartMailboxExportJobResponse =
   struct
     type nonrec t =
@@ -4725,12 +7509,12 @@ module StartMailboxExportJobResponse =
           (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" MailboxExportJobId.of_json in
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" MailboxExportJobId.of_json in
       make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a mailbox export job to export MIME-format email messages and calendar items from the specified mailbox to the specified Amazon Simple Storage Service (Amazon S3) bucket. For more information, see Exporting mailbox content in the Amazon WorkMail Administrator Guide."]
+       "Starts a mailbox export job to export MIME-format email messages and calendar items from the specified mailbox to the specified Amazon Simple Storage Service (Amazon S3) bucket. For more information, see Exporting mailbox content in the WorkMail Administrator Guide."]
 module StartMailboxExportJobRequest =
   struct
     type nonrec t =
@@ -4739,9 +7523,9 @@ module StartMailboxExportJobRequest =
         [@ocaml.doc "The idempotency token for the client request."];
       organizationId: OrganizationId.t
         [@ocaml.doc "The identifier associated with the organization."];
-      entityId: WorkMailIdentifier.t
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the user or resource associated with the mailbox."];
+          "The identifier of the user or resource associated with the mailbox. The identifier can accept UserId or ResourceId, Username or Resourcename, or email. The following identity formats are available: Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789 , or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"];
       description: Description.t option
         [@ocaml.doc "The mailbox export job description."];
       roleArn: RoleArn.t
@@ -4777,7 +7561,7 @@ module StartMailboxExportJobRequest =
         [("ClientToken",
            (Some (IdempotencyClientToken.to_value x.clientToken)));
         ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
         ("Description", (Option.map x.description ~f:Description.to_value));
         ("RoleArn", (Some (RoleArn.to_value x.roleArn)));
         ("KmsKeyArn", (Some (KmsKeyArn.to_value x.kmsKeyArn)));
@@ -4799,7 +7583,7 @@ module StartMailboxExportJobRequest =
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
@@ -4810,23 +7594,23 @@ module StartMailboxExportJobRequest =
       make ~s3Prefix ~s3BucketName ~kmsKeyArn ~roleArn ?description ~entityId
         ~organizationId ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Prefix = field_map_exn json "S3Prefix" S3ObjectKey.of_json in
+    let of_json json__ =
+      let s3Prefix = field_map_exn json__ "S3Prefix" S3ObjectKey.of_json in
       let s3BucketName =
-        field_map_exn json "S3BucketName" S3BucketName.of_json in
-      let kmsKeyArn = field_map_exn json "KmsKeyArn" KmsKeyArn.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+        field_map_exn json__ "S3BucketName" S3BucketName.of_json in
+      let kmsKeyArn = field_map_exn json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" IdempotencyClientToken.of_json in
+        field_map_exn json__ "ClientToken" IdempotencyClientToken.of_json in
       make ~s3Prefix ~s3BucketName ~kmsKeyArn ~roleArn ?description ~entityId
         ~organizationId ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Starts a mailbox export job to export MIME-format email messages and calendar items from the specified mailbox to the specified Amazon Simple Storage Service (Amazon S3) bucket. For more information, see Exporting mailbox content in the Amazon WorkMail Administrator Guide."]
+       "Starts a mailbox export job to export MIME-format email messages and calendar items from the specified mailbox to the specified Amazon Simple Storage Service (Amazon S3) bucket. For more information, see Exporting mailbox content in the WorkMail Administrator Guide."]
 module ResetPasswordResponse =
   struct
     type nonrec t = unit
@@ -4985,11 +7769,11 @@ module ResetPasswordRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~password ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" Password.of_json in
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "Password" Password.of_json in
+      let userId = field_map_exn json__ "UserId" WorkMailIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~password ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5012,6 +7796,7 @@ module RegisterToWorkMailResponse =
       | `MailDomainStateException of MailDomainStateException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -5045,6 +7830,9 @@ module RegisterToWorkMailResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5077,6 +7865,9 @@ module RegisterToWorkMailResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5127,6 +7918,10 @@ module RegisterToWorkMailResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -5140,7 +7935,7 @@ module RegisterToWorkMailResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers an existing and disabled user, group, or resource for Amazon WorkMail use by associating a mailbox and calendaring capabilities. It performs no change if the user, group, or resource is enabled and fails if the user, group, or resource is deleted. This operation results in the accumulation of costs. For more information, see Pricing. The equivalent console functionality for this operation is Enable. Users can either be created by calling the CreateUser API operation or they can be synchronized from your directory. For more information, see DeregisterFromWorkMail."]
+       "Registers an existing and disabled user, group, or resource for WorkMail use by associating a mailbox and calendaring capabilities. It performs no change if the user, group, or resource is enabled and fails if the user, group, or resource is deleted. This operation results in the accumulation of costs. For more information, see Pricing. The equivalent console functionality for this operation is Enable. Users can either be created by calling the CreateUser API operation or they can be synchronized from your directory. For more information, see DeregisterFromWorkMail."]
 module RegisterToWorkMailRequest =
   struct
     type nonrec t =
@@ -5148,9 +7943,9 @@ module RegisterToWorkMailRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the user, group, or resource exists."];
-      entityId: WorkMailIdentifier.t
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the user, group, or resource to be updated."];
+          "The identifier for the user, group, or resource to be updated. The identifier can accept UserId, ResourceId, or GroupId, or Username, Resourcename, or Groupname. The following identity formats are available: Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Entity name: entity"];
       email: EmailAddress.t
         [@ocaml.doc
           "The email for the user, group, or resource to be updated."]}
@@ -5162,7 +7957,7 @@ module RegisterToWorkMailRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
         ("Email", (Some (EmailAddress.to_value x.email)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5170,22 +7965,22 @@ module RegisterToWorkMailRequest =
         EmailAddress.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Email") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~email ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map_exn json "Email" EmailAddress.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let email = field_map_exn json__ "Email" EmailAddress.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~email ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers an existing and disabled user, group, or resource for Amazon WorkMail use by associating a mailbox and calendaring capabilities. It performs no change if the user, group, or resource is enabled and fails if the user, group, or resource is deleted. This operation results in the accumulation of costs. For more information, see Pricing. The equivalent console functionality for this operation is Enable. Users can either be created by calling the CreateUser API operation or they can be synchronized from your directory. For more information, see DeregisterFromWorkMail."]
+       "Registers an existing and disabled user, group, or resource for WorkMail use by associating a mailbox and calendaring capabilities. It performs no change if the user, group, or resource is enabled and fails if the user, group, or resource is deleted. This operation results in the accumulation of costs. For more information, see Pricing. The equivalent console functionality for this operation is Enable. Users can either be created by calling the CreateUser API operation or they can be synchronized from your directory. For more information, see DeregisterFromWorkMail."]
 module RegisterMailDomainResponse =
   struct
     type nonrec t = unit
@@ -5264,7 +8059,7 @@ module RegisterMailDomainResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a new domain in Amazon WorkMail and SES, and configures it for use by WorkMail. Emails received by SES for this domain are routed to the specified WorkMail organization, and WorkMail has permanent permission to use the specified domain for sending your users' emails."]
+       "Registers a new domain in WorkMail and SES, and configures it for use by WorkMail. Emails received by SES for this domain are routed to the specified WorkMail organization, and WorkMail has permanent permission to use the specified domain for sending your users' emails."]
 module RegisterMailDomainRequest =
   struct
     type nonrec t =
@@ -5273,10 +8068,10 @@ module RegisterMailDomainRequest =
         [@ocaml.doc "Idempotency token used when retrying requests."];
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization under which you're creating the domain."];
+          "The WorkMail organization under which you're creating the domain."];
       domainName: WorkMailDomainName.t
         [@ocaml.doc
-          "The name of the mail domain to create in Amazon WorkMail and SES."]}
+          "The name of the mail domain to create in WorkMail and SES."]}
     let context_ = "RegisterMailDomainRequest"
     let make ?clientToken =
       fun ~organizationId ->
@@ -5301,17 +8096,17 @@ module RegisterMailDomainRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ~domainName ~organizationId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainName =
-        field_map_exn json "DomainName" WorkMailDomainName.of_json in
+        field_map_exn json__ "DomainName" WorkMailDomainName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       let clientToken =
-        field_map json "ClientToken" IdempotencyClientToken.of_json in
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
       make ~domainName ~organizationId ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Registers a new domain in Amazon WorkMail and SES, and configures it for use by WorkMail. Emails received by SES for this domain are routed to the specified WorkMail organization, and WorkMail has permanent permission to use the specified domain for sending your users' emails."]
+       "Registers a new domain in WorkMail and SES, and configures it for use by WorkMail. Emails received by SES for this domain are routed to the specified WorkMail organization, and WorkMail has permanent permission to use the specified domain for sending your users' emails."]
 module PutRetentionPolicyResponse =
   struct
     type nonrec t = unit
@@ -5427,16 +8222,16 @@ module PutRetentionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~folderConfigurations ?description ~name ?id ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let folderConfigurations =
-        field_map_exn json "FolderConfigurations"
+        field_map_exn json__ "FolderConfigurations"
           FolderConfigurations.of_json in
       let description =
-        field_map json "Description" PolicyDescription.of_json in
-      let name = field_map_exn json "Name" ShortString.of_json in
-      let id = field_map json "Id" ShortString.of_json in
+        field_map json__ "Description" PolicyDescription.of_json in
+      let name = field_map_exn json__ "Name" ShortString.of_json in
+      let id = field_map json__ "Id" ShortString.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~folderConfigurations ?description ~name ?id ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Puts a retention policy to the specified organization."]
@@ -5525,7 +8320,7 @@ module PutMobileDeviceAccessOverrideRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "Identifies the Amazon WorkMail organization for which you create the override."];
+          "Identifies the WorkMail organization for which you create the override."];
       userId: EntityIdentifier.t
         [@ocaml.doc
           "The WorkMail user for which you create the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
@@ -5572,16 +8367,16 @@ module PutMobileDeviceAccessOverrideRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?description ~effect_ ~deviceId ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
       let effect_ =
-        field_map_exn json "Effect" MobileDeviceAccessRuleEffect.of_json in
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
-      let userId = field_map_exn json "UserId" EntityIdentifier.of_json in
+        field_map_exn json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?description ~effect_ ~deviceId ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5672,12 +8467,12 @@ module PutMailboxPermissionsRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier of the organization under which the user, group, or resource exists."];
-      entityId: WorkMailIdentifier.t
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the user, group, or resource for which to update mailbox permissions."];
-      granteeId: WorkMailIdentifier.t
+          "The identifier of the user or resource for which to update mailbox permissions. The identifier can be UserId, ResourceID, or Group Id, Username, Resourcename, or Groupname, or email. Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"];
+      granteeId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the user, group, or resource to which to grant the permissions."];
+          "The identifier of the user, group, or resource to which to grant the permissions. The identifier can be UserId, ResourceID, or Group Id, Username, Resourcename, or Groupname, or email. Grantee ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: grantee\\@domain.tld Grantee name: grantee"];
       permissionValues: PermissionValues.t
         [@ocaml.doc
           "The permissions granted to the grantee. SEND_AS allows the grantee to send email as the owner of the mailbox (the grantee is not mentioned on these emails). SEND_ON_BEHALF allows the grantee to send email on behalf of the owner of the mailbox (the grantee is not mentioned as the physical sender of these emails). FULL_ACCESS allows the grantee full access to the mailbox, irrespective of other folder-level permissions set on the mailbox."]}
@@ -5692,8 +8487,8 @@ module PutMailboxPermissionsRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
-        ("GranteeId", (Some (WorkMailIdentifier.to_value x.granteeId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
+        ("GranteeId", (Some (EntityIdentifier.to_value x.granteeId)));
         ("PermissionValues",
           (Some (PermissionValues.to_value x.permissionValues)))]
     let to_query v = to_query to_value v
@@ -5702,24 +8497,24 @@ module PutMailboxPermissionsRequest =
         PermissionValues.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PermissionValues") in
       let granteeId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GranteeId") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~permissionValues ~granteeId ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionValues =
-        field_map_exn json "PermissionValues" PermissionValues.of_json in
+        field_map_exn json__ "PermissionValues" PermissionValues.of_json in
       let granteeId =
-        field_map_exn json "GranteeId" WorkMailIdentifier.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+        field_map_exn json__ "GranteeId" EntityIdentifier.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~permissionValues ~granteeId ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5803,14 +8598,161 @@ module PutInboundDmarcSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~enforced ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enforced = field_map_exn json "Enforced" BooleanObject.of_json in
+    let of_json json__ =
+      let enforced = field_map_exn json__ "Enforced" BooleanObject.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~enforced ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Enables or disables a DMARC policy for a given organization."]
+module PutIdentityProviderConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables integration between IAM Identity Center (IdC) and WorkMail to proxy authentication requests for mailbox users. You can connect your IdC directory or your external directory to WorkMail through IdC and manage access to WorkMail mailboxes in a single place. For enhanced protection, you could enable Multifactor Authentication (MFA) and Personal Access Tokens."]
+module PutIdentityProviderConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc "The ID of the WorkMail Organization."];
+      authenticationMode: IdentityProviderAuthenticationMode.t
+        [@ocaml.doc "The authentication mode used in WorkMail."];
+      identityCenterConfiguration: IdentityCenterConfiguration.t
+        [@ocaml.doc "The details of the IAM Identity Center configuration."];
+      personalAccessTokenConfiguration: PersonalAccessTokenConfiguration.t
+        [@ocaml.doc
+          "The details of the Personal Access Token configuration."]}
+    let context_ = "PutIdentityProviderConfigurationRequest"
+    let make ~organizationId =
+      fun ~authenticationMode ->
+        fun ~identityCenterConfiguration ->
+          fun ~personalAccessTokenConfiguration ->
+            fun () ->
+              {
+                organizationId;
+                authenticationMode;
+                identityCenterConfiguration;
+                personalAccessTokenConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("AuthenticationMode",
+          (Some
+             (IdentityProviderAuthenticationMode.to_value
+                x.authenticationMode)));
+        ("IdentityCenterConfiguration",
+          (Some
+             (IdentityCenterConfiguration.to_value
+                x.identityCenterConfiguration)));
+        ("PersonalAccessTokenConfiguration",
+          (Some
+             (PersonalAccessTokenConfiguration.to_value
+                x.personalAccessTokenConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let personalAccessTokenConfiguration =
+        PersonalAccessTokenConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "PersonalAccessTokenConfiguration") in
+      let identityCenterConfiguration =
+        IdentityCenterConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "IdentityCenterConfiguration") in
+      let authenticationMode =
+        IdentityProviderAuthenticationMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AuthenticationMode") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~personalAccessTokenConfiguration ~identityCenterConfiguration
+        ~authenticationMode ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let personalAccessTokenConfiguration =
+        field_map_exn json__ "PersonalAccessTokenConfiguration"
+          PersonalAccessTokenConfiguration.of_json in
+      let identityCenterConfiguration =
+        field_map_exn json__ "IdentityCenterConfiguration"
+          IdentityCenterConfiguration.of_json in
+      let authenticationMode =
+        field_map_exn json__ "AuthenticationMode"
+          IdentityProviderAuthenticationMode.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~personalAccessTokenConfiguration ~identityCenterConfiguration
+        ~authenticationMode ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Enables integration between IAM Identity Center (IdC) and WorkMail to proxy authentication requests for mailbox users. You can connect your IdC directory or your external directory to WorkMail through IdC and manage access to WorkMail mailboxes in a single place. For enhanced protection, you could enable Multifactor Authentication (MFA) and Personal Access Tokens."]
 module PutEmailMonitoringConfigurationResponse =
   struct
     type nonrec t = unit
@@ -5888,22 +8830,22 @@ module PutEmailMonitoringConfigurationRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The ID of the organization for which the email monitoring configuration is set."];
-      roleArn: RoleArn.t
+      roleArn: RoleArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM Role associated with the email monitoring configuration."];
+          "The Amazon Resource Name (ARN) of the IAM Role associated with the email monitoring configuration. If absent, the IAM Role Arn of AWSServiceRoleForAmazonWorkMailEvents will be used."];
       logGroupArn: LogGroupArn.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the CloudWatch Log group associated with the email monitoring configuration."]}
     let context_ = "PutEmailMonitoringConfigurationRequest"
-    let make ~organizationId =
-      fun ~roleArn ->
+    let make ?roleArn =
+      fun ~organizationId ->
         fun ~logGroupArn ->
-          fun () -> { organizationId; roleArn; logGroupArn }
+          fun () -> { roleArn; organizationId; logGroupArn }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("RoleArn", (Some (RoleArn.to_value x.roleArn)));
+        ("RoleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("LogGroupArn", (Some (LogGroupArn.to_value x.logGroupArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5911,18 +8853,19 @@ module PutEmailMonitoringConfigurationRequest =
         LogGroupArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LogGroupArn") in
       let roleArn =
-        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~logGroupArn ~roleArn ~organizationId ()
+      make ~logGroupArn ?roleArn ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupArn = field_map_exn json "LogGroupArn" LogGroupArn.of_json in
-      let roleArn = field_map_exn json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let logGroupArn =
+        field_map_exn json__ "LogGroupArn" LogGroupArn.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~logGroupArn ~roleArn ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~logGroupArn ?roleArn ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates or updates the email monitoring configuration for a specified organization."]
@@ -5935,6 +8878,7 @@ module PutAccessControlRuleResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -5951,6 +8895,8 @@ module PutAccessControlRuleResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -5967,6 +8913,8 @@ module PutAccessControlRuleResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -5991,6 +8939,10 @@ module PutAccessControlRuleResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6004,7 +8956,7 @@ module PutAccessControlRuleResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a new access control rule for the specified organization. The rule allows or denies access to the organization for the specified IPv4 addresses, access protocol actions, and user IDs. Adding a new rule with the same name as an existing rule replaces the older rule."]
+       "Adds a new access control rule for the specified organization. The rule allows or denies access to the organization for the specified IPv4 addresses, access protocol actions, user IDs and impersonation IDs. Adding a new rule with the same name as an existing rule replaces the older rule."]
 module PutAccessControlRuleRequest =
   struct
     type nonrec t =
@@ -6028,7 +8980,11 @@ module PutAccessControlRuleRequest =
       notUserIds: UserIdList.t option
         [@ocaml.doc "User IDs to exclude from the rule."];
       organizationId: OrganizationId.t
-        [@ocaml.doc "The identifier of the organization."]}
+        [@ocaml.doc "The identifier of the organization."];
+      impersonationRoleIds: ImpersonationRoleIdList.t option
+        [@ocaml.doc "Impersonation role IDs to include in the rule."];
+      notImpersonationRoleIds: ImpersonationRoleIdList.t option
+        [@ocaml.doc "Impersonation role IDs to exclude from the rule."]}
     let context_ = "PutAccessControlRuleRequest"
     let make ?ipRanges =
       fun ?notIpRanges ->
@@ -6036,23 +8992,27 @@ module PutAccessControlRuleRequest =
           fun ?notActions ->
             fun ?userIds ->
               fun ?notUserIds ->
-                fun ~name ->
-                  fun ~effect_ ->
-                    fun ~description ->
-                      fun ~organizationId ->
-                        fun () ->
-                          {
-                            ipRanges;
-                            notIpRanges;
-                            actions;
-                            notActions;
-                            userIds;
-                            notUserIds;
-                            name;
-                            effect_;
-                            description;
-                            organizationId
-                          }
+                fun ?impersonationRoleIds ->
+                  fun ?notImpersonationRoleIds ->
+                    fun ~name ->
+                      fun ~effect_ ->
+                        fun ~description ->
+                          fun ~organizationId ->
+                            fun () ->
+                              {
+                                ipRanges;
+                                notIpRanges;
+                                actions;
+                                notActions;
+                                userIds;
+                                notUserIds;
+                                impersonationRoleIds;
+                                notImpersonationRoleIds;
+                                name;
+                                effect_;
+                                description;
+                                organizationId
+                              }
     let to_value x =
       structure_to_value
         [("Name", (Some (AccessControlRuleName.to_value x.name)));
@@ -6065,9 +9025,21 @@ module PutAccessControlRuleRequest =
         ("NotActions", (Option.map x.notActions ~f:ActionsList.to_value));
         ("UserIds", (Option.map x.userIds ~f:UserIdList.to_value));
         ("NotUserIds", (Option.map x.notUserIds ~f:UserIdList.to_value));
-        ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)))]
+        ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleIds",
+          (Option.map x.impersonationRoleIds
+             ~f:ImpersonationRoleIdList.to_value));
+        ("NotImpersonationRoleIds",
+          (Option.map x.notImpersonationRoleIds
+             ~f:ImpersonationRoleIdList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let notImpersonationRoleIds =
+        (Option.map ~f:ImpersonationRoleIdList.of_xml)
+          (Xml.child xml_arg0 "NotImpersonationRoleIds") in
+      let impersonationRoleIds =
+        (Option.map ~f:ImpersonationRoleIdList.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleIds") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
@@ -6092,28 +9064,37 @@ module PutAccessControlRuleRequest =
       let name =
         AccessControlRuleName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~organizationId ?notUserIds ?userIds ?notActions ?actions
-        ?notIpRanges ?ipRanges ~description ~effect_ ~name ()
+      make ?notImpersonationRoleIds ?impersonationRoleIds ~organizationId
+        ?notUserIds ?userIds ?notActions ?actions ?notIpRanges ?ipRanges
+        ~description ~effect_ ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let notImpersonationRoleIds =
+        field_map json__ "NotImpersonationRoleIds"
+          ImpersonationRoleIdList.of_json in
+      let impersonationRoleIds =
+        field_map json__ "ImpersonationRoleIds"
+          ImpersonationRoleIdList.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      let notUserIds = field_map json "NotUserIds" UserIdList.of_json in
-      let userIds = field_map json "UserIds" UserIdList.of_json in
-      let notActions = field_map json "NotActions" ActionsList.of_json in
-      let actions = field_map json "Actions" ActionsList.of_json in
-      let notIpRanges = field_map json "NotIpRanges" IpRangeList.of_json in
-      let ipRanges = field_map json "IpRanges" IpRangeList.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      let notUserIds = field_map json__ "NotUserIds" UserIdList.of_json in
+      let userIds = field_map json__ "UserIds" UserIdList.of_json in
+      let notActions = field_map json__ "NotActions" ActionsList.of_json in
+      let actions = field_map json__ "Actions" ActionsList.of_json in
+      let notIpRanges = field_map json__ "NotIpRanges" IpRangeList.of_json in
+      let ipRanges = field_map json__ "IpRanges" IpRangeList.of_json in
       let description =
-        field_map_exn json "Description" AccessControlRuleDescription.of_json in
+        field_map_exn json__ "Description"
+          AccessControlRuleDescription.of_json in
       let effect_ =
-        field_map_exn json "Effect" AccessControlRuleEffect.of_json in
-      let name = field_map_exn json "Name" AccessControlRuleName.of_json in
-      make ~organizationId ?notUserIds ?userIds ?notActions ?actions
-        ?notIpRanges ?ipRanges ~description ~effect_ ~name ()
+        field_map_exn json__ "Effect" AccessControlRuleEffect.of_json in
+      let name = field_map_exn json__ "Name" AccessControlRuleName.of_json in
+      make ?notImpersonationRoleIds ?impersonationRoleIds ~organizationId
+        ?notUserIds ?userIds ?notActions ?actions ?notIpRanges ?ipRanges
+        ~description ~effect_ ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a new access control rule for the specified organization. The rule allows or denies access to the organization for the specified IPv4 addresses, access protocol actions, and user IDs. Adding a new rule with the same name as an existing rule replaces the older rule."]
+       "Adds a new access control rule for the specified organization. The rule allows or denies access to the organization for the specified IPv4 addresses, access protocol actions, user IDs and impersonation IDs. Adding a new rule with the same name as an existing rule replaces the older rule."]
 module ListUsersResponse =
   struct
     type nonrec t =
@@ -6183,9 +9164,9 @@ module ListUsersResponse =
       let users = (Option.map ~f:Users.of_xml) (Xml.child xml_arg0 "Users") in
       make ?nextToken ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let users = field_map json "Users" Users.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let users = field_map json__ "Users" Users.of_json in
       make ?nextToken ?users ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the organization's users."]
@@ -6201,20 +9182,28 @@ module ListUsersRequest =
           "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return in a single call."]}
+          "The maximum number of results to return in a single call."];
+      filters: ListUsersFilters.t option
+        [@ocaml.doc
+          "Limit the user search results based on the filter criteria. You can only use one filter per request."]}
     let context_ = "ListUsersRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~organizationId ->
-          fun () -> { nextToken; maxResults; organizationId }
+        fun ?filters ->
+          fun ~organizationId ->
+            fun () -> { nextToken; maxResults; filters; organizationId }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:ListUsersFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListUsersFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -6222,14 +9211,15 @@ module ListUsersRequest =
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ?maxResults ?nextToken ~organizationId ()
+      make ?filters ?maxResults ?nextToken ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" ListUsersFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ?maxResults ?nextToken ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?filters ?maxResults ?nextToken ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the organization's users."]
 module ListTagsForResourceResponse =
@@ -6272,11 +9262,11 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags applied to an Amazon WorkMail organization resource."]
+       "Lists the tags applied to an WorkMail organization resource."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -6294,13 +9284,13 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags applied to an Amazon WorkMail organization resource."]
+       "Lists the tags applied to an WorkMail organization resource."]
 module ListResourcesResponse =
   struct
     type nonrec t =
@@ -6315,6 +9305,7 @@ module ListResourcesResponse =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resources =
       fun ?nextToken -> fun () -> { resources; nextToken }
@@ -6328,6 +9319,9 @@ module ListResourcesResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6340,6 +9334,9 @@ module ListResourcesResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6356,6 +9353,10 @@ module ListResourcesResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6373,9 +9374,9 @@ module ListResourcesResponse =
         (Option.map ~f:Resources.of_xml) (Xml.child xml_arg0 "Resources") in
       make ?nextToken ?resources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resources = field_map json "Resources" Resources.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resources = field_map json__ "Resources" Resources.of_json in
       make ?nextToken ?resources ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the organization's resources."]
@@ -6391,20 +9392,28 @@ module ListResourcesRequest =
           "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return in a single call."]}
+          "The maximum number of results to return in a single call."];
+      filters: ListResourcesFilters.t option
+        [@ocaml.doc
+          "Limit the resource search results based on the filter criteria. You can only use one filter per request."]}
     let context_ = "ListResourcesRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~organizationId ->
-          fun () -> { nextToken; maxResults; organizationId }
+        fun ?filters ->
+          fun ~organizationId ->
+            fun () -> { nextToken; maxResults; filters; organizationId }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:ListResourcesFilters.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListResourcesFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
@@ -6412,14 +9421,15 @@ module ListResourcesRequest =
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ?maxResults ?nextToken ~organizationId ()
+      make ?filters ?maxResults ?nextToken ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" ListResourcesFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ?maxResults ?nextToken ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?filters ?maxResults ?nextToken ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the organization's resources."]
 module ListResourceDelegatesResponse =
@@ -6437,9 +9447,173 @@ module ListResourceDelegatesResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?delegates =
       fun ?nextToken -> fun () -> { delegates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Delegates",
+           (Option.map x.delegates ~f:ResourceDelegates.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let delegates =
+        (Option.map ~f:ResourceDelegates.of_xml)
+          (Xml.child xml_arg0 "Delegates") in
+      make ?nextToken ?delegates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let delegates = field_map json__ "Delegates" ResourceDelegates.of_json in
+      make ?nextToken ?delegates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the delegates associated with a resource. Users and groups can be resource delegates and answer requests on behalf of the resource."]
+module ListResourceDelegatesRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier for the organization that contains the resource for which delegates are listed."];
+      resourceId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the resource whose delegates are listed. The identifier can accept ResourceId, Resourcename, or email. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Email address: resource\\@domain.tld Resource name: resource"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token used to paginate through the delegates associated with a resource."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The number of maximum results in a page."]}
+    let context_ = "ListResourceDelegatesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~organizationId ->
+          fun ~resourceId ->
+            fun () -> { nextToken; maxResults; organizationId; resourceId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceId =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?maxResults ?nextToken ~resourceId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?maxResults ?nextToken ~resourceId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the delegates associated with a resource. Users and groups can be resource delegates and answer requests on behalf of the resource."]
+module ListPersonalAccessTokensResponse =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token from the previous response to query the next page."];
+      personalAccessTokenSummaries: PersonalAccessTokenSummaryList.t option
+        [@ocaml.doc
+          "Lists all the personal tokens in an organization or user, if user ID is provided."]}
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nextToken =
+      fun ?personalAccessTokenSummaries ->
+        fun () -> { nextToken; personalAccessTokenSummaries }
     let error_of_json name json =
       match name with
       | "EntityNotFoundException" ->
@@ -6501,51 +9675,50 @@ module ListResourceDelegatesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Delegates",
-           (Option.map x.delegates ~f:ResourceDelegates.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PersonalAccessTokenSummaries",
+          (Option.map x.personalAccessTokenSummaries
+             ~f:PersonalAccessTokenSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let personalAccessTokenSummaries =
+        (Option.map ~f:PersonalAccessTokenSummaryList.of_xml)
+          (Xml.child xml_arg0 "PersonalAccessTokenSummaries") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let delegates =
-        (Option.map ~f:ResourceDelegates.of_xml)
-          (Xml.child xml_arg0 "Delegates") in
-      make ?nextToken ?delegates ()
+      make ?personalAccessTokenSummaries ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let delegates = field_map json "Delegates" ResourceDelegates.of_json in
-      make ?nextToken ?delegates ()
+    let of_json json__ =
+      let personalAccessTokenSummaries =
+        field_map json__ "PersonalAccessTokenSummaries"
+          PersonalAccessTokenSummaryList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?personalAccessTokenSummaries ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the delegates associated with a resource. Users and groups can be resource delegates and answer requests on behalf of the resource."]
-module ListResourceDelegatesRequest =
+  end[@@ocaml.doc "Returns a summary of your Personal Access Tokens."]
+module ListPersonalAccessTokensRequest =
   struct
     type nonrec t =
       {
-      organizationId: OrganizationId.t
-        [@ocaml.doc
-          "The identifier for the organization that contains the resource for which delegates are listed."];
-      resourceId: WorkMailIdentifier.t
-        [@ocaml.doc
-          "The identifier for the resource whose delegates are listed."];
+      organizationId: OrganizationId.t [@ocaml.doc "The Organization ID."];
+      userId: EntityIdentifier.t option [@ocaml.doc "The WorkMail User ID."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token used to paginate through the delegates associated with a resource."];
+          "The token from the previous response to query the next page."];
       maxResults: MaxResults.t option
-        [@ocaml.doc "The number of maximum results in a page."]}
-    let context_ = "ListResourceDelegatesRequest"
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ~organizationId ->
-          fun ~resourceId ->
-            fun () -> { nextToken; maxResults; organizationId; resourceId }
+        [@ocaml.doc
+          "The maximum amount of items that should be returned in a response."]}
+    let context_ = "ListPersonalAccessTokensRequest"
+    let make ?userId =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~organizationId ->
+            fun () -> { userId; nextToken; maxResults; organizationId }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (WorkMailIdentifier.to_value x.resourceId)));
+        ("UserId", (Option.map x.userId ~f:EntityIdentifier.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -6554,25 +9727,22 @@ module ListResourceDelegatesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let resourceId =
-        WorkMailIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      let userId =
+        (Option.map ~f:EntityIdentifier.of_xml) (Xml.child xml_arg0 "UserId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ?maxResults ?nextToken ~resourceId ~organizationId ()
+      make ?maxResults ?nextToken ?userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let resourceId =
-        field_map_exn json "ResourceId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let userId = field_map json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ?maxResults ?nextToken ~resourceId ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?maxResults ?nextToken ?userId ~organizationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the delegates associated with a resource. Users and groups can be resource delegates and answer requests on behalf of the resource."]
+  end[@@ocaml.doc "Returns a summary of your Personal Access Tokens."]
 module ListOrganizationsResponse =
   struct
     type nonrec t =
@@ -6627,10 +9797,11 @@ module ListOrganizationsResponse =
           (Xml.child xml_arg0 "OrganizationSummaries") in
       make ?nextToken ?organizationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let organizationSummaries =
-        field_map json "OrganizationSummaries" OrganizationSummaries.of_json in
+        field_map json__ "OrganizationSummaries"
+          OrganizationSummaries.of_json in
       make ?nextToken ?organizationSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the customer's organizations."]
@@ -6658,9 +9829,9 @@ module ListOrganizationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the customer's organizations."]
@@ -6670,7 +9841,7 @@ module ListMobileDeviceAccessRulesResponse =
       {
       rules: MobileDeviceAccessRulesList.t option
         [@ocaml.doc
-          "The list of mobile device access rules that exist under the specified Amazon WorkMail organization."]}
+          "The list of mobile device access rules that exist under the specified WorkMail organization."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
@@ -6731,19 +9902,19 @@ module ListMobileDeviceAccessRulesResponse =
           (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" MobileDeviceAccessRulesList.of_json in
+    let of_json json__ =
+      let rules =
+        field_map json__ "Rules" MobileDeviceAccessRulesList.of_json in
       make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the mobile device access rules for the specified Amazon WorkMail organization."]
+       "Lists the mobile device access rules for the specified WorkMail organization."]
 module ListMobileDeviceAccessRulesRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
-        [@ocaml.doc
-          "The Amazon WorkMail organization for which to list the rules."]}
+        [@ocaml.doc "The WorkMail organization for which to list the rules."]}
     let context_ = "ListMobileDeviceAccessRulesRequest"
     let make ~organizationId = fun () -> { organizationId }
     let to_value x =
@@ -6757,20 +9928,20 @@ module ListMobileDeviceAccessRulesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the mobile device access rules for the specified Amazon WorkMail organization."]
+       "Lists the mobile device access rules for the specified WorkMail organization."]
 module ListMobileDeviceAccessOverridesResponse =
   struct
     type nonrec t =
       {
       overrides: MobileDeviceAccessOverridesList.t option
         [@ocaml.doc
-          "The list of mobile device access overrides that exist for the specified Amazon WorkMail organization and user."];
+          "The list of mobile device access overrides that exist for the specified WorkMail organization and user."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use to retrieve the next page of results. The value is \226\128\156null\226\128\157 when there are no more results to return."]}
@@ -6848,10 +10019,10 @@ module ListMobileDeviceAccessOverridesResponse =
           (Xml.child xml_arg0 "Overrides") in
       make ?nextToken ?overrides ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let overrides =
-        field_map json "Overrides" MobileDeviceAccessOverridesList.of_json in
+        field_map json__ "Overrides" MobileDeviceAccessOverridesList.of_json in
       make ?nextToken ?overrides ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6862,7 +10033,7 @@ module ListMobileDeviceAccessOverridesRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization under which to list mobile device access overrides."];
+          "The WorkMail organization under which to list mobile device access overrides."];
       userId: EntityIdentifier.t option
         [@ocaml.doc
           "The WorkMail user under which you list the mobile device access overrides. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
@@ -6906,13 +10077,13 @@ module ListMobileDeviceAccessOverridesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?maxResults ?nextToken ?deviceId ?userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
-      let userId = field_map json "UserId" EntityIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?maxResults ?nextToken ?deviceId ?userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6998,9 +10169,9 @@ module ListMailboxPermissionsResponse =
         (Option.map ~f:Permissions.of_xml) (Xml.child xml_arg0 "Permissions") in
       make ?nextToken ?permissions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let permissions = field_map json "Permissions" Permissions.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let permissions = field_map json__ "Permissions" Permissions.of_json in
       make ?nextToken ?permissions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7012,9 +10183,9 @@ module ListMailboxPermissionsRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier of the organization under which the user, group, or resource exists."];
-      entityId: WorkMailIdentifier.t
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the user, group, or resource for which to list mailbox permissions."];
+          "The identifier of the user, or resource for which to list mailbox permissions. The entity ID can accept UserId or ResourceId, Username or Resourcename, or email. Entity ID: 12345678-1234-1234-1234-123456789012, or r-0123456789a0123456789b0123456789 Email address: entity\\@domain.tld Entity name: entity"];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
@@ -7031,7 +10202,7 @@ module ListMailboxPermissionsRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -7041,19 +10212,19 @@ module ListMailboxPermissionsRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?maxResults ?nextToken ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?maxResults ?nextToken ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7125,9 +10296,9 @@ module ListMailboxExportJobsResponse =
       let jobs = (Option.map ~f:Jobs.of_xml) (Xml.child xml_arg0 "Jobs") in
       make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let jobs = field_map json "Jobs" Jobs.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let jobs = field_map json__ "Jobs" Jobs.of_json in
       make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7164,11 +10335,11 @@ module ListMailboxExportJobsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?maxResults ?nextToken ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?maxResults ?nextToken ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7179,7 +10350,7 @@ module ListMailDomainsResponse =
       {
       mailDomains: MailDomains.t option
         [@ocaml.doc
-          "The list of mail domain summaries, specifying domains that exist in the specified Amazon WorkMail organization, along with the information about whether the domain is or isn't the default."];
+          "The list of mail domain summaries, specifying domains that exist in the specified WorkMail organization, along with the information about whether the domain is or isn't the default."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use to retrieve the next page of results. The value becomes null when there are no more results to return."]}
@@ -7245,20 +10416,18 @@ module ListMailDomainsResponse =
         (Option.map ~f:MailDomains.of_xml) (Xml.child xml_arg0 "MailDomains") in
       make ?nextToken ?mailDomains ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let mailDomains = field_map json "MailDomains" MailDomains.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let mailDomains = field_map json__ "MailDomains" MailDomains.of_json in
       make ?nextToken ?mailDomains ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Lists the mail domains in a given Amazon WorkMail organization."]
+  end[@@ocaml.doc "Lists the mail domains in a given WorkMail organization."]
 module ListMailDomainsRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
-        [@ocaml.doc
-          "The Amazon WorkMail organization for which to list domains."];
+        [@ocaml.doc "The WorkMail organization for which to list domains."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of results to return in a single call."];
@@ -7287,15 +10456,137 @@ module ListMailDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?nextToken ?maxResults ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?nextToken ?maxResults ~organizationId ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the mail domains in a given WorkMail organization."]
+module ListImpersonationRolesResponse =
+  struct
+    type nonrec t =
+      {
+      roles: ImpersonationRoleList.t option
+        [@ocaml.doc
+          "The list of impersonation roles under the given WorkMail organization."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next page of results. The value is null when there are no results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?roles = fun ?nextToken -> fun () -> { roles; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Roles", (Option.map x.roles ~f:ImpersonationRoleList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let roles =
+        (Option.map ~f:ImpersonationRoleList.of_xml)
+          (Xml.child xml_arg0 "Roles") in
+      make ?nextToken ?roles ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let roles = field_map json__ "Roles" ImpersonationRoleList.of_json in
+      make ?nextToken ?roles ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the mail domains in a given Amazon WorkMail organization."]
+       "Lists all the impersonation roles for the given WorkMail organization."]
+module ListImpersonationRolesRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization to which the listed impersonation roles belong."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token used to retrieve the next page of results. The first call doesn't require a token."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results returned in a single call."]}
+    let context_ = "ListImpersonationRolesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~organizationId ->
+          fun () -> { nextToken; maxResults; organizationId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?maxResults ?nextToken ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?maxResults ?nextToken ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the impersonation roles for the given WorkMail organization."]
 module ListGroupsResponse =
   struct
     type nonrec t =
@@ -7375,9 +10666,9 @@ module ListGroupsResponse =
         (Option.map ~f:Groups.of_xml) (Xml.child xml_arg0 "Groups") in
       make ?nextToken ?groups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let groups = field_map json "Groups" Groups.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groups = field_map json__ "Groups" Groups.of_json in
       make ?nextToken ?groups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns summaries of the organization's groups."]
@@ -7393,16 +10684,173 @@ module ListGroupsRequest =
           "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "The maximum number of results to return in a single call."]}
+          "The maximum number of results to return in a single call."];
+      filters: ListGroupsFilters.t option
+        [@ocaml.doc
+          "Limit the search results based on the filter criteria. Only one filter per request is supported."]}
     let context_ = "ListGroupsRequest"
     let make ?nextToken =
       fun ?maxResults ->
-        fun ~organizationId ->
-          fun () -> { nextToken; maxResults; organizationId }
+        fun ?filters ->
+          fun ~organizationId ->
+            fun () -> { nextToken; maxResults; filters; organizationId }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("Filters", (Option.map x.filters ~f:ListGroupsFilters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListGroupsFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?filters ?maxResults ?nextToken ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "Filters" ListGroupsFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?filters ?maxResults ?nextToken ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns summaries of the organization's groups."]
+module ListGroupsForEntityResponse =
+  struct
+    type nonrec t =
+      {
+      groups: GroupIdentifiers.t option
+        [@ocaml.doc "The overview of groups in an organization."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is `null` when there are no more results to return."]}
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?groups = fun ?nextToken -> fun () -> { groups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Groups", (Option.map x.groups ~f:GroupIdentifiers.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let groups =
+        (Option.map ~f:GroupIdentifiers.of_xml) (Xml.child xml_arg0 "Groups") in
+      make ?nextToken ?groups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groups = field_map json__ "Groups" GroupIdentifiers.of_json in
+      make ?nextToken ?groups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns all the groups to which an entity belongs."]
+module ListGroupsForEntityRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier for the organization under which the entity exists."];
+      entityId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the entity. The entity ID can accept UserId or GroupID, Username or Groupname, or email. Entity ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"];
+      filters: ListGroupsForEntityFilters.t option
+        [@ocaml.doc "Limit the search results based on the filter criteria."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call."]}
+    let context_ = "ListGroupsForEntityRequest"
+    let make ?filters =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~organizationId ->
+            fun ~entityId ->
+              fun () ->
+                { filters; nextToken; maxResults; organizationId; entityId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
+        ("Filters",
+          (Option.map x.filters ~f:ListGroupsForEntityFilters.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -7411,19 +10859,28 @@ module ListGroupsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filters =
+        (Option.map ~f:ListGroupsForEntityFilters.of_xml)
+          (Xml.child xml_arg0 "Filters") in
+      let entityId =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ?maxResults ?nextToken ~organizationId ()
+      make ?maxResults ?nextToken ?filters ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters =
+        field_map json__ "Filters" ListGroupsForEntityFilters.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ?maxResults ?nextToken ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?maxResults ?nextToken ?filters ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns summaries of the organization's groups."]
+  end[@@ocaml.doc "Returns all the groups to which an entity belongs."]
 module ListGroupMembersResponse =
   struct
     type nonrec t =
@@ -7512,9 +10969,9 @@ module ListGroupMembersResponse =
         (Option.map ~f:Members.of_xml) (Xml.child xml_arg0 "Members") in
       make ?nextToken ?members ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let members = field_map json "Members" Members.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let members = field_map json__ "Members" Members.of_json in
       make ?nextToken ?members ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7526,9 +10983,9 @@ module ListGroupMembersRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the group exists."];
-      groupId: WorkMailIdentifier.t
+      groupId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the group to which the members (users or groups) are associated."];
+          "The identifier for the group to which the members (users or groups) are associated. The identifier can accept GroupId, Groupname, or email. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: group\\@domain.tld Group name: group"];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token to use to retrieve the next page of results. The first call does not contain any tokens."];
@@ -7545,7 +11002,7 @@ module ListGroupMembersRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("GroupId", (Some (WorkMailIdentifier.to_value x.groupId)));
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -7555,23 +11012,151 @@ module ListGroupMembersRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let groupId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?maxResults ?nextToken ~groupId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let groupId = field_map_exn json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?maxResults ?nextToken ~groupId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an overview of the members of a group. Users and groups can be members of a group."]
+module ListAvailabilityConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      availabilityConfigurations: AvailabilityConfigurationList.t option
+        [@ocaml.doc
+          "The list of AvailabilityConfiguration's that exist for the specified WorkMail organization."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. The value is null when there are no further results to return."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?availabilityConfigurations =
+      fun ?nextToken -> fun () -> { availabilityConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AvailabilityConfigurations",
+           (Option.map x.availabilityConfigurations
+              ~f:AvailabilityConfigurationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let availabilityConfigurations =
+        (Option.map ~f:AvailabilityConfigurationList.of_xml)
+          (Xml.child xml_arg0 "AvailabilityConfigurations") in
+      make ?nextToken ?availabilityConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let availabilityConfigurations =
+        field_map json__ "AvailabilityConfigurations"
+          AvailabilityConfigurationList.of_json in
+      make ?nextToken ?availabilityConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all the AvailabilityConfiguration's for the given WorkMail organization."]
+module ListAvailabilityConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization for which the AvailabilityConfiguration's will be listed."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in a single call."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. The first call does not require a token."]}
+    let context_ = "ListAvailabilityConfigurationsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~organizationId ->
+          fun () -> { maxResults; nextToken; organizationId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ?nextToken ?maxResults ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?nextToken ?maxResults ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List all the AvailabilityConfiguration's for the given WorkMail organization."]
 module ListAliasesResponse =
   struct
     type nonrec t =
@@ -7660,9 +11245,9 @@ module ListAliasesResponse =
         (Option.map ~f:Aliases.of_xml) (Xml.child xml_arg0 "Aliases") in
       make ?nextToken ?aliases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let aliases = field_map json "Aliases" Aliases.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let aliases = field_map json__ "Aliases" Aliases.of_json in
       make ?nextToken ?aliases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7710,12 +11295,13 @@ module ListAliasesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ?maxResults ?nextToken ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let entityId =
+        field_map_exn json__ "EntityId" WorkMailIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?maxResults ?nextToken ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7776,8 +11362,8 @@ module ListAccessControlRulesResponse =
           (Xml.child xml_arg0 "Rules") in
       make ?rules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" AccessControlRulesList.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" AccessControlRulesList.of_json in
       make ?rules ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7801,13 +11387,197 @@ module ListAccessControlRulesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the access control rules for the specified organization."]
+module GetPersonalAccessTokenMetadataResponse =
+  struct
+    type nonrec t =
+      {
+      personalAccessTokenId: PersonalAccessTokenId.t option
+        [@ocaml.doc "The Personal Access Token ID."];
+      userId: WorkMailIdentifier.t option
+        [@ocaml.doc "The WorkMail User ID."];
+      name: PersonalAccessTokenName.t option
+        [@ocaml.doc "The Personal Access Token name."];
+      dateCreated: Timestamp.t option
+        [@ocaml.doc
+          "The date when the Personal Access Token ID was created."];
+      dateLastUsed: Timestamp.t option
+        [@ocaml.doc
+          "The date when the Personal Access Token ID was last used."];
+      expiresTime: Timestamp.t option
+        [@ocaml.doc
+          "The time when the Personal Access Token ID will expire."];
+      scopes: PersonalAccessTokenScopeList.t option
+        [@ocaml.doc
+          "Lists all the Personal Access Token permissions for a mailbox."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?personalAccessTokenId =
+      fun ?userId ->
+        fun ?name ->
+          fun ?dateCreated ->
+            fun ?dateLastUsed ->
+              fun ?expiresTime ->
+                fun ?scopes ->
+                  fun () ->
+                    {
+                      personalAccessTokenId;
+                      userId;
+                      name;
+                      dateCreated;
+                      dateLastUsed;
+                      expiresTime;
+                      scopes
+                    }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PersonalAccessTokenId",
+           (Option.map x.personalAccessTokenId
+              ~f:PersonalAccessTokenId.to_value));
+        ("UserId", (Option.map x.userId ~f:WorkMailIdentifier.to_value));
+        ("Name", (Option.map x.name ~f:PersonalAccessTokenName.to_value));
+        ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
+        ("DateLastUsed", (Option.map x.dateLastUsed ~f:Timestamp.to_value));
+        ("ExpiresTime", (Option.map x.expiresTime ~f:Timestamp.to_value));
+        ("Scopes",
+          (Option.map x.scopes ~f:PersonalAccessTokenScopeList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scopes =
+        (Option.map ~f:PersonalAccessTokenScopeList.of_xml)
+          (Xml.child xml_arg0 "Scopes") in
+      let expiresTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ExpiresTime") in
+      let dateLastUsed =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateLastUsed") in
+      let dateCreated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateCreated") in
+      let name =
+        (Option.map ~f:PersonalAccessTokenName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let userId =
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "UserId") in
+      let personalAccessTokenId =
+        (Option.map ~f:PersonalAccessTokenId.of_xml)
+          (Xml.child xml_arg0 "PersonalAccessTokenId") in
+      make ?scopes ?expiresTime ?dateLastUsed ?dateCreated ?name ?userId
+        ?personalAccessTokenId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scopes =
+        field_map json__ "Scopes" PersonalAccessTokenScopeList.of_json in
+      let expiresTime = field_map json__ "ExpiresTime" Timestamp.of_json in
+      let dateLastUsed = field_map json__ "DateLastUsed" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let name = field_map json__ "Name" PersonalAccessTokenName.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
+      let personalAccessTokenId =
+        field_map json__ "PersonalAccessTokenId"
+          PersonalAccessTokenId.of_json in
+      make ?scopes ?expiresTime ?dateLastUsed ?dateCreated ?name ?userId
+        ?personalAccessTokenId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests details of a specific Personal Access Token within the WorkMail organization."]
+module GetPersonalAccessTokenMetadataRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t [@ocaml.doc "The Organization ID."];
+      personalAccessTokenId: PersonalAccessTokenId.t
+        [@ocaml.doc "The Personal Access Token ID."]}
+    let context_ = "GetPersonalAccessTokenMetadataRequest"
+    let make ~organizationId =
+      fun ~personalAccessTokenId ->
+        fun () -> { organizationId; personalAccessTokenId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("PersonalAccessTokenId",
+          (Some (PersonalAccessTokenId.to_value x.personalAccessTokenId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let personalAccessTokenId =
+        PersonalAccessTokenId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PersonalAccessTokenId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~personalAccessTokenId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let personalAccessTokenId =
+        field_map_exn json__ "PersonalAccessTokenId"
+          PersonalAccessTokenId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~personalAccessTokenId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests details of a specific Personal Access Token within the WorkMail organization."]
 module GetMobileDeviceAccessOverrideResponse =
   struct
     type nonrec t =
@@ -7937,16 +11707,16 @@ module GetMobileDeviceAccessOverrideResponse =
       make ?dateModified ?dateCreated ?description ?effect_ ?deviceId ?userId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dateModified = field_map json "DateModified" Timestamp.of_json in
-      let dateCreated = field_map json "DateCreated" Timestamp.of_json in
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
       let effect_ =
-        field_map json "Effect" MobileDeviceAccessRuleEffect.of_json in
-      let deviceId = field_map json "DeviceId" DeviceId.of_json in
-      let userId = field_map json "UserId" WorkMailIdentifier.of_json in
+        field_map json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
+      let deviceId = field_map json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
       make ?dateModified ?dateCreated ?description ?effect_ ?deviceId ?userId
         ()
     let to_json v = composed_to_json to_value v
@@ -7958,7 +11728,7 @@ module GetMobileDeviceAccessOverrideRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization to which you want to apply the override."];
+          "The WorkMail organization to which you want to apply the override."];
       userId: EntityIdentifier.t
         [@ocaml.doc
           "Identifies the WorkMail user for the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
@@ -7987,11 +11757,11 @@ module GetMobileDeviceAccessOverrideRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~deviceId ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
-      let userId = field_map_exn json "UserId" EntityIdentifier.of_json in
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~deviceId ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8002,7 +11772,7 @@ module GetMobileDeviceAccessEffectResponse =
       {
       effect_: MobileDeviceAccessRuleEffect.t option
         [@ocaml.doc
-          "The effect of the simulated access, ALLOW or DENY, after evaluating mobile device access rules in the Amazon WorkMail organization for the simulated user parameters."];
+          "The effect of the simulated access, ALLOW or DENY, after evaluating mobile device access rules in the WorkMail organization for the simulated user parameters."];
       matchedRules: MobileDeviceAccessMatchedRuleList.t option
         [@ocaml.doc
           "A list of the rules which matched the simulated user input and produced the effect."]}
@@ -8073,23 +11843,23 @@ module GetMobileDeviceAccessEffectResponse =
           (Xml.child xml_arg0 "Effect") in
       make ?matchedRules ?effect_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let matchedRules =
-        field_map json "MatchedRules"
+        field_map json__ "MatchedRules"
           MobileDeviceAccessMatchedRuleList.of_json in
       let effect_ =
-        field_map json "Effect" MobileDeviceAccessRuleEffect.of_json in
+        field_map json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
       make ?matchedRules ?effect_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Simulates the effect of the mobile device access rules for the given attributes of a sample access event. Use this method to test the effects of the current set of mobile device access rules for the Amazon WorkMail organization for a particular user's attributes."]
+       "Simulates the effect of the mobile device access rules for the given attributes of a sample access event. Use this method to test the effects of the current set of mobile device access rules for the WorkMail organization for a particular user's attributes."]
 module GetMobileDeviceAccessEffectRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization to simulate the access effect for."];
+          "The WorkMail organization to simulate the access effect for."];
       deviceType: DeviceType.t option
         [@ocaml.doc "Device type the simulated user will report."];
       deviceModel: DeviceModel.t option
@@ -8142,20 +11912,21 @@ module GetMobileDeviceAccessEffectRequest =
       make ?deviceUserAgent ?deviceOperatingSystem ?deviceModel ?deviceType
         ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deviceUserAgent =
-        field_map json "DeviceUserAgent" DeviceUserAgent.of_json in
+        field_map json__ "DeviceUserAgent" DeviceUserAgent.of_json in
       let deviceOperatingSystem =
-        field_map json "DeviceOperatingSystem" DeviceOperatingSystem.of_json in
-      let deviceModel = field_map json "DeviceModel" DeviceModel.of_json in
-      let deviceType = field_map json "DeviceType" DeviceType.of_json in
+        field_map json__ "DeviceOperatingSystem"
+          DeviceOperatingSystem.of_json in
+      let deviceModel = field_map json__ "DeviceModel" DeviceModel.of_json in
+      let deviceType = field_map json__ "DeviceType" DeviceType.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?deviceUserAgent ?deviceOperatingSystem ?deviceModel ?deviceType
         ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Simulates the effect of the mobile device access rules for the given attributes of a sample access event. Use this method to test the effects of the current set of mobile device access rules for the Amazon WorkMail organization for a particular user's attributes."]
+       "Simulates the effect of the mobile device access rules for the given attributes of a sample access event. Use this method to test the effects of the current set of mobile device access rules for the WorkMail organization for a particular user's attributes."]
 module GetMailboxDetailsResponse =
   struct
     type nonrec t =
@@ -8168,6 +11939,7 @@ module GetMailboxDetailsResponse =
           "The current mailbox size, in MB, for the specified user."]}
     type nonrec error =
       [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -8177,6 +11949,8 @@ module GetMailboxDetailsResponse =
       match name with
       | "EntityNotFoundException" ->
           `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
       | "OrganizationNotFoundException" ->
           `OrganizationNotFoundException
             (OrganizationNotFoundException.of_json json)
@@ -8190,6 +11964,8 @@ module GetMailboxDetailsResponse =
       match name with
       | "EntityNotFoundException" ->
           `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "OrganizationNotFoundException" ->
           `OrganizationNotFoundException
             (OrganizationNotFoundException.of_xml xml)
@@ -8203,6 +11979,10 @@ module GetMailboxDetailsResponse =
           `Assoc
             [("error", (`String "EntityNotFoundException"));
             ("details", (EntityNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
       | `OrganizationNotFoundException e ->
           `Assoc
             [("error", (`String "OrganizationNotFoundException"));
@@ -8230,9 +12010,9 @@ module GetMailboxDetailsResponse =
           (Xml.child xml_arg0 "MailboxQuota") in
       make ?mailboxSize ?mailboxQuota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mailboxSize = field_map json "MailboxSize" MailboxSize.of_json in
-      let mailboxQuota = field_map json "MailboxQuota" MailboxQuota.of_json in
+    let of_json json__ =
+      let mailboxSize = field_map json__ "MailboxSize" MailboxSize.of_json in
+      let mailboxQuota = field_map json__ "MailboxQuota" MailboxQuota.of_json in
       make ?mailboxSize ?mailboxQuota ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8244,9 +12024,9 @@ module GetMailboxDetailsRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization that contains the user whose mailbox details are being requested."];
-      userId: WorkMailIdentifier.t
+      userId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the user whose mailbox details are being requested."]}
+          "The identifier for the user whose mailbox details are being requested. The identifier can be the UserId, Username, or email. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"]}
     let context_ = "GetMailboxDetailsRequest"
     let make ~organizationId =
       fun ~userId -> fun () -> { organizationId; userId }
@@ -8254,21 +12034,21 @@ module GetMailboxDetailsRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("UserId", (Some (WorkMailIdentifier.to_value x.userId)))]
+        ("UserId", (Some (EntityIdentifier.to_value x.userId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8279,7 +12059,7 @@ module GetMailDomainResponse =
       {
       records: DnsRecords.t option
         [@ocaml.doc
-          "A list of the DNS records that Amazon WorkMail recommends adding in your DNS provider for the best user experience. The records configure your domain with DMARC, SPF, DKIM, and direct incoming email traffic to SES. See admin guide for more details."];
+          "A list of the DNS records that WorkMail recommends adding in your DNS provider for the best user experience. The records configure your domain with DMARC, SPF, DKIM, and direct incoming email traffic to SES. See admin guide for more details."];
       isTestDomain: Boolean.t option
         [@ocaml.doc
           "Specifies whether the domain is a test domain provided by WorkMail, or a custom domain."];
@@ -8391,16 +12171,16 @@ module GetMailDomainResponse =
       make ?dkimVerificationStatus ?ownershipVerificationStatus ?isDefault
         ?isTestDomain ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimVerificationStatus =
-        field_map json "DkimVerificationStatus"
+        field_map json__ "DkimVerificationStatus"
           DnsRecordVerificationStatus.of_json in
       let ownershipVerificationStatus =
-        field_map json "OwnershipVerificationStatus"
+        field_map json__ "OwnershipVerificationStatus"
           DnsRecordVerificationStatus.of_json in
-      let isDefault = field_map json "IsDefault" Boolean.of_json in
-      let isTestDomain = field_map json "IsTestDomain" Boolean.of_json in
-      let records = field_map json "Records" DnsRecords.of_json in
+      let isDefault = field_map json__ "IsDefault" Boolean.of_json in
+      let isTestDomain = field_map json__ "IsTestDomain" Boolean.of_json in
+      let records = field_map json__ "Records" DnsRecords.of_json in
       make ?dkimVerificationStatus ?ownershipVerificationStatus ?isDefault
         ?isTestDomain ?records ()
     let to_json v = composed_to_json to_value v
@@ -8412,7 +12192,7 @@ module GetMailDomainRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization for which the domain is retrieved."];
+          "The WorkMail organization for which the domain is retrieved."];
       domainName: WorkMailDomainName.t
         [@ocaml.doc "The domain from which you want to retrieve details."]}
     let context_ = "GetMailDomainRequest"
@@ -8433,15 +12213,363 @@ module GetMailDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~domainName ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainName =
-        field_map_exn json "DomainName" WorkMailDomainName.of_json in
+        field_map_exn json__ "DomainName" WorkMailDomainName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~domainName ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets details for a mail domain, including domain records required to configure your domain with recommended security."]
+module GetImpersonationRoleResponse =
+  struct
+    type nonrec t =
+      {
+      impersonationRoleId: ImpersonationRoleId.t option
+        [@ocaml.doc "The impersonation role ID."];
+      name: ImpersonationRoleName.t option
+        [@ocaml.doc "The impersonation role name."];
+      type_: ImpersonationRoleType.t option
+        [@ocaml.doc "The impersonation role type."];
+      description: ImpersonationRoleDescription.t option
+        [@ocaml.doc "The impersonation role description."];
+      rules: ImpersonationRuleList.t option
+        [@ocaml.doc "The list of rules for the given impersonation role."];
+      dateCreated: Timestamp.t option
+        [@ocaml.doc "The date when the impersonation role was created."];
+      dateModified: Timestamp.t option
+        [@ocaml.doc
+          "The date when the impersonation role was last modified."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?impersonationRoleId =
+      fun ?name ->
+        fun ?type_ ->
+          fun ?description ->
+            fun ?rules ->
+              fun ?dateCreated ->
+                fun ?dateModified ->
+                  fun () ->
+                    {
+                      impersonationRoleId;
+                      name;
+                      type_;
+                      description;
+                      rules;
+                      dateCreated;
+                      dateModified
+                    }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImpersonationRoleId",
+           (Option.map x.impersonationRoleId ~f:ImpersonationRoleId.to_value));
+        ("Name", (Option.map x.name ~f:ImpersonationRoleName.to_value));
+        ("Type", (Option.map x.type_ ~f:ImpersonationRoleType.to_value));
+        ("Description",
+          (Option.map x.description ~f:ImpersonationRoleDescription.to_value));
+        ("Rules", (Option.map x.rules ~f:ImpersonationRuleList.to_value));
+        ("DateCreated", (Option.map x.dateCreated ~f:Timestamp.to_value));
+        ("DateModified", (Option.map x.dateModified ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dateModified =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateModified") in
+      let dateCreated =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DateCreated") in
+      let rules =
+        (Option.map ~f:ImpersonationRuleList.of_xml)
+          (Xml.child xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:ImpersonationRoleDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:ImpersonationRoleType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let name =
+        (Option.map ~f:ImpersonationRoleName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let impersonationRoleId =
+        (Option.map ~f:ImpersonationRoleId.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleId") in
+      make ?dateModified ?dateCreated ?rules ?description ?type_ ?name
+        ?impersonationRoleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dateModified = field_map json__ "DateModified" Timestamp.of_json in
+      let dateCreated = field_map json__ "DateCreated" Timestamp.of_json in
+      let rules = field_map json__ "Rules" ImpersonationRuleList.of_json in
+      let description =
+        field_map json__ "Description" ImpersonationRoleDescription.of_json in
+      let type_ = field_map json__ "Type" ImpersonationRoleType.of_json in
+      let name = field_map json__ "Name" ImpersonationRoleName.of_json in
+      let impersonationRoleId =
+        field_map json__ "ImpersonationRoleId" ImpersonationRoleId.of_json in
+      make ?dateModified ?dateCreated ?rules ?description ?type_ ?name
+        ?impersonationRoleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the impersonation role details for the given WorkMail organization."]
+module GetImpersonationRoleRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization from which to retrieve the impersonation role."];
+      impersonationRoleId: ImpersonationRoleId.t
+        [@ocaml.doc "The impersonation role ID to retrieve."]}
+    let context_ = "GetImpersonationRoleRequest"
+    let make ~organizationId =
+      fun ~impersonationRoleId ->
+        fun () -> { organizationId; impersonationRoleId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleId",
+          (Some (ImpersonationRoleId.to_value x.impersonationRoleId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impersonationRoleId =
+        ImpersonationRoleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRoleId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~impersonationRoleId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impersonationRoleId =
+        field_map_exn json__ "ImpersonationRoleId"
+          ImpersonationRoleId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~impersonationRoleId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets the impersonation role details for the given WorkMail organization."]
+module GetImpersonationRoleEffectResponse =
+  struct
+    type nonrec t =
+      {
+      type_: ImpersonationRoleType.t option
+        [@ocaml.doc "The impersonation role type."];
+      effect_: AccessEffect.t option
+        [@ocaml.doc
+          "Effect of the impersonation role on the target user based on its rules. Available effects are ALLOW or DENY."];
+      matchedRules: ImpersonationMatchedRuleList.t option
+        [@ocaml.doc
+          "A list of the rules that match the input and produce the configured effect."]}
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?type_ =
+      fun ?effect_ ->
+        fun ?matchedRules -> fun () -> { type_; effect_; matchedRules }
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:ImpersonationRoleType.to_value));
+        ("Effect", (Option.map x.effect_ ~f:AccessEffect.to_value));
+        ("MatchedRules",
+          (Option.map x.matchedRules ~f:ImpersonationMatchedRuleList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let matchedRules =
+        (Option.map ~f:ImpersonationMatchedRuleList.of_xml)
+          (Xml.child xml_arg0 "MatchedRules") in
+      let effect_ =
+        (Option.map ~f:AccessEffect.of_xml) (Xml.child xml_arg0 "Effect") in
+      let type_ =
+        (Option.map ~f:ImpersonationRoleType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      make ?matchedRules ?effect_ ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let matchedRules =
+        field_map json__ "MatchedRules" ImpersonationMatchedRuleList.of_json in
+      let effect_ = field_map json__ "Effect" AccessEffect.of_json in
+      let type_ = field_map json__ "Type" ImpersonationRoleType.of_json in
+      make ?matchedRules ?effect_ ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Tests whether the given impersonation role can impersonate a target user."]
+module GetImpersonationRoleEffectRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization where the impersonation role is defined."];
+      impersonationRoleId: ImpersonationRoleId.t
+        [@ocaml.doc "The impersonation role ID to test."];
+      targetUser: EntityIdentifier.t
+        [@ocaml.doc
+          "The WorkMail organization user chosen to test the impersonation role. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"]}
+    let context_ = "GetImpersonationRoleEffectRequest"
+    let make ~organizationId =
+      fun ~impersonationRoleId ->
+        fun ~targetUser ->
+          fun () -> { organizationId; impersonationRoleId; targetUser }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleId",
+          (Some (ImpersonationRoleId.to_value x.impersonationRoleId)));
+        ("TargetUser", (Some (EntityIdentifier.to_value x.targetUser)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetUser =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetUser") in
+      let impersonationRoleId =
+        ImpersonationRoleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRoleId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~targetUser ~impersonationRoleId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetUser =
+        field_map_exn json__ "TargetUser" EntityIdentifier.of_json in
+      let impersonationRoleId =
+        field_map_exn json__ "ImpersonationRoleId"
+          ImpersonationRoleId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~targetUser ~impersonationRoleId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Tests whether the given impersonation role can impersonate a target user."]
 module GetDefaultRetentionPolicyResponse =
   struct
     type nonrec t =
@@ -8533,12 +12661,12 @@ module GetDefaultRetentionPolicyResponse =
       let id = (Option.map ~f:ShortString.of_xml) (Xml.child xml_arg0 "Id") in
       make ?folderConfigurations ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let folderConfigurations =
-        field_map json "FolderConfigurations" FolderConfigurations.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" ShortString.of_json in
-      let id = field_map json "Id" ShortString.of_json in
+        field_map json__ "FolderConfigurations" FolderConfigurations.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" ShortString.of_json in
+      let id = field_map json__ "Id" ShortString.of_json in
       make ?folderConfigurations ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8561,9 +12689,9 @@ module GetDefaultRetentionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8582,6 +12710,7 @@ module GetAccessControlEffectResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?effect_ =
       fun ?matchedRules -> fun () -> { effect_; matchedRules }
@@ -8597,6 +12726,8 @@ module GetAccessControlEffectResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8611,6 +12742,8 @@ module GetAccessControlEffectResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8631,6 +12764,10 @@ module GetAccessControlEffectResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8652,14 +12789,14 @@ module GetAccessControlEffectResponse =
           (Xml.child xml_arg0 "Effect") in
       make ?matchedRules ?effect_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let matchedRules =
-        field_map json "MatchedRules" AccessControlRuleNameList.of_json in
-      let effect_ = field_map json "Effect" AccessControlRuleEffect.of_json in
+        field_map json__ "MatchedRules" AccessControlRuleNameList.of_json in
+      let effect_ = field_map json__ "Effect" AccessControlRuleEffect.of_json in
       make ?matchedRules ?effect_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the effects of an organization's access control rules as they apply to a specified IPv4 address, access protocol action, or user ID."]
+       "Gets the effects of an organization's access control rules as they apply to a specified IPv4 address, access protocol action, and user ID or impersonation role ID. You must provide either the user ID or impersonation role ID. Impersonation role ID can only be used with Action EWS."]
 module GetAccessControlEffectRequest =
   struct
     type nonrec t =
@@ -8670,25 +12807,40 @@ module GetAccessControlEffectRequest =
       action: AccessControlRuleAction.t
         [@ocaml.doc
           "The access protocol action. Valid values include ActiveSync, AutoDiscover, EWS, IMAP, SMTP, WindowsOutlook, and WebMail."];
-      userId: WorkMailIdentifier.t [@ocaml.doc "The user ID."]}
+      userId: WorkMailIdentifier.t option [@ocaml.doc "The user ID."];
+      impersonationRoleId: ImpersonationRoleId.t option
+        [@ocaml.doc "The impersonation role ID."]}
     let context_ = "GetAccessControlEffectRequest"
-    let make ~organizationId =
-      fun ~ipAddress ->
-        fun ~action ->
-          fun ~userId ->
-            fun () -> { organizationId; ipAddress; action; userId }
+    let make ?userId =
+      fun ?impersonationRoleId ->
+        fun ~organizationId ->
+          fun ~ipAddress ->
+            fun ~action ->
+              fun () ->
+                {
+                  userId;
+                  impersonationRoleId;
+                  organizationId;
+                  ipAddress;
+                  action
+                }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
         ("IpAddress", (Some (IpAddress.to_value x.ipAddress)));
         ("Action", (Some (AccessControlRuleAction.to_value x.action)));
-        ("UserId", (Some (WorkMailIdentifier.to_value x.userId)))]
+        ("UserId", (Option.map x.userId ~f:WorkMailIdentifier.to_value));
+        ("ImpersonationRoleId",
+          (Option.map x.impersonationRoleId ~f:ImpersonationRoleId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let impersonationRoleId =
+        (Option.map ~f:ImpersonationRoleId.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleId") in
       let userId =
-        WorkMailIdentifier.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "UserId") in
       let action =
         AccessControlRuleAction.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Action") in
@@ -8698,19 +12850,21 @@ module GetAccessControlEffectRequest =
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~userId ~action ~ipAddress ~organizationId ()
+      make ?impersonationRoleId ?userId ~action ~ipAddress ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let impersonationRoleId =
+        field_map json__ "ImpersonationRoleId" ImpersonationRoleId.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
       let action =
-        field_map_exn json "Action" AccessControlRuleAction.of_json in
-      let ipAddress = field_map_exn json "IpAddress" IpAddress.of_json in
+        field_map_exn json__ "Action" AccessControlRuleAction.of_json in
+      let ipAddress = field_map_exn json__ "IpAddress" IpAddress.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~userId ~action ~ipAddress ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?impersonationRoleId ?userId ~action ~ipAddress ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the effects of an organization's access control rules as they apply to a specified IPv4 address, access protocol action, or user ID."]
+       "Gets the effects of an organization's access control rules as they apply to a specified IPv4 address, access protocol action, and user ID or impersonation role ID. You must provide either the user ID or impersonation role ID. Impersonation role ID can only be used with Action EWS."]
 module DisassociateMemberFromGroupResponse =
   struct
     type nonrec t = unit
@@ -8833,12 +12987,12 @@ module DisassociateMemberFromGroupRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the group exists."];
-      groupId: WorkMailIdentifier.t
+      groupId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the group from which members are removed."];
-      memberId: WorkMailIdentifier.t
+          "The identifier for the group from which members are removed. The identifier can accept GroupId, Groupname, or email. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: group\\@domain.tld Group name: group"];
+      memberId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the member to be removed to the group."]}
+          "The identifier for the member to be removed from the group. The member ID can accept UserID or GroupId, Username or Groupname, or email. Member ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: member\\@domain.tld Member name: member"]}
     let context_ = "DisassociateMemberFromGroupRequest"
     let make ~organizationId =
       fun ~groupId ->
@@ -8847,26 +13001,26 @@ module DisassociateMemberFromGroupRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("GroupId", (Some (WorkMailIdentifier.to_value x.groupId)));
-        ("MemberId", (Some (WorkMailIdentifier.to_value x.memberId)))]
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)));
+        ("MemberId", (Some (EntityIdentifier.to_value x.memberId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let memberId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
       let groupId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~memberId ~groupId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map_exn json "MemberId" WorkMailIdentifier.of_json in
-      let groupId = field_map_exn json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" EntityIdentifier.of_json in
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~memberId ~groupId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a member from a group."]
@@ -8879,6 +13033,7 @@ module DisassociateDelegateFromResourceResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -8895,6 +13050,9 @@ module DisassociateDelegateFromResourceResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -8911,6 +13069,9 @@ module DisassociateDelegateFromResourceResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -8935,6 +13096,10 @@ module DisassociateDelegateFromResourceResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -8955,12 +13120,12 @@ module DisassociateDelegateFromResourceRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the resource exists."];
-      resourceId: ResourceId.t
+      resourceId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the resource from which delegates' set members are removed."];
-      entityId: WorkMailIdentifier.t
+          "The identifier of the resource from which delegates' set members are removed. The identifier can accept ResourceId, Resourcename, or email. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Email address: resource\\@domain.tld Resource name: resource"];
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the member (user, group) to be removed from the resource's delegates."]}
+          "The identifier for the member (user, group) to be removed from the resource's delegates. The entity ID can accept UserId or GroupID, Username or Groupname, or email. Entity: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity: entity"]}
     let context_ = "DisassociateDelegateFromResourceRequest"
     let make ~organizationId =
       fun ~resourceId ->
@@ -8969,26 +13134,27 @@ module DisassociateDelegateFromResourceRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)))]
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let resourceId =
-        ResourceId.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~entityId ~resourceId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~entityId ~resourceId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a member from the resource's set of delegates."]
@@ -9000,22 +13166,58 @@ module DescribeUserResponse =
         [@ocaml.doc "The identifier for the described user."];
       name: UserName.t option [@ocaml.doc "The name for the user."];
       email: EmailAddress.t option [@ocaml.doc "The email of the user."];
-      displayName: String_.t option
+      displayName: UserAttribute.t option
         [@ocaml.doc "The display name of the user."];
       state: EntityState.t option
         [@ocaml.doc
-          "The state of a user: enabled (registered to Amazon WorkMail) or disabled (deregistered or never registered to WorkMail)."];
+          "The state of a user: enabled (registered to WorkMail) or disabled (deregistered or never registered to WorkMail)."];
       userRole: UserRole.t option
         [@ocaml.doc
-          "In certain cases, other entities are modeled as users. If interoperability is enabled, resources are imported into Amazon WorkMail as users. Because different WorkMail organizations rely on different directory types, administrators can distinguish between an unregistered user (account is disabled and has a user role) and the directory administrators. The values are USER, RESOURCE, and SYSTEM_USER."];
+          "In certain cases, other entities are modeled as users. If interoperability is enabled, resources are imported into WorkMail as users. Because different WorkMail organizations rely on different directory types, administrators can distinguish between an unregistered user (account is disabled and has a user role) and the directory administrators. The values are USER, RESOURCE, SYSTEM_USER, and REMOTE_USER."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time at which the user was enabled for Amazon WorkMail usage, in UNIX epoch time format."];
+          "The date and time at which the user was enabled for WorkMailusage, in UNIX epoch time format."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time at which the user was disabled for Amazon WorkMail usage, in UNIX epoch time format."]}
+          "The date and time at which the user was disabled for WorkMail usage, in UNIX epoch time format."];
+      mailboxProvisionedDate: Timestamp.t option
+        [@ocaml.doc "The date when the mailbox was created for the user."];
+      mailboxDeprovisionedDate: Timestamp.t option
+        [@ocaml.doc "The date when the mailbox was removed for the user."];
+      firstName: UserAttribute.t option
+        [@ocaml.doc "First name of the user."];
+      lastName: UserAttribute.t option [@ocaml.doc "Last name of the user."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If enabled, the user is hidden from the global address list."];
+      initials: UserAttribute.t option [@ocaml.doc "Initials of the user."];
+      telephone: UserAttribute.t option [@ocaml.doc "User's contact number."];
+      street: UserAttribute.t option
+        [@ocaml.doc "Street where the user is located."];
+      jobTitle: UserAttribute.t option [@ocaml.doc "Job title of the user."];
+      city: UserAttribute.t option
+        [@ocaml.doc "City where the user is located."];
+      company: UserAttribute.t option [@ocaml.doc "Company of the user."];
+      zipCode: UserAttribute.t option [@ocaml.doc "Zip code of the user."];
+      department: UserAttribute.t option
+        [@ocaml.doc "Department of the user."];
+      country: UserAttribute.t option
+        [@ocaml.doc "Country where the user is located."];
+      office: UserAttribute.t option
+        [@ocaml.doc "Office where the user is located."];
+      identityProviderUserId: IdentityProviderUserId.t option
+        [@ocaml.doc
+          "User ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."];
+      identityProviderIdentityStoreId:
+        IdentityProviderIdentityStoreId.t option
+        [@ocaml.doc
+          "Identity Store ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."]}
     type nonrec error =
-      [ `EntityNotFoundException of EntityNotFoundException.t 
+      [
+        `DirectoryServiceAuthenticationFailedException of
+          DirectoryServiceAuthenticationFailedException.t 
+      | `DirectoryUnavailableException of DirectoryUnavailableException.t 
+      | `EntityNotFoundException of EntityNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
@@ -9028,19 +13230,62 @@ module DescribeUserResponse =
               fun ?userRole ->
                 fun ?enabledDate ->
                   fun ?disabledDate ->
-                    fun () ->
-                      {
-                        userId;
-                        name;
-                        email;
-                        displayName;
-                        state;
-                        userRole;
-                        enabledDate;
-                        disabledDate
-                      }
+                    fun ?mailboxProvisionedDate ->
+                      fun ?mailboxDeprovisionedDate ->
+                        fun ?firstName ->
+                          fun ?lastName ->
+                            fun ?hiddenFromGlobalAddressList ->
+                              fun ?initials ->
+                                fun ?telephone ->
+                                  fun ?street ->
+                                    fun ?jobTitle ->
+                                      fun ?city ->
+                                        fun ?company ->
+                                          fun ?zipCode ->
+                                            fun ?department ->
+                                              fun ?country ->
+                                                fun ?office ->
+                                                  fun ?identityProviderUserId
+                                                    ->
+                                                    fun
+                                                      ?identityProviderIdentityStoreId
+                                                      ->
+                                                      fun () ->
+                                                        {
+                                                          userId;
+                                                          name;
+                                                          email;
+                                                          displayName;
+                                                          state;
+                                                          userRole;
+                                                          enabledDate;
+                                                          disabledDate;
+                                                          mailboxProvisionedDate;
+                                                          mailboxDeprovisionedDate;
+                                                          firstName;
+                                                          lastName;
+                                                          hiddenFromGlobalAddressList;
+                                                          initials;
+                                                          telephone;
+                                                          street;
+                                                          jobTitle;
+                                                          city;
+                                                          company;
+                                                          zipCode;
+                                                          department;
+                                                          country;
+                                                          office;
+                                                          identityProviderUserId;
+                                                          identityProviderIdentityStoreId
+                                                        }
     let error_of_json name json =
       match name with
+      | "DirectoryServiceAuthenticationFailedException" ->
+          `DirectoryServiceAuthenticationFailedException
+            (DirectoryServiceAuthenticationFailedException.of_json json)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_json json)
       | "EntityNotFoundException" ->
           `EntityNotFoundException (EntityNotFoundException.of_json json)
       | "InvalidParameterException" ->
@@ -9056,6 +13301,12 @@ module DescribeUserResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "DirectoryServiceAuthenticationFailedException" ->
+          `DirectoryServiceAuthenticationFailedException
+            (DirectoryServiceAuthenticationFailedException.of_xml xml)
+      | "DirectoryUnavailableException" ->
+          `DirectoryUnavailableException
+            (DirectoryUnavailableException.of_xml xml)
       | "EntityNotFoundException" ->
           `EntityNotFoundException (EntityNotFoundException.of_xml xml)
       | "InvalidParameterException" ->
@@ -9069,6 +13320,16 @@ module DescribeUserResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `DirectoryServiceAuthenticationFailedException e ->
+          `Assoc
+            [("error",
+               (`String "DirectoryServiceAuthenticationFailedException"));
+            ("details",
+              (DirectoryServiceAuthenticationFailedException.to_json e))]
+      | `DirectoryUnavailableException e ->
+          `Assoc
+            [("error", (`String "DirectoryUnavailableException"));
+            ("details", (DirectoryUnavailableException.to_json e))]
       | `EntityNotFoundException e ->
           `Assoc
             [("error", (`String "EntityNotFoundException"));
@@ -9095,13 +13356,77 @@ module DescribeUserResponse =
         [("UserId", (Option.map x.userId ~f:WorkMailIdentifier.to_value));
         ("Name", (Option.map x.name ~f:UserName.to_value));
         ("Email", (Option.map x.email ~f:EmailAddress.to_value));
-        ("DisplayName", (Option.map x.displayName ~f:String_.to_value));
+        ("DisplayName", (Option.map x.displayName ~f:UserAttribute.to_value));
         ("State", (Option.map x.state ~f:EntityState.to_value));
         ("UserRole", (Option.map x.userRole ~f:UserRole.to_value));
         ("EnabledDate", (Option.map x.enabledDate ~f:Timestamp.to_value));
-        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value))]
+        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value));
+        ("MailboxProvisionedDate",
+          (Option.map x.mailboxProvisionedDate ~f:Timestamp.to_value));
+        ("MailboxDeprovisionedDate",
+          (Option.map x.mailboxDeprovisionedDate ~f:Timestamp.to_value));
+        ("FirstName", (Option.map x.firstName ~f:UserAttribute.to_value));
+        ("LastName", (Option.map x.lastName ~f:UserAttribute.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value));
+        ("Initials", (Option.map x.initials ~f:UserAttribute.to_value));
+        ("Telephone", (Option.map x.telephone ~f:UserAttribute.to_value));
+        ("Street", (Option.map x.street ~f:UserAttribute.to_value));
+        ("JobTitle", (Option.map x.jobTitle ~f:UserAttribute.to_value));
+        ("City", (Option.map x.city ~f:UserAttribute.to_value));
+        ("Company", (Option.map x.company ~f:UserAttribute.to_value));
+        ("ZipCode", (Option.map x.zipCode ~f:UserAttribute.to_value));
+        ("Department", (Option.map x.department ~f:UserAttribute.to_value));
+        ("Country", (Option.map x.country ~f:UserAttribute.to_value));
+        ("Office", (Option.map x.office ~f:UserAttribute.to_value));
+        ("IdentityProviderUserId",
+          (Option.map x.identityProviderUserId
+             ~f:IdentityProviderUserId.to_value));
+        ("IdentityProviderIdentityStoreId",
+          (Option.map x.identityProviderIdentityStoreId
+             ~f:IdentityProviderIdentityStoreId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderIdentityStoreId =
+        (Option.map ~f:IdentityProviderIdentityStoreId.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderIdentityStoreId") in
+      let identityProviderUserId =
+        (Option.map ~f:IdentityProviderUserId.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderUserId") in
+      let office =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Office") in
+      let country =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Country") in
+      let department =
+        (Option.map ~f:UserAttribute.of_xml)
+          (Xml.child xml_arg0 "Department") in
+      let zipCode =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "ZipCode") in
+      let company =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Company") in
+      let city =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "City") in
+      let jobTitle =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "JobTitle") in
+      let street =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Street") in
+      let telephone =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Telephone") in
+      let initials =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "Initials") in
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let lastName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "LastName") in
+      let firstName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "FirstName") in
+      let mailboxDeprovisionedDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "MailboxDeprovisionedDate") in
+      let mailboxProvisionedDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "MailboxProvisionedDate") in
       let disabledDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DisabledDate") in
       let enabledDate =
@@ -9111,27 +13436,60 @@ module DescribeUserResponse =
       let state =
         (Option.map ~f:EntityState.of_xml) (Xml.child xml_arg0 "State") in
       let displayName =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DisplayName") in
+        (Option.map ~f:UserAttribute.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
       let email =
         (Option.map ~f:EmailAddress.of_xml) (Xml.child xml_arg0 "Email") in
       let name = (Option.map ~f:UserName.of_xml) (Xml.child xml_arg0 "Name") in
       let userId =
         (Option.map ~f:WorkMailIdentifier.of_xml)
           (Xml.child xml_arg0 "UserId") in
-      make ?disabledDate ?enabledDate ?userRole ?state ?displayName ?email
-        ?name ?userId ()
+      make ?identityProviderIdentityStoreId ?identityProviderUserId ?office
+        ?country ?department ?zipCode ?company ?city ?jobTitle ?street
+        ?telephone ?initials ?hiddenFromGlobalAddressList ?lastName
+        ?firstName ?mailboxDeprovisionedDate ?mailboxProvisionedDate
+        ?disabledDate ?enabledDate ?userRole ?state ?displayName ?email ?name
+        ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let userRole = field_map json "UserRole" UserRole.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let displayName = field_map json "DisplayName" String_.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let name = field_map json "Name" UserName.of_json in
-      let userId = field_map json "UserId" WorkMailIdentifier.of_json in
-      make ?disabledDate ?enabledDate ?userRole ?state ?displayName ?email
-        ?name ?userId ()
+    let of_json json__ =
+      let identityProviderIdentityStoreId =
+        field_map json__ "IdentityProviderIdentityStoreId"
+          IdentityProviderIdentityStoreId.of_json in
+      let identityProviderUserId =
+        field_map json__ "IdentityProviderUserId"
+          IdentityProviderUserId.of_json in
+      let office = field_map json__ "Office" UserAttribute.of_json in
+      let country = field_map json__ "Country" UserAttribute.of_json in
+      let department = field_map json__ "Department" UserAttribute.of_json in
+      let zipCode = field_map json__ "ZipCode" UserAttribute.of_json in
+      let company = field_map json__ "Company" UserAttribute.of_json in
+      let city = field_map json__ "City" UserAttribute.of_json in
+      let jobTitle = field_map json__ "JobTitle" UserAttribute.of_json in
+      let street = field_map json__ "Street" UserAttribute.of_json in
+      let telephone = field_map json__ "Telephone" UserAttribute.of_json in
+      let initials = field_map json__ "Initials" UserAttribute.of_json in
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let lastName = field_map json__ "LastName" UserAttribute.of_json in
+      let firstName = field_map json__ "FirstName" UserAttribute.of_json in
+      let mailboxDeprovisionedDate =
+        field_map json__ "MailboxDeprovisionedDate" Timestamp.of_json in
+      let mailboxProvisionedDate =
+        field_map json__ "MailboxProvisionedDate" Timestamp.of_json in
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let userRole = field_map json__ "UserRole" UserRole.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let displayName = field_map json__ "DisplayName" UserAttribute.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let name = field_map json__ "Name" UserName.of_json in
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
+      make ?identityProviderIdentityStoreId ?identityProviderUserId ?office
+        ?country ?department ?zipCode ?company ?city ?jobTitle ?street
+        ?telephone ?initials ?hiddenFromGlobalAddressList ?lastName
+        ?firstName ?mailboxDeprovisionedDate ?mailboxProvisionedDate
+        ?disabledDate ?enabledDate ?userRole ?state ?displayName ?email ?name
+        ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information regarding the user."]
 module DescribeUserRequest =
@@ -9141,8 +13499,9 @@ module DescribeUserRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the user exists."];
-      userId: WorkMailIdentifier.t
-        [@ocaml.doc "The identifier for the user to be described."]}
+      userId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the user to be described. The identifier can be the UserId, Username, or email. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"]}
     let context_ = "DescribeUserRequest"
     let make ~organizationId =
       fun ~userId -> fun () -> { organizationId; userId }
@@ -9150,21 +13509,21 @@ module DescribeUserRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("UserId", (Some (WorkMailIdentifier.to_value x.userId)))]
+        ("UserId", (Some (EntityIdentifier.to_value x.userId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides information regarding the user."]
@@ -9184,18 +13543,24 @@ module DescribeResourceResponse =
         [@ocaml.doc "The booking options for the described resource."];
       state: EntityState.t option
         [@ocaml.doc
-          "The state of the resource: enabled (registered to Amazon WorkMail), disabled (deregistered or never registered to WorkMail), or deleted."];
+          "The state of the resource: enabled (registered to WorkMail), disabled (deregistered or never registered to WorkMail), or deleted."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
           "The date and time when a resource was enabled for WorkMail, in UNIX epoch time format."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time when a resource was disabled from WorkMail, in UNIX epoch time format."]}
+          "The date and time when a resource was disabled from WorkMail, in UNIX epoch time format."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Description of the resource."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If enabled, the resource is hidden from the global address list."]}
     type nonrec error =
       [ `EntityNotFoundException of EntityNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceId =
       fun ?email ->
@@ -9205,17 +13570,21 @@ module DescribeResourceResponse =
               fun ?state ->
                 fun ?enabledDate ->
                   fun ?disabledDate ->
-                    fun () ->
-                      {
-                        resourceId;
-                        email;
-                        name;
-                        type_;
-                        bookingOptions;
-                        state;
-                        enabledDate;
-                        disabledDate
-                      }
+                    fun ?description ->
+                      fun ?hiddenFromGlobalAddressList ->
+                        fun () ->
+                          {
+                            resourceId;
+                            email;
+                            name;
+                            type_;
+                            bookingOptions;
+                            state;
+                            enabledDate;
+                            disabledDate;
+                            description;
+                            hiddenFromGlobalAddressList
+                          }
     let error_of_json name json =
       match name with
       | "EntityNotFoundException" ->
@@ -9228,6 +13597,9 @@ module DescribeResourceResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -9242,6 +13614,9 @@ module DescribeResourceResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -9262,6 +13637,10 @@ module DescribeResourceResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -9277,9 +13656,19 @@ module DescribeResourceResponse =
           (Option.map x.bookingOptions ~f:BookingOptions.to_value));
         ("State", (Option.map x.state ~f:EntityState.to_value));
         ("EnabledDate", (Option.map x.enabledDate ~f:Timestamp.to_value));
-        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value))]
+        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let disabledDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DisabledDate") in
       let enabledDate =
@@ -9297,21 +13686,27 @@ module DescribeResourceResponse =
         (Option.map ~f:EmailAddress.of_xml) (Xml.child xml_arg0 "Email") in
       let resourceId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
-      make ?disabledDate ?enabledDate ?state ?bookingOptions ?type_ ?name
-        ?email ?resourceId ()
+      make ?hiddenFromGlobalAddressList ?description ?disabledDate
+        ?enabledDate ?state ?bookingOptions ?type_ ?name ?email ?resourceId
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let state = field_map json "State" EntityState.of_json in
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
       let bookingOptions =
-        field_map json "BookingOptions" BookingOptions.of_json in
-      let type_ = field_map json "Type" ResourceType.of_json in
-      let name = field_map json "Name" ResourceName.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      make ?disabledDate ?enabledDate ?state ?bookingOptions ?type_ ?name
-        ?email ?resourceId ()
+        field_map json__ "BookingOptions" BookingOptions.of_json in
+      let type_ = field_map json__ "Type" ResourceType.of_json in
+      let name = field_map json__ "Name" ResourceName.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      make ?hiddenFromGlobalAddressList ?description ?disabledDate
+        ?enabledDate ?state ?bookingOptions ?type_ ?name ?email ?resourceId
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the data available for the resource."]
 module DescribeResourceRequest =
@@ -9321,8 +13716,9 @@ module DescribeResourceRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier associated with the organization for which the resource is described."];
-      resourceId: ResourceId.t
-        [@ocaml.doc "The identifier of the resource to be described."]}
+      resourceId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier of the resource to be described. The identifier can accept ResourceId, Resourcename, or email. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Email address: resource\\@domain.tld Resource name: resource"]}
     let context_ = "DescribeResourceRequest"
     let make ~organizationId =
       fun ~resourceId -> fun () -> { organizationId; resourceId }
@@ -9330,21 +13726,22 @@ module DescribeResourceRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)))]
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceId =
-        ResourceId.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~resourceId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~resourceId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the data available for the resource."]
@@ -9359,7 +13756,7 @@ module DescribeOrganizationResponse =
       state: String_.t option [@ocaml.doc "The state of an organization."];
       directoryId: String_.t option
         [@ocaml.doc
-          "The identifier for the directory associated with an Amazon WorkMail organization."];
+          "The identifier for the directory associated with an WorkMail organization."];
       directoryType: String_.t option
         [@ocaml.doc
           "The type of directory associated with the WorkMail organization."];
@@ -9373,7 +13770,13 @@ module DescribeOrganizationResponse =
         [@ocaml.doc
           "(Optional) The error message indicating if unexpected behavior was encountered with regards to the organization."];
       aRN: AmazonResourceName.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the organization."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the organization."];
+      migrationAdmin: WorkMailIdentifier.t option
+        [@ocaml.doc
+          "The user ID of the migration admin if migration is enabled for the organization."];
+      interoperabilityEnabled: Boolean.t option
+        [@ocaml.doc
+          "Indicates if interoperability is enabled for this organization."]}
     type nonrec error =
       [ `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
@@ -9387,18 +13790,22 @@ module DescribeOrganizationResponse =
                 fun ?completedDate ->
                   fun ?errorMessage ->
                     fun ?aRN ->
-                      fun () ->
-                        {
-                          organizationId;
-                          alias;
-                          state;
-                          directoryId;
-                          directoryType;
-                          defaultMailDomain;
-                          completedDate;
-                          errorMessage;
-                          aRN
-                        }
+                      fun ?migrationAdmin ->
+                        fun ?interoperabilityEnabled ->
+                          fun () ->
+                            {
+                              organizationId;
+                              alias;
+                              state;
+                              directoryId;
+                              directoryType;
+                              defaultMailDomain;
+                              completedDate;
+                              errorMessage;
+                              aRN;
+                              migrationAdmin;
+                              interoperabilityEnabled
+                            }
     let error_of_json name json =
       match name with
       | "InvalidParameterException" ->
@@ -9445,9 +13852,19 @@ module DescribeOrganizationResponse =
           (Option.map x.defaultMailDomain ~f:String_.to_value));
         ("CompletedDate", (Option.map x.completedDate ~f:Timestamp.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
-        ("ARN", (Option.map x.aRN ~f:AmazonResourceName.to_value))]
+        ("ARN", (Option.map x.aRN ~f:AmazonResourceName.to_value));
+        ("MigrationAdmin",
+          (Option.map x.migrationAdmin ~f:WorkMailIdentifier.to_value));
+        ("InteroperabilityEnabled",
+          (Option.map x.interoperabilityEnabled ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let interoperabilityEnabled =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "InteroperabilityEnabled") in
+      let migrationAdmin =
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "MigrationAdmin") in
       let aRN =
         (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "ARN") in
       let errorMessage =
@@ -9467,23 +13884,29 @@ module DescribeOrganizationResponse =
       let organizationId =
         (Option.map ~f:OrganizationId.of_xml)
           (Xml.child xml_arg0 "OrganizationId") in
-      make ?aRN ?errorMessage ?completedDate ?defaultMailDomain
-        ?directoryType ?directoryId ?state ?alias ?organizationId ()
+      make ?interoperabilityEnabled ?migrationAdmin ?aRN ?errorMessage
+        ?completedDate ?defaultMailDomain ?directoryType ?directoryId ?state
+        ?alias ?organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map json "ARN" AmazonResourceName.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let completedDate = field_map json "CompletedDate" Timestamp.of_json in
+    let of_json json__ =
+      let interoperabilityEnabled =
+        field_map json__ "InteroperabilityEnabled" Boolean.of_json in
+      let migrationAdmin =
+        field_map json__ "MigrationAdmin" WorkMailIdentifier.of_json in
+      let aRN = field_map json__ "ARN" AmazonResourceName.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let completedDate = field_map json__ "CompletedDate" Timestamp.of_json in
       let defaultMailDomain =
-        field_map json "DefaultMailDomain" String_.of_json in
-      let directoryType = field_map json "DirectoryType" String_.of_json in
-      let directoryId = field_map json "DirectoryId" String_.of_json in
-      let state = field_map json "State" String_.of_json in
-      let alias = field_map json "Alias" OrganizationName.of_json in
+        field_map json__ "DefaultMailDomain" String_.of_json in
+      let directoryType = field_map json__ "DirectoryType" String_.of_json in
+      let directoryId = field_map json__ "DirectoryId" String_.of_json in
+      let state = field_map json__ "State" String_.of_json in
+      let alias = field_map json__ "Alias" OrganizationName.of_json in
       let organizationId =
-        field_map json "OrganizationId" OrganizationId.of_json in
-      make ?aRN ?errorMessage ?completedDate ?defaultMailDomain
-        ?directoryType ?directoryId ?state ?alias ?organizationId ()
+        field_map json__ "OrganizationId" OrganizationId.of_json in
+      make ?interoperabilityEnabled ?migrationAdmin ?aRN ?errorMessage
+        ?completedDate ?defaultMailDomain ?directoryType ?directoryId ?state
+        ?alias ?organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides more information regarding a given organization based on its identifier."]
@@ -9506,9 +13929,9 @@ module DescribeOrganizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9680,21 +14103,21 @@ module DescribeMailboxExportJobResponse =
       make ?endTime ?startTime ?errorInfo ?state ?estimatedProgress ?s3Path
         ?s3Prefix ?s3BucketName ?kmsKeyArn ?roleArn ?description ?entityId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Timestamp.of_json in
-      let startTime = field_map json "StartTime" Timestamp.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" Timestamp.of_json in
+      let startTime = field_map json__ "StartTime" Timestamp.of_json in
       let errorInfo =
-        field_map json "ErrorInfo" MailboxExportErrorInfo.of_json in
-      let state = field_map json "State" MailboxExportJobState.of_json in
+        field_map json__ "ErrorInfo" MailboxExportErrorInfo.of_json in
+      let state = field_map json__ "State" MailboxExportJobState.of_json in
       let estimatedProgress =
-        field_map json "EstimatedProgress" Percentage.of_json in
-      let s3Path = field_map json "S3Path" S3ObjectKey.of_json in
-      let s3Prefix = field_map json "S3Prefix" S3ObjectKey.of_json in
-      let s3BucketName = field_map json "S3BucketName" S3BucketName.of_json in
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let entityId = field_map json "EntityId" WorkMailIdentifier.of_json in
+        field_map json__ "EstimatedProgress" Percentage.of_json in
+      let s3Path = field_map json__ "S3Path" S3ObjectKey.of_json in
+      let s3Prefix = field_map json__ "S3Prefix" S3ObjectKey.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" S3BucketName.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let entityId = field_map json__ "EntityId" WorkMailIdentifier.of_json in
       make ?endTime ?startTime ?errorInfo ?state ?estimatedProgress ?s3Path
         ?s3Prefix ?s3BucketName ?kmsKeyArn ?roleArn ?description ?entityId ()
     let to_json v = composed_to_json to_value v
@@ -9722,10 +14145,10 @@ module DescribeMailboxExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~organizationId ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      let jobId = field_map_exn json "JobId" MailboxExportJobId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      let jobId = field_map_exn json__ "JobId" MailboxExportJobId.of_json in
       make ~organizationId ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the current status of a mailbox export job."]
@@ -9784,8 +14207,8 @@ module DescribeInboundDmarcSettingsResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enforced") in
       make ?enforced ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enforced = field_map json "Enforced" Boolean.of_json in
+    let of_json json__ =
+      let enforced = field_map json__ "Enforced" Boolean.of_json in
       make ?enforced ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9809,13 +14232,156 @@ module DescribeInboundDmarcSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the settings in a DMARC policy for a specified organization."]
+module DescribeIdentityProviderConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      authenticationMode: IdentityProviderAuthenticationMode.t option
+        [@ocaml.doc "The authentication mode used in WorkMail."];
+      identityCenterConfiguration: IdentityCenterConfiguration.t option
+        [@ocaml.doc "The details of the IAM Identity Center configuration."];
+      personalAccessTokenConfiguration:
+        PersonalAccessTokenConfiguration.t option
+        [@ocaml.doc
+          "The details of the Personal Access Token configuration."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?authenticationMode =
+      fun ?identityCenterConfiguration ->
+        fun ?personalAccessTokenConfiguration ->
+          fun () ->
+            {
+              authenticationMode;
+              identityCenterConfiguration;
+              personalAccessTokenConfiguration
+            }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AuthenticationMode",
+           (Option.map x.authenticationMode
+              ~f:IdentityProviderAuthenticationMode.to_value));
+        ("IdentityCenterConfiguration",
+          (Option.map x.identityCenterConfiguration
+             ~f:IdentityCenterConfiguration.to_value));
+        ("PersonalAccessTokenConfiguration",
+          (Option.map x.personalAccessTokenConfiguration
+             ~f:PersonalAccessTokenConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let personalAccessTokenConfiguration =
+        (Option.map ~f:PersonalAccessTokenConfiguration.of_xml)
+          (Xml.child xml_arg0 "PersonalAccessTokenConfiguration") in
+      let identityCenterConfiguration =
+        (Option.map ~f:IdentityCenterConfiguration.of_xml)
+          (Xml.child xml_arg0 "IdentityCenterConfiguration") in
+      let authenticationMode =
+        (Option.map ~f:IdentityProviderAuthenticationMode.of_xml)
+          (Xml.child xml_arg0 "AuthenticationMode") in
+      make ?personalAccessTokenConfiguration ?identityCenterConfiguration
+        ?authenticationMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let personalAccessTokenConfiguration =
+        field_map json__ "PersonalAccessTokenConfiguration"
+          PersonalAccessTokenConfiguration.of_json in
+      let identityCenterConfiguration =
+        field_map json__ "IdentityCenterConfiguration"
+          IdentityCenterConfiguration.of_json in
+      let authenticationMode =
+        field_map json__ "AuthenticationMode"
+          IdentityProviderAuthenticationMode.of_json in
+      make ?personalAccessTokenConfiguration ?identityCenterConfiguration
+        ?authenticationMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information on the current IdC setup for the WorkMail organization."]
+module DescribeIdentityProviderConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t [@ocaml.doc "The Organization ID."]}
+    let context_ = "DescribeIdentityProviderConfigurationRequest"
+    let make ~organizationId = fun () -> { organizationId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns detailed information on the current IdC setup for the WorkMail organization."]
 module DescribeGroupResponse =
   struct
     type nonrec t =
@@ -9828,13 +14394,16 @@ module DescribeGroupResponse =
         [@ocaml.doc "The email of the described group."];
       state: EntityState.t option
         [@ocaml.doc
-          "The state of the user: enabled (registered to Amazon WorkMail) or disabled (deregistered or never registered to WorkMail)."];
+          "The state of the user: enabled (registered to WorkMail) or disabled (deregistered or never registered to WorkMail)."];
       enabledDate: Timestamp.t option
         [@ocaml.doc
           "The date and time when a user was registered to WorkMail, in UNIX epoch time format."];
       disabledDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time when a user was deregistered from WorkMail, in UNIX epoch time format."]}
+          "The date and time when a user was deregistered from WorkMail, in UNIX epoch time format."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If the value is set to true, the group is hidden from the address book."]}
     type nonrec error =
       [ `EntityNotFoundException of EntityNotFoundException.t 
       | `InvalidParameterException of InvalidParameterException.t 
@@ -9847,8 +14416,17 @@ module DescribeGroupResponse =
           fun ?state ->
             fun ?enabledDate ->
               fun ?disabledDate ->
-                fun () ->
-                  { groupId; name; email; state; enabledDate; disabledDate }
+                fun ?hiddenFromGlobalAddressList ->
+                  fun () ->
+                    {
+                      groupId;
+                      name;
+                      email;
+                      state;
+                      enabledDate;
+                      disabledDate;
+                      hiddenFromGlobalAddressList
+                    }
     let error_of_json name json =
       match name with
       | "EntityNotFoundException" ->
@@ -9907,9 +14485,14 @@ module DescribeGroupResponse =
         ("Email", (Option.map x.email ~f:EmailAddress.to_value));
         ("State", (Option.map x.state ~f:EntityState.to_value));
         ("EnabledDate", (Option.map x.enabledDate ~f:Timestamp.to_value));
-        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value))]
+        ("DisabledDate", (Option.map x.disabledDate ~f:Timestamp.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
       let disabledDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DisabledDate") in
       let enabledDate =
@@ -9922,16 +14505,20 @@ module DescribeGroupResponse =
       let groupId =
         (Option.map ~f:WorkMailIdentifier.of_xml)
           (Xml.child xml_arg0 "GroupId") in
-      make ?disabledDate ?enabledDate ?state ?email ?name ?groupId ()
+      make ?hiddenFromGlobalAddressList ?disabledDate ?enabledDate ?state
+        ?email ?name ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let disabledDate = field_map json "DisabledDate" Timestamp.of_json in
-      let enabledDate = field_map json "EnabledDate" Timestamp.of_json in
-      let state = field_map json "State" EntityState.of_json in
-      let email = field_map json "Email" EmailAddress.of_json in
-      let name = field_map json "Name" GroupName.of_json in
-      let groupId = field_map json "GroupId" WorkMailIdentifier.of_json in
-      make ?disabledDate ?enabledDate ?state ?email ?name ?groupId ()
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let disabledDate = field_map json__ "DisabledDate" Timestamp.of_json in
+      let enabledDate = field_map json__ "EnabledDate" Timestamp.of_json in
+      let state = field_map json__ "State" EntityState.of_json in
+      let email = field_map json__ "Email" EmailAddress.of_json in
+      let name = field_map json__ "Name" GroupName.of_json in
+      let groupId = field_map json__ "GroupId" WorkMailIdentifier.of_json in
+      make ?hiddenFromGlobalAddressList ?disabledDate ?enabledDate ?state
+        ?email ?name ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the data available for the group."]
 module DescribeGroupRequest =
@@ -9941,8 +14528,9 @@ module DescribeGroupRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier for the organization under which the group exists."];
-      groupId: WorkMailIdentifier.t
-        [@ocaml.doc "The identifier for the group to be described."]}
+      groupId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier for the group to be described. The identifier can accept GroupId, Groupname, or email. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: group\\@domain.tld Group name: group"]}
     let context_ = "DescribeGroupRequest"
     let make ~organizationId =
       fun ~groupId -> fun () -> { organizationId; groupId }
@@ -9950,24 +14538,149 @@ module DescribeGroupRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("GroupId", (Some (WorkMailIdentifier.to_value x.groupId)))]
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let groupId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~groupId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~groupId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the data available for the group."]
+module DescribeEntityResponse =
+  struct
+    type nonrec t =
+      {
+      entityId: WorkMailIdentifier.t option
+        [@ocaml.doc "The entity ID under which the entity exists."];
+      name: String_.t option
+        [@ocaml.doc
+          "Username, GroupName, or ResourceName based on entity type."];
+      type_: EntityType.t option [@ocaml.doc "Entity type."]}
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?entityId =
+      fun ?name -> fun ?type_ -> fun () -> { entityId; name; type_ }
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EntityId", (Option.map x.entityId ~f:WorkMailIdentifier.to_value));
+        ("Name", (Option.map x.name ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:EntityType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        (Option.map ~f:EntityType.of_xml) (Xml.child xml_arg0 "Type") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      let entityId =
+        (Option.map ~f:WorkMailIdentifier.of_xml)
+          (Xml.child xml_arg0 "EntityId") in
+      make ?type_ ?name ?entityId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" EntityType.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let entityId = field_map json__ "EntityId" WorkMailIdentifier.of_json in
+      make ?type_ ?name ?entityId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns basic details about an entity in WorkMail."]
+module DescribeEntityRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier for the organization under which the entity exists."];
+      email: EmailAddress.t
+        [@ocaml.doc "The email under which the entity exists."]}
+    let context_ = "DescribeEntityRequest"
+    let make ~organizationId =
+      fun ~email -> fun () -> { organizationId; email }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("Email", (Some (EmailAddress.to_value x.email)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let email =
+        EmailAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Email") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~email ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let email = field_map_exn json__ "Email" EmailAddress.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~email ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns basic details about an entity in WorkMail."]
 module DescribeEmailMonitoringConfigurationResponse =
   struct
     type nonrec t =
@@ -10049,9 +14762,9 @@ module DescribeEmailMonitoringConfigurationResponse =
         (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
       make ?logGroupArn ?roleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logGroupArn = field_map json "LogGroupArn" LogGroupArn.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let logGroupArn = field_map json__ "LogGroupArn" LogGroupArn.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       make ?logGroupArn ?roleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10076,9 +14789,9 @@ module DescribeEmailMonitoringConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10165,14 +14878,14 @@ module DeregisterMailDomainResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a domain from Amazon WorkMail, stops email routing to WorkMail, and removes the authorization allowing WorkMail use. SES keeps the domain because other applications may use it. You must first remove any email address used by WorkMail entities before you remove the domain."]
+       "Removes a domain from WorkMail, stops email routing to WorkMail, and removes the authorization allowing WorkMail use. SES keeps the domain because other applications may use it. You must first remove any email address used by WorkMail entities before you remove the domain."]
 module DeregisterMailDomainRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization for which the domain will be deregistered."];
+          "The WorkMail organization for which the domain will be deregistered."];
       domainName: WorkMailDomainName.t
         [@ocaml.doc "The domain to deregister in WorkMail and SES."]}
     let context_ = "DeregisterMailDomainRequest"
@@ -10193,15 +14906,15 @@ module DeregisterMailDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~domainName ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainName =
-        field_map_exn json "DomainName" WorkMailDomainName.of_json in
+        field_map_exn json__ "DomainName" WorkMailDomainName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~domainName ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a domain from Amazon WorkMail, stops email routing to WorkMail, and removes the authorization allowing WorkMail use. SES keeps the domain because other applications may use it. You must first remove any email address used by WorkMail entities before you remove the domain."]
+       "Removes a domain from WorkMail, stops email routing to WorkMail, and removes the authorization allowing WorkMail use. SES keeps the domain because other applications may use it. You must first remove any email address used by WorkMail entities before you remove the domain."]
 module DeregisterFromWorkMailResponse =
   struct
     type nonrec t = unit
@@ -10280,17 +14993,17 @@ module DeregisterFromWorkMailResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Mark a user, group, or resource as no longer used in Amazon WorkMail. This action disassociates the mailbox and schedules it for clean-up. WorkMail keeps mailboxes for 30 days before they are permanently removed. The functionality in the console is Disable."]
+       "Mark a user, group, or resource as no longer used in WorkMail. This action disassociates the mailbox and schedules it for clean-up. WorkMail keeps mailboxes for 30 days before they are permanently removed. The functionality in the console is Disable."]
 module DeregisterFromWorkMailRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The identifier for the organization under which the Amazon WorkMail entity exists."];
-      entityId: WorkMailIdentifier.t
+          "The identifier for the organization under which the WorkMail entity exists."];
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier for the member (user or group) to be updated."]}
+          "The identifier for the member to be updated. The identifier can be UserId, ResourceId, or Group Id, Username, Resourcename, or Groupname, or email. Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"]}
     let context_ = "DeregisterFromWorkMailRequest"
     let make ~organizationId =
       fun ~entityId -> fun () -> { organizationId; entityId }
@@ -10298,25 +15011,25 @@ module DeregisterFromWorkMailRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)))]
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Mark a user, group, or resource as no longer used in Amazon WorkMail. This action disassociates the mailbox and schedules it for clean-up. WorkMail keeps mailboxes for 30 days before they are permanently removed. The functionality in the console is Disable."]
+       "Mark a user, group, or resource as no longer used in WorkMail. This action disassociates the mailbox and schedules it for clean-up. WorkMail keeps mailboxes for 30 days before they are permanently removed. The functionality in the console is Disable."]
 module DeleteUserResponse =
   struct
     type nonrec t = unit
@@ -10423,15 +15136,16 @@ module DeleteUserResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a user from Amazon WorkMail and all subsequent systems. Before you can delete a user, the user state must be DISABLED. Use the DescribeUser action to confirm the user state. Deleting a user is permanent and cannot be undone. WorkMail archives user mailboxes for 30 days before they are permanently removed."]
+       "Deletes a user from WorkMail and all subsequent systems. Before you can delete a user, the user state must be DISABLED. Use the DescribeUser action to confirm the user state. Deleting a user is permanent and cannot be undone. WorkMail archives user mailboxes for 30 days before they are permanently removed."]
 module DeleteUserRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc "The organization that contains the user to be deleted."];
-      userId: WorkMailIdentifier.t
-        [@ocaml.doc "The identifier of the user to be deleted."]}
+      userId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier of the user to be deleted. The identifier can be the UserId or Username. The following identity formats are available: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 User name: user"]}
     let context_ = "DeleteUserRequest"
     let make ~organizationId =
       fun ~userId -> fun () -> { organizationId; userId }
@@ -10439,25 +15153,25 @@ module DeleteUserRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("UserId", (Some (WorkMailIdentifier.to_value x.userId)))]
+        ("UserId", (Some (EntityIdentifier.to_value x.userId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let userId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "UserId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a user from Amazon WorkMail and all subsequent systems. Before you can delete a user, the user state must be DISABLED. Use the DescribeUser action to confirm the user state. Deleting a user is permanent and cannot be undone. WorkMail archives user mailboxes for 30 days before they are permanently removed."]
+       "Deletes a user from WorkMail and all subsequent systems. Before you can delete a user, the user state must be DISABLED. Use the DescribeUser action to confirm the user state. Deleting a user is permanent and cannot be undone. WorkMail archives user mailboxes for 30 days before they are permanently removed."]
 module DeleteRetentionPolicyResponse =
   struct
     type nonrec t = unit
@@ -10541,10 +15255,10 @@ module DeleteRetentionPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~id ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ShortString.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ShortString.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~id ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10557,6 +15271,7 @@ module DeleteResourceResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -10571,6 +15286,9 @@ module DeleteResourceResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -10585,6 +15303,9 @@ module DeleteResourceResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -10593,6 +15314,106 @@ module DeleteResourceResponse =
           `Assoc
             [("error", (`String "EntityStateException"));
             ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified resource."]
+module DeleteResourceRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The identifier associated with the organization from which the resource is deleted."];
+      resourceId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier of the resource to be deleted. The identifier can accept ResourceId, or Resourcename. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Resource name: resource"]}
+    let context_ = "DeleteResourceRequest"
+    let make ~organizationId =
+      fun ~resourceId -> fun () -> { organizationId; resourceId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceId =
+        EntityIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~resourceId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~resourceId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified resource."]
+module DeletePersonalAccessTokenResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
       | `InvalidParameterException e ->
           `Assoc
             [("error", (`String "InvalidParameterException"));
@@ -10617,41 +15438,45 @@ module DeleteResourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the specified resource."]
-module DeleteResourceRequest =
+  end[@@ocaml.doc
+       "Deletes the Personal Access Token from the provided WorkMail Organization."]
+module DeletePersonalAccessTokenRequest =
   struct
     type nonrec t =
       {
-      organizationId: OrganizationId.t
-        [@ocaml.doc
-          "The identifier associated with the organization from which the resource is deleted."];
-      resourceId: ResourceId.t
-        [@ocaml.doc "The identifier of the resource to be deleted."]}
-    let context_ = "DeleteResourceRequest"
+      organizationId: OrganizationId.t [@ocaml.doc "The Organization ID."];
+      personalAccessTokenId: PersonalAccessTokenId.t
+        [@ocaml.doc "The Personal Access Token ID."]}
+    let context_ = "DeletePersonalAccessTokenRequest"
     let make ~organizationId =
-      fun ~resourceId -> fun () -> { organizationId; resourceId }
+      fun ~personalAccessTokenId ->
+        fun () -> { organizationId; personalAccessTokenId }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)))]
+        ("PersonalAccessTokenId",
+          (Some (PersonalAccessTokenId.to_value x.personalAccessTokenId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let resourceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
+      let personalAccessTokenId =
+        PersonalAccessTokenId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PersonalAccessTokenId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~resourceId ~organizationId ()
+      make ~personalAccessTokenId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let personalAccessTokenId =
+        field_map_exn json__ "PersonalAccessTokenId"
+          PersonalAccessTokenId.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~resourceId ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~personalAccessTokenId ~organizationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes the specified resource."]
+  end[@@ocaml.doc
+       "Deletes the Personal Access Token from the provided WorkMail Organization."]
 module DeleteOrganizationResponse =
   struct
     type nonrec t =
@@ -10722,14 +15547,14 @@ module DeleteOrganizationResponse =
           (Xml.child xml_arg0 "OrganizationId") in
       make ?state ?organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map json "State" String_.of_json in
+    let of_json json__ =
+      let state = field_map json__ "State" String_.of_json in
       let organizationId =
-        field_map json "OrganizationId" OrganizationId.of_json in
+        field_map json__ "OrganizationId" OrganizationId.of_json in
       make ?state ?organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon WorkMail organization and all underlying AWS resources managed by Amazon WorkMail as part of the organization. You can choose whether to delete the associated directory. For more information, see Removing an organization in the Amazon WorkMail Administrator Guide."]
+       "Deletes an WorkMail organization and all underlying AWS resources managed by WorkMail as part of the organization. You can choose whether to delete the associated directory. For more information, see Removing an organization in the WorkMail Administrator Guide."]
 module DeleteOrganizationRequest =
   struct
     type nonrec t =
@@ -10739,20 +15564,43 @@ module DeleteOrganizationRequest =
       organizationId: OrganizationId.t [@ocaml.doc "The organization ID."];
       deleteDirectory: Boolean.t
         [@ocaml.doc
-          "If true, deletes the AWS Directory Service directory associated with the organization."]}
+          "If true, deletes the AWS Directory Service directory associated with the organization."];
+      forceDelete: Boolean.t option
+        [@ocaml.doc
+          "Deletes a WorkMail organization even if the organization has enabled users."];
+      deleteIdentityCenterApplication: Boolean.t option
+        [@ocaml.doc
+          "Deletes IAM Identity Center application for WorkMail. This action does not affect authentication settings for any organization."]}
     let context_ = "DeleteOrganizationRequest"
     let make ?clientToken =
-      fun ~organizationId ->
-        fun ~deleteDirectory ->
-          fun () -> { clientToken; organizationId; deleteDirectory }
+      fun ?forceDelete ->
+        fun ?deleteIdentityCenterApplication ->
+          fun ~organizationId ->
+            fun ~deleteDirectory ->
+              fun () ->
+                {
+                  clientToken;
+                  forceDelete;
+                  deleteIdentityCenterApplication;
+                  organizationId;
+                  deleteDirectory
+                }
     let to_value x =
       structure_to_value
         [("ClientToken",
            (Option.map x.clientToken ~f:IdempotencyClientToken.to_value));
         ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)));
-        ("DeleteDirectory", (Some (Boolean.to_value x.deleteDirectory)))]
+        ("DeleteDirectory", (Some (Boolean.to_value x.deleteDirectory)));
+        ("ForceDelete", (Option.map x.forceDelete ~f:Boolean.to_value));
+        ("DeleteIdentityCenterApplication",
+          (Option.map x.deleteIdentityCenterApplication ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deleteIdentityCenterApplication =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DeleteIdentityCenterApplication") in
+      let forceDelete =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ForceDelete") in
       let deleteDirectory =
         Boolean.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DeleteDirectory") in
@@ -10762,19 +15610,24 @@ module DeleteOrganizationRequest =
       let clientToken =
         (Option.map ~f:IdempotencyClientToken.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
-      make ~deleteDirectory ~organizationId ?clientToken ()
+      make ?deleteIdentityCenterApplication ?forceDelete ~deleteDirectory
+        ~organizationId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deleteIdentityCenterApplication =
+        field_map json__ "DeleteIdentityCenterApplication" Boolean.of_json in
+      let forceDelete = field_map json__ "ForceDelete" Boolean.of_json in
       let deleteDirectory =
-        field_map_exn json "DeleteDirectory" Boolean.of_json in
+        field_map_exn json__ "DeleteDirectory" Boolean.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       let clientToken =
-        field_map json "ClientToken" IdempotencyClientToken.of_json in
-      make ~deleteDirectory ~organizationId ?clientToken ()
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
+      make ?deleteIdentityCenterApplication ?forceDelete ~deleteDirectory
+        ~organizationId ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes an Amazon WorkMail organization and all underlying AWS resources managed by Amazon WorkMail as part of the organization. You can choose whether to delete the associated directory. For more information, see Removing an organization in the Amazon WorkMail Administrator Guide."]
+       "Deletes an WorkMail organization and all underlying AWS resources managed by WorkMail as part of the organization. You can choose whether to delete the associated directory. For more information, see Removing an organization in the WorkMail Administrator Guide."]
 module DeleteMobileDeviceAccessRuleResponse =
   struct
     type nonrec t = unit
@@ -10835,14 +15688,14 @@ module DeleteMobileDeviceAccessRuleResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a mobile device access rule for the specified Amazon WorkMail organization. Deleting already deleted and non-existing rules does not produce an error. In those cases, the service sends back an HTTP 200 response with an empty HTTP body."]
+       "Deletes a mobile device access rule for the specified WorkMail organization. Deleting already deleted and non-existing rules does not produce an error. In those cases, the service sends back an HTTP 200 response with an empty HTTP body."]
 module DeleteMobileDeviceAccessRuleRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization under which the rule will be deleted."];
+          "The WorkMail organization under which the rule will be deleted."];
       mobileDeviceAccessRuleId: MobileDeviceAccessRuleId.t
         [@ocaml.doc "The identifier of the rule to be deleted."]}
     let context_ = "DeleteMobileDeviceAccessRuleRequest"
@@ -10867,16 +15720,16 @@ module DeleteMobileDeviceAccessRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~mobileDeviceAccessRuleId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mobileDeviceAccessRuleId =
-        field_map_exn json "MobileDeviceAccessRuleId"
+        field_map_exn json__ "MobileDeviceAccessRuleId"
           MobileDeviceAccessRuleId.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~mobileDeviceAccessRuleId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a mobile device access rule for the specified Amazon WorkMail organization. Deleting already deleted and non-existing rules does not produce an error. In those cases, the service sends back an HTTP 200 response with an empty HTTP body."]
+       "Deletes a mobile device access rule for the specified WorkMail organization. Deleting already deleted and non-existing rules does not produce an error. In those cases, the service sends back an HTTP 200 response with an empty HTTP body."]
 module DeleteMobileDeviceAccessOverrideResponse =
   struct
     type nonrec t = unit
@@ -10953,7 +15806,7 @@ module DeleteMobileDeviceAccessOverrideRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization for which the access override will be deleted."];
+          "The WorkMail organization for which the access override will be deleted."];
       userId: EntityIdentifier.t
         [@ocaml.doc
           "The WorkMail user for which you want to delete the override. Accepts the following types of user identities: User ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: user\\@domain.tld User name: user"];
@@ -10982,11 +15835,11 @@ module DeleteMobileDeviceAccessOverrideRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~deviceId ~userId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deviceId = field_map_exn json "DeviceId" DeviceId.of_json in
-      let userId = field_map_exn json "UserId" EntityIdentifier.of_json in
+    let of_json json__ =
+      let deviceId = field_map_exn json__ "DeviceId" DeviceId.of_json in
+      let userId = field_map_exn json__ "UserId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~deviceId ~userId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11076,12 +15929,12 @@ module DeleteMailboxPermissionsRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The identifier of the organization under which the member (user or group) exists."];
-      entityId: WorkMailIdentifier.t
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the member (user or group) that owns the mailbox."];
-      granteeId: WorkMailIdentifier.t
+          "The identifier of the entity that owns the mailbox. The identifier can be UserId or Group Id, Username or Groupname, or email. Entity ID: 12345678-1234-1234-1234-123456789012, r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity name: entity"];
+      granteeId: EntityIdentifier.t
         [@ocaml.doc
-          "The identifier of the member (user or group) for which to delete granted permissions."]}
+          "The identifier of the entity for which to delete granted permissions. The identifier can be UserId, ResourceID, or Group Id, Username or Groupname, or email. Grantee ID: 12345678-1234-1234-1234-123456789012,r-0123456789a0123456789b0123456789, or S-1-1-12-1234567890-123456789-123456789-1234 Email address: grantee\\@domain.tld Grantee name: grantee"]}
     let context_ = "DeleteMailboxPermissionsRequest"
     let make ~organizationId =
       fun ~entityId ->
@@ -11090,30 +15943,292 @@ module DeleteMailboxPermissionsRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)));
-        ("GranteeId", (Some (WorkMailIdentifier.to_value x.granteeId)))]
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)));
+        ("GranteeId", (Some (EntityIdentifier.to_value x.granteeId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let granteeId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GranteeId") in
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~granteeId ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let granteeId =
-        field_map_exn json "GranteeId" WorkMailIdentifier.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+        field_map_exn json__ "GranteeId" EntityIdentifier.of_json in
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~granteeId ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes permissions granted to a member (user or group)."]
+module DeleteImpersonationRoleResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an impersonation role for the given WorkMail organization."]
+module DeleteImpersonationRoleRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization from which to delete the impersonation role."];
+      impersonationRoleId: ImpersonationRoleId.t
+        [@ocaml.doc "The ID of the impersonation role to delete."]}
+    let context_ = "DeleteImpersonationRoleRequest"
+    let make ~organizationId =
+      fun ~impersonationRoleId ->
+        fun () -> { organizationId; impersonationRoleId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleId",
+          (Some (ImpersonationRoleId.to_value x.impersonationRoleId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impersonationRoleId =
+        ImpersonationRoleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRoleId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~impersonationRoleId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impersonationRoleId =
+        field_map_exn json__ "ImpersonationRoleId"
+          ImpersonationRoleId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~impersonationRoleId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an impersonation role for the given WorkMail organization."]
+module DeleteIdentityProviderConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables the integration between IdC and WorkMail. Authentication will continue with the directory as it was before the IdC integration. You might have to reset your directory passwords and reconfigure your desktop and mobile email clients."]
+module DeleteIdentityProviderConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t [@ocaml.doc "The Organization ID."]}
+    let context_ = "DeleteIdentityProviderConfigurationRequest"
+    let make ~organizationId = fun () -> { organizationId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Disables the integration between IdC and WorkMail. Authentication will continue with the directory as it was before the IdC integration. You might have to reset your directory passwords and reconfigure your desktop and mobile email clients."]
+module DeleteIdentityCenterApplicationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the IAM Identity Center application from WorkMail. This action does not affect the authentication settings for any WorkMail organizations."]
+module DeleteIdentityCenterApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      applicationArn: ApplicationArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the application."]}
+    let context_ = "DeleteIdentityCenterApplicationRequest"
+    let make ~applicationArn = fun () -> { applicationArn }
+    let to_value x =
+      structure_to_value
+        [("ApplicationArn",
+           (Some (ApplicationArn.to_value x.applicationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationArn =
+        ApplicationArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApplicationArn") in
+      make ~applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationArn =
+        field_map_exn json__ "ApplicationArn" ApplicationArn.of_json in
+      make ~applicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the IAM Identity Center application from WorkMail. This action does not affect the authentication settings for any WorkMail organizations."]
 module DeleteGroupResponse =
   struct
     type nonrec t = unit
@@ -11219,15 +16334,16 @@ module DeleteGroupResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a group from Amazon WorkMail."]
+  end[@@ocaml.doc "Deletes a group from WorkMail."]
 module DeleteGroupRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc "The organization that contains the group."];
-      groupId: WorkMailIdentifier.t
-        [@ocaml.doc "The identifier of the group to be deleted."]}
+      groupId: EntityIdentifier.t
+        [@ocaml.doc
+          "The identifier of the group to be deleted. The identifier can be the GroupId, or Groupname. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Group name: group"]}
     let context_ = "DeleteGroupRequest"
     let make ~organizationId =
       fun ~groupId -> fun () -> { organizationId; groupId }
@@ -11235,24 +16351,24 @@ module DeleteGroupRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("GroupId", (Some (WorkMailIdentifier.to_value x.groupId)))]
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let groupId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~groupId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map_exn json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~groupId ~organizationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a group from Amazon WorkMail."]
+  end[@@ocaml.doc "Deletes a group from WorkMail."]
 module DeleteEmailMonitoringConfigurationResponse =
   struct
     type nonrec t = unit
@@ -11334,13 +16450,101 @@ module DeleteEmailMonitoringConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the email monitoring configuration for a specified organization."]
+module DeleteAvailabilityConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the AvailabilityConfiguration for the given WorkMail organization and domain."]
+module DeleteAvailabilityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization for which the AvailabilityConfiguration will be deleted."];
+      domainName: DomainName.t
+        [@ocaml.doc
+          "The domain for which the AvailabilityConfiguration will be deleted."]}
+    let context_ = "DeleteAvailabilityConfigurationRequest"
+    let make ~organizationId =
+      fun ~domainName -> fun () -> { organizationId; domainName }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("DomainName", (Some (DomainName.to_value x.domainName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~domainName ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~domainName ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the AvailabilityConfiguration for the given WorkMail organization and domain."]
 module DeleteAliasResponse =
   struct
     type nonrec t = unit
@@ -11456,11 +16660,12 @@ module DeleteAliasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~alias ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map_exn json "Alias" EmailAddress.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let alias = field_map_exn json__ "Alias" EmailAddress.of_json in
+      let entityId =
+        field_map_exn json__ "EntityId" WorkMailIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~alias ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11543,10 +16748,10 @@ module DeleteAccessControlRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~name ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" AccessControlRuleName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" AccessControlRuleName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~name ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11680,12 +16885,12 @@ module CreateUserResponse =
           (Xml.child xml_arg0 "UserId") in
       make ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "UserId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let userId = field_map json__ "UserId" WorkMailIdentifier.of_json in
       make ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a user who can be used in Amazon WorkMail by calling the RegisterToWorkMail operation."]
+       "Creates a user who can be used in WorkMail by calling the RegisterToWorkMail operation."]
 module CreateUserRequest =
   struct
     type nonrec t =
@@ -11696,46 +16901,106 @@ module CreateUserRequest =
       name: UserName.t
         [@ocaml.doc
           "The name for the new user. WorkMail directory user names have a maximum length of 64. All others have a maximum length of 20."];
-      displayName: String_.t
+      displayName: UserAttribute.t
         [@ocaml.doc "The display name for the new user."];
-      password: Password.t [@ocaml.doc "The password for the new user."]}
+      password: Password.t option
+        [@ocaml.doc "The password for the new user."];
+      role: UserRole.t option
+        [@ocaml.doc
+          "The role of the new user. You cannot pass SYSTEM_USER or RESOURCE role in a single request. When a user role is not selected, the default role of USER is selected."];
+      firstName: UserAttribute.t option
+        [@ocaml.doc "The first name of the new user."];
+      lastName: UserAttribute.t option
+        [@ocaml.doc "The last name of the new user."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If this parameter is enabled, the user will be hidden from the address book."];
+      identityProviderUserId: IdentityProviderUserId.t option
+        [@ocaml.doc
+          "User ID from the IAM Identity Center. If this parameter is empty it will be updated automatically when the user logs in for the first time to the mailbox associated with WorkMail."]}
     let context_ = "CreateUserRequest"
-    let make ~organizationId =
-      fun ~name ->
-        fun ~displayName ->
-          fun ~password ->
-            fun () -> { organizationId; name; displayName; password }
+    let make ?password =
+      fun ?role ->
+        fun ?firstName ->
+          fun ?lastName ->
+            fun ?hiddenFromGlobalAddressList ->
+              fun ?identityProviderUserId ->
+                fun ~organizationId ->
+                  fun ~name ->
+                    fun ~displayName ->
+                      fun () ->
+                        {
+                          password;
+                          role;
+                          firstName;
+                          lastName;
+                          hiddenFromGlobalAddressList;
+                          identityProviderUserId;
+                          organizationId;
+                          name;
+                          displayName
+                        }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
         ("Name", (Some (UserName.to_value x.name)));
-        ("DisplayName", (Some (String_.to_value x.displayName)));
-        ("Password", (Some (Password.to_value x.password)))]
+        ("DisplayName", (Some (UserAttribute.to_value x.displayName)));
+        ("Password", (Option.map x.password ~f:Password.to_value));
+        ("Role", (Option.map x.role ~f:UserRole.to_value));
+        ("FirstName", (Option.map x.firstName ~f:UserAttribute.to_value));
+        ("LastName", (Option.map x.lastName ~f:UserAttribute.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value));
+        ("IdentityProviderUserId",
+          (Option.map x.identityProviderUserId
+             ~f:IdentityProviderUserId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let identityProviderUserId =
+        (Option.map ~f:IdentityProviderUserId.of_xml)
+          (Xml.child xml_arg0 "IdentityProviderUserId") in
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let lastName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "LastName") in
+      let firstName =
+        (Option.map ~f:UserAttribute.of_xml) (Xml.child xml_arg0 "FirstName") in
+      let role = (Option.map ~f:UserRole.of_xml) (Xml.child xml_arg0 "Role") in
       let password =
-        Password.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
       let displayName =
-        String_.of_xml
+        UserAttribute.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DisplayName") in
       let name =
         UserName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~password ~displayName ~name ~organizationId ()
+      make ?identityProviderUserId ?hiddenFromGlobalAddressList ?lastName
+        ?firstName ?role ?password ~displayName ~name ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" Password.of_json in
-      let displayName = field_map_exn json "DisplayName" String_.of_json in
-      let name = field_map_exn json "Name" UserName.of_json in
+    let of_json json__ =
+      let identityProviderUserId =
+        field_map json__ "IdentityProviderUserId"
+          IdentityProviderUserId.of_json in
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let lastName = field_map json__ "LastName" UserAttribute.of_json in
+      let firstName = field_map json__ "FirstName" UserAttribute.of_json in
+      let role = field_map json__ "Role" UserRole.of_json in
+      let password = field_map json__ "Password" Password.of_json in
+      let displayName =
+        field_map_exn json__ "DisplayName" UserAttribute.of_json in
+      let name = field_map_exn json__ "Name" UserName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~password ~displayName ~name ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?identityProviderUserId ?hiddenFromGlobalAddressList ?lastName
+        ?firstName ?role ?password ~displayName ~name ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a user who can be used in Amazon WorkMail by calling the RegisterToWorkMail operation."]
+       "Creates a user who can be used in WorkMail by calling the RegisterToWorkMail operation."]
 module CreateResourceResponse =
   struct
     type nonrec t =
@@ -11752,6 +17017,7 @@ module CreateResourceResponse =
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
       | `ReservedNameException of ReservedNameException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resourceId = fun () -> { resourceId }
     let error_of_json name json =
@@ -11774,6 +17040,9 @@ module CreateResourceResponse =
             (OrganizationStateException.of_json json)
       | "ReservedNameException" ->
           `ReservedNameException (ReservedNameException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -11796,6 +17065,9 @@ module CreateResourceResponse =
           `OrganizationStateException (OrganizationStateException.of_xml xml)
       | "ReservedNameException" ->
           `ReservedNameException (ReservedNameException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -11830,6 +17102,10 @@ module CreateResourceResponse =
           `Assoc
             [("error", (`String "ReservedNameException"));
             ("details", (ReservedNameException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -11844,11 +17120,11 @@ module CreateResourceResponse =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ResourceId") in
       make ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       make ?resourceId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new Amazon WorkMail resource."]
+  end[@@ocaml.doc "Creates a new WorkMail resource."]
 module CreateResourceRequest =
   struct
     type nonrec t =
@@ -11859,18 +17135,44 @@ module CreateResourceRequest =
       name: ResourceName.t [@ocaml.doc "The name of the new resource."];
       type_: ResourceType.t
         [@ocaml.doc
-          "The type of the new resource. The available types are equipment and room."]}
+          "The type of the new resource. The available types are equipment and room."];
+      description: ResourceDescription.t option
+        [@ocaml.doc "Resource description."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If this parameter is enabled, the resource will be hidden from the address book."]}
     let context_ = "CreateResourceRequest"
-    let make ~organizationId =
-      fun ~name -> fun ~type_ -> fun () -> { organizationId; name; type_ }
+    let make ?description =
+      fun ?hiddenFromGlobalAddressList ->
+        fun ~organizationId ->
+          fun ~name ->
+            fun ~type_ ->
+              fun () ->
+                {
+                  description;
+                  hiddenFromGlobalAddressList;
+                  organizationId;
+                  name;
+                  type_
+                }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
         ("Name", (Some (ResourceName.to_value x.name)));
-        ("Type", (Some (ResourceType.to_value x.type_)))]
+        ("Type", (Some (ResourceType.to_value x.type_)));
+        ("Description",
+          (Option.map x.description ~f:ResourceDescription.to_value));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
+      let description =
+        (Option.map ~f:ResourceDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
       let type_ =
         ResourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       let name =
@@ -11878,16 +17180,22 @@ module CreateResourceRequest =
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~type_ ~name ~organizationId ()
+      make ?hiddenFromGlobalAddressList ?description ~type_ ~name
+        ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" ResourceType.of_json in
-      let name = field_map_exn json "Name" ResourceName.of_json in
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let description =
+        field_map json__ "Description" ResourceDescription.of_json in
+      let type_ = field_map_exn json__ "Type" ResourceType.of_json in
+      let name = field_map_exn json__ "Name" ResourceName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~type_ ~name ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?hiddenFromGlobalAddressList ?description ~type_ ~name
+        ~organizationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new Amazon WorkMail resource."]
+  end[@@ocaml.doc "Creates a new WorkMail resource."]
 module CreateOrganizationResponse =
   struct
     type nonrec t =
@@ -11971,13 +17279,13 @@ module CreateOrganizationResponse =
           (Xml.child xml_arg0 "OrganizationId") in
       make ?organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map json "OrganizationId" OrganizationId.of_json in
+        field_map json__ "OrganizationId" OrganizationId.of_json in
       make ?organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon WorkMail organization. Optionally, you can choose to associate an existing AWS Directory Service directory with your organization. If an AWS Directory Service directory ID is specified, the organization alias must match the directory alias. If you choose not to associate an existing directory with your organization, then we create a new Amazon WorkMail directory for you. For more information, see Adding an organization in the Amazon WorkMail Administrator Guide. You can associate multiple email domains with an organization, then set your default email domain from the Amazon WorkMail console. You can also associate a domain that is managed in an Amazon Route 53 public hosted zone. For more information, see Adding a domain and Choosing the default domain in the Amazon WorkMail Administrator Guide. Optionally, you can use a customer managed master key from AWS Key Management Service (AWS KMS) to encrypt email for your organization. If you don't associate an AWS KMS key, Amazon WorkMail creates a default AWS managed master key for you."]
+       "Creates a new WorkMail organization. Optionally, you can choose to associate an existing AWS Directory Service directory with your organization. If an AWS Directory Service directory ID is specified, the organization alias must match the directory alias. If you choose not to associate an existing directory with your organization, then we create a new WorkMail directory for you. For more information, see Adding an organization in the WorkMail Administrator Guide. You can associate multiple email domains with an organization, then choose your default email domain from the WorkMail console. You can also associate a domain that is managed in an Amazon Route 53 public hosted zone. For more information, see Adding a domain and Choosing the default domain in the WorkMail Administrator Guide. Optionally, you can use a customer managed key from AWS Key Management Service (AWS KMS) to encrypt email for your organization. If you don't associate an AWS KMS key, WorkMail creates a default, AWS managed key for you."]
 module CreateOrganizationRequest =
   struct
     type nonrec t =
@@ -11991,10 +17299,10 @@ module CreateOrganizationRequest =
         [@ocaml.doc "The email domains to associate with the organization."];
       kmsKeyArn: KmsKeyArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of a customer managed master key from AWS KMS."];
+          "The Amazon Resource Name (ARN) of a customer managed key from AWS KMS."];
       enableInteroperability: Boolean.t option
         [@ocaml.doc
-          "When true, allows organization interoperability between Amazon WorkMail and Microsoft Exchange. Can only be set to true if an AD Connector directory ID is included in the request."]}
+          "When true, allows organization interoperability between WorkMail and Microsoft Exchange. If true, you must include a AD Connector directory ID in the request."]}
     let context_ = "CreateOrganizationRequest"
     let make ?directoryId =
       fun ?clientToken ->
@@ -12041,20 +17349,20 @@ module CreateOrganizationRequest =
       make ?enableInteroperability ?kmsKeyArn ?domains ?clientToken ~alias
         ?directoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableInteroperability =
-        field_map json "EnableInteroperability" Boolean.of_json in
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
-      let domains = field_map json "Domains" Domains.of_json in
+        field_map json__ "EnableInteroperability" Boolean.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let domains = field_map json__ "Domains" Domains.of_json in
       let clientToken =
-        field_map json "ClientToken" IdempotencyClientToken.of_json in
-      let alias = field_map_exn json "Alias" OrganizationName.of_json in
-      let directoryId = field_map json "DirectoryId" DirectoryId.of_json in
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
+      let alias = field_map_exn json__ "Alias" OrganizationName.of_json in
+      let directoryId = field_map json__ "DirectoryId" DirectoryId.of_json in
       make ?enableInteroperability ?kmsKeyArn ?domains ?clientToken ~alias
         ?directoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon WorkMail organization. Optionally, you can choose to associate an existing AWS Directory Service directory with your organization. If an AWS Directory Service directory ID is specified, the organization alias must match the directory alias. If you choose not to associate an existing directory with your organization, then we create a new Amazon WorkMail directory for you. For more information, see Adding an organization in the Amazon WorkMail Administrator Guide. You can associate multiple email domains with an organization, then set your default email domain from the Amazon WorkMail console. You can also associate a domain that is managed in an Amazon Route 53 public hosted zone. For more information, see Adding a domain and Choosing the default domain in the Amazon WorkMail Administrator Guide. Optionally, you can use a customer managed master key from AWS Key Management Service (AWS KMS) to encrypt email for your organization. If you don't associate an AWS KMS key, Amazon WorkMail creates a default AWS managed master key for you."]
+       "Creates a new WorkMail organization. Optionally, you can choose to associate an existing AWS Directory Service directory with your organization. If an AWS Directory Service directory ID is specified, the organization alias must match the directory alias. If you choose not to associate an existing directory with your organization, then we create a new WorkMail directory for you. For more information, see Adding an organization in the WorkMail Administrator Guide. You can associate multiple email domains with an organization, then choose your default email domain from the WorkMail console. You can also associate a domain that is managed in an Amazon Route 53 public hosted zone. For more information, see Adding a domain and Choosing the default domain in the WorkMail Administrator Guide. Optionally, you can use a customer managed key from AWS Key Management Service (AWS KMS) to encrypt email for your organization. If you don't associate an AWS KMS key, WorkMail creates a default, AWS managed key for you."]
 module CreateMobileDeviceAccessRuleResponse =
   struct
     type nonrec t =
@@ -12133,21 +17441,21 @@ module CreateMobileDeviceAccessRuleResponse =
           (Xml.child xml_arg0 "MobileDeviceAccessRuleId") in
       make ?mobileDeviceAccessRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mobileDeviceAccessRuleId =
-        field_map json "MobileDeviceAccessRuleId"
+        field_map json__ "MobileDeviceAccessRuleId"
           MobileDeviceAccessRuleId.of_json in
       make ?mobileDeviceAccessRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new mobile device access rule for the specified Amazon WorkMail organization."]
+       "Creates a new mobile device access rule for the specified WorkMail organization."]
 module CreateMobileDeviceAccessRuleRequest =
   struct
     type nonrec t =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc
-          "The Amazon WorkMail organization under which the rule will be created."];
+          "The WorkMail organization under which the rule will be created."];
       clientToken: IdempotencyClientToken.t option
         [@ocaml.doc "The idempotency token for the client request."];
       name: MobileDeviceAccessRuleName.t [@ocaml.doc "The rule name."];
@@ -12281,41 +17589,318 @@ module CreateMobileDeviceAccessRuleRequest =
         ?notDeviceTypes ?deviceTypes ~effect_ ?description ~name ?clientToken
         ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notDeviceUserAgents =
-        field_map json "NotDeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "NotDeviceUserAgents" DeviceUserAgentList.of_json in
       let deviceUserAgents =
-        field_map json "DeviceUserAgents" DeviceUserAgentList.of_json in
+        field_map json__ "DeviceUserAgents" DeviceUserAgentList.of_json in
       let notDeviceOperatingSystems =
-        field_map json "NotDeviceOperatingSystems"
+        field_map json__ "NotDeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let deviceOperatingSystems =
-        field_map json "DeviceOperatingSystems"
+        field_map json__ "DeviceOperatingSystems"
           DeviceOperatingSystemList.of_json in
       let notDeviceModels =
-        field_map json "NotDeviceModels" DeviceModelList.of_json in
+        field_map json__ "NotDeviceModels" DeviceModelList.of_json in
       let deviceModels =
-        field_map json "DeviceModels" DeviceModelList.of_json in
+        field_map json__ "DeviceModels" DeviceModelList.of_json in
       let notDeviceTypes =
-        field_map json "NotDeviceTypes" DeviceTypeList.of_json in
-      let deviceTypes = field_map json "DeviceTypes" DeviceTypeList.of_json in
+        field_map json__ "NotDeviceTypes" DeviceTypeList.of_json in
+      let deviceTypes = field_map json__ "DeviceTypes" DeviceTypeList.of_json in
       let effect_ =
-        field_map_exn json "Effect" MobileDeviceAccessRuleEffect.of_json in
+        field_map_exn json__ "Effect" MobileDeviceAccessRuleEffect.of_json in
       let description =
-        field_map json "Description"
+        field_map json__ "Description"
           MobileDeviceAccessRuleDescription.of_json in
-      let name = field_map_exn json "Name" MobileDeviceAccessRuleName.of_json in
+      let name =
+        field_map_exn json__ "Name" MobileDeviceAccessRuleName.of_json in
       let clientToken =
-        field_map json "ClientToken" IdempotencyClientToken.of_json in
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ?notDeviceUserAgents ?deviceUserAgents ?notDeviceOperatingSystems
         ?deviceOperatingSystems ?notDeviceModels ?deviceModels
         ?notDeviceTypes ?deviceTypes ~effect_ ?description ~name ?clientToken
         ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new mobile device access rule for the specified Amazon WorkMail organization."]
+       "Creates a new mobile device access rule for the specified WorkMail organization."]
+module CreateImpersonationRoleResponse =
+  struct
+    type nonrec t =
+      {
+      impersonationRoleId: ImpersonationRoleId.t option
+        [@ocaml.doc "The new impersonation role ID."]}
+    type nonrec error =
+      [ `EntityNotFoundException of EntityNotFoundException.t 
+      | `EntityStateException of EntityStateException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?impersonationRoleId = fun () -> { impersonationRoleId }
+    let error_of_json name json =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_json json)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EntityNotFoundException" ->
+          `EntityNotFoundException (EntityNotFoundException.of_xml xml)
+      | "EntityStateException" ->
+          `EntityStateException (EntityStateException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EntityNotFoundException e ->
+          `Assoc
+            [("error", (`String "EntityNotFoundException"));
+            ("details", (EntityNotFoundException.to_json e))]
+      | `EntityStateException e ->
+          `Assoc
+            [("error", (`String "EntityStateException"));
+            ("details", (EntityStateException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ImpersonationRoleId",
+           (Option.map x.impersonationRoleId ~f:ImpersonationRoleId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impersonationRoleId =
+        (Option.map ~f:ImpersonationRoleId.of_xml)
+          (Xml.child xml_arg0 "ImpersonationRoleId") in
+      make ?impersonationRoleId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impersonationRoleId =
+        field_map json__ "ImpersonationRoleId" ImpersonationRoleId.of_json in
+      make ?impersonationRoleId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an impersonation role for the given WorkMail organization. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries also complete successfully without performing any further actions."]
+module CreateImpersonationRoleRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: IdempotencyClientToken.t option
+        [@ocaml.doc "The idempotency token for the client request."];
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization to create the new impersonation role within."];
+      name: ImpersonationRoleName.t
+        [@ocaml.doc "The name of the new impersonation role."];
+      type_: ImpersonationRoleType.t
+        [@ocaml.doc
+          "The impersonation role's type. The available impersonation role types are READ_ONLY or FULL_ACCESS."];
+      description: ImpersonationRoleDescription.t option
+        [@ocaml.doc "The description of the new impersonation role."];
+      rules: ImpersonationRuleList.t
+        [@ocaml.doc "The list of rules for the impersonation role."]}
+    let context_ = "CreateImpersonationRoleRequest"
+    let make ?clientToken =
+      fun ?description ->
+        fun ~organizationId ->
+          fun ~name ->
+            fun ~type_ ->
+              fun ~rules ->
+                fun () ->
+                  {
+                    clientToken;
+                    description;
+                    organizationId;
+                    name;
+                    type_;
+                    rules
+                  }
+    let to_value x =
+      structure_to_value
+        [("ClientToken",
+           (Option.map x.clientToken ~f:IdempotencyClientToken.to_value));
+        ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)));
+        ("Name", (Some (ImpersonationRoleName.to_value x.name)));
+        ("Type", (Some (ImpersonationRoleType.to_value x.type_)));
+        ("Description",
+          (Option.map x.description ~f:ImpersonationRoleDescription.to_value));
+        ("Rules", (Some (ImpersonationRuleList.to_value x.rules)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let rules =
+        ImpersonationRuleList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
+      let description =
+        (Option.map ~f:ImpersonationRoleDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let type_ =
+        ImpersonationRoleType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let name =
+        ImpersonationRoleName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      let clientToken =
+        (Option.map ~f:IdempotencyClientToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      make ~rules ?description ~type_ ~name ~organizationId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let rules = field_map_exn json__ "Rules" ImpersonationRuleList.of_json in
+      let description =
+        field_map json__ "Description" ImpersonationRoleDescription.of_json in
+      let type_ = field_map_exn json__ "Type" ImpersonationRoleType.of_json in
+      let name = field_map_exn json__ "Name" ImpersonationRoleName.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
+      make ~rules ?description ~type_ ~name ~organizationId ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an impersonation role for the given WorkMail organization. Idempotency ensures that an API request completes no more than one time. With an idempotent request, if the original request completes successfully, any subsequent retries also complete successfully without performing any further actions."]
+module CreateIdentityCenterApplicationResponse =
+  struct
+    type nonrec t =
+      {
+      applicationArn: ApplicationArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the application."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?applicationArn = fun () -> { applicationArn }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ApplicationArn",
+           (Option.map x.applicationArn ~f:ApplicationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let applicationArn =
+        (Option.map ~f:ApplicationArn.of_xml)
+          (Xml.child xml_arg0 "ApplicationArn") in
+      make ?applicationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let applicationArn =
+        field_map json__ "ApplicationArn" ApplicationArn.of_json in
+      make ?applicationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the WorkMail application in IAM Identity Center that can be used later in the WorkMail - IdC integration. For more information, see PutIdentityProviderConfiguration. This action does not affect the authentication settings for any WorkMail organizations."]
+module CreateIdentityCenterApplicationRequest =
+  struct
+    type nonrec t =
+      {
+      name: IdentityCenterApplicationName.t
+        [@ocaml.doc "The name of the IAM Identity Center application."];
+      instanceArn: InstanceArn.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the instance."];
+      clientToken: IdempotencyClientToken.t option
+        [@ocaml.doc "The idempotency token associated with the request."]}
+    let context_ = "CreateIdentityCenterApplicationRequest"
+    let make ?clientToken =
+      fun ~name ->
+        fun ~instanceArn -> fun () -> { clientToken; name; instanceArn }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (IdentityCenterApplicationName.to_value x.name)));
+        ("InstanceArn", (Some (InstanceArn.to_value x.instanceArn)));
+        ("ClientToken",
+          (Option.map x.clientToken ~f:IdempotencyClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:IdempotencyClientToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      let instanceArn =
+        InstanceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "InstanceArn") in
+      let name =
+        IdentityCenterApplicationName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ?clientToken ~instanceArn ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
+      let instanceArn =
+        field_map_exn json__ "InstanceArn" InstanceArn.of_json in
+      let name =
+        field_map_exn json__ "Name" IdentityCenterApplicationName.of_json in
+      make ?clientToken ~instanceArn ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates the WorkMail application in IAM Identity Center that can be used later in the WorkMail - IdC integration. For more information, see PutIdentityProviderConfiguration. This action does not affect the authentication settings for any WorkMail organizations."]
 module CreateGroupResponse =
   struct
     type nonrec t =
@@ -12436,12 +18021,12 @@ module CreateGroupResponse =
           (Xml.child xml_arg0 "GroupId") in
       make ?groupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groupId = field_map json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let groupId = field_map json__ "GroupId" WorkMailIdentifier.of_json in
       make ?groupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a group that can be used in Amazon WorkMail by calling the RegisterToWorkMail operation."]
+       "Creates a group that can be used in WorkMail by calling the RegisterToWorkMail operation."]
 module CreateGroupRequest =
   struct
     type nonrec t =
@@ -12449,32 +18034,200 @@ module CreateGroupRequest =
       organizationId: OrganizationId.t
         [@ocaml.doc
           "The organization under which the group is to be created."];
-      name: GroupName.t [@ocaml.doc "The name of the group."]}
+      name: GroupName.t [@ocaml.doc "The name of the group."];
+      hiddenFromGlobalAddressList: Boolean.t option
+        [@ocaml.doc
+          "If this parameter is enabled, the group will be hidden from the address book."]}
     let context_ = "CreateGroupRequest"
-    let make ~organizationId =
-      fun ~name -> fun () -> { organizationId; name }
+    let make ?hiddenFromGlobalAddressList =
+      fun ~organizationId ->
+        fun ~name ->
+          fun () -> { hiddenFromGlobalAddressList; organizationId; name }
     let to_value x =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("Name", (Some (GroupName.to_value x.name)))]
+        ("Name", (Some (GroupName.to_value x.name)));
+        ("HiddenFromGlobalAddressList",
+          (Option.map x.hiddenFromGlobalAddressList ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hiddenFromGlobalAddressList =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "HiddenFromGlobalAddressList") in
       let name =
         GroupName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
-      make ~name ~organizationId ()
+      make ?hiddenFromGlobalAddressList ~name ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" GroupName.of_json in
+    let of_json json__ =
+      let hiddenFromGlobalAddressList =
+        field_map json__ "HiddenFromGlobalAddressList" Boolean.of_json in
+      let name = field_map_exn json__ "Name" GroupName.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      make ~name ~organizationId ()
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ?hiddenFromGlobalAddressList ~name ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a group that can be used in Amazon WorkMail by calling the RegisterToWorkMail operation."]
+       "Creates a group that can be used in WorkMail by calling the RegisterToWorkMail operation."]
+module CreateAvailabilityConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NameAvailabilityException of NameAvailabilityException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NameAvailabilityException" ->
+          `NameAvailabilityException (NameAvailabilityException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NameAvailabilityException" ->
+          `NameAvailabilityException (NameAvailabilityException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NameAvailabilityException e ->
+          `Assoc
+            [("error", (`String "NameAvailabilityException"));
+            ("details", (NameAvailabilityException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an AvailabilityConfiguration for the given WorkMail organization and domain."]
+module CreateAvailabilityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: IdempotencyClientToken.t option
+        [@ocaml.doc
+          "An idempotent token that ensures that an API request is executed only once."];
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization for which the AvailabilityConfiguration will be created."];
+      domainName: DomainName.t
+        [@ocaml.doc "The domain to which the provider applies."];
+      ewsProvider: EwsAvailabilityProvider.t option
+        [@ocaml.doc
+          "Exchange Web Services (EWS) availability provider definition. The request must contain exactly one provider definition, either EwsProvider or LambdaProvider."];
+      lambdaProvider: LambdaAvailabilityProvider.t option
+        [@ocaml.doc
+          "Lambda availability provider definition. The request must contain exactly one provider definition, either EwsProvider or LambdaProvider."]}
+    let context_ = "CreateAvailabilityConfigurationRequest"
+    let make ?clientToken =
+      fun ?ewsProvider ->
+        fun ?lambdaProvider ->
+          fun ~organizationId ->
+            fun ~domainName ->
+              fun () ->
+                {
+                  clientToken;
+                  ewsProvider;
+                  lambdaProvider;
+                  organizationId;
+                  domainName
+                }
+    let to_value x =
+      structure_to_value
+        [("ClientToken",
+           (Option.map x.clientToken ~f:IdempotencyClientToken.to_value));
+        ("OrganizationId", (Some (OrganizationId.to_value x.organizationId)));
+        ("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("EwsProvider",
+          (Option.map x.ewsProvider ~f:EwsAvailabilityProvider.to_value));
+        ("LambdaProvider",
+          (Option.map x.lambdaProvider ~f:LambdaAvailabilityProvider.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lambdaProvider =
+        (Option.map ~f:LambdaAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "LambdaProvider") in
+      let ewsProvider =
+        (Option.map ~f:EwsAvailabilityProvider.of_xml)
+          (Xml.child xml_arg0 "EwsProvider") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      let clientToken =
+        (Option.map ~f:IdempotencyClientToken.of_xml)
+          (Xml.child xml_arg0 "ClientToken") in
+      make ?lambdaProvider ?ewsProvider ~domainName ~organizationId
+        ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lambdaProvider =
+        field_map json__ "LambdaProvider" LambdaAvailabilityProvider.of_json in
+      let ewsProvider =
+        field_map json__ "EwsProvider" EwsAvailabilityProvider.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyClientToken.of_json in
+      make ?lambdaProvider ?ewsProvider ~domainName ~organizationId
+        ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an AvailabilityConfiguration for the given WorkMail organization and domain."]
 module CreateAliasResponse =
   struct
     type nonrec t = unit
@@ -12592,7 +18345,7 @@ module CreateAliasResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an alias to the set of a given member (user or group) of Amazon WorkMail."]
+       "Adds an alias to the set of a given member (user or group) of WorkMail."]
 module CreateAliasRequest =
   struct
     type nonrec t =
@@ -12628,15 +18381,16 @@ module CreateAliasRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~alias ~entityId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map_exn json "Alias" EmailAddress.of_json in
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let alias = field_map_exn json__ "Alias" EmailAddress.of_json in
+      let entityId =
+        field_map_exn json__ "EntityId" WorkMailIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~alias ~entityId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an alias to the set of a given member (user or group) of Amazon WorkMail."]
+       "Adds an alias to the set of a given member (user or group) of WorkMail."]
 module CancelMailboxExportJobResponse =
   struct
     type nonrec t = unit
@@ -12739,16 +18493,141 @@ module CancelMailboxExportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClientToken") in
       make ~organizationId ~jobId ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
-      let jobId = field_map_exn json "JobId" MailboxExportJobId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      let jobId = field_map_exn json__ "JobId" MailboxExportJobId.of_json in
       let clientToken =
-        field_map_exn json "ClientToken" IdempotencyClientToken.of_json in
+        field_map_exn json__ "ClientToken" IdempotencyClientToken.of_json in
       make ~organizationId ~jobId ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Cancels a mailbox export job. If the mailbox export job is near completion, it might not be possible to cancel it."]
+module AssumeImpersonationRoleResponse =
+  struct
+    type nonrec t =
+      {
+      token: ImpersonationToken.t option
+        [@ocaml.doc "The authentication token for the impersonation role."];
+      expiresIn: ExpiresIn.t option
+        [@ocaml.doc "The authentication token's validity, in seconds."]}
+    type nonrec error =
+      [ `InvalidParameterException of InvalidParameterException.t 
+      | `OrganizationNotFoundException of OrganizationNotFoundException.t 
+      | `OrganizationStateException of OrganizationStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?token = fun ?expiresIn -> fun () -> { token; expiresIn }
+    let error_of_json name json =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_json json)
+      | "OrganizationStateException" ->
+          `OrganizationStateException
+            (OrganizationStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "OrganizationNotFoundException" ->
+          `OrganizationNotFoundException
+            (OrganizationNotFoundException.of_xml xml)
+      | "OrganizationStateException" ->
+          `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `OrganizationNotFoundException e ->
+          `Assoc
+            [("error", (`String "OrganizationNotFoundException"));
+            ("details", (OrganizationNotFoundException.to_json e))]
+      | `OrganizationStateException e ->
+          `Assoc
+            [("error", (`String "OrganizationStateException"));
+            ("details", (OrganizationStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Token", (Option.map x.token ~f:ImpersonationToken.to_value));
+        ("ExpiresIn", (Option.map x.expiresIn ~f:ExpiresIn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiresIn =
+        (Option.map ~f:ExpiresIn.of_xml) (Xml.child xml_arg0 "ExpiresIn") in
+      let token =
+        (Option.map ~f:ImpersonationToken.of_xml)
+          (Xml.child xml_arg0 "Token") in
+      make ?expiresIn ?token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiresIn = field_map json__ "ExpiresIn" ExpiresIn.of_json in
+      let token = field_map json__ "Token" ImpersonationToken.of_json in
+      make ?expiresIn ?token ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assumes an impersonation role for the given WorkMail organization. This method returns an authentication token you can use to make impersonated calls."]
+module AssumeImpersonationRoleRequest =
+  struct
+    type nonrec t =
+      {
+      organizationId: OrganizationId.t
+        [@ocaml.doc
+          "The WorkMail organization under which the impersonation role will be assumed."];
+      impersonationRoleId: ImpersonationRoleId.t
+        [@ocaml.doc "The impersonation role ID to assume."]}
+    let context_ = "AssumeImpersonationRoleRequest"
+    let make ~organizationId =
+      fun ~impersonationRoleId ->
+        fun () -> { organizationId; impersonationRoleId }
+    let to_value x =
+      structure_to_value
+        [("OrganizationId",
+           (Some (OrganizationId.to_value x.organizationId)));
+        ("ImpersonationRoleId",
+          (Some (ImpersonationRoleId.to_value x.impersonationRoleId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impersonationRoleId =
+        ImpersonationRoleId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ImpersonationRoleId") in
+      let organizationId =
+        OrganizationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
+      make ~impersonationRoleId ~organizationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impersonationRoleId =
+        field_map_exn json__ "ImpersonationRoleId"
+          ImpersonationRoleId.of_json in
+      let organizationId =
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
+      make ~impersonationRoleId ~organizationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Assumes an impersonation role for the given WorkMail organization. This method returns an authentication token you can use to make impersonated calls."]
 module AssociateMemberToGroupResponse =
   struct
     type nonrec t = unit
@@ -12870,11 +18749,12 @@ module AssociateMemberToGroupRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc "The organization under which the group exists."];
-      groupId: WorkMailIdentifier.t
+      groupId: EntityIdentifier.t
         [@ocaml.doc
-          "The group to which the member (user or group) is associated."];
-      memberId: WorkMailIdentifier.t
-        [@ocaml.doc "The member (user or group) to associate to the group."]}
+          "The group to which the member (user or group) is associated. The identifier can accept GroupId, Groupname, or email. The following identity formats are available: Group ID: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: group\\@domain.tld Group name: group"];
+      memberId: EntityIdentifier.t
+        [@ocaml.doc
+          "The member (user or group) to associate to the group. The member ID can accept UserID or GroupId, Username or Groupname, or email. Member: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: member\\@domain.tld Member name: member"]}
     let context_ = "AssociateMemberToGroupRequest"
     let make ~organizationId =
       fun ~groupId ->
@@ -12883,26 +18763,26 @@ module AssociateMemberToGroupRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("GroupId", (Some (WorkMailIdentifier.to_value x.groupId)));
-        ("MemberId", (Some (WorkMailIdentifier.to_value x.memberId)))]
+        ("GroupId", (Some (EntityIdentifier.to_value x.groupId)));
+        ("MemberId", (Some (EntityIdentifier.to_value x.memberId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let memberId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "MemberId") in
       let groupId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "GroupId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~memberId ~groupId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let memberId = field_map_exn json "MemberId" WorkMailIdentifier.of_json in
-      let groupId = field_map_exn json "GroupId" WorkMailIdentifier.of_json in
+    let of_json json__ =
+      let memberId = field_map_exn json__ "MemberId" EntityIdentifier.of_json in
+      let groupId = field_map_exn json__ "GroupId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~memberId ~groupId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a member (user or group) to the group's set."]
@@ -12915,6 +18795,7 @@ module AssociateDelegateToResourceResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `OrganizationNotFoundException of OrganizationNotFoundException.t 
       | `OrganizationStateException of OrganizationStateException.t 
+      | `UnsupportedOperationException of UnsupportedOperationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
@@ -12931,6 +18812,9 @@ module AssociateDelegateToResourceResponse =
       | "OrganizationStateException" ->
           `OrganizationStateException
             (OrganizationStateException.of_json json)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -12947,6 +18831,9 @@ module AssociateDelegateToResourceResponse =
             (OrganizationNotFoundException.of_xml xml)
       | "OrganizationStateException" ->
           `OrganizationStateException (OrganizationStateException.of_xml xml)
+      | "UnsupportedOperationException" ->
+          `UnsupportedOperationException
+            (UnsupportedOperationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -12971,6 +18858,10 @@ module AssociateDelegateToResourceResponse =
           `Assoc
             [("error", (`String "OrganizationStateException"));
             ("details", (OrganizationStateException.to_json e))]
+      | `UnsupportedOperationException e ->
+          `Assoc
+            [("error", (`String "UnsupportedOperationException"));
+            ("details", (UnsupportedOperationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -12991,12 +18882,12 @@ module AssociateDelegateToResourceRequest =
       {
       organizationId: OrganizationId.t
         [@ocaml.doc "The organization under which the resource exists."];
-      resourceId: ResourceId.t
+      resourceId: EntityIdentifier.t
         [@ocaml.doc
-          "The resource for which members (users or groups) are associated."];
-      entityId: WorkMailIdentifier.t
+          "The resource for which members (users or groups) are associated. The identifier can accept ResourceId, Resourcename, or email. The following identity formats are available: Resource ID: r-0123456789a0123456789b0123456789 Email address: resource\\@domain.tld Resource name: resource"];
+      entityId: EntityIdentifier.t
         [@ocaml.doc
-          "The member (user or group) to associate to the resource."]}
+          "The member (user or group) to associate to the resource. The entity ID can accept UserId or GroupID, Username or Groupname, or email. Entity: 12345678-1234-1234-1234-123456789012 or S-1-1-12-1234567890-123456789-123456789-1234 Email address: entity\\@domain.tld Entity: entity"]}
     let context_ = "AssociateDelegateToResourceRequest"
     let make ~organizationId =
       fun ~resourceId ->
@@ -13005,26 +18896,27 @@ module AssociateDelegateToResourceRequest =
       structure_to_value
         [("OrganizationId",
            (Some (OrganizationId.to_value x.organizationId)));
-        ("ResourceId", (Some (ResourceId.to_value x.resourceId)));
-        ("EntityId", (Some (WorkMailIdentifier.to_value x.entityId)))]
+        ("ResourceId", (Some (EntityIdentifier.to_value x.resourceId)));
+        ("EntityId", (Some (EntityIdentifier.to_value x.entityId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let entityId =
-        WorkMailIdentifier.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EntityId") in
       let resourceId =
-        ResourceId.of_xml
+        EntityIdentifier.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       let organizationId =
         OrganizationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OrganizationId") in
       make ~entityId ~resourceId ~organizationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityId = field_map_exn json "EntityId" WorkMailIdentifier.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" EntityIdentifier.of_json in
+      let resourceId =
+        field_map_exn json__ "ResourceId" EntityIdentifier.of_json in
       let organizationId =
-        field_map_exn json "OrganizationId" OrganizationId.of_json in
+        field_map_exn json__ "OrganizationId" OrganizationId.of_json in
       make ~entityId ~resourceId ~organizationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

@@ -28,6 +28,27 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_describe_entities =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and entityRequestList =
+         flag "entity-request-list" (required json_arg)
+           ~doc:"JSON EntityRequestList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_describe_entities
+           (Values.BatchDescribeEntitiesRequest.make
+              ~entityRequestList:(Values.EntityRequestList.of_json
+                                    entityRequestList) ())
+           (Some Values.BatchDescribeEntitiesResponse.to_json)
+           (Some Values.BatchDescribeEntitiesResponse.error_to_json)])
 let cancel_change_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -47,6 +68,24 @@ let cancel_change_set =
            (Values.CancelChangeSetRequest.make ~catalog ~changeSetId ())
            (Some Values.CancelChangeSetResponse.to_json)
            (Some Values.CancelChangeSetResponse.error_to_json)])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.DeleteResourcePolicyResponse.to_json)
+           (Some Values.DeleteResourcePolicyResponse.error_to_json)])
 let describe_change_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -85,6 +124,24 @@ let describe_entity =
            (Values.DescribeEntityRequest.make ~catalog ~entityId ())
            (Some Values.DescribeEntityResponse.to_json)
            (Some Values.DescribeEntityResponse.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.GetResourcePolicyResponse.to_json)
+           (Some Values.GetResourcePolicyResponse.error_to_json)])
 let list_change_sets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -99,7 +156,8 @@ let list_change_sets =
          flag "filter-list" (optional json_arg) ~doc:"JSON FilterList"
        and sort = flag "sort" (optional json_arg) ~doc:"JSON Sort"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResultInteger"
+         flag "max-results" (optional int)
+           ~doc:"INT ListChangeSetsMaxResultInteger"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and catalog = flag "catalog" (required string) ~doc:"STRING Catalog" in
@@ -128,7 +186,16 @@ let list_entities =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResultInteger"
+         flag "max-results" (optional int)
+           ~doc:"INT ListEntitiesMaxResultInteger"
+       and ownershipType =
+         flag "ownership-type" (optional json_arg) ~doc:"JSON OwnershipType"
+       and entityTypeFilters =
+         flag "entity-type-filters" (optional json_arg)
+           ~doc:"JSON EntityTypeFilters"
+       and entityTypeSort =
+         flag "entity-type-sort" (optional json_arg)
+           ~doc:"JSON EntityTypeSort"
        and catalog = flag "catalog" (required string) ~doc:"STRING Catalog"
        and entityType =
          flag "entity-type" (required string) ~doc:"STRING EntityType" in
@@ -138,9 +205,54 @@ let list_entities =
            (Values.ListEntitiesRequest.make
               ?filterList:(Option.map ~f:Values.FilterList.of_json filterList)
               ?sort:(Option.map ~f:Values.Sort.of_json sort) ?nextToken
-              ?maxResults ~catalog ~entityType ())
+              ?maxResults
+              ?ownershipType:(Option.map ~f:Values.OwnershipType.of_json
+                                ownershipType)
+              ?entityTypeFilters:(Option.map
+                                    ~f:Values.EntityTypeFilters.of_json
+                                    entityTypeFilters)
+              ?entityTypeSort:(Option.map ~f:Values.EntityTypeSort.of_json
+                                 entityTypeSort) ~catalog ~entityType ())
            (Some Values.ListEntitiesResponse.to_json)
            (Some Values.ListEntitiesResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceArn ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN"
+       and policy =
+         flag "policy" (required string) ~doc:"STRING ResourcePolicyJson" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ~resourceArn ~policy ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let start_change_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -156,6 +268,9 @@ let start_change_set =
        and clientRequestToken =
          flag "client-request-token" (optional string)
            ~doc:"STRING ClientRequestToken"
+       and changeSetTags =
+         flag "change-set-tags" (optional json_arg) ~doc:"JSON TagList"
+       and intent = flag "intent" (optional json_arg) ~doc:"JSON Intent"
        and catalog = flag "catalog" (required string) ~doc:"STRING Catalog"
        and changeSet =
          flag "change-set" (required json_arg)
@@ -164,16 +279,67 @@ let start_change_set =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_change_set
            (Values.StartChangeSetRequest.make ?changeSetName
-              ?clientRequestToken ~catalog
+              ?clientRequestToken
+              ?changeSetTags:(Option.map ~f:Values.TagList.of_json
+                                changeSetTags)
+              ?intent:(Option.map ~f:Values.Intent.of_json intent) ~catalog
               ~changeSet:(Values.RequestedChangeList.of_json changeSet) ())
            (Some Values.StartChangeSetResponse.to_json)
            (Some Values.StartChangeSetResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceArn
+              ~tags:(Values.TagList.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceARN"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceArn
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("cancel-change-set", cancel_change_set);
+    [("batch-describe-entities", batch_describe_entities);
+    ("cancel-change-set", cancel_change_set);
+    ("delete-resource-policy", delete_resource_policy);
     ("describe-change-set", describe_change_set);
     ("describe-entity", describe_entity);
+    ("get-resource-policy", get_resource_policy);
     ("list-change-sets", list_change_sets);
     ("list-entities", list_entities);
-    ("start-change-set", start_change_set)]
+    ("list-tags-for-resource", list_tags_for_resource);
+    ("put-resource-policy", put_resource_policy);
+    ("start-change-set", start_change_set);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource)]

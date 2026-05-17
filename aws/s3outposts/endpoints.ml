@@ -7,6 +7,8 @@ type ('i, 'o, 'e) t =
   | DeleteEndpoint: (DeleteEndpointRequest.t, unit, unit) t 
   | ListEndpoints: (ListEndpointsRequest.t, ListEndpointsResult.t,
   ListEndpointsResult.error) t 
+  | ListOutpostsWithS3: (ListOutpostsWithS3Request.t,
+  ListOutpostsWithS3Result.t, ListOutpostsWithS3Result.error) t 
   | ListSharedEndpoints: (ListSharedEndpointsRequest.t,
   ListSharedEndpointsResult.t, ListSharedEndpointsResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
@@ -14,6 +16,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateEndpoint -> `POST
   | DeleteEndpoint -> `DELETE
   | ListEndpoints -> `GET
+  | ListOutpostsWithS3 -> `GET
   | ListSharedEndpoints -> `GET
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -29,6 +32,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListEndpoints ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/S3Outposts/ListEndpoints")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListOutpostsWithS3 ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/S3Outposts/ListOutpostsWithS3")
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
@@ -92,6 +106,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListEndpoints ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListOutpostsWithS3 ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListSharedEndpoints ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -153,6 +170,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListEndpointsResult.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListEndpointsResult.error_of_json))
+  | ListOutpostsWithS3 ->
+      if is_success
+      then Ok (ListOutpostsWithS3Result.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListOutpostsWithS3Result.error_of_json))
   | ListSharedEndpoints ->
       if is_success
       then Ok (ListSharedEndpointsResult.of_json (response_to_json resp))

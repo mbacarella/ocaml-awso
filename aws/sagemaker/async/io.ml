@@ -17,8 +17,24 @@ let add_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddTags input
 let associate_trial_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateTrialComponent input
+let attach_cluster_node_volume ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AttachClusterNodeVolume input
+let batch_add_cluster_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchAddClusterNodes input
+let batch_delete_cluster_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteClusterNodes input
 let batch_describe_model_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDescribeModelPackage input
+let batch_reboot_cluster_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchRebootClusterNodes input
+let batch_replace_cluster_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchReplaceClusterNodes input
+let create_a_i_benchmark_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAIBenchmarkJob input
+let create_a_i_recommendation_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAIRecommendationJob input
+let create_a_i_workload_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAIWorkloadConfig input
 let create_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAction input
 let create_algorithm ?endpoint_url ?cfg input =
@@ -31,10 +47,18 @@ let create_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateArtifact input
 let create_auto_m_l_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateAutoMLJob input
+let create_auto_m_l_job_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAutoMLJobV2 input
+let create_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCluster input
+let create_cluster_scheduler_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateClusterSchedulerConfig input
 let create_code_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCodeRepository input
 let create_compilation_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCompilationJob input
+let create_compute_quota ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateComputeQuota input
 let create_context ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateContext input
 let create_data_quality_job_definition ?endpoint_url ?cfg input =
@@ -43,6 +67,10 @@ let create_device_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDeviceFleet input
 let create_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDomain input
+let create_edge_deployment_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateEdgeDeploymentPlan input
+let create_edge_deployment_stage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateEdgeDeploymentStage input
 let create_edge_packaging_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEdgePackagingJob input
 let create_endpoint ?endpoint_url ?cfg input =
@@ -55,6 +83,12 @@ let create_feature_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFeatureGroup input
 let create_flow_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFlowDefinition input
+let create_hub ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateHub input
+let create_hub_content_presigned_urls ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateHubContentPresignedUrls input
+let create_hub_content_reference ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateHubContentReference input
 let create_human_task_ui ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateHumanTaskUi input
 let create_hyper_parameter_tuning_job ?endpoint_url ?cfg input =
@@ -63,14 +97,26 @@ let create_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImage input
 let create_image_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateImageVersion input
+let create_inference_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateInferenceComponent input
+let create_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateInferenceExperiment input
 let create_inference_recommendations_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateInferenceRecommendationsJob input
 let create_labeling_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLabelingJob input
+let create_mlflow_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateMlflowApp input
+let create_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateMlflowTrackingServer input
 let create_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateModel input
 let create_model_bias_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateModelBiasJobDefinition input
+let create_model_card ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateModelCard input
+let create_model_card_export_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateModelCardExportJob input
 let create_model_explainability_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateModelExplainabilityJobDefinition
     input
@@ -87,20 +133,35 @@ let create_notebook_instance ?endpoint_url ?cfg input =
 let create_notebook_instance_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateNotebookInstanceLifecycleConfig
     input
+let create_optimization_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateOptimizationJob input
+let create_partner_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePartnerApp input
+let create_partner_app_presigned_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePartnerAppPresignedUrl input
 let create_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePipeline input
 let create_presigned_domain_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePresignedDomainUrl input
+let create_presigned_mlflow_app_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePresignedMlflowAppUrl input
+let create_presigned_mlflow_tracking_server_url ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePresignedMlflowTrackingServerUrl
+    input
 let create_presigned_notebook_instance_url ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePresignedNotebookInstanceUrl input
 let create_processing_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProcessingJob input
 let create_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateProject input
+let create_space ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSpace input
 let create_studio_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateStudioLifecycleConfig input
 let create_training_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTrainingJob input
+let create_training_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTrainingPlan input
 let create_transform_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTransformJob input
 let create_trial ?endpoint_url ?cfg input =
@@ -113,6 +174,12 @@ let create_workforce ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkforce input
 let create_workteam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkteam input
+let delete_a_i_benchmark_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAIBenchmarkJob input
+let delete_a_i_recommendation_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAIRecommendationJob input
+let delete_a_i_workload_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAIWorkloadConfig input
 let delete_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAction input
 let delete_algorithm ?endpoint_url ?cfg input =
@@ -125,8 +192,16 @@ let delete_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteArtifact input
 let delete_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAssociation input
+let delete_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCluster input
+let delete_cluster_scheduler_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteClusterSchedulerConfig input
 let delete_code_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCodeRepository input
+let delete_compilation_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCompilationJob input
+let delete_compute_quota ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteComputeQuota input
 let delete_context ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteContext input
 let delete_data_quality_job_definition ?endpoint_url ?cfg input =
@@ -135,6 +210,10 @@ let delete_device_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDeviceFleet input
 let delete_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDomain input
+let delete_edge_deployment_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteEdgeDeploymentPlan input
+let delete_edge_deployment_stage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteEdgeDeploymentStage input
 let delete_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEndpoint input
 let delete_endpoint_config ?endpoint_url ?cfg input =
@@ -145,16 +224,34 @@ let delete_feature_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFeatureGroup input
 let delete_flow_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFlowDefinition input
+let delete_hub ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHub input
+let delete_hub_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHubContent input
+let delete_hub_content_reference ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHubContentReference input
 let delete_human_task_ui ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHumanTaskUi input
+let delete_hyper_parameter_tuning_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteHyperParameterTuningJob input
 let delete_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteImage input
 let delete_image_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteImageVersion input
+let delete_inference_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteInferenceComponent input
+let delete_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteInferenceExperiment input
+let delete_mlflow_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMlflowApp input
+let delete_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteMlflowTrackingServer input
 let delete_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteModel input
 let delete_model_bias_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteModelBiasJobDefinition input
+let delete_model_card ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteModelCard input
 let delete_model_explainability_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteModelExplainabilityJobDefinition
     input
@@ -173,14 +270,24 @@ let delete_notebook_instance ?endpoint_url ?cfg input =
 let delete_notebook_instance_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteNotebookInstanceLifecycleConfig
     input
+let delete_optimization_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteOptimizationJob input
+let delete_partner_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePartnerApp input
 let delete_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePipeline input
+let delete_processing_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteProcessingJob input
 let delete_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteProject input
+let delete_space ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSpace input
 let delete_studio_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStudioLifecycleConfig input
 let delete_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTags input
+let delete_training_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTrainingJob input
 let delete_trial ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTrial input
 let delete_trial_component ?endpoint_url ?cfg input =
@@ -193,6 +300,12 @@ let delete_workteam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkteam input
 let deregister_devices ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterDevices input
+let describe_a_i_benchmark_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAIBenchmarkJob input
+let describe_a_i_recommendation_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAIRecommendationJob input
+let describe_a_i_workload_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAIWorkloadConfig input
 let describe_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAction input
 let describe_algorithm ?endpoint_url ?cfg input =
@@ -205,10 +318,22 @@ let describe_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeArtifact input
 let describe_auto_m_l_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAutoMLJob input
+let describe_auto_m_l_job_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAutoMLJobV2 input
+let describe_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCluster input
+let describe_cluster_event ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeClusterEvent input
+let describe_cluster_node ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeClusterNode input
+let describe_cluster_scheduler_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeClusterSchedulerConfig input
 let describe_code_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCodeRepository input
 let describe_compilation_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCompilationJob input
+let describe_compute_quota ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeComputeQuota input
 let describe_context ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeContext input
 let describe_data_quality_job_definition ?endpoint_url ?cfg input =
@@ -219,6 +344,8 @@ let describe_device_fleet ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDeviceFleet input
 let describe_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDomain input
+let describe_edge_deployment_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEdgeDeploymentPlan input
 let describe_edge_packaging_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEdgePackagingJob input
 let describe_endpoint ?endpoint_url ?cfg input =
@@ -229,8 +356,14 @@ let describe_experiment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExperiment input
 let describe_feature_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFeatureGroup input
+let describe_feature_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFeatureMetadata input
 let describe_flow_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFlowDefinition input
+let describe_hub ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeHub input
+let describe_hub_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeHubContent input
 let describe_human_task_ui ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeHumanTaskUi input
 let describe_hyper_parameter_tuning_job ?endpoint_url ?cfg input =
@@ -239,16 +372,28 @@ let describe_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImage input
 let describe_image_version ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeImageVersion input
+let describe_inference_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInferenceComponent input
+let describe_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInferenceExperiment input
 let describe_inference_recommendations_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeInferenceRecommendationsJob input
 let describe_labeling_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLabelingJob input
 let describe_lineage_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLineageGroup input
+let describe_mlflow_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMlflowApp input
+let describe_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeMlflowTrackingServer input
 let describe_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeModel input
 let describe_model_bias_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeModelBiasJobDefinition input
+let describe_model_card ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeModelCard input
+let describe_model_card_export_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeModelCardExportJob input
 let describe_model_explainability_job_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeModelExplainabilityJobDefinition
     input
@@ -265,6 +410,10 @@ let describe_notebook_instance ?endpoint_url ?cfg input =
 let describe_notebook_instance_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeNotebookInstanceLifecycleConfig
     input
+let describe_optimization_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeOptimizationJob input
+let describe_partner_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribePartnerApp input
 let describe_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePipeline input
 let describe_pipeline_definition_for_execution ?endpoint_url ?cfg input =
@@ -276,12 +425,21 @@ let describe_processing_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeProcessingJob input
 let describe_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeProject input
+let describe_reserved_capacity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeReservedCapacity input
+let describe_space ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSpace input
 let describe_studio_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeStudioLifecycleConfig input
 let describe_subscribed_workteam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSubscribedWorkteam input
 let describe_training_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTrainingJob input
+let describe_training_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrainingPlan input
+let describe_training_plan_extension_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTrainingPlanExtensionHistory
+    input
 let describe_transform_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTransformJob input
 let describe_trial ?endpoint_url ?cfg input =
@@ -294,6 +452,8 @@ let describe_workforce ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkforce input
 let describe_workteam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkteam input
+let detach_cluster_node_volume ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetachClusterNodeVolume input
 let disable_sagemaker_servicecatalog_portfolio ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableSagemakerServicecatalogPortfolio
     input
@@ -302,6 +462,8 @@ let disassociate_trial_component ?endpoint_url ?cfg input =
 let enable_sagemaker_servicecatalog_portfolio ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableSagemakerServicecatalogPortfolio
     input
+let extend_training_plan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExtendTrainingPlan input
 let get_device_fleet_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDeviceFleetReport input
 let get_lineage_group_policy ?endpoint_url ?cfg input =
@@ -311,12 +473,25 @@ let get_model_package_group_policy ?endpoint_url ?cfg input =
 let get_sagemaker_servicecatalog_portfolio_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSagemakerServicecatalogPortfolioStatus
     input
+let get_scaling_configuration_recommendation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetScalingConfigurationRecommendation
+    input
 let get_search_suggestions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSearchSuggestions input
+let import_hub_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportHubContent input
+let list_a_i_benchmark_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAIBenchmarkJobs input
+let list_a_i_recommendation_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAIRecommendationJobs input
+let list_a_i_workload_configs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAIWorkloadConfigs input
 let list_actions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListActions input
 let list_algorithms ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAlgorithms input
+let list_aliases ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAliases input
 let list_app_image_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAppImageConfigs input
 let list_apps ?endpoint_url ?cfg input =
@@ -329,10 +504,20 @@ let list_auto_m_l_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAutoMLJobs input
 let list_candidates_for_auto_m_l_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCandidatesForAutoMLJob input
+let list_cluster_events ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClusterEvents input
+let list_cluster_nodes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClusterNodes input
+let list_cluster_scheduler_configs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClusterSchedulerConfigs input
+let list_clusters ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListClusters input
 let list_code_repositories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCodeRepositories input
 let list_compilation_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCompilationJobs input
+let list_compute_quotas ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListComputeQuotas input
 let list_contexts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListContexts input
 let list_data_quality_job_definitions ?endpoint_url ?cfg input =
@@ -343,6 +528,8 @@ let list_devices ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDevices input
 let list_domains ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDomains input
+let list_edge_deployment_plans ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEdgeDeploymentPlans input
 let list_edge_packaging_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEdgePackagingJobs input
 let list_endpoint_configs ?endpoint_url ?cfg input =
@@ -355,6 +542,12 @@ let list_feature_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFeatureGroups input
 let list_flow_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFlowDefinitions input
+let list_hub_content_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListHubContentVersions input
+let list_hub_contents ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListHubContents input
+let list_hubs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListHubs input
 let list_human_task_uis ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListHumanTaskUis input
 let list_hyper_parameter_tuning_jobs ?endpoint_url ?cfg input =
@@ -363,6 +556,13 @@ let list_image_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImageVersions input
 let list_images ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListImages input
+let list_inference_components ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInferenceComponents input
+let list_inference_experiments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInferenceExperiments input
+let list_inference_recommendations_job_steps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListInferenceRecommendationsJobSteps
+    input
 let list_inference_recommendations_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInferenceRecommendationsJobs input
 let list_labeling_jobs ?endpoint_url ?cfg input =
@@ -371,8 +571,18 @@ let list_labeling_jobs_for_workteam ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLabelingJobsForWorkteam input
 let list_lineage_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListLineageGroups input
+let list_mlflow_apps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMlflowApps input
+let list_mlflow_tracking_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMlflowTrackingServers input
 let list_model_bias_job_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListModelBiasJobDefinitions input
+let list_model_card_export_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListModelCardExportJobs input
+let list_model_card_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListModelCardVersions input
+let list_model_cards ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListModelCards input
 let list_model_explainability_job_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListModelExplainabilityJobDefinitions
     input
@@ -386,6 +596,10 @@ let list_model_quality_job_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListModelQualityJobDefinitions input
 let list_models ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListModels input
+let list_monitoring_alert_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMonitoringAlertHistory input
+let list_monitoring_alerts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListMonitoringAlerts input
 let list_monitoring_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMonitoringExecutions input
 let list_monitoring_schedules ?endpoint_url ?cfg input =
@@ -395,18 +609,30 @@ let list_notebook_instance_lifecycle_configs ?endpoint_url ?cfg input =
     input
 let list_notebook_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListNotebookInstances input
+let list_optimization_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListOptimizationJobs input
+let list_partner_apps ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPartnerApps input
 let list_pipeline_execution_steps ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelineExecutionSteps input
 let list_pipeline_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelineExecutions input
 let list_pipeline_parameters_for_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelineParametersForExecution input
+let list_pipeline_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPipelineVersions input
 let list_pipelines ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPipelines input
 let list_processing_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProcessingJobs input
 let list_projects ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProjects input
+let list_resource_catalogs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceCatalogs input
+let list_spaces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSpaces input
+let list_stage_devices ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStageDevices input
 let list_studio_lifecycle_configs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStudioLifecycleConfigs input
 let list_subscribed_workteams ?endpoint_url ?cfg input =
@@ -419,12 +645,16 @@ let list_training_jobs_for_hyper_parameter_tuning_job ?endpoint_url ?cfg
   input =
   eval ?endpoint_url ?cfg
     Endpoints.ListTrainingJobsForHyperParameterTuningJob input
+let list_training_plans ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTrainingPlans input
 let list_transform_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTransformJobs input
 let list_trial_components ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTrialComponents input
 let list_trials ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTrials input
+let list_ultra_servers_by_reserved_capacity ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUltraServersByReservedCapacity input
 let list_user_profiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUserProfiles input
 let list_workforces ?endpoint_url ?cfg input =
@@ -443,32 +673,56 @@ let retry_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetryPipelineExecution input
 let search ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Search input
+let search_training_plan_offerings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchTrainingPlanOfferings input
 let send_pipeline_execution_step_failure ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendPipelineExecutionStepFailure input
 let send_pipeline_execution_step_success ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SendPipelineExecutionStepSuccess input
+let start_cluster_health_check ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartClusterHealthCheck input
+let start_edge_deployment_stage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartEdgeDeploymentStage input
+let start_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartInferenceExperiment input
+let start_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartMlflowTrackingServer input
 let start_monitoring_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMonitoringSchedule input
 let start_notebook_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartNotebookInstance input
 let start_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartPipelineExecution input
+let start_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSession input
+let stop_a_i_benchmark_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopAIBenchmarkJob input
+let stop_a_i_recommendation_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopAIRecommendationJob input
 let stop_auto_m_l_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopAutoMLJob input
 let stop_compilation_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopCompilationJob input
+let stop_edge_deployment_stage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopEdgeDeploymentStage input
 let stop_edge_packaging_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopEdgePackagingJob input
 let stop_hyper_parameter_tuning_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopHyperParameterTuningJob input
+let stop_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopInferenceExperiment input
 let stop_inference_recommendations_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopInferenceRecommendationsJob input
 let stop_labeling_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopLabelingJob input
+let stop_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopMlflowTrackingServer input
 let stop_monitoring_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopMonitoringSchedule input
 let stop_notebook_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopNotebookInstance input
+let stop_optimization_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopOptimizationJob input
 let stop_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopPipelineExecution input
 let stop_processing_job ?endpoint_url ?cfg input =
@@ -483,8 +737,16 @@ let update_app_image_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateAppImageConfig input
 let update_artifact ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateArtifact input
+let update_cluster ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCluster input
+let update_cluster_scheduler_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateClusterSchedulerConfig input
+let update_cluster_software ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateClusterSoftware input
 let update_code_repository ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCodeRepository input
+let update_compute_quota ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateComputeQuota input
 let update_context ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContext input
 let update_device_fleet ?endpoint_url ?cfg input =
@@ -499,10 +761,37 @@ let update_endpoint_weights_and_capacities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEndpointWeightsAndCapacities input
 let update_experiment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateExperiment input
+let update_feature_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFeatureGroup input
+let update_feature_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFeatureMetadata input
+let update_hub ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHub input
+let update_hub_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHubContent input
+let update_hub_content_reference ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHubContentReference input
 let update_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateImage input
+let update_image_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateImageVersion input
+let update_inference_component ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateInferenceComponent input
+let update_inference_component_runtime_config ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateInferenceComponentRuntimeConfig
+    input
+let update_inference_experiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateInferenceExperiment input
+let update_mlflow_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMlflowApp input
+let update_mlflow_tracking_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMlflowTrackingServer input
+let update_model_card ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateModelCard input
 let update_model_package ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateModelPackage input
+let update_monitoring_alert ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMonitoringAlert input
 let update_monitoring_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMonitoringSchedule input
 let update_notebook_instance ?endpoint_url ?cfg input =
@@ -510,12 +799,18 @@ let update_notebook_instance ?endpoint_url ?cfg input =
 let update_notebook_instance_lifecycle_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateNotebookInstanceLifecycleConfig
     input
+let update_partner_app ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePartnerApp input
 let update_pipeline ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePipeline input
 let update_pipeline_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePipelineExecution input
+let update_pipeline_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePipelineVersion input
 let update_project ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateProject input
+let update_space ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSpace input
 let update_training_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTrainingJob input
 let update_trial ?endpoint_url ?cfg input =

@@ -39,12 +39,18 @@ let create_activity =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
        and name = flag "name" (required string) ~doc:"STRING Name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_activity
            (Values.CreateActivityInput.make
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name ())
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration) ~name ())
            (Some Values.CreateActivityOutput.to_json)
            (Some Values.CreateActivityOutput.error_to_json)])
 let create_state_machine =
@@ -66,6 +72,13 @@ let create_state_machine =
        and tracingConfiguration =
          flag "tracing-configuration" (optional json_arg)
            ~doc:"JSON TracingConfiguration"
+       and publish = flag "publish" (optional bool) ~doc:"BOOL Publish"
+       and versionDescription =
+         flag "version-description" (optional string)
+           ~doc:"STRING VersionDescription"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
        and name = flag "name" (required string) ~doc:"STRING Name"
        and definition =
          flag "definition" (required string) ~doc:"STRING Definition"
@@ -81,10 +94,39 @@ let create_state_machine =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?tracingConfiguration:(Option.map
                                        ~f:Values.TracingConfiguration.of_json
-                                       tracingConfiguration) ~name
+                                       tracingConfiguration) ?publish
+              ?versionDescription
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration) ~name
               ~definition ~roleArn ())
            (Some Values.CreateStateMachineOutput.to_json)
            (Some Values.CreateStateMachineOutput.error_to_json)])
+let create_state_machine_alias =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING AliasDescription"
+       and name =
+         flag "name" (required string) ~doc:"STRING CharacterRestrictedName"
+       and routingConfiguration =
+         flag "routing-configuration" (required json_arg)
+           ~doc:"JSON RoutingConfigurationList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_state_machine_alias
+           (Values.CreateStateMachineAliasInput.make ?description ~name
+              ~routingConfiguration:(Values.RoutingConfigurationList.of_json
+                                       routingConfiguration) ())
+           (Some Values.CreateStateMachineAliasOutput.to_json)
+           (Some Values.CreateStateMachineAliasOutput.error_to_json)])
 let delete_activity =
   Command.async ~summary:""
     ([%map_open.Command
@@ -121,6 +163,44 @@ let delete_state_machine =
            (Values.DeleteStateMachineInput.make ~stateMachineArn ())
            (Some Values.DeleteStateMachineOutput.to_json)
            (Some Values.DeleteStateMachineOutput.error_to_json)])
+let delete_state_machine_alias =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stateMachineAliasArn =
+         flag "state-machine-alias-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_state_machine_alias
+           (Values.DeleteStateMachineAliasInput.make ~stateMachineAliasArn ())
+           (Some Values.DeleteStateMachineAliasOutput.to_json)
+           (Some Values.DeleteStateMachineAliasOutput.error_to_json)])
+let delete_state_machine_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stateMachineVersionArn =
+         flag "state-machine-version-arn" (required string)
+           ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_state_machine_version
+           (Values.DeleteStateMachineVersionInput.make
+              ~stateMachineVersionArn ())
+           (Some Values.DeleteStateMachineVersionOutput.to_json)
+           (Some Values.DeleteStateMachineVersionOutput.error_to_json)])
 let describe_activity =
   Command.async ~summary:""
     ([%map_open.Command
@@ -149,14 +229,36 @@ let describe_execution =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and includedData =
+         flag "included-data" (optional json_arg) ~doc:"JSON IncludedData"
        and executionArn =
          flag "execution-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_execution
-           (Values.DescribeExecutionInput.make ~executionArn ())
+           (Values.DescribeExecutionInput.make
+              ?includedData:(Option.map ~f:Values.IncludedData.of_json
+                               includedData) ~executionArn ())
            (Some Values.DescribeExecutionOutput.to_json)
            (Some Values.DescribeExecutionOutput.error_to_json)])
+let describe_map_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and mapRunArn =
+         flag "map-run-arn" (required string) ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_map_run
+           (Values.DescribeMapRunInput.make ~mapRunArn ())
+           (Some Values.DescribeMapRunOutput.to_json)
+           (Some Values.DescribeMapRunOutput.error_to_json)])
 let describe_state_machine =
   Command.async ~summary:""
     ([%map_open.Command
@@ -167,14 +269,36 @@ let describe_state_machine =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and includedData =
+         flag "included-data" (optional json_arg) ~doc:"JSON IncludedData"
        and stateMachineArn =
          flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_state_machine
-           (Values.DescribeStateMachineInput.make ~stateMachineArn ())
+           (Values.DescribeStateMachineInput.make
+              ?includedData:(Option.map ~f:Values.IncludedData.of_json
+                               includedData) ~stateMachineArn ())
            (Some Values.DescribeStateMachineOutput.to_json)
            (Some Values.DescribeStateMachineOutput.error_to_json)])
+let describe_state_machine_alias =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stateMachineAliasArn =
+         flag "state-machine-alias-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_state_machine_alias
+           (Values.DescribeStateMachineAliasInput.make ~stateMachineAliasArn
+              ()) (Some Values.DescribeStateMachineAliasOutput.to_json)
+           (Some Values.DescribeStateMachineAliasOutput.error_to_json)])
 let describe_state_machine_for_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -185,13 +309,16 @@ let describe_state_machine_for_execution =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and includedData =
+         flag "included-data" (optional json_arg) ~doc:"JSON IncludedData"
        and executionArn =
          flag "execution-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_state_machine_for_execution
-           (Values.DescribeStateMachineForExecutionInput.make ~executionArn
-              ())
+           (Values.DescribeStateMachineForExecutionInput.make
+              ?includedData:(Option.map ~f:Values.IncludedData.of_json
+                               includedData) ~executionArn ())
            (Some Values.DescribeStateMachineForExecutionOutput.to_json)
            (Some Values.DescribeStateMachineForExecutionOutput.error_to_json)])
 let get_activity_task =
@@ -270,22 +397,96 @@ let list_executions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and stateMachineArn =
+         flag "state-machine-arn" (optional string) ~doc:"STRING Arn"
        and statusFilter =
          flag "status-filter" (optional json_arg) ~doc:"JSON ExecutionStatus"
        and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
        and nextToken =
          flag "next-token" (optional string)
            ~doc:"STRING ListExecutionsPageToken"
+       and mapRunArn =
+         flag "map-run-arn" (optional string) ~doc:"STRING LongArn"
+       and redriveFilter =
+         flag "redrive-filter" (optional json_arg)
+           ~doc:"JSON ExecutionRedriveFilter" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_executions
+           (Values.ListExecutionsInput.make ?stateMachineArn
+              ?statusFilter:(Option.map ~f:Values.ExecutionStatus.of_json
+                               statusFilter) ?maxResults ?nextToken
+              ?mapRunArn
+              ?redriveFilter:(Option.map
+                                ~f:Values.ExecutionRedriveFilter.of_json
+                                redriveFilter) ())
+           (Some Values.ListExecutionsOutput.to_json)
+           (Some Values.ListExecutionsOutput.error_to_json)])
+let list_map_runs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PageToken"
+       and executionArn =
+         flag "execution-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_map_runs
+           (Values.ListMapRunsInput.make ?maxResults ?nextToken ~executionArn
+              ()) (Some Values.ListMapRunsOutput.to_json)
+           (Some Values.ListMapRunsOutput.error_to_json)])
+let list_state_machine_aliases =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PageToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
        and stateMachineArn =
          flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.list_executions
-           (Values.ListExecutionsInput.make
-              ?statusFilter:(Option.map ~f:Values.ExecutionStatus.of_json
-                               statusFilter) ?maxResults ?nextToken
-              ~stateMachineArn ()) (Some Values.ListExecutionsOutput.to_json)
-           (Some Values.ListExecutionsOutput.error_to_json)])
+           Io.list_state_machine_aliases
+           (Values.ListStateMachineAliasesInput.make ?nextToken ?maxResults
+              ~stateMachineArn ())
+           (Some Values.ListStateMachineAliasesOutput.to_json)
+           (Some Values.ListStateMachineAliasesOutput.error_to_json)])
+let list_state_machine_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PageToken"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and stateMachineArn =
+         flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_state_machine_versions
+           (Values.ListStateMachineVersionsInput.make ?nextToken ?maxResults
+              ~stateMachineArn ())
+           (Some Values.ListStateMachineVersionsOutput.to_json)
+           (Some Values.ListStateMachineVersionsOutput.error_to_json)])
 let list_state_machines =
   Command.async ~summary:""
     ([%map_open.Command
@@ -323,6 +524,50 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceInput.make ~resourceArn ())
            (Some Values.ListTagsForResourceOutput.to_json)
            (Some Values.ListTagsForResourceOutput.error_to_json)])
+let publish_state_machine_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and revisionId =
+         flag "revision-id" (optional string) ~doc:"STRING RevisionId"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING VersionDescription"
+       and stateMachineArn =
+         flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.publish_state_machine_version
+           (Values.PublishStateMachineVersionInput.make ?revisionId
+              ?description ~stateMachineArn ())
+           (Some Values.PublishStateMachineVersionOutput.to_json)
+           (Some Values.PublishStateMachineVersionOutput.error_to_json)])
+let redrive_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and executionArn =
+         flag "execution-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.redrive_execution
+           (Values.RedriveExecutionInput.make ?clientToken ~executionArn ())
+           (Some Values.RedriveExecutionOutput.to_json)
+           (Some Values.RedriveExecutionOutput.error_to_json)])
 let send_task_failure =
   Command.async ~summary:""
     ([%map_open.Command
@@ -419,13 +664,16 @@ let start_sync_execution =
        and input = flag "input" (optional string) ~doc:"STRING SensitiveData"
        and traceHeader =
          flag "trace-header" (optional string) ~doc:"STRING TraceHeader"
+       and includedData =
+         flag "included-data" (optional json_arg) ~doc:"JSON IncludedData"
        and stateMachineArn =
          flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_sync_execution
            (Values.StartSyncExecutionInput.make ?name ?input ?traceHeader
-              ~stateMachineArn ())
+              ?includedData:(Option.map ~f:Values.IncludedData.of_json
+                               includedData) ~stateMachineArn ())
            (Some Values.StartSyncExecutionOutput.to_json)
            (Some Values.StartSyncExecutionOutput.error_to_json)])
 let stop_execution =
@@ -470,6 +718,48 @@ let tag_resource =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.TagResourceOutput.to_json)
            (Some Values.TagResourceOutput.error_to_json)])
+let test_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING Arn"
+       and input = flag "input" (optional string) ~doc:"STRING SensitiveData"
+       and inspectionLevel =
+         flag "inspection-level" (optional json_arg)
+           ~doc:"JSON InspectionLevel"
+       and revealSecrets =
+         flag "reveal-secrets" (optional bool) ~doc:"BOOL RevealSecrets"
+       and variables =
+         flag "variables" (optional string) ~doc:"STRING SensitiveData"
+       and stateName =
+         flag "state-name" (optional string) ~doc:"STRING TestStateStateName"
+       and mock = flag "mock" (optional json_arg) ~doc:"JSON MockInput"
+       and context =
+         flag "context" (optional string) ~doc:"STRING SensitiveData"
+       and stateConfiguration =
+         flag "state-configuration" (optional json_arg)
+           ~doc:"JSON TestStateConfiguration"
+       and definition =
+         flag "definition" (required string) ~doc:"STRING Definition" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_state
+           (Values.TestStateInput.make ?roleArn ?input
+              ?inspectionLevel:(Option.map ~f:Values.InspectionLevel.of_json
+                                  inspectionLevel) ?revealSecrets ?variables
+              ?stateName ?mock:(Option.map ~f:Values.MockInput.of_json mock)
+              ?context
+              ?stateConfiguration:(Option.map
+                                     ~f:Values.TestStateConfiguration.of_json
+                                     stateConfiguration) ~definition ())
+           (Some Values.TestStateOutput.to_json)
+           (Some Values.TestStateOutput.error_to_json)])
 let untag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -491,6 +781,36 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceOutput.to_json)
            (Some Values.UntagResourceOutput.error_to_json)])
+let update_map_run =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxConcurrency =
+         flag "max-concurrency" (optional int) ~doc:"INT MaxConcurrency"
+       and toleratedFailurePercentage =
+         flag "tolerated-failure-percentage" (optional float)
+           ~doc:"FLOAT ToleratedFailurePercentage"
+       and toleratedFailureCount =
+         flag "tolerated-failure-count" (optional json_arg)
+           ~doc:"JSON ToleratedFailureCount"
+       and mapRunArn =
+         flag "map-run-arn" (required string) ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_map_run
+           (Values.UpdateMapRunInput.make ?maxConcurrency
+              ?toleratedFailurePercentage
+              ?toleratedFailureCount:(Option.map
+                                        ~f:Values.ToleratedFailureCount.of_json
+                                        toleratedFailureCount) ~mapRunArn ())
+           (Some Values.UpdateMapRunOutput.to_json)
+           (Some Values.UpdateMapRunOutput.error_to_json)])
 let update_state_machine =
   Command.async ~summary:""
     ([%map_open.Command
@@ -510,6 +830,13 @@ let update_state_machine =
        and tracingConfiguration =
          flag "tracing-configuration" (optional json_arg)
            ~doc:"JSON TracingConfiguration"
+       and publish = flag "publish" (optional bool) ~doc:"BOOL Publish"
+       and versionDescription =
+         flag "version-description" (optional string)
+           ~doc:"STRING VersionDescription"
+       and encryptionConfiguration =
+         flag "encryption-configuration" (optional json_arg)
+           ~doc:"JSON EncryptionConfiguration"
        and stateMachineArn =
          flag "state-machine-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
@@ -521,27 +848,99 @@ let update_state_machine =
                                        loggingConfiguration)
               ?tracingConfiguration:(Option.map
                                        ~f:Values.TracingConfiguration.of_json
-                                       tracingConfiguration) ~stateMachineArn
-              ()) (Some Values.UpdateStateMachineOutput.to_json)
+                                       tracingConfiguration) ?publish
+              ?versionDescription
+              ?encryptionConfiguration:(Option.map
+                                          ~f:Values.EncryptionConfiguration.of_json
+                                          encryptionConfiguration)
+              ~stateMachineArn ())
+           (Some Values.UpdateStateMachineOutput.to_json)
            (Some Values.UpdateStateMachineOutput.error_to_json)])
+let update_state_machine_alias =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING AliasDescription"
+       and routingConfiguration =
+         flag "routing-configuration" (optional json_arg)
+           ~doc:"JSON RoutingConfigurationList"
+       and stateMachineAliasArn =
+         flag "state-machine-alias-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_state_machine_alias
+           (Values.UpdateStateMachineAliasInput.make ?description
+              ?routingConfiguration:(Option.map
+                                       ~f:Values.RoutingConfigurationList.of_json
+                                       routingConfiguration)
+              ~stateMachineAliasArn ())
+           (Some Values.UpdateStateMachineAliasOutput.to_json)
+           (Some Values.UpdateStateMachineAliasOutput.error_to_json)])
+let validate_state_machine_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and type_ =
+         flag "type-" (optional json_arg) ~doc:"JSON StateMachineType"
+       and severity =
+         flag "severity" (optional json_arg)
+           ~doc:"JSON ValidateStateMachineDefinitionSeverity"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ValidateStateMachineDefinitionMaxResult"
+       and definition =
+         flag "definition" (required string) ~doc:"STRING Definition" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.validate_state_machine_definition
+           (Values.ValidateStateMachineDefinitionInput.make
+              ?type_:(Option.map ~f:Values.StateMachineType.of_json type_)
+              ?severity:(Option.map
+                           ~f:Values.ValidateStateMachineDefinitionSeverity.of_json
+                           severity) ?maxResults ~definition ())
+           (Some Values.ValidateStateMachineDefinitionOutput.to_json)
+           (Some Values.ValidateStateMachineDefinitionOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-activity", create_activity);
     ("create-state-machine", create_state_machine);
+    ("create-state-machine-alias", create_state_machine_alias);
     ("delete-activity", delete_activity);
     ("delete-state-machine", delete_state_machine);
+    ("delete-state-machine-alias", delete_state_machine_alias);
+    ("delete-state-machine-version", delete_state_machine_version);
     ("describe-activity", describe_activity);
     ("describe-execution", describe_execution);
+    ("describe-map-run", describe_map_run);
     ("describe-state-machine", describe_state_machine);
+    ("describe-state-machine-alias", describe_state_machine_alias);
     ("describe-state-machine-for-execution",
       describe_state_machine_for_execution);
     ("get-activity-task", get_activity_task);
     ("get-execution-history", get_execution_history);
     ("list-activities", list_activities);
     ("list-executions", list_executions);
+    ("list-map-runs", list_map_runs);
+    ("list-state-machine-aliases", list_state_machine_aliases);
+    ("list-state-machine-versions", list_state_machine_versions);
     ("list-state-machines", list_state_machines);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("publish-state-machine-version", publish_state_machine_version);
+    ("redrive-execution", redrive_execution);
     ("send-task-failure", send_task_failure);
     ("send-task-heartbeat", send_task_heartbeat);
     ("send-task-success", send_task_success);
@@ -549,5 +948,9 @@ let main =
     ("start-sync-execution", start_sync_execution);
     ("stop-execution", stop_execution);
     ("tag-resource", tag_resource);
+    ("test-state", test_state);
     ("untag-resource", untag_resource);
-    ("update-state-machine", update_state_machine)]
+    ("update-map-run", update_map_run);
+    ("update-state-machine", update_state_machine);
+    ("update-state-machine-alias", update_state_machine_alias);
+    ("validate-state-machine-definition", validate_state_machine_definition)]

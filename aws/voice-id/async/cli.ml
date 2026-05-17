@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let associate_fraudster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and fraudsterId =
+         flag "fraudster-id" (required string) ~doc:"STRING FraudsterId"
+       and watchlistId =
+         flag "watchlist-id" (required string) ~doc:"STRING WatchlistId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_fraudster
+           (Values.AssociateFraudsterRequest.make ~domainId ~fraudsterId
+              ~watchlistId ())
+           (Some Values.AssociateFraudsterResponse.to_json)
+           (Some Values.AssociateFraudsterResponse.error_to_json)])
 let create_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -57,6 +80,32 @@ let create_domain =
                                                     serverSideEncryptionConfiguration)
               ()) (Some Values.CreateDomainResponse.to_json)
            (Some Values.CreateDomainResponse.error_to_json)])
+let create_watchlist =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING ClientTokenString"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING WatchlistDescription"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and name = flag "name" (required string) ~doc:"STRING WatchlistName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_watchlist
+           (Values.CreateWatchlistRequest.make ?clientToken ?description
+              ~domainId ~name ())
+           (Some Values.CreateWatchlistResponse.to_json)
+           (Some Values.CreateWatchlistResponse.error_to_json)])
 let delete_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -111,6 +160,25 @@ let delete_speaker =
            Io.delete_speaker
            (Values.DeleteSpeakerRequest.make ~domainId ~speakerId ()) None
            None])
+let delete_watchlist =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and watchlistId =
+         flag "watchlist-id" (required string) ~doc:"STRING WatchlistId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_watchlist
+           (Values.DeleteWatchlistRequest.make ~domainId ~watchlistId ())
+           None None])
 let describe_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -209,6 +277,49 @@ let describe_speaker_enrollment_job =
            (Values.DescribeSpeakerEnrollmentJobRequest.make ~domainId ~jobId
               ()) (Some Values.DescribeSpeakerEnrollmentJobResponse.to_json)
            (Some Values.DescribeSpeakerEnrollmentJobResponse.error_to_json)])
+let describe_watchlist =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and watchlistId =
+         flag "watchlist-id" (required string) ~doc:"STRING WatchlistId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_watchlist
+           (Values.DescribeWatchlistRequest.make ~domainId ~watchlistId ())
+           (Some Values.DescribeWatchlistResponse.to_json)
+           (Some Values.DescribeWatchlistResponse.error_to_json)])
+let disassociate_fraudster =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and fraudsterId =
+         flag "fraudster-id" (required string) ~doc:"STRING FraudsterId"
+       and watchlistId =
+         flag "watchlist-id" (required string) ~doc:"STRING WatchlistId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_fraudster
+           (Values.DisassociateFraudsterRequest.make ~domainId ~fraudsterId
+              ~watchlistId ())
+           (Some Values.DisassociateFraudsterResponse.to_json)
+           (Some Values.DisassociateFraudsterResponse.error_to_json)])
 let evaluate_session =
   Command.async ~summary:""
     ([%map_open.Command
@@ -279,6 +390,31 @@ let list_fraudster_registration_jobs =
                             jobStatus) ?maxResults ?nextToken ~domainId ())
            (Some Values.ListFraudsterRegistrationJobsResponse.to_json)
            (Some Values.ListFraudsterRegistrationJobsResponse.error_to_json)])
+let list_fraudsters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsForList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and watchlistId =
+         flag "watchlist-id" (optional string) ~doc:"STRING WatchlistId"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_fraudsters
+           (Values.ListFraudstersRequest.make ?maxResults ?nextToken
+              ?watchlistId ~domainId ())
+           (Some Values.ListFraudstersResponse.to_json)
+           (Some Values.ListFraudstersResponse.error_to_json)])
 let list_speaker_enrollment_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -348,6 +484,28 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_watchlists =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsForList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_watchlists
+           (Values.ListWatchlistsRequest.make ?maxResults ?nextToken
+              ~domainId ()) (Some Values.ListWatchlistsResponse.to_json)
+           (Some Values.ListWatchlistsResponse.error_to_json)])
 let opt_out_speaker =
   Command.async ~summary:""
     ([%map_open.Command
@@ -522,28 +680,60 @@ let update_domain =
                                                     serverSideEncryptionConfiguration)
               ()) (Some Values.UpdateDomainResponse.to_json)
            (Some Values.UpdateDomainResponse.error_to_json)])
+let update_watchlist =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING WatchlistDescription"
+       and name = flag "name" (optional string) ~doc:"STRING WatchlistName"
+       and domainId =
+         flag "domain-id" (required string) ~doc:"STRING DomainId"
+       and watchlistId =
+         flag "watchlist-id" (required string) ~doc:"STRING WatchlistId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_watchlist
+           (Values.UpdateWatchlistRequest.make ?description ?name ~domainId
+              ~watchlistId ()) (Some Values.UpdateWatchlistResponse.to_json)
+           (Some Values.UpdateWatchlistResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("create-domain", create_domain);
+    [("associate-fraudster", associate_fraudster);
+    ("create-domain", create_domain);
+    ("create-watchlist", create_watchlist);
     ("delete-domain", delete_domain);
     ("delete-fraudster", delete_fraudster);
     ("delete-speaker", delete_speaker);
+    ("delete-watchlist", delete_watchlist);
     ("describe-domain", describe_domain);
     ("describe-fraudster", describe_fraudster);
     ("describe-fraudster-registration-job",
       describe_fraudster_registration_job);
     ("describe-speaker", describe_speaker);
     ("describe-speaker-enrollment-job", describe_speaker_enrollment_job);
+    ("describe-watchlist", describe_watchlist);
+    ("disassociate-fraudster", disassociate_fraudster);
     ("evaluate-session", evaluate_session);
     ("list-domains", list_domains);
     ("list-fraudster-registration-jobs", list_fraudster_registration_jobs);
+    ("list-fraudsters", list_fraudsters);
     ("list-speaker-enrollment-jobs", list_speaker_enrollment_jobs);
     ("list-speakers", list_speakers);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-watchlists", list_watchlists);
     ("opt-out-speaker", opt_out_speaker);
     ("start-fraudster-registration-job", start_fraudster_registration_job);
     ("start-speaker-enrollment-job", start_speaker_enrollment_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-domain", update_domain)]
+    ("update-domain", update_domain);
+    ("update-watchlist", update_watchlist)]

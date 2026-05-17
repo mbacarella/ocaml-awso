@@ -31,6 +31,8 @@ let delete_custom_key_store ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomKeyStore input
 let delete_imported_key_material ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteImportedKeyMaterial input
+let derive_shared_secret ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeriveSharedSecret input
 let describe_custom_key_stores ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCustomKeyStores input
 let describe_key ?endpoint_url ?cfg input =
@@ -55,8 +57,12 @@ let generate_data_key_pair_without_plaintext ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GenerateDataKeyPairWithoutPlaintext input
 let generate_data_key_without_plaintext ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GenerateDataKeyWithoutPlaintext input
+let generate_mac ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GenerateMac input
 let generate_random ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GenerateRandom input
+let get_key_last_usage ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetKeyLastUsage input
 let get_key_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKeyPolicy input
 let get_key_rotation_status ?endpoint_url ?cfg input =
@@ -73,6 +79,8 @@ let list_grants ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGrants input
 let list_key_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKeyPolicies input
+let list_key_rotations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListKeyRotations input
 let list_keys ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKeys input
 let list_resource_tags ?endpoint_url ?cfg input =
@@ -89,6 +97,8 @@ let retire_grant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetireGrant input
 let revoke_grant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeGrant input
+let rotate_key_on_demand ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RotateKeyOnDemand input
 let schedule_key_deletion ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ScheduleKeyDeletion input
 let sign ?endpoint_url ?cfg input =
@@ -107,3 +117,5 @@ let update_primary_region ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePrimaryRegion input
 let verify ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Verify input
+let verify_mac ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.VerifyMac input

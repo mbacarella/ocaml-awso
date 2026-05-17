@@ -10,6 +10,12 @@ val add_tags :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       AddTagsInput.t -> (AddTagsOutput.t, AddTagsOutput.error) Result.t Lwt.t
+val add_trust_store_revocations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AddTrustStoreRevocationsInput.t ->
+        (AddTrustStoreRevocationsOutput.t,
+          AddTrustStoreRevocationsOutput.error) Result.t Lwt.t
 val create_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -32,6 +38,12 @@ val create_target_group :
       CreateTargetGroupInput.t ->
         (CreateTargetGroupOutput.t, CreateTargetGroupOutput.error) Result.t
           Lwt.t
+val create_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTrustStoreInput.t ->
+        (CreateTrustStoreOutput.t, CreateTrustStoreOutput.error) Result.t
+          Lwt.t
 val delete_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -48,11 +60,23 @@ val delete_rule :
     ?cfg:Awso.Cfg.t ->
       DeleteRuleInput.t ->
         (DeleteRuleOutput.t, DeleteRuleOutput.error) Result.t Lwt.t
+val delete_shared_trust_store_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSharedTrustStoreAssociationInput.t ->
+        (DeleteSharedTrustStoreAssociationOutput.t,
+          DeleteSharedTrustStoreAssociationOutput.error) Result.t Lwt.t
 val delete_target_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteTargetGroupInput.t ->
         (DeleteTargetGroupOutput.t, DeleteTargetGroupOutput.error) Result.t
+          Lwt.t
+val delete_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTrustStoreInput.t ->
+        (DeleteTrustStoreOutput.t, DeleteTrustStoreOutput.error) Result.t
           Lwt.t
 val deregister_targets :
   ?endpoint_url:string ->
@@ -66,6 +90,18 @@ val describe_account_limits :
       DescribeAccountLimitsInput.t ->
         (DescribeAccountLimitsOutput.t, DescribeAccountLimitsOutput.error)
           Result.t Lwt.t
+val describe_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCapacityReservationInput.t ->
+        (DescribeCapacityReservationOutput.t,
+          DescribeCapacityReservationOutput.error) Result.t Lwt.t
+val describe_listener_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeListenerAttributesInput.t ->
+        (DescribeListenerAttributesOutput.t,
+          DescribeListenerAttributesOutput.error) Result.t Lwt.t
 val describe_listener_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -124,11 +160,64 @@ val describe_target_health :
       DescribeTargetHealthInput.t ->
         (DescribeTargetHealthOutput.t, DescribeTargetHealthOutput.error)
           Result.t Lwt.t
+val describe_trust_store_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrustStoreAssociationsInput.t ->
+        (DescribeTrustStoreAssociationsOutput.t,
+          DescribeTrustStoreAssociationsOutput.error) Result.t Lwt.t
+val describe_trust_store_revocations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrustStoreRevocationsInput.t ->
+        (DescribeTrustStoreRevocationsOutput.t,
+          DescribeTrustStoreRevocationsOutput.error) Result.t Lwt.t
+val describe_trust_stores :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeTrustStoresInput.t ->
+        (DescribeTrustStoresOutput.t, DescribeTrustStoresOutput.error)
+          Result.t Lwt.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyInput.t ->
+        (GetResourcePolicyOutput.t, GetResourcePolicyOutput.error) Result.t
+          Lwt.t
+val get_trust_store_ca_certificates_bundle :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTrustStoreCaCertificatesBundleInput.t ->
+        (GetTrustStoreCaCertificatesBundleOutput.t,
+          GetTrustStoreCaCertificatesBundleOutput.error) Result.t Lwt.t
+val get_trust_store_revocation_content :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTrustStoreRevocationContentInput.t ->
+        (GetTrustStoreRevocationContentOutput.t,
+          GetTrustStoreRevocationContentOutput.error) Result.t Lwt.t
+val modify_capacity_reservation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyCapacityReservationInput.t ->
+        (ModifyCapacityReservationOutput.t,
+          ModifyCapacityReservationOutput.error) Result.t Lwt.t
+val modify_ip_pools :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyIpPoolsInput.t ->
+        (ModifyIpPoolsOutput.t, ModifyIpPoolsOutput.error) Result.t Lwt.t
 val modify_listener :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ModifyListenerInput.t ->
         (ModifyListenerOutput.t, ModifyListenerOutput.error) Result.t Lwt.t
+val modify_listener_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyListenerAttributesInput.t ->
+        (ModifyListenerAttributesOutput.t,
+          ModifyListenerAttributesOutput.error) Result.t Lwt.t
 val modify_load_balancer_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -152,6 +241,12 @@ val modify_target_group_attributes :
       ModifyTargetGroupAttributesInput.t ->
         (ModifyTargetGroupAttributesOutput.t,
           ModifyTargetGroupAttributesOutput.error) Result.t Lwt.t
+val modify_trust_store :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyTrustStoreInput.t ->
+        (ModifyTrustStoreOutput.t, ModifyTrustStoreOutput.error) Result.t
+          Lwt.t
 val register_targets :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -168,6 +263,12 @@ val remove_tags :
     ?cfg:Awso.Cfg.t ->
       RemoveTagsInput.t ->
         (RemoveTagsOutput.t, RemoveTagsOutput.error) Result.t Lwt.t
+val remove_trust_store_revocations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RemoveTrustStoreRevocationsInput.t ->
+        (RemoveTrustStoreRevocationsOutput.t,
+          RemoveTrustStoreRevocationsOutput.error) Result.t Lwt.t
 val set_ip_address_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

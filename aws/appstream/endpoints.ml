@@ -2,6 +2,10 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateAppBlockBuilderAppBlock:
+  (AssociateAppBlockBuilderAppBlockRequest.t,
+  AssociateAppBlockBuilderAppBlockResult.t,
+  AssociateAppBlockBuilderAppBlockResult.error) t 
   | AssociateApplicationFleet: (AssociateApplicationFleetRequest.t,
   AssociateApplicationFleetResult.t, AssociateApplicationFleetResult.error) t
   
@@ -11,6 +15,10 @@ type ('i, 'o, 'e) t =
   AssociateApplicationToEntitlementResult.error) t 
   | AssociateFleet: (AssociateFleetRequest.t, AssociateFleetResult.t,
   AssociateFleetResult.error) t 
+  | AssociateSoftwareToImageBuilder:
+  (AssociateSoftwareToImageBuilderRequest.t,
+  AssociateSoftwareToImageBuilderResult.t,
+  AssociateSoftwareToImageBuilderResult.error) t 
   | BatchAssociateUserStack: (BatchAssociateUserStackRequest.t,
   BatchAssociateUserStackResult.t, BatchAssociateUserStackResult.error) t 
   | BatchDisassociateUserStack: (BatchDisassociateUserStackRequest.t,
@@ -20,12 +28,20 @@ type ('i, 'o, 'e) t =
   CopyImageResponse.error) t 
   | CreateAppBlock: (CreateAppBlockRequest.t, CreateAppBlockResult.t,
   CreateAppBlockResult.error) t 
+  | CreateAppBlockBuilder: (CreateAppBlockBuilderRequest.t,
+  CreateAppBlockBuilderResult.t, CreateAppBlockBuilderResult.error) t 
+  | CreateAppBlockBuilderStreamingURL:
+  (CreateAppBlockBuilderStreamingURLRequest.t,
+  CreateAppBlockBuilderStreamingURLResult.t,
+  CreateAppBlockBuilderStreamingURLResult.error) t 
   | CreateApplication: (CreateApplicationRequest.t,
   CreateApplicationResult.t, CreateApplicationResult.error) t 
   | CreateDirectoryConfig: (CreateDirectoryConfigRequest.t,
   CreateDirectoryConfigResult.t, CreateDirectoryConfigResult.error) t 
   | CreateEntitlement: (CreateEntitlementRequest.t,
   CreateEntitlementResult.t, CreateEntitlementResult.error) t 
+  | CreateExportImageTask: (CreateExportImageTaskRequest.t,
+  CreateExportImageTaskResult.t, CreateExportImageTaskResult.error) t 
   | CreateFleet: (CreateFleetRequest.t, CreateFleetResult.t,
   CreateFleetResult.error) t 
   | CreateImageBuilder: (CreateImageBuilderRequest.t,
@@ -33,10 +49,14 @@ type ('i, 'o, 'e) t =
   | CreateImageBuilderStreamingURL: (CreateImageBuilderStreamingURLRequest.t,
   CreateImageBuilderStreamingURLResult.t,
   CreateImageBuilderStreamingURLResult.error) t 
+  | CreateImportedImage: (CreateImportedImageRequest.t,
+  CreateImportedImageResult.t, CreateImportedImageResult.error) t 
   | CreateStack: (CreateStackRequest.t, CreateStackResult.t,
   CreateStackResult.error) t 
   | CreateStreamingURL: (CreateStreamingURLRequest.t,
   CreateStreamingURLResult.t, CreateStreamingURLResult.error) t 
+  | CreateThemeForStack: (CreateThemeForStackRequest.t,
+  CreateThemeForStackResult.t, CreateThemeForStackResult.error) t 
   | CreateUpdatedImage: (CreateUpdatedImageRequest.t,
   CreateUpdatedImageResult.t, CreateUpdatedImageResult.error) t 
   | CreateUsageReportSubscription: (CreateUsageReportSubscriptionRequest.t,
@@ -46,6 +66,8 @@ type ('i, 'o, 'e) t =
   CreateUserResult.error) t 
   | DeleteAppBlock: (DeleteAppBlockRequest.t, DeleteAppBlockResult.t,
   DeleteAppBlockResult.error) t 
+  | DeleteAppBlockBuilder: (DeleteAppBlockBuilderRequest.t,
+  DeleteAppBlockBuilderResult.t, DeleteAppBlockBuilderResult.error) t 
   | DeleteApplication: (DeleteApplicationRequest.t,
   DeleteApplicationResult.t, DeleteApplicationResult.error) t 
   | DeleteDirectoryConfig: (DeleteDirectoryConfigRequest.t,
@@ -62,13 +84,23 @@ type ('i, 'o, 'e) t =
   DeleteImagePermissionsResult.t, DeleteImagePermissionsResult.error) t 
   | DeleteStack: (DeleteStackRequest.t, DeleteStackResult.t,
   DeleteStackResult.error) t 
+  | DeleteThemeForStack: (DeleteThemeForStackRequest.t,
+  DeleteThemeForStackResult.t, DeleteThemeForStackResult.error) t 
   | DeleteUsageReportSubscription: (DeleteUsageReportSubscriptionRequest.t,
   DeleteUsageReportSubscriptionResult.t,
   DeleteUsageReportSubscriptionResult.error) t 
   | DeleteUser: (DeleteUserRequest.t, DeleteUserResult.t,
   DeleteUserResult.error) t 
+  | DescribeAppBlockBuilderAppBlockAssociations:
+  (DescribeAppBlockBuilderAppBlockAssociationsRequest.t,
+  DescribeAppBlockBuilderAppBlockAssociationsResult.t,
+  DescribeAppBlockBuilderAppBlockAssociationsResult.error) t 
+  | DescribeAppBlockBuilders: (DescribeAppBlockBuildersRequest.t,
+  DescribeAppBlockBuildersResult.t, DescribeAppBlockBuildersResult.error) t 
   | DescribeAppBlocks: (DescribeAppBlocksRequest.t,
   DescribeAppBlocksResult.t, DescribeAppBlocksResult.error) t 
+  | DescribeAppLicenseUsage: (DescribeAppLicenseUsageRequest.t,
+  DescribeAppLicenseUsageResult.t, DescribeAppLicenseUsageResult.error) t 
   | DescribeApplicationFleetAssociations:
   (DescribeApplicationFleetAssociationsRequest.t,
   DescribeApplicationFleetAssociationsResult.t,
@@ -89,8 +121,13 @@ type ('i, 'o, 'e) t =
   DescribeImagesResult.error) t 
   | DescribeSessions: (DescribeSessionsRequest.t, DescribeSessionsResult.t,
   DescribeSessionsResult.error) t 
+  | DescribeSoftwareAssociations: (DescribeSoftwareAssociationsRequest.t,
+  DescribeSoftwareAssociationsResult.t,
+  DescribeSoftwareAssociationsResult.error) t 
   | DescribeStacks: (DescribeStacksRequest.t, DescribeStacksResult.t,
   DescribeStacksResult.error) t 
+  | DescribeThemeForStack: (DescribeThemeForStackRequest.t,
+  DescribeThemeForStackResult.t, DescribeThemeForStackResult.error) t 
   | DescribeUsageReportSubscriptions:
   (DescribeUsageReportSubscriptionsRequest.t,
   DescribeUsageReportSubscriptionsResult.t,
@@ -102,6 +139,10 @@ type ('i, 'o, 'e) t =
   DescribeUsersResult.error) t 
   | DisableUser: (DisableUserRequest.t, DisableUserResult.t,
   DisableUserResult.error) t 
+  | DisassociateAppBlockBuilderAppBlock:
+  (DisassociateAppBlockBuilderAppBlockRequest.t,
+  DisassociateAppBlockBuilderAppBlockResult.t,
+  DisassociateAppBlockBuilderAppBlockResult.error) t 
   | DisassociateApplicationFleet: (DisassociateApplicationFleetRequest.t,
   DisassociateApplicationFleetResult.t,
   DisassociateApplicationFleetResult.error) t 
@@ -111,22 +152,40 @@ type ('i, 'o, 'e) t =
   DisassociateApplicationFromEntitlementResult.error) t 
   | DisassociateFleet: (DisassociateFleetRequest.t,
   DisassociateFleetResult.t, DisassociateFleetResult.error) t 
+  | DisassociateSoftwareFromImageBuilder:
+  (DisassociateSoftwareFromImageBuilderRequest.t,
+  DisassociateSoftwareFromImageBuilderResult.t,
+  DisassociateSoftwareFromImageBuilderResult.error) t 
+  | DrainSessionInstance: (DrainSessionInstanceRequest.t,
+  DrainSessionInstanceResult.t, DrainSessionInstanceResult.error) t 
   | EnableUser: (EnableUserRequest.t, EnableUserResult.t,
   EnableUserResult.error) t 
   | ExpireSession: (ExpireSessionRequest.t, ExpireSessionResult.t,
   ExpireSessionResult.error) t 
+  | GetExportImageTask: (GetExportImageTaskRequest.t,
+  GetExportImageTaskResult.t, GetExportImageTaskResult.error) t 
   | ListAssociatedFleets: (ListAssociatedFleetsRequest.t,
   ListAssociatedFleetsResult.t, ListAssociatedFleetsResult.error) t 
   | ListAssociatedStacks: (ListAssociatedStacksRequest.t,
   ListAssociatedStacksResult.t, ListAssociatedStacksResult.error) t 
   | ListEntitledApplications: (ListEntitledApplicationsRequest.t,
   ListEntitledApplicationsResult.t, ListEntitledApplicationsResult.error) t 
+  | ListExportImageTasks: (ListExportImageTasksRequest.t,
+  ListExportImageTasksResult.t, ListExportImageTasksResult.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | StartAppBlockBuilder: (StartAppBlockBuilderRequest.t,
+  StartAppBlockBuilderResult.t, StartAppBlockBuilderResult.error) t 
   | StartFleet: (StartFleetRequest.t, StartFleetResult.t,
   StartFleetResult.error) t 
   | StartImageBuilder: (StartImageBuilderRequest.t,
   StartImageBuilderResult.t, StartImageBuilderResult.error) t 
+  | StartSoftwareDeploymentToImageBuilder:
+  (StartSoftwareDeploymentToImageBuilderRequest.t,
+  StartSoftwareDeploymentToImageBuilderResult.t,
+  StartSoftwareDeploymentToImageBuilderResult.error) t 
+  | StopAppBlockBuilder: (StopAppBlockBuilderRequest.t,
+  StopAppBlockBuilderResult.t, StopAppBlockBuilderResult.error) t 
   | StopFleet: (StopFleetRequest.t, StopFleetResult.t, StopFleetResult.error)
   t 
   | StopImageBuilder: (StopImageBuilderRequest.t, StopImageBuilderResult.t,
@@ -135,6 +194,8 @@ type ('i, 'o, 'e) t =
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAppBlockBuilder: (UpdateAppBlockBuilderRequest.t,
+  UpdateAppBlockBuilderResult.t, UpdateAppBlockBuilderResult.error) t 
   | UpdateApplication: (UpdateApplicationRequest.t,
   UpdateApplicationResult.t, UpdateApplicationResult.error) t 
   | UpdateDirectoryConfig: (UpdateDirectoryConfigRequest.t,
@@ -147,27 +208,37 @@ type ('i, 'o, 'e) t =
   UpdateImagePermissionsResult.t, UpdateImagePermissionsResult.error) t 
   | UpdateStack: (UpdateStackRequest.t, UpdateStackResult.t,
   UpdateStackResult.error) t 
+  | UpdateThemeForStack: (UpdateThemeForStackRequest.t,
+  UpdateThemeForStackResult.t, UpdateThemeForStackResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateAppBlockBuilderAppBlock -> `POST
   | AssociateApplicationFleet -> `POST
   | AssociateApplicationToEntitlement -> `POST
   | AssociateFleet -> `POST
+  | AssociateSoftwareToImageBuilder -> `POST
   | BatchAssociateUserStack -> `POST
   | BatchDisassociateUserStack -> `POST
   | CopyImage -> `POST
   | CreateAppBlock -> `POST
+  | CreateAppBlockBuilder -> `POST
+  | CreateAppBlockBuilderStreamingURL -> `POST
   | CreateApplication -> `POST
   | CreateDirectoryConfig -> `POST
   | CreateEntitlement -> `POST
+  | CreateExportImageTask -> `POST
   | CreateFleet -> `POST
   | CreateImageBuilder -> `POST
   | CreateImageBuilderStreamingURL -> `POST
+  | CreateImportedImage -> `POST
   | CreateStack -> `POST
   | CreateStreamingURL -> `POST
+  | CreateThemeForStack -> `POST
   | CreateUpdatedImage -> `POST
   | CreateUsageReportSubscription -> `POST
   | CreateUser -> `POST
   | DeleteAppBlock -> `POST
+  | DeleteAppBlockBuilder -> `POST
   | DeleteApplication -> `POST
   | DeleteDirectoryConfig -> `POST
   | DeleteEntitlement -> `POST
@@ -176,9 +247,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteImageBuilder -> `POST
   | DeleteImagePermissions -> `POST
   | DeleteStack -> `POST
+  | DeleteThemeForStack -> `POST
   | DeleteUsageReportSubscription -> `POST
   | DeleteUser -> `POST
+  | DescribeAppBlockBuilderAppBlockAssociations -> `POST
+  | DescribeAppBlockBuilders -> `POST
   | DescribeAppBlocks -> `POST
+  | DescribeAppLicenseUsage -> `POST
   | DescribeApplicationFleetAssociations -> `POST
   | DescribeApplications -> `POST
   | DescribeDirectoryConfigs -> `POST
@@ -188,56 +263,79 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeImagePermissions -> `POST
   | DescribeImages -> `POST
   | DescribeSessions -> `POST
+  | DescribeSoftwareAssociations -> `POST
   | DescribeStacks -> `POST
+  | DescribeThemeForStack -> `POST
   | DescribeUsageReportSubscriptions -> `POST
   | DescribeUserStackAssociations -> `POST
   | DescribeUsers -> `POST
   | DisableUser -> `POST
+  | DisassociateAppBlockBuilderAppBlock -> `POST
   | DisassociateApplicationFleet -> `POST
   | DisassociateApplicationFromEntitlement -> `POST
   | DisassociateFleet -> `POST
+  | DisassociateSoftwareFromImageBuilder -> `POST
+  | DrainSessionInstance -> `POST
   | EnableUser -> `POST
   | ExpireSession -> `POST
+  | GetExportImageTask -> `POST
   | ListAssociatedFleets -> `POST
   | ListAssociatedStacks -> `POST
   | ListEntitledApplications -> `POST
+  | ListExportImageTasks -> `POST
   | ListTagsForResource -> `POST
+  | StartAppBlockBuilder -> `POST
   | StartFleet -> `POST
   | StartImageBuilder -> `POST
+  | StartSoftwareDeploymentToImageBuilder -> `POST
+  | StopAppBlockBuilder -> `POST
   | StopFleet -> `POST
   | StopImageBuilder -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
+  | UpdateAppBlockBuilder -> `POST
   | UpdateApplication -> `POST
   | UpdateDirectoryConfig -> `POST
   | UpdateEntitlement -> `POST
   | UpdateFleet -> `POST
   | UpdateImagePermissions -> `POST
   | UpdateStack -> `POST
+  | UpdateThemeForStack -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateAppBlockBuilderAppBlock ->
+          (Format.kasprintf Uri.of_string) "/"
       | AssociateApplicationFleet -> (Format.kasprintf Uri.of_string) "/"
       | AssociateApplicationToEntitlement ->
           (Format.kasprintf Uri.of_string) "/"
       | AssociateFleet -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateSoftwareToImageBuilder ->
+          (Format.kasprintf Uri.of_string) "/"
       | BatchAssociateUserStack -> (Format.kasprintf Uri.of_string) "/"
       | BatchDisassociateUserStack -> (Format.kasprintf Uri.of_string) "/"
       | CopyImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateAppBlock -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAppBlockBuilder -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAppBlockBuilderStreamingURL ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateApplication -> (Format.kasprintf Uri.of_string) "/"
       | CreateDirectoryConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateEntitlement -> (Format.kasprintf Uri.of_string) "/"
+      | CreateExportImageTask -> (Format.kasprintf Uri.of_string) "/"
       | CreateFleet -> (Format.kasprintf Uri.of_string) "/"
       | CreateImageBuilder -> (Format.kasprintf Uri.of_string) "/"
       | CreateImageBuilderStreamingURL ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateImportedImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateStack -> (Format.kasprintf Uri.of_string) "/"
       | CreateStreamingURL -> (Format.kasprintf Uri.of_string) "/"
+      | CreateThemeForStack -> (Format.kasprintf Uri.of_string) "/"
       | CreateUpdatedImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateUsageReportSubscription -> (Format.kasprintf Uri.of_string) "/"
       | CreateUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAppBlock -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAppBlockBuilder -> (Format.kasprintf Uri.of_string) "/"
       | DeleteApplication -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDirectoryConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEntitlement -> (Format.kasprintf Uri.of_string) "/"
@@ -246,9 +344,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteImageBuilder -> (Format.kasprintf Uri.of_string) "/"
       | DeleteImagePermissions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStack -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteThemeForStack -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUsageReportSubscription -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAppBlockBuilderAppBlockAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeAppBlockBuilders -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAppBlocks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAppLicenseUsage -> (Format.kasprintf Uri.of_string) "/"
       | DescribeApplicationFleetAssociations ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeApplications -> (Format.kasprintf Uri.of_string) "/"
@@ -259,37 +362,61 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeImagePermissions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImages -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSessions -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSoftwareAssociations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStacks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeThemeForStack -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUsageReportSubscriptions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeUserStackAssociations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUsers -> (Format.kasprintf Uri.of_string) "/"
       | DisableUser -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateAppBlockBuilderAppBlock ->
+          (Format.kasprintf Uri.of_string) "/"
       | DisassociateApplicationFleet -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateApplicationFromEntitlement ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateFleet -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateSoftwareFromImageBuilder ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DrainSessionInstance -> (Format.kasprintf Uri.of_string) "/"
       | EnableUser -> (Format.kasprintf Uri.of_string) "/"
       | ExpireSession -> (Format.kasprintf Uri.of_string) "/"
+      | GetExportImageTask -> (Format.kasprintf Uri.of_string) "/"
       | ListAssociatedFleets -> (Format.kasprintf Uri.of_string) "/"
       | ListAssociatedStacks -> (Format.kasprintf Uri.of_string) "/"
       | ListEntitledApplications -> (Format.kasprintf Uri.of_string) "/"
+      | ListExportImageTasks -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
+      | StartAppBlockBuilder -> (Format.kasprintf Uri.of_string) "/"
       | StartFleet -> (Format.kasprintf Uri.of_string) "/"
       | StartImageBuilder -> (Format.kasprintf Uri.of_string) "/"
+      | StartSoftwareDeploymentToImageBuilder ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StopAppBlockBuilder -> (Format.kasprintf Uri.of_string) "/"
       | StopFleet -> (Format.kasprintf Uri.of_string) "/"
       | StopImageBuilder -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAppBlockBuilder -> (Format.kasprintf Uri.of_string) "/"
       | UpdateApplication -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDirectoryConfig -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEntitlement -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFleet -> (Format.kasprintf Uri.of_string) "/"
       | UpdateImagePermissions -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateStack -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateStack -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateThemeForStack -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
+  | AssociateAppBlockBuilderAppBlock ->
+      let json = AssociateAppBlockBuilderAppBlockRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.AssociateAppBlockBuilderAppBlock")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | AssociateApplicationFleet ->
       let json = AssociateApplicationFleetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -315,6 +442,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.AssociateFleet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssociateSoftwareToImageBuilder ->
+      let json = AssociateSoftwareToImageBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.AssociateSoftwareToImageBuilder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchAssociateUserStack ->
       let json = BatchAssociateUserStackRequest.to_json req in
@@ -349,6 +485,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.CreateAppBlock")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAppBlockBuilder ->
+      let json = CreateAppBlockBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.CreateAppBlockBuilder")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAppBlockBuilderStreamingURL ->
+      let json = CreateAppBlockBuilderStreamingURLRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.CreateAppBlockBuilderStreamingURL")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateApplication ->
       let json = CreateApplicationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -372,6 +525,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.CreateEntitlement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateExportImageTask ->
+      let json = CreateExportImageTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.CreateExportImageTask")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateFleet ->
       let json = CreateFleetRequest.to_json req in
@@ -398,6 +559,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "PhotonAdminProxyService.CreateImageBuilderStreamingURL")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateImportedImage ->
+      let json = CreateImportedImageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.CreateImportedImage")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateStack ->
       let json = CreateStackRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -413,6 +582,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.CreateStreamingURL")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateThemeForStack ->
+      let json = CreateThemeForStackRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.CreateThemeForStack")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateUpdatedImage ->
       let json = CreateUpdatedImageRequest.to_json req in
@@ -446,6 +623,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DeleteAppBlock")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAppBlockBuilder ->
+      let json = DeleteAppBlockBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.DeleteAppBlockBuilder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteApplication ->
       let json = DeleteApplicationRequest.to_json req in
@@ -511,6 +696,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DeleteStack")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteThemeForStack ->
+      let json = DeleteThemeForStackRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.DeleteThemeForStack")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteUsageReportSubscription ->
       let json = DeleteUsageReportSubscriptionRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -528,6 +721,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DeleteUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAppBlockBuilderAppBlockAssociations ->
+      let json =
+        DescribeAppBlockBuilderAppBlockAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.DescribeAppBlockBuilderAppBlockAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAppBlockBuilders ->
+      let json = DescribeAppBlockBuildersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.DescribeAppBlockBuilders")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeAppBlocks ->
       let json = DescribeAppBlocksRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -535,6 +747,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DescribeAppBlocks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAppLicenseUsage ->
+      let json = DescribeAppLicenseUsageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.DescribeAppLicenseUsage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeApplicationFleetAssociations ->
       let json = DescribeApplicationFleetAssociationsRequest.to_json req in
@@ -611,6 +831,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DescribeSessions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeSoftwareAssociations ->
+      let json = DescribeSoftwareAssociationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.DescribeSoftwareAssociations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeStacks ->
       let json = DescribeStacksRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -618,6 +847,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DescribeStacks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeThemeForStack ->
+      let json = DescribeThemeForStackRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.DescribeThemeForStack")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeUsageReportSubscriptions ->
       let json = DescribeUsageReportSubscriptionsRequest.to_json req in
@@ -653,6 +890,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DisableUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateAppBlockBuilderAppBlock ->
+      let json = DisassociateAppBlockBuilderAppBlockRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.DisassociateAppBlockBuilderAppBlock")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateApplicationFleet ->
       let json = DisassociateApplicationFleetRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -679,6 +925,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.DisassociateFleet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisassociateSoftwareFromImageBuilder ->
+      let json = DisassociateSoftwareFromImageBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.DisassociateSoftwareFromImageBuilder")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DrainSessionInstance ->
+      let json = DrainSessionInstanceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.DrainSessionInstance")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | EnableUser ->
       let json = EnableUserRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -694,6 +957,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.ExpireSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetExportImageTask ->
+      let json = GetExportImageTaskRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.GetExportImageTask")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAssociatedFleets ->
       let json = ListAssociatedFleetsRequest.to_json req in
@@ -720,6 +991,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "PhotonAdminProxyService.ListEntitledApplications")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListExportImageTasks ->
+      let json = ListExportImageTasksRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.ListExportImageTasks")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -727,6 +1006,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartAppBlockBuilder ->
+      let json = StartAppBlockBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.StartAppBlockBuilder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartFleet ->
       let json = StartFleetRequest.to_json req in
@@ -743,6 +1030,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.StartImageBuilder")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSoftwareDeploymentToImageBuilder ->
+      let json = StartSoftwareDeploymentToImageBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "PhotonAdminProxyService.StartSoftwareDeploymentToImageBuilder")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopAppBlockBuilder ->
+      let json = StopAppBlockBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.StopAppBlockBuilder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopFleet ->
       let json = StopFleetRequest.to_json req in
@@ -775,6 +1079,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAppBlockBuilder ->
+      let json = UpdateAppBlockBuilderRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.UpdateAppBlockBuilder")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateApplication ->
       let json = UpdateApplicationRequest.to_json req in
@@ -824,6 +1136,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "PhotonAdminProxyService.UpdateStack")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateThemeForStack ->
+      let json = UpdateThemeForStackRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "PhotonAdminProxyService.UpdateThemeForStack")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -847,6 +1167,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = parse_aws_error in
   let _ = resp in
   match endpoint with
+  | AssociateAppBlockBuilderAppBlock ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateAppBlockBuilderAppBlockResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateAppBlockBuilderAppBlockResult.error_of_json))
   | AssociateApplicationFleet ->
       if is_success
       then
@@ -871,6 +1200,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (AssociateFleetResult.of_json json)
       else Error (parse_aws_error (Some AssociateFleetResult.error_of_json))
+  | AssociateSoftwareToImageBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssociateSoftwareToImageBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateSoftwareToImageBuilderResult.error_of_json))
   | BatchAssociateUserStack ->
       if is_success
       then
@@ -900,6 +1238,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateAppBlockResult.of_json json)
       else Error (parse_aws_error (Some CreateAppBlockResult.error_of_json))
+  | CreateAppBlockBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAppBlockBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateAppBlockBuilderResult.error_of_json))
+  | CreateAppBlockBuilderStreamingURL ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAppBlockBuilderStreamingURLResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAppBlockBuilderStreamingURLResult.error_of_json))
   | CreateApplication ->
       if is_success
       then
@@ -922,6 +1277,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateEntitlementResult.of_json json)
       else
         Error (parse_aws_error (Some CreateEntitlementResult.error_of_json))
+  | CreateExportImageTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateExportImageTaskResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateExportImageTaskResult.error_of_json))
   | CreateFleet ->
       if is_success
       then
@@ -944,6 +1307,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateImageBuilderStreamingURLResult.error_of_json))
+  | CreateImportedImage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateImportedImageResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateImportedImageResult.error_of_json))
   | CreateStack ->
       if is_success
       then
@@ -957,6 +1328,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateStreamingURLResult.of_json json)
       else
         Error (parse_aws_error (Some CreateStreamingURLResult.error_of_json))
+  | CreateThemeForStack ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateThemeForStackResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateThemeForStackResult.error_of_json))
   | CreateUpdatedImage ->
       if is_success
       then
@@ -985,6 +1364,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteAppBlockResult.of_json json)
       else Error (parse_aws_error (Some DeleteAppBlockResult.error_of_json))
+  | DeleteAppBlockBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAppBlockBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteAppBlockBuilderResult.error_of_json))
   | DeleteApplication ->
       if is_success
       then
@@ -1040,6 +1427,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteStackResult.of_json json)
       else Error (parse_aws_error (Some DeleteStackResult.error_of_json))
+  | DeleteThemeForStack ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteThemeForStackResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteThemeForStackResult.error_of_json))
   | DeleteUsageReportSubscription ->
       if is_success
       then
@@ -1055,6 +1450,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteUserResult.of_json json)
       else Error (parse_aws_error (Some DeleteUserResult.error_of_json))
+  | DescribeAppBlockBuilderAppBlockAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAppBlockBuilderAppBlockAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeAppBlockBuilderAppBlockAssociationsResult.error_of_json))
+  | DescribeAppBlockBuilders ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAppBlockBuildersResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeAppBlockBuildersResult.error_of_json))
   | DescribeAppBlocks ->
       if is_success
       then
@@ -1062,6 +1476,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeAppBlocksResult.of_json json)
       else
         Error (parse_aws_error (Some DescribeAppBlocksResult.error_of_json))
+  | DescribeAppLicenseUsage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAppLicenseUsageResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeAppLicenseUsageResult.error_of_json))
   | DescribeApplicationFleetAssociations ->
       if is_success
       then
@@ -1132,12 +1554,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeSessionsResult.of_json json)
       else
         Error (parse_aws_error (Some DescribeSessionsResult.error_of_json))
+  | DescribeSoftwareAssociations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSoftwareAssociationsResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSoftwareAssociationsResult.error_of_json))
   | DescribeStacks ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeStacksResult.of_json json)
       else Error (parse_aws_error (Some DescribeStacksResult.error_of_json))
+  | DescribeThemeForStack ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeThemeForStackResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeThemeForStackResult.error_of_json))
   | DescribeUsageReportSubscriptions ->
       if is_success
       then
@@ -1168,6 +1607,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DisableUserResult.of_json json)
       else Error (parse_aws_error (Some DisableUserResult.error_of_json))
+  | DisassociateAppBlockBuilderAppBlock ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateAppBlockBuilderAppBlockResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateAppBlockBuilderAppBlockResult.error_of_json))
   | DisassociateApplicationFleet ->
       if is_success
       then
@@ -1193,6 +1641,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DisassociateFleetResult.of_json json)
       else
         Error (parse_aws_error (Some DisassociateFleetResult.error_of_json))
+  | DisassociateSoftwareFromImageBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisassociateSoftwareFromImageBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateSoftwareFromImageBuilderResult.error_of_json))
+  | DrainSessionInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DrainSessionInstanceResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DrainSessionInstanceResult.error_of_json))
   | EnableUser ->
       if is_success
       then
@@ -1205,6 +1670,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ExpireSessionResult.of_json json)
       else Error (parse_aws_error None)
+  | GetExportImageTask ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetExportImageTaskResult.of_json json)
+      else
+        Error (parse_aws_error (Some GetExportImageTaskResult.error_of_json))
   | ListAssociatedFleets ->
       if is_success
       then
@@ -1226,6 +1698,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListEntitledApplicationsResult.error_of_json))
+  | ListExportImageTasks ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListExportImageTasksResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListExportImageTasksResult.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -1234,6 +1714,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | StartAppBlockBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartAppBlockBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartAppBlockBuilderResult.error_of_json))
   | StartFleet ->
       if is_success
       then
@@ -1247,6 +1735,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (StartImageBuilderResult.of_json json)
       else
         Error (parse_aws_error (Some StartImageBuilderResult.error_of_json))
+  | StartSoftwareDeploymentToImageBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSoftwareDeploymentToImageBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartSoftwareDeploymentToImageBuilderResult.error_of_json))
+  | StopAppBlockBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopAppBlockBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StopAppBlockBuilderResult.error_of_json))
   | StopFleet ->
       if is_success
       then
@@ -1272,6 +1777,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAppBlockBuilder ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAppBlockBuilderResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateAppBlockBuilderResult.error_of_json))
   | UpdateApplication ->
       if is_success
       then
@@ -1314,3 +1827,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateStackResult.of_json json)
       else Error (parse_aws_error (Some UpdateStackResult.error_of_json))
+  | UpdateThemeForStack ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateThemeForStackResult.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateThemeForStackResult.error_of_json))

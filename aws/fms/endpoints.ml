@@ -6,11 +6,17 @@ type ('i, 'o, 'e) t =
   | AssociateThirdPartyFirewall: (AssociateThirdPartyFirewallRequest.t,
   AssociateThirdPartyFirewallResponse.t,
   AssociateThirdPartyFirewallResponse.error) t 
+  | BatchAssociateResource: (BatchAssociateResourceRequest.t,
+  BatchAssociateResourceResponse.t, BatchAssociateResourceResponse.error) t 
+  | BatchDisassociateResource: (BatchDisassociateResourceRequest.t,
+  BatchDisassociateResourceResponse.t,
+  BatchDisassociateResourceResponse.error) t 
   | DeleteAppsList: (DeleteAppsListRequest.t, unit, unit) t 
   | DeleteNotificationChannel: (DeleteNotificationChannelRequest.t, unit,
   unit) t 
   | DeletePolicy: (DeletePolicyRequest.t, unit, unit) t 
   | DeleteProtocolsList: (DeleteProtocolsListRequest.t, unit, unit) t 
+  | DeleteResourceSet: (DeleteResourceSetRequest.t, unit, unit) t 
   | DisassociateAdminAccount: (DisassociateAdminAccountRequest.t, unit, 
   unit) t 
   | DisassociateThirdPartyFirewall: (DisassociateThirdPartyFirewallRequest.t,
@@ -18,6 +24,8 @@ type ('i, 'o, 'e) t =
   DisassociateThirdPartyFirewallResponse.error) t 
   | GetAdminAccount: (GetAdminAccountRequest.t, GetAdminAccountResponse.t,
   GetAdminAccountResponse.error) t 
+  | GetAdminScope: (GetAdminScopeRequest.t, GetAdminScopeResponse.t,
+  GetAdminScopeResponse.error) t 
   | GetAppsList: (GetAppsListRequest.t, GetAppsListResponse.t,
   GetAppsListResponse.error) t 
   | GetComplianceDetail: (GetComplianceDetailRequest.t,
@@ -30,28 +38,46 @@ type ('i, 'o, 'e) t =
   GetProtectionStatusResponse.t, GetProtectionStatusResponse.error) t 
   | GetProtocolsList: (GetProtocolsListRequest.t, GetProtocolsListResponse.t,
   GetProtocolsListResponse.error) t 
+  | GetResourceSet: (GetResourceSetRequest.t, GetResourceSetResponse.t,
+  GetResourceSetResponse.error) t 
   | GetThirdPartyFirewallAssociationStatus:
   (GetThirdPartyFirewallAssociationStatusRequest.t,
   GetThirdPartyFirewallAssociationStatusResponse.t,
   GetThirdPartyFirewallAssociationStatusResponse.error) t 
   | GetViolationDetails: (GetViolationDetailsRequest.t,
   GetViolationDetailsResponse.t, GetViolationDetailsResponse.error) t 
+  | ListAdminAccountsForOrganization:
+  (ListAdminAccountsForOrganizationRequest.t,
+  ListAdminAccountsForOrganizationResponse.t,
+  ListAdminAccountsForOrganizationResponse.error) t 
+  | ListAdminsManagingAccount: (ListAdminsManagingAccountRequest.t,
+  ListAdminsManagingAccountResponse.t,
+  ListAdminsManagingAccountResponse.error) t 
   | ListAppsLists: (ListAppsListsRequest.t, ListAppsListsResponse.t,
   ListAppsListsResponse.error) t 
   | ListComplianceStatus: (ListComplianceStatusRequest.t,
   ListComplianceStatusResponse.t, ListComplianceStatusResponse.error) t 
+  | ListDiscoveredResources: (ListDiscoveredResourcesRequest.t,
+  ListDiscoveredResourcesResponse.t, ListDiscoveredResourcesResponse.error) t
+  
   | ListMemberAccounts: (ListMemberAccountsRequest.t,
   ListMemberAccountsResponse.t, ListMemberAccountsResponse.error) t 
   | ListPolicies: (ListPoliciesRequest.t, ListPoliciesResponse.t,
   ListPoliciesResponse.error) t 
   | ListProtocolsLists: (ListProtocolsListsRequest.t,
   ListProtocolsListsResponse.t, ListProtocolsListsResponse.error) t 
+  | ListResourceSetResources: (ListResourceSetResourcesRequest.t,
+  ListResourceSetResourcesResponse.t, ListResourceSetResourcesResponse.error)
+  t 
+  | ListResourceSets: (ListResourceSetsRequest.t, ListResourceSetsResponse.t,
+  ListResourceSetsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListThirdPartyFirewallFirewallPolicies:
   (ListThirdPartyFirewallFirewallPoliciesRequest.t,
   ListThirdPartyFirewallFirewallPoliciesResponse.t,
   ListThirdPartyFirewallFirewallPoliciesResponse.error) t 
+  | PutAdminAccount: (PutAdminAccountRequest.t, unit, unit) t 
   | PutAppsList: (PutAppsListRequest.t, PutAppsListResponse.t,
   PutAppsListResponse.error) t 
   | PutNotificationChannel: (PutNotificationChannelRequest.t, unit, unit) t 
@@ -59,6 +85,8 @@ type ('i, 'o, 'e) t =
   PutPolicyResponse.error) t 
   | PutProtocolsList: (PutProtocolsListRequest.t, PutProtocolsListResponse.t,
   PutProtocolsListResponse.error) t 
+  | PutResourceSet: (PutResourceSetRequest.t, PutResourceSetResponse.t,
+  PutResourceSetResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -67,32 +95,44 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateAdminAccount -> `POST
   | AssociateThirdPartyFirewall -> `POST
+  | BatchAssociateResource -> `POST
+  | BatchDisassociateResource -> `POST
   | DeleteAppsList -> `POST
   | DeleteNotificationChannel -> `POST
   | DeletePolicy -> `POST
   | DeleteProtocolsList -> `POST
+  | DeleteResourceSet -> `POST
   | DisassociateAdminAccount -> `POST
   | DisassociateThirdPartyFirewall -> `POST
   | GetAdminAccount -> `POST
+  | GetAdminScope -> `POST
   | GetAppsList -> `POST
   | GetComplianceDetail -> `POST
   | GetNotificationChannel -> `POST
   | GetPolicy -> `POST
   | GetProtectionStatus -> `POST
   | GetProtocolsList -> `POST
+  | GetResourceSet -> `POST
   | GetThirdPartyFirewallAssociationStatus -> `POST
   | GetViolationDetails -> `POST
+  | ListAdminAccountsForOrganization -> `POST
+  | ListAdminsManagingAccount -> `POST
   | ListAppsLists -> `POST
   | ListComplianceStatus -> `POST
+  | ListDiscoveredResources -> `POST
   | ListMemberAccounts -> `POST
   | ListPolicies -> `POST
   | ListProtocolsLists -> `POST
+  | ListResourceSetResources -> `POST
+  | ListResourceSets -> `POST
   | ListTagsForResource -> `POST
   | ListThirdPartyFirewallFirewallPolicies -> `POST
+  | PutAdminAccount -> `POST
   | PutAppsList -> `POST
   | PutNotificationChannel -> `POST
   | PutPolicy -> `POST
   | PutProtocolsList -> `POST
+  | PutResourceSet -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -100,35 +140,48 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AssociateAdminAccount -> (Format.kasprintf Uri.of_string) "/"
       | AssociateThirdPartyFirewall -> (Format.kasprintf Uri.of_string) "/"
+      | BatchAssociateResource -> (Format.kasprintf Uri.of_string) "/"
+      | BatchDisassociateResource -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAppsList -> (Format.kasprintf Uri.of_string) "/"
       | DeleteNotificationChannel -> (Format.kasprintf Uri.of_string) "/"
       | DeletePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteProtocolsList -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourceSet -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateAdminAccount -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateThirdPartyFirewall ->
           (Format.kasprintf Uri.of_string) "/"
       | GetAdminAccount -> (Format.kasprintf Uri.of_string) "/"
+      | GetAdminScope -> (Format.kasprintf Uri.of_string) "/"
       | GetAppsList -> (Format.kasprintf Uri.of_string) "/"
       | GetComplianceDetail -> (Format.kasprintf Uri.of_string) "/"
       | GetNotificationChannel -> (Format.kasprintf Uri.of_string) "/"
       | GetPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetProtectionStatus -> (Format.kasprintf Uri.of_string) "/"
       | GetProtocolsList -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourceSet -> (Format.kasprintf Uri.of_string) "/"
       | GetThirdPartyFirewallAssociationStatus ->
           (Format.kasprintf Uri.of_string) "/"
       | GetViolationDetails -> (Format.kasprintf Uri.of_string) "/"
+      | ListAdminAccountsForOrganization ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListAdminsManagingAccount -> (Format.kasprintf Uri.of_string) "/"
       | ListAppsLists -> (Format.kasprintf Uri.of_string) "/"
       | ListComplianceStatus -> (Format.kasprintf Uri.of_string) "/"
+      | ListDiscoveredResources -> (Format.kasprintf Uri.of_string) "/"
       | ListMemberAccounts -> (Format.kasprintf Uri.of_string) "/"
       | ListPolicies -> (Format.kasprintf Uri.of_string) "/"
       | ListProtocolsLists -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceSetResources -> (Format.kasprintf Uri.of_string) "/"
+      | ListResourceSets -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListThirdPartyFirewallFirewallPolicies ->
           (Format.kasprintf Uri.of_string) "/"
+      | PutAdminAccount -> (Format.kasprintf Uri.of_string) "/"
       | PutAppsList -> (Format.kasprintf Uri.of_string) "/"
       | PutNotificationChannel -> (Format.kasprintf Uri.of_string) "/"
       | PutPolicy -> (Format.kasprintf Uri.of_string) "/"
       | PutProtocolsList -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourceSet -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -149,6 +202,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.AssociateThirdPartyFirewall")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchAssociateResource ->
+      let json = BatchAssociateResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.BatchAssociateResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchDisassociateResource ->
+      let json = BatchDisassociateResourceRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.BatchDisassociateResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteAppsList ->
       let json = DeleteAppsListRequest.to_json req in
@@ -182,6 +251,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.DeleteProtocolsList")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourceSet ->
+      let json = DeleteResourceSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.DeleteResourceSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateAdminAccount ->
       let json = DisassociateAdminAccountRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -205,6 +282,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.GetAdminAccount")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetAdminScope ->
+      let json = GetAdminScopeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.GetAdminScope")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetAppsList ->
       let json = GetAppsListRequest.to_json req in
@@ -254,6 +339,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.GetProtocolsList")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourceSet ->
+      let json = GetResourceSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.GetResourceSet")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetThirdPartyFirewallAssociationStatus ->
       let json = GetThirdPartyFirewallAssociationStatusRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -271,6 +364,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.GetViolationDetails")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAdminAccountsForOrganization ->
+      let json = ListAdminAccountsForOrganizationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSFMS_20180101.ListAdminAccountsForOrganization")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAdminsManagingAccount ->
+      let json = ListAdminsManagingAccountRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.ListAdminsManagingAccount")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAppsLists ->
       let json = ListAppsListsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -286,6 +396,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.ListComplianceStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDiscoveredResources ->
+      let json = ListDiscoveredResourcesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.ListDiscoveredResources")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListMemberAccounts ->
       let json = ListMemberAccountsRequest.to_json req in
@@ -311,6 +429,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.ListProtocolsLists")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListResourceSetResources ->
+      let json = ListResourceSetResourcesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.ListResourceSetResources")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListResourceSets ->
+      let json = ListResourceSetsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.ListResourceSets")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForResource ->
       let json = ListTagsForResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -327,6 +461,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSFMS_20180101.ListThirdPartyFirewallFirewallPolicies")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutAdminAccount ->
+      let json = PutAdminAccountRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.PutAdminAccount")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutAppsList ->
       let json = PutAppsListRequest.to_json req in
@@ -359,6 +501,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSFMS_20180101.PutProtocolsList")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourceSet ->
+      let json = PutResourceSetRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSFMS_20180101.PutResourceSet")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -410,6 +560,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateThirdPartyFirewallResponse.error_of_json))
+  | BatchAssociateResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchAssociateResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchAssociateResourceResponse.error_of_json))
+  | BatchDisassociateResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchDisassociateResourceResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchDisassociateResourceResponse.error_of_json))
   | DeleteAppsList ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteNotificationChannel ->
@@ -417,6 +585,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeletePolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteProtocolsList ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourceSet ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateAdminAccount ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -436,6 +606,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetAdminAccountResponse.of_json json)
       else
         Error (parse_aws_error (Some GetAdminAccountResponse.error_of_json))
+  | GetAdminScope ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetAdminScopeResponse.of_json json)
+      else Error (parse_aws_error (Some GetAdminScopeResponse.error_of_json))
   | GetAppsList ->
       if is_success
       then
@@ -480,6 +656,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetProtocolsListResponse.of_json json)
       else
         Error (parse_aws_error (Some GetProtocolsListResponse.error_of_json))
+  | GetResourceSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetResourceSetResponse.error_of_json))
   | GetThirdPartyFirewallAssociationStatus ->
       if is_success
       then
@@ -498,6 +681,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetViolationDetailsResponse.error_of_json))
+  | ListAdminAccountsForOrganization ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAdminAccountsForOrganizationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAdminAccountsForOrganizationResponse.error_of_json))
+  | ListAdminsManagingAccount ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAdminsManagingAccountResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAdminsManagingAccountResponse.error_of_json))
   | ListAppsLists ->
       if is_success
       then
@@ -512,6 +713,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListComplianceStatusResponse.error_of_json))
+  | ListDiscoveredResources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDiscoveredResourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListDiscoveredResourcesResponse.error_of_json))
   | ListMemberAccounts ->
       if is_success
       then
@@ -534,6 +744,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListProtocolsListsResponse.error_of_json))
+  | ListResourceSetResources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceSetResourcesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListResourceSetResourcesResponse.error_of_json))
+  | ListResourceSets ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListResourceSetsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListResourceSetsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then
@@ -552,6 +778,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some
                 ListThirdPartyFirewallFirewallPoliciesResponse.error_of_json))
+  | PutAdminAccount ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | PutAppsList ->
       if is_success
       then
@@ -573,6 +801,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (PutProtocolsListResponse.of_json json)
       else
         Error (parse_aws_error (Some PutProtocolsListResponse.error_of_json))
+  | PutResourceSet ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourceSetResponse.of_json json)
+      else
+        Error (parse_aws_error (Some PutResourceSetResponse.error_of_json))
   | TagResource ->
       if is_success
       then

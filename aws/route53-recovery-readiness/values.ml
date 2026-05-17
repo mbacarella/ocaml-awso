@@ -51,8 +51,8 @@ module NLBResource =
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" Zz__string.of_json in make ?arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Zz__string.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The Network Load Balancer resource that a DNS target resource points to."]
@@ -78,9 +78,9 @@ module R53ResourceRecord =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?recordSetId ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let recordSetId = field_map json "RecordSetId" Zz__string.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+    let of_json json__ =
+      let recordSetId = field_map json__ "RecordSetId" Zz__string.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
       make ?recordSetId ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -109,10 +109,10 @@ module TargetResource =
         (Option.map ~f:NLBResource.of_xml) (Xml.child xml_arg0 "nLBResource") in
       make ?r53Resource ?nLBResource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let r53Resource =
-        field_map json "R53Resource" R53ResourceRecord.of_json in
-      let nLBResource = field_map json "NLBResource" NLBResource.of_json in
+        field_map json__ "R53Resource" R53ResourceRecord.of_json in
+      let nLBResource = field_map json__ "NLBResource" NLBResource.of_json in
       make ?r53Resource ?nLBResource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The target resource that the Route 53 record points to."]
@@ -172,13 +172,13 @@ module DNSTargetResource =
       make ?targetResource ?recordType ?recordSetId ?hostedZoneArn
         ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetResource =
-        field_map json "TargetResource" TargetResource.of_json in
-      let recordType = field_map json "RecordType" Zz__string.of_json in
-      let recordSetId = field_map json "RecordSetId" Zz__string.of_json in
-      let hostedZoneArn = field_map json "HostedZoneArn" Zz__string.of_json in
-      let domainName = field_map json "DomainName" Zz__string.of_json in
+        field_map json__ "TargetResource" TargetResource.of_json in
+      let recordType = field_map json__ "RecordType" Zz__string.of_json in
+      let recordSetId = field_map json__ "RecordSetId" Zz__string.of_json in
+      let hostedZoneArn = field_map json__ "HostedZoneArn" Zz__string.of_json in
+      let domainName = field_map json__ "DomainName" Zz__string.of_json in
       make ?targetResource ?recordType ?recordSetId ?hostedZoneArn
         ?domainName ()
     let to_json v = composed_to_json to_value v
@@ -188,6 +188,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -252,13 +255,13 @@ module Resource =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "componentId") in
       make ?resourceArn ?readinessScopes ?dnsTargetResource ?componentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" Zz__string.of_json in
       let readinessScopes =
-        field_map json "ReadinessScopes" Zz__listOf__string.of_json in
+        field_map json__ "ReadinessScopes" Zz__listOf__string.of_json in
       let dnsTargetResource =
-        field_map json "DnsTargetResource" DNSTargetResource.of_json in
-      let componentId = field_map json "ComponentId" Zz__string.of_json in
+        field_map json__ "DnsTargetResource" DNSTargetResource.of_json in
+      let componentId = field_map json__ "ComponentId" Zz__string.of_json in
       make ?resourceArn ?readinessScopes ?dnsTargetResource ?componentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource element of a resource set."]
@@ -278,8 +281,8 @@ module Message =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "messageText") in
       make ?messageText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageText = field_map json "MessageText" Zz__string.of_json in
+    let of_json json__ =
+      let messageText = field_map json__ "MessageText" Zz__string.of_json in
       make ?messageText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information relating to readiness check status."]
@@ -332,6 +335,8 @@ module Tags =
                     (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -343,6 +348,9 @@ module Zz__listOfResource =
   struct
     type nonrec t = Resource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Resource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -447,6 +455,9 @@ module Zz__listOfMessage =
   struct
     type nonrec t = Message.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Message.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -471,41 +482,41 @@ module ListRulesOutput =
   struct
     type nonrec t =
       {
-      resourceType: Zz__stringMax64.t
+      resourceType: Zz__stringMax64.t option
         [@ocaml.doc "The resource type that the readiness rule applies to."];
-      ruleDescription: Zz__stringMax256.t
+      ruleDescription: Zz__stringMax256.t option
         [@ocaml.doc "The description of a readiness rule."];
-      ruleId: Zz__stringMax64.t [@ocaml.doc "The ID for the readiness rule."]}
-    let context_ = "ListRulesOutput"
-    let make ~resourceType =
-      fun ~ruleDescription ->
-        fun ~ruleId -> fun () -> { resourceType; ruleDescription; ruleId }
+      ruleId: Zz__stringMax64.t option
+        [@ocaml.doc "The ID for the readiness rule."]}
+    let make ?resourceType =
+      fun ?ruleDescription ->
+        fun ?ruleId -> fun () -> { resourceType; ruleDescription; ruleId }
     let to_value x =
       structure_to_value
-        [("resourceType", (Some (Zz__stringMax64.to_value x.resourceType)));
+        [("resourceType",
+           (Option.map x.resourceType ~f:Zz__stringMax64.to_value));
         ("ruleDescription",
-          (Some (Zz__stringMax256.to_value x.ruleDescription)));
-        ("ruleId", (Some (Zz__stringMax64.to_value x.ruleId)))]
+          (Option.map x.ruleDescription ~f:Zz__stringMax256.to_value));
+        ("ruleId", (Option.map x.ruleId ~f:Zz__stringMax64.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let ruleId =
-        Zz__stringMax64.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ruleId") in
+        (Option.map ~f:Zz__stringMax64.of_xml) (Xml.child xml_arg0 "ruleId") in
       let ruleDescription =
-        Zz__stringMax256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ruleDescription") in
+        (Option.map ~f:Zz__stringMax256.of_xml)
+          (Xml.child xml_arg0 "ruleDescription") in
       let resourceType =
-        Zz__stringMax64.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
-      make ~ruleId ~ruleDescription ~resourceType ()
+        (Option.map ~f:Zz__stringMax64.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      make ?ruleId ?ruleDescription ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleId = field_map_exn json "RuleId" Zz__stringMax64.of_json in
+    let of_json json__ =
+      let ruleId = field_map json__ "RuleId" Zz__stringMax64.of_json in
       let ruleDescription =
-        field_map_exn json "RuleDescription" Zz__stringMax256.of_json in
+        field_map json__ "RuleDescription" Zz__stringMax256.of_json in
       let resourceType =
-        field_map_exn json "ResourceType" Zz__stringMax64.of_json in
-      make ~ruleId ~ruleDescription ~resourceType ()
+        field_map json__ "ResourceType" Zz__stringMax64.of_json in
+      make ?ruleId ?ruleDescription ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Readiness rule information, including the resource type, rule ID, and rule description."]
@@ -513,71 +524,72 @@ module ResourceSetOutput =
   struct
     type nonrec t =
       {
-      resourceSetArn: Zz__stringMax256.t
+      resourceSetArn: Zz__stringMax256.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the resource set."];
-      resourceSetName: Zz__stringMax64PatternAAZAZ09Z.t
+      resourceSetName: Zz__stringMax64PatternAAZAZ09Z.t option
         [@ocaml.doc "The name of the resource set."];
-      resourceSetType: Zz__stringPatternAWSAZaZ09AZaZ09.t
+      resourceSetType: Zz__stringPatternAWSAZaZ09AZaZ09.t option
         [@ocaml.doc
           "The resource type of the resources in the resource set. Enter one of the following values for resource type: AWS::ApiGateway::Stage, AWS::ApiGatewayV2::Stage, AWS::AutoScaling::AutoScalingGroup, AWS::CloudWatch::Alarm, AWS::EC2::CustomerGateway, AWS::DynamoDB::Table, AWS::EC2::Volume, AWS::ElasticLoadBalancing::LoadBalancer, AWS::ElasticLoadBalancingV2::LoadBalancer, AWS::Lambda::Function, AWS::MSK::Cluster, AWS::RDS::DBCluster, AWS::Route53::HealthCheck, AWS::SQS::Queue, AWS::SNS::Topic, AWS::SNS::Subscription, AWS::EC2::VPC, AWS::EC2::VPNConnection, AWS::EC2::VPNGateway, AWS::Route53RecoveryReadiness::DNSTargetResource"];
-      resources: Zz__listOfResource.t
+      resources: Zz__listOfResource.t option
         [@ocaml.doc "A list of resource objects."];
       tags: Tags.t option }
-    let context_ = "ResourceSetOutput"
-    let make ?tags =
-      fun ~resourceSetArn ->
-        fun ~resourceSetName ->
-          fun ~resourceSetType ->
-            fun ~resources ->
+    let make ?resourceSetArn =
+      fun ?resourceSetName ->
+        fun ?resourceSetType ->
+          fun ?resources ->
+            fun ?tags ->
               fun () ->
                 {
-                  tags;
                   resourceSetArn;
                   resourceSetName;
                   resourceSetType;
-                  resources
+                  resources;
+                  tags
                 }
     let to_value x =
       structure_to_value
         [("resourceSetArn",
-           (Some (Zz__stringMax256.to_value x.resourceSetArn)));
+           (Option.map x.resourceSetArn ~f:Zz__stringMax256.to_value));
         ("resourceSetName",
-          (Some (Zz__stringMax64PatternAAZAZ09Z.to_value x.resourceSetName)));
+          (Option.map x.resourceSetName
+             ~f:Zz__stringMax64PatternAAZAZ09Z.to_value));
         ("resourceSetType",
-          (Some (Zz__stringPatternAWSAZaZ09AZaZ09.to_value x.resourceSetType)));
-        ("resources", (Some (Zz__listOfResource.to_value x.resources)));
+          (Option.map x.resourceSetType
+             ~f:Zz__stringPatternAWSAZaZ09AZaZ09.to_value));
+        ("resources",
+          (Option.map x.resources ~f:Zz__listOfResource.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let resources =
-        Zz__listOfResource.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resources") in
+        (Option.map ~f:Zz__listOfResource.of_xml)
+          (Xml.child xml_arg0 "resources") in
       let resourceSetType =
-        Zz__stringPatternAWSAZaZ09AZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceSetType") in
+        (Option.map ~f:Zz__stringPatternAWSAZaZ09AZaZ09.of_xml)
+          (Xml.child xml_arg0 "resourceSetType") in
       let resourceSetName =
-        Zz__stringMax64PatternAAZAZ09Z.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceSetName") in
+        (Option.map ~f:Zz__stringMax64PatternAAZAZ09Z.of_xml)
+          (Xml.child xml_arg0 "resourceSetName") in
       let resourceSetArn =
-        Zz__stringMax256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceSetArn") in
-      make ?tags ~resources ~resourceSetType ~resourceSetName ~resourceSetArn
+        (Option.map ~f:Zz__stringMax256.of_xml)
+          (Xml.child xml_arg0 "resourceSetArn") in
+      make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let resources =
-        field_map_exn json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map_exn json "ResourceSetType"
+        field_map json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map_exn json "ResourceSetName"
+        field_map json__ "ResourceSetName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let resourceSetArn =
-        field_map_exn json "ResourceSetArn" Zz__stringMax256.of_json in
-      make ?tags ~resources ~resourceSetType ~resourceSetName ~resourceSetArn
+        field_map json__ "ResourceSetArn" Zz__stringMax256.of_json in
+      make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A collection of resources of the same type."]
@@ -585,51 +597,51 @@ module RecoveryGroupOutput =
   struct
     type nonrec t =
       {
-      cells: Zz__listOf__string.t
+      cells: Zz__listOf__string.t option
         [@ocaml.doc "A list of a cell's Amazon Resource Names (ARNs)."];
-      recoveryGroupArn: Zz__stringMax256.t
+      recoveryGroupArn: Zz__stringMax256.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the recovery group."];
-      recoveryGroupName: Zz__stringMax64PatternAAZAZ09Z.t
+      recoveryGroupName: Zz__stringMax64PatternAAZAZ09Z.t option
         [@ocaml.doc "The name of the recovery group."];
       tags: Tags.t option
         [@ocaml.doc "The tags associated with the recovery group."]}
-    let context_ = "RecoveryGroupOutput"
-    let make ?tags =
-      fun ~cells ->
-        fun ~recoveryGroupArn ->
-          fun ~recoveryGroupName ->
-            fun () -> { tags; cells; recoveryGroupArn; recoveryGroupName }
+    let make ?cells =
+      fun ?recoveryGroupArn ->
+        fun ?recoveryGroupName ->
+          fun ?tags ->
+            fun () -> { cells; recoveryGroupArn; recoveryGroupName; tags }
     let to_value x =
       structure_to_value
-        [("cells", (Some (Zz__listOf__string.to_value x.cells)));
+        [("cells", (Option.map x.cells ~f:Zz__listOf__string.to_value));
         ("recoveryGroupArn",
-          (Some (Zz__stringMax256.to_value x.recoveryGroupArn)));
+          (Option.map x.recoveryGroupArn ~f:Zz__stringMax256.to_value));
         ("recoveryGroupName",
-          (Some (Zz__stringMax64PatternAAZAZ09Z.to_value x.recoveryGroupName)));
+          (Option.map x.recoveryGroupName
+             ~f:Zz__stringMax64PatternAAZAZ09Z.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let recoveryGroupName =
-        Zz__stringMax64PatternAAZAZ09Z.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recoveryGroupName") in
+        (Option.map ~f:Zz__stringMax64PatternAAZAZ09Z.of_xml)
+          (Xml.child xml_arg0 "recoveryGroupName") in
       let recoveryGroupArn =
-        Zz__stringMax256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recoveryGroupArn") in
+        (Option.map ~f:Zz__stringMax256.of_xml)
+          (Xml.child xml_arg0 "recoveryGroupArn") in
       let cells =
-        Zz__listOf__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cells") in
-      make ?tags ~recoveryGroupName ~recoveryGroupArn ~cells ()
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "cells") in
+      make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName"
+        field_map json__ "RecoveryGroupName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let recoveryGroupArn =
-        field_map_exn json "RecoveryGroupArn" Zz__stringMax256.of_json in
-      let cells = field_map_exn json "Cells" Zz__listOf__string.of_json in
-      make ?tags ~recoveryGroupName ~recoveryGroupArn ~cells ()
+        field_map json__ "RecoveryGroupArn" Zz__stringMax256.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
+      make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A representation of the application, typically containing multiple cells."]
@@ -637,56 +649,55 @@ module ReadinessCheckOutput =
   struct
     type nonrec t =
       {
-      readinessCheckArn: Zz__stringMax256.t
+      readinessCheckArn: Zz__stringMax256.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) associated with a readiness check."];
       readinessCheckName: Zz__stringMax64PatternAAZAZ09Z.t option
         [@ocaml.doc "Name of a readiness check."];
-      resourceSet: Zz__stringMax64PatternAAZAZ09Z.t
+      resourceSet: Zz__stringMax64PatternAAZAZ09Z.t option
         [@ocaml.doc "Name of the resource set to be checked."];
       tags: Tags.t option }
-    let context_ = "ReadinessCheckOutput"
-    let make ?readinessCheckName =
-      fun ?tags ->
-        fun ~readinessCheckArn ->
-          fun ~resourceSet ->
+    let make ?readinessCheckArn =
+      fun ?readinessCheckName ->
+        fun ?resourceSet ->
+          fun ?tags ->
             fun () ->
-              { readinessCheckName; tags; readinessCheckArn; resourceSet }
+              { readinessCheckArn; readinessCheckName; resourceSet; tags }
     let to_value x =
       structure_to_value
         [("readinessCheckArn",
-           (Some (Zz__stringMax256.to_value x.readinessCheckArn)));
+           (Option.map x.readinessCheckArn ~f:Zz__stringMax256.to_value));
         ("readinessCheckName",
           (Option.map x.readinessCheckName
              ~f:Zz__stringMax64PatternAAZAZ09Z.to_value));
         ("resourceSet",
-          (Some (Zz__stringMax64PatternAAZAZ09Z.to_value x.resourceSet)));
+          (Option.map x.resourceSet
+             ~f:Zz__stringMax64PatternAAZAZ09Z.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let resourceSet =
-        Zz__stringMax64PatternAAZAZ09Z.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceSet") in
+        (Option.map ~f:Zz__stringMax64PatternAAZAZ09Z.of_xml)
+          (Xml.child xml_arg0 "resourceSet") in
       let readinessCheckName =
         (Option.map ~f:Zz__stringMax64PatternAAZAZ09Z.of_xml)
           (Xml.child xml_arg0 "readinessCheckName") in
       let readinessCheckArn =
-        Zz__stringMax256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "readinessCheckArn") in
-      make ?tags ~resourceSet ?readinessCheckName ~readinessCheckArn ()
+        (Option.map ~f:Zz__stringMax256.of_xml)
+          (Xml.child xml_arg0 "readinessCheckArn") in
+      make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceSet =
-        field_map_exn json "ResourceSet"
-          Zz__stringMax64PatternAAZAZ09Z.of_json in
+        field_map json__ "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckName =
-        field_map json "ReadinessCheckName"
+        field_map json__ "ReadinessCheckName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckArn =
-        field_map_exn json "ReadinessCheckArn" Zz__stringMax256.of_json in
-      make ?tags ~resourceSet ?readinessCheckName ~readinessCheckArn ()
+        field_map json__ "ReadinessCheckArn" Zz__stringMax256.of_json in
+      make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A readiness check."]
 module CrossAccountAuthorization =
@@ -706,58 +717,57 @@ module CellOutput =
   struct
     type nonrec t =
       {
-      cellArn: Zz__stringMax256.t
+      cellArn: Zz__stringMax256.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the cell."];
-      cellName: Zz__stringMax64PatternAAZAZ09Z.t
+      cellName: Zz__stringMax64PatternAAZAZ09Z.t option
         [@ocaml.doc "The name of the cell."];
-      cells: Zz__listOf__string.t [@ocaml.doc "A list of cell ARNs."];
-      parentReadinessScopes: Zz__listOf__string.t
+      cells: Zz__listOf__string.t option [@ocaml.doc "A list of cell ARNs."];
+      parentReadinessScopes: Zz__listOf__string.t option
         [@ocaml.doc
           "The readiness scope for the cell, which can be a cell Amazon Resource Name (ARN) or a recovery group ARN. This is a list but currently can have only one element."];
       tags: Tags.t option [@ocaml.doc "Tags on the resources."]}
-    let context_ = "CellOutput"
-    let make ?tags =
-      fun ~cellArn ->
-        fun ~cellName ->
-          fun ~cells ->
-            fun ~parentReadinessScopes ->
+    let make ?cellArn =
+      fun ?cellName ->
+        fun ?cells ->
+          fun ?parentReadinessScopes ->
+            fun ?tags ->
               fun () ->
-                { tags; cellArn; cellName; cells; parentReadinessScopes }
+                { cellArn; cellName; cells; parentReadinessScopes; tags }
     let to_value x =
       structure_to_value
-        [("cellArn", (Some (Zz__stringMax256.to_value x.cellArn)));
+        [("cellArn", (Option.map x.cellArn ~f:Zz__stringMax256.to_value));
         ("cellName",
-          (Some (Zz__stringMax64PatternAAZAZ09Z.to_value x.cellName)));
-        ("cells", (Some (Zz__listOf__string.to_value x.cells)));
+          (Option.map x.cellName ~f:Zz__stringMax64PatternAAZAZ09Z.to_value));
+        ("cells", (Option.map x.cells ~f:Zz__listOf__string.to_value));
         ("parentReadinessScopes",
-          (Some (Zz__listOf__string.to_value x.parentReadinessScopes)));
+          (Option.map x.parentReadinessScopes ~f:Zz__listOf__string.to_value));
         ("tags", (Option.map x.tags ~f:Tags.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       let parentReadinessScopes =
-        Zz__listOf__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "parentReadinessScopes") in
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "parentReadinessScopes") in
       let cells =
-        Zz__listOf__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cells") in
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "cells") in
       let cellName =
-        Zz__stringMax64PatternAAZAZ09Z.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
+        (Option.map ~f:Zz__stringMax64PatternAAZAZ09Z.of_xml)
+          (Xml.child xml_arg0 "cellName") in
       let cellArn =
-        Zz__stringMax256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "cellArn") in
-      make ?tags ~parentReadinessScopes ~cells ~cellName ~cellArn ()
+        (Option.map ~f:Zz__stringMax256.of_xml)
+          (Xml.child xml_arg0 "cellArn") in
+      make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let parentReadinessScopes =
-        field_map_exn json "ParentReadinessScopes" Zz__listOf__string.of_json in
-      let cells = field_map_exn json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "ParentReadinessScopes" Zz__listOf__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       let cellName =
-        field_map_exn json "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
-      let cellArn = field_map_exn json "CellArn" Zz__stringMax256.of_json in
-      make ?tags ~parentReadinessScopes ~cells ~cellName ~cellArn ()
+        field_map json__ "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
+      let cellArn = field_map json__ "CellArn" Zz__stringMax256.of_json in
+      make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a cell."]
 module ReadinessCheckSummary =
@@ -784,10 +794,10 @@ module ReadinessCheckSummary =
         (Option.map ~f:Readiness.of_xml) (Xml.child xml_arg0 "readiness") in
       make ?readinessCheckName ?readiness ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessCheckName =
-        field_map json "ReadinessCheckName" Zz__string.of_json in
-      let readiness = field_map json "Readiness" Readiness.of_json in
+        field_map json__ "ReadinessCheckName" Zz__string.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
       make ?readinessCheckName ?readiness ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -798,48 +808,48 @@ module ResourceResult =
       {
       componentId: Zz__string.t option
         [@ocaml.doc "The component id of the resource."];
-      lastCheckedTimestamp: ReadinessCheckTimestamp.t
+      lastCheckedTimestamp: ReadinessCheckTimestamp.t option
         [@ocaml.doc
           "The time (UTC) that the resource was last checked for readiness, in ISO-8601 format."];
-      readiness: Readiness.t [@ocaml.doc "The readiness of a resource."];
+      readiness: Readiness.t option
+        [@ocaml.doc "The readiness of a resource."];
       resourceArn: Zz__string.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
-    let context_ = "ResourceResult"
     let make ?componentId =
-      fun ?resourceArn ->
-        fun ~lastCheckedTimestamp ->
-          fun ~readiness ->
+      fun ?lastCheckedTimestamp ->
+        fun ?readiness ->
+          fun ?resourceArn ->
             fun () ->
-              { componentId; resourceArn; lastCheckedTimestamp; readiness }
+              { componentId; lastCheckedTimestamp; readiness; resourceArn }
     let to_value x =
       structure_to_value
         [("componentId", (Option.map x.componentId ~f:Zz__string.to_value));
         ("lastCheckedTimestamp",
-          (Some (ReadinessCheckTimestamp.to_value x.lastCheckedTimestamp)));
-        ("readiness", (Some (Readiness.to_value x.readiness)));
+          (Option.map x.lastCheckedTimestamp
+             ~f:ReadinessCheckTimestamp.to_value));
+        ("readiness", (Option.map x.readiness ~f:Readiness.to_value));
         ("resourceArn", (Option.map x.resourceArn ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "resourceArn") in
       let readiness =
-        Readiness.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "readiness") in
+        (Option.map ~f:Readiness.of_xml) (Xml.child xml_arg0 "readiness") in
       let lastCheckedTimestamp =
-        ReadinessCheckTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastCheckedTimestamp") in
+        (Option.map ~f:ReadinessCheckTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastCheckedTimestamp") in
       let componentId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "componentId") in
-      make ?resourceArn ~readiness ~lastCheckedTimestamp ?componentId ()
+      make ?resourceArn ?readiness ?lastCheckedTimestamp ?componentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map json "ResourceArn" Zz__string.of_json in
-      let readiness = field_map_exn json "Readiness" Readiness.of_json in
+    let of_json json__ =
+      let resourceArn = field_map json__ "ResourceArn" Zz__string.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
       let lastCheckedTimestamp =
-        field_map_exn json "LastCheckedTimestamp"
+        field_map json__ "LastCheckedTimestamp"
           ReadinessCheckTimestamp.of_json in
-      let componentId = field_map json "ComponentId" Zz__string.of_json in
-      make ?resourceArn ~readiness ~lastCheckedTimestamp ?componentId ()
+      let componentId = field_map json__ "ComponentId" Zz__string.of_json in
+      make ?resourceArn ?readiness ?lastCheckedTimestamp ?componentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of a successful Resource request, with status for an individual resource."]
@@ -847,49 +857,49 @@ module RuleResult =
   struct
     type nonrec t =
       {
-      lastCheckedTimestamp: ReadinessCheckTimestamp.t
+      lastCheckedTimestamp: ReadinessCheckTimestamp.t option
         [@ocaml.doc
           "The time the resource was last checked for readiness, in ISO-8601 format, UTC."];
-      messages: Zz__listOfMessage.t
+      messages: Zz__listOfMessage.t option
         [@ocaml.doc "Details about the resource's readiness."];
-      readiness: Readiness.t [@ocaml.doc "The readiness at rule level."];
-      ruleId: Zz__string.t [@ocaml.doc "The identifier of the rule."]}
-    let context_ = "RuleResult"
-    let make ~lastCheckedTimestamp =
-      fun ~messages ->
-        fun ~readiness ->
-          fun ~ruleId ->
+      readiness: Readiness.t option
+        [@ocaml.doc "The readiness at rule level."];
+      ruleId: Zz__string.t option [@ocaml.doc "The identifier of the rule."]}
+    let make ?lastCheckedTimestamp =
+      fun ?messages ->
+        fun ?readiness ->
+          fun ?ruleId ->
             fun () -> { lastCheckedTimestamp; messages; readiness; ruleId }
     let to_value x =
       structure_to_value
         [("lastCheckedTimestamp",
-           (Some (ReadinessCheckTimestamp.to_value x.lastCheckedTimestamp)));
-        ("messages", (Some (Zz__listOfMessage.to_value x.messages)));
-        ("readiness", (Some (Readiness.to_value x.readiness)));
-        ("ruleId", (Some (Zz__string.to_value x.ruleId)))]
+           (Option.map x.lastCheckedTimestamp
+              ~f:ReadinessCheckTimestamp.to_value));
+        ("messages", (Option.map x.messages ~f:Zz__listOfMessage.to_value));
+        ("readiness", (Option.map x.readiness ~f:Readiness.to_value));
+        ("ruleId", (Option.map x.ruleId ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let ruleId =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ruleId") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ruleId") in
       let readiness =
-        Readiness.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "readiness") in
+        (Option.map ~f:Readiness.of_xml) (Xml.child xml_arg0 "readiness") in
       let messages =
-        Zz__listOfMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "messages") in
+        (Option.map ~f:Zz__listOfMessage.of_xml)
+          (Xml.child xml_arg0 "messages") in
       let lastCheckedTimestamp =
-        ReadinessCheckTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "lastCheckedTimestamp") in
-      make ~ruleId ~readiness ~messages ~lastCheckedTimestamp ()
+        (Option.map ~f:ReadinessCheckTimestamp.of_xml)
+          (Xml.child xml_arg0 "lastCheckedTimestamp") in
+      make ?ruleId ?readiness ?messages ?lastCheckedTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ruleId = field_map_exn json "RuleId" Zz__string.of_json in
-      let readiness = field_map_exn json "Readiness" Readiness.of_json in
-      let messages = field_map_exn json "Messages" Zz__listOfMessage.of_json in
+    let of_json json__ =
+      let ruleId = field_map json__ "RuleId" Zz__string.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
+      let messages = field_map json__ "Messages" Zz__listOfMessage.of_json in
       let lastCheckedTimestamp =
-        field_map_exn json "LastCheckedTimestamp"
+        field_map json__ "LastCheckedTimestamp"
           ReadinessCheckTimestamp.of_json in
-      make ~ruleId ~readiness ~messages ~lastCheckedTimestamp ()
+      make ?ruleId ?readiness ?messages ?lastCheckedTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of a successful Rule request, with status for an individual rule."]
@@ -897,26 +907,25 @@ module Recommendation =
   struct
     type nonrec t =
       {
-      recommendationText: Zz__string.t
+      recommendationText: Zz__string.t option
         [@ocaml.doc
           "Text of the recommendations that are provided to make an application more recovery resilient."]}
-    let context_ = "Recommendation"
-    let make ~recommendationText = fun () -> { recommendationText }
+    let make ?recommendationText = fun () -> { recommendationText }
     let to_value x =
       structure_to_value
         [("recommendationText",
-           (Some (Zz__string.to_value x.recommendationText)))]
+           (Option.map x.recommendationText ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let recommendationText =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "recommendationText") in
-      make ~recommendationText ()
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "recommendationText") in
+      make ?recommendationText ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationText =
-        field_map_exn json "RecommendationText" Zz__string.of_json in
-      make ~recommendationText ()
+        field_map json__ "RecommendationText" Zz__string.of_json in
+      make ?recommendationText ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Recommendations that are provided to make an application more recovery resilient."]
@@ -934,8 +943,8 @@ module AccessDeniedException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -954,8 +963,8 @@ module InternalServerException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected error occurred."]
@@ -973,8 +982,8 @@ module ResourceNotFoundException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource does not exist."]
@@ -992,8 +1001,8 @@ module ThrottlingException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request was denied due to request throttling."]
@@ -1011,8 +1020,8 @@ module ValidationException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1021,6 +1030,9 @@ module Zz__listOfListRulesOutput =
   struct
     type nonrec t = ListRulesOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListRulesOutput.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1064,6 +1076,9 @@ module Zz__listOfResourceSetOutput =
   struct
     type nonrec t = ResourceSetOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceSetOutput.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1089,6 +1104,9 @@ module Zz__listOfRecoveryGroupOutput =
   struct
     type nonrec t = RecoveryGroupOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecoveryGroupOutput.to_value)) |>
         (fun x -> `List x)
@@ -1115,6 +1133,9 @@ module Zz__listOfReadinessCheckOutput =
   struct
     type nonrec t = ReadinessCheckOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReadinessCheckOutput.to_value)) |>
         (fun x -> `List x)
@@ -1141,6 +1162,9 @@ module Zz__listOfCrossAccountAuthorization =
   struct
     type nonrec t = CrossAccountAuthorization.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CrossAccountAuthorization.to_value)) |>
         (fun x -> `List x)
@@ -1167,6 +1191,9 @@ module Zz__listOfCellOutput =
   struct
     type nonrec t = CellOutput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CellOutput.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1191,6 +1218,9 @@ module Zz__listOfReadinessCheckSummary =
   struct
     type nonrec t = ReadinessCheckSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReadinessCheckSummary.to_value)) |>
         (fun x -> `List x)
@@ -1217,6 +1247,9 @@ module Zz__listOfResourceResult =
   struct
     type nonrec t = ResourceResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1242,6 +1275,9 @@ module Zz__listOfRuleResult =
   struct
     type nonrec t = RuleResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RuleResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1280,6 +1316,9 @@ module Zz__listOfRecommendation =
   struct
     type nonrec t = Recommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Recommendation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1315,8 +1354,8 @@ module ConflictException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1442,17 +1481,17 @@ module UpdateResourceSetResponse =
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let resources = field_map json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map json "ResourceSetType"
+        field_map json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map json "ResourceSetName"
+        field_map json__ "ResourceSetName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let resourceSetArn =
-        field_map json "ResourceSetArn" Zz__stringMax256.of_json in
+        field_map json__ "ResourceSetArn" Zz__stringMax256.of_json in
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let to_json v = composed_to_json to_value v
@@ -1491,14 +1530,14 @@ module UpdateResourceSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceSetName") in
       make ~resources ~resourceSetType ~resourceSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resources =
-        field_map_exn json "Resources" Zz__listOfResource.of_json in
+        field_map_exn json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map_exn json "ResourceSetType"
+        field_map_exn json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       make ~resources ~resourceSetType ~resourceSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Name of a resource set."]
@@ -1605,14 +1644,14 @@ module UpdateRecoveryGroupResponse =
           (Xml.child xml_arg0 "cells") in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let recoveryGroupName =
-        field_map json "RecoveryGroupName"
+        field_map json__ "RecoveryGroupName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let recoveryGroupArn =
-        field_map json "RecoveryGroupArn" Zz__stringMax256.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "RecoveryGroupArn" Zz__stringMax256.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a recovery group."]
@@ -1643,10 +1682,10 @@ module UpdateRecoveryGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cells") in
       make ~recoveryGroupName ~cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
-      let cells = field_map_exn json "Cells" Zz__listOf__string.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
+      let cells = field_map_exn json__ "Cells" Zz__listOf__string.of_json in
       make ~recoveryGroupName ~cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Name of a recovery group."]
@@ -1756,15 +1795,15 @@ module UpdateReadinessCheckResponse =
           (Xml.child xml_arg0 "readinessCheckArn") in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceSet =
-        field_map json "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
+        field_map json__ "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckName =
-        field_map json "ReadinessCheckName"
+        field_map json__ "ReadinessCheckName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckArn =
-        field_map json "ReadinessCheckArn" Zz__stringMax256.of_json in
+        field_map json__ "ReadinessCheckArn" Zz__stringMax256.of_json in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a readiness check."]
@@ -1795,11 +1834,11 @@ module UpdateReadinessCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "readinessCheckName") in
       make ~resourceSetName ~readinessCheckName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
       make ~resourceSetName ~readinessCheckName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Name of a readiness check to describe."]
@@ -1912,14 +1951,14 @@ module UpdateCellResponse =
           (Xml.child xml_arg0 "cellArn") in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let parentReadinessScopes =
-        field_map json "ParentReadinessScopes" Zz__listOf__string.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "ParentReadinessScopes" Zz__listOf__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       let cellName =
-        field_map json "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
-      let cellArn = field_map json "CellArn" Zz__stringMax256.of_json in
+        field_map json__ "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
+      let cellArn = field_map json__ "CellArn" Zz__stringMax256.of_json in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1948,9 +1987,9 @@ module UpdateCellRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
       make ~cells ~cellName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cells = field_map_exn json "Cells" Zz__listOf__string.of_json in
-      let cellName = field_map_exn json "CellName" Zz__string.of_json in
+    let of_json json__ =
+      let cells = field_map_exn json__ "Cells" Zz__listOf__string.of_json in
+      let cellName = field_map_exn json__ "CellName" Zz__string.of_json in
       make ~cells ~cellName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1980,9 +2019,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -2065,9 +2104,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds a tag to a resource."]
@@ -2128,8 +2167,8 @@ module ListTagsForResourcesResponse =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a resource."]
 module ListTagsForResourcesRequest =
@@ -2150,8 +2189,8 @@ module ListTagsForResourcesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resource-arn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a resource."]
@@ -2233,9 +2272,9 @@ module ListRulesResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?rules ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" Zz__listOfListRulesOutput.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" Zz__listOfListRulesOutput.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?rules ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2271,10 +2310,10 @@ module ListRulesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?resourceType ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?resourceType ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2358,10 +2397,10 @@ module ListResourceSetsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?resourceSets ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceSets =
-        field_map json "ResourceSets" Zz__listOfResourceSetOutput.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "ResourceSets" Zz__listOfResourceSetOutput.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?resourceSets ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the resource sets in an account."]
@@ -2389,9 +2428,9 @@ module ListResourceSetsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the resource sets in an account."]
@@ -2475,10 +2514,11 @@ module ListRecoveryGroupsResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?recoveryGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroups =
-        field_map json "RecoveryGroups" Zz__listOfRecoveryGroupOutput.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "RecoveryGroups"
+          Zz__listOfRecoveryGroupOutput.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?recoveryGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the recovery groups in an account."]
@@ -2506,9 +2546,9 @@ module ListRecoveryGroupsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the recovery groups in an account."]
@@ -2593,11 +2633,11 @@ module ListReadinessChecksResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?readinessChecks ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessChecks =
-        field_map json "ReadinessChecks"
+        field_map json__ "ReadinessChecks"
           Zz__listOfReadinessCheckOutput.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?readinessChecks ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the readiness checks for an account."]
@@ -2625,9 +2665,9 @@ module ListReadinessChecksRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the readiness checks for an account."]
@@ -2712,10 +2752,10 @@ module ListCrossAccountAuthorizationsResponse =
           (Xml.child xml_arg0 "crossAccountAuthorizations") in
       make ?nextToken ?crossAccountAuthorizations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let crossAccountAuthorizations =
-        field_map json "CrossAccountAuthorizations"
+        field_map json__ "CrossAccountAuthorizations"
           Zz__listOfCrossAccountAuthorization.of_json in
       make ?nextToken ?crossAccountAuthorizations ()
     let to_json v = composed_to_json to_value v
@@ -2745,9 +2785,9 @@ module ListCrossAccountAuthorizationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2828,9 +2868,9 @@ module ListCellsResponse =
           (Xml.child xml_arg0 "cells") in
       make ?nextToken ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let cells = field_map json "Cells" Zz__listOfCellOutput.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOfCellOutput.of_json in
       make ?nextToken ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the cells for an account."]
@@ -2858,9 +2898,9 @@ module ListCellsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the cells for an account."]
@@ -2985,17 +3025,17 @@ module GetResourceSetResponse =
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let resources = field_map json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map json "ResourceSetType"
+        field_map json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map json "ResourceSetName"
+        field_map json__ "ResourceSetName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let resourceSetArn =
-        field_map json "ResourceSetArn" Zz__stringMax256.of_json in
+        field_map json__ "ResourceSetArn" Zz__stringMax256.of_json in
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let to_json v = composed_to_json to_value v
@@ -3018,9 +3058,9 @@ module GetResourceSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceSetName") in
       make ~resourceSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       make ~resourceSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3128,14 +3168,14 @@ module GetRecoveryGroupResponse =
           (Xml.child xml_arg0 "cells") in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let recoveryGroupName =
-        field_map json "RecoveryGroupName"
+        field_map json__ "RecoveryGroupName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let recoveryGroupArn =
-        field_map json "RecoveryGroupArn" Zz__stringMax256.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "RecoveryGroupArn" Zz__stringMax256.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3159,9 +3199,9 @@ module GetRecoveryGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryGroupName") in
       make ~recoveryGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
       make ~recoveryGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3263,12 +3303,12 @@ module GetRecoveryGroupReadinessSummaryResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?readinessChecks ?readiness ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessChecks =
-        field_map json "ReadinessChecks"
+        field_map json__ "ReadinessChecks"
           Zz__listOfReadinessCheckSummary.of_json in
-      let readiness = field_map json "Readiness" Readiness.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?readinessChecks ?readiness ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3307,11 +3347,11 @@ module GetRecoveryGroupReadinessSummaryRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~recoveryGroupName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~recoveryGroupName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3418,12 +3458,12 @@ module GetReadinessCheckStatusResponse =
           (Xml.child xml_arg0 "messages") in
       make ?resources ?readiness ?nextToken ?messages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resources =
-        field_map json "Resources" Zz__listOfResourceResult.of_json in
-      let readiness = field_map json "Readiness" Readiness.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let messages = field_map json "Messages" Zz__listOfMessage.of_json in
+        field_map json__ "Resources" Zz__listOfResourceResult.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let messages = field_map json__ "Messages" Zz__listOfMessage.of_json in
       make ?resources ?readiness ?nextToken ?messages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3462,11 +3502,11 @@ module GetReadinessCheckStatusRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~readinessCheckName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~readinessCheckName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3577,15 +3617,15 @@ module GetReadinessCheckResponse =
           (Xml.child xml_arg0 "readinessCheckArn") in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceSet =
-        field_map json "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
+        field_map json__ "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckName =
-        field_map json "ReadinessCheckName"
+        field_map json__ "ReadinessCheckName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckArn =
-        field_map json "ReadinessCheckArn" Zz__stringMax256.of_json in
+        field_map json__ "ReadinessCheckArn" Zz__stringMax256.of_json in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about a readiness check."]
@@ -3682,10 +3722,10 @@ module GetReadinessCheckResourceStatusResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?rules ?readiness ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" Zz__listOfRuleResult.of_json in
-      let readiness = field_map json "Readiness" Readiness.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" Zz__listOfRuleResult.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?rules ?readiness ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3735,13 +3775,13 @@ module GetReadinessCheckResourceStatusRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~resourceIdentifier ~readinessCheckName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceIdentifier =
-        field_map_exn json "ResourceIdentifier" Zz__string.of_json in
+        field_map_exn json__ "ResourceIdentifier" Zz__string.of_json in
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~resourceIdentifier ~readinessCheckName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3765,9 +3805,9 @@ module GetReadinessCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "readinessCheckName") in
       make ~readinessCheckName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
       make ~readinessCheckName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets details about a readiness check."]
@@ -3880,14 +3920,14 @@ module GetCellResponse =
           (Xml.child xml_arg0 "cellArn") in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let parentReadinessScopes =
-        field_map json "ParentReadinessScopes" Zz__listOf__string.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "ParentReadinessScopes" Zz__listOf__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       let cellName =
-        field_map json "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
-      let cellArn = field_map json "CellArn" Zz__stringMax256.of_json in
+        field_map json__ "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
+      let cellArn = field_map json__ "CellArn" Zz__stringMax256.of_json in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3909,8 +3949,8 @@ module GetCellRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
       make ~cellName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cellName = field_map_exn json "CellName" Zz__string.of_json in
+    let of_json json__ =
+      let cellName = field_map_exn json__ "CellName" Zz__string.of_json in
       make ~cellName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4012,12 +4052,12 @@ module GetCellReadinessSummaryResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?readinessChecks ?readiness ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessChecks =
-        field_map json "ReadinessChecks"
+        field_map json__ "ReadinessChecks"
           Zz__listOfReadinessCheckSummary.of_json in
-      let readiness = field_map json "Readiness" Readiness.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+      let readiness = field_map json__ "Readiness" Readiness.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       make ?readinessChecks ?readiness ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4053,10 +4093,10 @@ module GetCellReadinessSummaryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
       make ?nextToken ?maxResults ~cellName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let cellName = field_map_exn json "CellName" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let cellName = field_map_exn json__ "CellName" Zz__string.of_json in
       make ?nextToken ?maxResults ~cellName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4160,12 +4200,12 @@ module GetArchitectureRecommendationsResponse =
           (Xml.child xml_arg0 "lastAuditTimestamp") in
       make ?recommendations ?nextToken ?lastAuditTimestamp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendations =
-        field_map json "Recommendations" Zz__listOfRecommendation.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map json__ "Recommendations" Zz__listOfRecommendation.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let lastAuditTimestamp =
-        field_map json "LastAuditTimestamp" LastAuditTimestamp.of_json in
+        field_map json__ "LastAuditTimestamp" LastAuditTimestamp.of_json in
       make ?recommendations ?nextToken ?lastAuditTimestamp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4204,11 +4244,11 @@ module GetArchitectureRecommendationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~recoveryGroupName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~recoveryGroupName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4230,9 +4270,9 @@ module DeleteResourceSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceSetName") in
       make ~resourceSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       make ~resourceSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a resource set."]
@@ -4255,9 +4295,9 @@ module DeleteRecoveryGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "recoveryGroupName") in
       make ~recoveryGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
       make ~recoveryGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a recovery group."]
@@ -4280,9 +4320,9 @@ module DeleteReadinessCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "readinessCheckName") in
       make ~readinessCheckName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
       make ~readinessCheckName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a readiness check."]
@@ -4373,9 +4413,9 @@ module DeleteCrossAccountAuthorizationRequest =
              "crossAccountAuthorization") in
       make ~crossAccountAuthorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossAccountAuthorization =
-        field_map_exn json "CrossAccountAuthorization" Zz__string.of_json in
+        field_map_exn json__ "CrossAccountAuthorization" Zz__string.of_json in
       make ~crossAccountAuthorization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes cross account readiness authorization."]
@@ -4396,8 +4436,8 @@ module DeleteCellRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
       make ~cellName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cellName = field_map_exn json "CellName" Zz__string.of_json in
+    let of_json json__ =
+      let cellName = field_map_exn json__ "CellName" Zz__string.of_json in
       make ~cellName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4523,17 +4563,17 @@ module CreateResourceSetResponse =
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let resources = field_map json "Resources" Zz__listOfResource.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let resources = field_map json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map json "ResourceSetType"
+        field_map json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map json "ResourceSetName"
+        field_map json__ "ResourceSetName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let resourceSetArn =
-        field_map json "ResourceSetArn" Zz__stringMax256.of_json in
+        field_map json__ "ResourceSetArn" Zz__stringMax256.of_json in
       make ?tags ?resources ?resourceSetType ?resourceSetName ?resourceSetArn
         ()
     let to_json v = composed_to_json to_value v
@@ -4580,15 +4620,15 @@ module CreateResourceSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceSetName") in
       make ?tags ~resources ~resourceSetType ~resourceSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resources =
-        field_map_exn json "Resources" Zz__listOfResource.of_json in
+        field_map_exn json__ "Resources" Zz__listOfResource.of_json in
       let resourceSetType =
-        field_map_exn json "ResourceSetType"
+        field_map_exn json__ "ResourceSetType"
           Zz__stringPatternAWSAZaZ09AZaZ09.of_json in
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       make ?tags ~resources ~resourceSetType ~resourceSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4696,14 +4736,14 @@ module CreateRecoveryGroupResponse =
           (Xml.child xml_arg0 "cells") in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let recoveryGroupName =
-        field_map json "RecoveryGroupName"
+        field_map json__ "RecoveryGroupName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let recoveryGroupArn =
-        field_map json "RecoveryGroupArn" Zz__stringMax256.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "RecoveryGroupArn" Zz__stringMax256.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       make ?tags ?recoveryGroupName ?recoveryGroupArn ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4740,11 +4780,11 @@ module CreateRecoveryGroupRequest =
           (Xml.child xml_arg0 "cells") in
       make ?tags ~recoveryGroupName ?cells ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let recoveryGroupName =
-        field_map_exn json "RecoveryGroupName" Zz__string.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map_exn json__ "RecoveryGroupName" Zz__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       make ?tags ~recoveryGroupName ?cells ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4855,15 +4895,15 @@ module CreateReadinessCheckResponse =
           (Xml.child xml_arg0 "readinessCheckArn") in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceSet =
-        field_map json "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
+        field_map json__ "ResourceSet" Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckName =
-        field_map json "ReadinessCheckName"
+        field_map json__ "ReadinessCheckName"
           Zz__stringMax64PatternAAZAZ09Z.of_json in
       let readinessCheckArn =
-        field_map json "ReadinessCheckArn" Zz__stringMax256.of_json in
+        field_map json__ "ReadinessCheckArn" Zz__stringMax256.of_json in
       make ?tags ?resourceSet ?readinessCheckName ?readinessCheckArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4899,12 +4939,12 @@ module CreateReadinessCheckRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "readinessCheckName") in
       make ?tags ~resourceSetName ~readinessCheckName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let resourceSetName =
-        field_map_exn json "ResourceSetName" Zz__string.of_json in
+        field_map_exn json__ "ResourceSetName" Zz__string.of_json in
       let readinessCheckName =
-        field_map_exn json "ReadinessCheckName" Zz__string.of_json in
+        field_map_exn json__ "ReadinessCheckName" Zz__string.of_json in
       make ?tags ~resourceSetName ~readinessCheckName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4992,9 +5032,9 @@ module CreateCrossAccountAuthorizationResponse =
           (Xml.child xml_arg0 "crossAccountAuthorization") in
       make ?crossAccountAuthorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossAccountAuthorization =
-        field_map json "CrossAccountAuthorization"
+        field_map json__ "CrossAccountAuthorization"
           CrossAccountAuthorization.of_json in
       make ?crossAccountAuthorization ()
     let to_json v = composed_to_json to_value v
@@ -5022,9 +5062,9 @@ module CreateCrossAccountAuthorizationRequest =
              "crossAccountAuthorization") in
       make ~crossAccountAuthorization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossAccountAuthorization =
-        field_map_exn json "CrossAccountAuthorization"
+        field_map_exn json__ "CrossAccountAuthorization"
           CrossAccountAuthorization.of_json in
       make ~crossAccountAuthorization ()
     let to_json v = composed_to_json to_value v
@@ -5139,14 +5179,14 @@ module CreateCellResponse =
           (Xml.child xml_arg0 "cellArn") in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let parentReadinessScopes =
-        field_map json "ParentReadinessScopes" Zz__listOf__string.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
+        field_map json__ "ParentReadinessScopes" Zz__listOf__string.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
       let cellName =
-        field_map json "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
-      let cellArn = field_map json "CellArn" Zz__stringMax256.of_json in
+        field_map json__ "CellName" Zz__stringMax64PatternAAZAZ09Z.of_json in
+      let cellArn = field_map json__ "CellArn" Zz__stringMax256.of_json in
       make ?tags ?parentReadinessScopes ?cells ?cellName ?cellArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a cell in an account."]
@@ -5178,10 +5218,10 @@ module CreateCellRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "cellName") in
       make ?tags ?cells ~cellName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
-      let cells = field_map json "Cells" Zz__listOf__string.of_json in
-      let cellName = field_map_exn json "CellName" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let cells = field_map json__ "Cells" Zz__listOf__string.of_json in
+      let cellName = field_map_exn json__ "CellName" Zz__string.of_json in
       make ?tags ?cells ~cellName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a cell in an account."]

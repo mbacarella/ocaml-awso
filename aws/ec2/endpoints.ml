@@ -2,10 +2,20 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AcceptAddressTransfer: (AcceptAddressTransferRequest.t,
+  AcceptAddressTransferResult.t, AcceptAddressTransferResult.error) t 
+  | AcceptCapacityReservationBillingOwnership:
+  (AcceptCapacityReservationBillingOwnershipRequest.t,
+  AcceptCapacityReservationBillingOwnershipResult.t,
+  AcceptCapacityReservationBillingOwnershipResult.error) t 
   | AcceptReservedInstancesExchangeQuote:
   (AcceptReservedInstancesExchangeQuoteRequest.t,
   AcceptReservedInstancesExchangeQuoteResult.t,
   AcceptReservedInstancesExchangeQuoteResult.error) t 
+  | AcceptTransitGatewayClientVpnAttachment:
+  (AcceptTransitGatewayClientVpnAttachmentRequest.t,
+  AcceptTransitGatewayClientVpnAttachmentResult.t,
+  AcceptTransitGatewayClientVpnAttachmentResult.error) t 
   | AcceptTransitGatewayMulticastDomainAssociations:
   (AcceptTransitGatewayMulticastDomainAssociationsRequest.t,
   AcceptTransitGatewayMulticastDomainAssociationsResult.t,
@@ -40,8 +50,15 @@ type ('i, 'o, 'e) t =
   AssignIpv6AddressesResult.t, AssignIpv6AddressesResult.error) t 
   | AssignPrivateIpAddresses: (AssignPrivateIpAddressesRequest.t,
   AssignPrivateIpAddressesResult.t, AssignPrivateIpAddressesResult.error) t 
+  | AssignPrivateNatGatewayAddress: (AssignPrivateNatGatewayAddressRequest.t,
+  AssignPrivateNatGatewayAddressResult.t,
+  AssignPrivateNatGatewayAddressResult.error) t 
   | AssociateAddress: (AssociateAddressRequest.t, AssociateAddressResult.t,
   AssociateAddressResult.error) t 
+  | AssociateCapacityReservationBillingOwner:
+  (AssociateCapacityReservationBillingOwnerRequest.t,
+  AssociateCapacityReservationBillingOwnerResult.t,
+  AssociateCapacityReservationBillingOwnerResult.error) t 
   | AssociateClientVpnTargetNetwork:
   (AssociateClientVpnTargetNetworkRequest.t,
   AssociateClientVpnTargetNetworkResult.t,
@@ -57,14 +74,31 @@ type ('i, 'o, 'e) t =
   | AssociateInstanceEventWindow: (AssociateInstanceEventWindowRequest.t,
   AssociateInstanceEventWindowResult.t,
   AssociateInstanceEventWindowResult.error) t 
+  | AssociateIpamByoasn: (AssociateIpamByoasnRequest.t,
+  AssociateIpamByoasnResult.t, AssociateIpamByoasnResult.error) t 
+  | AssociateIpamResourceDiscovery: (AssociateIpamResourceDiscoveryRequest.t,
+  AssociateIpamResourceDiscoveryResult.t,
+  AssociateIpamResourceDiscoveryResult.error) t 
+  | AssociateNatGatewayAddress: (AssociateNatGatewayAddressRequest.t,
+  AssociateNatGatewayAddressResult.t, AssociateNatGatewayAddressResult.error)
+  t 
+  | AssociateRouteServer: (AssociateRouteServerRequest.t,
+  AssociateRouteServerResult.t, AssociateRouteServerResult.error) t 
   | AssociateRouteTable: (AssociateRouteTableRequest.t,
   AssociateRouteTableResult.t, AssociateRouteTableResult.error) t 
+  | AssociateSecurityGroupVpc: (AssociateSecurityGroupVpcRequest.t,
+  AssociateSecurityGroupVpcResult.t, AssociateSecurityGroupVpcResult.error) t
+  
   | AssociateSubnetCidrBlock: (AssociateSubnetCidrBlockRequest.t,
   AssociateSubnetCidrBlockResult.t, AssociateSubnetCidrBlockResult.error) t 
   | AssociateTransitGatewayMulticastDomain:
   (AssociateTransitGatewayMulticastDomainRequest.t,
   AssociateTransitGatewayMulticastDomainResult.t,
   AssociateTransitGatewayMulticastDomainResult.error) t 
+  | AssociateTransitGatewayPolicyTable:
+  (AssociateTransitGatewayPolicyTableRequest.t,
+  AssociateTransitGatewayPolicyTableResult.t,
+  AssociateTransitGatewayPolicyTableResult.error) t 
   | AssociateTransitGatewayRouteTable:
   (AssociateTransitGatewayRouteTableRequest.t,
   AssociateTransitGatewayRouteTableResult.t,
@@ -78,6 +112,10 @@ type ('i, 'o, 'e) t =
   | AttachInternetGateway: (AttachInternetGatewayRequest.t, unit, unit) t 
   | AttachNetworkInterface: (AttachNetworkInterfaceRequest.t,
   AttachNetworkInterfaceResult.t, AttachNetworkInterfaceResult.error) t 
+  | AttachVerifiedAccessTrustProvider:
+  (AttachVerifiedAccessTrustProviderRequest.t,
+  AttachVerifiedAccessTrustProviderResult.t,
+  AttachVerifiedAccessTrustProviderResult.error) t 
   | AttachVolume: (AttachVolumeRequest.t, VolumeAttachment.t,
   VolumeAttachment.error) t 
   | AttachVpnGateway: (AttachVpnGatewayRequest.t, AttachVpnGatewayResult.t,
@@ -103,7 +141,14 @@ type ('i, 'o, 'e) t =
   CancelCapacityReservationFleetsResult.t,
   CancelCapacityReservationFleetsResult.error) t 
   | CancelConversionTask: (CancelConversionRequest.t, unit, unit) t 
+  | CancelDeclarativePoliciesReport:
+  (CancelDeclarativePoliciesReportRequest.t,
+  CancelDeclarativePoliciesReportResult.t,
+  CancelDeclarativePoliciesReportResult.error) t 
   | CancelExportTask: (CancelExportTaskRequest.t, unit, unit) t 
+  | CancelImageLaunchPermission: (CancelImageLaunchPermissionRequest.t,
+  CancelImageLaunchPermissionResult.t,
+  CancelImageLaunchPermissionResult.error) t 
   | CancelImportTask: (CancelImportTaskRequest.t, CancelImportTaskResult.t,
   CancelImportTaskResult.error) t 
   | CancelReservedInstancesListing: (CancelReservedInstancesListingRequest.t,
@@ -123,9 +168,19 @@ type ('i, 'o, 'e) t =
   t 
   | CopySnapshot: (CopySnapshotRequest.t, CopySnapshotResult.t,
   CopySnapshotResult.error) t 
+  | CopyVolumes: (CopyVolumesRequest.t, CopyVolumesResult.t,
+  CopyVolumesResult.error) t 
+  | CreateCapacityManagerDataExport:
+  (CreateCapacityManagerDataExportRequest.t,
+  CreateCapacityManagerDataExportResult.t,
+  CreateCapacityManagerDataExportResult.error) t 
   | CreateCapacityReservation: (CreateCapacityReservationRequest.t,
   CreateCapacityReservationResult.t, CreateCapacityReservationResult.error) t
   
+  | CreateCapacityReservationBySplitting:
+  (CreateCapacityReservationBySplittingRequest.t,
+  CreateCapacityReservationBySplittingResult.t,
+  CreateCapacityReservationBySplittingResult.error) t 
   | CreateCapacityReservationFleet: (CreateCapacityReservationFleetRequest.t,
   CreateCapacityReservationFleetResult.t,
   CreateCapacityReservationFleetResult.error) t 
@@ -135,12 +190,20 @@ type ('i, 'o, 'e) t =
   CreateClientVpnEndpointResult.t, CreateClientVpnEndpointResult.error) t 
   | CreateClientVpnRoute: (CreateClientVpnRouteRequest.t,
   CreateClientVpnRouteResult.t, CreateClientVpnRouteResult.error) t 
+  | CreateCoipCidr: (CreateCoipCidrRequest.t, CreateCoipCidrResult.t,
+  CreateCoipCidrResult.error) t 
+  | CreateCoipPool: (CreateCoipPoolRequest.t, CreateCoipPoolResult.t,
+  CreateCoipPoolResult.error) t 
   | CreateCustomerGateway: (CreateCustomerGatewayRequest.t,
   CreateCustomerGatewayResult.t, CreateCustomerGatewayResult.error) t 
   | CreateDefaultSubnet: (CreateDefaultSubnetRequest.t,
   CreateDefaultSubnetResult.t, CreateDefaultSubnetResult.error) t 
   | CreateDefaultVpc: (CreateDefaultVpcRequest.t, CreateDefaultVpcResult.t,
   CreateDefaultVpcResult.error) t 
+  | CreateDelegateMacVolumeOwnershipTask:
+  (CreateDelegateMacVolumeOwnershipTaskRequest.t,
+  CreateDelegateMacVolumeOwnershipTaskResult.t,
+  CreateDelegateMacVolumeOwnershipTaskResult.error) t 
   | CreateDhcpOptions: (CreateDhcpOptionsRequest.t,
   CreateDhcpOptionsResult.t, CreateDhcpOptionsResult.error) t 
   | CreateEgressOnlyInternetGateway:
@@ -155,6 +218,11 @@ type ('i, 'o, 'e) t =
   CreateFpgaImageResult.error) t 
   | CreateImage: (CreateImageRequest.t, CreateImageResult.t,
   CreateImageResult.error) t 
+  | CreateImageUsageReport: (CreateImageUsageReportRequest.t,
+  CreateImageUsageReportResult.t, CreateImageUsageReportResult.error) t 
+  | CreateInstanceConnectEndpoint: (CreateInstanceConnectEndpointRequest.t,
+  CreateInstanceConnectEndpointResult.t,
+  CreateInstanceConnectEndpointResult.error) t 
   | CreateInstanceEventWindow: (CreateInstanceEventWindowRequest.t,
   CreateInstanceEventWindowResult.t, CreateInstanceEventWindowResult.error) t
   
@@ -162,10 +230,30 @@ type ('i, 'o, 'e) t =
   CreateInstanceExportTaskResult.t, CreateInstanceExportTaskResult.error) t 
   | CreateInternetGateway: (CreateInternetGatewayRequest.t,
   CreateInternetGatewayResult.t, CreateInternetGatewayResult.error) t 
+  | CreateInterruptibleCapacityReservationAllocation:
+  (CreateInterruptibleCapacityReservationAllocationRequest.t,
+  CreateInterruptibleCapacityReservationAllocationResult.t,
+  CreateInterruptibleCapacityReservationAllocationResult.error) t 
   | CreateIpam: (CreateIpamRequest.t, CreateIpamResult.t,
   CreateIpamResult.error) t 
+  | CreateIpamExternalResourceVerificationToken:
+  (CreateIpamExternalResourceVerificationTokenRequest.t,
+  CreateIpamExternalResourceVerificationTokenResult.t,
+  CreateIpamExternalResourceVerificationTokenResult.error) t 
+  | CreateIpamPolicy: (CreateIpamPolicyRequest.t, CreateIpamPolicyResult.t,
+  CreateIpamPolicyResult.error) t 
   | CreateIpamPool: (CreateIpamPoolRequest.t, CreateIpamPoolResult.t,
   CreateIpamPoolResult.error) t 
+  | CreateIpamPrefixListResolver: (CreateIpamPrefixListResolverRequest.t,
+  CreateIpamPrefixListResolverResult.t,
+  CreateIpamPrefixListResolverResult.error) t 
+  | CreateIpamPrefixListResolverTarget:
+  (CreateIpamPrefixListResolverTargetRequest.t,
+  CreateIpamPrefixListResolverTargetResult.t,
+  CreateIpamPrefixListResolverTargetResult.error) t 
+  | CreateIpamResourceDiscovery: (CreateIpamResourceDiscoveryRequest.t,
+  CreateIpamResourceDiscoveryResult.t,
+  CreateIpamResourceDiscoveryResult.error) t 
   | CreateIpamScope: (CreateIpamScopeRequest.t, CreateIpamScopeResult.t,
   CreateIpamScopeResult.error) t 
   | CreateKeyPair: (CreateKeyPairRequest.t, KeyPair.t, KeyPair.error) t 
@@ -176,10 +264,30 @@ type ('i, 'o, 'e) t =
   CreateLaunchTemplateVersionResult.error) t 
   | CreateLocalGatewayRoute: (CreateLocalGatewayRouteRequest.t,
   CreateLocalGatewayRouteResult.t, CreateLocalGatewayRouteResult.error) t 
+  | CreateLocalGatewayRouteTable: (CreateLocalGatewayRouteTableRequest.t,
+  CreateLocalGatewayRouteTableResult.t,
+  CreateLocalGatewayRouteTableResult.error) t 
+  | CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation:
+  (CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationRequest.t,
+  CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.t,
+  CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.error) t
+  
   | CreateLocalGatewayRouteTableVpcAssociation:
   (CreateLocalGatewayRouteTableVpcAssociationRequest.t,
   CreateLocalGatewayRouteTableVpcAssociationResult.t,
   CreateLocalGatewayRouteTableVpcAssociationResult.error) t 
+  | CreateLocalGatewayVirtualInterface:
+  (CreateLocalGatewayVirtualInterfaceRequest.t,
+  CreateLocalGatewayVirtualInterfaceResult.t,
+  CreateLocalGatewayVirtualInterfaceResult.error) t 
+  | CreateLocalGatewayVirtualInterfaceGroup:
+  (CreateLocalGatewayVirtualInterfaceGroupRequest.t,
+  CreateLocalGatewayVirtualInterfaceGroupResult.t,
+  CreateLocalGatewayVirtualInterfaceGroupResult.error) t 
+  | CreateMacSystemIntegrityProtectionModificationTask:
+  (CreateMacSystemIntegrityProtectionModificationTaskRequest.t,
+  CreateMacSystemIntegrityProtectionModificationTaskResult.t,
+  CreateMacSystemIntegrityProtectionModificationTaskResult.error) t 
   | CreateManagedPrefixList: (CreateManagedPrefixListRequest.t,
   CreateManagedPrefixListResult.t, CreateManagedPrefixListResult.error) t 
   | CreateNatGateway: (CreateNatGatewayRequest.t, CreateNatGatewayResult.t,
@@ -214,8 +322,19 @@ type ('i, 'o, 'e) t =
   CreateRestoreImageTaskResult.t, CreateRestoreImageTaskResult.error) t 
   | CreateRoute: (CreateRouteRequest.t, CreateRouteResult.t,
   CreateRouteResult.error) t 
+  | CreateRouteServer: (CreateRouteServerRequest.t,
+  CreateRouteServerResult.t, CreateRouteServerResult.error) t 
+  | CreateRouteServerEndpoint: (CreateRouteServerEndpointRequest.t,
+  CreateRouteServerEndpointResult.t, CreateRouteServerEndpointResult.error) t
+  
+  | CreateRouteServerPeer: (CreateRouteServerPeerRequest.t,
+  CreateRouteServerPeerResult.t, CreateRouteServerPeerResult.error) t 
   | CreateRouteTable: (CreateRouteTableRequest.t, CreateRouteTableResult.t,
   CreateRouteTableResult.error) t 
+  | CreateSecondaryNetwork: (CreateSecondaryNetworkRequest.t,
+  CreateSecondaryNetworkResult.t, CreateSecondaryNetworkResult.error) t 
+  | CreateSecondarySubnet: (CreateSecondarySubnetRequest.t,
+  CreateSecondarySubnetResult.t, CreateSecondarySubnetResult.error) t 
   | CreateSecurityGroup: (CreateSecurityGroupRequest.t,
   CreateSecurityGroupResult.t, CreateSecurityGroupResult.error) t 
   | CreateSnapshot: (CreateSnapshotRequest.t, Snapshot.t, Snapshot.error) t 
@@ -253,6 +372,14 @@ type ('i, 'o, 'e) t =
   (CreateTransitGatewayConnectPeerRequest.t,
   CreateTransitGatewayConnectPeerResult.t,
   CreateTransitGatewayConnectPeerResult.error) t 
+  | CreateTransitGatewayMeteringPolicy:
+  (CreateTransitGatewayMeteringPolicyRequest.t,
+  CreateTransitGatewayMeteringPolicyResult.t,
+  CreateTransitGatewayMeteringPolicyResult.error) t 
+  | CreateTransitGatewayMeteringPolicyEntry:
+  (CreateTransitGatewayMeteringPolicyEntryRequest.t,
+  CreateTransitGatewayMeteringPolicyEntryResult.t,
+  CreateTransitGatewayMeteringPolicyEntryResult.error) t 
   | CreateTransitGatewayMulticastDomain:
   (CreateTransitGatewayMulticastDomainRequest.t,
   CreateTransitGatewayMulticastDomainResult.t,
@@ -261,6 +388,10 @@ type ('i, 'o, 'e) t =
   (CreateTransitGatewayPeeringAttachmentRequest.t,
   CreateTransitGatewayPeeringAttachmentResult.t,
   CreateTransitGatewayPeeringAttachmentResult.error) t 
+  | CreateTransitGatewayPolicyTable:
+  (CreateTransitGatewayPolicyTableRequest.t,
+  CreateTransitGatewayPolicyTableResult.t,
+  CreateTransitGatewayPolicyTableResult.error) t 
   | CreateTransitGatewayPrefixListReference:
   (CreateTransitGatewayPrefixListReferenceRequest.t,
   CreateTransitGatewayPrefixListReferenceResult.t,
@@ -271,12 +402,36 @@ type ('i, 'o, 'e) t =
   | CreateTransitGatewayRouteTable: (CreateTransitGatewayRouteTableRequest.t,
   CreateTransitGatewayRouteTableResult.t,
   CreateTransitGatewayRouteTableResult.error) t 
+  | CreateTransitGatewayRouteTableAnnouncement:
+  (CreateTransitGatewayRouteTableAnnouncementRequest.t,
+  CreateTransitGatewayRouteTableAnnouncementResult.t,
+  CreateTransitGatewayRouteTableAnnouncementResult.error) t 
   | CreateTransitGatewayVpcAttachment:
   (CreateTransitGatewayVpcAttachmentRequest.t,
   CreateTransitGatewayVpcAttachmentResult.t,
   CreateTransitGatewayVpcAttachmentResult.error) t 
+  | CreateVerifiedAccessEndpoint: (CreateVerifiedAccessEndpointRequest.t,
+  CreateVerifiedAccessEndpointResult.t,
+  CreateVerifiedAccessEndpointResult.error) t 
+  | CreateVerifiedAccessGroup: (CreateVerifiedAccessGroupRequest.t,
+  CreateVerifiedAccessGroupResult.t, CreateVerifiedAccessGroupResult.error) t
+  
+  | CreateVerifiedAccessInstance: (CreateVerifiedAccessInstanceRequest.t,
+  CreateVerifiedAccessInstanceResult.t,
+  CreateVerifiedAccessInstanceResult.error) t 
+  | CreateVerifiedAccessTrustProvider:
+  (CreateVerifiedAccessTrustProviderRequest.t,
+  CreateVerifiedAccessTrustProviderResult.t,
+  CreateVerifiedAccessTrustProviderResult.error) t 
   | CreateVolume: (CreateVolumeRequest.t, Volume.t, Volume.error) t 
   | CreateVpc: (CreateVpcRequest.t, CreateVpcResult.t, CreateVpcResult.error)
+  t 
+  | CreateVpcBlockPublicAccessExclusion:
+  (CreateVpcBlockPublicAccessExclusionRequest.t,
+  CreateVpcBlockPublicAccessExclusionResult.t,
+  CreateVpcBlockPublicAccessExclusionResult.error) t 
+  | CreateVpcEncryptionControl: (CreateVpcEncryptionControlRequest.t,
+  CreateVpcEncryptionControlResult.t, CreateVpcEncryptionControlResult.error)
   t 
   | CreateVpcEndpoint: (CreateVpcEndpointRequest.t,
   CreateVpcEndpointResult.t, CreateVpcEndpointResult.error) t 
@@ -291,18 +446,28 @@ type ('i, 'o, 'e) t =
   | CreateVpcPeeringConnection: (CreateVpcPeeringConnectionRequest.t,
   CreateVpcPeeringConnectionResult.t, CreateVpcPeeringConnectionResult.error)
   t 
+  | CreateVpnConcentrator: (CreateVpnConcentratorRequest.t,
+  CreateVpnConcentratorResult.t, CreateVpnConcentratorResult.error) t 
   | CreateVpnConnection: (CreateVpnConnectionRequest.t,
   CreateVpnConnectionResult.t, CreateVpnConnectionResult.error) t 
   | CreateVpnConnectionRoute: (CreateVpnConnectionRouteRequest.t, unit, 
   unit) t 
   | CreateVpnGateway: (CreateVpnGatewayRequest.t, CreateVpnGatewayResult.t,
   CreateVpnGatewayResult.error) t 
+  | DeleteCapacityManagerDataExport:
+  (DeleteCapacityManagerDataExportRequest.t,
+  DeleteCapacityManagerDataExportResult.t,
+  DeleteCapacityManagerDataExportResult.error) t 
   | DeleteCarrierGateway: (DeleteCarrierGatewayRequest.t,
   DeleteCarrierGatewayResult.t, DeleteCarrierGatewayResult.error) t 
   | DeleteClientVpnEndpoint: (DeleteClientVpnEndpointRequest.t,
   DeleteClientVpnEndpointResult.t, DeleteClientVpnEndpointResult.error) t 
   | DeleteClientVpnRoute: (DeleteClientVpnRouteRequest.t,
   DeleteClientVpnRouteResult.t, DeleteClientVpnRouteResult.error) t 
+  | DeleteCoipCidr: (DeleteCoipCidrRequest.t, DeleteCoipCidrResult.t,
+  DeleteCoipCidrResult.error) t 
+  | DeleteCoipPool: (DeleteCoipPoolRequest.t, DeleteCoipPoolResult.t,
+  DeleteCoipPoolResult.error) t 
   | DeleteCustomerGateway: (DeleteCustomerGatewayRequest.t, unit, unit) t 
   | DeleteDhcpOptions: (DeleteDhcpOptionsRequest.t, unit, unit) t 
   | DeleteEgressOnlyInternetGateway:
@@ -315,17 +480,39 @@ type ('i, 'o, 'e) t =
   DeleteFlowLogsResult.error) t 
   | DeleteFpgaImage: (DeleteFpgaImageRequest.t, DeleteFpgaImageResult.t,
   DeleteFpgaImageResult.error) t 
+  | DeleteImageUsageReport: (DeleteImageUsageReportRequest.t,
+  DeleteImageUsageReportResult.t, DeleteImageUsageReportResult.error) t 
+  | DeleteInstanceConnectEndpoint: (DeleteInstanceConnectEndpointRequest.t,
+  DeleteInstanceConnectEndpointResult.t,
+  DeleteInstanceConnectEndpointResult.error) t 
   | DeleteInstanceEventWindow: (DeleteInstanceEventWindowRequest.t,
   DeleteInstanceEventWindowResult.t, DeleteInstanceEventWindowResult.error) t
   
   | DeleteInternetGateway: (DeleteInternetGatewayRequest.t, unit, unit) t 
   | DeleteIpam: (DeleteIpamRequest.t, DeleteIpamResult.t,
   DeleteIpamResult.error) t 
+  | DeleteIpamExternalResourceVerificationToken:
+  (DeleteIpamExternalResourceVerificationTokenRequest.t,
+  DeleteIpamExternalResourceVerificationTokenResult.t,
+  DeleteIpamExternalResourceVerificationTokenResult.error) t 
+  | DeleteIpamPolicy: (DeleteIpamPolicyRequest.t, DeleteIpamPolicyResult.t,
+  DeleteIpamPolicyResult.error) t 
   | DeleteIpamPool: (DeleteIpamPoolRequest.t, DeleteIpamPoolResult.t,
   DeleteIpamPoolResult.error) t 
+  | DeleteIpamPrefixListResolver: (DeleteIpamPrefixListResolverRequest.t,
+  DeleteIpamPrefixListResolverResult.t,
+  DeleteIpamPrefixListResolverResult.error) t 
+  | DeleteIpamPrefixListResolverTarget:
+  (DeleteIpamPrefixListResolverTargetRequest.t,
+  DeleteIpamPrefixListResolverTargetResult.t,
+  DeleteIpamPrefixListResolverTargetResult.error) t 
+  | DeleteIpamResourceDiscovery: (DeleteIpamResourceDiscoveryRequest.t,
+  DeleteIpamResourceDiscoveryResult.t,
+  DeleteIpamResourceDiscoveryResult.error) t 
   | DeleteIpamScope: (DeleteIpamScopeRequest.t, DeleteIpamScopeResult.t,
   DeleteIpamScopeResult.error) t 
-  | DeleteKeyPair: (DeleteKeyPairRequest.t, unit, unit) t 
+  | DeleteKeyPair: (DeleteKeyPairRequest.t, DeleteKeyPairResult.t,
+  DeleteKeyPairResult.error) t 
   | DeleteLaunchTemplate: (DeleteLaunchTemplateRequest.t,
   DeleteLaunchTemplateResult.t, DeleteLaunchTemplateResult.error) t 
   | DeleteLaunchTemplateVersions: (DeleteLaunchTemplateVersionsRequest.t,
@@ -333,10 +520,26 @@ type ('i, 'o, 'e) t =
   DeleteLaunchTemplateVersionsResult.error) t 
   | DeleteLocalGatewayRoute: (DeleteLocalGatewayRouteRequest.t,
   DeleteLocalGatewayRouteResult.t, DeleteLocalGatewayRouteResult.error) t 
+  | DeleteLocalGatewayRouteTable: (DeleteLocalGatewayRouteTableRequest.t,
+  DeleteLocalGatewayRouteTableResult.t,
+  DeleteLocalGatewayRouteTableResult.error) t 
+  | DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation:
+  (DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationRequest.t,
+  DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.t,
+  DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.error) t
+  
   | DeleteLocalGatewayRouteTableVpcAssociation:
   (DeleteLocalGatewayRouteTableVpcAssociationRequest.t,
   DeleteLocalGatewayRouteTableVpcAssociationResult.t,
   DeleteLocalGatewayRouteTableVpcAssociationResult.error) t 
+  | DeleteLocalGatewayVirtualInterface:
+  (DeleteLocalGatewayVirtualInterfaceRequest.t,
+  DeleteLocalGatewayVirtualInterfaceResult.t,
+  DeleteLocalGatewayVirtualInterfaceResult.error) t 
+  | DeleteLocalGatewayVirtualInterfaceGroup:
+  (DeleteLocalGatewayVirtualInterfaceGroupRequest.t,
+  DeleteLocalGatewayVirtualInterfaceGroupResult.t,
+  DeleteLocalGatewayVirtualInterfaceGroupResult.error) t 
   | DeleteManagedPrefixList: (DeleteManagedPrefixListRequest.t,
   DeleteManagedPrefixListResult.t, DeleteManagedPrefixListResult.error) t 
   | DeleteNatGateway: (DeleteNatGatewayRequest.t, DeleteNatGatewayResult.t,
@@ -369,8 +572,20 @@ type ('i, 'o, 'e) t =
   DeleteQueuedReservedInstancesResult.t,
   DeleteQueuedReservedInstancesResult.error) t 
   | DeleteRoute: (DeleteRouteRequest.t, unit, unit) t 
+  | DeleteRouteServer: (DeleteRouteServerRequest.t,
+  DeleteRouteServerResult.t, DeleteRouteServerResult.error) t 
+  | DeleteRouteServerEndpoint: (DeleteRouteServerEndpointRequest.t,
+  DeleteRouteServerEndpointResult.t, DeleteRouteServerEndpointResult.error) t
+  
+  | DeleteRouteServerPeer: (DeleteRouteServerPeerRequest.t,
+  DeleteRouteServerPeerResult.t, DeleteRouteServerPeerResult.error) t 
   | DeleteRouteTable: (DeleteRouteTableRequest.t, unit, unit) t 
-  | DeleteSecurityGroup: (DeleteSecurityGroupRequest.t, unit, unit) t 
+  | DeleteSecondaryNetwork: (DeleteSecondaryNetworkRequest.t,
+  DeleteSecondaryNetworkResult.t, DeleteSecondaryNetworkResult.error) t 
+  | DeleteSecondarySubnet: (DeleteSecondarySubnetRequest.t,
+  DeleteSecondarySubnetResult.t, DeleteSecondarySubnetResult.error) t 
+  | DeleteSecurityGroup: (DeleteSecurityGroupRequest.t,
+  DeleteSecurityGroupResult.t, DeleteSecurityGroupResult.error) t 
   | DeleteSnapshot: (DeleteSnapshotRequest.t, unit, unit) t 
   | DeleteSpotDatafeedSubscription: (DeleteSpotDatafeedSubscriptionRequest.t,
   unit, unit) t 
@@ -393,6 +608,10 @@ type ('i, 'o, 'e) t =
   
   | DeleteTransitGateway: (DeleteTransitGatewayRequest.t,
   DeleteTransitGatewayResult.t, DeleteTransitGatewayResult.error) t 
+  | DeleteTransitGatewayClientVpnAttachment:
+  (DeleteTransitGatewayClientVpnAttachmentRequest.t,
+  DeleteTransitGatewayClientVpnAttachmentResult.t,
+  DeleteTransitGatewayClientVpnAttachmentResult.error) t 
   | DeleteTransitGatewayConnect: (DeleteTransitGatewayConnectRequest.t,
   DeleteTransitGatewayConnectResult.t,
   DeleteTransitGatewayConnectResult.error) t 
@@ -400,6 +619,14 @@ type ('i, 'o, 'e) t =
   (DeleteTransitGatewayConnectPeerRequest.t,
   DeleteTransitGatewayConnectPeerResult.t,
   DeleteTransitGatewayConnectPeerResult.error) t 
+  | DeleteTransitGatewayMeteringPolicy:
+  (DeleteTransitGatewayMeteringPolicyRequest.t,
+  DeleteTransitGatewayMeteringPolicyResult.t,
+  DeleteTransitGatewayMeteringPolicyResult.error) t 
+  | DeleteTransitGatewayMeteringPolicyEntry:
+  (DeleteTransitGatewayMeteringPolicyEntryRequest.t,
+  DeleteTransitGatewayMeteringPolicyEntryResult.t,
+  DeleteTransitGatewayMeteringPolicyEntryResult.error) t 
   | DeleteTransitGatewayMulticastDomain:
   (DeleteTransitGatewayMulticastDomainRequest.t,
   DeleteTransitGatewayMulticastDomainResult.t,
@@ -408,6 +635,10 @@ type ('i, 'o, 'e) t =
   (DeleteTransitGatewayPeeringAttachmentRequest.t,
   DeleteTransitGatewayPeeringAttachmentResult.t,
   DeleteTransitGatewayPeeringAttachmentResult.error) t 
+  | DeleteTransitGatewayPolicyTable:
+  (DeleteTransitGatewayPolicyTableRequest.t,
+  DeleteTransitGatewayPolicyTableResult.t,
+  DeleteTransitGatewayPolicyTableResult.error) t 
   | DeleteTransitGatewayPrefixListReference:
   (DeleteTransitGatewayPrefixListReferenceRequest.t,
   DeleteTransitGatewayPrefixListReferenceResult.t,
@@ -418,12 +649,36 @@ type ('i, 'o, 'e) t =
   | DeleteTransitGatewayRouteTable: (DeleteTransitGatewayRouteTableRequest.t,
   DeleteTransitGatewayRouteTableResult.t,
   DeleteTransitGatewayRouteTableResult.error) t 
+  | DeleteTransitGatewayRouteTableAnnouncement:
+  (DeleteTransitGatewayRouteTableAnnouncementRequest.t,
+  DeleteTransitGatewayRouteTableAnnouncementResult.t,
+  DeleteTransitGatewayRouteTableAnnouncementResult.error) t 
   | DeleteTransitGatewayVpcAttachment:
   (DeleteTransitGatewayVpcAttachmentRequest.t,
   DeleteTransitGatewayVpcAttachmentResult.t,
   DeleteTransitGatewayVpcAttachmentResult.error) t 
+  | DeleteVerifiedAccessEndpoint: (DeleteVerifiedAccessEndpointRequest.t,
+  DeleteVerifiedAccessEndpointResult.t,
+  DeleteVerifiedAccessEndpointResult.error) t 
+  | DeleteVerifiedAccessGroup: (DeleteVerifiedAccessGroupRequest.t,
+  DeleteVerifiedAccessGroupResult.t, DeleteVerifiedAccessGroupResult.error) t
+  
+  | DeleteVerifiedAccessInstance: (DeleteVerifiedAccessInstanceRequest.t,
+  DeleteVerifiedAccessInstanceResult.t,
+  DeleteVerifiedAccessInstanceResult.error) t 
+  | DeleteVerifiedAccessTrustProvider:
+  (DeleteVerifiedAccessTrustProviderRequest.t,
+  DeleteVerifiedAccessTrustProviderResult.t,
+  DeleteVerifiedAccessTrustProviderResult.error) t 
   | DeleteVolume: (DeleteVolumeRequest.t, unit, unit) t 
   | DeleteVpc: (DeleteVpcRequest.t, unit, unit) t 
+  | DeleteVpcBlockPublicAccessExclusion:
+  (DeleteVpcBlockPublicAccessExclusionRequest.t,
+  DeleteVpcBlockPublicAccessExclusionResult.t,
+  DeleteVpcBlockPublicAccessExclusionResult.error) t 
+  | DeleteVpcEncryptionControl: (DeleteVpcEncryptionControlRequest.t,
+  DeleteVpcEncryptionControlResult.t, DeleteVpcEncryptionControlResult.error)
+  t 
   | DeleteVpcEndpointConnectionNotifications:
   (DeleteVpcEndpointConnectionNotificationsRequest.t,
   DeleteVpcEndpointConnectionNotificationsResult.t,
@@ -437,18 +692,23 @@ type ('i, 'o, 'e) t =
   | DeleteVpcPeeringConnection: (DeleteVpcPeeringConnectionRequest.t,
   DeleteVpcPeeringConnectionResult.t, DeleteVpcPeeringConnectionResult.error)
   t 
+  | DeleteVpnConcentrator: (DeleteVpnConcentratorRequest.t,
+  DeleteVpnConcentratorResult.t, DeleteVpnConcentratorResult.error) t 
   | DeleteVpnConnection: (DeleteVpnConnectionRequest.t, unit, unit) t 
   | DeleteVpnConnectionRoute: (DeleteVpnConnectionRouteRequest.t, unit, 
   unit) t 
   | DeleteVpnGateway: (DeleteVpnGatewayRequest.t, unit, unit) t 
   | DeprovisionByoipCidr: (DeprovisionByoipCidrRequest.t,
   DeprovisionByoipCidrResult.t, DeprovisionByoipCidrResult.error) t 
+  | DeprovisionIpamByoasn: (DeprovisionIpamByoasnRequest.t,
+  DeprovisionIpamByoasnResult.t, DeprovisionIpamByoasnResult.error) t 
   | DeprovisionIpamPoolCidr: (DeprovisionIpamPoolCidrRequest.t,
   DeprovisionIpamPoolCidrResult.t, DeprovisionIpamPoolCidrResult.error) t 
   | DeprovisionPublicIpv4PoolCidr: (DeprovisionPublicIpv4PoolCidrRequest.t,
   DeprovisionPublicIpv4PoolCidrResult.t,
   DeprovisionPublicIpv4PoolCidrResult.error) t 
-  | DeregisterImage: (DeregisterImageRequest.t, unit, unit) t 
+  | DeregisterImage: (DeregisterImageRequest.t, DeregisterImageResult.t,
+  DeregisterImageResult.error) t 
   | DeregisterInstanceEventNotificationAttributes:
   (DeregisterInstanceEventNotificationAttributesRequest.t,
   DeregisterInstanceEventNotificationAttributesResult.t,
@@ -464,6 +724,8 @@ type ('i, 'o, 'e) t =
   | DescribeAccountAttributes: (DescribeAccountAttributesRequest.t,
   DescribeAccountAttributesResult.t, DescribeAccountAttributesResult.error) t
   
+  | DescribeAddressTransfers: (DescribeAddressTransfersRequest.t,
+  DescribeAddressTransfersResult.t, DescribeAddressTransfersResult.error) t 
   | DescribeAddresses: (DescribeAddressesRequest.t,
   DescribeAddressesResult.t, DescribeAddressesResult.error) t 
   | DescribeAddressesAttribute: (DescribeAddressesAttributeRequest.t,
@@ -475,14 +737,46 @@ type ('i, 'o, 'e) t =
   | DescribeAvailabilityZones: (DescribeAvailabilityZonesRequest.t,
   DescribeAvailabilityZonesResult.t, DescribeAvailabilityZonesResult.error) t
   
+  | DescribeAwsNetworkPerformanceMetricSubscriptions:
+  (DescribeAwsNetworkPerformanceMetricSubscriptionsRequest.t,
+  DescribeAwsNetworkPerformanceMetricSubscriptionsResult.t,
+  DescribeAwsNetworkPerformanceMetricSubscriptionsResult.error) t 
   | DescribeBundleTasks: (DescribeBundleTasksRequest.t,
   DescribeBundleTasksResult.t, DescribeBundleTasksResult.error) t 
   | DescribeByoipCidrs: (DescribeByoipCidrsRequest.t,
   DescribeByoipCidrsResult.t, DescribeByoipCidrsResult.error) t 
+  | DescribeCapacityBlockExtensionHistory:
+  (DescribeCapacityBlockExtensionHistoryRequest.t,
+  DescribeCapacityBlockExtensionHistoryResult.t,
+  DescribeCapacityBlockExtensionHistoryResult.error) t 
+  | DescribeCapacityBlockExtensionOfferings:
+  (DescribeCapacityBlockExtensionOfferingsRequest.t,
+  DescribeCapacityBlockExtensionOfferingsResult.t,
+  DescribeCapacityBlockExtensionOfferingsResult.error) t 
+  | DescribeCapacityBlockOfferings: (DescribeCapacityBlockOfferingsRequest.t,
+  DescribeCapacityBlockOfferingsResult.t,
+  DescribeCapacityBlockOfferingsResult.error) t 
+  | DescribeCapacityBlockStatus: (DescribeCapacityBlockStatusRequest.t,
+  DescribeCapacityBlockStatusResult.t,
+  DescribeCapacityBlockStatusResult.error) t 
+  | DescribeCapacityBlocks: (DescribeCapacityBlocksRequest.t,
+  DescribeCapacityBlocksResult.t, DescribeCapacityBlocksResult.error) t 
+  | DescribeCapacityManagerDataExports:
+  (DescribeCapacityManagerDataExportsRequest.t,
+  DescribeCapacityManagerDataExportsResult.t,
+  DescribeCapacityManagerDataExportsResult.error) t 
+  | DescribeCapacityReservationBillingRequests:
+  (DescribeCapacityReservationBillingRequestsRequest.t,
+  DescribeCapacityReservationBillingRequestsResult.t,
+  DescribeCapacityReservationBillingRequestsResult.error) t 
   | DescribeCapacityReservationFleets:
   (DescribeCapacityReservationFleetsRequest.t,
   DescribeCapacityReservationFleetsResult.t,
   DescribeCapacityReservationFleetsResult.error) t 
+  | DescribeCapacityReservationTopology:
+  (DescribeCapacityReservationTopologyRequest.t,
+  DescribeCapacityReservationTopologyResult.t,
+  DescribeCapacityReservationTopologyResult.error) t 
   | DescribeCapacityReservations: (DescribeCapacityReservationsRequest.t,
   DescribeCapacityReservationsResult.t,
   DescribeCapacityReservationsResult.error) t 
@@ -513,6 +807,10 @@ type ('i, 'o, 'e) t =
   DescribeConversionTasksResult.t, DescribeConversionTasksResult.error) t 
   | DescribeCustomerGateways: (DescribeCustomerGatewaysRequest.t,
   DescribeCustomerGatewaysResult.t, DescribeCustomerGatewaysResult.error) t 
+  | DescribeDeclarativePoliciesReports:
+  (DescribeDeclarativePoliciesReportsRequest.t,
+  DescribeDeclarativePoliciesReportsResult.t,
+  DescribeDeclarativePoliciesReportsResult.error) t 
   | DescribeDhcpOptions: (DescribeDhcpOptionsRequest.t,
   DescribeDhcpOptionsResult.t, DescribeDhcpOptionsResult.error) t 
   | DescribeEgressOnlyInternetGateways:
@@ -561,6 +859,15 @@ type ('i, 'o, 'e) t =
   DescribeIdentityIdFormatResult.t, DescribeIdentityIdFormatResult.error) t 
   | DescribeImageAttribute: (DescribeImageAttributeRequest.t,
   ImageAttribute.t, ImageAttribute.error) t 
+  | DescribeImageReferences: (DescribeImageReferencesRequest.t,
+  DescribeImageReferencesResult.t, DescribeImageReferencesResult.error) t 
+  | DescribeImageUsageReportEntries:
+  (DescribeImageUsageReportEntriesRequest.t,
+  DescribeImageUsageReportEntriesResult.t,
+  DescribeImageUsageReportEntriesResult.error) t 
+  | DescribeImageUsageReports: (DescribeImageUsageReportsRequest.t,
+  DescribeImageUsageReportsResult.t, DescribeImageUsageReportsResult.error) t
+  
   | DescribeImages: (DescribeImagesRequest.t, DescribeImagesResult.t,
   DescribeImagesResult.error) t 
   | DescribeImportImageTasks: (DescribeImportImageTasksRequest.t,
@@ -570,6 +877,10 @@ type ('i, 'o, 'e) t =
   DescribeImportSnapshotTasksResult.error) t 
   | DescribeInstanceAttribute: (DescribeInstanceAttributeRequest.t,
   InstanceAttribute.t, InstanceAttribute.error) t 
+  | DescribeInstanceConnectEndpoints:
+  (DescribeInstanceConnectEndpointsRequest.t,
+  DescribeInstanceConnectEndpointsResult.t,
+  DescribeInstanceConnectEndpointsResult.error) t 
   | DescribeInstanceCreditSpecifications:
   (DescribeInstanceCreditSpecificationsRequest.t,
   DescribeInstanceCreditSpecificationsResult.t,
@@ -581,8 +892,20 @@ type ('i, 'o, 'e) t =
   | DescribeInstanceEventWindows: (DescribeInstanceEventWindowsRequest.t,
   DescribeInstanceEventWindowsResult.t,
   DescribeInstanceEventWindowsResult.error) t 
+  | DescribeInstanceImageMetadata: (DescribeInstanceImageMetadataRequest.t,
+  DescribeInstanceImageMetadataResult.t,
+  DescribeInstanceImageMetadataResult.error) t 
+  | DescribeInstanceSqlHaHistoryStates:
+  (DescribeInstanceSqlHaHistoryStatesRequest.t,
+  DescribeInstanceSqlHaHistoryStatesResult.t,
+  DescribeInstanceSqlHaHistoryStatesResult.error) t 
+  | DescribeInstanceSqlHaStates: (DescribeInstanceSqlHaStatesRequest.t,
+  DescribeInstanceSqlHaStatesResult.t,
+  DescribeInstanceSqlHaStatesResult.error) t 
   | DescribeInstanceStatus: (DescribeInstanceStatusRequest.t,
   DescribeInstanceStatusResult.t, DescribeInstanceStatusResult.error) t 
+  | DescribeInstanceTopology: (DescribeInstanceTopologyRequest.t,
+  DescribeInstanceTopologyResult.t, DescribeInstanceTopologyResult.error) t 
   | DescribeInstanceTypeOfferings: (DescribeInstanceTypeOfferingsRequest.t,
   DescribeInstanceTypeOfferingsResult.t,
   DescribeInstanceTypeOfferingsResult.error) t 
@@ -592,8 +915,32 @@ type ('i, 'o, 'e) t =
   DescribeInstancesResult.t, DescribeInstancesResult.error) t 
   | DescribeInternetGateways: (DescribeInternetGatewaysRequest.t,
   DescribeInternetGatewaysResult.t, DescribeInternetGatewaysResult.error) t 
+  | DescribeIpamByoasn: (DescribeIpamByoasnRequest.t,
+  DescribeIpamByoasnResult.t, DescribeIpamByoasnResult.error) t 
+  | DescribeIpamExternalResourceVerificationTokens:
+  (DescribeIpamExternalResourceVerificationTokensRequest.t,
+  DescribeIpamExternalResourceVerificationTokensResult.t,
+  DescribeIpamExternalResourceVerificationTokensResult.error) t 
+  | DescribeIpamPolicies: (DescribeIpamPoliciesRequest.t,
+  DescribeIpamPoliciesResult.t, DescribeIpamPoliciesResult.error) t 
   | DescribeIpamPools: (DescribeIpamPoolsRequest.t,
   DescribeIpamPoolsResult.t, DescribeIpamPoolsResult.error) t 
+  | DescribeIpamPrefixListResolverTargets:
+  (DescribeIpamPrefixListResolverTargetsRequest.t,
+  DescribeIpamPrefixListResolverTargetsResult.t,
+  DescribeIpamPrefixListResolverTargetsResult.error) t 
+  | DescribeIpamPrefixListResolvers:
+  (DescribeIpamPrefixListResolversRequest.t,
+  DescribeIpamPrefixListResolversResult.t,
+  DescribeIpamPrefixListResolversResult.error) t 
+  | DescribeIpamResourceDiscoveries:
+  (DescribeIpamResourceDiscoveriesRequest.t,
+  DescribeIpamResourceDiscoveriesResult.t,
+  DescribeIpamResourceDiscoveriesResult.error) t 
+  | DescribeIpamResourceDiscoveryAssociations:
+  (DescribeIpamResourceDiscoveryAssociationsRequest.t,
+  DescribeIpamResourceDiscoveryAssociationsResult.t,
+  DescribeIpamResourceDiscoveryAssociationsResult.error) t 
   | DescribeIpamScopes: (DescribeIpamScopesRequest.t,
   DescribeIpamScopesResult.t, DescribeIpamScopesResult.error) t 
   | DescribeIpams: (DescribeIpamsRequest.t, DescribeIpamsResult.t,
@@ -630,6 +977,13 @@ type ('i, 'o, 'e) t =
   DescribeLocalGatewayVirtualInterfacesResult.error) t 
   | DescribeLocalGateways: (DescribeLocalGatewaysRequest.t,
   DescribeLocalGatewaysResult.t, DescribeLocalGatewaysResult.error) t 
+  | DescribeLockedSnapshots: (DescribeLockedSnapshotsRequest.t,
+  DescribeLockedSnapshotsResult.t, DescribeLockedSnapshotsResult.error) t 
+  | DescribeMacHosts: (DescribeMacHostsRequest.t, DescribeMacHostsResult.t,
+  DescribeMacHostsResult.error) t 
+  | DescribeMacModificationTasks: (DescribeMacModificationTasksRequest.t,
+  DescribeMacModificationTasksResult.t,
+  DescribeMacModificationTasksResult.error) t 
   | DescribeManagedPrefixLists: (DescribeManagedPrefixListsRequest.t,
   DescribeManagedPrefixListsResult.t, DescribeManagedPrefixListsResult.error)
   t 
@@ -665,6 +1019,8 @@ type ('i, 'o, 'e) t =
   | DescribeNetworkInterfaces: (DescribeNetworkInterfacesRequest.t,
   DescribeNetworkInterfacesResult.t, DescribeNetworkInterfacesResult.error) t
   
+  | DescribeOutpostLags: (DescribeOutpostLagsRequest.t,
+  DescribeOutpostLagsResult.t, DescribeOutpostLagsResult.error) t 
   | DescribePlacementGroups: (DescribePlacementGroupsRequest.t,
   DescribePlacementGroupsResult.t, DescribePlacementGroupsResult.error) t 
   | DescribePrefixLists: (DescribePrefixListsRequest.t,
@@ -694,6 +1050,13 @@ type ('i, 'o, 'e) t =
   (DescribeReservedInstancesOfferingsRequest.t,
   DescribeReservedInstancesOfferingsResult.t,
   DescribeReservedInstancesOfferingsResult.error) t 
+  | DescribeRouteServerEndpoints: (DescribeRouteServerEndpointsRequest.t,
+  DescribeRouteServerEndpointsResult.t,
+  DescribeRouteServerEndpointsResult.error) t 
+  | DescribeRouteServerPeers: (DescribeRouteServerPeersRequest.t,
+  DescribeRouteServerPeersResult.t, DescribeRouteServerPeersResult.error) t 
+  | DescribeRouteServers: (DescribeRouteServersRequest.t,
+  DescribeRouteServersResult.t, DescribeRouteServersResult.error) t 
   | DescribeRouteTables: (DescribeRouteTablesRequest.t,
   DescribeRouteTablesResult.t, DescribeRouteTablesResult.error) t 
   | DescribeScheduledInstanceAvailability:
@@ -703,6 +1066,14 @@ type ('i, 'o, 'e) t =
   | DescribeScheduledInstances: (DescribeScheduledInstancesRequest.t,
   DescribeScheduledInstancesResult.t, DescribeScheduledInstancesResult.error)
   t 
+  | DescribeSecondaryInterfaces: (DescribeSecondaryInterfacesRequest.t,
+  DescribeSecondaryInterfacesResult.t,
+  DescribeSecondaryInterfacesResult.error) t 
+  | DescribeSecondaryNetworks: (DescribeSecondaryNetworksRequest.t,
+  DescribeSecondaryNetworksResult.t, DescribeSecondaryNetworksResult.error) t
+  
+  | DescribeSecondarySubnets: (DescribeSecondarySubnetsRequest.t,
+  DescribeSecondarySubnetsResult.t, DescribeSecondarySubnetsResult.error) t 
   | DescribeSecurityGroupReferences:
   (DescribeSecurityGroupReferencesRequest.t,
   DescribeSecurityGroupReferencesResult.t,
@@ -710,8 +1081,16 @@ type ('i, 'o, 'e) t =
   | DescribeSecurityGroupRules: (DescribeSecurityGroupRulesRequest.t,
   DescribeSecurityGroupRulesResult.t, DescribeSecurityGroupRulesResult.error)
   t 
+  | DescribeSecurityGroupVpcAssociations:
+  (DescribeSecurityGroupVpcAssociationsRequest.t,
+  DescribeSecurityGroupVpcAssociationsResult.t,
+  DescribeSecurityGroupVpcAssociationsResult.error) t 
   | DescribeSecurityGroups: (DescribeSecurityGroupsRequest.t,
   DescribeSecurityGroupsResult.t, DescribeSecurityGroupsResult.error) t 
+  | DescribeServiceLinkVirtualInterfaces:
+  (DescribeServiceLinkVirtualInterfacesRequest.t,
+  DescribeServiceLinkVirtualInterfacesResult.t,
+  DescribeServiceLinkVirtualInterfacesResult.error) t 
   | DescribeSnapshotAttribute: (DescribeSnapshotAttributeRequest.t,
   DescribeSnapshotAttributeResult.t, DescribeSnapshotAttributeResult.error) t
   
@@ -748,6 +1127,10 @@ type ('i, 'o, 'e) t =
   DescribeSubnetsResult.error) t 
   | DescribeTags: (DescribeTagsRequest.t, DescribeTagsResult.t,
   DescribeTagsResult.error) t 
+  | DescribeTrafficMirrorFilterRules:
+  (DescribeTrafficMirrorFilterRulesRequest.t,
+  DescribeTrafficMirrorFilterRulesResult.t,
+  DescribeTrafficMirrorFilterRulesResult.error) t 
   | DescribeTrafficMirrorFilters: (DescribeTrafficMirrorFiltersRequest.t,
   DescribeTrafficMirrorFiltersResult.t,
   DescribeTrafficMirrorFiltersResult.error) t 
@@ -768,6 +1151,10 @@ type ('i, 'o, 'e) t =
   | DescribeTransitGatewayConnects: (DescribeTransitGatewayConnectsRequest.t,
   DescribeTransitGatewayConnectsResult.t,
   DescribeTransitGatewayConnectsResult.error) t 
+  | DescribeTransitGatewayMeteringPolicies:
+  (DescribeTransitGatewayMeteringPoliciesRequest.t,
+  DescribeTransitGatewayMeteringPoliciesResult.t,
+  DescribeTransitGatewayMeteringPoliciesResult.error) t 
   | DescribeTransitGatewayMulticastDomains:
   (DescribeTransitGatewayMulticastDomainsRequest.t,
   DescribeTransitGatewayMulticastDomainsResult.t,
@@ -776,6 +1163,14 @@ type ('i, 'o, 'e) t =
   (DescribeTransitGatewayPeeringAttachmentsRequest.t,
   DescribeTransitGatewayPeeringAttachmentsResult.t,
   DescribeTransitGatewayPeeringAttachmentsResult.error) t 
+  | DescribeTransitGatewayPolicyTables:
+  (DescribeTransitGatewayPolicyTablesRequest.t,
+  DescribeTransitGatewayPolicyTablesResult.t,
+  DescribeTransitGatewayPolicyTablesResult.error) t 
+  | DescribeTransitGatewayRouteTableAnnouncements:
+  (DescribeTransitGatewayRouteTableAnnouncementsRequest.t,
+  DescribeTransitGatewayRouteTableAnnouncementsResult.t,
+  DescribeTransitGatewayRouteTableAnnouncementsResult.error) t 
   | DescribeTransitGatewayRouteTables:
   (DescribeTransitGatewayRouteTablesRequest.t,
   DescribeTransitGatewayRouteTablesResult.t,
@@ -790,6 +1185,25 @@ type ('i, 'o, 'e) t =
   (DescribeTrunkInterfaceAssociationsRequest.t,
   DescribeTrunkInterfaceAssociationsResult.t,
   DescribeTrunkInterfaceAssociationsResult.error) t 
+  | DescribeVerifiedAccessEndpoints:
+  (DescribeVerifiedAccessEndpointsRequest.t,
+  DescribeVerifiedAccessEndpointsResult.t,
+  DescribeVerifiedAccessEndpointsResult.error) t 
+  | DescribeVerifiedAccessGroups: (DescribeVerifiedAccessGroupsRequest.t,
+  DescribeVerifiedAccessGroupsResult.t,
+  DescribeVerifiedAccessGroupsResult.error) t 
+  | DescribeVerifiedAccessInstanceLoggingConfigurations:
+  (DescribeVerifiedAccessInstanceLoggingConfigurationsRequest.t,
+  DescribeVerifiedAccessInstanceLoggingConfigurationsResult.t,
+  DescribeVerifiedAccessInstanceLoggingConfigurationsResult.error) t 
+  | DescribeVerifiedAccessInstances:
+  (DescribeVerifiedAccessInstancesRequest.t,
+  DescribeVerifiedAccessInstancesResult.t,
+  DescribeVerifiedAccessInstancesResult.error) t 
+  | DescribeVerifiedAccessTrustProviders:
+  (DescribeVerifiedAccessTrustProvidersRequest.t,
+  DescribeVerifiedAccessTrustProvidersResult.t,
+  DescribeVerifiedAccessTrustProvidersResult.error) t 
   | DescribeVolumeAttribute: (DescribeVolumeAttributeRequest.t,
   DescribeVolumeAttributeResult.t, DescribeVolumeAttributeResult.error) t 
   | DescribeVolumeStatus: (DescribeVolumeStatusRequest.t,
@@ -801,12 +1215,27 @@ type ('i, 'o, 'e) t =
   DescribeVolumesModificationsResult.error) t 
   | DescribeVpcAttribute: (DescribeVpcAttributeRequest.t,
   DescribeVpcAttributeResult.t, DescribeVpcAttributeResult.error) t 
+  | DescribeVpcBlockPublicAccessExclusions:
+  (DescribeVpcBlockPublicAccessExclusionsRequest.t,
+  DescribeVpcBlockPublicAccessExclusionsResult.t,
+  DescribeVpcBlockPublicAccessExclusionsResult.error) t 
+  | DescribeVpcBlockPublicAccessOptions:
+  (DescribeVpcBlockPublicAccessOptionsRequest.t,
+  DescribeVpcBlockPublicAccessOptionsResult.t,
+  DescribeVpcBlockPublicAccessOptionsResult.error) t 
   | DescribeVpcClassicLink: (DescribeVpcClassicLinkRequest.t,
   DescribeVpcClassicLinkResult.t, DescribeVpcClassicLinkResult.error) t 
   | DescribeVpcClassicLinkDnsSupport:
   (DescribeVpcClassicLinkDnsSupportRequest.t,
   DescribeVpcClassicLinkDnsSupportResult.t,
   DescribeVpcClassicLinkDnsSupportResult.error) t 
+  | DescribeVpcEncryptionControls: (DescribeVpcEncryptionControlsRequest.t,
+  DescribeVpcEncryptionControlsResult.t,
+  DescribeVpcEncryptionControlsResult.error) t 
+  | DescribeVpcEndpointAssociations:
+  (DescribeVpcEndpointAssociationsRequest.t,
+  DescribeVpcEndpointAssociationsResult.t,
+  DescribeVpcEndpointAssociationsResult.error) t 
   | DescribeVpcEndpointConnectionNotifications:
   (DescribeVpcEndpointConnectionNotificationsRequest.t,
   DescribeVpcEndpointConnectionNotificationsResult.t,
@@ -832,6 +1261,8 @@ type ('i, 'o, 'e) t =
   DescribeVpcPeeringConnectionsResult.error) t 
   | DescribeVpcs: (DescribeVpcsRequest.t, DescribeVpcsResult.t,
   DescribeVpcsResult.error) t 
+  | DescribeVpnConcentrators: (DescribeVpnConcentratorsRequest.t,
+  DescribeVpnConcentratorsResult.t, DescribeVpnConcentratorsResult.error) t 
   | DescribeVpnConnections: (DescribeVpnConnectionsRequest.t,
   DescribeVpnConnectionsResult.t, DescribeVpnConnectionsResult.error) t 
   | DescribeVpnGateways: (DescribeVpnGatewaysRequest.t,
@@ -840,9 +1271,24 @@ type ('i, 'o, 'e) t =
   DetachClassicLinkVpcResult.t, DetachClassicLinkVpcResult.error) t 
   | DetachInternetGateway: (DetachInternetGatewayRequest.t, unit, unit) t 
   | DetachNetworkInterface: (DetachNetworkInterfaceRequest.t, unit, unit) t 
+  | DetachVerifiedAccessTrustProvider:
+  (DetachVerifiedAccessTrustProviderRequest.t,
+  DetachVerifiedAccessTrustProviderResult.t,
+  DetachVerifiedAccessTrustProviderResult.error) t 
   | DetachVolume: (DetachVolumeRequest.t, VolumeAttachment.t,
   VolumeAttachment.error) t 
   | DetachVpnGateway: (DetachVpnGatewayRequest.t, unit, unit) t 
+  | DisableAddressTransfer: (DisableAddressTransferRequest.t,
+  DisableAddressTransferResult.t, DisableAddressTransferResult.error) t 
+  | DisableAllowedImagesSettings: (DisableAllowedImagesSettingsRequest.t,
+  DisableAllowedImagesSettingsResult.t,
+  DisableAllowedImagesSettingsResult.error) t 
+  | DisableAwsNetworkPerformanceMetricSubscription:
+  (DisableAwsNetworkPerformanceMetricSubscriptionRequest.t,
+  DisableAwsNetworkPerformanceMetricSubscriptionResult.t,
+  DisableAwsNetworkPerformanceMetricSubscriptionResult.error) t 
+  | DisableCapacityManager: (DisableCapacityManagerRequest.t,
+  DisableCapacityManagerResult.t, DisableCapacityManagerResult.error) t 
   | DisableEbsEncryptionByDefault: (DisableEbsEncryptionByDefaultRequest.t,
   DisableEbsEncryptionByDefaultResult.t,
   DisableEbsEncryptionByDefaultResult.error) t 
@@ -851,15 +1297,37 @@ type ('i, 'o, 'e) t =
   | DisableFastSnapshotRestores: (DisableFastSnapshotRestoresRequest.t,
   DisableFastSnapshotRestoresResult.t,
   DisableFastSnapshotRestoresResult.error) t 
+  | DisableImage: (DisableImageRequest.t, DisableImageResult.t,
+  DisableImageResult.error) t 
+  | DisableImageBlockPublicAccess: (DisableImageBlockPublicAccessRequest.t,
+  DisableImageBlockPublicAccessResult.t,
+  DisableImageBlockPublicAccessResult.error) t 
   | DisableImageDeprecation: (DisableImageDeprecationRequest.t,
   DisableImageDeprecationResult.t, DisableImageDeprecationResult.error) t 
+  | DisableImageDeregistrationProtection:
+  (DisableImageDeregistrationProtectionRequest.t,
+  DisableImageDeregistrationProtectionResult.t,
+  DisableImageDeregistrationProtectionResult.error) t 
+  | DisableInstanceSqlHaStandbyDetections:
+  (DisableInstanceSqlHaStandbyDetectionsRequest.t,
+  DisableInstanceSqlHaStandbyDetectionsResult.t,
+  DisableInstanceSqlHaStandbyDetectionsResult.error) t 
   | DisableIpamOrganizationAdminAccount:
   (DisableIpamOrganizationAdminAccountRequest.t,
   DisableIpamOrganizationAdminAccountResult.t,
   DisableIpamOrganizationAdminAccountResult.error) t 
+  | DisableIpamPolicy: (DisableIpamPolicyRequest.t,
+  DisableIpamPolicyResult.t, DisableIpamPolicyResult.error) t 
+  | DisableRouteServerPropagation: (DisableRouteServerPropagationRequest.t,
+  DisableRouteServerPropagationResult.t,
+  DisableRouteServerPropagationResult.error) t 
   | DisableSerialConsoleAccess: (DisableSerialConsoleAccessRequest.t,
   DisableSerialConsoleAccessResult.t, DisableSerialConsoleAccessResult.error)
   t 
+  | DisableSnapshotBlockPublicAccess:
+  (DisableSnapshotBlockPublicAccessRequest.t,
+  DisableSnapshotBlockPublicAccessResult.t,
+  DisableSnapshotBlockPublicAccessResult.error) t 
   | DisableTransitGatewayRouteTablePropagation:
   (DisableTransitGatewayRouteTablePropagationRequest.t,
   DisableTransitGatewayRouteTablePropagationResult.t,
@@ -873,6 +1341,10 @@ type ('i, 'o, 'e) t =
   DisableVpcClassicLinkDnsSupportResult.t,
   DisableVpcClassicLinkDnsSupportResult.error) t 
   | DisassociateAddress: (DisassociateAddressRequest.t, unit, unit) t 
+  | DisassociateCapacityReservationBillingOwner:
+  (DisassociateCapacityReservationBillingOwnerRequest.t,
+  DisassociateCapacityReservationBillingOwnerResult.t,
+  DisassociateCapacityReservationBillingOwnerResult.error) t 
   | DisassociateClientVpnTargetNetwork:
   (DisassociateClientVpnTargetNetworkRequest.t,
   DisassociateClientVpnTargetNetworkResult.t,
@@ -888,7 +1360,21 @@ type ('i, 'o, 'e) t =
   (DisassociateInstanceEventWindowRequest.t,
   DisassociateInstanceEventWindowResult.t,
   DisassociateInstanceEventWindowResult.error) t 
+  | DisassociateIpamByoasn: (DisassociateIpamByoasnRequest.t,
+  DisassociateIpamByoasnResult.t, DisassociateIpamByoasnResult.error) t 
+  | DisassociateIpamResourceDiscovery:
+  (DisassociateIpamResourceDiscoveryRequest.t,
+  DisassociateIpamResourceDiscoveryResult.t,
+  DisassociateIpamResourceDiscoveryResult.error) t 
+  | DisassociateNatGatewayAddress: (DisassociateNatGatewayAddressRequest.t,
+  DisassociateNatGatewayAddressResult.t,
+  DisassociateNatGatewayAddressResult.error) t 
+  | DisassociateRouteServer: (DisassociateRouteServerRequest.t,
+  DisassociateRouteServerResult.t, DisassociateRouteServerResult.error) t 
   | DisassociateRouteTable: (DisassociateRouteTableRequest.t, unit, unit) t 
+  | DisassociateSecurityGroupVpc: (DisassociateSecurityGroupVpcRequest.t,
+  DisassociateSecurityGroupVpcResult.t,
+  DisassociateSecurityGroupVpcResult.error) t 
   | DisassociateSubnetCidrBlock: (DisassociateSubnetCidrBlockRequest.t,
   DisassociateSubnetCidrBlockResult.t,
   DisassociateSubnetCidrBlockResult.error) t 
@@ -896,6 +1382,10 @@ type ('i, 'o, 'e) t =
   (DisassociateTransitGatewayMulticastDomainRequest.t,
   DisassociateTransitGatewayMulticastDomainResult.t,
   DisassociateTransitGatewayMulticastDomainResult.error) t 
+  | DisassociateTransitGatewayPolicyTable:
+  (DisassociateTransitGatewayPolicyTableRequest.t,
+  DisassociateTransitGatewayPolicyTableResult.t,
+  DisassociateTransitGatewayPolicyTableResult.error) t 
   | DisassociateTransitGatewayRouteTable:
   (DisassociateTransitGatewayRouteTableRequest.t,
   DisassociateTransitGatewayRouteTableResult.t,
@@ -905,6 +1395,17 @@ type ('i, 'o, 'e) t =
   t 
   | DisassociateVpcCidrBlock: (DisassociateVpcCidrBlockRequest.t,
   DisassociateVpcCidrBlockResult.t, DisassociateVpcCidrBlockResult.error) t 
+  | EnableAddressTransfer: (EnableAddressTransferRequest.t,
+  EnableAddressTransferResult.t, EnableAddressTransferResult.error) t 
+  | EnableAllowedImagesSettings: (EnableAllowedImagesSettingsRequest.t,
+  EnableAllowedImagesSettingsResult.t,
+  EnableAllowedImagesSettingsResult.error) t 
+  | EnableAwsNetworkPerformanceMetricSubscription:
+  (EnableAwsNetworkPerformanceMetricSubscriptionRequest.t,
+  EnableAwsNetworkPerformanceMetricSubscriptionResult.t,
+  EnableAwsNetworkPerformanceMetricSubscriptionResult.error) t 
+  | EnableCapacityManager: (EnableCapacityManagerRequest.t,
+  EnableCapacityManagerResult.t, EnableCapacityManagerResult.error) t 
   | EnableEbsEncryptionByDefault: (EnableEbsEncryptionByDefaultRequest.t,
   EnableEbsEncryptionByDefaultResult.t,
   EnableEbsEncryptionByDefaultResult.error) t 
@@ -913,15 +1414,41 @@ type ('i, 'o, 'e) t =
   | EnableFastSnapshotRestores: (EnableFastSnapshotRestoresRequest.t,
   EnableFastSnapshotRestoresResult.t, EnableFastSnapshotRestoresResult.error)
   t 
+  | EnableImage: (EnableImageRequest.t, EnableImageResult.t,
+  EnableImageResult.error) t 
+  | EnableImageBlockPublicAccess: (EnableImageBlockPublicAccessRequest.t,
+  EnableImageBlockPublicAccessResult.t,
+  EnableImageBlockPublicAccessResult.error) t 
   | EnableImageDeprecation: (EnableImageDeprecationRequest.t,
   EnableImageDeprecationResult.t, EnableImageDeprecationResult.error) t 
+  | EnableImageDeregistrationProtection:
+  (EnableImageDeregistrationProtectionRequest.t,
+  EnableImageDeregistrationProtectionResult.t,
+  EnableImageDeregistrationProtectionResult.error) t 
+  | EnableInstanceSqlHaStandbyDetections:
+  (EnableInstanceSqlHaStandbyDetectionsRequest.t,
+  EnableInstanceSqlHaStandbyDetectionsResult.t,
+  EnableInstanceSqlHaStandbyDetectionsResult.error) t 
   | EnableIpamOrganizationAdminAccount:
   (EnableIpamOrganizationAdminAccountRequest.t,
   EnableIpamOrganizationAdminAccountResult.t,
   EnableIpamOrganizationAdminAccountResult.error) t 
+  | EnableIpamPolicy: (EnableIpamPolicyRequest.t, EnableIpamPolicyResult.t,
+  EnableIpamPolicyResult.error) t 
+  | EnableReachabilityAnalyzerOrganizationSharing:
+  (EnableReachabilityAnalyzerOrganizationSharingRequest.t,
+  EnableReachabilityAnalyzerOrganizationSharingResult.t,
+  EnableReachabilityAnalyzerOrganizationSharingResult.error) t 
+  | EnableRouteServerPropagation: (EnableRouteServerPropagationRequest.t,
+  EnableRouteServerPropagationResult.t,
+  EnableRouteServerPropagationResult.error) t 
   | EnableSerialConsoleAccess: (EnableSerialConsoleAccessRequest.t,
   EnableSerialConsoleAccessResult.t, EnableSerialConsoleAccessResult.error) t
   
+  | EnableSnapshotBlockPublicAccess:
+  (EnableSnapshotBlockPublicAccessRequest.t,
+  EnableSnapshotBlockPublicAccessResult.t,
+  EnableSnapshotBlockPublicAccessResult.error) t 
   | EnableTransitGatewayRouteTablePropagation:
   (EnableTransitGatewayRouteTablePropagationRequest.t,
   EnableTransitGatewayRouteTablePropagationResult.t,
@@ -947,6 +1474,14 @@ type ('i, 'o, 'e) t =
   | ExportTransitGatewayRoutes: (ExportTransitGatewayRoutesRequest.t,
   ExportTransitGatewayRoutesResult.t, ExportTransitGatewayRoutesResult.error)
   t 
+  | ExportVerifiedAccessInstanceClientConfiguration:
+  (ExportVerifiedAccessInstanceClientConfigurationRequest.t,
+  ExportVerifiedAccessInstanceClientConfigurationResult.t,
+  ExportVerifiedAccessInstanceClientConfigurationResult.error) t 
+  | GetActiveVpnTunnelStatus: (GetActiveVpnTunnelStatusRequest.t,
+  GetActiveVpnTunnelStatusResult.t, GetActiveVpnTunnelStatusResult.error) t 
+  | GetAllowedImagesSettings: (GetAllowedImagesSettingsRequest.t,
+  GetAllowedImagesSettingsResult.t, GetAllowedImagesSettingsResult.error) t 
   | GetAssociatedEnclaveCertificateIamRoles:
   (GetAssociatedEnclaveCertificateIamRolesRequest.t,
   GetAssociatedEnclaveCertificateIamRolesResult.t,
@@ -954,6 +1489,23 @@ type ('i, 'o, 'e) t =
   | GetAssociatedIpv6PoolCidrs: (GetAssociatedIpv6PoolCidrsRequest.t,
   GetAssociatedIpv6PoolCidrsResult.t, GetAssociatedIpv6PoolCidrsResult.error)
   t 
+  | GetAwsNetworkPerformanceData: (GetAwsNetworkPerformanceDataRequest.t,
+  GetAwsNetworkPerformanceDataResult.t,
+  GetAwsNetworkPerformanceDataResult.error) t 
+  | GetCapacityManagerAttributes: (GetCapacityManagerAttributesRequest.t,
+  GetCapacityManagerAttributesResult.t,
+  GetCapacityManagerAttributesResult.error) t 
+  | GetCapacityManagerMetricData: (GetCapacityManagerMetricDataRequest.t,
+  GetCapacityManagerMetricDataResult.t,
+  GetCapacityManagerMetricDataResult.error) t 
+  | GetCapacityManagerMetricDimensions:
+  (GetCapacityManagerMetricDimensionsRequest.t,
+  GetCapacityManagerMetricDimensionsResult.t,
+  GetCapacityManagerMetricDimensionsResult.error) t 
+  | GetCapacityManagerMonitoredTagKeys:
+  (GetCapacityManagerMonitoredTagKeysRequest.t,
+  GetCapacityManagerMonitoredTagKeysResult.t,
+  GetCapacityManagerMonitoredTagKeysResult.error) t 
   | GetCapacityReservationUsage: (GetCapacityReservationUsageRequest.t,
   GetCapacityReservationUsageResult.t,
   GetCapacityReservationUsageResult.error) t 
@@ -963,6 +1515,10 @@ type ('i, 'o, 'e) t =
   GetConsoleOutputResult.error) t 
   | GetConsoleScreenshot: (GetConsoleScreenshotRequest.t,
   GetConsoleScreenshotResult.t, GetConsoleScreenshotResult.error) t 
+  | GetDeclarativePoliciesReportSummary:
+  (GetDeclarativePoliciesReportSummaryRequest.t,
+  GetDeclarativePoliciesReportSummaryResult.t,
+  GetDeclarativePoliciesReportSummaryResult.error) t 
   | GetDefaultCreditSpecification: (GetDefaultCreditSpecificationRequest.t,
   GetDefaultCreditSpecificationResult.t,
   GetDefaultCreditSpecificationResult.error) t 
@@ -971,6 +1527,8 @@ type ('i, 'o, 'e) t =
   | GetEbsEncryptionByDefault: (GetEbsEncryptionByDefaultRequest.t,
   GetEbsEncryptionByDefaultResult.t, GetEbsEncryptionByDefaultResult.error) t
   
+  | GetEnabledIpamPolicy: (GetEnabledIpamPolicyRequest.t,
+  GetEnabledIpamPolicyResult.t, GetEnabledIpamPolicyResult.error) t 
   | GetFlowLogsIntegrationTemplate: (GetFlowLogsIntegrationTemplateRequest.t,
   GetFlowLogsIntegrationTemplateResult.t,
   GetFlowLogsIntegrationTemplateResult.error) t 
@@ -982,16 +1540,56 @@ type ('i, 'o, 'e) t =
   (GetHostReservationPurchasePreviewRequest.t,
   GetHostReservationPurchasePreviewResult.t,
   GetHostReservationPurchasePreviewResult.error) t 
+  | GetImageAncestry: (GetImageAncestryRequest.t, GetImageAncestryResult.t,
+  GetImageAncestryResult.error) t 
+  | GetImageBlockPublicAccessState: (GetImageBlockPublicAccessStateRequest.t,
+  GetImageBlockPublicAccessStateResult.t,
+  GetImageBlockPublicAccessStateResult.error) t 
+  | GetInstanceMetadataDefaults: (GetInstanceMetadataDefaultsRequest.t,
+  GetInstanceMetadataDefaultsResult.t,
+  GetInstanceMetadataDefaultsResult.error) t 
+  | GetInstanceTpmEkPub: (GetInstanceTpmEkPubRequest.t,
+  GetInstanceTpmEkPubResult.t, GetInstanceTpmEkPubResult.error) t 
   | GetInstanceTypesFromInstanceRequirements:
   (GetInstanceTypesFromInstanceRequirementsRequest.t,
   GetInstanceTypesFromInstanceRequirementsResult.t,
   GetInstanceTypesFromInstanceRequirementsResult.error) t 
+  | GetInstanceUefiData: (GetInstanceUefiDataRequest.t,
+  GetInstanceUefiDataResult.t, GetInstanceUefiDataResult.error) t 
   | GetIpamAddressHistory: (GetIpamAddressHistoryRequest.t,
   GetIpamAddressHistoryResult.t, GetIpamAddressHistoryResult.error) t 
+  | GetIpamDiscoveredAccounts: (GetIpamDiscoveredAccountsRequest.t,
+  GetIpamDiscoveredAccountsResult.t, GetIpamDiscoveredAccountsResult.error) t
+  
+  | GetIpamDiscoveredPublicAddresses:
+  (GetIpamDiscoveredPublicAddressesRequest.t,
+  GetIpamDiscoveredPublicAddressesResult.t,
+  GetIpamDiscoveredPublicAddressesResult.error) t 
+  | GetIpamDiscoveredResourceCidrs: (GetIpamDiscoveredResourceCidrsRequest.t,
+  GetIpamDiscoveredResourceCidrsResult.t,
+  GetIpamDiscoveredResourceCidrsResult.error) t 
+  | GetIpamPolicyAllocationRules: (GetIpamPolicyAllocationRulesRequest.t,
+  GetIpamPolicyAllocationRulesResult.t,
+  GetIpamPolicyAllocationRulesResult.error) t 
+  | GetIpamPolicyOrganizationTargets:
+  (GetIpamPolicyOrganizationTargetsRequest.t,
+  GetIpamPolicyOrganizationTargetsResult.t,
+  GetIpamPolicyOrganizationTargetsResult.error) t 
   | GetIpamPoolAllocations: (GetIpamPoolAllocationsRequest.t,
   GetIpamPoolAllocationsResult.t, GetIpamPoolAllocationsResult.error) t 
   | GetIpamPoolCidrs: (GetIpamPoolCidrsRequest.t, GetIpamPoolCidrsResult.t,
   GetIpamPoolCidrsResult.error) t 
+  | GetIpamPrefixListResolverRules: (GetIpamPrefixListResolverRulesRequest.t,
+  GetIpamPrefixListResolverRulesResult.t,
+  GetIpamPrefixListResolverRulesResult.error) t 
+  | GetIpamPrefixListResolverVersionEntries:
+  (GetIpamPrefixListResolverVersionEntriesRequest.t,
+  GetIpamPrefixListResolverVersionEntriesResult.t,
+  GetIpamPrefixListResolverVersionEntriesResult.error) t 
+  | GetIpamPrefixListResolverVersions:
+  (GetIpamPrefixListResolverVersionsRequest.t,
+  GetIpamPrefixListResolverVersionsResult.t,
+  GetIpamPrefixListResolverVersionsResult.error) t 
   | GetIpamResourceCidrs: (GetIpamResourceCidrsRequest.t,
   GetIpamResourceCidrsResult.t, GetIpamResourceCidrsResult.error) t 
   | GetLaunchTemplateData: (GetLaunchTemplateDataRequest.t,
@@ -1003,6 +1601,9 @@ type ('i, 'o, 'e) t =
   | GetManagedPrefixListEntries: (GetManagedPrefixListEntriesRequest.t,
   GetManagedPrefixListEntriesResult.t,
   GetManagedPrefixListEntriesResult.error) t 
+  | GetManagedResourceVisibility: (GetManagedResourceVisibilityRequest.t,
+  GetManagedResourceVisibilityResult.t,
+  GetManagedResourceVisibilityResult.error) t 
   | GetNetworkInsightsAccessScopeAnalysisFindings:
   (GetNetworkInsightsAccessScopeAnalysisFindingsRequest.t,
   GetNetworkInsightsAccessScopeAnalysisFindingsResult.t,
@@ -1017,9 +1618,24 @@ type ('i, 'o, 'e) t =
   (GetReservedInstancesExchangeQuoteRequest.t,
   GetReservedInstancesExchangeQuoteResult.t,
   GetReservedInstancesExchangeQuoteResult.error) t 
+  | GetRouteServerAssociations: (GetRouteServerAssociationsRequest.t,
+  GetRouteServerAssociationsResult.t, GetRouteServerAssociationsResult.error)
+  t 
+  | GetRouteServerPropagations: (GetRouteServerPropagationsRequest.t,
+  GetRouteServerPropagationsResult.t, GetRouteServerPropagationsResult.error)
+  t 
+  | GetRouteServerRoutingDatabase: (GetRouteServerRoutingDatabaseRequest.t,
+  GetRouteServerRoutingDatabaseResult.t,
+  GetRouteServerRoutingDatabaseResult.error) t 
+  | GetSecurityGroupsForVpc: (GetSecurityGroupsForVpcRequest.t,
+  GetSecurityGroupsForVpcResult.t, GetSecurityGroupsForVpcResult.error) t 
   | GetSerialConsoleAccessStatus: (GetSerialConsoleAccessStatusRequest.t,
   GetSerialConsoleAccessStatusResult.t,
   GetSerialConsoleAccessStatusResult.error) t 
+  | GetSnapshotBlockPublicAccessState:
+  (GetSnapshotBlockPublicAccessStateRequest.t,
+  GetSnapshotBlockPublicAccessStateResult.t,
+  GetSnapshotBlockPublicAccessStateResult.error) t 
   | GetSpotPlacementScores: (GetSpotPlacementScoresRequest.t,
   GetSpotPlacementScoresResult.t, GetSpotPlacementScoresResult.error) t 
   | GetSubnetCidrReservations: (GetSubnetCidrReservationsRequest.t,
@@ -1029,10 +1645,22 @@ type ('i, 'o, 'e) t =
   (GetTransitGatewayAttachmentPropagationsRequest.t,
   GetTransitGatewayAttachmentPropagationsResult.t,
   GetTransitGatewayAttachmentPropagationsResult.error) t 
+  | GetTransitGatewayMeteringPolicyEntries:
+  (GetTransitGatewayMeteringPolicyEntriesRequest.t,
+  GetTransitGatewayMeteringPolicyEntriesResult.t,
+  GetTransitGatewayMeteringPolicyEntriesResult.error) t 
   | GetTransitGatewayMulticastDomainAssociations:
   (GetTransitGatewayMulticastDomainAssociationsRequest.t,
   GetTransitGatewayMulticastDomainAssociationsResult.t,
   GetTransitGatewayMulticastDomainAssociationsResult.error) t 
+  | GetTransitGatewayPolicyTableAssociations:
+  (GetTransitGatewayPolicyTableAssociationsRequest.t,
+  GetTransitGatewayPolicyTableAssociationsResult.t,
+  GetTransitGatewayPolicyTableAssociationsResult.error) t 
+  | GetTransitGatewayPolicyTableEntries:
+  (GetTransitGatewayPolicyTableEntriesRequest.t,
+  GetTransitGatewayPolicyTableEntriesResult.t,
+  GetTransitGatewayPolicyTableEntriesResult.error) t 
   | GetTransitGatewayPrefixListReferences:
   (GetTransitGatewayPrefixListReferencesRequest.t,
   GetTransitGatewayPrefixListReferencesResult.t,
@@ -1045,6 +1673,21 @@ type ('i, 'o, 'e) t =
   (GetTransitGatewayRouteTablePropagationsRequest.t,
   GetTransitGatewayRouteTablePropagationsResult.t,
   GetTransitGatewayRouteTablePropagationsResult.error) t 
+  | GetVerifiedAccessEndpointPolicy:
+  (GetVerifiedAccessEndpointPolicyRequest.t,
+  GetVerifiedAccessEndpointPolicyResult.t,
+  GetVerifiedAccessEndpointPolicyResult.error) t 
+  | GetVerifiedAccessEndpointTargets:
+  (GetVerifiedAccessEndpointTargetsRequest.t,
+  GetVerifiedAccessEndpointTargetsResult.t,
+  GetVerifiedAccessEndpointTargetsResult.error) t 
+  | GetVerifiedAccessGroupPolicy: (GetVerifiedAccessGroupPolicyRequest.t,
+  GetVerifiedAccessGroupPolicyResult.t,
+  GetVerifiedAccessGroupPolicyResult.error) t 
+  | GetVpcResourcesBlockingEncryptionEnforcement:
+  (GetVpcResourcesBlockingEncryptionEnforcementRequest.t,
+  GetVpcResourcesBlockingEncryptionEnforcementResult.t,
+  GetVpcResourcesBlockingEncryptionEnforcementResult.error) t 
   | GetVpnConnectionDeviceSampleConfiguration:
   (GetVpnConnectionDeviceSampleConfigurationRequest.t,
   GetVpnConnectionDeviceSampleConfigurationResult.t,
@@ -1052,6 +1695,9 @@ type ('i, 'o, 'e) t =
   | GetVpnConnectionDeviceTypes: (GetVpnConnectionDeviceTypesRequest.t,
   GetVpnConnectionDeviceTypesResult.t,
   GetVpnConnectionDeviceTypesResult.error) t 
+  | GetVpnTunnelReplacementStatus: (GetVpnTunnelReplacementStatusRequest.t,
+  GetVpnTunnelReplacementStatusResult.t,
+  GetVpnTunnelReplacementStatusResult.error) t 
   | ImportClientVpnClientCertificateRevocationList:
   (ImportClientVpnClientCertificateRevocationListRequest.t,
   ImportClientVpnClientCertificateRevocationListResult.t,
@@ -1071,6 +1717,10 @@ type ('i, 'o, 'e) t =
   | ListSnapshotsInRecycleBin: (ListSnapshotsInRecycleBinRequest.t,
   ListSnapshotsInRecycleBinResult.t, ListSnapshotsInRecycleBinResult.error) t
   
+  | ListVolumesInRecycleBin: (ListVolumesInRecycleBinRequest.t,
+  ListVolumesInRecycleBinResult.t, ListVolumesInRecycleBinResult.error) t 
+  | LockSnapshot: (LockSnapshotRequest.t, LockSnapshotResult.t,
+  LockSnapshotResult.error) t 
   | ModifyAddressAttribute: (ModifyAddressAttributeRequest.t,
   ModifyAddressAttributeResult.t, ModifyAddressAttributeResult.error) t 
   | ModifyAvailabilityZoneGroup: (ModifyAvailabilityZoneGroupRequest.t,
@@ -1105,6 +1755,11 @@ type ('i, 'o, 'e) t =
   (ModifyInstanceCapacityReservationAttributesRequest.t,
   ModifyInstanceCapacityReservationAttributesResult.t,
   ModifyInstanceCapacityReservationAttributesResult.error) t 
+  | ModifyInstanceConnectEndpoint: (ModifyInstanceConnectEndpointRequest.t,
+  ModifyInstanceConnectEndpointResult.t,
+  ModifyInstanceConnectEndpointResult.error) t 
+  | ModifyInstanceCpuOptions: (ModifyInstanceCpuOptionsRequest.t,
+  ModifyInstanceCpuOptionsResult.t, ModifyInstanceCpuOptionsResult.error) t 
   | ModifyInstanceCreditSpecification:
   (ModifyInstanceCreditSpecificationRequest.t,
   ModifyInstanceCreditSpecificationResult.t,
@@ -1119,30 +1774,62 @@ type ('i, 'o, 'e) t =
   (ModifyInstanceMaintenanceOptionsRequest.t,
   ModifyInstanceMaintenanceOptionsResult.t,
   ModifyInstanceMaintenanceOptionsResult.error) t 
+  | ModifyInstanceMetadataDefaults: (ModifyInstanceMetadataDefaultsRequest.t,
+  ModifyInstanceMetadataDefaultsResult.t,
+  ModifyInstanceMetadataDefaultsResult.error) t 
   | ModifyInstanceMetadataOptions: (ModifyInstanceMetadataOptionsRequest.t,
   ModifyInstanceMetadataOptionsResult.t,
   ModifyInstanceMetadataOptionsResult.error) t 
+  | ModifyInstanceNetworkPerformanceOptions:
+  (ModifyInstanceNetworkPerformanceRequest.t,
+  ModifyInstanceNetworkPerformanceResult.t,
+  ModifyInstanceNetworkPerformanceResult.error) t 
   | ModifyInstancePlacement: (ModifyInstancePlacementRequest.t,
   ModifyInstancePlacementResult.t, ModifyInstancePlacementResult.error) t 
   | ModifyIpam: (ModifyIpamRequest.t, ModifyIpamResult.t,
   ModifyIpamResult.error) t 
+  | ModifyIpamPolicyAllocationRules:
+  (ModifyIpamPolicyAllocationRulesRequest.t,
+  ModifyIpamPolicyAllocationRulesResult.t,
+  ModifyIpamPolicyAllocationRulesResult.error) t 
   | ModifyIpamPool: (ModifyIpamPoolRequest.t, ModifyIpamPoolResult.t,
   ModifyIpamPoolResult.error) t 
+  | ModifyIpamPrefixListResolver: (ModifyIpamPrefixListResolverRequest.t,
+  ModifyIpamPrefixListResolverResult.t,
+  ModifyIpamPrefixListResolverResult.error) t 
+  | ModifyIpamPrefixListResolverTarget:
+  (ModifyIpamPrefixListResolverTargetRequest.t,
+  ModifyIpamPrefixListResolverTargetResult.t,
+  ModifyIpamPrefixListResolverTargetResult.error) t 
   | ModifyIpamResourceCidr: (ModifyIpamResourceCidrRequest.t,
   ModifyIpamResourceCidrResult.t, ModifyIpamResourceCidrResult.error) t 
+  | ModifyIpamResourceDiscovery: (ModifyIpamResourceDiscoveryRequest.t,
+  ModifyIpamResourceDiscoveryResult.t,
+  ModifyIpamResourceDiscoveryResult.error) t 
   | ModifyIpamScope: (ModifyIpamScopeRequest.t, ModifyIpamScopeResult.t,
   ModifyIpamScopeResult.error) t 
   | ModifyLaunchTemplate: (ModifyLaunchTemplateRequest.t,
   ModifyLaunchTemplateResult.t, ModifyLaunchTemplateResult.error) t 
+  | ModifyLocalGatewayRoute: (ModifyLocalGatewayRouteRequest.t,
+  ModifyLocalGatewayRouteResult.t, ModifyLocalGatewayRouteResult.error) t 
   | ModifyManagedPrefixList: (ModifyManagedPrefixListRequest.t,
   ModifyManagedPrefixListResult.t, ModifyManagedPrefixListResult.error) t 
+  | ModifyManagedResourceVisibility:
+  (ModifyManagedResourceVisibilityRequest.t,
+  ModifyManagedResourceVisibilityResult.t,
+  ModifyManagedResourceVisibilityResult.error) t 
   | ModifyNetworkInterfaceAttribute:
   (ModifyNetworkInterfaceAttributeRequest.t, unit, unit) t 
   | ModifyPrivateDnsNameOptions: (ModifyPrivateDnsNameOptionsRequest.t,
   ModifyPrivateDnsNameOptionsResult.t,
   ModifyPrivateDnsNameOptionsResult.error) t 
+  | ModifyPublicIpDnsNameOptions: (ModifyPublicIpDnsNameOptionsRequest.t,
+  ModifyPublicIpDnsNameOptionsResult.t,
+  ModifyPublicIpDnsNameOptionsResult.error) t 
   | ModifyReservedInstances: (ModifyReservedInstancesRequest.t,
   ModifyReservedInstancesResult.t, ModifyReservedInstancesResult.error) t 
+  | ModifyRouteServer: (ModifyRouteServerRequest.t,
+  ModifyRouteServerResult.t, ModifyRouteServerResult.error) t 
   | ModifySecurityGroupRules: (ModifySecurityGroupRulesRequest.t,
   ModifySecurityGroupRulesResult.t, ModifySecurityGroupRulesResult.error) t 
   | ModifySnapshotAttribute: (ModifySnapshotAttributeRequest.t, unit, 
@@ -1164,6 +1851,10 @@ type ('i, 'o, 'e) t =
   t 
   | ModifyTransitGateway: (ModifyTransitGatewayRequest.t,
   ModifyTransitGatewayResult.t, ModifyTransitGatewayResult.error) t 
+  | ModifyTransitGatewayMeteringPolicy:
+  (ModifyTransitGatewayMeteringPolicyRequest.t,
+  ModifyTransitGatewayMeteringPolicyResult.t,
+  ModifyTransitGatewayMeteringPolicyResult.error) t 
   | ModifyTransitGatewayPrefixListReference:
   (ModifyTransitGatewayPrefixListReferenceRequest.t,
   ModifyTransitGatewayPrefixListReferenceResult.t,
@@ -1172,10 +1863,46 @@ type ('i, 'o, 'e) t =
   (ModifyTransitGatewayVpcAttachmentRequest.t,
   ModifyTransitGatewayVpcAttachmentResult.t,
   ModifyTransitGatewayVpcAttachmentResult.error) t 
+  | ModifyVerifiedAccessEndpoint: (ModifyVerifiedAccessEndpointRequest.t,
+  ModifyVerifiedAccessEndpointResult.t,
+  ModifyVerifiedAccessEndpointResult.error) t 
+  | ModifyVerifiedAccessEndpointPolicy:
+  (ModifyVerifiedAccessEndpointPolicyRequest.t,
+  ModifyVerifiedAccessEndpointPolicyResult.t,
+  ModifyVerifiedAccessEndpointPolicyResult.error) t 
+  | ModifyVerifiedAccessGroup: (ModifyVerifiedAccessGroupRequest.t,
+  ModifyVerifiedAccessGroupResult.t, ModifyVerifiedAccessGroupResult.error) t
+  
+  | ModifyVerifiedAccessGroupPolicy:
+  (ModifyVerifiedAccessGroupPolicyRequest.t,
+  ModifyVerifiedAccessGroupPolicyResult.t,
+  ModifyVerifiedAccessGroupPolicyResult.error) t 
+  | ModifyVerifiedAccessInstance: (ModifyVerifiedAccessInstanceRequest.t,
+  ModifyVerifiedAccessInstanceResult.t,
+  ModifyVerifiedAccessInstanceResult.error) t 
+  | ModifyVerifiedAccessInstanceLoggingConfiguration:
+  (ModifyVerifiedAccessInstanceLoggingConfigurationRequest.t,
+  ModifyVerifiedAccessInstanceLoggingConfigurationResult.t,
+  ModifyVerifiedAccessInstanceLoggingConfigurationResult.error) t 
+  | ModifyVerifiedAccessTrustProvider:
+  (ModifyVerifiedAccessTrustProviderRequest.t,
+  ModifyVerifiedAccessTrustProviderResult.t,
+  ModifyVerifiedAccessTrustProviderResult.error) t 
   | ModifyVolume: (ModifyVolumeRequest.t, ModifyVolumeResult.t,
   ModifyVolumeResult.error) t 
   | ModifyVolumeAttribute: (ModifyVolumeAttributeRequest.t, unit, unit) t 
   | ModifyVpcAttribute: (ModifyVpcAttributeRequest.t, unit, unit) t 
+  | ModifyVpcBlockPublicAccessExclusion:
+  (ModifyVpcBlockPublicAccessExclusionRequest.t,
+  ModifyVpcBlockPublicAccessExclusionResult.t,
+  ModifyVpcBlockPublicAccessExclusionResult.error) t 
+  | ModifyVpcBlockPublicAccessOptions:
+  (ModifyVpcBlockPublicAccessOptionsRequest.t,
+  ModifyVpcBlockPublicAccessOptionsResult.t,
+  ModifyVpcBlockPublicAccessOptionsResult.error) t 
+  | ModifyVpcEncryptionControl: (ModifyVpcEncryptionControlRequest.t,
+  ModifyVpcEncryptionControlResult.t, ModifyVpcEncryptionControlResult.error)
+  t 
   | ModifyVpcEndpoint: (ModifyVpcEndpointRequest.t,
   ModifyVpcEndpointResult.t, ModifyVpcEndpointResult.error) t 
   | ModifyVpcEndpointConnectionNotification:
@@ -1216,13 +1943,24 @@ type ('i, 'o, 'e) t =
   MoveAddressToVpcResult.error) t 
   | MoveByoipCidrToIpam: (MoveByoipCidrToIpamRequest.t,
   MoveByoipCidrToIpamResult.t, MoveByoipCidrToIpamResult.error) t 
+  | MoveCapacityReservationInstances:
+  (MoveCapacityReservationInstancesRequest.t,
+  MoveCapacityReservationInstancesResult.t,
+  MoveCapacityReservationInstancesResult.error) t 
   | ProvisionByoipCidr: (ProvisionByoipCidrRequest.t,
   ProvisionByoipCidrResult.t, ProvisionByoipCidrResult.error) t 
+  | ProvisionIpamByoasn: (ProvisionIpamByoasnRequest.t,
+  ProvisionIpamByoasnResult.t, ProvisionIpamByoasnResult.error) t 
   | ProvisionIpamPoolCidr: (ProvisionIpamPoolCidrRequest.t,
   ProvisionIpamPoolCidrResult.t, ProvisionIpamPoolCidrResult.error) t 
   | ProvisionPublicIpv4PoolCidr: (ProvisionPublicIpv4PoolCidrRequest.t,
   ProvisionPublicIpv4PoolCidrResult.t,
   ProvisionPublicIpv4PoolCidrResult.error) t 
+  | PurchaseCapacityBlock: (PurchaseCapacityBlockRequest.t,
+  PurchaseCapacityBlockResult.t, PurchaseCapacityBlockResult.error) t 
+  | PurchaseCapacityBlockExtension: (PurchaseCapacityBlockExtensionRequest.t,
+  PurchaseCapacityBlockExtensionResult.t,
+  PurchaseCapacityBlockExtensionResult.error) t 
   | PurchaseHostReservation: (PurchaseHostReservationRequest.t,
   PurchaseHostReservationResult.t, PurchaseHostReservationResult.error) t 
   | PurchaseReservedInstancesOffering:
@@ -1247,6 +1985,14 @@ type ('i, 'o, 'e) t =
   (RegisterTransitGatewayMulticastGroupSourcesRequest.t,
   RegisterTransitGatewayMulticastGroupSourcesResult.t,
   RegisterTransitGatewayMulticastGroupSourcesResult.error) t 
+  | RejectCapacityReservationBillingOwnership:
+  (RejectCapacityReservationBillingOwnershipRequest.t,
+  RejectCapacityReservationBillingOwnershipResult.t,
+  RejectCapacityReservationBillingOwnershipResult.error) t 
+  | RejectTransitGatewayClientVpnAttachment:
+  (RejectTransitGatewayClientVpnAttachmentRequest.t,
+  RejectTransitGatewayClientVpnAttachmentResult.t,
+  RejectTransitGatewayClientVpnAttachmentResult.error) t 
   | RejectTransitGatewayMulticastDomainAssociations:
   (RejectTransitGatewayMulticastDomainAssociationsRequest.t,
   RejectTransitGatewayMulticastDomainAssociationsResult.t,
@@ -1275,6 +2021,10 @@ type ('i, 'o, 'e) t =
   (ReplaceIamInstanceProfileAssociationRequest.t,
   ReplaceIamInstanceProfileAssociationResult.t,
   ReplaceIamInstanceProfileAssociationResult.error) t 
+  | ReplaceImageCriteriaInAllowedImagesSettings:
+  (ReplaceImageCriteriaInAllowedImagesSettingsRequest.t,
+  ReplaceImageCriteriaInAllowedImagesSettingsResult.t,
+  ReplaceImageCriteriaInAllowedImagesSettingsResult.error) t 
   | ReplaceNetworkAclAssociation: (ReplaceNetworkAclAssociationRequest.t,
   ReplaceNetworkAclAssociationResult.t,
   ReplaceNetworkAclAssociationResult.error) t 
@@ -1286,6 +2036,8 @@ type ('i, 'o, 'e) t =
   | ReplaceTransitGatewayRoute: (ReplaceTransitGatewayRouteRequest.t,
   ReplaceTransitGatewayRouteResult.t, ReplaceTransitGatewayRouteResult.error)
   t 
+  | ReplaceVpnTunnel: (ReplaceVpnTunnelRequest.t, ReplaceVpnTunnelResult.t,
+  ReplaceVpnTunnelResult.error) t 
   | ReportInstanceStatus: (ReportInstanceStatusRequest.t, unit, unit) t 
   | RequestSpotFleet: (RequestSpotFleetRequest.t, RequestSpotFleetResponse.t,
   RequestSpotFleetResponse.error) t 
@@ -1316,6 +2068,9 @@ type ('i, 'o, 'e) t =
   RestoreSnapshotFromRecycleBinResult.error) t 
   | RestoreSnapshotTier: (RestoreSnapshotTierRequest.t,
   RestoreSnapshotTierResult.t, RestoreSnapshotTierResult.error) t 
+  | RestoreVolumeFromRecycleBin: (RestoreVolumeFromRecycleBinRequest.t,
+  RestoreVolumeFromRecycleBinResult.t,
+  RestoreVolumeFromRecycleBinResult.error) t 
   | RevokeClientVpnIngress: (RevokeClientVpnIngressRequest.t,
   RevokeClientVpnIngressResult.t, RevokeClientVpnIngressResult.error) t 
   | RevokeSecurityGroupEgress: (RevokeSecurityGroupEgressRequest.t,
@@ -1339,6 +2094,9 @@ type ('i, 'o, 'e) t =
   t 
   | SendDiagnosticInterrupt: (SendDiagnosticInterruptRequest.t, unit, 
   unit) t 
+  | StartDeclarativePoliciesReport: (StartDeclarativePoliciesReportRequest.t,
+  StartDeclarativePoliciesReportResult.t,
+  StartDeclarativePoliciesReportResult.error) t 
   | StartInstances: (StartInstancesRequest.t, StartInstancesResult.t,
   StartInstancesResult.error) t 
   | StartNetworkInsightsAccessScopeAnalysis:
@@ -1363,8 +2121,26 @@ type ('i, 'o, 'e) t =
   UnassignIpv6AddressesResult.t, UnassignIpv6AddressesResult.error) t 
   | UnassignPrivateIpAddresses: (UnassignPrivateIpAddressesRequest.t, 
   unit, unit) t 
+  | UnassignPrivateNatGatewayAddress:
+  (UnassignPrivateNatGatewayAddressRequest.t,
+  UnassignPrivateNatGatewayAddressResult.t,
+  UnassignPrivateNatGatewayAddressResult.error) t 
+  | UnlockSnapshot: (UnlockSnapshotRequest.t, UnlockSnapshotResult.t,
+  UnlockSnapshotResult.error) t 
   | UnmonitorInstances: (UnmonitorInstancesRequest.t,
   UnmonitorInstancesResult.t, UnmonitorInstancesResult.error) t 
+  | UpdateCapacityManagerMonitoredTagKeys:
+  (UpdateCapacityManagerMonitoredTagKeysRequest.t,
+  UpdateCapacityManagerMonitoredTagKeysResult.t,
+  UpdateCapacityManagerMonitoredTagKeysResult.error) t 
+  | UpdateCapacityManagerOrganizationsAccess:
+  (UpdateCapacityManagerOrganizationsAccessRequest.t,
+  UpdateCapacityManagerOrganizationsAccessResult.t,
+  UpdateCapacityManagerOrganizationsAccessResult.error) t 
+  | UpdateInterruptibleCapacityReservationAllocation:
+  (UpdateInterruptibleCapacityReservationAllocationRequest.t,
+  UpdateInterruptibleCapacityReservationAllocationResult.t,
+  UpdateInterruptibleCapacityReservationAllocationResult.error) t 
   | UpdateSecurityGroupRuleDescriptionsEgress:
   (UpdateSecurityGroupRuleDescriptionsEgressRequest.t,
   UpdateSecurityGroupRuleDescriptionsEgressResult.t,
@@ -1377,7 +2153,10 @@ type ('i, 'o, 'e) t =
   WithdrawByoipCidrResult.t, WithdrawByoipCidrResult.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AcceptAddressTransfer -> `POST
+  | AcceptCapacityReservationBillingOwnership -> `POST
   | AcceptReservedInstancesExchangeQuote -> `POST
+  | AcceptTransitGatewayClientVpnAttachment -> `POST
   | AcceptTransitGatewayMulticastDomainAssociations -> `POST
   | AcceptTransitGatewayPeeringAttachment -> `POST
   | AcceptTransitGatewayVpcAttachment -> `POST
@@ -1390,21 +2169,30 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ApplySecurityGroupsToClientVpnTargetNetwork -> `POST
   | AssignIpv6Addresses -> `POST
   | AssignPrivateIpAddresses -> `POST
+  | AssignPrivateNatGatewayAddress -> `POST
   | AssociateAddress -> `POST
+  | AssociateCapacityReservationBillingOwner -> `POST
   | AssociateClientVpnTargetNetwork -> `POST
   | AssociateDhcpOptions -> `POST
   | AssociateEnclaveCertificateIamRole -> `POST
   | AssociateIamInstanceProfile -> `POST
   | AssociateInstanceEventWindow -> `POST
+  | AssociateIpamByoasn -> `POST
+  | AssociateIpamResourceDiscovery -> `POST
+  | AssociateNatGatewayAddress -> `POST
+  | AssociateRouteServer -> `POST
   | AssociateRouteTable -> `POST
+  | AssociateSecurityGroupVpc -> `POST
   | AssociateSubnetCidrBlock -> `POST
   | AssociateTransitGatewayMulticastDomain -> `POST
+  | AssociateTransitGatewayPolicyTable -> `POST
   | AssociateTransitGatewayRouteTable -> `POST
   | AssociateTrunkInterface -> `POST
   | AssociateVpcCidrBlock -> `POST
   | AttachClassicLinkVpc -> `POST
   | AttachInternetGateway -> `POST
   | AttachNetworkInterface -> `POST
+  | AttachVerifiedAccessTrustProvider -> `POST
   | AttachVolume -> `POST
   | AttachVpnGateway -> `POST
   | AuthorizeClientVpnIngress -> `POST
@@ -1415,7 +2203,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CancelCapacityReservation -> `POST
   | CancelCapacityReservationFleets -> `POST
   | CancelConversionTask -> `POST
+  | CancelDeclarativePoliciesReport -> `POST
   | CancelExportTask -> `POST
+  | CancelImageLaunchPermission -> `POST
   | CancelImportTask -> `POST
   | CancelReservedInstancesListing -> `POST
   | CancelSpotFleetRequests -> `POST
@@ -1424,31 +2214,50 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CopyFpgaImage -> `POST
   | CopyImage -> `POST
   | CopySnapshot -> `POST
+  | CopyVolumes -> `POST
+  | CreateCapacityManagerDataExport -> `POST
   | CreateCapacityReservation -> `POST
+  | CreateCapacityReservationBySplitting -> `POST
   | CreateCapacityReservationFleet -> `POST
   | CreateCarrierGateway -> `POST
   | CreateClientVpnEndpoint -> `POST
   | CreateClientVpnRoute -> `POST
+  | CreateCoipCidr -> `POST
+  | CreateCoipPool -> `POST
   | CreateCustomerGateway -> `POST
   | CreateDefaultSubnet -> `POST
   | CreateDefaultVpc -> `POST
+  | CreateDelegateMacVolumeOwnershipTask -> `POST
   | CreateDhcpOptions -> `POST
   | CreateEgressOnlyInternetGateway -> `POST
   | CreateFleet -> `POST
   | CreateFlowLogs -> `POST
   | CreateFpgaImage -> `POST
   | CreateImage -> `POST
+  | CreateImageUsageReport -> `POST
+  | CreateInstanceConnectEndpoint -> `POST
   | CreateInstanceEventWindow -> `POST
   | CreateInstanceExportTask -> `POST
   | CreateInternetGateway -> `POST
+  | CreateInterruptibleCapacityReservationAllocation -> `POST
   | CreateIpam -> `POST
+  | CreateIpamExternalResourceVerificationToken -> `POST
+  | CreateIpamPolicy -> `POST
   | CreateIpamPool -> `POST
+  | CreateIpamPrefixListResolver -> `POST
+  | CreateIpamPrefixListResolverTarget -> `POST
+  | CreateIpamResourceDiscovery -> `POST
   | CreateIpamScope -> `POST
   | CreateKeyPair -> `POST
   | CreateLaunchTemplate -> `POST
   | CreateLaunchTemplateVersion -> `POST
   | CreateLocalGatewayRoute -> `POST
+  | CreateLocalGatewayRouteTable -> `POST
+  | CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation -> `POST
   | CreateLocalGatewayRouteTableVpcAssociation -> `POST
+  | CreateLocalGatewayVirtualInterface -> `POST
+  | CreateLocalGatewayVirtualInterfaceGroup -> `POST
+  | CreateMacSystemIntegrityProtectionModificationTask -> `POST
   | CreateManagedPrefixList -> `POST
   | CreateNatGateway -> `POST
   | CreateNetworkAcl -> `POST
@@ -1463,7 +2272,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateReservedInstancesListing -> `POST
   | CreateRestoreImageTask -> `POST
   | CreateRoute -> `POST
+  | CreateRouteServer -> `POST
+  | CreateRouteServerEndpoint -> `POST
+  | CreateRouteServerPeer -> `POST
   | CreateRouteTable -> `POST
+  | CreateSecondaryNetwork -> `POST
+  | CreateSecondarySubnet -> `POST
   | CreateSecurityGroup -> `POST
   | CreateSnapshot -> `POST
   | CreateSnapshots -> `POST
@@ -1479,40 +2293,65 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateTransitGateway -> `POST
   | CreateTransitGatewayConnect -> `POST
   | CreateTransitGatewayConnectPeer -> `POST
+  | CreateTransitGatewayMeteringPolicy -> `POST
+  | CreateTransitGatewayMeteringPolicyEntry -> `POST
   | CreateTransitGatewayMulticastDomain -> `POST
   | CreateTransitGatewayPeeringAttachment -> `POST
+  | CreateTransitGatewayPolicyTable -> `POST
   | CreateTransitGatewayPrefixListReference -> `POST
   | CreateTransitGatewayRoute -> `POST
   | CreateTransitGatewayRouteTable -> `POST
+  | CreateTransitGatewayRouteTableAnnouncement -> `POST
   | CreateTransitGatewayVpcAttachment -> `POST
+  | CreateVerifiedAccessEndpoint -> `POST
+  | CreateVerifiedAccessGroup -> `POST
+  | CreateVerifiedAccessInstance -> `POST
+  | CreateVerifiedAccessTrustProvider -> `POST
   | CreateVolume -> `POST
   | CreateVpc -> `POST
+  | CreateVpcBlockPublicAccessExclusion -> `POST
+  | CreateVpcEncryptionControl -> `POST
   | CreateVpcEndpoint -> `POST
   | CreateVpcEndpointConnectionNotification -> `POST
   | CreateVpcEndpointServiceConfiguration -> `POST
   | CreateVpcPeeringConnection -> `POST
+  | CreateVpnConcentrator -> `POST
   | CreateVpnConnection -> `POST
   | CreateVpnConnectionRoute -> `POST
   | CreateVpnGateway -> `POST
+  | DeleteCapacityManagerDataExport -> `POST
   | DeleteCarrierGateway -> `POST
   | DeleteClientVpnEndpoint -> `POST
   | DeleteClientVpnRoute -> `POST
+  | DeleteCoipCidr -> `POST
+  | DeleteCoipPool -> `POST
   | DeleteCustomerGateway -> `POST
   | DeleteDhcpOptions -> `POST
   | DeleteEgressOnlyInternetGateway -> `POST
   | DeleteFleets -> `POST
   | DeleteFlowLogs -> `POST
   | DeleteFpgaImage -> `POST
+  | DeleteImageUsageReport -> `POST
+  | DeleteInstanceConnectEndpoint -> `POST
   | DeleteInstanceEventWindow -> `POST
   | DeleteInternetGateway -> `POST
   | DeleteIpam -> `POST
+  | DeleteIpamExternalResourceVerificationToken -> `POST
+  | DeleteIpamPolicy -> `POST
   | DeleteIpamPool -> `POST
+  | DeleteIpamPrefixListResolver -> `POST
+  | DeleteIpamPrefixListResolverTarget -> `POST
+  | DeleteIpamResourceDiscovery -> `POST
   | DeleteIpamScope -> `POST
   | DeleteKeyPair -> `POST
   | DeleteLaunchTemplate -> `POST
   | DeleteLaunchTemplateVersions -> `POST
   | DeleteLocalGatewayRoute -> `POST
+  | DeleteLocalGatewayRouteTable -> `POST
+  | DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation -> `POST
   | DeleteLocalGatewayRouteTableVpcAssociation -> `POST
+  | DeleteLocalGatewayVirtualInterface -> `POST
+  | DeleteLocalGatewayVirtualInterfaceGroup -> `POST
   | DeleteManagedPrefixList -> `POST
   | DeleteNatGateway -> `POST
   | DeleteNetworkAcl -> `POST
@@ -1527,7 +2366,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeletePublicIpv4Pool -> `POST
   | DeleteQueuedReservedInstances -> `POST
   | DeleteRoute -> `POST
+  | DeleteRouteServer -> `POST
+  | DeleteRouteServerEndpoint -> `POST
+  | DeleteRouteServerPeer -> `POST
   | DeleteRouteTable -> `POST
+  | DeleteSecondaryNetwork -> `POST
+  | DeleteSecondarySubnet -> `POST
   | DeleteSecurityGroup -> `POST
   | DeleteSnapshot -> `POST
   | DeleteSpotDatafeedSubscription -> `POST
@@ -1539,24 +2383,37 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteTrafficMirrorSession -> `POST
   | DeleteTrafficMirrorTarget -> `POST
   | DeleteTransitGateway -> `POST
+  | DeleteTransitGatewayClientVpnAttachment -> `POST
   | DeleteTransitGatewayConnect -> `POST
   | DeleteTransitGatewayConnectPeer -> `POST
+  | DeleteTransitGatewayMeteringPolicy -> `POST
+  | DeleteTransitGatewayMeteringPolicyEntry -> `POST
   | DeleteTransitGatewayMulticastDomain -> `POST
   | DeleteTransitGatewayPeeringAttachment -> `POST
+  | DeleteTransitGatewayPolicyTable -> `POST
   | DeleteTransitGatewayPrefixListReference -> `POST
   | DeleteTransitGatewayRoute -> `POST
   | DeleteTransitGatewayRouteTable -> `POST
+  | DeleteTransitGatewayRouteTableAnnouncement -> `POST
   | DeleteTransitGatewayVpcAttachment -> `POST
+  | DeleteVerifiedAccessEndpoint -> `POST
+  | DeleteVerifiedAccessGroup -> `POST
+  | DeleteVerifiedAccessInstance -> `POST
+  | DeleteVerifiedAccessTrustProvider -> `POST
   | DeleteVolume -> `POST
   | DeleteVpc -> `POST
+  | DeleteVpcBlockPublicAccessExclusion -> `POST
+  | DeleteVpcEncryptionControl -> `POST
   | DeleteVpcEndpointConnectionNotifications -> `POST
   | DeleteVpcEndpointServiceConfigurations -> `POST
   | DeleteVpcEndpoints -> `POST
   | DeleteVpcPeeringConnection -> `POST
+  | DeleteVpnConcentrator -> `POST
   | DeleteVpnConnection -> `POST
   | DeleteVpnConnectionRoute -> `POST
   | DeleteVpnGateway -> `POST
   | DeprovisionByoipCidr -> `POST
+  | DeprovisionIpamByoasn -> `POST
   | DeprovisionIpamPoolCidr -> `POST
   | DeprovisionPublicIpv4PoolCidr -> `POST
   | DeregisterImage -> `POST
@@ -1564,13 +2421,23 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeregisterTransitGatewayMulticastGroupMembers -> `POST
   | DeregisterTransitGatewayMulticastGroupSources -> `POST
   | DescribeAccountAttributes -> `POST
+  | DescribeAddressTransfers -> `POST
   | DescribeAddresses -> `POST
   | DescribeAddressesAttribute -> `POST
   | DescribeAggregateIdFormat -> `POST
   | DescribeAvailabilityZones -> `POST
+  | DescribeAwsNetworkPerformanceMetricSubscriptions -> `POST
   | DescribeBundleTasks -> `POST
   | DescribeByoipCidrs -> `POST
+  | DescribeCapacityBlockExtensionHistory -> `POST
+  | DescribeCapacityBlockExtensionOfferings -> `POST
+  | DescribeCapacityBlockOfferings -> `POST
+  | DescribeCapacityBlockStatus -> `POST
+  | DescribeCapacityBlocks -> `POST
+  | DescribeCapacityManagerDataExports -> `POST
+  | DescribeCapacityReservationBillingRequests -> `POST
   | DescribeCapacityReservationFleets -> `POST
+  | DescribeCapacityReservationTopology -> `POST
   | DescribeCapacityReservations -> `POST
   | DescribeCarrierGateways -> `POST
   | DescribeClassicLinkInstances -> `POST
@@ -1582,6 +2449,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeCoipPools -> `POST
   | DescribeConversionTasks -> `POST
   | DescribeCustomerGateways -> `POST
+  | DescribeDeclarativePoliciesReports -> `POST
   | DescribeDhcpOptions -> `POST
   | DescribeEgressOnlyInternetGateways -> `POST
   | DescribeElasticGpus -> `POST
@@ -1602,19 +2470,34 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeIdFormat -> `POST
   | DescribeIdentityIdFormat -> `POST
   | DescribeImageAttribute -> `POST
+  | DescribeImageReferences -> `POST
+  | DescribeImageUsageReportEntries -> `POST
+  | DescribeImageUsageReports -> `POST
   | DescribeImages -> `POST
   | DescribeImportImageTasks -> `POST
   | DescribeImportSnapshotTasks -> `POST
   | DescribeInstanceAttribute -> `POST
+  | DescribeInstanceConnectEndpoints -> `POST
   | DescribeInstanceCreditSpecifications -> `POST
   | DescribeInstanceEventNotificationAttributes -> `POST
   | DescribeInstanceEventWindows -> `POST
+  | DescribeInstanceImageMetadata -> `POST
+  | DescribeInstanceSqlHaHistoryStates -> `POST
+  | DescribeInstanceSqlHaStates -> `POST
   | DescribeInstanceStatus -> `POST
+  | DescribeInstanceTopology -> `POST
   | DescribeInstanceTypeOfferings -> `POST
   | DescribeInstanceTypes -> `POST
   | DescribeInstances -> `POST
   | DescribeInternetGateways -> `POST
+  | DescribeIpamByoasn -> `POST
+  | DescribeIpamExternalResourceVerificationTokens -> `POST
+  | DescribeIpamPolicies -> `POST
   | DescribeIpamPools -> `POST
+  | DescribeIpamPrefixListResolverTargets -> `POST
+  | DescribeIpamPrefixListResolvers -> `POST
+  | DescribeIpamResourceDiscoveries -> `POST
+  | DescribeIpamResourceDiscoveryAssociations -> `POST
   | DescribeIpamScopes -> `POST
   | DescribeIpams -> `POST
   | DescribeIpv6Pools -> `POST
@@ -1627,6 +2510,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeLocalGatewayVirtualInterfaceGroups -> `POST
   | DescribeLocalGatewayVirtualInterfaces -> `POST
   | DescribeLocalGateways -> `POST
+  | DescribeLockedSnapshots -> `POST
+  | DescribeMacHosts -> `POST
+  | DescribeMacModificationTasks -> `POST
   | DescribeManagedPrefixLists -> `POST
   | DescribeMovingAddresses -> `POST
   | DescribeNatGateways -> `POST
@@ -1638,6 +2524,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeNetworkInterfaceAttribute -> `POST
   | DescribeNetworkInterfacePermissions -> `POST
   | DescribeNetworkInterfaces -> `POST
+  | DescribeOutpostLags -> `POST
   | DescribePlacementGroups -> `POST
   | DescribePrefixLists -> `POST
   | DescribePrincipalIdFormat -> `POST
@@ -1648,12 +2535,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeReservedInstancesListings -> `POST
   | DescribeReservedInstancesModifications -> `POST
   | DescribeReservedInstancesOfferings -> `POST
+  | DescribeRouteServerEndpoints -> `POST
+  | DescribeRouteServerPeers -> `POST
+  | DescribeRouteServers -> `POST
   | DescribeRouteTables -> `POST
   | DescribeScheduledInstanceAvailability -> `POST
   | DescribeScheduledInstances -> `POST
+  | DescribeSecondaryInterfaces -> `POST
+  | DescribeSecondaryNetworks -> `POST
+  | DescribeSecondarySubnets -> `POST
   | DescribeSecurityGroupReferences -> `POST
   | DescribeSecurityGroupRules -> `POST
+  | DescribeSecurityGroupVpcAssociations -> `POST
   | DescribeSecurityGroups -> `POST
+  | DescribeServiceLinkVirtualInterfaces -> `POST
   | DescribeSnapshotAttribute -> `POST
   | DescribeSnapshotTierStatus -> `POST
   | DescribeSnapshots -> `POST
@@ -1667,25 +2562,38 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeStoreImageTasks -> `POST
   | DescribeSubnets -> `POST
   | DescribeTags -> `POST
+  | DescribeTrafficMirrorFilterRules -> `POST
   | DescribeTrafficMirrorFilters -> `POST
   | DescribeTrafficMirrorSessions -> `POST
   | DescribeTrafficMirrorTargets -> `POST
   | DescribeTransitGatewayAttachments -> `POST
   | DescribeTransitGatewayConnectPeers -> `POST
   | DescribeTransitGatewayConnects -> `POST
+  | DescribeTransitGatewayMeteringPolicies -> `POST
   | DescribeTransitGatewayMulticastDomains -> `POST
   | DescribeTransitGatewayPeeringAttachments -> `POST
+  | DescribeTransitGatewayPolicyTables -> `POST
+  | DescribeTransitGatewayRouteTableAnnouncements -> `POST
   | DescribeTransitGatewayRouteTables -> `POST
   | DescribeTransitGatewayVpcAttachments -> `POST
   | DescribeTransitGateways -> `POST
   | DescribeTrunkInterfaceAssociations -> `POST
+  | DescribeVerifiedAccessEndpoints -> `POST
+  | DescribeVerifiedAccessGroups -> `POST
+  | DescribeVerifiedAccessInstanceLoggingConfigurations -> `POST
+  | DescribeVerifiedAccessInstances -> `POST
+  | DescribeVerifiedAccessTrustProviders -> `POST
   | DescribeVolumeAttribute -> `POST
   | DescribeVolumeStatus -> `POST
   | DescribeVolumes -> `POST
   | DescribeVolumesModifications -> `POST
   | DescribeVpcAttribute -> `POST
+  | DescribeVpcBlockPublicAccessExclusions -> `POST
+  | DescribeVpcBlockPublicAccessOptions -> `POST
   | DescribeVpcClassicLink -> `POST
   | DescribeVpcClassicLinkDnsSupport -> `POST
+  | DescribeVpcEncryptionControls -> `POST
+  | DescribeVpcEndpointAssociations -> `POST
   | DescribeVpcEndpointConnectionNotifications -> `POST
   | DescribeVpcEndpointConnections -> `POST
   | DescribeVpcEndpointServiceConfigurations -> `POST
@@ -1694,40 +2602,72 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeVpcEndpoints -> `POST
   | DescribeVpcPeeringConnections -> `POST
   | DescribeVpcs -> `POST
+  | DescribeVpnConcentrators -> `POST
   | DescribeVpnConnections -> `POST
   | DescribeVpnGateways -> `POST
   | DetachClassicLinkVpc -> `POST
   | DetachInternetGateway -> `POST
   | DetachNetworkInterface -> `POST
+  | DetachVerifiedAccessTrustProvider -> `POST
   | DetachVolume -> `POST
   | DetachVpnGateway -> `POST
+  | DisableAddressTransfer -> `POST
+  | DisableAllowedImagesSettings -> `POST
+  | DisableAwsNetworkPerformanceMetricSubscription -> `POST
+  | DisableCapacityManager -> `POST
   | DisableEbsEncryptionByDefault -> `POST
   | DisableFastLaunch -> `POST
   | DisableFastSnapshotRestores -> `POST
+  | DisableImage -> `POST
+  | DisableImageBlockPublicAccess -> `POST
   | DisableImageDeprecation -> `POST
+  | DisableImageDeregistrationProtection -> `POST
+  | DisableInstanceSqlHaStandbyDetections -> `POST
   | DisableIpamOrganizationAdminAccount -> `POST
+  | DisableIpamPolicy -> `POST
+  | DisableRouteServerPropagation -> `POST
   | DisableSerialConsoleAccess -> `POST
+  | DisableSnapshotBlockPublicAccess -> `POST
   | DisableTransitGatewayRouteTablePropagation -> `POST
   | DisableVgwRoutePropagation -> `POST
   | DisableVpcClassicLink -> `POST
   | DisableVpcClassicLinkDnsSupport -> `POST
   | DisassociateAddress -> `POST
+  | DisassociateCapacityReservationBillingOwner -> `POST
   | DisassociateClientVpnTargetNetwork -> `POST
   | DisassociateEnclaveCertificateIamRole -> `POST
   | DisassociateIamInstanceProfile -> `POST
   | DisassociateInstanceEventWindow -> `POST
+  | DisassociateIpamByoasn -> `POST
+  | DisassociateIpamResourceDiscovery -> `POST
+  | DisassociateNatGatewayAddress -> `POST
+  | DisassociateRouteServer -> `POST
   | DisassociateRouteTable -> `POST
+  | DisassociateSecurityGroupVpc -> `POST
   | DisassociateSubnetCidrBlock -> `POST
   | DisassociateTransitGatewayMulticastDomain -> `POST
+  | DisassociateTransitGatewayPolicyTable -> `POST
   | DisassociateTransitGatewayRouteTable -> `POST
   | DisassociateTrunkInterface -> `POST
   | DisassociateVpcCidrBlock -> `POST
+  | EnableAddressTransfer -> `POST
+  | EnableAllowedImagesSettings -> `POST
+  | EnableAwsNetworkPerformanceMetricSubscription -> `POST
+  | EnableCapacityManager -> `POST
   | EnableEbsEncryptionByDefault -> `POST
   | EnableFastLaunch -> `POST
   | EnableFastSnapshotRestores -> `POST
+  | EnableImage -> `POST
+  | EnableImageBlockPublicAccess -> `POST
   | EnableImageDeprecation -> `POST
+  | EnableImageDeregistrationProtection -> `POST
+  | EnableInstanceSqlHaStandbyDetections -> `POST
   | EnableIpamOrganizationAdminAccount -> `POST
+  | EnableIpamPolicy -> `POST
+  | EnableReachabilityAnalyzerOrganizationSharing -> `POST
+  | EnableRouteServerPropagation -> `POST
   | EnableSerialConsoleAccess -> `POST
+  | EnableSnapshotBlockPublicAccess -> `POST
   | EnableTransitGatewayRouteTablePropagation -> `POST
   | EnableVgwRoutePropagation -> `POST
   | EnableVolumeIO -> `POST
@@ -1737,40 +2677,77 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ExportClientVpnClientConfiguration -> `POST
   | ExportImage -> `POST
   | ExportTransitGatewayRoutes -> `POST
+  | ExportVerifiedAccessInstanceClientConfiguration -> `POST
+  | GetActiveVpnTunnelStatus -> `POST
+  | GetAllowedImagesSettings -> `POST
   | GetAssociatedEnclaveCertificateIamRoles -> `POST
   | GetAssociatedIpv6PoolCidrs -> `POST
+  | GetAwsNetworkPerformanceData -> `POST
+  | GetCapacityManagerAttributes -> `POST
+  | GetCapacityManagerMetricData -> `POST
+  | GetCapacityManagerMetricDimensions -> `POST
+  | GetCapacityManagerMonitoredTagKeys -> `POST
   | GetCapacityReservationUsage -> `POST
   | GetCoipPoolUsage -> `POST
   | GetConsoleOutput -> `POST
   | GetConsoleScreenshot -> `POST
+  | GetDeclarativePoliciesReportSummary -> `POST
   | GetDefaultCreditSpecification -> `POST
   | GetEbsDefaultKmsKeyId -> `POST
   | GetEbsEncryptionByDefault -> `POST
+  | GetEnabledIpamPolicy -> `POST
   | GetFlowLogsIntegrationTemplate -> `POST
   | GetGroupsForCapacityReservation -> `POST
   | GetHostReservationPurchasePreview -> `POST
+  | GetImageAncestry -> `POST
+  | GetImageBlockPublicAccessState -> `POST
+  | GetInstanceMetadataDefaults -> `POST
+  | GetInstanceTpmEkPub -> `POST
   | GetInstanceTypesFromInstanceRequirements -> `POST
+  | GetInstanceUefiData -> `POST
   | GetIpamAddressHistory -> `POST
+  | GetIpamDiscoveredAccounts -> `POST
+  | GetIpamDiscoveredPublicAddresses -> `POST
+  | GetIpamDiscoveredResourceCidrs -> `POST
+  | GetIpamPolicyAllocationRules -> `POST
+  | GetIpamPolicyOrganizationTargets -> `POST
   | GetIpamPoolAllocations -> `POST
   | GetIpamPoolCidrs -> `POST
+  | GetIpamPrefixListResolverRules -> `POST
+  | GetIpamPrefixListResolverVersionEntries -> `POST
+  | GetIpamPrefixListResolverVersions -> `POST
   | GetIpamResourceCidrs -> `POST
   | GetLaunchTemplateData -> `POST
   | GetManagedPrefixListAssociations -> `POST
   | GetManagedPrefixListEntries -> `POST
+  | GetManagedResourceVisibility -> `POST
   | GetNetworkInsightsAccessScopeAnalysisFindings -> `POST
   | GetNetworkInsightsAccessScopeContent -> `POST
   | GetPasswordData -> `POST
   | GetReservedInstancesExchangeQuote -> `POST
+  | GetRouteServerAssociations -> `POST
+  | GetRouteServerPropagations -> `POST
+  | GetRouteServerRoutingDatabase -> `POST
+  | GetSecurityGroupsForVpc -> `POST
   | GetSerialConsoleAccessStatus -> `POST
+  | GetSnapshotBlockPublicAccessState -> `POST
   | GetSpotPlacementScores -> `POST
   | GetSubnetCidrReservations -> `POST
   | GetTransitGatewayAttachmentPropagations -> `POST
+  | GetTransitGatewayMeteringPolicyEntries -> `POST
   | GetTransitGatewayMulticastDomainAssociations -> `POST
+  | GetTransitGatewayPolicyTableAssociations -> `POST
+  | GetTransitGatewayPolicyTableEntries -> `POST
   | GetTransitGatewayPrefixListReferences -> `POST
   | GetTransitGatewayRouteTableAssociations -> `POST
   | GetTransitGatewayRouteTablePropagations -> `POST
+  | GetVerifiedAccessEndpointPolicy -> `POST
+  | GetVerifiedAccessEndpointTargets -> `POST
+  | GetVerifiedAccessGroupPolicy -> `POST
+  | GetVpcResourcesBlockingEncryptionEnforcement -> `POST
   | GetVpnConnectionDeviceSampleConfiguration -> `POST
   | GetVpnConnectionDeviceTypes -> `POST
+  | GetVpnTunnelReplacementStatus -> `POST
   | ImportClientVpnClientCertificateRevocationList -> `POST
   | ImportImage -> `POST
   | ImportInstance -> `POST
@@ -1779,6 +2756,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ImportVolume -> `POST
   | ListImagesInRecycleBin -> `POST
   | ListSnapshotsInRecycleBin -> `POST
+  | ListVolumesInRecycleBin -> `POST
+  | LockSnapshot -> `POST
   | ModifyAddressAttribute -> `POST
   | ModifyAvailabilityZoneGroup -> `POST
   | ModifyCapacityReservation -> `POST
@@ -1794,21 +2773,33 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyImageAttribute -> `POST
   | ModifyInstanceAttribute -> `POST
   | ModifyInstanceCapacityReservationAttributes -> `POST
+  | ModifyInstanceConnectEndpoint -> `POST
+  | ModifyInstanceCpuOptions -> `POST
   | ModifyInstanceCreditSpecification -> `POST
   | ModifyInstanceEventStartTime -> `POST
   | ModifyInstanceEventWindow -> `POST
   | ModifyInstanceMaintenanceOptions -> `POST
+  | ModifyInstanceMetadataDefaults -> `POST
   | ModifyInstanceMetadataOptions -> `POST
+  | ModifyInstanceNetworkPerformanceOptions -> `POST
   | ModifyInstancePlacement -> `POST
   | ModifyIpam -> `POST
+  | ModifyIpamPolicyAllocationRules -> `POST
   | ModifyIpamPool -> `POST
+  | ModifyIpamPrefixListResolver -> `POST
+  | ModifyIpamPrefixListResolverTarget -> `POST
   | ModifyIpamResourceCidr -> `POST
+  | ModifyIpamResourceDiscovery -> `POST
   | ModifyIpamScope -> `POST
   | ModifyLaunchTemplate -> `POST
+  | ModifyLocalGatewayRoute -> `POST
   | ModifyManagedPrefixList -> `POST
+  | ModifyManagedResourceVisibility -> `POST
   | ModifyNetworkInterfaceAttribute -> `POST
   | ModifyPrivateDnsNameOptions -> `POST
+  | ModifyPublicIpDnsNameOptions -> `POST
   | ModifyReservedInstances -> `POST
+  | ModifyRouteServer -> `POST
   | ModifySecurityGroupRules -> `POST
   | ModifySnapshotAttribute -> `POST
   | ModifySnapshotTier -> `POST
@@ -1818,11 +2809,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ModifyTrafficMirrorFilterRule -> `POST
   | ModifyTrafficMirrorSession -> `POST
   | ModifyTransitGateway -> `POST
+  | ModifyTransitGatewayMeteringPolicy -> `POST
   | ModifyTransitGatewayPrefixListReference -> `POST
   | ModifyTransitGatewayVpcAttachment -> `POST
+  | ModifyVerifiedAccessEndpoint -> `POST
+  | ModifyVerifiedAccessEndpointPolicy -> `POST
+  | ModifyVerifiedAccessGroup -> `POST
+  | ModifyVerifiedAccessGroupPolicy -> `POST
+  | ModifyVerifiedAccessInstance -> `POST
+  | ModifyVerifiedAccessInstanceLoggingConfiguration -> `POST
+  | ModifyVerifiedAccessTrustProvider -> `POST
   | ModifyVolume -> `POST
   | ModifyVolumeAttribute -> `POST
   | ModifyVpcAttribute -> `POST
+  | ModifyVpcBlockPublicAccessExclusion -> `POST
+  | ModifyVpcBlockPublicAccessOptions -> `POST
+  | ModifyVpcEncryptionControl -> `POST
   | ModifyVpcEndpoint -> `POST
   | ModifyVpcEndpointConnectionNotification -> `POST
   | ModifyVpcEndpointServiceConfiguration -> `POST
@@ -1837,9 +2839,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | MonitorInstances -> `POST
   | MoveAddressToVpc -> `POST
   | MoveByoipCidrToIpam -> `POST
+  | MoveCapacityReservationInstances -> `POST
   | ProvisionByoipCidr -> `POST
+  | ProvisionIpamByoasn -> `POST
   | ProvisionIpamPoolCidr -> `POST
   | ProvisionPublicIpv4PoolCidr -> `POST
+  | PurchaseCapacityBlock -> `POST
+  | PurchaseCapacityBlockExtension -> `POST
   | PurchaseHostReservation -> `POST
   | PurchaseReservedInstancesOffering -> `POST
   | PurchaseScheduledInstances -> `POST
@@ -1848,6 +2854,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RegisterInstanceEventNotificationAttributes -> `POST
   | RegisterTransitGatewayMulticastGroupMembers -> `POST
   | RegisterTransitGatewayMulticastGroupSources -> `POST
+  | RejectCapacityReservationBillingOwnership -> `POST
+  | RejectTransitGatewayClientVpnAttachment -> `POST
   | RejectTransitGatewayMulticastDomainAssociations -> `POST
   | RejectTransitGatewayPeeringAttachment -> `POST
   | RejectTransitGatewayVpcAttachment -> `POST
@@ -1857,11 +2865,13 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ReleaseHosts -> `POST
   | ReleaseIpamPoolAllocation -> `POST
   | ReplaceIamInstanceProfileAssociation -> `POST
+  | ReplaceImageCriteriaInAllowedImagesSettings -> `POST
   | ReplaceNetworkAclAssociation -> `POST
   | ReplaceNetworkAclEntry -> `POST
   | ReplaceRoute -> `POST
   | ReplaceRouteTableAssociation -> `POST
   | ReplaceTransitGatewayRoute -> `POST
+  | ReplaceVpnTunnel -> `POST
   | ReportInstanceStatus -> `POST
   | RequestSpotFleet -> `POST
   | RequestSpotInstances -> `POST
@@ -1877,6 +2887,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | RestoreManagedPrefixListVersion -> `POST
   | RestoreSnapshotFromRecycleBin -> `POST
   | RestoreSnapshotTier -> `POST
+  | RestoreVolumeFromRecycleBin -> `POST
   | RevokeClientVpnIngress -> `POST
   | RevokeSecurityGroupEgress -> `POST
   | RevokeSecurityGroupIngress -> `POST
@@ -1886,6 +2897,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SearchTransitGatewayMulticastGroups -> `POST
   | SearchTransitGatewayRoutes -> `POST
   | SendDiagnosticInterrupt -> `POST
+  | StartDeclarativePoliciesReport -> `POST
   | StartInstances -> `POST
   | StartNetworkInsightsAccessScopeAnalysis -> `POST
   | StartNetworkInsightsAnalysis -> `POST
@@ -1895,14 +2907,24 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TerminateInstances -> `POST
   | UnassignIpv6Addresses -> `POST
   | UnassignPrivateIpAddresses -> `POST
+  | UnassignPrivateNatGatewayAddress -> `POST
+  | UnlockSnapshot -> `POST
   | UnmonitorInstances -> `POST
+  | UpdateCapacityManagerMonitoredTagKeys -> `POST
+  | UpdateCapacityManagerOrganizationsAccess -> `POST
+  | UpdateInterruptibleCapacityReservationAllocation -> `POST
   | UpdateSecurityGroupRuleDescriptionsEgress -> `POST
   | UpdateSecurityGroupRuleDescriptionsIngress -> `POST
   | WithdrawByoipCidr -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AcceptAddressTransfer -> (Format.kasprintf Uri.of_string) "/"
+      | AcceptCapacityReservationBillingOwnership ->
+          (Format.kasprintf Uri.of_string) "/"
       | AcceptReservedInstancesExchangeQuote ->
+          (Format.kasprintf Uri.of_string) "/"
+      | AcceptTransitGatewayClientVpnAttachment ->
           (Format.kasprintf Uri.of_string) "/"
       | AcceptTransitGatewayMulticastDomainAssociations ->
           (Format.kasprintf Uri.of_string) "/"
@@ -1920,7 +2942,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | AssignIpv6Addresses -> (Format.kasprintf Uri.of_string) "/"
       | AssignPrivateIpAddresses -> (Format.kasprintf Uri.of_string) "/"
+      | AssignPrivateNatGatewayAddress ->
+          (Format.kasprintf Uri.of_string) "/"
       | AssociateAddress -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateCapacityReservationBillingOwner ->
+          (Format.kasprintf Uri.of_string) "/"
       | AssociateClientVpnTargetNetwork ->
           (Format.kasprintf Uri.of_string) "/"
       | AssociateDhcpOptions -> (Format.kasprintf Uri.of_string) "/"
@@ -1928,9 +2954,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | AssociateIamInstanceProfile -> (Format.kasprintf Uri.of_string) "/"
       | AssociateInstanceEventWindow -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateIpamByoasn -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateIpamResourceDiscovery ->
+          (Format.kasprintf Uri.of_string) "/"
+      | AssociateNatGatewayAddress -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateRouteServer -> (Format.kasprintf Uri.of_string) "/"
       | AssociateRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | AssociateSecurityGroupVpc -> (Format.kasprintf Uri.of_string) "/"
       | AssociateSubnetCidrBlock -> (Format.kasprintf Uri.of_string) "/"
       | AssociateTransitGatewayMulticastDomain ->
+          (Format.kasprintf Uri.of_string) "/"
+      | AssociateTransitGatewayPolicyTable ->
           (Format.kasprintf Uri.of_string) "/"
       | AssociateTransitGatewayRouteTable ->
           (Format.kasprintf Uri.of_string) "/"
@@ -1939,6 +2973,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AttachClassicLinkVpc -> (Format.kasprintf Uri.of_string) "/"
       | AttachInternetGateway -> (Format.kasprintf Uri.of_string) "/"
       | AttachNetworkInterface -> (Format.kasprintf Uri.of_string) "/"
+      | AttachVerifiedAccessTrustProvider ->
+          (Format.kasprintf Uri.of_string) "/"
       | AttachVolume -> (Format.kasprintf Uri.of_string) "/"
       | AttachVpnGateway -> (Format.kasprintf Uri.of_string) "/"
       | AuthorizeClientVpnIngress -> (Format.kasprintf Uri.of_string) "/"
@@ -1950,7 +2986,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CancelCapacityReservationFleets ->
           (Format.kasprintf Uri.of_string) "/"
       | CancelConversionTask -> (Format.kasprintf Uri.of_string) "/"
+      | CancelDeclarativePoliciesReport ->
+          (Format.kasprintf Uri.of_string) "/"
       | CancelExportTask -> (Format.kasprintf Uri.of_string) "/"
+      | CancelImageLaunchPermission -> (Format.kasprintf Uri.of_string) "/"
       | CancelImportTask -> (Format.kasprintf Uri.of_string) "/"
       | CancelReservedInstancesListing ->
           (Format.kasprintf Uri.of_string) "/"
@@ -1960,15 +2999,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CopyFpgaImage -> (Format.kasprintf Uri.of_string) "/"
       | CopyImage -> (Format.kasprintf Uri.of_string) "/"
       | CopySnapshot -> (Format.kasprintf Uri.of_string) "/"
+      | CopyVolumes -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCapacityManagerDataExport ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCapacityReservationBySplitting ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateCapacityReservationFleet ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateCarrierGateway -> (Format.kasprintf Uri.of_string) "/"
       | CreateClientVpnEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateClientVpnRoute -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCoipCidr -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCoipPool -> (Format.kasprintf Uri.of_string) "/"
       | CreateCustomerGateway -> (Format.kasprintf Uri.of_string) "/"
       | CreateDefaultSubnet -> (Format.kasprintf Uri.of_string) "/"
       | CreateDefaultVpc -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDelegateMacVolumeOwnershipTask ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateDhcpOptions -> (Format.kasprintf Uri.of_string) "/"
       | CreateEgressOnlyInternetGateway ->
           (Format.kasprintf Uri.of_string) "/"
@@ -1976,17 +3024,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateFlowLogs -> (Format.kasprintf Uri.of_string) "/"
       | CreateFpgaImage -> (Format.kasprintf Uri.of_string) "/"
       | CreateImage -> (Format.kasprintf Uri.of_string) "/"
+      | CreateImageUsageReport -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInstanceConnectEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstanceEventWindow -> (Format.kasprintf Uri.of_string) "/"
       | CreateInstanceExportTask -> (Format.kasprintf Uri.of_string) "/"
       | CreateInternetGateway -> (Format.kasprintf Uri.of_string) "/"
+      | CreateInterruptibleCapacityReservationAllocation ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateIpam -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIpamExternalResourceVerificationToken ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateIpamPolicy -> (Format.kasprintf Uri.of_string) "/"
       | CreateIpamPool -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIpamPrefixListResolver -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIpamPrefixListResolverTarget ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateIpamResourceDiscovery -> (Format.kasprintf Uri.of_string) "/"
       | CreateIpamScope -> (Format.kasprintf Uri.of_string) "/"
       | CreateKeyPair -> (Format.kasprintf Uri.of_string) "/"
       | CreateLaunchTemplate -> (Format.kasprintf Uri.of_string) "/"
       | CreateLaunchTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateLocalGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLocalGatewayRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateLocalGatewayRouteTableVpcAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateLocalGatewayVirtualInterface ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateLocalGatewayVirtualInterfaceGroup ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateMacSystemIntegrityProtectionModificationTask ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateManagedPrefixList -> (Format.kasprintf Uri.of_string) "/"
       | CreateNatGateway -> (Format.kasprintf Uri.of_string) "/"
@@ -2005,7 +3073,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | CreateRestoreImageTask -> (Format.kasprintf Uri.of_string) "/"
       | CreateRoute -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRouteServer -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRouteServerEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | CreateRouteServerPeer -> (Format.kasprintf Uri.of_string) "/"
       | CreateRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | CreateSecondaryNetwork -> (Format.kasprintf Uri.of_string) "/"
+      | CreateSecondarySubnet -> (Format.kasprintf Uri.of_string) "/"
       | CreateSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshots -> (Format.kasprintf Uri.of_string) "/"
@@ -2023,31 +3096,52 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateTransitGatewayConnect -> (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayConnectPeer ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateTransitGatewayMeteringPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateTransitGatewayMeteringPolicyEntry ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayMulticastDomain ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayPeeringAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateTransitGatewayPolicyTable ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayPrefixListReference ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayRouteTable ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateTransitGatewayRouteTableAnnouncement ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateTransitGatewayVpcAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateVerifiedAccessEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVerifiedAccessGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVerifiedAccessInstance -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVerifiedAccessTrustProvider ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateVolume -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpc -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVpcBlockPublicAccessExclusion ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateVpcEncryptionControl -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpcEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpcEndpointConnectionNotification ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateVpcEndpointServiceConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateVpcPeeringConnection -> (Format.kasprintf Uri.of_string) "/"
+      | CreateVpnConcentrator -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpnConnection -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpnConnectionRoute -> (Format.kasprintf Uri.of_string) "/"
       | CreateVpnGateway -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCapacityManagerDataExport ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteCarrierGateway -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClientVpnEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteClientVpnRoute -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCoipCidr -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCoipPool -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCustomerGateway -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDhcpOptions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEgressOnlyInternetGateway ->
@@ -2055,16 +3149,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteFleets -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFlowLogs -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFpgaImage -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteImageUsageReport -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteInstanceConnectEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInstanceEventWindow -> (Format.kasprintf Uri.of_string) "/"
       | DeleteInternetGateway -> (Format.kasprintf Uri.of_string) "/"
       | DeleteIpam -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIpamExternalResourceVerificationToken ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteIpamPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteIpamPool -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIpamPrefixListResolver -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIpamPrefixListResolverTarget ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteIpamResourceDiscovery -> (Format.kasprintf Uri.of_string) "/"
       | DeleteIpamScope -> (Format.kasprintf Uri.of_string) "/"
       | DeleteKeyPair -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLaunchTemplate -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLaunchTemplateVersions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteLocalGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLocalGatewayRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteLocalGatewayRouteTableVpcAssociation ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteLocalGatewayVirtualInterface ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteLocalGatewayVirtualInterfaceGroup ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteManagedPrefixList -> (Format.kasprintf Uri.of_string) "/"
       | DeleteNatGateway -> (Format.kasprintf Uri.of_string) "/"
@@ -2083,7 +3193,12 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeletePublicIpv4Pool -> (Format.kasprintf Uri.of_string) "/"
       | DeleteQueuedReservedInstances -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRoute -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRouteServer -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRouteServerEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteRouteServerPeer -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSecondaryNetwork -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteSecondarySubnet -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSecurityGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSpotDatafeedSubscription ->
@@ -2096,32 +3211,52 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteTrafficMirrorSession -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTrafficMirrorTarget -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGateway -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransitGatewayClientVpnAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayConnect -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayConnectPeer ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransitGatewayMeteringPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransitGatewayMeteringPolicyEntry ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayMulticastDomain ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayPeeringAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransitGatewayPolicyTable ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayPrefixListReference ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayRouteTable ->
           (Format.kasprintf Uri.of_string) "/"
+      | DeleteTransitGatewayRouteTableAnnouncement ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteTransitGatewayVpcAttachment ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteVerifiedAccessEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVerifiedAccessGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVerifiedAccessInstance -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVerifiedAccessTrustProvider ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteVolume -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpc -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVpcBlockPublicAccessExclusion ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteVpcEncryptionControl -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcEndpointConnectionNotifications ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcEndpointServiceConfigurations ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpcPeeringConnection -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteVpnConcentrator -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpnConnection -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpnConnectionRoute -> (Format.kasprintf Uri.of_string) "/"
       | DeleteVpnGateway -> (Format.kasprintf Uri.of_string) "/"
       | DeprovisionByoipCidr -> (Format.kasprintf Uri.of_string) "/"
+      | DeprovisionIpamByoasn -> (Format.kasprintf Uri.of_string) "/"
       | DeprovisionIpamPoolCidr -> (Format.kasprintf Uri.of_string) "/"
       | DeprovisionPublicIpv4PoolCidr -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterImage -> (Format.kasprintf Uri.of_string) "/"
@@ -2132,13 +3267,30 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeregisterTransitGatewayMulticastGroupSources ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeAccountAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAddressTransfers -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAddresses -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAddressesAttribute -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAggregateIdFormat -> (Format.kasprintf Uri.of_string) "/"
       | DescribeAvailabilityZones -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAwsNetworkPerformanceMetricSubscriptions ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeBundleTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeByoipCidrs -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityBlockExtensionHistory ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityBlockExtensionOfferings ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityBlockOfferings ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityBlockStatus -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityBlocks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityManagerDataExports ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityReservationBillingRequests ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeCapacityReservationFleets ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeCapacityReservationTopology ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeCapacityReservations -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCarrierGateways -> (Format.kasprintf Uri.of_string) "/"
@@ -2153,6 +3305,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeCoipPools -> (Format.kasprintf Uri.of_string) "/"
       | DescribeConversionTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCustomerGateways -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeDeclarativePoliciesReports ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeDhcpOptions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEgressOnlyInternetGateways ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2176,21 +3330,44 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeIdFormat -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIdentityIdFormat -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImageAttribute -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImageReferences -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeImageUsageReportEntries ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeImageUsageReports -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImages -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImportImageTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeImportSnapshotTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceAttribute -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceConnectEndpoints ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceCreditSpecifications ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceEventNotificationAttributes ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceEventWindows -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceImageMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceSqlHaHistoryStates ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceSqlHaStates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceStatus -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeInstanceTopology -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceTypeOfferings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstanceTypes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInstances -> (Format.kasprintf Uri.of_string) "/"
       | DescribeInternetGateways -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamByoasn -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamExternalResourceVerificationTokens ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamPolicies -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIpamPools -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamPrefixListResolverTargets ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamPrefixListResolvers ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamResourceDiscoveries ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeIpamResourceDiscoveryAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeIpamScopes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIpams -> (Format.kasprintf Uri.of_string) "/"
       | DescribeIpv6Pools -> (Format.kasprintf Uri.of_string) "/"
@@ -2209,6 +3386,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeLocalGatewayVirtualInterfaces ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeLocalGateways -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeLockedSnapshots -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMacHosts -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMacModificationTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeManagedPrefixLists -> (Format.kasprintf Uri.of_string) "/"
       | DescribeMovingAddresses -> (Format.kasprintf Uri.of_string) "/"
       | DescribeNatGateways -> (Format.kasprintf Uri.of_string) "/"
@@ -2225,6 +3405,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeNetworkInterfacePermissions ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeNetworkInterfaces -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeOutpostLags -> (Format.kasprintf Uri.of_string) "/"
       | DescribePlacementGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribePrefixLists -> (Format.kasprintf Uri.of_string) "/"
       | DescribePrincipalIdFormat -> (Format.kasprintf Uri.of_string) "/"
@@ -2239,14 +3420,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeReservedInstancesOfferings ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeRouteServerEndpoints -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRouteServerPeers -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeRouteServers -> (Format.kasprintf Uri.of_string) "/"
       | DescribeRouteTables -> (Format.kasprintf Uri.of_string) "/"
       | DescribeScheduledInstanceAvailability ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeScheduledInstances -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSecondaryInterfaces -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSecondaryNetworks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSecondarySubnets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSecurityGroupReferences ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeSecurityGroupRules -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeSecurityGroupVpcAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeSecurityGroups -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeServiceLinkVirtualInterfaces ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshotAttribute -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshotTierStatus -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshots -> (Format.kasprintf Uri.of_string) "/"
@@ -2262,6 +3453,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeStoreImageTasks -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSubnets -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTags -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeTrafficMirrorFilterRules ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeTrafficMirrorFilters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrafficMirrorSessions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrafficMirrorTargets -> (Format.kasprintf Uri.of_string) "/"
@@ -2271,9 +3464,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DescribeTransitGatewayConnects ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeTransitGatewayMeteringPolicies ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeTransitGatewayMulticastDomains ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeTransitGatewayPeeringAttachments ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeTransitGatewayPolicyTables ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeTransitGatewayRouteTableAnnouncements ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeTransitGatewayRouteTables ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2282,13 +3481,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeTransitGateways -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrunkInterfaceAssociations ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedAccessEndpoints ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedAccessGroups -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedAccessInstanceLoggingConfigurations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedAccessInstances ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVerifiedAccessTrustProviders ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeVolumeAttribute -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVolumeStatus -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVolumes -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVolumesModifications -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcAttribute -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcBlockPublicAccessExclusions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcBlockPublicAccessOptions ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcClassicLink -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcClassicLinkDnsSupport ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcEncryptionControls -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpcEndpointAssociations ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcEndpointConnectionNotifications ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2302,20 +3517,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeVpcEndpoints -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcPeeringConnections -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpcs -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeVpnConcentrators -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpnConnections -> (Format.kasprintf Uri.of_string) "/"
       | DescribeVpnGateways -> (Format.kasprintf Uri.of_string) "/"
       | DetachClassicLinkVpc -> (Format.kasprintf Uri.of_string) "/"
       | DetachInternetGateway -> (Format.kasprintf Uri.of_string) "/"
       | DetachNetworkInterface -> (Format.kasprintf Uri.of_string) "/"
+      | DetachVerifiedAccessTrustProvider ->
+          (Format.kasprintf Uri.of_string) "/"
       | DetachVolume -> (Format.kasprintf Uri.of_string) "/"
       | DetachVpnGateway -> (Format.kasprintf Uri.of_string) "/"
+      | DisableAddressTransfer -> (Format.kasprintf Uri.of_string) "/"
+      | DisableAllowedImagesSettings -> (Format.kasprintf Uri.of_string) "/"
+      | DisableAwsNetworkPerformanceMetricSubscription ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisableCapacityManager -> (Format.kasprintf Uri.of_string) "/"
       | DisableEbsEncryptionByDefault -> (Format.kasprintf Uri.of_string) "/"
       | DisableFastLaunch -> (Format.kasprintf Uri.of_string) "/"
       | DisableFastSnapshotRestores -> (Format.kasprintf Uri.of_string) "/"
+      | DisableImage -> (Format.kasprintf Uri.of_string) "/"
+      | DisableImageBlockPublicAccess -> (Format.kasprintf Uri.of_string) "/"
       | DisableImageDeprecation -> (Format.kasprintf Uri.of_string) "/"
+      | DisableImageDeregistrationProtection ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisableInstanceSqlHaStandbyDetections ->
+          (Format.kasprintf Uri.of_string) "/"
       | DisableIpamOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisableIpamPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DisableRouteServerPropagation -> (Format.kasprintf Uri.of_string) "/"
       | DisableSerialConsoleAccess -> (Format.kasprintf Uri.of_string) "/"
+      | DisableSnapshotBlockPublicAccess ->
+          (Format.kasprintf Uri.of_string) "/"
       | DisableTransitGatewayRouteTablePropagation ->
           (Format.kasprintf Uri.of_string) "/"
       | DisableVgwRoutePropagation -> (Format.kasprintf Uri.of_string) "/"
@@ -2323,6 +3556,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableVpcClassicLinkDnsSupport ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateAddress -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateCapacityReservationBillingOwner ->
+          (Format.kasprintf Uri.of_string) "/"
       | DisassociateClientVpnTargetNetwork ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateEnclaveCertificateIamRole ->
@@ -2331,21 +3566,46 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateInstanceEventWindow ->
           (Format.kasprintf Uri.of_string) "/"
+      | DisassociateIpamByoasn -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateIpamResourceDiscovery ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisassociateNatGatewayAddress -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateRouteServer -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateRouteTable -> (Format.kasprintf Uri.of_string) "/"
+      | DisassociateSecurityGroupVpc -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateSubnetCidrBlock -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateTransitGatewayMulticastDomain ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DisassociateTransitGatewayPolicyTable ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateTransitGatewayRouteTable ->
           (Format.kasprintf Uri.of_string) "/"
       | DisassociateTrunkInterface -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateVpcCidrBlock -> (Format.kasprintf Uri.of_string) "/"
+      | EnableAddressTransfer -> (Format.kasprintf Uri.of_string) "/"
+      | EnableAllowedImagesSettings -> (Format.kasprintf Uri.of_string) "/"
+      | EnableAwsNetworkPerformanceMetricSubscription ->
+          (Format.kasprintf Uri.of_string) "/"
+      | EnableCapacityManager -> (Format.kasprintf Uri.of_string) "/"
       | EnableEbsEncryptionByDefault -> (Format.kasprintf Uri.of_string) "/"
       | EnableFastLaunch -> (Format.kasprintf Uri.of_string) "/"
       | EnableFastSnapshotRestores -> (Format.kasprintf Uri.of_string) "/"
+      | EnableImage -> (Format.kasprintf Uri.of_string) "/"
+      | EnableImageBlockPublicAccess -> (Format.kasprintf Uri.of_string) "/"
       | EnableImageDeprecation -> (Format.kasprintf Uri.of_string) "/"
+      | EnableImageDeregistrationProtection ->
+          (Format.kasprintf Uri.of_string) "/"
+      | EnableInstanceSqlHaStandbyDetections ->
+          (Format.kasprintf Uri.of_string) "/"
       | EnableIpamOrganizationAdminAccount ->
           (Format.kasprintf Uri.of_string) "/"
+      | EnableIpamPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | EnableReachabilityAnalyzerOrganizationSharing ->
+          (Format.kasprintf Uri.of_string) "/"
+      | EnableRouteServerPropagation -> (Format.kasprintf Uri.of_string) "/"
       | EnableSerialConsoleAccess -> (Format.kasprintf Uri.of_string) "/"
+      | EnableSnapshotBlockPublicAccess ->
+          (Format.kasprintf Uri.of_string) "/"
       | EnableTransitGatewayRouteTablePropagation ->
           (Format.kasprintf Uri.of_string) "/"
       | EnableVgwRoutePropagation -> (Format.kasprintf Uri.of_string) "/"
@@ -2359,32 +3619,67 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | ExportImage -> (Format.kasprintf Uri.of_string) "/"
       | ExportTransitGatewayRoutes -> (Format.kasprintf Uri.of_string) "/"
+      | ExportVerifiedAccessInstanceClientConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetActiveVpnTunnelStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetAllowedImagesSettings -> (Format.kasprintf Uri.of_string) "/"
       | GetAssociatedEnclaveCertificateIamRoles ->
           (Format.kasprintf Uri.of_string) "/"
       | GetAssociatedIpv6PoolCidrs -> (Format.kasprintf Uri.of_string) "/"
+      | GetAwsNetworkPerformanceData -> (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityManagerAttributes -> (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityManagerMetricData -> (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityManagerMetricDimensions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityManagerMonitoredTagKeys ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetCapacityReservationUsage -> (Format.kasprintf Uri.of_string) "/"
       | GetCoipPoolUsage -> (Format.kasprintf Uri.of_string) "/"
       | GetConsoleOutput -> (Format.kasprintf Uri.of_string) "/"
       | GetConsoleScreenshot -> (Format.kasprintf Uri.of_string) "/"
+      | GetDeclarativePoliciesReportSummary ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetDefaultCreditSpecification -> (Format.kasprintf Uri.of_string) "/"
       | GetEbsDefaultKmsKeyId -> (Format.kasprintf Uri.of_string) "/"
       | GetEbsEncryptionByDefault -> (Format.kasprintf Uri.of_string) "/"
+      | GetEnabledIpamPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetFlowLogsIntegrationTemplate ->
           (Format.kasprintf Uri.of_string) "/"
       | GetGroupsForCapacityReservation ->
           (Format.kasprintf Uri.of_string) "/"
       | GetHostReservationPurchasePreview ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetImageAncestry -> (Format.kasprintf Uri.of_string) "/"
+      | GetImageBlockPublicAccessState ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetInstanceMetadataDefaults -> (Format.kasprintf Uri.of_string) "/"
+      | GetInstanceTpmEkPub -> (Format.kasprintf Uri.of_string) "/"
       | GetInstanceTypesFromInstanceRequirements ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetInstanceUefiData -> (Format.kasprintf Uri.of_string) "/"
       | GetIpamAddressHistory -> (Format.kasprintf Uri.of_string) "/"
+      | GetIpamDiscoveredAccounts -> (Format.kasprintf Uri.of_string) "/"
+      | GetIpamDiscoveredPublicAddresses ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIpamDiscoveredResourceCidrs ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIpamPolicyAllocationRules -> (Format.kasprintf Uri.of_string) "/"
+      | GetIpamPolicyOrganizationTargets ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetIpamPoolAllocations -> (Format.kasprintf Uri.of_string) "/"
       | GetIpamPoolCidrs -> (Format.kasprintf Uri.of_string) "/"
+      | GetIpamPrefixListResolverRules ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIpamPrefixListResolverVersionEntries ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetIpamPrefixListResolverVersions ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetIpamResourceCidrs -> (Format.kasprintf Uri.of_string) "/"
       | GetLaunchTemplateData -> (Format.kasprintf Uri.of_string) "/"
       | GetManagedPrefixListAssociations ->
           (Format.kasprintf Uri.of_string) "/"
       | GetManagedPrefixListEntries -> (Format.kasprintf Uri.of_string) "/"
+      | GetManagedResourceVisibility -> (Format.kasprintf Uri.of_string) "/"
       | GetNetworkInsightsAccessScopeAnalysisFindings ->
           (Format.kasprintf Uri.of_string) "/"
       | GetNetworkInsightsAccessScopeContent ->
@@ -2392,12 +3687,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetPasswordData -> (Format.kasprintf Uri.of_string) "/"
       | GetReservedInstancesExchangeQuote ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetRouteServerAssociations -> (Format.kasprintf Uri.of_string) "/"
+      | GetRouteServerPropagations -> (Format.kasprintf Uri.of_string) "/"
+      | GetRouteServerRoutingDatabase -> (Format.kasprintf Uri.of_string) "/"
+      | GetSecurityGroupsForVpc -> (Format.kasprintf Uri.of_string) "/"
       | GetSerialConsoleAccessStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetSnapshotBlockPublicAccessState ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetSpotPlacementScores -> (Format.kasprintf Uri.of_string) "/"
       | GetSubnetCidrReservations -> (Format.kasprintf Uri.of_string) "/"
       | GetTransitGatewayAttachmentPropagations ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetTransitGatewayMeteringPolicyEntries ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetTransitGatewayMulticastDomainAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetTransitGatewayPolicyTableAssociations ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetTransitGatewayPolicyTableEntries ->
           (Format.kasprintf Uri.of_string) "/"
       | GetTransitGatewayPrefixListReferences ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2405,9 +3712,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | GetTransitGatewayRouteTablePropagations ->
           (Format.kasprintf Uri.of_string) "/"
+      | GetVerifiedAccessEndpointPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetVerifiedAccessEndpointTargets ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetVerifiedAccessGroupPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetVpcResourcesBlockingEncryptionEnforcement ->
+          (Format.kasprintf Uri.of_string) "/"
       | GetVpnConnectionDeviceSampleConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | GetVpnConnectionDeviceTypes -> (Format.kasprintf Uri.of_string) "/"
+      | GetVpnTunnelReplacementStatus -> (Format.kasprintf Uri.of_string) "/"
       | ImportClientVpnClientCertificateRevocationList ->
           (Format.kasprintf Uri.of_string) "/"
       | ImportImage -> (Format.kasprintf Uri.of_string) "/"
@@ -2417,6 +3732,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ImportVolume -> (Format.kasprintf Uri.of_string) "/"
       | ListImagesInRecycleBin -> (Format.kasprintf Uri.of_string) "/"
       | ListSnapshotsInRecycleBin -> (Format.kasprintf Uri.of_string) "/"
+      | ListVolumesInRecycleBin -> (Format.kasprintf Uri.of_string) "/"
+      | LockSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | ModifyAddressAttribute -> (Format.kasprintf Uri.of_string) "/"
       | ModifyAvailabilityZoneGroup -> (Format.kasprintf Uri.of_string) "/"
       | ModifyCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
@@ -2435,24 +3752,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyInstanceAttribute -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceCapacityReservationAttributes ->
           (Format.kasprintf Uri.of_string) "/"
+      | ModifyInstanceConnectEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyInstanceCpuOptions -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceCreditSpecification ->
           (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceEventStartTime -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceEventWindow -> (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceMaintenanceOptions ->
           (Format.kasprintf Uri.of_string) "/"
+      | ModifyInstanceMetadataDefaults ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyInstanceMetadataOptions -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyInstanceNetworkPerformanceOptions ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyInstancePlacement -> (Format.kasprintf Uri.of_string) "/"
       | ModifyIpam -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIpamPolicyAllocationRules ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyIpamPool -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIpamPrefixListResolver -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIpamPrefixListResolverTarget ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyIpamResourceCidr -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyIpamResourceDiscovery -> (Format.kasprintf Uri.of_string) "/"
       | ModifyIpamScope -> (Format.kasprintf Uri.of_string) "/"
       | ModifyLaunchTemplate -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyLocalGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
       | ModifyManagedPrefixList -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyManagedResourceVisibility ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyNetworkInterfaceAttribute ->
           (Format.kasprintf Uri.of_string) "/"
       | ModifyPrivateDnsNameOptions -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyPublicIpDnsNameOptions -> (Format.kasprintf Uri.of_string) "/"
       | ModifyReservedInstances -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyRouteServer -> (Format.kasprintf Uri.of_string) "/"
       | ModifySecurityGroupRules -> (Format.kasprintf Uri.of_string) "/"
       | ModifySnapshotAttribute -> (Format.kasprintf Uri.of_string) "/"
       | ModifySnapshotTier -> (Format.kasprintf Uri.of_string) "/"
@@ -2463,13 +3797,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ModifyTrafficMirrorFilterRule -> (Format.kasprintf Uri.of_string) "/"
       | ModifyTrafficMirrorSession -> (Format.kasprintf Uri.of_string) "/"
       | ModifyTransitGateway -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyTransitGatewayMeteringPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyTransitGatewayPrefixListReference ->
           (Format.kasprintf Uri.of_string) "/"
       | ModifyTransitGatewayVpcAttachment ->
           (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessEndpointPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessGroupPolicy ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessInstance -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessInstanceLoggingConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyVerifiedAccessTrustProvider ->
+          (Format.kasprintf Uri.of_string) "/"
       | ModifyVolume -> (Format.kasprintf Uri.of_string) "/"
       | ModifyVolumeAttribute -> (Format.kasprintf Uri.of_string) "/"
       | ModifyVpcAttribute -> (Format.kasprintf Uri.of_string) "/"
+      | ModifyVpcBlockPublicAccessExclusion ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyVpcBlockPublicAccessOptions ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ModifyVpcEncryptionControl -> (Format.kasprintf Uri.of_string) "/"
       | ModifyVpcEndpoint -> (Format.kasprintf Uri.of_string) "/"
       | ModifyVpcEndpointConnectionNotification ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2489,9 +3841,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | MonitorInstances -> (Format.kasprintf Uri.of_string) "/"
       | MoveAddressToVpc -> (Format.kasprintf Uri.of_string) "/"
       | MoveByoipCidrToIpam -> (Format.kasprintf Uri.of_string) "/"
+      | MoveCapacityReservationInstances ->
+          (Format.kasprintf Uri.of_string) "/"
       | ProvisionByoipCidr -> (Format.kasprintf Uri.of_string) "/"
+      | ProvisionIpamByoasn -> (Format.kasprintf Uri.of_string) "/"
       | ProvisionIpamPoolCidr -> (Format.kasprintf Uri.of_string) "/"
       | ProvisionPublicIpv4PoolCidr -> (Format.kasprintf Uri.of_string) "/"
+      | PurchaseCapacityBlock -> (Format.kasprintf Uri.of_string) "/"
+      | PurchaseCapacityBlockExtension ->
+          (Format.kasprintf Uri.of_string) "/"
       | PurchaseHostReservation -> (Format.kasprintf Uri.of_string) "/"
       | PurchaseReservedInstancesOffering ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2503,6 +3861,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | RegisterTransitGatewayMulticastGroupMembers ->
           (Format.kasprintf Uri.of_string) "/"
       | RegisterTransitGatewayMulticastGroupSources ->
+          (Format.kasprintf Uri.of_string) "/"
+      | RejectCapacityReservationBillingOwnership ->
+          (Format.kasprintf Uri.of_string) "/"
+      | RejectTransitGatewayClientVpnAttachment ->
           (Format.kasprintf Uri.of_string) "/"
       | RejectTransitGatewayMulticastDomainAssociations ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2517,11 +3879,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ReleaseIpamPoolAllocation -> (Format.kasprintf Uri.of_string) "/"
       | ReplaceIamInstanceProfileAssociation ->
           (Format.kasprintf Uri.of_string) "/"
+      | ReplaceImageCriteriaInAllowedImagesSettings ->
+          (Format.kasprintf Uri.of_string) "/"
       | ReplaceNetworkAclAssociation -> (Format.kasprintf Uri.of_string) "/"
       | ReplaceNetworkAclEntry -> (Format.kasprintf Uri.of_string) "/"
       | ReplaceRoute -> (Format.kasprintf Uri.of_string) "/"
       | ReplaceRouteTableAssociation -> (Format.kasprintf Uri.of_string) "/"
       | ReplaceTransitGatewayRoute -> (Format.kasprintf Uri.of_string) "/"
+      | ReplaceVpnTunnel -> (Format.kasprintf Uri.of_string) "/"
       | ReportInstanceStatus -> (Format.kasprintf Uri.of_string) "/"
       | RequestSpotFleet -> (Format.kasprintf Uri.of_string) "/"
       | RequestSpotInstances -> (Format.kasprintf Uri.of_string) "/"
@@ -2539,6 +3904,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | RestoreSnapshotFromRecycleBin -> (Format.kasprintf Uri.of_string) "/"
       | RestoreSnapshotTier -> (Format.kasprintf Uri.of_string) "/"
+      | RestoreVolumeFromRecycleBin -> (Format.kasprintf Uri.of_string) "/"
       | RevokeClientVpnIngress -> (Format.kasprintf Uri.of_string) "/"
       | RevokeSecurityGroupEgress -> (Format.kasprintf Uri.of_string) "/"
       | RevokeSecurityGroupIngress -> (Format.kasprintf Uri.of_string) "/"
@@ -2549,6 +3915,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | SearchTransitGatewayRoutes -> (Format.kasprintf Uri.of_string) "/"
       | SendDiagnosticInterrupt -> (Format.kasprintf Uri.of_string) "/"
+      | StartDeclarativePoliciesReport ->
+          (Format.kasprintf Uri.of_string) "/"
       | StartInstances -> (Format.kasprintf Uri.of_string) "/"
       | StartNetworkInsightsAccessScopeAnalysis ->
           (Format.kasprintf Uri.of_string) "/"
@@ -2560,7 +3928,16 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | TerminateInstances -> (Format.kasprintf Uri.of_string) "/"
       | UnassignIpv6Addresses -> (Format.kasprintf Uri.of_string) "/"
       | UnassignPrivateIpAddresses -> (Format.kasprintf Uri.of_string) "/"
+      | UnassignPrivateNatGatewayAddress ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UnlockSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | UnmonitorInstances -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCapacityManagerMonitoredTagKeys ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateCapacityManagerOrganizationsAccess ->
+          (Format.kasprintf Uri.of_string) "/"
+      | UpdateInterruptibleCapacityReservationAllocation ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateSecurityGroupRuleDescriptionsEgress ->
           (Format.kasprintf Uri.of_string) "/"
       | UpdateSecurityGroupRuleDescriptionsIngress ->
@@ -2570,6 +3947,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AcceptAddressTransfer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AcceptAddressTransfer"]); ("Version", [apiVersion])] in
+        let query =
+          (AcceptAddressTransferRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AcceptCapacityReservationBillingOwnership ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AcceptCapacityReservationBillingOwnership"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AcceptCapacityReservationBillingOwnershipRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AcceptReservedInstancesExchangeQuote ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2581,6 +3985,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (AcceptReservedInstancesExchangeQuoteRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AcceptTransitGatewayClientVpnAttachment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AcceptTransitGatewayClientVpnAttachment"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AcceptTransitGatewayClientVpnAttachmentRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -2745,6 +4163,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssignPrivateNatGatewayAddress ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssignPrivateNatGatewayAddress"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssignPrivateNatGatewayAddressRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AssociateAddress ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2755,6 +4187,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["AssociateAddress"]); ("Version", [apiVersion])] in
         let query =
           (AssociateAddressRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateCapacityReservationBillingOwner ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateCapacityReservationBillingOwner"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateCapacityReservationBillingOwnerRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AssociateClientVpnTargetNetwork ->
@@ -2826,6 +4272,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateIpamByoasn ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateIpamByoasn"]); ("Version", [apiVersion])] in
+        let query =
+          (AssociateIpamByoasnRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateIpamResourceDiscovery ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateIpamResourceDiscovery"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateIpamResourceDiscoveryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateNatGatewayAddress ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateNatGatewayAddress"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateNatGatewayAddressRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateRouteServer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateRouteServer"]); ("Version", [apiVersion])] in
+        let query =
+          (AssociateRouteServerRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | AssociateRouteTable ->
       let headers =
         Awso.Http.Headers.of_list
@@ -2836,6 +4336,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["AssociateRouteTable"]); ("Version", [apiVersion])] in
         let query =
           (AssociateRouteTableRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateSecurityGroupVpc ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateSecurityGroupVpc"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateSecurityGroupVpcRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -2864,6 +4378,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (AssociateTransitGatewayMulticastDomainRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AssociateTransitGatewayPolicyTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AssociateTransitGatewayPolicyTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AssociateTransitGatewayPolicyTableRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -2944,6 +4472,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["AttachNetworkInterface"]); ("Version", [apiVersion])] in
         let query =
           (AttachNetworkInterfaceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | AttachVerifiedAccessTrustProvider ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["AttachVerifiedAccessTrustProvider"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (AttachVerifiedAccessTrustProviderRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -3076,6 +4618,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CancelConversionRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CancelDeclarativePoliciesReport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CancelDeclarativePoliciesReport"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CancelDeclarativePoliciesReportRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CancelExportTask ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3086,6 +4642,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CancelExportTask"]); ("Version", [apiVersion])] in
         let query =
           (CancelExportTaskRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CancelImageLaunchPermission ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CancelImageLaunchPermission"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CancelImageLaunchPermissionRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CancelImportTask ->
@@ -3188,6 +4758,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CopySnapshotRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CopyVolumes ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["CopyVolumes"]); ("Version", [apiVersion])] in
+        let query =
+          (CopyVolumesRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateCapacityManagerDataExport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateCapacityManagerDataExport"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateCapacityManagerDataExportRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateCapacityReservation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3199,6 +4794,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (CreateCapacityReservationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateCapacityReservationBySplitting ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateCapacityReservationBySplitting"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateCapacityReservationBySplittingRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -3256,6 +4865,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateCoipCidr ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateCoipCidr"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateCoipCidrRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateCoipPool ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateCoipPool"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateCoipPoolRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateCustomerGateway ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3292,6 +4925,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateDefaultVpc"]); ("Version", [apiVersion])] in
         let query =
           (CreateDefaultVpcRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateDelegateMacVolumeOwnershipTask ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateDelegateMacVolumeOwnershipTask"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateDelegateMacVolumeOwnershipTaskRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateDhcpOptions ->
@@ -3366,6 +5013,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CreateImageRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateImageUsageReport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateImageUsageReport"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateImageUsageReportRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateInstanceConnectEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateInstanceConnectEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateInstanceConnectEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateInstanceEventWindow ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3407,6 +5081,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateInterruptibleCapacityReservationAllocation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateInterruptibleCapacityReservationAllocation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateInterruptibleCapacityReservationAllocationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateIpam ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3416,6 +5105,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["CreateIpam"]); ("Version", [apiVersion])] in
         let query =
           (CreateIpamRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIpamExternalResourceVerificationToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIpamExternalResourceVerificationToken"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateIpamExternalResourceVerificationTokenRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIpamPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIpamPolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateIpamPolicyRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateIpamPool ->
@@ -3428,6 +5143,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateIpamPool"]); ("Version", [apiVersion])] in
         let query =
           (CreateIpamPoolRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIpamPrefixListResolver ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIpamPrefixListResolver"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateIpamPrefixListResolverRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIpamPrefixListResolverTarget ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIpamPrefixListResolverTarget"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateIpamPrefixListResolverTargetRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateIpamResourceDiscovery ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateIpamResourceDiscovery"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateIpamResourceDiscoveryRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateIpamScope ->
@@ -3494,6 +5251,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateLocalGatewayRouteTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateLocalGatewayRouteTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateLocalGatewayRouteTableRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action",
+             ["CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateLocalGatewayRouteTableVpcAssociation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3506,6 +5293,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (CreateLocalGatewayRouteTableVpcAssociationRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateLocalGatewayVirtualInterface ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateLocalGatewayVirtualInterface"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateLocalGatewayVirtualInterfaceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateLocalGatewayVirtualInterfaceGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateLocalGatewayVirtualInterfaceGroup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateLocalGatewayVirtualInterfaceGroupRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateMacSystemIntegrityProtectionModificationTask ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateMacSystemIntegrityProtectionModificationTask"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateMacSystemIntegrityProtectionModificationTaskRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateManagedPrefixList ->
@@ -3692,6 +5522,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (CreateRouteRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateRouteServer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateRouteServer"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateRouteServerRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateRouteServerEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateRouteServerEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateRouteServerEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateRouteServerPeer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateRouteServerPeer"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateRouteServerPeerRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateRouteTable ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3702,6 +5571,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateRouteTable"]); ("Version", [apiVersion])] in
         let query =
           (CreateRouteTableRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateSecondaryNetwork ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateSecondaryNetwork"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateSecondaryNetworkRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateSecondarySubnet ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateSecondarySubnet"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateSecondarySubnetRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateSecurityGroup ->
@@ -3901,6 +5796,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateTransitGatewayMeteringPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateTransitGatewayMeteringPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateTransitGatewayMeteringPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateTransitGatewayMeteringPolicyEntry ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateTransitGatewayMeteringPolicyEntry"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateTransitGatewayMeteringPolicyEntryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateTransitGatewayMulticastDomain ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3926,6 +5849,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (CreateTransitGatewayPeeringAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateTransitGatewayPolicyTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateTransitGatewayPolicyTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateTransitGatewayPolicyTableRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -3971,6 +5908,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateTransitGatewayRouteTableAnnouncement ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateTransitGatewayRouteTableAnnouncement"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateTransitGatewayRouteTableAnnouncementRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateTransitGatewayVpcAttachment ->
       let headers =
         Awso.Http.Headers.of_list
@@ -3982,6 +5933,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (CreateTransitGatewayVpcAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVerifiedAccessEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVerifiedAccessEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVerifiedAccessEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVerifiedAccessGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVerifiedAccessGroup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVerifiedAccessGroupRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVerifiedAccessInstance ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVerifiedAccessInstance"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVerifiedAccessInstanceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVerifiedAccessTrustProvider ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVerifiedAccessTrustProvider"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVerifiedAccessTrustProviderRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -4005,6 +6012,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["CreateVpc"]); ("Version", [apiVersion])] in
         let query =
           (CreateVpcRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVpcBlockPublicAccessExclusion ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVpcBlockPublicAccessExclusion"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVpcBlockPublicAccessExclusionRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVpcEncryptionControl ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVpcEncryptionControl"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (CreateVpcEncryptionControlRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateVpcEndpoint ->
@@ -4061,6 +6096,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | CreateVpnConcentrator ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["CreateVpnConcentrator"]); ("Version", [apiVersion])] in
+        let query =
+          (CreateVpnConcentratorRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | CreateVpnConnection ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4098,6 +6146,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["CreateVpnGateway"]); ("Version", [apiVersion])] in
         let query =
           (CreateVpnGatewayRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteCapacityManagerDataExport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteCapacityManagerDataExport"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteCapacityManagerDataExportRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteCarrierGateway ->
@@ -4138,6 +6200,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (DeleteClientVpnRouteRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteCoipCidr ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteCoipCidr"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteCoipCidrRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteCoipPool ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteCoipPool"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteCoipPoolRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteCustomerGateway ->
@@ -4214,6 +6300,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DeleteFpgaImageRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteImageUsageReport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteImageUsageReport"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteImageUsageReportRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteInstanceConnectEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteInstanceConnectEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteInstanceConnectEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteInstanceEventWindow ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4252,6 +6365,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DeleteIpamRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIpamExternalResourceVerificationToken ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIpamExternalResourceVerificationToken"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteIpamExternalResourceVerificationTokenRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIpamPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIpamPolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteIpamPolicyRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteIpamPool ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4262,6 +6401,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteIpamPool"]); ("Version", [apiVersion])] in
         let query =
           (DeleteIpamPoolRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIpamPrefixListResolver ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIpamPrefixListResolver"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteIpamPrefixListResolverRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIpamPrefixListResolverTarget ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIpamPrefixListResolverTarget"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteIpamPrefixListResolverTargetRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteIpamResourceDiscovery ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteIpamResourceDiscovery"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteIpamResourceDiscoveryRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteIpamScope ->
@@ -4328,6 +6509,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteLocalGatewayRouteTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteLocalGatewayRouteTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteLocalGatewayRouteTableRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action",
+             ["DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteLocalGatewayRouteTableVpcAssociation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4339,6 +6550,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DeleteLocalGatewayRouteTableVpcAssociationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteLocalGatewayVirtualInterface ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteLocalGatewayVirtualInterface"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteLocalGatewayVirtualInterfaceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteLocalGatewayVirtualInterfaceGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteLocalGatewayVirtualInterfaceGroup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteLocalGatewayVirtualInterfaceGroupRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -4527,6 +6766,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DeleteRouteRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteRouteServer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteRouteServer"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteRouteServerRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteRouteServerEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteRouteServerEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteRouteServerEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteRouteServerPeer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteRouteServerPeer"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteRouteServerPeerRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteRouteTable ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4537,6 +6815,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeleteRouteTable"]); ("Version", [apiVersion])] in
         let query =
           (DeleteRouteTableRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteSecondaryNetwork ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteSecondaryNetwork"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteSecondaryNetworkRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteSecondarySubnet ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteSecondarySubnet"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteSecondarySubnetRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteSecurityGroup ->
@@ -4683,6 +6987,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTransitGatewayClientVpnAttachment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTransitGatewayClientVpnAttachment"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteTransitGatewayClientVpnAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteTransitGatewayConnect ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4711,6 +7029,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTransitGatewayMeteringPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTransitGatewayMeteringPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteTransitGatewayMeteringPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTransitGatewayMeteringPolicyEntry ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTransitGatewayMeteringPolicyEntry"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteTransitGatewayMeteringPolicyEntryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteTransitGatewayMulticastDomain ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4736,6 +7082,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DeleteTransitGatewayPeeringAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTransitGatewayPolicyTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTransitGatewayPolicyTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteTransitGatewayPolicyTableRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -4781,6 +7141,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteTransitGatewayRouteTableAnnouncement ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteTransitGatewayRouteTableAnnouncement"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteTransitGatewayRouteTableAnnouncementRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteTransitGatewayVpcAttachment ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4792,6 +7166,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DeleteTransitGatewayVpcAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVerifiedAccessEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVerifiedAccessEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVerifiedAccessEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVerifiedAccessGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVerifiedAccessGroup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVerifiedAccessGroupRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVerifiedAccessInstance ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVerifiedAccessInstance"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVerifiedAccessInstanceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVerifiedAccessTrustProvider ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVerifiedAccessTrustProvider"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVerifiedAccessTrustProviderRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -4815,6 +7245,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let meta = [("Action", ["DeleteVpc"]); ("Version", [apiVersion])] in
         let query =
           (DeleteVpcRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVpcBlockPublicAccessExclusion ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVpcBlockPublicAccessExclusion"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVpcBlockPublicAccessExclusionRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVpcEncryptionControl ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVpcEncryptionControl"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DeleteVpcEncryptionControlRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteVpcEndpointConnectionNotifications ->
@@ -4872,6 +7330,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeleteVpnConcentrator ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeleteVpnConcentrator"]); ("Version", [apiVersion])] in
+        let query =
+          (DeleteVpnConcentratorRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DeleteVpnConnection ->
       let headers =
         Awso.Http.Headers.of_list
@@ -4921,6 +7392,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DeprovisionByoipCidr"]); ("Version", [apiVersion])] in
         let query =
           (DeprovisionByoipCidrRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DeprovisionIpamByoasn ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DeprovisionIpamByoasn"]); ("Version", [apiVersion])] in
+        let query =
+          (DeprovisionIpamByoasnRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -5020,6 +7504,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeAddressTransfers ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeAddressTransfers"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeAddressTransfersRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeAddresses ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5074,6 +7572,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeAwsNetworkPerformanceMetricSubscriptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeAwsNetworkPerformanceMetricSubscriptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeAwsNetworkPerformanceMetricSubscriptionsRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeBundleTasks ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5100,6 +7613,103 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityBlockExtensionHistory ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityBlockExtensionHistory"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityBlockExtensionHistoryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityBlockExtensionOfferings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityBlockExtensionOfferings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityBlockExtensionOfferingsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityBlockOfferings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityBlockOfferings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityBlockOfferingsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityBlockStatus ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityBlockStatus"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityBlockStatusRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityBlocks ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityBlocks"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityBlocksRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityManagerDataExports ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityManagerDataExports"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityManagerDataExportsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityReservationBillingRequests ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityReservationBillingRequests"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityReservationBillingRequestsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeCapacityReservationFleets ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5111,6 +7721,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DescribeCapacityReservationFleetsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeCapacityReservationTopology ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeCapacityReservationTopology"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeCapacityReservationTopologyRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -5263,6 +7887,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DescribeCustomerGatewaysRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeDeclarativePoliciesReports ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeDeclarativePoliciesReports"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeDeclarativePoliciesReportsRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -5530,6 +8168,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeImageReferences ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeImageReferences"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeImageReferencesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeImageUsageReportEntries ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeImageUsageReportEntries"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeImageUsageReportEntriesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeImageUsageReports ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeImageUsageReports"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeImageUsageReportsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeImages ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5584,6 +8264,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInstanceConnectEndpoints ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInstanceConnectEndpoints"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInstanceConnectEndpointsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeInstanceCreditSpecifications ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5626,6 +8320,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInstanceImageMetadata ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInstanceImageMetadata"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInstanceImageMetadataRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInstanceSqlHaHistoryStates ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInstanceSqlHaHistoryStates"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInstanceSqlHaHistoryStatesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInstanceSqlHaStates ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInstanceSqlHaStates"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInstanceSqlHaStatesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeInstanceStatus ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5636,6 +8372,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeInstanceStatus"]); ("Version", [apiVersion])] in
         let query =
           (DescribeInstanceStatusRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeInstanceTopology ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeInstanceTopology"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeInstanceTopologyRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -5692,6 +8442,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamByoasn ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamByoasn"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamByoasnRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamExternalResourceVerificationTokens ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamExternalResourceVerificationTokens"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamExternalResourceVerificationTokensRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamPolicies ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamPolicies"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamPoliciesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeIpamPools ->
       let headers =
         Awso.Http.Headers.of_list
@@ -5702,6 +8492,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeIpamPools"]); ("Version", [apiVersion])] in
         let query =
           (DescribeIpamPoolsRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamPrefixListResolverTargets ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamPrefixListResolverTargets"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamPrefixListResolverTargetsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamPrefixListResolvers ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamPrefixListResolvers"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamPrefixListResolversRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamResourceDiscoveries ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamResourceDiscoveries"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamResourceDiscoveriesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeIpamResourceDiscoveryAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeIpamResourceDiscoveryAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeIpamResourceDiscoveryAssociationsRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeIpamScopes ->
@@ -5865,6 +8711,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeLockedSnapshots ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeLockedSnapshots"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeLockedSnapshotsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeMacHosts ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeMacHosts"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeMacHostsRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeMacModificationTasks ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeMacModificationTasks"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeMacModificationTasksRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeManagedPrefixLists ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6017,6 +8903,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeOutpostLags ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeOutpostLags"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeOutpostLagsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribePlacementGroups ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6154,6 +9053,47 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeRouteServerEndpoints ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeRouteServerEndpoints"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeRouteServerEndpointsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeRouteServerPeers ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeRouteServerPeers"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeRouteServerPeersRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeRouteServers ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeRouteServers"]); ("Version", [apiVersion])] in
+        let query =
+          (DescribeRouteServersRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeRouteTables ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6195,6 +9135,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeSecondaryInterfaces ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeSecondaryInterfaces"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeSecondaryInterfacesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeSecondaryNetworks ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeSecondaryNetworks"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeSecondaryNetworksRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeSecondarySubnets ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeSecondarySubnets"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeSecondarySubnetsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeSecurityGroupReferences ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6223,6 +9205,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeSecurityGroupVpcAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeSecurityGroupVpcAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeSecurityGroupVpcAssociationsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeSecurityGroups ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6233,6 +9229,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DescribeSecurityGroups"]); ("Version", [apiVersion])] in
         let query =
           (DescribeSecurityGroupsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeServiceLinkVirtualInterfaces ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeServiceLinkVirtualInterfaces"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeServiceLinkVirtualInterfacesRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -6411,6 +9421,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DescribeTagsRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTrafficMirrorFilterRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTrafficMirrorFilterRules"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTrafficMirrorFilterRulesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeTrafficMirrorFilters ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6495,6 +9519,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTransitGatewayMeteringPolicies ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTransitGatewayMeteringPolicies"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTransitGatewayMeteringPoliciesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeTransitGatewayMulticastDomains ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6521,6 +9559,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (DescribeTransitGatewayPeeringAttachmentsRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTransitGatewayPolicyTables ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTransitGatewayPolicyTables"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTransitGatewayPolicyTablesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeTransitGatewayRouteTableAnnouncements ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeTransitGatewayRouteTableAnnouncements"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeTransitGatewayRouteTableAnnouncementsRequest.to_query req)
+            |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeTransitGatewayRouteTables ->
@@ -6576,6 +9642,78 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DescribeTrunkInterfaceAssociationsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedAccessEndpoints ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVerifiedAccessEndpoints"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVerifiedAccessEndpointsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedAccessGroups ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVerifiedAccessGroups"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVerifiedAccessGroupsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedAccessInstanceLoggingConfigurations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action",
+             ["DescribeVerifiedAccessInstanceLoggingConfigurations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVerifiedAccessInstanceLoggingConfigurationsRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedAccessInstances ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVerifiedAccessInstances"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVerifiedAccessInstancesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVerifiedAccessTrustProviders ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVerifiedAccessTrustProviders"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVerifiedAccessTrustProvidersRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -6645,6 +9783,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVpcBlockPublicAccessExclusions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVpcBlockPublicAccessExclusions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVpcBlockPublicAccessExclusionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVpcBlockPublicAccessOptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVpcBlockPublicAccessOptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVpcBlockPublicAccessOptionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeVpcClassicLink ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6669,6 +9835,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DescribeVpcClassicLinkDnsSupportRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVpcEncryptionControls ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVpcEncryptionControls"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVpcEncryptionControlsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVpcEndpointAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVpcEndpointAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVpcEndpointAssociationsRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -6780,6 +9974,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (DescribeVpcsRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DescribeVpnConcentrators ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DescribeVpnConcentrators"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DescribeVpnConcentratorsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DescribeVpnConnections ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6845,6 +10053,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DetachVerifiedAccessTrustProvider ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DetachVerifiedAccessTrustProvider"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DetachVerifiedAccessTrustProviderRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DetachVolume ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6866,6 +10088,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DetachVpnGateway"]); ("Version", [apiVersion])] in
         let query =
           (DetachVpnGatewayRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableAddressTransfer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableAddressTransfer"]); ("Version", [apiVersion])] in
+        let query =
+          (DisableAddressTransferRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableAllowedImagesSettings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableAllowedImagesSettings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableAllowedImagesSettingsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableAwsNetworkPerformanceMetricSubscription ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableAwsNetworkPerformanceMetricSubscription"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableAwsNetworkPerformanceMetricSubscriptionRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableCapacityManager ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableCapacityManager"]); ("Version", [apiVersion])] in
+        let query =
+          (DisableCapacityManagerRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisableEbsEncryptionByDefault ->
@@ -6908,6 +10184,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableImage ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["DisableImage"]); ("Version", [apiVersion])] in
+        let query =
+          (DisableImageRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableImageBlockPublicAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableImageBlockPublicAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableImageBlockPublicAccessRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisableImageDeprecation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6919,6 +10220,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DisableImageDeprecationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableImageDeregistrationProtection ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableImageDeregistrationProtection"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableImageDeregistrationProtectionRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableInstanceSqlHaStandbyDetections ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableInstanceSqlHaStandbyDetections"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableInstanceSqlHaStandbyDetectionsRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -6936,6 +10265,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableIpamPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableIpamPolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (DisableIpamPolicyRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableRouteServerPropagation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableRouteServerPropagation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableRouteServerPropagationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisableSerialConsoleAccess ->
       let headers =
         Awso.Http.Headers.of_list
@@ -6947,6 +10302,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DisableSerialConsoleAccessRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisableSnapshotBlockPublicAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisableSnapshotBlockPublicAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisableSnapshotBlockPublicAccessRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7018,6 +10387,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateCapacityReservationBillingOwner ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateCapacityReservationBillingOwner"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateCapacityReservationBillingOwnerRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisassociateClientVpnTargetNetwork ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7074,6 +10457,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateIpamByoasn ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateIpamByoasn"]); ("Version", [apiVersion])] in
+        let query =
+          (DisassociateIpamByoasnRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateIpamResourceDiscovery ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateIpamResourceDiscovery"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateIpamResourceDiscoveryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateNatGatewayAddress ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateNatGatewayAddress"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateNatGatewayAddressRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateRouteServer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateRouteServer"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateRouteServerRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | DisassociateRouteTable ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7084,6 +10522,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["DisassociateRouteTable"]); ("Version", [apiVersion])] in
         let query =
           (DisassociateRouteTableRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateSecurityGroupVpc ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateSecurityGroupVpc"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateSecurityGroupVpcRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7112,6 +10564,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (DisassociateTransitGatewayMulticastDomainRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | DisassociateTransitGatewayPolicyTable ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["DisassociateTransitGatewayPolicyTable"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (DisassociateTransitGatewayPolicyTableRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7157,6 +10623,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableAddressTransfer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableAddressTransfer"]); ("Version", [apiVersion])] in
+        let query =
+          (EnableAddressTransferRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableAllowedImagesSettings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableAllowedImagesSettings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableAllowedImagesSettingsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableAwsNetworkPerformanceMetricSubscription ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableAwsNetworkPerformanceMetricSubscription"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableAwsNetworkPerformanceMetricSubscriptionRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableCapacityManager ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableCapacityManager"]); ("Version", [apiVersion])] in
+        let query =
+          (EnableCapacityManagerRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | EnableEbsEncryptionByDefault ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7197,6 +10717,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableImage ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["EnableImage"]); ("Version", [apiVersion])] in
+        let query =
+          (EnableImageRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableImageBlockPublicAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableImageBlockPublicAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableImageBlockPublicAccessRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | EnableImageDeprecation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7207,6 +10752,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["EnableImageDeprecation"]); ("Version", [apiVersion])] in
         let query =
           (EnableImageDeprecationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableImageDeregistrationProtection ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableImageDeregistrationProtection"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableImageDeregistrationProtectionRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableInstanceSqlHaStandbyDetections ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableInstanceSqlHaStandbyDetections"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableInstanceSqlHaStandbyDetectionsRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7224,6 +10797,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableIpamPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableIpamPolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (EnableIpamPolicyRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableReachabilityAnalyzerOrganizationSharing ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableReachabilityAnalyzerOrganizationSharing"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableReachabilityAnalyzerOrganizationSharingRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableRouteServerPropagation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableRouteServerPropagation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableRouteServerPropagationRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | EnableSerialConsoleAccess ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7235,6 +10848,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (EnableSerialConsoleAccessRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | EnableSnapshotBlockPublicAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["EnableSnapshotBlockPublicAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (EnableSnapshotBlockPublicAccessRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7358,6 +10985,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ExportVerifiedAccessInstanceClientConfiguration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ExportVerifiedAccessInstanceClientConfiguration"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ExportVerifiedAccessInstanceClientConfigurationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetActiveVpnTunnelStatus ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetActiveVpnTunnelStatus"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetActiveVpnTunnelStatusRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetAllowedImagesSettings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetAllowedImagesSettings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetAllowedImagesSettingsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetAssociatedEnclaveCertificateIamRoles ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7383,6 +11053,76 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetAssociatedIpv6PoolCidrsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetAwsNetworkPerformanceData ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetAwsNetworkPerformanceData"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetAwsNetworkPerformanceDataRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetCapacityManagerAttributes ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetCapacityManagerAttributes"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetCapacityManagerAttributesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetCapacityManagerMetricData ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetCapacityManagerMetricData"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetCapacityManagerMetricDataRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetCapacityManagerMetricDimensions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetCapacityManagerMetricDimensions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetCapacityManagerMetricDimensionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetCapacityManagerMonitoredTagKeys ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetCapacityManagerMonitoredTagKeys"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetCapacityManagerMonitoredTagKeysRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7437,6 +11177,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetDeclarativePoliciesReportSummary ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetDeclarativePoliciesReportSummary"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetDeclarativePoliciesReportSummaryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetDefaultCreditSpecification ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7475,6 +11229,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetEbsEncryptionByDefaultRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetEnabledIpamPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetEnabledIpamPolicy"]); ("Version", [apiVersion])] in
+        let query =
+          (GetEnabledIpamPolicyRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7520,6 +11287,59 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetImageAncestry ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetImageAncestry"]); ("Version", [apiVersion])] in
+        let query =
+          (GetImageAncestryRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetImageBlockPublicAccessState ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetImageBlockPublicAccessState"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetImageBlockPublicAccessStateRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetInstanceMetadataDefaults ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetInstanceMetadataDefaults"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetInstanceMetadataDefaultsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetInstanceTpmEkPub ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetInstanceTpmEkPub"]); ("Version", [apiVersion])] in
+        let query =
+          (GetInstanceTpmEkPubRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetInstanceTypesFromInstanceRequirements ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7534,6 +11354,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetInstanceUefiData ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetInstanceUefiData"]); ("Version", [apiVersion])] in
+        let query =
+          (GetInstanceUefiDataRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetIpamAddressHistory ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7544,6 +11377,76 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetIpamAddressHistory"]); ("Version", [apiVersion])] in
         let query =
           (GetIpamAddressHistoryRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamDiscoveredAccounts ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamDiscoveredAccounts"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamDiscoveredAccountsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamDiscoveredPublicAddresses ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamDiscoveredPublicAddresses"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamDiscoveredPublicAddressesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamDiscoveredResourceCidrs ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamDiscoveredResourceCidrs"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamDiscoveredResourceCidrsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamPolicyAllocationRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamPolicyAllocationRules"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamPolicyAllocationRulesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamPolicyOrganizationTargets ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamPolicyOrganizationTargets"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamPolicyOrganizationTargetsRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7570,6 +11473,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["GetIpamPoolCidrs"]); ("Version", [apiVersion])] in
         let query =
           (GetIpamPoolCidrsRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamPrefixListResolverRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamPrefixListResolverRules"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamPrefixListResolverRulesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamPrefixListResolverVersionEntries ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamPrefixListResolverVersionEntries"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamPrefixListResolverVersionEntriesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetIpamPrefixListResolverVersions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetIpamPrefixListResolverVersions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetIpamPrefixListResolverVersionsRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetIpamResourceCidrs ->
@@ -7623,6 +11568,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetManagedPrefixListEntriesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetManagedResourceVisibility ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetManagedResourceVisibility"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetManagedResourceVisibilityRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7680,6 +11639,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetRouteServerAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetRouteServerAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetRouteServerAssociationsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetRouteServerPropagations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetRouteServerPropagations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetRouteServerPropagationsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetRouteServerRoutingDatabase ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetRouteServerRoutingDatabase"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetRouteServerRoutingDatabaseRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetSecurityGroupsForVpc ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetSecurityGroupsForVpc"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetSecurityGroupsForVpcRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetSerialConsoleAccessStatus ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7691,6 +11706,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetSerialConsoleAccessStatusRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetSnapshotBlockPublicAccessState ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetSnapshotBlockPublicAccessState"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetSnapshotBlockPublicAccessStateRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7735,6 +11764,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetTransitGatewayMeteringPolicyEntries ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetTransitGatewayMeteringPolicyEntries"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetTransitGatewayMeteringPolicyEntriesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetTransitGatewayMulticastDomainAssociations ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7747,6 +11790,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (GetTransitGatewayMulticastDomainAssociationsRequest.to_query req)
             |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetTransitGatewayPolicyTableAssociations ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetTransitGatewayPolicyTableAssociations"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetTransitGatewayPolicyTableAssociationsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetTransitGatewayPolicyTableEntries ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetTransitGatewayPolicyTableEntries"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetTransitGatewayPolicyTableEntriesRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetTransitGatewayPrefixListReferences ->
@@ -7791,6 +11862,62 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetVerifiedAccessEndpointPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetVerifiedAccessEndpointPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetVerifiedAccessEndpointPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetVerifiedAccessEndpointTargets ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetVerifiedAccessEndpointTargets"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetVerifiedAccessEndpointTargetsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetVerifiedAccessGroupPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetVerifiedAccessGroupPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetVerifiedAccessGroupPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetVpcResourcesBlockingEncryptionEnforcement ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetVpcResourcesBlockingEncryptionEnforcement"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetVpcResourcesBlockingEncryptionEnforcementRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | GetVpnConnectionDeviceSampleConfiguration ->
       let headers =
         Awso.Http.Headers.of_list
@@ -7816,6 +11943,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (GetVpnConnectionDeviceTypesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | GetVpnTunnelReplacementStatus ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["GetVpnTunnelReplacementStatus"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (GetVpnTunnelReplacementStatusRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -7915,6 +12056,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (ListSnapshotsInRecycleBinRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ListVolumesInRecycleBin ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ListVolumesInRecycleBin"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ListVolumesInRecycleBinRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | LockSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta = [("Action", ["LockSnapshot"]); ("Version", [apiVersion])] in
+        let query =
+          (LockSnapshotRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyAddressAttribute ->
@@ -8116,6 +12282,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyInstanceConnectEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyInstanceConnectEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyInstanceConnectEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyInstanceCpuOptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyInstanceCpuOptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyInstanceCpuOptionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyInstanceCreditSpecification ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8172,6 +12366,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyInstanceMetadataDefaults ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyInstanceMetadataDefaults"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyInstanceMetadataDefaultsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyInstanceMetadataOptions ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8183,6 +12391,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ModifyInstanceMetadataOptionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyInstanceNetworkPerformanceOptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyInstanceNetworkPerformanceOptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyInstanceNetworkPerformanceRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8211,6 +12433,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (ModifyIpamRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIpamPolicyAllocationRules ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIpamPolicyAllocationRules"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyIpamPolicyAllocationRulesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyIpamPool ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8223,6 +12459,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           (ModifyIpamPoolRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIpamPrefixListResolver ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIpamPrefixListResolver"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyIpamPrefixListResolverRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIpamPrefixListResolverTarget ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIpamPrefixListResolverTarget"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyIpamPrefixListResolverTargetRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyIpamResourceCidr ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8233,6 +12497,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ModifyIpamResourceCidr"]); ("Version", [apiVersion])] in
         let query =
           (ModifyIpamResourceCidrRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyIpamResourceDiscovery ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyIpamResourceDiscovery"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyIpamResourceDiscoveryRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8261,6 +12539,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyLocalGatewayRoute ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyLocalGatewayRoute"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyLocalGatewayRouteRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyManagedPrefixList ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8272,6 +12564,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ModifyManagedPrefixListRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyManagedResourceVisibility ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyManagedResourceVisibility"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyManagedResourceVisibilityRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8303,6 +12609,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyPublicIpDnsNameOptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyPublicIpDnsNameOptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyPublicIpDnsNameOptionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyReservedInstances ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8315,6 +12635,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (ModifyReservedInstancesRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyRouteServer ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyRouteServer"]); ("Version", [apiVersion])] in
+        let query =
+          (ModifyRouteServerRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifySecurityGroupRules ->
@@ -8439,6 +12771,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyTransitGatewayMeteringPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyTransitGatewayMeteringPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyTransitGatewayMeteringPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ModifyTransitGatewayPrefixListReference ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8464,6 +12810,105 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ModifyTransitGatewayVpcAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessEndpoint ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessEndpoint"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessEndpointRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessEndpointPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessEndpointPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessEndpointPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessGroup ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessGroup"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessGroupRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessGroupPolicy ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessGroupPolicy"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessGroupPolicyRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessInstance ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessInstance"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessInstanceRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessInstanceLoggingConfiguration ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessInstanceLoggingConfiguration"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessInstanceLoggingConfigurationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVerifiedAccessTrustProvider ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVerifiedAccessTrustProvider"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVerifiedAccessTrustProviderRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8501,6 +12946,48 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ModifyVpcAttribute"]); ("Version", [apiVersion])] in
         let query =
           (ModifyVpcAttributeRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVpcBlockPublicAccessExclusion ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVpcBlockPublicAccessExclusion"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVpcBlockPublicAccessExclusionRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVpcBlockPublicAccessOptions ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVpcBlockPublicAccessOptions"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVpcBlockPublicAccessOptionsRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ModifyVpcEncryptionControl ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ModifyVpcEncryptionControl"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ModifyVpcEncryptionControlRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8689,6 +13176,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | MoveCapacityReservationInstances ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["MoveCapacityReservationInstances"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (MoveCapacityReservationInstancesRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ProvisionByoipCidr ->
       let headers =
         Awso.Http.Headers.of_list
@@ -8699,6 +13200,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Action", ["ProvisionByoipCidr"]); ("Version", [apiVersion])] in
         let query =
           (ProvisionByoipCidrRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ProvisionIpamByoasn ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ProvisionIpamByoasn"]); ("Version", [apiVersion])] in
+        let query =
+          (ProvisionIpamByoasnRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8726,6 +13240,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (ProvisionPublicIpv4PoolCidrRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PurchaseCapacityBlock ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PurchaseCapacityBlock"]); ("Version", [apiVersion])] in
+        let query =
+          (PurchaseCapacityBlockRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | PurchaseCapacityBlockExtension ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["PurchaseCapacityBlockExtension"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (PurchaseCapacityBlockExtensionRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -8834,6 +13375,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (RegisterTransitGatewayMulticastGroupSourcesRequest.to_query req)
             |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RejectCapacityReservationBillingOwnership ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RejectCapacityReservationBillingOwnership"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RejectCapacityReservationBillingOwnershipRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RejectTransitGatewayClientVpnAttachment ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RejectTransitGatewayClientVpnAttachment"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RejectTransitGatewayClientVpnAttachmentRequest.to_query req) |>
+            Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RejectTransitGatewayMulticastDomainAssociations ->
@@ -8958,6 +13527,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ReplaceImageCriteriaInAllowedImagesSettings ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ReplaceImageCriteriaInAllowedImagesSettings"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (ReplaceImageCriteriaInAllowedImagesSettingsRequest.to_query req)
+            |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ReplaceNetworkAclAssociation ->
       let headers =
         Awso.Http.Headers.of_list
@@ -9022,6 +13605,18 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (ReplaceTransitGatewayRouteRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | ReplaceVpnTunnel ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["ReplaceVpnTunnel"]); ("Version", [apiVersion])] in
+        let query =
+          (ReplaceVpnTunnelRequest.to_query req) |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | ReportInstanceStatus ->
@@ -9225,6 +13820,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | RestoreVolumeFromRecycleBin ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["RestoreVolumeFromRecycleBin"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (RestoreVolumeFromRecycleBinRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | RevokeClientVpnIngress ->
       let headers =
         Awso.Http.Headers.of_list
@@ -9343,6 +13952,20 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("Version", [apiVersion])] in
         let query =
           (SendDiagnosticInterruptRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | StartDeclarativePoliciesReport ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["StartDeclarativePoliciesReport"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (StartDeclarativePoliciesReportRequest.to_query req) |>
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
@@ -9465,6 +14088,32 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UnassignPrivateNatGatewayAddress ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UnassignPrivateNatGatewayAddress"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UnassignPrivateNatGatewayAddressRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UnlockSnapshot ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UnlockSnapshot"]); ("Version", [apiVersion])] in
+        let query =
+          (UnlockSnapshotRequest.to_query req) |> Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | UnmonitorInstances ->
       let headers =
         Awso.Http.Headers.of_list
@@ -9476,6 +14125,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         let query =
           (UnmonitorInstancesRequest.to_query req) |>
             Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UpdateCapacityManagerMonitoredTagKeys ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UpdateCapacityManagerMonitoredTagKeys"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UpdateCapacityManagerMonitoredTagKeysRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UpdateCapacityManagerOrganizationsAccess ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UpdateCapacityManagerOrganizationsAccess"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UpdateCapacityManagerOrganizationsAccessRequest.to_query req) |>
+            Awso.Client.Query.render in
+        Some (Uri.encoded_of_query (meta @ query)) in
+      Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
+  | UpdateInterruptibleCapacityReservationAllocation ->
+      let headers =
+        Awso.Http.Headers.of_list
+          [("content-type",
+             "application/x-www-form-urlencoded; charset=utf-8")] in
+      let body =
+        let meta =
+          [("Action", ["UpdateInterruptibleCapacityReservationAllocation"]);
+          ("Version", [apiVersion])] in
+        let query =
+          (UpdateInterruptibleCapacityReservationAllocationRequest.to_query
+             req)
+            |> Awso.Client.Query.render in
         Some (Uri.encoded_of_query (meta @ query)) in
       Awso.Http.Request.make ?body ~headers (method_of_endpoint endp)
   | UpdateSecurityGroupRuleDescriptionsEgress ->
@@ -9544,8 +14236,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       Ok (of_xml xml)
     else Error (parse_aws_error ()) in
   match endpoint with
+  | AcceptAddressTransfer ->
+      response_of_some_xml AcceptAddressTransferResult.of_xml
+  | AcceptCapacityReservationBillingOwnership ->
+      response_of_some_xml
+        AcceptCapacityReservationBillingOwnershipResult.of_xml
   | AcceptReservedInstancesExchangeQuote ->
       response_of_some_xml AcceptReservedInstancesExchangeQuoteResult.of_xml
+  | AcceptTransitGatewayClientVpnAttachment ->
+      response_of_some_xml
+        AcceptTransitGatewayClientVpnAttachmentResult.of_xml
   | AcceptTransitGatewayMulticastDomainAssociations ->
       response_of_some_xml
         AcceptTransitGatewayMulticastDomainAssociationsResult.of_xml
@@ -9570,7 +14270,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml AssignIpv6AddressesResult.of_xml
   | AssignPrivateIpAddresses ->
       response_of_some_xml AssignPrivateIpAddressesResult.of_xml
+  | AssignPrivateNatGatewayAddress ->
+      response_of_some_xml AssignPrivateNatGatewayAddressResult.of_xml
   | AssociateAddress -> response_of_some_xml AssociateAddressResult.of_xml
+  | AssociateCapacityReservationBillingOwner ->
+      response_of_some_xml
+        AssociateCapacityReservationBillingOwnerResult.of_xml
   | AssociateClientVpnTargetNetwork ->
       response_of_some_xml AssociateClientVpnTargetNetworkResult.of_xml
   | AssociateDhcpOptions -> response_of_none ()
@@ -9580,13 +14285,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml AssociateIamInstanceProfileResult.of_xml
   | AssociateInstanceEventWindow ->
       response_of_some_xml AssociateInstanceEventWindowResult.of_xml
+  | AssociateIpamByoasn ->
+      response_of_some_xml AssociateIpamByoasnResult.of_xml
+  | AssociateIpamResourceDiscovery ->
+      response_of_some_xml AssociateIpamResourceDiscoveryResult.of_xml
+  | AssociateNatGatewayAddress ->
+      response_of_some_xml AssociateNatGatewayAddressResult.of_xml
+  | AssociateRouteServer ->
+      response_of_some_xml AssociateRouteServerResult.of_xml
   | AssociateRouteTable ->
       response_of_some_xml AssociateRouteTableResult.of_xml
+  | AssociateSecurityGroupVpc ->
+      response_of_some_xml AssociateSecurityGroupVpcResult.of_xml
   | AssociateSubnetCidrBlock ->
       response_of_some_xml AssociateSubnetCidrBlockResult.of_xml
   | AssociateTransitGatewayMulticastDomain ->
       response_of_some_xml
         AssociateTransitGatewayMulticastDomainResult.of_xml
+  | AssociateTransitGatewayPolicyTable ->
+      response_of_some_xml AssociateTransitGatewayPolicyTableResult.of_xml
   | AssociateTransitGatewayRouteTable ->
       response_of_some_xml AssociateTransitGatewayRouteTableResult.of_xml
   | AssociateTrunkInterface ->
@@ -9598,6 +14315,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | AttachInternetGateway -> response_of_none ()
   | AttachNetworkInterface ->
       response_of_some_xml AttachNetworkInterfaceResult.of_xml
+  | AttachVerifiedAccessTrustProvider ->
+      response_of_some_xml AttachVerifiedAccessTrustProviderResult.of_xml
   | AttachVolume -> response_of_some_xml VolumeAttachment.of_xml
   | AttachVpnGateway -> response_of_some_xml AttachVpnGatewayResult.of_xml
   | AuthorizeClientVpnIngress ->
@@ -9613,7 +14332,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CancelCapacityReservationFleets ->
       response_of_some_xml CancelCapacityReservationFleetsResult.of_xml
   | CancelConversionTask -> response_of_none ()
+  | CancelDeclarativePoliciesReport ->
+      response_of_some_xml CancelDeclarativePoliciesReportResult.of_xml
   | CancelExportTask -> response_of_none ()
+  | CancelImageLaunchPermission ->
+      response_of_some_xml CancelImageLaunchPermissionResult.of_xml
   | CancelImportTask -> response_of_some_xml CancelImportTaskResult.of_xml
   | CancelReservedInstancesListing ->
       response_of_some_xml CancelReservedInstancesListingResult.of_xml
@@ -9626,8 +14349,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CopyFpgaImage -> response_of_some_xml CopyFpgaImageResult.of_xml
   | CopyImage -> response_of_some_xml CopyImageResult.of_xml
   | CopySnapshot -> response_of_some_xml CopySnapshotResult.of_xml
+  | CopyVolumes -> response_of_some_xml CopyVolumesResult.of_xml
+  | CreateCapacityManagerDataExport ->
+      response_of_some_xml CreateCapacityManagerDataExportResult.of_xml
   | CreateCapacityReservation ->
       response_of_some_xml CreateCapacityReservationResult.of_xml
+  | CreateCapacityReservationBySplitting ->
+      response_of_some_xml CreateCapacityReservationBySplittingResult.of_xml
   | CreateCapacityReservationFleet ->
       response_of_some_xml CreateCapacityReservationFleetResult.of_xml
   | CreateCarrierGateway ->
@@ -9636,11 +14364,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml CreateClientVpnEndpointResult.of_xml
   | CreateClientVpnRoute ->
       response_of_some_xml CreateClientVpnRouteResult.of_xml
+  | CreateCoipCidr -> response_of_some_xml CreateCoipCidrResult.of_xml
+  | CreateCoipPool -> response_of_some_xml CreateCoipPoolResult.of_xml
   | CreateCustomerGateway ->
       response_of_some_xml CreateCustomerGatewayResult.of_xml
   | CreateDefaultSubnet ->
       response_of_some_xml CreateDefaultSubnetResult.of_xml
   | CreateDefaultVpc -> response_of_some_xml CreateDefaultVpcResult.of_xml
+  | CreateDelegateMacVolumeOwnershipTask ->
+      response_of_some_xml CreateDelegateMacVolumeOwnershipTaskResult.of_xml
   | CreateDhcpOptions -> response_of_some_xml CreateDhcpOptionsResult.of_xml
   | CreateEgressOnlyInternetGateway ->
       response_of_some_xml CreateEgressOnlyInternetGatewayResult.of_xml
@@ -9648,14 +14380,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateFlowLogs -> response_of_some_xml CreateFlowLogsResult.of_xml
   | CreateFpgaImage -> response_of_some_xml CreateFpgaImageResult.of_xml
   | CreateImage -> response_of_some_xml CreateImageResult.of_xml
+  | CreateImageUsageReport ->
+      response_of_some_xml CreateImageUsageReportResult.of_xml
+  | CreateInstanceConnectEndpoint ->
+      response_of_some_xml CreateInstanceConnectEndpointResult.of_xml
   | CreateInstanceEventWindow ->
       response_of_some_xml CreateInstanceEventWindowResult.of_xml
   | CreateInstanceExportTask ->
       response_of_some_xml CreateInstanceExportTaskResult.of_xml
   | CreateInternetGateway ->
       response_of_some_xml CreateInternetGatewayResult.of_xml
+  | CreateInterruptibleCapacityReservationAllocation ->
+      response_of_some_xml
+        CreateInterruptibleCapacityReservationAllocationResult.of_xml
   | CreateIpam -> response_of_some_xml CreateIpamResult.of_xml
+  | CreateIpamExternalResourceVerificationToken ->
+      response_of_some_xml
+        CreateIpamExternalResourceVerificationTokenResult.of_xml
+  | CreateIpamPolicy -> response_of_some_xml CreateIpamPolicyResult.of_xml
   | CreateIpamPool -> response_of_some_xml CreateIpamPoolResult.of_xml
+  | CreateIpamPrefixListResolver ->
+      response_of_some_xml CreateIpamPrefixListResolverResult.of_xml
+  | CreateIpamPrefixListResolverTarget ->
+      response_of_some_xml CreateIpamPrefixListResolverTargetResult.of_xml
+  | CreateIpamResourceDiscovery ->
+      response_of_some_xml CreateIpamResourceDiscoveryResult.of_xml
   | CreateIpamScope -> response_of_some_xml CreateIpamScopeResult.of_xml
   | CreateKeyPair -> response_of_some_xml KeyPair.of_xml
   | CreateLaunchTemplate ->
@@ -9664,9 +14413,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml CreateLaunchTemplateVersionResult.of_xml
   | CreateLocalGatewayRoute ->
       response_of_some_xml CreateLocalGatewayRouteResult.of_xml
+  | CreateLocalGatewayRouteTable ->
+      response_of_some_xml CreateLocalGatewayRouteTableResult.of_xml
+  | CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+      response_of_some_xml
+        CreateLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.of_xml
   | CreateLocalGatewayRouteTableVpcAssociation ->
       response_of_some_xml
         CreateLocalGatewayRouteTableVpcAssociationResult.of_xml
+  | CreateLocalGatewayVirtualInterface ->
+      response_of_some_xml CreateLocalGatewayVirtualInterfaceResult.of_xml
+  | CreateLocalGatewayVirtualInterfaceGroup ->
+      response_of_some_xml
+        CreateLocalGatewayVirtualInterfaceGroupResult.of_xml
+  | CreateMacSystemIntegrityProtectionModificationTask ->
+      response_of_some_xml
+        CreateMacSystemIntegrityProtectionModificationTaskResult.of_xml
   | CreateManagedPrefixList ->
       response_of_some_xml CreateManagedPrefixListResult.of_xml
   | CreateNatGateway -> response_of_some_xml CreateNatGatewayResult.of_xml
@@ -9691,7 +14453,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | CreateRestoreImageTask ->
       response_of_some_xml CreateRestoreImageTaskResult.of_xml
   | CreateRoute -> response_of_some_xml CreateRouteResult.of_xml
+  | CreateRouteServer -> response_of_some_xml CreateRouteServerResult.of_xml
+  | CreateRouteServerEndpoint ->
+      response_of_some_xml CreateRouteServerEndpointResult.of_xml
+  | CreateRouteServerPeer ->
+      response_of_some_xml CreateRouteServerPeerResult.of_xml
   | CreateRouteTable -> response_of_some_xml CreateRouteTableResult.of_xml
+  | CreateSecondaryNetwork ->
+      response_of_some_xml CreateSecondaryNetworkResult.of_xml
+  | CreateSecondarySubnet ->
+      response_of_some_xml CreateSecondarySubnetResult.of_xml
   | CreateSecurityGroup ->
       response_of_some_xml CreateSecurityGroupResult.of_xml
   | CreateSnapshot -> response_of_some_xml Snapshot.of_xml
@@ -9718,10 +14489,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml CreateTransitGatewayConnectResult.of_xml
   | CreateTransitGatewayConnectPeer ->
       response_of_some_xml CreateTransitGatewayConnectPeerResult.of_xml
+  | CreateTransitGatewayMeteringPolicy ->
+      response_of_some_xml CreateTransitGatewayMeteringPolicyResult.of_xml
+  | CreateTransitGatewayMeteringPolicyEntry ->
+      response_of_some_xml
+        CreateTransitGatewayMeteringPolicyEntryResult.of_xml
   | CreateTransitGatewayMulticastDomain ->
       response_of_some_xml CreateTransitGatewayMulticastDomainResult.of_xml
   | CreateTransitGatewayPeeringAttachment ->
       response_of_some_xml CreateTransitGatewayPeeringAttachmentResult.of_xml
+  | CreateTransitGatewayPolicyTable ->
+      response_of_some_xml CreateTransitGatewayPolicyTableResult.of_xml
   | CreateTransitGatewayPrefixListReference ->
       response_of_some_xml
         CreateTransitGatewayPrefixListReferenceResult.of_xml
@@ -9729,10 +14507,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml CreateTransitGatewayRouteResult.of_xml
   | CreateTransitGatewayRouteTable ->
       response_of_some_xml CreateTransitGatewayRouteTableResult.of_xml
+  | CreateTransitGatewayRouteTableAnnouncement ->
+      response_of_some_xml
+        CreateTransitGatewayRouteTableAnnouncementResult.of_xml
   | CreateTransitGatewayVpcAttachment ->
       response_of_some_xml CreateTransitGatewayVpcAttachmentResult.of_xml
+  | CreateVerifiedAccessEndpoint ->
+      response_of_some_xml CreateVerifiedAccessEndpointResult.of_xml
+  | CreateVerifiedAccessGroup ->
+      response_of_some_xml CreateVerifiedAccessGroupResult.of_xml
+  | CreateVerifiedAccessInstance ->
+      response_of_some_xml CreateVerifiedAccessInstanceResult.of_xml
+  | CreateVerifiedAccessTrustProvider ->
+      response_of_some_xml CreateVerifiedAccessTrustProviderResult.of_xml
   | CreateVolume -> response_of_some_xml Volume.of_xml
   | CreateVpc -> response_of_some_xml CreateVpcResult.of_xml
+  | CreateVpcBlockPublicAccessExclusion ->
+      response_of_some_xml CreateVpcBlockPublicAccessExclusionResult.of_xml
+  | CreateVpcEncryptionControl ->
+      response_of_some_xml CreateVpcEncryptionControlResult.of_xml
   | CreateVpcEndpoint -> response_of_some_xml CreateVpcEndpointResult.of_xml
   | CreateVpcEndpointConnectionNotification ->
       response_of_some_xml
@@ -9741,16 +14534,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml CreateVpcEndpointServiceConfigurationResult.of_xml
   | CreateVpcPeeringConnection ->
       response_of_some_xml CreateVpcPeeringConnectionResult.of_xml
+  | CreateVpnConcentrator ->
+      response_of_some_xml CreateVpnConcentratorResult.of_xml
   | CreateVpnConnection ->
       response_of_some_xml CreateVpnConnectionResult.of_xml
   | CreateVpnConnectionRoute -> response_of_none ()
   | CreateVpnGateway -> response_of_some_xml CreateVpnGatewayResult.of_xml
+  | DeleteCapacityManagerDataExport ->
+      response_of_some_xml DeleteCapacityManagerDataExportResult.of_xml
   | DeleteCarrierGateway ->
       response_of_some_xml DeleteCarrierGatewayResult.of_xml
   | DeleteClientVpnEndpoint ->
       response_of_some_xml DeleteClientVpnEndpointResult.of_xml
   | DeleteClientVpnRoute ->
       response_of_some_xml DeleteClientVpnRouteResult.of_xml
+  | DeleteCoipCidr -> response_of_some_xml DeleteCoipCidrResult.of_xml
+  | DeleteCoipPool -> response_of_some_xml DeleteCoipPoolResult.of_xml
   | DeleteCustomerGateway -> response_of_none ()
   | DeleteDhcpOptions -> response_of_none ()
   | DeleteEgressOnlyInternetGateway ->
@@ -9758,22 +14557,46 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteFleets -> response_of_some_xml DeleteFleetsResult.of_xml
   | DeleteFlowLogs -> response_of_some_xml DeleteFlowLogsResult.of_xml
   | DeleteFpgaImage -> response_of_some_xml DeleteFpgaImageResult.of_xml
+  | DeleteImageUsageReport ->
+      response_of_some_xml DeleteImageUsageReportResult.of_xml
+  | DeleteInstanceConnectEndpoint ->
+      response_of_some_xml DeleteInstanceConnectEndpointResult.of_xml
   | DeleteInstanceEventWindow ->
       response_of_some_xml DeleteInstanceEventWindowResult.of_xml
   | DeleteInternetGateway -> response_of_none ()
   | DeleteIpam -> response_of_some_xml DeleteIpamResult.of_xml
+  | DeleteIpamExternalResourceVerificationToken ->
+      response_of_some_xml
+        DeleteIpamExternalResourceVerificationTokenResult.of_xml
+  | DeleteIpamPolicy -> response_of_some_xml DeleteIpamPolicyResult.of_xml
   | DeleteIpamPool -> response_of_some_xml DeleteIpamPoolResult.of_xml
+  | DeleteIpamPrefixListResolver ->
+      response_of_some_xml DeleteIpamPrefixListResolverResult.of_xml
+  | DeleteIpamPrefixListResolverTarget ->
+      response_of_some_xml DeleteIpamPrefixListResolverTargetResult.of_xml
+  | DeleteIpamResourceDiscovery ->
+      response_of_some_xml DeleteIpamResourceDiscoveryResult.of_xml
   | DeleteIpamScope -> response_of_some_xml DeleteIpamScopeResult.of_xml
-  | DeleteKeyPair -> response_of_none ()
+  | DeleteKeyPair -> response_of_some_xml DeleteKeyPairResult.of_xml
   | DeleteLaunchTemplate ->
       response_of_some_xml DeleteLaunchTemplateResult.of_xml
   | DeleteLaunchTemplateVersions ->
       response_of_some_xml DeleteLaunchTemplateVersionsResult.of_xml
   | DeleteLocalGatewayRoute ->
       response_of_some_xml DeleteLocalGatewayRouteResult.of_xml
+  | DeleteLocalGatewayRouteTable ->
+      response_of_some_xml DeleteLocalGatewayRouteTableResult.of_xml
+  | DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociation ->
+      response_of_some_xml
+        DeleteLocalGatewayRouteTableVirtualInterfaceGroupAssociationResult.of_xml
   | DeleteLocalGatewayRouteTableVpcAssociation ->
       response_of_some_xml
         DeleteLocalGatewayRouteTableVpcAssociationResult.of_xml
+  | DeleteLocalGatewayVirtualInterface ->
+      response_of_some_xml DeleteLocalGatewayVirtualInterfaceResult.of_xml
+  | DeleteLocalGatewayVirtualInterfaceGroup ->
+      response_of_some_xml
+        DeleteLocalGatewayVirtualInterfaceGroupResult.of_xml
   | DeleteManagedPrefixList ->
       response_of_some_xml DeleteManagedPrefixListResult.of_xml
   | DeleteNatGateway -> response_of_some_xml DeleteNatGatewayResult.of_xml
@@ -9797,8 +14620,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteQueuedReservedInstances ->
       response_of_some_xml DeleteQueuedReservedInstancesResult.of_xml
   | DeleteRoute -> response_of_none ()
+  | DeleteRouteServer -> response_of_some_xml DeleteRouteServerResult.of_xml
+  | DeleteRouteServerEndpoint ->
+      response_of_some_xml DeleteRouteServerEndpointResult.of_xml
+  | DeleteRouteServerPeer ->
+      response_of_some_xml DeleteRouteServerPeerResult.of_xml
   | DeleteRouteTable -> response_of_none ()
-  | DeleteSecurityGroup -> response_of_none ()
+  | DeleteSecondaryNetwork ->
+      response_of_some_xml DeleteSecondaryNetworkResult.of_xml
+  | DeleteSecondarySubnet ->
+      response_of_some_xml DeleteSecondarySubnetResult.of_xml
+  | DeleteSecurityGroup ->
+      response_of_some_xml DeleteSecurityGroupResult.of_xml
   | DeleteSnapshot -> response_of_none ()
   | DeleteSpotDatafeedSubscription -> response_of_none ()
   | DeleteSubnet -> response_of_none ()
@@ -9815,14 +14648,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DeleteTrafficMirrorTargetResult.of_xml
   | DeleteTransitGateway ->
       response_of_some_xml DeleteTransitGatewayResult.of_xml
+  | DeleteTransitGatewayClientVpnAttachment ->
+      response_of_some_xml
+        DeleteTransitGatewayClientVpnAttachmentResult.of_xml
   | DeleteTransitGatewayConnect ->
       response_of_some_xml DeleteTransitGatewayConnectResult.of_xml
   | DeleteTransitGatewayConnectPeer ->
       response_of_some_xml DeleteTransitGatewayConnectPeerResult.of_xml
+  | DeleteTransitGatewayMeteringPolicy ->
+      response_of_some_xml DeleteTransitGatewayMeteringPolicyResult.of_xml
+  | DeleteTransitGatewayMeteringPolicyEntry ->
+      response_of_some_xml
+        DeleteTransitGatewayMeteringPolicyEntryResult.of_xml
   | DeleteTransitGatewayMulticastDomain ->
       response_of_some_xml DeleteTransitGatewayMulticastDomainResult.of_xml
   | DeleteTransitGatewayPeeringAttachment ->
       response_of_some_xml DeleteTransitGatewayPeeringAttachmentResult.of_xml
+  | DeleteTransitGatewayPolicyTable ->
+      response_of_some_xml DeleteTransitGatewayPolicyTableResult.of_xml
   | DeleteTransitGatewayPrefixListReference ->
       response_of_some_xml
         DeleteTransitGatewayPrefixListReferenceResult.of_xml
@@ -9830,10 +14673,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DeleteTransitGatewayRouteResult.of_xml
   | DeleteTransitGatewayRouteTable ->
       response_of_some_xml DeleteTransitGatewayRouteTableResult.of_xml
+  | DeleteTransitGatewayRouteTableAnnouncement ->
+      response_of_some_xml
+        DeleteTransitGatewayRouteTableAnnouncementResult.of_xml
   | DeleteTransitGatewayVpcAttachment ->
       response_of_some_xml DeleteTransitGatewayVpcAttachmentResult.of_xml
+  | DeleteVerifiedAccessEndpoint ->
+      response_of_some_xml DeleteVerifiedAccessEndpointResult.of_xml
+  | DeleteVerifiedAccessGroup ->
+      response_of_some_xml DeleteVerifiedAccessGroupResult.of_xml
+  | DeleteVerifiedAccessInstance ->
+      response_of_some_xml DeleteVerifiedAccessInstanceResult.of_xml
+  | DeleteVerifiedAccessTrustProvider ->
+      response_of_some_xml DeleteVerifiedAccessTrustProviderResult.of_xml
   | DeleteVolume -> response_of_none ()
   | DeleteVpc -> response_of_none ()
+  | DeleteVpcBlockPublicAccessExclusion ->
+      response_of_some_xml DeleteVpcBlockPublicAccessExclusionResult.of_xml
+  | DeleteVpcEncryptionControl ->
+      response_of_some_xml DeleteVpcEncryptionControlResult.of_xml
   | DeleteVpcEndpointConnectionNotifications ->
       response_of_some_xml
         DeleteVpcEndpointConnectionNotificationsResult.of_xml
@@ -9844,16 +14702,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DeleteVpcEndpointsResult.of_xml
   | DeleteVpcPeeringConnection ->
       response_of_some_xml DeleteVpcPeeringConnectionResult.of_xml
+  | DeleteVpnConcentrator ->
+      response_of_some_xml DeleteVpnConcentratorResult.of_xml
   | DeleteVpnConnection -> response_of_none ()
   | DeleteVpnConnectionRoute -> response_of_none ()
   | DeleteVpnGateway -> response_of_none ()
   | DeprovisionByoipCidr ->
       response_of_some_xml DeprovisionByoipCidrResult.of_xml
+  | DeprovisionIpamByoasn ->
+      response_of_some_xml DeprovisionIpamByoasnResult.of_xml
   | DeprovisionIpamPoolCidr ->
       response_of_some_xml DeprovisionIpamPoolCidrResult.of_xml
   | DeprovisionPublicIpv4PoolCidr ->
       response_of_some_xml DeprovisionPublicIpv4PoolCidrResult.of_xml
-  | DeregisterImage -> response_of_none ()
+  | DeregisterImage -> response_of_some_xml DeregisterImageResult.of_xml
   | DeregisterInstanceEventNotificationAttributes ->
       response_of_some_xml
         DeregisterInstanceEventNotificationAttributesResult.of_xml
@@ -9865,6 +14727,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         DeregisterTransitGatewayMulticastGroupSourcesResult.of_xml
   | DescribeAccountAttributes ->
       response_of_some_xml DescribeAccountAttributesResult.of_xml
+  | DescribeAddressTransfers ->
+      response_of_some_xml DescribeAddressTransfersResult.of_xml
   | DescribeAddresses -> response_of_some_xml DescribeAddressesResult.of_xml
   | DescribeAddressesAttribute ->
       response_of_some_xml DescribeAddressesAttributeResult.of_xml
@@ -9872,12 +14736,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeAggregateIdFormatResult.of_xml
   | DescribeAvailabilityZones ->
       response_of_some_xml DescribeAvailabilityZonesResult.of_xml
+  | DescribeAwsNetworkPerformanceMetricSubscriptions ->
+      response_of_some_xml
+        DescribeAwsNetworkPerformanceMetricSubscriptionsResult.of_xml
   | DescribeBundleTasks ->
       response_of_some_xml DescribeBundleTasksResult.of_xml
   | DescribeByoipCidrs ->
       response_of_some_xml DescribeByoipCidrsResult.of_xml
+  | DescribeCapacityBlockExtensionHistory ->
+      response_of_some_xml DescribeCapacityBlockExtensionHistoryResult.of_xml
+  | DescribeCapacityBlockExtensionOfferings ->
+      response_of_some_xml
+        DescribeCapacityBlockExtensionOfferingsResult.of_xml
+  | DescribeCapacityBlockOfferings ->
+      response_of_some_xml DescribeCapacityBlockOfferingsResult.of_xml
+  | DescribeCapacityBlockStatus ->
+      response_of_some_xml DescribeCapacityBlockStatusResult.of_xml
+  | DescribeCapacityBlocks ->
+      response_of_some_xml DescribeCapacityBlocksResult.of_xml
+  | DescribeCapacityManagerDataExports ->
+      response_of_some_xml DescribeCapacityManagerDataExportsResult.of_xml
+  | DescribeCapacityReservationBillingRequests ->
+      response_of_some_xml
+        DescribeCapacityReservationBillingRequestsResult.of_xml
   | DescribeCapacityReservationFleets ->
       response_of_some_xml DescribeCapacityReservationFleetsResult.of_xml
+  | DescribeCapacityReservationTopology ->
+      response_of_some_xml DescribeCapacityReservationTopologyResult.of_xml
   | DescribeCapacityReservations ->
       response_of_some_xml DescribeCapacityReservationsResult.of_xml
   | DescribeCarrierGateways ->
@@ -9899,6 +14784,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeConversionTasksResult.of_xml
   | DescribeCustomerGateways ->
       response_of_some_xml DescribeCustomerGatewaysResult.of_xml
+  | DescribeDeclarativePoliciesReports ->
+      response_of_some_xml DescribeDeclarativePoliciesReportsResult.of_xml
   | DescribeDhcpOptions ->
       response_of_some_xml DescribeDhcpOptionsResult.of_xml
   | DescribeEgressOnlyInternetGateways ->
@@ -9935,6 +14822,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DescribeIdentityIdFormat ->
       response_of_some_xml DescribeIdentityIdFormatResult.of_xml
   | DescribeImageAttribute -> response_of_some_xml ImageAttribute.of_xml
+  | DescribeImageReferences ->
+      response_of_some_xml DescribeImageReferencesResult.of_xml
+  | DescribeImageUsageReportEntries ->
+      response_of_some_xml DescribeImageUsageReportEntriesResult.of_xml
+  | DescribeImageUsageReports ->
+      response_of_some_xml DescribeImageUsageReportsResult.of_xml
   | DescribeImages -> response_of_some_xml DescribeImagesResult.of_xml
   | DescribeImportImageTasks ->
       response_of_some_xml DescribeImportImageTasksResult.of_xml
@@ -9942,6 +14835,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeImportSnapshotTasksResult.of_xml
   | DescribeInstanceAttribute ->
       response_of_some_xml InstanceAttribute.of_xml
+  | DescribeInstanceConnectEndpoints ->
+      response_of_some_xml DescribeInstanceConnectEndpointsResult.of_xml
   | DescribeInstanceCreditSpecifications ->
       response_of_some_xml DescribeInstanceCreditSpecificationsResult.of_xml
   | DescribeInstanceEventNotificationAttributes ->
@@ -9949,8 +14844,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         DescribeInstanceEventNotificationAttributesResult.of_xml
   | DescribeInstanceEventWindows ->
       response_of_some_xml DescribeInstanceEventWindowsResult.of_xml
+  | DescribeInstanceImageMetadata ->
+      response_of_some_xml DescribeInstanceImageMetadataResult.of_xml
+  | DescribeInstanceSqlHaHistoryStates ->
+      response_of_some_xml DescribeInstanceSqlHaHistoryStatesResult.of_xml
+  | DescribeInstanceSqlHaStates ->
+      response_of_some_xml DescribeInstanceSqlHaStatesResult.of_xml
   | DescribeInstanceStatus ->
       response_of_some_xml DescribeInstanceStatusResult.of_xml
+  | DescribeInstanceTopology ->
+      response_of_some_xml DescribeInstanceTopologyResult.of_xml
   | DescribeInstanceTypeOfferings ->
       response_of_some_xml DescribeInstanceTypeOfferingsResult.of_xml
   | DescribeInstanceTypes ->
@@ -9958,7 +14861,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DescribeInstances -> response_of_some_xml DescribeInstancesResult.of_xml
   | DescribeInternetGateways ->
       response_of_some_xml DescribeInternetGatewaysResult.of_xml
+  | DescribeIpamByoasn ->
+      response_of_some_xml DescribeIpamByoasnResult.of_xml
+  | DescribeIpamExternalResourceVerificationTokens ->
+      response_of_some_xml
+        DescribeIpamExternalResourceVerificationTokensResult.of_xml
+  | DescribeIpamPolicies ->
+      response_of_some_xml DescribeIpamPoliciesResult.of_xml
   | DescribeIpamPools -> response_of_some_xml DescribeIpamPoolsResult.of_xml
+  | DescribeIpamPrefixListResolverTargets ->
+      response_of_some_xml DescribeIpamPrefixListResolverTargetsResult.of_xml
+  | DescribeIpamPrefixListResolvers ->
+      response_of_some_xml DescribeIpamPrefixListResolversResult.of_xml
+  | DescribeIpamResourceDiscoveries ->
+      response_of_some_xml DescribeIpamResourceDiscoveriesResult.of_xml
+  | DescribeIpamResourceDiscoveryAssociations ->
+      response_of_some_xml
+        DescribeIpamResourceDiscoveryAssociationsResult.of_xml
   | DescribeIpamScopes ->
       response_of_some_xml DescribeIpamScopesResult.of_xml
   | DescribeIpams -> response_of_some_xml DescribeIpamsResult.of_xml
@@ -9983,6 +14902,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeLocalGatewayVirtualInterfacesResult.of_xml
   | DescribeLocalGateways ->
       response_of_some_xml DescribeLocalGatewaysResult.of_xml
+  | DescribeLockedSnapshots ->
+      response_of_some_xml DescribeLockedSnapshotsResult.of_xml
+  | DescribeMacHosts -> response_of_some_xml DescribeMacHostsResult.of_xml
+  | DescribeMacModificationTasks ->
+      response_of_some_xml DescribeMacModificationTasksResult.of_xml
   | DescribeManagedPrefixLists ->
       response_of_some_xml DescribeManagedPrefixListsResult.of_xml
   | DescribeMovingAddresses ->
@@ -10006,6 +14930,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeNetworkInterfacePermissionsResult.of_xml
   | DescribeNetworkInterfaces ->
       response_of_some_xml DescribeNetworkInterfacesResult.of_xml
+  | DescribeOutpostLags ->
+      response_of_some_xml DescribeOutpostLagsResult.of_xml
   | DescribePlacementGroups ->
       response_of_some_xml DescribePlacementGroupsResult.of_xml
   | DescribePrefixLists ->
@@ -10026,18 +14952,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         DescribeReservedInstancesModificationsResult.of_xml
   | DescribeReservedInstancesOfferings ->
       response_of_some_xml DescribeReservedInstancesOfferingsResult.of_xml
+  | DescribeRouteServerEndpoints ->
+      response_of_some_xml DescribeRouteServerEndpointsResult.of_xml
+  | DescribeRouteServerPeers ->
+      response_of_some_xml DescribeRouteServerPeersResult.of_xml
+  | DescribeRouteServers ->
+      response_of_some_xml DescribeRouteServersResult.of_xml
   | DescribeRouteTables ->
       response_of_some_xml DescribeRouteTablesResult.of_xml
   | DescribeScheduledInstanceAvailability ->
       response_of_some_xml DescribeScheduledInstanceAvailabilityResult.of_xml
   | DescribeScheduledInstances ->
       response_of_some_xml DescribeScheduledInstancesResult.of_xml
+  | DescribeSecondaryInterfaces ->
+      response_of_some_xml DescribeSecondaryInterfacesResult.of_xml
+  | DescribeSecondaryNetworks ->
+      response_of_some_xml DescribeSecondaryNetworksResult.of_xml
+  | DescribeSecondarySubnets ->
+      response_of_some_xml DescribeSecondarySubnetsResult.of_xml
   | DescribeSecurityGroupReferences ->
       response_of_some_xml DescribeSecurityGroupReferencesResult.of_xml
   | DescribeSecurityGroupRules ->
       response_of_some_xml DescribeSecurityGroupRulesResult.of_xml
+  | DescribeSecurityGroupVpcAssociations ->
+      response_of_some_xml DescribeSecurityGroupVpcAssociationsResult.of_xml
   | DescribeSecurityGroups ->
       response_of_some_xml DescribeSecurityGroupsResult.of_xml
+  | DescribeServiceLinkVirtualInterfaces ->
+      response_of_some_xml DescribeServiceLinkVirtualInterfacesResult.of_xml
   | DescribeSnapshotAttribute ->
       response_of_some_xml DescribeSnapshotAttributeResult.of_xml
   | DescribeSnapshotTierStatus ->
@@ -10061,6 +15003,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeStoreImageTasksResult.of_xml
   | DescribeSubnets -> response_of_some_xml DescribeSubnetsResult.of_xml
   | DescribeTags -> response_of_some_xml DescribeTagsResult.of_xml
+  | DescribeTrafficMirrorFilterRules ->
+      response_of_some_xml DescribeTrafficMirrorFilterRulesResult.of_xml
   | DescribeTrafficMirrorFilters ->
       response_of_some_xml DescribeTrafficMirrorFiltersResult.of_xml
   | DescribeTrafficMirrorSessions ->
@@ -10073,12 +15017,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeTransitGatewayConnectPeersResult.of_xml
   | DescribeTransitGatewayConnects ->
       response_of_some_xml DescribeTransitGatewayConnectsResult.of_xml
+  | DescribeTransitGatewayMeteringPolicies ->
+      response_of_some_xml
+        DescribeTransitGatewayMeteringPoliciesResult.of_xml
   | DescribeTransitGatewayMulticastDomains ->
       response_of_some_xml
         DescribeTransitGatewayMulticastDomainsResult.of_xml
   | DescribeTransitGatewayPeeringAttachments ->
       response_of_some_xml
         DescribeTransitGatewayPeeringAttachmentsResult.of_xml
+  | DescribeTransitGatewayPolicyTables ->
+      response_of_some_xml DescribeTransitGatewayPolicyTablesResult.of_xml
+  | DescribeTransitGatewayRouteTableAnnouncements ->
+      response_of_some_xml
+        DescribeTransitGatewayRouteTableAnnouncementsResult.of_xml
   | DescribeTransitGatewayRouteTables ->
       response_of_some_xml DescribeTransitGatewayRouteTablesResult.of_xml
   | DescribeTransitGatewayVpcAttachments ->
@@ -10087,6 +15039,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeTransitGatewaysResult.of_xml
   | DescribeTrunkInterfaceAssociations ->
       response_of_some_xml DescribeTrunkInterfaceAssociationsResult.of_xml
+  | DescribeVerifiedAccessEndpoints ->
+      response_of_some_xml DescribeVerifiedAccessEndpointsResult.of_xml
+  | DescribeVerifiedAccessGroups ->
+      response_of_some_xml DescribeVerifiedAccessGroupsResult.of_xml
+  | DescribeVerifiedAccessInstanceLoggingConfigurations ->
+      response_of_some_xml
+        DescribeVerifiedAccessInstanceLoggingConfigurationsResult.of_xml
+  | DescribeVerifiedAccessInstances ->
+      response_of_some_xml DescribeVerifiedAccessInstancesResult.of_xml
+  | DescribeVerifiedAccessTrustProviders ->
+      response_of_some_xml DescribeVerifiedAccessTrustProvidersResult.of_xml
   | DescribeVolumeAttribute ->
       response_of_some_xml DescribeVolumeAttributeResult.of_xml
   | DescribeVolumeStatus ->
@@ -10096,10 +15059,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DescribeVolumesModificationsResult.of_xml
   | DescribeVpcAttribute ->
       response_of_some_xml DescribeVpcAttributeResult.of_xml
+  | DescribeVpcBlockPublicAccessExclusions ->
+      response_of_some_xml
+        DescribeVpcBlockPublicAccessExclusionsResult.of_xml
+  | DescribeVpcBlockPublicAccessOptions ->
+      response_of_some_xml DescribeVpcBlockPublicAccessOptionsResult.of_xml
   | DescribeVpcClassicLink ->
       response_of_some_xml DescribeVpcClassicLinkResult.of_xml
   | DescribeVpcClassicLinkDnsSupport ->
       response_of_some_xml DescribeVpcClassicLinkDnsSupportResult.of_xml
+  | DescribeVpcEncryptionControls ->
+      response_of_some_xml DescribeVpcEncryptionControlsResult.of_xml
+  | DescribeVpcEndpointAssociations ->
+      response_of_some_xml DescribeVpcEndpointAssociationsResult.of_xml
   | DescribeVpcEndpointConnectionNotifications ->
       response_of_some_xml
         DescribeVpcEndpointConnectionNotificationsResult.of_xml
@@ -10117,6 +15089,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DescribeVpcPeeringConnections ->
       response_of_some_xml DescribeVpcPeeringConnectionsResult.of_xml
   | DescribeVpcs -> response_of_some_xml DescribeVpcsResult.of_xml
+  | DescribeVpnConcentrators ->
+      response_of_some_xml DescribeVpnConcentratorsResult.of_xml
   | DescribeVpnConnections ->
       response_of_some_xml DescribeVpnConnectionsResult.of_xml
   | DescribeVpnGateways ->
@@ -10125,19 +15099,42 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DetachClassicLinkVpcResult.of_xml
   | DetachInternetGateway -> response_of_none ()
   | DetachNetworkInterface -> response_of_none ()
+  | DetachVerifiedAccessTrustProvider ->
+      response_of_some_xml DetachVerifiedAccessTrustProviderResult.of_xml
   | DetachVolume -> response_of_some_xml VolumeAttachment.of_xml
   | DetachVpnGateway -> response_of_none ()
+  | DisableAddressTransfer ->
+      response_of_some_xml DisableAddressTransferResult.of_xml
+  | DisableAllowedImagesSettings ->
+      response_of_some_xml DisableAllowedImagesSettingsResult.of_xml
+  | DisableAwsNetworkPerformanceMetricSubscription ->
+      response_of_some_xml
+        DisableAwsNetworkPerformanceMetricSubscriptionResult.of_xml
+  | DisableCapacityManager ->
+      response_of_some_xml DisableCapacityManagerResult.of_xml
   | DisableEbsEncryptionByDefault ->
       response_of_some_xml DisableEbsEncryptionByDefaultResult.of_xml
   | DisableFastLaunch -> response_of_some_xml DisableFastLaunchResult.of_xml
   | DisableFastSnapshotRestores ->
       response_of_some_xml DisableFastSnapshotRestoresResult.of_xml
+  | DisableImage -> response_of_some_xml DisableImageResult.of_xml
+  | DisableImageBlockPublicAccess ->
+      response_of_some_xml DisableImageBlockPublicAccessResult.of_xml
   | DisableImageDeprecation ->
       response_of_some_xml DisableImageDeprecationResult.of_xml
+  | DisableImageDeregistrationProtection ->
+      response_of_some_xml DisableImageDeregistrationProtectionResult.of_xml
+  | DisableInstanceSqlHaStandbyDetections ->
+      response_of_some_xml DisableInstanceSqlHaStandbyDetectionsResult.of_xml
   | DisableIpamOrganizationAdminAccount ->
       response_of_some_xml DisableIpamOrganizationAdminAccountResult.of_xml
+  | DisableIpamPolicy -> response_of_some_xml DisableIpamPolicyResult.of_xml
+  | DisableRouteServerPropagation ->
+      response_of_some_xml DisableRouteServerPropagationResult.of_xml
   | DisableSerialConsoleAccess ->
       response_of_some_xml DisableSerialConsoleAccessResult.of_xml
+  | DisableSnapshotBlockPublicAccess ->
+      response_of_some_xml DisableSnapshotBlockPublicAccessResult.of_xml
   | DisableTransitGatewayRouteTablePropagation ->
       response_of_some_xml
         DisableTransitGatewayRouteTablePropagationResult.of_xml
@@ -10147,6 +15144,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DisableVpcClassicLinkDnsSupport ->
       response_of_some_xml DisableVpcClassicLinkDnsSupportResult.of_xml
   | DisassociateAddress -> response_of_none ()
+  | DisassociateCapacityReservationBillingOwner ->
+      response_of_some_xml
+        DisassociateCapacityReservationBillingOwnerResult.of_xml
   | DisassociateClientVpnTargetNetwork ->
       response_of_some_xml DisassociateClientVpnTargetNetworkResult.of_xml
   | DisassociateEnclaveCertificateIamRole ->
@@ -10155,29 +15155,65 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml DisassociateIamInstanceProfileResult.of_xml
   | DisassociateInstanceEventWindow ->
       response_of_some_xml DisassociateInstanceEventWindowResult.of_xml
+  | DisassociateIpamByoasn ->
+      response_of_some_xml DisassociateIpamByoasnResult.of_xml
+  | DisassociateIpamResourceDiscovery ->
+      response_of_some_xml DisassociateIpamResourceDiscoveryResult.of_xml
+  | DisassociateNatGatewayAddress ->
+      response_of_some_xml DisassociateNatGatewayAddressResult.of_xml
+  | DisassociateRouteServer ->
+      response_of_some_xml DisassociateRouteServerResult.of_xml
   | DisassociateRouteTable -> response_of_none ()
+  | DisassociateSecurityGroupVpc ->
+      response_of_some_xml DisassociateSecurityGroupVpcResult.of_xml
   | DisassociateSubnetCidrBlock ->
       response_of_some_xml DisassociateSubnetCidrBlockResult.of_xml
   | DisassociateTransitGatewayMulticastDomain ->
       response_of_some_xml
         DisassociateTransitGatewayMulticastDomainResult.of_xml
+  | DisassociateTransitGatewayPolicyTable ->
+      response_of_some_xml DisassociateTransitGatewayPolicyTableResult.of_xml
   | DisassociateTransitGatewayRouteTable ->
       response_of_some_xml DisassociateTransitGatewayRouteTableResult.of_xml
   | DisassociateTrunkInterface ->
       response_of_some_xml DisassociateTrunkInterfaceResult.of_xml
   | DisassociateVpcCidrBlock ->
       response_of_some_xml DisassociateVpcCidrBlockResult.of_xml
+  | EnableAddressTransfer ->
+      response_of_some_xml EnableAddressTransferResult.of_xml
+  | EnableAllowedImagesSettings ->
+      response_of_some_xml EnableAllowedImagesSettingsResult.of_xml
+  | EnableAwsNetworkPerformanceMetricSubscription ->
+      response_of_some_xml
+        EnableAwsNetworkPerformanceMetricSubscriptionResult.of_xml
+  | EnableCapacityManager ->
+      response_of_some_xml EnableCapacityManagerResult.of_xml
   | EnableEbsEncryptionByDefault ->
       response_of_some_xml EnableEbsEncryptionByDefaultResult.of_xml
   | EnableFastLaunch -> response_of_some_xml EnableFastLaunchResult.of_xml
   | EnableFastSnapshotRestores ->
       response_of_some_xml EnableFastSnapshotRestoresResult.of_xml
+  | EnableImage -> response_of_some_xml EnableImageResult.of_xml
+  | EnableImageBlockPublicAccess ->
+      response_of_some_xml EnableImageBlockPublicAccessResult.of_xml
   | EnableImageDeprecation ->
       response_of_some_xml EnableImageDeprecationResult.of_xml
+  | EnableImageDeregistrationProtection ->
+      response_of_some_xml EnableImageDeregistrationProtectionResult.of_xml
+  | EnableInstanceSqlHaStandbyDetections ->
+      response_of_some_xml EnableInstanceSqlHaStandbyDetectionsResult.of_xml
   | EnableIpamOrganizationAdminAccount ->
       response_of_some_xml EnableIpamOrganizationAdminAccountResult.of_xml
+  | EnableIpamPolicy -> response_of_some_xml EnableIpamPolicyResult.of_xml
+  | EnableReachabilityAnalyzerOrganizationSharing ->
+      response_of_some_xml
+        EnableReachabilityAnalyzerOrganizationSharingResult.of_xml
+  | EnableRouteServerPropagation ->
+      response_of_some_xml EnableRouteServerPropagationResult.of_xml
   | EnableSerialConsoleAccess ->
       response_of_some_xml EnableSerialConsoleAccessResult.of_xml
+  | EnableSnapshotBlockPublicAccess ->
+      response_of_some_xml EnableSnapshotBlockPublicAccessResult.of_xml
   | EnableTransitGatewayRouteTablePropagation ->
       response_of_some_xml
         EnableTransitGatewayRouteTablePropagationResult.of_xml
@@ -10195,37 +15231,84 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ExportImage -> response_of_some_xml ExportImageResult.of_xml
   | ExportTransitGatewayRoutes ->
       response_of_some_xml ExportTransitGatewayRoutesResult.of_xml
+  | ExportVerifiedAccessInstanceClientConfiguration ->
+      response_of_some_xml
+        ExportVerifiedAccessInstanceClientConfigurationResult.of_xml
+  | GetActiveVpnTunnelStatus ->
+      response_of_some_xml GetActiveVpnTunnelStatusResult.of_xml
+  | GetAllowedImagesSettings ->
+      response_of_some_xml GetAllowedImagesSettingsResult.of_xml
   | GetAssociatedEnclaveCertificateIamRoles ->
       response_of_some_xml
         GetAssociatedEnclaveCertificateIamRolesResult.of_xml
   | GetAssociatedIpv6PoolCidrs ->
       response_of_some_xml GetAssociatedIpv6PoolCidrsResult.of_xml
+  | GetAwsNetworkPerformanceData ->
+      response_of_some_xml GetAwsNetworkPerformanceDataResult.of_xml
+  | GetCapacityManagerAttributes ->
+      response_of_some_xml GetCapacityManagerAttributesResult.of_xml
+  | GetCapacityManagerMetricData ->
+      response_of_some_xml GetCapacityManagerMetricDataResult.of_xml
+  | GetCapacityManagerMetricDimensions ->
+      response_of_some_xml GetCapacityManagerMetricDimensionsResult.of_xml
+  | GetCapacityManagerMonitoredTagKeys ->
+      response_of_some_xml GetCapacityManagerMonitoredTagKeysResult.of_xml
   | GetCapacityReservationUsage ->
       response_of_some_xml GetCapacityReservationUsageResult.of_xml
   | GetCoipPoolUsage -> response_of_some_xml GetCoipPoolUsageResult.of_xml
   | GetConsoleOutput -> response_of_some_xml GetConsoleOutputResult.of_xml
   | GetConsoleScreenshot ->
       response_of_some_xml GetConsoleScreenshotResult.of_xml
+  | GetDeclarativePoliciesReportSummary ->
+      response_of_some_xml GetDeclarativePoliciesReportSummaryResult.of_xml
   | GetDefaultCreditSpecification ->
       response_of_some_xml GetDefaultCreditSpecificationResult.of_xml
   | GetEbsDefaultKmsKeyId ->
       response_of_some_xml GetEbsDefaultKmsKeyIdResult.of_xml
   | GetEbsEncryptionByDefault ->
       response_of_some_xml GetEbsEncryptionByDefaultResult.of_xml
+  | GetEnabledIpamPolicy ->
+      response_of_some_xml GetEnabledIpamPolicyResult.of_xml
   | GetFlowLogsIntegrationTemplate ->
       response_of_some_xml GetFlowLogsIntegrationTemplateResult.of_xml
   | GetGroupsForCapacityReservation ->
       response_of_some_xml GetGroupsForCapacityReservationResult.of_xml
   | GetHostReservationPurchasePreview ->
       response_of_some_xml GetHostReservationPurchasePreviewResult.of_xml
+  | GetImageAncestry -> response_of_some_xml GetImageAncestryResult.of_xml
+  | GetImageBlockPublicAccessState ->
+      response_of_some_xml GetImageBlockPublicAccessStateResult.of_xml
+  | GetInstanceMetadataDefaults ->
+      response_of_some_xml GetInstanceMetadataDefaultsResult.of_xml
+  | GetInstanceTpmEkPub ->
+      response_of_some_xml GetInstanceTpmEkPubResult.of_xml
   | GetInstanceTypesFromInstanceRequirements ->
       response_of_some_xml
         GetInstanceTypesFromInstanceRequirementsResult.of_xml
+  | GetInstanceUefiData ->
+      response_of_some_xml GetInstanceUefiDataResult.of_xml
   | GetIpamAddressHistory ->
       response_of_some_xml GetIpamAddressHistoryResult.of_xml
+  | GetIpamDiscoveredAccounts ->
+      response_of_some_xml GetIpamDiscoveredAccountsResult.of_xml
+  | GetIpamDiscoveredPublicAddresses ->
+      response_of_some_xml GetIpamDiscoveredPublicAddressesResult.of_xml
+  | GetIpamDiscoveredResourceCidrs ->
+      response_of_some_xml GetIpamDiscoveredResourceCidrsResult.of_xml
+  | GetIpamPolicyAllocationRules ->
+      response_of_some_xml GetIpamPolicyAllocationRulesResult.of_xml
+  | GetIpamPolicyOrganizationTargets ->
+      response_of_some_xml GetIpamPolicyOrganizationTargetsResult.of_xml
   | GetIpamPoolAllocations ->
       response_of_some_xml GetIpamPoolAllocationsResult.of_xml
   | GetIpamPoolCidrs -> response_of_some_xml GetIpamPoolCidrsResult.of_xml
+  | GetIpamPrefixListResolverRules ->
+      response_of_some_xml GetIpamPrefixListResolverRulesResult.of_xml
+  | GetIpamPrefixListResolverVersionEntries ->
+      response_of_some_xml
+        GetIpamPrefixListResolverVersionEntriesResult.of_xml
+  | GetIpamPrefixListResolverVersions ->
+      response_of_some_xml GetIpamPrefixListResolverVersionsResult.of_xml
   | GetIpamResourceCidrs ->
       response_of_some_xml GetIpamResourceCidrsResult.of_xml
   | GetLaunchTemplateData ->
@@ -10234,6 +15317,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml GetManagedPrefixListAssociationsResult.of_xml
   | GetManagedPrefixListEntries ->
       response_of_some_xml GetManagedPrefixListEntriesResult.of_xml
+  | GetManagedResourceVisibility ->
+      response_of_some_xml GetManagedResourceVisibilityResult.of_xml
   | GetNetworkInsightsAccessScopeAnalysisFindings ->
       response_of_some_xml
         GetNetworkInsightsAccessScopeAnalysisFindingsResult.of_xml
@@ -10242,8 +15327,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetPasswordData -> response_of_some_xml GetPasswordDataResult.of_xml
   | GetReservedInstancesExchangeQuote ->
       response_of_some_xml GetReservedInstancesExchangeQuoteResult.of_xml
+  | GetRouteServerAssociations ->
+      response_of_some_xml GetRouteServerAssociationsResult.of_xml
+  | GetRouteServerPropagations ->
+      response_of_some_xml GetRouteServerPropagationsResult.of_xml
+  | GetRouteServerRoutingDatabase ->
+      response_of_some_xml GetRouteServerRoutingDatabaseResult.of_xml
+  | GetSecurityGroupsForVpc ->
+      response_of_some_xml GetSecurityGroupsForVpcResult.of_xml
   | GetSerialConsoleAccessStatus ->
       response_of_some_xml GetSerialConsoleAccessStatusResult.of_xml
+  | GetSnapshotBlockPublicAccessState ->
+      response_of_some_xml GetSnapshotBlockPublicAccessStateResult.of_xml
   | GetSpotPlacementScores ->
       response_of_some_xml GetSpotPlacementScoresResult.of_xml
   | GetSubnetCidrReservations ->
@@ -10251,9 +15346,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetTransitGatewayAttachmentPropagations ->
       response_of_some_xml
         GetTransitGatewayAttachmentPropagationsResult.of_xml
+  | GetTransitGatewayMeteringPolicyEntries ->
+      response_of_some_xml
+        GetTransitGatewayMeteringPolicyEntriesResult.of_xml
   | GetTransitGatewayMulticastDomainAssociations ->
       response_of_some_xml
         GetTransitGatewayMulticastDomainAssociationsResult.of_xml
+  | GetTransitGatewayPolicyTableAssociations ->
+      response_of_some_xml
+        GetTransitGatewayPolicyTableAssociationsResult.of_xml
+  | GetTransitGatewayPolicyTableEntries ->
+      response_of_some_xml GetTransitGatewayPolicyTableEntriesResult.of_xml
   | GetTransitGatewayPrefixListReferences ->
       response_of_some_xml GetTransitGatewayPrefixListReferencesResult.of_xml
   | GetTransitGatewayRouteTableAssociations ->
@@ -10262,11 +15365,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | GetTransitGatewayRouteTablePropagations ->
       response_of_some_xml
         GetTransitGatewayRouteTablePropagationsResult.of_xml
+  | GetVerifiedAccessEndpointPolicy ->
+      response_of_some_xml GetVerifiedAccessEndpointPolicyResult.of_xml
+  | GetVerifiedAccessEndpointTargets ->
+      response_of_some_xml GetVerifiedAccessEndpointTargetsResult.of_xml
+  | GetVerifiedAccessGroupPolicy ->
+      response_of_some_xml GetVerifiedAccessGroupPolicyResult.of_xml
+  | GetVpcResourcesBlockingEncryptionEnforcement ->
+      response_of_some_xml
+        GetVpcResourcesBlockingEncryptionEnforcementResult.of_xml
   | GetVpnConnectionDeviceSampleConfiguration ->
       response_of_some_xml
         GetVpnConnectionDeviceSampleConfigurationResult.of_xml
   | GetVpnConnectionDeviceTypes ->
       response_of_some_xml GetVpnConnectionDeviceTypesResult.of_xml
+  | GetVpnTunnelReplacementStatus ->
+      response_of_some_xml GetVpnTunnelReplacementStatusResult.of_xml
   | ImportClientVpnClientCertificateRevocationList ->
       response_of_some_xml
         ImportClientVpnClientCertificateRevocationListResult.of_xml
@@ -10279,6 +15393,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml ListImagesInRecycleBinResult.of_xml
   | ListSnapshotsInRecycleBin ->
       response_of_some_xml ListSnapshotsInRecycleBinResult.of_xml
+  | ListVolumesInRecycleBin ->
+      response_of_some_xml ListVolumesInRecycleBinResult.of_xml
+  | LockSnapshot -> response_of_some_xml LockSnapshotResult.of_xml
   | ModifyAddressAttribute ->
       response_of_some_xml ModifyAddressAttributeResult.of_xml
   | ModifyAvailabilityZoneGroup ->
@@ -10304,6 +15421,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ModifyInstanceCapacityReservationAttributes ->
       response_of_some_xml
         ModifyInstanceCapacityReservationAttributesResult.of_xml
+  | ModifyInstanceConnectEndpoint ->
+      response_of_some_xml ModifyInstanceConnectEndpointResult.of_xml
+  | ModifyInstanceCpuOptions ->
+      response_of_some_xml ModifyInstanceCpuOptionsResult.of_xml
   | ModifyInstanceCreditSpecification ->
       response_of_some_xml ModifyInstanceCreditSpecificationResult.of_xml
   | ModifyInstanceEventStartTime ->
@@ -10312,24 +15433,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml ModifyInstanceEventWindowResult.of_xml
   | ModifyInstanceMaintenanceOptions ->
       response_of_some_xml ModifyInstanceMaintenanceOptionsResult.of_xml
+  | ModifyInstanceMetadataDefaults ->
+      response_of_some_xml ModifyInstanceMetadataDefaultsResult.of_xml
   | ModifyInstanceMetadataOptions ->
       response_of_some_xml ModifyInstanceMetadataOptionsResult.of_xml
+  | ModifyInstanceNetworkPerformanceOptions ->
+      response_of_some_xml ModifyInstanceNetworkPerformanceResult.of_xml
   | ModifyInstancePlacement ->
       response_of_some_xml ModifyInstancePlacementResult.of_xml
   | ModifyIpam -> response_of_some_xml ModifyIpamResult.of_xml
+  | ModifyIpamPolicyAllocationRules ->
+      response_of_some_xml ModifyIpamPolicyAllocationRulesResult.of_xml
   | ModifyIpamPool -> response_of_some_xml ModifyIpamPoolResult.of_xml
+  | ModifyIpamPrefixListResolver ->
+      response_of_some_xml ModifyIpamPrefixListResolverResult.of_xml
+  | ModifyIpamPrefixListResolverTarget ->
+      response_of_some_xml ModifyIpamPrefixListResolverTargetResult.of_xml
   | ModifyIpamResourceCidr ->
       response_of_some_xml ModifyIpamResourceCidrResult.of_xml
+  | ModifyIpamResourceDiscovery ->
+      response_of_some_xml ModifyIpamResourceDiscoveryResult.of_xml
   | ModifyIpamScope -> response_of_some_xml ModifyIpamScopeResult.of_xml
   | ModifyLaunchTemplate ->
       response_of_some_xml ModifyLaunchTemplateResult.of_xml
+  | ModifyLocalGatewayRoute ->
+      response_of_some_xml ModifyLocalGatewayRouteResult.of_xml
   | ModifyManagedPrefixList ->
       response_of_some_xml ModifyManagedPrefixListResult.of_xml
+  | ModifyManagedResourceVisibility ->
+      response_of_some_xml ModifyManagedResourceVisibilityResult.of_xml
   | ModifyNetworkInterfaceAttribute -> response_of_none ()
   | ModifyPrivateDnsNameOptions ->
       response_of_some_xml ModifyPrivateDnsNameOptionsResult.of_xml
+  | ModifyPublicIpDnsNameOptions ->
+      response_of_some_xml ModifyPublicIpDnsNameOptionsResult.of_xml
   | ModifyReservedInstances ->
       response_of_some_xml ModifyReservedInstancesResult.of_xml
+  | ModifyRouteServer -> response_of_some_xml ModifyRouteServerResult.of_xml
   | ModifySecurityGroupRules ->
       response_of_some_xml ModifySecurityGroupRulesResult.of_xml
   | ModifySnapshotAttribute -> response_of_none ()
@@ -10347,14 +15487,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml ModifyTrafficMirrorSessionResult.of_xml
   | ModifyTransitGateway ->
       response_of_some_xml ModifyTransitGatewayResult.of_xml
+  | ModifyTransitGatewayMeteringPolicy ->
+      response_of_some_xml ModifyTransitGatewayMeteringPolicyResult.of_xml
   | ModifyTransitGatewayPrefixListReference ->
       response_of_some_xml
         ModifyTransitGatewayPrefixListReferenceResult.of_xml
   | ModifyTransitGatewayVpcAttachment ->
       response_of_some_xml ModifyTransitGatewayVpcAttachmentResult.of_xml
+  | ModifyVerifiedAccessEndpoint ->
+      response_of_some_xml ModifyVerifiedAccessEndpointResult.of_xml
+  | ModifyVerifiedAccessEndpointPolicy ->
+      response_of_some_xml ModifyVerifiedAccessEndpointPolicyResult.of_xml
+  | ModifyVerifiedAccessGroup ->
+      response_of_some_xml ModifyVerifiedAccessGroupResult.of_xml
+  | ModifyVerifiedAccessGroupPolicy ->
+      response_of_some_xml ModifyVerifiedAccessGroupPolicyResult.of_xml
+  | ModifyVerifiedAccessInstance ->
+      response_of_some_xml ModifyVerifiedAccessInstanceResult.of_xml
+  | ModifyVerifiedAccessInstanceLoggingConfiguration ->
+      response_of_some_xml
+        ModifyVerifiedAccessInstanceLoggingConfigurationResult.of_xml
+  | ModifyVerifiedAccessTrustProvider ->
+      response_of_some_xml ModifyVerifiedAccessTrustProviderResult.of_xml
   | ModifyVolume -> response_of_some_xml ModifyVolumeResult.of_xml
   | ModifyVolumeAttribute -> response_of_none ()
   | ModifyVpcAttribute -> response_of_none ()
+  | ModifyVpcBlockPublicAccessExclusion ->
+      response_of_some_xml ModifyVpcBlockPublicAccessExclusionResult.of_xml
+  | ModifyVpcBlockPublicAccessOptions ->
+      response_of_some_xml ModifyVpcBlockPublicAccessOptionsResult.of_xml
+  | ModifyVpcEncryptionControl ->
+      response_of_some_xml ModifyVpcEncryptionControlResult.of_xml
   | ModifyVpcEndpoint -> response_of_some_xml ModifyVpcEndpointResult.of_xml
   | ModifyVpcEndpointConnectionNotification ->
       response_of_some_xml
@@ -10381,12 +15544,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | MoveAddressToVpc -> response_of_some_xml MoveAddressToVpcResult.of_xml
   | MoveByoipCidrToIpam ->
       response_of_some_xml MoveByoipCidrToIpamResult.of_xml
+  | MoveCapacityReservationInstances ->
+      response_of_some_xml MoveCapacityReservationInstancesResult.of_xml
   | ProvisionByoipCidr ->
       response_of_some_xml ProvisionByoipCidrResult.of_xml
+  | ProvisionIpamByoasn ->
+      response_of_some_xml ProvisionIpamByoasnResult.of_xml
   | ProvisionIpamPoolCidr ->
       response_of_some_xml ProvisionIpamPoolCidrResult.of_xml
   | ProvisionPublicIpv4PoolCidr ->
       response_of_some_xml ProvisionPublicIpv4PoolCidrResult.of_xml
+  | PurchaseCapacityBlock ->
+      response_of_some_xml PurchaseCapacityBlockResult.of_xml
+  | PurchaseCapacityBlockExtension ->
+      response_of_some_xml PurchaseCapacityBlockExtensionResult.of_xml
   | PurchaseHostReservation ->
       response_of_some_xml PurchaseHostReservationResult.of_xml
   | PurchaseReservedInstancesOffering ->
@@ -10404,6 +15575,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | RegisterTransitGatewayMulticastGroupSources ->
       response_of_some_xml
         RegisterTransitGatewayMulticastGroupSourcesResult.of_xml
+  | RejectCapacityReservationBillingOwnership ->
+      response_of_some_xml
+        RejectCapacityReservationBillingOwnershipResult.of_xml
+  | RejectTransitGatewayClientVpnAttachment ->
+      response_of_some_xml
+        RejectTransitGatewayClientVpnAttachmentResult.of_xml
   | RejectTransitGatewayMulticastDomainAssociations ->
       response_of_some_xml
         RejectTransitGatewayMulticastDomainAssociationsResult.of_xml
@@ -10421,6 +15598,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml ReleaseIpamPoolAllocationResult.of_xml
   | ReplaceIamInstanceProfileAssociation ->
       response_of_some_xml ReplaceIamInstanceProfileAssociationResult.of_xml
+  | ReplaceImageCriteriaInAllowedImagesSettings ->
+      response_of_some_xml
+        ReplaceImageCriteriaInAllowedImagesSettingsResult.of_xml
   | ReplaceNetworkAclAssociation ->
       response_of_some_xml ReplaceNetworkAclAssociationResult.of_xml
   | ReplaceNetworkAclEntry -> response_of_none ()
@@ -10429,6 +15609,7 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml ReplaceRouteTableAssociationResult.of_xml
   | ReplaceTransitGatewayRoute ->
       response_of_some_xml ReplaceTransitGatewayRouteResult.of_xml
+  | ReplaceVpnTunnel -> response_of_some_xml ReplaceVpnTunnelResult.of_xml
   | ReportInstanceStatus -> response_of_none ()
   | RequestSpotFleet -> response_of_some_xml RequestSpotFleetResponse.of_xml
   | RequestSpotInstances ->
@@ -10453,6 +15634,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       response_of_some_xml RestoreSnapshotFromRecycleBinResult.of_xml
   | RestoreSnapshotTier ->
       response_of_some_xml RestoreSnapshotTierResult.of_xml
+  | RestoreVolumeFromRecycleBin ->
+      response_of_some_xml RestoreVolumeFromRecycleBinResult.of_xml
   | RevokeClientVpnIngress ->
       response_of_some_xml RevokeClientVpnIngressResult.of_xml
   | RevokeSecurityGroupEgress ->
@@ -10469,6 +15652,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | SearchTransitGatewayRoutes ->
       response_of_some_xml SearchTransitGatewayRoutesResult.of_xml
   | SendDiagnosticInterrupt -> response_of_none ()
+  | StartDeclarativePoliciesReport ->
+      response_of_some_xml StartDeclarativePoliciesReportResult.of_xml
   | StartInstances -> response_of_some_xml StartInstancesResult.of_xml
   | StartNetworkInsightsAccessScopeAnalysis ->
       response_of_some_xml
@@ -10486,8 +15671,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | UnassignIpv6Addresses ->
       response_of_some_xml UnassignIpv6AddressesResult.of_xml
   | UnassignPrivateIpAddresses -> response_of_none ()
+  | UnassignPrivateNatGatewayAddress ->
+      response_of_some_xml UnassignPrivateNatGatewayAddressResult.of_xml
+  | UnlockSnapshot -> response_of_some_xml UnlockSnapshotResult.of_xml
   | UnmonitorInstances ->
       response_of_some_xml UnmonitorInstancesResult.of_xml
+  | UpdateCapacityManagerMonitoredTagKeys ->
+      response_of_some_xml UpdateCapacityManagerMonitoredTagKeysResult.of_xml
+  | UpdateCapacityManagerOrganizationsAccess ->
+      response_of_some_xml
+        UpdateCapacityManagerOrganizationsAccessResult.of_xml
+  | UpdateInterruptibleCapacityReservationAllocation ->
+      response_of_some_xml
+        UpdateInterruptibleCapacityReservationAllocationResult.of_xml
   | UpdateSecurityGroupRuleDescriptionsEgress ->
       response_of_some_xml
         UpdateSecurityGroupRuleDescriptionsEgressResult.of_xml

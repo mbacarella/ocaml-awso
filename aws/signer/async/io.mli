@@ -16,6 +16,12 @@ val describe_signing_job :
       DescribeSigningJobRequest.t ->
         (DescribeSigningJobResponse.t, DescribeSigningJobResponse.error)
           Result.t Async.Deferred.t
+val get_revocation_status :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRevocationStatusRequest.t ->
+        (GetRevocationStatusResponse.t, GetRevocationStatusResponse.error)
+          Result.t Async.Deferred.t
 val get_signing_platform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -78,6 +84,12 @@ val revoke_signing_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RevokeSigningProfileRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val sign_payload :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SignPayloadRequest.t ->
+        (SignPayloadResponse.t, SignPayloadResponse.error) Result.t
+          Async.Deferred.t
 val start_signing_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

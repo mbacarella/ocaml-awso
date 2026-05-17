@@ -157,6 +157,9 @@ module ContentClassifiers =
     type nonrec t = ContentClassifier.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:256); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContentClassifier.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -251,16 +254,16 @@ module HumanLoopSummary =
       make ?flowDefinitionArn ?failureReason ?creationTime ?humanLoopStatus
         ?humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flowDefinitionArn =
-        field_map json "FlowDefinitionArn" FlowDefinitionArn.of_json in
+        field_map json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
       let failureReason =
-        field_map json "FailureReason" FailureReason.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+        field_map json__ "FailureReason" FailureReason.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let humanLoopStatus =
-        field_map json "HumanLoopStatus" HumanLoopStatus.of_json in
+        field_map json__ "HumanLoopStatus" HumanLoopStatus.of_json in
       let humanLoopName =
-        field_map json "HumanLoopName" HumanLoopName.of_json in
+        field_map json__ "HumanLoopName" HumanLoopName.of_json in
       make ?flowDefinitionArn ?failureReason ?creationTime ?humanLoopStatus
         ?humanLoopName ()
     let to_json v = composed_to_json to_value v
@@ -292,8 +295,8 @@ module InternalServerException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -312,8 +315,8 @@ module ResourceNotFoundException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -332,8 +335,8 @@ module ThrottlingException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You exceeded the maximum number of requests."]
@@ -351,8 +354,8 @@ module ValidationException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request isn't valid. Check the syntax and try again."]
@@ -370,8 +373,8 @@ module ConflictException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -410,8 +413,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:FailureReason.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" FailureReason.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" FailureReason.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -436,9 +439,9 @@ module HumanLoopDataAttributes =
           (Xml.child_exn ~context:context_ xml_arg0 "ContentClassifiers") in
       make ~contentClassifiers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentClassifiers =
-        field_map_exn json "ContentClassifiers" ContentClassifiers.of_json in
+        field_map_exn json__ "ContentClassifiers" ContentClassifiers.of_json in
       make ~contentClassifiers ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -462,9 +465,9 @@ module HumanLoopInput =
           (Xml.child_exn ~context:context_ xml_arg0 "InputContent") in
       make ~inputContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inputContent =
-        field_map_exn json "InputContent" InputContent.of_json in
+        field_map_exn json__ "InputContent" InputContent.of_json in
       make ~inputContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -473,6 +476,9 @@ module HumanLoopSummaries =
   struct
     type nonrec t = HumanLoopSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HumanLoopSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -559,24 +565,22 @@ module HumanLoopOutput =
   struct
     type nonrec t =
       {
-      outputS3Uri: String_.t
+      outputS3Uri: String_.t option
         [@ocaml.doc
           "The location of the Amazon S3 object where Amazon Augmented AI stores your human loop output."]}
-    let context_ = "HumanLoopOutput"
-    let make ~outputS3Uri = fun () -> { outputS3Uri }
+    let make ?outputS3Uri = fun () -> { outputS3Uri }
     let to_value x =
       structure_to_value
-        [("OutputS3Uri", (Some (String_.to_value x.outputS3Uri)))]
+        [("OutputS3Uri", (Option.map x.outputS3Uri ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let outputS3Uri =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OutputS3Uri") in
-      make ~outputS3Uri ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OutputS3Uri") in
+      make ?outputS3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputS3Uri = field_map_exn json "OutputS3Uri" String_.of_json in
-      make ~outputS3Uri ()
+    let of_json json__ =
+      let outputS3Uri = field_map json__ "OutputS3Uri" String_.of_json in
+      make ?outputS3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about where the human output will be stored."]
 module StopHumanLoopResponse =
@@ -663,9 +667,9 @@ module StopHumanLoopRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ~humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ~humanLoopName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the specified human loop."]
@@ -752,8 +756,8 @@ module StartHumanLoopResponse =
           (Xml.child xml_arg0 "HumanLoopArn") in
       make ?humanLoopArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let humanLoopArn = field_map json "HumanLoopArn" HumanLoopArn.of_json in
+    let of_json json__ =
+      let humanLoopArn = field_map json__ "HumanLoopArn" HumanLoopArn.of_json in
       make ?humanLoopArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -810,15 +814,15 @@ module StartHumanLoopRequest =
       make ?dataAttributes ~humanLoopInput ~flowDefinitionArn ~humanLoopName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dataAttributes =
-        field_map json "DataAttributes" HumanLoopDataAttributes.of_json in
+        field_map json__ "DataAttributes" HumanLoopDataAttributes.of_json in
       let humanLoopInput =
-        field_map_exn json "HumanLoopInput" HumanLoopInput.of_json in
+        field_map_exn json__ "HumanLoopInput" HumanLoopInput.of_json in
       let flowDefinitionArn =
-        field_map_exn json "FlowDefinitionArn" FlowDefinitionArn.of_json in
+        field_map_exn json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ?dataAttributes ~humanLoopInput ~flowDefinitionArn ~humanLoopName
         ()
     let to_json v = composed_to_json to_value v
@@ -828,7 +832,7 @@ module ListHumanLoopsResponse =
   struct
     type nonrec t =
       {
-      humanLoopSummaries: HumanLoopSummaries.t
+      humanLoopSummaries: HumanLoopSummaries.t option
         [@ocaml.doc
           "An array of objects that contain information about the human loops."];
       nextToken: NextToken.t option
@@ -839,9 +843,8 @@ module ListHumanLoopsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListHumanLoopsResponse"
-    let make ?nextToken =
-      fun ~humanLoopSummaries -> fun () -> { nextToken; humanLoopSummaries }
+    let make ?humanLoopSummaries =
+      fun ?nextToken -> fun () -> { humanLoopSummaries; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -893,22 +896,22 @@ module ListHumanLoopsResponse =
     let to_value x =
       structure_to_value
         [("HumanLoopSummaries",
-           (Some (HumanLoopSummaries.to_value x.humanLoopSummaries)));
+           (Option.map x.humanLoopSummaries ~f:HumanLoopSummaries.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let humanLoopSummaries =
-        HumanLoopSummaries.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopSummaries") in
-      make ?nextToken ~humanLoopSummaries ()
+        (Option.map ~f:HumanLoopSummaries.of_xml)
+          (Xml.child xml_arg0 "HumanLoopSummaries") in
+      make ?nextToken ?humanLoopSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let humanLoopSummaries =
-        field_map_exn json "HumanLoopSummaries" HumanLoopSummaries.of_json in
-      make ?nextToken ~humanLoopSummaries ()
+        field_map json__ "HumanLoopSummaries" HumanLoopSummaries.of_json in
+      make ?nextToken ?humanLoopSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about human loops, given the specified parameters. If a human loop was deleted, it will not be included."]
@@ -979,16 +982,16 @@ module ListHumanLoopsRequest =
       make ?maxResults ?nextToken ?sortOrder ~flowDefinitionArn
         ?creationTimeBefore ?creationTimeAfter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
       let flowDefinitionArn =
-        field_map_exn json "FlowDefinitionArn" FlowDefinitionArn.of_json in
+        field_map_exn json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
       let creationTimeBefore =
-        field_map json "CreationTimeBefore" Timestamp.of_json in
+        field_map json__ "CreationTimeBefore" Timestamp.of_json in
       let creationTimeAfter =
-        field_map json "CreationTimeAfter" Timestamp.of_json in
+        field_map json__ "CreationTimeAfter" Timestamp.of_json in
       make ?maxResults ?nextToken ?sortOrder ~flowDefinitionArn
         ?creationTimeBefore ?creationTimeAfter ()
     let to_json v = composed_to_json to_value v
@@ -998,7 +1001,7 @@ module DescribeHumanLoopResponse =
   struct
     type nonrec t =
       {
-      creationTime: Timestamp.t
+      creationTime: Timestamp.t option
         [@ocaml.doc
           "The creation time when Amazon Augmented AI created the human loop."];
       failureReason: String_.t option
@@ -1007,14 +1010,14 @@ module DescribeHumanLoopResponse =
       failureCode: String_.t option
         [@ocaml.doc
           "A failure code that identifies the type of failure. Possible values: ValidationError, Expired, InternalError"];
-      humanLoopStatus: HumanLoopStatus.t
+      humanLoopStatus: HumanLoopStatus.t option
         [@ocaml.doc "The status of the human loop."];
-      humanLoopName: HumanLoopName.t
+      humanLoopName: HumanLoopName.t option
         [@ocaml.doc
           "The name of the human loop. The name must be lowercase, unique within the Region in your account, and can have up to 63 characters. Valid characters: a-z, 0-9, and - (hyphen)."];
-      humanLoopArn: HumanLoopArn.t
+      humanLoopArn: HumanLoopArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the human loop."];
-      flowDefinitionArn: FlowDefinitionArn.t
+      flowDefinitionArn: FlowDefinitionArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the flow definition."];
       humanLoopOutput: HumanLoopOutput.t option
         [@ocaml.doc
@@ -1025,25 +1028,24 @@ module DescribeHumanLoopResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeHumanLoopResponse"
-    let make ?failureReason =
-      fun ?failureCode ->
-        fun ?humanLoopOutput ->
-          fun ~creationTime ->
-            fun ~humanLoopStatus ->
-              fun ~humanLoopName ->
-                fun ~humanLoopArn ->
-                  fun ~flowDefinitionArn ->
+    let make ?creationTime =
+      fun ?failureReason ->
+        fun ?failureCode ->
+          fun ?humanLoopStatus ->
+            fun ?humanLoopName ->
+              fun ?humanLoopArn ->
+                fun ?flowDefinitionArn ->
+                  fun ?humanLoopOutput ->
                     fun () ->
                       {
+                        creationTime;
                         failureReason;
                         failureCode;
-                        humanLoopOutput;
-                        creationTime;
                         humanLoopStatus;
                         humanLoopName;
                         humanLoopArn;
-                        flowDefinitionArn
+                        flowDefinitionArn;
+                        humanLoopOutput
                       }
     let error_of_json name json =
       match name with
@@ -1095,15 +1097,17 @@ module DescribeHumanLoopResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("CreationTime", (Some (Timestamp.to_value x.creationTime)));
+        [("CreationTime", (Option.map x.creationTime ~f:Timestamp.to_value));
         ("FailureReason", (Option.map x.failureReason ~f:String_.to_value));
         ("FailureCode", (Option.map x.failureCode ~f:String_.to_value));
         ("HumanLoopStatus",
-          (Some (HumanLoopStatus.to_value x.humanLoopStatus)));
-        ("HumanLoopName", (Some (HumanLoopName.to_value x.humanLoopName)));
-        ("HumanLoopArn", (Some (HumanLoopArn.to_value x.humanLoopArn)));
+          (Option.map x.humanLoopStatus ~f:HumanLoopStatus.to_value));
+        ("HumanLoopName",
+          (Option.map x.humanLoopName ~f:HumanLoopName.to_value));
+        ("HumanLoopArn",
+          (Option.map x.humanLoopArn ~f:HumanLoopArn.to_value));
         ("FlowDefinitionArn",
-          (Some (FlowDefinitionArn.to_value x.flowDefinitionArn)));
+          (Option.map x.flowDefinitionArn ~f:FlowDefinitionArn.to_value));
         ("HumanLoopOutput",
           (Option.map x.humanLoopOutput ~f:HumanLoopOutput.to_value))]
     let to_query v = to_query to_value v
@@ -1112,43 +1116,41 @@ module DescribeHumanLoopResponse =
         (Option.map ~f:HumanLoopOutput.of_xml)
           (Xml.child xml_arg0 "HumanLoopOutput") in
       let flowDefinitionArn =
-        FlowDefinitionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FlowDefinitionArn") in
+        (Option.map ~f:FlowDefinitionArn.of_xml)
+          (Xml.child xml_arg0 "FlowDefinitionArn") in
       let humanLoopArn =
-        HumanLoopArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopArn") in
+        (Option.map ~f:HumanLoopArn.of_xml)
+          (Xml.child xml_arg0 "HumanLoopArn") in
       let humanLoopName =
-        HumanLoopName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
+        (Option.map ~f:HumanLoopName.of_xml)
+          (Xml.child xml_arg0 "HumanLoopName") in
       let humanLoopStatus =
-        HumanLoopStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopStatus") in
+        (Option.map ~f:HumanLoopStatus.of_xml)
+          (Xml.child xml_arg0 "HumanLoopStatus") in
       let failureCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureCode") in
       let failureReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FailureReason") in
       let creationTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationTime") in
-      make ?humanLoopOutput ~flowDefinitionArn ~humanLoopArn ~humanLoopName
-        ~humanLoopStatus ?failureCode ?failureReason ~creationTime ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      make ?humanLoopOutput ?flowDefinitionArn ?humanLoopArn ?humanLoopName
+        ?humanLoopStatus ?failureCode ?failureReason ?creationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopOutput =
-        field_map json "HumanLoopOutput" HumanLoopOutput.of_json in
+        field_map json__ "HumanLoopOutput" HumanLoopOutput.of_json in
       let flowDefinitionArn =
-        field_map_exn json "FlowDefinitionArn" FlowDefinitionArn.of_json in
-      let humanLoopArn =
-        field_map_exn json "HumanLoopArn" HumanLoopArn.of_json in
+        field_map json__ "FlowDefinitionArn" FlowDefinitionArn.of_json in
+      let humanLoopArn = field_map json__ "HumanLoopArn" HumanLoopArn.of_json in
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map json__ "HumanLoopName" HumanLoopName.of_json in
       let humanLoopStatus =
-        field_map_exn json "HumanLoopStatus" HumanLoopStatus.of_json in
-      let failureCode = field_map json "FailureCode" String_.of_json in
-      let failureReason = field_map json "FailureReason" String_.of_json in
-      let creationTime = field_map_exn json "CreationTime" Timestamp.of_json in
-      make ?humanLoopOutput ~flowDefinitionArn ~humanLoopArn ~humanLoopName
-        ~humanLoopStatus ?failureCode ?failureReason ~creationTime ()
+        field_map json__ "HumanLoopStatus" HumanLoopStatus.of_json in
+      let failureCode = field_map json__ "FailureCode" String_.of_json in
+      let failureReason = field_map json__ "FailureReason" String_.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      make ?humanLoopOutput ?flowDefinitionArn ?humanLoopArn ?humanLoopName
+        ?humanLoopStatus ?failureCode ?failureReason ?creationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about the specified human loop. If the human loop was deleted, this operation will return a ResourceNotFoundException error."]
@@ -1171,9 +1173,9 @@ module DescribeHumanLoopRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ~humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ~humanLoopName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1263,9 +1265,9 @@ module DeleteHumanLoopRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HumanLoopName") in
       make ~humanLoopName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let humanLoopName =
-        field_map_exn json "HumanLoopName" HumanLoopName.of_json in
+        field_map_exn json__ "HumanLoopName" HumanLoopName.of_json in
       make ~humanLoopName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

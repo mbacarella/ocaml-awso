@@ -60,16 +60,16 @@ module Metadata = struct
   module Protocol = struct
     type t = Botodata.protocol
 
-    let parser =
-      let open Json_parser in
-      map_result string ~f:(function
-        | "query" -> Ok `query
-        | "json" -> Ok `json
-        | "rest-json" -> Ok `rest_json
-        | "rest-xml" -> Ok `rest_xml
-        | "ec2" -> Ok `ec2
-        | x -> Result.failf "Unknown protocol %s" x)
+    let of_string : string -> (Botodata.protocol, string) Result.t = function
+      | "query" -> Ok `query
+      | "json" -> Ok `json
+      | "rest-json" -> Ok `rest_json
+      | "rest-xml" -> Ok `rest_xml
+      | "ec2" -> Ok `ec2
+      | x -> Result.failf "Unknown protocol %s" x
     ;;
+
+    let parser = Json_parser.(map_result string ~f:of_string)
   end
 
   type t = Botodata.metadata
@@ -86,13 +86,36 @@ module Metadata = struct
        and serviceId = field_opt "serviceId" string
        and signatureVersion = field "signatureVersion" string
        and timestampFormat = field_opt "timestampFormat" TimestampFormat.parser
-       and protocol = field "protocol" Protocol.parser
+       and protocol_raw = field "protocol" string
+       and protocols = field_opt "protocols" (list string)
        and () = field_ignored "protocolSettings"
+       and () = field_ignored "auth"
+       and () = field_ignored "awsQueryCompatible"
+       and () = field_ignored "ripServiceName"
        and jsonVersion = field_opt "jsonVersion" string
        and targetPrefix = field_opt "targetPrefix" Uri.parser
        and xmlNamespace = field_opt "xmlNamespace" Uri.parser
        and signingName = field_opt "signingName" string
        and uid = field_opt "uid" string in
+       let protocol =
+         match Protocol.of_string protocol_raw with
+         | Ok p -> p
+         | Error _ -> (
+           (* Some services (e.g. cloudwatch) advertise protocol="smithy-rpc-v2-cbor"
+              but list legacy protocols in [protocols] as fallbacks. Pick the
+              last supported entry from [protocols] (typically the most stable
+              one, matching what the service previously generated as). *)
+           let candidates = Option.value protocols ~default:[] in
+           let supported =
+             List.filter_map candidates ~f:(fun s ->
+               match Protocol.of_string s with
+               | Ok p -> Some p
+               | Error _ -> None)
+           in
+           match List.rev supported with
+           | p :: _ -> p
+           | [] -> failwithf "Unknown protocol %s" protocol_raw ())
+       in
        { Botodata.apiVersion
        ; checksumFormat
        ; endpointPrefix
@@ -304,7 +327,14 @@ module Operation = struct
        and httpChecksum = field_opt "httpChecksum" HttpChecksum.parser
        and endpoint = field_opt "endpoint" Endpoint.parser
        and endpointdiscovery = field_opt "endpointdiscovery" Endpointdiscovergy.parser
-       and _endpointoperation = field_opt "endpointoperation" bool in
+       and _endpointoperation = field_opt "endpointoperation" bool
+       and () = field_ignored "readonly"
+       and () = field_ignored "staticContextParams"
+       and () = field_ignored "operationContextParams"
+       and () = field_ignored "requestcompression"
+       and () = field_ignored "auth"
+       and () = field_ignored "unsignedPayload"
+       and () = field_ignored "deprecatedSince" in
        { Botodata.name
        ; http
        ; input
@@ -344,7 +374,8 @@ module Shape = struct
     let parser =
       let open Json_parser in
       let%map box = field_opt "box" bool
-      and documentation = field_opt "documentation" string in
+      and documentation = field_opt "documentation" string
+      and () = field_ignored "sensitive" in
       Botodata.Boolean_shape { box; documentation }
     ;;
   end
@@ -356,7 +387,8 @@ module Shape = struct
       and sensitive = field_opt "sensitive" bool
       and min = field_opt "min" int
       and max = field_opt "max" int
-      and documentation = field_opt "documentation" string in
+      and documentation = field_opt "documentation" string
+      and () = field_ignored "requiresLength" in
       Botodata.Blob_shape { streaming; sensitive; min; max; documentation }
     ;;
   end
@@ -367,7 +399,8 @@ module Shape = struct
       let%map box = field_opt "box" bool
       and min = field_opt "min" int64
       and max = field_opt "max" int64
-      and documentation = field_opt "documentation" string in
+      and documentation = field_opt "documentation" string
+      and () = field_ignored "sensitive" in
       Botodata.Long_shape { box; min; max; documentation }
     ;;
   end
@@ -378,7 +411,8 @@ module Shape = struct
       let%map box = field_opt "box" bool
       and documentation = field_opt "documentation" string
       and min = field_opt "min" float
-      and max = field_opt "max" float in
+      and max = field_opt "max" float
+      and () = field_ignored "sensitive" in
       Botodata.Double_shape { box; documentation; min; max }
     ;;
   end
@@ -389,7 +423,8 @@ module Shape = struct
       let%map box = field_opt "box" bool
       and documentation = field_opt "documentation" string
       and min = field_opt "min" float
-      and max = field_opt "max" float in
+      and max = field_opt "max" float
+      and () = field_ignored "sensitive" in
       Botodata.Float_shape { box; documentation; min; max }
     ;;
   end
@@ -402,7 +437,9 @@ module Shape = struct
       and documentation = field_opt "documentation" string
       and box = field_opt "box" bool
       and deprecated = field_opt "deprecated" bool
-      and deprecatedMessage = field_opt "deprecatedMessage" string in
+      and deprecatedMessage = field_opt "deprecatedMessage" string
+      and () = field_ignored "sensitive"
+      and () = field_ignored "deprecatedSince" in
       Botodata.Integer_shape
         { min; max; documentation; box; deprecated; deprecatedMessage }
     ;;
@@ -412,7 +449,8 @@ module Shape = struct
     let parser =
       let open Json_parser in
       let%map timestampFormat = field_opt "timestampFormat" TimestampFormat.parser
-      and documentation = field_opt "documentation" string in
+      and documentation = field_opt "documentation" string
+      and () = field_ignored "sensitive" in
       Botodata.Timestamp_shape { timestampFormat; documentation }
     ;;
   end
@@ -438,7 +476,9 @@ module Shape = struct
          and idempotencyToken = field_opt "idempotencyToken" bool
          and eventpayload = field_opt "eventpayload" bool
          and hostLabel = field_opt "hostLabel" bool
-         and jsonvalue = field_opt "jsonvalue" bool in
+         and jsonvalue = field_opt "jsonvalue" bool
+         and () = field_ignored "deprecatedSince"
+         and () = field_ignored "contextParam" in
          { Botodata.shape
          ; deprecated
          ; deprecatedMessage
@@ -470,7 +510,9 @@ module Shape = struct
       and () = field_ignored "locationName"
       and sensitive = field_opt "sensitive" bool
       and deprecated = field_opt "deprecated" bool
-      and deprecatedMessage = field_opt "deprecatedMessage" string in
+      and deprecatedMessage = field_opt "deprecatedMessage" string
+      and () = field_ignored "sparse"
+      and () = field_ignored "deprecatedSince" in
       Botodata.List_shape
         { member
         ; min
@@ -501,7 +543,8 @@ module Shape = struct
       and flattened = field_opt "flattened" bool
       and locationName = field_opt "locationName" string
       and documentation = field_opt "documentation" string
-      and sensitive = field_opt "sensitive" bool in
+      and sensitive = field_opt "sensitive" bool
+      and () = field_ignored "sparse" in
       Botodata.Map_shape
         { key; value; min; max; flattened; locationName; documentation; sensitive }
     ;;
@@ -541,7 +584,8 @@ module Shape = struct
       and _synthetic = field_opt "synthetic" bool
       and retryable = field_opt "retryable" Retryable.parser
       and union = field_opt "union" bool
-      and box = field_opt "box" bool in
+      and box = field_opt "box" bool
+      and () = field_ignored "deprecatedSince" in
       Botodata.Structure_shape
         { required
         ; members
@@ -577,7 +621,8 @@ module Shape = struct
       and pattern = field_opt "pattern" string
       and deprecated = field_opt "deprecated" bool
       and deprecatedMessage = field_opt "deprecatedMessage" string
-      and sensitive = field_opt "sensitive" bool in
+      and sensitive = field_opt "sensitive" bool
+      and () = field_ignored "deprecatedSince" in
       Botodata.Enum_shape
         { cases
         ; documentation
@@ -600,7 +645,9 @@ module Shape = struct
       and sensitive = field_opt "sensitive" bool
       and documentation = field_opt "documentation" string
       and deprecated = field_opt "deprecated" bool
-      and deprecatedMessage = field_opt "deprecatedMessage" string in
+      and deprecatedMessage = field_opt "deprecatedMessage" string
+      and () = field_ignored "box"
+      and () = field_ignored "deprecatedSince" in
       Botodata.String_shape
         { pattern; min; max; sensitive; documentation; deprecated; deprecatedMessage }
     ;;
@@ -643,7 +690,10 @@ let parse =
         and shapes = field "shapes" Shapes.parser
         and operations = field "operations" Operations.parser
         and version = field_opt "version" string
-        and () = field_ignored "examples" in
+        and () = field_ignored "examples"
+        and () = field_ignored "deprecated"
+        and () = field_ignored "deprecatedMessage"
+        and () = field_ignored "clientContextParams" in
         { Botodata.metadata; version; operations; shapes; documentation }))
 ;;
 
@@ -680,8 +730,12 @@ let fix_shape_name_collisions (service : Botodata.service) =
           | Double_shape _
           | Blob_shape _
           | Timestamp_shape _
-          | List_shape _
           | Enum_shape _ -> shape
+          | List_shape ls ->
+            List_shape
+              { ls with
+                member = { ls.member with shape = maybe_get_fixed_name ls.member.shape }
+              }
           | Map_shape ms ->
             Map_shape
               { ms with
@@ -718,4 +772,77 @@ let fix_shape_name_collisions (service : Botodata.service) =
   }
 ;;
 
-let of_json x = x |> Yojson.Safe.from_string |> parse |> fix_shape_name_collisions
+(* AWS writes the fuckingspecs themselves. They mark [Message] required on
+   AccessDeniedException, then ship a service that returns AccessDeniedException
+   with no Message. They mark [PricingBucket] required on GeocodeResponse, then
+   ship a service that returns GeocodeResponse with no PricingBucket. We parse
+   the [required] field carefully, generate strict-make and strict-of_json,
+   and then their python devs bulldoze right past their own spec on the wire.
+
+   So! For shapes only reached from operation outputs/errors we strip
+   [required] so [of_json] uses [field_map] instead of [field_map_exn] and
+   the parser stays robust to whatever the live service feels like emitting
+   that day. Shapes also reachable from inputs keep [required]; we still
+   want to yell at the *caller* when they forget a field. *)
+let make_output_shapes_lenient_why_python_devs_whyyy service =
+  let shapes_table = Hashtbl.create 1024 in
+  List.iter service.Botodata.shapes ~f:(fun (n, s) -> Hashtbl.replace shapes_table n s);
+  let reach_from seeds =
+    let seen = ref String.Set.empty in
+    let rec visit name =
+      if not (Set.mem !seen name)
+      then (
+        seen := Set.add !seen name;
+        match Hashtbl.find_opt shapes_table name with
+        | None -> ()
+        | Some shape -> (
+          match shape with
+          | Botodata.Structure_shape ss ->
+            List.iter ss.members ~f:(fun (_, m) -> visit m.shape)
+          | List_shape ls -> visit ls.member.shape
+          | Map_shape ms ->
+            visit ms.key;
+            visit ms.value
+          | _ -> ()))
+    in
+    List.iter seeds ~f:visit;
+    !seen
+  in
+  let input_seeds =
+    List.filter_map service.operations ~f:(fun op ->
+      Option.map op.input ~f:(fun i -> i.shape))
+  in
+  let output_seeds =
+    List.concat_map service.operations ~f:(fun op ->
+      let out =
+        Option.value_map op.output ~default:[] ~f:(fun (o : Botodata.operation_output) ->
+          [ o.shape ])
+      in
+      let errs =
+        Option.value_map op.errors ~default:[] ~f:(fun errs ->
+          List.map errs ~f:(fun (e : Botodata.operation_error) -> e.shape))
+      in
+      out @ errs)
+  in
+  let input_reachable = reach_from input_seeds in
+  let output_reachable = reach_from output_seeds in
+  let output_only n = Set.mem output_reachable n && not (Set.mem input_reachable n) in
+  let shapes =
+    List.map service.shapes ~f:(fun (name, shape) ->
+      if output_only name
+      then (
+        match shape with
+        | Botodata.Structure_shape ss ->
+          name, Botodata.Structure_shape { ss with required = None }
+        | s -> name, s)
+      else name, shape)
+  in
+  { service with shapes }
+;;
+
+let of_json x =
+  Yojson.Safe.from_string x
+  |> parse
+  |> fix_shape_name_collisions
+  |> make_output_shapes_lenient_why_python_devs_whyyy
+;;

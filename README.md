@@ -1,19 +1,19 @@
 # awso - OCaml AWS client
 
-Forked from [awsm](https://github.com/solvuu/awsm), Copyright (c) Solvuu, Inc.
+Forked from [awsm](https://github.com/solvuu/awsm) which is Copyright (c) Solvuu, Inc.
 Released under the [MIT license](./LICENSE.md).
 
 Pure OCaml client for AWS. Code is auto-generated for all services
 based on the API declared in
 [botocore](https://github.com/boto/botocore/). Higher level functions
-are often implemented on top of this base, e.g. to support multi-part
+are sometimes provided on top of this base to (e.g.) support multi-part
 uploads to S3.
-
-Sub-libraries are provided for Async and Lwt versions of all code.
 
 ## Features
 
-Nearly all of AWS's 300+ APIs are supported. Three I/O flavors:
+Nearly all of AWS's 400+ APIs are supported (generated from
+[botocore 1.43.9](https://github.com/boto/botocore/releases/tag/1.43.9),
+freshened 2026-05-17). Three I/O flavors:
 
 - `awso-async` — Jane Street Async backend
 - `awso-lwt` — Lwt backend
@@ -31,14 +31,14 @@ opam install awso-sync    # synchronous (blocking)
 opam install awso-cli     # umbrella CLI binary
 ```
 
-Note: the AWS surface is massive (~300 services) and this package can take
-a lengthy amount of time to build. About 5 minutes of building on a typical workstation.
+Note: the AWS surface is massive and this package can take a lengthy amount of
+time and space to build.
 
 ### Examples
 
 See the [examples](./examples) directory.
 
-Here is a short example that lists all EC2 instances, using Async I/O:
+Here is a short example that lists all EC2 instances using Async:
 
 ```dune
 ; dune
@@ -97,28 +97,27 @@ dune exec ./ec2_describe_instances.exe
 | `lib/runtime/async/` | Async backend | Yes (`awso-async`) |
 | `lib/runtime/lwt/` | Lwt backend | Yes (`awso-lwt`) |
 | `lib/runtime/sync/` | Synchronous (blocking) backend, libcurl-based | Yes (`awso-sync`) |
-| `lib/runtime/unix/` | Sync Unix backend | Yes (`awso-unix`) |
-| `lib/common/` | Jane Street Core/Base compatibility shim | Yes (`awso-common`) |
-| `aws/<service>/` | Auto-generated per-service bindings (~300 services) | Yes (under `awso`, `awso-async`, `awso-lwt`, `awso-sync`) |
+| `lib/common/` | Jane Street Core compatibility shim | Yes (`awso-common`) |
+| `aws/<service>/` | Auto-generated per-service bindings (~400 services) | Yes (under `awso`, `awso-async`, `awso-lwt`, `awso-sync`) |
 | `awso-cli/` | A bit like the Python aws cli | Yes (`awso-cli`) |
 | `lib/codegen/` | The code generator that produces `aws/<service>/` from botocore JSON | **No**: private library |
-| `vendor/botocore/` | Vendored botocore JSON used by the codegen | **No**: not in release tarballs |
-| `dogfood/` | Internal maintenance tools that use `awso` itself | **No**: not packaged |
-| `examples/` | Example programs | **No**: not installed |
+| `vendor/botocore/` | Vendored botocore JSON used by the codegen | **No** |
+| `dogfood/` | Important maintainer tools that use `awso` itself | **No** |
+| `examples/` | Example programs | **No**, not installed |
 
 ### Why is the `aws/` tree committed to git?
 
-`aws/<service>/` contains roughly 300 services worth of generated OCaml. We
-commit it on purpose so that `opam install awso-async` (or any sibling
-package) never has to run the codegen at install time. End users get a
-~25-dependency build instead of ~50+ — `ppxlib`, `sedlex`, `ocamlgraph`, and
-the rest of the codegen toolchain stay private to maintainers. The decision
-trades repo size for install-time simplicity and predictability.
+`aws/<service>/` contains roughly 400 services worth of generated OCaml. We
+commit it on purpose so that `opam install awso-async` (or any sibling package)
+never has to run the codegen at install time. End users get a ~25 dependency
+build instead of ~50+: `ppxlib`, `sedlex`, `ocamlgraph`, and the rest of the
+codegen toolchain stay private to maintainers. The decision trades repo size
+for install-time simplicity and predictability.
 
-Regeneration is a maintainer concern:
+Regeneration is a maintainer concern, but you can re-generate yourself like so:
 
 ```
-make generate-code   # re-runs awso-codegen against vendor/botocore/
+make generate-code
 ```
 
 After regenerating, commit the resulting diff alongside whatever change

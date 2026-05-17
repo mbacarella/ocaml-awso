@@ -2,12 +2,17 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | ConfigureLogsForChannel: (ConfigureLogsForChannelRequest.t,
+  ConfigureLogsForChannelResponse.t, ConfigureLogsForChannelResponse.error) t
+  
   | ConfigureLogsForPlaybackConfiguration:
   (ConfigureLogsForPlaybackConfigurationRequest.t,
   ConfigureLogsForPlaybackConfigurationResponse.t,
   ConfigureLogsForPlaybackConfigurationResponse.error) t 
   | CreateChannel: (CreateChannelRequest.t, CreateChannelResponse.t,
   CreateChannelResponse.error) t 
+  | CreateLiveSource: (CreateLiveSourceRequest.t, CreateLiveSourceResponse.t,
+  CreateLiveSourceResponse.error) t 
   | CreatePrefetchSchedule: (CreatePrefetchScheduleRequest.t,
   CreatePrefetchScheduleResponse.t, CreatePrefetchScheduleResponse.error) t 
   | CreateProgram: (CreateProgramRequest.t, CreateProgramResponse.t,
@@ -20,6 +25,10 @@ type ('i, 'o, 'e) t =
   DeleteChannelResponse.error) t 
   | DeleteChannelPolicy: (DeleteChannelPolicyRequest.t,
   DeleteChannelPolicyResponse.t, DeleteChannelPolicyResponse.error) t 
+  | DeleteFunction: (DeleteFunctionRequest.t, DeleteFunctionResponse.t,
+  DeleteFunctionResponse.error) t 
+  | DeleteLiveSource: (DeleteLiveSourceRequest.t, DeleteLiveSourceResponse.t,
+  DeleteLiveSourceResponse.error) t 
   | DeletePlaybackConfiguration: (DeletePlaybackConfigurationRequest.t,
   DeletePlaybackConfigurationResponse.t,
   DeletePlaybackConfigurationResponse.error) t 
@@ -33,6 +42,8 @@ type ('i, 'o, 'e) t =
   DeleteVodSourceResponse.error) t 
   | DescribeChannel: (DescribeChannelRequest.t, DescribeChannelResponse.t,
   DescribeChannelResponse.error) t 
+  | DescribeLiveSource: (DescribeLiveSourceRequest.t,
+  DescribeLiveSourceResponse.t, DescribeLiveSourceResponse.error) t 
   | DescribeProgram: (DescribeProgramRequest.t, DescribeProgramResponse.t,
   DescribeProgramResponse.error) t 
   | DescribeSourceLocation: (DescribeSourceLocationRequest.t,
@@ -43,6 +54,8 @@ type ('i, 'o, 'e) t =
   GetChannelPolicyResponse.error) t 
   | GetChannelSchedule: (GetChannelScheduleRequest.t,
   GetChannelScheduleResponse.t, GetChannelScheduleResponse.error) t 
+  | GetFunction: (GetFunctionRequest.t, GetFunctionResponse.t,
+  GetFunctionResponse.error) t 
   | GetPlaybackConfiguration: (GetPlaybackConfigurationRequest.t,
   GetPlaybackConfigurationResponse.t, GetPlaybackConfigurationResponse.error)
   t 
@@ -52,6 +65,10 @@ type ('i, 'o, 'e) t =
   ListAlertsResponse.error) t 
   | ListChannels: (ListChannelsRequest.t, ListChannelsResponse.t,
   ListChannelsResponse.error) t 
+  | ListFunctions: (ListFunctionsRequest.t, ListFunctionsResponse.t,
+  ListFunctionsResponse.error) t 
+  | ListLiveSources: (ListLiveSourcesRequest.t, ListLiveSourcesResponse.t,
+  ListLiveSourcesResponse.error) t 
   | ListPlaybackConfigurations: (ListPlaybackConfigurationsRequest.t,
   ListPlaybackConfigurationsResponse.t,
   ListPlaybackConfigurationsResponse.error) t 
@@ -65,6 +82,8 @@ type ('i, 'o, 'e) t =
   ListVodSourcesResponse.error) t 
   | PutChannelPolicy: (PutChannelPolicyRequest.t, PutChannelPolicyResponse.t,
   PutChannelPolicyResponse.error) t 
+  | PutFunction: (PutFunctionRequest.t, PutFunctionResponse.t,
+  PutFunctionResponse.error) t 
   | PutPlaybackConfiguration: (PutPlaybackConfigurationRequest.t,
   PutPlaybackConfigurationResponse.t, PutPlaybackConfigurationResponse.error)
   t 
@@ -76,58 +95,80 @@ type ('i, 'o, 'e) t =
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateChannel: (UpdateChannelRequest.t, UpdateChannelResponse.t,
   UpdateChannelResponse.error) t 
+  | UpdateLiveSource: (UpdateLiveSourceRequest.t, UpdateLiveSourceResponse.t,
+  UpdateLiveSourceResponse.error) t 
+  | UpdateProgram: (UpdateProgramRequest.t, UpdateProgramResponse.t,
+  UpdateProgramResponse.error) t 
   | UpdateSourceLocation: (UpdateSourceLocationRequest.t,
   UpdateSourceLocationResponse.t, UpdateSourceLocationResponse.error) t 
   | UpdateVodSource: (UpdateVodSourceRequest.t, UpdateVodSourceResponse.t,
   UpdateVodSourceResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | ConfigureLogsForChannel -> `PUT
   | ConfigureLogsForPlaybackConfiguration -> `PUT
   | CreateChannel -> `POST
+  | CreateLiveSource -> `POST
   | CreatePrefetchSchedule -> `POST
   | CreateProgram -> `POST
   | CreateSourceLocation -> `POST
   | CreateVodSource -> `POST
   | DeleteChannel -> `DELETE
   | DeleteChannelPolicy -> `DELETE
+  | DeleteFunction -> `DELETE
+  | DeleteLiveSource -> `DELETE
   | DeletePlaybackConfiguration -> `DELETE
   | DeletePrefetchSchedule -> `DELETE
   | DeleteProgram -> `DELETE
   | DeleteSourceLocation -> `DELETE
   | DeleteVodSource -> `DELETE
   | DescribeChannel -> `GET
+  | DescribeLiveSource -> `GET
   | DescribeProgram -> `GET
   | DescribeSourceLocation -> `GET
   | DescribeVodSource -> `GET
   | GetChannelPolicy -> `GET
   | GetChannelSchedule -> `GET
+  | GetFunction -> `GET
   | GetPlaybackConfiguration -> `GET
   | GetPrefetchSchedule -> `GET
   | ListAlerts -> `GET
   | ListChannels -> `GET
+  | ListFunctions -> `GET
+  | ListLiveSources -> `GET
   | ListPlaybackConfigurations -> `GET
   | ListPrefetchSchedules -> `POST
   | ListSourceLocations -> `GET
   | ListTagsForResource -> `GET
   | ListVodSources -> `GET
   | PutChannelPolicy -> `PUT
+  | PutFunction -> `PUT
   | PutPlaybackConfiguration -> `PUT
   | StartChannel -> `PUT
   | StopChannel -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateChannel -> `PUT
+  | UpdateLiveSource -> `PUT
+  | UpdateProgram -> `PUT
   | UpdateSourceLocation -> `PUT
   | UpdateVodSource -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | ConfigureLogsForChannel ->
+          (Format.kasprintf Uri.of_string) "/configureLogs/channel"
       | ConfigureLogsForPlaybackConfiguration ->
           (Format.kasprintf Uri.of_string)
             "/configureLogs/playbackConfiguration"
       | CreateChannel ->
           (Format.kasprintf Uri.of_string) "/channel/%s"
             (Zz__string.to_header x.CreateChannelRequest.channelName)
+      | CreateLiveSource ->
+          (Format.kasprintf Uri.of_string) "/sourceLocation/%s/liveSource/%s"
+            (Zz__string.to_header
+               x.CreateLiveSourceRequest.sourceLocationName)
+            (Zz__string.to_header x.CreateLiveSourceRequest.liveSourceName)
       | CreatePrefetchSchedule ->
           (Format.kasprintf Uri.of_string) "/prefetchSchedule/%s/%s"
             (Zz__string.to_header
@@ -151,6 +192,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteChannelPolicy ->
           (Format.kasprintf Uri.of_string) "/channel/%s/policy"
             (Zz__string.to_header x.DeleteChannelPolicyRequest.channelName)
+      | DeleteFunction ->
+          (Format.kasprintf Uri.of_string) "/function/%s"
+            (Zz__string.to_header x.DeleteFunctionRequest.functionId)
+      | DeleteLiveSource ->
+          (Format.kasprintf Uri.of_string) "/sourceLocation/%s/liveSource/%s"
+            (Zz__string.to_header
+               x.DeleteLiveSourceRequest.sourceLocationName)
+            (Zz__string.to_header x.DeleteLiveSourceRequest.liveSourceName)
       | DeletePlaybackConfiguration ->
           (Format.kasprintf Uri.of_string) "/playbackConfiguration/%s"
             (Zz__string.to_header x.DeletePlaybackConfigurationRequest.name)
@@ -174,6 +223,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeChannel ->
           (Format.kasprintf Uri.of_string) "/channel/%s"
             (Zz__string.to_header x.DescribeChannelRequest.channelName)
+      | DescribeLiveSource ->
+          (Format.kasprintf Uri.of_string) "/sourceLocation/%s/liveSource/%s"
+            (Zz__string.to_header
+               x.DescribeLiveSourceRequest.sourceLocationName)
+            (Zz__string.to_header x.DescribeLiveSourceRequest.liveSourceName)
       | DescribeProgram ->
           (Format.kasprintf Uri.of_string) "/channel/%s/program/%s"
             (Zz__string.to_header x.DescribeProgramRequest.channelName)
@@ -203,7 +257,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("audience", (Zz__string.to_header v)))
+                 x.audience])
+      | GetFunction ->
+          (Format.kasprintf Uri.of_string) "/function/%s"
+            (Zz__string.to_header x.GetFunctionRequest.functionId)
       | GetPlaybackConfiguration ->
           (Format.kasprintf Uri.of_string) "/playbackConfiguration/%s"
             (Zz__string.to_header x.GetPlaybackConfigurationRequest.name)
@@ -225,6 +285,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListChannels ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/channels")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | ListFunctions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/functions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | ListLiveSources ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/sourceLocation/%s/liveSources"
+               (Zz__string.to_header
+                  x.ListLiveSourcesRequest.sourceLocationName))
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -274,6 +357,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutChannelPolicy ->
           (Format.kasprintf Uri.of_string) "/channel/%s/policy"
             (Zz__string.to_header x.PutChannelPolicyRequest.channelName)
+      | PutFunction ->
+          (Format.kasprintf Uri.of_string) "/function/%s"
+            (Zz__string.to_header x.PutFunctionRequest.functionId)
       | PutPlaybackConfiguration ->
           (Format.kasprintf Uri.of_string) "/playbackConfiguration"
       | StartChannel ->
@@ -294,6 +380,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateChannel ->
           (Format.kasprintf Uri.of_string) "/channel/%s"
             (Zz__string.to_header x.UpdateChannelRequest.channelName)
+      | UpdateLiveSource ->
+          (Format.kasprintf Uri.of_string) "/sourceLocation/%s/liveSource/%s"
+            (Zz__string.to_header
+               x.UpdateLiveSourceRequest.sourceLocationName)
+            (Zz__string.to_header x.UpdateLiveSourceRequest.liveSourceName)
+      | UpdateProgram ->
+          (Format.kasprintf Uri.of_string) "/channel/%s/program/%s"
+            (Zz__string.to_header x.UpdateProgramRequest.channelName)
+            (Zz__string.to_header x.UpdateProgramRequest.programName)
       | UpdateSourceLocation ->
           (Format.kasprintf Uri.of_string) "/sourceLocation/%s"
             (Zz__string.to_header
@@ -306,6 +401,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | ConfigureLogsForChannel ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ConfigureLogsForPlaybackConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | CreateChannel ->
@@ -329,6 +426,37 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (PlaybackMode.to_value
                              req.CreateChannelRequest.playbackMode));
                       Option.map req.CreateChannelRequest.tags
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)));
+                      Option.map req.CreateChannelRequest.tier
+                        ~f:(fun x -> ("Tier", (Tier.to_value x)));
+                      Option.map
+                        req.CreateChannelRequest.timeShiftConfiguration
+                        ~f:(fun x ->
+                              ("TimeShiftConfiguration",
+                                (TimeShiftConfiguration.to_value x)));
+                      Option.map req.CreateChannelRequest.audiences
+                        ~f:(fun x -> ("Audiences", (Audiences.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLiveSource ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("HttpPackageConfigurations",
+                           (HttpPackageConfigurations.to_value
+                              req.CreateLiveSourceRequest.httpPackageConfigurations));
+                      Option.map req.CreateLiveSourceRequest.tags
                         ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -346,16 +474,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Some
-                         ("Consumption",
-                           (PrefetchConsumption.to_value
-                              req.CreatePrefetchScheduleRequest.consumption));
-                      Some
-                        ("Retrieval",
-                          (PrefetchRetrieval.to_value
-                             req.CreatePrefetchScheduleRequest.retrieval));
+                      [Option.map
+                         req.CreatePrefetchScheduleRequest.consumption
+                         ~f:(fun x ->
+                               ("Consumption",
+                                 (PrefetchConsumption.to_value x)));
+                      Option.map req.CreatePrefetchScheduleRequest.retrieval
+                        ~f:(fun x ->
+                              ("Retrieval", (PrefetchRetrieval.to_value x)));
+                      Option.map
+                        req.CreatePrefetchScheduleRequest.recurringPrefetchConfiguration
+                        ~f:(fun x ->
+                              ("RecurringPrefetchConfiguration",
+                                (RecurringPrefetchConfiguration.to_value x)));
+                      Option.map
+                        req.CreatePrefetchScheduleRequest.scheduleType
+                        ~f:(fun x ->
+                              ("ScheduleType",
+                                (PrefetchScheduleType.to_value x)));
                       Option.map req.CreatePrefetchScheduleRequest.streamId
-                        ~f:(fun x -> ("StreamId", (Zz__string.to_value x)))])
+                        ~f:(fun x -> ("StreamId", (Zz__string.to_value x)));
+                      Option.map req.CreatePrefetchScheduleRequest.tags
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -375,6 +515,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.CreateProgramRequest.adBreaks
                          ~f:(fun x ->
                                ("AdBreaks", (Zz__listOfAdBreak.to_value x)));
+                      Option.map req.CreateProgramRequest.liveSourceName
+                        ~f:(fun x ->
+                              ("LiveSourceName", (Zz__string.to_value x)));
                       Some
                         ("ScheduleConfiguration",
                           (ScheduleConfiguration.to_value
@@ -383,10 +526,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("SourceLocationName",
                           (Zz__string.to_value
                              req.CreateProgramRequest.sourceLocationName));
-                      Some
-                        ("VodSourceName",
-                          (Zz__string.to_value
-                             req.CreateProgramRequest.vodSourceName))])
+                      Option.map req.CreateProgramRequest.vodSourceName
+                        ~f:(fun x ->
+                              ("VodSourceName", (Zz__string.to_value x)));
+                      Option.map req.CreateProgramRequest.audienceMedia
+                        ~f:(fun x ->
+                              ("AudienceMedia",
+                                (Zz__listOfAudienceMedia.to_value x)));
+                      Option.map req.CreateProgramRequest.tags
+                        ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -457,6 +605,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteChannel -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteChannelPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteFunction -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteLiveSource -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePlaybackConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePrefetchSchedule ->
@@ -465,6 +615,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteSourceLocation -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteVodSource -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeChannel ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeLiveSource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeProgram ->
@@ -482,6 +635,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetChannelSchedule ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFunction ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPlaybackConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -492,6 +648,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListChannels ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFunctions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLiveSources ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPlaybackConfigurations ->
@@ -512,6 +674,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                                  (Zz__integerMin1Max100.to_value x)));
                       Option.map req.ListPrefetchSchedulesRequest.nextToken
                         ~f:(fun x -> ("NextToken", (Zz__string.to_value x)));
+                      Option.map
+                        req.ListPrefetchSchedulesRequest.scheduleType
+                        ~f:(fun x ->
+                              ("ScheduleType",
+                                (ListPrefetchScheduleType.to_value x)));
                       Option.map req.ListPrefetchSchedulesRequest.streamId
                         ~f:(fun x -> ("StreamId", (Zz__string.to_value x)))])
                    ~f:(fun (x, y) ->
@@ -531,6 +698,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutChannelPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | PutFunction -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutPlaybackConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | StartChannel -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -557,6 +725,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateChannel -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateLiveSource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateProgram -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateSourceLocation -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateVodSource -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
@@ -607,60 +777,71 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | ConfigureLogsForChannel ->
+      if is_success
+      then
+        Ok (ConfigureLogsForChannelResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | ConfigureLogsForPlaybackConfiguration ->
       if is_success
       then
         Ok
           (ConfigureLogsForPlaybackConfigurationResponse.of_json
              (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some
-                ConfigureLogsForPlaybackConfigurationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | CreateChannel ->
       if is_success
       then Ok (CreateChannelResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | CreateLiveSource ->
+      if is_success
+      then Ok (CreateLiveSourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | CreatePrefetchSchedule ->
       if is_success
       then
         Ok (CreatePrefetchScheduleResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some CreatePrefetchScheduleResponse.error_of_json))
+      else Error (parse_aws_error None)
   | CreateProgram ->
       if is_success
       then Ok (CreateProgramResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some CreateProgramResponse.error_of_json))
+      else Error (parse_aws_error None)
   | CreateSourceLocation ->
       if is_success
       then Ok (CreateSourceLocationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some CreateSourceLocationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | CreateVodSource ->
       if is_success
       then Ok (CreateVodSourceResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some CreateVodSourceResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeleteChannel ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteChannelResponse.of_header_and_body (headers, ()))
-      else Error (parse_aws_error (Some DeleteChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeleteChannelPolicy ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteChannelPolicyResponse.of_header_and_body (headers, ()))
-      else
-        Error
-          (parse_aws_error (Some DeleteChannelPolicyResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | DeleteFunction ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteFunctionResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
+  | DeleteLiveSource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteLiveSourceResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error None)
   | DeletePlaybackConfiguration ->
       if is_success
       then
@@ -669,122 +850,107 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok
           (DeletePlaybackConfigurationResponse.of_header_and_body
              (headers, ()))
-      else
-        Error
-          (parse_aws_error
-             (Some DeletePlaybackConfigurationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeletePrefetchSchedule ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeletePrefetchScheduleResponse.of_header_and_body (headers, ()))
-      else
-        Error
-          (parse_aws_error
-             (Some DeletePrefetchScheduleResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeleteProgram ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteProgramResponse.of_header_and_body (headers, ()))
-      else Error (parse_aws_error (Some DeleteProgramResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeleteSourceLocation ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteSourceLocationResponse.of_header_and_body (headers, ()))
-      else
-        Error
-          (parse_aws_error (Some DeleteSourceLocationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DeleteVodSource ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteVodSourceResponse.of_header_and_body (headers, ()))
-      else
-        Error (parse_aws_error (Some DeleteVodSourceResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DescribeChannel ->
       if is_success
       then Ok (DescribeChannelResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some DescribeChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | DescribeLiveSource ->
+      if is_success
+      then Ok (DescribeLiveSourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | DescribeProgram ->
       if is_success
       then Ok (DescribeProgramResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some DescribeProgramResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DescribeSourceLocation ->
       if is_success
       then
         Ok (DescribeSourceLocationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some DescribeSourceLocationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | DescribeVodSource ->
       if is_success
       then Ok (DescribeVodSourceResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some DescribeVodSourceResponse.error_of_json))
+      else Error (parse_aws_error None)
   | GetChannelPolicy ->
       if is_success
       then Ok (GetChannelPolicyResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some GetChannelPolicyResponse.error_of_json))
+      else Error (parse_aws_error None)
   | GetChannelSchedule ->
       if is_success
       then Ok (GetChannelScheduleResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some GetChannelScheduleResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | GetFunction ->
+      if is_success
+      then Ok (GetFunctionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | GetPlaybackConfiguration ->
       if is_success
       then
         Ok (GetPlaybackConfigurationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some GetPlaybackConfigurationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | GetPrefetchSchedule ->
       if is_success
       then Ok (GetPrefetchScheduleResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some GetPrefetchScheduleResponse.error_of_json))
+      else Error (parse_aws_error None)
   | ListAlerts ->
       if is_success
       then Ok (ListAlertsResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListAlertsResponse.error_of_json))
+      else Error (parse_aws_error None)
   | ListChannels ->
       if is_success
       then Ok (ListChannelsResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | ListFunctions ->
+      if is_success
+      then Ok (ListFunctionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
+  | ListLiveSources ->
+      if is_success
+      then Ok (ListLiveSourcesResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | ListPlaybackConfigurations ->
       if is_success
       then
         Ok
           (ListPlaybackConfigurationsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some ListPlaybackConfigurationsResponse.error_of_json))
+      else Error (parse_aws_error None)
   | ListPrefetchSchedules ->
       if is_success
       then Ok (ListPrefetchSchedulesResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListPrefetchSchedulesResponse.error_of_json))
+      else Error (parse_aws_error None)
   | ListSourceLocations ->
       if is_success
       then Ok (ListSourceLocationsResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some ListSourceLocationsResponse.error_of_json))
+      else Error (parse_aws_error None)
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -794,53 +960,57 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | ListVodSources ->
       if is_success
       then Ok (ListVodSourcesResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some ListVodSourcesResponse.error_of_json))
+      else Error (parse_aws_error None)
   | PutChannelPolicy ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (PutChannelPolicyResponse.of_header_and_body (headers, ()))
-      else
-        Error (parse_aws_error (Some PutChannelPolicyResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | PutFunction ->
+      if is_success
+      then Ok (PutFunctionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | PutPlaybackConfiguration ->
       if is_success
       then
         Ok (PutPlaybackConfigurationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error
-             (Some PutPlaybackConfigurationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | StartChannel ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (StartChannelResponse.of_header_and_body (headers, ()))
-      else Error (parse_aws_error (Some StartChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
   | StopChannel ->
       if is_success
       then
         let headers =
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (StopChannelResponse.of_header_and_body (headers, ()))
-      else Error (parse_aws_error (Some StopChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateChannel ->
       if is_success
       then Ok (UpdateChannelResponse.of_json (response_to_json resp))
-      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
+      else Error (parse_aws_error None)
+  | UpdateLiveSource ->
+      if is_success
+      then Ok (UpdateLiveSourceResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
+  | UpdateProgram ->
+      if is_success
+      then Ok (UpdateProgramResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error None)
   | UpdateSourceLocation ->
       if is_success
       then Ok (UpdateSourceLocationResponse.of_json (response_to_json resp))
-      else
-        Error
-          (parse_aws_error (Some UpdateSourceLocationResponse.error_of_json))
+      else Error (parse_aws_error None)
   | UpdateVodSource ->
       if is_success
       then Ok (UpdateVodSourceResponse.of_json (response_to_json resp))
-      else
-        Error (parse_aws_error (Some UpdateVodSourceResponse.error_of_json))
+      else Error (parse_aws_error None)

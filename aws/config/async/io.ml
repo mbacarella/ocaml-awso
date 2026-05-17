@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_resource_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateResourceTypes input
 let batch_get_aggregate_resource_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetAggregateResourceConfig input
 let batch_get_resource_config ?endpoint_url ?cfg input =
@@ -43,6 +45,9 @@ let delete_resource_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourceConfig input
 let delete_retention_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRetentionConfiguration input
+let delete_service_linked_configuration_recorder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServiceLinkedConfigurationRecorder
+    input
 let delete_stored_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteStoredQuery input
 let deliver_config_snapshot ?endpoint_url ?cfg input =
@@ -106,6 +111,8 @@ let describe_remediation_execution_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRemediationExecutionStatus input
 let describe_retention_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRetentionConfigurations input
+let disassociate_resource_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateResourceTypes input
 let get_aggregate_compliance_details_by_config_rule ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg Endpoints.GetAggregateComplianceDetailsByConfigRule
@@ -149,12 +156,20 @@ let get_organization_custom_rule_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOrganizationCustomRulePolicy input
 let get_resource_config_history ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceConfigHistory input
+let get_resource_evaluation_summary ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourceEvaluationSummary input
 let get_stored_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStoredQuery input
 let list_aggregate_discovered_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAggregateDiscoveredResources input
+let list_configuration_recorders ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConfigurationRecorders input
+let list_conformance_pack_compliance_scores ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListConformancePackComplianceScores input
 let list_discovered_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDiscoveredResources input
+let list_resource_evaluations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListResourceEvaluations input
 let list_stored_queries ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListStoredQueries input
 let list_tags_for_resource ?endpoint_url ?cfg input =
@@ -187,6 +202,9 @@ let put_resource_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutResourceConfig input
 let put_retention_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutRetentionConfiguration input
+let put_service_linked_configuration_recorder ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutServiceLinkedConfigurationRecorder
+    input
 let put_stored_query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutStoredQuery input
 let select_aggregate_resource_config ?endpoint_url ?cfg input =
@@ -199,6 +217,8 @@ let start_configuration_recorder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartConfigurationRecorder input
 let start_remediation_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartRemediationExecution input
+let start_resource_evaluation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartResourceEvaluation input
 let stop_configuration_recorder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopConfigurationRecorder input
 let tag_resource ?endpoint_url ?cfg input =

@@ -47,13 +47,16 @@ module Identifier =
   end
 module Properties =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc
+                            "Allow up to 256K length of Resource properties"]
     let context_ = "Properties"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:16384) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:262144) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -62,13 +65,14 @@ module Properties =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Properties" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Allow up to 256K length of Resource properties"]
 module HandlerErrorCode =
   struct
     type nonrec t =
       | NotUpdatable 
       | InvalidRequest 
       | AccessDenied 
+      | UnauthorizedTaggingOperation 
       | InvalidCredentials 
       | AlreadyExists 
       | NotFound 
@@ -88,6 +92,7 @@ module HandlerErrorCode =
       | NotUpdatable -> "NotUpdatable"
       | InvalidRequest -> "InvalidRequest"
       | AccessDenied -> "AccessDenied"
+      | UnauthorizedTaggingOperation -> "UnauthorizedTaggingOperation"
       | InvalidCredentials -> "InvalidCredentials"
       | AlreadyExists -> "AlreadyExists"
       | NotFound -> "NotFound"
@@ -106,6 +111,7 @@ module HandlerErrorCode =
       | "NotUpdatable" -> NotUpdatable
       | "InvalidRequest" -> InvalidRequest
       | "AccessDenied" -> AccessDenied
+      | "UnauthorizedTaggingOperation" -> UnauthorizedTaggingOperation
       | "InvalidCredentials" -> InvalidCredentials
       | "AlreadyExists" -> AlreadyExists
       | "NotFound" -> NotFound
@@ -217,7 +223,13 @@ module StatusMessage =
     type nonrec t = string
     let context_ = "StatusMessage"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -260,6 +272,106 @@ module TypeName =
     let of_json j = string_of_json ~kind:"TypeName" j
     let to_json = simple_to_json to_value
   end
+module HookFailureMode =
+  struct
+    type nonrec t = string
+    let context_ = "HookFailureMode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[-A-Za-z_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HookFailureMode" j
+    let to_json = simple_to_json to_value
+  end
+module HookInvocationPoint =
+  struct
+    type nonrec t = string
+    let context_ = "HookInvocationPoint"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[-A-Za-z_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HookInvocationPoint" j
+    let to_json = simple_to_json to_value
+  end
+module HookStatus =
+  struct
+    type nonrec t = string
+    let context_ = "HookStatus"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[-A-Za-z_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HookStatus" j
+    let to_json = simple_to_json to_value
+  end
+module HookTypeArn =
+  struct
+    type nonrec t = string
+    let context_ = "HookTypeArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"arn:aws.*:.+:.*:.*:.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HookTypeArn" j
+    let to_json = simple_to_json to_value
+  end
+module TypeVersionId =
+  struct
+    type nonrec t = string
+    let context_ = "TypeVersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TypeVersionId" j
+    let to_json = simple_to_json to_value
+  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -267,8 +379,10 @@ module ErrorMessage =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -302,9 +416,9 @@ module ResourceDescription =
         (Option.map ~f:Identifier.of_xml) (Xml.child xml_arg0 "Identifier") in
       make ?properties ?identifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let properties = field_map json "Properties" Properties.of_json in
-      let identifier = field_map json "Identifier" Identifier.of_json in
+    let of_json json__ =
+      let properties = field_map json__ "Properties" Properties.of_json in
+      let identifier = field_map json__ "Identifier" Identifier.of_json in
       make ?properties ?identifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents information about a provisioned resource."]
@@ -320,6 +434,9 @@ module ProgressEvent =
       requestToken: RequestToken.t option
         [@ocaml.doc
           "The unique token representing this resource operation request. Use the RequestToken with GetResourceRequestStatus to return the current status of a resource operation request."];
+      hooksRequestToken: RequestToken.t option
+        [@ocaml.doc
+          "The unique token representing the Hooks operation for the request."];
       operation: Operation.t option
         [@ocaml.doc "The resource operation type."];
       operationStatus: OperationStatus.t option
@@ -341,32 +458,36 @@ module ProgressEvent =
     let make ?typeName =
       fun ?identifier ->
         fun ?requestToken ->
-          fun ?operation ->
-            fun ?operationStatus ->
-              fun ?eventTime ->
-                fun ?resourceModel ->
-                  fun ?statusMessage ->
-                    fun ?errorCode ->
-                      fun ?retryAfter ->
-                        fun () ->
-                          {
-                            typeName;
-                            identifier;
-                            requestToken;
-                            operation;
-                            operationStatus;
-                            eventTime;
-                            resourceModel;
-                            statusMessage;
-                            errorCode;
-                            retryAfter
-                          }
+          fun ?hooksRequestToken ->
+            fun ?operation ->
+              fun ?operationStatus ->
+                fun ?eventTime ->
+                  fun ?resourceModel ->
+                    fun ?statusMessage ->
+                      fun ?errorCode ->
+                        fun ?retryAfter ->
+                          fun () ->
+                            {
+                              typeName;
+                              identifier;
+                              requestToken;
+                              hooksRequestToken;
+                              operation;
+                              operationStatus;
+                              eventTime;
+                              resourceModel;
+                              statusMessage;
+                              errorCode;
+                              retryAfter
+                            }
     let to_value x =
       structure_to_value
         [("TypeName", (Option.map x.typeName ~f:TypeName.to_value));
         ("Identifier", (Option.map x.identifier ~f:Identifier.to_value));
         ("RequestToken",
           (Option.map x.requestToken ~f:RequestToken.to_value));
+        ("HooksRequestToken",
+          (Option.map x.hooksRequestToken ~f:RequestToken.to_value));
         ("Operation", (Option.map x.operation ~f:Operation.to_value));
         ("OperationStatus",
           (Option.map x.operationStatus ~f:OperationStatus.to_value));
@@ -397,6 +518,9 @@ module ProgressEvent =
           (Xml.child xml_arg0 "OperationStatus") in
       let operation =
         (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
+      let hooksRequestToken =
+        (Option.map ~f:RequestToken.of_xml)
+          (Xml.child xml_arg0 "HooksRequestToken") in
       let requestToken =
         (Option.map ~f:RequestToken.of_xml)
           (Xml.child xml_arg0 "RequestToken") in
@@ -405,23 +529,27 @@ module ProgressEvent =
       let typeName =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?retryAfter ?errorCode ?statusMessage ?resourceModel ?eventTime
-        ?operationStatus ?operation ?requestToken ?identifier ?typeName ()
+        ?operationStatus ?operation ?hooksRequestToken ?requestToken
+        ?identifier ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let retryAfter = field_map json "RetryAfter" Timestamp.of_json in
-      let errorCode = field_map json "ErrorCode" HandlerErrorCode.of_json in
+    let of_json json__ =
+      let retryAfter = field_map json__ "RetryAfter" Timestamp.of_json in
+      let errorCode = field_map json__ "ErrorCode" HandlerErrorCode.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let resourceModel = field_map json "ResourceModel" Properties.of_json in
-      let eventTime = field_map json "EventTime" Timestamp.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let resourceModel = field_map json__ "ResourceModel" Properties.of_json in
+      let eventTime = field_map json__ "EventTime" Timestamp.of_json in
       let operationStatus =
-        field_map json "OperationStatus" OperationStatus.of_json in
-      let operation = field_map json "Operation" Operation.of_json in
-      let requestToken = field_map json "RequestToken" RequestToken.of_json in
-      let identifier = field_map json "Identifier" Identifier.of_json in
-      let typeName = field_map json "TypeName" TypeName.of_json in
+        field_map json__ "OperationStatus" OperationStatus.of_json in
+      let operation = field_map json__ "Operation" Operation.of_json in
+      let hooksRequestToken =
+        field_map json__ "HooksRequestToken" RequestToken.of_json in
+      let requestToken = field_map json__ "RequestToken" RequestToken.of_json in
+      let identifier = field_map json__ "Identifier" Identifier.of_json in
+      let typeName = field_map json__ "TypeName" TypeName.of_json in
       make ?retryAfter ?errorCode ?statusMessage ?resourceModel ?eventTime
-        ?operationStatus ?operation ?requestToken ?identifier ?typeName ()
+        ?operationStatus ?operation ?hooksRequestToken ?requestToken
+        ?identifier ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the current status of a resource operation request. For more information, see Managing resource operation requests in the Amazon Web Services Cloud Control API User Guide."]
@@ -429,6 +557,9 @@ module OperationStatuses =
   struct
     type nonrec t = OperationStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperationStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -454,6 +585,9 @@ module Operations =
   struct
     type nonrec t = Operation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Operation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -474,6 +608,105 @@ module Operations =
       list_of_json ~kind:"Operations" ~of_json:Operation.of_json j
     let to_json v = composed_to_json to_value v
   end
+module HookProgressEvent =
+  struct
+    type nonrec t =
+      {
+      hookTypeName: TypeName.t option
+        [@ocaml.doc "The type name of the Hook being invoked."];
+      hookTypeVersionId: TypeVersionId.t option
+        [@ocaml.doc "The type version of the Hook being invoked."];
+      hookTypeArn: HookTypeArn.t option
+        [@ocaml.doc "The ARN of the Hook being invoked."];
+      invocationPoint: HookInvocationPoint.t option
+        [@ocaml.doc
+          "States whether the Hook is invoked before or after resource provisioning."];
+      hookStatus: HookStatus.t option
+        [@ocaml.doc
+          "The status of the Hook invocation. The following are potential statuses: HOOK_PENDING: The Hook was added to the invocation plan, but not yet invoked. HOOK_IN_PROGRESS: The Hook was invoked, but hasn't completed. HOOK_COMPLETE_SUCCEEDED: The Hook invocation is complete with a successful result. HOOK_COMPLETE_FAILED: The Hook invocation is complete with a failed result. HOOK_FAILED: The Hook invocation didn't complete successfully."];
+      hookEventTime: Timestamp.t option
+        [@ocaml.doc "The time that the Hook invocation request initiated."];
+      hookStatusMessage: StatusMessage.t option
+        [@ocaml.doc "The message explaining the current Hook status."];
+      failureMode: HookFailureMode.t option
+        [@ocaml.doc
+          "The failure mode of the invocation. The following are the potential statuses: FAIL: This will fail the Hook invocation and the request associated with it. WARN: This will fail the Hook invocation, but not the request associated with it."]}
+    let make ?hookTypeName =
+      fun ?hookTypeVersionId ->
+        fun ?hookTypeArn ->
+          fun ?invocationPoint ->
+            fun ?hookStatus ->
+              fun ?hookEventTime ->
+                fun ?hookStatusMessage ->
+                  fun ?failureMode ->
+                    fun () ->
+                      {
+                        hookTypeName;
+                        hookTypeVersionId;
+                        hookTypeArn;
+                        invocationPoint;
+                        hookStatus;
+                        hookEventTime;
+                        hookStatusMessage;
+                        failureMode
+                      }
+    let to_value x =
+      structure_to_value
+        [("HookTypeName", (Option.map x.hookTypeName ~f:TypeName.to_value));
+        ("HookTypeVersionId",
+          (Option.map x.hookTypeVersionId ~f:TypeVersionId.to_value));
+        ("HookTypeArn", (Option.map x.hookTypeArn ~f:HookTypeArn.to_value));
+        ("InvocationPoint",
+          (Option.map x.invocationPoint ~f:HookInvocationPoint.to_value));
+        ("HookStatus", (Option.map x.hookStatus ~f:HookStatus.to_value));
+        ("HookEventTime", (Option.map x.hookEventTime ~f:Timestamp.to_value));
+        ("HookStatusMessage",
+          (Option.map x.hookStatusMessage ~f:StatusMessage.to_value));
+        ("FailureMode",
+          (Option.map x.failureMode ~f:HookFailureMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let failureMode =
+        (Option.map ~f:HookFailureMode.of_xml)
+          (Xml.child xml_arg0 "FailureMode") in
+      let hookStatusMessage =
+        (Option.map ~f:StatusMessage.of_xml)
+          (Xml.child xml_arg0 "HookStatusMessage") in
+      let hookEventTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "HookEventTime") in
+      let hookStatus =
+        (Option.map ~f:HookStatus.of_xml) (Xml.child xml_arg0 "HookStatus") in
+      let invocationPoint =
+        (Option.map ~f:HookInvocationPoint.of_xml)
+          (Xml.child xml_arg0 "InvocationPoint") in
+      let hookTypeArn =
+        (Option.map ~f:HookTypeArn.of_xml) (Xml.child xml_arg0 "HookTypeArn") in
+      let hookTypeVersionId =
+        (Option.map ~f:TypeVersionId.of_xml)
+          (Xml.child xml_arg0 "HookTypeVersionId") in
+      let hookTypeName =
+        (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "HookTypeName") in
+      make ?failureMode ?hookStatusMessage ?hookEventTime ?hookStatus
+        ?invocationPoint ?hookTypeArn ?hookTypeVersionId ?hookTypeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let failureMode =
+        field_map json__ "FailureMode" HookFailureMode.of_json in
+      let hookStatusMessage =
+        field_map json__ "HookStatusMessage" StatusMessage.of_json in
+      let hookEventTime = field_map json__ "HookEventTime" Timestamp.of_json in
+      let hookStatus = field_map json__ "HookStatus" HookStatus.of_json in
+      let invocationPoint =
+        field_map json__ "InvocationPoint" HookInvocationPoint.of_json in
+      let hookTypeArn = field_map json__ "HookTypeArn" HookTypeArn.of_json in
+      let hookTypeVersionId =
+        field_map json__ "HookTypeVersionId" TypeVersionId.of_json in
+      let hookTypeName = field_map json__ "HookTypeName" TypeName.of_json in
+      make ?failureMode ?hookStatusMessage ?hookEventTime ?hookStatus
+        ?invocationPoint ?hookTypeArn ?hookTypeVersionId ?hookTypeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the current status of applicable Hooks for a resource operation request. It contains list of Hook invocation information for the resource specified in the request since the same target can invoke multiple Hooks. For more information, see Managing resource operation requests with Amazon Web Services Cloud Control API ."]
 module AlreadyExistsException =
   struct
     type nonrec t = {
@@ -488,8 +721,8 @@ module AlreadyExistsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource with the name requested already exists."]
@@ -507,8 +740,8 @@ module ClientTokenConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -527,8 +760,8 @@ module ConcurrentOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -547,8 +780,8 @@ module GeneralServiceException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -567,8 +800,8 @@ module HandlerFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -587,8 +820,8 @@ module HandlerInternalFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -607,8 +840,8 @@ module InvalidCredentialsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -627,8 +860,8 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -647,8 +880,8 @@ module NetworkFailureException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -667,8 +900,8 @@ module NotStabilizedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -687,8 +920,8 @@ module NotUpdatableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -707,8 +940,8 @@ module PrivateTypeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -727,8 +960,8 @@ module ResourceConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -747,8 +980,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A resource with the specified identifier can't be found."]
@@ -766,8 +999,8 @@ module ServiceInternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -786,8 +1019,8 @@ module ServiceLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -806,8 +1039,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
@@ -825,8 +1058,8 @@ module TypeNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -845,8 +1078,8 @@ module UnsupportedActionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -873,13 +1106,16 @@ module ClientToken =
   end
 module PatchDocument =
   struct
-    type nonrec t = string
+    type nonrec t = string[@@ocaml.doc
+                            "Allow up to 256K length of Resource properties"]
     let context_ = "PatchDocument"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:65536) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:262144) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -888,7 +1124,7 @@ module PatchDocument =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PatchDocument" j
     let to_json = simple_to_json to_value
-  end
+  end[@@ocaml.doc "Allow up to 256K length of Resource properties"]
 module RoleArn =
   struct
     type nonrec t = string
@@ -910,26 +1146,6 @@ module RoleArn =
     let of_json j = string_of_json ~kind:"RoleArn" j
     let to_json = simple_to_json to_value
   end
-module TypeVersionId =
-  struct
-    type nonrec t = string
-    let context_ = "TypeVersionId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:128) >>=
-                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9-]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TypeVersionId" j
-    let to_json = simple_to_json to_value
-  end
 module HandlerNextToken =
   struct
     type nonrec t = string
@@ -939,7 +1155,7 @@ module HandlerNextToken =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:2048) >>=
+                (check_string_max i ~max:4096) >>=
                   (fun () -> check_pattern i ~pattern:".+")));
         i
     let of_string x = x
@@ -954,6 +1170,9 @@ module ResourceDescriptions =
   struct
     type nonrec t = ResourceDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceDescription.to_value)) |>
         (fun x -> `List x)
@@ -1018,6 +1237,9 @@ module ResourceRequestStatusSummaries =
   struct
     type nonrec t = ProgressEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProgressEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1064,14 +1286,42 @@ module ResourceRequestStatusFilter =
         (Option.map ~f:Operations.of_xml) (Xml.child xml_arg0 "Operations") in
       make ?operationStatuses ?operations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let operationStatuses =
-        field_map json "OperationStatuses" OperationStatuses.of_json in
-      let operations = field_map json "Operations" Operations.of_json in
+        field_map json__ "OperationStatuses" OperationStatuses.of_json in
+      let operations = field_map json__ "Operations" Operations.of_json in
       make ?operationStatuses ?operations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The filter criteria to use in determining the requests returned."]
+module HooksProgressEvent =
+  struct
+    type nonrec t = HookProgressEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:HookProgressEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:HookProgressEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"HooksProgressEvent"
+        ~of_json:HookProgressEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RequestTokenNotFoundException =
   struct
     type nonrec t = {
@@ -1086,8 +1336,8 @@ module RequestTokenNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1106,8 +1356,8 @@ module ConcurrentModificationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1333,9 +1583,9 @@ module UpdateResourceOutput =
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressEvent =
-        field_map json "ProgressEvent" ProgressEvent.of_json in
+        field_map json__ "ProgressEvent" ProgressEvent.of_json in
       make ?progressEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1405,15 +1655,15 @@ module UpdateResourceInput =
       make ~patchDocument ~identifier ?clientToken ?roleArn ?typeVersionId
         ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let patchDocument =
-        field_map_exn json "PatchDocument" PatchDocument.of_json in
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+        field_map_exn json__ "PatchDocument" PatchDocument.of_json in
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let typeVersionId =
-        field_map json "TypeVersionId" TypeVersionId.of_json in
-      let typeName = field_map_exn json "TypeName" TypeName.of_json in
+        field_map json__ "TypeVersionId" TypeVersionId.of_json in
+      let typeName = field_map_exn json__ "TypeName" TypeName.of_json in
       make ~patchDocument ~identifier ?clientToken ?roleArn ?typeVersionId
         ~typeName ()
     let to_json v = composed_to_json to_value v
@@ -1633,11 +1883,11 @@ module ListResourcesOutput =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?nextToken ?resourceDescriptions ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" HandlerNextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" HandlerNextToken.of_json in
       let resourceDescriptions =
-        field_map json "ResourceDescriptions" ResourceDescriptions.of_json in
-      let typeName = field_map json "TypeName" TypeName.of_json in
+        field_map json__ "ResourceDescriptions" ResourceDescriptions.of_json in
+      let typeName = field_map json__ "TypeName" TypeName.of_json in
       make ?nextToken ?resourceDescriptions ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1706,14 +1956,14 @@ module ListResourcesInput =
       make ?resourceModel ?maxResults ?nextToken ?roleArn ?typeVersionId
         ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceModel = field_map json "ResourceModel" Properties.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" HandlerNextToken.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let resourceModel = field_map json__ "ResourceModel" Properties.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" HandlerNextToken.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let typeVersionId =
-        field_map json "TypeVersionId" TypeVersionId.of_json in
-      let typeName = field_map_exn json "TypeName" TypeName.of_json in
+        field_map json__ "TypeVersionId" TypeVersionId.of_json in
+      let typeName = field_map_exn json__ "TypeName" TypeName.of_json in
       make ?resourceModel ?maxResults ?nextToken ?roleArn ?typeVersionId
         ~typeName ()
     let to_json v = composed_to_json to_value v
@@ -1764,10 +2014,10 @@ module ListResourceRequestsOutput =
           (Xml.child xml_arg0 "ResourceRequestStatusSummaries") in
       make ?nextToken ?resourceRequestStatusSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let resourceRequestStatusSummaries =
-        field_map json "ResourceRequestStatusSummaries"
+        field_map json__ "ResourceRequestStatusSummaries"
           ResourceRequestStatusSummaries.of_json in
       make ?nextToken ?resourceRequestStatusSummaries ()
     let to_json v = composed_to_json to_value v
@@ -1807,12 +2057,12 @@ module ListResourceRequestsInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?resourceRequestStatusFilter ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRequestStatusFilter =
-        field_map json "ResourceRequestStatusFilter"
+        field_map json__ "ResourceRequestStatusFilter"
           ResourceRequestStatusFilter.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?resourceRequestStatusFilter ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1823,11 +2073,16 @@ module GetResourceRequestStatusOutput =
       {
       progressEvent: ProgressEvent.t option
         [@ocaml.doc
-          "Represents the current status of the resource operation request."]}
+          "Represents the current status of the resource operation request."];
+      hooksProgressEvent: HooksProgressEvent.t option
+        [@ocaml.doc
+          "Lists Hook invocations for the specified target in the request. This is a list since the same target can invoke multiple Hooks."]}
     type nonrec error =
       [ `RequestTokenNotFoundException of RequestTokenNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?progressEvent = fun () -> { progressEvent }
+    let make ?progressEvent =
+      fun ?hooksProgressEvent ->
+        fun () -> { progressEvent; hooksProgressEvent }
     let error_of_json name json =
       match name with
       | "RequestTokenNotFoundException" ->
@@ -1857,18 +2112,25 @@ module GetResourceRequestStatusOutput =
     let to_value x =
       structure_to_value
         [("ProgressEvent",
-           (Option.map x.progressEvent ~f:ProgressEvent.to_value))]
+           (Option.map x.progressEvent ~f:ProgressEvent.to_value));
+        ("HooksProgressEvent",
+          (Option.map x.hooksProgressEvent ~f:HooksProgressEvent.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let hooksProgressEvent =
+        (Option.map ~f:HooksProgressEvent.of_xml)
+          (Xml.child xml_arg0 "HooksProgressEvent") in
       let progressEvent =
         (Option.map ~f:ProgressEvent.of_xml)
           (Xml.child xml_arg0 "ProgressEvent") in
-      make ?progressEvent ()
+      make ?hooksProgressEvent ?progressEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let hooksProgressEvent =
+        field_map json__ "HooksProgressEvent" HooksProgressEvent.of_json in
       let progressEvent =
-        field_map json "ProgressEvent" ProgressEvent.of_json in
-      make ?progressEvent ()
+        field_map json__ "ProgressEvent" ProgressEvent.of_json in
+      make ?hooksProgressEvent ?progressEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the current status of a resource operation request. For more information, see Tracking the progress of resource operation requests in the Amazon Web Services Cloud Control API User Guide."]
@@ -1891,9 +2153,9 @@ module GetResourceRequestStatusInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RequestToken") in
       make ~requestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestToken =
-        field_map_exn json "RequestToken" RequestToken.of_json in
+        field_map_exn json__ "RequestToken" RequestToken.of_json in
       make ~requestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2101,10 +2363,10 @@ module GetResourceOutput =
         (Option.map ~f:TypeName.of_xml) (Xml.child xml_arg0 "TypeName") in
       make ?resourceDescription ?typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceDescription =
-        field_map json "ResourceDescription" ResourceDescription.of_json in
-      let typeName = field_map json "TypeName" TypeName.of_json in
+        field_map json__ "ResourceDescription" ResourceDescription.of_json in
+      let typeName = field_map json__ "TypeName" TypeName.of_json in
       make ?resourceDescription ?typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2150,12 +2412,12 @@ module GetResourceInput =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~identifier ?roleArn ?typeVersionId ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let typeVersionId =
-        field_map json "TypeVersionId" TypeVersionId.of_json in
-      let typeName = field_map_exn json "TypeName" TypeName.of_json in
+        field_map json__ "TypeVersionId" TypeVersionId.of_json in
+      let typeName = field_map_exn json__ "TypeName" TypeName.of_json in
       make ~identifier ?roleArn ?typeVersionId ~typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2381,9 +2643,9 @@ module DeleteResourceOutput =
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressEvent =
-        field_map json "ProgressEvent" ProgressEvent.of_json in
+        field_map json__ "ProgressEvent" ProgressEvent.of_json in
       make ?progressEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2437,13 +2699,13 @@ module DeleteResourceInput =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~identifier ?clientToken ?roleArn ?typeVersionId ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" Identifier.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let identifier = field_map_exn json__ "Identifier" Identifier.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let typeVersionId =
-        field_map json "TypeVersionId" TypeVersionId.of_json in
-      let typeName = field_map_exn json "TypeName" TypeName.of_json in
+        field_map json__ "TypeVersionId" TypeVersionId.of_json in
+      let typeName = field_map_exn json__ "TypeName" TypeName.of_json in
       make ~identifier ?clientToken ?roleArn ?typeVersionId ~typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2669,9 +2931,9 @@ module CreateResourceOutput =
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressEvent =
-        field_map json "ProgressEvent" ProgressEvent.of_json in
+        field_map json__ "ProgressEvent" ProgressEvent.of_json in
       make ?progressEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2726,13 +2988,14 @@ module CreateResourceInput =
         TypeName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TypeName") in
       make ~desiredState ?clientToken ?roleArn ?typeVersionId ~typeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let desiredState = field_map_exn json "DesiredState" Properties.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let desiredState =
+        field_map_exn json__ "DesiredState" Properties.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let typeVersionId =
-        field_map json "TypeVersionId" TypeVersionId.of_json in
-      let typeName = field_map_exn json "TypeName" TypeName.of_json in
+        field_map json__ "TypeVersionId" TypeVersionId.of_json in
+      let typeName = field_map_exn json__ "TypeName" TypeName.of_json in
       make ~desiredState ?clientToken ?roleArn ?typeVersionId ~typeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2794,9 +3057,9 @@ module CancelResourceRequestOutput =
           (Xml.child xml_arg0 "ProgressEvent") in
       make ?progressEvent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let progressEvent =
-        field_map json "ProgressEvent" ProgressEvent.of_json in
+        field_map json__ "ProgressEvent" ProgressEvent.of_json in
       make ?progressEvent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2820,9 +3083,9 @@ module CancelResourceRequestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "RequestToken") in
       make ~requestToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestToken =
-        field_map_exn json "RequestToken" RequestToken.of_json in
+        field_map_exn json__ "RequestToken" RequestToken.of_json in
       make ~requestToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

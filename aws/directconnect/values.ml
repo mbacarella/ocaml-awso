@@ -169,11 +169,11 @@ module MacSecKey =
         (Option.map ~f:SecretARN.of_xml) (Xml.child xml_arg0 "secretARN") in
       make ?startOn ?state ?ckn ?secretARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startOn = field_map json "startOn" StartOnDate.of_json in
-      let state = field_map json "state" State.of_json in
-      let ckn = field_map json "ckn" Ckn.of_json in
-      let secretARN = field_map json "secretARN" SecretARN.of_json in
+    let of_json json__ =
+      let startOn = field_map json__ "startOn" StartOnDate.of_json in
+      let state = field_map json__ "state" State.of_json in
+      let ckn = field_map json__ "ckn" Ckn.of_json in
+      let secretARN = field_map json__ "secretARN" SecretARN.of_json in
       make ?startOn ?state ?ckn ?secretARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the MAC Security (MACsec) secret key."]
@@ -197,9 +197,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ?value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a tag."]
@@ -375,6 +375,19 @@ module CustomerAddress =
     let of_json j = string_of_json ~kind:"CustomerAddress" j
     let to_json = simple_to_json to_value
   end
+module LongAsn =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module CIDR =
   struct
     type nonrec t = string
@@ -500,8 +513,8 @@ module DirectConnectClientException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters are not valid."]
@@ -519,8 +532,8 @@ module DirectConnectServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A server-side error occurred."]
@@ -646,6 +659,9 @@ module MacSecKeyList =
   struct
     type nonrec t = MacSecKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MacSecKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -677,6 +693,19 @@ module OwnerAccount =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"OwnerAccount" j
+    let to_json = simple_to_json to_value
+  end
+module PartnerInterconnectMacSecCapable =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module PartnerName =
@@ -736,6 +765,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -788,7 +820,10 @@ module BGPPeer =
       bgpPeerId: BGPPeerId.t option [@ocaml.doc "The ID of the BGP peer."];
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for the BGP peer. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -812,31 +847,34 @@ module BGPPeer =
           "The Direct Connect endpoint that terminates the logical connection. This device might be different than the device that terminates the physical connection."]}
     let make ?bgpPeerId =
       fun ?asn ->
-        fun ?authKey ->
-          fun ?addressFamily ->
-            fun ?amazonAddress ->
-              fun ?customerAddress ->
-                fun ?bgpPeerState ->
-                  fun ?bgpStatus ->
-                    fun ?awsDeviceV2 ->
-                      fun ?awsLogicalDeviceId ->
-                        fun () ->
-                          {
-                            bgpPeerId;
-                            asn;
-                            authKey;
-                            addressFamily;
-                            amazonAddress;
-                            customerAddress;
-                            bgpPeerState;
-                            bgpStatus;
-                            awsDeviceV2;
-                            awsLogicalDeviceId
-                          }
+        fun ?asnLong ->
+          fun ?authKey ->
+            fun ?addressFamily ->
+              fun ?amazonAddress ->
+                fun ?customerAddress ->
+                  fun ?bgpPeerState ->
+                    fun ?bgpStatus ->
+                      fun ?awsDeviceV2 ->
+                        fun ?awsLogicalDeviceId ->
+                          fun () ->
+                            {
+                              bgpPeerId;
+                              asn;
+                              asnLong;
+                              authKey;
+                              addressFamily;
+                              amazonAddress;
+                              customerAddress;
+                              bgpPeerState;
+                              bgpStatus;
+                              awsDeviceV2;
+                              awsLogicalDeviceId
+                            }
     let to_value x =
       structure_to_value
         [("bgpPeerId", (Option.map x.bgpPeerId ~f:BGPPeerId.to_value));
         ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("addressFamily",
           (Option.map x.addressFamily ~f:AddressFamily.to_value));
@@ -873,30 +911,33 @@ module BGPPeer =
           (Xml.child xml_arg0 "addressFamily") in
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let bgpPeerId =
         (Option.map ~f:BGPPeerId.of_xml) (Xml.child xml_arg0 "bgpPeerId") in
       make ?awsLogicalDeviceId ?awsDeviceV2 ?bgpStatus ?bgpPeerState
-        ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn
+        ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asnLong ?asn
         ?bgpPeerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let awsLogicalDeviceId =
-        field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
-      let awsDeviceV2 = field_map json "awsDeviceV2" AwsDeviceV2.of_json in
-      let bgpStatus = field_map json "bgpStatus" BGPStatus.of_json in
-      let bgpPeerState = field_map json "bgpPeerState" BGPPeerState.of_json in
+        field_map json__ "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
+      let awsDeviceV2 = field_map json__ "awsDeviceV2" AwsDeviceV2.of_json in
+      let bgpStatus = field_map json__ "bgpStatus" BGPStatus.of_json in
+      let bgpPeerState = field_map json__ "bgpPeerState" BGPPeerState.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let asn = field_map json "asn" ASN.of_json in
-      let bgpPeerId = field_map json "bgpPeerId" BGPPeerId.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let bgpPeerId = field_map json__ "bgpPeerId" BGPPeerId.of_json in
       make ?awsLogicalDeviceId ?awsDeviceV2 ?bgpStatus ?bgpPeerState
-        ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn
+        ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asnLong ?asn
         ?bgpPeerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a BGP peer."]
@@ -915,8 +956,8 @@ module RouteFilterPrefix =
       let cidr = (Option.map ~f:CIDR.of_xml) (Xml.child xml_arg0 "cidr") in
       make ?cidr ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cidr = field_map json "cidr" CIDR.of_json in make ?cidr ()
+    let of_json json__ =
+      let cidr = field_map json__ "cidr" CIDR.of_json in make ?cidr ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a route filter prefix that a customer can advertise through Border Gateway Protocol (BGP) over a public virtual interface."]
@@ -966,8 +1007,7 @@ module Connection =
         [@ocaml.doc
           "The Direct Connect endpoint on which the physical connection terminates."];
       jumboFrameCapable: JumboFrameCapable.t option
-        [@ocaml.doc
-          "Indicates whether jumbo frames (9001 MTU) are supported."];
+        [@ocaml.doc "Indicates whether jumbo frames are supported."];
       awsDeviceV2: AwsDeviceV2.t option
         [@ocaml.doc
           "The Direct Connect endpoint that terminates the physical connection."];
@@ -993,7 +1033,11 @@ module Connection =
           "The MAC Security (MACsec) connection encryption mode. The valid values are no_encrypt, should_encrypt, and must_encrypt."];
       macSecKeys: MacSecKeyList.t option
         [@ocaml.doc
-          "The MAC Security (MACsec) security keys associated with the connection."]}
+          "The MAC Security (MACsec) security keys associated with the connection."];
+      partnerInterconnectMacSecCapable:
+        PartnerInterconnectMacSecCapable.t option
+        [@ocaml.doc
+          "Indicates whether the interconnect hosting this connection supports MAC Security (MACsec)."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -1020,31 +1064,35 @@ module Connection =
                                           fun ?portEncryptionStatus ->
                                             fun ?encryptionMode ->
                                               fun ?macSecKeys ->
-                                                fun () ->
-                                                  {
-                                                    ownerAccount;
-                                                    connectionId;
-                                                    connectionName;
-                                                    connectionState;
-                                                    region;
-                                                    location;
-                                                    bandwidth;
-                                                    vlan;
-                                                    partnerName;
-                                                    loaIssueTime;
-                                                    lagId;
-                                                    awsDevice;
-                                                    jumboFrameCapable;
-                                                    awsDeviceV2;
-                                                    awsLogicalDeviceId;
-                                                    hasLogicalRedundancy;
-                                                    tags;
-                                                    providerName;
-                                                    macSecCapable;
-                                                    portEncryptionStatus;
-                                                    encryptionMode;
-                                                    macSecKeys
-                                                  }
+                                                fun
+                                                  ?partnerInterconnectMacSecCapable
+                                                  ->
+                                                  fun () ->
+                                                    {
+                                                      ownerAccount;
+                                                      connectionId;
+                                                      connectionName;
+                                                      connectionState;
+                                                      region;
+                                                      location;
+                                                      bandwidth;
+                                                      vlan;
+                                                      partnerName;
+                                                      loaIssueTime;
+                                                      lagId;
+                                                      awsDevice;
+                                                      jumboFrameCapable;
+                                                      awsDeviceV2;
+                                                      awsLogicalDeviceId;
+                                                      hasLogicalRedundancy;
+                                                      tags;
+                                                      providerName;
+                                                      macSecCapable;
+                                                      portEncryptionStatus;
+                                                      encryptionMode;
+                                                      macSecKeys;
+                                                      partnerInterconnectMacSecCapable
+                                                    }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -1116,9 +1164,15 @@ module Connection =
           (Option.map x.portEncryptionStatus ~f:PortEncryptionStatus.to_value));
         ("encryptionMode",
           (Option.map x.encryptionMode ~f:EncryptionMode.to_value));
-        ("macSecKeys", (Option.map x.macSecKeys ~f:MacSecKeyList.to_value))]
+        ("macSecKeys", (Option.map x.macSecKeys ~f:MacSecKeyList.to_value));
+        ("partnerInterconnectMacSecCapable",
+          (Option.map x.partnerInterconnectMacSecCapable
+             ~f:PartnerInterconnectMacSecCapable.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let partnerInterconnectMacSecCapable =
+        (Option.map ~f:PartnerInterconnectMacSecCapable.of_xml)
+          (Xml.child xml_arg0 "partnerInterconnectMacSecCapable") in
       let macSecKeys =
         (Option.map ~f:MacSecKeyList.of_xml)
           (Xml.child xml_arg0 "macSecKeys") in
@@ -1173,50 +1227,98 @@ module Connection =
       let ownerAccount =
         (Option.map ~f:OwnerAccount.of_xml)
           (Xml.child xml_arg0 "ownerAccount") in
-      make ?macSecKeys ?encryptionMode ?portEncryptionStatus ?macSecCapable
-        ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
-        ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
-        ?partnerName ?vlan ?bandwidth ?location ?region ?connectionState
-        ?connectionName ?connectionId ?ownerAccount ()
+      make ?partnerInterconnectMacSecCapable ?macSecKeys ?encryptionMode
+        ?portEncryptionStatus ?macSecCapable ?providerName ?tags
+        ?hasLogicalRedundancy ?awsLogicalDeviceId ?awsDeviceV2
+        ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime ?partnerName ?vlan
+        ?bandwidth ?location ?region ?connectionState ?connectionName
+        ?connectionId ?ownerAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
+    let of_json json__ =
+      let partnerInterconnectMacSecCapable =
+        field_map json__ "partnerInterconnectMacSecCapable"
+          PartnerInterconnectMacSecCapable.of_json in
+      let macSecKeys = field_map json__ "macSecKeys" MacSecKeyList.of_json in
       let encryptionMode =
-        field_map json "encryptionMode" EncryptionMode.of_json in
+        field_map json__ "encryptionMode" EncryptionMode.of_json in
       let portEncryptionStatus =
-        field_map json "portEncryptionStatus" PortEncryptionStatus.of_json in
+        field_map json__ "portEncryptionStatus" PortEncryptionStatus.of_json in
       let macSecCapable =
-        field_map json "macSecCapable" MacSecCapable.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "macSecCapable" MacSecCapable.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let hasLogicalRedundancy =
-        field_map json "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
+        field_map json__ "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
       let awsLogicalDeviceId =
-        field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
-      let awsDeviceV2 = field_map json "awsDeviceV2" AwsDeviceV2.of_json in
+        field_map json__ "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
+      let awsDeviceV2 = field_map json__ "awsDeviceV2" AwsDeviceV2.of_json in
       let jumboFrameCapable =
-        field_map json "jumboFrameCapable" JumboFrameCapable.of_json in
-      let awsDevice = field_map json "awsDevice" AwsDevice.of_json in
-      let lagId = field_map json "lagId" LagId.of_json in
-      let loaIssueTime = field_map json "loaIssueTime" LoaIssueTime.of_json in
-      let partnerName = field_map json "partnerName" PartnerName.of_json in
-      let vlan = field_map json "vlan" VLAN.of_json in
-      let bandwidth = field_map json "bandwidth" Bandwidth.of_json in
-      let location = field_map json "location" LocationCode.of_json in
-      let region = field_map json "region" Region.of_json in
+        field_map json__ "jumboFrameCapable" JumboFrameCapable.of_json in
+      let awsDevice = field_map json__ "awsDevice" AwsDevice.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
+      let loaIssueTime = field_map json__ "loaIssueTime" LoaIssueTime.of_json in
+      let partnerName = field_map json__ "partnerName" PartnerName.of_json in
+      let vlan = field_map json__ "vlan" VLAN.of_json in
+      let bandwidth = field_map json__ "bandwidth" Bandwidth.of_json in
+      let location = field_map json__ "location" LocationCode.of_json in
+      let region = field_map json__ "region" Region.of_json in
       let connectionState =
-        field_map json "connectionState" ConnectionState.of_json in
+        field_map json__ "connectionState" ConnectionState.of_json in
       let connectionName =
-        field_map json "connectionName" ConnectionName.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
-      make ?macSecKeys ?encryptionMode ?portEncryptionStatus ?macSecCapable
-        ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
-        ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
-        ?partnerName ?vlan ?bandwidth ?location ?region ?connectionState
-        ?connectionName ?connectionId ?ownerAccount ()
+        field_map json__ "connectionName" ConnectionName.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      make ?partnerInterconnectMacSecCapable ?macSecKeys ?encryptionMode
+        ?portEncryptionStatus ?macSecCapable ?providerName ?tags
+        ?hasLogicalRedundancy ?awsLogicalDeviceId ?awsDeviceV2
+        ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime ?partnerName ?vlan
+        ?bandwidth ?location ?region ?connectionState ?connectionName
+        ?connectionId ?ownerAccount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an Direct Connect connection."]
+module CoreNetworkAttachmentId =
+  struct
+    type nonrec t = string
+    let context_ = "CoreNetworkAttachmentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:28) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^attachment-([0-9a-f]{1,17})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreNetworkAttachmentId" j
+    let to_json = simple_to_json to_value
+  end
+module CoreNetworkIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "CoreNetworkIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:14) >>=
+             (fun () ->
+                (check_string_max i ~max:30) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^core-network-([0-9a-f]{1,17})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CoreNetworkIdentifier" j
+    let to_json = simple_to_json to_value
+  end
 module GatewayIdentifier =
   struct
     type nonrec t = string
@@ -1259,6 +1361,9 @@ module BGPPeerList =
   struct
     type nonrec t = BGPPeer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BGPPeer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1292,19 +1397,6 @@ module DirectConnectGatewayId =
     let of_json j = string_of_json ~kind:"DirectConnectGatewayId" j
     let to_json = simple_to_json to_value
   end
-module LongAsn =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
 module MTU =
   struct
     type nonrec t = int
@@ -1322,6 +1414,9 @@ module RouteFilterPrefixList =
   struct
     type nonrec t = RouteFilterPrefix.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RouteFilterPrefix.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1416,6 +1511,7 @@ module VirtualInterfaceState =
       | Pending 
       | Available 
       | Down 
+      | Testing 
       | Deleting 
       | Deleted 
       | Rejected 
@@ -1429,6 +1525,7 @@ module VirtualInterfaceState =
       | Pending -> "pending"
       | Available -> "available"
       | Down -> "down"
+      | Testing -> "testing"
       | Deleting -> "deleting"
       | Deleted -> "deleted"
       | Rejected -> "rejected"
@@ -1441,6 +1538,7 @@ module VirtualInterfaceState =
       | "pending" -> Pending
       | "available" -> Available
       | "down" -> Down
+      | "testing" -> Testing
       | "deleting" -> Deleting
       | "deleted" -> Deleted
       | "rejected" -> Rejected
@@ -1486,6 +1584,9 @@ module AvailableMacSecPortSpeeds =
   struct
     type nonrec t = PortSpeed.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortSpeed.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1511,6 +1612,9 @@ module AvailablePortSpeeds =
   struct
     type nonrec t = PortSpeed.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortSpeed.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1548,6 +1652,9 @@ module ProviderList =
   struct
     type nonrec t = ProviderName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ProviderName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1572,6 +1679,9 @@ module BGPPeerIdList =
   struct
     type nonrec t = BGPPeerId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BGPPeerId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1673,6 +1783,9 @@ module ConnectionList =
   struct
     type nonrec t = Connection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Connection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1974,6 +2087,49 @@ module VirtualInterfaceRegion =
     let of_json j = string_of_json ~kind:"VirtualInterfaceRegion" j
     let to_json = simple_to_json to_value
   end
+module AssociatedCoreNetwork =
+  struct
+    type nonrec t =
+      {
+      id: CoreNetworkIdentifier.t option
+        [@ocaml.doc
+          "The ID of the Cloud WAN core network that the Direct Connect gateway is associated to."];
+      ownerAccount: OwnerAccount.t option
+        [@ocaml.doc "The account owner of the Cloud WAN core network."];
+      attachmentId: CoreNetworkAttachmentId.t option
+        [@ocaml.doc "the ID of the Direct Connect gateway attachment."]}
+    let make ?id =
+      fun ?ownerAccount ->
+        fun ?attachmentId -> fun () -> { id; ownerAccount; attachmentId }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:CoreNetworkIdentifier.to_value));
+        ("ownerAccount",
+          (Option.map x.ownerAccount ~f:OwnerAccount.to_value));
+        ("attachmentId",
+          (Option.map x.attachmentId ~f:CoreNetworkAttachmentId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentId =
+        (Option.map ~f:CoreNetworkAttachmentId.of_xml)
+          (Xml.child xml_arg0 "attachmentId") in
+      let ownerAccount =
+        (Option.map ~f:OwnerAccount.of_xml)
+          (Xml.child xml_arg0 "ownerAccount") in
+      let id =
+        (Option.map ~f:CoreNetworkIdentifier.of_xml)
+          (Xml.child xml_arg0 "id") in
+      make ?attachmentId ?ownerAccount ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentId =
+        field_map json__ "attachmentId" CoreNetworkAttachmentId.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      let id = field_map json__ "id" CoreNetworkIdentifier.of_json in
+      make ?attachmentId ?ownerAccount ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Web Services Cloud WAN core network that the Direct Connect gateway is associated to. This is only returned when a Direct Connect gateway is associated to a Cloud WAN core network."]
 module AssociatedGateway =
   struct
     type nonrec t =
@@ -2011,11 +2167,11 @@ module AssociatedGateway =
         (Option.map ~f:GatewayIdentifier.of_xml) (Xml.child xml_arg0 "id") in
       make ?region ?ownerAccount ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "region" Region.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
-      let type_ = field_map json "type" GatewayType.of_json in
-      let id = field_map json "id" GatewayIdentifier.of_json in
+    let of_json json__ =
+      let region = field_map json__ "region" Region.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      let type_ = field_map json__ "type" GatewayType.of_json in
+      let id = field_map json__ "id" GatewayIdentifier.of_json in
       make ?region ?ownerAccount ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the associated gateway."]
@@ -2175,17 +2331,20 @@ module VirtualInterface =
         [@ocaml.doc "The ID of the connection."];
       virtualInterfaceType: VirtualInterfaceType.t option
         [@ocaml.doc
-          "The type of virtual interface. The possible values are private and public."];
+          "The type of virtual interface. The possible values are private, public and transit."];
       virtualInterfaceName: VirtualInterfaceName.t option
         [@ocaml.doc
           "The name of the virtual interface assigned by the customer network. The name has a maximum of 100 characters. The following are valid characters: a-z, 0-9 and a hyphen (-)."];
       vlan: VLAN.t option [@ocaml.doc "The ID of the VLAN."];
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for the virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       amazonSideAsn: LongAsn.t option
         [@ocaml.doc
-          "The autonomous system number (ASN) for the Amazon side of the connection."];
+          "The autonomous system number (AS) for the Amazon side of the connection."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -2197,15 +2356,14 @@ module VirtualInterface =
         [@ocaml.doc "The address family for the BGP peer."];
       virtualInterfaceState: VirtualInterfaceState.t option
         [@ocaml.doc
-          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."];
+          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. testing: A virtual interface is in this state immediately after calling StartBgpFailoverTest and remains in this state during the duration of the test. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."];
       customerRouterConfig: RouterConfig.t option
         [@ocaml.doc "The customer router configuration."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500"];
       jumboFrameCapable: JumboFrameCapable.t option
-        [@ocaml.doc
-          "Indicates whether jumbo frames (9001 MTU) are supported."];
+        [@ocaml.doc "Indicates whether jumbo frames are supported."];
       virtualGatewayId: VirtualGatewayId.t option
         [@ocaml.doc
           "The ID of the virtual private gateway. Applies only to private virtual interfaces."];
@@ -2243,53 +2401,57 @@ module VirtualInterface =
               fun ?virtualInterfaceName ->
                 fun ?vlan ->
                   fun ?asn ->
-                    fun ?amazonSideAsn ->
-                      fun ?authKey ->
-                        fun ?amazonAddress ->
-                          fun ?customerAddress ->
-                            fun ?addressFamily ->
-                              fun ?virtualInterfaceState ->
-                                fun ?customerRouterConfig ->
-                                  fun ?mtu ->
-                                    fun ?jumboFrameCapable ->
-                                      fun ?virtualGatewayId ->
-                                        fun ?directConnectGatewayId ->
-                                          fun ?routeFilterPrefixes ->
-                                            fun ?bgpPeers ->
-                                              fun ?region ->
-                                                fun ?awsDeviceV2 ->
-                                                  fun ?awsLogicalDeviceId ->
-                                                    fun ?tags ->
-                                                      fun ?siteLinkEnabled ->
-                                                        fun () ->
-                                                          {
-                                                            ownerAccount;
-                                                            virtualInterfaceId;
-                                                            location;
-                                                            connectionId;
-                                                            virtualInterfaceType;
-                                                            virtualInterfaceName;
-                                                            vlan;
-                                                            asn;
-                                                            amazonSideAsn;
-                                                            authKey;
-                                                            amazonAddress;
-                                                            customerAddress;
-                                                            addressFamily;
-                                                            virtualInterfaceState;
-                                                            customerRouterConfig;
-                                                            mtu;
-                                                            jumboFrameCapable;
-                                                            virtualGatewayId;
-                                                            directConnectGatewayId;
-                                                            routeFilterPrefixes;
-                                                            bgpPeers;
-                                                            region;
-                                                            awsDeviceV2;
-                                                            awsLogicalDeviceId;
-                                                            tags;
-                                                            siteLinkEnabled
-                                                          }
+                    fun ?asnLong ->
+                      fun ?amazonSideAsn ->
+                        fun ?authKey ->
+                          fun ?amazonAddress ->
+                            fun ?customerAddress ->
+                              fun ?addressFamily ->
+                                fun ?virtualInterfaceState ->
+                                  fun ?customerRouterConfig ->
+                                    fun ?mtu ->
+                                      fun ?jumboFrameCapable ->
+                                        fun ?virtualGatewayId ->
+                                          fun ?directConnectGatewayId ->
+                                            fun ?routeFilterPrefixes ->
+                                              fun ?bgpPeers ->
+                                                fun ?region ->
+                                                  fun ?awsDeviceV2 ->
+                                                    fun ?awsLogicalDeviceId
+                                                      ->
+                                                      fun ?tags ->
+                                                        fun ?siteLinkEnabled
+                                                          ->
+                                                          fun () ->
+                                                            {
+                                                              ownerAccount;
+                                                              virtualInterfaceId;
+                                                              location;
+                                                              connectionId;
+                                                              virtualInterfaceType;
+                                                              virtualInterfaceName;
+                                                              vlan;
+                                                              asn;
+                                                              asnLong;
+                                                              amazonSideAsn;
+                                                              authKey;
+                                                              amazonAddress;
+                                                              customerAddress;
+                                                              addressFamily;
+                                                              virtualInterfaceState;
+                                                              customerRouterConfig;
+                                                              mtu;
+                                                              jumboFrameCapable;
+                                                              virtualGatewayId;
+                                                              directConnectGatewayId;
+                                                              routeFilterPrefixes;
+                                                              bgpPeers;
+                                                              region;
+                                                              awsDeviceV2;
+                                                              awsLogicalDeviceId;
+                                                              tags;
+                                                              siteLinkEnabled
+                                                            }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -2357,6 +2519,7 @@ module VirtualInterface =
           (Option.map x.virtualInterfaceName ~f:VirtualInterfaceName.to_value));
         ("vlan", (Option.map x.vlan ~f:VLAN.to_value));
         ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("amazonSideAsn", (Option.map x.amazonSideAsn ~f:LongAsn.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
@@ -2435,6 +2598,8 @@ module VirtualInterface =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let amazonSideAsn =
         (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "amazonSideAsn") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan = (Option.map ~f:VLAN.of_xml) (Xml.child xml_arg0 "vlan") in
       let virtualInterfaceName =
@@ -2458,57 +2623,59 @@ module VirtualInterface =
         ?bgpPeers ?routeFilterPrefixes ?directConnectGatewayId
         ?virtualGatewayId ?jumboFrameCapable ?mtu ?customerRouterConfig
         ?virtualInterfaceState ?addressFamily ?customerAddress ?amazonAddress
-        ?authKey ?amazonSideAsn ?asn ?vlan ?virtualInterfaceName
+        ?authKey ?amazonSideAsn ?asnLong ?asn ?vlan ?virtualInterfaceName
         ?virtualInterfaceType ?connectionId ?location ?virtualInterfaceId
         ?ownerAccount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let siteLinkEnabled =
-        field_map json "siteLinkEnabled" SiteLinkEnabled.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "siteLinkEnabled" SiteLinkEnabled.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let awsLogicalDeviceId =
-        field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
-      let awsDeviceV2 = field_map json "awsDeviceV2" AwsDeviceV2.of_json in
-      let region = field_map json "region" Region.of_json in
-      let bgpPeers = field_map json "bgpPeers" BGPPeerList.of_json in
+        field_map json__ "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
+      let awsDeviceV2 = field_map json__ "awsDeviceV2" AwsDeviceV2.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      let bgpPeers = field_map json__ "bgpPeers" BGPPeerList.of_json in
       let routeFilterPrefixes =
-        field_map json "routeFilterPrefixes" RouteFilterPrefixList.of_json in
+        field_map json__ "routeFilterPrefixes" RouteFilterPrefixList.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       let jumboFrameCapable =
-        field_map json "jumboFrameCapable" JumboFrameCapable.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
+        field_map json__ "jumboFrameCapable" JumboFrameCapable.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
       let customerRouterConfig =
-        field_map json "customerRouterConfig" RouterConfig.of_json in
+        field_map json__ "customerRouterConfig" RouterConfig.of_json in
       let virtualInterfaceState =
-        field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
+        field_map json__ "virtualInterfaceState"
+          VirtualInterfaceState.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let amazonSideAsn = field_map json "amazonSideAsn" LongAsn.of_json in
-      let asn = field_map json "asn" ASN.of_json in
-      let vlan = field_map json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let amazonSideAsn = field_map json__ "amazonSideAsn" LongAsn.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
+        field_map json__ "virtualInterfaceName" VirtualInterfaceName.of_json in
       let virtualInterfaceType =
-        field_map json "virtualInterfaceType" VirtualInterfaceType.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
-      let location = field_map json "location" LocationCode.of_json in
+        field_map json__ "virtualInterfaceType" VirtualInterfaceType.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
+      let location = field_map json__ "location" LocationCode.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
       make ?siteLinkEnabled ?tags ?awsLogicalDeviceId ?awsDeviceV2 ?region
         ?bgpPeers ?routeFilterPrefixes ?directConnectGatewayId
         ?virtualGatewayId ?jumboFrameCapable ?mtu ?customerRouterConfig
         ?virtualInterfaceState ?addressFamily ?customerAddress ?amazonAddress
-        ?authKey ?amazonSideAsn ?asn ?vlan ?virtualInterfaceName
+        ?authKey ?amazonSideAsn ?asnLong ?asn ?vlan ?virtualInterfaceName
         ?virtualInterfaceType ?connectionId ?location ?virtualInterfaceId
         ?ownerAccount ()
     let to_json v = composed_to_json to_value v
@@ -2541,11 +2708,11 @@ module VirtualGateway =
           (Xml.child xml_arg0 "virtualGatewayId") in
       make ?virtualGatewayState ?virtualGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayState =
-        field_map json "virtualGatewayState" VirtualGatewayState.of_json in
+        field_map json__ "virtualGatewayState" VirtualGatewayState.of_json in
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       make ?virtualGatewayState ?virtualGatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2619,17 +2786,17 @@ module Location =
       make ?availableMacSecPortSpeeds ?availableProviders
         ?availablePortSpeeds ?region ?locationName ?locationCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availableMacSecPortSpeeds =
-        field_map json "availableMacSecPortSpeeds"
+        field_map json__ "availableMacSecPortSpeeds"
           AvailableMacSecPortSpeeds.of_json in
       let availableProviders =
-        field_map json "availableProviders" ProviderList.of_json in
+        field_map json__ "availableProviders" ProviderList.of_json in
       let availablePortSpeeds =
-        field_map json "availablePortSpeeds" AvailablePortSpeeds.of_json in
-      let region = field_map json "region" Region.of_json in
-      let locationName = field_map json "locationName" LocationName.of_json in
-      let locationCode = field_map json "locationCode" LocationCode.of_json in
+        field_map json__ "availablePortSpeeds" AvailablePortSpeeds.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      let locationName = field_map json__ "locationName" LocationName.of_json in
+      let locationCode = field_map json__ "locationCode" LocationCode.of_json in
       make ?availableMacSecPortSpeeds ?availableProviders
         ?availablePortSpeeds ?region ?locationName ?locationCode ()
     let to_json v = composed_to_json to_value v
@@ -2716,17 +2883,17 @@ module VirtualInterfaceTestHistory =
       make ?endTime ?startTime ?testDurationInMinutes ?ownerAccount ?status
         ?bgpPeers ?virtualInterfaceId ?testId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "endTime" EndTime.of_json in
-      let startTime = field_map json "startTime" StartTime.of_json in
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" EndTime.of_json in
+      let startTime = field_map json__ "startTime" StartTime.of_json in
       let testDurationInMinutes =
-        field_map json "testDurationInMinutes" TestDuration.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
-      let status = field_map json "status" FailureTestHistoryStatus.of_json in
-      let bgpPeers = field_map json "bgpPeers" BGPPeerIdList.of_json in
+        field_map json__ "testDurationInMinutes" TestDuration.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      let status = field_map json__ "status" FailureTestHistoryStatus.of_json in
+      let bgpPeers = field_map json__ "bgpPeers" BGPPeerIdList.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      let testId = field_map json "testId" TestId.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      let testId = field_map json__ "testId" TestId.of_json in
       make ?endTime ?startTime ?testDurationInMinutes ?ownerAccount ?status
         ?bgpPeers ?virtualInterfaceId ?testId ()
     let to_json v = composed_to_json to_value v
@@ -2737,10 +2904,10 @@ module Lag =
       {
       connectionsBandwidth: Bandwidth.t option
         [@ocaml.doc
-          "The individual bandwidth of the physical connections bundled by the LAG. The possible values are 1Gbps and 10Gbps."];
+          "The individual bandwidth of the physical connections bundled by the LAG. The possible values are 1Gbps, 10Gbps, 100Gbps, or 400 Gbps.."];
       numberOfConnections: Count.t option
         [@ocaml.doc
-          "The number of physical dedicated connections bundled by the LAG, up to a maximum of 10."];
+          "The number of physical dedicated connections initially provisioned and bundled by the LAG. You can have a maximum of four connections when the port speed is 1 Gbps or 10 Gbps, or two when the port speed is 100 Gbps or 400 Gbps."];
       lagId: LagId.t option [@ocaml.doc "The ID of the LAG."];
       ownerAccount: OwnerAccount.t option
         [@ocaml.doc
@@ -2768,8 +2935,7 @@ module Lag =
       allowsHostedConnections: BooleanFlag.t option
         [@ocaml.doc "Indicates whether the LAG can host other connections."];
       jumboFrameCapable: JumboFrameCapable.t option
-        [@ocaml.doc
-          "Indicates whether jumbo frames (9001 MTU) are supported."];
+        [@ocaml.doc "Indicates whether jumbo frames are supported."];
       hasLogicalRedundancy: HasLogicalRedundancy.t option
         [@ocaml.doc
           "Indicates whether the LAG supports a secondary BGP peer in the same address family (IPv4/IPv6)."];
@@ -2983,36 +3149,36 @@ module Lag =
         ?minimumLinks ?region ?location ?lagState ?lagName ?ownerAccount
         ?lagId ?numberOfConnections ?connectionsBandwidth ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
+    let of_json json__ =
+      let macSecKeys = field_map json__ "macSecKeys" MacSecKeyList.of_json in
       let encryptionMode =
-        field_map json "encryptionMode" EncryptionMode.of_json in
+        field_map json__ "encryptionMode" EncryptionMode.of_json in
       let macSecCapable =
-        field_map json "macSecCapable" MacSecCapable.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "macSecCapable" MacSecCapable.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let hasLogicalRedundancy =
-        field_map json "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
+        field_map json__ "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
       let jumboFrameCapable =
-        field_map json "jumboFrameCapable" JumboFrameCapable.of_json in
+        field_map json__ "jumboFrameCapable" JumboFrameCapable.of_json in
       let allowsHostedConnections =
-        field_map json "allowsHostedConnections" BooleanFlag.of_json in
-      let connections = field_map json "connections" ConnectionList.of_json in
+        field_map json__ "allowsHostedConnections" BooleanFlag.of_json in
+      let connections = field_map json__ "connections" ConnectionList.of_json in
       let awsLogicalDeviceId =
-        field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
-      let awsDeviceV2 = field_map json "awsDeviceV2" AwsDeviceV2.of_json in
-      let awsDevice = field_map json "awsDevice" AwsDevice.of_json in
-      let minimumLinks = field_map json "minimumLinks" Count.of_json in
-      let region = field_map json "region" Region.of_json in
-      let location = field_map json "location" LocationCode.of_json in
-      let lagState = field_map json "lagState" LagState.of_json in
-      let lagName = field_map json "lagName" LagName.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
-      let lagId = field_map json "lagId" LagId.of_json in
+        field_map json__ "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
+      let awsDeviceV2 = field_map json__ "awsDeviceV2" AwsDeviceV2.of_json in
+      let awsDevice = field_map json__ "awsDevice" AwsDevice.of_json in
+      let minimumLinks = field_map json__ "minimumLinks" Count.of_json in
+      let region = field_map json__ "region" Region.of_json in
+      let location = field_map json__ "location" LocationCode.of_json in
+      let lagState = field_map json__ "lagState" LagState.of_json in
+      let lagName = field_map json__ "lagName" LagName.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
       let numberOfConnections =
-        field_map json "numberOfConnections" Count.of_json in
+        field_map json__ "numberOfConnections" Count.of_json in
       let connectionsBandwidth =
-        field_map json "connectionsBandwidth" Bandwidth.of_json in
+        field_map json__ "connectionsBandwidth" Bandwidth.of_json in
       make ?macSecKeys ?encryptionMode ?macSecCapable ?providerName ?tags
         ?hasLogicalRedundancy ?jumboFrameCapable ?allowsHostedConnections
         ?connections ?awsLogicalDeviceId ?awsDeviceV2 ?awsDevice
@@ -3046,8 +3212,7 @@ module Interconnect =
         [@ocaml.doc
           "The Direct Connect endpoint on which the physical connection terminates."];
       jumboFrameCapable: JumboFrameCapable.t option
-        [@ocaml.doc
-          "Indicates whether jumbo frames (9001 MTU) are supported."];
+        [@ocaml.doc "Indicates whether jumbo frames are supported."];
       awsDeviceV2: AwsDeviceV2.t option
         [@ocaml.doc
           "The Direct Connect endpoint that terminates the physical connection."];
@@ -3061,7 +3226,18 @@ module Interconnect =
         [@ocaml.doc "The tags associated with the interconnect."];
       providerName: ProviderName.t option
         [@ocaml.doc
-          "The name of the service provider associated with the interconnect."]}
+          "The name of the service provider associated with the interconnect."];
+      macSecCapable: MacSecCapable.t option
+        [@ocaml.doc
+          "Indicates whether the interconnect supports MAC Security (MACsec)."];
+      portEncryptionStatus: PortEncryptionStatus.t option
+        [@ocaml.doc
+          "The MAC Security (MACsec) port link status. The valid values are Encryption Up, which means that there is an active Connection Key Name, or Encryption Down."];
+      encryptionMode: EncryptionMode.t option
+        [@ocaml.doc
+          "The MAC Security (MACsec) encryption mode. The valid values are no_encrypt, should_encrypt, and must_encrypt."];
+      macSecKeys: MacSecKeyList.t option
+        [@ocaml.doc "The MAC Security (MACsec) security keys."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -3083,24 +3259,32 @@ module Interconnect =
                             fun ?hasLogicalRedundancy ->
                               fun ?tags ->
                                 fun ?providerName ->
-                                  fun () ->
-                                    {
-                                      interconnectId;
-                                      interconnectName;
-                                      interconnectState;
-                                      region;
-                                      location;
-                                      bandwidth;
-                                      loaIssueTime;
-                                      lagId;
-                                      awsDevice;
-                                      jumboFrameCapable;
-                                      awsDeviceV2;
-                                      awsLogicalDeviceId;
-                                      hasLogicalRedundancy;
-                                      tags;
-                                      providerName
-                                    }
+                                  fun ?macSecCapable ->
+                                    fun ?portEncryptionStatus ->
+                                      fun ?encryptionMode ->
+                                        fun ?macSecKeys ->
+                                          fun () ->
+                                            {
+                                              interconnectId;
+                                              interconnectName;
+                                              interconnectState;
+                                              region;
+                                              location;
+                                              bandwidth;
+                                              loaIssueTime;
+                                              lagId;
+                                              awsDevice;
+                                              jumboFrameCapable;
+                                              awsDeviceV2;
+                                              awsLogicalDeviceId;
+                                              hasLogicalRedundancy;
+                                              tags;
+                                              providerName;
+                                              macSecCapable;
+                                              portEncryptionStatus;
+                                              encryptionMode;
+                                              macSecKeys
+                                            }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -3177,9 +3361,28 @@ module Interconnect =
           (Option.map x.hasLogicalRedundancy ~f:HasLogicalRedundancy.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("providerName",
-          (Option.map x.providerName ~f:ProviderName.to_value))]
+          (Option.map x.providerName ~f:ProviderName.to_value));
+        ("macSecCapable",
+          (Option.map x.macSecCapable ~f:MacSecCapable.to_value));
+        ("portEncryptionStatus",
+          (Option.map x.portEncryptionStatus ~f:PortEncryptionStatus.to_value));
+        ("encryptionMode",
+          (Option.map x.encryptionMode ~f:EncryptionMode.to_value));
+        ("macSecKeys", (Option.map x.macSecKeys ~f:MacSecKeyList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let macSecKeys =
+        (Option.map ~f:MacSecKeyList.of_xml)
+          (Xml.child xml_arg0 "macSecKeys") in
+      let encryptionMode =
+        (Option.map ~f:EncryptionMode.of_xml)
+          (Xml.child xml_arg0 "encryptionMode") in
+      let portEncryptionStatus =
+        (Option.map ~f:PortEncryptionStatus.of_xml)
+          (Xml.child xml_arg0 "portEncryptionStatus") in
+      let macSecCapable =
+        (Option.map ~f:MacSecCapable.of_xml)
+          (Xml.child xml_arg0 "macSecCapable") in
       let providerName =
         (Option.map ~f:ProviderName.of_xml)
           (Xml.child xml_arg0 "providerName") in
@@ -3216,34 +3419,43 @@ module Interconnect =
       let interconnectId =
         (Option.map ~f:InterconnectId.of_xml)
           (Xml.child xml_arg0 "interconnectId") in
-      make ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
+      make ?macSecKeys ?encryptionMode ?portEncryptionStatus ?macSecCapable
+        ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
         ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
         ?bandwidth ?location ?region ?interconnectState ?interconnectName
         ?interconnectId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let providerName = field_map json "providerName" ProviderName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let macSecKeys = field_map json__ "macSecKeys" MacSecKeyList.of_json in
+      let encryptionMode =
+        field_map json__ "encryptionMode" EncryptionMode.of_json in
+      let portEncryptionStatus =
+        field_map json__ "portEncryptionStatus" PortEncryptionStatus.of_json in
+      let macSecCapable =
+        field_map json__ "macSecCapable" MacSecCapable.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let hasLogicalRedundancy =
-        field_map json "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
+        field_map json__ "hasLogicalRedundancy" HasLogicalRedundancy.of_json in
       let awsLogicalDeviceId =
-        field_map json "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
-      let awsDeviceV2 = field_map json "awsDeviceV2" AwsDeviceV2.of_json in
+        field_map json__ "awsLogicalDeviceId" AwsLogicalDeviceId.of_json in
+      let awsDeviceV2 = field_map json__ "awsDeviceV2" AwsDeviceV2.of_json in
       let jumboFrameCapable =
-        field_map json "jumboFrameCapable" JumboFrameCapable.of_json in
-      let awsDevice = field_map json "awsDevice" AwsDevice.of_json in
-      let lagId = field_map json "lagId" LagId.of_json in
-      let loaIssueTime = field_map json "loaIssueTime" LoaIssueTime.of_json in
-      let bandwidth = field_map json "bandwidth" Bandwidth.of_json in
-      let location = field_map json "location" LocationCode.of_json in
-      let region = field_map json "region" Region.of_json in
+        field_map json__ "jumboFrameCapable" JumboFrameCapable.of_json in
+      let awsDevice = field_map json__ "awsDevice" AwsDevice.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
+      let loaIssueTime = field_map json__ "loaIssueTime" LoaIssueTime.of_json in
+      let bandwidth = field_map json__ "bandwidth" Bandwidth.of_json in
+      let location = field_map json__ "location" LocationCode.of_json in
+      let region = field_map json__ "region" Region.of_json in
       let interconnectState =
-        field_map json "interconnectState" InterconnectState.of_json in
+        field_map json__ "interconnectState" InterconnectState.of_json in
       let interconnectName =
-        field_map json "interconnectName" InterconnectName.of_json in
+        field_map json__ "interconnectName" InterconnectName.of_json in
       let interconnectId =
-        field_map json "interconnectId" InterconnectId.of_json in
-      make ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
+        field_map json__ "interconnectId" InterconnectId.of_json in
+      make ?macSecKeys ?encryptionMode ?portEncryptionStatus ?macSecCapable
+        ?providerName ?tags ?hasLogicalRedundancy ?awsLogicalDeviceId
         ?awsDeviceV2 ?jumboFrameCapable ?awsDevice ?lagId ?loaIssueTime
         ?bandwidth ?location ?region ?interconnectState ?interconnectName
         ?interconnectId ()
@@ -3268,9 +3480,9 @@ module ResourceTag =
         (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?tags ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let resourceArn = field_map json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let resourceArn = field_map json__ "resourceArn" ResourceArn.of_json in
       make ?tags ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3393,7 +3605,7 @@ module DirectConnectGateway =
         [@ocaml.doc "The name of the Direct Connect gateway."];
       amazonSideAsn: LongAsn.t option
         [@ocaml.doc
-          "The autonomous system number (ASN) for the Amazon side of the connection."];
+          "The autonomous system number (AS) for the Amazon side of the connection."];
       ownerAccount: OwnerAccount.t option
         [@ocaml.doc
           "The ID of the Amazon Web Services account that owns the Direct Connect gateway."];
@@ -3402,22 +3614,25 @@ module DirectConnectGateway =
           "The state of the Direct Connect gateway. The following are the possible values: pending: The initial state after calling CreateDirectConnectGateway. available: The Direct Connect gateway is ready for use. deleting: The initial state after calling DeleteDirectConnectGateway. deleted: The Direct Connect gateway is deleted and cannot pass traffic."];
       stateChangeError: StateChangeError.t option
         [@ocaml.doc
-          "The error message if the state of an object failed to advance."]}
+          "The error message if the state of an object failed to advance."];
+      tags: TagList.t option [@ocaml.doc "Information about a tag."]}
     let make ?directConnectGatewayId =
       fun ?directConnectGatewayName ->
         fun ?amazonSideAsn ->
           fun ?ownerAccount ->
             fun ?directConnectGatewayState ->
               fun ?stateChangeError ->
-                fun () ->
-                  {
-                    directConnectGatewayId;
-                    directConnectGatewayName;
-                    amazonSideAsn;
-                    ownerAccount;
-                    directConnectGatewayState;
-                    stateChangeError
-                  }
+                fun ?tags ->
+                  fun () ->
+                    {
+                      directConnectGatewayId;
+                      directConnectGatewayName;
+                      amazonSideAsn;
+                      ownerAccount;
+                      directConnectGatewayState;
+                      stateChangeError;
+                      tags
+                    }
     let to_value x =
       structure_to_value
         [("directConnectGatewayId",
@@ -3433,9 +3648,11 @@ module DirectConnectGateway =
           (Option.map x.directConnectGatewayState
              ~f:DirectConnectGatewayState.to_value));
         ("stateChangeError",
-          (Option.map x.stateChangeError ~f:StateChangeError.to_value))]
+          (Option.map x.stateChangeError ~f:StateChangeError.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let stateChangeError =
         (Option.map ~f:StateChangeError.of_xml)
           (Xml.child xml_arg0 "stateChangeError") in
@@ -3453,24 +3670,25 @@ module DirectConnectGateway =
       let directConnectGatewayId =
         (Option.map ~f:DirectConnectGatewayId.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayId") in
-      make ?stateChangeError ?directConnectGatewayState ?ownerAccount
+      make ?tags ?stateChangeError ?directConnectGatewayState ?ownerAccount
         ?amazonSideAsn ?directConnectGatewayName ?directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let stateChangeError =
-        field_map json "stateChangeError" StateChangeError.of_json in
+        field_map json__ "stateChangeError" StateChangeError.of_json in
       let directConnectGatewayState =
-        field_map json "directConnectGatewayState"
+        field_map json__ "directConnectGatewayState"
           DirectConnectGatewayState.of_json in
-      let ownerAccount = field_map json "ownerAccount" OwnerAccount.of_json in
-      let amazonSideAsn = field_map json "amazonSideAsn" LongAsn.of_json in
+      let ownerAccount = field_map json__ "ownerAccount" OwnerAccount.of_json in
+      let amazonSideAsn = field_map json__ "amazonSideAsn" LongAsn.of_json in
       let directConnectGatewayName =
-        field_map json "directConnectGatewayName"
+        field_map json__ "directConnectGatewayName"
           DirectConnectGatewayName.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
-      make ?stateChangeError ?directConnectGatewayState ?ownerAccount
+      make ?tags ?stateChangeError ?directConnectGatewayState ?ownerAccount
         ?amazonSideAsn ?directConnectGatewayName ?directConnectGatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3561,24 +3779,24 @@ module DirectConnectGatewayAttachment =
         ?virtualInterfaceOwnerAccount ?virtualInterfaceRegion
         ?virtualInterfaceId ?directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateChangeError =
-        field_map json "stateChangeError" StateChangeError.of_json in
+        field_map json__ "stateChangeError" StateChangeError.of_json in
       let attachmentType =
-        field_map json "attachmentType"
+        field_map json__ "attachmentType"
           DirectConnectGatewayAttachmentType.of_json in
       let attachmentState =
-        field_map json "attachmentState"
+        field_map json__ "attachmentState"
           DirectConnectGatewayAttachmentState.of_json in
       let virtualInterfaceOwnerAccount =
-        field_map json "virtualInterfaceOwnerAccount" OwnerAccount.of_json in
+        field_map json__ "virtualInterfaceOwnerAccount" OwnerAccount.of_json in
       let virtualInterfaceRegion =
-        field_map json "virtualInterfaceRegion"
+        field_map json__ "virtualInterfaceRegion"
           VirtualInterfaceRegion.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?stateChangeError ?attachmentType ?attachmentState
         ?virtualInterfaceOwnerAccount ?virtualInterfaceRegion
@@ -3597,7 +3815,7 @@ module DirectConnectGatewayAssociation =
           "The ID of the Amazon Web Services account that owns the associated gateway."];
       associationState: DirectConnectGatewayAssociationState.t option
         [@ocaml.doc
-          "The state of the association. The following are the possible values: associating: The initial state after calling CreateDirectConnectGatewayAssociation. associated: The Direct Connect gateway and virtual private gateway or transit gateway are successfully associated and ready to pass traffic. disassociating: The initial state after calling DeleteDirectConnectGatewayAssociation. disassociated: The virtual private gateway or transit gateway is disassociated from the Direct Connect gateway. Traffic flow between the Direct Connect gateway and virtual private gateway or transit gateway is stopped."];
+          "The state of the association. The following are the possible values: associating: The initial state after calling CreateDirectConnectGatewayAssociation. associated: The Direct Connect gateway and virtual private gateway or transit gateway are successfully associated and ready to pass traffic. disassociating: The initial state after calling DeleteDirectConnectGatewayAssociation. disassociated: The virtual private gateway or transit gateway is disassociated from the Direct Connect gateway. Traffic flow between the Direct Connect gateway and virtual private gateway or transit gateway is stopped. updating: The CIDR blocks for the virtual private gateway or transit gateway are currently being updated. This could be new CIDR blocks added or current CIDR blocks removed."];
       stateChangeError: StateChangeError.t option
         [@ocaml.doc
           "The error message if the state of an object failed to advance."];
@@ -3608,6 +3826,9 @@ module DirectConnectGatewayAssociation =
       allowedPrefixesToDirectConnectGateway: RouteFilterPrefixList.t option
         [@ocaml.doc
           "The Amazon VPC prefixes to advertise to the Direct Connect gateway."];
+      associatedCoreNetwork: AssociatedCoreNetwork.t option
+        [@ocaml.doc
+          "The ID of the Cloud WAN core network associated with the Direct Connect gateway attachment."];
       virtualGatewayId: VirtualGatewayId.t option
         [@ocaml.doc
           "The ID of the virtual private gateway. Applies only to private virtual interfaces."];
@@ -3624,22 +3845,24 @@ module DirectConnectGatewayAssociation =
             fun ?associatedGateway ->
               fun ?associationId ->
                 fun ?allowedPrefixesToDirectConnectGateway ->
-                  fun ?virtualGatewayId ->
-                    fun ?virtualGatewayRegion ->
-                      fun ?virtualGatewayOwnerAccount ->
-                        fun () ->
-                          {
-                            directConnectGatewayId;
-                            directConnectGatewayOwnerAccount;
-                            associationState;
-                            stateChangeError;
-                            associatedGateway;
-                            associationId;
-                            allowedPrefixesToDirectConnectGateway;
-                            virtualGatewayId;
-                            virtualGatewayRegion;
-                            virtualGatewayOwnerAccount
-                          }
+                  fun ?associatedCoreNetwork ->
+                    fun ?virtualGatewayId ->
+                      fun ?virtualGatewayRegion ->
+                        fun ?virtualGatewayOwnerAccount ->
+                          fun () ->
+                            {
+                              directConnectGatewayId;
+                              directConnectGatewayOwnerAccount;
+                              associationState;
+                              stateChangeError;
+                              associatedGateway;
+                              associationId;
+                              allowedPrefixesToDirectConnectGateway;
+                              associatedCoreNetwork;
+                              virtualGatewayId;
+                              virtualGatewayRegion;
+                              virtualGatewayOwnerAccount
+                            }
     let to_value x =
       structure_to_value
         [("directConnectGatewayId",
@@ -3661,6 +3884,9 @@ module DirectConnectGatewayAssociation =
         ("allowedPrefixesToDirectConnectGateway",
           (Option.map x.allowedPrefixesToDirectConnectGateway
              ~f:RouteFilterPrefixList.to_value));
+        ("associatedCoreNetwork",
+          (Option.map x.associatedCoreNetwork
+             ~f:AssociatedCoreNetwork.to_value));
         ("virtualGatewayId",
           (Option.map x.virtualGatewayId ~f:VirtualGatewayId.to_value));
         ("virtualGatewayRegion",
@@ -3678,6 +3904,9 @@ module DirectConnectGatewayAssociation =
       let virtualGatewayId =
         (Option.map ~f:VirtualGatewayId.of_xml)
           (Xml.child xml_arg0 "virtualGatewayId") in
+      let associatedCoreNetwork =
+        (Option.map ~f:AssociatedCoreNetwork.of_xml)
+          (Xml.child xml_arg0 "associatedCoreNetwork") in
       let allowedPrefixesToDirectConnectGateway =
         (Option.map ~f:RouteFilterPrefixList.of_xml)
           (Xml.child xml_arg0 "allowedPrefixesToDirectConnectGateway") in
@@ -3700,39 +3929,44 @@ module DirectConnectGatewayAssociation =
         (Option.map ~f:DirectConnectGatewayId.of_xml)
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?virtualGatewayOwnerAccount ?virtualGatewayRegion
-        ?virtualGatewayId ?allowedPrefixesToDirectConnectGateway
-        ?associationId ?associatedGateway ?stateChangeError ?associationState
+        ?virtualGatewayId ?associatedCoreNetwork
+        ?allowedPrefixesToDirectConnectGateway ?associationId
+        ?associatedGateway ?stateChangeError ?associationState
         ?directConnectGatewayOwnerAccount ?directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayOwnerAccount =
-        field_map json "virtualGatewayOwnerAccount" OwnerAccount.of_json in
+        field_map json__ "virtualGatewayOwnerAccount" OwnerAccount.of_json in
       let virtualGatewayRegion =
-        field_map json "virtualGatewayRegion" VirtualGatewayRegion.of_json in
+        field_map json__ "virtualGatewayRegion" VirtualGatewayRegion.of_json in
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
+      let associatedCoreNetwork =
+        field_map json__ "associatedCoreNetwork"
+          AssociatedCoreNetwork.of_json in
       let allowedPrefixesToDirectConnectGateway =
-        field_map json "allowedPrefixesToDirectConnectGateway"
+        field_map json__ "allowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let associationId =
-        field_map json "associationId"
+        field_map json__ "associationId"
           DirectConnectGatewayAssociationId.of_json in
       let associatedGateway =
-        field_map json "associatedGateway" AssociatedGateway.of_json in
+        field_map json__ "associatedGateway" AssociatedGateway.of_json in
       let stateChangeError =
-        field_map json "stateChangeError" StateChangeError.of_json in
+        field_map json__ "stateChangeError" StateChangeError.of_json in
       let associationState =
-        field_map json "associationState"
+        field_map json__ "associationState"
           DirectConnectGatewayAssociationState.of_json in
       let directConnectGatewayOwnerAccount =
-        field_map json "directConnectGatewayOwnerAccount"
+        field_map json__ "directConnectGatewayOwnerAccount"
           OwnerAccount.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?virtualGatewayOwnerAccount ?virtualGatewayRegion
-        ?virtualGatewayId ?allowedPrefixesToDirectConnectGateway
-        ?associationId ?associatedGateway ?stateChangeError ?associationState
+        ?virtualGatewayId ?associatedCoreNetwork
+        ?allowedPrefixesToDirectConnectGateway ?associationId
+        ?associatedGateway ?stateChangeError ?associationState
         ?directConnectGatewayOwnerAccount ?directConnectGatewayId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3829,26 +4063,26 @@ module DirectConnectGatewayAssociationProposal =
         ?proposalState ?directConnectGatewayOwnerAccount
         ?directConnectGatewayId ?proposalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestedAllowedPrefixesToDirectConnectGateway =
-        field_map json "requestedAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "requestedAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let existingAllowedPrefixesToDirectConnectGateway =
-        field_map json "existingAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "existingAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let associatedGateway =
-        field_map json "associatedGateway" AssociatedGateway.of_json in
+        field_map json__ "associatedGateway" AssociatedGateway.of_json in
       let proposalState =
-        field_map json "proposalState"
+        field_map json__ "proposalState"
           DirectConnectGatewayAssociationProposalState.of_json in
       let directConnectGatewayOwnerAccount =
-        field_map json "directConnectGatewayOwnerAccount"
+        field_map json__ "directConnectGatewayOwnerAccount"
           OwnerAccount.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let proposalId =
-        field_map json "proposalId"
+        field_map json__ "proposalId"
           DirectConnectGatewayAssociationProposalId.of_json in
       make ?requestedAllowedPrefixesToDirectConnectGateway
         ?existingAllowedPrefixesToDirectConnectGateway ?associatedGateway
@@ -3882,10 +4116,10 @@ module CustomerAgreement =
           (Xml.child xml_arg0 "agreementName") in
       make ?status ?agreementName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" Status.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
       let agreementName =
-        field_map json "agreementName" AgreementName.of_json in
+        field_map json__ "agreementName" AgreementName.of_json in
       make ?status ?agreementName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The name and status of a customer agreement."]
@@ -3902,10 +4136,26 @@ module EnableSiteLink =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module PaginationToken =
+  struct
+    type nonrec t = string
+    let context_ = "PaginationToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PaginationToken" j
+    let to_json = simple_to_json to_value
+  end
 module VirtualInterfaceList =
   struct
     type nonrec t = VirtualInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3931,6 +4181,9 @@ module VirtualGatewayList =
   struct
     type nonrec t = VirtualGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualGateway.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3956,6 +4209,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3979,6 +4235,9 @@ module LocationList =
   struct
     type nonrec t = Location.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Location.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3999,23 +4258,13 @@ module LocationList =
       list_of_json ~kind:"LocationList" ~of_json:Location.of_json j
     let to_json v = composed_to_json to_value v
   end
-module PaginationToken =
-  struct
-    type nonrec t = string
-    let context_ = "PaginationToken"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PaginationToken" j
-    let to_json = simple_to_json to_value
-  end
 module VirtualInterfaceTestHistoryList =
   struct
     type nonrec t = VirtualInterfaceTestHistory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualInterfaceTestHistory.to_value)) |>
         (fun x -> `List x)
@@ -4056,6 +4305,9 @@ module LagList =
   struct
     type nonrec t = Lag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Lag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4079,6 +4331,9 @@ module InterconnectList =
   struct
     type nonrec t = Interconnect.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Interconnect.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4103,6 +4358,9 @@ module ResourceTagList =
   struct
     type nonrec t = ResourceTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4127,6 +4385,9 @@ module ResourceArnList =
   struct
     type nonrec t = ResourceArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4211,17 +4472,17 @@ module RouterType =
       make ?routerTypeIdentifier ?xsltTemplateNameForMacSec ?xsltTemplateName
         ?software ?platform ?vendor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routerTypeIdentifier =
-        field_map json "routerTypeIdentifier" RouterTypeIdentifier.of_json in
+        field_map json__ "routerTypeIdentifier" RouterTypeIdentifier.of_json in
       let xsltTemplateNameForMacSec =
-        field_map json "xsltTemplateNameForMacSec"
+        field_map json__ "xsltTemplateNameForMacSec"
           XsltTemplateNameForMacSec.of_json in
       let xsltTemplateName =
-        field_map json "xsltTemplateName" XsltTemplateName.of_json in
-      let software = field_map json "software" Software.of_json in
-      let platform = field_map json "platform" Platform.of_json in
-      let vendor = field_map json "vendor" Vendor.of_json in
+        field_map json__ "xsltTemplateName" XsltTemplateName.of_json in
+      let software = field_map json__ "software" Software.of_json in
+      let platform = field_map json__ "platform" Platform.of_json in
+      let vendor = field_map json__ "vendor" Vendor.of_json in
       make ?routerTypeIdentifier ?xsltTemplateNameForMacSec ?xsltTemplateName
         ?software ?platform ?vendor ()
     let to_json v = composed_to_json to_value v
@@ -4291,10 +4552,10 @@ module Loa =
         (Option.map ~f:LoaContent.of_xml) (Xml.child xml_arg0 "loaContent") in
       make ?loaContentType ?loaContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loaContentType =
-        field_map json "loaContentType" LoaContentType.of_json in
-      let loaContent = field_map json "loaContent" LoaContent.of_json in
+        field_map json__ "loaContentType" LoaContentType.of_json in
+      let loaContent = field_map json__ "loaContent" LoaContent.of_json in
       make ?loaContentType ?loaContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4303,6 +4564,9 @@ module DirectConnectGatewayList =
   struct
     type nonrec t = DirectConnectGateway.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectConnectGateway.to_value)) |>
         (fun x -> `List x)
@@ -4329,6 +4593,9 @@ module DirectConnectGatewayAttachmentList =
   struct
     type nonrec t = DirectConnectGatewayAttachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectConnectGatewayAttachment.to_value)) |>
         (fun x -> `List x)
@@ -4355,6 +4622,9 @@ module DirectConnectGatewayAssociationList =
   struct
     type nonrec t = DirectConnectGatewayAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectConnectGatewayAssociation.to_value)) |>
         (fun x -> `List x)
@@ -4394,6 +4664,9 @@ module DirectConnectGatewayAssociationProposalList =
   struct
     type nonrec t = DirectConnectGatewayAssociationProposal.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DirectConnectGatewayAssociationProposal.to_value))
         |> (fun x -> `List x)
@@ -4421,6 +4694,9 @@ module AgreementList =
   struct
     type nonrec t = CustomerAgreement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerAgreement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4479,10 +4755,13 @@ module NewTransitVirtualInterface =
       vlan: VLAN.t option [@ocaml.doc "The ID of the VLAN."];
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for a new transit virtual interface.The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -4502,28 +4781,30 @@ module NewTransitVirtualInterface =
     let make ?virtualInterfaceName =
       fun ?vlan ->
         fun ?asn ->
-          fun ?mtu ->
-            fun ?authKey ->
-              fun ?amazonAddress ->
-                fun ?customerAddress ->
-                  fun ?addressFamily ->
-                    fun ?directConnectGatewayId ->
-                      fun ?tags ->
-                        fun ?enableSiteLink ->
-                          fun () ->
-                            {
-                              virtualInterfaceName;
-                              vlan;
-                              asn;
-                              mtu;
-                              authKey;
-                              amazonAddress;
-                              customerAddress;
-                              addressFamily;
-                              directConnectGatewayId;
-                              tags;
-                              enableSiteLink
-                            }
+          fun ?asnLong ->
+            fun ?mtu ->
+              fun ?authKey ->
+                fun ?amazonAddress ->
+                  fun ?customerAddress ->
+                    fun ?addressFamily ->
+                      fun ?directConnectGatewayId ->
+                        fun ?tags ->
+                          fun ?enableSiteLink ->
+                            fun () ->
+                              {
+                                virtualInterfaceName;
+                                vlan;
+                                asn;
+                                asnLong;
+                                mtu;
+                                authKey;
+                                amazonAddress;
+                                customerAddress;
+                                addressFamily;
+                                directConnectGatewayId;
+                                tags;
+                                enableSiteLink
+                              }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
@@ -4531,6 +4812,7 @@ module NewTransitVirtualInterface =
               ~f:VirtualInterfaceName.to_value));
         ("vlan", (Option.map x.vlan ~f:VLAN.to_value));
         ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("mtu", (Option.map x.mtu ~f:MTU.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
@@ -4566,36 +4848,39 @@ module NewTransitVirtualInterface =
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let mtu = (Option.map ~f:MTU.of_xml) (Xml.child xml_arg0 "mtu") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan = (Option.map ~f:VLAN.of_xml) (Xml.child xml_arg0 "vlan") in
       let virtualInterfaceName =
         (Option.map ~f:VirtualInterfaceName.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceName") in
       make ?enableSiteLink ?tags ?directConnectGatewayId ?addressFamily
-        ?customerAddress ?amazonAddress ?authKey ?mtu ?asn ?vlan
+        ?customerAddress ?amazonAddress ?authKey ?mtu ?asnLong ?asn ?vlan
         ?virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableSiteLink =
-        field_map json "enableSiteLink" EnableSiteLink.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "enableSiteLink" EnableSiteLink.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
-      let asn = field_map json "asn" ASN.of_json in
-      let vlan = field_map json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
+        field_map json__ "virtualInterfaceName" VirtualInterfaceName.of_json in
       make ?enableSiteLink ?tags ?directConnectGatewayId ?addressFamily
-        ?customerAddress ?amazonAddress ?authKey ?mtu ?asn ?vlan
+        ?customerAddress ?amazonAddress ?authKey ?mtu ?asnLong ?asn ?vlan
         ?virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a transit virtual interface."]
@@ -4607,9 +4892,12 @@ module NewPublicVirtualInterface =
         [@ocaml.doc
           "The name of the virtual interface assigned by the customer network. The name has a maximum of 100 characters. The following are valid characters: a-z, 0-9 and a hyphen (-)."];
       vlan: VLAN.t [@ocaml.doc "The ID of the VLAN."];
-      asn: ASN.t
+      asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for a new public virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -4625,33 +4913,36 @@ module NewPublicVirtualInterface =
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the public virtual interface."]}
     let context_ = "NewPublicVirtualInterface"
-    let make ?authKey =
-      fun ?amazonAddress ->
-        fun ?customerAddress ->
-          fun ?addressFamily ->
-            fun ?routeFilterPrefixes ->
-              fun ?tags ->
-                fun ~virtualInterfaceName ->
-                  fun ~vlan ->
-                    fun ~asn ->
-                      fun () ->
-                        {
-                          authKey;
-                          amazonAddress;
-                          customerAddress;
-                          addressFamily;
-                          routeFilterPrefixes;
-                          tags;
-                          virtualInterfaceName;
-                          vlan;
-                          asn
-                        }
+    let make ?asn =
+      fun ?asnLong ->
+        fun ?authKey ->
+          fun ?amazonAddress ->
+            fun ?customerAddress ->
+              fun ?addressFamily ->
+                fun ?routeFilterPrefixes ->
+                  fun ?tags ->
+                    fun ~virtualInterfaceName ->
+                      fun ~vlan ->
+                        fun () ->
+                          {
+                            asn;
+                            asnLong;
+                            authKey;
+                            amazonAddress;
+                            customerAddress;
+                            addressFamily;
+                            routeFilterPrefixes;
+                            tags;
+                            virtualInterfaceName;
+                            vlan
+                          }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
            (Some (VirtualInterfaceName.to_value x.virtualInterfaceName)));
         ("vlan", (Some (VLAN.to_value x.vlan)));
-        ("asn", (Some (ASN.to_value x.asn)));
+        ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
           (Option.map x.amazonAddress ~f:AmazonAddress.to_value));
@@ -4679,33 +4970,36 @@ module NewPublicVirtualInterface =
           (Xml.child xml_arg0 "amazonAddress") in
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
-      let asn = ASN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "asn") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
+      let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan =
         VLAN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vlan") in
       let virtualInterfaceName =
         VirtualInterfaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
-        ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+        ?amazonAddress ?authKey ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let routeFilterPrefixes =
-        field_map json "routeFilterPrefixes" RouteFilterPrefixList.of_json in
+        field_map json__ "routeFilterPrefixes" RouteFilterPrefixList.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let asn = field_map_exn json "asn" ASN.of_json in
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map_exn json "virtualInterfaceName"
+        field_map_exn json__ "virtualInterfaceName"
           VirtualInterfaceName.of_json in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
-        ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+        ?amazonAddress ?authKey ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a public virtual interface."]
 module NewPrivateVirtualInterface =
@@ -4716,12 +5010,15 @@ module NewPrivateVirtualInterface =
         [@ocaml.doc
           "The name of the virtual interface assigned by the customer network. The name has a maximum of 100 characters. The following are valid characters: a-z, 0-9 and a hyphen (-)."];
       vlan: VLAN.t [@ocaml.doc "The ID of the VLAN."];
-      asn: ASN.t
+      asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong. The valid values are 1-2147483646."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for a new private virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -4741,39 +5038,42 @@ module NewPrivateVirtualInterface =
       enableSiteLink: EnableSiteLink.t option
         [@ocaml.doc "Indicates whether to enable or disable SiteLink."]}
     let context_ = "NewPrivateVirtualInterface"
-    let make ?mtu =
-      fun ?authKey ->
-        fun ?amazonAddress ->
-          fun ?customerAddress ->
-            fun ?addressFamily ->
-              fun ?virtualGatewayId ->
-                fun ?directConnectGatewayId ->
-                  fun ?tags ->
-                    fun ?enableSiteLink ->
-                      fun ~virtualInterfaceName ->
-                        fun ~vlan ->
-                          fun ~asn ->
-                            fun () ->
-                              {
-                                mtu;
-                                authKey;
-                                amazonAddress;
-                                customerAddress;
-                                addressFamily;
-                                virtualGatewayId;
-                                directConnectGatewayId;
-                                tags;
-                                enableSiteLink;
-                                virtualInterfaceName;
-                                vlan;
-                                asn
-                              }
+    let make ?asn =
+      fun ?asnLong ->
+        fun ?mtu ->
+          fun ?authKey ->
+            fun ?amazonAddress ->
+              fun ?customerAddress ->
+                fun ?addressFamily ->
+                  fun ?virtualGatewayId ->
+                    fun ?directConnectGatewayId ->
+                      fun ?tags ->
+                        fun ?enableSiteLink ->
+                          fun ~virtualInterfaceName ->
+                            fun ~vlan ->
+                              fun () ->
+                                {
+                                  asn;
+                                  asnLong;
+                                  mtu;
+                                  authKey;
+                                  amazonAddress;
+                                  customerAddress;
+                                  addressFamily;
+                                  virtualGatewayId;
+                                  directConnectGatewayId;
+                                  tags;
+                                  enableSiteLink;
+                                  virtualInterfaceName;
+                                  vlan
+                                }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
            (Some (VirtualInterfaceName.to_value x.virtualInterfaceName)));
         ("vlan", (Some (VLAN.to_value x.vlan)));
-        ("asn", (Some (ASN.to_value x.asn)));
+        ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("mtu", (Option.map x.mtu ~f:MTU.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
@@ -4814,41 +5114,44 @@ module NewPrivateVirtualInterface =
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let mtu = (Option.map ~f:MTU.of_xml) (Xml.child xml_arg0 "mtu") in
-      let asn = ASN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "asn") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
+      let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan =
         VLAN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vlan") in
       let virtualInterfaceName =
         VirtualInterfaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?enableSiteLink ?tags ?directConnectGatewayId ?virtualGatewayId
-        ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu ~asn
-        ~vlan ~virtualInterfaceName ()
+        ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu ?asnLong
+        ?asn ~vlan ~virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableSiteLink =
-        field_map json "enableSiteLink" EnableSiteLink.of_json in
-      let tags = field_map json "tags" TagList.of_json in
+        field_map json__ "enableSiteLink" EnableSiteLink.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
-      let asn = field_map_exn json "asn" ASN.of_json in
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map_exn json "virtualInterfaceName"
+        field_map_exn json__ "virtualInterfaceName"
           VirtualInterfaceName.of_json in
       make ?enableSiteLink ?tags ?directConnectGatewayId ?virtualGatewayId
-        ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu ~asn
-        ~vlan ~virtualInterfaceName ()
+        ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu ?asnLong
+        ?asn ~vlan ~virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a private virtual interface."]
 module RequestMACSec =
@@ -4883,7 +5186,10 @@ module NewBGPPeer =
       {
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for a new BGP peer. The valid range is from 1 to 4294967294."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -4894,16 +5200,24 @@ module NewBGPPeer =
       customerAddress: CustomerAddress.t option
         [@ocaml.doc "The IP address assigned to the customer interface."]}
     let make ?asn =
-      fun ?authKey ->
-        fun ?addressFamily ->
-          fun ?amazonAddress ->
-            fun ?customerAddress ->
-              fun () ->
-                { asn; authKey; addressFamily; amazonAddress; customerAddress
-                }
+      fun ?asnLong ->
+        fun ?authKey ->
+          fun ?addressFamily ->
+            fun ?amazonAddress ->
+              fun ?customerAddress ->
+                fun () ->
+                  {
+                    asn;
+                    asnLong;
+                    authKey;
+                    addressFamily;
+                    amazonAddress;
+                    customerAddress
+                  }
     let to_value x =
       structure_to_value
         [("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("addressFamily",
           (Option.map x.addressFamily ~f:AddressFamily.to_value));
@@ -4924,19 +5238,24 @@ module NewBGPPeer =
           (Xml.child xml_arg0 "addressFamily") in
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
-      make ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn ()
+      make ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asnLong
+        ?asn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let asn = field_map json "asn" ASN.of_json in
-      make ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asn ()
+        field_map json__ "addressFamily" AddressFamily.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      make ?customerAddress ?amazonAddress ?addressFamily ?authKey ?asnLong
+        ?asn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a new BGP peer."]
 module Cak =
@@ -4962,10 +5281,13 @@ module NewTransitVirtualInterfaceAllocation =
       vlan: VLAN.t option [@ocaml.doc "The ID of the VLAN."];
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong. The valid values are 1-2147483646."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The ASN when allocating a new transit virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500"];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -4981,24 +5303,26 @@ module NewTransitVirtualInterfaceAllocation =
     let make ?virtualInterfaceName =
       fun ?vlan ->
         fun ?asn ->
-          fun ?mtu ->
-            fun ?authKey ->
-              fun ?amazonAddress ->
-                fun ?customerAddress ->
-                  fun ?addressFamily ->
-                    fun ?tags ->
-                      fun () ->
-                        {
-                          virtualInterfaceName;
-                          vlan;
-                          asn;
-                          mtu;
-                          authKey;
-                          amazonAddress;
-                          customerAddress;
-                          addressFamily;
-                          tags
-                        }
+          fun ?asnLong ->
+            fun ?mtu ->
+              fun ?authKey ->
+                fun ?amazonAddress ->
+                  fun ?customerAddress ->
+                    fun ?addressFamily ->
+                      fun ?tags ->
+                        fun () ->
+                          {
+                            virtualInterfaceName;
+                            vlan;
+                            asn;
+                            asnLong;
+                            mtu;
+                            authKey;
+                            amazonAddress;
+                            customerAddress;
+                            addressFamily;
+                            tags
+                          }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
@@ -5006,6 +5330,7 @@ module NewTransitVirtualInterfaceAllocation =
               ~f:VirtualInterfaceName.to_value));
         ("vlan", (Option.map x.vlan ~f:VLAN.to_value));
         ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("mtu", (Option.map x.mtu ~f:MTU.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
@@ -5030,30 +5355,33 @@ module NewTransitVirtualInterfaceAllocation =
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let mtu = (Option.map ~f:MTU.of_xml) (Xml.child xml_arg0 "mtu") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan = (Option.map ~f:VLAN.of_xml) (Xml.child xml_arg0 "vlan") in
       let virtualInterfaceName =
         (Option.map ~f:VirtualInterfaceName.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceName") in
       make ?tags ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu
-        ?asn ?vlan ?virtualInterfaceName ()
+        ?asnLong ?asn ?vlan ?virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
-      let asn = field_map json "asn" ASN.of_json in
-      let vlan = field_map json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
+        field_map json__ "virtualInterfaceName" VirtualInterfaceName.of_json in
       make ?tags ?addressFamily ?customerAddress ?amazonAddress ?authKey ?mtu
-        ?asn ?vlan ?virtualInterfaceName ()
+        ?asnLong ?asn ?vlan ?virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a transit virtual interface to be provisioned on a connection."]
@@ -5065,9 +5393,12 @@ module NewPublicVirtualInterfaceAllocation =
         [@ocaml.doc
           "The name of the virtual interface assigned by the customer network. The name has a maximum of 100 characters. The following are valid characters: a-z, 0-9 and a hyphen (-)."];
       vlan: VLAN.t [@ocaml.doc "The ID of the VLAN."];
-      asn: ASN.t
+      asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong. The valid values are 1-2147483646."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The ASN when allocating a new public virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -5083,33 +5414,36 @@ module NewPublicVirtualInterfaceAllocation =
       tags: TagList.t option
         [@ocaml.doc "The tags associated with the public virtual interface."]}
     let context_ = "NewPublicVirtualInterfaceAllocation"
-    let make ?authKey =
-      fun ?amazonAddress ->
-        fun ?customerAddress ->
-          fun ?addressFamily ->
-            fun ?routeFilterPrefixes ->
-              fun ?tags ->
-                fun ~virtualInterfaceName ->
-                  fun ~vlan ->
-                    fun ~asn ->
-                      fun () ->
-                        {
-                          authKey;
-                          amazonAddress;
-                          customerAddress;
-                          addressFamily;
-                          routeFilterPrefixes;
-                          tags;
-                          virtualInterfaceName;
-                          vlan;
-                          asn
-                        }
+    let make ?asn =
+      fun ?asnLong ->
+        fun ?authKey ->
+          fun ?amazonAddress ->
+            fun ?customerAddress ->
+              fun ?addressFamily ->
+                fun ?routeFilterPrefixes ->
+                  fun ?tags ->
+                    fun ~virtualInterfaceName ->
+                      fun ~vlan ->
+                        fun () ->
+                          {
+                            asn;
+                            asnLong;
+                            authKey;
+                            amazonAddress;
+                            customerAddress;
+                            addressFamily;
+                            routeFilterPrefixes;
+                            tags;
+                            virtualInterfaceName;
+                            vlan
+                          }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
            (Some (VirtualInterfaceName.to_value x.virtualInterfaceName)));
         ("vlan", (Some (VLAN.to_value x.vlan)));
-        ("asn", (Some (ASN.to_value x.asn)));
+        ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
           (Option.map x.amazonAddress ~f:AmazonAddress.to_value));
@@ -5137,33 +5471,36 @@ module NewPublicVirtualInterfaceAllocation =
           (Xml.child xml_arg0 "amazonAddress") in
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
-      let asn = ASN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "asn") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
+      let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan =
         VLAN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vlan") in
       let virtualInterfaceName =
         VirtualInterfaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
-        ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+        ?amazonAddress ?authKey ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let routeFilterPrefixes =
-        field_map json "routeFilterPrefixes" RouteFilterPrefixList.of_json in
+        field_map json__ "routeFilterPrefixes" RouteFilterPrefixList.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let asn = field_map_exn json "asn" ASN.of_json in
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map_exn json "virtualInterfaceName"
+        field_map_exn json__ "virtualInterfaceName"
           VirtualInterfaceName.of_json in
       make ?tags ?routeFilterPrefixes ?addressFamily ?customerAddress
-        ?amazonAddress ?authKey ~asn ~vlan ~virtualInterfaceName ()
+        ?amazonAddress ?authKey ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a public virtual interface to be provisioned on a connection."]
@@ -5175,12 +5512,15 @@ module NewPrivateVirtualInterfaceAllocation =
         [@ocaml.doc
           "The name of the virtual interface assigned by the customer network. The name has a maximum of 100 characters. The following are valid characters: a-z, 0-9 and a hyphen (-)."];
       vlan: VLAN.t [@ocaml.doc "The ID of the VLAN."];
-      asn: ASN.t
+      asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration. The valid values are 1-2147483647."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong. The valid values are 1-2147483646."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The ASN when allocating a new private virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500."];
       authKey: BGPAuthKey.t option
         [@ocaml.doc
           "The authentication key for BGP configuration. This string has a minimum length of 6 characters and and a maximun lenth of 80 characters."];
@@ -5194,33 +5534,36 @@ module NewPrivateVirtualInterfaceAllocation =
         [@ocaml.doc
           "The tags associated with the private virtual interface."]}
     let context_ = "NewPrivateVirtualInterfaceAllocation"
-    let make ?mtu =
-      fun ?authKey ->
-        fun ?amazonAddress ->
-          fun ?addressFamily ->
-            fun ?customerAddress ->
-              fun ?tags ->
-                fun ~virtualInterfaceName ->
-                  fun ~vlan ->
-                    fun ~asn ->
-                      fun () ->
-                        {
-                          mtu;
-                          authKey;
-                          amazonAddress;
-                          addressFamily;
-                          customerAddress;
-                          tags;
-                          virtualInterfaceName;
-                          vlan;
-                          asn
-                        }
+    let make ?asn =
+      fun ?asnLong ->
+        fun ?mtu ->
+          fun ?authKey ->
+            fun ?amazonAddress ->
+              fun ?addressFamily ->
+                fun ?customerAddress ->
+                  fun ?tags ->
+                    fun ~virtualInterfaceName ->
+                      fun ~vlan ->
+                        fun () ->
+                          {
+                            asn;
+                            asnLong;
+                            mtu;
+                            authKey;
+                            amazonAddress;
+                            addressFamily;
+                            customerAddress;
+                            tags;
+                            virtualInterfaceName;
+                            vlan
+                          }
     let to_value x =
       structure_to_value
         [("virtualInterfaceName",
            (Some (VirtualInterfaceName.to_value x.virtualInterfaceName)));
         ("vlan", (Some (VLAN.to_value x.vlan)));
-        ("asn", (Some (ASN.to_value x.asn)));
+        ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("mtu", (Option.map x.mtu ~f:MTU.to_value));
         ("authKey", (Option.map x.authKey ~f:BGPAuthKey.to_value));
         ("amazonAddress",
@@ -5245,32 +5588,35 @@ module NewPrivateVirtualInterfaceAllocation =
       let authKey =
         (Option.map ~f:BGPAuthKey.of_xml) (Xml.child xml_arg0 "authKey") in
       let mtu = (Option.map ~f:MTU.of_xml) (Xml.child xml_arg0 "mtu") in
-      let asn = ASN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "asn") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
+      let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let vlan =
         VLAN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "vlan") in
       let virtualInterfaceName =
         VirtualInterfaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceName") in
       make ?tags ?customerAddress ?addressFamily ?amazonAddress ?authKey ?mtu
-        ~asn ~vlan ~virtualInterfaceName ()
+        ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
       let addressFamily =
-        field_map json "addressFamily" AddressFamily.of_json in
+        field_map json__ "addressFamily" AddressFamily.of_json in
       let amazonAddress =
-        field_map json "amazonAddress" AmazonAddress.of_json in
-      let authKey = field_map json "authKey" BGPAuthKey.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
-      let asn = field_map_exn json "asn" ASN.of_json in
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+        field_map json__ "amazonAddress" AmazonAddress.of_json in
+      let authKey = field_map json__ "authKey" BGPAuthKey.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let virtualInterfaceName =
-        field_map_exn json "virtualInterfaceName"
+        field_map_exn json__ "virtualInterfaceName"
           VirtualInterfaceName.of_json in
       make ?tags ?customerAddress ?addressFamily ?amazonAddress ?authKey ?mtu
-        ~asn ~vlan ~virtualInterfaceName ()
+        ?asnLong ?asn ~vlan ~virtualInterfaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a private virtual interface to be provisioned on a connection."]
@@ -5279,12 +5625,16 @@ module VirtualInterfaces =
     type nonrec t =
       {
       virtualInterfaces: VirtualInterfaceList.t option
-        [@ocaml.doc "The virtual interfaces"]}
+        [@ocaml.doc "The virtual interfaces"];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?virtualInterfaces = fun () -> { virtualInterfaces }
+    let make ?virtualInterfaces =
+      fun ?nextToken -> fun () -> { virtualInterfaces; nextToken }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -5324,21 +5674,26 @@ module VirtualInterfaces =
     let to_value x =
       structure_to_value
         [("virtualInterfaces",
-           (Option.map x.virtualInterfaces ~f:VirtualInterfaceList.to_value))]
+           (Option.map x.virtualInterfaces ~f:VirtualInterfaceList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let virtualInterfaces =
         (Option.map ~f:VirtualInterfaceList.of_xml)
           (Xml.child xml_arg0 "virtualInterfaces") in
-      make ?virtualInterfaces ()
+      make ?nextToken ?virtualInterfaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let virtualInterfaces =
-        field_map json "virtualInterfaces" VirtualInterfaceList.of_json in
-      make ?virtualInterfaces ()
+        field_map json__ "virtualInterfaces" VirtualInterfaceList.of_json in
+      make ?nextToken ?virtualInterfaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays all virtual interfaces for an Amazon Web Services account. Virtual interfaces deleted fewer than 15 minutes before you make the request are also returned. If you specify a connection ID, only the virtual interfaces associated with the connection are returned. If you specify a virtual interface ID, then only a single virtual interface is returned. A virtual interface (VLAN) transmits the traffic between the Direct Connect location and the customer network."]
+       "Displays all virtual interfaces for an Amazon Web Services account. Virtual interfaces deleted fewer than 15 minutes before you make the request are also returned. If you specify a connection ID, only the virtual interfaces associated with the connection are returned. If you specify a virtual interface ID, then only a single virtual interface is returned. A virtual interface (VLAN) transmits the traffic between the Direct Connect location and the customer network. If you're using an asn, the response includes ASN value in both the asn and asnLong fields. If you're using asnLong, the response returns a value of 0 (zero) for the asn attribute because it exceeds the highest ASN value of 2,147,483,647 that it can support"]
 module VirtualGateways =
   struct
     type nonrec t =
@@ -5397,13 +5752,13 @@ module VirtualGateways =
           (Xml.child xml_arg0 "virtualGateways") in
       make ?virtualGateways ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGateways =
-        field_map json "virtualGateways" VirtualGatewayList.of_json in
+        field_map json__ "virtualGateways" VirtualGatewayList.of_json in
       make ?virtualGateways ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the virtual private gateways owned by the Amazon Web Services account. You can create one or more Direct Connect private virtual interfaces linked to a virtual private gateway."]
+       "Deprecated. Use DescribeVpnGateways instead. See DescribeVPNGateways in the Amazon Elastic Compute Cloud API Reference. Lists the virtual private gateways owned by the Amazon Web Services account. You can create one or more Direct Connect private virtual interfaces linked to a virtual private gateway."]
 module UpdateVirtualInterfaceAttributesRequest =
   struct
     type nonrec t =
@@ -5412,7 +5767,7 @@ module UpdateVirtualInterfaceAttributesRequest =
         [@ocaml.doc "The ID of the virtual private interface."];
       mtu: MTU.t option
         [@ocaml.doc
-          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 9001. The default value is 1500."];
+          "The maximum transmission unit (MTU), in bytes. The supported values are 1500 and 8500. The default value is 1500."];
       enableSiteLink: EnableSiteLink.t option
         [@ocaml.doc "Indicates whether to enable or disable SiteLink."];
       virtualInterfaceName: VirtualInterfaceName.t option
@@ -5448,18 +5803,18 @@ module UpdateVirtualInterfaceAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?virtualInterfaceName ?enableSiteLink ?mtu ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceName =
-        field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
+        field_map json__ "virtualInterfaceName" VirtualInterfaceName.of_json in
       let enableSiteLink =
-        field_map json "enableSiteLink" EnableSiteLink.of_json in
-      let mtu = field_map json "mtu" MTU.of_json in
+        field_map json__ "enableSiteLink" EnableSiteLink.of_json in
+      let mtu = field_map json__ "mtu" MTU.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ?virtualInterfaceName ?enableSiteLink ?mtu ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the specified attributes of the specified virtual private interface. Setting the MTU of a virtual interface to 9001 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual q interface supports jumbo frames, call DescribeVirtualInterfaces."]
+       "Updates the specified attributes of the specified virtual private interface. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
 module UpdateLagRequest =
   struct
     type nonrec t =
@@ -5498,20 +5853,23 @@ module UpdateLagRequest =
         LagId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lagId") in
       make ?encryptionMode ?minimumLinks ?lagName ~lagId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionMode =
-        field_map json "encryptionMode" EncryptionMode.of_json in
-      let minimumLinks = field_map json "minimumLinks" Count.of_json in
-      let lagName = field_map json "lagName" LagName.of_json in
-      let lagId = field_map_exn json "lagId" LagId.of_json in
+        field_map json__ "encryptionMode" EncryptionMode.of_json in
+      let minimumLinks = field_map json__ "minimumLinks" Count.of_json in
+      let lagName = field_map json__ "lagName" LagName.of_json in
+      let lagId = field_map_exn json__ "lagId" LagId.of_json in
       make ?encryptionMode ?minimumLinks ?lagName ~lagId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the attributes of the specified link aggregation group (LAG). You can update the following LAG attributes: The name of the LAG. The value for the minimum number of connections that must be operational for the LAG itself to be operational. The LAG's MACsec encryption mode. Amazon Web Services assigns this value to each connection which is part of the LAG. The tags If you adjust the threshold value for the minimum number of operational connections, ensure that the new value does not cause the LAG to fall below the threshold and become non-operational."]
 module UpdateDirectConnectGatewayResponse =
   struct
-    type nonrec t = {
-      directConnectGateway: DirectConnectGateway.t option }
+    type nonrec t =
+      {
+      directConnectGateway: DirectConnectGateway.t option
+        [@ocaml.doc
+          "Informaiton about a Direct Connect gateway, which enables you to connect virtual interfaces and virtual private gateways or transit gateways."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -5565,9 +5923,9 @@ module UpdateDirectConnectGatewayResponse =
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGateway =
-        field_map json "directConnectGateway" DirectConnectGateway.of_json in
+        field_map json__ "directConnectGateway" DirectConnectGateway.of_json in
       make ?directConnectGateway ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the name of a current Direct Connect gateway."]
@@ -5601,12 +5959,12 @@ module UpdateDirectConnectGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ~newDirectConnectGatewayName ~directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newDirectConnectGatewayName =
-        field_map_exn json "newDirectConnectGatewayName"
+        field_map_exn json__ "newDirectConnectGatewayName"
           DirectConnectGatewayName.of_json in
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ~newDirectConnectGatewayName ~directConnectGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -5616,7 +5974,9 @@ module UpdateDirectConnectGatewayAssociationResult =
     type nonrec t =
       {
       directConnectGatewayAssociation:
-        DirectConnectGatewayAssociation.t option }
+        DirectConnectGatewayAssociation.t option
+        [@ocaml.doc
+          "Information about an association between a Direct Connect gateway and a virtual private gateway or transit gateway."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -5671,9 +6031,9 @@ module UpdateDirectConnectGatewayAssociationResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociation =
-        field_map json "directConnectGatewayAssociation"
+        field_map json__ "directConnectGatewayAssociation"
           DirectConnectGatewayAssociation.of_json in
       make ?directConnectGatewayAssociation ()
     let to_json v = composed_to_json to_value v
@@ -5727,15 +6087,15 @@ module UpdateDirectConnectGatewayAssociationRequest =
       make ?removeAllowedPrefixesToDirectConnectGateway
         ?addAllowedPrefixesToDirectConnectGateway ?associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let removeAllowedPrefixesToDirectConnectGateway =
-        field_map json "removeAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "removeAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let addAllowedPrefixesToDirectConnectGateway =
-        field_map json "addAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "addAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let associationId =
-        field_map json "associationId"
+        field_map json__ "associationId"
           DirectConnectGatewayAssociationId.of_json in
       make ?removeAllowedPrefixesToDirectConnectGateway
         ?addAllowedPrefixesToDirectConnectGateway ?associationId ()
@@ -5748,7 +6108,7 @@ module UpdateConnectionRequest =
       {
       connectionId: ConnectionId.t
         [@ocaml.doc
-          "The ID of the dedicated connection. You can use DescribeConnections to retrieve the connection ID."];
+          "The ID of the connection. You can use DescribeConnections to retrieve the connection ID."];
       connectionName: ConnectionName.t option
         [@ocaml.doc "The name of the connection."];
       encryptionMode: EncryptionMode.t option
@@ -5779,17 +6139,17 @@ module UpdateConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?encryptionMode ?connectionName ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionMode =
-        field_map json "encryptionMode" EncryptionMode.of_json in
+        field_map json__ "encryptionMode" EncryptionMode.of_json in
       let connectionName =
-        field_map json "connectionName" ConnectionName.of_json in
+        field_map json__ "connectionName" ConnectionName.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ?encryptionMode ?connectionName ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the Direct Connect dedicated connection configuration. You can update the following parameters for a connection: The connection name The connection's MAC Security (MACsec) encryption mode."]
+       "Updates the Direct Connect connection configuration. You can update the following parameters for a connection: The connection name The connection's MAC Security (MACsec) encryption mode."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -5868,9 +6228,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5968,9 +6329,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6034,9 +6396,9 @@ module StopBgpFailoverTestResponse =
           (Xml.child xml_arg0 "virtualInterfaceTest") in
       make ?virtualInterfaceTest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceTest =
-        field_map json "virtualInterfaceTest"
+        field_map json__ "virtualInterfaceTest"
           VirtualInterfaceTestHistory.of_json in
       make ?virtualInterfaceTest ()
     let to_json v = composed_to_json to_value v
@@ -6061,9 +6423,9 @@ module StopBgpFailoverTestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the virtual interface failover test."]
@@ -6126,9 +6488,9 @@ module StartBgpFailoverTestResponse =
           (Xml.child xml_arg0 "virtualInterfaceTest") in
       make ?virtualInterfaceTest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceTest =
-        field_map json "virtualInterfaceTest"
+        field_map json__ "virtualInterfaceTest"
           VirtualInterfaceTestHistory.of_json in
       make ?virtualInterfaceTest ()
     let to_json v = composed_to_json to_value v
@@ -6144,7 +6506,7 @@ module StartBgpFailoverTestRequest =
         [@ocaml.doc "The BGP peers to place in the DOWN state."];
       testDurationInMinutes: TestDuration.t option
         [@ocaml.doc
-          "The time in minutes that the virtual interface failover test will last. Maximum value: 180 minutes (3 hours). Default: 180 minutes (3 hours)."]}
+          "The time in minutes that the virtual interface failover test will last. Maximum value: 4,320 minutes (72 hours). Default: 180 minutes (3 hours)."]}
     let context_ = "StartBgpFailoverTestRequest"
     let make ?bgpPeers =
       fun ?testDurationInMinutes ->
@@ -6169,12 +6531,12 @@ module StartBgpFailoverTestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?testDurationInMinutes ?bgpPeers ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let testDurationInMinutes =
-        field_map json "testDurationInMinutes" TestDuration.of_json in
-      let bgpPeers = field_map json "bgpPeers" BGPPeerIdList.of_json in
+        field_map json__ "testDurationInMinutes" TestDuration.of_json in
+      let bgpPeers = field_map json__ "bgpPeers" BGPPeerIdList.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ?testDurationInMinutes ?bgpPeers ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6234,8 +6596,8 @@ module Locations =
         (Option.map ~f:LocationList.of_xml) (Xml.child xml_arg0 "locations") in
       make ?locations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locations = field_map json "locations" LocationList.of_json in
+    let of_json json__ =
+      let locations = field_map json__ "locations" LocationList.of_json in
       make ?locations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6307,10 +6669,10 @@ module ListVirtualInterfaceTestHistoryResponse =
           (Xml.child xml_arg0 "virtualInterfaceTestHistory") in
       make ?nextToken ?virtualInterfaceTestHistory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let virtualInterfaceTestHistory =
-        field_map json "virtualInterfaceTestHistory"
+        field_map json__ "virtualInterfaceTestHistory"
           VirtualInterfaceTestHistoryList.of_json in
       make ?nextToken ?virtualInterfaceTestHistory ()
     let to_json v = composed_to_json to_value v
@@ -6380,27 +6742,31 @@ module ListVirtualInterfaceTestHistoryRequest =
       make ?nextToken ?maxResults ?status ?bgpPeers ?virtualInterfaceId
         ?testId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
-      let status = field_map json "status" FailureTestHistoryStatus.of_json in
-      let bgpPeers = field_map json "bgpPeers" BGPPeerIdList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
+      let status = field_map json__ "status" FailureTestHistoryStatus.of_json in
+      let bgpPeers = field_map json__ "bgpPeers" BGPPeerIdList.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      let testId = field_map json "testId" TestId.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      let testId = field_map json__ "testId" TestId.of_json in
       make ?nextToken ?maxResults ?status ?bgpPeers ?virtualInterfaceId
         ?testId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the virtual interface failover test history."]
 module Lags =
   struct
-    type nonrec t = {
-      lags: LagList.t option [@ocaml.doc "The LAGs."]}
+    type nonrec t =
+      {
+      lags: LagList.t option [@ocaml.doc "The LAGs."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?lags = fun () -> { lags }
+    let make ?lags = fun ?nextToken -> fun () -> { lags; nextToken }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -6438,14 +6804,21 @@ module Lags =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("lags", (Option.map x.lags ~f:LagList.to_value))]
+      structure_to_value
+        [("lags", (Option.map x.lags ~f:LagList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let lags = (Option.map ~f:LagList.of_xml) (Xml.child xml_arg0 "lags") in
-      make ?lags ()
+      make ?nextToken ?lags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lags = field_map json "lags" LagList.of_json in make ?lags ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let lags = field_map json__ "lags" LagList.of_json in
+      make ?nextToken ?lags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes all your link aggregation groups (LAG) or the specified LAG."]
@@ -6454,12 +6827,16 @@ module Interconnects =
     type nonrec t =
       {
       interconnects: InterconnectList.t option
-        [@ocaml.doc "The interconnects."]}
+        [@ocaml.doc "The interconnects."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?interconnects = fun () -> { interconnects }
+    let make ?interconnects =
+      fun ?nextToken -> fun () -> { interconnects; nextToken }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -6499,18 +6876,23 @@ module Interconnects =
     let to_value x =
       structure_to_value
         [("interconnects",
-           (Option.map x.interconnects ~f:InterconnectList.to_value))]
+           (Option.map x.interconnects ~f:InterconnectList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let interconnects =
         (Option.map ~f:InterconnectList.of_xml)
           (Xml.child xml_arg0 "interconnects") in
-      make ?interconnects ()
+      make ?nextToken ?interconnects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let interconnects =
-        field_map json "interconnects" InterconnectList.of_json in
-      make ?interconnects ()
+        field_map json__ "interconnects" InterconnectList.of_json in
+      make ?nextToken ?interconnects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the interconnects owned by the Amazon Web Services account or only the specified interconnect."]
@@ -6520,10 +6902,10 @@ module DisassociateMacSecKeyResponse =
       {
       connectionId: ConnectionId.t option
         [@ocaml.doc
-          "The ID of the dedicated connection (dxcon-xxxx), or the ID of the LAG (dxlag-xxxx)."];
+          "The ID of the dedicated connection (dxcon-xxxx), interconnect (dxcon-xxxx), or LAG (dxlag-xxxx)."];
       macSecKeys: MacSecKeyList.t option
         [@ocaml.doc
-          "The MAC Security (MACsec) security keys no longer associated with the dedicated connection."]}
+          "The MAC Security (MACsec) security keys no longer associated with the connection."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -6581,20 +6963,20 @@ module DisassociateMacSecKeyResponse =
           (Xml.child xml_arg0 "connectionId") in
       make ?macSecKeys ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
+    let of_json json__ =
+      let macSecKeys = field_map json__ "macSecKeys" MacSecKeyList.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
       make ?macSecKeys ?connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the association between a MAC Security (MACsec) security key and an Direct Connect dedicated connection."]
+       "Removes the association between a MAC Security (MACsec) security key and a Direct Connect connection."]
 module DisassociateMacSecKeyRequest =
   struct
     type nonrec t =
       {
       connectionId: ConnectionId.t
         [@ocaml.doc
-          "The ID of the dedicated connection (dxcon-xxxx), or the ID of the LAG (dxlag-xxxx). You can use DescribeConnections or DescribeLags to retrieve connection ID."];
+          "The ID of the dedicated connection (dxcon-xxxx), interconnect (dxcon-xxxx), or LAG (dxlag-xxxx). You can use DescribeConnections, DescribeInterconnects, or DescribeLags to retrieve connection ID."];
       secretARN: SecretARN.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the MAC Security (MACsec) secret key. You can use DescribeConnections to retrieve the ARN of the MAC Security (MACsec) secret key."]}
@@ -6615,14 +6997,14 @@ module DisassociateMacSecKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~secretARN ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretARN = field_map_exn json "secretARN" SecretARN.of_json in
+    let of_json json__ =
+      let secretARN = field_map_exn json__ "secretARN" SecretARN.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~secretARN ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes the association between a MAC Security (MACsec) security key and an Direct Connect dedicated connection."]
+       "Removes the association between a MAC Security (MACsec) security key and a Direct Connect connection."]
 module DisassociateConnectionFromLagRequest =
   struct
     type nonrec t =
@@ -6644,10 +7026,10 @@ module DisassociateConnectionFromLagRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~lagId ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lagId = field_map_exn json "lagId" LagId.of_json in
+    let of_json json__ =
+      let lagId = field_map_exn json__ "lagId" LagId.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~lagId ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6659,34 +7041,53 @@ module DescribeVirtualInterfacesRequest =
       connectionId: ConnectionId.t option
         [@ocaml.doc "The ID of the connection."];
       virtualInterfaceId: VirtualInterfaceId.t option
-        [@ocaml.doc "The ID of the virtual interface."]}
+        [@ocaml.doc "The ID of the virtual interface."];
+      maxResults: MaxResultSetSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value. If MaxResults is given a value larger than 100, only 100 results are returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
     let make ?connectionId =
       fun ?virtualInterfaceId ->
-        fun () -> { connectionId; virtualInterfaceId }
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () ->
+              { connectionId; virtualInterfaceId; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("connectionId",
            (Option.map x.connectionId ~f:ConnectionId.to_value));
         ("virtualInterfaceId",
-          (Option.map x.virtualInterfaceId ~f:VirtualInterfaceId.to_value))]
+          (Option.map x.virtualInterfaceId ~f:VirtualInterfaceId.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultSetSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultSetSize.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let virtualInterfaceId =
         (Option.map ~f:VirtualInterfaceId.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceId") in
       let connectionId =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
-      make ?virtualInterfaceId ?connectionId ()
+      make ?nextToken ?maxResults ?virtualInterfaceId ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
-      make ?virtualInterfaceId ?connectionId ()
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
+      make ?nextToken ?maxResults ?virtualInterfaceId ?connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays all virtual interfaces for an Amazon Web Services account. Virtual interfaces deleted fewer than 15 minutes before you make the request are also returned. If you specify a connection ID, only the virtual interfaces associated with the connection are returned. If you specify a virtual interface ID, then only a single virtual interface is returned. A virtual interface (VLAN) transmits the traffic between the Direct Connect location and the customer network."]
+       "Displays all virtual interfaces for an Amazon Web Services account. Virtual interfaces deleted fewer than 15 minutes before you make the request are also returned. If you specify a connection ID, only the virtual interfaces associated with the connection are returned. If you specify a virtual interface ID, then only a single virtual interface is returned. A virtual interface (VLAN) transmits the traffic between the Direct Connect location and the customer network. If you're using an asn, the response includes ASN value in both the asn and asnLong fields. If you're using asnLong, the response returns a value of 0 (zero) for the asn attribute because it exceeds the highest ASN value of 2,147,483,647 that it can support"]
 module DescribeTagsResponse =
   struct
     type nonrec t =
@@ -6745,9 +7146,9 @@ module DescribeTagsResponse =
           (Xml.child xml_arg0 "resourceTags") in
       make ?resourceTags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map json "resourceTags" ResourceTagList.of_json in
+        field_map json__ "resourceTags" ResourceTagList.of_json in
       make ?resourceTags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6770,9 +7171,9 @@ module DescribeTagsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArns") in
       make ~resourceArns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArns =
-        field_map_exn json "resourceArns" ResourceArnList.of_json in
+        field_map_exn json__ "resourceArns" ResourceArnList.of_json in
       make ~resourceArns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6866,14 +7267,14 @@ module DescribeRouterConfigurationResponse =
       make ?virtualInterfaceName ?virtualInterfaceId ?router
         ?customerRouterConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceName =
-        field_map json "virtualInterfaceName" VirtualInterfaceName.of_json in
+        field_map json__ "virtualInterfaceName" VirtualInterfaceName.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      let router = field_map json "router" RouterType.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      let router = field_map json__ "router" RouterType.of_json in
       let customerRouterConfig =
-        field_map json "customerRouterConfig" RouterConfig.of_json in
+        field_map json__ "customerRouterConfig" RouterConfig.of_json in
       make ?virtualInterfaceName ?virtualInterfaceId ?router
         ?customerRouterConfig ()
     let to_json v = composed_to_json to_value v
@@ -6907,11 +7308,11 @@ module DescribeRouterConfigurationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?routerTypeIdentifier ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routerTypeIdentifier =
-        field_map json "routerTypeIdentifier" RouterTypeIdentifier.of_json in
+        field_map json__ "routerTypeIdentifier" RouterTypeIdentifier.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ?routerTypeIdentifier ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the details about a virtual interface's router."]
@@ -6952,30 +7353,51 @@ module DescribeLoaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?loaContentType ?providerName ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loaContentType =
-        field_map json "loaContentType" LoaContentType.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
+        field_map json__ "loaContentType" LoaContentType.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ?loaContentType ?providerName ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the LOA-CFA for a connection, interconnect, or link aggregation group (LAG). The Letter of Authorization - Connecting Facility Assignment (LOA-CFA) is a document that is used when establishing your cross connect to Amazon Web Services at the colocation facility. For more information, see Requesting Cross Connects at Direct Connect Locations in the Direct Connect User Guide."]
 module DescribeLagsRequest =
   struct
-    type nonrec t = {
-      lagId: LagId.t option [@ocaml.doc "The ID of the LAG."]}
-    let make ?lagId = fun () -> { lagId }
+    type nonrec t =
+      {
+      lagId: LagId.t option [@ocaml.doc "The ID of the LAG."];
+      maxResults: MaxResultSetSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value. If MaxResults is given a value larger than 100, only 100 results are returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let make ?lagId =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { lagId; maxResults; nextToken }
     let to_value x =
-      structure_to_value [("lagId", (Option.map x.lagId ~f:LagId.to_value))]
+      structure_to_value
+        [("lagId", (Option.map x.lagId ~f:LagId.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultSetSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultSetSize.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let lagId = (Option.map ~f:LagId.of_xml) (Xml.child xml_arg0 "lagId") in
-      make ?lagId ()
+      make ?nextToken ?maxResults ?lagId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lagId = field_map json "lagId" LagId.of_json in make ?lagId ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
+      make ?nextToken ?maxResults ?lagId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes all your link aggregation groups (LAG) or the specified LAG."]
@@ -6984,23 +7406,41 @@ module DescribeInterconnectsRequest =
     type nonrec t =
       {
       interconnectId: InterconnectId.t option
-        [@ocaml.doc "The ID of the interconnect."]}
-    let make ?interconnectId = fun () -> { interconnectId }
+        [@ocaml.doc "The ID of the interconnect."];
+      maxResults: MaxResultSetSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value. If MaxResults is given a value larger than 100, only 100 results are returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let make ?interconnectId =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { interconnectId; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("interconnectId",
-           (Option.map x.interconnectId ~f:InterconnectId.to_value))]
+           (Option.map x.interconnectId ~f:InterconnectId.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultSetSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultSetSize.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let interconnectId =
         (Option.map ~f:InterconnectId.of_xml)
           (Xml.child xml_arg0 "interconnectId") in
-      make ?interconnectId ()
+      make ?nextToken ?maxResults ?interconnectId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let interconnectId =
-        field_map json "interconnectId" InterconnectId.of_json in
-      make ?interconnectId ()
+        field_map json__ "interconnectId" InterconnectId.of_json in
+      make ?nextToken ?maxResults ?interconnectId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the interconnects owned by the Amazon Web Services account or only the specified interconnect."]
@@ -7059,8 +7499,8 @@ module DescribeInterconnectLoaResponse =
       let loa = (Option.map ~f:Loa.of_xml) (Xml.child xml_arg0 "loa") in
       make ?loa ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loa = field_map json "loa" Loa.of_json in make ?loa ()
+    let of_json json__ =
+      let loa = field_map json__ "loa" Loa.of_json in make ?loa ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deprecated. Use DescribeLoa instead. Gets the LOA-CFA for the specified interconnect. The Letter of Authorization - Connecting Facility Assignment (LOA-CFA) is a document that is used when establishing your cross connect to Amazon Web Services at the colocation facility. For more information, see Requesting Cross Connects at Direct Connect Locations in the Direct Connect User Guide."]
@@ -7102,12 +7542,12 @@ module DescribeInterconnectLoaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ?loaContentType ?providerName ~interconnectId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loaContentType =
-        field_map json "loaContentType" LoaContentType.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
+        field_map json__ "loaContentType" LoaContentType.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
       let interconnectId =
-        field_map_exn json "interconnectId" InterconnectId.of_json in
+        field_map_exn json__ "interconnectId" InterconnectId.of_json in
       make ?loaContentType ?providerName ~interconnectId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7117,23 +7557,42 @@ module DescribeHostedConnectionsRequest =
     type nonrec t =
       {
       connectionId: ConnectionId.t
-        [@ocaml.doc "The ID of the interconnect or LAG."]}
+        [@ocaml.doc "The ID of the interconnect or LAG."];
+      maxResults: MaxResultSetSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value. If MaxResults is given a value larger than 100, only 100 results are returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
     let context_ = "DescribeHostedConnectionsRequest"
-    let make ~connectionId = fun () -> { connectionId }
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~connectionId ->
+          fun () -> { maxResults; nextToken; connectionId }
     let to_value x =
       structure_to_value
-        [("connectionId", (Some (ConnectionId.to_value x.connectionId)))]
+        [("connectionId", (Some (ConnectionId.to_value x.connectionId)));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultSetSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultSetSize.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let connectionId =
         ConnectionId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
-      make ~connectionId ()
+      make ?nextToken ?maxResults ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
-      make ~connectionId ()
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
+      make ?nextToken ?maxResults ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the hosted connections that have been provisioned on the specified interconnect or link aggregation group (LAG). Intended for use by Direct Connect Partners only."]
@@ -7203,10 +7662,10 @@ module DescribeDirectConnectGatewaysResult =
           (Xml.child xml_arg0 "directConnectGateways") in
       make ?nextToken ?directConnectGateways ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let directConnectGateways =
-        field_map json "directConnectGateways"
+        field_map json__ "directConnectGateways"
           DirectConnectGatewayList.of_json in
       make ?nextToken ?directConnectGateways ()
     let to_json v = composed_to_json to_value v
@@ -7249,11 +7708,11 @@ module DescribeDirectConnectGatewaysRequest =
           (Xml.child xml_arg0 "directConnectGatewayId") in
       make ?nextToken ?maxResults ?directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?nextToken ?maxResults ?directConnectGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -7327,10 +7786,10 @@ module DescribeDirectConnectGatewayAttachmentsResult =
           (Xml.child xml_arg0 "directConnectGatewayAttachments") in
       make ?nextToken ?directConnectGatewayAttachments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let directConnectGatewayAttachments =
-        field_map json "directConnectGatewayAttachments"
+        field_map json__ "directConnectGatewayAttachments"
           DirectConnectGatewayAttachmentList.of_json in
       make ?nextToken ?directConnectGatewayAttachments ()
     let to_json v = composed_to_json to_value v
@@ -7388,13 +7847,13 @@ module DescribeDirectConnectGatewayAttachmentsRequest =
       make ?nextToken ?maxResults ?virtualInterfaceId ?directConnectGatewayId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?nextToken ?maxResults ?virtualInterfaceId ?directConnectGatewayId
         ()
@@ -7469,15 +7928,15 @@ module DescribeDirectConnectGatewayAssociationsResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociations") in
       make ?nextToken ?directConnectGatewayAssociations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let directConnectGatewayAssociations =
-        field_map json "directConnectGatewayAssociations"
+        field_map json__ "directConnectGatewayAssociations"
           DirectConnectGatewayAssociationList.of_json in
       make ?nextToken ?directConnectGatewayAssociations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the associations between your Direct Connect gateways and virtual private gateways and transit gateways. You must specify one of the following: A Direct Connect gateway The response contains all virtual private gateways and transit gateways associated with the Direct Connect gateway. A virtual private gateway The response contains the Direct Connect gateway. A transit gateway The response contains the Direct Connect gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway and a transit gateway The response contains the association between the Direct Connect gateway and transit gateway."]
+       "Lists the associations between your Direct Connect gateways and virtual private gateways and transit gateways. You must specify one of the following: A Direct Connect gateway The response contains all virtual private gateways and transit gateways associated with the Direct Connect gateway. A virtual private gateway The response contains the Direct Connect gateway. A transit gateway The response contains the Direct Connect gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway and a transit gateway The response contains the association between the Direct Connect gateway and transit gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway association to a Cloud WAN core network The response contains the Cloud WAN core network ID that the Direct Connect gateway is associated to."]
 module DescribeDirectConnectGatewayAssociationsRequest =
   struct
     type nonrec t =
@@ -7550,24 +8009,24 @@ module DescribeDirectConnectGatewayAssociationsRequest =
       make ?virtualGatewayId ?nextToken ?maxResults ?directConnectGatewayId
         ?associatedGatewayId ?associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let associatedGatewayId =
-        field_map json "associatedGatewayId" AssociatedGatewayId.of_json in
+        field_map json__ "associatedGatewayId" AssociatedGatewayId.of_json in
       let associationId =
-        field_map json "associationId"
+        field_map json__ "associationId"
           DirectConnectGatewayAssociationId.of_json in
       make ?virtualGatewayId ?nextToken ?maxResults ?directConnectGatewayId
         ?associatedGatewayId ?associationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the associations between your Direct Connect gateways and virtual private gateways and transit gateways. You must specify one of the following: A Direct Connect gateway The response contains all virtual private gateways and transit gateways associated with the Direct Connect gateway. A virtual private gateway The response contains the Direct Connect gateway. A transit gateway The response contains the Direct Connect gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway and a transit gateway The response contains the association between the Direct Connect gateway and transit gateway."]
+       "Lists the associations between your Direct Connect gateways and virtual private gateways and transit gateways. You must specify one of the following: A Direct Connect gateway The response contains all virtual private gateways and transit gateways associated with the Direct Connect gateway. A virtual private gateway The response contains the Direct Connect gateway. A transit gateway The response contains the Direct Connect gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway and a transit gateway The response contains the association between the Direct Connect gateway and transit gateway. A Direct Connect gateway and a virtual private gateway The response contains the association between the Direct Connect gateway and virtual private gateway. A Direct Connect gateway association to a Cloud WAN core network The response contains the Cloud WAN core network ID that the Direct Connect gateway is associated to."]
 module DescribeDirectConnectGatewayAssociationProposalsResult =
   struct
     type nonrec t =
@@ -7638,10 +8097,10 @@ module DescribeDirectConnectGatewayAssociationProposalsResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposals") in
       make ?nextToken ?directConnectGatewayAssociationProposals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let directConnectGatewayAssociationProposals =
-        field_map json "directConnectGatewayAssociationProposals"
+        field_map json__ "directConnectGatewayAssociationProposals"
           DirectConnectGatewayAssociationProposalList.of_json in
       make ?nextToken ?directConnectGatewayAssociationProposals ()
     let to_json v = composed_to_json to_value v
@@ -7708,16 +8167,16 @@ module DescribeDirectConnectGatewayAssociationProposalsRequest =
       make ?nextToken ?maxResults ?associatedGatewayId ?proposalId
         ?directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResultSetSize.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
       let associatedGatewayId =
-        field_map json "associatedGatewayId" AssociatedGatewayId.of_json in
+        field_map json__ "associatedGatewayId" AssociatedGatewayId.of_json in
       let proposalId =
-        field_map json "proposalId"
+        field_map json__ "proposalId"
           DirectConnectGatewayAssociationProposalId.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?nextToken ?maxResults ?associatedGatewayId ?proposalId
         ?directConnectGatewayId ()
@@ -7790,10 +8249,10 @@ module DescribeCustomerMetadataResponse =
           (Xml.child xml_arg0 "agreements") in
       make ?nniPartnerType ?agreements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nniPartnerType =
-        field_map json "nniPartnerType" NniPartnerType.of_json in
-      let agreements = field_map json "agreements" AgreementList.of_json in
+        field_map json__ "nniPartnerType" NniPartnerType.of_json in
+      let agreements = field_map json__ "agreements" AgreementList.of_json in
       make ?nniPartnerType ?agreements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7803,22 +8262,40 @@ module DescribeConnectionsRequest =
     type nonrec t =
       {
       connectionId: ConnectionId.t option
-        [@ocaml.doc "The ID of the connection."]}
-    let make ?connectionId = fun () -> { connectionId }
+        [@ocaml.doc "The ID of the connection."];
+      maxResults: MaxResultSetSize.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value. If MaxResults is given a value larger than 100, only 100 results are returned."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let make ?connectionId =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { connectionId; maxResults; nextToken }
     let to_value x =
       structure_to_value
         [("connectionId",
-           (Option.map x.connectionId ~f:ConnectionId.to_value))]
+           (Option.map x.connectionId ~f:ConnectionId.to_value));
+        ("maxResults",
+          (Option.map x.maxResults ~f:MaxResultSetSize.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResultSetSize.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
       let connectionId =
         (Option.map ~f:ConnectionId.of_xml)
           (Xml.child xml_arg0 "connectionId") in
-      make ?connectionId ()
+      make ?nextToken ?maxResults ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
-      make ?connectionId ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResultSetSize.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
+      make ?nextToken ?maxResults ?connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the specified connection or all connections in this Region."]
@@ -7841,9 +8318,9 @@ module DescribeConnectionsOnInterconnectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ~interconnectId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let interconnectId =
-        field_map_exn json "interconnectId" InterconnectId.of_json in
+        field_map_exn json__ "interconnectId" InterconnectId.of_json in
       make ~interconnectId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7903,8 +8380,8 @@ module DescribeConnectionLoaResponse =
       let loa = (Option.map ~f:Loa.of_xml) (Xml.child xml_arg0 "loa") in
       make ?loa ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let loa = field_map json "loa" Loa.of_json in make ?loa ()
+    let of_json json__ =
+      let loa = field_map json__ "loa" Loa.of_json in make ?loa ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deprecated. Use DescribeLoa instead. Gets the LOA-CFA for a connection. The Letter of Authorization - Connecting Facility Assignment (LOA-CFA) is a document that your APN partner or service provider uses when establishing your cross connect to Amazon Web Services at the colocation facility. For more information, see Requesting Cross Connects at Direct Connect Locations in the Direct Connect User Guide."]
@@ -7944,12 +8421,12 @@ module DescribeConnectionLoaRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?loaContentType ?providerName ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let loaContentType =
-        field_map json "loaContentType" LoaContentType.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
+        field_map json__ "loaContentType" LoaContentType.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ?loaContentType ?providerName ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7960,7 +8437,7 @@ module DeleteVirtualInterfaceResponse =
       {
       virtualInterfaceState: VirtualInterfaceState.t option
         [@ocaml.doc
-          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
+          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. testing: A virtual interface is in this state immediately after calling StartBgpFailoverTest and remains in this state during the duration of the test. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -8014,9 +8491,10 @@ module DeleteVirtualInterfaceResponse =
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceState =
-        field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
+        field_map json__ "virtualInterfaceState"
+          VirtualInterfaceState.of_json in
       make ?virtualInterfaceState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a virtual interface."]
@@ -8039,9 +8517,9 @@ module DeleteVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a virtual interface."]
@@ -8059,8 +8537,9 @@ module DeleteLagRequest =
         LagId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "lagId") in
       make ~lagId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lagId = field_map_exn json "lagId" LagId.of_json in make ~lagId ()
+    let of_json json__ =
+      let lagId = field_map_exn json__ "lagId" LagId.of_json in
+      make ~lagId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified link aggregation group (LAG). You cannot delete a LAG if it has active virtual interfaces or hosted connections."]
@@ -8123,9 +8602,9 @@ module DeleteInterconnectResponse =
           (Xml.child xml_arg0 "interconnectState") in
       make ?interconnectState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let interconnectState =
-        field_map json "interconnectState" InterconnectState.of_json in
+        field_map json__ "interconnectState" InterconnectState.of_json in
       make ?interconnectState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8149,9 +8628,9 @@ module DeleteInterconnectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectId") in
       make ~interconnectId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let interconnectId =
-        field_map_exn json "interconnectId" InterconnectId.of_json in
+        field_map_exn json__ "interconnectId" InterconnectId.of_json in
       make ~interconnectId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8215,9 +8694,9 @@ module DeleteDirectConnectGatewayResult =
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGateway =
-        field_map json "directConnectGateway" DirectConnectGateway.of_json in
+        field_map json__ "directConnectGateway" DirectConnectGateway.of_json in
       make ?directConnectGateway ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8241,9 +8720,9 @@ module DeleteDirectConnectGatewayRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "directConnectGatewayId") in
       make ~directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ~directConnectGatewayId ()
     let to_json v = composed_to_json to_value v
@@ -8310,9 +8789,9 @@ module DeleteDirectConnectGatewayAssociationResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociation =
-        field_map json "directConnectGatewayAssociation"
+        field_map json__ "directConnectGatewayAssociation"
           DirectConnectGatewayAssociation.of_json in
       make ?directConnectGatewayAssociation ()
     let to_json v = composed_to_json to_value v
@@ -8356,14 +8835,14 @@ module DeleteDirectConnectGatewayAssociationRequest =
           (Xml.child xml_arg0 "associationId") in
       make ?virtualGatewayId ?directConnectGatewayId ?associationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let associationId =
-        field_map json "associationId"
+        field_map json__ "associationId"
           DirectConnectGatewayAssociationId.of_json in
       make ?virtualGatewayId ?directConnectGatewayId ?associationId ()
     let to_json v = composed_to_json to_value v
@@ -8430,9 +8909,9 @@ module DeleteDirectConnectGatewayAssociationProposalResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposal") in
       make ?directConnectGatewayAssociationProposal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociationProposal =
-        field_map json "directConnectGatewayAssociationProposal"
+        field_map json__ "directConnectGatewayAssociationProposal"
           DirectConnectGatewayAssociationProposal.of_json in
       make ?directConnectGatewayAssociationProposal ()
     let to_json v = composed_to_json to_value v
@@ -8459,9 +8938,9 @@ module DeleteDirectConnectGatewayAssociationProposalRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "proposalId") in
       make ~proposalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let proposalId =
-        field_map_exn json "proposalId"
+        field_map_exn json__ "proposalId"
           DirectConnectGatewayAssociationProposalId.of_json in
       make ~proposalId ()
     let to_json v = composed_to_json to_value v
@@ -8484,9 +8963,9 @@ module DeleteConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8549,9 +9028,9 @@ module DeleteBGPPeerResponse =
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterface =
-        field_map json "virtualInterface" VirtualInterface.of_json in
+        field_map json__ "virtualInterface" VirtualInterface.of_json in
       make ?virtualInterface ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8564,20 +9043,32 @@ module DeleteBGPPeerRequest =
         [@ocaml.doc "The ID of the virtual interface."];
       asn: ASN.t option
         [@ocaml.doc
-          "The autonomous system (AS) number for Border Gateway Protocol (BGP) configuration."];
+          "The autonomous system number (ASN). The valid range is from 1 to 2147483646 for Border Gateway Protocol (BGP) configuration. If you provide a number greater than the maximum, an error is returned. Use asnLong instead. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
+      asnLong: LongAsn.t option
+        [@ocaml.doc
+          "The long ASN for the BGP peer to be deleted from a Direct Connect virtual interface. The valid range is from 1 to 4294967294 for BGP configuration. You can use asnLong or asn, but not both. We recommend using asnLong as it supports a greater pool of numbers. The asnLong attribute accepts both ASN and long ASN ranges. If you provide a value in the same API call for both asn and asnLong, the API will only accept the value for asnLong."];
       customerAddress: CustomerAddress.t option
         [@ocaml.doc "The IP address assigned to the customer interface."];
       bgpPeerId: BGPPeerId.t option [@ocaml.doc "The ID of the BGP peer."]}
     let make ?virtualInterfaceId =
       fun ?asn ->
-        fun ?customerAddress ->
-          fun ?bgpPeerId ->
-            fun () -> { virtualInterfaceId; asn; customerAddress; bgpPeerId }
+        fun ?asnLong ->
+          fun ?customerAddress ->
+            fun ?bgpPeerId ->
+              fun () ->
+                {
+                  virtualInterfaceId;
+                  asn;
+                  asnLong;
+                  customerAddress;
+                  bgpPeerId
+                }
     let to_value x =
       structure_to_value
         [("virtualInterfaceId",
            (Option.map x.virtualInterfaceId ~f:VirtualInterfaceId.to_value));
         ("asn", (Option.map x.asn ~f:ASN.to_value));
+        ("asnLong", (Option.map x.asnLong ~f:LongAsn.to_value));
         ("customerAddress",
           (Option.map x.customerAddress ~f:CustomerAddress.to_value));
         ("bgpPeerId", (Option.map x.bgpPeerId ~f:BGPPeerId.to_value))]
@@ -8588,27 +9079,32 @@ module DeleteBGPPeerRequest =
       let customerAddress =
         (Option.map ~f:CustomerAddress.of_xml)
           (Xml.child xml_arg0 "customerAddress") in
+      let asnLong =
+        (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "asnLong") in
       let asn = (Option.map ~f:ASN.of_xml) (Xml.child xml_arg0 "asn") in
       let virtualInterfaceId =
         (Option.map ~f:VirtualInterfaceId.of_xml)
           (Xml.child xml_arg0 "virtualInterfaceId") in
-      make ?bgpPeerId ?customerAddress ?asn ?virtualInterfaceId ()
+      make ?bgpPeerId ?customerAddress ?asnLong ?asn ?virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bgpPeerId = field_map json "bgpPeerId" BGPPeerId.of_json in
+    let of_json json__ =
+      let bgpPeerId = field_map json__ "bgpPeerId" BGPPeerId.of_json in
       let customerAddress =
-        field_map json "customerAddress" CustomerAddress.of_json in
-      let asn = field_map json "asn" ASN.of_json in
+        field_map json__ "customerAddress" CustomerAddress.of_json in
+      let asnLong = field_map json__ "asnLong" LongAsn.of_json in
+      let asn = field_map json__ "asn" ASN.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
-      make ?bgpPeerId ?customerAddress ?asn ?virtualInterfaceId ()
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
+      make ?bgpPeerId ?customerAddress ?asnLong ?asn ?virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes the specified BGP peer on the specified virtual interface with the specified customer address and ASN. You cannot delete the last BGP peer from a virtual interface."]
 module CreateTransitVirtualInterfaceResult =
   struct
-    type nonrec t = {
-      virtualInterface: VirtualInterface.t option }
+    type nonrec t =
+      {
+      virtualInterface: VirtualInterface.t option
+        [@ocaml.doc "Information about a virtual interface."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -8679,13 +9175,13 @@ module CreateTransitVirtualInterfaceResult =
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterface =
-        field_map json "virtualInterface" VirtualInterface.of_json in
+        field_map json__ "virtualInterface" VirtualInterface.of_json in
       make ?virtualInterface ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a transit virtual interface. A transit virtual interface should be used to access one or more transit gateways associated with Direct Connect gateways. A transit virtual interface enables the connection of multiple VPCs attached to a transit gateway to a Direct Connect gateway. If you associate your transit gateway with one or more Direct Connect gateways, the Autonomous System Number (ASN) used by the transit gateway and the Direct Connect gateway must be different. For example, if you use the default ASN 64512 for both your the transit gateway and Direct Connect gateway, the association request fails. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
+       "Creates a transit virtual interface. A transit virtual interface should be used to access one or more transit gateways associated with Direct Connect gateways. A transit virtual interface enables the connection of multiple VPCs attached to a transit gateway to a Direct Connect gateway. If you associate your transit gateway with one or more Direct Connect gateways, the Autonomous System Number (ASN) used by the transit gateway and the Direct Connect gateway must be different. For example, if you use the default ASN 64512 for both your the transit gateway and Direct Connect gateway, the association request fails. A jumbo MTU value must be either 1500 or 8500. No other values will be accepted. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
 module CreateTransitVirtualInterfaceRequest =
   struct
     type nonrec t =
@@ -8715,16 +9211,16 @@ module CreateTransitVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newTransitVirtualInterface ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newTransitVirtualInterface =
-        field_map_exn json "newTransitVirtualInterface"
+        field_map_exn json__ "newTransitVirtualInterface"
           NewTransitVirtualInterface.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newTransitVirtualInterface ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a transit virtual interface. A transit virtual interface should be used to access one or more transit gateways associated with Direct Connect gateways. A transit virtual interface enables the connection of multiple VPCs attached to a transit gateway to a Direct Connect gateway. If you associate your transit gateway with one or more Direct Connect gateways, the Autonomous System Number (ASN) used by the transit gateway and the Direct Connect gateway must be different. For example, if you use the default ASN 64512 for both your the transit gateway and Direct Connect gateway, the association request fails. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
+       "Creates a transit virtual interface. A transit virtual interface should be used to access one or more transit gateways associated with Direct Connect gateways. A transit virtual interface enables the connection of multiple VPCs attached to a transit gateway to a Direct Connect gateway. If you associate your transit gateway with one or more Direct Connect gateways, the Autonomous System Number (ASN) used by the transit gateway and the Direct Connect gateway must be different. For example, if you use the default ASN 64512 for both your the transit gateway and Direct Connect gateway, the association request fails. A jumbo MTU value must be either 1500 or 8500. No other values will be accepted. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
 module CreatePublicVirtualInterfaceRequest =
   struct
     type nonrec t =
@@ -8753,12 +9249,12 @@ module CreatePublicVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPublicVirtualInterface ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newPublicVirtualInterface =
-        field_map_exn json "newPublicVirtualInterface"
+        field_map_exn json__ "newPublicVirtualInterface"
           NewPublicVirtualInterface.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newPublicVirtualInterface ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8792,27 +9288,27 @@ module CreatePrivateVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~newPrivateVirtualInterface ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newPrivateVirtualInterface =
-        field_map_exn json "newPrivateVirtualInterface"
+        field_map_exn json__ "newPrivateVirtualInterface"
           NewPrivateVirtualInterface.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newPrivateVirtualInterface ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a private virtual interface. A virtual interface is the VLAN that transports Direct Connect traffic. A private virtual interface can be connected to either a Direct Connect gateway or a Virtual Private Gateway (VGW). Connecting the private virtual interface to a Direct Connect gateway enables the possibility for connecting to multiple VPCs, including VPCs in different Amazon Web Services Regions. Connecting the private virtual interface to a VGW only provides access to a single VPC within the same Region. Setting the MTU of a virtual interface to 9001 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
+       "Creates a private virtual interface. A virtual interface is the VLAN that transports Direct Connect traffic. A private virtual interface can be connected to either a Direct Connect gateway or a Virtual Private Gateway (VGW). Connecting the private virtual interface to a Direct Connect gateway enables the possibility for connecting to multiple VPCs, including VPCs in different Amazon Web Services Regions. Connecting the private virtual interface to a VGW only provides access to a single VPC within the same Region. Setting the MTU of a virtual interface to 8500 (jumbo frames) can cause an update to the underlying physical connection if it wasn't updated to support jumbo frames. Updating the connection disrupts network connectivity for all virtual interfaces associated with the connection for up to 30 seconds. To check whether your connection supports jumbo frames, call DescribeConnections. To check whether your virtual interface supports jumbo frames, call DescribeVirtualInterfaces."]
 module CreateLagRequest =
   struct
     type nonrec t =
       {
       numberOfConnections: Count.t
         [@ocaml.doc
-          "The number of physical dedicated connections initially provisioned and bundled by the LAG."];
+          "The number of physical dedicated connections initially provisioned and bundled by the LAG. You can have a maximum of four connections when the port speed is 1Gbps or 10Gbps, or two when the port speed is 100Gbps or 400Gbps."];
       location: LocationCode.t [@ocaml.doc "The location for the LAG."];
       connectionsBandwidth: Bandwidth.t
         [@ocaml.doc
-          "The bandwidth of the individual physical dedicated connections bundled by the LAG. The possible values are 1Gbps and 10Gbps."];
+          "The bandwidth of the individual physical dedicated connections bundled by the LAG. The possible values are 1Gbps,10Gbps, 100Gbps, and 400Gbps."];
       lagName: LagName.t [@ocaml.doc "The name of the LAG."];
       connectionId: ConnectionId.t option
         [@ocaml.doc
@@ -8897,26 +9393,26 @@ module CreateLagRequest =
         ?connectionId ~lagName ~connectionsBandwidth ~location
         ~numberOfConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestMACSec =
-        field_map json "requestMACSec" RequestMACSec.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
+        field_map json__ "requestMACSec" RequestMACSec.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
       let childConnectionTags =
-        field_map json "childConnectionTags" TagList.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
-      let lagName = field_map_exn json "lagName" LagName.of_json in
+        field_map json__ "childConnectionTags" TagList.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
+      let lagName = field_map_exn json__ "lagName" LagName.of_json in
       let connectionsBandwidth =
-        field_map_exn json "connectionsBandwidth" Bandwidth.of_json in
-      let location = field_map_exn json "location" LocationCode.of_json in
+        field_map_exn json__ "connectionsBandwidth" Bandwidth.of_json in
+      let location = field_map_exn json__ "location" LocationCode.of_json in
       let numberOfConnections =
-        field_map_exn json "numberOfConnections" Count.of_json in
+        field_map_exn json__ "numberOfConnections" Count.of_json in
       make ?requestMACSec ?providerName ?childConnectionTags ?tags
         ?connectionId ~lagName ~connectionsBandwidth ~location
         ~numberOfConnections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a link aggregation group (LAG) with the specified number of bundled physical dedicated connections between the customer network and a specific Direct Connect location. A LAG is a logical interface that uses the Link Aggregation Control Protocol (LACP) to aggregate multiple interfaces, enabling you to treat them as a single interface. All connections in a LAG must use the same bandwidth (either 1Gbps or 10Gbps) and must terminate at the same Direct Connect endpoint. You can have up to 10 dedicated connections per LAG. Regardless of this limit, if you request more connections for the LAG than Direct Connect can allocate on a single endpoint, no LAG is created. You can specify an existing physical dedicated connection or interconnect to include in the LAG (which counts towards the total number of connections). Doing so interrupts the current physical dedicated connection, and re-establishes them as a member of the LAG. The LAG will be created on the same Direct Connect endpoint to which the dedicated connection terminates. Any virtual interfaces associated with the dedicated connection are automatically disassociated and re-associated with the LAG. The connection ID does not change. If the Amazon Web Services account used to create a LAG is a registered Direct Connect Partner, the LAG is automatically enabled to host sub-connections. For a LAG owned by a partner, any associated virtual interfaces cannot be directly configured."]
+       "Creates a link aggregation group (LAG) with the specified number of bundled physical dedicated connections between the customer network and a specific Direct Connect location. A LAG is a logical interface that uses the Link Aggregation Control Protocol (LACP) to aggregate multiple interfaces, enabling you to treat them as a single interface. All connections in a LAG must use the same bandwidth (either 1Gbps, 10Gbps, 100Gbps, or 400Gbps) and must terminate at the same Direct Connect endpoint. You can have up to 10 dedicated connections per location. Regardless of this limit, if you request more connections for the LAG than Direct Connect can allocate on a single endpoint, no LAG is created.. You can specify an existing physical dedicated connection or interconnect to include in the LAG (which counts towards the total number of connections). Doing so interrupts the current physical dedicated connection, and re-establishes them as a member of the LAG. The LAG will be created on the same Direct Connect endpoint to which the dedicated connection terminates. Any virtual interfaces associated with the dedicated connection are automatically disassociated and re-associated with the LAG. The connection ID does not change. If the Amazon Web Services account used to create a LAG is a registered Direct Connect Partner, the LAG is automatically enabled to host sub-connections. For a LAG owned by a partner, any associated virtual interfaces cannot be directly configured."]
 module CreateInterconnectRequest =
   struct
     type nonrec t =
@@ -8925,7 +9421,7 @@ module CreateInterconnectRequest =
         [@ocaml.doc "The name of the interconnect."];
       bandwidth: Bandwidth.t
         [@ocaml.doc
-          "The port bandwidth, in Gbps. The possible values are 1 and 10."];
+          "The port bandwidth, in Gbps. The possible values are 1, 10, and 100."];
       location: LocationCode.t
         [@ocaml.doc "The location of the interconnect."];
       lagId: LagId.t option [@ocaml.doc "The ID of the LAG."];
@@ -8933,23 +9429,28 @@ module CreateInterconnectRequest =
         [@ocaml.doc "The tags to associate with the interconnect."];
       providerName: ProviderName.t option
         [@ocaml.doc
-          "The name of the service provider associated with the interconnect."]}
+          "The name of the service provider associated with the interconnect."];
+      requestMACSec: RequestMACSec.t option
+        [@ocaml.doc
+          "Indicates whether you want the interconnect to support MAC Security (MACsec)."]}
     let context_ = "CreateInterconnectRequest"
     let make ?lagId =
       fun ?tags ->
         fun ?providerName ->
-          fun ~interconnectName ->
-            fun ~bandwidth ->
-              fun ~location ->
-                fun () ->
-                  {
-                    lagId;
-                    tags;
-                    providerName;
-                    interconnectName;
-                    bandwidth;
-                    location
-                  }
+          fun ?requestMACSec ->
+            fun ~interconnectName ->
+              fun ~bandwidth ->
+                fun ~location ->
+                  fun () ->
+                    {
+                      lagId;
+                      tags;
+                      providerName;
+                      requestMACSec;
+                      interconnectName;
+                      bandwidth;
+                      location
+                    }
     let to_value x =
       structure_to_value
         [("interconnectName",
@@ -8959,9 +9460,14 @@ module CreateInterconnectRequest =
         ("lagId", (Option.map x.lagId ~f:LagId.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("providerName",
-          (Option.map x.providerName ~f:ProviderName.to_value))]
+          (Option.map x.providerName ~f:ProviderName.to_value));
+        ("requestMACSec",
+          (Option.map x.requestMACSec ~f:RequestMACSec.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let requestMACSec =
+        (Option.map ~f:RequestMACSec.of_xml)
+          (Xml.child xml_arg0 "requestMACSec") in
       let providerName =
         (Option.map ~f:ProviderName.of_xml)
           (Xml.child xml_arg0 "providerName") in
@@ -8976,19 +9482,21 @@ module CreateInterconnectRequest =
       let interconnectName =
         InterconnectName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "interconnectName") in
-      make ?providerName ?tags ?lagId ~location ~bandwidth ~interconnectName
-        ()
+      make ?requestMACSec ?providerName ?tags ?lagId ~location ~bandwidth
+        ~interconnectName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let providerName = field_map json "providerName" ProviderName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let lagId = field_map json "lagId" LagId.of_json in
-      let location = field_map_exn json "location" LocationCode.of_json in
-      let bandwidth = field_map_exn json "bandwidth" Bandwidth.of_json in
+    let of_json json__ =
+      let requestMACSec =
+        field_map json__ "requestMACSec" RequestMACSec.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
+      let location = field_map_exn json__ "location" LocationCode.of_json in
+      let bandwidth = field_map_exn json__ "bandwidth" Bandwidth.of_json in
       let interconnectName =
-        field_map_exn json "interconnectName" InterconnectName.of_json in
-      make ?providerName ?tags ?lagId ~location ~bandwidth ~interconnectName
-        ()
+        field_map_exn json__ "interconnectName" InterconnectName.of_json in
+      make ?requestMACSec ?providerName ?tags ?lagId ~location ~bandwidth
+        ~interconnectName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an interconnect between an Direct Connect Partner's network and a specific Direct Connect location. An interconnect is a connection that is capable of hosting other connections. The Direct Connect Partner can use an interconnect to provide Direct Connect hosted connections to customers through their own network services. Like a standard connection, an interconnect links the partner's network to an Direct Connect location over a standard Ethernet fiber-optic cable. One end is connected to the partner's router, the other to an Direct Connect router. You can automatically add the new interconnect to a link aggregation group (LAG) by specifying a LAG ID in the request. This ensures that the new interconnect is allocated on the same Direct Connect endpoint that hosts the specified LAG. If there are no available ports on the endpoint, the request fails and no interconnect is created. For each end customer, the Direct Connect Partner provisions a connection on their interconnect by calling AllocateHostedConnection. The end customer can then connect to Amazon Web Services resources by creating a virtual interface on their connection, using the VLAN assigned to them by the Direct Connect Partner. Intended for use by Direct Connect Partners only."]
@@ -9051,9 +9559,9 @@ module CreateDirectConnectGatewayResult =
           (Xml.child xml_arg0 "directConnectGateway") in
       make ?directConnectGateway ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGateway =
-        field_map json "directConnectGateway" DirectConnectGateway.of_json in
+        field_map json__ "directConnectGateway" DirectConnectGateway.of_json in
       make ?directConnectGateway ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9064,35 +9572,41 @@ module CreateDirectConnectGatewayRequest =
       {
       directConnectGatewayName: DirectConnectGatewayName.t
         [@ocaml.doc "The name of the Direct Connect gateway."];
+      tags: TagList.t option
+        [@ocaml.doc "The key-value pair tags associated with the request."];
       amazonSideAsn: LongAsn.t option
         [@ocaml.doc
           "The autonomous system number (ASN) for Border Gateway Protocol (BGP) to be configured on the Amazon side of the connection. The ASN must be in the private range of 64,512 to 65,534 or 4,200,000,000 to 4,294,967,294. The default is 64512."]}
     let context_ = "CreateDirectConnectGatewayRequest"
-    let make ?amazonSideAsn =
-      fun ~directConnectGatewayName ->
-        fun () -> { amazonSideAsn; directConnectGatewayName }
+    let make ?tags =
+      fun ?amazonSideAsn ->
+        fun ~directConnectGatewayName ->
+          fun () -> { tags; amazonSideAsn; directConnectGatewayName }
     let to_value x =
       structure_to_value
         [("directConnectGatewayName",
            (Some
               (DirectConnectGatewayName.to_value x.directConnectGatewayName)));
+        ("tags", (Option.map x.tags ~f:TagList.to_value));
         ("amazonSideAsn", (Option.map x.amazonSideAsn ~f:LongAsn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let amazonSideAsn =
         (Option.map ~f:LongAsn.of_xml) (Xml.child xml_arg0 "amazonSideAsn") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       let directConnectGatewayName =
         DirectConnectGatewayName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "directConnectGatewayName") in
-      make ?amazonSideAsn ~directConnectGatewayName ()
+      make ?amazonSideAsn ?tags ~directConnectGatewayName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let amazonSideAsn = field_map json "amazonSideAsn" LongAsn.of_json in
+    let of_json json__ =
+      let amazonSideAsn = field_map json__ "amazonSideAsn" LongAsn.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
       let directConnectGatewayName =
-        field_map_exn json "directConnectGatewayName"
+        field_map_exn json__ "directConnectGatewayName"
           DirectConnectGatewayName.of_json in
-      make ?amazonSideAsn ~directConnectGatewayName ()
+      make ?amazonSideAsn ?tags ~directConnectGatewayName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Direct Connect gateway, which is an intermediate object that enables you to connect a set of virtual interfaces and virtual private gateways. A Direct Connect gateway is global and visible in any Amazon Web Services Region after it is created. The virtual interfaces and virtual private gateways that are connected through a Direct Connect gateway can be in different Amazon Web Services Regions. This enables you to connect to a VPC in any Region, regardless of the Region in which the virtual interfaces are located, and pass traffic between them."]
@@ -9157,9 +9671,9 @@ module CreateDirectConnectGatewayAssociationResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociation =
-        field_map json "directConnectGatewayAssociation"
+        field_map json__ "directConnectGatewayAssociation"
           DirectConnectGatewayAssociation.of_json in
       make ?directConnectGatewayAssociation ()
     let to_json v = composed_to_json to_value v
@@ -9220,15 +9734,16 @@ module CreateDirectConnectGatewayAssociationRequest =
       make ?virtualGatewayId ?addAllowedPrefixesToDirectConnectGateway
         ?gatewayId ~directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       let addAllowedPrefixesToDirectConnectGateway =
-        field_map json "addAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "addAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
-      let gatewayId = field_map json "gatewayId" GatewayIdToAssociate.of_json in
+      let gatewayId =
+        field_map json__ "gatewayId" GatewayIdToAssociate.of_json in
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?virtualGatewayId ?addAllowedPrefixesToDirectConnectGateway
         ?gatewayId ~directConnectGatewayId ()
@@ -9296,9 +9811,9 @@ module CreateDirectConnectGatewayAssociationProposalResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociationProposal") in
       make ?directConnectGatewayAssociationProposal ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociationProposal =
-        field_map json "directConnectGatewayAssociationProposal"
+        field_map json__ "directConnectGatewayAssociationProposal"
           DirectConnectGatewayAssociationProposal.of_json in
       make ?directConnectGatewayAssociationProposal ()
     let to_json v = composed_to_json to_value v
@@ -9373,20 +9888,20 @@ module CreateDirectConnectGatewayAssociationProposalRequest =
         ?addAllowedPrefixesToDirectConnectGateway ~gatewayId
         ~directConnectGatewayOwnerAccount ~directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let removeAllowedPrefixesToDirectConnectGateway =
-        field_map json "removeAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "removeAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let addAllowedPrefixesToDirectConnectGateway =
-        field_map json "addAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "addAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let gatewayId =
-        field_map_exn json "gatewayId" GatewayIdToAssociate.of_json in
+        field_map_exn json__ "gatewayId" GatewayIdToAssociate.of_json in
       let directConnectGatewayOwnerAccount =
-        field_map_exn json "directConnectGatewayOwnerAccount"
+        field_map_exn json__ "directConnectGatewayOwnerAccount"
           OwnerAccount.of_json in
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?removeAllowedPrefixesToDirectConnectGateway
         ?addAllowedPrefixesToDirectConnectGateway ~gatewayId
@@ -9410,7 +9925,7 @@ module CreateConnectionRequest =
           "The name of the service provider associated with the requested connection."];
       requestMACSec: RequestMACSec.t option
         [@ocaml.doc
-          "Indicates whether you want the connection to support MAC Security (MACsec). MAC Security (MACsec) is only available on dedicated connections. For information about MAC Security (MACsec) prerequisties, see MACsec prerequisties in the Direct Connect User Guide."]}
+          "Indicates whether you want the connection to support MAC Security (MACsec). MAC Security (MACsec) is unavailable on hosted connections. For information about MAC Security (MACsec) prerequisites, see MAC Security in Direct Connect in the Direct Connect User Guide."]}
     let context_ = "CreateConnectionRequest"
     let make ?lagId =
       fun ?tags ->
@@ -9462,16 +9977,16 @@ module CreateConnectionRequest =
       make ?requestMACSec ?providerName ?tags ?lagId ~connectionName
         ~bandwidth ~location ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestMACSec =
-        field_map json "requestMACSec" RequestMACSec.of_json in
-      let providerName = field_map json "providerName" ProviderName.of_json in
-      let tags = field_map json "tags" TagList.of_json in
-      let lagId = field_map json "lagId" LagId.of_json in
+        field_map json__ "requestMACSec" RequestMACSec.of_json in
+      let providerName = field_map json__ "providerName" ProviderName.of_json in
+      let tags = field_map json__ "tags" TagList.of_json in
+      let lagId = field_map json__ "lagId" LagId.of_json in
       let connectionName =
-        field_map_exn json "connectionName" ConnectionName.of_json in
-      let bandwidth = field_map_exn json "bandwidth" Bandwidth.of_json in
-      let location = field_map_exn json "location" LocationCode.of_json in
+        field_map_exn json__ "connectionName" ConnectionName.of_json in
+      let bandwidth = field_map_exn json__ "bandwidth" Bandwidth.of_json in
+      let location = field_map_exn json__ "location" LocationCode.of_json in
       make ?requestMACSec ?providerName ?tags ?lagId ~connectionName
         ~bandwidth ~location ()
     let to_json v = composed_to_json to_value v
@@ -9535,13 +10050,13 @@ module CreateBGPPeerResponse =
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterface =
-        field_map json "virtualInterface" VirtualInterface.of_json in
+        field_map json__ "virtualInterface" VirtualInterface.of_json in
       make ?virtualInterface ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a BGP peer on the specified virtual interface. You must create a BGP peer for the corresponding address family (IPv4/IPv6) in order to access Amazon Web Services resources that also use that address family. If logical redundancy is not supported by the connection, interconnect, or LAG, the BGP peer cannot be in the same address family as an existing BGP peer on the virtual interface. When creating a IPv6 BGP peer, omit the Amazon address and customer address. IPv6 addresses are automatically assigned from the Amazon pool of IPv6 addresses; you cannot specify custom IPv6 addresses. For a public virtual interface, the Autonomous System Number (ASN) must be private or already on the allow list for the virtual interface."]
+       "Creates a BGP peer on the specified virtual interface. You must create a BGP peer for the corresponding address family (IPv4/IPv6) in order to access Amazon Web Services resources that also use that address family. If logical redundancy is not supported by the connection, interconnect, or LAG, the BGP peer cannot be in the same address family as an existing BGP peer on the virtual interface. When creating a IPv6 BGP peer, omit the Amazon address and customer address. IPv6 addresses are automatically assigned from the Amazon pool of IPv6 addresses; you cannot specify custom IPv6 addresses. If you let Amazon Web Services auto-assign IPv4 addresses, a /30 CIDR will be allocated from 169.254.0.0/16. Amazon Web Services does not recommend this option if you intend to use the customer router peer IP address as the source and destination for traffic. Instead you should use RFC 1918 or other addressing, and specify the address yourself. For more information about RFC 1918 see Address Allocation for Private Internets. For a public virtual interface, the Autonomous System Number (ASN) must be private or already on the allow list for the virtual interface."]
 module CreateBGPPeerRequest =
   struct
     type nonrec t =
@@ -9566,24 +10081,28 @@ module CreateBGPPeerRequest =
           (Xml.child xml_arg0 "virtualInterfaceId") in
       make ?newBGPPeer ?virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newBGPPeer = field_map json "newBGPPeer" NewBGPPeer.of_json in
+    let of_json json__ =
+      let newBGPPeer = field_map json__ "newBGPPeer" NewBGPPeer.of_json in
       let virtualInterfaceId =
-        field_map json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ?newBGPPeer ?virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a BGP peer on the specified virtual interface. You must create a BGP peer for the corresponding address family (IPv4/IPv6) in order to access Amazon Web Services resources that also use that address family. If logical redundancy is not supported by the connection, interconnect, or LAG, the BGP peer cannot be in the same address family as an existing BGP peer on the virtual interface. When creating a IPv6 BGP peer, omit the Amazon address and customer address. IPv6 addresses are automatically assigned from the Amazon pool of IPv6 addresses; you cannot specify custom IPv6 addresses. For a public virtual interface, the Autonomous System Number (ASN) must be private or already on the allow list for the virtual interface."]
+       "Creates a BGP peer on the specified virtual interface. You must create a BGP peer for the corresponding address family (IPv4/IPv6) in order to access Amazon Web Services resources that also use that address family. If logical redundancy is not supported by the connection, interconnect, or LAG, the BGP peer cannot be in the same address family as an existing BGP peer on the virtual interface. When creating a IPv6 BGP peer, omit the Amazon address and customer address. IPv6 addresses are automatically assigned from the Amazon pool of IPv6 addresses; you cannot specify custom IPv6 addresses. If you let Amazon Web Services auto-assign IPv4 addresses, a /30 CIDR will be allocated from 169.254.0.0/16. Amazon Web Services does not recommend this option if you intend to use the customer router peer IP address as the source and destination for traffic. Instead you should use RFC 1918 or other addressing, and specify the address yourself. For more information about RFC 1918 see Address Allocation for Private Internets. For a public virtual interface, the Autonomous System Number (ASN) must be private or already on the allow list for the virtual interface."]
 module Connections =
   struct
     type nonrec t =
       {
-      connections: ConnectionList.t option [@ocaml.doc "The connections."]}
+      connections: ConnectionList.t option [@ocaml.doc "The connections."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?connections = fun () -> { connections }
+    let make ?connections =
+      fun ?nextToken -> fun () -> { connections; nextToken }
     let error_of_json name json =
       match name with
       | "DirectConnectClientException" ->
@@ -9623,17 +10142,22 @@ module Connections =
     let to_value x =
       structure_to_value
         [("connections",
-           (Option.map x.connections ~f:ConnectionList.to_value))]
+           (Option.map x.connections ~f:ConnectionList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
       let connections =
         (Option.map ~f:ConnectionList.of_xml)
           (Xml.child xml_arg0 "connections") in
-      make ?connections ()
+      make ?nextToken ?connections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connections = field_map json "connections" ConnectionList.of_json in
-      make ?connections ()
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let connections = field_map json__ "connections" ConnectionList.of_json in
+      make ?nextToken ?connections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays the specified connection or all connections in this Region."]
@@ -9643,7 +10167,7 @@ module ConfirmTransitVirtualInterfaceResponse =
       {
       virtualInterfaceState: VirtualInterfaceState.t option
         [@ocaml.doc
-          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
+          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. testing: A virtual interface is in this state immediately after calling StartBgpFailoverTest and remains in this state during the duration of the test. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -9697,9 +10221,10 @@ module ConfirmTransitVirtualInterfaceResponse =
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceState =
-        field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
+        field_map json__ "virtualInterfaceState"
+          VirtualInterfaceState.of_json in
       make ?virtualInterfaceState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9732,12 +10257,12 @@ module ConfirmTransitVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~directConnectGatewayId ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ~directConnectGatewayId ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9748,7 +10273,7 @@ module ConfirmPublicVirtualInterfaceResponse =
       {
       virtualInterfaceState: VirtualInterfaceState.t option
         [@ocaml.doc
-          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
+          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. testing: A virtual interface is in this state immediately after calling StartBgpFailoverTest and remains in this state during the duration of the test. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -9802,9 +10327,10 @@ module ConfirmPublicVirtualInterfaceResponse =
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceState =
-        field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
+        field_map json__ "virtualInterfaceState"
+          VirtualInterfaceState.of_json in
       make ?virtualInterfaceState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9828,9 +10354,9 @@ module ConfirmPublicVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9841,7 +10367,7 @@ module ConfirmPrivateVirtualInterfaceResponse =
       {
       virtualInterfaceState: VirtualInterfaceState.t option
         [@ocaml.doc
-          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
+          "The state of the virtual interface. The following are the possible values: confirming: The creation of the virtual interface is pending confirmation from the virtual interface owner. If the owner of the virtual interface is different from the owner of the connection on which it is provisioned, then the virtual interface will remain in this state until it is confirmed by the virtual interface owner. verifying: This state only applies to public virtual interfaces. Each public virtual interface needs validation before the virtual interface can be created. pending: A virtual interface is in this state from the time that it is created until the virtual interface is ready to forward traffic. available: A virtual interface that is able to forward traffic. down: A virtual interface that is BGP down. testing: A virtual interface is in this state immediately after calling StartBgpFailoverTest and remains in this state during the duration of the test. deleting: A virtual interface is in this state immediately after calling DeleteVirtualInterface until it can no longer forward traffic. deleted: A virtual interface that cannot forward traffic. rejected: The virtual interface owner has declined creation of the virtual interface. If a virtual interface in the Confirming state is deleted by the virtual interface owner, the virtual interface enters the Rejected state. unknown: The state of the virtual interface is not available."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -9895,9 +10421,10 @@ module ConfirmPrivateVirtualInterfaceResponse =
           (Xml.child xml_arg0 "virtualInterfaceState") in
       make ?virtualInterfaceState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterfaceState =
-        field_map json "virtualInterfaceState" VirtualInterfaceState.of_json in
+        field_map json__ "virtualInterfaceState"
+          VirtualInterfaceState.of_json in
       make ?virtualInterfaceState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9940,14 +10467,14 @@ module ConfirmPrivateVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ?directConnectGatewayId ?virtualGatewayId ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayId =
-        field_map json "directConnectGatewayId"
+        field_map json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       let virtualGatewayId =
-        field_map json "virtualGatewayId" VirtualGatewayId.of_json in
+        field_map json__ "virtualGatewayId" VirtualGatewayId.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ?directConnectGatewayId ?virtualGatewayId ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10009,8 +10536,9 @@ module ConfirmCustomerAgreementResponse =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" Status.of_json in make ?status ()
+    let of_json json__ =
+      let status = field_map json__ "status" Status.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The confirmation of the terms of agreement when creating the connection/link aggregation group (LAG)."]
@@ -10032,9 +10560,9 @@ module ConfirmCustomerAgreementRequest =
           (Xml.child xml_arg0 "agreementName") in
       make ?agreementName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let agreementName =
-        field_map json "agreementName" AgreementName.of_json in
+        field_map json__ "agreementName" AgreementName.of_json in
       make ?agreementName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10098,9 +10626,9 @@ module ConfirmConnectionResponse =
           (Xml.child xml_arg0 "connectionState") in
       make ?connectionState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionState =
-        field_map json "connectionState" ConnectionState.of_json in
+        field_map json__ "connectionState" ConnectionState.of_json in
       make ?connectionState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10123,9 +10651,9 @@ module ConfirmConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10156,11 +10684,11 @@ module AssociateVirtualInterfaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualInterfaceId") in
       make ~connectionId ~virtualInterfaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       let virtualInterfaceId =
-        field_map_exn json "virtualInterfaceId" VirtualInterfaceId.of_json in
+        field_map_exn json__ "virtualInterfaceId" VirtualInterfaceId.of_json in
       make ~connectionId ~virtualInterfaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10171,10 +10699,10 @@ module AssociateMacSecKeyResponse =
       {
       connectionId: ConnectionId.t option
         [@ocaml.doc
-          "The ID of the dedicated connection (dxcon-xxxx), or the ID of the LAG (dxlag-xxxx)."];
+          "The ID of the dedicated connection (dxcon-xxxx), interconnect (dxcon-xxxx), or LAG (dxlag-xxxx)."];
       macSecKeys: MacSecKeyList.t option
         [@ocaml.doc
-          "The MAC Security (MACsec) security keys associated with the dedicated connection."]}
+          "The MAC Security (MACsec) security keys associated with the connection."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -10232,29 +10760,29 @@ module AssociateMacSecKeyResponse =
           (Xml.child xml_arg0 "connectionId") in
       make ?macSecKeys ?connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let macSecKeys = field_map json "macSecKeys" MacSecKeyList.of_json in
-      let connectionId = field_map json "connectionId" ConnectionId.of_json in
+    let of_json json__ =
+      let macSecKeys = field_map json__ "macSecKeys" MacSecKeyList.of_json in
+      let connectionId = field_map json__ "connectionId" ConnectionId.of_json in
       make ?macSecKeys ?connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a MAC Security (MACsec) Connection Key Name (CKN)/ Connectivity Association Key (CAK) pair with an Direct Connect dedicated connection. You must supply either the secretARN, or the CKN/CAK (ckn and cak) pair in the request. For information about MAC Security (MACsec) key considerations, see MACsec pre-shared CKN/CAK key considerations in the Direct Connect User Guide."]
+       "Associates a MAC Security (MACsec) Connection Key Name (CKN)/ Connectivity Association Key (CAK) pair with a Direct Connect connection. You must supply either the secretARN, or the CKN/CAK (ckn and cak) pair in the request. For information about MAC Security (MACsec) key considerations, see MACsec pre-shared CKN/CAK key considerations in the Direct Connect User Guide."]
 module AssociateMacSecKeyRequest =
   struct
     type nonrec t =
       {
       connectionId: ConnectionId.t
         [@ocaml.doc
-          "The ID of the dedicated connection (dxcon-xxxx), or the ID of the LAG (dxlag-xxxx). You can use DescribeConnections or DescribeLags to retrieve connection ID."];
+          "The ID of the dedicated connection (dxcon-xxxx), interconnect (dxcon-xxxx), or LAG (dxlag-xxxx). You can use DescribeConnections, DescribeInterconnects, or DescribeLags to retrieve connection ID."];
       secretARN: SecretARN.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the MAC Security (MACsec) secret key to associate with the dedicated connection. You can use DescribeConnections or DescribeLags to retrieve the MAC Security (MACsec) secret key. If you use this request parameter, you do not use the ckn and cak request parameters."];
+          "The Amazon Resource Name (ARN) of the MAC Security (MACsec) secret key to associate with the connection. You can use DescribeConnections or DescribeLags to retrieve the MAC Security (MACsec) secret key. If you use this request parameter, you do not use the ckn and cak request parameters."];
       ckn: Ckn.t option
         [@ocaml.doc
-          "The MAC Security (MACsec) CKN to associate with the dedicated connection. You can create the CKN/CAK pair using an industry standard tool. The valid values are 64 hexadecimal characters (0-9, A-E). If you use this request parameter, you must use the cak request parameter and not use the secretARN request parameter."];
+          "The MAC Security (MACsec) CKN to associate with the connection. You can create the CKN/CAK pair using an industry standard tool. The valid values are 64 hexadecimal characters (0-9, A-E). If you use this request parameter, you must use the cak request parameter and not use the secretARN request parameter."];
       cak: Cak.t option
         [@ocaml.doc
-          "The MAC Security (MACsec) CAK to associate with the dedicated connection. You can create the CKN/CAK pair using an industry standard tool. The valid values are 64 hexadecimal characters (0-9, A-E). If you use this request parameter, you must use the ckn request parameter and not use the secretARN request parameter."]}
+          "The MAC Security (MACsec) CAK to associate with the connection. You can create the CKN/CAK pair using an industry standard tool. The valid values are 64 hexadecimal characters (0-9, A-E). If you use this request parameter, you must use the ckn request parameter and not use the secretARN request parameter."]}
     let context_ = "AssociateMacSecKeyRequest"
     let make ?secretARN =
       fun ?ckn ->
@@ -10278,16 +10806,16 @@ module AssociateMacSecKeyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ?cak ?ckn ?secretARN ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cak = field_map json "cak" Cak.of_json in
-      let ckn = field_map json "ckn" Ckn.of_json in
-      let secretARN = field_map json "secretARN" SecretARN.of_json in
+    let of_json json__ =
+      let cak = field_map json__ "cak" Cak.of_json in
+      let ckn = field_map json__ "ckn" Ckn.of_json in
+      let secretARN = field_map json__ "secretARN" SecretARN.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ?cak ?ckn ?secretARN ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates a MAC Security (MACsec) Connection Key Name (CKN)/ Connectivity Association Key (CAK) pair with an Direct Connect dedicated connection. You must supply either the secretARN, or the CKN/CAK (ckn and cak) pair in the request. For information about MAC Security (MACsec) key considerations, see MACsec pre-shared CKN/CAK key considerations in the Direct Connect User Guide."]
+       "Associates a MAC Security (MACsec) Connection Key Name (CKN)/ Connectivity Association Key (CAK) pair with a Direct Connect connection. You must supply either the secretARN, or the CKN/CAK (ckn and cak) pair in the request. For information about MAC Security (MACsec) key considerations, see MACsec pre-shared CKN/CAK key considerations in the Direct Connect User Guide."]
 module AssociateHostedConnectionRequest =
   struct
     type nonrec t =
@@ -10315,11 +10843,11 @@ module AssociateHostedConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~parentConnectionId ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parentConnectionId =
-        field_map_exn json "parentConnectionId" ConnectionId.of_json in
+        field_map_exn json__ "parentConnectionId" ConnectionId.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~parentConnectionId ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10347,18 +10875,20 @@ module AssociateConnectionWithLagRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "connectionId") in
       make ~lagId ~connectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lagId = field_map_exn json "lagId" LagId.of_json in
+    let of_json json__ =
+      let lagId = field_map_exn json__ "lagId" LagId.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~lagId ~connectionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates an existing connection with a link aggregation group (LAG). The connection is interrupted and re-established as a member of the LAG (connectivity to Amazon Web Services is interrupted). The connection must be hosted on the same Direct Connect endpoint as the LAG, and its bandwidth must match the bandwidth for the LAG. You can re-associate a connection that's currently associated with a different LAG; however, if removing the connection would cause the original LAG to fall below its setting for minimum number of operational connections, the request fails. Any virtual interfaces that are directly associated with the connection are automatically re-associated with the LAG. If the connection was originally associated with a different LAG, the virtual interfaces remain associated with the original LAG. For interconnects, any hosted connections are automatically re-associated with the LAG. If the interconnect was originally associated with a different LAG, the hosted connections remain associated with the original LAG."]
 module AllocateTransitVirtualInterfaceResult =
   struct
-    type nonrec t = {
-      virtualInterface: VirtualInterface.t option }
+    type nonrec t =
+      {
+      virtualInterface: VirtualInterface.t option
+        [@ocaml.doc "Information about the transit virtual interface."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -10429,9 +10959,9 @@ module AllocateTransitVirtualInterfaceResult =
           (Xml.child xml_arg0 "virtualInterface") in
       make ?virtualInterface ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualInterface =
-        field_map json "virtualInterface" VirtualInterface.of_json in
+        field_map json__ "virtualInterface" VirtualInterface.of_json in
       make ?virtualInterface ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10482,14 +11012,14 @@ module AllocateTransitVirtualInterfaceRequest =
       make ~newTransitVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newTransitVirtualInterfaceAllocation =
-        field_map_exn json "newTransitVirtualInterfaceAllocation"
+        field_map_exn json__ "newTransitVirtualInterfaceAllocation"
           NewTransitVirtualInterfaceAllocation.of_json in
       let ownerAccount =
-        field_map_exn json "ownerAccount" OwnerAccount.of_json in
+        field_map_exn json__ "ownerAccount" OwnerAccount.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newTransitVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let to_json v = composed_to_json to_value v
@@ -10538,14 +11068,14 @@ module AllocatePublicVirtualInterfaceRequest =
       make ~newPublicVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newPublicVirtualInterfaceAllocation =
-        field_map_exn json "newPublicVirtualInterfaceAllocation"
+        field_map_exn json__ "newPublicVirtualInterfaceAllocation"
           NewPublicVirtualInterfaceAllocation.of_json in
       let ownerAccount =
-        field_map_exn json "ownerAccount" OwnerAccount.of_json in
+        field_map_exn json__ "ownerAccount" OwnerAccount.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newPublicVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let to_json v = composed_to_json to_value v
@@ -10597,14 +11127,14 @@ module AllocatePrivateVirtualInterfaceRequest =
       make ~newPrivateVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newPrivateVirtualInterfaceAllocation =
-        field_map_exn json "newPrivateVirtualInterfaceAllocation"
+        field_map_exn json__ "newPrivateVirtualInterfaceAllocation"
           NewPrivateVirtualInterfaceAllocation.of_json in
       let ownerAccount =
-        field_map_exn json "ownerAccount" OwnerAccount.of_json in
+        field_map_exn json__ "ownerAccount" OwnerAccount.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ~newPrivateVirtualInterfaceAllocation ~ownerAccount ~connectionId
         ()
     let to_json v = composed_to_json to_value v
@@ -10621,7 +11151,7 @@ module AllocateHostedConnectionRequest =
           "The ID of the Amazon Web Services account ID of the customer for the connection."];
       bandwidth: Bandwidth.t
         [@ocaml.doc
-          "The bandwidth of the connection. The possible values are 50Mbps, 100Mbps, 200Mbps, 300Mbps, 400Mbps, 500Mbps, 1Gbps, 2Gbps, 5Gbps, and 10Gbps. Note that only those Direct Connect Partners who have met specific requirements are allowed to create a 1Gbps, 2Gbps, 5Gbps or 10Gbps hosted connection."];
+          "The bandwidth of the connection. The possible values are 50Mbps, 100Mbps, 200Mbps, 300Mbps, 400Mbps, 500Mbps, 1Gbps, 2Gbps, 5Gbps, 10Gbps, and 25Gbps. Note that only those Direct Connect Partners who have met specific requirements are allowed to create a 1Gbps, 2Gbps, 5Gbps, 10Gbps, or 25Gbps hosted connection."];
       connectionName: ConnectionName.t
         [@ocaml.doc "The name of the hosted connection."];
       vlan: VLAN.t
@@ -10673,16 +11203,16 @@ module AllocateHostedConnectionRequest =
       make ?tags ~vlan ~connectionName ~bandwidth ~ownerAccount ~connectionId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let connectionName =
-        field_map_exn json "connectionName" ConnectionName.of_json in
-      let bandwidth = field_map_exn json "bandwidth" Bandwidth.of_json in
+        field_map_exn json__ "connectionName" ConnectionName.of_json in
+      let bandwidth = field_map_exn json__ "bandwidth" Bandwidth.of_json in
       let ownerAccount =
-        field_map_exn json "ownerAccount" OwnerAccount.of_json in
+        field_map_exn json__ "ownerAccount" OwnerAccount.of_json in
       let connectionId =
-        field_map_exn json "connectionId" ConnectionId.of_json in
+        field_map_exn json__ "connectionId" ConnectionId.of_json in
       make ?tags ~vlan ~connectionName ~bandwidth ~ownerAccount ~connectionId
         ()
     let to_json v = composed_to_json to_value v
@@ -10744,15 +11274,15 @@ module AllocateConnectionOnInterconnectRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "bandwidth") in
       make ~vlan ~interconnectId ~ownerAccount ~connectionName ~bandwidth ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vlan = field_map_exn json "vlan" VLAN.of_json in
+    let of_json json__ =
+      let vlan = field_map_exn json__ "vlan" VLAN.of_json in
       let interconnectId =
-        field_map_exn json "interconnectId" InterconnectId.of_json in
+        field_map_exn json__ "interconnectId" InterconnectId.of_json in
       let ownerAccount =
-        field_map_exn json "ownerAccount" OwnerAccount.of_json in
+        field_map_exn json__ "ownerAccount" OwnerAccount.of_json in
       let connectionName =
-        field_map_exn json "connectionName" ConnectionName.of_json in
-      let bandwidth = field_map_exn json "bandwidth" Bandwidth.of_json in
+        field_map_exn json__ "connectionName" ConnectionName.of_json in
+      let bandwidth = field_map_exn json__ "bandwidth" Bandwidth.of_json in
       make ~vlan ~interconnectId ~ownerAccount ~connectionName ~bandwidth ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10762,7 +11292,9 @@ module AcceptDirectConnectGatewayAssociationProposalResult =
     type nonrec t =
       {
       directConnectGatewayAssociation:
-        DirectConnectGatewayAssociation.t option }
+        DirectConnectGatewayAssociation.t option
+        [@ocaml.doc
+          "Information about an association between a Direct Connect gateway and a virtual gateway or transit gateway."]}
     type nonrec error =
       [ `DirectConnectClientException of DirectConnectClientException.t 
       | `DirectConnectServerException of DirectConnectServerException.t 
@@ -10817,9 +11349,9 @@ module AcceptDirectConnectGatewayAssociationProposalResult =
           (Xml.child xml_arg0 "directConnectGatewayAssociation") in
       make ?directConnectGatewayAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let directConnectGatewayAssociation =
-        field_map json "directConnectGatewayAssociation"
+        field_map json__ "directConnectGatewayAssociation"
           DirectConnectGatewayAssociation.of_json in
       make ?directConnectGatewayAssociation ()
     let to_json v = composed_to_json to_value v
@@ -10882,18 +11414,18 @@ module AcceptDirectConnectGatewayAssociationProposalRequest =
       make ?overrideAllowedPrefixesToDirectConnectGateway
         ~associatedGatewayOwnerAccount ~proposalId ~directConnectGatewayId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrideAllowedPrefixesToDirectConnectGateway =
-        field_map json "overrideAllowedPrefixesToDirectConnectGateway"
+        field_map json__ "overrideAllowedPrefixesToDirectConnectGateway"
           RouteFilterPrefixList.of_json in
       let associatedGatewayOwnerAccount =
-        field_map_exn json "associatedGatewayOwnerAccount"
+        field_map_exn json__ "associatedGatewayOwnerAccount"
           OwnerAccount.of_json in
       let proposalId =
-        field_map_exn json "proposalId"
+        field_map_exn json__ "proposalId"
           DirectConnectGatewayAssociationProposalId.of_json in
       let directConnectGatewayId =
-        field_map_exn json "directConnectGatewayId"
+        field_map_exn json__ "directConnectGatewayId"
           DirectConnectGatewayId.of_json in
       make ?overrideAllowedPrefixesToDirectConnectGateway
         ~associatedGatewayOwnerAccount ~proposalId ~directConnectGatewayId ()

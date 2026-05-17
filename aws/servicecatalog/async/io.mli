@@ -448,6 +448,27 @@ val list_tag_options :
       ListTagOptionsInput.t ->
         (ListTagOptionsOutput.t, ListTagOptionsOutput.error) Result.t
           Async.Deferred.t
+val notify_provision_product_engine_workflow_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      NotifyProvisionProductEngineWorkflowResultInput.t ->
+        (NotifyProvisionProductEngineWorkflowResultOutput.t,
+          NotifyProvisionProductEngineWorkflowResultOutput.error) Result.t
+          Async.Deferred.t
+val notify_terminate_provisioned_product_engine_workflow_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      NotifyTerminateProvisionedProductEngineWorkflowResultInput.t ->
+        (NotifyTerminateProvisionedProductEngineWorkflowResultOutput.t,
+          NotifyTerminateProvisionedProductEngineWorkflowResultOutput.error)
+          Result.t Async.Deferred.t
+val notify_update_provisioned_product_engine_workflow_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      NotifyUpdateProvisionedProductEngineWorkflowResultInput.t ->
+        (NotifyUpdateProvisionedProductEngineWorkflowResultOutput.t,
+          NotifyUpdateProvisionedProductEngineWorkflowResultOutput.error)
+          Result.t Async.Deferred.t
 val provision_product :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

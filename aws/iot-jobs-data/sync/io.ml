@@ -15,6 +15,8 @@ let describe_job_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobExecution input
 let get_pending_job_executions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPendingJobExecutions input
+let start_command_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCommandExecution input
 let start_next_pending_job_execution ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartNextPendingJobExecution input
 let update_job_execution ?endpoint_url ?cfg input =

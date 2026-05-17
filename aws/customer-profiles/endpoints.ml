@@ -4,15 +4,60 @@ open Values
 type ('i, 'o, 'e) t =
   | AddProfileKey: (AddProfileKeyRequest.t, AddProfileKeyResponse.t,
   AddProfileKeyResponse.error) t 
+  | BatchGetCalculatedAttributeForProfile:
+  (BatchGetCalculatedAttributeForProfileRequest.t,
+  BatchGetCalculatedAttributeForProfileResponse.t,
+  BatchGetCalculatedAttributeForProfileResponse.error) t 
+  | BatchGetProfile: (BatchGetProfileRequest.t, BatchGetProfileResponse.t,
+  BatchGetProfileResponse.error) t 
+  | CreateCalculatedAttributeDefinition:
+  (CreateCalculatedAttributeDefinitionRequest.t,
+  CreateCalculatedAttributeDefinitionResponse.t,
+  CreateCalculatedAttributeDefinitionResponse.error) t 
   | CreateDomain: (CreateDomainRequest.t, CreateDomainResponse.t,
   CreateDomainResponse.error) t 
+  | CreateDomainLayout: (CreateDomainLayoutRequest.t,
+  CreateDomainLayoutResponse.t, CreateDomainLayoutResponse.error) t 
+  | CreateEventStream: (CreateEventStreamRequest.t,
+  CreateEventStreamResponse.t, CreateEventStreamResponse.error) t 
+  | CreateEventTrigger: (CreateEventTriggerRequest.t,
+  CreateEventTriggerResponse.t, CreateEventTriggerResponse.error) t 
   | CreateIntegrationWorkflow: (CreateIntegrationWorkflowRequest.t,
   CreateIntegrationWorkflowResponse.t,
   CreateIntegrationWorkflowResponse.error) t 
   | CreateProfile: (CreateProfileRequest.t, CreateProfileResponse.t,
   CreateProfileResponse.error) t 
+  | CreateRecommender: (CreateRecommenderRequest.t,
+  CreateRecommenderResponse.t, CreateRecommenderResponse.error) t 
+  | CreateRecommenderFilter: (CreateRecommenderFilterRequest.t,
+  CreateRecommenderFilterResponse.t, CreateRecommenderFilterResponse.error) t
+  
+  | CreateRecommenderSchema: (CreateRecommenderSchemaRequest.t,
+  CreateRecommenderSchemaResponse.t, CreateRecommenderSchemaResponse.error) t
+  
+  | CreateSegmentDefinition: (CreateSegmentDefinitionRequest.t,
+  CreateSegmentDefinitionResponse.t, CreateSegmentDefinitionResponse.error) t
+  
+  | CreateSegmentEstimate: (CreateSegmentEstimateRequest.t,
+  CreateSegmentEstimateResponse.t, CreateSegmentEstimateResponse.error) t 
+  | CreateSegmentSnapshot: (CreateSegmentSnapshotRequest.t,
+  CreateSegmentSnapshotResponse.t, CreateSegmentSnapshotResponse.error) t 
+  | CreateUploadJob: (CreateUploadJobRequest.t, CreateUploadJobResponse.t,
+  CreateUploadJobResponse.error) t 
+  | DeleteCalculatedAttributeDefinition:
+  (DeleteCalculatedAttributeDefinitionRequest.t,
+  DeleteCalculatedAttributeDefinitionResponse.t,
+  DeleteCalculatedAttributeDefinitionResponse.error) t 
   | DeleteDomain: (DeleteDomainRequest.t, DeleteDomainResponse.t,
   DeleteDomainResponse.error) t 
+  | DeleteDomainLayout: (DeleteDomainLayoutRequest.t,
+  DeleteDomainLayoutResponse.t, DeleteDomainLayoutResponse.error) t 
+  | DeleteDomainObjectType: (DeleteDomainObjectTypeRequest.t,
+  DeleteDomainObjectTypeResponse.t, DeleteDomainObjectTypeResponse.error) t 
+  | DeleteEventStream: (DeleteEventStreamRequest.t,
+  DeleteEventStreamResponse.t, DeleteEventStreamResponse.error) t 
+  | DeleteEventTrigger: (DeleteEventTriggerRequest.t,
+  DeleteEventTriggerResponse.t, DeleteEventTriggerResponse.error) t 
   | DeleteIntegration: (DeleteIntegrationRequest.t,
   DeleteIntegrationResponse.t, DeleteIntegrationResponse.error) t 
   | DeleteProfile: (DeleteProfileRequest.t, DeleteProfileResponse.t,
@@ -24,12 +69,42 @@ type ('i, 'o, 'e) t =
   | DeleteProfileObjectType: (DeleteProfileObjectTypeRequest.t,
   DeleteProfileObjectTypeResponse.t, DeleteProfileObjectTypeResponse.error) t
   
+  | DeleteRecommender: (DeleteRecommenderRequest.t,
+  DeleteRecommenderResponse.t, DeleteRecommenderResponse.error) t 
+  | DeleteRecommenderFilter: (DeleteRecommenderFilterRequest.t,
+  DeleteRecommenderFilterResponse.t, DeleteRecommenderFilterResponse.error) t
+  
+  | DeleteRecommenderSchema: (DeleteRecommenderSchemaRequest.t,
+  DeleteRecommenderSchemaResponse.t, DeleteRecommenderSchemaResponse.error) t
+  
+  | DeleteSegmentDefinition: (DeleteSegmentDefinitionRequest.t,
+  DeleteSegmentDefinitionResponse.t, DeleteSegmentDefinitionResponse.error) t
+  
   | DeleteWorkflow: (DeleteWorkflowRequest.t, DeleteWorkflowResponse.t,
   DeleteWorkflowResponse.error) t 
+  | DetectProfileObjectType: (DetectProfileObjectTypeRequest.t,
+  DetectProfileObjectTypeResponse.t, DetectProfileObjectTypeResponse.error) t
+  
   | GetAutoMergingPreview: (GetAutoMergingPreviewRequest.t,
   GetAutoMergingPreviewResponse.t, GetAutoMergingPreviewResponse.error) t 
+  | GetCalculatedAttributeDefinition:
+  (GetCalculatedAttributeDefinitionRequest.t,
+  GetCalculatedAttributeDefinitionResponse.t,
+  GetCalculatedAttributeDefinitionResponse.error) t 
+  | GetCalculatedAttributeForProfile:
+  (GetCalculatedAttributeForProfileRequest.t,
+  GetCalculatedAttributeForProfileResponse.t,
+  GetCalculatedAttributeForProfileResponse.error) t 
   | GetDomain: (GetDomainRequest.t, GetDomainResponse.t,
   GetDomainResponse.error) t 
+  | GetDomainLayout: (GetDomainLayoutRequest.t, GetDomainLayoutResponse.t,
+  GetDomainLayoutResponse.error) t 
+  | GetDomainObjectType: (GetDomainObjectTypeRequest.t,
+  GetDomainObjectTypeResponse.t, GetDomainObjectTypeResponse.error) t 
+  | GetEventStream: (GetEventStreamRequest.t, GetEventStreamResponse.t,
+  GetEventStreamResponse.error) t 
+  | GetEventTrigger: (GetEventTriggerRequest.t, GetEventTriggerResponse.t,
+  GetEventTriggerResponse.error) t 
   | GetIdentityResolutionJob: (GetIdentityResolutionJobRequest.t,
   GetIdentityResolutionJobResponse.t, GetIdentityResolutionJobResponse.error)
   t 
@@ -37,11 +112,41 @@ type ('i, 'o, 'e) t =
   GetIntegrationResponse.error) t 
   | GetMatches: (GetMatchesRequest.t, GetMatchesResponse.t,
   GetMatchesResponse.error) t 
+  | GetObjectTypeAttributeStatistics:
+  (GetObjectTypeAttributeStatisticsRequest.t,
+  GetObjectTypeAttributeStatisticsResponse.t,
+  GetObjectTypeAttributeStatisticsResponse.error) t 
+  | GetProfileHistoryRecord: (GetProfileHistoryRecordRequest.t,
+  GetProfileHistoryRecordResponse.t, GetProfileHistoryRecordResponse.error) t
+  
   | GetProfileObjectType: (GetProfileObjectTypeRequest.t,
   GetProfileObjectTypeResponse.t, GetProfileObjectTypeResponse.error) t 
   | GetProfileObjectTypeTemplate: (GetProfileObjectTypeTemplateRequest.t,
   GetProfileObjectTypeTemplateResponse.t,
   GetProfileObjectTypeTemplateResponse.error) t 
+  | GetProfileRecommendations: (GetProfileRecommendationsRequest.t,
+  GetProfileRecommendationsResponse.t,
+  GetProfileRecommendationsResponse.error) t 
+  | GetRecommender: (GetRecommenderRequest.t, GetRecommenderResponse.t,
+  GetRecommenderResponse.error) t 
+  | GetRecommenderFilter: (GetRecommenderFilterRequest.t,
+  GetRecommenderFilterResponse.t, GetRecommenderFilterResponse.error) t 
+  | GetRecommenderSchema: (GetRecommenderSchemaRequest.t,
+  GetRecommenderSchemaResponse.t, GetRecommenderSchemaResponse.error) t 
+  | GetSegmentDefinition: (GetSegmentDefinitionRequest.t,
+  GetSegmentDefinitionResponse.t, GetSegmentDefinitionResponse.error) t 
+  | GetSegmentEstimate: (GetSegmentEstimateRequest.t,
+  GetSegmentEstimateResponse.t, GetSegmentEstimateResponse.error) t 
+  | GetSegmentMembership: (GetSegmentMembershipRequest.t,
+  GetSegmentMembershipResponse.t, GetSegmentMembershipResponse.error) t 
+  | GetSegmentSnapshot: (GetSegmentSnapshotRequest.t,
+  GetSegmentSnapshotResponse.t, GetSegmentSnapshotResponse.error) t 
+  | GetSimilarProfiles: (GetSimilarProfilesRequest.t,
+  GetSimilarProfilesResponse.t, GetSimilarProfilesResponse.error) t 
+  | GetUploadJob: (GetUploadJobRequest.t, GetUploadJobResponse.t,
+  GetUploadJobResponse.error) t 
+  | GetUploadJobPath: (GetUploadJobPathRequest.t, GetUploadJobPathResponse.t,
+  GetUploadJobPathResponse.error) t 
   | GetWorkflow: (GetWorkflowRequest.t, GetWorkflowResponse.t,
   GetWorkflowResponse.error) t 
   | GetWorkflowSteps: (GetWorkflowStepsRequest.t, GetWorkflowStepsResponse.t,
@@ -49,13 +154,40 @@ type ('i, 'o, 'e) t =
   | ListAccountIntegrations: (ListAccountIntegrationsRequest.t,
   ListAccountIntegrationsResponse.t, ListAccountIntegrationsResponse.error) t
   
+  | ListCalculatedAttributeDefinitions:
+  (ListCalculatedAttributeDefinitionsRequest.t,
+  ListCalculatedAttributeDefinitionsResponse.t,
+  ListCalculatedAttributeDefinitionsResponse.error) t 
+  | ListCalculatedAttributesForProfile:
+  (ListCalculatedAttributesForProfileRequest.t,
+  ListCalculatedAttributesForProfileResponse.t,
+  ListCalculatedAttributesForProfileResponse.error) t 
+  | ListDomainLayouts: (ListDomainLayoutsRequest.t,
+  ListDomainLayoutsResponse.t, ListDomainLayoutsResponse.error) t 
+  | ListDomainObjectTypes: (ListDomainObjectTypesRequest.t,
+  ListDomainObjectTypesResponse.t, ListDomainObjectTypesResponse.error) t 
   | ListDomains: (ListDomainsRequest.t, ListDomainsResponse.t,
   ListDomainsResponse.error) t 
+  | ListEventStreams: (ListEventStreamsRequest.t, ListEventStreamsResponse.t,
+  ListEventStreamsResponse.error) t 
+  | ListEventTriggers: (ListEventTriggersRequest.t,
+  ListEventTriggersResponse.t, ListEventTriggersResponse.error) t 
   | ListIdentityResolutionJobs: (ListIdentityResolutionJobsRequest.t,
   ListIdentityResolutionJobsResponse.t,
   ListIdentityResolutionJobsResponse.error) t 
   | ListIntegrations: (ListIntegrationsRequest.t, ListIntegrationsResponse.t,
   ListIntegrationsResponse.error) t 
+  | ListObjectTypeAttributeValues: (ListObjectTypeAttributeValuesRequest.t,
+  ListObjectTypeAttributeValuesResponse.t,
+  ListObjectTypeAttributeValuesResponse.error) t 
+  | ListObjectTypeAttributes: (ListObjectTypeAttributesRequest.t,
+  ListObjectTypeAttributesResponse.t, ListObjectTypeAttributesResponse.error)
+  t 
+  | ListProfileAttributeValues: (ProfileAttributeValuesRequest.t,
+  ProfileAttributeValuesResponse.t, ProfileAttributeValuesResponse.error) t 
+  | ListProfileHistoryRecords: (ListProfileHistoryRecordsRequest.t,
+  ListProfileHistoryRecordsResponse.t,
+  ListProfileHistoryRecordsResponse.error) t 
   | ListProfileObjectTypeTemplates: (ListProfileObjectTypeTemplatesRequest.t,
   ListProfileObjectTypeTemplatesResponse.t,
   ListProfileObjectTypeTemplatesResponse.error) t 
@@ -63,12 +195,28 @@ type ('i, 'o, 'e) t =
   ListProfileObjectTypesResponse.t, ListProfileObjectTypesResponse.error) t 
   | ListProfileObjects: (ListProfileObjectsRequest.t,
   ListProfileObjectsResponse.t, ListProfileObjectsResponse.error) t 
+  | ListRecommenderFilters: (ListRecommenderFiltersRequest.t,
+  ListRecommenderFiltersResponse.t, ListRecommenderFiltersResponse.error) t 
+  | ListRecommenderRecipes: (ListRecommenderRecipesRequest.t,
+  ListRecommenderRecipesResponse.t, ListRecommenderRecipesResponse.error) t 
+  | ListRecommenderSchemas: (ListRecommenderSchemasRequest.t,
+  ListRecommenderSchemasResponse.t, ListRecommenderSchemasResponse.error) t 
+  | ListRecommenders: (ListRecommendersRequest.t, ListRecommendersResponse.t,
+  ListRecommendersResponse.error) t 
+  | ListRuleBasedMatches: (ListRuleBasedMatchesRequest.t,
+  ListRuleBasedMatchesResponse.t, ListRuleBasedMatchesResponse.error) t 
+  | ListSegmentDefinitions: (ListSegmentDefinitionsRequest.t,
+  ListSegmentDefinitionsResponse.t, ListSegmentDefinitionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListUploadJobs: (ListUploadJobsRequest.t, ListUploadJobsResponse.t,
+  ListUploadJobsResponse.error) t 
   | ListWorkflows: (ListWorkflowsRequest.t, ListWorkflowsResponse.t,
   ListWorkflowsResponse.error) t 
   | MergeProfiles: (MergeProfilesRequest.t, MergeProfilesResponse.t,
   MergeProfilesResponse.error) t 
+  | PutDomainObjectType: (PutDomainObjectTypeRequest.t,
+  PutDomainObjectTypeResponse.t, PutDomainObjectTypeResponse.error) t 
   | PutIntegration: (PutIntegrationRequest.t, PutIntegrationResponse.t,
   PutIntegrationResponse.error) t 
   | PutProfileObject: (PutProfileObjectRequest.t, PutProfileObjectResponse.t,
@@ -77,63 +225,178 @@ type ('i, 'o, 'e) t =
   PutProfileObjectTypeResponse.t, PutProfileObjectTypeResponse.error) t 
   | SearchProfiles: (SearchProfilesRequest.t, SearchProfilesResponse.t,
   SearchProfilesResponse.error) t 
+  | StartRecommender: (StartRecommenderRequest.t, StartRecommenderResponse.t,
+  StartRecommenderResponse.error) t 
+  | StartUploadJob: (StartUploadJobRequest.t, StartUploadJobResponse.t,
+  StartUploadJobResponse.error) t 
+  | StopRecommender: (StopRecommenderRequest.t, StopRecommenderResponse.t,
+  StopRecommenderResponse.error) t 
+  | StopUploadJob: (StopUploadJobRequest.t, StopUploadJobResponse.t,
+  StopUploadJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateCalculatedAttributeDefinition:
+  (UpdateCalculatedAttributeDefinitionRequest.t,
+  UpdateCalculatedAttributeDefinitionResponse.t,
+  UpdateCalculatedAttributeDefinitionResponse.error) t 
   | UpdateDomain: (UpdateDomainRequest.t, UpdateDomainResponse.t,
   UpdateDomainResponse.error) t 
+  | UpdateDomainLayout: (UpdateDomainLayoutRequest.t,
+  UpdateDomainLayoutResponse.t, UpdateDomainLayoutResponse.error) t 
+  | UpdateEventTrigger: (UpdateEventTriggerRequest.t,
+  UpdateEventTriggerResponse.t, UpdateEventTriggerResponse.error) t 
   | UpdateProfile: (UpdateProfileRequest.t, UpdateProfileResponse.t,
   UpdateProfileResponse.error) t 
+  | UpdateRecommender: (UpdateRecommenderRequest.t,
+  UpdateRecommenderResponse.t, UpdateRecommenderResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddProfileKey -> `POST
+  | BatchGetCalculatedAttributeForProfile -> `POST
+  | BatchGetProfile -> `POST
+  | CreateCalculatedAttributeDefinition -> `POST
   | CreateDomain -> `POST
+  | CreateDomainLayout -> `POST
+  | CreateEventStream -> `POST
+  | CreateEventTrigger -> `POST
   | CreateIntegrationWorkflow -> `POST
   | CreateProfile -> `POST
+  | CreateRecommender -> `POST
+  | CreateRecommenderFilter -> `POST
+  | CreateRecommenderSchema -> `POST
+  | CreateSegmentDefinition -> `POST
+  | CreateSegmentEstimate -> `POST
+  | CreateSegmentSnapshot -> `POST
+  | CreateUploadJob -> `POST
+  | DeleteCalculatedAttributeDefinition -> `DELETE
   | DeleteDomain -> `DELETE
+  | DeleteDomainLayout -> `DELETE
+  | DeleteDomainObjectType -> `DELETE
+  | DeleteEventStream -> `DELETE
+  | DeleteEventTrigger -> `DELETE
   | DeleteIntegration -> `POST
   | DeleteProfile -> `POST
   | DeleteProfileKey -> `POST
   | DeleteProfileObject -> `POST
   | DeleteProfileObjectType -> `DELETE
+  | DeleteRecommender -> `DELETE
+  | DeleteRecommenderFilter -> `DELETE
+  | DeleteRecommenderSchema -> `DELETE
+  | DeleteSegmentDefinition -> `DELETE
   | DeleteWorkflow -> `DELETE
+  | DetectProfileObjectType -> `POST
   | GetAutoMergingPreview -> `POST
+  | GetCalculatedAttributeDefinition -> `GET
+  | GetCalculatedAttributeForProfile -> `GET
   | GetDomain -> `GET
+  | GetDomainLayout -> `GET
+  | GetDomainObjectType -> `GET
+  | GetEventStream -> `GET
+  | GetEventTrigger -> `GET
   | GetIdentityResolutionJob -> `GET
   | GetIntegration -> `POST
   | GetMatches -> `GET
+  | GetObjectTypeAttributeStatistics -> `POST
+  | GetProfileHistoryRecord -> `GET
   | GetProfileObjectType -> `GET
   | GetProfileObjectTypeTemplate -> `GET
+  | GetProfileRecommendations -> `POST
+  | GetRecommender -> `GET
+  | GetRecommenderFilter -> `GET
+  | GetRecommenderSchema -> `GET
+  | GetSegmentDefinition -> `GET
+  | GetSegmentEstimate -> `GET
+  | GetSegmentMembership -> `POST
+  | GetSegmentSnapshot -> `GET
+  | GetSimilarProfiles -> `POST
+  | GetUploadJob -> `GET
+  | GetUploadJobPath -> `GET
   | GetWorkflow -> `GET
   | GetWorkflowSteps -> `GET
   | ListAccountIntegrations -> `POST
+  | ListCalculatedAttributeDefinitions -> `GET
+  | ListCalculatedAttributesForProfile -> `GET
+  | ListDomainLayouts -> `GET
+  | ListDomainObjectTypes -> `GET
   | ListDomains -> `GET
+  | ListEventStreams -> `GET
+  | ListEventTriggers -> `GET
   | ListIdentityResolutionJobs -> `GET
   | ListIntegrations -> `GET
+  | ListObjectTypeAttributeValues -> `GET
+  | ListObjectTypeAttributes -> `GET
+  | ListProfileAttributeValues -> `GET
+  | ListProfileHistoryRecords -> `POST
   | ListProfileObjectTypeTemplates -> `GET
   | ListProfileObjectTypes -> `GET
   | ListProfileObjects -> `POST
+  | ListRecommenderFilters -> `GET
+  | ListRecommenderRecipes -> `GET
+  | ListRecommenderSchemas -> `GET
+  | ListRecommenders -> `GET
+  | ListRuleBasedMatches -> `GET
+  | ListSegmentDefinitions -> `GET
   | ListTagsForResource -> `GET
+  | ListUploadJobs -> `GET
   | ListWorkflows -> `POST
   | MergeProfiles -> `POST
+  | PutDomainObjectType -> `PUT
   | PutIntegration -> `PUT
   | PutProfileObject -> `PUT
   | PutProfileObjectType -> `PUT
   | SearchProfiles -> `POST
+  | StartRecommender -> `PUT
+  | StartUploadJob -> `PUT
+  | StopRecommender -> `PUT
+  | StopUploadJob -> `PUT
   | TagResource -> `POST
   | UntagResource -> `DELETE
+  | UpdateCalculatedAttributeDefinition -> `PUT
   | UpdateDomain -> `PUT
+  | UpdateDomainLayout -> `PUT
+  | UpdateEventTrigger -> `PUT
   | UpdateProfile -> `PUT
+  | UpdateRecommender -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddProfileKey ->
           (Format.kasprintf Uri.of_string) "/domains/%s/profiles/keys"
             (Name.to_header x.AddProfileKeyRequest.domainName)
+      | BatchGetCalculatedAttributeForProfile ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/calculated-attributes/%s/batch-get-for-profiles"
+            (Name.to_header
+               x.BatchGetCalculatedAttributeForProfileRequest.domainName)
+            (TypeName.to_header
+               x.BatchGetCalculatedAttributeForProfileRequest.calculatedAttributeName)
+      | BatchGetProfile ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/batch-get-profiles"
+            (Name.to_header x.BatchGetProfileRequest.domainName)
+      | CreateCalculatedAttributeDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/calculated-attributes/%s"
+            (Name.to_header
+               x.CreateCalculatedAttributeDefinitionRequest.domainName)
+            (TypeName.to_header
+               x.CreateCalculatedAttributeDefinitionRequest.calculatedAttributeName)
       | CreateDomain ->
           (Format.kasprintf Uri.of_string) "/domains/%s"
             (Name.to_header x.CreateDomainRequest.domainName)
+      | CreateDomainLayout ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/layouts/%s"
+            (Name.to_header x.CreateDomainLayoutRequest.domainName)
+            (Name.to_header x.CreateDomainLayoutRequest.layoutDefinitionName)
+      | CreateEventStream ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-streams/%s"
+            (Name.to_header x.CreateEventStreamRequest.domainName)
+            (Name.to_header x.CreateEventStreamRequest.eventStreamName)
+      | CreateEventTrigger ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-triggers/%s"
+            (Name.to_header x.CreateEventTriggerRequest.domainName)
+            (Name.to_header x.CreateEventTriggerRequest.eventTriggerName)
       | CreateIntegrationWorkflow ->
           (Format.kasprintf Uri.of_string)
             "/domains/%s/workflows/integrations"
@@ -141,9 +404,68 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateProfile ->
           (Format.kasprintf Uri.of_string) "/domains/%s/profiles"
             (Name.to_header x.CreateProfileRequest.domainName)
+      | CreateRecommender ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/recommenders/%s"
+            (Name.to_header x.CreateRecommenderRequest.domainName)
+            (Name.to_header x.CreateRecommenderRequest.recommenderName)
+      | CreateRecommenderFilter ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-filters/%s"
+            (Name.to_header x.CreateRecommenderFilterRequest.domainName)
+            (RecommenderFilterName.to_header
+               x.CreateRecommenderFilterRequest.recommenderFilterName)
+      | CreateRecommenderSchema ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-schemas/%s"
+            (Name.to_header x.CreateRecommenderSchemaRequest.domainName)
+            (Name.to_header
+               x.CreateRecommenderSchemaRequest.recommenderSchemaName)
+      | CreateSegmentDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segment-definitions/%s"
+            (Name.to_header x.CreateSegmentDefinitionRequest.domainName)
+            (Name.to_header
+               x.CreateSegmentDefinitionRequest.segmentDefinitionName)
+      | CreateSegmentEstimate ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/segment-estimates"
+            (Name.to_header x.CreateSegmentEstimateRequest.domainName)
+      | CreateSegmentSnapshot ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segments/%s/snapshots"
+            (Name.to_header x.CreateSegmentSnapshotRequest.domainName)
+            (Name.to_header
+               x.CreateSegmentSnapshotRequest.segmentDefinitionName)
+      | CreateUploadJob ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs"
+            (Name.to_header x.CreateUploadJobRequest.domainName)
+      | DeleteCalculatedAttributeDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/calculated-attributes/%s"
+            (Name.to_header
+               x.DeleteCalculatedAttributeDefinitionRequest.domainName)
+            (TypeName.to_header
+               x.DeleteCalculatedAttributeDefinitionRequest.calculatedAttributeName)
       | DeleteDomain ->
           (Format.kasprintf Uri.of_string) "/domains/%s"
             (Name.to_header x.DeleteDomainRequest.domainName)
+      | DeleteDomainLayout ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/layouts/%s"
+            (Name.to_header x.DeleteDomainLayoutRequest.domainName)
+            (Name.to_header x.DeleteDomainLayoutRequest.layoutDefinitionName)
+      | DeleteDomainObjectType ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/domain-object-types/%s"
+            (Name.to_header x.DeleteDomainObjectTypeRequest.domainName)
+            (TypeName.to_header
+               x.DeleteDomainObjectTypeRequest.objectTypeName)
+      | DeleteEventStream ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-streams/%s"
+            (Name.to_header x.DeleteEventStreamRequest.domainName)
+            (Name.to_header x.DeleteEventStreamRequest.eventStreamName)
+      | DeleteEventTrigger ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-triggers/%s"
+            (Name.to_header x.DeleteEventTriggerRequest.domainName)
+            (Name.to_header x.DeleteEventTriggerRequest.eventTriggerName)
       | DeleteIntegration ->
           (Format.kasprintf Uri.of_string) "/domains/%s/integrations/delete"
             (Name.to_header x.DeleteIntegrationRequest.domainName)
@@ -162,17 +484,75 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (Name.to_header x.DeleteProfileObjectTypeRequest.domainName)
             (TypeName.to_header
                x.DeleteProfileObjectTypeRequest.objectTypeName)
+      | DeleteRecommender ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/recommenders/%s"
+            (Name.to_header x.DeleteRecommenderRequest.domainName)
+            (Name.to_header x.DeleteRecommenderRequest.recommenderName)
+      | DeleteRecommenderFilter ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-filters/%s"
+            (Name.to_header x.DeleteRecommenderFilterRequest.domainName)
+            (RecommenderFilterName.to_header
+               x.DeleteRecommenderFilterRequest.recommenderFilterName)
+      | DeleteRecommenderSchema ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-schemas/%s"
+            (Name.to_header x.DeleteRecommenderSchemaRequest.domainName)
+            (Name.to_header
+               x.DeleteRecommenderSchemaRequest.recommenderSchemaName)
+      | DeleteSegmentDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segment-definitions/%s"
+            (Name.to_header x.DeleteSegmentDefinitionRequest.domainName)
+            (Name.to_header
+               x.DeleteSegmentDefinitionRequest.segmentDefinitionName)
       | DeleteWorkflow ->
           (Format.kasprintf Uri.of_string) "/domains/%s/workflows/%s"
             (Name.to_header x.DeleteWorkflowRequest.domainName)
             (String1To255.to_header x.DeleteWorkflowRequest.workflowId)
+      | DetectProfileObjectType ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/detect/object-types"
+            (Name.to_header x.DetectProfileObjectTypeRequest.domainName)
       | GetAutoMergingPreview ->
           (Format.kasprintf Uri.of_string)
             "/domains/%s/identity-resolution-jobs/auto-merging-preview"
             (Name.to_header x.GetAutoMergingPreviewRequest.domainName)
+      | GetCalculatedAttributeDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/calculated-attributes/%s"
+            (Name.to_header
+               x.GetCalculatedAttributeDefinitionRequest.domainName)
+            (TypeName.to_header
+               x.GetCalculatedAttributeDefinitionRequest.calculatedAttributeName)
+      | GetCalculatedAttributeForProfile ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/profile/%s/calculated-attributes/%s"
+            (Name.to_header
+               x.GetCalculatedAttributeForProfileRequest.domainName)
+            (Uuid.to_header
+               x.GetCalculatedAttributeForProfileRequest.profileId)
+            (TypeName.to_header
+               x.GetCalculatedAttributeForProfileRequest.calculatedAttributeName)
       | GetDomain ->
           (Format.kasprintf Uri.of_string) "/domains/%s"
             (Name.to_header x.GetDomainRequest.domainName)
+      | GetDomainLayout ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/layouts/%s"
+            (Name.to_header x.GetDomainLayoutRequest.domainName)
+            (Name.to_header x.GetDomainLayoutRequest.layoutDefinitionName)
+      | GetDomainObjectType ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/domain-object-types/%s"
+            (Name.to_header x.GetDomainObjectTypeRequest.domainName)
+            (TypeName.to_header x.GetDomainObjectTypeRequest.objectTypeName)
+      | GetEventStream ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-streams/%s"
+            (Name.to_header x.GetEventStreamRequest.domainName)
+            (Name.to_header x.GetEventStreamRequest.eventStreamName)
+      | GetEventTrigger ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-triggers/%s"
+            (Name.to_header x.GetEventTriggerRequest.domainName)
+            (Name.to_header x.GetEventTriggerRequest.eventTriggerName)
       | GetIdentityResolutionJob ->
           (Format.kasprintf Uri.of_string)
             "/domains/%s/identity-resolution-jobs/%s"
@@ -191,6 +571,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
                  x.maxResults])
+      | GetObjectTypeAttributeStatistics ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/object-types/%s/attributes/%s/statistics"
+            (Name.to_header
+               x.GetObjectTypeAttributeStatisticsRequest.domainName)
+            (TypeName.to_header
+               x.GetObjectTypeAttributeStatisticsRequest.objectTypeName)
+            (String1To1000.to_header
+               x.GetObjectTypeAttributeStatisticsRequest.attributeName)
+      | GetProfileHistoryRecord ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/profiles/%s/history-records/%s"
+            (Name.to_header x.GetProfileHistoryRecordRequest.domainName)
+            (Uuid.to_header x.GetProfileHistoryRecordRequest.profileId)
+            (Uuid.to_header x.GetProfileHistoryRecordRequest.id)
       | GetProfileObjectType ->
           (Format.kasprintf Uri.of_string) "/domains/%s/object-types/%s"
             (Name.to_header x.GetProfileObjectTypeRequest.domainName)
@@ -198,6 +593,74 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetProfileObjectTypeTemplate ->
           (Format.kasprintf Uri.of_string) "/templates/%s"
             (Name.to_header x.GetProfileObjectTypeTemplateRequest.templateId)
+      | GetProfileRecommendations ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/profiles/%s/recommendations"
+            (Name.to_header x.GetProfileRecommendationsRequest.domainName)
+            (Uuid.to_header x.GetProfileRecommendationsRequest.profileId)
+      | GetRecommender ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/recommenders/%s"
+               (Name.to_header x.GetRecommenderRequest.domainName)
+               (Name.to_header x.GetRecommenderRequest.recommenderName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("training-metrics-count",
+                          (GetRecommenderRequestTrainingMetricsCountInteger.to_header
+                             v))) x.trainingMetricsCount])
+      | GetRecommenderFilter ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-filters/%s"
+            (Name.to_header x.GetRecommenderFilterRequest.domainName)
+            (RecommenderFilterName.to_header
+               x.GetRecommenderFilterRequest.recommenderFilterName)
+      | GetRecommenderSchema ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommender-schemas/%s"
+            (Name.to_header x.GetRecommenderSchemaRequest.domainName)
+            (Name.to_header
+               x.GetRecommenderSchemaRequest.recommenderSchemaName)
+      | GetSegmentDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segment-definitions/%s"
+            (Name.to_header x.GetSegmentDefinitionRequest.domainName)
+            (Name.to_header
+               x.GetSegmentDefinitionRequest.segmentDefinitionName)
+      | GetSegmentEstimate ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/segment-estimates/%s"
+            (Name.to_header x.GetSegmentEstimateRequest.domainName)
+            (String1To255.to_header x.GetSegmentEstimateRequest.estimateId)
+      | GetSegmentMembership ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segments/%s/membership"
+            (Name.to_header x.GetSegmentMembershipRequest.domainName)
+            (Name.to_header
+               x.GetSegmentMembershipRequest.segmentDefinitionName)
+      | GetSegmentSnapshot ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/segments/%s/snapshots/%s"
+            (Name.to_header x.GetSegmentSnapshotRequest.domainName)
+            (Name.to_header x.GetSegmentSnapshotRequest.segmentDefinitionName)
+            (Uuid.to_header x.GetSegmentSnapshotRequest.snapshotId)
+      | GetSimilarProfiles ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/matches"
+               (Name.to_header x.GetSimilarProfilesRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | GetUploadJob ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs/%s"
+            (Name.to_header x.GetUploadJobRequest.domainName)
+            (Uuid.to_header x.GetUploadJobRequest.jobId)
+      | GetUploadJobPath ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs/%s/path"
+            (Name.to_header x.GetUploadJobPathRequest.domainName)
+            (Name.to_header x.GetUploadJobPathRequest.jobId)
       | GetWorkflow ->
           (Format.kasprintf Uri.of_string) "/domains/%s/workflows/%s"
             (Name.to_header x.GetWorkflowRequest.domainName)
@@ -227,8 +690,75 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("include-hidden", (OptionalBoolean.to_header v)))
                  x.includeHidden])
+      | ListCalculatedAttributeDefinitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/calculated-attributes"
+               (Name.to_header
+                  x.ListCalculatedAttributeDefinitionsRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListCalculatedAttributesForProfile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/profile/%s/calculated-attributes"
+               (Name.to_header
+                  x.ListCalculatedAttributesForProfileRequest.domainName)
+               (Uuid.to_header
+                  x.ListCalculatedAttributesForProfileRequest.profileId))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListDomainLayouts ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/layouts"
+               (Name.to_header x.ListDomainLayoutsRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListDomainObjectTypes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/domain-object-types"
+               (Name.to_header x.ListDomainObjectTypesRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
       | ListDomains ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/domains")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListEventStreams ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/event-streams"
+               (Name.to_header x.ListEventStreamsRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListEventTriggers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/event-triggers"
+               (Name.to_header x.ListEventTriggersRequest.domainName))
             (List.filter_opt
                [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
                   x.nextToken;
@@ -260,6 +790,52 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("include-hidden", (OptionalBoolean.to_header v)))
                  x.includeHidden])
+      | ListObjectTypeAttributeValues ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/object-types/%s/attributes/%s/values"
+               (Name.to_header
+                  x.ListObjectTypeAttributeValuesRequest.domainName)
+               (TypeName.to_header
+                  x.ListObjectTypeAttributeValuesRequest.objectTypeName)
+               (String1To1000.to_header
+                  x.ListObjectTypeAttributeValuesRequest.attributeName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListObjectTypeAttributes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/object-types/%s/attributes"
+               (Name.to_header x.ListObjectTypeAttributesRequest.domainName)
+               (TypeName.to_header
+                  x.ListObjectTypeAttributesRequest.objectTypeName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListProfileAttributeValues ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/profile-attributes/%s/values"
+            (Name.to_header x.ProfileAttributeValuesRequest.domainName)
+            (String1To255.to_header
+               x.ProfileAttributeValuesRequest.attributeName)
+      | ListProfileHistoryRecords ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/profiles/history-records"
+               (Name.to_header x.ListProfileHistoryRecordsRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
       | ListProfileObjectTypeTemplates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/templates")
@@ -289,9 +865,86 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
                  x.maxResults])
+      | ListRecommenderFilters ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/recommender-filters"
+               (Name.to_header x.ListRecommenderFiltersRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
+      | ListRecommenderRecipes ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/recommender-recipes")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("max-results",
+                          (ListRecommenderRecipesRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
+      | ListRecommenderSchemas ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/recommender-schemas"
+               (Name.to_header x.ListRecommenderSchemasRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
+      | ListRecommenders ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/recommenders"
+               (Name.to_header x.ListRecommendersRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("max-results",
+                          (ListRecommendersRequestMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
+      | ListRuleBasedMatches ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/profiles/ruleBasedMatches"
+               (Name.to_header x.ListRuleBasedMatchesRequest.domainName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
+                 x.maxResults])
+      | ListSegmentDefinitions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/domains/%s/segment-definitions"
+               (Name.to_header x.ListSegmentDefinitionsRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxSize500.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (TagArn.to_header x.ListTagsForResourceRequest.resourceArn)
+      | ListUploadJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs"
+               (Name.to_header x.ListUploadJobsRequest.domainName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("max-results", (MaxSize500.to_header v)))
+                  x.maxResults;
+               Option.map ~f:(fun v -> ("next-token", (Token.to_header v)))
+                 x.nextToken])
       | ListWorkflows ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/domains/%s/workflows"
@@ -306,6 +959,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/domains/%s/profiles/objects/merge"
             (Name.to_header x.MergeProfilesRequest.domainName)
+      | PutDomainObjectType ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/domain-object-types/%s"
+            (Name.to_header x.PutDomainObjectTypeRequest.domainName)
+            (TypeName.to_header x.PutDomainObjectTypeRequest.objectTypeName)
       | PutIntegration ->
           (Format.kasprintf Uri.of_string) "/domains/%s/integrations"
             (Name.to_header x.PutIntegrationRequest.domainName)
@@ -326,6 +984,23 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("max-results", (MaxSize100.to_header v)))
                  x.maxResults])
+      | StartRecommender ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/recommenders/%s/start"
+            (Name.to_header x.StartRecommenderRequest.domainName)
+            (Name.to_header x.StartRecommenderRequest.recommenderName)
+      | StartUploadJob ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs/%s"
+            (Name.to_header x.StartUploadJobRequest.domainName)
+            (Name.to_header x.StartUploadJobRequest.jobId)
+      | StopRecommender ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/recommenders/%s/stop"
+            (Name.to_header x.StopRecommenderRequest.domainName)
+            (Name.to_header x.StopRecommenderRequest.recommenderName)
+      | StopUploadJob ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/upload-jobs/%s/stop"
+            (Name.to_header x.StopUploadJobRequest.domainName)
+            (Name.to_header x.StopUploadJobRequest.jobId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (TagArn.to_header x.TagResourceRequest.resourceArn)
@@ -335,12 +1010,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (TagArn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
+      | UpdateCalculatedAttributeDefinition ->
+          (Format.kasprintf Uri.of_string)
+            "/domains/%s/calculated-attributes/%s"
+            (Name.to_header
+               x.UpdateCalculatedAttributeDefinitionRequest.domainName)
+            (TypeName.to_header
+               x.UpdateCalculatedAttributeDefinitionRequest.calculatedAttributeName)
       | UpdateDomain ->
           (Format.kasprintf Uri.of_string) "/domains/%s"
             (Name.to_header x.UpdateDomainRequest.domainName)
+      | UpdateDomainLayout ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/layouts/%s"
+            (Name.to_header x.UpdateDomainLayoutRequest.domainName)
+            (Name.to_header x.UpdateDomainLayoutRequest.layoutDefinitionName)
+      | UpdateEventTrigger ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/event-triggers/%s"
+            (Name.to_header x.UpdateEventTriggerRequest.domainName)
+            (Name.to_header x.UpdateEventTriggerRequest.eventTriggerName)
       | UpdateProfile ->
           (Format.kasprintf Uri.of_string) "/domains/%s/profiles"
-            (Name.to_header x.UpdateProfileRequest.domainName))
+            (Name.to_header x.UpdateProfileRequest.domainName)
+      | UpdateRecommender ->
+          (Format.kasprintf Uri.of_string) "/domains/%s/recommenders/%s"
+            (Name.to_header x.UpdateRecommenderRequest.domainName)
+            (Name.to_header x.UpdateRecommenderRequest.recommenderName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
@@ -364,6 +1058,97 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Values",
                           (RequestValueList.to_value
                              req.AddProfileKeyRequest.values))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetCalculatedAttributeForProfile ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ProfileIds",
+                           (BatchGetCalculatedAttributeForProfileIdList.to_value
+                              req.BatchGetCalculatedAttributeForProfileRequest.profileIds));
+                      Option.map
+                        req.BatchGetCalculatedAttributeForProfileRequest.conditionOverrides
+                        ~f:(fun x ->
+                              ("ConditionOverrides",
+                                (ConditionOverrides.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | BatchGetProfile ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ProfileIds",
+                           (BatchGetProfileIdList.to_value
+                              req.BatchGetProfileRequest.profileIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCalculatedAttributeDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateCalculatedAttributeDefinitionRequest.displayName
+                         ~f:(fun x ->
+                               ("DisplayName", (DisplayName.to_value x)));
+                      Option.map
+                        req.CreateCalculatedAttributeDefinitionRequest.description
+                        ~f:(fun x ->
+                              ("Description", (SensitiveText.to_value x)));
+                      Some
+                        ("AttributeDetails",
+                          (AttributeDetails.to_value
+                             req.CreateCalculatedAttributeDefinitionRequest.attributeDetails));
+                      Option.map
+                        req.CreateCalculatedAttributeDefinitionRequest.conditions
+                        ~f:(fun x -> ("Conditions", (Conditions.to_value x)));
+                      Option.map
+                        req.CreateCalculatedAttributeDefinitionRequest.filter
+                        ~f:(fun x -> ("Filter", (Filter.to_value x)));
+                      Some
+                        ("Statistic",
+                          (Statistic.to_value
+                             req.CreateCalculatedAttributeDefinitionRequest.statistic));
+                      Option.map
+                        req.CreateCalculatedAttributeDefinitionRequest.useHistoricalData
+                        ~f:(fun x ->
+                              ("UseHistoricalData",
+                                (OptionalBoolean.to_value x)));
+                      Option.map
+                        req.CreateCalculatedAttributeDefinitionRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -395,7 +1180,108 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateDomainRequest.matching
                         ~f:(fun x ->
                               ("Matching", (MatchingRequest.to_value x)));
+                      Option.map req.CreateDomainRequest.ruleBasedMatching
+                        ~f:(fun x ->
+                              ("RuleBasedMatching",
+                                (RuleBasedMatchingRequest.to_value x)));
+                      Option.map req.CreateDomainRequest.dataStore
+                        ~f:(fun x ->
+                              ("DataStore", (DataStoreRequest.to_value x)));
                       Option.map req.CreateDomainRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDomainLayout ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Description",
+                           (SensitiveText.to_value
+                              req.CreateDomainLayoutRequest.description));
+                      Some
+                        ("DisplayName",
+                          (DisplayName.to_value
+                             req.CreateDomainLayoutRequest.displayName));
+                      Option.map req.CreateDomainLayoutRequest.isDefault
+                        ~f:(fun x -> ("IsDefault", (Boolean.to_value x)));
+                      Some
+                        ("LayoutType",
+                          (LayoutType.to_value
+                             req.CreateDomainLayoutRequest.layoutType));
+                      Some
+                        ("Layout",
+                          (SensitiveString1To2000000.to_value
+                             req.CreateDomainLayoutRequest.layout));
+                      Option.map req.CreateDomainLayoutRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateEventStream ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Uri",
+                           (String1To255.to_value
+                              req.CreateEventStreamRequest.uri));
+                      Option.map req.CreateEventStreamRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateEventTrigger ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ObjectTypeName",
+                           (TypeName.to_value
+                              req.CreateEventTriggerRequest.objectTypeName));
+                      Option.map req.CreateEventTriggerRequest.description
+                        ~f:(fun x ->
+                              ("Description", (SensitiveText.to_value x)));
+                      Some
+                        ("EventTriggerConditions",
+                          (EventTriggerConditions.to_value
+                             req.CreateEventTriggerRequest.eventTriggerConditions));
+                      Option.map req.CreateEventTriggerRequest.segmentFilter
+                        ~f:(fun x -> ("SegmentFilter", (Name.to_value x)));
+                      Option.map
+                        req.CreateEventTriggerRequest.eventTriggerLimits
+                        ~f:(fun x ->
+                              ("EventTriggerLimits",
+                                (EventTriggerLimits.to_value x)));
+                      Option.map req.CreateEventTriggerRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -449,55 +1335,67 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Option.map req.CreateProfileRequest.accountNumber
                          ~f:(fun x ->
-                               ("AccountNumber", (String1To255.to_value x)));
+                               ("AccountNumber",
+                                 (SensitiveString1To255.to_value x)));
                       Option.map
                         req.CreateProfileRequest.additionalInformation
                         ~f:(fun x ->
                               ("AdditionalInformation",
-                                (String1To1000.to_value x)));
+                                (SensitiveString1To1000.to_value x)));
                       Option.map req.CreateProfileRequest.partyType
                         ~f:(fun x -> ("PartyType", (PartyType.to_value x)));
                       Option.map req.CreateProfileRequest.businessName
                         ~f:(fun x ->
-                              ("BusinessName", (String1To255.to_value x)));
+                              ("BusinessName",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.firstName
-                        ~f:(fun x -> ("FirstName", (String1To255.to_value x)));
+                        ~f:(fun x ->
+                              ("FirstName",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.middleName
                         ~f:(fun x ->
-                              ("MiddleName", (String1To255.to_value x)));
+                              ("MiddleName",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.lastName
-                        ~f:(fun x -> ("LastName", (String1To255.to_value x)));
+                        ~f:(fun x ->
+                              ("LastName",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.birthDate
-                        ~f:(fun x -> ("BirthDate", (String1To255.to_value x)));
+                        ~f:(fun x ->
+                              ("BirthDate",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.gender
                         ~f:(fun x -> ("Gender", (Gender.to_value x)));
                       Option.map req.CreateProfileRequest.phoneNumber
                         ~f:(fun x ->
-                              ("PhoneNumber", (String1To255.to_value x)));
+                              ("PhoneNumber",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.mobilePhoneNumber
                         ~f:(fun x ->
                               ("MobilePhoneNumber",
-                                (String1To255.to_value x)));
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.homePhoneNumber
                         ~f:(fun x ->
-                              ("HomePhoneNumber", (String1To255.to_value x)));
+                              ("HomePhoneNumber",
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.businessPhoneNumber
                         ~f:(fun x ->
                               ("BusinessPhoneNumber",
-                                (String1To255.to_value x)));
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.emailAddress
                         ~f:(fun x ->
-                              ("EmailAddress", (String1To255.to_value x)));
+                              ("EmailAddress",
+                                (SensitiveString1To255.to_value x)));
                       Option.map
                         req.CreateProfileRequest.personalEmailAddress
                         ~f:(fun x ->
                               ("PersonalEmailAddress",
-                                (String1To255.to_value x)));
+                                (SensitiveString1To255.to_value x)));
                       Option.map
                         req.CreateProfileRequest.businessEmailAddress
                         ~f:(fun x ->
                               ("BusinessEmailAddress",
-                                (String1To255.to_value x)));
+                                (SensitiveString1To255.to_value x)));
                       Option.map req.CreateProfileRequest.address
                         ~f:(fun x -> ("Address", (Address.to_value x)));
                       Option.map req.CreateProfileRequest.shippingAddress
@@ -508,7 +1406,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateProfileRequest.billingAddress
                         ~f:(fun x -> ("BillingAddress", (Address.to_value x)));
                       Option.map req.CreateProfileRequest.attributes
-                        ~f:(fun x -> ("Attributes", (Attributes.to_value x)))])
+                        ~f:(fun x -> ("Attributes", (Attributes.to_value x)));
+                      Option.map req.CreateProfileRequest.partyTypeString
+                        ~f:(fun x ->
+                              ("PartyTypeString",
+                                (SensitiveString1To255.to_value x)));
+                      Option.map req.CreateProfileRequest.genderString
+                        ~f:(fun x ->
+                              ("GenderString",
+                                (SensitiveString1To255.to_value x)));
+                      Option.map req.CreateProfileRequest.profileType
+                        ~f:(fun x ->
+                              ("ProfileType", (ProfileType.to_value x)));
+                      Option.map
+                        req.CreateProfileRequest.engagementPreferences
+                        ~f:(fun x ->
+                              ("EngagementPreferences",
+                                (EngagementPreferences.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -516,7 +1430,227 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRecommender ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RecommenderRecipeName",
+                           (RecommenderRecipeName.to_value
+                              req.CreateRecommenderRequest.recommenderRecipeName));
+                      Option.map
+                        req.CreateRecommenderRequest.recommenderConfig
+                        ~f:(fun x ->
+                              ("RecommenderConfig",
+                                (RecommenderConfig.to_value x)));
+                      Option.map req.CreateRecommenderRequest.description
+                        ~f:(fun x ->
+                              ("Description", (SensitiveText.to_value x)));
+                      Option.map
+                        req.CreateRecommenderRequest.recommenderSchemaName
+                        ~f:(fun x ->
+                              ("RecommenderSchemaName", (Name.to_value x)));
+                      Option.map req.CreateRecommenderRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRecommenderFilter ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RecommenderFilterExpression",
+                           (RecommenderFilterExpression.to_value
+                              req.CreateRecommenderFilterRequest.recommenderFilterExpression));
+                      Option.map
+                        req.CreateRecommenderFilterRequest.recommenderSchemaName
+                        ~f:(fun x ->
+                              ("RecommenderSchemaName", (Name.to_value x)));
+                      Option.map
+                        req.CreateRecommenderFilterRequest.description
+                        ~f:(fun x ->
+                              ("Description", (SensitiveText.to_value x)));
+                      Option.map req.CreateRecommenderFilterRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRecommenderSchema ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Fields",
+                           (RecommenderSchemaFields.to_value
+                              req.CreateRecommenderSchemaRequest.fields));
+                      Option.map req.CreateRecommenderSchemaRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSegmentDefinition ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DisplayName",
+                           (String1To255.to_value
+                              req.CreateSegmentDefinitionRequest.displayName));
+                      Option.map
+                        req.CreateSegmentDefinitionRequest.description
+                        ~f:(fun x ->
+                              ("Description",
+                                (SensitiveString1To4000.to_value x)));
+                      Option.map
+                        req.CreateSegmentDefinitionRequest.segmentGroups
+                        ~f:(fun x ->
+                              ("SegmentGroups", (SegmentGroup.to_value x)));
+                      Option.map
+                        req.CreateSegmentDefinitionRequest.segmentSqlQuery
+                        ~f:(fun x ->
+                              ("SegmentSqlQuery",
+                                (SensitiveString1To50000.to_value x)));
+                      Option.map
+                        req.CreateSegmentDefinitionRequest.segmentSort
+                        ~f:(fun x ->
+                              ("SegmentSort", (SegmentSort.to_value x)));
+                      Option.map req.CreateSegmentDefinitionRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSegmentEstimate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateSegmentEstimateRequest.segmentQuery
+                         ~f:(fun x ->
+                               ("SegmentQuery",
+                                 (SegmentGroupStructure.to_value x)));
+                      Option.map
+                        req.CreateSegmentEstimateRequest.segmentSqlQuery
+                        ~f:(fun x ->
+                              ("SegmentSqlQuery",
+                                (SensitiveString1To50000.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSegmentSnapshot ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DataFormat",
+                           (DataFormat.to_value
+                              req.CreateSegmentSnapshotRequest.dataFormat));
+                      Option.map
+                        req.CreateSegmentSnapshotRequest.encryptionKey
+                        ~f:(fun x ->
+                              ("EncryptionKey", (EncryptionKey.to_value x)));
+                      Option.map req.CreateSegmentSnapshotRequest.roleArn
+                        ~f:(fun x -> ("RoleArn", (RoleArn.to_value x)));
+                      Option.map
+                        req.CreateSegmentSnapshotRequest.destinationUri
+                        ~f:(fun x ->
+                              ("DestinationUri", (String1To255.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateUploadJob ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("DisplayName",
+                           (String1To255.to_value
+                              req.CreateUploadJobRequest.displayName));
+                      Some
+                        ("Fields",
+                          (FieldMap.to_value
+                             req.CreateUploadJobRequest.fields));
+                      Some
+                        ("UniqueKey",
+                          (Text.to_value req.CreateUploadJobRequest.uniqueKey));
+                      Option.map req.CreateUploadJobRequest.dataExpiry
+                        ~f:(fun x ->
+                              ("DataExpiry",
+                                (ExpirationDaysInteger.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteCalculatedAttributeDefinition ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteDomain -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDomainLayout -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDomainObjectType ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEventStream -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteEventTrigger -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteIntegration ->
       let (headers, body) =
         let headers =
@@ -613,7 +1747,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteProfileObjectType ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRecommender -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRecommenderFilter ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRecommenderSchema ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteSegmentDefinition ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWorkflow -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DetectProfileObjectType ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Objects",
+                           (Objects.to_value
+                              req.DetectProfileObjectTypeRequest.objects))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAutoMergingPreview ->
       let (headers, body) =
         let headers =
@@ -630,7 +1791,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ConflictResolution",
                           (ConflictResolution.to_value
-                             req.GetAutoMergingPreviewRequest.conflictResolution))])
+                             req.GetAutoMergingPreviewRequest.conflictResolution));
+                      Option.map
+                        req.GetAutoMergingPreviewRequest.minAllowedConfidenceScoreForMerging
+                        ~f:(fun x ->
+                              ("MinAllowedConfidenceScoreForMerging",
+                                (Double0To1.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -638,7 +1804,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCalculatedAttributeDefinition ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCalculatedAttributeForProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDomain ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDomainLayout ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDomainObjectType ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEventStream ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetEventTrigger ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetIdentityResolutionJob ->
@@ -667,10 +1851,133 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetMatches ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetObjectTypeAttributeStatistics ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetProfileHistoryRecord ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetProfileObjectType ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetProfileObjectTypeTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetProfileRecommendations ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("RecommenderName",
+                           (Name.to_value
+                              req.GetProfileRecommendationsRequest.recommenderName));
+                      Option.map req.GetProfileRecommendationsRequest.context
+                        ~f:(fun x ->
+                              ("Context", (RecommenderContext.to_value x)));
+                      Option.map
+                        req.GetProfileRecommendationsRequest.recommenderFilters
+                        ~f:(fun x ->
+                              ("RecommenderFilters",
+                                (RecommenderFilters.to_value x)));
+                      Option.map
+                        req.GetProfileRecommendationsRequest.recommenderPromotionalFilters
+                        ~f:(fun x ->
+                              ("RecommenderPromotionalFilters",
+                                (RecommenderPromotionalFilters.to_value x)));
+                      Option.map
+                        req.GetProfileRecommendationsRequest.candidateIds
+                        ~f:(fun x ->
+                              ("CandidateIds", (CandidateIdList.to_value x)));
+                      Option.map
+                        req.GetProfileRecommendationsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxSize500__lc1.to_value x)));
+                      Option.map
+                        req.GetProfileRecommendationsRequest.metadataConfig
+                        ~f:(fun x ->
+                              ("MetadataConfig", (MetadataConfig.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRecommender ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRecommenderFilter ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRecommenderSchema ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSegmentDefinition ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSegmentEstimate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSegmentMembership ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ProfileIds",
+                           (ProfileIds.to_value
+                              req.GetSegmentMembershipRequest.profileIds))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSegmentSnapshot ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSimilarProfiles ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("MatchType",
+                           (MatchType.to_value
+                              req.GetSimilarProfilesRequest.matchType));
+                      Some
+                        ("SearchKey",
+                          (String1To255.to_value
+                             req.GetSimilarProfilesRequest.searchKey));
+                      Some
+                        ("SearchValue",
+                          (String1To255.to_value
+                             req.GetSimilarProfilesRequest.searchValue))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetUploadJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetUploadJobPath ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetWorkflow ->
@@ -699,7 +2006,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCalculatedAttributeDefinitions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCalculatedAttributesForProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDomainLayouts ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDomainObjectTypes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListDomains ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEventStreams ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListEventTriggers ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIdentityResolutionJobs ->
@@ -707,6 +2032,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIntegrations ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListObjectTypeAttributeValues ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListObjectTypeAttributes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProfileAttributeValues ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProfileHistoryRecords ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ProfileId",
+                           (Uuid.to_value
+                              req.ListProfileHistoryRecordsRequest.profileId));
+                      Option.map
+                        req.ListProfileHistoryRecordsRequest.objectTypeName
+                        ~f:(fun x ->
+                              ("ObjectTypeName", (TypeName.to_value x)));
+                      Option.map
+                        req.ListProfileHistoryRecordsRequest.actionType
+                        ~f:(fun x -> ("ActionType", (ActionType.to_value x)));
+                      Option.map
+                        req.ListProfileHistoryRecordsRequest.performedBy
+                        ~f:(fun x ->
+                              ("PerformedBy", (String1To255.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListProfileObjectTypeTemplates ->
       let (headers, body) = (None, None) in
@@ -741,7 +2106,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecommenderFilters ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecommenderRecipes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecommenderSchemas ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecommenders ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRuleBasedMatches ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSegmentDefinitions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUploadJobs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListWorkflows ->
@@ -799,6 +2185,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | PutDomainObjectType -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutIntegration -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutProfileObject -> Awso.Http.Request.make (method_of_endpoint endp)
   | PutProfileObjectType -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -817,7 +2204,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("Values",
                           (RequestValueList.to_value
-                             req.SearchProfilesRequest.values))])
+                             req.SearchProfilesRequest.values));
+                      Option.map
+                        req.SearchProfilesRequest.additionalSearchKeys
+                        ~f:(fun x ->
+                              ("AdditionalSearchKeys",
+                                (AdditionalSearchKeysList.to_value x)));
+                      Option.map req.SearchProfilesRequest.logicalOperator
+                        ~f:(fun x ->
+                              ("LogicalOperator",
+                                (LogicalOperator.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -825,6 +2221,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartRecommender -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartUploadJob -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StopRecommender -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StopUploadJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -845,8 +2245,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCalculatedAttributeDefinition ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateDomain -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDomainLayout -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateEventTrigger -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRecommender -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -899,10 +2304,54 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (AddProfileKeyResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some AddProfileKeyResponse.error_of_json))
+  | BatchGetCalculatedAttributeForProfile ->
+      if is_success
+      then
+        Ok
+          (BatchGetCalculatedAttributeForProfileResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                BatchGetCalculatedAttributeForProfileResponse.error_of_json))
+  | BatchGetProfile ->
+      if is_success
+      then Ok (BatchGetProfileResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some BatchGetProfileResponse.error_of_json))
+  | CreateCalculatedAttributeDefinition ->
+      if is_success
+      then
+        Ok
+          (CreateCalculatedAttributeDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCalculatedAttributeDefinitionResponse.error_of_json))
   | CreateDomain ->
       if is_success
       then Ok (CreateDomainResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateDomainResponse.error_of_json))
+  | CreateDomainLayout ->
+      if is_success
+      then Ok (CreateDomainLayoutResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateDomainLayoutResponse.error_of_json))
+  | CreateEventStream ->
+      if is_success
+      then Ok (CreateEventStreamResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateEventStreamResponse.error_of_json))
+  | CreateEventTrigger ->
+      if is_success
+      then Ok (CreateEventTriggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateEventTriggerResponse.error_of_json))
   | CreateIntegrationWorkflow ->
       if is_success
       then
@@ -916,10 +2365,100 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateProfileResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateProfileResponse.error_of_json))
+  | CreateRecommender ->
+      if is_success
+      then Ok (CreateRecommenderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateRecommenderResponse.error_of_json))
+  | CreateRecommenderFilter ->
+      if is_success
+      then
+        Ok (CreateRecommenderFilterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRecommenderFilterResponse.error_of_json))
+  | CreateRecommenderSchema ->
+      if is_success
+      then
+        Ok (CreateRecommenderSchemaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRecommenderSchemaResponse.error_of_json))
+  | CreateSegmentDefinition ->
+      if is_success
+      then
+        Ok (CreateSegmentDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSegmentDefinitionResponse.error_of_json))
+  | CreateSegmentEstimate ->
+      if is_success
+      then Ok (CreateSegmentEstimateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSegmentEstimateResponse.error_of_json))
+  | CreateSegmentSnapshot ->
+      if is_success
+      then Ok (CreateSegmentSnapshotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSegmentSnapshotResponse.error_of_json))
+  | CreateUploadJob ->
+      if is_success
+      then Ok (CreateUploadJobResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateUploadJobResponse.error_of_json))
+  | DeleteCalculatedAttributeDefinition ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteCalculatedAttributeDefinitionResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCalculatedAttributeDefinitionResponse.error_of_json))
   | DeleteDomain ->
       if is_success
       then Ok (DeleteDomainResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some DeleteDomainResponse.error_of_json))
+  | DeleteDomainLayout ->
+      if is_success
+      then Ok (DeleteDomainLayoutResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteDomainLayoutResponse.error_of_json))
+  | DeleteDomainObjectType ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteDomainObjectTypeResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDomainObjectTypeResponse.error_of_json))
+  | DeleteEventStream ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteEventStreamResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteEventStreamResponse.error_of_json))
+  | DeleteEventTrigger ->
+      if is_success
+      then Ok (DeleteEventTriggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteEventTriggerResponse.error_of_json))
   | DeleteIntegration ->
       if is_success
       then Ok (DeleteIntegrationResponse.of_json (response_to_json resp))
@@ -949,6 +2488,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteProfileObjectTypeResponse.error_of_json))
+  | DeleteRecommender ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRecommenderResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteRecommenderResponse.error_of_json))
+  | DeleteRecommenderFilter ->
+      if is_success
+      then
+        Ok (DeleteRecommenderFilterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRecommenderFilterResponse.error_of_json))
+  | DeleteRecommenderSchema ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteRecommenderSchemaResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteRecommenderSchemaResponse.error_of_json))
+  | DeleteSegmentDefinition ->
+      if is_success
+      then
+        Ok (DeleteSegmentDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteSegmentDefinitionResponse.error_of_json))
   | DeleteWorkflow ->
       if is_success
       then
@@ -957,16 +2531,65 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteWorkflowResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteWorkflowResponse.error_of_json))
+  | DetectProfileObjectType ->
+      if is_success
+      then
+        Ok (DetectProfileObjectTypeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DetectProfileObjectTypeResponse.error_of_json))
   | GetAutoMergingPreview ->
       if is_success
       then Ok (GetAutoMergingPreviewResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetAutoMergingPreviewResponse.error_of_json))
+  | GetCalculatedAttributeDefinition ->
+      if is_success
+      then
+        Ok
+          (GetCalculatedAttributeDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCalculatedAttributeDefinitionResponse.error_of_json))
+  | GetCalculatedAttributeForProfile ->
+      if is_success
+      then
+        Ok
+          (GetCalculatedAttributeForProfileResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetCalculatedAttributeForProfileResponse.error_of_json))
   | GetDomain ->
       if is_success
       then Ok (GetDomainResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetDomainResponse.error_of_json))
+  | GetDomainLayout ->
+      if is_success
+      then Ok (GetDomainLayoutResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetDomainLayoutResponse.error_of_json))
+  | GetDomainObjectType ->
+      if is_success
+      then Ok (GetDomainObjectTypeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDomainObjectTypeResponse.error_of_json))
+  | GetEventStream ->
+      if is_success
+      then Ok (GetEventStreamResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetEventStreamResponse.error_of_json))
+  | GetEventTrigger ->
+      if is_success
+      then Ok (GetEventTriggerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetEventTriggerResponse.error_of_json))
   | GetIdentityResolutionJob ->
       if is_success
       then
@@ -984,6 +2607,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMatchesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMatchesResponse.error_of_json))
+  | GetObjectTypeAttributeStatistics ->
+      if is_success
+      then
+        Ok
+          (GetObjectTypeAttributeStatisticsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetObjectTypeAttributeStatisticsResponse.error_of_json))
+  | GetProfileHistoryRecord ->
+      if is_success
+      then
+        Ok (GetProfileHistoryRecordResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetProfileHistoryRecordResponse.error_of_json))
   | GetProfileObjectType ->
       if is_success
       then Ok (GetProfileObjectTypeResponse.of_json (response_to_json resp))
@@ -1000,6 +2641,71 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetProfileObjectTypeTemplateResponse.error_of_json))
+  | GetProfileRecommendations ->
+      if is_success
+      then
+        Ok
+          (GetProfileRecommendationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetProfileRecommendationsResponse.error_of_json))
+  | GetRecommender ->
+      if is_success
+      then Ok (GetRecommenderResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetRecommenderResponse.error_of_json))
+  | GetRecommenderFilter ->
+      if is_success
+      then Ok (GetRecommenderFilterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRecommenderFilterResponse.error_of_json))
+  | GetRecommenderSchema ->
+      if is_success
+      then Ok (GetRecommenderSchemaResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRecommenderSchemaResponse.error_of_json))
+  | GetSegmentDefinition ->
+      if is_success
+      then Ok (GetSegmentDefinitionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSegmentDefinitionResponse.error_of_json))
+  | GetSegmentEstimate ->
+      if is_success
+      then Ok (GetSegmentEstimateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSegmentEstimateResponse.error_of_json))
+  | GetSegmentMembership ->
+      if is_success
+      then Ok (GetSegmentMembershipResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSegmentMembershipResponse.error_of_json))
+  | GetSegmentSnapshot ->
+      if is_success
+      then Ok (GetSegmentSnapshotResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSegmentSnapshotResponse.error_of_json))
+  | GetSimilarProfiles ->
+      if is_success
+      then Ok (GetSimilarProfilesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetSimilarProfilesResponse.error_of_json))
+  | GetUploadJob ->
+      if is_success
+      then Ok (GetUploadJobResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetUploadJobResponse.error_of_json))
+  | GetUploadJobPath ->
+      if is_success
+      then Ok (GetUploadJobPathResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetUploadJobPathResponse.error_of_json))
   | GetWorkflow ->
       if is_success
       then Ok (GetWorkflowResponse.of_json (response_to_json resp))
@@ -1017,10 +2723,53 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListAccountIntegrationsResponse.error_of_json))
+  | ListCalculatedAttributeDefinitions ->
+      if is_success
+      then
+        Ok
+          (ListCalculatedAttributeDefinitionsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCalculatedAttributeDefinitionsResponse.error_of_json))
+  | ListCalculatedAttributesForProfile ->
+      if is_success
+      then
+        Ok
+          (ListCalculatedAttributesForProfileResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListCalculatedAttributesForProfileResponse.error_of_json))
+  | ListDomainLayouts ->
+      if is_success
+      then Ok (ListDomainLayoutsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDomainLayoutsResponse.error_of_json))
+  | ListDomainObjectTypes ->
+      if is_success
+      then Ok (ListDomainObjectTypesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListDomainObjectTypesResponse.error_of_json))
   | ListDomains ->
       if is_success
       then Ok (ListDomainsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListDomainsResponse.error_of_json))
+  | ListEventStreams ->
+      if is_success
+      then Ok (ListEventStreamsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListEventStreamsResponse.error_of_json))
+  | ListEventTriggers ->
+      if is_success
+      then Ok (ListEventTriggersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListEventTriggersResponse.error_of_json))
   | ListIdentityResolutionJobs ->
       if is_success
       then
@@ -1035,6 +2784,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListIntegrationsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListIntegrationsResponse.error_of_json))
+  | ListObjectTypeAttributeValues ->
+      if is_success
+      then
+        Ok
+          (ListObjectTypeAttributeValuesResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListObjectTypeAttributeValuesResponse.error_of_json))
+  | ListObjectTypeAttributes ->
+      if is_success
+      then
+        Ok (ListObjectTypeAttributesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListObjectTypeAttributesResponse.error_of_json))
+  | ListProfileAttributeValues ->
+      if is_success
+      then
+        Ok (ProfileAttributeValuesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ProfileAttributeValuesResponse.error_of_json))
+  | ListProfileHistoryRecords ->
+      if is_success
+      then
+        Ok
+          (ListProfileHistoryRecordsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListProfileHistoryRecordsResponse.error_of_json))
   | ListProfileObjectTypeTemplates ->
       if is_success
       then
@@ -1059,12 +2843,60 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListProfileObjectsResponse.error_of_json))
+  | ListRecommenderFilters ->
+      if is_success
+      then
+        Ok (ListRecommenderFiltersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecommenderFiltersResponse.error_of_json))
+  | ListRecommenderRecipes ->
+      if is_success
+      then
+        Ok (ListRecommenderRecipesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecommenderRecipesResponse.error_of_json))
+  | ListRecommenderSchemas ->
+      if is_success
+      then
+        Ok (ListRecommenderSchemasResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecommenderSchemasResponse.error_of_json))
+  | ListRecommenders ->
+      if is_success
+      then Ok (ListRecommendersResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListRecommendersResponse.error_of_json))
+  | ListRuleBasedMatches ->
+      if is_success
+      then Ok (ListRuleBasedMatchesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRuleBasedMatchesResponse.error_of_json))
+  | ListSegmentDefinitions ->
+      if is_success
+      then
+        Ok (ListSegmentDefinitionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSegmentDefinitionsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListUploadJobs ->
+      if is_success
+      then Ok (ListUploadJobsResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListUploadJobsResponse.error_of_json))
   | ListWorkflows ->
       if is_success
       then Ok (ListWorkflowsResponse.of_json (response_to_json resp))
@@ -1073,6 +2905,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (MergeProfilesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some MergeProfilesResponse.error_of_json))
+  | PutDomainObjectType ->
+      if is_success
+      then Ok (PutDomainObjectTypeResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some PutDomainObjectTypeResponse.error_of_json))
   | PutIntegration ->
       if is_success
       then Ok (PutIntegrationResponse.of_json (response_to_json resp))
@@ -1094,6 +2932,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (SearchProfilesResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some SearchProfilesResponse.error_of_json))
+  | StartRecommender ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartRecommenderResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StartRecommenderResponse.error_of_json))
+  | StartUploadJob ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StartUploadJobResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StartUploadJobResponse.error_of_json))
+  | StopRecommender ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopRecommenderResponse.of_header_and_body (headers, ()))
+      else
+        Error (parse_aws_error (Some StopRecommenderResponse.error_of_json))
+  | StopUploadJob ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (StopUploadJobResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some StopUploadJobResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -1108,11 +2977,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UntagResourceResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateCalculatedAttributeDefinition ->
+      if is_success
+      then
+        Ok
+          (UpdateCalculatedAttributeDefinitionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCalculatedAttributeDefinitionResponse.error_of_json))
   | UpdateDomain ->
       if is_success
       then Ok (UpdateDomainResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateDomainResponse.error_of_json))
+  | UpdateDomainLayout ->
+      if is_success
+      then Ok (UpdateDomainLayoutResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateDomainLayoutResponse.error_of_json))
+  | UpdateEventTrigger ->
+      if is_success
+      then Ok (UpdateEventTriggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateEventTriggerResponse.error_of_json))
   | UpdateProfile ->
       if is_success
       then Ok (UpdateProfileResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateProfileResponse.error_of_json))
+  | UpdateRecommender ->
+      if is_success
+      then Ok (UpdateRecommenderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateRecommenderResponse.error_of_json))

@@ -24,6 +24,42 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module RuntimeEnvironmentSecretsName =
+  struct
+    type nonrec t = string
+    let context_ = "RuntimeEnvironmentSecretsName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuntimeEnvironmentSecretsName" j
+    let to_json = simple_to_json to_value
+  end
+module RuntimeEnvironmentSecretsValue =
+  struct
+    type nonrec t = string
+    let context_ = "RuntimeEnvironmentSecretsValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RuntimeEnvironmentSecretsValue" j
+    let to_json = simple_to_json to_value
+  end
 module RuntimeEnvironmentVariablesKey =
   struct
     type nonrec t = string
@@ -87,6 +123,14 @@ module Runtime =
       | NODEJS_14 
       | CORRETTO_8 
       | CORRETTO_11 
+      | NODEJS_16 
+      | GO_1 
+      | DOTNET_6 
+      | PHP_81 
+      | RUBY_31 
+      | PYTHON_311 
+      | NODEJS_18 
+      | NODEJS_22 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -96,6 +140,14 @@ module Runtime =
       | NODEJS_14 -> "NODEJS_14"
       | CORRETTO_8 -> "CORRETTO_8"
       | CORRETTO_11 -> "CORRETTO_11"
+      | NODEJS_16 -> "NODEJS_16"
+      | GO_1 -> "GO_1"
+      | DOTNET_6 -> "DOTNET_6"
+      | PHP_81 -> "PHP_81"
+      | RUBY_31 -> "RUBY_31"
+      | PYTHON_311 -> "PYTHON_311"
+      | NODEJS_18 -> "NODEJS_18"
+      | NODEJS_22 -> "NODEJS_22"
       | Non_static_id s -> s
     let of_string =
       function
@@ -104,6 +156,14 @@ module Runtime =
       | "NODEJS_14" -> NODEJS_14
       | "CORRETTO_8" -> CORRETTO_8
       | "CORRETTO_11" -> CORRETTO_11
+      | "NODEJS_16" -> NODEJS_16
+      | "GO_1" -> GO_1
+      | "DOTNET_6" -> DOTNET_6
+      | "PHP_81" -> PHP_81
+      | "RUBY_31" -> RUBY_31
+      | "PYTHON_311" -> PYTHON_311
+      | "NODEJS_18" -> NODEJS_18
+      | "NODEJS_22" -> NODEJS_22
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -112,6 +172,40 @@ module Runtime =
       of_string (string_of_xml ~kind:"enumeration Runtime" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"Runtime" j)
     let to_json = simple_to_json to_value
+  end
+module RuntimeEnvironmentSecrets =
+  struct
+    type nonrec t =
+      (RuntimeEnvironmentSecretsName.t * RuntimeEnvironmentSecretsValue.t)
+        list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((RuntimeEnvironmentSecretsName.of_string chopped),
+                              (RuntimeEnvironmentSecretsValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RuntimeEnvironmentSecretsName.to_value x) |>
+                    (fun x ->
+                       (RuntimeEnvironmentSecretsValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RuntimeEnvironmentSecretsName.of_string
+        ~of_json:RuntimeEnvironmentSecretsValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module RuntimeEnvironmentVariables =
   struct
@@ -139,6 +233,8 @@ module RuntimeEnvironmentVariables =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -197,21 +293,26 @@ module CodeConfigurationValues =
           "The port that your application listens to in the container. Default: 8080"];
       runtimeEnvironmentVariables: RuntimeEnvironmentVariables.t option
         [@ocaml.doc
-          "The environment variables that are available to your running App Runner service. An array of key-value pairs. Keys with a prefix of AWSAPPRUNNER are reserved for system use and aren't valid."]}
+          "The environment variables that are available to your running App Runner service. An array of key-value pairs."];
+      runtimeEnvironmentSecrets: RuntimeEnvironmentSecrets.t option
+        [@ocaml.doc
+          "An array of key-value pairs representing the secrets and parameters that get referenced to your service as an environment variable. The supported values are either the full Amazon Resource Name (ARN) of the Secrets Manager secret or the full ARN of the parameter in the Amazon Web Services Systems Manager Parameter Store. If the Amazon Web Services Systems Manager Parameter Store parameter exists in the same Amazon Web Services Region as the service that you're launching, you can use either the full ARN or name of the secret. If the parameter exists in a different Region, then the full ARN must be specified. Currently, cross account referencing of Amazon Web Services Systems Manager Parameter Store parameter is not supported."]}
     let context_ = "CodeConfigurationValues"
     let make ?buildCommand =
       fun ?startCommand ->
         fun ?port ->
           fun ?runtimeEnvironmentVariables ->
-            fun ~runtime ->
-              fun () ->
-                {
-                  buildCommand;
-                  startCommand;
-                  port;
-                  runtimeEnvironmentVariables;
-                  runtime
-                }
+            fun ?runtimeEnvironmentSecrets ->
+              fun ~runtime ->
+                fun () ->
+                  {
+                    buildCommand;
+                    startCommand;
+                    port;
+                    runtimeEnvironmentVariables;
+                    runtimeEnvironmentSecrets;
+                    runtime
+                  }
     let to_value x =
       structure_to_value
         [("Runtime", (Some (Runtime.to_value x.runtime)));
@@ -222,9 +323,15 @@ module CodeConfigurationValues =
         ("Port", (Option.map x.port ~f:String_.to_value));
         ("RuntimeEnvironmentVariables",
           (Option.map x.runtimeEnvironmentVariables
-             ~f:RuntimeEnvironmentVariables.to_value))]
+             ~f:RuntimeEnvironmentVariables.to_value));
+        ("RuntimeEnvironmentSecrets",
+          (Option.map x.runtimeEnvironmentSecrets
+             ~f:RuntimeEnvironmentSecrets.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runtimeEnvironmentSecrets =
+        (Option.map ~f:RuntimeEnvironmentSecrets.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironmentSecrets") in
       let runtimeEnvironmentVariables =
         (Option.map ~f:RuntimeEnvironmentVariables.of_xml)
           (Xml.child xml_arg0 "RuntimeEnvironmentVariables") in
@@ -237,19 +344,22 @@ module CodeConfigurationValues =
           (Xml.child xml_arg0 "BuildCommand") in
       let runtime =
         Runtime.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Runtime") in
-      make ?runtimeEnvironmentVariables ?port ?startCommand ?buildCommand
-        ~runtime ()
+      make ?runtimeEnvironmentSecrets ?runtimeEnvironmentVariables ?port
+        ?startCommand ?buildCommand ~runtime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let runtimeEnvironmentSecrets =
+        field_map json__ "RuntimeEnvironmentSecrets"
+          RuntimeEnvironmentSecrets.of_json in
       let runtimeEnvironmentVariables =
-        field_map json "RuntimeEnvironmentVariables"
+        field_map json__ "RuntimeEnvironmentVariables"
           RuntimeEnvironmentVariables.of_json in
-      let port = field_map json "Port" String_.of_json in
-      let startCommand = field_map json "StartCommand" StartCommand.of_json in
-      let buildCommand = field_map json "BuildCommand" BuildCommand.of_json in
-      let runtime = field_map_exn json "Runtime" Runtime.of_json in
-      make ?runtimeEnvironmentVariables ?port ?startCommand ?buildCommand
-        ~runtime ()
+      let port = field_map json__ "Port" String_.of_json in
+      let startCommand = field_map json__ "StartCommand" StartCommand.of_json in
+      let buildCommand = field_map json__ "BuildCommand" BuildCommand.of_json in
+      let runtime = field_map_exn json__ "Runtime" Runtime.of_json in
+      make ?runtimeEnvironmentSecrets ?runtimeEnvironmentVariables ?port
+        ?startCommand ?buildCommand ~runtime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the basic configuration needed for building and running an App Runner service. This type doesn't support the full set of possible configuration options. Fur full configuration capabilities, use a apprunner.yaml file in the source code repository."]
@@ -369,6 +479,19 @@ module EgressType =
     let of_json j = of_string (string_of_json ~kind:"EgressType" j)
     let to_json = simple_to_json to_value
   end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module RoleArn =
   struct
     type nonrec t = string
@@ -422,12 +545,13 @@ module CodeConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSource") in
       make ?codeConfigurationValues ~configurationSource ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let codeConfigurationValues =
-        field_map json "CodeConfigurationValues"
+        field_map json__ "CodeConfigurationValues"
           CodeConfigurationValues.of_json in
       let configurationSource =
-        field_map_exn json "ConfigurationSource" ConfigurationSource.of_json in
+        field_map_exn json__ "ConfigurationSource"
+          ConfigurationSource.of_json in
       make ?codeConfigurationValues ~configurationSource ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -457,30 +581,60 @@ module SourceCodeVersion =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let type_ = field_map_exn json "Type" SourceCodeVersionType.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let type_ = field_map_exn json__ "Type" SourceCodeVersionType.of_json in
       make ~value ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Identifies a version of code that App Runner refers to within a source code repository."]
+module SourceDirectory =
+  struct
+    type nonrec t = string
+    let context_ = "SourceDirectory"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:4096) >>=
+                  (fun () -> check_pattern i ~pattern:"[^\\x00]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SourceDirectory" j
+    let to_json = simple_to_json to_value
+  end
 module ImageConfiguration =
   struct
     type nonrec t =
       {
       runtimeEnvironmentVariables: RuntimeEnvironmentVariables.t option
         [@ocaml.doc
-          "Environment variables that are available to your running App Runner service. An array of key-value pairs. Keys with a prefix of AWSAPPRUNNER are reserved for system use and aren't valid."];
+          "Environment variables that are available to your running App Runner service. An array of key-value pairs."];
       startCommand: StartCommand.t option
         [@ocaml.doc
           "An optional command that App Runner runs to start the application in the source image. If specified, this command overrides the Docker image\226\128\153s default start command."];
       port: String_.t option
         [@ocaml.doc
-          "The port that your application listens to in the container. Default: 8080"]}
+          "The port that your application listens to in the container. Default: 8080"];
+      runtimeEnvironmentSecrets: RuntimeEnvironmentSecrets.t option
+        [@ocaml.doc
+          "An array of key-value pairs representing the secrets and parameters that get referenced to your service as an environment variable. The supported values are either the full Amazon Resource Name (ARN) of the Secrets Manager secret or the full ARN of the parameter in the Amazon Web Services Systems Manager Parameter Store. If the Amazon Web Services Systems Manager Parameter Store parameter exists in the same Amazon Web Services Region as the service that you're launching, you can use either the full ARN or name of the secret. If the parameter exists in a different Region, then the full ARN must be specified. Currently, cross account referencing of Amazon Web Services Systems Manager Parameter Store parameter is not supported."]}
     let make ?runtimeEnvironmentVariables =
       fun ?startCommand ->
         fun ?port ->
-          fun () -> { runtimeEnvironmentVariables; startCommand; port }
+          fun ?runtimeEnvironmentSecrets ->
+            fun () ->
+              {
+                runtimeEnvironmentVariables;
+                startCommand;
+                port;
+                runtimeEnvironmentSecrets
+              }
     let to_value x =
       structure_to_value
         [("RuntimeEnvironmentVariables",
@@ -488,9 +642,15 @@ module ImageConfiguration =
               ~f:RuntimeEnvironmentVariables.to_value));
         ("StartCommand",
           (Option.map x.startCommand ~f:StartCommand.to_value));
-        ("Port", (Option.map x.port ~f:String_.to_value))]
+        ("Port", (Option.map x.port ~f:String_.to_value));
+        ("RuntimeEnvironmentSecrets",
+          (Option.map x.runtimeEnvironmentSecrets
+             ~f:RuntimeEnvironmentSecrets.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let runtimeEnvironmentSecrets =
+        (Option.map ~f:RuntimeEnvironmentSecrets.of_xml)
+          (Xml.child xml_arg0 "RuntimeEnvironmentSecrets") in
       let port = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Port") in
       let startCommand =
         (Option.map ~f:StartCommand.of_xml)
@@ -498,15 +658,20 @@ module ImageConfiguration =
       let runtimeEnvironmentVariables =
         (Option.map ~f:RuntimeEnvironmentVariables.of_xml)
           (Xml.child xml_arg0 "RuntimeEnvironmentVariables") in
-      make ?port ?startCommand ?runtimeEnvironmentVariables ()
+      make ?runtimeEnvironmentSecrets ?port ?startCommand
+        ?runtimeEnvironmentVariables ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" String_.of_json in
-      let startCommand = field_map json "StartCommand" StartCommand.of_json in
+    let of_json json__ =
+      let runtimeEnvironmentSecrets =
+        field_map json__ "RuntimeEnvironmentSecrets"
+          RuntimeEnvironmentSecrets.of_json in
+      let port = field_map json__ "Port" String_.of_json in
+      let startCommand = field_map json__ "StartCommand" StartCommand.of_json in
       let runtimeEnvironmentVariables =
-        field_map json "RuntimeEnvironmentVariables"
+        field_map json__ "RuntimeEnvironmentVariables"
           RuntimeEnvironmentVariables.of_json in
-      make ?port ?startCommand ?runtimeEnvironmentVariables ()
+      make ?runtimeEnvironmentSecrets ?port ?startCommand
+        ?runtimeEnvironmentVariables ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration that App Runner uses to run an App Runner service using an image pulled from a source image repository."]
@@ -590,12 +755,12 @@ module CertificateValidationRecord =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?status ?value ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map json "Status" CertificateValidationRecordStatus.of_json in
-      let value = field_map json "Value" String_.of_json in
-      let type_ = field_map json "Type" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+        field_map json__ "Status" CertificateValidationRecordStatus.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?status ?value ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -622,6 +787,47 @@ module AutoScalingConfigurationName =
     let of_json j = string_of_json ~kind:"AutoScalingConfigurationName" j
     let to_json = simple_to_json to_value
   end
+module AutoScalingConfigurationStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | INACTIVE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | INACTIVE -> "INACTIVE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "INACTIVE" -> INACTIVE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoScalingConfigurationStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AutoScalingConfigurationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module HasAssociatedService =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module Integer =
   struct
     type nonrec t = int
@@ -633,6 +839,31 @@ module Integer =
     let of_xml xml_arg0 =
       Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module IsDefault =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
 module KmsKeyArn =
@@ -772,10 +1003,12 @@ module Cpu =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:4) >>=
+          ((check_string_min i ~min:3) >>=
              (fun () ->
-                (check_string_max i ~max:6) >>=
-                  (fun () -> check_pattern i ~pattern:"1024|2048|(1|2) vCPU")));
+                (check_string_max i ~max:9) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"256|512|1024|2048|4096|(0.25|0.5|1|2|4) vCPU")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -792,11 +1025,12 @@ module Memory =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:4) >>=
+          ((check_string_min i ~min:3) >>=
              (fun () ->
-                (check_string_max i ~max:4) >>=
+                (check_string_max i ~max:6) >>=
                   (fun () ->
-                     check_pattern i ~pattern:"2048|3072|4096|(2|3|4) GB")));
+                     check_pattern i
+                       ~pattern:"512|1024|2048|3072|4096|6144|8192|10240|12288|(0.5|1|2|3|4|6|8|10|12) GB")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -832,25 +1066,63 @@ module EgressConfiguration =
         (Option.map ~f:EgressType.of_xml) (Xml.child xml_arg0 "EgressType") in
       make ?vpcConnectorArn ?egressType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcConnectorArn =
-        field_map json "VpcConnectorArn" AppRunnerResourceArn.of_json in
-      let egressType = field_map json "EgressType" EgressType.of_json in
+        field_map json__ "VpcConnectorArn" AppRunnerResourceArn.of_json in
+      let egressType = field_map json__ "EgressType" EgressType.of_json in
       make ?vpcConnectorArn ?egressType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes configuration settings related to outbound network traffic of an App Runner service."]
-module Boolean =
+module IngressConfiguration =
   struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
+    type nonrec t =
+      {
+      isPubliclyAccessible: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether your App Runner service is publicly accessible. To make the service publicly accessible set it to True. To make the service privately accessible, from only within an Amazon VPC set it to False."]}
+    let make ?isPubliclyAccessible = fun () -> { isPubliclyAccessible }
+    let to_value x =
+      structure_to_value
+        [("IsPubliclyAccessible",
+           (Option.map x.isPubliclyAccessible ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
     let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
+      let isPubliclyAccessible =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "IsPubliclyAccessible") in
+      make ?isPubliclyAccessible ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isPubliclyAccessible =
+        field_map json__ "IsPubliclyAccessible" Boolean.of_json in
+      make ?isPubliclyAccessible ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Network configuration settings for inbound network traffic."]
+module IpAddressType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUAL_STACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUAL_STACK -> "DUAL_STACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUAL_STACK" -> DUAL_STACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IpAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IpAddressType" j)
     let to_json = simple_to_json to_value
   end
 module AuthenticationConfiguration =
@@ -879,10 +1151,10 @@ module AuthenticationConfiguration =
           (Xml.child xml_arg0 "ConnectionArn") in
       make ?accessRoleArn ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accessRoleArn = field_map json "AccessRoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let accessRoleArn = field_map json__ "AccessRoleArn" RoleArn.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" AppRunnerResourceArn.of_json in
+        field_map json__ "ConnectionArn" AppRunnerResourceArn.of_json in
       make ?accessRoleArn ?connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -899,21 +1171,36 @@ module CodeRepository =
           "The version that should be used within the source code repository."];
       codeConfiguration: CodeConfiguration.t option
         [@ocaml.doc
-          "Configuration for building and running the service from a source code repository."]}
+          "Configuration for building and running the service from a source code repository. CodeConfiguration is required only for CreateService request."];
+      sourceDirectory: SourceDirectory.t option
+        [@ocaml.doc
+          "The path of the directory that stores source code and configuration files. The build and start commands also execute from here. The path is absolute from root and, if not specified, defaults to the repository root."]}
     let context_ = "CodeRepository"
     let make ?codeConfiguration =
-      fun ~repositoryUrl ->
-        fun ~sourceCodeVersion ->
-          fun () -> { codeConfiguration; repositoryUrl; sourceCodeVersion }
+      fun ?sourceDirectory ->
+        fun ~repositoryUrl ->
+          fun ~sourceCodeVersion ->
+            fun () ->
+              {
+                codeConfiguration;
+                sourceDirectory;
+                repositoryUrl;
+                sourceCodeVersion
+              }
     let to_value x =
       structure_to_value
         [("RepositoryUrl", (Some (String_.to_value x.repositoryUrl)));
         ("SourceCodeVersion",
           (Some (SourceCodeVersion.to_value x.sourceCodeVersion)));
         ("CodeConfiguration",
-          (Option.map x.codeConfiguration ~f:CodeConfiguration.to_value))]
+          (Option.map x.codeConfiguration ~f:CodeConfiguration.to_value));
+        ("SourceDirectory",
+          (Option.map x.sourceDirectory ~f:SourceDirectory.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sourceDirectory =
+        (Option.map ~f:SourceDirectory.of_xml)
+          (Xml.child xml_arg0 "SourceDirectory") in
       let codeConfiguration =
         (Option.map ~f:CodeConfiguration.of_xml)
           (Xml.child xml_arg0 "CodeConfiguration") in
@@ -923,15 +1210,20 @@ module CodeRepository =
       let repositoryUrl =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RepositoryUrl") in
-      make ?codeConfiguration ~sourceCodeVersion ~repositoryUrl ()
+      make ?sourceDirectory ?codeConfiguration ~sourceCodeVersion
+        ~repositoryUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let sourceDirectory =
+        field_map json__ "SourceDirectory" SourceDirectory.of_json in
       let codeConfiguration =
-        field_map json "CodeConfiguration" CodeConfiguration.of_json in
+        field_map json__ "CodeConfiguration" CodeConfiguration.of_json in
       let sourceCodeVersion =
-        field_map_exn json "SourceCodeVersion" SourceCodeVersion.of_json in
-      let repositoryUrl = field_map_exn json "RepositoryUrl" String_.of_json in
-      make ?codeConfiguration ~sourceCodeVersion ~repositoryUrl ()
+        field_map_exn json__ "SourceCodeVersion" SourceCodeVersion.of_json in
+      let repositoryUrl =
+        field_map_exn json__ "RepositoryUrl" String_.of_json in
+      make ?sourceDirectory ?codeConfiguration ~sourceCodeVersion
+        ~repositoryUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a source code repository."]
 module ImageRepository =
@@ -973,13 +1265,14 @@ module ImageRepository =
           (Xml.child_exn ~context:context_ xml_arg0 "ImageIdentifier") in
       make ~imageRepositoryType ?imageConfiguration ~imageIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let imageRepositoryType =
-        field_map_exn json "ImageRepositoryType" ImageRepositoryType.of_json in
+        field_map_exn json__ "ImageRepositoryType"
+          ImageRepositoryType.of_json in
       let imageConfiguration =
-        field_map json "ImageConfiguration" ImageConfiguration.of_json in
+        field_map json__ "ImageConfiguration" ImageConfiguration.of_json in
       let imageIdentifier =
-        field_map_exn json "ImageIdentifier" ImageIdentifier.of_json in
+        field_map_exn json__ "ImageIdentifier" ImageIdentifier.of_json in
       make ~imageRepositoryType ?imageConfiguration ~imageIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a source image repository."]
@@ -1040,6 +1333,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1059,18 +1355,6 @@ module StringList =
     let of_json j =
       list_of_json ~kind:"StringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Timestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
   end
 module VpcConnectorName =
   struct
@@ -1249,6 +1533,7 @@ module OperationType =
       | PAUSE_SERVICE 
       | RESUME_SERVICE 
       | DELETE_SERVICE 
+      | UPDATE_SERVICE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1258,6 +1543,7 @@ module OperationType =
       | PAUSE_SERVICE -> "PAUSE_SERVICE"
       | RESUME_SERVICE -> "RESUME_SERVICE"
       | DELETE_SERVICE -> "DELETE_SERVICE"
+      | UPDATE_SERVICE -> "UPDATE_SERVICE"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1266,6 +1552,7 @@ module OperationType =
       | "PAUSE_SERVICE" -> PAUSE_SERVICE
       | "RESUME_SERVICE" -> RESUME_SERVICE
       | "DELETE_SERVICE" -> DELETE_SERVICE
+      | "UPDATE_SERVICE" -> UPDATE_SERVICE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1376,16 +1663,45 @@ module ProviderType =
   struct
     type nonrec t =
       | GITHUB 
+      | BITBUCKET 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | GITHUB -> "GITHUB" | Non_static_id s -> s
-    let of_string = function | "GITHUB" -> GITHUB | x -> Non_static_id x
+    let to_string =
+      function
+      | GITHUB -> "GITHUB"
+      | BITBUCKET -> "BITBUCKET"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GITHUB" -> GITHUB
+      | "BITBUCKET" -> BITBUCKET
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration ProviderType" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"ProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module DomainName =
+  struct
+    type nonrec t = string
+    let context_ = "DomainName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9*.-]{1,255}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DomainName" j
     let to_json = simple_to_json to_value
   end
 module TracingVendor =
@@ -1408,6 +1724,9 @@ module CertificateValidationRecordList =
   struct
     type nonrec t = CertificateValidationRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CertificateValidationRecord.to_value)) |>
         (fun x -> `List x)
@@ -1475,26 +1794,6 @@ module CustomDomainAssociationStatus =
       of_string (string_of_json ~kind:"CustomDomainAssociationStatus" j)
     let to_json = simple_to_json to_value
   end
-module DomainName =
-  struct
-    type nonrec t = string
-    let context_ = "DomainName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[A-Za-z0-9*.-]{1,255}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"DomainName" j
-    let to_json = simple_to_json to_value
-  end
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -1509,6 +1808,123 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module CustomerAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "CustomerAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CustomerAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module IngressVpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      vpcId: String_.t option
+        [@ocaml.doc "The ID of the VPC that is used for the VPC endpoint."];
+      vpcEndpointId: String_.t option
+        [@ocaml.doc
+          "The ID of the VPC endpoint that your App Runner service connects to."]}
+    let make ?vpcId =
+      fun ?vpcEndpointId -> fun () -> { vpcId; vpcEndpointId }
+    let to_value x =
+      structure_to_value
+        [("VpcId", (Option.map x.vpcId ~f:String_.to_value));
+        ("VpcEndpointId", (Option.map x.vpcEndpointId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcEndpointId") in
+      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcId") in
+      make ?vpcEndpointId ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointId = field_map json__ "VpcEndpointId" String_.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      make ?vpcEndpointId ?vpcId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of your VPC and the associated VPC endpoint. The VPC endpoint is an Amazon Web Services PrivateLink resource that allows access to your App Runner services from within an Amazon VPC."]
+module VpcIngressConnectionName =
+  struct
+    type nonrec t = string
+    let context_ = "VpcIngressConnectionName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:40) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9][A-Za-z0-9\\-_]{3,39}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcIngressConnectionName" j
+    let to_json = simple_to_json to_value
+  end
+module VpcIngressConnectionStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | PENDING_CREATION 
+      | PENDING_UPDATE 
+      | PENDING_DELETION 
+      | FAILED_CREATION 
+      | FAILED_UPDATE 
+      | FAILED_DELETION 
+      | DELETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | PENDING_CREATION -> "PENDING_CREATION"
+      | PENDING_UPDATE -> "PENDING_UPDATE"
+      | PENDING_DELETION -> "PENDING_DELETION"
+      | FAILED_CREATION -> "FAILED_CREATION"
+      | FAILED_UPDATE -> "FAILED_UPDATE"
+      | FAILED_DELETION -> "FAILED_DELETION"
+      | DELETED -> "DELETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "PENDING_CREATION" -> PENDING_CREATION
+      | "PENDING_UPDATE" -> PENDING_UPDATE
+      | "PENDING_DELETION" -> PENDING_DELETION
+      | "FAILED_CREATION" -> FAILED_CREATION
+      | "FAILED_UPDATE" -> FAILED_UPDATE
+      | "FAILED_DELETION" -> FAILED_DELETION
+      | "DELETED" -> DELETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpcIngressConnectionStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"VpcIngressConnectionStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module AutoScalingConfigurationSummary =
   struct
     type nonrec t =
@@ -1521,16 +1937,36 @@ module AutoScalingConfigurationSummary =
           "The customer-provided auto scaling configuration name. It can be used in multiple revisions of a configuration."];
       autoScalingConfigurationRevision: Integer.t option
         [@ocaml.doc
-          "The revision of this auto scaling configuration. It's unique among all the active configurations (\"Status\": \"ACTIVE\") with the same AutoScalingConfigurationName."]}
+          "The revision of this auto scaling configuration. It's unique among all the active configurations (\"Status\": \"ACTIVE\") with the same AutoScalingConfigurationName."];
+      status: AutoScalingConfigurationStatus.t option
+        [@ocaml.doc
+          "The current state of the auto scaling configuration. If the status of a configuration revision is INACTIVE, it was deleted and can't be used. Inactive configuration revisions are permanently removed some time after they are deleted."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the auto scaling configuration was created. It's in Unix time stamp format."];
+      hasAssociatedService: HasAssociatedService.t option
+        [@ocaml.doc
+          "Indicates if this auto scaling configuration has an App Runner service associated with it. A value of true indicates one or more services are associated. A value of false indicates no services are associated."];
+      isDefault: IsDefault.t option
+        [@ocaml.doc
+          "Indicates if this auto scaling configuration should be used as the default for a new App Runner service that does not have an auto scaling configuration ARN specified during creation. Each account can have only one default AutoScalingConfiguration per region. The default AutoScalingConfiguration can be any revision under the same AutoScalingConfigurationName."]}
     let make ?autoScalingConfigurationArn =
       fun ?autoScalingConfigurationName ->
         fun ?autoScalingConfigurationRevision ->
-          fun () ->
-            {
-              autoScalingConfigurationArn;
-              autoScalingConfigurationName;
-              autoScalingConfigurationRevision
-            }
+          fun ?status ->
+            fun ?createdAt ->
+              fun ?hasAssociatedService ->
+                fun ?isDefault ->
+                  fun () ->
+                    {
+                      autoScalingConfigurationArn;
+                      autoScalingConfigurationName;
+                      autoScalingConfigurationRevision;
+                      status;
+                      createdAt;
+                      hasAssociatedService;
+                      isDefault
+                    }
     let to_value x =
       structure_to_value
         [("AutoScalingConfigurationArn",
@@ -1540,9 +1976,25 @@ module AutoScalingConfigurationSummary =
           (Option.map x.autoScalingConfigurationName
              ~f:AutoScalingConfigurationName.to_value));
         ("AutoScalingConfigurationRevision",
-          (Option.map x.autoScalingConfigurationRevision ~f:Integer.to_value))]
+          (Option.map x.autoScalingConfigurationRevision ~f:Integer.to_value));
+        ("Status",
+          (Option.map x.status ~f:AutoScalingConfigurationStatus.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("HasAssociatedService",
+          (Option.map x.hasAssociatedService ~f:HasAssociatedService.to_value));
+        ("IsDefault", (Option.map x.isDefault ~f:IsDefault.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let isDefault =
+        (Option.map ~f:IsDefault.of_xml) (Xml.child xml_arg0 "IsDefault") in
+      let hasAssociatedService =
+        (Option.map ~f:HasAssociatedService.of_xml)
+          (Xml.child xml_arg0 "HasAssociatedService") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let status =
+        (Option.map ~f:AutoScalingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let autoScalingConfigurationRevision =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "AutoScalingConfigurationRevision") in
@@ -1552,19 +2004,27 @@ module AutoScalingConfigurationSummary =
       let autoScalingConfigurationArn =
         (Option.map ~f:AppRunnerResourceArn.of_xml)
           (Xml.child xml_arg0 "AutoScalingConfigurationArn") in
-      make ?autoScalingConfigurationRevision ?autoScalingConfigurationName
+      make ?isDefault ?hasAssociatedService ?createdAt ?status
+        ?autoScalingConfigurationRevision ?autoScalingConfigurationName
         ?autoScalingConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let isDefault = field_map json__ "IsDefault" IsDefault.of_json in
+      let hasAssociatedService =
+        field_map json__ "HasAssociatedService" HasAssociatedService.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status =
+        field_map json__ "Status" AutoScalingConfigurationStatus.of_json in
       let autoScalingConfigurationRevision =
-        field_map json "AutoScalingConfigurationRevision" Integer.of_json in
+        field_map json__ "AutoScalingConfigurationRevision" Integer.of_json in
       let autoScalingConfigurationName =
-        field_map json "AutoScalingConfigurationName"
+        field_map json__ "AutoScalingConfigurationName"
           AutoScalingConfigurationName.of_json in
       let autoScalingConfigurationArn =
-        field_map json "AutoScalingConfigurationArn"
+        field_map json__ "AutoScalingConfigurationArn"
           AppRunnerResourceArn.of_json in
-      make ?autoScalingConfigurationRevision ?autoScalingConfigurationName
+      make ?isDefault ?hasAssociatedService ?createdAt ?status
+        ?autoScalingConfigurationRevision ?autoScalingConfigurationName
         ?autoScalingConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1585,8 +2045,8 @@ module EncryptionConfiguration =
         KmsKeyArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KmsKey") in
       make ~kmsKey ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKey = field_map_exn json "KmsKey" KmsKeyArn.of_json in
+    let of_json json__ =
+      let kmsKey = field_map_exn json__ "KmsKey" KmsKeyArn.of_json in
       make ~kmsKey ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1663,16 +2123,17 @@ module HealthCheckConfiguration =
       make ?unhealthyThreshold ?healthyThreshold ?timeout ?interval ?path
         ?protocol ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unhealthyThreshold =
-        field_map json "UnhealthyThreshold"
+        field_map json__ "UnhealthyThreshold"
           HealthCheckUnhealthyThreshold.of_json in
       let healthyThreshold =
-        field_map json "HealthyThreshold" HealthCheckHealthyThreshold.of_json in
-      let timeout = field_map json "Timeout" HealthCheckTimeout.of_json in
-      let interval = field_map json "Interval" HealthCheckInterval.of_json in
-      let path = field_map json "Path" HealthCheckPath.of_json in
-      let protocol = field_map json "Protocol" HealthCheckProtocol.of_json in
+        field_map json__ "HealthyThreshold"
+          HealthCheckHealthyThreshold.of_json in
+      let timeout = field_map json__ "Timeout" HealthCheckTimeout.of_json in
+      let interval = field_map json__ "Interval" HealthCheckInterval.of_json in
+      let path = field_map json__ "Path" HealthCheckPath.of_json in
+      let protocol = field_map json__ "Protocol" HealthCheckProtocol.of_json in
       make ?unhealthyThreshold ?healthyThreshold ?timeout ?interval ?path
         ?protocol ()
     let to_json v = composed_to_json to_value v
@@ -1709,10 +2170,11 @@ module InstanceConfiguration =
       let cpu = (Option.map ~f:Cpu.of_xml) (Xml.child xml_arg0 "Cpu") in
       make ?instanceRoleArn ?memory ?cpu ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceRoleArn = field_map json "InstanceRoleArn" RoleArn.of_json in
-      let memory = field_map json "Memory" Memory.of_json in
-      let cpu = field_map json "Cpu" Cpu.of_json in
+    let of_json json__ =
+      let instanceRoleArn =
+        field_map json__ "InstanceRoleArn" RoleArn.of_json in
+      let memory = field_map json__ "Memory" Memory.of_json in
+      let cpu = field_map json__ "Cpu" Cpu.of_json in
       make ?instanceRoleArn ?memory ?cpu ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1723,23 +2185,47 @@ module NetworkConfiguration =
       {
       egressConfiguration: EgressConfiguration.t option
         [@ocaml.doc
-          "Network configuration settings for outbound message traffic."]}
-    let make ?egressConfiguration = fun () -> { egressConfiguration }
+          "Network configuration settings for outbound message traffic."];
+      ingressConfiguration: IngressConfiguration.t option
+        [@ocaml.doc
+          "Network configuration settings for inbound message traffic."];
+      ipAddressType: IpAddressType.t option
+        [@ocaml.doc
+          "App Runner provides you with the option to choose between IPv4 and dual stack (IPv4 and IPv6). This is an optional parameter. If you do not specify an IpAddressType, it defaults to select IPv4."]}
+    let make ?egressConfiguration =
+      fun ?ingressConfiguration ->
+        fun ?ipAddressType ->
+          fun () ->
+            { egressConfiguration; ingressConfiguration; ipAddressType }
     let to_value x =
       structure_to_value
         [("EgressConfiguration",
-           (Option.map x.egressConfiguration ~f:EgressConfiguration.to_value))]
+           (Option.map x.egressConfiguration ~f:EgressConfiguration.to_value));
+        ("IngressConfiguration",
+          (Option.map x.ingressConfiguration ~f:IngressConfiguration.to_value));
+        ("IpAddressType",
+          (Option.map x.ipAddressType ~f:IpAddressType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:IpAddressType.of_xml)
+          (Xml.child xml_arg0 "IpAddressType") in
+      let ingressConfiguration =
+        (Option.map ~f:IngressConfiguration.of_xml)
+          (Xml.child xml_arg0 "IngressConfiguration") in
       let egressConfiguration =
         (Option.map ~f:EgressConfiguration.of_xml)
           (Xml.child xml_arg0 "EgressConfiguration") in
-      make ?egressConfiguration ()
+      make ?ipAddressType ?ingressConfiguration ?egressConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "IpAddressType" IpAddressType.of_json in
+      let ingressConfiguration =
+        field_map json__ "IngressConfiguration" IngressConfiguration.of_json in
       let egressConfiguration =
-        field_map json "EgressConfiguration" EgressConfiguration.of_json in
-      make ?egressConfiguration ()
+        field_map json__ "EgressConfiguration" EgressConfiguration.of_json in
+      make ?ipAddressType ?ingressConfiguration ?egressConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes configuration settings related to network traffic of an App Runner service. Consists of embedded objects for each configurable network feature."]
@@ -1774,12 +2260,12 @@ module ServiceObservabilityConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ObservabilityEnabled") in
       make ?observabilityConfigurationArn ~observabilityEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfigurationArn =
-        field_map json "ObservabilityConfigurationArn"
+        field_map json__ "ObservabilityConfigurationArn"
           AppRunnerResourceArn.of_json in
       let observabilityEnabled =
-        field_map_exn json "ObservabilityEnabled" Boolean.of_json in
+        field_map_exn json__ "ObservabilityEnabled" Boolean.of_json in
       make ?observabilityConfigurationArn ~observabilityEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1839,21 +2325,89 @@ module SourceConfiguration =
       make ?authenticationConfiguration ?autoDeploymentsEnabled
         ?imageRepository ?codeRepository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let authenticationConfiguration =
-        field_map json "AuthenticationConfiguration"
+        field_map json__ "AuthenticationConfiguration"
           AuthenticationConfiguration.of_json in
       let autoDeploymentsEnabled =
-        field_map json "AutoDeploymentsEnabled" NullableBoolean.of_json in
+        field_map json__ "AutoDeploymentsEnabled" NullableBoolean.of_json in
       let imageRepository =
-        field_map json "ImageRepository" ImageRepository.of_json in
+        field_map json__ "ImageRepository" ImageRepository.of_json in
       let codeRepository =
-        field_map json "CodeRepository" CodeRepository.of_json in
+        field_map json__ "CodeRepository" CodeRepository.of_json in
       make ?authenticationConfiguration ?autoDeploymentsEnabled
         ?imageRepository ?codeRepository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the source deployed to an App Runner service. It can be a code or an image repository."]
+module AutoScalingConfigurationRevision =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for AutoScalingConfigurationRevision" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Latest =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module MaxConcurrency =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxConcurrency" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MaxSize =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MaxSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MinSize =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MinSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module Tag =
   struct
     type nonrec t =
@@ -1872,12 +2426,51 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a tag that is applied to an App Runner resource. A tag is a metadata item consisting of a key-value pair."]
+module VpcIngressConnectionSummary =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the VPC Ingress Connection."];
+      serviceArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service associated with the VPC Ingress Connection."]}
+    let make ?vpcIngressConnectionArn =
+      fun ?serviceArn -> fun () -> { vpcIngressConnectionArn; serviceArn }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Option.map x.vpcIngressConnectionArn
+              ~f:AppRunnerResourceArn.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
+      let vpcIngressConnectionArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnectionArn") in
+      make ?serviceArn ?vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceArn =
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let vpcIngressConnectionArn =
+        field_map json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ?serviceArn ?vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides summary information about an VPC Ingress Connection, which includes its VPC Ingress Connection ARN and its associated Service ARN."]
 module VpcConnector =
   struct
     type nonrec t =
@@ -1963,18 +2556,19 @@ module VpcConnector =
       make ?deletedAt ?createdAt ?status ?securityGroups ?subnets
         ?vpcConnectorRevision ?vpcConnectorArn ?vpcConnectorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" VpcConnectorStatus.of_json in
-      let securityGroups = field_map json "SecurityGroups" StringList.of_json in
-      let subnets = field_map json "Subnets" StringList.of_json in
+    let of_json json__ =
+      let deletedAt = field_map json__ "DeletedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" VpcConnectorStatus.of_json in
+      let securityGroups =
+        field_map json__ "SecurityGroups" StringList.of_json in
+      let subnets = field_map json__ "Subnets" StringList.of_json in
       let vpcConnectorRevision =
-        field_map json "VpcConnectorRevision" Integer.of_json in
+        field_map json__ "VpcConnectorRevision" Integer.of_json in
       let vpcConnectorArn =
-        field_map json "VpcConnectorArn" AppRunnerResourceArn.of_json in
+        field_map json__ "VpcConnectorArn" AppRunnerResourceArn.of_json in
       let vpcConnectorName =
-        field_map json "VpcConnectorName" VpcConnectorName.of_json in
+        field_map json__ "VpcConnectorName" VpcConnectorName.of_json in
       make ?deletedAt ?createdAt ?status ?securityGroups ?subnets
         ?vpcConnectorRevision ?vpcConnectorArn ?vpcConnectorName ()
     let to_json v = composed_to_json to_value v
@@ -2002,7 +2596,7 @@ module ServiceSummary =
           "The time when the App Runner service was last updated. It's in theUnix time stamp format."];
       status: ServiceStatus.t option
         [@ocaml.doc
-          "The current state of the App Runner service. These particular values mean the following. CREATE_FAILED \226\128\147 The service failed to create. Read the failure events and logs, change any parameters that need to be fixed, and retry the call to create the service. The failed service isn't usable, and still counts towards your service quota. When you're done analyzing the failure, delete the service. DELETE_FAILED \226\128\147 The service failed to delete and can't be successfully recovered. Retry the service deletion call to ensure that all related resources are removed."]}
+          "The current state of the App Runner service. These particular values mean the following. CREATE_FAILED \226\128\147 The service failed to create. The failed service isn't usable, and still counts towards your service quota. To troubleshoot this failure, read the failure events and logs, change any parameters that need to be fixed, and rebuild your service using UpdateService. DELETE_FAILED \226\128\147 The service failed to delete and can't be successfully recovered. Retry the service deletion call to ensure that all related resources are removed."]}
     let make ?serviceName =
       fun ?serviceId ->
         fun ?serviceArn ->
@@ -2050,15 +2644,15 @@ module ServiceSummary =
       make ?status ?updatedAt ?createdAt ?serviceUrl ?serviceArn ?serviceId
         ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" ServiceStatus.of_json in
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let serviceUrl = field_map json "ServiceUrl" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" ServiceStatus.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let serviceUrl = field_map json__ "ServiceUrl" String_.of_json in
       let serviceArn =
-        field_map json "ServiceArn" AppRunnerResourceArn.of_json in
-      let serviceId = field_map json "ServiceId" ServiceId.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
       make ?status ?updatedAt ?createdAt ?serviceUrl ?serviceArn ?serviceId
         ?serviceName ()
     let to_json v = composed_to_json to_value v
@@ -2133,14 +2727,15 @@ module OperationSummary =
       let id = (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "Id") in
       make ?updatedAt ?endedAt ?startedAt ?targetArn ?status ?type_ ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let updatedAt = field_map json "UpdatedAt" Timestamp.of_json in
-      let endedAt = field_map json "EndedAt" Timestamp.of_json in
-      let startedAt = field_map json "StartedAt" Timestamp.of_json in
-      let targetArn = field_map json "TargetArn" AppRunnerResourceArn.of_json in
-      let status = field_map json "Status" OperationStatus.of_json in
-      let type_ = field_map json "Type" OperationType.of_json in
-      let id = field_map json "Id" UUID.of_json in
+    let of_json json__ =
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let endedAt = field_map json__ "EndedAt" Timestamp.of_json in
+      let startedAt = field_map json__ "StartedAt" Timestamp.of_json in
+      let targetArn =
+        field_map json__ "TargetArn" AppRunnerResourceArn.of_json in
+      let status = field_map json__ "Status" OperationStatus.of_json in
+      let type_ = field_map json__ "Type" OperationType.of_json in
+      let id = field_map json__ "Id" UUID.of_json in
       make ?updatedAt ?endedAt ?startedAt ?targetArn ?status ?type_ ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2192,14 +2787,14 @@ module ObservabilityConfigurationSummary =
       make ?observabilityConfigurationRevision
         ?observabilityConfigurationName ?observabilityConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfigurationRevision =
-        field_map json "ObservabilityConfigurationRevision" Integer.of_json in
+        field_map json__ "ObservabilityConfigurationRevision" Integer.of_json in
       let observabilityConfigurationName =
-        field_map json "ObservabilityConfigurationName"
+        field_map json__ "ObservabilityConfigurationName"
           ObservabilityConfigurationName.of_json in
       let observabilityConfigurationArn =
-        field_map json "ObservabilityConfigurationArn"
+        field_map json__ "ObservabilityConfigurationArn"
           AppRunnerResourceArn.of_json in
       make ?observabilityConfigurationRevision
         ?observabilityConfigurationName ?observabilityConfigurationArn ()
@@ -2262,18 +2857,62 @@ module ConnectionSummary =
           (Xml.child xml_arg0 "ConnectionName") in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" ConnectionStatus.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" ConnectionStatus.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" AppRunnerResourceArn.of_json in
+        field_map json__ "ConnectionArn" AppRunnerResourceArn.of_json in
       let connectionName =
-        field_map json "ConnectionName" ConnectionName.of_json in
+        field_map json__ "ConnectionName" ConnectionName.of_json in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides summary information about an App Runner connection resource."]
+module VpcDNSTarget =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the VPC Ingress Connection that is associated with your service."];
+      vpcId: String_.t option
+        [@ocaml.doc
+          "The ID of the Amazon VPC that is associated with the custom domain name of the target DNS."];
+      domainName: DomainName.t option
+        [@ocaml.doc
+          "The domain name of your target DNS that is associated with the Amazon VPC."]}
+    let make ?vpcIngressConnectionArn =
+      fun ?vpcId ->
+        fun ?domainName ->
+          fun () -> { vpcIngressConnectionArn; vpcId; domainName }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Option.map x.vpcIngressConnectionArn
+              ~f:AppRunnerResourceArn.to_value));
+        ("VpcId", (Option.map x.vpcId ~f:String_.to_value));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      let vpcId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcId") in
+      let vpcIngressConnectionArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnectionArn") in
+      make ?domainName ?vpcId ?vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let vpcId = field_map json__ "VpcId" String_.of_json in
+      let vpcIngressConnectionArn =
+        field_map json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ?domainName ?vpcId ?vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "DNS Target record for a custom domain of this Amazon VPC."]
 module ObservabilityConfigurationStatus =
   struct
     type nonrec t =
@@ -2321,8 +2960,8 @@ module TraceConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "Vendor") in
       make ~vendor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vendor = field_map_exn json "Vendor" TracingVendor.of_json in
+    let of_json json__ =
+      let vendor = field_map_exn json__ "Vendor" TracingVendor.of_json in
       make ~vendor ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2331,97 +2970,68 @@ module CustomDomain =
   struct
     type nonrec t =
       {
-      domainName: DomainName.t
+      domainName: DomainName.t option
         [@ocaml.doc
           "An associated custom domain endpoint. It can be a root domain (for example, example.com), a subdomain (for example, login.example.com or admin.login.example.com), or a wildcard (for example, *.example.com)."];
-      enableWWWSubdomain: NullableBoolean.t
+      enableWWWSubdomain: NullableBoolean.t option
         [@ocaml.doc
           "When true, the subdomain www.DomainName is associated with the App Runner service in addition to the base domain."];
       certificateValidationRecords: CertificateValidationRecordList.t option
         [@ocaml.doc
           "A list of certificate CNAME records that's used for this domain name."];
-      status: CustomDomainAssociationStatus.t
+      status: CustomDomainAssociationStatus.t option
         [@ocaml.doc "The current state of the domain name association."]}
-    let context_ = "CustomDomain"
-    let make ?certificateValidationRecords =
-      fun ~domainName ->
-        fun ~enableWWWSubdomain ->
-          fun ~status ->
+    let make ?domainName =
+      fun ?enableWWWSubdomain ->
+        fun ?certificateValidationRecords ->
+          fun ?status ->
             fun () ->
               {
-                certificateValidationRecords;
                 domainName;
                 enableWWWSubdomain;
+                certificateValidationRecords;
                 status
               }
     let to_value x =
       structure_to_value
-        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        [("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("EnableWWWSubdomain",
-          (Some (NullableBoolean.to_value x.enableWWWSubdomain)));
+          (Option.map x.enableWWWSubdomain ~f:NullableBoolean.to_value));
         ("CertificateValidationRecords",
           (Option.map x.certificateValidationRecords
              ~f:CertificateValidationRecordList.to_value));
-        ("Status", (Some (CustomDomainAssociationStatus.to_value x.status)))]
+        ("Status",
+          (Option.map x.status ~f:CustomDomainAssociationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        CustomDomainAssociationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:CustomDomainAssociationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let certificateValidationRecords =
         (Option.map ~f:CertificateValidationRecordList.of_xml)
           (Xml.child xml_arg0 "CertificateValidationRecords") in
       let enableWWWSubdomain =
-        NullableBoolean.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EnableWWWSubdomain") in
+        (Option.map ~f:NullableBoolean.of_xml)
+          (Xml.child xml_arg0 "EnableWWWSubdomain") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ~status ?certificateValidationRecords ~enableWWWSubdomain
-        ~domainName ()
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      make ?status ?certificateValidationRecords ?enableWWWSubdomain
+        ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "Status" CustomDomainAssociationStatus.of_json in
+        field_map json__ "Status" CustomDomainAssociationStatus.of_json in
       let certificateValidationRecords =
-        field_map json "CertificateValidationRecords"
+        field_map json__ "CertificateValidationRecords"
           CertificateValidationRecordList.of_json in
       let enableWWWSubdomain =
-        field_map_exn json "EnableWWWSubdomain" NullableBoolean.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ~status ?certificateValidationRecords ~enableWWWSubdomain
-        ~domainName ()
+        field_map json__ "EnableWWWSubdomain" NullableBoolean.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      make ?status ?certificateValidationRecords ?enableWWWSubdomain
+        ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes a custom domain that's associated with an App Runner service."]
-module AutoScalingConfigurationStatus =
-  struct
-    type nonrec t =
-      | ACTIVE 
-      | INACTIVE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ACTIVE -> "ACTIVE"
-      | INACTIVE -> "INACTIVE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ACTIVE" -> ACTIVE
-      | "INACTIVE" -> INACTIVE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration AutoScalingConfigurationStatus"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"AutoScalingConfigurationStatus" j)
-    let to_json = simple_to_json to_value
-  end
 module InternalServiceErrorException =
   struct
     type nonrec t = {
@@ -2436,8 +3046,8 @@ module InternalServiceErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An unexpected service exception occurred."]
@@ -2455,8 +3065,8 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2475,8 +3085,8 @@ module InvalidStateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2495,42 +3105,166 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A resource doesn't exist for the specified Amazon Resource Name (ARN) in your Amazon Web Services account."]
+module VpcIngressConnection =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the VPC Ingress Connection."];
+      vpcIngressConnectionName: VpcIngressConnectionName.t option
+        [@ocaml.doc "The customer-provided VPC Ingress Connection name."];
+      serviceArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service associated with the VPC Ingress Connection."];
+      status: VpcIngressConnectionStatus.t option
+        [@ocaml.doc
+          "The current status of the VPC Ingress Connection. The VPC Ingress Connection displays one of the following statuses: AVAILABLE, PENDING_CREATION, PENDING_UPDATE, PENDING_DELETION,FAILED_CREATION, FAILED_UPDATE, FAILED_DELETION, and DELETED.."];
+      accountId: CustomerAccountId.t option
+        [@ocaml.doc
+          "The Account Id you use to create the VPC Ingress Connection resource."];
+      domainName: DomainName.t option
+        [@ocaml.doc
+          "The domain name associated with the VPC Ingress Connection resource."];
+      ingressVpcConfiguration: IngressVpcConfiguration.t option
+        [@ocaml.doc
+          "Specifications for the customer\226\128\153s VPC and related PrivateLink VPC endpoint that are used to associate with the VPC Ingress Connection resource."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the VPC Ingress Connection was created. It's in the Unix time stamp format. Type: Timestamp Required: Yes"];
+      deletedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the App Runner service was deleted. It's in the Unix time stamp format. Type: Timestamp Required: No"]}
+    let make ?vpcIngressConnectionArn =
+      fun ?vpcIngressConnectionName ->
+        fun ?serviceArn ->
+          fun ?status ->
+            fun ?accountId ->
+              fun ?domainName ->
+                fun ?ingressVpcConfiguration ->
+                  fun ?createdAt ->
+                    fun ?deletedAt ->
+                      fun () ->
+                        {
+                          vpcIngressConnectionArn;
+                          vpcIngressConnectionName;
+                          serviceArn;
+                          status;
+                          accountId;
+                          domainName;
+                          ingressVpcConfiguration;
+                          createdAt;
+                          deletedAt
+                        }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Option.map x.vpcIngressConnectionArn
+              ~f:AppRunnerResourceArn.to_value));
+        ("VpcIngressConnectionName",
+          (Option.map x.vpcIngressConnectionName
+             ~f:VpcIngressConnectionName.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("Status",
+          (Option.map x.status ~f:VpcIngressConnectionStatus.to_value));
+        ("AccountId", (Option.map x.accountId ~f:CustomerAccountId.to_value));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("IngressVpcConfiguration",
+          (Option.map x.ingressVpcConfiguration
+             ~f:IngressVpcConfiguration.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("DeletedAt", (Option.map x.deletedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DeletedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let ingressVpcConfiguration =
+        (Option.map ~f:IngressVpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "IngressVpcConfiguration") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      let accountId =
+        (Option.map ~f:CustomerAccountId.of_xml)
+          (Xml.child xml_arg0 "AccountId") in
+      let status =
+        (Option.map ~f:VpcIngressConnectionStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let serviceArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
+      let vpcIngressConnectionName =
+        (Option.map ~f:VpcIngressConnectionName.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnectionName") in
+      let vpcIngressConnectionArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnectionArn") in
+      make ?deletedAt ?createdAt ?ingressVpcConfiguration ?domainName
+        ?accountId ?status ?serviceArn ?vpcIngressConnectionName
+        ?vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletedAt = field_map json__ "DeletedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let ingressVpcConfiguration =
+        field_map json__ "IngressVpcConfiguration"
+          IngressVpcConfiguration.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let accountId = field_map json__ "AccountId" CustomerAccountId.of_json in
+      let status =
+        field_map json__ "Status" VpcIngressConnectionStatus.of_json in
+      let serviceArn =
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let vpcIngressConnectionName =
+        field_map json__ "VpcIngressConnectionName"
+          VpcIngressConnectionName.of_json in
+      let vpcIngressConnectionArn =
+        field_map json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ?deletedAt ?createdAt ?ingressVpcConfiguration ?domainName
+        ?accountId ?status ?serviceArn ?vpcIngressConnectionName
+        ?vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The App Runner resource that specifies an App Runner endpoint for incoming traffic. It establishes a connection between a VPC interface endpoint and a App Runner service, to make your App Runner service accessible from only within an Amazon VPC."]
 module Service =
   struct
     type nonrec t =
       {
-      serviceName: ServiceName.t
+      serviceName: ServiceName.t option
         [@ocaml.doc "The customer-provided service name."];
-      serviceId: ServiceId.t
+      serviceId: ServiceId.t option
         [@ocaml.doc
           "An ID that App Runner generated for this service. It's unique within the Amazon Web Services Region."];
-      serviceArn: AppRunnerResourceArn.t
+      serviceArn: AppRunnerResourceArn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of this service."];
-      serviceUrl: String_.t
+      serviceUrl: String_.t option
         [@ocaml.doc
           "A subdomain URL that App Runner generated for this service. You can use this URL to access your service web application."];
-      createdAt: Timestamp.t
+      createdAt: Timestamp.t option
         [@ocaml.doc
           "The time when the App Runner service was created. It's in the Unix time stamp format."];
-      updatedAt: Timestamp.t
+      updatedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the App Runner service was last updated at. It's in the Unix time stamp format."];
       deletedAt: Timestamp.t option
         [@ocaml.doc
           "The time when the App Runner service was deleted. It's in the Unix time stamp format."];
-      status: ServiceStatus.t
+      status: ServiceStatus.t option
         [@ocaml.doc
-          "The current state of the App Runner service. These particular values mean the following. CREATE_FAILED \226\128\147 The service failed to create. To troubleshoot this failure, read the failure events and logs, change any parameters that need to be fixed, and retry the call to create the service. The failed service isn't usable, and still counts towards your service quota. When you're done analyzing the failure, delete the service. DELETE_FAILED \226\128\147 The service failed to delete and can't be successfully recovered. Retry the service deletion call to ensure that all related resources are removed."];
-      sourceConfiguration: SourceConfiguration.t
+          "The current state of the App Runner service. These particular values mean the following. CREATE_FAILED \226\128\147 The service failed to create. The failed service isn't usable, and still counts towards your service quota. To troubleshoot this failure, read the failure events and logs, change any parameters that need to be fixed, and rebuild your service using UpdateService. DELETE_FAILED \226\128\147 The service failed to delete and can't be successfully recovered. Retry the service deletion call to ensure that all related resources are removed."];
+      sourceConfiguration: SourceConfiguration.t option
         [@ocaml.doc
           "The source deployed to the App Runner service. It can be a code or an image repository."];
-      instanceConfiguration: InstanceConfiguration.t
+      instanceConfiguration: InstanceConfiguration.t option
         [@ocaml.doc
           "The runtime configuration of instances (scaling units) of this service."];
       encryptionConfiguration: EncryptionConfiguration.t option
@@ -2539,62 +3273,64 @@ module Service =
       healthCheckConfiguration: HealthCheckConfiguration.t option
         [@ocaml.doc
           "The settings for the health check that App Runner performs to monitor the health of this service."];
-      autoScalingConfigurationSummary: AutoScalingConfigurationSummary.t
+      autoScalingConfigurationSummary:
+        AutoScalingConfigurationSummary.t option
         [@ocaml.doc
           "Summary information for the App Runner automatic scaling configuration resource that's associated with this service."];
-      networkConfiguration: NetworkConfiguration.t
+      networkConfiguration: NetworkConfiguration.t option
         [@ocaml.doc
           "Configuration settings related to network traffic of the web application that this service runs."];
       observabilityConfiguration: ServiceObservabilityConfiguration.t option
         [@ocaml.doc "The observability configuration of this service."]}
-    let context_ = "Service"
-    let make ?deletedAt =
-      fun ?encryptionConfiguration ->
-        fun ?healthCheckConfiguration ->
-          fun ?observabilityConfiguration ->
-            fun ~serviceName ->
-              fun ~serviceId ->
-                fun ~serviceArn ->
-                  fun ~serviceUrl ->
-                    fun ~createdAt ->
-                      fun ~updatedAt ->
-                        fun ~status ->
-                          fun ~sourceConfiguration ->
-                            fun ~instanceConfiguration ->
-                              fun ~autoScalingConfigurationSummary ->
-                                fun ~networkConfiguration ->
+    let make ?serviceName =
+      fun ?serviceId ->
+        fun ?serviceArn ->
+          fun ?serviceUrl ->
+            fun ?createdAt ->
+              fun ?updatedAt ->
+                fun ?deletedAt ->
+                  fun ?status ->
+                    fun ?sourceConfiguration ->
+                      fun ?instanceConfiguration ->
+                        fun ?encryptionConfiguration ->
+                          fun ?healthCheckConfiguration ->
+                            fun ?autoScalingConfigurationSummary ->
+                              fun ?networkConfiguration ->
+                                fun ?observabilityConfiguration ->
                                   fun () ->
                                     {
-                                      deletedAt;
-                                      encryptionConfiguration;
-                                      healthCheckConfiguration;
-                                      observabilityConfiguration;
                                       serviceName;
                                       serviceId;
                                       serviceArn;
                                       serviceUrl;
                                       createdAt;
                                       updatedAt;
+                                      deletedAt;
                                       status;
                                       sourceConfiguration;
                                       instanceConfiguration;
+                                      encryptionConfiguration;
+                                      healthCheckConfiguration;
                                       autoScalingConfigurationSummary;
-                                      networkConfiguration
+                                      networkConfiguration;
+                                      observabilityConfiguration
                                     }
     let to_value x =
       structure_to_value
-        [("ServiceName", (Some (ServiceName.to_value x.serviceName)));
-        ("ServiceId", (Some (ServiceId.to_value x.serviceId)));
-        ("ServiceArn", (Some (AppRunnerResourceArn.to_value x.serviceArn)));
-        ("ServiceUrl", (Some (String_.to_value x.serviceUrl)));
-        ("CreatedAt", (Some (Timestamp.to_value x.createdAt)));
-        ("UpdatedAt", (Some (Timestamp.to_value x.updatedAt)));
+        [("ServiceName", (Option.map x.serviceName ~f:ServiceName.to_value));
+        ("ServiceId", (Option.map x.serviceId ~f:ServiceId.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("ServiceUrl", (Option.map x.serviceUrl ~f:String_.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("UpdatedAt", (Option.map x.updatedAt ~f:Timestamp.to_value));
         ("DeletedAt", (Option.map x.deletedAt ~f:Timestamp.to_value));
-        ("Status", (Some (ServiceStatus.to_value x.status)));
+        ("Status", (Option.map x.status ~f:ServiceStatus.to_value));
         ("SourceConfiguration",
-          (Some (SourceConfiguration.to_value x.sourceConfiguration)));
+          (Option.map x.sourceConfiguration ~f:SourceConfiguration.to_value));
         ("InstanceConfiguration",
-          (Some (InstanceConfiguration.to_value x.instanceConfiguration)));
+          (Option.map x.instanceConfiguration
+             ~f:InstanceConfiguration.to_value));
         ("EncryptionConfiguration",
           (Option.map x.encryptionConfiguration
              ~f:EncryptionConfiguration.to_value));
@@ -2602,11 +3338,10 @@ module Service =
           (Option.map x.healthCheckConfiguration
              ~f:HealthCheckConfiguration.to_value));
         ("AutoScalingConfigurationSummary",
-          (Some
-             (AutoScalingConfigurationSummary.to_value
-                x.autoScalingConfigurationSummary)));
+          (Option.map x.autoScalingConfigurationSummary
+             ~f:AutoScalingConfigurationSummary.to_value));
         ("NetworkConfiguration",
-          (Some (NetworkConfiguration.to_value x.networkConfiguration)));
+          (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
         ("ObservabilityConfiguration",
           (Option.map x.observabilityConfiguration
              ~f:ServiceObservabilityConfiguration.to_value))]
@@ -2616,12 +3351,11 @@ module Service =
         (Option.map ~f:ServiceObservabilityConfiguration.of_xml)
           (Xml.child xml_arg0 "ObservabilityConfiguration") in
       let networkConfiguration =
-        NetworkConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "NetworkConfiguration") in
+        (Option.map ~f:NetworkConfiguration.of_xml)
+          (Xml.child xml_arg0 "NetworkConfiguration") in
       let autoScalingConfigurationSummary =
-        AutoScalingConfigurationSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "AutoScalingConfigurationSummary") in
+        (Option.map ~f:AutoScalingConfigurationSummary.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfigurationSummary") in
       let healthCheckConfiguration =
         (Option.map ~f:HealthCheckConfiguration.of_xml)
           (Xml.child xml_arg0 "HealthCheckConfiguration") in
@@ -2629,82 +3363,235 @@ module Service =
         (Option.map ~f:EncryptionConfiguration.of_xml)
           (Xml.child xml_arg0 "EncryptionConfiguration") in
       let instanceConfiguration =
-        InstanceConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceConfiguration") in
+        (Option.map ~f:InstanceConfiguration.of_xml)
+          (Xml.child xml_arg0 "InstanceConfiguration") in
       let sourceConfiguration =
-        SourceConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceConfiguration") in
+        (Option.map ~f:SourceConfiguration.of_xml)
+          (Xml.child xml_arg0 "SourceConfiguration") in
       let status =
-        ServiceStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:ServiceStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let deletedAt =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DeletedAt") in
       let updatedAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "UpdatedAt") in
       let createdAt =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreatedAt") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
       let serviceUrl =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceUrl") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceUrl") in
       let serviceArn =
-        AppRunnerResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
       let serviceId =
-        ServiceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        (Option.map ~f:ServiceId.of_xml) (Xml.child xml_arg0 "ServiceId") in
       let serviceName =
-        ServiceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
-      make ?observabilityConfiguration ~networkConfiguration
-        ~autoScalingConfigurationSummary ?healthCheckConfiguration
-        ?encryptionConfiguration ~instanceConfiguration ~sourceConfiguration
-        ~status ?deletedAt ~updatedAt ~createdAt ~serviceUrl ~serviceArn
-        ~serviceId ~serviceName ()
+        (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "ServiceName") in
+      make ?observabilityConfiguration ?networkConfiguration
+        ?autoScalingConfigurationSummary ?healthCheckConfiguration
+        ?encryptionConfiguration ?instanceConfiguration ?sourceConfiguration
+        ?status ?deletedAt ?updatedAt ?createdAt ?serviceUrl ?serviceArn
+        ?serviceId ?serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ServiceObservabilityConfiguration.of_json in
       let networkConfiguration =
-        field_map_exn json "NetworkConfiguration"
-          NetworkConfiguration.of_json in
+        field_map json__ "NetworkConfiguration" NetworkConfiguration.of_json in
       let autoScalingConfigurationSummary =
-        field_map_exn json "AutoScalingConfigurationSummary"
+        field_map json__ "AutoScalingConfigurationSummary"
           AutoScalingConfigurationSummary.of_json in
       let healthCheckConfiguration =
-        field_map json "HealthCheckConfiguration"
+        field_map json__ "HealthCheckConfiguration"
           HealthCheckConfiguration.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
       let instanceConfiguration =
-        field_map_exn json "InstanceConfiguration"
+        field_map json__ "InstanceConfiguration"
           InstanceConfiguration.of_json in
       let sourceConfiguration =
-        field_map_exn json "SourceConfiguration" SourceConfiguration.of_json in
-      let status = field_map_exn json "Status" ServiceStatus.of_json in
-      let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
-      let updatedAt = field_map_exn json "UpdatedAt" Timestamp.of_json in
-      let createdAt = field_map_exn json "CreatedAt" Timestamp.of_json in
-      let serviceUrl = field_map_exn json "ServiceUrl" String_.of_json in
+        field_map json__ "SourceConfiguration" SourceConfiguration.of_json in
+      let status = field_map json__ "Status" ServiceStatus.of_json in
+      let deletedAt = field_map json__ "DeletedAt" Timestamp.of_json in
+      let updatedAt = field_map json__ "UpdatedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let serviceUrl = field_map json__ "ServiceUrl" String_.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
-      let serviceId = field_map_exn json "ServiceId" ServiceId.of_json in
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
-      make ?observabilityConfiguration ~networkConfiguration
-        ~autoScalingConfigurationSummary ?healthCheckConfiguration
-        ?encryptionConfiguration ~instanceConfiguration ~sourceConfiguration
-        ~status ?deletedAt ~updatedAt ~createdAt ~serviceUrl ~serviceArn
-        ~serviceId ~serviceName ()
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let serviceId = field_map json__ "ServiceId" ServiceId.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      make ?observabilityConfiguration ?networkConfiguration
+        ?autoScalingConfigurationSummary ?healthCheckConfiguration
+        ?encryptionConfiguration ?instanceConfiguration ?sourceConfiguration
+        ?status ?deletedAt ?updatedAt ?createdAt ?serviceUrl ?serviceArn
+        ?serviceId ?serviceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes an App Runner service. It can describe a service in any state, including deleted services. This type contains the full information about a service, including configuration details. It's returned by the CreateService, DescribeService, and DeleteService actions. A subset of this information is returned by the ListServices action using the ServiceSummary type."]
+module AutoScalingConfiguration =
+  struct
+    type nonrec t =
+      {
+      autoScalingConfigurationArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of this auto scaling configuration."];
+      autoScalingConfigurationName: AutoScalingConfigurationName.t option
+        [@ocaml.doc
+          "The customer-provided auto scaling configuration name. It can be used in multiple revisions of a configuration."];
+      autoScalingConfigurationRevision:
+        AutoScalingConfigurationRevision.t option
+        [@ocaml.doc
+          "The revision of this auto scaling configuration. It's unique among all the active configurations (\"Status\": \"ACTIVE\") that share the same AutoScalingConfigurationName."];
+      latest: Latest.t option
+        [@ocaml.doc
+          "It's set to true for the configuration with the highest Revision among all configurations that share the same AutoScalingConfigurationName. It's set to false otherwise."];
+      status: AutoScalingConfigurationStatus.t option
+        [@ocaml.doc
+          "The current state of the auto scaling configuration. If the status of a configuration revision is INACTIVE, it was deleted and can't be used. Inactive configuration revisions are permanently removed some time after they are deleted."];
+      maxConcurrency: MaxConcurrency.t option
+        [@ocaml.doc
+          "The maximum number of concurrent requests that an instance processes. If the number of concurrent requests exceeds this limit, App Runner scales the service up."];
+      minSize: MinSize.t option
+        [@ocaml.doc
+          "The minimum number of instances that App Runner provisions for a service. The service always has at least MinSize provisioned instances. Some of them actively serve traffic. The rest of them (provisioned and inactive instances) are a cost-effective compute capacity reserve and are ready to be quickly activated. You pay for memory usage of all the provisioned instances. You pay for CPU usage of only the active subset. App Runner temporarily doubles the number of provisioned instances during deployments, to maintain the same capacity for both old and new code."];
+      maxSize: MaxSize.t option
+        [@ocaml.doc
+          "The maximum number of instances that a service scales up to. At most MaxSize instances actively serve traffic for your service."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the auto scaling configuration was created. It's in Unix time stamp format."];
+      deletedAt: Timestamp.t option
+        [@ocaml.doc
+          "The time when the auto scaling configuration was deleted. It's in Unix time stamp format."];
+      hasAssociatedService: HasAssociatedService.t option
+        [@ocaml.doc
+          "Indicates if this auto scaling configuration has an App Runner service associated with it. A value of true indicates one or more services are associated. A value of false indicates no services are associated."];
+      isDefault: IsDefault.t option
+        [@ocaml.doc
+          "Indicates if this auto scaling configuration should be used as the default for a new App Runner service that does not have an auto scaling configuration ARN specified during creation. Each account can have only one default AutoScalingConfiguration per region. The default AutoScalingConfiguration can be any revision under the same AutoScalingConfigurationName."]}
+    let make ?autoScalingConfigurationArn =
+      fun ?autoScalingConfigurationName ->
+        fun ?autoScalingConfigurationRevision ->
+          fun ?latest ->
+            fun ?status ->
+              fun ?maxConcurrency ->
+                fun ?minSize ->
+                  fun ?maxSize ->
+                    fun ?createdAt ->
+                      fun ?deletedAt ->
+                        fun ?hasAssociatedService ->
+                          fun ?isDefault ->
+                            fun () ->
+                              {
+                                autoScalingConfigurationArn;
+                                autoScalingConfigurationName;
+                                autoScalingConfigurationRevision;
+                                latest;
+                                status;
+                                maxConcurrency;
+                                minSize;
+                                maxSize;
+                                createdAt;
+                                deletedAt;
+                                hasAssociatedService;
+                                isDefault
+                              }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingConfigurationArn",
+           (Option.map x.autoScalingConfigurationArn
+              ~f:AppRunnerResourceArn.to_value));
+        ("AutoScalingConfigurationName",
+          (Option.map x.autoScalingConfigurationName
+             ~f:AutoScalingConfigurationName.to_value));
+        ("AutoScalingConfigurationRevision",
+          (Option.map x.autoScalingConfigurationRevision
+             ~f:AutoScalingConfigurationRevision.to_value));
+        ("Latest", (Option.map x.latest ~f:Latest.to_value));
+        ("Status",
+          (Option.map x.status ~f:AutoScalingConfigurationStatus.to_value));
+        ("MaxConcurrency",
+          (Option.map x.maxConcurrency ~f:MaxConcurrency.to_value));
+        ("MinSize", (Option.map x.minSize ~f:MinSize.to_value));
+        ("MaxSize", (Option.map x.maxSize ~f:MaxSize.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("DeletedAt", (Option.map x.deletedAt ~f:Timestamp.to_value));
+        ("HasAssociatedService",
+          (Option.map x.hasAssociatedService ~f:HasAssociatedService.to_value));
+        ("IsDefault", (Option.map x.isDefault ~f:IsDefault.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isDefault =
+        (Option.map ~f:IsDefault.of_xml) (Xml.child xml_arg0 "IsDefault") in
+      let hasAssociatedService =
+        (Option.map ~f:HasAssociatedService.of_xml)
+          (Xml.child xml_arg0 "HasAssociatedService") in
+      let deletedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DeletedAt") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let maxSize =
+        (Option.map ~f:MaxSize.of_xml) (Xml.child xml_arg0 "MaxSize") in
+      let minSize =
+        (Option.map ~f:MinSize.of_xml) (Xml.child xml_arg0 "MinSize") in
+      let maxConcurrency =
+        (Option.map ~f:MaxConcurrency.of_xml)
+          (Xml.child xml_arg0 "MaxConcurrency") in
+      let status =
+        (Option.map ~f:AutoScalingConfigurationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let latest =
+        (Option.map ~f:Latest.of_xml) (Xml.child xml_arg0 "Latest") in
+      let autoScalingConfigurationRevision =
+        (Option.map ~f:AutoScalingConfigurationRevision.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfigurationRevision") in
+      let autoScalingConfigurationName =
+        (Option.map ~f:AutoScalingConfigurationName.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfigurationName") in
+      let autoScalingConfigurationArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfigurationArn") in
+      make ?isDefault ?hasAssociatedService ?deletedAt ?createdAt ?maxSize
+        ?minSize ?maxConcurrency ?status ?latest
+        ?autoScalingConfigurationRevision ?autoScalingConfigurationName
+        ?autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isDefault = field_map json__ "IsDefault" IsDefault.of_json in
+      let hasAssociatedService =
+        field_map json__ "HasAssociatedService" HasAssociatedService.of_json in
+      let deletedAt = field_map json__ "DeletedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let maxSize = field_map json__ "MaxSize" MaxSize.of_json in
+      let minSize = field_map json__ "MinSize" MinSize.of_json in
+      let maxConcurrency =
+        field_map json__ "MaxConcurrency" MaxConcurrency.of_json in
+      let status =
+        field_map json__ "Status" AutoScalingConfigurationStatus.of_json in
+      let latest = field_map json__ "Latest" Latest.of_json in
+      let autoScalingConfigurationRevision =
+        field_map json__ "AutoScalingConfigurationRevision"
+          AutoScalingConfigurationRevision.of_json in
+      let autoScalingConfigurationName =
+        field_map json__ "AutoScalingConfigurationName"
+          AutoScalingConfigurationName.of_json in
+      let autoScalingConfigurationArn =
+        field_map json__ "AutoScalingConfigurationArn"
+          AppRunnerResourceArn.of_json in
+      make ?isDefault ?hasAssociatedService ?deletedAt ?createdAt ?maxSize
+        ?minSize ?maxConcurrency ?status ?latest
+        ?autoScalingConfigurationRevision ?autoScalingConfigurationName
+        ?autoScalingConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes an App Runner automatic scaling configuration resource. A higher MinSize increases the spread of your App Runner service over more Availability Zones in the Amazon Web Services Region. The tradeoff is a higher minimal cost. A lower MaxSize controls your cost. The tradeoff is lower responsiveness during peak demand. Multiple revisions of a configuration might have the same AutoScalingConfigurationName and different AutoScalingConfigurationRevision values."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2728,6 +3615,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2767,10 +3657,93 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
+module VpcIngressConnectionSummaryList =
+  struct
+    type nonrec t = VpcIngressConnectionSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcIngressConnectionSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcIngressConnectionSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcIngressConnectionSummaryList"
+        ~of_json:VpcIngressConnectionSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListVpcIngressConnectionsFilter =
+  struct
+    type nonrec t =
+      {
+      serviceArn: AppRunnerResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of a service to filter by."];
+      vpcEndpointId: String_.t option
+        [@ocaml.doc "The ID of a VPC Endpoint to filter by."]}
+    let make ?serviceArn =
+      fun ?vpcEndpointId -> fun () -> { serviceArn; vpcEndpointId }
+    let to_value x =
+      structure_to_value
+        [("ServiceArn",
+           (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("VpcEndpointId", (Option.map x.vpcEndpointId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VpcEndpointId") in
+      let serviceArn =
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
+      make ?vpcEndpointId ?serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointId = field_map json__ "VpcEndpointId" String_.of_json in
+      let serviceArn =
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      make ?vpcEndpointId ?serviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of VPC Ingress Connections based on the filter provided. It can return either ServiceArn or VpcEndpointId, or both."]
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module VpcConnectors =
   struct
     type nonrec t = VpcConnector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VpcConnector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2791,28 +3764,13 @@ module VpcConnectors =
       list_of_json ~kind:"VpcConnectors" ~of_json:VpcConnector.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ServiceSummaryList =
   struct
     type nonrec t = ServiceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2852,10 +3810,42 @@ module ServiceMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ServiceArnList =
+  struct
+    type nonrec t = AppRunnerResourceArn.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AppRunnerResourceArn.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AppRunnerResourceArn.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceArnList"
+        ~of_json:AppRunnerResourceArn.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module OperationSummaryList =
   struct
     type nonrec t = OperationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2900,6 +3890,9 @@ module ObservabilityConfigurationSummaryList =
   struct
     type nonrec t = ObservabilityConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObservabilityConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2927,6 +3920,9 @@ module ConnectionSummaryList =
   struct
     type nonrec t = ConnectionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConnectionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2952,6 +3948,9 @@ module AutoScalingConfigurationSummaryList =
   struct
     type nonrec t = AutoScalingConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoScalingConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -2972,6 +3971,33 @@ module AutoScalingConfigurationSummaryList =
     let of_json j =
       list_of_json ~kind:"AutoScalingConfigurationSummaryList"
         ~of_json:AutoScalingConfigurationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcDNSTargetList =
+  struct
+    type nonrec t = VpcDNSTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcDNSTarget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcDNSTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcDNSTargetList" ~of_json:VpcDNSTarget.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ObservabilityConfiguration =
@@ -3066,21 +4092,21 @@ module ObservabilityConfiguration =
         ?observabilityConfigurationRevision ?traceConfiguration
         ?observabilityConfigurationName ?observabilityConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
+    let of_json json__ =
+      let deletedAt = field_map json__ "DeletedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
       let status =
-        field_map json "Status" ObservabilityConfigurationStatus.of_json in
-      let latest = field_map json "Latest" Boolean.of_json in
+        field_map json__ "Status" ObservabilityConfigurationStatus.of_json in
+      let latest = field_map json__ "Latest" Boolean.of_json in
       let observabilityConfigurationRevision =
-        field_map json "ObservabilityConfigurationRevision" Integer.of_json in
+        field_map json__ "ObservabilityConfigurationRevision" Integer.of_json in
       let traceConfiguration =
-        field_map json "TraceConfiguration" TraceConfiguration.of_json in
+        field_map json__ "TraceConfiguration" TraceConfiguration.of_json in
       let observabilityConfigurationName =
-        field_map json "ObservabilityConfigurationName"
+        field_map json__ "ObservabilityConfigurationName"
           ObservabilityConfigurationName.of_json in
       let observabilityConfigurationArn =
-        field_map json "ObservabilityConfigurationArn"
+        field_map json__ "ObservabilityConfigurationArn"
           AppRunnerResourceArn.of_json in
       make ?deletedAt ?createdAt ?status ?latest
         ?observabilityConfigurationRevision ?traceConfiguration
@@ -3092,6 +4118,9 @@ module CustomDomainList =
   struct
     type nonrec t = CustomDomain.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomDomain.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3131,134 +4160,6 @@ module DescribeCustomDomainsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module AutoScalingConfiguration =
-  struct
-    type nonrec t =
-      {
-      autoScalingConfigurationArn: AppRunnerResourceArn.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of this auto scaling configuration."];
-      autoScalingConfigurationName: AutoScalingConfigurationName.t option
-        [@ocaml.doc
-          "The customer-provided auto scaling configuration name. It can be used in multiple revisions of a configuration."];
-      autoScalingConfigurationRevision: Integer.t option
-        [@ocaml.doc
-          "The revision of this auto scaling configuration. It's unique among all the active configurations (\"Status\": \"ACTIVE\") that share the same AutoScalingConfigurationName."];
-      latest: Boolean.t option
-        [@ocaml.doc
-          "It's set to true for the configuration with the highest Revision among all configurations that share the same AutoScalingConfigurationName. It's set to false otherwise."];
-      status: AutoScalingConfigurationStatus.t option
-        [@ocaml.doc
-          "The current state of the auto scaling configuration. If the status of a configuration revision is INACTIVE, it was deleted and can't be used. Inactive configuration revisions are permanently removed some time after they are deleted."];
-      maxConcurrency: Integer.t option
-        [@ocaml.doc
-          "The maximum number of concurrent requests that an instance processes. If the number of concurrent requests exceeds this limit, App Runner scales the service up."];
-      minSize: Integer.t option
-        [@ocaml.doc
-          "The minimum number of instances that App Runner provisions for a service. The service always has at least MinSize provisioned instances. Some of them actively serve traffic. The rest of them (provisioned and inactive instances) are a cost-effective compute capacity reserve and are ready to be quickly activated. You pay for memory usage of all the provisioned instances. You pay for CPU usage of only the active subset. App Runner temporarily doubles the number of provisioned instances during deployments, to maintain the same capacity for both old and new code."];
-      maxSize: Integer.t option
-        [@ocaml.doc
-          "The maximum number of instances that a service scales up to. At most MaxSize instances actively serve traffic for your service."];
-      createdAt: Timestamp.t option
-        [@ocaml.doc
-          "The time when the auto scaling configuration was created. It's in Unix time stamp format."];
-      deletedAt: Timestamp.t option
-        [@ocaml.doc
-          "The time when the auto scaling configuration was deleted. It's in Unix time stamp format."]}
-    let make ?autoScalingConfigurationArn =
-      fun ?autoScalingConfigurationName ->
-        fun ?autoScalingConfigurationRevision ->
-          fun ?latest ->
-            fun ?status ->
-              fun ?maxConcurrency ->
-                fun ?minSize ->
-                  fun ?maxSize ->
-                    fun ?createdAt ->
-                      fun ?deletedAt ->
-                        fun () ->
-                          {
-                            autoScalingConfigurationArn;
-                            autoScalingConfigurationName;
-                            autoScalingConfigurationRevision;
-                            latest;
-                            status;
-                            maxConcurrency;
-                            minSize;
-                            maxSize;
-                            createdAt;
-                            deletedAt
-                          }
-    let to_value x =
-      structure_to_value
-        [("AutoScalingConfigurationArn",
-           (Option.map x.autoScalingConfigurationArn
-              ~f:AppRunnerResourceArn.to_value));
-        ("AutoScalingConfigurationName",
-          (Option.map x.autoScalingConfigurationName
-             ~f:AutoScalingConfigurationName.to_value));
-        ("AutoScalingConfigurationRevision",
-          (Option.map x.autoScalingConfigurationRevision ~f:Integer.to_value));
-        ("Latest", (Option.map x.latest ~f:Boolean.to_value));
-        ("Status",
-          (Option.map x.status ~f:AutoScalingConfigurationStatus.to_value));
-        ("MaxConcurrency", (Option.map x.maxConcurrency ~f:Integer.to_value));
-        ("MinSize", (Option.map x.minSize ~f:Integer.to_value));
-        ("MaxSize", (Option.map x.maxSize ~f:Integer.to_value));
-        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
-        ("DeletedAt", (Option.map x.deletedAt ~f:Timestamp.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let deletedAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "DeletedAt") in
-      let createdAt =
-        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
-      let maxSize =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxSize") in
-      let minSize =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MinSize") in
-      let maxConcurrency =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxConcurrency") in
-      let status =
-        (Option.map ~f:AutoScalingConfigurationStatus.of_xml)
-          (Xml.child xml_arg0 "Status") in
-      let latest =
-        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Latest") in
-      let autoScalingConfigurationRevision =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "AutoScalingConfigurationRevision") in
-      let autoScalingConfigurationName =
-        (Option.map ~f:AutoScalingConfigurationName.of_xml)
-          (Xml.child xml_arg0 "AutoScalingConfigurationName") in
-      let autoScalingConfigurationArn =
-        (Option.map ~f:AppRunnerResourceArn.of_xml)
-          (Xml.child xml_arg0 "AutoScalingConfigurationArn") in
-      make ?deletedAt ?createdAt ?maxSize ?minSize ?maxConcurrency ?status
-        ?latest ?autoScalingConfigurationRevision
-        ?autoScalingConfigurationName ?autoScalingConfigurationArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletedAt = field_map json "DeletedAt" Timestamp.of_json in
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let maxSize = field_map json "MaxSize" Integer.of_json in
-      let minSize = field_map json "MinSize" Integer.of_json in
-      let maxConcurrency = field_map json "MaxConcurrency" Integer.of_json in
-      let status =
-        field_map json "Status" AutoScalingConfigurationStatus.of_json in
-      let latest = field_map json "Latest" Boolean.of_json in
-      let autoScalingConfigurationRevision =
-        field_map json "AutoScalingConfigurationRevision" Integer.of_json in
-      let autoScalingConfigurationName =
-        field_map json "AutoScalingConfigurationName"
-          AutoScalingConfigurationName.of_json in
-      let autoScalingConfigurationArn =
-        field_map json "AutoScalingConfigurationArn"
-          AppRunnerResourceArn.of_json in
-      make ?deletedAt ?createdAt ?maxSize ?minSize ?maxConcurrency ?status
-        ?latest ?autoScalingConfigurationRevision
-        ?autoScalingConfigurationName ?autoScalingConfigurationArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Describes an App Runner automatic scaling configuration resource. A higher MinSize increases the spread of your App Runner service over more Availability Zones in the Amazon Web Services Region. The tradeoff is a higher minimal cost. A lower MaxSize controls your cost. The tradeoff is lower responsiveness during peak demand. Multiple revisions of a configuration might have the same AutoScalingConfigurationName and different AutoScalingConfigurationRevision values."]
 module Connection =
   struct
     type nonrec t =
@@ -3315,14 +4216,14 @@ module Connection =
           (Xml.child xml_arg0 "ConnectionName") in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" Timestamp.of_json in
-      let status = field_map json "Status" ConnectionStatus.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let status = field_map json__ "Status" ConnectionStatus.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" AppRunnerResourceArn.of_json in
+        field_map json__ "ConnectionArn" AppRunnerResourceArn.of_json in
       let connectionName =
-        field_map json "ConnectionName" ConnectionName.of_json in
+        field_map json__ "ConnectionName" ConnectionName.of_json in
       make ?createdAt ?status ?providerType ?connectionArn ?connectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an App Runner connection resource."]
@@ -3340,8 +4241,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3368,10 +4269,7 @@ module ASConfigMaxSize =
   struct
     type nonrec t = int
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
@@ -3400,25 +4298,20 @@ module ASConfigMinSize =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module UpdateServiceResponse =
+module UpdateVpcIngressConnectionResponse =
   struct
     type nonrec t =
       {
-      service: Service.t
+      vpcIngressConnection: VpcIngressConnection.t option
         [@ocaml.doc
-          "A description of the App Runner service updated by this request. All configuration values in the returned Service structure reflect configuration changes that are being applied by this request."];
-      operationId: UUID.t
-        [@ocaml.doc
-          "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
+          "A description of the App Runner VPC Ingress Connection resource that's updated by this request."]}
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `InvalidStateException of InvalidStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateServiceResponse"
-    let make ~service =
-      fun ~operationId -> fun () -> { service; operationId }
+    let make ?vpcIngressConnection = fun () -> { vpcIngressConnection }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -3471,20 +4364,148 @@ module UpdateServiceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Service", (Some (Service.to_value x.service)));
-        ("OperationId", (Some (UUID.to_value x.operationId)))]
+        [("VpcIngressConnection",
+           (Option.map x.vpcIngressConnection
+              ~f:VpcIngressConnection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnection =
+        (Option.map ~f:VpcIngressConnection.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnection") in
+      make ?vpcIngressConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnection =
+        field_map json__ "VpcIngressConnection" VpcIngressConnection.of_json in
+      make ?vpcIngressConnection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an existing App Runner VPC Ingress Connection resource. The VPC Ingress Connection must be in one of the following states to be updated: AVAILABLE FAILED_CREATION FAILED_UPDATE"]
+module UpdateVpcIngressConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (Arn) for the App Runner VPC Ingress Connection resource that you want to update."];
+      ingressVpcConfiguration: IngressVpcConfiguration.t
+        [@ocaml.doc
+          "Specifications for the customer\226\128\153s Amazon VPC and the related Amazon Web Services PrivateLink VPC endpoint that are used to update the VPC Ingress Connection resource."]}
+    let context_ = "UpdateVpcIngressConnectionRequest"
+    let make ~vpcIngressConnectionArn =
+      fun ~ingressVpcConfiguration ->
+        fun () -> { vpcIngressConnectionArn; ingressVpcConfiguration }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Some (AppRunnerResourceArn.to_value x.vpcIngressConnectionArn)));
+        ("IngressVpcConfiguration",
+          (Some (IngressVpcConfiguration.to_value x.ingressVpcConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ingressVpcConfiguration =
+        IngressVpcConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IngressVpcConfiguration") in
+      let vpcIngressConnectionArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcIngressConnectionArn") in
+      make ~ingressVpcConfiguration ~vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ingressVpcConfiguration =
+        field_map_exn json__ "IngressVpcConfiguration"
+          IngressVpcConfiguration.of_json in
+      let vpcIngressConnectionArn =
+        field_map_exn json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ~ingressVpcConfiguration ~vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an existing App Runner VPC Ingress Connection resource. The VPC Ingress Connection must be in one of the following states to be updated: AVAILABLE FAILED_CREATION FAILED_UPDATE"]
+module UpdateServiceResponse =
+  struct
+    type nonrec t =
+      {
+      service: Service.t option
+        [@ocaml.doc
+          "A description of the App Runner service updated by this request. All configuration values in the returned Service structure reflect configuration changes that are being applied by this request."];
+      operationId: UUID.t option
+        [@ocaml.doc
+          "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidStateException of InvalidStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?service =
+      fun ?operationId -> fun () -> { service; operationId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidStateException e ->
+          `Assoc
+            [("error", (`String "InvalidStateException"));
+            ("details", (InvalidStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Service", (Option.map x.service ~f:Service.to_value));
+        ("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ~operationId ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?operationId ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" UUID.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
-      make ~operationId ~service ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      make ?operationId ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update an App Runner service. You can update the source configuration and instance configuration of the service. You can also update the ARN of the auto scaling configuration resource that's associated with the service. However, you can't change the name or the encryption configuration of the service. These can be set only when you create the service. To update the tags applied to your service, use the separate actions TagResource and UntagResource. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
@@ -3576,30 +4597,138 @@ module UpdateServiceRequest =
         ?healthCheckConfiguration ?autoScalingConfigurationArn
         ?instanceConfiguration ?sourceConfiguration ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ServiceObservabilityConfiguration.of_json in
       let networkConfiguration =
-        field_map json "NetworkConfiguration" NetworkConfiguration.of_json in
+        field_map json__ "NetworkConfiguration" NetworkConfiguration.of_json in
       let healthCheckConfiguration =
-        field_map json "HealthCheckConfiguration"
+        field_map json__ "HealthCheckConfiguration"
           HealthCheckConfiguration.of_json in
       let autoScalingConfigurationArn =
-        field_map json "AutoScalingConfigurationArn"
+        field_map json__ "AutoScalingConfigurationArn"
           AppRunnerResourceArn.of_json in
       let instanceConfiguration =
-        field_map json "InstanceConfiguration" InstanceConfiguration.of_json in
+        field_map json__ "InstanceConfiguration"
+          InstanceConfiguration.of_json in
       let sourceConfiguration =
-        field_map json "SourceConfiguration" SourceConfiguration.of_json in
+        field_map json__ "SourceConfiguration" SourceConfiguration.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ?observabilityConfiguration ?networkConfiguration
         ?healthCheckConfiguration ?autoScalingConfigurationArn
         ?instanceConfiguration ?sourceConfiguration ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Update an App Runner service. You can update the source configuration and instance configuration of the service. You can also update the ARN of the auto scaling configuration resource that's associated with the service. However, you can't change the name or the encryption configuration of the service. These can be set only when you create the service. To update the tags applied to your service, use the separate actions TagResource and UntagResource. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
+module UpdateDefaultAutoScalingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      autoScalingConfiguration: AutoScalingConfiguration.t option
+        [@ocaml.doc
+          "A description of the App Runner auto scaling configuration that was set as default."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?autoScalingConfiguration =
+      fun () -> { autoScalingConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AutoScalingConfiguration",
+           (Option.map x.autoScalingConfiguration
+              ~f:AutoScalingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoScalingConfiguration =
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfiguration") in
+      make ?autoScalingConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoScalingConfiguration =
+        field_map json__ "AutoScalingConfiguration"
+          AutoScalingConfiguration.of_json in
+      make ?autoScalingConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an auto scaling configuration to be the default. The existing default auto scaling configuration will be set to non-default automatically."]
+module UpdateDefaultAutoScalingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      autoScalingConfigurationArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the App Runner auto scaling configuration that you want to set as the default. The ARN can be a full auto scaling configuration ARN, or a partial ARN ending with either .../name or .../name/revision . If a revision isn't specified, the latest active revision is set as the default."]}
+    let context_ = "UpdateDefaultAutoScalingConfigurationRequest"
+    let make ~autoScalingConfigurationArn =
+      fun () -> { autoScalingConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingConfigurationArn",
+           (Some
+              (AppRunnerResourceArn.to_value x.autoScalingConfigurationArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let autoScalingConfigurationArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "AutoScalingConfigurationArn") in
+      make ~autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let autoScalingConfigurationArn =
+        field_map_exn json__ "AutoScalingConfigurationArn"
+          AppRunnerResourceArn.of_json in
+      make ~autoScalingConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update an auto scaling configuration to be the default. The existing default auto scaling configuration will be set to non-default automatically."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -3695,10 +4824,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AppRunnerResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Remove tags from an App Runner resource."]
@@ -3797,10 +4926,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AppRunnerResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3809,7 +4938,7 @@ module StartDeploymentResponse =
   struct
     type nonrec t =
       {
-      operationId: UUID.t
+      operationId: UUID.t option
         [@ocaml.doc
           "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
     type nonrec error =
@@ -3817,8 +4946,7 @@ module StartDeploymentResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "StartDeploymentResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -3863,16 +4991,16 @@ module StartDeploymentResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (UUID.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" UUID.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Initiate a manual deployment of the latest commit in a source code repository or the latest image in a source image repository to an App Runner service. For a source code repository, App Runner retrieves the commit and builds a Docker image. For a source image repository, App Runner retrieves the latest Docker image. In both cases, App Runner then deploys the new image to your service and starts a new container instance. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
@@ -3895,9 +5023,9 @@ module StartDeploymentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3906,7 +5034,7 @@ module ResumeServiceResponse =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc
           "A description of the App Runner service that this request just resumed."];
       operationId: UUID.t option
@@ -3918,9 +5046,8 @@ module ResumeServiceResponse =
       | `InvalidStateException of InvalidStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ResumeServiceResponse"
-    let make ?operationId =
-      fun ~service -> fun () -> { operationId; service }
+    let make ?service =
+      fun ?operationId -> fun () -> { service; operationId }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -3973,20 +5100,20 @@ module ResumeServiceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Service", (Some (Service.to_value x.service)));
+        [("Service", (Option.map x.service ~f:Service.to_value));
         ("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ?operationId ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?operationId ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" UUID.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
-      make ?operationId ~service ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      make ?operationId ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Resume an active App Runner service. App Runner provisions compute capacity for the service. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
@@ -4009,9 +5136,9 @@ module ResumeServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4020,7 +5147,7 @@ module PauseServiceResponse =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc
           "A description of the App Runner service that this request just paused."];
       operationId: UUID.t option
@@ -4032,9 +5159,8 @@ module PauseServiceResponse =
       | `InvalidStateException of InvalidStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PauseServiceResponse"
-    let make ?operationId =
-      fun ~service -> fun () -> { operationId; service }
+    let make ?service =
+      fun ?operationId -> fun () -> { service; operationId }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4087,20 +5213,20 @@ module PauseServiceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Service", (Some (Service.to_value x.service)));
+        [("Service", (Option.map x.service ~f:Service.to_value));
         ("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
         (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ?operationId ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?operationId ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" UUID.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
-      make ?operationId ~service ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      make ?operationId ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Pause an active App Runner service. App Runner reduces compute capacity for the service to zero and loses state (for example, ephemeral storage is removed). This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
@@ -4123,20 +5249,21 @@ module PauseServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Pause an active App Runner service. App Runner reduces compute capacity for the service to zero and loses state (for example, ephemeral storage is removed). This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
-module ListVpcConnectorsResponse =
+module ListVpcIngressConnectionsResponse =
   struct
     type nonrec t =
       {
-      vpcConnectors: VpcConnectors.t
+      vpcIngressConnectionSummaryList:
+        VpcIngressConnectionSummaryList.t option
         [@ocaml.doc
-          "A list of information records for VPC connectors. In a paginated request, the request returns up to MaxResults records for each call."];
+          "A list of summary information records for VPC Ingress Connections. In a paginated request, the request returns up to MaxResults records for each call."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "The token that you can pass in a subsequent request to get the next result page. It's returned in a paginated request."]}
@@ -4144,9 +5271,9 @@ module ListVpcConnectorsResponse =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListVpcConnectorsResponse"
-    let make ?nextToken =
-      fun ~vpcConnectors -> fun () -> { nextToken; vpcConnectors }
+    let make ?vpcIngressConnectionSummaryList =
+      fun ?nextToken ->
+        fun () -> { vpcIngressConnectionSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4183,22 +5310,139 @@ module ListVpcConnectorsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("VpcConnectors", (Some (VpcConnectors.to_value x.vpcConnectors)));
+        [("VpcIngressConnectionSummaryList",
+           (Option.map x.vpcIngressConnectionSummaryList
+              ~f:VpcIngressConnectionSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let vpcIngressConnectionSummaryList =
+        (Option.map ~f:VpcIngressConnectionSummaryList.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnectionSummaryList") in
+      make ?nextToken ?vpcIngressConnectionSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let vpcIngressConnectionSummaryList =
+        field_map json__ "VpcIngressConnectionSummaryList"
+          VpcIngressConnectionSummaryList.of_json in
+      make ?nextToken ?vpcIngressConnectionSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Return a list of App Runner VPC Ingress Connections in your Amazon Web Services account."]
+module ListVpcIngressConnectionsRequest =
+  struct
+    type nonrec t =
+      {
+      filter: ListVpcIngressConnectionsFilter.t option
+        [@ocaml.doc
+          "The VPC Ingress Connections to be listed based on either the Service Arn or Vpc Endpoint Id, or both."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to include in each response (result page). It's used for a paginated request. If you don't specify MaxResults, the request retrieves all available results in a single response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token from a previous result page. It's used for a paginated request. The request retrieves the next result page. All other parameter values must be identical to the ones that are specified in the initial request. If you don't specify NextToken, the request retrieves the first result page."]}
+    let make ?filter =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filter; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("Filter",
+           (Option.map x.filter ~f:ListVpcIngressConnectionsFilter.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filter =
+        (Option.map ~f:ListVpcIngressConnectionsFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      make ?nextToken ?maxResults ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filter =
+        field_map json__ "Filter" ListVpcIngressConnectionsFilter.of_json in
+      make ?nextToken ?maxResults ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Return a list of App Runner VPC Ingress Connections in your Amazon Web Services account."]
+module ListVpcConnectorsResponse =
+  struct
+    type nonrec t =
+      {
+      vpcConnectors: VpcConnectors.t option
+        [@ocaml.doc
+          "A list of information records for VPC connectors. In a paginated request, the request returns up to MaxResults records for each call."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token that you can pass in a subsequent request to get the next result page. It's returned in a paginated request."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcConnectors =
+      fun ?nextToken -> fun () -> { vpcConnectors; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcConnectors",
+           (Option.map x.vpcConnectors ~f:VpcConnectors.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let vpcConnectors =
-        VpcConnectors.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectors") in
-      make ?nextToken ~vpcConnectors ()
+        (Option.map ~f:VpcConnectors.of_xml)
+          (Xml.child xml_arg0 "VpcConnectors") in
+      make ?nextToken ?vpcConnectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let vpcConnectors =
-        field_map_exn json "VpcConnectors" VpcConnectors.of_json in
-      make ?nextToken ~vpcConnectors ()
+        field_map json__ "VpcConnectors" VpcConnectors.of_json in
+      make ?nextToken ?vpcConnectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of App Runner VPC connectors in your Amazon Web Services account."]
@@ -4226,9 +5470,9 @@ module ListVpcConnectorsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4304,8 +5548,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "List tags that are associated with for an App Runner resource. The response contains a list of tag key-value pairs."]
@@ -4329,9 +5573,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ResourceArn" AppRunnerResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4340,7 +5584,7 @@ module ListServicesResponse =
   struct
     type nonrec t =
       {
-      serviceSummaryList: ServiceSummaryList.t
+      serviceSummaryList: ServiceSummaryList.t option
         [@ocaml.doc
           "A list of service summary information records. In a paginated request, the request returns up to MaxResults records for each call."];
       nextToken: String_.t option
@@ -4350,9 +5594,8 @@ module ListServicesResponse =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListServicesResponse"
-    let make ?nextToken =
-      fun ~serviceSummaryList -> fun () -> { nextToken; serviceSummaryList }
+    let make ?serviceSummaryList =
+      fun ?nextToken -> fun () -> { serviceSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4390,22 +5633,22 @@ module ListServicesResponse =
     let to_value x =
       structure_to_value
         [("ServiceSummaryList",
-           (Some (ServiceSummaryList.to_value x.serviceSummaryList)));
+           (Option.map x.serviceSummaryList ~f:ServiceSummaryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let serviceSummaryList =
-        ServiceSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceSummaryList") in
-      make ?nextToken ~serviceSummaryList ()
+        (Option.map ~f:ServiceSummaryList.of_xml)
+          (Xml.child xml_arg0 "ServiceSummaryList") in
+      make ?nextToken ?serviceSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let serviceSummaryList =
-        field_map_exn json "ServiceSummaryList" ServiceSummaryList.of_json in
-      make ?nextToken ~serviceSummaryList ()
+        field_map json__ "ServiceSummaryList" ServiceSummaryList.of_json in
+      make ?nextToken ?serviceSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of running App Runner services in your Amazon Web Services account."]
@@ -4435,13 +5678,142 @@ module ListServicesRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ServiceMaxResults.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" ServiceMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of running App Runner services in your Amazon Web Services account."]
+module ListServicesForAutoScalingConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      serviceArnList: ServiceArnList.t option
+        [@ocaml.doc
+          "A list of service ARN records. In a paginated request, the request returns up to MaxResults records for each call."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token that you can pass in a subsequent request to get the next result page. It's returned in a paginated request."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceArnList =
+      fun ?nextToken -> fun () -> { serviceArnList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServiceArnList",
+           (Option.map x.serviceArnList ~f:ServiceArnList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let serviceArnList =
+        (Option.map ~f:ServiceArnList.of_xml)
+          (Xml.child xml_arg0 "ServiceArnList") in
+      make ?nextToken ?serviceArnList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let serviceArnList =
+        field_map json__ "ServiceArnList" ServiceArnList.of_json in
+      make ?nextToken ?serviceArnList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the associated App Runner services using an auto scaling configuration."]
+module ListServicesForAutoScalingConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      autoScalingConfigurationArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the App Runner auto scaling configuration that you want to list the services for. The ARN can be a full auto scaling configuration ARN, or a partial ARN ending with either .../name or .../name/revision . If a revision isn't specified, the latest active revision is used."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to include in each response (result page). It's used for a paginated request. If you don't specify MaxResults, the request retrieves all available results in a single response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token from a previous result page. It's used for a paginated request. The request retrieves the next result page. All other parameter values must be identical to the ones specified in the initial request. If you don't specify NextToken, the request retrieves the first result page."]}
+    let context_ = "ListServicesForAutoScalingConfigurationRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~autoScalingConfigurationArn ->
+          fun () -> { maxResults; nextToken; autoScalingConfigurationArn }
+    let to_value x =
+      structure_to_value
+        [("AutoScalingConfigurationArn",
+           (Some
+              (AppRunnerResourceArn.to_value x.autoScalingConfigurationArn)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let autoScalingConfigurationArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "AutoScalingConfigurationArn") in
+      make ?nextToken ?maxResults ~autoScalingConfigurationArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let autoScalingConfigurationArn =
+        field_map_exn json__ "AutoScalingConfigurationArn"
+          AppRunnerResourceArn.of_json in
+      make ?nextToken ?maxResults ~autoScalingConfigurationArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of the associated App Runner services using an auto scaling configuration."]
 module ListOperationsResponse =
   struct
     type nonrec t =
@@ -4516,10 +5888,10 @@ module ListOperationsResponse =
           (Xml.child xml_arg0 "OperationSummaryList") in
       make ?nextToken ?operationSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let operationSummaryList =
-        field_map json "OperationSummaryList" OperationSummaryList.of_json in
+        field_map json__ "OperationSummaryList" OperationSummaryList.of_json in
       make ?nextToken ?operationSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4559,12 +5931,12 @@ module ListOperationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?maxResults ?nextToken ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" ListOperationsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "MaxResults" ListOperationsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ?maxResults ?nextToken ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4574,7 +5946,7 @@ module ListObservabilityConfigurationsResponse =
     type nonrec t =
       {
       observabilityConfigurationSummaryList:
-        ObservabilityConfigurationSummaryList.t
+        ObservabilityConfigurationSummaryList.t option
         [@ocaml.doc
           "A list of summary information records for observability configurations. In a paginated request, the request returns up to MaxResults records for each call."];
       nextToken: NextToken.t option
@@ -4584,10 +5956,9 @@ module ListObservabilityConfigurationsResponse =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListObservabilityConfigurationsResponse"
-    let make ?nextToken =
-      fun ~observabilityConfigurationSummaryList ->
-        fun () -> { nextToken; observabilityConfigurationSummaryList }
+    let make ?observabilityConfigurationSummaryList =
+      fun ?nextToken ->
+        fun () -> { observabilityConfigurationSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4625,26 +5996,24 @@ module ListObservabilityConfigurationsResponse =
     let to_value x =
       structure_to_value
         [("ObservabilityConfigurationSummaryList",
-           (Some
-              (ObservabilityConfigurationSummaryList.to_value
-                 x.observabilityConfigurationSummaryList)));
+           (Option.map x.observabilityConfigurationSummaryList
+              ~f:ObservabilityConfigurationSummaryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let observabilityConfigurationSummaryList =
-        ObservabilityConfigurationSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ObservabilityConfigurationSummaryList") in
-      make ?nextToken ~observabilityConfigurationSummaryList ()
+        (Option.map ~f:ObservabilityConfigurationSummaryList.of_xml)
+          (Xml.child xml_arg0 "ObservabilityConfigurationSummaryList") in
+      make ?nextToken ?observabilityConfigurationSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let observabilityConfigurationSummaryList =
-        field_map_exn json "ObservabilityConfigurationSummaryList"
+        field_map json__ "ObservabilityConfigurationSummaryList"
           ObservabilityConfigurationSummaryList.of_json in
-      make ?nextToken ~observabilityConfigurationSummaryList ()
+      make ?nextToken ?observabilityConfigurationSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of active App Runner observability configurations in your Amazon Web Services account. You can query the revisions for a specific configuration name or the revisions for all active configurations in your account. You can optionally query only the latest revision of each requested name. To retrieve a full description of a particular configuration revision, call and provide one of the ARNs returned by ListObservabilityConfigurations."]
@@ -4697,12 +6066,12 @@ module ListObservabilityConfigurationsRequest =
       make ?nextToken ?maxResults ?latestOnly ?observabilityConfigurationName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let latestOnly = field_map json "LatestOnly" Boolean.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let latestOnly = field_map json__ "LatestOnly" Boolean.of_json in
       let observabilityConfigurationName =
-        field_map json "ObservabilityConfigurationName"
+        field_map json__ "ObservabilityConfigurationName"
           ObservabilityConfigurationName.of_json in
       make ?nextToken ?maxResults ?latestOnly ?observabilityConfigurationName
         ()
@@ -4713,7 +6082,7 @@ module ListConnectionsResponse =
   struct
     type nonrec t =
       {
-      connectionSummaryList: ConnectionSummaryList.t
+      connectionSummaryList: ConnectionSummaryList.t option
         [@ocaml.doc
           "A list of summary information records for connections. In a paginated request, the request returns up to MaxResults records for each call."];
       nextToken: NextToken.t option
@@ -4723,10 +6092,8 @@ module ListConnectionsResponse =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListConnectionsResponse"
-    let make ?nextToken =
-      fun ~connectionSummaryList ->
-        fun () -> { nextToken; connectionSummaryList }
+    let make ?connectionSummaryList =
+      fun ?nextToken -> fun () -> { connectionSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4764,23 +6131,24 @@ module ListConnectionsResponse =
     let to_value x =
       structure_to_value
         [("ConnectionSummaryList",
-           (Some (ConnectionSummaryList.to_value x.connectionSummaryList)));
+           (Option.map x.connectionSummaryList
+              ~f:ConnectionSummaryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let connectionSummaryList =
-        ConnectionSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionSummaryList") in
-      make ?nextToken ~connectionSummaryList ()
+        (Option.map ~f:ConnectionSummaryList.of_xml)
+          (Xml.child xml_arg0 "ConnectionSummaryList") in
+      make ?nextToken ?connectionSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let connectionSummaryList =
-        field_map_exn json "ConnectionSummaryList"
+        field_map json__ "ConnectionSummaryList"
           ConnectionSummaryList.of_json in
-      make ?nextToken ~connectionSummaryList ()
+      make ?nextToken ?connectionSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of App Runner connections that are associated with your Amazon Web Services account."]
@@ -4817,11 +6185,11 @@ module ListConnectionsRequest =
           (Xml.child xml_arg0 "ConnectionName") in
       make ?nextToken ?maxResults ?connectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let connectionName =
-        field_map json "ConnectionName" ConnectionName.of_json in
+        field_map json__ "ConnectionName" ConnectionName.of_json in
       make ?nextToken ?maxResults ?connectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4831,7 +6199,7 @@ module ListAutoScalingConfigurationsResponse =
     type nonrec t =
       {
       autoScalingConfigurationSummaryList:
-        AutoScalingConfigurationSummaryList.t
+        AutoScalingConfigurationSummaryList.t option
         [@ocaml.doc
           "A list of summary information records for auto scaling configurations. In a paginated request, the request returns up to MaxResults records for each call."];
       nextToken: NextToken.t option
@@ -4841,10 +6209,9 @@ module ListAutoScalingConfigurationsResponse =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListAutoScalingConfigurationsResponse"
-    let make ?nextToken =
-      fun ~autoScalingConfigurationSummaryList ->
-        fun () -> { nextToken; autoScalingConfigurationSummaryList }
+    let make ?autoScalingConfigurationSummaryList =
+      fun ?nextToken ->
+        fun () -> { autoScalingConfigurationSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -4882,26 +6249,24 @@ module ListAutoScalingConfigurationsResponse =
     let to_value x =
       structure_to_value
         [("AutoScalingConfigurationSummaryList",
-           (Some
-              (AutoScalingConfigurationSummaryList.to_value
-                 x.autoScalingConfigurationSummaryList)));
+           (Option.map x.autoScalingConfigurationSummaryList
+              ~f:AutoScalingConfigurationSummaryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let autoScalingConfigurationSummaryList =
-        AutoScalingConfigurationSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "AutoScalingConfigurationSummaryList") in
-      make ?nextToken ~autoScalingConfigurationSummaryList ()
+        (Option.map ~f:AutoScalingConfigurationSummaryList.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfigurationSummaryList") in
+      make ?nextToken ?autoScalingConfigurationSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let autoScalingConfigurationSummaryList =
-        field_map_exn json "AutoScalingConfigurationSummaryList"
+        field_map json__ "AutoScalingConfigurationSummaryList"
           AutoScalingConfigurationSummaryList.of_json in
-      make ?nextToken ~autoScalingConfigurationSummaryList ()
+      make ?nextToken ?autoScalingConfigurationSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of active App Runner automatic scaling configurations in your Amazon Web Services account. You can query the revisions for a specific configuration name or the revisions for all active configurations in your account. You can optionally query only the latest revision of each requested name. To retrieve a full description of a particular configuration revision, call and provide one of the ARNs returned by ListAutoScalingConfigurations."]
@@ -4954,12 +6319,12 @@ module ListAutoScalingConfigurationsRequest =
       make ?nextToken ?maxResults ?latestOnly ?autoScalingConfigurationName
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let latestOnly = field_map json "LatestOnly" Boolean.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let latestOnly = field_map json__ "LatestOnly" Boolean.of_json in
       let autoScalingConfigurationName =
-        field_map json "AutoScalingConfigurationName"
+        field_map json__ "AutoScalingConfigurationName"
           AutoScalingConfigurationName.of_json in
       make ?nextToken ?maxResults ?latestOnly ?autoScalingConfigurationName
         ()
@@ -4970,26 +6335,29 @@ module DisassociateCustomDomainResponse =
   struct
     type nonrec t =
       {
-      dNSTarget: String_.t
+      dNSTarget: String_.t option
         [@ocaml.doc
           "The App Runner subdomain of the App Runner service. The disassociated custom domain name was mapped to this target name."];
-      serviceArn: AppRunnerResourceArn.t
+      serviceArn: AppRunnerResourceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the App Runner service that a custom domain name is disassociated from."];
-      customDomain: CustomDomain.t
+      customDomain: CustomDomain.t option
         [@ocaml.doc
-          "A description of the domain name that's being disassociated."]}
+          "A description of the domain name that's being disassociated."];
+      vpcDNSTargets: VpcDNSTargetList.t option
+        [@ocaml.doc
+          "DNS Target records for the custom domains of this Amazon VPC."]}
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `InvalidStateException of InvalidStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisassociateCustomDomainResponse"
-    let make ~dNSTarget =
-      fun ~serviceArn ->
-        fun ~customDomain ->
-          fun () -> { dNSTarget; serviceArn; customDomain }
+    let make ?dNSTarget =
+      fun ?serviceArn ->
+        fun ?customDomain ->
+          fun ?vpcDNSTargets ->
+            fun () -> { dNSTarget; serviceArn; customDomain; vpcDNSTargets }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -5042,28 +6410,36 @@ module DisassociateCustomDomainResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DNSTarget", (Some (String_.to_value x.dNSTarget)));
-        ("ServiceArn", (Some (AppRunnerResourceArn.to_value x.serviceArn)));
-        ("CustomDomain", (Some (CustomDomain.to_value x.customDomain)))]
+        [("DNSTarget", (Option.map x.dNSTarget ~f:String_.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("CustomDomain",
+          (Option.map x.customDomain ~f:CustomDomain.to_value));
+        ("VpcDNSTargets",
+          (Option.map x.vpcDNSTargets ~f:VpcDNSTargetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vpcDNSTargets =
+        (Option.map ~f:VpcDNSTargetList.of_xml)
+          (Xml.child xml_arg0 "VpcDNSTargets") in
       let customDomain =
-        CustomDomain.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomain") in
+        (Option.map ~f:CustomDomain.of_xml)
+          (Xml.child xml_arg0 "CustomDomain") in
       let serviceArn =
-        AppRunnerResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
       let dNSTarget =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
-      make ~customDomain ~serviceArn ~dNSTarget ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DNSTarget") in
+      make ?vpcDNSTargets ?customDomain ?serviceArn ?dNSTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customDomain =
-        field_map_exn json "CustomDomain" CustomDomain.of_json in
+    let of_json json__ =
+      let vpcDNSTargets =
+        field_map json__ "VpcDNSTargets" VpcDNSTargetList.of_json in
+      let customDomain = field_map json__ "CustomDomain" CustomDomain.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
-      let dNSTarget = field_map_exn json "DNSTarget" String_.of_json in
-      make ~customDomain ~serviceArn ~dNSTarget ()
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let dNSTarget = field_map json__ "DNSTarget" String_.of_json in
+      make ?vpcDNSTargets ?customDomain ?serviceArn ?dNSTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociate a custom domain name from an App Runner service. Certificates tracking domain validity are associated with a custom domain and are stored in AWS Certificate Manager (ACM). These certificates aren't deleted as part of this action. App Runner delays certificate deletion for 30 days after a domain is disassociated from your service."]
@@ -5094,28 +6470,27 @@ module DisassociateCustomDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~domainName ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~domainName ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disassociate a custom domain name from an App Runner service. Certificates tracking domain validity are associated with a custom domain and are stored in AWS Certificate Manager (ACM). These certificates aren't deleted as part of this action. App Runner delays certificate deletion for 30 days after a domain is disassociated from your service."]
-module DescribeVpcConnectorResponse =
+module DescribeVpcIngressConnectionResponse =
   struct
     type nonrec t =
       {
-      vpcConnector: VpcConnector.t
+      vpcIngressConnection: VpcIngressConnection.t option
         [@ocaml.doc
-          "A description of the App Runner VPC connector that you specified in this request."]}
+          "A description of the App Runner VPC Ingress Connection that you specified in this request."]}
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeVpcConnectorResponse"
-    let make ~vpcConnector = fun () -> { vpcConnector }
+    let make ?vpcIngressConnection = fun () -> { vpcIngressConnection }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -5160,18 +6535,120 @@ module DescribeVpcConnectorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("VpcConnector", (Some (VpcConnector.to_value x.vpcConnector)))]
+        [("VpcIngressConnection",
+           (Option.map x.vpcIngressConnection
+              ~f:VpcIngressConnection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnection =
+        (Option.map ~f:VpcIngressConnection.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnection") in
+      make ?vpcIngressConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnection =
+        field_map json__ "VpcIngressConnection" VpcIngressConnection.of_json in
+      make ?vpcIngressConnection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Return a full description of an App Runner VPC Ingress Connection resource."]
+module DescribeVpcIngressConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the App Runner VPC Ingress Connection that you want a description for."]}
+    let context_ = "DescribeVpcIngressConnectionRequest"
+    let make ~vpcIngressConnectionArn = fun () -> { vpcIngressConnectionArn }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Some (AppRunnerResourceArn.to_value x.vpcIngressConnectionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnectionArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcIngressConnectionArn") in
+      make ~vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnectionArn =
+        field_map_exn json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ~vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Return a full description of an App Runner VPC Ingress Connection resource."]
+module DescribeVpcConnectorResponse =
+  struct
+    type nonrec t =
+      {
+      vpcConnector: VpcConnector.t option
+        [@ocaml.doc
+          "A description of the App Runner VPC connector that you specified in this request."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcConnector = fun () -> { vpcConnector }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcConnector",
+           (Option.map x.vpcConnector ~f:VpcConnector.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vpcConnector =
-        VpcConnector.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
-      make ~vpcConnector ()
+        (Option.map ~f:VpcConnector.of_xml)
+          (Xml.child xml_arg0 "VpcConnector") in
+      make ?vpcConnector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConnector =
-        field_map_exn json "VpcConnector" VpcConnector.of_json in
-      make ~vpcConnector ()
+    let of_json json__ =
+      let vpcConnector = field_map json__ "VpcConnector" VpcConnector.of_json in
+      make ?vpcConnector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Return a description of an App Runner VPC connector resource."]
@@ -5195,9 +6672,9 @@ module DescribeVpcConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorArn") in
       make ~vpcConnectorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcConnectorArn =
-        field_map_exn json "VpcConnectorArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "VpcConnectorArn" AppRunnerResourceArn.of_json in
       make ~vpcConnectorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5206,7 +6683,7 @@ module DescribeServiceResponse =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc
           "A full description of the App Runner service that you specified in this request."]}
     type nonrec error =
@@ -5214,8 +6691,7 @@ module DescribeServiceResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeServiceResponse"
-    let make ~service = fun () -> { service }
+    let make ?service = fun () -> { service }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -5259,16 +6735,17 @@ module DescribeServiceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Service", (Some (Service.to_value x.service)))]
+      structure_to_value
+        [("Service", (Option.map x.service ~f:Service.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map_exn json "Service" Service.of_json in
-      make ~service ()
+    let of_json json__ =
+      let service = field_map json__ "Service" Service.of_json in
+      make ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Return a full description of an App Runner service."]
 module DescribeServiceRequest =
@@ -5290,9 +6767,9 @@ module DescribeServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Return a full description of an App Runner service."]
@@ -5300,7 +6777,7 @@ module DescribeObservabilityConfigurationResponse =
   struct
     type nonrec t =
       {
-      observabilityConfiguration: ObservabilityConfiguration.t
+      observabilityConfiguration: ObservabilityConfiguration.t option
         [@ocaml.doc
           "A full description of the App Runner observability configuration that you specified in this request."]}
     type nonrec error =
@@ -5308,8 +6785,7 @@ module DescribeObservabilityConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeObservabilityConfigurationResponse"
-    let make ~observabilityConfiguration =
+    let make ?observabilityConfiguration =
       fun () -> { observabilityConfiguration }
     let error_of_json name json =
       match name with
@@ -5356,22 +6832,20 @@ module DescribeObservabilityConfigurationResponse =
     let to_value x =
       structure_to_value
         [("ObservabilityConfiguration",
-           (Some
-              (ObservabilityConfiguration.to_value
-                 x.observabilityConfiguration)))]
+           (Option.map x.observabilityConfiguration
+              ~f:ObservabilityConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let observabilityConfiguration =
-        ObservabilityConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ObservabilityConfiguration") in
-      make ~observabilityConfiguration ()
+        (Option.map ~f:ObservabilityConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObservabilityConfiguration") in
+      make ?observabilityConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map_exn json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ObservabilityConfiguration.of_json in
-      make ~observabilityConfiguration ()
+      make ?observabilityConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Return a full description of an App Runner observability configuration resource."]
@@ -5398,9 +6872,9 @@ module DescribeObservabilityConfigurationRequest =
              "ObservabilityConfigurationArn") in
       make ~observabilityConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfigurationArn =
-        field_map_exn json "ObservabilityConfigurationArn"
+        field_map_exn json__ "ObservabilityConfigurationArn"
           AppRunnerResourceArn.of_json in
       make ~observabilityConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -5410,15 +6884,18 @@ module DescribeCustomDomainsResponse =
   struct
     type nonrec t =
       {
-      dNSTarget: String_.t
+      dNSTarget: String_.t option
         [@ocaml.doc
           "The App Runner subdomain of the App Runner service. The associated custom domain names are mapped to this target name."];
-      serviceArn: AppRunnerResourceArn.t
+      serviceArn: AppRunnerResourceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the App Runner service whose associated custom domain names you want to describe."];
-      customDomains: CustomDomainList.t
+      customDomains: CustomDomainList.t option
         [@ocaml.doc
           "A list of descriptions of custom domain names that are associated with the service. In a paginated request, the request returns up to MaxResults records per call."];
+      vpcDNSTargets: VpcDNSTargetList.t option
+        [@ocaml.doc
+          "DNS Target records for the custom domains of this Amazon VPC."];
       nextToken: String_.t option
         [@ocaml.doc
           "The token that you can pass in a subsequent request to get the next result page. It's returned in a paginated request."]}
@@ -5427,12 +6904,19 @@ module DescribeCustomDomainsResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeCustomDomainsResponse"
-    let make ?nextToken =
-      fun ~dNSTarget ->
-        fun ~serviceArn ->
-          fun ~customDomains ->
-            fun () -> { nextToken; dNSTarget; serviceArn; customDomains }
+    let make ?dNSTarget =
+      fun ?serviceArn ->
+        fun ?customDomains ->
+          fun ?vpcDNSTargets ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  dNSTarget;
+                  serviceArn;
+                  customDomains;
+                  vpcDNSTargets;
+                  nextToken
+                }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -5477,32 +6961,41 @@ module DescribeCustomDomainsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DNSTarget", (Some (String_.to_value x.dNSTarget)));
-        ("ServiceArn", (Some (AppRunnerResourceArn.to_value x.serviceArn)));
-        ("CustomDomains", (Some (CustomDomainList.to_value x.customDomains)));
+        [("DNSTarget", (Option.map x.dNSTarget ~f:String_.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("CustomDomains",
+          (Option.map x.customDomains ~f:CustomDomainList.to_value));
+        ("VpcDNSTargets",
+          (Option.map x.vpcDNSTargets ~f:VpcDNSTargetList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let vpcDNSTargets =
+        (Option.map ~f:VpcDNSTargetList.of_xml)
+          (Xml.child xml_arg0 "VpcDNSTargets") in
       let customDomains =
-        CustomDomainList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomains") in
+        (Option.map ~f:CustomDomainList.of_xml)
+          (Xml.child xml_arg0 "CustomDomains") in
       let serviceArn =
-        AppRunnerResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
       let dNSTarget =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
-      make ?nextToken ~customDomains ~serviceArn ~dNSTarget ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DNSTarget") in
+      make ?nextToken ?vpcDNSTargets ?customDomains ?serviceArn ?dNSTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let vpcDNSTargets =
+        field_map json__ "VpcDNSTargets" VpcDNSTargetList.of_json in
       let customDomains =
-        field_map_exn json "CustomDomains" CustomDomainList.of_json in
+        field_map json__ "CustomDomains" CustomDomainList.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
-      let dNSTarget = field_map_exn json "DNSTarget" String_.of_json in
-      make ?nextToken ~customDomains ~serviceArn ~dNSTarget ()
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let dNSTarget = field_map json__ "DNSTarget" String_.of_json in
+      make ?nextToken ?vpcDNSTargets ?customDomains ?serviceArn ?dNSTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Return a description of custom domain names that are associated with an App Runner service."]
@@ -5542,12 +7035,12 @@ module DescribeCustomDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?maxResults ?nextToken ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxResults =
-        field_map json "MaxResults" DescribeCustomDomainsMaxResults.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+        field_map json__ "MaxResults" DescribeCustomDomainsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ?maxResults ?nextToken ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5556,7 +7049,7 @@ module DescribeAutoScalingConfigurationResponse =
   struct
     type nonrec t =
       {
-      autoScalingConfiguration: AutoScalingConfiguration.t
+      autoScalingConfiguration: AutoScalingConfiguration.t option
         [@ocaml.doc
           "A full description of the App Runner auto scaling configuration that you specified in this request."]}
     type nonrec error =
@@ -5564,8 +7057,7 @@ module DescribeAutoScalingConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeAutoScalingConfigurationResponse"
-    let make ~autoScalingConfiguration =
+    let make ?autoScalingConfiguration =
       fun () -> { autoScalingConfiguration }
     let error_of_json name json =
       match name with
@@ -5612,21 +7104,20 @@ module DescribeAutoScalingConfigurationResponse =
     let to_value x =
       structure_to_value
         [("AutoScalingConfiguration",
-           (Some
-              (AutoScalingConfiguration.to_value x.autoScalingConfiguration)))]
+           (Option.map x.autoScalingConfiguration
+              ~f:AutoScalingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let autoScalingConfiguration =
-        AutoScalingConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "AutoScalingConfiguration") in
-      make ~autoScalingConfiguration ()
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfiguration") in
+      make ?autoScalingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingConfiguration =
-        field_map_exn json "AutoScalingConfiguration"
+        field_map json__ "AutoScalingConfiguration"
           AutoScalingConfiguration.of_json in
-      make ~autoScalingConfiguration ()
+      make ?autoScalingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Return a full description of an App Runner automatic scaling configuration resource."]
@@ -5653,133 +7144,28 @@ module DescribeAutoScalingConfigurationRequest =
              "AutoScalingConfigurationArn") in
       make ~autoScalingConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingConfigurationArn =
-        field_map_exn json "AutoScalingConfigurationArn"
+        field_map_exn json__ "AutoScalingConfigurationArn"
           AppRunnerResourceArn.of_json in
       make ~autoScalingConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Return a full description of an App Runner automatic scaling configuration resource."]
-module DeleteVpcConnectorResponse =
+module DeleteVpcIngressConnectionResponse =
   struct
     type nonrec t =
       {
-      vpcConnector: VpcConnector.t
+      vpcIngressConnection: VpcIngressConnection.t option
         [@ocaml.doc
-          "A description of the App Runner VPC connector that this request just deleted."]}
-    type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
-      | `InvalidRequestException of InvalidRequestException.t 
-      | `ResourceNotFoundException of ResourceNotFoundException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteVpcConnectorResponse"
-    let make ~vpcConnector = fun () -> { vpcConnector }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceErrorException" ->
-          `InternalServiceErrorException
-            (InternalServiceErrorException.of_json json)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_json json)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceErrorException" ->
-          `InternalServiceErrorException
-            (InternalServiceErrorException.of_xml xml)
-      | "InvalidRequestException" ->
-          `InvalidRequestException (InvalidRequestException.of_xml xml)
-      | "ResourceNotFoundException" ->
-          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceErrorException e ->
-          `Assoc
-            [("error", (`String "InternalServiceErrorException"));
-            ("details", (InternalServiceErrorException.to_json e))]
-      | `InvalidRequestException e ->
-          `Assoc
-            [("error", (`String "InvalidRequestException"));
-            ("details", (InvalidRequestException.to_json e))]
-      | `ResourceNotFoundException e ->
-          `Assoc
-            [("error", (`String "ResourceNotFoundException"));
-            ("details", (ResourceNotFoundException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("VpcConnector", (Some (VpcConnector.to_value x.vpcConnector)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcConnector =
-        VpcConnector.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
-      make ~vpcConnector ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConnector =
-        field_map_exn json "VpcConnector" VpcConnector.of_json in
-      make ~vpcConnector ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Delete an App Runner VPC connector resource. You can't delete a connector that's used by one or more App Runner services."]
-module DeleteVpcConnectorRequest =
-  struct
-    type nonrec t =
-      {
-      vpcConnectorArn: AppRunnerResourceArn.t
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the App Runner VPC connector that you want to delete. The ARN must be a full VPC connector ARN."]}
-    let context_ = "DeleteVpcConnectorRequest"
-    let make ~vpcConnectorArn = fun () -> { vpcConnectorArn }
-    let to_value x =
-      structure_to_value
-        [("VpcConnectorArn",
-           (Some (AppRunnerResourceArn.to_value x.vpcConnectorArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let vpcConnectorArn =
-        AppRunnerResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorArn") in
-      make ~vpcConnectorArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConnectorArn =
-        field_map_exn json "VpcConnectorArn" AppRunnerResourceArn.of_json in
-      make ~vpcConnectorArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Delete an App Runner VPC connector resource. You can't delete a connector that's used by one or more App Runner services."]
-module DeleteServiceResponse =
-  struct
-    type nonrec t =
-      {
-      service: Service.t
-        [@ocaml.doc
-          "A description of the App Runner service that this request just deleted."];
-      operationId: UUID.t
-        [@ocaml.doc
-          "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
+          "A description of the App Runner VPC Ingress Connection that this request just deleted."]}
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `InvalidStateException of InvalidStateException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteServiceResponse"
-    let make ~service =
-      fun ~operationId -> fun () -> { service; operationId }
+    let make ?vpcIngressConnection = fun () -> { vpcIngressConnection }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -5832,23 +7218,237 @@ module DeleteServiceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Service", (Some (Service.to_value x.service)));
-        ("OperationId", (Some (UUID.to_value x.operationId)))]
+        [("VpcIngressConnection",
+           (Option.map x.vpcIngressConnection
+              ~f:VpcIngressConnection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnection =
+        (Option.map ~f:VpcIngressConnection.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnection") in
+      make ?vpcIngressConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnection =
+        field_map json__ "VpcIngressConnection" VpcIngressConnection.of_json in
+      make ?vpcIngressConnection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an App Runner VPC Ingress Connection resource that's associated with an App Runner service. The VPC Ingress Connection must be in one of the following states to be deleted: AVAILABLE FAILED_CREATION FAILED_UPDATE FAILED_DELETION"]
+module DeleteVpcIngressConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnectionArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the App Runner VPC Ingress Connection that you want to delete."]}
+    let context_ = "DeleteVpcIngressConnectionRequest"
+    let make ~vpcIngressConnectionArn = fun () -> { vpcIngressConnectionArn }
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnectionArn",
+           (Some (AppRunnerResourceArn.to_value x.vpcIngressConnectionArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnectionArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcIngressConnectionArn") in
+      make ~vpcIngressConnectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnectionArn =
+        field_map_exn json__ "VpcIngressConnectionArn"
+          AppRunnerResourceArn.of_json in
+      make ~vpcIngressConnectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an App Runner VPC Ingress Connection resource that's associated with an App Runner service. The VPC Ingress Connection must be in one of the following states to be deleted: AVAILABLE FAILED_CREATION FAILED_UPDATE FAILED_DELETION"]
+module DeleteVpcConnectorResponse =
+  struct
+    type nonrec t =
+      {
+      vpcConnector: VpcConnector.t option
+        [@ocaml.doc
+          "A description of the App Runner VPC connector that this request just deleted."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcConnector = fun () -> { vpcConnector }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcConnector",
+           (Option.map x.vpcConnector ~f:VpcConnector.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConnector =
+        (Option.map ~f:VpcConnector.of_xml)
+          (Xml.child xml_arg0 "VpcConnector") in
+      make ?vpcConnector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConnector = field_map json__ "VpcConnector" VpcConnector.of_json in
+      make ?vpcConnector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an App Runner VPC connector resource. You can't delete a connector that's used by one or more App Runner services."]
+module DeleteVpcConnectorRequest =
+  struct
+    type nonrec t =
+      {
+      vpcConnectorArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the App Runner VPC connector that you want to delete. The ARN must be a full VPC connector ARN."]}
+    let context_ = "DeleteVpcConnectorRequest"
+    let make ~vpcConnectorArn = fun () -> { vpcConnectorArn }
+    let to_value x =
+      structure_to_value
+        [("VpcConnectorArn",
+           (Some (AppRunnerResourceArn.to_value x.vpcConnectorArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcConnectorArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorArn") in
+      make ~vpcConnectorArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcConnectorArn =
+        field_map_exn json__ "VpcConnectorArn" AppRunnerResourceArn.of_json in
+      make ~vpcConnectorArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Delete an App Runner VPC connector resource. You can't delete a connector that's used by one or more App Runner services."]
+module DeleteServiceResponse =
+  struct
+    type nonrec t =
+      {
+      service: Service.t option
+        [@ocaml.doc
+          "A description of the App Runner service that this request just deleted."];
+      operationId: UUID.t option
+        [@ocaml.doc
+          "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidStateException of InvalidStateException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?service =
+      fun ?operationId -> fun () -> { service; operationId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidStateException e ->
+          `Assoc
+            [("error", (`String "InvalidStateException"));
+            ("details", (InvalidStateException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Service", (Option.map x.service ~f:Service.to_value));
+        ("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ~operationId ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?operationId ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" UUID.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
-      make ~operationId ~service ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      make ?operationId ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an App Runner service. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
+       "Delete an App Runner service. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress. Make sure that you don't have any active VPCIngressConnections associated with the service you want to delete."]
 module DeleteServiceRequest =
   struct
     type nonrec t =
@@ -5868,18 +7468,18 @@ module DeleteServiceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an App Runner service. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
+       "Delete an App Runner service. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress. Make sure that you don't have any active VPCIngressConnections associated with the service you want to delete."]
 module DeleteObservabilityConfigurationResponse =
   struct
     type nonrec t =
       {
-      observabilityConfiguration: ObservabilityConfiguration.t
+      observabilityConfiguration: ObservabilityConfiguration.t option
         [@ocaml.doc
           "A description of the App Runner observability configuration that this request just deleted."]}
     type nonrec error =
@@ -5887,8 +7487,7 @@ module DeleteObservabilityConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteObservabilityConfigurationResponse"
-    let make ~observabilityConfiguration =
+    let make ?observabilityConfiguration =
       fun () -> { observabilityConfiguration }
     let error_of_json name json =
       match name with
@@ -5935,22 +7534,20 @@ module DeleteObservabilityConfigurationResponse =
     let to_value x =
       structure_to_value
         [("ObservabilityConfiguration",
-           (Some
-              (ObservabilityConfiguration.to_value
-                 x.observabilityConfiguration)))]
+           (Option.map x.observabilityConfiguration
+              ~f:ObservabilityConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let observabilityConfiguration =
-        ObservabilityConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ObservabilityConfiguration") in
-      make ~observabilityConfiguration ()
+        (Option.map ~f:ObservabilityConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObservabilityConfiguration") in
+      make ?observabilityConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map_exn json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ObservabilityConfiguration.of_json in
-      make ~observabilityConfiguration ()
+      make ?observabilityConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Delete an App Runner observability configuration resource. You can delete a specific revision or the latest active revision. You can't delete a configuration that's used by one or more App Runner services."]
@@ -5977,9 +7574,9 @@ module DeleteObservabilityConfigurationRequest =
              "ObservabilityConfigurationArn") in
       make ~observabilityConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfigurationArn =
-        field_map_exn json "ObservabilityConfigurationArn"
+        field_map_exn json__ "ObservabilityConfigurationArn"
           AppRunnerResourceArn.of_json in
       make ~observabilityConfigurationArn ()
     let to_json v = composed_to_json to_value v
@@ -6049,8 +7646,8 @@ module DeleteConnectionResponse =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map json "Connection" Connection.of_json in
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
       make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6075,9 +7672,9 @@ module DeleteConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionArn =
-        field_map_exn json "ConnectionArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ConnectionArn" AppRunnerResourceArn.of_json in
       make ~connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6086,7 +7683,7 @@ module DeleteAutoScalingConfigurationResponse =
   struct
     type nonrec t =
       {
-      autoScalingConfiguration: AutoScalingConfiguration.t
+      autoScalingConfiguration: AutoScalingConfiguration.t option
         [@ocaml.doc
           "A description of the App Runner auto scaling configuration that this request just deleted."]}
     type nonrec error =
@@ -6094,8 +7691,7 @@ module DeleteAutoScalingConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteAutoScalingConfigurationResponse"
-    let make ~autoScalingConfiguration =
+    let make ?autoScalingConfiguration =
       fun () -> { autoScalingConfiguration }
     let error_of_json name json =
       match name with
@@ -6142,60 +7738,223 @@ module DeleteAutoScalingConfigurationResponse =
     let to_value x =
       structure_to_value
         [("AutoScalingConfiguration",
-           (Some
-              (AutoScalingConfiguration.to_value x.autoScalingConfiguration)))]
+           (Option.map x.autoScalingConfiguration
+              ~f:AutoScalingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let autoScalingConfiguration =
-        AutoScalingConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "AutoScalingConfiguration") in
-      make ~autoScalingConfiguration ()
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfiguration") in
+      make ?autoScalingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingConfiguration =
-        field_map_exn json "AutoScalingConfiguration"
+        field_map json__ "AutoScalingConfiguration"
           AutoScalingConfiguration.of_json in
-      make ~autoScalingConfiguration ()
+      make ?autoScalingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an App Runner automatic scaling configuration resource. You can delete a specific revision or the latest active revision. You can't delete a configuration that's used by one or more App Runner services."]
+       "Delete an App Runner automatic scaling configuration resource. You can delete a top level auto scaling configuration, a specific revision of one, or all revisions associated with the top level configuration. You can't delete the default auto scaling configuration or a configuration that's used by one or more App Runner services."]
 module DeleteAutoScalingConfigurationRequest =
   struct
     type nonrec t =
       {
       autoScalingConfigurationArn: AppRunnerResourceArn.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the App Runner auto scaling configuration that you want to delete. The ARN can be a full auto scaling configuration ARN, or a partial ARN ending with either .../name or .../name/revision . If a revision isn't specified, the latest active revision is deleted."]}
+          "The Amazon Resource Name (ARN) of the App Runner auto scaling configuration that you want to delete. The ARN can be a full auto scaling configuration ARN, or a partial ARN ending with either .../name or .../name/revision . If a revision isn't specified, the latest active revision is deleted."];
+      deleteAllRevisions: Boolean.t option
+        [@ocaml.doc
+          "Set to true to delete all of the revisions associated with the AutoScalingConfigurationArn parameter value. When DeleteAllRevisions is set to true, the only valid value for the Amazon Resource Name (ARN) is a partial ARN ending with: .../name."]}
     let context_ = "DeleteAutoScalingConfigurationRequest"
-    let make ~autoScalingConfigurationArn =
-      fun () -> { autoScalingConfigurationArn }
+    let make ?deleteAllRevisions =
+      fun ~autoScalingConfigurationArn ->
+        fun () -> { deleteAllRevisions; autoScalingConfigurationArn }
     let to_value x =
       structure_to_value
         [("AutoScalingConfigurationArn",
            (Some
-              (AppRunnerResourceArn.to_value x.autoScalingConfigurationArn)))]
+              (AppRunnerResourceArn.to_value x.autoScalingConfigurationArn)));
+        ("DeleteAllRevisions",
+          (Option.map x.deleteAllRevisions ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deleteAllRevisions =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "DeleteAllRevisions") in
       let autoScalingConfigurationArn =
         AppRunnerResourceArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "AutoScalingConfigurationArn") in
-      make ~autoScalingConfigurationArn ()
+      make ?deleteAllRevisions ~autoScalingConfigurationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deleteAllRevisions =
+        field_map json__ "DeleteAllRevisions" Boolean.of_json in
       let autoScalingConfigurationArn =
-        field_map_exn json "AutoScalingConfigurationArn"
+        field_map_exn json__ "AutoScalingConfigurationArn"
           AppRunnerResourceArn.of_json in
-      make ~autoScalingConfigurationArn ()
+      make ?deleteAllRevisions ~autoScalingConfigurationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Delete an App Runner automatic scaling configuration resource. You can delete a specific revision or the latest active revision. You can't delete a configuration that's used by one or more App Runner services."]
+       "Delete an App Runner automatic scaling configuration resource. You can delete a top level auto scaling configuration, a specific revision of one, or all revisions associated with the top level configuration. You can't delete the default auto scaling configuration or a configuration that's used by one or more App Runner services."]
+module CreateVpcIngressConnectionResponse =
+  struct
+    type nonrec t =
+      {
+      vpcIngressConnection: VpcIngressConnection.t option
+        [@ocaml.doc
+          "A description of the App Runner VPC Ingress Connection resource that's created by this request."]}
+    type nonrec error =
+      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `InvalidStateException of InvalidStateException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcIngressConnection = fun () -> { vpcIngressConnection }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "InvalidStateException" ->
+          `InvalidStateException (InvalidStateException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `InvalidStateException e ->
+          `Assoc
+            [("error", (`String "InvalidStateException"));
+            ("details", (InvalidStateException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcIngressConnection",
+           (Option.map x.vpcIngressConnection
+              ~f:VpcIngressConnection.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcIngressConnection =
+        (Option.map ~f:VpcIngressConnection.of_xml)
+          (Xml.child xml_arg0 "VpcIngressConnection") in
+      make ?vpcIngressConnection ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcIngressConnection =
+        field_map json__ "VpcIngressConnection" VpcIngressConnection.of_json in
+      make ?vpcIngressConnection ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an App Runner VPC Ingress Connection resource. App Runner requires this resource when you want to associate your App Runner service with an Amazon VPC endpoint."]
+module CreateVpcIngressConnectionRequest =
+  struct
+    type nonrec t =
+      {
+      serviceArn: AppRunnerResourceArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) for this App Runner service that is used to create the VPC Ingress Connection resource."];
+      vpcIngressConnectionName: VpcIngressConnectionName.t
+        [@ocaml.doc
+          "A name for the VPC Ingress Connection resource. It must be unique across all the active VPC Ingress Connections in your Amazon Web Services account in the Amazon Web Services Region."];
+      ingressVpcConfiguration: IngressVpcConfiguration.t
+        [@ocaml.doc
+          "Specifications for the customer\226\128\153s Amazon VPC and the related Amazon Web Services PrivateLink VPC endpoint that are used to create the VPC Ingress Connection resource."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An optional list of metadata items that you can associate with the VPC Ingress Connection resource. A tag is a key-value pair."]}
+    let context_ = "CreateVpcIngressConnectionRequest"
+    let make ?tags =
+      fun ~serviceArn ->
+        fun ~vpcIngressConnectionName ->
+          fun ~ingressVpcConfiguration ->
+            fun () ->
+              {
+                tags;
+                serviceArn;
+                vpcIngressConnectionName;
+                ingressVpcConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("ServiceArn", (Some (AppRunnerResourceArn.to_value x.serviceArn)));
+        ("VpcIngressConnectionName",
+          (Some
+             (VpcIngressConnectionName.to_value x.vpcIngressConnectionName)));
+        ("IngressVpcConfiguration",
+          (Some (IngressVpcConfiguration.to_value x.ingressVpcConfiguration)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let ingressVpcConfiguration =
+        IngressVpcConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "IngressVpcConfiguration") in
+      let vpcIngressConnectionName =
+        VpcIngressConnectionName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "VpcIngressConnectionName") in
+      let serviceArn =
+        AppRunnerResourceArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
+      make ?tags ~ingressVpcConfiguration ~vpcIngressConnectionName
+        ~serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let ingressVpcConfiguration =
+        field_map_exn json__ "IngressVpcConfiguration"
+          IngressVpcConfiguration.of_json in
+      let vpcIngressConnectionName =
+        field_map_exn json__ "VpcIngressConnectionName"
+          VpcIngressConnectionName.of_json in
+      let serviceArn =
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      make ?tags ~ingressVpcConfiguration ~vpcIngressConnectionName
+        ~serviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Create an App Runner VPC Ingress Connection resource. App Runner requires this resource when you want to associate your App Runner service with an Amazon VPC endpoint."]
 module CreateVpcConnectorResponse =
   struct
     type nonrec t =
       {
-      vpcConnector: VpcConnector.t
+      vpcConnector: VpcConnector.t option
         [@ocaml.doc
           "A description of the App Runner VPC connector that's created by this request."]}
     type nonrec error =
@@ -6203,8 +7962,7 @@ module CreateVpcConnectorResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateVpcConnectorResponse"
-    let make ~vpcConnector = fun () -> { vpcConnector }
+    let make ?vpcConnector = fun () -> { vpcConnector }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -6251,18 +8009,18 @@ module CreateVpcConnectorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("VpcConnector", (Some (VpcConnector.to_value x.vpcConnector)))]
+        [("VpcConnector",
+           (Option.map x.vpcConnector ~f:VpcConnector.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vpcConnector =
-        VpcConnector.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VpcConnector") in
-      make ~vpcConnector ()
+        (Option.map ~f:VpcConnector.of_xml)
+          (Xml.child xml_arg0 "VpcConnector") in
+      make ?vpcConnector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vpcConnector =
-        field_map_exn json "VpcConnector" VpcConnector.of_json in
-      make ~vpcConnector ()
+    let of_json json__ =
+      let vpcConnector = field_map json__ "VpcConnector" VpcConnector.of_json in
+      make ?vpcConnector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create an App Runner VPC connector resource. App Runner requires this resource when you want to associate your App Runner service to a custom Amazon Virtual Private Cloud (Amazon VPC)."]
@@ -6274,7 +8032,7 @@ module CreateVpcConnectorRequest =
         [@ocaml.doc "A name for the VPC connector."];
       subnets: StringList.t
         [@ocaml.doc
-          "A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify."];
+          "A list of IDs of subnets that App Runner should use when it associates your service with a custom Amazon VPC. Specify IDs of subnets of a single Amazon VPC. App Runner determines the Amazon VPC from the subnets you specify. App Runner only supports subnets of IP address type IPv4 and dual stack (IPv4 and IPv6)."];
       securityGroups: StringList.t option
         [@ocaml.doc
           "A list of IDs of security groups that App Runner should use for access to Amazon Web Services resources under the specified subnets. If not specified, App Runner uses the default security group of the Amazon VPC. The default security group allows all outbound traffic."];
@@ -6309,12 +8067,13 @@ module CreateVpcConnectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "VpcConnectorName") in
       make ?tags ?securityGroups ~subnets ~vpcConnectorName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let securityGroups = field_map json "SecurityGroups" StringList.of_json in
-      let subnets = field_map_exn json "Subnets" StringList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let securityGroups =
+        field_map json__ "SecurityGroups" StringList.of_json in
+      let subnets = field_map_exn json__ "Subnets" StringList.of_json in
       let vpcConnectorName =
-        field_map_exn json "VpcConnectorName" VpcConnectorName.of_json in
+        field_map_exn json__ "VpcConnectorName" VpcConnectorName.of_json in
       make ?tags ?securityGroups ~subnets ~vpcConnectorName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6323,10 +8082,10 @@ module CreateServiceResponse =
   struct
     type nonrec t =
       {
-      service: Service.t
+      service: Service.t option
         [@ocaml.doc
           "A description of the App Runner service that's created by this request."];
-      operationId: UUID.t
+      operationId: UUID.t option
         [@ocaml.doc
           "The unique ID of the asynchronous operation that this request started. You can use it combined with the ListOperations call to track the operation's progress."]}
     type nonrec error =
@@ -6334,9 +8093,8 @@ module CreateServiceResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateServiceResponse"
-    let make ~service =
-      fun ~operationId -> fun () -> { service; operationId }
+    let make ?service =
+      fun ?operationId -> fun () -> { service; operationId }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -6383,20 +8141,20 @@ module CreateServiceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Service", (Some (Service.to_value x.service)));
-        ("OperationId", (Some (UUID.to_value x.operationId)))]
+        [("Service", (Option.map x.service ~f:Service.to_value));
+        ("OperationId", (Option.map x.operationId ~f:UUID.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        UUID.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
+        (Option.map ~f:UUID.of_xml) (Xml.child xml_arg0 "OperationId") in
       let service =
-        Service.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      make ~operationId ~service ()
+        (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
+      make ?operationId ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" UUID.of_json in
-      let service = field_map_exn json "Service" Service.of_json in
-      make ~operationId ~service ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" UUID.of_json in
+      let service = field_map json__ "Service" Service.of_json in
+      make ?operationId ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create an App Runner service. After the service is created, the action also automatically starts a deployment. This is an asynchronous operation. On a successful call, you can use the returned OperationId and the ListOperations call to track the operation's progress."]
@@ -6507,27 +8265,30 @@ module CreateServiceRequest =
         ?encryptionConfiguration ?tags ?instanceConfiguration
         ~sourceConfiguration ~serviceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ServiceObservabilityConfiguration.of_json in
       let networkConfiguration =
-        field_map json "NetworkConfiguration" NetworkConfiguration.of_json in
+        field_map json__ "NetworkConfiguration" NetworkConfiguration.of_json in
       let autoScalingConfigurationArn =
-        field_map json "AutoScalingConfigurationArn"
+        field_map json__ "AutoScalingConfigurationArn"
           AppRunnerResourceArn.of_json in
       let healthCheckConfiguration =
-        field_map json "HealthCheckConfiguration"
+        field_map json__ "HealthCheckConfiguration"
           HealthCheckConfiguration.of_json in
       let encryptionConfiguration =
-        field_map json "EncryptionConfiguration"
+        field_map json__ "EncryptionConfiguration"
           EncryptionConfiguration.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let instanceConfiguration =
-        field_map json "InstanceConfiguration" InstanceConfiguration.of_json in
+        field_map json__ "InstanceConfiguration"
+          InstanceConfiguration.of_json in
       let sourceConfiguration =
-        field_map_exn json "SourceConfiguration" SourceConfiguration.of_json in
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+        field_map_exn json__ "SourceConfiguration"
+          SourceConfiguration.of_json in
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
       make ?observabilityConfiguration ?networkConfiguration
         ?autoScalingConfigurationArn ?healthCheckConfiguration
         ?encryptionConfiguration ?tags ?instanceConfiguration
@@ -6539,7 +8300,7 @@ module CreateObservabilityConfigurationResponse =
   struct
     type nonrec t =
       {
-      observabilityConfiguration: ObservabilityConfiguration.t
+      observabilityConfiguration: ObservabilityConfiguration.t option
         [@ocaml.doc
           "A description of the App Runner observability configuration that's created by this request."]}
     type nonrec error =
@@ -6547,8 +8308,7 @@ module CreateObservabilityConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateObservabilityConfigurationResponse"
-    let make ~observabilityConfiguration =
+    let make ?observabilityConfiguration =
       fun () -> { observabilityConfiguration }
     let error_of_json name json =
       match name with
@@ -6597,22 +8357,20 @@ module CreateObservabilityConfigurationResponse =
     let to_value x =
       structure_to_value
         [("ObservabilityConfiguration",
-           (Some
-              (ObservabilityConfiguration.to_value
-                 x.observabilityConfiguration)))]
+           (Option.map x.observabilityConfiguration
+              ~f:ObservabilityConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let observabilityConfiguration =
-        ObservabilityConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ObservabilityConfiguration") in
-      make ~observabilityConfiguration ()
+        (Option.map ~f:ObservabilityConfiguration.of_xml)
+          (Xml.child xml_arg0 "ObservabilityConfiguration") in
+      make ?observabilityConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let observabilityConfiguration =
-        field_map_exn json "ObservabilityConfiguration"
+        field_map json__ "ObservabilityConfiguration"
           ObservabilityConfiguration.of_json in
-      make ~observabilityConfiguration ()
+      make ?observabilityConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create an App Runner observability configuration resource. App Runner requires this resource when you create or update App Runner services and you want to enable non-default observability features. You can share an observability configuration across multiple services. Create multiple revisions of a configuration by calling this action multiple times using the same ObservabilityConfigurationName. The call returns incremental ObservabilityConfigurationRevision values. When you create a service and configure an observability configuration resource, the service uses the latest active revision of the observability configuration by default. You can optionally configure the service to use a specific revision. The observability configuration resource is designed to configure multiple features (currently one feature, tracing). This action takes optional parameters that describe the configuration of these features (currently one parameter, TraceConfiguration). If you don't specify a feature parameter, App Runner doesn't enable the feature."]
@@ -6656,12 +8414,12 @@ module CreateObservabilityConfigurationRequest =
              "ObservabilityConfigurationName") in
       make ?tags ?traceConfiguration ~observabilityConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let traceConfiguration =
-        field_map json "TraceConfiguration" TraceConfiguration.of_json in
+        field_map json__ "TraceConfiguration" TraceConfiguration.of_json in
       let observabilityConfigurationName =
-        field_map_exn json "ObservabilityConfigurationName"
+        field_map_exn json__ "ObservabilityConfigurationName"
           ObservabilityConfigurationName.of_json in
       make ?tags ?traceConfiguration ~observabilityConfigurationName ()
     let to_json v = composed_to_json to_value v
@@ -6671,7 +8429,7 @@ module CreateConnectionResponse =
   struct
     type nonrec t =
       {
-      connection: Connection.t
+      connection: Connection.t option
         [@ocaml.doc
           "A description of the App Runner connection that's created by this request."]}
     type nonrec error =
@@ -6679,8 +8437,7 @@ module CreateConnectionResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateConnectionResponse"
-    let make ~connection = fun () -> { connection }
+    let make ?connection = fun () -> { connection }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -6727,20 +8484,19 @@ module CreateConnectionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Connection", (Some (Connection.to_value x.connection)))]
+        [("Connection", (Option.map x.connection ~f:Connection.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let connection =
-        Connection.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Connection") in
-      make ~connection ()
+        (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
+      make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map_exn json "Connection" Connection.of_json in
-      make ~connection ()
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
+      make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an App Runner connection resource. App Runner requires a connection resource when you create App Runner services that access private repositories from certain third-party providers. You can share a connection across multiple services. A connection resource is needed to access GitHub repositories. GitHub requires a user interface approval process through the App Runner console before you can use the connection."]
+       "Create an App Runner connection resource. App Runner requires a connection resource when you create App Runner services that access private repositories from certain third-party providers. You can share a connection across multiple services. A connection resource is needed to access GitHub and Bitbucket repositories. Both require a user interface approval process through the App Runner console before you can use the connection."]
 module CreateConnectionRequest =
   struct
     type nonrec t =
@@ -6774,21 +8530,21 @@ module CreateConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionName") in
       make ?tags ~providerType ~connectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let providerType =
-        field_map_exn json "ProviderType" ProviderType.of_json in
+        field_map_exn json__ "ProviderType" ProviderType.of_json in
       let connectionName =
-        field_map_exn json "ConnectionName" ConnectionName.of_json in
+        field_map_exn json__ "ConnectionName" ConnectionName.of_json in
       make ?tags ~providerType ~connectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Create an App Runner connection resource. App Runner requires a connection resource when you create App Runner services that access private repositories from certain third-party providers. You can share a connection across multiple services. A connection resource is needed to access GitHub repositories. GitHub requires a user interface approval process through the App Runner console before you can use the connection."]
+       "Create an App Runner connection resource. App Runner requires a connection resource when you create App Runner services that access private repositories from certain third-party providers. You can share a connection across multiple services. A connection resource is needed to access GitHub and Bitbucket repositories. Both require a user interface approval process through the App Runner console before you can use the connection."]
 module CreateAutoScalingConfigurationResponse =
   struct
     type nonrec t =
       {
-      autoScalingConfiguration: AutoScalingConfiguration.t
+      autoScalingConfiguration: AutoScalingConfiguration.t option
         [@ocaml.doc
           "A description of the App Runner auto scaling configuration that's created by this request."]}
     type nonrec error =
@@ -6796,8 +8552,7 @@ module CreateAutoScalingConfigurationResponse =
       | `InvalidRequestException of InvalidRequestException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAutoScalingConfigurationResponse"
-    let make ~autoScalingConfiguration =
+    let make ?autoScalingConfiguration =
       fun () -> { autoScalingConfiguration }
     let error_of_json name json =
       match name with
@@ -6846,21 +8601,20 @@ module CreateAutoScalingConfigurationResponse =
     let to_value x =
       structure_to_value
         [("AutoScalingConfiguration",
-           (Some
-              (AutoScalingConfiguration.to_value x.autoScalingConfiguration)))]
+           (Option.map x.autoScalingConfiguration
+              ~f:AutoScalingConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let autoScalingConfiguration =
-        AutoScalingConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "AutoScalingConfiguration") in
-      make ~autoScalingConfiguration ()
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "AutoScalingConfiguration") in
+      make ?autoScalingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingConfiguration =
-        field_map_exn json "AutoScalingConfiguration"
+        field_map json__ "AutoScalingConfiguration"
           AutoScalingConfiguration.of_json in
-      make ~autoScalingConfiguration ()
+      make ?autoScalingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create an App Runner automatic scaling configuration resource. App Runner requires this resource when you create or update App Runner services and you require non-default auto scaling settings. You can share an auto scaling configuration across multiple services. Create multiple revisions of a configuration by calling this action multiple times using the same AutoScalingConfigurationName. The call returns incremental AutoScalingConfigurationRevision values. When you create a service and configure an auto scaling configuration resource, the service uses the latest active revision of the auto scaling configuration by default. You can optionally configure the service to use a specific revision. Configure a higher MinSize to increase the spread of your App Runner service over more Availability Zones in the Amazon Web Services Region. The tradeoff is a higher minimal cost. Configure a lower MaxSize to control your cost. The tradeoff is lower responsiveness during peak demand."]
@@ -6870,7 +8624,7 @@ module CreateAutoScalingConfigurationRequest =
       {
       autoScalingConfigurationName: AutoScalingConfigurationName.t
         [@ocaml.doc
-          "A name for the auto scaling configuration. When you use it for the first time in an Amazon Web Services Region, App Runner creates revision number 1 of this name. When you use the same name in subsequent calls, App Runner creates incremental revisions of the configuration. The name DefaultConfiguration is reserved (it's the configuration that App Runner uses if you don't provide a custome one). You can't use it to create a new auto scaling configuration, and you can't create a revision of it. When you want to use your own auto scaling configuration for your App Runner service, create a configuration with a different name, and then provide it when you create or update your service."];
+          "A name for the auto scaling configuration. When you use it for the first time in an Amazon Web Services Region, App Runner creates revision number 1 of this name. When you use the same name in subsequent calls, App Runner creates incremental revisions of the configuration. Prior to the release of Auto scale configuration enhancements, the name DefaultConfiguration was reserved. This restriction is no longer in place. You can now manage DefaultConfiguration the same way you manage your custom auto scaling configurations. This means you can do the following with the DefaultConfiguration that App Runner provides: Create new revisions of the DefaultConfiguration. Delete the revisions of the DefaultConfiguration. Delete the auto scaling configuration for which the App Runner DefaultConfiguration was created. If you delete the auto scaling configuration you can create another custom auto scaling configuration with the same DefaultConfiguration name. The original DefaultConfiguration resource provided by App Runner remains in your account unless you make changes to it."];
       maxConcurrency: ASConfigMaxConcurrency.t option
         [@ocaml.doc
           "The maximum number of concurrent requests that you want an instance to process. If the number of concurrent requests exceeds this limit, App Runner scales up your service. Default: 100"];
@@ -6925,14 +8679,14 @@ module CreateAutoScalingConfigurationRequest =
       make ?tags ?maxSize ?minSize ?maxConcurrency
         ~autoScalingConfigurationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let maxSize = field_map json "MaxSize" ASConfigMaxSize.of_json in
-      let minSize = field_map json "MinSize" ASConfigMinSize.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let maxSize = field_map json__ "MaxSize" ASConfigMaxSize.of_json in
+      let minSize = field_map json__ "MinSize" ASConfigMinSize.of_json in
       let maxConcurrency =
-        field_map json "MaxConcurrency" ASConfigMaxConcurrency.of_json in
+        field_map json__ "MaxConcurrency" ASConfigMaxConcurrency.of_json in
       let autoScalingConfigurationName =
-        field_map_exn json "AutoScalingConfigurationName"
+        field_map_exn json__ "AutoScalingConfigurationName"
           AutoScalingConfigurationName.of_json in
       make ?tags ?maxSize ?minSize ?maxConcurrency
         ~autoScalingConfigurationName ()
@@ -6943,25 +8697,28 @@ module AssociateCustomDomainResponse =
   struct
     type nonrec t =
       {
-      dNSTarget: String_.t
+      dNSTarget: String_.t option
         [@ocaml.doc
           "The App Runner subdomain of the App Runner service. The custom domain name is mapped to this target name."];
-      serviceArn: AppRunnerResourceArn.t
+      serviceArn: AppRunnerResourceArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the App Runner service with which a custom domain name is associated."];
-      customDomain: CustomDomain.t
+      customDomain: CustomDomain.t option
         [@ocaml.doc
-          "A description of the domain name that's being associated."]}
+          "A description of the domain name that's being associated."];
+      vpcDNSTargets: VpcDNSTargetList.t option
+        [@ocaml.doc
+          "DNS Target records for the custom domains of this Amazon VPC."]}
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `InvalidStateException of InvalidStateException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "AssociateCustomDomainResponse"
-    let make ~dNSTarget =
-      fun ~serviceArn ->
-        fun ~customDomain ->
-          fun () -> { dNSTarget; serviceArn; customDomain }
+    let make ?dNSTarget =
+      fun ?serviceArn ->
+        fun ?customDomain ->
+          fun ?vpcDNSTargets ->
+            fun () -> { dNSTarget; serviceArn; customDomain; vpcDNSTargets }
     let error_of_json name json =
       match name with
       | "InternalServiceErrorException" ->
@@ -7006,28 +8763,36 @@ module AssociateCustomDomainResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DNSTarget", (Some (String_.to_value x.dNSTarget)));
-        ("ServiceArn", (Some (AppRunnerResourceArn.to_value x.serviceArn)));
-        ("CustomDomain", (Some (CustomDomain.to_value x.customDomain)))]
+        [("DNSTarget", (Option.map x.dNSTarget ~f:String_.to_value));
+        ("ServiceArn",
+          (Option.map x.serviceArn ~f:AppRunnerResourceArn.to_value));
+        ("CustomDomain",
+          (Option.map x.customDomain ~f:CustomDomain.to_value));
+        ("VpcDNSTargets",
+          (Option.map x.vpcDNSTargets ~f:VpcDNSTargetList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vpcDNSTargets =
+        (Option.map ~f:VpcDNSTargetList.of_xml)
+          (Xml.child xml_arg0 "VpcDNSTargets") in
       let customDomain =
-        CustomDomain.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CustomDomain") in
+        (Option.map ~f:CustomDomain.of_xml)
+          (Xml.child xml_arg0 "CustomDomain") in
       let serviceArn =
-        AppRunnerResourceArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
+        (Option.map ~f:AppRunnerResourceArn.of_xml)
+          (Xml.child xml_arg0 "ServiceArn") in
       let dNSTarget =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DNSTarget") in
-      make ~customDomain ~serviceArn ~dNSTarget ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "DNSTarget") in
+      make ?vpcDNSTargets ?customDomain ?serviceArn ?dNSTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let customDomain =
-        field_map_exn json "CustomDomain" CustomDomain.of_json in
+    let of_json json__ =
+      let vpcDNSTargets =
+        field_map json__ "VpcDNSTargets" VpcDNSTargetList.of_json in
+      let customDomain = field_map json__ "CustomDomain" CustomDomain.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
-      let dNSTarget = field_map_exn json "DNSTarget" String_.of_json in
-      make ~customDomain ~serviceArn ~dNSTarget ()
+        field_map json__ "ServiceArn" AppRunnerResourceArn.of_json in
+      let dNSTarget = field_map json__ "DNSTarget" String_.of_json in
+      make ?vpcDNSTargets ?customDomain ?serviceArn ?dNSTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associate your own domain name with the App Runner subdomain URL of your App Runner service. After you call AssociateCustomDomain and receive a successful response, use the information in the CustomDomain record that's returned to add CNAME records to your Domain Name System (DNS). For each mapped domain name, add a mapping to the target App Runner subdomain and one or more certificate validation records. App Runner then performs DNS validation to verify that you own or control the domain name that you associated. App Runner tracks domain validity in a certificate stored in AWS Certificate Manager (ACM)."]
@@ -7068,12 +8833,12 @@ module AssociateCustomDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceArn") in
       make ?enableWWWSubdomain ~domainName ~serviceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableWWWSubdomain =
-        field_map json "EnableWWWSubdomain" NullableBoolean.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+        field_map json__ "EnableWWWSubdomain" NullableBoolean.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       let serviceArn =
-        field_map_exn json "ServiceArn" AppRunnerResourceArn.of_json in
+        field_map_exn json__ "ServiceArn" AppRunnerResourceArn.of_json in
       make ?enableWWWSubdomain ~domainName ~serviceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

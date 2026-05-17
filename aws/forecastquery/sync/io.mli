@@ -5,3 +5,9 @@ val query_forecast :
     ?cfg:Awso.Cfg.t ->
       QueryForecastRequest.t ->
         (QueryForecastResponse.t, QueryForecastResponse.error) Result.t
+val query_what_if_forecast :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      QueryWhatIfForecastRequest.t ->
+        (QueryWhatIfForecastResponse.t, QueryWhatIfForecastResponse.error)
+          Result.t

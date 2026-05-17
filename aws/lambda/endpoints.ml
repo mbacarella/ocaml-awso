@@ -7,8 +7,13 @@ type ('i, 'o, 'e) t =
   AddLayerVersionPermissionResponse.error) t 
   | AddPermission: (AddPermissionRequest.t, AddPermissionResponse.t,
   AddPermissionResponse.error) t 
+  | CheckpointDurableExecution: (CheckpointDurableExecutionRequest.t,
+  CheckpointDurableExecutionResponse.t,
+  CheckpointDurableExecutionResponse.error) t 
   | CreateAlias: (CreateAliasRequest.t, AliasConfiguration.t,
   AliasConfiguration.error) t 
+  | CreateCapacityProvider: (CreateCapacityProviderRequest.t,
+  CreateCapacityProviderResponse.t, CreateCapacityProviderResponse.error) t 
   | CreateCodeSigningConfig: (CreateCodeSigningConfigRequest.t,
   CreateCodeSigningConfigResponse.t, CreateCodeSigningConfigResponse.error) t
   
@@ -21,13 +26,16 @@ type ('i, 'o, 'e) t =
   CreateFunctionUrlConfigResponse.t, CreateFunctionUrlConfigResponse.error) t
   
   | DeleteAlias: (DeleteAliasRequest.t, unit, unit) t 
+  | DeleteCapacityProvider: (DeleteCapacityProviderRequest.t,
+  DeleteCapacityProviderResponse.t, DeleteCapacityProviderResponse.error) t 
   | DeleteCodeSigningConfig: (DeleteCodeSigningConfigRequest.t,
   DeleteCodeSigningConfigResponse.t, DeleteCodeSigningConfigResponse.error) t
   
   | DeleteEventSourceMapping: (DeleteEventSourceMappingRequest.t,
   EventSourceMappingConfiguration.t, EventSourceMappingConfiguration.error) t
   
-  | DeleteFunction: (DeleteFunctionRequest.t, unit, unit) t 
+  | DeleteFunction: (DeleteFunctionRequest.t, DeleteFunctionResponse.t,
+  DeleteFunctionResponse.error) t 
   | DeleteFunctionCodeSigningConfig:
   (DeleteFunctionCodeSigningConfigRequest.t, unit, unit) t 
   | DeleteFunctionConcurrency: (DeleteFunctionConcurrencyRequest.t, unit,
@@ -43,8 +51,18 @@ type ('i, 'o, 'e) t =
   GetAccountSettingsResponse.t, GetAccountSettingsResponse.error) t 
   | GetAlias: (GetAliasRequest.t, AliasConfiguration.t,
   AliasConfiguration.error) t 
+  | GetCapacityProvider: (GetCapacityProviderRequest.t,
+  GetCapacityProviderResponse.t, GetCapacityProviderResponse.error) t 
   | GetCodeSigningConfig: (GetCodeSigningConfigRequest.t,
   GetCodeSigningConfigResponse.t, GetCodeSigningConfigResponse.error) t 
+  | GetDurableExecution: (GetDurableExecutionRequest.t,
+  GetDurableExecutionResponse.t, GetDurableExecutionResponse.error) t 
+  | GetDurableExecutionHistory: (GetDurableExecutionHistoryRequest.t,
+  GetDurableExecutionHistoryResponse.t,
+  GetDurableExecutionHistoryResponse.error) t 
+  | GetDurableExecutionState: (GetDurableExecutionStateRequest.t,
+  GetDurableExecutionStateResponse.t, GetDurableExecutionStateResponse.error)
+  t 
   | GetEventSourceMapping: (GetEventSourceMappingRequest.t,
   EventSourceMappingConfiguration.t, EventSourceMappingConfiguration.error) t
   
@@ -59,6 +77,12 @@ type ('i, 'o, 'e) t =
   FunctionConfiguration.t, FunctionConfiguration.error) t 
   | GetFunctionEventInvokeConfig: (GetFunctionEventInvokeConfigRequest.t,
   FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error) t 
+  | GetFunctionRecursionConfig: (GetFunctionRecursionConfigRequest.t,
+  GetFunctionRecursionConfigResponse.t,
+  GetFunctionRecursionConfigResponse.error) t 
+  | GetFunctionScalingConfig: (GetFunctionScalingConfigRequest.t,
+  GetFunctionScalingConfigResponse.t, GetFunctionScalingConfigResponse.error)
+  t 
   | GetFunctionUrlConfig: (GetFunctionUrlConfigRequest.t,
   GetFunctionUrlConfigResponse.t, GetFunctionUrlConfigResponse.error) t 
   | GetLayerVersion: (GetLayerVersionRequest.t, GetLayerVersionResponse.t,
@@ -73,14 +97,26 @@ type ('i, 'o, 'e) t =
   (GetProvisionedConcurrencyConfigRequest.t,
   GetProvisionedConcurrencyConfigResponse.t,
   GetProvisionedConcurrencyConfigResponse.error) t 
+  | GetRuntimeManagementConfig: (GetRuntimeManagementConfigRequest.t,
+  GetRuntimeManagementConfigResponse.t,
+  GetRuntimeManagementConfigResponse.error) t 
   | Invoke: (InvocationRequest.t, InvocationResponse.t,
   InvocationResponse.error) t 
   | InvokeAsync: (InvokeAsyncRequest.t, InvokeAsyncResponse.t,
   InvokeAsyncResponse.error) t 
+  | InvokeWithResponseStream: (InvokeWithResponseStreamRequest.t,
+  InvokeWithResponseStreamResponse.t, InvokeWithResponseStreamResponse.error)
+  t 
   | ListAliases: (ListAliasesRequest.t, ListAliasesResponse.t,
   ListAliasesResponse.error) t 
+  | ListCapacityProviders: (ListCapacityProvidersRequest.t,
+  ListCapacityProvidersResponse.t, ListCapacityProvidersResponse.error) t 
   | ListCodeSigningConfigs: (ListCodeSigningConfigsRequest.t,
   ListCodeSigningConfigsResponse.t, ListCodeSigningConfigsResponse.error) t 
+  | ListDurableExecutionsByFunction:
+  (ListDurableExecutionsByFunctionRequest.t,
+  ListDurableExecutionsByFunctionResponse.t,
+  ListDurableExecutionsByFunctionResponse.error) t 
   | ListEventSourceMappings: (ListEventSourceMappingsRequest.t,
   ListEventSourceMappingsResponse.t, ListEventSourceMappingsResponse.error) t
   
@@ -89,6 +125,10 @@ type ('i, 'o, 'e) t =
   ListFunctionEventInvokeConfigsResponse.error) t 
   | ListFunctionUrlConfigs: (ListFunctionUrlConfigsRequest.t,
   ListFunctionUrlConfigsResponse.t, ListFunctionUrlConfigsResponse.error) t 
+  | ListFunctionVersionsByCapacityProvider:
+  (ListFunctionVersionsByCapacityProviderRequest.t,
+  ListFunctionVersionsByCapacityProviderResponse.t,
+  ListFunctionVersionsByCapacityProviderResponse.error) t 
   | ListFunctions: (ListFunctionsRequest.t, ListFunctionsResponse.t,
   ListFunctionsResponse.error) t 
   | ListFunctionsByCodeSigningConfig:
@@ -118,17 +158,42 @@ type ('i, 'o, 'e) t =
   Concurrency.error) t 
   | PutFunctionEventInvokeConfig: (PutFunctionEventInvokeConfigRequest.t,
   FunctionEventInvokeConfig.t, FunctionEventInvokeConfig.error) t 
+  | PutFunctionRecursionConfig: (PutFunctionRecursionConfigRequest.t,
+  PutFunctionRecursionConfigResponse.t,
+  PutFunctionRecursionConfigResponse.error) t 
+  | PutFunctionScalingConfig: (PutFunctionScalingConfigRequest.t,
+  PutFunctionScalingConfigResponse.t, PutFunctionScalingConfigResponse.error)
+  t 
   | PutProvisionedConcurrencyConfig:
   (PutProvisionedConcurrencyConfigRequest.t,
   PutProvisionedConcurrencyConfigResponse.t,
   PutProvisionedConcurrencyConfigResponse.error) t 
+  | PutRuntimeManagementConfig: (PutRuntimeManagementConfigRequest.t,
+  PutRuntimeManagementConfigResponse.t,
+  PutRuntimeManagementConfigResponse.error) t 
   | RemoveLayerVersionPermission: (RemoveLayerVersionPermissionRequest.t,
   unit, unit) t 
   | RemovePermission: (RemovePermissionRequest.t, unit, unit) t 
+  | SendDurableExecutionCallbackFailure:
+  (SendDurableExecutionCallbackFailureRequest.t,
+  SendDurableExecutionCallbackFailureResponse.t,
+  SendDurableExecutionCallbackFailureResponse.error) t 
+  | SendDurableExecutionCallbackHeartbeat:
+  (SendDurableExecutionCallbackHeartbeatRequest.t,
+  SendDurableExecutionCallbackHeartbeatResponse.t,
+  SendDurableExecutionCallbackHeartbeatResponse.error) t 
+  | SendDurableExecutionCallbackSuccess:
+  (SendDurableExecutionCallbackSuccessRequest.t,
+  SendDurableExecutionCallbackSuccessResponse.t,
+  SendDurableExecutionCallbackSuccessResponse.error) t 
+  | StopDurableExecution: (StopDurableExecutionRequest.t,
+  StopDurableExecutionResponse.t, StopDurableExecutionResponse.error) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateAlias: (UpdateAliasRequest.t, AliasConfiguration.t,
   AliasConfiguration.error) t 
+  | UpdateCapacityProvider: (UpdateCapacityProviderRequest.t,
+  UpdateCapacityProviderResponse.t, UpdateCapacityProviderResponse.error) t 
   | UpdateCodeSigningConfig: (UpdateCodeSigningConfigRequest.t,
   UpdateCodeSigningConfigResponse.t, UpdateCodeSigningConfigResponse.error) t
   
@@ -148,12 +213,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddLayerVersionPermission -> `POST
   | AddPermission -> `POST
+  | CheckpointDurableExecution -> `POST
   | CreateAlias -> `POST
+  | CreateCapacityProvider -> `POST
   | CreateCodeSigningConfig -> `POST
   | CreateEventSourceMapping -> `POST
   | CreateFunction -> `POST
   | CreateFunctionUrlConfig -> `POST
   | DeleteAlias -> `DELETE
+  | DeleteCapacityProvider -> `DELETE
   | DeleteCodeSigningConfig -> `DELETE
   | DeleteEventSourceMapping -> `DELETE
   | DeleteFunction -> `DELETE
@@ -165,26 +233,37 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteProvisionedConcurrencyConfig -> `DELETE
   | GetAccountSettings -> `GET
   | GetAlias -> `GET
+  | GetCapacityProvider -> `GET
   | GetCodeSigningConfig -> `GET
+  | GetDurableExecution -> `GET
+  | GetDurableExecutionHistory -> `GET
+  | GetDurableExecutionState -> `GET
   | GetEventSourceMapping -> `GET
   | GetFunction -> `GET
   | GetFunctionCodeSigningConfig -> `GET
   | GetFunctionConcurrency -> `GET
   | GetFunctionConfiguration -> `GET
   | GetFunctionEventInvokeConfig -> `GET
+  | GetFunctionRecursionConfig -> `GET
+  | GetFunctionScalingConfig -> `GET
   | GetFunctionUrlConfig -> `GET
   | GetLayerVersion -> `GET
   | GetLayerVersionByArn -> `GET
   | GetLayerVersionPolicy -> `GET
   | GetPolicy -> `GET
   | GetProvisionedConcurrencyConfig -> `GET
+  | GetRuntimeManagementConfig -> `GET
   | Invoke -> `POST
   | InvokeAsync -> `POST
+  | InvokeWithResponseStream -> `POST
   | ListAliases -> `GET
+  | ListCapacityProviders -> `GET
   | ListCodeSigningConfigs -> `GET
+  | ListDurableExecutionsByFunction -> `GET
   | ListEventSourceMappings -> `GET
   | ListFunctionEventInvokeConfigs -> `GET
   | ListFunctionUrlConfigs -> `GET
+  | ListFunctionVersionsByCapacityProvider -> `GET
   | ListFunctions -> `GET
   | ListFunctionsByCodeSigningConfig -> `GET
   | ListLayerVersions -> `GET
@@ -197,12 +276,20 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | PutFunctionCodeSigningConfig -> `PUT
   | PutFunctionConcurrency -> `PUT
   | PutFunctionEventInvokeConfig -> `PUT
+  | PutFunctionRecursionConfig -> `PUT
+  | PutFunctionScalingConfig -> `PUT
   | PutProvisionedConcurrencyConfig -> `PUT
+  | PutRuntimeManagementConfig -> `PUT
   | RemoveLayerVersionPermission -> `DELETE
   | RemovePermission -> `DELETE
+  | SendDurableExecutionCallbackFailure -> `POST
+  | SendDurableExecutionCallbackHeartbeat -> `POST
+  | SendDurableExecutionCallbackSuccess -> `POST
+  | StopDurableExecution -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateAlias -> `PUT
+  | UpdateCapacityProvider -> `PUT
   | UpdateCodeSigningConfig -> `PUT
   | UpdateEventSourceMapping -> `PUT
   | UpdateFunctionCode -> `PUT
@@ -228,20 +315,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2015-03-31/functions/%s/policy"
-               (FunctionName.to_header x.AddPermissionRequest.functionName))
+               (NamespacedFunctionName.to_header
+                  x.AddPermissionRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
+      | CheckpointDurableExecution ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-executions/%s/checkpoint"
+            (DurableExecutionArn.to_header
+               x.CheckpointDurableExecutionRequest.durableExecutionArn)
       | CreateAlias ->
           (Format.kasprintf Uri.of_string) "/2015-03-31/functions/%s/aliases"
             (FunctionName.to_header x.CreateAliasRequest.functionName)
+      | CreateCapacityProvider ->
+          (Format.kasprintf Uri.of_string) "/2025-11-30/capacity-providers"
       | CreateCodeSigningConfig ->
-          (Format.kasprintf Uri.of_string)
-            "/2020-04-22/code-signing-configs/"
+          (Format.kasprintf Uri.of_string) "/2020-04-22/code-signing-configs"
       | CreateEventSourceMapping ->
           (Format.kasprintf Uri.of_string)
-            "/2015-03-31/event-source-mappings/"
+            "/2015-03-31/event-source-mappings"
       | CreateFunction ->
           (Format.kasprintf Uri.of_string) "/2015-03-31/functions"
       | CreateFunctionUrlConfig ->
@@ -259,6 +355,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2015-03-31/functions/%s/aliases/%s"
             (FunctionName.to_header x.DeleteAliasRequest.functionName)
             (Alias.to_header x.DeleteAliasRequest.name)
+      | DeleteCapacityProvider ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-11-30/capacity-providers/%s"
+            (CapacityProviderName.to_header
+               x.DeleteCapacityProviderRequest.capacityProviderName)
       | DeleteCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-04-22/code-signing-configs/%s"
@@ -271,15 +372,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2015-03-31/functions/%s"
-               (FunctionName.to_header x.DeleteFunctionRequest.functionName))
+               (NamespacedFunctionName.to_header
+                  x.DeleteFunctionRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | DeleteFunctionCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-06-30/functions/%s/code-signing-config"
-            (FunctionName.to_header
+            (NamespacedFunctionName.to_header
                x.DeleteFunctionCodeSigningConfigRequest.functionName)
       | DeleteFunctionConcurrency ->
           (Format.kasprintf Uri.of_string)
@@ -290,11 +394,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2019-09-25/functions/%s/event-invoke-config"
-               (FunctionName.to_header
+               (NamespacedFunctionName.to_header
                   x.DeleteFunctionEventInvokeConfigRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | DeleteFunctionUrlConfig ->
           Uri.add_query_params'
@@ -321,17 +427,60 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (List.filter_opt
                [Some ("Qualifier", (Qualifier.to_header x.qualifier))])
       | GetAccountSettings ->
-          (Format.kasprintf Uri.of_string) "/2016-08-19/account-settings/"
+          (Format.kasprintf Uri.of_string) "/2016-08-19/account-settings"
       | GetAlias ->
           (Format.kasprintf Uri.of_string)
             "/2015-03-31/functions/%s/aliases/%s"
             (FunctionName.to_header x.GetAliasRequest.functionName)
             (Alias.to_header x.GetAliasRequest.name)
+      | GetCapacityProvider ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-11-30/capacity-providers/%s"
+            (CapacityProviderName.to_header
+               x.GetCapacityProviderRequest.capacityProviderName)
       | GetCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-04-22/code-signing-configs/%s"
             (CodeSigningConfigArn.to_header
                x.GetCodeSigningConfigRequest.codeSigningConfigArn)
+      | GetDurableExecution ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-executions/%s"
+            (DurableExecutionArn.to_header
+               x.GetDurableExecutionRequest.durableExecutionArn)
+      | GetDurableExecutionHistory ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-12-01/durable-executions/%s/history"
+               (DurableExecutionArn.to_header
+                  x.GetDurableExecutionHistoryRequest.durableExecutionArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("IncludeExecutionData",
+                          (IncludeExecutionData.to_header v)))
+                  x.includeExecutionData;
+               Option.map ~f:(fun v -> ("MaxItems", (ItemCount.to_header v)))
+                 x.maxItems;
+               Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                 x.marker;
+               Option.map
+                 ~f:(fun v -> ("ReverseOrder", (ReverseOrder.to_header v)))
+                 x.reverseOrder])
+      | GetDurableExecutionState ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-12-01/durable-executions/%s/state"
+               (DurableExecutionArn.to_header
+                  x.GetDurableExecutionStateRequest.durableExecutionArn))
+            (List.filter_opt
+               [Some
+                  ("CheckpointToken",
+                    (CheckpointToken.to_header x.checkpointToken));
+               Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                 x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (ItemCount.to_header v)))
+                 x.maxItems])
       | GetEventSourceMapping ->
           (Format.kasprintf Uri.of_string)
             "/2015-03-31/event-source-mappings/%s"
@@ -343,12 +492,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.GetFunctionRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | GetFunctionCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-06-30/functions/%s/code-signing-config"
-            (FunctionName.to_header
+            (NamespacedFunctionName.to_header
                x.GetFunctionCodeSigningConfigRequest.functionName)
       | GetFunctionConcurrency ->
           (Format.kasprintf Uri.of_string)
@@ -363,18 +514,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.GetFunctionConfigurationRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | GetFunctionEventInvokeConfig ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2019-09-25/functions/%s/event-invoke-config"
-               (FunctionName.to_header
+               (NamespacedFunctionName.to_header
                   x.GetFunctionEventInvokeConfigRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
+      | GetFunctionRecursionConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/2024-08-31/functions/%s/recursion-config"
+            (UnqualifiedFunctionName.to_header
+               x.GetFunctionRecursionConfigRequest.functionName)
+      | GetFunctionScalingConfig ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-11-30/functions/%s/function-scaling-config"
+               (UnqualifiedFunctionName.to_header
+                  x.GetFunctionScalingConfigRequest.functionName))
+            (List.filter_opt
+               [Some
+                  ("Qualifier",
+                    (PublishedFunctionQualifier.to_header x.qualifier))])
       | GetFunctionUrlConfig ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2021-10-31/functions/%s/url"
@@ -411,7 +581,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.GetPolicyRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | GetProvisionedConcurrencyConfig ->
           Uri.add_query_params'
@@ -421,6 +593,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.GetProvisionedConcurrencyConfigRequest.functionName))
             (List.filter_opt
                [Some ("Qualifier", (Qualifier.to_header x.qualifier))])
+      | GetRuntimeManagementConfig ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-07-20/functions/%s/runtime-management-config"
+               (NamespacedFunctionName.to_header
+                  x.GetRuntimeManagementConfigRequest.functionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
+                  x.qualifier])
       | Invoke ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -429,13 +613,27 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.InvocationRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | InvokeAsync ->
           (Format.kasprintf Uri.of_string)
-            "/2014-11-13/functions/%s/invoke-async/"
+            "/2014-11-13/functions/%s/invoke-async"
             (NamespacedFunctionName.to_header
                x.InvokeAsyncRequest.functionName)
+      | InvokeWithResponseStream ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-11-15/functions/%s/response-streaming-invocations"
+               (NamespacedFunctionName.to_header
+                  x.InvokeWithResponseStreamRequest.functionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
+                  x.qualifier])
       | ListAliases ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -443,33 +641,84 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (FunctionName.to_header x.ListAliasesRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("FunctionVersion", (Version.to_header v)))
+                  ~f:(fun v ->
+                        ("FunctionVersion",
+                          (VersionWithLatestPublished.to_header v)))
                   x.functionVersion;
                Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                  x.marker;
                Option.map
                  ~f:(fun v -> ("MaxItems", (MaxListItems.to_header v)))
                  x.maxItems])
+      | ListCapacityProviders ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-11-30/capacity-providers")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("State", (CapacityProviderState.to_header v)))
+                  x.state;
+               Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                 x.marker;
+               Option.map
+                 ~f:(fun v -> ("MaxItems", (MaxFiftyListItems.to_header v)))
+                 x.maxItems])
       | ListCodeSigningConfigs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
-               "/2020-04-22/code-signing-configs/")
+               "/2020-04-22/code-signing-configs")
             (List.filter_opt
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                   x.marker;
                Option.map
                  ~f:(fun v -> ("MaxItems", (MaxListItems.to_header v)))
                  x.maxItems])
+      | ListDurableExecutionsByFunction ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-12-01/functions/%s/durable-executions"
+               (NamespacedFunctionName.to_header
+                  x.ListDurableExecutionsByFunctionRequest.functionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
+                  x.qualifier;
+               Option.map
+                 ~f:(fun v ->
+                       ("DurableExecutionName",
+                         (DurableExecutionName.to_header v)))
+                 x.durableExecutionName;
+               Option.map
+                 ~f:(fun v -> ("Statuses", (ExecutionStatusList.to_header v)))
+                 x.statuses;
+               Option.map
+                 ~f:(fun v ->
+                       ("StartedAfter", (ExecutionTimestamp.to_header v)))
+                 x.startedAfter;
+               Option.map
+                 ~f:(fun v ->
+                       ("StartedBefore", (ExecutionTimestamp.to_header v)))
+                 x.startedBefore;
+               Option.map
+                 ~f:(fun v -> ("ReverseOrder", (ReverseOrder.to_header v)))
+                 x.reverseOrder;
+               Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                 x.marker;
+               Option.map ~f:(fun v -> ("MaxItems", (ItemCount.to_header v)))
+                 x.maxItems])
       | ListEventSourceMappings ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
-               "/2015-03-31/event-source-mappings/")
+               "/2015-03-31/event-source-mappings")
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("EventSourceArn", (Arn.to_header v)))
                   x.eventSourceArn;
                Option.map
-                 ~f:(fun v -> ("FunctionName", (FunctionName.to_header v)))
+                 ~f:(fun v ->
+                       ("FunctionName", (NamespacedFunctionName.to_header v)))
                  x.functionName;
                Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
                  x.marker;
@@ -480,7 +729,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2019-09-25/functions/%s/event-invoke-config/list"
-               (FunctionName.to_header
+               (NamespacedFunctionName.to_header
                   x.ListFunctionEventInvokeConfigsRequest.functionName))
             (List.filter_opt
                [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
@@ -500,9 +749,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.marker;
                Option.map ~f:(fun v -> ("MaxItems", (MaxItems.to_header v)))
                  x.maxItems])
+      | ListFunctionVersionsByCapacityProvider ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-11-30/capacity-providers/%s/function-versions"
+               (CapacityProviderName.to_header
+                  x.ListFunctionVersionsByCapacityProviderRequest.capacityProviderName))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("Marker", (String_.to_header v)))
+                  x.marker;
+               Option.map
+                 ~f:(fun v -> ("MaxItems", (MaxFiftyListItems.to_header v)))
+                 x.maxItems])
       | ListFunctions ->
           Uri.add_query_params'
-            ((Format.kasprintf Uri.of_string) "/2015-03-31/functions/")
+            ((Format.kasprintf Uri.of_string) "/2015-03-31/functions")
             (List.filter_opt
                [Option.map
                   ~f:(fun v -> ("MasterRegion", (MasterRegion.to_header v)))
@@ -578,7 +839,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                             v))) x.maxItems])
       | ListTags ->
           (Format.kasprintf Uri.of_string) "/2017-03-31/tags/%s"
-            (FunctionArn.to_header x.ListTagsRequest.resource)
+            (TaggableResource.to_header x.ListTagsRequest.resource)
       | ListVersionsByFunction ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -601,7 +862,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | PutFunctionCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-06-30/functions/%s/code-signing-config"
-            (FunctionName.to_header
+            (NamespacedFunctionName.to_header
                x.PutFunctionCodeSigningConfigRequest.functionName)
       | PutFunctionConcurrency ->
           (Format.kasprintf Uri.of_string)
@@ -612,12 +873,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2019-09-25/functions/%s/event-invoke-config"
-               (FunctionName.to_header
+               (NamespacedFunctionName.to_header
                   x.PutFunctionEventInvokeConfigRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
+      | PutFunctionRecursionConfig ->
+          (Format.kasprintf Uri.of_string)
+            "/2024-08-31/functions/%s/recursion-config"
+            (UnqualifiedFunctionName.to_header
+               x.PutFunctionRecursionConfigRequest.functionName)
+      | PutFunctionScalingConfig ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2025-11-30/functions/%s/function-scaling-config"
+               (UnqualifiedFunctionName.to_header
+                  x.PutFunctionScalingConfigRequest.functionName))
+            (List.filter_opt
+               [Some
+                  ("Qualifier",
+                    (PublishedFunctionQualifier.to_header x.qualifier))])
       | PutProvisionedConcurrencyConfig ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -626,6 +904,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.PutProvisionedConcurrencyConfigRequest.functionName))
             (List.filter_opt
                [Some ("Qualifier", (Qualifier.to_header x.qualifier))])
+      | PutRuntimeManagementConfig ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/2021-07-20/functions/%s/runtime-management-config"
+               (NamespacedFunctionName.to_header
+                  x.PutRuntimeManagementConfigRequest.functionName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
+                  x.qualifier])
       | RemoveLayerVersionPermission ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -644,22 +934,45 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2015-03-31/functions/%s/policy/%s"
-               (FunctionName.to_header x.RemovePermissionRequest.functionName)
+               (NamespacedFunctionName.to_header
+                  x.RemovePermissionRequest.functionName)
                (NamespacedStatementId.to_header
                   x.RemovePermissionRequest.statementId))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier;
                Option.map ~f:(fun v -> ("RevisionId", (String_.to_header v)))
                  x.revisionId])
+      | SendDurableExecutionCallbackFailure ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-execution-callbacks/%s/fail"
+            (CallbackId.to_header
+               x.SendDurableExecutionCallbackFailureRequest.callbackId)
+      | SendDurableExecutionCallbackHeartbeat ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-execution-callbacks/%s/heartbeat"
+            (CallbackId.to_header
+               x.SendDurableExecutionCallbackHeartbeatRequest.callbackId)
+      | SendDurableExecutionCallbackSuccess ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-execution-callbacks/%s/succeed"
+            (CallbackId.to_header
+               x.SendDurableExecutionCallbackSuccessRequest.callbackId)
+      | StopDurableExecution ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-12-01/durable-executions/%s/stop"
+            (DurableExecutionArn.to_header
+               x.StopDurableExecutionRequest.durableExecutionArn)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/2017-03-31/tags/%s"
-            (FunctionArn.to_header x.TagResourceRequest.resource)
+            (TaggableResource.to_header x.TagResourceRequest.resource)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/2017-03-31/tags/%s"
-               (FunctionArn.to_header x.UntagResourceRequest.resource))
+               (TaggableResource.to_header x.UntagResourceRequest.resource))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateAlias ->
@@ -667,6 +980,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/2015-03-31/functions/%s/aliases/%s"
             (FunctionName.to_header x.UpdateAliasRequest.functionName)
             (Alias.to_header x.UpdateAliasRequest.name)
+      | UpdateCapacityProvider ->
+          (Format.kasprintf Uri.of_string)
+            "/2025-11-30/capacity-providers/%s"
+            (CapacityProviderName.to_header
+               x.UpdateCapacityProviderRequest.capacityProviderName)
       | UpdateCodeSigningConfig ->
           (Format.kasprintf Uri.of_string)
             "/2020-04-22/code-signing-configs/%s"
@@ -688,11 +1006,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/2019-09-25/functions/%s/event-invoke-config"
-               (FunctionName.to_header
+               (NamespacedFunctionName.to_header
                   x.UpdateFunctionEventInvokeConfigRequest.functionName))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("Qualifier", (Qualifier.to_header v)))
+                  ~f:(fun v ->
+                        ("Qualifier",
+                          (NumericLatestPublishedOrAliasQualifier.to_header v)))
                   x.qualifier])
       | UpdateFunctionUrlConfig ->
           Uri.add_query_params'
@@ -777,7 +1097,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.AddPermissionRequest.functionUrlAuthType
                         ~f:(fun x ->
                               ("FunctionUrlAuthType",
-                                (FunctionUrlAuthType.to_value x)))])
+                                (FunctionUrlAuthType.to_value x)));
+                      Option.map
+                        req.AddPermissionRequest.invokedViaFunctionUrl
+                        ~f:(fun x ->
+                              ("InvokedViaFunctionUrl",
+                                (InvokedViaFunctionUrl.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CheckpointDurableExecution ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CheckpointToken",
+                           (CheckpointToken.to_value
+                              req.CheckpointDurableExecutionRequest.checkpointToken));
+                      Option.map
+                        req.CheckpointDurableExecutionRequest.updates
+                        ~f:(fun x ->
+                              ("Updates", (OperationUpdates.to_value x)));
+                      Option.map
+                        req.CheckpointDurableExecutionRequest.clientToken
+                        ~f:(fun x ->
+                              ("ClientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -799,7 +1152,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (Alias.to_value req.CreateAliasRequest.name));
                       Some
                         ("FunctionVersion",
-                          (Version.to_value
+                          (VersionWithLatestPublished.to_value
                              req.CreateAliasRequest.functionVersion));
                       Option.map req.CreateAliasRequest.description
                         ~f:(fun x ->
@@ -808,6 +1161,49 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("RoutingConfig",
                                 (AliasRoutingConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateCapacityProvider ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("CapacityProviderName",
+                           (CapacityProviderName.to_value
+                              req.CreateCapacityProviderRequest.capacityProviderName));
+                      Some
+                        ("VpcConfig",
+                          (CapacityProviderVpcConfig.to_value
+                             req.CreateCapacityProviderRequest.vpcConfig));
+                      Some
+                        ("PermissionsConfig",
+                          (CapacityProviderPermissionsConfig.to_value
+                             req.CreateCapacityProviderRequest.permissionsConfig));
+                      Option.map
+                        req.CreateCapacityProviderRequest.instanceRequirements
+                        ~f:(fun x ->
+                              ("InstanceRequirements",
+                                (InstanceRequirements.to_value x)));
+                      Option.map
+                        req.CreateCapacityProviderRequest.capacityProviderScalingConfig
+                        ~f:(fun x ->
+                              ("CapacityProviderScalingConfig",
+                                (CapacityProviderScalingConfig.to_value x)));
+                      Option.map req.CreateCapacityProviderRequest.kmsKeyArn
+                        ~f:(fun x ->
+                              ("KmsKeyArn", (KMSKeyArnNonEmpty.to_value x)));
+                      Option.map req.CreateCapacityProviderRequest.tags
+                        ~f:(fun x -> ("Tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -836,7 +1232,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateCodeSigningConfigRequest.codeSigningPolicies
                         ~f:(fun x ->
                               ("CodeSigningPolicies",
-                                (CodeSigningPolicies.to_value x)))])
+                                (CodeSigningPolicies.to_value x)));
+                      Option.map req.CreateCodeSigningConfigRequest.tags
+                        ~f:(fun x -> ("Tags", (Tags.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -858,7 +1256,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("EventSourceArn", (Arn.to_value x)));
                       Some
                         ("FunctionName",
-                          (FunctionName.to_value
+                          (NamespacedFunctionName.to_value
                              req.CreateEventSourceMappingRequest.functionName));
                       Option.map req.CreateEventSourceMappingRequest.enabled
                         ~f:(fun x -> ("Enabled", (Enabled.to_value x)));
@@ -910,6 +1308,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("MaximumRetryAttempts",
                                 (MaximumRetryAttemptsEventSourceMapping.to_value
                                    x)));
+                      Option.map req.CreateEventSourceMappingRequest.tags
+                        ~f:(fun x -> ("Tags", (Tags.to_value x)));
                       Option.map
                         req.CreateEventSourceMappingRequest.tumblingWindowInSeconds
                         ~f:(fun x ->
@@ -933,7 +1333,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.CreateEventSourceMappingRequest.functionResponseTypes
                         ~f:(fun x ->
                               ("FunctionResponseTypes",
-                                (FunctionResponseTypeList.to_value x)))])
+                                (FunctionResponseTypeList.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.amazonManagedKafkaEventSourceConfig
+                        ~f:(fun x ->
+                              ("AmazonManagedKafkaEventSourceConfig",
+                                (AmazonManagedKafkaEventSourceConfig.to_value
+                                   x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.selfManagedKafkaEventSourceConfig
+                        ~f:(fun x ->
+                              ("SelfManagedKafkaEventSourceConfig",
+                                (SelfManagedKafkaEventSourceConfig.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.scalingConfig
+                        ~f:(fun x ->
+                              ("ScalingConfig", (ScalingConfig.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.documentDBEventSourceConfig
+                        ~f:(fun x ->
+                              ("DocumentDBEventSourceConfig",
+                                (DocumentDBEventSourceConfig.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.kMSKeyArn
+                        ~f:(fun x -> ("KMSKeyArn", (KMSKeyArn.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.metricsConfig
+                        ~f:(fun x ->
+                              ("MetricsConfig",
+                                (EventSourceMappingMetricsConfig.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.loggingConfig
+                        ~f:(fun x ->
+                              ("LoggingConfig",
+                                (EventSourceMappingLoggingConfig.to_value x)));
+                      Option.map
+                        req.CreateEventSourceMappingRequest.provisionedPollerConfig
+                        ~f:(fun x ->
+                              ("ProvisionedPollerConfig",
+                                (ProvisionedPollerConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1014,7 +1452,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateFunctionRequest.ephemeralStorage
                         ~f:(fun x ->
                               ("EphemeralStorage",
-                                (EphemeralStorage.to_value x)))])
+                                (EphemeralStorage.to_value x)));
+                      Option.map req.CreateFunctionRequest.snapStart
+                        ~f:(fun x -> ("SnapStart", (SnapStart.to_value x)));
+                      Option.map req.CreateFunctionRequest.loggingConfig
+                        ~f:(fun x ->
+                              ("LoggingConfig", (LoggingConfig.to_value x)));
+                      Option.map
+                        req.CreateFunctionRequest.capacityProviderConfig
+                        ~f:(fun x ->
+                              ("CapacityProviderConfig",
+                                (CapacityProviderConfig.to_value x)));
+                      Option.map req.CreateFunctionRequest.publishTo
+                        ~f:(fun x ->
+                              ("PublishTo",
+                                (FunctionVersionLatestPublished.to_value x)));
+                      Option.map req.CreateFunctionRequest.durableConfig
+                        ~f:(fun x ->
+                              ("DurableConfig", (DurableConfig.to_value x)));
+                      Option.map req.CreateFunctionRequest.tenancyConfig
+                        ~f:(fun x ->
+                              ("TenancyConfig", (TenancyConfig.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1036,7 +1494,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                            (FunctionUrlAuthType.to_value
                               req.CreateFunctionUrlConfigRequest.authType));
                       Option.map req.CreateFunctionUrlConfigRequest.cors
-                        ~f:(fun x -> ("Cors", (Cors.to_value x)))])
+                        ~f:(fun x -> ("Cors", (Cors.to_value x)));
+                      Option.map
+                        req.CreateFunctionUrlConfigRequest.invokeMode
+                        ~f:(fun x -> ("InvokeMode", (InvokeMode.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1045,6 +1506,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteCapacityProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteCodeSigningConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteEventSourceMapping ->
@@ -1067,7 +1530,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetAlias ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetCapacityProvider ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetCodeSigningConfig ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDurableExecution ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDurableExecutionHistory ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDurableExecutionState ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetEventSourceMapping ->
@@ -1088,6 +1563,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetFunctionEventInvokeConfig ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFunctionRecursionConfig ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetFunctionScalingConfig ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetFunctionUrlConfig ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1106,6 +1587,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetProvisionedConcurrencyConfig ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRuntimeManagementConfig ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | Invoke ->
       let headers =
         Some
@@ -1117,7 +1601,13 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
               Option.map req.InvocationRequest.logType
                 ~f:(fun x -> ("X-Amz-Log-Type", (LogType.to_header x)));
               Option.map req.InvocationRequest.clientContext
-                ~f:(fun x -> ("X-Amz-Client-Context", (String_.to_header x)))])
+                ~f:(fun x -> ("X-Amz-Client-Context", (String_.to_header x)));
+              Option.map req.InvocationRequest.durableExecutionName
+                ~f:(fun x ->
+                      ("X-Amz-Durable-Execution-Name",
+                        (DurableExecutionName.to_header x)));
+              Option.map req.InvocationRequest.tenantId
+                ~f:(fun x -> ("X-Amz-Tenant-Id", (TenantId.to_header x)))])
              |> Awso.Http.Headers.of_list) in
       let body = Option.map req.payload ~f:Blob.to_header in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -1125,10 +1615,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
       let body = BlobStream.to_header req.invokeArgs in
       Awso.Http.Request.make ?headers ~body (method_of_endpoint endp)
+  | InvokeWithResponseStream ->
+      let headers =
+        Some
+          ((List.filter_opt
+              [Option.map req.InvokeWithResponseStreamRequest.invocationType
+                 ~f:(fun x ->
+                       ("X-Amz-Invocation-Type",
+                         (ResponseStreamingInvocationType.to_header x)));
+              Option.map req.InvokeWithResponseStreamRequest.logType
+                ~f:(fun x -> ("X-Amz-Log-Type", (LogType.to_header x)));
+              Option.map req.InvokeWithResponseStreamRequest.clientContext
+                ~f:(fun x -> ("X-Amz-Client-Context", (String_.to_header x)));
+              Option.map req.InvokeWithResponseStreamRequest.tenantId
+                ~f:(fun x -> ("X-Amz-Tenant-Id", (TenantId.to_header x)))])
+             |> Awso.Http.Headers.of_list) in
+      let body = Option.map req.payload ~f:Blob.to_header in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListAliases ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCapacityProviders ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCodeSigningConfigs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDurableExecutionsByFunction ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListEventSourceMappings ->
@@ -1138,6 +1651,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFunctionUrlConfigs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListFunctionVersionsByCapacityProvider ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFunctions ->
@@ -1212,7 +1728,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("Description", (Description.to_value x)));
                       Option.map req.PublishVersionRequest.revisionId
-                        ~f:(fun x -> ("RevisionId", (String_.to_value x)))])
+                        ~f:(fun x -> ("RevisionId", (String_.to_value x)));
+                      Option.map req.PublishVersionRequest.publishTo
+                        ~f:(fun x ->
+                              ("PublishTo",
+                                (FunctionVersionLatestPublished.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1226,11 +1746,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutFunctionEventInvokeConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | PutFunctionRecursionConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutFunctionScalingConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | PutProvisionedConcurrencyConfig ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutRuntimeManagementConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RemoveLayerVersionPermission ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | RemovePermission -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SendDurableExecutionCallbackFailure ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        Option.map req.error
+          ~f:(fun param ->
+                ((param |> ErrorObject.to_value) |>
+                   Awso.Botodata.Json.value_to_json)
+                  |> Yojson.Safe.to_string) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendDurableExecutionCallbackHeartbeat ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | SendDurableExecutionCallbackSuccess ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body = Option.map req.result ~f:BinaryOperationPayload.to_header in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StopDurableExecution ->
+      let headers = Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+      let body =
+        Option.map req.error
+          ~f:(fun param ->
+                ((param |> ErrorObject.to_value) |>
+                   Awso.Botodata.Json.value_to_json)
+                  |> Yojson.Safe.to_string) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -1252,6 +1803,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAlias -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateCapacityProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateCodeSigningConfig ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateEventSourceMapping ->
@@ -1353,10 +1906,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (AddPermissionResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some AddPermissionResponse.error_of_json))
+  | CheckpointDurableExecution ->
+      if is_success
+      then
+        Ok
+          (CheckpointDurableExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CheckpointDurableExecutionResponse.error_of_json))
   | CreateAlias ->
       if is_success
       then Ok (AliasConfiguration.of_json (response_to_json resp))
       else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
+  | CreateCapacityProvider ->
+      if is_success
+      then
+        Ok (CreateCapacityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCapacityProviderResponse.error_of_json))
   | CreateCodeSigningConfig ->
       if is_success
       then
@@ -1386,6 +1956,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some CreateFunctionUrlConfigResponse.error_of_json))
   | DeleteAlias -> if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteCapacityProvider ->
+      if is_success
+      then
+        Ok (DeleteCapacityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCapacityProviderResponse.error_of_json))
   | DeleteCodeSigningConfig ->
       if is_success
       then
@@ -1405,7 +1983,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           (parse_aws_error
              (Some EventSourceMappingConfiguration.error_of_json))
   | DeleteFunction ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then Ok (DeleteFunctionResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some DeleteFunctionResponse.error_of_json))
   | DeleteFunctionCodeSigningConfig ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteFunctionConcurrency ->
@@ -1428,12 +2009,41 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (AliasConfiguration.of_json (response_to_json resp))
       else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
+  | GetCapacityProvider ->
+      if is_success
+      then Ok (GetCapacityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetCapacityProviderResponse.error_of_json))
   | GetCodeSigningConfig ->
       if is_success
       then Ok (GetCodeSigningConfigResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetCodeSigningConfigResponse.error_of_json))
+  | GetDurableExecution ->
+      if is_success
+      then Ok (GetDurableExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDurableExecutionResponse.error_of_json))
+  | GetDurableExecutionHistory ->
+      if is_success
+      then
+        Ok
+          (GetDurableExecutionHistoryResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDurableExecutionHistoryResponse.error_of_json))
+  | GetDurableExecutionState ->
+      if is_success
+      then
+        Ok (GetDurableExecutionStateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDurableExecutionStateResponse.error_of_json))
   | GetEventSourceMapping ->
       if is_success
       then
@@ -1474,6 +2084,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some FunctionEventInvokeConfig.error_of_json))
+  | GetFunctionRecursionConfig ->
+      if is_success
+      then
+        Ok
+          (GetFunctionRecursionConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFunctionRecursionConfigResponse.error_of_json))
+  | GetFunctionScalingConfig ->
+      if is_success
+      then
+        Ok (GetFunctionScalingConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetFunctionScalingConfigResponse.error_of_json))
   | GetFunctionUrlConfig ->
       if is_success
       then Ok (GetFunctionUrlConfigResponse.of_json (response_to_json resp))
@@ -1510,6 +2137,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetProvisionedConcurrencyConfigResponse.error_of_json))
+  | GetRuntimeManagementConfig ->
+      if is_success
+      then
+        Ok
+          (GetRuntimeManagementConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRuntimeManagementConfigResponse.error_of_json))
   | Invoke ->
       if is_success
       then
@@ -1522,10 +2158,31 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (InvokeAsyncResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some InvokeAsyncResponse.error_of_json))
+  | InvokeWithResponseStream ->
+      if is_success
+      then
+        let body =
+          InvokeWithResponseStreamResponseEvent.of_string
+            (Awso.Http.Response.body resp) in
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (InvokeWithResponseStreamResponse.of_header_and_body
+             (headers, body))
+      else
+        Error
+          (parse_aws_error
+             (Some InvokeWithResponseStreamResponse.error_of_json))
   | ListAliases ->
       if is_success
       then Ok (ListAliasesResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
+  | ListCapacityProviders ->
+      if is_success
+      then Ok (ListCapacityProvidersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCapacityProvidersResponse.error_of_json))
   | ListCodeSigningConfigs ->
       if is_success
       then
@@ -1534,6 +2191,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListCodeSigningConfigsResponse.error_of_json))
+  | ListDurableExecutionsByFunction ->
+      if is_success
+      then
+        Ok
+          (ListDurableExecutionsByFunctionResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDurableExecutionsByFunctionResponse.error_of_json))
   | ListEventSourceMappings ->
       if is_success
       then
@@ -1560,6 +2227,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListFunctionUrlConfigsResponse.error_of_json))
+  | ListFunctionVersionsByCapacityProvider ->
+      if is_success
+      then
+        Ok
+          (ListFunctionVersionsByCapacityProviderResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListFunctionVersionsByCapacityProviderResponse.error_of_json))
   | ListFunctions ->
       if is_success
       then Ok (ListFunctionsResponse.of_json (response_to_json resp))
@@ -1636,6 +2314,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some FunctionEventInvokeConfig.error_of_json))
+  | PutFunctionRecursionConfig ->
+      if is_success
+      then
+        Ok
+          (PutFunctionRecursionConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutFunctionRecursionConfigResponse.error_of_json))
+  | PutFunctionScalingConfig ->
+      if is_success
+      then
+        Ok (PutFunctionScalingConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutFunctionScalingConfigResponse.error_of_json))
   | PutProvisionedConcurrencyConfig ->
       if is_success
       then
@@ -1646,10 +2341,62 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutProvisionedConcurrencyConfigResponse.error_of_json))
+  | PutRuntimeManagementConfig ->
+      if is_success
+      then
+        Ok
+          (PutRuntimeManagementConfigResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some PutRuntimeManagementConfigResponse.error_of_json))
   | RemoveLayerVersionPermission ->
       if is_success then Ok () else Error (parse_aws_error None)
   | RemovePermission ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | SendDurableExecutionCallbackFailure ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (SendDurableExecutionCallbackFailureResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some SendDurableExecutionCallbackFailureResponse.error_of_json))
+  | SendDurableExecutionCallbackHeartbeat ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (SendDurableExecutionCallbackHeartbeatResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                SendDurableExecutionCallbackHeartbeatResponse.error_of_json))
+  | SendDurableExecutionCallbackSuccess ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (SendDurableExecutionCallbackSuccessResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some SendDurableExecutionCallbackSuccessResponse.error_of_json))
+  | StopDurableExecution ->
+      if is_success
+      then Ok (StopDurableExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StopDurableExecutionResponse.error_of_json))
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
@@ -1657,6 +2404,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (AliasConfiguration.of_json (response_to_json resp))
       else Error (parse_aws_error (Some AliasConfiguration.error_of_json))
+  | UpdateCapacityProvider ->
+      if is_success
+      then
+        Ok (UpdateCapacityProviderResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCapacityProviderResponse.error_of_json))
   | UpdateCodeSigningConfig ->
       if is_success
       then

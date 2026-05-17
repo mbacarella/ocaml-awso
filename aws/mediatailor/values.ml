@@ -24,22 +24,175 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module Operator =
+module Integer =
   struct
-    type nonrec t =
-      | EQUALS 
-      | Non_static_id of string 
+    type nonrec t = int
     let make i = i
-    let to_string = function | EQUALS -> "EQUALS" | Non_static_id s -> s
-    let of_string = function | "EQUALS" -> EQUALS | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Operator" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Operator" j)
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module SegmentationDescriptor =
+  struct
+    type nonrec t =
+      {
+      segmentationEventId: Integer.t option
+        [@ocaml.doc
+          "The Event Identifier to assign to the segmentation_descriptor.segmentation_event_id message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. The default value is 1."];
+      segmentationUpidType: Integer.t option
+        [@ocaml.doc
+          "The Upid Type to assign to the segmentation_descriptor.segmentation_upid_type message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. Values must be between 0 and 256, inclusive. The default value is 14."];
+      segmentationUpid: String_.t option
+        [@ocaml.doc
+          "The Upid to assign to the segmentation_descriptor.segmentation_upid message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. The value must be a hexadecimal string containing only the characters 0 though 9 and A through F. The default value is \"\" (an empty string)."];
+      segmentationTypeId: Integer.t option
+        [@ocaml.doc
+          "The Type Identifier to assign to the segmentation_descriptor.segmentation_type_id message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. Values must be between 0 and 256, inclusive. The default value is 48."];
+      segmentNum: Integer.t option
+        [@ocaml.doc
+          "The segment number to assign to the segmentation_descriptor.segment_num message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification Values must be between 0 and 256, inclusive. The default value is 0."];
+      segmentsExpected: Integer.t option
+        [@ocaml.doc
+          "The number of segments expected, which is assigned to the segmentation_descriptor.segments_expectedS message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification Values must be between 0 and 256, inclusive. The default value is 0."];
+      subSegmentNum: Integer.t option
+        [@ocaml.doc
+          "The sub-segment number to assign to the segmentation_descriptor.sub_segment_num message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. Values must be between 0 and 256, inclusive. The defualt value is null."];
+      subSegmentsExpected: Integer.t option
+        [@ocaml.doc
+          "The number of sub-segments expected, which is assigned to the segmentation_descriptor.sub_segments_expected message, as defined in section 10.3.3.1 of the 2022 SCTE-35 specification. Values must be between 0 and 256, inclusive. The default value is null."]}
+    let make ?segmentationEventId =
+      fun ?segmentationUpidType ->
+        fun ?segmentationUpid ->
+          fun ?segmentationTypeId ->
+            fun ?segmentNum ->
+              fun ?segmentsExpected ->
+                fun ?subSegmentNum ->
+                  fun ?subSegmentsExpected ->
+                    fun () ->
+                      {
+                        segmentationEventId;
+                        segmentationUpidType;
+                        segmentationUpid;
+                        segmentationTypeId;
+                        segmentNum;
+                        segmentsExpected;
+                        subSegmentNum;
+                        subSegmentsExpected
+                      }
+    let to_value x =
+      structure_to_value
+        [("SegmentationEventId",
+           (Option.map x.segmentationEventId ~f:Integer.to_value));
+        ("SegmentationUpidType",
+          (Option.map x.segmentationUpidType ~f:Integer.to_value));
+        ("SegmentationUpid",
+          (Option.map x.segmentationUpid ~f:String_.to_value));
+        ("SegmentationTypeId",
+          (Option.map x.segmentationTypeId ~f:Integer.to_value));
+        ("SegmentNum", (Option.map x.segmentNum ~f:Integer.to_value));
+        ("SegmentsExpected",
+          (Option.map x.segmentsExpected ~f:Integer.to_value));
+        ("SubSegmentNum", (Option.map x.subSegmentNum ~f:Integer.to_value));
+        ("SubSegmentsExpected",
+          (Option.map x.subSegmentsExpected ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let subSegmentsExpected =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "SubSegmentsExpected") in
+      let subSegmentNum =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "SubSegmentNum") in
+      let segmentsExpected =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "SegmentsExpected") in
+      let segmentNum =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "SegmentNum") in
+      let segmentationTypeId =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "SegmentationTypeId") in
+      let segmentationUpid =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "SegmentationUpid") in
+      let segmentationUpidType =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "SegmentationUpidType") in
+      let segmentationEventId =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "SegmentationEventId") in
+      make ?subSegmentsExpected ?subSegmentNum ?segmentsExpected ?segmentNum
+        ?segmentationTypeId ?segmentationUpid ?segmentationUpidType
+        ?segmentationEventId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let subSegmentsExpected =
+        field_map json__ "SubSegmentsExpected" Integer.of_json in
+      let subSegmentNum = field_map json__ "SubSegmentNum" Integer.of_json in
+      let segmentsExpected =
+        field_map json__ "SegmentsExpected" Integer.of_json in
+      let segmentNum = field_map json__ "SegmentNum" Integer.of_json in
+      let segmentationTypeId =
+        field_map json__ "SegmentationTypeId" Integer.of_json in
+      let segmentationUpid =
+        field_map json__ "SegmentationUpid" String_.of_json in
+      let segmentationUpidType =
+        field_map json__ "SegmentationUpidType" Integer.of_json in
+      let segmentationEventId =
+        field_map json__ "SegmentationEventId" Integer.of_json in
+      make ?subSegmentsExpected ?subSegmentNum ?segmentsExpected ?segmentNum
+        ?segmentationTypeId ?segmentationUpid ?segmentationUpidType
+        ?segmentationEventId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The segmentation_descriptor message can contain advanced metadata fields, like content identifiers, to convey a wide range of information about the ad break. MediaTailor writes the ad metadata in the egress manifest as part of the EXT-X-DATERANGE or EventStream ad marker's SCTE-35 data. segmentation_descriptor messages must be sent with the time_signal message type. See the segmentation_descriptor() table of the 2022 SCTE-35 specification for more information."]
+module KeyValuePair =
+  struct
+    type nonrec t =
+      {
+      key: String_.t
+        [@ocaml.doc
+          "For SCTE35_ENHANCED output, defines a key. MediaTailor takes this key, and its associated value, and generates the key/value pair within the EXT-X-ASSETtag. If you specify a key, you must also specify a corresponding value."];
+      value: String_.t
+        [@ocaml.doc
+          "For SCTE35_ENHANCED output, defines a value. MediaTailor; takes this value, and its associated key, and generates the key/value pair within the EXT-X-ASSETtag. If you specify a value, you must also specify a corresponding key."]}
+    let context_ = "KeyValuePair"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (String_.to_value x.key)));
+        ("Value", (Some (String_.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let key = field_map_exn json__ "Key" String_.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For SCTE35_ENHANCED output, defines a key and corresponding value. MediaTailor generates these pairs within the EXT-X-ASSETtag."]
 module Zz__string =
   struct
     type nonrec t = string
@@ -66,25 +219,345 @@ module Zz__integer =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Type =
+module SegmentationDescriptorList =
+  struct
+    type nonrec t = SegmentationDescriptor.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SegmentationDescriptor.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SegmentationDescriptor.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SegmentationDescriptorList"
+        ~of_json:SegmentationDescriptor.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AdBreakMetadataList =
+  struct
+    type nonrec t = KeyValuePair.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyValuePair.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyValuePair.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AdBreakMetadataList" ~of_json:KeyValuePair.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module MessageType =
   struct
     type nonrec t =
-      | DASH 
-      | HLS 
+      | SPLICE_INSERT 
+      | TIME_SIGNAL 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | DASH -> "DASH" | HLS -> "HLS" | Non_static_id s -> s
+      function
+      | SPLICE_INSERT -> "SPLICE_INSERT"
+      | TIME_SIGNAL -> "TIME_SIGNAL"
+      | Non_static_id s -> s
     let of_string =
-      function | "DASH" -> DASH | "HLS" -> HLS | x -> Non_static_id x
+      function
+      | "SPLICE_INSERT" -> SPLICE_INSERT
+      | "TIME_SIGNAL" -> TIME_SIGNAL
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Type" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Type" j)
+      of_string (string_of_xml ~kind:"enumeration MessageType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MessageType" j)
     let to_json = simple_to_json to_value
   end
+module SlateSource =
+  struct
+    type nonrec t =
+      {
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc
+          "The name of the source location where the slate VOD source is stored."];
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc
+          "The slate VOD source name. The VOD source must already exist in a source location before it can be used for slate."]}
+    let make ?sourceLocationName =
+      fun ?vodSourceName -> fun () -> { sourceLocationName; vodSourceName }
+    let to_value x =
+      structure_to_value
+        [("SourceLocationName",
+           (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vodSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      make ?vodSourceName ?sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      make ?vodSourceName ?sourceLocationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Slate VOD source configuration."]
+module SpliceInsertMessage =
+  struct
+    type nonrec t =
+      {
+      availNum: Zz__integer.t option
+        [@ocaml.doc
+          "This is written to splice_insert.avail_num, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."];
+      availsExpected: Zz__integer.t option
+        [@ocaml.doc
+          "This is written to splice_insert.avails_expected, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."];
+      spliceEventId: Zz__integer.t option
+        [@ocaml.doc
+          "This is written to splice_insert.splice_event_id, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 1."];
+      uniqueProgramId: Zz__integer.t option
+        [@ocaml.doc
+          "This is written to splice_insert.unique_program_id, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."]}
+    let make ?availNum =
+      fun ?availsExpected ->
+        fun ?spliceEventId ->
+          fun ?uniqueProgramId ->
+            fun () ->
+              { availNum; availsExpected; spliceEventId; uniqueProgramId }
+    let to_value x =
+      structure_to_value
+        [("AvailNum", (Option.map x.availNum ~f:Zz__integer.to_value));
+        ("AvailsExpected",
+          (Option.map x.availsExpected ~f:Zz__integer.to_value));
+        ("SpliceEventId",
+          (Option.map x.spliceEventId ~f:Zz__integer.to_value));
+        ("UniqueProgramId",
+          (Option.map x.uniqueProgramId ~f:Zz__integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let uniqueProgramId =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "UniqueProgramId") in
+      let spliceEventId =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "SpliceEventId") in
+      let availsExpected =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "AvailsExpected") in
+      let availNum =
+        (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "AvailNum") in
+      make ?uniqueProgramId ?spliceEventId ?availsExpected ?availNum ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let uniqueProgramId =
+        field_map json__ "UniqueProgramId" Zz__integer.of_json in
+      let spliceEventId =
+        field_map json__ "SpliceEventId" Zz__integer.of_json in
+      let availsExpected =
+        field_map json__ "AvailsExpected" Zz__integer.of_json in
+      let availNum = field_map json__ "AvailNum" Zz__integer.of_json in
+      make ?uniqueProgramId ?spliceEventId ?availsExpected ?availNum ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Splice insert message configuration."]
+module TimeSignalMessage =
+  struct
+    type nonrec t =
+      {
+      segmentationDescriptors: SegmentationDescriptorList.t option
+        [@ocaml.doc
+          "The configurations for the SCTE-35 segmentation_descriptor message(s) sent with the time_signal message."]}
+    let make ?segmentationDescriptors = fun () -> { segmentationDescriptors }
+    let to_value x =
+      structure_to_value
+        [("SegmentationDescriptors",
+           (Option.map x.segmentationDescriptors
+              ~f:SegmentationDescriptorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let segmentationDescriptors =
+        (Option.map ~f:SegmentationDescriptorList.of_xml)
+          (Xml.child xml_arg0 "SegmentationDescriptors") in
+      make ?segmentationDescriptors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let segmentationDescriptors =
+        field_map json__ "SegmentationDescriptors"
+          SegmentationDescriptorList.of_json in
+      make ?segmentationDescriptors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The SCTE-35 time_signal message can be sent with one or more segmentation_descriptor messages. A time_signal message can be sent only if a single segmentation_descriptor message is sent. The time_signal message contains only the splice_time field which is constructed using a given presentation timestamp. When sending a time_signal message, the splice_command_type field in the splice_info_section message is set to 6 (0x06). See the time_signal() table of the 2022 SCTE-35 specification for more information."]
+module Zz__long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module Operator =
+  struct
+    type nonrec t =
+      | EQUALS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | EQUALS -> "EQUALS" | Non_static_id s -> s
+    let of_string = function | "EQUALS" -> EQUALS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Operator" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Operator" j)
+    let to_json = simple_to_json to_value
+  end
+module AdMarkupType =
+  struct
+    type nonrec t =
+      | DATERANGE 
+      | SCTE35_ENHANCED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DATERANGE -> "DATERANGE"
+      | SCTE35_ENHANCED -> "SCTE35_ENHANCED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DATERANGE" -> DATERANGE
+      | "SCTE35_ENHANCED" -> SCTE35_ENHANCED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AdMarkupType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AdMarkupType" j)
+    let to_json = simple_to_json to_value
+  end
+module AdBreak =
+  struct
+    type nonrec t =
+      {
+      messageType: MessageType.t option
+        [@ocaml.doc
+          "The SCTE-35 ad insertion type. Accepted value: SPLICE_INSERT, TIME_SIGNAL."];
+      offsetMillis: Zz__long.t
+        [@ocaml.doc
+          "How long (in milliseconds) after the beginning of the program that an ad starts. This value must fall within 100ms of a segment boundary, otherwise the ad break will be skipped."];
+      slate: SlateSource.t option
+        [@ocaml.doc "Ad break slate configuration."];
+      spliceInsertMessage: SpliceInsertMessage.t option
+        [@ocaml.doc
+          "This defines the SCTE-35 splice_insert() message inserted around the ad. For information about using splice_insert(), see the SCTE-35 specficiaiton, section 9.7.3.1."];
+      timeSignalMessage: TimeSignalMessage.t option
+        [@ocaml.doc
+          "Defines the SCTE-35 time_signal message inserted around the ad. Programs on a channel's schedule can be configured with one or more ad breaks. You can attach a splice_insert SCTE-35 message to the ad break. This message provides basic metadata about the ad break. See section 9.7.4 of the 2022 SCTE-35 specification for more information."];
+      adBreakMetadata: AdBreakMetadataList.t option
+        [@ocaml.doc
+          "Defines a list of key/value pairs that MediaTailor generates within the EXT-X-ASSETtag for SCTE35_ENHANCED output."]}
+    let context_ = "AdBreak"
+    let make ?messageType =
+      fun ?slate ->
+        fun ?spliceInsertMessage ->
+          fun ?timeSignalMessage ->
+            fun ?adBreakMetadata ->
+              fun ~offsetMillis ->
+                fun () ->
+                  {
+                    messageType;
+                    slate;
+                    spliceInsertMessage;
+                    timeSignalMessage;
+                    adBreakMetadata;
+                    offsetMillis
+                  }
+    let to_value x =
+      structure_to_value
+        [("MessageType", (Option.map x.messageType ~f:MessageType.to_value));
+        ("OffsetMillis", (Some (Zz__long.to_value x.offsetMillis)));
+        ("Slate", (Option.map x.slate ~f:SlateSource.to_value));
+        ("SpliceInsertMessage",
+          (Option.map x.spliceInsertMessage ~f:SpliceInsertMessage.to_value));
+        ("TimeSignalMessage",
+          (Option.map x.timeSignalMessage ~f:TimeSignalMessage.to_value));
+        ("AdBreakMetadata",
+          (Option.map x.adBreakMetadata ~f:AdBreakMetadataList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let adBreakMetadata =
+        (Option.map ~f:AdBreakMetadataList.of_xml)
+          (Xml.child xml_arg0 "AdBreakMetadata") in
+      let timeSignalMessage =
+        (Option.map ~f:TimeSignalMessage.of_xml)
+          (Xml.child xml_arg0 "TimeSignalMessage") in
+      let spliceInsertMessage =
+        (Option.map ~f:SpliceInsertMessage.of_xml)
+          (Xml.child xml_arg0 "SpliceInsertMessage") in
+      let slate =
+        (Option.map ~f:SlateSource.of_xml) (Xml.child xml_arg0 "Slate") in
+      let offsetMillis =
+        Zz__long.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OffsetMillis") in
+      let messageType =
+        (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "MessageType") in
+      make ?adBreakMetadata ?timeSignalMessage ?spliceInsertMessage ?slate
+        ~offsetMillis ?messageType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let adBreakMetadata =
+        field_map json__ "AdBreakMetadata" AdBreakMetadataList.of_json in
+      let timeSignalMessage =
+        field_map json__ "TimeSignalMessage" TimeSignalMessage.of_json in
+      let spliceInsertMessage =
+        field_map json__ "SpliceInsertMessage" SpliceInsertMessage.of_json in
+      let slate = field_map json__ "Slate" SlateSource.of_json in
+      let offsetMillis = field_map_exn json__ "OffsetMillis" Zz__long.of_json in
+      let messageType = field_map json__ "MessageType" MessageType.of_json in
+      make ?adBreakMetadata ?timeSignalMessage ?spliceInsertMessage ?slate
+        ~offsetMillis ?messageType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Ad break configuration parameters."]
 module AvailMatchingCriteria =
   struct
     type nonrec t =
@@ -111,14 +584,865 @@ module AvailMatchingCriteria =
           (Xml.child_exn ~context:context_ xml_arg0 "DynamicVariable") in
       make ~operator ~dynamicVariable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operator = field_map_exn json "Operator" Operator.of_json in
+    let of_json json__ =
+      let operator = field_map_exn json__ "Operator" Operator.of_json in
       let dynamicVariable =
-        field_map_exn json "DynamicVariable" Zz__string.of_json in
+        field_map_exn json__ "DynamicVariable" Zz__string.of_json in
       make ~operator ~dynamicVariable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "MediaTailor only places (consumes) prefetched ads if the ad break meets the criteria defined by the dynamic variables. This gives you granular control over which ad break to place the prefetched ads into. As an example, let's say that you set DynamicVariable to scte.event_id and Operator to EQUALS, and your playback configuration has an ADS URL of https://my.ads.server.com/path?&podId=\\[scte.avail_num\\]&event=\\[scte.event_id\\]&duration=\\[session.avail_duration_secs\\]. And the prefetch request to the ADS contains these values https://my.ads.server.com/path?&podId=3&event=my-awesome-event&duration=30. MediaTailor will only insert the prefetched ads into the ad break if has a SCTE marker with an event id of my-awesome-event, since it must match the event id that MediaTailor uses to query the ADS. You can specify up to five AvailMatchingCriteria. If you specify multiple AvailMatchingCriteria, MediaTailor combines them to match using a logical AND. You can model logical OR combinations by creating multiple prefetch schedules."]
+module AdsInteractionExcludeEventType =
+  struct
+    type nonrec t =
+      | AD_MARKER_FOUND 
+      | NON_AD_MARKER_FOUND 
+      | MAKING_ADS_REQUEST 
+      | MODIFIED_TARGET_URL 
+      | VAST_REDIRECT 
+      | EMPTY_VAST_RESPONSE 
+      | EMPTY_VMAP_RESPONSE 
+      | VAST_RESPONSE 
+      | REDIRECTED_VAST_RESPONSE 
+      | FILLED_AVAIL 
+      | FILLED_OVERLAY_AVAIL 
+      | BEACON_FIRED 
+      | WARNING_NO_ADVERTISEMENTS 
+      | WARNING_VPAID_AD_DROPPED 
+      | WARNING_URL_VARIABLE_SUBSTITUTION_FAILED 
+      | ERROR_UNKNOWN 
+      | ERROR_UNKNOWN_HOST 
+      | ERROR_DISALLOWED_HOST 
+      | ERROR_ADS_IO 
+      | ERROR_ADS_TIMEOUT 
+      | ERROR_ADS_RESPONSE_PARSE 
+      | ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT 
+      | ERROR_ADS_INVALID_RESPONSE 
+      | ERROR_VAST_REDIRECT_EMPTY_RESPONSE 
+      | ERROR_VAST_REDIRECT_MULTIPLE_VAST 
+      | ERROR_VAST_REDIRECT_FAILED 
+      | ERROR_VAST_MISSING_MEDIAFILES 
+      | ERROR_VAST_MISSING_CREATIVES 
+      | ERROR_VAST_MISSING_OVERLAYS 
+      | ERROR_VAST_MISSING_IMPRESSION 
+      | ERROR_VAST_INVALID_VAST_AD_TAG_URI 
+      | ERROR_VAST_MULTIPLE_TRACKING_EVENTS 
+      | ERROR_VAST_MULTIPLE_LINEAR 
+      | ERROR_VAST_INVALID_MEDIA_FILE 
+      | ERROR_FIRING_BEACON_FAILED 
+      | ERROR_PERSONALIZATION_DISABLED 
+      | VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET 
+      | VOD_TIME_BASED_AVAIL_PLAN_SUCCESS 
+      | VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS 
+      | INTERSTITIAL_VOD_SUCCESS 
+      | INTERSTITIAL_VOD_FAILURE 
+      | PRE_ADS_REQUEST_HOOK_ERROR 
+      | PRE_ADS_REQUEST_FUNCTION_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AD_MARKER_FOUND -> "AD_MARKER_FOUND"
+      | NON_AD_MARKER_FOUND -> "NON_AD_MARKER_FOUND"
+      | MAKING_ADS_REQUEST -> "MAKING_ADS_REQUEST"
+      | MODIFIED_TARGET_URL -> "MODIFIED_TARGET_URL"
+      | VAST_REDIRECT -> "VAST_REDIRECT"
+      | EMPTY_VAST_RESPONSE -> "EMPTY_VAST_RESPONSE"
+      | EMPTY_VMAP_RESPONSE -> "EMPTY_VMAP_RESPONSE"
+      | VAST_RESPONSE -> "VAST_RESPONSE"
+      | REDIRECTED_VAST_RESPONSE -> "REDIRECTED_VAST_RESPONSE"
+      | FILLED_AVAIL -> "FILLED_AVAIL"
+      | FILLED_OVERLAY_AVAIL -> "FILLED_OVERLAY_AVAIL"
+      | BEACON_FIRED -> "BEACON_FIRED"
+      | WARNING_NO_ADVERTISEMENTS -> "WARNING_NO_ADVERTISEMENTS"
+      | WARNING_VPAID_AD_DROPPED -> "WARNING_VPAID_AD_DROPPED"
+      | WARNING_URL_VARIABLE_SUBSTITUTION_FAILED ->
+          "WARNING_URL_VARIABLE_SUBSTITUTION_FAILED"
+      | ERROR_UNKNOWN -> "ERROR_UNKNOWN"
+      | ERROR_UNKNOWN_HOST -> "ERROR_UNKNOWN_HOST"
+      | ERROR_DISALLOWED_HOST -> "ERROR_DISALLOWED_HOST"
+      | ERROR_ADS_IO -> "ERROR_ADS_IO"
+      | ERROR_ADS_TIMEOUT -> "ERROR_ADS_TIMEOUT"
+      | ERROR_ADS_RESPONSE_PARSE -> "ERROR_ADS_RESPONSE_PARSE"
+      | ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT ->
+          "ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT"
+      | ERROR_ADS_INVALID_RESPONSE -> "ERROR_ADS_INVALID_RESPONSE"
+      | ERROR_VAST_REDIRECT_EMPTY_RESPONSE ->
+          "ERROR_VAST_REDIRECT_EMPTY_RESPONSE"
+      | ERROR_VAST_REDIRECT_MULTIPLE_VAST ->
+          "ERROR_VAST_REDIRECT_MULTIPLE_VAST"
+      | ERROR_VAST_REDIRECT_FAILED -> "ERROR_VAST_REDIRECT_FAILED"
+      | ERROR_VAST_MISSING_MEDIAFILES -> "ERROR_VAST_MISSING_MEDIAFILES"
+      | ERROR_VAST_MISSING_CREATIVES -> "ERROR_VAST_MISSING_CREATIVES"
+      | ERROR_VAST_MISSING_OVERLAYS -> "ERROR_VAST_MISSING_OVERLAYS"
+      | ERROR_VAST_MISSING_IMPRESSION -> "ERROR_VAST_MISSING_IMPRESSION"
+      | ERROR_VAST_INVALID_VAST_AD_TAG_URI ->
+          "ERROR_VAST_INVALID_VAST_AD_TAG_URI"
+      | ERROR_VAST_MULTIPLE_TRACKING_EVENTS ->
+          "ERROR_VAST_MULTIPLE_TRACKING_EVENTS"
+      | ERROR_VAST_MULTIPLE_LINEAR -> "ERROR_VAST_MULTIPLE_LINEAR"
+      | ERROR_VAST_INVALID_MEDIA_FILE -> "ERROR_VAST_INVALID_MEDIA_FILE"
+      | ERROR_FIRING_BEACON_FAILED -> "ERROR_FIRING_BEACON_FAILED"
+      | ERROR_PERSONALIZATION_DISABLED -> "ERROR_PERSONALIZATION_DISABLED"
+      | VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET ->
+          "VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET"
+      | VOD_TIME_BASED_AVAIL_PLAN_SUCCESS ->
+          "VOD_TIME_BASED_AVAIL_PLAN_SUCCESS"
+      | VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS ->
+          "VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS"
+      | INTERSTITIAL_VOD_SUCCESS -> "INTERSTITIAL_VOD_SUCCESS"
+      | INTERSTITIAL_VOD_FAILURE -> "INTERSTITIAL_VOD_FAILURE"
+      | PRE_ADS_REQUEST_HOOK_ERROR -> "PRE_ADS_REQUEST_HOOK_ERROR"
+      | PRE_ADS_REQUEST_FUNCTION_ERROR -> "PRE_ADS_REQUEST_FUNCTION_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AD_MARKER_FOUND" -> AD_MARKER_FOUND
+      | "NON_AD_MARKER_FOUND" -> NON_AD_MARKER_FOUND
+      | "MAKING_ADS_REQUEST" -> MAKING_ADS_REQUEST
+      | "MODIFIED_TARGET_URL" -> MODIFIED_TARGET_URL
+      | "VAST_REDIRECT" -> VAST_REDIRECT
+      | "EMPTY_VAST_RESPONSE" -> EMPTY_VAST_RESPONSE
+      | "EMPTY_VMAP_RESPONSE" -> EMPTY_VMAP_RESPONSE
+      | "VAST_RESPONSE" -> VAST_RESPONSE
+      | "REDIRECTED_VAST_RESPONSE" -> REDIRECTED_VAST_RESPONSE
+      | "FILLED_AVAIL" -> FILLED_AVAIL
+      | "FILLED_OVERLAY_AVAIL" -> FILLED_OVERLAY_AVAIL
+      | "BEACON_FIRED" -> BEACON_FIRED
+      | "WARNING_NO_ADVERTISEMENTS" -> WARNING_NO_ADVERTISEMENTS
+      | "WARNING_VPAID_AD_DROPPED" -> WARNING_VPAID_AD_DROPPED
+      | "WARNING_URL_VARIABLE_SUBSTITUTION_FAILED" ->
+          WARNING_URL_VARIABLE_SUBSTITUTION_FAILED
+      | "ERROR_UNKNOWN" -> ERROR_UNKNOWN
+      | "ERROR_UNKNOWN_HOST" -> ERROR_UNKNOWN_HOST
+      | "ERROR_DISALLOWED_HOST" -> ERROR_DISALLOWED_HOST
+      | "ERROR_ADS_IO" -> ERROR_ADS_IO
+      | "ERROR_ADS_TIMEOUT" -> ERROR_ADS_TIMEOUT
+      | "ERROR_ADS_RESPONSE_PARSE" -> ERROR_ADS_RESPONSE_PARSE
+      | "ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT" ->
+          ERROR_ADS_RESPONSE_UNKNOWN_ROOT_ELEMENT
+      | "ERROR_ADS_INVALID_RESPONSE" -> ERROR_ADS_INVALID_RESPONSE
+      | "ERROR_VAST_REDIRECT_EMPTY_RESPONSE" ->
+          ERROR_VAST_REDIRECT_EMPTY_RESPONSE
+      | "ERROR_VAST_REDIRECT_MULTIPLE_VAST" ->
+          ERROR_VAST_REDIRECT_MULTIPLE_VAST
+      | "ERROR_VAST_REDIRECT_FAILED" -> ERROR_VAST_REDIRECT_FAILED
+      | "ERROR_VAST_MISSING_MEDIAFILES" -> ERROR_VAST_MISSING_MEDIAFILES
+      | "ERROR_VAST_MISSING_CREATIVES" -> ERROR_VAST_MISSING_CREATIVES
+      | "ERROR_VAST_MISSING_OVERLAYS" -> ERROR_VAST_MISSING_OVERLAYS
+      | "ERROR_VAST_MISSING_IMPRESSION" -> ERROR_VAST_MISSING_IMPRESSION
+      | "ERROR_VAST_INVALID_VAST_AD_TAG_URI" ->
+          ERROR_VAST_INVALID_VAST_AD_TAG_URI
+      | "ERROR_VAST_MULTIPLE_TRACKING_EVENTS" ->
+          ERROR_VAST_MULTIPLE_TRACKING_EVENTS
+      | "ERROR_VAST_MULTIPLE_LINEAR" -> ERROR_VAST_MULTIPLE_LINEAR
+      | "ERROR_VAST_INVALID_MEDIA_FILE" -> ERROR_VAST_INVALID_MEDIA_FILE
+      | "ERROR_FIRING_BEACON_FAILED" -> ERROR_FIRING_BEACON_FAILED
+      | "ERROR_PERSONALIZATION_DISABLED" -> ERROR_PERSONALIZATION_DISABLED
+      | "VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET" ->
+          VOD_TIME_BASED_AVAIL_PLAN_VAST_RESPONSE_FOR_OFFSET
+      | "VOD_TIME_BASED_AVAIL_PLAN_SUCCESS" ->
+          VOD_TIME_BASED_AVAIL_PLAN_SUCCESS
+      | "VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS" ->
+          VOD_TIME_BASED_AVAIL_PLAN_WARNING_NO_ADVERTISEMENTS
+      | "INTERSTITIAL_VOD_SUCCESS" -> INTERSTITIAL_VOD_SUCCESS
+      | "INTERSTITIAL_VOD_FAILURE" -> INTERSTITIAL_VOD_FAILURE
+      | "PRE_ADS_REQUEST_HOOK_ERROR" -> PRE_ADS_REQUEST_HOOK_ERROR
+      | "PRE_ADS_REQUEST_FUNCTION_ERROR" -> PRE_ADS_REQUEST_FUNCTION_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AdsInteractionExcludeEventType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AdsInteractionExcludeEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module AdsInteractionPublishOptInEventType =
+  struct
+    type nonrec t =
+      | RAW_ADS_RESPONSE 
+      | RAW_ADS_REQUEST 
+      | PRE_ADS_REQUEST_HOOK_SUMMARY 
+      | PRE_ADS_REQUEST_FUNCTION_COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RAW_ADS_RESPONSE -> "RAW_ADS_RESPONSE"
+      | RAW_ADS_REQUEST -> "RAW_ADS_REQUEST"
+      | PRE_ADS_REQUEST_HOOK_SUMMARY -> "PRE_ADS_REQUEST_HOOK_SUMMARY"
+      | PRE_ADS_REQUEST_FUNCTION_COMPLETED ->
+          "PRE_ADS_REQUEST_FUNCTION_COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RAW_ADS_RESPONSE" -> RAW_ADS_RESPONSE
+      | "RAW_ADS_REQUEST" -> RAW_ADS_REQUEST
+      | "PRE_ADS_REQUEST_HOOK_SUMMARY" -> PRE_ADS_REQUEST_HOOK_SUMMARY
+      | "PRE_ADS_REQUEST_FUNCTION_COMPLETED" ->
+          PRE_ADS_REQUEST_FUNCTION_COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration AdsInteractionPublishOptInEventType" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"AdsInteractionPublishOptInEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module ManifestServiceExcludeEventType =
+  struct
+    type nonrec t =
+      | GENERATED_MANIFEST 
+      | ORIGIN_MANIFEST 
+      | SESSION_INITIALIZED 
+      | TRACKING_RESPONSE 
+      | CONFIG_SYNTAX_ERROR 
+      | CONFIG_SECURITY_ERROR 
+      | UNKNOWN_HOST 
+      | TIMEOUT_ERROR 
+      | CONNECTION_ERROR 
+      | IO_ERROR 
+      | UNKNOWN_ERROR 
+      | HOST_DISALLOWED 
+      | PARSING_ERROR 
+      | MANIFEST_ERROR 
+      | NO_MASTER_OR_MEDIA_PLAYLIST 
+      | NO_MASTER_PLAYLIST 
+      | NO_MEDIA_PLAYLIST 
+      | INCOMPATIBLE_HLS_VERSION 
+      | SCTE35_PARSING_ERROR 
+      | INVALID_SINGLE_PERIOD_DASH_MANIFEST 
+      | UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST 
+      | LAST_PERIOD_MISSING_AUDIO 
+      | LAST_PERIOD_MISSING_AUDIO_WARNING 
+      | ERROR_ORIGIN_PREFIX_INTERPOLATION 
+      | ERROR_ADS_INTERPOLATION 
+      | ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION 
+      | ERROR_CDN_AD_SEGMENT_INTERPOLATION 
+      | ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION 
+      | ERROR_SLATE_AD_URL_INTERPOLATION 
+      | ERROR_PROFILE_NAME_INTERPOLATION 
+      | ERROR_BUMPER_START_INTERPOLATION 
+      | ERROR_BUMPER_END_INTERPOLATION 
+      | PRE_SESSION_INIT_HOOK_ERROR 
+      | PRE_SESSION_INIT_FUNCTION_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | GENERATED_MANIFEST -> "GENERATED_MANIFEST"
+      | ORIGIN_MANIFEST -> "ORIGIN_MANIFEST"
+      | SESSION_INITIALIZED -> "SESSION_INITIALIZED"
+      | TRACKING_RESPONSE -> "TRACKING_RESPONSE"
+      | CONFIG_SYNTAX_ERROR -> "CONFIG_SYNTAX_ERROR"
+      | CONFIG_SECURITY_ERROR -> "CONFIG_SECURITY_ERROR"
+      | UNKNOWN_HOST -> "UNKNOWN_HOST"
+      | TIMEOUT_ERROR -> "TIMEOUT_ERROR"
+      | CONNECTION_ERROR -> "CONNECTION_ERROR"
+      | IO_ERROR -> "IO_ERROR"
+      | UNKNOWN_ERROR -> "UNKNOWN_ERROR"
+      | HOST_DISALLOWED -> "HOST_DISALLOWED"
+      | PARSING_ERROR -> "PARSING_ERROR"
+      | MANIFEST_ERROR -> "MANIFEST_ERROR"
+      | NO_MASTER_OR_MEDIA_PLAYLIST -> "NO_MASTER_OR_MEDIA_PLAYLIST"
+      | NO_MASTER_PLAYLIST -> "NO_MASTER_PLAYLIST"
+      | NO_MEDIA_PLAYLIST -> "NO_MEDIA_PLAYLIST"
+      | INCOMPATIBLE_HLS_VERSION -> "INCOMPATIBLE_HLS_VERSION"
+      | SCTE35_PARSING_ERROR -> "SCTE35_PARSING_ERROR"
+      | INVALID_SINGLE_PERIOD_DASH_MANIFEST ->
+          "INVALID_SINGLE_PERIOD_DASH_MANIFEST"
+      | UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST ->
+          "UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST"
+      | LAST_PERIOD_MISSING_AUDIO -> "LAST_PERIOD_MISSING_AUDIO"
+      | LAST_PERIOD_MISSING_AUDIO_WARNING ->
+          "LAST_PERIOD_MISSING_AUDIO_WARNING"
+      | ERROR_ORIGIN_PREFIX_INTERPOLATION ->
+          "ERROR_ORIGIN_PREFIX_INTERPOLATION"
+      | ERROR_ADS_INTERPOLATION -> "ERROR_ADS_INTERPOLATION"
+      | ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION ->
+          "ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION"
+      | ERROR_CDN_AD_SEGMENT_INTERPOLATION ->
+          "ERROR_CDN_AD_SEGMENT_INTERPOLATION"
+      | ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION ->
+          "ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION"
+      | ERROR_SLATE_AD_URL_INTERPOLATION ->
+          "ERROR_SLATE_AD_URL_INTERPOLATION"
+      | ERROR_PROFILE_NAME_INTERPOLATION ->
+          "ERROR_PROFILE_NAME_INTERPOLATION"
+      | ERROR_BUMPER_START_INTERPOLATION ->
+          "ERROR_BUMPER_START_INTERPOLATION"
+      | ERROR_BUMPER_END_INTERPOLATION -> "ERROR_BUMPER_END_INTERPOLATION"
+      | PRE_SESSION_INIT_HOOK_ERROR -> "PRE_SESSION_INIT_HOOK_ERROR"
+      | PRE_SESSION_INIT_FUNCTION_ERROR -> "PRE_SESSION_INIT_FUNCTION_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "GENERATED_MANIFEST" -> GENERATED_MANIFEST
+      | "ORIGIN_MANIFEST" -> ORIGIN_MANIFEST
+      | "SESSION_INITIALIZED" -> SESSION_INITIALIZED
+      | "TRACKING_RESPONSE" -> TRACKING_RESPONSE
+      | "CONFIG_SYNTAX_ERROR" -> CONFIG_SYNTAX_ERROR
+      | "CONFIG_SECURITY_ERROR" -> CONFIG_SECURITY_ERROR
+      | "UNKNOWN_HOST" -> UNKNOWN_HOST
+      | "TIMEOUT_ERROR" -> TIMEOUT_ERROR
+      | "CONNECTION_ERROR" -> CONNECTION_ERROR
+      | "IO_ERROR" -> IO_ERROR
+      | "UNKNOWN_ERROR" -> UNKNOWN_ERROR
+      | "HOST_DISALLOWED" -> HOST_DISALLOWED
+      | "PARSING_ERROR" -> PARSING_ERROR
+      | "MANIFEST_ERROR" -> MANIFEST_ERROR
+      | "NO_MASTER_OR_MEDIA_PLAYLIST" -> NO_MASTER_OR_MEDIA_PLAYLIST
+      | "NO_MASTER_PLAYLIST" -> NO_MASTER_PLAYLIST
+      | "NO_MEDIA_PLAYLIST" -> NO_MEDIA_PLAYLIST
+      | "INCOMPATIBLE_HLS_VERSION" -> INCOMPATIBLE_HLS_VERSION
+      | "SCTE35_PARSING_ERROR" -> SCTE35_PARSING_ERROR
+      | "INVALID_SINGLE_PERIOD_DASH_MANIFEST" ->
+          INVALID_SINGLE_PERIOD_DASH_MANIFEST
+      | "UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST" ->
+          UNSUPPORTED_SINGLE_PERIOD_DASH_MANIFEST
+      | "LAST_PERIOD_MISSING_AUDIO" -> LAST_PERIOD_MISSING_AUDIO
+      | "LAST_PERIOD_MISSING_AUDIO_WARNING" ->
+          LAST_PERIOD_MISSING_AUDIO_WARNING
+      | "ERROR_ORIGIN_PREFIX_INTERPOLATION" ->
+          ERROR_ORIGIN_PREFIX_INTERPOLATION
+      | "ERROR_ADS_INTERPOLATION" -> ERROR_ADS_INTERPOLATION
+      | "ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION" ->
+          ERROR_LIVE_PRE_ROLL_ADS_INTERPOLATION
+      | "ERROR_CDN_AD_SEGMENT_INTERPOLATION" ->
+          ERROR_CDN_AD_SEGMENT_INTERPOLATION
+      | "ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION" ->
+          ERROR_CDN_CONTENT_SEGMENT_INTERPOLATION
+      | "ERROR_SLATE_AD_URL_INTERPOLATION" ->
+          ERROR_SLATE_AD_URL_INTERPOLATION
+      | "ERROR_PROFILE_NAME_INTERPOLATION" ->
+          ERROR_PROFILE_NAME_INTERPOLATION
+      | "ERROR_BUMPER_START_INTERPOLATION" ->
+          ERROR_BUMPER_START_INTERPOLATION
+      | "ERROR_BUMPER_END_INTERPOLATION" -> ERROR_BUMPER_END_INTERPOLATION
+      | "PRE_SESSION_INIT_HOOK_ERROR" -> PRE_SESSION_INIT_HOOK_ERROR
+      | "PRE_SESSION_INIT_FUNCTION_ERROR" -> PRE_SESSION_INIT_FUNCTION_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ManifestServiceExcludeEventType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ManifestServiceExcludeEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module ManifestServicePublishOptInEventType =
+  struct
+    type nonrec t =
+      | PRE_SESSION_INIT_HOOK_SUMMARY 
+      | PRE_SESSION_INIT_FUNCTION_COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRE_SESSION_INIT_HOOK_SUMMARY -> "PRE_SESSION_INIT_HOOK_SUMMARY"
+      | PRE_SESSION_INIT_FUNCTION_COMPLETED ->
+          "PRE_SESSION_INIT_FUNCTION_COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRE_SESSION_INIT_HOOK_SUMMARY" -> PRE_SESSION_INIT_HOOK_SUMMARY
+      | "PRE_SESSION_INIT_FUNCTION_COMPLETED" ->
+          PRE_SESSION_INIT_FUNCTION_COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration ManifestServicePublishOptInEventType" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"ManifestServicePublishOptInEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module AdMarkupTypes =
+  struct
+    type nonrec t = AdMarkupType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdMarkupType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdMarkupType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"adMarkupTypes" ~of_json:AdMarkupType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ClipRange =
+  struct
+    type nonrec t =
+      {
+      endOffsetMillis: Zz__long.t option
+        [@ocaml.doc
+          "The end offset of the clip range, in milliseconds, starting from the beginning of the VOD source associated with the program."];
+      startOffsetMillis: Zz__long.t option
+        [@ocaml.doc
+          "The start offset of the clip range, in milliseconds. This offset truncates the start at the number of milliseconds into the duration of the VOD source."]}
+    let make ?endOffsetMillis =
+      fun ?startOffsetMillis ->
+        fun () -> { endOffsetMillis; startOffsetMillis }
+    let to_value x =
+      structure_to_value
+        [("EndOffsetMillis",
+           (Option.map x.endOffsetMillis ~f:Zz__long.to_value));
+        ("StartOffsetMillis",
+          (Option.map x.startOffsetMillis ~f:Zz__long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let startOffsetMillis =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "StartOffsetMillis") in
+      let endOffsetMillis =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "EndOffsetMillis") in
+      make ?startOffsetMillis ?endOffsetMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let startOffsetMillis =
+        field_map json__ "StartOffsetMillis" Zz__long.of_json in
+      let endOffsetMillis =
+        field_map json__ "EndOffsetMillis" Zz__long.of_json in
+      make ?startOffsetMillis ?endOffsetMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Clip range configuration for the VOD source associated with the program."]
+module Zz__listOfAdBreak =
+  struct
+    type nonrec t = AdBreak.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdBreak.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdBreak.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAdBreak" ~of_json:AdBreak.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Type =
+  struct
+    type nonrec t =
+      | DASH 
+      | HLS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | DASH -> "DASH" | HLS -> "HLS" | Non_static_id s -> s
+    let of_string =
+      function | "DASH" -> DASH | "HLS" -> HLS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Type" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Type" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__listOfAvailMatchingCriteria =
+  struct
+    type nonrec t = AvailMatchingCriteria.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailMatchingCriteria.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailMatchingCriteria.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAvailMatchingCriteria"
+        ~of_json:AvailMatchingCriteria.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TrafficShapingRetrievalWindow =
+  struct
+    type nonrec t =
+      {
+      retrievalWindowDurationSeconds: Zz__integer.t option
+        [@ocaml.doc
+          "The amount of time, in seconds, that MediaTailor spreads prefetch requests to the ADS."]}
+    let make ?retrievalWindowDurationSeconds =
+      fun () -> { retrievalWindowDurationSeconds }
+    let to_value x =
+      structure_to_value
+        [("RetrievalWindowDurationSeconds",
+           (Option.map x.retrievalWindowDurationSeconds
+              ~f:Zz__integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let retrievalWindowDurationSeconds =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "RetrievalWindowDurationSeconds") in
+      make ?retrievalWindowDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let retrievalWindowDurationSeconds =
+        field_map json__ "RetrievalWindowDurationSeconds" Zz__integer.of_json in
+      make ?retrievalWindowDurationSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that tells Elemental MediaTailor how many seconds to spread out requests to the ad decision server (ADS). Instead of sending ADS requests for all sessions at the same time, MediaTailor spreads the requests across the amount of time specified in the retrieval window."]
+module TrafficShapingTpsConfiguration =
+  struct
+    type nonrec t =
+      {
+      peakTps: Zz__integer.t option
+        [@ocaml.doc
+          "The maximum number of transactions per second (TPS) that your ad decision server (ADS) can handle. MediaTailor uses this value along with concurrent users and headroom multiplier to calculate optimal traffic distribution and prevent ADS overload."];
+      peakConcurrentUsers: Zz__integer.t option
+        [@ocaml.doc
+          "The expected peak number of concurrent viewers for your content. MediaTailor uses this value along with peak TPS to determine how to distribute prefetch requests across the available capacity without exceeding your ADS limits."]}
+    let make ?peakTps =
+      fun ?peakConcurrentUsers -> fun () -> { peakTps; peakConcurrentUsers }
+    let to_value x =
+      structure_to_value
+        [("PeakTps", (Option.map x.peakTps ~f:Zz__integer.to_value));
+        ("PeakConcurrentUsers",
+          (Option.map x.peakConcurrentUsers ~f:Zz__integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let peakConcurrentUsers =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "PeakConcurrentUsers") in
+      let peakTps =
+        (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "PeakTps") in
+      make ?peakConcurrentUsers ?peakTps ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let peakConcurrentUsers =
+        field_map json__ "PeakConcurrentUsers" Zz__integer.of_json in
+      let peakTps = field_map json__ "PeakTps" Zz__integer.of_json in
+      make ?peakConcurrentUsers ?peakTps ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for TPS-based traffic shaping. This approach limits requests to the ad decision server (ADS) based on transactions per second and concurrent users."]
+module TrafficShapingType =
+  struct
+    type nonrec t =
+      | RETRIEVAL_WINDOW 
+      | TPS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RETRIEVAL_WINDOW -> "RETRIEVAL_WINDOW"
+      | TPS -> "TPS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RETRIEVAL_WINDOW" -> RETRIEVAL_WINDOW
+      | "TPS" -> TPS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TrafficShapingType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TrafficShapingType" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__mapOf__string =
+  struct
+    type nonrec t = (Zz__string.t * Zz__string.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((Zz__string.of_string chopped),
+                              (Zz__string.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Zz__string.to_value x) |>
+                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Zz__string.of_string
+        ~of_json:Zz__string.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CompressionMethod =
+  struct
+    type nonrec t =
+      | NONE 
+      | GZIP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | NONE -> "NONE" | GZIP -> "GZIP" | Non_static_id s -> s
+    let of_string =
+      function | "NONE" -> NONE | "GZIP" -> GZIP | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CompressionMethod" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"CompressionMethod" j)
+    let to_json = simple_to_json to_value
+  end
+module Method =
+  struct
+    type nonrec t =
+      | GET 
+      | POST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | GET -> "GET" | POST -> "POST" | Non_static_id s -> s
+    let of_string =
+      function | "GET" -> GET | "POST" -> POST | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Method" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Method" j)
+    let to_json = simple_to_json to_value
+  end
+module StringMap =
+  struct
+    type nonrec t = (Zz__string.t * Zz__string.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((Zz__string.of_string chopped),
+                              (Zz__string.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (Zz__string.to_value x) |>
+                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:Zz__string.of_string
+        ~of_json:Zz__string.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__adsInteractionExcludeEventTypesList =
+  struct
+    type nonrec t = AdsInteractionExcludeEventType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdsInteractionExcludeEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AdsInteractionExcludeEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__adsInteractionExcludeEventTypesList"
+        ~of_json:AdsInteractionExcludeEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__adsInteractionPublishOptInEventTypesList =
+  struct
+    type nonrec t = AdsInteractionPublishOptInEventType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AdsInteractionPublishOptInEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:AdsInteractionPublishOptInEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__adsInteractionPublishOptInEventTypesList"
+        ~of_json:AdsInteractionPublishOptInEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__manifestServiceExcludeEventTypesList =
+  struct
+    type nonrec t = ManifestServiceExcludeEventType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ManifestServiceExcludeEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ManifestServiceExcludeEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__manifestServiceExcludeEventTypesList"
+        ~of_json:ManifestServiceExcludeEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__manifestServicePublishOptInEventTypesList =
+  struct
+    type nonrec t = ManifestServicePublishOptInEventType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ManifestServicePublishOptInEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ManifestServicePublishOptInEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__manifestServicePublishOptInEventTypesList"
+        ~of_json:ManifestServicePublishOptInEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LoggingStrategy =
+  struct
+    type nonrec t =
+      | VENDED_LOGS 
+      | LEGACY_CLOUDWATCH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | VENDED_LOGS -> "VENDED_LOGS"
+      | LEGACY_CLOUDWATCH -> "LEGACY_CLOUDWATCH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "VENDED_LOGS" -> VENDED_LOGS
+      | "LEGACY_CLOUDWATCH" -> LEGACY_CLOUDWATCH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LoggingStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LoggingStrategy" j)
+    let to_json = simple_to_json to_value
+  end
 module Zz__boolean =
   struct
     type nonrec t = bool
@@ -130,6 +1454,53 @@ module Zz__boolean =
     let of_xml xml_arg0 =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module FunctionRef =
+  struct
+    type nonrec t =
+      {
+      runCondition: Zz__string.t option
+        [@ocaml.doc
+          "An optional expression that evaluates to a boolean. MediaTailor evaluates this expression immediately before running the step, using the accumulated state at that point in the sequence. If the expression evaluates to false, MediaTailor skips the step and moves to the next one. If omitted, the step always runs."];
+      functionId: Zz__string.t option
+        [@ocaml.doc
+          "The identifier of the child function to execute in this step."]}
+    let make ?runCondition =
+      fun ?functionId -> fun () -> { runCondition; functionId }
+    let to_value x =
+      structure_to_value
+        [("RunCondition", (Option.map x.runCondition ~f:Zz__string.to_value));
+        ("FunctionId", (Option.map x.functionId ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let functionId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "FunctionId") in
+      let runCondition =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "RunCondition") in
+      make ?functionId ?runCondition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let functionId = field_map json__ "FunctionId" Zz__string.of_json in
+      let runCondition = field_map json__ "RunCondition" Zz__string.of_json in
+      make ?functionId ?runCondition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A reference to a child function within a SEQUENTIAL_EXECUTOR function."]
+module LogType =
+  struct
+    type nonrec t =
+      | AS_RUN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | AS_RUN -> "AS_RUN" | Non_static_id s -> s
+    let of_string = function | "AS_RUN" -> AS_RUN | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogType" j)
     let to_json = simple_to_json to_value
   end
 module DashPlaylistSettings =
@@ -187,16 +1558,16 @@ module DashPlaylistSettings =
       make ?suggestedPresentationDelaySeconds ?minUpdatePeriodSeconds
         ?minBufferTimeSeconds ?manifestWindowSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suggestedPresentationDelaySeconds =
-        field_map json "SuggestedPresentationDelaySeconds"
+        field_map json__ "SuggestedPresentationDelaySeconds"
           Zz__integer.of_json in
       let minUpdatePeriodSeconds =
-        field_map json "MinUpdatePeriodSeconds" Zz__integer.of_json in
+        field_map json__ "MinUpdatePeriodSeconds" Zz__integer.of_json in
       let minBufferTimeSeconds =
-        field_map json "MinBufferTimeSeconds" Zz__integer.of_json in
+        field_map json__ "MinBufferTimeSeconds" Zz__integer.of_json in
       let manifestWindowSeconds =
-        field_map json "ManifestWindowSeconds" Zz__integer.of_json in
+        field_map json__ "ManifestWindowSeconds" Zz__integer.of_json in
       make ?suggestedPresentationDelaySeconds ?minUpdatePeriodSeconds
         ?minBufferTimeSeconds ?manifestWindowSeconds ()
     let to_json v = composed_to_json to_value v
@@ -207,38 +1578,36 @@ module HlsPlaylistSettings =
       {
       manifestWindowSeconds: Zz__integer.t option
         [@ocaml.doc
-          "The total duration (in seconds) of each manifest. Minimum value: 30 seconds. Maximum value: 3600 seconds."]}
-    let make ?manifestWindowSeconds = fun () -> { manifestWindowSeconds }
+          "The total duration (in seconds) of each manifest. Minimum value: 30 seconds. Maximum value: 3600 seconds."];
+      adMarkupType: AdMarkupTypes.t option
+        [@ocaml.doc
+          "Determines the type of SCTE 35 tags to use in ad markup. Specify DATERANGE to use DATERANGE tags (for live or VOD content). Specify SCTE35_ENHANCED to use EXT-X-CUE-OUT and EXT-X-CUE-IN tags (for VOD content only)."]}
+    let make ?manifestWindowSeconds =
+      fun ?adMarkupType -> fun () -> { manifestWindowSeconds; adMarkupType }
     let to_value x =
       structure_to_value
         [("ManifestWindowSeconds",
-           (Option.map x.manifestWindowSeconds ~f:Zz__integer.to_value))]
+           (Option.map x.manifestWindowSeconds ~f:Zz__integer.to_value));
+        ("AdMarkupType",
+          (Option.map x.adMarkupType ~f:AdMarkupTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let adMarkupType =
+        (Option.map ~f:AdMarkupTypes.of_xml)
+          (Xml.child xml_arg0 "AdMarkupType") in
       let manifestWindowSeconds =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "ManifestWindowSeconds") in
-      make ?manifestWindowSeconds ()
+      make ?adMarkupType ?manifestWindowSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let adMarkupType =
+        field_map json__ "AdMarkupType" AdMarkupTypes.of_json in
       let manifestWindowSeconds =
-        field_map json "ManifestWindowSeconds" Zz__integer.of_json in
-      make ?manifestWindowSeconds ()
+        field_map json__ "ManifestWindowSeconds" Zz__integer.of_json in
+      make ?adMarkupType ?manifestWindowSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "HLS playlist configuration parameters."]
-module Zz__long =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
 module Zz__timestampUnix =
   struct
     type nonrec t = string
@@ -251,6 +1620,96 @@ module Zz__timestampUnix =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module AlternateMedia =
+  struct
+    type nonrec t =
+      {
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc "The name of the source location for alternateMedia."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the live source for alternateMedia."];
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the VOD source for alternateMedia."];
+      clipRange: ClipRange.t option ;
+      scheduledStartTimeMillis: Zz__long.t option
+        [@ocaml.doc
+          "The date and time that the alternateMedia is scheduled to start, in epoch milliseconds."];
+      adBreaks: Zz__listOfAdBreak.t option
+        [@ocaml.doc
+          "Ad break configuration parameters defined in AlternateMedia."];
+      durationMillis: Zz__long.t option
+        [@ocaml.doc "The duration of the alternateMedia in milliseconds."]}
+    let make ?sourceLocationName =
+      fun ?liveSourceName ->
+        fun ?vodSourceName ->
+          fun ?clipRange ->
+            fun ?scheduledStartTimeMillis ->
+              fun ?adBreaks ->
+                fun ?durationMillis ->
+                  fun () ->
+                    {
+                      sourceLocationName;
+                      liveSourceName;
+                      vodSourceName;
+                      clipRange;
+                      scheduledStartTimeMillis;
+                      adBreaks;
+                      durationMillis
+                    }
+    let to_value x =
+      structure_to_value
+        [("SourceLocationName",
+           (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value));
+        ("ScheduledStartTimeMillis",
+          (Option.map x.scheduledStartTimeMillis ~f:Zz__long.to_value));
+        ("AdBreaks", (Option.map x.adBreaks ~f:Zz__listOfAdBreak.to_value));
+        ("DurationMillis",
+          (Option.map x.durationMillis ~f:Zz__long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationMillis =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let adBreaks =
+        (Option.map ~f:Zz__listOfAdBreak.of_xml)
+          (Xml.child xml_arg0 "AdBreaks") in
+      let scheduledStartTimeMillis =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "ScheduledStartTimeMillis") in
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
+      let vodSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      make ?durationMillis ?adBreaks ?scheduledStartTimeMillis ?clipRange
+        ?vodSourceName ?liveSourceName ?sourceLocationName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationMillis = field_map json__ "DurationMillis" Zz__long.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      let scheduledStartTimeMillis =
+        field_map json__ "ScheduledStartTimeMillis" Zz__long.of_json in
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      make ?durationMillis ?adBreaks ?scheduledStartTimeMillis ?clipRange
+        ?vodSourceName ?liveSourceName ?sourceLocationName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A playlist of media (VOD and/or live) to be played instead of the default media on a particular program."]
 module HttpPackageConfiguration =
   struct
     type nonrec t =
@@ -284,10 +1743,10 @@ module HttpPackageConfiguration =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ~type_ ~sourceGroup ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
-      let path = field_map_exn json "Path" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Type.of_json in
+      let sourceGroup = field_map_exn json__ "SourceGroup" Zz__string.of_json in
+      let path = field_map_exn json__ "Path" Zz__string.of_json in
       make ~type_ ~sourceGroup ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -297,17 +1756,20 @@ module AccessType =
     type nonrec t =
       | S3_SIGV4 
       | SECRETS_MANAGER_ACCESS_TOKEN 
+      | AUTODETECT_SIGV4 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | S3_SIGV4 -> "S3_SIGV4"
       | SECRETS_MANAGER_ACCESS_TOKEN -> "SECRETS_MANAGER_ACCESS_TOKEN"
+      | AUTODETECT_SIGV4 -> "AUTODETECT_SIGV4"
       | Non_static_id s -> s
     let of_string =
       function
       | "S3_SIGV4" -> S3_SIGV4
       | "SECRETS_MANAGER_ACCESS_TOKEN" -> SECRETS_MANAGER_ACCESS_TOKEN
+      | "AUTODETECT_SIGV4" -> AUTODETECT_SIGV4
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -351,11 +1813,11 @@ module SecretsManagerAccessTokenConfiguration =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "HeaderName") in
       make ?secretStringKey ?secretArn ?headerName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretStringKey =
-        field_map json "SecretStringKey" Zz__string.of_json in
-      let secretArn = field_map json "SecretArn" Zz__string.of_json in
-      let headerName = field_map json "HeaderName" Zz__string.of_json in
+        field_map json__ "SecretStringKey" Zz__string.of_json in
+      let secretArn = field_map json__ "SecretArn" Zz__string.of_json in
+      let headerName = field_map json__ "HeaderName" Zz__string.of_json in
       make ?secretStringKey ?secretArn ?headerName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -364,8 +1826,12 @@ module SegmentDeliveryConfiguration =
   struct
     type nonrec t =
       {
-      baseUrl: Zz__string.t option ;
-      name: Zz__string.t option }
+      baseUrl: Zz__string.t option
+        [@ocaml.doc
+          "The base URL of the host or path of the segment delivery server that you're using to serve segments. This is typically a content delivery network (CDN). The URL can be absolute or relative. To use an absolute URL include the protocol, such as https://example.com/some/path. To use a relative URL specify the relative path, such as /some/path*."];
+      name: Zz__string.t option
+        [@ocaml.doc
+          "A unique identifier used to distinguish between multiple segment delivery configurations in a source location."]}
     let make ?baseUrl = fun ?name -> fun () -> { baseUrl; name }
     let to_value x =
       structure_to_value
@@ -379,82 +1845,259 @@ module SegmentDeliveryConfiguration =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "BaseUrl") in
       make ?name ?baseUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Zz__string.of_json in
-      let baseUrl = field_map json "BaseUrl" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Zz__string.of_json in
+      let baseUrl = field_map json__ "BaseUrl" Zz__string.of_json in
       make ?name ?baseUrl ()
     let to_json v = composed_to_json to_value v
-  end
-module Zz__listOfAvailMatchingCriteria =
+  end[@@ocaml.doc "The segment delivery configuration settings."]
+module RecurringConsumption =
   struct
-    type nonrec t = AvailMatchingCriteria.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:AvailMatchingCriteria.to_value)) |>
-        (fun x -> `List x)
+    type nonrec t =
+      {
+      retrievedAdExpirationSeconds: Zz__integer.t option
+        [@ocaml.doc
+          "The number of seconds that an ad is available for insertion after it was prefetched."];
+      availMatchingCriteria: Zz__listOfAvailMatchingCriteria.t option
+        [@ocaml.doc
+          "The configuration for the dynamic variables that determine which ad breaks that MediaTailor inserts prefetched ads in."]}
+    let make ?retrievedAdExpirationSeconds =
+      fun ?availMatchingCriteria ->
+        fun () -> { retrievedAdExpirationSeconds; availMatchingCriteria }
+    let to_value x =
+      structure_to_value
+        [("RetrievedAdExpirationSeconds",
+           (Option.map x.retrievedAdExpirationSeconds ~f:Zz__integer.to_value));
+        ("AvailMatchingCriteria",
+          (Option.map x.availMatchingCriteria
+             ~f:Zz__listOfAvailMatchingCriteria.to_value))]
     let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:AvailMatchingCriteria.of_xml)
-    let of_json j =
-      list_of_json ~kind:"__listOfAvailMatchingCriteria"
-        ~of_json:AvailMatchingCriteria.of_json j
+    let of_xml xml_arg0 =
+      let availMatchingCriteria =
+        (Option.map ~f:Zz__listOfAvailMatchingCriteria.of_xml)
+          (Xml.child xml_arg0 "AvailMatchingCriteria") in
+      let retrievedAdExpirationSeconds =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "RetrievedAdExpirationSeconds") in
+      make ?availMatchingCriteria ?retrievedAdExpirationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availMatchingCriteria =
+        field_map json__ "AvailMatchingCriteria"
+          Zz__listOfAvailMatchingCriteria.of_json in
+      let retrievedAdExpirationSeconds =
+        field_map json__ "RetrievedAdExpirationSeconds" Zz__integer.of_json in
+      make ?availMatchingCriteria ?retrievedAdExpirationSeconds ()
     let to_json v = composed_to_json to_value v
-  end
-module Zz__mapOf__string =
+  end[@@ocaml.doc
+       "The settings that determine how and when MediaTailor places prefetched ads into upcoming ad breaks for recurring prefetch scedules."]
+module RecurringRetrieval =
   struct
-    type nonrec t = (Zz__string.t * Zz__string.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((Zz__string.of_string chopped),
-                              (Zz__string.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (Zz__string.to_value x) |>
-                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
+    type nonrec t =
+      {
+      dynamicVariables: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The dynamic variables to use for substitution during prefetch requests to the ADS."];
+      delayAfterAvailEndSeconds: Zz__integer.t option
+        [@ocaml.doc
+          "The number of seconds that MediaTailor waits after an ad avail before prefetching ads for the next avail. If not set, the default is 0 (no delay)."];
+      trafficShapingType: TrafficShapingType.t option
+        [@ocaml.doc
+          "Indicates the type of traffic shaping used to limit the number of requests to the ADS at one time."];
+      trafficShapingRetrievalWindow: TrafficShapingRetrievalWindow.t option
+        [@ocaml.doc
+          "The configuration that tells Elemental MediaTailor how many seconds to spread out requests to the ad decision server (ADS). Instead of sending ADS requests for all sessions at the same time, MediaTailor spreads the requests across the amount of time specified in the retrieval window."];
+      trafficShapingTpsConfiguration: TrafficShapingTpsConfiguration.t option
+        [@ocaml.doc
+          "The configuration for TPS-based traffic shaping. This approach limits requests to the ad decision server (ADS) based on transactions per second and concurrent users."]}
+    let make ?dynamicVariables =
+      fun ?delayAfterAvailEndSeconds ->
+        fun ?trafficShapingType ->
+          fun ?trafficShapingRetrievalWindow ->
+            fun ?trafficShapingTpsConfiguration ->
+              fun () ->
+                {
+                  dynamicVariables;
+                  delayAfterAvailEndSeconds;
+                  trafficShapingType;
+                  trafficShapingRetrievalWindow;
+                  trafficShapingTpsConfiguration
+                }
+    let to_value x =
+      structure_to_value
+        [("DynamicVariables",
+           (Option.map x.dynamicVariables ~f:Zz__mapOf__string.to_value));
+        ("DelayAfterAvailEndSeconds",
+          (Option.map x.delayAfterAvailEndSeconds ~f:Zz__integer.to_value));
+        ("TrafficShapingType",
+          (Option.map x.trafficShapingType ~f:TrafficShapingType.to_value));
+        ("TrafficShapingRetrievalWindow",
+          (Option.map x.trafficShapingRetrievalWindow
+             ~f:TrafficShapingRetrievalWindow.to_value));
+        ("TrafficShapingTpsConfiguration",
+          (Option.map x.trafficShapingTpsConfiguration
+             ~f:TrafficShapingTpsConfiguration.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:Zz__string.of_string
-        ~of_json:Zz__string.of_json j
+    let of_xml xml_arg0 =
+      let trafficShapingTpsConfiguration =
+        (Option.map ~f:TrafficShapingTpsConfiguration.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingTpsConfiguration") in
+      let trafficShapingRetrievalWindow =
+        (Option.map ~f:TrafficShapingRetrievalWindow.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingRetrievalWindow") in
+      let trafficShapingType =
+        (Option.map ~f:TrafficShapingType.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingType") in
+      let delayAfterAvailEndSeconds =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "DelayAfterAvailEndSeconds") in
+      let dynamicVariables =
+        (Option.map ~f:Zz__mapOf__string.of_xml)
+          (Xml.child xml_arg0 "DynamicVariables") in
+      make ?trafficShapingTpsConfiguration ?trafficShapingRetrievalWindow
+        ?trafficShapingType ?delayAfterAvailEndSeconds ?dynamicVariables ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let trafficShapingTpsConfiguration =
+        field_map json__ "TrafficShapingTpsConfiguration"
+          TrafficShapingTpsConfiguration.of_json in
+      let trafficShapingRetrievalWindow =
+        field_map json__ "TrafficShapingRetrievalWindow"
+          TrafficShapingRetrievalWindow.of_json in
+      let trafficShapingType =
+        field_map json__ "TrafficShapingType" TrafficShapingType.of_json in
+      let delayAfterAvailEndSeconds =
+        field_map json__ "DelayAfterAvailEndSeconds" Zz__integer.of_json in
+      let dynamicVariables =
+        field_map json__ "DynamicVariables" Zz__mapOf__string.of_json in
+      make ?trafficShapingTpsConfiguration ?trafficShapingRetrievalWindow
+        ?trafficShapingType ?delayAfterAvailEndSeconds ?dynamicVariables ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "With recurring prefetch, MediaTailor automatically prefetches ads for every avail that occurs during the retrieval window. The following configurations describe the MediaTailor behavior when prefetching ads for a live event."]
+module StreamingMediaFileConditioning =
+  struct
+    type nonrec t =
+      | TRANSCODE 
+      | NONE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TRANSCODE -> "TRANSCODE"
+      | NONE -> "NONE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TRANSCODE" -> TRANSCODE
+      | "NONE" -> NONE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration StreamingMediaFileConditioning"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"StreamingMediaFileConditioning" j)
+    let to_json = simple_to_json to_value
+  end
+module HttpRequest =
+  struct
+    type nonrec t =
+      {
+      method_: Method.t option
+        [@ocaml.doc
+          "The HTTP method to use when making requests to the ad decision server. Supported values are GET and POST."];
+      body: Zz__string.t option
+        [@ocaml.doc
+          "The request body content to send with HTTP requests to the ad decision server. This value is only eligible for POST requests."];
+      headers: StringMap.t option
+        [@ocaml.doc
+          "Custom HTTP headers to include in requests to the ad decision server. Specify headers as key-value pairs. This value is only eligible for POST requests."];
+      compressRequest: CompressionMethod.t option
+        [@ocaml.doc
+          "The compression method to apply to requests sent to the ad decision server. Supported values are NONE and GZIP. This value is only eligible for POST requests."]}
+    let make ?method_ =
+      fun ?body ->
+        fun ?headers ->
+          fun ?compressRequest ->
+            fun () -> { method_; body; headers; compressRequest }
+    let to_value x =
+      structure_to_value
+        [("Method", (Option.map x.method_ ~f:Method.to_value));
+        ("Body", (Option.map x.body ~f:Zz__string.to_value));
+        ("Headers", (Option.map x.headers ~f:StringMap.to_value));
+        ("CompressRequest",
+          (Option.map x.compressRequest ~f:CompressionMethod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let compressRequest =
+        (Option.map ~f:CompressionMethod.of_xml)
+          (Xml.child xml_arg0 "CompressRequest") in
+      let headers =
+        (Option.map ~f:StringMap.of_xml) (Xml.child xml_arg0 "Headers") in
+      let body =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Body") in
+      let method_ =
+        (Option.map ~f:Method.of_xml) (Xml.child xml_arg0 "Method") in
+      make ?compressRequest ?headers ?body ?method_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let compressRequest =
+        field_map json__ "CompressRequest" CompressionMethod.of_json in
+      let headers = field_map json__ "Headers" StringMap.of_json in
+      let body = field_map json__ "Body" Zz__string.of_json in
+      let method_ = field_map json__ "Method" Method.of_json in
+      make ?compressRequest ?headers ?body ?method_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "HTTP request configuration parameters that define how MediaTailor communicates with the ad decision server."]
+module FillPolicy =
+  struct
+    type nonrec t =
+      | FULL_AVAIL_ONLY 
+      | PARTIAL_AVAIL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FULL_AVAIL_ONLY -> "FULL_AVAIL_ONLY"
+      | PARTIAL_AVAIL -> "PARTIAL_AVAIL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FULL_AVAIL_ONLY" -> FULL_AVAIL_ONLY
+      | "PARTIAL_AVAIL" -> PARTIAL_AVAIL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FillPolicy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FillPolicy" j)
+    let to_json = simple_to_json to_value
   end
 module Mode =
   struct
     type nonrec t =
       | OFF 
       | BEHIND_LIVE_EDGE 
+      | AFTER_LIVE_EDGE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | OFF -> "OFF"
       | BEHIND_LIVE_EDGE -> "BEHIND_LIVE_EDGE"
+      | AFTER_LIVE_EDGE -> "AFTER_LIVE_EDGE"
       | Non_static_id s -> s
     let of_string =
       function
       | "OFF" -> OFF
       | "BEHIND_LIVE_EDGE" -> BEHIND_LIVE_EDGE
+      | "AFTER_LIVE_EDGE" -> AFTER_LIVE_EDGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -490,6 +2133,145 @@ module OriginManifestType =
     let of_json j = of_string (string_of_json ~kind:"OriginManifestType" j)
     let to_json = simple_to_json to_value
   end
+module EventName =
+  struct
+    type nonrec t =
+      | PRE_SESSION_INITIALIZATION 
+      | PRE_ADS_REQUEST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PRE_SESSION_INITIALIZATION -> "PRE_SESSION_INITIALIZATION"
+      | PRE_ADS_REQUEST -> "PRE_ADS_REQUEST"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PRE_SESSION_INITIALIZATION" -> PRE_SESSION_INITIALIZATION
+      | "PRE_ADS_REQUEST" -> PRE_ADS_REQUEST
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EventName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EventName" j)
+    let to_json = simple_to_json to_value
+  end
+module AdsInteractionLog =
+  struct
+    type nonrec t =
+      {
+      publishOptInEventTypes:
+        Zz__adsInteractionPublishOptInEventTypesList.t option
+        [@ocaml.doc
+          "Indicates that MediaTailor emits RAW_ADS_RESPONSE logs for playback sessions that are initialized with this configuration."];
+      excludeEventTypes: Zz__adsInteractionExcludeEventTypesList.t option
+        [@ocaml.doc
+          "Indicates that MediaTailor won't emit the selected events in the logs for playback sessions that are initialized with this configuration."]}
+    let make ?publishOptInEventTypes =
+      fun ?excludeEventTypes ->
+        fun () -> { publishOptInEventTypes; excludeEventTypes }
+    let to_value x =
+      structure_to_value
+        [("PublishOptInEventTypes",
+           (Option.map x.publishOptInEventTypes
+              ~f:Zz__adsInteractionPublishOptInEventTypesList.to_value));
+        ("ExcludeEventTypes",
+          (Option.map x.excludeEventTypes
+             ~f:Zz__adsInteractionExcludeEventTypesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeEventTypes =
+        (Option.map ~f:Zz__adsInteractionExcludeEventTypesList.of_xml)
+          (Xml.child xml_arg0 "ExcludeEventTypes") in
+      let publishOptInEventTypes =
+        (Option.map ~f:Zz__adsInteractionPublishOptInEventTypesList.of_xml)
+          (Xml.child xml_arg0 "PublishOptInEventTypes") in
+      make ?excludeEventTypes ?publishOptInEventTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeEventTypes =
+        field_map json__ "ExcludeEventTypes"
+          Zz__adsInteractionExcludeEventTypesList.of_json in
+      let publishOptInEventTypes =
+        field_map json__ "PublishOptInEventTypes"
+          Zz__adsInteractionPublishOptInEventTypesList.of_json in
+      make ?excludeEventTypes ?publishOptInEventTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings for customizing what events are included in logs for interactions with the ad decision server (ADS). For more information about ADS logs, inlcuding descriptions of the event types, see MediaTailor ADS logs description and event types in Elemental MediaTailor User Guide."]
+module ManifestServiceInteractionLog =
+  struct
+    type nonrec t =
+      {
+      publishOptInEventTypes:
+        Zz__manifestServicePublishOptInEventTypesList.t option
+        [@ocaml.doc
+          "Indicates that MediaTailor will emit the selected events in the logs for playback sessions that are initialized with this configuration. These events are not emitted by default and must be explicitly opted in."];
+      excludeEventTypes: Zz__manifestServiceExcludeEventTypesList.t option
+        [@ocaml.doc
+          "Indicates that MediaTailor won't emit the selected events in the logs for playback sessions that are initialized with this configuration."]}
+    let make ?publishOptInEventTypes =
+      fun ?excludeEventTypes ->
+        fun () -> { publishOptInEventTypes; excludeEventTypes }
+    let to_value x =
+      structure_to_value
+        [("PublishOptInEventTypes",
+           (Option.map x.publishOptInEventTypes
+              ~f:Zz__manifestServicePublishOptInEventTypesList.to_value));
+        ("ExcludeEventTypes",
+          (Option.map x.excludeEventTypes
+             ~f:Zz__manifestServiceExcludeEventTypesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let excludeEventTypes =
+        (Option.map ~f:Zz__manifestServiceExcludeEventTypesList.of_xml)
+          (Xml.child xml_arg0 "ExcludeEventTypes") in
+      let publishOptInEventTypes =
+        (Option.map ~f:Zz__manifestServicePublishOptInEventTypesList.of_xml)
+          (Xml.child xml_arg0 "PublishOptInEventTypes") in
+      make ?excludeEventTypes ?publishOptInEventTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let excludeEventTypes =
+        field_map json__ "ExcludeEventTypes"
+          Zz__manifestServiceExcludeEventTypesList.of_json in
+      let publishOptInEventTypes =
+        field_map json__ "PublishOptInEventTypes"
+          Zz__manifestServicePublishOptInEventTypesList.of_json in
+      make ?excludeEventTypes ?publishOptInEventTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Settings for customizing what events are included in logs for interactions with the origin server. For more information about manifest service logs, including descriptions of the event types, see MediaTailor manifest logs description and event types in Elemental MediaTailor User Guide."]
+module Zz__listOfLoggingStrategies =
+  struct
+    type nonrec t = LoggingStrategy.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LoggingStrategy.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LoggingStrategy.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfLoggingStrategies"
+        ~of_json:LoggingStrategy.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AdMarkerPassthrough =
   struct
     type nonrec t =
@@ -506,12 +2288,101 @@ module AdMarkerPassthrough =
         (Option.map ~f:Zz__boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Zz__boolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Zz__boolean.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For HLS, when set to true, MediaTailor passes through EXT-X-CUE-IN, EXT-X-CUE-OUT, and EXT-X-SPLICEPOINT-SCTE35 ad markers from the origin manifest to the MediaTailor personalized manifest. No logic is applied to these ad markers. For example, if EXT-X-CUE-OUT has a value of 60, but no ads are filled for that ad break, MediaTailor will not set the value to 0."]
+module RuntimeType =
+  struct
+    type nonrec t =
+      | JSONATA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | JSONATA -> "JSONATA" | Non_static_id s -> s
+    let of_string = function | "JSONATA" -> JSONATA | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RuntimeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuntimeType" j)
+    let to_json = simple_to_json to_value
+  end
+module MethodType =
+  struct
+    type nonrec t =
+      | GET 
+      | POST 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | GET -> "GET" | POST -> "POST" | Non_static_id s -> s
+    let of_string =
+      function | "GET" -> GET | "POST" -> POST | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MethodType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MethodType" j)
+    let to_json = simple_to_json to_value
+  end
+module Zz__listOfFunctionsRef =
+  struct
+    type nonrec t = FunctionRef.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FunctionRef.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FunctionRef.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfFunctionsRef" ~of_json:FunctionRef.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module LogTypes =
+  struct
+    type nonrec t = LogType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LogType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LogType.of_xml)
+    let of_json j = list_of_json ~kind:"LogTypes" ~of_json:LogType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResponseOutputItem =
   struct
     type nonrec t =
@@ -520,20 +2391,19 @@ module ResponseOutputItem =
         [@ocaml.doc "DASH manifest configuration settings."];
       hlsPlaylistSettings: HlsPlaylistSettings.t option
         [@ocaml.doc "HLS manifest configuration settings."];
-      manifestName: Zz__string.t
+      manifestName: Zz__string.t option
         [@ocaml.doc
           "The name of the manifest for the channel that will appear in the channel output's playback URL."];
-      playbackUrl: Zz__string.t
+      playbackUrl: Zz__string.t option
         [@ocaml.doc "The URL used for playback by content players."];
-      sourceGroup: Zz__string.t
+      sourceGroup: Zz__string.t option
         [@ocaml.doc
           "A string used to associate a package configuration source group with a channel output."]}
-    let context_ = "ResponseOutputItem"
     let make ?dashPlaylistSettings =
       fun ?hlsPlaylistSettings ->
-        fun ~manifestName ->
-          fun ~playbackUrl ->
-            fun ~sourceGroup ->
+        fun ?manifestName ->
+          fun ?playbackUrl ->
+            fun ?sourceGroup ->
               fun () ->
                 {
                   dashPlaylistSettings;
@@ -549,42 +2419,38 @@ module ResponseOutputItem =
               ~f:DashPlaylistSettings.to_value));
         ("HlsPlaylistSettings",
           (Option.map x.hlsPlaylistSettings ~f:HlsPlaylistSettings.to_value));
-        ("ManifestName", (Some (Zz__string.to_value x.manifestName)));
-        ("PlaybackUrl", (Some (Zz__string.to_value x.playbackUrl)));
-        ("SourceGroup", (Some (Zz__string.to_value x.sourceGroup)))]
+        ("ManifestName", (Option.map x.manifestName ~f:Zz__string.to_value));
+        ("PlaybackUrl", (Option.map x.playbackUrl ~f:Zz__string.to_value));
+        ("SourceGroup", (Option.map x.sourceGroup ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceGroup =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceGroup") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "SourceGroup") in
       let playbackUrl =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PlaybackUrl") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "PlaybackUrl") in
       let manifestName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ManifestName") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ManifestName") in
       let hlsPlaylistSettings =
         (Option.map ~f:HlsPlaylistSettings.of_xml)
           (Xml.child xml_arg0 "HlsPlaylistSettings") in
       let dashPlaylistSettings =
         (Option.map ~f:DashPlaylistSettings.of_xml)
           (Xml.child xml_arg0 "DashPlaylistSettings") in
-      make ~sourceGroup ~playbackUrl ~manifestName ?hlsPlaylistSettings
+      make ?sourceGroup ?playbackUrl ?manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
-      let playbackUrl = field_map_exn json "PlaybackUrl" Zz__string.of_json in
-      let manifestName = field_map_exn json "ManifestName" Zz__string.of_json in
+    let of_json json__ =
+      let sourceGroup = field_map json__ "SourceGroup" Zz__string.of_json in
+      let playbackUrl = field_map json__ "PlaybackUrl" Zz__string.of_json in
+      let manifestName = field_map json__ "ManifestName" Zz__string.of_json in
       let hlsPlaylistSettings =
-        field_map json "HlsPlaylistSettings" HlsPlaylistSettings.of_json in
+        field_map json__ "HlsPlaylistSettings" HlsPlaylistSettings.of_json in
       let dashPlaylistSettings =
-        field_map json "DashPlaylistSettings" DashPlaylistSettings.of_json in
-      make ~sourceGroup ~playbackUrl ~manifestName ?hlsPlaylistSettings
+        field_map json__ "DashPlaylistSettings" DashPlaylistSettings.of_json in
+      make ?sourceGroup ?playbackUrl ?manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This response includes only the \"property\" : \"type\" property."]
+  end[@@ocaml.doc "The output item response."]
 module ScheduleAdBreak =
   struct
     type nonrec t =
@@ -636,22 +2502,53 @@ module ScheduleAdBreak =
       make ?vodSourceName ?sourceLocationName ?approximateStartTime
         ?approximateDurationSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let approximateStartTime =
-        field_map json "ApproximateStartTime" Zz__timestampUnix.of_json in
+        field_map json__ "ApproximateStartTime" Zz__timestampUnix.of_json in
       let approximateDurationSeconds =
-        field_map json "ApproximateDurationSeconds" Zz__long.of_json in
+        field_map json__ "ApproximateDurationSeconds" Zz__long.of_json in
       make ?vodSourceName ?sourceLocationName ?approximateStartTime
         ?approximateDurationSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The schedule's ad break properties."]
+module Zz__listOfAlternateMedia =
+  struct
+    type nonrec t = AlternateMedia.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AlternateMedia.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AlternateMedia.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAlternateMedia"
+        ~of_json:AlternateMedia.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module HttpPackageConfigurations =
   struct
     type nonrec t = HttpPackageConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpPackageConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -680,7 +2577,7 @@ module AccessConfiguration =
       {
       accessType: AccessType.t option
         [@ocaml.doc
-          "The type of authentication used to access content from HttpConfiguration::BaseUrl on your source location. Accepted value: S3_SIGV4. S3_SIGV4 - AWS Signature Version 4 authentication for Amazon S3 hosted virtual-style access. If your source location base URL is an Amazon S3 bucket, MediaTailor can use AWS Signature Version 4 (SigV4) authentication to access the bucket where your source content is stored. Your MediaTailor source location baseURL must follow the S3 virtual hosted-style request URL format. For example, https://bucket-name.s3.Region.amazonaws.com/key-name. Before you can use S3_SIGV4, you must meet these requirements: \226\128\162 You must allow MediaTailor to access your S3 bucket by granting mediatailor.amazonaws.com principal access in IAM. For information about configuring access in IAM, see Access management in the IAM User Guide. \226\128\162 The mediatailor.amazonaws.com service principal must have permissions to read all top level manifests referenced by the VodSource packaging configurations. \226\128\162 The caller of the API must have s3:GetObject IAM permissions to read all top level manifests referenced by your MediaTailor VodSource packaging configurations."];
+          "The type of authentication used to access content from HttpConfiguration::BaseUrl on your source location. S3_SIGV4 - AWS Signature Version 4 authentication for Amazon S3 hosted virtual-style access. If your source location base URL is an Amazon S3 bucket, MediaTailor can use AWS Signature Version 4 (SigV4) authentication to access the bucket where your source content is stored. Your MediaTailor source location baseURL must follow the S3 virtual hosted-style request URL format. For example, https://bucket-name.s3.Region.amazonaws.com/key-name. Before you can use S3_SIGV4, you must meet these requirements: \226\128\162 You must allow MediaTailor to access your S3 bucket by granting mediatailor.amazonaws.com principal access in IAM. For information about configuring access in IAM, see Access management in the IAM User Guide. \226\128\162 The mediatailor.amazonaws.com service principal must have permissions to read all top level manifests referenced by the VodSource packaging configurations. \226\128\162 The caller of the API must have s3:GetObject IAM permissions to read all top level manifests referenced by your MediaTailor VodSource packaging configurations. AUTODETECT_SIGV4 - AWS Signature Version 4 authentication for a set of supported services: MediaPackage Version 2 and Amazon S3 hosted virtual-style access. If your source location base URL is a MediaPackage Version 2 endpoint or an Amazon S3 bucket, MediaTailor can use AWS Signature Version 4 (SigV4) authentication to access the resource where your source content is stored. Before you can use AUTODETECT_SIGV4 with a MediaPackage Version 2 endpoint, you must meet these requirements: \226\128\162 You must grant MediaTailor access to your MediaPackage endpoint by granting mediatailor.amazonaws.com principal access in an Origin Access policy on the endpoint. \226\128\162 Your MediaTailor source location base URL must be a MediaPackage V2 endpoint. \226\128\162 The caller of the API must have mediapackagev2:GetObject IAM permissions to read all top level manifests referenced by the MediaTailor source packaging configurations. Before you can use AUTODETECT_SIGV4 with an Amazon S3 bucket, you must meet these requirements: \226\128\162 You must grant MediaTailor access to your S3 bucket by granting mediatailor.amazonaws.com principal access in IAM. For more information about configuring access in IAM, see Access management in the IAM User Guide.. \226\128\162 The mediatailor.amazonaws.com service principal must have permissions to read all top-level manifests referenced by the VodSource packaging configurations. \226\128\162 The caller of the API must have s3:GetObject IAM permissions to read all top level manifests referenced by your MediaTailor VodSource packaging configurations."];
       secretsManagerAccessTokenConfiguration:
         SecretsManagerAccessTokenConfiguration.t option
         [@ocaml.doc
@@ -703,11 +2600,11 @@ module AccessConfiguration =
         (Option.map ~f:AccessType.of_xml) (Xml.child xml_arg0 "AccessType") in
       make ?secretsManagerAccessTokenConfiguration ?accessType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secretsManagerAccessTokenConfiguration =
-        field_map json "SecretsManagerAccessTokenConfiguration"
+        field_map json__ "SecretsManagerAccessTokenConfiguration"
           SecretsManagerAccessTokenConfiguration.of_json in
-      let accessType = field_map json "AccessType" AccessType.of_json in
+      let accessType = field_map json__ "AccessType" AccessType.of_json in
       make ?secretsManagerAccessTokenConfiguration ?accessType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Access configuration parameters."]
@@ -728,8 +2625,8 @@ module DefaultSegmentDeliveryConfiguration =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "BaseUrl") in
       make ?baseUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseUrl = field_map json "BaseUrl" Zz__string.of_json in
+    let of_json json__ =
+      let baseUrl = field_map json__ "BaseUrl" Zz__string.of_json in
       make ?baseUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -753,8 +2650,8 @@ module HttpConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "BaseUrl") in
       make ~baseUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseUrl = field_map_exn json "BaseUrl" Zz__string.of_json in
+    let of_json json__ =
+      let baseUrl = field_map_exn json__ "BaseUrl" Zz__string.of_json in
       make ~baseUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The HTTP configuration for the source location."]
@@ -762,6 +2659,9 @@ module Zz__listOfSegmentDeliveryConfiguration =
   struct
     type nonrec t = SegmentDeliveryConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SegmentDeliveryConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -796,7 +2696,7 @@ module PrefetchConsumption =
           "The time when MediaTailor no longer considers the prefetched ads for use in an ad break. MediaTailor automatically deletes prefetch schedules no less than seven days after the end time. If you'd like to manually delete the prefetch schedule, you can call DeletePrefetchSchedule."];
       startTime: Zz__timestampUnix.t option
         [@ocaml.doc
-          "The time when prefetched ads are considered for use in an ad break. If you don't specify StartTime, the prefetched ads are available after MediaTailor retrives them from the ad decision server."]}
+          "The time when prefetched ads are considered for use in an ad break. If you don't specify StartTime, the prefetched ads are available after MediaTailor retrieves them from the ad decision server."]}
     let context_ = "PrefetchConsumption"
     let make ?availMatchingCriteria =
       fun ?startTime ->
@@ -822,41 +2722,79 @@ module PrefetchConsumption =
           (Xml.child xml_arg0 "AvailMatchingCriteria") in
       make ?startTime ~endTime ?availMatchingCriteria ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" Zz__timestampUnix.of_json in
-      let endTime = field_map_exn json "EndTime" Zz__timestampUnix.of_json in
+    let of_json json__ =
+      let startTime = field_map json__ "StartTime" Zz__timestampUnix.of_json in
+      let endTime = field_map_exn json__ "EndTime" Zz__timestampUnix.of_json in
       let availMatchingCriteria =
-        field_map json "AvailMatchingCriteria"
+        field_map json__ "AvailMatchingCriteria"
           Zz__listOfAvailMatchingCriteria.of_json in
       make ?startTime ~endTime ?availMatchingCriteria ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains settings that determine how and when that MediaTailor places prefetched ads into upcoming ad breaks."]
+       "For single prefetch, describes how and when that MediaTailor places prefetched ads into upcoming ad breaks."]
 module PrefetchRetrieval =
   struct
     type nonrec t =
       {
       dynamicVariables: Zz__mapOf__string.t option
         [@ocaml.doc
-          "The dynamic variables to use for substitution during prefetch requests to the ad decision server (ADS). You intially configure dynamic variables for the ADS URL when you set up your playback configuration. When you specify DynamicVariables for prefetch retrieval, MediaTailor includes the dynamic variables in the request to the ADS."];
+          "The dynamic variables to use for substitution during prefetch requests to the ad decision server (ADS). You initially configure dynamic variables for the ADS URL when you set up your playback configuration. When you specify DynamicVariables for prefetch retrieval, MediaTailor includes the dynamic variables in the request to the ADS."];
       endTime: Zz__timestampUnix.t
         [@ocaml.doc
           "The time when prefetch retrieval ends for the ad break. Prefetching will be attempted for manifest requests that occur at or before this time."];
       startTime: Zz__timestampUnix.t option
         [@ocaml.doc
-          "The time when prefetch retrievals can start for this break. Ad prefetching will be attempted for manifest requests that occur at or after this time. Defaults to the current time. If not specified, the prefetch retrieval starts as soon as possible."]}
+          "The time when prefetch retrievals can start for this break. Ad prefetching will be attempted for manifest requests that occur at or after this time. Defaults to the current time. If not specified, the prefetch retrieval starts as soon as possible."];
+      trafficShapingType: TrafficShapingType.t option
+        [@ocaml.doc
+          "Indicates the type of traffic shaping used to limit the number of requests to the ADS at one time."];
+      trafficShapingRetrievalWindow: TrafficShapingRetrievalWindow.t option
+        [@ocaml.doc
+          "The configuration that tells Elemental MediaTailor how many seconds to spread out requests to the ad decision server (ADS). Instead of sending ADS requests for all sessions at the same time, MediaTailor spreads the requests across the amount of time specified in the retrieval window."];
+      trafficShapingTpsConfiguration: TrafficShapingTpsConfiguration.t option
+        [@ocaml.doc
+          "The configuration for TPS-based traffic shaping. This approach limits requests to the ad decision server (ADS) based on transactions per second and concurrent users."]}
     let context_ = "PrefetchRetrieval"
     let make ?dynamicVariables =
       fun ?startTime ->
-        fun ~endTime -> fun () -> { dynamicVariables; startTime; endTime }
+        fun ?trafficShapingType ->
+          fun ?trafficShapingRetrievalWindow ->
+            fun ?trafficShapingTpsConfiguration ->
+              fun ~endTime ->
+                fun () ->
+                  {
+                    dynamicVariables;
+                    startTime;
+                    trafficShapingType;
+                    trafficShapingRetrievalWindow;
+                    trafficShapingTpsConfiguration;
+                    endTime
+                  }
     let to_value x =
       structure_to_value
         [("DynamicVariables",
            (Option.map x.dynamicVariables ~f:Zz__mapOf__string.to_value));
         ("EndTime", (Some (Zz__timestampUnix.to_value x.endTime)));
-        ("StartTime", (Option.map x.startTime ~f:Zz__timestampUnix.to_value))]
+        ("StartTime", (Option.map x.startTime ~f:Zz__timestampUnix.to_value));
+        ("TrafficShapingType",
+          (Option.map x.trafficShapingType ~f:TrafficShapingType.to_value));
+        ("TrafficShapingRetrievalWindow",
+          (Option.map x.trafficShapingRetrievalWindow
+             ~f:TrafficShapingRetrievalWindow.to_value));
+        ("TrafficShapingTpsConfiguration",
+          (Option.map x.trafficShapingTpsConfiguration
+             ~f:TrafficShapingTpsConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let trafficShapingTpsConfiguration =
+        (Option.map ~f:TrafficShapingTpsConfiguration.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingTpsConfiguration") in
+      let trafficShapingRetrievalWindow =
+        (Option.map ~f:TrafficShapingRetrievalWindow.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingRetrievalWindow") in
+      let trafficShapingType =
+        (Option.map ~f:TrafficShapingType.of_xml)
+          (Xml.child xml_arg0 "TrafficShapingType") in
       let startTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "StartTime") in
@@ -866,42 +2804,203 @@ module PrefetchRetrieval =
       let dynamicVariables =
         (Option.map ~f:Zz__mapOf__string.of_xml)
           (Xml.child xml_arg0 "DynamicVariables") in
-      make ?startTime ~endTime ?dynamicVariables ()
+      make ?trafficShapingTpsConfiguration ?trafficShapingRetrievalWindow
+        ?trafficShapingType ?startTime ~endTime ?dynamicVariables ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTime = field_map json "StartTime" Zz__timestampUnix.of_json in
-      let endTime = field_map_exn json "EndTime" Zz__timestampUnix.of_json in
+    let of_json json__ =
+      let trafficShapingTpsConfiguration =
+        field_map json__ "TrafficShapingTpsConfiguration"
+          TrafficShapingTpsConfiguration.of_json in
+      let trafficShapingRetrievalWindow =
+        field_map json__ "TrafficShapingRetrievalWindow"
+          TrafficShapingRetrievalWindow.of_json in
+      let trafficShapingType =
+        field_map json__ "TrafficShapingType" TrafficShapingType.of_json in
+      let startTime = field_map json__ "StartTime" Zz__timestampUnix.of_json in
+      let endTime = field_map_exn json__ "EndTime" Zz__timestampUnix.of_json in
       let dynamicVariables =
-        field_map json "DynamicVariables" Zz__mapOf__string.of_json in
-      make ?startTime ~endTime ?dynamicVariables ()
+        field_map json__ "DynamicVariables" Zz__mapOf__string.of_json in
+      make ?trafficShapingTpsConfiguration ?trafficShapingRetrievalWindow
+        ?trafficShapingType ?startTime ~endTime ?dynamicVariables ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains settings governing when MediaTailor prefetches ads, and which dynamic variables that MediaTailor includes in the request to the ad decision server."]
+module PrefetchScheduleType =
+  struct
+    type nonrec t =
+      | SINGLE 
+      | RECURRING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SINGLE -> "SINGLE"
+      | RECURRING -> "RECURRING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SINGLE" -> SINGLE
+      | "RECURRING" -> RECURRING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PrefetchScheduleType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PrefetchScheduleType" j)
+    let to_json = simple_to_json to_value
+  end
+module RecurringPrefetchConfiguration =
+  struct
+    type nonrec t =
+      {
+      startTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The start time for the window that MediaTailor prefetches and inserts ads in a live event."];
+      endTime: Zz__timestampUnix.t
+        [@ocaml.doc
+          "The end time for the window that MediaTailor prefetches and inserts ads in a live event."];
+      recurringConsumption: RecurringConsumption.t
+        [@ocaml.doc
+          "The settings that determine how and when MediaTailor places prefetched ads into upcoming ad breaks for recurring prefetch scedules."];
+      recurringRetrieval: RecurringRetrieval.t
+        [@ocaml.doc
+          "The configuration for prefetch ad retrieval from the ADS."]}
+    let context_ = "RecurringPrefetchConfiguration"
+    let make ?startTime =
+      fun ~endTime ->
+        fun ~recurringConsumption ->
+          fun ~recurringRetrieval ->
+            fun () ->
+              { startTime; endTime; recurringConsumption; recurringRetrieval
+              }
+    let to_value x =
+      structure_to_value
+        [("StartTime",
+           (Option.map x.startTime ~f:Zz__timestampUnix.to_value));
+        ("EndTime", (Some (Zz__timestampUnix.to_value x.endTime)));
+        ("RecurringConsumption",
+          (Some (RecurringConsumption.to_value x.recurringConsumption)));
+        ("RecurringRetrieval",
+          (Some (RecurringRetrieval.to_value x.recurringRetrieval)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recurringRetrieval =
+        RecurringRetrieval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RecurringRetrieval") in
+      let recurringConsumption =
+        RecurringConsumption.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RecurringConsumption") in
+      let endTime =
+        Zz__timestampUnix.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      make ~recurringRetrieval ~recurringConsumption ~endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recurringRetrieval =
+        field_map_exn json__ "RecurringRetrieval" RecurringRetrieval.of_json in
+      let recurringConsumption =
+        field_map_exn json__ "RecurringConsumption"
+          RecurringConsumption.of_json in
+      let endTime = field_map_exn json__ "EndTime" Zz__timestampUnix.of_json in
+      let startTime = field_map json__ "StartTime" Zz__timestampUnix.of_json in
+      make ~recurringRetrieval ~recurringConsumption ~endTime ?startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that defines how MediaTailor performs recurring prefetch."]
+module AdConditioningConfiguration =
+  struct
+    type nonrec t =
+      {
+      streamingMediaFileConditioning: StreamingMediaFileConditioning.t
+        [@ocaml.doc
+          "For ads that have media files with streaming delivery and supported file extensions, indicates what transcoding action MediaTailor takes when it first receives these ads from the ADS. TRANSCODE indicates that MediaTailor must transcode the ads. NONE indicates that you have already transcoded the ads outside of MediaTailor and don't need them transcoded as part of the ad insertion workflow. For more information about ad conditioning see Using preconditioned ads in the Elemental MediaTailor user guide."]}
+    let context_ = "AdConditioningConfiguration"
+    let make ~streamingMediaFileConditioning =
+      fun () -> { streamingMediaFileConditioning }
+    let to_value x =
+      structure_to_value
+        [("StreamingMediaFileConditioning",
+           (Some
+              (StreamingMediaFileConditioning.to_value
+                 x.streamingMediaFileConditioning)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let streamingMediaFileConditioning =
+        StreamingMediaFileConditioning.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "StreamingMediaFileConditioning") in
+      make ~streamingMediaFileConditioning ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let streamingMediaFileConditioning =
+        field_map_exn json__ "StreamingMediaFileConditioning"
+          StreamingMediaFileConditioning.of_json in
+      make ~streamingMediaFileConditioning ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The setting that indicates what conditioning MediaTailor will perform on ads that the ad decision server (ADS) returns."]
+module AdDecisionServerConfiguration =
+  struct
+    type nonrec t =
+      {
+      httpRequest: HttpRequest.t option
+        [@ocaml.doc
+          "The HTTP request configuration parameters for the ad decision server."]}
+    let make ?httpRequest = fun () -> { httpRequest }
+    let to_value x =
+      structure_to_value
+        [("HttpRequest", (Option.map x.httpRequest ~f:HttpRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let httpRequest =
+        (Option.map ~f:HttpRequest.of_xml) (Xml.child xml_arg0 "HttpRequest") in
+      make ?httpRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let httpRequest = field_map json__ "HttpRequest" HttpRequest.of_json in
+      make ?httpRequest ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration parameters for customizing HTTP requests sent to the ad decision server (ADS). This allows you to specify the HTTP method, headers, request body, and compression settings for ADS requests."]
 module AvailSuppression =
   struct
     type nonrec t =
       {
       mode: Mode.t option
         [@ocaml.doc
-          "Sets the ad suppression mode. By default, ad suppression is off and all ad breaks are filled with ads or slate. When Mode is set to BEHIND_LIVE_EDGE, ad suppression is active and MediaTailor won't fill ad breaks on or behind the ad suppression Value time in the manifest lookback window."];
+          "Sets the ad suppression mode. By default, ad suppression is off and all ad breaks are filled with ads or slate. When Mode is set to BEHIND_LIVE_EDGE, ad suppression is active and MediaTailor won't fill ad breaks on or behind the ad suppression Value time in the manifest lookback window. When Mode is set to AFTER_LIVE_EDGE, ad suppression is active and MediaTailor won't fill ad breaks that are within the live edge plus the avail suppression value."];
       value: Zz__string.t option
         [@ocaml.doc
-          "A live edge offset time in HH:MM:SS. MediaTailor won't fill ad breaks on or behind this time in the manifest lookback window. If Value is set to 00:00:00, it is in sync with the live edge, and MediaTailor won't fill any ad breaks on or behind the live edge. If you set a Value time, MediaTailor won't fill any ad breaks on or behind this time in the manifest lookback window. For example, if you set 00:45:00, then MediaTailor will fill ad breaks that occur within 45 minutes behind the live edge, but won't fill ad breaks on or behind 45 minutes behind the live edge."]}
-    let make ?mode = fun ?value -> fun () -> { mode; value }
+          "A live edge offset time in HH:MM:SS. MediaTailor won't fill ad breaks on or behind this time in the manifest lookback window. If Value is set to 00:00:00, it is in sync with the live edge, and MediaTailor won't fill any ad breaks on or behind the live edge. If you set a Value time, MediaTailor won't fill any ad breaks on or behind this time in the manifest lookback window. For example, if you set 00:45:00, then MediaTailor will fill ad breaks that occur within 45 minutes behind the live edge, but won't fill ad breaks on or behind 45 minutes behind the live edge."];
+      fillPolicy: FillPolicy.t option
+        [@ocaml.doc
+          "Defines the policy to apply to the avail suppression mode. BEHIND_LIVE_EDGE will always use the full avail suppression policy. AFTER_LIVE_EDGE mode can be used to invoke partial ad break fills when a session starts mid-break."]}
+    let make ?mode =
+      fun ?value -> fun ?fillPolicy -> fun () -> { mode; value; fillPolicy }
     let to_value x =
       structure_to_value
         [("Mode", (Option.map x.mode ~f:Mode.to_value));
-        ("Value", (Option.map x.value ~f:Zz__string.to_value))]
+        ("Value", (Option.map x.value ~f:Zz__string.to_value));
+        ("FillPolicy", (Option.map x.fillPolicy ~f:FillPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let fillPolicy =
+        (Option.map ~f:FillPolicy.of_xml) (Xml.child xml_arg0 "FillPolicy") in
       let value =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Value") in
       let mode = (Option.map ~f:Mode.of_xml) (Xml.child xml_arg0 "Mode") in
-      make ?value ?mode ()
+      make ?fillPolicy ?value ?mode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" Zz__string.of_json in
-      let mode = field_map json "Mode" Mode.of_json in make ?value ?mode ()
+    let of_json json__ =
+      let fillPolicy = field_map json__ "FillPolicy" FillPolicy.of_json in
+      let value = field_map json__ "Value" Zz__string.of_json in
+      let mode = field_map json__ "Mode" Mode.of_json in
+      make ?fillPolicy ?value ?mode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configuration for avail suppression, also known as ad suppression. For more information about ad suppression, see Ad Suppression."]
@@ -926,9 +3025,9 @@ module Bumper =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "EndUrl") in
       make ?startUrl ?endUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startUrl = field_map json "StartUrl" Zz__string.of_json in
-      let endUrl = field_map json "EndUrl" Zz__string.of_json in
+    let of_json json__ =
+      let startUrl = field_map json__ "StartUrl" Zz__string.of_json in
+      let endUrl = field_map json__ "EndUrl" Zz__string.of_json in
       make ?startUrl ?endUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -962,11 +3061,11 @@ module CdnConfiguration =
           (Xml.child xml_arg0 "AdSegmentUrlPrefix") in
       make ?contentSegmentUrlPrefix ?adSegmentUrlPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contentSegmentUrlPrefix =
-        field_map json "ContentSegmentUrlPrefix" Zz__string.of_json in
+        field_map json__ "ContentSegmentUrlPrefix" Zz__string.of_json in
       let adSegmentUrlPrefix =
-        field_map json "AdSegmentUrlPrefix" Zz__string.of_json in
+        field_map json__ "AdSegmentUrlPrefix" Zz__string.of_json in
       make ?contentSegmentUrlPrefix ?adSegmentUrlPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -995,6 +3094,8 @@ module ConfigurationAliasesResponse =
                        (Zz__mapOf__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1039,15 +3140,45 @@ module DashConfiguration =
           (Xml.child xml_arg0 "ManifestEndpointPrefix") in
       make ?originManifestType ?mpdLocation ?manifestEndpointPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originManifestType =
-        field_map json "OriginManifestType" OriginManifestType.of_json in
-      let mpdLocation = field_map json "MpdLocation" Zz__string.of_json in
+        field_map json__ "OriginManifestType" OriginManifestType.of_json in
+      let mpdLocation = field_map json__ "MpdLocation" Zz__string.of_json in
       let manifestEndpointPrefix =
-        field_map json "ManifestEndpointPrefix" Zz__string.of_json in
+        field_map json__ "ManifestEndpointPrefix" Zz__string.of_json in
       make ?originManifestType ?mpdLocation ?manifestEndpointPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for DASH content."]
+module FunctionMapping =
+  struct
+    type nonrec t = (EventName.t * Zz__string.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((EventName.of_string chopped),
+                              (Zz__string.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (EventName.to_value x) |>
+                    (fun x -> (Zz__string.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:EventName.of_string
+        ~of_json:Zz__string.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module HlsConfiguration =
   struct
     type nonrec t =
@@ -1067,12 +3198,37 @@ module HlsConfiguration =
           (Xml.child xml_arg0 "ManifestEndpointPrefix") in
       make ?manifestEndpointPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let manifestEndpointPrefix =
-        field_map json "ManifestEndpointPrefix" Zz__string.of_json in
+        field_map json__ "ManifestEndpointPrefix" Zz__string.of_json in
       make ?manifestEndpointPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for HLS content."]
+module InsertionMode =
+  struct
+    type nonrec t =
+      | STITCHED_ONLY 
+      | PLAYER_SELECT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STITCHED_ONLY -> "STITCHED_ONLY"
+      | PLAYER_SELECT -> "PLAYER_SELECT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STITCHED_ONLY" -> STITCHED_ONLY
+      | "PLAYER_SELECT" -> PLAYER_SELECT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InsertionMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InsertionMode" j)
+    let to_json = simple_to_json to_value
+  end
 module LivePreRollConfiguration =
   struct
     type nonrec t =
@@ -1102,11 +3258,11 @@ module LivePreRollConfiguration =
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
       make ?maxDurationSeconds ?adDecisionServerUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maxDurationSeconds =
-        field_map json "MaxDurationSeconds" Zz__integer.of_json in
+        field_map json__ "MaxDurationSeconds" Zz__integer.of_json in
       let adDecisionServerUrl =
-        field_map json "AdDecisionServerUrl" Zz__string.of_json in
+        field_map json__ "AdDecisionServerUrl" Zz__string.of_json in
       make ?maxDurationSeconds ?adDecisionServerUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for pre-roll ad insertion."]
@@ -1114,28 +3270,74 @@ module LogConfiguration =
   struct
     type nonrec t =
       {
-      percentEnabled: Zz__integer.t
+      percentEnabled: Zz__integer.t option
         [@ocaml.doc
-          "The percentage of session logs that MediaTailor sends to your Cloudwatch Logs account. For example, if your playback configuration has 1000 sessions and percentEnabled is set to 60, MediaTailor sends logs for 600 of the sessions to CloudWatch Logs. MediaTailor decides at random which of the playback configuration sessions to send logs for. If you want to view logs for a specific session, you can use the debug log mode. Valid values: 0 - 100"]}
-    let context_ = "LogConfiguration"
-    let make ~percentEnabled = fun () -> { percentEnabled }
+          "The percentage of session logs that MediaTailor sends to your configured log destination. For example, if your playback configuration has 1000 sessions and percentEnabled is set to 60, MediaTailor sends logs for 600 of the sessions to CloudWatch Logs. MediaTailor decides at random which of the playback configuration sessions to send logs for. If you want to view logs for a specific session, you can use the debug log mode. Valid values: 0 - 100"];
+      enabledLoggingStrategies: Zz__listOfLoggingStrategies.t option
+        [@ocaml.doc
+          "The method used for collecting logs from AWS Elemental MediaTailor. LEGACY_CLOUDWATCH indicates that MediaTailor is sending logs directly to Amazon CloudWatch Logs. VENDED_LOGS indicates that MediaTailor is sending logs to CloudWatch, which then vends the logs to your destination of choice. Supported destinations are CloudWatch Logs log group, Amazon S3 bucket, and Amazon Data Firehose stream."];
+      adsInteractionLog: AdsInteractionLog.t option
+        [@ocaml.doc
+          "Settings for customizing what events are included in logs for interactions with the ad decision server (ADS)."];
+      manifestServiceInteractionLog: ManifestServiceInteractionLog.t option
+        [@ocaml.doc
+          "Settings for customizing what events are included in logs for interactions with the origin server."]}
+    let make ?percentEnabled =
+      fun ?enabledLoggingStrategies ->
+        fun ?adsInteractionLog ->
+          fun ?manifestServiceInteractionLog ->
+            fun () ->
+              {
+                percentEnabled;
+                enabledLoggingStrategies;
+                adsInteractionLog;
+                manifestServiceInteractionLog
+              }
     let to_value x =
       structure_to_value
-        [("PercentEnabled", (Some (Zz__integer.to_value x.percentEnabled)))]
+        [("PercentEnabled",
+           (Option.map x.percentEnabled ~f:Zz__integer.to_value));
+        ("EnabledLoggingStrategies",
+          (Option.map x.enabledLoggingStrategies
+             ~f:Zz__listOfLoggingStrategies.to_value));
+        ("AdsInteractionLog",
+          (Option.map x.adsInteractionLog ~f:AdsInteractionLog.to_value));
+        ("ManifestServiceInteractionLog",
+          (Option.map x.manifestServiceInteractionLog
+             ~f:ManifestServiceInteractionLog.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let manifestServiceInteractionLog =
+        (Option.map ~f:ManifestServiceInteractionLog.of_xml)
+          (Xml.child xml_arg0 "ManifestServiceInteractionLog") in
+      let adsInteractionLog =
+        (Option.map ~f:AdsInteractionLog.of_xml)
+          (Xml.child xml_arg0 "AdsInteractionLog") in
+      let enabledLoggingStrategies =
+        (Option.map ~f:Zz__listOfLoggingStrategies.of_xml)
+          (Xml.child xml_arg0 "EnabledLoggingStrategies") in
       let percentEnabled =
-        Zz__integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PercentEnabled") in
-      make ~percentEnabled ()
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "PercentEnabled") in
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ?percentEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let manifestServiceInteractionLog =
+        field_map json__ "ManifestServiceInteractionLog"
+          ManifestServiceInteractionLog.of_json in
+      let adsInteractionLog =
+        field_map json__ "AdsInteractionLog" AdsInteractionLog.of_json in
+      let enabledLoggingStrategies =
+        field_map json__ "EnabledLoggingStrategies"
+          Zz__listOfLoggingStrategies.of_json in
       let percentEnabled =
-        field_map_exn json "PercentEnabled" Zz__integer.of_json in
-      make ~percentEnabled ()
+        field_map json__ "PercentEnabled" Zz__integer.of_json in
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ?percentEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns Amazon CloudWatch log settings for a playback configuration."]
+       "Defines where AWS Elemental MediaTailor sends logs for the playback configuration."]
 module ManifestProcessingRules =
   struct
     type nonrec t =
@@ -1155,9 +3357,9 @@ module ManifestProcessingRules =
           (Xml.child xml_arg0 "AdMarkerPassthrough") in
       make ?adMarkerPassthrough ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let adMarkerPassthrough =
-        field_map json "AdMarkerPassthrough" AdMarkerPassthrough.of_json in
+        field_map json__ "AdMarkerPassthrough" AdMarkerPassthrough.of_json in
       make ?adMarkerPassthrough ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1177,10 +3379,268 @@ module Zz__integerMin1 =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module CustomOutputConfiguration =
+  struct
+    type nonrec t =
+      {
+      runtime: RuntimeType.t
+        [@ocaml.doc
+          "The expression language used to evaluate expressions in the function configuration. Set this to JSONata."];
+      output: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "A map of output bindings. Each key is a namespaced output path (such as player_params.device_type or temp.variant), and each value is an expression that MediaTailor evaluates at runtime against the current session state. For more information about expression syntax, see JSONata expression reference in the MediaTailor User Guide."]}
+    let context_ = "CustomOutputConfiguration"
+    let make ?output = fun ~runtime -> fun () -> { output; runtime }
+    let to_value x =
+      structure_to_value
+        [("Runtime", (Some (RuntimeType.to_value x.runtime)));
+        ("Output", (Option.map x.output ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let output =
+        (Option.map ~f:Zz__mapOf__string.of_xml)
+          (Xml.child xml_arg0 "Output") in
+      let runtime =
+        RuntimeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Runtime") in
+      make ?output ~runtime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let output = field_map json__ "Output" Zz__mapOf__string.of_json in
+      let runtime = field_map_exn json__ "Runtime" RuntimeType.of_json in
+      make ?output ~runtime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a CUSTOM_OUTPUT function. MediaTailor evaluates the output expressions against the current session state and commits the results as output bindings. CUSTOM_OUTPUT functions do not make external calls. For more information, see CUSTOM_OUTPUT in the MediaTailor User Guide."]
+module FunctionType =
+  struct
+    type nonrec t =
+      | HTTP_REQUEST 
+      | CUSTOM_OUTPUT 
+      | SEQUENTIAL_EXECUTOR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HTTP_REQUEST -> "HTTP_REQUEST"
+      | CUSTOM_OUTPUT -> "CUSTOM_OUTPUT"
+      | SEQUENTIAL_EXECUTOR -> "SEQUENTIAL_EXECUTOR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HTTP_REQUEST" -> HTTP_REQUEST
+      | "CUSTOM_OUTPUT" -> CUSTOM_OUTPUT
+      | "SEQUENTIAL_EXECUTOR" -> SEQUENTIAL_EXECUTOR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FunctionType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FunctionType" j)
+    let to_json = simple_to_json to_value
+  end
+module HttpRequestConfiguration =
+  struct
+    type nonrec t =
+      {
+      runtime: RuntimeType.t
+        [@ocaml.doc
+          "The expression language used to evaluate expressions in the function configuration. Set this to JSONata."];
+      output: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "A map of output bindings. Each key is a namespaced output path (such as player_params.device_type or temp.identity), and each value is an expression that MediaTailor evaluates at runtime. Output expressions in an HTTP_REQUEST function can reference the response object returned by the HTTP call. For more information about expression syntax, see JSONata expression reference in the MediaTailor User Guide."];
+      methodType: MethodType.t
+        [@ocaml.doc
+          "The HTTP method for the request. Valid values: GET and POST."];
+      requestTimeoutMilliseconds: Zz__integer.t
+        [@ocaml.doc
+          "The maximum time, in milliseconds, that MediaTailor waits for a response from the external service. If the call exceeds this timeout, MediaTailor sets the response status code to null and proceeds with output expression evaluation. Valid values: 100 to 2000."];
+      url: Zz__string.t
+        [@ocaml.doc
+          "An expression that evaluates to the request URL. Use \\{%...%\\} delimiters for dynamic expressions. The maximum length after evaluation is 2,048 characters."];
+      body: Zz__string.t option
+        [@ocaml.doc
+          "An expression that evaluates to the request body. Used with POST requests. The maximum size after evaluation is 64 KB."];
+      headers: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "A map of HTTP header names to expression values. MediaTailor evaluates each header value expression at runtime and includes the result in the outbound HTTP request. Maximum 50 headers."]}
+    let context_ = "HttpRequestConfiguration"
+    let make ?output =
+      fun ?body ->
+        fun ?headers ->
+          fun ~runtime ->
+            fun ~methodType ->
+              fun ~requestTimeoutMilliseconds ->
+                fun ~url ->
+                  fun () ->
+                    {
+                      output;
+                      body;
+                      headers;
+                      runtime;
+                      methodType;
+                      requestTimeoutMilliseconds;
+                      url
+                    }
+    let to_value x =
+      structure_to_value
+        [("Runtime", (Some (RuntimeType.to_value x.runtime)));
+        ("Output", (Option.map x.output ~f:Zz__mapOf__string.to_value));
+        ("MethodType", (Some (MethodType.to_value x.methodType)));
+        ("RequestTimeoutMilliseconds",
+          (Some (Zz__integer.to_value x.requestTimeoutMilliseconds)));
+        ("Url", (Some (Zz__string.to_value x.url)));
+        ("Body", (Option.map x.body ~f:Zz__string.to_value));
+        ("Headers", (Option.map x.headers ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let headers =
+        (Option.map ~f:Zz__mapOf__string.of_xml)
+          (Xml.child xml_arg0 "Headers") in
+      let body =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Body") in
+      let url =
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Url") in
+      let requestTimeoutMilliseconds =
+        Zz__integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "RequestTimeoutMilliseconds") in
+      let methodType =
+        MethodType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MethodType") in
+      let output =
+        (Option.map ~f:Zz__mapOf__string.of_xml)
+          (Xml.child xml_arg0 "Output") in
+      let runtime =
+        RuntimeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Runtime") in
+      make ?headers ?body ~url ~requestTimeoutMilliseconds ~methodType
+        ?output ~runtime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let headers = field_map json__ "Headers" Zz__mapOf__string.of_json in
+      let body = field_map json__ "Body" Zz__string.of_json in
+      let url = field_map_exn json__ "Url" Zz__string.of_json in
+      let requestTimeoutMilliseconds =
+        field_map_exn json__ "RequestTimeoutMilliseconds" Zz__integer.of_json in
+      let methodType = field_map_exn json__ "MethodType" MethodType.of_json in
+      let output = field_map json__ "Output" Zz__mapOf__string.of_json in
+      let runtime = field_map_exn json__ "Runtime" RuntimeType.of_json in
+      make ?headers ?body ~url ~requestTimeoutMilliseconds ~methodType
+        ?output ~runtime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Function Configuration DataStructure"]
+module SequentialExecutorConfiguration =
+  struct
+    type nonrec t =
+      {
+      runtime: RuntimeType.t
+        [@ocaml.doc
+          "The expression language used to evaluate expressions in the function configuration. Set this to JSONata."];
+      output: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "An optional map of output bindings that controls which bindings the sequence commits to the session state after all steps complete. If omitted, MediaTailor commits all accumulated output bindings from all child steps."];
+      functionList: Zz__listOfFunctionsRef.t
+        [@ocaml.doc
+          "An ordered list of 1 to 10 steps. Each step specifies a child function to execute and an optional run condition expression that controls whether the step runs. MediaTailor executes steps in order, passing data between steps through temporary data."];
+      timeoutMilliseconds: Zz__integer.t
+        [@ocaml.doc
+          "The maximum time, in milliseconds, for the entire sequence to complete. This timeout covers all steps, including any HTTP calls made by child functions. If the sequence exceeds this timeout, MediaTailor discards all output from the sequence and proceeds with default behavior."]}
+    let context_ = "SequentialExecutorConfiguration"
+    let make ?output =
+      fun ~runtime ->
+        fun ~functionList ->
+          fun ~timeoutMilliseconds ->
+            fun () -> { output; runtime; functionList; timeoutMilliseconds }
+    let to_value x =
+      structure_to_value
+        [("Runtime", (Some (RuntimeType.to_value x.runtime)));
+        ("Output", (Option.map x.output ~f:Zz__mapOf__string.to_value));
+        ("FunctionList",
+          (Some (Zz__listOfFunctionsRef.to_value x.functionList)));
+        ("TimeoutMilliseconds",
+          (Some (Zz__integer.to_value x.timeoutMilliseconds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeoutMilliseconds =
+        Zz__integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TimeoutMilliseconds") in
+      let functionList =
+        Zz__listOfFunctionsRef.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FunctionList") in
+      let output =
+        (Option.map ~f:Zz__mapOf__string.of_xml)
+          (Xml.child xml_arg0 "Output") in
+      let runtime =
+        RuntimeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Runtime") in
+      make ~timeoutMilliseconds ~functionList ?output ~runtime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeoutMilliseconds =
+        field_map_exn json__ "TimeoutMilliseconds" Zz__integer.of_json in
+      let functionList =
+        field_map_exn json__ "FunctionList" Zz__listOfFunctionsRef.of_json in
+      let output = field_map json__ "Output" Zz__mapOf__string.of_json in
+      let runtime = field_map_exn json__ "Runtime" RuntimeType.of_json in
+      make ~timeoutMilliseconds ~functionList ?output ~runtime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for a SEQUENTIAL_EXECUTOR function. A SEQUENTIAL_EXECUTOR runs a sequence of child functions in order, passing data between steps through temporary data. For more information, see SEQUENTIAL_EXECUTOR in the MediaTailor User Guide."]
+module Audiences =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j = list_of_json ~kind:"Audiences" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LogConfigurationForChannel =
+  struct
+    type nonrec t =
+      {
+      logTypes: LogTypes.t option [@ocaml.doc "The log types."]}
+    let make ?logTypes = fun () -> { logTypes }
+    let to_value x =
+      structure_to_value
+        [("LogTypes", (Option.map x.logTypes ~f:LogTypes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypes =
+        (Option.map ~f:LogTypes.of_xml) (Xml.child xml_arg0 "LogTypes") in
+      make ?logTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypes = field_map json__ "LogTypes" LogTypes.of_json in
+      make ?logTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The log configuration for the channel."]
 module ResponseOutputs =
   struct
     type nonrec t = ResponseOutputItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResponseOutputItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1202,45 +3662,41 @@ module ResponseOutputs =
         ~of_json:ResponseOutputItem.of_json j
     let to_json v = composed_to_json to_value v
   end
-module SlateSource =
+module AlertCategory =
   struct
     type nonrec t =
-      {
-      sourceLocationName: Zz__string.t option
-        [@ocaml.doc
-          "The name of the source location where the slate VOD source is stored."];
-      vodSourceName: Zz__string.t option
-        [@ocaml.doc
-          "The slate VOD source name. The VOD source must already exist in a source location before it can be used for slate."]}
-    let make ?sourceLocationName =
-      fun ?vodSourceName -> fun () -> { sourceLocationName; vodSourceName }
-    let to_value x =
-      structure_to_value
-        [("SourceLocationName",
-           (Option.map x.sourceLocationName ~f:Zz__string.to_value));
-        ("VodSourceName",
-          (Option.map x.vodSourceName ~f:Zz__string.to_value))]
+      | SCHEDULING_ERROR 
+      | PLAYBACK_WARNING 
+      | INFO 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SCHEDULING_ERROR -> "SCHEDULING_ERROR"
+      | PLAYBACK_WARNING -> "PLAYBACK_WARNING"
+      | INFO -> "INFO"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SCHEDULING_ERROR" -> SCHEDULING_ERROR
+      | "PLAYBACK_WARNING" -> PLAYBACK_WARNING
+      | "INFO" -> INFO
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let vodSourceName =
-        (Option.map ~f:Zz__string.of_xml)
-          (Xml.child xml_arg0 "VodSourceName") in
-      let sourceLocationName =
-        (Option.map ~f:Zz__string.of_xml)
-          (Xml.child xml_arg0 "SourceLocationName") in
-      make ?vodSourceName ?sourceLocationName ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
-      let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
-      make ?vodSourceName ?sourceLocationName ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Slate VOD source configuration."]
+      of_string (string_of_xml ~kind:"enumeration AlertCategory" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AlertCategory" j)
+    let to_json = simple_to_json to_value
+  end
 module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1266,17 +3722,20 @@ module ScheduleEntryType =
     type nonrec t =
       | PROGRAM 
       | FILLER_SLATE 
+      | ALTERNATE_MEDIA 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | PROGRAM -> "PROGRAM"
       | FILLER_SLATE -> "FILLER_SLATE"
+      | ALTERNATE_MEDIA -> "ALTERNATE_MEDIA"
       | Non_static_id s -> s
     let of_string =
       function
       | "PROGRAM" -> PROGRAM
       | "FILLER_SLATE" -> FILLER_SLATE
+      | "ALTERNATE_MEDIA" -> ALTERNATE_MEDIA
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1291,6 +3750,9 @@ module Zz__listOfScheduleAdBreak =
   struct
     type nonrec t = ScheduleAdBreak.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduleAdBreak.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1312,80 +3774,6 @@ module Zz__listOfScheduleAdBreak =
         ~of_json:ScheduleAdBreak.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MessageType =
-  struct
-    type nonrec t =
-      | SPLICE_INSERT 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | SPLICE_INSERT -> "SPLICE_INSERT" | Non_static_id s -> s
-    let of_string =
-      function | "SPLICE_INSERT" -> SPLICE_INSERT | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration MessageType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"MessageType" j)
-    let to_json = simple_to_json to_value
-  end
-module SpliceInsertMessage =
-  struct
-    type nonrec t =
-      {
-      availNum: Zz__integer.t option
-        [@ocaml.doc
-          "This is written to splice_insert.avail_num, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."];
-      availsExpected: Zz__integer.t option
-        [@ocaml.doc
-          "This is written to splice_insert.avails_expected, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."];
-      spliceEventId: Zz__integer.t option
-        [@ocaml.doc
-          "This is written to splice_insert.splice_event_id, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 1."];
-      uniqueProgramId: Zz__integer.t option
-        [@ocaml.doc
-          "This is written to splice_insert.unique_program_id, as defined in section 9.7.3.1 of the SCTE-35 specification. The default value is 0. Values must be between 0 and 256, inclusive."]}
-    let make ?availNum =
-      fun ?availsExpected ->
-        fun ?spliceEventId ->
-          fun ?uniqueProgramId ->
-            fun () ->
-              { availNum; availsExpected; spliceEventId; uniqueProgramId }
-    let to_value x =
-      structure_to_value
-        [("AvailNum", (Option.map x.availNum ~f:Zz__integer.to_value));
-        ("AvailsExpected",
-          (Option.map x.availsExpected ~f:Zz__integer.to_value));
-        ("SpliceEventId",
-          (Option.map x.spliceEventId ~f:Zz__integer.to_value));
-        ("UniqueProgramId",
-          (Option.map x.uniqueProgramId ~f:Zz__integer.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let uniqueProgramId =
-        (Option.map ~f:Zz__integer.of_xml)
-          (Xml.child xml_arg0 "UniqueProgramId") in
-      let spliceEventId =
-        (Option.map ~f:Zz__integer.of_xml)
-          (Xml.child xml_arg0 "SpliceEventId") in
-      let availsExpected =
-        (Option.map ~f:Zz__integer.of_xml)
-          (Xml.child xml_arg0 "AvailsExpected") in
-      let availNum =
-        (Option.map ~f:Zz__integer.of_xml) (Xml.child xml_arg0 "AvailNum") in
-      make ?uniqueProgramId ?spliceEventId ?availsExpected ?availNum ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let uniqueProgramId =
-        field_map json "UniqueProgramId" Zz__integer.of_json in
-      let spliceEventId = field_map json "SpliceEventId" Zz__integer.of_json in
-      let availsExpected =
-        field_map json "AvailsExpected" Zz__integer.of_json in
-      let availNum = field_map json "AvailNum" Zz__integer.of_json in
-      make ?uniqueProgramId ?spliceEventId ?availsExpected ?availNum ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Splice insert message configuration."]
 module RelativePosition =
   struct
     type nonrec t =
@@ -1411,6 +3799,72 @@ module RelativePosition =
     let of_json j = of_string (string_of_json ~kind:"RelativePosition" j)
     let to_json = simple_to_json to_value
   end
+module AudienceMedia =
+  struct
+    type nonrec t =
+      {
+      audience: Zz__string.t option
+        [@ocaml.doc "The Audience defined in AudienceMedia."];
+      alternateMedia: Zz__listOfAlternateMedia.t option
+        [@ocaml.doc "The list of AlternateMedia defined in AudienceMedia."]}
+    let make ?audience =
+      fun ?alternateMedia -> fun () -> { audience; alternateMedia }
+    let to_value x =
+      structure_to_value
+        [("Audience", (Option.map x.audience ~f:Zz__string.to_value));
+        ("AlternateMedia",
+          (Option.map x.alternateMedia ~f:Zz__listOfAlternateMedia.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let alternateMedia =
+        (Option.map ~f:Zz__listOfAlternateMedia.of_xml)
+          (Xml.child xml_arg0 "AlternateMedia") in
+      let audience =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Audience") in
+      make ?alternateMedia ?audience ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let alternateMedia =
+        field_map json__ "AlternateMedia" Zz__listOfAlternateMedia.of_json in
+      let audience = field_map json__ "Audience" Zz__string.of_json in
+      make ?alternateMedia ?audience ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An AudienceMedia object contains an Audience and a list of AlternateMedia."]
+module UpdateProgramTransition =
+  struct
+    type nonrec t =
+      {
+      scheduledStartTimeMillis: Zz__long.t option
+        [@ocaml.doc
+          "The date and time that the program is scheduled to start, in epoch milliseconds."];
+      durationMillis: Zz__long.t option
+        [@ocaml.doc "The duration of the live program in seconds."]}
+    let make ?scheduledStartTimeMillis =
+      fun ?durationMillis ->
+        fun () -> { scheduledStartTimeMillis; durationMillis }
+    let to_value x =
+      structure_to_value
+        [("ScheduledStartTimeMillis",
+           (Option.map x.scheduledStartTimeMillis ~f:Zz__long.to_value));
+        ("DurationMillis",
+          (Option.map x.durationMillis ~f:Zz__long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let durationMillis =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let scheduledStartTimeMillis =
+        (Option.map ~f:Zz__long.of_xml)
+          (Xml.child xml_arg0 "ScheduledStartTimeMillis") in
+      make ?durationMillis ?scheduledStartTimeMillis ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let durationMillis = field_map json__ "DurationMillis" Zz__long.of_json in
+      let scheduledStartTimeMillis =
+        field_map json__ "ScheduledStartTimeMillis" Zz__long.of_json in
+      make ?durationMillis ?scheduledStartTimeMillis ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Program transition configuration."]
 module RequestOutputItem =
   struct
     type nonrec t =
@@ -1463,13 +3917,14 @@ module RequestOutputItem =
       make ~sourceGroup ~manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceGroup = field_map_exn json "SourceGroup" Zz__string.of_json in
-      let manifestName = field_map_exn json "ManifestName" Zz__string.of_json in
+    let of_json json__ =
+      let sourceGroup = field_map_exn json__ "SourceGroup" Zz__string.of_json in
+      let manifestName =
+        field_map_exn json__ "ManifestName" Zz__string.of_json in
       let hlsPlaylistSettings =
-        field_map json "HlsPlaylistSettings" HlsPlaylistSettings.of_json in
+        field_map json__ "HlsPlaylistSettings" HlsPlaylistSettings.of_json in
       let dashPlaylistSettings =
-        field_map json "DashPlaylistSettings" DashPlaylistSettings.of_json in
+        field_map json__ "DashPlaylistSettings" DashPlaylistSettings.of_json in
       make ~sourceGroup ~manifestName ?hlsPlaylistSettings
         ?dashPlaylistSettings ()
     let to_json v = composed_to_json to_value v
@@ -1478,94 +3933,93 @@ module VodSource =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t [@ocaml.doc "The ARN for the VOD source."];
+      arn: Zz__string.t option [@ocaml.doc "The ARN for the VOD source."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the VOD source was created."];
-      httpPackageConfigurations: HttpPackageConfigurations.t
+      httpPackageConfigurations: HttpPackageConfigurations.t option
         [@ocaml.doc "The HTTP package configurations for the VOD source."];
       lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the VOD source was last modified."];
-      sourceLocationName: Zz__string.t
+      sourceLocationName: Zz__string.t option
         [@ocaml.doc
           "The name of the source location that the VOD source is associated with."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the VOD source."];
-      vodSourceName: Zz__string.t [@ocaml.doc "The name of the VOD source."]}
-    let context_ = "VodSource"
-    let make ?creationTime =
-      fun ?lastModifiedTime ->
-        fun ?tags ->
-          fun ~arn ->
-            fun ~httpPackageConfigurations ->
-              fun ~sourceLocationName ->
-                fun ~vodSourceName ->
+        [@ocaml.doc
+          "The tags assigned to the VOD source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the VOD source."]}
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?httpPackageConfigurations ->
+          fun ?lastModifiedTime ->
+            fun ?sourceLocationName ->
+              fun ?tags ->
+                fun ?vodSourceName ->
                   fun () ->
                     {
-                      creationTime;
-                      lastModifiedTime;
-                      tags;
                       arn;
+                      creationTime;
                       httpPackageConfigurations;
+                      lastModifiedTime;
                       sourceLocationName;
+                      tags;
                       vodSourceName
                     }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Zz__string.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
         ("HttpPackageConfigurations",
-          (Some
-             (HttpPackageConfigurations.to_value x.httpPackageConfigurations)));
+          (Option.map x.httpPackageConfigurations
+             ~f:HttpPackageConfigurations.to_value));
         ("LastModifiedTime",
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("SourceLocationName",
-          (Some (Zz__string.to_value x.sourceLocationName)));
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
         ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
-        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vodSourceName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let sourceLocationName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
       let lastModifiedTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
       let httpPackageConfigurations =
-        HttpPackageConfigurations.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "HttpPackageConfigurations") in
+        (Option.map ~f:HttpPackageConfigurations.of_xml)
+          (Xml.child xml_arg0 "HttpPackageConfigurations") in
       let creationTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
-      let arn =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ~vodSourceName ?tags ~sourceLocationName ?lastModifiedTime
-        ~httpPackageConfigurations ?creationTime ~arn ()
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpPackageConfigurations =
-        field_map_exn json "HttpPackageConfigurations"
+        field_map json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
-      make ~vodSourceName ?tags ~sourceLocationName ?lastModifiedTime
-        ~httpPackageConfigurations ?creationTime ~arn ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "VOD source configuration parameters."]
 module SourceLocation =
@@ -1574,73 +4028,75 @@ module SourceLocation =
       {
       accessConfiguration: AccessConfiguration.t option
         [@ocaml.doc "The access configuration for the source location."];
-      arn: Zz__string.t [@ocaml.doc "The ARN of the SourceLocation."];
+      arn: Zz__string.t option [@ocaml.doc "The ARN of the SourceLocation."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the source location was created."];
       defaultSegmentDeliveryConfiguration:
         DefaultSegmentDeliveryConfiguration.t option
         [@ocaml.doc "The default segment delivery configuration."];
-      httpConfiguration: HttpConfiguration.t
+      httpConfiguration: HttpConfiguration.t option
         [@ocaml.doc "The HTTP configuration for the source location."];
       lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the source location was last modified."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
-      sourceLocationName: Zz__string.t
+        Zz__listOfSegmentDeliveryConfiguration.t option
+        [@ocaml.doc
+          "The segment delivery configurations for the source location."];
+      sourceLocationName: Zz__string.t option
         [@ocaml.doc "The name of the source location."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the source location."]}
-    let context_ = "SourceLocation"
+        [@ocaml.doc
+          "The tags assigned to the source location. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     let make ?accessConfiguration =
-      fun ?creationTime ->
-        fun ?defaultSegmentDeliveryConfiguration ->
-          fun ?lastModifiedTime ->
-            fun ?segmentDeliveryConfigurations ->
-              fun ?tags ->
-                fun ~arn ->
-                  fun ~httpConfiguration ->
-                    fun ~sourceLocationName ->
+      fun ?arn ->
+        fun ?creationTime ->
+          fun ?defaultSegmentDeliveryConfiguration ->
+            fun ?httpConfiguration ->
+              fun ?lastModifiedTime ->
+                fun ?segmentDeliveryConfigurations ->
+                  fun ?sourceLocationName ->
+                    fun ?tags ->
                       fun () ->
                         {
                           accessConfiguration;
+                          arn;
                           creationTime;
                           defaultSegmentDeliveryConfiguration;
+                          httpConfiguration;
                           lastModifiedTime;
                           segmentDeliveryConfigurations;
-                          tags;
-                          arn;
-                          httpConfiguration;
-                          sourceLocationName
+                          sourceLocationName;
+                          tags
                         }
     let to_value x =
       structure_to_value
         [("AccessConfiguration",
            (Option.map x.accessConfiguration ~f:AccessConfiguration.to_value));
-        ("Arn", (Some (Zz__string.to_value x.arn)));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
         ("DefaultSegmentDeliveryConfiguration",
           (Option.map x.defaultSegmentDeliveryConfiguration
              ~f:DefaultSegmentDeliveryConfiguration.to_value));
         ("HttpConfiguration",
-          (Some (HttpConfiguration.to_value x.httpConfiguration)));
+          (Option.map x.httpConfiguration ~f:HttpConfiguration.to_value));
         ("LastModifiedTime",
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("SegmentDeliveryConfigurations",
           (Option.map x.segmentDeliveryConfigurations
              ~f:Zz__listOfSegmentDeliveryConfiguration.to_value));
         ("SourceLocationName",
-          (Some (Zz__string.to_value x.sourceLocationName)));
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
         ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let sourceLocationName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
       let segmentDeliveryConfigurations =
         (Option.map ~f:Zz__listOfSegmentDeliveryConfiguration.of_xml)
           (Xml.child xml_arg0 "SegmentDeliveryConfigurations") in
@@ -1648,133 +4104,164 @@ module SourceLocation =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
       let httpConfiguration =
-        HttpConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "HttpConfiguration") in
+        (Option.map ~f:HttpConfiguration.of_xml)
+          (Xml.child xml_arg0 "HttpConfiguration") in
       let defaultSegmentDeliveryConfiguration =
         (Option.map ~f:DefaultSegmentDeliveryConfiguration.of_xml)
           (Xml.child xml_arg0 "DefaultSegmentDeliveryConfiguration") in
       let creationTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
-      let arn =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       let accessConfiguration =
         (Option.map ~f:AccessConfiguration.of_xml)
           (Xml.child xml_arg0 "AccessConfiguration") in
-      make ?tags ~sourceLocationName ?segmentDeliveryConfigurations
-        ?lastModifiedTime ~httpConfiguration
-        ?defaultSegmentDeliveryConfiguration ?creationTime ~arn
+      make ?tags ?sourceLocationName ?segmentDeliveryConfigurations
+        ?lastModifiedTime ?httpConfiguration
+        ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpConfiguration =
-        field_map_exn json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
-      make ?tags ~sourceLocationName ?segmentDeliveryConfigurations
-        ?lastModifiedTime ~httpConfiguration
-        ?defaultSegmentDeliveryConfiguration ?creationTime ~arn
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
+      make ?tags ?sourceLocationName ?segmentDeliveryConfigurations
+        ?lastModifiedTime ?httpConfiguration
+        ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This response includes only the \"type\" : \"object\" property."]
+       "A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module PrefetchSchedule =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t
+      arn: Zz__string.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the prefetch schedule."];
-      consumption: PrefetchConsumption.t
+      consumption: PrefetchConsumption.t option
         [@ocaml.doc
-          "Consumption settings determine how, and when, MediaTailor places the prefetched ads into ad breaks. Ad consumption occurs within a span of time that you define, called a consumption window. You can designate which ad breaks that MediaTailor fills with prefetch ads by setting avail matching criteria."];
-      name: Zz__string.t
+          "Consumption settings determine how, and when, MediaTailor places the prefetched ads into ad breaks for single prefetch schedules. Ad consumption occurs within a span of time that you define, called a consumption window. You can designate which ad breaks that MediaTailor fills with prefetch ads by setting avail matching criteria."];
+      name: Zz__string.t option
         [@ocaml.doc
           "The name of the prefetch schedule. The name must be unique among all prefetch schedules that are associated with the specified playback configuration."];
-      playbackConfigurationName: Zz__string.t
+      playbackConfigurationName: Zz__string.t option
         [@ocaml.doc
           "The name of the playback configuration to create the prefetch schedule for."];
-      retrieval: PrefetchRetrieval.t
+      retrieval: PrefetchRetrieval.t option
         [@ocaml.doc
           "A complex type that contains settings for prefetch retrieval from the ad decision server (ADS)."];
+      scheduleType: PrefetchScheduleType.t option
+        [@ocaml.doc
+          "The frequency that MediaTailor creates prefetch schedules. SINGLE indicates that this schedule applies to one ad break. RECURRING indicates that MediaTailor automatically creates a schedule for each ad avail in a live event. For more information about the prefetch types and when you might use each, see Prefetching ads in Elemental MediaTailor."];
+      recurringPrefetchConfiguration: RecurringPrefetchConfiguration.t option
+        [@ocaml.doc
+          "The settings that determine how and when MediaTailor prefetches ads and inserts them into ad breaks."];
       streamId: Zz__string.t option
         [@ocaml.doc
-          "An optional stream identifier that you can specify in order to prefetch for multiple streams that use the same playback configuration."]}
-    let context_ = "PrefetchSchedule"
-    let make ?streamId =
-      fun ~arn ->
-        fun ~consumption ->
-          fun ~name ->
-            fun ~playbackConfigurationName ->
-              fun ~retrieval ->
-                fun () ->
-                  {
-                    streamId;
-                    arn;
-                    consumption;
-                    name;
-                    playbackConfigurationName;
-                    retrieval
-                  }
+          "An optional stream identifier that you can specify in order to prefetch for multiple streams that use the same playback configuration."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the prefetch schedule. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    let make ?arn =
+      fun ?consumption ->
+        fun ?name ->
+          fun ?playbackConfigurationName ->
+            fun ?retrieval ->
+              fun ?scheduleType ->
+                fun ?recurringPrefetchConfiguration ->
+                  fun ?streamId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          consumption;
+                          name;
+                          playbackConfigurationName;
+                          retrieval;
+                          scheduleType;
+                          recurringPrefetchConfiguration;
+                          streamId;
+                          tags
+                        }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Zz__string.to_value x.arn)));
-        ("Consumption", (Some (PrefetchConsumption.to_value x.consumption)));
-        ("Name", (Some (Zz__string.to_value x.name)));
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("Consumption",
+          (Option.map x.consumption ~f:PrefetchConsumption.to_value));
+        ("Name", (Option.map x.name ~f:Zz__string.to_value));
         ("PlaybackConfigurationName",
-          (Some (Zz__string.to_value x.playbackConfigurationName)));
-        ("Retrieval", (Some (PrefetchRetrieval.to_value x.retrieval)));
-        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value))]
+          (Option.map x.playbackConfigurationName ~f:Zz__string.to_value));
+        ("Retrieval", (Option.map x.retrieval ~f:PrefetchRetrieval.to_value));
+        ("ScheduleType",
+          (Option.map x.scheduleType ~f:PrefetchScheduleType.to_value));
+        ("RecurringPrefetchConfiguration",
+          (Option.map x.recurringPrefetchConfiguration
+             ~f:RecurringPrefetchConfiguration.to_value));
+        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let streamId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let recurringPrefetchConfiguration =
+        (Option.map ~f:RecurringPrefetchConfiguration.of_xml)
+          (Xml.child xml_arg0 "RecurringPrefetchConfiguration") in
+      let scheduleType =
+        (Option.map ~f:PrefetchScheduleType.of_xml)
+          (Xml.child xml_arg0 "ScheduleType") in
       let retrieval =
-        PrefetchRetrieval.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Retrieval") in
+        (Option.map ~f:PrefetchRetrieval.of_xml)
+          (Xml.child xml_arg0 "Retrieval") in
       let playbackConfigurationName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "PlaybackConfigurationName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "PlaybackConfigurationName") in
       let name =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Name") in
       let consumption =
-        PrefetchConsumption.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Consumption") in
-      let arn =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
-        ~arn ()
+        (Option.map ~f:PrefetchConsumption.of_xml)
+          (Xml.child xml_arg0 "Consumption") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?streamId ?recurringPrefetchConfiguration ?scheduleType
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "StreamId" Zz__string.of_json in
-      let retrieval =
-        field_map_exn json "Retrieval" PrefetchRetrieval.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let streamId = field_map json__ "StreamId" Zz__string.of_json in
+      let recurringPrefetchConfiguration =
+        field_map json__ "RecurringPrefetchConfiguration"
+          RecurringPrefetchConfiguration.of_json in
+      let scheduleType =
+        field_map json__ "ScheduleType" PrefetchScheduleType.of_json in
+      let retrieval = field_map json__ "Retrieval" PrefetchRetrieval.of_json in
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let consumption =
-        field_map_exn json "Consumption" PrefetchConsumption.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
-      make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
-        ~arn ()
+        field_map json__ "Consumption" PrefetchConsumption.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?streamId ?recurringPrefetchConfiguration ?scheduleType
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains prefetch schedule information."]
+       "A prefetch schedule allows you to tell MediaTailor to fetch and prepare certain ads before an ad break happens. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module PlaybackConfiguration =
   struct
     type nonrec t =
@@ -1798,11 +4285,14 @@ module PlaybackConfiguration =
         [@ocaml.doc "The configuration for a DASH source."];
       hlsConfiguration: HlsConfiguration.t option
         [@ocaml.doc "The configuration for HLS content."];
+      insertionMode: InsertionMode.t option
+        [@ocaml.doc
+          "The setting that controls whether players can use stitched or guided ad insertion. The default, STITCHED_ONLY, forces all player sessions to use stitched (server-side) ad insertion. Choosing PLAYER_SELECT allows players to select either stitched or guided ad insertion at session-initialization time. The default for players that do not specify an insertion mode is stitched."];
       livePreRollConfiguration: LivePreRollConfiguration.t option
         [@ocaml.doc "The configuration for pre-roll ad insertion."];
       logConfiguration: LogConfiguration.t option
         [@ocaml.doc
-          "The Amazon CloudWatch log settings for a playback configuration."];
+          "Defines where AWS Elemental MediaTailor sends logs for the playback configuration."];
       manifestProcessingRules: ManifestProcessingRules.t option
         [@ocaml.doc
           "The configuration for manifest processing rules. Manifest processing rules enable customization of the personalized manifests created by MediaTailor."];
@@ -1824,13 +4314,21 @@ module PlaybackConfiguration =
         [@ocaml.doc
           "The URL for a video asset to transcode and use to fill in time that's not used by ads. AWS Elemental MediaTailor shows the slate to fill in gaps in media content. Configuring the slate is optional for non-VPAID playback configurations. For VPAID, the slate is required because MediaTailor provides it in the slots designated for dynamic ad content. The slate must be a high-quality asset that contains both audio and video."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the playback configuration."];
+        [@ocaml.doc
+          "The tags to assign to the playback configuration. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       transcodeProfileName: Zz__string.t option
         [@ocaml.doc
           "The name that is used to associate this playback configuration with a custom transcode profile. This overrides the dynamic transcoding defaults of MediaTailor. Use this only if you have already set up custom profiles with the help of AWS Support."];
       videoContentSourceUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."]}
+          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."];
+      adConditioningConfiguration: AdConditioningConfiguration.t option
+        [@ocaml.doc
+          "The setting that indicates what conditioning MediaTailor will perform on ads that the ad decision server (ADS) returns, and what priority MediaTailor uses when inserting ads."];
+      adDecisionServerConfiguration: AdDecisionServerConfiguration.t option ;
+      functionMapping: FunctionMapping.t option
+        [@ocaml.doc
+          "A map of lifecycle hook event names to function identifiers. The function mapping specifies which function MediaTailor executes at each lifecycle hook during ad insertion. Valid keys are PRE_SESSION_INITIALIZATION and PRE_ADS_REQUEST. For more information, see Functions lifecycle hooks in the MediaTailor User Guide."]}
     let make ?adDecisionServerUrl =
       fun ?availSuppression ->
         fun ?bumper ->
@@ -1838,40 +4336,51 @@ module PlaybackConfiguration =
             fun ?configurationAliases ->
               fun ?dashConfiguration ->
                 fun ?hlsConfiguration ->
-                  fun ?livePreRollConfiguration ->
-                    fun ?logConfiguration ->
-                      fun ?manifestProcessingRules ->
-                        fun ?name ->
-                          fun ?personalizationThresholdSeconds ->
-                            fun ?playbackConfigurationArn ->
-                              fun ?playbackEndpointPrefix ->
-                                fun ?sessionInitializationEndpointPrefix ->
-                                  fun ?slateAdUrl ->
-                                    fun ?tags ->
-                                      fun ?transcodeProfileName ->
-                                        fun ?videoContentSourceUrl ->
-                                          fun () ->
-                                            {
-                                              adDecisionServerUrl;
-                                              availSuppression;
-                                              bumper;
-                                              cdnConfiguration;
-                                              configurationAliases;
-                                              dashConfiguration;
-                                              hlsConfiguration;
-                                              livePreRollConfiguration;
-                                              logConfiguration;
-                                              manifestProcessingRules;
-                                              name;
-                                              personalizationThresholdSeconds;
-                                              playbackConfigurationArn;
-                                              playbackEndpointPrefix;
-                                              sessionInitializationEndpointPrefix;
-                                              slateAdUrl;
-                                              tags;
-                                              transcodeProfileName;
-                                              videoContentSourceUrl
-                                            }
+                  fun ?insertionMode ->
+                    fun ?livePreRollConfiguration ->
+                      fun ?logConfiguration ->
+                        fun ?manifestProcessingRules ->
+                          fun ?name ->
+                            fun ?personalizationThresholdSeconds ->
+                              fun ?playbackConfigurationArn ->
+                                fun ?playbackEndpointPrefix ->
+                                  fun ?sessionInitializationEndpointPrefix ->
+                                    fun ?slateAdUrl ->
+                                      fun ?tags ->
+                                        fun ?transcodeProfileName ->
+                                          fun ?videoContentSourceUrl ->
+                                            fun ?adConditioningConfiguration
+                                              ->
+                                              fun
+                                                ?adDecisionServerConfiguration
+                                                ->
+                                                fun ?functionMapping ->
+                                                  fun () ->
+                                                    {
+                                                      adDecisionServerUrl;
+                                                      availSuppression;
+                                                      bumper;
+                                                      cdnConfiguration;
+                                                      configurationAliases;
+                                                      dashConfiguration;
+                                                      hlsConfiguration;
+                                                      insertionMode;
+                                                      livePreRollConfiguration;
+                                                      logConfiguration;
+                                                      manifestProcessingRules;
+                                                      name;
+                                                      personalizationThresholdSeconds;
+                                                      playbackConfigurationArn;
+                                                      playbackEndpointPrefix;
+                                                      sessionInitializationEndpointPrefix;
+                                                      slateAdUrl;
+                                                      tags;
+                                                      transcodeProfileName;
+                                                      videoContentSourceUrl;
+                                                      adConditioningConfiguration;
+                                                      adDecisionServerConfiguration;
+                                                      functionMapping
+                                                    }
     let to_value x =
       structure_to_value
         [("AdDecisionServerUrl",
@@ -1888,6 +4397,8 @@ module PlaybackConfiguration =
           (Option.map x.dashConfiguration ~f:DashConfiguration.to_value));
         ("HlsConfiguration",
           (Option.map x.hlsConfiguration ~f:HlsConfiguration.to_value));
+        ("InsertionMode",
+          (Option.map x.insertionMode ~f:InsertionMode.to_value));
         ("LivePreRollConfiguration",
           (Option.map x.livePreRollConfiguration
              ~f:LivePreRollConfiguration.to_value));
@@ -1912,9 +4423,26 @@ module PlaybackConfiguration =
         ("TranscodeProfileName",
           (Option.map x.transcodeProfileName ~f:Zz__string.to_value));
         ("VideoContentSourceUrl",
-          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value))]
+          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value));
+        ("AdConditioningConfiguration",
+          (Option.map x.adConditioningConfiguration
+             ~f:AdConditioningConfiguration.to_value));
+        ("AdDecisionServerConfiguration",
+          (Option.map x.adDecisionServerConfiguration
+             ~f:AdDecisionServerConfiguration.to_value));
+        ("FunctionMapping",
+          (Option.map x.functionMapping ~f:FunctionMapping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let functionMapping =
+        (Option.map ~f:FunctionMapping.of_xml)
+          (Xml.child xml_arg0 "FunctionMapping") in
+      let adDecisionServerConfiguration =
+        (Option.map ~f:AdDecisionServerConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdDecisionServerConfiguration") in
+      let adConditioningConfiguration =
+        (Option.map ~f:AdConditioningConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdConditioningConfiguration") in
       let videoContentSourceUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VideoContentSourceUrl") in
@@ -1948,6 +4476,9 @@ module PlaybackConfiguration =
       let livePreRollConfiguration =
         (Option.map ~f:LivePreRollConfiguration.of_xml)
           (Xml.child xml_arg0 "LivePreRollConfiguration") in
+      let insertionMode =
+        (Option.map ~f:InsertionMode.of_xml)
+          (Xml.child xml_arg0 "InsertionMode") in
       let hlsConfiguration =
         (Option.map ~f:HlsConfiguration.of_xml)
           (Xml.child xml_arg0 "HlsConfiguration") in
@@ -1968,69 +4499,282 @@ module PlaybackConfiguration =
       let adDecisionServerUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let functionMapping =
+        field_map json__ "FunctionMapping" FunctionMapping.of_json in
+      let adDecisionServerConfiguration =
+        field_map json__ "AdDecisionServerConfiguration"
+          AdDecisionServerConfiguration.of_json in
+      let adConditioningConfiguration =
+        field_map json__ "AdConditioningConfiguration"
+          AdConditioningConfiguration.of_json in
       let videoContentSourceUrl =
-        field_map json "VideoContentSourceUrl" Zz__string.of_json in
+        field_map json__ "VideoContentSourceUrl" Zz__string.of_json in
       let transcodeProfileName =
-        field_map json "TranscodeProfileName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let slateAdUrl = field_map json "SlateAdUrl" Zz__string.of_json in
+        field_map json__ "TranscodeProfileName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let slateAdUrl = field_map json__ "SlateAdUrl" Zz__string.of_json in
       let sessionInitializationEndpointPrefix =
-        field_map json "SessionInitializationEndpointPrefix"
+        field_map json__ "SessionInitializationEndpointPrefix"
           Zz__string.of_json in
       let playbackEndpointPrefix =
-        field_map json "PlaybackEndpointPrefix" Zz__string.of_json in
+        field_map json__ "PlaybackEndpointPrefix" Zz__string.of_json in
       let playbackConfigurationArn =
-        field_map json "PlaybackConfigurationArn" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationArn" Zz__string.of_json in
       let personalizationThresholdSeconds =
-        field_map json "PersonalizationThresholdSeconds"
+        field_map json__ "PersonalizationThresholdSeconds"
           Zz__integerMin1.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let manifestProcessingRules =
-        field_map json "ManifestProcessingRules"
+        field_map json__ "ManifestProcessingRules"
           ManifestProcessingRules.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration" LogConfiguration.of_json in
+        field_map json__ "LogConfiguration" LogConfiguration.of_json in
       let livePreRollConfiguration =
-        field_map json "LivePreRollConfiguration"
+        field_map json__ "LivePreRollConfiguration"
           LivePreRollConfiguration.of_json in
+      let insertionMode =
+        field_map json__ "InsertionMode" InsertionMode.of_json in
       let hlsConfiguration =
-        field_map json "HlsConfiguration" HlsConfiguration.of_json in
+        field_map json__ "HlsConfiguration" HlsConfiguration.of_json in
       let dashConfiguration =
-        field_map json "DashConfiguration" DashConfiguration.of_json in
+        field_map json__ "DashConfiguration" DashConfiguration.of_json in
       let configurationAliases =
-        field_map json "ConfigurationAliases"
+        field_map json__ "ConfigurationAliases"
           ConfigurationAliasesResponse.of_json in
       let cdnConfiguration =
-        field_map json "CdnConfiguration" CdnConfiguration.of_json in
-      let bumper = field_map json "Bumper" Bumper.of_json in
+        field_map json__ "CdnConfiguration" CdnConfiguration.of_json in
+      let bumper = field_map json__ "Bumper" Bumper.of_json in
       let availSuppression =
-        field_map json "AvailSuppression" AvailSuppression.of_json in
+        field_map json__ "AvailSuppression" AvailSuppression.of_json in
       let adDecisionServerUrl =
-        field_map json "AdDecisionServerUrl" Zz__string.of_json in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+        field_map json__ "AdDecisionServerUrl" Zz__string.of_json in
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
+       "A playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
+module LiveSource =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option [@ocaml.doc "The ARN for the live source."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was created."];
+      httpPackageConfigurations: HttpPackageConfigurations.t option
+        [@ocaml.doc "The HTTP package configurations for the live source."];
+      lastModifiedTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was last modified."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name that's used to refer to a live source."];
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc "The name of the source location."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the live source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?httpPackageConfigurations ->
+          fun ?lastModifiedTime ->
+            fun ?liveSourceName ->
+              fun ?sourceLocationName ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      creationTime;
+                      httpPackageConfigurations;
+                      lastModifiedTime;
+                      liveSourceName;
+                      sourceLocationName;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("HttpPackageConfigurations",
+          (Option.map x.httpPackageConfigurations
+             ~f:HttpPackageConfigurations.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let lastModifiedTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let httpPackageConfigurations =
+        (Option.map ~f:HttpPackageConfigurations.of_xml)
+          (Xml.child xml_arg0 "HttpPackageConfigurations") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let httpPackageConfigurations =
+        field_map json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Live source configuration parameters."]
+module Function =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t option
+        [@ocaml.doc "The identifier of the function."];
+      functionType: FunctionType.t option
+        [@ocaml.doc "The type of the function."];
+      description: Zz__string.t option
+        [@ocaml.doc "A description of the function."];
+      httpRequestConfiguration: HttpRequestConfiguration.t option
+        [@ocaml.doc "The configuration for an HTTP_REQUEST function."];
+      customOutputConfiguration: CustomOutputConfiguration.t option
+        [@ocaml.doc "The configuration for a CUSTOM_OUTPUT function."];
+      sequentialExecutorConfiguration:
+        SequentialExecutorConfiguration.t option
+        [@ocaml.doc "The configuration for a SEQUENTIAL_EXECUTOR function."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the function. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the function."]}
+    let make ?functionId =
+      fun ?functionType ->
+        fun ?description ->
+          fun ?httpRequestConfiguration ->
+            fun ?customOutputConfiguration ->
+              fun ?sequentialExecutorConfiguration ->
+                fun ?tags ->
+                  fun ?arn ->
+                    fun () ->
+                      {
+                        functionId;
+                        functionType;
+                        description;
+                        httpRequestConfiguration;
+                        customOutputConfiguration;
+                        sequentialExecutorConfiguration;
+                        tags;
+                        arn
+                      }
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Option.map x.functionId ~f:Zz__string.to_value));
+        ("FunctionType",
+          (Option.map x.functionType ~f:FunctionType.to_value));
+        ("Description", (Option.map x.description ~f:Zz__string.to_value));
+        ("HttpRequestConfiguration",
+          (Option.map x.httpRequestConfiguration
+             ~f:HttpRequestConfiguration.to_value));
+        ("CustomOutputConfiguration",
+          (Option.map x.customOutputConfiguration
+             ~f:CustomOutputConfiguration.to_value));
+        ("SequentialExecutorConfiguration",
+          (Option.map x.sequentialExecutorConfiguration
+             ~f:SequentialExecutorConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sequentialExecutorConfiguration =
+        (Option.map ~f:SequentialExecutorConfiguration.of_xml)
+          (Xml.child xml_arg0 "SequentialExecutorConfiguration") in
+      let customOutputConfiguration =
+        (Option.map ~f:CustomOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomOutputConfiguration") in
+      let httpRequestConfiguration =
+        (Option.map ~f:HttpRequestConfiguration.of_xml)
+          (Xml.child xml_arg0 "HttpRequestConfiguration") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
+      let functionType =
+        (Option.map ~f:FunctionType.of_xml)
+          (Xml.child xml_arg0 "FunctionType") in
+      let functionId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "FunctionId") in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sequentialExecutorConfiguration =
+        field_map json__ "SequentialExecutorConfiguration"
+          SequentialExecutorConfiguration.of_json in
+      let customOutputConfiguration =
+        field_map json__ "CustomOutputConfiguration"
+          CustomOutputConfiguration.of_json in
+      let httpRequestConfiguration =
+        field_map json__ "HttpRequestConfiguration"
+          HttpRequestConfiguration.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let functionType = field_map json__ "FunctionType" FunctionType.of_json in
+      let functionId = field_map json__ "FunctionId" Zz__string.of_json in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Define Mixin --"]
 module Channel =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t [@ocaml.doc "The ARN of the channel."];
-      channelName: Zz__string.t [@ocaml.doc "The name of the channel."];
-      channelState: Zz__string.t
+      arn: Zz__string.t option [@ocaml.doc "The ARN of the channel."];
+      channelName: Zz__string.t option
+        [@ocaml.doc "The name of the channel."];
+      channelState: Zz__string.t option
         [@ocaml.doc
           "Returns the state whether the channel is running or not."];
       creationTime: Zz__timestampUnix.t option
@@ -2040,58 +4784,81 @@ module Channel =
           "The slate used to fill gaps between programs in the schedule. You must configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't support filler slate for channels using the LOOP PlaybackMode."];
       lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc "The timestamp of when the channel was last modified."];
-      outputs: ResponseOutputs.t
+      outputs: ResponseOutputs.t option
         [@ocaml.doc "The channel's output properties."];
-      playbackMode: Zz__string.t
+      playbackMode: Zz__string.t option
         [@ocaml.doc
           "The type of playback mode for this channel. LINEAR - Programs play back-to-back only once. LOOP - Programs play back-to-back in an endless loop. When the last program in the schedule plays, playback loops back to the first program in the schedule."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the channel."]}
-    let context_ = "Channel"
-    let make ?creationTime =
-      fun ?fillerSlate ->
-        fun ?lastModifiedTime ->
-          fun ?tags ->
-            fun ~arn ->
-              fun ~channelName ->
-                fun ~channelState ->
-                  fun ~outputs ->
-                    fun ~playbackMode ->
-                      fun () ->
-                        {
-                          creationTime;
-                          fillerSlate;
-                          lastModifiedTime;
-                          tags;
-                          arn;
-                          channelName;
-                          channelState;
-                          outputs;
-                          playbackMode
-                        }
+        [@ocaml.doc
+          "The tags to assign to the channel. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      tier: Zz__string.t option
+        [@ocaml.doc
+          "The tier for this channel. STANDARD tier channels can contain live programs."];
+      logConfiguration: LogConfigurationForChannel.t option
+        [@ocaml.doc "The log configuration."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
+    let make ?arn =
+      fun ?channelName ->
+        fun ?channelState ->
+          fun ?creationTime ->
+            fun ?fillerSlate ->
+              fun ?lastModifiedTime ->
+                fun ?outputs ->
+                  fun ?playbackMode ->
+                    fun ?tags ->
+                      fun ?tier ->
+                        fun ?logConfiguration ->
+                          fun ?audiences ->
+                            fun () ->
+                              {
+                                arn;
+                                channelName;
+                                channelState;
+                                creationTime;
+                                fillerSlate;
+                                lastModifiedTime;
+                                outputs;
+                                playbackMode;
+                                tags;
+                                tier;
+                                logConfiguration;
+                                audiences
+                              }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (Zz__string.to_value x.arn)));
-        ("ChannelName", (Some (Zz__string.to_value x.channelName)));
-        ("ChannelState", (Some (Zz__string.to_value x.channelState)));
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
+        ("ChannelState", (Option.map x.channelState ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
         ("FillerSlate", (Option.map x.fillerSlate ~f:SlateSource.to_value));
         ("LastModifiedTime",
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
-        ("Outputs", (Some (ResponseOutputs.to_value x.outputs)));
-        ("PlaybackMode", (Some (Zz__string.to_value x.playbackMode)));
-        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+        ("Outputs", (Option.map x.outputs ~f:ResponseOutputs.to_value));
+        ("PlaybackMode", (Option.map x.playbackMode ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Tier", (Option.map x.tier ~f:Zz__string.to_value));
+        ("LogConfiguration",
+          (Option.map x.logConfiguration
+             ~f:LogConfigurationForChannel.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let logConfiguration =
+        (Option.map ~f:LogConfigurationForChannel.of_xml)
+          (Xml.child xml_arg0 "LogConfiguration") in
+      let tier =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Tier") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let playbackMode =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "PlaybackMode") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "PlaybackMode") in
       let outputs =
-        ResponseOutputs.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Outputs") in
+        (Option.map ~f:ResponseOutputs.of_xml) (Xml.child xml_arg0 "Outputs") in
       let lastModifiedTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "LastModifiedTime") in
@@ -2101,101 +4868,110 @@ module Channel =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
       let channelState =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChannelState") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelState") in
       let channelName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
-      let arn =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ?tags ~playbackMode ~outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ~channelState ~channelName ~arn ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?audiences ?logConfiguration ?tier ?tags ?playbackMode ?outputs
+        ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let playbackMode = field_map_exn json "PlaybackMode" Zz__string.of_json in
-      let outputs = field_map_exn json "Outputs" ResponseOutputs.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let logConfiguration =
+        field_map json__ "LogConfiguration"
+          LogConfigurationForChannel.of_json in
+      let tier = field_map json__ "Tier" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let playbackMode = field_map json__ "PlaybackMode" Zz__string.of_json in
+      let outputs = field_map json__ "Outputs" ResponseOutputs.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelState = field_map_exn json "ChannelState" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
-      make ?tags ~playbackMode ~outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ~channelState ~channelName ~arn ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelState = field_map json__ "ChannelState" Zz__string.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?audiences ?logConfiguration ?tier ?tags ?playbackMode ?outputs
+        ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The configuration parameters for a channel."]
+  end[@@ocaml.doc
+       "The configuration parameters for a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module Alert =
   struct
     type nonrec t =
       {
-      alertCode: Zz__string.t
+      alertCode: Zz__string.t option
         [@ocaml.doc "The code for the alert. For example, NOT_PROCESSED."];
-      alertMessage: Zz__string.t
+      alertMessage: Zz__string.t option
         [@ocaml.doc
           "If an alert is generated for a resource, an explanation of the reason for the alert."];
-      lastModifiedTime: Zz__timestampUnix.t
+      lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc "The timestamp when the alert was last modified."];
-      relatedResourceArns: Zz__listOf__string.t
+      relatedResourceArns: Zz__listOf__string.t option
         [@ocaml.doc
           "The Amazon Resource Names (ARNs) related to this alert."];
-      resourceArn: Zz__string.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
-    let context_ = "Alert"
-    let make ~alertCode =
-      fun ~alertMessage ->
-        fun ~lastModifiedTime ->
-          fun ~relatedResourceArns ->
-            fun ~resourceArn ->
-              fun () ->
-                {
-                  alertCode;
-                  alertMessage;
-                  lastModifiedTime;
-                  relatedResourceArns;
-                  resourceArn
-                }
+      resourceArn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
+      category: AlertCategory.t option
+        [@ocaml.doc "The category that MediaTailor assigns to the alert."]}
+    let make ?alertCode =
+      fun ?alertMessage ->
+        fun ?lastModifiedTime ->
+          fun ?relatedResourceArns ->
+            fun ?resourceArn ->
+              fun ?category ->
+                fun () ->
+                  {
+                    alertCode;
+                    alertMessage;
+                    lastModifiedTime;
+                    relatedResourceArns;
+                    resourceArn;
+                    category
+                  }
     let to_value x =
       structure_to_value
-        [("AlertCode", (Some (Zz__string.to_value x.alertCode)));
-        ("AlertMessage", (Some (Zz__string.to_value x.alertMessage)));
+        [("AlertCode", (Option.map x.alertCode ~f:Zz__string.to_value));
+        ("AlertMessage", (Option.map x.alertMessage ~f:Zz__string.to_value));
         ("LastModifiedTime",
-          (Some (Zz__timestampUnix.to_value x.lastModifiedTime)));
+          (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("RelatedResourceArns",
-          (Some (Zz__listOf__string.to_value x.relatedResourceArns)));
-        ("ResourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+          (Option.map x.relatedResourceArns ~f:Zz__listOf__string.to_value));
+        ("ResourceArn", (Option.map x.resourceArn ~f:Zz__string.to_value));
+        ("Category", (Option.map x.category ~f:AlertCategory.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let category =
+        (Option.map ~f:AlertCategory.of_xml) (Xml.child xml_arg0 "Category") in
       let resourceArn =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ResourceArn") in
       let relatedResourceArns =
-        Zz__listOf__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RelatedResourceArns") in
+        (Option.map ~f:Zz__listOf__string.of_xml)
+          (Xml.child xml_arg0 "RelatedResourceArns") in
       let lastModifiedTime =
-        Zz__timestampUnix.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastModifiedTime") in
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
       let alertMessage =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AlertMessage") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AlertMessage") in
       let alertCode =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AlertCode") in
-      make ~resourceArn ~relatedResourceArns ~lastModifiedTime ~alertMessage
-        ~alertCode ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "AlertCode") in
+      make ?category ?resourceArn ?relatedResourceArns ?lastModifiedTime
+        ?alertMessage ?alertCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let category = field_map json__ "Category" AlertCategory.of_json in
+      let resourceArn = field_map json__ "ResourceArn" Zz__string.of_json in
       let relatedResourceArns =
-        field_map_exn json "RelatedResourceArns" Zz__listOf__string.of_json in
+        field_map json__ "RelatedResourceArns" Zz__listOf__string.of_json in
       let lastModifiedTime =
-        field_map_exn json "LastModifiedTime" Zz__timestampUnix.of_json in
-      let alertMessage = field_map_exn json "AlertMessage" Zz__string.of_json in
-      let alertCode = field_map_exn json "AlertCode" Zz__string.of_json in
-      make ~resourceArn ~relatedResourceArns ~lastModifiedTime ~alertMessage
-        ~alertCode ()
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let alertMessage = field_map json__ "AlertMessage" Zz__string.of_json in
+      let alertCode = field_map json__ "AlertCode" Zz__string.of_json in
+      make ?category ?resourceArn ?relatedResourceArns ?lastModifiedTime
+        ?alertMessage ?alertCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Alert configuration parameters."]
 module ScheduleEntry =
@@ -2207,65 +4983,79 @@ module ScheduleEntry =
       approximateStartTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The approximate time that the program will start playing."];
-      arn: Zz__string.t [@ocaml.doc "The ARN of the program."];
-      channelName: Zz__string.t
+      arn: Zz__string.t option [@ocaml.doc "The ARN of the program."];
+      channelName: Zz__string.t option
         [@ocaml.doc "The name of the channel that uses this schedule."];
-      programName: Zz__string.t [@ocaml.doc "The name of the program."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the live source used for the program."];
+      programName: Zz__string.t option
+        [@ocaml.doc "The name of the program."];
       scheduleAdBreaks: Zz__listOfScheduleAdBreak.t option
         [@ocaml.doc "The schedule's ad break properties."];
       scheduleEntryType: ScheduleEntryType.t option
-        [@ocaml.doc
-          "The type of schedule entry. Valid values: PROGRAM or FILLER_SLATE."];
-      sourceLocationName: Zz__string.t
+        [@ocaml.doc "The type of schedule entry."];
+      sourceLocationName: Zz__string.t option
         [@ocaml.doc "The name of the source location."];
-      vodSourceName: Zz__string.t [@ocaml.doc "The name of the VOD source."]}
-    let context_ = "ScheduleEntry"
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the VOD source."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in ScheduleEntry."]}
     let make ?approximateDurationSeconds =
       fun ?approximateStartTime ->
-        fun ?scheduleAdBreaks ->
-          fun ?scheduleEntryType ->
-            fun ~arn ->
-              fun ~channelName ->
-                fun ~programName ->
-                  fun ~sourceLocationName ->
-                    fun ~vodSourceName ->
-                      fun () ->
-                        {
-                          approximateDurationSeconds;
-                          approximateStartTime;
-                          scheduleAdBreaks;
-                          scheduleEntryType;
-                          arn;
-                          channelName;
-                          programName;
-                          sourceLocationName;
-                          vodSourceName
-                        }
+        fun ?arn ->
+          fun ?channelName ->
+            fun ?liveSourceName ->
+              fun ?programName ->
+                fun ?scheduleAdBreaks ->
+                  fun ?scheduleEntryType ->
+                    fun ?sourceLocationName ->
+                      fun ?vodSourceName ->
+                        fun ?audiences ->
+                          fun () ->
+                            {
+                              approximateDurationSeconds;
+                              approximateStartTime;
+                              arn;
+                              channelName;
+                              liveSourceName;
+                              programName;
+                              scheduleAdBreaks;
+                              scheduleEntryType;
+                              sourceLocationName;
+                              vodSourceName;
+                              audiences
+                            }
     let to_value x =
       structure_to_value
         [("ApproximateDurationSeconds",
            (Option.map x.approximateDurationSeconds ~f:Zz__long.to_value));
         ("ApproximateStartTime",
           (Option.map x.approximateStartTime ~f:Zz__timestampUnix.to_value));
-        ("Arn", (Some (Zz__string.to_value x.arn)));
-        ("ChannelName", (Some (Zz__string.to_value x.channelName)));
-        ("ProgramName", (Some (Zz__string.to_value x.programName)));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("ProgramName", (Option.map x.programName ~f:Zz__string.to_value));
         ("ScheduleAdBreaks",
           (Option.map x.scheduleAdBreaks
              ~f:Zz__listOfScheduleAdBreak.to_value));
         ("ScheduleEntryType",
           (Option.map x.scheduleEntryType ~f:ScheduleEntryType.to_value));
         ("SourceLocationName",
-          (Some (Zz__string.to_value x.sourceLocationName)));
-        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
       let vodSourceName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
       let sourceLocationName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
       let scheduleEntryType =
         (Option.map ~f:ScheduleEntryType.of_xml)
           (Xml.child xml_arg0 "ScheduleEntryType") in
@@ -2273,98 +5063,75 @@ module ScheduleEntry =
         (Option.map ~f:Zz__listOfScheduleAdBreak.of_xml)
           (Xml.child xml_arg0 "ScheduleAdBreaks") in
       let programName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ProgramName") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ProgramName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
       let channelName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
-      let arn =
-        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
       let approximateStartTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "ApproximateStartTime") in
       let approximateDurationSeconds =
         (Option.map ~f:Zz__long.of_xml)
           (Xml.child xml_arg0 "ApproximateDurationSeconds") in
-      make ~vodSourceName ~sourceLocationName ?scheduleEntryType
-        ?scheduleAdBreaks ~programName ~channelName ~arn
+      make ?audiences ?vodSourceName ?sourceLocationName ?scheduleEntryType
+        ?scheduleAdBreaks ?programName ?liveSourceName ?channelName ?arn
         ?approximateStartTime ?approximateDurationSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let scheduleEntryType =
-        field_map json "ScheduleEntryType" ScheduleEntryType.of_json in
+        field_map json__ "ScheduleEntryType" ScheduleEntryType.of_json in
       let scheduleAdBreaks =
-        field_map json "ScheduleAdBreaks" Zz__listOfScheduleAdBreak.of_json in
-      let programName = field_map_exn json "ProgramName" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      let arn = field_map_exn json "Arn" Zz__string.of_json in
+        field_map json__ "ScheduleAdBreaks" Zz__listOfScheduleAdBreak.of_json in
+      let programName = field_map json__ "ProgramName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       let approximateStartTime =
-        field_map json "ApproximateStartTime" Zz__timestampUnix.of_json in
+        field_map json__ "ApproximateStartTime" Zz__timestampUnix.of_json in
       let approximateDurationSeconds =
-        field_map json "ApproximateDurationSeconds" Zz__long.of_json in
-      make ~vodSourceName ~sourceLocationName ?scheduleEntryType
-        ?scheduleAdBreaks ~programName ~channelName ~arn
+        field_map json__ "ApproximateDurationSeconds" Zz__long.of_json in
+      make ?audiences ?vodSourceName ?sourceLocationName ?scheduleEntryType
+        ?scheduleAdBreaks ?programName ?liveSourceName ?channelName ?arn
         ?approximateStartTime ?approximateDurationSeconds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The properties for a schedule."]
-module AdBreak =
+module AdBreakOpportunity =
   struct
     type nonrec t =
       {
-      messageType: MessageType.t option
-        [@ocaml.doc
-          "The SCTE-35 ad insertion type. Accepted value: SPLICE_INSERT."];
       offsetMillis: Zz__long.t option
         [@ocaml.doc
-          "How long (in milliseconds) after the beginning of the program that an ad starts. This value must fall within 100ms of a segment boundary, otherwise the ad break will be skipped."];
-      slate: SlateSource.t option
-        [@ocaml.doc "Ad break slate configuration."];
-      spliceInsertMessage: SpliceInsertMessage.t option
-        [@ocaml.doc
-          "This defines the SCTE-35 splice_insert() message inserted around the ad. For information about using splice_insert(), see the SCTE-35 specficiaiton, section 9.7.3.1."]}
-    let make ?messageType =
-      fun ?offsetMillis ->
-        fun ?slate ->
-          fun ?spliceInsertMessage ->
-            fun () ->
-              { messageType; offsetMillis; slate; spliceInsertMessage }
+          "The offset in milliseconds from the start of the VOD source at which an ad marker was detected."]}
+    let make ?offsetMillis = fun () -> { offsetMillis }
     let to_value x =
       structure_to_value
-        [("MessageType", (Option.map x.messageType ~f:MessageType.to_value));
-        ("OffsetMillis", (Option.map x.offsetMillis ~f:Zz__long.to_value));
-        ("Slate", (Option.map x.slate ~f:SlateSource.to_value));
-        ("SpliceInsertMessage",
-          (Option.map x.spliceInsertMessage ~f:SpliceInsertMessage.to_value))]
+        [("OffsetMillis", (Option.map x.offsetMillis ~f:Zz__long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let spliceInsertMessage =
-        (Option.map ~f:SpliceInsertMessage.of_xml)
-          (Xml.child xml_arg0 "SpliceInsertMessage") in
-      let slate =
-        (Option.map ~f:SlateSource.of_xml) (Xml.child xml_arg0 "Slate") in
       let offsetMillis =
         (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "OffsetMillis") in
-      let messageType =
-        (Option.map ~f:MessageType.of_xml) (Xml.child xml_arg0 "MessageType") in
-      make ?spliceInsertMessage ?slate ?offsetMillis ?messageType ()
+      make ?offsetMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spliceInsertMessage =
-        field_map json "SpliceInsertMessage" SpliceInsertMessage.of_json in
-      let slate = field_map json "Slate" SlateSource.of_json in
-      let offsetMillis = field_map json "OffsetMillis" Zz__long.of_json in
-      let messageType = field_map json "MessageType" MessageType.of_json in
-      make ?spliceInsertMessage ?slate ?offsetMillis ?messageType ()
+    let of_json json__ =
+      let offsetMillis = field_map json__ "OffsetMillis" Zz__long.of_json in
+      make ?offsetMillis ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Ad break configuration parameters."]
+  end[@@ocaml.doc
+       "A location at which a zero-duration ad marker was detected in a VOD source manifest."]
 module Transition =
   struct
     type nonrec t =
       {
+      durationMillis: Zz__long.t option
+        [@ocaml.doc "The duration of the live program in seconds."];
       relativePosition: RelativePosition.t
         [@ocaml.doc
           "The position where this program will be inserted relative to the RelativePosition."];
@@ -2378,21 +5145,25 @@ module Transition =
         [@ocaml.doc
           "Defines when the program plays in the schedule. You can set the value to ABSOLUTE or RELATIVE. ABSOLUTE - The program plays at a specific wall clock time. This setting can only be used for channels using the LINEAR PlaybackMode. Note the following considerations when using ABSOLUTE transitions: If the preceding program in the schedule has a duration that extends past the wall clock time, MediaTailor truncates the preceding program on a common segment boundary. If there are gaps in playback, MediaTailor plays the FillerSlate you configured for your linear channel. RELATIVE - The program is inserted into the schedule either before or after a program that you specify via RelativePosition."]}
     let context_ = "Transition"
-    let make ?relativeProgram =
-      fun ?scheduledStartTimeMillis ->
-        fun ~relativePosition ->
-          fun ~type_ ->
-            fun () ->
-              {
-                relativeProgram;
-                scheduledStartTimeMillis;
-                relativePosition;
-                type_
-              }
+    let make ?durationMillis =
+      fun ?relativeProgram ->
+        fun ?scheduledStartTimeMillis ->
+          fun ~relativePosition ->
+            fun ~type_ ->
+              fun () ->
+                {
+                  durationMillis;
+                  relativeProgram;
+                  scheduledStartTimeMillis;
+                  relativePosition;
+                  type_
+                }
     let to_value x =
       structure_to_value
-        [("RelativePosition",
-           (Some (RelativePosition.to_value x.relativePosition)));
+        [("DurationMillis",
+           (Option.map x.durationMillis ~f:Zz__long.to_value));
+        ("RelativePosition",
+          (Some (RelativePosition.to_value x.relativePosition)));
         ("RelativeProgram",
           (Option.map x.relativeProgram ~f:Zz__string.to_value));
         ("ScheduledStartTimeMillis",
@@ -2411,21 +5182,83 @@ module Transition =
       let relativePosition =
         RelativePosition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RelativePosition") in
+      let durationMillis =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
       make ~type_ ?scheduledStartTimeMillis ?relativeProgram
-        ~relativePosition ()
+        ~relativePosition ?durationMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Zz__string.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" Zz__string.of_json in
       let scheduledStartTimeMillis =
-        field_map json "ScheduledStartTimeMillis" Zz__long.of_json in
+        field_map json__ "ScheduledStartTimeMillis" Zz__long.of_json in
       let relativeProgram =
-        field_map json "RelativeProgram" Zz__string.of_json in
+        field_map json__ "RelativeProgram" Zz__string.of_json in
       let relativePosition =
-        field_map_exn json "RelativePosition" RelativePosition.of_json in
+        field_map_exn json__ "RelativePosition" RelativePosition.of_json in
+      let durationMillis = field_map json__ "DurationMillis" Zz__long.of_json in
       make ~type_ ?scheduledStartTimeMillis ?relativeProgram
-        ~relativePosition ()
+        ~relativePosition ?durationMillis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Program transition configuration."]
+module Zz__listOfAudienceMedia =
+  struct
+    type nonrec t = AudienceMedia.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AudienceMedia.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AudienceMedia.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfAudienceMedia"
+        ~of_json:AudienceMedia.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateProgramScheduleConfiguration =
+  struct
+    type nonrec t =
+      {
+      transition: UpdateProgramTransition.t option
+        [@ocaml.doc "Program transition configuration."];
+      clipRange: ClipRange.t option
+        [@ocaml.doc "Program clip range configuration."]}
+    let make ?transition =
+      fun ?clipRange -> fun () -> { transition; clipRange }
+    let to_value x =
+      structure_to_value
+        [("Transition",
+           (Option.map x.transition ~f:UpdateProgramTransition.to_value));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
+      let transition =
+        (Option.map ~f:UpdateProgramTransition.of_xml)
+          (Xml.child xml_arg0 "Transition") in
+      make ?clipRange ?transition ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let transition =
+        field_map json__ "Transition" UpdateProgramTransition.of_json in
+      make ?clipRange ?transition ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Schedule configuration parameters."]
 module ChannelState =
   struct
     type nonrec t =
@@ -2451,10 +5284,39 @@ module ChannelState =
     let of_json j = of_string (string_of_json ~kind:"ChannelState" j)
     let to_json = simple_to_json to_value
   end
+module TimeShiftConfiguration =
+  struct
+    type nonrec t =
+      {
+      maxTimeDelaySeconds: Zz__integer.t
+        [@ocaml.doc
+          "The maximum time delay for time-shifted viewing. The minimum allowed maximum time delay is 0 seconds, and the maximum allowed maximum time delay is 21600 seconds (6 hours)."]}
+    let context_ = "TimeShiftConfiguration"
+    let make ~maxTimeDelaySeconds = fun () -> { maxTimeDelaySeconds }
+    let to_value x =
+      structure_to_value
+        [("MaxTimeDelaySeconds",
+           (Some (Zz__integer.to_value x.maxTimeDelaySeconds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxTimeDelaySeconds =
+        Zz__integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MaxTimeDelaySeconds") in
+      make ~maxTimeDelaySeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxTimeDelaySeconds =
+        field_map_exn json__ "MaxTimeDelaySeconds" Zz__integer.of_json in
+      make ~maxTimeDelaySeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for time-shifted viewing."]
 module RequestOutputs =
   struct
     type nonrec t = RequestOutputItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RequestOutputItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2500,6 +5362,8 @@ module ConfigurationAliasesRequest =
                        (Zz__mapOf__string.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2534,10 +5398,10 @@ module DashConfigurationForPut =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "MpdLocation") in
       make ?originManifestType ?mpdLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originManifestType =
-        field_map json "OriginManifestType" OriginManifestType.of_json in
-      let mpdLocation = field_map json "MpdLocation" Zz__string.of_json in
+        field_map json__ "OriginManifestType" OriginManifestType.of_json in
+      let mpdLocation = field_map json__ "MpdLocation" Zz__string.of_json in
       make ?originManifestType ?mpdLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration for DASH PUT operations."]
@@ -2545,6 +5409,9 @@ module Zz__listOfVodSource =
   struct
     type nonrec t = VodSource.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VodSource.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2597,15 +5464,18 @@ module BadRequestException =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Zz__string.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Invalid request parameters."]
+  end[@@ocaml.doc "A request contains unexpected data."]
 module Zz__listOfSourceLocation =
   struct
     type nonrec t = SourceLocation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SourceLocation.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2631,6 +5501,9 @@ module Zz__listOfPrefetchSchedule =
   struct
     type nonrec t = PrefetchSchedule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PrefetchSchedule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2651,6 +5524,36 @@ module Zz__listOfPrefetchSchedule =
       list_of_json ~kind:"__listOfPrefetchSchedule"
         ~of_json:PrefetchSchedule.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ListPrefetchScheduleType =
+  struct
+    type nonrec t =
+      | SINGLE 
+      | RECURRING 
+      | ALL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SINGLE -> "SINGLE"
+      | RECURRING -> "RECURRING"
+      | ALL -> "ALL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SINGLE" -> SINGLE
+      | "RECURRING" -> RECURRING
+      | "ALL" -> ALL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListPrefetchScheduleType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListPrefetchScheduleType" j)
+    let to_json = simple_to_json to_value
   end
 module Zz__integerMin1Max100 =
   struct
@@ -2674,6 +5577,9 @@ module Zz__listOfPlaybackConfiguration =
   struct
     type nonrec t = PlaybackConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlaybackConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -2696,10 +5602,68 @@ module Zz__listOfPlaybackConfiguration =
         ~of_json:PlaybackConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Zz__listOfLiveSource =
+  struct
+    type nonrec t = LiveSource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LiveSource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:LiveSource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfLiveSource" ~of_json:LiveSource.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Zz__listOfFunctionsResponse =
+  struct
+    type nonrec t = Function.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Function.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Function.of_xml)
+    let of_json j =
+      list_of_json ~kind:"__listOfFunctionsResponse"
+        ~of_json:Function.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Zz__listOfChannel =
   struct
     type nonrec t = Channel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Channel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2724,6 +5688,9 @@ module Zz__listOfAlert =
   struct
     type nonrec t = Alert.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Alert.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2748,6 +5715,9 @@ module Zz__listOfScheduleEntry =
   struct
     type nonrec t = ScheduleEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduleEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2769,12 +5739,15 @@ module Zz__listOfScheduleEntry =
         ~of_json:ScheduleEntry.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Zz__listOfAdBreak =
+module AdBreakOpportunities =
   struct
-    type nonrec t = AdBreak.t list
+    type nonrec t = AdBreakOpportunity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:AdBreak.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:AdBreakOpportunity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -2788,32 +5761,53 @@ module Zz__listOfAdBreak =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:AdBreak.of_xml)
+                     | _ -> true))) ~f:AdBreakOpportunity.of_xml)
     let of_json j =
-      list_of_json ~kind:"__listOfAdBreak" ~of_json:AdBreak.of_json j
+      list_of_json ~kind:"AdBreakOpportunities"
+        ~of_json:AdBreakOpportunity.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
   end
 module ScheduleConfiguration =
   struct
     type nonrec t =
       {
       transition: Transition.t
-        [@ocaml.doc "Program transition configurations."]}
+        [@ocaml.doc "Program transition configurations."];
+      clipRange: ClipRange.t option
+        [@ocaml.doc "Program clip range configuration."]}
     let context_ = "ScheduleConfiguration"
-    let make ~transition = fun () -> { transition }
+    let make ?clipRange =
+      fun ~transition -> fun () -> { clipRange; transition }
     let to_value x =
       structure_to_value
-        [("Transition", (Some (Transition.to_value x.transition)))]
+        [("Transition", (Some (Transition.to_value x.transition)));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
       let transition =
         Transition.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Transition") in
-      make ~transition ()
+      make ?clipRange ~transition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transition = field_map_exn json "Transition" Transition.of_json in
-      make ~transition ()
+    let of_json json__ =
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let transition = field_map_exn json__ "Transition" Transition.of_json in
+      make ?clipRange ~transition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Schedule configuration parameters. A channel must be stopped before changes can be made to the schedule."]
@@ -2836,23 +5830,53 @@ module PlaybackMode =
     let of_json j = of_string (string_of_json ~kind:"PlaybackMode" j)
     let to_json = simple_to_json to_value
   end
+module Tier =
+  struct
+    type nonrec t =
+      | BASIC 
+      | STANDARD 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BASIC -> "BASIC"
+      | STANDARD -> "STANDARD"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BASIC" -> BASIC
+      | "STANDARD" -> STANDARD
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Tier" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Tier" j)
+    let to_json = simple_to_json to_value
+  end
 module UpdateVodSourceResponse =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the VOD source."];
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with the VOD source."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the VOD source was created."];
       httpPackageConfigurations: HttpPackageConfigurations.t option
-        [@ocaml.doc "The HTTP package configurations."];
+        [@ocaml.doc
+          "A list of HTTP package configurations for the VOD source on this account."];
       lastModifiedTime: Zz__timestampUnix.t option
-        [@ocaml.doc "The ARN for the VOD source."];
+        [@ocaml.doc
+          "The timestamp that indicates when the VOD source was last modified."];
       sourceLocationName: Zz__string.t option
         [@ocaml.doc
           "The name of the source location associated with the VOD source."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the VOD source."];
+        [@ocaml.doc
+          "The tags to assign to the VOD source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       vodSourceName: Zz__string.t option
         [@ocaml.doc "The name of the VOD source."]}
     type nonrec error =
@@ -2928,36 +5952,34 @@ module UpdateVodSourceResponse =
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpPackageConfigurations =
-        field_map json "HttpPackageConfigurations"
+        field_map json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates a specific VOD source in a specific source location."]
+  end[@@ocaml.doc "Updates a VOD source's configuration."]
 module UpdateVodSourceRequest =
   struct
     type nonrec t =
       {
       httpPackageConfigurations: HttpPackageConfigurations.t
         [@ocaml.doc
-          "An array of HTTP package configurations for the VOD source on this account."];
+          "A list of HTTP package configurations for the VOD source on this account."];
       sourceLocationName: Zz__string.t
         [@ocaml.doc
-          "The identifier for the source location you are working on."];
-      vodSourceName: Zz__string.t
-        [@ocaml.doc "The identifier for the VOD source you are working on."]}
+          "The name of the source location associated with this VOD Source."];
+      vodSourceName: Zz__string.t [@ocaml.doc "The name of the VOD source."]}
     let context_ = "UpdateVodSourceRequest"
     let make ~httpPackageConfigurations =
       fun ~sourceLocationName ->
@@ -2969,60 +5991,65 @@ module UpdateVodSourceRequest =
         [("HttpPackageConfigurations",
            (Some
               (HttpPackageConfigurations.to_value x.httpPackageConfigurations)));
-        ("sourceLocationName",
+        ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)));
-        ("vodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vodSourceName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "vodSourceName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       let httpPackageConfigurations =
         HttpPackageConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
              "HttpPackageConfigurations") in
       make ~vodSourceName ~sourceLocationName ~httpPackageConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
+        field_map_exn json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       let httpPackageConfigurations =
-        field_map_exn json "HttpPackageConfigurations"
+        field_map_exn json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       make ~vodSourceName ~sourceLocationName ~httpPackageConfigurations ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Updates a specific VOD source in a specific source location."]
+  end[@@ocaml.doc "Updates a VOD source's configuration."]
 module UpdateSourceLocationResponse =
   struct
     type nonrec t =
       {
       accessConfiguration: AccessConfiguration.t option
-        [@ocaml.doc "The access configuration for the source location."];
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the source location."];
+        [@ocaml.doc
+          "Access configuration parameters. Configures the type of authentication used to access content from your source location."];
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with the source location."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the source location was created."];
       defaultSegmentDeliveryConfiguration:
         DefaultSegmentDeliveryConfiguration.t option
-        [@ocaml.doc "The default segment delivery configuration settings."];
-      httpConfiguration: HttpConfiguration.t option
         [@ocaml.doc
-          "The HTTP package configuration settings for the source location."];
+          "The optional configuration for the host server that serves segments."];
+      httpConfiguration: HttpConfiguration.t option
+        [@ocaml.doc "The HTTP configuration for the source location."];
       lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc
           "The timestamp that indicates when the source location was last modified."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
+        Zz__listOfSegmentDeliveryConfiguration.t option
+        [@ocaml.doc
+          "The segment delivery configurations for the source location. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."];
       sourceLocationName: Zz__string.t option
         [@ocaml.doc "The name of the source location."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the source location."]}
+        [@ocaml.doc
+          "The tags to assign to the source location. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?accessConfiguration =
@@ -3113,31 +6140,32 @@ module UpdateSourceLocationResponse =
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpConfiguration =
-        field_map json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
       make ?tags ?sourceLocationName ?segmentDeliveryConfigurations
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Updates a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module UpdateSourceLocationRequest =
   struct
     type nonrec t =
@@ -3152,10 +6180,11 @@ module UpdateSourceLocationRequest =
       httpConfiguration: HttpConfiguration.t
         [@ocaml.doc "The HTTP configuration for the source location."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
-      sourceLocationName: Zz__string.t
+        Zz__listOfSegmentDeliveryConfiguration.t option
         [@ocaml.doc
-          "The identifier for the source location you are working on."]}
+          "A list of the segment delivery configurations associated with this resource."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc "The name of the source location."]}
     let context_ = "UpdateSourceLocationRequest"
     let make ?accessConfiguration =
       fun ?defaultSegmentDeliveryConfiguration ->
@@ -3182,13 +6211,13 @@ module UpdateSourceLocationRequest =
         ("SegmentDeliveryConfigurations",
           (Option.map x.segmentDeliveryConfigurations
              ~f:Zz__listOfSegmentDeliveryConfiguration.to_value));
-        ("sourceLocationName",
+        ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       let segmentDeliveryConfigurations =
         (Option.map ~f:Zz__listOfSegmentDeliveryConfiguration.of_xml)
           (Xml.child xml_arg0 "SegmentDeliveryConfigurations") in
@@ -3205,47 +6234,460 @@ module UpdateSourceLocationRequest =
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let httpConfiguration =
-        field_map_exn json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map_exn json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
       make ~sourceLocationName ?segmentDeliveryConfigurations
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Updates a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
+module UpdateProgramResponse =
+  struct
+    type nonrec t =
+      {
+      adBreaks: Zz__listOfAdBreak.t option
+        [@ocaml.doc "The ad break configuration settings."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN to assign to the program."];
+      channelName: Zz__string.t option
+        [@ocaml.doc "The name to assign to the channel for this program."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc "The time the program was created."];
+      programName: Zz__string.t option
+        [@ocaml.doc "The name to assign to this program."];
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc
+          "The name to assign to the source location for this program."];
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc "The name that's used to refer to a VOD source."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the LiveSource for this Program."];
+      clipRange: ClipRange.t option
+        [@ocaml.doc "The clip range configuration settings."];
+      durationMillis: Zz__long.t option
+        [@ocaml.doc "The duration of the live program in milliseconds."];
+      scheduledStartTime: Zz__timestampUnix.t option
+        [@ocaml.doc "The scheduled start time for this Program."];
+      audienceMedia: Zz__listOfAudienceMedia.t option
+        [@ocaml.doc "The list of AudienceMedia defined in program."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the program. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?adBreaks =
+      fun ?arn ->
+        fun ?channelName ->
+          fun ?creationTime ->
+            fun ?programName ->
+              fun ?sourceLocationName ->
+                fun ?vodSourceName ->
+                  fun ?liveSourceName ->
+                    fun ?clipRange ->
+                      fun ?durationMillis ->
+                        fun ?scheduledStartTime ->
+                          fun ?audienceMedia ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  adBreaks;
+                                  arn;
+                                  channelName;
+                                  creationTime;
+                                  programName;
+                                  sourceLocationName;
+                                  vodSourceName;
+                                  liveSourceName;
+                                  clipRange;
+                                  durationMillis;
+                                  scheduledStartTime;
+                                  audienceMedia;
+                                  tags
+                                }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AdBreaks", (Option.map x.adBreaks ~f:Zz__listOfAdBreak.to_value));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("ProgramName", (Option.map x.programName ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value));
+        ("DurationMillis",
+          (Option.map x.durationMillis ~f:Zz__long.to_value));
+        ("ScheduledStartTime",
+          (Option.map x.scheduledStartTime ~f:Zz__timestampUnix.to_value));
+        ("AudienceMedia",
+          (Option.map x.audienceMedia ~f:Zz__listOfAudienceMedia.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let audienceMedia =
+        (Option.map ~f:Zz__listOfAudienceMedia.of_xml)
+          (Xml.child xml_arg0 "AudienceMedia") in
+      let scheduledStartTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "ScheduledStartTime") in
+      let durationMillis =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let vodSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      let programName =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ProgramName") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let channelName =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      let adBreaks =
+        (Option.map ~f:Zz__listOfAdBreak.of_xml)
+          (Xml.child xml_arg0 "AdBreaks") in
+      make ?tags ?audienceMedia ?scheduledStartTime ?durationMillis
+        ?clipRange ?liveSourceName ?vodSourceName ?sourceLocationName
+        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let audienceMedia =
+        field_map json__ "AudienceMedia" Zz__listOfAudienceMedia.of_json in
+      let scheduledStartTime =
+        field_map json__ "ScheduledStartTime" Zz__timestampUnix.of_json in
+      let durationMillis = field_map json__ "DurationMillis" Zz__long.of_json in
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      let programName = field_map json__ "ProgramName" Zz__string.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      make ?tags ?audienceMedia ?scheduledStartTime ?durationMillis
+        ?clipRange ?liveSourceName ?vodSourceName ?sourceLocationName
+        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a program within a channel."]
+module UpdateProgramRequest =
+  struct
+    type nonrec t =
+      {
+      adBreaks: Zz__listOfAdBreak.t option
+        [@ocaml.doc "The ad break configuration settings."];
+      channelName: Zz__string.t
+        [@ocaml.doc "The name of the channel for this Program."];
+      programName: Zz__string.t [@ocaml.doc "The name of the Program."];
+      scheduleConfiguration: UpdateProgramScheduleConfiguration.t
+        [@ocaml.doc "The schedule configuration settings."];
+      audienceMedia: Zz__listOfAudienceMedia.t option
+        [@ocaml.doc "The list of AudienceMedia defined in program."]}
+    let context_ = "UpdateProgramRequest"
+    let make ?adBreaks =
+      fun ?audienceMedia ->
+        fun ~channelName ->
+          fun ~programName ->
+            fun ~scheduleConfiguration ->
+              fun () ->
+                {
+                  adBreaks;
+                  audienceMedia;
+                  channelName;
+                  programName;
+                  scheduleConfiguration
+                }
+    let to_value x =
+      structure_to_value
+        [("AdBreaks", (Option.map x.adBreaks ~f:Zz__listOfAdBreak.to_value));
+        ("ChannelName", (Some (Zz__string.to_value x.channelName)));
+        ("ProgramName", (Some (Zz__string.to_value x.programName)));
+        ("ScheduleConfiguration",
+          (Some
+             (UpdateProgramScheduleConfiguration.to_value
+                x.scheduleConfiguration)));
+        ("AudienceMedia",
+          (Option.map x.audienceMedia ~f:Zz__listOfAudienceMedia.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let audienceMedia =
+        (Option.map ~f:Zz__listOfAudienceMedia.of_xml)
+          (Xml.child xml_arg0 "AudienceMedia") in
+      let scheduleConfiguration =
+        UpdateProgramScheduleConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScheduleConfiguration") in
+      let programName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgramName") in
+      let channelName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
+      let adBreaks =
+        (Option.map ~f:Zz__listOfAdBreak.of_xml)
+          (Xml.child xml_arg0 "AdBreaks") in
+      make ?audienceMedia ~scheduleConfiguration ~programName ~channelName
+        ?adBreaks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let audienceMedia =
+        field_map json__ "AudienceMedia" Zz__listOfAudienceMedia.of_json in
+      let scheduleConfiguration =
+        field_map_exn json__ "ScheduleConfiguration"
+          UpdateProgramScheduleConfiguration.of_json in
+      let programName = field_map_exn json__ "ProgramName" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      make ?audienceMedia ~scheduleConfiguration ~programName ~channelName
+        ?adBreaks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a program within a channel."]
+module UpdateLiveSourceResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with this live source."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was created."];
+      httpPackageConfigurations: HttpPackageConfigurations.t option
+        [@ocaml.doc
+          "A list of HTTP package configurations for the live source on this account."];
+      lastModifiedTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was last modified."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc
+          "The name of the source location associated with the live source."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the live source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?httpPackageConfigurations ->
+          fun ?lastModifiedTime ->
+            fun ?liveSourceName ->
+              fun ?sourceLocationName ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      creationTime;
+                      httpPackageConfigurations;
+                      lastModifiedTime;
+                      liveSourceName;
+                      sourceLocationName;
+                      tags
+                    }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("HttpPackageConfigurations",
+          (Option.map x.httpPackageConfigurations
+             ~f:HttpPackageConfigurations.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let lastModifiedTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let httpPackageConfigurations =
+        (Option.map ~f:HttpPackageConfigurations.of_xml)
+          (Xml.child xml_arg0 "HttpPackageConfigurations") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let httpPackageConfigurations =
+        field_map json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a live source's configuration."]
+module UpdateLiveSourceRequest =
+  struct
+    type nonrec t =
+      {
+      httpPackageConfigurations: HttpPackageConfigurations.t
+        [@ocaml.doc
+          "A list of HTTP package configurations for the live source on this account."];
+      liveSourceName: Zz__string.t
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc
+          "The name of the source location associated with this Live Source."]}
+    let context_ = "UpdateLiveSourceRequest"
+    let make ~httpPackageConfigurations =
+      fun ~liveSourceName ->
+        fun ~sourceLocationName ->
+          fun () ->
+            { httpPackageConfigurations; liveSourceName; sourceLocationName }
+    let to_value x =
+      structure_to_value
+        [("HttpPackageConfigurations",
+           (Some
+              (HttpPackageConfigurations.to_value x.httpPackageConfigurations)));
+        ("LiveSourceName", (Some (Zz__string.to_value x.liveSourceName)));
+        ("SourceLocationName",
+          (Some (Zz__string.to_value x.sourceLocationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceLocationName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LiveSourceName") in
+      let httpPackageConfigurations =
+        HttpPackageConfigurations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "HttpPackageConfigurations") in
+      make ~sourceLocationName ~liveSourceName ~httpPackageConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceLocationName =
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map_exn json__ "LiveSourceName" Zz__string.of_json in
+      let httpPackageConfigurations =
+        field_map_exn json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      make ~sourceLocationName ~liveSourceName ~httpPackageConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a live source's configuration."]
 module UpdateChannelResponse =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the channel."];
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) associated with the channel."];
       channelName: Zz__string.t option
         [@ocaml.doc "The name of the channel."];
       channelState: ChannelState.t option
         [@ocaml.doc
-          "Indicates whether the channel is in a running state or not."];
+          "Returns the state whether the channel is running or not."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc "The timestamp of when the channel was created."];
       fillerSlate: SlateSource.t option
         [@ocaml.doc
-          "Contains information about the slate used to fill gaps between programs in the schedule."];
+          "The slate used to fill gaps between programs in the schedule. You must configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't support filler slate for channels using the LOOP PlaybackMode."];
       lastModifiedTime: Zz__timestampUnix.t option
-        [@ocaml.doc "The timestamp of when the channel was last modified."];
+        [@ocaml.doc
+          "The timestamp that indicates when the channel was last modified."];
       outputs: ResponseOutputs.t option
         [@ocaml.doc "The channel's output properties."];
       playbackMode: Zz__string.t option
-        [@ocaml.doc "The channel's playback mode."];
+        [@ocaml.doc
+          "The type of playback mode for this channel. LINEAR - Programs play back-to-back only once. LOOP - Programs play back-to-back in an endless loop. When the last program in the schedule plays, playback loops back to the first program in the schedule."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the channel."]}
+        [@ocaml.doc
+          "The tags to assign to the channel. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      tier: Zz__string.t option
+        [@ocaml.doc "The tier associated with this Channel."];
+      timeShiftConfiguration: TimeShiftConfiguration.t option
+        [@ocaml.doc
+          "The time-shifted viewing configuration for the channel."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -3257,18 +6699,24 @@ module UpdateChannelResponse =
                 fun ?outputs ->
                   fun ?playbackMode ->
                     fun ?tags ->
-                      fun () ->
-                        {
-                          arn;
-                          channelName;
-                          channelState;
-                          creationTime;
-                          fillerSlate;
-                          lastModifiedTime;
-                          outputs;
-                          playbackMode;
-                          tags
-                        }
+                      fun ?tier ->
+                        fun ?timeShiftConfiguration ->
+                          fun ?audiences ->
+                            fun () ->
+                              {
+                                arn;
+                                channelName;
+                                channelState;
+                                creationTime;
+                                fillerSlate;
+                                lastModifiedTime;
+                                outputs;
+                                playbackMode;
+                                tags;
+                                tier;
+                                timeShiftConfiguration;
+                                audiences
+                              }
     let error_of_json name json =
       match name with
       | name ->
@@ -3298,9 +6746,21 @@ module UpdateChannelResponse =
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("Outputs", (Option.map x.outputs ~f:ResponseOutputs.to_value));
         ("PlaybackMode", (Option.map x.playbackMode ~f:Zz__string.to_value));
-        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Tier", (Option.map x.tier ~f:Zz__string.to_value));
+        ("TimeShiftConfiguration",
+          (Option.map x.timeShiftConfiguration
+             ~f:TimeShiftConfiguration.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let timeShiftConfiguration =
+        (Option.map ~f:TimeShiftConfiguration.of_xml)
+          (Xml.child xml_arg0 "TimeShiftConfiguration") in
+      let tier =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Tier") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let playbackMode =
@@ -3321,47 +6781,78 @@ module UpdateChannelResponse =
       let channelName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ?playbackMode
+        ?outputs ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
-      let outputs = field_map json "Outputs" ResponseOutputs.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let timeShiftConfiguration =
+        field_map json__ "TimeShiftConfiguration"
+          TimeShiftConfiguration.of_json in
+      let tier = field_map json__ "Tier" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let playbackMode = field_map json__ "PlaybackMode" Zz__string.of_json in
+      let outputs = field_map json__ "Outputs" ResponseOutputs.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelState = field_map json "ChannelState" ChannelState.of_json in
-      let channelName = field_map json "ChannelName" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelState = field_map json__ "ChannelState" ChannelState.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ?playbackMode
+        ?outputs ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing channel."]
+  end[@@ocaml.doc
+       "Updates a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module UpdateChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."];
       fillerSlate: SlateSource.t option
         [@ocaml.doc
           "The slate used to fill gaps between programs in the schedule. You must configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't support filler slate for channels using the LOOP PlaybackMode."];
       outputs: RequestOutputs.t
-        [@ocaml.doc "The channel's output properties."]}
+        [@ocaml.doc "The channel's output properties."];
+      timeShiftConfiguration: TimeShiftConfiguration.t option
+        [@ocaml.doc
+          "The time-shifted viewing configuration you want to associate to the channel."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
     let context_ = "UpdateChannelRequest"
     let make ?fillerSlate =
-      fun ~channelName ->
-        fun ~outputs -> fun () -> { fillerSlate; channelName; outputs }
+      fun ?timeShiftConfiguration ->
+        fun ?audiences ->
+          fun ~channelName ->
+            fun ~outputs ->
+              fun () ->
+                {
+                  fillerSlate;
+                  timeShiftConfiguration;
+                  audiences;
+                  channelName;
+                  outputs
+                }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
         ("FillerSlate", (Option.map x.fillerSlate ~f:SlateSource.to_value));
-        ("Outputs", (Some (RequestOutputs.to_value x.outputs)))]
+        ("Outputs", (Some (RequestOutputs.to_value x.outputs)));
+        ("TimeShiftConfiguration",
+          (Option.map x.timeShiftConfiguration
+             ~f:TimeShiftConfiguration.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let timeShiftConfiguration =
+        (Option.map ~f:TimeShiftConfiguration.of_xml)
+          (Xml.child xml_arg0 "TimeShiftConfiguration") in
       let outputs =
         RequestOutputs.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Outputs") in
@@ -3369,26 +6860,32 @@ module UpdateChannelRequest =
         (Option.map ~f:SlateSource.of_xml) (Xml.child xml_arg0 "FillerSlate") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
-      make ~outputs ?fillerSlate ~channelName ()
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
+      make ?audiences ?timeShiftConfiguration ~outputs ?fillerSlate
+        ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outputs = field_map_exn json "Outputs" RequestOutputs.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      make ~outputs ?fillerSlate ~channelName ()
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let timeShiftConfiguration =
+        field_map json__ "TimeShiftConfiguration"
+          TimeShiftConfiguration.of_json in
+      let outputs = field_map_exn json__ "Outputs" RequestOutputs.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      make ?audiences ?timeShiftConfiguration ~outputs ?fillerSlate
+        ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing channel."]
+  end[@@ocaml.doc
+       "Updates a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module UntagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the playback configuration. You can get this from the response to any playback configuration request."];
+          "The Amazon Resource Name (ARN) of the resource to untag."];
       tagKeys: Zz__listOf__string.t
-        [@ocaml.doc
-          "A comma-separated list of the tag keys to remove from the playback configuration."]}
+        [@ocaml.doc "The tag keys associated with the resource."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
@@ -3406,22 +6903,22 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Removes tags from the specified playback configuration resource. You can specify one or more tags to remove."]
+  end[@@ocaml.doc "The resource to untag."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the playback configuration. You can get this from the response to any playback configuration request."];
+          "The Amazon Resource Name (ARN) associated with the resource."];
       tags: Zz__mapOf__string.t
-        [@ocaml.doc "A comma-separated list of tag key:value pairs."]}
+        [@ocaml.doc
+          "The tags to assign to the resource. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
@@ -3438,13 +6935,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Zz__mapOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Zz__mapOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds tags to the specified playback configuration resource. You can specify one or more tags to add."]
+       "The resource to tag. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]
 module StopChannelResponse =
   struct
     type nonrec t = unit
@@ -3474,30 +6971,31 @@ module StopChannelResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Stops a specific channel."]
+  end[@@ocaml.doc
+       "Stops a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module StopChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."]}
     let context_ = "StopChannelRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Stops a specific channel."]
+  end[@@ocaml.doc
+       "Stops a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module StartChannelResponse =
   struct
     type nonrec t = unit
@@ -3527,37 +7025,38 @@ module StartChannelResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a specific channel."]
+  end[@@ocaml.doc
+       "Starts a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module StartChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."]}
     let context_ = "StartChannelRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Starts a specific channel."]
+  end[@@ocaml.doc
+       "Starts a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module PutPlaybackConfigurationResponse =
   struct
     type nonrec t =
       {
       adDecisionServerUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL for the ad decision server (ADS). This includes the specification of static parameters and placeholders for dynamic parameters. AWS Elemental MediaTailor substitutes player-specific and session-specific parameters as needed when calling the ADS. Alternately, for testing, you can provide a static VAST URL. The maximum length is 25,000 characters."];
+          "The URL for the ad decision server (ADS). This includes the specification of static parameters and placeholders for dynamic parameters. AWS Elemental MediaTailor substitutes player-specific and session-specific parameters as needed when calling the ADS. Alternately, for testing you can provide a static VAST URL. The maximum length is 25,000 characters."];
       availSuppression: AvailSuppression.t option
         [@ocaml.doc
           "The configuration for avail suppression, also known as ad suppression. For more information about ad suppression, see Ad Suppression."];
@@ -3574,11 +7073,14 @@ module PutPlaybackConfigurationResponse =
         [@ocaml.doc "The configuration for DASH content."];
       hlsConfiguration: HlsConfiguration.t option
         [@ocaml.doc "The configuration for HLS content."];
+      insertionMode: InsertionMode.t option
+        [@ocaml.doc
+          "The setting that controls whether players can use stitched or guided ad insertion. The default, STITCHED_ONLY, forces all player sessions to use stitched (server-side) ad insertion. Choosing PLAYER_SELECT allows players to select either stitched or guided ad insertion at session-initialization time. The default for players that do not specify an insertion mode is stitched."];
       livePreRollConfiguration: LivePreRollConfiguration.t option
         [@ocaml.doc "The configuration for pre-roll ad insertion."];
       logConfiguration: LogConfiguration.t option
         [@ocaml.doc
-          "The Amazon CloudWatch log settings for a playback configuration."];
+          "The configuration that defines where AWS Elemental MediaTailor sends logs for the playback configuration."];
       manifestProcessingRules: ManifestProcessingRules.t option
         [@ocaml.doc
           "The configuration for manifest processing rules. Manifest processing rules enable customization of the personalized manifests created by MediaTailor."];
@@ -3589,24 +7091,34 @@ module PutPlaybackConfigurationResponse =
           "Defines the maximum duration of underfilled ad time (in seconds) allowed in an ad break. If the duration of underfilled ad time exceeds the personalization threshold, then the personalization of the ad break is abandoned and the underlying content is shown. This feature applies to ad replacement in live and VOD streams, rather than ad insertion, because it relies on an underlying content stream. For more information about ad break behavior, including ad replacement and insertion, see Ad Behavior in AWS Elemental MediaTailor."];
       playbackConfigurationArn: Zz__string.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the playback configuration."];
+          "The Amazon Resource Name (ARN) associated with the playback configuration."];
       playbackEndpointPrefix: Zz__string.t option
         [@ocaml.doc
-          "The URL that the player accesses to get a manifest from AWS Elemental MediaTailor. This session will use server-side reporting."];
+          "The playback endpoint prefix associated with the playback configuration."];
       sessionInitializationEndpointPrefix: Zz__string.t option
         [@ocaml.doc
-          "The URL that the player uses to initialize a session that uses client-side reporting."];
+          "The session initialization endpoint prefix associated with the playback configuration."];
       slateAdUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads. AWS Elemental MediaTailor shows the slate to fill in gaps in media content. Configuring the slate is optional for non-VPAID playback configurations. For VPAID, the slate is required because MediaTailor provides it in the slots designated for dynamic ad content. The slate must be a high-quality asset that contains both audio and video."];
+          "The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads. AWS Elemental MediaTailor shows the slate to fill in gaps in media content. Configuring the slate is optional for non-VPAID configurations. For VPAID, the slate is required because MediaTailor provides it in the slots that are designated for dynamic ad content. The slate must be a high-quality asset that contains both audio and video."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the playback configuration."];
+        [@ocaml.doc
+          "The tags to assign to the playback configuration. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       transcodeProfileName: Zz__string.t option
         [@ocaml.doc
           "The name that is used to associate this playback configuration with a custom transcode profile. This overrides the dynamic transcoding defaults of MediaTailor. Use this only if you have already set up custom profiles with the help of AWS Support."];
       videoContentSourceUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."]}
+          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."];
+      adConditioningConfiguration: AdConditioningConfiguration.t option
+        [@ocaml.doc
+          "The setting that indicates what conditioning MediaTailor will perform on ads that the ad decision server (ADS) returns, and what priority MediaTailor uses when inserting ads."];
+      adDecisionServerConfiguration: AdDecisionServerConfiguration.t option
+        [@ocaml.doc
+          "The configuration for customizing HTTP requests to the ad decision server (ADS). This includes settings for request method, headers, body content, and compression options."];
+      functionMapping: FunctionMapping.t option
+        [@ocaml.doc
+          "A map of lifecycle hook event names to function identifiers. The function mapping specifies which function MediaTailor executes at each lifecycle hook during ad insertion. Valid keys are PRE_SESSION_INITIALIZATION and PRE_ADS_REQUEST. For more information, see Functions lifecycle hooks in the MediaTailor User Guide."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?adDecisionServerUrl =
@@ -3616,40 +7128,51 @@ module PutPlaybackConfigurationResponse =
             fun ?configurationAliases ->
               fun ?dashConfiguration ->
                 fun ?hlsConfiguration ->
-                  fun ?livePreRollConfiguration ->
-                    fun ?logConfiguration ->
-                      fun ?manifestProcessingRules ->
-                        fun ?name ->
-                          fun ?personalizationThresholdSeconds ->
-                            fun ?playbackConfigurationArn ->
-                              fun ?playbackEndpointPrefix ->
-                                fun ?sessionInitializationEndpointPrefix ->
-                                  fun ?slateAdUrl ->
-                                    fun ?tags ->
-                                      fun ?transcodeProfileName ->
-                                        fun ?videoContentSourceUrl ->
-                                          fun () ->
-                                            {
-                                              adDecisionServerUrl;
-                                              availSuppression;
-                                              bumper;
-                                              cdnConfiguration;
-                                              configurationAliases;
-                                              dashConfiguration;
-                                              hlsConfiguration;
-                                              livePreRollConfiguration;
-                                              logConfiguration;
-                                              manifestProcessingRules;
-                                              name;
-                                              personalizationThresholdSeconds;
-                                              playbackConfigurationArn;
-                                              playbackEndpointPrefix;
-                                              sessionInitializationEndpointPrefix;
-                                              slateAdUrl;
-                                              tags;
-                                              transcodeProfileName;
-                                              videoContentSourceUrl
-                                            }
+                  fun ?insertionMode ->
+                    fun ?livePreRollConfiguration ->
+                      fun ?logConfiguration ->
+                        fun ?manifestProcessingRules ->
+                          fun ?name ->
+                            fun ?personalizationThresholdSeconds ->
+                              fun ?playbackConfigurationArn ->
+                                fun ?playbackEndpointPrefix ->
+                                  fun ?sessionInitializationEndpointPrefix ->
+                                    fun ?slateAdUrl ->
+                                      fun ?tags ->
+                                        fun ?transcodeProfileName ->
+                                          fun ?videoContentSourceUrl ->
+                                            fun ?adConditioningConfiguration
+                                              ->
+                                              fun
+                                                ?adDecisionServerConfiguration
+                                                ->
+                                                fun ?functionMapping ->
+                                                  fun () ->
+                                                    {
+                                                      adDecisionServerUrl;
+                                                      availSuppression;
+                                                      bumper;
+                                                      cdnConfiguration;
+                                                      configurationAliases;
+                                                      dashConfiguration;
+                                                      hlsConfiguration;
+                                                      insertionMode;
+                                                      livePreRollConfiguration;
+                                                      logConfiguration;
+                                                      manifestProcessingRules;
+                                                      name;
+                                                      personalizationThresholdSeconds;
+                                                      playbackConfigurationArn;
+                                                      playbackEndpointPrefix;
+                                                      sessionInitializationEndpointPrefix;
+                                                      slateAdUrl;
+                                                      tags;
+                                                      transcodeProfileName;
+                                                      videoContentSourceUrl;
+                                                      adConditioningConfiguration;
+                                                      adDecisionServerConfiguration;
+                                                      functionMapping
+                                                    }
     let error_of_json name json =
       match name with
       | name ->
@@ -3682,6 +7205,8 @@ module PutPlaybackConfigurationResponse =
           (Option.map x.dashConfiguration ~f:DashConfiguration.to_value));
         ("HlsConfiguration",
           (Option.map x.hlsConfiguration ~f:HlsConfiguration.to_value));
+        ("InsertionMode",
+          (Option.map x.insertionMode ~f:InsertionMode.to_value));
         ("LivePreRollConfiguration",
           (Option.map x.livePreRollConfiguration
              ~f:LivePreRollConfiguration.to_value));
@@ -3706,9 +7231,26 @@ module PutPlaybackConfigurationResponse =
         ("TranscodeProfileName",
           (Option.map x.transcodeProfileName ~f:Zz__string.to_value));
         ("VideoContentSourceUrl",
-          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value))]
+          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value));
+        ("AdConditioningConfiguration",
+          (Option.map x.adConditioningConfiguration
+             ~f:AdConditioningConfiguration.to_value));
+        ("AdDecisionServerConfiguration",
+          (Option.map x.adDecisionServerConfiguration
+             ~f:AdDecisionServerConfiguration.to_value));
+        ("FunctionMapping",
+          (Option.map x.functionMapping ~f:FunctionMapping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let functionMapping =
+        (Option.map ~f:FunctionMapping.of_xml)
+          (Xml.child xml_arg0 "FunctionMapping") in
+      let adDecisionServerConfiguration =
+        (Option.map ~f:AdDecisionServerConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdDecisionServerConfiguration") in
+      let adConditioningConfiguration =
+        (Option.map ~f:AdConditioningConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdConditioningConfiguration") in
       let videoContentSourceUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VideoContentSourceUrl") in
@@ -3742,6 +7284,9 @@ module PutPlaybackConfigurationResponse =
       let livePreRollConfiguration =
         (Option.map ~f:LivePreRollConfiguration.of_xml)
           (Xml.child xml_arg0 "LivePreRollConfiguration") in
+      let insertionMode =
+        (Option.map ~f:InsertionMode.of_xml)
+          (Xml.child xml_arg0 "InsertionMode") in
       let hlsConfiguration =
         (Option.map ~f:HlsConfiguration.of_xml)
           (Xml.child xml_arg0 "HlsConfiguration") in
@@ -3762,62 +7307,78 @@ module PutPlaybackConfigurationResponse =
       let adDecisionServerUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let functionMapping =
+        field_map json__ "FunctionMapping" FunctionMapping.of_json in
+      let adDecisionServerConfiguration =
+        field_map json__ "AdDecisionServerConfiguration"
+          AdDecisionServerConfiguration.of_json in
+      let adConditioningConfiguration =
+        field_map json__ "AdConditioningConfiguration"
+          AdConditioningConfiguration.of_json in
       let videoContentSourceUrl =
-        field_map json "VideoContentSourceUrl" Zz__string.of_json in
+        field_map json__ "VideoContentSourceUrl" Zz__string.of_json in
       let transcodeProfileName =
-        field_map json "TranscodeProfileName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let slateAdUrl = field_map json "SlateAdUrl" Zz__string.of_json in
+        field_map json__ "TranscodeProfileName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let slateAdUrl = field_map json__ "SlateAdUrl" Zz__string.of_json in
       let sessionInitializationEndpointPrefix =
-        field_map json "SessionInitializationEndpointPrefix"
+        field_map json__ "SessionInitializationEndpointPrefix"
           Zz__string.of_json in
       let playbackEndpointPrefix =
-        field_map json "PlaybackEndpointPrefix" Zz__string.of_json in
+        field_map json__ "PlaybackEndpointPrefix" Zz__string.of_json in
       let playbackConfigurationArn =
-        field_map json "PlaybackConfigurationArn" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationArn" Zz__string.of_json in
       let personalizationThresholdSeconds =
-        field_map json "PersonalizationThresholdSeconds"
+        field_map json__ "PersonalizationThresholdSeconds"
           Zz__integerMin1.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let manifestProcessingRules =
-        field_map json "ManifestProcessingRules"
+        field_map json__ "ManifestProcessingRules"
           ManifestProcessingRules.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration" LogConfiguration.of_json in
+        field_map json__ "LogConfiguration" LogConfiguration.of_json in
       let livePreRollConfiguration =
-        field_map json "LivePreRollConfiguration"
+        field_map json__ "LivePreRollConfiguration"
           LivePreRollConfiguration.of_json in
+      let insertionMode =
+        field_map json__ "InsertionMode" InsertionMode.of_json in
       let hlsConfiguration =
-        field_map json "HlsConfiguration" HlsConfiguration.of_json in
+        field_map json__ "HlsConfiguration" HlsConfiguration.of_json in
       let dashConfiguration =
-        field_map json "DashConfiguration" DashConfiguration.of_json in
+        field_map json__ "DashConfiguration" DashConfiguration.of_json in
       let configurationAliases =
-        field_map json "ConfigurationAliases"
+        field_map json__ "ConfigurationAliases"
           ConfigurationAliasesResponse.of_json in
       let cdnConfiguration =
-        field_map json "CdnConfiguration" CdnConfiguration.of_json in
-      let bumper = field_map json "Bumper" Bumper.of_json in
+        field_map json__ "CdnConfiguration" CdnConfiguration.of_json in
+      let bumper = field_map json__ "Bumper" Bumper.of_json in
       let availSuppression =
-        field_map json "AvailSuppression" AvailSuppression.of_json in
+        field_map json__ "AvailSuppression" AvailSuppression.of_json in
       let adDecisionServerUrl =
-        field_map json "AdDecisionServerUrl" Zz__string.of_json in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+        field_map json__ "AdDecisionServerUrl" Zz__string.of_json in
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a new playback configuration to AWS Elemental MediaTailor."]
+       "Creates a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
 module PutPlaybackConfigurationRequest =
   struct
     type nonrec t =
@@ -3839,12 +7400,15 @@ module PutPlaybackConfigurationRequest =
           "The player parameters and aliases used as dynamic variables during session initialization. For more information, see Domain Variables."];
       dashConfiguration: DashConfigurationForPut.t option
         [@ocaml.doc "The configuration for DASH content."];
+      insertionMode: InsertionMode.t option
+        [@ocaml.doc
+          "The setting that controls whether players can use stitched or guided ad insertion. The default, STITCHED_ONLY, forces all player sessions to use stitched (server-side) ad insertion. Choosing PLAYER_SELECT allows players to select either stitched or guided ad insertion at session-initialization time. The default for players that do not specify an insertion mode is stitched."];
       livePreRollConfiguration: LivePreRollConfiguration.t option
         [@ocaml.doc "The configuration for pre-roll ad insertion."];
       manifestProcessingRules: ManifestProcessingRules.t option
         [@ocaml.doc
           "The configuration for manifest processing rules. Manifest processing rules enable customization of the personalized manifests created by MediaTailor."];
-      name: Zz__string.t option
+      name: Zz__string.t
         [@ocaml.doc "The identifier for the playback configuration."];
       personalizationThresholdSeconds: Zz__integerMin1.t option
         [@ocaml.doc
@@ -3853,44 +7417,63 @@ module PutPlaybackConfigurationRequest =
         [@ocaml.doc
           "The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads. AWS Elemental MediaTailor shows the slate to fill in gaps in media content. Configuring the slate is optional for non-VPAID configurations. For VPAID, the slate is required because MediaTailor provides it in the slots that are designated for dynamic ad content. The slate must be a high-quality asset that contains both audio and video."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the playback configuration."];
+        [@ocaml.doc
+          "The tags to assign to the playback configuration. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       transcodeProfileName: Zz__string.t option
         [@ocaml.doc
           "The name that is used to associate this playback configuration with a custom transcode profile. This overrides the dynamic transcoding defaults of MediaTailor. Use this only if you have already set up custom profiles with the help of AWS Support."];
       videoContentSourceUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."]}
+          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."];
+      adConditioningConfiguration: AdConditioningConfiguration.t option
+        [@ocaml.doc
+          "The setting that indicates what conditioning MediaTailor will perform on ads that the ad decision server (ADS) returns, and what priority MediaTailor uses when inserting ads."];
+      adDecisionServerConfiguration: AdDecisionServerConfiguration.t option
+        [@ocaml.doc
+          "The configuration for customizing HTTP requests to the ad decision server (ADS). This includes settings for request method, headers, body content, and compression options."];
+      functionMapping: FunctionMapping.t option
+        [@ocaml.doc
+          "A map of lifecycle hook event names to function identifiers. The function mapping specifies which function MediaTailor executes at each lifecycle hook during ad insertion. Valid keys are PRE_SESSION_INITIALIZATION and PRE_ADS_REQUEST. For more information, see Functions lifecycle hooks in the MediaTailor User Guide."]}
+    let context_ = "PutPlaybackConfigurationRequest"
     let make ?adDecisionServerUrl =
       fun ?availSuppression ->
         fun ?bumper ->
           fun ?cdnConfiguration ->
             fun ?configurationAliases ->
               fun ?dashConfiguration ->
-                fun ?livePreRollConfiguration ->
-                  fun ?manifestProcessingRules ->
-                    fun ?name ->
+                fun ?insertionMode ->
+                  fun ?livePreRollConfiguration ->
+                    fun ?manifestProcessingRules ->
                       fun ?personalizationThresholdSeconds ->
                         fun ?slateAdUrl ->
                           fun ?tags ->
                             fun ?transcodeProfileName ->
                               fun ?videoContentSourceUrl ->
-                                fun () ->
-                                  {
-                                    adDecisionServerUrl;
-                                    availSuppression;
-                                    bumper;
-                                    cdnConfiguration;
-                                    configurationAliases;
-                                    dashConfiguration;
-                                    livePreRollConfiguration;
-                                    manifestProcessingRules;
-                                    name;
-                                    personalizationThresholdSeconds;
-                                    slateAdUrl;
-                                    tags;
-                                    transcodeProfileName;
-                                    videoContentSourceUrl
-                                  }
+                                fun ?adConditioningConfiguration ->
+                                  fun ?adDecisionServerConfiguration ->
+                                    fun ?functionMapping ->
+                                      fun ~name ->
+                                        fun () ->
+                                          {
+                                            adDecisionServerUrl;
+                                            availSuppression;
+                                            bumper;
+                                            cdnConfiguration;
+                                            configurationAliases;
+                                            dashConfiguration;
+                                            insertionMode;
+                                            livePreRollConfiguration;
+                                            manifestProcessingRules;
+                                            personalizationThresholdSeconds;
+                                            slateAdUrl;
+                                            tags;
+                                            transcodeProfileName;
+                                            videoContentSourceUrl;
+                                            adConditioningConfiguration;
+                                            adDecisionServerConfiguration;
+                                            functionMapping;
+                                            name
+                                          }
     let to_value x =
       structure_to_value
         [("AdDecisionServerUrl",
@@ -3905,13 +7488,15 @@ module PutPlaybackConfigurationRequest =
              ~f:ConfigurationAliasesRequest.to_value));
         ("DashConfiguration",
           (Option.map x.dashConfiguration ~f:DashConfigurationForPut.to_value));
+        ("InsertionMode",
+          (Option.map x.insertionMode ~f:InsertionMode.to_value));
         ("LivePreRollConfiguration",
           (Option.map x.livePreRollConfiguration
              ~f:LivePreRollConfiguration.to_value));
         ("ManifestProcessingRules",
           (Option.map x.manifestProcessingRules
              ~f:ManifestProcessingRules.to_value));
-        ("Name", (Option.map x.name ~f:Zz__string.to_value));
+        ("Name", (Some (Zz__string.to_value x.name)));
         ("PersonalizationThresholdSeconds",
           (Option.map x.personalizationThresholdSeconds
              ~f:Zz__integerMin1.to_value));
@@ -3920,9 +7505,26 @@ module PutPlaybackConfigurationRequest =
         ("TranscodeProfileName",
           (Option.map x.transcodeProfileName ~f:Zz__string.to_value));
         ("VideoContentSourceUrl",
-          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value))]
+          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value));
+        ("AdConditioningConfiguration",
+          (Option.map x.adConditioningConfiguration
+             ~f:AdConditioningConfiguration.to_value));
+        ("AdDecisionServerConfiguration",
+          (Option.map x.adDecisionServerConfiguration
+             ~f:AdDecisionServerConfiguration.to_value));
+        ("FunctionMapping",
+          (Option.map x.functionMapping ~f:FunctionMapping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let functionMapping =
+        (Option.map ~f:FunctionMapping.of_xml)
+          (Xml.child xml_arg0 "FunctionMapping") in
+      let adDecisionServerConfiguration =
+        (Option.map ~f:AdDecisionServerConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdDecisionServerConfiguration") in
+      let adConditioningConfiguration =
+        (Option.map ~f:AdConditioningConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdConditioningConfiguration") in
       let videoContentSourceUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VideoContentSourceUrl") in
@@ -3937,13 +7539,16 @@ module PutPlaybackConfigurationRequest =
         (Option.map ~f:Zz__integerMin1.of_xml)
           (Xml.child xml_arg0 "PersonalizationThresholdSeconds") in
       let name =
-        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Name") in
+        Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let manifestProcessingRules =
         (Option.map ~f:ManifestProcessingRules.of_xml)
           (Xml.child xml_arg0 "ManifestProcessingRules") in
       let livePreRollConfiguration =
         (Option.map ~f:LivePreRollConfiguration.of_xml)
           (Xml.child xml_arg0 "LivePreRollConfiguration") in
+      let insertionMode =
+        (Option.map ~f:InsertionMode.of_xml)
+          (Xml.child xml_arg0 "InsertionMode") in
       let dashConfiguration =
         (Option.map ~f:DashConfigurationForPut.of_xml)
           (Xml.child xml_arg0 "DashConfiguration") in
@@ -3961,47 +7566,285 @@ module PutPlaybackConfigurationRequest =
       let adDecisionServerUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
-        ?personalizationThresholdSeconds ?name ?manifestProcessingRules
-        ?livePreRollConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
+        ?personalizationThresholdSeconds ~name ?manifestProcessingRules
+        ?livePreRollConfiguration ?insertionMode ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let functionMapping =
+        field_map json__ "FunctionMapping" FunctionMapping.of_json in
+      let adDecisionServerConfiguration =
+        field_map json__ "AdDecisionServerConfiguration"
+          AdDecisionServerConfiguration.of_json in
+      let adConditioningConfiguration =
+        field_map json__ "AdConditioningConfiguration"
+          AdConditioningConfiguration.of_json in
       let videoContentSourceUrl =
-        field_map json "VideoContentSourceUrl" Zz__string.of_json in
+        field_map json__ "VideoContentSourceUrl" Zz__string.of_json in
       let transcodeProfileName =
-        field_map json "TranscodeProfileName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let slateAdUrl = field_map json "SlateAdUrl" Zz__string.of_json in
+        field_map json__ "TranscodeProfileName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let slateAdUrl = field_map json__ "SlateAdUrl" Zz__string.of_json in
       let personalizationThresholdSeconds =
-        field_map json "PersonalizationThresholdSeconds"
+        field_map json__ "PersonalizationThresholdSeconds"
           Zz__integerMin1.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       let manifestProcessingRules =
-        field_map json "ManifestProcessingRules"
+        field_map json__ "ManifestProcessingRules"
           ManifestProcessingRules.of_json in
       let livePreRollConfiguration =
-        field_map json "LivePreRollConfiguration"
+        field_map json__ "LivePreRollConfiguration"
           LivePreRollConfiguration.of_json in
+      let insertionMode =
+        field_map json__ "InsertionMode" InsertionMode.of_json in
       let dashConfiguration =
-        field_map json "DashConfiguration" DashConfigurationForPut.of_json in
+        field_map json__ "DashConfiguration" DashConfigurationForPut.of_json in
       let configurationAliases =
-        field_map json "ConfigurationAliases"
+        field_map json__ "ConfigurationAliases"
           ConfigurationAliasesRequest.of_json in
       let cdnConfiguration =
-        field_map json "CdnConfiguration" CdnConfiguration.of_json in
-      let bumper = field_map json "Bumper" Bumper.of_json in
+        field_map json__ "CdnConfiguration" CdnConfiguration.of_json in
+      let bumper = field_map json__ "Bumper" Bumper.of_json in
       let availSuppression =
-        field_map json "AvailSuppression" AvailSuppression.of_json in
+        field_map json__ "AvailSuppression" AvailSuppression.of_json in
       let adDecisionServerUrl =
-        field_map json "AdDecisionServerUrl" Zz__string.of_json in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
-        ?personalizationThresholdSeconds ?name ?manifestProcessingRules
-        ?livePreRollConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        field_map json__ "AdDecisionServerUrl" Zz__string.of_json in
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
+        ?personalizationThresholdSeconds ~name ?manifestProcessingRules
+        ?livePreRollConfiguration ?insertionMode ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a new playback configuration to AWS Elemental MediaTailor."]
+       "Creates a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
+module PutFunctionResponse =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t option
+        [@ocaml.doc "The identifier of the function."];
+      functionType: FunctionType.t option
+        [@ocaml.doc "The type of the function."];
+      description: Zz__string.t option
+        [@ocaml.doc "A description of the function."];
+      httpRequestConfiguration: HttpRequestConfiguration.t option
+        [@ocaml.doc "The configuration for an HTTP_REQUEST function."];
+      customOutputConfiguration: CustomOutputConfiguration.t option
+        [@ocaml.doc "The configuration for a CUSTOM_OUTPUT function."];
+      sequentialExecutorConfiguration:
+        SequentialExecutorConfiguration.t option
+        [@ocaml.doc "The configuration for a SEQUENTIAL_EXECUTOR function."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the function. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the function."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?functionId =
+      fun ?functionType ->
+        fun ?description ->
+          fun ?httpRequestConfiguration ->
+            fun ?customOutputConfiguration ->
+              fun ?sequentialExecutorConfiguration ->
+                fun ?tags ->
+                  fun ?arn ->
+                    fun () ->
+                      {
+                        functionId;
+                        functionType;
+                        description;
+                        httpRequestConfiguration;
+                        customOutputConfiguration;
+                        sequentialExecutorConfiguration;
+                        tags;
+                        arn
+                      }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Option.map x.functionId ~f:Zz__string.to_value));
+        ("FunctionType",
+          (Option.map x.functionType ~f:FunctionType.to_value));
+        ("Description", (Option.map x.description ~f:Zz__string.to_value));
+        ("HttpRequestConfiguration",
+          (Option.map x.httpRequestConfiguration
+             ~f:HttpRequestConfiguration.to_value));
+        ("CustomOutputConfiguration",
+          (Option.map x.customOutputConfiguration
+             ~f:CustomOutputConfiguration.to_value));
+        ("SequentialExecutorConfiguration",
+          (Option.map x.sequentialExecutorConfiguration
+             ~f:SequentialExecutorConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sequentialExecutorConfiguration =
+        (Option.map ~f:SequentialExecutorConfiguration.of_xml)
+          (Xml.child xml_arg0 "SequentialExecutorConfiguration") in
+      let customOutputConfiguration =
+        (Option.map ~f:CustomOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomOutputConfiguration") in
+      let httpRequestConfiguration =
+        (Option.map ~f:HttpRequestConfiguration.of_xml)
+          (Xml.child xml_arg0 "HttpRequestConfiguration") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
+      let functionType =
+        (Option.map ~f:FunctionType.of_xml)
+          (Xml.child xml_arg0 "FunctionType") in
+      let functionId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "FunctionId") in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sequentialExecutorConfiguration =
+        field_map json__ "SequentialExecutorConfiguration"
+          SequentialExecutorConfiguration.of_json in
+      let customOutputConfiguration =
+        field_map json__ "CustomOutputConfiguration"
+          CustomOutputConfiguration.of_json in
+      let httpRequestConfiguration =
+        field_map json__ "HttpRequestConfiguration"
+          HttpRequestConfiguration.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let functionType = field_map json__ "FunctionType" FunctionType.of_json in
+      let functionId = field_map json__ "FunctionId" Zz__string.of_json in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Define Mixin --"]
+module PutFunctionRequest =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t
+        [@ocaml.doc
+          "The identifier of the function. The identifier must be unique within your account."];
+      functionType: FunctionType.t
+        [@ocaml.doc
+          "The type of the function. The function type determines what the function can do at runtime. Valid values: CUSTOM_OUTPUT evaluates expressions and produces output bindings with no external calls. HTTP_REQUEST makes an HTTP call to an external service and evaluates output expressions that can reference the response. SEQUENTIAL_EXECUTOR runs a sequence of child functions in order, passing data between steps through temporary data. For more information, see Function types and composition in the MediaTailor User Guide."];
+      description: Zz__string.t option
+        [@ocaml.doc "A description of the function."];
+      httpRequestConfiguration: HttpRequestConfiguration.t option
+        [@ocaml.doc
+          "The configuration for an HTTP_REQUEST function. Specifies the HTTP method, URL, headers, body, timeout, and output expressions. Required when FunctionType is HTTP_REQUEST."];
+      customOutputConfiguration: CustomOutputConfiguration.t option
+        [@ocaml.doc
+          "The configuration for a CUSTOM_OUTPUT function. Specifies the runtime and output expressions. Required when FunctionType is CUSTOM_OUTPUT."];
+      sequentialExecutorConfiguration:
+        SequentialExecutorConfiguration.t option
+        [@ocaml.doc
+          "The configuration for a SEQUENTIAL_EXECUTOR function. Specifies the ordered list of child functions to execute, an optional output block, and a timeout. Required when FunctionType is SEQUENTIAL_EXECUTOR."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the function. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    let context_ = "PutFunctionRequest"
+    let make ?description =
+      fun ?httpRequestConfiguration ->
+        fun ?customOutputConfiguration ->
+          fun ?sequentialExecutorConfiguration ->
+            fun ?tags ->
+              fun ~functionId ->
+                fun ~functionType ->
+                  fun () ->
+                    {
+                      description;
+                      httpRequestConfiguration;
+                      customOutputConfiguration;
+                      sequentialExecutorConfiguration;
+                      tags;
+                      functionId;
+                      functionType
+                    }
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Some (Zz__string.to_value x.functionId)));
+        ("FunctionType", (Some (FunctionType.to_value x.functionType)));
+        ("Description", (Option.map x.description ~f:Zz__string.to_value));
+        ("HttpRequestConfiguration",
+          (Option.map x.httpRequestConfiguration
+             ~f:HttpRequestConfiguration.to_value));
+        ("CustomOutputConfiguration",
+          (Option.map x.customOutputConfiguration
+             ~f:CustomOutputConfiguration.to_value));
+        ("SequentialExecutorConfiguration",
+          (Option.map x.sequentialExecutorConfiguration
+             ~f:SequentialExecutorConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sequentialExecutorConfiguration =
+        (Option.map ~f:SequentialExecutorConfiguration.of_xml)
+          (Xml.child xml_arg0 "SequentialExecutorConfiguration") in
+      let customOutputConfiguration =
+        (Option.map ~f:CustomOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomOutputConfiguration") in
+      let httpRequestConfiguration =
+        (Option.map ~f:HttpRequestConfiguration.of_xml)
+          (Xml.child xml_arg0 "HttpRequestConfiguration") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
+      let functionType =
+        FunctionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FunctionType") in
+      let functionId =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FunctionId") in
+      make ?tags ?sequentialExecutorConfiguration ?customOutputConfiguration
+        ?httpRequestConfiguration ?description ~functionType ~functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sequentialExecutorConfiguration =
+        field_map json__ "SequentialExecutorConfiguration"
+          SequentialExecutorConfiguration.of_json in
+      let customOutputConfiguration =
+        field_map json__ "CustomOutputConfiguration"
+          CustomOutputConfiguration.of_json in
+      let httpRequestConfiguration =
+        field_map json__ "HttpRequestConfiguration"
+          HttpRequestConfiguration.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let functionType =
+        field_map_exn json__ "FunctionType" FunctionType.of_json in
+      let functionId = field_map_exn json__ "FunctionId" Zz__string.of_json in
+      make ?tags ?sequentialExecutorConfiguration ?customOutputConfiguration
+        ?httpRequestConfiguration ?description ~functionType ~functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Define Mixin --"]
 module PutChannelPolicyResponse =
   struct
     type nonrec t = unit
@@ -4031,13 +7874,14 @@ module PutChannelPolicyResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates an IAM policy for the channel."]
+  end[@@ocaml.doc
+       "Creates an IAM policy for the channel. IAM policies are used to control access to your channel."]
 module PutChannelPolicyRequest =
   struct
     type nonrec t =
       {
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
+        [@ocaml.doc "The channel name associated with this Channel Policy."];
       policy: Zz__string.t
         [@ocaml.doc
           "Adds an IAM role that determines the permissions of your channel."]}
@@ -4045,7 +7889,7 @@ module PutChannelPolicyRequest =
     let make ~channelName = fun ~policy -> fun () -> { channelName; policy }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
         ("Policy", (Some (Zz__string.to_value x.policy)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4053,15 +7897,16 @@ module PutChannelPolicyRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Policy") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~policy ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~policy ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates an IAM policy for the channel."]
+  end[@@ocaml.doc
+       "Creates an IAM policy for the channel. IAM policies are used to control access to your channel."]
 module ListVodSourcesResponse =
   struct
     type nonrec t =
@@ -4070,7 +7915,7 @@ module ListVodSourcesResponse =
         [@ocaml.doc "Lists the VOD sources."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
@@ -4103,25 +7948,26 @@ module ListVodSourcesResponse =
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfVodSource.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfVodSource.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all the VOD sources in a source location."]
+  end[@@ocaml.doc
+       "Lists the VOD sources contained in a source location. A source represents a piece of content."]
 module ListVodSourcesRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Upper bound on number of records to return. The maximum number of results is 100."];
+          "The maximum number of VOD sources that you want MediaTailor to return in response to the current request. If there are more than MaxResults VOD sources, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."];
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListVodSources request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."];
       sourceLocationName: Zz__string.t
         [@ocaml.doc
-          "The identifier for the source location you are working on."]}
+          "The name of the source location associated with this VOD Source list."]}
     let context_ = "ListVodSourcesRequest"
     let make ?maxResults =
       fun ?nextToken ->
@@ -4131,33 +7977,35 @@ module ListVodSourcesRequest =
       structure_to_value
         [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
-        ("sourceLocationName",
+        ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~sourceLocationName ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~sourceLocationName ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all the VOD sources in a source location."]
+  end[@@ocaml.doc
+       "Lists the VOD sources contained in a source location. A source represents a piece of content."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "A comma-separated list of tag key:value pairs."]}
+        [@ocaml.doc
+          "The tags associated with this resource. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4195,19 +8043,19 @@ module ListTagsForResourceResponse =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the tags assigned to the specified playback configuration resource."]
+       "A list of tags that are associated with this resource. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: Zz__string.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the playback configuration. You can get this from the response to any playback configuration request."]}
+          "The Amazon Resource Name (ARN) associated with this resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -4220,21 +8068,21 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the tags assigned to the specified playback configuration resource."]
+       "A list of tags that are associated with this resource. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]
 module ListSourceLocationsResponse =
   struct
     type nonrec t =
       {
       items: Zz__listOfSourceLocation.t option
-        [@ocaml.doc "An array of source locations."];
+        [@ocaml.doc "A list of source locations."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
@@ -4267,22 +8115,23 @@ module ListSourceLocationsResponse =
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfSourceLocation.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfSourceLocation.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a list of source locations."]
+  end[@@ocaml.doc
+       "Lists the source locations for a channel. A source location defines the host server URL, and contains a list of sources."]
 module ListSourceLocationsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Upper bound on number of records to return. The maximum number of results is 100."];
+          "The maximum number of source locations that you want MediaTailor to return in response to the current request. If there are more than MaxResults source locations, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListSourceLocations request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
@@ -4297,12 +8146,13 @@ module ListSourceLocationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves a list of source locations."]
+  end[@@ocaml.doc
+       "Lists the source locations for a channel. A source location defines the host server URL, and contains a list of sources."]
 module ListPrefetchSchedulesResponse =
   struct
     type nonrec t =
@@ -4312,7 +8162,7 @@ module ListPrefetchSchedulesResponse =
           "Lists the prefetch schedules. An empty Items list doesn't mean there aren't more items to fetch, just that that page was empty."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "The value that you will use forNextToken in the next ListPrefetchSchedulesRequest request."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
@@ -4346,34 +8196,46 @@ module ListPrefetchSchedulesResponse =
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfPrefetchSchedule.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfPrefetchSchedule.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new prefetch schedule."]
+  end[@@ocaml.doc
+       "Lists the prefetch schedules for a playback configuration."]
 module ListPrefetchSchedulesRequest =
   struct
     type nonrec t =
       {
       maxResults: Zz__integerMin1Max100.t option
         [@ocaml.doc
-          "The maximum number of prefetch schedules that you want MediaTailor to return in response to the current request. If the playback configuration has more than MaxResults prefetch schedules, use the value of NextToken in the response to get the next page of results."];
+          "The maximum number of prefetch schedules that you want MediaTailor to return in response to the current request. If there are more than MaxResults prefetch schedules, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "(Optional) If the playback configuration has more than MaxResults prefetch schedules, use NextToken to get the second and subsequent pages of results. For the first ListPrefetchSchedulesRequest request, omit this value. For the second and subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. If the previous response didn't include a NextToken element, there are no more prefetch schedules to get."];
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListPrefetchSchedules request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."];
       playbackConfigurationName: Zz__string.t
-        [@ocaml.doc "The name of the playback configuration."];
+        [@ocaml.doc
+          "Retrieves the prefetch schedule(s) for a specific playback configuration."];
+      scheduleType: ListPrefetchScheduleType.t option
+        [@ocaml.doc
+          "The type of prefetch schedules that you want to list. SINGLE indicates that you want to list the configured single prefetch schedules. RECURRING indicates that you want to list the configured recurring prefetch schedules. ALL indicates that you want to list all configured prefetch schedules."];
       streamId: Zz__string.t option
         [@ocaml.doc
           "An optional filtering parameter whereby MediaTailor filters the prefetch schedules to include only specific streams."]}
     let context_ = "ListPrefetchSchedulesRequest"
     let make ?maxResults =
       fun ?nextToken ->
-        fun ?streamId ->
-          fun ~playbackConfigurationName ->
-            fun () ->
-              { maxResults; nextToken; streamId; playbackConfigurationName }
+        fun ?scheduleType ->
+          fun ?streamId ->
+            fun ~playbackConfigurationName ->
+              fun () ->
+                {
+                  maxResults;
+                  nextToken;
+                  scheduleType;
+                  streamId;
+                  playbackConfigurationName
+                }
     let to_value x =
       structure_to_value
         [("MaxResults",
@@ -4381,11 +8243,16 @@ module ListPrefetchSchedulesRequest =
         ("NextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
         ("PlaybackConfigurationName",
           (Some (Zz__string.to_value x.playbackConfigurationName)));
+        ("ScheduleType",
+          (Option.map x.scheduleType ~f:ListPrefetchScheduleType.to_value));
         ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let streamId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let scheduleType =
+        (Option.map ~f:ListPrefetchScheduleType.of_xml)
+          (Xml.child xml_arg0 "ScheduleType") in
       let playbackConfigurationName =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -4395,18 +8262,23 @@ module ListPrefetchSchedulesRequest =
       let maxResults =
         (Option.map ~f:Zz__integerMin1Max100.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
-      make ?streamId ~playbackConfigurationName ?nextToken ?maxResults ()
+      make ?streamId ?scheduleType ~playbackConfigurationName ?nextToken
+        ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "StreamId" Zz__string.of_json in
+    let of_json json__ =
+      let streamId = field_map json__ "StreamId" Zz__string.of_json in
+      let scheduleType =
+        field_map json__ "ScheduleType" ListPrefetchScheduleType.of_json in
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+        field_map_exn json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let maxResults =
-        field_map json "MaxResults" Zz__integerMin1Max100.of_json in
-      make ?streamId ~playbackConfigurationName ?nextToken ?maxResults ()
+        field_map json__ "MaxResults" Zz__integerMin1Max100.of_json in
+      make ?streamId ?scheduleType ~playbackConfigurationName ?nextToken
+        ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a new prefetch schedule."]
+  end[@@ocaml.doc
+       "Lists the prefetch schedules for a playback configuration."]
 module ListPlaybackConfigurationsResponse =
   struct
     type nonrec t =
@@ -4450,23 +8322,24 @@ module ListPlaybackConfigurationsResponse =
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
       let items =
-        field_map json "Items" Zz__listOfPlaybackConfiguration.of_json in
+        field_map json__ "Items" Zz__listOfPlaybackConfiguration.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the playback configurations defined in AWS Elemental MediaTailor. You can specify a maximum number of configurations to return at a time. The default maximum is 50. Results are returned in pagefuls. If MediaTailor has more configurations than the specified maximum, it provides parameters in the response that you can use to retrieve the next pageful."]
+       "Retrieves existing playback configurations. For information about MediaTailor configurations, see Working with Configurations in AWS Elemental MediaTailor."]
 module ListPlaybackConfigurationsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
-        [@ocaml.doc "Maximum number of records to return."];
+        [@ocaml.doc
+          "The maximum number of playback configurations that you want MediaTailor to return in response to the current request. If there are more than MaxResults playback configurations, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token returned by the GET list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListPlaybackConfigurations request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
@@ -4481,20 +8354,194 @@ module ListPlaybackConfigurationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the playback configurations defined in AWS Elemental MediaTailor. You can specify a maximum number of configurations to return at a time. The default maximum is 50. Results are returned in pagefuls. If MediaTailor has more configurations than the specified maximum, it provides parameters in the response that you can use to retrieve the next pageful."]
+       "Retrieves existing playback configurations. For information about MediaTailor configurations, see Working with Configurations in AWS Elemental MediaTailor."]
+module ListLiveSourcesResponse =
+  struct
+    type nonrec t =
+      {
+      items: Zz__listOfLiveSource.t option
+        [@ocaml.doc "Lists the live sources."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Items", (Option.map x.items ~f:Zz__listOfLiveSource.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let items =
+        (Option.map ~f:Zz__listOfLiveSource.of_xml)
+          (Xml.child xml_arg0 "Items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfLiveSource.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the live sources contained in a source location. A source represents a piece of content."]
+module ListLiveSourcesRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of live sources that you want MediaTailor to return in response to the current request. If there are more than MaxResults live sources, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListLiveSources request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc
+          "The name of the source location associated with this Live Sources list."]}
+    let context_ = "ListLiveSourcesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~sourceLocationName ->
+          fun () -> { maxResults; nextToken; sourceLocationName }
+    let to_value x =
+      structure_to_value
+        [("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Some (Zz__string.to_value x.sourceLocationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceLocationName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      make ~sourceLocationName ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceLocationName =
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~sourceLocationName ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the live sources contained in a source location. A source represents a piece of content."]
+module ListFunctionsResponse =
+  struct
+    type nonrec t =
+      {
+      items: Zz__listOfFunctionsResponse.t option
+        [@ocaml.doc
+          "A list of functions associated with your account in the current Region."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListFunctions request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Items",
+           (Option.map x.items ~f:Zz__listOfFunctionsResponse.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let items =
+        (Option.map ~f:Zz__listOfFunctionsResponse.of_xml)
+          (Xml.child xml_arg0 "Items") in
+      make ?nextToken ?items ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items =
+        field_map json__ "Items" Zz__listOfFunctionsResponse.of_json in
+      make ?nextToken ?items ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all functions associated with your AWS account in the current Region. For more information about functions, see Working with functions in the MediaTailor User Guide."]
+module ListFunctionsRequest =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of functions that you want MediaTailor to return in response to the current request. If there are more than MaxResults functions, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses token-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
+      nextToken: Zz__string.t option
+        [@ocaml.doc
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListFunctions request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all functions associated with your AWS account in the current Region. For more information about functions, see Working with functions in the MediaTailor User Guide."]
 module ListChannelsResponse =
   struct
     type nonrec t =
       {
       items: Zz__listOfChannel.t option
         [@ocaml.doc
-          "An array of channels that are associated with this account."];
+          "A list of channels that are associated with this account."];
       nextToken: Zz__string.t option
         [@ocaml.doc
           "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
@@ -4529,23 +8576,23 @@ module ListChannelsResponse =
         (Option.map ~f:Zz__listOfChannel.of_xml) (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfChannel.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfChannel.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of channels that are associated with this account."]
+       "Retrieves information about the channels that are associated with the current AWS account."]
 module ListChannelsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Upper bound on number of records to return. The maximum number of results is 100."];
+          "The maximum number of channels that you want MediaTailor to return in response to the current request. If there are more than MaxResults channels, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListChannels request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
@@ -4560,23 +8607,23 @@ module ListChannelsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves a list of channels that are associated with this account."]
+       "Retrieves information about the channels that are associated with the current AWS account."]
 module ListAlertsResponse =
   struct
     type nonrec t =
       {
       items: Zz__listOfAlert.t option
         [@ocaml.doc
-          "An array of alerts that are associated with this resource."];
+          "A list of alerts that are associated with this resource."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
@@ -4608,22 +8655,23 @@ module ListAlertsResponse =
         (Option.map ~f:Zz__listOfAlert.of_xml) (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfAlert.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfAlert.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of alerts for the given resource."]
+  end[@@ocaml.doc
+       "Lists the alerts that are associated with a MediaTailor channel assembly resource."]
 module ListAlertsRequest =
   struct
     type nonrec t =
       {
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Upper bound on number of records to return. The maximum number of results is 100."];
+          "The maximum number of alerts that you want MediaTailor to return in response to the current request. If there are more than MaxResults alerts, use the value of NextToken in the response to get the next page of results. The default value is 100. MediaTailor uses DynamoDB-based pagination, which means that a response might contain fewer than MaxResults items, including 0 items, even when more results are available. To retrieve all results, you must continue making requests using the NextToken value from each response until the response no longer includes a NextToken value."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."];
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results. For the first ListAlerts request, omit this value. For subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. Continue making requests until the response no longer includes a NextToken value, which indicates that all results have been retrieved."];
       resourceArn: Zz__string.t
         [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
     let context_ = "ListAlertsRequest"
@@ -4646,13 +8694,14 @@ module ListAlertsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ~resourceArn ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~resourceArn ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of alerts for the given resource."]
+  end[@@ocaml.doc
+       "Lists the alerts that are associated with a MediaTailor channel assembly resource."]
 module GetPrefetchScheduleResponse =
   struct
     type nonrec t =
@@ -4662,7 +8711,7 @@ module GetPrefetchScheduleResponse =
           "The Amazon Resource Name (ARN) of the prefetch schedule."];
       consumption: PrefetchConsumption.t option
         [@ocaml.doc
-          "Consumption settings determine how, and when, MediaTailor places the prefetched ads into ad breaks. Ad consumption occurs within a span of time that you define, called a consumption window. You can designate which ad breaks that MediaTailor fills with prefetch ads by setting avail matching criteria."];
+          "The configuration settings for how and when MediaTailor consumes prefetched ads from the ad decision server for single prefetch schedules. Each consumption configuration contains an end time and an optional start time that define the consumption window. Prefetch schedules automatically expire no earlier than seven days after the end time."];
       name: Zz__string.t option
         [@ocaml.doc
           "The name of the prefetch schedule. The name must be unique among all prefetch schedules that are associated with the specified playback configuration."];
@@ -4672,9 +8721,18 @@ module GetPrefetchScheduleResponse =
       retrieval: PrefetchRetrieval.t option
         [@ocaml.doc
           "A complex type that contains settings for prefetch retrieval from the ad decision server (ADS)."];
+      scheduleType: PrefetchScheduleType.t option
+        [@ocaml.doc
+          "The frequency that MediaTailor creates prefetch schedules. SINGLE indicates that this schedule applies to one ad break. RECURRING indicates that MediaTailor automatically creates a schedule for each ad avail in a live event."];
+      recurringPrefetchConfiguration: RecurringPrefetchConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how and when MediaTailor performs ad prefetching in a live event."];
       streamId: Zz__string.t option
         [@ocaml.doc
-          "An optional stream identifier that you can specify in order to prefetch for multiple streams that use the same playback configuration."]}
+          "An optional stream identifier that you can specify in order to prefetch for multiple streams that use the same playback configuration."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the prefetch schedule. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -4682,16 +8740,22 @@ module GetPrefetchScheduleResponse =
         fun ?name ->
           fun ?playbackConfigurationName ->
             fun ?retrieval ->
-              fun ?streamId ->
-                fun () ->
-                  {
-                    arn;
-                    consumption;
-                    name;
-                    playbackConfigurationName;
-                    retrieval;
-                    streamId
-                  }
+              fun ?scheduleType ->
+                fun ?recurringPrefetchConfiguration ->
+                  fun ?streamId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          consumption;
+                          name;
+                          playbackConfigurationName;
+                          retrieval;
+                          scheduleType;
+                          recurringPrefetchConfiguration;
+                          streamId;
+                          tags
+                        }
     let error_of_json name json =
       match name with
       | name ->
@@ -4717,11 +8781,25 @@ module GetPrefetchScheduleResponse =
         ("PlaybackConfigurationName",
           (Option.map x.playbackConfigurationName ~f:Zz__string.to_value));
         ("Retrieval", (Option.map x.retrieval ~f:PrefetchRetrieval.to_value));
-        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value))]
+        ("ScheduleType",
+          (Option.map x.scheduleType ~f:PrefetchScheduleType.to_value));
+        ("RecurringPrefetchConfiguration",
+          (Option.map x.recurringPrefetchConfiguration
+             ~f:RecurringPrefetchConfiguration.to_value));
+        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let streamId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let recurringPrefetchConfiguration =
+        (Option.map ~f:RecurringPrefetchConfiguration.of_xml)
+          (Xml.child xml_arg0 "RecurringPrefetchConfiguration") in
+      let scheduleType =
+        (Option.map ~f:PrefetchScheduleType.of_xml)
+          (Xml.child xml_arg0 "ScheduleType") in
       let retrieval =
         (Option.map ~f:PrefetchRetrieval.of_xml)
           (Xml.child xml_arg0 "Retrieval") in
@@ -4734,31 +8812,39 @@ module GetPrefetchScheduleResponse =
         (Option.map ~f:PrefetchConsumption.of_xml)
           (Xml.child xml_arg0 "Consumption") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
-        ?arn ()
+      make ?tags ?streamId ?recurringPrefetchConfiguration ?scheduleType
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "StreamId" Zz__string.of_json in
-      let retrieval = field_map json "Retrieval" PrefetchRetrieval.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let streamId = field_map json__ "StreamId" Zz__string.of_json in
+      let recurringPrefetchConfiguration =
+        field_map json__ "RecurringPrefetchConfiguration"
+          RecurringPrefetchConfiguration.of_json in
+      let scheduleType =
+        field_map json__ "ScheduleType" PrefetchScheduleType.of_json in
+      let retrieval = field_map json__ "Retrieval" PrefetchRetrieval.of_json in
       let playbackConfigurationName =
-        field_map json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let consumption =
-        field_map json "Consumption" PrefetchConsumption.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
-        ?arn ()
+        field_map json__ "Consumption" PrefetchConsumption.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?streamId ?recurringPrefetchConfiguration ?scheduleType
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the prefetch schedule for a specific playback configuration. If you call GetPrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code."]
+       "Retrieves a prefetch schedule for a playback configuration. A prefetch schedule allows you to tell MediaTailor to fetch and prepare certain ads before an ad break happens. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module GetPrefetchScheduleRequest =
   struct
     type nonrec t =
       {
       name: Zz__string.t
-        [@ocaml.doc "The identifier for the playback configuration."];
+        [@ocaml.doc
+          "The name of the prefetch schedule. The name must be unique among all prefetch schedules that are associated with the specified playback configuration."];
       playbackConfigurationName: Zz__string.t
-        [@ocaml.doc "The name of the playback configuration."]}
+        [@ocaml.doc
+          "Returns information about the prefetch schedule for a specific playback configuration. If you call GetPrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code."]}
     let context_ = "GetPrefetchScheduleRequest"
     let make ~name =
       fun ~playbackConfigurationName ->
@@ -4778,14 +8864,14 @@ module GetPrefetchScheduleRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~playbackConfigurationName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+        field_map_exn json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       make ~playbackConfigurationName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the prefetch schedule for a specific playback configuration. If you call GetPrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code."]
+       "Retrieves a prefetch schedule for a playback configuration. A prefetch schedule allows you to tell MediaTailor to fetch and prepare certain ads before an ad break happens. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module GetPlaybackConfigurationResponse =
   struct
     type nonrec t =
@@ -4809,11 +8895,14 @@ module GetPlaybackConfigurationResponse =
         [@ocaml.doc "The configuration for DASH content."];
       hlsConfiguration: HlsConfiguration.t option
         [@ocaml.doc "The configuration for HLS content."];
+      insertionMode: InsertionMode.t option
+        [@ocaml.doc
+          "The setting that controls whether players can use stitched or guided ad insertion. The default, STITCHED_ONLY, forces all player sessions to use stitched (server-side) ad insertion. Choosing PLAYER_SELECT allows players to select either stitched or guided ad insertion at session-initialization time. The default for players that do not specify an insertion mode is stitched."];
       livePreRollConfiguration: LivePreRollConfiguration.t option
         [@ocaml.doc "The configuration for pre-roll ad insertion."];
       logConfiguration: LogConfiguration.t option
         [@ocaml.doc
-          "The Amazon CloudWatch log settings for a playback configuration."];
+          "The configuration that defines where AWS Elemental MediaTailor sends logs for the playback configuration."];
       manifestProcessingRules: ManifestProcessingRules.t option
         [@ocaml.doc
           "The configuration for manifest processing rules. Manifest processing rules enable customization of the personalized manifests created by MediaTailor."];
@@ -4835,13 +8924,23 @@ module GetPlaybackConfigurationResponse =
         [@ocaml.doc
           "The URL for a high-quality video asset to transcode and use to fill in time that's not used by ads. AWS Elemental MediaTailor shows the slate to fill in gaps in media content. Configuring the slate is optional for non-VPAID playback configurations. For VPAID, the slate is required because MediaTailor provides it in the slots designated for dynamic ad content. The slate must be a high-quality asset that contains both audio and video."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the playback configuration."];
+        [@ocaml.doc
+          "The tags assigned to the playback configuration. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       transcodeProfileName: Zz__string.t option
         [@ocaml.doc
           "The name that is used to associate this playback configuration with a custom transcode profile. This overrides the dynamic transcoding defaults of MediaTailor. Use this only if you have already set up custom profiles with the help of AWS Support."];
       videoContentSourceUrl: Zz__string.t option
         [@ocaml.doc
-          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."]}
+          "The URL prefix for the parent manifest for the stream, minus the asset ID. The maximum length is 512 characters."];
+      adConditioningConfiguration: AdConditioningConfiguration.t option
+        [@ocaml.doc
+          "The setting that indicates what conditioning MediaTailor will perform on ads that the ad decision server (ADS) returns, and what priority MediaTailor uses when inserting ads."];
+      adDecisionServerConfiguration: AdDecisionServerConfiguration.t option
+        [@ocaml.doc
+          "The configuration for customizing HTTP requests to the ad decision server (ADS). This includes settings for request method, headers, body content, and compression options."];
+      functionMapping: FunctionMapping.t option
+        [@ocaml.doc
+          "A map of lifecycle hook event names to function identifiers. The function mapping specifies which function MediaTailor executes at each lifecycle hook during ad insertion. Valid keys are PRE_SESSION_INITIALIZATION and PRE_ADS_REQUEST. For more information, see Functions lifecycle hooks in the MediaTailor User Guide."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?adDecisionServerUrl =
@@ -4851,40 +8950,51 @@ module GetPlaybackConfigurationResponse =
             fun ?configurationAliases ->
               fun ?dashConfiguration ->
                 fun ?hlsConfiguration ->
-                  fun ?livePreRollConfiguration ->
-                    fun ?logConfiguration ->
-                      fun ?manifestProcessingRules ->
-                        fun ?name ->
-                          fun ?personalizationThresholdSeconds ->
-                            fun ?playbackConfigurationArn ->
-                              fun ?playbackEndpointPrefix ->
-                                fun ?sessionInitializationEndpointPrefix ->
-                                  fun ?slateAdUrl ->
-                                    fun ?tags ->
-                                      fun ?transcodeProfileName ->
-                                        fun ?videoContentSourceUrl ->
-                                          fun () ->
-                                            {
-                                              adDecisionServerUrl;
-                                              availSuppression;
-                                              bumper;
-                                              cdnConfiguration;
-                                              configurationAliases;
-                                              dashConfiguration;
-                                              hlsConfiguration;
-                                              livePreRollConfiguration;
-                                              logConfiguration;
-                                              manifestProcessingRules;
-                                              name;
-                                              personalizationThresholdSeconds;
-                                              playbackConfigurationArn;
-                                              playbackEndpointPrefix;
-                                              sessionInitializationEndpointPrefix;
-                                              slateAdUrl;
-                                              tags;
-                                              transcodeProfileName;
-                                              videoContentSourceUrl
-                                            }
+                  fun ?insertionMode ->
+                    fun ?livePreRollConfiguration ->
+                      fun ?logConfiguration ->
+                        fun ?manifestProcessingRules ->
+                          fun ?name ->
+                            fun ?personalizationThresholdSeconds ->
+                              fun ?playbackConfigurationArn ->
+                                fun ?playbackEndpointPrefix ->
+                                  fun ?sessionInitializationEndpointPrefix ->
+                                    fun ?slateAdUrl ->
+                                      fun ?tags ->
+                                        fun ?transcodeProfileName ->
+                                          fun ?videoContentSourceUrl ->
+                                            fun ?adConditioningConfiguration
+                                              ->
+                                              fun
+                                                ?adDecisionServerConfiguration
+                                                ->
+                                                fun ?functionMapping ->
+                                                  fun () ->
+                                                    {
+                                                      adDecisionServerUrl;
+                                                      availSuppression;
+                                                      bumper;
+                                                      cdnConfiguration;
+                                                      configurationAliases;
+                                                      dashConfiguration;
+                                                      hlsConfiguration;
+                                                      insertionMode;
+                                                      livePreRollConfiguration;
+                                                      logConfiguration;
+                                                      manifestProcessingRules;
+                                                      name;
+                                                      personalizationThresholdSeconds;
+                                                      playbackConfigurationArn;
+                                                      playbackEndpointPrefix;
+                                                      sessionInitializationEndpointPrefix;
+                                                      slateAdUrl;
+                                                      tags;
+                                                      transcodeProfileName;
+                                                      videoContentSourceUrl;
+                                                      adConditioningConfiguration;
+                                                      adDecisionServerConfiguration;
+                                                      functionMapping
+                                                    }
     let error_of_json name json =
       match name with
       | name ->
@@ -4917,6 +9027,8 @@ module GetPlaybackConfigurationResponse =
           (Option.map x.dashConfiguration ~f:DashConfiguration.to_value));
         ("HlsConfiguration",
           (Option.map x.hlsConfiguration ~f:HlsConfiguration.to_value));
+        ("InsertionMode",
+          (Option.map x.insertionMode ~f:InsertionMode.to_value));
         ("LivePreRollConfiguration",
           (Option.map x.livePreRollConfiguration
              ~f:LivePreRollConfiguration.to_value));
@@ -4941,9 +9053,26 @@ module GetPlaybackConfigurationResponse =
         ("TranscodeProfileName",
           (Option.map x.transcodeProfileName ~f:Zz__string.to_value));
         ("VideoContentSourceUrl",
-          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value))]
+          (Option.map x.videoContentSourceUrl ~f:Zz__string.to_value));
+        ("AdConditioningConfiguration",
+          (Option.map x.adConditioningConfiguration
+             ~f:AdConditioningConfiguration.to_value));
+        ("AdDecisionServerConfiguration",
+          (Option.map x.adDecisionServerConfiguration
+             ~f:AdDecisionServerConfiguration.to_value));
+        ("FunctionMapping",
+          (Option.map x.functionMapping ~f:FunctionMapping.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let functionMapping =
+        (Option.map ~f:FunctionMapping.of_xml)
+          (Xml.child xml_arg0 "FunctionMapping") in
+      let adDecisionServerConfiguration =
+        (Option.map ~f:AdDecisionServerConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdDecisionServerConfiguration") in
+      let adConditioningConfiguration =
+        (Option.map ~f:AdConditioningConfiguration.of_xml)
+          (Xml.child xml_arg0 "AdConditioningConfiguration") in
       let videoContentSourceUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VideoContentSourceUrl") in
@@ -4977,6 +9106,9 @@ module GetPlaybackConfigurationResponse =
       let livePreRollConfiguration =
         (Option.map ~f:LivePreRollConfiguration.of_xml)
           (Xml.child xml_arg0 "LivePreRollConfiguration") in
+      let insertionMode =
+        (Option.map ~f:InsertionMode.of_xml)
+          (Xml.child xml_arg0 "InsertionMode") in
       let hlsConfiguration =
         (Option.map ~f:HlsConfiguration.of_xml)
           (Xml.child xml_arg0 "HlsConfiguration") in
@@ -4997,62 +9129,78 @@ module GetPlaybackConfigurationResponse =
       let adDecisionServerUrl =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "AdDecisionServerUrl") in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let functionMapping =
+        field_map json__ "FunctionMapping" FunctionMapping.of_json in
+      let adDecisionServerConfiguration =
+        field_map json__ "AdDecisionServerConfiguration"
+          AdDecisionServerConfiguration.of_json in
+      let adConditioningConfiguration =
+        field_map json__ "AdConditioningConfiguration"
+          AdConditioningConfiguration.of_json in
       let videoContentSourceUrl =
-        field_map json "VideoContentSourceUrl" Zz__string.of_json in
+        field_map json__ "VideoContentSourceUrl" Zz__string.of_json in
       let transcodeProfileName =
-        field_map json "TranscodeProfileName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let slateAdUrl = field_map json "SlateAdUrl" Zz__string.of_json in
+        field_map json__ "TranscodeProfileName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let slateAdUrl = field_map json__ "SlateAdUrl" Zz__string.of_json in
       let sessionInitializationEndpointPrefix =
-        field_map json "SessionInitializationEndpointPrefix"
+        field_map json__ "SessionInitializationEndpointPrefix"
           Zz__string.of_json in
       let playbackEndpointPrefix =
-        field_map json "PlaybackEndpointPrefix" Zz__string.of_json in
+        field_map json__ "PlaybackEndpointPrefix" Zz__string.of_json in
       let playbackConfigurationArn =
-        field_map json "PlaybackConfigurationArn" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationArn" Zz__string.of_json in
       let personalizationThresholdSeconds =
-        field_map json "PersonalizationThresholdSeconds"
+        field_map json__ "PersonalizationThresholdSeconds"
           Zz__integerMin1.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let manifestProcessingRules =
-        field_map json "ManifestProcessingRules"
+        field_map json__ "ManifestProcessingRules"
           ManifestProcessingRules.of_json in
       let logConfiguration =
-        field_map json "LogConfiguration" LogConfiguration.of_json in
+        field_map json__ "LogConfiguration" LogConfiguration.of_json in
       let livePreRollConfiguration =
-        field_map json "LivePreRollConfiguration"
+        field_map json__ "LivePreRollConfiguration"
           LivePreRollConfiguration.of_json in
+      let insertionMode =
+        field_map json__ "InsertionMode" InsertionMode.of_json in
       let hlsConfiguration =
-        field_map json "HlsConfiguration" HlsConfiguration.of_json in
+        field_map json__ "HlsConfiguration" HlsConfiguration.of_json in
       let dashConfiguration =
-        field_map json "DashConfiguration" DashConfiguration.of_json in
+        field_map json__ "DashConfiguration" DashConfiguration.of_json in
       let configurationAliases =
-        field_map json "ConfigurationAliases"
+        field_map json__ "ConfigurationAliases"
           ConfigurationAliasesResponse.of_json in
       let cdnConfiguration =
-        field_map json "CdnConfiguration" CdnConfiguration.of_json in
-      let bumper = field_map json "Bumper" Bumper.of_json in
+        field_map json__ "CdnConfiguration" CdnConfiguration.of_json in
+      let bumper = field_map json__ "Bumper" Bumper.of_json in
       let availSuppression =
-        field_map json "AvailSuppression" AvailSuppression.of_json in
+        field_map json__ "AvailSuppression" AvailSuppression.of_json in
       let adDecisionServerUrl =
-        field_map json "AdDecisionServerUrl" Zz__string.of_json in
-      make ?videoContentSourceUrl ?transcodeProfileName ?tags ?slateAdUrl
+        field_map json__ "AdDecisionServerUrl" Zz__string.of_json in
+      make ?functionMapping ?adDecisionServerConfiguration
+        ?adConditioningConfiguration ?videoContentSourceUrl
+        ?transcodeProfileName ?tags ?slateAdUrl
         ?sessionInitializationEndpointPrefix ?playbackEndpointPrefix
         ?playbackConfigurationArn ?personalizationThresholdSeconds ?name
         ?manifestProcessingRules ?logConfiguration ?livePreRollConfiguration
-        ?hlsConfiguration ?dashConfiguration ?configurationAliases
-        ?cdnConfiguration ?bumper ?availSuppression ?adDecisionServerUrl ()
+        ?insertionMode ?hlsConfiguration ?dashConfiguration
+        ?configurationAliases ?cdnConfiguration ?bumper ?availSuppression
+        ?adDecisionServerUrl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the playback configuration for the specified name."]
+       "Retrieves a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
 module GetPlaybackConfigurationRequest =
   struct
     type nonrec t =
@@ -5069,21 +9217,164 @@ module GetPlaybackConfigurationRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the playback configuration for the specified name."]
+       "Retrieves a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
+module GetFunctionResponse =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t option
+        [@ocaml.doc "The identifier of the function."];
+      functionType: FunctionType.t option
+        [@ocaml.doc "The type of the function."];
+      description: Zz__string.t option
+        [@ocaml.doc "A description of the function."];
+      httpRequestConfiguration: HttpRequestConfiguration.t option
+        [@ocaml.doc "The configuration for an HTTP_REQUEST function."];
+      customOutputConfiguration: CustomOutputConfiguration.t option
+        [@ocaml.doc "The configuration for a CUSTOM_OUTPUT function."];
+      sequentialExecutorConfiguration:
+        SequentialExecutorConfiguration.t option
+        [@ocaml.doc "The configuration for a SEQUENTIAL_EXECUTOR function."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the function. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the function."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?functionId =
+      fun ?functionType ->
+        fun ?description ->
+          fun ?httpRequestConfiguration ->
+            fun ?customOutputConfiguration ->
+              fun ?sequentialExecutorConfiguration ->
+                fun ?tags ->
+                  fun ?arn ->
+                    fun () ->
+                      {
+                        functionId;
+                        functionType;
+                        description;
+                        httpRequestConfiguration;
+                        customOutputConfiguration;
+                        sequentialExecutorConfiguration;
+                        tags;
+                        arn
+                      }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Option.map x.functionId ~f:Zz__string.to_value));
+        ("FunctionType",
+          (Option.map x.functionType ~f:FunctionType.to_value));
+        ("Description", (Option.map x.description ~f:Zz__string.to_value));
+        ("HttpRequestConfiguration",
+          (Option.map x.httpRequestConfiguration
+             ~f:HttpRequestConfiguration.to_value));
+        ("CustomOutputConfiguration",
+          (Option.map x.customOutputConfiguration
+             ~f:CustomOutputConfiguration.to_value));
+        ("SequentialExecutorConfiguration",
+          (Option.map x.sequentialExecutorConfiguration
+             ~f:SequentialExecutorConfiguration.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sequentialExecutorConfiguration =
+        (Option.map ~f:SequentialExecutorConfiguration.of_xml)
+          (Xml.child xml_arg0 "SequentialExecutorConfiguration") in
+      let customOutputConfiguration =
+        (Option.map ~f:CustomOutputConfiguration.of_xml)
+          (Xml.child xml_arg0 "CustomOutputConfiguration") in
+      let httpRequestConfiguration =
+        (Option.map ~f:HttpRequestConfiguration.of_xml)
+          (Xml.child xml_arg0 "HttpRequestConfiguration") in
+      let description =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Description") in
+      let functionType =
+        (Option.map ~f:FunctionType.of_xml)
+          (Xml.child xml_arg0 "FunctionType") in
+      let functionId =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "FunctionId") in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sequentialExecutorConfiguration =
+        field_map json__ "SequentialExecutorConfiguration"
+          SequentialExecutorConfiguration.of_json in
+      let customOutputConfiguration =
+        field_map json__ "CustomOutputConfiguration"
+          CustomOutputConfiguration.of_json in
+      let httpRequestConfiguration =
+        field_map json__ "HttpRequestConfiguration"
+          HttpRequestConfiguration.of_json in
+      let description = field_map json__ "Description" Zz__string.of_json in
+      let functionType = field_map json__ "FunctionType" FunctionType.of_json in
+      let functionId = field_map json__ "FunctionId" Zz__string.of_json in
+      make ?arn ?tags ?sequentialExecutorConfiguration
+        ?customOutputConfiguration ?httpRequestConfiguration ?description
+        ?functionType ?functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Define Mixin --"]
+module GetFunctionRequest =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t [@ocaml.doc "The identifier of the function."]}
+    let context_ = "GetFunctionRequest"
+    let make ~functionId = fun () -> { functionId }
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Some (Zz__string.to_value x.functionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let functionId =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FunctionId") in
+      make ~functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let functionId = field_map_exn json__ "FunctionId" Zz__string.of_json in
+      make ~functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "-- Request/Response DataStructures --"]
 module GetChannelScheduleResponse =
   struct
     type nonrec t =
       {
       items: Zz__listOfScheduleEntry.t option
-        [@ocaml.doc "An array of schedule entries for the channel."];
+        [@ocaml.doc "A list of schedule entries for the channel."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."]}
+          "Pagination token returned by the list request when results exceed the maximum allowed. Use the token to fetch the next page of results."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?items = fun ?nextToken -> fun () -> { items; nextToken }
@@ -5116,9 +9407,9 @@ module GetChannelScheduleResponse =
           (Xml.child xml_arg0 "Items") in
       make ?nextToken ?items ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let items = field_map json "Items" Zz__listOfScheduleEntry.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let items = field_map json__ "Items" Zz__listOfScheduleEntry.of_json in
       make ?nextToken ?items ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about your channel's schedule."]
@@ -5127,31 +9418,44 @@ module GetChannelScheduleRequest =
     type nonrec t =
       {
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
-      durationMinutes: Zz__string.t option
         [@ocaml.doc
-          "The schedule duration in minutes. The maximum duration is 4320 minutes (three days)."];
+          "The name of the channel associated with this Channel Schedule."];
+      durationMinutes: Zz__string.t option
+        [@ocaml.doc "The duration in minutes of the channel schedule."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "Upper bound on number of records to return. The maximum number of results is 100."];
+          "The maximum number of channel schedules that you want MediaTailor to return in response to the current request. If there are more than MaxResults channel schedules, use the value of NextToken in the response to get the next page of results."];
       nextToken: Zz__string.t option
         [@ocaml.doc
-          "Pagination token from the GET list request. Use the token to fetch the next page of results."]}
+          "(Optional) If the playback configuration has more than MaxResults channel schedules, use NextToken to get the second and subsequent pages of results. For the first GetChannelScheduleRequest request, omit this value. For the second and subsequent requests, get the value of NextToken from the previous response and specify that value for NextToken in the request. If the previous response didn't include a NextToken element, there are no more channel schedules to get."];
+      audience: Zz__string.t option
+        [@ocaml.doc "The single audience for GetChannelScheduleRequest."]}
     let context_ = "GetChannelScheduleRequest"
     let make ?durationMinutes =
       fun ?maxResults ->
         fun ?nextToken ->
-          fun ~channelName ->
-            fun () -> { durationMinutes; maxResults; nextToken; channelName }
+          fun ?audience ->
+            fun ~channelName ->
+              fun () ->
+                {
+                  durationMinutes;
+                  maxResults;
+                  nextToken;
+                  audience;
+                  channelName
+                }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
         ("durationMinutes",
           (Option.map x.durationMinutes ~f:Zz__string.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:Zz__string.to_value));
+        ("audience", (Option.map x.audience ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audience =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "audience") in
       let nextToken =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
@@ -5161,16 +9465,17 @@ module GetChannelScheduleRequest =
           (Xml.child xml_arg0 "durationMinutes") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
-      make ?nextToken ?maxResults ?durationMinutes ~channelName ()
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
+      make ?audience ?nextToken ?maxResults ?durationMinutes ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let audience = field_map json__ "Audience" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let durationMinutes =
-        field_map json "DurationMinutes" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      make ?nextToken ?maxResults ?durationMinutes ~channelName ()
+        field_map json__ "DurationMinutes" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      make ?audience ?nextToken ?maxResults ?durationMinutes ~channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about your channel's schedule."]
 module GetChannelPolicyResponse =
@@ -5178,7 +9483,8 @@ module GetChannelPolicyResponse =
     type nonrec t =
       {
       policy: Zz__string.t option
-        [@ocaml.doc "The IAM policy for the channel."]}
+        [@ocaml.doc
+          "The IAM policy for the channel. IAM policies are used to control access to your channel."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?policy = fun () -> { policy }
@@ -5207,38 +9513,43 @@ module GetChannelPolicyResponse =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "Policy" Zz__string.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Zz__string.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a channel's IAM policy."]
+  end[@@ocaml.doc
+       "Returns the channel's IAM policy. IAM policies are used to control access to your channel."]
 module GetChannelPolicyRequest =
   struct
     type nonrec t =
       {
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+        [@ocaml.doc
+          "The name of the channel associated with this Channel Policy."]}
     let context_ = "GetChannelPolicyRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves information about a channel's IAM policy."]
+  end[@@ocaml.doc
+       "Returns the channel's IAM policy. IAM policies are used to control access to your channel."]
 module DescribeVodSourceResponse =
   struct
     type nonrec t =
       {
+      adBreakOpportunities: AdBreakOpportunities.t option
+        [@ocaml.doc "The ad break opportunities within the VOD source."];
       arn: Zz__string.t option [@ocaml.doc "The ARN of the VOD source."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
@@ -5246,33 +9557,36 @@ module DescribeVodSourceResponse =
       httpPackageConfigurations: HttpPackageConfigurations.t option
         [@ocaml.doc "The HTTP package configurations."];
       lastModifiedTime: Zz__timestampUnix.t option
-        [@ocaml.doc "The ARN for the VOD source."];
+        [@ocaml.doc "The last modified time of the VOD source."];
       sourceLocationName: Zz__string.t option
         [@ocaml.doc
           "The name of the source location associated with the VOD source."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the VOD source."];
+        [@ocaml.doc
+          "The tags assigned to the VOD source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       vodSourceName: Zz__string.t option
         [@ocaml.doc "The name of the VOD source."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
-    let make ?arn =
-      fun ?creationTime ->
-        fun ?httpPackageConfigurations ->
-          fun ?lastModifiedTime ->
-            fun ?sourceLocationName ->
-              fun ?tags ->
-                fun ?vodSourceName ->
-                  fun () ->
-                    {
-                      arn;
-                      creationTime;
-                      httpPackageConfigurations;
-                      lastModifiedTime;
-                      sourceLocationName;
-                      tags;
-                      vodSourceName
-                    }
+    let make ?adBreakOpportunities =
+      fun ?arn ->
+        fun ?creationTime ->
+          fun ?httpPackageConfigurations ->
+            fun ?lastModifiedTime ->
+              fun ?sourceLocationName ->
+                fun ?tags ->
+                  fun ?vodSourceName ->
+                    fun () ->
+                      {
+                        adBreakOpportunities;
+                        arn;
+                        creationTime;
+                        httpPackageConfigurations;
+                        lastModifiedTime;
+                        sourceLocationName;
+                        tags;
+                        vodSourceName
+                      }
     let error_of_json name json =
       match name with
       | name ->
@@ -5291,7 +9605,10 @@ module DescribeVodSourceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        [("AdBreakOpportunities",
+           (Option.map x.adBreakOpportunities
+              ~f:AdBreakOpportunities.to_value));
+        ("Arn", (Option.map x.arn ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
         ("HttpPackageConfigurations",
@@ -5324,63 +9641,69 @@ module DescribeVodSourceResponse =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      let adBreakOpportunities =
+        (Option.map ~f:AdBreakOpportunities.of_xml)
+          (Xml.child xml_arg0 "AdBreakOpportunities") in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
-        ?httpPackageConfigurations ?creationTime ?arn ()
+        ?httpPackageConfigurations ?creationTime ?arn ?adBreakOpportunities
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpPackageConfigurations =
-        field_map json "HttpPackageConfigurations"
+        field_map json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let adBreakOpportunities =
+        field_map json__ "AdBreakOpportunities" AdBreakOpportunities.of_json in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
-        ?httpPackageConfigurations ?creationTime ?arn ()
+        ?httpPackageConfigurations ?creationTime ?arn ?adBreakOpportunities
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides details about a specific VOD source in a specific source location."]
+       "Provides details about a specific video on demand (VOD) source in a specific source location."]
 module DescribeVodSourceRequest =
   struct
     type nonrec t =
       {
       sourceLocationName: Zz__string.t
         [@ocaml.doc
-          "The identifier for the source location you are working on."];
-      vodSourceName: Zz__string.t
-        [@ocaml.doc "The identifier for the VOD source you are working on."]}
+          "The name of the source location associated with this VOD Source."];
+      vodSourceName: Zz__string.t [@ocaml.doc "The name of the VOD Source."]}
     let context_ = "DescribeVodSourceRequest"
     let make ~sourceLocationName =
       fun ~vodSourceName -> fun () -> { sourceLocationName; vodSourceName }
     let to_value x =
       structure_to_value
-        [("sourceLocationName",
+        [("SourceLocationName",
            (Some (Zz__string.to_value x.sourceLocationName)));
-        ("vodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vodSourceName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "vodSourceName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       make ~vodSourceName ~sourceLocationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
+        field_map_exn json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       make ~vodSourceName ~sourceLocationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides details about a specific VOD source in a specific source location."]
+       "Provides details about a specific video on demand (VOD) source in a specific source location."]
 module DescribeSourceLocationResponse =
   struct
     type nonrec t =
@@ -5401,11 +9724,14 @@ module DescribeSourceLocationResponse =
         [@ocaml.doc
           "The timestamp that indicates when the source location was last modified."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
+        Zz__listOfSegmentDeliveryConfiguration.t option
+        [@ocaml.doc
+          "A list of the segment delivery configurations associated with this resource."];
       sourceLocationName: Zz__string.t option
         [@ocaml.doc "The name of the source location."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the source location."]}
+        [@ocaml.doc
+          "The tags assigned to the source location. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?accessConfiguration =
@@ -5496,59 +9822,58 @@ module DescribeSourceLocationResponse =
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpConfiguration =
-        field_map json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
       make ?tags ?sourceLocationName ?segmentDeliveryConfigurations
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the properties of the requested source location."]
+       "Describes a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module DescribeSourceLocationRequest =
   struct
     type nonrec t =
       {
       sourceLocationName: Zz__string.t
-        [@ocaml.doc
-          "The identifier for the source location you are working on."]}
+        [@ocaml.doc "The name of the source location."]}
     let context_ = "DescribeSourceLocationRequest"
     let make ~sourceLocationName = fun () -> { sourceLocationName }
     let to_value x =
       structure_to_value
-        [("sourceLocationName",
+        [("SourceLocationName",
            (Some (Zz__string.to_value x.sourceLocationName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       make ~sourceLocationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       make ~sourceLocationName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the properties of the requested source location."]
+       "Describes a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module DescribeProgramResponse =
   struct
     type nonrec t =
@@ -5560,6 +9885,8 @@ module DescribeProgramResponse =
         [@ocaml.doc "The name of the channel that the program belongs to."];
       creationTime: Zz__timestampUnix.t option
         [@ocaml.doc "The timestamp of when the program was created."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the LiveSource for this Program."];
       programName: Zz__string.t option
         [@ocaml.doc "The name of the program."];
       scheduledStartTime: Zz__timestampUnix.t option
@@ -5568,28 +9895,47 @@ module DescribeProgramResponse =
       sourceLocationName: Zz__string.t option
         [@ocaml.doc "The source location name."];
       vodSourceName: Zz__string.t option
-        [@ocaml.doc "The name that's used to refer to a VOD source."]}
+        [@ocaml.doc "The name that's used to refer to a VOD source."];
+      clipRange: ClipRange.t option
+        [@ocaml.doc "The clip range configuration settings."];
+      durationMillis: Long.t option
+        [@ocaml.doc "The duration of the live program in milliseconds."];
+      audienceMedia: Zz__listOfAudienceMedia.t option
+        [@ocaml.doc "The list of AudienceMedia defined in program."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the program. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?adBreaks =
       fun ?arn ->
         fun ?channelName ->
           fun ?creationTime ->
-            fun ?programName ->
-              fun ?scheduledStartTime ->
-                fun ?sourceLocationName ->
-                  fun ?vodSourceName ->
-                    fun () ->
-                      {
-                        adBreaks;
-                        arn;
-                        channelName;
-                        creationTime;
-                        programName;
-                        scheduledStartTime;
-                        sourceLocationName;
-                        vodSourceName
-                      }
+            fun ?liveSourceName ->
+              fun ?programName ->
+                fun ?scheduledStartTime ->
+                  fun ?sourceLocationName ->
+                    fun ?vodSourceName ->
+                      fun ?clipRange ->
+                        fun ?durationMillis ->
+                          fun ?audienceMedia ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  adBreaks;
+                                  arn;
+                                  channelName;
+                                  creationTime;
+                                  liveSourceName;
+                                  programName;
+                                  scheduledStartTime;
+                                  sourceLocationName;
+                                  vodSourceName;
+                                  clipRange;
+                                  durationMillis;
+                                  audienceMedia;
+                                  tags
+                                }
     let error_of_json name json =
       match name with
       | name ->
@@ -5613,15 +9959,31 @@ module DescribeProgramResponse =
         ("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
         ("ProgramName", (Option.map x.programName ~f:Zz__string.to_value));
         ("ScheduledStartTime",
           (Option.map x.scheduledStartTime ~f:Zz__timestampUnix.to_value));
         ("SourceLocationName",
           (Option.map x.sourceLocationName ~f:Zz__string.to_value));
         ("VodSourceName",
-          (Option.map x.vodSourceName ~f:Zz__string.to_value))]
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value));
+        ("DurationMillis", (Option.map x.durationMillis ~f:Long.to_value));
+        ("AudienceMedia",
+          (Option.map x.audienceMedia ~f:Zz__listOfAudienceMedia.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let audienceMedia =
+        (Option.map ~f:Zz__listOfAudienceMedia.of_xml)
+          (Xml.child xml_arg0 "AudienceMedia") in
+      let durationMillis =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
       let vodSourceName =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VodSourceName") in
@@ -5633,6 +9995,9 @@ module DescribeProgramResponse =
           (Xml.child xml_arg0 "ScheduledStartTime") in
       let programName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ProgramName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
       let creationTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
@@ -5642,56 +10007,214 @@ module DescribeProgramResponse =
       let adBreaks =
         (Option.map ~f:Zz__listOfAdBreak.of_xml)
           (Xml.child xml_arg0 "AdBreaks") in
-      make ?vodSourceName ?sourceLocationName ?scheduledStartTime
-        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+      make ?tags ?audienceMedia ?durationMillis ?clipRange ?vodSourceName
+        ?sourceLocationName ?scheduledStartTime ?programName ?liveSourceName
+        ?creationTime ?channelName ?arn ?adBreaks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let audienceMedia =
+        field_map json__ "AudienceMedia" Zz__listOfAudienceMedia.of_json in
+      let durationMillis = field_map json__ "DurationMillis" Long.of_json in
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let scheduledStartTime =
-        field_map json "ScheduledStartTime" Zz__timestampUnix.of_json in
-      let programName = field_map json "ProgramName" Zz__string.of_json in
+        field_map json__ "ScheduledStartTime" Zz__timestampUnix.of_json in
+      let programName = field_map json__ "ProgramName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelName = field_map json "ChannelName" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      let adBreaks = field_map json "AdBreaks" Zz__listOfAdBreak.of_json in
-      make ?vodSourceName ?sourceLocationName ?scheduledStartTime
-        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      make ?tags ?audienceMedia ?durationMillis ?clipRange ?vodSourceName
+        ?sourceLocationName ?scheduledStartTime ?programName ?liveSourceName
+        ?creationTime ?channelName ?arn ?adBreaks ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the properties of the requested program."]
+  end[@@ocaml.doc
+       "Describes a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
 module DescribeProgramRequest =
   struct
     type nonrec t =
       {
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
-      programName: Zz__string.t
-        [@ocaml.doc "The identifier for the program you are working on."]}
+        [@ocaml.doc "The name of the channel associated with this Program."];
+      programName: Zz__string.t [@ocaml.doc "The name of the program."]}
     let context_ = "DescribeProgramRequest"
     let make ~channelName =
       fun ~programName -> fun () -> { channelName; programName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
-        ("programName", (Some (Zz__string.to_value x.programName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
+        ("ProgramName", (Some (Zz__string.to_value x.programName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let programName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "programName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgramName") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~programName ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let programName = field_map_exn json "ProgramName" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let programName = field_map_exn json__ "ProgramName" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~programName ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Retrieves the properties of the requested program."]
+  end[@@ocaml.doc
+       "Describes a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
+module DescribeLiveSourceResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option [@ocaml.doc "The ARN of the live source."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was created."];
+      httpPackageConfigurations: HttpPackageConfigurations.t option
+        [@ocaml.doc "The HTTP package configurations."];
+      lastModifiedTime: Zz__timestampUnix.t option
+        [@ocaml.doc
+          "The timestamp that indicates when the live source was modified."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc
+          "The name of the source location associated with the live source."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the live source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?httpPackageConfigurations ->
+          fun ?lastModifiedTime ->
+            fun ?liveSourceName ->
+              fun ?sourceLocationName ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      creationTime;
+                      httpPackageConfigurations;
+                      lastModifiedTime;
+                      liveSourceName;
+                      sourceLocationName;
+                      tags
+                    }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("HttpPackageConfigurations",
+          (Option.map x.httpPackageConfigurations
+             ~f:HttpPackageConfigurations.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let lastModifiedTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let httpPackageConfigurations =
+        (Option.map ~f:HttpPackageConfigurations.of_xml)
+          (Xml.child xml_arg0 "HttpPackageConfigurations") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let httpPackageConfigurations =
+        field_map json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source to describe."]
+module DescribeLiveSourceRequest =
+  struct
+    type nonrec t =
+      {
+      liveSourceName: Zz__string.t
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc
+          "The name of the source location associated with this Live Source."]}
+    let context_ = "DescribeLiveSourceRequest"
+    let make ~liveSourceName =
+      fun ~sourceLocationName ->
+        fun () -> { liveSourceName; sourceLocationName }
+    let to_value x =
+      structure_to_value
+        [("LiveSourceName", (Some (Zz__string.to_value x.liveSourceName)));
+        ("SourceLocationName",
+          (Some (Zz__string.to_value x.sourceLocationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceLocationName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LiveSourceName") in
+      make ~sourceLocationName ~liveSourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceLocationName =
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map_exn json__ "LiveSourceName" Zz__string.of_json in
+      make ~sourceLocationName ~liveSourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source to describe."]
 module DescribeChannelResponse =
   struct
     type nonrec t =
@@ -5714,7 +10237,16 @@ module DescribeChannelResponse =
       playbackMode: Zz__string.t option
         [@ocaml.doc "The channel's playback mode."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the channel."]}
+        [@ocaml.doc
+          "The tags assigned to the channel. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      tier: Zz__string.t option [@ocaml.doc "The channel's tier."];
+      logConfiguration: LogConfigurationForChannel.t option
+        [@ocaml.doc "The log configuration for the channel."];
+      timeShiftConfiguration: TimeShiftConfiguration.t option
+        [@ocaml.doc
+          "The time-shifted viewing configuration for the channel."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -5726,18 +10258,26 @@ module DescribeChannelResponse =
                 fun ?outputs ->
                   fun ?playbackMode ->
                     fun ?tags ->
-                      fun () ->
-                        {
-                          arn;
-                          channelName;
-                          channelState;
-                          creationTime;
-                          fillerSlate;
-                          lastModifiedTime;
-                          outputs;
-                          playbackMode;
-                          tags
-                        }
+                      fun ?tier ->
+                        fun ?logConfiguration ->
+                          fun ?timeShiftConfiguration ->
+                            fun ?audiences ->
+                              fun () ->
+                                {
+                                  arn;
+                                  channelName;
+                                  channelState;
+                                  creationTime;
+                                  fillerSlate;
+                                  lastModifiedTime;
+                                  outputs;
+                                  playbackMode;
+                                  tags;
+                                  tier;
+                                  logConfiguration;
+                                  timeShiftConfiguration;
+                                  audiences
+                                }
     let error_of_json name json =
       match name with
       | name ->
@@ -5767,9 +10307,27 @@ module DescribeChannelResponse =
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("Outputs", (Option.map x.outputs ~f:ResponseOutputs.to_value));
         ("PlaybackMode", (Option.map x.playbackMode ~f:Zz__string.to_value));
-        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Tier", (Option.map x.tier ~f:Zz__string.to_value));
+        ("LogConfiguration",
+          (Option.map x.logConfiguration
+             ~f:LogConfigurationForChannel.to_value));
+        ("TimeShiftConfiguration",
+          (Option.map x.timeShiftConfiguration
+             ~f:TimeShiftConfiguration.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let timeShiftConfiguration =
+        (Option.map ~f:TimeShiftConfiguration.of_xml)
+          (Xml.child xml_arg0 "TimeShiftConfiguration") in
+      let logConfiguration =
+        (Option.map ~f:LogConfigurationForChannel.of_xml)
+          (Xml.child xml_arg0 "LogConfiguration") in
+      let tier =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Tier") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let playbackMode =
@@ -5790,48 +10348,59 @@ module DescribeChannelResponse =
       let channelName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+      make ?audiences ?timeShiftConfiguration ?logConfiguration ?tier ?tags
+        ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate ?creationTime
+        ?channelState ?channelName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
-      let outputs = field_map json "Outputs" ResponseOutputs.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let timeShiftConfiguration =
+        field_map json__ "TimeShiftConfiguration"
+          TimeShiftConfiguration.of_json in
+      let logConfiguration =
+        field_map json__ "LogConfiguration"
+          LogConfigurationForChannel.of_json in
+      let tier = field_map json__ "Tier" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let playbackMode = field_map json__ "PlaybackMode" Zz__string.of_json in
+      let outputs = field_map json__ "Outputs" ResponseOutputs.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelState = field_map json "ChannelState" ChannelState.of_json in
-      let channelName = field_map json "ChannelName" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelState = field_map json__ "ChannelState" ChannelState.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?audiences ?timeShiftConfiguration ?logConfiguration ?tier ?tags
+        ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate ?creationTime
+        ?channelState ?channelName ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the properties of a specific channel."]
+  end[@@ocaml.doc
+       "Describes a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module DescribeChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."]}
     let context_ = "DescribeChannelRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes the properties of a specific channel."]
+  end[@@ocaml.doc
+       "Describes a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module DeleteVodSourceResponse =
   struct
     type nonrec t = unit
@@ -5861,44 +10430,41 @@ module DeleteVodSourceResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes a specific VOD source in a specific source location."]
+  end[@@ocaml.doc "The video on demand (VOD) source to delete."]
 module DeleteVodSourceRequest =
   struct
     type nonrec t =
       {
       sourceLocationName: Zz__string.t
         [@ocaml.doc
-          "The identifier for the source location you are working on."];
-      vodSourceName: Zz__string.t
-        [@ocaml.doc "The identifier for the VOD source you are working on."]}
+          "The name of the source location associated with this VOD Source."];
+      vodSourceName: Zz__string.t [@ocaml.doc "The name of the VOD source."]}
     let context_ = "DeleteVodSourceRequest"
     let make ~sourceLocationName =
       fun ~vodSourceName -> fun () -> { sourceLocationName; vodSourceName }
     let to_value x =
       structure_to_value
-        [("sourceLocationName",
+        [("SourceLocationName",
            (Some (Zz__string.to_value x.sourceLocationName)));
-        ("vodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vodSourceName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "vodSourceName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       make ~vodSourceName ~sourceLocationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
+        field_map_exn json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       make ~vodSourceName ~sourceLocationName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Deletes a specific VOD source in a specific source location."]
+  end[@@ocaml.doc "The video on demand (VOD) source to delete."]
 module DeleteSourceLocationResponse =
   struct
     type nonrec t = unit
@@ -5928,33 +10494,34 @@ module DeleteSourceLocationResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Deletes a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module DeleteSourceLocationRequest =
   struct
     type nonrec t =
       {
       sourceLocationName: Zz__string.t
-        [@ocaml.doc
-          "The identifier for the source location you are working on."]}
+        [@ocaml.doc "The name of the source location."]}
     let context_ = "DeleteSourceLocationRequest"
     let make ~sourceLocationName = fun () -> { sourceLocationName }
     let to_value x =
       structure_to_value
-        [("sourceLocationName",
+        [("SourceLocationName",
            (Some (Zz__string.to_value x.sourceLocationName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       make ~sourceLocationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       make ~sourceLocationName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Deletes a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module DeleteProgramResponse =
   struct
     type nonrec t = unit
@@ -5984,38 +10551,38 @@ module DeleteProgramResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a specific program on a specific channel."]
+  end[@@ocaml.doc
+       "Deletes a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
 module DeleteProgramRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
-      programName: Zz__string.t
-        [@ocaml.doc "The identifier for the program you are working on."]}
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."];
+      programName: Zz__string.t [@ocaml.doc "The name of the program."]}
     let context_ = "DeleteProgramRequest"
     let make ~channelName =
       fun ~programName -> fun () -> { channelName; programName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
-        ("programName", (Some (Zz__string.to_value x.programName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
+        ("ProgramName", (Some (Zz__string.to_value x.programName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let programName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "programName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgramName") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~programName ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let programName = field_map_exn json "ProgramName" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let programName = field_map_exn json__ "ProgramName" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~programName ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a specific program on a specific channel."]
+  end[@@ocaml.doc
+       "Deletes a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
 module DeletePrefetchScheduleResponse =
   struct
     type nonrec t = unit
@@ -6046,15 +10613,17 @@ module DeletePrefetchScheduleResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a prefetch schedule for a specific playback configuration. If you call DeletePrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code."]
+       "Deletes a prefetch schedule for a specific playback configuration. If you call DeletePrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module DeletePrefetchScheduleRequest =
   struct
     type nonrec t =
       {
       name: Zz__string.t
-        [@ocaml.doc "The identifier for the playback configuration."];
+        [@ocaml.doc
+          "The name of the prefetch schedule. If the action is successful, the service sends back an HTTP 204 response with an empty HTTP body."];
       playbackConfigurationName: Zz__string.t
-        [@ocaml.doc "The name of the playback configuration."]}
+        [@ocaml.doc
+          "The name of the playback configuration for this prefetch schedule."]}
     let context_ = "DeletePrefetchScheduleRequest"
     let make ~name =
       fun ~playbackConfigurationName ->
@@ -6074,14 +10643,14 @@ module DeletePrefetchScheduleRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~playbackConfigurationName ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+        field_map_exn json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       make ~playbackConfigurationName ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a prefetch schedule for a specific playback configuration. If you call DeletePrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code."]
+       "Deletes a prefetch schedule for a specific playback configuration. If you call DeletePrefetchSchedule on an expired prefetch schedule, MediaTailor returns an HTTP 404 status code. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module DeletePlaybackConfigurationResponse =
   struct
     type nonrec t = unit
@@ -6112,13 +10681,13 @@ module DeletePlaybackConfigurationResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the playback configuration for the specified name."]
+       "Deletes a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
 module DeletePlaybackConfigurationRequest =
   struct
     type nonrec t =
       {
       name: Zz__string.t
-        [@ocaml.doc "The identifier for the playback configuration."]}
+        [@ocaml.doc "The name of the playback configuration."]}
     let context_ = "DeletePlaybackConfigurationRequest"
     let make ~name = fun () -> { name }
     let to_value x =
@@ -6129,12 +10698,133 @@ module DeletePlaybackConfigurationRequest =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Zz__string.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the playback configuration for the specified name."]
+       "Deletes a playback configuration. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."]
+module DeleteLiveSourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source to delete."]
+module DeleteLiveSourceRequest =
+  struct
+    type nonrec t =
+      {
+      liveSourceName: Zz__string.t
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc
+          "The name of the source location associated with this Live Source."]}
+    let context_ = "DeleteLiveSourceRequest"
+    let make ~liveSourceName =
+      fun ~sourceLocationName ->
+        fun () -> { liveSourceName; sourceLocationName }
+    let to_value x =
+      structure_to_value
+        [("LiveSourceName", (Some (Zz__string.to_value x.liveSourceName)));
+        ("SourceLocationName",
+          (Some (Zz__string.to_value x.sourceLocationName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourceLocationName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LiveSourceName") in
+      make ~sourceLocationName ~liveSourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourceLocationName =
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map_exn json__ "LiveSourceName" Zz__string.of_json in
+      make ~sourceLocationName ~liveSourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source to delete."]
+module DeleteFunctionResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a function. MediaTailor prevents deletion of a function that is still referenced by a playback configuration or by another function. Remove all references before deleting. For more information about functions, see Working with functions in the MediaTailor User Guide."]
+module DeleteFunctionRequest =
+  struct
+    type nonrec t =
+      {
+      functionId: Zz__string.t
+        [@ocaml.doc "The identifier of the function to delete."]}
+    let context_ = "DeleteFunctionRequest"
+    let make ~functionId = fun () -> { functionId }
+    let to_value x =
+      structure_to_value
+        [("FunctionId", (Some (Zz__string.to_value x.functionId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let functionId =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FunctionId") in
+      make ~functionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let functionId = field_map_exn json__ "FunctionId" Zz__string.of_json in
+      make ~functionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a function. MediaTailor prevents deletion of a function that is still referenced by a playback configuration or by another function. Remove all references before deleting. For more information about functions, see Working with functions in the MediaTailor User Guide."]
 module DeleteChannelResponse =
   struct
     type nonrec t = unit
@@ -6165,31 +10855,30 @@ module DeleteChannelResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a channel. You must stop the channel before it can be deleted."]
+       "Deletes a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module DeleteChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."]}
     let context_ = "DeleteChannelRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a channel. You must stop the channel before it can be deleted."]
+       "Deletes a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module DeleteChannelPolicyResponse =
   struct
     type nonrec t = unit
@@ -6219,49 +10908,52 @@ module DeleteChannelPolicyResponse =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a channel's IAM policy."]
+  end[@@ocaml.doc "The channel policy to delete."]
 module DeleteChannelPolicyRequest =
   struct
     type nonrec t =
       {
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."]}
+        [@ocaml.doc
+          "The name of the channel associated with this channel policy."]}
     let context_ = "DeleteChannelPolicyRequest"
     let make ~channelName = fun () -> { channelName }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)))]
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       make ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
+    let of_json json__ =
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
       make ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes a channel's IAM policy."]
+  end[@@ocaml.doc "The channel policy to delete."]
 module CreateVodSourceResponse =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the VOD source."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN to assign to this VOD source."];
       creationTime: Zz__timestampUnix.t option
-        [@ocaml.doc
-          "The timestamp that indicates when the VOD source was created."];
+        [@ocaml.doc "The time the VOD source was created."];
       httpPackageConfigurations: HttpPackageConfigurations.t option
-        [@ocaml.doc "The HTTP package configurations."];
+        [@ocaml.doc
+          "A list of HTTP package configuration parameters for this VOD source."];
       lastModifiedTime: Zz__timestampUnix.t option
-        [@ocaml.doc "The ARN for the VOD source."];
+        [@ocaml.doc "The time the VOD source was last modified."];
       sourceLocationName: Zz__string.t option
         [@ocaml.doc
-          "The name of the source location associated with the VOD source."];
+          "The name to assign to the source location for this VOD source."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the VOD source."];
+        [@ocaml.doc
+          "The tags to assign to the VOD source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       vodSourceName: Zz__string.t option
-        [@ocaml.doc "The name of the VOD source."]}
+        [@ocaml.doc "The name to assign to the VOD source."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -6335,38 +11027,37 @@ module CreateVodSourceResponse =
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpPackageConfigurations =
-        field_map json "HttpPackageConfigurations"
+        field_map json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       make ?vodSourceName ?tags ?sourceLocationName ?lastModifiedTime
         ?httpPackageConfigurations ?creationTime ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates name for a specific VOD source in a source location."]
+  end[@@ocaml.doc "The VOD source configuration parameters."]
 module CreateVodSourceRequest =
   struct
     type nonrec t =
       {
       httpPackageConfigurations: HttpPackageConfigurations.t
         [@ocaml.doc
-          "An array of HTTP package configuration parameters for this VOD source."];
+          "A list of HTTP package configuration parameters for this VOD source."];
       sourceLocationName: Zz__string.t
-        [@ocaml.doc
-          "The identifier for the source location you are working on."];
+        [@ocaml.doc "The name of the source location for this VOD source."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the VOD source."];
+        [@ocaml.doc
+          "The tags to assign to the VOD source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
       vodSourceName: Zz__string.t
-        [@ocaml.doc "The identifier for the VOD source you are working on."]}
+        [@ocaml.doc "The name associated with the VOD source.>"]}
     let context_ = "CreateVodSourceRequest"
     let make ?tags =
       fun ~httpPackageConfigurations ->
@@ -6384,20 +11075,20 @@ module CreateVodSourceRequest =
         [("HttpPackageConfigurations",
            (Some
               (HttpPackageConfigurations.to_value x.httpPackageConfigurations)));
-        ("sourceLocationName",
+        ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)));
         ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
-        ("vodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let vodSourceName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "vodSourceName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       let httpPackageConfigurations =
         HttpPackageConfigurations.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -6405,45 +11096,47 @@ module CreateVodSourceRequest =
       make ~vodSourceName ?tags ~sourceLocationName
         ~httpPackageConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+        field_map_exn json__ "VodSourceName" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       let httpPackageConfigurations =
-        field_map_exn json "HttpPackageConfigurations"
+        field_map_exn json__ "HttpPackageConfigurations"
           HttpPackageConfigurations.of_json in
       make ~vodSourceName ?tags ~sourceLocationName
         ~httpPackageConfigurations ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates name for a specific VOD source in a source location."]
+  end[@@ocaml.doc "The VOD source configuration parameters."]
 module CreateSourceLocationResponse =
   struct
     type nonrec t =
       {
       accessConfiguration: AccessConfiguration.t option
-        [@ocaml.doc "The access configuration for the source location."];
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the source location."];
-      creationTime: Zz__timestampUnix.t option
         [@ocaml.doc
-          "The timestamp that indicates when the source location was created."];
+          "Access configuration parameters. Configures the type of authentication used to access content from your source location."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN to assign to the source location."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc "The time the source location was created."];
       defaultSegmentDeliveryConfiguration:
         DefaultSegmentDeliveryConfiguration.t option
-        [@ocaml.doc "The default segment delivery configuration settings."];
+        [@ocaml.doc
+          "The optional configuration for the server that serves segments."];
       httpConfiguration: HttpConfiguration.t option
-        [@ocaml.doc
-          "The HTTP package configuration settings for the source location."];
+        [@ocaml.doc "The source's HTTP package configurations."];
       lastModifiedTime: Zz__timestampUnix.t option
-        [@ocaml.doc
-          "The timestamp that indicates when the source location was last modified."];
+        [@ocaml.doc "The time the source location was last modified."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
+        Zz__listOfSegmentDeliveryConfiguration.t option
+        [@ocaml.doc
+          "The segment delivery configurations for the source location. For information about MediaTailor configurations, see Working with configurations in AWS Elemental MediaTailor."];
       sourceLocationName: Zz__string.t option
-        [@ocaml.doc "The name of the source location."];
+        [@ocaml.doc "The name to assign to the source location."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the source location."]}
+        [@ocaml.doc
+          "The tags to assign to the source location. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?accessConfiguration =
@@ -6534,31 +11227,32 @@ module CreateSourceLocationResponse =
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
       let httpConfiguration =
-        field_map json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
       make ?tags ?sourceLocationName ?segmentDeliveryConfigurations
         ?lastModifiedTime ?httpConfiguration
         ?defaultSegmentDeliveryConfiguration ?creationTime ?arn
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Creates a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module CreateSourceLocationRequest =
   struct
     type nonrec t =
@@ -6573,12 +11267,14 @@ module CreateSourceLocationRequest =
       httpConfiguration: HttpConfiguration.t
         [@ocaml.doc "The source's HTTP package configurations."];
       segmentDeliveryConfigurations:
-        Zz__listOfSegmentDeliveryConfiguration.t option ;
-      sourceLocationName: Zz__string.t
+        Zz__listOfSegmentDeliveryConfiguration.t option
         [@ocaml.doc
-          "The identifier for the source location you are working on."];
+          "A list of the segment delivery configurations associated with this resource."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc "The name associated with the source location."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the source location."]}
+        [@ocaml.doc
+          "The tags to assign to the source location. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     let context_ = "CreateSourceLocationRequest"
     let make ?accessConfiguration =
       fun ?defaultSegmentDeliveryConfiguration ->
@@ -6607,7 +11303,7 @@ module CreateSourceLocationRequest =
         ("SegmentDeliveryConfigurations",
           (Option.map x.segmentDeliveryConfigurations
              ~f:Zz__listOfSegmentDeliveryConfiguration.to_value));
-        ("sourceLocationName",
+        ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)));
         ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
@@ -6616,7 +11312,7 @@ module CreateSourceLocationRequest =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let sourceLocationName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceLocationName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
       let segmentDeliveryConfigurations =
         (Option.map ~f:Zz__listOfSegmentDeliveryConfiguration.of_xml)
           (Xml.child xml_arg0 "SegmentDeliveryConfigurations") in
@@ -6633,66 +11329,89 @@ module CreateSourceLocationRequest =
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       let segmentDeliveryConfigurations =
-        field_map json "SegmentDeliveryConfigurations"
+        field_map json__ "SegmentDeliveryConfigurations"
           Zz__listOfSegmentDeliveryConfiguration.of_json in
       let httpConfiguration =
-        field_map_exn json "HttpConfiguration" HttpConfiguration.of_json in
+        field_map_exn json__ "HttpConfiguration" HttpConfiguration.of_json in
       let defaultSegmentDeliveryConfiguration =
-        field_map json "DefaultSegmentDeliveryConfiguration"
+        field_map json__ "DefaultSegmentDeliveryConfiguration"
           DefaultSegmentDeliveryConfiguration.of_json in
       let accessConfiguration =
-        field_map json "AccessConfiguration" AccessConfiguration.of_json in
+        field_map json__ "AccessConfiguration" AccessConfiguration.of_json in
       make ?tags ~sourceLocationName ?segmentDeliveryConfigurations
         ~httpConfiguration ?defaultSegmentDeliveryConfiguration
         ?accessConfiguration ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a source location on a specific channel."]
+  end[@@ocaml.doc
+       "Creates a source location. A source location is a container for sources. For more information about source locations, see Working with source locations in the MediaTailor User Guide."]
 module CreateProgramResponse =
   struct
     type nonrec t =
       {
       adBreaks: Zz__listOfAdBreak.t option
         [@ocaml.doc "The ad break configuration settings."];
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the program."];
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN to assign to the program."];
       channelName: Zz__string.t option
-        [@ocaml.doc "The name of the channel that the program belongs to."];
+        [@ocaml.doc "The name to assign to the channel for this program."];
       creationTime: Zz__timestampUnix.t option
-        [@ocaml.doc "The timestamp of when the program was created."];
+        [@ocaml.doc "The time the program was created."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the LiveSource for this Program."];
       programName: Zz__string.t option
-        [@ocaml.doc "The name of the program."];
+        [@ocaml.doc "The name to assign to this program."];
       scheduledStartTime: Zz__timestampUnix.t option
-        [@ocaml.doc
-          "The date and time that the program is scheduled to start in ISO 8601 format and Coordinated Universal Time (UTC). For example, the value 2021-03-27T17:48:16.751Z represents March 27, 2021 at 17:48:16.751 UTC."];
+        [@ocaml.doc "The scheduled start time for this Program."];
       sourceLocationName: Zz__string.t option
-        [@ocaml.doc "The source location name."];
+        [@ocaml.doc
+          "The name to assign to the source location for this program."];
       vodSourceName: Zz__string.t option
-        [@ocaml.doc "The name that's used to refer to a VOD source."]}
+        [@ocaml.doc "The name that's used to refer to a VOD source."];
+      clipRange: ClipRange.t option
+        [@ocaml.doc "The clip range configuration settings."];
+      durationMillis: Zz__long.t option
+        [@ocaml.doc "The duration of the live program in milliseconds."];
+      audienceMedia: Zz__listOfAudienceMedia.t option
+        [@ocaml.doc "The list of AudienceMedia defined in program."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the program. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?adBreaks =
       fun ?arn ->
         fun ?channelName ->
           fun ?creationTime ->
-            fun ?programName ->
-              fun ?scheduledStartTime ->
-                fun ?sourceLocationName ->
-                  fun ?vodSourceName ->
-                    fun () ->
-                      {
-                        adBreaks;
-                        arn;
-                        channelName;
-                        creationTime;
-                        programName;
-                        scheduledStartTime;
-                        sourceLocationName;
-                        vodSourceName
-                      }
+            fun ?liveSourceName ->
+              fun ?programName ->
+                fun ?scheduledStartTime ->
+                  fun ?sourceLocationName ->
+                    fun ?vodSourceName ->
+                      fun ?clipRange ->
+                        fun ?durationMillis ->
+                          fun ?audienceMedia ->
+                            fun ?tags ->
+                              fun () ->
+                                {
+                                  adBreaks;
+                                  arn;
+                                  channelName;
+                                  creationTime;
+                                  liveSourceName;
+                                  programName;
+                                  scheduledStartTime;
+                                  sourceLocationName;
+                                  vodSourceName;
+                                  clipRange;
+                                  durationMillis;
+                                  audienceMedia;
+                                  tags
+                                }
     let error_of_json name json =
       match name with
       | name ->
@@ -6716,15 +11435,32 @@ module CreateProgramResponse =
         ("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
         ("CreationTime",
           (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
         ("ProgramName", (Option.map x.programName ~f:Zz__string.to_value));
         ("ScheduledStartTime",
           (Option.map x.scheduledStartTime ~f:Zz__timestampUnix.to_value));
         ("SourceLocationName",
           (Option.map x.sourceLocationName ~f:Zz__string.to_value));
         ("VodSourceName",
-          (Option.map x.vodSourceName ~f:Zz__string.to_value))]
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("ClipRange", (Option.map x.clipRange ~f:ClipRange.to_value));
+        ("DurationMillis",
+          (Option.map x.durationMillis ~f:Zz__long.to_value));
+        ("AudienceMedia",
+          (Option.map x.audienceMedia ~f:Zz__listOfAudienceMedia.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let audienceMedia =
+        (Option.map ~f:Zz__listOfAudienceMedia.of_xml)
+          (Xml.child xml_arg0 "AudienceMedia") in
+      let durationMillis =
+        (Option.map ~f:Zz__long.of_xml) (Xml.child xml_arg0 "DurationMillis") in
+      let clipRange =
+        (Option.map ~f:ClipRange.of_xml) (Xml.child xml_arg0 "ClipRange") in
       let vodSourceName =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "VodSourceName") in
@@ -6736,6 +11472,9 @@ module CreateProgramResponse =
           (Xml.child xml_arg0 "ScheduledStartTime") in
       let programName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ProgramName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
       let creationTime =
         (Option.map ~f:Zz__timestampUnix.of_xml)
           (Xml.child xml_arg0 "CreationTime") in
@@ -6745,25 +11484,35 @@ module CreateProgramResponse =
       let adBreaks =
         (Option.map ~f:Zz__listOfAdBreak.of_xml)
           (Xml.child xml_arg0 "AdBreaks") in
-      make ?vodSourceName ?sourceLocationName ?scheduledStartTime
-        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+      make ?tags ?audienceMedia ?durationMillis ?clipRange ?vodSourceName
+        ?sourceLocationName ?scheduledStartTime ?programName ?liveSourceName
+        ?creationTime ?channelName ?arn ?adBreaks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName = field_map json "VodSourceName" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let audienceMedia =
+        field_map json__ "AudienceMedia" Zz__listOfAudienceMedia.of_json in
+      let durationMillis = field_map json__ "DurationMillis" Zz__long.of_json in
+      let clipRange = field_map json__ "ClipRange" ClipRange.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map json "SourceLocationName" Zz__string.of_json in
+        field_map json__ "SourceLocationName" Zz__string.of_json in
       let scheduledStartTime =
-        field_map json "ScheduledStartTime" Zz__timestampUnix.of_json in
-      let programName = field_map json "ProgramName" Zz__string.of_json in
+        field_map json__ "ScheduledStartTime" Zz__timestampUnix.of_json in
+      let programName = field_map json__ "ProgramName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelName = field_map json "ChannelName" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      let adBreaks = field_map json "AdBreaks" Zz__listOfAdBreak.of_json in
-      make ?vodSourceName ?sourceLocationName ?scheduledStartTime
-        ?programName ?creationTime ?channelName ?arn ?adBreaks ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      make ?tags ?audienceMedia ?durationMillis ?clipRange ?vodSourceName
+        ?sourceLocationName ?scheduledStartTime ?programName ?liveSourceName
+        ?creationTime ?channelName ?arn ?adBreaks ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a program."]
+  end[@@ocaml.doc
+       "Creates a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
 module CreateProgramRequest =
   struct
     type nonrec t =
@@ -6771,46 +11520,69 @@ module CreateProgramRequest =
       adBreaks: Zz__listOfAdBreak.t option
         [@ocaml.doc "The ad break configuration settings."];
       channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
-      programName: Zz__string.t
-        [@ocaml.doc "The identifier for the program you are working on."];
+        [@ocaml.doc "The name of the channel for this Program."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name of the LiveSource for this Program."];
+      programName: Zz__string.t [@ocaml.doc "The name of the Program."];
       scheduleConfiguration: ScheduleConfiguration.t
         [@ocaml.doc "The schedule configuration settings."];
       sourceLocationName: Zz__string.t
         [@ocaml.doc "The name of the source location."];
-      vodSourceName: Zz__string.t
-        [@ocaml.doc "The name that's used to refer to a VOD source."]}
+      vodSourceName: Zz__string.t option
+        [@ocaml.doc "The name that's used to refer to a VOD source."];
+      audienceMedia: Zz__listOfAudienceMedia.t option
+        [@ocaml.doc "The list of AudienceMedia defined in program."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the program. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     let context_ = "CreateProgramRequest"
     let make ?adBreaks =
-      fun ~channelName ->
-        fun ~programName ->
-          fun ~scheduleConfiguration ->
-            fun ~sourceLocationName ->
-              fun ~vodSourceName ->
-                fun () ->
-                  {
-                    adBreaks;
-                    channelName;
-                    programName;
-                    scheduleConfiguration;
-                    sourceLocationName;
-                    vodSourceName
-                  }
+      fun ?liveSourceName ->
+        fun ?vodSourceName ->
+          fun ?audienceMedia ->
+            fun ?tags ->
+              fun ~channelName ->
+                fun ~programName ->
+                  fun ~scheduleConfiguration ->
+                    fun ~sourceLocationName ->
+                      fun () ->
+                        {
+                          adBreaks;
+                          liveSourceName;
+                          vodSourceName;
+                          audienceMedia;
+                          tags;
+                          channelName;
+                          programName;
+                          scheduleConfiguration;
+                          sourceLocationName
+                        }
     let to_value x =
       structure_to_value
         [("AdBreaks", (Option.map x.adBreaks ~f:Zz__listOfAdBreak.to_value));
-        ("channelName", (Some (Zz__string.to_value x.channelName)));
-        ("programName", (Some (Zz__string.to_value x.programName)));
+        ("ChannelName", (Some (Zz__string.to_value x.channelName)));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("ProgramName", (Some (Zz__string.to_value x.programName)));
         ("ScheduleConfiguration",
           (Some (ScheduleConfiguration.to_value x.scheduleConfiguration)));
         ("SourceLocationName",
           (Some (Zz__string.to_value x.sourceLocationName)));
-        ("VodSourceName", (Some (Zz__string.to_value x.vodSourceName)))]
+        ("VodSourceName",
+          (Option.map x.vodSourceName ~f:Zz__string.to_value));
+        ("AudienceMedia",
+          (Option.map x.audienceMedia ~f:Zz__listOfAudienceMedia.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let audienceMedia =
+        (Option.map ~f:Zz__listOfAudienceMedia.of_xml)
+          (Xml.child xml_arg0 "AudienceMedia") in
       let vodSourceName =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "VodSourceName") in
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "VodSourceName") in
       let sourceLocationName =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
@@ -6819,53 +11591,69 @@ module CreateProgramRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleConfiguration") in
       let programName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "programName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ProgramName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
       let adBreaks =
         (Option.map ~f:Zz__listOfAdBreak.of_xml)
           (Xml.child xml_arg0 "AdBreaks") in
-      make ~vodSourceName ~sourceLocationName ~scheduleConfiguration
-        ~programName ~channelName ?adBreaks ()
+      make ?tags ?audienceMedia ?vodSourceName ~sourceLocationName
+        ~scheduleConfiguration ~programName ?liveSourceName ~channelName
+        ?adBreaks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vodSourceName =
-        field_map_exn json "VodSourceName" Zz__string.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let audienceMedia =
+        field_map json__ "AudienceMedia" Zz__listOfAudienceMedia.of_json in
+      let vodSourceName = field_map json__ "VodSourceName" Zz__string.of_json in
       let sourceLocationName =
-        field_map_exn json "SourceLocationName" Zz__string.of_json in
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
       let scheduleConfiguration =
-        field_map_exn json "ScheduleConfiguration"
+        field_map_exn json__ "ScheduleConfiguration"
           ScheduleConfiguration.of_json in
-      let programName = field_map_exn json "ProgramName" Zz__string.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      let adBreaks = field_map json "AdBreaks" Zz__listOfAdBreak.of_json in
-      make ~vodSourceName ~sourceLocationName ~scheduleConfiguration
-        ~programName ~channelName ?adBreaks ()
+      let programName = field_map_exn json__ "ProgramName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      let adBreaks = field_map json__ "AdBreaks" Zz__listOfAdBreak.of_json in
+      make ?tags ?audienceMedia ?vodSourceName ~sourceLocationName
+        ~scheduleConfiguration ~programName ?liveSourceName ~channelName
+        ?adBreaks ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a program."]
+  end[@@ocaml.doc
+       "Creates a program within a channel. For information about programs, see Working with programs in the MediaTailor User Guide."]
 module CreatePrefetchScheduleResponse =
   struct
     type nonrec t =
       {
       arn: Zz__string.t option
-        [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the prefetch schedule."];
+        [@ocaml.doc "The ARN to assign to the prefetch schedule."];
       consumption: PrefetchConsumption.t option
         [@ocaml.doc
-          "Consumption settings determine how, and when, MediaTailor places the prefetched ads into ad breaks. Ad consumption occurs within a span of time that you define, called a consumption window. You can designate which ad breaks that MediaTailor fills with prefetch ads by setting avail matching criteria."];
+          "The configuration settings for how and when MediaTailor consumes prefetched ads from the ad decision server for single prefetch schedules. Each consumption configuration contains an end time and an optional start time that define the consumption window. Prefetch schedules automatically expire no earlier than seven days after the end time."];
       name: Zz__string.t option
-        [@ocaml.doc
-          "The name of the prefetch schedule. The name must be unique among all prefetch schedules that are associated with the specified playback configuration."];
+        [@ocaml.doc "The name to assign to the prefetch schedule."];
       playbackConfigurationName: Zz__string.t option
-        [@ocaml.doc
-          "The name of the playback configuration to create the prefetch schedule for."];
+        [@ocaml.doc "The name to assign to the playback configuration."];
       retrieval: PrefetchRetrieval.t option
         [@ocaml.doc
-          "A complex type that contains settings for prefetch retrieval from the ad decision server (ADS)."];
+          "The configuration settings for retrieval of prefetched ads from the ad decision server. Only one set of prefetched ads will be retrieved and subsequently consumed for each ad break."];
+      recurringPrefetchConfiguration: RecurringPrefetchConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how MediaTailor performs recurring prefetch."];
+      scheduleType: PrefetchScheduleType.t option
+        [@ocaml.doc
+          "The frequency that MediaTailor creates prefetch schedules. SINGLE indicates that this schedule applies to one ad break. RECURRING indicates that MediaTailor automatically creates a schedule for each ad avail in a live event."];
       streamId: Zz__string.t option
         [@ocaml.doc
-          "An optional stream identifier that you can specify in order to prefetch for multiple streams that use the same playback configuration."]}
+          "An optional stream identifier that MediaTailor uses to prefetch ads for multiple streams that use the same playback configuration. If StreamId is specified, MediaTailor returns all of the prefetch schedules with an exact match on StreamId. If not specified, MediaTailor returns all of the prefetch schedules for the playback configuration, regardless of StreamId."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags assigned to the prefetch schedule. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -6873,16 +11661,22 @@ module CreatePrefetchScheduleResponse =
         fun ?name ->
           fun ?playbackConfigurationName ->
             fun ?retrieval ->
-              fun ?streamId ->
-                fun () ->
-                  {
-                    arn;
-                    consumption;
-                    name;
-                    playbackConfigurationName;
-                    retrieval;
-                    streamId
-                  }
+              fun ?recurringPrefetchConfiguration ->
+                fun ?scheduleType ->
+                  fun ?streamId ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          arn;
+                          consumption;
+                          name;
+                          playbackConfigurationName;
+                          retrieval;
+                          recurringPrefetchConfiguration;
+                          scheduleType;
+                          streamId;
+                          tags
+                        }
     let error_of_json name json =
       match name with
       | name ->
@@ -6908,11 +11702,25 @@ module CreatePrefetchScheduleResponse =
         ("PlaybackConfigurationName",
           (Option.map x.playbackConfigurationName ~f:Zz__string.to_value));
         ("Retrieval", (Option.map x.retrieval ~f:PrefetchRetrieval.to_value));
-        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value))]
+        ("RecurringPrefetchConfiguration",
+          (Option.map x.recurringPrefetchConfiguration
+             ~f:RecurringPrefetchConfiguration.to_value));
+        ("ScheduleType",
+          (Option.map x.scheduleType ~f:PrefetchScheduleType.to_value));
+        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let streamId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let scheduleType =
+        (Option.map ~f:PrefetchScheduleType.of_xml)
+          (Xml.child xml_arg0 "ScheduleType") in
+      let recurringPrefetchConfiguration =
+        (Option.map ~f:RecurringPrefetchConfiguration.of_xml)
+          (Xml.child xml_arg0 "RecurringPrefetchConfiguration") in
       let retrieval =
         (Option.map ~f:PrefetchRetrieval.of_xml)
           (Xml.child xml_arg0 "Retrieval") in
@@ -6925,69 +11733,105 @@ module CreatePrefetchScheduleResponse =
         (Option.map ~f:PrefetchConsumption.of_xml)
           (Xml.child xml_arg0 "Consumption") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
-        ?arn ()
+      make ?tags ?streamId ?scheduleType ?recurringPrefetchConfiguration
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "StreamId" Zz__string.of_json in
-      let retrieval = field_map json "Retrieval" PrefetchRetrieval.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let streamId = field_map json__ "StreamId" Zz__string.of_json in
+      let scheduleType =
+        field_map json__ "ScheduleType" PrefetchScheduleType.of_json in
+      let recurringPrefetchConfiguration =
+        field_map json__ "RecurringPrefetchConfiguration"
+          RecurringPrefetchConfiguration.of_json in
+      let retrieval = field_map json__ "Retrieval" PrefetchRetrieval.of_json in
       let playbackConfigurationName =
-        field_map json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map json "Name" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map json__ "Name" Zz__string.of_json in
       let consumption =
-        field_map json "Consumption" PrefetchConsumption.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?streamId ?retrieval ?playbackConfigurationName ?name ?consumption
-        ?arn ()
+        field_map json__ "Consumption" PrefetchConsumption.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?streamId ?scheduleType ?recurringPrefetchConfiguration
+        ?retrieval ?playbackConfigurationName ?name ?consumption ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new prefetch schedule for the specified playback configuration."]
+       "Creates a prefetch schedule for a playback configuration. A prefetch schedule allows you to tell MediaTailor to fetch and prepare certain ads before an ad break happens. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
 module CreatePrefetchScheduleRequest =
   struct
     type nonrec t =
       {
-      consumption: PrefetchConsumption.t
+      consumption: PrefetchConsumption.t option
         [@ocaml.doc
-          "The configuration settings for MediaTailor's consumption of the prefetched ads from the ad decision server. Each consumption configuration contains an end time and an optional start time that define the consumption window. Prefetch schedules automatically expire no earlier than seven days after the end time."];
+          "The configuration settings for how and when MediaTailor consumes prefetched ads from the ad decision server for single prefetch schedules. Each consumption configuration contains an end time and an optional start time that define the consumption window. Prefetch schedules automatically expire no earlier than seven days after the end time."];
       name: Zz__string.t
-        [@ocaml.doc "The identifier for the playback configuration."];
+        [@ocaml.doc "The name to assign to the schedule request."];
       playbackConfigurationName: Zz__string.t
-        [@ocaml.doc "The name of the playback configuration."];
-      retrieval: PrefetchRetrieval.t
+        [@ocaml.doc "The name to assign to the playback configuration."];
+      retrieval: PrefetchRetrieval.t option
         [@ocaml.doc
           "The configuration settings for retrieval of prefetched ads from the ad decision server. Only one set of prefetched ads will be retrieved and subsequently consumed for each ad break."];
+      recurringPrefetchConfiguration: RecurringPrefetchConfiguration.t option
+        [@ocaml.doc
+          "The configuration that defines how and when MediaTailor performs ad prefetching in a live event."];
+      scheduleType: PrefetchScheduleType.t option
+        [@ocaml.doc
+          "The frequency that MediaTailor creates prefetch schedules. SINGLE indicates that this schedule applies to one ad break. RECURRING indicates that MediaTailor automatically creates a schedule for each ad avail in a live event. For more information about the prefetch types and when you might use each, see Prefetching ads in Elemental MediaTailor."];
       streamId: Zz__string.t option
         [@ocaml.doc
-          "An optional stream identifier that MediaTailor uses to prefetch ads for multiple streams that use the same playback configuration. If StreamId is specified, MediaTailor returns all of the prefetch schedules with an exact match on StreamId. If not specified, MediaTailor returns all of the prefetch schedules for the playback configuration, regardless of StreamId."]}
+          "An optional stream identifier that MediaTailor uses to prefetch ads for multiple streams that use the same playback configuration. If StreamId is specified, MediaTailor returns all of the prefetch schedules with an exact match on StreamId. If not specified, MediaTailor returns all of the prefetch schedules for the playback configuration, regardless of StreamId."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the prefetch schedule. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
     let context_ = "CreatePrefetchScheduleRequest"
-    let make ?streamId =
-      fun ~consumption ->
-        fun ~name ->
-          fun ~playbackConfigurationName ->
-            fun ~retrieval ->
-              fun () ->
-                {
-                  streamId;
-                  consumption;
-                  name;
-                  playbackConfigurationName;
-                  retrieval
-                }
+    let make ?consumption =
+      fun ?retrieval ->
+        fun ?recurringPrefetchConfiguration ->
+          fun ?scheduleType ->
+            fun ?streamId ->
+              fun ?tags ->
+                fun ~name ->
+                  fun ~playbackConfigurationName ->
+                    fun () ->
+                      {
+                        consumption;
+                        retrieval;
+                        recurringPrefetchConfiguration;
+                        scheduleType;
+                        streamId;
+                        tags;
+                        name;
+                        playbackConfigurationName
+                      }
     let to_value x =
       structure_to_value
-        [("Consumption", (Some (PrefetchConsumption.to_value x.consumption)));
+        [("Consumption",
+           (Option.map x.consumption ~f:PrefetchConsumption.to_value));
         ("Name", (Some (Zz__string.to_value x.name)));
         ("PlaybackConfigurationName",
           (Some (Zz__string.to_value x.playbackConfigurationName)));
-        ("Retrieval", (Some (PrefetchRetrieval.to_value x.retrieval)));
-        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value))]
+        ("Retrieval", (Option.map x.retrieval ~f:PrefetchRetrieval.to_value));
+        ("RecurringPrefetchConfiguration",
+          (Option.map x.recurringPrefetchConfiguration
+             ~f:RecurringPrefetchConfiguration.to_value));
+        ("ScheduleType",
+          (Option.map x.scheduleType ~f:PrefetchScheduleType.to_value));
+        ("StreamId", (Option.map x.streamId ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let streamId =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "StreamId") in
+      let scheduleType =
+        (Option.map ~f:PrefetchScheduleType.of_xml)
+          (Xml.child xml_arg0 "ScheduleType") in
+      let recurringPrefetchConfiguration =
+        (Option.map ~f:RecurringPrefetchConfiguration.of_xml)
+          (Xml.child xml_arg0 "RecurringPrefetchConfiguration") in
       let retrieval =
-        PrefetchRetrieval.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Retrieval") in
+        (Option.map ~f:PrefetchRetrieval.of_xml)
+          (Xml.child xml_arg0 "Retrieval") in
       let playbackConfigurationName =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -6995,32 +11839,216 @@ module CreatePrefetchScheduleRequest =
       let name =
         Zz__string.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let consumption =
-        PrefetchConsumption.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Consumption") in
-      make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
-        ()
+        (Option.map ~f:PrefetchConsumption.of_xml)
+          (Xml.child xml_arg0 "Consumption") in
+      make ?tags ?streamId ?scheduleType ?recurringPrefetchConfiguration
+        ?retrieval ~playbackConfigurationName ~name ?consumption ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamId = field_map json "StreamId" Zz__string.of_json in
-      let retrieval =
-        field_map_exn json "Retrieval" PrefetchRetrieval.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let streamId = field_map json__ "StreamId" Zz__string.of_json in
+      let scheduleType =
+        field_map json__ "ScheduleType" PrefetchScheduleType.of_json in
+      let recurringPrefetchConfiguration =
+        field_map json__ "RecurringPrefetchConfiguration"
+          RecurringPrefetchConfiguration.of_json in
+      let retrieval = field_map json__ "Retrieval" PrefetchRetrieval.of_json in
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
-      let name = field_map_exn json "Name" Zz__string.of_json in
+        field_map_exn json__ "PlaybackConfigurationName" Zz__string.of_json in
+      let name = field_map_exn json__ "Name" Zz__string.of_json in
       let consumption =
-        field_map_exn json "Consumption" PrefetchConsumption.of_json in
-      make ?streamId ~retrieval ~playbackConfigurationName ~name ~consumption
-        ()
+        field_map json__ "Consumption" PrefetchConsumption.of_json in
+      make ?tags ?streamId ?scheduleType ?recurringPrefetchConfiguration
+        ?retrieval ~playbackConfigurationName ~name ?consumption ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new prefetch schedule for the specified playback configuration."]
+       "Creates a prefetch schedule for a playback configuration. A prefetch schedule allows you to tell MediaTailor to fetch and prepare certain ads before an ad break happens. For more information about ad prefetching, see Using ad prefetching in the MediaTailor User Guide."]
+module CreateLiveSourceResponse =
+  struct
+    type nonrec t =
+      {
+      arn: Zz__string.t option
+        [@ocaml.doc "The ARN to assign to the live source."];
+      creationTime: Zz__timestampUnix.t option
+        [@ocaml.doc "The time the live source was created."];
+      httpPackageConfigurations: HttpPackageConfigurations.t option
+        [@ocaml.doc
+          "A list of HTTP package configuration parameters for this live source."];
+      lastModifiedTime: Zz__timestampUnix.t option
+        [@ocaml.doc "The time the live source was last modified."];
+      liveSourceName: Zz__string.t option
+        [@ocaml.doc "The name to assign to the live source."];
+      sourceLocationName: Zz__string.t option
+        [@ocaml.doc
+          "The name to assign to the source location of the live source."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the live source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?httpPackageConfigurations ->
+          fun ?lastModifiedTime ->
+            fun ?liveSourceName ->
+              fun ?sourceLocationName ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      arn;
+                      creationTime;
+                      httpPackageConfigurations;
+                      lastModifiedTime;
+                      liveSourceName;
+                      sourceLocationName;
+                      tags
+                    }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Zz__string.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Zz__timestampUnix.to_value));
+        ("HttpPackageConfigurations",
+          (Option.map x.httpPackageConfigurations
+             ~f:HttpPackageConfigurations.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
+        ("LiveSourceName",
+          (Option.map x.liveSourceName ~f:Zz__string.to_value));
+        ("SourceLocationName",
+          (Option.map x.sourceLocationName ~f:Zz__string.to_value));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceLocationName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        (Option.map ~f:Zz__string.of_xml)
+          (Xml.child xml_arg0 "LiveSourceName") in
+      let lastModifiedTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "LastModifiedTime") in
+      let httpPackageConfigurations =
+        (Option.map ~f:HttpPackageConfigurations.of_xml)
+          (Xml.child xml_arg0 "HttpPackageConfigurations") in
+      let creationTime =
+        (Option.map ~f:Zz__timestampUnix.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sourceLocationName =
+        field_map json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map json__ "LiveSourceName" Zz__string.of_json in
+      let lastModifiedTime =
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let httpPackageConfigurations =
+        field_map json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?tags ?sourceLocationName ?liveSourceName ?lastModifiedTime
+        ?httpPackageConfigurations ?creationTime ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source configuration."]
+module CreateLiveSourceRequest =
+  struct
+    type nonrec t =
+      {
+      httpPackageConfigurations: HttpPackageConfigurations.t
+        [@ocaml.doc
+          "A list of HTTP package configuration parameters for this live source."];
+      liveSourceName: Zz__string.t
+        [@ocaml.doc "The name of the live source."];
+      sourceLocationName: Zz__string.t
+        [@ocaml.doc "The name of the source location."];
+      tags: Zz__mapOf__string.t option
+        [@ocaml.doc
+          "The tags to assign to the live source. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."]}
+    let context_ = "CreateLiveSourceRequest"
+    let make ?tags =
+      fun ~httpPackageConfigurations ->
+        fun ~liveSourceName ->
+          fun ~sourceLocationName ->
+            fun () ->
+              {
+                tags;
+                httpPackageConfigurations;
+                liveSourceName;
+                sourceLocationName
+              }
+    let to_value x =
+      structure_to_value
+        [("HttpPackageConfigurations",
+           (Some
+              (HttpPackageConfigurations.to_value x.httpPackageConfigurations)));
+        ("LiveSourceName", (Some (Zz__string.to_value x.liveSourceName)));
+        ("SourceLocationName",
+          (Some (Zz__string.to_value x.sourceLocationName)));
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
+      let sourceLocationName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SourceLocationName") in
+      let liveSourceName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LiveSourceName") in
+      let httpPackageConfigurations =
+        HttpPackageConfigurations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "HttpPackageConfigurations") in
+      make ?tags ~sourceLocationName ~liveSourceName
+        ~httpPackageConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let sourceLocationName =
+        field_map_exn json__ "SourceLocationName" Zz__string.of_json in
+      let liveSourceName =
+        field_map_exn json__ "LiveSourceName" Zz__string.of_json in
+      let httpPackageConfigurations =
+        field_map_exn json__ "HttpPackageConfigurations"
+          HttpPackageConfigurations.of_json in
+      make ?tags ~sourceLocationName ~liveSourceName
+        ~httpPackageConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The live source configuration."]
 module CreateChannelResponse =
   struct
     type nonrec t =
       {
-      arn: Zz__string.t option [@ocaml.doc "The ARN of the channel."];
+      arn: Zz__string.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) to assign to the channel."];
       channelName: Zz__string.t option
-        [@ocaml.doc "The name of the channel."];
+        [@ocaml.doc "The name to assign to the channel."];
       channelState: ChannelState.t option
         [@ocaml.doc
           "Indicates whether the channel is in a running state or not."];
@@ -7032,11 +12060,18 @@ module CreateChannelResponse =
       lastModifiedTime: Zz__timestampUnix.t option
         [@ocaml.doc "The timestamp of when the channel was last modified."];
       outputs: ResponseOutputs.t option
-        [@ocaml.doc "The channel's output properties."];
+        [@ocaml.doc "The output properties to assign to the channel."];
       playbackMode: Zz__string.t option
-        [@ocaml.doc "The channel's playback mode."];
+        [@ocaml.doc "The playback mode to assign to the channel."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags assigned to the channel."]}
+        [@ocaml.doc
+          "The tags to assign to the channel. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      tier: Zz__string.t option [@ocaml.doc "The tier of the channel."];
+      timeShiftConfiguration: TimeShiftConfiguration.t option
+        [@ocaml.doc
+          "The time-shifted viewing configuration assigned to the channel."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?arn =
@@ -7048,18 +12083,24 @@ module CreateChannelResponse =
                 fun ?outputs ->
                   fun ?playbackMode ->
                     fun ?tags ->
-                      fun () ->
-                        {
-                          arn;
-                          channelName;
-                          channelState;
-                          creationTime;
-                          fillerSlate;
-                          lastModifiedTime;
-                          outputs;
-                          playbackMode;
-                          tags
-                        }
+                      fun ?tier ->
+                        fun ?timeShiftConfiguration ->
+                          fun ?audiences ->
+                            fun () ->
+                              {
+                                arn;
+                                channelName;
+                                channelState;
+                                creationTime;
+                                fillerSlate;
+                                lastModifiedTime;
+                                outputs;
+                                playbackMode;
+                                tags;
+                                tier;
+                                timeShiftConfiguration;
+                                audiences
+                              }
     let error_of_json name json =
       match name with
       | name ->
@@ -7089,9 +12130,21 @@ module CreateChannelResponse =
           (Option.map x.lastModifiedTime ~f:Zz__timestampUnix.to_value));
         ("Outputs", (Option.map x.outputs ~f:ResponseOutputs.to_value));
         ("PlaybackMode", (Option.map x.playbackMode ~f:Zz__string.to_value));
-        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Tier", (Option.map x.tier ~f:Zz__string.to_value));
+        ("TimeShiftConfiguration",
+          (Option.map x.timeShiftConfiguration
+             ~f:TimeShiftConfiguration.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let timeShiftConfiguration =
+        (Option.map ~f:TimeShiftConfiguration.of_xml)
+          (Xml.child xml_arg0 "TimeShiftConfiguration") in
+      let tier =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Tier") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let playbackMode =
@@ -7112,31 +12165,38 @@ module CreateChannelResponse =
       let channelName =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
       let arn = (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "Arn") in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ?playbackMode
+        ?outputs ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
-      let playbackMode = field_map json "PlaybackMode" Zz__string.of_json in
-      let outputs = field_map json "Outputs" ResponseOutputs.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let timeShiftConfiguration =
+        field_map json__ "TimeShiftConfiguration"
+          TimeShiftConfiguration.of_json in
+      let tier = field_map json__ "Tier" Zz__string.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
+      let playbackMode = field_map json__ "PlaybackMode" Zz__string.of_json in
+      let outputs = field_map json__ "Outputs" ResponseOutputs.of_json in
       let lastModifiedTime =
-        field_map json "LastModifiedTime" Zz__timestampUnix.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
+        field_map json__ "LastModifiedTime" Zz__timestampUnix.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
       let creationTime =
-        field_map json "CreationTime" Zz__timestampUnix.of_json in
-      let channelState = field_map json "ChannelState" ChannelState.of_json in
-      let channelName = field_map json "ChannelName" Zz__string.of_json in
-      let arn = field_map json "Arn" Zz__string.of_json in
-      make ?tags ?playbackMode ?outputs ?lastModifiedTime ?fillerSlate
-        ?creationTime ?channelState ?channelName ?arn ()
+        field_map json__ "CreationTime" Zz__timestampUnix.of_json in
+      let channelState = field_map json__ "ChannelState" ChannelState.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      let arn = field_map json__ "Arn" Zz__string.of_json in
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ?playbackMode
+        ?outputs ?lastModifiedTime ?fillerSlate ?creationTime ?channelState
+        ?channelName ?arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a channel."]
+  end[@@ocaml.doc
+       "Creates a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module CreateChannelRequest =
   struct
     type nonrec t =
       {
-      channelName: Zz__string.t
-        [@ocaml.doc "The identifier for the channel you are working on."];
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."];
       fillerSlate: SlateSource.t option
         [@ocaml.doc
           "The slate used to fill gaps between programs in the schedule. You must configure filler slate if your channel uses the LINEAR PlaybackMode. MediaTailor doesn't support filler slate for channels using the LOOP PlaybackMode."];
@@ -7146,24 +12206,54 @@ module CreateChannelRequest =
         [@ocaml.doc
           "The type of playback mode to use for this channel. LINEAR - The programs in the schedule play once back-to-back in the schedule. LOOP - The programs in the schedule play back-to-back in an endless loop. When the last program in the schedule stops playing, playback loops back to the first program in the schedule."];
       tags: Zz__mapOf__string.t option
-        [@ocaml.doc "The tags to assign to the channel."]}
+        [@ocaml.doc
+          "The tags to assign to the channel. Tags are key-value pairs that you can associate with Amazon resources to help with organization, access control, and cost tracking. For more information, see Tagging AWS Elemental MediaTailor Resources."];
+      tier: Tier.t option [@ocaml.doc "The tier of the channel."];
+      timeShiftConfiguration: TimeShiftConfiguration.t option
+        [@ocaml.doc
+          "The time-shifted viewing configuration you want to associate to the channel."];
+      audiences: Audiences.t option
+        [@ocaml.doc "The list of audiences defined in channel."]}
     let context_ = "CreateChannelRequest"
     let make ?fillerSlate =
       fun ?tags ->
-        fun ~channelName ->
-          fun ~outputs ->
-            fun ~playbackMode ->
-              fun () ->
-                { fillerSlate; tags; channelName; outputs; playbackMode }
+        fun ?tier ->
+          fun ?timeShiftConfiguration ->
+            fun ?audiences ->
+              fun ~channelName ->
+                fun ~outputs ->
+                  fun ~playbackMode ->
+                    fun () ->
+                      {
+                        fillerSlate;
+                        tags;
+                        tier;
+                        timeShiftConfiguration;
+                        audiences;
+                        channelName;
+                        outputs;
+                        playbackMode
+                      }
     let to_value x =
       structure_to_value
-        [("channelName", (Some (Zz__string.to_value x.channelName)));
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
         ("FillerSlate", (Option.map x.fillerSlate ~f:SlateSource.to_value));
         ("Outputs", (Some (RequestOutputs.to_value x.outputs)));
         ("PlaybackMode", (Some (PlaybackMode.to_value x.playbackMode)));
-        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value))]
+        ("tags", (Option.map x.tags ~f:Zz__mapOf__string.to_value));
+        ("Tier", (Option.map x.tier ~f:Tier.to_value));
+        ("TimeShiftConfiguration",
+          (Option.map x.timeShiftConfiguration
+             ~f:TimeShiftConfiguration.to_value));
+        ("Audiences", (Option.map x.audiences ~f:Audiences.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let audiences =
+        (Option.map ~f:Audiences.of_xml) (Xml.child xml_arg0 "Audiences") in
+      let timeShiftConfiguration =
+        (Option.map ~f:TimeShiftConfiguration.of_xml)
+          (Xml.child xml_arg0 "TimeShiftConfiguration") in
+      let tier = (Option.map ~f:Tier.of_xml) (Xml.child xml_arg0 "Tier") in
       let tags =
         (Option.map ~f:Zz__mapOf__string.of_xml) (Xml.child xml_arg0 "tags") in
       let playbackMode =
@@ -7176,19 +12266,27 @@ module CreateChannelRequest =
         (Option.map ~f:SlateSource.of_xml) (Xml.child xml_arg0 "FillerSlate") in
       let channelName =
         Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "channelName") in
-      make ?tags ~playbackMode ~outputs ?fillerSlate ~channelName ()
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ~playbackMode
+        ~outputs ?fillerSlate ~channelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Zz__mapOf__string.of_json in
+    let of_json json__ =
+      let audiences = field_map json__ "Audiences" Audiences.of_json in
+      let timeShiftConfiguration =
+        field_map json__ "TimeShiftConfiguration"
+          TimeShiftConfiguration.of_json in
+      let tier = field_map json__ "Tier" Tier.of_json in
+      let tags = field_map json__ "Tags" Zz__mapOf__string.of_json in
       let playbackMode =
-        field_map_exn json "PlaybackMode" PlaybackMode.of_json in
-      let outputs = field_map_exn json "Outputs" RequestOutputs.of_json in
-      let fillerSlate = field_map json "FillerSlate" SlateSource.of_json in
-      let channelName = field_map_exn json "ChannelName" Zz__string.of_json in
-      make ?tags ~playbackMode ~outputs ?fillerSlate ~channelName ()
+        field_map_exn json__ "PlaybackMode" PlaybackMode.of_json in
+      let outputs = field_map_exn json__ "Outputs" RequestOutputs.of_json in
+      let fillerSlate = field_map json__ "FillerSlate" SlateSource.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      make ?audiences ?timeShiftConfiguration ?tier ?tags ~playbackMode
+        ~outputs ?fillerSlate ~channelName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates a channel."]
+  end[@@ocaml.doc
+       "Creates a channel. For information about MediaTailor channels, see Working with channels in the MediaTailor User Guide."]
 module ConfigureLogsForPlaybackConfigurationResponse =
   struct
     type nonrec t =
@@ -7197,12 +12295,31 @@ module ConfigureLogsForPlaybackConfigurationResponse =
         [@ocaml.doc
           "The percentage of session logs that MediaTailor sends to your Cloudwatch Logs account."];
       playbackConfigurationName: Zz__string.t option
-        [@ocaml.doc "The name of the playback configuration."]}
+        [@ocaml.doc "The name of the playback configuration."];
+      enabledLoggingStrategies: Zz__listOfLoggingStrategies.t option
+        [@ocaml.doc
+          "The method used for collecting logs from AWS Elemental MediaTailor. LEGACY_CLOUDWATCH indicates that MediaTailor is sending logs directly to Amazon CloudWatch Logs. VENDED_LOGS indicates that MediaTailor is sending logs to CloudWatch, which then vends the logs to your destination of choice. Supported destinations are CloudWatch Logs log group, Amazon S3 bucket, and Amazon Data Firehose stream."];
+      adsInteractionLog: AdsInteractionLog.t option
+        [@ocaml.doc
+          "The event types that MediaTailor emits in logs for interactions with the ADS."];
+      manifestServiceInteractionLog: ManifestServiceInteractionLog.t option
+        [@ocaml.doc
+          "The event types that MediaTailor emits in logs for interactions with the origin server."]}
     type nonrec error =
       [ `Unknown_operation_error of (string * string option) ]
     let make ?percentEnabled =
       fun ?playbackConfigurationName ->
-        fun () -> { percentEnabled; playbackConfigurationName }
+        fun ?enabledLoggingStrategies ->
+          fun ?adsInteractionLog ->
+            fun ?manifestServiceInteractionLog ->
+              fun () ->
+                {
+                  percentEnabled;
+                  playbackConfigurationName;
+                  enabledLoggingStrategies;
+                  adsInteractionLog;
+                  manifestServiceInteractionLog
+                }
     let error_of_json name json =
       match name with
       | name ->
@@ -7224,46 +12341,111 @@ module ConfigureLogsForPlaybackConfigurationResponse =
         [("PercentEnabled",
            (Option.map x.percentEnabled ~f:Zz__integer.to_value));
         ("PlaybackConfigurationName",
-          (Option.map x.playbackConfigurationName ~f:Zz__string.to_value))]
+          (Option.map x.playbackConfigurationName ~f:Zz__string.to_value));
+        ("EnabledLoggingStrategies",
+          (Option.map x.enabledLoggingStrategies
+             ~f:Zz__listOfLoggingStrategies.to_value));
+        ("AdsInteractionLog",
+          (Option.map x.adsInteractionLog ~f:AdsInteractionLog.to_value));
+        ("ManifestServiceInteractionLog",
+          (Option.map x.manifestServiceInteractionLog
+             ~f:ManifestServiceInteractionLog.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let manifestServiceInteractionLog =
+        (Option.map ~f:ManifestServiceInteractionLog.of_xml)
+          (Xml.child xml_arg0 "ManifestServiceInteractionLog") in
+      let adsInteractionLog =
+        (Option.map ~f:AdsInteractionLog.of_xml)
+          (Xml.child xml_arg0 "AdsInteractionLog") in
+      let enabledLoggingStrategies =
+        (Option.map ~f:Zz__listOfLoggingStrategies.of_xml)
+          (Xml.child xml_arg0 "EnabledLoggingStrategies") in
       let playbackConfigurationName =
         (Option.map ~f:Zz__string.of_xml)
           (Xml.child xml_arg0 "PlaybackConfigurationName") in
       let percentEnabled =
         (Option.map ~f:Zz__integer.of_xml)
           (Xml.child xml_arg0 "PercentEnabled") in
-      make ?playbackConfigurationName ?percentEnabled ()
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ?playbackConfigurationName ?percentEnabled
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let manifestServiceInteractionLog =
+        field_map json__ "ManifestServiceInteractionLog"
+          ManifestServiceInteractionLog.of_json in
+      let adsInteractionLog =
+        field_map json__ "AdsInteractionLog" AdsInteractionLog.of_json in
+      let enabledLoggingStrategies =
+        field_map json__ "EnabledLoggingStrategies"
+          Zz__listOfLoggingStrategies.of_json in
       let playbackConfigurationName =
-        field_map json "PlaybackConfigurationName" Zz__string.of_json in
+        field_map json__ "PlaybackConfigurationName" Zz__string.of_json in
       let percentEnabled =
-        field_map json "PercentEnabled" Zz__integer.of_json in
-      make ?playbackConfigurationName ?percentEnabled ()
+        field_map json__ "PercentEnabled" Zz__integer.of_json in
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ?playbackConfigurationName ?percentEnabled
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configures Amazon CloudWatch log settings for a playback configuration."]
+       "Defines where AWS Elemental MediaTailor sends logs for the playback configuration."]
 module ConfigureLogsForPlaybackConfigurationRequest =
   struct
     type nonrec t =
       {
       percentEnabled: Zz__integer.t
         [@ocaml.doc
-          "The percentage of session logs that MediaTailor sends to your Cloudwatch Logs account. For example, if your playback configuration has 1000 sessions and percentEnabled is set to 60, MediaTailor sends logs for 600 of the sessions to CloudWatch Logs. MediaTailor decides at random which of the playback configuration sessions to send logs for. If you want to view logs for a specific session, you can use the debug log mode. Valid values: 0 - 100"];
+          "The percentage of session logs that MediaTailor sends to your CloudWatch Logs account. For example, if your playback configuration has 1000 sessions and percentEnabled is set to 60, MediaTailor sends logs for 600 of the sessions to CloudWatch Logs. MediaTailor decides at random which of the playback configuration sessions to send logs for. If you want to view logs for a specific session, you can use the debug log mode. Valid values: 0 - 100"];
       playbackConfigurationName: Zz__string.t
-        [@ocaml.doc "The name of the playback configuration."]}
+        [@ocaml.doc "The name of the playback configuration."];
+      enabledLoggingStrategies: Zz__listOfLoggingStrategies.t option
+        [@ocaml.doc
+          "The method used for collecting logs from AWS Elemental MediaTailor. To configure MediaTailor to send logs directly to Amazon CloudWatch Logs, choose LEGACY_CLOUDWATCH. To configure MediaTailor to send logs to CloudWatch, which then vends the logs to your destination of choice, choose VENDED_LOGS. Supported destinations are CloudWatch Logs log group, Amazon S3 bucket, and Amazon Data Firehose stream. To use vended logs, you must configure the delivery destination in Amazon CloudWatch, as described in Enable logging from AWS services, Logging that requires additional permissions \\[V2\\]."];
+      adsInteractionLog: AdsInteractionLog.t option
+        [@ocaml.doc
+          "The event types that MediaTailor emits in logs for interactions with the ADS."];
+      manifestServiceInteractionLog: ManifestServiceInteractionLog.t option
+        [@ocaml.doc
+          "The event types that MediaTailor emits in logs for interactions with the origin server."]}
     let context_ = "ConfigureLogsForPlaybackConfigurationRequest"
-    let make ~percentEnabled =
-      fun ~playbackConfigurationName ->
-        fun () -> { percentEnabled; playbackConfigurationName }
+    let make ?enabledLoggingStrategies =
+      fun ?adsInteractionLog ->
+        fun ?manifestServiceInteractionLog ->
+          fun ~percentEnabled ->
+            fun ~playbackConfigurationName ->
+              fun () ->
+                {
+                  enabledLoggingStrategies;
+                  adsInteractionLog;
+                  manifestServiceInteractionLog;
+                  percentEnabled;
+                  playbackConfigurationName
+                }
     let to_value x =
       structure_to_value
         [("PercentEnabled", (Some (Zz__integer.to_value x.percentEnabled)));
         ("PlaybackConfigurationName",
-          (Some (Zz__string.to_value x.playbackConfigurationName)))]
+          (Some (Zz__string.to_value x.playbackConfigurationName)));
+        ("EnabledLoggingStrategies",
+          (Option.map x.enabledLoggingStrategies
+             ~f:Zz__listOfLoggingStrategies.to_value));
+        ("AdsInteractionLog",
+          (Option.map x.adsInteractionLog ~f:AdsInteractionLog.to_value));
+        ("ManifestServiceInteractionLog",
+          (Option.map x.manifestServiceInteractionLog
+             ~f:ManifestServiceInteractionLog.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let manifestServiceInteractionLog =
+        (Option.map ~f:ManifestServiceInteractionLog.of_xml)
+          (Xml.child xml_arg0 "ManifestServiceInteractionLog") in
+      let adsInteractionLog =
+        (Option.map ~f:AdsInteractionLog.of_xml)
+          (Xml.child xml_arg0 "AdsInteractionLog") in
+      let enabledLoggingStrategies =
+        (Option.map ~f:Zz__listOfLoggingStrategies.of_xml)
+          (Xml.child xml_arg0 "EnabledLoggingStrategies") in
       let playbackConfigurationName =
         Zz__string.of_xml
           (Xml.child_exn ~context:context_ xml_arg0
@@ -7271,14 +12453,99 @@ module ConfigureLogsForPlaybackConfigurationRequest =
       let percentEnabled =
         Zz__integer.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "PercentEnabled") in
-      make ~playbackConfigurationName ~percentEnabled ()
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ~playbackConfigurationName ~percentEnabled
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let manifestServiceInteractionLog =
+        field_map json__ "ManifestServiceInteractionLog"
+          ManifestServiceInteractionLog.of_json in
+      let adsInteractionLog =
+        field_map json__ "AdsInteractionLog" AdsInteractionLog.of_json in
+      let enabledLoggingStrategies =
+        field_map json__ "EnabledLoggingStrategies"
+          Zz__listOfLoggingStrategies.of_json in
       let playbackConfigurationName =
-        field_map_exn json "PlaybackConfigurationName" Zz__string.of_json in
+        field_map_exn json__ "PlaybackConfigurationName" Zz__string.of_json in
       let percentEnabled =
-        field_map_exn json "PercentEnabled" Zz__integer.of_json in
-      make ~playbackConfigurationName ~percentEnabled ()
+        field_map_exn json__ "PercentEnabled" Zz__integer.of_json in
+      make ?manifestServiceInteractionLog ?adsInteractionLog
+        ?enabledLoggingStrategies ~playbackConfigurationName ~percentEnabled
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configures Amazon CloudWatch log settings for a playback configuration."]
+module ConfigureLogsForChannelResponse =
+  struct
+    type nonrec t =
+      {
+      channelName: Zz__string.t option
+        [@ocaml.doc "The name of the channel."];
+      logTypes: LogTypes.t option [@ocaml.doc "The types of logs collected."]}
+    type nonrec error =
+      [ `Unknown_operation_error of (string * string option) ]
+    let make ?channelName =
+      fun ?logTypes -> fun () -> { channelName; logTypes }
+    let error_of_json name json =
+      match name with
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ChannelName", (Option.map x.channelName ~f:Zz__string.to_value));
+        ("LogTypes", (Option.map x.logTypes ~f:LogTypes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypes =
+        (Option.map ~f:LogTypes.of_xml) (Xml.child xml_arg0 "LogTypes") in
+      let channelName =
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ChannelName") in
+      make ?logTypes ?channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypes = field_map json__ "LogTypes" LogTypes.of_json in
+      let channelName = field_map json__ "ChannelName" Zz__string.of_json in
+      make ?logTypes ?channelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configures Amazon CloudWatch log settings for a channel."]
+module ConfigureLogsForChannelRequest =
+  struct
+    type nonrec t =
+      {
+      channelName: Zz__string.t [@ocaml.doc "The name of the channel."];
+      logTypes: LogTypes.t [@ocaml.doc "The types of logs to collect."]}
+    let context_ = "ConfigureLogsForChannelRequest"
+    let make ~channelName =
+      fun ~logTypes -> fun () -> { channelName; logTypes }
+    let to_value x =
+      structure_to_value
+        [("ChannelName", (Some (Zz__string.to_value x.channelName)));
+        ("LogTypes", (Some (LogTypes.to_value x.logTypes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypes =
+        LogTypes.of_xml (Xml.child_exn ~context:context_ xml_arg0 "LogTypes") in
+      let channelName =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ChannelName") in
+      make ~logTypes ~channelName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypes = field_map_exn json__ "LogTypes" LogTypes.of_json in
+      let channelName = field_map_exn json__ "ChannelName" Zz__string.of_json in
+      make ~logTypes ~channelName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Configures Amazon CloudWatch log settings for a channel."]

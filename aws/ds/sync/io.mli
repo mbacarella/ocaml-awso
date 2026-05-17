@@ -53,6 +53,11 @@ val create_directory :
     ?cfg:Awso.Cfg.t ->
       CreateDirectoryRequest.t ->
         (CreateDirectoryResult.t, CreateDirectoryResult.error) Result.t
+val create_hybrid_a_d :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateHybridADRequest.t ->
+        (CreateHybridADResult.t, CreateHybridADResult.error) Result.t
 val create_log_subscription :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -74,6 +79,11 @@ val create_trust :
     ?cfg:Awso.Cfg.t ->
       CreateTrustRequest.t ->
         (CreateTrustResult.t, CreateTrustResult.error) Result.t
+val delete_a_d_assessment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteADAssessmentRequest.t ->
+        (DeleteADAssessmentResult.t, DeleteADAssessmentResult.error) Result.t
 val delete_conditional_forwarder :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -113,6 +123,18 @@ val deregister_event_topic :
       DeregisterEventTopicRequest.t ->
         (DeregisterEventTopicResult.t, DeregisterEventTopicResult.error)
           Result.t
+val describe_a_d_assessment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeADAssessmentRequest.t ->
+        (DescribeADAssessmentResult.t, DescribeADAssessmentResult.error)
+          Result.t
+val describe_c_a_enrollment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCAEnrollmentPolicyRequest.t ->
+        (DescribeCAEnrollmentPolicyResult.t,
+          DescribeCAEnrollmentPolicyResult.error) Result.t
 val describe_certificate :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -137,6 +159,12 @@ val describe_directories :
       DescribeDirectoriesRequest.t ->
         (DescribeDirectoriesResult.t, DescribeDirectoriesResult.error)
           Result.t
+val describe_directory_data_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeDirectoryDataAccessRequest.t ->
+        (DescribeDirectoryDataAccessResult.t,
+          DescribeDirectoryDataAccessResult.error) Result.t
 val describe_domain_controllers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -149,6 +177,12 @@ val describe_event_topics :
       DescribeEventTopicsRequest.t ->
         (DescribeEventTopicsResult.t, DescribeEventTopicsResult.error)
           Result.t
+val describe_hybrid_a_d_update :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeHybridADUpdateRequest.t ->
+        (DescribeHybridADUpdateResult.t, DescribeHybridADUpdateResult.error)
+          Result.t
 val describe_l_d_a_p_s_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -160,6 +194,11 @@ val describe_regions :
     ?cfg:Awso.Cfg.t ->
       DescribeRegionsRequest.t ->
         (DescribeRegionsResult.t, DescribeRegionsResult.error) Result.t
+val describe_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSettingsRequest.t ->
+        (DescribeSettingsResult.t, DescribeSettingsResult.error) Result.t
 val describe_shared_directories :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -176,12 +215,30 @@ val describe_trusts :
     ?cfg:Awso.Cfg.t ->
       DescribeTrustsRequest.t ->
         (DescribeTrustsResult.t, DescribeTrustsResult.error) Result.t
+val describe_update_directory :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeUpdateDirectoryRequest.t ->
+        (DescribeUpdateDirectoryResult.t,
+          DescribeUpdateDirectoryResult.error) Result.t
+val disable_c_a_enrollment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisableCAEnrollmentPolicyRequest.t ->
+        (DisableCAEnrollmentPolicyResult.t,
+          DisableCAEnrollmentPolicyResult.error) Result.t
 val disable_client_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DisableClientAuthenticationRequest.t ->
         (DisableClientAuthenticationResult.t,
           DisableClientAuthenticationResult.error) Result.t
+val disable_directory_data_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DisableDirectoryDataAccessRequest.t ->
+        (DisableDirectoryDataAccessResult.t,
+          DisableDirectoryDataAccessResult.error) Result.t
 val disable_l_d_a_p_s :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -197,12 +254,24 @@ val disable_sso :
     ?cfg:Awso.Cfg.t ->
       DisableSsoRequest.t ->
         (DisableSsoResult.t, DisableSsoResult.error) Result.t
+val enable_c_a_enrollment_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EnableCAEnrollmentPolicyRequest.t ->
+        (EnableCAEnrollmentPolicyResult.t,
+          EnableCAEnrollmentPolicyResult.error) Result.t
 val enable_client_authentication :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       EnableClientAuthenticationRequest.t ->
         (EnableClientAuthenticationResult.t,
           EnableClientAuthenticationResult.error) Result.t
+val enable_directory_data_access :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      EnableDirectoryDataAccessRequest.t ->
+        (EnableDirectoryDataAccessResult.t,
+          EnableDirectoryDataAccessResult.error) Result.t
 val enable_l_d_a_p_s :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -228,6 +297,11 @@ val get_snapshot_limits :
     ?cfg:Awso.Cfg.t ->
       GetSnapshotLimitsRequest.t ->
         (GetSnapshotLimitsResult.t, GetSnapshotLimitsResult.error) Result.t
+val list_a_d_assessments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListADAssessmentsRequest.t ->
+        (ListADAssessmentsResult.t, ListADAssessmentsResult.error) Result.t
 val list_certificates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -305,6 +379,11 @@ val share_directory :
     ?cfg:Awso.Cfg.t ->
       ShareDirectoryRequest.t ->
         (ShareDirectoryResult.t, ShareDirectoryResult.error) Result.t
+val start_a_d_assessment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartADAssessmentRequest.t ->
+        (StartADAssessmentResult.t, StartADAssessmentResult.error) Result.t
 val start_schema_extension :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -322,6 +401,17 @@ val update_conditional_forwarder :
       UpdateConditionalForwarderRequest.t ->
         (UpdateConditionalForwarderResult.t,
           UpdateConditionalForwarderResult.error) Result.t
+val update_directory_setup :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDirectorySetupRequest.t ->
+        (UpdateDirectorySetupResult.t, UpdateDirectorySetupResult.error)
+          Result.t
+val update_hybrid_a_d :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateHybridADRequest.t ->
+        (UpdateHybridADResult.t, UpdateHybridADResult.error) Result.t
 val update_number_of_domain_controllers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -333,6 +423,11 @@ val update_radius :
     ?cfg:Awso.Cfg.t ->
       UpdateRadiusRequest.t ->
         (UpdateRadiusResult.t, UpdateRadiusResult.error) Result.t
+val update_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSettingsRequest.t ->
+        (UpdateSettingsResult.t, UpdateSettingsResult.error) Result.t
 val update_trust :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

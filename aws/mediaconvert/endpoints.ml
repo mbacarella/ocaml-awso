@@ -14,6 +14,8 @@ type ('i, 'o, 'e) t =
   CreatePresetResponse.error) t 
   | CreateQueue: (CreateQueueRequest.t, CreateQueueResponse.t,
   CreateQueueResponse.error) t 
+  | CreateResourceShare: (CreateResourceShareRequest.t,
+  CreateResourceShareResponse.t, CreateResourceShareResponse.error) t 
   | DeleteJobTemplate: (DeleteJobTemplateRequest.t,
   DeleteJobTemplateResponse.t, DeleteJobTemplateResponse.error) t 
   | DeletePolicy: (DeletePolicyRequest.t, DeletePolicyResponse.t,
@@ -30,6 +32,8 @@ type ('i, 'o, 'e) t =
   | GetJob: (GetJobRequest.t, GetJobResponse.t, GetJobResponse.error) t 
   | GetJobTemplate: (GetJobTemplateRequest.t, GetJobTemplateResponse.t,
   GetJobTemplateResponse.error) t 
+  | GetJobsQueryResults: (GetJobsQueryResultsRequest.t,
+  GetJobsQueryResultsResponse.t, GetJobsQueryResultsResponse.error) t 
   | GetPolicy: (GetPolicyRequest.t, GetPolicyResponse.t,
   GetPolicyResponse.error) t 
   | GetPreset: (GetPresetRequest.t, GetPresetResponse.t,
@@ -46,8 +50,15 @@ type ('i, 'o, 'e) t =
   ListQueuesResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
+  | ListVersions: (ListVersionsRequest.t, ListVersionsResponse.t,
+  ListVersionsResponse.error) t 
+  | Probe: (ProbeRequest.t, ProbeResponse.t, ProbeResponse.error) t 
   | PutPolicy: (PutPolicyRequest.t, PutPolicyResponse.t,
   PutPolicyResponse.error) t 
+  | SearchJobs: (SearchJobsRequest.t, SearchJobsResponse.t,
+  SearchJobsResponse.error) t 
+  | StartJobsQuery: (StartJobsQueryRequest.t, StartJobsQueryResponse.t,
+  StartJobsQueryResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -66,6 +77,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateJobTemplate -> `POST
   | CreatePreset -> `POST
   | CreateQueue -> `POST
+  | CreateResourceShare -> `POST
   | DeleteJobTemplate -> `DELETE
   | DeletePolicy -> `DELETE
   | DeletePreset -> `DELETE
@@ -74,6 +86,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociateCertificate -> `DELETE
   | GetJob -> `GET
   | GetJobTemplate -> `GET
+  | GetJobsQueryResults -> `GET
   | GetPolicy -> `GET
   | GetPreset -> `GET
   | GetQueue -> `GET
@@ -82,7 +95,11 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListPresets -> `GET
   | ListQueues -> `GET
   | ListTagsForResource -> `GET
+  | ListVersions -> `GET
+  | Probe -> `POST
   | PutPolicy -> `PUT
+  | SearchJobs -> `GET
+  | StartJobsQuery -> `POST
   | TagResource -> `POST
   | UntagResource -> `PUT
   | UpdateJobTemplate -> `PUT
@@ -102,6 +119,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreatePreset ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/presets"
       | CreateQueue -> (Format.kasprintf Uri.of_string) "/2017-08-29/queues"
+      | CreateResourceShare ->
+          (Format.kasprintf Uri.of_string) "/2017-08-29/resourceShares"
       | DeleteJobTemplate ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/jobTemplates/%s"
             (Zz__string.to_header x.DeleteJobTemplateRequest.name)
@@ -123,6 +142,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetJobTemplate ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/jobTemplates/%s"
             (Zz__string.to_header x.GetJobTemplateRequest.name)
+      | GetJobsQueryResults ->
+          (Format.kasprintf Uri.of_string) "/2017-08-29/jobsQueries/%s"
+            (Zz__string.to_header x.GetJobsQueryResultsRequest.id)
       | GetPolicy -> (Format.kasprintf Uri.of_string) "/2017-08-29/policy"
       | GetPreset ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/presets/%s"
@@ -204,7 +226,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/tags/%s"
             (Zz__string.to_header x.ListTagsForResourceRequest.arn)
+      | ListVersions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2017-08-29/versions")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("maxResults", (Zz__integerMin1Max20.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken])
+      | Probe -> (Format.kasprintf Uri.of_string) "/2017-08-29/probe"
       | PutPolicy -> (Format.kasprintf Uri.of_string) "/2017-08-29/policy"
+      | SearchJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/2017-08-29/search")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("inputFile", (Zz__string.to_header v)))
+                  x.inputFile;
+               Option.map
+                 ~f:(fun v ->
+                       ("maxResults", (Zz__integerMin1Max20.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (Zz__string.to_header v)))
+                 x.nextToken;
+               Option.map ~f:(fun v -> ("order", (Order.to_header v)))
+                 x.order;
+               Option.map ~f:(fun v -> ("queue", (Zz__string.to_header v)))
+                 x.queue;
+               Option.map ~f:(fun v -> ("status", (JobStatus.to_header v)))
+                 x.status])
+      | StartJobsQuery ->
+          (Format.kasprintf Uri.of_string) "/2017-08-29/jobsQueries"
       | TagResource -> (Format.kasprintf Uri.of_string) "/2017-08-29/tags"
       | UntagResource ->
           (Format.kasprintf Uri.of_string) "/2017-08-29/tags/%s"
@@ -267,6 +323,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("hopDestinations",
                                 (Zz__listOfHopDestination.to_value x)));
+                      Option.map req.CreateJobRequest.jobEngineVersion
+                        ~f:(fun x ->
+                              ("jobEngineVersion", (Zz__string.to_value x)));
                       Option.map req.CreateJobRequest.jobTemplate
                         ~f:(fun x -> ("jobTemplate", (Zz__string.to_value x)));
                       Option.map req.CreateJobRequest.priority
@@ -390,9 +449,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CreateQueueRequest.description
+                      [Option.map req.CreateQueueRequest.concurrentJobs
                          ~f:(fun x ->
-                               ("description", (Zz__string.to_value x)));
+                               ("concurrentJobs", (Zz__integer.to_value x)));
+                      Option.map req.CreateQueueRequest.description
+                        ~f:(fun x -> ("description", (Zz__string.to_value x)));
+                      Option.map
+                        req.CreateQueueRequest.maximumConcurrentFeeds
+                        ~f:(fun x ->
+                              ("maximumConcurrentFeeds",
+                                (Zz__integerMin0.to_value x)));
                       Some
                         ("name",
                           (Zz__string.to_value req.CreateQueueRequest.name));
@@ -408,6 +474,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x -> ("status", (QueueStatus.to_value x)));
                       Option.map req.CreateQueueRequest.tags
                         ~f:(fun x -> ("tags", (Zz__mapOf__string.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateResourceShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("jobId",
+                           (Zz__string.to_value
+                              req.CreateResourceShareRequest.jobId));
+                      Some
+                        ("supportCaseId",
+                          (Zz__string.to_value
+                             req.CreateResourceShareRequest.supportCaseId))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -451,6 +541,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetJobTemplate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetJobsQueryResults ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPolicy ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -475,7 +568,61 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListTagsForResource ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListVersions ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | Probe ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ProbeRequest.inputFiles
+                         ~f:(fun x ->
+                               ("inputFiles",
+                                 (Zz__listOfProbeInputFile.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutPolicy -> Awso.Http.Request.make (method_of_endpoint endp)
+  | SearchJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartJobsQuery ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartJobsQueryRequest.filterList
+                         ~f:(fun x ->
+                               ("filterList",
+                                 (Zz__listOfJobsQueryFilter.to_value x)));
+                      Option.map req.StartJobsQueryRequest.maxResults
+                        ~f:(fun x ->
+                              ("maxResults",
+                                (Zz__integerMin1Max20.to_value x)));
+                      Option.map req.StartJobsQueryRequest.nextToken
+                        ~f:(fun x -> ("nextToken", (Zz__string.to_value x)));
+                      Option.map req.StartJobsQueryRequest.order
+                        ~f:(fun x -> ("order", (Order.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | TagResource ->
       let (headers, body) =
         let headers =
@@ -585,6 +732,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateQueueResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateQueueResponse.error_of_json))
+  | CreateResourceShare ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateResourceShareResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateResourceShareResponse.error_of_json))
   | DeleteJobTemplate ->
       if is_success
       then
@@ -640,6 +796,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetJobTemplateResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetJobTemplateResponse.error_of_json))
+  | GetJobsQueryResults ->
+      if is_success
+      then Ok (GetJobsQueryResultsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetJobsQueryResultsResponse.error_of_json))
   | GetPolicy ->
       if is_success
       then Ok (GetPolicyResponse.of_json (response_to_json resp))
@@ -675,10 +837,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceResponse.error_of_json))
+  | ListVersions ->
+      if is_success
+      then Ok (ListVersionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListVersionsResponse.error_of_json))
+  | Probe ->
+      if is_success
+      then Ok (ProbeResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ProbeResponse.error_of_json))
   | PutPolicy ->
       if is_success
       then Ok (PutPolicyResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some PutPolicyResponse.error_of_json))
+  | SearchJobs ->
+      if is_success
+      then Ok (SearchJobsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some SearchJobsResponse.error_of_json))
+  | StartJobsQuery ->
+      if is_success
+      then Ok (StartJobsQueryResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some StartJobsQueryResponse.error_of_json))
   | TagResource ->
       if is_success
       then

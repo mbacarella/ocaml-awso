@@ -19,6 +19,8 @@ let create_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateContent input
 let create_knowledge_base ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateKnowledgeBase input
+let create_quick_response ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateQuickResponse input
 let create_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSession input
 let delete_assistant ?endpoint_url ?cfg input =
@@ -27,8 +29,12 @@ let delete_assistant_association ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAssistantAssociation input
 let delete_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteContent input
+let delete_import_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteImportJob input
 let delete_knowledge_base ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteKnowledgeBase input
+let delete_quick_response ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteQuickResponse input
 let get_assistant ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetAssistant input
 let get_assistant_association ?endpoint_url ?cfg input =
@@ -37,8 +43,12 @@ let get_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContent input
 let get_content_summary ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetContentSummary input
+let get_import_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetImportJob input
 let get_knowledge_base ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetKnowledgeBase input
+let get_quick_response ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetQuickResponse input
 let get_recommendations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRecommendations input
 let get_session ?endpoint_url ?cfg input =
@@ -49,8 +59,12 @@ let list_assistants ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAssistants input
 let list_contents ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListContents input
+let list_import_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListImportJobs input
 let list_knowledge_bases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKnowledgeBases input
+let list_quick_responses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListQuickResponses input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let notify_recommendations_received ?endpoint_url ?cfg input =
@@ -61,10 +75,14 @@ let remove_knowledge_base_template_uri ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemoveKnowledgeBaseTemplateUri input
 let search_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchContent input
+let search_quick_responses ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchQuickResponses input
 let search_sessions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SearchSessions input
 let start_content_upload ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartContentUpload input
+let start_import_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartImportJob input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
@@ -73,3 +91,5 @@ let update_content ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateContent input
 let update_knowledge_base_template_uri ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateKnowledgeBaseTemplateUri input
+let update_quick_response ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateQuickResponse input

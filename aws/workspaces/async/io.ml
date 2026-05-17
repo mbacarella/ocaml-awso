@@ -11,28 +11,42 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let accept_account_link_invitation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AcceptAccountLinkInvitation input
 let associate_connection_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateConnectionAlias input
 let associate_ip_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateIpGroups input
+let associate_workspace_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateWorkspaceApplication input
 let authorize_ip_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AuthorizeIpRules input
 let copy_workspace_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CopyWorkspaceImage input
+let create_account_link_invitation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAccountLinkInvitation input
 let create_connect_client_add_in ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConnectClientAddIn input
 let create_connection_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConnectionAlias input
 let create_ip_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIpGroup input
+let create_standby_workspaces ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateStandbyWorkspaces input
 let create_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTags input
 let create_updated_workspace_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUpdatedWorkspaceImage input
 let create_workspace_bundle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkspaceBundle input
+let create_workspace_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkspaceImage input
 let create_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateWorkspaces input
+let create_workspaces_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateWorkspacesPool input
+let delete_account_link_invitation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAccountLinkInvitation input
 let delete_client_branding ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClientBranding input
 let delete_connect_client_add_in ?endpoint_url ?cfg input =
@@ -47,12 +61,20 @@ let delete_workspace_bundle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkspaceBundle input
 let delete_workspace_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWorkspaceImage input
+let deploy_workspace_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeployWorkspaceApplications input
 let deregister_workspace_directory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterWorkspaceDirectory input
 let describe_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccount input
 let describe_account_modifications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccountModifications input
+let describe_application_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeApplicationAssociations input
+let describe_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeApplications input
+let describe_bundle_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeBundleAssociations input
 let describe_client_branding ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClientBranding input
 let describe_client_properties ?endpoint_url ?cfg input =
@@ -63,10 +85,16 @@ let describe_connection_alias_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConnectionAliasPermissions input
 let describe_connection_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConnectionAliases input
+let describe_custom_workspace_image_import ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCustomWorkspaceImageImport input
+let describe_image_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeImageAssociations input
 let describe_ip_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIpGroups input
 let describe_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTags input
+let describe_workspace_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWorkspaceAssociations input
 let describe_workspace_bundles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkspaceBundles input
 let describe_workspace_directories ?endpoint_url ?cfg input =
@@ -81,24 +109,45 @@ let describe_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkspaces input
 let describe_workspaces_connection_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeWorkspacesConnectionStatus input
+let describe_workspaces_pool_sessions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWorkspacesPoolSessions input
+let describe_workspaces_pools ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeWorkspacesPools input
 let disassociate_connection_alias ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateConnectionAlias input
 let disassociate_ip_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateIpGroups input
+let disassociate_workspace_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateWorkspaceApplication input
+let get_account_link ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetAccountLink input
 let import_client_branding ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportClientBranding input
+let import_custom_workspace_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ImportCustomWorkspaceImage input
 let import_workspace_image ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportWorkspaceImage input
+let list_account_links ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAccountLinks input
 let list_available_management_cidr_ranges ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAvailableManagementCidrRanges input
 let migrate_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.MigrateWorkspace input
 let modify_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyAccount input
+let modify_certificate_based_auth_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyCertificateBasedAuthProperties
+    input
 let modify_client_properties ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyClientProperties input
+let modify_endpoint_encryption_mode ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyEndpointEncryptionMode input
+let modify_saml_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifySamlProperties input
 let modify_selfservice_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifySelfservicePermissions input
+let modify_streaming_properties ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyStreamingProperties input
 let modify_workspace_access_properties ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyWorkspaceAccessProperties input
 let modify_workspace_creation_properties ?endpoint_url ?cfg input =
@@ -113,16 +162,26 @@ let rebuild_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebuildWorkspaces input
 let register_workspace_directory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RegisterWorkspaceDirectory input
+let reject_account_link_invitation ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RejectAccountLinkInvitation input
 let restore_workspace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreWorkspace input
 let revoke_ip_rules ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeIpRules input
 let start_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartWorkspaces input
+let start_workspaces_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartWorkspacesPool input
 let stop_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopWorkspaces input
+let stop_workspaces_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopWorkspacesPool input
 let terminate_workspaces ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TerminateWorkspaces input
+let terminate_workspaces_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateWorkspacesPool input
+let terminate_workspaces_pool_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TerminateWorkspacesPoolSession input
 let update_connect_client_add_in ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConnectClientAddIn input
 let update_connection_alias_permission ?endpoint_url ?cfg input =
@@ -133,3 +192,5 @@ let update_workspace_bundle ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWorkspaceBundle input
 let update_workspace_image_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWorkspaceImagePermission input
+let update_workspaces_pool ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWorkspacesPool input

@@ -28,6 +28,29 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let cancel_capacity_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityTaskId =
+         flag "capacity-task-id" (required string)
+           ~doc:"STRING CapacityTaskId"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_capacity_task
+           (Values.CancelCapacityTaskInput.make ~capacityTaskId
+              ~outpostIdentifier ())
+           (Some Values.CancelCapacityTaskOutput.to_json)
+           (Some Values.CancelCapacityTaskOutput.error_to_json)])
 let cancel_order =
   Command.async ~summary:""
     ([%map_open.Command
@@ -54,24 +77,25 @@ let create_order =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and lineItems =
+         flag "line-items" (optional json_arg)
+           ~doc:"JSON LineItemRequestListDefinition"
        and paymentTerm =
          flag "payment-term" (optional json_arg) ~doc:"JSON PaymentTerm"
        and outpostIdentifier =
          flag "outpost-identifier" (required string)
            ~doc:"STRING OutpostIdentifier"
-       and lineItems =
-         flag "line-items" (required json_arg)
-           ~doc:"JSON LineItemRequestListDefinition"
        and paymentOption =
          flag "payment-option" (required json_arg) ~doc:"JSON PaymentOption" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_order
            (Values.CreateOrderInput.make
+              ?lineItems:(Option.map
+                            ~f:Values.LineItemRequestListDefinition.of_json
+                            lineItems)
               ?paymentTerm:(Option.map ~f:Values.PaymentTerm.of_json
                               paymentTerm) ~outpostIdentifier
-              ~lineItems:(Values.LineItemRequestListDefinition.of_json
-                            lineItems)
               ~paymentOption:(Values.PaymentOption.of_json paymentOption) ())
            (Some Values.CreateOrderOutput.to_json)
            (Some Values.CreateOrderOutput.error_to_json)])
@@ -111,6 +135,35 @@ let create_outpost =
                                         supportedHardwareType) ~name ~siteId
               ()) (Some Values.CreateOutpostOutput.to_json)
            (Some Values.CreateOutpostOutput.error_to_json)])
+let create_renewal =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string)
+           ~doc:"STRING AutoFillIdempotencyToken"
+       and paymentOption =
+         flag "payment-option" (required json_arg) ~doc:"JSON PaymentOption"
+       and paymentTerm =
+         flag "payment-term" (required json_arg) ~doc:"JSON PaymentTerm"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_renewal
+           (Values.CreateRenewalInput.make ?clientToken
+              ~paymentOption:(Values.PaymentOption.of_json paymentOption)
+              ~paymentTerm:(Values.PaymentTerm.of_json paymentTerm)
+              ~outpostIdentifier ())
+           (Some Values.CreateRenewalOutput.to_json)
+           (Some Values.CreateRenewalOutput.error_to_json)])
 let create_site =
   Command.async ~summary:""
     ([%map_open.Command
@@ -180,6 +233,29 @@ let delete_site =
            Io.delete_site (Values.DeleteSiteInput.make ~siteId ())
            (Some Values.DeleteSiteOutput.to_json)
            (Some Values.DeleteSiteOutput.error_to_json)])
+let get_capacity_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and capacityTaskId =
+         flag "capacity-task-id" (required string)
+           ~doc:"STRING CapacityTaskId"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_task
+           (Values.GetCapacityTaskInput.make ~capacityTaskId
+              ~outpostIdentifier ())
+           (Some Values.GetCapacityTaskOutput.to_json)
+           (Some Values.GetCapacityTaskOutput.error_to_json)])
 let get_catalog_item =
   Command.async ~summary:""
     ([%map_open.Command
@@ -198,6 +274,24 @@ let get_catalog_item =
            (Values.GetCatalogItemInput.make ~catalogItemId ())
            (Some Values.GetCatalogItemOutput.to_json)
            (Some Values.GetCatalogItemOutput.error_to_json)])
+let get_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectionId =
+         flag "connection-id" (required string) ~doc:"STRING ConnectionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_connection
+           (Values.GetConnectionRequest.make ~connectionId ())
+           (Some Values.GetConnectionResponse.to_json)
+           (Some Values.GetConnectionResponse.error_to_json)])
 let get_order =
   Command.async ~summary:""
     ([%map_open.Command
@@ -231,6 +325,30 @@ let get_outpost =
            Io.get_outpost (Values.GetOutpostInput.make ~outpostId ())
            (Some Values.GetOutpostOutput.to_json)
            (Some Values.GetOutpostOutput.error_to_json)])
+let get_outpost_billing_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_outpost_billing_information
+           (Values.GetOutpostBillingInformationInput.make ?nextToken
+              ?maxResults ~outpostIdentifier ())
+           (Some Values.GetOutpostBillingInformationOutput.to_json)
+           (Some Values.GetOutpostBillingInformationOutput.error_to_json)])
 let get_outpost_instance_types =
   Command.async ~summary:""
     ([%map_open.Command
@@ -254,6 +372,52 @@ let get_outpost_instance_types =
               ~outpostId ())
            (Some Values.GetOutpostInstanceTypesOutput.to_json)
            (Some Values.GetOutpostInstanceTypesOutput.error_to_json)])
+let get_outpost_supported_instance_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and orderId = flag "order-id" (optional string) ~doc:"STRING OrderId"
+       and assetId =
+         flag "asset-id" (optional string) ~doc:"STRING AssetIdInput"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_outpost_supported_instance_types
+           (Values.GetOutpostSupportedInstanceTypesInput.make ?orderId
+              ?assetId ?maxResults ?nextToken ~outpostIdentifier ())
+           (Some Values.GetOutpostSupportedInstanceTypesOutput.to_json)
+           (Some Values.GetOutpostSupportedInstanceTypesOutput.error_to_json)])
+let get_renewal_pricing =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_renewal_pricing
+           (Values.GetRenewalPricingInput.make ~outpostIdentifier ())
+           (Some Values.GetRenewalPricingOutput.to_json)
+           (Some Values.GetRenewalPricingOutput.error_to_json)])
 let get_site =
   Command.async ~summary:""
     ([%map_open.Command
@@ -290,6 +454,145 @@ let get_site_address =
               ~addressType:(Values.AddressType.of_json addressType) ())
            (Some Values.GetSiteAddressOutput.to_json)
            (Some Values.GetSiteAddressOutput.error_to_json)])
+let list_asset_instances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and assetIdFilter =
+         flag "asset-id-filter" (optional json_arg) ~doc:"JSON AssetIdList"
+       and instanceTypeFilter =
+         flag "instance-type-filter" (optional json_arg)
+           ~doc:"JSON OutpostInstanceTypeList"
+       and accountIdFilter =
+         flag "account-id-filter" (optional json_arg)
+           ~doc:"JSON AccountIdList"
+       and awsServiceFilter =
+         flag "aws-service-filter" (optional json_arg)
+           ~doc:"JSON AWSServiceNameList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_asset_instances
+           (Values.ListAssetInstancesInput.make
+              ?assetIdFilter:(Option.map ~f:Values.AssetIdList.of_json
+                                assetIdFilter)
+              ?instanceTypeFilter:(Option.map
+                                     ~f:Values.OutpostInstanceTypeList.of_json
+                                     instanceTypeFilter)
+              ?accountIdFilter:(Option.map ~f:Values.AccountIdList.of_json
+                                  accountIdFilter)
+              ?awsServiceFilter:(Option.map
+                                   ~f:Values.AWSServiceNameList.of_json
+                                   awsServiceFilter) ?maxResults ?nextToken
+              ~outpostIdentifier ())
+           (Some Values.ListAssetInstancesOutput.to_json)
+           (Some Values.ListAssetInstancesOutput.error_to_json)])
+let list_assets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and hostIdFilter =
+         flag "host-id-filter" (optional json_arg) ~doc:"JSON HostIdList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and statusFilter =
+         flag "status-filter" (optional json_arg) ~doc:"JSON StatusList"
+       and assetTypeFilter =
+         flag "asset-type-filter" (optional json_arg)
+           ~doc:"JSON AssetTypeList"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_assets
+           (Values.ListAssetsInput.make
+              ?hostIdFilter:(Option.map ~f:Values.HostIdList.of_json
+                               hostIdFilter) ?maxResults ?nextToken
+              ?statusFilter:(Option.map ~f:Values.StatusList.of_json
+                               statusFilter)
+              ?assetTypeFilter:(Option.map ~f:Values.AssetTypeList.of_json
+                                  assetTypeFilter) ~outpostIdentifier ())
+           (Some Values.ListAssetsOutput.to_json)
+           (Some Values.ListAssetsOutput.error_to_json)])
+let list_blocking_instances_for_capacity_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier"
+       and capacityTaskId =
+         flag "capacity-task-id" (required string)
+           ~doc:"STRING CapacityTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_blocking_instances_for_capacity_task
+           (Values.ListBlockingInstancesForCapacityTaskInput.make ?maxResults
+              ?nextToken ~outpostIdentifier ~capacityTaskId ())
+           (Some Values.ListBlockingInstancesForCapacityTaskOutput.to_json)
+           (Some
+              Values.ListBlockingInstancesForCapacityTaskOutput.error_to_json)])
+let list_capacity_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and outpostIdentifierFilter =
+         flag "outpost-identifier-filter" (optional string)
+           ~doc:"STRING OutpostIdentifier"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults1000"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING Token"
+       and capacityTaskStatusFilter =
+         flag "capacity-task-status-filter" (optional json_arg)
+           ~doc:"JSON CapacityTaskStatusList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_capacity_tasks
+           (Values.ListCapacityTasksInput.make ?outpostIdentifierFilter
+              ?maxResults ?nextToken
+              ?capacityTaskStatusFilter:(Option.map
+                                           ~f:Values.CapacityTaskStatusList.of_json
+                                           capacityTaskStatusFilter) ())
+           (Some Values.ListCapacityTasksOutput.to_json)
+           (Some Values.ListCapacityTasksOutput.error_to_json)])
 let list_catalog_items =
   Command.async ~summary:""
     ([%map_open.Command
@@ -444,6 +747,96 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let start_capacity_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and orderId = flag "order-id" (optional string) ~doc:"STRING OrderId"
+       and assetId =
+         flag "asset-id" (optional string) ~doc:"STRING AssetIdInput"
+       and instancesToExclude =
+         flag "instances-to-exclude" (optional json_arg)
+           ~doc:"JSON InstancesToExclude"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL DryRun"
+       and taskActionOnBlockingInstances =
+         flag "task-action-on-blocking-instances" (optional json_arg)
+           ~doc:"JSON TaskActionOnBlockingInstances"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier"
+       and instancePools =
+         flag "instance-pools" (required json_arg)
+           ~doc:"JSON RequestedInstancePools" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_capacity_task
+           (Values.StartCapacityTaskInput.make ?orderId ?assetId
+              ?instancesToExclude:(Option.map
+                                     ~f:Values.InstancesToExclude.of_json
+                                     instancesToExclude) ?dryRun
+              ?taskActionOnBlockingInstances:(Option.map
+                                                ~f:Values.TaskActionOnBlockingInstances.of_json
+                                                taskActionOnBlockingInstances)
+              ~outpostIdentifier
+              ~instancePools:(Values.RequestedInstancePools.of_json
+                                instancePools) ())
+           (Some Values.StartCapacityTaskOutput.to_json)
+           (Some Values.StartCapacityTaskOutput.error_to_json)])
+let start_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deviceSerialNumber =
+         flag "device-serial-number" (optional string)
+           ~doc:"STRING DeviceSerialNumber"
+       and assetId = flag "asset-id" (required string) ~doc:"STRING AssetId"
+       and clientPublicKey =
+         flag "client-public-key" (required string)
+           ~doc:"STRING WireGuardPublicKey"
+       and networkInterfaceDeviceIndex =
+         flag "network-interface-device-index" (required int)
+           ~doc:"INT NetworkInterfaceDeviceIndex" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_connection
+           (Values.StartConnectionRequest.make ?deviceSerialNumber ~assetId
+              ~clientPublicKey ~networkInterfaceDeviceIndex ())
+           (Some Values.StartConnectionResponse.to_json)
+           (Some Values.StartConnectionResponse.error_to_json)])
+let start_outpost_decommission =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and validateOnly =
+         flag "validate-only" (optional bool) ~doc:"BOOL ValidateOnly"
+       and outpostIdentifier =
+         flag "outpost-identifier" (required string)
+           ~doc:"STRING OutpostIdentifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_outpost_decommission
+           (Values.StartOutpostDecommissionInput.make ?validateOnly
+              ~outpostIdentifier ())
+           (Some Values.StartOutpostDecommissionOutput.to_json)
+           (Some Values.StartOutpostDecommissionOutput.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -617,23 +1010,39 @@ let update_site_rack_physical_properties =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("cancel-order", cancel_order);
+    [("cancel-capacity-task", cancel_capacity_task);
+    ("cancel-order", cancel_order);
     ("create-order", create_order);
     ("create-outpost", create_outpost);
+    ("create-renewal", create_renewal);
     ("create-site", create_site);
     ("delete-outpost", delete_outpost);
     ("delete-site", delete_site);
+    ("get-capacity-task", get_capacity_task);
     ("get-catalog-item", get_catalog_item);
+    ("get-connection", get_connection);
     ("get-order", get_order);
     ("get-outpost", get_outpost);
+    ("get-outpost-billing-information", get_outpost_billing_information);
     ("get-outpost-instance-types", get_outpost_instance_types);
+    ("get-outpost-supported-instance-types",
+      get_outpost_supported_instance_types);
+    ("get-renewal-pricing", get_renewal_pricing);
     ("get-site", get_site);
     ("get-site-address", get_site_address);
+    ("list-asset-instances", list_asset_instances);
+    ("list-assets", list_assets);
+    ("list-blocking-instances-for-capacity-task",
+      list_blocking_instances_for_capacity_task);
+    ("list-capacity-tasks", list_capacity_tasks);
     ("list-catalog-items", list_catalog_items);
     ("list-orders", list_orders);
     ("list-outposts", list_outposts);
     ("list-sites", list_sites);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("start-capacity-task", start_capacity_task);
+    ("start-connection", start_connection);
+    ("start-outpost-decommission", start_outpost_decommission);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-outpost", update_outpost);

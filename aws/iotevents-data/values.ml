@@ -237,9 +237,9 @@ module TimerDefinition =
         TimerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~seconds ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let seconds = field_map_exn json "seconds" Seconds.of_json in
-      let name = field_map_exn json "name" TimerName.of_json in
+    let of_json json__ =
+      let seconds = field_map_exn json__ "seconds" Seconds.of_json in
+      let name = field_map_exn json__ "name" TimerName.of_json in
       make ~seconds ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The new setting of a timer."]
@@ -264,9 +264,9 @@ module VariableDefinition =
         VariableName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" VariableValue.of_json in
-      let name = field_map_exn json "name" VariableName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" VariableValue.of_json in
+      let name = field_map_exn json__ "name" VariableName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The new value of the variable."]
@@ -292,56 +292,51 @@ module Timer =
   struct
     type nonrec t =
       {
-      name: TimerName.t [@ocaml.doc "The name of the timer."];
-      timestamp: Timestamp.t
+      name: TimerName.t option [@ocaml.doc "The name of the timer."];
+      timestamp: Timestamp.t option
         [@ocaml.doc "The expiration time for the timer."]}
-    let context_ = "Timer"
-    let make ~name = fun ~timestamp -> fun () -> { name; timestamp }
+    let make ?name = fun ?timestamp -> fun () -> { name; timestamp }
     let to_value x =
       structure_to_value
-        [("name", (Some (TimerName.to_value x.name)));
-        ("timestamp", (Some (Timestamp.to_value x.timestamp)))]
+        [("name", (Option.map x.name ~f:TimerName.to_value));
+        ("timestamp", (Option.map x.timestamp ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let timestamp =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
-      let name =
-        TimerName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~timestamp ~name ()
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "timestamp") in
+      let name = (Option.map ~f:TimerName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?timestamp ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map_exn json "timestamp" Timestamp.of_json in
-      let name = field_map_exn json "name" TimerName.of_json in
-      make ~timestamp ~name ()
+    let of_json json__ =
+      let timestamp = field_map json__ "timestamp" Timestamp.of_json in
+      let name = field_map json__ "name" TimerName.of_json in
+      make ?timestamp ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The current state of a timer."]
 module Variable =
   struct
     type nonrec t =
       {
-      name: VariableName.t [@ocaml.doc "The name of the variable."];
-      value: VariableValue.t
+      name: VariableName.t option [@ocaml.doc "The name of the variable."];
+      value: VariableValue.t option
         [@ocaml.doc "The current value of the variable."]}
-    let context_ = "Variable"
-    let make ~name = fun ~value -> fun () -> { name; value }
+    let make ?name = fun ?value -> fun () -> { name; value }
     let to_value x =
       structure_to_value
-        [("name", (Some (VariableName.to_value x.name)));
-        ("value", (Some (VariableValue.to_value x.value)))]
+        [("name", (Option.map x.name ~f:VariableName.to_value));
+        ("value", (Option.map x.value ~f:VariableValue.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        VariableValue.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "value") in
+        (Option.map ~f:VariableValue.of_xml) (Xml.child xml_arg0 "value") in
       let name =
-        VariableName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~value ~name ()
+        (Option.map ~f:VariableName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" VariableValue.of_json in
-      let name = field_map_exn json "name" VariableName.of_json in
-      make ~value ~name ()
+    let of_json json__ =
+      let value = field_map json__ "value" VariableValue.of_json in
+      let name = field_map json__ "name" VariableName.of_json in
+      make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The current state of the variable."]
 module AcknowledgeActionConfiguration =
@@ -359,8 +354,8 @@ module AcknowledgeActionConfiguration =
       let note = (Option.map ~f:Note.of_xml) (Xml.child xml_arg0 "note") in
       make ?note ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in make ?note ()
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in make ?note ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the configuration information of an acknowledge action."]
@@ -414,8 +409,8 @@ module DisableActionConfiguration =
       let note = (Option.map ~f:Note.of_xml) (Xml.child xml_arg0 "note") in
       make ?note ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in make ?note ()
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in make ?note ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the configuration information of a disable action."]
@@ -433,8 +428,8 @@ module EnableActionConfiguration =
       let note = (Option.map ~f:Note.of_xml) (Xml.child xml_arg0 "note") in
       make ?note ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in make ?note ()
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in make ?note ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the configuration information of an enable action."]
@@ -452,8 +447,8 @@ module ResetActionConfiguration =
       let note = (Option.map ~f:Note.of_xml) (Xml.child xml_arg0 "note") in
       make ?note ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in make ?note ()
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in make ?note ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the configuration information of a reset action."]
@@ -481,10 +476,10 @@ module SnoozeActionConfiguration =
           (Xml.child xml_arg0 "snoozeDuration") in
       make ?note ?snoozeDuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in
       let snoozeDuration =
-        field_map json "snoozeDuration" SnoozeDuration.of_json in
+        field_map json__ "snoozeDuration" SnoozeDuration.of_json in
       make ?note ?snoozeDuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -525,12 +520,12 @@ module SimpleRuleEvaluation =
           (Xml.child xml_arg0 "inputPropertyValue") in
       make ?thresholdValue ?operator ?inputPropertyValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let thresholdValue =
-        field_map json "thresholdValue" ThresholdValue.of_json in
-      let operator = field_map json "operator" ComparisonOperator.of_json in
+        field_map json__ "thresholdValue" ThresholdValue.of_json in
+      let operator = field_map json__ "operator" ComparisonOperator.of_json in
       let inputPropertyValue =
-        field_map json "inputPropertyValue" InputPropertyValue.of_json in
+        field_map json__ "inputPropertyValue" InputPropertyValue.of_json in
       make ?thresholdValue ?operator ?inputPropertyValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -570,8 +565,8 @@ module StateChangeConfiguration =
         (Option.map ~f:TriggerType.of_xml) (Xml.child xml_arg0 "triggerType") in
       make ?triggerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let triggerType = field_map json "triggerType" TriggerType.of_json in
+    let of_json json__ =
+      let triggerType = field_map json__ "triggerType" TriggerType.of_json in
       make ?triggerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -580,6 +575,9 @@ module TimerDefinitions =
   struct
     type nonrec t = TimerDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TimerDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -605,6 +603,9 @@ module VariableDefinitions =
   struct
     type nonrec t = VariableDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VariableDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -697,8 +698,8 @@ module DetectorStateSummary =
         (Option.map ~f:StateName.of_xml) (Xml.child xml_arg0 "stateName") in
       make ?stateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stateName = field_map json "stateName" StateName.of_json in
+    let of_json json__ =
+      let stateName = field_map json__ "stateName" StateName.of_json in
       make ?stateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the detector state."]
@@ -801,6 +802,9 @@ module Timers =
   struct
     type nonrec t = Timer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Timer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -824,6 +828,9 @@ module Variables =
   struct
     type nonrec t = Variable.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Variable.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -924,23 +931,24 @@ module CustomerAction =
         ?disableActionConfiguration ?enableActionConfiguration
         ?snoozeActionConfiguration ?actionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resetActionConfiguration =
-        field_map json "resetActionConfiguration"
+        field_map json__ "resetActionConfiguration"
           ResetActionConfiguration.of_json in
       let acknowledgeActionConfiguration =
-        field_map json "acknowledgeActionConfiguration"
+        field_map json__ "acknowledgeActionConfiguration"
           AcknowledgeActionConfiguration.of_json in
       let disableActionConfiguration =
-        field_map json "disableActionConfiguration"
+        field_map json__ "disableActionConfiguration"
           DisableActionConfiguration.of_json in
       let enableActionConfiguration =
-        field_map json "enableActionConfiguration"
+        field_map json__ "enableActionConfiguration"
           EnableActionConfiguration.of_json in
       let snoozeActionConfiguration =
-        field_map json "snoozeActionConfiguration"
+        field_map json__ "snoozeActionConfiguration"
           SnoozeActionConfiguration.of_json in
-      let actionName = field_map json "actionName" CustomerActionName.of_json in
+      let actionName =
+        field_map json__ "actionName" CustomerActionName.of_json in
       make ?resetActionConfiguration ?acknowledgeActionConfiguration
         ?disableActionConfiguration ?enableActionConfiguration
         ?snoozeActionConfiguration ?actionName ()
@@ -967,9 +975,9 @@ module RuleEvaluation =
           (Xml.child xml_arg0 "simpleRuleEvaluation") in
       make ?simpleRuleEvaluation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let simpleRuleEvaluation =
-        field_map json "simpleRuleEvaluation" SimpleRuleEvaluation.of_json in
+        field_map json__ "simpleRuleEvaluation" SimpleRuleEvaluation.of_json in
       make ?simpleRuleEvaluation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to evaluate data."]
@@ -1001,11 +1009,11 @@ module SystemEvent =
         (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "eventType") in
       make ?stateChangeConfiguration ?eventType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateChangeConfiguration =
-        field_map json "stateChangeConfiguration"
+        field_map json__ "stateChangeConfiguration"
           StateChangeConfiguration.of_json in
-      let eventType = field_map json "eventType" EventType.of_json in
+      let eventType = field_map json__ "eventType" EventType.of_json in
       make ?stateChangeConfiguration ?eventType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about alarm state changes."]
@@ -1110,11 +1118,11 @@ module DetectorStateDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "stateName") in
       make ~timers ~variables ~stateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timers = field_map_exn json "timers" TimerDefinitions.of_json in
+    let of_json json__ =
+      let timers = field_map_exn json__ "timers" TimerDefinitions.of_json in
       let variables =
-        field_map_exn json "variables" VariableDefinitions.of_json in
-      let stateName = field_map_exn json "stateName" StateName.of_json in
+        field_map_exn json__ "variables" VariableDefinitions.of_json in
+      let stateName = field_map_exn json__ "stateName" StateName.of_json in
       make ~timers ~variables ~stateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1190,9 +1198,9 @@ module TimestampValue =
           (Xml.child xml_arg0 "timeInMillis") in
       make ?timeInMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timeInMillis =
-        field_map json "timeInMillis" EpochMilliTimestamp.of_json in
+        field_map json__ "timeInMillis" EpochMilliTimestamp.of_json in
       make ?timeInMillis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a timestamp."]
@@ -1262,15 +1270,16 @@ module DetectorSummary =
       make ?lastUpdateTime ?creationTime ?state ?detectorModelVersion
         ?keyValue ?detectorModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let state = field_map json "state" DetectorStateSummary.of_json in
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let state = field_map json__ "state" DetectorStateSummary.of_json in
       let detectorModelVersion =
-        field_map json "detectorModelVersion" DetectorModelVersion.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+        field_map json__ "detectorModelVersion" DetectorModelVersion.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let detectorModelName =
-        field_map json "detectorModelName" DetectorModelName.of_json in
+        field_map json__ "detectorModelName" DetectorModelName.of_json in
       make ?lastUpdateTime ?creationTime ?state ?detectorModelVersion
         ?keyValue ?detectorModelName ()
     let to_json v = composed_to_json to_value v
@@ -1355,15 +1364,16 @@ module AlarmSummary =
       make ?lastUpdateTime ?creationTime ?stateName ?keyValue
         ?alarmModelVersion ?alarmModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let stateName = field_map json "stateName" AlarmStateName.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let stateName = field_map json__ "stateName" AlarmStateName.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelVersion =
-        field_map json "alarmModelVersion" AlarmModelVersion.of_json in
+        field_map json__ "alarmModelVersion" AlarmModelVersion.of_json in
       let alarmModelName =
-        field_map json "alarmModelName" AlarmModelName.of_json in
+        field_map json__ "alarmModelName" AlarmModelName.of_json in
       make ?lastUpdateTime ?creationTime ?stateName ?keyValue
         ?alarmModelVersion ?alarmModelName ()
     let to_json v = composed_to_json to_value v
@@ -1372,37 +1382,34 @@ module DetectorState =
   struct
     type nonrec t =
       {
-      stateName: StateName.t [@ocaml.doc "The name of the state."];
-      variables: Variables.t
+      stateName: StateName.t option [@ocaml.doc "The name of the state."];
+      variables: Variables.t option
         [@ocaml.doc "The current values of the detector's variables."];
-      timers: Timers.t
+      timers: Timers.t option
         [@ocaml.doc "The current state of the detector's timers."]}
-    let context_ = "DetectorState"
-    let make ~stateName =
-      fun ~variables ->
-        fun ~timers -> fun () -> { stateName; variables; timers }
+    let make ?stateName =
+      fun ?variables ->
+        fun ?timers -> fun () -> { stateName; variables; timers }
     let to_value x =
       structure_to_value
-        [("stateName", (Some (StateName.to_value x.stateName)));
-        ("variables", (Some (Variables.to_value x.variables)));
-        ("timers", (Some (Timers.to_value x.timers)))]
+        [("stateName", (Option.map x.stateName ~f:StateName.to_value));
+        ("variables", (Option.map x.variables ~f:Variables.to_value));
+        ("timers", (Option.map x.timers ~f:Timers.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let timers =
-        Timers.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timers") in
+        (Option.map ~f:Timers.of_xml) (Xml.child xml_arg0 "timers") in
       let variables =
-        Variables.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "variables") in
+        (Option.map ~f:Variables.of_xml) (Xml.child xml_arg0 "variables") in
       let stateName =
-        StateName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "stateName") in
-      make ~timers ~variables ~stateName ()
+        (Option.map ~f:StateName.of_xml) (Xml.child xml_arg0 "stateName") in
+      make ?timers ?variables ?stateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timers = field_map_exn json "timers" Timers.of_json in
-      let variables = field_map_exn json "variables" Variables.of_json in
-      let stateName = field_map_exn json "stateName" StateName.of_json in
-      make ~timers ~variables ~stateName ()
+    let of_json json__ =
+      let timers = field_map json__ "timers" Timers.of_json in
+      let variables = field_map json__ "variables" Variables.of_json in
+      let stateName = field_map json__ "stateName" StateName.of_json in
+      make ?timers ?variables ?stateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the current state of the detector instance."]
@@ -1449,13 +1456,13 @@ module AlarmState =
           (Xml.child xml_arg0 "stateName") in
       make ?systemEvent ?customerAction ?ruleEvaluation ?stateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let systemEvent = field_map json "systemEvent" SystemEvent.of_json in
+    let of_json json__ =
+      let systemEvent = field_map json__ "systemEvent" SystemEvent.of_json in
       let customerAction =
-        field_map json "customerAction" CustomerAction.of_json in
+        field_map json__ "customerAction" CustomerAction.of_json in
       let ruleEvaluation =
-        field_map json "ruleEvaluation" RuleEvaluation.of_json in
-      let stateName = field_map json "stateName" AlarmStateName.of_json in
+        field_map json__ "ruleEvaluation" RuleEvaluation.of_json in
+      let stateName = field_map json__ "stateName" AlarmStateName.of_json in
       make ?systemEvent ?customerAction ?ruleEvaluation ?stateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1509,11 +1516,11 @@ module BatchUpdateDetectorErrorEntry =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "messageId") in
       make ?errorMessage__lc1 ?errorCode ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage__lc1 =
-        field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let messageId = field_map json "messageId" MessageId.of_json in
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let messageId = field_map json__ "messageId" MessageId.of_json in
       make ?errorMessage__lc1 ?errorCode ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1562,12 +1569,13 @@ module UpdateDetectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "messageId") in
       make ~state ?keyValue ~detectorModelName ~messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map_exn json "state" DetectorStateDefinition.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let state =
+        field_map_exn json__ "state" DetectorStateDefinition.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let detectorModelName =
-        field_map_exn json "detectorModelName" DetectorModelName.of_json in
-      let messageId = field_map_exn json "messageId" MessageId.of_json in
+        field_map_exn json__ "detectorModelName" DetectorModelName.of_json in
+      let messageId = field_map_exn json__ "messageId" MessageId.of_json in
       make ~state ?keyValue ~detectorModelName ~messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information used to update the detector (instance)."]
@@ -1602,11 +1610,11 @@ module BatchAlarmActionErrorEntry =
         (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "requestId") in
       make ?errorMessage__lc1 ?errorCode ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage__lc1 =
-        field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let requestId = field_map json "requestId" RequestId.of_json in
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let requestId = field_map json__ "requestId" RequestId.of_json in
       make ?errorMessage__lc1 ?errorCode ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1659,14 +1667,14 @@ module SnoozeAlarmActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ~snoozeDuration ?note ?keyValue ~alarmModelName ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snoozeDuration =
-        field_map_exn json "snoozeDuration" SnoozeDuration.of_json in
-      let note = field_map json "note" Note.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+        field_map_exn json__ "snoozeDuration" SnoozeDuration.of_json in
+      let note = field_map json__ "note" Note.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
-      let requestId = field_map_exn json "requestId" RequestId.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
+      let requestId = field_map_exn json__ "requestId" RequestId.of_json in
       make ~snoozeDuration ?note ?keyValue ~alarmModelName ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to snooze the alarm."]
@@ -1709,12 +1717,12 @@ module ResetAlarmActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
-      let requestId = field_map_exn json "requestId" RequestId.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
+      let requestId = field_map_exn json__ "requestId" RequestId.of_json in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to reset the alarm."]
@@ -1749,11 +1757,11 @@ module BatchPutMessageErrorEntry =
         (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "messageId") in
       make ?errorMessage__lc1 ?errorCode ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorMessage__lc1 =
-        field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let messageId = field_map json "messageId" MessageId.of_json in
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let messageId = field_map json__ "messageId" MessageId.of_json in
       make ?errorMessage__lc1 ?errorCode ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about the errors encountered."]
@@ -1799,12 +1807,12 @@ module Message =
           (Xml.child_exn ~context:context_ xml_arg0 "messageId") in
       make ?timestamp ~payload ~inputName ~messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timestamp = field_map json "timestamp" TimestampValue.of_json in
-      let payload = field_map_exn json "payload" Payload.of_json in
+    let of_json json__ =
+      let timestamp = field_map json__ "timestamp" TimestampValue.of_json in
+      let payload = field_map_exn json__ "payload" Payload.of_json in
       let inputName =
-        field_map_exn json "inputName" EphemeralInputName.of_json in
-      let messageId = field_map_exn json "messageId" MessageId.of_json in
+        field_map_exn json__ "inputName" EphemeralInputName.of_json in
+      let messageId = field_map_exn json__ "messageId" MessageId.of_json in
       make ?timestamp ~payload ~inputName ~messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a message."]
@@ -1847,12 +1855,12 @@ module EnableAlarmActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
-      let requestId = field_map_exn json "requestId" RequestId.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
+      let requestId = field_map_exn json__ "requestId" RequestId.of_json in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to enable the alarm."]
@@ -1896,15 +1904,98 @@ module DisableAlarmActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
-      let requestId = field_map_exn json "requestId" RequestId.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
+      let requestId = field_map_exn json__ "requestId" RequestId.of_json in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information used to disable the alarm."]
+module BatchDeleteDetectorErrorEntry =
+  struct
+    type nonrec t =
+      {
+      messageId: MessageId.t option
+        [@ocaml.doc
+          "The ID of the message that caused the error. (See the value of the \"messageId\" in the detectors object of the DeleteDetectorRequest.)"];
+      errorCode: ErrorCode.t option [@ocaml.doc "The error code."];
+      errorMessage__lc1: ErrorMessage.t option
+        [@ocaml.doc "A message that describes the error."]}
+    let make ?messageId =
+      fun ?errorCode ->
+        fun ?errorMessage__lc1 ->
+          fun () -> { messageId; errorCode; errorMessage__lc1 }
+    let to_value x =
+      structure_to_value
+        [("messageId", (Option.map x.messageId ~f:MessageId.to_value));
+        ("errorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("ErrorMessage__lc1",
+          (Option.map x.errorMessage__lc1 ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage__lc1 =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "errorCode") in
+      let messageId =
+        (Option.map ~f:MessageId.of_xml) (Xml.child xml_arg0 "messageId") in
+      make ?errorMessage__lc1 ?errorCode ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let messageId = field_map json__ "messageId" MessageId.of_json in
+      make ?errorMessage__lc1 ?errorCode ?messageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains error messages associated with the deletion request."]
+module DeleteDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      messageId: MessageId.t
+        [@ocaml.doc
+          "The ID to assign to the DeleteDetectorRequest. Each \"messageId\" must be unique within each batch sent."];
+      detectorModelName: DetectorModelName.t
+        [@ocaml.doc
+          "The name of the detector model that was used to create the detector instance."];
+      keyValue: KeyValue.t option
+        [@ocaml.doc "The value of the key used to identify the detector."]}
+    let context_ = "DeleteDetectorRequest"
+    let make ?keyValue =
+      fun ~messageId ->
+        fun ~detectorModelName ->
+          fun () -> { keyValue; messageId; detectorModelName }
+    let to_value x =
+      structure_to_value
+        [("messageId", (Some (MessageId.to_value x.messageId)));
+        ("detectorModelName",
+          (Some (DetectorModelName.to_value x.detectorModelName)));
+        ("keyValue", (Option.map x.keyValue ~f:KeyValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keyValue =
+        (Option.map ~f:KeyValue.of_xml) (Xml.child xml_arg0 "keyValue") in
+      let detectorModelName =
+        DetectorModelName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
+      let messageId =
+        MessageId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "messageId") in
+      make ?keyValue ~detectorModelName ~messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
+      let detectorModelName =
+        field_map_exn json__ "detectorModelName" DetectorModelName.of_json in
+      let messageId = field_map_exn json__ "messageId" MessageId.of_json in
+      make ?keyValue ~detectorModelName ~messageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information used to delete the detector model."]
 module AcknowledgeAlarmActionRequest =
   struct
     type nonrec t =
@@ -1945,12 +2036,12 @@ module AcknowledgeAlarmActionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "requestId") in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let note = field_map json "note" Note.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let note = field_map json__ "note" Note.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
-      let requestId = field_map_exn json "requestId" RequestId.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
+      let requestId = field_map_exn json__ "requestId" RequestId.of_json in
       make ?note ?keyValue ~alarmModelName ~requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information needed to acknowledge the alarm."]
@@ -1958,6 +2049,9 @@ module DetectorSummaries =
   struct
     type nonrec t = DetectorSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DetectorSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1996,8 +2090,8 @@ module InternalFailureException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal failure occurred."]
@@ -2018,8 +2112,8 @@ module InvalidRequestException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was invalid."]
@@ -2053,8 +2147,8 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource was not found."]
@@ -2075,8 +2169,8 @@ module ServiceUnavailableException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The service is currently unavailable."]
@@ -2097,8 +2191,8 @@ module ThrottlingException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request could not be completed due to throttling."]
@@ -2124,6 +2218,9 @@ module AlarmSummaries =
   struct
     type nonrec t = AlarmSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AlarmSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2209,15 +2306,16 @@ module Detector =
       make ?lastUpdateTime ?creationTime ?state ?detectorModelVersion
         ?keyValue ?detectorModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let state = field_map json "state" DetectorState.of_json in
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let state = field_map json__ "state" DetectorState.of_json in
       let detectorModelVersion =
-        field_map json "detectorModelVersion" DetectorModelVersion.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+        field_map json__ "detectorModelVersion" DetectorModelVersion.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let detectorModelName =
-        field_map json "detectorModelName" DetectorModelName.of_json in
+        field_map json__ "detectorModelName" DetectorModelName.of_json in
       make ?lastUpdateTime ?creationTime ?state ?detectorModelVersion
         ?keyValue ?detectorModelName ()
     let to_json v = composed_to_json to_value v
@@ -2296,16 +2394,17 @@ module Alarm =
       make ?lastUpdateTime ?creationTime ?severity ?alarmState ?keyValue
         ?alarmModelVersion ?alarmModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdateTime = field_map json "lastUpdateTime" Timestamp.of_json in
-      let creationTime = field_map json "creationTime" Timestamp.of_json in
-      let severity = field_map json "severity" Severity.of_json in
-      let alarmState = field_map json "alarmState" AlarmState.of_json in
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let lastUpdateTime =
+        field_map json__ "lastUpdateTime" Timestamp.of_json in
+      let creationTime = field_map json__ "creationTime" Timestamp.of_json in
+      let severity = field_map json__ "severity" Severity.of_json in
+      let alarmState = field_map json__ "alarmState" AlarmState.of_json in
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelVersion =
-        field_map json "alarmModelVersion" AlarmModelVersion.of_json in
+        field_map json__ "alarmModelVersion" AlarmModelVersion.of_json in
       let alarmModelName =
-        field_map json "alarmModelName" AlarmModelName.of_json in
+        field_map json__ "alarmModelName" AlarmModelName.of_json in
       make ?lastUpdateTime ?creationTime ?severity ?alarmState ?keyValue
         ?alarmModelVersion ?alarmModelName ()
     let to_json v = composed_to_json to_value v
@@ -2314,6 +2413,9 @@ module BatchUpdateDetectorErrorEntries =
   struct
     type nonrec t = BatchUpdateDetectorErrorEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchUpdateDetectorErrorEntry.to_value)) |>
         (fun x -> `List x)
@@ -2341,6 +2443,9 @@ module UpdateDetectorRequests =
     type nonrec t = UpdateDetectorRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpdateDetectorRequest.to_value)) |>
         (fun x -> `List x)
@@ -2367,6 +2472,9 @@ module BatchAlarmActionErrorEntries =
   struct
     type nonrec t = BatchAlarmActionErrorEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchAlarmActionErrorEntry.to_value)) |>
         (fun x -> `List x)
@@ -2394,6 +2502,9 @@ module SnoozeAlarmActionRequests =
     type nonrec t = SnoozeAlarmActionRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SnoozeAlarmActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -2421,6 +2532,9 @@ module ResetAlarmActionRequests =
     type nonrec t = ResetAlarmActionRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResetAlarmActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -2447,6 +2561,9 @@ module BatchPutMessageErrorEntries =
   struct
     type nonrec t = BatchPutMessageErrorEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchPutMessageErrorEntry.to_value)) |>
         (fun x -> `List x)
@@ -2474,6 +2591,9 @@ module Messages =
     type nonrec t = Message.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Message.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2498,6 +2618,9 @@ module EnableAlarmActionRequests =
     type nonrec t = EnableAlarmActionRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EnableAlarmActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -2525,6 +2648,9 @@ module DisableAlarmActionRequests =
     type nonrec t = DisableAlarmActionRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DisableAlarmActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -2547,11 +2673,73 @@ module DisableAlarmActionRequests =
         ~of_json:DisableAlarmActionRequest.of_json j
     let to_json v = composed_to_json to_value v
   end
+module BatchDeleteDetectorErrorEntries =
+  struct
+    type nonrec t = BatchDeleteDetectorErrorEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchDeleteDetectorErrorEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchDeleteDetectorErrorEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchDeleteDetectorErrorEntries"
+        ~of_json:BatchDeleteDetectorErrorEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeleteDetectorRequests =
+  struct
+    type nonrec t = DeleteDetectorRequest.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeleteDetectorRequest.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeleteDetectorRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DeleteDetectorRequests"
+        ~of_json:DeleteDetectorRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module AcknowledgeAlarmActionRequests =
   struct
     type nonrec t = AcknowledgeAlarmActionRequest.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AcknowledgeAlarmActionRequest.to_value)) |>
         (fun x -> `List x)
@@ -2665,10 +2853,10 @@ module ListDetectorsResponse =
           (Xml.child xml_arg0 "detectorSummaries") in
       make ?nextToken ?detectorSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let detectorSummaries =
-        field_map json "detectorSummaries" DetectorSummaries.of_json in
+        field_map json__ "detectorSummaries" DetectorSummaries.of_json in
       make ?nextToken ?detectorSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists detectors (the instances of a detector model)."]
@@ -2714,12 +2902,12 @@ module ListDetectorsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?maxResults ?nextToken ?stateName ~detectorModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let stateName = field_map json "stateName" StateName.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let stateName = field_map json__ "stateName" StateName.of_json in
       let detectorModelName =
-        field_map_exn json "detectorModelName" DetectorModelName.of_json in
+        field_map_exn json__ "detectorModelName" DetectorModelName.of_json in
       make ?maxResults ?nextToken ?stateName ~detectorModelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists detectors (the instances of a detector model)."]
@@ -2813,10 +3001,10 @@ module ListAlarmsResponse =
           (Xml.child xml_arg0 "alarmSummaries") in
       make ?nextToken ?alarmSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let alarmSummaries =
-        field_map json "alarmSummaries" AlarmSummaries.of_json in
+        field_map json__ "alarmSummaries" AlarmSummaries.of_json in
       make ?nextToken ?alarmSummaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2855,11 +3043,11 @@ module ListAlarmsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "alarmModelName") in
       make ?maxResults ?nextToken ~alarmModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
       make ?maxResults ?nextToken ~alarmModelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2945,8 +3133,8 @@ module DescribeDetectorResponse =
         (Option.map ~f:Detector.of_xml) (Xml.child xml_arg0 "detector") in
       make ?detector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let detector = field_map json "detector" Detector.of_json in
+    let of_json json__ =
+      let detector = field_map json__ "detector" Detector.of_json in
       make ?detector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2978,10 +3166,10 @@ module DescribeDetectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectorModelName") in
       make ?keyValue ~detectorModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let detectorModelName =
-        field_map_exn json "detectorModelName" DetectorModelName.of_json in
+        field_map_exn json__ "detectorModelName" DetectorModelName.of_json in
       make ?keyValue ~detectorModelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3065,8 +3253,8 @@ module DescribeAlarmResponse =
       let alarm = (Option.map ~f:Alarm.of_xml) (Xml.child xml_arg0 "alarm") in
       make ?alarm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alarm = field_map json "alarm" Alarm.of_json in make ?alarm ()
+    let of_json json__ =
+      let alarm = field_map json__ "alarm" Alarm.of_json in make ?alarm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about an alarm."]
 module DescribeAlarmRequest =
@@ -3095,10 +3283,10 @@ module DescribeAlarmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "alarmModelName") in
       make ?keyValue ~alarmModelName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyValue = field_map json "keyValue" KeyValue.of_json in
+    let of_json json__ =
+      let keyValue = field_map json__ "keyValue" KeyValue.of_json in
       let alarmModelName =
-        field_map_exn json "alarmModelName" AlarmModelName.of_json in
+        field_map_exn json__ "alarmModelName" AlarmModelName.of_json in
       make ?keyValue ~alarmModelName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves information about an alarm."]
@@ -3180,9 +3368,9 @@ module BatchUpdateDetectorResponse =
           (Xml.child xml_arg0 "batchUpdateDetectorErrorEntries") in
       make ?batchUpdateDetectorErrorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchUpdateDetectorErrorEntries =
-        field_map json "batchUpdateDetectorErrorEntries"
+        field_map json__ "batchUpdateDetectorErrorEntries"
           BatchUpdateDetectorErrorEntries.of_json in
       make ?batchUpdateDetectorErrorEntries ()
     let to_json v = composed_to_json to_value v
@@ -3207,9 +3395,9 @@ module BatchUpdateDetectorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "detectors") in
       make ~detectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let detectors =
-        field_map_exn json "detectors" UpdateDetectorRequests.of_json in
+        field_map_exn json__ "detectors" UpdateDetectorRequests.of_json in
       make ~detectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3290,9 +3478,9 @@ module BatchSnoozeAlarmResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries" BatchAlarmActionErrorEntries.of_json in
+        field_map json__ "errorEntries" BatchAlarmActionErrorEntries.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3317,9 +3505,9 @@ module BatchSnoozeAlarmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "snoozeActionRequests") in
       make ~snoozeActionRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snoozeActionRequests =
-        field_map_exn json "snoozeActionRequests"
+        field_map_exn json__ "snoozeActionRequests"
           SnoozeAlarmActionRequests.of_json in
       make ~snoozeActionRequests ()
     let to_json v = composed_to_json to_value v
@@ -3401,9 +3589,9 @@ module BatchResetAlarmResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries" BatchAlarmActionErrorEntries.of_json in
+        field_map json__ "errorEntries" BatchAlarmActionErrorEntries.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3428,9 +3616,9 @@ module BatchResetAlarmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resetActionRequests") in
       make ~resetActionRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resetActionRequests =
-        field_map_exn json "resetActionRequests"
+        field_map_exn json__ "resetActionRequests"
           ResetAlarmActionRequests.of_json in
       make ~resetActionRequests ()
     let to_json v = composed_to_json to_value v
@@ -3513,9 +3701,9 @@ module BatchPutMessageResponse =
           (Xml.child xml_arg0 "BatchPutMessageErrorEntries") in
       make ?batchPutMessageErrorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let batchPutMessageErrorEntries =
-        field_map json "BatchPutMessageErrorEntries"
+        field_map json__ "BatchPutMessageErrorEntries"
           BatchPutMessageErrorEntries.of_json in
       make ?batchPutMessageErrorEntries ()
     let to_json v = composed_to_json to_value v
@@ -3539,8 +3727,8 @@ module BatchPutMessageRequest =
         Messages.of_xml (Xml.child_exn ~context:context_ xml_arg0 "messages") in
       make ~messages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messages = field_map_exn json "messages" Messages.of_json in
+    let of_json json__ =
+      let messages = field_map_exn json__ "messages" Messages.of_json in
       make ~messages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3621,9 +3809,9 @@ module BatchEnableAlarmResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries" BatchAlarmActionErrorEntries.of_json in
+        field_map json__ "errorEntries" BatchAlarmActionErrorEntries.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3648,9 +3836,9 @@ module BatchEnableAlarmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "enableActionRequests") in
       make ~enableActionRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let enableActionRequests =
-        field_map_exn json "enableActionRequests"
+        field_map_exn json__ "enableActionRequests"
           EnableAlarmActionRequests.of_json in
       make ~enableActionRequests ()
     let to_json v = composed_to_json to_value v
@@ -3732,9 +3920,9 @@ module BatchDisableAlarmResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries" BatchAlarmActionErrorEntries.of_json in
+        field_map json__ "errorEntries" BatchAlarmActionErrorEntries.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3760,14 +3948,125 @@ module BatchDisableAlarmRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "disableActionRequests") in
       make ~disableActionRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let disableActionRequests =
-        field_map_exn json "disableActionRequests"
+        field_map_exn json__ "disableActionRequests"
           DisableAlarmActionRequests.of_json in
       make ~disableActionRequests ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Disables one or more alarms. The alarms change to the DISABLED state after you disable them."]
+module BatchDeleteDetectorResponse =
+  struct
+    type nonrec t =
+      {
+      batchDeleteDetectorErrorEntries:
+        BatchDeleteDetectorErrorEntries.t option
+        [@ocaml.doc
+          "A list of errors associated with the request, or an empty array (\\[\\]) if there are no errors. Each error entry contains a messageId that helps you identify the entry that failed."]}
+    type nonrec error =
+      [ `InternalFailureException of InternalFailureException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `ServiceUnavailableException of ServiceUnavailableException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?batchDeleteDetectorErrorEntries =
+      fun () -> { batchDeleteDetectorErrorEntries }
+    let error_of_json name json =
+      match name with
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalFailureException" ->
+          `InternalFailureException (InternalFailureException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | "ServiceUnavailableException" ->
+          `ServiceUnavailableException
+            (ServiceUnavailableException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalFailureException e ->
+          `Assoc
+            [("error", (`String "InternalFailureException"));
+            ("details", (InternalFailureException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `ServiceUnavailableException e ->
+          `Assoc
+            [("error", (`String "ServiceUnavailableException"));
+            ("details", (ServiceUnavailableException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("batchDeleteDetectorErrorEntries",
+           (Option.map x.batchDeleteDetectorErrorEntries
+              ~f:BatchDeleteDetectorErrorEntries.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let batchDeleteDetectorErrorEntries =
+        (Option.map ~f:BatchDeleteDetectorErrorEntries.of_xml)
+          (Xml.child xml_arg0 "batchDeleteDetectorErrorEntries") in
+      make ?batchDeleteDetectorErrorEntries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let batchDeleteDetectorErrorEntries =
+        field_map json__ "batchDeleteDetectorErrorEntries"
+          BatchDeleteDetectorErrorEntries.of_json in
+      make ?batchDeleteDetectorErrorEntries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one or more detectors that were created. When a detector is deleted, its state will be cleared and the detector will be removed from the list of detectors. The deleted detector will no longer appear if referenced in the ListDetectors API call."]
+module BatchDeleteDetectorRequest =
+  struct
+    type nonrec t =
+      {
+      detectors: DeleteDetectorRequests.t
+        [@ocaml.doc "The list of one or more detectors to be deleted."]}
+    let context_ = "BatchDeleteDetectorRequest"
+    let make ~detectors = fun () -> { detectors }
+    let to_value x =
+      structure_to_value
+        [("detectors", (Some (DeleteDetectorRequests.to_value x.detectors)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let detectors =
+        DeleteDetectorRequests.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "detectors") in
+      make ~detectors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let detectors =
+        field_map_exn json__ "detectors" DeleteDetectorRequests.of_json in
+      make ~detectors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes one or more detectors that were created. When a detector is deleted, its state will be cleared and the detector will be removed from the list of detectors. The deleted detector will no longer appear if referenced in the ListDetectors API call."]
 module BatchAcknowledgeAlarmResponse =
   struct
     type nonrec t =
@@ -3844,9 +4143,9 @@ module BatchAcknowledgeAlarmResponse =
           (Xml.child xml_arg0 "errorEntries") in
       make ?errorEntries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorEntries =
-        field_map json "errorEntries" BatchAlarmActionErrorEntries.of_json in
+        field_map json__ "errorEntries" BatchAlarmActionErrorEntries.of_json in
       make ?errorEntries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3875,9 +4174,9 @@ module BatchAcknowledgeAlarmRequest =
              "acknowledgeActionRequests") in
       make ~acknowledgeActionRequests ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let acknowledgeActionRequests =
-        field_map_exn json "acknowledgeActionRequests"
+        field_map_exn json__ "acknowledgeActionRequests"
           AcknowledgeAlarmActionRequests.of_json in
       make ~acknowledgeActionRequests ()
     let to_json v = composed_to_json to_value v

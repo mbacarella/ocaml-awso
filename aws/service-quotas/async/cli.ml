@@ -45,6 +45,24 @@ let associate_service_quota_template =
            (Values.AssociateServiceQuotaTemplateRequest.make ())
            (Some Values.AssociateServiceQuotaTemplateResponse.to_json)
            (Some Values.AssociateServiceQuotaTemplateResponse.error_to_json)])
+let create_support_case =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and requestId =
+         flag "request-id" (required string) ~doc:"STRING RequestId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_support_case
+           (Values.CreateSupportCaseRequest.make ~requestId ())
+           (Some Values.CreateSupportCaseResponse.to_json)
+           (Some Values.CreateSupportCaseResponse.error_to_json)])
 let delete_service_quota_increase_request_from_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -127,6 +145,46 @@ let get_association_for_service_quota_template =
            (Some Values.GetAssociationForServiceQuotaTemplateResponse.to_json)
            (Some
               Values.GetAssociationForServiceQuotaTemplateResponse.error_to_json)])
+let get_auto_management_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_auto_management_configuration
+           (Values.GetAutoManagementConfigurationRequest.make ())
+           (Some Values.GetAutoManagementConfigurationResponse.to_json)
+           (Some Values.GetAutoManagementConfigurationResponse.error_to_json)])
+let get_quota_utilization_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsUtilization"
+       and reportId =
+         flag "report-id" (required string) ~doc:"STRING ReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_quota_utilization_report
+           (Values.GetQuotaUtilizationReportRequest.make ?nextToken
+              ?maxResults ~reportId ())
+           (Some Values.GetQuotaUtilizationReportResponse.to_json)
+           (Some Values.GetQuotaUtilizationReportResponse.error_to_json)])
 let get_requested_service_quota_change =
   Command.async ~summary:""
     ([%map_open.Command
@@ -155,6 +213,8 @@ let get_service_quota =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and contextId =
+         flag "context-id" (optional string) ~doc:"STRING QuotaContextId"
        and serviceCode =
          flag "service-code" (required string) ~doc:"STRING ServiceCode"
        and quotaCode =
@@ -162,8 +222,8 @@ let get_service_quota =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_service_quota
-           (Values.GetServiceQuotaRequest.make ~serviceCode ~quotaCode ())
-           (Some Values.GetServiceQuotaResponse.to_json)
+           (Values.GetServiceQuotaRequest.make ?contextId ~serviceCode
+              ~quotaCode ()) (Some Values.GetServiceQuotaResponse.to_json)
            (Some Values.GetServiceQuotaResponse.error_to_json)])
 let get_service_quota_increase_request_from_template =
   Command.async ~summary:""
@@ -230,14 +290,20 @@ let list_requested_service_quota_change_history =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and quotaRequestedAtLevel =
+         flag "quota-requested-at-level" (optional json_arg)
+           ~doc:"JSON AppliedLevelEnum" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_requested_service_quota_change_history
            (Values.ListRequestedServiceQuotaChangeHistoryRequest.make
               ?serviceCode
               ?status:(Option.map ~f:Values.RequestStatus.of_json status)
-              ?nextToken ?maxResults ())
+              ?nextToken ?maxResults
+              ?quotaRequestedAtLevel:(Option.map
+                                        ~f:Values.AppliedLevelEnum.of_json
+                                        quotaRequestedAtLevel) ())
            (Some
               Values.ListRequestedServiceQuotaChangeHistoryResponse.to_json)
            (Some
@@ -258,6 +324,9 @@ let list_requested_service_quota_change_history_by_quota =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and quotaRequestedAtLevel =
+         flag "quota-requested-at-level" (optional json_arg)
+           ~doc:"JSON AppliedLevelEnum"
        and serviceCode =
          flag "service-code" (required string) ~doc:"STRING ServiceCode"
        and quotaCode =
@@ -267,7 +336,11 @@ let list_requested_service_quota_change_history_by_quota =
            Io.list_requested_service_quota_change_history_by_quota
            (Values.ListRequestedServiceQuotaChangeHistoryByQuotaRequest.make
               ?status:(Option.map ~f:Values.RequestStatus.of_json status)
-              ?nextToken ?maxResults ~serviceCode ~quotaCode ())
+              ?nextToken ?maxResults
+              ?quotaRequestedAtLevel:(Option.map
+                                        ~f:Values.AppliedLevelEnum.of_json
+                                        quotaRequestedAtLevel) ~serviceCode
+              ~quotaCode ())
            (Some
               Values.ListRequestedServiceQuotaChangeHistoryByQuotaResponse.to_json)
            (Some
@@ -313,13 +386,21 @@ let list_service_quotas =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and quotaCode =
+         flag "quota-code" (optional string) ~doc:"STRING QuotaCode"
+       and quotaAppliedAtLevel =
+         flag "quota-applied-at-level" (optional json_arg)
+           ~doc:"JSON AppliedLevelEnum"
        and serviceCode =
          flag "service-code" (required string) ~doc:"STRING ServiceCode" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_service_quotas
            (Values.ListServiceQuotasRequest.make ?nextToken ?maxResults
-              ~serviceCode ())
+              ?quotaCode
+              ?quotaAppliedAtLevel:(Option.map
+                                      ~f:Values.AppliedLevelEnum.of_json
+                                      quotaAppliedAtLevel) ~serviceCode ())
            (Some Values.ListServiceQuotasResponse.to_json)
            (Some Values.ListServiceQuotasResponse.error_to_json)])
 let list_services =
@@ -398,6 +479,11 @@ let request_service_quota_increase =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and contextId =
+         flag "context-id" (optional string) ~doc:"STRING QuotaContextId"
+       and supportCaseAllowed =
+         flag "support-case-allowed" (optional bool)
+           ~doc:"BOOL SupportCaseAllowed"
        and serviceCode =
          flag "service-code" (required string) ~doc:"STRING ServiceCode"
        and quotaCode =
@@ -407,10 +493,72 @@ let request_service_quota_increase =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.request_service_quota_increase
-           (Values.RequestServiceQuotaIncreaseRequest.make ~serviceCode
-              ~quotaCode ~desiredValue ())
+           (Values.RequestServiceQuotaIncreaseRequest.make ?contextId
+              ?supportCaseAllowed ~serviceCode ~quotaCode ~desiredValue ())
            (Some Values.RequestServiceQuotaIncreaseResponse.to_json)
            (Some Values.RequestServiceQuotaIncreaseResponse.error_to_json)])
+let start_auto_management =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and notificationArn =
+         flag "notification-arn" (optional string)
+           ~doc:"STRING AmazonResourceName"
+       and exclusionList =
+         flag "exclusion-list" (optional json_arg) ~doc:"JSON ExclusionList"
+       and optInLevel =
+         flag "opt-in-level" (required json_arg) ~doc:"JSON OptInLevel"
+       and optInType =
+         flag "opt-in-type" (required json_arg) ~doc:"JSON OptInType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_auto_management
+           (Values.StartAutoManagementRequest.make ?notificationArn
+              ?exclusionList:(Option.map ~f:Values.ExclusionList.of_json
+                                exclusionList)
+              ~optInLevel:(Values.OptInLevel.of_json optInLevel)
+              ~optInType:(Values.OptInType.of_json optInType) ())
+           (Some Values.StartAutoManagementResponse.to_json)
+           (Some Values.StartAutoManagementResponse.error_to_json)])
+let start_quota_utilization_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_quota_utilization_report
+           (Values.StartQuotaUtilizationReportRequest.make ())
+           (Some Values.StartQuotaUtilizationReportResponse.to_json)
+           (Some Values.StartQuotaUtilizationReportResponse.error_to_json)])
+let stop_auto_management =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_auto_management (Values.StopAutoManagementRequest.make ())
+           (Some Values.StopAutoManagementResponse.to_json)
+           (Some Values.StopAutoManagementResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -454,10 +602,38 @@ let untag_resource =
               ~tagKeys:(Values.InputTagKeys.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_auto_management =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and optInType =
+         flag "opt-in-type" (optional json_arg) ~doc:"JSON OptInType"
+       and notificationArn =
+         flag "notification-arn" (optional string)
+           ~doc:"STRING AmazonResourceName"
+       and exclusionList =
+         flag "exclusion-list" (optional json_arg) ~doc:"JSON ExclusionList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_auto_management
+           (Values.UpdateAutoManagementRequest.make
+              ?optInType:(Option.map ~f:Values.OptInType.of_json optInType)
+              ?notificationArn
+              ?exclusionList:(Option.map ~f:Values.ExclusionList.of_json
+                                exclusionList) ())
+           (Some Values.UpdateAutoManagementResponse.to_json)
+           (Some Values.UpdateAutoManagementResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-service-quota-template", associate_service_quota_template);
+    ("create-support-case", create_support_case);
     ("delete-service-quota-increase-request-from-template",
       delete_service_quota_increase_request_from_template);
     ("disassociate-service-quota-template",
@@ -465,6 +641,8 @@ let main =
     ("get-a-w-s-default-service-quota", get_a_w_s_default_service_quota);
     ("get-association-for-service-quota-template",
       get_association_for_service_quota_template);
+    ("get-auto-management-configuration", get_auto_management_configuration);
+    ("get-quota-utilization-report", get_quota_utilization_report);
     ("get-requested-service-quota-change",
       get_requested_service_quota_change);
     ("get-service-quota", get_service_quota);
@@ -483,5 +661,9 @@ let main =
     ("put-service-quota-increase-request-into-template",
       put_service_quota_increase_request_into_template);
     ("request-service-quota-increase", request_service_quota_increase);
+    ("start-auto-management", start_auto_management);
+    ("start-quota-utilization-report", start_quota_utilization_report);
+    ("stop-auto-management", stop_auto_management);
     ("tag-resource", tag_resource);
-    ("untag-resource", untag_resource)]
+    ("untag-resource", untag_resource);
+    ("update-auto-management", update_auto_management)]

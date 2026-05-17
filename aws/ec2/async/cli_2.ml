@@ -3,7 +3,7 @@ open Core
 open Async
 open Cli_0[@@warning "-33"]
 open Cli_1[@@warning "-33"]
-let enable_image_deprecation =
+let enable_ipam_policy =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -14,18 +14,36 @@ let enable_image_deprecation =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId"
-       and deprecateAt =
-         flag "deprecate-at" (required json_arg)
-           ~doc:"JSON MillisecondDateTime" in
+       and organizationTargetId =
+         flag "organization-target-id" (optional string) ~doc:"STRING String"
+       and ipamPolicyId =
+         flag "ipam-policy-id" (required string) ~doc:"STRING IpamPolicyId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_image_deprecation
-           (Values.EnableImageDeprecationRequest.make ?dryRun ~imageId
-              ~deprecateAt:(Values.MillisecondDateTime.of_json deprecateAt)
-              ()) (Some Values.EnableImageDeprecationResult.to_json)
+           Io.enable_ipam_policy
+           (Values.EnableIpamPolicyRequest.make ?dryRun ?organizationTargetId
+              ~ipamPolicyId ()) (Some Values.EnableIpamPolicyResult.to_json)
            (Some Values.Ec2_error.to_json)])
-let enable_ipam_organization_admin_account =
+let enable_reachability_analyzer_organization_sharing =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_reachability_analyzer_organization_sharing
+           (Values.EnableReachabilityAnalyzerOrganizationSharingRequest.make
+              ?dryRun ())
+           (Some
+              Values.EnableReachabilityAnalyzerOrganizationSharingResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let enable_route_server_propagation =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -36,15 +54,16 @@ let enable_ipam_organization_admin_account =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and delegatedAdminAccountId =
-         flag "delegated-admin-account-id" (required string)
-           ~doc:"STRING String" in
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId"
+       and routeTableId =
+         flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.enable_ipam_organization_admin_account
-           (Values.EnableIpamOrganizationAdminAccountRequest.make ?dryRun
-              ~delegatedAdminAccountId ())
-           (Some Values.EnableIpamOrganizationAdminAccountResult.to_json)
+           Io.enable_route_server_propagation
+           (Values.EnableRouteServerPropagationRequest.make ?dryRun
+              ~routeServerId ~routeTableId ())
+           (Some Values.EnableRouteServerPropagationResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let enable_serial_console_access =
   Command.async ~summary:""
@@ -63,7 +82,7 @@ let enable_serial_console_access =
            (Values.EnableSerialConsoleAccessRequest.make ?dryRun ())
            (Some Values.EnableSerialConsoleAccessResult.to_json)
            (Some Values.Ec2_error.to_json)])
-let enable_transit_gateway_route_table_propagation =
+let enable_snapshot_block_public_access =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -74,18 +93,43 @@ let enable_transit_gateway_route_table_propagation =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and state =
+         flag "state" (required json_arg)
+           ~doc:"JSON SnapshotBlockPublicAccessState" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.enable_snapshot_block_public_access
+           (Values.EnableSnapshotBlockPublicAccessRequest.make ?dryRun
+              ~state:(Values.SnapshotBlockPublicAccessState.of_json state) ())
+           (Some Values.EnableSnapshotBlockPublicAccessResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let enable_transit_gateway_route_table_propagation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (optional string)
+           ~doc:"STRING TransitGatewayAttachmentId"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayRouteTableAnnouncementId =
+         flag "transit-gateway-route-table-announcement-id" (optional string)
+           ~doc:"STRING TransitGatewayRouteTableAnnouncementId"
        and transitGatewayRouteTableId =
          flag "transit-gateway-route-table-id" (required string)
-           ~doc:"STRING TransitGatewayRouteTableId"
-       and transitGatewayAttachmentId =
-         flag "transit-gateway-attachment-id" (required string)
-           ~doc:"STRING TransitGatewayAttachmentId" in
+           ~doc:"STRING TransitGatewayRouteTableId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.enable_transit_gateway_route_table_propagation
            (Values.EnableTransitGatewayRouteTablePropagationRequest.make
-              ?dryRun ~transitGatewayRouteTableId ~transitGatewayAttachmentId
-              ())
+              ?transitGatewayAttachmentId ?dryRun
+              ?transitGatewayRouteTableAnnouncementId
+              ~transitGatewayRouteTableId ())
            (Some
               Values.EnableTransitGatewayRouteTablePropagationResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -270,6 +314,69 @@ let export_transit_gateway_routes =
               ?dryRun ~transitGatewayRouteTableId ~s3Bucket ())
            (Some Values.ExportTransitGatewayRoutesResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let export_verified_access_instance_client_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessInstanceId =
+         flag "verified-access-instance-id" (required string)
+           ~doc:"STRING VerifiedAccessInstanceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.export_verified_access_instance_client_configuration
+           (Values.ExportVerifiedAccessInstanceClientConfigurationRequest.make
+              ?dryRun ~verifiedAccessInstanceId ())
+           (Some
+              Values.ExportVerifiedAccessInstanceClientConfigurationResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_active_vpn_tunnel_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpnConnectionId =
+         flag "vpn-connection-id" (required string)
+           ~doc:"STRING VpnConnectionId"
+       and vpnTunnelOutsideIpAddress =
+         flag "vpn-tunnel-outside-ip-address" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_active_vpn_tunnel_status
+           (Values.GetActiveVpnTunnelStatusRequest.make ?dryRun
+              ~vpnConnectionId ~vpnTunnelOutsideIpAddress ())
+           (Some Values.GetActiveVpnTunnelStatusResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_allowed_images_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_allowed_images_settings
+           (Values.GetAllowedImagesSettingsRequest.make ?dryRun ())
+           (Some Values.GetAllowedImagesSettingsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_associated_enclave_certificate_iam_roles =
   Command.async ~summary:""
     ([%map_open.Command
@@ -280,14 +387,14 @@ let get_associated_enclave_certificate_iam_roles =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and certificateArn =
-         flag "certificate-arn" (optional string) ~doc:"STRING ResourceArn"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+         flag "certificate-arn" (required string) ~doc:"STRING CertificateId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_associated_enclave_certificate_iam_roles
            (Values.GetAssociatedEnclaveCertificateIamRolesRequest.make
-              ?certificateArn ?dryRun ())
+              ?dryRun ~certificateArn ())
            (Some Values.GetAssociatedEnclaveCertificateIamRolesResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_associated_ipv6_pool_cidrs =
@@ -313,6 +420,160 @@ let get_associated_ipv6_pool_cidrs =
            (Values.GetAssociatedIpv6PoolCidrsRequest.make ?nextToken
               ?maxResults ?dryRun ~poolId ())
            (Some Values.GetAssociatedIpv6PoolCidrsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_aws_network_performance_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataQueries =
+         flag "data-queries" (optional json_arg) ~doc:"JSON DataQueries"
+       and startTime =
+         flag "start-time" (optional json_arg)
+           ~doc:"JSON MillisecondDateTime"
+       and endTime =
+         flag "end-time" (optional json_arg) ~doc:"JSON MillisecondDateTime"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_aws_network_performance_data
+           (Values.GetAwsNetworkPerformanceDataRequest.make
+              ?dataQueries:(Option.map ~f:Values.DataQueries.of_json
+                              dataQueries)
+              ?startTime:(Option.map ~f:Values.MillisecondDateTime.of_json
+                            startTime)
+              ?endTime:(Option.map ~f:Values.MillisecondDateTime.of_json
+                          endTime) ?maxResults ?nextToken ?dryRun ())
+           (Some Values.GetAwsNetworkPerformanceDataResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_capacity_manager_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_manager_attributes
+           (Values.GetCapacityManagerAttributesRequest.make ?dryRun ())
+           (Some Values.GetCapacityManagerAttributesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_capacity_manager_metric_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and groupBy =
+         flag "group-by" (optional json_arg) ~doc:"JSON GroupBySet"
+       and filterBy =
+         flag "filter-by" (optional json_arg)
+           ~doc:"JSON CapacityManagerConditionSet"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and metricNames =
+         flag "metric-names" (required json_arg) ~doc:"JSON MetricSet"
+       and startTime =
+         flag "start-time" (required json_arg)
+           ~doc:"JSON MillisecondDateTime"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON MillisecondDateTime"
+       and period = flag "period" (required int) ~doc:"INT Period" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_manager_metric_data
+           (Values.GetCapacityManagerMetricDataRequest.make
+              ?groupBy:(Option.map ~f:Values.GroupBySet.of_json groupBy)
+              ?filterBy:(Option.map
+                           ~f:Values.CapacityManagerConditionSet.of_json
+                           filterBy) ?maxResults ?nextToken ?dryRun
+              ~metricNames:(Values.MetricSet.of_json metricNames)
+              ~startTime:(Values.MillisecondDateTime.of_json startTime)
+              ~endTime:(Values.MillisecondDateTime.of_json endTime) ~period
+              ()) (Some Values.GetCapacityManagerMetricDataResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_capacity_manager_metric_dimensions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filterBy =
+         flag "filter-by" (optional json_arg)
+           ~doc:"JSON CapacityManagerConditionSet"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and groupBy =
+         flag "group-by" (required json_arg) ~doc:"JSON GroupBySet"
+       and startTime =
+         flag "start-time" (required json_arg)
+           ~doc:"JSON MillisecondDateTime"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON MillisecondDateTime"
+       and metricNames =
+         flag "metric-names" (required json_arg) ~doc:"JSON MetricSet" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_manager_metric_dimensions
+           (Values.GetCapacityManagerMetricDimensionsRequest.make
+              ?filterBy:(Option.map
+                           ~f:Values.CapacityManagerConditionSet.of_json
+                           filterBy) ?maxResults ?nextToken ?dryRun
+              ~groupBy:(Values.GroupBySet.of_json groupBy)
+              ~startTime:(Values.MillisecondDateTime.of_json startTime)
+              ~endTime:(Values.MillisecondDateTime.of_json endTime)
+              ~metricNames:(Values.MetricSet.of_json metricNames) ())
+           (Some Values.GetCapacityManagerMetricDimensionsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_capacity_manager_monitored_tag_keys =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetCapacityManagerMonitoredTagKeysRequestMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_capacity_manager_monitored_tag_keys
+           (Values.GetCapacityManagerMonitoredTagKeysRequest.make ?maxResults
+              ?nextToken ?dryRun ())
+           (Some Values.GetCapacityManagerMonitoredTagKeysResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_capacity_reservation_usage =
   Command.async ~summary:""
@@ -377,14 +638,14 @@ let get_console_output =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and latest = flag "latest" (optional bool) ~doc:"BOOL Boolean"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_console_output
-           (Values.GetConsoleOutputRequest.make ?dryRun ?latest ~instanceId
+           (Values.GetConsoleOutputRequest.make ?latest ?dryRun ~instanceId
               ()) (Some Values.GetConsoleOutputResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_console_screenshot =
@@ -407,6 +668,27 @@ let get_console_screenshot =
            (Values.GetConsoleScreenshotRequest.make ?dryRun ?wakeUp
               ~instanceId ())
            (Some Values.GetConsoleScreenshotResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_declarative_policies_report_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and reportId =
+         flag "report-id" (required string)
+           ~doc:"STRING DeclarativePoliciesReportId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_declarative_policies_report_summary
+           (Values.GetDeclarativePoliciesReportSummaryRequest.make ?dryRun
+              ~reportId ())
+           (Some Values.GetDeclarativePoliciesReportSummaryResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_default_credit_specification =
   Command.async ~summary:""
@@ -463,6 +745,23 @@ let get_ebs_encryption_by_default =
            Io.get_ebs_encryption_by_default
            (Values.GetEbsEncryptionByDefaultRequest.make ?dryRun ())
            (Some Values.GetEbsEncryptionByDefaultResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_enabled_ipam_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_enabled_ipam_policy
+           (Values.GetEnabledIpamPolicyRequest.make ?dryRun ())
+           (Some Values.GetEnabledIpamPolicyResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_flow_logs_integration_template =
   Command.async ~summary:""
@@ -540,6 +839,83 @@ let get_host_reservation_purchase_preview =
               ~offeringId ())
            (Some Values.GetHostReservationPurchasePreviewResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let get_image_ancestry =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_image_ancestry
+           (Values.GetImageAncestryRequest.make ?dryRun ~imageId ())
+           (Some Values.GetImageAncestryResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_image_block_public_access_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_image_block_public_access_state
+           (Values.GetImageBlockPublicAccessStateRequest.make ?dryRun ())
+           (Some Values.GetImageBlockPublicAccessStateResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_instance_metadata_defaults =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_instance_metadata_defaults
+           (Values.GetInstanceMetadataDefaultsRequest.make ?dryRun ())
+           (Some Values.GetInstanceMetadataDefaultsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_instance_tpm_ek_pub =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId"
+       and keyType =
+         flag "key-type" (required json_arg) ~doc:"JSON EkPubKeyType"
+       and keyFormat =
+         flag "key-format" (required json_arg) ~doc:"JSON EkPubKeyFormat" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_instance_tpm_ek_pub
+           (Values.GetInstanceTpmEkPubRequest.make ?dryRun ~instanceId
+              ~keyType:(Values.EkPubKeyType.of_json keyType)
+              ~keyFormat:(Values.EkPubKeyFormat.of_json keyFormat) ())
+           (Some Values.GetInstanceTpmEkPubResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_instance_types_from_instance_requirements =
   Command.async ~summary:""
     ([%map_open.Command
@@ -554,6 +930,7 @@ let get_instance_types_from_instance_requirements =
        and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
+       and context = flag "context" (optional string) ~doc:"STRING String"
        and architectureTypes =
          flag "architecture-types" (required json_arg)
            ~doc:"JSON ArchitectureTypeSet"
@@ -567,7 +944,7 @@ let get_instance_types_from_instance_requirements =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_instance_types_from_instance_requirements
            (Values.GetInstanceTypesFromInstanceRequirementsRequest.make
-              ?dryRun ?maxResults ?nextToken
+              ?dryRun ?maxResults ?nextToken ?context
               ~architectureTypes:(Values.ArchitectureTypeSet.of_json
                                     architectureTypes)
               ~virtualizationTypes:(Values.VirtualizationTypeSet.of_json
@@ -576,6 +953,25 @@ let get_instance_types_from_instance_requirements =
                                        instanceRequirements) ())
            (Some
               Values.GetInstanceTypesFromInstanceRequirementsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_instance_uefi_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_instance_uefi_data
+           (Values.GetInstanceUefiDataRequest.make ?dryRun ~instanceId ())
+           (Some Values.GetInstanceUefiDataResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_ipam_address_history =
   Command.async ~summary:""
@@ -611,6 +1007,161 @@ let get_ipam_address_history =
               ?endTime:(Option.map ~f:Values.MillisecondDateTime.of_json
                           endTime) ?maxResults ?nextToken ~cidr ~ipamScopeId
               ()) (Some Values.GetIpamAddressHistoryResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_discovered_accounts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and ipamResourceDiscoveryId =
+         flag "ipam-resource-discovery-id" (required string)
+           ~doc:"STRING IpamResourceDiscoveryId"
+       and discoveryRegion =
+         flag "discovery-region" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_discovered_accounts
+           (Values.GetIpamDiscoveredAccountsRequest.make ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ?maxResults ~ipamResourceDiscoveryId
+              ~discoveryRegion ())
+           (Some Values.GetIpamDiscoveredAccountsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_discovered_public_addresses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and ipamResourceDiscoveryId =
+         flag "ipam-resource-discovery-id" (required string)
+           ~doc:"STRING IpamResourceDiscoveryId"
+       and addressRegion =
+         flag "address-region" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_discovered_public_addresses
+           (Values.GetIpamDiscoveredPublicAddressesRequest.make ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ?maxResults ~ipamResourceDiscoveryId ~addressRegion
+              ())
+           (Some Values.GetIpamDiscoveredPublicAddressesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_discovered_resource_cidrs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and ipamResourceDiscoveryId =
+         flag "ipam-resource-discovery-id" (required string)
+           ~doc:"STRING IpamResourceDiscoveryId"
+       and resourceRegion =
+         flag "resource-region" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_discovered_resource_cidrs
+           (Values.GetIpamDiscoveredResourceCidrsRequest.make ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ?maxResults ~ipamResourceDiscoveryId ~resourceRegion
+              ()) (Some Values.GetIpamDiscoveredResourceCidrsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_policy_allocation_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and locale = flag "locale" (optional string) ~doc:"STRING String"
+       and resourceType =
+         flag "resource-type" (optional json_arg)
+           ~doc:"JSON IpamPolicyResourceType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and ipamPolicyId =
+         flag "ipam-policy-id" (required string) ~doc:"STRING IpamPolicyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_policy_allocation_rules
+           (Values.GetIpamPolicyAllocationRulesRequest.make ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?locale
+              ?resourceType:(Option.map
+                               ~f:Values.IpamPolicyResourceType.of_json
+                               resourceType) ?maxResults ?nextToken
+              ~ipamPolicyId ())
+           (Some Values.GetIpamPolicyAllocationRulesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_policy_organization_targets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and ipamPolicyId =
+         flag "ipam-policy-id" (required string) ~doc:"STRING IpamPolicyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_policy_organization_targets
+           (Values.GetIpamPolicyOrganizationTargetsRequest.make ?dryRun
+              ?maxResults ?nextToken
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ~ipamPolicyId ())
+           (Some Values.GetIpamPolicyOrganizationTargetsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_ipam_pool_allocations =
   Command.async ~summary:""
@@ -670,6 +1221,100 @@ let get_ipam_pool_cidrs =
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
               ?maxResults ?nextToken ~ipamPoolId ())
            (Some Values.GetIpamPoolCidrsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_prefix_list_resolver_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and ipamPrefixListResolverId =
+         flag "ipam-prefix-list-resolver-id" (required string)
+           ~doc:"STRING IpamPrefixListResolverId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_prefix_list_resolver_rules
+           (Values.GetIpamPrefixListResolverRulesRequest.make ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxResults ?nextToken ~ipamPrefixListResolverId ())
+           (Some Values.GetIpamPrefixListResolverRulesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_prefix_list_resolver_version_entries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and ipamPrefixListResolverId =
+         flag "ipam-prefix-list-resolver-id" (required string)
+           ~doc:"STRING IpamPrefixListResolverId"
+       and ipamPrefixListResolverVersion =
+         flag "ipam-prefix-list-resolver-version" (required json_arg)
+           ~doc:"JSON Long" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_prefix_list_resolver_version_entries
+           (Values.GetIpamPrefixListResolverVersionEntriesRequest.make
+              ?dryRun ?maxResults ?nextToken ~ipamPrefixListResolverId
+              ~ipamPrefixListResolverVersion:(Values.Long.of_json
+                                                ipamPrefixListResolverVersion)
+              ())
+           (Some Values.GetIpamPrefixListResolverVersionEntriesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_ipam_prefix_list_resolver_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and ipamPrefixListResolverVersions =
+         flag "ipam-prefix-list-resolver-versions" (optional json_arg)
+           ~doc:"JSON IpamPrefixListResolverVersionNumberSet"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT IpamMaxResults"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and ipamPrefixListResolverId =
+         flag "ipam-prefix-list-resolver-id" (required string)
+           ~doc:"STRING IpamPrefixListResolverId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_ipam_prefix_list_resolver_versions
+           (Values.GetIpamPrefixListResolverVersionsRequest.make ?dryRun
+              ?ipamPrefixListResolverVersions:(Option.map
+                                                 ~f:Values.IpamPrefixListResolverVersionNumberSet.of_json
+                                                 ipamPrefixListResolverVersions)
+              ?maxResults
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?nextToken ~ipamPrefixListResolverId ())
+           (Some Values.GetIpamPrefixListResolverVersionsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_ipam_resource_cidrs =
   Command.async ~summary:""
@@ -788,6 +1433,23 @@ let get_managed_prefix_list_entries =
               ?maxResults ?nextToken ~prefixListId ())
            (Some Values.GetManagedPrefixListEntriesResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let get_managed_resource_visibility =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_managed_resource_visibility
+           (Values.GetManagedResourceVisibilityRequest.make ?dryRun ())
+           (Some Values.GetManagedResourceVisibilityResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_network_insights_access_scope_analysis_findings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -800,7 +1462,7 @@ let get_network_insights_access_scope_analysis_findings =
            ~doc:"URL override endpoint url"
        and maxResults =
          flag "max-results" (optional int)
-           ~doc:"INT NetworkInsightsMaxResults"
+           ~doc:"INT GetNetworkInsightsAccessScopeAnalysisFindingsMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
@@ -884,6 +1546,103 @@ let get_reserved_instances_exchange_quote =
                                       reservedInstanceIds) ())
            (Some Values.GetReservedInstancesExchangeQuoteResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let get_route_server_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_route_server_associations
+           (Values.GetRouteServerAssociationsRequest.make ?dryRun
+              ~routeServerId ())
+           (Some Values.GetRouteServerAssociationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_route_server_propagations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and routeTableId =
+         flag "route-table-id" (optional string) ~doc:"STRING RouteTableId"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_route_server_propagations
+           (Values.GetRouteServerPropagationsRequest.make ?routeTableId
+              ?dryRun ~routeServerId ())
+           (Some Values.GetRouteServerPropagationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_route_server_routing_database =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RouteServerMaxResults"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_route_server_routing_database
+           (Values.GetRouteServerRoutingDatabaseRequest.make ?nextToken
+              ?maxResults ?dryRun
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ~routeServerId ())
+           (Some Values.GetRouteServerRoutingDatabaseResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_security_groups_for_vpc =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetSecurityGroupsForVpcRequestMaxResults"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_security_groups_for_vpc
+           (Values.GetSecurityGroupsForVpcRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?dryRun ~vpcId ())
+           (Some Values.GetSecurityGroupsForVpcResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_serial_console_access_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -900,6 +1659,23 @@ let get_serial_console_access_status =
            Io.get_serial_console_access_status
            (Values.GetSerialConsoleAccessStatusRequest.make ?dryRun ())
            (Some Values.GetSerialConsoleAccessStatusResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_snapshot_block_public_access_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_snapshot_block_public_access_state
+           (Values.GetSnapshotBlockPublicAccessStateRequest.make ?dryRun ())
+           (Some Values.GetSnapshotBlockPublicAccessStateResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_spot_placement_scores =
   Command.async ~summary:""
@@ -1007,6 +1783,36 @@ let get_transit_gateway_attachment_propagations =
               ?maxResults ?nextToken ?dryRun ~transitGatewayAttachmentId ())
            (Some Values.GetTransitGatewayAttachmentPropagationsResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let get_transit_gateway_metering_policy_entries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT TransitGatewayMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMeteringPolicyId =
+         flag "transit-gateway-metering-policy-id" (required string)
+           ~doc:"STRING TransitGatewayMeteringPolicyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transit_gateway_metering_policy_entries
+           (Values.GetTransitGatewayMeteringPolicyEntriesRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxResults ?nextToken ?dryRun ~transitGatewayMeteringPolicyId
+              ())
+           (Some Values.GetTransitGatewayMeteringPolicyEntriesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_transit_gateway_multicast_domain_associations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1017,9 +1823,6 @@ let get_transit_gateway_multicast_domain_associations =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and transitGatewayMulticastDomainId =
-         flag "transit-gateway-multicast-domain-id" (optional string)
-           ~doc:"STRING TransitGatewayMulticastDomainId"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and maxResults =
@@ -1027,16 +1830,78 @@ let get_transit_gateway_multicast_domain_associations =
            ~doc:"INT TransitGatewayMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMulticastDomainId =
+         flag "transit-gateway-multicast-domain-id" (required string)
+           ~doc:"STRING TransitGatewayMulticastDomainId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_transit_gateway_multicast_domain_associations
            (Values.GetTransitGatewayMulticastDomainAssociationsRequest.make
-              ?transitGatewayMulticastDomainId
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
+              ?maxResults ?nextToken ?dryRun ~transitGatewayMulticastDomainId
+              ())
            (Some
               Values.GetTransitGatewayMulticastDomainAssociationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_transit_gateway_policy_table_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT TransitGatewayMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayPolicyTableId =
+         flag "transit-gateway-policy-table-id" (required string)
+           ~doc:"STRING TransitGatewayPolicyTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transit_gateway_policy_table_associations
+           (Values.GetTransitGatewayPolicyTableAssociationsRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxResults ?nextToken ?dryRun ~transitGatewayPolicyTableId ())
+           (Some
+              Values.GetTransitGatewayPolicyTableAssociationsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_transit_gateway_policy_table_entries =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT TransitGatewayMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayPolicyTableId =
+         flag "transit-gateway-policy-table-id" (required string)
+           ~doc:"STRING TransitGatewayPolicyTableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transit_gateway_policy_table_entries
+           (Values.GetTransitGatewayPolicyTableEntriesRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxResults ?nextToken ?dryRun ~transitGatewayPolicyTableId ())
+           (Some Values.GetTransitGatewayPolicyTableEntriesResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let get_transit_gateway_prefix_list_references =
   Command.async ~summary:""
@@ -1125,6 +1990,99 @@ let get_transit_gateway_route_table_propagations =
               ?maxResults ?nextToken ?dryRun ~transitGatewayRouteTableId ())
            (Some Values.GetTransitGatewayRouteTablePropagationsResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let get_verified_access_endpoint_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessEndpointId =
+         flag "verified-access-endpoint-id" (required string)
+           ~doc:"STRING VerifiedAccessEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_verified_access_endpoint_policy
+           (Values.GetVerifiedAccessEndpointPolicyRequest.make ?dryRun
+              ~verifiedAccessEndpointId ())
+           (Some Values.GetVerifiedAccessEndpointPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_verified_access_endpoint_targets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetVerifiedAccessEndpointTargetsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessEndpointId =
+         flag "verified-access-endpoint-id" (required string)
+           ~doc:"STRING VerifiedAccessEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_verified_access_endpoint_targets
+           (Values.GetVerifiedAccessEndpointTargetsRequest.make ?maxResults
+              ?nextToken ?dryRun ~verifiedAccessEndpointId ())
+           (Some Values.GetVerifiedAccessEndpointTargetsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_verified_access_group_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessGroupId =
+         flag "verified-access-group-id" (required string)
+           ~doc:"STRING VerifiedAccessGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_verified_access_group_policy
+           (Values.GetVerifiedAccessGroupPolicyRequest.make ?dryRun
+              ~verifiedAccessGroupId ())
+           (Some Values.GetVerifiedAccessGroupPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_vpc_resources_blocking_encryption_enforcement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT GetVpcResourcesBlockingEncryptionEnforcementMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_vpc_resources_blocking_encryption_enforcement
+           (Values.GetVpcResourcesBlockingEncryptionEnforcementRequest.make
+              ?maxResults ?nextToken ?dryRun ~vpcId ())
+           (Some
+              Values.GetVpcResourcesBlockingEncryptionEnforcementResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let get_vpn_connection_device_sample_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1138,6 +2096,8 @@ let get_vpn_connection_device_sample_configuration =
        and internetKeyExchangeVersion =
          flag "internet-key-exchange-version" (optional string)
            ~doc:"STRING String"
+       and sampleType =
+         flag "sample-type" (optional string) ~doc:"STRING String"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and vpnConnectionId =
          flag "vpn-connection-id" (required string)
@@ -1149,8 +2109,8 @@ let get_vpn_connection_device_sample_configuration =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_vpn_connection_device_sample_configuration
            (Values.GetVpnConnectionDeviceSampleConfigurationRequest.make
-              ?internetKeyExchangeVersion ?dryRun ~vpnConnectionId
-              ~vpnConnectionDeviceTypeId ())
+              ?internetKeyExchangeVersion ?sampleType ?dryRun
+              ~vpnConnectionId ~vpnConnectionDeviceTypeId ())
            (Some
               Values.GetVpnConnectionDeviceSampleConfigurationResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1175,6 +2135,30 @@ let get_vpn_connection_device_types =
            (Values.GetVpnConnectionDeviceTypesRequest.make ?maxResults
               ?nextToken ?dryRun ())
            (Some Values.GetVpnConnectionDeviceTypesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let get_vpn_tunnel_replacement_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpnConnectionId =
+         flag "vpn-connection-id" (required string)
+           ~doc:"STRING VpnConnectionId"
+       and vpnTunnelOutsideIpAddress =
+         flag "vpn-tunnel-outside-ip-address" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_vpn_tunnel_replacement_status
+           (Values.GetVpnTunnelReplacementStatusRequest.make ?dryRun
+              ~vpnConnectionId ~vpnTunnelOutsideIpAddress ())
+           (Some Values.GetVpnTunnelReplacementStatusResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let import_client_vpn_client_certificate_revocation_list =
   Command.async ~summary:""
@@ -1271,25 +2255,25 @@ let import_instance =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and description =
          flag "description" (optional string) ~doc:"STRING String"
-       and diskImages =
-         flag "disk-images" (optional json_arg) ~doc:"JSON DiskImageList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and launchSpecification =
          flag "launch-specification" (optional json_arg)
            ~doc:"JSON ImportInstanceLaunchSpecification"
+       and diskImages =
+         flag "disk-images" (optional json_arg) ~doc:"JSON DiskImageList"
        and platform =
          flag "platform" (required json_arg) ~doc:"JSON PlatformValues" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_instance
-           (Values.ImportInstanceRequest.make ?description
-              ?diskImages:(Option.map ~f:Values.DiskImageList.of_json
-                             diskImages) ?dryRun
+           (Values.ImportInstanceRequest.make ?dryRun ?description
               ?launchSpecification:(Option.map
                                       ~f:Values.ImportInstanceLaunchSpecification.of_json
                                       launchSpecification)
+              ?diskImages:(Option.map ~f:Values.DiskImageList.of_json
+                             diskImages)
               ~platform:(Values.PlatformValues.of_json platform) ())
            (Some Values.ImportInstanceResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1303,20 +2287,20 @@ let import_key_pair =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and tagSpecifications =
          flag "tag-specifications" (optional json_arg)
            ~doc:"JSON TagSpecificationList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and keyName = flag "key-name" (required string) ~doc:"STRING String"
        and publicKeyMaterial =
          flag "public-key-material" (required json_arg) ~doc:"JSON Blob" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_key_pair
-           (Values.ImportKeyPairRequest.make ?dryRun
+           (Values.ImportKeyPairRequest.make
               ?tagSpecifications:(Option.map
                                     ~f:Values.TagSpecificationList.of_json
-                                    tagSpecifications) ~keyName
+                                    tagSpecifications) ?dryRun ~keyName
               ~publicKeyMaterial:(Values.Blob.of_json publicKeyMaterial) ())
            (Some Values.ImportKeyPairResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1372,11 +2356,14 @@ let import_volume =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and description =
-         flag "description" (optional string) ~doc:"STRING String"
+       and availabilityZoneId =
+         flag "availability-zone-id" (optional string)
+           ~doc:"STRING AvailabilityZoneId"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and availabilityZone =
-         flag "availability-zone" (required string) ~doc:"STRING String"
+         flag "availability-zone" (optional string) ~doc:"STRING String"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
        and image =
          flag "image" (required json_arg) ~doc:"JSON DiskImageDetail"
        and volume =
@@ -1384,8 +2371,9 @@ let import_volume =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_volume
-           (Values.ImportVolumeRequest.make ?description ?dryRun
-              ~availabilityZone ~image:(Values.DiskImageDetail.of_json image)
+           (Values.ImportVolumeRequest.make ?availabilityZoneId ?dryRun
+              ?availabilityZone ?description
+              ~image:(Values.DiskImageDetail.of_json image)
               ~volume:(Values.VolumeDetail.of_json volume) ())
            (Some Values.ImportVolumeResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1442,6 +2430,65 @@ let list_snapshots_in_recycle_bin =
               ?snapshotIds:(Option.map ~f:Values.SnapshotIdStringList.of_json
                               snapshotIds) ?dryRun ())
            (Some Values.ListSnapshotsInRecycleBinResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let list_volumes_in_recycle_bin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and volumeIds =
+         flag "volume-ids" (optional json_arg) ~doc:"JSON VolumeIdStringList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT Integer"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_volumes_in_recycle_bin
+           (Values.ListVolumesInRecycleBinRequest.make
+              ?volumeIds:(Option.map ~f:Values.VolumeIdStringList.of_json
+                            volumeIds) ?dryRun ?maxResults ?nextToken ())
+           (Some Values.ListVolumesInRecycleBinResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let lock_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and coolOffPeriod =
+         flag "cool-off-period" (optional int)
+           ~doc:"INT CoolOffPeriodRequestHours"
+       and lockDuration =
+         flag "lock-duration" (optional int)
+           ~doc:"INT RetentionPeriodRequestDays"
+       and expirationDate =
+         flag "expiration-date" (optional json_arg)
+           ~doc:"JSON MillisecondDateTime"
+       and snapshotId =
+         flag "snapshot-id" (required string) ~doc:"STRING SnapshotId"
+       and lockMode =
+         flag "lock-mode" (required json_arg) ~doc:"JSON LockMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.lock_snapshot
+           (Values.LockSnapshotRequest.make ?dryRun ?coolOffPeriod
+              ?lockDuration
+              ?expirationDate:(Option.map
+                                 ~f:Values.MillisecondDateTime.of_json
+                                 expirationDate) ~snapshotId
+              ~lockMode:(Values.LockMode.of_json lockMode) ())
+           (Some Values.LockSnapshotResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_address_attribute =
   Command.async ~summary:""
@@ -1508,6 +2555,9 @@ let modify_capacity_reservation =
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and additionalInfo =
          flag "additional-info" (optional string) ~doc:"STRING String"
+       and instanceMatchCriteria =
+         flag "instance-match-criteria" (optional json_arg)
+           ~doc:"JSON InstanceMatchCriteria"
        and capacityReservationId =
          flag "capacity-reservation-id" (required string)
            ~doc:"STRING CapacityReservationId" in
@@ -1518,6 +2568,9 @@ let modify_capacity_reservation =
               ?endDate:(Option.map ~f:Values.DateTime.of_json endDate)
               ?endDateType:(Option.map ~f:Values.EndDateType.of_json
                               endDateType) ?accept ?dryRun ?additionalInfo
+              ?instanceMatchCriteria:(Option.map
+                                        ~f:Values.InstanceMatchCriteria.of_json
+                                        instanceMatchCriteria)
               ~capacityReservationId ())
            (Some Values.ModifyCapacityReservationResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1590,6 +2643,15 @@ let modify_client_vpn_endpoint =
        and clientLoginBannerOptions =
          flag "client-login-banner-options" (optional json_arg)
            ~doc:"JSON ClientLoginBannerOptions"
+       and clientRouteEnforcementOptions =
+         flag "client-route-enforcement-options" (optional json_arg)
+           ~doc:"JSON ClientRouteEnforcementOptions"
+       and disconnectOnSessionTimeout =
+         flag "disconnect-on-session-timeout" (optional bool)
+           ~doc:"BOOL Boolean"
+       and transitGatewayConfiguration =
+         flag "transit-gateway-configuration" (optional json_arg)
+           ~doc:"JSON TransitGatewayConfigurationInputStructure"
        and clientVpnEndpointId =
          flag "client-vpn-endpoint-id" (required string)
            ~doc:"STRING ClientVpnEndpointId" in
@@ -1617,6 +2679,13 @@ let modify_client_vpn_endpoint =
               ?clientLoginBannerOptions:(Option.map
                                            ~f:Values.ClientLoginBannerOptions.of_json
                                            clientLoginBannerOptions)
+              ?clientRouteEnforcementOptions:(Option.map
+                                                ~f:Values.ClientRouteEnforcementOptions.of_json
+                                                clientRouteEnforcementOptions)
+              ?disconnectOnSessionTimeout
+              ?transitGatewayConfiguration:(Option.map
+                                              ~f:Values.TransitGatewayConfigurationInputStructure.of_json
+                                              transitGatewayConfiguration)
               ~clientVpnEndpointId ())
            (Some Values.ModifyClientVpnEndpointResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1762,24 +2831,29 @@ let modify_hosts =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and autoPlacement =
-         flag "auto-placement" (optional json_arg) ~doc:"JSON AutoPlacement"
        and hostRecovery =
          flag "host-recovery" (optional json_arg) ~doc:"JSON HostRecovery"
        and instanceType =
          flag "instance-type" (optional string) ~doc:"STRING String"
        and instanceFamily =
          flag "instance-family" (optional string) ~doc:"STRING String"
+       and hostMaintenance =
+         flag "host-maintenance" (optional json_arg)
+           ~doc:"JSON HostMaintenance"
+       and autoPlacement =
+         flag "auto-placement" (optional json_arg) ~doc:"JSON AutoPlacement"
        and hostIds =
          flag "host-ids" (required json_arg) ~doc:"JSON RequestHostIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_hosts
            (Values.ModifyHostsRequest.make
-              ?autoPlacement:(Option.map ~f:Values.AutoPlacement.of_json
-                                autoPlacement)
               ?hostRecovery:(Option.map ~f:Values.HostRecovery.of_json
                                hostRecovery) ?instanceType ?instanceFamily
+              ?hostMaintenance:(Option.map ~f:Values.HostMaintenance.of_json
+                                  hostMaintenance)
+              ?autoPlacement:(Option.map ~f:Values.AutoPlacement.of_json
+                                autoPlacement)
               ~hostIds:(Values.RequestHostIdList.of_json hostIds) ())
            (Some Values.ModifyHostsResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -1811,16 +2885,16 @@ let modify_identity_id_format =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and principalArn =
-         flag "principal-arn" (required string) ~doc:"STRING String"
        and resource = flag "resource" (required string) ~doc:"STRING String"
        and useLongIds =
-         flag "use-long-ids" (required bool) ~doc:"BOOL Boolean" in
+         flag "use-long-ids" (required bool) ~doc:"BOOL Boolean"
+       and principalArn =
+         flag "principal-arn" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_identity_id_format
-           (Values.ModifyIdentityIdFormatRequest.make ~principalArn ~resource
-              ~useLongIds ()) None (Some Values.Ec2_error.to_json)])
+           (Values.ModifyIdentityIdFormatRequest.make ~resource ~useLongIds
+              ~principalArn ()) None (Some Values.Ec2_error.to_json)])
 let modify_image_attribute =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1849,13 +2923,15 @@ let modify_image_attribute =
        and userIds =
          flag "user-ids" (optional json_arg) ~doc:"JSON UserIdStringList"
        and value = flag "value" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and organizationArns =
          flag "organization-arns" (optional json_arg)
            ~doc:"JSON OrganizationArnStringList"
        and organizationalUnitArns =
          flag "organizational-unit-arns" (optional json_arg)
            ~doc:"JSON OrganizationalUnitArnStringList"
+       and imdsSupport =
+         flag "imds-support" (optional json_arg) ~doc:"JSON AttributeValue"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and imageId = flag "image-id" (required string) ~doc:"STRING ImageId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1874,14 +2950,16 @@ let modify_image_attribute =
               ?userGroups:(Option.map ~f:Values.UserGroupStringList.of_json
                              userGroups)
               ?userIds:(Option.map ~f:Values.UserIdStringList.of_json userIds)
-              ?value ?dryRun
+              ?value
               ?organizationArns:(Option.map
                                    ~f:Values.OrganizationArnStringList.of_json
                                    organizationArns)
               ?organizationalUnitArns:(Option.map
                                          ~f:Values.OrganizationalUnitArnStringList.of_json
-                                         organizationalUnitArns) ~imageId ())
-           None (Some Values.Ec2_error.to_json)])
+                                         organizationalUnitArns)
+              ?imdsSupport:(Option.map ~f:Values.AttributeValue.of_json
+                              imdsSupport) ?dryRun ~imageId ()) None
+           (Some Values.Ec2_error.to_json)])
 let modify_instance_attribute =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1895,39 +2973,44 @@ let modify_instance_attribute =
        and sourceDestCheck =
          flag "source-dest-check" (optional json_arg)
            ~doc:"JSON AttributeBooleanValue"
+       and disableApiStop =
+         flag "disable-api-stop" (optional json_arg)
+           ~doc:"JSON AttributeBooleanValue"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and attribute =
          flag "attribute" (optional json_arg)
            ~doc:"JSON InstanceAttributeName"
+       and value =
+         flag "value" (optional string)
+           ~doc:"STRING ModifyInstanceAttributeValue"
        and blockDeviceMappings =
          flag "block-device-mappings" (optional json_arg)
            ~doc:"JSON InstanceBlockDeviceMappingSpecificationList"
        and disableApiTermination =
          flag "disable-api-termination" (optional json_arg)
            ~doc:"JSON AttributeBooleanValue"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and ebsOptimized =
-         flag "ebs-optimized" (optional json_arg)
-           ~doc:"JSON AttributeBooleanValue"
-       and enaSupport =
-         flag "ena-support" (optional json_arg)
-           ~doc:"JSON AttributeBooleanValue"
-       and groups =
-         flag "groups" (optional json_arg) ~doc:"JSON GroupIdStringList"
-       and instanceInitiatedShutdownBehavior =
-         flag "instance-initiated-shutdown-behavior" (optional json_arg)
-           ~doc:"JSON AttributeValue"
        and instanceType =
          flag "instance-type" (optional json_arg) ~doc:"JSON AttributeValue"
        and kernel =
          flag "kernel" (optional json_arg) ~doc:"JSON AttributeValue"
        and ramdisk =
          flag "ramdisk" (optional json_arg) ~doc:"JSON AttributeValue"
+       and userData =
+         flag "user-data" (optional json_arg) ~doc:"JSON BlobAttributeValue"
+       and instanceInitiatedShutdownBehavior =
+         flag "instance-initiated-shutdown-behavior" (optional json_arg)
+           ~doc:"JSON AttributeValue"
+       and groups =
+         flag "groups" (optional json_arg) ~doc:"JSON GroupIdStringList"
+       and ebsOptimized =
+         flag "ebs-optimized" (optional json_arg)
+           ~doc:"JSON AttributeBooleanValue"
        and sriovNetSupport =
          flag "sriov-net-support" (optional json_arg)
            ~doc:"JSON AttributeValue"
-       and userData =
-         flag "user-data" (optional json_arg) ~doc:"JSON BlobAttributeValue"
-       and value = flag "value" (optional string) ~doc:"STRING String"
+       and enaSupport =
+         flag "ena-support" (optional json_arg)
+           ~doc:"JSON AttributeBooleanValue"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId" in
        fun () ->
@@ -1937,31 +3020,34 @@ let modify_instance_attribute =
               ?sourceDestCheck:(Option.map
                                   ~f:Values.AttributeBooleanValue.of_json
                                   sourceDestCheck)
+              ?disableApiStop:(Option.map
+                                 ~f:Values.AttributeBooleanValue.of_json
+                                 disableApiStop) ?dryRun
               ?attribute:(Option.map ~f:Values.InstanceAttributeName.of_json
-                            attribute)
+                            attribute) ?value
               ?blockDeviceMappings:(Option.map
                                       ~f:Values.InstanceBlockDeviceMappingSpecificationList.of_json
                                       blockDeviceMappings)
               ?disableApiTermination:(Option.map
                                         ~f:Values.AttributeBooleanValue.of_json
-                                        disableApiTermination) ?dryRun
-              ?ebsOptimized:(Option.map
-                               ~f:Values.AttributeBooleanValue.of_json
-                               ebsOptimized)
-              ?enaSupport:(Option.map ~f:Values.AttributeBooleanValue.of_json
-                             enaSupport)
-              ?groups:(Option.map ~f:Values.GroupIdStringList.of_json groups)
-              ?instanceInitiatedShutdownBehavior:(Option.map
-                                                    ~f:Values.AttributeValue.of_json
-                                                    instanceInitiatedShutdownBehavior)
+                                        disableApiTermination)
               ?instanceType:(Option.map ~f:Values.AttributeValue.of_json
                                instanceType)
               ?kernel:(Option.map ~f:Values.AttributeValue.of_json kernel)
               ?ramdisk:(Option.map ~f:Values.AttributeValue.of_json ramdisk)
+              ?userData:(Option.map ~f:Values.BlobAttributeValue.of_json
+                           userData)
+              ?instanceInitiatedShutdownBehavior:(Option.map
+                                                    ~f:Values.AttributeValue.of_json
+                                                    instanceInitiatedShutdownBehavior)
+              ?groups:(Option.map ~f:Values.GroupIdStringList.of_json groups)
+              ?ebsOptimized:(Option.map
+                               ~f:Values.AttributeBooleanValue.of_json
+                               ebsOptimized)
               ?sriovNetSupport:(Option.map ~f:Values.AttributeValue.of_json
                                   sriovNetSupport)
-              ?userData:(Option.map ~f:Values.BlobAttributeValue.of_json
-                           userData) ?value ~instanceId ()) None
+              ?enaSupport:(Option.map ~f:Values.AttributeBooleanValue.of_json
+                             enaSupport) ~instanceId ()) None
            (Some Values.Ec2_error.to_json)])
 let modify_instance_capacity_reservation_attributes =
   Command.async ~summary:""
@@ -1989,6 +3075,69 @@ let modify_instance_capacity_reservation_attributes =
               ())
            (Some
               Values.ModifyInstanceCapacityReservationAttributesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_instance_connect_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and securityGroupIds =
+         flag "security-group-ids" (optional json_arg)
+           ~doc:"JSON SecurityGroupIdStringListRequest"
+       and preserveClientIp =
+         flag "preserve-client-ip" (optional bool) ~doc:"BOOL Boolean"
+       and instanceConnectEndpointId =
+         flag "instance-connect-endpoint-id" (required string)
+           ~doc:"STRING InstanceConnectEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_instance_connect_endpoint
+           (Values.ModifyInstanceConnectEndpointRequest.make ?dryRun
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
+              ?securityGroupIds:(Option.map
+                                   ~f:Values.SecurityGroupIdStringListRequest.of_json
+                                   securityGroupIds) ?preserveClientIp
+              ~instanceConnectEndpointId ())
+           (Some Values.ModifyInstanceConnectEndpointResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_instance_cpu_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and coreCount = flag "core-count" (optional int) ~doc:"INT Integer"
+       and threadsPerCore =
+         flag "threads-per-core" (optional int) ~doc:"INT Integer"
+       and nestedVirtualization =
+         flag "nested-virtualization" (optional json_arg)
+           ~doc:"JSON NestedVirtualizationSpecification"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_instance_cpu_options
+           (Values.ModifyInstanceCpuOptionsRequest.make ?coreCount
+              ?threadsPerCore
+              ?nestedVirtualization:(Option.map
+                                       ~f:Values.NestedVirtualizationSpecification.of_json
+                                       nestedVirtualization) ?dryRun
+              ~instanceId ())
+           (Some Values.ModifyInstanceCpuOptionsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_instance_credit_specification =
   Command.async ~summary:""
@@ -2085,6 +3234,9 @@ let modify_instance_maintenance_options =
        and autoRecovery =
          flag "auto-recovery" (optional json_arg)
            ~doc:"JSON InstanceAutoRecoveryState"
+       and rebootMigration =
+         flag "reboot-migration" (optional json_arg)
+           ~doc:"JSON InstanceRebootMigrationState"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId" in
@@ -2094,8 +3246,55 @@ let modify_instance_maintenance_options =
            (Values.ModifyInstanceMaintenanceOptionsRequest.make
               ?autoRecovery:(Option.map
                                ~f:Values.InstanceAutoRecoveryState.of_json
-                               autoRecovery) ?dryRun ~instanceId ())
+                               autoRecovery)
+              ?rebootMigration:(Option.map
+                                  ~f:Values.InstanceRebootMigrationState.of_json
+                                  rebootMigration) ?dryRun ~instanceId ())
            (Some Values.ModifyInstanceMaintenanceOptionsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_instance_metadata_defaults =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and httpTokens =
+         flag "http-tokens" (optional json_arg)
+           ~doc:"JSON MetadataDefaultHttpTokensState"
+       and httpPutResponseHopLimit =
+         flag "http-put-response-hop-limit" (optional int)
+           ~doc:"INT BoxedInteger"
+       and httpEndpoint =
+         flag "http-endpoint" (optional json_arg)
+           ~doc:"JSON DefaultInstanceMetadataEndpointState"
+       and instanceMetadataTags =
+         flag "instance-metadata-tags" (optional json_arg)
+           ~doc:"JSON DefaultInstanceMetadataTagsState"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and httpTokensEnforced =
+         flag "http-tokens-enforced" (optional json_arg)
+           ~doc:"JSON DefaultHttpTokensEnforcedState" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_instance_metadata_defaults
+           (Values.ModifyInstanceMetadataDefaultsRequest.make
+              ?httpTokens:(Option.map
+                             ~f:Values.MetadataDefaultHttpTokensState.of_json
+                             httpTokens) ?httpPutResponseHopLimit
+              ?httpEndpoint:(Option.map
+                               ~f:Values.DefaultInstanceMetadataEndpointState.of_json
+                               httpEndpoint)
+              ?instanceMetadataTags:(Option.map
+                                       ~f:Values.DefaultInstanceMetadataTagsState.of_json
+                                       instanceMetadataTags) ?dryRun
+              ?httpTokensEnforced:(Option.map
+                                     ~f:Values.DefaultHttpTokensEnforcedState.of_json
+                                     httpTokensEnforced) ())
+           (Some Values.ModifyInstanceMetadataDefaultsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_instance_metadata_options =
   Command.async ~summary:""
@@ -2140,6 +3339,31 @@ let modify_instance_metadata_options =
                                        instanceMetadataTags) ~instanceId ())
            (Some Values.ModifyInstanceMetadataOptionsResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let modify_instance_network_performance_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId"
+       and bandwidthWeighting =
+         flag "bandwidth-weighting" (required json_arg)
+           ~doc:"JSON InstanceBandwidthWeighting" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_instance_network_performance_options
+           (Values.ModifyInstanceNetworkPerformanceRequest.make ?dryRun
+              ~instanceId
+              ~bandwidthWeighting:(Values.InstanceBandwidthWeighting.of_json
+                                     bandwidthWeighting) ())
+           (Some Values.ModifyInstanceNetworkPerformanceResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let modify_instance_placement =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2150,29 +3374,31 @@ let modify_instance_placement =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and affinity =
-         flag "affinity" (optional json_arg) ~doc:"JSON Affinity"
        and groupName =
          flag "group-name" (optional string) ~doc:"STRING PlacementGroupName"
-       and hostId =
-         flag "host-id" (optional string) ~doc:"STRING DedicatedHostId"
-       and tenancy =
-         flag "tenancy" (optional json_arg) ~doc:"JSON HostTenancy"
        and partitionNumber =
          flag "partition-number" (optional int) ~doc:"INT Integer"
        and hostResourceGroupArn =
          flag "host-resource-group-arn" (optional string)
            ~doc:"STRING String"
+       and groupId =
+         flag "group-id" (optional string) ~doc:"STRING PlacementGroupId"
+       and tenancy =
+         flag "tenancy" (optional json_arg) ~doc:"JSON HostTenancy"
+       and affinity =
+         flag "affinity" (optional json_arg) ~doc:"JSON Affinity"
+       and hostId =
+         flag "host-id" (optional string) ~doc:"STRING DedicatedHostId"
        and instanceId =
          flag "instance-id" (required string) ~doc:"STRING InstanceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_instance_placement
-           (Values.ModifyInstancePlacementRequest.make
-              ?affinity:(Option.map ~f:Values.Affinity.of_json affinity)
-              ?groupName ?hostId
+           (Values.ModifyInstancePlacementRequest.make ?groupName
+              ?partitionNumber ?hostResourceGroupArn ?groupId
               ?tenancy:(Option.map ~f:Values.HostTenancy.of_json tenancy)
-              ?partitionNumber ?hostResourceGroupArn ~instanceId ())
+              ?affinity:(Option.map ~f:Values.Affinity.of_json affinity)
+              ?hostId ~instanceId ())
            (Some Values.ModifyInstancePlacementResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_ipam =
@@ -2194,6 +3420,12 @@ let modify_ipam =
        and removeOperatingRegions =
          flag "remove-operating-regions" (optional json_arg)
            ~doc:"JSON RemoveIpamOperatingRegionSet"
+       and tier = flag "tier" (optional json_arg) ~doc:"JSON IpamTier"
+       and enablePrivateGua =
+         flag "enable-private-gua" (optional bool) ~doc:"BOOL Boolean"
+       and meteredAccount =
+         flag "metered-account" (optional json_arg)
+           ~doc:"JSON IpamMeteredAccount"
        and ipamId = flag "ipam-id" (required string) ~doc:"STRING IpamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -2204,8 +3436,44 @@ let modify_ipam =
                                       addOperatingRegions)
               ?removeOperatingRegions:(Option.map
                                          ~f:Values.RemoveIpamOperatingRegionSet.of_json
-                                         removeOperatingRegions) ~ipamId ())
+                                         removeOperatingRegions)
+              ?tier:(Option.map ~f:Values.IpamTier.of_json tier)
+              ?enablePrivateGua
+              ?meteredAccount:(Option.map
+                                 ~f:Values.IpamMeteredAccount.of_json
+                                 meteredAccount) ~ipamId ())
            (Some Values.ModifyIpamResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_ipam_policy_allocation_rules =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and allocationRules =
+         flag "allocation-rules" (optional json_arg)
+           ~doc:"JSON IpamPolicyAllocationRuleListRequest"
+       and ipamPolicyId =
+         flag "ipam-policy-id" (required string) ~doc:"STRING IpamPolicyId"
+       and locale = flag "locale" (required string) ~doc:"STRING String"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON IpamPolicyResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_ipam_policy_allocation_rules
+           (Values.ModifyIpamPolicyAllocationRulesRequest.make ?dryRun
+              ?allocationRules:(Option.map
+                                  ~f:Values.IpamPolicyAllocationRuleListRequest.of_json
+                                  allocationRules) ~ipamPolicyId ~locale
+              ~resourceType:(Values.IpamPolicyResourceType.of_json
+                               resourceType) ())
+           (Some Values.ModifyIpamPolicyAllocationRulesResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_ipam_pool =
   Command.async ~summary:""
@@ -2257,6 +3525,64 @@ let modify_ipam_pool =
                                                removeAllocationResourceTags)
               ~ipamPoolId ()) (Some Values.ModifyIpamPoolResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let modify_ipam_prefix_list_resolver =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and rules =
+         flag "rules" (optional json_arg)
+           ~doc:"JSON IpamPrefixListResolverRuleRequestSet"
+       and ipamPrefixListResolverId =
+         flag "ipam-prefix-list-resolver-id" (required string)
+           ~doc:"STRING IpamPrefixListResolverId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_ipam_prefix_list_resolver
+           (Values.ModifyIpamPrefixListResolverRequest.make ?dryRun
+              ?description
+              ?rules:(Option.map
+                        ~f:Values.IpamPrefixListResolverRuleRequestSet.of_json
+                        rules) ~ipamPrefixListResolverId ())
+           (Some Values.ModifyIpamPrefixListResolverResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_ipam_prefix_list_resolver_target =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and desiredVersion =
+         flag "desired-version" (optional json_arg) ~doc:"JSON BoxedLong"
+       and trackLatestVersion =
+         flag "track-latest-version" (optional bool) ~doc:"BOOL BoxedBoolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and ipamPrefixListResolverTargetId =
+         flag "ipam-prefix-list-resolver-target-id" (required string)
+           ~doc:"STRING IpamPrefixListResolverTargetId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_ipam_prefix_list_resolver_target
+           (Values.ModifyIpamPrefixListResolverTargetRequest.make ?dryRun
+              ?desiredVersion:(Option.map ~f:Values.BoxedLong.of_json
+                                 desiredVersion) ?trackLatestVersion
+              ?clientToken ~ipamPrefixListResolverTargetId ())
+           (Some Values.ModifyIpamPrefixListResolverTargetResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let modify_ipam_resource_cidr =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2289,6 +3615,54 @@ let modify_ipam_resource_cidr =
               ~resourceRegion ~currentIpamScopeId ~monitored ())
            (Some Values.ModifyIpamResourceCidrResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let modify_ipam_resource_discovery =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and addOperatingRegions =
+         flag "add-operating-regions" (optional json_arg)
+           ~doc:"JSON AddIpamOperatingRegionSet"
+       and removeOperatingRegions =
+         flag "remove-operating-regions" (optional json_arg)
+           ~doc:"JSON RemoveIpamOperatingRegionSet"
+       and addOrganizationalUnitExclusions =
+         flag "add-organizational-unit-exclusions" (optional json_arg)
+           ~doc:"JSON AddIpamOrganizationalUnitExclusionSet"
+       and removeOrganizationalUnitExclusions =
+         flag "remove-organizational-unit-exclusions" (optional json_arg)
+           ~doc:"JSON RemoveIpamOrganizationalUnitExclusionSet"
+       and ipamResourceDiscoveryId =
+         flag "ipam-resource-discovery-id" (required string)
+           ~doc:"STRING IpamResourceDiscoveryId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_ipam_resource_discovery
+           (Values.ModifyIpamResourceDiscoveryRequest.make ?dryRun
+              ?description
+              ?addOperatingRegions:(Option.map
+                                      ~f:Values.AddIpamOperatingRegionSet.of_json
+                                      addOperatingRegions)
+              ?removeOperatingRegions:(Option.map
+                                         ~f:Values.RemoveIpamOperatingRegionSet.of_json
+                                         removeOperatingRegions)
+              ?addOrganizationalUnitExclusions:(Option.map
+                                                  ~f:Values.AddIpamOrganizationalUnitExclusionSet.of_json
+                                                  addOrganizationalUnitExclusions)
+              ?removeOrganizationalUnitExclusions:(Option.map
+                                                     ~f:Values.RemoveIpamOrganizationalUnitExclusionSet.of_json
+                                                     removeOrganizationalUnitExclusions)
+              ~ipamResourceDiscoveryId ())
+           (Some Values.ModifyIpamResourceDiscoveryResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let modify_ipam_scope =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2302,13 +3676,23 @@ let modify_ipam_scope =
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and description =
          flag "description" (optional string) ~doc:"STRING String"
+       and externalAuthorityConfiguration =
+         flag "external-authority-configuration" (optional json_arg)
+           ~doc:"JSON ExternalAuthorityConfiguration"
+       and removeExternalAuthorityConfiguration =
+         flag "remove-external-authority-configuration" (optional bool)
+           ~doc:"BOOL Boolean"
        and ipamScopeId =
          flag "ipam-scope-id" (required string) ~doc:"STRING IpamScopeId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_ipam_scope
            (Values.ModifyIpamScopeRequest.make ?dryRun ?description
-              ~ipamScopeId ()) (Some Values.ModifyIpamScopeResult.to_json)
+              ?externalAuthorityConfiguration:(Option.map
+                                                 ~f:Values.ExternalAuthorityConfiguration.of_json
+                                                 externalAuthorityConfiguration)
+              ?removeExternalAuthorityConfiguration ~ipamScopeId ())
+           (Some Values.ModifyIpamScopeResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_launch_template =
   Command.async ~summary:""
@@ -2338,6 +3722,39 @@ let modify_launch_template =
               ?launchTemplateId ?launchTemplateName ?defaultVersion ())
            (Some Values.ModifyLaunchTemplateResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let modify_local_gateway_route =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and destinationCidrBlock =
+         flag "destination-cidr-block" (optional string) ~doc:"STRING String"
+       and localGatewayVirtualInterfaceGroupId =
+         flag "local-gateway-virtual-interface-group-id" (optional string)
+           ~doc:"STRING LocalGatewayVirtualInterfaceGroupId"
+       and networkInterfaceId =
+         flag "network-interface-id" (optional string)
+           ~doc:"STRING NetworkInterfaceId"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and destinationPrefixListId =
+         flag "destination-prefix-list-id" (optional string)
+           ~doc:"STRING PrefixListResourceId"
+       and localGatewayRouteTableId =
+         flag "local-gateway-route-table-id" (required string)
+           ~doc:"STRING LocalGatewayRoutetableId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_local_gateway_route
+           (Values.ModifyLocalGatewayRouteRequest.make ?destinationCidrBlock
+              ?localGatewayVirtualInterfaceGroupId ?networkInterfaceId
+              ?dryRun ?destinationPrefixListId ~localGatewayRouteTableId ())
+           (Some Values.ModifyLocalGatewayRouteResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let modify_managed_prefix_list =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2360,6 +3777,9 @@ let modify_managed_prefix_list =
          flag "remove-entries" (optional json_arg)
            ~doc:"JSON RemovePrefixListEntries"
        and maxEntries = flag "max-entries" (optional int) ~doc:"INT Integer"
+       and ipamPrefixListResolverSyncEnabled =
+         flag "ipam-prefix-list-resolver-sync-enabled" (optional bool)
+           ~doc:"BOOL BoxedBoolean"
        and prefixListId =
          flag "prefix-list-id" (required string)
            ~doc:"STRING PrefixListResourceId" in
@@ -2373,8 +3793,31 @@ let modify_managed_prefix_list =
                              addEntries)
               ?removeEntries:(Option.map
                                 ~f:Values.RemovePrefixListEntries.of_json
-                                removeEntries) ?maxEntries ~prefixListId ())
+                                removeEntries) ?maxEntries
+              ?ipamPrefixListResolverSyncEnabled ~prefixListId ())
            (Some Values.ModifyManagedPrefixListResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_managed_resource_visibility =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and defaultVisibility =
+         flag "default-visibility" (required json_arg)
+           ~doc:"JSON ManagedResourceDefaultVisibility" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_managed_resource_visibility
+           (Values.ModifyManagedResourceVisibilityRequest.make ?dryRun
+              ~defaultVisibility:(Values.ManagedResourceDefaultVisibility.of_json
+                                    defaultVisibility) ())
+           (Some Values.ModifyManagedResourceVisibilityResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_network_interface_attribute =
   Command.async ~summary:""
@@ -2386,18 +3829,32 @@ let modify_network_interface_attribute =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and attachment =
-         flag "attachment" (optional json_arg)
-           ~doc:"JSON NetworkInterfaceAttachmentChanges"
+       and enaSrdSpecification =
+         flag "ena-srd-specification" (optional json_arg)
+           ~doc:"JSON EnaSrdSpecification"
+       and enablePrimaryIpv6 =
+         flag "enable-primary-ipv6" (optional bool) ~doc:"BOOL Boolean"
+       and connectionTrackingSpecification =
+         flag "connection-tracking-specification" (optional json_arg)
+           ~doc:"JSON ConnectionTrackingSpecificationRequest"
+       and associatePublicIpAddress =
+         flag "associate-public-ip-address" (optional bool)
+           ~doc:"BOOL Boolean"
+       and associatedSubnetIds =
+         flag "associated-subnet-ids" (optional json_arg)
+           ~doc:"JSON SubnetIdList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and description =
          flag "description" (optional json_arg) ~doc:"JSON AttributeValue"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and groups =
-         flag "groups" (optional json_arg)
-           ~doc:"JSON SecurityGroupIdStringList"
        and sourceDestCheck =
          flag "source-dest-check" (optional json_arg)
            ~doc:"JSON AttributeBooleanValue"
+       and groups =
+         flag "groups" (optional json_arg)
+           ~doc:"JSON SecurityGroupIdStringList"
+       and attachment =
+         flag "attachment" (optional json_arg)
+           ~doc:"JSON NetworkInterfaceAttachmentChanges"
        and networkInterfaceId =
          flag "network-interface-id" (required string)
            ~doc:"STRING NetworkInterfaceId" in
@@ -2405,17 +3862,26 @@ let modify_network_interface_attribute =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_network_interface_attribute
            (Values.ModifyNetworkInterfaceAttributeRequest.make
-              ?attachment:(Option.map
-                             ~f:Values.NetworkInterfaceAttachmentChanges.of_json
-                             attachment)
+              ?enaSrdSpecification:(Option.map
+                                      ~f:Values.EnaSrdSpecification.of_json
+                                      enaSrdSpecification) ?enablePrimaryIpv6
+              ?connectionTrackingSpecification:(Option.map
+                                                  ~f:Values.ConnectionTrackingSpecificationRequest.of_json
+                                                  connectionTrackingSpecification)
+              ?associatePublicIpAddress
+              ?associatedSubnetIds:(Option.map ~f:Values.SubnetIdList.of_json
+                                      associatedSubnetIds) ?dryRun
               ?description:(Option.map ~f:Values.AttributeValue.of_json
-                              description) ?dryRun
-              ?groups:(Option.map ~f:Values.SecurityGroupIdStringList.of_json
-                         groups)
+                              description)
               ?sourceDestCheck:(Option.map
                                   ~f:Values.AttributeBooleanValue.of_json
-                                  sourceDestCheck) ~networkInterfaceId ())
-           None (Some Values.Ec2_error.to_json)])
+                                  sourceDestCheck)
+              ?groups:(Option.map ~f:Values.SecurityGroupIdStringList.of_json
+                         groups)
+              ?attachment:(Option.map
+                             ~f:Values.NetworkInterfaceAttachmentChanges.of_json
+                             attachment) ~networkInterfaceId ()) None
+           (Some Values.Ec2_error.to_json)])
 let modify_private_dns_name_options =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2427,8 +3893,6 @@ let modify_private_dns_name_options =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceId =
-         flag "instance-id" (optional string) ~doc:"STRING InstanceId"
        and privateDnsHostnameType =
          flag "private-dns-hostname-type" (optional json_arg)
            ~doc:"JSON HostnameType"
@@ -2437,17 +3901,44 @@ let modify_private_dns_name_options =
            ~doc:"BOOL Boolean"
        and enableResourceNameDnsAAAARecord =
          flag "enable-resource-name-dns-a-a-a-a-record" (optional bool)
-           ~doc:"BOOL Boolean" in
+           ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_private_dns_name_options
            (Values.ModifyPrivateDnsNameOptionsRequest.make ?dryRun
-              ?instanceId
               ?privateDnsHostnameType:(Option.map
                                          ~f:Values.HostnameType.of_json
                                          privateDnsHostnameType)
               ?enableResourceNameDnsARecord ?enableResourceNameDnsAAAARecord
-              ()) (Some Values.ModifyPrivateDnsNameOptionsResult.to_json)
+              ~instanceId ())
+           (Some Values.ModifyPrivateDnsNameOptionsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_public_ip_dns_name_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkInterfaceId =
+         flag "network-interface-id" (required string)
+           ~doc:"STRING NetworkInterfaceId"
+       and hostnameType =
+         flag "hostname-type" (required json_arg)
+           ~doc:"JSON PublicIpDnsOption" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_public_ip_dns_name_options
+           (Values.ModifyPublicIpDnsNameOptionsRequest.make ?dryRun
+              ~networkInterfaceId
+              ~hostnameType:(Values.PublicIpDnsOption.of_json hostnameType)
+              ()) (Some Values.ModifyPublicIpDnsNameOptionsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_reserved_instances =
   Command.async ~summary:""
@@ -2476,6 +3967,39 @@ let modify_reserved_instances =
               ~targetConfigurations:(Values.ReservedInstancesConfigurationList.of_json
                                        targetConfigurations) ())
            (Some Values.ModifyReservedInstancesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_route_server =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and persistRoutes =
+         flag "persist-routes" (optional json_arg)
+           ~doc:"JSON RouteServerPersistRoutesAction"
+       and persistRoutesDuration =
+         flag "persist-routes-duration" (optional json_arg)
+           ~doc:"JSON BoxedLong"
+       and snsNotificationsEnabled =
+         flag "sns-notifications-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and routeServerId =
+         flag "route-server-id" (required string) ~doc:"STRING RouteServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_route_server
+           (Values.ModifyRouteServerRequest.make
+              ?persistRoutes:(Option.map
+                                ~f:Values.RouteServerPersistRoutesAction.of_json
+                                persistRoutes)
+              ?persistRoutesDuration:(Option.map ~f:Values.BoxedLong.of_json
+                                        persistRoutesDuration)
+              ?snsNotificationsEnabled ?dryRun ~routeServerId ())
+           (Some Values.ModifyRouteServerResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_security_group_rules =
   Command.async ~summary:""
@@ -2576,17 +4100,17 @@ let modify_spot_fleet_request =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and excessCapacityTerminationPolicy =
-         flag "excess-capacity-termination-policy" (optional json_arg)
-           ~doc:"JSON ExcessCapacityTerminationPolicy"
        and launchTemplateConfigs =
          flag "launch-template-configs" (optional json_arg)
            ~doc:"JSON LaunchTemplateConfigList"
-       and targetCapacity =
-         flag "target-capacity" (optional int) ~doc:"INT Integer"
        and onDemandTargetCapacity =
          flag "on-demand-target-capacity" (optional int) ~doc:"INT Integer"
        and context = flag "context" (optional string) ~doc:"STRING String"
+       and targetCapacity =
+         flag "target-capacity" (optional int) ~doc:"INT Integer"
+       and excessCapacityTerminationPolicy =
+         flag "excess-capacity-termination-policy" (optional json_arg)
+           ~doc:"JSON ExcessCapacityTerminationPolicy"
        and spotFleetRequestId =
          flag "spot-fleet-request-id" (required string)
            ~doc:"STRING SpotFleetRequestId" in
@@ -2594,13 +4118,13 @@ let modify_spot_fleet_request =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_spot_fleet_request
            (Values.ModifySpotFleetRequestRequest.make
-              ?excessCapacityTerminationPolicy:(Option.map
-                                                  ~f:Values.ExcessCapacityTerminationPolicy.of_json
-                                                  excessCapacityTerminationPolicy)
               ?launchTemplateConfigs:(Option.map
                                         ~f:Values.LaunchTemplateConfigList.of_json
                                         launchTemplateConfigs)
-              ?targetCapacity ?onDemandTargetCapacity ?context
+              ?onDemandTargetCapacity ?context ?targetCapacity
+              ?excessCapacityTerminationPolicy:(Option.map
+                                                  ~f:Values.ExcessCapacityTerminationPolicy.of_json
+                                                  excessCapacityTerminationPolicy)
               ~spotFleetRequestId ())
            (Some Values.ModifySpotFleetRequestResponse.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -2746,7 +4270,7 @@ let modify_traffic_mirror_filter_rule =
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and trafficMirrorFilterRuleId =
          flag "traffic-mirror-filter-rule-id" (required string)
-           ~doc:"STRING TrafficMirrorFilterRuleId" in
+           ~doc:"STRING TrafficMirrorFilterRuleIdWithResolver" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_traffic_mirror_filter_rule
@@ -2840,6 +4364,39 @@ let modify_transit_gateway =
                           options) ?dryRun ~transitGatewayId ())
            (Some Values.ModifyTransitGatewayResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let modify_transit_gateway_metering_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and addMiddleboxAttachmentIds =
+         flag "add-middlebox-attachment-ids" (optional json_arg)
+           ~doc:"JSON TransitGatewayAttachmentIdStringList"
+       and removeMiddleboxAttachmentIds =
+         flag "remove-middlebox-attachment-ids" (optional json_arg)
+           ~doc:"JSON TransitGatewayAttachmentIdStringList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMeteringPolicyId =
+         flag "transit-gateway-metering-policy-id" (required string)
+           ~doc:"STRING TransitGatewayMeteringPolicyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_transit_gateway_metering_policy
+           (Values.ModifyTransitGatewayMeteringPolicyRequest.make
+              ?addMiddleboxAttachmentIds:(Option.map
+                                            ~f:Values.TransitGatewayAttachmentIdStringList.of_json
+                                            addMiddleboxAttachmentIds)
+              ?removeMiddleboxAttachmentIds:(Option.map
+                                               ~f:Values.TransitGatewayAttachmentIdStringList.of_json
+                                               removeMiddleboxAttachmentIds)
+              ?dryRun ~transitGatewayMeteringPolicyId ())
+           (Some Values.ModifyTransitGatewayMeteringPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let modify_transit_gateway_prefix_list_reference =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2906,6 +4463,263 @@ let modify_transit_gateway_vpc_attachment =
                           ~f:Values.ModifyTransitGatewayVpcAttachmentRequestOptions.of_json
                           options) ?dryRun ~transitGatewayAttachmentId ())
            (Some Values.ModifyTransitGatewayVpcAttachmentResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and verifiedAccessGroupId =
+         flag "verified-access-group-id" (optional string)
+           ~doc:"STRING VerifiedAccessGroupId"
+       and loadBalancerOptions =
+         flag "load-balancer-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessEndpointLoadBalancerOptions"
+       and networkInterfaceOptions =
+         flag "network-interface-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessEndpointEniOptions"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and rdsOptions =
+         flag "rds-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessEndpointRdsOptions"
+       and cidrOptions =
+         flag "cidr-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessEndpointCidrOptions"
+       and verifiedAccessEndpointId =
+         flag "verified-access-endpoint-id" (required string)
+           ~doc:"STRING VerifiedAccessEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_endpoint
+           (Values.ModifyVerifiedAccessEndpointRequest.make
+              ?verifiedAccessGroupId
+              ?loadBalancerOptions:(Option.map
+                                      ~f:Values.ModifyVerifiedAccessEndpointLoadBalancerOptions.of_json
+                                      loadBalancerOptions)
+              ?networkInterfaceOptions:(Option.map
+                                          ~f:Values.ModifyVerifiedAccessEndpointEniOptions.of_json
+                                          networkInterfaceOptions)
+              ?description ?clientToken ?dryRun
+              ?rdsOptions:(Option.map
+                             ~f:Values.ModifyVerifiedAccessEndpointRdsOptions.of_json
+                             rdsOptions)
+              ?cidrOptions:(Option.map
+                              ~f:Values.ModifyVerifiedAccessEndpointCidrOptions.of_json
+                              cidrOptions) ~verifiedAccessEndpointId ())
+           (Some Values.ModifyVerifiedAccessEndpointResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_endpoint_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyEnabled =
+         flag "policy-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and policyDocument =
+         flag "policy-document" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and sseSpecification =
+         flag "sse-specification" (optional json_arg)
+           ~doc:"JSON VerifiedAccessSseSpecificationRequest"
+       and verifiedAccessEndpointId =
+         flag "verified-access-endpoint-id" (required string)
+           ~doc:"STRING VerifiedAccessEndpointId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_endpoint_policy
+           (Values.ModifyVerifiedAccessEndpointPolicyRequest.make
+              ?policyEnabled ?policyDocument ?clientToken ?dryRun
+              ?sseSpecification:(Option.map
+                                   ~f:Values.VerifiedAccessSseSpecificationRequest.of_json
+                                   sseSpecification)
+              ~verifiedAccessEndpointId ())
+           (Some Values.ModifyVerifiedAccessEndpointPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and verifiedAccessInstanceId =
+         flag "verified-access-instance-id" (optional string)
+           ~doc:"STRING VerifiedAccessInstanceId"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and verifiedAccessGroupId =
+         flag "verified-access-group-id" (required string)
+           ~doc:"STRING VerifiedAccessGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_group
+           (Values.ModifyVerifiedAccessGroupRequest.make
+              ?verifiedAccessInstanceId ?description ?clientToken ?dryRun
+              ~verifiedAccessGroupId ())
+           (Some Values.ModifyVerifiedAccessGroupResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_group_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyEnabled =
+         flag "policy-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and policyDocument =
+         flag "policy-document" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and sseSpecification =
+         flag "sse-specification" (optional json_arg)
+           ~doc:"JSON VerifiedAccessSseSpecificationRequest"
+       and verifiedAccessGroupId =
+         flag "verified-access-group-id" (required string)
+           ~doc:"STRING VerifiedAccessGroupId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_group_policy
+           (Values.ModifyVerifiedAccessGroupPolicyRequest.make ?policyEnabled
+              ?policyDocument ?clientToken ?dryRun
+              ?sseSpecification:(Option.map
+                                   ~f:Values.VerifiedAccessSseSpecificationRequest.of_json
+                                   sseSpecification) ~verifiedAccessGroupId
+              ()) (Some Values.ModifyVerifiedAccessGroupPolicyResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and cidrEndpointsCustomSubDomain =
+         flag "cidr-endpoints-custom-sub-domain" (optional string)
+           ~doc:"STRING String"
+       and verifiedAccessInstanceId =
+         flag "verified-access-instance-id" (required string)
+           ~doc:"STRING VerifiedAccessInstanceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_instance
+           (Values.ModifyVerifiedAccessInstanceRequest.make ?description
+              ?dryRun ?clientToken ?cidrEndpointsCustomSubDomain
+              ~verifiedAccessInstanceId ())
+           (Some Values.ModifyVerifiedAccessInstanceResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_instance_logging_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and verifiedAccessInstanceId =
+         flag "verified-access-instance-id" (required string)
+           ~doc:"STRING VerifiedAccessInstanceId"
+       and accessLogs =
+         flag "access-logs" (required json_arg)
+           ~doc:"JSON VerifiedAccessLogOptions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_instance_logging_configuration
+           (Values.ModifyVerifiedAccessInstanceLoggingConfigurationRequest.make
+              ?dryRun ?clientToken ~verifiedAccessInstanceId
+              ~accessLogs:(Values.VerifiedAccessLogOptions.of_json accessLogs)
+              ())
+           (Some
+              Values.ModifyVerifiedAccessInstanceLoggingConfigurationResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_verified_access_trust_provider =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and oidcOptions =
+         flag "oidc-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessTrustProviderOidcOptions"
+       and deviceOptions =
+         flag "device-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessTrustProviderDeviceOptions"
+       and description =
+         flag "description" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and sseSpecification =
+         flag "sse-specification" (optional json_arg)
+           ~doc:"JSON VerifiedAccessSseSpecificationRequest"
+       and nativeApplicationOidcOptions =
+         flag "native-application-oidc-options" (optional json_arg)
+           ~doc:"JSON ModifyVerifiedAccessNativeApplicationOidcOptions"
+       and verifiedAccessTrustProviderId =
+         flag "verified-access-trust-provider-id" (required string)
+           ~doc:"STRING VerifiedAccessTrustProviderId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_verified_access_trust_provider
+           (Values.ModifyVerifiedAccessTrustProviderRequest.make
+              ?oidcOptions:(Option.map
+                              ~f:Values.ModifyVerifiedAccessTrustProviderOidcOptions.of_json
+                              oidcOptions)
+              ?deviceOptions:(Option.map
+                                ~f:Values.ModifyVerifiedAccessTrustProviderDeviceOptions.of_json
+                                deviceOptions) ?description ?dryRun
+              ?clientToken
+              ?sseSpecification:(Option.map
+                                   ~f:Values.VerifiedAccessSseSpecificationRequest.of_json
+                                   sseSpecification)
+              ?nativeApplicationOidcOptions:(Option.map
+                                               ~f:Values.ModifyVerifiedAccessNativeApplicationOidcOptions.of_json
+                                               nativeApplicationOidcOptions)
+              ~verifiedAccessTrustProviderId ())
+           (Some Values.ModifyVerifiedAccessTrustProviderResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_volume =
   Command.async ~summary:""
@@ -2975,6 +4789,9 @@ let modify_vpc_attribute =
        and enableDnsSupport =
          flag "enable-dns-support" (optional json_arg)
            ~doc:"JSON AttributeBooleanValue"
+       and enableNetworkAddressUsageMetrics =
+         flag "enable-network-address-usage-metrics" (optional json_arg)
+           ~doc:"JSON AttributeBooleanValue"
        and vpcId = flag "vpc-id" (required string) ~doc:"STRING VpcId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -2985,7 +4802,132 @@ let modify_vpc_attribute =
                                      enableDnsHostnames)
               ?enableDnsSupport:(Option.map
                                    ~f:Values.AttributeBooleanValue.of_json
-                                   enableDnsSupport) ~vpcId ()) None
+                                   enableDnsSupport)
+              ?enableNetworkAddressUsageMetrics:(Option.map
+                                                   ~f:Values.AttributeBooleanValue.of_json
+                                                   enableNetworkAddressUsageMetrics)
+              ~vpcId ()) None (Some Values.Ec2_error.to_json)])
+let modify_vpc_block_public_access_exclusion =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and exclusionId =
+         flag "exclusion-id" (required string)
+           ~doc:"STRING VpcBlockPublicAccessExclusionId"
+       and internetGatewayExclusionMode =
+         flag "internet-gateway-exclusion-mode" (required json_arg)
+           ~doc:"JSON InternetGatewayExclusionMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_vpc_block_public_access_exclusion
+           (Values.ModifyVpcBlockPublicAccessExclusionRequest.make ?dryRun
+              ~exclusionId
+              ~internetGatewayExclusionMode:(Values.InternetGatewayExclusionMode.of_json
+                                               internetGatewayExclusionMode)
+              ())
+           (Some Values.ModifyVpcBlockPublicAccessExclusionResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_vpc_block_public_access_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and internetGatewayBlockMode =
+         flag "internet-gateway-block-mode" (required json_arg)
+           ~doc:"JSON InternetGatewayBlockMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_vpc_block_public_access_options
+           (Values.ModifyVpcBlockPublicAccessOptionsRequest.make ?dryRun
+              ~internetGatewayBlockMode:(Values.InternetGatewayBlockMode.of_json
+                                           internetGatewayBlockMode) ())
+           (Some Values.ModifyVpcBlockPublicAccessOptionsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let modify_vpc_encryption_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and mode =
+         flag "mode" (optional json_arg) ~doc:"JSON VpcEncryptionControlMode"
+       and internetGatewayExclusion =
+         flag "internet-gateway-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and egressOnlyInternetGatewayExclusion =
+         flag "egress-only-internet-gateway-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and natGatewayExclusion =
+         flag "nat-gateway-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and virtualPrivateGatewayExclusion =
+         flag "virtual-private-gateway-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and vpcPeeringExclusion =
+         flag "vpc-peering-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and lambdaExclusion =
+         flag "lambda-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and vpcLatticeExclusion =
+         flag "vpc-lattice-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and elasticFileSystemExclusion =
+         flag "elastic-file-system-exclusion" (optional json_arg)
+           ~doc:"JSON VpcEncryptionControlExclusionStateInput"
+       and vpcEncryptionControlId =
+         flag "vpc-encryption-control-id" (required string)
+           ~doc:"STRING VpcEncryptionControlId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_vpc_encryption_control
+           (Values.ModifyVpcEncryptionControlRequest.make ?dryRun
+              ?mode:(Option.map ~f:Values.VpcEncryptionControlMode.of_json
+                       mode)
+              ?internetGatewayExclusion:(Option.map
+                                           ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                           internetGatewayExclusion)
+              ?egressOnlyInternetGatewayExclusion:(Option.map
+                                                     ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                                     egressOnlyInternetGatewayExclusion)
+              ?natGatewayExclusion:(Option.map
+                                      ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                      natGatewayExclusion)
+              ?virtualPrivateGatewayExclusion:(Option.map
+                                                 ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                                 virtualPrivateGatewayExclusion)
+              ?vpcPeeringExclusion:(Option.map
+                                      ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                      vpcPeeringExclusion)
+              ?lambdaExclusion:(Option.map
+                                  ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                  lambdaExclusion)
+              ?vpcLatticeExclusion:(Option.map
+                                      ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                      vpcLatticeExclusion)
+              ?elasticFileSystemExclusion:(Option.map
+                                             ~f:Values.VpcEncryptionControlExclusionStateInput.of_json
+                                             elasticFileSystemExclusion)
+              ~vpcEncryptionControlId ())
+           (Some Values.ModifyVpcEncryptionControlResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_vpc_endpoint =
   Command.async ~summary:""
@@ -3020,8 +4962,16 @@ let modify_vpc_endpoint =
        and removeSecurityGroupIds =
          flag "remove-security-group-ids" (optional json_arg)
            ~doc:"JSON VpcEndpointSecurityGroupIdList"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and dnsOptions =
+         flag "dns-options" (optional json_arg)
+           ~doc:"JSON DnsOptionsSpecification"
        and privateDnsEnabled =
          flag "private-dns-enabled" (optional bool) ~doc:"BOOL Boolean"
+       and subnetConfigurations =
+         flag "subnet-configurations" (optional json_arg)
+           ~doc:"JSON SubnetConfigurationsList"
        and vpcEndpointId =
          flag "vpc-endpoint-id" (required string) ~doc:"STRING VpcEndpointId" in
        fun () ->
@@ -3047,8 +4997,15 @@ let modify_vpc_endpoint =
               ?removeSecurityGroupIds:(Option.map
                                          ~f:Values.VpcEndpointSecurityGroupIdList.of_json
                                          removeSecurityGroupIds)
-              ?privateDnsEnabled ~vpcEndpointId ())
-           (Some Values.ModifyVpcEndpointResult.to_json)
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
+              ?dnsOptions:(Option.map
+                             ~f:Values.DnsOptionsSpecification.of_json
+                             dnsOptions) ?privateDnsEnabled
+              ?subnetConfigurations:(Option.map
+                                       ~f:Values.SubnetConfigurationsList.of_json
+                                       subnetConfigurations) ~vpcEndpointId
+              ()) (Some Values.ModifyVpcEndpointResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_vpc_endpoint_connection_notification =
   Command.async ~summary:""
@@ -3109,6 +5066,18 @@ let modify_vpc_endpoint_service_configuration =
        and removeGatewayLoadBalancerArns =
          flag "remove-gateway-load-balancer-arns" (optional json_arg)
            ~doc:"JSON ValueStringList"
+       and addSupportedIpAddressTypes =
+         flag "add-supported-ip-address-types" (optional json_arg)
+           ~doc:"JSON ValueStringList"
+       and removeSupportedIpAddressTypes =
+         flag "remove-supported-ip-address-types" (optional json_arg)
+           ~doc:"JSON ValueStringList"
+       and addSupportedRegions =
+         flag "add-supported-regions" (optional json_arg)
+           ~doc:"JSON ValueStringList"
+       and removeSupportedRegions =
+         flag "remove-supported-regions" (optional json_arg)
+           ~doc:"JSON ValueStringList"
        and serviceId =
          flag "service-id" (required string)
            ~doc:"STRING VpcEndpointServiceId" in
@@ -3129,7 +5098,19 @@ let modify_vpc_endpoint_service_configuration =
               ?removeGatewayLoadBalancerArns:(Option.map
                                                 ~f:Values.ValueStringList.of_json
                                                 removeGatewayLoadBalancerArns)
-              ~serviceId ())
+              ?addSupportedIpAddressTypes:(Option.map
+                                             ~f:Values.ValueStringList.of_json
+                                             addSupportedIpAddressTypes)
+              ?removeSupportedIpAddressTypes:(Option.map
+                                                ~f:Values.ValueStringList.of_json
+                                                removeSupportedIpAddressTypes)
+              ?addSupportedRegions:(Option.map
+                                      ~f:Values.ValueStringList.of_json
+                                      addSupportedRegions)
+              ?removeSupportedRegions:(Option.map
+                                         ~f:Values.ValueStringList.of_json
+                                         removeSupportedRegions) ~serviceId
+              ())
            (Some Values.ModifyVpcEndpointServiceConfigurationResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_vpc_endpoint_service_payer_responsibility =
@@ -3298,6 +5279,9 @@ let modify_vpn_connection_options =
        and remoteIpv6NetworkCidr =
          flag "remote-ipv6-network-cidr" (optional string)
            ~doc:"STRING String"
+       and tunnelBandwidth =
+         flag "tunnel-bandwidth" (optional json_arg)
+           ~doc:"JSON VpnTunnelBandwidth"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and vpnConnectionId =
          flag "vpn-connection-id" (required string)
@@ -3307,9 +5291,11 @@ let modify_vpn_connection_options =
            Io.modify_vpn_connection_options
            (Values.ModifyVpnConnectionOptionsRequest.make
               ?localIpv4NetworkCidr ?remoteIpv4NetworkCidr
-              ?localIpv6NetworkCidr ?remoteIpv6NetworkCidr ?dryRun
-              ~vpnConnectionId ())
-           (Some Values.ModifyVpnConnectionOptionsResult.to_json)
+              ?localIpv6NetworkCidr ?remoteIpv6NetworkCidr
+              ?tunnelBandwidth:(Option.map
+                                  ~f:Values.VpnTunnelBandwidth.of_json
+                                  tunnelBandwidth) ?dryRun ~vpnConnectionId
+              ()) (Some Values.ModifyVpnConnectionOptionsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let modify_vpn_tunnel_certificate =
   Command.async ~summary:""
@@ -3346,6 +5332,10 @@ let modify_vpn_tunnel_options =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and skipTunnelReplacement =
+         flag "skip-tunnel-replacement" (optional bool) ~doc:"BOOL Boolean"
+       and preSharedKeyStorage =
+         flag "pre-shared-key-storage" (optional string) ~doc:"STRING String"
        and vpnConnectionId =
          flag "vpn-connection-id" (required string)
            ~doc:"STRING VpnConnectionId"
@@ -3359,7 +5349,8 @@ let modify_vpn_tunnel_options =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_vpn_tunnel_options
            (Values.ModifyVpnTunnelOptionsRequest.make ?dryRun
-              ~vpnConnectionId ~vpnTunnelOutsideIpAddress
+              ?skipTunnelReplacement ?preSharedKeyStorage ~vpnConnectionId
+              ~vpnTunnelOutsideIpAddress
               ~tunnelOptions:(Values.ModifyVpnTunnelOptionsSpecification.of_json
                                 tunnelOptions) ())
            (Some Values.ModifyVpnTunnelOptionsResult.to_json)
@@ -3426,6 +5417,35 @@ let move_byoip_cidr_to_ipam =
               ~ipamPoolOwner ())
            (Some Values.MoveByoipCidrToIpamResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let move_capacity_reservation_instances =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and sourceCapacityReservationId =
+         flag "source-capacity-reservation-id" (required string)
+           ~doc:"STRING CapacityReservationId"
+       and destinationCapacityReservationId =
+         flag "destination-capacity-reservation-id" (required string)
+           ~doc:"STRING CapacityReservationId"
+       and instanceCount =
+         flag "instance-count" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.move_capacity_reservation_instances
+           (Values.MoveCapacityReservationInstancesRequest.make ?dryRun
+              ?clientToken ~sourceCapacityReservationId
+              ~destinationCapacityReservationId ~instanceCount ())
+           (Some Values.MoveCapacityReservationInstancesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let provision_byoip_cidr =
   Command.async ~summary:""
     ([%map_open.Command
@@ -3449,6 +5469,8 @@ let provision_byoip_cidr =
            ~doc:"JSON TagSpecificationList"
        and multiRegion =
          flag "multi-region" (optional bool) ~doc:"BOOL Boolean"
+       and networkBorderGroup =
+         flag "network-border-group" (optional string) ~doc:"STRING String"
        and cidr = flag "cidr" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -3461,7 +5483,32 @@ let provision_byoip_cidr =
               ?poolTagSpecifications:(Option.map
                                         ~f:Values.TagSpecificationList.of_json
                                         poolTagSpecifications) ?multiRegion
-              ~cidr ()) (Some Values.ProvisionByoipCidrResult.to_json)
+              ?networkBorderGroup ~cidr ())
+           (Some Values.ProvisionByoipCidrResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let provision_ipam_byoasn =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and ipamId = flag "ipam-id" (required string) ~doc:"STRING IpamId"
+       and asn = flag "asn" (required string) ~doc:"STRING String"
+       and asnAuthorizationContext =
+         flag "asn-authorization-context" (required json_arg)
+           ~doc:"JSON AsnAuthorizationContext" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.provision_ipam_byoasn
+           (Values.ProvisionIpamByoasnRequest.make ?dryRun ~ipamId ~asn
+              ~asnAuthorizationContext:(Values.AsnAuthorizationContext.of_json
+                                          asnAuthorizationContext) ())
+           (Some Values.ProvisionIpamByoasnResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let provision_ipam_pool_cidr =
   Command.async ~summary:""
@@ -3478,6 +5525,17 @@ let provision_ipam_pool_cidr =
        and cidrAuthorizationContext =
          flag "cidr-authorization-context" (optional json_arg)
            ~doc:"JSON IpamCidrAuthorizationContext"
+       and netmaskLength =
+         flag "netmask-length" (optional int) ~doc:"INT Integer"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and verificationMethod =
+         flag "verification-method" (optional json_arg)
+           ~doc:"JSON VerificationMethod"
+       and ipamExternalResourceVerificationTokenId =
+         flag "ipam-external-resource-verification-token-id"
+           (optional string)
+           ~doc:"STRING IpamExternalResourceVerificationTokenId"
        and ipamPoolId =
          flag "ipam-pool-id" (required string) ~doc:"STRING IpamPoolId" in
        fun () ->
@@ -3487,7 +5545,11 @@ let provision_ipam_pool_cidr =
               ?cidrAuthorizationContext:(Option.map
                                            ~f:Values.IpamCidrAuthorizationContext.of_json
                                            cidrAuthorizationContext)
-              ~ipamPoolId ())
+              ?netmaskLength ?clientToken
+              ?verificationMethod:(Option.map
+                                     ~f:Values.VerificationMethod.of_json
+                                     verificationMethod)
+              ?ipamExternalResourceVerificationTokenId ~ipamPoolId ())
            (Some Values.ProvisionIpamPoolCidrResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let provision_public_ipv4_pool_cidr =
@@ -3501,6 +5563,8 @@ let provision_public_ipv4_pool_cidr =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and networkBorderGroup =
+         flag "network-border-group" (optional string) ~doc:"STRING String"
        and ipamPoolId =
          flag "ipam-pool-id" (required string) ~doc:"STRING IpamPoolId"
        and poolId =
@@ -3511,8 +5575,64 @@ let provision_public_ipv4_pool_cidr =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.provision_public_ipv4_pool_cidr
            (Values.ProvisionPublicIpv4PoolCidrRequest.make ?dryRun
-              ~ipamPoolId ~poolId ~netmaskLength ())
+              ?networkBorderGroup ~ipamPoolId ~poolId ~netmaskLength ())
            (Some Values.ProvisionPublicIpv4PoolCidrResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let purchase_capacity_block =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and capacityBlockOfferingId =
+         flag "capacity-block-offering-id" (required string)
+           ~doc:"STRING OfferingId"
+       and instancePlatform =
+         flag "instance-platform" (required json_arg)
+           ~doc:"JSON CapacityReservationInstancePlatform" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.purchase_capacity_block
+           (Values.PurchaseCapacityBlockRequest.make ?dryRun
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications)
+              ~capacityBlockOfferingId
+              ~instancePlatform:(Values.CapacityReservationInstancePlatform.of_json
+                                   instancePlatform) ())
+           (Some Values.PurchaseCapacityBlockResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let purchase_capacity_block_extension =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and capacityBlockExtensionOfferingId =
+         flag "capacity-block-extension-offering-id" (required string)
+           ~doc:"STRING OfferingId"
+       and capacityReservationId =
+         flag "capacity-reservation-id" (required string)
+           ~doc:"STRING CapacityReservationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.purchase_capacity_block_extension
+           (Values.PurchaseCapacityBlockExtensionRequest.make ?dryRun
+              ~capacityBlockExtensionOfferingId ~capacityReservationId ())
+           (Some Values.PurchaseCapacityBlockExtensionResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let purchase_host_reservation =
   Command.async ~summary:""
@@ -3561,12 +5681,12 @@ let purchase_reserved_instances_offering =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and purchaseTime =
+         flag "purchase-time" (optional json_arg) ~doc:"JSON DateTime"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and limitPrice =
          flag "limit-price" (optional json_arg)
            ~doc:"JSON ReservedInstanceLimitPrice"
-       and purchaseTime =
-         flag "purchase-time" (optional json_arg) ~doc:"JSON DateTime"
        and instanceCount =
          flag "instance-count" (required int) ~doc:"INT Integer"
        and reservedInstancesOfferingId =
@@ -3575,12 +5695,12 @@ let purchase_reserved_instances_offering =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.purchase_reserved_instances_offering
-           (Values.PurchaseReservedInstancesOfferingRequest.make ?dryRun
+           (Values.PurchaseReservedInstancesOfferingRequest.make
+              ?purchaseTime:(Option.map ~f:Values.DateTime.of_json
+                               purchaseTime) ?dryRun
               ?limitPrice:(Option.map
                              ~f:Values.ReservedInstanceLimitPrice.of_json
-                             limitPrice)
-              ?purchaseTime:(Option.map ~f:Values.DateTime.of_json
-                               purchaseTime) ~instanceCount
+                             limitPrice) ~instanceCount
               ~reservedInstancesOfferingId ())
            (Some Values.PurchaseReservedInstancesOfferingResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -3641,49 +5761,69 @@ let register_image =
            ~doc:"URL override endpoint url"
        and imageLocation =
          flag "image-location" (optional string) ~doc:"STRING String"
-       and architecture =
-         flag "architecture" (optional json_arg)
-           ~doc:"JSON ArchitectureValues"
-       and blockDeviceMappings =
-         flag "block-device-mappings" (optional json_arg)
-           ~doc:"JSON BlockDeviceMappingRequestList"
-       and description =
-         flag "description" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and enaSupport =
-         flag "ena-support" (optional bool) ~doc:"BOOL Boolean"
-       and kernelId =
-         flag "kernel-id" (optional string) ~doc:"STRING KernelId"
        and billingProducts =
          flag "billing-products" (optional json_arg)
            ~doc:"JSON BillingProductList"
+       and bootMode =
+         flag "boot-mode" (optional json_arg) ~doc:"JSON BootModeValues"
+       and tpmSupport =
+         flag "tpm-support" (optional json_arg) ~doc:"JSON TpmSupportValues"
+       and uefiData =
+         flag "uefi-data" (optional string)
+           ~doc:"STRING ImageUefiDataRequest"
+       and imdsSupport =
+         flag "imds-support" (optional json_arg)
+           ~doc:"JSON ImdsSupportValues"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ImageDescriptionRequest"
+       and architecture =
+         flag "architecture" (optional json_arg)
+           ~doc:"JSON ArchitectureValues"
+       and kernelId =
+         flag "kernel-id" (optional string) ~doc:"STRING KernelId"
        and ramdiskId =
          flag "ramdisk-id" (optional string) ~doc:"STRING RamdiskId"
        and rootDeviceName =
          flag "root-device-name" (optional string) ~doc:"STRING String"
-       and sriovNetSupport =
-         flag "sriov-net-support" (optional string) ~doc:"STRING String"
+       and blockDeviceMappings =
+         flag "block-device-mappings" (optional json_arg)
+           ~doc:"JSON BlockDeviceMappingRequestList"
        and virtualizationType =
          flag "virtualization-type" (optional string) ~doc:"STRING String"
-       and bootMode =
-         flag "boot-mode" (optional json_arg) ~doc:"JSON BootModeValues"
-       and name = flag "name" (required string) ~doc:"STRING String" in
+       and sriovNetSupport =
+         flag "sriov-net-support" (optional string) ~doc:"STRING String"
+       and enaSupport =
+         flag "ena-support" (optional bool) ~doc:"BOOL Boolean"
+       and name =
+         flag "name" (required string) ~doc:"STRING ImageNameRequest" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_image
            (Values.RegisterImageRequest.make ?imageLocation
-              ?architecture:(Option.map ~f:Values.ArchitectureValues.of_json
-                               architecture)
-              ?blockDeviceMappings:(Option.map
-                                      ~f:Values.BlockDeviceMappingRequestList.of_json
-                                      blockDeviceMappings) ?description
-              ?dryRun ?enaSupport ?kernelId
               ?billingProducts:(Option.map
                                   ~f:Values.BillingProductList.of_json
-                                  billingProducts) ?ramdiskId ?rootDeviceName
-              ?sriovNetSupport ?virtualizationType
+                                  billingProducts)
               ?bootMode:(Option.map ~f:Values.BootModeValues.of_json bootMode)
-              ~name ()) (Some Values.RegisterImageResult.to_json)
+              ?tpmSupport:(Option.map ~f:Values.TpmSupportValues.of_json
+                             tpmSupport) ?uefiData
+              ?imdsSupport:(Option.map ~f:Values.ImdsSupportValues.of_json
+                              imdsSupport)
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications) ?dryRun ?description
+              ?architecture:(Option.map ~f:Values.ArchitectureValues.of_json
+                               architecture) ?kernelId ?ramdiskId
+              ?rootDeviceName
+              ?blockDeviceMappings:(Option.map
+                                      ~f:Values.BlockDeviceMappingRequestList.of_json
+                                      blockDeviceMappings)
+              ?virtualizationType ?sriovNetSupport ?enaSupport ~name ())
+           (Some Values.RegisterImageResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let register_instance_event_notification_attributes =
   Command.async ~summary:""
@@ -3697,15 +5837,14 @@ let register_instance_event_notification_attributes =
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and instanceTagAttribute =
-         flag "instance-tag-attribute" (optional json_arg)
+         flag "instance-tag-attribute" (required json_arg)
            ~doc:"JSON RegisterInstanceTagAttributeRequest" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_instance_event_notification_attributes
            (Values.RegisterInstanceEventNotificationAttributesRequest.make
               ?dryRun
-              ?instanceTagAttribute:(Option.map
-                                       ~f:Values.RegisterInstanceTagAttributeRequest.of_json
+              ~instanceTagAttribute:(Values.RegisterInstanceTagAttributeRequest.of_json
                                        instanceTagAttribute) ())
            (Some
               Values.RegisterInstanceEventNotificationAttributesResult.to_json)
@@ -3720,23 +5859,22 @@ let register_transit_gateway_multicast_group_members =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and transitGatewayMulticastDomainId =
-         flag "transit-gateway-multicast-domain-id" (optional string)
-           ~doc:"STRING TransitGatewayMulticastDomainId"
        and groupIpAddress =
          flag "group-ip-address" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMulticastDomainId =
+         flag "transit-gateway-multicast-domain-id" (required string)
+           ~doc:"STRING TransitGatewayMulticastDomainId"
        and networkInterfaceIds =
-         flag "network-interface-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayNetworkInterfaceIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+         flag "network-interface-ids" (required json_arg)
+           ~doc:"JSON TransitGatewayNetworkInterfaceIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_transit_gateway_multicast_group_members
            (Values.RegisterTransitGatewayMulticastGroupMembersRequest.make
-              ?transitGatewayMulticastDomainId ?groupIpAddress
-              ?networkInterfaceIds:(Option.map
-                                      ~f:Values.TransitGatewayNetworkInterfaceIdList.of_json
-                                      networkInterfaceIds) ?dryRun ())
+              ?groupIpAddress ?dryRun ~transitGatewayMulticastDomainId
+              ~networkInterfaceIds:(Values.TransitGatewayNetworkInterfaceIdList.of_json
+                                      networkInterfaceIds) ())
            (Some
               Values.RegisterTransitGatewayMulticastGroupMembersResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -3750,25 +5888,67 @@ let register_transit_gateway_multicast_group_sources =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and transitGatewayMulticastDomainId =
-         flag "transit-gateway-multicast-domain-id" (optional string)
-           ~doc:"STRING TransitGatewayMulticastDomainId"
        and groupIpAddress =
          flag "group-ip-address" (optional string) ~doc:"STRING String"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMulticastDomainId =
+         flag "transit-gateway-multicast-domain-id" (required string)
+           ~doc:"STRING TransitGatewayMulticastDomainId"
        and networkInterfaceIds =
-         flag "network-interface-ids" (optional json_arg)
-           ~doc:"JSON TransitGatewayNetworkInterfaceIdList"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+         flag "network-interface-ids" (required json_arg)
+           ~doc:"JSON TransitGatewayNetworkInterfaceIdList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_transit_gateway_multicast_group_sources
            (Values.RegisterTransitGatewayMulticastGroupSourcesRequest.make
-              ?transitGatewayMulticastDomainId ?groupIpAddress
-              ?networkInterfaceIds:(Option.map
-                                      ~f:Values.TransitGatewayNetworkInterfaceIdList.of_json
-                                      networkInterfaceIds) ?dryRun ())
+              ?groupIpAddress ?dryRun ~transitGatewayMulticastDomainId
+              ~networkInterfaceIds:(Values.TransitGatewayNetworkInterfaceIdList.of_json
+                                      networkInterfaceIds) ())
            (Some
               Values.RegisterTransitGatewayMulticastGroupSourcesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let reject_capacity_reservation_billing_ownership =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and capacityReservationId =
+         flag "capacity-reservation-id" (required string)
+           ~doc:"STRING CapacityReservationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_capacity_reservation_billing_ownership
+           (Values.RejectCapacityReservationBillingOwnershipRequest.make
+              ?dryRun ~capacityReservationId ())
+           (Some
+              Values.RejectCapacityReservationBillingOwnershipResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let reject_transit_gateway_client_vpn_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayAttachmentId =
+         flag "transit-gateway-attachment-id" (required string)
+           ~doc:"STRING TransitGatewayAttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.reject_transit_gateway_client_vpn_attachment
+           (Values.RejectTransitGatewayClientVpnAttachmentRequest.make
+              ?dryRun ~transitGatewayAttachmentId ())
+           (Some Values.RejectTransitGatewayClientVpnAttachmentResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let reject_transit_gateway_multicast_domain_associations =
   Command.async ~summary:""
@@ -3977,6 +6157,30 @@ let replace_iam_instance_profile_association =
                                      iamInstanceProfile) ~associationId ())
            (Some Values.ReplaceIamInstanceProfileAssociationResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let replace_image_criteria_in_allowed_images_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageCriteria =
+         flag "image-criteria" (optional json_arg)
+           ~doc:"JSON ImageCriterionRequestList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.replace_image_criteria_in_allowed_images_settings
+           (Values.ReplaceImageCriteriaInAllowedImagesSettingsRequest.make
+              ?imageCriteria:(Option.map
+                                ~f:Values.ImageCriterionRequestList.of_json
+                                imageCriteria) ?dryRun ())
+           (Some
+              Values.ReplaceImageCriteriaInAllowedImagesSettingsResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let replace_network_acl_association =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4010,32 +6214,33 @@ let replace_network_acl_entry =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and cidrBlock =
          flag "cidr-block" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and icmpTypeCode =
-         flag "icmp-type-code" (optional json_arg) ~doc:"JSON IcmpTypeCode"
        and ipv6CidrBlock =
          flag "ipv6-cidr-block" (optional string) ~doc:"STRING String"
+       and icmpTypeCode =
+         flag "icmp-type-code" (optional json_arg) ~doc:"JSON IcmpTypeCode"
        and portRange =
          flag "port-range" (optional json_arg) ~doc:"JSON PortRange"
-       and egress = flag "egress" (required bool) ~doc:"BOOL Boolean"
        and networkAclId =
          flag "network-acl-id" (required string) ~doc:"STRING NetworkAclId"
+       and ruleNumber = flag "rule-number" (required int) ~doc:"INT Integer"
        and protocol = flag "protocol" (required string) ~doc:"STRING String"
        and ruleAction =
          flag "rule-action" (required json_arg) ~doc:"JSON RuleAction"
-       and ruleNumber = flag "rule-number" (required int) ~doc:"INT Integer" in
+       and egress = flag "egress" (required bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.replace_network_acl_entry
-           (Values.ReplaceNetworkAclEntryRequest.make ?cidrBlock ?dryRun
+           (Values.ReplaceNetworkAclEntryRequest.make ?dryRun ?cidrBlock
+              ?ipv6CidrBlock
               ?icmpTypeCode:(Option.map ~f:Values.IcmpTypeCode.of_json
-                               icmpTypeCode) ?ipv6CidrBlock
+                               icmpTypeCode)
               ?portRange:(Option.map ~f:Values.PortRange.of_json portRange)
-              ~egress ~networkAclId ~protocol
-              ~ruleAction:(Values.RuleAction.of_json ruleAction) ~ruleNumber
-              ()) None (Some Values.Ec2_error.to_json)])
+              ~networkAclId ~ruleNumber ~protocol
+              ~ruleAction:(Values.RuleAction.of_json ruleAction) ~egress ())
+           None (Some Values.Ec2_error.to_json)])
 let replace_route =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4046,28 +6251,13 @@ let replace_route =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and destinationCidrBlock =
-         flag "destination-cidr-block" (optional string) ~doc:"STRING String"
-       and destinationIpv6CidrBlock =
-         flag "destination-ipv6-cidr-block" (optional string)
-           ~doc:"STRING String"
        and destinationPrefixListId =
          flag "destination-prefix-list-id" (optional string)
            ~doc:"STRING PrefixListResourceId"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and vpcEndpointId =
          flag "vpc-endpoint-id" (optional string) ~doc:"STRING VpcEndpointId"
-       and egressOnlyInternetGatewayId =
-         flag "egress-only-internet-gateway-id" (optional string)
-           ~doc:"STRING EgressOnlyInternetGatewayId"
-       and gatewayId =
-         flag "gateway-id" (optional string) ~doc:"STRING RouteGatewayId"
-       and instanceId =
-         flag "instance-id" (optional string) ~doc:"STRING InstanceId"
        and localTarget =
          flag "local-target" (optional bool) ~doc:"BOOL Boolean"
-       and natGatewayId =
-         flag "nat-gateway-id" (optional string) ~doc:"STRING NatGatewayId"
        and transitGatewayId =
          flag "transit-gateway-id" (optional string)
            ~doc:"STRING TransitGatewayId"
@@ -4077,26 +6267,43 @@ let replace_route =
        and carrierGatewayId =
          flag "carrier-gateway-id" (optional string)
            ~doc:"STRING CarrierGatewayId"
+       and coreNetworkArn =
+         flag "core-network-arn" (optional string)
+           ~doc:"STRING CoreNetworkArn"
+       and odbNetworkArn =
+         flag "odb-network-arn" (optional string) ~doc:"STRING OdbNetworkArn"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and destinationCidrBlock =
+         flag "destination-cidr-block" (optional string) ~doc:"STRING String"
+       and gatewayId =
+         flag "gateway-id" (optional string) ~doc:"STRING RouteGatewayId"
+       and destinationIpv6CidrBlock =
+         flag "destination-ipv6-cidr-block" (optional string)
+           ~doc:"STRING String"
+       and egressOnlyInternetGatewayId =
+         flag "egress-only-internet-gateway-id" (optional string)
+           ~doc:"STRING EgressOnlyInternetGatewayId"
+       and instanceId =
+         flag "instance-id" (optional string) ~doc:"STRING InstanceId"
        and networkInterfaceId =
          flag "network-interface-id" (optional string)
            ~doc:"STRING NetworkInterfaceId"
        and vpcPeeringConnectionId =
          flag "vpc-peering-connection-id" (optional string)
            ~doc:"STRING VpcPeeringConnectionId"
-       and coreNetworkArn =
-         flag "core-network-arn" (optional string)
-           ~doc:"STRING CoreNetworkArn"
+       and natGatewayId =
+         flag "nat-gateway-id" (optional string) ~doc:"STRING NatGatewayId"
        and routeTableId =
          flag "route-table-id" (required string) ~doc:"STRING RouteTableId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.replace_route
-           (Values.ReplaceRouteRequest.make ?destinationCidrBlock
-              ?destinationIpv6CidrBlock ?destinationPrefixListId ?dryRun
-              ?vpcEndpointId ?egressOnlyInternetGatewayId ?gatewayId
-              ?instanceId ?localTarget ?natGatewayId ?transitGatewayId
-              ?localGatewayId ?carrierGatewayId ?networkInterfaceId
-              ?vpcPeeringConnectionId ?coreNetworkArn ~routeTableId ()) None
+           (Values.ReplaceRouteRequest.make ?destinationPrefixListId
+              ?vpcEndpointId ?localTarget ?transitGatewayId ?localGatewayId
+              ?carrierGatewayId ?coreNetworkArn ?odbNetworkArn ?dryRun
+              ?destinationCidrBlock ?gatewayId ?destinationIpv6CidrBlock
+              ?egressOnlyInternetGatewayId ?instanceId ?networkInterfaceId
+              ?vpcPeeringConnectionId ?natGatewayId ~routeTableId ()) None
            (Some Values.Ec2_error.to_json)])
 let replace_route_table_association =
   Command.async ~summary:""
@@ -4149,6 +6356,32 @@ let replace_transit_gateway_route =
               ~destinationCidrBlock ~transitGatewayRouteTableId ())
            (Some Values.ReplaceTransitGatewayRouteResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let replace_vpn_tunnel =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and applyPendingMaintenance =
+         flag "apply-pending-maintenance" (optional bool) ~doc:"BOOL Boolean"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and vpnConnectionId =
+         flag "vpn-connection-id" (required string)
+           ~doc:"STRING VpnConnectionId"
+       and vpnTunnelOutsideIpAddress =
+         flag "vpn-tunnel-outside-ip-address" (required string)
+           ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.replace_vpn_tunnel
+           (Values.ReplaceVpnTunnelRequest.make ?applyPendingMaintenance
+              ?dryRun ~vpnConnectionId ~vpnTunnelOutsideIpAddress ())
+           (Some Values.ReplaceVpnTunnelResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let report_instance_status =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4159,29 +6392,31 @@ let report_instance_status =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and description =
-         flag "description" (optional string) ~doc:"STRING String"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and endTime = flag "end-time" (optional json_arg) ~doc:"JSON DateTime"
        and startTime =
          flag "start-time" (optional json_arg) ~doc:"JSON DateTime"
+       and endTime = flag "end-time" (optional json_arg) ~doc:"JSON DateTime"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING ReportInstanceStatusRequestDescription"
        and instances =
          flag "instances" (required json_arg)
            ~doc:"JSON InstanceIdStringList"
-       and reasonCodes =
-         flag "reason-codes" (required json_arg) ~doc:"JSON ReasonCodesList"
        and status =
-         flag "status" (required json_arg) ~doc:"JSON ReportStatusType" in
+         flag "status" (required json_arg) ~doc:"JSON ReportStatusType"
+       and reasonCodes =
+         flag "reason-codes" (required json_arg) ~doc:"JSON ReasonCodesList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.report_instance_status
-           (Values.ReportInstanceStatusRequest.make ?description ?dryRun
-              ?endTime:(Option.map ~f:Values.DateTime.of_json endTime)
+           (Values.ReportInstanceStatusRequest.make ?dryRun
               ?startTime:(Option.map ~f:Values.DateTime.of_json startTime)
+              ?endTime:(Option.map ~f:Values.DateTime.of_json endTime)
+              ?description
               ~instances:(Values.InstanceIdStringList.of_json instances)
-              ~reasonCodes:(Values.ReasonCodesList.of_json reasonCodes)
-              ~status:(Values.ReportStatusType.of_json status) ()) None
-           (Some Values.Ec2_error.to_json)])
+              ~status:(Values.ReportStatusType.of_json status)
+              ~reasonCodes:(Values.ReasonCodesList.of_json reasonCodes) ())
+           None (Some Values.Ec2_error.to_json)])
 let request_spot_fleet =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4214,54 +6449,54 @@ let request_spot_instances =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and availabilityZoneGroup =
-         flag "availability-zone-group" (optional string)
-           ~doc:"STRING String"
-       and blockDurationMinutes =
-         flag "block-duration-minutes" (optional int) ~doc:"INT Integer"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and instanceCount =
-         flag "instance-count" (optional int) ~doc:"INT Integer"
-       and launchGroup =
-         flag "launch-group" (optional string) ~doc:"STRING String"
        and launchSpecification =
          flag "launch-specification" (optional json_arg)
            ~doc:"JSON RequestSpotLaunchSpecification"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and instanceInterruptionBehavior =
+         flag "instance-interruption-behavior" (optional json_arg)
+           ~doc:"JSON InstanceInterruptionBehavior"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and spotPrice =
          flag "spot-price" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and instanceCount =
+         flag "instance-count" (optional int) ~doc:"INT Integer"
        and type_ =
          flag "type-" (optional json_arg) ~doc:"JSON SpotInstanceType"
        and validFrom =
          flag "valid-from" (optional json_arg) ~doc:"JSON DateTime"
        and validUntil =
          flag "valid-until" (optional json_arg) ~doc:"JSON DateTime"
-       and tagSpecifications =
-         flag "tag-specifications" (optional json_arg)
-           ~doc:"JSON TagSpecificationList"
-       and instanceInterruptionBehavior =
-         flag "instance-interruption-behavior" (optional json_arg)
-           ~doc:"JSON InstanceInterruptionBehavior" in
+       and launchGroup =
+         flag "launch-group" (optional string) ~doc:"STRING String"
+       and availabilityZoneGroup =
+         flag "availability-zone-group" (optional string)
+           ~doc:"STRING String"
+       and blockDurationMinutes =
+         flag "block-duration-minutes" (optional int) ~doc:"INT Integer" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.request_spot_instances
-           (Values.RequestSpotInstancesRequest.make ?availabilityZoneGroup
-              ?blockDurationMinutes ?clientToken ?dryRun ?instanceCount
-              ?launchGroup
+           (Values.RequestSpotInstancesRequest.make
               ?launchSpecification:(Option.map
                                       ~f:Values.RequestSpotLaunchSpecification.of_json
-                                      launchSpecification) ?spotPrice
-              ?type_:(Option.map ~f:Values.SpotInstanceType.of_json type_)
-              ?validFrom:(Option.map ~f:Values.DateTime.of_json validFrom)
-              ?validUntil:(Option.map ~f:Values.DateTime.of_json validUntil)
+                                      launchSpecification)
               ?tagSpecifications:(Option.map
                                     ~f:Values.TagSpecificationList.of_json
                                     tagSpecifications)
               ?instanceInterruptionBehavior:(Option.map
                                                ~f:Values.InstanceInterruptionBehavior.of_json
                                                instanceInterruptionBehavior)
-              ()) (Some Values.RequestSpotInstancesResult.to_json)
+              ?dryRun ?spotPrice ?clientToken ?instanceCount
+              ?type_:(Option.map ~f:Values.SpotInstanceType.of_json type_)
+              ?validFrom:(Option.map ~f:Values.DateTime.of_json validFrom)
+              ?validUntil:(Option.map ~f:Values.DateTime.of_json validUntil)
+              ?launchGroup ?availabilityZoneGroup ?blockDurationMinutes ())
+           (Some Values.RequestSpotInstancesResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let reset_address_attribute =
   Command.async ~summary:""
@@ -4360,17 +6595,17 @@ let reset_instance_attribute =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and instanceId =
+         flag "instance-id" (required string) ~doc:"STRING InstanceId"
        and attribute =
          flag "attribute" (required json_arg)
-           ~doc:"JSON InstanceAttributeName"
-       and instanceId =
-         flag "instance-id" (required string) ~doc:"STRING InstanceId" in
+           ~doc:"JSON InstanceAttributeName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.reset_instance_attribute
-           (Values.ResetInstanceAttributeRequest.make ?dryRun
-              ~attribute:(Values.InstanceAttributeName.of_json attribute)
-              ~instanceId ()) None (Some Values.Ec2_error.to_json)])
+           (Values.ResetInstanceAttributeRequest.make ?dryRun ~instanceId
+              ~attribute:(Values.InstanceAttributeName.of_json attribute) ())
+           None (Some Values.Ec2_error.to_json)])
 let reset_network_interface_attribute =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4523,6 +6758,25 @@ let restore_snapshot_tier =
               ?permanentRestore ?dryRun ~snapshotId ())
            (Some Values.RestoreSnapshotTierResult.to_json)
            (Some Values.Ec2_error.to_json)])
+let restore_volume_from_recycle_bin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and volumeId =
+         flag "volume-id" (required string) ~doc:"STRING VolumeId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.restore_volume_from_recycle_bin
+           (Values.RestoreVolumeFromRecycleBinRequest.make ?dryRun ~volumeId
+              ()) (Some Values.RestoreVolumeFromRecycleBinResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let revoke_client_vpn_ingress =
   Command.async ~summary:""
     ([%map_open.Command
@@ -4561,37 +6815,37 @@ let revoke_security_group_egress =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and ipPermissions =
-         flag "ip-permissions" (optional json_arg)
-           ~doc:"JSON IpPermissionList"
        and securityGroupRuleIds =
          flag "security-group-rule-ids" (optional json_arg)
            ~doc:"JSON SecurityGroupRuleIdList"
-       and cidrIp = flag "cidr-ip" (optional string) ~doc:"STRING String"
-       and fromPort = flag "from-port" (optional int) ~doc:"INT Integer"
-       and ipProtocol =
-         flag "ip-protocol" (optional string) ~doc:"STRING String"
-       and toPort = flag "to-port" (optional int) ~doc:"INT Integer"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and sourceSecurityGroupName =
          flag "source-security-group-name" (optional string)
            ~doc:"STRING String"
        and sourceSecurityGroupOwnerId =
          flag "source-security-group-owner-id" (optional string)
            ~doc:"STRING String"
+       and ipProtocol =
+         flag "ip-protocol" (optional string) ~doc:"STRING String"
+       and fromPort = flag "from-port" (optional int) ~doc:"INT Integer"
+       and toPort = flag "to-port" (optional int) ~doc:"INT Integer"
+       and cidrIp = flag "cidr-ip" (optional string) ~doc:"STRING String"
+       and ipPermissions =
+         flag "ip-permissions" (optional json_arg)
+           ~doc:"JSON IpPermissionList"
        and groupId =
          flag "group-id" (required string) ~doc:"STRING SecurityGroupId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.revoke_security_group_egress
-           (Values.RevokeSecurityGroupEgressRequest.make ?dryRun
-              ?ipPermissions:(Option.map ~f:Values.IpPermissionList.of_json
-                                ipPermissions)
+           (Values.RevokeSecurityGroupEgressRequest.make
               ?securityGroupRuleIds:(Option.map
                                        ~f:Values.SecurityGroupRuleIdList.of_json
-                                       securityGroupRuleIds) ?cidrIp
-              ?fromPort ?ipProtocol ?toPort ?sourceSecurityGroupName
-              ?sourceSecurityGroupOwnerId ~groupId ())
+                                       securityGroupRuleIds) ?dryRun
+              ?sourceSecurityGroupName ?sourceSecurityGroupOwnerId
+              ?ipProtocol ?fromPort ?toPort ?cidrIp
+              ?ipPermissions:(Option.map ~f:Values.IpPermissionList.of_json
+                                ipPermissions) ~groupId ())
            (Some Values.RevokeSecurityGroupEgressResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let revoke_security_group_ingress =
@@ -4622,10 +6876,10 @@ let revoke_security_group_ingress =
          flag "source-security-group-owner-id" (optional string)
            ~doc:"STRING String"
        and toPort = flag "to-port" (optional int) ~doc:"INT Integer"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and securityGroupRuleIds =
          flag "security-group-rule-ids" (optional json_arg)
-           ~doc:"JSON SecurityGroupRuleIdList" in
+           ~doc:"JSON SecurityGroupRuleIdList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.revoke_security_group_ingress
@@ -4634,10 +6888,9 @@ let revoke_security_group_ingress =
               ?ipPermissions:(Option.map ~f:Values.IpPermissionList.of_json
                                 ipPermissions) ?ipProtocol
               ?sourceSecurityGroupName ?sourceSecurityGroupOwnerId ?toPort
-              ?dryRun
               ?securityGroupRuleIds:(Option.map
                                        ~f:Values.SecurityGroupRuleIdList.of_json
-                                       securityGroupRuleIds) ())
+                                       securityGroupRuleIds) ?dryRun ())
            (Some Values.RevokeSecurityGroupIngressResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let run_instances =
@@ -4680,27 +6933,9 @@ let run_instances =
            ~doc:"JSON SecurityGroupStringList"
        and subnetId =
          flag "subnet-id" (optional string) ~doc:"STRING SubnetId"
-       and userData = flag "user-data" (optional string) ~doc:"STRING String"
-       and additionalInfo =
-         flag "additional-info" (optional string) ~doc:"STRING String"
-       and clientToken =
-         flag "client-token" (optional string) ~doc:"STRING String"
-       and disableApiTermination =
-         flag "disable-api-termination" (optional bool) ~doc:"BOOL Boolean"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
-       and ebsOptimized =
-         flag "ebs-optimized" (optional bool) ~doc:"BOOL Boolean"
-       and iamInstanceProfile =
-         flag "iam-instance-profile" (optional json_arg)
-           ~doc:"JSON IamInstanceProfileSpecification"
-       and instanceInitiatedShutdownBehavior =
-         flag "instance-initiated-shutdown-behavior" (optional json_arg)
-           ~doc:"JSON ShutdownBehavior"
-       and networkInterfaces =
-         flag "network-interfaces" (optional json_arg)
-           ~doc:"JSON InstanceNetworkInterfaceSpecificationList"
-       and privateIpAddress =
-         flag "private-ip-address" (optional string) ~doc:"STRING String"
+       and userData =
+         flag "user-data" (optional string)
+           ~doc:"STRING RunInstancesUserData"
        and elasticGpuSpecification =
          flag "elastic-gpu-specification" (optional json_arg)
            ~doc:"JSON ElasticGpuSpecifications"
@@ -4742,6 +6977,38 @@ let run_instances =
        and maintenanceOptions =
          flag "maintenance-options" (optional json_arg)
            ~doc:"JSON InstanceMaintenanceOptionsRequest"
+       and disableApiStop =
+         flag "disable-api-stop" (optional bool) ~doc:"BOOL Boolean"
+       and enablePrimaryIpv6 =
+         flag "enable-primary-ipv6" (optional bool) ~doc:"BOOL Boolean"
+       and networkPerformanceOptions =
+         flag "network-performance-options" (optional json_arg)
+           ~doc:"JSON InstanceNetworkPerformanceOptionsRequest"
+       and operator =
+         flag "operator" (optional json_arg) ~doc:"JSON OperatorRequest"
+       and secondaryInterfaces =
+         flag "secondary-interfaces" (optional json_arg)
+           ~doc:"JSON InstanceSecondaryInterfaceSpecificationListRequest"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and disableApiTermination =
+         flag "disable-api-termination" (optional bool) ~doc:"BOOL Boolean"
+       and instanceInitiatedShutdownBehavior =
+         flag "instance-initiated-shutdown-behavior" (optional json_arg)
+           ~doc:"JSON ShutdownBehavior"
+       and privateIpAddress =
+         flag "private-ip-address" (optional string) ~doc:"STRING String"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and additionalInfo =
+         flag "additional-info" (optional string) ~doc:"STRING String"
+       and networkInterfaces =
+         flag "network-interfaces" (optional json_arg)
+           ~doc:"JSON InstanceNetworkInterfaceSpecificationList"
+       and iamInstanceProfile =
+         flag "iam-instance-profile" (optional json_arg)
+           ~doc:"JSON IamInstanceProfileSpecification"
+       and ebsOptimized =
+         flag "ebs-optimized" (optional bool) ~doc:"BOOL Boolean"
        and maxCount = flag "max-count" (required int) ~doc:"INT Integer"
        and minCount = flag "min-count" (required int) ~doc:"INT Integer" in
        fun () ->
@@ -4767,17 +7034,6 @@ let run_instances =
               ?securityGroups:(Option.map
                                  ~f:Values.SecurityGroupStringList.of_json
                                  securityGroups) ?subnetId ?userData
-              ?additionalInfo ?clientToken ?disableApiTermination ?dryRun
-              ?ebsOptimized
-              ?iamInstanceProfile:(Option.map
-                                     ~f:Values.IamInstanceProfileSpecification.of_json
-                                     iamInstanceProfile)
-              ?instanceInitiatedShutdownBehavior:(Option.map
-                                                    ~f:Values.ShutdownBehavior.of_json
-                                                    instanceInitiatedShutdownBehavior)
-              ?networkInterfaces:(Option.map
-                                    ~f:Values.InstanceNetworkInterfaceSpecificationList.of_json
-                                    networkInterfaces) ?privateIpAddress
               ?elasticGpuSpecification:(Option.map
                                           ~f:Values.ElasticGpuSpecifications.of_json
                                           elasticGpuSpecification)
@@ -4818,8 +7074,28 @@ let run_instances =
                                         privateDnsNameOptions)
               ?maintenanceOptions:(Option.map
                                      ~f:Values.InstanceMaintenanceOptionsRequest.of_json
-                                     maintenanceOptions) ~maxCount ~minCount
-              ()) (Some Values.Reservation.to_json)
+                                     maintenanceOptions) ?disableApiStop
+              ?enablePrimaryIpv6
+              ?networkPerformanceOptions:(Option.map
+                                            ~f:Values.InstanceNetworkPerformanceOptionsRequest.of_json
+                                            networkPerformanceOptions)
+              ?operator:(Option.map ~f:Values.OperatorRequest.of_json
+                           operator)
+              ?secondaryInterfaces:(Option.map
+                                      ~f:Values.InstanceSecondaryInterfaceSpecificationListRequest.of_json
+                                      secondaryInterfaces) ?dryRun
+              ?disableApiTermination
+              ?instanceInitiatedShutdownBehavior:(Option.map
+                                                    ~f:Values.ShutdownBehavior.of_json
+                                                    instanceInitiatedShutdownBehavior)
+              ?privateIpAddress ?clientToken ?additionalInfo
+              ?networkInterfaces:(Option.map
+                                    ~f:Values.InstanceNetworkInterfaceSpecificationList.of_json
+                                    networkInterfaces)
+              ?iamInstanceProfile:(Option.map
+                                     ~f:Values.IamInstanceProfileSpecification.of_json
+                                     iamInstanceProfile) ?ebsOptimized
+              ~maxCount ~minCount ()) (Some Values.Reservation.to_json)
            (Some Values.Ec2_error.to_json)])
 let run_scheduled_instances =
   Command.async ~summary:""
@@ -4890,9 +7166,6 @@ let search_transit_gateway_multicast_groups =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and transitGatewayMulticastDomainId =
-         flag "transit-gateway-multicast-domain-id" (optional string)
-           ~doc:"STRING TransitGatewayMulticastDomainId"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and maxResults =
@@ -4900,14 +7173,17 @@ let search_transit_gateway_multicast_groups =
            ~doc:"INT TransitGatewayMaxResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING String"
-       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean" in
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and transitGatewayMulticastDomainId =
+         flag "transit-gateway-multicast-domain-id" (required string)
+           ~doc:"STRING TransitGatewayMulticastDomainId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_transit_gateway_multicast_groups
            (Values.SearchTransitGatewayMulticastGroupsRequest.make
-              ?transitGatewayMulticastDomainId
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ?dryRun ())
+              ?maxResults ?nextToken ?dryRun ~transitGatewayMulticastDomainId
+              ())
            (Some Values.SearchTransitGatewayMulticastGroupsResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let search_transit_gateway_routes =
@@ -4924,6 +7200,8 @@ let search_transit_gateway_routes =
          flag "max-results" (optional int)
            ~doc:"INT TransitGatewayMaxResults"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
        and transitGatewayRouteTableId =
          flag "transit-gateway-route-table-id" (required string)
            ~doc:"STRING TransitGatewayRouteTableId"
@@ -4933,7 +7211,7 @@ let search_transit_gateway_routes =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_transit_gateway_routes
            (Values.SearchTransitGatewayRoutesRequest.make ?maxResults ?dryRun
-              ~transitGatewayRouteTableId
+              ?nextToken ~transitGatewayRouteTableId
               ~filters:(Values.FilterList.of_json filters) ())
            (Some Values.SearchTransitGatewayRoutesResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -4955,6 +7233,33 @@ let send_diagnostic_interrupt =
            Io.send_diagnostic_interrupt
            (Values.SendDiagnosticInterruptRequest.make ?dryRun ~instanceId ())
            None (Some Values.Ec2_error.to_json)])
+let start_declarative_policies_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and s3Prefix = flag "s3-prefix" (optional string) ~doc:"STRING String"
+       and tagSpecifications =
+         flag "tag-specifications" (optional json_arg)
+           ~doc:"JSON TagSpecificationList"
+       and s3Bucket = flag "s3-bucket" (required string) ~doc:"STRING String"
+       and targetId = flag "target-id" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_declarative_policies_report
+           (Values.StartDeclarativePoliciesReportRequest.make ?dryRun
+              ?s3Prefix
+              ?tagSpecifications:(Option.map
+                                    ~f:Values.TagSpecificationList.of_json
+                                    tagSpecifications) ~s3Bucket ~targetId ())
+           (Some Values.StartDeclarativePoliciesReportResult.to_json)
+           (Some Values.Ec2_error.to_json)])
 let start_instances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -5018,8 +7323,13 @@ let start_network_insights_analysis =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and additionalAccounts =
+         flag "additional-accounts" (optional json_arg)
+           ~doc:"JSON ValueStringList"
        and filterInArns =
          flag "filter-in-arns" (optional json_arg) ~doc:"JSON ArnList"
+       and filterOutArns =
+         flag "filter-out-arns" (optional json_arg) ~doc:"JSON ArnList"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and tagSpecifications =
          flag "tag-specifications" (optional json_arg)
@@ -5033,8 +7343,13 @@ let start_network_insights_analysis =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_network_insights_analysis
            (Values.StartNetworkInsightsAnalysisRequest.make
+              ?additionalAccounts:(Option.map
+                                     ~f:Values.ValueStringList.of_json
+                                     additionalAccounts)
               ?filterInArns:(Option.map ~f:Values.ArnList.of_json
-                               filterInArns) ?dryRun
+                               filterInArns)
+              ?filterOutArns:(Option.map ~f:Values.ArnList.of_json
+                                filterOutArns) ?dryRun
               ?tagSpecifications:(Option.map
                                     ~f:Values.TagSpecificationList.of_json
                                     tagSpecifications) ~networkInsightsPathId
@@ -5074,6 +7389,8 @@ let stop_instances =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and hibernate = flag "hibernate" (optional bool) ~doc:"BOOL Boolean"
+       and skipOsShutdown =
+         flag "skip-os-shutdown" (optional bool) ~doc:"BOOL Boolean"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
        and instanceIds =
@@ -5082,7 +7399,8 @@ let stop_instances =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_instances
-           (Values.StopInstancesRequest.make ?hibernate ?dryRun ?force
+           (Values.StopInstancesRequest.make ?hibernate ?skipOsShutdown
+              ?dryRun ?force
               ~instanceIds:(Values.InstanceIdStringList.of_json instanceIds)
               ()) (Some Values.StopInstancesResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -5097,7 +7415,7 @@ let terminate_client_vpn_connections =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and connectionId =
-         flag "connection-id" (optional string) ~doc:"STRING VpnConnectionId"
+         flag "connection-id" (optional string) ~doc:"STRING String"
        and username = flag "username" (optional string) ~doc:"STRING String"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and clientVpnEndpointId =
@@ -5120,6 +7438,9 @@ let terminate_instances =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and force = flag "force" (optional bool) ~doc:"BOOL Boolean"
+       and skipOsShutdown =
+         flag "skip-os-shutdown" (optional bool) ~doc:"BOOL Boolean"
        and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and instanceIds =
          flag "instance-ids" (required json_arg)
@@ -5127,7 +7448,8 @@ let terminate_instances =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.terminate_instances
-           (Values.TerminateInstancesRequest.make ?dryRun
+           (Values.TerminateInstancesRequest.make ?force ?skipOsShutdown
+              ?dryRun
               ~instanceIds:(Values.InstanceIdStringList.of_json instanceIds)
               ()) (Some Values.TerminateInstancesResult.to_json)
            (Some Values.Ec2_error.to_json)])
@@ -5141,11 +7463,11 @@ let unassign_ipv6_addresses =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and ipv6Prefixes =
+         flag "ipv6-prefixes" (optional json_arg) ~doc:"JSON IpPrefixList"
        and ipv6Addresses =
          flag "ipv6-addresses" (optional json_arg)
            ~doc:"JSON Ipv6AddressList"
-       and ipv6Prefixes =
-         flag "ipv6-prefixes" (optional json_arg) ~doc:"JSON IpPrefixList"
        and networkInterfaceId =
          flag "network-interface-id" (required string)
            ~doc:"STRING NetworkInterfaceId" in
@@ -5153,10 +7475,10 @@ let unassign_ipv6_addresses =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.unassign_ipv6_addresses
            (Values.UnassignIpv6AddressesRequest.make
-              ?ipv6Addresses:(Option.map ~f:Values.Ipv6AddressList.of_json
-                                ipv6Addresses)
               ?ipv6Prefixes:(Option.map ~f:Values.IpPrefixList.of_json
-                               ipv6Prefixes) ~networkInterfaceId ())
+                               ipv6Prefixes)
+              ?ipv6Addresses:(Option.map ~f:Values.Ipv6AddressList.of_json
+                                ipv6Addresses) ~networkInterfaceId ())
            (Some Values.UnassignIpv6AddressesResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let unassign_private_ip_addresses =
@@ -5169,11 +7491,11 @@ let unassign_private_ip_addresses =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and ipv4Prefixes =
+         flag "ipv4-prefixes" (optional json_arg) ~doc:"JSON IpPrefixList"
        and privateIpAddresses =
          flag "private-ip-addresses" (optional json_arg)
            ~doc:"JSON PrivateIpAddressStringList"
-       and ipv4Prefixes =
-         flag "ipv4-prefixes" (optional json_arg) ~doc:"JSON IpPrefixList"
        and networkInterfaceId =
          flag "network-interface-id" (required string)
            ~doc:"STRING NetworkInterfaceId" in
@@ -5181,11 +7503,57 @@ let unassign_private_ip_addresses =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.unassign_private_ip_addresses
            (Values.UnassignPrivateIpAddressesRequest.make
+              ?ipv4Prefixes:(Option.map ~f:Values.IpPrefixList.of_json
+                               ipv4Prefixes)
               ?privateIpAddresses:(Option.map
                                      ~f:Values.PrivateIpAddressStringList.of_json
-                                     privateIpAddresses)
-              ?ipv4Prefixes:(Option.map ~f:Values.IpPrefixList.of_json
-                               ipv4Prefixes) ~networkInterfaceId ()) None
+                                     privateIpAddresses) ~networkInterfaceId
+              ()) None (Some Values.Ec2_error.to_json)])
+let unassign_private_nat_gateway_address =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxDrainDurationSeconds =
+         flag "max-drain-duration-seconds" (optional int)
+           ~doc:"INT DrainSeconds"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and natGatewayId =
+         flag "nat-gateway-id" (required string) ~doc:"STRING NatGatewayId"
+       and privateIpAddresses =
+         flag "private-ip-addresses" (required json_arg) ~doc:"JSON IpList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.unassign_private_nat_gateway_address
+           (Values.UnassignPrivateNatGatewayAddressRequest.make
+              ?maxDrainDurationSeconds ?dryRun ~natGatewayId
+              ~privateIpAddresses:(Values.IpList.of_json privateIpAddresses)
+              ())
+           (Some Values.UnassignPrivateNatGatewayAddressResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let unlock_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and snapshotId =
+         flag "snapshot-id" (required string) ~doc:"STRING SnapshotId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.unlock_snapshot
+           (Values.UnlockSnapshotRequest.make ?dryRun ~snapshotId ())
+           (Some Values.UnlockSnapshotResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let unmonitor_instances =
   Command.async ~summary:""
@@ -5207,6 +7575,84 @@ let unmonitor_instances =
            (Values.UnmonitorInstancesRequest.make ?dryRun
               ~instanceIds:(Values.InstanceIdStringList.of_json instanceIds)
               ()) (Some Values.UnmonitorInstancesResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let update_capacity_manager_monitored_tag_keys =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activateTagKeys =
+         flag "activate-tag-keys" (optional json_arg)
+           ~doc:"JSON ValueStringList"
+       and deactivateTagKeys =
+         flag "deactivate-tag-keys" (optional json_arg)
+           ~doc:"JSON ValueStringList"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_capacity_manager_monitored_tag_keys
+           (Values.UpdateCapacityManagerMonitoredTagKeysRequest.make
+              ?activateTagKeys:(Option.map ~f:Values.ValueStringList.of_json
+                                  activateTagKeys)
+              ?deactivateTagKeys:(Option.map
+                                    ~f:Values.ValueStringList.of_json
+                                    deactivateTagKeys) ?dryRun ?clientToken
+              ())
+           (Some Values.UpdateCapacityManagerMonitoredTagKeysResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let update_capacity_manager_organizations_access =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and organizationsAccess =
+         flag "organizations-access" (required bool) ~doc:"BOOL BoxedBoolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_capacity_manager_organizations_access
+           (Values.UpdateCapacityManagerOrganizationsAccessRequest.make
+              ?dryRun ?clientToken ~organizationsAccess ())
+           (Some
+              Values.UpdateCapacityManagerOrganizationsAccessResult.to_json)
+           (Some Values.Ec2_error.to_json)])
+let update_interruptible_capacity_reservation_allocation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and capacityReservationId =
+         flag "capacity-reservation-id" (required string)
+           ~doc:"STRING CapacityReservationId"
+       and targetInstanceCount =
+         flag "target-instance-count" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_interruptible_capacity_reservation_allocation
+           (Values.UpdateInterruptibleCapacityReservationAllocationRequest.make
+              ?dryRun ~capacityReservationId ~targetInstanceCount ())
+           (Some
+              Values.UpdateInterruptibleCapacityReservationAllocationResult.to_json)
            (Some Values.Ec2_error.to_json)])
 let update_security_group_rule_descriptions_egress =
   Command.async ~summary:""

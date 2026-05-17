@@ -7,6 +7,8 @@ type ('i, 'o, 'e) t =
   | GetPendingJobExecutions: (GetPendingJobExecutionsRequest.t,
   GetPendingJobExecutionsResponse.t, GetPendingJobExecutionsResponse.error) t
   
+  | StartCommandExecution: (StartCommandExecutionRequest.t,
+  StartCommandExecutionResponse.t, StartCommandExecutionResponse.error) t 
   | StartNextPendingJobExecution: (StartNextPendingJobExecutionRequest.t,
   StartNextPendingJobExecutionResponse.t,
   StartNextPendingJobExecutionResponse.error) t 
@@ -16,6 +18,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | DescribeJobExecution -> `GET
   | GetPendingJobExecutions -> `GET
+  | StartCommandExecution -> `POST
   | StartNextPendingJobExecution -> `PUT
   | UpdateJobExecution -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -40,6 +43,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetPendingJobExecutions ->
           (Format.kasprintf Uri.of_string) "/things/%s/jobs"
             (ThingName.to_header x.GetPendingJobExecutionsRequest.thingName)
+      | StartCommandExecution ->
+          (Format.kasprintf Uri.of_string) "/command-executions"
       | StartNextPendingJobExecution ->
           (Format.kasprintf Uri.of_string) "/things/%s/jobs/$next"
             (ThingName.to_header
@@ -57,6 +62,43 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetPendingJobExecutions ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartCommandExecution ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("targetArn",
+                           (TargetArn.to_value
+                              req.StartCommandExecutionRequest.targetArn));
+                      Some
+                        ("commandArn",
+                          (CommandArn.to_value
+                             req.StartCommandExecutionRequest.commandArn));
+                      Option.map req.StartCommandExecutionRequest.parameters
+                        ~f:(fun x ->
+                              ("parameters",
+                                (CommandExecutionParameterMap.to_value x)));
+                      Option.map
+                        req.StartCommandExecutionRequest.executionTimeoutSeconds
+                        ~f:(fun x ->
+                              ("executionTimeoutSeconds",
+                                (CommandExecutionTimeoutInSeconds.to_value x)));
+                      Option.map req.StartCommandExecutionRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken",
+                                (ClientRequestTokenV2.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartNextPendingJobExecution ->
       Awso.Http.Request.make (method_of_endpoint endp)
@@ -170,6 +212,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetPendingJobExecutionsResponse.error_of_json))
+  | StartCommandExecution ->
+      if is_success
+      then Ok (StartCommandExecutionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartCommandExecutionResponse.error_of_json))
   | StartNextPendingJobExecution ->
       if is_success
       then

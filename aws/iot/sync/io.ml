@@ -17,6 +17,8 @@ let add_thing_to_billing_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddThingToBillingGroup input
 let add_thing_to_thing_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddThingToThingGroup input
+let associate_sbom_with_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSbomWithPackageVersion input
 let associate_targets_with_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateTargetsWithJob input
 let attach_policy ?endpoint_url ?cfg input =
@@ -51,6 +53,10 @@ let create_billing_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateBillingGroup input
 let create_certificate_from_csr ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCertificateFromCsr input
+let create_certificate_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCertificateProvider input
+let create_command ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCommand input
 let create_custom_metric ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateCustomMetric input
 let create_dimension ?endpoint_url ?cfg input =
@@ -71,6 +77,10 @@ let create_mitigation_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMitigationAction input
 let create_o_t_a_update ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateOTAUpdate input
+let create_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePackage input
+let create_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePackageVersion input
 let create_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreatePolicy input
 let create_policy_version ?endpoint_url ?cfg input =
@@ -111,6 +121,12 @@ let delete_c_a_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCACertificate input
 let delete_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCertificate input
+let delete_certificate_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCertificateProvider input
+let delete_command ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCommand input
+let delete_command_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCommandExecution input
 let delete_custom_metric ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteCustomMetric input
 let delete_dimension ?endpoint_url ?cfg input =
@@ -131,6 +147,10 @@ let delete_mitigation_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMitigationAction input
 let delete_o_t_a_update ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteOTAUpdate input
+let delete_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePackage input
+let delete_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePackageVersion input
 let delete_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePolicy input
 let delete_policy_version ?endpoint_url ?cfg input =
@@ -181,6 +201,8 @@ let describe_c_a_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCACertificate input
 let describe_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCertificate input
+let describe_certificate_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCertificateProvider input
 let describe_custom_metric ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCustomMetric input
 let describe_default_authorizer ?endpoint_url ?cfg input =
@@ -191,6 +213,8 @@ let describe_dimension ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDimension input
 let describe_domain_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDomainConfiguration input
+let describe_encryption_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeEncryptionConfiguration input
 let describe_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEndpoint input
 let describe_event_configurations ?endpoint_url ?cfg input =
@@ -239,6 +263,8 @@ let detach_thing_principal ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetachThingPrincipal input
 let disable_topic_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableTopicRule input
+let disassociate_sbom_from_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateSbomFromPackageVersion input
 let enable_topic_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableTopicRule input
 let get_behavior_model_training_summaries ?endpoint_url ?cfg input =
@@ -247,6 +273,10 @@ let get_buckets_aggregation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetBucketsAggregation input
 let get_cardinality ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetCardinality input
+let get_command ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCommand input
+let get_command_execution ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCommandExecution input
 let get_effective_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEffectivePolicies input
 let get_indexing_configuration ?endpoint_url ?cfg input =
@@ -257,6 +287,12 @@ let get_logging_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLoggingOptions input
 let get_o_t_a_update ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOTAUpdate input
+let get_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPackage input
+let get_package_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPackageConfiguration input
+let get_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPackageVersion input
 let get_percentiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPercentiles input
 let get_policy ?endpoint_url ?cfg input =
@@ -267,6 +303,8 @@ let get_registration_code ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetRegistrationCode input
 let get_statistics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetStatistics input
+let get_thing_connectivity_data ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetThingConnectivityData input
 let get_topic_rule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTopicRule input
 let get_topic_rule_destination ?endpoint_url ?cfg input =
@@ -294,10 +332,16 @@ let list_billing_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListBillingGroups input
 let list_c_a_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCACertificates input
+let list_certificate_providers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCertificateProviders input
 let list_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCertificates input
 let list_certificates_by_c_a ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCertificatesByCA input
+let list_command_executions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCommandExecutions input
+let list_commands ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCommands input
 let list_custom_metrics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCustomMetrics input
 let list_detect_mitigation_actions_executions ?endpoint_url ?cfg input =
@@ -331,6 +375,10 @@ let list_o_t_a_updates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOTAUpdates input
 let list_outgoing_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListOutgoingCertificates input
+let list_package_versions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPackageVersions input
+let list_packages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPackages input
 let list_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPolicies input
 let list_policy_principals ?endpoint_url ?cfg input =
@@ -341,12 +389,18 @@ let list_principal_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPrincipalPolicies input
 let list_principal_things ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPrincipalThings input
+let list_principal_things_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPrincipalThingsV2 input
 let list_provisioning_template_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProvisioningTemplateVersions input
 let list_provisioning_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListProvisioningTemplates input
+let list_related_resources_for_audit_finding ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRelatedResourcesForAuditFinding input
 let list_role_aliases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListRoleAliases input
+let list_sbom_validation_results ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSbomValidationResults input
 let list_scheduled_audits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListScheduledAudits input
 let list_security_profiles ?endpoint_url ?cfg input =
@@ -367,6 +421,8 @@ let list_thing_groups_for_thing ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListThingGroupsForThing input
 let list_thing_principals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListThingPrincipals input
+let list_thing_principals_v2 ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListThingPrincipalsV2 input
 let list_thing_registration_task_reports ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListThingRegistrationTaskReports input
 let list_thing_registration_tasks ?endpoint_url ?cfg input =
@@ -449,6 +505,10 @@ let update_c_a_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCACertificate input
 let update_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCertificate input
+let update_certificate_provider ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCertificateProvider input
+let update_command ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCommand input
 let update_custom_metric ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCustomMetric input
 let update_dimension ?endpoint_url ?cfg input =
@@ -457,6 +517,8 @@ let update_domain_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDomainConfiguration input
 let update_dynamic_thing_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDynamicThingGroup input
+let update_encryption_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEncryptionConfiguration input
 let update_event_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEventConfigurations input
 let update_fleet_metric ?endpoint_url ?cfg input =
@@ -467,6 +529,12 @@ let update_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateJob input
 let update_mitigation_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMitigationAction input
+let update_package ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePackage input
+let update_package_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePackageConfiguration input
+let update_package_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePackageVersion input
 let update_provisioning_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateProvisioningTemplate input
 let update_role_alias ?endpoint_url ?cfg input =
@@ -483,6 +551,8 @@ let update_thing_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateThingGroup input
 let update_thing_groups_for_thing ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateThingGroupsForThing input
+let update_thing_type ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateThingType input
 let update_topic_rule_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTopicRuleDestination input
 let validate_security_profile_behaviors ?endpoint_url ?cfg input =

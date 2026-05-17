@@ -12,11 +12,31 @@ val batch_get_stream_key :
       BatchGetStreamKeyRequest.t ->
         (BatchGetStreamKeyResponse.t, BatchGetStreamKeyResponse.error)
           Result.t Async.Deferred.t
+val batch_start_viewer_session_revocation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchStartViewerSessionRevocationRequest.t ->
+        (BatchStartViewerSessionRevocationResponse.t,
+          BatchStartViewerSessionRevocationResponse.error) Result.t
+          Async.Deferred.t
+val create_ad_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAdConfigurationRequest.t ->
+        (CreateAdConfigurationResponse.t,
+          CreateAdConfigurationResponse.error) Result.t Async.Deferred.t
 val create_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateChannelRequest.t ->
         (CreateChannelResponse.t, CreateChannelResponse.error) Result.t
+          Async.Deferred.t
+val create_playback_restriction_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreatePlaybackRestrictionPolicyRequest.t ->
+        (CreatePlaybackRestrictionPolicyResponse.t,
+          CreatePlaybackRestrictionPolicyResponse.error) Result.t
           Async.Deferred.t
 val create_recording_configuration :
   ?endpoint_url:string ->
@@ -31,6 +51,11 @@ val create_stream_key :
       CreateStreamKeyRequest.t ->
         (CreateStreamKeyResponse.t, CreateStreamKeyResponse.error) Result.t
           Async.Deferred.t
+val delete_ad_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAdConfigurationRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +66,11 @@ val delete_playback_key_pair :
       DeletePlaybackKeyPairRequest.t ->
         (DeletePlaybackKeyPairResponse.t,
           DeletePlaybackKeyPairResponse.error) Result.t Async.Deferred.t
+val delete_playback_restriction_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePlaybackRestrictionPolicyRequest.t ->
+        (unit, unit) Result.t Async.Deferred.t
 val delete_recording_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -50,6 +80,12 @@ val delete_stream_key :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteStreamKeyRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val get_ad_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAdConfigurationRequest.t ->
+        (GetAdConfigurationResponse.t, GetAdConfigurationResponse.error)
+          Result.t Async.Deferred.t
 val get_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -62,6 +98,13 @@ val get_playback_key_pair :
       GetPlaybackKeyPairRequest.t ->
         (GetPlaybackKeyPairResponse.t, GetPlaybackKeyPairResponse.error)
           Result.t Async.Deferred.t
+val get_playback_restriction_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPlaybackRestrictionPolicyRequest.t ->
+        (GetPlaybackRestrictionPolicyResponse.t,
+          GetPlaybackRestrictionPolicyResponse.error) Result.t
+          Async.Deferred.t
 val get_recording_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -92,6 +135,18 @@ val import_playback_key_pair :
       ImportPlaybackKeyPairRequest.t ->
         (ImportPlaybackKeyPairResponse.t,
           ImportPlaybackKeyPairResponse.error) Result.t Async.Deferred.t
+val insert_ad_break :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InsertAdBreakRequest.t ->
+        (InsertAdBreakResponse.t, InsertAdBreakResponse.error) Result.t
+          Async.Deferred.t
+val list_ad_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAdConfigurationsRequest.t ->
+        (ListAdConfigurationsResponse.t, ListAdConfigurationsResponse.error)
+          Result.t Async.Deferred.t
 val list_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -104,6 +159,13 @@ val list_playback_key_pairs :
       ListPlaybackKeyPairsRequest.t ->
         (ListPlaybackKeyPairsResponse.t, ListPlaybackKeyPairsResponse.error)
           Result.t Async.Deferred.t
+val list_playback_restriction_policies :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPlaybackRestrictionPoliciesRequest.t ->
+        (ListPlaybackRestrictionPoliciesResponse.t,
+          ListPlaybackRestrictionPoliciesResponse.error) Result.t
+          Async.Deferred.t
 val list_recording_configurations :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -139,6 +201,13 @@ val put_metadata :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutMetadataRequest.t -> (unit, unit) Result.t Async.Deferred.t
+val start_viewer_session_revocation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartViewerSessionRevocationRequest.t ->
+        (StartViewerSessionRevocationResponse.t,
+          StartViewerSessionRevocationResponse.error) Result.t
+          Async.Deferred.t
 val stop_stream :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -162,4 +231,11 @@ val update_channel :
     ?cfg:Awso.Cfg.t ->
       UpdateChannelRequest.t ->
         (UpdateChannelResponse.t, UpdateChannelResponse.error) Result.t
+          Async.Deferred.t
+val update_playback_restriction_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdatePlaybackRestrictionPolicyRequest.t ->
+        (UpdatePlaybackRestrictionPolicyResponse.t,
+          UpdatePlaybackRestrictionPolicyResponse.error) Result.t
           Async.Deferred.t

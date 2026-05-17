@@ -12,6 +12,12 @@ val create_app_instance_admin :
       CreateAppInstanceAdminRequest.t ->
         (CreateAppInstanceAdminResponse.t,
           CreateAppInstanceAdminResponse.error) Result.t Async.Deferred.t
+val create_app_instance_bot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAppInstanceBotRequest.t ->
+        (CreateAppInstanceBotResponse.t, CreateAppInstanceBotResponse.error)
+          Result.t Async.Deferred.t
 val create_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -27,6 +33,10 @@ val delete_app_instance_admin :
     ?cfg:Awso.Cfg.t ->
       DeleteAppInstanceAdminRequest.t ->
         (unit, unit) Result.t Async.Deferred.t
+val delete_app_instance_bot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAppInstanceBotRequest.t -> (unit, unit) Result.t Async.Deferred.t
 val delete_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -49,6 +59,12 @@ val describe_app_instance_admin :
       DescribeAppInstanceAdminRequest.t ->
         (DescribeAppInstanceAdminResponse.t,
           DescribeAppInstanceAdminResponse.error) Result.t Async.Deferred.t
+val describe_app_instance_bot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAppInstanceBotRequest.t ->
+        (DescribeAppInstanceBotResponse.t,
+          DescribeAppInstanceBotResponse.error) Result.t Async.Deferred.t
 val describe_app_instance_user :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -75,6 +91,12 @@ val list_app_instance_admins :
       ListAppInstanceAdminsRequest.t ->
         (ListAppInstanceAdminsResponse.t,
           ListAppInstanceAdminsResponse.error) Result.t Async.Deferred.t
+val list_app_instance_bots :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAppInstanceBotsRequest.t ->
+        (ListAppInstanceBotsResponse.t, ListAppInstanceBotsResponse.error)
+          Result.t Async.Deferred.t
 val list_app_instance_user_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -107,6 +129,13 @@ val put_app_instance_retention_settings :
         (PutAppInstanceRetentionSettingsResponse.t,
           PutAppInstanceRetentionSettingsResponse.error) Result.t
           Async.Deferred.t
+val put_app_instance_user_expiration_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutAppInstanceUserExpirationSettingsRequest.t ->
+        (PutAppInstanceUserExpirationSettingsResponse.t,
+          PutAppInstanceUserExpirationSettingsResponse.error) Result.t
+          Async.Deferred.t
 val register_app_instance_user_endpoint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -127,6 +156,12 @@ val update_app_instance :
     ?cfg:Awso.Cfg.t ->
       UpdateAppInstanceRequest.t ->
         (UpdateAppInstanceResponse.t, UpdateAppInstanceResponse.error)
+          Result.t Async.Deferred.t
+val update_app_instance_bot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAppInstanceBotRequest.t ->
+        (UpdateAppInstanceBotResponse.t, UpdateAppInstanceBotResponse.error)
           Result.t Async.Deferred.t
 val update_app_instance_user :
   ?endpoint_url:string ->

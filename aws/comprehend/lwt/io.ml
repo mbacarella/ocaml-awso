@@ -21,24 +21,34 @@ let batch_detect_sentiment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDetectSentiment input
 let batch_detect_syntax ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDetectSyntax input
+let batch_detect_targeted_sentiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDetectTargetedSentiment input
 let classify_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ClassifyDocument input
 let contains_pii_entities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ContainsPiiEntities input
+let create_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateDataset input
 let create_document_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDocumentClassifier input
 let create_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEndpoint input
 let create_entity_recognizer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEntityRecognizer input
+let create_flywheel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateFlywheel input
 let delete_document_classifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDocumentClassifier input
 let delete_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEndpoint input
 let delete_entity_recognizer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEntityRecognizer input
+let delete_flywheel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteFlywheel input
 let delete_resource_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
+let describe_dataset ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDataset input
 let describe_document_classification_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDocumentClassificationJob input
 let describe_document_classifier ?endpoint_url ?cfg input =
@@ -54,6 +64,10 @@ let describe_entity_recognizer ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEntityRecognizer input
 let describe_events_detection_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEventsDetectionJob input
+let describe_flywheel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFlywheel input
+let describe_flywheel_iteration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFlywheelIteration input
 let describe_key_phrases_detection_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeKeyPhrasesDetectionJob input
 let describe_pii_entities_detection_job ?endpoint_url ?cfg input =
@@ -79,8 +93,14 @@ let detect_sentiment ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetectSentiment input
 let detect_syntax ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DetectSyntax input
+let detect_targeted_sentiment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetectTargetedSentiment input
+let detect_toxic_content ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DetectToxicContent input
 let import_model ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ImportModel input
+let list_datasets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDatasets input
 let list_document_classification_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDocumentClassificationJobs input
 let list_document_classifier_summaries ?endpoint_url ?cfg input =
@@ -99,6 +119,10 @@ let list_entity_recognizers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEntityRecognizers input
 let list_events_detection_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListEventsDetectionJobs input
+let list_flywheel_iteration_history ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFlywheelIterationHistory input
+let list_flywheels ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFlywheels input
 let list_key_phrases_detection_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListKeyPhrasesDetectionJobs input
 let list_pii_entities_detection_jobs ?endpoint_url ?cfg input =
@@ -121,6 +145,8 @@ let start_entities_detection_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartEntitiesDetectionJob input
 let start_events_detection_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartEventsDetectionJob input
+let start_flywheel_iteration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartFlywheelIteration input
 let start_key_phrases_detection_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartKeyPhrasesDetectionJob input
 let start_pii_entities_detection_job ?endpoint_url ?cfg input =
@@ -155,3 +181,5 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateEndpoint input
+let update_flywheel ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFlywheel input

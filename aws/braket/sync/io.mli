@@ -22,6 +22,18 @@ val create_quantum_task :
       CreateQuantumTaskRequest.t ->
         (CreateQuantumTaskResponse.t, CreateQuantumTaskResponse.error)
           Result.t
+val create_spending_limit :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSpendingLimitRequest.t ->
+        (CreateSpendingLimitResponse.t, CreateSpendingLimitResponse.error)
+          Result.t
+val delete_spending_limit :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSpendingLimitRequest.t ->
+        (DeleteSpendingLimitResponse.t, DeleteSpendingLimitResponse.error)
+          Result.t
 val get_device :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -58,6 +70,12 @@ val search_quantum_tasks :
       SearchQuantumTasksRequest.t ->
         (SearchQuantumTasksResponse.t, SearchQuantumTasksResponse.error)
           Result.t
+val search_spending_limits :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SearchSpendingLimitsRequest.t ->
+        (SearchSpendingLimitsResponse.t, SearchSpendingLimitsResponse.error)
+          Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -68,3 +86,9 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_spending_limit :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSpendingLimitRequest.t ->
+        (UpdateSpendingLimitResponse.t, UpdateSpendingLimitResponse.error)
+          Result.t

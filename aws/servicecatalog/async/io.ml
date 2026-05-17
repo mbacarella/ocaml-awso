@@ -166,6 +166,18 @@ let list_stack_instances_for_provisioned_product ?endpoint_url ?cfg input =
     input
 let list_tag_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagOptions input
+let notify_provision_product_engine_workflow_result ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.NotifyProvisionProductEngineWorkflowResult input
+let notify_terminate_provisioned_product_engine_workflow_result ?endpoint_url
+  ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.NotifyTerminateProvisionedProductEngineWorkflowResult input
+let notify_update_provisioned_product_engine_workflow_result ?endpoint_url
+  ?cfg input =
+  eval ?endpoint_url ?cfg
+    Endpoints.NotifyUpdateProvisionedProductEngineWorkflowResult input
 let provision_product ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ProvisionProduct input
 let reject_portfolio_share ?endpoint_url ?cfg input =

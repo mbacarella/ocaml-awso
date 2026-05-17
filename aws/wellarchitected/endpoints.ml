@@ -3,25 +3,43 @@ open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
   | AssociateLenses: (AssociateLensesInput.t, unit, unit) t 
+  | AssociateProfiles: (AssociateProfilesInput.t, unit, unit) t 
   | CreateLensShare: (CreateLensShareInput.t, CreateLensShareOutput.t,
   CreateLensShareOutput.error) t 
   | CreateLensVersion: (CreateLensVersionInput.t, CreateLensVersionOutput.t,
   CreateLensVersionOutput.error) t 
   | CreateMilestone: (CreateMilestoneInput.t, CreateMilestoneOutput.t,
   CreateMilestoneOutput.error) t 
+  | CreateProfile: (CreateProfileInput.t, CreateProfileOutput.t,
+  CreateProfileOutput.error) t 
+  | CreateProfileShare: (CreateProfileShareInput.t,
+  CreateProfileShareOutput.t, CreateProfileShareOutput.error) t 
+  | CreateReviewTemplate: (CreateReviewTemplateInput.t,
+  CreateReviewTemplateOutput.t, CreateReviewTemplateOutput.error) t 
+  | CreateTemplateShare: (CreateTemplateShareInput.t,
+  CreateTemplateShareOutput.t, CreateTemplateShareOutput.error) t 
   | CreateWorkload: (CreateWorkloadInput.t, CreateWorkloadOutput.t,
   CreateWorkloadOutput.error) t 
   | CreateWorkloadShare: (CreateWorkloadShareInput.t,
   CreateWorkloadShareOutput.t, CreateWorkloadShareOutput.error) t 
   | DeleteLens: (DeleteLensInput.t, unit, unit) t 
   | DeleteLensShare: (DeleteLensShareInput.t, unit, unit) t 
+  | DeleteProfile: (DeleteProfileInput.t, unit, unit) t 
+  | DeleteProfileShare: (DeleteProfileShareInput.t, unit, unit) t 
+  | DeleteReviewTemplate: (DeleteReviewTemplateInput.t, unit, unit) t 
+  | DeleteTemplateShare: (DeleteTemplateShareInput.t, unit, unit) t 
   | DeleteWorkload: (DeleteWorkloadInput.t, unit, unit) t 
   | DeleteWorkloadShare: (DeleteWorkloadShareInput.t, unit, unit) t 
   | DisassociateLenses: (DisassociateLensesInput.t, unit, unit) t 
+  | DisassociateProfiles: (DisassociateProfilesInput.t, unit, unit) t 
   | ExportLens: (ExportLensInput.t, ExportLensOutput.t,
   ExportLensOutput.error) t 
   | GetAnswer: (GetAnswerInput.t, GetAnswerOutput.t, GetAnswerOutput.error) t
   
+  | GetConsolidatedReport: (GetConsolidatedReportInput.t,
+  GetConsolidatedReportOutput.t, GetConsolidatedReportOutput.error) t 
+  | GetGlobalSettings: (unit, GetGlobalSettingsOutput.t,
+  GetGlobalSettingsOutput.error) t 
   | GetLens: (GetLensInput.t, GetLensOutput.t, GetLensOutput.error) t 
   | GetLensReview: (GetLensReviewInput.t, GetLensReviewOutput.t,
   GetLensReviewOutput.error) t 
@@ -31,12 +49,27 @@ type ('i, 'o, 'e) t =
   GetLensVersionDifferenceOutput.t, GetLensVersionDifferenceOutput.error) t 
   | GetMilestone: (GetMilestoneInput.t, GetMilestoneOutput.t,
   GetMilestoneOutput.error) t 
+  | GetProfile: (GetProfileInput.t, GetProfileOutput.t,
+  GetProfileOutput.error) t 
+  | GetProfileTemplate: (GetProfileTemplateInput.t,
+  GetProfileTemplateOutput.t, GetProfileTemplateOutput.error) t 
+  | GetReviewTemplate: (GetReviewTemplateInput.t, GetReviewTemplateOutput.t,
+  GetReviewTemplateOutput.error) t 
+  | GetReviewTemplateAnswer: (GetReviewTemplateAnswerInput.t,
+  GetReviewTemplateAnswerOutput.t, GetReviewTemplateAnswerOutput.error) t 
+  | GetReviewTemplateLensReview: (GetReviewTemplateLensReviewInput.t,
+  GetReviewTemplateLensReviewOutput.t,
+  GetReviewTemplateLensReviewOutput.error) t 
   | GetWorkload: (GetWorkloadInput.t, GetWorkloadOutput.t,
   GetWorkloadOutput.error) t 
   | ImportLens: (ImportLensInput.t, ImportLensOutput.t,
   ImportLensOutput.error) t 
   | ListAnswers: (ListAnswersInput.t, ListAnswersOutput.t,
   ListAnswersOutput.error) t 
+  | ListCheckDetails: (ListCheckDetailsInput.t, ListCheckDetailsOutput.t,
+  ListCheckDetailsOutput.error) t 
+  | ListCheckSummaries: (ListCheckSummariesInput.t,
+  ListCheckSummariesOutput.t, ListCheckSummariesOutput.error) t 
   | ListLensReviewImprovements: (ListLensReviewImprovementsInput.t,
   ListLensReviewImprovementsOutput.t, ListLensReviewImprovementsOutput.error)
   t 
@@ -50,10 +83,23 @@ type ('i, 'o, 'e) t =
   ListMilestonesOutput.error) t 
   | ListNotifications: (ListNotificationsInput.t, ListNotificationsOutput.t,
   ListNotificationsOutput.error) t 
+  | ListProfileNotifications: (ListProfileNotificationsInput.t,
+  ListProfileNotificationsOutput.t, ListProfileNotificationsOutput.error) t 
+  | ListProfileShares: (ListProfileSharesInput.t, ListProfileSharesOutput.t,
+  ListProfileSharesOutput.error) t 
+  | ListProfiles: (ListProfilesInput.t, ListProfilesOutput.t,
+  ListProfilesOutput.error) t 
+  | ListReviewTemplateAnswers: (ListReviewTemplateAnswersInput.t,
+  ListReviewTemplateAnswersOutput.t, ListReviewTemplateAnswersOutput.error) t
+  
+  | ListReviewTemplates: (ListReviewTemplatesInput.t,
+  ListReviewTemplatesOutput.t, ListReviewTemplatesOutput.error) t 
   | ListShareInvitations: (ListShareInvitationsInput.t,
   ListShareInvitationsOutput.t, ListShareInvitationsOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
+  | ListTemplateShares: (ListTemplateSharesInput.t,
+  ListTemplateSharesOutput.t, ListTemplateSharesOutput.error) t 
   | ListWorkloadShares: (ListWorkloadSharesInput.t,
   ListWorkloadSharesOutput.t, ListWorkloadSharesOutput.error) t 
   | ListWorkloads: (ListWorkloadsInput.t, ListWorkloadsOutput.t,
@@ -64,8 +110,20 @@ type ('i, 'o, 'e) t =
   UntagResourceOutput.error) t 
   | UpdateAnswer: (UpdateAnswerInput.t, UpdateAnswerOutput.t,
   UpdateAnswerOutput.error) t 
+  | UpdateGlobalSettings: (UpdateGlobalSettingsInput.t, unit, unit) t 
+  | UpdateIntegration: (UpdateIntegrationInput.t, unit, unit) t 
   | UpdateLensReview: (UpdateLensReviewInput.t, UpdateLensReviewOutput.t,
   UpdateLensReviewOutput.error) t 
+  | UpdateProfile: (UpdateProfileInput.t, UpdateProfileOutput.t,
+  UpdateProfileOutput.error) t 
+  | UpdateReviewTemplate: (UpdateReviewTemplateInput.t,
+  UpdateReviewTemplateOutput.t, UpdateReviewTemplateOutput.error) t 
+  | UpdateReviewTemplateAnswer: (UpdateReviewTemplateAnswerInput.t,
+  UpdateReviewTemplateAnswerOutput.t, UpdateReviewTemplateAnswerOutput.error)
+  t 
+  | UpdateReviewTemplateLensReview: (UpdateReviewTemplateLensReviewInput.t,
+  UpdateReviewTemplateLensReviewOutput.t,
+  UpdateReviewTemplateLensReviewOutput.error) t 
   | UpdateShareInvitation: (UpdateShareInvitationInput.t,
   UpdateShareInvitationOutput.t, UpdateShareInvitationOutput.error) t 
   | UpdateWorkload: (UpdateWorkloadInput.t, UpdateWorkloadOutput.t,
@@ -73,53 +131,92 @@ type ('i, 'o, 'e) t =
   | UpdateWorkloadShare: (UpdateWorkloadShareInput.t,
   UpdateWorkloadShareOutput.t, UpdateWorkloadShareOutput.error) t 
   | UpgradeLensReview: (UpgradeLensReviewInput.t, unit, unit) t 
+  | UpgradeProfileVersion: (UpgradeProfileVersionInput.t, unit, unit) t 
+  | UpgradeReviewTemplateLensReview: (UpgradeReviewTemplateLensReviewInput.t,
+  unit, unit) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateLenses -> `PATCH
+  | AssociateProfiles -> `PATCH
   | CreateLensShare -> `POST
   | CreateLensVersion -> `POST
   | CreateMilestone -> `POST
+  | CreateProfile -> `POST
+  | CreateProfileShare -> `POST
+  | CreateReviewTemplate -> `POST
+  | CreateTemplateShare -> `POST
   | CreateWorkload -> `POST
   | CreateWorkloadShare -> `POST
   | DeleteLens -> `DELETE
   | DeleteLensShare -> `DELETE
+  | DeleteProfile -> `DELETE
+  | DeleteProfileShare -> `DELETE
+  | DeleteReviewTemplate -> `DELETE
+  | DeleteTemplateShare -> `DELETE
   | DeleteWorkload -> `DELETE
   | DeleteWorkloadShare -> `DELETE
   | DisassociateLenses -> `PATCH
+  | DisassociateProfiles -> `PATCH
   | ExportLens -> `GET
   | GetAnswer -> `GET
+  | GetConsolidatedReport -> `GET
+  | GetGlobalSettings -> `GET
   | GetLens -> `GET
   | GetLensReview -> `GET
   | GetLensReviewReport -> `GET
   | GetLensVersionDifference -> `GET
   | GetMilestone -> `GET
+  | GetProfile -> `GET
+  | GetProfileTemplate -> `GET
+  | GetReviewTemplate -> `GET
+  | GetReviewTemplateAnswer -> `GET
+  | GetReviewTemplateLensReview -> `GET
   | GetWorkload -> `GET
   | ImportLens -> `PUT
   | ListAnswers -> `GET
+  | ListCheckDetails -> `POST
+  | ListCheckSummaries -> `POST
   | ListLensReviewImprovements -> `GET
   | ListLensReviews -> `GET
   | ListLensShares -> `GET
   | ListLenses -> `GET
   | ListMilestones -> `POST
   | ListNotifications -> `POST
+  | ListProfileNotifications -> `GET
+  | ListProfileShares -> `GET
+  | ListProfiles -> `GET
+  | ListReviewTemplateAnswers -> `GET
+  | ListReviewTemplates -> `GET
   | ListShareInvitations -> `GET
   | ListTagsForResource -> `GET
+  | ListTemplateShares -> `GET
   | ListWorkloadShares -> `GET
   | ListWorkloads -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateAnswer -> `PATCH
+  | UpdateGlobalSettings -> `PATCH
+  | UpdateIntegration -> `POST
   | UpdateLensReview -> `PATCH
+  | UpdateProfile -> `PATCH
+  | UpdateReviewTemplate -> `PATCH
+  | UpdateReviewTemplateAnswer -> `PATCH
+  | UpdateReviewTemplateLensReview -> `PATCH
   | UpdateShareInvitation -> `PATCH
   | UpdateWorkload -> `PATCH
   | UpdateWorkloadShare -> `PATCH
   | UpgradeLensReview -> `PUT
+  | UpgradeProfileVersion -> `PUT
+  | UpgradeReviewTemplateLensReview -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateLenses ->
           (Format.kasprintf Uri.of_string) "/workloads/%s/associateLenses"
             (WorkloadId.to_header x.AssociateLensesInput.workloadId)
+      | AssociateProfiles ->
+          (Format.kasprintf Uri.of_string) "/workloads/%s/associateProfiles"
+            (WorkloadId.to_header x.AssociateProfilesInput.workloadId)
       | CreateLensShare ->
           (Format.kasprintf Uri.of_string) "/lenses/%s/shares"
             (LensAlias.to_header x.CreateLensShareInput.lensAlias)
@@ -129,6 +226,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateMilestone ->
           (Format.kasprintf Uri.of_string) "/workloads/%s/milestones"
             (WorkloadId.to_header x.CreateMilestoneInput.workloadId)
+      | CreateProfile -> (Format.kasprintf Uri.of_string) "/profiles"
+      | CreateProfileShare ->
+          (Format.kasprintf Uri.of_string) "/profiles/%s/shares"
+            (ProfileArn.to_header x.CreateProfileShareInput.profileArn)
+      | CreateReviewTemplate ->
+          (Format.kasprintf Uri.of_string) "/reviewTemplates"
+      | CreateTemplateShare ->
+          (Format.kasprintf Uri.of_string) "/templates/shares/%s"
+            (TemplateArn.to_header x.CreateTemplateShareInput.templateArn)
       | CreateWorkload -> (Format.kasprintf Uri.of_string) "/workloads"
       | CreateWorkloadShare ->
           (Format.kasprintf Uri.of_string) "/workloads/%s/shares"
@@ -147,6 +253,40 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/lenses/%s/shares/%s"
                (LensAlias.to_header x.DeleteLensShareInput.lensAlias)
                (ShareId.to_header x.DeleteLensShareInput.shareId))
+            (List.filter_opt
+               [Some
+                  ("ClientRequestToken",
+                    (ClientRequestToken.to_header x.clientRequestToken))])
+      | DeleteProfile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profiles/%s"
+               (ProfileArn.to_header x.DeleteProfileInput.profileArn))
+            (List.filter_opt
+               [Some
+                  ("ClientRequestToken",
+                    (ClientRequestToken.to_header x.clientRequestToken))])
+      | DeleteProfileShare ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profiles/%s/shares/%s"
+               (ProfileArn.to_header x.DeleteProfileShareInput.profileArn)
+               (ShareId.to_header x.DeleteProfileShareInput.shareId))
+            (List.filter_opt
+               [Some
+                  ("ClientRequestToken",
+                    (ClientRequestToken.to_header x.clientRequestToken))])
+      | DeleteReviewTemplate ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/reviewTemplates/%s"
+               (TemplateArn.to_header x.DeleteReviewTemplateInput.templateArn))
+            (List.filter_opt
+               [Some
+                  ("ClientRequestToken",
+                    (ClientRequestToken.to_header x.clientRequestToken))])
+      | DeleteTemplateShare ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/templates/shares/%s/%s"
+               (TemplateArn.to_header x.DeleteTemplateShareInput.templateArn)
+               (ShareId.to_header x.DeleteTemplateShareInput.shareId))
             (List.filter_opt
                [Some
                   ("ClientRequestToken",
@@ -171,6 +311,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisassociateLenses ->
           (Format.kasprintf Uri.of_string) "/workloads/%s/disassociateLenses"
             (WorkloadId.to_header x.DisassociateLensesInput.workloadId)
+      | DisassociateProfiles ->
+          (Format.kasprintf Uri.of_string)
+            "/workloads/%s/disassociateProfiles"
+            (WorkloadId.to_header x.DisassociateProfilesInput.workloadId)
       | ExportLens ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/lenses/%s/export"
@@ -191,6 +335,26 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v ->
                         ("MilestoneNumber", (MilestoneNumber.to_header v)))
                   x.milestoneNumber])
+      | GetConsolidatedReport ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/consolidatedReport")
+            (List.filter_opt
+               [Some ("Format", (ReportFormat.to_header x.format));
+               Option.map
+                 ~f:(fun v ->
+                       ("IncludeSharedResources",
+                         (IncludeSharedResources.to_header v)))
+                 x.includeSharedResources;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (GetConsolidatedReportMaxResults.to_header v)))
+                 x.maxResults])
+      | GetGlobalSettings ->
+          (Format.kasprintf Uri.of_string) "/global-settings"
       | GetLens ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/lenses/%s"
@@ -236,6 +400,32 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/workloads/%s/milestones/%s"
             (WorkloadId.to_header x.GetMilestoneInput.workloadId)
             (MilestoneNumber.to_header x.GetMilestoneInput.milestoneNumber)
+      | GetProfile ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profiles/%s"
+               (ProfileArn.to_header x.GetProfileInput.profileArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("ProfileVersion", (ProfileVersion.to_header v)))
+                  x.profileVersion])
+      | GetProfileTemplate ->
+          (Format.kasprintf Uri.of_string) "/profileTemplate"
+      | GetReviewTemplate ->
+          (Format.kasprintf Uri.of_string) "/reviewTemplates/%s"
+            (TemplateArn.to_header x.GetReviewTemplateInput.templateArn)
+      | GetReviewTemplateAnswer ->
+          (Format.kasprintf Uri.of_string)
+            "/reviewTemplates/%s/lensReviews/%s/answers/%s"
+            (TemplateArn.to_header x.GetReviewTemplateAnswerInput.templateArn)
+            (LensAlias.to_header x.GetReviewTemplateAnswerInput.lensAlias)
+            (QuestionId.to_header x.GetReviewTemplateAnswerInput.questionId)
+      | GetReviewTemplateLensReview ->
+          (Format.kasprintf Uri.of_string)
+            "/reviewTemplates/%s/lensReviews/%s"
+            (TemplateArn.to_header
+               x.GetReviewTemplateLensReviewInput.templateArn)
+            (LensAlias.to_header x.GetReviewTemplateLensReviewInput.lensAlias)
       | GetWorkload ->
           (Format.kasprintf Uri.of_string) "/workloads/%s"
             (WorkloadId.to_header x.GetWorkloadInput.workloadId)
@@ -259,7 +449,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v ->
                        ("MaxResults", (ListAnswersMaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("QuestionPriority", (QuestionPriority.to_header v)))
+                 x.questionPriority])
+      | ListCheckDetails ->
+          (Format.kasprintf Uri.of_string) "/workloads/%s/checks"
+            (WorkloadId.to_header x.ListCheckDetailsInput.workloadId)
+      | ListCheckSummaries ->
+          (Format.kasprintf Uri.of_string) "/workloads/%s/checkSummaries"
+            (WorkloadId.to_header x.ListCheckSummariesInput.workloadId)
       | ListLensReviewImprovements ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
@@ -282,7 +482,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("MaxResults",
                          (ListLensReviewImprovementsMaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("QuestionPriority", (QuestionPriority.to_header v)))
+                 x.questionPriority])
       | ListLensReviews ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/workloads/%s/lensReviews"
@@ -314,7 +518,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("MaxResults",
                          (ListWorkloadSharesMaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("Status", (ShareStatus.to_header v)))
+                 x.status])
       | ListLenses ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/lenses")
             (List.filter_opt
@@ -337,6 +543,86 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (WorkloadId.to_header x.ListMilestonesInput.workloadId)
       | ListNotifications ->
           (Format.kasprintf Uri.of_string) "/notifications"
+      | ListProfileNotifications ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profileNotifications/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("WorkloadId", (WorkloadId.to_header v)))
+                  x.workloadId;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListProfileShares ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profiles/%s/shares"
+               (ProfileArn.to_header x.ListProfileSharesInput.profileArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("SharedWithPrefix", (SharedWithPrefix.to_header v)))
+                  x.sharedWithPrefix;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (ListProfileSharesMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("Status", (ShareStatus.to_header v)))
+                 x.status])
+      | ListProfiles ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/profileSummaries")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("ProfileNamePrefix",
+                          (ProfileNamePrefix.to_header v)))
+                  x.profileNamePrefix;
+               Option.map
+                 ~f:(fun v ->
+                       ("ProfileOwnerType", (ProfileOwnerType.to_header v)))
+                 x.profileOwnerType;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListReviewTemplateAnswers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/reviewTemplates/%s/lensReviews/%s/answers"
+               (TemplateArn.to_header
+                  x.ListReviewTemplateAnswersInput.templateArn)
+               (LensAlias.to_header
+                  x.ListReviewTemplateAnswersInput.lensAlias))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("PillarId", (PillarId.to_header v)))
+                  x.pillarId;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (ListReviewTemplateAnswersMaxResults.to_header v)))
+                 x.maxResults])
+      | ListReviewTemplates ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/reviewTemplates")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListShareInvitations ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/shareInvitations")
@@ -361,10 +647,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("MaxResults",
                          (ListShareInvitationsMaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("ProfileNamePrefix", (ProfileNamePrefix.to_header v)))
+                 x.profileNamePrefix;
+               Option.map
+                 ~f:(fun v ->
+                       ("TemplateNamePrefix",
+                         (TemplateNamePrefix.to_header v)))
+                 x.templateNamePrefix])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (WorkloadArn.to_header x.ListTagsForResourceInput.workloadArn)
+      | ListTemplateShares ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/templates/shares/%s"
+               (TemplateArn.to_header x.ListTemplateSharesInput.templateArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("SharedWithPrefix", (SharedWithPrefix.to_header v)))
+                  x.sharedWithPrefix;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (ListTemplateSharesMaxResults.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("Status", (ShareStatus.to_header v)))
+                 x.status])
       | ListWorkloadShares ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/workloads/%s/shares"
@@ -381,7 +695,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v ->
                        ("MaxResults",
                          (ListWorkloadSharesMaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("Status", (ShareStatus.to_header v)))
+                 x.status])
       | ListWorkloads ->
           (Format.kasprintf Uri.of_string) "/workloadsSummaries"
       | TagResource ->
@@ -399,10 +715,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (WorkloadId.to_header x.UpdateAnswerInput.workloadId)
             (LensAlias.to_header x.UpdateAnswerInput.lensAlias)
             (QuestionId.to_header x.UpdateAnswerInput.questionId)
+      | UpdateGlobalSettings ->
+          (Format.kasprintf Uri.of_string) "/global-settings"
+      | UpdateIntegration ->
+          (Format.kasprintf Uri.of_string) "/workloads/%s/updateIntegration"
+            (WorkloadId.to_header x.UpdateIntegrationInput.workloadId)
       | UpdateLensReview ->
           (Format.kasprintf Uri.of_string) "/workloads/%s/lensReviews/%s"
             (WorkloadId.to_header x.UpdateLensReviewInput.workloadId)
             (LensAlias.to_header x.UpdateLensReviewInput.lensAlias)
+      | UpdateProfile ->
+          (Format.kasprintf Uri.of_string) "/profiles/%s"
+            (ProfileArn.to_header x.UpdateProfileInput.profileArn)
+      | UpdateReviewTemplate ->
+          (Format.kasprintf Uri.of_string) "/reviewTemplates/%s"
+            (TemplateArn.to_header x.UpdateReviewTemplateInput.templateArn)
+      | UpdateReviewTemplateAnswer ->
+          (Format.kasprintf Uri.of_string)
+            "/reviewTemplates/%s/lensReviews/%s/answers/%s"
+            (TemplateArn.to_header
+               x.UpdateReviewTemplateAnswerInput.templateArn)
+            (LensAlias.to_header x.UpdateReviewTemplateAnswerInput.lensAlias)
+            (QuestionId.to_header
+               x.UpdateReviewTemplateAnswerInput.questionId)
+      | UpdateReviewTemplateLensReview ->
+          (Format.kasprintf Uri.of_string)
+            "/reviewTemplates/%s/lensReviews/%s"
+            (TemplateArn.to_header
+               x.UpdateReviewTemplateLensReviewInput.templateArn)
+            (LensAlias.to_header
+               x.UpdateReviewTemplateLensReviewInput.lensAlias)
       | UpdateShareInvitation ->
           (Format.kasprintf Uri.of_string) "/shareInvitations/%s"
             (ShareInvitationId.to_header
@@ -418,12 +760,25 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string)
             "/workloads/%s/lensReviews/%s/upgrade"
             (WorkloadId.to_header x.UpgradeLensReviewInput.workloadId)
-            (LensAlias.to_header x.UpgradeLensReviewInput.lensAlias))
+            (LensAlias.to_header x.UpgradeLensReviewInput.lensAlias)
+      | UpgradeProfileVersion ->
+          (Format.kasprintf Uri.of_string)
+            "/workloads/%s/profiles/%s/upgrade"
+            (WorkloadId.to_header x.UpgradeProfileVersionInput.workloadId)
+            (ProfileArn.to_header x.UpgradeProfileVersionInput.profileArn)
+      | UpgradeReviewTemplateLensReview ->
+          (Format.kasprintf Uri.of_string)
+            "/reviewTemplates/%s/lensReviews/%s/upgrade"
+            (TemplateArn.to_header
+               x.UpgradeReviewTemplateLensReviewInput.templateArn)
+            (LensAlias.to_header
+               x.UpgradeReviewTemplateLensReviewInput.lensAlias))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | AssociateLenses -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateProfiles -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateLensShare ->
       let (headers, body) =
         let headers =
@@ -499,6 +854,124 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateProfile ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ProfileName",
+                           (ProfileName.to_value
+                              req.CreateProfileInput.profileName));
+                      Some
+                        ("ProfileDescription",
+                          (ProfileDescription.to_value
+                             req.CreateProfileInput.profileDescription));
+                      Some
+                        ("ProfileQuestions",
+                          (ProfileQuestionUpdates.to_value
+                             req.CreateProfileInput.profileQuestions));
+                      Some
+                        ("ClientRequestToken",
+                          (ClientRequestToken.to_value
+                             req.CreateProfileInput.clientRequestToken));
+                      Option.map req.CreateProfileInput.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateProfileShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SharedWith",
+                           (SharedWith.to_value
+                              req.CreateProfileShareInput.sharedWith));
+                      Some
+                        ("ClientRequestToken",
+                          (ClientRequestToken.to_value
+                             req.CreateProfileShareInput.clientRequestToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateReviewTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TemplateName",
+                           (TemplateName.to_value
+                              req.CreateReviewTemplateInput.templateName));
+                      Some
+                        ("Description",
+                          (TemplateDescription.to_value
+                             req.CreateReviewTemplateInput.description));
+                      Some
+                        ("Lenses",
+                          (ReviewTemplateLenses.to_value
+                             req.CreateReviewTemplateInput.lenses));
+                      Option.map req.CreateReviewTemplateInput.notes
+                        ~f:(fun x -> ("Notes", (Notes.to_value x)));
+                      Option.map req.CreateReviewTemplateInput.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Some
+                        ("ClientRequestToken",
+                          (ClientRequestToken.to_value
+                             req.CreateReviewTemplateInput.clientRequestToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateTemplateShare ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SharedWith",
+                           (SharedWith.to_value
+                              req.CreateTemplateShareInput.sharedWith));
+                      Some
+                        ("ClientRequestToken",
+                          (ClientRequestToken.to_value
+                             req.CreateTemplateShareInput.clientRequestToken))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateWorkload ->
       let (headers, body) =
         let headers =
@@ -538,10 +1011,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("ArchitecturalDesign",
                                 (WorkloadArchitecturalDesign.to_value x)));
-                      Some
-                        ("ReviewOwner",
-                          (WorkloadReviewOwner.to_value
-                             req.CreateWorkloadInput.reviewOwner));
+                      Option.map req.CreateWorkloadInput.reviewOwner
+                        ~f:(fun x ->
+                              ("ReviewOwner",
+                                (WorkloadReviewOwner.to_value x)));
                       Option.map req.CreateWorkloadInput.industryType
                         ~f:(fun x ->
                               ("IndustryType",
@@ -560,7 +1033,27 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (ClientRequestToken.to_value
                              req.CreateWorkloadInput.clientRequestToken));
                       Option.map req.CreateWorkloadInput.tags
-                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map req.CreateWorkloadInput.discoveryConfig
+                        ~f:(fun x ->
+                              ("DiscoveryConfig",
+                                (WorkloadDiscoveryConfig.to_value x)));
+                      Option.map req.CreateWorkloadInput.applications
+                        ~f:(fun x ->
+                              ("Applications",
+                                (WorkloadApplications.to_value x)));
+                      Option.map req.CreateWorkloadInput.profileArns
+                        ~f:(fun x ->
+                              ("ProfileArns",
+                                (WorkloadProfileArns.to_value x)));
+                      Option.map req.CreateWorkloadInput.reviewTemplateArns
+                        ~f:(fun x ->
+                              ("ReviewTemplateArns",
+                                (ReviewTemplateArns.to_value x)));
+                      Option.map req.CreateWorkloadInput.jiraConfiguration
+                        ~f:(fun x ->
+                              ("JiraConfiguration",
+                                (WorkloadJiraConfigurationInput.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -598,13 +1091,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteLens -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteLensShare -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteProfileShare -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteReviewTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTemplateShare -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWorkload -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteWorkloadShare -> Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateLenses -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateProfiles -> Awso.Http.Request.make (method_of_endpoint endp)
   | ExportLens ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetAnswer ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetConsolidatedReport ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetGlobalSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetLens ->
@@ -622,12 +1126,98 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetMilestone ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetProfile ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetProfileTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetReviewTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetReviewTemplateAnswer ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetReviewTemplateLensReview ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetWorkload ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ImportLens -> Awso.Http.Request.make (method_of_endpoint endp)
   | ListAnswers ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCheckDetails ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListCheckDetailsInput.nextToken
+                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListCheckDetailsInput.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Some
+                        ("LensArn",
+                          (LensArn.to_value req.ListCheckDetailsInput.lensArn));
+                      Some
+                        ("PillarId",
+                          (PillarId.to_value
+                             req.ListCheckDetailsInput.pillarId));
+                      Some
+                        ("QuestionId",
+                          (QuestionId.to_value
+                             req.ListCheckDetailsInput.questionId));
+                      Some
+                        ("ChoiceId",
+                          (ChoiceId.to_value
+                             req.ListCheckDetailsInput.choiceId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCheckSummaries ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListCheckSummariesInput.nextToken
+                         ~f:(fun x -> ("NextToken", (NextToken.to_value x)));
+                      Option.map req.ListCheckSummariesInput.maxResults
+                        ~f:(fun x -> ("MaxResults", (MaxResults.to_value x)));
+                      Some
+                        ("LensArn",
+                          (LensArn.to_value
+                             req.ListCheckSummariesInput.lensArn));
+                      Some
+                        ("PillarId",
+                          (PillarId.to_value
+                             req.ListCheckSummariesInput.pillarId));
+                      Some
+                        ("QuestionId",
+                          (QuestionId.to_value
+                             req.ListCheckSummariesInput.questionId));
+                      Some
+                        ("ChoiceId",
+                          (ChoiceId.to_value
+                             req.ListCheckSummariesInput.choiceId))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListLensReviewImprovements ->
       let (headers, body) = (None, None) in
@@ -677,7 +1267,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListNotificationsInput.maxResults
                         ~f:(fun x ->
                               ("MaxResults",
-                                (ListNotificationsMaxResults.to_value x)))])
+                                (ListNotificationsMaxResults.to_value x)));
+                      Option.map req.ListNotificationsInput.resourceArn
+                        ~f:(fun x ->
+                              ("ResourceArn", (ResourceArn.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -685,10 +1278,28 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProfileNotifications ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProfileShares ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProfiles ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListReviewTemplateAnswers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListReviewTemplates ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListShareInvitations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTemplateShares ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListWorkloadShares ->
@@ -741,11 +1352,45 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateAnswer -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateGlobalSettings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateIntegration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("ClientRequestToken",
+                           (ClientRequestToken.to_value
+                              req.UpdateIntegrationInput.clientRequestToken));
+                      Some
+                        ("IntegratingService",
+                          (IntegratingService.to_value
+                             req.UpdateIntegrationInput.integratingService))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateLensReview -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateProfile -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReviewTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReviewTemplateAnswer ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateReviewTemplateLensReview ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateShareInvitation -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateWorkload -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateWorkloadShare -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpgradeLensReview -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpgradeProfileVersion -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpgradeReviewTemplateLensReview ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -796,6 +1441,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   match endpoint with
   | AssociateLenses ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | AssociateProfiles ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | CreateLensShare ->
       if is_success
       then Ok (CreateLensShareOutput.of_json (response_to_json resp))
@@ -809,6 +1456,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateMilestoneOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateMilestoneOutput.error_of_json))
+  | CreateProfile ->
+      if is_success
+      then Ok (CreateProfileOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateProfileOutput.error_of_json))
+  | CreateProfileShare ->
+      if is_success
+      then Ok (CreateProfileShareOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some CreateProfileShareOutput.error_of_json))
+  | CreateReviewTemplate ->
+      if is_success
+      then Ok (CreateReviewTemplateOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateReviewTemplateOutput.error_of_json))
+  | CreateTemplateShare ->
+      if is_success
+      then Ok (CreateTemplateShareOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateTemplateShareOutput.error_of_json))
   | CreateWorkload ->
       if is_success
       then Ok (CreateWorkloadOutput.of_json (response_to_json resp))
@@ -822,11 +1490,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   | DeleteLens -> if is_success then Ok () else Error (parse_aws_error None)
   | DeleteLensShare ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteProfile ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteProfileShare ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteReviewTemplate ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTemplateShare ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteWorkload ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteWorkloadShare ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateLenses ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateProfiles ->
       if is_success then Ok () else Error (parse_aws_error None)
   | ExportLens ->
       if is_success
@@ -836,6 +1514,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetAnswerOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetAnswerOutput.error_of_json))
+  | GetConsolidatedReport ->
+      if is_success
+      then Ok (GetConsolidatedReportOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetConsolidatedReportOutput.error_of_json))
+  | GetGlobalSettings ->
+      if is_success
+      then Ok (GetGlobalSettingsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetGlobalSettingsOutput.error_of_json))
   | GetLens ->
       if is_success
       then Ok (GetLensOutput.of_json (response_to_json resp))
@@ -862,6 +1551,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetMilestoneOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetMilestoneOutput.error_of_json))
+  | GetProfile ->
+      if is_success
+      then Ok (GetProfileOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetProfileOutput.error_of_json))
+  | GetProfileTemplate ->
+      if is_success
+      then Ok (GetProfileTemplateOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetProfileTemplateOutput.error_of_json))
+  | GetReviewTemplate ->
+      if is_success
+      then Ok (GetReviewTemplateOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetReviewTemplateOutput.error_of_json))
+  | GetReviewTemplateAnswer ->
+      if is_success
+      then Ok (GetReviewTemplateAnswerOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetReviewTemplateAnswerOutput.error_of_json))
+  | GetReviewTemplateLensReview ->
+      if is_success
+      then
+        Ok
+          (GetReviewTemplateLensReviewOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetReviewTemplateLensReviewOutput.error_of_json))
   | GetWorkload ->
       if is_success
       then Ok (GetWorkloadOutput.of_json (response_to_json resp))
@@ -874,6 +1592,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListAnswersOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListAnswersOutput.error_of_json))
+  | ListCheckDetails ->
+      if is_success
+      then Ok (ListCheckDetailsOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCheckDetailsOutput.error_of_json))
+  | ListCheckSummaries ->
+      if is_success
+      then Ok (ListCheckSummariesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListCheckSummariesOutput.error_of_json))
   | ListLensReviewImprovements ->
       if is_success
       then
@@ -903,6 +1631,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListNotificationsOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListNotificationsOutput.error_of_json))
+  | ListProfileNotifications ->
+      if is_success
+      then
+        Ok (ListProfileNotificationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListProfileNotificationsOutput.error_of_json))
+  | ListProfileShares ->
+      if is_success
+      then Ok (ListProfileSharesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListProfileSharesOutput.error_of_json))
+  | ListProfiles ->
+      if is_success
+      then Ok (ListProfilesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListProfilesOutput.error_of_json))
+  | ListReviewTemplateAnswers ->
+      if is_success
+      then
+        Ok (ListReviewTemplateAnswersOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListReviewTemplateAnswersOutput.error_of_json))
+  | ListReviewTemplates ->
+      if is_success
+      then Ok (ListReviewTemplatesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListReviewTemplatesOutput.error_of_json))
   | ListShareInvitations ->
       if is_success
       then Ok (ListShareInvitationsOutput.of_json (response_to_json resp))
@@ -915,6 +1674,11 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
+  | ListTemplateShares ->
+      if is_success
+      then Ok (ListTemplateSharesOutput.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListTemplateSharesOutput.error_of_json))
   | ListWorkloadShares ->
       if is_success
       then Ok (ListWorkloadSharesOutput.of_json (response_to_json resp))
@@ -942,11 +1706,43 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdateAnswerOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdateAnswerOutput.error_of_json))
+  | UpdateGlobalSettings ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateIntegration ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateLensReview ->
       if is_success
       then Ok (UpdateLensReviewOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateLensReviewOutput.error_of_json))
+  | UpdateProfile ->
+      if is_success
+      then Ok (UpdateProfileOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some UpdateProfileOutput.error_of_json))
+  | UpdateReviewTemplate ->
+      if is_success
+      then Ok (UpdateReviewTemplateOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateReviewTemplateOutput.error_of_json))
+  | UpdateReviewTemplateAnswer ->
+      if is_success
+      then
+        Ok (UpdateReviewTemplateAnswerOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateReviewTemplateAnswerOutput.error_of_json))
+  | UpdateReviewTemplateLensReview ->
+      if is_success
+      then
+        Ok
+          (UpdateReviewTemplateLensReviewOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateReviewTemplateLensReviewOutput.error_of_json))
   | UpdateShareInvitation ->
       if is_success
       then Ok (UpdateShareInvitationOutput.of_json (response_to_json resp))
@@ -964,4 +1760,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error (Some UpdateWorkloadShareOutput.error_of_json))
   | UpgradeLensReview ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpgradeProfileVersion ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpgradeReviewTemplateLensReview ->
       if is_success then Ok () else Error (parse_aws_error None)

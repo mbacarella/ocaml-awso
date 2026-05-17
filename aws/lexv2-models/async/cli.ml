@@ -28,6 +28,87 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let batch_create_custom_vocabulary_item =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId"
+       and customVocabularyItemList =
+         flag "custom-vocabulary-item-list" (required json_arg)
+           ~doc:"JSON CreateCustomVocabularyItemsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_create_custom_vocabulary_item
+           (Values.BatchCreateCustomVocabularyItemRequest.make ~botId
+              ~botVersion ~localeId
+              ~customVocabularyItemList:(Values.CreateCustomVocabularyItemsList.of_json
+                                           customVocabularyItemList) ())
+           (Some Values.BatchCreateCustomVocabularyItemResponse.to_json)
+           (Some Values.BatchCreateCustomVocabularyItemResponse.error_to_json)])
+let batch_delete_custom_vocabulary_item =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId"
+       and customVocabularyItemList =
+         flag "custom-vocabulary-item-list" (required json_arg)
+           ~doc:"JSON DeleteCustomVocabularyItemsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_delete_custom_vocabulary_item
+           (Values.BatchDeleteCustomVocabularyItemRequest.make ~botId
+              ~botVersion ~localeId
+              ~customVocabularyItemList:(Values.DeleteCustomVocabularyItemsList.of_json
+                                           customVocabularyItemList) ())
+           (Some Values.BatchDeleteCustomVocabularyItemResponse.to_json)
+           (Some Values.BatchDeleteCustomVocabularyItemResponse.error_to_json)])
+let batch_update_custom_vocabulary_item =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId"
+       and customVocabularyItemList =
+         flag "custom-vocabulary-item-list" (required json_arg)
+           ~doc:"JSON UpdateCustomVocabularyItemsList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_update_custom_vocabulary_item
+           (Values.BatchUpdateCustomVocabularyItemRequest.make ~botId
+              ~botVersion ~localeId
+              ~customVocabularyItemList:(Values.UpdateCustomVocabularyItemsList.of_json
+                                           customVocabularyItemList) ())
+           (Some Values.BatchUpdateCustomVocabularyItemResponse.to_json)
+           (Some Values.BatchUpdateCustomVocabularyItemResponse.error_to_json)])
 let build_bot_locale =
   Command.async ~summary:""
     ([%map_open.Command
@@ -64,6 +145,12 @@ let create_bot =
        and botTags = flag "bot-tags" (optional json_arg) ~doc:"JSON TagMap"
        and testBotAliasTags =
          flag "test-bot-alias-tags" (optional json_arg) ~doc:"JSON TagMap"
+       and botType = flag "bot-type" (optional json_arg) ~doc:"JSON BotType"
+       and botMembers =
+         flag "bot-members" (optional json_arg) ~doc:"JSON BotMembers"
+       and errorLogSettings =
+         flag "error-log-settings" (optional json_arg)
+           ~doc:"JSON ErrorLogSettings"
        and botName = flag "bot-name" (required string) ~doc:"STRING Name"
        and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn"
        and dataPrivacy =
@@ -77,7 +164,12 @@ let create_bot =
            (Values.CreateBotRequest.make ?description
               ?botTags:(Option.map ~f:Values.TagMap.of_json botTags)
               ?testBotAliasTags:(Option.map ~f:Values.TagMap.of_json
-                                   testBotAliasTags) ~botName ~roleArn
+                                   testBotAliasTags)
+              ?botType:(Option.map ~f:Values.BotType.of_json botType)
+              ?botMembers:(Option.map ~f:Values.BotMembers.of_json botMembers)
+              ?errorLogSettings:(Option.map
+                                   ~f:Values.ErrorLogSettings.of_json
+                                   errorLogSettings) ~botName ~roleArn
               ~dataPrivacy:(Values.DataPrivacy.of_json dataPrivacy)
               ~idleSessionTTLInSeconds ())
            (Some Values.CreateBotResponse.to_json)
@@ -140,6 +232,21 @@ let create_bot_locale =
          flag "description" (optional string) ~doc:"STRING Description"
        and voiceSettings =
          flag "voice-settings" (optional json_arg) ~doc:"JSON VoiceSettings"
+       and unifiedSpeechSettings =
+         flag "unified-speech-settings" (optional json_arg)
+           ~doc:"JSON UnifiedSpeechSettings"
+       and audioFillerSettings =
+         flag "audio-filler-settings" (optional json_arg)
+           ~doc:"JSON AudioFillerSettings"
+       and speechRecognitionSettings =
+         flag "speech-recognition-settings" (optional json_arg)
+           ~doc:"JSON SpeechRecognitionSettings"
+       and generativeAISettings =
+         flag "generative-a-i-settings" (optional json_arg)
+           ~doc:"JSON GenerativeAISettings"
+       and speechDetectionSensitivity =
+         flag "speech-detection-sensitivity" (optional json_arg)
+           ~doc:"JSON SpeechDetectionSensitivity"
        and botId = flag "bot-id" (required string) ~doc:"STRING Id"
        and botVersion =
          flag "bot-version" (required string) ~doc:"STRING DraftBotVersion"
@@ -153,10 +260,44 @@ let create_bot_locale =
            Io.create_bot_locale
            (Values.CreateBotLocaleRequest.make ?description
               ?voiceSettings:(Option.map ~f:Values.VoiceSettings.of_json
-                                voiceSettings) ~botId ~botVersion ~localeId
-              ~nluIntentConfidenceThreshold ())
+                                voiceSettings)
+              ?unifiedSpeechSettings:(Option.map
+                                        ~f:Values.UnifiedSpeechSettings.of_json
+                                        unifiedSpeechSettings)
+              ?audioFillerSettings:(Option.map
+                                      ~f:Values.AudioFillerSettings.of_json
+                                      audioFillerSettings)
+              ?speechRecognitionSettings:(Option.map
+                                            ~f:Values.SpeechRecognitionSettings.of_json
+                                            speechRecognitionSettings)
+              ?generativeAISettings:(Option.map
+                                       ~f:Values.GenerativeAISettings.of_json
+                                       generativeAISettings)
+              ?speechDetectionSensitivity:(Option.map
+                                             ~f:Values.SpeechDetectionSensitivity.of_json
+                                             speechDetectionSensitivity)
+              ~botId ~botVersion ~localeId ~nluIntentConfidenceThreshold ())
            (Some Values.CreateBotLocaleResponse.to_json)
            (Some Values.CreateBotLocaleResponse.error_to_json)])
+let create_bot_replica =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and replicaRegion =
+         flag "replica-region" (required string) ~doc:"STRING ReplicaRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_bot_replica
+           (Values.CreateBotReplicaRequest.make ~botId ~replicaRegion ())
+           (Some Values.CreateBotReplicaResponse.to_json)
+           (Some Values.CreateBotReplicaResponse.error_to_json)])
 let create_bot_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -219,6 +360,9 @@ let create_intent =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and intentDisplayName =
+         flag "intent-display-name" (optional string)
+           ~doc:"STRING DisplayName"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and parentIntentSignature =
@@ -248,6 +392,15 @@ let create_intent =
        and kendraConfiguration =
          flag "kendra-configuration" (optional json_arg)
            ~doc:"JSON KendraConfiguration"
+       and initialResponseSetting =
+         flag "initial-response-setting" (optional json_arg)
+           ~doc:"JSON InitialResponseSetting"
+       and qnAIntentConfiguration =
+         flag "qn-a-intent-configuration" (optional json_arg)
+           ~doc:"JSON QnAIntentConfiguration"
+       and qInConnectIntentConfiguration =
+         flag "q-in-connect-intent-configuration" (optional json_arg)
+           ~doc:"JSON QInConnectIntentConfiguration"
        and intentName =
          flag "intent-name" (required string) ~doc:"STRING Name"
        and botId = flag "bot-id" (required string) ~doc:"STRING Id"
@@ -258,7 +411,7 @@ let create_intent =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_intent
-           (Values.CreateIntentRequest.make ?description
+           (Values.CreateIntentRequest.make ?intentDisplayName ?description
               ?parentIntentSignature
               ?sampleUtterances:(Option.map
                                    ~f:Values.SampleUtterancesList.of_json
@@ -282,8 +435,17 @@ let create_intent =
                                  outputContexts)
               ?kendraConfiguration:(Option.map
                                       ~f:Values.KendraConfiguration.of_json
-                                      kendraConfiguration) ~intentName ~botId
-              ~botVersion ~localeId ())
+                                      kendraConfiguration)
+              ?initialResponseSetting:(Option.map
+                                         ~f:Values.InitialResponseSetting.of_json
+                                         initialResponseSetting)
+              ?qnAIntentConfiguration:(Option.map
+                                         ~f:Values.QnAIntentConfiguration.of_json
+                                         qnAIntentConfiguration)
+              ?qInConnectIntentConfiguration:(Option.map
+                                                ~f:Values.QInConnectIntentConfiguration.of_json
+                                                qInConnectIntentConfiguration)
+              ~intentName ~botId ~botVersion ~localeId ())
            (Some Values.CreateIntentResponse.to_json)
            (Some Values.CreateIntentResponse.error_to_json)])
 let create_resource_policy =
@@ -363,6 +525,9 @@ let create_slot =
        and multipleValuesSetting =
          flag "multiple-values-setting" (optional json_arg)
            ~doc:"JSON MultipleValuesSetting"
+       and subSlotSetting =
+         flag "sub-slot-setting" (optional json_arg)
+           ~doc:"JSON SubSlotSetting"
        and slotName = flag "slot-name" (required string) ~doc:"STRING Name"
        and valueElicitationSetting =
          flag "value-elicitation-setting" (required json_arg)
@@ -382,7 +547,9 @@ let create_slot =
                                      obfuscationSetting)
               ?multipleValuesSetting:(Option.map
                                         ~f:Values.MultipleValuesSetting.of_json
-                                        multipleValuesSetting) ~slotName
+                                        multipleValuesSetting)
+              ?subSlotSetting:(Option.map ~f:Values.SubSlotSetting.of_json
+                                 subSlotSetting) ~slotName
               ~valueElicitationSetting:(Values.SlotValueElicitationSetting.of_json
                                           valueElicitationSetting) ~botId
               ~botVersion ~localeId ~intentId ())
@@ -412,6 +579,9 @@ let create_slot_type =
        and externalSourceSetting =
          flag "external-source-setting" (optional json_arg)
            ~doc:"JSON ExternalSourceSetting"
+       and compositeSlotTypeSetting =
+         flag "composite-slot-type-setting" (optional json_arg)
+           ~doc:"JSON CompositeSlotTypeSetting"
        and slotTypeName =
          flag "slot-type-name" (required string) ~doc:"STRING Name"
        and botId = flag "bot-id" (required string) ~doc:"STRING Id"
@@ -431,10 +601,35 @@ let create_slot_type =
               ?parentSlotTypeSignature
               ?externalSourceSetting:(Option.map
                                         ~f:Values.ExternalSourceSetting.of_json
-                                        externalSourceSetting) ~slotTypeName
-              ~botId ~botVersion ~localeId ())
+                                        externalSourceSetting)
+              ?compositeSlotTypeSetting:(Option.map
+                                           ~f:Values.CompositeSlotTypeSetting.of_json
+                                           compositeSlotTypeSetting)
+              ~slotTypeName ~botId ~botVersion ~localeId ())
            (Some Values.CreateSlotTypeResponse.to_json)
            (Some Values.CreateSlotTypeResponse.error_to_json)])
+let create_test_set_discrepancy_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id"
+       and target =
+         flag "target" (required json_arg)
+           ~doc:"JSON TestSetDiscrepancyReportResourceTarget" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_test_set_discrepancy_report
+           (Values.CreateTestSetDiscrepancyReportRequest.make ~testSetId
+              ~target:(Values.TestSetDiscrepancyReportResourceTarget.of_json
+                         target) ())
+           (Some Values.CreateTestSetDiscrepancyReportResponse.to_json)
+           (Some Values.CreateTestSetDiscrepancyReportResponse.error_to_json)])
 let create_upload_url =
   Command.async ~summary:""
     ([%map_open.Command
@@ -494,6 +689,26 @@ let delete_bot_alias =
               ~botAliasId ~botId ())
            (Some Values.DeleteBotAliasResponse.to_json)
            (Some Values.DeleteBotAliasResponse.error_to_json)])
+let delete_bot_analyzer_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botAnalyzerRequestId =
+         flag "bot-analyzer-request-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_bot_analyzer_recommendation
+           (Values.DeleteBotAnalyzerRecommendationRequest.make ~botId
+              ~botAnalyzerRequestId ())
+           (Some Values.DeleteBotAnalyzerRecommendationResponse.to_json)
+           (Some Values.DeleteBotAnalyzerRecommendationResponse.error_to_json)])
 let delete_bot_locale =
   Command.async ~summary:""
     ([%map_open.Command
@@ -515,6 +730,25 @@ let delete_bot_locale =
            (Values.DeleteBotLocaleRequest.make ~botId ~botVersion ~localeId
               ()) (Some Values.DeleteBotLocaleResponse.to_json)
            (Some Values.DeleteBotLocaleResponse.error_to_json)])
+let delete_bot_replica =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and replicaRegion =
+         flag "replica-region" (required string) ~doc:"STRING ReplicaRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_bot_replica
+           (Values.DeleteBotReplicaRequest.make ~botId ~replicaRegion ())
+           (Some Values.DeleteBotReplicaResponse.to_json)
+           (Some Values.DeleteBotReplicaResponse.error_to_json)])
 let delete_bot_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -709,6 +943,21 @@ let delete_slot_type =
            Io.delete_slot_type
            (Values.DeleteSlotTypeRequest.make ?skipResourceInUseCheck
               ~slotTypeId ~botId ~botVersion ~localeId ()) None None])
+let delete_test_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_test_set
+           (Values.DeleteTestSetRequest.make ~testSetId ()) None None])
 let delete_utterances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -765,6 +1014,31 @@ let describe_bot_alias =
            (Values.DescribeBotAliasRequest.make ~botAliasId ~botId ())
            (Some Values.DescribeBotAliasResponse.to_json)
            (Some Values.DescribeBotAliasResponse.error_to_json)])
+let describe_bot_analyzer_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botAnalyzerRequestId =
+         flag "bot-analyzer-request-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_bot_analyzer_recommendation
+           (Values.DescribeBotAnalyzerRecommendationRequest.make ?nextToken
+              ?maxResults ~botId ~botAnalyzerRequestId ())
+           (Some Values.DescribeBotAnalyzerRecommendationResponse.to_json)
+           (Some
+              Values.DescribeBotAnalyzerRecommendationResponse.error_to_json)])
 let describe_bot_locale =
   Command.async ~summary:""
     ([%map_open.Command
@@ -810,6 +1084,49 @@ let describe_bot_recommendation =
               ~localeId ~botRecommendationId ())
            (Some Values.DescribeBotRecommendationResponse.to_json)
            (Some Values.DescribeBotRecommendationResponse.error_to_json)])
+let describe_bot_replica =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and replicaRegion =
+         flag "replica-region" (required string) ~doc:"STRING ReplicaRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_bot_replica
+           (Values.DescribeBotReplicaRequest.make ~botId ~replicaRegion ())
+           (Some Values.DescribeBotReplicaResponse.to_json)
+           (Some Values.DescribeBotReplicaResponse.error_to_json)])
+let describe_bot_resource_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId"
+       and generationId =
+         flag "generation-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_bot_resource_generation
+           (Values.DescribeBotResourceGenerationRequest.make ~botId
+              ~botVersion ~localeId ~generationId ())
+           (Some Values.DescribeBotResourceGenerationResponse.to_json)
+           (Some Values.DescribeBotResourceGenerationResponse.error_to_json)])
 let describe_bot_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -976,6 +1293,121 @@ let describe_slot_type =
               ~botVersion ~localeId ())
            (Some Values.DescribeSlotTypeResponse.to_json)
            (Some Values.DescribeSlotTypeResponse.error_to_json)])
+let describe_test_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testExecutionId =
+         flag "test-execution-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_test_execution
+           (Values.DescribeTestExecutionRequest.make ~testExecutionId ())
+           (Some Values.DescribeTestExecutionResponse.to_json)
+           (Some Values.DescribeTestExecutionResponse.error_to_json)])
+let describe_test_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_test_set
+           (Values.DescribeTestSetRequest.make ~testSetId ())
+           (Some Values.DescribeTestSetResponse.to_json)
+           (Some Values.DescribeTestSetResponse.error_to_json)])
+let describe_test_set_discrepancy_report =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testSetDiscrepancyReportId =
+         flag "test-set-discrepancy-report-id" (required string)
+           ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_test_set_discrepancy_report
+           (Values.DescribeTestSetDiscrepancyReportRequest.make
+              ~testSetDiscrepancyReportId ())
+           (Some Values.DescribeTestSetDiscrepancyReportResponse.to_json)
+           (Some
+              Values.DescribeTestSetDiscrepancyReportResponse.error_to_json)])
+let describe_test_set_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testSetGenerationId =
+         flag "test-set-generation-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_test_set_generation
+           (Values.DescribeTestSetGenerationRequest.make ~testSetGenerationId
+              ()) (Some Values.DescribeTestSetGenerationResponse.to_json)
+           (Some Values.DescribeTestSetGenerationResponse.error_to_json)])
+let generate_bot_element =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and intentId = flag "intent-id" (required string) ~doc:"STRING Id"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.generate_bot_element
+           (Values.GenerateBotElementRequest.make ~intentId ~botId
+              ~botVersion ~localeId ())
+           (Some Values.GenerateBotElementResponse.to_json)
+           (Some Values.GenerateBotElementResponse.error_to_json)])
+let get_test_execution_artifacts_url =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testExecutionId =
+         flag "test-execution-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_test_execution_artifacts_url
+           (Values.GetTestExecutionArtifactsUrlRequest.make ~testExecutionId
+              ()) (Some Values.GetTestExecutionArtifactsUrlResponse.to_json)
+           (Some Values.GetTestExecutionArtifactsUrlResponse.error_to_json)])
 let list_aggregated_utterances =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1020,6 +1452,30 @@ let list_aggregated_utterances =
                                       aggregationDuration) ())
            (Some Values.ListAggregatedUtterancesResponse.to_json)
            (Some Values.ListAggregatedUtterancesResponse.error_to_json)])
+let list_bot_alias_replicas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and replicaRegion =
+         flag "replica-region" (required string) ~doc:"STRING ReplicaRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bot_alias_replicas
+           (Values.ListBotAliasReplicasRequest.make ?maxResults ?nextToken
+              ~botId ~replicaRegion ())
+           (Some Values.ListBotAliasReplicasResponse.to_json)
+           (Some Values.ListBotAliasReplicasResponse.error_to_json)])
 let list_bot_aliases =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1041,6 +1497,32 @@ let list_bot_aliases =
            (Values.ListBotAliasesRequest.make ?maxResults ?nextToken ~botId
               ()) (Some Values.ListBotAliasesResponse.to_json)
            (Some Values.ListBotAliasesResponse.error_to_json)])
+let list_bot_analyzer_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and localeId =
+         flag "locale-id" (optional string) ~doc:"STRING LocaleId"
+       and botVersion =
+         flag "bot-version" (optional string) ~doc:"STRING DraftBotVersion"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bot_analyzer_history
+           (Values.ListBotAnalyzerHistoryRequest.make ?localeId ?botVersion
+              ?nextToken ?maxResults ~botId ())
+           (Some Values.ListBotAnalyzerHistoryResponse.to_json)
+           (Some Values.ListBotAnalyzerHistoryResponse.error_to_json)])
 let list_bot_locales =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1097,6 +1579,80 @@ let list_bot_recommendations =
               ~botId ~botVersion ~localeId ())
            (Some Values.ListBotRecommendationsResponse.to_json)
            (Some Values.ListBotRecommendationsResponse.error_to_json)])
+let list_bot_replicas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bot_replicas
+           (Values.ListBotReplicasRequest.make ~botId ())
+           (Some Values.ListBotReplicasResponse.to_json)
+           (Some Values.ListBotReplicasResponse.error_to_json)])
+let list_bot_resource_generations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON GenerationSortBy"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bot_resource_generations
+           (Values.ListBotResourceGenerationsRequest.make
+              ?sortBy:(Option.map ~f:Values.GenerationSortBy.of_json sortBy)
+              ?maxResults ?nextToken ~botId ~botVersion ~localeId ())
+           (Some Values.ListBotResourceGenerationsResponse.to_json)
+           (Some Values.ListBotResourceGenerationsResponse.error_to_json)])
+let list_bot_version_replicas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON BotVersionReplicaSortBy"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and replicaRegion =
+         flag "replica-region" (required string) ~doc:"STRING ReplicaRegion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_bot_version_replicas
+           (Values.ListBotVersionReplicasRequest.make ?maxResults ?nextToken
+              ?sortBy:(Option.map ~f:Values.BotVersionReplicaSortBy.of_json
+                         sortBy) ~botId ~replicaRegion ())
+           (Some Values.ListBotVersionReplicasResponse.to_json)
+           (Some Values.ListBotVersionReplicasResponse.error_to_json)])
 let list_bot_versions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1200,6 +1756,32 @@ let list_built_in_slot_types =
                          sortBy) ?maxResults ?nextToken ~localeId ())
            (Some Values.ListBuiltInSlotTypesResponse.to_json)
            (Some Values.ListBuiltInSlotTypesResponse.error_to_json)])
+let list_custom_vocabulary_items =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_custom_vocabulary_items
+           (Values.ListCustomVocabularyItemsRequest.make ?maxResults
+              ?nextToken ~botId ~botVersion ~localeId ())
+           (Some Values.ListCustomVocabularyItemsResponse.to_json)
+           (Some Values.ListCustomVocabularyItemsResponse.error_to_json)])
 let list_exports =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1264,6 +1846,126 @@ let list_imports =
               ?maxResults ?nextToken ?localeId ())
            (Some Values.ListImportsResponse.to_json)
            (Some Values.ListImportsResponse.error_to_json)])
+let list_intent_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and binBy =
+         flag "bin-by" (optional json_arg) ~doc:"JSON AnalyticsBinByList"
+       and groupBy =
+         flag "group-by" (optional json_arg)
+           ~doc:"JSON AnalyticsIntentGroupByList"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsIntentFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and metrics =
+         flag "metrics" (required json_arg)
+           ~doc:"JSON AnalyticsIntentMetrics" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_intent_metrics
+           (Values.ListIntentMetricsRequest.make
+              ?binBy:(Option.map ~f:Values.AnalyticsBinByList.of_json binBy)
+              ?groupBy:(Option.map
+                          ~f:Values.AnalyticsIntentGroupByList.of_json
+                          groupBy)
+              ?filters:(Option.map ~f:Values.AnalyticsIntentFilters.of_json
+                          filters) ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime)
+              ~metrics:(Values.AnalyticsIntentMetrics.of_json metrics) ())
+           (Some Values.ListIntentMetricsResponse.to_json)
+           (Some Values.ListIntentMetricsResponse.error_to_json)])
+let list_intent_paths =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON AnalyticsPathFilters"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and intentPath =
+         flag "intent-path" (required string) ~doc:"STRING AnalyticsPath" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_intent_paths
+           (Values.ListIntentPathsRequest.make
+              ?filters:(Option.map ~f:Values.AnalyticsPathFilters.of_json
+                          filters) ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime) ~intentPath
+              ()) (Some Values.ListIntentPathsResponse.to_json)
+           (Some Values.ListIntentPathsResponse.error_to_json)])
+let list_intent_stage_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and binBy =
+         flag "bin-by" (optional json_arg) ~doc:"JSON AnalyticsBinByList"
+       and groupBy =
+         flag "group-by" (optional json_arg)
+           ~doc:"JSON AnalyticsIntentStageGroupByList"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsIntentStageFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and metrics =
+         flag "metrics" (required json_arg)
+           ~doc:"JSON AnalyticsIntentStageMetrics" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_intent_stage_metrics
+           (Values.ListIntentStageMetricsRequest.make
+              ?binBy:(Option.map ~f:Values.AnalyticsBinByList.of_json binBy)
+              ?groupBy:(Option.map
+                          ~f:Values.AnalyticsIntentStageGroupByList.of_json
+                          groupBy)
+              ?filters:(Option.map
+                          ~f:Values.AnalyticsIntentStageFilters.of_json
+                          filters) ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime)
+              ~metrics:(Values.AnalyticsIntentStageMetrics.of_json metrics)
+              ()) (Some Values.ListIntentStageMetricsResponse.to_json)
+           (Some Values.ListIntentStageMetricsResponse.error_to_json)])
 let list_intents =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1324,6 +2026,86 @@ let list_recommended_intents =
               ~botId ~botVersion ~localeId ~botRecommendationId ())
            (Some Values.ListRecommendedIntentsResponse.to_json)
            (Some Values.ListRecommendedIntentsResponse.error_to_json)])
+let list_session_analytics_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON SessionDataSortBy"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsSessionFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_session_analytics_data
+           (Values.ListSessionAnalyticsDataRequest.make
+              ?sortBy:(Option.map ~f:Values.SessionDataSortBy.of_json sortBy)
+              ?filters:(Option.map ~f:Values.AnalyticsSessionFilters.of_json
+                          filters) ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime) ())
+           (Some Values.ListSessionAnalyticsDataResponse.to_json)
+           (Some Values.ListSessionAnalyticsDataResponse.error_to_json)])
+let list_session_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and binBy =
+         flag "bin-by" (optional json_arg) ~doc:"JSON AnalyticsBinByList"
+       and groupBy =
+         flag "group-by" (optional json_arg)
+           ~doc:"JSON AnalyticsSessionGroupByList"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsSessionFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and metrics =
+         flag "metrics" (required json_arg)
+           ~doc:"JSON AnalyticsSessionMetrics" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_session_metrics
+           (Values.ListSessionMetricsRequest.make
+              ?binBy:(Option.map ~f:Values.AnalyticsBinByList.of_json binBy)
+              ?groupBy:(Option.map
+                          ~f:Values.AnalyticsSessionGroupByList.of_json
+                          groupBy)
+              ?filters:(Option.map ~f:Values.AnalyticsSessionFilters.of_json
+                          filters) ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime)
+              ~metrics:(Values.AnalyticsSessionMetrics.of_json metrics) ())
+           (Some Values.ListSessionMetricsResponse.to_json)
+           (Some Values.ListSessionMetricsResponse.error_to_json)])
 let list_slot_types =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1407,6 +2189,192 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceARN ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_test_execution_result_items =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and testExecutionId =
+         flag "test-execution-id" (required string) ~doc:"STRING Id"
+       and resultFilterBy =
+         flag "result-filter-by" (required json_arg)
+           ~doc:"JSON TestExecutionResultFilterBy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_test_execution_result_items
+           (Values.ListTestExecutionResultItemsRequest.make ?maxResults
+              ?nextToken ~testExecutionId
+              ~resultFilterBy:(Values.TestExecutionResultFilterBy.of_json
+                                 resultFilterBy) ())
+           (Some Values.ListTestExecutionResultItemsResponse.to_json)
+           (Some Values.ListTestExecutionResultItemsResponse.error_to_json)])
+let list_test_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON TestExecutionSortBy"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_test_executions
+           (Values.ListTestExecutionsRequest.make
+              ?sortBy:(Option.map ~f:Values.TestExecutionSortBy.of_json
+                         sortBy) ?maxResults ?nextToken ())
+           (Some Values.ListTestExecutionsResponse.to_json)
+           (Some Values.ListTestExecutionsResponse.error_to_json)])
+let list_test_set_records =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_test_set_records
+           (Values.ListTestSetRecordsRequest.make ?maxResults ?nextToken
+              ~testSetId ()) (Some Values.ListTestSetRecordsResponse.to_json)
+           (Some Values.ListTestSetRecordsResponse.error_to_json)])
+let list_test_sets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON TestSetSortBy"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_test_sets
+           (Values.ListTestSetsRequest.make
+              ?sortBy:(Option.map ~f:Values.TestSetSortBy.of_json sortBy)
+              ?maxResults ?nextToken ())
+           (Some Values.ListTestSetsResponse.to_json)
+           (Some Values.ListTestSetsResponse.error_to_json)])
+let list_utterance_analytics_data =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON UtteranceDataSortBy"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsUtteranceFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_utterance_analytics_data
+           (Values.ListUtteranceAnalyticsDataRequest.make
+              ?sortBy:(Option.map ~f:Values.UtteranceDataSortBy.of_json
+                         sortBy)
+              ?filters:(Option.map
+                          ~f:Values.AnalyticsUtteranceFilters.of_json filters)
+              ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime) ())
+           (Some Values.ListUtteranceAnalyticsDataResponse.to_json)
+           (Some Values.ListUtteranceAnalyticsDataResponse.error_to_json)])
+let list_utterance_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and binBy =
+         flag "bin-by" (optional json_arg) ~doc:"JSON AnalyticsBinByList"
+       and groupBy =
+         flag "group-by" (optional json_arg)
+           ~doc:"JSON AnalyticsUtteranceGroupByList"
+       and attributes =
+         flag "attributes" (optional json_arg)
+           ~doc:"JSON AnalyticsUtteranceAttributes"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON AnalyticsUtteranceFilters"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and startDateTime =
+         flag "start-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endDateTime =
+         flag "end-date-time" (required json_arg) ~doc:"JSON Timestamp"
+       and metrics =
+         flag "metrics" (required json_arg)
+           ~doc:"JSON AnalyticsUtteranceMetrics" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_utterance_metrics
+           (Values.ListUtteranceMetricsRequest.make
+              ?binBy:(Option.map ~f:Values.AnalyticsBinByList.of_json binBy)
+              ?groupBy:(Option.map
+                          ~f:Values.AnalyticsUtteranceGroupByList.of_json
+                          groupBy)
+              ?attributes:(Option.map
+                             ~f:Values.AnalyticsUtteranceAttributes.of_json
+                             attributes)
+              ?filters:(Option.map
+                          ~f:Values.AnalyticsUtteranceFilters.of_json filters)
+              ?maxResults ?nextToken ~botId
+              ~startDateTime:(Values.Timestamp.of_json startDateTime)
+              ~endDateTime:(Values.Timestamp.of_json endDateTime)
+              ~metrics:(Values.AnalyticsUtteranceMetrics.of_json metrics) ())
+           (Some Values.ListUtteranceMetricsResponse.to_json)
+           (Some Values.ListUtteranceMetricsResponse.error_to_json)])
 let search_associated_transcripts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1442,6 +2410,30 @@ let search_associated_transcripts =
               ~filters:(Values.AssociatedTranscriptFilters.of_json filters)
               ()) (Some Values.SearchAssociatedTranscriptsResponse.to_json)
            (Some Values.SearchAssociatedTranscriptsResponse.error_to_json)])
+let start_bot_analyzer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and localeId =
+         flag "locale-id" (optional string) ~doc:"STRING LocaleId"
+       and botVersion =
+         flag "bot-version" (optional string) ~doc:"STRING DraftBotVersion"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and analysisScope =
+         flag "analysis-scope" (required json_arg) ~doc:"JSON AnalysisScope" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_bot_analyzer
+           (Values.StartBotAnalyzerRequest.make ?localeId ?botVersion ~botId
+              ~analysisScope:(Values.AnalysisScope.of_json analysisScope) ())
+           (Some Values.StartBotAnalyzerResponse.to_json)
+           (Some Values.StartBotAnalyzerResponse.error_to_json)])
 let start_bot_recommendation =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1475,6 +2467,31 @@ let start_bot_recommendation =
                                           transcriptSourceSetting) ())
            (Some Values.StartBotRecommendationResponse.to_json)
            (Some Values.StartBotRecommendationResponse.error_to_json)])
+let start_bot_resource_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and generationInputPrompt =
+         flag "generation-input-prompt" (required string)
+           ~doc:"STRING GenerationInput"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING BotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_bot_resource_generation
+           (Values.StartBotResourceGenerationRequest.make
+              ~generationInputPrompt ~botId ~botVersion ~localeId ())
+           (Some Values.StartBotResourceGenerationResponse.to_json)
+           (Some Values.StartBotResourceGenerationResponse.error_to_json)])
 let start_import =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1503,6 +2520,113 @@ let start_import =
               ~mergeStrategy:(Values.MergeStrategy.of_json mergeStrategy) ())
            (Some Values.StartImportResponse.to_json)
            (Some Values.StartImportResponse.error_to_json)])
+let start_test_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and testExecutionModality =
+         flag "test-execution-modality" (optional json_arg)
+           ~doc:"JSON TestExecutionModality"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id"
+       and target =
+         flag "target" (required json_arg) ~doc:"JSON TestExecutionTarget"
+       and apiMode =
+         flag "api-mode" (required json_arg) ~doc:"JSON TestExecutionApiMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_test_execution
+           (Values.StartTestExecutionRequest.make
+              ?testExecutionModality:(Option.map
+                                        ~f:Values.TestExecutionModality.of_json
+                                        testExecutionModality) ~testSetId
+              ~target:(Values.TestExecutionTarget.of_json target)
+              ~apiMode:(Values.TestExecutionApiMode.of_json apiMode) ())
+           (Some Values.StartTestExecutionResponse.to_json)
+           (Some Values.StartTestExecutionResponse.error_to_json)])
+let start_test_set_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and testSetTags =
+         flag "test-set-tags" (optional json_arg) ~doc:"JSON TagMap"
+       and testSetName =
+         flag "test-set-name" (required string) ~doc:"STRING Name"
+       and storageLocation =
+         flag "storage-location" (required json_arg)
+           ~doc:"JSON TestSetStorageLocation"
+       and generationDataSource =
+         flag "generation-data-source" (required json_arg)
+           ~doc:"JSON TestSetGenerationDataSource"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_test_set_generation
+           (Values.StartTestSetGenerationRequest.make ?description
+              ?testSetTags:(Option.map ~f:Values.TagMap.of_json testSetTags)
+              ~testSetName
+              ~storageLocation:(Values.TestSetStorageLocation.of_json
+                                  storageLocation)
+              ~generationDataSource:(Values.TestSetGenerationDataSource.of_json
+                                       generationDataSource) ~roleArn ())
+           (Some Values.StartTestSetGenerationResponse.to_json)
+           (Some Values.StartTestSetGenerationResponse.error_to_json)])
+let stop_bot_analyzer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botAnalyzerRequestId =
+         flag "bot-analyzer-request-id" (required string) ~doc:"STRING UUID" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_bot_analyzer
+           (Values.StopBotAnalyzerRequest.make ~botId ~botAnalyzerRequestId
+              ()) (Some Values.StopBotAnalyzerResponse.to_json)
+           (Some Values.StopBotAnalyzerResponse.error_to_json)])
+let stop_bot_recommendation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and botId = flag "bot-id" (required string) ~doc:"STRING Id"
+       and botVersion =
+         flag "bot-version" (required string) ~doc:"STRING DraftBotVersion"
+       and localeId =
+         flag "locale-id" (required string) ~doc:"STRING LocaleId"
+       and botRecommendationId =
+         flag "bot-recommendation-id" (required string) ~doc:"STRING Id" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_bot_recommendation
+           (Values.StopBotRecommendationRequest.make ~botId ~botVersion
+              ~localeId ~botRecommendationId ())
+           (Some Values.StopBotRecommendationResponse.to_json)
+           (Some Values.StopBotRecommendationResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1558,6 +2682,12 @@ let update_bot =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
+       and botType = flag "bot-type" (optional json_arg) ~doc:"JSON BotType"
+       and botMembers =
+         flag "bot-members" (optional json_arg) ~doc:"JSON BotMembers"
+       and errorLogSettings =
+         flag "error-log-settings" (optional json_arg)
+           ~doc:"JSON ErrorLogSettings"
        and botId = flag "bot-id" (required string) ~doc:"STRING Id"
        and botName = flag "bot-name" (required string) ~doc:"STRING Name"
        and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn"
@@ -1569,8 +2699,13 @@ let update_bot =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_bot
-           (Values.UpdateBotRequest.make ?description ~botId ~botName
-              ~roleArn ~dataPrivacy:(Values.DataPrivacy.of_json dataPrivacy)
+           (Values.UpdateBotRequest.make ?description
+              ?botType:(Option.map ~f:Values.BotType.of_json botType)
+              ?botMembers:(Option.map ~f:Values.BotMembers.of_json botMembers)
+              ?errorLogSettings:(Option.map
+                                   ~f:Values.ErrorLogSettings.of_json
+                                   errorLogSettings) ~botId ~botName ~roleArn
+              ~dataPrivacy:(Values.DataPrivacy.of_json dataPrivacy)
               ~idleSessionTTLInSeconds ())
            (Some Values.UpdateBotResponse.to_json)
            (Some Values.UpdateBotResponse.error_to_json)])
@@ -1632,6 +2767,21 @@ let update_bot_locale =
          flag "description" (optional string) ~doc:"STRING Description"
        and voiceSettings =
          flag "voice-settings" (optional json_arg) ~doc:"JSON VoiceSettings"
+       and unifiedSpeechSettings =
+         flag "unified-speech-settings" (optional json_arg)
+           ~doc:"JSON UnifiedSpeechSettings"
+       and audioFillerSettings =
+         flag "audio-filler-settings" (optional json_arg)
+           ~doc:"JSON AudioFillerSettings"
+       and speechRecognitionSettings =
+         flag "speech-recognition-settings" (optional json_arg)
+           ~doc:"JSON SpeechRecognitionSettings"
+       and generativeAISettings =
+         flag "generative-a-i-settings" (optional json_arg)
+           ~doc:"JSON GenerativeAISettings"
+       and speechDetectionSensitivity =
+         flag "speech-detection-sensitivity" (optional json_arg)
+           ~doc:"JSON SpeechDetectionSensitivity"
        and botId = flag "bot-id" (required string) ~doc:"STRING Id"
        and botVersion =
          flag "bot-version" (required string) ~doc:"STRING DraftBotVersion"
@@ -1645,8 +2795,23 @@ let update_bot_locale =
            Io.update_bot_locale
            (Values.UpdateBotLocaleRequest.make ?description
               ?voiceSettings:(Option.map ~f:Values.VoiceSettings.of_json
-                                voiceSettings) ~botId ~botVersion ~localeId
-              ~nluIntentConfidenceThreshold ())
+                                voiceSettings)
+              ?unifiedSpeechSettings:(Option.map
+                                        ~f:Values.UnifiedSpeechSettings.of_json
+                                        unifiedSpeechSettings)
+              ?audioFillerSettings:(Option.map
+                                      ~f:Values.AudioFillerSettings.of_json
+                                      audioFillerSettings)
+              ?speechRecognitionSettings:(Option.map
+                                            ~f:Values.SpeechRecognitionSettings.of_json
+                                            speechRecognitionSettings)
+              ?generativeAISettings:(Option.map
+                                       ~f:Values.GenerativeAISettings.of_json
+                                       generativeAISettings)
+              ?speechDetectionSensitivity:(Option.map
+                                             ~f:Values.SpeechDetectionSensitivity.of_json
+                                             speechDetectionSensitivity)
+              ~botId ~botVersion ~localeId ~nluIntentConfidenceThreshold ())
            (Some Values.UpdateBotLocaleResponse.to_json)
            (Some Values.UpdateBotLocaleResponse.error_to_json)])
 let update_bot_recommendation =
@@ -1708,6 +2873,9 @@ let update_intent =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and intentDisplayName =
+         flag "intent-display-name" (optional string)
+           ~doc:"STRING DisplayName"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and parentIntentSignature =
@@ -1740,6 +2908,15 @@ let update_intent =
        and kendraConfiguration =
          flag "kendra-configuration" (optional json_arg)
            ~doc:"JSON KendraConfiguration"
+       and initialResponseSetting =
+         flag "initial-response-setting" (optional json_arg)
+           ~doc:"JSON InitialResponseSetting"
+       and qnAIntentConfiguration =
+         flag "qn-a-intent-configuration" (optional json_arg)
+           ~doc:"JSON QnAIntentConfiguration"
+       and qInConnectIntentConfiguration =
+         flag "q-in-connect-intent-configuration" (optional json_arg)
+           ~doc:"JSON QInConnectIntentConfiguration"
        and intentId = flag "intent-id" (required string) ~doc:"STRING Id"
        and intentName =
          flag "intent-name" (required string) ~doc:"STRING Name"
@@ -1751,7 +2928,7 @@ let update_intent =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_intent
-           (Values.UpdateIntentRequest.make ?description
+           (Values.UpdateIntentRequest.make ?intentDisplayName ?description
               ?parentIntentSignature
               ?sampleUtterances:(Option.map
                                    ~f:Values.SampleUtterancesList.of_json
@@ -1778,8 +2955,17 @@ let update_intent =
                                  outputContexts)
               ?kendraConfiguration:(Option.map
                                       ~f:Values.KendraConfiguration.of_json
-                                      kendraConfiguration) ~intentId
-              ~intentName ~botId ~botVersion ~localeId ())
+                                      kendraConfiguration)
+              ?initialResponseSetting:(Option.map
+                                         ~f:Values.InitialResponseSetting.of_json
+                                         initialResponseSetting)
+              ?qnAIntentConfiguration:(Option.map
+                                         ~f:Values.QnAIntentConfiguration.of_json
+                                         qnAIntentConfiguration)
+              ?qInConnectIntentConfiguration:(Option.map
+                                                ~f:Values.QInConnectIntentConfiguration.of_json
+                                                qInConnectIntentConfiguration)
+              ~intentId ~intentName ~botId ~botVersion ~localeId ())
            (Some Values.UpdateIntentResponse.to_json)
            (Some Values.UpdateIntentResponse.error_to_json)])
 let update_resource_policy =
@@ -1827,6 +3013,9 @@ let update_slot =
        and multipleValuesSetting =
          flag "multiple-values-setting" (optional json_arg)
            ~doc:"JSON MultipleValuesSetting"
+       and subSlotSetting =
+         flag "sub-slot-setting" (optional json_arg)
+           ~doc:"JSON SubSlotSetting"
        and slotId = flag "slot-id" (required string) ~doc:"STRING Id"
        and slotName = flag "slot-name" (required string) ~doc:"STRING Name"
        and valueElicitationSetting =
@@ -1847,8 +3036,9 @@ let update_slot =
                                      obfuscationSetting)
               ?multipleValuesSetting:(Option.map
                                         ~f:Values.MultipleValuesSetting.of_json
-                                        multipleValuesSetting) ~slotId
-              ~slotName
+                                        multipleValuesSetting)
+              ?subSlotSetting:(Option.map ~f:Values.SubSlotSetting.of_json
+                                 subSlotSetting) ~slotId ~slotName
               ~valueElicitationSetting:(Values.SlotValueElicitationSetting.of_json
                                           valueElicitationSetting) ~botId
               ~botVersion ~localeId ~intentId ())
@@ -1878,6 +3068,9 @@ let update_slot_type =
        and externalSourceSetting =
          flag "external-source-setting" (optional json_arg)
            ~doc:"JSON ExternalSourceSetting"
+       and compositeSlotTypeSetting =
+         flag "composite-slot-type-setting" (optional json_arg)
+           ~doc:"JSON CompositeSlotTypeSetting"
        and slotTypeId =
          flag "slot-type-id" (required string) ~doc:"STRING Id"
        and slotTypeName =
@@ -1899,17 +3092,48 @@ let update_slot_type =
               ?parentSlotTypeSignature
               ?externalSourceSetting:(Option.map
                                         ~f:Values.ExternalSourceSetting.of_json
-                                        externalSourceSetting) ~slotTypeId
-              ~slotTypeName ~botId ~botVersion ~localeId ())
+                                        externalSourceSetting)
+              ?compositeSlotTypeSetting:(Option.map
+                                           ~f:Values.CompositeSlotTypeSetting.of_json
+                                           compositeSlotTypeSetting)
+              ~slotTypeId ~slotTypeName ~botId ~botVersion ~localeId ())
            (Some Values.UpdateSlotTypeResponse.to_json)
            (Some Values.UpdateSlotTypeResponse.error_to_json)])
+let update_test_set =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and testSetId = flag "test-set-id" (required string) ~doc:"STRING Id"
+       and testSetName =
+         flag "test-set-name" (required string) ~doc:"STRING Name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_test_set
+           (Values.UpdateTestSetRequest.make ?description ~testSetId
+              ~testSetName ()) (Some Values.UpdateTestSetResponse.to_json)
+           (Some Values.UpdateTestSetResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("build-bot-locale", build_bot_locale);
+    [("batch-create-custom-vocabulary-item",
+       batch_create_custom_vocabulary_item);
+    ("batch-delete-custom-vocabulary-item",
+      batch_delete_custom_vocabulary_item);
+    ("batch-update-custom-vocabulary-item",
+      batch_update_custom_vocabulary_item);
+    ("build-bot-locale", build_bot_locale);
     ("create-bot", create_bot);
     ("create-bot-alias", create_bot_alias);
     ("create-bot-locale", create_bot_locale);
+    ("create-bot-replica", create_bot_replica);
     ("create-bot-version", create_bot_version);
     ("create-export", create_export);
     ("create-intent", create_intent);
@@ -1917,10 +3141,15 @@ let main =
     ("create-resource-policy-statement", create_resource_policy_statement);
     ("create-slot", create_slot);
     ("create-slot-type", create_slot_type);
+    ("create-test-set-discrepancy-report",
+      create_test_set_discrepancy_report);
     ("create-upload-url", create_upload_url);
     ("delete-bot", delete_bot);
     ("delete-bot-alias", delete_bot_alias);
+    ("delete-bot-analyzer-recommendation",
+      delete_bot_analyzer_recommendation);
     ("delete-bot-locale", delete_bot_locale);
+    ("delete-bot-replica", delete_bot_replica);
     ("delete-bot-version", delete_bot_version);
     ("delete-custom-vocabulary", delete_custom_vocabulary);
     ("delete-export", delete_export);
@@ -1930,11 +3159,16 @@ let main =
     ("delete-resource-policy-statement", delete_resource_policy_statement);
     ("delete-slot", delete_slot);
     ("delete-slot-type", delete_slot_type);
+    ("delete-test-set", delete_test_set);
     ("delete-utterances", delete_utterances);
     ("describe-bot", describe_bot);
     ("describe-bot-alias", describe_bot_alias);
+    ("describe-bot-analyzer-recommendation",
+      describe_bot_analyzer_recommendation);
     ("describe-bot-locale", describe_bot_locale);
     ("describe-bot-recommendation", describe_bot_recommendation);
+    ("describe-bot-replica", describe_bot_replica);
+    ("describe-bot-resource-generation", describe_bot_resource_generation);
     ("describe-bot-version", describe_bot_version);
     ("describe-custom-vocabulary-metadata",
       describe_custom_vocabulary_metadata);
@@ -1944,24 +3178,54 @@ let main =
     ("describe-resource-policy", describe_resource_policy);
     ("describe-slot", describe_slot);
     ("describe-slot-type", describe_slot_type);
+    ("describe-test-execution", describe_test_execution);
+    ("describe-test-set", describe_test_set);
+    ("describe-test-set-discrepancy-report",
+      describe_test_set_discrepancy_report);
+    ("describe-test-set-generation", describe_test_set_generation);
+    ("generate-bot-element", generate_bot_element);
+    ("get-test-execution-artifacts-url", get_test_execution_artifacts_url);
     ("list-aggregated-utterances", list_aggregated_utterances);
+    ("list-bot-alias-replicas", list_bot_alias_replicas);
     ("list-bot-aliases", list_bot_aliases);
+    ("list-bot-analyzer-history", list_bot_analyzer_history);
     ("list-bot-locales", list_bot_locales);
     ("list-bot-recommendations", list_bot_recommendations);
+    ("list-bot-replicas", list_bot_replicas);
+    ("list-bot-resource-generations", list_bot_resource_generations);
+    ("list-bot-version-replicas", list_bot_version_replicas);
     ("list-bot-versions", list_bot_versions);
     ("list-bots", list_bots);
     ("list-built-in-intents", list_built_in_intents);
     ("list-built-in-slot-types", list_built_in_slot_types);
+    ("list-custom-vocabulary-items", list_custom_vocabulary_items);
     ("list-exports", list_exports);
     ("list-imports", list_imports);
+    ("list-intent-metrics", list_intent_metrics);
+    ("list-intent-paths", list_intent_paths);
+    ("list-intent-stage-metrics", list_intent_stage_metrics);
     ("list-intents", list_intents);
     ("list-recommended-intents", list_recommended_intents);
+    ("list-session-analytics-data", list_session_analytics_data);
+    ("list-session-metrics", list_session_metrics);
     ("list-slot-types", list_slot_types);
     ("list-slots", list_slots);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-test-execution-result-items", list_test_execution_result_items);
+    ("list-test-executions", list_test_executions);
+    ("list-test-set-records", list_test_set_records);
+    ("list-test-sets", list_test_sets);
+    ("list-utterance-analytics-data", list_utterance_analytics_data);
+    ("list-utterance-metrics", list_utterance_metrics);
     ("search-associated-transcripts", search_associated_transcripts);
+    ("start-bot-analyzer", start_bot_analyzer);
     ("start-bot-recommendation", start_bot_recommendation);
+    ("start-bot-resource-generation", start_bot_resource_generation);
     ("start-import", start_import);
+    ("start-test-execution", start_test_execution);
+    ("start-test-set-generation", start_test_set_generation);
+    ("stop-bot-analyzer", stop_bot_analyzer);
+    ("stop-bot-recommendation", stop_bot_recommendation);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-bot", update_bot);
@@ -1972,4 +3236,5 @@ let main =
     ("update-intent", update_intent);
     ("update-resource-policy", update_resource_policy);
     ("update-slot", update_slot);
-    ("update-slot-type", update_slot_type)]
+    ("update-slot-type", update_slot_type);
+    ("update-test-set", update_test_set)]

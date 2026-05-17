@@ -5,32 +5,74 @@ type ('i, 'o, 'e) t =
   | AddTags: (AddTagsRequest.t, AddTagsResponse.t, AddTagsResponse.error) t 
   | CancelQuery: (CancelQueryRequest.t, CancelQueryResponse.t,
   CancelQueryResponse.error) t 
+  | CreateChannel: (CreateChannelRequest.t, CreateChannelResponse.t,
+  CreateChannelResponse.error) t 
+  | CreateDashboard: (CreateDashboardRequest.t, CreateDashboardResponse.t,
+  CreateDashboardResponse.error) t 
   | CreateEventDataStore: (CreateEventDataStoreRequest.t,
   CreateEventDataStoreResponse.t, CreateEventDataStoreResponse.error) t 
   | CreateTrail: (CreateTrailRequest.t, CreateTrailResponse.t,
   CreateTrailResponse.error) t 
+  | DeleteChannel: (DeleteChannelRequest.t, DeleteChannelResponse.t,
+  DeleteChannelResponse.error) t 
+  | DeleteDashboard: (DeleteDashboardRequest.t, DeleteDashboardResponse.t,
+  DeleteDashboardResponse.error) t 
   | DeleteEventDataStore: (DeleteEventDataStoreRequest.t,
   DeleteEventDataStoreResponse.t, DeleteEventDataStoreResponse.error) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyRequest.t,
+  DeleteResourcePolicyResponse.t, DeleteResourcePolicyResponse.error) t 
   | DeleteTrail: (DeleteTrailRequest.t, DeleteTrailResponse.t,
   DeleteTrailResponse.error) t 
+  | DeregisterOrganizationDelegatedAdmin:
+  (DeregisterOrganizationDelegatedAdminRequest.t,
+  DeregisterOrganizationDelegatedAdminResponse.t,
+  DeregisterOrganizationDelegatedAdminResponse.error) t 
   | DescribeQuery: (DescribeQueryRequest.t, DescribeQueryResponse.t,
   DescribeQueryResponse.error) t 
   | DescribeTrails: (DescribeTrailsRequest.t, DescribeTrailsResponse.t,
   DescribeTrailsResponse.error) t 
+  | DisableFederation: (DisableFederationRequest.t,
+  DisableFederationResponse.t, DisableFederationResponse.error) t 
+  | EnableFederation: (EnableFederationRequest.t, EnableFederationResponse.t,
+  EnableFederationResponse.error) t 
+  | GenerateQuery: (GenerateQueryRequest.t, GenerateQueryResponse.t,
+  GenerateQueryResponse.error) t 
+  | GetChannel: (GetChannelRequest.t, GetChannelResponse.t,
+  GetChannelResponse.error) t 
+  | GetDashboard: (GetDashboardRequest.t, GetDashboardResponse.t,
+  GetDashboardResponse.error) t 
+  | GetEventConfiguration: (GetEventConfigurationRequest.t,
+  GetEventConfigurationResponse.t, GetEventConfigurationResponse.error) t 
   | GetEventDataStore: (GetEventDataStoreRequest.t,
   GetEventDataStoreResponse.t, GetEventDataStoreResponse.error) t 
   | GetEventSelectors: (GetEventSelectorsRequest.t,
   GetEventSelectorsResponse.t, GetEventSelectorsResponse.error) t 
+  | GetImport: (GetImportRequest.t, GetImportResponse.t,
+  GetImportResponse.error) t 
   | GetInsightSelectors: (GetInsightSelectorsRequest.t,
   GetInsightSelectorsResponse.t, GetInsightSelectorsResponse.error) t 
   | GetQueryResults: (GetQueryResultsRequest.t, GetQueryResultsResponse.t,
   GetQueryResultsResponse.error) t 
+  | GetResourcePolicy: (GetResourcePolicyRequest.t,
+  GetResourcePolicyResponse.t, GetResourcePolicyResponse.error) t 
   | GetTrail: (GetTrailRequest.t, GetTrailResponse.t, GetTrailResponse.error)
   t 
   | GetTrailStatus: (GetTrailStatusRequest.t, GetTrailStatusResponse.t,
   GetTrailStatusResponse.error) t 
+  | ListChannels: (ListChannelsRequest.t, ListChannelsResponse.t,
+  ListChannelsResponse.error) t 
+  | ListDashboards: (ListDashboardsRequest.t, ListDashboardsResponse.t,
+  ListDashboardsResponse.error) t 
   | ListEventDataStores: (ListEventDataStoresRequest.t,
   ListEventDataStoresResponse.t, ListEventDataStoresResponse.error) t 
+  | ListImportFailures: (ListImportFailuresRequest.t,
+  ListImportFailuresResponse.t, ListImportFailuresResponse.error) t 
+  | ListImports: (ListImportsRequest.t, ListImportsResponse.t,
+  ListImportsResponse.error) t 
+  | ListInsightsData: (ListInsightsDataRequest.t, ListInsightsDataResponse.t,
+  ListInsightsDataResponse.error) t 
+  | ListInsightsMetricData: (ListInsightsMetricDataRequest.t,
+  ListInsightsMetricDataResponse.t, ListInsightsMetricDataResponse.error) t 
   | ListPublicKeys: (ListPublicKeysRequest.t, ListPublicKeysResponse.t,
   ListPublicKeysResponse.error) t 
   | ListQueries: (ListQueriesRequest.t, ListQueriesResponse.t,
@@ -41,20 +83,46 @@ type ('i, 'o, 'e) t =
   ListTrailsResponse.error) t 
   | LookupEvents: (LookupEventsRequest.t, LookupEventsResponse.t,
   LookupEventsResponse.error) t 
+  | PutEventConfiguration: (PutEventConfigurationRequest.t,
+  PutEventConfigurationResponse.t, PutEventConfigurationResponse.error) t 
   | PutEventSelectors: (PutEventSelectorsRequest.t,
   PutEventSelectorsResponse.t, PutEventSelectorsResponse.error) t 
   | PutInsightSelectors: (PutInsightSelectorsRequest.t,
   PutInsightSelectorsResponse.t, PutInsightSelectorsResponse.error) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
+  | RegisterOrganizationDelegatedAdmin:
+  (RegisterOrganizationDelegatedAdminRequest.t,
+  RegisterOrganizationDelegatedAdminResponse.t,
+  RegisterOrganizationDelegatedAdminResponse.error) t 
   | RemoveTags: (RemoveTagsRequest.t, RemoveTagsResponse.t,
   RemoveTagsResponse.error) t 
   | RestoreEventDataStore: (RestoreEventDataStoreRequest.t,
   RestoreEventDataStoreResponse.t, RestoreEventDataStoreResponse.error) t 
+  | SearchSampleQueries: (SearchSampleQueriesRequest.t,
+  SearchSampleQueriesResponse.t, SearchSampleQueriesResponse.error) t 
+  | StartDashboardRefresh: (StartDashboardRefreshRequest.t,
+  StartDashboardRefreshResponse.t, StartDashboardRefreshResponse.error) t 
+  | StartEventDataStoreIngestion: (StartEventDataStoreIngestionRequest.t,
+  StartEventDataStoreIngestionResponse.t,
+  StartEventDataStoreIngestionResponse.error) t 
+  | StartImport: (StartImportRequest.t, StartImportResponse.t,
+  StartImportResponse.error) t 
   | StartLogging: (StartLoggingRequest.t, StartLoggingResponse.t,
   StartLoggingResponse.error) t 
   | StartQuery: (StartQueryRequest.t, StartQueryResponse.t,
   StartQueryResponse.error) t 
+  | StopEventDataStoreIngestion: (StopEventDataStoreIngestionRequest.t,
+  StopEventDataStoreIngestionResponse.t,
+  StopEventDataStoreIngestionResponse.error) t 
+  | StopImport: (StopImportRequest.t, StopImportResponse.t,
+  StopImportResponse.error) t 
   | StopLogging: (StopLoggingRequest.t, StopLoggingResponse.t,
   StopLoggingResponse.error) t 
+  | UpdateChannel: (UpdateChannelRequest.t, UpdateChannelResponse.t,
+  UpdateChannelResponse.error) t 
+  | UpdateDashboard: (UpdateDashboardRequest.t, UpdateDashboardResponse.t,
+  UpdateDashboardResponse.error) t 
   | UpdateEventDataStore: (UpdateEventDataStoreRequest.t,
   UpdateEventDataStoreResponse.t, UpdateEventDataStoreResponse.error) t 
   | UpdateTrail: (UpdateTrailRequest.t, UpdateTrailResponse.t,
@@ -63,31 +131,62 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddTags -> `POST
   | CancelQuery -> `POST
+  | CreateChannel -> `POST
+  | CreateDashboard -> `POST
   | CreateEventDataStore -> `POST
   | CreateTrail -> `POST
+  | DeleteChannel -> `POST
+  | DeleteDashboard -> `POST
   | DeleteEventDataStore -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteTrail -> `POST
+  | DeregisterOrganizationDelegatedAdmin -> `POST
   | DescribeQuery -> `POST
   | DescribeTrails -> `POST
+  | DisableFederation -> `POST
+  | EnableFederation -> `POST
+  | GenerateQuery -> `POST
+  | GetChannel -> `POST
+  | GetDashboard -> `POST
+  | GetEventConfiguration -> `POST
   | GetEventDataStore -> `POST
   | GetEventSelectors -> `POST
+  | GetImport -> `POST
   | GetInsightSelectors -> `POST
   | GetQueryResults -> `POST
+  | GetResourcePolicy -> `POST
   | GetTrail -> `POST
   | GetTrailStatus -> `POST
+  | ListChannels -> `POST
+  | ListDashboards -> `POST
   | ListEventDataStores -> `POST
+  | ListImportFailures -> `POST
+  | ListImports -> `POST
+  | ListInsightsData -> `POST
+  | ListInsightsMetricData -> `POST
   | ListPublicKeys -> `POST
   | ListQueries -> `POST
   | ListTags -> `POST
   | ListTrails -> `POST
   | LookupEvents -> `POST
+  | PutEventConfiguration -> `POST
   | PutEventSelectors -> `POST
   | PutInsightSelectors -> `POST
+  | PutResourcePolicy -> `POST
+  | RegisterOrganizationDelegatedAdmin -> `POST
   | RemoveTags -> `POST
   | RestoreEventDataStore -> `POST
+  | SearchSampleQueries -> `POST
+  | StartDashboardRefresh -> `POST
+  | StartEventDataStoreIngestion -> `POST
+  | StartImport -> `POST
   | StartLogging -> `POST
   | StartQuery -> `POST
+  | StopEventDataStoreIngestion -> `POST
+  | StopImport -> `POST
   | StopLogging -> `POST
+  | UpdateChannel -> `POST
+  | UpdateDashboard -> `POST
   | UpdateEventDataStore -> `POST
   | UpdateTrail -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -95,31 +194,64 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AddTags -> (Format.kasprintf Uri.of_string) "/"
       | CancelQuery -> (Format.kasprintf Uri.of_string) "/"
+      | CreateChannel -> (Format.kasprintf Uri.of_string) "/"
+      | CreateDashboard -> (Format.kasprintf Uri.of_string) "/"
       | CreateEventDataStore -> (Format.kasprintf Uri.of_string) "/"
       | CreateTrail -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteChannel -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDashboard -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEventDataStore -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTrail -> (Format.kasprintf Uri.of_string) "/"
+      | DeregisterOrganizationDelegatedAdmin ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeQuery -> (Format.kasprintf Uri.of_string) "/"
       | DescribeTrails -> (Format.kasprintf Uri.of_string) "/"
+      | DisableFederation -> (Format.kasprintf Uri.of_string) "/"
+      | EnableFederation -> (Format.kasprintf Uri.of_string) "/"
+      | GenerateQuery -> (Format.kasprintf Uri.of_string) "/"
+      | GetChannel -> (Format.kasprintf Uri.of_string) "/"
+      | GetDashboard -> (Format.kasprintf Uri.of_string) "/"
+      | GetEventConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | GetEventDataStore -> (Format.kasprintf Uri.of_string) "/"
       | GetEventSelectors -> (Format.kasprintf Uri.of_string) "/"
+      | GetImport -> (Format.kasprintf Uri.of_string) "/"
       | GetInsightSelectors -> (Format.kasprintf Uri.of_string) "/"
       | GetQueryResults -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetTrail -> (Format.kasprintf Uri.of_string) "/"
       | GetTrailStatus -> (Format.kasprintf Uri.of_string) "/"
+      | ListChannels -> (Format.kasprintf Uri.of_string) "/"
+      | ListDashboards -> (Format.kasprintf Uri.of_string) "/"
       | ListEventDataStores -> (Format.kasprintf Uri.of_string) "/"
+      | ListImportFailures -> (Format.kasprintf Uri.of_string) "/"
+      | ListImports -> (Format.kasprintf Uri.of_string) "/"
+      | ListInsightsData -> (Format.kasprintf Uri.of_string) "/"
+      | ListInsightsMetricData -> (Format.kasprintf Uri.of_string) "/"
       | ListPublicKeys -> (Format.kasprintf Uri.of_string) "/"
       | ListQueries -> (Format.kasprintf Uri.of_string) "/"
       | ListTags -> (Format.kasprintf Uri.of_string) "/"
       | ListTrails -> (Format.kasprintf Uri.of_string) "/"
       | LookupEvents -> (Format.kasprintf Uri.of_string) "/"
+      | PutEventConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | PutEventSelectors -> (Format.kasprintf Uri.of_string) "/"
       | PutInsightSelectors -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | RegisterOrganizationDelegatedAdmin ->
+          (Format.kasprintf Uri.of_string) "/"
       | RemoveTags -> (Format.kasprintf Uri.of_string) "/"
       | RestoreEventDataStore -> (Format.kasprintf Uri.of_string) "/"
+      | SearchSampleQueries -> (Format.kasprintf Uri.of_string) "/"
+      | StartDashboardRefresh -> (Format.kasprintf Uri.of_string) "/"
+      | StartEventDataStoreIngestion -> (Format.kasprintf Uri.of_string) "/"
+      | StartImport -> (Format.kasprintf Uri.of_string) "/"
       | StartLogging -> (Format.kasprintf Uri.of_string) "/"
       | StartQuery -> (Format.kasprintf Uri.of_string) "/"
+      | StopEventDataStoreIngestion -> (Format.kasprintf Uri.of_string) "/"
+      | StopImport -> (Format.kasprintf Uri.of_string) "/"
       | StopLogging -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateChannel -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateDashboard -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEventDataStore -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTrail -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -143,6 +275,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.CancelQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateChannel ->
+      let json = CreateChannelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.CreateChannel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateDashboard ->
+      let json = CreateDashboardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.CreateDashboard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateEventDataStore ->
       let json = CreateEventDataStoreRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -161,6 +311,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.CreateTrail")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteChannel ->
+      let json = DeleteChannelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeleteChannel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDashboard ->
+      let json = DeleteDashboardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeleteDashboard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteEventDataStore ->
       let json = DeleteEventDataStoreRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -170,6 +338,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeleteEventDataStore")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteTrail ->
       let json = DeleteTrailRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -178,6 +355,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeleteTrail")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeregisterOrganizationDelegatedAdmin ->
+      let json = DeregisterOrganizationDelegatedAdminRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DeregisterOrganizationDelegatedAdmin")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeQuery ->
       let json = DescribeQueryRequest.to_json req in
@@ -197,6 +383,60 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DescribeTrails")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DisableFederation ->
+      let json = DisableFederationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.DisableFederation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | EnableFederation ->
+      let json = EnableFederationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.EnableFederation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GenerateQuery ->
+      let json = GenerateQueryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GenerateQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetChannel ->
+      let json = GetChannelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetChannel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDashboard ->
+      let json = GetDashboardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetDashboard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetEventConfiguration ->
+      let json = GetEventConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetEventConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetEventDataStore ->
       let json = GetEventDataStoreRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -214,6 +454,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetEventSelectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetImport ->
+      let json = GetImportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetImport")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetInsightSelectors ->
       let json = GetInsightSelectorsRequest.to_json req in
@@ -233,6 +482,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetQueryResults")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let json = GetResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetTrail ->
       let json = GetTrailRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -251,6 +509,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.GetTrailStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListChannels ->
+      let json = ListChannelsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListChannels")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDashboards ->
+      let json = ListDashboardsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListDashboards")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListEventDataStores ->
       let json = ListEventDataStoresRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -259,6 +535,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListEventDataStores")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListImportFailures ->
+      let json = ListImportFailuresRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListImportFailures")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListImports ->
+      let json = ListImportsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListImports")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInsightsData ->
+      let json = ListInsightsDataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListInsightsData")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInsightsMetricData ->
+      let json = ListInsightsMetricDataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.ListInsightsMetricData")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPublicKeys ->
       let json = ListPublicKeysRequest.to_json req in
@@ -305,6 +617,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.LookupEvents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutEventConfiguration ->
+      let json = PutEventConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.PutEventConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutEventSelectors ->
       let json = PutEventSelectorsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -322,6 +643,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.PutInsightSelectors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.PutResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RegisterOrganizationDelegatedAdmin ->
+      let json = RegisterOrganizationDelegatedAdminRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.RegisterOrganizationDelegatedAdmin")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RemoveTags ->
       let json = RemoveTagsRequest.to_json req in
@@ -341,6 +680,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.RestoreEventDataStore")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | SearchSampleQueries ->
+      let json = SearchSampleQueriesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.SearchSampleQueries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartDashboardRefresh ->
+      let json = StartDashboardRefreshRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StartDashboardRefresh")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartEventDataStoreIngestion ->
+      let json = StartEventDataStoreIngestionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StartEventDataStoreIngestion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartImport ->
+      let json = StartImportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StartImport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartLogging ->
       let json = StartLoggingRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -359,6 +734,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StartQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopEventDataStoreIngestion ->
+      let json = StopEventDataStoreIngestionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StopEventDataStoreIngestion")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopImport ->
+      let json = StopImportRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StopImport")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopLogging ->
       let json = StopLoggingRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -367,6 +760,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.StopLogging")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateChannel ->
+      let json = UpdateChannelRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.UpdateChannel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateDashboard ->
+      let json = UpdateDashboardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "com.amazonaws.cloudtrail.v20131101.CloudTrail_20131101.UpdateDashboard")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateEventDataStore ->
       let json = UpdateEventDataStoreRequest.to_json req in
@@ -421,6 +832,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CancelQueryResponse.of_json json)
       else Error (parse_aws_error (Some CancelQueryResponse.error_of_json))
+  | CreateChannel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateChannelResponse.of_json json)
+      else Error (parse_aws_error (Some CreateChannelResponse.error_of_json))
+  | CreateDashboard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateDashboardResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateDashboardResponse.error_of_json))
   | CreateEventDataStore ->
       if is_success
       then
@@ -435,6 +859,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateTrailResponse.of_json json)
       else Error (parse_aws_error (Some CreateTrailResponse.error_of_json))
+  | DeleteChannel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteChannelResponse.of_json json)
+      else Error (parse_aws_error (Some DeleteChannelResponse.error_of_json))
+  | DeleteDashboard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDashboardResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteDashboardResponse.error_of_json))
   | DeleteEventDataStore ->
       if is_success
       then
@@ -443,12 +880,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteEventDataStoreResponse.error_of_json))
+  | DeleteResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteResourcePolicyResponse.error_of_json))
   | DeleteTrail ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteTrailResponse.of_json json)
       else Error (parse_aws_error (Some DeleteTrailResponse.error_of_json))
+  | DeregisterOrganizationDelegatedAdmin ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeregisterOrganizationDelegatedAdminResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeregisterOrganizationDelegatedAdminResponse.error_of_json))
   | DescribeQuery ->
       if is_success
       then
@@ -462,6 +916,47 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeTrailsResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeTrailsResponse.error_of_json))
+  | DisableFederation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DisableFederationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DisableFederationResponse.error_of_json))
+  | EnableFederation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (EnableFederationResponse.of_json json)
+      else
+        Error (parse_aws_error (Some EnableFederationResponse.error_of_json))
+  | GenerateQuery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateQueryResponse.of_json json)
+      else Error (parse_aws_error (Some GenerateQueryResponse.error_of_json))
+  | GetChannel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetChannelResponse.of_json json)
+      else Error (parse_aws_error (Some GetChannelResponse.error_of_json))
+  | GetDashboard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDashboardResponse.of_json json)
+      else Error (parse_aws_error (Some GetDashboardResponse.error_of_json))
+  | GetEventConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetEventConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetEventConfigurationResponse.error_of_json))
   | GetEventDataStore ->
       if is_success
       then
@@ -478,6 +973,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetEventSelectorsResponse.error_of_json))
+  | GetImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetImportResponse.of_json json)
+      else Error (parse_aws_error (Some GetImportResponse.error_of_json))
   | GetInsightSelectors ->
       if is_success
       then
@@ -493,6 +994,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetQueryResultsResponse.of_json json)
       else
         Error (parse_aws_error (Some GetQueryResultsResponse.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourcePolicyResponse.error_of_json))
   | GetTrail ->
       if is_success
       then
@@ -506,6 +1015,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetTrailStatusResponse.of_json json)
       else
         Error (parse_aws_error (Some GetTrailStatusResponse.error_of_json))
+  | ListChannels ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListChannelsResponse.of_json json)
+      else Error (parse_aws_error (Some ListChannelsResponse.error_of_json))
+  | ListDashboards ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDashboardsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListDashboardsResponse.error_of_json))
   | ListEventDataStores ->
       if is_success
       then
@@ -514,6 +1036,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListEventDataStoresResponse.error_of_json))
+  | ListImportFailures ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImportFailuresResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListImportFailuresResponse.error_of_json))
+  | ListImports ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImportsResponse.of_json json)
+      else Error (parse_aws_error (Some ListImportsResponse.error_of_json))
+  | ListInsightsData ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInsightsDataResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListInsightsDataResponse.error_of_json))
+  | ListInsightsMetricData ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInsightsMetricDataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInsightsMetricDataResponse.error_of_json))
   | ListPublicKeys ->
       if is_success
       then
@@ -545,6 +1097,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (LookupEventsResponse.of_json json)
       else Error (parse_aws_error (Some LookupEventsResponse.error_of_json))
+  | PutEventConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutEventConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutEventConfigurationResponse.error_of_json))
   | PutEventSelectors ->
       if is_success
       then
@@ -561,6 +1121,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some PutInsightSelectorsResponse.error_of_json))
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
+  | RegisterOrganizationDelegatedAdmin ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RegisterOrganizationDelegatedAdminResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RegisterOrganizationDelegatedAdminResponse.error_of_json))
   | RemoveTags ->
       if is_success
       then
@@ -575,6 +1152,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some RestoreEventDataStoreResponse.error_of_json))
+  | SearchSampleQueries ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (SearchSampleQueriesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some SearchSampleQueriesResponse.error_of_json))
+  | StartDashboardRefresh ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartDashboardRefreshResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some StartDashboardRefreshResponse.error_of_json))
+  | StartEventDataStoreIngestion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartEventDataStoreIngestionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartEventDataStoreIngestionResponse.error_of_json))
+  | StartImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartImportResponse.of_json json)
+      else Error (parse_aws_error (Some StartImportResponse.error_of_json))
   | StartLogging ->
       if is_success
       then
@@ -587,12 +1195,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StartQueryResponse.of_json json)
       else Error (parse_aws_error (Some StartQueryResponse.error_of_json))
+  | StopEventDataStoreIngestion ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopEventDataStoreIngestionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopEventDataStoreIngestionResponse.error_of_json))
+  | StopImport ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopImportResponse.of_json json)
+      else Error (parse_aws_error (Some StopImportResponse.error_of_json))
   | StopLogging ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (StopLoggingResponse.of_json json)
       else Error (parse_aws_error (Some StopLoggingResponse.error_of_json))
+  | UpdateChannel ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateChannelResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateChannelResponse.error_of_json))
+  | UpdateDashboard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateDashboardResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateDashboardResponse.error_of_json))
   | UpdateEventDataStore ->
       if is_success
       then

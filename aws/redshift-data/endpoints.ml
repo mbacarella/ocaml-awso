@@ -14,6 +14,8 @@ type ('i, 'o, 'e) t =
   ExecuteStatementOutput.error) t 
   | GetStatementResult: (GetStatementResultRequest.t,
   GetStatementResultResponse.t, GetStatementResultResponse.error) t 
+  | GetStatementResultV2: (GetStatementResultV2Request.t,
+  GetStatementResultV2Response.t, GetStatementResultV2Response.error) t 
   | ListDatabases: (ListDatabasesRequest.t, ListDatabasesResponse.t,
   ListDatabasesResponse.error) t 
   | ListSchemas: (ListSchemasRequest.t, ListSchemasResponse.t,
@@ -30,6 +32,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeTable -> `POST
   | ExecuteStatement -> `POST
   | GetStatementResult -> `POST
+  | GetStatementResultV2 -> `POST
   | ListDatabases -> `POST
   | ListSchemas -> `POST
   | ListStatements -> `POST
@@ -43,6 +46,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeTable -> (Format.kasprintf Uri.of_string) "/"
       | ExecuteStatement -> (Format.kasprintf Uri.of_string) "/"
       | GetStatementResult -> (Format.kasprintf Uri.of_string) "/"
+      | GetStatementResultV2 -> (Format.kasprintf Uri.of_string) "/"
       | ListDatabases -> (Format.kasprintf Uri.of_string) "/"
       | ListSchemas -> (Format.kasprintf Uri.of_string) "/"
       | ListStatements -> (Format.kasprintf Uri.of_string) "/"
@@ -97,6 +101,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "RedshiftData.GetStatementResult")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetStatementResultV2 ->
+      let json = GetStatementResultV2Request.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "RedshiftData.GetStatementResultV2")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDatabases ->
       let json = ListDatabasesRequest.to_json req in
@@ -197,6 +209,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetStatementResultResponse.error_of_json))
+  | GetStatementResultV2 ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetStatementResultV2Response.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetStatementResultV2Response.error_of_json))
   | ListDatabases ->
       if is_success
       then

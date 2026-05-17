@@ -48,6 +48,24 @@ let accept_environment_account_connection =
            (Some Values.AcceptEnvironmentAccountConnectionOutput.to_json)
            (Some
               Values.AcceptEnvironmentAccountConnectionOutput.error_to_json)])
+let cancel_component_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_component_deployment
+           (Values.CancelComponentDeploymentInput.make ~componentName ())
+           (Some Values.CancelComponentDeploymentOutput.to_json)
+           (Some Values.CancelComponentDeploymentOutput.error_to_json)])
 let cancel_environment_deployment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -106,6 +124,46 @@ let cancel_service_pipeline_deployment =
            (Values.CancelServicePipelineDeploymentInput.make ~serviceName ())
            (Some Values.CancelServicePipelineDeploymentOutput.to_json)
            (Some Values.CancelServicePipelineDeploymentOutput.error_to_json)])
+let create_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and environmentName =
+         flag "environment-name" (optional string) ~doc:"STRING ResourceName"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (optional string) ~doc:"STRING ResourceName"
+       and serviceSpec =
+         flag "service-spec" (optional string) ~doc:"STRING SpecContents"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and manifest =
+         flag "manifest" (required string)
+           ~doc:"STRING TemplateManifestContents"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and templateFile =
+         flag "template-file" (required string)
+           ~doc:"STRING TemplateFileContents" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_component
+           (Values.CreateComponentInput.make ?clientToken ?description
+              ?environmentName ?serviceInstanceName ?serviceName ?serviceSpec
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~manifest
+              ~name ~templateFile ())
+           (Some Values.CreateComponentOutput.to_json)
+           (Some Values.CreateComponentOutput.error_to_json)])
 let create_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -116,6 +174,10 @@ let create_environment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and codebuildRoleArn =
+         flag "codebuild-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and componentRoleArn =
+         flag "component-role-arn" (optional string) ~doc:"STRING RoleArn"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and environmentAccountConnectionId =
@@ -140,8 +202,9 @@ let create_environment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_environment
-           (Values.CreateEnvironmentInput.make ?description
-              ?environmentAccountConnectionId ?protonServiceRoleArn
+           (Values.CreateEnvironmentInput.make ?codebuildRoleArn
+              ?componentRoleArn ?description ?environmentAccountConnectionId
+              ?protonServiceRoleArn
               ?provisioningRepository:(Option.map
                                          ~f:Values.RepositoryBranchInput.of_json
                                          provisioningRepository)
@@ -161,19 +224,24 @@ let create_environment_account_connection =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and codebuildRoleArn =
+         flag "codebuild-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and componentRoleArn =
+         flag "component-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and environmentName =
          flag "environment-name" (required string) ~doc:"STRING ResourceName"
        and managementAccountId =
          flag "management-account-id" (required string)
-           ~doc:"STRING AwsAccountId"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING Arn" in
+           ~doc:"STRING AwsAccountId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_environment_account_connection
            (Values.CreateEnvironmentAccountConnectionInput.make ?clientToken
+              ?codebuildRoleArn ?componentRoleArn ?roleArn
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~environmentName ~managementAccountId ~roleArn ())
+              ~environmentName ~managementAccountId ())
            (Some Values.CreateEnvironmentAccountConnectionOutput.to_json)
            (Some
               Values.CreateEnvironmentAccountConnectionOutput.error_to_json)])
@@ -305,6 +373,68 @@ let create_service =
               ?templateMinorVersion ~name ~spec ~templateMajorVersion
               ~templateName ()) (Some Values.CreateServiceOutput.to_json)
            (Some Values.CreateServiceOutput.error_to_json)])
+let create_service_instance =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and templateMajorVersion =
+         flag "template-major-version" (optional string)
+           ~doc:"STRING TemplateVersionPart"
+       and templateMinorVersion =
+         flag "template-minor-version" (optional string)
+           ~doc:"STRING TemplateVersionPart"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName"
+       and spec = flag "spec" (required string) ~doc:"STRING SpecContents" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_service_instance
+           (Values.CreateServiceInstanceInput.make ?clientToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?templateMajorVersion ?templateMinorVersion ~name ~serviceName
+              ~spec ()) (Some Values.CreateServiceInstanceOutput.to_json)
+           (Some Values.CreateServiceInstanceOutput.error_to_json)])
+let create_service_sync_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and branch =
+         flag "branch" (required string) ~doc:"STRING GitBranchName"
+       and filePath =
+         flag "file-path" (required string) ~doc:"STRING OpsFilePath"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and repositoryProvider =
+         flag "repository-provider" (required json_arg)
+           ~doc:"JSON RepositoryProvider"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_service_sync_config
+           (Values.CreateServiceSyncConfigInput.make ~branch ~filePath
+              ~repositoryName
+              ~repositoryProvider:(Values.RepositoryProvider.of_json
+                                     repositoryProvider) ~serviceName ())
+           (Some Values.CreateServiceSyncConfigOutput.to_json)
+           (Some Values.CreateServiceSyncConfigOutput.error_to_json)])
 let create_service_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -354,6 +484,9 @@ let create_service_template_version =
        and majorVersion =
          flag "major-version" (optional string)
            ~doc:"STRING TemplateVersionPart"
+       and supportedComponentSources =
+         flag "supported-component-sources" (optional json_arg)
+           ~doc:"JSON ServiceTemplateSupportedComponentSourceInputList"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and compatibleEnvironmentTemplates =
          flag "compatible-environment-templates" (required json_arg)
@@ -368,6 +501,9 @@ let create_service_template_version =
            Io.create_service_template_version
            (Values.CreateServiceTemplateVersionInput.make ?clientToken
               ?description ?majorVersion
+              ?supportedComponentSources:(Option.map
+                                            ~f:Values.ServiceTemplateSupportedComponentSourceInputList.of_json
+                                            supportedComponentSources)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~compatibleEnvironmentTemplates:(Values.CompatibleEnvironmentTemplateInputList.of_json
                                                  compatibleEnvironmentTemplates)
@@ -409,6 +545,38 @@ let create_template_sync_config =
               ~templateType:(Values.TemplateType.of_json templateType) ())
            (Some Values.CreateTemplateSyncConfigOutput.to_json)
            (Some Values.CreateTemplateSyncConfigOutput.error_to_json)])
+let delete_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_component (Values.DeleteComponentInput.make ~name ())
+           (Some Values.DeleteComponentOutput.to_json)
+           (Some Values.DeleteComponentOutput.error_to_json)])
+let delete_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING DeploymentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_deployment (Values.DeleteDeploymentInput.make ~id ())
+           (Some Values.DeleteDeploymentOutput.to_json)
+           (Some Values.DeleteDeploymentOutput.error_to_json)])
 let delete_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -524,6 +692,24 @@ let delete_service =
            Io.delete_service (Values.DeleteServiceInput.make ~name ())
            (Some Values.DeleteServiceOutput.to_json)
            (Some Values.DeleteServiceOutput.error_to_json)])
+let delete_service_sync_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_service_sync_config
+           (Values.DeleteServiceSyncConfigInput.make ~serviceName ())
+           (Some Values.DeleteServiceSyncConfigOutput.to_json)
+           (Some Values.DeleteServiceSyncConfigOutput.error_to_json)])
 let delete_service_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -603,6 +789,49 @@ let get_account_settings =
            Io.get_account_settings (Values.GetAccountSettingsInput.make ())
            (Some Values.GetAccountSettingsOutput.to_json)
            (Some Values.GetAccountSettingsOutput.error_to_json)])
+let get_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_component (Values.GetComponentInput.make ~name ())
+           (Some Values.GetComponentOutput.to_json)
+           (Some Values.GetComponentOutput.error_to_json)])
+let get_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and componentName =
+         flag "component-name" (optional string) ~doc:"STRING ResourceName"
+       and environmentName =
+         flag "environment-name" (optional string) ~doc:"STRING ResourceName"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (optional string) ~doc:"STRING ResourceName"
+       and id = flag "id" (required string) ~doc:"STRING DeploymentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_deployment
+           (Values.GetDeploymentInput.make ?componentName ?environmentName
+              ?serviceInstanceName ?serviceName ~id ())
+           (Some Values.GetDeploymentOutput.to_json)
+           (Some Values.GetDeploymentOutput.error_to_json)])
 let get_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -729,6 +958,22 @@ let get_repository_sync_status =
               ~syncType:(Values.SyncType.of_json syncType) ())
            (Some Values.GetRepositorySyncStatusOutput.to_json)
            (Some Values.GetRepositorySyncStatusOutput.error_to_json)])
+let get_resources_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resources_summary (Values.GetResourcesSummaryInput.make ())
+           (Some Values.GetResourcesSummaryOutput.to_json)
+           (Some Values.GetResourcesSummaryOutput.error_to_json)])
 let get_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -764,6 +1009,68 @@ let get_service_instance =
            (Values.GetServiceInstanceInput.make ~name ~serviceName ())
            (Some Values.GetServiceInstanceOutput.to_json)
            (Some Values.GetServiceInstanceOutput.error_to_json)])
+let get_service_instance_sync_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceInstanceName =
+         flag "service-instance-name" (required string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_service_instance_sync_status
+           (Values.GetServiceInstanceSyncStatusInput.make
+              ~serviceInstanceName ~serviceName ())
+           (Some Values.GetServiceInstanceSyncStatusOutput.to_json)
+           (Some Values.GetServiceInstanceSyncStatusOutput.error_to_json)])
+let get_service_sync_blocker_summary =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_service_sync_blocker_summary
+           (Values.GetServiceSyncBlockerSummaryInput.make
+              ?serviceInstanceName ~serviceName ())
+           (Some Values.GetServiceSyncBlockerSummaryOutput.to_json)
+           (Some Values.GetServiceSyncBlockerSummaryOutput.error_to_json)])
+let get_service_sync_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_service_sync_config
+           (Values.GetServiceSyncConfigInput.make ~serviceName ())
+           (Some Values.GetServiceSyncConfigOutput.to_json)
+           (Some Values.GetServiceSyncConfigOutput.error_to_json)])
 let get_service_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -852,6 +1159,108 @@ let get_template_sync_status =
               ~templateVersion ())
            (Some Values.GetTemplateSyncStatusOutput.to_json)
            (Some Values.GetTemplateSyncStatusOutput.error_to_json)])
+let list_component_outputs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING EmptyNextToken"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_component_outputs
+           (Values.ListComponentOutputsInput.make ?deploymentId ?nextToken
+              ~componentName ())
+           (Some Values.ListComponentOutputsOutput.to_json)
+           (Some Values.ListComponentOutputsOutput.error_to_json)])
+let list_component_provisioned_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING EmptyNextToken"
+       and componentName =
+         flag "component-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_component_provisioned_resources
+           (Values.ListComponentProvisionedResourcesInput.make ?nextToken
+              ~componentName ())
+           (Some Values.ListComponentProvisionedResourcesOutput.to_json)
+           (Some Values.ListComponentProvisionedResourcesOutput.error_to_json)])
+let list_components =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and environmentName =
+         flag "environment-name" (optional string) ~doc:"STRING ResourceName"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxPageResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (optional string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_components
+           (Values.ListComponentsInput.make ?environmentName ?maxResults
+              ?nextToken ?serviceInstanceName ?serviceName ())
+           (Some Values.ListComponentsOutput.to_json)
+           (Some Values.ListComponentsOutput.error_to_json)])
+let list_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and componentName =
+         flag "component-name" (optional string) ~doc:"STRING ResourceName"
+       and environmentName =
+         flag "environment-name" (optional string) ~doc:"STRING ResourceName"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxPageResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceName"
+       and serviceName =
+         flag "service-name" (optional string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_deployments
+           (Values.ListDeploymentsInput.make ?componentName ?environmentName
+              ?maxResults ?nextToken ?serviceInstanceName ?serviceName ())
+           (Some Values.ListDeploymentsOutput.to_json)
+           (Some Values.ListDeploymentsOutput.error_to_json)])
 let list_environment_account_connections =
   Command.async ~summary:""
     ([%map_open.Command
@@ -896,6 +1305,8 @@ let list_environment_outputs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING EmptyNextToken"
        and environmentName =
@@ -903,7 +1314,7 @@ let list_environment_outputs =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_environment_outputs
-           (Values.ListEnvironmentOutputsInput.make ?nextToken
+           (Values.ListEnvironmentOutputsInput.make ?deploymentId ?nextToken
               ~environmentName ())
            (Some Values.ListEnvironmentOutputsOutput.to_json)
            (Some Values.ListEnvironmentOutputsOutput.error_to_json)])
@@ -1061,6 +1472,8 @@ let list_service_instance_outputs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING EmptyNextToken"
        and serviceInstanceName =
@@ -1071,8 +1484,8 @@ let list_service_instance_outputs =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_service_instance_outputs
-           (Values.ListServiceInstanceOutputsInput.make ?nextToken
-              ~serviceInstanceName ~serviceName ())
+           (Values.ListServiceInstanceOutputsInput.make ?deploymentId
+              ?nextToken ~serviceInstanceName ~serviceName ())
            (Some Values.ListServiceInstanceOutputsOutput.to_json)
            (Some Values.ListServiceInstanceOutputsOutput.error_to_json)])
 let list_service_instance_provisioned_resources =
@@ -1110,18 +1523,31 @@ let list_service_instances =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ListServiceInstancesFilterList"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxPageResults"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and serviceName =
-         flag "service-name" (optional string) ~doc:"STRING ResourceName" in
+         flag "service-name" (optional string) ~doc:"STRING ResourceName"
+       and sortBy =
+         flag "sort-by" (optional json_arg)
+           ~doc:"JSON ListServiceInstancesSortBy"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrder" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_service_instances
-           (Values.ListServiceInstancesInput.make ?maxResults ?nextToken
-              ?serviceName ())
-           (Some Values.ListServiceInstancesOutput.to_json)
+           (Values.ListServiceInstancesInput.make
+              ?filters:(Option.map
+                          ~f:Values.ListServiceInstancesFilterList.of_json
+                          filters) ?maxResults ?nextToken ?serviceName
+              ?sortBy:(Option.map
+                         ~f:Values.ListServiceInstancesSortBy.of_json sortBy)
+              ?sortOrder:(Option.map ~f:Values.SortOrder.of_json sortOrder)
+              ()) (Some Values.ListServiceInstancesOutput.to_json)
            (Some Values.ListServiceInstancesOutput.error_to_json)])
 let list_service_pipeline_outputs =
   Command.async ~summary:""
@@ -1133,6 +1559,8 @@ let list_service_pipeline_outputs =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deploymentId =
+         flag "deployment-id" (optional string) ~doc:"STRING DeploymentId"
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING EmptyNextToken"
        and serviceName =
@@ -1140,8 +1568,8 @@ let list_service_pipeline_outputs =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_service_pipeline_outputs
-           (Values.ListServicePipelineOutputsInput.make ?nextToken
-              ~serviceName ())
+           (Values.ListServicePipelineOutputsInput.make ?deploymentId
+              ?nextToken ~serviceName ())
            (Some Values.ListServicePipelineOutputsOutput.to_json)
            (Some Values.ListServicePipelineOutputsOutput.error_to_json)])
 let list_service_pipeline_provisioned_resources =
@@ -1270,14 +1698,14 @@ let notify_resource_deployment_status_change =
        and outputs =
          flag "outputs" (optional json_arg)
            ~doc:"JSON NotifyResourceDeploymentStatusChangeInputOutputsList"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON ResourceDeploymentStatus"
        and statusMessage =
          flag "status-message" (optional string)
-           ~doc:"STRING SyntheticNotifyResourceDeploymentStatusChangeInputString"
+           ~doc:"STRING NotifyResourceDeploymentStatusChangeInputStatusMessageString"
        and resourceArn =
-         flag "resource-arn" (required string) ~doc:"STRING Arn"
-       and status =
-         flag "status" (required json_arg)
-           ~doc:"JSON ResourceDeploymentStatus" in
+         flag "resource-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.notify_resource_deployment_status_change
@@ -1285,8 +1713,9 @@ let notify_resource_deployment_status_change =
               ?deploymentId
               ?outputs:(Option.map
                           ~f:Values.NotifyResourceDeploymentStatusChangeInputOutputsList.of_json
-                          outputs) ?statusMessage ~resourceArn
-              ~status:(Values.ResourceDeploymentStatus.of_json status) ())
+                          outputs)
+              ?status:(Option.map ~f:Values.ResourceDeploymentStatus.of_json
+                         status) ?statusMessage ~resourceArn ())
            (Some Values.NotifyResourceDeploymentStatusChangeOutput.to_json)
            (Some
               Values.NotifyResourceDeploymentStatusChangeOutput.error_to_json)])
@@ -1361,22 +1790,67 @@ let update_account_settings =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and deletePipelineProvisioningRepository =
+         flag "delete-pipeline-provisioning-repository" (optional bool)
+           ~doc:"BOOL Boolean"
+       and pipelineCodebuildRoleArn =
+         flag "pipeline-codebuild-role-arn" (optional string)
+           ~doc:"STRING RoleArnOrEmptyString"
        and pipelineProvisioningRepository =
          flag "pipeline-provisioning-repository" (optional json_arg)
            ~doc:"JSON RepositoryBranchInput"
        and pipelineServiceRoleArn =
          flag "pipeline-service-role-arn" (optional string)
-           ~doc:"STRING PipelineRoleArn" in
+           ~doc:"STRING RoleArnOrEmptyString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_account_settings
            (Values.UpdateAccountSettingsInput.make
+              ?deletePipelineProvisioningRepository ?pipelineCodebuildRoleArn
               ?pipelineProvisioningRepository:(Option.map
                                                  ~f:Values.RepositoryBranchInput.of_json
                                                  pipelineProvisioningRepository)
               ?pipelineServiceRoleArn ())
            (Some Values.UpdateAccountSettingsOutput.to_json)
            (Some Values.UpdateAccountSettingsOutput.error_to_json)])
+let update_component =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and serviceInstanceName =
+         flag "service-instance-name" (optional string)
+           ~doc:"STRING ResourceNameOrEmpty"
+       and serviceName =
+         flag "service-name" (optional string)
+           ~doc:"STRING ResourceNameOrEmpty"
+       and serviceSpec =
+         flag "service-spec" (optional string) ~doc:"STRING SpecContents"
+       and templateFile =
+         flag "template-file" (optional string)
+           ~doc:"STRING TemplateFileContents"
+       and deploymentType =
+         flag "deployment-type" (required json_arg)
+           ~doc:"JSON ComponentDeploymentUpdateType"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_component
+           (Values.UpdateComponentInput.make ?clientToken ?description
+              ?serviceInstanceName ?serviceName ?serviceSpec ?templateFile
+              ~deploymentType:(Values.ComponentDeploymentUpdateType.of_json
+                                 deploymentType) ~name ())
+           (Some Values.UpdateComponentOutput.to_json)
+           (Some Values.UpdateComponentOutput.error_to_json)])
 let update_environment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1387,6 +1861,10 @@ let update_environment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and codebuildRoleArn =
+         flag "codebuild-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and componentRoleArn =
+         flag "component-role-arn" (optional string) ~doc:"STRING RoleArn"
        and description =
          flag "description" (optional string) ~doc:"STRING Description"
        and environmentAccountConnectionId =
@@ -1411,8 +1889,9 @@ let update_environment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_environment
-           (Values.UpdateEnvironmentInput.make ?description
-              ?environmentAccountConnectionId ?protonServiceRoleArn
+           (Values.UpdateEnvironmentInput.make ?codebuildRoleArn
+              ?componentRoleArn ?description ?environmentAccountConnectionId
+              ?protonServiceRoleArn
               ?provisioningRepository:(Option.map
                                          ~f:Values.RepositoryBranchInput.of_json
                                          provisioningRepository) ?spec
@@ -1431,15 +1910,19 @@ let update_environment_account_connection =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and codebuildRoleArn =
+         flag "codebuild-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and componentRoleArn =
+         flag "component-role-arn" (optional string) ~doc:"STRING RoleArn"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
        and id =
          flag "id" (required string)
-           ~doc:"STRING EnvironmentAccountConnectionId"
-       and roleArn = flag "role-arn" (required string) ~doc:"STRING Arn" in
+           ~doc:"STRING EnvironmentAccountConnectionId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_environment_account_connection
-           (Values.UpdateEnvironmentAccountConnectionInput.make ~id ~roleArn
-              ())
+           (Values.UpdateEnvironmentAccountConnectionInput.make
+              ?codebuildRoleArn ?componentRoleArn ?roleArn ~id ())
            (Some Values.UpdateEnvironmentAccountConnectionOutput.to_json)
            (Some
               Values.UpdateEnvironmentAccountConnectionOutput.error_to_json)])
@@ -1525,6 +2008,8 @@ let update_service_instance =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
        and spec = flag "spec" (optional string) ~doc:"STRING SpecContents"
        and templateMajorVersion =
          flag "template-major-version" (optional string)
@@ -1541,7 +2026,7 @@ let update_service_instance =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_service_instance
-           (Values.UpdateServiceInstanceInput.make ?spec
+           (Values.UpdateServiceInstanceInput.make ?clientToken ?spec
               ?templateMajorVersion ?templateMinorVersion
               ~deploymentType:(Values.DeploymentUpdateType.of_json
                                  deploymentType) ~name ~serviceName ())
@@ -1578,6 +2063,56 @@ let update_service_pipeline =
                                  deploymentType) ~serviceName ~spec ())
            (Some Values.UpdateServicePipelineOutput.to_json)
            (Some Values.UpdateServicePipelineOutput.error_to_json)])
+let update_service_sync_blocker =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING String"
+       and resolvedReason =
+         flag "resolved-reason" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_service_sync_blocker
+           (Values.UpdateServiceSyncBlockerInput.make ~id ~resolvedReason ())
+           (Some Values.UpdateServiceSyncBlockerOutput.to_json)
+           (Some Values.UpdateServiceSyncBlockerOutput.error_to_json)])
+let update_service_sync_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and branch =
+         flag "branch" (required string) ~doc:"STRING GitBranchName"
+       and filePath =
+         flag "file-path" (required string) ~doc:"STRING OpsFilePath"
+       and repositoryName =
+         flag "repository-name" (required string)
+           ~doc:"STRING RepositoryName"
+       and repositoryProvider =
+         flag "repository-provider" (required json_arg)
+           ~doc:"JSON RepositoryProvider"
+       and serviceName =
+         flag "service-name" (required string) ~doc:"STRING ResourceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_service_sync_config
+           (Values.UpdateServiceSyncConfigInput.make ~branch ~filePath
+              ~repositoryName
+              ~repositoryProvider:(Values.RepositoryProvider.of_json
+                                     repositoryProvider) ~serviceName ())
+           (Some Values.UpdateServiceSyncConfigOutput.to_json)
+           (Some Values.UpdateServiceSyncConfigOutput.error_to_json)])
 let update_service_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1616,6 +2151,9 @@ let update_service_template_version =
          flag "description" (optional string) ~doc:"STRING Description"
        and status =
          flag "status" (optional json_arg) ~doc:"JSON TemplateVersionStatus"
+       and supportedComponentSources =
+         flag "supported-component-sources" (optional json_arg)
+           ~doc:"JSON ServiceTemplateSupportedComponentSourceInputList"
        and majorVersion =
          flag "major-version" (required string)
            ~doc:"STRING TemplateVersionPart"
@@ -1633,7 +2171,11 @@ let update_service_template_version =
                                                  compatibleEnvironmentTemplates)
               ?description
               ?status:(Option.map ~f:Values.TemplateVersionStatus.of_json
-                         status) ~majorVersion ~minorVersion ~templateName ())
+                         status)
+              ?supportedComponentSources:(Option.map
+                                            ~f:Values.ServiceTemplateSupportedComponentSourceInputList.of_json
+                                            supportedComponentSources)
+              ~majorVersion ~minorVersion ~templateName ())
            (Some Values.UpdateServiceTemplateVersionOutput.to_json)
            (Some Values.UpdateServiceTemplateVersionOutput.error_to_json)])
 let update_template_sync_config =
@@ -1675,11 +2217,13 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("accept-environment-account-connection",
        accept_environment_account_connection);
+    ("cancel-component-deployment", cancel_component_deployment);
     ("cancel-environment-deployment", cancel_environment_deployment);
     ("cancel-service-instance-deployment",
       cancel_service_instance_deployment);
     ("cancel-service-pipeline-deployment",
       cancel_service_pipeline_deployment);
+    ("create-component", create_component);
     ("create-environment", create_environment);
     ("create-environment-account-connection",
       create_environment_account_connection);
@@ -1688,9 +2232,13 @@ let main =
       create_environment_template_version);
     ("create-repository", create_repository);
     ("create-service", create_service);
+    ("create-service-instance", create_service_instance);
+    ("create-service-sync-config", create_service_sync_config);
     ("create-service-template", create_service_template);
     ("create-service-template-version", create_service_template_version);
     ("create-template-sync-config", create_template_sync_config);
+    ("delete-component", delete_component);
+    ("delete-deployment", delete_deployment);
     ("delete-environment", delete_environment);
     ("delete-environment-account-connection",
       delete_environment_account_connection);
@@ -1699,10 +2247,13 @@ let main =
       delete_environment_template_version);
     ("delete-repository", delete_repository);
     ("delete-service", delete_service);
+    ("delete-service-sync-config", delete_service_sync_config);
     ("delete-service-template", delete_service_template);
     ("delete-service-template-version", delete_service_template_version);
     ("delete-template-sync-config", delete_template_sync_config);
     ("get-account-settings", get_account_settings);
+    ("get-component", get_component);
+    ("get-deployment", get_deployment);
     ("get-environment", get_environment);
     ("get-environment-account-connection",
       get_environment_account_connection);
@@ -1710,12 +2261,21 @@ let main =
     ("get-environment-template-version", get_environment_template_version);
     ("get-repository", get_repository);
     ("get-repository-sync-status", get_repository_sync_status);
+    ("get-resources-summary", get_resources_summary);
     ("get-service", get_service);
     ("get-service-instance", get_service_instance);
+    ("get-service-instance-sync-status", get_service_instance_sync_status);
+    ("get-service-sync-blocker-summary", get_service_sync_blocker_summary);
+    ("get-service-sync-config", get_service_sync_config);
     ("get-service-template", get_service_template);
     ("get-service-template-version", get_service_template_version);
     ("get-template-sync-config", get_template_sync_config);
     ("get-template-sync-status", get_template_sync_status);
+    ("list-component-outputs", list_component_outputs);
+    ("list-component-provisioned-resources",
+      list_component_provisioned_resources);
+    ("list-components", list_components);
+    ("list-deployments", list_deployments);
     ("list-environment-account-connections",
       list_environment_account_connections);
     ("list-environment-outputs", list_environment_outputs);
@@ -1745,6 +2305,7 @@ let main =
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-account-settings", update_account_settings);
+    ("update-component", update_component);
     ("update-environment", update_environment);
     ("update-environment-account-connection",
       update_environment_account_connection);
@@ -1754,6 +2315,8 @@ let main =
     ("update-service", update_service);
     ("update-service-instance", update_service_instance);
     ("update-service-pipeline", update_service_pipeline);
+    ("update-service-sync-blocker", update_service_sync_blocker);
+    ("update-service-sync-config", update_service_sync_config);
     ("update-service-template", update_service_template);
     ("update-service-template-version", update_service_template_version);
     ("update-template-sync-config", update_template_sync_config)]

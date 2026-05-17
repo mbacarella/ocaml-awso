@@ -46,6 +46,104 @@ let associate_alias =
            Io.associate_alias
            (Values.AssociateAliasRequest.make ~targetDistributionId ~alias ())
            None None])
+let associate_distribution_tenant_web_a_c_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and webACLArn =
+         flag "web-a-c-l-arn" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_distribution_tenant_web_a_c_l
+           (Values.AssociateDistributionTenantWebACLRequest.make ?ifMatch ~id
+              ~webACLArn ())
+           (Some Values.AssociateDistributionTenantWebACLResult.to_json)
+           (Some Values.AssociateDistributionTenantWebACLResult.error_to_json)])
+let associate_distribution_web_a_c_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and webACLArn =
+         flag "web-a-c-l-arn" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.associate_distribution_web_a_c_l
+           (Values.AssociateDistributionWebACLRequest.make ?ifMatch ~id
+              ~webACLArn ())
+           (Some Values.AssociateDistributionWebACLResult.to_json)
+           (Some Values.AssociateDistributionWebACLResult.error_to_json)])
+let copy_distribution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and staging = flag "staging" (optional bool) ~doc:"BOOL boolean"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL boolean"
+       and primaryDistributionId =
+         flag "primary-distribution-id" (required string)
+           ~doc:"STRING string"
+       and callerReference =
+         flag "caller-reference" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.copy_distribution
+           (Values.CopyDistributionRequest.make ?staging ?ifMatch ?enabled
+              ~primaryDistributionId ~callerReference ())
+           (Some Values.CopyDistributionResult.to_json)
+           (Some Values.CopyDistributionResult.error_to_json)])
+let create_anycast_ip_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and ipamCidrConfigs =
+         flag "ipam-cidr-configs" (optional json_arg)
+           ~doc:"JSON IpamCidrConfigList"
+       and name =
+         flag "name" (required string) ~doc:"STRING AnycastIpListName"
+       and ipCount = flag "ip-count" (required int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_anycast_ip_list
+           (Values.CreateAnycastIpListRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
+              ?ipamCidrConfigs:(Option.map
+                                  ~f:Values.IpamCidrConfigList.of_json
+                                  ipamCidrConfigs) ~name ~ipCount ())
+           (Some Values.CreateAnycastIpListResult.to_json)
+           (Some Values.CreateAnycastIpListResult.error_to_json)])
 let create_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,6 +188,82 @@ let create_cloud_front_origin_access_identity =
            (Some Values.CreateCloudFrontOriginAccessIdentityResult.to_json)
            (Some
               Values.CreateCloudFrontOriginAccessIdentityResult.error_to_json)])
+let create_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name = flag "name" (required string) ~doc:"STRING FunctionName"
+       and connectionFunctionConfig =
+         flag "connection-function-config" (required json_arg)
+           ~doc:"JSON FunctionConfig"
+       and connectionFunctionCode =
+         flag "connection-function-code" (required json_arg)
+           ~doc:"JSON FunctionBlob" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_connection_function
+           (Values.CreateConnectionFunctionRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
+              ~connectionFunctionConfig:(Values.FunctionConfig.of_json
+                                           connectionFunctionConfig)
+              ~connectionFunctionCode:(Values.FunctionBlob.of_json
+                                         connectionFunctionCode) ())
+           (Some Values.CreateConnectionFunctionResult.to_json)
+           (Some Values.CreateConnectionFunctionResult.error_to_json)])
+let create_connection_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipv6Enabled =
+         flag "ipv6-enabled" (optional bool) ~doc:"BOOL boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and anycastIpListId =
+         flag "anycast-ip-list-id" (optional string) ~doc:"STRING string"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL boolean"
+       and name = flag "name" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_connection_group
+           (Values.CreateConnectionGroupRequest.make ?ipv6Enabled
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?anycastIpListId
+              ?enabled ~name ())
+           (Some Values.CreateConnectionGroupResult.to_json)
+           (Some Values.CreateConnectionGroupResult.error_to_json)])
+let create_continuous_deployment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and continuousDeploymentPolicyConfig =
+         flag "continuous-deployment-policy-config" (required json_arg)
+           ~doc:"JSON ContinuousDeploymentPolicyConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_continuous_deployment_policy
+           (Values.CreateContinuousDeploymentPolicyRequest.make
+              ~continuousDeploymentPolicyConfig:(Values.ContinuousDeploymentPolicyConfig.of_json
+                                                   continuousDeploymentPolicyConfig)
+              ())
+           (Some Values.CreateContinuousDeploymentPolicyResult.to_json)
+           (Some Values.CreateContinuousDeploymentPolicyResult.error_to_json)])
 let create_distribution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -111,6 +285,50 @@ let create_distribution =
                                      distributionConfig) ())
            (Some Values.CreateDistributionResult.to_json)
            (Some Values.CreateDistributionResult.error_to_json)])
+let create_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and customizations =
+         flag "customizations" (optional json_arg) ~doc:"JSON Customizations"
+       and parameters =
+         flag "parameters" (optional json_arg) ~doc:"JSON Parameters"
+       and connectionGroupId =
+         flag "connection-group-id" (optional string) ~doc:"STRING string"
+       and managedCertificateRequest =
+         flag "managed-certificate-request" (optional json_arg)
+           ~doc:"JSON ManagedCertificateRequest"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL boolean"
+       and distributionId =
+         flag "distribution-id" (required string) ~doc:"STRING string"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING CreateDistributionTenantRequestNameString"
+       and domains =
+         flag "domains" (required json_arg) ~doc:"JSON DomainList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_distribution_tenant
+           (Values.CreateDistributionTenantRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?customizations:(Option.map ~f:Values.Customizations.of_json
+                                 customizations)
+              ?parameters:(Option.map ~f:Values.Parameters.of_json parameters)
+              ?connectionGroupId
+              ?managedCertificateRequest:(Option.map
+                                            ~f:Values.ManagedCertificateRequest.of_json
+                                            managedCertificateRequest)
+              ?enabled ~distributionId ~name
+              ~domains:(Values.DomainList.of_json domains) ())
+           (Some Values.CreateDistributionTenantResult.to_json)
+           (Some Values.CreateDistributionTenantResult.error_to_json)])
 let create_distribution_with_tags =
   Command.async ~summary:""
     ([%map_open.Command
@@ -185,6 +403,7 @@ let create_function =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and name = flag "name" (required string) ~doc:"STRING FunctionName"
        and functionConfig =
          flag "function-config" (required json_arg)
@@ -194,7 +413,8 @@ let create_function =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_function
-           (Values.CreateFunctionRequest.make ~name
+           (Values.CreateFunctionRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
               ~functionConfig:(Values.FunctionConfig.of_json functionConfig)
               ~functionCode:(Values.FunctionBlob.of_json functionCode) ())
            (Some Values.CreateFunctionResult.to_json)
@@ -222,6 +442,29 @@ let create_invalidation =
                                     invalidationBatch) ())
            (Some Values.CreateInvalidationResult.to_json)
            (Some Values.CreateInvalidationResult.error_to_json)])
+let create_invalidation_for_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and invalidationBatch =
+         flag "invalidation-batch" (required json_arg)
+           ~doc:"JSON InvalidationBatch" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_invalidation_for_distribution_tenant
+           (Values.CreateInvalidationForDistributionTenantRequest.make ~id
+              ~invalidationBatch:(Values.InvalidationBatch.of_json
+                                    invalidationBatch) ())
+           (Some Values.CreateInvalidationForDistributionTenantResult.to_json)
+           (Some
+              Values.CreateInvalidationForDistributionTenantResult.error_to_json)])
 let create_key_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -242,6 +485,32 @@ let create_key_group =
               ~keyGroupConfig:(Values.KeyGroupConfig.of_json keyGroupConfig)
               ()) (Some Values.CreateKeyGroupResult.to_json)
            (Some Values.CreateKeyGroupResult.error_to_json)])
+let create_key_value_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and comment =
+         flag "comment" (optional string) ~doc:"STRING KeyValueStoreComment"
+       and importSource =
+         flag "import-source" (optional json_arg) ~doc:"JSON ImportSource"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name =
+         flag "name" (required string) ~doc:"STRING KeyValueStoreName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_key_value_store
+           (Values.CreateKeyValueStoreRequest.make ?comment
+              ?importSource:(Option.map ~f:Values.ImportSource.of_json
+                               importSource)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ())
+           (Some Values.CreateKeyValueStoreResult.to_json)
+           (Some Values.CreateKeyValueStoreResult.error_to_json)])
 let create_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -265,6 +534,27 @@ let create_monitoring_subscription =
                                          monitoringSubscription) ())
            (Some Values.CreateMonitoringSubscriptionResult.to_json)
            (Some Values.CreateMonitoringSubscriptionResult.error_to_json)])
+let create_origin_access_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and originAccessControlConfig =
+         flag "origin-access-control-config" (required json_arg)
+           ~doc:"JSON OriginAccessControlConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_origin_access_control
+           (Values.CreateOriginAccessControlRequest.make
+              ~originAccessControlConfig:(Values.OriginAccessControlConfig.of_json
+                                            originAccessControlConfig) ())
+           (Some Values.CreateOriginAccessControlResult.to_json)
+           (Some Values.CreateOriginAccessControlResult.error_to_json)])
 let create_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -397,6 +687,73 @@ let create_streaming_distribution_with_tags =
            (Some Values.CreateStreamingDistributionWithTagsResult.to_json)
            (Some
               Values.CreateStreamingDistributionWithTagsResult.error_to_json)])
+let create_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and useClientCertificateOCSPEndpoint =
+         flag "use-client-certificate-o-c-s-p-endpoint" (optional bool)
+           ~doc:"BOOL boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name = flag "name" (required string) ~doc:"STRING string"
+       and caCertificatesBundleSource =
+         flag "ca-certificates-bundle-source" (required json_arg)
+           ~doc:"JSON CaCertificatesBundleSource" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_trust_store
+           (Values.CreateTrustStoreRequest.make
+              ?useClientCertificateOCSPEndpoint
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
+              ~caCertificatesBundleSource:(Values.CaCertificatesBundleSource.of_json
+                                             caCertificatesBundleSource) ())
+           (Some Values.CreateTrustStoreResult.to_json)
+           (Some Values.CreateTrustStoreResult.error_to_json)])
+let create_vpc_origin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and vpcOriginEndpointConfig =
+         flag "vpc-origin-endpoint-config" (required json_arg)
+           ~doc:"JSON VpcOriginEndpointConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_vpc_origin
+           (Values.CreateVpcOriginRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~vpcOriginEndpointConfig:(Values.VpcOriginEndpointConfig.of_json
+                                          vpcOriginEndpointConfig) ())
+           (Some Values.CreateVpcOriginResult.to_json)
+           (Some Values.CreateVpcOriginResult.error_to_json)])
+let delete_anycast_ip_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_anycast_ip_list
+           (Values.DeleteAnycastIpListRequest.make ~id ~ifMatch ()) None None])
 let delete_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -430,6 +787,57 @@ let delete_cloud_front_origin_access_identity =
            Io.delete_cloud_front_origin_access_identity
            (Values.DeleteCloudFrontOriginAccessIdentityRequest.make ?ifMatch
               ~id ()) None None])
+let delete_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connection_function
+           (Values.DeleteConnectionFunctionRequest.make ~id ~ifMatch ()) None
+           None])
+let delete_connection_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connection_group
+           (Values.DeleteConnectionGroupRequest.make ~id ~ifMatch ()) None
+           None])
+let delete_continuous_deployment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_continuous_deployment_policy
+           (Values.DeleteContinuousDeploymentPolicyRequest.make ?ifMatch ~id
+              ()) None None])
 let delete_distribution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -446,6 +854,23 @@ let delete_distribution =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_distribution
            (Values.DeleteDistributionRequest.make ?ifMatch ~id ()) None None])
+let delete_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_distribution_tenant
+           (Values.DeleteDistributionTenantRequest.make ~id ~ifMatch ()) None
+           None])
 let delete_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -490,7 +915,7 @@ let delete_function =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (required string) ~doc:"STRING string"
+       and name = flag "name" (required string) ~doc:"STRING FunctionName"
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -512,6 +937,24 @@ let delete_key_group =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_key_group
            (Values.DeleteKeyGroupRequest.make ?ifMatch ~id ()) None None])
+let delete_key_value_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING KeyValueStoreName"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_key_value_store
+           (Values.DeleteKeyValueStoreRequest.make ~name ~ifMatch ()) None
+           None])
 let delete_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -530,6 +973,23 @@ let delete_monitoring_subscription =
            (Values.DeleteMonitoringSubscriptionRequest.make ~distributionId
               ()) (Some Values.DeleteMonitoringSubscriptionResult.to_json)
            (Some Values.DeleteMonitoringSubscriptionResult.error_to_json)])
+let delete_origin_access_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_origin_access_control
+           (Values.DeleteOriginAccessControlRequest.make ?ifMatch ~id ())
+           None None])
 let delete_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -580,6 +1040,23 @@ let delete_realtime_log_config =
            Io.delete_realtime_log_config
            (Values.DeleteRealtimeLogConfigRequest.make ?name ?aRN ()) None
            None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ~resourceArn ()) None
+           None])
 let delete_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -614,6 +1091,61 @@ let delete_streaming_distribution =
            Io.delete_streaming_distribution
            (Values.DeleteStreamingDistributionRequest.make ?ifMatch ~id ())
            None None])
+let delete_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_trust_store
+           (Values.DeleteTrustStoreRequest.make ~id ~ifMatch ()) None None])
+let delete_vpc_origin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_vpc_origin
+           (Values.DeleteVpcOriginRequest.make ~id ~ifMatch ())
+           (Some Values.DeleteVpcOriginResult.to_json)
+           (Some Values.DeleteVpcOriginResult.error_to_json)])
+let describe_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_connection_function
+           (Values.DescribeConnectionFunctionRequest.make
+              ?stage:(Option.map ~f:Values.FunctionStage.of_json stage)
+              ~identifier ())
+           (Some Values.DescribeConnectionFunctionResult.to_json)
+           (Some Values.DescribeConnectionFunctionResult.error_to_json)])
 let describe_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -625,7 +1157,7 @@ let describe_function =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
-       and name = flag "name" (required string) ~doc:"STRING string" in
+       and name = flag "name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_function
@@ -633,6 +1165,79 @@ let describe_function =
               ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ~name
               ()) (Some Values.DescribeFunctionResult.to_json)
            (Some Values.DescribeFunctionResult.error_to_json)])
+let describe_key_value_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING KeyValueStoreName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_key_value_store
+           (Values.DescribeKeyValueStoreRequest.make ~name ())
+           (Some Values.DescribeKeyValueStoreResult.to_json)
+           (Some Values.DescribeKeyValueStoreResult.error_to_json)])
+let disassociate_distribution_tenant_web_a_c_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_distribution_tenant_web_a_c_l
+           (Values.DisassociateDistributionTenantWebACLRequest.make ?ifMatch
+              ~id ())
+           (Some Values.DisassociateDistributionTenantWebACLResult.to_json)
+           (Some
+              Values.DisassociateDistributionTenantWebACLResult.error_to_json)])
+let disassociate_distribution_web_a_c_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.disassociate_distribution_web_a_c_l
+           (Values.DisassociateDistributionWebACLRequest.make ?ifMatch ~id ())
+           (Some Values.DisassociateDistributionWebACLResult.to_json)
+           (Some Values.DisassociateDistributionWebACLResult.error_to_json)])
+let get_anycast_ip_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_anycast_ip_list
+           (Values.GetAnycastIpListRequest.make ~id ())
+           (Some Values.GetAnycastIpListResult.to_json)
+           (Some Values.GetAnycastIpListResult.error_to_json)])
 let get_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -701,6 +1306,100 @@ let get_cloud_front_origin_access_identity_config =
            (Some Values.GetCloudFrontOriginAccessIdentityConfigResult.to_json)
            (Some
               Values.GetCloudFrontOriginAccessIdentityConfigResult.error_to_json)])
+let get_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_connection_function
+           (Values.GetConnectionFunctionRequest.make
+              ?stage:(Option.map ~f:Values.FunctionStage.of_json stage)
+              ~identifier ())
+           (Some Values.GetConnectionFunctionResult.to_json)
+           (Some Values.GetConnectionFunctionResult.error_to_json)])
+let get_connection_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_connection_group
+           (Values.GetConnectionGroupRequest.make ~identifier ())
+           (Some Values.GetConnectionGroupResult.to_json)
+           (Some Values.GetConnectionGroupResult.error_to_json)])
+let get_connection_group_by_routing_endpoint =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and routingEndpoint =
+         flag "routing-endpoint" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_connection_group_by_routing_endpoint
+           (Values.GetConnectionGroupByRoutingEndpointRequest.make
+              ~routingEndpoint ())
+           (Some Values.GetConnectionGroupByRoutingEndpointResult.to_json)
+           (Some
+              Values.GetConnectionGroupByRoutingEndpointResult.error_to_json)])
+let get_continuous_deployment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_continuous_deployment_policy
+           (Values.GetContinuousDeploymentPolicyRequest.make ~id ())
+           (Some Values.GetContinuousDeploymentPolicyResult.to_json)
+           (Some Values.GetContinuousDeploymentPolicyResult.error_to_json)])
+let get_continuous_deployment_policy_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_continuous_deployment_policy_config
+           (Values.GetContinuousDeploymentPolicyConfigRequest.make ~id ())
+           (Some Values.GetContinuousDeploymentPolicyConfigResult.to_json)
+           (Some
+              Values.GetContinuousDeploymentPolicyConfigResult.error_to_json)])
 let get_distribution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -734,6 +1433,41 @@ let get_distribution_config =
            (Values.GetDistributionConfigRequest.make ~id ())
            (Some Values.GetDistributionConfigResult.to_json)
            (Some Values.GetDistributionConfigResult.error_to_json)])
+let get_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_distribution_tenant
+           (Values.GetDistributionTenantRequest.make ~identifier ())
+           (Some Values.GetDistributionTenantResult.to_json)
+           (Some Values.GetDistributionTenantResult.error_to_json)])
+let get_distribution_tenant_by_domain =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domain = flag "domain" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_distribution_tenant_by_domain
+           (Values.GetDistributionTenantByDomainRequest.make ~domain ())
+           (Some Values.GetDistributionTenantByDomainResult.to_json)
+           (Some Values.GetDistributionTenantByDomainResult.error_to_json)])
 let get_field_level_encryption =
   Command.async ~summary:""
     ([%map_open.Command
@@ -814,7 +1548,7 @@ let get_function =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
-       and name = flag "name" (required string) ~doc:"STRING string" in
+       and name = flag "name" (required string) ~doc:"STRING FunctionName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_function
@@ -841,6 +1575,27 @@ let get_invalidation =
            (Values.GetInvalidationRequest.make ~distributionId ~id ())
            (Some Values.GetInvalidationResult.to_json)
            (Some Values.GetInvalidationResult.error_to_json)])
+let get_invalidation_for_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and distributionTenantId =
+         flag "distribution-tenant-id" (required string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_invalidation_for_distribution_tenant
+           (Values.GetInvalidationForDistributionTenantRequest.make
+              ~distributionTenantId ~id ())
+           (Some Values.GetInvalidationForDistributionTenantResult.to_json)
+           (Some
+              Values.GetInvalidationForDistributionTenantResult.error_to_json)])
 let get_key_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -874,6 +1629,24 @@ let get_key_group_config =
            (Values.GetKeyGroupConfigRequest.make ~id ())
            (Some Values.GetKeyGroupConfigResult.to_json)
            (Some Values.GetKeyGroupConfigResult.error_to_json)])
+let get_managed_certificate_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_managed_certificate_details
+           (Values.GetManagedCertificateDetailsRequest.make ~identifier ())
+           (Some Values.GetManagedCertificateDetailsResult.to_json)
+           (Some Values.GetManagedCertificateDetailsResult.error_to_json)])
 let get_monitoring_subscription =
   Command.async ~summary:""
     ([%map_open.Command
@@ -892,6 +1665,40 @@ let get_monitoring_subscription =
            (Values.GetMonitoringSubscriptionRequest.make ~distributionId ())
            (Some Values.GetMonitoringSubscriptionResult.to_json)
            (Some Values.GetMonitoringSubscriptionResult.error_to_json)])
+let get_origin_access_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_origin_access_control
+           (Values.GetOriginAccessControlRequest.make ~id ())
+           (Some Values.GetOriginAccessControlResult.to_json)
+           (Some Values.GetOriginAccessControlResult.error_to_json)])
+let get_origin_access_control_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_origin_access_control_config
+           (Values.GetOriginAccessControlConfigRequest.make ~id ())
+           (Some Values.GetOriginAccessControlConfigResult.to_json)
+           (Some Values.GetOriginAccessControlConfigResult.error_to_json)])
 let get_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -977,6 +1784,24 @@ let get_realtime_log_config =
            (Values.GetRealtimeLogConfigRequest.make ?name ?aRN ())
            (Some Values.GetRealtimeLogConfigResult.to_json)
            (Some Values.GetRealtimeLogConfigResult.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.GetResourcePolicyResult.to_json)
+           (Some Values.GetResourcePolicyResult.error_to_json)])
 let get_response_headers_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1045,6 +1870,58 @@ let get_streaming_distribution_config =
            (Values.GetStreamingDistributionConfigRequest.make ~id ())
            (Some Values.GetStreamingDistributionConfigResult.to_json)
            (Some Values.GetStreamingDistributionConfigResult.error_to_json)])
+let get_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_trust_store
+           (Values.GetTrustStoreRequest.make ~identifier ())
+           (Some Values.GetTrustStoreResult.to_json)
+           (Some Values.GetTrustStoreResult.error_to_json)])
+let get_vpc_origin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_vpc_origin (Values.GetVpcOriginRequest.make ~id ())
+           (Some Values.GetVpcOriginResult.to_json)
+           (Some Values.GetVpcOriginResult.error_to_json)])
+let list_anycast_ip_lists =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_anycast_ip_lists
+           (Values.ListAnycastIpListsRequest.make ?marker ?maxItems ())
+           (Some Values.ListAnycastIpListsResult.to_json)
+           (Some Values.ListAnycastIpListsResult.error_to_json)])
 let list_cache_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1112,6 +1989,117 @@ let list_conflicting_aliases =
               ~distributionId ~alias ())
            (Some Values.ListConflictingAliasesResult.to_json)
            (Some Values.ListConflictingAliasesResult.error_to_json)])
+let list_connection_functions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer"
+       and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connection_functions
+           (Values.ListConnectionFunctionsRequest.make ?marker ?maxItems
+              ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ())
+           (Some Values.ListConnectionFunctionsResult.to_json)
+           (Some Values.ListConnectionFunctionsResult.error_to_json)])
+let list_connection_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and associationFilter =
+         flag "association-filter" (optional json_arg)
+           ~doc:"JSON ConnectionGroupAssociationFilter"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connection_groups
+           (Values.ListConnectionGroupsRequest.make
+              ?associationFilter:(Option.map
+                                    ~f:Values.ConnectionGroupAssociationFilter.of_json
+                                    associationFilter) ?marker ?maxItems ())
+           (Some Values.ListConnectionGroupsResult.to_json)
+           (Some Values.ListConnectionGroupsResult.error_to_json)])
+let list_continuous_deployment_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_continuous_deployment_policies
+           (Values.ListContinuousDeploymentPoliciesRequest.make ?marker
+              ?maxItems ())
+           (Some Values.ListContinuousDeploymentPoliciesResult.to_json)
+           (Some Values.ListContinuousDeploymentPoliciesResult.error_to_json)])
+let list_distribution_tenants =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and associationFilter =
+         flag "association-filter" (optional json_arg)
+           ~doc:"JSON DistributionTenantAssociationFilter"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distribution_tenants
+           (Values.ListDistributionTenantsRequest.make
+              ?associationFilter:(Option.map
+                                    ~f:Values.DistributionTenantAssociationFilter.of_json
+                                    associationFilter) ?marker ?maxItems ())
+           (Some Values.ListDistributionTenantsResult.to_json)
+           (Some Values.ListDistributionTenantsResult.error_to_json)])
+let list_distribution_tenants_by_customization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and webACLArn =
+         flag "web-a-c-l-arn" (optional string) ~doc:"STRING string"
+       and certificateArn =
+         flag "certificate-arn" (optional string) ~doc:"STRING string"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distribution_tenants_by_customization
+           (Values.ListDistributionTenantsByCustomizationRequest.make
+              ?webACLArn ?certificateArn ?marker ?maxItems ())
+           (Some Values.ListDistributionTenantsByCustomizationResult.to_json)
+           (Some
+              Values.ListDistributionTenantsByCustomizationResult.error_to_json)])
 let list_distributions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1130,6 +2118,28 @@ let list_distributions =
            (Values.ListDistributionsRequest.make ?marker ?maxItems ())
            (Some Values.ListDistributionsResult.to_json)
            (Some Values.ListDistributionsResult.error_to_json)])
+let list_distributions_by_anycast_ip_list_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string"
+       and anycastIpListId =
+         flag "anycast-ip-list-id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_anycast_ip_list_id
+           (Values.ListDistributionsByAnycastIpListIdRequest.make ?marker
+              ?maxItems ~anycastIpListId ())
+           (Some Values.ListDistributionsByAnycastIpListIdResult.to_json)
+           (Some
+              Values.ListDistributionsByAnycastIpListIdResult.error_to_json)])
 let list_distributions_by_cache_policy_id =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1151,6 +2161,53 @@ let list_distributions_by_cache_policy_id =
               ?maxItems ~cachePolicyId ())
            (Some Values.ListDistributionsByCachePolicyIdResult.to_json)
            (Some Values.ListDistributionsByCachePolicyIdResult.error_to_json)])
+let list_distributions_by_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer"
+       and connectionFunctionIdentifier =
+         flag "connection-function-identifier" (required string)
+           ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_connection_function
+           (Values.ListDistributionsByConnectionFunctionRequest.make ?marker
+              ?maxItems ~connectionFunctionIdentifier ())
+           (Some Values.ListDistributionsByConnectionFunctionResult.to_json)
+           (Some
+              Values.ListDistributionsByConnectionFunctionResult.error_to_json)])
+let list_distributions_by_connection_mode =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer"
+       and connectionMode =
+         flag "connection-mode" (required json_arg)
+           ~doc:"JSON ConnectionMode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_connection_mode
+           (Values.ListDistributionsByConnectionModeRequest.make ?marker
+              ?maxItems
+              ~connectionMode:(Values.ConnectionMode.of_json connectionMode)
+              ())
+           (Some Values.ListDistributionsByConnectionModeResult.to_json)
+           (Some Values.ListDistributionsByConnectionModeResult.error_to_json)])
 let list_distributions_by_key_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1196,6 +2253,27 @@ let list_distributions_by_origin_request_policy_id =
               Values.ListDistributionsByOriginRequestPolicyIdResult.to_json)
            (Some
               Values.ListDistributionsByOriginRequestPolicyIdResult.error_to_json)])
+let list_distributions_by_owned_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_owned_resource
+           (Values.ListDistributionsByOwnedResourceRequest.make ?marker
+              ?maxItems ~resourceArn ())
+           (Some Values.ListDistributionsByOwnedResourceResult.to_json)
+           (Some Values.ListDistributionsByOwnedResourceResult.error_to_json)])
 let list_distributions_by_realtime_log_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1246,6 +2324,48 @@ let list_distributions_by_response_headers_policy_id =
               Values.ListDistributionsByResponseHeadersPolicyIdResult.to_json)
            (Some
               Values.ListDistributionsByResponseHeadersPolicyIdResult.error_to_json)])
+let list_distributions_by_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string"
+       and trustStoreIdentifier =
+         flag "trust-store-identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_trust_store
+           (Values.ListDistributionsByTrustStoreRequest.make ?marker
+              ?maxItems ~trustStoreIdentifier ())
+           (Some Values.ListDistributionsByTrustStoreResult.to_json)
+           (Some Values.ListDistributionsByTrustStoreResult.error_to_json)])
+let list_distributions_by_vpc_origin_id =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string"
+       and vpcOriginId =
+         flag "vpc-origin-id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_distributions_by_vpc_origin_id
+           (Values.ListDistributionsByVpcOriginIdRequest.make ?marker
+              ?maxItems ~vpcOriginId ())
+           (Some Values.ListDistributionsByVpcOriginIdResult.to_json)
+           (Some Values.ListDistributionsByVpcOriginIdResult.error_to_json)])
 let list_distributions_by_web_a_c_l_id =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1267,6 +2387,30 @@ let list_distributions_by_web_a_c_l_id =
               ~webACLId ())
            (Some Values.ListDistributionsByWebACLIdResult.to_json)
            (Some Values.ListDistributionsByWebACLIdResult.error_to_json)])
+let list_domain_conflicts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and domain = flag "domain" (required string) ~doc:"STRING string"
+       and domainControlValidationResource =
+         flag "domain-control-validation-resource" (required json_arg)
+           ~doc:"JSON DistributionResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_domain_conflicts
+           (Values.ListDomainConflictsRequest.make ?maxItems ?marker ~domain
+              ~domainControlValidationResource:(Values.DistributionResourceId.of_json
+                                                  domainControlValidationResource)
+              ()) (Some Values.ListDomainConflictsResult.to_json)
+           (Some Values.ListDomainConflictsResult.error_to_json)])
 let list_field_level_encryption_configs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1346,6 +2490,27 @@ let list_invalidations =
               ~distributionId ())
            (Some Values.ListInvalidationsResult.to_json)
            (Some Values.ListInvalidationsResult.error_to_json)])
+let list_invalidations_for_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_invalidations_for_distribution_tenant
+           (Values.ListInvalidationsForDistributionTenantRequest.make ?marker
+              ?maxItems ~id ())
+           (Some Values.ListInvalidationsForDistributionTenantResult.to_json)
+           (Some
+              Values.ListInvalidationsForDistributionTenantResult.error_to_json)])
 let list_key_groups =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1364,6 +2529,43 @@ let list_key_groups =
            (Values.ListKeyGroupsRequest.make ?marker ?maxItems ())
            (Some Values.ListKeyGroupsResult.to_json)
            (Some Values.ListKeyGroupsResult.error_to_json)])
+let list_key_value_stores =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string"
+       and status = flag "status" (optional string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_key_value_stores
+           (Values.ListKeyValueStoresRequest.make ?marker ?maxItems ?status
+              ()) (Some Values.ListKeyValueStoresResult.to_json)
+           (Some Values.ListKeyValueStoresResult.error_to_json)])
+let list_origin_access_controls =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_origin_access_controls
+           (Values.ListOriginAccessControlsRequest.make ?marker ?maxItems ())
+           (Some Values.ListOriginAccessControlsResult.to_json)
+           (Some Values.ListOriginAccessControlsResult.error_to_json)])
 let list_origin_request_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1481,6 +2683,60 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resource ())
            (Some Values.ListTagsForResourceResult.to_json)
            (Some Values.ListTagsForResourceResult.error_to_json)])
+let list_trust_stores =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_trust_stores
+           (Values.ListTrustStoresRequest.make ?marker ?maxItems ())
+           (Some Values.ListTrustStoresResult.to_json)
+           (Some Values.ListTrustStoresResult.error_to_json)])
+let list_vpc_origins =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING string"
+       and maxItems = flag "max-items" (optional string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_vpc_origins
+           (Values.ListVpcOriginsRequest.make ?marker ?maxItems ())
+           (Some Values.ListVpcOriginsResult.to_json)
+           (Some Values.ListVpcOriginsResult.error_to_json)])
+let publish_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.publish_connection_function
+           (Values.PublishConnectionFunctionRequest.make ~id ~ifMatch ())
+           (Some Values.PublishConnectionFunctionResult.to_json)
+           (Some Values.PublishConnectionFunctionResult.error_to_json)])
 let publish_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1491,7 +2747,7 @@ let publish_function =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (required string) ~doc:"STRING string"
+       and name = flag "name" (required string) ~doc:"STRING FunctionName"
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1499,6 +2755,26 @@ let publish_function =
            (Values.PublishFunctionRequest.make ~name ~ifMatch ())
            (Some Values.PublishFunctionResult.to_json)
            (Some Values.PublishFunctionResult.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING string"
+       and policyDocument =
+         flag "policy-document" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ~resourceArn ~policyDocument
+              ()) (Some Values.PutResourcePolicyResult.to_json)
+           (Some Values.PutResourcePolicyResult.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1517,6 +2793,32 @@ let tag_resource =
            Io.tag_resource
            (Values.TagResourceRequest.make ~resource
               ~tags:(Values.Tags.of_json tags) ()) None None])
+let test_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string"
+       and connectionObject =
+         flag "connection-object" (required json_arg)
+           ~doc:"JSON FunctionEventObject" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_connection_function
+           (Values.TestConnectionFunctionRequest.make
+              ?stage:(Option.map ~f:Values.FunctionStage.of_json stage) ~id
+              ~ifMatch
+              ~connectionObject:(Values.FunctionEventObject.of_json
+                                   connectionObject) ())
+           (Some Values.TestConnectionFunctionResult.to_json)
+           (Some Values.TestConnectionFunctionResult.error_to_json)])
 let test_function =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1528,7 +2830,7 @@ let test_function =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and stage = flag "stage" (optional json_arg) ~doc:"JSON FunctionStage"
-       and name = flag "name" (required string) ~doc:"STRING string"
+       and name = flag "name" (required string) ~doc:"STRING FunctionName"
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string"
        and eventObject =
          flag "event-object" (required json_arg)
@@ -1560,6 +2862,34 @@ let untag_resource =
            Io.untag_resource
            (Values.UntagResourceRequest.make ~resource
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ()) None None])
+let update_anycast_ip_list =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and ipamCidrConfigs =
+         flag "ipam-cidr-configs" (optional json_arg)
+           ~doc:"JSON IpamCidrConfigList"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_anycast_ip_list
+           (Values.UpdateAnycastIpListRequest.make
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
+              ?ipamCidrConfigs:(Option.map
+                                  ~f:Values.IpamCidrConfigList.of_json
+                                  ipamCidrConfigs) ~id ~ifMatch ())
+           (Some Values.UpdateAnycastIpListResult.to_json)
+           (Some Values.UpdateAnycastIpListResult.error_to_json)])
 let update_cache_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1608,6 +2938,82 @@ let update_cloud_front_origin_access_identity =
            (Some Values.UpdateCloudFrontOriginAccessIdentityResult.to_json)
            (Some
               Values.UpdateCloudFrontOriginAccessIdentityResult.error_to_json)])
+let update_connection_function =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string"
+       and connectionFunctionConfig =
+         flag "connection-function-config" (required json_arg)
+           ~doc:"JSON FunctionConfig"
+       and connectionFunctionCode =
+         flag "connection-function-code" (required json_arg)
+           ~doc:"JSON FunctionBlob" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_connection_function
+           (Values.UpdateConnectionFunctionRequest.make ~id ~ifMatch
+              ~connectionFunctionConfig:(Values.FunctionConfig.of_json
+                                           connectionFunctionConfig)
+              ~connectionFunctionCode:(Values.FunctionBlob.of_json
+                                         connectionFunctionCode) ())
+           (Some Values.UpdateConnectionFunctionResult.to_json)
+           (Some Values.UpdateConnectionFunctionResult.error_to_json)])
+let update_connection_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipv6Enabled =
+         flag "ipv6-enabled" (optional bool) ~doc:"BOOL boolean"
+       and anycastIpListId =
+         flag "anycast-ip-list-id" (optional string) ~doc:"STRING string"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL boolean"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_connection_group
+           (Values.UpdateConnectionGroupRequest.make ?ipv6Enabled
+              ?anycastIpListId ?enabled ~id ~ifMatch ())
+           (Some Values.UpdateConnectionGroupResult.to_json)
+           (Some Values.UpdateConnectionGroupResult.error_to_json)])
+let update_continuous_deployment_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and continuousDeploymentPolicyConfig =
+         flag "continuous-deployment-policy-config" (required json_arg)
+           ~doc:"JSON ContinuousDeploymentPolicyConfig"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_continuous_deployment_policy
+           (Values.UpdateContinuousDeploymentPolicyRequest.make ?ifMatch
+              ~continuousDeploymentPolicyConfig:(Values.ContinuousDeploymentPolicyConfig.of_json
+                                                   continuousDeploymentPolicyConfig)
+              ~id ())
+           (Some Values.UpdateContinuousDeploymentPolicyResult.to_json)
+           (Some Values.UpdateContinuousDeploymentPolicyResult.error_to_json)])
 let update_distribution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1631,6 +3037,93 @@ let update_distribution =
                                      distributionConfig) ~id ())
            (Some Values.UpdateDistributionResult.to_json)
            (Some Values.UpdateDistributionResult.error_to_json)])
+let update_distribution_tenant =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and distributionId =
+         flag "distribution-id" (optional string) ~doc:"STRING string"
+       and domains =
+         flag "domains" (optional json_arg) ~doc:"JSON DomainList"
+       and customizations =
+         flag "customizations" (optional json_arg) ~doc:"JSON Customizations"
+       and parameters =
+         flag "parameters" (optional json_arg) ~doc:"JSON Parameters"
+       and connectionGroupId =
+         flag "connection-group-id" (optional string) ~doc:"STRING string"
+       and managedCertificateRequest =
+         flag "managed-certificate-request" (optional json_arg)
+           ~doc:"JSON ManagedCertificateRequest"
+       and enabled = flag "enabled" (optional bool) ~doc:"BOOL boolean"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_distribution_tenant
+           (Values.UpdateDistributionTenantRequest.make ?distributionId
+              ?domains:(Option.map ~f:Values.DomainList.of_json domains)
+              ?customizations:(Option.map ~f:Values.Customizations.of_json
+                                 customizations)
+              ?parameters:(Option.map ~f:Values.Parameters.of_json parameters)
+              ?connectionGroupId
+              ?managedCertificateRequest:(Option.map
+                                            ~f:Values.ManagedCertificateRequest.of_json
+                                            managedCertificateRequest)
+              ?enabled ~id ~ifMatch ())
+           (Some Values.UpdateDistributionTenantResult.to_json)
+           (Some Values.UpdateDistributionTenantResult.error_to_json)])
+let update_distribution_with_staging_config =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stagingDistributionId =
+         flag "staging-distribution-id" (optional string)
+           ~doc:"STRING string"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_distribution_with_staging_config
+           (Values.UpdateDistributionWithStagingConfigRequest.make
+              ?stagingDistributionId ?ifMatch ~id ())
+           (Some Values.UpdateDistributionWithStagingConfigResult.to_json)
+           (Some
+              Values.UpdateDistributionWithStagingConfigResult.error_to_json)])
+let update_domain_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and domain = flag "domain" (required string) ~doc:"STRING string"
+       and targetResource =
+         flag "target-resource" (required json_arg)
+           ~doc:"JSON DistributionResourceId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_domain_association
+           (Values.UpdateDomainAssociationRequest.make ?ifMatch ~domain
+              ~targetResource:(Values.DistributionResourceId.of_json
+                                 targetResource) ())
+           (Some Values.UpdateDomainAssociationResult.to_json)
+           (Some Values.UpdateDomainAssociationResult.error_to_json)])
 let update_field_level_encryption_config =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1689,7 +3182,7 @@ let update_function =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (required string) ~doc:"STRING string"
+       and name = flag "name" (required string) ~doc:"STRING FunctionName"
        and ifMatch = flag "if-match" (required string) ~doc:"STRING string"
        and functionConfig =
          flag "function-config" (required json_arg)
@@ -1726,6 +3219,50 @@ let update_key_group =
               ~keyGroupConfig:(Values.KeyGroupConfig.of_json keyGroupConfig)
               ~id ()) (Some Values.UpdateKeyGroupResult.to_json)
            (Some Values.UpdateKeyGroupResult.error_to_json)])
+let update_key_value_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name =
+         flag "name" (required string) ~doc:"STRING KeyValueStoreName"
+       and comment =
+         flag "comment" (required string) ~doc:"STRING KeyValueStoreComment"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_key_value_store
+           (Values.UpdateKeyValueStoreRequest.make ~name ~comment ~ifMatch ())
+           (Some Values.UpdateKeyValueStoreResult.to_json)
+           (Some Values.UpdateKeyValueStoreResult.error_to_json)])
+let update_origin_access_control =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ifMatch = flag "if-match" (optional string) ~doc:"STRING string"
+       and originAccessControlConfig =
+         flag "origin-access-control-config" (required json_arg)
+           ~doc:"JSON OriginAccessControlConfig"
+       and id = flag "id" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_origin_access_control
+           (Values.UpdateOriginAccessControlRequest.make ?ifMatch
+              ~originAccessControlConfig:(Values.OriginAccessControlConfig.of_json
+                                            originAccessControlConfig) ~id ())
+           (Some Values.UpdateOriginAccessControlResult.to_json)
+           (Some Values.UpdateOriginAccessControlResult.error_to_json)])
 let update_origin_request_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1845,14 +3382,94 @@ let update_streaming_distribution =
                                               streamingDistributionConfig)
               ~id ()) (Some Values.UpdateStreamingDistributionResult.to_json)
            (Some Values.UpdateStreamingDistributionResult.error_to_json)])
+let update_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and caCertificatesBundleSource =
+         flag "ca-certificates-bundle-source" (optional json_arg)
+           ~doc:"JSON CaCertificatesBundleSource"
+       and useClientCertificateOCSPEndpoint =
+         flag "use-client-certificate-o-c-s-p-endpoint" (optional bool)
+           ~doc:"BOOL boolean"
+       and id = flag "id" (required string) ~doc:"STRING ResourceId"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_trust_store
+           (Values.UpdateTrustStoreRequest.make
+              ?caCertificatesBundleSource:(Option.map
+                                             ~f:Values.CaCertificatesBundleSource.of_json
+                                             caCertificatesBundleSource)
+              ?useClientCertificateOCSPEndpoint ~id ~ifMatch ())
+           (Some Values.UpdateTrustStoreResult.to_json)
+           (Some Values.UpdateTrustStoreResult.error_to_json)])
+let update_vpc_origin =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and vpcOriginEndpointConfig =
+         flag "vpc-origin-endpoint-config" (required json_arg)
+           ~doc:"JSON VpcOriginEndpointConfig"
+       and id = flag "id" (required string) ~doc:"STRING string"
+       and ifMatch = flag "if-match" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_vpc_origin
+           (Values.UpdateVpcOriginRequest.make
+              ~vpcOriginEndpointConfig:(Values.VpcOriginEndpointConfig.of_json
+                                          vpcOriginEndpointConfig) ~id
+              ~ifMatch ()) (Some Values.UpdateVpcOriginResult.to_json)
+           (Some Values.UpdateVpcOriginResult.error_to_json)])
+let verify_dns_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domain = flag "domain" (optional string) ~doc:"STRING string"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING string" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.verify_dns_configuration
+           (Values.VerifyDnsConfigurationRequest.make ?domain ~identifier ())
+           (Some Values.VerifyDnsConfigurationResult.to_json)
+           (Some Values.VerifyDnsConfigurationResult.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("associate-alias", associate_alias);
+    ("associate-distribution-tenant-web-a-c-l",
+      associate_distribution_tenant_web_a_c_l);
+    ("associate-distribution-web-a-c-l", associate_distribution_web_a_c_l);
+    ("copy-distribution", copy_distribution);
+    ("create-anycast-ip-list", create_anycast_ip_list);
     ("create-cache-policy", create_cache_policy);
     ("create-cloud-front-origin-access-identity",
       create_cloud_front_origin_access_identity);
+    ("create-connection-function", create_connection_function);
+    ("create-connection-group", create_connection_group);
+    ("create-continuous-deployment-policy",
+      create_continuous_deployment_policy);
     ("create-distribution", create_distribution);
+    ("create-distribution-tenant", create_distribution_tenant);
     ("create-distribution-with-tags", create_distribution_with_tags);
     ("create-field-level-encryption-config",
       create_field_level_encryption_config);
@@ -1860,8 +3477,12 @@ let main =
       create_field_level_encryption_profile);
     ("create-function", create_function);
     ("create-invalidation", create_invalidation);
+    ("create-invalidation-for-distribution-tenant",
+      create_invalidation_for_distribution_tenant);
     ("create-key-group", create_key_group);
+    ("create-key-value-store", create_key_value_store);
     ("create-monitoring-subscription", create_monitoring_subscription);
+    ("create-origin-access-control", create_origin_access_control);
     ("create-origin-request-policy", create_origin_request_policy);
     ("create-public-key", create_public_key);
     ("create-realtime-log-config", create_realtime_log_config);
@@ -1869,31 +3490,60 @@ let main =
     ("create-streaming-distribution", create_streaming_distribution);
     ("create-streaming-distribution-with-tags",
       create_streaming_distribution_with_tags);
+    ("create-trust-store", create_trust_store);
+    ("create-vpc-origin", create_vpc_origin);
+    ("delete-anycast-ip-list", delete_anycast_ip_list);
     ("delete-cache-policy", delete_cache_policy);
     ("delete-cloud-front-origin-access-identity",
       delete_cloud_front_origin_access_identity);
+    ("delete-connection-function", delete_connection_function);
+    ("delete-connection-group", delete_connection_group);
+    ("delete-continuous-deployment-policy",
+      delete_continuous_deployment_policy);
     ("delete-distribution", delete_distribution);
+    ("delete-distribution-tenant", delete_distribution_tenant);
     ("delete-field-level-encryption-config",
       delete_field_level_encryption_config);
     ("delete-field-level-encryption-profile",
       delete_field_level_encryption_profile);
     ("delete-function", delete_function);
     ("delete-key-group", delete_key_group);
+    ("delete-key-value-store", delete_key_value_store);
     ("delete-monitoring-subscription", delete_monitoring_subscription);
+    ("delete-origin-access-control", delete_origin_access_control);
     ("delete-origin-request-policy", delete_origin_request_policy);
     ("delete-public-key", delete_public_key);
     ("delete-realtime-log-config", delete_realtime_log_config);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-response-headers-policy", delete_response_headers_policy);
     ("delete-streaming-distribution", delete_streaming_distribution);
+    ("delete-trust-store", delete_trust_store);
+    ("delete-vpc-origin", delete_vpc_origin);
+    ("describe-connection-function", describe_connection_function);
     ("describe-function", describe_function);
+    ("describe-key-value-store", describe_key_value_store);
+    ("disassociate-distribution-tenant-web-a-c-l",
+      disassociate_distribution_tenant_web_a_c_l);
+    ("disassociate-distribution-web-a-c-l",
+      disassociate_distribution_web_a_c_l);
+    ("get-anycast-ip-list", get_anycast_ip_list);
     ("get-cache-policy", get_cache_policy);
     ("get-cache-policy-config", get_cache_policy_config);
     ("get-cloud-front-origin-access-identity",
       get_cloud_front_origin_access_identity);
     ("get-cloud-front-origin-access-identity-config",
       get_cloud_front_origin_access_identity_config);
+    ("get-connection-function", get_connection_function);
+    ("get-connection-group", get_connection_group);
+    ("get-connection-group-by-routing-endpoint",
+      get_connection_group_by_routing_endpoint);
+    ("get-continuous-deployment-policy", get_continuous_deployment_policy);
+    ("get-continuous-deployment-policy-config",
+      get_continuous_deployment_policy_config);
     ("get-distribution", get_distribution);
     ("get-distribution-config", get_distribution_config);
+    ("get-distribution-tenant", get_distribution_tenant);
+    ("get-distribution-tenant-by-domain", get_distribution_tenant_by_domain);
     ("get-field-level-encryption", get_field_level_encryption);
     ("get-field-level-encryption-config", get_field_level_encryption_config);
     ("get-field-level-encryption-profile",
@@ -1902,64 +3552,115 @@ let main =
       get_field_level_encryption_profile_config);
     ("get-function", get_function);
     ("get-invalidation", get_invalidation);
+    ("get-invalidation-for-distribution-tenant",
+      get_invalidation_for_distribution_tenant);
     ("get-key-group", get_key_group);
     ("get-key-group-config", get_key_group_config);
+    ("get-managed-certificate-details", get_managed_certificate_details);
     ("get-monitoring-subscription", get_monitoring_subscription);
+    ("get-origin-access-control", get_origin_access_control);
+    ("get-origin-access-control-config", get_origin_access_control_config);
     ("get-origin-request-policy", get_origin_request_policy);
     ("get-origin-request-policy-config", get_origin_request_policy_config);
     ("get-public-key", get_public_key);
     ("get-public-key-config", get_public_key_config);
     ("get-realtime-log-config", get_realtime_log_config);
+    ("get-resource-policy", get_resource_policy);
     ("get-response-headers-policy", get_response_headers_policy);
     ("get-response-headers-policy-config",
       get_response_headers_policy_config);
     ("get-streaming-distribution", get_streaming_distribution);
     ("get-streaming-distribution-config", get_streaming_distribution_config);
+    ("get-trust-store", get_trust_store);
+    ("get-vpc-origin", get_vpc_origin);
+    ("list-anycast-ip-lists", list_anycast_ip_lists);
     ("list-cache-policies", list_cache_policies);
     ("list-cloud-front-origin-access-identities",
       list_cloud_front_origin_access_identities);
     ("list-conflicting-aliases", list_conflicting_aliases);
+    ("list-connection-functions", list_connection_functions);
+    ("list-connection-groups", list_connection_groups);
+    ("list-continuous-deployment-policies",
+      list_continuous_deployment_policies);
+    ("list-distribution-tenants", list_distribution_tenants);
+    ("list-distribution-tenants-by-customization",
+      list_distribution_tenants_by_customization);
     ("list-distributions", list_distributions);
+    ("list-distributions-by-anycast-ip-list-id",
+      list_distributions_by_anycast_ip_list_id);
     ("list-distributions-by-cache-policy-id",
       list_distributions_by_cache_policy_id);
+    ("list-distributions-by-connection-function",
+      list_distributions_by_connection_function);
+    ("list-distributions-by-connection-mode",
+      list_distributions_by_connection_mode);
     ("list-distributions-by-key-group", list_distributions_by_key_group);
     ("list-distributions-by-origin-request-policy-id",
       list_distributions_by_origin_request_policy_id);
+    ("list-distributions-by-owned-resource",
+      list_distributions_by_owned_resource);
     ("list-distributions-by-realtime-log-config",
       list_distributions_by_realtime_log_config);
     ("list-distributions-by-response-headers-policy-id",
       list_distributions_by_response_headers_policy_id);
+    ("list-distributions-by-trust-store", list_distributions_by_trust_store);
+    ("list-distributions-by-vpc-origin-id",
+      list_distributions_by_vpc_origin_id);
     ("list-distributions-by-web-a-c-l-id",
       list_distributions_by_web_a_c_l_id);
+    ("list-domain-conflicts", list_domain_conflicts);
     ("list-field-level-encryption-configs",
       list_field_level_encryption_configs);
     ("list-field-level-encryption-profiles",
       list_field_level_encryption_profiles);
     ("list-functions", list_functions);
     ("list-invalidations", list_invalidations);
+    ("list-invalidations-for-distribution-tenant",
+      list_invalidations_for_distribution_tenant);
     ("list-key-groups", list_key_groups);
+    ("list-key-value-stores", list_key_value_stores);
+    ("list-origin-access-controls", list_origin_access_controls);
     ("list-origin-request-policies", list_origin_request_policies);
     ("list-public-keys", list_public_keys);
     ("list-realtime-log-configs", list_realtime_log_configs);
     ("list-response-headers-policies", list_response_headers_policies);
     ("list-streaming-distributions", list_streaming_distributions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-trust-stores", list_trust_stores);
+    ("list-vpc-origins", list_vpc_origins);
+    ("publish-connection-function", publish_connection_function);
     ("publish-function", publish_function);
+    ("put-resource-policy", put_resource_policy);
     ("tag-resource", tag_resource);
+    ("test-connection-function", test_connection_function);
     ("test-function", test_function);
     ("untag-resource", untag_resource);
+    ("update-anycast-ip-list", update_anycast_ip_list);
     ("update-cache-policy", update_cache_policy);
     ("update-cloud-front-origin-access-identity",
       update_cloud_front_origin_access_identity);
+    ("update-connection-function", update_connection_function);
+    ("update-connection-group", update_connection_group);
+    ("update-continuous-deployment-policy",
+      update_continuous_deployment_policy);
     ("update-distribution", update_distribution);
+    ("update-distribution-tenant", update_distribution_tenant);
+    ("update-distribution-with-staging-config",
+      update_distribution_with_staging_config);
+    ("update-domain-association", update_domain_association);
     ("update-field-level-encryption-config",
       update_field_level_encryption_config);
     ("update-field-level-encryption-profile",
       update_field_level_encryption_profile);
     ("update-function", update_function);
     ("update-key-group", update_key_group);
+    ("update-key-value-store", update_key_value_store);
+    ("update-origin-access-control", update_origin_access_control);
     ("update-origin-request-policy", update_origin_request_policy);
     ("update-public-key", update_public_key);
     ("update-realtime-log-config", update_realtime_log_config);
     ("update-response-headers-policy", update_response_headers_policy);
-    ("update-streaming-distribution", update_streaming_distribution)]
+    ("update-streaming-distribution", update_streaming_distribution);
+    ("update-trust-store", update_trust_store);
+    ("update-vpc-origin", update_vpc_origin);
+    ("verify-dns-configuration", verify_dns_configuration)]

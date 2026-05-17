@@ -13,6 +13,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let add_custom_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AddCustomAttributes input
+let add_user_pool_client_secret ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AddUserPoolClientSecret input
 let admin_add_user_to_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AdminAddUserToGroup input
 let admin_confirm_sign_up ?endpoint_url ?cfg input =
@@ -69,6 +71,8 @@ let associate_software_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateSoftwareToken input
 let change_password ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ChangePassword input
+let complete_web_authn_registration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CompleteWebAuthnRegistration input
 let confirm_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ConfirmDevice input
 let confirm_forgot_password ?endpoint_url ?cfg input =
@@ -79,8 +83,12 @@ let create_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateGroup input
 let create_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIdentityProvider input
+let create_managed_login_branding ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateManagedLoginBranding input
 let create_resource_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateResourceServer input
+let create_terms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateTerms input
 let create_user_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateUserImportJob input
 let create_user_pool ?endpoint_url ?cfg input =
@@ -93,8 +101,12 @@ let delete_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteGroup input
 let delete_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteIdentityProvider input
+let delete_managed_login_branding ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteManagedLoginBranding input
 let delete_resource_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourceServer input
+let delete_terms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteTerms input
 let delete_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUser input
 let delete_user_attributes ?endpoint_url ?cfg input =
@@ -103,14 +115,25 @@ let delete_user_pool ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUserPool input
 let delete_user_pool_client ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUserPoolClient input
+let delete_user_pool_client_secret ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteUserPoolClientSecret input
 let delete_user_pool_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUserPoolDomain input
+let delete_web_authn_credential ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWebAuthnCredential input
 let describe_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIdentityProvider input
+let describe_managed_login_branding ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeManagedLoginBranding input
+let describe_managed_login_branding_by_client ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeManagedLoginBrandingByClient
+    input
 let describe_resource_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeResourceServer input
 let describe_risk_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRiskConfiguration input
+let describe_terms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeTerms input
 let describe_user_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeUserImportJob input
 let describe_user_pool ?endpoint_url ?cfg input =
@@ -131,14 +154,20 @@ let get_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetGroup input
 let get_identity_provider_by_identifier ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetIdentityProviderByIdentifier input
+let get_log_delivery_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetLogDeliveryConfiguration input
 let get_signing_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSigningCertificate input
+let get_tokens_from_refresh_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetTokensFromRefreshToken input
 let get_u_i_customization ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUICustomization input
 let get_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUser input
 let get_user_attribute_verification_code ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUserAttributeVerificationCode input
+let get_user_auth_factors ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetUserAuthFactors input
 let get_user_pool_mfa_config ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetUserPoolMfaConfig input
 let global_sign_out ?endpoint_url ?cfg input =
@@ -155,8 +184,12 @@ let list_resource_servers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResourceServers input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_terms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTerms input
 let list_user_import_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUserImportJobs input
+let list_user_pool_client_secrets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUserPoolClientSecrets input
 let list_user_pool_clients ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUserPoolClients input
 let list_user_pools ?endpoint_url ?cfg input =
@@ -165,12 +198,16 @@ let list_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsers input
 let list_users_in_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsersInGroup input
+let list_web_authn_credentials ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWebAuthnCredentials input
 let resend_confirmation_code ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResendConfirmationCode input
 let respond_to_auth_challenge ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RespondToAuthChallenge input
 let revoke_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RevokeToken input
+let set_log_delivery_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SetLogDeliveryConfiguration input
 let set_risk_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SetRiskConfiguration input
 let set_u_i_customization ?endpoint_url ?cfg input =
@@ -185,6 +222,8 @@ let sign_up ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.SignUp input
 let start_user_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartUserImportJob input
+let start_web_authn_registration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartWebAuthnRegistration input
 let stop_user_import_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopUserImportJob input
 let tag_resource ?endpoint_url ?cfg input =
@@ -199,8 +238,12 @@ let update_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateGroup input
 let update_identity_provider ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateIdentityProvider input
+let update_managed_login_branding ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateManagedLoginBranding input
 let update_resource_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResourceServer input
+let update_terms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateTerms input
 let update_user_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateUserAttributes input
 let update_user_pool ?endpoint_url ?cfg input =

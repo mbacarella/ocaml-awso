@@ -41,6 +41,9 @@ module StringSetAttributeValue =
   struct
     type nonrec t = StringAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -80,6 +83,9 @@ module NumberSetAttributeValue =
   struct
     type nonrec t = NumberAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NumberAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -158,6 +164,9 @@ module BinarySetAttributeValue =
   struct
     type nonrec t = BinaryAttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BinaryAttributeValue.to_value)) |>
         (fun x -> `List x)
@@ -207,7 +216,7 @@ module rec
                          "An attribute of type Map. For example: \"M\": \\{\"Name\": \\{\"S\": \"Joe\"\\}, \"Age\": \\{\"N\": \"35\"\\}\\}"];
                      l: ListAttributeValue.t option
                        [@ocaml.doc
-                         "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\", \"3.14159\"\\}\\]"];
+                         "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\": \"3.14159\"\\}\\]"];
                      nULL: NullAttributeValue.t option
                        [@ocaml.doc
                          "An attribute of type Null. For example: \"NULL\": true"];
@@ -258,7 +267,7 @@ module rec
           "An attribute of type Map. For example: \"M\": \\{\"Name\": \\{\"S\": \"Joe\"\\}, \"Age\": \\{\"N\": \"35\"\\}\\}"];
       l: ListAttributeValue.t option
         [@ocaml.doc
-          "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\", \"3.14159\"\\}\\]"];
+          "An attribute of type List. For example: \"L\": \\[ \\{\"S\": \"Cookies\"\\} , \\{\"S\": \"Coffee\"\\}, \\{\"N\": \"3.14159\"\\}\\]"];
       nULL: NullAttributeValue.t option
         [@ocaml.doc "An attribute of type Null. For example: \"NULL\": true"];
       bOOL: BooleanAttributeValue.t option
@@ -315,17 +324,17 @@ module rec
         (Option.map ~f:StringAttributeValue.of_xml) (Xml.child xml_arg0 "S") in
       make ?bOOL ?nULL ?l ?m ?bS ?nS ?sS ?b ?n ?s ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let bOOL = field_map json "BOOL" BooleanAttributeValue.of_json in
-      let nULL = field_map json "NULL" NullAttributeValue.of_json in
-      let l = field_map json "L" ListAttributeValue.of_json in
-      let m = field_map json "M" MapAttributeValue.of_json in
-      let bS = field_map json "BS" BinarySetAttributeValue.of_json in
-      let nS = field_map json "NS" NumberSetAttributeValue.of_json in
-      let sS = field_map json "SS" StringSetAttributeValue.of_json in
-      let b = field_map json "B" BinaryAttributeValue.of_json in
-      let n = field_map json "N" NumberAttributeValue.of_json in
-      let s = field_map json "S" StringAttributeValue.of_json in
+    let of_json json__ =
+      let bOOL = field_map json__ "BOOL" BooleanAttributeValue.of_json in
+      let nULL = field_map json__ "NULL" NullAttributeValue.of_json in
+      let l = field_map json__ "L" ListAttributeValue.of_json in
+      let m = field_map json__ "M" MapAttributeValue.of_json in
+      let bS = field_map json__ "BS" BinarySetAttributeValue.of_json in
+      let nS = field_map json__ "NS" NumberSetAttributeValue.of_json in
+      let sS = field_map json__ "SS" StringSetAttributeValue.of_json in
+      let b = field_map json__ "B" BinaryAttributeValue.of_json in
+      let n = field_map json__ "N" NumberAttributeValue.of_json in
+      let s = field_map json__ "S" StringAttributeValue.of_json in
       make ?bOOL ?nULL ?l ?m ?bS ?nS ?sS ?b ?n ?s ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -344,6 +353,9 @@ module rec
   struct
     type nonrec t = AttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -379,6 +391,7 @@ module rec
                              (string, string) List.Assoc.t ->
                                (AttributeName.t, AttributeValue.t)
                                  List.Assoc.t
+                           val to_header : t -> string
                          end =
        struct
          type nonrec t = (AttributeName.t * AttributeValue.t) list
@@ -403,6 +416,8 @@ module rec
                             (AttributeValue.to_value y) |> (fun y -> (x, y))))))
              |> (fun x -> `Map x)
          let to_query v = to_query to_value v
+         let to_header _ =
+           failwithf "to_header is not implemented for Map_shape objects" ()
          let of_xml _ =
            failwith
              "of_xml_converter_of_shape: Map_shape case not implemented"
@@ -435,6 +450,8 @@ module AttributeMap =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -490,6 +507,54 @@ module ShardId =
     let of_json j = string_of_json ~kind:"ShardId" j
     let to_json = simple_to_json to_value
   end
+module ShardFilterType =
+  struct
+    type nonrec t =
+      | CHILD_SHARDS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | CHILD_SHARDS -> "CHILD_SHARDS" | Non_static_id s -> s
+    let of_string =
+      function | "CHILD_SHARDS" -> CHILD_SHARDS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ShardFilterType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ShardFilterType" j)
+    let to_json = simple_to_json to_value
+  end
+module ShardFilter =
+  struct
+    type nonrec t =
+      {
+      type_: ShardFilterType.t option
+        [@ocaml.doc
+          "Contains the type of filter to be applied on the DescribeStream API. Currently, the only value this parameter accepts is CHILD_SHARDS."];
+      shardId: ShardId.t option
+        [@ocaml.doc
+          "Contains the shardId of the parent shard for which you are requesting child shards. Sample request:"]}
+    let make ?type_ = fun ?shardId -> fun () -> { type_; shardId }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:ShardFilterType.to_value));
+        ("ShardId", (Option.map x.shardId ~f:ShardId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shardId =
+        (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ShardId") in
+      let type_ =
+        (Option.map ~f:ShardFilterType.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?shardId ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
+      let type_ = field_map json__ "Type" ShardFilterType.of_json in
+      make ?shardId ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This optional field contains the filter definition for the DescribeStream API."]
 module PositiveIntegerObject =
   struct
     type nonrec t = int
@@ -516,20 +581,28 @@ module DescribeStreamInput =
           "The maximum number of shard objects to return. The upper limit is 100."];
       exclusiveStartShardId: ShardId.t option
         [@ocaml.doc
-          "The shard ID of the first item that this operation will evaluate. Use the value that was returned for LastEvaluatedShardId in the previous operation."]}
+          "The shard ID of the first item that this operation will evaluate. Use the value that was returned for LastEvaluatedShardId in the previous operation."];
+      shardFilter: ShardFilter.t option
+        [@ocaml.doc
+          "This optional field contains the filter definition for the DescribeStream API."]}
     let context_ = "DescribeStreamInput"
     let make ?limit =
       fun ?exclusiveStartShardId ->
-        fun ~streamArn ->
-          fun () -> { limit; exclusiveStartShardId; streamArn }
+        fun ?shardFilter ->
+          fun ~streamArn ->
+            fun () ->
+              { limit; exclusiveStartShardId; shardFilter; streamArn }
     let to_value x =
       structure_to_value
         [("StreamArn", (Some (StreamArn.to_value x.streamArn)));
         ("Limit", (Option.map x.limit ~f:PositiveIntegerObject.to_value));
         ("ExclusiveStartShardId",
-          (Option.map x.exclusiveStartShardId ~f:ShardId.to_value))]
+          (Option.map x.exclusiveStartShardId ~f:ShardId.to_value));
+        ("ShardFilter", (Option.map x.shardFilter ~f:ShardFilter.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let shardFilter =
+        (Option.map ~f:ShardFilter.of_xml) (Xml.child xml_arg0 "ShardFilter") in
       let exclusiveStartShardId =
         (Option.map ~f:ShardId.of_xml)
           (Xml.child xml_arg0 "ExclusiveStartShardId") in
@@ -539,14 +612,15 @@ module DescribeStreamInput =
       let streamArn =
         StreamArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
-      make ?exclusiveStartShardId ?limit ~streamArn ()
+      make ?shardFilter ?exclusiveStartShardId ?limit ~streamArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let shardFilter = field_map json__ "ShardFilter" ShardFilter.of_json in
       let exclusiveStartShardId =
-        field_map json "ExclusiveStartShardId" ShardId.of_json in
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
-      let streamArn = field_map_exn json "StreamArn" StreamArn.of_json in
-      make ?exclusiveStartShardId ?limit ~streamArn ()
+        field_map json__ "ExclusiveStartShardId" ShardId.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
+      let streamArn = field_map_exn json__ "StreamArn" StreamArn.of_json in
+      make ?shardFilter ?exclusiveStartShardId ?limit ~streamArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a DescribeStream operation."]
 module TableName =
@@ -691,11 +765,11 @@ module SequenceNumberRange =
           (Xml.child xml_arg0 "StartingSequenceNumber") in
       make ?endingSequenceNumber ?startingSequenceNumber ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let endingSequenceNumber =
-        field_map json "EndingSequenceNumber" SequenceNumber.of_json in
+        field_map json__ "EndingSequenceNumber" SequenceNumber.of_json in
       let startingSequenceNumber =
-        field_map json "StartingSequenceNumber" SequenceNumber.of_json in
+        field_map json__ "StartingSequenceNumber" SequenceNumber.of_json in
       make ?endingSequenceNumber ?startingSequenceNumber ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -731,11 +805,11 @@ module Shard =
         (Option.map ~f:ShardId.of_xml) (Xml.child xml_arg0 "ShardId") in
       make ?parentShardId ?sequenceNumberRange ?shardId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let parentShardId = field_map json "ParentShardId" ShardId.of_json in
+    let of_json json__ =
+      let parentShardId = field_map json__ "ParentShardId" ShardId.of_json in
       let sequenceNumberRange =
-        field_map json "SequenceNumberRange" SequenceNumberRange.of_json in
-      let shardId = field_map json "ShardId" ShardId.of_json in
+        field_map json__ "SequenceNumberRange" SequenceNumberRange.of_json in
+      let shardId = field_map json__ "ShardId" ShardId.of_json in
       make ?parentShardId ?sequenceNumberRange ?shardId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -744,6 +818,9 @@ module ShardDescriptionList =
   struct
     type nonrec t = Shard.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Shard.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -805,33 +882,32 @@ module KeySchemaElement =
   struct
     type nonrec t =
       {
-      attributeName: KeySchemaAttributeName.t
+      attributeName: KeySchemaAttributeName.t option
         [@ocaml.doc "The name of a key attribute."];
-      keyType: KeyType.t
+      keyType: KeyType.t option
         [@ocaml.doc
           "The role that this key attribute will assume: HASH - partition key RANGE - sort key The partition key of an item is also known as its hash attribute. The term \"hash attribute\" derives from DynamoDB's usage of an internal hash function to evenly distribute data items across partitions, based on their partition key values. The sort key of an item is also known as its range attribute. The term \"range attribute\" derives from the way DynamoDB stores items with the same partition key physically close together, in sorted order by the sort key value."]}
-    let context_ = "KeySchemaElement"
-    let make ~attributeName =
-      fun ~keyType -> fun () -> { attributeName; keyType }
+    let make ?attributeName =
+      fun ?keyType -> fun () -> { attributeName; keyType }
     let to_value x =
       structure_to_value
         [("AttributeName",
-           (Some (KeySchemaAttributeName.to_value x.attributeName)));
-        ("KeyType", (Some (KeyType.to_value x.keyType)))]
+           (Option.map x.attributeName ~f:KeySchemaAttributeName.to_value));
+        ("KeyType", (Option.map x.keyType ~f:KeyType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let keyType =
-        KeyType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "KeyType") in
+        (Option.map ~f:KeyType.of_xml) (Xml.child xml_arg0 "KeyType") in
       let attributeName =
-        KeySchemaAttributeName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AttributeName") in
-      make ~keyType ~attributeName ()
+        (Option.map ~f:KeySchemaAttributeName.of_xml)
+          (Xml.child xml_arg0 "AttributeName") in
+      make ?keyType ?attributeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let keyType = field_map_exn json "KeyType" KeyType.of_json in
+    let of_json json__ =
+      let keyType = field_map json__ "KeyType" KeyType.of_json in
       let attributeName =
-        field_map_exn json "AttributeName" KeySchemaAttributeName.of_json in
-      make ~keyType ~attributeName ()
+        field_map json__ "AttributeName" KeySchemaAttributeName.of_json in
+      make ?keyType ?attributeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a single element of a key schema. A key schema specifies the attributes that make up the primary key of a table, or the key attributes of an index. A KeySchemaElement represents exactly one attribute of the primary key. For example, a simple primary key would be represented by one KeySchemaElement (for the partition key). A composite primary key would require one KeySchemaElement for the partition key, and another KeySchemaElement for the sort key. A KeySchemaElement must be a scalar, top-level attribute (not a nested attribute). The data type must be one of String, Number, or Binary. The attribute cannot be nested within a List or a Map."]
@@ -843,6 +919,9 @@ module KeySchema =
         ok_or_failwith
           ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeySchemaElement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -871,7 +950,7 @@ module StreamDescription =
         [@ocaml.doc "The Amazon Resource Name (ARN) for the stream."];
       streamLabel: String_.t option
         [@ocaml.doc
-          "A timestamp, in ISO 8601 format, for this stream. Note that LatestStreamLabel is not a unique identifier for the stream, because it is possible that a stream from another table might have the same timestamp. However, the combination of the following three elements is guaranteed to be unique: the AWS customer ID. the table name the StreamLabel"];
+          "A timestamp, in ISO 8601 format, for this stream. Note that LatestStreamLabel is not a unique identifier for the stream, because it is possible that a stream from another table might have the same timestamp. However, the combination of the following three elements is guaranteed to be unique: the Amazon Web Services customer ID. the table name the StreamLabel"];
       streamStatus: StreamStatus.t option
         [@ocaml.doc
           "Indicates the current status of the stream: ENABLING - Streams is currently being enabled on the DynamoDB table. ENABLED - the stream is enabled. DISABLING - Streams is currently being disabled on the DynamoDB table. DISABLED - the stream is disabled."];
@@ -956,19 +1035,19 @@ module StreamDescription =
         ?creationRequestDateTime ?streamViewType ?streamStatus ?streamLabel
         ?streamArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedShardId =
-        field_map json "LastEvaluatedShardId" ShardId.of_json in
-      let shards = field_map json "Shards" ShardDescriptionList.of_json in
-      let keySchema = field_map json "KeySchema" KeySchema.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "LastEvaluatedShardId" ShardId.of_json in
+      let shards = field_map json__ "Shards" ShardDescriptionList.of_json in
+      let keySchema = field_map json__ "KeySchema" KeySchema.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       let creationRequestDateTime =
-        field_map json "CreationRequestDateTime" Date.of_json in
+        field_map json__ "CreationRequestDateTime" Date.of_json in
       let streamViewType =
-        field_map json "StreamViewType" StreamViewType.of_json in
-      let streamStatus = field_map json "StreamStatus" StreamStatus.of_json in
-      let streamLabel = field_map json "StreamLabel" String_.of_json in
-      let streamArn = field_map json "StreamArn" StreamArn.of_json in
+        field_map json__ "StreamViewType" StreamViewType.of_json in
+      let streamStatus = field_map json__ "StreamStatus" StreamStatus.of_json in
+      let streamLabel = field_map json__ "StreamLabel" String_.of_json in
+      let streamArn = field_map json__ "StreamArn" StreamArn.of_json in
       make ?lastEvaluatedShardId ?shards ?keySchema ?tableName
         ?creationRequestDateTime ?streamViewType ?streamStatus ?streamLabel
         ?streamArn ()
@@ -1004,8 +1083,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1027,8 +1106,8 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred on the server side."]
@@ -1087,9 +1166,9 @@ module DescribeStreamOutput =
           (Xml.child xml_arg0 "StreamDescription") in
       make ?streamDescription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamDescription =
-        field_map json "StreamDescription" StreamDescription.of_json in
+        field_map json__ "StreamDescription" StreamDescription.of_json in
       make ?streamDescription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a DescribeStream operation."]
@@ -1109,8 +1188,8 @@ module ExpiredIteratorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1160,10 +1239,10 @@ module GetRecordsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ShardIterator") in
       make ?limit ~shardIterator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
       let shardIterator =
-        field_map_exn json "ShardIterator" ShardIterator.of_json in
+        field_map_exn json__ "ShardIterator" ShardIterator.of_json in
       make ?limit ~shardIterator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetRecords operation."]
@@ -1183,8 +1262,8 @@ module TrimmedDataAccessException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1209,7 +1288,7 @@ module StreamRecord =
       {
       approximateCreationDateTime: Date.t option
         [@ocaml.doc
-          "The approximate date and time when the stream record was created, in UNIX epoch time format."];
+          "The approximate date and time when the stream record was created, in ISO 8601 format and rounded down to the closest second."];
       keys: AttributeMap.t option
         [@ocaml.doc
           "The primary key attribute(s) for the DynamoDB item that was modified."];
@@ -1279,17 +1358,17 @@ module StreamRecord =
       make ?streamViewType ?sizeBytes ?sequenceNumber ?oldImage ?newImage
         ?keys ?approximateCreationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let streamViewType =
-        field_map json "StreamViewType" StreamViewType.of_json in
-      let sizeBytes = field_map json "SizeBytes" PositiveLongObject.of_json in
+        field_map json__ "StreamViewType" StreamViewType.of_json in
+      let sizeBytes = field_map json__ "SizeBytes" PositiveLongObject.of_json in
       let sequenceNumber =
-        field_map json "SequenceNumber" SequenceNumber.of_json in
-      let oldImage = field_map json "OldImage" AttributeMap.of_json in
-      let newImage = field_map json "NewImage" AttributeMap.of_json in
-      let keys = field_map json "Keys" AttributeMap.of_json in
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
+      let oldImage = field_map json__ "OldImage" AttributeMap.of_json in
+      let newImage = field_map json__ "NewImage" AttributeMap.of_json in
+      let keys = field_map json__ "Keys" AttributeMap.of_json in
       let approximateCreationDateTime =
-        field_map json "ApproximateCreationDateTime" Date.of_json in
+        field_map json__ "ApproximateCreationDateTime" Date.of_json in
       make ?streamViewType ?sizeBytes ?sequenceNumber ?oldImage ?newImage
         ?keys ?approximateCreationDateTime ()
     let to_json v = composed_to_json to_value v
@@ -1345,9 +1424,9 @@ module Identity =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PrincipalId") in
       make ?type_ ?principalId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" String_.of_json in
-      let principalId = field_map json "PrincipalId" String_.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" String_.of_json in
+      let principalId = field_map json__ "PrincipalId" String_.of_json in
       make ?type_ ?principalId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1367,7 +1446,7 @@ module Record =
           "The version number of the stream record format. This number is updated whenever the structure of Record is modified. Client applications must not assume that eventVersion will remain at a particular value, as this number is subject to change at any time. In general, eventVersion will only increase as the low-level DynamoDB Streams API evolves."];
       eventSource: String_.t option
         [@ocaml.doc
-          "The AWS service from which the stream record originated. For DynamoDB Streams, this is aws:dynamodb."];
+          "The Amazon Web Services service from which the stream record originated. For DynamoDB Streams, this is aws:dynamodb."];
       awsRegion: String_.t option
         [@ocaml.doc
           "The region in which the GetRecords request was received."];
@@ -1422,14 +1501,14 @@ module Record =
       make ?userIdentity ?dynamodb ?awsRegion ?eventSource ?eventVersion
         ?eventName ?eventID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userIdentity = field_map json "userIdentity" Identity.of_json in
-      let dynamodb = field_map json "dynamodb" StreamRecord.of_json in
-      let awsRegion = field_map json "awsRegion" String_.of_json in
-      let eventSource = field_map json "eventSource" String_.of_json in
-      let eventVersion = field_map json "eventVersion" String_.of_json in
-      let eventName = field_map json "eventName" OperationType.of_json in
-      let eventID = field_map json "eventID" String_.of_json in
+    let of_json json__ =
+      let userIdentity = field_map json__ "userIdentity" Identity.of_json in
+      let dynamodb = field_map json__ "dynamodb" StreamRecord.of_json in
+      let awsRegion = field_map json__ "awsRegion" String_.of_json in
+      let eventSource = field_map json__ "eventSource" String_.of_json in
+      let eventVersion = field_map json__ "eventVersion" String_.of_json in
+      let eventName = field_map json__ "eventName" OperationType.of_json in
+      let eventID = field_map json__ "eventID" String_.of_json in
       make ?userIdentity ?dynamodb ?awsRegion ?eventSource ?eventVersion
         ?eventName ?eventID ()
     let to_json v = composed_to_json to_value v
@@ -1438,6 +1517,9 @@ module RecordList =
   struct
     type nonrec t = Record.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Record.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1473,12 +1555,12 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "There is no limit to the number of daily on-demand backups that can be taken. Up to 50 simultaneous table operations are allowed per account. These operations include CreateTable, UpdateTable, DeleteTable,UpdateTimeToLive, RestoreTableFromBackup, and RestoreTableToPointInTime. The only exception is when you are creating a table with one or more secondary indexes. You can have up to 25 such requests running at a time; however, if the table or index specifications are complex, DynamoDB might temporarily reduce the number of concurrent operations. There is a soft account quota of 256 tables."]
+       "There is no limit to the number of daily on-demand backups that can be taken. For most purposes, up to 500 simultaneous table operations are allowed per account. These operations include CreateTable, UpdateTable, DeleteTable,UpdateTimeToLive, RestoreTableFromBackup, and RestoreTableToPointInTime. When you are creating a table with one or more secondary indexes, you can have up to 250 such requests running at a time. However, if the table or index specifications are complex, then DynamoDB might temporarily reduce the number of concurrent operations. When importing into DynamoDB, up to 50 simultaneous import table operations are allowed per account. There is a soft account quota of 2,500 tables. GetRecords was called with a value of more than 1000 for the limit request parameter. More than 2 processes are reading from the same streams shard at the same time. Exceeding this limit may result in request throttling."]
 module GetRecordsOutput =
   struct
     type nonrec t =
@@ -1569,10 +1651,10 @@ module GetRecordsOutput =
         (Option.map ~f:RecordList.of_xml) (Xml.child xml_arg0 "Records") in
       make ?nextShardIterator ?records ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextShardIterator =
-        field_map json "NextShardIterator" ShardIterator.of_json in
-      let records = field_map json "Records" RecordList.of_json in
+        field_map json__ "NextShardIterator" ShardIterator.of_json in
+      let records = field_map json__ "Records" RecordList.of_json in
       make ?nextShardIterator ?records ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetRecords operation."]
@@ -1653,13 +1735,13 @@ module GetShardIteratorInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StreamArn") in
       make ?sequenceNumber ~shardIteratorType ~shardId ~streamArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sequenceNumber =
-        field_map json "SequenceNumber" SequenceNumber.of_json in
+        field_map json__ "SequenceNumber" SequenceNumber.of_json in
       let shardIteratorType =
-        field_map_exn json "ShardIteratorType" ShardIteratorType.of_json in
-      let shardId = field_map_exn json "ShardId" ShardId.of_json in
-      let streamArn = field_map_exn json "StreamArn" StreamArn.of_json in
+        field_map_exn json__ "ShardIteratorType" ShardIteratorType.of_json in
+      let shardId = field_map_exn json__ "ShardId" ShardId.of_json in
+      let streamArn = field_map_exn json__ "StreamArn" StreamArn.of_json in
       make ?sequenceNumber ~shardIteratorType ~shardId ~streamArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a GetShardIterator operation."]
@@ -1728,9 +1810,9 @@ module GetShardIteratorOutput =
           (Xml.child xml_arg0 "ShardIterator") in
       make ?shardIterator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shardIterator =
-        field_map json "ShardIterator" ShardIterator.of_json in
+        field_map json__ "ShardIterator" ShardIterator.of_json in
       make ?shardIterator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a GetShardIterator operation."]
@@ -1769,11 +1851,11 @@ module ListStreamsInput =
         (Option.map ~f:TableName.of_xml) (Xml.child xml_arg0 "TableName") in
       make ?exclusiveStartStreamArn ?limit ?tableName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let exclusiveStartStreamArn =
-        field_map json "ExclusiveStartStreamArn" StreamArn.of_json in
-      let limit = field_map json "Limit" PositiveIntegerObject.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
+        field_map json__ "ExclusiveStartStreamArn" StreamArn.of_json in
+      let limit = field_map json__ "Limit" PositiveIntegerObject.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
       make ?exclusiveStartStreamArn ?limit ?tableName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a ListStreams operation."]
@@ -1788,7 +1870,7 @@ module Stream =
           "The DynamoDB table with which the stream is associated."];
       streamLabel: String_.t option
         [@ocaml.doc
-          "A timestamp, in ISO 8601 format, for this stream. Note that LatestStreamLabel is not a unique identifier for the stream, because it is possible that a stream from another table might have the same timestamp. However, the combination of the following three elements is guaranteed to be unique: the AWS customer ID. the table name the StreamLabel"]}
+          "A timestamp, in ISO 8601 format, for this stream. Note that LatestStreamLabel is not a unique identifier for the stream, because it is possible that a stream from another table might have the same timestamp. However, the combination of the following three elements is guaranteed to be unique: the Amazon Web Services customer ID. the table name the StreamLabel"]}
     let make ?streamArn =
       fun ?tableName ->
         fun ?streamLabel -> fun () -> { streamArn; tableName; streamLabel }
@@ -1807,10 +1889,10 @@ module Stream =
         (Option.map ~f:StreamArn.of_xml) (Xml.child xml_arg0 "StreamArn") in
       make ?streamLabel ?tableName ?streamArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let streamLabel = field_map json "StreamLabel" String_.of_json in
-      let tableName = field_map json "TableName" TableName.of_json in
-      let streamArn = field_map json "StreamArn" StreamArn.of_json in
+    let of_json json__ =
+      let streamLabel = field_map json__ "StreamLabel" String_.of_json in
+      let tableName = field_map json__ "TableName" TableName.of_json in
+      let streamArn = field_map json__ "StreamArn" StreamArn.of_json in
       make ?streamLabel ?tableName ?streamArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1819,6 +1901,9 @@ module StreamList =
   struct
     type nonrec t = Stream.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Stream.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1901,10 +1986,10 @@ module ListStreamsOutput =
         (Option.map ~f:StreamList.of_xml) (Xml.child xml_arg0 "Streams") in
       make ?lastEvaluatedStreamArn ?streams ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastEvaluatedStreamArn =
-        field_map json "LastEvaluatedStreamArn" StreamArn.of_json in
-      let streams = field_map json "Streams" StreamList.of_json in
+        field_map json__ "LastEvaluatedStreamArn" StreamArn.of_json in
+      let streams = field_map json__ "Streams" StreamList.of_json in
       make ?lastEvaluatedStreamArn ?streams ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a ListStreams operation."]

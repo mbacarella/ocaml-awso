@@ -85,6 +85,8 @@ let add_job_flow_steps =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING ArnType"
        and jobFlowId =
          flag "job-flow-id" (required string)
            ~doc:"STRING XmlStringMaxLen256"
@@ -93,7 +95,7 @@ let add_job_flow_steps =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.add_job_flow_steps
-           (Values.AddJobFlowStepsInput.make ~jobFlowId
+           (Values.AddJobFlowStepsInput.make ?executionRoleArn ~jobFlowId
               ~steps:(Values.StepConfigList.of_json steps) ())
            (Some Values.AddJobFlowStepsOutput.to_json)
            (Some Values.AddJobFlowStepsOutput.error_to_json)])
@@ -144,6 +146,37 @@ let cancel_steps =
               ~stepIds:(Values.StepIdsList.of_json stepIds) ())
            (Some Values.CancelStepsOutput.to_json)
            (Some Values.CancelStepsOutput.error_to_json)])
+let create_persistent_app_u_i =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and eMRContainersConfig =
+         flag "e-m-r-containers-config" (optional json_arg)
+           ~doc:"JSON EMRContainersConfig"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and xReferer = flag "x-referer" (optional string) ~doc:"STRING String"
+       and profilerType =
+         flag "profiler-type" (optional json_arg) ~doc:"JSON ProfilerType"
+       and targetResourceArn =
+         flag "target-resource-arn" (required string) ~doc:"STRING ArnType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_persistent_app_u_i
+           (Values.CreatePersistentAppUIInput.make
+              ?eMRContainersConfig:(Option.map
+                                      ~f:Values.EMRContainersConfig.of_json
+                                      eMRContainersConfig)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?xReferer
+              ?profilerType:(Option.map ~f:Values.ProfilerType.of_json
+                               profilerType) ~targetResourceArn ())
+           (Some Values.CreatePersistentAppUIOutput.to_json)
+           (Some Values.CreatePersistentAppUIOutput.error_to_json)])
 let create_security_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -185,6 +218,16 @@ let create_studio =
          flag "idp-relay-state-parameter-name" (optional string)
            ~doc:"STRING XmlStringMaxLen256"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and trustedIdentityPropagationEnabled =
+         flag "trusted-identity-propagation-enabled" (optional bool)
+           ~doc:"BOOL BooleanObject"
+       and idcUserAssignment =
+         flag "idc-user-assignment" (optional json_arg)
+           ~doc:"JSON IdcUserAssignment"
+       and idcInstanceArn =
+         flag "idc-instance-arn" (optional string) ~doc:"STRING ArnType"
+       and encryptionKeyArn =
+         flag "encryption-key-arn" (optional string) ~doc:"STRING XmlString"
        and name =
          flag "name" (required string) ~doc:"STRING XmlStringMaxLen256"
        and authMode =
@@ -208,7 +251,12 @@ let create_studio =
            Io.create_studio
            (Values.CreateStudioInput.make ?description ?userRole ?idpAuthUrl
               ?idpRelayStateParameterName
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?trustedIdentityPropagationEnabled
+              ?idcUserAssignment:(Option.map
+                                    ~f:Values.IdcUserAssignment.of_json
+                                    idcUserAssignment) ?idcInstanceArn
+              ?encryptionKeyArn ~name
               ~authMode:(Values.AuthMode.of_json authMode) ~vpcId
               ~subnetIds:(Values.SubnetIdList.of_json subnetIds) ~serviceRole
               ~workspaceSecurityGroupId ~engineSecurityGroupId
@@ -373,6 +421,25 @@ let describe_notebook_execution =
            (Values.DescribeNotebookExecutionInput.make ~notebookExecutionId
               ()) (Some Values.DescribeNotebookExecutionOutput.to_json)
            (Some Values.DescribeNotebookExecutionOutput.error_to_json)])
+let describe_persistent_app_u_i =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and persistentAppUIId =
+         flag "persistent-app-u-i-id" (required string)
+           ~doc:"STRING XmlStringMaxLen256" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_persistent_app_u_i
+           (Values.DescribePersistentAppUIInput.make ~persistentAppUIId ())
+           (Some Values.DescribePersistentAppUIOutput.to_json)
+           (Some Values.DescribePersistentAppUIOutput.error_to_json)])
 let describe_release_label =
   Command.async ~summary:""
     ([%map_open.Command
@@ -484,6 +551,27 @@ let get_block_public_access_configuration =
            (Values.GetBlockPublicAccessConfigurationInput.make ())
            (Some Values.GetBlockPublicAccessConfigurationOutput.to_json)
            (Some Values.GetBlockPublicAccessConfigurationOutput.error_to_json)])
+let get_cluster_session_credentials =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING ArnType"
+       and clusterId =
+         flag "cluster-id" (required string) ~doc:"STRING XmlStringMaxLen256" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cluster_session_credentials
+           (Values.GetClusterSessionCredentialsInput.make ?executionRoleArn
+              ~clusterId ())
+           (Some Values.GetClusterSessionCredentialsOutput.to_json)
+           (Some Values.GetClusterSessionCredentialsOutput.error_to_json)])
 let get_managed_scaling_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -502,6 +590,70 @@ let get_managed_scaling_policy =
            (Values.GetManagedScalingPolicyInput.make ~clusterId ())
            (Some Values.GetManagedScalingPolicyOutput.to_json)
            (Some Values.GetManagedScalingPolicyOutput.error_to_json)])
+let get_on_cluster_app_u_i_presigned_u_r_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and onClusterAppUIType =
+         flag "on-cluster-app-u-i-type" (optional json_arg)
+           ~doc:"JSON OnClusterAppUIType"
+       and applicationId =
+         flag "application-id" (optional string)
+           ~doc:"STRING XmlStringMaxLen256"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL BooleanObject"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING ArnType"
+       and clusterId =
+         flag "cluster-id" (required string) ~doc:"STRING XmlStringMaxLen256" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_on_cluster_app_u_i_presigned_u_r_l
+           (Values.GetOnClusterAppUIPresignedURLInput.make
+              ?onClusterAppUIType:(Option.map
+                                     ~f:Values.OnClusterAppUIType.of_json
+                                     onClusterAppUIType) ?applicationId
+              ?dryRun ?executionRoleArn ~clusterId ())
+           (Some Values.GetOnClusterAppUIPresignedURLOutput.to_json)
+           (Some Values.GetOnClusterAppUIPresignedURLOutput.error_to_json)])
+let get_persistent_app_u_i_presigned_u_r_l =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and persistentAppUIType =
+         flag "persistent-app-u-i-type" (optional json_arg)
+           ~doc:"JSON PersistentAppUIType"
+       and applicationId =
+         flag "application-id" (optional string)
+           ~doc:"STRING XmlStringMaxLen256"
+       and authProxyCall =
+         flag "auth-proxy-call" (optional bool) ~doc:"BOOL BooleanObject"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING ArnType"
+       and persistentAppUIId =
+         flag "persistent-app-u-i-id" (required string)
+           ~doc:"STRING XmlStringMaxLen256" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_persistent_app_u_i_presigned_u_r_l
+           (Values.GetPersistentAppUIPresignedURLInput.make
+              ?persistentAppUIType:(Option.map
+                                      ~f:Values.PersistentAppUIType.of_json
+                                      persistentAppUIType) ?applicationId
+              ?authProxyCall ?executionRoleArn ~persistentAppUIId ())
+           (Some Values.GetPersistentAppUIPresignedURLOutput.to_json)
+           (Some Values.GetPersistentAppUIPresignedURLOutput.error_to_json)])
 let get_studio_session_mapping =
   Command.async ~summary:""
     ([%map_open.Command
@@ -674,7 +826,9 @@ let list_notebook_executions =
            ~doc:"JSON NotebookExecutionStatus"
        and from = flag "from" (optional json_arg) ~doc:"JSON Date"
        and to_ = flag "to-" (optional json_arg) ~doc:"JSON Date"
-       and marker = flag "marker" (optional string) ~doc:"STRING Marker" in
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and executionEngineId =
+         flag "execution-engine-id" (optional string) ~doc:"STRING XmlString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_notebook_executions
@@ -682,7 +836,8 @@ let list_notebook_executions =
               ?status:(Option.map ~f:Values.NotebookExecutionStatus.of_json
                          status)
               ?from:(Option.map ~f:Values.Date.of_json from)
-              ?to_:(Option.map ~f:Values.Date.of_json to_) ?marker ())
+              ?to_:(Option.map ~f:Values.Date.of_json to_) ?marker
+              ?executionEngineId ())
            (Some Values.ListNotebookExecutionsOutput.to_json)
            (Some Values.ListNotebookExecutionsOutput.error_to_json)])
 let list_release_labels =
@@ -791,6 +946,25 @@ let list_studios =
            Io.list_studios (Values.ListStudiosInput.make ?marker ())
            (Some Values.ListStudiosOutput.to_json)
            (Some Values.ListStudiosOutput.error_to_json)])
+let list_supported_instance_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING String"
+       and releaseLabel =
+         flag "release-label" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_supported_instance_types
+           (Values.ListSupportedInstanceTypesInput.make ?marker ~releaseLabel
+              ()) (Some Values.ListSupportedInstanceTypesOutput.to_json)
+           (Some Values.ListSupportedInstanceTypesOutput.error_to_json)])
 let modify_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -803,13 +977,16 @@ let modify_cluster =
            ~doc:"URL override endpoint url"
        and stepConcurrencyLevel =
          flag "step-concurrency-level" (optional int) ~doc:"INT Integer"
+       and extendedSupport =
+         flag "extended-support" (optional bool) ~doc:"BOOL BooleanObject"
        and clusterId =
          flag "cluster-id" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.modify_cluster
-           (Values.ModifyClusterInput.make ?stepConcurrencyLevel ~clusterId
-              ()) (Some Values.ModifyClusterOutput.to_json)
+           (Values.ModifyClusterInput.make ?stepConcurrencyLevel
+              ?extendedSupport ~clusterId ())
+           (Some Values.ModifyClusterOutput.to_json)
            (Some Values.ModifyClusterOutput.error_to_json)])
 let modify_instance_fleet =
   Command.async ~summary:""
@@ -1052,6 +1229,9 @@ let run_job_flow =
            ~doc:"STRING XmlStringMaxLen256"
        and steps =
          flag "steps" (optional json_arg) ~doc:"JSON StepConfigList"
+       and stepExecutionRoleArn =
+         flag "step-execution-role-arn" (optional string)
+           ~doc:"STRING ArnType"
        and bootstrapActions =
          flag "bootstrap-actions" (optional json_arg)
            ~doc:"JSON BootstrapActionConfigList"
@@ -1103,6 +1283,18 @@ let run_job_flow =
        and autoTerminationPolicy =
          flag "auto-termination-policy" (optional json_arg)
            ~doc:"JSON AutoTerminationPolicy"
+       and oSReleaseLabel =
+         flag "o-s-release-label" (optional string)
+           ~doc:"STRING XmlStringMaxLen256"
+       and ebsRootVolumeIops =
+         flag "ebs-root-volume-iops" (optional int) ~doc:"INT Integer"
+       and ebsRootVolumeThroughput =
+         flag "ebs-root-volume-throughput" (optional int) ~doc:"INT Integer"
+       and extendedSupport =
+         flag "extended-support" (optional bool) ~doc:"BOOL BooleanObject"
+       and monitoringConfiguration =
+         flag "monitoring-configuration" (optional json_arg)
+           ~doc:"JSON MonitoringConfiguration"
        and name =
          flag "name" (required string) ~doc:"STRING XmlStringMaxLen256"
        and instances =
@@ -1114,6 +1306,7 @@ let run_job_flow =
            (Values.RunJobFlowInput.make ?logUri ?logEncryptionKmsKeyId
               ?additionalInfo ?amiVersion ?releaseLabel
               ?steps:(Option.map ~f:Values.StepConfigList.of_json steps)
+              ?stepExecutionRoleArn
               ?bootstrapActions:(Option.map
                                    ~f:Values.BootstrapActionConfigList.of_json
                                    bootstrapActions)
@@ -1149,10 +1342,36 @@ let run_job_flow =
                                         placementGroupConfigs)
               ?autoTerminationPolicy:(Option.map
                                         ~f:Values.AutoTerminationPolicy.of_json
-                                        autoTerminationPolicy) ~name
+                                        autoTerminationPolicy)
+              ?oSReleaseLabel ?ebsRootVolumeIops ?ebsRootVolumeThroughput
+              ?extendedSupport
+              ?monitoringConfiguration:(Option.map
+                                          ~f:Values.MonitoringConfiguration.of_json
+                                          monitoringConfiguration) ~name
               ~instances:(Values.JobFlowInstancesConfig.of_json instances) ())
            (Some Values.RunJobFlowOutput.to_json)
            (Some Values.RunJobFlowOutput.error_to_json)])
+let set_keep_job_flow_alive_when_no_steps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobFlowIds =
+         flag "job-flow-ids" (required json_arg) ~doc:"JSON XmlStringList"
+       and keepJobFlowAliveWhenNoSteps =
+         flag "keep-job-flow-alive-when-no-steps" (required bool)
+           ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.set_keep_job_flow_alive_when_no_steps
+           (Values.SetKeepJobFlowAliveWhenNoStepsInput.make
+              ~jobFlowIds:(Values.XmlStringList.of_json jobFlowIds)
+              ~keepJobFlowAliveWhenNoSteps ()) None None])
 let set_termination_protection =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1173,6 +1392,27 @@ let set_termination_protection =
            (Values.SetTerminationProtectionInput.make
               ~jobFlowIds:(Values.XmlStringList.of_json jobFlowIds)
               ~terminationProtected ()) None None])
+let set_unhealthy_node_replacement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and jobFlowIds =
+         flag "job-flow-ids" (required json_arg) ~doc:"JSON XmlStringList"
+       and unhealthyNodeReplacement =
+         flag "unhealthy-node-replacement" (required bool)
+           ~doc:"BOOL BooleanObject" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.set_unhealthy_node_replacement
+           (Values.SetUnhealthyNodeReplacementInput.make
+              ~jobFlowIds:(Values.XmlStringList.of_json jobFlowIds)
+              ~unhealthyNodeReplacement ()) None None])
 let set_visible_to_all_users =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1203,6 +1443,10 @@ let start_notebook_execution =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and editorId =
+         flag "editor-id" (optional string) ~doc:"STRING XmlStringMaxLen256"
+       and relativePath =
+         flag "relative-path" (optional string) ~doc:"STRING XmlString"
        and notebookExecutionName =
          flag "notebook-execution-name" (optional string)
            ~doc:"STRING XmlStringMaxLen256"
@@ -1212,10 +1456,18 @@ let start_notebook_execution =
          flag "notebook-instance-security-group-id" (optional string)
            ~doc:"STRING XmlStringMaxLen256"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
-       and editorId =
-         flag "editor-id" (required string) ~doc:"STRING XmlStringMaxLen256"
-       and relativePath =
-         flag "relative-path" (required string) ~doc:"STRING XmlString"
+       and notebookS3Location =
+         flag "notebook-s3-location" (optional json_arg)
+           ~doc:"JSON NotebookS3LocationFromInput"
+       and outputNotebookS3Location =
+         flag "output-notebook-s3-location" (optional json_arg)
+           ~doc:"JSON OutputNotebookS3LocationFromInput"
+       and outputNotebookFormat =
+         flag "output-notebook-format" (optional json_arg)
+           ~doc:"JSON OutputNotebookFormat"
+       and environmentVariables =
+         flag "environment-variables" (optional json_arg)
+           ~doc:"JSON EnvironmentVariablesMap"
        and executionEngine =
          flag "execution-engine" (required json_arg)
            ~doc:"JSON ExecutionEngineConfig"
@@ -1224,10 +1476,22 @@ let start_notebook_execution =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_notebook_execution
-           (Values.StartNotebookExecutionInput.make ?notebookExecutionName
-              ?notebookParams ?notebookInstanceSecurityGroupId
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~editorId
-              ~relativePath
+           (Values.StartNotebookExecutionInput.make ?editorId ?relativePath
+              ?notebookExecutionName ?notebookParams
+              ?notebookInstanceSecurityGroupId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?notebookS3Location:(Option.map
+                                     ~f:Values.NotebookS3LocationFromInput.of_json
+                                     notebookS3Location)
+              ?outputNotebookS3Location:(Option.map
+                                           ~f:Values.OutputNotebookS3LocationFromInput.of_json
+                                           outputNotebookS3Location)
+              ?outputNotebookFormat:(Option.map
+                                       ~f:Values.OutputNotebookFormat.of_json
+                                       outputNotebookFormat)
+              ?environmentVariables:(Option.map
+                                       ~f:Values.EnvironmentVariablesMap.of_json
+                                       environmentVariables)
               ~executionEngine:(Values.ExecutionEngineConfig.of_json
                                   executionEngine) ~serviceRole ())
            (Some Values.StartNotebookExecutionOutput.to_json)
@@ -1287,6 +1551,8 @@ let update_studio =
          flag "subnet-ids" (optional json_arg) ~doc:"JSON SubnetIdList"
        and defaultS3Location =
          flag "default-s3-location" (optional string) ~doc:"STRING XmlString"
+       and encryptionKeyArn =
+         flag "encryption-key-arn" (optional string) ~doc:"STRING XmlString"
        and studioId =
          flag "studio-id" (required string) ~doc:"STRING XmlStringMaxLen256" in
        fun () ->
@@ -1294,7 +1560,7 @@ let update_studio =
            Io.update_studio
            (Values.UpdateStudioInput.make ?name ?description
               ?subnetIds:(Option.map ~f:Values.SubnetIdList.of_json subnetIds)
-              ?defaultS3Location ~studioId ()) None None])
+              ?defaultS3Location ?encryptionKeyArn ~studioId ()) None None])
 let update_studio_session_mapping =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1333,6 +1599,7 @@ let main =
     ("add-job-flow-steps", add_job_flow_steps);
     ("add-tags", add_tags);
     ("cancel-steps", cancel_steps);
+    ("create-persistent-app-u-i", create_persistent_app_u_i);
     ("create-security-configuration", create_security_configuration);
     ("create-studio", create_studio);
     ("create-studio-session-mapping", create_studio_session_mapping);
@@ -1342,6 +1609,7 @@ let main =
     ("describe-cluster", describe_cluster);
     ("describe-job-flows", describe_job_flows);
     ("describe-notebook-execution", describe_notebook_execution);
+    ("describe-persistent-app-u-i", describe_persistent_app_u_i);
     ("describe-release-label", describe_release_label);
     ("describe-security-configuration", describe_security_configuration);
     ("describe-step", describe_step);
@@ -1349,7 +1617,12 @@ let main =
     ("get-auto-termination-policy", get_auto_termination_policy);
     ("get-block-public-access-configuration",
       get_block_public_access_configuration);
+    ("get-cluster-session-credentials", get_cluster_session_credentials);
     ("get-managed-scaling-policy", get_managed_scaling_policy);
+    ("get-on-cluster-app-u-i-presigned-u-r-l",
+      get_on_cluster_app_u_i_presigned_u_r_l);
+    ("get-persistent-app-u-i-presigned-u-r-l",
+      get_persistent_app_u_i_presigned_u_r_l);
     ("get-studio-session-mapping", get_studio_session_mapping);
     ("list-bootstrap-actions", list_bootstrap_actions);
     ("list-clusters", list_clusters);
@@ -1362,6 +1635,7 @@ let main =
     ("list-steps", list_steps);
     ("list-studio-session-mappings", list_studio_session_mappings);
     ("list-studios", list_studios);
+    ("list-supported-instance-types", list_supported_instance_types);
     ("modify-cluster", modify_cluster);
     ("modify-instance-fleet", modify_instance_fleet);
     ("modify-instance-groups", modify_instance_groups);
@@ -1375,7 +1649,10 @@ let main =
     ("remove-managed-scaling-policy", remove_managed_scaling_policy);
     ("remove-tags", remove_tags);
     ("run-job-flow", run_job_flow);
+    ("set-keep-job-flow-alive-when-no-steps",
+      set_keep_job_flow_alive_when_no_steps);
     ("set-termination-protection", set_termination_protection);
+    ("set-unhealthy-node-replacement", set_unhealthy_node_replacement);
     ("set-visible-to-all-users", set_visible_to_all_users);
     ("start-notebook-execution", start_notebook_execution);
     ("stop-notebook-execution", stop_notebook_execution);

@@ -45,6 +45,409 @@ module ACMCertArn =
     let of_json j = string_of_json ~kind:"ACMCertArn" j
     let to_json = simple_to_json to_value
   end
+module AllowAWSToRetainLogs =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AllowAWSToRetainLogs" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AllowAWSToRetainLogs" j)
+    let to_json = simple_to_json to_value
+  end
+module SessionTagValue =
+  struct
+    type nonrec t = string
+    let context_ = "SessionTagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\.\\-_/#A-Za-z0-9 ]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionTagValue" j
+    let to_json = simple_to_json to_value
+  end
+module KubernetesNamespace =
+  struct
+    type nonrec t = string
+    let context_ = "KubernetesNamespace"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[a-z0-9]([-a-z0-9]*[a-z0-9])?")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KubernetesNamespace" j
+    let to_json = simple_to_json to_value
+  end
+module ClusterId =
+  struct
+    type nonrec t = string
+    let context_ = "ClusterId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[0-9A-Za-z][A-Za-z0-9\\-_]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClusterId" j
+    let to_json = simple_to_json to_value
+  end
+module SecureNamespaceInfo =
+  struct
+    type nonrec t =
+      {
+      clusterId: ClusterId.t option
+        [@ocaml.doc
+          "The ID of the Amazon EKS cluster where Amazon EMR on EKS jobs run."];
+      namespace: KubernetesNamespace.t option
+        [@ocaml.doc
+          "The namespace of the Amazon EKS cluster where the system jobs run."]}
+    let make ?clusterId =
+      fun ?namespace -> fun () -> { clusterId; namespace }
+    let to_value x =
+      structure_to_value
+        [("clusterId", (Option.map x.clusterId ~f:ClusterId.to_value));
+        ("namespace",
+          (Option.map x.namespace ~f:KubernetesNamespace.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:KubernetesNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let clusterId =
+        (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "clusterId") in
+      make ?namespace ?clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace =
+        field_map json__ "namespace" KubernetesNamespace.of_json in
+      let clusterId = field_map json__ "clusterId" ClusterId.of_json in
+      make ?namespace ?clusterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Namespace inputs for the system job."]
+module IAMRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IAMRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):iam::(\\d{12})?:(role((\\u002F)|(\\u002F[\\u0021-\\u007F]+\\u002F))[\\w+=,.@-]+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IAMRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module LakeFormationConfiguration =
+  struct
+    type nonrec t =
+      {
+      authorizedSessionTagValue: SessionTagValue.t option
+        [@ocaml.doc
+          "The session tag to authorize Amazon EMR on EKS for API calls to Lake Formation."];
+      secureNamespaceInfo: SecureNamespaceInfo.t option
+        [@ocaml.doc "The namespace input of the system job."];
+      queryEngineRoleArn: IAMRoleArn.t option
+        [@ocaml.doc
+          "The query engine IAM role ARN that is tied to the secure Spark job. The QueryEngine role assumes the JobExecutionRole to execute all the Lake Formation calls."]}
+    let make ?authorizedSessionTagValue =
+      fun ?secureNamespaceInfo ->
+        fun ?queryEngineRoleArn ->
+          fun () ->
+            {
+              authorizedSessionTagValue;
+              secureNamespaceInfo;
+              queryEngineRoleArn
+            }
+    let to_value x =
+      structure_to_value
+        [("authorizedSessionTagValue",
+           (Option.map x.authorizedSessionTagValue
+              ~f:SessionTagValue.to_value));
+        ("secureNamespaceInfo",
+          (Option.map x.secureNamespaceInfo ~f:SecureNamespaceInfo.to_value));
+        ("queryEngineRoleArn",
+          (Option.map x.queryEngineRoleArn ~f:IAMRoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryEngineRoleArn =
+        (Option.map ~f:IAMRoleArn.of_xml)
+          (Xml.child xml_arg0 "queryEngineRoleArn") in
+      let secureNamespaceInfo =
+        (Option.map ~f:SecureNamespaceInfo.of_xml)
+          (Xml.child xml_arg0 "secureNamespaceInfo") in
+      let authorizedSessionTagValue =
+        (Option.map ~f:SessionTagValue.of_xml)
+          (Xml.child xml_arg0 "authorizedSessionTagValue") in
+      make ?queryEngineRoleArn ?secureNamespaceInfo
+        ?authorizedSessionTagValue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryEngineRoleArn =
+        field_map json__ "queryEngineRoleArn" IAMRoleArn.of_json in
+      let secureNamespaceInfo =
+        field_map json__ "secureNamespaceInfo" SecureNamespaceInfo.of_json in
+      let authorizedSessionTagValue =
+        field_map json__ "authorizedSessionTagValue" SessionTagValue.of_json in
+      make ?queryEngineRoleArn ?secureNamespaceInfo
+        ?authorizedSessionTagValue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lake Formation related configuration inputs for the security configuration."]
+module SecretsManagerArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecretsManagerArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):secretsmanager:.+:(\\d{12}):secret:[0-9a-zA-Z/_+=.@-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretsManagerArn" j
+    let to_json = simple_to_json to_value
+  end
+module CertificateProviderType =
+  struct
+    type nonrec t =
+      | PEM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | PEM -> "PEM" | Non_static_id s -> s
+    let of_string = function | "PEM" -> PEM | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CertificateProviderType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CertificateProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module TLSCertificateConfiguration =
+  struct
+    type nonrec t =
+      {
+      certificateProviderType: CertificateProviderType.t option
+        [@ocaml.doc
+          "The TLS certificate type. Acceptable values: PEM or Custom."];
+      publicCertificateSecretArn: SecretsManagerArn.t option
+        [@ocaml.doc
+          "Secrets Manager ARN that contains the public TLS certificate contents, used for communication between the user job and the system job."];
+      privateCertificateSecretArn: SecretsManagerArn.t option
+        [@ocaml.doc
+          "Secrets Manager ARN that contains the private TLS certificate contents, used for communication between the user job and the system job."]}
+    let make ?certificateProviderType =
+      fun ?publicCertificateSecretArn ->
+        fun ?privateCertificateSecretArn ->
+          fun () ->
+            {
+              certificateProviderType;
+              publicCertificateSecretArn;
+              privateCertificateSecretArn
+            }
+    let to_value x =
+      structure_to_value
+        [("certificateProviderType",
+           (Option.map x.certificateProviderType
+              ~f:CertificateProviderType.to_value));
+        ("publicCertificateSecretArn",
+          (Option.map x.publicCertificateSecretArn
+             ~f:SecretsManagerArn.to_value));
+        ("privateCertificateSecretArn",
+          (Option.map x.privateCertificateSecretArn
+             ~f:SecretsManagerArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let privateCertificateSecretArn =
+        (Option.map ~f:SecretsManagerArn.of_xml)
+          (Xml.child xml_arg0 "privateCertificateSecretArn") in
+      let publicCertificateSecretArn =
+        (Option.map ~f:SecretsManagerArn.of_xml)
+          (Xml.child xml_arg0 "publicCertificateSecretArn") in
+      let certificateProviderType =
+        (Option.map ~f:CertificateProviderType.of_xml)
+          (Xml.child xml_arg0 "certificateProviderType") in
+      make ?privateCertificateSecretArn ?publicCertificateSecretArn
+        ?certificateProviderType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let privateCertificateSecretArn =
+        field_map json__ "privateCertificateSecretArn"
+          SecretsManagerArn.of_json in
+      let publicCertificateSecretArn =
+        field_map json__ "publicCertificateSecretArn"
+          SecretsManagerArn.of_json in
+      let certificateProviderType =
+        field_map json__ "certificateProviderType"
+          CertificateProviderType.of_json in
+      make ?privateCertificateSecretArn ?publicCertificateSecretArn
+        ?certificateProviderType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configurations related to the TLS certificate for the security configuration."]
+module InTransitEncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      tlsCertificateConfiguration: TLSCertificateConfiguration.t option
+        [@ocaml.doc
+          "TLS certificate-related configuration input for the security configuration."]}
+    let make ?tlsCertificateConfiguration =
+      fun () -> { tlsCertificateConfiguration }
+    let to_value x =
+      structure_to_value
+        [("tlsCertificateConfiguration",
+           (Option.map x.tlsCertificateConfiguration
+              ~f:TLSCertificateConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tlsCertificateConfiguration =
+        (Option.map ~f:TLSCertificateConfiguration.of_xml)
+          (Xml.child xml_arg0 "tlsCertificateConfiguration") in
+      make ?tlsCertificateConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tlsCertificateConfiguration =
+        field_map json__ "tlsCertificateConfiguration"
+          TLSCertificateConfiguration.of_json in
+      make ?tlsCertificateConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configurations related to in-transit encryption for the security configuration."]
+module EncryptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      inTransitEncryptionConfiguration:
+        InTransitEncryptionConfiguration.t option
+        [@ocaml.doc
+          "In-transit encryption-related input for the security configuration."]}
+    let make ?inTransitEncryptionConfiguration =
+      fun () -> { inTransitEncryptionConfiguration }
+    let to_value x =
+      structure_to_value
+        [("inTransitEncryptionConfiguration",
+           (Option.map x.inTransitEncryptionConfiguration
+              ~f:InTransitEncryptionConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inTransitEncryptionConfiguration =
+        (Option.map ~f:InTransitEncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "inTransitEncryptionConfiguration") in
+      make ?inTransitEncryptionConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inTransitEncryptionConfiguration =
+        field_map json__ "inTransitEncryptionConfiguration"
+          InTransitEncryptionConfiguration.of_json in
+      make ?inTransitEncryptionConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configurations related to encryption for the security configuration."]
+module AuthorizationConfiguration =
+  struct
+    type nonrec t =
+      {
+      lakeFormationConfiguration: LakeFormationConfiguration.t option
+        [@ocaml.doc
+          "Lake Formation related configuration inputs for the security configuration."];
+      encryptionConfiguration: EncryptionConfiguration.t option
+        [@ocaml.doc
+          "Encryption-related configuration input for the security configuration."]}
+    let make ?lakeFormationConfiguration =
+      fun ?encryptionConfiguration ->
+        fun () -> { lakeFormationConfiguration; encryptionConfiguration }
+    let to_value x =
+      structure_to_value
+        [("lakeFormationConfiguration",
+           (Option.map x.lakeFormationConfiguration
+              ~f:LakeFormationConfiguration.to_value));
+        ("encryptionConfiguration",
+          (Option.map x.encryptionConfiguration
+             ~f:EncryptionConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionConfiguration =
+        (Option.map ~f:EncryptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "encryptionConfiguration") in
+      let lakeFormationConfiguration =
+        (Option.map ~f:LakeFormationConfiguration.of_xml)
+          (Xml.child xml_arg0 "lakeFormationConfiguration") in
+      make ?encryptionConfiguration ?lakeFormationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionConfiguration =
+        field_map json__ "encryptionConfiguration"
+          EncryptionConfiguration.of_json in
+      let lakeFormationConfiguration =
+        field_map json__ "lakeFormationConfiguration"
+          LakeFormationConfiguration.of_json in
+      make ?encryptionConfiguration ?lakeFormationConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Authorization-related configuration inputs for the security configuration."]
 module Base64Encoded =
   struct
     type nonrec t = string
@@ -63,6 +466,19 @@ module Base64Encoded =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Base64Encoded" j
+    let to_json = simple_to_json to_value
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
 module ResourceIdString =
@@ -111,10 +527,10 @@ module CancelJobRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "jobRunId") in
       make ~virtualClusterId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~virtualClusterId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -153,8 +569,8 @@ module ValidationException =
         (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String1024.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String1024.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "There are invalid parameters in the client request."]
@@ -172,8 +588,8 @@ module InternalServerException =
         (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String1024.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String1024.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This is an internal server exception."]
@@ -238,10 +654,10 @@ module CancelJobRunResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?virtualClusterId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -274,10 +690,11 @@ module Certificate =
           (Xml.child xml_arg0 "certificateArn") in
       make ?certificateData ?certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateData =
-        field_map json "certificateData" Base64Encoded.of_json in
-      let certificateArn = field_map json "certificateArn" ACMCertArn.of_json in
+        field_map json__ "certificateData" Base64Encoded.of_json in
+      let certificateArn =
+        field_map json__ "certificateArn" ACMCertArn.of_json in
       make ?certificateData ?certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -368,36 +785,15 @@ module CloudWatchMonitoringConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupName") in
       make ?logStreamNamePrefix ~logGroupName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logStreamNamePrefix =
-        field_map json "logStreamNamePrefix" String256.of_json in
+        field_map json__ "logStreamNamePrefix" String256.of_json in
       let logGroupName =
-        field_map_exn json "logGroupName" LogGroupName.of_json in
+        field_map_exn json__ "logGroupName" LogGroupName.of_json in
       make ?logStreamNamePrefix ~logGroupName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A configuration for CloudWatch monitoring. You can configure your jobs to send log information to CloudWatch Logs."]
-module ClusterId =
-  struct
-    type nonrec t = string
-    let context_ = "ClusterId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"^[0-9A-Za-z][A-Za-z0-9\\-_]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ClusterId" j
-    let to_json = simple_to_json to_value
-  end
 module SensitivePropertiesMap =
   struct
     type nonrec t = (String1024.t * String1024.t) list
@@ -420,6 +816,8 @@ module SensitivePropertiesMap =
                     (fun x -> (String1024.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -486,13 +884,13 @@ module rec
           (Xml.child_exn ~context:context_ xml_arg0 "classification") in
       make ?configurations ?properties ~classification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurations =
-        field_map json "configurations" ConfigurationList.of_json in
+        field_map json__ "configurations" ConfigurationList.of_json in
       let properties =
-        field_map json "properties" SensitivePropertiesMap.of_json in
+        field_map json__ "properties" SensitivePropertiesMap.of_json in
       let classification =
-        field_map_exn json "classification" String1024.of_json in
+        field_map_exn json__ "classification" String1024.of_json in
       make ?configurations ?properties ~classification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -512,6 +910,9 @@ module rec
     type nonrec t = Configuration.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Configuration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -570,8 +971,8 @@ module S3MonitoringConfiguration =
         UriString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "logUri") in
       make ~logUri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logUri = field_map_exn json "logUri" UriString.of_json in
+    let of_json json__ =
+      let logUri = field_map_exn json__ "logUri" UriString.of_json in
       make ~logUri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -601,10 +1002,148 @@ module PersistentAppUI =
     let of_json j = of_string (string_of_json ~kind:"PersistentAppUI" j)
     let to_json = simple_to_json to_value
   end
+module KmsKeyArn =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(arn:(aws[a-zA-Z0-9-]*):kms:.+:(\\d{12})?:key\\/[(0-9a-zA-Z)-?]+|\\$\\{[a-zA-Z]\\w*\\})$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyArn" j
+    let to_json = simple_to_json to_value
+  end
+module ManagedLogs =
+  struct
+    type nonrec t =
+      {
+      allowAWSToRetainLogs: AllowAWSToRetainLogs.t option
+        [@ocaml.doc
+          "Determines whether Amazon Web Services can retain logs."];
+      encryptionKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "The Amazon resource name (ARN) of the encryption key for logs."]}
+    let make ?allowAWSToRetainLogs =
+      fun ?encryptionKeyArn ->
+        fun () -> { allowAWSToRetainLogs; encryptionKeyArn }
+    let to_value x =
+      structure_to_value
+        [("allowAWSToRetainLogs",
+           (Option.map x.allowAWSToRetainLogs
+              ~f:AllowAWSToRetainLogs.to_value));
+        ("encryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:KmsKeyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml)
+          (Xml.child xml_arg0 "encryptionKeyArn") in
+      let allowAWSToRetainLogs =
+        (Option.map ~f:AllowAWSToRetainLogs.of_xml)
+          (Xml.child xml_arg0 "allowAWSToRetainLogs") in
+      make ?encryptionKeyArn ?allowAWSToRetainLogs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "encryptionKeyArn" KmsKeyArn.of_json in
+      let allowAWSToRetainLogs =
+        field_map json__ "allowAWSToRetainLogs" AllowAWSToRetainLogs.of_json in
+      make ?encryptionKeyArn ?allowAWSToRetainLogs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The entity that provides configuration control over managed logs."]
+module RotationSize =
+  struct
+    type nonrec t = string
+    let context_ = "RotationSize"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^\\d+(\\.\\d+)?[KMG][Bb]?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RotationSize" j
+    let to_json = simple_to_json to_value
+  end
+module MaxFilesToKeep =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:50) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxFilesToKeep" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ContainerLogRotationConfiguration =
+  struct
+    type nonrec t =
+      {
+      rotationSize: RotationSize.t
+        [@ocaml.doc
+          "The file size at which to rotate logs. Minimum of 2KB, Maximum of 2GB."];
+      maxFilesToKeep: MaxFilesToKeep.t
+        [@ocaml.doc
+          "The number of files to keep in container after rotation."]}
+    let context_ = "ContainerLogRotationConfiguration"
+    let make ~rotationSize =
+      fun ~maxFilesToKeep -> fun () -> { rotationSize; maxFilesToKeep }
+    let to_value x =
+      structure_to_value
+        [("rotationSize", (Some (RotationSize.to_value x.rotationSize)));
+        ("maxFilesToKeep", (Some (MaxFilesToKeep.to_value x.maxFilesToKeep)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxFilesToKeep =
+        MaxFilesToKeep.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxFilesToKeep") in
+      let rotationSize =
+        RotationSize.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "rotationSize") in
+      make ~maxFilesToKeep ~rotationSize ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxFilesToKeep =
+        field_map_exn json__ "maxFilesToKeep" MaxFilesToKeep.of_json in
+      let rotationSize =
+        field_map_exn json__ "rotationSize" RotationSize.of_json in
+      make ~maxFilesToKeep ~rotationSize ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The settings for container log rotation."]
 module MonitoringConfiguration =
   struct
     type nonrec t =
       {
+      managedLogs: ManagedLogs.t option
+        [@ocaml.doc
+          "The entity that controls configuration for managed logs."];
       persistentAppUI: PersistentAppUI.t option
         [@ocaml.doc
           "Monitoring configurations for the persistent application UI."];
@@ -612,28 +1151,42 @@ module MonitoringConfiguration =
         CloudWatchMonitoringConfiguration.t option
         [@ocaml.doc "Monitoring configurations for CloudWatch."];
       s3MonitoringConfiguration: S3MonitoringConfiguration.t option
-        [@ocaml.doc "Amazon S3 configuration for monitoring log publishing."]}
-    let make ?persistentAppUI =
-      fun ?cloudWatchMonitoringConfiguration ->
-        fun ?s3MonitoringConfiguration ->
-          fun () ->
-            {
-              persistentAppUI;
-              cloudWatchMonitoringConfiguration;
-              s3MonitoringConfiguration
-            }
+        [@ocaml.doc "Amazon S3 configuration for monitoring log publishing."];
+      containerLogRotationConfiguration:
+        ContainerLogRotationConfiguration.t option
+        [@ocaml.doc "Enable or disable container log rotation."]}
+    let make ?managedLogs =
+      fun ?persistentAppUI ->
+        fun ?cloudWatchMonitoringConfiguration ->
+          fun ?s3MonitoringConfiguration ->
+            fun ?containerLogRotationConfiguration ->
+              fun () ->
+                {
+                  managedLogs;
+                  persistentAppUI;
+                  cloudWatchMonitoringConfiguration;
+                  s3MonitoringConfiguration;
+                  containerLogRotationConfiguration
+                }
     let to_value x =
       structure_to_value
-        [("persistentAppUI",
-           (Option.map x.persistentAppUI ~f:PersistentAppUI.to_value));
+        [("managedLogs", (Option.map x.managedLogs ~f:ManagedLogs.to_value));
+        ("persistentAppUI",
+          (Option.map x.persistentAppUI ~f:PersistentAppUI.to_value));
         ("cloudWatchMonitoringConfiguration",
           (Option.map x.cloudWatchMonitoringConfiguration
              ~f:CloudWatchMonitoringConfiguration.to_value));
         ("s3MonitoringConfiguration",
           (Option.map x.s3MonitoringConfiguration
-             ~f:S3MonitoringConfiguration.to_value))]
+             ~f:S3MonitoringConfiguration.to_value));
+        ("containerLogRotationConfiguration",
+          (Option.map x.containerLogRotationConfiguration
+             ~f:ContainerLogRotationConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let containerLogRotationConfiguration =
+        (Option.map ~f:ContainerLogRotationConfiguration.of_xml)
+          (Xml.child xml_arg0 "containerLogRotationConfiguration") in
       let s3MonitoringConfiguration =
         (Option.map ~f:S3MonitoringConfiguration.of_xml)
           (Xml.child xml_arg0 "s3MonitoringConfiguration") in
@@ -643,20 +1196,26 @@ module MonitoringConfiguration =
       let persistentAppUI =
         (Option.map ~f:PersistentAppUI.of_xml)
           (Xml.child xml_arg0 "persistentAppUI") in
-      make ?s3MonitoringConfiguration ?cloudWatchMonitoringConfiguration
-        ?persistentAppUI ()
+      let managedLogs =
+        (Option.map ~f:ManagedLogs.of_xml) (Xml.child xml_arg0 "managedLogs") in
+      make ?containerLogRotationConfiguration ?s3MonitoringConfiguration
+        ?cloudWatchMonitoringConfiguration ?persistentAppUI ?managedLogs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let containerLogRotationConfiguration =
+        field_map json__ "containerLogRotationConfiguration"
+          ContainerLogRotationConfiguration.of_json in
       let s3MonitoringConfiguration =
-        field_map json "s3MonitoringConfiguration"
+        field_map json__ "s3MonitoringConfiguration"
           S3MonitoringConfiguration.of_json in
       let cloudWatchMonitoringConfiguration =
-        field_map json "cloudWatchMonitoringConfiguration"
+        field_map json__ "cloudWatchMonitoringConfiguration"
           CloudWatchMonitoringConfiguration.of_json in
       let persistentAppUI =
-        field_map json "persistentAppUI" PersistentAppUI.of_json in
-      make ?s3MonitoringConfiguration ?cloudWatchMonitoringConfiguration
-        ?persistentAppUI ()
+        field_map json__ "persistentAppUI" PersistentAppUI.of_json in
+      let managedLogs = field_map json__ "managedLogs" ManagedLogs.of_json in
+      make ?containerLogRotationConfiguration ?s3MonitoringConfiguration
+        ?cloudWatchMonitoringConfiguration ?persistentAppUI ?managedLogs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration setting for monitoring."]
 module ConfigurationOverrides =
@@ -689,35 +1248,34 @@ module ConfigurationOverrides =
           (Xml.child xml_arg0 "applicationConfiguration") in
       make ?monitoringConfiguration ?applicationConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let monitoringConfiguration =
-        field_map json "monitoringConfiguration"
+        field_map json__ "monitoringConfiguration"
           MonitoringConfiguration.of_json in
       let applicationConfiguration =
-        field_map json "applicationConfiguration" ConfigurationList.of_json in
+        field_map json__ "applicationConfiguration" ConfigurationList.of_json in
       make ?monitoringConfiguration ?applicationConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A configuration specification to be used to override existing configurations."]
-module KubernetesNamespace =
+module ResourceNameString =
   struct
     type nonrec t = string
-    let context_ = "KubernetesNamespace"
+    let context_ = "ResourceNameString"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () ->
-                     check_pattern i ~pattern:"[a-z0-9]([-a-z0-9]*[a-z0-9])?")));
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\.\\-_/#A-Za-z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KubernetesNamespace" j
+    let of_json j = string_of_json ~kind:"ResourceNameString" j
     let to_json = simple_to_json to_value
   end
 module EksInfo =
@@ -725,30 +1283,41 @@ module EksInfo =
     type nonrec t =
       {
       namespace: KubernetesNamespace.t option
-        [@ocaml.doc "The namespaces of the EKS cluster."]}
-    let make ?namespace = fun () -> { namespace }
+        [@ocaml.doc "The namespaces of the Amazon EKS cluster."];
+      nodeLabel: ResourceNameString.t option
+        [@ocaml.doc
+          "The nodeLabel of the nodes where the resources of this virtual cluster can get scheduled. It requires relevant scaling and policy engine addons."]}
+    let make ?namespace =
+      fun ?nodeLabel -> fun () -> { namespace; nodeLabel }
     let to_value x =
       structure_to_value
         [("namespace",
-           (Option.map x.namespace ~f:KubernetesNamespace.to_value))]
+           (Option.map x.namespace ~f:KubernetesNamespace.to_value));
+        ("nodeLabel",
+          (Option.map x.nodeLabel ~f:ResourceNameString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let nodeLabel =
+        (Option.map ~f:ResourceNameString.of_xml)
+          (Xml.child xml_arg0 "nodeLabel") in
       let namespace =
         (Option.map ~f:KubernetesNamespace.of_xml)
           (Xml.child xml_arg0 "namespace") in
-      make ?namespace ()
+      make ?nodeLabel ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespace = field_map json "namespace" KubernetesNamespace.of_json in
-      make ?namespace ()
+    let of_json json__ =
+      let nodeLabel = field_map json__ "nodeLabel" ResourceNameString.of_json in
+      let namespace =
+        field_map json__ "namespace" KubernetesNamespace.of_json in
+      make ?nodeLabel ?namespace ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The information about the EKS cluster."]
+  end[@@ocaml.doc "The information about the Amazon EKS cluster."]
 module ContainerInfo =
   struct
     type nonrec t =
       {
       eksInfo: EksInfo.t option
-        [@ocaml.doc "The information about the EKS cluster."]}
+        [@ocaml.doc "The information about the Amazon EKS cluster."]}
     let make ?eksInfo = fun () -> { eksInfo }
     let to_value x =
       structure_to_value
@@ -759,8 +1328,8 @@ module ContainerInfo =
         (Option.map ~f:EksInfo.of_xml) (Xml.child xml_arg0 "eksInfo") in
       make ?eksInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eksInfo = field_map json "eksInfo" EksInfo.of_json in
+    let of_json json__ =
+      let eksInfo = field_map json__ "eksInfo" EksInfo.of_json in
       make ?eksInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -789,7 +1358,7 @@ module ContainerProvider =
       {
       type_: ContainerProviderType.t
         [@ocaml.doc
-          "The type of the container provider. EKS is the only supported type as of now."];
+          "The type of the container provider. Amazon EKS is the only supported type as of now."];
       id: ClusterId.t [@ocaml.doc "The ID of the container cluster."];
       info: ContainerInfo.t option
         [@ocaml.doc "The information about the container cluster."]}
@@ -811,10 +1380,10 @@ module ContainerProvider =
           (Xml.child_exn ~context:context_ xml_arg0 "type") in
       make ?info ~id ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let info = field_map json "info" ContainerInfo.of_json in
-      let id = field_map_exn json "id" ClusterId.of_json in
-      let type_ = field_map_exn json "type" ContainerProviderType.of_json in
+    let of_json json__ =
+      let info = field_map json__ "info" ContainerInfo.of_json in
+      let id = field_map_exn json__ "id" ClusterId.of_json in
+      let type_ = field_map_exn json__ "type" ContainerProviderType.of_json in
       make ?info ~id ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The information about the container provider."]
@@ -884,6 +1453,8 @@ module TagMap =
                        (StringEmpty256.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -891,26 +1462,859 @@ module TagMap =
         ~of_json:StringEmpty256.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResourceNameString =
+module TemplateParameterName =
   struct
     type nonrec t = string
-    let context_ = "ResourceNameString"
+    let context_ = "TemplateParameterName"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\.\\-_/#A-Za-z0-9]+")));
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[\\.\\-_\\#A-Za-z0-9]+")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ResourceNameString" j
+    let of_json j = string_of_json ~kind:"TemplateParameterName" j
     let to_json = simple_to_json to_value
   end
+module TemplateParameterDataType =
+  struct
+    type nonrec t =
+      | NUMBER 
+      | STRING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NUMBER -> "NUMBER"
+      | STRING -> "STRING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NUMBER" -> NUMBER
+      | "STRING" -> STRING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TemplateParameterDataType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TemplateParameterDataType" j)
+    let to_json = simple_to_json to_value
+  end
+module TemplateParameterConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: TemplateParameterDataType.t option
+        [@ocaml.doc
+          "The type of the job template parameter. Allowed values are: \226\128\152STRING\226\128\153, \226\128\152NUMBER\226\128\153."];
+      defaultValue: String1024.t option
+        [@ocaml.doc "The default value for the job template parameter."]}
+    let make ?type_ = fun ?defaultValue -> fun () -> { type_; defaultValue }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:TemplateParameterDataType.to_value));
+        ("defaultValue", (Option.map x.defaultValue ~f:String1024.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let defaultValue =
+        (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "defaultValue") in
+      let type_ =
+        (Option.map ~f:TemplateParameterDataType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      make ?defaultValue ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let defaultValue = field_map json__ "defaultValue" String1024.of_json in
+      let type_ = field_map json__ "type" TemplateParameterDataType.of_json in
+      make ?defaultValue ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration of a job template parameter."]
+module TemplateParameterConfigurationMap =
+  struct
+    type nonrec t =
+      (TemplateParameterName.t * TemplateParameterConfiguration.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types TemplateParameterName TemplateParameterConfiguration"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TemplateParameterName.to_value x) |>
+                    (fun x ->
+                       (TemplateParameterConfiguration.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TemplateParameterName.of_string
+        ~of_json:TemplateParameterConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ParametricReleaseLabel =
+  struct
+    type nonrec t = string
+    let context_ = "ParametricReleaseLabel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"([\\.\\-_/A-Za-z0-9]+|\\$\\{[a-zA-Z]\\w*\\})")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParametricReleaseLabel" j
+    let to_json = simple_to_json to_value
+  end
+module ParametricIAMRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "ParametricIAMRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:4) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"(^arn:(aws[a-zA-Z0-9-]*):iam::(\\d{12})?:(role((\\u002F)|(\\u002F[\\u0021-\\u007F]+\\u002F))[\\w+=,.@-]+)$)|([\\.\\-_\\#A-Za-z0-9\\$\\{\\}]+)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ParametricIAMRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module TemplateParameter =
+  struct
+    type nonrec t = string
+    let context_ = "TemplateParameter"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\.\\-_/#A-Za-z0-9\\$\\{\\}]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TemplateParameter" j
+    let to_json = simple_to_json to_value
+  end
+module ParametricS3MonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      logUri: UriString.t option
+        [@ocaml.doc "Amazon S3 destination URI for log publishing."]}
+    let make ?logUri = fun () -> { logUri }
+    let to_value x =
+      structure_to_value
+        [("logUri", (Option.map x.logUri ~f:UriString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logUri =
+        (Option.map ~f:UriString.of_xml) (Xml.child xml_arg0 "logUri") in
+      make ?logUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logUri = field_map json__ "logUri" UriString.of_json in
+      make ?logUri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Amazon S3 configuration for monitoring log publishing. You can configure your jobs to send log information to Amazon S3. This data type allows job template parameters to be specified within."]
+module ParametricCloudWatchMonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      logGroupName: TemplateParameter.t option
+        [@ocaml.doc "The name of the log group for log publishing."];
+      logStreamNamePrefix: String256.t option
+        [@ocaml.doc "The specified name prefix for log streams."]}
+    let make ?logGroupName =
+      fun ?logStreamNamePrefix ->
+        fun () -> { logGroupName; logStreamNamePrefix }
+    let to_value x =
+      structure_to_value
+        [("logGroupName",
+           (Option.map x.logGroupName ~f:TemplateParameter.to_value));
+        ("logStreamNamePrefix",
+          (Option.map x.logStreamNamePrefix ~f:String256.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logStreamNamePrefix =
+        (Option.map ~f:String256.of_xml)
+          (Xml.child xml_arg0 "logStreamNamePrefix") in
+      let logGroupName =
+        (Option.map ~f:TemplateParameter.of_xml)
+          (Xml.child xml_arg0 "logGroupName") in
+      make ?logStreamNamePrefix ?logGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logStreamNamePrefix =
+        field_map json__ "logStreamNamePrefix" String256.of_json in
+      let logGroupName =
+        field_map json__ "logGroupName" TemplateParameter.of_json in
+      make ?logStreamNamePrefix ?logGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A configuration for CloudWatch monitoring. You can configure your jobs to send log information to CloudWatch Logs. This data type allows job template parameters to be specified within."]
+module ParametricMonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      persistentAppUI: TemplateParameter.t option
+        [@ocaml.doc
+          "Monitoring configurations for the persistent application UI."];
+      cloudWatchMonitoringConfiguration:
+        ParametricCloudWatchMonitoringConfiguration.t option
+        [@ocaml.doc "Monitoring configurations for CloudWatch."];
+      s3MonitoringConfiguration: ParametricS3MonitoringConfiguration.t option
+        [@ocaml.doc "Amazon S3 configuration for monitoring log publishing."]}
+    let make ?persistentAppUI =
+      fun ?cloudWatchMonitoringConfiguration ->
+        fun ?s3MonitoringConfiguration ->
+          fun () ->
+            {
+              persistentAppUI;
+              cloudWatchMonitoringConfiguration;
+              s3MonitoringConfiguration
+            }
+    let to_value x =
+      structure_to_value
+        [("persistentAppUI",
+           (Option.map x.persistentAppUI ~f:TemplateParameter.to_value));
+        ("cloudWatchMonitoringConfiguration",
+          (Option.map x.cloudWatchMonitoringConfiguration
+             ~f:ParametricCloudWatchMonitoringConfiguration.to_value));
+        ("s3MonitoringConfiguration",
+          (Option.map x.s3MonitoringConfiguration
+             ~f:ParametricS3MonitoringConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3MonitoringConfiguration =
+        (Option.map ~f:ParametricS3MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "s3MonitoringConfiguration") in
+      let cloudWatchMonitoringConfiguration =
+        (Option.map ~f:ParametricCloudWatchMonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "cloudWatchMonitoringConfiguration") in
+      let persistentAppUI =
+        (Option.map ~f:TemplateParameter.of_xml)
+          (Xml.child xml_arg0 "persistentAppUI") in
+      make ?s3MonitoringConfiguration ?cloudWatchMonitoringConfiguration
+        ?persistentAppUI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3MonitoringConfiguration =
+        field_map json__ "s3MonitoringConfiguration"
+          ParametricS3MonitoringConfiguration.of_json in
+      let cloudWatchMonitoringConfiguration =
+        field_map json__ "cloudWatchMonitoringConfiguration"
+          ParametricCloudWatchMonitoringConfiguration.of_json in
+      let persistentAppUI =
+        field_map json__ "persistentAppUI" TemplateParameter.of_json in
+      make ?s3MonitoringConfiguration ?cloudWatchMonitoringConfiguration
+        ?persistentAppUI ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration setting for monitoring. This data type allows job template parameters to be specified within."]
+module ParametricConfigurationOverrides =
+  struct
+    type nonrec t =
+      {
+      applicationConfiguration: ConfigurationList.t option
+        [@ocaml.doc
+          "The configurations for the application running by the job run."];
+      monitoringConfiguration: ParametricMonitoringConfiguration.t option
+        [@ocaml.doc "The configurations for monitoring."]}
+    let make ?applicationConfiguration =
+      fun ?monitoringConfiguration ->
+        fun () -> { applicationConfiguration; monitoringConfiguration }
+    let to_value x =
+      structure_to_value
+        [("applicationConfiguration",
+           (Option.map x.applicationConfiguration
+              ~f:ConfigurationList.to_value));
+        ("monitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:ParametricMonitoringConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let monitoringConfiguration =
+        (Option.map ~f:ParametricMonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "monitoringConfiguration") in
+      let applicationConfiguration =
+        (Option.map ~f:ConfigurationList.of_xml)
+          (Xml.child xml_arg0 "applicationConfiguration") in
+      make ?monitoringConfiguration ?applicationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let monitoringConfiguration =
+        field_map json__ "monitoringConfiguration"
+          ParametricMonitoringConfiguration.of_json in
+      let applicationConfiguration =
+        field_map json__ "applicationConfiguration" ConfigurationList.of_json in
+      make ?monitoringConfiguration ?applicationConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A configuration specification to be used to override existing configurations. This data type allows job template parameters to be specified within."]
+module SparkSubmitParameters =
+  struct
+    type nonrec t = string
+    let context_ = "SparkSubmitParameters"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:102400) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SparkSubmitParameters" j
+    let to_json = simple_to_json to_value
+  end
+module EntryPointPath =
+  struct
+    type nonrec t = string
+    let context_ = "EntryPointPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntryPointPath" j
+    let to_json = simple_to_json to_value
+  end
+module EntryPointArgument =
+  struct
+    type nonrec t = string
+    let context_ = "EntryPointArgument"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10280) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EntryPointArgument" j
+    let to_json = simple_to_json to_value
+  end
+module EntryPointArguments =
+  struct
+    type nonrec t = EntryPointArgument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EntryPointArgument.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EntryPointArgument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EntryPointArguments"
+        ~of_json:EntryPointArgument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SparkSubmitJobDriver =
+  struct
+    type nonrec t =
+      {
+      entryPoint: EntryPointPath.t
+        [@ocaml.doc "The entry point of job application."];
+      entryPointArguments: EntryPointArguments.t option
+        [@ocaml.doc "The arguments for job application."];
+      sparkSubmitParameters: SparkSubmitParameters.t option
+        [@ocaml.doc
+          "The Spark submit parameters that are used for job runs."]}
+    let context_ = "SparkSubmitJobDriver"
+    let make ?entryPointArguments =
+      fun ?sparkSubmitParameters ->
+        fun ~entryPoint ->
+          fun () ->
+            { entryPointArguments; sparkSubmitParameters; entryPoint }
+    let to_value x =
+      structure_to_value
+        [("entryPoint", (Some (EntryPointPath.to_value x.entryPoint)));
+        ("entryPointArguments",
+          (Option.map x.entryPointArguments ~f:EntryPointArguments.to_value));
+        ("sparkSubmitParameters",
+          (Option.map x.sparkSubmitParameters
+             ~f:SparkSubmitParameters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sparkSubmitParameters =
+        (Option.map ~f:SparkSubmitParameters.of_xml)
+          (Xml.child xml_arg0 "sparkSubmitParameters") in
+      let entryPointArguments =
+        (Option.map ~f:EntryPointArguments.of_xml)
+          (Xml.child xml_arg0 "entryPointArguments") in
+      let entryPoint =
+        EntryPointPath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "entryPoint") in
+      make ?sparkSubmitParameters ?entryPointArguments ~entryPoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sparkSubmitParameters =
+        field_map json__ "sparkSubmitParameters"
+          SparkSubmitParameters.of_json in
+      let entryPointArguments =
+        field_map json__ "entryPointArguments" EntryPointArguments.of_json in
+      let entryPoint =
+        field_map_exn json__ "entryPoint" EntryPointPath.of_json in
+      make ?sparkSubmitParameters ?entryPointArguments ~entryPoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The information about job driver for Spark submit."]
+module SparkSqlParameters =
+  struct
+    type nonrec t = string
+    let context_ = "SparkSqlParameters"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:102400) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SparkSqlParameters" j
+    let to_json = simple_to_json to_value
+  end
+module SparkSqlJobDriver =
+  struct
+    type nonrec t =
+      {
+      entryPoint: EntryPointPath.t option
+        [@ocaml.doc "The SQL file to be executed."];
+      sparkSqlParameters: SparkSqlParameters.t option
+        [@ocaml.doc
+          "The Spark parameters to be included in the Spark SQL command."]}
+    let make ?entryPoint =
+      fun ?sparkSqlParameters -> fun () -> { entryPoint; sparkSqlParameters }
+    let to_value x =
+      structure_to_value
+        [("entryPoint", (Option.map x.entryPoint ~f:EntryPointPath.to_value));
+        ("sparkSqlParameters",
+          (Option.map x.sparkSqlParameters ~f:SparkSqlParameters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sparkSqlParameters =
+        (Option.map ~f:SparkSqlParameters.of_xml)
+          (Xml.child xml_arg0 "sparkSqlParameters") in
+      let entryPoint =
+        (Option.map ~f:EntryPointPath.of_xml)
+          (Xml.child xml_arg0 "entryPoint") in
+      make ?sparkSqlParameters ?entryPoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sparkSqlParameters =
+        field_map json__ "sparkSqlParameters" SparkSqlParameters.of_json in
+      let entryPoint = field_map json__ "entryPoint" EntryPointPath.of_json in
+      make ?sparkSqlParameters ?entryPoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The job driver for job type."]
+module JobDriver =
+  struct
+    type nonrec t =
+      {
+      sparkSubmitJobDriver: SparkSubmitJobDriver.t option
+        [@ocaml.doc "The job driver parameters specified for spark submit."];
+      sparkSqlJobDriver: SparkSqlJobDriver.t option
+        [@ocaml.doc "The job driver for job type."]}
+    let make ?sparkSubmitJobDriver =
+      fun ?sparkSqlJobDriver ->
+        fun () -> { sparkSubmitJobDriver; sparkSqlJobDriver }
+    let to_value x =
+      structure_to_value
+        [("sparkSubmitJobDriver",
+           (Option.map x.sparkSubmitJobDriver
+              ~f:SparkSubmitJobDriver.to_value));
+        ("sparkSqlJobDriver",
+          (Option.map x.sparkSqlJobDriver ~f:SparkSqlJobDriver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sparkSqlJobDriver =
+        (Option.map ~f:SparkSqlJobDriver.of_xml)
+          (Xml.child xml_arg0 "sparkSqlJobDriver") in
+      let sparkSubmitJobDriver =
+        (Option.map ~f:SparkSubmitJobDriver.of_xml)
+          (Xml.child xml_arg0 "sparkSubmitJobDriver") in
+      make ?sparkSqlJobDriver ?sparkSubmitJobDriver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sparkSqlJobDriver =
+        field_map json__ "sparkSqlJobDriver" SparkSqlJobDriver.of_json in
+      let sparkSubmitJobDriver =
+        field_map json__ "sparkSubmitJobDriver" SparkSubmitJobDriver.of_json in
+      make ?sparkSqlJobDriver ?sparkSubmitJobDriver ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify the driver that the job runs on. Exactly one of the two available job drivers is required, either sparkSqlJobDriver or sparkSubmitJobDriver."]
+module JobTemplateData =
+  struct
+    type nonrec t =
+      {
+      executionRoleArn: ParametricIAMRoleArn.t
+        [@ocaml.doc "The execution role ARN of the job run."];
+      releaseLabel: ParametricReleaseLabel.t
+        [@ocaml.doc "The release version of Amazon EMR."];
+      configurationOverrides: ParametricConfigurationOverrides.t option
+        [@ocaml.doc
+          "The configuration settings that are used to override defaults configuration."];
+      jobDriver: JobDriver.t ;
+      parameterConfiguration: TemplateParameterConfigurationMap.t option
+        [@ocaml.doc
+          "The configuration of parameters existing in the job template."];
+      jobTags: TagMap.t option
+        [@ocaml.doc
+          "The tags assigned to jobs started using the job template."]}
+    let context_ = "JobTemplateData"
+    let make ?configurationOverrides =
+      fun ?parameterConfiguration ->
+        fun ?jobTags ->
+          fun ~executionRoleArn ->
+            fun ~releaseLabel ->
+              fun ~jobDriver ->
+                fun () ->
+                  {
+                    configurationOverrides;
+                    parameterConfiguration;
+                    jobTags;
+                    executionRoleArn;
+                    releaseLabel;
+                    jobDriver
+                  }
+    let to_value x =
+      structure_to_value
+        [("executionRoleArn",
+           (Some (ParametricIAMRoleArn.to_value x.executionRoleArn)));
+        ("releaseLabel",
+          (Some (ParametricReleaseLabel.to_value x.releaseLabel)));
+        ("configurationOverrides",
+          (Option.map x.configurationOverrides
+             ~f:ParametricConfigurationOverrides.to_value));
+        ("jobDriver", (Some (JobDriver.to_value x.jobDriver)));
+        ("parameterConfiguration",
+          (Option.map x.parameterConfiguration
+             ~f:TemplateParameterConfigurationMap.to_value));
+        ("jobTags", (Option.map x.jobTags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobTags =
+        (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "jobTags") in
+      let parameterConfiguration =
+        (Option.map ~f:TemplateParameterConfigurationMap.of_xml)
+          (Xml.child xml_arg0 "parameterConfiguration") in
+      let jobDriver =
+        JobDriver.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "jobDriver") in
+      let configurationOverrides =
+        (Option.map ~f:ParametricConfigurationOverrides.of_xml)
+          (Xml.child xml_arg0 "configurationOverrides") in
+      let releaseLabel =
+        ParametricReleaseLabel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "releaseLabel") in
+      let executionRoleArn =
+        ParametricIAMRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "executionRoleArn") in
+      make ?jobTags ?parameterConfiguration ~jobDriver
+        ?configurationOverrides ~releaseLabel ~executionRoleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobTags = field_map json__ "jobTags" TagMap.of_json in
+      let parameterConfiguration =
+        field_map json__ "parameterConfiguration"
+          TemplateParameterConfigurationMap.of_json in
+      let jobDriver = field_map_exn json__ "jobDriver" JobDriver.of_json in
+      let configurationOverrides =
+        field_map json__ "configurationOverrides"
+          ParametricConfigurationOverrides.of_json in
+      let releaseLabel =
+        field_map_exn json__ "releaseLabel" ParametricReleaseLabel.of_json in
+      let executionRoleArn =
+        field_map_exn json__ "executionRoleArn" ParametricIAMRoleArn.of_json in
+      make ?jobTags ?parameterConfiguration ~jobDriver
+        ?configurationOverrides ~releaseLabel ~executionRoleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The values of StartJobRun API requests used in job runs started using the job template."]
+module CreateJobTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      name: ResourceNameString.t
+        [@ocaml.doc "The specified name of the job template."];
+      clientToken: ClientToken.t
+        [@ocaml.doc "The client token of the job template."];
+      jobTemplateData: JobTemplateData.t
+        [@ocaml.doc
+          "The job template data which holds values of StartJobRun API request."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags that are associated with the job template."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc "The KMS key ARN used to encrypt the job template."]}
+    let context_ = "CreateJobTemplateRequest"
+    let make ?tags =
+      fun ?kmsKeyArn ->
+        fun ~name ->
+          fun ~clientToken ->
+            fun ~jobTemplateData ->
+              fun () ->
+                { tags; kmsKeyArn; name; clientToken; jobTemplateData }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (ResourceNameString.to_value x.name)));
+        ("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("jobTemplateData",
+          (Some (JobTemplateData.to_value x.jobTemplateData)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let jobTemplateData =
+        JobTemplateData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "jobTemplateData") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let name =
+        ResourceNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?kmsKeyArn ?tags ~jobTemplateData ~clientToken ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let jobTemplateData =
+        field_map_exn json__ "jobTemplateData" JobTemplateData.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      let name = field_map_exn json__ "name" ResourceNameString.of_json in
+      make ?kmsKeyArn ?tags ~jobTemplateData ~clientToken ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: String1024.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String1024.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String1024.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource was not found."]
+module JobTemplateArn =
+  struct
+    type nonrec t = string
+    let context_ = "JobTemplateArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:60) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):emr-containers:.+:(\\d{12}):\\/jobtemplates\\/[0-9a-zA-Z]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"JobTemplateArn" j
+    let to_json = simple_to_json to_value
+  end
+module Date =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module CreateJobTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "This output display the created job template ID."];
+      name: ResourceNameString.t option
+        [@ocaml.doc
+          "This output displays the name of the created job template."];
+      arn: JobTemplateArn.t option
+        [@ocaml.doc
+          "This output display the ARN of the created job template."];
+      createdAt: Date.t option
+        [@ocaml.doc
+          "This output displays the date and time when the job template was created."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id =
+      fun ?name ->
+        fun ?arn -> fun ?createdAt -> fun () -> { id; name; arn; createdAt }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("name", (Option.map x.name ~f:ResourceNameString.to_value));
+        ("arn", (Option.map x.arn ~f:JobTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map ~f:JobTemplateArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let name =
+        (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?createdAt ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let arn = field_map json__ "arn" JobTemplateArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?createdAt ?arn ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
 module ReleaseLabel =
   struct
     type nonrec t = string
@@ -929,28 +2333,6 @@ module ReleaseLabel =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ReleaseLabel" j
-    let to_json = simple_to_json to_value
-  end
-module IAMRoleArn =
-  struct
-    type nonrec t = string
-    let context_ = "IAMRoleArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):iam::(\\d{12})?:(role((\\u002F)|(\\u002F[\\u0021-\\u007F]+\\u002F))[\\w+=,.@-]+)$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IAMRoleArn" j
     let to_json = simple_to_json to_value
   end
 module EndpointType =
@@ -989,7 +2371,7 @@ module CreateManagedEndpointRequest =
         [@ocaml.doc "The ARN of the execution role."];
       certificateArn: ACMCertArn.t option
         [@ocaml.doc
-          "The certificate ARN provided by users for the managed endpoint. This fiedd is under deprecation and will be removed in future releases."];
+          "The certificate ARN provided by users for the managed endpoint. This field is under deprecation and will be removed in future releases."];
       configurationOverrides: ConfigurationOverrides.t option
         [@ocaml.doc
           "The configuration settings that will be used to override existing configurations."];
@@ -1062,45 +2444,28 @@ module CreateManagedEndpointRequest =
       make ?tags ~clientToken ?configurationOverrides ?certificateArn
         ~executionRoleArn ~releaseLabel ~type_ ~virtualClusterId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let configurationOverrides =
-        field_map json "configurationOverrides"
+        field_map json__ "configurationOverrides"
           ConfigurationOverrides.of_json in
-      let certificateArn = field_map json "certificateArn" ACMCertArn.of_json in
+      let certificateArn =
+        field_map json__ "certificateArn" ACMCertArn.of_json in
       let executionRoleArn =
-        field_map_exn json "executionRoleArn" IAMRoleArn.of_json in
+        field_map_exn json__ "executionRoleArn" IAMRoleArn.of_json in
       let releaseLabel =
-        field_map_exn json "releaseLabel" ReleaseLabel.of_json in
-      let type_ = field_map_exn json "type" EndpointType.of_json in
+        field_map_exn json__ "releaseLabel" ReleaseLabel.of_json in
+      let type_ = field_map_exn json__ "type" EndpointType.of_json in
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let name = field_map_exn json "name" ResourceNameString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let name = field_map_exn json__ "name" ResourceNameString.of_json in
       make ?tags ~clientToken ?configurationOverrides ?certificateArn
         ~executionRoleArn ~releaseLabel ~type_ ~virtualClusterId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = {
-      message: String1024.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:String1024.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String1024.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource was not found."]
+       "Creates a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
 module EndpointArn =
   struct
     type nonrec t = string
@@ -1204,16 +2569,213 @@ module CreateManagedEndpointResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?arn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let arn = field_map json "arn" EndpointArn.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let arn = field_map json__ "arn" EndpointArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?virtualClusterId ?arn ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Creates a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
+module SecurityConfigurationData =
+  struct
+    type nonrec t =
+      {
+      authorizationConfiguration: AuthorizationConfiguration.t option
+        [@ocaml.doc
+          "Authorization-related configuration input for the security configuration."]}
+    let make ?authorizationConfiguration =
+      fun () -> { authorizationConfiguration }
+    let to_value x =
+      structure_to_value
+        [("authorizationConfiguration",
+           (Option.map x.authorizationConfiguration
+              ~f:AuthorizationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizationConfiguration =
+        (Option.map ~f:AuthorizationConfiguration.of_xml)
+          (Xml.child xml_arg0 "authorizationConfiguration") in
+      make ?authorizationConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizationConfiguration =
+        field_map json__ "authorizationConfiguration"
+          AuthorizationConfiguration.of_json in
+      make ?authorizationConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configurations related to the security configuration for the request."]
+module CreateSecurityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "The client idempotency token to use when creating the security configuration."];
+      name: ResourceNameString.t
+        [@ocaml.doc "The name of the security configuration."];
+      containerProvider: ContainerProvider.t option
+        [@ocaml.doc
+          "The container provider associated with the security configuration."];
+      securityConfigurationData: SecurityConfigurationData.t
+        [@ocaml.doc "Security configuration input for the request."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags to add to the security configuration."]}
+    let context_ = "CreateSecurityConfigurationRequest"
+    let make ?containerProvider =
+      fun ?tags ->
+        fun ~clientToken ->
+          fun ~name ->
+            fun ~securityConfigurationData ->
+              fun () ->
+                {
+                  containerProvider;
+                  tags;
+                  clientToken;
+                  name;
+                  securityConfigurationData
+                }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("name", (Some (ResourceNameString.to_value x.name)));
+        ("containerProvider",
+          (Option.map x.containerProvider ~f:ContainerProvider.to_value));
+        ("securityConfigurationData",
+          (Some
+             (SecurityConfigurationData.to_value x.securityConfigurationData)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let securityConfigurationData =
+        SecurityConfigurationData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "securityConfigurationData") in
+      let containerProvider =
+        (Option.map ~f:ContainerProvider.of_xml)
+          (Xml.child xml_arg0 "containerProvider") in
+      let name =
+        ResourceNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      make ?tags ~securityConfigurationData ?containerProvider ~name
+        ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let securityConfigurationData =
+        field_map_exn json__ "securityConfigurationData"
+          SecurityConfigurationData.of_json in
+      let containerProvider =
+        field_map json__ "containerProvider" ContainerProvider.of_json in
+      let name = field_map_exn json__ "name" ResourceNameString.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      make ?tags ~securityConfigurationData ?containerProvider ~name
+        ~clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a security configuration. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
+module SecurityConfigurationArn =
+  struct
+    type nonrec t = string
+    let context_ = "SecurityConfigurationArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:60) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):emr-containers:.+:(\\d{12}):\\/securityconfigurations\\/[0-9a-zA-Z]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecurityConfigurationArn" j
+    let to_json = simple_to_json to_value
+  end
+module CreateSecurityConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "The ID of the security configuration."];
+      name: ResourceNameString.t option
+        [@ocaml.doc "The name of the security configuration."];
+      arn: SecurityConfigurationArn.t option
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the security configuration."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun ?name -> fun ?arn -> fun () -> { id; name; arn }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("name", (Option.map x.name ~f:ResourceNameString.to_value));
+        ("arn", (Option.map x.arn ~f:SecurityConfigurationArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn =
+        (Option.map ~f:SecurityConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      let name =
+        (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?arn ?name ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "arn" SecurityConfigurationArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?arn ?name ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a security configuration. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
 module CreateVirtualClusterRequest =
   struct
     type nonrec t =
@@ -1225,22 +2787,37 @@ module CreateVirtualClusterRequest =
       clientToken: ClientToken.t
         [@ocaml.doc "The client token of the virtual cluster."];
       tags: TagMap.t option
-        [@ocaml.doc "The tags assigned to the virtual cluster."]}
+        [@ocaml.doc "The tags assigned to the virtual cluster."];
+      securityConfigurationId: ResourceIdString.t option
+        [@ocaml.doc "The ID of the security configuration."]}
     let context_ = "CreateVirtualClusterRequest"
     let make ?tags =
-      fun ~name ->
-        fun ~containerProvider ->
-          fun ~clientToken ->
-            fun () -> { tags; name; containerProvider; clientToken }
+      fun ?securityConfigurationId ->
+        fun ~name ->
+          fun ~containerProvider ->
+            fun ~clientToken ->
+              fun () ->
+                {
+                  tags;
+                  securityConfigurationId;
+                  name;
+                  containerProvider;
+                  clientToken
+                }
     let to_value x =
       structure_to_value
         [("name", (Some (ResourceNameString.to_value x.name)));
         ("containerProvider",
           (Some (ContainerProvider.to_value x.containerProvider)));
         ("clientToken", (Some (ClientToken.to_value x.clientToken)));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("securityConfigurationId",
+          (Option.map x.securityConfigurationId ~f:ResourceIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let securityConfigurationId =
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "securityConfigurationId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let clientToken =
         ClientToken.of_xml
@@ -1251,15 +2828,20 @@ module CreateVirtualClusterRequest =
       let name =
         ResourceNameString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tags ~clientToken ~containerProvider ~name ()
+      make ?securityConfigurationId ?tags ~clientToken ~containerProvider
+        ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let securityConfigurationId =
+        field_map json__ "securityConfigurationId" ResourceIdString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let containerProvider =
-        field_map_exn json "containerProvider" ContainerProvider.of_json in
-      let name = field_map_exn json "name" ResourceNameString.of_json in
-      make ?tags ~clientToken ~containerProvider ~name ()
+        field_map_exn json__ "containerProvider" ContainerProvider.of_json in
+      let name = field_map_exn json__ "name" ResourceNameString.of_json in
+      make ?securityConfigurationId ?tags ~clientToken ~containerProvider
+        ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a virtual cluster. Virtual cluster is a managed entity on Amazon EMR on EKS. You can create, describe, list and delete virtual clusters. They do not consume any additional resource in your system. A single virtual cluster maps to a single Kubernetes namespace. Given this relationship, you can model virtual clusters the same way you model Kubernetes namespaces to meet your requirements."]
@@ -1285,6 +2867,26 @@ module VirtualClusterArn =
     let of_json j = string_of_json ~kind:"VirtualClusterArn" j
     let to_json = simple_to_json to_value
   end
+module EKSRequestThrottledException =
+  struct
+    type nonrec t = {
+      message: String1024.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String1024.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String1024.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request exceeded the Amazon EKS API operation limits."]
 module CreateVirtualClusterResponse =
   struct
     type nonrec t =
@@ -1296,13 +2898,17 @@ module CreateVirtualClusterResponse =
       arn: VirtualClusterArn.t option
         [@ocaml.doc "This output contains the ARN of virtual cluster."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `EKSRequestThrottledException of EKSRequestThrottledException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?id = fun ?name -> fun ?arn -> fun () -> { id; name; arn }
     let error_of_json name json =
       match name with
+      | "EKSRequestThrottledException" ->
+          `EKSRequestThrottledException
+            (EKSRequestThrottledException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ResourceNotFoundException" ->
@@ -1314,6 +2920,9 @@ module CreateVirtualClusterResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "EKSRequestThrottledException" ->
+          `EKSRequestThrottledException
+            (EKSRequestThrottledException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -1324,6 +2933,10 @@ module CreateVirtualClusterResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `EKSRequestThrottledException e ->
+          `Assoc
+            [("error", (`String "EKSRequestThrottledException"));
+            ("details", (EKSRequestThrottledException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1356,26 +2969,153 @@ module CreateVirtualClusterResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?arn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "arn" VirtualClusterArn.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "arn" VirtualClusterArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?arn ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a virtual cluster. Virtual cluster is a managed entity on Amazon EMR on EKS. You can create, describe, list and delete virtual clusters. They do not consume any additional resource in your system. A single virtual cluster maps to a single Kubernetes namespace. Given this relationship, you can model virtual clusters the same way you model Kubernetes namespaces to meet your requirements."]
-module Date =
+module CredentialType =
   struct
     type nonrec t = string
-    let make i = i
+    let context_ = "CredentialType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*\\S.*$")));
+        i
     let of_string x = x
-    let to_value x = `Timestamp x
+    let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CredentialType" j
     let to_json = simple_to_json to_value
   end
+module Token =
+  struct
+    type nonrec t = string
+    let context_ = "Token"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () -> check_pattern i ~pattern:"^.*\\S.*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Token" j
+    let to_json = simple_to_json to_value
+  end
+module Credentials =
+  struct
+    type nonrec t =
+      {
+      token: Token.t option
+        [@ocaml.doc "The actual session token being returned."]}
+    let make ?token = fun () -> { token }
+    let to_value x =
+      structure_to_value [("token", (Option.map x.token ~f:Token.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let token = (Option.map ~f:Token.of_xml) (Xml.child xml_arg0 "token") in
+      make ?token ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let token = field_map json__ "token" Token.of_json in make ?token ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure containing the session token being returned."]
+module DeleteJobTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t
+        [@ocaml.doc "The ID of the job template that will be deleted."]}
+    let context_ = "DeleteJobTemplateRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("templateId", (Some (ResourceIdString.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResourceIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "templateId") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
+      make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
+module DeleteJobTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc
+          "This output contains the ID of the job template that was deleted."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id = fun () -> { id }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ResourceIdString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "id" ResourceIdString.of_json in make ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
 module DeleteManagedEndpointRequest =
   struct
     type nonrec t =
@@ -1401,14 +3141,14 @@ module DeleteManagedEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~virtualClusterId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~virtualClusterId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Deletes a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
 module DeleteManagedEndpointResponse =
   struct
     type nonrec t =
@@ -1470,14 +3210,14 @@ module DeleteManagedEndpointResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?virtualClusterId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Deletes a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
 module DeleteVirtualClusterRequest =
   struct
     type nonrec t =
@@ -1496,8 +3236,8 @@ module DeleteVirtualClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1555,8 +3295,8 @@ module DeleteVirtualClusterResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map json "id" ResourceIdString.of_json in make ?id ()
+    let of_json json__ =
+      let id = field_map json__ "id" ResourceIdString.of_json in make ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a virtual cluster. Virtual cluster is a managed entity on Amazon EMR on EKS. You can create, describe, list and delete virtual clusters. They do not consume any additional resource in your system. A single virtual cluster maps to a single Kubernetes namespace. Given this relationship, you can model virtual clusters the same way you model Kubernetes namespaces to meet your requirements."]
@@ -1586,14 +3326,79 @@ module DescribeJobRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "jobRunId") in
       make ~virtualClusterId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~virtualClusterId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays detailed information about a job run. A job run is a unit of work, such as a Spark jar, PySpark script, or SparkSQL query, that you submit to Amazon EMR on EKS."]
+module JavaInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for JavaInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RetryPolicyExecution =
+  struct
+    type nonrec t =
+      {
+      currentAttemptCount: JavaInteger.t option
+        [@ocaml.doc
+          "The current number of attempts made on the driver of the job."]}
+    let make ?currentAttemptCount = fun () -> { currentAttemptCount }
+    let to_value x =
+      structure_to_value
+        [("currentAttemptCount",
+           (Option.map x.currentAttemptCount ~f:JavaInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let currentAttemptCount =
+        (Option.map ~f:JavaInteger.of_xml)
+          (Xml.child xml_arg0 "currentAttemptCount") in
+      make ?currentAttemptCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currentAttemptCount =
+        field_map json__ "currentAttemptCount" JavaInteger.of_json in
+      make ?currentAttemptCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The current status of the retry policy executed on the job."]
+module RetryPolicyConfiguration =
+  struct
+    type nonrec t =
+      {
+      maxAttempts: JavaInteger.t
+        [@ocaml.doc "The maximum number of attempts on the job's driver."]}
+    let context_ = "RetryPolicyConfiguration"
+    let make ~maxAttempts = fun () -> { maxAttempts }
+    let to_value x =
+      structure_to_value
+        [("maxAttempts", (Some (JavaInteger.to_value x.maxAttempts)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxAttempts =
+        JavaInteger.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxAttempts") in
+      make ~maxAttempts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxAttempts =
+        field_map_exn json__ "maxAttempts" JavaInteger.of_json in
+      make ~maxAttempts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of the retry policy that the job runs on."]
 module RequestIdentityUserArn =
   struct
     type nonrec t = string
@@ -1656,169 +3461,6 @@ module JobRunState =
     let of_json j = of_string (string_of_json ~kind:"JobRunState" j)
     let to_json = simple_to_json to_value
   end
-module SparkSubmitParameters =
-  struct
-    type nonrec t = string
-    let context_ = "SparkSubmitParameters"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:102400) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(?!\\s*$)(^[^';|\\u0026\\u003C\\u003E*?`$(){}\\[\\]!#\\\\]*$)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"SparkSubmitParameters" j
-    let to_json = simple_to_json to_value
-  end
-module EntryPointPath =
-  struct
-    type nonrec t = string
-    let context_ = "EntryPointPath"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(?!\\s*$)(^[^';|\\u0026\\u003C\\u003E*?`$(){}\\[\\]!#\\\\]*$)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntryPointPath" j
-    let to_json = simple_to_json to_value
-  end
-module EntryPointArgument =
-  struct
-    type nonrec t = string
-    let context_ = "EntryPointArgument"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:10280) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"(?!\\s*$)(^[^';|\\u0026\\u003C\\u003E*?`$(){}\\[\\]!#\\\\]*$)")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EntryPointArgument" j
-    let to_json = simple_to_json to_value
-  end
-module EntryPointArguments =
-  struct
-    type nonrec t = EntryPointArgument.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:EntryPointArgument.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:EntryPointArgument.of_xml)
-    let of_json j =
-      list_of_json ~kind:"EntryPointArguments"
-        ~of_json:EntryPointArgument.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module SparkSubmitJobDriver =
-  struct
-    type nonrec t =
-      {
-      entryPoint: EntryPointPath.t
-        [@ocaml.doc "The entry point of job application."];
-      entryPointArguments: EntryPointArguments.t option
-        [@ocaml.doc "The arguments for job application."];
-      sparkSubmitParameters: SparkSubmitParameters.t option
-        [@ocaml.doc
-          "The Spark submit parameters that are used for job runs."]}
-    let context_ = "SparkSubmitJobDriver"
-    let make ?entryPointArguments =
-      fun ?sparkSubmitParameters ->
-        fun ~entryPoint ->
-          fun () ->
-            { entryPointArguments; sparkSubmitParameters; entryPoint }
-    let to_value x =
-      structure_to_value
-        [("entryPoint", (Some (EntryPointPath.to_value x.entryPoint)));
-        ("entryPointArguments",
-          (Option.map x.entryPointArguments ~f:EntryPointArguments.to_value));
-        ("sparkSubmitParameters",
-          (Option.map x.sparkSubmitParameters
-             ~f:SparkSubmitParameters.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sparkSubmitParameters =
-        (Option.map ~f:SparkSubmitParameters.of_xml)
-          (Xml.child xml_arg0 "sparkSubmitParameters") in
-      let entryPointArguments =
-        (Option.map ~f:EntryPointArguments.of_xml)
-          (Xml.child xml_arg0 "entryPointArguments") in
-      let entryPoint =
-        EntryPointPath.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "entryPoint") in
-      make ?sparkSubmitParameters ?entryPointArguments ~entryPoint ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sparkSubmitParameters =
-        field_map json "sparkSubmitParameters" SparkSubmitParameters.of_json in
-      let entryPointArguments =
-        field_map json "entryPointArguments" EntryPointArguments.of_json in
-      let entryPoint = field_map_exn json "entryPoint" EntryPointPath.of_json in
-      make ?sparkSubmitParameters ?entryPointArguments ~entryPoint ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The information about job driver for Spark submit."]
-module JobDriver =
-  struct
-    type nonrec t =
-      {
-      sparkSubmitJobDriver: SparkSubmitJobDriver.t option
-        [@ocaml.doc "The job driver parameters specified for spark submit."]}
-    let make ?sparkSubmitJobDriver = fun () -> { sparkSubmitJobDriver }
-    let to_value x =
-      structure_to_value
-        [("sparkSubmitJobDriver",
-           (Option.map x.sparkSubmitJobDriver
-              ~f:SparkSubmitJobDriver.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sparkSubmitJobDriver =
-        (Option.map ~f:SparkSubmitJobDriver.of_xml)
-          (Xml.child xml_arg0 "sparkSubmitJobDriver") in
-      make ?sparkSubmitJobDriver ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sparkSubmitJobDriver =
-        field_map json "sparkSubmitJobDriver" SparkSubmitJobDriver.of_json in
-      make ?sparkSubmitJobDriver ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Specify the driver that the job runs on."]
 module JobArn =
   struct
     type nonrec t = string
@@ -1904,7 +3546,13 @@ module JobRun =
         [@ocaml.doc "Additional details of the job run state."];
       failureReason: FailureReason.t option
         [@ocaml.doc "The reasons why the job run has failed."];
-      tags: TagMap.t option [@ocaml.doc "The assigned tags of the job run."]}
+      tags: TagMap.t option [@ocaml.doc "The assigned tags of the job run."];
+      retryPolicyConfiguration: RetryPolicyConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the retry policy that the job runs on."];
+      retryPolicyExecution: RetryPolicyExecution.t option
+        [@ocaml.doc
+          "The current status of the retry policy executed on the job."]}
     let make ?id =
       fun ?name ->
         fun ?virtualClusterId ->
@@ -1921,25 +3569,29 @@ module JobRun =
                               fun ?stateDetails ->
                                 fun ?failureReason ->
                                   fun ?tags ->
-                                    fun () ->
-                                      {
-                                        id;
-                                        name;
-                                        virtualClusterId;
-                                        arn;
-                                        state;
-                                        clientToken;
-                                        executionRoleArn;
-                                        releaseLabel;
-                                        configurationOverrides;
-                                        jobDriver;
-                                        createdAt;
-                                        createdBy;
-                                        finishedAt;
-                                        stateDetails;
-                                        failureReason;
-                                        tags
-                                      }
+                                    fun ?retryPolicyConfiguration ->
+                                      fun ?retryPolicyExecution ->
+                                        fun () ->
+                                          {
+                                            id;
+                                            name;
+                                            virtualClusterId;
+                                            arn;
+                                            state;
+                                            clientToken;
+                                            executionRoleArn;
+                                            releaseLabel;
+                                            configurationOverrides;
+                                            jobDriver;
+                                            createdAt;
+                                            createdBy;
+                                            finishedAt;
+                                            stateDetails;
+                                            failureReason;
+                                            tags;
+                                            retryPolicyConfiguration;
+                                            retryPolicyExecution
+                                          }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ResourceIdString.to_value));
@@ -1964,9 +3616,20 @@ module JobRun =
         ("stateDetails", (Option.map x.stateDetails ~f:String256.to_value));
         ("failureReason",
           (Option.map x.failureReason ~f:FailureReason.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("retryPolicyConfiguration",
+          (Option.map x.retryPolicyConfiguration
+             ~f:RetryPolicyConfiguration.to_value));
+        ("retryPolicyExecution",
+          (Option.map x.retryPolicyExecution ~f:RetryPolicyExecution.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let retryPolicyExecution =
+        (Option.map ~f:RetryPolicyExecution.of_xml)
+          (Xml.child xml_arg0 "retryPolicyExecution") in
+      let retryPolicyConfiguration =
+        (Option.map ~f:RetryPolicyConfiguration.of_xml)
+          (Xml.child xml_arg0 "retryPolicyConfiguration") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let failureReason =
         (Option.map ~f:FailureReason.of_xml)
@@ -2003,38 +3666,43 @@ module JobRun =
         (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?failureReason ?stateDetails ?finishedAt ?createdBy
-        ?createdAt ?jobDriver ?configurationOverrides ?releaseLabel
-        ?executionRoleArn ?clientToken ?state ?arn ?virtualClusterId ?name
-        ?id ()
+      make ?retryPolicyExecution ?retryPolicyConfiguration ?tags
+        ?failureReason ?stateDetails ?finishedAt ?createdBy ?createdAt
+        ?jobDriver ?configurationOverrides ?releaseLabel ?executionRoleArn
+        ?clientToken ?state ?arn ?virtualClusterId ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let retryPolicyExecution =
+        field_map json__ "retryPolicyExecution" RetryPolicyExecution.of_json in
+      let retryPolicyConfiguration =
+        field_map json__ "retryPolicyConfiguration"
+          RetryPolicyConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let stateDetails = field_map json "stateDetails" String256.of_json in
-      let finishedAt = field_map json "finishedAt" Date.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let stateDetails = field_map json__ "stateDetails" String256.of_json in
+      let finishedAt = field_map json__ "finishedAt" Date.of_json in
       let createdBy =
-        field_map json "createdBy" RequestIdentityUserArn.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
-      let jobDriver = field_map json "jobDriver" JobDriver.of_json in
+        field_map json__ "createdBy" RequestIdentityUserArn.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let jobDriver = field_map json__ "jobDriver" JobDriver.of_json in
       let configurationOverrides =
-        field_map json "configurationOverrides"
+        field_map json__ "configurationOverrides"
           ConfigurationOverrides.of_json in
-      let releaseLabel = field_map json "releaseLabel" ReleaseLabel.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
       let executionRoleArn =
-        field_map json "executionRoleArn" IAMRoleArn.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let state = field_map json "state" JobRunState.of_json in
-      let arn = field_map json "arn" JobArn.of_json in
+        field_map json__ "executionRoleArn" IAMRoleArn.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let state = field_map json__ "state" JobRunState.of_json in
+      let arn = field_map json__ "arn" JobArn.of_json in
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
-      make ?tags ?failureReason ?stateDetails ?finishedAt ?createdBy
-        ?createdAt ?jobDriver ?configurationOverrides ?releaseLabel
-        ?executionRoleArn ?clientToken ?state ?arn ?virtualClusterId ?name
-        ?id ()
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?retryPolicyExecution ?retryPolicyConfiguration ?tags
+        ?failureReason ?stateDetails ?finishedAt ?createdBy ?createdAt
+        ?jobDriver ?configurationOverrides ?releaseLabel ?executionRoleArn
+        ?clientToken ?state ?arn ?virtualClusterId ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This entity describes a job run. A job run is a unit of work, such as a Spark jar, PySpark script, or SparkSQL query, that you submit to Amazon EMR on EKS."]
@@ -2099,11 +3767,226 @@ module DescribeJobRunResponse =
         (Option.map ~f:JobRun.of_xml) (Xml.child xml_arg0 "jobRun") in
       make ?jobRun ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobRun = field_map json "jobRun" JobRun.of_json in make ?jobRun ()
+    let of_json json__ =
+      let jobRun = field_map json__ "jobRun" JobRun.of_json in
+      make ?jobRun ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Displays detailed information about a job run. A job run is a unit of work, such as a Spark jar, PySpark script, or SparkSQL query, that you submit to Amazon EMR on EKS."]
+module DescribeJobTemplateRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t
+        [@ocaml.doc "The ID of the job template that will be described."]}
+    let context_ = "DescribeJobTemplateRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("templateId", (Some (ResourceIdString.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResourceIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "templateId") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
+      make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays detailed information about a specified job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
+module String2048 =
+  struct
+    type nonrec t = string
+    let context_ = "String2048"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String2048" j
+    let to_json = simple_to_json to_value
+  end
+module JobTemplate =
+  struct
+    type nonrec t =
+      {
+      name: ResourceNameString.t option
+        [@ocaml.doc "The name of the job template."];
+      id: ResourceIdString.t option
+        [@ocaml.doc "The ID of the job template."];
+      arn: JobTemplateArn.t option
+        [@ocaml.doc "The ARN of the job template."];
+      createdAt: Date.t option
+        [@ocaml.doc "The date and time when the job template was created."];
+      createdBy: RequestIdentityUserArn.t option
+        [@ocaml.doc "The user who created the job template."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags assigned to the job template."];
+      jobTemplateData: JobTemplateData.t option
+        [@ocaml.doc
+          "The job template data which holds values of StartJobRun API request."];
+      kmsKeyArn: KmsKeyArn.t option
+        [@ocaml.doc "The KMS key ARN used to encrypt the job template."];
+      decryptionError: String2048.t option
+        [@ocaml.doc
+          "The error message in case the decryption of job template fails."]}
+    let make ?name =
+      fun ?id ->
+        fun ?arn ->
+          fun ?createdAt ->
+            fun ?createdBy ->
+              fun ?tags ->
+                fun ?jobTemplateData ->
+                  fun ?kmsKeyArn ->
+                    fun ?decryptionError ->
+                      fun () ->
+                        {
+                          name;
+                          id;
+                          arn;
+                          createdAt;
+                          createdBy;
+                          tags;
+                          jobTemplateData;
+                          kmsKeyArn;
+                          decryptionError
+                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:ResourceNameString.to_value));
+        ("id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("arn", (Option.map x.arn ~f:JobTemplateArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Date.to_value));
+        ("createdBy",
+          (Option.map x.createdBy ~f:RequestIdentityUserArn.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("jobTemplateData",
+          (Option.map x.jobTemplateData ~f:JobTemplateData.to_value));
+        ("kmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value));
+        ("decryptionError",
+          (Option.map x.decryptionError ~f:String2048.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let decryptionError =
+        (Option.map ~f:String2048.of_xml)
+          (Xml.child xml_arg0 "decryptionError") in
+      let kmsKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "kmsKeyArn") in
+      let jobTemplateData =
+        (Option.map ~f:JobTemplateData.of_xml)
+          (Xml.child xml_arg0 "jobTemplateData") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let createdBy =
+        (Option.map ~f:RequestIdentityUserArn.of_xml)
+          (Xml.child xml_arg0 "createdBy") in
+      let createdAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map ~f:JobTemplateArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      let name =
+        (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
+      make ?decryptionError ?kmsKeyArn ?jobTemplateData ?tags ?createdBy
+        ?createdAt ?arn ?id ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let decryptionError =
+        field_map json__ "decryptionError" String2048.of_json in
+      let kmsKeyArn = field_map json__ "kmsKeyArn" KmsKeyArn.of_json in
+      let jobTemplateData =
+        field_map json__ "jobTemplateData" JobTemplateData.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let createdBy =
+        field_map json__ "createdBy" RequestIdentityUserArn.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let arn = field_map json__ "arn" JobTemplateArn.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      make ?decryptionError ?kmsKeyArn ?jobTemplateData ?tags ?createdBy
+        ?createdAt ?arn ?id ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This entity describes a job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
+module DescribeJobTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      jobTemplate: JobTemplate.t option
+        [@ocaml.doc
+          "This output displays information about the specified job template."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobTemplate = fun () -> { jobTemplate }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobTemplate", (Option.map x.jobTemplate ~f:JobTemplate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobTemplate =
+        (Option.map ~f:JobTemplate.of_xml) (Xml.child xml_arg0 "jobTemplate") in
+      make ?jobTemplate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobTemplate = field_map json__ "jobTemplate" JobTemplate.of_json in
+      make ?jobTemplate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays detailed information about a specified job template. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
 module DescribeManagedEndpointRequest =
   struct
     type nonrec t =
@@ -2130,18 +4013,21 @@ module DescribeManagedEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
       make ~virtualClusterId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~virtualClusterId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays detailed information about a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Displays detailed information about a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
 module SubnetIds =
   struct
     type nonrec t = String256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2349,31 +4235,32 @@ module Endpoint =
         ?certificateArn ?executionRoleArn ?releaseLabel ?state ?type_
         ?virtualClusterId ?arn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let failureReason =
-        field_map json "failureReason" FailureReason.of_json in
-      let stateDetails = field_map json "stateDetails" String256.of_json in
-      let subnetIds = field_map json "subnetIds" SubnetIds.of_json in
-      let securityGroup = field_map json "securityGroup" String256.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
-      let serverUrl = field_map json "serverUrl" UriString.of_json in
+        field_map json__ "failureReason" FailureReason.of_json in
+      let stateDetails = field_map json__ "stateDetails" String256.of_json in
+      let subnetIds = field_map json__ "subnetIds" SubnetIds.of_json in
+      let securityGroup = field_map json__ "securityGroup" String256.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let serverUrl = field_map json__ "serverUrl" UriString.of_json in
       let configurationOverrides =
-        field_map json "configurationOverrides"
+        field_map json__ "configurationOverrides"
           ConfigurationOverrides.of_json in
       let certificateAuthority =
-        field_map json "certificateAuthority" Certificate.of_json in
-      let certificateArn = field_map json "certificateArn" ACMCertArn.of_json in
+        field_map json__ "certificateAuthority" Certificate.of_json in
+      let certificateArn =
+        field_map json__ "certificateArn" ACMCertArn.of_json in
       let executionRoleArn =
-        field_map json "executionRoleArn" IAMRoleArn.of_json in
-      let releaseLabel = field_map json "releaseLabel" ReleaseLabel.of_json in
-      let state = field_map json "state" EndpointState.of_json in
-      let type_ = field_map json "type" EndpointType.of_json in
+        field_map json__ "executionRoleArn" IAMRoleArn.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
+      let state = field_map json__ "state" EndpointState.of_json in
+      let type_ = field_map json__ "type" EndpointType.of_json in
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let arn = field_map json "arn" EndpointArn.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let arn = field_map json__ "arn" EndpointArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?tags ?failureReason ?stateDetails ?subnetIds ?securityGroup
         ?createdAt ?serverUrl ?configurationOverrides ?certificateAuthority
         ?certificateArn ?executionRoleArn ?releaseLabel ?state ?type_
@@ -2443,12 +4330,193 @@ module DescribeManagedEndpointResponse =
         (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "endpoint") in
       make ?endpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoint = field_map json "endpoint" Endpoint.of_json in
+    let of_json json__ =
+      let endpoint = field_map json__ "endpoint" Endpoint.of_json in
       make ?endpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Displays detailed information about a managed endpoint. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Displays detailed information about a managed endpoint. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
+module DescribeSecurityConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t
+        [@ocaml.doc "The ID of the security configuration."]}
+    let context_ = "DescribeSecurityConfigurationRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value
+        [("securityConfigurationId", (Some (ResourceIdString.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResourceIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "securityConfigurationId") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
+      make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays detailed information about a specified security configuration. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
+module SecurityConfiguration =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "The ID of the security configuration."];
+      name: ResourceNameString.t option
+        [@ocaml.doc "The name of the security configuration."];
+      arn: SecurityConfigurationArn.t option
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) of the security configuration."];
+      createdAt: Date.t option
+        [@ocaml.doc "The date and time that the job run was created."];
+      createdBy: RequestIdentityUserArn.t option
+        [@ocaml.doc "The user who created the job run."];
+      securityConfigurationData: SecurityConfigurationData.t option
+        [@ocaml.doc "Security configuration inputs for the request."];
+      tags: TagMap.t option
+        [@ocaml.doc "The tags to assign to the security configuration."]}
+    let make ?id =
+      fun ?name ->
+        fun ?arn ->
+          fun ?createdAt ->
+            fun ?createdBy ->
+              fun ?securityConfigurationData ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      id;
+                      name;
+                      arn;
+                      createdAt;
+                      createdBy;
+                      securityConfigurationData;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("name", (Option.map x.name ~f:ResourceNameString.to_value));
+        ("arn", (Option.map x.arn ~f:SecurityConfigurationArn.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Date.to_value));
+        ("createdBy",
+          (Option.map x.createdBy ~f:RequestIdentityUserArn.to_value));
+        ("securityConfigurationData",
+          (Option.map x.securityConfigurationData
+             ~f:SecurityConfigurationData.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let securityConfigurationData =
+        (Option.map ~f:SecurityConfigurationData.of_xml)
+          (Xml.child xml_arg0 "securityConfigurationData") in
+      let createdBy =
+        (Option.map ~f:RequestIdentityUserArn.of_xml)
+          (Xml.child xml_arg0 "createdBy") in
+      let createdAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let arn =
+        (Option.map ~f:SecurityConfigurationArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      let name =
+        (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?tags ?securityConfigurationData ?createdBy ?createdAt ?arn ?name
+        ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let securityConfigurationData =
+        field_map json__ "securityConfigurationData"
+          SecurityConfigurationData.of_json in
+      let createdBy =
+        field_map json__ "createdBy" RequestIdentityUserArn.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
+      let arn = field_map json__ "arn" SecurityConfigurationArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?tags ?securityConfigurationData ?createdBy ?createdAt ?arn ?name
+        ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inputs related to the security configuration. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
+module DescribeSecurityConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      securityConfiguration: SecurityConfiguration.t option
+        [@ocaml.doc "Details of the security configuration."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?securityConfiguration = fun () -> { securityConfiguration }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("securityConfiguration",
+           (Option.map x.securityConfiguration
+              ~f:SecurityConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityConfiguration =
+        (Option.map ~f:SecurityConfiguration.of_xml)
+          (Xml.child xml_arg0 "securityConfiguration") in
+      make ?securityConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityConfiguration =
+        field_map json__ "securityConfiguration"
+          SecurityConfiguration.of_json in
+      make ?securityConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Displays detailed information about a specified security configuration. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
 module DescribeVirtualClusterRequest =
   struct
     type nonrec t =
@@ -2467,8 +4535,8 @@ module DescribeVirtualClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ResourceIdString.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ResourceIdString.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2522,7 +4590,9 @@ module VirtualCluster =
       createdAt: Date.t option
         [@ocaml.doc "The date and time when the virtual cluster is created."];
       tags: TagMap.t option
-        [@ocaml.doc "The assigned tags of the virtual cluster."]}
+        [@ocaml.doc "The assigned tags of the virtual cluster."];
+      securityConfigurationId: ResourceIdString.t option
+        [@ocaml.doc "The ID of the security configuration."]}
     let make ?id =
       fun ?name ->
         fun ?arn ->
@@ -2530,16 +4600,18 @@ module VirtualCluster =
             fun ?containerProvider ->
               fun ?createdAt ->
                 fun ?tags ->
-                  fun () ->
-                    {
-                      id;
-                      name;
-                      arn;
-                      state;
-                      containerProvider;
-                      createdAt;
-                      tags
-                    }
+                  fun ?securityConfigurationId ->
+                    fun () ->
+                      {
+                        id;
+                        name;
+                        arn;
+                        state;
+                        containerProvider;
+                        createdAt;
+                        tags;
+                        securityConfigurationId
+                      }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ResourceIdString.to_value));
@@ -2549,9 +4621,14 @@ module VirtualCluster =
         ("containerProvider",
           (Option.map x.containerProvider ~f:ContainerProvider.to_value));
         ("createdAt", (Option.map x.createdAt ~f:Date.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("securityConfigurationId",
+          (Option.map x.securityConfigurationId ~f:ResourceIdString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let securityConfigurationId =
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "securityConfigurationId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let createdAt =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAt") in
@@ -2567,21 +4644,25 @@ module VirtualCluster =
         (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
       let id =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?createdAt ?containerProvider ?state ?arn ?name ?id ()
+      make ?securityConfigurationId ?tags ?createdAt ?containerProvider
+        ?state ?arn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let createdAt = field_map json "createdAt" Date.of_json in
+    let of_json json__ =
+      let securityConfigurationId =
+        field_map json__ "securityConfigurationId" ResourceIdString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let createdAt = field_map json__ "createdAt" Date.of_json in
       let containerProvider =
-        field_map json "containerProvider" ContainerProvider.of_json in
-      let state = field_map json "state" VirtualClusterState.of_json in
-      let arn = field_map json "arn" VirtualClusterArn.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
-      make ?tags ?createdAt ?containerProvider ?state ?arn ?name ?id ()
+        field_map json__ "containerProvider" ContainerProvider.of_json in
+      let state = field_map json__ "state" VirtualClusterState.of_json in
+      let arn = field_map json__ "arn" VirtualClusterArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?securityConfigurationId ?tags ?createdAt ?containerProvider
+        ?state ?arn ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This entity describes a virtual cluster. A virtual cluster is a Kubernetes namespace that Amazon EMR is registered with. Amazon EMR uses virtual clusters to run jobs and host endpoints. Multiple virtual clusters can be backed by the same physical cluster. However, each virtual cluster maps to one namespace on an EKS cluster. Virtual clusters do not create any active resources that contribute to your bill or that require lifecycle management outside the service."]
+       "This entity describes a virtual cluster. A virtual cluster is a Kubernetes namespace that Amazon EMR is registered with. Amazon EMR uses virtual clusters to run jobs and host endpoints. Multiple virtual clusters can be backed by the same physical cluster. However, each virtual cluster maps to one namespace on an Amazon EKS cluster. Virtual clusters do not create any active resources that contribute to your bill or that require lifecycle management outside the service."]
 module DescribeVirtualClusterResponse =
   struct
     type nonrec t =
@@ -2646,9 +4727,9 @@ module DescribeVirtualClusterResponse =
           (Xml.child xml_arg0 "virtualCluster") in
       make ?virtualCluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualCluster =
-        field_map json "virtualCluster" VirtualCluster.of_json in
+        field_map json__ "virtualCluster" VirtualCluster.of_json in
       make ?virtualCluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2658,6 +4739,9 @@ module EndpointStates =
     type nonrec t = EndpointState.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2683,6 +4767,9 @@ module EndpointTypes =
     type nonrec t = EndpointType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EndpointType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2707,6 +4794,9 @@ module Endpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2727,25 +4817,240 @@ module Endpoints =
       list_of_json ~kind:"Endpoints" ~of_json:Endpoint.of_json j
     let to_json v = composed_to_json to_value v
   end
-module JavaInteger =
+module LogContext =
   struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t = string
+    let context_ = "LogContext"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^((?!.*-s3alias)(?!xn--.*)[a-z0-9][-a-z0-9.]*)?[a-z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for JavaInteger" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"LogContext" j
     let to_json = simple_to_json to_value
   end
+module GetManagedEndpointSessionCredentialsRequest =
+  struct
+    type nonrec t =
+      {
+      endpointIdentifier: String2048.t
+        [@ocaml.doc
+          "The ARN of the managed endpoint for which the request is submitted."];
+      virtualClusterIdentifier: String2048.t
+        [@ocaml.doc
+          "The ARN of the Virtual Cluster which the Managed Endpoint belongs to."];
+      executionRoleArn: IAMRoleArn.t
+        [@ocaml.doc
+          "The IAM Execution Role ARN that will be used by the job run."];
+      credentialType: CredentialType.t
+        [@ocaml.doc
+          "Type of the token requested. Currently supported and default value of this field is \226\128\156TOKEN.\226\128\157"];
+      durationInSeconds: JavaInteger.t option
+        [@ocaml.doc
+          "Duration in seconds for which the session token is valid. The default duration is 15 minutes and the maximum is 12 hours."];
+      logContext: LogContext.t option
+        [@ocaml.doc
+          "String identifier used to separate sections of the execution logs uploaded to S3."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc "The client idempotency token of the job run request."]}
+    let context_ = "GetManagedEndpointSessionCredentialsRequest"
+    let make ?durationInSeconds =
+      fun ?logContext ->
+        fun ?clientToken ->
+          fun ~endpointIdentifier ->
+            fun ~virtualClusterIdentifier ->
+              fun ~executionRoleArn ->
+                fun ~credentialType ->
+                  fun () ->
+                    {
+                      durationInSeconds;
+                      logContext;
+                      clientToken;
+                      endpointIdentifier;
+                      virtualClusterIdentifier;
+                      executionRoleArn;
+                      credentialType
+                    }
+    let to_value x =
+      structure_to_value
+        [("endpointId", (Some (String2048.to_value x.endpointIdentifier)));
+        ("virtualClusterId",
+          (Some (String2048.to_value x.virtualClusterIdentifier)));
+        ("executionRoleArn", (Some (IAMRoleArn.to_value x.executionRoleArn)));
+        ("credentialType", (Some (CredentialType.to_value x.credentialType)));
+        ("durationInSeconds",
+          (Option.map x.durationInSeconds ~f:JavaInteger.to_value));
+        ("logContext", (Option.map x.logContext ~f:LogContext.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let logContext =
+        (Option.map ~f:LogContext.of_xml) (Xml.child xml_arg0 "logContext") in
+      let durationInSeconds =
+        (Option.map ~f:JavaInteger.of_xml)
+          (Xml.child xml_arg0 "durationInSeconds") in
+      let credentialType =
+        CredentialType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "credentialType") in
+      let executionRoleArn =
+        IAMRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "executionRoleArn") in
+      let virtualClusterIdentifier =
+        String2048.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
+      let endpointIdentifier =
+        String2048.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "endpointId") in
+      make ?clientToken ?logContext ?durationInSeconds ~credentialType
+        ~executionRoleArn ~virtualClusterIdentifier ~endpointIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let logContext = field_map json__ "logContext" LogContext.of_json in
+      let durationInSeconds =
+        field_map json__ "durationInSeconds" JavaInteger.of_json in
+      let credentialType =
+        field_map_exn json__ "credentialType" CredentialType.of_json in
+      let executionRoleArn =
+        field_map_exn json__ "executionRoleArn" IAMRoleArn.of_json in
+      let virtualClusterIdentifier =
+        field_map_exn json__ "virtualClusterIdentifier" String2048.of_json in
+      let endpointIdentifier =
+        field_map_exn json__ "endpointIdentifier" String2048.of_json in
+      make ?clientToken ?logContext ?durationInSeconds ~credentialType
+        ~executionRoleArn ~virtualClusterIdentifier ~endpointIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generate a session token to connect to a managed endpoint."]
+module RequestThrottledException =
+  struct
+    type nonrec t = {
+      message: String1024.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:String1024.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:String1024.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" String1024.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request throttled."]
+module GetManagedEndpointSessionCredentialsResponse =
+  struct
+    type nonrec t =
+      {
+      id: ResourceIdString.t option
+        [@ocaml.doc "The identifier of the session token returned."];
+      credentials: Credentials.t option
+        [@ocaml.doc "The structure containing the session credentials."];
+      expiresAt: Date.t option
+        [@ocaml.doc "The date and time when the session token will expire."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `RequestThrottledException of RequestThrottledException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?id =
+      fun ?credentials ->
+        fun ?expiresAt -> fun () -> { id; credentials; expiresAt }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "RequestThrottledException" ->
+          `RequestThrottledException (RequestThrottledException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "RequestThrottledException" ->
+          `RequestThrottledException (RequestThrottledException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `RequestThrottledException e ->
+          `Assoc
+            [("error", (`String "RequestThrottledException"));
+            ("details", (RequestThrottledException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:ResourceIdString.to_value));
+        ("credentials", (Option.map x.credentials ~f:Credentials.to_value));
+        ("expiresAt", (Option.map x.expiresAt ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiresAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "expiresAt") in
+      let credentials =
+        (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "credentials") in
+      let id =
+        (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
+      make ?expiresAt ?credentials ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiresAt = field_map json__ "expiresAt" Date.of_json in
+      let credentials = field_map json__ "credentials" Credentials.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
+      make ?expiresAt ?credentials ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Generate a session token to connect to a managed endpoint."]
 module JobRunStates =
   struct
     type nonrec t = JobRunState.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobRunState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2770,6 +5075,9 @@ module JobRuns =
   struct
     type nonrec t = JobRun.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobRun.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2787,6 +5095,33 @@ module JobRuns =
                           | _ -> true)
                      | _ -> true))) ~f:JobRun.of_xml)
     let of_json j = list_of_json ~kind:"JobRuns" ~of_json:JobRun.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module JobTemplates =
+  struct
+    type nonrec t = JobTemplate.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JobTemplate.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:JobTemplate.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JobTemplates" ~of_json:JobTemplate.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NextToken =
@@ -2877,15 +5212,15 @@ module ListJobRunsRequest =
       make ?nextToken ?maxResults ?states ?name ?createdAfter ?createdBefore
         ~virtualClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" JavaInteger.of_json in
-      let states = field_map json "states" JobRunStates.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let createdAfter = field_map json "createdAfter" Date.of_json in
-      let createdBefore = field_map json "createdBefore" Date.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" JavaInteger.of_json in
+      let states = field_map json__ "states" JobRunStates.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let createdAfter = field_map json__ "createdAfter" Date.of_json in
+      let createdBefore = field_map json__ "createdBefore" Date.of_json in
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ?states ?name ?createdAfter ?createdBefore
         ~virtualClusterId ()
     let to_json v = composed_to_json to_value v
@@ -2950,13 +5285,127 @@ module ListJobRunsResponse =
         (Option.map ~f:JobRuns.of_xml) (Xml.child xml_arg0 "jobRuns") in
       make ?nextToken ?jobRuns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let jobRuns = field_map json "jobRuns" JobRuns.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let jobRuns = field_map json__ "jobRuns" JobRuns.of_json in
       make ?nextToken ?jobRuns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists job runs based on a set of parameters. A job run is a unit of work, such as a Spark jar, PySpark script, or SparkSQL query, that you submit to Amazon EMR on EKS."]
+module ListJobTemplatesRequest =
+  struct
+    type nonrec t =
+      {
+      createdAfter: Date.t option
+        [@ocaml.doc
+          "The date and time after which the job templates were created."];
+      createdBefore: Date.t option
+        [@ocaml.doc
+          "The date and time before which the job templates were created."];
+      maxResults: JavaInteger.t option
+        [@ocaml.doc
+          "The maximum number of job templates that can be listed."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next set of job templates to return."]}
+    let make ?createdAfter =
+      fun ?createdBefore ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { createdAfter; createdBefore; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("createdAfter", (Option.map x.createdAfter ~f:Date.to_value));
+        ("createdBefore", (Option.map x.createdBefore ~f:Date.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:JavaInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:JavaInteger.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let createdBefore =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdBefore") in
+      let createdAfter =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAfter") in
+      make ?nextToken ?maxResults ?createdBefore ?createdAfter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" JavaInteger.of_json in
+      let createdBefore = field_map json__ "createdBefore" Date.of_json in
+      let createdAfter = field_map json__ "createdAfter" Date.of_json in
+      make ?nextToken ?maxResults ?createdBefore ?createdAfter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists job templates based on a set of parameters. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
+module ListJobTemplatesResponse =
+  struct
+    type nonrec t =
+      {
+      templates: JobTemplates.t option
+        [@ocaml.doc
+          "This output lists information about the specified job templates."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "This output displays the token for the next set of job templates."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templates =
+      fun ?nextToken -> fun () -> { templates; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("templates", (Option.map x.templates ~f:JobTemplates.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let templates =
+        (Option.map ~f:JobTemplates.of_xml) (Xml.child xml_arg0 "templates") in
+      make ?nextToken ?templates ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let templates = field_map json__ "templates" JobTemplates.of_json in
+      make ?nextToken ?templates ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists job templates based on a set of parameters. Job template stores values of StartJobRun API request in a template and can be used to start a job run. Job template allows two use cases: avoid repeating recurring StartJobRun API request values, enforcing certain values in StartJobRun API request."]
 module ListManagedEndpointsRequest =
   struct
     type nonrec t =
@@ -3027,20 +5476,20 @@ module ListManagedEndpointsRequest =
       make ?nextToken ?maxResults ?states ?types ?createdAfter ?createdBefore
         ~virtualClusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" JavaInteger.of_json in
-      let states = field_map json "states" EndpointStates.of_json in
-      let types = field_map json "types" EndpointTypes.of_json in
-      let createdAfter = field_map json "createdAfter" Date.of_json in
-      let createdBefore = field_map json "createdBefore" Date.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" JavaInteger.of_json in
+      let states = field_map json__ "states" EndpointStates.of_json in
+      let types = field_map json__ "types" EndpointTypes.of_json in
+      let createdAfter = field_map json__ "createdAfter" Date.of_json in
+      let createdBefore = field_map json__ "createdBefore" Date.of_json in
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
       make ?nextToken ?maxResults ?states ?types ?createdAfter ?createdBefore
         ~virtualClusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists managed endpoints based on a set of parameters. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Lists managed endpoints based on a set of parameters. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
 module ListManagedEndpointsResponse =
   struct
     type nonrec t =
@@ -3099,13 +5548,161 @@ module ListManagedEndpointsResponse =
         (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "endpoints") in
       make ?nextToken ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let endpoints = field_map json "endpoints" Endpoints.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let endpoints = field_map json__ "endpoints" Endpoints.of_json in
       make ?nextToken ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists managed endpoints based on a set of parameters. A managed endpoint is a gateway that connects EMR Studio to Amazon EMR on EKS so that EMR Studio can communicate with your virtual cluster."]
+       "Lists managed endpoints based on a set of parameters. A managed endpoint is a gateway that connects Amazon EMR Studio to Amazon EMR on EKS so that Amazon EMR Studio can communicate with your virtual cluster."]
+module ListSecurityConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      createdAfter: Date.t option
+        [@ocaml.doc
+          "The date and time after which the security configuration was created."];
+      createdBefore: Date.t option
+        [@ocaml.doc
+          "The date and time before which the security configuration was created."];
+      maxResults: JavaInteger.t option
+        [@ocaml.doc
+          "The maximum number of security configurations the operation can list."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of security configurations to return."]}
+    let make ?createdAfter =
+      fun ?createdBefore ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun () -> { createdAfter; createdBefore; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("createdAfter", (Option.map x.createdAfter ~f:Date.to_value));
+        ("createdBefore", (Option.map x.createdBefore ~f:Date.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:JavaInteger.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:JavaInteger.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let createdBefore =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdBefore") in
+      let createdAfter =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "createdAfter") in
+      make ?nextToken ?maxResults ?createdBefore ?createdAfter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" JavaInteger.of_json in
+      let createdBefore = field_map json__ "createdBefore" Date.of_json in
+      let createdAfter = field_map json__ "createdAfter" Date.of_json in
+      make ?nextToken ?maxResults ?createdBefore ?createdAfter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists security configurations based on a set of parameters. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
+module SecurityConfigurations =
+  struct
+    type nonrec t = SecurityConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityConfigurations"
+        ~of_json:SecurityConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListSecurityConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      securityConfigurations: SecurityConfigurations.t option
+        [@ocaml.doc "The list of returned security configurations."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token for the next set of security configurations to return."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?securityConfigurations =
+      fun ?nextToken -> fun () -> { securityConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("securityConfigurations",
+           (Option.map x.securityConfigurations
+              ~f:SecurityConfigurations.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let securityConfigurations =
+        (Option.map ~f:SecurityConfigurations.of_xml)
+          (Xml.child xml_arg0 "securityConfigurations") in
+      make ?nextToken ?securityConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let securityConfigurations =
+        field_map json__ "securityConfigurations"
+          SecurityConfigurations.of_json in
+      make ?nextToken ?securityConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists security configurations based on a set of parameters. Security configurations in Amazon EMR on EKS are templates for different security setups. You can use security configurations to configure the Lake Formation integration setup. You can also create a security configuration to re-use a security setup each time you create a virtual cluster."]
 module RsiArn =
   struct
     type nonrec t = string
@@ -3145,8 +5742,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" RsiArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags assigned to the resources."]
@@ -3208,8 +5805,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags assigned to the resources."]
 module VirtualClusterStates =
@@ -3217,6 +5814,9 @@ module VirtualClusterStates =
     type nonrec t = VirtualClusterState.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualClusterState.to_value)) |>
         (fun x -> `List x)
@@ -3247,7 +5847,7 @@ module ListVirtualClustersRequest =
         [@ocaml.doc "The container provider ID of the virtual cluster."];
       containerProviderType: ContainerProviderType.t option
         [@ocaml.doc
-          "The container provider type of the virtual cluster. EKS is the only supported type as of now."];
+          "The container provider type of the virtual cluster. Amazon EKS is the only supported type as of now."];
       createdAfter: Date.t option
         [@ocaml.doc
           "The date and time after which the virtual clusters are created."];
@@ -3261,7 +5861,10 @@ module ListVirtualClustersRequest =
           "The maximum number of virtual clusters that can be listed."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "The token for the next set of virtual clusters to return."]}
+          "The token for the next set of virtual clusters to return."];
+      eksAccessEntryIntegrated: Boolean.t option
+        [@ocaml.doc
+          "Optional Boolean that specifies whether the operation should return the virtual clusters that have the access entry integration enabled or disabled. If not specified, the operation returns all applicable virtual clusters."]}
     let make ?containerProviderId =
       fun ?containerProviderType ->
         fun ?createdAfter ->
@@ -3269,16 +5872,18 @@ module ListVirtualClustersRequest =
             fun ?states ->
               fun ?maxResults ->
                 fun ?nextToken ->
-                  fun () ->
-                    {
-                      containerProviderId;
-                      containerProviderType;
-                      createdAfter;
-                      createdBefore;
-                      states;
-                      maxResults;
-                      nextToken
-                    }
+                  fun ?eksAccessEntryIntegrated ->
+                    fun () ->
+                      {
+                        containerProviderId;
+                        containerProviderType;
+                        createdAfter;
+                        createdBefore;
+                        states;
+                        maxResults;
+                        nextToken;
+                        eksAccessEntryIntegrated
+                      }
     let to_value x =
       structure_to_value
         [("containerProviderId",
@@ -3290,9 +5895,14 @@ module ListVirtualClustersRequest =
         ("createdBefore", (Option.map x.createdBefore ~f:Date.to_value));
         ("states", (Option.map x.states ~f:VirtualClusterStates.to_value));
         ("maxResults", (Option.map x.maxResults ~f:JavaInteger.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("eksAccessEntryIntegrated",
+          (Option.map x.eksAccessEntryIntegrated ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let eksAccessEntryIntegrated =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "eksAccessEntryIntegrated") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
@@ -3310,21 +5920,26 @@ module ListVirtualClustersRequest =
       let containerProviderId =
         (Option.map ~f:String1024.of_xml)
           (Xml.child xml_arg0 "containerProviderId") in
-      make ?nextToken ?maxResults ?states ?createdBefore ?createdAfter
-        ?containerProviderType ?containerProviderId ()
+      make ?eksAccessEntryIntegrated ?nextToken ?maxResults ?states
+        ?createdBefore ?createdAfter ?containerProviderType
+        ?containerProviderId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" JavaInteger.of_json in
-      let states = field_map json "states" VirtualClusterStates.of_json in
-      let createdBefore = field_map json "createdBefore" Date.of_json in
-      let createdAfter = field_map json "createdAfter" Date.of_json in
+    let of_json json__ =
+      let eksAccessEntryIntegrated =
+        field_map json__ "eksAccessEntryIntegrated" Boolean.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" JavaInteger.of_json in
+      let states = field_map json__ "states" VirtualClusterStates.of_json in
+      let createdBefore = field_map json__ "createdBefore" Date.of_json in
+      let createdAfter = field_map json__ "createdAfter" Date.of_json in
       let containerProviderType =
-        field_map json "containerProviderType" ContainerProviderType.of_json in
+        field_map json__ "containerProviderType"
+          ContainerProviderType.of_json in
       let containerProviderId =
-        field_map json "containerProviderId" String1024.of_json in
-      make ?nextToken ?maxResults ?states ?createdBefore ?createdAfter
-        ?containerProviderType ?containerProviderId ()
+        field_map json__ "containerProviderId" String1024.of_json in
+      make ?eksAccessEntryIntegrated ?nextToken ?maxResults ?states
+        ?createdBefore ?createdAfter ?containerProviderType
+        ?containerProviderId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists information about the specified virtual cluster. Virtual cluster is a managed entity on Amazon EMR on EKS. You can create, describe, list and delete virtual clusters. They do not consume any additional resource in your system. A single virtual cluster maps to a single Kubernetes namespace. Given this relationship, you can model virtual clusters the same way you model Kubernetes namespaces to meet your requirements."]
@@ -3332,6 +5947,9 @@ module VirtualClusters =
   struct
     type nonrec t = VirtualCluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:VirtualCluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3413,14 +6031,45 @@ module ListVirtualClustersResponse =
           (Xml.child xml_arg0 "virtualClusters") in
       make ?nextToken ?virtualClusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let virtualClusters =
-        field_map json "virtualClusters" VirtualClusters.of_json in
+        field_map json__ "virtualClusters" VirtualClusters.of_json in
       make ?nextToken ?virtualClusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists information about the specified virtual cluster. Virtual cluster is a managed entity on Amazon EMR on EKS. You can create, describe, list and delete virtual clusters. They do not consume any additional resource in your system. A single virtual cluster maps to a single Kubernetes namespace. Given this relationship, you can model virtual clusters the same way you model Kubernetes namespaces to meet your requirements."]
+module TemplateParameterInputMap =
+  struct
+    type nonrec t = (TemplateParameterName.t * String1024.t) list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TemplateParameterName.of_string chopped),
+                              (String1024.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TemplateParameterName.to_value x) |>
+                    (fun x -> (String1024.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TemplateParameterName.of_string
+        ~of_json:String1024.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module StartJobRunRequest =
   struct
     type nonrec t =
@@ -3432,62 +6081,94 @@ module StartJobRunRequest =
           "The virtual cluster ID for which the job run request is submitted."];
       clientToken: ClientToken.t
         [@ocaml.doc "The client idempotency token of the job run request."];
-      executionRoleArn: IAMRoleArn.t
+      executionRoleArn: IAMRoleArn.t option
         [@ocaml.doc "The execution role ARN for the job run."];
-      releaseLabel: ReleaseLabel.t
+      releaseLabel: ReleaseLabel.t option
         [@ocaml.doc "The Amazon EMR release version to use for the job run."];
-      jobDriver: JobDriver.t [@ocaml.doc "The job driver for the job run."];
+      jobDriver: JobDriver.t option
+        [@ocaml.doc "The job driver for the job run."];
       configurationOverrides: ConfigurationOverrides.t option
         [@ocaml.doc "The configuration overrides for the job run."];
-      tags: TagMap.t option [@ocaml.doc "The tags assigned to job runs."]}
+      tags: TagMap.t option [@ocaml.doc "The tags assigned to job runs."];
+      jobTemplateId: ResourceIdString.t option
+        [@ocaml.doc "The job template ID to be used to start the job run."];
+      jobTemplateParameters: TemplateParameterInputMap.t option
+        [@ocaml.doc
+          "The values of job template parameters to start a job run."];
+      retryPolicyConfiguration: RetryPolicyConfiguration.t option
+        [@ocaml.doc "The retry policy configuration for the job run."]}
     let context_ = "StartJobRunRequest"
     let make ?name =
-      fun ?configurationOverrides ->
-        fun ?tags ->
-          fun ~virtualClusterId ->
-            fun ~clientToken ->
-              fun ~executionRoleArn ->
-                fun ~releaseLabel ->
-                  fun ~jobDriver ->
-                    fun () ->
-                      {
-                        name;
-                        configurationOverrides;
-                        tags;
-                        virtualClusterId;
-                        clientToken;
-                        executionRoleArn;
-                        releaseLabel;
-                        jobDriver
-                      }
+      fun ?executionRoleArn ->
+        fun ?releaseLabel ->
+          fun ?jobDriver ->
+            fun ?configurationOverrides ->
+              fun ?tags ->
+                fun ?jobTemplateId ->
+                  fun ?jobTemplateParameters ->
+                    fun ?retryPolicyConfiguration ->
+                      fun ~virtualClusterId ->
+                        fun ~clientToken ->
+                          fun () ->
+                            {
+                              name;
+                              executionRoleArn;
+                              releaseLabel;
+                              jobDriver;
+                              configurationOverrides;
+                              tags;
+                              jobTemplateId;
+                              jobTemplateParameters;
+                              retryPolicyConfiguration;
+                              virtualClusterId;
+                              clientToken
+                            }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:ResourceNameString.to_value));
         ("virtualClusterId",
           (Some (ResourceIdString.to_value x.virtualClusterId)));
         ("clientToken", (Some (ClientToken.to_value x.clientToken)));
-        ("executionRoleArn", (Some (IAMRoleArn.to_value x.executionRoleArn)));
-        ("releaseLabel", (Some (ReleaseLabel.to_value x.releaseLabel)));
-        ("jobDriver", (Some (JobDriver.to_value x.jobDriver)));
+        ("executionRoleArn",
+          (Option.map x.executionRoleArn ~f:IAMRoleArn.to_value));
+        ("releaseLabel",
+          (Option.map x.releaseLabel ~f:ReleaseLabel.to_value));
+        ("jobDriver", (Option.map x.jobDriver ~f:JobDriver.to_value));
         ("configurationOverrides",
           (Option.map x.configurationOverrides
              ~f:ConfigurationOverrides.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("jobTemplateId",
+          (Option.map x.jobTemplateId ~f:ResourceIdString.to_value));
+        ("jobTemplateParameters",
+          (Option.map x.jobTemplateParameters
+             ~f:TemplateParameterInputMap.to_value));
+        ("retryPolicyConfiguration",
+          (Option.map x.retryPolicyConfiguration
+             ~f:RetryPolicyConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let retryPolicyConfiguration =
+        (Option.map ~f:RetryPolicyConfiguration.of_xml)
+          (Xml.child xml_arg0 "retryPolicyConfiguration") in
+      let jobTemplateParameters =
+        (Option.map ~f:TemplateParameterInputMap.of_xml)
+          (Xml.child xml_arg0 "jobTemplateParameters") in
+      let jobTemplateId =
+        (Option.map ~f:ResourceIdString.of_xml)
+          (Xml.child xml_arg0 "jobTemplateId") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let configurationOverrides =
         (Option.map ~f:ConfigurationOverrides.of_xml)
           (Xml.child xml_arg0 "configurationOverrides") in
       let jobDriver =
-        JobDriver.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDriver") in
+        (Option.map ~f:JobDriver.of_xml) (Xml.child xml_arg0 "jobDriver") in
       let releaseLabel =
-        ReleaseLabel.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "releaseLabel") in
+        (Option.map ~f:ReleaseLabel.of_xml)
+          (Xml.child xml_arg0 "releaseLabel") in
       let executionRoleArn =
-        IAMRoleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "executionRoleArn") in
+        (Option.map ~f:IAMRoleArn.of_xml)
+          (Xml.child xml_arg0 "executionRoleArn") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
@@ -3496,25 +6177,35 @@ module StartJobRunRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "virtualClusterId") in
       let name =
         (Option.map ~f:ResourceNameString.of_xml) (Xml.child xml_arg0 "name") in
-      make ?tags ?configurationOverrides ~jobDriver ~releaseLabel
-        ~executionRoleArn ~clientToken ~virtualClusterId ?name ()
+      make ?retryPolicyConfiguration ?jobTemplateParameters ?jobTemplateId
+        ?tags ?configurationOverrides ?jobDriver ?releaseLabel
+        ?executionRoleArn ~clientToken ~virtualClusterId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let retryPolicyConfiguration =
+        field_map json__ "retryPolicyConfiguration"
+          RetryPolicyConfiguration.of_json in
+      let jobTemplateParameters =
+        field_map json__ "jobTemplateParameters"
+          TemplateParameterInputMap.of_json in
+      let jobTemplateId =
+        field_map json__ "jobTemplateId" ResourceIdString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
       let configurationOverrides =
-        field_map json "configurationOverrides"
+        field_map json__ "configurationOverrides"
           ConfigurationOverrides.of_json in
-      let jobDriver = field_map_exn json "jobDriver" JobDriver.of_json in
-      let releaseLabel =
-        field_map_exn json "releaseLabel" ReleaseLabel.of_json in
+      let jobDriver = field_map json__ "jobDriver" JobDriver.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
       let executionRoleArn =
-        field_map_exn json "executionRoleArn" IAMRoleArn.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
+        field_map json__ "executionRoleArn" IAMRoleArn.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
       let virtualClusterId =
-        field_map_exn json "virtualClusterId" ResourceIdString.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      make ?tags ?configurationOverrides ~jobDriver ~releaseLabel
-        ~executionRoleArn ~clientToken ~virtualClusterId ?name ()
+        field_map_exn json__ "virtualClusterId" ResourceIdString.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      make ?retryPolicyConfiguration ?jobTemplateParameters ?jobTemplateId
+        ?tags ?configurationOverrides ?jobDriver ?releaseLabel
+        ?executionRoleArn ~clientToken ~virtualClusterId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts a job run. A job run is a unit of work, such as a Spark jar, PySpark script, or SparkSQL query, that you submit to Amazon EMR on EKS."]
@@ -3600,12 +6291,12 @@ module StartJobRunResponse =
         (Option.map ~f:ResourceIdString.of_xml) (Xml.child xml_arg0 "id") in
       make ?virtualClusterId ?arn ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let virtualClusterId =
-        field_map json "virtualClusterId" ResourceIdString.of_json in
-      let arn = field_map json "arn" JobArn.of_json in
-      let name = field_map json "name" ResourceNameString.of_json in
-      let id = field_map json "id" ResourceIdString.of_json in
+        field_map json__ "virtualClusterId" ResourceIdString.of_json in
+      let arn = field_map json__ "arn" JobArn.of_json in
+      let name = field_map json__ "name" ResourceNameString.of_json in
+      let id = field_map json__ "id" ResourceIdString.of_json in
       make ?virtualClusterId ?arn ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3618,6 +6309,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String128.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3659,13 +6353,13 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" RsiArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns tags to resources. A tag is a label that you assign to an AWS resource. Each tag consists of a key and an optional value, both of which you define. Tags enable you to categorize your AWS resources by attributes such as purpose, owner, or environment. When you have many resources of the same type, you can quickly identify a specific resource based on the tags you've assigned to it. For example, you can define a set of tags for your Amazon EMR on EKS clusters to help you track each cluster's owner and stack level. We recommend that you devise a consistent set of tag keys for each resource type. You can then search and filter the resources based on the tags that you add."]
+       "Assigns tags to resources. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key and an optional value, both of which you define. Tags enable you to categorize your Amazon Web Services resources by attributes such as purpose, owner, or environment. When you have many resources of the same type, you can quickly identify a specific resource based on the tags you've assigned to it. For example, you can define a set of tags for your Amazon EMR on EKS clusters to help you track each cluster's owner and stack level. We recommend that you devise a consistent set of tag keys for each resource type. You can then search and filter the resources based on the tags that you add."]
 module TagResourceResponse =
   struct
     type nonrec t = unit
@@ -3723,7 +6417,7 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Assigns tags to resources. A tag is a label that you assign to an AWS resource. Each tag consists of a key and an optional value, both of which you define. Tags enable you to categorize your AWS resources by attributes such as purpose, owner, or environment. When you have many resources of the same type, you can quickly identify a specific resource based on the tags you've assigned to it. For example, you can define a set of tags for your Amazon EMR on EKS clusters to help you track each cluster's owner and stack level. We recommend that you devise a consistent set of tag keys for each resource type. You can then search and filter the resources based on the tags that you add."]
+       "Assigns tags to resources. A tag is a label that you assign to an Amazon Web Services resource. Each tag consists of a key and an optional value, both of which you define. Tags enable you to categorize your Amazon Web Services resources by attributes such as purpose, owner, or environment. When you have many resources of the same type, you can quickly identify a specific resource based on the tags you've assigned to it. For example, you can define a set of tags for your Amazon EMR on EKS clusters to help you track each cluster's owner and stack level. We recommend that you devise a consistent set of tag keys for each resource type. You can then search and filter the resources based on the tags that you add."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -3747,9 +6441,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" RsiArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" RsiArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes tags from resources."]

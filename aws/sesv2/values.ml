@@ -24,6 +24,169 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module BounceSubType =
+  struct
+    type nonrec t = string
+    let context_ = "BounceSubType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BounceSubType" j
+    let to_json = simple_to_json to_value
+  end
+module BounceType =
+  struct
+    type nonrec t =
+      | UNDETERMINED 
+      | TRANSIENT 
+      | PERMANENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UNDETERMINED -> "UNDETERMINED"
+      | TRANSIENT -> "TRANSIENT"
+      | PERMANENT -> "PERMANENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "UNDETERMINED" -> UNDETERMINED
+      | "TRANSIENT" -> TRANSIENT
+      | "PERMANENT" -> PERMANENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BounceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BounceType" j)
+    let to_json = simple_to_json to_value
+  end
+module DiagnosticCode =
+  struct
+    type nonrec t = string
+    let context_ = "DiagnosticCode"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DiagnosticCode" j
+    let to_json = simple_to_json to_value
+  end
+module ComplaintFeedbackType =
+  struct
+    type nonrec t = string
+    let context_ = "ComplaintFeedbackType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComplaintFeedbackType" j
+    let to_json = simple_to_json to_value
+  end
+module ComplaintSubType =
+  struct
+    type nonrec t = string
+    let context_ = "ComplaintSubType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ComplaintSubType" j
+    let to_json = simple_to_json to_value
+  end
+module Bounce =
+  struct
+    type nonrec t =
+      {
+      bounceType: BounceType.t option
+        [@ocaml.doc
+          "The type of the bounce, as determined by SES. Can be one of UNDETERMINED, TRANSIENT, or PERMANENT"];
+      bounceSubType: BounceSubType.t option
+        [@ocaml.doc "The subtype of the bounce, as determined by SES."];
+      diagnosticCode: DiagnosticCode.t option
+        [@ocaml.doc
+          "The status code issued by the reporting Message Transfer Authority (MTA). This field only appears if a delivery status notification (DSN) was attached to the bounce and the Diagnostic-Code was provided in the DSN."]}
+    let make ?bounceType =
+      fun ?bounceSubType ->
+        fun ?diagnosticCode ->
+          fun () -> { bounceType; bounceSubType; diagnosticCode }
+    let to_value x =
+      structure_to_value
+        [("BounceType", (Option.map x.bounceType ~f:BounceType.to_value));
+        ("BounceSubType",
+          (Option.map x.bounceSubType ~f:BounceSubType.to_value));
+        ("DiagnosticCode",
+          (Option.map x.diagnosticCode ~f:DiagnosticCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let diagnosticCode =
+        (Option.map ~f:DiagnosticCode.of_xml)
+          (Xml.child xml_arg0 "DiagnosticCode") in
+      let bounceSubType =
+        (Option.map ~f:BounceSubType.of_xml)
+          (Xml.child xml_arg0 "BounceSubType") in
+      let bounceType =
+        (Option.map ~f:BounceType.of_xml) (Xml.child xml_arg0 "BounceType") in
+      make ?diagnosticCode ?bounceSubType ?bounceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let diagnosticCode =
+        field_map json__ "DiagnosticCode" DiagnosticCode.of_json in
+      let bounceSubType =
+        field_map json__ "BounceSubType" BounceSubType.of_json in
+      let bounceType = field_map json__ "BounceType" BounceType.of_json in
+      make ?diagnosticCode ?bounceSubType ?bounceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a Bounce event."]
+module Complaint =
+  struct
+    type nonrec t =
+      {
+      complaintSubType: ComplaintSubType.t option
+        [@ocaml.doc
+          "Can either be null or OnAccountSuppressionList. If the value is OnAccountSuppressionList, SES accepted the message, but didn't attempt to send it because it was on the account-level suppression list."];
+      complaintFeedbackType: ComplaintFeedbackType.t option
+        [@ocaml.doc
+          "The value of the Feedback-Type field from the feedback report received from the ISP."]}
+    let make ?complaintSubType =
+      fun ?complaintFeedbackType ->
+        fun () -> { complaintSubType; complaintFeedbackType }
+    let to_value x =
+      structure_to_value
+        [("ComplaintSubType",
+           (Option.map x.complaintSubType ~f:ComplaintSubType.to_value));
+        ("ComplaintFeedbackType",
+          (Option.map x.complaintFeedbackType
+             ~f:ComplaintFeedbackType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let complaintFeedbackType =
+        (Option.map ~f:ComplaintFeedbackType.of_xml)
+          (Xml.child xml_arg0 "ComplaintFeedbackType") in
+      let complaintSubType =
+        (Option.map ~f:ComplaintSubType.of_xml)
+          (Xml.child xml_arg0 "ComplaintSubType") in
+      make ?complaintFeedbackType ?complaintSubType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let complaintFeedbackType =
+        field_map json__ "ComplaintFeedbackType"
+          ComplaintFeedbackType.of_json in
+      let complaintSubType =
+        field_map json__ "ComplaintSubType" ComplaintSubType.of_json in
+      make ?complaintFeedbackType ?complaintSubType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a Complaint event."]
 module DefaultDimensionValue =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -83,6 +246,141 @@ module DimensionValueSource =
     let of_json j = of_string (string_of_json ~kind:"DimensionValueSource" j)
     let to_json = simple_to_json to_value
   end
+module AttachmentContentDescription =
+  struct
+    type nonrec t = string
+    let context_ = "AttachmentContentDescription"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttachmentContentDescription" j
+    let to_json = simple_to_json to_value
+  end
+module AttachmentContentDisposition =
+  struct
+    type nonrec t =
+      | ATTACHMENT 
+      | INLINE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ATTACHMENT -> "ATTACHMENT"
+      | INLINE -> "INLINE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ATTACHMENT" -> ATTACHMENT
+      | "INLINE" -> INLINE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AttachmentContentDisposition"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AttachmentContentDisposition" j)
+    let to_json = simple_to_json to_value
+  end
+module AttachmentContentId =
+  struct
+    type nonrec t = string
+    let context_ = "AttachmentContentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:78) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttachmentContentId" j
+    let to_json = simple_to_json to_value
+  end
+module AttachmentContentTransferEncoding =
+  struct
+    type nonrec t =
+      | BASE64 
+      | QUOTED_PRINTABLE 
+      | SEVEN_BIT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BASE64 -> "BASE64"
+      | QUOTED_PRINTABLE -> "QUOTED_PRINTABLE"
+      | SEVEN_BIT -> "SEVEN_BIT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BASE64" -> BASE64
+      | "QUOTED_PRINTABLE" -> QUOTED_PRINTABLE
+      | "SEVEN_BIT" -> SEVEN_BIT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AttachmentContentTransferEncoding"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"AttachmentContentTransferEncoding" j)
+    let to_json = simple_to_json to_value
+  end
+module AttachmentContentType =
+  struct
+    type nonrec t = string
+    let context_ = "AttachmentContentType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:78) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttachmentContentType" j
+    let to_json = simple_to_json to_value
+  end
+module AttachmentFileName =
+  struct
+    type nonrec t = string
+    let context_ = "AttachmentFileName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AttachmentFileName" j
+    let to_json = simple_to_json to_value
+  end
+module RawAttachmentData =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
 module Charset =
   struct
     type nonrec t = string
@@ -109,6 +407,50 @@ module MessageData =
     let of_json j = string_of_json ~kind:"MessageData" j
     let to_json = simple_to_json to_value
   end
+module MessageHeaderName =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The name of the message header. The message header name has to meet the following criteria: Can contain any printable ASCII character (33 - 126) except for colon (:). Can contain no more than 126 characters."]
+    let context_ = "MessageHeaderName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:126) >>=
+                  (fun () -> check_pattern i ~pattern:"^[!-9;-@A-~]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MessageHeaderName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The name of the message header. The message header name has to meet the following criteria: Can contain any printable ASCII character (33 - 126) except for colon (:). Can contain no more than 126 characters."]
+module MessageHeaderValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The value of the message header. The message header value has to meet the following criteria: Can contain any printable ASCII character."]
+    let context_ = "MessageHeaderValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:995) >>=
+                  (fun () -> check_pattern i ~pattern:"[ -~]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MessageHeaderValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The value of the message header. The message header value has to meet the following criteria: Can contain any printable ASCII character."]
 module EmailAddress =
   struct
     type nonrec t = string
@@ -276,6 +618,286 @@ module TopicName =
     let of_json j = string_of_json ~kind:"TopicName" j
     let to_json = simple_to_json to_value
   end
+module EventDetails =
+  struct
+    type nonrec t =
+      {
+      bounce: Bounce.t option
+        [@ocaml.doc "Information about a Bounce event."];
+      complaint: Complaint.t option
+        [@ocaml.doc "Information about a Complaint event."]}
+    let make ?bounce = fun ?complaint -> fun () -> { bounce; complaint }
+    let to_value x =
+      structure_to_value
+        [("Bounce", (Option.map x.bounce ~f:Bounce.to_value));
+        ("Complaint", (Option.map x.complaint ~f:Complaint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let complaint =
+        (Option.map ~f:Complaint.of_xml) (Xml.child xml_arg0 "Complaint") in
+      let bounce =
+        (Option.map ~f:Bounce.of_xml) (Xml.child xml_arg0 "Bounce") in
+      make ?complaint ?bounce ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let complaint = field_map json__ "Complaint" Complaint.of_json in
+      let bounce = field_map json__ "Bounce" Bounce.of_json in
+      make ?complaint ?bounce ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a Bounce object if the event type is BOUNCE. Contains a Complaint object if the event type is COMPLAINT."]
+module EventType =
+  struct
+    type nonrec t =
+      | SEND 
+      | REJECT 
+      | BOUNCE 
+      | COMPLAINT 
+      | DELIVERY 
+      | OPEN 
+      | CLICK 
+      | RENDERING_FAILURE 
+      | DELIVERY_DELAY 
+      | SUBSCRIPTION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEND -> "SEND"
+      | REJECT -> "REJECT"
+      | BOUNCE -> "BOUNCE"
+      | COMPLAINT -> "COMPLAINT"
+      | DELIVERY -> "DELIVERY"
+      | OPEN -> "OPEN"
+      | CLICK -> "CLICK"
+      | RENDERING_FAILURE -> "RENDERING_FAILURE"
+      | DELIVERY_DELAY -> "DELIVERY_DELAY"
+      | SUBSCRIPTION -> "SUBSCRIPTION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEND" -> SEND
+      | "REJECT" -> REJECT
+      | "BOUNCE" -> BOUNCE
+      | "COMPLAINT" -> COMPLAINT
+      | "DELIVERY" -> DELIVERY
+      | "OPEN" -> OPEN
+      | "CLICK" -> CLICK
+      | "RENDERING_FAILURE" -> RENDERING_FAILURE
+      | "DELIVERY_DELAY" -> DELIVERY_DELAY
+      | "SUBSCRIPTION" -> SUBSCRIPTION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EventType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EventType" j)
+    let to_json = simple_to_json to_value
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module InsightsEmailAddress =
+  struct
+    type nonrec t = string
+    let context_ = "InsightsEmailAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:320) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InsightsEmailAddress" j
+    let to_json = simple_to_json to_value
+  end
+module EmailSubject =
+  struct
+    type nonrec t = string
+    let context_ = "EmailSubject"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:998) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EmailSubject" j
+    let to_json = simple_to_json to_value
+  end
+module Isp =
+  struct
+    type nonrec t = string
+    let context_ = "Isp"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Isp" j
+    let to_json = simple_to_json to_value
+  end
+module DeliveryEventType =
+  struct
+    type nonrec t =
+      | SEND 
+      | DELIVERY 
+      | TRANSIENT_BOUNCE 
+      | PERMANENT_BOUNCE 
+      | UNDETERMINED_BOUNCE 
+      | COMPLAINT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEND -> "SEND"
+      | DELIVERY -> "DELIVERY"
+      | TRANSIENT_BOUNCE -> "TRANSIENT_BOUNCE"
+      | PERMANENT_BOUNCE -> "PERMANENT_BOUNCE"
+      | UNDETERMINED_BOUNCE -> "UNDETERMINED_BOUNCE"
+      | COMPLAINT -> "COMPLAINT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEND" -> SEND
+      | "DELIVERY" -> DELIVERY
+      | "TRANSIENT_BOUNCE" -> TRANSIENT_BOUNCE
+      | "PERMANENT_BOUNCE" -> PERMANENT_BOUNCE
+      | "UNDETERMINED_BOUNCE" -> UNDETERMINED_BOUNCE
+      | "COMPLAINT" -> COMPLAINT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeliveryEventType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeliveryEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module EngagementEventType =
+  struct
+    type nonrec t =
+      | OPEN 
+      | CLICK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | OPEN -> "OPEN" | CLICK -> "CLICK" | Non_static_id s -> s
+    let of_string =
+      function | "OPEN" -> OPEN | "CLICK" -> CLICK | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EngagementEventType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EngagementEventType" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricDimensionValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A list of values associated with the MetricDimensionName to filter metrics by. Can either be * as a wildcard for all values or a list of up to 10 specific values. If one Dimension has the * value, other dimensions can only contain one value."]
+    let context_ = "MetricDimensionValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricDimensionValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A list of values associated with the MetricDimensionName to filter metrics by. Can either be * as a wildcard for all values or a list of up to 10 specific values. If one Dimension has the * value, other dimensions can only contain one value."]
+module Metric =
+  struct
+    type nonrec t =
+      | SEND 
+      | COMPLAINT 
+      | PERMANENT_BOUNCE 
+      | TRANSIENT_BOUNCE 
+      | OPEN 
+      | CLICK 
+      | DELIVERY 
+      | DELIVERY_OPEN 
+      | DELIVERY_CLICK 
+      | DELIVERY_COMPLAINT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SEND -> "SEND"
+      | COMPLAINT -> "COMPLAINT"
+      | PERMANENT_BOUNCE -> "PERMANENT_BOUNCE"
+      | TRANSIENT_BOUNCE -> "TRANSIENT_BOUNCE"
+      | OPEN -> "OPEN"
+      | CLICK -> "CLICK"
+      | DELIVERY -> "DELIVERY"
+      | DELIVERY_OPEN -> "DELIVERY_OPEN"
+      | DELIVERY_CLICK -> "DELIVERY_CLICK"
+      | DELIVERY_COMPLAINT -> "DELIVERY_COMPLAINT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SEND" -> SEND
+      | "COMPLAINT" -> COMPLAINT
+      | "PERMANENT_BOUNCE" -> PERMANENT_BOUNCE
+      | "TRANSIENT_BOUNCE" -> TRANSIENT_BOUNCE
+      | "OPEN" -> OPEN
+      | "CLICK" -> CLICK
+      | "DELIVERY" -> DELIVERY
+      | "DELIVERY_OPEN" -> DELIVERY_OPEN
+      | "DELIVERY_CLICK" -> DELIVERY_CLICK
+      | "DELIVERY_COMPLAINT" -> DELIVERY_COMPLAINT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Metric" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Metric" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricAggregation =
+  struct
+    type nonrec t =
+      | RATE 
+      | VOLUME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RATE -> "RATE" | VOLUME -> "VOLUME" | Non_static_id s -> s
+    let of_string =
+      function | "RATE" -> RATE | "VOLUME" -> VOLUME | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricAggregation" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricAggregation" j)
+    let to_json = simple_to_json to_value
+  end
 module Percentage =
   struct
     type nonrec t = float[@@ocaml.doc
@@ -306,6 +928,38 @@ module Volume =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "An object that contains information about inbox placement volume."]
+module SuppressionConfidenceVerdictThreshold =
+  struct
+    type nonrec t =
+      | MEDIUM 
+      | HIGH 
+      | MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | MANAGED -> "MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | "MANAGED" -> MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration SuppressionConfidenceVerdictThreshold" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"SuppressionConfidenceVerdictThreshold" j)
+    let to_json = simple_to_json to_value
+  end
 module CloudWatchDimensionConfiguration =
   struct
     type nonrec t =
@@ -318,7 +972,7 @@ module CloudWatchDimensionConfiguration =
           "The location where the Amazon SES API v2 finds the value of a dimension to publish to Amazon CloudWatch. To use the message tags that you specify using an X-SES-MESSAGE-TAGS header or a parameter to the SendEmail or SendRawEmail API, choose messageTag. To use your own email headers, choose emailHeader. To use link tags, choose linkTags."];
       defaultDimensionValue: DefaultDimensionValue.t
         [@ocaml.doc
-          "The default value of the dimension that is published to Amazon CloudWatch if you don't provide the value of the dimension when you send an email. This value has to meet the following criteria: It can only contain ASCII letters (a\226\128\147z, A\226\128\147Z), numbers (0\226\128\1479), underscores (_), or dashes (-). It can contain no more than 256 characters."]}
+          "The default value of the dimension that is published to Amazon CloudWatch if you don't provide the value of the dimension when you send an email. This value has to meet the following criteria: Can only contain ASCII letters (a\226\128\147z, A\226\128\147Z), numbers (0\226\128\1479), underscores (_), or dashes (-), at signs (\\@), and periods (.). It can contain no more than 256 characters."]}
     let context_ = "CloudWatchDimensionConfiguration"
     let make ~dimensionName =
       fun ~dimensionValueSource ->
@@ -345,19 +999,126 @@ module CloudWatchDimensionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultDimensionValue =
-        field_map_exn json "DefaultDimensionValue"
+        field_map_exn json__ "DefaultDimensionValue"
           DefaultDimensionValue.of_json in
       let dimensionValueSource =
-        field_map_exn json "DimensionValueSource"
+        field_map_exn json__ "DimensionValueSource"
           DimensionValueSource.of_json in
       let dimensionName =
-        field_map_exn json "DimensionName" DimensionName.of_json in
+        field_map_exn json__ "DimensionName" DimensionName.of_json in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that defines the dimension configuration to use when you send email events to Amazon CloudWatch."]
+module Attachment =
+  struct
+    type nonrec t =
+      {
+      rawContent: RawAttachmentData.t
+        [@ocaml.doc
+          "The raw data of the attachment. It needs to be base64-encoded if you are accessing Amazon SES directly through the HTTPS interface. If you are accessing Amazon SES using an Amazon Web Services SDK, the SDK takes care of the base 64-encoding for you."];
+      contentDisposition: AttachmentContentDisposition.t option
+        [@ocaml.doc
+          "A standard descriptor indicating how the attachment should be rendered in the email. Supported values: ATTACHMENT or INLINE."];
+      fileName: AttachmentFileName.t
+        [@ocaml.doc
+          "The file name for the attachment as it will appear in the email. Amazon SES restricts certain file extensions. To ensure attachments are accepted, check the Unsupported attachment types in the Amazon SES Developer Guide."];
+      contentDescription: AttachmentContentDescription.t option
+        [@ocaml.doc "A brief description of the attachment content."];
+      contentId: AttachmentContentId.t option
+        [@ocaml.doc
+          "Unique identifier for the attachment, used for referencing attachments with INLINE disposition in HTML content."];
+      contentTransferEncoding: AttachmentContentTransferEncoding.t option
+        [@ocaml.doc
+          "Specifies how the attachment is encoded. Supported values: BASE64, QUOTED_PRINTABLE, SEVEN_BIT."];
+      contentType: AttachmentContentType.t option
+        [@ocaml.doc
+          "The MIME type of the attachment. Example: application/pdf, image/jpeg"]}
+    let context_ = "Attachment"
+    let make ?contentDisposition =
+      fun ?contentDescription ->
+        fun ?contentId ->
+          fun ?contentTransferEncoding ->
+            fun ?contentType ->
+              fun ~rawContent ->
+                fun ~fileName ->
+                  fun () ->
+                    {
+                      contentDisposition;
+                      contentDescription;
+                      contentId;
+                      contentTransferEncoding;
+                      contentType;
+                      rawContent;
+                      fileName
+                    }
+    let to_value x =
+      structure_to_value
+        [("RawContent", (Some (RawAttachmentData.to_value x.rawContent)));
+        ("ContentDisposition",
+          (Option.map x.contentDisposition
+             ~f:AttachmentContentDisposition.to_value));
+        ("FileName", (Some (AttachmentFileName.to_value x.fileName)));
+        ("ContentDescription",
+          (Option.map x.contentDescription
+             ~f:AttachmentContentDescription.to_value));
+        ("ContentId",
+          (Option.map x.contentId ~f:AttachmentContentId.to_value));
+        ("ContentTransferEncoding",
+          (Option.map x.contentTransferEncoding
+             ~f:AttachmentContentTransferEncoding.to_value));
+        ("ContentType",
+          (Option.map x.contentType ~f:AttachmentContentType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contentType =
+        (Option.map ~f:AttachmentContentType.of_xml)
+          (Xml.child xml_arg0 "ContentType") in
+      let contentTransferEncoding =
+        (Option.map ~f:AttachmentContentTransferEncoding.of_xml)
+          (Xml.child xml_arg0 "ContentTransferEncoding") in
+      let contentId =
+        (Option.map ~f:AttachmentContentId.of_xml)
+          (Xml.child xml_arg0 "ContentId") in
+      let contentDescription =
+        (Option.map ~f:AttachmentContentDescription.of_xml)
+          (Xml.child xml_arg0 "ContentDescription") in
+      let fileName =
+        AttachmentFileName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileName") in
+      let contentDisposition =
+        (Option.map ~f:AttachmentContentDisposition.of_xml)
+          (Xml.child xml_arg0 "ContentDisposition") in
+      let rawContent =
+        RawAttachmentData.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RawContent") in
+      make ?contentType ?contentTransferEncoding ?contentId
+        ?contentDescription ~fileName ?contentDisposition ~rawContent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contentType =
+        field_map json__ "ContentType" AttachmentContentType.of_json in
+      let contentTransferEncoding =
+        field_map json__ "ContentTransferEncoding"
+          AttachmentContentTransferEncoding.of_json in
+      let contentId =
+        field_map json__ "ContentId" AttachmentContentId.of_json in
+      let contentDescription =
+        field_map json__ "ContentDescription"
+          AttachmentContentDescription.of_json in
+      let fileName =
+        field_map_exn json__ "FileName" AttachmentFileName.of_json in
+      let contentDisposition =
+        field_map json__ "ContentDisposition"
+          AttachmentContentDisposition.of_json in
+      let rawContent =
+        field_map_exn json__ "RawContent" RawAttachmentData.of_json in
+      make ?contentType ?contentTransferEncoding ?contentId
+        ?contentDescription ~fileName ?contentDisposition ~rawContent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains metadata and attachment raw content."]
 module Content =
   struct
     type nonrec t =
@@ -380,17 +1141,94 @@ module Content =
         MessageData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ?charset ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let charset = field_map json "Charset" Charset.of_json in
-      let data = field_map_exn json "Data" MessageData.of_json in
+    let of_json json__ =
+      let charset = field_map json__ "Charset" Charset.of_json in
+      let data = field_map_exn json__ "Data" MessageData.of_json in
       make ?charset ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that represents the content of the email, and optionally a character set specification."]
+module MessageHeader =
+  struct
+    type nonrec t =
+      {
+      name: MessageHeaderName.t
+        [@ocaml.doc
+          "The name of the message header. The message header name has to meet the following criteria: Can contain any printable ASCII character (33 - 126) except for colon (:). Can contain no more than 126 characters."];
+      value: MessageHeaderValue.t
+        [@ocaml.doc
+          "The value of the message header. The message header value has to meet the following criteria: Can contain any printable ASCII character. Can contain no more than 995 characters. The combined length of the header name and value must not exceed 996 characters."]}
+    let context_ = "MessageHeader"
+    let make ~name = fun ~value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("Name", (Some (MessageHeaderName.to_value x.name)));
+        ("Value", (Some (MessageHeaderValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        MessageHeaderValue.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let name =
+        MessageHeaderName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MessageHeaderValue.of_json in
+      let name = field_map_exn json__ "Name" MessageHeaderName.of_json in
+      make ~value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the name and value of a message header that you add to an email."]
+module EmailTemplateHtml =
+  struct
+    type nonrec t = string[@@ocaml.doc "The HTML body of the email."]
+    let context_ = "EmailTemplateHtml"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EmailTemplateHtml" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The HTML body of the email."]
+module EmailTemplateSubject =
+  struct
+    type nonrec t = string[@@ocaml.doc "The subject line of the email."]
+    let context_ = "EmailTemplateSubject"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EmailTemplateSubject" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The subject line of the email."]
+module EmailTemplateText =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The email body that will be visible to recipients whose email clients do not display HTML."]
+    let context_ = "EmailTemplateText"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EmailTemplateText" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The email body that will be visible to recipients whose email clients do not display HTML."]
 module EmailAddressList =
   struct
     type nonrec t = EmailAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EmailAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -437,9 +1275,9 @@ module MessageTag =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MessageTagValue.of_json in
-      let name = field_map_exn json "Name" MessageTagName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MessageTagValue.of_json in
+      let name = field_map_exn json__ "Name" MessageTagName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -464,9 +1302,9 @@ module ReplacementTemplate =
           (Xml.child xml_arg0 "ReplacementTemplateData") in
       make ?replacementTemplateData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replacementTemplateData =
-        field_map json "ReplacementTemplateData" EmailTemplateData.of_json in
+        field_map json__ "ReplacementTemplateData" EmailTemplateData.of_json in
       make ?replacementTemplateData ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -488,6 +1326,9 @@ module IspNameList =
   struct
     type nonrec t = IspName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IspName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -508,6 +1349,67 @@ module IspNameList =
       list_of_json ~kind:"IspNameList" ~of_json:IspName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SendingStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | REINSTATED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | REINSTATED -> "REINSTATED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "REINSTATED" -> REINSTATED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SendingStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SendingStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module StatusCause =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A description of the reason for a status change, such as automated actions taken due to reputation findings or manual status updates."]
+    let context_ = "StatusCause"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StatusCause" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "A description of the reason for a status change, such as automated actions taken due to reputation findings or manual status updates."]
+module Region =
+  struct
+    type nonrec t = string[@@ocaml.doc "The name of an AWS-Region."]
+    let context_ = "Region"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Region" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of an AWS-Region."]
 module ContactListDestination =
   struct
     type nonrec t =
@@ -537,12 +1439,12 @@ module ContactListDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListImportAction ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contactListImportAction =
-        field_map_exn json "ContactListImportAction"
+        field_map_exn json__ "ContactListImportAction"
           ContactListImportAction.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ~contactListImportAction ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -571,9 +1473,9 @@ module SuppressionListDestination =
              "SuppressionListImportAction") in
       make ~suppressionListImportAction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suppressionListImportAction =
-        field_map_exn json "SuppressionListImportAction"
+        field_map_exn json__ "SuppressionListImportAction"
           SuppressionListImportAction.of_json in
       make ~suppressionListImportAction ()
     let to_json v = composed_to_json to_value v
@@ -631,14 +1533,342 @@ module TopicPreference =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicName") in
       make ~subscriptionStatus ~topicName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionStatus =
-        field_map_exn json "SubscriptionStatus" SubscriptionStatus.of_json in
-      let topicName = field_map_exn json "TopicName" TopicName.of_json in
+        field_map_exn json__ "SubscriptionStatus" SubscriptionStatus.of_json in
+      let topicName = field_map_exn json__ "TopicName" TopicName.of_json in
       make ~subscriptionStatus ~topicName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The contact's preference for being opted-in to or opted-out of a topic."]
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module InsightsEvent =
+  struct
+    type nonrec t =
+      {
+      timestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of the event."];
+      type_: EventType.t option
+        [@ocaml.doc
+          "The type of event: SEND - The send request was successful and SES will attempt to deliver the message to the recipient\226\128\153s mail server. (If account-level or global suppression is being used, SES will still count it as a send, but delivery is suppressed.) DELIVERY - SES successfully delivered the email to the recipient's mail server. Excludes deliveries to the mailbox simulator, and those from emails addressed to more than one recipient. BOUNCE - Feedback received for delivery failures. Additional details about the bounce are provided in the Details object. Excludes bounces from the mailbox simulator, and those from emails addressed to more than one recipient. COMPLAINT - Complaint received for the email. Additional details about the complaint are provided in the Details object. This excludes complaints from the mailbox simulator, those originating from your account-level suppression list (if enabled), and those from emails addressed to more than one recipient. OPEN - Open event for emails including open trackers. Excludes opens for emails addressed to more than one recipient. CLICK - Click event for emails including wrapped links. Excludes clicks for emails addressed to more than one recipient."];
+      details: EventDetails.t option
+        [@ocaml.doc "Details about bounce or complaint events."]}
+    let make ?timestamp =
+      fun ?type_ -> fun ?details -> fun () -> { timestamp; type_; details }
+    let to_value x =
+      structure_to_value
+        [("Timestamp", (Option.map x.timestamp ~f:Timestamp.to_value));
+        ("Type", (Option.map x.type_ ~f:EventType.to_value));
+        ("Details", (Option.map x.details ~f:EventDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let details =
+        (Option.map ~f:EventDetails.of_xml) (Xml.child xml_arg0 "Details") in
+      let type_ =
+        (Option.map ~f:EventType.of_xml) (Xml.child xml_arg0 "Type") in
+      let timestamp =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      make ?details ?type_ ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let details = field_map json__ "Details" EventDetails.of_json in
+      let type_ = field_map json__ "Type" EventType.of_json in
+      let timestamp = field_map json__ "Timestamp" Timestamp.of_json in
+      make ?details ?type_ ?timestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object containing details about a specific event."]
+module EmailAddressFilterList =
+  struct
+    type nonrec t = InsightsEmailAddress.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightsEmailAddress.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightsEmailAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EmailAddressFilterList"
+        ~of_json:InsightsEmailAddress.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EmailSubjectFilterList =
+  struct
+    type nonrec t = EmailSubject.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EmailSubject.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EmailSubject.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EmailSubjectFilterList"
+        ~of_json:EmailSubject.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IspFilterList =
+  struct
+    type nonrec t = Isp.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Isp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Isp.of_xml)
+    let of_json j = list_of_json ~kind:"IspFilterList" ~of_json:Isp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LastDeliveryEventList =
+  struct
+    type nonrec t = DeliveryEventType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DeliveryEventType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DeliveryEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LastDeliveryEventList"
+        ~of_json:DeliveryEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module LastEngagementEventList =
+  struct
+    type nonrec t = EngagementEventType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:2); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EngagementEventType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EngagementEventType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LastEngagementEventList"
+        ~of_json:EngagementEventType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportDimensionValue =
+  struct
+    type nonrec t = MetricDimensionValue.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDimensionValue.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDimensionValue.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportDimensionValue"
+        ~of_json:MetricDimensionValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDimensionName =
+  struct
+    type nonrec t =
+      | EMAIL_IDENTITY 
+      | CONFIGURATION_SET 
+      | ISP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EMAIL_IDENTITY -> "EMAIL_IDENTITY"
+      | CONFIGURATION_SET -> "CONFIGURATION_SET"
+      | ISP -> "ISP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EMAIL_IDENTITY" -> EMAIL_IDENTITY
+      | "CONFIGURATION_SET" -> CONFIGURATION_SET
+      | "ISP" -> ISP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration MetricDimensionName" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricDimensionName" j)
+    let to_json = simple_to_json to_value
+  end
+module ExportMetric =
+  struct
+    type nonrec t =
+      {
+      name: Metric.t option ;
+      aggregation: MetricAggregation.t option }
+    let make ?name = fun ?aggregation -> fun () -> { name; aggregation }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:Metric.to_value));
+        ("Aggregation",
+          (Option.map x.aggregation ~f:MetricAggregation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let aggregation =
+        (Option.map ~f:MetricAggregation.of_xml)
+          (Xml.child xml_arg0 "Aggregation") in
+      let name = (Option.map ~f:Metric.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?aggregation ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let aggregation =
+        field_map json__ "Aggregation" MetricAggregation.of_json in
+      let name = field_map json__ "Name" Metric.of_json in
+      make ?aggregation ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains a mapping between a Metric and MetricAggregation."]
+module EmailAddressInsightsConfidenceVerdict =
+  struct
+    type nonrec t =
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration EmailAddressInsightsConfidenceVerdict" xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"EmailAddressInsightsConfidenceVerdict" j)
+    let to_json = simple_to_json to_value
+  end
 module DomainIspPlacement =
   struct
     type nonrec t =
@@ -697,22 +1927,83 @@ module DomainIspPlacement =
       make ?spamPercentage ?inboxPercentage ?spamRawCount ?inboxRawCount
         ?ispName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spamPercentage = field_map json "SpamPercentage" Percentage.of_json in
+    let of_json json__ =
+      let spamPercentage =
+        field_map json__ "SpamPercentage" Percentage.of_json in
       let inboxPercentage =
-        field_map json "InboxPercentage" Percentage.of_json in
-      let spamRawCount = field_map json "SpamRawCount" Volume.of_json in
-      let inboxRawCount = field_map json "InboxRawCount" Volume.of_json in
-      let ispName = field_map json "IspName" IspName.of_json in
+        field_map json__ "InboxPercentage" Percentage.of_json in
+      let spamRawCount = field_map json__ "SpamRawCount" Volume.of_json in
+      let inboxRawCount = field_map json__ "InboxRawCount" Volume.of_json in
+      let ispName = field_map json__ "IspName" IspName.of_json in
       make ?spamPercentage ?inboxPercentage ?spamRawCount ?inboxRawCount
         ?ispName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains inbox placement data for email sent from one of your email domains to a specific email provider."]
+module FeatureStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FeatureStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FeatureStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SuppressionConfidenceThreshold =
+  struct
+    type nonrec t =
+      {
+      confidenceVerdictThreshold: SuppressionConfidenceVerdictThreshold.t
+        [@ocaml.doc
+          "The confidence level threshold for suppression decisions."]}
+    let context_ = "SuppressionConfidenceThreshold"
+    let make ~confidenceVerdictThreshold =
+      fun () -> { confidenceVerdictThreshold }
+    let to_value x =
+      structure_to_value
+        [("ConfidenceVerdictThreshold",
+           (Some
+              (SuppressionConfidenceVerdictThreshold.to_value
+                 x.confidenceVerdictThreshold)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidenceVerdictThreshold =
+        SuppressionConfidenceVerdictThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ConfidenceVerdictThreshold") in
+      make ~confidenceVerdictThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidenceVerdictThreshold =
+        field_map_exn json__ "ConfidenceVerdictThreshold"
+          SuppressionConfidenceVerdictThreshold.of_json in
+      make ~confidenceVerdictThreshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the confidence threshold settings for Auto Validation."]
 module CloudWatchDimensionConfigurations =
   struct
     type nonrec t = CloudWatchDimensionConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchDimensionConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -736,60 +2027,12 @@ module CloudWatchDimensionConfigurations =
         ~of_json:CloudWatchDimensionConfiguration.of_json j
     let to_json v = composed_to_json to_value v
   end
-module EventType =
-  struct
-    type nonrec t =
-      | SEND 
-      | REJECT 
-      | BOUNCE 
-      | COMPLAINT 
-      | DELIVERY 
-      | OPEN 
-      | CLICK 
-      | RENDERING_FAILURE 
-      | DELIVERY_DELAY 
-      | SUBSCRIPTION 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SEND -> "SEND"
-      | REJECT -> "REJECT"
-      | BOUNCE -> "BOUNCE"
-      | COMPLAINT -> "COMPLAINT"
-      | DELIVERY -> "DELIVERY"
-      | OPEN -> "OPEN"
-      | CLICK -> "CLICK"
-      | RENDERING_FAILURE -> "RENDERING_FAILURE"
-      | DELIVERY_DELAY -> "DELIVERY_DELAY"
-      | SUBSCRIPTION -> "SUBSCRIPTION"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SEND" -> SEND
-      | "REJECT" -> REJECT
-      | "BOUNCE" -> BOUNCE
-      | "COMPLAINT" -> COMPLAINT
-      | "DELIVERY" -> DELIVERY
-      | "OPEN" -> OPEN
-      | "CLICK" -> CLICK
-      | "RENDERING_FAILURE" -> RENDERING_FAILURE
-      | "DELIVERY_DELAY" -> DELIVERY_DELAY
-      | "SUBSCRIPTION" -> SUBSCRIPTION
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration EventType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EventType" j)
-    let to_json = simple_to_json to_value
-  end
 module AmazonResourceName =
   struct
     type nonrec t = string
     let context_ = "AmazonResourceName"
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -826,16 +2069,17 @@ module RblName =
     let of_json j = string_of_json ~kind:"RblName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The name of a blacklist that an IP address was found on."]
-module Timestamp =
+module Counter =
   struct
-    type nonrec t = string
+    type nonrec t = Int64.t
     let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module Description =
@@ -864,31 +2108,32 @@ module DisplayName =
     let of_json j = string_of_json ~kind:"DisplayName" j
     let to_json = simple_to_json to_value
   end
-module TagKey =
+module AttachmentList =
   struct
-    type nonrec t = string
-    let context_ = "TagKey"
+    type nonrec t = Attachment.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Attachment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagKey" j
-    let to_json = simple_to_json to_value
-  end
-module TagValue =
-  struct
-    type nonrec t = string
-    let context_ = "TagValue"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TagValue" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Attachment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttachmentList" ~of_json:Attachment.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Body =
   struct
@@ -911,11 +2156,43 @@ module Body =
       let text = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Text") in
       make ?html ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let html = field_map json "Html" Content.of_json in
-      let text = field_map json "Text" Content.of_json in make ?html ?text ()
+    let of_json json__ =
+      let html = field_map json__ "Html" Content.of_json in
+      let text = field_map json__ "Text" Content.of_json in
+      make ?html ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the body of the email message."]
+module MessageHeaderList =
+  struct
+    type nonrec t = MessageHeader.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MessageHeader.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MessageHeader.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MessageHeaderList" ~of_json:MessageHeader.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module RawMessageData =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -930,10 +2207,47 @@ module RawMessageData =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The raw email message. The message has to meet the following criteria: The message has to contain a header and a body, separated by one blank line. All of the required header fields must be present in the message. Each part of a multipart MIME message must be formatted properly. Attachments must be in a file format that the Amazon SES API v2 supports. The entire message must be Base64 encoded. If any of the MIME parts in your message contain content that is outside of the 7-bit ASCII character range, you should encode that content to ensure that recipients' email clients render the message properly. The length of any single line of text in the message can't exceed 1,000 characters. This restriction is defined in RFC 5321."]
+module EmailTemplateContent =
+  struct
+    type nonrec t =
+      {
+      subject: EmailTemplateSubject.t option
+        [@ocaml.doc "The subject line of the email."];
+      text: EmailTemplateText.t option
+        [@ocaml.doc
+          "The email body that will be visible to recipients whose email clients do not display HTML."];
+      html: EmailTemplateHtml.t option
+        [@ocaml.doc "The HTML body of the email."]}
+    let make ?subject =
+      fun ?text -> fun ?html -> fun () -> { subject; text; html }
+    let to_value x =
+      structure_to_value
+        [("Subject", (Option.map x.subject ~f:EmailTemplateSubject.to_value));
+        ("Text", (Option.map x.text ~f:EmailTemplateText.to_value));
+        ("Html", (Option.map x.html ~f:EmailTemplateHtml.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let html =
+        (Option.map ~f:EmailTemplateHtml.of_xml) (Xml.child xml_arg0 "Html") in
+      let text =
+        (Option.map ~f:EmailTemplateText.of_xml) (Xml.child xml_arg0 "Text") in
+      let subject =
+        (Option.map ~f:EmailTemplateSubject.of_xml)
+          (Xml.child xml_arg0 "Subject") in
+      make ?html ?text ?subject ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let html = field_map json__ "Html" EmailTemplateHtml.of_json in
+      let text = field_map json__ "Text" EmailTemplateText.of_json in
+      let subject = field_map json__ "Subject" EmailTemplateSubject.of_json in
+      make ?html ?text ?subject ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The content of the email, composed of a subject line, an HTML part, and a text-only part."]
 module EmailTemplateName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The name of the template. You will refer to this name when you send email using the SendTemplatedEmail or SendBulkTemplatedEmail operations."]
+                            "The name of the template. You will refer to this name when you send email using the SendEmail or SendBulkEmail operations."]
     let context_ = "EmailTemplateName"
     let make i =
       let open Result in ok_or_failwith (check_string_min i ~min:1); i
@@ -945,7 +2259,7 @@ module EmailTemplateName =
     let of_json j = string_of_json ~kind:"EmailTemplateName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "The name of the template. You will refer to this name when you send email using the SendTemplatedEmail or SendBulkTemplatedEmail operations."]
+       "The name of the template. You will refer to this name when you send email using the SendEmail or SendBulkEmail operations."]
 module BulkEmailStatus =
   struct
     type nonrec t =
@@ -1073,11 +2387,13 @@ module Destination =
           (Xml.child xml_arg0 "ToAddresses") in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bccAddresses =
-        field_map json "BccAddresses" EmailAddressList.of_json in
-      let ccAddresses = field_map json "CcAddresses" EmailAddressList.of_json in
-      let toAddresses = field_map json "ToAddresses" EmailAddressList.of_json in
+        field_map json__ "BccAddresses" EmailAddressList.of_json in
+      let ccAddresses =
+        field_map json__ "CcAddresses" EmailAddressList.of_json in
+      let toAddresses =
+        field_map json__ "ToAddresses" EmailAddressList.of_json in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1086,6 +2402,9 @@ module MessageTagList =
   struct
     type nonrec t = MessageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MessageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1125,9 +2444,9 @@ module ReplacementEmailContent =
           (Xml.child xml_arg0 "ReplacementTemplate") in
       make ?replacementTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let replacementTemplate =
-        field_map json "ReplacementTemplate" ReplacementTemplate.of_json in
+        field_map json__ "ReplacementTemplate" ReplacementTemplate.of_json in
       make ?replacementTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1168,13 +2487,70 @@ module InboxPlacementTrackingOption =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Global") in
       make ?trackedIsps ?global ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackedIsps = field_map json "TrackedIsps" IspNameList.of_json in
-      let global = field_map json "Global" Enabled.of_json in
+    let of_json json__ =
+      let trackedIsps = field_map json__ "TrackedIsps" IspNameList.of_json in
+      let global = field_map json__ "Global" Enabled.of_json in
       make ?trackedIsps ?global ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the inbox placement data settings for a verified domain that\226\128\153s associated with your Amazon Web Services account. This data is available only if you enabled the Deliverability dashboard for the domain."]
+module TenantId =
+  struct
+    type nonrec t = string
+    let context_ = "TenantId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TenantId" j
+    let to_json = simple_to_json to_value
+  end
+module TenantName =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The name of a tenant. The name can contain up to 64 alphanumeric characters, including letters, numbers, hyphens (-) and underscores (_) only."]
+    let context_ = "TenantName"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TenantName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The name of a tenant. The name can contain up to 64 alphanumeric characters, including letters, numbers, hyphens (-) and underscores (_) only."]
+module ResourceType =
+  struct
+    type nonrec t =
+      | EMAIL_IDENTITY 
+      | CONFIGURATION_SET 
+      | EMAIL_TEMPLATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EMAIL_IDENTITY -> "EMAIL_IDENTITY"
+      | CONFIGURATION_SET -> "CONFIGURATION_SET"
+      | EMAIL_TEMPLATE -> "EMAIL_TEMPLATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EMAIL_IDENTITY" -> EMAIL_IDENTITY
+      | "CONFIGURATION_SET" -> CONFIGURATION_SET
+      | "EMAIL_TEMPLATE" -> EMAIL_TEMPLATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ResourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
+    let to_json = simple_to_json to_value
+  end
 module SuppressionListReason =
   struct
     type nonrec t =
@@ -1200,6 +2576,284 @@ module SuppressionListReason =
         (string_of_xml ~kind:"enumeration SuppressionListReason" xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"SuppressionListReason" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendationImpact =
+  struct
+    type nonrec t =
+      | LOW 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | LOW -> "LOW" | HIGH -> "HIGH" | Non_static_id s -> s
+    let of_string =
+      function | "LOW" -> LOW | "HIGH" -> HIGH | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationImpact" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationImpact" j)
+    let to_json = simple_to_json to_value
+  end
+module ReputationEntityReference =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The unique identifier for a reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."]
+    let context_ = "ReputationEntityReference"
+    let make i =
+      let open Result in ok_or_failwith (check_string_min i ~min:1); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReputationEntityReference" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The unique identifier for a reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."]
+module ReputationEntityType =
+  struct
+    type nonrec t =
+      | RESOURCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | RESOURCE -> "RESOURCE" | Non_static_id s -> s
+    let of_string = function | "RESOURCE" -> RESOURCE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReputationEntityType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReputationEntityType" j)
+    let to_json = simple_to_json to_value
+  end
+module StatusRecord =
+  struct
+    type nonrec t =
+      {
+      status: SendingStatus.t option
+        [@ocaml.doc
+          "The current sending status. This can be one of the following: ENABLED \226\128\147 Sending is allowed. DISABLED \226\128\147 Sending is prevented. REINSTATED \226\128\147 Sending is allowed even with active reputation findings."];
+      cause: StatusCause.t option
+        [@ocaml.doc
+          "A description of the reason for the current status, or null if no specific cause is available."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp when this status was last updated."]}
+    let make ?status =
+      fun ?cause ->
+        fun ?lastUpdatedTimestamp ->
+          fun () -> { status; cause; lastUpdatedTimestamp }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:SendingStatus.to_value));
+        ("Cause", (Option.map x.cause ~f:StatusCause.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let cause =
+        (Option.map ~f:StatusCause.of_xml) (Xml.child xml_arg0 "Cause") in
+      let status =
+        (Option.map ~f:SendingStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?lastUpdatedTimestamp ?cause ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let cause = field_map json__ "Cause" StatusCause.of_json in
+      let status = field_map json__ "Status" SendingStatus.of_json in
+      make ?lastUpdatedTimestamp ?cause ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains status information for a reputation entity, including the current status, cause description, and timestamp."]
+module RecommendationDescription =
+  struct
+    type nonrec t = string
+    let context_ = "RecommendationDescription"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RecommendationDescription" j
+    let to_json = simple_to_json to_value
+  end
+module RecommendationStatus =
+  struct
+    type nonrec t =
+      | OPEN 
+      | FIXED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | OPEN -> "OPEN" | FIXED -> "FIXED" | Non_static_id s -> s
+    let of_string =
+      function | "OPEN" -> OPEN | "FIXED" -> FIXED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendationType =
+  struct
+    type nonrec t =
+      | DKIM 
+      | DMARC 
+      | SPF 
+      | BIMI 
+      | COMPLAINT 
+      | BOUNCE 
+      | FEEDBACK_3P 
+      | IP_LISTING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DKIM -> "DKIM"
+      | DMARC -> "DMARC"
+      | SPF -> "SPF"
+      | BIMI -> "BIMI"
+      | COMPLAINT -> "COMPLAINT"
+      | BOUNCE -> "BOUNCE"
+      | FEEDBACK_3P -> "FEEDBACK_3P"
+      | IP_LISTING -> "IP_LISTING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DKIM" -> DKIM
+      | "DMARC" -> DMARC
+      | "SPF" -> SPF
+      | "BIMI" -> BIMI
+      | "COMPLAINT" -> COMPLAINT
+      | "BOUNCE" -> BOUNCE
+      | "FEEDBACK_3P" -> FEEDBACK_3P
+      | "IP_LISTING" -> IP_LISTING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RecommendationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RecommendationType" j)
+    let to_json = simple_to_json to_value
+  end
+module EndpointId =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The ID of the multi-region endpoint (global-endpoint)."]
+    let context_ = "EndpointId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EndpointId" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."]
+module EndpointName =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The name of the multi-region endpoint (global-endpoint)."]
+    let context_ = "EndpointName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[\\w\\-_]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EndpointName" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc "The name of the multi-region endpoint (global-endpoint)."]
+module Regions =
+  struct
+    type nonrec t = Region.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Region.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Region.of_xml)
+    let of_json j = list_of_json ~kind:"Regions" ~of_json:Region.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Status =
+  struct
+    type nonrec t =
+      | CREATING 
+      | READY 
+      | FAILED 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | READY -> "READY"
+      | FAILED -> "FAILED"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "READY" -> READY
+      | "FAILED" -> FAILED
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Status" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Status" j)
+    let to_json = simple_to_json to_value
+  end
+module FailedRecordsCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for FailedRecordsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module ImportDestination =
@@ -1233,12 +2887,12 @@ module ImportDestination =
           (Xml.child xml_arg0 "SuppressionListDestination") in
       make ?contactListDestination ?suppressionListDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contactListDestination =
-        field_map json "ContactListDestination"
+        field_map json__ "ContactListDestination"
           ContactListDestination.of_json in
       let suppressionListDestination =
-        field_map json "SuppressionListDestination"
+        field_map json__ "SuppressionListDestination"
           SuppressionListDestination.of_json in
       make ?contactListDestination ?suppressionListDestination ()
     let to_json v = composed_to_json to_value v
@@ -1246,8 +2900,7 @@ module ImportDestination =
        "An object that contains details about the resource destination the import job is going to target."]
 module JobId =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "A string that represents the import job ID."]
+    type nonrec t = string[@@ocaml.doc "A string that represents a job ID."]
     let context_ = "JobId"
     let make i =
       let open Result in ok_or_failwith (check_string_min i ~min:1); i
@@ -1258,7 +2911,7 @@ module JobId =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"JobId" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "A string that represents the import job ID."]
+  end[@@ocaml.doc "A string that represents a job ID."]
 module JobStatus =
   struct
     type nonrec t =
@@ -1266,6 +2919,7 @@ module JobStatus =
       | PROCESSING 
       | COMPLETED 
       | FAILED 
+      | CANCELLED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1274,6 +2928,7 @@ module JobStatus =
       | PROCESSING -> "PROCESSING"
       | COMPLETED -> "COMPLETED"
       | FAILED -> "FAILED"
+      | CANCELLED -> "CANCELLED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1281,6 +2936,7 @@ module JobStatus =
       | "PROCESSING" -> PROCESSING
       | "COMPLETED" -> COMPLETED
       | "FAILED" -> FAILED
+      | "CANCELLED" -> CANCELLED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1288,6 +2944,45 @@ module JobStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration JobStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"JobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ProcessedRecordsCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ProcessedRecordsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExportSourceType =
+  struct
+    type nonrec t =
+      | METRICS_DATA 
+      | MESSAGE_INSIGHTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | METRICS_DATA -> "METRICS_DATA"
+      | MESSAGE_INSIGHTS -> "MESSAGE_INSIGHTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "METRICS_DATA" -> METRICS_DATA
+      | "MESSAGE_INSIGHTS" -> MESSAGE_INSIGHTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ExportSourceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ExportSourceType" j)
     let to_json = simple_to_json to_value
   end
 module Identity =
@@ -1332,6 +3027,41 @@ module IdentityType =
     let of_json j = of_string (string_of_json ~kind:"IdentityType" j)
     let to_json = simple_to_json to_value
   end
+module VerificationStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | SUCCESS 
+      | FAILED 
+      | TEMPORARY_FAILURE 
+      | NOT_STARTED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | SUCCESS -> "SUCCESS"
+      | FAILED -> "FAILED"
+      | TEMPORARY_FAILURE -> "TEMPORARY_FAILURE"
+      | NOT_STARTED -> "NOT_STARTED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "SUCCESS" -> SUCCESS
+      | "FAILED" -> FAILED
+      | "TEMPORARY_FAILURE" -> TEMPORARY_FAILURE
+      | "NOT_STARTED" -> NOT_STARTED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VerificationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VerificationStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module CampaignId =
   struct
     type nonrec t = string
@@ -1349,6 +3079,9 @@ module Esps =
   struct
     type nonrec t = Esp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Esp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1385,6 +3118,9 @@ module IpList =
   struct
     type nonrec t = Ip.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Ip.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -1488,19 +3224,6 @@ module ReportName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "A name that helps you identify a report generated by the Deliverability dashboard."]
-module EmailTemplateSubject =
-  struct
-    type nonrec t = string[@@ocaml.doc "The subject line of the email."]
-    let context_ = "EmailTemplateSubject"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EmailTemplateSubject" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The subject line of the email."]
 module FailureRedirectionURL =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -1535,6 +3258,9 @@ module TopicPreferenceList =
   struct
     type nonrec t = TopicPreference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TopicPreference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1582,6 +3308,37 @@ module UseDefaultIfPreferenceUnavailable =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "One part of a key-value pair that defines a tag. The maximum length of a tag key is 128 characters. The minimum length is 1 character."];
+      value: TagValue.t
+        [@ocaml.doc
+          "The optional part of a key-value pair that defines a tag. The maximum length of a tag value is 256 characters. The minimum length is 0 characters. If you don't want a resource to have a specific tag value, don't specify a value for this\194\160parameter. If you don't specify a value, Amazon SES sets the value to an empty string."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that defines the tags that are associated with a resource. A\194\160tag\194\160is a label that you optionally define and associate with a resource. Tags can help you categorize and manage resources in different ways, such as by purpose, owner, environment, or other criteria. A resource can have as many as 50 tags. Each tag consists of a required\194\160tag key\194\160and an associated\194\160tag value, both of which you define. A tag key is a general label that acts as a category for a more specific tag value. A tag value acts as a descriptor within a tag key. A tag key can contain as many as 128 characters. A tag value can contain as many as 256 characters. The characters can be Unicode letters, digits, white space, or one of the following symbols: _ . : / = + -. The following additional restrictions apply to tags: Tag keys and values are case sensitive. For each associated resource, each tag key must be unique and it can have only one value. The\194\160aws:\194\160prefix is reserved for use by Amazon Web Services; you can\226\128\153t use it in any tag keys or values that you define. In addition, you can't edit or remove tag keys or values that use this prefix. Tags that use this prefix don\226\128\153t count against the limit of 50 tags per resource. You can associate tags with public or shared resources, but the tags are available only for your Amazon Web Services account, not any other accounts that share the resource. In addition, the tags are available only for resources that are located in the specified Amazon Web Services Region for your Amazon Web Services account."]
 module FeedbackId =
   struct
     type nonrec t = string
@@ -1593,6 +3350,223 @@ module FeedbackId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"FeedbackId" j
+    let to_json = simple_to_json to_value
+  end
+module InsightsEvents =
+  struct
+    type nonrec t = InsightsEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:InsightsEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:InsightsEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightsEvents" ~of_json:InsightsEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MessageInsightsExportMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MessageInsightsExportMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module MessageInsightsFilters =
+  struct
+    type nonrec t =
+      {
+      fromEmailAddress: EmailAddressFilterList.t option
+        [@ocaml.doc "The from address used to send the message."];
+      destination: EmailAddressFilterList.t option
+        [@ocaml.doc "The recipient's email address."];
+      subject: EmailSubjectFilterList.t option
+        [@ocaml.doc "The subject line of the message."];
+      isp: IspFilterList.t option
+        [@ocaml.doc "The recipient's ISP (e.g., Gmail, Yahoo, etc.)."];
+      lastDeliveryEvent: LastDeliveryEventList.t option
+        [@ocaml.doc
+          "The last delivery-related event for the email, where the ordering is as follows: SEND < BOUNCE < DELIVERY < COMPLAINT."];
+      lastEngagementEvent: LastEngagementEventList.t option
+        [@ocaml.doc
+          "The last engagement-related event for the email, where the ordering is as follows: OPEN < CLICK. Engagement events are only available if Engagement tracking is enabled."]}
+    let make ?fromEmailAddress =
+      fun ?destination ->
+        fun ?subject ->
+          fun ?isp ->
+            fun ?lastDeliveryEvent ->
+              fun ?lastEngagementEvent ->
+                fun () ->
+                  {
+                    fromEmailAddress;
+                    destination;
+                    subject;
+                    isp;
+                    lastDeliveryEvent;
+                    lastEngagementEvent
+                  }
+    let to_value x =
+      structure_to_value
+        [("FromEmailAddress",
+           (Option.map x.fromEmailAddress ~f:EmailAddressFilterList.to_value));
+        ("Destination",
+          (Option.map x.destination ~f:EmailAddressFilterList.to_value));
+        ("Subject",
+          (Option.map x.subject ~f:EmailSubjectFilterList.to_value));
+        ("Isp", (Option.map x.isp ~f:IspFilterList.to_value));
+        ("LastDeliveryEvent",
+          (Option.map x.lastDeliveryEvent ~f:LastDeliveryEventList.to_value));
+        ("LastEngagementEvent",
+          (Option.map x.lastEngagementEvent
+             ~f:LastEngagementEventList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastEngagementEvent =
+        (Option.map ~f:LastEngagementEventList.of_xml)
+          (Xml.child xml_arg0 "LastEngagementEvent") in
+      let lastDeliveryEvent =
+        (Option.map ~f:LastDeliveryEventList.of_xml)
+          (Xml.child xml_arg0 "LastDeliveryEvent") in
+      let isp =
+        (Option.map ~f:IspFilterList.of_xml) (Xml.child xml_arg0 "Isp") in
+      let subject =
+        (Option.map ~f:EmailSubjectFilterList.of_xml)
+          (Xml.child xml_arg0 "Subject") in
+      let destination =
+        (Option.map ~f:EmailAddressFilterList.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      let fromEmailAddress =
+        (Option.map ~f:EmailAddressFilterList.of_xml)
+          (Xml.child xml_arg0 "FromEmailAddress") in
+      make ?lastEngagementEvent ?lastDeliveryEvent ?isp ?subject ?destination
+        ?fromEmailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastEngagementEvent =
+        field_map json__ "LastEngagementEvent"
+          LastEngagementEventList.of_json in
+      let lastDeliveryEvent =
+        field_map json__ "LastDeliveryEvent" LastDeliveryEventList.of_json in
+      let isp = field_map json__ "Isp" IspFilterList.of_json in
+      let subject = field_map json__ "Subject" EmailSubjectFilterList.of_json in
+      let destination =
+        field_map json__ "Destination" EmailAddressFilterList.of_json in
+      let fromEmailAddress =
+        field_map json__ "FromEmailAddress" EmailAddressFilterList.of_json in
+      make ?lastEngagementEvent ?lastDeliveryEvent ?isp ?subject ?destination
+        ?fromEmailAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing Message Insights filters. If you specify multiple filters, the filters are joined by AND. If you specify multiple values for a filter, the values are joined by OR. Filter values are case-sensitive. FromEmailAddress, Destination, and Subject filters support partial match. A partial match is performed by using the * wildcard character placed at the beginning (suffix match), the end (prefix match) or both ends of the string (contains match). In order to match the literal characters * or \\, they must be escaped using the \\ character. If no wildcard character is present, an exact match is performed."]
+module ExportDimensions =
+  struct
+    type nonrec t = (MetricDimensionName.t * ExportDimensionValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types MetricDimensionName ExportDimensionValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (MetricDimensionName.to_value x) |>
+                    (fun x ->
+                       (ExportDimensionValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:MetricDimensionName.of_string
+        ~of_json:ExportDimensionValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExportMetrics =
+  struct
+    type nonrec t = ExportMetric.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportMetric.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportMetrics" ~of_json:ExportMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricNamespace =
+  struct
+    type nonrec t =
+      | VDM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | VDM -> "VDM" | Non_static_id s -> s
+    let of_string = function | "VDM" -> VDM | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration MetricNamespace" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"MetricNamespace" j)
     let to_json = simple_to_json to_value
   end
 module DnsToken =
@@ -1608,10 +3582,79 @@ module DnsToken =
     let of_json j = string_of_json ~kind:"DnsToken" j
     let to_json = simple_to_json to_value
   end
+module AdminEmail =
+  struct
+    type nonrec t = string
+    let context_ = "AdminEmail"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdminEmail" j
+    let to_json = simple_to_json to_value
+  end
+module PrimaryNameServer =
+  struct
+    type nonrec t = string
+    let context_ = "PrimaryNameServer"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PrimaryNameServer" j
+    let to_json = simple_to_json to_value
+  end
+module SerialNumber =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module EmailAddressInsightsVerdict =
+  struct
+    type nonrec t =
+      {
+      confidenceVerdict: EmailAddressInsightsConfidenceVerdict.t option
+        [@ocaml.doc "The confidence level of the validation verdict."]}
+    let make ?confidenceVerdict = fun () -> { confidenceVerdict }
+    let to_value x =
+      structure_to_value
+        [("ConfidenceVerdict",
+           (Option.map x.confidenceVerdict
+              ~f:EmailAddressInsightsConfidenceVerdict.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let confidenceVerdict =
+        (Option.map ~f:EmailAddressInsightsConfidenceVerdict.of_xml)
+          (Xml.child xml_arg0 "ConfidenceVerdict") in
+      make ?confidenceVerdict ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let confidenceVerdict =
+        field_map json__ "ConfidenceVerdict"
+          EmailAddressInsightsConfidenceVerdict.of_json in
+      make ?confidenceVerdict ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the overall validation verdict for an email address."]
 module DomainIspPlacements =
   struct
     type nonrec t = DomainIspPlacement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainIspPlacement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1673,11 +3716,11 @@ module VolumeStatistics =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "InboxRawCount") in
       make ?projectedSpam ?projectedInbox ?spamRawCount ?inboxRawCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectedSpam = field_map json "ProjectedSpam" Volume.of_json in
-      let projectedInbox = field_map json "ProjectedInbox" Volume.of_json in
-      let spamRawCount = field_map json "SpamRawCount" Volume.of_json in
-      let inboxRawCount = field_map json "InboxRawCount" Volume.of_json in
+    let of_json json__ =
+      let projectedSpam = field_map json__ "ProjectedSpam" Volume.of_json in
+      let projectedInbox = field_map json__ "ProjectedInbox" Volume.of_json in
+      let spamRawCount = field_map json__ "SpamRawCount" Volume.of_json in
+      let inboxRawCount = field_map json__ "InboxRawCount" Volume.of_json in
       make ?projectedSpam ?projectedInbox ?spamRawCount ?inboxRawCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1746,14 +3789,16 @@ module PlacementStatistics =
       make ?dkimPercentage ?spfPercentage ?missingPercentage ?spamPercentage
         ?inboxPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dkimPercentage = field_map json "DkimPercentage" Percentage.of_json in
-      let spfPercentage = field_map json "SpfPercentage" Percentage.of_json in
+    let of_json json__ =
+      let dkimPercentage =
+        field_map json__ "DkimPercentage" Percentage.of_json in
+      let spfPercentage = field_map json__ "SpfPercentage" Percentage.of_json in
       let missingPercentage =
-        field_map json "MissingPercentage" Percentage.of_json in
-      let spamPercentage = field_map json "SpamPercentage" Percentage.of_json in
+        field_map json__ "MissingPercentage" Percentage.of_json in
+      let spamPercentage =
+        field_map json__ "SpamPercentage" Percentage.of_json in
       let inboxPercentage =
-        field_map json "InboxPercentage" Percentage.of_json in
+        field_map json__ "InboxPercentage" Percentage.of_json in
       make ?dkimPercentage ?spfPercentage ?missingPercentage ?spamPercentage
         ?inboxPercentage ()
     let to_json v = composed_to_json to_value v
@@ -1791,17 +3836,20 @@ module WarmupStatus =
     type nonrec t =
       | IN_PROGRESS 
       | DONE 
+      | NOT_APPLICABLE 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | IN_PROGRESS -> "IN_PROGRESS"
       | DONE -> "DONE"
+      | NOT_APPLICABLE -> "NOT_APPLICABLE"
       | Non_static_id s -> s
     let of_string =
       function
       | "IN_PROGRESS" -> IN_PROGRESS
       | "DONE" -> DONE
+      | "NOT_APPLICABLE" -> NOT_APPLICABLE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1811,6 +3859,49 @@ module WarmupStatus =
     let of_json j = of_string (string_of_json ~kind:"WarmupStatus" j)
     let to_json = simple_to_json to_value
   end
+module SuppressionConditionThreshold =
+  struct
+    type nonrec t =
+      {
+      conditionThresholdEnabled: FeatureStatus.t
+        [@ocaml.doc
+          "Indicates whether Auto Validation is enabled for suppression. Set to ENABLED to enable the Auto Validation feature, or set to DISABLED to disable it."];
+      overallConfidenceThreshold: SuppressionConfidenceThreshold.t option
+        [@ocaml.doc
+          "The overall confidence threshold used to determine suppression decisions."]}
+    let context_ = "SuppressionConditionThreshold"
+    let make ?overallConfidenceThreshold =
+      fun ~conditionThresholdEnabled ->
+        fun () -> { overallConfidenceThreshold; conditionThresholdEnabled }
+    let to_value x =
+      structure_to_value
+        [("ConditionThresholdEnabled",
+           (Some (FeatureStatus.to_value x.conditionThresholdEnabled)));
+        ("OverallConfidenceThreshold",
+          (Option.map x.overallConfidenceThreshold
+             ~f:SuppressionConfidenceThreshold.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let overallConfidenceThreshold =
+        (Option.map ~f:SuppressionConfidenceThreshold.of_xml)
+          (Xml.child xml_arg0 "OverallConfidenceThreshold") in
+      let conditionThresholdEnabled =
+        FeatureStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ConditionThresholdEnabled") in
+      make ?overallConfidenceThreshold ~conditionThresholdEnabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let overallConfidenceThreshold =
+        field_map json__ "OverallConfidenceThreshold"
+          SuppressionConfidenceThreshold.of_json in
+      let conditionThresholdEnabled =
+        field_map_exn json__ "ConditionThresholdEnabled"
+          FeatureStatus.of_json in
+      make ?overallConfidenceThreshold ~conditionThresholdEnabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains Auto Validation settings, allowing you to suppress sending to specific destination(s) if they do not meet required threshold. For details on Auto Validation, see Auto Validation."]
 module CloudWatchDestination =
   struct
     type nonrec t =
@@ -1833,14 +3924,40 @@ module CloudWatchDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionConfigurations") in
       make ~dimensionConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionConfigurations =
-        field_map_exn json "DimensionConfigurations"
+        field_map_exn json__ "DimensionConfigurations"
           CloudWatchDimensionConfigurations.of_json in
       make ~dimensionConfigurations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that defines an Amazon CloudWatch destination for email events. You can use Amazon CloudWatch to monitor and gain insights on your email sending metrics."]
+module EventBridgeDestination =
+  struct
+    type nonrec t =
+      {
+      eventBusArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon EventBridge bus to publish email events to. Only the default bus is supported."]}
+    let context_ = "EventBridgeDestination"
+    let make ~eventBusArn = fun () -> { eventBusArn }
+    let to_value x =
+      structure_to_value
+        [("EventBusArn", (Some (AmazonResourceName.to_value x.eventBusArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventBusArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EventBusArn") in
+      make ~eventBusArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventBusArn =
+        field_map_exn json__ "EventBusArn" AmazonResourceName.of_json in
+      make ~eventBusArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that defines an Amazon EventBridge destination for email events. You can use Amazon EventBridge to send notifications when certain email events occur."]
 module EventDestinationName =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -1860,6 +3977,9 @@ module EventTypes =
   struct
     type nonrec t = EventType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1908,11 +4028,11 @@ module KinesisFirehoseDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "IamRoleArn") in
       make ~deliveryStreamArn ~iamRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamArn =
-        field_map_exn json "DeliveryStreamArn" AmazonResourceName.of_json in
+        field_map_exn json__ "DeliveryStreamArn" AmazonResourceName.of_json in
       let iamRoleArn =
-        field_map_exn json "IamRoleArn" AmazonResourceName.of_json in
+        field_map_exn json__ "IamRoleArn" AmazonResourceName.of_json in
       make ~deliveryStreamArn ~iamRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1936,9 +4056,9 @@ module PinpointDestination =
           (Xml.child xml_arg0 "ApplicationArn") in
       make ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationArn =
-        field_map json "ApplicationArn" AmazonResourceName.of_json in
+        field_map json__ "ApplicationArn" AmazonResourceName.of_json in
       make ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1962,12 +4082,13 @@ module SnsDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
+    let of_json json__ =
+      let topicArn =
+        field_map_exn json__ "TopicArn" AmazonResourceName.of_json in
       make ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notification when certain email events occur."]
+       "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notifications when certain email events occur."]
 module BlacklistEntry =
   struct
     type nonrec t =
@@ -1976,8 +4097,7 @@ module BlacklistEntry =
         [@ocaml.doc
           "The name of the blacklist that the IP address appears on."];
       listingTime: Timestamp.t option
-        [@ocaml.doc
-          "The time when the blacklisting event occurred, shown in Unix time format."];
+        [@ocaml.doc "The time when the blacklisting event occurred."];
       description: BlacklistingDescription.t option
         [@ocaml.doc
           "Additional information about the blacklisting event, as provided by the blacklist maintainer."]}
@@ -2001,11 +4121,11 @@ module BlacklistEntry =
         (Option.map ~f:RblName.of_xml) (Xml.child xml_arg0 "RblName") in
       make ?description ?listingTime ?rblName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" BlacklistingDescription.of_json in
-      let listingTime = field_map json "ListingTime" Timestamp.of_json in
-      let rblName = field_map json "RblName" RblName.of_json in
+        field_map json__ "Description" BlacklistingDescription.of_json in
+      let listingTime = field_map json__ "ListingTime" Timestamp.of_json in
+      let rblName = field_map json__ "RblName" RblName.of_json in
       make ?description ?listingTime ?rblName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2074,34 +4194,174 @@ module ReviewStatus =
     let of_json j = of_string (string_of_json ~kind:"ReviewStatus" j)
     let to_json = simple_to_json to_value
   end
-module EmailTemplateHtml =
+module RouteDetails =
   struct
-    type nonrec t = string[@@ocaml.doc "The HTML body of the email."]
-    let context_ = "EmailTemplateHtml"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      region: Region.t
+        [@ocaml.doc
+          "The name of an AWS-Region to be a secondary region for the multi-region endpoint (global-endpoint)."]}
+    let context_ = "RouteDetails"
+    let make ~region = fun () -> { region }
+    let to_value x =
+      structure_to_value [("Region", (Some (Region.to_value x.region)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EmailTemplateHtml" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The HTML body of the email."]
-module EmailTemplateText =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "The email body that will be visible to recipients whose email clients do not display HTML."]
-    let context_ = "EmailTemplateText"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EmailTemplateText" j
-    let to_json = simple_to_json to_value
+    let of_xml xml_arg0 =
+      let region =
+        Region.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Region") in
+      make ~region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map_exn json__ "Region" Region.of_json in
+      make ~region ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The email body that will be visible to recipients whose email clients do not display HTML."]
+       "An object that contains route configuration. Includes secondary region name."]
+module QueryErrorCode =
+  struct
+    type nonrec t =
+      | INTERNAL_FAILURE 
+      | ACCESS_DENIED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL_FAILURE -> "INTERNAL_FAILURE"
+      | ACCESS_DENIED -> "ACCESS_DENIED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL_FAILURE" -> INTERNAL_FAILURE
+      | "ACCESS_DENIED" -> ACCESS_DENIED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QueryErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "QueryErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module QueryIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "QueryIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"QueryIdentifier" j
+    let to_json = simple_to_json to_value
+  end
+module MetricValueList =
+  struct
+    type nonrec t = Counter.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Counter.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Counter.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricValueList" ~of_json:Counter.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TimestampList =
+  struct
+    type nonrec t = Timestamp.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Timestamp.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Timestamp.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TimestampList" ~of_json:Timestamp.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Dimensions =
+  struct
+    type nonrec t = (MetricDimensionName.t * MetricDimensionValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((MetricDimensionName.of_string chopped),
+                              (MetricDimensionValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (MetricDimensionName.to_value x) |>
+                    (fun x ->
+                       (MetricDimensionValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:MetricDimensionName.of_string
+        ~of_json:MetricDimensionValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Topic =
   struct
     type nonrec t =
@@ -2150,48 +4410,18 @@ module Topic =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicName") in
       make ~defaultSubscriptionStatus ?description ~displayName ~topicName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultSubscriptionStatus =
-        field_map_exn json "DefaultSubscriptionStatus"
+        field_map_exn json__ "DefaultSubscriptionStatus"
           SubscriptionStatus.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let displayName = field_map_exn json "DisplayName" DisplayName.of_json in
-      let topicName = field_map_exn json "TopicName" TopicName.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let displayName =
+        field_map_exn json__ "DisplayName" DisplayName.of_json in
+      let topicName = field_map_exn json__ "TopicName" TopicName.of_json in
       make ~defaultSubscriptionStatus ?description ~displayName ~topicName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An interest group, theme, or label within a list. Lists can have multiple topics."]
-module Tag =
-  struct
-    type nonrec t =
-      {
-      key: TagKey.t
-        [@ocaml.doc
-          "One part of a key-value pair that defines a tag. The maximum length of a tag key is 128 characters. The minimum length is 1 character."];
-      value: TagValue.t
-        [@ocaml.doc
-          "The optional part of a key-value pair that defines a tag. The maximum length of a tag value is 256 characters. The minimum length is 0 characters. If you don't want a resource to have a specific tag value, don't specify a value for this\194\160parameter. If you don't specify a value, Amazon SES sets the value to an empty string."]}
-    let context_ = "Tag"
-    let make ~key = fun ~value -> fun () -> { key; value }
-    let to_value x =
-      structure_to_value
-        [("Key", (Some (TagKey.to_value x.key)));
-        ("Value", (Some (TagValue.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let key =
-        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
-      make ~value ~key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
-      make ~value ~key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object that defines the tags that are associated with a resource. A\194\160tag\194\160is a label that you optionally define and associate with a resource. Tags can help you categorize and manage resources in different ways, such as by purpose, owner, environment, or other criteria. A resource can have as many as 50 tags. Each tag consists of a required\194\160tag key\194\160and an associated\194\160tag value, both of which you define. A tag key is a general label that acts as a category for a more specific tag value. A tag value acts as a descriptor within a tag key. A tag key can contain as many as 128 characters. A tag value can contain as many as 256 characters. The characters can be Unicode letters, digits, white space, or one of the following symbols: _ . : / = + -. The following additional restrictions apply to tags: Tag keys and values are case sensitive. For each associated resource, each tag key must be unique and it can have only one value. The\194\160aws:\194\160prefix is reserved for use by Amazon Web Services; you can\226\128\153t use it in any tag keys or values that you define. In addition, you can't edit or remove tag keys or values that use this prefix. Tags that use this prefix don\226\128\153t count against the limit of 50 tags per resource. You can associate tags with public or shared resources, but the tags are available only for your Amazon Web Services account, not any other accounts that share the resource. In addition, the tags are available only for resources that are located in the specified Amazon Web Services Region for your Amazon Web Services account."]
 module Message =
   struct
     type nonrec t =
@@ -2201,25 +4431,45 @@ module Message =
           "The subject line of the email. The subject line can only contain 7-bit ASCII characters. However, you can specify non-ASCII characters in the subject line by using encoded-word syntax, as described in RFC 2047."];
       body: Body.t
         [@ocaml.doc
-          "The body of the message. You can specify an HTML version of the message, a text-only version of the message, or both."]}
+          "The body of the message. You can specify an HTML version of the message, a text-only version of the message, or both."];
+      headers: MessageHeaderList.t option
+        [@ocaml.doc
+          "The list of message headers that will be added to the email message."];
+      attachments: AttachmentList.t option
+        [@ocaml.doc
+          "The List of attachments to include in your email. All recipients will receive the same attachments."]}
     let context_ = "Message"
-    let make ~subject = fun ~body -> fun () -> { subject; body }
+    let make ?headers =
+      fun ?attachments ->
+        fun ~subject ->
+          fun ~body -> fun () -> { headers; attachments; subject; body }
     let to_value x =
       structure_to_value
         [("Subject", (Some (Content.to_value x.subject)));
-        ("Body", (Some (Body.to_value x.body)))]
+        ("Body", (Some (Body.to_value x.body)));
+        ("Headers", (Option.map x.headers ~f:MessageHeaderList.to_value));
+        ("Attachments",
+          (Option.map x.attachments ~f:AttachmentList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachments =
+        (Option.map ~f:AttachmentList.of_xml)
+          (Xml.child xml_arg0 "Attachments") in
+      let headers =
+        (Option.map ~f:MessageHeaderList.of_xml)
+          (Xml.child xml_arg0 "Headers") in
       let body =
         Body.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Body") in
       let subject =
         Content.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
-      make ~body ~subject ()
+      make ?attachments ?headers ~body ~subject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map_exn json "Body" Body.of_json in
-      let subject = field_map_exn json "Subject" Content.of_json in
-      make ~body ~subject ()
+    let of_json json__ =
+      let attachments = field_map json__ "Attachments" AttachmentList.of_json in
+      let headers = field_map json__ "Headers" MessageHeaderList.of_json in
+      let body = field_map_exn json__ "Body" Body.of_json in
+      let subject = field_map_exn json__ "Subject" Content.of_json in
+      make ?attachments ?headers ~body ~subject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the email message that you're sending. The Message object consists of a subject line and a message body."]
@@ -2229,7 +4479,7 @@ module RawMessage =
       {
       data: RawMessageData.t
         [@ocaml.doc
-          "The raw email message. The message has to meet the following criteria: The message has to contain a header and a body, separated by one blank line. All of the required header fields must be present in the message. Each part of a multipart MIME message must be formatted properly. Attachments must be in a file format that the Amazon SES supports. The entire message must be Base64 encoded. If any of the MIME parts in your message contain content that is outside of the 7-bit ASCII character range, you should encode that content to ensure that recipients' email clients render the message properly. The length of any single line of text in the message can't exceed 1,000 characters. This restriction is defined in RFC 5321."]}
+          "The raw email message. The message has to meet the following criteria: The message has to contain a header and a body, separated by one blank line. All of the required header fields must be present in the message. Each part of a multipart MIME message must be formatted properly. Attachments must be in a file format that the Amazon SES supports. The raw data of the message needs to base64-encoded if you are accessing Amazon SES directly through the HTTPS interface. If you are accessing Amazon SES using an Amazon Web Services SDK, the SDK takes care of the base 64-encoding for you. If any of the MIME parts in your message contain content that is outside of the 7-bit ASCII character range, you should encode that content to ensure that recipients' email clients render the message properly. The length of any single line of text in the message can't exceed 1,000 characters. This restriction is defined in RFC 5321."]}
     let context_ = "RawMessage"
     let make ~data = fun () -> { data }
     let of_header_and_body = ((fun (xs, pipe) -> make ~data:pipe ())
@@ -2243,8 +4493,8 @@ module RawMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map_exn json "Data" RawMessageData.of_json in
+    let of_json json__ =
+      let data = field_map_exn json__ "Data" RawMessageData.of_json in
       make ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the raw content of an email message."]
@@ -2254,48 +4504,88 @@ module Template =
       {
       templateName: EmailTemplateName.t option
         [@ocaml.doc
-          "The name of the template. You will refer to this name when you send email using the SendTemplatedEmail or SendBulkTemplatedEmail operations."];
+          "The name of the template. You will refer to this name when you send email using the SendEmail or SendBulkEmail operations."];
       templateArn: AmazonResourceName.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the template."];
+      templateContent: EmailTemplateContent.t option
+        [@ocaml.doc
+          "The content of the template. Amazon SES supports only simple substitions when you send email using the SendEmail or SendBulkEmail operations and you provide the full template content in the request."];
       templateData: EmailTemplateData.t option
         [@ocaml.doc
-          "An object that defines the values to use for message variables in the template. This object is a set of key-value pairs. Each key defines a message variable in the template. The corresponding value defines the value to use for that variable."]}
+          "An object that defines the values to use for message variables in the template. This object is a set of key-value pairs. Each key defines a message variable in the template. The corresponding value defines the value to use for that variable."];
+      headers: MessageHeaderList.t option
+        [@ocaml.doc
+          "The list of message headers that will be added to the email message."];
+      attachments: AttachmentList.t option
+        [@ocaml.doc
+          "The List of attachments to include in your email. All recipients will receive the same attachments."]}
     let make ?templateName =
       fun ?templateArn ->
-        fun ?templateData ->
-          fun () -> { templateName; templateArn; templateData }
+        fun ?templateContent ->
+          fun ?templateData ->
+            fun ?headers ->
+              fun ?attachments ->
+                fun () ->
+                  {
+                    templateName;
+                    templateArn;
+                    templateContent;
+                    templateData;
+                    headers;
+                    attachments
+                  }
     let to_value x =
       structure_to_value
         [("TemplateName",
            (Option.map x.templateName ~f:EmailTemplateName.to_value));
         ("TemplateArn",
           (Option.map x.templateArn ~f:AmazonResourceName.to_value));
+        ("TemplateContent",
+          (Option.map x.templateContent ~f:EmailTemplateContent.to_value));
         ("TemplateData",
-          (Option.map x.templateData ~f:EmailTemplateData.to_value))]
+          (Option.map x.templateData ~f:EmailTemplateData.to_value));
+        ("Headers", (Option.map x.headers ~f:MessageHeaderList.to_value));
+        ("Attachments",
+          (Option.map x.attachments ~f:AttachmentList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let attachments =
+        (Option.map ~f:AttachmentList.of_xml)
+          (Xml.child xml_arg0 "Attachments") in
+      let headers =
+        (Option.map ~f:MessageHeaderList.of_xml)
+          (Xml.child xml_arg0 "Headers") in
       let templateData =
         (Option.map ~f:EmailTemplateData.of_xml)
           (Xml.child xml_arg0 "TemplateData") in
+      let templateContent =
+        (Option.map ~f:EmailTemplateContent.of_xml)
+          (Xml.child xml_arg0 "TemplateContent") in
       let templateArn =
         (Option.map ~f:AmazonResourceName.of_xml)
           (Xml.child xml_arg0 "TemplateArn") in
       let templateName =
         (Option.map ~f:EmailTemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
-      make ?templateData ?templateArn ?templateName ()
+      make ?attachments ?headers ?templateData ?templateContent ?templateArn
+        ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let attachments = field_map json__ "Attachments" AttachmentList.of_json in
+      let headers = field_map json__ "Headers" MessageHeaderList.of_json in
       let templateData =
-        field_map json "TemplateData" EmailTemplateData.of_json in
+        field_map json__ "TemplateData" EmailTemplateData.of_json in
+      let templateContent =
+        field_map json__ "TemplateContent" EmailTemplateContent.of_json in
       let templateArn =
-        field_map json "TemplateArn" AmazonResourceName.of_json in
+        field_map json__ "TemplateArn" AmazonResourceName.of_json in
       let templateName =
-        field_map json "TemplateName" EmailTemplateName.of_json in
-      make ?templateData ?templateArn ?templateName ()
+        field_map json__ "TemplateName" EmailTemplateName.of_json in
+      make ?attachments ?headers ?templateData ?templateContent ?templateArn
+        ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that defines the email template to use for an email message, and the values to use for any message variables in that template. An email template is a type of message template that contains content that you want to define, save, and reuse in email messages that you send."]
+       "An object that defines the email template to use for an email message, and the values to use for any message variables in that template. An email template is a type of message template that contains content that you want to reuse in email messages that you send. You can specifiy the email template by providing the name or ARN of an email template previously saved in your Amazon SES account or by providing the full template content."]
 module BulkEmailEntryResult =
   struct
     type nonrec t =
@@ -2327,10 +4617,10 @@ module BulkEmailEntryResult =
         (Option.map ~f:BulkEmailStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?messageId ?error ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" OutboundMessageId.of_json in
-      let error = field_map json "Error" ErrorMessage.of_json in
-      let status = field_map json "Status" BulkEmailStatus.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
+      let error = field_map json__ "Error" ErrorMessage.of_json in
+      let status = field_map json__ "Status" BulkEmailStatus.of_json in
       make ?messageId ?error ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2347,12 +4637,22 @@ module BulkEmailEntry =
           "A list of tags, in the form of name/value pairs, to apply to an email that you send using the SendBulkTemplatedEmail operation. Tags correspond to characteristics of the email that you define, so that you can publish email sending events."];
       replacementEmailContent: ReplacementEmailContent.t option
         [@ocaml.doc
-          "The ReplacementEmailContent associated with a BulkEmailEntry."]}
+          "The ReplacementEmailContent associated with a BulkEmailEntry."];
+      replacementHeaders: MessageHeaderList.t option
+        [@ocaml.doc
+          "The list of message headers associated with the BulkEmailEntry data type. Headers Not Present in BulkEmailEntry: If a header is specified in Template but not in BulkEmailEntry, the header from Template will be added to the outgoing email. Headers Present in BulkEmailEntry: If a header is specified in BulkEmailEntry, it takes precedence over any header of the same name specified in Template : If the header is also defined within Template, the value from BulkEmailEntry will replace the header's value in the email. If the header is not defined within Template, it will simply be added to the email as specified in BulkEmailEntry."]}
     let context_ = "BulkEmailEntry"
     let make ?replacementTags =
       fun ?replacementEmailContent ->
-        fun ~destination ->
-          fun () -> { replacementTags; replacementEmailContent; destination }
+        fun ?replacementHeaders ->
+          fun ~destination ->
+            fun () ->
+              {
+                replacementTags;
+                replacementEmailContent;
+                replacementHeaders;
+                destination
+              }
     let to_value x =
       structure_to_value
         [("Destination", (Some (Destination.to_value x.destination)));
@@ -2360,9 +4660,14 @@ module BulkEmailEntry =
           (Option.map x.replacementTags ~f:MessageTagList.to_value));
         ("ReplacementEmailContent",
           (Option.map x.replacementEmailContent
-             ~f:ReplacementEmailContent.to_value))]
+             ~f:ReplacementEmailContent.to_value));
+        ("ReplacementHeaders",
+          (Option.map x.replacementHeaders ~f:MessageHeaderList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let replacementHeaders =
+        (Option.map ~f:MessageHeaderList.of_xml)
+          (Xml.child xml_arg0 "ReplacementHeaders") in
       let replacementEmailContent =
         (Option.map ~f:ReplacementEmailContent.of_xml)
           (Xml.child xml_arg0 "ReplacementEmailContent") in
@@ -2372,17 +4677,131 @@ module BulkEmailEntry =
       let destination =
         Destination.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
-      make ?replacementEmailContent ?replacementTags ~destination ()
+      make ?replacementHeaders ?replacementEmailContent ?replacementTags
+        ~destination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let replacementHeaders =
+        field_map json__ "ReplacementHeaders" MessageHeaderList.of_json in
       let replacementEmailContent =
-        field_map json "ReplacementEmailContent"
+        field_map json__ "ReplacementEmailContent"
           ReplacementEmailContent.of_json in
       let replacementTags =
-        field_map json "ReplacementTags" MessageTagList.of_json in
-      let destination = field_map_exn json "Destination" Destination.of_json in
-      make ?replacementEmailContent ?replacementTags ~destination ()
+        field_map json__ "ReplacementTags" MessageTagList.of_json in
+      let destination =
+        field_map_exn json__ "Destination" Destination.of_json in
+      make ?replacementHeaders ?replacementEmailContent ?replacementTags
+        ~destination ()
     let to_json v = composed_to_json to_value v
+  end
+module DkimSigningAttributesOrigin =
+  struct
+    type nonrec t =
+      | AWS_SES 
+      | EXTERNAL 
+      | AWS_SES_AF_SOUTH_1 
+      | AWS_SES_EU_NORTH_1 
+      | AWS_SES_AP_SOUTH_1 
+      | AWS_SES_EU_WEST_3 
+      | AWS_SES_EU_WEST_2 
+      | AWS_SES_EU_SOUTH_1 
+      | AWS_SES_EU_WEST_1 
+      | AWS_SES_AP_NORTHEAST_3 
+      | AWS_SES_AP_NORTHEAST_2 
+      | AWS_SES_ME_SOUTH_1 
+      | AWS_SES_AP_NORTHEAST_1 
+      | AWS_SES_IL_CENTRAL_1 
+      | AWS_SES_SA_EAST_1 
+      | AWS_SES_CA_CENTRAL_1 
+      | AWS_SES_AP_SOUTHEAST_1 
+      | AWS_SES_AP_SOUTHEAST_2 
+      | AWS_SES_AP_SOUTHEAST_3 
+      | AWS_SES_EU_CENTRAL_1 
+      | AWS_SES_US_EAST_1 
+      | AWS_SES_US_EAST_2 
+      | AWS_SES_US_WEST_1 
+      | AWS_SES_US_WEST_2 
+      | AWS_SES_ME_CENTRAL_1 
+      | AWS_SES_AP_SOUTH_2 
+      | AWS_SES_EU_CENTRAL_2 
+      | AWS_SES_AP_SOUTHEAST_5 
+      | AWS_SES_CA_WEST_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_SES -> "AWS_SES"
+      | EXTERNAL -> "EXTERNAL"
+      | AWS_SES_AF_SOUTH_1 -> "AWS_SES_AF_SOUTH_1"
+      | AWS_SES_EU_NORTH_1 -> "AWS_SES_EU_NORTH_1"
+      | AWS_SES_AP_SOUTH_1 -> "AWS_SES_AP_SOUTH_1"
+      | AWS_SES_EU_WEST_3 -> "AWS_SES_EU_WEST_3"
+      | AWS_SES_EU_WEST_2 -> "AWS_SES_EU_WEST_2"
+      | AWS_SES_EU_SOUTH_1 -> "AWS_SES_EU_SOUTH_1"
+      | AWS_SES_EU_WEST_1 -> "AWS_SES_EU_WEST_1"
+      | AWS_SES_AP_NORTHEAST_3 -> "AWS_SES_AP_NORTHEAST_3"
+      | AWS_SES_AP_NORTHEAST_2 -> "AWS_SES_AP_NORTHEAST_2"
+      | AWS_SES_ME_SOUTH_1 -> "AWS_SES_ME_SOUTH_1"
+      | AWS_SES_AP_NORTHEAST_1 -> "AWS_SES_AP_NORTHEAST_1"
+      | AWS_SES_IL_CENTRAL_1 -> "AWS_SES_IL_CENTRAL_1"
+      | AWS_SES_SA_EAST_1 -> "AWS_SES_SA_EAST_1"
+      | AWS_SES_CA_CENTRAL_1 -> "AWS_SES_CA_CENTRAL_1"
+      | AWS_SES_AP_SOUTHEAST_1 -> "AWS_SES_AP_SOUTHEAST_1"
+      | AWS_SES_AP_SOUTHEAST_2 -> "AWS_SES_AP_SOUTHEAST_2"
+      | AWS_SES_AP_SOUTHEAST_3 -> "AWS_SES_AP_SOUTHEAST_3"
+      | AWS_SES_EU_CENTRAL_1 -> "AWS_SES_EU_CENTRAL_1"
+      | AWS_SES_US_EAST_1 -> "AWS_SES_US_EAST_1"
+      | AWS_SES_US_EAST_2 -> "AWS_SES_US_EAST_2"
+      | AWS_SES_US_WEST_1 -> "AWS_SES_US_WEST_1"
+      | AWS_SES_US_WEST_2 -> "AWS_SES_US_WEST_2"
+      | AWS_SES_ME_CENTRAL_1 -> "AWS_SES_ME_CENTRAL_1"
+      | AWS_SES_AP_SOUTH_2 -> "AWS_SES_AP_SOUTH_2"
+      | AWS_SES_EU_CENTRAL_2 -> "AWS_SES_EU_CENTRAL_2"
+      | AWS_SES_AP_SOUTHEAST_5 -> "AWS_SES_AP_SOUTHEAST_5"
+      | AWS_SES_CA_WEST_1 -> "AWS_SES_CA_WEST_1"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_SES" -> AWS_SES
+      | "EXTERNAL" -> EXTERNAL
+      | "AWS_SES_AF_SOUTH_1" -> AWS_SES_AF_SOUTH_1
+      | "AWS_SES_EU_NORTH_1" -> AWS_SES_EU_NORTH_1
+      | "AWS_SES_AP_SOUTH_1" -> AWS_SES_AP_SOUTH_1
+      | "AWS_SES_EU_WEST_3" -> AWS_SES_EU_WEST_3
+      | "AWS_SES_EU_WEST_2" -> AWS_SES_EU_WEST_2
+      | "AWS_SES_EU_SOUTH_1" -> AWS_SES_EU_SOUTH_1
+      | "AWS_SES_EU_WEST_1" -> AWS_SES_EU_WEST_1
+      | "AWS_SES_AP_NORTHEAST_3" -> AWS_SES_AP_NORTHEAST_3
+      | "AWS_SES_AP_NORTHEAST_2" -> AWS_SES_AP_NORTHEAST_2
+      | "AWS_SES_ME_SOUTH_1" -> AWS_SES_ME_SOUTH_1
+      | "AWS_SES_AP_NORTHEAST_1" -> AWS_SES_AP_NORTHEAST_1
+      | "AWS_SES_IL_CENTRAL_1" -> AWS_SES_IL_CENTRAL_1
+      | "AWS_SES_SA_EAST_1" -> AWS_SES_SA_EAST_1
+      | "AWS_SES_CA_CENTRAL_1" -> AWS_SES_CA_CENTRAL_1
+      | "AWS_SES_AP_SOUTHEAST_1" -> AWS_SES_AP_SOUTHEAST_1
+      | "AWS_SES_AP_SOUTHEAST_2" -> AWS_SES_AP_SOUTHEAST_2
+      | "AWS_SES_AP_SOUTHEAST_3" -> AWS_SES_AP_SOUTHEAST_3
+      | "AWS_SES_EU_CENTRAL_1" -> AWS_SES_EU_CENTRAL_1
+      | "AWS_SES_US_EAST_1" -> AWS_SES_US_EAST_1
+      | "AWS_SES_US_EAST_2" -> AWS_SES_US_EAST_2
+      | "AWS_SES_US_WEST_1" -> AWS_SES_US_WEST_1
+      | "AWS_SES_US_WEST_2" -> AWS_SES_US_WEST_2
+      | "AWS_SES_ME_CENTRAL_1" -> AWS_SES_ME_CENTRAL_1
+      | "AWS_SES_AP_SOUTH_2" -> AWS_SES_AP_SOUTH_2
+      | "AWS_SES_EU_CENTRAL_2" -> AWS_SES_EU_CENTRAL_2
+      | "AWS_SES_AP_SOUTHEAST_5" -> AWS_SES_AP_SOUTHEAST_5
+      | "AWS_SES_CA_WEST_1" -> AWS_SES_CA_WEST_1
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DkimSigningAttributesOrigin"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DkimSigningAttributesOrigin" j)
+    let to_json = simple_to_json to_value
   end
 module DkimSigningKeyLength =
   struct
@@ -2462,7 +4881,7 @@ module DomainDeliverabilityTrackingOption =
           "A verified domain that\226\128\153s associated with your Amazon Web Services account and currently has an active Deliverability dashboard subscription."];
       subscriptionStartDate: Timestamp.t option
         [@ocaml.doc
-          "The date, in Unix time format, when you enabled the Deliverability dashboard for the domain."];
+          "The date when you enabled the Deliverability dashboard for the domain."];
       inboxPlacementTrackingOption: InboxPlacementTrackingOption.t option
         [@ocaml.doc
           "An object that contains information about the inbox placement data settings for the domain."]}
@@ -2491,62 +4910,735 @@ module DomainDeliverabilityTrackingOption =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?inboxPlacementTrackingOption ?subscriptionStartDate ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inboxPlacementTrackingOption =
-        field_map json "InboxPlacementTrackingOption"
+        field_map json__ "InboxPlacementTrackingOption"
           InboxPlacementTrackingOption.of_json in
       let subscriptionStartDate =
-        field_map json "SubscriptionStartDate" Timestamp.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
+        field_map json__ "SubscriptionStartDate" Timestamp.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
       make ?inboxPlacementTrackingOption ?subscriptionStartDate ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the Deliverability dashboard subscription for a verified domain that you use to send email and currently has an active Deliverability dashboard subscription. If a Deliverability dashboard subscription is active for a domain, you gain access to reputation, inbox placement, and other metrics for the domain."]
+module DashboardOptions =
+  struct
+    type nonrec t =
+      {
+      engagementMetrics: FeatureStatus.t option
+        [@ocaml.doc
+          "Specifies the status of your VDM engagement metrics collection. Can be one of the following: ENABLED \226\128\147 Amazon SES enables engagement metrics for the configuration set. DISABLED \226\128\147 Amazon SES disables engagement metrics for the configuration set."]}
+    let make ?engagementMetrics = fun () -> { engagementMetrics }
+    let to_value x =
+      structure_to_value
+        [("EngagementMetrics",
+           (Option.map x.engagementMetrics ~f:FeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let engagementMetrics =
+        (Option.map ~f:FeatureStatus.of_xml)
+          (Xml.child xml_arg0 "EngagementMetrics") in
+      make ?engagementMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let engagementMetrics =
+        field_map json__ "EngagementMetrics" FeatureStatus.of_json in
+      make ?engagementMetrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing additional settings for your VDM configuration as applicable to the Dashboard."]
+module GuardianOptions =
+  struct
+    type nonrec t =
+      {
+      optimizedSharedDelivery: FeatureStatus.t option
+        [@ocaml.doc
+          "Specifies the status of your VDM optimized shared delivery. Can be one of the following: ENABLED \226\128\147 Amazon SES enables optimized shared delivery for the configuration set. DISABLED \226\128\147 Amazon SES disables optimized shared delivery for the configuration set."]}
+    let make ?optimizedSharedDelivery = fun () -> { optimizedSharedDelivery }
+    let to_value x =
+      structure_to_value
+        [("OptimizedSharedDelivery",
+           (Option.map x.optimizedSharedDelivery ~f:FeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optimizedSharedDelivery =
+        (Option.map ~f:FeatureStatus.of_xml)
+          (Xml.child xml_arg0 "OptimizedSharedDelivery") in
+      make ?optimizedSharedDelivery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optimizedSharedDelivery =
+        field_map json__ "OptimizedSharedDelivery" FeatureStatus.of_json in
+      make ?optimizedSharedDelivery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing additional settings for your VDM configuration as applicable to the Guardian."]
+module DashboardAttributes =
+  struct
+    type nonrec t =
+      {
+      engagementMetrics: FeatureStatus.t option
+        [@ocaml.doc
+          "Specifies the status of your VDM engagement metrics collection. Can be one of the following: ENABLED \226\128\147 Amazon SES enables engagement metrics for your account. DISABLED \226\128\147 Amazon SES disables engagement metrics for your account."]}
+    let make ?engagementMetrics = fun () -> { engagementMetrics }
+    let to_value x =
+      structure_to_value
+        [("EngagementMetrics",
+           (Option.map x.engagementMetrics ~f:FeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let engagementMetrics =
+        (Option.map ~f:FeatureStatus.of_xml)
+          (Xml.child xml_arg0 "EngagementMetrics") in
+      make ?engagementMetrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let engagementMetrics =
+        field_map json__ "EngagementMetrics" FeatureStatus.of_json in
+      make ?engagementMetrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing additional settings for your VDM configuration as applicable to the Dashboard."]
+module GuardianAttributes =
+  struct
+    type nonrec t =
+      {
+      optimizedSharedDelivery: FeatureStatus.t option
+        [@ocaml.doc
+          "Specifies the status of your VDM optimized shared delivery. Can be one of the following: ENABLED \226\128\147 Amazon SES enables optimized shared delivery for your account. DISABLED \226\128\147 Amazon SES disables optimized shared delivery for your account."]}
+    let make ?optimizedSharedDelivery = fun () -> { optimizedSharedDelivery }
+    let to_value x =
+      structure_to_value
+        [("OptimizedSharedDelivery",
+           (Option.map x.optimizedSharedDelivery ~f:FeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optimizedSharedDelivery =
+        (Option.map ~f:FeatureStatus.of_xml)
+          (Xml.child xml_arg0 "OptimizedSharedDelivery") in
+      make ?optimizedSharedDelivery ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optimizedSharedDelivery =
+        field_map json__ "OptimizedSharedDelivery" FeatureStatus.of_json in
+      make ?optimizedSharedDelivery ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object containing additional settings for your VDM configuration as applicable to the Guardian."]
+module TenantInfo =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t option [@ocaml.doc "The name of the tenant."];
+      tenantId: TenantId.t option
+        [@ocaml.doc "A unique identifier for the tenant."];
+      tenantArn: AmazonResourceName.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the tenant."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time when the tenant was created."]}
+    let make ?tenantName =
+      fun ?tenantId ->
+        fun ?tenantArn ->
+          fun ?createdTimestamp ->
+            fun () -> { tenantName; tenantId; tenantArn; createdTimestamp }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Option.map x.tenantName ~f:TenantName.to_value));
+        ("TenantId", (Option.map x.tenantId ~f:TenantId.to_value));
+        ("TenantArn",
+          (Option.map x.tenantArn ~f:AmazonResourceName.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let tenantArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "TenantArn") in
+      let tenantId =
+        (Option.map ~f:TenantId.of_xml) (Xml.child xml_arg0 "TenantId") in
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      make ?createdTimestamp ?tenantArn ?tenantId ?tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let tenantArn = field_map json__ "TenantArn" AmazonResourceName.of_json in
+      let tenantId = field_map json__ "TenantId" TenantId.of_json in
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      make ?createdTimestamp ?tenantArn ?tenantId ?tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains basic information about a tenant."]
+module TenantResource =
+  struct
+    type nonrec t =
+      {
+      resourceType: ResourceType.t option
+        [@ocaml.doc
+          "The type of resource associated with the tenant. Valid values are EMAIL_IDENTITY, CONFIGURATION_SET, or EMAIL_TEMPLATE."];
+      resourceArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource associated with the tenant."]}
+    let make ?resourceType =
+      fun ?resourceArn -> fun () -> { resourceType; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceType",
+           (Option.map x.resourceType ~f:ResourceType.to_value));
+        ("ResourceArn",
+          (Option.map x.resourceArn ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceArn") in
+      let resourceType =
+        (Option.map ~f:ResourceType.of_xml)
+          (Xml.child xml_arg0 "ResourceType") in
+      make ?resourceArn ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map json__ "ResourceArn" AmazonResourceName.of_json in
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
+      make ?resourceArn ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains information about a resource associated with a tenant."]
+module ListTenantResourcesFilterKey =
+  struct
+    type nonrec t =
+      | RESOURCE_TYPE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RESOURCE_TYPE -> "RESOURCE_TYPE" | Non_static_id s -> s
+    let of_string =
+      function | "RESOURCE_TYPE" -> RESOURCE_TYPE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListTenantResourcesFilterKey"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListTenantResourcesFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module ListTenantResourcesFilterValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The value used to filter tenant resources. When filtering by RESOURCE_TYPE, valid values are EMAIL_IDENTITY, CONFIGURATION_SET, or EMAIL_TEMPLATE."]
+    let context_ = "ListTenantResourcesFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListTenantResourcesFilterValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The value used to filter tenant resources. When filtering by RESOURCE_TYPE, valid values are EMAIL_IDENTITY, CONFIGURATION_SET, or EMAIL_TEMPLATE."]
 module SuppressedDestinationSummary =
   struct
     type nonrec t =
       {
-      emailAddress: EmailAddress.t
+      emailAddress: EmailAddress.t option
         [@ocaml.doc
           "The email address that's on the suppression list for your account."];
-      reason: SuppressionListReason.t
+      reason: SuppressionListReason.t option
         [@ocaml.doc
           "The reason that the address was added to the suppression list for your account."];
-      lastUpdateTime: Timestamp.t
+      lastUpdateTime: Timestamp.t option
         [@ocaml.doc
           "The date and time when the suppressed destination was last updated, shown in Unix time format."]}
-    let context_ = "SuppressedDestinationSummary"
-    let make ~emailAddress =
-      fun ~reason ->
-        fun ~lastUpdateTime ->
+    let make ?emailAddress =
+      fun ?reason ->
+        fun ?lastUpdateTime ->
           fun () -> { emailAddress; reason; lastUpdateTime }
     let to_value x =
       structure_to_value
-        [("EmailAddress", (Some (EmailAddress.to_value x.emailAddress)));
-        ("Reason", (Some (SuppressionListReason.to_value x.reason)));
-        ("LastUpdateTime", (Some (Timestamp.to_value x.lastUpdateTime)))]
+        [("EmailAddress",
+           (Option.map x.emailAddress ~f:EmailAddress.to_value));
+        ("Reason", (Option.map x.reason ~f:SuppressionListReason.to_value));
+        ("LastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let lastUpdateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastUpdateTime") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdateTime") in
       let reason =
-        SuppressionListReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Reason") in
+        (Option.map ~f:SuppressionListReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
       let emailAddress =
-        EmailAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
-      make ~lastUpdateTime ~reason ~emailAddress ()
+        (Option.map ~f:EmailAddress.of_xml)
+          (Xml.child xml_arg0 "EmailAddress") in
+      make ?lastUpdateTime ?reason ?emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdateTime =
-        field_map_exn json "LastUpdateTime" Timestamp.of_json in
-      let reason = field_map_exn json "Reason" SuppressionListReason.of_json in
-      let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
-      make ~lastUpdateTime ~reason ~emailAddress ()
+        field_map json__ "LastUpdateTime" Timestamp.of_json in
+      let reason = field_map json__ "Reason" SuppressionListReason.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
+      make ?lastUpdateTime ?reason ?emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary that describes the suppressed email address."]
+module ResourceTenantMetadata =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t option
+        [@ocaml.doc "The name of the tenant associated with the resource."];
+      tenantId: TenantId.t option
+        [@ocaml.doc
+          "A unique identifier for the tenant associated with the resource."];
+      resourceArn: AmazonResourceName.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."];
+      associatedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The date and time when the resource was associated with the tenant."]}
+    let make ?tenantName =
+      fun ?tenantId ->
+        fun ?resourceArn ->
+          fun ?associatedTimestamp ->
+            fun () ->
+              { tenantName; tenantId; resourceArn; associatedTimestamp }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Option.map x.tenantName ~f:TenantName.to_value));
+        ("TenantId", (Option.map x.tenantId ~f:TenantId.to_value));
+        ("ResourceArn",
+          (Option.map x.resourceArn ~f:AmazonResourceName.to_value));
+        ("AssociatedTimestamp",
+          (Option.map x.associatedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "AssociatedTimestamp") in
+      let resourceArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceArn") in
+      let tenantId =
+        (Option.map ~f:TenantId.of_xml) (Xml.child xml_arg0 "TenantId") in
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      make ?associatedTimestamp ?resourceArn ?tenantId ?tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associatedTimestamp =
+        field_map json__ "AssociatedTimestamp" Timestamp.of_json in
+      let resourceArn =
+        field_map json__ "ResourceArn" AmazonResourceName.of_json in
+      let tenantId = field_map json__ "TenantId" TenantId.of_json in
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      make ?associatedTimestamp ?resourceArn ?tenantId ?tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure that contains information about a tenant associated with a resource."]
+module ReputationEntity =
+  struct
+    type nonrec t =
+      {
+      reputationEntityReference: ReputationEntityReference.t option
+        [@ocaml.doc
+          "The unique identifier for the reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."];
+      reputationEntityType: ReputationEntityType.t option
+        [@ocaml.doc
+          "The type of reputation entity. Currently, only RESOURCE type entities are supported."];
+      reputationManagementPolicy: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the reputation management policy applied to this entity. This is an Amazon Web Services Amazon SES-managed policy."];
+      customerManagedStatus: StatusRecord.t option
+        [@ocaml.doc
+          "The customer-managed status record for this reputation entity, including the current status, cause description, and last updated timestamp."];
+      awsSesManagedStatus: StatusRecord.t option
+        [@ocaml.doc
+          "The Amazon Web Services Amazon SES-managed status record for this reputation entity, including the current status, cause description, and last updated timestamp."];
+      sendingStatusAggregate: SendingStatus.t option
+        [@ocaml.doc
+          "The aggregate sending status that determines whether the entity is allowed to send emails. This status is derived from both the customer-managed and Amazon Web Services Amazon SES-managed statuses. If either the customer-managed status or the Amazon Web Services Amazon SES-managed status is DISABLED, the aggregate status will be DISABLED and the entity will not be allowed to send emails. When the customer-managed status is set to REINSTATED, the entity can continue sending even if there are active reputation findings, provided the Amazon Web Services Amazon SES-managed status also permits sending. The entity can only send emails when both statuses permit sending."];
+      reputationImpact: RecommendationImpact.t option
+        [@ocaml.doc
+          "The reputation impact level for this entity, representing the highest impact reputation finding currently active. Reputation findings can be retrieved using the ListRecommendations operation."]}
+    let make ?reputationEntityReference =
+      fun ?reputationEntityType ->
+        fun ?reputationManagementPolicy ->
+          fun ?customerManagedStatus ->
+            fun ?awsSesManagedStatus ->
+              fun ?sendingStatusAggregate ->
+                fun ?reputationImpact ->
+                  fun () ->
+                    {
+                      reputationEntityReference;
+                      reputationEntityType;
+                      reputationManagementPolicy;
+                      customerManagedStatus;
+                      awsSesManagedStatus;
+                      sendingStatusAggregate;
+                      reputationImpact
+                    }
+    let to_value x =
+      structure_to_value
+        [("ReputationEntityReference",
+           (Option.map x.reputationEntityReference
+              ~f:ReputationEntityReference.to_value));
+        ("ReputationEntityType",
+          (Option.map x.reputationEntityType ~f:ReputationEntityType.to_value));
+        ("ReputationManagementPolicy",
+          (Option.map x.reputationManagementPolicy
+             ~f:AmazonResourceName.to_value));
+        ("CustomerManagedStatus",
+          (Option.map x.customerManagedStatus ~f:StatusRecord.to_value));
+        ("AwsSesManagedStatus",
+          (Option.map x.awsSesManagedStatus ~f:StatusRecord.to_value));
+        ("SendingStatusAggregate",
+          (Option.map x.sendingStatusAggregate ~f:SendingStatus.to_value));
+        ("ReputationImpact",
+          (Option.map x.reputationImpact ~f:RecommendationImpact.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reputationImpact =
+        (Option.map ~f:RecommendationImpact.of_xml)
+          (Xml.child xml_arg0 "ReputationImpact") in
+      let sendingStatusAggregate =
+        (Option.map ~f:SendingStatus.of_xml)
+          (Xml.child xml_arg0 "SendingStatusAggregate") in
+      let awsSesManagedStatus =
+        (Option.map ~f:StatusRecord.of_xml)
+          (Xml.child xml_arg0 "AwsSesManagedStatus") in
+      let customerManagedStatus =
+        (Option.map ~f:StatusRecord.of_xml)
+          (Xml.child xml_arg0 "CustomerManagedStatus") in
+      let reputationManagementPolicy =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ReputationManagementPolicy") in
+      let reputationEntityType =
+        (Option.map ~f:ReputationEntityType.of_xml)
+          (Xml.child xml_arg0 "ReputationEntityType") in
+      let reputationEntityReference =
+        (Option.map ~f:ReputationEntityReference.of_xml)
+          (Xml.child xml_arg0 "ReputationEntityReference") in
+      make ?reputationImpact ?sendingStatusAggregate ?awsSesManagedStatus
+        ?customerManagedStatus ?reputationManagementPolicy
+        ?reputationEntityType ?reputationEntityReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reputationImpact =
+        field_map json__ "ReputationImpact" RecommendationImpact.of_json in
+      let sendingStatusAggregate =
+        field_map json__ "SendingStatusAggregate" SendingStatus.of_json in
+      let awsSesManagedStatus =
+        field_map json__ "AwsSesManagedStatus" StatusRecord.of_json in
+      let customerManagedStatus =
+        field_map json__ "CustomerManagedStatus" StatusRecord.of_json in
+      let reputationManagementPolicy =
+        field_map json__ "ReputationManagementPolicy"
+          AmazonResourceName.of_json in
+      let reputationEntityType =
+        field_map json__ "ReputationEntityType" ReputationEntityType.of_json in
+      let reputationEntityReference =
+        field_map json__ "ReputationEntityReference"
+          ReputationEntityReference.of_json in
+      make ?reputationImpact ?sendingStatusAggregate ?awsSesManagedStatus
+        ?customerManagedStatus ?reputationManagementPolicy
+        ?reputationEntityType ?reputationEntityReference ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains information about a reputation entity, including its reference, type, policy, status records, and reputation impact."]
+module ReputationEntityFilterKey =
+  struct
+    type nonrec t =
+      | ENTITY_TYPE 
+      | REPUTATION_IMPACT 
+      | SENDING_STATUS 
+      | ENTITY_REFERENCE_PREFIX 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENTITY_TYPE -> "ENTITY_TYPE"
+      | REPUTATION_IMPACT -> "REPUTATION_IMPACT"
+      | SENDING_STATUS -> "SENDING_STATUS"
+      | ENTITY_REFERENCE_PREFIX -> "ENTITY_REFERENCE_PREFIX"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENTITY_TYPE" -> ENTITY_TYPE
+      | "REPUTATION_IMPACT" -> REPUTATION_IMPACT
+      | "SENDING_STATUS" -> SENDING_STATUS
+      | "ENTITY_REFERENCE_PREFIX" -> ENTITY_REFERENCE_PREFIX
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReputationEntityFilterKey" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ReputationEntityFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module ReputationEntityFilterValue =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The filter value to match against the specified filter key."]
+    let context_ = "ReputationEntityFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReputationEntityFilterValue" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The filter value to match against the specified filter key."]
+module Recommendation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The resource affected by the recommendation, with values like arn:aws:ses:us-east-1:123456789012:identity/example.com."];
+      type_: RecommendationType.t option
+        [@ocaml.doc
+          "The recommendation type, with values like DKIM, SPF, DMARC, BIMI, or COMPLAINT."];
+      description: RecommendationDescription.t option
+        [@ocaml.doc
+          "The recommendation description / disambiguator - e.g. DKIM1 and DKIM2 are different recommendations about your DKIM setup."];
+      status: RecommendationStatus.t option
+        [@ocaml.doc
+          "The recommendation status, with values like OPEN or FIXED."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The first time this issue was encountered and the recommendation was generated."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc "The last time the recommendation was updated."];
+      impact: RecommendationImpact.t option
+        [@ocaml.doc
+          "The recommendation impact, with values like HIGH or LOW."]}
+    let make ?resourceArn =
+      fun ?type_ ->
+        fun ?description ->
+          fun ?status ->
+            fun ?createdTimestamp ->
+              fun ?lastUpdatedTimestamp ->
+                fun ?impact ->
+                  fun () ->
+                    {
+                      resourceArn;
+                      type_;
+                      description;
+                      status;
+                      createdTimestamp;
+                      lastUpdatedTimestamp;
+                      impact
+                    }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn",
+           (Option.map x.resourceArn ~f:AmazonResourceName.to_value));
+        ("Type", (Option.map x.type_ ~f:RecommendationType.to_value));
+        ("Description",
+          (Option.map x.description ~f:RecommendationDescription.to_value));
+        ("Status", (Option.map x.status ~f:RecommendationStatus.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value));
+        ("Impact", (Option.map x.impact ~f:RecommendationImpact.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let impact =
+        (Option.map ~f:RecommendationImpact.of_xml)
+          (Xml.child xml_arg0 "Impact") in
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let status =
+        (Option.map ~f:RecommendationStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let description =
+        (Option.map ~f:RecommendationDescription.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let type_ =
+        (Option.map ~f:RecommendationType.of_xml) (Xml.child xml_arg0 "Type") in
+      let resourceArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceArn") in
+      make ?impact ?lastUpdatedTimestamp ?createdTimestamp ?status
+        ?description ?type_ ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let impact = field_map json__ "Impact" RecommendationImpact.of_json in
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let status = field_map json__ "Status" RecommendationStatus.of_json in
+      let description =
+        field_map json__ "Description" RecommendationDescription.of_json in
+      let type_ = field_map json__ "Type" RecommendationType.of_json in
+      let resourceArn =
+        field_map json__ "ResourceArn" AmazonResourceName.of_json in
+      make ?impact ?lastUpdatedTimestamp ?createdTimestamp ?status
+        ?description ?type_ ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A recommendation generated for your account."]
+module ListRecommendationFilterValue =
+  struct
+    type nonrec t = string
+    let context_ = "ListRecommendationFilterValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ListRecommendationFilterValue" j
+    let to_json = simple_to_json to_value
+  end
+module ListRecommendationsFilterKey =
+  struct
+    type nonrec t =
+      | TYPE 
+      | IMPACT 
+      | STATUS 
+      | RESOURCE_ARN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | TYPE -> "TYPE"
+      | IMPACT -> "IMPACT"
+      | STATUS -> "STATUS"
+      | RESOURCE_ARN -> "RESOURCE_ARN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TYPE" -> TYPE
+      | "IMPACT" -> IMPACT
+      | "STATUS" -> STATUS
+      | "RESOURCE_ARN" -> RESOURCE_ARN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListRecommendationsFilterKey"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListRecommendationsFilterKey" j)
+    let to_json = simple_to_json to_value
+  end
+module MultiRegionEndpoint =
+  struct
+    type nonrec t =
+      {
+      endpointName: EndpointName.t option
+        [@ocaml.doc
+          "The name of the multi-region endpoint (global-endpoint)."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the multi-region endpoint (global-endpoint). CREATING \226\128\147 The resource is being provisioned. READY \226\128\147 The resource is ready to use. FAILED \226\128\147 The resource failed to be provisioned. DELETING \226\128\147 The resource is being deleted as requested."];
+      endpointId: EndpointId.t option
+        [@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."];
+      regions: Regions.t option
+        [@ocaml.doc
+          "Primary and secondary regions between which multi-region endpoint splits sending traffic."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time stamp of when the multi-region endpoint (global-endpoint) was created."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time stamp of when the multi-region endpoint (global-endpoint) was last updated."]}
+    let make ?endpointName =
+      fun ?status ->
+        fun ?endpointId ->
+          fun ?regions ->
+            fun ?createdTimestamp ->
+              fun ?lastUpdatedTimestamp ->
+                fun () ->
+                  {
+                    endpointName;
+                    status;
+                    endpointId;
+                    regions;
+                    createdTimestamp;
+                    lastUpdatedTimestamp
+                  }
+    let to_value x =
+      structure_to_value
+        [("EndpointName",
+           (Option.map x.endpointName ~f:EndpointName.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:EndpointId.to_value));
+        ("Regions", (Option.map x.regions ~f:Regions.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let regions =
+        (Option.map ~f:Regions.of_xml) (Xml.child xml_arg0 "Regions") in
+      let endpointId =
+        (Option.map ~f:EndpointId.of_xml) (Xml.child xml_arg0 "EndpointId") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let endpointName =
+        (Option.map ~f:EndpointName.of_xml)
+          (Xml.child xml_arg0 "EndpointName") in
+      make ?lastUpdatedTimestamp ?createdTimestamp ?regions ?endpointId
+        ?status ?endpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let regions = field_map json__ "Regions" Regions.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let endpointName = field_map json__ "EndpointName" EndpointName.of_json in
+      make ?lastUpdatedTimestamp ?createdTimestamp ?regions ?endpointId
+        ?status ?endpointName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains multi-region endpoint (global-endpoint) properties."]
 module ImportJobSummary =
   struct
     type nonrec t =
@@ -2555,13 +5647,27 @@ module ImportJobSummary =
       importDestination: ImportDestination.t option ;
       jobStatus: JobStatus.t option ;
       createdTimestamp: Timestamp.t option
-        [@ocaml.doc "The date and time when the import job was created."]}
+        [@ocaml.doc "The date and time when the import job was created."];
+      processedRecordsCount: ProcessedRecordsCount.t option
+        [@ocaml.doc "The current number of records processed."];
+      failedRecordsCount: FailedRecordsCount.t option
+        [@ocaml.doc
+          "The number of records that failed processing because of invalid input or other reasons."]}
     let make ?jobId =
       fun ?importDestination ->
         fun ?jobStatus ->
           fun ?createdTimestamp ->
-            fun () ->
-              { jobId; importDestination; jobStatus; createdTimestamp }
+            fun ?processedRecordsCount ->
+              fun ?failedRecordsCount ->
+                fun () ->
+                  {
+                    jobId;
+                    importDestination;
+                    jobStatus;
+                    createdTimestamp;
+                    processedRecordsCount;
+                    failedRecordsCount
+                  }
     let to_value x =
       structure_to_value
         [("JobId", (Option.map x.jobId ~f:JobId.to_value));
@@ -2569,9 +5675,20 @@ module ImportJobSummary =
           (Option.map x.importDestination ~f:ImportDestination.to_value));
         ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
         ("CreatedTimestamp",
-          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("ProcessedRecordsCount",
+          (Option.map x.processedRecordsCount
+             ~f:ProcessedRecordsCount.to_value));
+        ("FailedRecordsCount",
+          (Option.map x.failedRecordsCount ~f:FailedRecordsCount.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let failedRecordsCount =
+        (Option.map ~f:FailedRecordsCount.of_xml)
+          (Xml.child xml_arg0 "FailedRecordsCount") in
+      let processedRecordsCount =
+        (Option.map ~f:ProcessedRecordsCount.of_xml)
+          (Xml.child xml_arg0 "ProcessedRecordsCount") in
       let createdTimestamp =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "CreatedTimestamp") in
@@ -2581,18 +5698,91 @@ module ImportJobSummary =
         (Option.map ~f:ImportDestination.of_xml)
           (Xml.child xml_arg0 "ImportDestination") in
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
-      make ?createdTimestamp ?jobStatus ?importDestination ?jobId ()
+      make ?failedRecordsCount ?processedRecordsCount ?createdTimestamp
+        ?jobStatus ?importDestination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let failedRecordsCount =
+        field_map json__ "FailedRecordsCount" FailedRecordsCount.of_json in
+      let processedRecordsCount =
+        field_map json__ "ProcessedRecordsCount"
+          ProcessedRecordsCount.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
       let importDestination =
-        field_map json "ImportDestination" ImportDestination.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
-      make ?createdTimestamp ?jobStatus ?importDestination ?jobId ()
+        field_map json__ "ImportDestination" ImportDestination.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?failedRecordsCount ?processedRecordsCount ?createdTimestamp
+        ?jobStatus ?importDestination ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A summary of the import job."]
+module ExportJobSummary =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option [@ocaml.doc "The export job ID."];
+      exportSourceType: ExportSourceType.t option
+        [@ocaml.doc "The source type of the export job."];
+      jobStatus: JobStatus.t option
+        [@ocaml.doc "The status of the export job."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the export job was created."];
+      completedTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the export job was completed."]}
+    let make ?jobId =
+      fun ?exportSourceType ->
+        fun ?jobStatus ->
+          fun ?createdTimestamp ->
+            fun ?completedTimestamp ->
+              fun () ->
+                {
+                  jobId;
+                  exportSourceType;
+                  jobStatus;
+                  createdTimestamp;
+                  completedTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("ExportSourceType",
+          (Option.map x.exportSourceType ~f:ExportSourceType.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("CompletedTimestamp",
+          (Option.map x.completedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let completedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CompletedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let exportSourceType =
+        (Option.map ~f:ExportSourceType.of_xml)
+          (Xml.child xml_arg0 "ExportSourceType") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?completedTimestamp ?createdTimestamp ?jobStatus ?exportSourceType
+        ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let completedTimestamp =
+        field_map json__ "CompletedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let exportSourceType =
+        field_map json__ "ExportSourceType" ExportSourceType.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?completedTimestamp ?createdTimestamp ?jobStatus ?exportSourceType
+        ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary of the export job."]
 module EmailTemplateMetadata =
   struct
     type nonrec t =
@@ -2619,11 +5809,11 @@ module EmailTemplateMetadata =
           (Xml.child xml_arg0 "TemplateName") in
       make ?createdTimestamp ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
       let templateName =
-        field_map json "TemplateName" EmailTemplateName.of_json in
+        field_map json__ "TemplateName" EmailTemplateName.of_json in
       make ?createdTimestamp ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about an email template."]
@@ -2638,19 +5828,34 @@ module IdentityInfo =
         [@ocaml.doc "The address or domain of the identity."];
       sendingEnabled: Enabled.t option
         [@ocaml.doc
-          "Indicates whether or not you can send email from the identity. An identity is an email address or domain that you send email from. Before you can send email from an identity, you have to demostrate that you own the identity, and that you authorize Amazon SES to send email from that identity."]}
+          "Indicates whether or not you can send email from the identity. An identity is an email address or domain that you send email from. Before you can send email from an identity, you have to demostrate that you own the identity, and that you authorize Amazon SES to send email from that identity."];
+      verificationStatus: VerificationStatus.t option
+        [@ocaml.doc
+          "The verification status of the identity. The status can be one of the following: PENDING \226\128\147 The verification process was initiated, but Amazon SES hasn't yet been able to verify the identity. SUCCESS \226\128\147 The verification process completed successfully. FAILED \226\128\147 The verification process failed. TEMPORARY_FAILURE \226\128\147 A temporary issue is preventing Amazon SES from determining the verification status of the identity. NOT_STARTED \226\128\147 The verification process hasn't been initiated for the identity."]}
     let make ?identityType =
       fun ?identityName ->
         fun ?sendingEnabled ->
-          fun () -> { identityType; identityName; sendingEnabled }
+          fun ?verificationStatus ->
+            fun () ->
+              {
+                identityType;
+                identityName;
+                sendingEnabled;
+                verificationStatus
+              }
     let to_value x =
       structure_to_value
         [("IdentityType",
            (Option.map x.identityType ~f:IdentityType.to_value));
         ("IdentityName", (Option.map x.identityName ~f:Identity.to_value));
-        ("SendingEnabled", (Option.map x.sendingEnabled ~f:Enabled.to_value))]
+        ("SendingEnabled", (Option.map x.sendingEnabled ~f:Enabled.to_value));
+        ("VerificationStatus",
+          (Option.map x.verificationStatus ~f:VerificationStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let verificationStatus =
+        (Option.map ~f:VerificationStatus.of_xml)
+          (Xml.child xml_arg0 "VerificationStatus") in
       let sendingEnabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       let identityName =
@@ -2658,13 +5863,15 @@ module IdentityInfo =
       let identityType =
         (Option.map ~f:IdentityType.of_xml)
           (Xml.child xml_arg0 "IdentityType") in
-      make ?sendingEnabled ?identityName ?identityType ()
+      make ?verificationStatus ?sendingEnabled ?identityName ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
-      let identityName = field_map json "IdentityName" Identity.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
-      make ?sendingEnabled ?identityName ?identityType ()
+    let of_json json__ =
+      let verificationStatus =
+        field_map json__ "VerificationStatus" VerificationStatus.of_json in
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
+      let identityName = field_map json__ "IdentityName" Identity.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
+      make ?verificationStatus ?sendingEnabled ?identityName ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an email identity."]
 module DomainDeliverabilityCampaign =
@@ -2687,10 +5894,10 @@ module DomainDeliverabilityCampaign =
           "The IP addresses that were used to send the email message."];
       firstSeenDateTime: Timestamp.t option
         [@ocaml.doc
-          "The first time, in Unix time format, when the email message was delivered to any recipient's inbox. This value can help you determine how long it took for a campaign to deliver an email message."];
+          "The first time when the email message was delivered to any recipient's inbox. This value can help you determine how long it took for a campaign to deliver an email message."];
       lastSeenDateTime: Timestamp.t option
         [@ocaml.doc
-          "The last time, in Unix time format, when the email message was delivered to any recipient's inbox. This value can help you determine how long it took for a campaign to deliver an email message."];
+          "The last time when the email message was delivered to any recipient's inbox. This value can help you determine how long it took for a campaign to deliver an email message."];
       inboxCount: Volume.t option
         [@ocaml.doc
           "The number of email messages that were delivered to recipients\226\128\153 inboxes."];
@@ -2799,23 +6006,24 @@ module DomainDeliverabilityCampaign =
         ?spamCount ?inboxCount ?lastSeenDateTime ?firstSeenDateTime
         ?sendingIps ?fromAddress ?subject ?imageUrl ?campaignId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let esps = field_map json "Esps" Esps.of_json in
-      let projectedVolume = field_map json "ProjectedVolume" Volume.of_json in
-      let readDeleteRate = field_map json "ReadDeleteRate" Percentage.of_json in
-      let deleteRate = field_map json "DeleteRate" Percentage.of_json in
-      let readRate = field_map json "ReadRate" Percentage.of_json in
-      let spamCount = field_map json "SpamCount" Volume.of_json in
-      let inboxCount = field_map json "InboxCount" Volume.of_json in
+    let of_json json__ =
+      let esps = field_map json__ "Esps" Esps.of_json in
+      let projectedVolume = field_map json__ "ProjectedVolume" Volume.of_json in
+      let readDeleteRate =
+        field_map json__ "ReadDeleteRate" Percentage.of_json in
+      let deleteRate = field_map json__ "DeleteRate" Percentage.of_json in
+      let readRate = field_map json__ "ReadRate" Percentage.of_json in
+      let spamCount = field_map json__ "SpamCount" Volume.of_json in
+      let inboxCount = field_map json__ "InboxCount" Volume.of_json in
       let lastSeenDateTime =
-        field_map json "LastSeenDateTime" Timestamp.of_json in
+        field_map json__ "LastSeenDateTime" Timestamp.of_json in
       let firstSeenDateTime =
-        field_map json "FirstSeenDateTime" Timestamp.of_json in
-      let sendingIps = field_map json "SendingIps" IpList.of_json in
-      let fromAddress = field_map json "FromAddress" Identity.of_json in
-      let subject = field_map json "Subject" Subject.of_json in
-      let imageUrl = field_map json "ImageUrl" ImageUrl.of_json in
-      let campaignId = field_map json "CampaignId" CampaignId.of_json in
+        field_map json__ "FirstSeenDateTime" Timestamp.of_json in
+      let sendingIps = field_map json__ "SendingIps" IpList.of_json in
+      let fromAddress = field_map json__ "FromAddress" Identity.of_json in
+      let subject = field_map json__ "Subject" Subject.of_json in
+      let imageUrl = field_map json__ "ImageUrl" ImageUrl.of_json in
+      let campaignId = field_map json__ "CampaignId" CampaignId.of_json in
       make ?esps ?projectedVolume ?readDeleteRate ?deleteRate ?readRate
         ?spamCount ?inboxCount ?lastSeenDateTime ?firstSeenDateTime
         ?sendingIps ?fromAddress ?subject ?imageUrl ?campaignId ()
@@ -2840,7 +6048,7 @@ module DeliverabilityTestReport =
           "The sender address that you specified for the predictive inbox placement test."];
       createDate: Timestamp.t option
         [@ocaml.doc
-          "The date and time when the predictive inbox placement test was created, in Unix time format."];
+          "The date and time when the predictive inbox placement test was created."];
       deliverabilityTestStatus: DeliverabilityTestStatus.t option
         [@ocaml.doc
           "The status of the predictive inbox placement test. If the status is IN_PROGRESS, then the predictive inbox placement test is currently running. Predictive inbox placement tests are usually complete within 24 hours of creating the test. If the status is COMPLETE, then the test is finished, and you can use the GetDeliverabilityTestReport to view the results of the test."]}
@@ -2891,17 +6099,17 @@ module DeliverabilityTestReport =
       make ?deliverabilityTestStatus ?createDate ?fromEmailAddress ?subject
         ?reportName ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliverabilityTestStatus =
-        field_map json "DeliverabilityTestStatus"
+        field_map json__ "DeliverabilityTestStatus"
           DeliverabilityTestStatus.of_json in
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
       let subject =
-        field_map json "Subject" DeliverabilityTestSubject.of_json in
-      let reportName = field_map json "ReportName" ReportName.of_json in
-      let reportId = field_map json "ReportId" ReportId.of_json in
+        field_map json__ "Subject" DeliverabilityTestSubject.of_json in
+      let reportName = field_map json__ "ReportName" ReportName.of_json in
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
       make ?deliverabilityTestStatus ?createDate ?fromEmailAddress ?subject
         ?reportName ?reportId ()
     let to_json v = composed_to_json to_value v
@@ -2971,17 +6179,19 @@ module CustomVerificationEmailTemplateMetadata =
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
+        field_map json__ "FailureRedirectionURL"
+          FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map json "SuccessRedirectionURL" SuccessRedirectionURL.of_json in
+        field_map json__ "SuccessRedirectionURL"
+          SuccessRedirectionURL.of_json in
       let templateSubject =
-        field_map json "TemplateSubject" EmailTemplateSubject.of_json in
+        field_map json__ "TemplateSubject" EmailTemplateSubject.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
       let templateName =
-        field_map json "TemplateName" EmailTemplateName.of_json in
+        field_map json__ "TemplateName" EmailTemplateName.of_json in
       make ?failureRedirectionURL ?successRedirectionURL ?templateSubject
         ?fromEmailAddress ?templateName ()
     let to_json v = composed_to_json to_value v
@@ -3050,16 +6260,17 @@ module Contact =
       make ?lastUpdatedTimestamp ?unsubscribeAll ?topicDefaultPreferences
         ?topicPreferences ?emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let unsubscribeAll =
-        field_map json "UnsubscribeAll" UnsubscribeAll.of_json in
+        field_map json__ "UnsubscribeAll" UnsubscribeAll.of_json in
       let topicDefaultPreferences =
-        field_map json "TopicDefaultPreferences" TopicPreferenceList.of_json in
+        field_map json__ "TopicDefaultPreferences"
+          TopicPreferenceList.of_json in
       let topicPreferences =
-        field_map json "TopicPreferences" TopicPreferenceList.of_json in
-      let emailAddress = field_map json "EmailAddress" EmailAddress.of_json in
+        field_map json__ "TopicPreferences" TopicPreferenceList.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
       make ?lastUpdatedTimestamp ?unsubscribeAll ?topicDefaultPreferences
         ?topicPreferences ?emailAddress ()
     let to_json v = composed_to_json to_value v
@@ -3093,11 +6304,11 @@ module TopicFilter =
         (Option.map ~f:TopicName.of_xml) (Xml.child xml_arg0 "TopicName") in
       make ?useDefaultIfPreferenceUnavailable ?topicName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let useDefaultIfPreferenceUnavailable =
-        field_map json "UseDefaultIfPreferenceUnavailable"
+        field_map json__ "UseDefaultIfPreferenceUnavailable"
           UseDefaultIfPreferenceUnavailable.of_json in
-      let topicName = field_map json "TopicName" TopicName.of_json in
+      let topicName = field_map json__ "TopicName" TopicName.of_json in
       make ?useDefaultIfPreferenceUnavailable ?topicName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Used for filtering by a specific topic preference."]
@@ -3129,11 +6340,11 @@ module ContactList =
           (Xml.child xml_arg0 "ContactListName") in
       make ?lastUpdatedTimestamp ?contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let contactListName =
-        field_map json "ContactListName" ContactListName.of_json in
+        field_map json__ "ContactListName" ContactListName.of_json in
       make ?lastUpdatedTimestamp ?contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3153,6 +6364,32 @@ module ConfigurationSetName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The name of a configuration set. Configuration sets are groups of rules that you can apply to the emails you send. You apply a configuration set to an email by including a reference to the configuration set in the headers of the email. When you apply a configuration set to an email, all of the rules in that configuration set are applied to the email."]
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SuppressedDestinationAttributes =
   struct
     type nonrec t =
@@ -3179,13 +6416,71 @@ module SuppressedDestinationAttributes =
           (Xml.child xml_arg0 "MessageId") in
       make ?feedbackId ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let feedbackId = field_map json "FeedbackId" FeedbackId.of_json in
-      let messageId = field_map json "MessageId" OutboundMessageId.of_json in
+    let of_json json__ =
+      let feedbackId = field_map json__ "FeedbackId" FeedbackId.of_json in
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
       make ?feedbackId ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains additional attributes that are related an email address that is on the suppression list for your account."]
+module Route =
+  struct
+    type nonrec t =
+      {
+      region: Region.t option [@ocaml.doc "The name of an AWS-Region."]}
+    let make ?region = fun () -> { region }
+    let to_value x =
+      structure_to_value
+        [("Region", (Option.map x.region ~f:Region.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:Region.of_xml) (Xml.child xml_arg0 "Region") in
+      make ?region ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "Region" Region.of_json in
+      make ?region ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object which contains an AWS-Region and routing status."]
+module EmailInsights =
+  struct
+    type nonrec t =
+      {
+      destination: InsightsEmailAddress.t option
+        [@ocaml.doc "The recipient of the email."];
+      isp: Isp.t option
+        [@ocaml.doc "The recipient's ISP (e.g., Gmail, Yahoo, etc.)."];
+      events: InsightsEvents.t option
+        [@ocaml.doc "A list of events associated with the sent email."]}
+    let make ?destination =
+      fun ?isp -> fun ?events -> fun () -> { destination; isp; events }
+    let to_value x =
+      structure_to_value
+        [("Destination",
+           (Option.map x.destination ~f:InsightsEmailAddress.to_value));
+        ("Isp", (Option.map x.isp ~f:Isp.to_value));
+        ("Events", (Option.map x.events ~f:InsightsEvents.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:InsightsEvents.of_xml) (Xml.child xml_arg0 "Events") in
+      let isp = (Option.map ~f:Isp.of_xml) (Xml.child xml_arg0 "Isp") in
+      let destination =
+        (Option.map ~f:InsightsEmailAddress.of_xml)
+          (Xml.child xml_arg0 "Destination") in
+      make ?events ?isp ?destination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let events = field_map json__ "Events" InsightsEvents.of_json in
+      let isp = field_map json__ "Isp" Isp.of_json in
+      let destination =
+        field_map json__ "Destination" InsightsEmailAddress.of_json in
+      make ?events ?isp ?destination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An email's insights contain metadata and delivery information about a specific email."]
 module FailedRecordsS3Url =
   struct
     type nonrec t = string
@@ -3221,7 +6516,7 @@ module DataFormat =
 module S3Url =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "An Amazon S3 URL in the format s3://<bucket_name>/<object>."]
+                            "An Amazon S3 URL in the format s3://<bucket_name>/<object> or a pre-signed URL."]
     let context_ = "S3Url"
     let make i =
       let open Result in
@@ -3237,33 +6532,146 @@ module S3Url =
     let of_json j = string_of_json ~kind:"S3Url" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "An Amazon S3 URL in the format s3://<bucket_name>/<object>."]
-module DkimSigningAttributesOrigin =
+       "An Amazon S3 URL in the format s3://<bucket_name>/<object> or a pre-signed URL."]
+module MessageInsightsDataSource =
   struct
     type nonrec t =
-      | AWS_SES 
-      | EXTERNAL 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | AWS_SES -> "AWS_SES"
-      | EXTERNAL -> "EXTERNAL"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "AWS_SES" -> AWS_SES
-      | "EXTERNAL" -> EXTERNAL
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      startDate: Timestamp.t
+        [@ocaml.doc
+          "Represents the start date for the export interval as a timestamp. The start date is inclusive."];
+      endDate: Timestamp.t
+        [@ocaml.doc
+          "Represents the end date for the export interval as a timestamp. The end date is inclusive."];
+      include_: MessageInsightsFilters.t option
+        [@ocaml.doc "Filters for results to be included in the export file."];
+      exclude: MessageInsightsFilters.t option
+        [@ocaml.doc
+          "Filters for results to be excluded from the export file."];
+      maxResults: MessageInsightsExportMaxResults.t option
+        [@ocaml.doc "The maximum number of results."]}
+    let context_ = "MessageInsightsDataSource"
+    let make ?include_ =
+      fun ?exclude ->
+        fun ?maxResults ->
+          fun ~startDate ->
+            fun ~endDate ->
+              fun () -> { include_; exclude; maxResults; startDate; endDate }
+    let to_value x =
+      structure_to_value
+        [("StartDate", (Some (Timestamp.to_value x.startDate)));
+        ("EndDate", (Some (Timestamp.to_value x.endDate)));
+        ("Include",
+          (Option.map x.include_ ~f:MessageInsightsFilters.to_value));
+        ("Exclude",
+          (Option.map x.exclude ~f:MessageInsightsFilters.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:MessageInsightsExportMaxResults.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration DkimSigningAttributesOrigin"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"DkimSigningAttributesOrigin" j)
+      let maxResults =
+        (Option.map ~f:MessageInsightsExportMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let exclude =
+        (Option.map ~f:MessageInsightsFilters.of_xml)
+          (Xml.child xml_arg0 "Exclude") in
+      let include_ =
+        (Option.map ~f:MessageInsightsFilters.of_xml)
+          (Xml.child xml_arg0 "Include") in
+      let endDate =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EndDate") in
+      let startDate =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
+      make ?maxResults ?exclude ?include_ ~endDate ~startDate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" MessageInsightsExportMaxResults.of_json in
+      let exclude = field_map json__ "Exclude" MessageInsightsFilters.of_json in
+      let include_ =
+        field_map json__ "Include" MessageInsightsFilters.of_json in
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
+      make ?maxResults ?exclude ?include_ ~endDate ~startDate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains filters applied when performing the Message Insights export."]
+module MetricsDataSource =
+  struct
+    type nonrec t =
+      {
+      dimensions: ExportDimensions.t
+        [@ocaml.doc
+          "An object that contains a mapping between a MetricDimensionName and MetricDimensionValue to filter metrics by. Must contain a least 1 dimension but no more than 3 unique ones."];
+      namespace: MetricNamespace.t
+        [@ocaml.doc "The metrics namespace - e.g., VDM."];
+      metrics: ExportMetrics.t
+        [@ocaml.doc "A list of ExportMetric objects to export."];
+      startDate: Timestamp.t
+        [@ocaml.doc
+          "Represents the start date for the export interval as a timestamp."];
+      endDate: Timestamp.t
+        [@ocaml.doc
+          "Represents the end date for the export interval as a timestamp."]}
+    let context_ = "MetricsDataSource"
+    let make ~dimensions =
+      fun ~namespace ->
+        fun ~metrics ->
+          fun ~startDate ->
+            fun ~endDate ->
+              fun () ->
+                { dimensions; namespace; metrics; startDate; endDate }
+    let to_value x =
+      structure_to_value
+        [("Dimensions", (Some (ExportDimensions.to_value x.dimensions)));
+        ("Namespace", (Some (MetricNamespace.to_value x.namespace)));
+        ("Metrics", (Some (ExportMetrics.to_value x.metrics)));
+        ("StartDate", (Some (Timestamp.to_value x.startDate)));
+        ("EndDate", (Some (Timestamp.to_value x.endDate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endDate =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EndDate") in
+      let startDate =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
+      let metrics =
+        ExportMetrics.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metrics") in
+      let namespace =
+        MetricNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+      let dimensions =
+        ExportDimensions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Dimensions") in
+      make ~endDate ~startDate ~metrics ~namespace ~dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
+      let metrics = field_map_exn json__ "Metrics" ExportMetrics.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" MetricNamespace.of_json in
+      let dimensions =
+        field_map_exn json__ "Dimensions" ExportDimensions.of_json in
+      make ~endDate ~startDate ~metrics ~namespace ~dimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains details about the data source for the metrics export."]
+module ExportedRecordsCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ExportedRecordsCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module DkimStatus =
@@ -3304,6 +6712,9 @@ module DnsTokenList =
   struct
     type nonrec t = DnsToken.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DnsToken.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3323,6 +6734,19 @@ module DnsTokenList =
     let of_json j =
       list_of_json ~kind:"DnsTokenList" ~of_json:DnsToken.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module HostedZone =
+  struct
+    type nonrec t = string
+    let context_ = "HostedZone"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"HostedZone" j
+    let to_json = simple_to_json to_value
   end
 module BehaviorOnMxFailure =
   struct
@@ -3432,6 +6856,198 @@ module PolicyName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The name of the policy. The policy name cannot exceed 64 characters and can only include alphanumeric characters, dashes, and underscores."]
+module SOARecord =
+  struct
+    type nonrec t =
+      {
+      primaryNameServer: PrimaryNameServer.t option
+        [@ocaml.doc "Primary name server specified in the SOA record."];
+      adminEmail: AdminEmail.t option
+        [@ocaml.doc "Administrative contact email from the SOA record."];
+      serialNumber: SerialNumber.t option
+        [@ocaml.doc "Serial number from the SOA record."]}
+    let make ?primaryNameServer =
+      fun ?adminEmail ->
+        fun ?serialNumber ->
+          fun () -> { primaryNameServer; adminEmail; serialNumber }
+    let to_value x =
+      structure_to_value
+        [("PrimaryNameServer",
+           (Option.map x.primaryNameServer ~f:PrimaryNameServer.to_value));
+        ("AdminEmail", (Option.map x.adminEmail ~f:AdminEmail.to_value));
+        ("SerialNumber",
+          (Option.map x.serialNumber ~f:SerialNumber.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serialNumber =
+        (Option.map ~f:SerialNumber.of_xml)
+          (Xml.child xml_arg0 "SerialNumber") in
+      let adminEmail =
+        (Option.map ~f:AdminEmail.of_xml) (Xml.child xml_arg0 "AdminEmail") in
+      let primaryNameServer =
+        (Option.map ~f:PrimaryNameServer.of_xml)
+          (Xml.child xml_arg0 "PrimaryNameServer") in
+      make ?serialNumber ?adminEmail ?primaryNameServer ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serialNumber = field_map json__ "SerialNumber" SerialNumber.of_json in
+      let adminEmail = field_map json__ "AdminEmail" AdminEmail.of_json in
+      let primaryNameServer =
+        field_map json__ "PrimaryNameServer" PrimaryNameServer.of_json in
+      make ?serialNumber ?adminEmail ?primaryNameServer ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains information about the start of authority (SOA) record associated with the identity."]
+module VerificationError =
+  struct
+    type nonrec t =
+      | SERVICE_ERROR 
+      | DNS_SERVER_ERROR 
+      | HOST_NOT_FOUND 
+      | TYPE_NOT_FOUND 
+      | INVALID_VALUE 
+      | REPLICATION_ACCESS_DENIED 
+      | REPLICATION_PRIMARY_NOT_FOUND 
+      | REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED 
+      | REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED 
+      | REPLICATION_PRIMARY_INVALID_REGION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVICE_ERROR -> "SERVICE_ERROR"
+      | DNS_SERVER_ERROR -> "DNS_SERVER_ERROR"
+      | HOST_NOT_FOUND -> "HOST_NOT_FOUND"
+      | TYPE_NOT_FOUND -> "TYPE_NOT_FOUND"
+      | INVALID_VALUE -> "INVALID_VALUE"
+      | REPLICATION_ACCESS_DENIED -> "REPLICATION_ACCESS_DENIED"
+      | REPLICATION_PRIMARY_NOT_FOUND -> "REPLICATION_PRIMARY_NOT_FOUND"
+      | REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED ->
+          "REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED"
+      | REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED ->
+          "REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED"
+      | REPLICATION_PRIMARY_INVALID_REGION ->
+          "REPLICATION_PRIMARY_INVALID_REGION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVICE_ERROR" -> SERVICE_ERROR
+      | "DNS_SERVER_ERROR" -> DNS_SERVER_ERROR
+      | "HOST_NOT_FOUND" -> HOST_NOT_FOUND
+      | "TYPE_NOT_FOUND" -> TYPE_NOT_FOUND
+      | "INVALID_VALUE" -> INVALID_VALUE
+      | "REPLICATION_ACCESS_DENIED" -> REPLICATION_ACCESS_DENIED
+      | "REPLICATION_PRIMARY_NOT_FOUND" -> REPLICATION_PRIMARY_NOT_FOUND
+      | "REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED" ->
+          REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED
+      | "REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED" ->
+          REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED
+      | "REPLICATION_PRIMARY_INVALID_REGION" ->
+          REPLICATION_PRIMARY_INVALID_REGION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VerificationError" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VerificationError" j)
+    let to_json = simple_to_json to_value
+  end
+module EmailAddressInsightsMailboxEvaluations =
+  struct
+    type nonrec t =
+      {
+      hasValidSyntax: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Checks that the email address follows proper RFC standards and contains valid characters in the correct format."];
+      hasValidDnsRecords: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Checks that the domain exists, has valid DNS records, and is con\239\172\129gured to receive email."];
+      mailboxExists: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Checks that the mailbox exists and can receive messages without actually sending an email."];
+      isRoleAddress: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Identi\239\172\129es role-based addresses (such as admin\\@, support\\@, or info\\@) that may have lower engagement rates."];
+      isDisposable: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Checks disposable or temporary email addresses that could negatively impact your sender reputation."];
+      isRandomInput: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc "Checks if the input appears to be random text."]}
+    let make ?hasValidSyntax =
+      fun ?hasValidDnsRecords ->
+        fun ?mailboxExists ->
+          fun ?isRoleAddress ->
+            fun ?isDisposable ->
+              fun ?isRandomInput ->
+                fun () ->
+                  {
+                    hasValidSyntax;
+                    hasValidDnsRecords;
+                    mailboxExists;
+                    isRoleAddress;
+                    isDisposable;
+                    isRandomInput
+                  }
+    let to_value x =
+      structure_to_value
+        [("HasValidSyntax",
+           (Option.map x.hasValidSyntax
+              ~f:EmailAddressInsightsVerdict.to_value));
+        ("HasValidDnsRecords",
+          (Option.map x.hasValidDnsRecords
+             ~f:EmailAddressInsightsVerdict.to_value));
+        ("MailboxExists",
+          (Option.map x.mailboxExists ~f:EmailAddressInsightsVerdict.to_value));
+        ("IsRoleAddress",
+          (Option.map x.isRoleAddress ~f:EmailAddressInsightsVerdict.to_value));
+        ("IsDisposable",
+          (Option.map x.isDisposable ~f:EmailAddressInsightsVerdict.to_value));
+        ("IsRandomInput",
+          (Option.map x.isRandomInput ~f:EmailAddressInsightsVerdict.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let isRandomInput =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "IsRandomInput") in
+      let isDisposable =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "IsDisposable") in
+      let isRoleAddress =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "IsRoleAddress") in
+      let mailboxExists =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "MailboxExists") in
+      let hasValidDnsRecords =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "HasValidDnsRecords") in
+      let hasValidSyntax =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "HasValidSyntax") in
+      make ?isRandomInput ?isDisposable ?isRoleAddress ?mailboxExists
+        ?hasValidDnsRecords ?hasValidSyntax ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let isRandomInput =
+        field_map json__ "IsRandomInput" EmailAddressInsightsVerdict.of_json in
+      let isDisposable =
+        field_map json__ "IsDisposable" EmailAddressInsightsVerdict.of_json in
+      let isRoleAddress =
+        field_map json__ "IsRoleAddress" EmailAddressInsightsVerdict.of_json in
+      let mailboxExists =
+        field_map json__ "MailboxExists" EmailAddressInsightsVerdict.of_json in
+      let hasValidDnsRecords =
+        field_map json__ "HasValidDnsRecords"
+          EmailAddressInsightsVerdict.of_json in
+      let hasValidSyntax =
+        field_map json__ "HasValidSyntax" EmailAddressInsightsVerdict.of_json in
+      make ?isRandomInput ?isDisposable ?isRoleAddress ?mailboxExists
+        ?hasValidDnsRecords ?hasValidSyntax ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains individual validation checks performed on an email address."]
 module DailyVolume =
   struct
     type nonrec t =
@@ -3468,12 +7084,12 @@ module DailyVolume =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?domainIspPlacements ?volumeStatistics ?startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainIspPlacements =
-        field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
+        field_map json__ "DomainIspPlacements" DomainIspPlacements.of_json in
       let volumeStatistics =
-        field_map json "VolumeStatistics" VolumeStatistics.of_json in
-      let startDate = field_map json "StartDate" Timestamp.of_json in
+        field_map json__ "VolumeStatistics" VolumeStatistics.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
       make ?domainIspPlacements ?volumeStatistics ?startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3504,10 +7120,10 @@ module IspPlacement =
         (Option.map ~f:IspName.of_xml) (Xml.child xml_arg0 "IspName") in
       make ?placementStatistics ?ispName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let placementStatistics =
-        field_map json "PlacementStatistics" PlacementStatistics.of_json in
-      let ispName = field_map json "IspName" IspName.of_json in
+        field_map json__ "PlacementStatistics" PlacementStatistics.of_json in
+      let ispName = field_map json__ "IspName" IspName.of_json in
       make ?placementStatistics ?ispName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3516,53 +7132,117 @@ module DedicatedIp =
   struct
     type nonrec t =
       {
-      ip: Ip.t [@ocaml.doc "An IPv4 address."];
-      warmupStatus: WarmupStatus.t
+      ip: Ip.t option [@ocaml.doc "An IPv4 address."];
+      warmupStatus: WarmupStatus.t option
         [@ocaml.doc
-          "The warm-up status of a dedicated IP address. The status can have one of the following values: IN_PROGRESS \226\128\147 The IP address isn't ready to use because the dedicated IP warm-up process is ongoing. DONE \226\128\147 The dedicated IP warm-up process is complete, and the IP address is ready to use."];
-      warmupPercentage: Percentage100Wrapper.t
+          "The warm-up status of a dedicated IP address. The status can have one of the following values: IN_PROGRESS \226\128\147 The IP address isn't ready to use because the dedicated IP warm-up process is ongoing. DONE \226\128\147 The dedicated IP warm-up process is complete, and the IP address is ready to use. NOT_APPLICABLE \226\128\147 The warm-up status doesn't apply to this IP address. This status is used for IP addresses in managed dedicated IP pools, where Amazon SES automatically handles the warm-up process."];
+      warmupPercentage: Percentage100Wrapper.t option
         [@ocaml.doc
-          "Indicates how complete the dedicated IP warm-up process is. When this value equals 1, the address has completed the warm-up process and is ready for use."];
+          "Indicates the progress of your dedicated IP warm-up: 0-100 \226\128\147 For standard dedicated IP addresses, this shows the warm-up completion percentage. A value of 100 means the IP address is fully warmed up and ready for use. -1 \226\128\147 Appears for IP addresses in managed dedicated pools where Amazon SES automatically handles the warm-up process, making the percentage not applicable."];
       poolName: PoolName.t option
         [@ocaml.doc
           "The name of the dedicated IP pool that the IP address is associated with."]}
-    let context_ = "DedicatedIp"
-    let make ?poolName =
-      fun ~ip ->
-        fun ~warmupStatus ->
-          fun ~warmupPercentage ->
-            fun () -> { poolName; ip; warmupStatus; warmupPercentage }
+    let make ?ip =
+      fun ?warmupStatus ->
+        fun ?warmupPercentage ->
+          fun ?poolName ->
+            fun () -> { ip; warmupStatus; warmupPercentage; poolName }
     let to_value x =
       structure_to_value
-        [("Ip", (Some (Ip.to_value x.ip)));
-        ("WarmupStatus", (Some (WarmupStatus.to_value x.warmupStatus)));
+        [("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("WarmupStatus",
+          (Option.map x.warmupStatus ~f:WarmupStatus.to_value));
         ("WarmupPercentage",
-          (Some (Percentage100Wrapper.to_value x.warmupPercentage)));
+          (Option.map x.warmupPercentage ~f:Percentage100Wrapper.to_value));
         ("PoolName", (Option.map x.poolName ~f:PoolName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let poolName =
         (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
       let warmupPercentage =
-        Percentage100Wrapper.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WarmupPercentage") in
+        (Option.map ~f:Percentage100Wrapper.of_xml)
+          (Xml.child xml_arg0 "WarmupPercentage") in
       let warmupStatus =
-        WarmupStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WarmupStatus") in
-      let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ip") in
-      make ?poolName ~warmupPercentage ~warmupStatus ~ip ()
+        (Option.map ~f:WarmupStatus.of_xml)
+          (Xml.child xml_arg0 "WarmupStatus") in
+      let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
+      make ?poolName ?warmupPercentage ?warmupStatus ?ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolName = field_map json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
       let warmupPercentage =
-        field_map_exn json "WarmupPercentage" Percentage100Wrapper.of_json in
-      let warmupStatus =
-        field_map_exn json "WarmupStatus" WarmupStatus.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
-      make ?poolName ~warmupPercentage ~warmupStatus ~ip ()
+        field_map json__ "WarmupPercentage" Percentage100Wrapper.of_json in
+      let warmupStatus = field_map json__ "WarmupStatus" WarmupStatus.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      make ?poolName ?warmupPercentage ?warmupStatus ?ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a dedicated IP address that is associated with your Amazon SES account. To learn more about requesting dedicated IP addresses, see Requesting and Relinquishing Dedicated IP Addresses in the Amazon SES Developer Guide."]
+module ScalingMode =
+  struct
+    type nonrec t =
+      | STANDARD 
+      | MANAGED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | STANDARD -> "STANDARD"
+      | MANAGED -> "MANAGED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "STANDARD" -> STANDARD
+      | "MANAGED" -> MANAGED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ScalingMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScalingMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ArchiveArn =
+  struct
+    type nonrec t = string
+    let context_ = "ArchiveArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:(aws|aws-[a-z-]+):ses:[a-z]{2,4}-[a-z-]+-[0-9]:[0-9]{1,20}:mailmanager-archive/a-[a-z0-9]{24,62}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ArchiveArn" j
+    let to_json = simple_to_json to_value
+  end
+module MaxDeliverySeconds =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:50400L) >>=
+             (fun () -> check_int64_min i ~min:300L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module TlsPolicy =
   struct
     type nonrec t =
@@ -3606,6 +7286,9 @@ module SuppressionListReasons =
   struct
     type nonrec t = SuppressionListReason.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuppressionListReason.to_value)) |>
         (fun x -> `List x)
@@ -3628,6 +7311,35 @@ module SuppressionListReasons =
         ~of_json:SuppressionListReason.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SuppressionValidationOptions =
+  struct
+    type nonrec t =
+      {
+      conditionThreshold: SuppressionConditionThreshold.t
+        [@ocaml.doc
+          "Specifies the condition threshold settings for suppression validation."]}
+    let context_ = "SuppressionValidationOptions"
+    let make ~conditionThreshold = fun () -> { conditionThreshold }
+    let to_value x =
+      structure_to_value
+        [("ConditionThreshold",
+           (Some
+              (SuppressionConditionThreshold.to_value x.conditionThreshold)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditionThreshold =
+        SuppressionConditionThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConditionThreshold") in
+      make ~conditionThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditionThreshold =
+        field_map_exn json__ "ConditionThreshold"
+          SuppressionConditionThreshold.of_json in
+      make ~conditionThreshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains validation options for email address suppression."]
 module CustomRedirectDomain =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -3642,18 +7354,46 @@ module CustomRedirectDomain =
     let of_json j = string_of_json ~kind:"CustomRedirectDomain" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "The domain to use for tracking open and click events."]
+module HttpsPolicy =
+  struct
+    type nonrec t =
+      | REQUIRE 
+      | REQUIRE_OPEN_ONLY 
+      | OPTIONAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUIRE -> "REQUIRE"
+      | REQUIRE_OPEN_ONLY -> "REQUIRE_OPEN_ONLY"
+      | OPTIONAL -> "OPTIONAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUIRE" -> REQUIRE
+      | "REQUIRE_OPEN_ONLY" -> REQUIRE_OPEN_ONLY
+      | "OPTIONAL" -> OPTIONAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration HttpsPolicy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"HttpsPolicy" j)
+    let to_json = simple_to_json to_value
+  end
 module EventDestination =
   struct
     type nonrec t =
       {
-      name: EventDestinationName.t
+      name: EventDestinationName.t option
         [@ocaml.doc "A name that identifies the event destination."];
       enabled: Enabled.t option
         [@ocaml.doc
           "If true, the event destination is enabled. When the event destination is enabled, the specified event types are sent to the destinations in this EventDestinationDefinition. If false, the event destination is disabled. When the event destination is disabled, events aren't sent to the specified destinations."];
-      matchingEventTypes: EventTypes.t
+      matchingEventTypes: EventTypes.t option
         [@ocaml.doc
-          "The types of events that Amazon SES sends to the specified event destinations."];
+          "The types of events that Amazon SES sends to the specified event destinations. SEND - The send request was successful and SES will attempt to deliver the message to the recipient\226\128\153s mail server. (If account-level or global suppression is being used, SES will still count it as a send, but delivery is suppressed.) REJECT - SES accepted the email, but determined that it contained a virus and didn\226\128\153t attempt to deliver it to the recipient\226\128\153s mail server. BOUNCE - (Hard bounce) The recipient's mail server permanently rejected the email. (Soft bounces are only included when SES fails to deliver the email after retrying for a period of time.) COMPLAINT - The email was successfully delivered to the recipient\226\128\153s mail server, but the recipient marked it as spam. DELIVERY - SES successfully delivered the email to the recipient's mail server. OPEN - The recipient received the message and opened it in their email client. CLICK - The recipient clicked one or more links in the email. RENDERING_FAILURE - The email wasn't sent because of a template rendering issue. This event type can occur when template data is missing, or when there is a mismatch between template parameters and data. (This event type only occurs when you send email using the SendEmail or SendBulkEmail API operations.) DELIVERY_DELAY - The email couldn't be delivered to the recipient\226\128\153s mail server because a temporary issue occurred. Delivery delays can occur, for example, when the recipient's inbox is full, or when the receiving email server experiences a transient issue. SUBSCRIPTION - The email was successfully delivered, but the recipient updated their subscription preferences by clicking on an unsubscribe link as part of your subscription management."];
       kinesisFirehoseDestination: KinesisFirehoseDestination.t option
         [@ocaml.doc
           "An object that defines an Amazon Kinesis Data Firehose destination for email events. You can use Amazon Kinesis Data Firehose to stream data to other services, such as Amazon S3 and Amazon Redshift."];
@@ -3662,34 +7402,38 @@ module EventDestination =
           "An object that defines an Amazon CloudWatch destination for email events. You can use Amazon CloudWatch to monitor and gain insights on your email sending metrics."];
       snsDestination: SnsDestination.t option
         [@ocaml.doc
-          "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notification when certain email events occur."];
+          "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notifications when certain email events occur."];
+      eventBridgeDestination: EventBridgeDestination.t option
+        [@ocaml.doc
+          "An object that defines an Amazon EventBridge destination for email events. You can use Amazon EventBridge to send notifications when certain email events occur."];
       pinpointDestination: PinpointDestination.t option
         [@ocaml.doc
           "An object that defines an Amazon Pinpoint project destination for email events. You can send email event data to a Amazon Pinpoint project to view metrics using the Transactional Messaging dashboards that are built in to Amazon Pinpoint. For more information, see Transactional Messaging Charts in the Amazon Pinpoint User Guide."]}
-    let context_ = "EventDestination"
-    let make ?enabled =
-      fun ?kinesisFirehoseDestination ->
-        fun ?cloudWatchDestination ->
-          fun ?snsDestination ->
-            fun ?pinpointDestination ->
-              fun ~name ->
-                fun ~matchingEventTypes ->
-                  fun () ->
-                    {
-                      enabled;
-                      kinesisFirehoseDestination;
-                      cloudWatchDestination;
-                      snsDestination;
-                      pinpointDestination;
-                      name;
-                      matchingEventTypes
-                    }
+    let make ?name =
+      fun ?enabled ->
+        fun ?matchingEventTypes ->
+          fun ?kinesisFirehoseDestination ->
+            fun ?cloudWatchDestination ->
+              fun ?snsDestination ->
+                fun ?eventBridgeDestination ->
+                  fun ?pinpointDestination ->
+                    fun () ->
+                      {
+                        name;
+                        enabled;
+                        matchingEventTypes;
+                        kinesisFirehoseDestination;
+                        cloudWatchDestination;
+                        snsDestination;
+                        eventBridgeDestination;
+                        pinpointDestination
+                      }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EventDestinationName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:EventDestinationName.to_value));
         ("Enabled", (Option.map x.enabled ~f:Enabled.to_value));
         ("MatchingEventTypes",
-          (Some (EventTypes.to_value x.matchingEventTypes)));
+          (Option.map x.matchingEventTypes ~f:EventTypes.to_value));
         ("KinesisFirehoseDestination",
           (Option.map x.kinesisFirehoseDestination
              ~f:KinesisFirehoseDestination.to_value));
@@ -3698,6 +7442,9 @@ module EventDestination =
              ~f:CloudWatchDestination.to_value));
         ("SnsDestination",
           (Option.map x.snsDestination ~f:SnsDestination.to_value));
+        ("EventBridgeDestination",
+          (Option.map x.eventBridgeDestination
+             ~f:EventBridgeDestination.to_value));
         ("PinpointDestination",
           (Option.map x.pinpointDestination ~f:PinpointDestination.to_value))]
     let to_query v = to_query to_value v
@@ -3705,6 +7452,9 @@ module EventDestination =
       let pinpointDestination =
         (Option.map ~f:PinpointDestination.of_xml)
           (Xml.child xml_arg0 "PinpointDestination") in
+      let eventBridgeDestination =
+        (Option.map ~f:EventBridgeDestination.of_xml)
+          (Xml.child xml_arg0 "EventBridgeDestination") in
       let snsDestination =
         (Option.map ~f:SnsDestination.of_xml)
           (Xml.child xml_arg0 "SnsDestination") in
@@ -3715,32 +7465,38 @@ module EventDestination =
         (Option.map ~f:KinesisFirehoseDestination.of_xml)
           (Xml.child xml_arg0 "KinesisFirehoseDestination") in
       let matchingEventTypes =
-        EventTypes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MatchingEventTypes") in
+        (Option.map ~f:EventTypes.of_xml)
+          (Xml.child xml_arg0 "MatchingEventTypes") in
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       let name =
-        EventDestinationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ~matchingEventTypes ?enabled ~name ()
+        (Option.map ~f:EventDestinationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      make ?pinpointDestination ?eventBridgeDestination ?snsDestination
+        ?cloudWatchDestination ?kinesisFirehoseDestination
+        ?matchingEventTypes ?enabled ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pinpointDestination =
-        field_map json "PinpointDestination" PinpointDestination.of_json in
+        field_map json__ "PinpointDestination" PinpointDestination.of_json in
+      let eventBridgeDestination =
+        field_map json__ "EventBridgeDestination"
+          EventBridgeDestination.of_json in
       let snsDestination =
-        field_map json "SnsDestination" SnsDestination.of_json in
+        field_map json__ "SnsDestination" SnsDestination.of_json in
       let cloudWatchDestination =
-        field_map json "CloudWatchDestination" CloudWatchDestination.of_json in
+        field_map json__ "CloudWatchDestination"
+          CloudWatchDestination.of_json in
       let kinesisFirehoseDestination =
-        field_map json "KinesisFirehoseDestination"
+        field_map json__ "KinesisFirehoseDestination"
           KinesisFirehoseDestination.of_json in
       let matchingEventTypes =
-        field_map_exn json "MatchingEventTypes" EventTypes.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
-      let name = field_map_exn json "Name" EventDestinationName.of_json in
-      make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ~matchingEventTypes ?enabled ~name ()
+        field_map json__ "MatchingEventTypes" EventTypes.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
+      let name = field_map json__ "Name" EventDestinationName.of_json in
+      make ?pinpointDestination ?eventBridgeDestination ?snsDestination
+        ?cloudWatchDestination ?kinesisFirehoseDestination
+        ?matchingEventTypes ?enabled ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In the Amazon SES API v2, events include message sends, deliveries, opens, clicks, bounces, complaints and delivery delays. Event destinations are places that you can send information about these events to. For example, you can send event data to Amazon SNS to receive notifications when you receive bounces or complaints, or you can use Amazon Kinesis Data Firehose to stream data to Amazon S3 for long-term storage."]
@@ -3748,6 +7504,9 @@ module BlacklistEntries =
   struct
     type nonrec t = BlacklistEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlacklistEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3791,6 +7550,9 @@ module AdditionalContactEmailAddresses =
         ok_or_failwith
           ((check_list_max i ~max:4) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalContactEmailAddress.to_value)) |>
         (fun x -> `List x)
@@ -3877,9 +7639,9 @@ module ReviewDetails =
         (Option.map ~f:ReviewStatus.of_xml) (Xml.child xml_arg0 "Status") in
       make ?caseId ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caseId = field_map json "CaseId" CaseId.of_json in
-      let status = field_map json "Status" ReviewStatus.of_json in
+    let of_json json__ =
+      let caseId = field_map json__ "CaseId" CaseId.of_json in
+      let status = field_map json__ "Status" ReviewStatus.of_json in
       make ?caseId ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3889,11 +7651,7 @@ module UseCaseDescription =
     type nonrec t = string
     let context_ = "UseCaseDescription"
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:5000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
+      let open Result in ok_or_failwith (check_string_max i ~max:5000); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3963,6 +7721,199 @@ module SentLast24Hours =
     let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
+module SuppressionValidationAttributes =
+  struct
+    type nonrec t =
+      {
+      conditionThreshold: SuppressionConditionThreshold.t
+        [@ocaml.doc
+          "Specifies the condition threshold settings for account-level suppression."]}
+    let context_ = "SuppressionValidationAttributes"
+    let make ~conditionThreshold = fun () -> { conditionThreshold }
+    let to_value x =
+      structure_to_value
+        [("ConditionThreshold",
+           (Some
+              (SuppressionConditionThreshold.to_value x.conditionThreshold)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let conditionThreshold =
+        SuppressionConditionThreshold.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConditionThreshold") in
+      make ~conditionThreshold ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let conditionThreshold =
+        field_map_exn json__ "ConditionThreshold"
+          SuppressionConditionThreshold.of_json in
+      make ~conditionThreshold ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Structure containing validation attributes used for suppressing sending to specific destination on account level."]
+module RoutesDetails =
+  struct
+    type nonrec t = RouteDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RouteDetails.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RouteDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RoutesDetails" ~of_json:RouteDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDataError =
+  struct
+    type nonrec t =
+      {
+      id: QueryIdentifier.t option [@ocaml.doc "The query identifier."];
+      code: QueryErrorCode.t option
+        [@ocaml.doc
+          "The query error code. Can be one of: INTERNAL_FAILURE \226\128\147 Amazon SES has failed to process one of the queries. ACCESS_DENIED \226\128\147 You have insufficient access to retrieve metrics based on the given query."];
+      message: QueryErrorMessage.t option
+        [@ocaml.doc
+          "The error message associated with the current query error."]}
+    let make ?id =
+      fun ?code -> fun ?message -> fun () -> { id; code; message }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:QueryIdentifier.to_value));
+        ("Code", (Option.map x.code ~f:QueryErrorCode.to_value));
+        ("Message", (Option.map x.message ~f:QueryErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:QueryErrorMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:QueryErrorCode.of_xml) (Xml.child xml_arg0 "Code") in
+      let id =
+        (Option.map ~f:QueryIdentifier.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?message ?code ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" QueryErrorMessage.of_json in
+      let code = field_map json__ "Code" QueryErrorCode.of_json in
+      let id = field_map json__ "Id" QueryIdentifier.of_json in
+      make ?message ?code ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error corresponding to the unsuccessful processing of a single metric data query."]
+module MetricDataResult =
+  struct
+    type nonrec t =
+      {
+      id: QueryIdentifier.t option [@ocaml.doc "The query identifier."];
+      timestamps: TimestampList.t option
+        [@ocaml.doc "A list of timestamps for the metric data results."];
+      values: MetricValueList.t option
+        [@ocaml.doc
+          "A list of values (cumulative / sum) for the metric data results."]}
+    let make ?id =
+      fun ?timestamps -> fun ?values -> fun () -> { id; timestamps; values }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:QueryIdentifier.to_value));
+        ("Timestamps", (Option.map x.timestamps ~f:TimestampList.to_value));
+        ("Values", (Option.map x.values ~f:MetricValueList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:MetricValueList.of_xml) (Xml.child xml_arg0 "Values") in
+      let timestamps =
+        (Option.map ~f:TimestampList.of_xml)
+          (Xml.child xml_arg0 "Timestamps") in
+      let id =
+        (Option.map ~f:QueryIdentifier.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?values ?timestamps ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "Values" MetricValueList.of_json in
+      let timestamps = field_map json__ "Timestamps" TimestampList.of_json in
+      let id = field_map json__ "Id" QueryIdentifier.of_json in
+      make ?values ?timestamps ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The result of a single metric data query."]
+module BatchGetMetricDataQuery =
+  struct
+    type nonrec t =
+      {
+      id: QueryIdentifier.t [@ocaml.doc "The query identifier."];
+      namespace: MetricNamespace.t
+        [@ocaml.doc "The query namespace - e.g. VDM"];
+      metric: Metric.t
+        [@ocaml.doc
+          "The queried metric. This can be one of the following: SEND \226\128\147 Emails sent eligible for tracking in the VDM dashboard. This excludes emails sent to the mailbox simulator and emails addressed to more than one recipient. COMPLAINT \226\128\147 Complaints received for your account. This excludes complaints from the mailbox simulator, those originating from your account-level suppression list (if enabled), and those for emails addressed to more than one recipient PERMANENT_BOUNCE \226\128\147 Permanent bounces - i.e. feedback received for emails sent to non-existent mailboxes. Excludes bounces from the mailbox simulator, those originating from your account-level suppression list (if enabled), and those for emails addressed to more than one recipient. TRANSIENT_BOUNCE \226\128\147 Transient bounces - i.e. feedback received for delivery failures excluding issues with non-existent mailboxes. Excludes bounces from the mailbox simulator, and those for emails addressed to more than one recipient. OPEN \226\128\147 Unique open events for emails including open trackers. Excludes opens for emails addressed to more than one recipient. CLICK \226\128\147 Unique click events for emails including wrapped links. Excludes clicks for emails addressed to more than one recipient. DELIVERY \226\128\147 Successful deliveries for email sending attempts. Excludes deliveries to the mailbox simulator and for emails addressed to more than one recipient. DELIVERY_OPEN \226\128\147 Successful deliveries for email sending attempts. Excludes deliveries to the mailbox simulator, for emails addressed to more than one recipient, and emails without open trackers. DELIVERY_CLICK \226\128\147 Successful deliveries for email sending attempts. Excludes deliveries to the mailbox simulator, for emails addressed to more than one recipient, and emails without click trackers. DELIVERY_COMPLAINT \226\128\147 Successful deliveries for email sending attempts. Excludes deliveries to the mailbox simulator, for emails addressed to more than one recipient, and emails addressed to recipients hosted by ISPs with which Amazon SES does not have a feedback loop agreement."];
+      dimensions: Dimensions.t option
+        [@ocaml.doc
+          "An object that contains mapping between MetricDimensionName and MetricDimensionValue to filter metrics by."];
+      startDate: Timestamp.t
+        [@ocaml.doc "Represents the start date for the query interval."];
+      endDate: Timestamp.t
+        [@ocaml.doc "Represents the end date for the query interval."]}
+    let context_ = "BatchGetMetricDataQuery"
+    let make ?dimensions =
+      fun ~id ->
+        fun ~namespace ->
+          fun ~metric ->
+            fun ~startDate ->
+              fun ~endDate ->
+                fun () ->
+                  { dimensions; id; namespace; metric; startDate; endDate }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (QueryIdentifier.to_value x.id)));
+        ("Namespace", (Some (MetricNamespace.to_value x.namespace)));
+        ("Metric", (Some (Metric.to_value x.metric)));
+        ("Dimensions", (Option.map x.dimensions ~f:Dimensions.to_value));
+        ("StartDate", (Some (Timestamp.to_value x.startDate)));
+        ("EndDate", (Some (Timestamp.to_value x.endDate)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endDate =
+        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "EndDate") in
+      let startDate =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
+      let dimensions =
+        (Option.map ~f:Dimensions.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let metric =
+        Metric.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      let namespace =
+        MetricNamespace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Namespace") in
+      let id =
+        QueryIdentifier.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~endDate ~startDate ?dimensions ~metric ~namespace ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
+      let dimensions = field_map json__ "Dimensions" Dimensions.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
+      let namespace =
+        field_map_exn json__ "Namespace" MetricNamespace.of_json in
+      let id = field_map_exn json__ "Id" QueryIdentifier.of_json in
+      make ~endDate ~startDate ?dimensions ~metric ~namespace ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a single metric data query to include in a batch."]
 module BadRequestException =
   struct
     type nonrec t = unit
@@ -3975,7 +7926,7 @@ module BadRequestException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input you provided is invalid."]
-module NotFoundException =
+module ConflictException =
   struct
     type nonrec t = unit
     let make () = ()
@@ -3986,7 +7937,8 @@ module NotFoundException =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The resource you attempted to access doesn't exist."]
+  end[@@ocaml.doc
+       "If there is already an ongoing account details update under review."]
 module TooManyRequestsException =
   struct
     type nonrec t = unit
@@ -3999,43 +7951,18 @@ module TooManyRequestsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Too many requests have been made to the operation."]
-module EmailTemplateContent =
+module NotFoundException =
   struct
-    type nonrec t =
-      {
-      subject: EmailTemplateSubject.t option
-        [@ocaml.doc "The subject line of the email."];
-      text: EmailTemplateText.t option
-        [@ocaml.doc
-          "The email body that will be visible to recipients whose email clients do not display HTML."];
-      html: EmailTemplateHtml.t option
-        [@ocaml.doc "The HTML body of the email."]}
-    let make ?subject =
-      fun ?text -> fun ?html -> fun () -> { subject; text; html }
-    let to_value x =
-      structure_to_value
-        [("Subject", (Option.map x.subject ~f:EmailTemplateSubject.to_value));
-        ("Text", (Option.map x.text ~f:EmailTemplateText.to_value));
-        ("Html", (Option.map x.html ~f:EmailTemplateHtml.to_value))]
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let html =
-        (Option.map ~f:EmailTemplateHtml.of_xml) (Xml.child xml_arg0 "Html") in
-      let text =
-        (Option.map ~f:EmailTemplateText.of_xml) (Xml.child xml_arg0 "Text") in
-      let subject =
-        (Option.map ~f:EmailTemplateSubject.of_xml)
-          (Xml.child xml_arg0 "Subject") in
-      make ?html ?text ?subject ()
+    let of_xml _ = make ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let html = field_map json "Html" EmailTemplateHtml.of_json in
-      let text = field_map json "Text" EmailTemplateText.of_json in
-      let subject = field_map json "Subject" EmailTemplateSubject.of_json in
-      make ?html ?text ?subject ()
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The content of the email, composed of a subject line, an HTML part, and a text-only part."]
+  end[@@ocaml.doc "The resource you attempted to access doesn't exist."]
 module TemplateContent =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -4080,6 +8007,9 @@ module Topics =
   struct
     type nonrec t = Topic.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Topic.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4117,7 +8047,10 @@ module EventDestinationDefinition =
           "An object that defines an Amazon CloudWatch destination for email events. You can use Amazon CloudWatch to monitor and gain insights on your email sending metrics."];
       snsDestination: SnsDestination.t option
         [@ocaml.doc
-          "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notification when certain email events occur."];
+          "An object that defines an Amazon SNS destination for email events. You can use Amazon SNS to send notifications when certain email events occur."];
+      eventBridgeDestination: EventBridgeDestination.t option
+        [@ocaml.doc
+          "An object that defines an Amazon EventBridge destination for email events. You can use Amazon EventBridge to send notifications when certain email events occur."];
       pinpointDestination: PinpointDestination.t option
         [@ocaml.doc
           "An object that defines an Amazon Pinpoint project destination for email events. You can send email event data to a Amazon Pinpoint project to view metrics using the Transactional Messaging dashboards that are built in to Amazon Pinpoint. For more information, see Transactional Messaging Charts in the Amazon Pinpoint User Guide."]}
@@ -4126,16 +8059,18 @@ module EventDestinationDefinition =
         fun ?kinesisFirehoseDestination ->
           fun ?cloudWatchDestination ->
             fun ?snsDestination ->
-              fun ?pinpointDestination ->
-                fun () ->
-                  {
-                    enabled;
-                    matchingEventTypes;
-                    kinesisFirehoseDestination;
-                    cloudWatchDestination;
-                    snsDestination;
-                    pinpointDestination
-                  }
+              fun ?eventBridgeDestination ->
+                fun ?pinpointDestination ->
+                  fun () ->
+                    {
+                      enabled;
+                      matchingEventTypes;
+                      kinesisFirehoseDestination;
+                      cloudWatchDestination;
+                      snsDestination;
+                      eventBridgeDestination;
+                      pinpointDestination
+                    }
     let to_value x =
       structure_to_value
         [("Enabled", (Option.map x.enabled ~f:Enabled.to_value));
@@ -4149,6 +8084,9 @@ module EventDestinationDefinition =
              ~f:CloudWatchDestination.to_value));
         ("SnsDestination",
           (Option.map x.snsDestination ~f:SnsDestination.to_value));
+        ("EventBridgeDestination",
+          (Option.map x.eventBridgeDestination
+             ~f:EventBridgeDestination.to_value));
         ("PinpointDestination",
           (Option.map x.pinpointDestination ~f:PinpointDestination.to_value))]
     let to_query v = to_query to_value v
@@ -4156,6 +8094,9 @@ module EventDestinationDefinition =
       let pinpointDestination =
         (Option.map ~f:PinpointDestination.of_xml)
           (Xml.child xml_arg0 "PinpointDestination") in
+      let eventBridgeDestination =
+        (Option.map ~f:EventBridgeDestination.of_xml)
+          (Xml.child xml_arg0 "EventBridgeDestination") in
       let snsDestination =
         (Option.map ~f:SnsDestination.of_xml)
           (Xml.child xml_arg0 "SnsDestination") in
@@ -4170,24 +8111,30 @@ module EventDestinationDefinition =
           (Xml.child xml_arg0 "MatchingEventTypes") in
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
-      make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ()
+      make ?pinpointDestination ?eventBridgeDestination ?snsDestination
+        ?cloudWatchDestination ?kinesisFirehoseDestination
+        ?matchingEventTypes ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pinpointDestination =
-        field_map json "PinpointDestination" PinpointDestination.of_json in
+        field_map json__ "PinpointDestination" PinpointDestination.of_json in
+      let eventBridgeDestination =
+        field_map json__ "EventBridgeDestination"
+          EventBridgeDestination.of_json in
       let snsDestination =
-        field_map json "SnsDestination" SnsDestination.of_json in
+        field_map json__ "SnsDestination" SnsDestination.of_json in
       let cloudWatchDestination =
-        field_map json "CloudWatchDestination" CloudWatchDestination.of_json in
+        field_map json__ "CloudWatchDestination"
+          CloudWatchDestination.of_json in
       let kinesisFirehoseDestination =
-        field_map json "KinesisFirehoseDestination"
+        field_map json__ "KinesisFirehoseDestination"
           KinesisFirehoseDestination.of_json in
       let matchingEventTypes =
-        field_map json "MatchingEventTypes" EventTypes.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
-      make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ()
+        field_map json__ "MatchingEventTypes" EventTypes.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
+      make ?pinpointDestination ?eventBridgeDestination ?snsDestination
+        ?cloudWatchDestination ?kinesisFirehoseDestination
+        ?matchingEventTypes ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that defines the event destination. Specifically, it defines which services receive events from emails sent using the configuration set that the event destination is associated with. Also defines the types of events that are sent to the event destination."]
@@ -4195,6 +8142,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4229,29 +8179,6 @@ module RenderedEmailTemplate =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The complete MIME message rendered by applying the data in the TemplateData parameter to the template specified in the TemplateName parameter."]
-module TagList =
-  struct
-    type nonrec t = Tag.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:Tag.of_xml)
-    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module AccountSuspendedException =
   struct
     type nonrec t = unit
@@ -4323,10 +8250,10 @@ module EmailContent =
       {
       simple: Message.t option
         [@ocaml.doc
-          "The simple email message. The message consists of a subject and a message body."];
+          "The simple email message. The message consists of a subject, message body and attachments list."];
       raw: RawMessage.t option
         [@ocaml.doc
-          "The raw email message. The message has to meet the following criteria: The message has to contain a header and a body, separated by one blank line. All of the required header fields must be present in the message. Each part of a multipart MIME message must be formatted properly. If you include attachments, they must be in a file format that the Amazon SES API v2 supports. The entire message must be Base64 encoded. If any of the MIME parts in your message contain content that is outside of the 7-bit ASCII character range, you should encode that content to ensure that recipients' email clients render the message properly. The length of any single line of text in the message can't exceed 1,000 characters. This restriction is defined in RFC 5321."];
+          "The raw email message. The message has to meet the following criteria: The message has to contain a header and a body, separated by one blank line. All of the required header fields must be present in the message. Each part of a multipart MIME message must be formatted properly. If you include attachments, they must be in a file format that the Amazon SES API v2 supports. The raw data of the message needs to base64-encoded if you are accessing Amazon SES directly through the HTTPS interface. If you are accessing Amazon SES using an Amazon Web Services SDK, the SDK takes care of the base 64-encoding for you. If any of the MIME parts in your message contain content that is outside of the 7-bit ASCII character range, you should encode that content to ensure that recipients' email clients render the message properly. The length of any single line of text in the message can't exceed 1,000 characters. This restriction is defined in RFC 5321."];
       template: Template.t option
         [@ocaml.doc "The template to use for the email message."]}
     let make ?simple =
@@ -4345,14 +8272,14 @@ module EmailContent =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Simple") in
       make ?template ?raw ?simple ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map json "Template" Template.of_json in
-      let raw = field_map json "Raw" RawMessage.of_json in
-      let simple = field_map json "Simple" Message.of_json in
+    let of_json json__ =
+      let template = field_map json__ "Template" Template.of_json in
+      let raw = field_map json__ "Raw" RawMessage.of_json in
+      let simple = field_map json__ "Simple" Message.of_json in
       make ?template ?raw ?simple ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object that defines the entire content of the email, including the message headers and the body content. You can create a simple email message, in which you specify the subject and the text and HTML versions of the message body. You can also create raw messages, in which you specify a complete MIME-formatted message. Raw messages can include attachments and custom headers."]
+       "An object that defines the entire content of the email, including the message headers, body content, and attachments. For a simple email message, you specify the subject and provide both text and HTML versions of the message body. You can also add attachments to simple and templated messages. For a raw message, you provide a complete MIME-formatted message, which can include custom headers and attachments."]
 module ListManagementOptions =
   struct
     type nonrec t =
@@ -4377,10 +8304,10 @@ module ListManagementOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?topicName ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicName = field_map json "TopicName" TopicName.of_json in
+    let of_json json__ =
+      let topicName = field_map json__ "TopicName" TopicName.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?topicName ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4389,6 +8316,9 @@ module BulkEmailEntryResultList =
   struct
     type nonrec t = BulkEmailEntryResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkEmailEntryResult.to_value)) |>
         (fun x -> `List x)
@@ -4427,8 +8357,8 @@ module BulkEmailContent =
         (Option.map ~f:Template.of_xml) (Xml.child xml_arg0 "Template") in
       make ?template ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map json "Template" Template.of_json in
+    let of_json json__ =
+      let template = field_map json__ "Template" Template.of_json in
       make ?template ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4437,6 +8367,9 @@ module BulkEmailEntryList =
   struct
     type nonrec t = BulkEmailEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BulkEmailEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4470,16 +8403,21 @@ module DkimSigningAttributes =
           "\\[Bring Your Own DKIM\\] A private key that's used to generate a DKIM signature. The private key must use 1024 or 2048-bit RSA encryption, and must be encoded using base64 encoding."];
       nextSigningKeyLength: DkimSigningKeyLength.t option
         [@ocaml.doc
-          "\\[Easy DKIM\\] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."]}
+          "\\[Easy DKIM\\] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."];
+      domainSigningAttributesOrigin: DkimSigningAttributesOrigin.t option
+        [@ocaml.doc
+          "The attribute to use for configuring DKIM for the identity depends on the operation: For PutEmailIdentityDkimSigningAttributes: None of the values are allowed - use the SigningAttributesOrigin parameter instead For CreateEmailIdentity when replicating a parent identity's DKIM configuration: Allowed values: All values except AWS_SES and EXTERNAL AWS_SES \226\128\147 Configure DKIM for the identity by using Easy DKIM. EXTERNAL \226\128\147 Configure DKIM for the identity by using Bring Your Own DKIM (BYODKIM). AWS_SES_AF_SOUTH_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Africa (Cape Town) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_NORTH_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Stockholm) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTH_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Mumbai) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTH_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Hyderabad) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_3 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Paris) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (London) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_SOUTH_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Milan) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Ireland) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_3 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Osaka) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Seoul) region using Deterministic Easy-DKIM (DEED). AWS_SES_ME_CENTRAL_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Middle East (UAE) region using Deterministic Easy-DKIM (DEED). AWS_SES_ME_SOUTH_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Middle East (Bahrain) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Tokyo) region using Deterministic Easy-DKIM (DEED). AWS_SES_IL_CENTRAL_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Israel (Tel Aviv) region using Deterministic Easy-DKIM (DEED). AWS_SES_SA_EAST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in South America (S\195\163o Paulo) region using Deterministic Easy-DKIM (DEED). AWS_SES_CA_CENTRAL_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Canada (Central) region using Deterministic Easy-DKIM (DEED). AWS_SES_CA_WEST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Canada (Calgary) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Singapore) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Sydney) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_3 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Jakarta) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_5 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Asia Pacific (Malaysia) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_CENTRAL_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Frankfurt) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_CENTRAL_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in Europe (Zurich) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_EAST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in US East (N. Virginia) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_EAST_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in US East (Ohio) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_WEST_1 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in US West (N. California) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_WEST_2 \226\128\147 Configure DKIM for the identity by replicating from a parent identity in US West (Oregon) region using Deterministic Easy-DKIM (DEED)."]}
     let make ?domainSigningSelector =
       fun ?domainSigningPrivateKey ->
         fun ?nextSigningKeyLength ->
-          fun () ->
-            {
-              domainSigningSelector;
-              domainSigningPrivateKey;
-              nextSigningKeyLength
-            }
+          fun ?domainSigningAttributesOrigin ->
+            fun () ->
+              {
+                domainSigningSelector;
+                domainSigningPrivateKey;
+                nextSigningKeyLength;
+                domainSigningAttributesOrigin
+              }
     let to_value x =
       structure_to_value
         [("DomainSigningSelector",
@@ -4487,9 +8425,15 @@ module DkimSigningAttributes =
         ("DomainSigningPrivateKey",
           (Option.map x.domainSigningPrivateKey ~f:PrivateKey.to_value));
         ("NextSigningKeyLength",
-          (Option.map x.nextSigningKeyLength ~f:DkimSigningKeyLength.to_value))]
+          (Option.map x.nextSigningKeyLength ~f:DkimSigningKeyLength.to_value));
+        ("DomainSigningAttributesOrigin",
+          (Option.map x.domainSigningAttributesOrigin
+             ~f:DkimSigningAttributesOrigin.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let domainSigningAttributesOrigin =
+        (Option.map ~f:DkimSigningAttributesOrigin.of_xml)
+          (Xml.child xml_arg0 "DomainSigningAttributesOrigin") in
       let nextSigningKeyLength =
         (Option.map ~f:DkimSigningKeyLength.of_xml)
           (Xml.child xml_arg0 "NextSigningKeyLength") in
@@ -4499,18 +8443,21 @@ module DkimSigningAttributes =
       let domainSigningSelector =
         (Option.map ~f:Selector.of_xml)
           (Xml.child xml_arg0 "DomainSigningSelector") in
-      make ?nextSigningKeyLength ?domainSigningPrivateKey
-        ?domainSigningSelector ()
+      make ?domainSigningAttributesOrigin ?nextSigningKeyLength
+        ?domainSigningPrivateKey ?domainSigningSelector ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let domainSigningAttributesOrigin =
+        field_map json__ "DomainSigningAttributesOrigin"
+          DkimSigningAttributesOrigin.of_json in
       let nextSigningKeyLength =
-        field_map json "NextSigningKeyLength" DkimSigningKeyLength.of_json in
+        field_map json__ "NextSigningKeyLength" DkimSigningKeyLength.of_json in
       let domainSigningPrivateKey =
-        field_map json "DomainSigningPrivateKey" PrivateKey.of_json in
+        field_map json__ "DomainSigningPrivateKey" PrivateKey.of_json in
       let domainSigningSelector =
-        field_map json "DomainSigningSelector" Selector.of_json in
-      make ?nextSigningKeyLength ?domainSigningPrivateKey
-        ?domainSigningSelector ()
+        field_map json__ "DomainSigningSelector" Selector.of_json in
+      make ?domainSigningAttributesOrigin ?nextSigningKeyLength
+        ?domainSigningPrivateKey ?domainSigningSelector ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains configuration for Bring Your Own DKIM (BYODKIM), or, for Easy DKIM"]
@@ -4530,6 +8477,9 @@ module DomainDeliverabilityTrackingOptions =
   struct
     type nonrec t = DomainDeliverabilityTrackingOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainDeliverabilityTrackingOption.to_value)) |>
         (fun x -> `List x)
@@ -4553,6 +8503,43 @@ module DomainDeliverabilityTrackingOptions =
         ~of_json:DomainDeliverabilityTrackingOption.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VdmOptions =
+  struct
+    type nonrec t =
+      {
+      dashboardOptions: DashboardOptions.t option
+        [@ocaml.doc
+          "Specifies additional settings for your VDM configuration as applicable to the Dashboard."];
+      guardianOptions: GuardianOptions.t option
+        [@ocaml.doc
+          "Specifies additional settings for your VDM configuration as applicable to the Guardian."]}
+    let make ?dashboardOptions =
+      fun ?guardianOptions -> fun () -> { dashboardOptions; guardianOptions }
+    let to_value x =
+      structure_to_value
+        [("DashboardOptions",
+           (Option.map x.dashboardOptions ~f:DashboardOptions.to_value));
+        ("GuardianOptions",
+          (Option.map x.guardianOptions ~f:GuardianOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let guardianOptions =
+        (Option.map ~f:GuardianOptions.of_xml)
+          (Xml.child xml_arg0 "GuardianOptions") in
+      let dashboardOptions =
+        (Option.map ~f:DashboardOptions.of_xml)
+          (Xml.child xml_arg0 "DashboardOptions") in
+      make ?guardianOptions ?dashboardOptions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let guardianOptions =
+        field_map json__ "GuardianOptions" GuardianOptions.of_json in
+      let dashboardOptions =
+        field_map json__ "DashboardOptions" DashboardOptions.of_json in
+      make ?guardianOptions ?dashboardOptions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that defines the VDM settings that apply to emails that you send using the configuration set."]
 module SendingPoolName =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -4568,19 +8555,55 @@ module SendingPoolName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The name of the dedicated IP pool to associate with the configuration set."]
-module ConflictException =
+module VdmAttributes =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t =
+      {
+      vdmEnabled: FeatureStatus.t
+        [@ocaml.doc
+          "Specifies the status of your VDM configuration. Can be one of the following: ENABLED \226\128\147 Amazon SES enables VDM for your account. DISABLED \226\128\147 Amazon SES disables VDM for your account."];
+      dashboardAttributes: DashboardAttributes.t option
+        [@ocaml.doc
+          "Specifies additional settings for your VDM configuration as applicable to the Dashboard."];
+      guardianAttributes: GuardianAttributes.t option
+        [@ocaml.doc
+          "Specifies additional settings for your VDM configuration as applicable to the Guardian."]}
+    let context_ = "VdmAttributes"
+    let make ?dashboardAttributes =
+      fun ?guardianAttributes ->
+        fun ~vdmEnabled ->
+          fun () -> { dashboardAttributes; guardianAttributes; vdmEnabled }
+    let to_value x =
+      structure_to_value
+        [("VdmEnabled", (Some (FeatureStatus.to_value x.vdmEnabled)));
+        ("DashboardAttributes",
+          (Option.map x.dashboardAttributes ~f:DashboardAttributes.to_value));
+        ("GuardianAttributes",
+          (Option.map x.guardianAttributes ~f:GuardianAttributes.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let guardianAttributes =
+        (Option.map ~f:GuardianAttributes.of_xml)
+          (Xml.child xml_arg0 "GuardianAttributes") in
+      let dashboardAttributes =
+        (Option.map ~f:DashboardAttributes.of_xml)
+          (Xml.child xml_arg0 "DashboardAttributes") in
+      let vdmEnabled =
+        FeatureStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VdmEnabled") in
+      make ?guardianAttributes ?dashboardAttributes ~vdmEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let guardianAttributes =
+        field_map json__ "GuardianAttributes" GuardianAttributes.of_json in
+      let dashboardAttributes =
+        field_map json__ "DashboardAttributes" DashboardAttributes.of_json in
+      let vdmEnabled =
+        field_map_exn json__ "VdmEnabled" FeatureStatus.of_json in
+      make ?guardianAttributes ?dashboardAttributes ~vdmEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "If there is already an ongoing account details update under review."]
+       "The VDM attributes that apply to your Amazon SES account."]
 module EnabledWrapper =
   struct
     type nonrec t = bool
@@ -4593,6 +8616,121 @@ module EnabledWrapper =
       Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
+  end
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module TenantInfoList =
+  struct
+    type nonrec t = TenantInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TenantInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TenantInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TenantInfoList" ~of_json:TenantInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxItems =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MaxItems" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TenantResourceList =
+  struct
+    type nonrec t = TenantResource.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TenantResource.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TenantResource.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TenantResourceList" ~of_json:TenantResource.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTenantResourcesFilter =
+  struct
+    type nonrec t =
+      (ListTenantResourcesFilterKey.t * ListTenantResourcesFilterValue.t)
+        list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ListTenantResourcesFilterKey.of_string chopped),
+                              (ListTenantResourcesFilterValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ListTenantResourcesFilterKey.to_value x) |>
+                    (fun x ->
+                       (ListTenantResourcesFilterValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ListTenantResourcesFilterKey.of_string
+        ~of_json:ListTenantResourcesFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module InvalidNextTokenException =
   struct
@@ -4607,23 +8745,13 @@ module InvalidNextTokenException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The specified request includes an invalid or expired token."]
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end
 module SuppressedDestinationSummaries =
   struct
     type nonrec t = SuppressedDestinationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SuppressedDestinationSummary.to_value)) |>
         (fun x -> `List x)
@@ -4646,16 +8774,227 @@ module SuppressedDestinationSummaries =
         ~of_json:SuppressedDestinationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module MaxItems =
+module ResourceTenantMetadataList =
+  struct
+    type nonrec t = ResourceTenantMetadata.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceTenantMetadata.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceTenantMetadata.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTenantMetadataList"
+        ~of_json:ResourceTenantMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReputationEntitiesList =
+  struct
+    type nonrec t = ReputationEntity.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ReputationEntity.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ReputationEntity.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReputationEntitiesList"
+        ~of_json:ReputationEntity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReputationEntityFilter =
+  struct
+    type nonrec t =
+      (ReputationEntityFilterKey.t * ReputationEntityFilterValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ReputationEntityFilterKey.of_string chopped),
+                              (ReputationEntityFilterValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ReputationEntityFilterKey.to_value x) |>
+                    (fun x ->
+                       (ReputationEntityFilterValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ReputationEntityFilterKey.of_string
+        ~of_json:ReputationEntityFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RecommendationsList =
+  struct
+    type nonrec t = Recommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Recommendation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Recommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationsList"
+        ~of_json:Recommendation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListRecommendationsFilter =
+  struct
+    type nonrec t =
+      (ListRecommendationsFilterKey.t * ListRecommendationFilterValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ListRecommendationsFilterKey.of_string chopped),
+                              (ListRecommendationFilterValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ListRecommendationsFilterKey.to_value x) |>
+                    (fun x ->
+                       (ListRecommendationFilterValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ListRecommendationsFilterKey.of_string
+        ~of_json:ListRecommendationFilterValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MultiRegionEndpoints =
+  struct
+    type nonrec t = MultiRegionEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MultiRegionEndpoint.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MultiRegionEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MultiRegionEndpoints"
+        ~of_json:MultiRegionEndpoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NextTokenV2 =
+  struct
+    type nonrec t = string
+    let context_ = "NextTokenV2"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:5000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextTokenV2" j
+    let to_json = simple_to_json to_value
+  end
+module PageSizeV2 =
   struct
     type nonrec t = int
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
     let of_string = Int.of_string
     let to_value x = `Integer x
     let to_query v = to_query to_value v
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for MaxItems" xml_arg0)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PageSizeV2" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
@@ -4663,6 +9002,9 @@ module ImportJobSummaryList =
   struct
     type nonrec t = ImportJobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImportJobSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4711,10 +9053,41 @@ module ImportDestinationType =
       of_string (string_of_json ~kind:"ImportDestinationType" j)
     let to_json = simple_to_json to_value
   end
+module ExportJobSummaryList =
+  struct
+    type nonrec t = ExportJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExportJobSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExportJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExportJobSummaryList"
+        ~of_json:ExportJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module EmailTemplateMetadataList =
   struct
     type nonrec t = EmailTemplateMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EmailTemplateMetadata.to_value)) |>
         (fun x -> `List x)
@@ -4741,6 +9114,9 @@ module IdentityInfoList =
   struct
     type nonrec t = IdentityInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4765,6 +9141,9 @@ module DomainDeliverabilityCampaignList =
   struct
     type nonrec t = DomainDeliverabilityCampaign.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainDeliverabilityCampaign.to_value)) |>
         (fun x -> `List x)
@@ -4791,6 +9170,9 @@ module DeliverabilityTestReports =
   struct
     type nonrec t = DeliverabilityTestReport.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeliverabilityTestReport.to_value)) |>
         (fun x -> `List x)
@@ -4817,6 +9199,9 @@ module ListOfDedicatedIpPools =
   struct
     type nonrec t = PoolName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PoolName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4841,6 +9226,9 @@ module CustomVerificationEmailTemplatesList =
   struct
     type nonrec t = CustomVerificationEmailTemplateMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomVerificationEmailTemplateMetadata.to_value))
         |> (fun x -> `List x)
@@ -4868,6 +9256,9 @@ module ListOfContacts =
   struct
     type nonrec t = Contact.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Contact.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4913,10 +9304,10 @@ module ListContactsFilter =
           (Xml.child xml_arg0 "FilteredStatus") in
       make ?topicFilter ?filteredStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicFilter = field_map json "TopicFilter" TopicFilter.of_json in
+    let of_json json__ =
+      let topicFilter = field_map json__ "TopicFilter" TopicFilter.of_json in
       let filteredStatus =
-        field_map json "FilteredStatus" SubscriptionStatus.of_json in
+        field_map json__ "FilteredStatus" SubscriptionStatus.of_json in
       make ?topicFilter ?filteredStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A filter that can be applied to a list of contacts."]
@@ -4924,6 +9315,9 @@ module ListOfContactLists =
   struct
     type nonrec t = ContactList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ContactList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4948,6 +9342,9 @@ module ConfigurationSetNameList =
   struct
     type nonrec t = ConfigurationSetName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationSetName.to_value)) |>
         (fun x -> `List x)
@@ -4970,33 +9367,108 @@ module ConfigurationSetNameList =
         ~of_json:ConfigurationSetName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Tenant =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t option [@ocaml.doc "The name of the tenant."];
+      tenantId: TenantId.t option
+        [@ocaml.doc "A unique identifier for the tenant."];
+      tenantArn: AmazonResourceName.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the tenant."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time when the tenant was created."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) associated with the tenant."];
+      sendingStatus: SendingStatus.t option
+        [@ocaml.doc "The status of sending capability for the tenant."]}
+    let make ?tenantName =
+      fun ?tenantId ->
+        fun ?tenantArn ->
+          fun ?createdTimestamp ->
+            fun ?tags ->
+              fun ?sendingStatus ->
+                fun () ->
+                  {
+                    tenantName;
+                    tenantId;
+                    tenantArn;
+                    createdTimestamp;
+                    tags;
+                    sendingStatus
+                  }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Option.map x.tenantName ~f:TenantName.to_value));
+        ("TenantId", (Option.map x.tenantId ~f:TenantId.to_value));
+        ("TenantArn",
+          (Option.map x.tenantArn ~f:AmazonResourceName.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SendingStatus",
+          (Option.map x.sendingStatus ~f:SendingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sendingStatus =
+        (Option.map ~f:SendingStatus.of_xml)
+          (Xml.child xml_arg0 "SendingStatus") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let tenantArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "TenantArn") in
+      let tenantId =
+        (Option.map ~f:TenantId.of_xml) (Xml.child xml_arg0 "TenantId") in
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      make ?sendingStatus ?tags ?createdTimestamp ?tenantArn ?tenantId
+        ?tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sendingStatus =
+        field_map json__ "SendingStatus" SendingStatus.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let tenantArn = field_map json__ "TenantArn" AmazonResourceName.of_json in
+      let tenantId = field_map json__ "TenantId" TenantId.of_json in
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      make ?sendingStatus ?tags ?createdTimestamp ?tenantArn ?tenantId
+        ?tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure that contains details about a tenant."]
 module SuppressedDestination =
   struct
     type nonrec t =
       {
-      emailAddress: EmailAddress.t
+      emailAddress: EmailAddress.t option
         [@ocaml.doc
           "The email address that is on the suppression list for your account."];
-      reason: SuppressionListReason.t
+      reason: SuppressionListReason.t option
         [@ocaml.doc
           "The reason that the address was added to the suppression list for your account."];
-      lastUpdateTime: Timestamp.t
+      lastUpdateTime: Timestamp.t option
         [@ocaml.doc
           "The date and time when the suppressed destination was last updated, shown in Unix time format."];
       attributes: SuppressedDestinationAttributes.t option
         [@ocaml.doc
           "An optional value that can contain additional information about the reasons that the address was added to the suppression list for your account."]}
-    let context_ = "SuppressedDestination"
-    let make ?attributes =
-      fun ~emailAddress ->
-        fun ~reason ->
-          fun ~lastUpdateTime ->
-            fun () -> { attributes; emailAddress; reason; lastUpdateTime }
+    let make ?emailAddress =
+      fun ?reason ->
+        fun ?lastUpdateTime ->
+          fun ?attributes ->
+            fun () -> { emailAddress; reason; lastUpdateTime; attributes }
     let to_value x =
       structure_to_value
-        [("EmailAddress", (Some (EmailAddress.to_value x.emailAddress)));
-        ("Reason", (Some (SuppressionListReason.to_value x.reason)));
-        ("LastUpdateTime", (Some (Timestamp.to_value x.lastUpdateTime)));
+        [("EmailAddress",
+           (Option.map x.emailAddress ~f:EmailAddress.to_value));
+        ("Reason", (Option.map x.reason ~f:SuppressionListReason.to_value));
+        ("LastUpdateTime",
+          (Option.map x.lastUpdateTime ~f:Timestamp.to_value));
         ("Attributes",
           (Option.map x.attributes
              ~f:SuppressedDestinationAttributes.to_value))]
@@ -5006,41 +9478,79 @@ module SuppressedDestination =
         (Option.map ~f:SuppressedDestinationAttributes.of_xml)
           (Xml.child xml_arg0 "Attributes") in
       let lastUpdateTime =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "LastUpdateTime") in
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdateTime") in
       let reason =
-        SuppressionListReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Reason") in
+        (Option.map ~f:SuppressionListReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
       let emailAddress =
-        EmailAddress.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
-      make ?attributes ~lastUpdateTime ~reason ~emailAddress ()
+        (Option.map ~f:EmailAddress.of_xml)
+          (Xml.child xml_arg0 "EmailAddress") in
+      make ?attributes ?lastUpdateTime ?reason ?emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map json "Attributes" SuppressedDestinationAttributes.of_json in
+        field_map json__ "Attributes" SuppressedDestinationAttributes.of_json in
       let lastUpdateTime =
-        field_map_exn json "LastUpdateTime" Timestamp.of_json in
-      let reason = field_map_exn json "Reason" SuppressionListReason.of_json in
-      let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
-      make ?attributes ~lastUpdateTime ~reason ~emailAddress ()
+        field_map json__ "LastUpdateTime" Timestamp.of_json in
+      let reason = field_map json__ "Reason" SuppressionListReason.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
+      make ?attributes ?lastUpdateTime ?reason ?emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about an email address that is on the suppression list for your account."]
-module FailedRecordsCount =
+module Routes =
   struct
-    type nonrec t = int
+    type nonrec t = Route.t list
     let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Route.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for FailedRecordsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Route.of_xml)
+    let of_json j = list_of_json ~kind:"Routes" ~of_json:Route.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EmailInsightsList =
+  struct
+    type nonrec t = EmailInsights.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EmailInsights.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EmailInsights.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EmailInsightsList" ~of_json:EmailInsights.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module FailureInfo =
   struct
@@ -5048,9 +9558,9 @@ module FailureInfo =
       {
       failedRecordsS3Url: FailedRecordsS3Url.t option
         [@ocaml.doc
-          "An Amazon S3 presigned URL that contains all the failed records and related information."];
+          "An Amazon S3 pre-signed URL that contains all the failed records and related information."];
       errorMessage: ErrorMessage.t option
-        [@ocaml.doc "A message about why the import job failed."]}
+        [@ocaml.doc "A message about why the job failed."]}
     let make ?failedRecordsS3Url =
       fun ?errorMessage -> fun () -> { failedRecordsS3Url; errorMessage }
     let to_value x =
@@ -5069,14 +9579,13 @@ module FailureInfo =
           (Xml.child xml_arg0 "FailedRecordsS3Url") in
       make ?errorMessage ?failedRecordsS3Url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
       let failedRecordsS3Url =
-        field_map json "FailedRecordsS3Url" FailedRecordsS3Url.of_json in
+        field_map json__ "FailedRecordsS3Url" FailedRecordsS3Url.of_json in
       make ?errorMessage ?failedRecordsS3Url ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object that contains the failure details about an import job."]
+  end[@@ocaml.doc "An object that contains the failure details about a job."]
 module ImportDataSource =
   struct
     type nonrec t =
@@ -5101,27 +9610,119 @@ module ImportDataSource =
         S3Url.of_xml (Xml.child_exn ~context:context_ xml_arg0 "S3Url") in
       make ~dataFormat ~s3Url ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataFormat = field_map_exn json "DataFormat" DataFormat.of_json in
-      let s3Url = field_map_exn json "S3Url" S3Url.of_json in
+    let of_json json__ =
+      let dataFormat = field_map_exn json__ "DataFormat" DataFormat.of_json in
+      let s3Url = field_map_exn json__ "S3Url" S3Url.of_json in
       make ~dataFormat ~s3Url ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains details about the data source of the import job."]
-module ProcessedRecordsCount =
+module ExportDataSource =
   struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
+    type nonrec t =
+      {
+      metricsDataSource: MetricsDataSource.t option ;
+      messageInsightsDataSource: MessageInsightsDataSource.t option }
+    let make ?metricsDataSource =
+      fun ?messageInsightsDataSource ->
+        fun () -> { metricsDataSource; messageInsightsDataSource }
+    let to_value x =
+      structure_to_value
+        [("MetricsDataSource",
+           (Option.map x.metricsDataSource ~f:MetricsDataSource.to_value));
+        ("MessageInsightsDataSource",
+          (Option.map x.messageInsightsDataSource
+             ~f:MessageInsightsDataSource.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for ProcessedRecordsCount" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
+      let messageInsightsDataSource =
+        (Option.map ~f:MessageInsightsDataSource.of_xml)
+          (Xml.child xml_arg0 "MessageInsightsDataSource") in
+      let metricsDataSource =
+        (Option.map ~f:MetricsDataSource.of_xml)
+          (Xml.child xml_arg0 "MetricsDataSource") in
+      make ?messageInsightsDataSource ?metricsDataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageInsightsDataSource =
+        field_map json__ "MessageInsightsDataSource"
+          MessageInsightsDataSource.of_json in
+      let metricsDataSource =
+        field_map json__ "MetricsDataSource" MetricsDataSource.of_json in
+      make ?messageInsightsDataSource ?metricsDataSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains details about the data source of the export job. It can only contain one of MetricsDataSource or MessageInsightsDataSource object."]
+module ExportDestination =
+  struct
+    type nonrec t =
+      {
+      dataFormat: DataFormat.t
+        [@ocaml.doc
+          "The data format of the final export job file, can be one of the following: CSV - A comma-separated values file. JSON - A Json file."];
+      s3Url: S3Url.t option
+        [@ocaml.doc
+          "An Amazon S3 pre-signed URL that points to the generated export file."]}
+    let context_ = "ExportDestination"
+    let make ?s3Url = fun ~dataFormat -> fun () -> { s3Url; dataFormat }
+    let to_value x =
+      structure_to_value
+        [("DataFormat", (Some (DataFormat.to_value x.dataFormat)));
+        ("S3Url", (Option.map x.s3Url ~f:S3Url.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Url = (Option.map ~f:S3Url.of_xml) (Xml.child xml_arg0 "S3Url") in
+      let dataFormat =
+        DataFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DataFormat") in
+      make ?s3Url ~dataFormat ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Url = field_map json__ "S3Url" S3Url.of_json in
+      let dataFormat = field_map_exn json__ "DataFormat" DataFormat.of_json in
+      make ?s3Url ~dataFormat ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains details about the destination of the export job."]
+module ExportStatistics =
+  struct
+    type nonrec t =
+      {
+      processedRecordsCount: ProcessedRecordsCount.t option
+        [@ocaml.doc
+          "The number of records that were processed to generate the final export file."];
+      exportedRecordsCount: ExportedRecordsCount.t option
+        [@ocaml.doc
+          "The number of records that were exported to the final export file. This value might not be available for all export source types"]}
+    let make ?processedRecordsCount =
+      fun ?exportedRecordsCount ->
+        fun () -> { processedRecordsCount; exportedRecordsCount }
+    let to_value x =
+      structure_to_value
+        [("ProcessedRecordsCount",
+           (Option.map x.processedRecordsCount
+              ~f:ProcessedRecordsCount.to_value));
+        ("ExportedRecordsCount",
+          (Option.map x.exportedRecordsCount ~f:ExportedRecordsCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exportedRecordsCount =
+        (Option.map ~f:ExportedRecordsCount.of_xml)
+          (Xml.child xml_arg0 "ExportedRecordsCount") in
+      let processedRecordsCount =
+        (Option.map ~f:ProcessedRecordsCount.of_xml)
+          (Xml.child xml_arg0 "ProcessedRecordsCount") in
+      make ?exportedRecordsCount ?processedRecordsCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exportedRecordsCount =
+        field_map json__ "ExportedRecordsCount" ExportedRecordsCount.of_json in
+      let processedRecordsCount =
+        field_map json__ "ProcessedRecordsCount"
+          ProcessedRecordsCount.of_json in
+      make ?exportedRecordsCount ?processedRecordsCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Statistics about the execution of an export job."]
 module DkimAttributes =
   struct
     type nonrec t =
@@ -5135,9 +9736,12 @@ module DkimAttributes =
       tokens: DnsTokenList.t option
         [@ocaml.doc
           "If you used Easy DKIM to configure DKIM authentication for the domain, then this object contains a set of unique strings that you use to create a set of CNAME records that you add to the DNS configuration for your domain. When Amazon SES detects these records in the DNS configuration for your domain, the DKIM authentication process is complete. If you configured DKIM authentication for the domain by providing your own public-private key pair, then this object contains the selector for the public key. Regardless of the DKIM authentication method you use, Amazon SES searches for the appropriate records in the DNS configuration of the domain for up to 72 hours."];
+      signingHostedZone: HostedZone.t option
+        [@ocaml.doc
+          "The hosted zone where Amazon SES publishes the DKIM public key TXT records for this email identity. This value indicates the DNS zone that customers must reference when configuring their CNAME records for DKIM authentication. When configuring DKIM for your domain, create CNAME records in your DNS that point to the selectors in this hosted zone. For example: selector1._domainkey.yourdomain.com CNAME selector1.<SigningHostedZone> selector2._domainkey.yourdomain.com CNAME selector2.<SigningHostedZone> selector3._domainkey.yourdomain.com CNAME selector3.<SigningHostedZone>"];
       signingAttributesOrigin: DkimSigningAttributesOrigin.t option
         [@ocaml.doc
-          "A string that indicates how DKIM was configured for the identity. These are the possible values: AWS_SES \226\128\147 Indicates that DKIM was configured for the identity by using Easy DKIM. EXTERNAL \226\128\147 Indicates that DKIM was configured for the identity by using Bring Your Own DKIM (BYODKIM)."];
+          "A string that indicates how DKIM was configured for the identity. These are the possible values: AWS_SES \226\128\147 Indicates that DKIM was configured for the identity by using Easy DKIM. EXTERNAL \226\128\147 Indicates that DKIM was configured for the identity by using Bring Your Own DKIM (BYODKIM). AWS_SES_AF_SOUTH_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Africa (Cape Town) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_NORTH_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Stockholm) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTH_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Mumbai) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTH_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Hyderabad) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_3 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Paris) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (London) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_SOUTH_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Milan) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_WEST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Ireland) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_3 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Osaka) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Seoul) region using Deterministic Easy-DKIM (DEED). AWS_SES_ME_CENTRAL_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Middle East (UAE) region using Deterministic Easy-DKIM (DEED). AWS_SES_ME_SOUTH_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Middle East (Bahrain) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_NORTHEAST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Tokyo) region using Deterministic Easy-DKIM (DEED). AWS_SES_IL_CENTRAL_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Israel (Tel Aviv) region using Deterministic Easy-DKIM (DEED). AWS_SES_SA_EAST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in South America (S\195\163o Paulo) region using Deterministic Easy-DKIM (DEED). AWS_SES_CA_CENTRAL_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Canada (Central) region using Deterministic Easy-DKIM (DEED). AWS_SES_CA_WEST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Canada (Calgary) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Singapore) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Sydney) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_3 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Jakarta) region using Deterministic Easy-DKIM (DEED). AWS_SES_AP_SOUTHEAST_5 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Asia Pacific (Malaysia) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_CENTRAL_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Frankfurt) region using Deterministic Easy-DKIM (DEED). AWS_SES_EU_CENTRAL_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in Europe (Zurich) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_EAST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in US East (N. Virginia) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_EAST_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in US East (Ohio) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_WEST_1 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in US West (N. California) region using Deterministic Easy-DKIM (DEED). AWS_SES_US_WEST_2 \226\128\147 Indicates that DKIM was configured for the identity by replicating signing attributes from a parent identity in US West (Oregon) region using Deterministic Easy-DKIM (DEED)."];
       nextSigningKeyLength: DkimSigningKeyLength.t option
         [@ocaml.doc
           "\\[Easy DKIM\\] The key length of the future DKIM key pair to be generated. This can be changed at most once per day."];
@@ -5150,26 +9754,30 @@ module DkimAttributes =
     let make ?signingEnabled =
       fun ?status ->
         fun ?tokens ->
-          fun ?signingAttributesOrigin ->
-            fun ?nextSigningKeyLength ->
-              fun ?currentSigningKeyLength ->
-                fun ?lastKeyGenerationTimestamp ->
-                  fun () ->
-                    {
-                      signingEnabled;
-                      status;
-                      tokens;
-                      signingAttributesOrigin;
-                      nextSigningKeyLength;
-                      currentSigningKeyLength;
-                      lastKeyGenerationTimestamp
-                    }
+          fun ?signingHostedZone ->
+            fun ?signingAttributesOrigin ->
+              fun ?nextSigningKeyLength ->
+                fun ?currentSigningKeyLength ->
+                  fun ?lastKeyGenerationTimestamp ->
+                    fun () ->
+                      {
+                        signingEnabled;
+                        status;
+                        tokens;
+                        signingHostedZone;
+                        signingAttributesOrigin;
+                        nextSigningKeyLength;
+                        currentSigningKeyLength;
+                        lastKeyGenerationTimestamp
+                      }
     let to_value x =
       structure_to_value
         [("SigningEnabled",
            (Option.map x.signingEnabled ~f:Enabled.to_value));
         ("Status", (Option.map x.status ~f:DkimStatus.to_value));
         ("Tokens", (Option.map x.tokens ~f:DnsTokenList.to_value));
+        ("SigningHostedZone",
+          (Option.map x.signingHostedZone ~f:HostedZone.to_value));
         ("SigningAttributesOrigin",
           (Option.map x.signingAttributesOrigin
              ~f:DkimSigningAttributesOrigin.to_value));
@@ -5194,6 +9802,9 @@ module DkimAttributes =
       let signingAttributesOrigin =
         (Option.map ~f:DkimSigningAttributesOrigin.of_xml)
           (Xml.child xml_arg0 "SigningAttributesOrigin") in
+      let signingHostedZone =
+        (Option.map ~f:HostedZone.of_xml)
+          (Xml.child xml_arg0 "SigningHostedZone") in
       let tokens =
         (Option.map ~f:DnsTokenList.of_xml) (Xml.child xml_arg0 "Tokens") in
       let status =
@@ -5201,25 +9812,28 @@ module DkimAttributes =
       let signingEnabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SigningEnabled") in
       make ?lastKeyGenerationTimestamp ?currentSigningKeyLength
-        ?nextSigningKeyLength ?signingAttributesOrigin ?tokens ?status
-        ?signingEnabled ()
+        ?nextSigningKeyLength ?signingAttributesOrigin ?signingHostedZone
+        ?tokens ?status ?signingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastKeyGenerationTimestamp =
-        field_map json "LastKeyGenerationTimestamp" Timestamp.of_json in
+        field_map json__ "LastKeyGenerationTimestamp" Timestamp.of_json in
       let currentSigningKeyLength =
-        field_map json "CurrentSigningKeyLength" DkimSigningKeyLength.of_json in
+        field_map json__ "CurrentSigningKeyLength"
+          DkimSigningKeyLength.of_json in
       let nextSigningKeyLength =
-        field_map json "NextSigningKeyLength" DkimSigningKeyLength.of_json in
+        field_map json__ "NextSigningKeyLength" DkimSigningKeyLength.of_json in
       let signingAttributesOrigin =
-        field_map json "SigningAttributesOrigin"
+        field_map json__ "SigningAttributesOrigin"
           DkimSigningAttributesOrigin.of_json in
-      let tokens = field_map json "Tokens" DnsTokenList.of_json in
-      let status = field_map json "Status" DkimStatus.of_json in
-      let signingEnabled = field_map json "SigningEnabled" Enabled.of_json in
+      let signingHostedZone =
+        field_map json__ "SigningHostedZone" HostedZone.of_json in
+      let tokens = field_map json__ "Tokens" DnsTokenList.of_json in
+      let status = field_map json__ "Status" DkimStatus.of_json in
+      let signingEnabled = field_map json__ "SigningEnabled" Enabled.of_json in
       make ?lastKeyGenerationTimestamp ?currentSigningKeyLength
-        ?nextSigningKeyLength ?signingAttributesOrigin ?tokens ?status
-        ?signingEnabled ()
+        ?nextSigningKeyLength ?signingAttributesOrigin ?signingHostedZone
+        ?tokens ?status ?signingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the DKIM authentication status for an email identity. Amazon SES determines the authentication status by searching for specific records in the DNS configuration for the domain. If you used Easy DKIM to set up DKIM authentication, Amazon SES tries to find three unique CNAME records in the DNS configuration for your domain. If you provided a public key to perform DKIM authentication, Amazon SES tries to find a TXT record that uses the selector that you specified. The value of the TXT record must be a public key that's paired with the private key that you specified in the process of creating the identity"]
@@ -5227,51 +9841,49 @@ module MailFromAttributes =
   struct
     type nonrec t =
       {
-      mailFromDomain: MailFromDomainName.t
+      mailFromDomain: MailFromDomainName.t option
         [@ocaml.doc
           "The name of a domain that an email identity uses as a custom MAIL FROM domain."];
-      mailFromDomainStatus: MailFromDomainStatus.t
+      mailFromDomainStatus: MailFromDomainStatus.t option
         [@ocaml.doc
           "The status of the MAIL FROM domain. This status can have the following values: PENDING \226\128\147 Amazon SES hasn't started searching for the MX record yet. SUCCESS \226\128\147 Amazon SES detected the required MX record for the MAIL FROM domain. FAILED \226\128\147 Amazon SES can't find the required MX record, or the record no longer exists. TEMPORARY_FAILURE \226\128\147 A temporary issue occurred, which prevented Amazon SES from determining the status of the MAIL FROM domain."];
-      behaviorOnMxFailure: BehaviorOnMxFailure.t
+      behaviorOnMxFailure: BehaviorOnMxFailure.t option
         [@ocaml.doc
-          "The action to take if the required MX record can't be found when you send an email. When you set this value to UseDefaultValue, the mail is sent using amazonses.com as the MAIL FROM domain. When you set this value to RejectMessage, the Amazon SES API v2 returns a MailFromDomainNotVerified error, and doesn't attempt to deliver the email. These behaviors are taken when the custom MAIL FROM domain configuration is in the Pending, Failed, and TemporaryFailure states."]}
-    let context_ = "MailFromAttributes"
-    let make ~mailFromDomain =
-      fun ~mailFromDomainStatus ->
-        fun ~behaviorOnMxFailure ->
+          "The action to take if the required MX record can't be found when you send an email. When you set this value to USE_DEFAULT_VALUE, the mail is sent using amazonses.com as the MAIL FROM domain. When you set this value to REJECT_MESSAGE, the Amazon SES API v2 returns a MailFromDomainNotVerified error, and doesn't attempt to deliver the email. These behaviors are taken when the custom MAIL FROM domain configuration is in the Pending, Failed, and TemporaryFailure states."]}
+    let make ?mailFromDomain =
+      fun ?mailFromDomainStatus ->
+        fun ?behaviorOnMxFailure ->
           fun () ->
             { mailFromDomain; mailFromDomainStatus; behaviorOnMxFailure }
     let to_value x =
       structure_to_value
         [("MailFromDomain",
-           (Some (MailFromDomainName.to_value x.mailFromDomain)));
+           (Option.map x.mailFromDomain ~f:MailFromDomainName.to_value));
         ("MailFromDomainStatus",
-          (Some (MailFromDomainStatus.to_value x.mailFromDomainStatus)));
+          (Option.map x.mailFromDomainStatus ~f:MailFromDomainStatus.to_value));
         ("BehaviorOnMxFailure",
-          (Some (BehaviorOnMxFailure.to_value x.behaviorOnMxFailure)))]
+          (Option.map x.behaviorOnMxFailure ~f:BehaviorOnMxFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let behaviorOnMxFailure =
-        BehaviorOnMxFailure.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BehaviorOnMxFailure") in
+        (Option.map ~f:BehaviorOnMxFailure.of_xml)
+          (Xml.child xml_arg0 "BehaviorOnMxFailure") in
       let mailFromDomainStatus =
-        MailFromDomainStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomainStatus") in
+        (Option.map ~f:MailFromDomainStatus.of_xml)
+          (Xml.child xml_arg0 "MailFromDomainStatus") in
       let mailFromDomain =
-        MailFromDomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomain") in
-      make ~behaviorOnMxFailure ~mailFromDomainStatus ~mailFromDomain ()
+        (Option.map ~f:MailFromDomainName.of_xml)
+          (Xml.child xml_arg0 "MailFromDomain") in
+      make ?behaviorOnMxFailure ?mailFromDomainStatus ?mailFromDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMxFailure =
-        field_map_exn json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
+        field_map json__ "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
       let mailFromDomainStatus =
-        field_map_exn json "MailFromDomainStatus"
-          MailFromDomainStatus.of_json in
+        field_map json__ "MailFromDomainStatus" MailFromDomainStatus.of_json in
       let mailFromDomain =
-        field_map_exn json "MailFromDomain" MailFromDomainName.of_json in
-      make ~behaviorOnMxFailure ~mailFromDomainStatus ~mailFromDomain ()
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      make ?behaviorOnMxFailure ?mailFromDomainStatus ?mailFromDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of attributes that are associated with a MAIL FROM domain."]
@@ -5296,6 +9908,8 @@ module PolicyMap =
                     (fun x -> (Policy.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5303,10 +9917,115 @@ module PolicyMap =
         ~of_json:Policy.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VerificationInfo =
+  struct
+    type nonrec t =
+      {
+      lastCheckedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time a verification attempt was made for this identity."];
+      lastSuccessTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time a successful verification was made for this identity."];
+      errorType: VerificationError.t option
+        [@ocaml.doc
+          "Provides the reason for the failure describing why Amazon SES was not able to successfully verify the identity. Below are the possible values: INVALID_VALUE \226\128\147 Amazon SES was able to find the record, but the value contained within the record was invalid. Ensure you have published the correct values for the record. TYPE_NOT_FOUND \226\128\147 The queried hostname exists but does not have the requested type of DNS record. Ensure that you have published the correct type of DNS record. HOST_NOT_FOUND \226\128\147 The queried hostname does not exist or was not reachable at the time of the request. Ensure that you have published the required DNS record(s). SERVICE_ERROR \226\128\147 A temporary issue is preventing Amazon SES from determining the verification status of the domain. DNS_SERVER_ERROR \226\128\147 The DNS server encountered an issue and was unable to complete the request. REPLICATION_ACCESS_DENIED \226\128\147 The verification failed because the user does not have the required permissions to replicate the DKIM key from the primary region. Ensure you have the necessary permissions in both primary and replica regions. REPLICATION_PRIMARY_NOT_FOUND \226\128\147 The verification failed because no corresponding identity was found in the specified primary region. Ensure the identity exists in the primary region before attempting replication. REPLICATION_PRIMARY_BYO_DKIM_NOT_SUPPORTED \226\128\147 The verification failed because the identity in the primary region is configured with Bring Your Own DKIM (BYODKIM). DKIM key replication is only supported for identities using Easy DKIM. REPLICATION_REPLICA_AS_PRIMARY_NOT_SUPPORTED \226\128\147 The verification failed because the specified primary identity is a replica of another identity, and multi-level replication is not supported; the primary identity must be a non-replica identity. REPLICATION_PRIMARY_INVALID_REGION \226\128\147 The verification failed due to an invalid primary region specified. Ensure you provide a valid Amazon Web Services region where Amazon SES is available and different from the replica region."];
+      sOARecord: SOARecord.t option
+        [@ocaml.doc
+          "An object that contains information about the start of authority (SOA) record associated with the identity."]}
+    let make ?lastCheckedTimestamp =
+      fun ?lastSuccessTimestamp ->
+        fun ?errorType ->
+          fun ?sOARecord ->
+            fun () ->
+              {
+                lastCheckedTimestamp;
+                lastSuccessTimestamp;
+                errorType;
+                sOARecord
+              }
+    let to_value x =
+      structure_to_value
+        [("LastCheckedTimestamp",
+           (Option.map x.lastCheckedTimestamp ~f:Timestamp.to_value));
+        ("LastSuccessTimestamp",
+          (Option.map x.lastSuccessTimestamp ~f:Timestamp.to_value));
+        ("ErrorType", (Option.map x.errorType ~f:VerificationError.to_value));
+        ("SOARecord", (Option.map x.sOARecord ~f:SOARecord.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sOARecord =
+        (Option.map ~f:SOARecord.of_xml) (Xml.child xml_arg0 "SOARecord") in
+      let errorType =
+        (Option.map ~f:VerificationError.of_xml)
+          (Xml.child xml_arg0 "ErrorType") in
+      let lastSuccessTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastSuccessTimestamp") in
+      let lastCheckedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastCheckedTimestamp") in
+      make ?sOARecord ?errorType ?lastSuccessTimestamp ?lastCheckedTimestamp
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sOARecord = field_map json__ "SOARecord" SOARecord.of_json in
+      let errorType = field_map json__ "ErrorType" VerificationError.of_json in
+      let lastSuccessTimestamp =
+        field_map json__ "LastSuccessTimestamp" Timestamp.of_json in
+      let lastCheckedTimestamp =
+        field_map json__ "LastCheckedTimestamp" Timestamp.of_json in
+      make ?sOARecord ?errorType ?lastSuccessTimestamp ?lastCheckedTimestamp
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains additional information about the verification status for the identity."]
+module MailboxValidation =
+  struct
+    type nonrec t =
+      {
+      isValid: EmailAddressInsightsVerdict.t option
+        [@ocaml.doc
+          "Overall validity assessment with a con\239\172\129dence verdict."];
+      evaluations: EmailAddressInsightsMailboxEvaluations.t option
+        [@ocaml.doc
+          "Specific validation checks performed on the email address."]}
+    let make ?isValid =
+      fun ?evaluations -> fun () -> { isValid; evaluations }
+    let to_value x =
+      structure_to_value
+        [("IsValid",
+           (Option.map x.isValid ~f:EmailAddressInsightsVerdict.to_value));
+        ("Evaluations",
+          (Option.map x.evaluations
+             ~f:EmailAddressInsightsMailboxEvaluations.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluations =
+        (Option.map ~f:EmailAddressInsightsMailboxEvaluations.of_xml)
+          (Xml.child xml_arg0 "Evaluations") in
+      let isValid =
+        (Option.map ~f:EmailAddressInsightsVerdict.of_xml)
+          (Xml.child xml_arg0 "IsValid") in
+      make ?evaluations ?isValid ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluations =
+        field_map json__ "Evaluations"
+          EmailAddressInsightsMailboxEvaluations.of_json in
+      let isValid =
+        field_map json__ "IsValid" EmailAddressInsightsVerdict.of_json in
+      make ?evaluations ?isValid ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains detailed validation information about an email address."]
 module DailyVolumes =
   struct
     type nonrec t = DailyVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DailyVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5366,13 +10085,13 @@ module OverallVolume =
           (Xml.child xml_arg0 "VolumeStatistics") in
       make ?domainIspPlacements ?readRatePercent ?volumeStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainIspPlacements =
-        field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
+        field_map json__ "DomainIspPlacements" DomainIspPlacements.of_json in
       let readRatePercent =
-        field_map json "ReadRatePercent" Percentage.of_json in
+        field_map json__ "ReadRatePercent" Percentage.of_json in
       let volumeStatistics =
-        field_map json "VolumeStatistics" VolumeStatistics.of_json in
+        field_map json__ "VolumeStatistics" VolumeStatistics.of_json in
       make ?domainIspPlacements ?readRatePercent ?volumeStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5381,6 +10100,9 @@ module IspPlacements =
   struct
     type nonrec t = IspPlacement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IspPlacement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5450,6 +10172,9 @@ module DedicatedIpList =
   struct
     type nonrec t = DedicatedIp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DedicatedIp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5470,6 +10195,58 @@ module DedicatedIpList =
       list_of_json ~kind:"DedicatedIpList" ~of_json:DedicatedIp.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DedicatedIpPool =
+  struct
+    type nonrec t =
+      {
+      poolName: PoolName.t option
+        [@ocaml.doc "The name of the dedicated IP pool."];
+      scalingMode: ScalingMode.t option
+        [@ocaml.doc
+          "The type of the dedicated IP pool. STANDARD \226\128\147 A dedicated IP pool where you can control which IPs are part of the pool. MANAGED \226\128\147 A dedicated IP pool where the reputation and number of IPs are automatically managed by Amazon SES."]}
+    let make ?poolName =
+      fun ?scalingMode -> fun () -> { poolName; scalingMode }
+    let to_value x =
+      structure_to_value
+        [("PoolName", (Option.map x.poolName ~f:PoolName.to_value));
+        ("ScalingMode", (Option.map x.scalingMode ~f:ScalingMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingMode =
+        (Option.map ~f:ScalingMode.of_xml) (Xml.child xml_arg0 "ScalingMode") in
+      let poolName =
+        (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
+      make ?scalingMode ?poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingMode = field_map json__ "ScalingMode" ScalingMode.of_json in
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
+      make ?scalingMode ?poolName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains information about a dedicated IP pool."]
+module ArchivingOptions =
+  struct
+    type nonrec t =
+      {
+      archiveArn: ArchiveArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the MailManager archive where the Amazon SES API v2 will archive sent emails."]}
+    let make ?archiveArn = fun () -> { archiveArn }
+    let to_value x =
+      structure_to_value
+        [("ArchiveArn", (Option.map x.archiveArn ~f:ArchiveArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let archiveArn =
+        (Option.map ~f:ArchiveArn.of_xml) (Xml.child xml_arg0 "ArchiveArn") in
+      make ?archiveArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let archiveArn = field_map json__ "ArchiveArn" ArchiveArn.of_json in
+      make ?archiveArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Used to associate a configuration set with a MailManager archive."]
 module DeliveryOptions =
   struct
     type nonrec t =
@@ -5479,27 +10256,40 @@ module DeliveryOptions =
           "Specifies whether messages that use the configuration set are required to use Transport Layer Security (TLS). If the value is Require, messages are only delivered if a TLS connection can be established. If the value is Optional, messages can be delivered in plain text if a TLS connection can't be established."];
       sendingPoolName: PoolName.t option
         [@ocaml.doc
-          "The name of the dedicated IP pool to associate with the configuration set."]}
+          "The name of the dedicated IP pool to associate with the configuration set."];
+      maxDeliverySeconds: MaxDeliverySeconds.t option
+        [@ocaml.doc
+          "The maximum amount of time, in seconds, that Amazon SES API v2 will attempt delivery of email. If specified, the value must greater than or equal to 300 seconds (5 minutes) and less than or equal to 50400 seconds (840 minutes)."]}
     let make ?tlsPolicy =
-      fun ?sendingPoolName -> fun () -> { tlsPolicy; sendingPoolName }
+      fun ?sendingPoolName ->
+        fun ?maxDeliverySeconds ->
+          fun () -> { tlsPolicy; sendingPoolName; maxDeliverySeconds }
     let to_value x =
       structure_to_value
         [("TlsPolicy", (Option.map x.tlsPolicy ~f:TlsPolicy.to_value));
         ("SendingPoolName",
-          (Option.map x.sendingPoolName ~f:PoolName.to_value))]
+          (Option.map x.sendingPoolName ~f:PoolName.to_value));
+        ("MaxDeliverySeconds",
+          (Option.map x.maxDeliverySeconds ~f:MaxDeliverySeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxDeliverySeconds =
+        (Option.map ~f:MaxDeliverySeconds.of_xml)
+          (Xml.child xml_arg0 "MaxDeliverySeconds") in
       let sendingPoolName =
         (Option.map ~f:PoolName.of_xml)
           (Xml.child xml_arg0 "SendingPoolName") in
       let tlsPolicy =
         (Option.map ~f:TlsPolicy.of_xml) (Xml.child xml_arg0 "TlsPolicy") in
-      make ?sendingPoolName ?tlsPolicy ()
+      make ?maxDeliverySeconds ?sendingPoolName ?tlsPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingPoolName = field_map json "SendingPoolName" PoolName.of_json in
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
-      make ?sendingPoolName ?tlsPolicy ()
+    let of_json json__ =
+      let maxDeliverySeconds =
+        field_map json__ "MaxDeliverySeconds" MaxDeliverySeconds.of_json in
+      let sendingPoolName =
+        field_map json__ "SendingPoolName" PoolName.of_json in
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
+      make ?maxDeliverySeconds ?sendingPoolName ?tlsPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Used to associate a configuration set with a dedicated IP pool."]
@@ -5532,11 +10322,11 @@ module ReputationOptions =
           (Xml.child xml_arg0 "ReputationMetricsEnabled") in
       make ?lastFreshStart ?reputationMetricsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastFreshStart =
-        field_map json "LastFreshStart" LastFreshStart.of_json in
+        field_map json__ "LastFreshStart" LastFreshStart.of_json in
       let reputationMetricsEnabled =
-        field_map json "ReputationMetricsEnabled" Enabled.of_json in
+        field_map json__ "ReputationMetricsEnabled" Enabled.of_json in
       make ?lastFreshStart ?reputationMetricsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5559,8 +10349,8 @@ module SendingOptions =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5571,23 +10361,35 @@ module SuppressionOptions =
       {
       suppressedReasons: SuppressionListReasons.t option
         [@ocaml.doc
-          "A list that contains the reasons that email addresses are automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."]}
-    let make ?suppressedReasons = fun () -> { suppressedReasons }
+          "A list that contains the reasons that email addresses are automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."];
+      validationOptions: SuppressionValidationOptions.t option }
+    let make ?suppressedReasons =
+      fun ?validationOptions ->
+        fun () -> { suppressedReasons; validationOptions }
     let to_value x =
       structure_to_value
         [("SuppressedReasons",
-           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value))]
+           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value));
+        ("ValidationOptions",
+          (Option.map x.validationOptions
+             ~f:SuppressionValidationOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationOptions =
+        (Option.map ~f:SuppressionValidationOptions.of_xml)
+          (Xml.child xml_arg0 "ValidationOptions") in
       let suppressedReasons =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
-      make ?suppressedReasons ()
+      make ?validationOptions ?suppressedReasons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let validationOptions =
+        field_map json__ "ValidationOptions"
+          SuppressionValidationOptions.of_json in
       let suppressedReasons =
-        field_map json "SuppressedReasons" SuppressionListReasons.of_json in
-      make ?suppressedReasons ()
+        field_map json__ "SuppressedReasons" SuppressionListReasons.of_json in
+      make ?validationOptions ?suppressedReasons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the suppression list preferences for your account."]
@@ -5596,25 +10398,34 @@ module TrackingOptions =
     type nonrec t =
       {
       customRedirectDomain: CustomRedirectDomain.t
-        [@ocaml.doc "The domain to use for tracking open and click events."]}
+        [@ocaml.doc "The domain to use for tracking open and click events."];
+      httpsPolicy: HttpsPolicy.t option
+        [@ocaml.doc
+          "The https policy to use for tracking open and click events."]}
     let context_ = "TrackingOptions"
-    let make ~customRedirectDomain = fun () -> { customRedirectDomain }
+    let make ?httpsPolicy =
+      fun ~customRedirectDomain ->
+        fun () -> { httpsPolicy; customRedirectDomain }
     let to_value x =
       structure_to_value
         [("CustomRedirectDomain",
-           (Some (CustomRedirectDomain.to_value x.customRedirectDomain)))]
+           (Some (CustomRedirectDomain.to_value x.customRedirectDomain)));
+        ("HttpsPolicy", (Option.map x.httpsPolicy ~f:HttpsPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let httpsPolicy =
+        (Option.map ~f:HttpsPolicy.of_xml) (Xml.child xml_arg0 "HttpsPolicy") in
       let customRedirectDomain =
         CustomRedirectDomain.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CustomRedirectDomain") in
-      make ~customRedirectDomain ()
+      make ?httpsPolicy ~customRedirectDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let httpsPolicy = field_map json__ "HttpsPolicy" HttpsPolicy.of_json in
       let customRedirectDomain =
-        field_map_exn json "CustomRedirectDomain"
+        field_map_exn json__ "CustomRedirectDomain"
           CustomRedirectDomain.of_json in
-      make ~customRedirectDomain ()
+      make ?httpsPolicy ~customRedirectDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that defines the tracking options for a configuration set. When you use the Amazon SES API v2 to send an email, it contains an invisible image that's used to track when recipients open your email. If your email contains links, those links are changed slightly in order to track when recipients click them. These images and links include references to a domain operated by Amazon Web Services. You can optionally configure the Amazon SES to use a domain that you operate for these images and links."]
@@ -5622,6 +10433,9 @@ module EventDestinations =
   struct
     type nonrec t = EventDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventDestination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5667,6 +10481,8 @@ module BlacklistReport =
                        (BlacklistEntries.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -5678,6 +10494,9 @@ module BlacklistItemNames =
   struct
     type nonrec t = BlacklistItemName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlacklistItemName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5771,18 +10590,18 @@ module AccountDetails =
       make ?reviewDetails ?additionalContactEmailAddresses
         ?useCaseDescription ?contactLanguage ?websiteURL ?mailType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reviewDetails =
-        field_map json "ReviewDetails" ReviewDetails.of_json in
+        field_map json__ "ReviewDetails" ReviewDetails.of_json in
       let additionalContactEmailAddresses =
-        field_map json "AdditionalContactEmailAddresses"
+        field_map json__ "AdditionalContactEmailAddresses"
           AdditionalContactEmailAddresses.of_json in
       let useCaseDescription =
-        field_map json "UseCaseDescription" UseCaseDescription.of_json in
+        field_map json__ "UseCaseDescription" UseCaseDescription.of_json in
       let contactLanguage =
-        field_map json "ContactLanguage" ContactLanguage.of_json in
-      let websiteURL = field_map json "WebsiteURL" WebsiteURL.of_json in
-      let mailType = field_map json "MailType" MailType.of_json in
+        field_map json__ "ContactLanguage" ContactLanguage.of_json in
+      let websiteURL = field_map json__ "WebsiteURL" WebsiteURL.of_json in
+      let mailType = field_map json__ "MailType" MailType.of_json in
       make ?reviewDetails ?additionalContactEmailAddresses
         ?useCaseDescription ?contactLanguage ?websiteURL ?mailType ()
     let to_json v = composed_to_json to_value v
@@ -5807,7 +10626,7 @@ module SendQuota =
       {
       max24HourSend: Max24HourSend.t option
         [@ocaml.doc
-          "The maximum number of emails that you can send in the current Amazon Web Services Region over a 24-hour period. This value is also called your sending quota."];
+          "The maximum number of emails that you can send in the current Amazon Web Services Region over a 24-hour period. A value of -1 signifies an unlimited quota. (This value is also referred to as your sending quota.)"];
       maxSendRate: MaxSendRate.t option
         [@ocaml.doc
           "The maximum number of emails that you can send per second in the current Amazon Web Services Region. This value is also called your maximum sending rate or your maximum TPS (transactions per second) rate."];
@@ -5837,12 +10656,12 @@ module SendQuota =
           (Xml.child xml_arg0 "Max24HourSend") in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentLast24Hours =
-        field_map json "SentLast24Hours" SentLast24Hours.of_json in
-      let maxSendRate = field_map json "MaxSendRate" MaxSendRate.of_json in
+        field_map json__ "SentLast24Hours" SentLast24Hours.of_json in
+      let maxSendRate = field_map json__ "MaxSendRate" MaxSendRate.of_json in
       let max24HourSend =
-        field_map json "Max24HourSend" Max24HourSend.of_json in
+        field_map json__ "Max24HourSend" Max24HourSend.of_json in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5853,26 +10672,399 @@ module SuppressionAttributes =
       {
       suppressedReasons: SuppressionListReasons.t option
         [@ocaml.doc
-          "A list that contains the reasons that email addresses will be automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."]}
-    let make ?suppressedReasons = fun () -> { suppressedReasons }
+          "A list that contains the reasons that email addresses will be automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."];
+      validationAttributes: SuppressionValidationAttributes.t option }
+    let make ?suppressedReasons =
+      fun ?validationAttributes ->
+        fun () -> { suppressedReasons; validationAttributes }
     let to_value x =
       structure_to_value
         [("SuppressedReasons",
-           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value))]
+           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value));
+        ("ValidationAttributes",
+          (Option.map x.validationAttributes
+             ~f:SuppressionValidationAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationAttributes =
+        (Option.map ~f:SuppressionValidationAttributes.of_xml)
+          (Xml.child xml_arg0 "ValidationAttributes") in
       let suppressedReasons =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
-      make ?suppressedReasons ()
+      make ?validationAttributes ?suppressedReasons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let validationAttributes =
+        field_map json__ "ValidationAttributes"
+          SuppressionValidationAttributes.of_json in
       let suppressedReasons =
-        field_map json "SuppressedReasons" SuppressionListReasons.of_json in
-      make ?suppressedReasons ()
+        field_map json__ "SuppressedReasons" SuppressionListReasons.of_json in
+      make ?validationAttributes ?suppressedReasons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about the email address suppression preferences for your account in the current Amazon Web Services Region."]
+module Details =
+  struct
+    type nonrec t =
+      {
+      routesDetails: RoutesDetails.t
+        [@ocaml.doc
+          "A list of route configuration details. Must contain exactly one route configuration."]}
+    let context_ = "Details"
+    let make ~routesDetails = fun () -> { routesDetails }
+    let to_value x =
+      structure_to_value
+        [("RoutesDetails", (Some (RoutesDetails.to_value x.routesDetails)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let routesDetails =
+        RoutesDetails.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RoutesDetails") in
+      make ~routesDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let routesDetails =
+        field_map_exn json__ "RoutesDetails" RoutesDetails.of_json in
+      make ~routesDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains configuration details of multi-region endpoint (global-endpoint)."]
+module InternalServiceErrorException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request couldn't be processed because an error occurred with the Amazon SES API v2."]
+module MetricDataErrorList =
+  struct
+    type nonrec t = MetricDataError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDataError.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDataError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDataErrorList"
+        ~of_json:MetricDataError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MetricDataResultList =
+  struct
+    type nonrec t = MetricDataResult.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDataResult.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDataResult.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDataResultList"
+        ~of_json:MetricDataResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BatchGetMetricDataQueries =
+  struct
+    type nonrec t = BatchGetMetricDataQuery.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchGetMetricDataQuery.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchGetMetricDataQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchGetMetricDataQueries"
+        ~of_json:BatchGetMetricDataQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateReputationEntityPolicyResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body."]
+module UpdateReputationEntityPolicyRequest =
+  struct
+    type nonrec t =
+      {
+      reputationEntityType: ReputationEntityType.t
+        [@ocaml.doc
+          "The type of reputation entity. Currently, only RESOURCE type entities are supported."];
+      reputationEntityReference: ReputationEntityReference.t
+        [@ocaml.doc
+          "The unique identifier for the reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."];
+      reputationEntityPolicy: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the reputation management policy to apply to this entity. This is an Amazon Web Services Amazon SES-managed policy."]}
+    let context_ = "UpdateReputationEntityPolicyRequest"
+    let make ~reputationEntityType =
+      fun ~reputationEntityReference ->
+        fun ~reputationEntityPolicy ->
+          fun () ->
+            {
+              reputationEntityType;
+              reputationEntityReference;
+              reputationEntityPolicy
+            }
+    let to_value x =
+      structure_to_value
+        [("ReputationEntityType",
+           (Some (ReputationEntityType.to_value x.reputationEntityType)));
+        ("ReputationEntityReference",
+          (Some
+             (ReputationEntityReference.to_value x.reputationEntityReference)));
+        ("ReputationEntityPolicy",
+          (Some (AmazonResourceName.to_value x.reputationEntityPolicy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reputationEntityPolicy =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReputationEntityPolicy") in
+      let reputationEntityReference =
+        ReputationEntityReference.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ReputationEntityReference") in
+      let reputationEntityType =
+        ReputationEntityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReputationEntityType") in
+      make ~reputationEntityPolicy ~reputationEntityReference
+        ~reputationEntityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reputationEntityPolicy =
+        field_map_exn json__ "ReputationEntityPolicy"
+          AmazonResourceName.of_json in
+      let reputationEntityReference =
+        field_map_exn json__ "ReputationEntityReference"
+          ReputationEntityReference.of_json in
+      let reputationEntityType =
+        field_map_exn json__ "ReputationEntityType"
+          ReputationEntityType.of_json in
+      make ~reputationEntityPolicy ~reputationEntityReference
+        ~reputationEntityType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to update the reputation management policy for a reputation entity."]
+module UpdateReputationEntityCustomerManagedStatusResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConflictException of ConflictException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body."]
+module UpdateReputationEntityCustomerManagedStatusRequest =
+  struct
+    type nonrec t =
+      {
+      reputationEntityType: ReputationEntityType.t
+        [@ocaml.doc
+          "The type of reputation entity. Currently, only RESOURCE type entities are supported."];
+      reputationEntityReference: ReputationEntityReference.t
+        [@ocaml.doc
+          "The unique identifier for the reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."];
+      sendingStatus: SendingStatus.t
+        [@ocaml.doc
+          "The new customer-managed sending status for the reputation entity. This can be one of the following: ENABLED \226\128\147 Allow sending for this entity. DISABLED \226\128\147 Prevent sending for this entity. REINSTATED \226\128\147 Allow sending even if there are active reputation findings."]}
+    let context_ = "UpdateReputationEntityCustomerManagedStatusRequest"
+    let make ~reputationEntityType =
+      fun ~reputationEntityReference ->
+        fun ~sendingStatus ->
+          fun () ->
+            { reputationEntityType; reputationEntityReference; sendingStatus
+            }
+    let to_value x =
+      structure_to_value
+        [("ReputationEntityType",
+           (Some (ReputationEntityType.to_value x.reputationEntityType)));
+        ("ReputationEntityReference",
+          (Some
+             (ReputationEntityReference.to_value x.reputationEntityReference)));
+        ("SendingStatus", (Some (SendingStatus.to_value x.sendingStatus)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sendingStatus =
+        SendingStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SendingStatus") in
+      let reputationEntityReference =
+        ReputationEntityReference.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ReputationEntityReference") in
+      let reputationEntityType =
+        ReputationEntityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReputationEntityType") in
+      make ~sendingStatus ~reputationEntityReference ~reputationEntityType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sendingStatus =
+        field_map_exn json__ "SendingStatus" SendingStatus.of_json in
+      let reputationEntityReference =
+        field_map_exn json__ "ReputationEntityReference"
+          ReputationEntityReference.of_json in
+      let reputationEntityType =
+        field_map_exn json__ "ReputationEntityType"
+          ReputationEntityType.of_json in
+      make ~sendingStatus ~reputationEntityReference ~reputationEntityType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to update the customer-managed sending status for a reputation entity."]
 module UpdateEmailTemplateResponse =
   struct
     type nonrec t = unit
@@ -5958,11 +11150,11 @@ module UpdateEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateContent ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateContent =
-        field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
+        field_map_exn json__ "TemplateContent" EmailTemplateContent.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateContent ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6057,10 +11249,11 @@ module UpdateEmailIdentityPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policy ~policyName ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" Policy.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~policy ~policyName ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6137,7 +11330,7 @@ module UpdateCustomVerificationEmailTemplateRequest =
         [@ocaml.doc "The subject line of the custom verification email."];
       templateContent: TemplateContent.t
         [@ocaml.doc
-          "The content of the custom verification email. The total size of the email must be less than 10 MB. The message body may contain HTML, with some limitations. For more information, see Custom Verification Email Frequently Asked Questions in the Amazon SES Developer Guide."];
+          "The content of the custom verification email. The total size of the email must be less than 10 MB. The message body may contain HTML, with some limitations. For more information, see Custom verification email frequently asked questions in the Amazon SES Developer Guide."];
       successRedirectionURL: SuccessRedirectionURL.t
         [@ocaml.doc
           "The URL that the recipient of the verification email is sent to if his or her address is successfully verified."];
@@ -6196,21 +11389,21 @@ module UpdateCustomVerificationEmailTemplateRequest =
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map_exn json "FailureRedirectionURL"
+        field_map_exn json__ "FailureRedirectionURL"
           FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map_exn json "SuccessRedirectionURL"
+        field_map_exn json__ "SuccessRedirectionURL"
           SuccessRedirectionURL.of_json in
       let templateContent =
-        field_map_exn json "TemplateContent" TemplateContent.of_json in
+        field_map_exn json__ "TemplateContent" TemplateContent.of_json in
       let templateSubject =
-        field_map_exn json "TemplateSubject" EmailTemplateSubject.of_json in
+        field_map_exn json__ "TemplateSubject" EmailTemplateSubject.of_json in
       let fromEmailAddress =
-        field_map_exn json "FromEmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "FromEmailAddress" EmailAddress.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~failureRedirectionURL ~successRedirectionURL ~templateContent
         ~templateSubject ~fromEmailAddress ~templateName ()
     let to_json v = composed_to_json to_value v
@@ -6284,14 +11477,15 @@ module UpdateContactResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a contact's preferences for a list. It is not necessary to specify all existing topic preferences in the TopicPreferences object, just the ones that need updating."]
+       "Updates a contact's preferences for a list. You must specify all existing topic preferences in the TopicPreferences object, not just the ones that need updating; otherwise, all your existing preferences will be removed."]
 module UpdateContactRequest =
   struct
     type nonrec t =
       {
       contactListName: ContactListName.t
         [@ocaml.doc "The name of the contact list."];
-      emailAddress: EmailAddress.t [@ocaml.doc "The contact's email addres."];
+      emailAddress: EmailAddress.t
+        [@ocaml.doc "The contact's email address."];
       topicPreferences: TopicPreferenceList.t option
         [@ocaml.doc
           "The contact's preference for being opted-in to or opted-out of a topic."];
@@ -6345,22 +11539,22 @@ module UpdateContactRequest =
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributesData =
-        field_map json "AttributesData" AttributesData.of_json in
+        field_map json__ "AttributesData" AttributesData.of_json in
       let unsubscribeAll =
-        field_map json "UnsubscribeAll" UnsubscribeAll.of_json in
+        field_map json__ "UnsubscribeAll" UnsubscribeAll.of_json in
       let topicPreferences =
-        field_map json "TopicPreferences" TopicPreferenceList.of_json in
+        field_map json__ "TopicPreferences" TopicPreferenceList.of_json in
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates a contact's preferences for a list. It is not necessary to specify all existing topic preferences in the TopicPreferences object, just the ones that need updating."]
+       "Updates a contact's preferences for a list. You must specify all existing topic preferences in the TopicPreferences object, not just the ones that need updating; otherwise, all your existing preferences will be removed."]
 module UpdateContactListResponse =
   struct
     type nonrec t = unit
@@ -6463,11 +11657,11 @@ module UpdateContactListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?description ?topics ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "Description" Description.of_json in
-      let topics = field_map json "Topics" Topics.of_json in
+    let of_json json__ =
+      let description = field_map json__ "Description" Description.of_json in
+      let topics = field_map json__ "Topics" Topics.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?description ?topics ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6568,15 +11762,15 @@ module UpdateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination"
+        field_map_exn json__ "EventDestination"
           EventDestinationDefinition.of_json in
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -6678,10 +11872,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6690,7 +11884,7 @@ module TestRenderEmailTemplateResponse =
   struct
     type nonrec t =
       {
-      renderedTemplate: RenderedEmailTemplate.t
+      renderedTemplate: RenderedEmailTemplate.t option
         [@ocaml.doc
           "The complete MIME message rendered by applying the data in the TemplateData parameter to the template specified in the TemplateName parameter."]}
     type nonrec error =
@@ -6698,8 +11892,7 @@ module TestRenderEmailTemplateResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "TestRenderEmailTemplateResponse"
-    let make ~renderedTemplate = fun () -> { renderedTemplate }
+    let make ?renderedTemplate = fun () -> { renderedTemplate }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6743,18 +11936,18 @@ module TestRenderEmailTemplateResponse =
     let to_value x =
       structure_to_value
         [("RenderedTemplate",
-           (Some (RenderedEmailTemplate.to_value x.renderedTemplate)))]
+           (Option.map x.renderedTemplate ~f:RenderedEmailTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let renderedTemplate =
-        RenderedEmailTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RenderedTemplate") in
-      make ~renderedTemplate ()
+        (Option.map ~f:RenderedEmailTemplate.of_xml)
+          (Xml.child xml_arg0 "RenderedTemplate") in
+      make ?renderedTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let renderedTemplate =
-        field_map_exn json "RenderedTemplate" RenderedEmailTemplate.of_json in
-      make ~renderedTemplate ()
+        field_map json__ "RenderedTemplate" RenderedEmailTemplate.of_json in
+      make ?renderedTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The following element is returned by the service."]
 module TestRenderEmailTemplateRequest =
@@ -6783,11 +11976,11 @@ module TestRenderEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateData ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateData =
-        field_map_exn json "TemplateData" EmailTemplateData.of_json in
+        field_map_exn json__ "TemplateData" EmailTemplateData.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateData ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6886,10 +12079,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6900,7 +12093,7 @@ module SendEmailResponse =
       {
       messageId: OutboundMessageId.t option
         [@ocaml.doc
-          "A unique identifier for the message that is generated when the message is accepted. It's possible for Amazon SES to accept a message without sending it. This can happen when the message that you're trying to send has an attachment contains a virus, or when you send a templated email that contains invalid personalization content, for example."]}
+          "A unique identifier for the message that is generated when the message is accepted. It's possible for Amazon SES to accept a message without sending it. For example, this can happen when the message that you're trying to send has an attachment that contains a virus, or when you send a templated email that contains invalid personalization content."]}
     type nonrec error =
       [ `AccountSuspendedException of AccountSuspendedException.t 
       | `BadRequestException of BadRequestException.t 
@@ -7004,8 +12197,8 @@ module SendEmailResponse =
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" OutboundMessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7034,13 +12227,18 @@ module SendEmailRequest =
           "This parameter is used only for sending authorization. It is the ARN of the identity that is associated with the sending authorization policy that permits you to use the email address specified in the FeedbackForwardingEmailAddress parameter. For example, if the owner of example.com (which has ARN arn:aws:ses:us-east-1:123456789012:identity/example.com) attaches a policy to it that authorizes you to use feedback\\@example.com, then you would specify the FeedbackForwardingEmailAddressIdentityArn to be arn:aws:ses:us-east-1:123456789012:identity/example.com, and the FeedbackForwardingEmailAddress to be feedback\\@example.com. For more information about sending authorization, see the Amazon SES Developer Guide."];
       content: EmailContent.t
         [@ocaml.doc
-          "An object that contains the body of the message. You can send either a Simple message Raw message or a template Message."];
+          "An object that contains the body of the message. You can send either a Simple message, Raw message, or a Templated message."];
       emailTags: MessageTagList.t option
         [@ocaml.doc
           "A list of tags, in the form of name/value pairs, to apply to an email that you send using the SendEmail operation. Tags correspond to characteristics of the email that you define, so that you can publish email sending events."];
       configurationSetName: ConfigurationSetName.t option
         [@ocaml.doc
           "The name of the configuration set to use when sending the email."];
+      endpointId: EndpointId.t option
+        [@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."];
+      tenantName: TenantName.t option
+        [@ocaml.doc
+          "The name of the tenant through which this email will be sent. The email sending operation will only succeed if all referenced resources (identities, configuration sets, and templates) are associated with this tenant."];
       listManagementOptions: ListManagementOptions.t option
         [@ocaml.doc
           "An object used to specify a list or topic to which an email belongs, which will be used when a contact chooses to unsubscribe."]}
@@ -7053,21 +12251,25 @@ module SendEmailRequest =
               fun ?feedbackForwardingEmailAddressIdentityArn ->
                 fun ?emailTags ->
                   fun ?configurationSetName ->
-                    fun ?listManagementOptions ->
-                      fun ~content ->
-                        fun () ->
-                          {
-                            fromEmailAddress;
-                            fromEmailAddressIdentityArn;
-                            destination;
-                            replyToAddresses;
-                            feedbackForwardingEmailAddress;
-                            feedbackForwardingEmailAddressIdentityArn;
-                            emailTags;
-                            configurationSetName;
-                            listManagementOptions;
-                            content
-                          }
+                    fun ?endpointId ->
+                      fun ?tenantName ->
+                        fun ?listManagementOptions ->
+                          fun ~content ->
+                            fun () ->
+                              {
+                                fromEmailAddress;
+                                fromEmailAddressIdentityArn;
+                                destination;
+                                replyToAddresses;
+                                feedbackForwardingEmailAddress;
+                                feedbackForwardingEmailAddressIdentityArn;
+                                emailTags;
+                                configurationSetName;
+                                endpointId;
+                                tenantName;
+                                listManagementOptions;
+                                content
+                              }
     let to_value x =
       structure_to_value
         [("FromEmailAddress",
@@ -7088,6 +12290,8 @@ module SendEmailRequest =
         ("EmailTags", (Option.map x.emailTags ~f:MessageTagList.to_value));
         ("ConfigurationSetName",
           (Option.map x.configurationSetName ~f:ConfigurationSetName.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:EndpointId.to_value));
+        ("TenantName", (Option.map x.tenantName ~f:TenantName.to_value));
         ("ListManagementOptions",
           (Option.map x.listManagementOptions
              ~f:ListManagementOptions.to_value))]
@@ -7096,6 +12300,10 @@ module SendEmailRequest =
       let listManagementOptions =
         (Option.map ~f:ListManagementOptions.of_xml)
           (Xml.child xml_arg0 "ListManagementOptions") in
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      let endpointId =
+        (Option.map ~f:EndpointId.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let configurationSetName =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
@@ -7122,32 +12330,38 @@ module SendEmailRequest =
       let fromEmailAddress =
         (Option.map ~f:EmailAddress.of_xml)
           (Xml.child xml_arg0 "FromEmailAddress") in
-      make ?listManagementOptions ?configurationSetName ?emailTags ~content
+      make ?listManagementOptions ?tenantName ?endpointId
+        ?configurationSetName ?emailTags ~content
         ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses ?destination
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let listManagementOptions =
-        field_map json "ListManagementOptions" ListManagementOptions.of_json in
+        field_map json__ "ListManagementOptions"
+          ListManagementOptions.of_json in
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let emailTags = field_map json "EmailTags" MessageTagList.of_json in
-      let content = field_map_exn json "Content" EmailContent.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let emailTags = field_map json__ "EmailTags" MessageTagList.of_json in
+      let content = field_map_exn json__ "Content" EmailContent.of_json in
       let feedbackForwardingEmailAddressIdentityArn =
-        field_map json "FeedbackForwardingEmailAddressIdentityArn"
+        field_map json__ "FeedbackForwardingEmailAddressIdentityArn"
           AmazonResourceName.of_json in
       let feedbackForwardingEmailAddress =
-        field_map json "FeedbackForwardingEmailAddress" EmailAddress.of_json in
+        field_map json__ "FeedbackForwardingEmailAddress"
+          EmailAddress.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" EmailAddressList.of_json in
-      let destination = field_map json "Destination" Destination.of_json in
+        field_map json__ "ReplyToAddresses" EmailAddressList.of_json in
+      let destination = field_map json__ "Destination" Destination.of_json in
       let fromEmailAddressIdentityArn =
-        field_map json "FromEmailAddressIdentityArn"
+        field_map json__ "FromEmailAddressIdentityArn"
           AmazonResourceName.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
-      make ?listManagementOptions ?configurationSetName ?emailTags ~content
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
+      make ?listManagementOptions ?tenantName ?endpointId
+        ?configurationSetName ?emailTags ~content
         ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses ?destination
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
@@ -7255,8 +12469,8 @@ module SendCustomVerificationEmailResponse =
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" OutboundMessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The following element is returned by the service."]
@@ -7296,13 +12510,13 @@ module SendCustomVerificationEmailRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ?configurationSetName ~templateName ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       make ?configurationSetName ~templateName ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7311,7 +12525,7 @@ module SendBulkEmailResponse =
   struct
     type nonrec t =
       {
-      bulkEmailEntryResults: BulkEmailEntryResultList.t
+      bulkEmailEntryResults: BulkEmailEntryResultList.t option
         [@ocaml.doc
           "One object per intended recipient. Check each response object and retry any messages with a failure status."]}
     type nonrec error =
@@ -7325,8 +12539,7 @@ module SendBulkEmailResponse =
       | `SendingPausedException of SendingPausedException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SendBulkEmailResponse"
-    let make ~bulkEmailEntryResults = fun () -> { bulkEmailEntryResults }
+    let make ?bulkEmailEntryResults = fun () -> { bulkEmailEntryResults }
     let error_of_json name json =
       match name with
       | "AccountSuspendedException" ->
@@ -7410,19 +12623,20 @@ module SendBulkEmailResponse =
     let to_value x =
       structure_to_value
         [("BulkEmailEntryResults",
-           (Some (BulkEmailEntryResultList.to_value x.bulkEmailEntryResults)))]
+           (Option.map x.bulkEmailEntryResults
+              ~f:BulkEmailEntryResultList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let bulkEmailEntryResults =
-        BulkEmailEntryResultList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BulkEmailEntryResults") in
-      make ~bulkEmailEntryResults ()
+        (Option.map ~f:BulkEmailEntryResultList.of_xml)
+          (Xml.child xml_arg0 "BulkEmailEntryResults") in
+      make ?bulkEmailEntryResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bulkEmailEntryResults =
-        field_map_exn json "BulkEmailEntryResults"
+        field_map json__ "BulkEmailEntryResults"
           BulkEmailEntryResultList.of_json in
-      make ~bulkEmailEntryResults ()
+      make ?bulkEmailEntryResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The following data is returned in JSON format by the service."]
@@ -7455,7 +12669,12 @@ module SendBulkEmailRequest =
         [@ocaml.doc "The list of bulk email entry objects."];
       configurationSetName: ConfigurationSetName.t option
         [@ocaml.doc
-          "The name of the configuration set to use when sending the email."]}
+          "The name of the configuration set to use when sending the email."];
+      endpointId: EndpointId.t option
+        [@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."];
+      tenantName: TenantName.t option
+        [@ocaml.doc
+          "The name of the tenant through which this bulk email will be sent. The email sending operation will only succeed if all referenced resources (identities, configuration sets, and templates) are associated with this tenant."]}
     let context_ = "SendBulkEmailRequest"
     let make ?fromEmailAddress =
       fun ?fromEmailAddressIdentityArn ->
@@ -7464,20 +12683,24 @@ module SendBulkEmailRequest =
             fun ?feedbackForwardingEmailAddressIdentityArn ->
               fun ?defaultEmailTags ->
                 fun ?configurationSetName ->
-                  fun ~defaultContent ->
-                    fun ~bulkEmailEntries ->
-                      fun () ->
-                        {
-                          fromEmailAddress;
-                          fromEmailAddressIdentityArn;
-                          replyToAddresses;
-                          feedbackForwardingEmailAddress;
-                          feedbackForwardingEmailAddressIdentityArn;
-                          defaultEmailTags;
-                          configurationSetName;
-                          defaultContent;
-                          bulkEmailEntries
-                        }
+                  fun ?endpointId ->
+                    fun ?tenantName ->
+                      fun ~defaultContent ->
+                        fun ~bulkEmailEntries ->
+                          fun () ->
+                            {
+                              fromEmailAddress;
+                              fromEmailAddressIdentityArn;
+                              replyToAddresses;
+                              feedbackForwardingEmailAddress;
+                              feedbackForwardingEmailAddressIdentityArn;
+                              defaultEmailTags;
+                              configurationSetName;
+                              endpointId;
+                              tenantName;
+                              defaultContent;
+                              bulkEmailEntries
+                            }
     let to_value x =
       structure_to_value
         [("FromEmailAddress",
@@ -7500,9 +12723,15 @@ module SendBulkEmailRequest =
         ("BulkEmailEntries",
           (Some (BulkEmailEntryList.to_value x.bulkEmailEntries)));
         ("ConfigurationSetName",
-          (Option.map x.configurationSetName ~f:ConfigurationSetName.to_value))]
+          (Option.map x.configurationSetName ~f:ConfigurationSetName.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:EndpointId.to_value));
+        ("TenantName", (Option.map x.tenantName ~f:TenantName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      let endpointId =
+        (Option.map ~f:EndpointId.of_xml) (Xml.child xml_arg0 "EndpointId") in
       let configurationSetName =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
@@ -7530,34 +12759,39 @@ module SendBulkEmailRequest =
       let fromEmailAddress =
         (Option.map ~f:EmailAddress.of_xml)
           (Xml.child xml_arg0 "FromEmailAddress") in
-      make ?configurationSetName ~bulkEmailEntries ~defaultContent
-        ?defaultEmailTags ?feedbackForwardingEmailAddressIdentityArn
+      make ?tenantName ?endpointId ?configurationSetName ~bulkEmailEntries
+        ~defaultContent ?defaultEmailTags
+        ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       let bulkEmailEntries =
-        field_map_exn json "BulkEmailEntries" BulkEmailEntryList.of_json in
+        field_map_exn json__ "BulkEmailEntries" BulkEmailEntryList.of_json in
       let defaultContent =
-        field_map_exn json "DefaultContent" BulkEmailContent.of_json in
+        field_map_exn json__ "DefaultContent" BulkEmailContent.of_json in
       let defaultEmailTags =
-        field_map json "DefaultEmailTags" MessageTagList.of_json in
+        field_map json__ "DefaultEmailTags" MessageTagList.of_json in
       let feedbackForwardingEmailAddressIdentityArn =
-        field_map json "FeedbackForwardingEmailAddressIdentityArn"
+        field_map json__ "FeedbackForwardingEmailAddressIdentityArn"
           AmazonResourceName.of_json in
       let feedbackForwardingEmailAddress =
-        field_map json "FeedbackForwardingEmailAddress" EmailAddress.of_json in
+        field_map json__ "FeedbackForwardingEmailAddress"
+          EmailAddress.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" EmailAddressList.of_json in
+        field_map json__ "ReplyToAddresses" EmailAddressList.of_json in
       let fromEmailAddressIdentityArn =
-        field_map json "FromEmailAddressIdentityArn"
+        field_map json__ "FromEmailAddressIdentityArn"
           AmazonResourceName.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
-      make ?configurationSetName ~bulkEmailEntries ~defaultContent
-        ?defaultEmailTags ?feedbackForwardingEmailAddressIdentityArn
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
+      make ?tenantName ?endpointId ?configurationSetName ~bulkEmailEntries
+        ~defaultContent ?defaultEmailTags
+        ?feedbackForwardingEmailAddressIdentityArn
         ?feedbackForwardingEmailAddress ?replyToAddresses
         ?fromEmailAddressIdentityArn ?fromEmailAddress ()
     let to_json v = composed_to_json to_value v
@@ -7639,10 +12873,11 @@ module PutSuppressedDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~reason ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "Reason" SuppressionListReason.of_json in
+    let of_json json__ =
+      let reason =
+        field_map_exn json__ "Reason" SuppressionListReason.of_json in
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       make ~reason ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7741,12 +12976,13 @@ module PutEmailIdentityMailFromAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?behaviorOnMxFailure ?mailFromDomain ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMxFailure =
-        field_map json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
+        field_map json__ "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
       let mailFromDomain =
-        field_map json "MailFromDomain" MailFromDomainName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?behaviorOnMxFailure ?mailFromDomain ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7836,10 +13072,11 @@ module PutEmailIdentityFeedbackAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?emailForwardingEnabled ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailForwardingEnabled =
-        field_map json "EmailForwardingEnabled" Enabled.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "EmailForwardingEnabled" Enabled.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?emailForwardingEnabled ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7853,14 +13090,19 @@ module PutEmailIdentityDkimSigningAttributesResponse =
           "The DKIM authentication status of the identity. Amazon SES determines the authentication status by searching for specific records in the DNS configuration for your domain. If you used Easy DKIM to set up DKIM authentication, Amazon SES tries to find three unique CNAME records in the DNS configuration for your domain. If you provided a public key to perform DKIM authentication, Amazon SES tries to find a TXT record that uses the selector that you specified. The value of the TXT record must be a public key that's paired with the private key that you specified in the process of creating the identity. The status can be one of the following: PENDING \226\128\147 The verification process was initiated, but Amazon SES hasn't yet detected the DKIM records in the DNS configuration for the domain. SUCCESS \226\128\147 The verification process completed successfully. FAILED \226\128\147 The verification process failed. This typically occurs when Amazon SES fails to find the DKIM records in the DNS configuration of the domain. TEMPORARY_FAILURE \226\128\147 A temporary issue is preventing Amazon SES from determining the DKIM authentication status of the domain. NOT_STARTED \226\128\147 The DKIM verification process hasn't been initiated for the domain."];
       dkimTokens: DnsTokenList.t option
         [@ocaml.doc
-          "If you used Easy DKIM to configure DKIM authentication for the domain, then this object contains a set of unique strings that you use to create a set of CNAME records that you add to the DNS configuration for your domain. When Amazon SES detects these records in the DNS configuration for your domain, the DKIM authentication process is complete. If you configured DKIM authentication for the domain by providing your own public-private key pair, then this object contains the selector that's associated with your public key. Regardless of the DKIM authentication method you use, Amazon SES searches for the appropriate records in the DNS configuration of the domain for up to 72 hours."]}
+          "If you used Easy DKIM to configure DKIM authentication for the domain, then this object contains a set of unique strings that you use to create a set of CNAME records that you add to the DNS configuration for your domain. When Amazon SES detects these records in the DNS configuration for your domain, the DKIM authentication process is complete. If you configured DKIM authentication for the domain by providing your own public-private key pair, then this object contains the selector that's associated with your public key. Regardless of the DKIM authentication method you use, Amazon SES searches for the appropriate records in the DNS configuration of the domain for up to 72 hours."];
+      signingHostedZone: HostedZone.t option
+        [@ocaml.doc
+          "The hosted zone where Amazon SES publishes the DKIM public key TXT records for this email identity. This value indicates the DNS zone that customers must reference when configuring their CNAME records for DKIM authentication. When configuring DKIM for your domain, create CNAME records in your DNS that point to the selectors in this hosted zone. For example: selector1._domainkey.yourdomain.com CNAME selector1.<SigningHostedZone> selector2._domainkey.yourdomain.com CNAME selector2.<SigningHostedZone> selector3._domainkey.yourdomain.com CNAME selector3.<SigningHostedZone>"]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?dkimStatus =
-      fun ?dkimTokens -> fun () -> { dkimStatus; dkimTokens }
+      fun ?dkimTokens ->
+        fun ?signingHostedZone ->
+          fun () -> { dkimStatus; dkimTokens; signingHostedZone }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -7904,19 +13146,26 @@ module PutEmailIdentityDkimSigningAttributesResponse =
     let to_value x =
       structure_to_value
         [("DkimStatus", (Option.map x.dkimStatus ~f:DkimStatus.to_value));
-        ("DkimTokens", (Option.map x.dkimTokens ~f:DnsTokenList.to_value))]
+        ("DkimTokens", (Option.map x.dkimTokens ~f:DnsTokenList.to_value));
+        ("SigningHostedZone",
+          (Option.map x.signingHostedZone ~f:HostedZone.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let signingHostedZone =
+        (Option.map ~f:HostedZone.of_xml)
+          (Xml.child xml_arg0 "SigningHostedZone") in
       let dkimTokens =
         (Option.map ~f:DnsTokenList.of_xml) (Xml.child xml_arg0 "DkimTokens") in
       let dkimStatus =
         (Option.map ~f:DkimStatus.of_xml) (Xml.child xml_arg0 "DkimStatus") in
-      make ?dkimTokens ?dkimStatus ()
+      make ?signingHostedZone ?dkimTokens ?dkimStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dkimTokens = field_map json "DkimTokens" DnsTokenList.of_json in
-      let dkimStatus = field_map json "DkimStatus" DkimStatus.of_json in
-      make ?dkimTokens ?dkimStatus ()
+    let of_json json__ =
+      let signingHostedZone =
+        field_map json__ "SigningHostedZone" HostedZone.of_json in
+      let dkimTokens = field_map json__ "DkimTokens" DnsTokenList.of_json in
+      let dkimStatus = field_map json__ "DkimStatus" DkimStatus.of_json in
+      make ?signingHostedZone ?dkimTokens ?dkimStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "If the action is successful, the service sends back an HTTP 200 response. The following data is returned in JSON format by the service."]
@@ -7958,13 +13207,14 @@ module PutEmailIdentityDkimSigningAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?signingAttributes ~signingAttributesOrigin ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let signingAttributes =
-        field_map json "SigningAttributes" DkimSigningAttributes.of_json in
+        field_map json__ "SigningAttributes" DkimSigningAttributes.of_json in
       let signingAttributesOrigin =
-        field_map_exn json "SigningAttributesOrigin"
+        field_map_exn json__ "SigningAttributesOrigin"
           DkimSigningAttributesOrigin.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?signingAttributes ~signingAttributesOrigin ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8051,9 +13301,10 @@ module PutEmailIdentityDkimAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?signingEnabled ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signingEnabled = field_map json "SigningEnabled" Enabled.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let signingEnabled = field_map json__ "SigningEnabled" Enabled.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?signingEnabled ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8144,10 +13395,11 @@ module PutEmailIdentityConfigurationSetAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?configurationSetName ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?configurationSetName ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8258,12 +13510,12 @@ module PutDeliverabilityDashboardOptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
       make ?subscribedDomains ~dashboardEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscribedDomains =
-        field_map json "SubscribedDomains"
+        field_map json__ "SubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let dashboardEnabled =
-        field_map_exn json "DashboardEnabled" Enabled.of_json in
+        field_map_exn json__ "DashboardEnabled" Enabled.of_json in
       make ?subscribedDomains ~dashboardEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8352,14 +13604,115 @@ module PutDedicatedIpWarmupAttributesRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~warmupPercentage ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let warmupPercentage =
-        field_map_exn json "WarmupPercentage" Percentage100Wrapper.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
+        field_map_exn json__ "WarmupPercentage" Percentage100Wrapper.of_json in
+      let ip = field_map_exn json__ "Ip" Ip.of_json in
       make ~warmupPercentage ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to change the warm-up attributes for a dedicated IP address. This operation is useful when you want to resume the warm-up process for an existing IP address."]
+module PutDedicatedIpPoolScalingAttributesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module PutDedicatedIpPoolScalingAttributesRequest =
+  struct
+    type nonrec t =
+      {
+      poolName: PoolName.t [@ocaml.doc "The name of the dedicated IP pool."];
+      scalingMode: ScalingMode.t
+        [@ocaml.doc
+          "The scaling mode to apply to the dedicated IP pool. Changing the scaling mode from MANAGED to STANDARD is not supported."]}
+    let context_ = "PutDedicatedIpPoolScalingAttributesRequest"
+    let make ~poolName =
+      fun ~scalingMode -> fun () -> { poolName; scalingMode }
+    let to_value x =
+      structure_to_value
+        [("PoolName", (Some (PoolName.to_value x.poolName)));
+        ("ScalingMode", (Some (ScalingMode.to_value x.scalingMode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingMode =
+        ScalingMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ScalingMode") in
+      let poolName =
+        PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
+      make ~scalingMode ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingMode =
+        field_map_exn json__ "ScalingMode" ScalingMode.of_json in
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
+      make ~scalingMode ~poolName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to convert a dedicated IP pool to a different scaling mode."]
 module PutDedicatedIpInPoolResponse =
   struct
     type nonrec t = unit
@@ -8444,14 +13797,107 @@ module PutDedicatedIpInPoolRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~destinationPoolName ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationPoolName =
-        field_map_exn json "DestinationPoolName" PoolName.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
+        field_map_exn json__ "DestinationPoolName" PoolName.of_json in
+      let ip = field_map_exn json__ "Ip" Ip.of_json in
       make ~destinationPoolName ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to move a dedicated IP address to a dedicated IP pool."]
+module PutConfigurationSetVdmOptionsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module PutConfigurationSetVdmOptionsRequest =
+  struct
+    type nonrec t =
+      {
+      configurationSetName: ConfigurationSetName.t
+        [@ocaml.doc "The name of the configuration set."];
+      vdmOptions: VdmOptions.t option
+        [@ocaml.doc "The VDM options to apply to the configuration set."]}
+    let context_ = "PutConfigurationSetVdmOptionsRequest"
+    let make ?vdmOptions =
+      fun ~configurationSetName ->
+        fun () -> { vdmOptions; configurationSetName }
+    let to_value x =
+      structure_to_value
+        [("ConfigurationSetName",
+           (Some (ConfigurationSetName.to_value x.configurationSetName)));
+        ("VdmOptions", (Option.map x.vdmOptions ~f:VdmOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vdmOptions =
+        (Option.map ~f:VdmOptions.of_xml) (Xml.child xml_arg0 "VdmOptions") in
+      let configurationSetName =
+        ConfigurationSetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
+      make ?vdmOptions ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vdmOptions = field_map json__ "VdmOptions" VdmOptions.of_json in
+      let configurationSetName =
+        field_map_exn json__ "ConfigurationSetName"
+          ConfigurationSetName.of_json in
+      make ?vdmOptions ~configurationSetName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to add specific VDM settings to a configuration set."]
 module PutConfigurationSetTrackingOptionsResponse =
   struct
     type nonrec t = unit
@@ -8517,34 +13963,41 @@ module PutConfigurationSetTrackingOptionsRequest =
       configurationSetName: ConfigurationSetName.t
         [@ocaml.doc "The name of the configuration set."];
       customRedirectDomain: CustomRedirectDomain.t option
-        [@ocaml.doc "The domain to use to track open and click events."]}
+        [@ocaml.doc "The domain to use to track open and click events."];
+      httpsPolicy: HttpsPolicy.t option }
     let context_ = "PutConfigurationSetTrackingOptionsRequest"
     let make ?customRedirectDomain =
-      fun ~configurationSetName ->
-        fun () -> { customRedirectDomain; configurationSetName }
+      fun ?httpsPolicy ->
+        fun ~configurationSetName ->
+          fun () ->
+            { customRedirectDomain; httpsPolicy; configurationSetName }
     let to_value x =
       structure_to_value
         [("ConfigurationSetName",
            (Some (ConfigurationSetName.to_value x.configurationSetName)));
         ("CustomRedirectDomain",
-          (Option.map x.customRedirectDomain ~f:CustomRedirectDomain.to_value))]
+          (Option.map x.customRedirectDomain ~f:CustomRedirectDomain.to_value));
+        ("HttpsPolicy", (Option.map x.httpsPolicy ~f:HttpsPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let httpsPolicy =
+        (Option.map ~f:HttpsPolicy.of_xml) (Xml.child xml_arg0 "HttpsPolicy") in
       let customRedirectDomain =
         (Option.map ~f:CustomRedirectDomain.of_xml)
           (Xml.child xml_arg0 "CustomRedirectDomain") in
       let configurationSetName =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
-      make ?customRedirectDomain ~configurationSetName ()
+      make ?httpsPolicy ?customRedirectDomain ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let httpsPolicy = field_map json__ "HttpsPolicy" HttpsPolicy.of_json in
       let customRedirectDomain =
-        field_map json "CustomRedirectDomain" CustomRedirectDomain.of_json in
+        field_map json__ "CustomRedirectDomain" CustomRedirectDomain.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
-      make ?customRedirectDomain ~configurationSetName ()
+      make ?httpsPolicy ?customRedirectDomain ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to add a custom domain for tracking open and click events to a configuration set."]
@@ -8615,34 +14068,48 @@ module PutConfigurationSetSuppressionOptionsRequest =
           "The name of the configuration set to change the suppression list preferences for."];
       suppressedReasons: SuppressionListReasons.t option
         [@ocaml.doc
-          "A list that contains the reasons that email addresses are automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."]}
+          "A list that contains the reasons that email addresses are automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."];
+      validationOptions: SuppressionValidationOptions.t option
+        [@ocaml.doc
+          "An object that contains information about the email address suppression preferences for the configuration set in the current Amazon Web Services Region."]}
     let context_ = "PutConfigurationSetSuppressionOptionsRequest"
     let make ?suppressedReasons =
-      fun ~configurationSetName ->
-        fun () -> { suppressedReasons; configurationSetName }
+      fun ?validationOptions ->
+        fun ~configurationSetName ->
+          fun () ->
+            { suppressedReasons; validationOptions; configurationSetName }
     let to_value x =
       structure_to_value
         [("ConfigurationSetName",
            (Some (ConfigurationSetName.to_value x.configurationSetName)));
         ("SuppressedReasons",
-          (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value))]
+          (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value));
+        ("ValidationOptions",
+          (Option.map x.validationOptions
+             ~f:SuppressionValidationOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationOptions =
+        (Option.map ~f:SuppressionValidationOptions.of_xml)
+          (Xml.child xml_arg0 "ValidationOptions") in
       let suppressedReasons =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
       let configurationSetName =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
-      make ?suppressedReasons ~configurationSetName ()
+      make ?validationOptions ?suppressedReasons ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let validationOptions =
+        field_map json__ "ValidationOptions"
+          SuppressionValidationOptions.of_json in
       let suppressedReasons =
-        field_map json "SuppressedReasons" SuppressionListReasons.of_json in
+        field_map json__ "SuppressedReasons" SuppressionListReasons.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
-      make ?suppressedReasons ~configurationSetName ()
+      make ?validationOptions ?suppressedReasons ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to change the account suppression list preferences for a specific configuration set."]
@@ -8732,10 +14199,10 @@ module PutConfigurationSetSendingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?sendingEnabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?sendingEnabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -8828,11 +14295,11 @@ module PutConfigurationSetReputationOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?reputationMetricsEnabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reputationMetricsEnabled =
-        field_map json "ReputationMetricsEnabled" Enabled.of_json in
+        field_map json__ "ReputationMetricsEnabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?reputationMetricsEnabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -8908,21 +14375,36 @@ module PutConfigurationSetDeliveryOptionsRequest =
           "Specifies whether messages that use the configuration set are required to use Transport Layer Security (TLS). If the value is Require, messages are only delivered if a TLS connection can be established. If the value is Optional, messages can be delivered in plain text if a TLS connection can't be established."];
       sendingPoolName: SendingPoolName.t option
         [@ocaml.doc
-          "The name of the dedicated IP pool to associate with the configuration set."]}
+          "The name of the dedicated IP pool to associate with the configuration set."];
+      maxDeliverySeconds: MaxDeliverySeconds.t option
+        [@ocaml.doc
+          "The maximum amount of time, in seconds, that Amazon SES API v2 will attempt delivery of email. If specified, the value must greater than or equal to 300 seconds (5 minutes) and less than or equal to 50400 seconds (840 minutes)."]}
     let context_ = "PutConfigurationSetDeliveryOptionsRequest"
     let make ?tlsPolicy =
       fun ?sendingPoolName ->
-        fun ~configurationSetName ->
-          fun () -> { tlsPolicy; sendingPoolName; configurationSetName }
+        fun ?maxDeliverySeconds ->
+          fun ~configurationSetName ->
+            fun () ->
+              {
+                tlsPolicy;
+                sendingPoolName;
+                maxDeliverySeconds;
+                configurationSetName
+              }
     let to_value x =
       structure_to_value
         [("ConfigurationSetName",
            (Some (ConfigurationSetName.to_value x.configurationSetName)));
         ("TlsPolicy", (Option.map x.tlsPolicy ~f:TlsPolicy.to_value));
         ("SendingPoolName",
-          (Option.map x.sendingPoolName ~f:SendingPoolName.to_value))]
+          (Option.map x.sendingPoolName ~f:SendingPoolName.to_value));
+        ("MaxDeliverySeconds",
+          (Option.map x.maxDeliverySeconds ~f:MaxDeliverySeconds.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let maxDeliverySeconds =
+        (Option.map ~f:MaxDeliverySeconds.of_xml)
+          (Xml.child xml_arg0 "MaxDeliverySeconds") in
       let sendingPoolName =
         (Option.map ~f:SendingPoolName.of_xml)
           (Xml.child xml_arg0 "SendingPoolName") in
@@ -8931,19 +14413,192 @@ module PutConfigurationSetDeliveryOptionsRequest =
       let configurationSetName =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
-      make ?sendingPoolName ?tlsPolicy ~configurationSetName ()
+      make ?maxDeliverySeconds ?sendingPoolName ?tlsPolicy
+        ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let maxDeliverySeconds =
+        field_map json__ "MaxDeliverySeconds" MaxDeliverySeconds.of_json in
       let sendingPoolName =
-        field_map json "SendingPoolName" SendingPoolName.of_json in
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
+        field_map json__ "SendingPoolName" SendingPoolName.of_json in
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
-      make ?sendingPoolName ?tlsPolicy ~configurationSetName ()
+      make ?maxDeliverySeconds ?sendingPoolName ?tlsPolicy
+        ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to associate a configuration set with a dedicated IP pool."]
+module PutConfigurationSetArchivingOptionsResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module PutConfigurationSetArchivingOptionsRequest =
+  struct
+    type nonrec t =
+      {
+      configurationSetName: ConfigurationSetName.t
+        [@ocaml.doc
+          "The name of the configuration set to associate with a MailManager archive."];
+      archiveArn: ArchiveArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the MailManager archive that the Amazon SES API v2 sends email to."]}
+    let context_ = "PutConfigurationSetArchivingOptionsRequest"
+    let make ?archiveArn =
+      fun ~configurationSetName ->
+        fun () -> { archiveArn; configurationSetName }
+    let to_value x =
+      structure_to_value
+        [("ConfigurationSetName",
+           (Some (ConfigurationSetName.to_value x.configurationSetName)));
+        ("ArchiveArn", (Option.map x.archiveArn ~f:ArchiveArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let archiveArn =
+        (Option.map ~f:ArchiveArn.of_xml) (Xml.child xml_arg0 "ArchiveArn") in
+      let configurationSetName =
+        ConfigurationSetName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
+      make ?archiveArn ~configurationSetName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let archiveArn = field_map json__ "ArchiveArn" ArchiveArn.of_json in
+      let configurationSetName =
+        field_map_exn json__ "ConfigurationSetName"
+          ConfigurationSetName.of_json in
+      make ?archiveArn ~configurationSetName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to associate a configuration set with a MailManager archive."]
+module PutAccountVdmAttributesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Update your Amazon SES account VDM attributes. You can execute this operation no more than once per second."]
+module PutAccountVdmAttributesRequest =
+  struct
+    type nonrec t =
+      {
+      vdmAttributes: VdmAttributes.t
+        [@ocaml.doc
+          "The VDM attributes that you wish to apply to your Amazon SES account."]}
+    let context_ = "PutAccountVdmAttributesRequest"
+    let make ~vdmAttributes = fun () -> { vdmAttributes }
+    let to_value x =
+      structure_to_value
+        [("VdmAttributes", (Some (VdmAttributes.to_value x.vdmAttributes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vdmAttributes =
+        VdmAttributes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VdmAttributes") in
+      make ~vdmAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vdmAttributes =
+        field_map_exn json__ "VdmAttributes" VdmAttributes.of_json in
+      make ~vdmAttributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A request to submit new account VDM attributes."]
 module PutAccountSuppressionAttributesResponse =
   struct
     type nonrec t = unit
@@ -8999,23 +14654,37 @@ module PutAccountSuppressionAttributesRequest =
       {
       suppressedReasons: SuppressionListReasons.t option
         [@ocaml.doc
-          "A list that contains the reasons that email addresses will be automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."]}
-    let make ?suppressedReasons = fun () -> { suppressedReasons }
+          "A list that contains the reasons that email addresses will be automatically added to the suppression list for your account. This list can contain any or all of the following: COMPLAINT \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a complaint. BOUNCE \226\128\147 Amazon SES adds an email address to the suppression list for your account when a message sent to that address results in a hard bounce."];
+      validationAttributes: SuppressionValidationAttributes.t option
+        [@ocaml.doc
+          "An object that contains additional suppression attributes for your account."]}
+    let make ?suppressedReasons =
+      fun ?validationAttributes ->
+        fun () -> { suppressedReasons; validationAttributes }
     let to_value x =
       structure_to_value
         [("SuppressedReasons",
-           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value))]
+           (Option.map x.suppressedReasons ~f:SuppressionListReasons.to_value));
+        ("ValidationAttributes",
+          (Option.map x.validationAttributes
+             ~f:SuppressionValidationAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let validationAttributes =
+        (Option.map ~f:SuppressionValidationAttributes.of_xml)
+          (Xml.child xml_arg0 "ValidationAttributes") in
       let suppressedReasons =
         (Option.map ~f:SuppressionListReasons.of_xml)
           (Xml.child xml_arg0 "SuppressedReasons") in
-      make ?suppressedReasons ()
+      make ?validationAttributes ?suppressedReasons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let validationAttributes =
+        field_map json__ "ValidationAttributes"
+          SuppressionValidationAttributes.of_json in
       let suppressedReasons =
-        field_map json "SuppressedReasons" SuppressionListReasons.of_json in
-      make ?suppressedReasons ()
+        field_map json__ "SuppressedReasons" SuppressionListReasons.of_json in
+      make ?validationAttributes ?suppressedReasons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to change your account's suppression preferences."]
@@ -9086,8 +14755,8 @@ module PutAccountSendingAttributesRequest =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9161,7 +14830,7 @@ module PutAccountDetailsRequest =
           "The URL of your website. This information helps us better understand the type of content that you plan to send."];
       contactLanguage: ContactLanguage.t option
         [@ocaml.doc "The language you would prefer to be contacted with."];
-      useCaseDescription: UseCaseDescription.t
+      useCaseDescription: UseCaseDescription.t option
         [@ocaml.doc
           "A description of the types of email that you plan to send."];
       additionalContactEmailAddresses:
@@ -9170,22 +14839,22 @@ module PutAccountDetailsRequest =
           "Additional email addresses that you would like to be notified regarding Amazon SES matters."];
       productionAccessEnabled: EnabledWrapper.t option
         [@ocaml.doc
-          "Indicates whether or not your account should have production access in the current Amazon Web Services Region. If the value is false, then your account is in the sandbox. When your account is in the sandbox, you can only send email to verified identities. Additionally, the maximum number of emails you can send in a 24-hour period (your sending quota) is 200, and the maximum number of emails you can send per second (your maximum sending rate) is 1. If the value is true, then your account has production access. When your account has production access, you can send email to any address. The sending quota and maximum sending rate for your account vary based on your specific use case."]}
+          "Indicates whether or not your account should have production access in the current Amazon Web Services Region. If the value is false, then your account is in the sandbox. When your account is in the sandbox, you can only send email to verified identities. If the value is true, then your account has production access. When your account has production access, you can send email to any address. The sending quota and maximum sending rate for your account vary based on your specific use case."]}
     let context_ = "PutAccountDetailsRequest"
     let make ?contactLanguage =
-      fun ?additionalContactEmailAddresses ->
-        fun ?productionAccessEnabled ->
-          fun ~mailType ->
-            fun ~websiteURL ->
-              fun ~useCaseDescription ->
+      fun ?useCaseDescription ->
+        fun ?additionalContactEmailAddresses ->
+          fun ?productionAccessEnabled ->
+            fun ~mailType ->
+              fun ~websiteURL ->
                 fun () ->
                   {
                     contactLanguage;
+                    useCaseDescription;
                     additionalContactEmailAddresses;
                     productionAccessEnabled;
                     mailType;
-                    websiteURL;
-                    useCaseDescription
+                    websiteURL
                   }
     let to_value x =
       structure_to_value
@@ -9194,7 +14863,7 @@ module PutAccountDetailsRequest =
         ("ContactLanguage",
           (Option.map x.contactLanguage ~f:ContactLanguage.to_value));
         ("UseCaseDescription",
-          (Some (UseCaseDescription.to_value x.useCaseDescription)));
+          (Option.map x.useCaseDescription ~f:UseCaseDescription.to_value));
         ("AdditionalContactEmailAddresses",
           (Option.map x.additionalContactEmailAddresses
              ~f:AdditionalContactEmailAddresses.to_value));
@@ -9209,8 +14878,8 @@ module PutAccountDetailsRequest =
         (Option.map ~f:AdditionalContactEmailAddresses.of_xml)
           (Xml.child xml_arg0 "AdditionalContactEmailAddresses") in
       let useCaseDescription =
-        UseCaseDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UseCaseDescription") in
+        (Option.map ~f:UseCaseDescription.of_xml)
+          (Xml.child xml_arg0 "UseCaseDescription") in
       let contactLanguage =
         (Option.map ~f:ContactLanguage.of_xml)
           (Xml.child xml_arg0 "ContactLanguage") in
@@ -9220,22 +14889,22 @@ module PutAccountDetailsRequest =
       let mailType =
         MailType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MailType") in
       make ?productionAccessEnabled ?additionalContactEmailAddresses
-        ~useCaseDescription ?contactLanguage ~websiteURL ~mailType ()
+        ?useCaseDescription ?contactLanguage ~websiteURL ~mailType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let productionAccessEnabled =
-        field_map json "ProductionAccessEnabled" EnabledWrapper.of_json in
+        field_map json__ "ProductionAccessEnabled" EnabledWrapper.of_json in
       let additionalContactEmailAddresses =
-        field_map json "AdditionalContactEmailAddresses"
+        field_map json__ "AdditionalContactEmailAddresses"
           AdditionalContactEmailAddresses.of_json in
       let useCaseDescription =
-        field_map_exn json "UseCaseDescription" UseCaseDescription.of_json in
+        field_map json__ "UseCaseDescription" UseCaseDescription.of_json in
       let contactLanguage =
-        field_map json "ContactLanguage" ContactLanguage.of_json in
-      let websiteURL = field_map_exn json "WebsiteURL" WebsiteURL.of_json in
-      let mailType = field_map_exn json "MailType" MailType.of_json in
+        field_map json__ "ContactLanguage" ContactLanguage.of_json in
+      let websiteURL = field_map_exn json__ "WebsiteURL" WebsiteURL.of_json in
+      let mailType = field_map_exn json__ "MailType" MailType.of_json in
       make ?productionAccessEnabled ?additionalContactEmailAddresses
-        ~useCaseDescription ?contactLanguage ~websiteURL ~mailType ()
+        ?useCaseDescription ?contactLanguage ~websiteURL ~mailType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to submit new account details."]
 module PutAccountDedicatedIpWarmupAttributesResponse =
@@ -9306,27 +14975,125 @@ module PutAccountDedicatedIpWarmupAttributesRequest =
           (Xml.child xml_arg0 "AutoWarmupEnabled") in
       make ?autoWarmupEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoWarmupEnabled =
-        field_map json "AutoWarmupEnabled" Enabled.of_json in
+        field_map json__ "AutoWarmupEnabled" Enabled.of_json in
       make ?autoWarmupEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to enable or disable the automatic IP address warm-up feature."]
-module ListTagsForResourceResponse =
+module ListTenantsResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t
+      tenants: TenantInfoList.t option
         [@ocaml.doc
-          "An array that lists all the tags that are associated with the resource. Each tag consists of a required tag key (Key) and an associated tag value (Value)"]}
+          "An array that contains basic information about each tenant."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates that there are additional tenants to list. To view additional tenants, issue another request to ListTenants, and pass this token in the NextToken parameter."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tenants = fun ?nextToken -> fun () -> { tenants; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Tenants", (Option.map x.tenants ~f:TenantInfoList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tenants =
+        (Option.map ~f:TenantInfoList.of_xml) (Xml.child xml_arg0 "Tenants") in
+      make ?nextToken ?tenants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tenants = field_map json__ "Tenants" TenantInfoList.of_json in
+      make ?nextToken ?tenants ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about tenants associated with your account."]
+module ListTenantsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListTenants to indicate the position in the list of tenants."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListTenants. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results."]}
+    let make ?nextToken = fun ?pageSize -> fun () -> { nextToken; pageSize }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?pageSize ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list all tenants associated with your account in the current Amazon Web Services Region."]
+module ListTenantResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      tenantResources: TenantResourceList.t option
+        [@ocaml.doc
+          "An array that contains information about each resource associated with the tenant."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates that there are additional resources to list. To view additional resources, issue another request to ListTenantResources, and pass this token in the NextToken parameter."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~tags = fun () -> { tags }
+    let make ?tenantResources =
+      fun ?nextToken -> fun () -> { tenantResources; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9368,15 +15135,141 @@ module ListTagsForResourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Tags", (Some (TagList.to_value x.tags)))]
+      structure_to_value
+        [("TenantResources",
+           (Option.map x.tenantResources ~f:TenantResourceList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ~tags ()
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let tenantResources =
+        (Option.map ~f:TenantResourceList.of_xml)
+          (Xml.child xml_arg0 "TenantResources") in
+      make ?nextToken ?tenantResources ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in make ~tags ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tenantResources =
+        field_map json__ "TenantResources" TenantResourceList.of_json in
+      make ?nextToken ?tenantResources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about resources associated with a specific tenant."]
+module ListTenantResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc "The name of the tenant to list resources for."];
+      filter: ListTenantResourcesFilter.t option
+        [@ocaml.doc
+          "A map of filter keys and values for filtering the list of tenant resources. Currently, the only supported filter key is RESOURCE_TYPE."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListTenantResources. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListTenantResources to indicate the position in the list of tenant resources."]}
+    let context_ = "ListTenantResourcesRequest"
+    let make ?filter =
+      fun ?pageSize ->
+        fun ?nextToken ->
+          fun ~tenantName ->
+            fun () -> { filter; pageSize; nextToken; tenantName }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)));
+        ("Filter",
+          (Option.map x.filter ~f:ListTenantResourcesFilter.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let filter =
+        (Option.map ~f:ListTenantResourcesFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ?nextToken ?pageSize ?filter ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let filter =
+        field_map json__ "Filter" ListTenantResourcesFilter.of_json in
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ?nextToken ?pageSize ?filter ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list resources associated with a specific tenant."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array that lists all the tags that are associated with the resource. Each tag consists of a required tag key (Key) and an associated tag value (Value)"]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieve a list of the tags (keys and values) that are associated with a specified resource. A\194\160tag\194\160is a label that you optionally define and associate with a resource. Each tag consists of a required\194\160tag key\194\160and an optional associated\194\160tag value. A tag key is a general label that acts as a category for more specific tag values. A tag value acts as a descriptor within a tag key."]
@@ -9399,9 +15292,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9479,10 +15372,10 @@ module ListSuppressedDestinationsResponse =
           (Xml.child xml_arg0 "SuppressedDestinationSummaries") in
       make ?nextToken ?suppressedDestinationSummaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let suppressedDestinationSummaries =
-        field_map json "SuppressedDestinationSummaries"
+        field_map json__ "SuppressedDestinationSummaries"
           SuppressedDestinationSummaries.of_json in
       make ?nextToken ?suppressedDestinationSummaries ()
     let to_json v = composed_to_json to_value v
@@ -9496,10 +15389,10 @@ module ListSuppressedDestinationsRequest =
           "The factors that caused the email address to be added to ."];
       startDate: Timestamp.t option
         [@ocaml.doc
-          "Used to filter the list of suppressed email destinations so that it only includes addresses that were added to the list after a specific date. The date that you specify should be in Unix time format."];
+          "Used to filter the list of suppressed email destinations so that it only includes addresses that were added to the list after a specific date."];
       endDate: Timestamp.t option
         [@ocaml.doc
-          "Used to filter the list of suppressed email destinations so that it only includes addresses that were added to the list before a specific date. The date that you specify should be in Unix time format."];
+          "Used to filter the list of suppressed email destinations so that it only includes addresses that were added to the list before a specific date."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "A token returned from a previous call to ListSuppressedDestinations to indicate the position in the list of suppressed email addresses."];
@@ -9535,16 +15428,468 @@ module ListSuppressedDestinationsRequest =
           (Xml.child xml_arg0 "Reason") in
       make ?pageSize ?nextToken ?endDate ?startDate ?reasons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let endDate = field_map json "EndDate" Timestamp.of_json in
-      let startDate = field_map json "StartDate" Timestamp.of_json in
-      let reasons = field_map json "Reasons" SuppressionListReasons.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let endDate = field_map json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
+      let reasons = field_map json__ "Reasons" SuppressionListReasons.of_json in
       make ?pageSize ?nextToken ?endDate ?startDate ?reasons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to obtain a list of email destinations that are on the suppression list for your account."]
+module ListResourceTenantsResponse =
+  struct
+    type nonrec t =
+      {
+      resourceTenants: ResourceTenantMetadataList.t option
+        [@ocaml.doc
+          "An array that contains information about each tenant associated with the resource."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates that there are additional tenants to list. To view additional tenants, issue another request to ListResourceTenants, and pass this token in the NextToken parameter."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceTenants =
+      fun ?nextToken -> fun () -> { resourceTenants; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceTenants",
+           (Option.map x.resourceTenants
+              ~f:ResourceTenantMetadataList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let resourceTenants =
+        (Option.map ~f:ResourceTenantMetadataList.of_xml)
+          (Xml.child xml_arg0 "ResourceTenants") in
+      make ?nextToken ?resourceTenants ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let resourceTenants =
+        field_map json__ "ResourceTenants" ResourceTenantMetadataList.of_json in
+      make ?nextToken ?resourceTenants ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about tenants associated with a specific resource."]
+module ListResourceTenantsRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource to list associated tenants for."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListResourceTenants. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListResourceTenants to indicate the position in the list of resource tenants."]}
+    let context_ = "ListResourceTenantsRequest"
+    let make ?pageSize =
+      fun ?nextToken ->
+        fun ~resourceArn -> fun () -> { pageSize; nextToken; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (AmazonResourceName.to_value x.resourceArn)));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let resourceArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ?nextToken ?pageSize ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
+      make ?nextToken ?pageSize ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list tenants associated with a specific resource."]
+module ListReputationEntitiesResponse =
+  struct
+    type nonrec t =
+      {
+      reputationEntities: ReputationEntitiesList.t option
+        [@ocaml.doc
+          "An array that contains information about the reputation entities in your account."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token that indicates that there are additional reputation entities to list. To view additional reputation entities, issue another request to ListReputationEntities, and pass this token in the NextToken parameter."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reputationEntities =
+      fun ?nextToken -> fun () -> { reputationEntities; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReputationEntities",
+           (Option.map x.reputationEntities
+              ~f:ReputationEntitiesList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let reputationEntities =
+        (Option.map ~f:ReputationEntitiesList.of_xml)
+          (Xml.child xml_arg0 "ReputationEntities") in
+      make ?nextToken ?reputationEntities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let reputationEntities =
+        field_map json__ "ReputationEntities" ReputationEntitiesList.of_json in
+      make ?nextToken ?reputationEntities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of reputation entities in your account."]
+module ListReputationEntitiesRequest =
+  struct
+    type nonrec t =
+      {
+      filter: ReputationEntityFilter.t option
+        [@ocaml.doc
+          "An object that contains filters to apply when listing reputation entities. You can filter by entity type, reputation impact, sending status, or entity reference prefix."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListReputationEntities to indicate the position in the list of reputation entities."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListReputationEntities. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results."]}
+    let make ?filter =
+      fun ?nextToken ->
+        fun ?pageSize -> fun () -> { filter; nextToken; pageSize }
+    let to_value x =
+      structure_to_value
+        [("Filter", (Option.map x.filter ~f:ReputationEntityFilter.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filter =
+        (Option.map ~f:ReputationEntityFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      make ?pageSize ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter = field_map json__ "Filter" ReputationEntityFilter.of_json in
+      make ?pageSize ?nextToken ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list reputation entities with optional filtering."]
+module ListRecommendationsResponse =
+  struct
+    type nonrec t =
+      {
+      recommendations: RecommendationsList.t option
+        [@ocaml.doc "The recommendations applicable to your account."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A string token indicating that there might be additional recommendations available to be listed. Use the token provided in the ListRecommendationsResponse to use in the subsequent call to ListRecommendations with the same parameters to retrieve the next page of recommendations."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommendations =
+      fun ?nextToken -> fun () -> { recommendations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Recommendations",
+           (Option.map x.recommendations ~f:RecommendationsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let recommendations =
+        (Option.map ~f:RecommendationsList.of_xml)
+          (Xml.child xml_arg0 "Recommendations") in
+      make ?nextToken ?recommendations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let recommendations =
+        field_map json__ "Recommendations" RecommendationsList.of_json in
+      make ?nextToken ?recommendations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the response to your request to retrieve the list of recommendations for your account."]
+module ListRecommendationsRequest =
+  struct
+    type nonrec t =
+      {
+      filter: ListRecommendationsFilter.t option
+        [@ocaml.doc
+          "Filters applied when retrieving recommendations. Can eiter be an individual filter, or combinations of STATUS and IMPACT or STATUS and TYPE"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListRecommendations to indicate the position in the list of recommendations."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListRecommendations. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results. The value you specify has to be at least 1, and can be no more than 100."]}
+    let make ?filter =
+      fun ?nextToken ->
+        fun ?pageSize -> fun () -> { filter; nextToken; pageSize }
+    let to_value x =
+      structure_to_value
+        [("Filter",
+           (Option.map x.filter ~f:ListRecommendationsFilter.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let filter =
+        (Option.map ~f:ListRecommendationsFilter.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      make ?pageSize ?nextToken ?filter ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filter =
+        field_map json__ "Filter" ListRecommendationsFilter.of_json in
+      make ?pageSize ?nextToken ?filter ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list the existing recommendations for your account."]
+module ListMultiRegionEndpointsResponse =
+  struct
+    type nonrec t =
+      {
+      multiRegionEndpoints: MultiRegionEndpoints.t option
+        [@ocaml.doc
+          "An array that contains key multi-region endpoint (global-endpoint) properties."];
+      nextToken: NextTokenV2.t option
+        [@ocaml.doc
+          "A token indicating that there are additional multi-region endpoints (global-endpoints) available to be listed. Pass this token to a subsequent ListMultiRegionEndpoints call to retrieve the next page."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?multiRegionEndpoints =
+      fun ?nextToken -> fun () -> { multiRegionEndpoints; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MultiRegionEndpoints",
+           (Option.map x.multiRegionEndpoints
+              ~f:MultiRegionEndpoints.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextTokenV2.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextTokenV2.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let multiRegionEndpoints =
+        (Option.map ~f:MultiRegionEndpoints.of_xml)
+          (Xml.child xml_arg0 "MultiRegionEndpoints") in
+      make ?nextToken ?multiRegionEndpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextTokenV2.of_json in
+      let multiRegionEndpoints =
+        field_map json__ "MultiRegionEndpoints" MultiRegionEndpoints.of_json in
+      make ?nextToken ?multiRegionEndpoints ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The following elements are returned by the service."]
+module ListMultiRegionEndpointsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextTokenV2.t option
+        [@ocaml.doc
+          "A token returned from a previous call to ListMultiRegionEndpoints to indicate the position in the list of multi-region endpoints (global-endpoints)."];
+      pageSize: PageSizeV2.t option
+        [@ocaml.doc
+          "The number of results to show in a single call to ListMultiRegionEndpoints. If the number of results is larger than the number you specified in this parameter, the response includes a NextToken element that you can use to retrieve the next page of results."]}
+    let make ?nextToken = fun ?pageSize -> fun () -> { nextToken; pageSize }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextTokenV2.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:PageSizeV2.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pageSize =
+        (Option.map ~f:PageSizeV2.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let nextToken =
+        (Option.map ~f:NextTokenV2.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" PageSizeV2.of_json in
+      let nextToken = field_map json__ "NextToken" NextTokenV2.of_json in
+      make ?pageSize ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list all the multi-region endpoints (global-endpoints) whose primary region is the AWS-Region where operation is executed."]
 module ListImportJobsResponse =
   struct
     type nonrec t =
@@ -9606,10 +15951,10 @@ module ListImportJobsResponse =
           (Xml.child xml_arg0 "ImportJobs") in
       make ?nextToken ?importJobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let importJobs =
-        field_map json "ImportJobs" ImportJobSummaryList.of_json in
+        field_map json__ "ImportJobs" ImportJobSummaryList.of_json in
       make ?nextToken ?importJobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9649,15 +15994,136 @@ module ListImportJobsRequest =
           (Xml.child xml_arg0 "ImportDestinationType") in
       make ?pageSize ?nextToken ?importDestinationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let importDestinationType =
-        field_map json "ImportDestinationType" ImportDestinationType.of_json in
+        field_map json__ "ImportDestinationType"
+          ImportDestinationType.of_json in
       make ?pageSize ?nextToken ?importDestinationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request to list all of the import jobs for a data destination within the specified maximum number of import jobs."]
+module ListExportJobsResponse =
+  struct
+    type nonrec t =
+      {
+      exportJobs: ExportJobSummaryList.t option
+        [@ocaml.doc "A list of the export job summaries."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A string token indicating that there might be additional export jobs available to be listed. Use this token to a subsequent call to ListExportJobs with the same parameters to retrieve the next page of export jobs."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?exportJobs =
+      fun ?nextToken -> fun () -> { exportJobs; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ExportJobs",
+           (Option.map x.exportJobs ~f:ExportJobSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let exportJobs =
+        (Option.map ~f:ExportJobSummaryList.of_xml)
+          (Xml.child xml_arg0 "ExportJobs") in
+      make ?nextToken ?exportJobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let exportJobs =
+        field_map json__ "ExportJobs" ExportJobSummaryList.of_json in
+      make ?nextToken ?exportJobs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module ListExportJobsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The pagination token returned from a previous call to ListExportJobs to indicate the position in the list of export jobs."];
+      pageSize: MaxItems.t option
+        [@ocaml.doc
+          "Maximum number of export jobs to return at once. Use this parameter to paginate results. If additional export jobs exist beyond the specified limit, the NextToken element is sent in the response. Use the NextToken value in subsequent calls to ListExportJobs to retrieve additional export jobs."];
+      exportSourceType: ExportSourceType.t option
+        [@ocaml.doc
+          "A value used to list export jobs that have a certain ExportSourceType."];
+      jobStatus: JobStatus.t option
+        [@ocaml.doc
+          "A value used to list export jobs that have a certain JobStatus."]}
+    let make ?nextToken =
+      fun ?pageSize ->
+        fun ?exportSourceType ->
+          fun ?jobStatus ->
+            fun () -> { nextToken; pageSize; exportSourceType; jobStatus }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:MaxItems.to_value));
+        ("ExportSourceType",
+          (Option.map x.exportSourceType ~f:ExportSourceType.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let exportSourceType =
+        (Option.map ~f:ExportSourceType.of_xml)
+          (Xml.child xml_arg0 "ExportSourceType") in
+      let pageSize =
+        (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?jobStatus ?exportSourceType ?pageSize ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let exportSourceType =
+        field_map json__ "ExportSourceType" ExportSourceType.of_json in
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?jobStatus ?exportSourceType ?pageSize ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to list all export jobs with filters."]
 module ListEmailTemplatesResponse =
   struct
     type nonrec t =
@@ -9721,10 +16187,11 @@ module ListEmailTemplatesResponse =
           (Xml.child xml_arg0 "TemplatesMetadata") in
       make ?nextToken ?templatesMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let templatesMetadata =
-        field_map json "TemplatesMetadata" EmailTemplateMetadataList.of_json in
+        field_map json__ "TemplatesMetadata"
+          EmailTemplateMetadataList.of_json in
       make ?nextToken ?templatesMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The following elements are returned by the service."]
@@ -9737,7 +16204,7 @@ module ListEmailTemplatesRequest =
           "A token returned from a previous call to ListEmailTemplates to indicate the position in the list of email templates."];
       pageSize: MaxItems.t option
         [@ocaml.doc
-          "The number of results to show in a single call to ListEmailTemplates. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results. The value you specify has to be at least 1, and can be no more than 10."]}
+          "The number of results to show in a single call to ListEmailTemplates. If the number of results is larger than the number you specified in this parameter, then the response includes a NextToken element, which you can use to obtain additional results. The value you specify has to be at least 1, and can be no more than 100."]}
     let make ?nextToken = fun ?pageSize -> fun () -> { nextToken; pageSize }
     let to_value x =
       structure_to_value
@@ -9751,9 +16218,9 @@ module ListEmailTemplatesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9820,10 +16287,10 @@ module ListEmailIdentitiesResponse =
           (Xml.child xml_arg0 "EmailIdentities") in
       make ?nextToken ?emailIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let emailIdentities =
-        field_map json "EmailIdentities" IdentityInfoList.of_json in
+        field_map json__ "EmailIdentities" IdentityInfoList.of_json in
       make ?nextToken ?emailIdentities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9851,9 +16318,9 @@ module ListEmailIdentitiesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9862,7 +16329,8 @@ module ListDomainDeliverabilityCampaignsResponse =
   struct
     type nonrec t =
       {
-      domainDeliverabilityCampaigns: DomainDeliverabilityCampaignList.t
+      domainDeliverabilityCampaigns:
+        DomainDeliverabilityCampaignList.t option
         [@ocaml.doc
           "An array of responses, one for each campaign that used the domain to send email during the specified time range."];
       nextToken: NextToken.t option
@@ -9873,10 +16341,9 @@ module ListDomainDeliverabilityCampaignsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDomainDeliverabilityCampaignsResponse"
-    let make ?nextToken =
-      fun ~domainDeliverabilityCampaigns ->
-        fun () -> { nextToken; domainDeliverabilityCampaigns }
+    let make ?domainDeliverabilityCampaigns =
+      fun ?nextToken ->
+        fun () -> { domainDeliverabilityCampaigns; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -9920,26 +16387,24 @@ module ListDomainDeliverabilityCampaignsResponse =
     let to_value x =
       structure_to_value
         [("DomainDeliverabilityCampaigns",
-           (Some
-              (DomainDeliverabilityCampaignList.to_value
-                 x.domainDeliverabilityCampaigns)));
+           (Option.map x.domainDeliverabilityCampaigns
+              ~f:DomainDeliverabilityCampaignList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let domainDeliverabilityCampaigns =
-        DomainDeliverabilityCampaignList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DomainDeliverabilityCampaigns") in
-      make ?nextToken ~domainDeliverabilityCampaigns ()
+        (Option.map ~f:DomainDeliverabilityCampaignList.of_xml)
+          (Xml.child xml_arg0 "DomainDeliverabilityCampaigns") in
+      make ?nextToken ?domainDeliverabilityCampaigns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let domainDeliverabilityCampaigns =
-        field_map_exn json "DomainDeliverabilityCampaigns"
+        field_map json__ "DomainDeliverabilityCampaigns"
           DomainDeliverabilityCampaignList.of_json in
-      make ?nextToken ~domainDeliverabilityCampaigns ()
+      make ?nextToken ?domainDeliverabilityCampaigns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An array of objects that provide deliverability data for all the campaigns that used a specific domain to send email during a specified time range. This data is available for a domain only if you enabled the Deliverability dashboard for the domain."]
@@ -9949,10 +16414,10 @@ module ListDomainDeliverabilityCampaignsRequest =
       {
       startDate: Timestamp.t
         [@ocaml.doc
-          "The first day, in Unix time format, that you want to obtain deliverability data for."];
+          "The first day that you want to obtain deliverability data for."];
       endDate: Timestamp.t
         [@ocaml.doc
-          "The last day, in Unix time format, that you want to obtain deliverability data for. This value has to be less than or equal to 30 days after the value of the StartDate parameter."];
+          "The last day that you want to obtain deliverability data for. This value has to be less than or equal to 30 days after the value of the StartDate parameter."];
       subscribedDomain: Domain.t
         [@ocaml.doc "The domain to obtain deliverability data for."];
       nextToken: NextToken.t option
@@ -9992,13 +16457,13 @@ module ListDomainDeliverabilityCampaignsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
       make ?pageSize ?nextToken ~subscribedDomain ~endDate ~startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let subscribedDomain =
-        field_map_exn json "SubscribedDomain" Domain.of_json in
-      let endDate = field_map_exn json "EndDate" Timestamp.of_json in
-      let startDate = field_map_exn json "StartDate" Timestamp.of_json in
+        field_map_exn json__ "SubscribedDomain" Domain.of_json in
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
       make ?pageSize ?nextToken ~subscribedDomain ~endDate ~startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10007,7 +16472,7 @@ module ListDeliverabilityTestReportsResponse =
   struct
     type nonrec t =
       {
-      deliverabilityTestReports: DeliverabilityTestReports.t
+      deliverabilityTestReports: DeliverabilityTestReports.t option
         [@ocaml.doc
           "An object that contains a lists of predictive inbox placement tests that you've performed."];
       nextToken: NextToken.t option
@@ -10018,10 +16483,8 @@ module ListDeliverabilityTestReportsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDeliverabilityTestReportsResponse"
-    let make ?nextToken =
-      fun ~deliverabilityTestReports ->
-        fun () -> { nextToken; deliverabilityTestReports }
+    let make ?deliverabilityTestReports =
+      fun ?nextToken -> fun () -> { deliverabilityTestReports; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10065,25 +16528,24 @@ module ListDeliverabilityTestReportsResponse =
     let to_value x =
       structure_to_value
         [("DeliverabilityTestReports",
-           (Some
-              (DeliverabilityTestReports.to_value x.deliverabilityTestReports)));
+           (Option.map x.deliverabilityTestReports
+              ~f:DeliverabilityTestReports.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let deliverabilityTestReports =
-        DeliverabilityTestReports.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestReports") in
-      make ?nextToken ~deliverabilityTestReports ()
+        (Option.map ~f:DeliverabilityTestReports.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestReports") in
+      make ?nextToken ?deliverabilityTestReports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let deliverabilityTestReports =
-        field_map_exn json "DeliverabilityTestReports"
+        field_map json__ "DeliverabilityTestReports"
           DeliverabilityTestReports.of_json in
-      make ?nextToken ~deliverabilityTestReports ()
+      make ?nextToken ?deliverabilityTestReports ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of the predictive inbox placement test reports that are available for your account, regardless of whether or not those tests are complete."]
@@ -10110,9 +16572,9 @@ module ListDeliverabilityTestReportsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10179,10 +16641,10 @@ module ListDedicatedIpPoolsResponse =
           (Xml.child xml_arg0 "DedicatedIpPools") in
       make ?nextToken ?dedicatedIpPools ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dedicatedIpPools =
-        field_map json "DedicatedIpPools" ListOfDedicatedIpPools.of_json in
+        field_map json__ "DedicatedIpPools" ListOfDedicatedIpPools.of_json in
       make ?nextToken ?dedicatedIpPools ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of dedicated IP pools."]
@@ -10209,9 +16671,9 @@ module ListDedicatedIpPoolsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to obtain a list of dedicated IP pools."]
@@ -10280,10 +16742,10 @@ module ListCustomVerificationEmailTemplatesResponse =
           (Xml.child xml_arg0 "CustomVerificationEmailTemplates") in
       make ?nextToken ?customVerificationEmailTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let customVerificationEmailTemplates =
-        field_map json "CustomVerificationEmailTemplates"
+        field_map json__ "CustomVerificationEmailTemplates"
           CustomVerificationEmailTemplatesList.of_json in
       make ?nextToken ?customVerificationEmailTemplates ()
     let to_json v = composed_to_json to_value v
@@ -10311,9 +16773,9 @@ module ListCustomVerificationEmailTemplatesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10385,9 +16847,9 @@ module ListContactsResponse =
         (Option.map ~f:ListOfContacts.of_xml) (Xml.child xml_arg0 "Contacts") in
       make ?nextToken ?contacts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let contacts = field_map json "Contacts" ListOfContacts.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let contacts = field_map json__ "Contacts" ListOfContacts.of_json in
       make ?nextToken ?contacts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the contacts present in a specific contact list."]
@@ -10432,12 +16894,12 @@ module ListContactsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?nextToken ?pageSize ?filter ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let filter = field_map json "Filter" ListContactsFilter.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let filter = field_map json__ "Filter" ListContactsFilter.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?nextToken ?pageSize ?filter ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the contacts present in a specific contact list."]
@@ -10502,13 +16964,14 @@ module ListContactListsResponse =
           (Xml.child xml_arg0 "ContactLists") in
       make ?nextToken ?contactLists ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let contactLists =
-        field_map json "ContactLists" ListOfContactLists.of_json in
+        field_map json__ "ContactLists" ListOfContactLists.of_json in
       make ?nextToken ?contactLists ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all of the contact lists available."]
+  end[@@ocaml.doc
+       "Lists all of the contact lists available. If your output includes a \"NextToken\" field with a string value, this indicates there may be additional contacts on the filtered list - regardless of the number of contacts returned."]
 module ListContactListsRequest =
   struct
     type nonrec t =
@@ -10532,12 +16995,13 @@ module ListContactListsRequest =
         (Option.map ~f:MaxItems.of_xml) (Xml.child xml_arg0 "PageSize") in
       make ?nextToken ?pageSize ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
       make ?nextToken ?pageSize ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all of the contact lists available."]
+  end[@@ocaml.doc
+       "Lists all of the contact lists available. If your output includes a \"NextToken\" field with a string value, this indicates there may be additional contacts on the filtered list - regardless of the number of contacts returned."]
 module ListConfigurationSetsResponse =
   struct
     type nonrec t =
@@ -10601,10 +17065,10 @@ module ListConfigurationSetsResponse =
           (Xml.child xml_arg0 "ConfigurationSets") in
       make ?nextToken ?configurationSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let configurationSets =
-        field_map json "ConfigurationSets" ConfigurationSetNameList.of_json in
+        field_map json__ "ConfigurationSets" ConfigurationSetNameList.of_json in
       make ?nextToken ?configurationSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10632,18 +17096,108 @@ module ListConfigurationSetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to obtain a list of configuration sets for your Amazon SES account in the current Amazon Web Services Region."]
+module GetTenantResponse =
+  struct
+    type nonrec t =
+      {
+      tenant: Tenant.t option
+        [@ocaml.doc "A structure that contains details about the tenant."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tenant = fun () -> { tenant }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Tenant", (Option.map x.tenant ~f:Tenant.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tenant =
+        (Option.map ~f:Tenant.of_xml) (Xml.child xml_arg0 "Tenant") in
+      make ?tenant ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tenant = field_map json__ "Tenant" Tenant.of_json in
+      make ?tenant ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a specific tenant."]
+module GetTenantRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc "The name of the tenant to retrieve information about."]}
+    let context_ = "GetTenantRequest"
+    let make ~tenantName = fun () -> { tenantName }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to get information about a specific tenant."]
 module GetSuppressedDestinationResponse =
   struct
     type nonrec t =
       {
-      suppressedDestination: SuppressedDestination.t
+      suppressedDestination: SuppressedDestination.t option
         [@ocaml.doc
           "An object containing information about the suppressed email address."]}
     type nonrec error =
@@ -10651,8 +17205,7 @@ module GetSuppressedDestinationResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetSuppressedDestinationResponse"
-    let make ~suppressedDestination = fun () -> { suppressedDestination }
+    let make ?suppressedDestination = fun () -> { suppressedDestination }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10696,19 +17249,20 @@ module GetSuppressedDestinationResponse =
     let to_value x =
       structure_to_value
         [("SuppressedDestination",
-           (Some (SuppressedDestination.to_value x.suppressedDestination)))]
+           (Option.map x.suppressedDestination
+              ~f:SuppressedDestination.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let suppressedDestination =
-        SuppressedDestination.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SuppressedDestination") in
-      make ~suppressedDestination ()
+        (Option.map ~f:SuppressedDestination.of_xml)
+          (Xml.child xml_arg0 "SuppressedDestination") in
+      make ?suppressedDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suppressedDestination =
-        field_map_exn json "SuppressedDestination"
+        field_map json__ "SuppressedDestination"
           SuppressedDestination.of_json in
-      make ~suppressedDestination ()
+      make ?suppressedDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the suppressed email address."]
 module GetSuppressedDestinationRequest =
@@ -10730,13 +17284,407 @@ module GetSuppressedDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       make ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to retrieve information about an email address that's on the suppression list for your account."]
+module GetReputationEntityResponse =
+  struct
+    type nonrec t =
+      {
+      reputationEntity: ReputationEntity.t option
+        [@ocaml.doc
+          "The reputation entity information, including status records, policy configuration, and reputation impact."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?reputationEntity = fun () -> { reputationEntity }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ReputationEntity",
+           (Option.map x.reputationEntity ~f:ReputationEntity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reputationEntity =
+        (Option.map ~f:ReputationEntity.of_xml)
+          (Xml.child xml_arg0 "ReputationEntity") in
+      make ?reputationEntity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reputationEntity =
+        field_map json__ "ReputationEntity" ReputationEntity.of_json in
+      make ?reputationEntity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the requested reputation entity."]
+module GetReputationEntityRequest =
+  struct
+    type nonrec t =
+      {
+      reputationEntityReference: ReputationEntityReference.t
+        [@ocaml.doc
+          "The unique identifier for the reputation entity. For resource-type entities, this is the Amazon Resource Name (ARN) of the resource."];
+      reputationEntityType: ReputationEntityType.t
+        [@ocaml.doc
+          "The type of reputation entity. Currently, only RESOURCE type entities are supported."]}
+    let context_ = "GetReputationEntityRequest"
+    let make ~reputationEntityReference =
+      fun ~reputationEntityType ->
+        fun () -> { reputationEntityReference; reputationEntityType }
+    let to_value x =
+      structure_to_value
+        [("ReputationEntityReference",
+           (Some
+              (ReputationEntityReference.to_value x.reputationEntityReference)));
+        ("ReputationEntityType",
+          (Some (ReputationEntityType.to_value x.reputationEntityType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reputationEntityType =
+        ReputationEntityType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReputationEntityType") in
+      let reputationEntityReference =
+        ReputationEntityReference.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "ReputationEntityReference") in
+      make ~reputationEntityType ~reputationEntityReference ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reputationEntityType =
+        field_map_exn json__ "ReputationEntityType"
+          ReputationEntityType.of_json in
+      let reputationEntityReference =
+        field_map_exn json__ "ReputationEntityReference"
+          ReputationEntityReference.of_json in
+      make ~reputationEntityType ~reputationEntityReference ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to retrieve information about a specific reputation entity."]
+module GetMultiRegionEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      endpointName: EndpointName.t option
+        [@ocaml.doc
+          "The name of the multi-region endpoint (global-endpoint)."];
+      endpointId: EndpointId.t option
+        [@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."];
+      routes: Routes.t option
+        [@ocaml.doc
+          "Contains routes information for the multi-region endpoint (global-endpoint)."];
+      status: Status.t option
+        [@ocaml.doc
+          "The status of the multi-region endpoint (global-endpoint). CREATING \226\128\147 The resource is being provisioned. READY \226\128\147 The resource is ready to use. FAILED \226\128\147 The resource failed to be provisioned. DELETING \226\128\147 The resource is being deleted as requested."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time stamp of when the multi-region endpoint (global-endpoint) was created."];
+      lastUpdatedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The time stamp of when the multi-region endpoint (global-endpoint) was last updated."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?endpointName =
+      fun ?endpointId ->
+        fun ?routes ->
+          fun ?status ->
+            fun ?createdTimestamp ->
+              fun ?lastUpdatedTimestamp ->
+                fun () ->
+                  {
+                    endpointName;
+                    endpointId;
+                    routes;
+                    status;
+                    createdTimestamp;
+                    lastUpdatedTimestamp
+                  }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EndpointName",
+           (Option.map x.endpointName ~f:EndpointName.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:EndpointId.to_value));
+        ("Routes", (Option.map x.routes ~f:Routes.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("LastUpdatedTimestamp",
+          (Option.map x.lastUpdatedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let routes =
+        (Option.map ~f:Routes.of_xml) (Xml.child xml_arg0 "Routes") in
+      let endpointId =
+        (Option.map ~f:EndpointId.of_xml) (Xml.child xml_arg0 "EndpointId") in
+      let endpointName =
+        (Option.map ~f:EndpointName.of_xml)
+          (Xml.child xml_arg0 "EndpointName") in
+      make ?lastUpdatedTimestamp ?createdTimestamp ?status ?routes
+        ?endpointId ?endpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedTimestamp =
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let routes = field_map json__ "Routes" Routes.of_json in
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let endpointName = field_map json__ "EndpointName" EndpointName.of_json in
+      make ?lastUpdatedTimestamp ?createdTimestamp ?status ?routes
+        ?endpointId ?endpointName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module GetMultiRegionEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      endpointName: EndpointName.t
+        [@ocaml.doc
+          "The name of the multi-region endpoint (global-endpoint)."]}
+    let context_ = "GetMultiRegionEndpointRequest"
+    let make ~endpointName = fun () -> { endpointName }
+    let to_value x =
+      structure_to_value
+        [("EndpointName", (Some (EndpointName.to_value x.endpointName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointName =
+        EndpointName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
+      make ~endpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointName =
+        field_map_exn json__ "EndpointName" EndpointName.of_json in
+      make ~endpointName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to display the multi-region endpoint (global-endpoint)."]
+module GetMessageInsightsResponse =
+  struct
+    type nonrec t =
+      {
+      messageId: OutboundMessageId.t option
+        [@ocaml.doc "A unique identifier for the message."];
+      fromEmailAddress: InsightsEmailAddress.t option
+        [@ocaml.doc "The from address used to send the message."];
+      subject: EmailSubject.t option
+        [@ocaml.doc "The subject line of the message."];
+      emailTags: MessageTagList.t option
+        [@ocaml.doc
+          "A list of tags, in the form of name/value pairs, that were applied to the email you sent, along with Amazon SES Auto-Tags."];
+      insights: EmailInsightsList.t option
+        [@ocaml.doc "A set of insights associated with the message."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?messageId =
+      fun ?fromEmailAddress ->
+        fun ?subject ->
+          fun ?emailTags ->
+            fun ?insights ->
+              fun () ->
+                { messageId; fromEmailAddress; subject; emailTags; insights }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MessageId",
+           (Option.map x.messageId ~f:OutboundMessageId.to_value));
+        ("FromEmailAddress",
+          (Option.map x.fromEmailAddress ~f:InsightsEmailAddress.to_value));
+        ("Subject", (Option.map x.subject ~f:EmailSubject.to_value));
+        ("EmailTags", (Option.map x.emailTags ~f:MessageTagList.to_value));
+        ("Insights", (Option.map x.insights ~f:EmailInsightsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let insights =
+        (Option.map ~f:EmailInsightsList.of_xml)
+          (Xml.child xml_arg0 "Insights") in
+      let emailTags =
+        (Option.map ~f:MessageTagList.of_xml)
+          (Xml.child xml_arg0 "EmailTags") in
+      let subject =
+        (Option.map ~f:EmailSubject.of_xml) (Xml.child xml_arg0 "Subject") in
+      let fromEmailAddress =
+        (Option.map ~f:InsightsEmailAddress.of_xml)
+          (Xml.child xml_arg0 "FromEmailAddress") in
+      let messageId =
+        (Option.map ~f:OutboundMessageId.of_xml)
+          (Xml.child xml_arg0 "MessageId") in
+      make ?insights ?emailTags ?subject ?fromEmailAddress ?messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let insights = field_map json__ "Insights" EmailInsightsList.of_json in
+      let emailTags = field_map json__ "EmailTags" MessageTagList.of_json in
+      let subject = field_map json__ "Subject" EmailSubject.of_json in
+      let fromEmailAddress =
+        field_map json__ "FromEmailAddress" InsightsEmailAddress.of_json in
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
+      make ?insights ?emailTags ?subject ?fromEmailAddress ?messageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a message."]
+module GetMessageInsightsRequest =
+  struct
+    type nonrec t =
+      {
+      messageId: OutboundMessageId.t
+        [@ocaml.doc
+          "A MessageId is a unique identifier for a message, and is returned when sending emails through Amazon SES."]}
+    let context_ = "GetMessageInsightsRequest"
+    let make ~messageId = fun () -> { messageId }
+    let to_value x =
+      structure_to_value
+        [("MessageId", (Some (OutboundMessageId.to_value x.messageId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let messageId =
+        OutboundMessageId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MessageId") in
+      make ~messageId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let messageId =
+        field_map_exn json__ "MessageId" OutboundMessageId.of_json in
+      make ~messageId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A request to return information about a message."]
 module GetImportJobResponse =
   struct
     type nonrec t =
@@ -10873,22 +17821,23 @@ module GetImportJobResponse =
         ?createdTimestamp ?jobStatus ?failureInfo ?importDataSource
         ?importDestination ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedRecordsCount =
-        field_map json "FailedRecordsCount" FailedRecordsCount.of_json in
+        field_map json__ "FailedRecordsCount" FailedRecordsCount.of_json in
       let processedRecordsCount =
-        field_map json "ProcessedRecordsCount" ProcessedRecordsCount.of_json in
+        field_map json__ "ProcessedRecordsCount"
+          ProcessedRecordsCount.of_json in
       let completedTimestamp =
-        field_map json "CompletedTimestamp" Timestamp.of_json in
+        field_map json__ "CompletedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let jobStatus = field_map json "JobStatus" JobStatus.of_json in
-      let failureInfo = field_map json "FailureInfo" FailureInfo.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let failureInfo = field_map json__ "FailureInfo" FailureInfo.of_json in
       let importDataSource =
-        field_map json "ImportDataSource" ImportDataSource.of_json in
+        field_map json__ "ImportDataSource" ImportDataSource.of_json in
       let importDestination =
-        field_map json "ImportDestination" ImportDestination.of_json in
-      let jobId = field_map json "JobId" JobId.of_json in
+        field_map json__ "ImportDestination" ImportDestination.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
       make ?failedRecordsCount ?processedRecordsCount ?completedTimestamp
         ?createdTimestamp ?jobStatus ?failureInfo ?importDataSource
         ?importDestination ?jobId ()
@@ -10909,28 +17858,59 @@ module GetImportJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "JobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request for information about an import job using the import job ID."]
-module GetEmailTemplateResponse =
+module GetExportJobResponse =
   struct
     type nonrec t =
       {
-      templateName: EmailTemplateName.t
-        [@ocaml.doc "The name of the template."];
-      templateContent: EmailTemplateContent.t
-        [@ocaml.doc
-          "The content of the email template, composed of a subject line, an HTML part, and a text-only part."]}
+      jobId: JobId.t option [@ocaml.doc "The export job ID."];
+      exportSourceType: ExportSourceType.t option
+        [@ocaml.doc "The type of source of the export job."];
+      jobStatus: JobStatus.t option
+        [@ocaml.doc "The status of the export job."];
+      exportDestination: ExportDestination.t option
+        [@ocaml.doc "The destination of the export job."];
+      exportDataSource: ExportDataSource.t option
+        [@ocaml.doc "The data source of the export job."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the export job was created."];
+      completedTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp of when the export job was completed."];
+      failureInfo: FailureInfo.t option
+        [@ocaml.doc "The failure details about an export job."];
+      statistics: ExportStatistics.t option
+        [@ocaml.doc "The statistics about the export job."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetEmailTemplateResponse"
-    let make ~templateName =
-      fun ~templateContent -> fun () -> { templateName; templateContent }
+    let make ?jobId =
+      fun ?exportSourceType ->
+        fun ?jobStatus ->
+          fun ?exportDestination ->
+            fun ?exportDataSource ->
+              fun ?createdTimestamp ->
+                fun ?completedTimestamp ->
+                  fun ?failureInfo ->
+                    fun ?statistics ->
+                      fun () ->
+                        {
+                          jobId;
+                          exportSourceType;
+                          jobStatus;
+                          exportDestination;
+                          exportDataSource;
+                          createdTimestamp;
+                          completedTimestamp;
+                          failureInfo;
+                          statistics
+                        }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -10973,25 +17953,176 @@ module GetEmailTemplateResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("TemplateName", (Some (EmailTemplateName.to_value x.templateName)));
-        ("TemplateContent",
-          (Some (EmailTemplateContent.to_value x.templateContent)))]
+        [("JobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("ExportSourceType",
+          (Option.map x.exportSourceType ~f:ExportSourceType.to_value));
+        ("JobStatus", (Option.map x.jobStatus ~f:JobStatus.to_value));
+        ("ExportDestination",
+          (Option.map x.exportDestination ~f:ExportDestination.to_value));
+        ("ExportDataSource",
+          (Option.map x.exportDataSource ~f:ExportDataSource.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("CompletedTimestamp",
+          (Option.map x.completedTimestamp ~f:Timestamp.to_value));
+        ("FailureInfo", (Option.map x.failureInfo ~f:FailureInfo.to_value));
+        ("Statistics",
+          (Option.map x.statistics ~f:ExportStatistics.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let templateContent =
-        EmailTemplateContent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TemplateContent") in
-      let templateName =
-        EmailTemplateName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
-      make ~templateContent ~templateName ()
+      let statistics =
+        (Option.map ~f:ExportStatistics.of_xml)
+          (Xml.child xml_arg0 "Statistics") in
+      let failureInfo =
+        (Option.map ~f:FailureInfo.of_xml) (Xml.child xml_arg0 "FailureInfo") in
+      let completedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CompletedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let exportDataSource =
+        (Option.map ~f:ExportDataSource.of_xml)
+          (Xml.child xml_arg0 "ExportDataSource") in
+      let exportDestination =
+        (Option.map ~f:ExportDestination.of_xml)
+          (Xml.child xml_arg0 "ExportDestination") in
+      let jobStatus =
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "JobStatus") in
+      let exportSourceType =
+        (Option.map ~f:ExportSourceType.of_xml)
+          (Xml.child xml_arg0 "ExportSourceType") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?statistics ?failureInfo ?completedTimestamp ?createdTimestamp
+        ?exportDataSource ?exportDestination ?jobStatus ?exportSourceType
+        ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let statistics = field_map json__ "Statistics" ExportStatistics.of_json in
+      let failureInfo = field_map json__ "FailureInfo" FailureInfo.of_json in
+      let completedTimestamp =
+        field_map json__ "CompletedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let exportDataSource =
+        field_map json__ "ExportDataSource" ExportDataSource.of_json in
+      let exportDestination =
+        field_map json__ "ExportDestination" ExportDestination.of_json in
+      let jobStatus = field_map json__ "JobStatus" JobStatus.of_json in
+      let exportSourceType =
+        field_map json__ "ExportSourceType" ExportSourceType.of_json in
+      let jobId = field_map json__ "JobId" JobId.of_json in
+      make ?statistics ?failureInfo ?completedTimestamp ?createdTimestamp
+        ?exportDataSource ?exportDestination ?jobStatus ?exportSourceType
+        ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module GetExportJobRequest =
+  struct
+    type nonrec t = {
+      jobId: JobId.t [@ocaml.doc "The export job ID."]}
+    let context_ = "GetExportJobRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value [("JobId", (Some (JobId.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to retrieve information about an export job using the export job ID."]
+module GetEmailTemplateResponse =
+  struct
+    type nonrec t =
+      {
+      templateName: EmailTemplateName.t option
+        [@ocaml.doc "The name of the template."];
+      templateContent: EmailTemplateContent.t option
+        [@ocaml.doc
+          "The content of the email template, composed of a subject line, an HTML part, and a text-only part."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) that are associated with the email template."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?templateName =
+      fun ?templateContent ->
+        fun ?tags -> fun () -> { templateName; templateContent; tags }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TemplateName",
+           (Option.map x.templateName ~f:EmailTemplateName.to_value));
+        ("TemplateContent",
+          (Option.map x.templateContent ~f:EmailTemplateContent.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let templateContent =
-        field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
+        (Option.map ~f:EmailTemplateContent.of_xml)
+          (Xml.child xml_arg0 "TemplateContent") in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
-      make ~templateContent ~templateName ()
+        (Option.map ~f:EmailTemplateName.of_xml)
+          (Xml.child xml_arg0 "TemplateName") in
+      make ?tags ?templateContent ?templateName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let templateContent =
+        field_map json__ "TemplateContent" EmailTemplateContent.of_json in
+      let templateName =
+        field_map json__ "TemplateName" EmailTemplateName.of_json in
+      make ?tags ?templateContent ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The following element is returned by the service."]
 module GetEmailTemplateRequest =
@@ -11012,9 +18143,9 @@ module GetEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11045,7 +18176,13 @@ module GetEmailIdentityResponse =
           "An array of objects that define the tags (keys and values) that are associated with the email identity."];
       configurationSetName: ConfigurationSetName.t option
         [@ocaml.doc
-          "The configuration set used by default when sending from this identity."]}
+          "The configuration set used by default when sending from this identity."];
+      verificationStatus: VerificationStatus.t option
+        [@ocaml.doc
+          "The verification status of the identity. The status can be one of the following: PENDING \226\128\147 The verification process was initiated, but Amazon SES hasn't yet been able to verify the identity. SUCCESS \226\128\147 The verification process completed successfully. FAILED \226\128\147 The verification process failed. TEMPORARY_FAILURE \226\128\147 A temporary issue is preventing Amazon SES from determining the verification status of the identity. NOT_STARTED \226\128\147 The verification process hasn't been initiated for the identity."];
+      verificationInfo: VerificationInfo.t option
+        [@ocaml.doc
+          "An object that contains additional information about the verification status for the identity."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `NotFoundException of NotFoundException.t 
@@ -11059,17 +18196,21 @@ module GetEmailIdentityResponse =
               fun ?policies ->
                 fun ?tags ->
                   fun ?configurationSetName ->
-                    fun () ->
-                      {
-                        identityType;
-                        feedbackForwardingStatus;
-                        verifiedForSendingStatus;
-                        dkimAttributes;
-                        mailFromAttributes;
-                        policies;
-                        tags;
-                        configurationSetName
-                      }
+                    fun ?verificationStatus ->
+                      fun ?verificationInfo ->
+                        fun () ->
+                          {
+                            identityType;
+                            feedbackForwardingStatus;
+                            verifiedForSendingStatus;
+                            dkimAttributes;
+                            mailFromAttributes;
+                            policies;
+                            tags;
+                            configurationSetName;
+                            verificationStatus;
+                            verificationInfo
+                          }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11125,9 +18266,19 @@ module GetEmailIdentityResponse =
         ("Policies", (Option.map x.policies ~f:PolicyMap.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("ConfigurationSetName",
-          (Option.map x.configurationSetName ~f:ConfigurationSetName.to_value))]
+          (Option.map x.configurationSetName ~f:ConfigurationSetName.to_value));
+        ("VerificationStatus",
+          (Option.map x.verificationStatus ~f:VerificationStatus.to_value));
+        ("VerificationInfo",
+          (Option.map x.verificationInfo ~f:VerificationInfo.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let verificationInfo =
+        (Option.map ~f:VerificationInfo.of_xml)
+          (Xml.child xml_arg0 "VerificationInfo") in
+      let verificationStatus =
+        (Option.map ~f:VerificationStatus.of_xml)
+          (Xml.child xml_arg0 "VerificationStatus") in
       let configurationSetName =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
@@ -11149,27 +18300,31 @@ module GetEmailIdentityResponse =
       let identityType =
         (Option.map ~f:IdentityType.of_xml)
           (Xml.child xml_arg0 "IdentityType") in
-      make ?configurationSetName ?tags ?policies ?mailFromAttributes
-        ?dkimAttributes ?verifiedForSendingStatus ?feedbackForwardingStatus
-        ?identityType ()
+      make ?verificationInfo ?verificationStatus ?configurationSetName ?tags
+        ?policies ?mailFromAttributes ?dkimAttributes
+        ?verifiedForSendingStatus ?feedbackForwardingStatus ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let verificationInfo =
+        field_map json__ "VerificationInfo" VerificationInfo.of_json in
+      let verificationStatus =
+        field_map json__ "VerificationStatus" VerificationStatus.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let policies = field_map json "Policies" PolicyMap.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let policies = field_map json__ "Policies" PolicyMap.of_json in
       let mailFromAttributes =
-        field_map json "MailFromAttributes" MailFromAttributes.of_json in
+        field_map json__ "MailFromAttributes" MailFromAttributes.of_json in
       let dkimAttributes =
-        field_map json "DkimAttributes" DkimAttributes.of_json in
+        field_map json__ "DkimAttributes" DkimAttributes.of_json in
       let verifiedForSendingStatus =
-        field_map json "VerifiedForSendingStatus" Enabled.of_json in
+        field_map json__ "VerifiedForSendingStatus" Enabled.of_json in
       let feedbackForwardingStatus =
-        field_map json "FeedbackForwardingStatus" Enabled.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
-      make ?configurationSetName ?tags ?policies ?mailFromAttributes
-        ?dkimAttributes ?verifiedForSendingStatus ?feedbackForwardingStatus
-        ?identityType ()
+        field_map json__ "FeedbackForwardingStatus" Enabled.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
+      make ?verificationInfo ?verificationStatus ?configurationSetName ?tags
+        ?policies ?mailFromAttributes ?dkimAttributes
+        ?verifiedForSendingStatus ?feedbackForwardingStatus ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about an email identity."]
 module GetEmailIdentityRequest =
@@ -11189,8 +18344,9 @@ module GetEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to return details about an email identity."]
@@ -11255,8 +18411,8 @@ module GetEmailIdentityPoliciesResponse =
         (Option.map ~f:PolicyMap.of_xml) (Xml.child xml_arg0 "Policies") in
       make ?policies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policies = field_map json "Policies" PolicyMap.of_json in
+    let of_json json__ =
+      let policies = field_map json__ "Policies" PolicyMap.of_json in
       make ?policies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Identity policies associated with email identity."]
@@ -11277,19 +18433,105 @@ module GetEmailIdentityPoliciesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to return the policies of an email identity."]
+module GetEmailAddressInsightsResponse =
+  struct
+    type nonrec t =
+      {
+      mailboxValidation: MailboxValidation.t option
+        [@ocaml.doc "Detailed validation results for the email address."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?mailboxValidation = fun () -> { mailboxValidation }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MailboxValidation",
+           (Option.map x.mailboxValidation ~f:MailboxValidation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mailboxValidation =
+        (Option.map ~f:MailboxValidation.of_xml)
+          (Xml.child xml_arg0 "MailboxValidation") in
+      make ?mailboxValidation ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mailboxValidation =
+        field_map json__ "MailboxValidation" MailboxValidation.of_json in
+      make ?mailboxValidation ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Validation insights about an email address."]
+module GetEmailAddressInsightsRequest =
+  struct
+    type nonrec t =
+      {
+      emailAddress: EmailAddress.t
+        [@ocaml.doc "The email address to analyze for validation insights."]}
+    let context_ = "GetEmailAddressInsightsRequest"
+    let make ~emailAddress = fun () -> { emailAddress }
+    let to_value x =
+      structure_to_value
+        [("EmailAddress", (Some (EmailAddress.to_value x.emailAddress)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let emailAddress =
+        EmailAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
+      make ~emailAddress ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let emailAddress =
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
+      make ~emailAddress ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to return validation insights about an email address."]
 module GetDomainStatisticsReportResponse =
   struct
     type nonrec t =
       {
-      overallVolume: OverallVolume.t
+      overallVolume: OverallVolume.t option
         [@ocaml.doc
           "An object that contains deliverability metrics for the domain that you specified. The data in this object is a summary of all of the data that was collected from the StartDate to the EndDate."];
-      dailyVolumes: DailyVolumes.t
+      dailyVolumes: DailyVolumes.t option
         [@ocaml.doc
           "An object that contains deliverability metrics for the domain that you specified. This object contains data for each day, starting on the StartDate and ending on the EndDate."]}
     type nonrec error =
@@ -11297,9 +18539,8 @@ module GetDomainStatisticsReportResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainStatisticsReportResponse"
-    let make ~overallVolume =
-      fun ~dailyVolumes -> fun () -> { overallVolume; dailyVolumes }
+    let make ?overallVolume =
+      fun ?dailyVolumes -> fun () -> { overallVolume; dailyVolumes }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -11342,24 +18583,25 @@ module GetDomainStatisticsReportResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OverallVolume", (Some (OverallVolume.to_value x.overallVolume)));
-        ("DailyVolumes", (Some (DailyVolumes.to_value x.dailyVolumes)))]
+        [("OverallVolume",
+           (Option.map x.overallVolume ~f:OverallVolume.to_value));
+        ("DailyVolumes",
+          (Option.map x.dailyVolumes ~f:DailyVolumes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dailyVolumes =
-        DailyVolumes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DailyVolumes") in
+        (Option.map ~f:DailyVolumes.of_xml)
+          (Xml.child xml_arg0 "DailyVolumes") in
       let overallVolume =
-        OverallVolume.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OverallVolume") in
-      make ~dailyVolumes ~overallVolume ()
+        (Option.map ~f:OverallVolume.of_xml)
+          (Xml.child xml_arg0 "OverallVolume") in
+      make ?dailyVolumes ?overallVolume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dailyVolumes =
-        field_map_exn json "DailyVolumes" DailyVolumes.of_json in
+    let of_json json__ =
+      let dailyVolumes = field_map json__ "DailyVolumes" DailyVolumes.of_json in
       let overallVolume =
-        field_map_exn json "OverallVolume" OverallVolume.of_json in
-      make ~dailyVolumes ~overallVolume ()
+        field_map json__ "OverallVolume" OverallVolume.of_json in
+      make ?dailyVolumes ?overallVolume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that includes statistics that are related to the domain that you specified."]
@@ -11396,10 +18638,10 @@ module GetDomainStatisticsReportRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~endDate ~startDate ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDate = field_map_exn json "EndDate" Timestamp.of_json in
-      let startDate = field_map_exn json "StartDate" Timestamp.of_json in
-      let domain = field_map_exn json "Domain" Identity.of_json in
+    let of_json json__ =
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
+      let domain = field_map_exn json__ "Domain" Identity.of_json in
       make ~endDate ~startDate ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to obtain deliverability metrics for a domain."]
@@ -11407,7 +18649,7 @@ module GetDomainDeliverabilityCampaignResponse =
   struct
     type nonrec t =
       {
-      domainDeliverabilityCampaign: DomainDeliverabilityCampaign.t
+      domainDeliverabilityCampaign: DomainDeliverabilityCampaign.t option
         [@ocaml.doc
           "An object that contains the deliverability data for the campaign."]}
     type nonrec error =
@@ -11415,8 +18657,7 @@ module GetDomainDeliverabilityCampaignResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainDeliverabilityCampaignResponse"
-    let make ~domainDeliverabilityCampaign =
+    let make ?domainDeliverabilityCampaign =
       fun () -> { domainDeliverabilityCampaign }
     let error_of_json name json =
       match name with
@@ -11461,22 +18702,20 @@ module GetDomainDeliverabilityCampaignResponse =
     let to_value x =
       structure_to_value
         [("DomainDeliverabilityCampaign",
-           (Some
-              (DomainDeliverabilityCampaign.to_value
-                 x.domainDeliverabilityCampaign)))]
+           (Option.map x.domainDeliverabilityCampaign
+              ~f:DomainDeliverabilityCampaign.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainDeliverabilityCampaign =
-        DomainDeliverabilityCampaign.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DomainDeliverabilityCampaign") in
-      make ~domainDeliverabilityCampaign ()
+        (Option.map ~f:DomainDeliverabilityCampaign.of_xml)
+          (Xml.child xml_arg0 "DomainDeliverabilityCampaign") in
+      make ?domainDeliverabilityCampaign ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainDeliverabilityCampaign =
-        field_map_exn json "DomainDeliverabilityCampaign"
+        field_map json__ "DomainDeliverabilityCampaign"
           DomainDeliverabilityCampaign.of_json in
-      make ~domainDeliverabilityCampaign ()
+      make ?domainDeliverabilityCampaign ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains all the deliverability data for a specific campaign. This data is available for a campaign only if the campaign sent email by using a domain that the Deliverability dashboard is enabled for."]
@@ -11499,8 +18738,8 @@ module GetDomainDeliverabilityCampaignRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CampaignId") in
       make ~campaignId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignId = field_map_exn json "CampaignId" CampaignId.of_json in
+    let of_json json__ =
+      let campaignId = field_map_exn json__ "CampaignId" CampaignId.of_json in
       make ~campaignId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11509,13 +18748,13 @@ module GetDeliverabilityTestReportResponse =
   struct
     type nonrec t =
       {
-      deliverabilityTestReport: DeliverabilityTestReport.t
+      deliverabilityTestReport: DeliverabilityTestReport.t option
         [@ocaml.doc
           "An object that contains the results of the predictive inbox placement test."];
-      overallPlacement: PlacementStatistics.t
+      overallPlacement: PlacementStatistics.t option
         [@ocaml.doc
           "An object that specifies how many test messages that were sent during the predictive inbox placement test were delivered to recipients' inboxes, how many were sent to recipients' spam folders, and how many weren't delivered."];
-      ispPlacements: IspPlacements.t
+      ispPlacements: IspPlacements.t option
         [@ocaml.doc
           "An object that describes how the test email was handled by several email providers, including Gmail, Hotmail, Yahoo, AOL, and others."];
       message: MessageContent.t option
@@ -11529,19 +18768,18 @@ module GetDeliverabilityTestReportResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDeliverabilityTestReportResponse"
-    let make ?message =
-      fun ?tags ->
-        fun ~deliverabilityTestReport ->
-          fun ~overallPlacement ->
-            fun ~ispPlacements ->
+    let make ?deliverabilityTestReport =
+      fun ?overallPlacement ->
+        fun ?ispPlacements ->
+          fun ?message ->
+            fun ?tags ->
               fun () ->
                 {
-                  message;
-                  tags;
                   deliverabilityTestReport;
                   overallPlacement;
-                  ispPlacements
+                  ispPlacements;
+                  message;
+                  tags
                 }
     let error_of_json name json =
       match name with
@@ -11586,11 +18824,12 @@ module GetDeliverabilityTestReportResponse =
     let to_value x =
       structure_to_value
         [("DeliverabilityTestReport",
-           (Some
-              (DeliverabilityTestReport.to_value x.deliverabilityTestReport)));
+           (Option.map x.deliverabilityTestReport
+              ~f:DeliverabilityTestReport.to_value));
         ("OverallPlacement",
-          (Some (PlacementStatistics.to_value x.overallPlacement)));
-        ("IspPlacements", (Some (IspPlacements.to_value x.ispPlacements)));
+          (Option.map x.overallPlacement ~f:PlacementStatistics.to_value));
+        ("IspPlacements",
+          (Option.map x.ispPlacements ~f:IspPlacements.to_value));
         ("Message", (Option.map x.message ~f:MessageContent.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
@@ -11599,30 +18838,29 @@ module GetDeliverabilityTestReportResponse =
       let message =
         (Option.map ~f:MessageContent.of_xml) (Xml.child xml_arg0 "Message") in
       let ispPlacements =
-        IspPlacements.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IspPlacements") in
+        (Option.map ~f:IspPlacements.of_xml)
+          (Xml.child xml_arg0 "IspPlacements") in
       let overallPlacement =
-        PlacementStatistics.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OverallPlacement") in
+        (Option.map ~f:PlacementStatistics.of_xml)
+          (Xml.child xml_arg0 "OverallPlacement") in
       let deliverabilityTestReport =
-        DeliverabilityTestReport.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestReport") in
-      make ?tags ?message ~ispPlacements ~overallPlacement
-        ~deliverabilityTestReport ()
+        (Option.map ~f:DeliverabilityTestReport.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestReport") in
+      make ?tags ?message ?ispPlacements ?overallPlacement
+        ?deliverabilityTestReport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let message = field_map json "Message" MessageContent.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let message = field_map json__ "Message" MessageContent.of_json in
       let ispPlacements =
-        field_map_exn json "IspPlacements" IspPlacements.of_json in
+        field_map json__ "IspPlacements" IspPlacements.of_json in
       let overallPlacement =
-        field_map_exn json "OverallPlacement" PlacementStatistics.of_json in
+        field_map json__ "OverallPlacement" PlacementStatistics.of_json in
       let deliverabilityTestReport =
-        field_map_exn json "DeliverabilityTestReport"
+        field_map json__ "DeliverabilityTestReport"
           DeliverabilityTestReport.of_json in
-      make ?tags ?message ~ispPlacements ~overallPlacement
-        ~deliverabilityTestReport ()
+      make ?tags ?message ?ispPlacements ?overallPlacement
+        ?deliverabilityTestReport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The results of the predictive inbox placement test."]
 module GetDeliverabilityTestReportRequest =
@@ -11643,8 +18881,8 @@ module GetDeliverabilityTestReportRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
       make ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map_exn json "ReportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map_exn json__ "ReportId" ReportId.of_json in
       make ~reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11653,12 +18891,12 @@ module GetDeliverabilityDashboardOptionsResponse =
   struct
     type nonrec t =
       {
-      dashboardEnabled: Enabled.t
+      dashboardEnabled: Enabled.t option
         [@ocaml.doc
           "Specifies whether the Deliverability dashboard is enabled. If this value is true, the dashboard is enabled."];
       subscriptionExpiryDate: Timestamp.t option
         [@ocaml.doc
-          "The date, in Unix time format, when your current subscription to the Deliverability dashboard is scheduled to expire, if your subscription is scheduled to expire at the end of the current calendar month. This value is null if you have an active subscription that isn\226\128\153t due to expire at the end of the month."];
+          "The date when your current subscription to the Deliverability dashboard is scheduled to expire, if your subscription is scheduled to expire at the end of the current calendar month. This value is null if you have an active subscription that isn\226\128\153t due to expire at the end of the month."];
       accountStatus: DeliverabilityDashboardAccountStatus.t option
         [@ocaml.doc
           "The current status of your Deliverability dashboard subscription. If this value is PENDING_EXPIRATION, your subscription is scheduled to expire at the end of the current calendar month."];
@@ -11674,19 +18912,18 @@ module GetDeliverabilityDashboardOptionsResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDeliverabilityDashboardOptionsResponse"
-    let make ?subscriptionExpiryDate =
-      fun ?accountStatus ->
-        fun ?activeSubscribedDomains ->
-          fun ?pendingExpirationSubscribedDomains ->
-            fun ~dashboardEnabled ->
+    let make ?dashboardEnabled =
+      fun ?subscriptionExpiryDate ->
+        fun ?accountStatus ->
+          fun ?activeSubscribedDomains ->
+            fun ?pendingExpirationSubscribedDomains ->
               fun () ->
                 {
+                  dashboardEnabled;
                   subscriptionExpiryDate;
                   accountStatus;
                   activeSubscribedDomains;
-                  pendingExpirationSubscribedDomains;
-                  dashboardEnabled
+                  pendingExpirationSubscribedDomains
                 }
     let error_of_json name json =
       match name with
@@ -11730,7 +18967,8 @@ module GetDeliverabilityDashboardOptionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DashboardEnabled", (Some (Enabled.to_value x.dashboardEnabled)));
+        [("DashboardEnabled",
+           (Option.map x.dashboardEnabled ~f:Enabled.to_value));
         ("SubscriptionExpiryDate",
           (Option.map x.subscriptionExpiryDate ~f:Timestamp.to_value));
         ("AccountStatus",
@@ -11757,27 +18995,27 @@ module GetDeliverabilityDashboardOptionsResponse =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "SubscriptionExpiryDate") in
       let dashboardEnabled =
-        Enabled.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
+        (Option.map ~f:Enabled.of_xml)
+          (Xml.child xml_arg0 "DashboardEnabled") in
       make ?pendingExpirationSubscribedDomains ?activeSubscribedDomains
-        ?accountStatus ?subscriptionExpiryDate ~dashboardEnabled ()
+        ?accountStatus ?subscriptionExpiryDate ?dashboardEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pendingExpirationSubscribedDomains =
-        field_map json "PendingExpirationSubscribedDomains"
+        field_map json__ "PendingExpirationSubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let activeSubscribedDomains =
-        field_map json "ActiveSubscribedDomains"
+        field_map json__ "ActiveSubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let accountStatus =
-        field_map json "AccountStatus"
+        field_map json__ "AccountStatus"
           DeliverabilityDashboardAccountStatus.of_json in
       let subscriptionExpiryDate =
-        field_map json "SubscriptionExpiryDate" Timestamp.of_json in
+        field_map json__ "SubscriptionExpiryDate" Timestamp.of_json in
       let dashboardEnabled =
-        field_map_exn json "DashboardEnabled" Enabled.of_json in
+        field_map json__ "DashboardEnabled" Enabled.of_json in
       make ?pendingExpirationSubscribedDomains ?activeSubscribedDomains
-        ?accountStatus ?subscriptionExpiryDate ~dashboardEnabled ()
+        ?accountStatus ?subscriptionExpiryDate ?dashboardEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that shows the status of the Deliverability dashboard."]
@@ -11865,10 +19103,10 @@ module GetDedicatedIpsResponse =
           (Xml.child xml_arg0 "DedicatedIps") in
       make ?nextToken ?dedicatedIps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dedicatedIps =
-        field_map json "DedicatedIps" DedicatedIpList.of_json in
+        field_map json__ "DedicatedIps" DedicatedIpList.of_json in
       make ?nextToken ?dedicatedIps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11904,10 +19142,10 @@ module GetDedicatedIpsRequest =
         (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
       make ?pageSize ?nextToken ?poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let poolName = field_map json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
       make ?pageSize ?nextToken ?poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11974,8 +19212,8 @@ module GetDedicatedIpResponse =
         (Option.map ~f:DedicatedIp.of_xml) (Xml.child xml_arg0 "DedicatedIp") in
       make ?dedicatedIp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dedicatedIp = field_map json "DedicatedIp" DedicatedIp.of_json in
+    let of_json json__ =
+      let dedicatedIp = field_map json__ "DedicatedIp" DedicatedIp.of_json in
       make ?dedicatedIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a dedicated IP address."]
@@ -11994,11 +19232,104 @@ module GetDedicatedIpRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ip = field_map_exn json "Ip" Ip.of_json in make ~ip ()
+    let of_json json__ =
+      let ip = field_map_exn json__ "Ip" Ip.of_json in make ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to obtain more information about a dedicated IP address."]
+module GetDedicatedIpPoolResponse =
+  struct
+    type nonrec t =
+      {
+      dedicatedIpPool: DedicatedIpPool.t option
+        [@ocaml.doc
+          "An object that contains information about a dedicated IP pool."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dedicatedIpPool = fun () -> { dedicatedIpPool }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DedicatedIpPool",
+           (Option.map x.dedicatedIpPool ~f:DedicatedIpPool.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dedicatedIpPool =
+        (Option.map ~f:DedicatedIpPool.of_xml)
+          (Xml.child xml_arg0 "DedicatedIpPool") in
+      make ?dedicatedIpPool ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dedicatedIpPool =
+        field_map json__ "DedicatedIpPool" DedicatedIpPool.of_json in
+      make ?dedicatedIpPool ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The following element is returned by the service."]
+module GetDedicatedIpPoolRequest =
+  struct
+    type nonrec t =
+      {
+      poolName: PoolName.t
+        [@ocaml.doc "The name of the dedicated IP pool to retrieve."]}
+    let context_ = "GetDedicatedIpPoolRequest"
+    let make ~poolName = fun () -> { poolName }
+    let to_value x =
+      structure_to_value
+        [("PoolName", (Some (PoolName.to_value x.poolName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let poolName =
+        PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
+      make ~poolName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
+      make ~poolName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to obtain more information about a dedicated IP pool."]
 module GetCustomVerificationEmailTemplateResponse =
   struct
     type nonrec t =
@@ -12012,6 +19343,9 @@ module GetCustomVerificationEmailTemplateResponse =
         [@ocaml.doc "The subject line of the custom verification email."];
       templateContent: TemplateContent.t option
         [@ocaml.doc "The content of the custom verification email."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) that are associated with the custom verification email template."];
       successRedirectionURL: SuccessRedirectionURL.t option
         [@ocaml.doc
           "The URL that the recipient of the verification email is sent to if his or her address is successfully verified."];
@@ -12027,17 +19361,19 @@ module GetCustomVerificationEmailTemplateResponse =
       fun ?fromEmailAddress ->
         fun ?templateSubject ->
           fun ?templateContent ->
-            fun ?successRedirectionURL ->
-              fun ?failureRedirectionURL ->
-                fun () ->
-                  {
-                    templateName;
-                    fromEmailAddress;
-                    templateSubject;
-                    templateContent;
-                    successRedirectionURL;
-                    failureRedirectionURL
-                  }
+            fun ?tags ->
+              fun ?successRedirectionURL ->
+                fun ?failureRedirectionURL ->
+                  fun () ->
+                    {
+                      templateName;
+                      fromEmailAddress;
+                      templateSubject;
+                      templateContent;
+                      tags;
+                      successRedirectionURL;
+                      failureRedirectionURL
+                    }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12088,6 +19424,7 @@ module GetCustomVerificationEmailTemplateResponse =
           (Option.map x.templateSubject ~f:EmailTemplateSubject.to_value));
         ("TemplateContent",
           (Option.map x.templateContent ~f:TemplateContent.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("SuccessRedirectionURL",
           (Option.map x.successRedirectionURL
              ~f:SuccessRedirectionURL.to_value));
@@ -12102,6 +19439,7 @@ module GetCustomVerificationEmailTemplateResponse =
       let successRedirectionURL =
         (Option.map ~f:SuccessRedirectionURL.of_xml)
           (Xml.child xml_arg0 "SuccessRedirectionURL") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let templateContent =
         (Option.map ~f:TemplateContent.of_xml)
           (Xml.child xml_arg0 "TemplateContent") in
@@ -12114,24 +19452,27 @@ module GetCustomVerificationEmailTemplateResponse =
       let templateName =
         (Option.map ~f:EmailTemplateName.of_xml)
           (Xml.child xml_arg0 "TemplateName") in
-      make ?failureRedirectionURL ?successRedirectionURL ?templateContent
-        ?templateSubject ?fromEmailAddress ?templateName ()
+      make ?failureRedirectionURL ?successRedirectionURL ?tags
+        ?templateContent ?templateSubject ?fromEmailAddress ?templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map json "FailureRedirectionURL" FailureRedirectionURL.of_json in
+        field_map json__ "FailureRedirectionURL"
+          FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map json "SuccessRedirectionURL" SuccessRedirectionURL.of_json in
+        field_map json__ "SuccessRedirectionURL"
+          SuccessRedirectionURL.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let templateContent =
-        field_map json "TemplateContent" TemplateContent.of_json in
+        field_map json__ "TemplateContent" TemplateContent.of_json in
       let templateSubject =
-        field_map json "TemplateSubject" EmailTemplateSubject.of_json in
+        field_map json__ "TemplateSubject" EmailTemplateSubject.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
       let templateName =
-        field_map json "TemplateName" EmailTemplateName.of_json in
-      make ?failureRedirectionURL ?successRedirectionURL ?templateContent
-        ?templateSubject ?fromEmailAddress ?templateName ()
+        field_map json__ "TemplateName" EmailTemplateName.of_json in
+      make ?failureRedirectionURL ?successRedirectionURL ?tags
+        ?templateContent ?templateSubject ?fromEmailAddress ?templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The following elements are returned by the service."]
 module GetCustomVerificationEmailTemplateRequest =
@@ -12153,9 +19494,9 @@ module GetCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12168,7 +19509,7 @@ module GetContactResponse =
         [@ocaml.doc
           "The name of the contact list to which the contact belongs."];
       emailAddress: EmailAddress.t option
-        [@ocaml.doc "The contact's email addres."];
+        [@ocaml.doc "The contact's email address."];
       topicPreferences: TopicPreferenceList.t option
         [@ocaml.doc
           "The contact's preference for being opted-in to or opted-out of a topic.>"];
@@ -12297,22 +19638,23 @@ module GetContactResponse =
         ?unsubscribeAll ?topicDefaultPreferences ?topicPreferences
         ?emailAddress ?contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
       let attributesData =
-        field_map json "AttributesData" AttributesData.of_json in
+        field_map json__ "AttributesData" AttributesData.of_json in
       let unsubscribeAll =
-        field_map json "UnsubscribeAll" UnsubscribeAll.of_json in
+        field_map json__ "UnsubscribeAll" UnsubscribeAll.of_json in
       let topicDefaultPreferences =
-        field_map json "TopicDefaultPreferences" TopicPreferenceList.of_json in
+        field_map json__ "TopicDefaultPreferences"
+          TopicPreferenceList.of_json in
       let topicPreferences =
-        field_map json "TopicPreferences" TopicPreferenceList.of_json in
-      let emailAddress = field_map json "EmailAddress" EmailAddress.of_json in
+        field_map json__ "TopicPreferences" TopicPreferenceList.of_json in
+      let emailAddress = field_map json__ "EmailAddress" EmailAddress.of_json in
       let contactListName =
-        field_map json "ContactListName" ContactListName.of_json in
+        field_map json__ "ContactListName" ContactListName.of_json in
       make ?lastUpdatedTimestamp ?createdTimestamp ?attributesData
         ?unsubscribeAll ?topicDefaultPreferences ?topicPreferences
         ?emailAddress ?contactListName ()
@@ -12325,7 +19667,8 @@ module GetContactRequest =
       contactListName: ContactListName.t
         [@ocaml.doc
           "The name of the contact list to which the contact belongs."];
-      emailAddress: EmailAddress.t [@ocaml.doc "The contact's email addres."]}
+      emailAddress: EmailAddress.t
+        [@ocaml.doc "The contact's email address."]}
     let context_ = "GetContactRequest"
     let make ~contactListName =
       fun ~emailAddress -> fun () -> { contactListName; emailAddress }
@@ -12344,11 +19687,11 @@ module GetContactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~emailAddress ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ~emailAddress ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns a contact from a contact list."]
@@ -12460,16 +19803,16 @@ module GetContactListResponse =
       make ?tags ?lastUpdatedTimestamp ?createdTimestamp ?description ?topics
         ?contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let lastUpdatedTimestamp =
-        field_map json "LastUpdatedTimestamp" Timestamp.of_json in
+        field_map json__ "LastUpdatedTimestamp" Timestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" Timestamp.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let topics = field_map json "Topics" Topics.of_json in
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let topics = field_map json__ "Topics" Topics.of_json in
       let contactListName =
-        field_map json "ContactListName" ContactListName.of_json in
+        field_map json__ "ContactListName" ContactListName.of_json in
       make ?tags ?lastUpdatedTimestamp ?createdTimestamp ?description ?topics
         ?contactListName ()
     let to_json v = composed_to_json to_value v
@@ -12494,9 +19837,9 @@ module GetContactListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12524,7 +19867,13 @@ module GetConfigurationSetResponse =
           "An array of objects that define the tags (keys and values) that are associated with the configuration set."];
       suppressionOptions: SuppressionOptions.t option
         [@ocaml.doc
-          "An object that contains information about the suppression list preferences for your account."]}
+          "An object that contains information about the suppression list preferences for your account."];
+      vdmOptions: VdmOptions.t option
+        [@ocaml.doc
+          "An object that contains information about the VDM preferences for your configuration set."];
+      archivingOptions: ArchivingOptions.t option
+        [@ocaml.doc
+          "An object that defines the MailManager archive where sent emails are archived that you send using the configuration set."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `NotFoundException of NotFoundException.t 
@@ -12537,16 +19886,20 @@ module GetConfigurationSetResponse =
             fun ?sendingOptions ->
               fun ?tags ->
                 fun ?suppressionOptions ->
-                  fun () ->
-                    {
-                      configurationSetName;
-                      trackingOptions;
-                      deliveryOptions;
-                      reputationOptions;
-                      sendingOptions;
-                      tags;
-                      suppressionOptions
-                    }
+                  fun ?vdmOptions ->
+                    fun ?archivingOptions ->
+                      fun () ->
+                        {
+                          configurationSetName;
+                          trackingOptions;
+                          deliveryOptions;
+                          reputationOptions;
+                          sendingOptions;
+                          tags;
+                          suppressionOptions;
+                          vdmOptions;
+                          archivingOptions
+                        }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12602,9 +19955,17 @@ module GetConfigurationSetResponse =
           (Option.map x.sendingOptions ~f:SendingOptions.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("SuppressionOptions",
-          (Option.map x.suppressionOptions ~f:SuppressionOptions.to_value))]
+          (Option.map x.suppressionOptions ~f:SuppressionOptions.to_value));
+        ("VdmOptions", (Option.map x.vdmOptions ~f:VdmOptions.to_value));
+        ("ArchivingOptions",
+          (Option.map x.archivingOptions ~f:ArchivingOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let archivingOptions =
+        (Option.map ~f:ArchivingOptions.of_xml)
+          (Xml.child xml_arg0 "ArchivingOptions") in
+      let vdmOptions =
+        (Option.map ~f:VdmOptions.of_xml) (Xml.child xml_arg0 "VdmOptions") in
       let suppressionOptions =
         (Option.map ~f:SuppressionOptions.of_xml)
           (Xml.child xml_arg0 "SuppressionOptions") in
@@ -12624,25 +19985,30 @@ module GetConfigurationSetResponse =
       let configurationSetName =
         (Option.map ~f:ConfigurationSetName.of_xml)
           (Xml.child xml_arg0 "ConfigurationSetName") in
-      make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
-        ?deliveryOptions ?trackingOptions ?configurationSetName ()
+      make ?archivingOptions ?vdmOptions ?suppressionOptions ?tags
+        ?sendingOptions ?reputationOptions ?deliveryOptions ?trackingOptions
+        ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let archivingOptions =
+        field_map json__ "ArchivingOptions" ArchivingOptions.of_json in
+      let vdmOptions = field_map json__ "VdmOptions" VdmOptions.of_json in
       let suppressionOptions =
-        field_map json "SuppressionOptions" SuppressionOptions.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "SuppressionOptions" SuppressionOptions.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let sendingOptions =
-        field_map json "SendingOptions" SendingOptions.of_json in
+        field_map json__ "SendingOptions" SendingOptions.of_json in
       let reputationOptions =
-        field_map json "ReputationOptions" ReputationOptions.of_json in
+        field_map json__ "ReputationOptions" ReputationOptions.of_json in
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let trackingOptions =
-        field_map json "TrackingOptions" TrackingOptions.of_json in
+        field_map json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
-        ?deliveryOptions ?trackingOptions ?configurationSetName ()
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      make ?archivingOptions ?vdmOptions ?suppressionOptions ?tags
+        ?sendingOptions ?reputationOptions ?deliveryOptions ?trackingOptions
+        ?configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a configuration set."]
 module GetConfigurationSetRequest =
@@ -12664,9 +20030,9 @@ module GetConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -12736,9 +20102,9 @@ module GetConfigurationSetEventDestinationsResponse =
           (Xml.child xml_arg0 "EventDestinations") in
       make ?eventDestinations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinations =
-        field_map json "EventDestinations" EventDestinations.of_json in
+        field_map json__ "EventDestinations" EventDestinations.of_json in
       make ?eventDestinations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12763,9 +20129,9 @@ module GetConfigurationSetEventDestinationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -12775,7 +20141,7 @@ module GetBlacklistReportsResponse =
   struct
     type nonrec t =
       {
-      blacklistReport: BlacklistReport.t
+      blacklistReport: BlacklistReport.t option
         [@ocaml.doc
           "An object that contains information about a blacklist that one of your dedicated IP addresses appears on."]}
     type nonrec error =
@@ -12783,8 +20149,7 @@ module GetBlacklistReportsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBlacklistReportsResponse"
-    let make ~blacklistReport = fun () -> { blacklistReport }
+    let make ?blacklistReport = fun () -> { blacklistReport }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12828,18 +20193,18 @@ module GetBlacklistReportsResponse =
     let to_value x =
       structure_to_value
         [("BlacklistReport",
-           (Some (BlacklistReport.to_value x.blacklistReport)))]
+           (Option.map x.blacklistReport ~f:BlacklistReport.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let blacklistReport =
-        BlacklistReport.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BlacklistReport") in
-      make ~blacklistReport ()
+        (Option.map ~f:BlacklistReport.of_xml)
+          (Xml.child xml_arg0 "BlacklistReport") in
+      make ?blacklistReport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blacklistReport =
-        field_map_exn json "BlacklistReport" BlacklistReport.of_json in
-      make ~blacklistReport ()
+        field_map json__ "BlacklistReport" BlacklistReport.of_json in
+      make ?blacklistReport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about blacklist events."]
@@ -12863,9 +20228,9 @@ module GetBlacklistReportsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BlacklistItemNames") in
       make ~blacklistItemNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blacklistItemNames =
-        field_map_exn json "BlacklistItemNames" BlacklistItemNames.of_json in
+        field_map_exn json__ "BlacklistItemNames" BlacklistItemNames.of_json in
       make ~blacklistItemNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12882,7 +20247,7 @@ module GetAccountResponse =
           "The reputation status of your Amazon SES account. The status can be one of the following: HEALTHY \226\128\147 There are no reputation-related issues that currently impact your account. PROBATION \226\128\147 We've identified potential issues with your Amazon SES account. We're placing your account under review while you work on correcting these issues. SHUTDOWN \226\128\147 Your account's ability to send email is currently paused because of an issue with the email sent from your account. When you correct the issue, you can contact us and request that your account's ability to send email is resumed."];
       productionAccessEnabled: Enabled.t option
         [@ocaml.doc
-          "Indicates whether or not your account has production access in the current Amazon Web Services Region. If the value is false, then your account is in the sandbox. When your account is in the sandbox, you can only send email to verified identities. Additionally, the maximum number of emails you can send in a 24-hour period (your sending quota) is 200, and the maximum number of emails you can send per second (your maximum sending rate) is 1. If the value is true, then your account has production access. When your account has production access, you can send email to any address. The sending quota and maximum sending rate for your account vary based on your specific use case."];
+          "Indicates whether or not your account has production access in the current Amazon Web Services Region. If the value is false, then your account is in the sandbox. When your account is in the sandbox, you can only send email to verified identities. If the value is true, then your account has production access. When your account has production access, you can send email to any address. The sending quota and maximum sending rate for your account vary based on your specific use case."];
       sendQuota: SendQuota.t option
         [@ocaml.doc
           "An object that contains information about the per-day and per-second sending limits for your Amazon SES account in the current Amazon Web Services Region."];
@@ -12893,7 +20258,10 @@ module GetAccountResponse =
         [@ocaml.doc
           "An object that contains information about the email address suppression preferences for your account in the current Amazon Web Services Region."];
       details: AccountDetails.t option
-        [@ocaml.doc "An object that defines your account details."]}
+        [@ocaml.doc "An object that defines your account details."];
+      vdmAttributes: VdmAttributes.t option
+        [@ocaml.doc
+          "The VDM attributes that apply to your Amazon SES account."]}
     type nonrec error =
       [ `BadRequestException of BadRequestException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
@@ -12905,16 +20273,18 @@ module GetAccountResponse =
             fun ?sendingEnabled ->
               fun ?suppressionAttributes ->
                 fun ?details ->
-                  fun () ->
-                    {
-                      dedicatedIpAutoWarmupEnabled;
-                      enforcementStatus;
-                      productionAccessEnabled;
-                      sendQuota;
-                      sendingEnabled;
-                      suppressionAttributes;
-                      details
-                    }
+                  fun ?vdmAttributes ->
+                    fun () ->
+                      {
+                        dedicatedIpAutoWarmupEnabled;
+                        enforcementStatus;
+                        productionAccessEnabled;
+                        sendQuota;
+                        sendingEnabled;
+                        suppressionAttributes;
+                        details;
+                        vdmAttributes
+                      }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -12961,9 +20331,14 @@ module GetAccountResponse =
         ("SuppressionAttributes",
           (Option.map x.suppressionAttributes
              ~f:SuppressionAttributes.to_value));
-        ("Details", (Option.map x.details ~f:AccountDetails.to_value))]
+        ("Details", (Option.map x.details ~f:AccountDetails.to_value));
+        ("VdmAttributes",
+          (Option.map x.vdmAttributes ~f:VdmAttributes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let vdmAttributes =
+        (Option.map ~f:VdmAttributes.of_xml)
+          (Xml.child xml_arg0 "VdmAttributes") in
       let details =
         (Option.map ~f:AccountDetails.of_xml) (Xml.child xml_arg0 "Details") in
       let suppressionAttributes =
@@ -12982,24 +20357,27 @@ module GetAccountResponse =
       let dedicatedIpAutoWarmupEnabled =
         (Option.map ~f:Enabled.of_xml)
           (Xml.child xml_arg0 "DedicatedIpAutoWarmupEnabled") in
-      make ?details ?suppressionAttributes ?sendingEnabled ?sendQuota
-        ?productionAccessEnabled ?enforcementStatus
+      make ?vdmAttributes ?details ?suppressionAttributes ?sendingEnabled
+        ?sendQuota ?productionAccessEnabled ?enforcementStatus
         ?dedicatedIpAutoWarmupEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let details = field_map json "Details" AccountDetails.of_json in
+    let of_json json__ =
+      let vdmAttributes =
+        field_map json__ "VdmAttributes" VdmAttributes.of_json in
+      let details = field_map json__ "Details" AccountDetails.of_json in
       let suppressionAttributes =
-        field_map json "SuppressionAttributes" SuppressionAttributes.of_json in
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
-      let sendQuota = field_map json "SendQuota" SendQuota.of_json in
+        field_map json__ "SuppressionAttributes"
+          SuppressionAttributes.of_json in
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
+      let sendQuota = field_map json__ "SendQuota" SendQuota.of_json in
       let productionAccessEnabled =
-        field_map json "ProductionAccessEnabled" Enabled.of_json in
+        field_map json__ "ProductionAccessEnabled" Enabled.of_json in
       let enforcementStatus =
-        field_map json "EnforcementStatus" GeneralEnforcementStatus.of_json in
+        field_map json__ "EnforcementStatus" GeneralEnforcementStatus.of_json in
       let dedicatedIpAutoWarmupEnabled =
-        field_map json "DedicatedIpAutoWarmupEnabled" Enabled.of_json in
-      make ?details ?suppressionAttributes ?sendingEnabled ?sendQuota
-        ?productionAccessEnabled ?enforcementStatus
+        field_map json__ "DedicatedIpAutoWarmupEnabled" Enabled.of_json in
+      make ?vdmAttributes ?details ?suppressionAttributes ?sendingEnabled
+        ?sendQuota ?productionAccessEnabled ?enforcementStatus
         ?dedicatedIpAutoWarmupEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13017,6 +20395,180 @@ module GetAccountRequest =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to obtain information about the email-sending capabilities of your Amazon SES account."]
+module DeleteTenantResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body."]
+module DeleteTenantResourceAssociationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body."]
+module DeleteTenantResourceAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc
+          "The name of the tenant to remove the resource association from."];
+      resourceArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource to remove from the tenant association."]}
+    let context_ = "DeleteTenantResourceAssociationRequest"
+    let make ~tenantName =
+      fun ~resourceArn -> fun () -> { tenantName; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)));
+        ("ResourceArn", (Some (AmazonResourceName.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ~resourceArn ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ~resourceArn ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to delete an association between a tenant and a resource."]
+module DeleteTenantRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc "The name of the tenant to delete."]}
+    let context_ = "DeleteTenantRequest"
+    let make ~tenantName = fun () -> { tenantName }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents a request to delete a tenant."]
 module DeleteSuppressedDestinationResponse =
   struct
     type nonrec t = unit
@@ -13094,13 +20646,118 @@ module DeleteSuppressedDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailAddress") in
       make ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       make ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to remove an email address from the suppression list for your account."]
+module DeleteMultiRegionEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      status: Status.t option
+        [@ocaml.doc
+          "A status of the multi-region endpoint (global-endpoint) right after the delete request. CREATING \226\128\147 The resource is being provisioned. READY \226\128\147 The resource is ready to use. FAILED \226\128\147 The resource failed to be provisioned. DELETING \226\128\147 The resource is being deleted as requested."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun () -> { status }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:Status.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module DeleteMultiRegionEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      endpointName: EndpointName.t
+        [@ocaml.doc
+          "The name of the multi-region endpoint (global-endpoint) to be deleted."]}
+    let context_ = "DeleteMultiRegionEndpointRequest"
+    let make ~endpointName = fun () -> { endpointName }
+    let to_value x =
+      structure_to_value
+        [("EndpointName", (Some (EndpointName.to_value x.endpointName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointName =
+        EndpointName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
+      make ~endpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointName =
+        field_map_exn json__ "EndpointName" EndpointName.of_json in
+      make ~endpointName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to delete a multi-region endpoint (global-endpoint)."]
 module DeleteEmailTemplateResponse =
   struct
     type nonrec t = unit
@@ -13177,9 +20834,9 @@ module DeleteEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13272,8 +20929,9 @@ module DeleteEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13361,9 +21019,10 @@ module DeleteEmailIdentityPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policyName ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~policyName ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13455,8 +21114,8 @@ module DeleteDedicatedIpPoolRequest =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ~poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolName = field_map_exn json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
       make ~poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a dedicated IP pool."]
@@ -13537,9 +21196,9 @@ module DeleteCustomVerificationEmailTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
       make ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
       make ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13628,11 +21287,11 @@ module DeleteContactRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~emailAddress ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ~emailAddress ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a contact from a contact list."]
@@ -13724,9 +21383,9 @@ module DeleteContactListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13819,9 +21478,9 @@ module DeleteConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -13913,17 +21572,401 @@ module DeleteConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to delete an event destination from a configuration set."]
+module CreateTenantResponse =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t option [@ocaml.doc "The name of the tenant."];
+      tenantId: TenantId.t option
+        [@ocaml.doc "A unique identifier for the tenant."];
+      tenantArn: AmazonResourceName.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the tenant."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc "The date and time when the tenant was created."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) associated with the tenant."];
+      sendingStatus: SendingStatus.t option
+        [@ocaml.doc "The status of email sending capability for the tenant."]}
+    type nonrec error =
+      [ `AlreadyExistsException of AlreadyExistsException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tenantName =
+      fun ?tenantId ->
+        fun ?tenantArn ->
+          fun ?createdTimestamp ->
+            fun ?tags ->
+              fun ?sendingStatus ->
+                fun () ->
+                  {
+                    tenantName;
+                    tenantId;
+                    tenantArn;
+                    createdTimestamp;
+                    tags;
+                    sendingStatus
+                  }
+    let error_of_json name json =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_json json)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_xml xml)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "AlreadyExistsException"));
+            ("details", (AlreadyExistsException.to_json e))]
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Option.map x.tenantName ~f:TenantName.to_value));
+        ("TenantId", (Option.map x.tenantId ~f:TenantId.to_value));
+        ("TenantArn",
+          (Option.map x.tenantArn ~f:AmazonResourceName.to_value));
+        ("CreatedTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("SendingStatus",
+          (Option.map x.sendingStatus ~f:SendingStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sendingStatus =
+        (Option.map ~f:SendingStatus.of_xml)
+          (Xml.child xml_arg0 "SendingStatus") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "CreatedTimestamp") in
+      let tenantArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "TenantArn") in
+      let tenantId =
+        (Option.map ~f:TenantId.of_xml) (Xml.child xml_arg0 "TenantId") in
+      let tenantName =
+        (Option.map ~f:TenantName.of_xml) (Xml.child xml_arg0 "TenantName") in
+      make ?sendingStatus ?tags ?createdTimestamp ?tenantArn ?tenantId
+        ?tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sendingStatus =
+        field_map json__ "SendingStatus" SendingStatus.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let createdTimestamp =
+        field_map json__ "CreatedTimestamp" Timestamp.of_json in
+      let tenantArn = field_map json__ "TenantArn" AmazonResourceName.of_json in
+      let tenantId = field_map json__ "TenantId" TenantId.of_json in
+      let tenantName = field_map json__ "TenantName" TenantName.of_json in
+      make ?sendingStatus ?tags ?createdTimestamp ?tenantArn ?tenantId
+        ?tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a newly created tenant."]
+module CreateTenantResourceAssociationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AlreadyExistsException of AlreadyExistsException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_json json)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_xml xml)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "AlreadyExistsException"));
+            ("details", (AlreadyExistsException.to_json e))]
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If the action is successful, the service sends back an HTTP 200 response with an empty HTTP body."]
+module CreateTenantResourceAssociationRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc "The name of the tenant to associate the resource with."];
+      resourceArn: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the resource to associate with the tenant."]}
+    let context_ = "CreateTenantResourceAssociationRequest"
+    let make ~tenantName =
+      fun ~resourceArn -> fun () -> { tenantName; resourceArn }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)));
+        ("ResourceArn", (Some (AmazonResourceName.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ~resourceArn ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ~resourceArn ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to associate a resource with a tenant. Resources can be email identities, configuration sets, or email templates. When you associate a resource with a tenant, you can use that resource when sending emails on behalf of that tenant."]
+module CreateTenantRequest =
+  struct
+    type nonrec t =
+      {
+      tenantName: TenantName.t
+        [@ocaml.doc
+          "The name of the tenant to create. The name can contain up to 64 alphanumeric characters, including letters, numbers, hyphens (-) and underscores (_) only."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) to associate with the tenant"]}
+    let context_ = "CreateTenantRequest"
+    let make ?tags = fun ~tenantName -> fun () -> { tags; tenantName }
+    let to_value x =
+      structure_to_value
+        [("TenantName", (Some (TenantName.to_value x.tenantName)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let tenantName =
+        TenantName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TenantName") in
+      make ?tags ~tenantName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let tenantName = field_map_exn json__ "TenantName" TenantName.of_json in
+      make ?tags ~tenantName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to create a tenant. Tenants are logical containers that group related SES resources together. Each tenant can have its own set of resources like email identities, configuration sets, and templates, along with reputation metrics and sending status. This helps isolate and manage email sending for different customers or business units within your Amazon SES API v2 account."]
+module CreateMultiRegionEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      status: Status.t option
+        [@ocaml.doc
+          "A status of the multi-region endpoint (global-endpoint) right after the create request. CREATING \226\128\147 The resource is being provisioned. READY \226\128\147 The resource is ready to use. FAILED \226\128\147 The resource failed to be provisioned. DELETING \226\128\147 The resource is being deleted as requested."];
+      endpointId: EndpointId.t option
+        [@ocaml.doc "The ID of the multi-region endpoint (global-endpoint)."]}
+    type nonrec error =
+      [ `AlreadyExistsException of AlreadyExistsException.t 
+      | `BadRequestException of BadRequestException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status = fun ?endpointId -> fun () -> { status; endpointId }
+    let error_of_json name json =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_json json)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AlreadyExistsException" ->
+          `AlreadyExistsException (AlreadyExistsException.of_xml xml)
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "AlreadyExistsException"));
+            ("details", (AlreadyExistsException.to_json e))]
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:Status.to_value));
+        ("EndpointId", (Option.map x.endpointId ~f:EndpointId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpointId =
+        (Option.map ~f:EndpointId.of_xml) (Xml.child xml_arg0 "EndpointId") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?endpointId ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpointId = field_map json__ "EndpointId" EndpointId.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      make ?endpointId ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module CreateMultiRegionEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      endpointName: EndpointName.t
+        [@ocaml.doc
+          "The name of the multi-region endpoint (global-endpoint)."];
+      details: Details.t
+        [@ocaml.doc
+          "Contains details of a multi-region endpoint (global-endpoint) being created."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) to associate with the multi-region endpoint (global-endpoint)."]}
+    let context_ = "CreateMultiRegionEndpointRequest"
+    let make ?tags =
+      fun ~endpointName ->
+        fun ~details -> fun () -> { tags; endpointName; details }
+    let to_value x =
+      structure_to_value
+        [("EndpointName", (Some (EndpointName.to_value x.endpointName)));
+        ("Details", (Some (Details.to_value x.details)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let details =
+        Details.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Details") in
+      let endpointName =
+        EndpointName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndpointName") in
+      make ?tags ~details ~endpointName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let details = field_map_exn json__ "Details" Details.of_json in
+      let endpointName =
+        field_map_exn json__ "EndpointName" EndpointName.of_json in
+      make ?tags ~details ~endpointName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to create a multi-region endpoint (global-endpoint)."]
 module CreateImportJobResponse =
   struct
     type nonrec t =
@@ -13983,8 +22026,8 @@ module CreateImportJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
       make ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map json "JobId" JobId.of_json in make ?jobId ()
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
@@ -14016,15 +22059,125 @@ module CreateImportJobRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ImportDestination") in
       make ~importDataSource ~importDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let importDataSource =
-        field_map_exn json "ImportDataSource" ImportDataSource.of_json in
+        field_map_exn json__ "ImportDataSource" ImportDataSource.of_json in
       let importDestination =
-        field_map_exn json "ImportDestination" ImportDestination.of_json in
+        field_map_exn json__ "ImportDestination" ImportDestination.of_json in
       make ~importDataSource ~importDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request to create an import job from a data source for a data destination."]
+module CreateExportJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc "A string that represents the export job ID."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId = fun () -> { jobId }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("JobId", (Option.map x.jobId ~f:JobId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "JobId") in
+      make ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "JobId" JobId.of_json in make ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module CreateExportJobRequest =
+  struct
+    type nonrec t =
+      {
+      exportDataSource: ExportDataSource.t
+        [@ocaml.doc "The data source for the export job."];
+      exportDestination: ExportDestination.t
+        [@ocaml.doc "The destination for the export job."]}
+    let context_ = "CreateExportJobRequest"
+    let make ~exportDataSource =
+      fun ~exportDestination ->
+        fun () -> { exportDataSource; exportDestination }
+    let to_value x =
+      structure_to_value
+        [("ExportDataSource",
+           (Some (ExportDataSource.to_value x.exportDataSource)));
+        ("ExportDestination",
+          (Some (ExportDestination.to_value x.exportDestination)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let exportDestination =
+        ExportDestination.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExportDestination") in
+      let exportDataSource =
+        ExportDataSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ExportDataSource") in
+      make ~exportDestination ~exportDataSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let exportDestination =
+        field_map_exn json__ "ExportDestination" ExportDestination.of_json in
+      let exportDataSource =
+        field_map_exn json__ "ExportDataSource" ExportDataSource.of_json in
+      make ~exportDestination ~exportDataSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to create an export job from a data source to a data destination."]
 module CreateEmailTemplateResponse =
   struct
     type nonrec t = unit
@@ -14100,31 +22253,39 @@ module CreateEmailTemplateRequest =
         [@ocaml.doc "The name of the template."];
       templateContent: EmailTemplateContent.t
         [@ocaml.doc
-          "The content of the email template, composed of a subject line, an HTML part, and a text-only part."]}
+          "The content of the email template, composed of a subject line, an HTML part, and a text-only part."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) to associate with the email template."]}
     let context_ = "CreateEmailTemplateRequest"
-    let make ~templateName =
-      fun ~templateContent -> fun () -> { templateName; templateContent }
+    let make ?tags =
+      fun ~templateName ->
+        fun ~templateContent ->
+          fun () -> { tags; templateName; templateContent }
     let to_value x =
       structure_to_value
         [("TemplateName", (Some (EmailTemplateName.to_value x.templateName)));
         ("TemplateContent",
-          (Some (EmailTemplateContent.to_value x.templateContent)))]
+          (Some (EmailTemplateContent.to_value x.templateContent)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let templateContent =
         EmailTemplateContent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateContent") in
       let templateName =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
-      make ~templateContent ~templateName ()
+      make ?tags ~templateContent ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let templateContent =
-        field_map_exn json "TemplateContent" EmailTemplateContent.of_json in
+        field_map_exn json__ "TemplateContent" EmailTemplateContent.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
-      make ~templateContent ~templateName ()
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
+      make ?tags ~templateContent ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request to create an email template. For more information, see the Amazon SES Developer Guide."]
@@ -14241,12 +22402,12 @@ module CreateEmailIdentityResponse =
           (Xml.child xml_arg0 "IdentityType") in
       make ?dkimAttributes ?verifiedForSendingStatus ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimAttributes =
-        field_map json "DkimAttributes" DkimAttributes.of_json in
+        field_map json__ "DkimAttributes" DkimAttributes.of_json in
       let verifiedForSendingStatus =
-        field_map json "VerifiedForSendingStatus" Enabled.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+        field_map json__ "VerifiedForSendingStatus" Enabled.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       make ?dkimAttributes ?verifiedForSendingStatus ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14302,13 +22463,15 @@ module CreateEmailIdentityRequest =
       make ?configurationSetName ?dkimSigningAttributes ?tags ~emailIdentity
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       let dkimSigningAttributes =
-        field_map json "DkimSigningAttributes" DkimSigningAttributes.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "DkimSigningAttributes"
+          DkimSigningAttributes.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?configurationSetName ?dkimSigningAttributes ?tags ~emailIdentity
         ()
     let to_json v = composed_to_json to_value v
@@ -14422,10 +22585,11 @@ module CreateEmailIdentityPolicyRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~policy ~policyName ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map_exn json "Policy" Policy.of_json in
-      let policyName = field_map_exn json "PolicyName" PolicyName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let policy = field_map_exn json__ "Policy" Policy.of_json in
+      let policyName = field_map_exn json__ "PolicyName" PolicyName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~policy ~policyName ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14434,10 +22598,10 @@ module CreateDeliverabilityTestReportResponse =
   struct
     type nonrec t =
       {
-      reportId: ReportId.t
+      reportId: ReportId.t option
         [@ocaml.doc
           "A unique string that identifies the predictive inbox placement test."];
-      deliverabilityTestStatus: DeliverabilityTestStatus.t
+      deliverabilityTestStatus: DeliverabilityTestStatus.t option
         [@ocaml.doc
           "The status of the predictive inbox placement test. If the status is IN_PROGRESS, then the predictive inbox placement test is currently running. Predictive inbox placement tests are usually complete within 24 hours of creating the test. If the status is COMPLETE, then the test is finished, and you can use the GetDeliverabilityTestReport to view the results of the test."]}
     type nonrec error =
@@ -14452,9 +22616,8 @@ module CreateDeliverabilityTestReportResponse =
       | `SendingPausedException of SendingPausedException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDeliverabilityTestReportResponse"
-    let make ~reportId =
-      fun ~deliverabilityTestStatus ->
+    let make ?reportId =
+      fun ?deliverabilityTestStatus ->
         fun () -> { reportId; deliverabilityTestStatus }
     let error_of_json name json =
       match name with
@@ -14548,26 +22711,25 @@ module CreateDeliverabilityTestReportResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ReportId", (Some (ReportId.to_value x.reportId)));
+        [("ReportId", (Option.map x.reportId ~f:ReportId.to_value));
         ("DeliverabilityTestStatus",
-          (Some
-             (DeliverabilityTestStatus.to_value x.deliverabilityTestStatus)))]
+          (Option.map x.deliverabilityTestStatus
+             ~f:DeliverabilityTestStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let deliverabilityTestStatus =
-        DeliverabilityTestStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestStatus") in
+        (Option.map ~f:DeliverabilityTestStatus.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestStatus") in
       let reportId =
-        ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
-      make ~deliverabilityTestStatus ~reportId ()
+        (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "ReportId") in
+      make ?deliverabilityTestStatus ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliverabilityTestStatus =
-        field_map_exn json "DeliverabilityTestStatus"
+        field_map json__ "DeliverabilityTestStatus"
           DeliverabilityTestStatus.of_json in
-      let reportId = field_map_exn json "ReportId" ReportId.of_json in
-      make ~deliverabilityTestStatus ~reportId ()
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
+      make ?deliverabilityTestStatus ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the predictive inbox placement test that you created."]
@@ -14613,12 +22775,12 @@ module CreateDeliverabilityTestReportRequest =
         (Option.map ~f:ReportName.of_xml) (Xml.child xml_arg0 "ReportName") in
       make ?tags ~content ~fromEmailAddress ?reportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let content = field_map_exn json "Content" EmailContent.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let content = field_map_exn json__ "Content" EmailContent.of_json in
       let fromEmailAddress =
-        field_map_exn json "FromEmailAddress" EmailAddress.of_json in
-      let reportName = field_map json "ReportName" ReportName.of_json in
+        field_map_exn json__ "FromEmailAddress" EmailAddress.of_json in
+      let reportName = field_map json__ "ReportName" ReportName.of_json in
       make ?tags ~content ~fromEmailAddress ?reportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14708,24 +22870,32 @@ module CreateDedicatedIpPoolRequest =
       poolName: PoolName.t [@ocaml.doc "The name of the dedicated IP pool."];
       tags: TagList.t option
         [@ocaml.doc
-          "An object that defines the tags (keys and values) that you want to associate with the pool."]}
+          "An object that defines the tags (keys and values) that you want to associate with the pool."];
+      scalingMode: ScalingMode.t option
+        [@ocaml.doc "The type of scaling mode."]}
     let context_ = "CreateDedicatedIpPoolRequest"
-    let make ?tags = fun ~poolName -> fun () -> { tags; poolName }
+    let make ?tags =
+      fun ?scalingMode ->
+        fun ~poolName -> fun () -> { tags; scalingMode; poolName }
     let to_value x =
       structure_to_value
         [("PoolName", (Some (PoolName.to_value x.poolName)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ScalingMode", (Option.map x.scalingMode ~f:ScalingMode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scalingMode =
+        (Option.map ~f:ScalingMode.of_xml) (Xml.child xml_arg0 "ScalingMode") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let poolName =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
-      make ?tags ~poolName ()
+      make ?scalingMode ?tags ~poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let poolName = field_map_exn json "PoolName" PoolName.of_json in
-      make ?tags ~poolName ()
+    let of_json json__ =
+      let scalingMode = field_map json__ "ScalingMode" ScalingMode.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
+      make ?scalingMode ?tags ~poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to create a new dedicated IP pool."]
 module CreateCustomVerificationEmailTemplateResponse =
@@ -14817,7 +22987,10 @@ module CreateCustomVerificationEmailTemplateRequest =
         [@ocaml.doc "The subject line of the custom verification email."];
       templateContent: TemplateContent.t
         [@ocaml.doc
-          "The content of the custom verification email. The total size of the email must be less than 10 MB. The message body may contain HTML, with some limitations. For more information, see Custom Verification Email Frequently Asked Questions in the Amazon SES Developer Guide."];
+          "The content of the custom verification email. The total size of the email must be less than 10 MB. The message body may contain HTML, with some limitations. For more information, see Custom verification email frequently asked questions in the Amazon SES Developer Guide."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "An array of objects that define the tags (keys and values) to associate with the custom verification email template."];
       successRedirectionURL: SuccessRedirectionURL.t
         [@ocaml.doc
           "The URL that the recipient of the verification email is sent to if his or her address is successfully verified."];
@@ -14825,21 +22998,23 @@ module CreateCustomVerificationEmailTemplateRequest =
         [@ocaml.doc
           "The URL that the recipient of the verification email is sent to if his or her address is not successfully verified."]}
     let context_ = "CreateCustomVerificationEmailTemplateRequest"
-    let make ~templateName =
-      fun ~fromEmailAddress ->
-        fun ~templateSubject ->
-          fun ~templateContent ->
-            fun ~successRedirectionURL ->
-              fun ~failureRedirectionURL ->
-                fun () ->
-                  {
-                    templateName;
-                    fromEmailAddress;
-                    templateSubject;
-                    templateContent;
-                    successRedirectionURL;
-                    failureRedirectionURL
-                  }
+    let make ?tags =
+      fun ~templateName ->
+        fun ~fromEmailAddress ->
+          fun ~templateSubject ->
+            fun ~templateContent ->
+              fun ~successRedirectionURL ->
+                fun ~failureRedirectionURL ->
+                  fun () ->
+                    {
+                      tags;
+                      templateName;
+                      fromEmailAddress;
+                      templateSubject;
+                      templateContent;
+                      successRedirectionURL;
+                      failureRedirectionURL
+                    }
     let to_value x =
       structure_to_value
         [("TemplateName", (Some (EmailTemplateName.to_value x.templateName)));
@@ -14849,6 +23024,7 @@ module CreateCustomVerificationEmailTemplateRequest =
           (Some (EmailTemplateSubject.to_value x.templateSubject)));
         ("TemplateContent",
           (Some (TemplateContent.to_value x.templateContent)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("SuccessRedirectionURL",
           (Some (SuccessRedirectionURL.to_value x.successRedirectionURL)));
         ("FailureRedirectionURL",
@@ -14861,6 +23037,7 @@ module CreateCustomVerificationEmailTemplateRequest =
       let successRedirectionURL =
         SuccessRedirectionURL.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SuccessRedirectionURL") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let templateContent =
         TemplateContent.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateContent") in
@@ -14873,26 +23050,27 @@ module CreateCustomVerificationEmailTemplateRequest =
       let templateName =
         EmailTemplateName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TemplateName") in
-      make ~failureRedirectionURL ~successRedirectionURL ~templateContent
-        ~templateSubject ~fromEmailAddress ~templateName ()
+      make ~failureRedirectionURL ~successRedirectionURL ?tags
+        ~templateContent ~templateSubject ~fromEmailAddress ~templateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureRedirectionURL =
-        field_map_exn json "FailureRedirectionURL"
+        field_map_exn json__ "FailureRedirectionURL"
           FailureRedirectionURL.of_json in
       let successRedirectionURL =
-        field_map_exn json "SuccessRedirectionURL"
+        field_map_exn json__ "SuccessRedirectionURL"
           SuccessRedirectionURL.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let templateContent =
-        field_map_exn json "TemplateContent" TemplateContent.of_json in
+        field_map_exn json__ "TemplateContent" TemplateContent.of_json in
       let templateSubject =
-        field_map_exn json "TemplateSubject" EmailTemplateSubject.of_json in
+        field_map_exn json__ "TemplateSubject" EmailTemplateSubject.of_json in
       let fromEmailAddress =
-        field_map_exn json "FromEmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "FromEmailAddress" EmailAddress.of_json in
       let templateName =
-        field_map_exn json "TemplateName" EmailTemplateName.of_json in
-      make ~failureRedirectionURL ~successRedirectionURL ~templateContent
-        ~templateSubject ~fromEmailAddress ~templateName ()
+        field_map_exn json__ "TemplateName" EmailTemplateName.of_json in
+      make ~failureRedirectionURL ~successRedirectionURL ?tags
+        ~templateContent ~templateSubject ~fromEmailAddress ~templateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents a request to create a custom verification email template."]
@@ -15025,17 +23203,17 @@ module CreateContactRequest =
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributesData =
-        field_map json "AttributesData" AttributesData.of_json in
+        field_map json__ "AttributesData" AttributesData.of_json in
       let unsubscribeAll =
-        field_map json "UnsubscribeAll" UnsubscribeAll.of_json in
+        field_map json__ "UnsubscribeAll" UnsubscribeAll.of_json in
       let topicPreferences =
-        field_map json "TopicPreferences" TopicPreferenceList.of_json in
+        field_map json__ "TopicPreferences" TopicPreferenceList.of_json in
       let emailAddress =
-        field_map_exn json "EmailAddress" EmailAddress.of_json in
+        field_map_exn json__ "EmailAddress" EmailAddress.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?attributesData ?unsubscribeAll ?topicPreferences ~emailAddress
         ~contactListName ()
     let to_json v = composed_to_json to_value v
@@ -15145,12 +23323,12 @@ module CreateContactListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ContactListName") in
       make ?tags ?description ?topics ~contactListName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let topics = field_map json "Topics" Topics.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let topics = field_map json__ "Topics" Topics.of_json in
       let contactListName =
-        field_map_exn json "ContactListName" ContactListName.of_json in
+        field_map_exn json__ "ContactListName" ContactListName.of_json in
       make ?tags ?description ?topics ~contactListName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a contact list."]
@@ -15263,7 +23441,13 @@ module CreateConfigurationSetRequest =
       tags: TagList.t option
         [@ocaml.doc
           "An array of objects that define the tags (keys and values) to associate with the configuration set."];
-      suppressionOptions: SuppressionOptions.t option }
+      suppressionOptions: SuppressionOptions.t option ;
+      vdmOptions: VdmOptions.t option
+        [@ocaml.doc
+          "An object that defines the VDM options for emails that you send using the configuration set."];
+      archivingOptions: ArchivingOptions.t option
+        [@ocaml.doc
+          "An object that defines the MailManager archiving options for emails that you send using the configuration set."]}
     let context_ = "CreateConfigurationSetRequest"
     let make ?trackingOptions =
       fun ?deliveryOptions ->
@@ -15271,17 +23455,21 @@ module CreateConfigurationSetRequest =
           fun ?sendingOptions ->
             fun ?tags ->
               fun ?suppressionOptions ->
-                fun ~configurationSetName ->
-                  fun () ->
-                    {
-                      trackingOptions;
-                      deliveryOptions;
-                      reputationOptions;
-                      sendingOptions;
-                      tags;
-                      suppressionOptions;
-                      configurationSetName
-                    }
+                fun ?vdmOptions ->
+                  fun ?archivingOptions ->
+                    fun ~configurationSetName ->
+                      fun () ->
+                        {
+                          trackingOptions;
+                          deliveryOptions;
+                          reputationOptions;
+                          sendingOptions;
+                          tags;
+                          suppressionOptions;
+                          vdmOptions;
+                          archivingOptions;
+                          configurationSetName
+                        }
     let to_value x =
       structure_to_value
         [("ConfigurationSetName",
@@ -15296,9 +23484,17 @@ module CreateConfigurationSetRequest =
           (Option.map x.sendingOptions ~f:SendingOptions.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("SuppressionOptions",
-          (Option.map x.suppressionOptions ~f:SuppressionOptions.to_value))]
+          (Option.map x.suppressionOptions ~f:SuppressionOptions.to_value));
+        ("VdmOptions", (Option.map x.vdmOptions ~f:VdmOptions.to_value));
+        ("ArchivingOptions",
+          (Option.map x.archivingOptions ~f:ArchivingOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let archivingOptions =
+        (Option.map ~f:ArchivingOptions.of_xml)
+          (Xml.child xml_arg0 "ArchivingOptions") in
+      let vdmOptions =
+        (Option.map ~f:VdmOptions.of_xml) (Xml.child xml_arg0 "VdmOptions") in
       let suppressionOptions =
         (Option.map ~f:SuppressionOptions.of_xml)
           (Xml.child xml_arg0 "SuppressionOptions") in
@@ -15318,26 +23514,31 @@ module CreateConfigurationSetRequest =
       let configurationSetName =
         ConfigurationSetName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
-      make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
-        ?deliveryOptions ?trackingOptions ~configurationSetName ()
+      make ?archivingOptions ?vdmOptions ?suppressionOptions ?tags
+        ?sendingOptions ?reputationOptions ?deliveryOptions ?trackingOptions
+        ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let archivingOptions =
+        field_map json__ "ArchivingOptions" ArchivingOptions.of_json in
+      let vdmOptions = field_map json__ "VdmOptions" VdmOptions.of_json in
       let suppressionOptions =
-        field_map json "SuppressionOptions" SuppressionOptions.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "SuppressionOptions" SuppressionOptions.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let sendingOptions =
-        field_map json "SendingOptions" SendingOptions.of_json in
+        field_map json__ "SendingOptions" SendingOptions.of_json in
       let reputationOptions =
-        field_map json "ReputationOptions" ReputationOptions.of_json in
+        field_map json__ "ReputationOptions" ReputationOptions.of_json in
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let trackingOptions =
-        field_map json "TrackingOptions" TrackingOptions.of_json in
+        field_map json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
-      make ?suppressionOptions ?tags ?sendingOptions ?reputationOptions
-        ?deliveryOptions ?trackingOptions ~configurationSetName ()
+      make ?archivingOptions ?vdmOptions ?suppressionOptions ?tags
+        ?sendingOptions ?reputationOptions ?deliveryOptions ?trackingOptions
+        ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to create a configuration set."]
 module CreateConfigurationSetEventDestinationResponse =
@@ -15454,17 +23655,206 @@ module CreateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination"
+        field_map_exn json__ "EventDestination"
           EventDestinationDefinition.of_json in
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to add an event destination to a configuration set."]
+module CancelExportJobResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An HTTP 200 response if the request succeeds, or an error message if the request fails."]
+module CancelExportJobRequest =
+  struct
+    type nonrec t = {
+      jobId: JobId.t [@ocaml.doc "The export job ID."]}
+    let context_ = "CancelExportJobRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value [("JobId", (Some (JobId.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "JobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "JobId" JobId.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a request to cancel an export job using the export job ID."]
+module BatchGetMetricDataResponse =
+  struct
+    type nonrec t =
+      {
+      results: MetricDataResultList.t option
+        [@ocaml.doc "A list of successfully retrieved MetricDataResult."];
+      errors: MetricDataErrorList.t option
+        [@ocaml.doc
+          "A list of MetricDataError encountered while processing your metric data batch request."]}
+    type nonrec error =
+      [ `BadRequestException of BadRequestException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?results = fun ?errors -> fun () -> { results; errors }
+    let error_of_json name json =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BadRequestException" ->
+          `BadRequestException (BadRequestException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BadRequestException e ->
+          `Assoc
+            [("error", (`String "BadRequestException"));
+            ("details", (BadRequestException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Results", (Option.map x.results ~f:MetricDataResultList.to_value));
+        ("Errors", (Option.map x.errors ~f:MetricDataErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:MetricDataErrorList.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      let results =
+        (Option.map ~f:MetricDataResultList.of_xml)
+          (Xml.child xml_arg0 "Results") in
+      make ?errors ?results ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors = field_map json__ "Errors" MetricDataErrorList.of_json in
+      let results = field_map json__ "Results" MetricDataResultList.of_json in
+      make ?errors ?results ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents the result of processing your metric data batch request"]
+module BatchGetMetricDataRequest =
+  struct
+    type nonrec t =
+      {
+      queries: BatchGetMetricDataQueries.t
+        [@ocaml.doc "A list of queries for metrics to be retrieved."]}
+    let context_ = "BatchGetMetricDataRequest"
+    let make ~queries = fun () -> { queries }
+    let to_value x =
+      structure_to_value
+        [("Queries", (Some (BatchGetMetricDataQueries.to_value x.queries)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queries =
+        BatchGetMetricDataQueries.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Queries") in
+      make ~queries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queries =
+        field_map_exn json__ "Queries" BatchGetMetricDataQueries.of_json in
+      make ~queries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Represents a request to retrieve a batch of metric data."]

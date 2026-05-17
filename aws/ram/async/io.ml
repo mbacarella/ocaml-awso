@@ -17,8 +17,16 @@ let associate_resource_share ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateResourceShare input
 let associate_resource_share_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateResourceSharePermission input
+let create_permission ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePermission input
+let create_permission_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreatePermissionVersion input
 let create_resource_share ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateResourceShare input
+let delete_permission ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePermission input
+let delete_permission_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeletePermissionVersion input
 let delete_resource_share ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteResourceShare input
 let disassociate_resource_share ?endpoint_url ?cfg input =
@@ -39,23 +47,36 @@ let get_resource_shares ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceShares input
 let list_pending_invitation_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPendingInvitationResources input
+let list_permission_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPermissionAssociations input
 let list_permission_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPermissionVersions input
 let list_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPermissions input
 let list_principals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPrincipals input
+let list_replace_permission_associations_work ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListReplacePermissionAssociationsWork
+    input
 let list_resource_share_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResourceSharePermissions input
 let list_resource_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResourceTypes input
 let list_resources ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListResources input
+let list_source_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListSourceAssociations input
+let promote_permission_created_from_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PromotePermissionCreatedFromPolicy input
 let promote_resource_share_created_from_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PromoteResourceShareCreatedFromPolicy
     input
 let reject_resource_share_invitation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RejectResourceShareInvitation input
+let replace_permission_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ReplacePermissionAssociations input
+let set_default_permission_version ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SetDefaultPermissionVersion input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =

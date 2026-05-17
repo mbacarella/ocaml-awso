@@ -48,6 +48,9 @@ let create_certificate_authority =
          flag "key-storage-security-standard" (optional json_arg)
            ~doc:"JSON KeyStorageSecurityStandard"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and usageMode =
+         flag "usage-mode" (optional json_arg)
+           ~doc:"JSON CertificateAuthorityUsageMode"
        and certificateAuthorityConfiguration =
          flag "certificate-authority-configuration" (required json_arg)
            ~doc:"JSON CertificateAuthorityConfiguration"
@@ -66,6 +69,9 @@ let create_certificate_authority =
                                              ~f:Values.KeyStorageSecurityStandard.of_json
                                              keyStorageSecurityStandard)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?usageMode:(Option.map
+                            ~f:Values.CertificateAuthorityUsageMode.of_json
+                            usageMode)
               ~certificateAuthorityConfiguration:(Values.CertificateAuthorityConfiguration.of_json
                                                     certificateAuthorityConfiguration)
               ~certificateAuthorityType:(Values.CertificateAuthorityType.of_json
@@ -379,17 +385,17 @@ let list_certificate_authorities =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and resourceOwner =
          flag "resource-owner" (optional json_arg) ~doc:"JSON ResourceOwner" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_certificate_authorities
-           (Values.ListCertificateAuthoritiesRequest.make ?nextToken
-              ?maxResults
+           (Values.ListCertificateAuthoritiesRequest.make ?maxResults
+              ?nextToken
               ?resourceOwner:(Option.map ~f:Values.ResourceOwner.of_json
                                 resourceOwner) ())
            (Some Values.ListCertificateAuthoritiesResponse.to_json)
@@ -404,16 +410,16 @@ let list_permissions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and certificateAuthorityArn =
          flag "certificate-authority-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_permissions
-           (Values.ListPermissionsRequest.make ?nextToken ?maxResults
+           (Values.ListPermissionsRequest.make ?maxResults ?nextToken
               ~certificateAuthorityArn ())
            (Some Values.ListPermissionsResponse.to_json)
            (Some Values.ListPermissionsResponse.error_to_json)])
@@ -427,16 +433,16 @@ let list_tags =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
        and certificateAuthorityArn =
          flag "certificate-authority-arn" (required string) ~doc:"STRING Arn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags
-           (Values.ListTagsRequest.make ?nextToken ?maxResults
+           (Values.ListTagsRequest.make ?maxResults ?nextToken
               ~certificateAuthorityArn ())
            (Some Values.ListTagsResponse.to_json)
            (Some Values.ListTagsResponse.error_to_json)])

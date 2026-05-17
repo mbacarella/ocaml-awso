@@ -6,6 +6,9 @@ type ('i, 'o, 'e) t =
   (AcceptEnvironmentAccountConnectionInput.t,
   AcceptEnvironmentAccountConnectionOutput.t,
   AcceptEnvironmentAccountConnectionOutput.error) t 
+  | CancelComponentDeployment: (CancelComponentDeploymentInput.t,
+  CancelComponentDeploymentOutput.t, CancelComponentDeploymentOutput.error) t
+  
   | CancelEnvironmentDeployment: (CancelEnvironmentDeploymentInput.t,
   CancelEnvironmentDeploymentOutput.t,
   CancelEnvironmentDeploymentOutput.error) t 
@@ -15,6 +18,8 @@ type ('i, 'o, 'e) t =
   | CancelServicePipelineDeployment: (CancelServicePipelineDeploymentInput.t,
   CancelServicePipelineDeploymentOutput.t,
   CancelServicePipelineDeploymentOutput.error) t 
+  | CreateComponent: (CreateComponentInput.t, CreateComponentOutput.t,
+  CreateComponentOutput.error) t 
   | CreateEnvironment: (CreateEnvironmentInput.t, CreateEnvironmentOutput.t,
   CreateEnvironmentOutput.error) t 
   | CreateEnvironmentAccountConnection:
@@ -32,6 +37,10 @@ type ('i, 'o, 'e) t =
   CreateRepositoryOutput.error) t 
   | CreateService: (CreateServiceInput.t, CreateServiceOutput.t,
   CreateServiceOutput.error) t 
+  | CreateServiceInstance: (CreateServiceInstanceInput.t,
+  CreateServiceInstanceOutput.t, CreateServiceInstanceOutput.error) t 
+  | CreateServiceSyncConfig: (CreateServiceSyncConfigInput.t,
+  CreateServiceSyncConfigOutput.t, CreateServiceSyncConfigOutput.error) t 
   | CreateServiceTemplate: (CreateServiceTemplateInput.t,
   CreateServiceTemplateOutput.t, CreateServiceTemplateOutput.error) t 
   | CreateServiceTemplateVersion: (CreateServiceTemplateVersionInput.t,
@@ -39,6 +48,10 @@ type ('i, 'o, 'e) t =
   CreateServiceTemplateVersionOutput.error) t 
   | CreateTemplateSyncConfig: (CreateTemplateSyncConfigInput.t,
   CreateTemplateSyncConfigOutput.t, CreateTemplateSyncConfigOutput.error) t 
+  | DeleteComponent: (DeleteComponentInput.t, DeleteComponentOutput.t,
+  DeleteComponentOutput.error) t 
+  | DeleteDeployment: (DeleteDeploymentInput.t, DeleteDeploymentOutput.t,
+  DeleteDeploymentOutput.error) t 
   | DeleteEnvironment: (DeleteEnvironmentInput.t, DeleteEnvironmentOutput.t,
   DeleteEnvironmentOutput.error) t 
   | DeleteEnvironmentAccountConnection:
@@ -56,6 +69,8 @@ type ('i, 'o, 'e) t =
   DeleteRepositoryOutput.error) t 
   | DeleteService: (DeleteServiceInput.t, DeleteServiceOutput.t,
   DeleteServiceOutput.error) t 
+  | DeleteServiceSyncConfig: (DeleteServiceSyncConfigInput.t,
+  DeleteServiceSyncConfigOutput.t, DeleteServiceSyncConfigOutput.error) t 
   | DeleteServiceTemplate: (DeleteServiceTemplateInput.t,
   DeleteServiceTemplateOutput.t, DeleteServiceTemplateOutput.error) t 
   | DeleteServiceTemplateVersion: (DeleteServiceTemplateVersionInput.t,
@@ -65,6 +80,10 @@ type ('i, 'o, 'e) t =
   DeleteTemplateSyncConfigOutput.t, DeleteTemplateSyncConfigOutput.error) t 
   | GetAccountSettings: (GetAccountSettingsInput.t,
   GetAccountSettingsOutput.t, GetAccountSettingsOutput.error) t 
+  | GetComponent: (GetComponentInput.t, GetComponentOutput.t,
+  GetComponentOutput.error) t 
+  | GetDeployment: (GetDeploymentInput.t, GetDeploymentOutput.t,
+  GetDeploymentOutput.error) t 
   | GetEnvironment: (GetEnvironmentInput.t, GetEnvironmentOutput.t,
   GetEnvironmentOutput.error) t 
   | GetEnvironmentAccountConnection: (GetEnvironmentAccountConnectionInput.t,
@@ -79,10 +98,20 @@ type ('i, 'o, 'e) t =
   GetRepositoryOutput.error) t 
   | GetRepositorySyncStatus: (GetRepositorySyncStatusInput.t,
   GetRepositorySyncStatusOutput.t, GetRepositorySyncStatusOutput.error) t 
+  | GetResourcesSummary: (GetResourcesSummaryInput.t,
+  GetResourcesSummaryOutput.t, GetResourcesSummaryOutput.error) t 
   | GetService: (GetServiceInput.t, GetServiceOutput.t,
   GetServiceOutput.error) t 
   | GetServiceInstance: (GetServiceInstanceInput.t,
   GetServiceInstanceOutput.t, GetServiceInstanceOutput.error) t 
+  | GetServiceInstanceSyncStatus: (GetServiceInstanceSyncStatusInput.t,
+  GetServiceInstanceSyncStatusOutput.t,
+  GetServiceInstanceSyncStatusOutput.error) t 
+  | GetServiceSyncBlockerSummary: (GetServiceSyncBlockerSummaryInput.t,
+  GetServiceSyncBlockerSummaryOutput.t,
+  GetServiceSyncBlockerSummaryOutput.error) t 
+  | GetServiceSyncConfig: (GetServiceSyncConfigInput.t,
+  GetServiceSyncConfigOutput.t, GetServiceSyncConfigOutput.error) t 
   | GetServiceTemplate: (GetServiceTemplateInput.t,
   GetServiceTemplateOutput.t, GetServiceTemplateOutput.error) t 
   | GetServiceTemplateVersion: (GetServiceTemplateVersionInput.t,
@@ -92,6 +121,16 @@ type ('i, 'o, 'e) t =
   GetTemplateSyncConfigOutput.t, GetTemplateSyncConfigOutput.error) t 
   | GetTemplateSyncStatus: (GetTemplateSyncStatusInput.t,
   GetTemplateSyncStatusOutput.t, GetTemplateSyncStatusOutput.error) t 
+  | ListComponentOutputs: (ListComponentOutputsInput.t,
+  ListComponentOutputsOutput.t, ListComponentOutputsOutput.error) t 
+  | ListComponentProvisionedResources:
+  (ListComponentProvisionedResourcesInput.t,
+  ListComponentProvisionedResourcesOutput.t,
+  ListComponentProvisionedResourcesOutput.error) t 
+  | ListComponents: (ListComponentsInput.t, ListComponentsOutput.t,
+  ListComponentsOutput.error) t 
+  | ListDeployments: (ListDeploymentsInput.t, ListDeploymentsOutput.t,
+  ListDeploymentsOutput.error) t 
   | ListEnvironmentAccountConnections:
   (ListEnvironmentAccountConnectionsInput.t,
   ListEnvironmentAccountConnectionsOutput.t,
@@ -153,6 +192,8 @@ type ('i, 'o, 'e) t =
   UntagResourceOutput.error) t 
   | UpdateAccountSettings: (UpdateAccountSettingsInput.t,
   UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error) t 
+  | UpdateComponent: (UpdateComponentInput.t, UpdateComponentOutput.t,
+  UpdateComponentOutput.error) t 
   | UpdateEnvironment: (UpdateEnvironmentInput.t, UpdateEnvironmentOutput.t,
   UpdateEnvironmentOutput.error) t 
   | UpdateEnvironmentAccountConnection:
@@ -172,6 +213,10 @@ type ('i, 'o, 'e) t =
   UpdateServiceInstanceOutput.t, UpdateServiceInstanceOutput.error) t 
   | UpdateServicePipeline: (UpdateServicePipelineInput.t,
   UpdateServicePipelineOutput.t, UpdateServicePipelineOutput.error) t 
+  | UpdateServiceSyncBlocker: (UpdateServiceSyncBlockerInput.t,
+  UpdateServiceSyncBlockerOutput.t, UpdateServiceSyncBlockerOutput.error) t 
+  | UpdateServiceSyncConfig: (UpdateServiceSyncConfigInput.t,
+  UpdateServiceSyncConfigOutput.t, UpdateServiceSyncConfigOutput.error) t 
   | UpdateServiceTemplate: (UpdateServiceTemplateInput.t,
   UpdateServiceTemplateOutput.t, UpdateServiceTemplateOutput.error) t 
   | UpdateServiceTemplateVersion: (UpdateServiceTemplateVersionInput.t,
@@ -182,40 +227,57 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptEnvironmentAccountConnection -> `POST
+  | CancelComponentDeployment -> `POST
   | CancelEnvironmentDeployment -> `POST
   | CancelServiceInstanceDeployment -> `POST
   | CancelServicePipelineDeployment -> `POST
+  | CreateComponent -> `POST
   | CreateEnvironment -> `POST
   | CreateEnvironmentAccountConnection -> `POST
   | CreateEnvironmentTemplate -> `POST
   | CreateEnvironmentTemplateVersion -> `POST
   | CreateRepository -> `POST
   | CreateService -> `POST
+  | CreateServiceInstance -> `POST
+  | CreateServiceSyncConfig -> `POST
   | CreateServiceTemplate -> `POST
   | CreateServiceTemplateVersion -> `POST
   | CreateTemplateSyncConfig -> `POST
+  | DeleteComponent -> `POST
+  | DeleteDeployment -> `POST
   | DeleteEnvironment -> `POST
   | DeleteEnvironmentAccountConnection -> `POST
   | DeleteEnvironmentTemplate -> `POST
   | DeleteEnvironmentTemplateVersion -> `POST
   | DeleteRepository -> `POST
   | DeleteService -> `POST
+  | DeleteServiceSyncConfig -> `POST
   | DeleteServiceTemplate -> `POST
   | DeleteServiceTemplateVersion -> `POST
   | DeleteTemplateSyncConfig -> `POST
   | GetAccountSettings -> `POST
+  | GetComponent -> `POST
+  | GetDeployment -> `POST
   | GetEnvironment -> `POST
   | GetEnvironmentAccountConnection -> `POST
   | GetEnvironmentTemplate -> `POST
   | GetEnvironmentTemplateVersion -> `POST
   | GetRepository -> `POST
   | GetRepositorySyncStatus -> `POST
+  | GetResourcesSummary -> `POST
   | GetService -> `POST
   | GetServiceInstance -> `POST
+  | GetServiceInstanceSyncStatus -> `POST
+  | GetServiceSyncBlockerSummary -> `POST
+  | GetServiceSyncConfig -> `POST
   | GetServiceTemplate -> `POST
   | GetServiceTemplateVersion -> `POST
   | GetTemplateSyncConfig -> `POST
   | GetTemplateSyncStatus -> `POST
+  | ListComponentOutputs -> `POST
+  | ListComponentProvisionedResources -> `POST
+  | ListComponents -> `POST
+  | ListDeployments -> `POST
   | ListEnvironmentAccountConnections -> `POST
   | ListEnvironmentOutputs -> `POST
   | ListEnvironmentProvisionedResources -> `POST
@@ -238,6 +300,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateAccountSettings -> `POST
+  | UpdateComponent -> `POST
   | UpdateEnvironment -> `POST
   | UpdateEnvironmentAccountConnection -> `POST
   | UpdateEnvironmentTemplate -> `POST
@@ -245,6 +308,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateService -> `POST
   | UpdateServiceInstance -> `POST
   | UpdateServicePipeline -> `POST
+  | UpdateServiceSyncBlocker -> `POST
+  | UpdateServiceSyncConfig -> `POST
   | UpdateServiceTemplate -> `POST
   | UpdateServiceTemplateVersion -> `POST
   | UpdateTemplateSyncConfig -> `POST
@@ -253,11 +318,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AcceptEnvironmentAccountConnection ->
           (Format.kasprintf Uri.of_string) "/"
+      | CancelComponentDeployment -> (Format.kasprintf Uri.of_string) "/"
       | CancelEnvironmentDeployment -> (Format.kasprintf Uri.of_string) "/"
       | CancelServiceInstanceDeployment ->
           (Format.kasprintf Uri.of_string) "/"
       | CancelServicePipelineDeployment ->
           (Format.kasprintf Uri.of_string) "/"
+      | CreateComponent -> (Format.kasprintf Uri.of_string) "/"
       | CreateEnvironment -> (Format.kasprintf Uri.of_string) "/"
       | CreateEnvironmentAccountConnection ->
           (Format.kasprintf Uri.of_string) "/"
@@ -266,9 +333,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | CreateRepository -> (Format.kasprintf Uri.of_string) "/"
       | CreateService -> (Format.kasprintf Uri.of_string) "/"
+      | CreateServiceInstance -> (Format.kasprintf Uri.of_string) "/"
+      | CreateServiceSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | CreateServiceTemplate -> (Format.kasprintf Uri.of_string) "/"
       | CreateServiceTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | CreateTemplateSyncConfig -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteComponent -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteDeployment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEnvironment -> (Format.kasprintf Uri.of_string) "/"
       | DeleteEnvironmentAccountConnection ->
           (Format.kasprintf Uri.of_string) "/"
@@ -277,10 +348,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | DeleteRepository -> (Format.kasprintf Uri.of_string) "/"
       | DeleteService -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteServiceSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | DeleteServiceTemplate -> (Format.kasprintf Uri.of_string) "/"
       | DeleteServiceTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | DeleteTemplateSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | GetAccountSettings -> (Format.kasprintf Uri.of_string) "/"
+      | GetComponent -> (Format.kasprintf Uri.of_string) "/"
+      | GetDeployment -> (Format.kasprintf Uri.of_string) "/"
       | GetEnvironment -> (Format.kasprintf Uri.of_string) "/"
       | GetEnvironmentAccountConnection ->
           (Format.kasprintf Uri.of_string) "/"
@@ -288,12 +362,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetEnvironmentTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetRepository -> (Format.kasprintf Uri.of_string) "/"
       | GetRepositorySyncStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcesSummary -> (Format.kasprintf Uri.of_string) "/"
       | GetService -> (Format.kasprintf Uri.of_string) "/"
       | GetServiceInstance -> (Format.kasprintf Uri.of_string) "/"
+      | GetServiceInstanceSyncStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetServiceSyncBlockerSummary -> (Format.kasprintf Uri.of_string) "/"
+      | GetServiceSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | GetServiceTemplate -> (Format.kasprintf Uri.of_string) "/"
       | GetServiceTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | GetTemplateSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | GetTemplateSyncStatus -> (Format.kasprintf Uri.of_string) "/"
+      | ListComponentOutputs -> (Format.kasprintf Uri.of_string) "/"
+      | ListComponentProvisionedResources ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListComponents -> (Format.kasprintf Uri.of_string) "/"
+      | ListDeployments -> (Format.kasprintf Uri.of_string) "/"
       | ListEnvironmentAccountConnections ->
           (Format.kasprintf Uri.of_string) "/"
       | ListEnvironmentOutputs -> (Format.kasprintf Uri.of_string) "/"
@@ -323,6 +406,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateAccountSettings -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateComponent -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEnvironment -> (Format.kasprintf Uri.of_string) "/"
       | UpdateEnvironmentAccountConnection ->
           (Format.kasprintf Uri.of_string) "/"
@@ -332,6 +416,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateService -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServiceInstance -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServicePipeline -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateServiceSyncBlocker -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateServiceSyncConfig -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServiceTemplate -> (Format.kasprintf Uri.of_string) "/"
       | UpdateServiceTemplateVersion -> (Format.kasprintf Uri.of_string) "/"
       | UpdateTemplateSyncConfig -> (Format.kasprintf Uri.of_string) "/")
@@ -346,6 +432,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AwsProton20200720.AcceptEnvironmentAccountConnection")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelComponentDeployment ->
+      let json = CancelComponentDeploymentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.CancelComponentDeployment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelEnvironmentDeployment ->
       let json = CancelEnvironmentDeploymentInput.to_json req in
@@ -372,6 +466,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target",
             "AwsProton20200720.CancelServicePipelineDeployment")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateComponent ->
+      let json = CreateComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.CreateComponent")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateEnvironment ->
       let json = CreateEnvironmentInput.to_json req in
@@ -423,6 +525,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.CreateService")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateServiceInstance ->
+      let json = CreateServiceInstanceInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.CreateServiceInstance")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateServiceSyncConfig ->
+      let json = CreateServiceSyncConfigInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.CreateServiceSyncConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateServiceTemplate ->
       let json = CreateServiceTemplateInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -446,6 +564,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.CreateTemplateSyncConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteComponent ->
+      let json = DeleteComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.DeleteComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteDeployment ->
+      let json = DeleteDeploymentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.DeleteDeployment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteEnvironment ->
       let json = DeleteEnvironmentInput.to_json req in
@@ -497,6 +631,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.DeleteService")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteServiceSyncConfig ->
+      let json = DeleteServiceSyncConfigInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.DeleteServiceSyncConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteServiceTemplate ->
       let json = DeleteServiceTemplateInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -528,6 +670,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.GetAccountSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetComponent ->
+      let json = GetComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetDeployment ->
+      let json = GetDeploymentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetDeployment")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetEnvironment ->
       let json = GetEnvironmentInput.to_json req in
@@ -578,6 +736,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.GetRepositorySyncStatus")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcesSummary ->
+      let json = GetResourcesSummaryInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetResourcesSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetService ->
       let json = GetServiceInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -593,6 +759,30 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.GetServiceInstance")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetServiceInstanceSyncStatus ->
+      let json = GetServiceInstanceSyncStatusInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetServiceInstanceSyncStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetServiceSyncBlockerSummary ->
+      let json = GetServiceSyncBlockerSummaryInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetServiceSyncBlockerSummary")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetServiceSyncConfig ->
+      let json = GetServiceSyncConfigInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.GetServiceSyncConfig")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetServiceTemplate ->
       let json = GetServiceTemplateInput.to_json req in
@@ -625,6 +815,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.GetTemplateSyncStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListComponentOutputs ->
+      let json = ListComponentOutputsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.ListComponentOutputs")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListComponentProvisionedResources ->
+      let json = ListComponentProvisionedResourcesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target",
+            "AwsProton20200720.ListComponentProvisionedResources")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListComponents ->
+      let json = ListComponentsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.ListComponents")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListDeployments ->
+      let json = ListDeploymentsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.ListDeployments")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListEnvironmentAccountConnections ->
       let json = ListEnvironmentAccountConnectionsInput.to_json req in
@@ -809,6 +1032,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.UpdateAccountSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateComponent ->
+      let json = UpdateComponentInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.UpdateComponent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateEnvironment ->
       let json = UpdateEnvironmentInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -867,6 +1098,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.0");
           ("X-Amz-Target", "AwsProton20200720.UpdateServicePipeline")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateServiceSyncBlocker ->
+      let json = UpdateServiceSyncBlockerInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.UpdateServiceSyncBlocker")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateServiceSyncConfig ->
+      let json = UpdateServiceSyncConfigInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.0");
+          ("X-Amz-Target", "AwsProton20200720.UpdateServiceSyncConfig")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateServiceTemplate ->
       let json = UpdateServiceTemplateInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -923,6 +1170,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AcceptEnvironmentAccountConnectionOutput.error_of_json))
+  | CancelComponentDeployment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelComponentDeploymentOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CancelComponentDeploymentOutput.error_of_json))
   | CancelEnvironmentDeployment ->
       if is_success
       then
@@ -950,6 +1206,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CancelServicePipelineDeploymentOutput.error_of_json))
+  | CreateComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateComponentOutput.of_json json)
+      else Error (parse_aws_error (Some CreateComponentOutput.error_of_json))
   | CreateEnvironment ->
       if is_success
       then
@@ -997,6 +1259,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateServiceOutput.of_json json)
       else Error (parse_aws_error (Some CreateServiceOutput.error_of_json))
+  | CreateServiceInstance ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateServiceInstanceOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateServiceInstanceOutput.error_of_json))
+  | CreateServiceSyncConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateServiceSyncConfigOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some CreateServiceSyncConfigOutput.error_of_json))
   | CreateServiceTemplate ->
       if is_success
       then
@@ -1023,6 +1301,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateTemplateSyncConfigOutput.error_of_json))
+  | DeleteComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteComponentOutput.of_json json)
+      else Error (parse_aws_error (Some DeleteComponentOutput.error_of_json))
+  | DeleteDeployment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteDeploymentOutput.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteDeploymentOutput.error_of_json))
   | DeleteEnvironment ->
       if is_success
       then
@@ -1070,6 +1361,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteServiceOutput.of_json json)
       else Error (parse_aws_error (Some DeleteServiceOutput.error_of_json))
+  | DeleteServiceSyncConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteServiceSyncConfigOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeleteServiceSyncConfigOutput.error_of_json))
   | DeleteServiceTemplate ->
       if is_success
       then
@@ -1103,6 +1402,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetAccountSettingsOutput.of_json json)
       else
         Error (parse_aws_error (Some GetAccountSettingsOutput.error_of_json))
+  | GetComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetComponentOutput.of_json json)
+      else Error (parse_aws_error (Some GetComponentOutput.error_of_json))
+  | GetDeployment ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetDeploymentOutput.of_json json)
+      else Error (parse_aws_error (Some GetDeploymentOutput.error_of_json))
   | GetEnvironment ->
       if is_success
       then
@@ -1149,6 +1460,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetRepositorySyncStatusOutput.error_of_json))
+  | GetResourcesSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcesSummaryOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourcesSummaryOutput.error_of_json))
   | GetService ->
       if is_success
       then
@@ -1162,6 +1481,32 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GetServiceInstanceOutput.of_json json)
       else
         Error (parse_aws_error (Some GetServiceInstanceOutput.error_of_json))
+  | GetServiceInstanceSyncStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceInstanceSyncStatusOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetServiceInstanceSyncStatusOutput.error_of_json))
+  | GetServiceSyncBlockerSummary ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceSyncBlockerSummaryOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetServiceSyncBlockerSummaryOutput.error_of_json))
+  | GetServiceSyncConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetServiceSyncConfigOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetServiceSyncConfigOutput.error_of_json))
   | GetServiceTemplate ->
       if is_success
       then
@@ -1194,6 +1539,35 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some GetTemplateSyncStatusOutput.error_of_json))
+  | ListComponentOutputs ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListComponentOutputsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListComponentOutputsOutput.error_of_json))
+  | ListComponentProvisionedResources ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListComponentProvisionedResourcesOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListComponentProvisionedResourcesOutput.error_of_json))
+  | ListComponents ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListComponentsOutput.of_json json)
+      else Error (parse_aws_error (Some ListComponentsOutput.error_of_json))
+  | ListDeployments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListDeploymentsOutput.of_json json)
+      else Error (parse_aws_error (Some ListDeploymentsOutput.error_of_json))
   | ListEnvironmentAccountConnections ->
       if is_success
       then
@@ -1376,6 +1750,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateAccountSettingsOutput.error_of_json))
+  | UpdateComponent ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateComponentOutput.of_json json)
+      else Error (parse_aws_error (Some UpdateComponentOutput.error_of_json))
   | UpdateEnvironment ->
       if is_success
       then
@@ -1432,6 +1812,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateServicePipelineOutput.error_of_json))
+  | UpdateServiceSyncBlocker ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateServiceSyncBlockerOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateServiceSyncBlockerOutput.error_of_json))
+  | UpdateServiceSyncConfig ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateServiceSyncConfigOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateServiceSyncConfigOutput.error_of_json))
   | UpdateServiceTemplate ->
       if is_success
       then

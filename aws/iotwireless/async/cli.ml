@@ -254,7 +254,10 @@ let create_device_profile =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientRequestToken =
          flag "client-request-token" (optional string)
-           ~doc:"STRING ClientRequestToken" in
+           ~doc:"STRING ClientRequestToken"
+       and sidewalk =
+         flag "sidewalk" (optional json_arg)
+           ~doc:"JSON SidewalkCreateDeviceProfile" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_device_profile
@@ -262,7 +265,10 @@ let create_device_profile =
               ?loRaWAN:(Option.map ~f:Values.LoRaWANDeviceProfile.of_json
                           loRaWAN)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ?clientRequestToken ())
+              ?clientRequestToken
+              ?sidewalk:(Option.map
+                           ~f:Values.SidewalkCreateDeviceProfile.of_json
+                           sidewalk) ())
            (Some Values.CreateDeviceProfileResponse.to_json)
            (Some Values.CreateDeviceProfileResponse.error_to_json)])
 let create_fuota_task =
@@ -284,6 +290,17 @@ let create_fuota_task =
        and loRaWAN =
          flag "lo-ra-w-a-n" (optional json_arg) ~doc:"JSON LoRaWANFuotaTask"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and redundancyPercent =
+         flag "redundancy-percent" (optional int)
+           ~doc:"INT RedundancyPercent"
+       and fragmentSizeBytes =
+         flag "fragment-size-bytes" (optional int)
+           ~doc:"INT FragmentSizeBytes"
+       and fragmentIntervalMS =
+         flag "fragment-interval-m-s" (optional int)
+           ~doc:"INT FragmentIntervalMS"
+       and descriptor =
+         flag "descriptor" (optional string) ~doc:"STRING FileDescriptor"
        and firmwareUpdateImage =
          flag "firmware-update-image" (required string)
            ~doc:"STRING FirmwareUpdateImage"
@@ -297,7 +314,8 @@ let create_fuota_task =
               ?clientRequestToken
               ?loRaWAN:(Option.map ~f:Values.LoRaWANFuotaTask.of_json loRaWAN)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~firmwareUpdateImage ~firmwareUpdateRole ())
+              ?redundancyPercent ?fragmentSizeBytes ?fragmentIntervalMS
+              ?descriptor ~firmwareUpdateImage ~firmwareUpdateRole ())
            (Some Values.CreateFuotaTaskResponse.to_json)
            (Some Values.CreateFuotaTaskResponse.error_to_json)])
 let create_multicast_group =
@@ -329,6 +347,56 @@ let create_multicast_group =
               ~loRaWAN:(Values.LoRaWANMulticast.of_json loRaWAN) ())
            (Some Values.CreateMulticastGroupResponse.to_json)
            (Some Values.CreateMulticastGroupResponse.error_to_json)])
+let create_network_analyzer_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and traceContent =
+         flag "trace-content" (optional json_arg) ~doc:"JSON TraceContent"
+       and wirelessDevices =
+         flag "wireless-devices" (optional json_arg)
+           ~doc:"JSON WirelessDeviceList"
+       and wirelessGateways =
+         flag "wireless-gateways" (optional json_arg)
+           ~doc:"JSON WirelessGatewayList"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and multicastGroups =
+         flag "multicast-groups" (optional json_arg)
+           ~doc:"JSON NetworkAnalyzerMulticastGroupList"
+       and name =
+         flag "name" (required string)
+           ~doc:"STRING NetworkAnalyzerConfigurationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_network_analyzer_configuration
+           (Values.CreateNetworkAnalyzerConfigurationRequest.make
+              ?traceContent:(Option.map ~f:Values.TraceContent.of_json
+                               traceContent)
+              ?wirelessDevices:(Option.map
+                                  ~f:Values.WirelessDeviceList.of_json
+                                  wirelessDevices)
+              ?wirelessGateways:(Option.map
+                                   ~f:Values.WirelessGatewayList.of_json
+                                   wirelessGateways) ?description
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?clientRequestToken
+              ?multicastGroups:(Option.map
+                                  ~f:Values.NetworkAnalyzerMulticastGroupList.of_json
+                                  multicastGroups) ~name ())
+           (Some Values.CreateNetworkAnalyzerConfigurationResponse.to_json)
+           (Some
+              Values.CreateNetworkAnalyzerConfigurationResponse.error_to_json)])
 let create_service_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -378,6 +446,12 @@ let create_wireless_device =
        and loRaWAN =
          flag "lo-ra-w-a-n" (optional json_arg) ~doc:"JSON LoRaWANDevice"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and positioning =
+         flag "positioning" (optional json_arg)
+           ~doc:"JSON PositioningConfigStatus"
+       and sidewalk =
+         flag "sidewalk" (optional json_arg)
+           ~doc:"JSON SidewalkCreateWirelessDevice"
        and type_ =
          flag "type-" (required json_arg) ~doc:"JSON WirelessDeviceType"
        and destinationName =
@@ -390,6 +464,12 @@ let create_wireless_device =
               ?clientRequestToken
               ?loRaWAN:(Option.map ~f:Values.LoRaWANDevice.of_json loRaWAN)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?positioning:(Option.map
+                              ~f:Values.PositioningConfigStatus.of_json
+                              positioning)
+              ?sidewalk:(Option.map
+                           ~f:Values.SidewalkCreateWirelessDevice.of_json
+                           sidewalk)
               ~type_:(Values.WirelessDeviceType.of_json type_)
               ~destinationName ())
            (Some Values.CreateWirelessDeviceResponse.to_json)
@@ -544,6 +624,27 @@ let delete_multicast_group =
            (Values.DeleteMulticastGroupRequest.make ~id ())
            (Some Values.DeleteMulticastGroupResponse.to_json)
            (Some Values.DeleteMulticastGroupResponse.error_to_json)])
+let delete_network_analyzer_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configurationName =
+         flag "configuration-name" (required string)
+           ~doc:"STRING NetworkAnalyzerConfigurationName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_network_analyzer_configuration
+           (Values.DeleteNetworkAnalyzerConfigurationRequest.make
+              ~configurationName ())
+           (Some Values.DeleteNetworkAnalyzerConfigurationResponse.to_json)
+           (Some
+              Values.DeleteNetworkAnalyzerConfigurationResponse.error_to_json)])
 let delete_queued_messages =
   Command.async ~summary:""
     ([%map_open.Command
@@ -603,6 +704,23 @@ let delete_wireless_device =
            (Values.DeleteWirelessDeviceRequest.make ~id ())
            (Some Values.DeleteWirelessDeviceResponse.to_json)
            (Some Values.DeleteWirelessDeviceResponse.error_to_json)])
+let delete_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ImportTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_wireless_device_import_task
+           (Values.DeleteWirelessDeviceImportTaskRequest.make ~id ())
+           (Some Values.DeleteWirelessDeviceImportTaskResponse.to_json)
+           (Some Values.DeleteWirelessDeviceImportTaskResponse.error_to_json)])
 let delete_wireless_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -657,6 +775,30 @@ let delete_wireless_gateway_task_definition =
            (Some Values.DeleteWirelessGatewayTaskDefinitionResponse.to_json)
            (Some
               Values.DeleteWirelessGatewayTaskDefinitionResponse.error_to_json)])
+let deregister_wireless_device =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and wirelessDeviceType =
+         flag "wireless-device-type" (optional json_arg)
+           ~doc:"JSON WirelessDeviceType"
+       and identifier =
+         flag "identifier" (required string) ~doc:"STRING Identifier" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.deregister_wireless_device
+           (Values.DeregisterWirelessDeviceRequest.make
+              ?wirelessDeviceType:(Option.map
+                                     ~f:Values.WirelessDeviceType.of_json
+                                     wirelessDeviceType) ~identifier ())
+           (Some Values.DeregisterWirelessDeviceResponse.to_json)
+           (Some Values.DeregisterWirelessDeviceResponse.error_to_json)])
 let disassociate_aws_account_from_partner_account =
   Command.async ~summary:""
     ([%map_open.Command
@@ -839,6 +981,24 @@ let get_device_profile =
            Io.get_device_profile (Values.GetDeviceProfileRequest.make ~id ())
            (Some Values.GetDeviceProfileResponse.to_json)
            (Some Values.GetDeviceProfileResponse.error_to_json)])
+let get_event_configuration_by_resource_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_event_configuration_by_resource_types
+           (Values.GetEventConfigurationByResourceTypesRequest.make ())
+           (Some Values.GetEventConfigurationByResourceTypesResponse.to_json)
+           (Some
+              Values.GetEventConfigurationByResourceTypesResponse.error_to_json)])
 let get_fuota_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -872,6 +1032,45 @@ let get_log_levels_by_resource_types =
            (Values.GetLogLevelsByResourceTypesRequest.make ())
            (Some Values.GetLogLevelsByResourceTypesResponse.to_json)
            (Some Values.GetLogLevelsByResourceTypesResponse.error_to_json)])
+let get_metric_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_metric_configuration
+           (Values.GetMetricConfigurationRequest.make ())
+           (Some Values.GetMetricConfigurationResponse.to_json)
+           (Some Values.GetMetricConfigurationResponse.error_to_json)])
+let get_metrics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and summaryMetricQueries =
+         flag "summary-metric-queries" (optional json_arg)
+           ~doc:"JSON SummaryMetricQueries" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_metrics
+           (Values.GetMetricsRequest.make
+              ?summaryMetricQueries:(Option.map
+                                       ~f:Values.SummaryMetricQueries.of_json
+                                       summaryMetricQueries) ())
+           (Some Values.GetMetricsResponse.to_json)
+           (Some Values.GetMetricsResponse.error_to_json)])
 let get_multicast_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -948,6 +1147,90 @@ let get_partner_account =
               ~partnerType:(Values.PartnerType.of_json partnerType) ())
            (Some Values.GetPartnerAccountResponse.to_json)
            (Some Values.GetPartnerAccountResponse.error_to_json)])
+let get_position =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_position
+           (Values.GetPositionRequest.make ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ()) (Some Values.GetPositionResponse.to_json)
+           (Some Values.GetPositionResponse.error_to_json)])
+let get_position_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_position_configuration
+           (Values.GetPositionConfigurationRequest.make ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ()) (Some Values.GetPositionConfigurationResponse.to_json)
+           (Some Values.GetPositionConfigurationResponse.error_to_json)])
+let get_position_estimate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and wiFiAccessPoints =
+         flag "wi-fi-access-points" (optional json_arg)
+           ~doc:"JSON WiFiAccessPoints"
+       and cellTowers =
+         flag "cell-towers" (optional json_arg) ~doc:"JSON CellTowers"
+       and ip = flag "ip" (optional json_arg) ~doc:"JSON Ip"
+       and gnss = flag "gnss" (optional json_arg) ~doc:"JSON Gnss"
+       and timestamp =
+         flag "timestamp" (optional json_arg) ~doc:"JSON CreationDate"
+       and advancedConfiguration =
+         flag "advanced-configuration" (optional json_arg)
+           ~doc:"JSON AdvancedConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_position_estimate
+           (Values.GetPositionEstimateRequest.make
+              ?wiFiAccessPoints:(Option.map
+                                   ~f:Values.WiFiAccessPoints.of_json
+                                   wiFiAccessPoints)
+              ?cellTowers:(Option.map ~f:Values.CellTowers.of_json cellTowers)
+              ?ip:(Option.map ~f:Values.Ip.of_json ip)
+              ?gnss:(Option.map ~f:Values.Gnss.of_json gnss)
+              ?timestamp:(Option.map ~f:Values.CreationDate.of_json timestamp)
+              ?advancedConfiguration:(Option.map
+                                        ~f:Values.AdvancedConfiguration.of_json
+                                        advancedConfiguration) ())
+           (Some Values.GetPositionEstimateResponse.to_json)
+           (Some Values.GetPositionEstimateResponse.error_to_json)])
 let get_resource_event_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -998,6 +1281,29 @@ let get_resource_log_level =
               ~resourceType ())
            (Some Values.GetResourceLogLevelResponse.to_json)
            (Some Values.GetResourceLogLevelResponse.error_to_json)])
+let get_resource_position =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_position
+           (Values.GetResourcePositionRequest.make ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ()) (Some Values.GetResourcePositionResponse.to_json)
+           (Some Values.GetResourcePositionResponse.error_to_json)])
 let get_service_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1060,6 +1366,23 @@ let get_wireless_device =
                                  identifierType) ())
            (Some Values.GetWirelessDeviceResponse.to_json)
            (Some Values.GetWirelessDeviceResponse.error_to_json)])
+let get_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ImportTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_wireless_device_import_task
+           (Values.GetWirelessDeviceImportTaskRequest.make ~id ())
+           (Some Values.GetWirelessDeviceImportTaskResponse.to_json)
+           (Some Values.GetWirelessDeviceImportTaskResponse.error_to_json)])
 let get_wireless_device_statistics =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1227,13 +1550,72 @@ let list_device_profiles =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and deviceProfileType =
+         flag "device-profile-type" (optional json_arg)
+           ~doc:"JSON DeviceProfileType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_device_profiles
-           (Values.ListDeviceProfilesRequest.make ?nextToken ?maxResults ())
+           (Values.ListDeviceProfilesRequest.make ?nextToken ?maxResults
+              ?deviceProfileType:(Option.map
+                                    ~f:Values.DeviceProfileType.of_json
+                                    deviceProfileType) ())
            (Some Values.ListDeviceProfilesResponse.to_json)
            (Some Values.ListDeviceProfilesResponse.error_to_json)])
+let list_devices_for_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON OnboardStatus"
+       and id = flag "id" (required string) ~doc:"STRING ImportTaskId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_devices_for_wireless_device_import_task
+           (Values.ListDevicesForWirelessDeviceImportTaskRequest.make
+              ?maxResults ?nextToken
+              ?status:(Option.map ~f:Values.OnboardStatus.of_json status) ~id
+              ())
+           (Some
+              Values.ListDevicesForWirelessDeviceImportTaskResponse.to_json)
+           (Some
+              Values.ListDevicesForWirelessDeviceImportTaskResponse.error_to_json)])
+let list_event_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON EventNotificationResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_event_configurations
+           (Values.ListEventConfigurationsRequest.make ?maxResults ?nextToken
+              ~resourceType:(Values.EventNotificationResourceType.of_json
+                               resourceType) ())
+           (Some Values.ListEventConfigurationsResponse.to_json)
+           (Some Values.ListEventConfigurationsResponse.error_to_json)])
 let list_fuota_tasks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1296,6 +1678,28 @@ let list_multicast_groups_by_fuota_task =
               ?maxResults ~id ())
            (Some Values.ListMulticastGroupsByFuotaTaskResponse.to_json)
            (Some Values.ListMulticastGroupsByFuotaTaskResponse.error_to_json)])
+let list_network_analyzer_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_network_analyzer_configurations
+           (Values.ListNetworkAnalyzerConfigurationsRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListNetworkAnalyzerConfigurationsResponse.to_json)
+           (Some
+              Values.ListNetworkAnalyzerConfigurationsResponse.error_to_json)])
 let list_partner_accounts =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1316,6 +1720,32 @@ let list_partner_accounts =
            (Values.ListPartnerAccountsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListPartnerAccountsResponse.to_json)
            (Some Values.ListPartnerAccountsResponse.error_to_json)])
+let list_position_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceType =
+         flag "resource-type" (optional json_arg)
+           ~doc:"JSON PositionResourceType"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_position_configurations
+           (Values.ListPositionConfigurationsRequest.make
+              ?resourceType:(Option.map
+                               ~f:Values.PositionResourceType.of_json
+                               resourceType) ?maxResults ?nextToken ())
+           (Some Values.ListPositionConfigurationsResponse.to_json)
+           (Some Values.ListPositionConfigurationsResponse.error_to_json)])
 let list_queued_messages =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1382,6 +1812,27 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_wireless_device_import_tasks =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_wireless_device_import_tasks
+           (Values.ListWirelessDeviceImportTasksRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListWirelessDeviceImportTasksResponse.to_json)
+           (Some Values.ListWirelessDeviceImportTasksResponse.error_to_json)])
 let list_wireless_devices =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1472,6 +1923,37 @@ let list_wireless_gateways =
            (Values.ListWirelessGatewaysRequest.make ?nextToken ?maxResults ())
            (Some Values.ListWirelessGatewaysResponse.to_json)
            (Some Values.ListWirelessGatewaysResponse.error_to_json)])
+let put_position_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and solvers =
+         flag "solvers" (optional json_arg)
+           ~doc:"JSON PositionSolverConfigurations"
+       and destination =
+         flag "destination" (optional string) ~doc:"STRING DestinationName"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_position_configuration
+           (Values.PutPositionConfigurationRequest.make
+              ?solvers:(Option.map
+                          ~f:Values.PositionSolverConfigurations.of_json
+                          solvers) ?destination ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ()) (Some Values.PutPositionConfigurationResponse.to_json)
+           (Some Values.PutPositionConfigurationResponse.error_to_json)])
 let put_resource_log_level =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1678,6 +2160,80 @@ let start_multicast_group_session =
               ~loRaWAN:(Values.LoRaWANMulticastSession.of_json loRaWAN) ())
            (Some Values.StartMulticastGroupSessionResponse.to_json)
            (Some Values.StartMulticastGroupSessionResponse.error_to_json)])
+let start_single_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and deviceName =
+         flag "device-name" (optional string) ~doc:"STRING DeviceName"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and positioning =
+         flag "positioning" (optional json_arg)
+           ~doc:"JSON PositioningConfigStatus"
+       and destinationName =
+         flag "destination-name" (required string)
+           ~doc:"STRING DestinationName"
+       and sidewalk =
+         flag "sidewalk" (required json_arg)
+           ~doc:"JSON SidewalkSingleStartImportInfo" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_single_wireless_device_import_task
+           (Values.StartSingleWirelessDeviceImportTaskRequest.make
+              ?clientRequestToken ?deviceName
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?positioning:(Option.map
+                              ~f:Values.PositioningConfigStatus.of_json
+                              positioning) ~destinationName
+              ~sidewalk:(Values.SidewalkSingleStartImportInfo.of_json
+                           sidewalk) ())
+           (Some Values.StartSingleWirelessDeviceImportTaskResponse.to_json)
+           (Some
+              Values.StartSingleWirelessDeviceImportTaskResponse.error_to_json)])
+let start_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientRequestToken =
+         flag "client-request-token" (optional string)
+           ~doc:"STRING ClientRequestToken"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and positioning =
+         flag "positioning" (optional json_arg)
+           ~doc:"JSON PositioningConfigStatus"
+       and destinationName =
+         flag "destination-name" (required string)
+           ~doc:"STRING DestinationName"
+       and sidewalk =
+         flag "sidewalk" (required json_arg)
+           ~doc:"JSON SidewalkStartImportInfo" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_wireless_device_import_task
+           (Values.StartWirelessDeviceImportTaskRequest.make
+              ?clientRequestToken
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?positioning:(Option.map
+                              ~f:Values.PositioningConfigStatus.of_json
+                              positioning) ~destinationName
+              ~sidewalk:(Values.SidewalkStartImportInfo.of_json sidewalk) ())
+           (Some Values.StartWirelessDeviceImportTaskResponse.to_json)
+           (Some Values.StartWirelessDeviceImportTaskResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1766,6 +2322,54 @@ let update_destination =
               ?roleArn ~name ())
            (Some Values.UpdateDestinationResponse.to_json)
            (Some Values.UpdateDestinationResponse.error_to_json)])
+let update_event_configuration_by_resource_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deviceRegistrationState =
+         flag "device-registration-state" (optional json_arg)
+           ~doc:"JSON DeviceRegistrationStateResourceTypeEventConfiguration"
+       and proximity =
+         flag "proximity" (optional json_arg)
+           ~doc:"JSON ProximityResourceTypeEventConfiguration"
+       and join =
+         flag "join" (optional json_arg)
+           ~doc:"JSON JoinResourceTypeEventConfiguration"
+       and connectionStatus =
+         flag "connection-status" (optional json_arg)
+           ~doc:"JSON ConnectionStatusResourceTypeEventConfiguration"
+       and messageDeliveryStatus =
+         flag "message-delivery-status" (optional json_arg)
+           ~doc:"JSON MessageDeliveryStatusResourceTypeEventConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_event_configuration_by_resource_types
+           (Values.UpdateEventConfigurationByResourceTypesRequest.make
+              ?deviceRegistrationState:(Option.map
+                                          ~f:Values.DeviceRegistrationStateResourceTypeEventConfiguration.of_json
+                                          deviceRegistrationState)
+              ?proximity:(Option.map
+                            ~f:Values.ProximityResourceTypeEventConfiguration.of_json
+                            proximity)
+              ?join:(Option.map
+                       ~f:Values.JoinResourceTypeEventConfiguration.of_json
+                       join)
+              ?connectionStatus:(Option.map
+                                   ~f:Values.ConnectionStatusResourceTypeEventConfiguration.of_json
+                                   connectionStatus)
+              ?messageDeliveryStatus:(Option.map
+                                        ~f:Values.MessageDeliveryStatusResourceTypeEventConfiguration.of_json
+                                        messageDeliveryStatus) ())
+           (Some
+              Values.UpdateEventConfigurationByResourceTypesResponse.to_json)
+           (Some
+              Values.UpdateEventConfigurationByResourceTypesResponse.error_to_json)])
 let update_fuota_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1787,13 +2391,25 @@ let update_fuota_task =
        and firmwareUpdateRole =
          flag "firmware-update-role" (optional string)
            ~doc:"STRING FirmwareUpdateRole"
+       and redundancyPercent =
+         flag "redundancy-percent" (optional int)
+           ~doc:"INT RedundancyPercent"
+       and fragmentSizeBytes =
+         flag "fragment-size-bytes" (optional int)
+           ~doc:"INT FragmentSizeBytes"
+       and fragmentIntervalMS =
+         flag "fragment-interval-m-s" (optional int)
+           ~doc:"INT FragmentIntervalMS"
+       and descriptor =
+         flag "descriptor" (optional string) ~doc:"STRING FileDescriptor"
        and id = flag "id" (required string) ~doc:"STRING FuotaTaskId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_fuota_task
            (Values.UpdateFuotaTaskRequest.make ?name ?description
               ?loRaWAN:(Option.map ~f:Values.LoRaWANFuotaTask.of_json loRaWAN)
-              ?firmwareUpdateImage ?firmwareUpdateRole ~id ())
+              ?firmwareUpdateImage ?firmwareUpdateRole ?redundancyPercent
+              ?fragmentSizeBytes ?fragmentIntervalMS ?descriptor ~id ())
            (Some Values.UpdateFuotaTaskResponse.to_json)
            (Some Values.UpdateFuotaTaskResponse.error_to_json)])
 let update_log_levels_by_resource_types =
@@ -1808,6 +2424,9 @@ let update_log_levels_by_resource_types =
            ~doc:"URL override endpoint url"
        and defaultLogLevel =
          flag "default-log-level" (optional json_arg) ~doc:"JSON LogLevel"
+       and fuotaTaskLogOptions =
+         flag "fuota-task-log-options" (optional json_arg)
+           ~doc:"JSON FuotaTaskLogOptionList"
        and wirelessDeviceLogOptions =
          flag "wireless-device-log-options" (optional json_arg)
            ~doc:"JSON WirelessDeviceLogOptionList"
@@ -1820,6 +2439,9 @@ let update_log_levels_by_resource_types =
            (Values.UpdateLogLevelsByResourceTypesRequest.make
               ?defaultLogLevel:(Option.map ~f:Values.LogLevel.of_json
                                   defaultLogLevel)
+              ?fuotaTaskLogOptions:(Option.map
+                                      ~f:Values.FuotaTaskLogOptionList.of_json
+                                      fuotaTaskLogOptions)
               ?wirelessDeviceLogOptions:(Option.map
                                            ~f:Values.WirelessDeviceLogOptionList.of_json
                                            wirelessDeviceLogOptions)
@@ -1828,6 +2450,28 @@ let update_log_levels_by_resource_types =
                                             wirelessGatewayLogOptions) ())
            (Some Values.UpdateLogLevelsByResourceTypesResponse.to_json)
            (Some Values.UpdateLogLevelsByResourceTypesResponse.error_to_json)])
+let update_metric_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and summaryMetric =
+         flag "summary-metric" (optional json_arg)
+           ~doc:"JSON SummaryMetricConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_metric_configuration
+           (Values.UpdateMetricConfigurationRequest.make
+              ?summaryMetric:(Option.map
+                                ~f:Values.SummaryMetricConfiguration.of_json
+                                summaryMetric) ())
+           (Some Values.UpdateMetricConfigurationResponse.to_json)
+           (Some Values.UpdateMetricConfigurationResponse.error_to_json)])
 let update_multicast_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1876,6 +2520,14 @@ let update_network_analyzer_configuration =
        and wirelessGatewaysToRemove =
          flag "wireless-gateways-to-remove" (optional json_arg)
            ~doc:"JSON WirelessGatewayList"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and multicastGroupsToAdd =
+         flag "multicast-groups-to-add" (optional json_arg)
+           ~doc:"JSON NetworkAnalyzerMulticastGroupList"
+       and multicastGroupsToRemove =
+         flag "multicast-groups-to-remove" (optional json_arg)
+           ~doc:"JSON NetworkAnalyzerMulticastGroupList"
        and configurationName =
          flag "configuration-name" (required string)
            ~doc:"STRING NetworkAnalyzerConfigurationName" in
@@ -1897,6 +2549,13 @@ let update_network_analyzer_configuration =
               ?wirelessGatewaysToRemove:(Option.map
                                            ~f:Values.WirelessGatewayList.of_json
                                            wirelessGatewaysToRemove)
+              ?description
+              ?multicastGroupsToAdd:(Option.map
+                                       ~f:Values.NetworkAnalyzerMulticastGroupList.of_json
+                                       multicastGroupsToAdd)
+              ?multicastGroupsToRemove:(Option.map
+                                          ~f:Values.NetworkAnalyzerMulticastGroupList.of_json
+                                          multicastGroupsToRemove)
               ~configurationName ())
            (Some Values.UpdateNetworkAnalyzerConfigurationResponse.to_json)
            (Some
@@ -1928,6 +2587,32 @@ let update_partner_account =
               ~partnerType:(Values.PartnerType.of_json partnerType) ())
            (Some Values.UpdatePartnerAccountResponse.to_json)
            (Some Values.UpdatePartnerAccountResponse.error_to_json)])
+let update_position =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType"
+       and position =
+         flag "position" (required json_arg) ~doc:"JSON PositionCoordinate" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_position
+           (Values.UpdatePositionRequest.make ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ~position:(Values.PositionCoordinate.of_json position) ())
+           (Some Values.UpdatePositionResponse.to_json)
+           (Some Values.UpdatePositionResponse.error_to_json)])
 let update_resource_event_configuration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1947,6 +2632,14 @@ let update_resource_event_configuration =
        and proximity =
          flag "proximity" (optional json_arg)
            ~doc:"JSON ProximityEventConfiguration"
+       and join =
+         flag "join" (optional json_arg) ~doc:"JSON JoinEventConfiguration"
+       and connectionStatus =
+         flag "connection-status" (optional json_arg)
+           ~doc:"JSON ConnectionStatusEventConfiguration"
+       and messageDeliveryStatus =
+         flag "message-delivery-status" (optional json_arg)
+           ~doc:"JSON MessageDeliveryStatusEventConfiguration"
        and identifier =
          flag "identifier" (required string) ~doc:"STRING Identifier"
        and identifierType =
@@ -1964,12 +2657,47 @@ let update_resource_event_configuration =
                                           deviceRegistrationState)
               ?proximity:(Option.map
                             ~f:Values.ProximityEventConfiguration.of_json
-                            proximity) ~identifier
+                            proximity)
+              ?join:(Option.map ~f:Values.JoinEventConfiguration.of_json join)
+              ?connectionStatus:(Option.map
+                                   ~f:Values.ConnectionStatusEventConfiguration.of_json
+                                   connectionStatus)
+              ?messageDeliveryStatus:(Option.map
+                                        ~f:Values.MessageDeliveryStatusEventConfiguration.of_json
+                                        messageDeliveryStatus) ~identifier
               ~identifierType:(Values.IdentifierType.of_json identifierType)
               ())
            (Some Values.UpdateResourceEventConfigurationResponse.to_json)
            (Some
               Values.UpdateResourceEventConfigurationResponse.error_to_json)])
+let update_resource_position =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and geoJsonPayload =
+         flag "geo-json-payload" (optional json_arg)
+           ~doc:"JSON GeoJsonPayload"
+       and resourceIdentifier =
+         flag "resource-identifier" (required string)
+           ~doc:"STRING PositionResourceIdentifier"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON PositionResourceType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_resource_position
+           (Values.UpdateResourcePositionRequest.make
+              ?geoJsonPayload:(Option.map ~f:Values.GeoJsonPayload.of_json
+                                 geoJsonPayload) ~resourceIdentifier
+              ~resourceType:(Values.PositionResourceType.of_json resourceType)
+              ()) (Some Values.UpdateResourcePositionResponse.to_json)
+           (Some Values.UpdateResourcePositionResponse.error_to_json)])
 let update_wireless_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1990,6 +2718,12 @@ let update_wireless_device =
        and loRaWAN =
          flag "lo-ra-w-a-n" (optional json_arg)
            ~doc:"JSON LoRaWANUpdateDevice"
+       and positioning =
+         flag "positioning" (optional json_arg)
+           ~doc:"JSON PositioningConfigStatus"
+       and sidewalk =
+         flag "sidewalk" (optional json_arg)
+           ~doc:"JSON SidewalkUpdateWirelessDevice"
        and id = flag "id" (required string) ~doc:"STRING WirelessDeviceId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1997,9 +2731,36 @@ let update_wireless_device =
            (Values.UpdateWirelessDeviceRequest.make ?destinationName ?name
               ?description
               ?loRaWAN:(Option.map ~f:Values.LoRaWANUpdateDevice.of_json
-                          loRaWAN) ~id ())
+                          loRaWAN)
+              ?positioning:(Option.map
+                              ~f:Values.PositioningConfigStatus.of_json
+                              positioning)
+              ?sidewalk:(Option.map
+                           ~f:Values.SidewalkUpdateWirelessDevice.of_json
+                           sidewalk) ~id ())
            (Some Values.UpdateWirelessDeviceResponse.to_json)
            (Some Values.UpdateWirelessDeviceResponse.error_to_json)])
+let update_wireless_device_import_task =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING ImportTaskId"
+       and sidewalk =
+         flag "sidewalk" (required json_arg)
+           ~doc:"JSON SidewalkUpdateImportInfo" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_wireless_device_import_task
+           (Values.UpdateWirelessDeviceImportTaskRequest.make ~id
+              ~sidewalk:(Values.SidewalkUpdateImportInfo.of_json sidewalk) ())
+           (Some Values.UpdateWirelessDeviceImportTaskResponse.to_json)
+           (Some Values.UpdateWirelessDeviceImportTaskResponse.error_to_json)])
 let update_wireless_gateway =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2019,6 +2780,8 @@ let update_wireless_gateway =
            ~doc:"JSON JoinEuiFilters"
        and netIdFilters =
          flag "net-id-filters" (optional json_arg) ~doc:"JSON NetIdFilters"
+       and maxEirp =
+         flag "max-eirp" (optional float) ~doc:"FLOAT GatewayMaxEirp"
        and id = flag "id" (required string) ~doc:"STRING WirelessGatewayId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -2027,7 +2790,7 @@ let update_wireless_gateway =
               ?joinEuiFilters:(Option.map ~f:Values.JoinEuiFilters.of_json
                                  joinEuiFilters)
               ?netIdFilters:(Option.map ~f:Values.NetIdFilters.of_json
-                               netIdFilters) ~id ())
+                               netIdFilters) ?maxEirp ~id ())
            (Some Values.UpdateWirelessGatewayResponse.to_json)
            (Some Values.UpdateWirelessGatewayResponse.error_to_json)])
 let main =
@@ -2052,6 +2815,8 @@ let main =
     ("create-device-profile", create_device_profile);
     ("create-fuota-task", create_fuota_task);
     ("create-multicast-group", create_multicast_group);
+    ("create-network-analyzer-configuration",
+      create_network_analyzer_configuration);
     ("create-service-profile", create_service_profile);
     ("create-wireless-device", create_wireless_device);
     ("create-wireless-gateway", create_wireless_gateway);
@@ -2062,13 +2827,18 @@ let main =
     ("delete-device-profile", delete_device_profile);
     ("delete-fuota-task", delete_fuota_task);
     ("delete-multicast-group", delete_multicast_group);
+    ("delete-network-analyzer-configuration",
+      delete_network_analyzer_configuration);
     ("delete-queued-messages", delete_queued_messages);
     ("delete-service-profile", delete_service_profile);
     ("delete-wireless-device", delete_wireless_device);
+    ("delete-wireless-device-import-task",
+      delete_wireless_device_import_task);
     ("delete-wireless-gateway", delete_wireless_gateway);
     ("delete-wireless-gateway-task", delete_wireless_gateway_task);
     ("delete-wireless-gateway-task-definition",
       delete_wireless_gateway_task_definition);
+    ("deregister-wireless-device", deregister_wireless_device);
     ("disassociate-aws-account-from-partner-account",
       disassociate_aws_account_from_partner_account);
     ("disassociate-multicast-group-from-fuota-task",
@@ -2085,18 +2855,27 @@ let main =
       disassociate_wireless_gateway_from_thing);
     ("get-destination", get_destination);
     ("get-device-profile", get_device_profile);
+    ("get-event-configuration-by-resource-types",
+      get_event_configuration_by_resource_types);
     ("get-fuota-task", get_fuota_task);
     ("get-log-levels-by-resource-types", get_log_levels_by_resource_types);
+    ("get-metric-configuration", get_metric_configuration);
+    ("get-metrics", get_metrics);
     ("get-multicast-group", get_multicast_group);
     ("get-multicast-group-session", get_multicast_group_session);
     ("get-network-analyzer-configuration",
       get_network_analyzer_configuration);
     ("get-partner-account", get_partner_account);
+    ("get-position", get_position);
+    ("get-position-configuration", get_position_configuration);
+    ("get-position-estimate", get_position_estimate);
     ("get-resource-event-configuration", get_resource_event_configuration);
     ("get-resource-log-level", get_resource_log_level);
+    ("get-resource-position", get_resource_position);
     ("get-service-endpoint", get_service_endpoint);
     ("get-service-profile", get_service_profile);
     ("get-wireless-device", get_wireless_device);
+    ("get-wireless-device-import-task", get_wireless_device_import_task);
     ("get-wireless-device-statistics", get_wireless_device_statistics);
     ("get-wireless-gateway", get_wireless_gateway);
     ("get-wireless-gateway-certificate", get_wireless_gateway_certificate);
@@ -2108,18 +2887,26 @@ let main =
       get_wireless_gateway_task_definition);
     ("list-destinations", list_destinations);
     ("list-device-profiles", list_device_profiles);
+    ("list-devices-for-wireless-device-import-task",
+      list_devices_for_wireless_device_import_task);
+    ("list-event-configurations", list_event_configurations);
     ("list-fuota-tasks", list_fuota_tasks);
     ("list-multicast-groups", list_multicast_groups);
     ("list-multicast-groups-by-fuota-task",
       list_multicast_groups_by_fuota_task);
+    ("list-network-analyzer-configurations",
+      list_network_analyzer_configurations);
     ("list-partner-accounts", list_partner_accounts);
+    ("list-position-configurations", list_position_configurations);
     ("list-queued-messages", list_queued_messages);
     ("list-service-profiles", list_service_profiles);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-wireless-device-import-tasks", list_wireless_device_import_tasks);
     ("list-wireless-devices", list_wireless_devices);
     ("list-wireless-gateway-task-definitions",
       list_wireless_gateway_task_definitions);
     ("list-wireless-gateways", list_wireless_gateways);
+    ("put-position-configuration", put_position_configuration);
     ("put-resource-log-level", put_resource_log_level);
     ("reset-all-resource-log-levels", reset_all_resource_log_levels);
     ("reset-resource-log-level", reset_resource_log_level);
@@ -2131,18 +2918,28 @@ let main =
       start_bulk_disassociate_wireless_device_from_multicast_group);
     ("start-fuota-task", start_fuota_task);
     ("start-multicast-group-session", start_multicast_group_session);
+    ("start-single-wireless-device-import-task",
+      start_single_wireless_device_import_task);
+    ("start-wireless-device-import-task", start_wireless_device_import_task);
     ("tag-resource", tag_resource);
     ("test-wireless-device", test_wireless_device);
     ("untag-resource", untag_resource);
     ("update-destination", update_destination);
+    ("update-event-configuration-by-resource-types",
+      update_event_configuration_by_resource_types);
     ("update-fuota-task", update_fuota_task);
     ("update-log-levels-by-resource-types",
       update_log_levels_by_resource_types);
+    ("update-metric-configuration", update_metric_configuration);
     ("update-multicast-group", update_multicast_group);
     ("update-network-analyzer-configuration",
       update_network_analyzer_configuration);
     ("update-partner-account", update_partner_account);
+    ("update-position", update_position);
     ("update-resource-event-configuration",
       update_resource_event_configuration);
+    ("update-resource-position", update_resource_position);
     ("update-wireless-device", update_wireless_device);
+    ("update-wireless-device-import-task",
+      update_wireless_device_import_task);
     ("update-wireless-gateway", update_wireless_gateway)]

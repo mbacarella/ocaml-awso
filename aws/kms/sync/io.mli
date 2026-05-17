@@ -47,7 +47,15 @@ val delete_custom_key_store :
 val delete_imported_key_material :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
-      DeleteImportedKeyMaterialRequest.t -> (unit, unit) Result.t
+      DeleteImportedKeyMaterialRequest.t ->
+        (DeleteImportedKeyMaterialResponse.t,
+          DeleteImportedKeyMaterialResponse.error) Result.t
+val derive_shared_secret :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeriveSharedSecretRequest.t ->
+        (DeriveSharedSecretResponse.t, DeriveSharedSecretResponse.error)
+          Result.t
 val describe_custom_key_stores :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -104,11 +112,21 @@ val generate_data_key_without_plaintext :
       GenerateDataKeyWithoutPlaintextRequest.t ->
         (GenerateDataKeyWithoutPlaintextResponse.t,
           GenerateDataKeyWithoutPlaintextResponse.error) Result.t
+val generate_mac :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GenerateMacRequest.t ->
+        (GenerateMacResponse.t, GenerateMacResponse.error) Result.t
 val generate_random :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GenerateRandomRequest.t ->
         (GenerateRandomResponse.t, GenerateRandomResponse.error) Result.t
+val get_key_last_usage :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKeyLastUsageRequest.t ->
+        (GetKeyLastUsageResponse.t, GetKeyLastUsageResponse.error) Result.t
 val get_key_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -152,6 +170,11 @@ val list_key_policies :
     ?cfg:Awso.Cfg.t ->
       ListKeyPoliciesRequest.t ->
         (ListKeyPoliciesResponse.t, ListKeyPoliciesResponse.error) Result.t
+val list_key_rotations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKeyRotationsRequest.t ->
+        (ListKeyRotationsResponse.t, ListKeyRotationsResponse.error) Result.t
 val list_keys :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -186,6 +209,12 @@ val retire_grant :
 val revoke_grant :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> RevokeGrantRequest.t -> (unit, unit) Result.t
+val rotate_key_on_demand :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RotateKeyOnDemandRequest.t ->
+        (RotateKeyOnDemandResponse.t, RotateKeyOnDemandResponse.error)
+          Result.t
 val schedule_key_deletion :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -221,3 +250,8 @@ val verify :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       VerifyRequest.t -> (VerifyResponse.t, VerifyResponse.error) Result.t
+val verify_mac :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      VerifyMacRequest.t ->
+        (VerifyMacResponse.t, VerifyMacResponse.error) Result.t

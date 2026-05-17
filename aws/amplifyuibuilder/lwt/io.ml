@@ -13,29 +13,57 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let create_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateComponent input
+let create_form ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateForm input
 let create_theme ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTheme input
 let delete_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteComponent input
+let delete_form ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteForm input
 let delete_theme ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTheme input
 let exchange_code_for_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExchangeCodeForToken input
 let export_components ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportComponents input
+let export_forms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportForms input
 let export_themes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ExportThemes input
+let get_codegen_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCodegenJob input
 let get_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetComponent input
+let get_form ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetForm input
+let get_metadata ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMetadata input
 let get_theme ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetTheme input
+let list_codegen_jobs ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCodegenJobs input
 let list_components ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListComponents input
+let list_forms ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListForms input
+let list_tags_for_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_themes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListThemes input
+let put_metadata_flag ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutMetadataFlag input
 let refresh_token ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RefreshToken input
+let start_codegen_job ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCodegenJob input
+let tag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.TagResource input
+let untag_resource ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_component ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateComponent input
+let update_form ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateForm input
 let update_theme ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTheme input

@@ -80,10 +80,10 @@ module DnsRecord =
       {
       type_: RecordType.t
         [@ocaml.doc
-          "The type of the resource, which indicates the type of value that Route 53 returns in response to DNS queries. You can specify values for Type in the following combinations: A AAAA A and AAAA SRV CNAME If you want Cloud Map to create a Route 53 alias record when you register an instance, specify A or AAAA for Type. You specify other settings, such as the IP address for A and AAAA records, when you register an instance. For more information, see RegisterInstance. The following values are supported: A Route 53 returns the IP address of the resource in IPv4 format, such as 192.0.2.44. AAAA Route 53 returns the IP address of the resource in IPv6 format, such as 2001:0db8:85a3:0000:0000:abcd:0001:2345. CNAME Route 53 returns the domain name of the resource, such as www.example.com. Note the following: You specify the domain name that you want to route traffic to when you register an instance. For more information, see Attributes in the topic RegisterInstance. You must specify WEIGHTED for the value of RoutingPolicy. You can't specify both CNAME for Type and settings for HealthCheckConfig. If you do, the request will fail with an InvalidInput error. SRV Route 53 returns the value for an SRV record. The value for an SRV record uses the following values: priority weight port service-hostname Note the following about the values: The values of priority and weight are both set to 1 and can't be changed. The value of port comes from the value that you specify for the AWS_INSTANCE_PORT attribute when you submit a RegisterInstance request. The value of service-hostname is a concatenation of the following values: The value that you specify for InstanceId when you register an instance. The name of the service. The name of the namespace. For example, if the value of InstanceId is test, the name of the service is backend, and the name of the namespace is example.com, the value of service-hostname is the following: test.backend.example.com If you specify settings for an SRV record, note the following: If you specify values for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both in the RegisterInstance request, Cloud Map automatically creates A and/or AAAA records that have the same name as the value of service-hostname in the SRV record. You can ignore these records. If you're using a system that requires a specific SRV format, such as HAProxy, see the Name element in the documentation about CreateService for information about how to specify the correct name format."];
+          "The type of the resource, which indicates the type of value that Route\194\16053 returns in response to DNS queries. You can specify values for Type in the following combinations: A AAAA A and AAAA SRV CNAME If you want Cloud Map to create a Route\194\16053 alias record when you register an instance, specify A or AAAA for Type. You specify other settings, such as the IP address for A and AAAA records, when you register an instance. For more information, see RegisterInstance. The following values are supported: A Route\194\16053 returns the IP address of the resource in IPv4 format, such as 192.0.2.44. AAAA Route\194\16053 returns the IP address of the resource in IPv6 format, such as 2001:0db8:85a3:0000:0000:abcd:0001:2345. CNAME Route\194\16053 returns the domain name of the resource, such as www.example.com. Note the following: You specify the domain name that you want to route traffic to when you register an instance. For more information, see Attributes in the topic RegisterInstance. You must specify WEIGHTED for the value of RoutingPolicy. You can't specify both CNAME for Type and settings for HealthCheckConfig. If you do, the request will fail with an InvalidInput error. SRV Route\194\16053 returns the value for an SRV record. The value for an SRV record uses the following values: priority weight port service-hostname Note the following about the values: The values of priority and weight are both set to 1 and can't be changed. The value of port comes from the value that you specify for the AWS_INSTANCE_PORT attribute when you submit a RegisterInstance request. The value of service-hostname is a concatenation of the following values: The value that you specify for InstanceId when you register an instance. The name of the service. The name of the namespace. For example, if the value of InstanceId is test, the name of the service is backend, and the name of the namespace is example.com, the value of service-hostname is the following: test.backend.example.com If you specify settings for an SRV record, note the following: If you specify values for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both in the RegisterInstance request, Cloud Map automatically creates A and/or AAAA records that have the same name as the value of service-hostname in the SRV record. You can ignore these records. If you're using a system that requires a specific SRV format, such as HAProxy, see the Name element in the documentation about CreateService for information about how to specify the correct name format."];
       tTL: RecordTTL.t
         [@ocaml.doc
-          "The amount of time, in seconds, that you want DNS resolvers to cache the settings for this record. Alias records don't include a TTL because Route 53 uses the TTL for the Amazon Web Services resource that an alias record routes traffic to. If you include the AWS_ALIAS_DNS_NAME attribute when you submit a RegisterInstance request, the TTL value is ignored. Always specify a TTL for the service; you can use a service to register instances that create either alias or non-alias records."]}
+          "The amount of time, in seconds, that you want DNS resolvers to cache the settings for this record. Alias records don't include a TTL because Route\194\16053 uses the TTL for the Amazon Web Services resource that an alias record routes traffic to. If you include the AWS_ALIAS_DNS_NAME attribute when you submit a RegisterInstance request, the TTL value is ignored. Always specify a TTL for the service; you can use a service to register instances that create either alias or non-alias records."]}
     let context_ = "DnsRecord"
     let make ~type_ = fun ~tTL -> fun () -> { type_; tTL }
     let to_value x =
@@ -98,13 +98,13 @@ module DnsRecord =
         RecordType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~tTL ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tTL = field_map_exn json "TTL" RecordTTL.of_json in
-      let type_ = field_map_exn json "Type" RecordType.of_json in
+    let of_json json__ =
+      let tTL = field_map_exn json__ "TTL" RecordTTL.of_json in
+      let type_ = field_map_exn json__ "Type" RecordType.of_json in
       make ~tTL ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains information about the Route 53 DNS records that you want Cloud Map to create when you register an instance."]
+       "A complex type that contains information about the Route\194\16053 DNS records that you want Cloud Map to create when you register an instance."]
 module ResourceId =
   struct
     type nonrec t = string
@@ -136,8 +136,8 @@ module SOA =
         RecordTTL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TTL") in
       make ~tTL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tTL = field_map_exn json "TTL" RecordTTL.of_json in make ~tTL ()
+    let of_json json__ =
+      let tTL = field_map_exn json__ "TTL" RecordTTL.of_json in make ~tTL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Start of Authority (SOA) properties for a public or private DNS namespace."]
@@ -146,7 +146,11 @@ module NamespaceName =
     type nonrec t = string
     let context_ = "NamespaceName"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_pattern i ~pattern:"^[!-~]{1,1024}$"));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -172,8 +176,8 @@ module SOAChange =
         RecordTTL.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TTL") in
       make ~tTL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tTL = field_map_exn json "TTL" RecordTTL.of_json in make ~tTL ()
+    let of_json json__ =
+      let tTL = field_map_exn json__ "TTL" RecordTTL.of_json in make ~tTL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updated Start of Authority (SOA) properties for a public or private DNS namespace."]
@@ -181,6 +185,9 @@ module DnsRecordList =
   struct
     type nonrec t = DnsRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DnsRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -310,7 +317,7 @@ module DnsProperties =
       {
       hostedZoneId: ResourceId.t option
         [@ocaml.doc
-          "The ID for the Route 53 hosted zone that Cloud Map creates when you create a namespace."];
+          "The ID for the Route\194\16053 hosted zone that Cloud Map creates when you create a namespace."];
       sOA: SOA.t option
         [@ocaml.doc "Start of Authority (SOA) record for the hosted zone."]}
     let make ?hostedZoneId = fun ?sOA -> fun () -> { hostedZoneId; sOA }
@@ -325,13 +332,13 @@ module DnsProperties =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "HostedZoneId") in
       make ?sOA ?hostedZoneId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sOA = field_map json "SOA" SOA.of_json in
-      let hostedZoneId = field_map json "HostedZoneId" ResourceId.of_json in
+    let of_json json__ =
+      let sOA = field_map json__ "SOA" SOA.of_json in
+      let hostedZoneId = field_map json__ "HostedZoneId" ResourceId.of_json in
       make ?sOA ?hostedZoneId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains the ID for the Route 53 hosted zone that Cloud Map creates when you create a namespace."]
+       "A complex type that contains the ID for the Route\194\16053 hosted zone that Cloud Map creates when you create a namespace."]
 module HttpProperties =
   struct
     type nonrec t =
@@ -348,8 +355,8 @@ module HttpProperties =
         (Option.map ~f:NamespaceName.of_xml) (Xml.child xml_arg0 "HttpName") in
       make ?httpName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let httpName = field_map json "HttpName" NamespaceName.of_json in
+    let of_json json__ =
+      let httpName = field_map json__ "HttpName" NamespaceName.of_json in
       make ?httpName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -409,8 +416,8 @@ module PublicDnsPropertiesMutableChange =
         SOAChange.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SOA") in
       make ~sOA ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sOA = field_map_exn json "SOA" SOAChange.of_json in make ~sOA ()
+    let of_json json__ =
+      let sOA = field_map_exn json__ "SOA" SOAChange.of_json in make ~sOA ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updated DNS properties for the public DNS namespace."]
 module PrivateDnsPropertiesMutableChange =
@@ -430,8 +437,8 @@ module PrivateDnsPropertiesMutableChange =
         SOAChange.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SOA") in
       make ~sOA ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sOA = field_map_exn json "SOA" SOAChange.of_json in make ~sOA ()
+    let of_json json__ =
+      let sOA = field_map_exn json__ "SOA" SOAChange.of_json in make ~sOA ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updated DNS properties for the private DNS namespace."]
 module TagKey =
@@ -470,6 +477,24 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module AWSAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AWSAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:12) >>=
+             (fun () -> check_string_min i ~min:12));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSAccountId" j
+    let to_json = simple_to_json to_value
+  end
 module Arn =
   struct
     type nonrec t = string
@@ -489,13 +514,14 @@ module DnsConfig =
     type nonrec t =
       {
       namespaceId: ResourceId.t option
-        [@ocaml.doc "The ID of the namespace to use for DNS configuration."];
+        [@ocaml.doc
+          "Use NamespaceId in Service instead. The ID of the namespace to use for DNS configuration."];
       routingPolicy: RoutingPolicy.t option
         [@ocaml.doc
-          "The routing policy that you want to apply to all Route 53 DNS records that Cloud Map creates when you register an instance and specify this service. If you want to use this service to register instances that create alias records, specify WEIGHTED for the routing policy. You can specify the following values: MULTIVALUE If you define a health check for the service and the health check is healthy, Route 53 returns the applicable value for up to eight instances. For example, suppose that the service includes configurations for one A record and a health check. You use the service to register 10 instances. Route 53 responds to DNS queries with IP addresses for up to eight healthy instances. If fewer than eight instances are healthy, Route 53 responds to every DNS query with the IP addresses for all of the healthy instances. If you don't define a health check for the service, Route 53 assumes that all instances are healthy and returns the values for up to eight instances. For more information about the multivalue routing policy, see Multivalue Answer Routing in the Route 53 Developer Guide. WEIGHTED Route 53 returns the applicable value from one randomly selected instance from among the instances that you registered using the same service. Currently, all records have the same weight, so you can't route more or less traffic to any instances. For example, suppose that the service includes configurations for one A record and a health check. You use the service to register 10 instances. Route 53 responds to DNS queries with the IP address for one randomly selected instance from among the healthy instances. If no instances are healthy, Route 53 responds to DNS queries as if all of the instances were healthy. If you don't define a health check for the service, Route 53 assumes that all instances are healthy and returns the applicable value for one randomly selected instance. For more information about the weighted routing policy, see Weighted Routing in the Route 53 Developer Guide."];
+          "The routing policy that you want to apply to all Route\194\16053 DNS records that Cloud Map creates when you register an instance and specify this service. If you want to use this service to register instances that create alias records, specify WEIGHTED for the routing policy. You can specify the following values: MULTIVALUE If you define a health check for the service and the health check is healthy, Route\194\16053 returns the applicable value for up to eight instances. For example, suppose that the service includes configurations for one A record and a health check. You use the service to register 10 instances. Route\194\16053 responds to DNS queries with IP addresses for up to eight healthy instances. If fewer than eight instances are healthy, Route\194\16053 responds to every DNS query with the IP addresses for all of the healthy instances. If you don't define a health check for the service, Route\194\16053 assumes that all instances are healthy and returns the values for up to eight instances. For more information about the multivalue routing policy, see Multivalue Answer Routing in the Route\194\16053 Developer Guide. WEIGHTED Route\194\16053 returns the applicable value from one randomly selected instance from among the instances that you registered using the same service. Currently, all records have the same weight, so you can't route more or less traffic to any instances. For example, suppose that the service includes configurations for one A record and a health check. You use the service to register 10 instances. Route\194\16053 responds to DNS queries with the IP address for one randomly selected instance from among the healthy instances. If no instances are healthy, Route\194\16053 responds to DNS queries as if all of the instances were healthy. If you don't define a health check for the service, Route\194\16053 assumes that all instances are healthy and returns the applicable value for one randomly selected instance. For more information about the weighted routing policy, see Weighted Routing in the Route\194\16053 Developer Guide."];
       dnsRecords: DnsRecordList.t
         [@ocaml.doc
-          "An array that contains one DnsRecord object for each Route 53 DNS record that you want Cloud Map to create when you register an instance."]}
+          "An array that contains one DnsRecord object for each Route\194\16053 DNS record that you want Cloud Map to create when you register an instance. The record type of a service specified in a DnsRecord object can't be updated. To change a record type, you need to delete the service and recreate it with a new DnsConfig."]}
     let context_ = "DnsConfig"
     let make ?namespaceId =
       fun ?routingPolicy ->
@@ -519,28 +545,29 @@ module DnsConfig =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "NamespaceId") in
       make ~dnsRecords ?routingPolicy ?namespaceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsRecords = field_map_exn json "DnsRecords" DnsRecordList.of_json in
+    let of_json json__ =
+      let dnsRecords =
+        field_map_exn json__ "DnsRecords" DnsRecordList.of_json in
       let routingPolicy =
-        field_map json "RoutingPolicy" RoutingPolicy.of_json in
-      let namespaceId = field_map json "NamespaceId" ResourceId.of_json in
+        field_map json__ "RoutingPolicy" RoutingPolicy.of_json in
+      let namespaceId = field_map json__ "NamespaceId" ResourceId.of_json in
       make ~dnsRecords ?routingPolicy ?namespaceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains information about the Amazon Route 53 DNS records that you want Cloud Map to create when you register an instance."]
+       "A complex type that contains information about the Amazon Route\194\16053 DNS records that you want Cloud Map to create when you register an instance."]
 module HealthCheckConfig =
   struct
     type nonrec t =
       {
       type_: HealthCheckType.t
         [@ocaml.doc
-          "The type of health check that you want to create, which indicates how Route 53 determines whether an endpoint is healthy. You can't change the value of Type after you create a health check. You can create the following types of health checks: HTTP: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTP request and waits for an HTTP status code of 200 or greater and less than 400. HTTPS: Route 53 tries to establish a TCP connection. If successful, Route 53 submits an HTTPS request and waits for an HTTP status code of 200 or greater and less than 400. If you specify HTTPS for the value of Type, the endpoint must support TLS v1.0 or later. TCP: Route 53 tries to establish a TCP connection. If you specify TCP for Type, don't specify a value for ResourcePath. For more information, see How Route 53 Determines Whether an Endpoint Is Healthy in the Route 53 Developer Guide."];
+          "The type of health check that you want to create, which indicates how Route\194\16053 determines whether an endpoint is healthy. You can't change the value of Type after you create a health check. You can create the following types of health checks: HTTP: Route\194\16053 tries to establish a TCP connection. If successful, Route\194\16053 submits an HTTP request and waits for an HTTP status code of 200 or greater and less than 400. HTTPS: Route\194\16053 tries to establish a TCP connection. If successful, Route\194\16053 submits an HTTPS request and waits for an HTTP status code of 200 or greater and less than 400. If you specify HTTPS for the value of Type, the endpoint must support TLS v1.0 or later. TCP: Route\194\16053 tries to establish a TCP connection. If you specify TCP for Type, don't specify a value for ResourcePath. For more information, see How Route\194\16053 Determines Whether an Endpoint Is Healthy in the Route\194\16053 Developer Guide."];
       resourcePath: ResourcePath.t option
         [@ocaml.doc
-          "The path that you want Route 53 to request when performing health checks. The path can be any value that your endpoint returns an HTTP status code of a 2xx or 3xx format for when the endpoint is healthy. An example file is /docs/route53-health-check.html. Route 53 automatically adds the DNS name for the service. If you don't specify a value for ResourcePath, the default value is /. If you specify TCP for Type, you must not specify a value for ResourcePath."];
+          "The path that you want Route\194\16053 to request when performing health checks. The path can be any value that your endpoint returns an HTTP status code of a 2xx or 3xx format for when the endpoint is healthy. An example file is /docs/route53-health-check.html. Route\194\16053 automatically adds the DNS name for the service. If you don't specify a value for ResourcePath, the default value is /. If you specify TCP for Type, you must not specify a value for ResourcePath."];
       failureThreshold: FailureThreshold.t option
         [@ocaml.doc
-          "The number of consecutive health checks that an endpoint must pass or fail for Route 53 to change the current status of the endpoint from unhealthy to healthy or the other way around. For more information, see How Route 53 Determines Whether an Endpoint Is Healthy in the Route 53 Developer Guide."]}
+          "The number of consecutive health checks that an endpoint must pass or fail for Route\194\16053 to change the current status of the endpoint from unhealthy to healthy or the other way around. For more information, see How Route\194\16053 Determines Whether an Endpoint Is Healthy in the Route\194\16053 Developer Guide."]}
     let context_ = "HealthCheckConfig"
     let make ?resourcePath =
       fun ?failureThreshold ->
@@ -565,15 +592,15 @@ module HealthCheckConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ?failureThreshold ?resourcePath ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureThreshold =
-        field_map json "FailureThreshold" FailureThreshold.of_json in
-      let resourcePath = field_map json "ResourcePath" ResourcePath.of_json in
-      let type_ = field_map_exn json "Type" HealthCheckType.of_json in
+        field_map json__ "FailureThreshold" FailureThreshold.of_json in
+      let resourcePath = field_map json__ "ResourcePath" ResourcePath.of_json in
+      let type_ = field_map_exn json__ "Type" HealthCheckType.of_json in
       make ?failureThreshold ?resourcePath ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both. Health checks are basic Route 53 health checks that monitor an Amazon Web Services endpoint. For information about pricing for health checks, see Amazon Route 53 Pricing. Note the following about configuring health checks. A and AAAA records If DnsConfig includes configurations for both A and AAAA records, Cloud Map creates a health check that uses the IPv4 address to check the health of the resource. If the endpoint tthat's specified by the IPv4 address is unhealthy, Route 53 considers both the A and AAAA records to be unhealthy. CNAME records You can't specify settings for HealthCheckConfig when the DNSConfig includes CNAME for the value of Type. If you do, the CreateService request will fail with an InvalidInput error. Request interval A Route 53 health checker in each health-checking Amazon Web Services Region sends a health check request to an endpoint every 30 seconds. On average, your endpoint receives a health check request about every two seconds. However, health checkers don't coordinate with one another. Therefore, you might sometimes see several requests in one second that's followed by a few seconds with no health checks at all. Health checking regions Health checkers perform checks from all Route 53 health-checking Regions. For a list of the current Regions, see Regions. Alias records When you register an instance, if you include the AWS_ALIAS_DNS_NAME attribute, Cloud Map creates a Route 53 alias record. Note the following: Route 53 automatically sets EvaluateTargetHealth to true for alias records. When EvaluateTargetHealth is true, the alias record inherits the health of the referenced Amazon Web Services resource. such as an ELB load balancer. For more information, see EvaluateTargetHealth. If you include HealthCheckConfig and then use the service to register an instance that creates an alias record, Route 53 doesn't create the health check. Charges for health checks Health checks are basic Route 53 health checks that monitor an Amazon Web Services endpoint. For information about pricing for health checks, see Amazon Route 53 Pricing."]
+       "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both. Health checks are basic Route\194\16053 health checks that monitor an Amazon Web Services endpoint. For information about pricing for health checks, see Amazon Route\194\16053 Pricing. Note the following about configuring health checks. A and AAAA records If DnsConfig includes configurations for both A and AAAA records, Cloud Map creates a health check that uses the IPv4 address to check the health of the resource. If the endpoint tthat's specified by the IPv4 address is unhealthy, Route\194\16053 considers both the A and AAAA records to be unhealthy. CNAME records You can't specify settings for HealthCheckConfig when the DNSConfig includes CNAME for the value of Type. If you do, the CreateService request will fail with an InvalidInput error. Request interval A Route\194\16053 health checker in each health-checking Amazon Web Services Region sends a health check request to an endpoint every 30 seconds. On average, your endpoint receives a health check request about every two seconds. However, health checkers don't coordinate with one another. Therefore, you might sometimes see several requests in one second that's followed by a few seconds with no health checks at all. Health checking regions Health checkers perform checks from all Route\194\16053 health-checking Regions. For a list of the current Regions, see Regions. Alias records When you register an instance, if you include the AWS_ALIAS_DNS_NAME attribute, Cloud Map creates a Route\194\16053 alias record. Note the following: Route\194\16053 automatically sets EvaluateTargetHealth to true for alias records. When EvaluateTargetHealth is true, the alias record inherits the health of the referenced Amazon Web Services resource. such as an ELB load balancer. For more information, see EvaluateTargetHealth. If you include HealthCheckConfig and then use the service to register an instance that creates an alias record, Route\194\16053 doesn't create the health check. Charges for health checks Health checks are basic Route\194\16053 health checks that monitor an Amazon Web Services endpoint. For information about pricing for health checks, see Amazon Route\194\16053 Pricing."]
 module HealthCheckCustomConfig =
   struct
     type nonrec t =
@@ -593,9 +620,9 @@ module HealthCheckCustomConfig =
           (Xml.child xml_arg0 "FailureThreshold") in
       make ?failureThreshold ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureThreshold =
-        field_map json "FailureThreshold" FailureThreshold.of_json in
+        field_map json__ "FailureThreshold" FailureThreshold.of_json in
       make ?failureThreshold ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -692,6 +719,7 @@ module FilterCondition =
       | EQ 
       | IN 
       | BETWEEN 
+      | BEGINS_WITH 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -699,12 +727,14 @@ module FilterCondition =
       | EQ -> "EQ"
       | IN -> "IN"
       | BETWEEN -> "BETWEEN"
+      | BEGINS_WITH -> "BEGINS_WITH"
       | Non_static_id s -> s
     let of_string =
       function
       | "EQ" -> EQ
       | "IN" -> IN
       | "BETWEEN" -> BETWEEN
+      | "BEGINS_WITH" -> BEGINS_WITH
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -718,6 +748,9 @@ module FilterValues =
   struct
     type nonrec t = FilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -742,12 +775,19 @@ module ServiceFilterName =
   struct
     type nonrec t =
       | NAMESPACE_ID 
+      | RESOURCE_OWNER 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | NAMESPACE_ID -> "NAMESPACE_ID" | Non_static_id s -> s
+      function
+      | NAMESPACE_ID -> "NAMESPACE_ID"
+      | RESOURCE_OWNER -> "RESOURCE_OWNER"
+      | Non_static_id s -> s
     let of_string =
-      function | "NAMESPACE_ID" -> NAMESPACE_ID | x -> Non_static_id x
+      function
+      | "NAMESPACE_ID" -> NAMESPACE_ID
+      | "RESOURCE_OWNER" -> RESOURCE_OWNER
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -843,7 +883,7 @@ module NamespaceProperties =
       {
       dnsProperties: DnsProperties.t option
         [@ocaml.doc
-          "A complex type that contains the ID for the Route 53 hosted zone that Cloud Map creates when you create a namespace."];
+          "A complex type that contains the ID for the Route\194\16053 hosted zone that Cloud Map creates when you create a namespace."];
       httpProperties: HttpProperties.t option
         [@ocaml.doc
           "A complex type that contains the name of an HTTP namespace."]}
@@ -865,11 +905,11 @@ module NamespaceProperties =
           (Xml.child xml_arg0 "DnsProperties") in
       make ?httpProperties ?dnsProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let httpProperties =
-        field_map json "HttpProperties" HttpProperties.of_json in
+        field_map json__ "HttpProperties" HttpProperties.of_json in
       let dnsProperties =
-        field_map json "DnsProperties" DnsProperties.of_json in
+        field_map json__ "DnsProperties" DnsProperties.of_json in
       make ?httpProperties ?dnsProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -906,10 +946,25 @@ module NamespaceFilterName =
   struct
     type nonrec t =
       | TYPE 
+      | NAME 
+      | HTTP_NAME 
+      | RESOURCE_OWNER 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | TYPE -> "TYPE" | Non_static_id s -> s
-    let of_string = function | "TYPE" -> TYPE | x -> Non_static_id x
+    let to_string =
+      function
+      | TYPE -> "TYPE"
+      | NAME -> "NAME"
+      | HTTP_NAME -> "HTTP_NAME"
+      | RESOURCE_OWNER -> "RESOURCE_OWNER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "TYPE" -> TYPE
+      | "NAME" -> NAME
+      | "HTTP_NAME" -> HTTP_NAME
+      | "RESOURCE_OWNER" -> RESOURCE_OWNER
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -940,12 +995,42 @@ module Attributes =
                     (fun x -> (AttrValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:AttrKey.of_string
         ~of_json:AttrValue.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ServiceAttributeKey =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceAttributeKey"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:255); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceAttributeKey" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceAttributeValue =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceAttributeValue"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1024); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceAttributeValue" j
+    let to_json = simple_to_json to_value
   end
 module OperationTargetType =
   struct
@@ -1012,7 +1097,7 @@ module NamespaceNameHttp =
       let open Result in
         ok_or_failwith
           ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"^[!-~]{1,1024}$"));
+             (fun () -> check_pattern i ~pattern:"^(?!arn:)[!-~]{1,1024}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1041,7 +1126,7 @@ module DnsConfigChange =
       {
       dnsRecords: DnsRecordList.t
         [@ocaml.doc
-          "An array that contains one DnsRecord object for each Route 53 record that you want Cloud Map to create when you register an instance."]}
+          "An array that contains one DnsRecord object for each Route\194\16053 record that you want Cloud Map to create when you register an instance."]}
     let context_ = "DnsConfigChange"
     let make ~dnsRecords = fun () -> { dnsRecords }
     let to_value x =
@@ -1054,12 +1139,13 @@ module DnsConfigChange =
           (Xml.child_exn ~context:context_ xml_arg0 "DnsRecords") in
       make ~dnsRecords ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dnsRecords = field_map_exn json "DnsRecords" DnsRecordList.of_json in
+    let of_json json__ =
+      let dnsRecords =
+        field_map_exn json__ "DnsRecords" DnsRecordList.of_json in
       make ~dnsRecords ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A complex type that contains information about changes to the Route 53 DNS records that Cloud Map creates when you register an instance."]
+       "A complex type that contains information about changes to the Route\194\16053 DNS records that Cloud Map creates when you register an instance."]
 module PublicDnsNamespacePropertiesChange =
   struct
     type nonrec t =
@@ -1080,9 +1166,9 @@ module PublicDnsNamespacePropertiesChange =
           (Xml.child_exn ~context:context_ xml_arg0 "DnsProperties") in
       make ~dnsProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dnsProperties =
-        field_map_exn json "DnsProperties"
+        field_map_exn json__ "DnsProperties"
           PublicDnsPropertiesMutableChange.of_json in
       make ~dnsProperties ()
     let to_json v = composed_to_json to_value v
@@ -1106,9 +1192,9 @@ module PrivateDnsNamespacePropertiesChange =
           (Xml.child_exn ~context:context_ xml_arg0 "DnsProperties") in
       make ~dnsProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dnsProperties =
-        field_map_exn json "DnsProperties"
+        field_map_exn json__ "DnsProperties"
           PrivateDnsPropertiesMutableChange.of_json in
       make ~dnsProperties ()
     let to_json v = composed_to_json to_value v
@@ -1153,9 +1239,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1170,6 +1256,9 @@ module ServiceSummary =
       arn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that Cloud Map assigns to the service when you create it."];
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace with which the service is associated. If this isn't your account ID, it is the ID of the account that shared the namespace with your account. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       name: ServiceName.t option [@ocaml.doc "The name of the service."];
       type_: ServiceType.t option
         [@ocaml.doc
@@ -1182,7 +1271,7 @@ module ServiceSummary =
           "The number of instances that are currently associated with the service. Instances that were previously associated with the service but that are deleted aren't included in the count. The count might not reflect pending registrations and deregistrations."];
       dnsConfig: DnsConfig.t option
         [@ocaml.doc
-          "Information about the Route 53 DNS records that you want Cloud Map to create when you register an instance."];
+          "Information about the Route\194\16053 DNS records that you want Cloud Map to create when you register an instance."];
       healthCheckConfig: HealthCheckConfig.t option
         [@ocaml.doc
           "Public DNS and HTTP namespaces only. Settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig."];
@@ -1190,34 +1279,43 @@ module ServiceSummary =
         [@ocaml.doc
           "Information about an optional custom health check. A custom health check, which requires that you use a third-party health checker to evaluate the health of your resources, is useful in the following circumstances: You can't use a health check that's defined by HealthCheckConfig because the resource isn't available over the internet. For example, you can use a custom health check when the instance is in an Amazon VPC. (To check the health of resources in a VPC, the health checker must also be in the VPC.) You want to use a third-party health checker regardless of where your resources are located. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both."];
       createDate: Timestamp.t option
-        [@ocaml.doc "The date and time that the service was created."]}
+        [@ocaml.doc "The date and time that the service was created."];
+      createdByAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the service. If this isn't your account ID, it is the account ID of the namespace owner or of another account with which the namespace has been shared. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
     let make ?id =
       fun ?arn ->
-        fun ?name ->
-          fun ?type_ ->
-            fun ?description ->
-              fun ?instanceCount ->
-                fun ?dnsConfig ->
-                  fun ?healthCheckConfig ->
-                    fun ?healthCheckCustomConfig ->
-                      fun ?createDate ->
-                        fun () ->
-                          {
-                            id;
-                            arn;
-                            name;
-                            type_;
-                            description;
-                            instanceCount;
-                            dnsConfig;
-                            healthCheckConfig;
-                            healthCheckCustomConfig;
-                            createDate
-                          }
+        fun ?resourceOwner ->
+          fun ?name ->
+            fun ?type_ ->
+              fun ?description ->
+                fun ?instanceCount ->
+                  fun ?dnsConfig ->
+                    fun ?healthCheckConfig ->
+                      fun ?healthCheckCustomConfig ->
+                        fun ?createDate ->
+                          fun ?createdByAccount ->
+                            fun () ->
+                              {
+                                id;
+                                arn;
+                                resourceOwner;
+                                name;
+                                type_;
+                                description;
+                                instanceCount;
+                                dnsConfig;
+                                healthCheckConfig;
+                                healthCheckCustomConfig;
+                                createDate;
+                                createdByAccount
+                              }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ResourceOwner",
+          (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
         ("Name", (Option.map x.name ~f:ServiceName.to_value));
         ("Type", (Option.map x.type_ ~f:ServiceType.to_value));
         ("Description",
@@ -1230,9 +1328,14 @@ module ServiceSummary =
         ("HealthCheckCustomConfig",
           (Option.map x.healthCheckCustomConfig
              ~f:HealthCheckCustomConfig.to_value));
-        ("CreateDate", (Option.map x.createDate ~f:Timestamp.to_value))]
+        ("CreateDate", (Option.map x.createDate ~f:Timestamp.to_value));
+        ("CreatedByAccount",
+          (Option.map x.createdByAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdByAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "CreatedByAccount") in
       let createDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreateDate") in
       let healthCheckCustomConfig =
@@ -1253,29 +1356,38 @@ module ServiceSummary =
         (Option.map ~f:ServiceType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?createDate ?healthCheckCustomConfig ?healthCheckConfig ?dnsConfig
-        ?instanceCount ?description ?type_ ?name ?arn ?id ()
+      make ?createdByAccount ?createDate ?healthCheckCustomConfig
+        ?healthCheckConfig ?dnsConfig ?instanceCount ?description ?type_
+        ?name ?resourceOwner ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+    let of_json json__ =
+      let createdByAccount =
+        field_map json__ "CreatedByAccount" AWSAccountId.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let healthCheckCustomConfig =
-        field_map json "HealthCheckCustomConfig"
+        field_map json__ "HealthCheckCustomConfig"
           HealthCheckCustomConfig.of_json in
       let healthCheckConfig =
-        field_map json "HealthCheckConfig" HealthCheckConfig.of_json in
-      let dnsConfig = field_map json "DnsConfig" DnsConfig.of_json in
+        field_map json__ "HealthCheckConfig" HealthCheckConfig.of_json in
+      let dnsConfig = field_map json__ "DnsConfig" DnsConfig.of_json in
       let instanceCount =
-        field_map json "InstanceCount" ResourceCount.of_json in
+        field_map json__ "InstanceCount" ResourceCount.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      let type_ = field_map json "Type" ServiceType.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ?createDate ?healthCheckCustomConfig ?healthCheckConfig ?dnsConfig
-        ?instanceCount ?description ?type_ ?name ?arn ?id ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let type_ = field_map json__ "Type" ServiceType.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?createdByAccount ?createDate ?healthCheckCustomConfig
+        ?healthCheckConfig ?dnsConfig ?instanceCount ?description ?type_
+        ?name ?resourceOwner ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a specified service."]
@@ -1283,13 +1395,15 @@ module ServiceFilter =
   struct
     type nonrec t =
       {
-      name: ServiceFilterName.t [@ocaml.doc "Specify NAMESPACE_ID."];
+      name: ServiceFilterName.t
+        [@ocaml.doc
+          "Specify the services that you want to get using one of the following. NAMESPACE_ID: Gets the services associated with the specified namespace. RESOURCE_OWNER: Gets the services associated with the namespaces created by your Amazon Web Services account or by other accounts. This can be used to filter for services created in a shared namespace. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       values: FilterValues.t
         [@ocaml.doc
-          "The values that are applicable to the value that you specify for Condition to filter the list of services."];
+          "The values that are applicable to the value that you specify for Condition to filter the list of services. NAMESPACE_ID: Specify one namespace ID or ARN. Specify the namespace ARN for namespaces that are shared with your Amazon Web Services account. RESOURCE_OWNER: Specify one of SELF or OTHER_ACCOUNTS. SELF can be used to filter services associated with namespaces created by you and OTHER_ACCOUNTS can be used to filter services associated with namespaces that were shared with you."];
       condition: FilterCondition.t option
         [@ocaml.doc
-          "The operator that you want to use to determine whether a service is returned by ListServices. Valid values for Condition include the following: EQ: When you specify EQ, specify one namespace ID for Values. EQ is the default condition and can be omitted. IN: When you specify IN, specify a list of the IDs for the namespaces that you want ListServices to return a list of services for. BETWEEN: Not applicable."]}
+          "The operator that you want to use to determine whether a service is returned by ListServices. Valid values for Condition include the following: EQ: When you specify EQ, specify one value. EQ is the default condition and can be omitted."]}
     let context_ = "ServiceFilter"
     let make ?condition =
       fun ~name -> fun ~values -> fun () -> { condition; name; values }
@@ -1311,10 +1425,10 @@ module ServiceFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?condition ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map json "Condition" FilterCondition.of_json in
-      let values = field_map_exn json "Values" FilterValues.of_json in
-      let name = field_map_exn json "Name" ServiceFilterName.of_json in
+    let of_json json__ =
+      let condition = field_map json__ "Condition" FilterCondition.of_json in
+      let values = field_map_exn json__ "Values" FilterValues.of_json in
+      let name = field_map_exn json__ "Name" ServiceFilterName.of_json in
       make ?condition ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1339,9 +1453,10 @@ module OperationSummary =
       let id = (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?status ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" OperationStatus.of_json in
-      let id = field_map json "Id" OperationId.of_json in make ?status ?id ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OperationStatus.of_json in
+      let id = field_map json__ "Id" OperationId.of_json in
+      make ?status ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about an operation that matches the criteria that you specified in a ListOperations request."]
@@ -1379,10 +1494,10 @@ module OperationFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?condition ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map json "Condition" FilterCondition.of_json in
-      let values = field_map_exn json "Values" FilterValues.of_json in
-      let name = field_map_exn json "Name" OperationFilterName.of_json in
+    let of_json json__ =
+      let condition = field_map json__ "Condition" FilterCondition.of_json in
+      let values = field_map_exn json__ "Values" FilterValues.of_json in
+      let name = field_map_exn json__ "Name" OperationFilterName.of_json in
       make ?condition ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1395,9 +1510,12 @@ module NamespaceSummary =
       arn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that Cloud Map assigns to the namespace when you create it."];
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace. If this isn't your account ID, it's the ID of the account that shared the namespace with your account. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       name: NamespaceName.t option
         [@ocaml.doc
-          "The name of the namespace. When you create a namespace, Cloud Map automatically creates a Route 53 hosted zone that has the same name as the namespace."];
+          "The name of the namespace. When you create a namespace, Cloud Map automatically creates a Route\194\16053 hosted zone that has the same name as the namespace."];
       type_: NamespaceType.t option
         [@ocaml.doc "The type of the namespace, either public or private."];
       description: ResourceDescription.t option
@@ -1411,27 +1529,31 @@ module NamespaceSummary =
         [@ocaml.doc "The date and time that the namespace was created."]}
     let make ?id =
       fun ?arn ->
-        fun ?name ->
-          fun ?type_ ->
-            fun ?description ->
-              fun ?serviceCount ->
-                fun ?properties ->
-                  fun ?createDate ->
-                    fun () ->
-                      {
-                        id;
-                        arn;
-                        name;
-                        type_;
-                        description;
-                        serviceCount;
-                        properties;
-                        createDate
-                      }
+        fun ?resourceOwner ->
+          fun ?name ->
+            fun ?type_ ->
+              fun ?description ->
+                fun ?serviceCount ->
+                  fun ?properties ->
+                    fun ?createDate ->
+                      fun () ->
+                        {
+                          id;
+                          arn;
+                          resourceOwner;
+                          name;
+                          type_;
+                          description;
+                          serviceCount;
+                          properties;
+                          createDate
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ResourceOwner",
+          (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
         ("Name", (Option.map x.name ~f:NamespaceName.to_value));
         ("Type", (Option.map x.type_ ~f:NamespaceType.to_value));
         ("Description",
@@ -1458,24 +1580,30 @@ module NamespaceSummary =
         (Option.map ~f:NamespaceType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
         (Option.map ~f:NamespaceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?createDate ?properties ?serviceCount ?description ?type_ ?name
-        ?arn ?id ()
+        ?resourceOwner ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+    let of_json json__ =
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let properties =
-        field_map json "Properties" NamespaceProperties.of_json in
-      let serviceCount = field_map json "ServiceCount" ResourceCount.of_json in
+        field_map json__ "Properties" NamespaceProperties.of_json in
+      let serviceCount =
+        field_map json__ "ServiceCount" ResourceCount.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      let type_ = field_map json "Type" NamespaceType.of_json in
-      let name = field_map json "Name" NamespaceName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let type_ = field_map json__ "Type" NamespaceType.of_json in
+      let name = field_map json__ "Name" NamespaceName.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?createDate ?properties ?serviceCount ?description ?type_ ?name
-        ?arn ?id ()
+        ?resourceOwner ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a namespace."]
@@ -1483,13 +1611,15 @@ module NamespaceFilter =
   struct
     type nonrec t =
       {
-      name: NamespaceFilterName.t [@ocaml.doc "Specify TYPE."];
+      name: NamespaceFilterName.t
+        [@ocaml.doc
+          "Specify the namespaces that you want to get using one of the following. TYPE: Gets the namespaces of the specified type. NAME: Gets the namespaces with the specified name. HTTP_NAME: Gets the namespaces with the specified HTTP name. RESOURCE_OWNER: Gets the namespaces created by your Amazon Web Services account or by other accounts. This can be used to filter for shared namespaces. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       values: FilterValues.t
         [@ocaml.doc
-          "If you specify EQ for Condition, specify either DNS_PUBLIC or DNS_PRIVATE. If you specify IN for Condition, you can specify DNS_PUBLIC, DNS_PRIVATE, or both."];
+          "Specify the values that are applicable to the value that you specify for Name. TYPE: Specify HTTP, DNS_PUBLIC, or DNS_PRIVATE. NAME: Specify the name of the namespace, which is found in Namespace.Name. HTTP_NAME: Specify the HTTP name of the namespace, which is found in Namespace.Properties.HttpProperties.HttpName. RESOURCE_OWNER: Specify one of SELF or OTHER_ACCOUNTS. SELF can be used to filter namespaces created by you and OTHER_ACCOUNTS can be used to filter namespaces shared with you that were created by other accounts."];
       condition: FilterCondition.t option
         [@ocaml.doc
-          "The operator that you want to use to determine whether ListNamespaces returns a namespace. Valid values for condition include: EQ When you specify EQ for the condition, you can choose to list only public namespaces or private namespaces, but not both. EQ is the default condition and can be omitted. IN When you specify IN for the condition, you can choose to list public namespaces, private namespaces, or both. BETWEEN Not applicable"]}
+          "Specify the operator that you want to use to determine whether a namespace matches the specified value. Valid values for Condition are one of the following. EQ: When you specify EQ for Condition, you can specify only one value. EQ is supported for TYPE, NAME, RESOURCE_OWNER and HTTP_NAME. EQ is the default condition and can be omitted. BEGINS_WITH: When you specify BEGINS_WITH for Condition, you can specify only one value. BEGINS_WITH is supported for TYPE, NAME, and HTTP_NAME."]}
     let context_ = "NamespaceFilter"
     let make ?condition =
       fun ~name -> fun ~values -> fun () -> { condition; name; values }
@@ -1511,10 +1641,10 @@ module NamespaceFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?condition ~values ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let condition = field_map json "Condition" FilterCondition.of_json in
-      let values = field_map_exn json "Values" FilterValues.of_json in
-      let name = field_map_exn json "Name" NamespaceFilterName.of_json in
+    let of_json json__ =
+      let condition = field_map json__ "Condition" FilterCondition.of_json in
+      let values = field_map_exn json__ "Values" FilterValues.of_json in
+      let name = field_map_exn json__ "Name" NamespaceFilterName.of_json in
       make ?condition ~values ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1528,26 +1658,75 @@ module InstanceSummary =
           "The ID for an instance that you created by using a specified service."];
       attributes: Attributes.t option
         [@ocaml.doc
-          "A string map that contains the following information: The attributes that are associated with the instance. For each attribute, the applicable value. Supported attribute keys include the following: AWS_ALIAS_DNS_NAME For an alias record that routes traffic to an Elastic Load Balancing load balancer, the DNS name that's associated with the load balancer. AWS_EC2_INSTANCE_ID (HTTP namespaces only) The Amazon EC2 instance ID for the instance. When the AWS_EC2_INSTANCE_ID attribute is specified, then the AWS_INSTANCE_IPV4 attribute contains the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME For a CNAME record, the domain name that Route 53 returns in response to DNS queries (for example, example.com). AWS_INSTANCE_IPV4 For an A record, the IPv4 address that Route 53 returns in response to DNS queries (for example, 192.0.2.44). AWS_INSTANCE_IPV6 For an AAAA record, the IPv6 address that Route 53 returns in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). AWS_INSTANCE_PORT For an SRV record, the value that Route 53 returns for the port. In addition, if the service includes HealthCheckConfig, the port on the endpoint that Route 53 sends requests to."]}
-    let make ?id = fun ?attributes -> fun () -> { id; attributes }
+          "A string map that contains the following information: The attributes that are associated with the instance. For each attribute, the applicable value. Supported attribute keys include the following: AWS_ALIAS_DNS_NAME For an alias record that routes traffic to an Elastic Load Balancing load balancer, the DNS name that's associated with the load balancer. AWS_EC2_INSTANCE_ID (HTTP namespaces only) The Amazon EC2 instance ID for the instance. When the AWS_EC2_INSTANCE_ID attribute is specified, then the AWS_INSTANCE_IPV4 attribute contains the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME For a CNAME record, the domain name that Route\194\16053 returns in response to DNS queries (for example, example.com). AWS_INSTANCE_IPV4 For an A record, the IPv4 address that Route\194\16053 returns in response to DNS queries (for example, 192.0.2.44). AWS_INSTANCE_IPV6 For an AAAA record, the IPv6 address that Route\194\16053 returns in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). AWS_INSTANCE_PORT For an SRV record, the value that Route\194\16053 returns for the port. In addition, if the service includes HealthCheckConfig, the port on the endpoint that Route\194\16053 sends requests to."];
+      createdByAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that registered the instance. If this isn't your account ID, it's the ID of the account that shared the namespace with your account or the ID of another account with which the namespace has been shared. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
+    let make ?id =
+      fun ?attributes ->
+        fun ?createdByAccount ->
+          fun () -> { id; attributes; createdByAccount }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
-        ("Attributes", (Option.map x.attributes ~f:Attributes.to_value))]
+        ("Attributes", (Option.map x.attributes ~f:Attributes.to_value));
+        ("CreatedByAccount",
+          (Option.map x.createdByAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdByAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "CreatedByAccount") in
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?attributes ?id ()
+      make ?createdByAccount ?attributes ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" Attributes.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ?attributes ?id ()
+    let of_json json__ =
+      let createdByAccount =
+        field_map json__ "CreatedByAccount" AWSAccountId.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?createdByAccount ?attributes ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the instances that you registered by using a specified service."]
+module ServiceAttributesMap =
+  struct
+    type nonrec t = (ServiceAttributeKey.t * ServiceAttributeValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((ServiceAttributeKey.of_string chopped),
+                              (ServiceAttributeValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (ServiceAttributeKey.to_value x) |>
+                    (fun x ->
+                       (ServiceAttributeValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:ServiceAttributeKey.of_string
+        ~of_json:ServiceAttributeValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Code =
   struct
     type nonrec t = string
@@ -1595,6 +1774,8 @@ module OperationTargetsMap =
                     (fun x -> (ResourceId.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1697,13 +1878,13 @@ module HttpInstanceSummary =
       make ?attributes ?healthStatus ?serviceName ?namespaceName ?instanceId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" Attributes.of_json in
-      let healthStatus = field_map json "HealthStatus" HealthStatus.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
+      let healthStatus = field_map json__ "HealthStatus" HealthStatus.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
       let namespaceName =
-        field_map json "NamespaceName" NamespaceNameHttp.of_json in
-      let instanceId = field_map json "InstanceId" ResourceId.of_json in
+        field_map json__ "NamespaceName" NamespaceNameHttp.of_json in
+      let instanceId = field_map json__ "InstanceId" ResourceId.of_json in
       make ?attributes ?healthStatus ?serviceName ?namespaceName ?instanceId
         ()
     let to_json v = composed_to_json to_value v
@@ -1725,8 +1906,8 @@ module PublicDnsPropertiesMutable =
       let sOA = SOA.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SOA") in
       make ~sOA ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sOA = field_map_exn json "SOA" SOA.of_json in make ~sOA ()
+    let of_json json__ =
+      let sOA = field_map_exn json__ "SOA" SOA.of_json in make ~sOA ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DNS properties for the public DNS namespace."]
 module PrivateDnsPropertiesMutable =
@@ -1745,8 +1926,8 @@ module PrivateDnsPropertiesMutable =
       let sOA = SOA.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SOA") in
       make ~sOA ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sOA = field_map_exn json "SOA" SOA.of_json in make ~sOA ()
+    let of_json json__ =
+      let sOA = field_map_exn json__ "SOA" SOA.of_json in make ~sOA ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DNS properties for the private DNS namespace."]
 module DuplicateRequest =
@@ -1754,7 +1935,7 @@ module DuplicateRequest =
     type nonrec t =
       {
       message: ErrorMessage.t option ;
-      duplicateOperationId: ResourceId.t option
+      duplicateOperationId: OperationId.t option
         [@ocaml.doc "The ID of the operation that's already in progress."]}
     let make ?message =
       fun ?duplicateOperationId ->
@@ -1763,20 +1944,20 @@ module DuplicateRequest =
       structure_to_value
         [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("DuplicateOperationId",
-          (Option.map x.duplicateOperationId ~f:ResourceId.to_value))]
+          (Option.map x.duplicateOperationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let duplicateOperationId =
-        (Option.map ~f:ResourceId.of_xml)
+        (Option.map ~f:OperationId.of_xml)
           (Xml.child xml_arg0 "DuplicateOperationId") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?duplicateOperationId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let duplicateOperationId =
-        field_map json "DuplicateOperationId" ResourceId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "DuplicateOperationId" OperationId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?duplicateOperationId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The operation is already in progress."]
@@ -1794,8 +1975,8 @@ module InvalidInput =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1814,8 +1995,8 @@ module ServiceNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No service exists with the specified ID."]
@@ -1827,7 +2008,7 @@ module ServiceChange =
         [@ocaml.doc "A description for the service."];
       dnsConfig: DnsConfigChange.t option
         [@ocaml.doc
-          "Information about the Route 53 DNS records that you want Cloud Map to create when you register an instance."];
+          "Information about the Route\194\16053 DNS records that you want Cloud Map to create when you register an instance."];
       healthCheckConfig: HealthCheckConfig.t option
         [@ocaml.doc
           "Public DNS and HTTP namespaces only. Settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig."]}
@@ -1855,16 +2036,36 @@ module ServiceChange =
           (Xml.child xml_arg0 "Description") in
       make ?healthCheckConfig ?dnsConfig ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let healthCheckConfig =
-        field_map json "HealthCheckConfig" HealthCheckConfig.of_json in
-      let dnsConfig = field_map json "DnsConfig" DnsConfigChange.of_json in
+        field_map json__ "HealthCheckConfig" HealthCheckConfig.of_json in
+      let dnsConfig = field_map json__ "DnsConfig" DnsConfigChange.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       make ?healthCheckConfig ?dnsConfig ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains changes to an existing service."]
+module ServiceAttributesLimitExceededException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The attribute can't be added to the service because you've exceeded the quota for the number of attributes you can add to a service."]
 module NamespaceNotFound =
   struct
     type nonrec t = {
@@ -1879,8 +2080,8 @@ module NamespaceNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No namespace exists with the specified ID."]
@@ -1898,8 +2099,8 @@ module ResourceInUse =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1931,12 +2132,12 @@ module PublicDnsNamespaceChange =
           (Xml.child xml_arg0 "Description") in
       make ?properties ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "Properties"
+        field_map json__ "Properties"
           PublicDnsNamespacePropertiesChange.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       make ?properties ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updated properties for the public DNS namespace."]
@@ -1967,12 +2168,12 @@ module PrivateDnsNamespaceChange =
           (Xml.child xml_arg0 "Description") in
       make ?properties ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "Properties"
+        field_map json__ "Properties"
           PrivateDnsNamespacePropertiesChange.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       make ?properties ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updated properties for the private DNS namespace."]
@@ -2020,9 +2221,9 @@ module HttpNamespaceChange =
           (Xml.child_exn ~context:context_ xml_arg0 "Description") in
       make ~description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map_exn json "Description" ResourceDescription.of_json in
+        field_map_exn json__ "Description" ResourceDescription.of_json in
       make ~description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updated properties for the HTTP namespace."]
@@ -2040,8 +2241,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2055,6 +2256,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2097,10 +2301,10 @@ module TooManyTagsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceName =
-        field_map json "ResourceName" AmazonResourceName.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "ResourceName" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2114,6 +2318,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2147,8 +2354,8 @@ module ResourceLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2189,6 +2396,9 @@ module ServiceSummariesList =
   struct
     type nonrec t = ServiceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2232,6 +2442,9 @@ module ServiceFilters =
   struct
     type nonrec t = ServiceFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2256,6 +2469,9 @@ module OperationSummaryList =
   struct
     type nonrec t = OperationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2281,6 +2497,9 @@ module OperationFilters =
   struct
     type nonrec t = OperationFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperationFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2306,6 +2525,9 @@ module NamespaceSummariesList =
   struct
     type nonrec t = NamespaceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NamespaceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2331,6 +2553,9 @@ module NamespaceFilters =
   struct
     type nonrec t = NamespaceFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NamespaceFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2356,6 +2581,9 @@ module InstanceSummaryList =
   struct
     type nonrec t = InstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2387,6 +2615,9 @@ module Service =
       arn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that Cloud Map assigns to the service when you create it."];
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace with which the service is associated. If this isn't your account ID, it is the ID of the account that shared the namespace with your account. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       name: ServiceName.t option [@ocaml.doc "The name of the service."];
       namespaceId: ResourceId.t option
         [@ocaml.doc
@@ -2398,13 +2629,13 @@ module Service =
           "The number of instances that are currently associated with the service. Instances that were previously associated with the service but that are deleted aren't included in the count. The count might not reflect pending registrations and deregistrations."];
       dnsConfig: DnsConfig.t option
         [@ocaml.doc
-          "A complex type that contains information about the Route 53 DNS records that you want Cloud Map to create when you register an instance."];
+          "A complex type that contains information about the Route\194\16053 DNS records that you want Cloud Map to create when you register an instance. The record types of a service can only be changed by deleting the service and recreating it with a new Dnsconfig."];
       type_: ServiceType.t option
         [@ocaml.doc
           "Describes the systems that can be used to discover the service instances. DNS_HTTP The service instances can be discovered using either DNS queries or the DiscoverInstances API operation. HTTP The service instances can only be discovered using the DiscoverInstances API operation. DNS Reserved."];
       healthCheckConfig: HealthCheckConfig.t option
         [@ocaml.doc
-          "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig. For information about the charges for health checks, see Amazon Route 53 Pricing."];
+          "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional health check. If you specify settings for a health check, Cloud Map associates the health check with the records that you specify in DnsConfig. For information about the charges for health checks, see Amazon Route\194\16053 Pricing."];
       healthCheckCustomConfig: HealthCheckCustomConfig.t option
         [@ocaml.doc
           "A complex type that contains information about an optional custom health check. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both."];
@@ -2413,38 +2644,47 @@ module Service =
           "The date and time that the service was created, in Unix format and Coordinated Universal Time (UTC). The value of CreateDate is accurate to milliseconds. For example, the value 1516925490.087 represents Friday, January 26, 2018 12:11:30.087 AM."];
       creatorRequestId: ResourceId.t option
         [@ocaml.doc
-          "A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string (for example, a date/timestamp)."]}
+          "A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string (for example, a date/timestamp)."];
+      createdByAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the service. If this isn't your account ID, it is the ID of account of the namespace owner or of another account with which the namespace has been shared. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
     let make ?id =
       fun ?arn ->
-        fun ?name ->
-          fun ?namespaceId ->
-            fun ?description ->
-              fun ?instanceCount ->
-                fun ?dnsConfig ->
-                  fun ?type_ ->
-                    fun ?healthCheckConfig ->
-                      fun ?healthCheckCustomConfig ->
-                        fun ?createDate ->
-                          fun ?creatorRequestId ->
-                            fun () ->
-                              {
-                                id;
-                                arn;
-                                name;
-                                namespaceId;
-                                description;
-                                instanceCount;
-                                dnsConfig;
-                                type_;
-                                healthCheckConfig;
-                                healthCheckCustomConfig;
-                                createDate;
-                                creatorRequestId
-                              }
+        fun ?resourceOwner ->
+          fun ?name ->
+            fun ?namespaceId ->
+              fun ?description ->
+                fun ?instanceCount ->
+                  fun ?dnsConfig ->
+                    fun ?type_ ->
+                      fun ?healthCheckConfig ->
+                        fun ?healthCheckCustomConfig ->
+                          fun ?createDate ->
+                            fun ?creatorRequestId ->
+                              fun ?createdByAccount ->
+                                fun () ->
+                                  {
+                                    id;
+                                    arn;
+                                    resourceOwner;
+                                    name;
+                                    namespaceId;
+                                    description;
+                                    instanceCount;
+                                    dnsConfig;
+                                    type_;
+                                    healthCheckConfig;
+                                    healthCheckCustomConfig;
+                                    createDate;
+                                    creatorRequestId;
+                                    createdByAccount
+                                  }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ResourceOwner",
+          (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
         ("Name", (Option.map x.name ~f:ServiceName.to_value));
         ("NamespaceId", (Option.map x.namespaceId ~f:ResourceId.to_value));
         ("Description",
@@ -2460,9 +2700,14 @@ module Service =
              ~f:HealthCheckCustomConfig.to_value));
         ("CreateDate", (Option.map x.createDate ~f:Timestamp.to_value));
         ("CreatorRequestId",
-          (Option.map x.creatorRequestId ~f:ResourceId.to_value))]
+          (Option.map x.creatorRequestId ~f:ResourceId.to_value));
+        ("CreatedByAccount",
+          (Option.map x.createdByAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdByAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "CreatedByAccount") in
       let creatorRequestId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "CreatorRequestId") in
@@ -2488,37 +2733,92 @@ module Service =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "NamespaceId") in
       let name =
         (Option.map ~f:ServiceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?creatorRequestId ?createDate ?healthCheckCustomConfig
-        ?healthCheckConfig ?type_ ?dnsConfig ?instanceCount ?description
-        ?namespaceId ?name ?arn ?id ()
+      make ?createdByAccount ?creatorRequestId ?createDate
+        ?healthCheckCustomConfig ?healthCheckConfig ?type_ ?dnsConfig
+        ?instanceCount ?description ?namespaceId ?name ?resourceOwner ?arn
+        ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let createdByAccount =
+        field_map json__ "CreatedByAccount" AWSAccountId.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let healthCheckCustomConfig =
-        field_map json "HealthCheckCustomConfig"
+        field_map json__ "HealthCheckCustomConfig"
           HealthCheckCustomConfig.of_json in
       let healthCheckConfig =
-        field_map json "HealthCheckConfig" HealthCheckConfig.of_json in
-      let type_ = field_map json "Type" ServiceType.of_json in
-      let dnsConfig = field_map json "DnsConfig" DnsConfig.of_json in
+        field_map json__ "HealthCheckConfig" HealthCheckConfig.of_json in
+      let type_ = field_map json__ "Type" ServiceType.of_json in
+      let dnsConfig = field_map json__ "DnsConfig" DnsConfig.of_json in
       let instanceCount =
-        field_map json "InstanceCount" ResourceCount.of_json in
+        field_map json__ "InstanceCount" ResourceCount.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      let namespaceId = field_map json "NamespaceId" ResourceId.of_json in
-      let name = field_map json "Name" ServiceName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ?creatorRequestId ?createDate ?healthCheckCustomConfig
-        ?healthCheckConfig ?type_ ?dnsConfig ?instanceCount ?description
-        ?namespaceId ?name ?arn ?id ()
+        field_map json__ "Description" ResourceDescription.of_json in
+      let namespaceId = field_map json__ "NamespaceId" ResourceId.of_json in
+      let name = field_map json__ "Name" ServiceName.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?createdByAccount ?creatorRequestId ?createDate
+        ?healthCheckCustomConfig ?healthCheckConfig ?type_ ?dnsConfig
+        ?instanceCount ?description ?namespaceId ?name ?resourceOwner ?arn
+        ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about the specified service."]
+module ServiceAttributes =
+  struct
+    type nonrec t =
+      {
+      serviceArn: Arn.t option
+        [@ocaml.doc
+          "The ARN of the service that the attributes are associated with."];
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace with which the service is associated. If this isn't your account ID, it is the ID of the account that shared the namespace with your account. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
+      attributes: ServiceAttributesMap.t option
+        [@ocaml.doc
+          "A string map that contains the following information for the service that you specify in ServiceArn: The attributes that apply to the service. For each attribute, the applicable value. You can specify a total of 30 attributes."]}
+    let make ?serviceArn =
+      fun ?resourceOwner ->
+        fun ?attributes ->
+          fun () -> { serviceArn; resourceOwner; attributes }
+    let to_value x =
+      structure_to_value
+        [("ServiceArn", (Option.map x.serviceArn ~f:Arn.to_value));
+        ("ResourceOwner",
+          (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
+        ("Attributes",
+          (Option.map x.attributes ~f:ServiceAttributesMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        (Option.map ~f:ServiceAttributesMap.of_xml)
+          (Xml.child xml_arg0 "Attributes") in
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
+      let serviceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ServiceArn") in
+      make ?attributes ?resourceOwner ?serviceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" ServiceAttributesMap.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      let serviceArn = field_map json__ "ServiceArn" Arn.of_json in
+      make ?attributes ?resourceOwner ?serviceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that contains information about attributes associated with a specific service."]
 module Operation =
   struct
     type nonrec t =
@@ -2526,6 +2826,9 @@ module Operation =
       id: OperationId.t option
         [@ocaml.doc
           "The ID of the operation that you want to get information about."];
+      ownerAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the namespace associated with the operation."];
       type_: OperationType.t option
         [@ocaml.doc
           "The name of the operation that's associated with the specified ID."];
@@ -2548,27 +2851,31 @@ module Operation =
         [@ocaml.doc
           "The name of the target entity that's associated with the operation: NAMESPACE The namespace ID is returned in the ResourceId property. SERVICE The service ID is returned in the ResourceId property. INSTANCE The instance ID is returned in the ResourceId property."]}
     let make ?id =
-      fun ?type_ ->
-        fun ?status ->
-          fun ?errorMessage ->
-            fun ?errorCode ->
-              fun ?createDate ->
-                fun ?updateDate ->
-                  fun ?targets ->
-                    fun () ->
-                      {
-                        id;
-                        type_;
-                        status;
-                        errorMessage;
-                        errorCode;
-                        createDate;
-                        updateDate;
-                        targets
-                      }
+      fun ?ownerAccount ->
+        fun ?type_ ->
+          fun ?status ->
+            fun ?errorMessage ->
+              fun ?errorCode ->
+                fun ?createDate ->
+                  fun ?updateDate ->
+                    fun ?targets ->
+                      fun () ->
+                        {
+                          id;
+                          ownerAccount;
+                          type_;
+                          status;
+                          errorMessage;
+                          errorCode;
+                          createDate;
+                          updateDate;
+                          targets
+                        }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:OperationId.to_value));
+        ("OwnerAccount",
+          (Option.map x.ownerAccount ~f:AWSAccountId.to_value));
         ("Type", (Option.map x.type_ ~f:OperationType.to_value));
         ("Status", (Option.map x.status ~f:OperationStatus.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:Message.to_value));
@@ -2593,21 +2900,25 @@ module Operation =
         (Option.map ~f:OperationStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let type_ =
         (Option.map ~f:OperationType.of_xml) (Xml.child xml_arg0 "Type") in
+      let ownerAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "OwnerAccount") in
       let id = (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?targets ?updateDate ?createDate ?errorCode ?errorMessage ?status
-        ?type_ ?id ()
+        ?type_ ?ownerAccount ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targets = field_map json "Targets" OperationTargetsMap.of_json in
-      let updateDate = field_map json "UpdateDate" Timestamp.of_json in
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
-      let errorCode = field_map json "ErrorCode" Code.of_json in
-      let errorMessage = field_map json "ErrorMessage" Message.of_json in
-      let status = field_map json "Status" OperationStatus.of_json in
-      let type_ = field_map json "Type" OperationType.of_json in
-      let id = field_map json "Id" OperationId.of_json in
+    let of_json json__ =
+      let targets = field_map json__ "Targets" OperationTargetsMap.of_json in
+      let updateDate = field_map json__ "UpdateDate" Timestamp.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
+      let errorCode = field_map json__ "ErrorCode" Code.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" Message.of_json in
+      let status = field_map json__ "Status" OperationStatus.of_json in
+      let type_ = field_map json__ "Type" OperationType.of_json in
+      let ownerAccount = field_map json__ "OwnerAccount" AWSAccountId.of_json in
+      let id = field_map json__ "Id" OperationId.of_json in
       make ?targets ?updateDate ?createDate ?errorCode ?errorMessage ?status
-        ?type_ ?id ()
+        ?type_ ?ownerAccount ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a specified operation."]
@@ -2625,8 +2936,8 @@ module OperationNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "No operation exists with the specified ID."]
@@ -2638,6 +2949,9 @@ module Namespace =
       arn: Arn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) that Cloud Map assigns to the namespace when you create it."];
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace. If this isn't your account ID, it's the ID of the account that shared the namespace with your account. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       name: NamespaceName.t option
         [@ocaml.doc "The name of the namespace, such as example.com."];
       type_: NamespaceType.t option
@@ -2660,29 +2974,33 @@ module Namespace =
           "A unique string that identifies the request and that allows failed requests to be retried without the risk of running an operation twice."]}
     let make ?id =
       fun ?arn ->
-        fun ?name ->
-          fun ?type_ ->
-            fun ?description ->
-              fun ?serviceCount ->
-                fun ?properties ->
-                  fun ?createDate ->
-                    fun ?creatorRequestId ->
-                      fun () ->
-                        {
-                          id;
-                          arn;
-                          name;
-                          type_;
-                          description;
-                          serviceCount;
-                          properties;
-                          createDate;
-                          creatorRequestId
-                        }
+        fun ?resourceOwner ->
+          fun ?name ->
+            fun ?type_ ->
+              fun ?description ->
+                fun ?serviceCount ->
+                  fun ?properties ->
+                    fun ?createDate ->
+                      fun ?creatorRequestId ->
+                        fun () ->
+                          {
+                            id;
+                            arn;
+                            resourceOwner;
+                            name;
+                            type_;
+                            description;
+                            serviceCount;
+                            properties;
+                            createDate;
+                            creatorRequestId
+                          }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("ResourceOwner",
+          (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
         ("Name", (Option.map x.name ~f:NamespaceName.to_value));
         ("Type", (Option.map x.type_ ~f:NamespaceType.to_value));
         ("Description",
@@ -2714,26 +3032,32 @@ module Namespace =
         (Option.map ~f:NamespaceType.of_xml) (Xml.child xml_arg0 "Type") in
       let name =
         (Option.map ~f:NamespaceName.of_xml) (Xml.child xml_arg0 "Name") in
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?creatorRequestId ?createDate ?properties ?serviceCount
-        ?description ?type_ ?name ?arn ?id ()
+        ?description ?type_ ?name ?resourceOwner ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let properties =
-        field_map json "Properties" NamespaceProperties.of_json in
-      let serviceCount = field_map json "ServiceCount" ResourceCount.of_json in
+        field_map json__ "Properties" NamespaceProperties.of_json in
+      let serviceCount =
+        field_map json__ "ServiceCount" ResourceCount.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
-      let type_ = field_map json "Type" NamespaceType.of_json in
-      let name = field_map json "Name" NamespaceName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
+      let type_ = field_map json__ "Type" NamespaceType.of_json in
+      let name = field_map json__ "Name" NamespaceName.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?creatorRequestId ?createDate ?properties ?serviceCount
-        ?description ?type_ ?name ?arn ?id ()
+        ?description ?type_ ?name ?resourceOwner ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a specified namespace."]
@@ -2758,6 +3082,8 @@ module InstanceHealthStatusMap =
                     (fun x -> (HealthStatus.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2779,8 +3105,8 @@ module InstanceNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2790,6 +3116,9 @@ module InstanceIdList =
     type nonrec t = ResourceId.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2814,7 +3143,7 @@ module Instance =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: ResourceId.t option
         [@ocaml.doc
           "An identifier that you want to associate with the instance. Note the following: If the service that's specified by ServiceId includes settings for an SRV record, the value of InstanceId is automatically included as part of the value for the SRV record. For more information, see DnsRecord > Type. You can use this value to update an existing instance. To register a new instance, you must specify a value that's unique among instances that you register by using the same service. If you specify an existing InstanceId and ServiceId, Cloud Map updates the existing DNS records. If there's also an existing health check, Cloud Map deletes the old health check and creates a new one. The health check isn't deleted immediately, so it will still appear for a while if you submit a ListHealthChecks request, for example."];
       creatorRequestId: ResourceId.t option
@@ -2822,41 +3151,87 @@ module Instance =
           "A unique string that identifies the request and that allows failed RegisterInstance requests to be retried without the risk of executing the operation twice. You must use a unique CreatorRequestId string every time you submit a RegisterInstance request if you're registering additional instances for the same namespace and service. CreatorRequestId can be any unique string (for example, a date/time stamp)."];
       attributes: Attributes.t option
         [@ocaml.doc
-          "A string map that contains the following information for the service that you specify in ServiceId: The attributes that apply to the records that are defined in the service. For each attribute, the applicable value. Supported attribute keys include the following: AWS_ALIAS_DNS_NAME If you want Cloud Map to create a Route 53 alias record that routes traffic to an Elastic Load Balancing load balancer, specify the DNS name that's associated with the load balancer. For information about how to get the DNS name, see AliasTarget->DNSName in the Route 53 API Reference. Note the following: The configuration for the service that's specified by ServiceId must include settings for an A record, an AAAA record, or both. In the service that's specified by ServiceId, the value of RoutingPolicy must be WEIGHTED. If the service that's specified by ServiceId includes HealthCheckConfig settings, Cloud Map creates the health check, but it won't associate the health check with the alias record. Auto naming currently doesn't support creating alias records that route traffic to Amazon Web Services resources other than ELB load balancers. If you specify a value for AWS_ALIAS_DNS_NAME, don't specify values for any of the AWS_INSTANCE attributes. AWS_EC2_INSTANCE_ID HTTP namespaces only. The Amazon EC2 instance ID for the instance. The AWS_INSTANCE_IPV4 attribute contains the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME If the service configuration includes a CNAME record, the domain name that you want Route 53 to return in response to DNS queries (for example, example.com). This value is required if the service specified by ServiceId includes settings for an CNAME record. AWS_INSTANCE_IPV4 If the service configuration includes an A record, the IPv4 address that you want Route 53 to return in response to DNS queries (for example, 192.0.2.44). This value is required if the service specified by ServiceId includes settings for an A record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_IPV6 If the service configuration includes an AAAA record, the IPv6 address that you want Route 53 to return in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). This value is required if the service specified by ServiceId includes settings for an AAAA record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_PORT If the service includes an SRV record, the value that you want Route 53 to return for the port. If the service includes HealthCheckConfig, the port on the endpoint that you want Route 53 to send requests to. This value is required if you specified settings for an SRV record or a Route 53 health check when you created the service."]}
-    let context_ = "Instance"
-    let make ?creatorRequestId =
-      fun ?attributes ->
-        fun ~id -> fun () -> { creatorRequestId; attributes; id }
+          "A string map that contains the following information for the service that you specify in ServiceId: The attributes that apply to the records that are defined in the service. For each attribute, the applicable value. Do not include sensitive information in the attributes if the namespace is discoverable by public DNS queries. Supported attribute keys include the following: AWS_ALIAS_DNS_NAME If you want Cloud Map to create a Route\194\16053 alias record that routes traffic to an Elastic Load Balancing load balancer, specify the DNS name that's associated with the load balancer. For information about how to get the DNS name, see AliasTarget->DNSName in the Route\194\16053 API Reference. Note the following: The configuration for the service that's specified by ServiceId must include settings for an A record, an AAAA record, or both. In the service that's specified by ServiceId, the value of RoutingPolicy must be WEIGHTED. If the service that's specified by ServiceId includes HealthCheckConfig settings, Cloud Map creates the health check, but it won't associate the health check with the alias record. Auto naming currently doesn't support creating alias records that route traffic to Amazon Web Services resources other than ELB load balancers. If you specify a value for AWS_ALIAS_DNS_NAME, don't specify values for any of the AWS_INSTANCE attributes. AWS_EC2_INSTANCE_ID HTTP namespaces only. The Amazon EC2 instance ID for the instance. The AWS_INSTANCE_IPV4 attribute contains the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME If the service configuration includes a CNAME record, the domain name that you want Route\194\16053 to return in response to DNS queries (for example, example.com). This value is required if the service specified by ServiceId includes settings for an CNAME record. AWS_INSTANCE_IPV4 If the service configuration includes an A record, the IPv4 address that you want Route\194\16053 to return in response to DNS queries (for example, 192.0.2.44). This value is required if the service specified by ServiceId includes settings for an A record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_IPV6 If the service configuration includes an AAAA record, the IPv6 address that you want Route\194\16053 to return in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). This value is required if the service specified by ServiceId includes settings for an AAAA record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_PORT If the service includes an SRV record, the value that you want Route\194\16053 to return for the port. If the service includes HealthCheckConfig, the port on the endpoint that you want Route\194\16053 to send requests to. This value is required if you specified settings for an SRV record or a Route\194\16053 health check when you created the service."];
+      createdByAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that registered the instance. If this isn't your account ID, it's the ID of the account that shared the namespace with your account or the ID of another account with which the namespace has been shared. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
+    let make ?id =
+      fun ?creatorRequestId ->
+        fun ?attributes ->
+          fun ?createdByAccount ->
+            fun () -> { id; creatorRequestId; attributes; createdByAccount }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
+        [("Id", (Option.map x.id ~f:ResourceId.to_value));
         ("CreatorRequestId",
           (Option.map x.creatorRequestId ~f:ResourceId.to_value));
-        ("Attributes", (Option.map x.attributes ~f:Attributes.to_value))]
+        ("Attributes", (Option.map x.attributes ~f:Attributes.to_value));
+        ("CreatedByAccount",
+          (Option.map x.createdByAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdByAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "CreatedByAccount") in
       let attributes =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       let creatorRequestId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "CreatorRequestId") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?attributes ?creatorRequestId ~id ()
+      let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?createdByAccount ?attributes ?creatorRequestId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" Attributes.of_json in
+    let of_json json__ =
+      let createdByAccount =
+        field_map json__ "CreatedByAccount" AWSAccountId.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
-      make ?attributes ?creatorRequestId ~id ()
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?createdByAccount ?attributes ?creatorRequestId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about an instance that Cloud Map creates when you submit a RegisterInstance request."]
+module RequestLimitExceeded =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The operation can't be completed because you've reached the quota for the number of requests. For more information, see Cloud Map API request throttling quota in the Cloud Map Developer Guide."]
+module Revision =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
 module HttpInstanceSummaryList =
   struct
     type nonrec t = HttpInstanceSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HttpInstanceSummary.to_value)) |>
         (fun x -> `List x)
@@ -2879,26 +3254,6 @@ module HttpInstanceSummaryList =
         ~of_json:HttpInstanceSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RequestLimitExceeded =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The operation can't be completed because you've reached the quota for the number of requests. For more information, see Cloud Map API request throttling quota in the Cloud Map Developer Guide."]
 module DiscoverMaxResults =
   struct
     type nonrec t = int
@@ -2949,6 +3304,39 @@ module HealthStatusFilter =
     let of_json j = of_string (string_of_json ~kind:"HealthStatusFilter" j)
     let to_json = simple_to_json to_value
   end
+module ServiceAttributeKeyList =
+  struct
+    type nonrec t = ServiceAttributeKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceAttributeKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceAttributeKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceAttributeKeyList"
+        ~of_json:ServiceAttributeKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ServiceAlreadyExists =
   struct
     type nonrec t =
@@ -2958,18 +3346,25 @@ module ServiceAlreadyExists =
         [@ocaml.doc
           "The CreatorRequestId that was used to create the service."];
       serviceId: ResourceId.t option
-        [@ocaml.doc "The ID of the existing service."]}
+        [@ocaml.doc "The ID of the existing service."];
+      serviceArn: Arn.t option
+        [@ocaml.doc "The ARN of the existing service."]}
     let make ?message =
       fun ?creatorRequestId ->
-        fun ?serviceId -> fun () -> { message; creatorRequestId; serviceId }
+        fun ?serviceId ->
+          fun ?serviceArn ->
+            fun () -> { message; creatorRequestId; serviceId; serviceArn }
     let to_value x =
       structure_to_value
         [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("CreatorRequestId",
           (Option.map x.creatorRequestId ~f:ResourceId.to_value));
-        ("ServiceId", (Option.map x.serviceId ~f:ResourceId.to_value))]
+        ("ServiceId", (Option.map x.serviceId ~f:ResourceId.to_value));
+        ("ServiceArn", (Option.map x.serviceArn ~f:Arn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serviceArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "ServiceArn") in
       let serviceId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "ServiceId") in
       let creatorRequestId =
@@ -2977,14 +3372,15 @@ module ServiceAlreadyExists =
           (Xml.child xml_arg0 "CreatorRequestId") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?serviceId ?creatorRequestId ?message ()
+      make ?serviceArn ?serviceId ?creatorRequestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceId = field_map json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let serviceArn = field_map json__ "ServiceArn" Arn.of_json in
+      let serviceId = field_map json__ "ServiceId" ResourceId.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ?serviceId ?creatorRequestId ?message ()
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?serviceArn ?serviceId ?creatorRequestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The service can't be created because a service with the same name already exists."]
@@ -3036,11 +3432,11 @@ module NamespaceAlreadyExists =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?namespaceId ?creatorRequestId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespaceId = field_map json "NamespaceId" ResourceId.of_json in
+    let of_json json__ =
+      let namespaceId = field_map json__ "NamespaceId" ResourceId.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?namespaceId ?creatorRequestId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3052,7 +3448,7 @@ module NamespaceNamePublic =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
+          ((check_string_max i ~max:253) >>=
              (fun () ->
                 check_pattern i
                   ~pattern:"^([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?$"));
@@ -3084,9 +3480,10 @@ module PublicDnsNamespaceProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "DnsProperties") in
       make ~dnsProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dnsProperties =
-        field_map_exn json "DnsProperties" PublicDnsPropertiesMutable.of_json in
+        field_map_exn json__ "DnsProperties"
+          PublicDnsPropertiesMutable.of_json in
       make ~dnsProperties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "DNS properties for the public DNS namespace."]
@@ -3097,8 +3494,8 @@ module NamespaceNamePrivate =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"^[!-~]{1,1024}$"));
+          ((check_string_max i ~max:253) >>=
+             (fun () -> check_pattern i ~pattern:"^(?!arn:)[!-~]{1,253}$"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -3127,9 +3524,9 @@ module PrivateDnsNamespaceProperties =
           (Xml.child_exn ~context:context_ xml_arg0 "DnsProperties") in
       make ~dnsProperties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dnsProperties =
-        field_map_exn json "DnsProperties"
+        field_map_exn json__ "DnsProperties"
           PrivateDnsPropertiesMutable.of_json in
       make ~dnsProperties ()
     let to_json v = composed_to_json to_value v
@@ -3191,43 +3588,132 @@ module UpdateServiceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits a request to perform the following operations: Update the TTL setting for existing DnsRecords configurations Add, update, or delete HealthCheckConfig for a specified service You can't add, update, or delete a HealthCheckCustomConfig configuration. For public and private DNS namespaces, note the following: If you omit any existing DnsRecords or HealthCheckConfig configurations from an UpdateService request, the configurations are deleted from the service. If you omit an existing HealthCheckCustomConfig configuration from an UpdateService request, the configuration isn't deleted from the service. When you update settings for a service, Cloud Map also updates the corresponding settings in all the records and health checks that were created by using the specified service."]
+       "Submits a request to perform the following operations: Update the TTL setting for existing DnsRecords configurations Add, update, or delete HealthCheckConfig for a specified service You can't add, update, or delete a HealthCheckCustomConfig configuration. For public and private DNS namespaces, note the following: If you omit any existing DnsRecords or HealthCheckConfig configurations from an UpdateService request, the configurations are deleted from the service. If you omit an existing HealthCheckCustomConfig configuration from an UpdateService request, the configuration isn't deleted from the service. You can't call UpdateService and update settings in the following scenarios: When the service is associated with an HTTP namespace When the service is associated with a shared namespace and contains instances that were registered by Amazon Web Services accounts other than the account making the UpdateService call When you update settings for a service, Cloud Map also updates the corresponding settings in all the records and health checks that were created by using the specified service."]
 module UpdateServiceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
-        [@ocaml.doc "The ID of the service that you want to update."];
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the service that you want to update. If the namespace associated with the service is shared with your Amazon Web Services account, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide"];
       service: ServiceChange.t
         [@ocaml.doc
-          "A complex type that contains the new settings for the service."]}
+          "A complex type that contains the new settings for the service. You can specify a maximum of 30 attributes (key-value pairs)."]}
     let context_ = "UpdateServiceRequest"
     let make ~id = fun ~service -> fun () -> { id; service }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
+        [("Id", (Some (Arn.to_value x.id)));
         ("Service", (Some (ServiceChange.to_value x.service)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let service =
         ServiceChange.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Service") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~service ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map_exn json "Service" ServiceChange.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
-      make ~service ~id ()
+    let of_json json__ =
+      let service = field_map_exn json__ "Service" ServiceChange.of_json in
+      let id = field_map_exn json__ "Id" Arn.of_json in make ~service ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits a request to perform the following operations: Update the TTL setting for existing DnsRecords configurations Add, update, or delete HealthCheckConfig for a specified service You can't add, update, or delete a HealthCheckCustomConfig configuration. For public and private DNS namespaces, note the following: If you omit any existing DnsRecords or HealthCheckConfig configurations from an UpdateService request, the configurations are deleted from the service. If you omit an existing HealthCheckCustomConfig configuration from an UpdateService request, the configuration isn't deleted from the service. When you update settings for a service, Cloud Map also updates the corresponding settings in all the records and health checks that were created by using the specified service."]
+       "Submits a request to perform the following operations: Update the TTL setting for existing DnsRecords configurations Add, update, or delete HealthCheckConfig for a specified service You can't add, update, or delete a HealthCheckCustomConfig configuration. For public and private DNS namespaces, note the following: If you omit any existing DnsRecords or HealthCheckConfig configurations from an UpdateService request, the configurations are deleted from the service. If you omit an existing HealthCheckCustomConfig configuration from an UpdateService request, the configuration isn't deleted from the service. You can't call UpdateService and update settings in the following scenarios: When the service is associated with an HTTP namespace When the service is associated with a shared namespace and contains instances that were registered by Amazon Web Services accounts other than the account making the UpdateService call When you update settings for a service, Cloud Map also updates the corresponding settings in all the records and health checks that were created by using the specified service."]
+module UpdateServiceAttributesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `ServiceAttributesLimitExceededException of
+          ServiceAttributesLimitExceededException.t 
+      | `ServiceNotFound of ServiceNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "ServiceAttributesLimitExceededException" ->
+          `ServiceAttributesLimitExceededException
+            (ServiceAttributesLimitExceededException.of_json json)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "ServiceAttributesLimitExceededException" ->
+          `ServiceAttributesLimitExceededException
+            (ServiceAttributesLimitExceededException.of_xml xml)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `ServiceAttributesLimitExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceAttributesLimitExceededException"));
+            ("details", (ServiceAttributesLimitExceededException.to_json e))]
+      | `ServiceNotFound e ->
+          `Assoc
+            [("error", (`String "ServiceNotFound"));
+            ("details", (ServiceNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits a request to update a specified service to add service-level attributes."]
+module UpdateServiceAttributesRequest =
+  struct
+    type nonrec t =
+      {
+      serviceId: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the service that you want to update. For services created in a namespace shared with your Amazon Web Services account, specify the service ARN."];
+      attributes: ServiceAttributesMap.t
+        [@ocaml.doc "A string map that contains attribute key-value pairs."]}
+    let context_ = "UpdateServiceAttributesRequest"
+    let make ~serviceId =
+      fun ~attributes -> fun () -> { serviceId; attributes }
+    let to_value x =
+      structure_to_value
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
+        ("Attributes", (Some (ServiceAttributesMap.to_value x.attributes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        ServiceAttributesMap.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
+      let serviceId =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+      make ~attributes ~serviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map_exn json__ "Attributes" ServiceAttributesMap.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
+      make ~attributes ~serviceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits a request to update a specified service to add service-level attributes."]
 module UpdatePublicDnsNamespaceResponse =
   struct
     type nonrec t =
@@ -3294,8 +3780,8 @@ module UpdatePublicDnsNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a public DNS namespace."]
@@ -3303,7 +3789,9 @@ module UpdatePublicDnsNamespaceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t [@ocaml.doc "The ID of the namespace being updated."];
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the namespace being updated."];
       updaterRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed UpdatePublicDnsNamespace requests to be retried without the risk of running the operation twice. UpdaterRequestId can be any unique string (for example, a date/timestamp)."];
@@ -3315,7 +3803,7 @@ module UpdatePublicDnsNamespaceRequest =
         fun ~namespace -> fun () -> { updaterRequestId; id; namespace }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
+        [("Id", (Some (Arn.to_value x.id)));
         ("UpdaterRequestId",
           (Option.map x.updaterRequestId ~f:ResourceId.to_value));
         ("Namespace", (Some (PublicDnsNamespaceChange.to_value x.namespace)))]
@@ -3327,16 +3815,15 @@ module UpdatePublicDnsNamespaceRequest =
       let updaterRequestId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "UpdaterRequestId") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~namespace ?updaterRequestId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let namespace =
-        field_map_exn json "Namespace" PublicDnsNamespaceChange.of_json in
+        field_map_exn json__ "Namespace" PublicDnsNamespaceChange.of_json in
       let updaterRequestId =
-        field_map json "UpdaterRequestId" ResourceId.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
+        field_map json__ "UpdaterRequestId" ResourceId.of_json in
+      let id = field_map_exn json__ "Id" Arn.of_json in
       make ~namespace ?updaterRequestId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a public DNS namespace."]
@@ -3406,8 +3893,8 @@ module UpdatePrivateDnsNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a private DNS namespace."]
@@ -3415,8 +3902,9 @@ module UpdatePrivateDnsNamespaceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
-        [@ocaml.doc "The ID of the namespace that you want to update."];
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the namespace that you want to update."];
       updaterRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed UpdatePrivateDnsNamespace requests to be retried without the risk of running the operation twice. UpdaterRequestId can be any unique string (for example, a date/timestamp)."];
@@ -3428,7 +3916,7 @@ module UpdatePrivateDnsNamespaceRequest =
         fun ~namespace -> fun () -> { updaterRequestId; id; namespace }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
+        [("Id", (Some (Arn.to_value x.id)));
         ("UpdaterRequestId",
           (Option.map x.updaterRequestId ~f:ResourceId.to_value));
         ("Namespace",
@@ -3441,16 +3929,15 @@ module UpdatePrivateDnsNamespaceRequest =
       let updaterRequestId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "UpdaterRequestId") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~namespace ?updaterRequestId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let namespace =
-        field_map_exn json "Namespace" PrivateDnsNamespaceChange.of_json in
+        field_map_exn json__ "Namespace" PrivateDnsNamespaceChange.of_json in
       let updaterRequestId =
-        field_map json "UpdaterRequestId" ResourceId.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
+        field_map json__ "UpdaterRequestId" ResourceId.of_json in
+      let id = field_map_exn json__ "Id" Arn.of_json in
       make ~namespace ?updaterRequestId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a private DNS namespace."]
@@ -3458,9 +3945,9 @@ module UpdateInstanceCustomHealthStatusRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that includes the configuration for the custom health check that you want to change the status for."];
+          "The ID or Amazon Resource Name (ARN) of the service that includes the configuration for the custom health check that you want to change the status for. For services created in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       instanceId: ResourceId.t
         [@ocaml.doc
           "The ID of the instance that you want to change the health status for."];
@@ -3472,7 +3959,7 @@ module UpdateInstanceCustomHealthStatusRequest =
         fun ~status -> fun () -> { serviceId; instanceId; status }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("InstanceId", (Some (ResourceId.to_value x.instanceId)));
         ("Status", (Some (CustomHealthStatus.to_value x.status)))]
     let to_query v = to_query to_value v
@@ -3484,18 +3971,17 @@ module UpdateInstanceCustomHealthStatusRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ~status ~instanceId ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" CustomHealthStatus.of_json in
-      let instanceId = field_map_exn json "InstanceId" ResourceId.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "Status" CustomHealthStatus.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" ResourceId.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ~status ~instanceId ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits a request to change the health status of a custom health check to healthy or unhealthy. You can use UpdateInstanceCustomHealthStatus to change the status only for custom health checks, which you define using HealthCheckCustomConfig when you create a service. You can't use it to change the status for Route 53 health checks, which you define using HealthCheckConfig. For more information, see HealthCheckCustomConfig."]
+       "Submits a request to change the health status of a custom health check to healthy or unhealthy. You can use UpdateInstanceCustomHealthStatus to change the status only for custom health checks, which you define using HealthCheckCustomConfig when you create a service. You can't use it to change the status for Route\194\16053 health checks, which you define using HealthCheckConfig. For more information, see HealthCheckCustomConfig."]
 module UpdateHttpNamespaceResponse =
   struct
     type nonrec t =
@@ -3562,8 +4048,8 @@ module UpdateHttpNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an HTTP namespace."]
@@ -3571,8 +4057,9 @@ module UpdateHttpNamespaceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
-        [@ocaml.doc "The ID of the namespace that you want to update."];
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the namespace that you want to update."];
       updaterRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed UpdateHttpNamespace requests to be retried without the risk of running the operation twice. UpdaterRequestId can be any unique string (for example, a date/timestamp)."];
@@ -3584,7 +4071,7 @@ module UpdateHttpNamespaceRequest =
         fun ~namespace -> fun () -> { updaterRequestId; id; namespace }
     let to_value x =
       structure_to_value
-        [("Id", (Some (ResourceId.to_value x.id)));
+        [("Id", (Some (Arn.to_value x.id)));
         ("UpdaterRequestId",
           (Option.map x.updaterRequestId ~f:ResourceId.to_value));
         ("Namespace", (Some (HttpNamespaceChange.to_value x.namespace)))]
@@ -3596,16 +4083,15 @@ module UpdateHttpNamespaceRequest =
       let updaterRequestId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "UpdaterRequestId") in
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~namespace ?updaterRequestId ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let namespace =
-        field_map_exn json "Namespace" HttpNamespaceChange.of_json in
+        field_map_exn json__ "Namespace" HttpNamespaceChange.of_json in
       let updaterRequestId =
-        field_map json "UpdaterRequestId" ResourceId.of_json in
-      let id = field_map_exn json "Id" ResourceId.of_json in
+        field_map json__ "UpdaterRequestId" ResourceId.of_json in
+      let id = field_map_exn json__ "Id" Arn.of_json in
       make ~namespace ?updaterRequestId ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an HTTP namespace."]
@@ -3681,10 +4167,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from the specified resource."]
@@ -3768,10 +4254,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to the specified resource."]
@@ -3847,8 +4333,8 @@ module RegisterInstanceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3857,18 +4343,18 @@ module RegisterInstanceRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that you want to use for settings for the instance."];
+          "The ID or Amazon Resource Name (ARN) of the service that you want to use for settings for the instance. For services created in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       instanceId: InstanceId.t
         [@ocaml.doc
-          "An identifier that you want to associate with the instance. Note the following: If the service that's specified by ServiceId includes settings for an SRV record, the value of InstanceId is automatically included as part of the value for the SRV record. For more information, see DnsRecord > Type. You can use this value to update an existing instance. To register a new instance, you must specify a value that's unique among instances that you register by using the same service. If you specify an existing InstanceId and ServiceId, Cloud Map updates the existing DNS records, if any. If there's also an existing health check, Cloud Map deletes the old health check and creates a new one. The health check isn't deleted immediately, so it will still appear for a while if you submit a ListHealthChecks request, for example."];
+          "An identifier that you want to associate with the instance. Note the following: If the service that's specified by ServiceId includes settings for an SRV record, the value of InstanceId is automatically included as part of the value for the SRV record. For more information, see DnsRecord > Type. You can use this value to update an existing instance. To register a new instance, you must specify a value that's unique among instances that you register by using the same service. If you specify an existing InstanceId and ServiceId, Cloud Map updates the existing DNS records, if any. If there's also an existing health check, Cloud Map deletes the old health check and creates a new one. The health check isn't deleted immediately, so it will still appear for a while if you submit a ListHealthChecks request, for example. Do not include sensitive information in InstanceId if the namespace is discoverable by public DNS queries and any Type member of DnsRecord for the service contains SRV because the InstanceId is discoverable by public DNS queries."];
       creatorRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed RegisterInstance requests to be retried without the risk of executing the operation twice. You must use a unique CreatorRequestId string every time you submit a RegisterInstance request if you're registering additional instances for the same namespace and service. CreatorRequestId can be any unique string (for example, a date/time stamp)."];
       attributes: Attributes.t
         [@ocaml.doc
-          "A string map that contains the following information for the service that you specify in ServiceId: The attributes that apply to the records that are defined in the service. For each attribute, the applicable value. Supported attribute keys include the following: AWS_ALIAS_DNS_NAME If you want Cloud Map to create an Amazon Route 53 alias record that routes traffic to an Elastic Load Balancing load balancer, specify the DNS name that's associated with the load balancer. For information about how to get the DNS name, see \"DNSName\" in the topic AliasTarget in the Route 53 API Reference. Note the following: The configuration for the service that's specified by ServiceId must include settings for an A record, an AAAA record, or both. In the service that's specified by ServiceId, the value of RoutingPolicy must be WEIGHTED. If the service that's specified by ServiceId includes HealthCheckConfig settings, Cloud Map will create the Route 53 health check, but it doesn't associate the health check with the alias record. Auto naming currently doesn't support creating alias records that route traffic to Amazon Web Services resources other than Elastic Load Balancing load balancers. If you specify a value for AWS_ALIAS_DNS_NAME, don't specify values for any of the AWS_INSTANCE attributes. AWS_EC2_INSTANCE_ID HTTP namespaces only. The Amazon EC2 instance ID for the instance. If the AWS_EC2_INSTANCE_ID attribute is specified, then the only other attribute that can be specified is AWS_INIT_HEALTH_STATUS. When the AWS_EC2_INSTANCE_ID attribute is specified, then the AWS_INSTANCE_IPV4 attribute will be filled out with the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME If the service configuration includes a CNAME record, the domain name that you want Route 53 to return in response to DNS queries (for example, example.com). This value is required if the service specified by ServiceId includes settings for an CNAME record. AWS_INSTANCE_IPV4 If the service configuration includes an A record, the IPv4 address that you want Route 53 to return in response to DNS queries (for example, 192.0.2.44). This value is required if the service specified by ServiceId includes settings for an A record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_IPV6 If the service configuration includes an AAAA record, the IPv6 address that you want Route 53 to return in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). This value is required if the service specified by ServiceId includes settings for an AAAA record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_PORT If the service includes an SRV record, the value that you want Route 53 to return for the port. If the service includes HealthCheckConfig, the port on the endpoint that you want Route 53 to send requests to. This value is required if you specified settings for an SRV record or a Route 53 health check when you created the service. Custom attributes You can add up to 30 custom attributes. For each key-value pair, the maximum length of the attribute name is 255 characters, and the maximum length of the attribute value is 1,024 characters. The total size of all provided attributes (sum of all keys and values) must not exceed 5,000 characters."]}
+          "A string map that contains the following information for the service that you specify in ServiceId: The attributes that apply to the records that are defined in the service. For each attribute, the applicable value. Do not include sensitive information in the attributes if the namespace is discoverable by public DNS queries. The following are the supported attribute keys. AWS_ALIAS_DNS_NAME If you want Cloud Map to create an Amazon Route\194\16053 alias record that routes traffic to an Elastic Load Balancing load balancer, specify the DNS name that's associated with the load balancer. For information about how to get the DNS name, see \"DNSName\" in the topic AliasTarget in the Route\194\16053 API Reference. Note the following: The configuration for the service that's specified by ServiceId must include settings for an A record, an AAAA record, or both. In the service that's specified by ServiceId, the value of RoutingPolicy must be WEIGHTED. If the service that's specified by ServiceId includes HealthCheckConfig settings, Cloud Map will create the Route\194\16053 health check, but it doesn't associate the health check with the alias record. Cloud Map currently doesn't support creating alias records that route traffic to Amazon Web Services resources other than Elastic Load Balancing load balancers. If you specify a value for AWS_ALIAS_DNS_NAME, don't specify values for any of the AWS_INSTANCE attributes. The AWS_ALIAS_DNS_NAME is not supported in the GovCloud (US) Regions. AWS_EC2_INSTANCE_ID HTTP namespaces only. The Amazon EC2 instance ID for the instance. If the AWS_EC2_INSTANCE_ID attribute is specified, then the only other attribute that can be specified is AWS_INIT_HEALTH_STATUS. When the AWS_EC2_INSTANCE_ID attribute is specified, then the AWS_INSTANCE_IPV4 attribute will be filled out with the primary private IPv4 address. AWS_INIT_HEALTH_STATUS If the service configuration includes HealthCheckCustomConfig, you can optionally use AWS_INIT_HEALTH_STATUS to specify the initial status of the custom health check, HEALTHY or UNHEALTHY. If you don't specify a value for AWS_INIT_HEALTH_STATUS, the initial status is HEALTHY. AWS_INSTANCE_CNAME If the service configuration includes a CNAME record, the domain name that you want Route\194\16053 to return in response to DNS queries (for example, example.com). This value is required if the service specified by ServiceId includes settings for an CNAME record. AWS_INSTANCE_IPV4 If the service configuration includes an A record, the IPv4 address that you want Route\194\16053 to return in response to DNS queries (for example, 192.0.2.44). This value is required if the service specified by ServiceId includes settings for an A record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_IPV6 If the service configuration includes an AAAA record, the IPv6 address that you want Route\194\16053 to return in response to DNS queries (for example, 2001:0db8:85a3:0000:0000:abcd:0001:2345). This value is required if the service specified by ServiceId includes settings for an AAAA record. If the service includes settings for an SRV record, you must specify a value for AWS_INSTANCE_IPV4, AWS_INSTANCE_IPV6, or both. AWS_INSTANCE_PORT If the service includes an SRV record, the value that you want Route\194\16053 to return for the port. If the service includes HealthCheckConfig, the port on the endpoint that you want Route\194\16053 to send requests to. This value is required if you specified settings for an SRV record or a Route\194\16053 health check when you created the service. Custom attributes You can add up to 30 custom attributes. For each key-value pair, the maximum length of the attribute name is 255 characters, and the maximum length of the attribute value is 1,024 characters. The total size of all provided attributes (sum of all keys and values) must not exceed 5,000 characters."]}
     let context_ = "RegisterInstanceRequest"
     let make ?creatorRequestId =
       fun ~serviceId ->
@@ -3877,7 +4363,7 @@ module RegisterInstanceRequest =
             fun () -> { creatorRequestId; serviceId; instanceId; attributes }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("InstanceId", (Some (InstanceId.to_value x.instanceId)));
         ("CreatorRequestId",
           (Option.map x.creatorRequestId ~f:ResourceId.to_value));
@@ -3894,16 +4380,15 @@ module RegisterInstanceRequest =
         InstanceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ~attributes ?creatorRequestId ~instanceId ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map_exn json "Attributes" Attributes.of_json in
+    let of_json json__ =
+      let attributes = field_map_exn json__ "Attributes" Attributes.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let instanceId = field_map_exn json "InstanceId" InstanceId.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let instanceId = field_map_exn json__ "InstanceId" InstanceId.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ~attributes ?creatorRequestId ~instanceId ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3956,8 +4441,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -3979,9 +4464,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists tags for the specified resource."]
@@ -4035,13 +4520,13 @@ module ListServicesResponse =
           (Xml.child xml_arg0 "Services") in
       make ?nextToken ?services ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let services = field_map json "Services" ServiceSummariesList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let services = field_map json__ "Services" ServiceSummariesList.of_json in
       make ?nextToken ?services ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists summary information for all the services that are associated with one or more specified namespaces."]
+       "Lists summary information for all the services that are associated with one or more namespaces."]
 module ListServicesRequest =
   struct
     type nonrec t =
@@ -4073,14 +4558,14 @@ module ListServicesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" ServiceFilters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" ServiceFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists summary information for all the services that are associated with one or more specified namespaces."]
+       "Lists summary information for all the services that are associated with one or more namespaces."]
 module ListOperationsResponse =
   struct
     type nonrec t =
@@ -4132,10 +4617,10 @@ module ListOperationsResponse =
           (Xml.child xml_arg0 "Operations") in
       make ?nextToken ?operations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let operations =
-        field_map json "Operations" OperationSummaryList.of_json in
+        field_map json__ "Operations" OperationSummaryList.of_json in
       make ?nextToken ?operations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4172,10 +4657,10 @@ module ListOperationsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" OperationFilters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" OperationFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4231,14 +4716,14 @@ module ListNamespacesResponse =
           (Xml.child xml_arg0 "Namespaces") in
       make ?nextToken ?namespaces ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let namespaces =
-        field_map json "Namespaces" NamespaceSummariesList.of_json in
+        field_map json__ "Namespaces" NamespaceSummariesList.of_json in
       make ?nextToken ?namespaces ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists summary information about the namespaces that were created by the current account."]
+       "Lists summary information about the namespaces that were created by the current Amazon Web Services account and shared with the current Amazon Web Services account."]
 module ListNamespacesRequest =
   struct
     type nonrec t =
@@ -4271,18 +4756,21 @@ module ListNamespacesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?filters ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" NamespaceFilters.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" NamespaceFilters.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?filters ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists summary information about the namespaces that were created by the current account."]
+       "Lists summary information about the namespaces that were created by the current Amazon Web Services account and shared with the current Amazon Web Services account."]
 module ListInstancesResponse =
   struct
     type nonrec t =
       {
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace that contains the specified service. If this isn't your account ID, it's the ID of the account that shared the namespace with your account."];
       instances: InstanceSummaryList.t option
         [@ocaml.doc
           "Summary information about the instances that are associated with the specified service."];
@@ -4293,8 +4781,9 @@ module ListInstancesResponse =
       [ `InvalidInput of InvalidInput.t 
       | `ServiceNotFound of ServiceNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?instances =
-      fun ?nextToken -> fun () -> { instances; nextToken }
+    let make ?resourceOwner =
+      fun ?instances ->
+        fun ?nextToken -> fun () -> { resourceOwner; instances; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4325,8 +4814,10 @@ module ListInstancesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Instances",
-           (Option.map x.instances ~f:InstanceSummaryList.to_value));
+        [("ResourceOwner",
+           (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
+        ("Instances",
+          (Option.map x.instances ~f:InstanceSummaryList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4335,12 +4826,18 @@ module ListInstancesResponse =
       let instances =
         (Option.map ~f:InstanceSummaryList.of_xml)
           (Xml.child xml_arg0 "Instances") in
-      make ?nextToken ?instances ()
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
+      make ?nextToken ?instances ?resourceOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let instances = field_map json "Instances" InstanceSummaryList.of_json in
-      make ?nextToken ?instances ()
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let instances =
+        field_map json__ "Instances" InstanceSummaryList.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      make ?nextToken ?instances ?resourceOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists summary information about the instances that you registered by using a specified service."]
@@ -4348,9 +4845,9 @@ module ListInstancesRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that you want to list instances for."];
+          "The ID or Amazon Resource Name (ARN) of the service that you want to list instances for. For services created in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "For the first ListInstances request, omit this value. If more than MaxResults instances match the specified criteria, you can submit another ListInstances request to get the next group of results. Specify the value of NextToken from the previous response in the next request."];
@@ -4363,7 +4860,7 @@ module ListInstancesRequest =
         fun ~serviceId -> fun () -> { nextToken; maxResults; serviceId }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
     let to_query v = to_query to_value v
@@ -4373,14 +4870,13 @@ module ListInstancesRequest =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ?maxResults ?nextToken ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ?maxResults ?nextToken ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4434,8 +4930,8 @@ module GetServiceResponse =
         (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
       make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map json "Service" Service.of_json in
+    let of_json json__ =
+      let service = field_map json__ "Service" Service.of_json in
       make ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the settings for a specified service."]
@@ -4443,23 +4939,102 @@ module GetServiceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: Arn.t
         [@ocaml.doc
-          "The ID of the service that you want to get settings for."]}
+          "The ID or Amazon Resource Name (ARN) of the service that you want to get settings for. For services created by consumers in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
     let context_ = "GetServiceRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (Arn.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Arn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the settings for a specified service."]
+module GetServiceAttributesResponse =
+  struct
+    type nonrec t =
+      {
+      serviceAttributes: ServiceAttributes.t option
+        [@ocaml.doc
+          "A complex type that contains the service ARN and a list of attribute key-value pairs associated with the service."]}
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `ServiceNotFound of ServiceNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceAttributes = fun () -> { serviceAttributes }
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `ServiceNotFound e ->
+          `Assoc
+            [("error", (`String "ServiceNotFound"));
+            ("details", (ServiceNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ServiceAttributes",
+           (Option.map x.serviceAttributes ~f:ServiceAttributes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceAttributes =
+        (Option.map ~f:ServiceAttributes.of_xml)
+          (Xml.child xml_arg0 "ServiceAttributes") in
+      make ?serviceAttributes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceAttributes =
+        field_map json__ "ServiceAttributes" ServiceAttributes.of_json in
+      make ?serviceAttributes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the attributes associated with a specified service."]
+module GetServiceAttributesRequest =
+  struct
+    type nonrec t =
+      {
+      serviceId: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the service that you want to get attributes for. For services created in a namespace shared with your Amazon Web Services account, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
+    let context_ = "GetServiceAttributesRequest"
+    let make ~serviceId = fun () -> { serviceId }
+    let to_value x =
+      structure_to_value [("ServiceId", (Some (Arn.to_value x.serviceId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceId =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+      make ~serviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
+      make ~serviceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the attributes associated with a specified service."]
 module GetOperationResponse =
   struct
     type nonrec t =
@@ -4511,37 +5086,48 @@ module GetOperationResponse =
         (Option.map ~f:Operation.of_xml) (Xml.child xml_arg0 "Operation") in
       make ?operation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operation = field_map json "Operation" Operation.of_json in
+    let of_json json__ =
+      let operation = field_map json__ "Operation" Operation.of_json in
       make ?operation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about any operation that returns an operation ID in the response, such as a CreateService request. To get a list of operations that match specified criteria, see ListOperations."]
+       "Gets information about any operation that returns an operation ID in the response, such as a CreateHttpNamespace request. To get a list of operations that match specified criteria, see ListOperations."]
 module GetOperationRequest =
   struct
     type nonrec t =
       {
-      operationId: ResourceId.t
+      operationId: OperationId.t
         [@ocaml.doc
-          "The ID of the operation that you want to get more information about."]}
+          "The ID of the operation that you want to get more information about."];
+      ownerAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the namespace associated with the operation, as specified in the namespace ResourceOwner field. For operations associated with namespaces that are shared with your account, you must specify an OwnerAccount."]}
     let context_ = "GetOperationRequest"
-    let make ~operationId = fun () -> { operationId }
+    let make ?ownerAccount =
+      fun ~operationId -> fun () -> { ownerAccount; operationId }
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (ResourceId.to_value x.operationId)))]
+        [("OperationId", (Some (OperationId.to_value x.operationId)));
+        ("OwnerAccount",
+          (Option.map x.ownerAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ownerAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "OwnerAccount") in
       let operationId =
-        ResourceId.of_xml
+        OperationId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+      make ?ownerAccount ~operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" ResourceId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let ownerAccount = field_map json__ "OwnerAccount" AWSAccountId.of_json in
+      let operationId =
+        field_map_exn json__ "OperationId" OperationId.of_json in
+      make ?ownerAccount ~operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about any operation that returns an operation ID in the response, such as a CreateService request. To get a list of operations that match specified criteria, see ListOperations."]
+       "Gets information about any operation that returns an operation ID in the response, such as a CreateHttpNamespace request. To get a list of operations that match specified criteria, see ListOperations."]
 module GetNamespaceResponse =
   struct
     type nonrec t =
@@ -4593,8 +5179,8 @@ module GetNamespaceResponse =
         (Option.map ~f:Namespace.of_xml) (Xml.child xml_arg0 "Namespace") in
       make ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let namespace = field_map json "Namespace" Namespace.of_json in
+    let of_json json__ =
+      let namespace = field_map json__ "Namespace" Namespace.of_json in
       make ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a namespace."]
@@ -4602,21 +5188,19 @@ module GetNamespaceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
+      id: Arn.t
         [@ocaml.doc
-          "The ID of the namespace that you want to get information about."]}
+          "The ID or Amazon Resource Name (ARN) of the namespace that you want to get information about. For namespaces shared with your Amazon Web Services account, specify the namespace ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide"]}
     let context_ = "GetNamespaceRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (Arn.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Arn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a namespace."]
 module GetInstancesHealthStatusResponse =
@@ -4684,9 +5268,9 @@ module GetInstancesHealthStatusResponse =
           (Xml.child xml_arg0 "Status") in
       make ?nextToken ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let status = field_map json "Status" InstanceHealthStatusMap.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let status = field_map json__ "Status" InstanceHealthStatusMap.of_json in
       make ?nextToken ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4695,9 +5279,9 @@ module GetInstancesHealthStatusRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that the instance is associated with."];
+          "The ID or Amazon Resource Name (ARN) of the service that the instance is associated with. For services created in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       instances: InstanceIdList.t option
         [@ocaml.doc
           "An array that contains the IDs of all the instances that you want to get the health status for. If you omit Instances, Cloud Map returns the health status for all the instances that are associated with the specified service. To get the IDs for the instances that you've registered by using a specified service, submit a ListInstances request."];
@@ -4715,7 +5299,7 @@ module GetInstancesHealthStatusRequest =
             fun () -> { instances; maxResults; nextToken; serviceId }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("Instances", (Option.map x.instances ~f:InstanceIdList.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
@@ -4729,15 +5313,14 @@ module GetInstancesHealthStatusRequest =
         (Option.map ~f:InstanceIdList.of_xml)
           (Xml.child xml_arg0 "Instances") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ?nextToken ?maxResults ?instances ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let instances = field_map json "Instances" InstanceIdList.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let instances = field_map json__ "Instances" InstanceIdList.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ?nextToken ?maxResults ?instances ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4746,6 +5329,9 @@ module GetInstanceResponse =
   struct
     type nonrec t =
       {
+      resourceOwner: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that created the namespace that contains the service that the instance is associated with. If this isn't your account ID, it's the ID of the account that shared the namespace with your account."];
       instance: Instance.t option
         [@ocaml.doc
           "A complex type that contains information about a specified instance."]}
@@ -4754,7 +5340,8 @@ module GetInstanceResponse =
       | `InvalidInput of InvalidInput.t 
       | `ServiceNotFound of ServiceNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?instance = fun () -> { instance }
+    let make ?resourceOwner =
+      fun ?instance -> fun () -> { resourceOwner; instance }
     let error_of_json name json =
       match name with
       | "InstanceNotFound" ->
@@ -4792,25 +5379,32 @@ module GetInstanceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Instance", (Option.map x.instance ~f:Instance.to_value))]
+        [("ResourceOwner",
+           (Option.map x.resourceOwner ~f:AWSAccountId.to_value));
+        ("Instance", (Option.map x.instance ~f:Instance.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let instance =
         (Option.map ~f:Instance.of_xml) (Xml.child xml_arg0 "Instance") in
-      make ?instance ()
+      let resourceOwner =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "ResourceOwner") in
+      make ?instance ?resourceOwner ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instance = field_map json "Instance" Instance.of_json in
-      make ?instance ()
+    let of_json json__ =
+      let instance = field_map json__ "Instance" Instance.of_json in
+      let resourceOwner =
+        field_map json__ "ResourceOwner" AWSAccountId.of_json in
+      make ?instance ?resourceOwner ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a specified instance."]
 module GetInstanceRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that the instance is associated with."];
+          "The ID or Amazon Resource Name (ARN) of the service that the instance is associated with. For services created in a shared namespace, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       instanceId: ResourceId.t
         [@ocaml.doc
           "The ID of the instance that you want to get information about."]}
@@ -4819,7 +5413,7 @@ module GetInstanceRequest =
       fun ~instanceId -> fun () -> { serviceId; instanceId }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("InstanceId", (Some (ResourceId.to_value x.instanceId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -4827,30 +5421,156 @@ module GetInstanceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ~instanceId ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map_exn json "InstanceId" ResourceId.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let instanceId = field_map_exn json__ "InstanceId" ResourceId.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ~instanceId ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about a specified instance."]
-module DiscoverInstancesResponse =
+module DiscoverInstancesRevisionResponse =
   struct
     type nonrec t =
       {
-      instances: HttpInstanceSummaryList.t option
+      instancesRevision: Revision.t option
         [@ocaml.doc
-          "A complex type that contains one HttpInstanceSummary for each registered instance."]}
+          "The increasing revision associated to the response Instances list. If a new instance is registered or deregistered, the InstancesRevision updates. The health status updates don't update InstancesRevision."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `NamespaceNotFound of NamespaceNotFound.t 
       | `RequestLimitExceeded of RequestLimitExceeded.t 
       | `ServiceNotFound of ServiceNotFound.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?instances = fun () -> { instances }
+    let make ?instancesRevision = fun () -> { instancesRevision }
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "NamespaceNotFound" ->
+          `NamespaceNotFound (NamespaceNotFound.of_json json)
+      | "RequestLimitExceeded" ->
+          `RequestLimitExceeded (RequestLimitExceeded.of_json json)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "NamespaceNotFound" ->
+          `NamespaceNotFound (NamespaceNotFound.of_xml xml)
+      | "RequestLimitExceeded" ->
+          `RequestLimitExceeded (RequestLimitExceeded.of_xml xml)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `NamespaceNotFound e ->
+          `Assoc
+            [("error", (`String "NamespaceNotFound"));
+            ("details", (NamespaceNotFound.to_json e))]
+      | `RequestLimitExceeded e ->
+          `Assoc
+            [("error", (`String "RequestLimitExceeded"));
+            ("details", (RequestLimitExceeded.to_json e))]
+      | `ServiceNotFound e ->
+          `Assoc
+            [("error", (`String "ServiceNotFound"));
+            ("details", (ServiceNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("InstancesRevision",
+           (Option.map x.instancesRevision ~f:Revision.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let instancesRevision =
+        (Option.map ~f:Revision.of_xml)
+          (Xml.child xml_arg0 "InstancesRevision") in
+      make ?instancesRevision ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let instancesRevision =
+        field_map json__ "InstancesRevision" Revision.of_json in
+      make ?instancesRevision ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Discovers the increasing revision associated with an instance."]
+module DiscoverInstancesRevisionRequest =
+  struct
+    type nonrec t =
+      {
+      namespaceName: NamespaceName.t
+        [@ocaml.doc
+          "The HttpName name of the namespace. The HttpName is found in the HttpProperties member of the Properties member of the namespace."];
+      serviceName: ServiceName.t
+        [@ocaml.doc
+          "The name of the service that you specified when you registered the instance."];
+      ownerAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the namespace associated with the instance, as specified in the namespace ResourceOwner field. For instances associated with namespaces that are shared with your account, you must specify an OwnerAccount. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."]}
+    let context_ = "DiscoverInstancesRevisionRequest"
+    let make ?ownerAccount =
+      fun ~namespaceName ->
+        fun ~serviceName ->
+          fun () -> { ownerAccount; namespaceName; serviceName }
+    let to_value x =
+      structure_to_value
+        [("NamespaceName", (Some (NamespaceName.to_value x.namespaceName)));
+        ("ServiceName", (Some (ServiceName.to_value x.serviceName)));
+        ("OwnerAccount",
+          (Option.map x.ownerAccount ~f:AWSAccountId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ownerAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "OwnerAccount") in
+      let serviceName =
+        ServiceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceName") in
+      let namespaceName =
+        NamespaceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NamespaceName") in
+      make ?ownerAccount ~serviceName ~namespaceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ownerAccount = field_map json__ "OwnerAccount" AWSAccountId.of_json in
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
+      let namespaceName =
+        field_map_exn json__ "NamespaceName" NamespaceName.of_json in
+      make ?ownerAccount ~serviceName ~namespaceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Discovers the increasing revision associated with an instance."]
+module DiscoverInstancesResponse =
+  struct
+    type nonrec t =
+      {
+      instances: HttpInstanceSummaryList.t option
+        [@ocaml.doc
+          "A complex type that contains one HttpInstanceSummary for each registered instance."];
+      instancesRevision: Revision.t option
+        [@ocaml.doc
+          "The increasing revision associated to the response Instances list. If a new instance is registered or deregistered, the InstancesRevision updates. The health status updates don't update InstancesRevision."]}
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `NamespaceNotFound of NamespaceNotFound.t 
+      | `RequestLimitExceeded of RequestLimitExceeded.t 
+      | `ServiceNotFound of ServiceNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?instances =
+      fun ?instancesRevision -> fun () -> { instances; instancesRevision }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4898,28 +5618,35 @@ module DiscoverInstancesResponse =
     let to_value x =
       structure_to_value
         [("Instances",
-           (Option.map x.instances ~f:HttpInstanceSummaryList.to_value))]
+           (Option.map x.instances ~f:HttpInstanceSummaryList.to_value));
+        ("InstancesRevision",
+          (Option.map x.instancesRevision ~f:Revision.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let instancesRevision =
+        (Option.map ~f:Revision.of_xml)
+          (Xml.child xml_arg0 "InstancesRevision") in
       let instances =
         (Option.map ~f:HttpInstanceSummaryList.of_xml)
           (Xml.child xml_arg0 "Instances") in
-      make ?instances ()
+      make ?instancesRevision ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let instancesRevision =
+        field_map json__ "InstancesRevision" Revision.of_json in
       let instances =
-        field_map json "Instances" HttpInstanceSummaryList.of_json in
-      make ?instances ()
+        field_map json__ "Instances" HttpInstanceSummaryList.of_json in
+      make ?instancesRevision ?instances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Discovers registered instances for a specified namespace and service. You can use DiscoverInstances to discover instances for any type of namespace. For public and private DNS namespaces, you can also use DNS queries to discover instances."]
+       "Discovers registered instances for a specified namespace and service. You can use DiscoverInstances to discover instances for any type of namespace. DiscoverInstances returns a randomized list of instances allowing customers to distribute traffic evenly across instances. For public and private DNS namespaces, you can also use DNS queries to discover instances."]
 module DiscoverInstancesRequest =
   struct
     type nonrec t =
       {
       namespaceName: NamespaceName.t
         [@ocaml.doc
-          "The HttpName name of the namespace. It's found in the HttpProperties member of the Properties member of the namespace."];
+          "The HttpName name of the namespace. The HttpName is found in the HttpProperties member of the Properties member of the namespace. In most cases, Name and HttpName match. However, if you reuse Name for namespace creation, a generated hash is added to HttpName to distinguish the two."];
       serviceName: ServiceName.t
         [@ocaml.doc
           "The name of the service that you specified when you registered the instance."];
@@ -4934,23 +5661,28 @@ module DiscoverInstancesRequest =
           "Opportunistic filters to scope the results based on custom attributes. If there are instances that match both the filters specified in both the QueryParameters parameter and this parameter, all of these instances are returned. Otherwise, the filters are ignored, and only instances that match the filters that are specified in the QueryParameters parameter are returned."];
       healthStatus: HealthStatusFilter.t option
         [@ocaml.doc
-          "The health status of the instances that you want to discover. This parameter is ignored for services that don't have a health check configured, and all instances are returned. HEALTHY Returns healthy instances. UNHEALTHY Returns unhealthy instances. ALL Returns all instances. HEALTHY_OR_ELSE_ALL Returns healthy instances, unless none are reporting a healthy state. In that case, return all instances. This is also called failing open."]}
+          "The health status of the instances that you want to discover. This parameter is ignored for services that don't have a health check configured, and all instances are returned. HEALTHY Returns healthy instances. UNHEALTHY Returns unhealthy instances. ALL Returns all instances. HEALTHY_OR_ELSE_ALL Returns healthy instances, unless none are reporting a healthy state. In that case, return all instances. This is also called failing open."];
+      ownerAccount: AWSAccountId.t option
+        [@ocaml.doc
+          "The ID of the Amazon Web Services account that owns the namespace associated with the instance, as specified in the namespace ResourceOwner field. For instances associated with namespaces that are shared with your account, you must specify an OwnerAccount."]}
     let context_ = "DiscoverInstancesRequest"
     let make ?maxResults =
       fun ?queryParameters ->
         fun ?optionalParameters ->
           fun ?healthStatus ->
-            fun ~namespaceName ->
-              fun ~serviceName ->
-                fun () ->
-                  {
-                    maxResults;
-                    queryParameters;
-                    optionalParameters;
-                    healthStatus;
-                    namespaceName;
-                    serviceName
-                  }
+            fun ?ownerAccount ->
+              fun ~namespaceName ->
+                fun ~serviceName ->
+                  fun () ->
+                    {
+                      maxResults;
+                      queryParameters;
+                      optionalParameters;
+                      healthStatus;
+                      ownerAccount;
+                      namespaceName;
+                      serviceName
+                    }
     let to_value x =
       structure_to_value
         [("NamespaceName", (Some (NamespaceName.to_value x.namespaceName)));
@@ -4962,9 +5694,14 @@ module DiscoverInstancesRequest =
         ("OptionalParameters",
           (Option.map x.optionalParameters ~f:Attributes.to_value));
         ("HealthStatus",
-          (Option.map x.healthStatus ~f:HealthStatusFilter.to_value))]
+          (Option.map x.healthStatus ~f:HealthStatusFilter.to_value));
+        ("OwnerAccount",
+          (Option.map x.ownerAccount ~f:AWSAccountId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ownerAccount =
+        (Option.map ~f:AWSAccountId.of_xml)
+          (Xml.child xml_arg0 "OwnerAccount") in
       let healthStatus =
         (Option.map ~f:HealthStatusFilter.of_xml)
           (Xml.child xml_arg0 "HealthStatus") in
@@ -4983,25 +5720,28 @@ module DiscoverInstancesRequest =
       let namespaceName =
         NamespaceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "NamespaceName") in
-      make ?healthStatus ?optionalParameters ?queryParameters ?maxResults
-        ~serviceName ~namespaceName ()
+      make ?ownerAccount ?healthStatus ?optionalParameters ?queryParameters
+        ?maxResults ~serviceName ~namespaceName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ownerAccount = field_map json__ "OwnerAccount" AWSAccountId.of_json in
       let healthStatus =
-        field_map json "HealthStatus" HealthStatusFilter.of_json in
+        field_map json__ "HealthStatus" HealthStatusFilter.of_json in
       let optionalParameters =
-        field_map json "OptionalParameters" Attributes.of_json in
+        field_map json__ "OptionalParameters" Attributes.of_json in
       let queryParameters =
-        field_map json "QueryParameters" Attributes.of_json in
-      let maxResults = field_map json "MaxResults" DiscoverMaxResults.of_json in
-      let serviceName = field_map_exn json "ServiceName" ServiceName.of_json in
+        field_map json__ "QueryParameters" Attributes.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" DiscoverMaxResults.of_json in
+      let serviceName =
+        field_map_exn json__ "ServiceName" ServiceName.of_json in
       let namespaceName =
-        field_map_exn json "NamespaceName" NamespaceName.of_json in
-      make ?healthStatus ?optionalParameters ?queryParameters ?maxResults
-        ~serviceName ~namespaceName ()
+        field_map_exn json__ "NamespaceName" NamespaceName.of_json in
+      make ?ownerAccount ?healthStatus ?optionalParameters ?queryParameters
+        ?maxResults ~serviceName ~namespaceName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Discovers registered instances for a specified namespace and service. You can use DiscoverInstances to discover instances for any type of namespace. For public and private DNS namespaces, you can also use DNS queries to discover instances."]
+       "Discovers registered instances for a specified namespace and service. You can use DiscoverInstances to discover instances for any type of namespace. DiscoverInstances returns a randomized list of instances allowing customers to distribute traffic evenly across instances. For public and private DNS namespaces, you can also use DNS queries to discover instances."]
 module DeregisterInstanceResponse =
   struct
     type nonrec t =
@@ -5073,19 +5813,19 @@ module DeregisterInstanceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the Amazon Route 53 DNS records and health check, if any, that Cloud Map created for the specified instance."]
+       "Deletes the Amazon Route\194\16053 DNS records and health check, if any, that Cloud Map created for the specified instance."]
 module DeregisterInstanceRequest =
   struct
     type nonrec t =
       {
-      serviceId: ResourceId.t
+      serviceId: Arn.t
         [@ocaml.doc
-          "The ID of the service that the instance is associated with."];
+          "The ID or Amazon Resource Name (ARN) of the service that the instance is associated with. If the namespace associated with the service is shared with your account, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       instanceId: ResourceId.t
         [@ocaml.doc
           "The value that you specified for Id in the RegisterInstance request."]}
@@ -5094,7 +5834,7 @@ module DeregisterInstanceRequest =
       fun ~instanceId -> fun () -> { serviceId; instanceId }
     let to_value x =
       structure_to_value
-        [("ServiceId", (Some (ResourceId.to_value x.serviceId)));
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
         ("InstanceId", (Some (ResourceId.to_value x.instanceId)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -5102,17 +5842,16 @@ module DeregisterInstanceRequest =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceId") in
       let serviceId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
       make ~instanceId ~serviceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let instanceId = field_map_exn json "InstanceId" ResourceId.of_json in
-      let serviceId = field_map_exn json "ServiceId" ResourceId.of_json in
+    let of_json json__ =
+      let instanceId = field_map_exn json__ "InstanceId" ResourceId.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
       make ~instanceId ~serviceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the Amazon Route 53 DNS records and health check, if any, that Cloud Map created for the specified instance."]
+       "Deletes the Amazon Route\194\16053 DNS records and health check, if any, that Cloud Map created for the specified instance."]
 module DeleteServiceResponse =
   struct
     type nonrec t = unit
@@ -5163,28 +5902,105 @@ module DeleteServiceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a specified service. If the service still contains one or more registered instances, the request fails."]
+       "Deletes a specified service and all associated service attributes. If the service still contains one or more registered instances, the request fails."]
 module DeleteServiceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
-        [@ocaml.doc "The ID of the service that you want to delete."]}
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the service that you want to delete. If the namespace associated with the service is shared with your Amazon Web Services account, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing."]}
     let context_ = "DeleteServiceRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (Arn.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Arn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a specified service. If the service still contains one or more registered instances, the request fails."]
+       "Deletes a specified service and all associated service attributes. If the service still contains one or more registered instances, the request fails."]
+module DeleteServiceAttributesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InvalidInput of InvalidInput.t 
+      | `ServiceNotFound of ServiceNotFound.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "ServiceNotFound" -> `ServiceNotFound (ServiceNotFound.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `ServiceNotFound e ->
+          `Assoc
+            [("error", (`String "ServiceNotFound"));
+            ("details", (ServiceNotFound.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes specific attributes associated with a service."]
+module DeleteServiceAttributesRequest =
+  struct
+    type nonrec t =
+      {
+      serviceId: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the service from which the attributes will be deleted. For services created in a namespace shared with your Amazon Web Services account, specify the service ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
+      attributes: ServiceAttributeKeyList.t
+        [@ocaml.doc
+          "A list of keys corresponding to each attribute that you want to delete."]}
+    let context_ = "DeleteServiceAttributesRequest"
+    let make ~serviceId =
+      fun ~attributes -> fun () -> { serviceId; attributes }
+    let to_value x =
+      structure_to_value
+        [("ServiceId", (Some (Arn.to_value x.serviceId)));
+        ("Attributes",
+          (Some (ServiceAttributeKeyList.to_value x.attributes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attributes =
+        ServiceAttributeKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Attributes") in
+      let serviceId =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ServiceId") in
+      make ~attributes ~serviceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attributes =
+        field_map_exn json__ "Attributes" ServiceAttributeKeyList.of_json in
+      let serviceId = field_map_exn json__ "ServiceId" Arn.of_json in
+      make ~attributes ~serviceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes specific attributes associated with a service."]
 module DeleteNamespaceResponse =
   struct
     type nonrec t =
@@ -5251,8 +6067,8 @@ module DeleteNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5261,20 +6077,19 @@ module DeleteNamespaceRequest =
   struct
     type nonrec t =
       {
-      id: ResourceId.t
-        [@ocaml.doc "The ID of the namespace that you want to delete."]}
+      id: Arn.t
+        [@ocaml.doc
+          "The ID or Amazon Resource Name (ARN) of the namespace that you want to delete."]}
     let context_ = "DeleteNamespaceRequest"
     let make ~id = fun () -> { id }
-    let to_value x =
-      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_value x = structure_to_value [("Id", (Some (Arn.to_value x.id)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let id =
-        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let id = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "Id" ResourceId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" Arn.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a namespace from the current account. If the namespace still contains one or more services, the request fails."]
@@ -5292,8 +6107,8 @@ module CustomHealthNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5376,22 +6191,22 @@ module CreateServiceResponse =
         (Option.map ~f:Service.of_xml) (Xml.child xml_arg0 "Service") in
       make ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let service = field_map json "Service" Service.of_json in
+    let of_json json__ =
+      let service = field_map json__ "Service" Service.of_json in
       make ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a service. This action defines the configuration for the following entities: For public and private DNS namespaces, one of the following combinations of DNS records in Amazon Route 53: A AAAA A and AAAA SRV CNAME Optionally, a health check After you create the service, you can submit a RegisterInstance request, and Cloud Map uses the values in the configuration to create the specified entities. For the current quota on the number of instances that you can register using the same namespace and using the same service, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a service. This action defines the configuration for the following entities: For public and private DNS namespaces, one of the following combinations of DNS records in Amazon Route\194\16053: A AAAA A and AAAA SRV CNAME Optionally, a health check After you create the service, you can submit a RegisterInstance request, and Cloud Map uses the values in the configuration to create the specified entities. For the current quota on the number of instances that you can register using the same namespace and using the same service, see Cloud Map quotas in the Cloud Map Developer Guide."]
 module CreateServiceRequest =
   struct
     type nonrec t =
       {
       name: ServiceName.t
         [@ocaml.doc
-          "The name that you want to assign to the service. If you want Cloud Map to create an SRV record when you register an instance and you're using a system that requires a specific SRV format, such as HAProxy, specify the following for Name: Start the name with an underscore (_), such as _exampleservice. End the name with ._protocol, such as ._tcp. When you register an instance, Cloud Map creates an SRV record and assigns a name to the record by concatenating the service name and the namespace name (for example, _exampleservice._tcp.example.com). For services that are accessible by DNS queries, you can't create multiple services with names that differ only by case (such as EXAMPLE and example). Otherwise, these services have the same DNS name and can't be distinguished. However, if you use a namespace that's only accessible by API calls, then you can create services that with names that differ only by case."];
-      namespaceId: ResourceId.t option
+          "The name that you want to assign to the service. Do not include sensitive information in the name if the namespace is discoverable by public DNS queries. If you want Cloud Map to create an SRV record when you register an instance and you're using a system that requires a specific SRV format, such as HAProxy, specify the following for Name: Start the name with an underscore (_), such as _exampleservice. End the name with ._protocol, such as ._tcp. When you register an instance, Cloud Map creates an SRV record and assigns a name to the record by concatenating the service name and the namespace name (for example, _exampleservice._tcp.example.com). For services that are accessible by DNS queries, you can't create multiple services with names that differ only by case (such as EXAMPLE and example). Otherwise, these services have the same DNS name and can't be distinguished. However, if you use a namespace that's only accessible by API calls, then you can create services that with names that differ only by case."];
+      namespaceId: Arn.t option
         [@ocaml.doc
-          "The ID of the namespace that you want to use to create the service. The namespace ID must be specified, but it can be specified either here or in the DnsConfig object."];
+          "The ID or Amazon Resource Name (ARN) of the namespace that you want to use to create the service. For namespaces shared with your Amazon Web Services account, specify the namespace ARN. For more information about shared namespaces, see Cross-account Cloud Map namespace sharing in the Cloud Map Developer Guide."];
       creatorRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed CreateService requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string (for example, a date/timestamp)."];
@@ -5399,10 +6214,10 @@ module CreateServiceRequest =
         [@ocaml.doc "A description for the service."];
       dnsConfig: DnsConfig.t option
         [@ocaml.doc
-          "A complex type that contains information about the Amazon Route 53 records that you want Cloud Map to create when you register an instance."];
+          "A complex type that contains information about the Amazon Route\194\16053 records that you want Cloud Map to create when you register an instance."];
       healthCheckConfig: HealthCheckConfig.t option
         [@ocaml.doc
-          "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional Route 53 health check. If you specify settings for a health check, Cloud Map associates the health check with all the Route 53 DNS records that you specify in DnsConfig. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both. For information about the charges for health checks, see Cloud Map Pricing."];
+          "Public DNS and HTTP namespaces only. A complex type that contains settings for an optional Route\194\16053 health check. If you specify settings for a health check, Cloud Map associates the health check with all the Route\194\16053 DNS records that you specify in DnsConfig. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both. For information about the charges for health checks, see Cloud Map Pricing."];
       healthCheckCustomConfig: HealthCheckCustomConfig.t option
         [@ocaml.doc
           "A complex type that contains information about an optional custom health check. If you specify a health check configuration, you can specify either HealthCheckCustomConfig or HealthCheckConfig but not both. You can't add, update, or delete a HealthCheckCustomConfig configuration from an existing service."];
@@ -5437,7 +6252,7 @@ module CreateServiceRequest =
     let to_value x =
       structure_to_value
         [("Name", (Some (ServiceName.to_value x.name)));
-        ("NamespaceId", (Option.map x.namespaceId ~f:ResourceId.to_value));
+        ("NamespaceId", (Option.map x.namespaceId ~f:Arn.to_value));
         ("CreatorRequestId",
           (Option.map x.creatorRequestId ~f:ResourceId.to_value));
         ("Description",
@@ -5470,32 +6285,32 @@ module CreateServiceRequest =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "CreatorRequestId") in
       let namespaceId =
-        (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "NamespaceId") in
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "NamespaceId") in
       let name =
         ServiceName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?type_ ?tags ?healthCheckCustomConfig ?healthCheckConfig
         ?dnsConfig ?description ?creatorRequestId ?namespaceId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" ServiceTypeOption.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" ServiceTypeOption.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let healthCheckCustomConfig =
-        field_map json "HealthCheckCustomConfig"
+        field_map json__ "HealthCheckCustomConfig"
           HealthCheckCustomConfig.of_json in
       let healthCheckConfig =
-        field_map json "HealthCheckConfig" HealthCheckConfig.of_json in
-      let dnsConfig = field_map json "DnsConfig" DnsConfig.of_json in
+        field_map json__ "HealthCheckConfig" HealthCheckConfig.of_json in
+      let dnsConfig = field_map json__ "DnsConfig" DnsConfig.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let namespaceId = field_map json "NamespaceId" ResourceId.of_json in
-      let name = field_map_exn json "Name" ServiceName.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let namespaceId = field_map json__ "NamespaceId" Arn.of_json in
+      let name = field_map_exn json__ "Name" ServiceName.of_json in
       make ?type_ ?tags ?healthCheckCustomConfig ?healthCheckConfig
         ?dnsConfig ?description ?creatorRequestId ?namespaceId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a service. This action defines the configuration for the following entities: For public and private DNS namespaces, one of the following combinations of DNS records in Amazon Route 53: A AAAA A and AAAA SRV CNAME Optionally, a health check After you create the service, you can submit a RegisterInstance request, and Cloud Map uses the values in the configuration to create the specified entities. For the current quota on the number of instances that you can register using the same namespace and using the same service, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a service. This action defines the configuration for the following entities: For public and private DNS namespaces, one of the following combinations of DNS records in Amazon Route\194\16053: A AAAA A and AAAA SRV CNAME Optionally, a health check After you create the service, you can submit a RegisterInstance request, and Cloud Map uses the values in the configuration to create the specified entities. For the current quota on the number of instances that you can register using the same namespace and using the same service, see Cloud Map quotas in the Cloud Map Developer Guide."]
 module CreatePublicDnsNamespaceResponse =
   struct
     type nonrec t =
@@ -5573,18 +6388,19 @@ module CreatePublicDnsNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a public namespace based on DNS, which is visible on the internet. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. You can discover instances that were registered with a public DNS namespace by using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a public namespace based on DNS, which is visible on the internet. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. You can discover instances that were registered with a public DNS namespace by using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide. The CreatePublicDnsNamespace API operation is not supported in the Amazon Web Services GovCloud (US) Regions."]
 module CreatePublicDnsNamespaceRequest =
   struct
     type nonrec t =
       {
       name: NamespaceNamePublic.t
-        [@ocaml.doc "The name that you want to assign to this namespace."];
+        [@ocaml.doc
+          "The name that you want to assign to this namespace. Do not include sensitive information in the name. The name is publicly available using DNS queries."];
       creatorRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed CreatePublicDnsNamespace requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string (for example, a date/timestamp)."];
@@ -5630,19 +6446,19 @@ module CreatePublicDnsNamespaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?properties ?tags ?description ?creatorRequestId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "Properties" PublicDnsNamespaceProperties.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "Properties" PublicDnsNamespaceProperties.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let name = field_map_exn json "Name" NamespaceNamePublic.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let name = field_map_exn json__ "Name" NamespaceNamePublic.of_json in
       make ?properties ?tags ?description ?creatorRequestId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a public namespace based on DNS, which is visible on the internet. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. You can discover instances that were registered with a public DNS namespace by using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a public namespace based on DNS, which is visible on the internet. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. You can discover instances that were registered with a public DNS namespace by using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide. The CreatePublicDnsNamespace API operation is not supported in the Amazon Web Services GovCloud (US) Regions."]
 module CreatePrivateDnsNamespaceResponse =
   struct
     type nonrec t =
@@ -5720,19 +6536,19 @@ module CreatePrivateDnsNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a private namespace based on DNS, which is visible only inside a specified Amazon VPC. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. Service instances that are registered using a private DNS namespace can be discovered using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a private namespace based on DNS, which is visible only inside a specified Amazon VPC. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. Service instances that are registered using a private DNS namespace can be discovered using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide."]
 module CreatePrivateDnsNamespaceRequest =
   struct
     type nonrec t =
       {
       name: NamespaceNamePrivate.t
         [@ocaml.doc
-          "The name that you want to assign to this namespace. When you create a private DNS namespace, Cloud Map automatically creates an Amazon Route 53 private hosted zone that has the same name as the namespace."];
+          "The name that you want to assign to this namespace. When you create a private DNS namespace, Cloud Map automatically creates an Amazon Route\194\16053 private hosted zone that has the same name as the namespace."];
       creatorRequestId: ResourceId.t option
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed CreatePrivateDnsNamespace requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string (for example, a date/timestamp)."];
@@ -5792,20 +6608,20 @@ module CreatePrivateDnsNamespaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?properties ?tags ~vpc ?description ?creatorRequestId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let properties =
-        field_map json "Properties" PrivateDnsNamespaceProperties.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let vpc = field_map_exn json "Vpc" ResourceId.of_json in
+        field_map json__ "Properties" PrivateDnsNamespaceProperties.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let vpc = field_map_exn json__ "Vpc" ResourceId.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let name = field_map_exn json "Name" NamespaceNamePrivate.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let name = field_map_exn json__ "Name" NamespaceNamePrivate.of_json in
       make ?properties ?tags ~vpc ?description ?creatorRequestId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a private namespace based on DNS, which is visible only inside a specified Amazon VPC. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. Service instances that are registered using a private DNS namespace can be discovered using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates a private namespace based on DNS, which is visible only inside a specified Amazon VPC. The namespace defines your service naming scheme. For example, if you name your namespace example.com and name your service backend, the resulting DNS name for the service is backend.example.com. Service instances that are registered using a private DNS namespace can be discovered using either a DiscoverInstances request or using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide."]
 module CreateHttpNamespaceResponse =
   struct
     type nonrec t =
@@ -5883,12 +6699,12 @@ module CreateHttpNamespaceResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an HTTP namespace. Service instances registered using an HTTP namespace can be discovered using a DiscoverInstances request but can't be discovered using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates an HTTP namespace. Service instances registered using an HTTP namespace can be discovered using a DiscoverInstances request but can't be discovered using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide."]
 module CreateHttpNamespaceRequest =
   struct
     type nonrec t =
@@ -5931,14 +6747,14 @@ module CreateHttpNamespaceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?description ?creatorRequestId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let description =
-        field_map json "Description" ResourceDescription.of_json in
+        field_map json__ "Description" ResourceDescription.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" ResourceId.of_json in
-      let name = field_map_exn json "Name" NamespaceNameHttp.of_json in
+        field_map json__ "CreatorRequestId" ResourceId.of_json in
+      let name = field_map_exn json__ "Name" NamespaceNameHttp.of_json in
       make ?tags ?description ?creatorRequestId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an HTTP namespace. Service instances registered using an HTTP namespace can be discovered using a DiscoverInstances request but can't be discovered using DNS. For the current quota on the number of namespaces that you can create using the same account, see Cloud Map quotas in the Cloud Map Developer Guide."]
+       "Creates an HTTP namespace. Service instances registered using an HTTP namespace can be discovered using a DiscoverInstances request but can't be discovered using DNS. For the current quota on the number of namespaces that you can create using the same Amazon Web Services account, see Cloud Map quotas in the Cloud Map Developer Guide."]

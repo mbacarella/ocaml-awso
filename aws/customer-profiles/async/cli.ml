@@ -51,6 +51,109 @@ let add_profile_key =
               ~values:(Values.RequestValueList.of_json values) ~domainName ())
            (Some Values.AddProfileKeyResponse.to_json)
            (Some Values.AddProfileKeyResponse.error_to_json)])
+let batch_get_calculated_attribute_for_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and conditionOverrides =
+         flag "condition-overrides" (optional json_arg)
+           ~doc:"JSON ConditionOverrides"
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileIds =
+         flag "profile-ids" (required json_arg)
+           ~doc:"JSON BatchGetCalculatedAttributeForProfileIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_calculated_attribute_for_profile
+           (Values.BatchGetCalculatedAttributeForProfileRequest.make
+              ?conditionOverrides:(Option.map
+                                     ~f:Values.ConditionOverrides.of_json
+                                     conditionOverrides)
+              ~calculatedAttributeName ~domainName
+              ~profileIds:(Values.BatchGetCalculatedAttributeForProfileIdList.of_json
+                             profileIds) ())
+           (Some Values.BatchGetCalculatedAttributeForProfileResponse.to_json)
+           (Some
+              Values.BatchGetCalculatedAttributeForProfileResponse.error_to_json)])
+let batch_get_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileIds =
+         flag "profile-ids" (required json_arg)
+           ~doc:"JSON BatchGetProfileIdList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_profile
+           (Values.BatchGetProfileRequest.make ~domainName
+              ~profileIds:(Values.BatchGetProfileIdList.of_json profileIds)
+              ()) (Some Values.BatchGetProfileResponse.to_json)
+           (Some Values.BatchGetProfileResponse.error_to_json)])
+let create_calculated_attribute_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING displayName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and conditions =
+         flag "conditions" (optional json_arg) ~doc:"JSON Conditions"
+       and filter = flag "filter" (optional json_arg) ~doc:"JSON Filter"
+       and useHistoricalData =
+         flag "use-historical-data" (optional bool)
+           ~doc:"BOOL optionalBoolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName"
+       and attributeDetails =
+         flag "attribute-details" (required json_arg)
+           ~doc:"JSON AttributeDetails"
+       and statistic =
+         flag "statistic" (required json_arg) ~doc:"JSON Statistic" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_calculated_attribute_definition
+           (Values.CreateCalculatedAttributeDefinitionRequest.make
+              ?displayName ?description
+              ?conditions:(Option.map ~f:Values.Conditions.of_json conditions)
+              ?filter:(Option.map ~f:Values.Filter.of_json filter)
+              ?useHistoricalData
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~calculatedAttributeName
+              ~attributeDetails:(Values.AttributeDetails.of_json
+                                   attributeDetails)
+              ~statistic:(Values.Statistic.of_json statistic) ())
+           (Some Values.CreateCalculatedAttributeDefinitionResponse.to_json)
+           (Some
+              Values.CreateCalculatedAttributeDefinitionResponse.error_to_json)])
 let create_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -69,6 +172,11 @@ let create_domain =
            ~doc:"STRING sqsQueueUrl"
        and matching =
          flag "matching" (optional json_arg) ~doc:"JSON MatchingRequest"
+       and ruleBasedMatching =
+         flag "rule-based-matching" (optional json_arg)
+           ~doc:"JSON RuleBasedMatchingRequest"
+       and dataStore =
+         flag "data-store" (optional json_arg) ~doc:"JSON DataStoreRequest"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name"
@@ -82,10 +190,113 @@ let create_domain =
               ?deadLetterQueueUrl
               ?matching:(Option.map ~f:Values.MatchingRequest.of_json
                            matching)
+              ?ruleBasedMatching:(Option.map
+                                    ~f:Values.RuleBasedMatchingRequest.of_json
+                                    ruleBasedMatching)
+              ?dataStore:(Option.map ~f:Values.DataStoreRequest.of_json
+                            dataStore)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
               ~defaultExpirationDays ())
            (Some Values.CreateDomainResponse.to_json)
            (Some Values.CreateDomainResponse.error_to_json)])
+let create_domain_layout =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and isDefault = flag "is-default" (optional bool) ~doc:"BOOL boolean"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and layoutDefinitionName =
+         flag "layout-definition-name" (required string) ~doc:"STRING name"
+       and description =
+         flag "description" (required string) ~doc:"STRING sensitiveText"
+       and displayName =
+         flag "display-name" (required string) ~doc:"STRING displayName"
+       and layoutType =
+         flag "layout-type" (required json_arg) ~doc:"JSON LayoutType"
+       and layout =
+         flag "layout" (required string)
+           ~doc:"STRING sensitiveString1To2000000" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_domain_layout
+           (Values.CreateDomainLayoutRequest.make ?isDefault
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~layoutDefinitionName ~description ~displayName
+              ~layoutType:(Values.LayoutType.of_json layoutType) ~layout ())
+           (Some Values.CreateDomainLayoutResponse.to_json)
+           (Some Values.CreateDomainLayoutResponse.error_to_json)])
+let create_event_stream =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and uri = flag "uri" (required string) ~doc:"STRING string1To255"
+       and eventStreamName =
+         flag "event-stream-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_event_stream
+           (Values.CreateEventStreamRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~uri ~eventStreamName ())
+           (Some Values.CreateEventStreamResponse.to_json)
+           (Some Values.CreateEventStreamResponse.error_to_json)])
+let create_event_trigger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and segmentFilter =
+         flag "segment-filter" (optional string) ~doc:"STRING name"
+       and eventTriggerLimits =
+         flag "event-trigger-limits" (optional json_arg)
+           ~doc:"JSON EventTriggerLimits"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventTriggerName =
+         flag "event-trigger-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName"
+       and eventTriggerConditions =
+         flag "event-trigger-conditions" (required json_arg)
+           ~doc:"JSON EventTriggerConditions" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_event_trigger
+           (Values.CreateEventTriggerRequest.make ?description ?segmentFilter
+              ?eventTriggerLimits:(Option.map
+                                     ~f:Values.EventTriggerLimits.of_json
+                                     eventTriggerLimits)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~eventTriggerName ~objectTypeName
+              ~eventTriggerConditions:(Values.EventTriggerConditions.of_json
+                                         eventTriggerConditions) ())
+           (Some Values.CreateEventTriggerResponse.to_json)
+           (Some Values.CreateEventTriggerResponse.error_to_json)])
 let create_integration_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -129,42 +340,50 @@ let create_profile =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and accountNumber =
-         flag "account-number" (optional string) ~doc:"STRING string1To255"
+         flag "account-number" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and additionalInformation =
          flag "additional-information" (optional string)
-           ~doc:"STRING string1To1000"
+           ~doc:"STRING sensitiveString1To1000"
        and partyType =
          flag "party-type" (optional json_arg) ~doc:"JSON PartyType"
        and businessName =
-         flag "business-name" (optional string) ~doc:"STRING string1To255"
+         flag "business-name" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and firstName =
-         flag "first-name" (optional string) ~doc:"STRING string1To255"
+         flag "first-name" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and middleName =
-         flag "middle-name" (optional string) ~doc:"STRING string1To255"
+         flag "middle-name" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and lastName =
-         flag "last-name" (optional string) ~doc:"STRING string1To255"
+         flag "last-name" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and birthDate =
-         flag "birth-date" (optional string) ~doc:"STRING string1To255"
+         flag "birth-date" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and gender = flag "gender" (optional json_arg) ~doc:"JSON Gender"
        and phoneNumber =
-         flag "phone-number" (optional string) ~doc:"STRING string1To255"
+         flag "phone-number" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and mobilePhoneNumber =
          flag "mobile-phone-number" (optional string)
-           ~doc:"STRING string1To255"
+           ~doc:"STRING sensitiveString1To255"
        and homePhoneNumber =
          flag "home-phone-number" (optional string)
-           ~doc:"STRING string1To255"
+           ~doc:"STRING sensitiveString1To255"
        and businessPhoneNumber =
          flag "business-phone-number" (optional string)
-           ~doc:"STRING string1To255"
+           ~doc:"STRING sensitiveString1To255"
        and emailAddress =
-         flag "email-address" (optional string) ~doc:"STRING string1To255"
+         flag "email-address" (optional string)
+           ~doc:"STRING sensitiveString1To255"
        and personalEmailAddress =
          flag "personal-email-address" (optional string)
-           ~doc:"STRING string1To255"
+           ~doc:"STRING sensitiveString1To255"
        and businessEmailAddress =
          flag "business-email-address" (optional string)
-           ~doc:"STRING string1To255"
+           ~doc:"STRING sensitiveString1To255"
        and address = flag "address" (optional json_arg) ~doc:"JSON Address"
        and shippingAddress =
          flag "shipping-address" (optional json_arg) ~doc:"JSON Address"
@@ -174,6 +393,17 @@ let create_profile =
          flag "billing-address" (optional json_arg) ~doc:"JSON Address"
        and attributes =
          flag "attributes" (optional json_arg) ~doc:"JSON Attributes"
+       and partyTypeString =
+         flag "party-type-string" (optional string)
+           ~doc:"STRING sensitiveString1To255"
+       and genderString =
+         flag "gender-string" (optional string)
+           ~doc:"STRING sensitiveString1To255"
+       and profileType =
+         flag "profile-type" (optional json_arg) ~doc:"JSON ProfileType"
+       and engagementPreferences =
+         flag "engagement-preferences" (optional json_arg)
+           ~doc:"JSON EngagementPreferences"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name" in
        fun () ->
@@ -195,8 +425,254 @@ let create_profile =
               ?billingAddress:(Option.map ~f:Values.Address.of_json
                                  billingAddress)
               ?attributes:(Option.map ~f:Values.Attributes.of_json attributes)
-              ~domainName ()) (Some Values.CreateProfileResponse.to_json)
+              ?partyTypeString ?genderString
+              ?profileType:(Option.map ~f:Values.ProfileType.of_json
+                              profileType)
+              ?engagementPreferences:(Option.map
+                                        ~f:Values.EngagementPreferences.of_json
+                                        engagementPreferences) ~domainName ())
+           (Some Values.CreateProfileResponse.to_json)
            (Some Values.CreateProfileResponse.error_to_json)])
+let create_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommenderConfig =
+         flag "recommender-config" (optional json_arg)
+           ~doc:"JSON RecommenderConfig"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and recommenderSchemaName =
+         flag "recommender-schema-name" (optional string) ~doc:"STRING name"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name"
+       and recommenderRecipeName =
+         flag "recommender-recipe-name" (required json_arg)
+           ~doc:"JSON RecommenderRecipeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_recommender
+           (Values.CreateRecommenderRequest.make
+              ?recommenderConfig:(Option.map
+                                    ~f:Values.RecommenderConfig.of_json
+                                    recommenderConfig) ?description
+              ?recommenderSchemaName
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~recommenderName
+              ~recommenderRecipeName:(Values.RecommenderRecipeName.of_json
+                                        recommenderRecipeName) ())
+           (Some Values.CreateRecommenderResponse.to_json)
+           (Some Values.CreateRecommenderResponse.error_to_json)])
+let create_recommender_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommenderSchemaName =
+         flag "recommender-schema-name" (optional string) ~doc:"STRING name"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderFilterName =
+         flag "recommender-filter-name" (required string)
+           ~doc:"STRING RecommenderFilterName"
+       and recommenderFilterExpression =
+         flag "recommender-filter-expression" (required string)
+           ~doc:"STRING RecommenderFilterExpression" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_recommender_filter
+           (Values.CreateRecommenderFilterRequest.make ?recommenderSchemaName
+              ?description ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~domainName ~recommenderFilterName ~recommenderFilterExpression
+              ()) (Some Values.CreateRecommenderFilterResponse.to_json)
+           (Some Values.CreateRecommenderFilterResponse.error_to_json)])
+let create_recommender_schema =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderSchemaName =
+         flag "recommender-schema-name" (required string) ~doc:"STRING name"
+       and fields =
+         flag "fields" (required json_arg)
+           ~doc:"JSON RecommenderSchemaFields" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_recommender_schema
+           (Values.CreateRecommenderSchemaRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~recommenderSchemaName
+              ~fields:(Values.RecommenderSchemaFields.of_json fields) ())
+           (Some Values.CreateRecommenderSchemaResponse.to_json)
+           (Some Values.CreateRecommenderSchemaResponse.error_to_json)])
+let create_segment_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING sensitiveString1To4000"
+       and segmentGroups =
+         flag "segment-groups" (optional json_arg) ~doc:"JSON SegmentGroup"
+       and segmentSqlQuery =
+         flag "segment-sql-query" (optional string)
+           ~doc:"STRING sensitiveString1To50000"
+       and segmentSort =
+         flag "segment-sort" (optional json_arg) ~doc:"JSON SegmentSort"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name"
+       and displayName =
+         flag "display-name" (required string) ~doc:"STRING string1To255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_segment_definition
+           (Values.CreateSegmentDefinitionRequest.make ?description
+              ?segmentGroups:(Option.map ~f:Values.SegmentGroup.of_json
+                                segmentGroups) ?segmentSqlQuery
+              ?segmentSort:(Option.map ~f:Values.SegmentSort.of_json
+                              segmentSort)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
+              ~segmentDefinitionName ~displayName ())
+           (Some Values.CreateSegmentDefinitionResponse.to_json)
+           (Some Values.CreateSegmentDefinitionResponse.error_to_json)])
+let create_segment_estimate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and segmentQuery =
+         flag "segment-query" (optional json_arg)
+           ~doc:"JSON SegmentGroupStructure"
+       and segmentSqlQuery =
+         flag "segment-sql-query" (optional string)
+           ~doc:"STRING sensitiveString1To50000"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_segment_estimate
+           (Values.CreateSegmentEstimateRequest.make
+              ?segmentQuery:(Option.map
+                               ~f:Values.SegmentGroupStructure.of_json
+                               segmentQuery) ?segmentSqlQuery ~domainName ())
+           (Some Values.CreateSegmentEstimateResponse.to_json)
+           (Some Values.CreateSegmentEstimateResponse.error_to_json)])
+let create_segment_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and encryptionKey =
+         flag "encryption-key" (optional string) ~doc:"STRING encryptionKey"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
+       and destinationUri =
+         flag "destination-uri" (optional string) ~doc:"STRING string1To255"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name"
+       and dataFormat =
+         flag "data-format" (required json_arg) ~doc:"JSON DataFormat" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_segment_snapshot
+           (Values.CreateSegmentSnapshotRequest.make ?encryptionKey ?roleArn
+              ?destinationUri ~domainName ~segmentDefinitionName
+              ~dataFormat:(Values.DataFormat.of_json dataFormat) ())
+           (Some Values.CreateSegmentSnapshotResponse.to_json)
+           (Some Values.CreateSegmentSnapshotResponse.error_to_json)])
+let create_upload_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dataExpiry =
+         flag "data-expiry" (optional int) ~doc:"INT expirationDaysInteger"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and displayName =
+         flag "display-name" (required string) ~doc:"STRING string1To255"
+       and fields = flag "fields" (required json_arg) ~doc:"JSON FieldMap"
+       and uniqueKey = flag "unique-key" (required string) ~doc:"STRING text" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_upload_job
+           (Values.CreateUploadJobRequest.make ?dataExpiry ~domainName
+              ~displayName ~fields:(Values.FieldMap.of_json fields)
+              ~uniqueKey ()) (Some Values.CreateUploadJobResponse.to_json)
+           (Some Values.CreateUploadJobResponse.error_to_json)])
+let delete_calculated_attribute_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_calculated_attribute_definition
+           (Values.DeleteCalculatedAttributeDefinitionRequest.make
+              ~domainName ~calculatedAttributeName ())
+           (Some Values.DeleteCalculatedAttributeDefinitionResponse.to_json)
+           (Some
+              Values.DeleteCalculatedAttributeDefinitionResponse.error_to_json)])
 let delete_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -214,6 +690,89 @@ let delete_domain =
            Io.delete_domain (Values.DeleteDomainRequest.make ~domainName ())
            (Some Values.DeleteDomainResponse.to_json)
            (Some Values.DeleteDomainResponse.error_to_json)])
+let delete_domain_layout =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and layoutDefinitionName =
+         flag "layout-definition-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_domain_layout
+           (Values.DeleteDomainLayoutRequest.make ~domainName
+              ~layoutDefinitionName ())
+           (Some Values.DeleteDomainLayoutResponse.to_json)
+           (Some Values.DeleteDomainLayoutResponse.error_to_json)])
+let delete_domain_object_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_domain_object_type
+           (Values.DeleteDomainObjectTypeRequest.make ~domainName
+              ~objectTypeName ())
+           (Some Values.DeleteDomainObjectTypeResponse.to_json)
+           (Some Values.DeleteDomainObjectTypeResponse.error_to_json)])
+let delete_event_stream =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventStreamName =
+         flag "event-stream-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_event_stream
+           (Values.DeleteEventStreamRequest.make ~domainName ~eventStreamName
+              ()) (Some Values.DeleteEventStreamResponse.to_json)
+           (Some Values.DeleteEventStreamResponse.error_to_json)])
+let delete_event_trigger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventTriggerName =
+         flag "event-trigger-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_event_trigger
+           (Values.DeleteEventTriggerRequest.make ~domainName
+              ~eventTriggerName ())
+           (Some Values.DeleteEventTriggerResponse.to_json)
+           (Some Values.DeleteEventTriggerResponse.error_to_json)])
 let delete_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -321,6 +880,90 @@ let delete_profile_object_type =
               ~objectTypeName ())
            (Some Values.DeleteProfileObjectTypeResponse.to_json)
            (Some Values.DeleteProfileObjectTypeResponse.error_to_json)])
+let delete_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_recommender
+           (Values.DeleteRecommenderRequest.make ~domainName ~recommenderName
+              ()) (Some Values.DeleteRecommenderResponse.to_json)
+           (Some Values.DeleteRecommenderResponse.error_to_json)])
+let delete_recommender_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderFilterName =
+         flag "recommender-filter-name" (required string)
+           ~doc:"STRING RecommenderFilterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_recommender_filter
+           (Values.DeleteRecommenderFilterRequest.make ~domainName
+              ~recommenderFilterName ())
+           (Some Values.DeleteRecommenderFilterResponse.to_json)
+           (Some Values.DeleteRecommenderFilterResponse.error_to_json)])
+let delete_recommender_schema =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderSchemaName =
+         flag "recommender-schema-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_recommender_schema
+           (Values.DeleteRecommenderSchemaRequest.make ~domainName
+              ~recommenderSchemaName ())
+           (Some Values.DeleteRecommenderSchemaResponse.to_json)
+           (Some Values.DeleteRecommenderSchemaResponse.error_to_json)])
+let delete_segment_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_segment_definition
+           (Values.DeleteSegmentDefinitionRequest.make ~domainName
+              ~segmentDefinitionName ())
+           (Some Values.DeleteSegmentDefinitionResponse.to_json)
+           (Some Values.DeleteSegmentDefinitionResponse.error_to_json)])
 let delete_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -341,7 +984,57 @@ let delete_workflow =
            (Values.DeleteWorkflowRequest.make ~domainName ~workflowId ())
            (Some Values.DeleteWorkflowResponse.to_json)
            (Some Values.DeleteWorkflowResponse.error_to_json)])
+let detect_profile_object_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and objects = flag "objects" (required json_arg) ~doc:"JSON Objects"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.detect_profile_object_type
+           (Values.DetectProfileObjectTypeRequest.make
+              ~objects:(Values.Objects.of_json objects) ~domainName ())
+           (Some Values.DetectProfileObjectTypeResponse.to_json)
+           (Some Values.DetectProfileObjectTypeResponse.error_to_json)])
 let get_auto_merging_preview =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and minAllowedConfidenceScoreForMerging =
+         flag "min-allowed-confidence-score-for-merging" (optional float)
+           ~doc:"FLOAT Double0To1"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and consolidation =
+         flag "consolidation" (required json_arg) ~doc:"JSON Consolidation"
+       and conflictResolution =
+         flag "conflict-resolution" (required json_arg)
+           ~doc:"JSON ConflictResolution" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_auto_merging_preview
+           (Values.GetAutoMergingPreviewRequest.make
+              ?minAllowedConfidenceScoreForMerging ~domainName
+              ~consolidation:(Values.Consolidation.of_json consolidation)
+              ~conflictResolution:(Values.ConflictResolution.of_json
+                                     conflictResolution) ())
+           (Some Values.GetAutoMergingPreviewResponse.to_json)
+           (Some Values.GetAutoMergingPreviewResponse.error_to_json)])
+let get_calculated_attribute_definition =
   Command.async ~summary:""
     ([%map_open.Command
        let cli_profile =
@@ -353,20 +1046,41 @@ let get_auto_merging_preview =
            ~doc:"URL override endpoint url"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name"
-       and consolidation =
-         flag "consolidation" (required json_arg) ~doc:"JSON Consolidation"
-       and conflictResolution =
-         flag "conflict-resolution" (required json_arg)
-           ~doc:"JSON ConflictResolution" in
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
-           Io.get_auto_merging_preview
-           (Values.GetAutoMergingPreviewRequest.make ~domainName
-              ~consolidation:(Values.Consolidation.of_json consolidation)
-              ~conflictResolution:(Values.ConflictResolution.of_json
-                                     conflictResolution) ())
-           (Some Values.GetAutoMergingPreviewResponse.to_json)
-           (Some Values.GetAutoMergingPreviewResponse.error_to_json)])
+           Io.get_calculated_attribute_definition
+           (Values.GetCalculatedAttributeDefinitionRequest.make ~domainName
+              ~calculatedAttributeName ())
+           (Some Values.GetCalculatedAttributeDefinitionResponse.to_json)
+           (Some
+              Values.GetCalculatedAttributeDefinitionResponse.error_to_json)])
+let get_calculated_attribute_for_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileId = flag "profile-id" (required string) ~doc:"STRING uuid"
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_calculated_attribute_for_profile
+           (Values.GetCalculatedAttributeForProfileRequest.make ~domainName
+              ~profileId ~calculatedAttributeName ())
+           (Some Values.GetCalculatedAttributeForProfileResponse.to_json)
+           (Some
+              Values.GetCalculatedAttributeForProfileResponse.error_to_json)])
 let get_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -384,6 +1098,88 @@ let get_domain =
            Io.get_domain (Values.GetDomainRequest.make ~domainName ())
            (Some Values.GetDomainResponse.to_json)
            (Some Values.GetDomainResponse.error_to_json)])
+let get_domain_layout =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and layoutDefinitionName =
+         flag "layout-definition-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_domain_layout
+           (Values.GetDomainLayoutRequest.make ~domainName
+              ~layoutDefinitionName ())
+           (Some Values.GetDomainLayoutResponse.to_json)
+           (Some Values.GetDomainLayoutResponse.error_to_json)])
+let get_domain_object_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_domain_object_type
+           (Values.GetDomainObjectTypeRequest.make ~domainName
+              ~objectTypeName ())
+           (Some Values.GetDomainObjectTypeResponse.to_json)
+           (Some Values.GetDomainObjectTypeResponse.error_to_json)])
+let get_event_stream =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventStreamName =
+         flag "event-stream-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_event_stream
+           (Values.GetEventStreamRequest.make ~domainName ~eventStreamName ())
+           (Some Values.GetEventStreamResponse.to_json)
+           (Some Values.GetEventStreamResponse.error_to_json)])
+let get_event_trigger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventTriggerName =
+         flag "event-trigger-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_event_trigger
+           (Values.GetEventTriggerRequest.make ~domainName ~eventTriggerName
+              ()) (Some Values.GetEventTriggerResponse.to_json)
+           (Some Values.GetEventTriggerResponse.error_to_json)])
 let get_identity_resolution_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -444,6 +1240,50 @@ let get_matches =
            (Values.GetMatchesRequest.make ?nextToken ?maxResults ~domainName
               ()) (Some Values.GetMatchesResponse.to_json)
            (Some Values.GetMatchesResponse.error_to_json)])
+let get_object_type_attribute_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName"
+       and attributeName =
+         flag "attribute-name" (required string) ~doc:"STRING string1To1000" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_object_type_attribute_statistics
+           (Values.GetObjectTypeAttributeStatisticsRequest.make ~domainName
+              ~objectTypeName ~attributeName ())
+           (Some Values.GetObjectTypeAttributeStatisticsResponse.to_json)
+           (Some
+              Values.GetObjectTypeAttributeStatisticsResponse.error_to_json)])
+let get_profile_history_record =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileId = flag "profile-id" (required string) ~doc:"STRING uuid"
+       and id = flag "id" (required string) ~doc:"STRING uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_profile_history_record
+           (Values.GetProfileHistoryRecordRequest.make ~domainName ~profileId
+              ~id ()) (Some Values.GetProfileHistoryRecordResponse.to_json)
+           (Some Values.GetProfileHistoryRecordResponse.error_to_json)])
 let get_profile_object_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -483,6 +1323,278 @@ let get_profile_object_type_template =
            (Values.GetProfileObjectTypeTemplateRequest.make ~templateId ())
            (Some Values.GetProfileObjectTypeTemplateResponse.to_json)
            (Some Values.GetProfileObjectTypeTemplateResponse.error_to_json)])
+let get_profile_recommendations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and context =
+         flag "context" (optional json_arg) ~doc:"JSON RecommenderContext"
+       and recommenderFilters =
+         flag "recommender-filters" (optional json_arg)
+           ~doc:"JSON RecommenderFilters"
+       and recommenderPromotionalFilters =
+         flag "recommender-promotional-filters" (optional json_arg)
+           ~doc:"JSON RecommenderPromotionalFilters"
+       and candidateIds =
+         flag "candidate-ids" (optional json_arg) ~doc:"JSON CandidateIdList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSize500__lc1"
+       and metadataConfig =
+         flag "metadata-config" (optional json_arg)
+           ~doc:"JSON MetadataConfig"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileId = flag "profile-id" (required string) ~doc:"STRING uuid"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_profile_recommendations
+           (Values.GetProfileRecommendationsRequest.make
+              ?context:(Option.map ~f:Values.RecommenderContext.of_json
+                          context)
+              ?recommenderFilters:(Option.map
+                                     ~f:Values.RecommenderFilters.of_json
+                                     recommenderFilters)
+              ?recommenderPromotionalFilters:(Option.map
+                                                ~f:Values.RecommenderPromotionalFilters.of_json
+                                                recommenderPromotionalFilters)
+              ?candidateIds:(Option.map ~f:Values.CandidateIdList.of_json
+                               candidateIds) ?maxResults
+              ?metadataConfig:(Option.map ~f:Values.MetadataConfig.of_json
+                                 metadataConfig) ~domainName ~profileId
+              ~recommenderName ())
+           (Some Values.GetProfileRecommendationsResponse.to_json)
+           (Some Values.GetProfileRecommendationsResponse.error_to_json)])
+let get_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trainingMetricsCount =
+         flag "training-metrics-count" (optional int)
+           ~doc:"INT GetRecommenderRequestTrainingMetricsCountInteger"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_recommender
+           (Values.GetRecommenderRequest.make ?trainingMetricsCount
+              ~domainName ~recommenderName ())
+           (Some Values.GetRecommenderResponse.to_json)
+           (Some Values.GetRecommenderResponse.error_to_json)])
+let get_recommender_filter =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderFilterName =
+         flag "recommender-filter-name" (required string)
+           ~doc:"STRING RecommenderFilterName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_recommender_filter
+           (Values.GetRecommenderFilterRequest.make ~domainName
+              ~recommenderFilterName ())
+           (Some Values.GetRecommenderFilterResponse.to_json)
+           (Some Values.GetRecommenderFilterResponse.error_to_json)])
+let get_recommender_schema =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderSchemaName =
+         flag "recommender-schema-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_recommender_schema
+           (Values.GetRecommenderSchemaRequest.make ~domainName
+              ~recommenderSchemaName ())
+           (Some Values.GetRecommenderSchemaResponse.to_json)
+           (Some Values.GetRecommenderSchemaResponse.error_to_json)])
+let get_segment_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_segment_definition
+           (Values.GetSegmentDefinitionRequest.make ~domainName
+              ~segmentDefinitionName ())
+           (Some Values.GetSegmentDefinitionResponse.to_json)
+           (Some Values.GetSegmentDefinitionResponse.error_to_json)])
+let get_segment_estimate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and estimateId =
+         flag "estimate-id" (required string) ~doc:"STRING string1To255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_segment_estimate
+           (Values.GetSegmentEstimateRequest.make ~domainName ~estimateId ())
+           (Some Values.GetSegmentEstimateResponse.to_json)
+           (Some Values.GetSegmentEstimateResponse.error_to_json)])
+let get_segment_membership =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name"
+       and profileIds =
+         flag "profile-ids" (required json_arg) ~doc:"JSON ProfileIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_segment_membership
+           (Values.GetSegmentMembershipRequest.make ~domainName
+              ~segmentDefinitionName
+              ~profileIds:(Values.ProfileIds.of_json profileIds) ())
+           (Some Values.GetSegmentMembershipResponse.to_json)
+           (Some Values.GetSegmentMembershipResponse.error_to_json)])
+let get_segment_snapshot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and segmentDefinitionName =
+         flag "segment-definition-name" (required string) ~doc:"STRING name"
+       and snapshotId =
+         flag "snapshot-id" (required string) ~doc:"STRING uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_segment_snapshot
+           (Values.GetSegmentSnapshotRequest.make ~domainName
+              ~segmentDefinitionName ~snapshotId ())
+           (Some Values.GetSegmentSnapshotResponse.to_json)
+           (Some Values.GetSegmentSnapshotResponse.error_to_json)])
+let get_similar_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and matchType =
+         flag "match-type" (required json_arg) ~doc:"JSON MatchType"
+       and searchKey =
+         flag "search-key" (required string) ~doc:"STRING string1To255"
+       and searchValue =
+         flag "search-value" (required string) ~doc:"STRING string1To255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_similar_profiles
+           (Values.GetSimilarProfilesRequest.make ?nextToken ?maxResults
+              ~domainName ~matchType:(Values.MatchType.of_json matchType)
+              ~searchKey ~searchValue ())
+           (Some Values.GetSimilarProfilesResponse.to_json)
+           (Some Values.GetSimilarProfilesResponse.error_to_json)])
+let get_upload_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and jobId = flag "job-id" (required string) ~doc:"STRING uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_upload_job
+           (Values.GetUploadJobRequest.make ~domainName ~jobId ())
+           (Some Values.GetUploadJobResponse.to_json)
+           (Some Values.GetUploadJobResponse.error_to_json)])
+let get_upload_job_path =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and jobId = flag "job-id" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_upload_job_path
+           (Values.GetUploadJobPathRequest.make ~domainName ~jobId ())
+           (Some Values.GetUploadJobPathResponse.to_json)
+           (Some Values.GetUploadJobPathResponse.error_to_json)])
 let get_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -552,6 +1664,100 @@ let list_account_integrations =
               ?includeHidden ~uri ())
            (Some Values.ListAccountIntegrationsResponse.to_json)
            (Some Values.ListAccountIntegrationsResponse.error_to_json)])
+let list_calculated_attribute_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_calculated_attribute_definitions
+           (Values.ListCalculatedAttributeDefinitionsRequest.make ?nextToken
+              ?maxResults ~domainName ())
+           (Some Values.ListCalculatedAttributeDefinitionsResponse.to_json)
+           (Some
+              Values.ListCalculatedAttributeDefinitionsResponse.error_to_json)])
+let list_calculated_attributes_for_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileId = flag "profile-id" (required string) ~doc:"STRING uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_calculated_attributes_for_profile
+           (Values.ListCalculatedAttributesForProfileRequest.make ?nextToken
+              ?maxResults ~domainName ~profileId ())
+           (Some Values.ListCalculatedAttributesForProfileResponse.to_json)
+           (Some
+              Values.ListCalculatedAttributesForProfileResponse.error_to_json)])
+let list_domain_layouts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_domain_layouts
+           (Values.ListDomainLayoutsRequest.make ?nextToken ?maxResults
+              ~domainName ()) (Some Values.ListDomainLayoutsResponse.to_json)
+           (Some Values.ListDomainLayoutsResponse.error_to_json)])
+let list_domain_object_types =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_domain_object_types
+           (Values.ListDomainObjectTypesRequest.make ?maxResults ?nextToken
+              ~domainName ())
+           (Some Values.ListDomainObjectTypesResponse.to_json)
+           (Some Values.ListDomainObjectTypesResponse.error_to_json)])
 let list_domains =
   Command.async ~summary:""
     ([%map_open.Command
@@ -572,6 +1778,50 @@ let list_domains =
            (Values.ListDomainsRequest.make ?nextToken ?maxResults ())
            (Some Values.ListDomainsResponse.to_json)
            (Some Values.ListDomainsResponse.error_to_json)])
+let list_event_streams =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_event_streams
+           (Values.ListEventStreamsRequest.make ?nextToken ?maxResults
+              ~domainName ()) (Some Values.ListEventStreamsResponse.to_json)
+           (Some Values.ListEventStreamsResponse.error_to_json)])
+let list_event_triggers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_event_triggers
+           (Values.ListEventTriggersRequest.make ?nextToken ?maxResults
+              ~domainName ()) (Some Values.ListEventTriggersResponse.to_json)
+           (Some Values.ListEventTriggersResponse.error_to_json)])
 let list_identity_resolution_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -620,6 +1870,111 @@ let list_integrations =
               ?includeHidden ~domainName ())
            (Some Values.ListIntegrationsResponse.to_json)
            (Some Values.ListIntegrationsResponse.error_to_json)])
+let list_object_type_attribute_values =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName"
+       and attributeName =
+         flag "attribute-name" (required string) ~doc:"STRING string1To1000" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_object_type_attribute_values
+           (Values.ListObjectTypeAttributeValuesRequest.make ?nextToken
+              ?maxResults ~domainName ~objectTypeName ~attributeName ())
+           (Some Values.ListObjectTypeAttributeValuesResponse.to_json)
+           (Some Values.ListObjectTypeAttributeValuesResponse.error_to_json)])
+let list_object_type_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_object_type_attributes
+           (Values.ListObjectTypeAttributesRequest.make ?nextToken
+              ?maxResults ~domainName ~objectTypeName ())
+           (Some Values.ListObjectTypeAttributesResponse.to_json)
+           (Some Values.ListObjectTypeAttributesResponse.error_to_json)])
+let list_profile_attribute_values =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and attributeName =
+         flag "attribute-name" (required string) ~doc:"STRING string1To255" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profile_attribute_values
+           (Values.ProfileAttributeValuesRequest.make ~domainName
+              ~attributeName ())
+           (Some Values.ProfileAttributeValuesResponse.to_json)
+           (Some Values.ProfileAttributeValuesResponse.error_to_json)])
+let list_profile_history_records =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and objectTypeName =
+         flag "object-type-name" (optional string) ~doc:"STRING typeName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and actionType =
+         flag "action-type" (optional json_arg) ~doc:"JSON ActionType"
+       and performedBy =
+         flag "performed-by" (optional string) ~doc:"STRING string1To255"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and profileId = flag "profile-id" (required string) ~doc:"STRING uuid" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profile_history_records
+           (Values.ListProfileHistoryRecordsRequest.make ?objectTypeName
+              ?nextToken ?maxResults
+              ?actionType:(Option.map ~f:Values.ActionType.of_json actionType)
+              ?performedBy ~domainName ~profileId ())
+           (Some Values.ListProfileHistoryRecordsResponse.to_json)
+           (Some Values.ListProfileHistoryRecordsResponse.error_to_json)])
 let list_profile_object_type_templates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -693,6 +2048,142 @@ let list_profile_objects =
                                objectFilter) ~domainName ~objectTypeName
               ~profileId ()) (Some Values.ListProfileObjectsResponse.to_json)
            (Some Values.ListProfileObjectsResponse.error_to_json)])
+let list_recommender_filters =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommender_filters
+           (Values.ListRecommenderFiltersRequest.make ?maxResults ?nextToken
+              ~domainName ())
+           (Some Values.ListRecommenderFiltersResponse.to_json)
+           (Some Values.ListRecommenderFiltersResponse.error_to_json)])
+let list_recommender_recipes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRecommenderRecipesRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommender_recipes
+           (Values.ListRecommenderRecipesRequest.make ?maxResults ?nextToken
+              ()) (Some Values.ListRecommenderRecipesResponse.to_json)
+           (Some Values.ListRecommenderRecipesResponse.error_to_json)])
+let list_recommender_schemas =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommender_schemas
+           (Values.ListRecommenderSchemasRequest.make ?maxResults ?nextToken
+              ~domainName ())
+           (Some Values.ListRecommenderSchemasResponse.to_json)
+           (Some Values.ListRecommenderSchemasResponse.error_to_json)])
+let list_recommenders =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListRecommendersRequestMaxResultsInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_recommenders
+           (Values.ListRecommendersRequest.make ?maxResults ?nextToken
+              ~domainName ()) (Some Values.ListRecommendersResponse.to_json)
+           (Some Values.ListRecommendersResponse.error_to_json)])
+let list_rule_based_matches =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_rule_based_matches
+           (Values.ListRuleBasedMatchesRequest.make ?nextToken ?maxResults
+              ~domainName ())
+           (Some Values.ListRuleBasedMatchesResponse.to_json)
+           (Some Values.ListRuleBasedMatchesResponse.error_to_json)])
+let list_segment_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSize500"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_segment_definitions
+           (Values.ListSegmentDefinitionsRequest.make ?maxResults ?nextToken
+              ~domainName ())
+           (Some Values.ListSegmentDefinitionsResponse.to_json)
+           (Some Values.ListSegmentDefinitionsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -711,6 +2202,28 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_upload_jobs =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxSize500"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING token"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_upload_jobs
+           (Values.ListUploadJobsRequest.make ?maxResults ?nextToken
+              ~domainName ()) (Some Values.ListUploadJobsResponse.to_json)
+           (Some Values.ListUploadJobsResponse.error_to_json)])
 let list_workflows =
   Command.async ~summary:""
     ([%map_open.Command
@@ -779,6 +2292,37 @@ let merge_profiles =
                                        profileIdsToBeMerged) ())
            (Some Values.MergeProfilesResponse.to_json)
            (Some Values.MergeProfilesResponse.error_to_json)])
+let put_domain_object_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING sensitiveString1To10000"
+       and encryptionKey =
+         flag "encryption-key" (optional string) ~doc:"STRING encryptionKey"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and objectTypeName =
+         flag "object-type-name" (required string) ~doc:"STRING typeName"
+       and fields =
+         flag "fields" (required json_arg) ~doc:"JSON DomainObjectTypeFields" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_domain_object_type
+           (Values.PutDomainObjectTypeRequest.make ?description
+              ?encryptionKey ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~domainName ~objectTypeName
+              ~fields:(Values.DomainObjectTypeFields.of_json fields) ())
+           (Some Values.PutDomainObjectTypeResponse.to_json)
+           (Some Values.PutDomainObjectTypeResponse.error_to_json)])
 let put_integration =
   Command.async ~summary:""
     ([%map_open.Command
@@ -792,25 +2336,34 @@ let put_integration =
        and uri = flag "uri" (optional string) ~doc:"STRING string1To255"
        and objectTypeName =
          flag "object-type-name" (optional string) ~doc:"STRING typeName"
+       and objectTypeNames =
+         flag "object-type-names" (optional json_arg)
+           ~doc:"JSON ObjectTypeNames"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and flowDefinition =
          flag "flow-definition" (optional json_arg)
            ~doc:"JSON FlowDefinition"
-       and objectTypeNames =
-         flag "object-type-names" (optional json_arg)
-           ~doc:"JSON ObjectTypeNames"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
+       and eventTriggerNames =
+         flag "event-trigger-names" (optional json_arg)
+           ~doc:"JSON EventTriggerNames"
+       and scope = flag "scope" (optional json_arg) ~doc:"JSON Scope"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_integration
            (Values.PutIntegrationRequest.make ?uri ?objectTypeName
+              ?objectTypeNames:(Option.map ~f:Values.ObjectTypeNames.of_json
+                                  objectTypeNames)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?flowDefinition:(Option.map ~f:Values.FlowDefinition.of_json
-                                 flowDefinition)
-              ?objectTypeNames:(Option.map ~f:Values.ObjectTypeNames.of_json
-                                  objectTypeNames) ~domainName ())
-           (Some Values.PutIntegrationResponse.to_json)
+                                 flowDefinition) ?roleArn
+              ?eventTriggerNames:(Option.map
+                                    ~f:Values.EventTriggerNames.of_json
+                                    eventTriggerNames)
+              ?scope:(Option.map ~f:Values.Scope.of_json scope) ~domainName
+              ()) (Some Values.PutIntegrationResponse.to_json)
            (Some Values.PutIntegrationResponse.error_to_json)])
 let put_profile_object =
   Command.async ~summary:""
@@ -856,6 +2409,10 @@ let put_profile_object_type =
        and sourceLastUpdatedTimestampFormat =
          flag "source-last-updated-timestamp-format" (optional string)
            ~doc:"STRING string1To255"
+       and maxProfileObjectCount =
+         flag "max-profile-object-count" (optional int) ~doc:"INT minSize1"
+       and sourcePriority =
+         flag "source-priority" (optional int) ~doc:"INT minSize1"
        and fields = flag "fields" (optional json_arg) ~doc:"JSON FieldMap"
        and keys = flag "keys" (optional json_arg) ~doc:"JSON KeyMap"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
@@ -864,13 +2421,14 @@ let put_profile_object_type =
        and objectTypeName =
          flag "object-type-name" (required string) ~doc:"STRING typeName"
        and description =
-         flag "description" (required string) ~doc:"STRING text" in
+         flag "description" (required string) ~doc:"STRING sensitiveText" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_profile_object_type
            (Values.PutProfileObjectTypeRequest.make ?templateId
               ?expirationDays ?encryptionKey ?allowProfileCreation
-              ?sourceLastUpdatedTimestampFormat
+              ?sourceLastUpdatedTimestampFormat ?maxProfileObjectCount
+              ?sourcePriority
               ?fields:(Option.map ~f:Values.FieldMap.of_json fields)
               ?keys:(Option.map ~f:Values.KeyMap.of_json keys)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName
@@ -891,6 +2449,12 @@ let search_profiles =
          flag "next-token" (optional string) ~doc:"STRING token"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT maxSize100"
+       and additionalSearchKeys =
+         flag "additional-search-keys" (optional json_arg)
+           ~doc:"JSON additionalSearchKeysList"
+       and logicalOperator =
+         flag "logical-operator" (optional json_arg)
+           ~doc:"JSON logicalOperator"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name"
        and keyName = flag "key-name" (required string) ~doc:"STRING name"
@@ -900,10 +2464,92 @@ let search_profiles =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.search_profiles
            (Values.SearchProfilesRequest.make ?nextToken ?maxResults
-              ~domainName ~keyName
+              ?additionalSearchKeys:(Option.map
+                                       ~f:Values.AdditionalSearchKeysList.of_json
+                                       additionalSearchKeys)
+              ?logicalOperator:(Option.map ~f:Values.LogicalOperator.of_json
+                                  logicalOperator) ~domainName ~keyName
               ~values:(Values.RequestValueList.of_json values) ())
            (Some Values.SearchProfilesResponse.to_json)
            (Some Values.SearchProfilesResponse.error_to_json)])
+let start_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_recommender
+           (Values.StartRecommenderRequest.make ~domainName ~recommenderName
+              ()) (Some Values.StartRecommenderResponse.to_json)
+           (Some Values.StartRecommenderResponse.error_to_json)])
+let start_upload_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and jobId = flag "job-id" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_upload_job
+           (Values.StartUploadJobRequest.make ~domainName ~jobId ())
+           (Some Values.StartUploadJobResponse.to_json)
+           (Some Values.StartUploadJobResponse.error_to_json)])
+let stop_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_recommender
+           (Values.StopRecommenderRequest.make ~domainName ~recommenderName
+              ()) (Some Values.StopRecommenderResponse.to_json)
+           (Some Values.StopRecommenderResponse.error_to_json)])
+let stop_upload_job =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and jobId = flag "job-id" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_upload_job
+           (Values.StopUploadJobRequest.make ~domainName ~jobId ())
+           (Some Values.StopUploadJobResponse.to_json)
+           (Some Values.StopUploadJobResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -945,6 +2591,37 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_calculated_attribute_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING displayName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and conditions =
+         flag "conditions" (optional json_arg) ~doc:"JSON Conditions"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and calculatedAttributeName =
+         flag "calculated-attribute-name" (required string)
+           ~doc:"STRING typeName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_calculated_attribute_definition
+           (Values.UpdateCalculatedAttributeDefinitionRequest.make
+              ?displayName ?description
+              ?conditions:(Option.map ~f:Values.Conditions.of_json conditions)
+              ~domainName ~calculatedAttributeName ())
+           (Some Values.UpdateCalculatedAttributeDefinitionResponse.to_json)
+           (Some
+              Values.UpdateCalculatedAttributeDefinitionResponse.error_to_json)])
 let update_domain =
   Command.async ~summary:""
     ([%map_open.Command
@@ -966,6 +2643,11 @@ let update_domain =
            ~doc:"STRING sqsQueueUrl"
        and matching =
          flag "matching" (optional json_arg) ~doc:"JSON MatchingRequest"
+       and ruleBasedMatching =
+         flag "rule-based-matching" (optional json_arg)
+           ~doc:"JSON RuleBasedMatchingRequest"
+       and dataStore =
+         flag "data-store" (optional json_arg) ~doc:"JSON DataStoreRequest"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name" in
@@ -976,9 +2658,88 @@ let update_domain =
               ?defaultEncryptionKey ?deadLetterQueueUrl
               ?matching:(Option.map ~f:Values.MatchingRequest.of_json
                            matching)
+              ?ruleBasedMatching:(Option.map
+                                    ~f:Values.RuleBasedMatchingRequest.of_json
+                                    ruleBasedMatching)
+              ?dataStore:(Option.map ~f:Values.DataStoreRequest.of_json
+                            dataStore)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~domainName ())
            (Some Values.UpdateDomainResponse.to_json)
            (Some Values.UpdateDomainResponse.error_to_json)])
+let update_domain_layout =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and displayName =
+         flag "display-name" (optional string) ~doc:"STRING displayName"
+       and isDefault = flag "is-default" (optional bool) ~doc:"BOOL boolean"
+       and layoutType =
+         flag "layout-type" (optional json_arg) ~doc:"JSON LayoutType"
+       and layout =
+         flag "layout" (optional string)
+           ~doc:"STRING sensitiveString1To2000000"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and layoutDefinitionName =
+         flag "layout-definition-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_domain_layout
+           (Values.UpdateDomainLayoutRequest.make ?description ?displayName
+              ?isDefault
+              ?layoutType:(Option.map ~f:Values.LayoutType.of_json layoutType)
+              ?layout ~domainName ~layoutDefinitionName ())
+           (Some Values.UpdateDomainLayoutResponse.to_json)
+           (Some Values.UpdateDomainLayoutResponse.error_to_json)])
+let update_event_trigger =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and objectTypeName =
+         flag "object-type-name" (optional string) ~doc:"STRING typeName"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and eventTriggerConditions =
+         flag "event-trigger-conditions" (optional json_arg)
+           ~doc:"JSON EventTriggerConditions"
+       and segmentFilter =
+         flag "segment-filter" (optional string) ~doc:"STRING name"
+       and eventTriggerLimits =
+         flag "event-trigger-limits" (optional json_arg)
+           ~doc:"JSON EventTriggerLimits"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and eventTriggerName =
+         flag "event-trigger-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_event_trigger
+           (Values.UpdateEventTriggerRequest.make ?objectTypeName
+              ?description
+              ?eventTriggerConditions:(Option.map
+                                         ~f:Values.EventTriggerConditions.of_json
+                                         eventTriggerConditions)
+              ?segmentFilter
+              ?eventTriggerLimits:(Option.map
+                                     ~f:Values.EventTriggerLimits.of_json
+                                     eventTriggerLimits) ~domainName
+              ~eventTriggerName ())
+           (Some Values.UpdateEventTriggerResponse.to_json)
+           (Some Values.UpdateEventTriggerResponse.error_to_json)])
 let update_profile =
   Command.async ~summary:""
     ([%map_open.Command
@@ -991,41 +2752,49 @@ let update_profile =
            ~doc:"URL override endpoint url"
        and additionalInformation =
          flag "additional-information" (optional string)
-           ~doc:"STRING string0To1000"
+           ~doc:"STRING sensitiveString0To1000"
        and accountNumber =
-         flag "account-number" (optional string) ~doc:"STRING string0To255"
+         flag "account-number" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and partyType =
          flag "party-type" (optional json_arg) ~doc:"JSON PartyType"
        and businessName =
-         flag "business-name" (optional string) ~doc:"STRING string0To255"
+         flag "business-name" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and firstName =
-         flag "first-name" (optional string) ~doc:"STRING string0To255"
+         flag "first-name" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and middleName =
-         flag "middle-name" (optional string) ~doc:"STRING string0To255"
+         flag "middle-name" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and lastName =
-         flag "last-name" (optional string) ~doc:"STRING string0To255"
+         flag "last-name" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and birthDate =
-         flag "birth-date" (optional string) ~doc:"STRING string0To255"
+         flag "birth-date" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and gender = flag "gender" (optional json_arg) ~doc:"JSON Gender"
        and phoneNumber =
-         flag "phone-number" (optional string) ~doc:"STRING string0To255"
+         flag "phone-number" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and mobilePhoneNumber =
          flag "mobile-phone-number" (optional string)
-           ~doc:"STRING string0To255"
+           ~doc:"STRING sensitiveString0To255"
        and homePhoneNumber =
          flag "home-phone-number" (optional string)
-           ~doc:"STRING string0To255"
+           ~doc:"STRING sensitiveString0To255"
        and businessPhoneNumber =
          flag "business-phone-number" (optional string)
-           ~doc:"STRING string0To255"
+           ~doc:"STRING sensitiveString0To255"
        and emailAddress =
-         flag "email-address" (optional string) ~doc:"STRING string0To255"
+         flag "email-address" (optional string)
+           ~doc:"STRING sensitiveString0To255"
        and personalEmailAddress =
          flag "personal-email-address" (optional string)
-           ~doc:"STRING string0To255"
+           ~doc:"STRING sensitiveString0To255"
        and businessEmailAddress =
          flag "business-email-address" (optional string)
-           ~doc:"STRING string0To255"
+           ~doc:"STRING sensitiveString0To255"
        and address =
          flag "address" (optional json_arg) ~doc:"JSON UpdateAddress"
        and shippingAddress =
@@ -1037,6 +2806,17 @@ let update_profile =
          flag "billing-address" (optional json_arg) ~doc:"JSON UpdateAddress"
        and attributes =
          flag "attributes" (optional json_arg) ~doc:"JSON UpdateAttributes"
+       and partyTypeString =
+         flag "party-type-string" (optional string)
+           ~doc:"STRING sensitiveString0To255"
+       and genderString =
+         flag "gender-string" (optional string)
+           ~doc:"STRING sensitiveString0To255"
+       and profileType =
+         flag "profile-type" (optional json_arg) ~doc:"JSON ProfileType"
+       and engagementPreferences =
+         flag "engagement-preferences" (optional json_arg)
+           ~doc:"JSON EngagementPreferences"
        and domainName =
          flag "domain-name" (required string) ~doc:"STRING name"
        and profileId = flag "profile-id" (required string) ~doc:"STRING uuid" in
@@ -1059,48 +2839,159 @@ let update_profile =
               ?billingAddress:(Option.map ~f:Values.UpdateAddress.of_json
                                  billingAddress)
               ?attributes:(Option.map ~f:Values.UpdateAttributes.of_json
-                             attributes) ~domainName ~profileId ())
-           (Some Values.UpdateProfileResponse.to_json)
+                             attributes) ?partyTypeString ?genderString
+              ?profileType:(Option.map ~f:Values.ProfileType.of_json
+                              profileType)
+              ?engagementPreferences:(Option.map
+                                        ~f:Values.EngagementPreferences.of_json
+                                        engagementPreferences) ~domainName
+              ~profileId ()) (Some Values.UpdateProfileResponse.to_json)
            (Some Values.UpdateProfileResponse.error_to_json)])
+let update_recommender =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING sensitiveText"
+       and recommenderConfig =
+         flag "recommender-config" (optional json_arg)
+           ~doc:"JSON RecommenderConfig"
+       and domainName =
+         flag "domain-name" (required string) ~doc:"STRING name"
+       and recommenderName =
+         flag "recommender-name" (required string) ~doc:"STRING name" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_recommender
+           (Values.UpdateRecommenderRequest.make ?description
+              ?recommenderConfig:(Option.map
+                                    ~f:Values.RecommenderConfig.of_json
+                                    recommenderConfig) ~domainName
+              ~recommenderName ())
+           (Some Values.UpdateRecommenderResponse.to_json)
+           (Some Values.UpdateRecommenderResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-profile-key", add_profile_key);
+    ("batch-get-calculated-attribute-for-profile",
+      batch_get_calculated_attribute_for_profile);
+    ("batch-get-profile", batch_get_profile);
+    ("create-calculated-attribute-definition",
+      create_calculated_attribute_definition);
     ("create-domain", create_domain);
+    ("create-domain-layout", create_domain_layout);
+    ("create-event-stream", create_event_stream);
+    ("create-event-trigger", create_event_trigger);
     ("create-integration-workflow", create_integration_workflow);
     ("create-profile", create_profile);
+    ("create-recommender", create_recommender);
+    ("create-recommender-filter", create_recommender_filter);
+    ("create-recommender-schema", create_recommender_schema);
+    ("create-segment-definition", create_segment_definition);
+    ("create-segment-estimate", create_segment_estimate);
+    ("create-segment-snapshot", create_segment_snapshot);
+    ("create-upload-job", create_upload_job);
+    ("delete-calculated-attribute-definition",
+      delete_calculated_attribute_definition);
     ("delete-domain", delete_domain);
+    ("delete-domain-layout", delete_domain_layout);
+    ("delete-domain-object-type", delete_domain_object_type);
+    ("delete-event-stream", delete_event_stream);
+    ("delete-event-trigger", delete_event_trigger);
     ("delete-integration", delete_integration);
     ("delete-profile", delete_profile);
     ("delete-profile-key", delete_profile_key);
     ("delete-profile-object", delete_profile_object);
     ("delete-profile-object-type", delete_profile_object_type);
+    ("delete-recommender", delete_recommender);
+    ("delete-recommender-filter", delete_recommender_filter);
+    ("delete-recommender-schema", delete_recommender_schema);
+    ("delete-segment-definition", delete_segment_definition);
     ("delete-workflow", delete_workflow);
+    ("detect-profile-object-type", detect_profile_object_type);
     ("get-auto-merging-preview", get_auto_merging_preview);
+    ("get-calculated-attribute-definition",
+      get_calculated_attribute_definition);
+    ("get-calculated-attribute-for-profile",
+      get_calculated_attribute_for_profile);
     ("get-domain", get_domain);
+    ("get-domain-layout", get_domain_layout);
+    ("get-domain-object-type", get_domain_object_type);
+    ("get-event-stream", get_event_stream);
+    ("get-event-trigger", get_event_trigger);
     ("get-identity-resolution-job", get_identity_resolution_job);
     ("get-integration", get_integration);
     ("get-matches", get_matches);
+    ("get-object-type-attribute-statistics",
+      get_object_type_attribute_statistics);
+    ("get-profile-history-record", get_profile_history_record);
     ("get-profile-object-type", get_profile_object_type);
     ("get-profile-object-type-template", get_profile_object_type_template);
+    ("get-profile-recommendations", get_profile_recommendations);
+    ("get-recommender", get_recommender);
+    ("get-recommender-filter", get_recommender_filter);
+    ("get-recommender-schema", get_recommender_schema);
+    ("get-segment-definition", get_segment_definition);
+    ("get-segment-estimate", get_segment_estimate);
+    ("get-segment-membership", get_segment_membership);
+    ("get-segment-snapshot", get_segment_snapshot);
+    ("get-similar-profiles", get_similar_profiles);
+    ("get-upload-job", get_upload_job);
+    ("get-upload-job-path", get_upload_job_path);
     ("get-workflow", get_workflow);
     ("get-workflow-steps", get_workflow_steps);
     ("list-account-integrations", list_account_integrations);
+    ("list-calculated-attribute-definitions",
+      list_calculated_attribute_definitions);
+    ("list-calculated-attributes-for-profile",
+      list_calculated_attributes_for_profile);
+    ("list-domain-layouts", list_domain_layouts);
+    ("list-domain-object-types", list_domain_object_types);
     ("list-domains", list_domains);
+    ("list-event-streams", list_event_streams);
+    ("list-event-triggers", list_event_triggers);
     ("list-identity-resolution-jobs", list_identity_resolution_jobs);
     ("list-integrations", list_integrations);
+    ("list-object-type-attribute-values", list_object_type_attribute_values);
+    ("list-object-type-attributes", list_object_type_attributes);
+    ("list-profile-attribute-values", list_profile_attribute_values);
+    ("list-profile-history-records", list_profile_history_records);
     ("list-profile-object-type-templates",
       list_profile_object_type_templates);
     ("list-profile-object-types", list_profile_object_types);
     ("list-profile-objects", list_profile_objects);
+    ("list-recommender-filters", list_recommender_filters);
+    ("list-recommender-recipes", list_recommender_recipes);
+    ("list-recommender-schemas", list_recommender_schemas);
+    ("list-recommenders", list_recommenders);
+    ("list-rule-based-matches", list_rule_based_matches);
+    ("list-segment-definitions", list_segment_definitions);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-upload-jobs", list_upload_jobs);
     ("list-workflows", list_workflows);
     ("merge-profiles", merge_profiles);
+    ("put-domain-object-type", put_domain_object_type);
     ("put-integration", put_integration);
     ("put-profile-object", put_profile_object);
     ("put-profile-object-type", put_profile_object_type);
     ("search-profiles", search_profiles);
+    ("start-recommender", start_recommender);
+    ("start-upload-job", start_upload_job);
+    ("stop-recommender", stop_recommender);
+    ("stop-upload-job", stop_upload_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-calculated-attribute-definition",
+      update_calculated_attribute_definition);
     ("update-domain", update_domain);
-    ("update-profile", update_profile)]
+    ("update-domain-layout", update_domain_layout);
+    ("update-event-trigger", update_event_trigger);
+    ("update-profile", update_profile);
+    ("update-recommender", update_recommender)]

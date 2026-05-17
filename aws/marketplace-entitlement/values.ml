@@ -116,11 +116,11 @@ module EntitlementValue =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "IntegerValue") in
       make ?stringValue ?booleanValue ?doubleValue ?integerValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stringValue = field_map json "StringValue" String_.of_json in
-      let booleanValue = field_map json "BooleanValue" Boolean.of_json in
-      let doubleValue = field_map json "DoubleValue" Double.of_json in
-      let integerValue = field_map json "IntegerValue" Integer.of_json in
+    let of_json json__ =
+      let stringValue = field_map json__ "StringValue" String_.of_json in
+      let booleanValue = field_map json__ "BooleanValue" Boolean.of_json in
+      let doubleValue = field_map json__ "DoubleValue" Double.of_json in
+      let integerValue = field_map json__ "IntegerValue" Integer.of_json in
       make ?stringValue ?booleanValue ?doubleValue ?integerValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -195,41 +195,59 @@ module Entitlement =
       customerIdentifier: NonEmptyString.t option
         [@ocaml.doc
           "The customer identifier is a handle to each unique customer in an application. Customer identifiers are obtained through the ResolveCustomer operation in AWS Marketplace Metering Service."];
+      customerAWSAccountId: NonEmptyString.t option
+        [@ocaml.doc
+          "The CustomerAWSAccountId parameter specifies the AWS account ID of the buyer."];
       value: EntitlementValue.t option
         [@ocaml.doc
           "The EntitlementValue represents the amount of capacity that the customer is entitled to for the product."];
       expirationDate: Timestamp.t option
         [@ocaml.doc
-          "The expiration date represents the minimum date through which this entitlement is expected to remain valid. For contractual products listed on AWS Marketplace, the expiration date is the date at which the customer will renew or cancel their contract. Customers who are opting to renew their contract will still have entitlements with an expiration date."]}
+          "The expiration date represents the minimum date through which this entitlement is expected to remain valid. For contractual products listed on AWS Marketplace, the expiration date is the date at which the customer will renew or cancel their contract. Customers who are opting to renew their contract will still have entitlements with an expiration date."];
+      licenseArn: String_.t option
+        [@ocaml.doc
+          "The LicenseArn is a unique identifier for a specific granted license. These are used for software purchased through AWS Marketplace."]}
     let make ?productCode =
       fun ?dimension ->
         fun ?customerIdentifier ->
-          fun ?value ->
-            fun ?expirationDate ->
-              fun () ->
-                {
-                  productCode;
-                  dimension;
-                  customerIdentifier;
-                  value;
-                  expirationDate
-                }
+          fun ?customerAWSAccountId ->
+            fun ?value ->
+              fun ?expirationDate ->
+                fun ?licenseArn ->
+                  fun () ->
+                    {
+                      productCode;
+                      dimension;
+                      customerIdentifier;
+                      customerAWSAccountId;
+                      value;
+                      expirationDate;
+                      licenseArn
+                    }
     let to_value x =
       structure_to_value
         [("ProductCode", (Option.map x.productCode ~f:ProductCode.to_value));
         ("Dimension", (Option.map x.dimension ~f:NonEmptyString.to_value));
         ("CustomerIdentifier",
           (Option.map x.customerIdentifier ~f:NonEmptyString.to_value));
+        ("CustomerAWSAccountId",
+          (Option.map x.customerAWSAccountId ~f:NonEmptyString.to_value));
         ("Value", (Option.map x.value ~f:EntitlementValue.to_value));
         ("ExpirationDate",
-          (Option.map x.expirationDate ~f:Timestamp.to_value))]
+          (Option.map x.expirationDate ~f:Timestamp.to_value));
+        ("LicenseArn", (Option.map x.licenseArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let licenseArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LicenseArn") in
       let expirationDate =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "ExpirationDate") in
       let value =
         (Option.map ~f:EntitlementValue.of_xml) (Xml.child xml_arg0 "Value") in
+      let customerAWSAccountId =
+        (Option.map ~f:NonEmptyString.of_xml)
+          (Xml.child xml_arg0 "CustomerAWSAccountId") in
       let customerIdentifier =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "CustomerIdentifier") in
@@ -238,18 +256,22 @@ module Entitlement =
           (Xml.child xml_arg0 "Dimension") in
       let productCode =
         (Option.map ~f:ProductCode.of_xml) (Xml.child xml_arg0 "ProductCode") in
-      make ?expirationDate ?value ?customerIdentifier ?dimension ?productCode
-        ()
+      make ?licenseArn ?expirationDate ?value ?customerAWSAccountId
+        ?customerIdentifier ?dimension ?productCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let value = field_map json "Value" EntitlementValue.of_json in
+    let of_json json__ =
+      let licenseArn = field_map json__ "LicenseArn" String_.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let value = field_map json__ "Value" EntitlementValue.of_json in
+      let customerAWSAccountId =
+        field_map json__ "CustomerAWSAccountId" NonEmptyString.of_json in
       let customerIdentifier =
-        field_map json "CustomerIdentifier" NonEmptyString.of_json in
-      let dimension = field_map json "Dimension" NonEmptyString.of_json in
-      let productCode = field_map json "ProductCode" ProductCode.of_json in
-      make ?expirationDate ?value ?customerIdentifier ?dimension ?productCode
-        ()
+        field_map json__ "CustomerIdentifier" NonEmptyString.of_json in
+      let dimension = field_map json__ "Dimension" NonEmptyString.of_json in
+      let productCode = field_map json__ "ProductCode" ProductCode.of_json in
+      make ?licenseArn ?expirationDate ?value ?customerAWSAccountId
+        ?customerIdentifier ?dimension ?productCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An entitlement represents capacity in a product owned by the customer. For example, a customer might own some number of users or seats in an SaaS application or some amount of data capacity in a multi-tenant database."]
@@ -271,6 +293,9 @@ module FilterValueList =
     type nonrec t = FilterValue.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -296,17 +321,23 @@ module GetEntitlementFilterName =
     type nonrec t =
       | CUSTOMER_IDENTIFIER 
       | DIMENSION 
+      | CUSTOMER_AWS_ACCOUNT_ID 
+      | LICENSE_ARN 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | CUSTOMER_IDENTIFIER -> "CUSTOMER_IDENTIFIER"
       | DIMENSION -> "DIMENSION"
+      | CUSTOMER_AWS_ACCOUNT_ID -> "CUSTOMER_AWS_ACCOUNT_ID"
+      | LICENSE_ARN -> "LICENSE_ARN"
       | Non_static_id s -> s
     let of_string =
       function
       | "CUSTOMER_IDENTIFIER" -> CUSTOMER_IDENTIFIER
       | "DIMENSION" -> DIMENSION
+      | "CUSTOMER_AWS_ACCOUNT_ID" -> CUSTOMER_AWS_ACCOUNT_ID
+      | "LICENSE_ARN" -> LICENSE_ARN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -323,6 +354,9 @@ module EntitlementList =
     type nonrec t = Entitlement.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:0); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Entitlement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -357,8 +391,8 @@ module InternalServiceErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -377,8 +411,8 @@ module InvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters in your request was invalid."]
@@ -396,8 +430,8 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The calls to the GetEntitlements API are throttled."]
@@ -425,12 +459,32 @@ module GetEntitlementFilters =
                        (FilterValueList.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:GetEntitlementFilterName.of_string
         ~of_json:FilterValueList.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module PageSizeInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for PageSizeInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module GetEntitlementsResult =
   struct
@@ -506,10 +560,10 @@ module GetEntitlementsResult =
           (Xml.child xml_arg0 "Entitlements") in
       make ?nextToken ?entitlements ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NonEmptyString.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NonEmptyString.of_json in
       let entitlements =
-        field_map json "Entitlements" EntitlementList.of_json in
+        field_map json__ "Entitlements" EntitlementList.of_json in
       make ?nextToken ?entitlements ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -523,11 +577,11 @@ module GetEntitlementsRequest =
           "Product code is used to uniquely identify a product in AWS Marketplace. The product code will be provided by AWS Marketplace when the product listing is created."];
       filter: GetEntitlementFilters.t option
         [@ocaml.doc
-          "Filter is used to return entitlements for a specific customer or for a specific dimension. Filters are described as keys mapped to a lists of values. Filtered requests are unioned for each value in the value list, and then intersected for each filter key."];
+          "Filter is used to return entitlements for a specific customer or for a specific dimension. Filters are described as keys mapped to a lists of values. Filtered requests are unioned for each value in the value list, and then intersected for each filter key. CustomerIdentifier and CustomerAWSAccountId are mutually exclusive parameters. You must use one or the other, but not both in the same request. If you're migrating an existing integration, use Account Feeds to map CustomerIdentifier to CustomerAWSAccountId, and Agreements Feeds to map CustomerAWSAccountId and LicenseArn."];
       nextToken: NonEmptyString.t option
         [@ocaml.doc
           "For paginated calls to GetEntitlements, pass the NextToken from the previous GetEntitlementsResult."];
-      maxResults: Integer.t option
+      maxResults: PageSizeInteger.t option
         [@ocaml.doc
           "The maximum number of items to retrieve from the GetEntitlements operation. For pagination, use the NextToken field in subsequent calls to GetEntitlements."]}
     let context_ = "GetEntitlementsRequest"
@@ -541,11 +595,12 @@ module GetEntitlementsRequest =
         [("ProductCode", (Some (ProductCode.to_value x.productCode)));
         ("Filter", (Option.map x.filter ~f:GetEntitlementFilters.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NonEmptyString.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:Integer.to_value))]
+        ("MaxResults", (Option.map x.maxResults ~f:PageSizeInteger.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:PageSizeInteger.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:NonEmptyString.of_xml)
           (Xml.child xml_arg0 "NextToken") in
@@ -557,11 +612,12 @@ module GetEntitlementsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ProductCode") in
       make ?maxResults ?nextToken ?filter ~productCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" NonEmptyString.of_json in
-      let filter = field_map json "Filter" GetEntitlementFilters.of_json in
-      let productCode = field_map_exn json "ProductCode" ProductCode.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSizeInteger.of_json in
+      let nextToken = field_map json__ "NextToken" NonEmptyString.of_json in
+      let filter = field_map json__ "Filter" GetEntitlementFilters.of_json in
+      let productCode =
+        field_map_exn json__ "ProductCode" ProductCode.of_json in
       make ?maxResults ?nextToken ?filter ~productCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

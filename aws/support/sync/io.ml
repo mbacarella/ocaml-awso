@@ -23,10 +23,14 @@ let describe_cases ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCases input
 let describe_communications ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCommunications input
+let describe_create_case_options ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCreateCaseOptions input
 let describe_services ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeServices input
 let describe_severity_levels ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSeverityLevels input
+let describe_supported_languages ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSupportedLanguages input
 let describe_trusted_advisor_check_refresh_statuses ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg

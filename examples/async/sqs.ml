@@ -11,13 +11,11 @@ let main () =
     "create_queue result: %s\n"
     (res |> CreateQueueResult.to_json |> Yojson.Safe.to_string);
   let queue_url =
-    res.CreateQueueResult.createQueueResult.queueUrl
-    |> Option.value_exn ~message:"No queueUrl"
+    res.CreateQueueResult.queueUrl |> Option.value_exn ~message:"No queueUrl"
   in
   printf "listing queues\n";
   let%bind res = Sqs.list_queues cfg in
-  let lqr = res.ListQueuesResult.listQueuesResult in
-  Option.iter lqr.ListQueuesResult.queueUrls ~f:(fun queue_urls ->
+  Option.iter res.ListQueuesResult.queueUrls ~f:(fun queue_urls ->
     List.iter queue_urls ~f:(fun url -> printf "- %s\n" url));
   let message_body =
     sprintf !"Test message body %{Time_float_unix}" (Time_float_unix.now ())

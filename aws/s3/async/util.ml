@@ -287,6 +287,7 @@ let map_bucket cfg ~bucket ~f =
         ; continuationToken = _
         ; nextContinuationToken
         ; startAfter = _
+        ; _
         } -> (
       match contents with
       | None -> return (Ok [])

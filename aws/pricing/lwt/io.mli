@@ -12,8 +12,20 @@ val get_attribute_values :
       GetAttributeValuesRequest.t ->
         (GetAttributeValuesResponse.t, GetAttributeValuesResponse.error)
           Result.t Lwt.t
+val get_price_list_file_url :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPriceListFileUrlRequest.t ->
+        (GetPriceListFileUrlResponse.t, GetPriceListFileUrlResponse.error)
+          Result.t Lwt.t
 val get_products :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetProductsRequest.t ->
         (GetProductsResponse.t, GetProductsResponse.error) Result.t Lwt.t
+val list_price_lists :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPriceListsRequest.t ->
+        (ListPriceListsResponse.t, ListPriceListsResponse.error) Result.t
+          Lwt.t

@@ -2,10 +2,16 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateResource: (AssociateResourceRequest.t,
+  AssociateResourceResponse.t, AssociateResourceResponse.error) t 
   | CreateCanary: (CreateCanaryRequest.t, CreateCanaryResponse.t,
   CreateCanaryResponse.error) t 
+  | CreateGroup: (CreateGroupRequest.t, CreateGroupResponse.t,
+  CreateGroupResponse.error) t 
   | DeleteCanary: (DeleteCanaryRequest.t, DeleteCanaryResponse.t,
   DeleteCanaryResponse.error) t 
+  | DeleteGroup: (DeleteGroupRequest.t, DeleteGroupResponse.t,
+  DeleteGroupResponse.error) t 
   | DescribeCanaries: (DescribeCanariesRequest.t, DescribeCanariesResponse.t,
   DescribeCanariesResponse.error) t 
   | DescribeCanariesLastRun: (DescribeCanariesLastRunRequest.t,
@@ -14,14 +20,26 @@ type ('i, 'o, 'e) t =
   | DescribeRuntimeVersions: (DescribeRuntimeVersionsRequest.t,
   DescribeRuntimeVersionsResponse.t, DescribeRuntimeVersionsResponse.error) t
   
+  | DisassociateResource: (DisassociateResourceRequest.t,
+  DisassociateResourceResponse.t, DisassociateResourceResponse.error) t 
   | GetCanary: (GetCanaryRequest.t, GetCanaryResponse.t,
   GetCanaryResponse.error) t 
   | GetCanaryRuns: (GetCanaryRunsRequest.t, GetCanaryRunsResponse.t,
   GetCanaryRunsResponse.error) t 
+  | GetGroup: (GetGroupRequest.t, GetGroupResponse.t, GetGroupResponse.error)
+  t 
+  | ListAssociatedGroups: (ListAssociatedGroupsRequest.t,
+  ListAssociatedGroupsResponse.t, ListAssociatedGroupsResponse.error) t 
+  | ListGroupResources: (ListGroupResourcesRequest.t,
+  ListGroupResourcesResponse.t, ListGroupResourcesResponse.error) t 
+  | ListGroups: (ListGroupsRequest.t, ListGroupsResponse.t,
+  ListGroupsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | StartCanary: (StartCanaryRequest.t, StartCanaryResponse.t,
   StartCanaryResponse.error) t 
+  | StartCanaryDryRun: (StartCanaryDryRunRequest.t,
+  StartCanaryDryRunResponse.t, StartCanaryDryRunResponse.error) t 
   | StopCanary: (StopCanaryRequest.t, StopCanaryResponse.t,
   StopCanaryResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -32,15 +50,24 @@ type ('i, 'o, 'e) t =
   UpdateCanaryResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateResource -> `PATCH
   | CreateCanary -> `POST
+  | CreateGroup -> `POST
   | DeleteCanary -> `DELETE
+  | DeleteGroup -> `DELETE
   | DescribeCanaries -> `POST
   | DescribeCanariesLastRun -> `POST
   | DescribeRuntimeVersions -> `POST
+  | DisassociateResource -> `PATCH
   | GetCanary -> `GET
   | GetCanaryRuns -> `POST
+  | GetGroup -> `GET
+  | ListAssociatedGroups -> `POST
+  | ListGroupResources -> `POST
+  | ListGroups -> `POST
   | ListTagsForResource -> `GET
   | StartCanary -> `POST
+  | StartCanaryDryRun -> `POST
   | StopCanary -> `POST
   | TagResource -> `POST
   | UntagResource -> `DELETE
@@ -48,37 +75,72 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateResource ->
+          (Format.kasprintf Uri.of_string) "/group/%s/associate"
+            (GroupIdentifier.to_header
+               x.AssociateResourceRequest.groupIdentifier)
       | CreateCanary -> (Format.kasprintf Uri.of_string) "/canary"
+      | CreateGroup -> (Format.kasprintf Uri.of_string) "/group"
       | DeleteCanary ->
-          (Format.kasprintf Uri.of_string) "/canary/%s"
-            (CanaryName.to_header x.DeleteCanaryRequest.name)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/canary/%s"
+               (CanaryName.to_header x.DeleteCanaryRequest.name))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("deleteLambda", (Boolean.to_header v)))
+                  x.deleteLambda])
+      | DeleteGroup ->
+          (Format.kasprintf Uri.of_string) "/group/%s"
+            (GroupIdentifier.to_header x.DeleteGroupRequest.groupIdentifier)
       | DescribeCanaries -> (Format.kasprintf Uri.of_string) "/canaries"
       | DescribeCanariesLastRun ->
           (Format.kasprintf Uri.of_string) "/canaries/last-run"
       | DescribeRuntimeVersions ->
           (Format.kasprintf Uri.of_string) "/runtime-versions"
+      | DisassociateResource ->
+          (Format.kasprintf Uri.of_string) "/group/%s/disassociate"
+            (GroupIdentifier.to_header
+               x.DisassociateResourceRequest.groupIdentifier)
       | GetCanary ->
-          (Format.kasprintf Uri.of_string) "/canary/%s"
-            (CanaryName.to_header x.GetCanaryRequest.name)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/canary/%s"
+               (CanaryName.to_header x.GetCanaryRequest.name))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("dryRunId", (UUID.to_header v)))
+                  x.dryRunId])
       | GetCanaryRuns ->
           (Format.kasprintf Uri.of_string) "/canary/%s/runs"
             (CanaryName.to_header x.GetCanaryRunsRequest.name)
+      | GetGroup ->
+          (Format.kasprintf Uri.of_string) "/group/%s"
+            (GroupIdentifier.to_header x.GetGroupRequest.groupIdentifier)
+      | ListAssociatedGroups ->
+          (Format.kasprintf Uri.of_string) "/resource/%s/groups"
+            (CanaryArn.to_header x.ListAssociatedGroupsRequest.resourceArn)
+      | ListGroupResources ->
+          (Format.kasprintf Uri.of_string) "/group/%s/resources"
+            (GroupIdentifier.to_header
+               x.ListGroupResourcesRequest.groupIdentifier)
+      | ListGroups -> (Format.kasprintf Uri.of_string) "/groups"
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (CanaryArn.to_header x.ListTagsForResourceRequest.resourceArn)
+            (ResourceArn.to_header x.ListTagsForResourceRequest.resourceArn)
       | StartCanary ->
           (Format.kasprintf Uri.of_string) "/canary/%s/start"
             (CanaryName.to_header x.StartCanaryRequest.name)
+      | StartCanaryDryRun ->
+          (Format.kasprintf Uri.of_string) "/canary/%s/dry-run/start"
+            (CanaryName.to_header x.StartCanaryDryRunRequest.name)
       | StopCanary ->
           (Format.kasprintf Uri.of_string) "/canary/%s/stop"
             (CanaryName.to_header x.StopCanaryRequest.name)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
-            (CanaryArn.to_header x.TagResourceRequest.resourceArn)
+            (ResourceArn.to_header x.TagResourceRequest.resourceArn)
       | UntagResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s"
-               (CanaryArn.to_header x.UntagResourceRequest.resourceArn))
+               (ResourceArn.to_header x.UntagResourceRequest.resourceArn))
             (List.filter_opt
                [Some ("tagKeys", (TagKeyList.to_header x.tagKeys))])
       | UpdateCanary ->
@@ -88,6 +150,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AssociateResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateCanary ->
       let (headers, body) =
         let headers =
@@ -137,6 +200,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.CreateCanaryRequest.vpcConfig
                         ~f:(fun x ->
                               ("VpcConfig", (VpcConfigInput.to_value x)));
+                      Option.map
+                        req.CreateCanaryRequest.resourcesToReplicateTags
+                        ~f:(fun x ->
+                              ("ResourcesToReplicateTags",
+                                (ResourceList.to_value x)));
+                      Option.map
+                        req.CreateCanaryRequest.provisionedResourceCleanup
+                        ~f:(fun x ->
+                              ("ProvisionedResourceCleanup",
+                                (ProvisionedResourceCleanupSetting.to_value x)));
+                      Option.map req.CreateCanaryRequest.browserConfigs
+                        ~f:(fun x ->
+                              ("BrowserConfigs", (BrowserConfigs.to_value x)));
                       Option.map req.CreateCanaryRequest.tags
                         ~f:(fun x -> ("Tags", (TagMap.to_value x)));
                       Option.map req.CreateCanaryRequest.artifactConfig
@@ -150,7 +226,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateGroup ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (GroupName.to_value req.CreateGroupRequest.name));
+                      Option.map req.CreateGroupRequest.tags
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteCanary -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteGroup -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeCanaries ->
       let (headers, body) =
         let headers =
@@ -194,7 +292,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.DescribeCanariesLastRunRequest.names
                         ~f:(fun x ->
                               ("Names",
-                                (DescribeCanariesLastRunNameFilter.to_value x)))])
+                                (DescribeCanariesLastRunNameFilter.to_value x)));
+                      Option.map
+                        req.DescribeCanariesLastRunRequest.browserType
+                        ~f:(fun x ->
+                              ("BrowserType", (BrowserType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -224,6 +326,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetCanary ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -239,7 +342,80 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.GetCanaryRunsRequest.nextToken
                          ~f:(fun x -> ("NextToken", (Token.to_value x)));
                       Option.map req.GetCanaryRunsRequest.maxResults
-                        ~f:(fun x -> ("MaxResults", (MaxSize100.to_value x)))])
+                        ~f:(fun x -> ("MaxResults", (MaxSize100.to_value x)));
+                      Option.map req.GetCanaryRunsRequest.dryRunId
+                        ~f:(fun x -> ("DryRunId", (UUID.to_value x)));
+                      Option.map req.GetCanaryRunsRequest.runType
+                        ~f:(fun x -> ("RunType", (RunType.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetGroup ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListAssociatedGroups ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListAssociatedGroupsRequest.nextToken
+                         ~f:(fun x ->
+                               ("NextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListAssociatedGroupsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxGroupResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListGroupResources ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListGroupResourcesRequest.nextToken
+                         ~f:(fun x ->
+                               ("NextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListGroupResourcesRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxGroupResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListGroups ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListGroupsRequest.nextToken
+                         ~f:(fun x ->
+                               ("NextToken", (PaginationToken.to_value x)));
+                      Option.map req.ListGroupsRequest.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults", (MaxGroupResults.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -252,6 +428,72 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartCanary ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | StartCanaryDryRun ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.StartCanaryDryRunRequest.code
+                         ~f:(fun x -> ("Code", (CanaryCodeInput.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.runtimeVersion
+                        ~f:(fun x -> ("RuntimeVersion", (String_.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.runConfig
+                        ~f:(fun x ->
+                              ("RunConfig",
+                                (CanaryRunConfigInput.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.vpcConfig
+                        ~f:(fun x ->
+                              ("VpcConfig", (VpcConfigInput.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.executionRoleArn
+                        ~f:(fun x ->
+                              ("ExecutionRoleArn", (RoleArn.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.successRetentionPeriodInDays
+                        ~f:(fun x ->
+                              ("SuccessRetentionPeriodInDays",
+                                (MaxSize1024.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.failureRetentionPeriodInDays
+                        ~f:(fun x ->
+                              ("FailureRetentionPeriodInDays",
+                                (MaxSize1024.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.visualReference
+                        ~f:(fun x ->
+                              ("VisualReference",
+                                (VisualReferenceInput.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.artifactS3Location
+                        ~f:(fun x ->
+                              ("ArtifactS3Location", (String_.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.artifactConfig
+                        ~f:(fun x ->
+                              ("ArtifactConfig",
+                                (ArtifactConfigInput.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.provisionedResourceCleanup
+                        ~f:(fun x ->
+                              ("ProvisionedResourceCleanup",
+                                (ProvisionedResourceCleanupSetting.to_value x)));
+                      Option.map req.StartCanaryDryRunRequest.browserConfigs
+                        ~f:(fun x ->
+                              ("BrowserConfigs", (BrowserConfigs.to_value x)));
+                      Option.map
+                        req.StartCanaryDryRunRequest.visualReferences
+                        ~f:(fun x ->
+                              ("VisualReferences",
+                                (VisualReferences.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StopCanary ->
       let (headers, body) = (None, None) in
@@ -325,10 +567,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AssociateResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (AssociateResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some AssociateResourceResponse.error_of_json))
   | CreateCanary ->
       if is_success
       then Ok (CreateCanaryResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateCanaryResponse.error_of_json))
+  | CreateGroup ->
+      if is_success
+      then Ok (CreateGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateGroupResponse.error_of_json))
   | DeleteCanary ->
       if is_success
       then
@@ -336,6 +591,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteCanaryResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteCanaryResponse.error_of_json))
+  | DeleteGroup ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteGroupResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some DeleteGroupResponse.error_of_json))
   | DescribeCanaries ->
       if is_success
       then Ok (DescribeCanariesResponse.of_json (response_to_json resp))
@@ -357,6 +619,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeRuntimeVersionsResponse.error_of_json))
+  | DisassociateResource ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DisassociateResourceResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DisassociateResourceResponse.error_of_json))
   | GetCanary ->
       if is_success
       then Ok (GetCanaryResponse.of_json (response_to_json resp))
@@ -365,6 +636,26 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetCanaryRunsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetCanaryRunsResponse.error_of_json))
+  | GetGroup ->
+      if is_success
+      then Ok (GetGroupResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetGroupResponse.error_of_json))
+  | ListAssociatedGroups ->
+      if is_success
+      then Ok (ListAssociatedGroupsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListAssociatedGroupsResponse.error_of_json))
+  | ListGroupResources ->
+      if is_success
+      then Ok (ListGroupResourcesResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListGroupResourcesResponse.error_of_json))
+  | ListGroups ->
+      if is_success
+      then Ok (ListGroupsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListGroupsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -378,6 +669,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (StartCanaryResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some StartCanaryResponse.error_of_json))
+  | StartCanaryDryRun ->
+      if is_success
+      then Ok (StartCanaryDryRunResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some StartCanaryDryRunResponse.error_of_json))
   | StopCanary ->
       if is_success
       then

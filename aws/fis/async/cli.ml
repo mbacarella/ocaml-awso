@@ -45,6 +45,12 @@ let create_experiment_template =
        and logConfiguration =
          flag "log-configuration" (optional json_arg)
            ~doc:"JSON CreateExperimentTemplateLogConfigurationInput"
+       and experimentOptions =
+         flag "experiment-options" (optional json_arg)
+           ~doc:"JSON CreateExperimentTemplateExperimentOptionsInput"
+       and experimentReportConfiguration =
+         flag "experiment-report-configuration" (optional json_arg)
+           ~doc:"JSON CreateExperimentTemplateReportConfigurationInput"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING ClientToken"
        and description =
@@ -67,14 +73,49 @@ let create_experiment_template =
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?logConfiguration:(Option.map
                                    ~f:Values.CreateExperimentTemplateLogConfigurationInput.of_json
-                                   logConfiguration) ~clientToken
-              ~description
+                                   logConfiguration)
+              ?experimentOptions:(Option.map
+                                    ~f:Values.CreateExperimentTemplateExperimentOptionsInput.of_json
+                                    experimentOptions)
+              ?experimentReportConfiguration:(Option.map
+                                                ~f:Values.CreateExperimentTemplateReportConfigurationInput.of_json
+                                                experimentReportConfiguration)
+              ~clientToken ~description
               ~stopConditions:(Values.CreateExperimentTemplateStopConditionInputList.of_json
                                  stopConditions)
               ~actions:(Values.CreateExperimentTemplateActionInputMap.of_json
                           actions) ~roleArn ())
            (Some Values.CreateExperimentTemplateResponse.to_json)
            (Some Values.CreateExperimentTemplateResponse.error_to_json)])
+let create_target_account_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING TargetAccountConfigurationDescription"
+       and experimentTemplateId =
+         flag "experiment-template-id" (required string)
+           ~doc:"STRING ExperimentTemplateId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING TargetAccountId"
+       and roleArn = flag "role-arn" (required string) ~doc:"STRING RoleArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_target_account_configuration
+           (Values.CreateTargetAccountConfigurationRequest.make ?clientToken
+              ?description ~experimentTemplateId ~accountId ~roleArn ())
+           (Some Values.CreateTargetAccountConfigurationResponse.to_json)
+           (Some
+              Values.CreateTargetAccountConfigurationResponse.error_to_json)])
 let delete_experiment_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -93,6 +134,29 @@ let delete_experiment_template =
            (Values.DeleteExperimentTemplateRequest.make ~id ())
            (Some Values.DeleteExperimentTemplateResponse.to_json)
            (Some Values.DeleteExperimentTemplateResponse.error_to_json)])
+let delete_target_account_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and experimentTemplateId =
+         flag "experiment-template-id" (required string)
+           ~doc:"STRING ExperimentTemplateId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING TargetAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_target_account_configuration
+           (Values.DeleteTargetAccountConfigurationRequest.make
+              ~experimentTemplateId ~accountId ())
+           (Some Values.DeleteTargetAccountConfigurationResponse.to_json)
+           (Some
+              Values.DeleteTargetAccountConfigurationResponse.error_to_json)])
 let get_action =
   Command.async ~summary:""
     ([%map_open.Command
@@ -125,6 +189,29 @@ let get_experiment =
            Io.get_experiment (Values.GetExperimentRequest.make ~id ())
            (Some Values.GetExperimentResponse.to_json)
            (Some Values.GetExperimentResponse.error_to_json)])
+let get_experiment_target_account_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and experimentId =
+         flag "experiment-id" (required string) ~doc:"STRING ExperimentId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING TargetAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_experiment_target_account_configuration
+           (Values.GetExperimentTargetAccountConfigurationRequest.make
+              ~experimentId ~accountId ())
+           (Some
+              Values.GetExperimentTargetAccountConfigurationResponse.to_json)
+           (Some
+              Values.GetExperimentTargetAccountConfigurationResponse.error_to_json)])
 let get_experiment_template =
   Command.async ~summary:""
     ([%map_open.Command
@@ -143,6 +230,44 @@ let get_experiment_template =
            (Values.GetExperimentTemplateRequest.make ~id ())
            (Some Values.GetExperimentTemplateResponse.to_json)
            (Some Values.GetExperimentTemplateResponse.error_to_json)])
+let get_safety_lever =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING SafetyLeverId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_safety_lever (Values.GetSafetyLeverRequest.make ~id ())
+           (Some Values.GetSafetyLeverResponse.to_json)
+           (Some Values.GetSafetyLeverResponse.error_to_json)])
+let get_target_account_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and experimentTemplateId =
+         flag "experiment-template-id" (required string)
+           ~doc:"STRING ExperimentTemplateId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING TargetAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_target_account_configuration
+           (Values.GetTargetAccountConfigurationRequest.make
+              ~experimentTemplateId ~accountId ())
+           (Some Values.GetTargetAccountConfigurationResponse.to_json)
+           (Some Values.GetTargetAccountConfigurationResponse.error_to_json)])
 let get_target_resource_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -182,6 +307,55 @@ let list_actions =
            (Values.ListActionsRequest.make ?maxResults ?nextToken ())
            (Some Values.ListActionsResponse.to_json)
            (Some Values.ListActionsResponse.error_to_json)])
+let list_experiment_resolved_targets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListExperimentResolvedTargetsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and targetName =
+         flag "target-name" (optional string) ~doc:"STRING TargetName"
+       and experimentId =
+         flag "experiment-id" (required string) ~doc:"STRING ExperimentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_experiment_resolved_targets
+           (Values.ListExperimentResolvedTargetsRequest.make ?maxResults
+              ?nextToken ?targetName ~experimentId ())
+           (Some Values.ListExperimentResolvedTargetsResponse.to_json)
+           (Some Values.ListExperimentResolvedTargetsResponse.error_to_json)])
+let list_experiment_target_account_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and experimentId =
+         flag "experiment-id" (required string) ~doc:"STRING ExperimentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_experiment_target_account_configurations
+           (Values.ListExperimentTargetAccountConfigurationsRequest.make
+              ?nextToken ~experimentId ())
+           (Some
+              Values.ListExperimentTargetAccountConfigurationsResponse.to_json)
+           (Some
+              Values.ListExperimentTargetAccountConfigurationsResponse.error_to_json)])
 let list_experiment_templates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -217,11 +391,15 @@ let list_experiments =
          flag "max-results" (optional int)
            ~doc:"INT ListExperimentsMaxResults"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and experimentTemplateId =
+         flag "experiment-template-id" (optional string)
+           ~doc:"STRING ExperimentTemplateId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_experiments
-           (Values.ListExperimentsRequest.make ?maxResults ?nextToken ())
+           (Values.ListExperimentsRequest.make ?maxResults ?nextToken
+              ?experimentTemplateId ())
            (Some Values.ListExperimentsResponse.to_json)
            (Some Values.ListExperimentsResponse.error_to_json)])
 let list_tags_for_resource =
@@ -242,6 +420,31 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_target_account_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListTargetAccountConfigurationsMaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and experimentTemplateId =
+         flag "experiment-template-id" (required string)
+           ~doc:"STRING ExperimentTemplateId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_target_account_configurations
+           (Values.ListTargetAccountConfigurationsRequest.make ?maxResults
+              ?nextToken ~experimentTemplateId ())
+           (Some Values.ListTargetAccountConfigurationsResponse.to_json)
+           (Some Values.ListTargetAccountConfigurationsResponse.error_to_json)])
 let list_target_resource_types =
   Command.async ~summary:""
     ([%map_open.Command
@@ -273,6 +476,9 @@ let start_experiment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and experimentOptions =
+         flag "experiment-options" (optional json_arg)
+           ~doc:"JSON StartExperimentExperimentOptionsInput"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING ClientToken"
@@ -283,6 +489,9 @@ let start_experiment =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_experiment
            (Values.StartExperimentRequest.make
+              ?experimentOptions:(Option.map
+                                    ~f:Values.StartExperimentExperimentOptionsInput.of_json
+                                    experimentOptions)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~clientToken
               ~experimentTemplateId ())
            (Some Values.StartExperimentResponse.to_json)
@@ -370,6 +579,12 @@ let update_experiment_template =
        and logConfiguration =
          flag "log-configuration" (optional json_arg)
            ~doc:"JSON UpdateExperimentTemplateLogConfigurationInput"
+       and experimentOptions =
+         flag "experiment-options" (optional json_arg)
+           ~doc:"JSON UpdateExperimentTemplateExperimentOptionsInput"
+       and experimentReportConfiguration =
+         flag "experiment-report-configuration" (optional json_arg)
+           ~doc:"JSON UpdateExperimentTemplateReportConfigurationInput"
        and id =
          flag "id" (required string) ~doc:"STRING ExperimentTemplateId" in
        fun () ->
@@ -387,25 +602,95 @@ let update_experiment_template =
                           actions) ?roleArn
               ?logConfiguration:(Option.map
                                    ~f:Values.UpdateExperimentTemplateLogConfigurationInput.of_json
-                                   logConfiguration) ~id ())
-           (Some Values.UpdateExperimentTemplateResponse.to_json)
+                                   logConfiguration)
+              ?experimentOptions:(Option.map
+                                    ~f:Values.UpdateExperimentTemplateExperimentOptionsInput.of_json
+                                    experimentOptions)
+              ?experimentReportConfiguration:(Option.map
+                                                ~f:Values.UpdateExperimentTemplateReportConfigurationInput.of_json
+                                                experimentReportConfiguration)
+              ~id ()) (Some Values.UpdateExperimentTemplateResponse.to_json)
            (Some Values.UpdateExperimentTemplateResponse.error_to_json)])
+let update_safety_lever_state =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING SafetyLeverId"
+       and state =
+         flag "state" (required json_arg)
+           ~doc:"JSON UpdateSafetyLeverStateInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_safety_lever_state
+           (Values.UpdateSafetyLeverStateRequest.make ~id
+              ~state:(Values.UpdateSafetyLeverStateInput.of_json state) ())
+           (Some Values.UpdateSafetyLeverStateResponse.to_json)
+           (Some Values.UpdateSafetyLeverStateResponse.error_to_json)])
+let update_target_account_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and roleArn = flag "role-arn" (optional string) ~doc:"STRING RoleArn"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING TargetAccountConfigurationDescription"
+       and experimentTemplateId =
+         flag "experiment-template-id" (required string)
+           ~doc:"STRING ExperimentTemplateId"
+       and accountId =
+         flag "account-id" (required string) ~doc:"STRING TargetAccountId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_target_account_configuration
+           (Values.UpdateTargetAccountConfigurationRequest.make ?roleArn
+              ?description ~experimentTemplateId ~accountId ())
+           (Some Values.UpdateTargetAccountConfigurationResponse.to_json)
+           (Some
+              Values.UpdateTargetAccountConfigurationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-experiment-template", create_experiment_template);
+    ("create-target-account-configuration",
+      create_target_account_configuration);
     ("delete-experiment-template", delete_experiment_template);
+    ("delete-target-account-configuration",
+      delete_target_account_configuration);
     ("get-action", get_action);
     ("get-experiment", get_experiment);
+    ("get-experiment-target-account-configuration",
+      get_experiment_target_account_configuration);
     ("get-experiment-template", get_experiment_template);
+    ("get-safety-lever", get_safety_lever);
+    ("get-target-account-configuration", get_target_account_configuration);
     ("get-target-resource-type", get_target_resource_type);
     ("list-actions", list_actions);
+    ("list-experiment-resolved-targets", list_experiment_resolved_targets);
+    ("list-experiment-target-account-configurations",
+      list_experiment_target_account_configurations);
     ("list-experiment-templates", list_experiment_templates);
     ("list-experiments", list_experiments);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-target-account-configurations",
+      list_target_account_configurations);
     ("list-target-resource-types", list_target_resource_types);
     ("start-experiment", start_experiment);
     ("stop-experiment", stop_experiment);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-experiment-template", update_experiment_template)]
+    ("update-experiment-template", update_experiment_template);
+    ("update-safety-lever-state", update_safety_lever_state);
+    ("update-target-account-configuration",
+      update_target_account_configuration)]

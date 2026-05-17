@@ -177,10 +177,65 @@ module MergeOptionTypeEnum =
     let of_json j = of_string (string_of_json ~kind:"MergeOptionTypeEnum" j)
     let to_json = simple_to_json to_value
   end
+module ObjectId =
+  struct
+    type nonrec t = string
+    let context_ = "ObjectId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ObjectId" j
+    let to_json = simple_to_json to_value
+  end
+module Date =
+  struct
+    type nonrec t = string
+    let context_ = "Date"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Date" j
+    let to_json = simple_to_json to_value
+  end
+module Email =
+  struct
+    type nonrec t = string
+    let context_ = "Email"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Email" j
+    let to_json = simple_to_json to_value
+  end
+module Name =
+  struct
+    type nonrec t = string
+    let context_ = "Name"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Name" j
+    let to_json = simple_to_json to_value
+  end
 module CallerReactions =
   struct
     type nonrec t = ReactionValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReactionValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -298,6 +353,8 @@ module ReactionCountsMap =
                     (fun x -> (Count.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -452,10 +509,10 @@ module MergeHunkDetail =
         (Option.map ~f:LineNumber.of_xml) (Xml.child xml_arg0 "startLine") in
       make ?hunkContent ?endLine ?startLine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hunkContent = field_map json "hunkContent" HunkContent.of_json in
-      let endLine = field_map json "endLine" LineNumber.of_json in
-      let startLine = field_map json "startLine" LineNumber.of_json in
+    let of_json json__ =
+      let hunkContent = field_map json__ "hunkContent" HunkContent.of_json in
+      let endLine = field_map json__ "endLine" LineNumber.of_json in
+      let startLine = field_map json__ "startLine" LineNumber.of_json in
       make ?hunkContent ?endLine ?startLine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -539,12 +596,12 @@ module OriginApprovalRuleTemplate =
           (Xml.child xml_arg0 "approvalRuleTemplateId") in
       make ?approvalRuleTemplateName ?approvalRuleTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateName =
-        field_map json "approvalRuleTemplateName"
+        field_map json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       let approvalRuleTemplateId =
-        field_map json "approvalRuleTemplateId"
+        field_map json__ "approvalRuleTemplateId"
           ApprovalRuleTemplateId.of_json in
       make ?approvalRuleTemplateName ?approvalRuleTemplateId ()
     let to_json v = composed_to_json to_value v
@@ -602,12 +659,12 @@ module MergeMetadata =
         (Option.map ~f:IsMerged.of_xml) (Xml.child xml_arg0 "isMerged") in
       make ?mergeOption ?mergeCommitId ?mergedBy ?isMerged ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mergeOption =
-        field_map json "mergeOption" MergeOptionTypeEnum.of_json in
-      let mergeCommitId = field_map json "mergeCommitId" CommitId.of_json in
-      let mergedBy = field_map json "mergedBy" Arn.of_json in
-      let isMerged = field_map json "isMerged" IsMerged.of_json in
+        field_map json__ "mergeOption" MergeOptionTypeEnum.of_json in
+      let mergeCommitId = field_map json__ "mergeCommitId" CommitId.of_json in
+      let mergedBy = field_map json__ "mergedBy" Arn.of_json in
+      let isMerged = field_map json__ "isMerged" IsMerged.of_json in
       make ?mergeOption ?mergeCommitId ?mergedBy ?isMerged ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -754,6 +811,105 @@ module ReplacementTypeEnum =
     let of_json j = of_string (string_of_json ~kind:"ReplacementTypeEnum" j)
     let to_json = simple_to_json to_value
   end
+module AdditionalData =
+  struct
+    type nonrec t = string
+    let context_ = "AdditionalData"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AdditionalData" j
+    let to_json = simple_to_json to_value
+  end
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
+module ParentList =
+  struct
+    type nonrec t = ObjectId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ObjectId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ObjectId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ParentList" ~of_json:ObjectId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UserInfo =
+  struct
+    type nonrec t =
+      {
+      name: Name.t option
+        [@ocaml.doc "The name of the user who made the specified commit."];
+      email: Email.t option
+        [@ocaml.doc
+          "The email address associated with the user who made the commit, if any."];
+      date: Date.t option
+        [@ocaml.doc
+          "The date when the specified commit was commited, in timestamp format with GMT offset."]}
+    let make ?name =
+      fun ?email -> fun ?date -> fun () -> { name; email; date }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:Name.to_value));
+        ("email", (Option.map x.email ~f:Email.to_value));
+        ("date", (Option.map x.date ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let date = (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "date") in
+      let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "email") in
+      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
+      make ?date ?email ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let date = field_map json__ "date" Date.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      make ?date ?email ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the user who made a specified commit."]
+module RevisionId =
+  struct
+    type nonrec t = string
+    let context_ = "RevisionId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RevisionId" j
+    let to_json = simple_to_json to_value
+  end
 module Mode =
   struct
     type nonrec t = string
@@ -765,19 +921,6 @@ module Mode =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Mode" j
-    let to_json = simple_to_json to_value
-  end
-module ObjectId =
-  struct
-    type nonrec t = string
-    let context_ = "ObjectId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ObjectId" j
     let to_json = simple_to_json to_value
   end
 module Comment =
@@ -883,21 +1026,21 @@ module Comment =
         ?authorArn ?lastModifiedDate ?creationDate ?inReplyTo ?content
         ?commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reactionCounts =
-        field_map json "reactionCounts" ReactionCountsMap.of_json in
+        field_map json__ "reactionCounts" ReactionCountsMap.of_json in
       let callerReactions =
-        field_map json "callerReactions" CallerReactions.of_json in
+        field_map json__ "callerReactions" CallerReactions.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let deleted = field_map json "deleted" IsCommentDeleted.of_json in
-      let authorArn = field_map json "authorArn" Arn.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let deleted = field_map json__ "deleted" IsCommentDeleted.of_json in
+      let authorArn = field_map json__ "authorArn" Arn.of_json in
       let lastModifiedDate =
-        field_map json "lastModifiedDate" LastModifiedDate.of_json in
-      let creationDate = field_map json "creationDate" CreationDate.of_json in
-      let inReplyTo = field_map json "inReplyTo" CommentId.of_json in
-      let content = field_map json "content" Content.of_json in
-      let commentId = field_map json "commentId" CommentId.of_json in
+        field_map json__ "lastModifiedDate" LastModifiedDate.of_json in
+      let creationDate = field_map json__ "creationDate" CreationDate.of_json in
+      let inReplyTo = field_map json__ "inReplyTo" CommentId.of_json in
+      let content = field_map json__ "content" Content.of_json in
+      let commentId = field_map json__ "commentId" CommentId.of_json in
       make ?reactionCounts ?callerReactions ?clientRequestToken ?deleted
         ?authorArn ?lastModifiedDate ?creationDate ?inReplyTo ?content
         ?commentId ()
@@ -1001,19 +1144,6 @@ module OverrideStatus =
     let of_json j = of_string (string_of_json ~kind:"OverrideStatus" j)
     let to_json = simple_to_json to_value
   end
-module RevisionId =
-  struct
-    type nonrec t = string
-    let context_ = "RevisionId"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RevisionId" j
-    let to_json = simple_to_json to_value
-  end
 module ApprovalState =
   struct
     type nonrec t =
@@ -1073,45 +1203,6 @@ module IsMove =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module Date =
-  struct
-    type nonrec t = string
-    let context_ = "Date"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Date" j
-    let to_json = simple_to_json to_value
-  end
-module Email =
-  struct
-    type nonrec t = string
-    let context_ = "Email"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Email" j
-    let to_json = simple_to_json to_value
-  end
-module Name =
-  struct
-    type nonrec t = string
-    let context_ = "Name"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Name" j
-    let to_json = simple_to_json to_value
-  end
 module FileModes =
   struct
     type nonrec t =
@@ -1145,10 +1236,11 @@ module FileModes =
         (Option.map ~f:FileModeTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base = field_map json "base" FileModeTypeEnum.of_json in
-      let destination = field_map json "destination" FileModeTypeEnum.of_json in
-      let source = field_map json "source" FileModeTypeEnum.of_json in
+    let of_json json__ =
+      let base = field_map json__ "base" FileModeTypeEnum.of_json in
+      let destination =
+        field_map json__ "destination" FileModeTypeEnum.of_json in
+      let source = field_map json__ "source" FileModeTypeEnum.of_json in
       make ?base ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about file modes in a merge or pull request."]
@@ -1182,10 +1274,10 @@ module FileSizes =
         (Option.map ~f:FileSize.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base = field_map json "base" FileSize.of_json in
-      let destination = field_map json "destination" FileSize.of_json in
-      let source = field_map json "source" FileSize.of_json in
+    let of_json json__ =
+      let base = field_map json__ "base" FileSize.of_json in
+      let destination = field_map json__ "destination" FileSize.of_json in
+      let source = field_map json__ "source" FileSize.of_json in
       make ?base ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1223,10 +1315,10 @@ module IsBinaryFile =
         (Option.map ~f:CapitalBoolean.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base = field_map json "base" CapitalBoolean.of_json in
-      let destination = field_map json "destination" CapitalBoolean.of_json in
-      let source = field_map json "source" CapitalBoolean.of_json in
+    let of_json json__ =
+      let base = field_map json__ "base" CapitalBoolean.of_json in
+      let destination = field_map json__ "destination" CapitalBoolean.of_json in
+      let source = field_map json__ "source" CapitalBoolean.of_json in
       make ?base ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1295,9 +1387,9 @@ module MergeOperations =
         (Option.map ~f:ChangeTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let destination = field_map json "destination" ChangeTypeEnum.of_json in
-      let source = field_map json "source" ChangeTypeEnum.of_json in
+    let of_json json__ =
+      let destination = field_map json__ "destination" ChangeTypeEnum.of_json in
+      let source = field_map json__ "source" ChangeTypeEnum.of_json in
       make ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1347,10 +1439,10 @@ module ObjectTypes =
         (Option.map ~f:ObjectTypeEnum.of_xml) (Xml.child xml_arg0 "source") in
       make ?base ?destination ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base = field_map json "base" ObjectTypeEnum.of_json in
-      let destination = field_map json "destination" ObjectTypeEnum.of_json in
-      let source = field_map json "source" ObjectTypeEnum.of_json in
+    let of_json json__ =
+      let base = field_map json__ "base" ObjectTypeEnum.of_json in
+      let destination = field_map json__ "destination" ObjectTypeEnum.of_json in
+      let source = field_map json__ "source" ObjectTypeEnum.of_json in
       make ?base ?destination ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1396,11 +1488,12 @@ module MergeHunk =
           (Xml.child xml_arg0 "isConflict") in
       make ?base ?destination ?source ?isConflict ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let base = field_map json "base" MergeHunkDetail.of_json in
-      let destination = field_map json "destination" MergeHunkDetail.of_json in
-      let source = field_map json "source" MergeHunkDetail.of_json in
-      let isConflict = field_map json "isConflict" IsHunkConflict.of_json in
+    let of_json json__ =
+      let base = field_map json__ "base" MergeHunkDetail.of_json in
+      let destination =
+        field_map json__ "destination" MergeHunkDetail.of_json in
+      let source = field_map json__ "source" MergeHunkDetail.of_json in
+      let isConflict = field_map json__ "isConflict" IsHunkConflict.of_json in
       make ?base ?destination ?source ?isConflict ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1495,22 +1588,22 @@ module ApprovalRule =
         ?lastModifiedDate ?ruleContentSha256 ?approvalRuleContent
         ?approvalRuleName ?approvalRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let originApprovalRuleTemplate =
-        field_map json "originApprovalRuleTemplate"
+        field_map json__ "originApprovalRuleTemplate"
           OriginApprovalRuleTemplate.of_json in
-      let lastModifiedUser = field_map json "lastModifiedUser" Arn.of_json in
-      let creationDate = field_map json "creationDate" CreationDate.of_json in
+      let lastModifiedUser = field_map json__ "lastModifiedUser" Arn.of_json in
+      let creationDate = field_map json__ "creationDate" CreationDate.of_json in
       let lastModifiedDate =
-        field_map json "lastModifiedDate" LastModifiedDate.of_json in
+        field_map json__ "lastModifiedDate" LastModifiedDate.of_json in
       let ruleContentSha256 =
-        field_map json "ruleContentSha256" RuleContentSha256.of_json in
+        field_map json__ "ruleContentSha256" RuleContentSha256.of_json in
       let approvalRuleContent =
-        field_map json "approvalRuleContent" ApprovalRuleContent.of_json in
+        field_map json__ "approvalRuleContent" ApprovalRuleContent.of_json in
       let approvalRuleName =
-        field_map json "approvalRuleName" ApprovalRuleName.of_json in
+        field_map json__ "approvalRuleName" ApprovalRuleName.of_json in
       let approvalRuleId =
-        field_map json "approvalRuleId" ApprovalRuleId.of_json in
+        field_map json__ "approvalRuleId" ApprovalRuleId.of_json in
       make ?originApprovalRuleTemplate ?lastModifiedUser ?creationDate
         ?lastModifiedDate ?ruleContentSha256 ?approvalRuleContent
         ?approvalRuleName ?approvalRuleId ()
@@ -1596,19 +1689,19 @@ module PullRequestTarget =
       make ?mergeMetadata ?mergeBase ?sourceCommit ?destinationCommit
         ?destinationReference ?sourceReference ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mergeMetadata =
-        field_map json "mergeMetadata" MergeMetadata.of_json in
-      let mergeBase = field_map json "mergeBase" CommitId.of_json in
-      let sourceCommit = field_map json "sourceCommit" CommitId.of_json in
+        field_map json__ "mergeMetadata" MergeMetadata.of_json in
+      let mergeBase = field_map json__ "mergeBase" CommitId.of_json in
+      let sourceCommit = field_map json__ "sourceCommit" CommitId.of_json in
       let destinationCommit =
-        field_map json "destinationCommit" CommitId.of_json in
+        field_map json__ "destinationCommit" CommitId.of_json in
       let destinationReference =
-        field_map json "destinationReference" ReferenceName.of_json in
+        field_map json__ "destinationReference" ReferenceName.of_json in
       let sourceReference =
-        field_map json "sourceReference" ReferenceName.of_json in
+        field_map json__ "sourceReference" ReferenceName.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?mergeMetadata ?mergeBase ?sourceCommit ?destinationCommit
         ?destinationReference ?sourceReference ?repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -1644,6 +1737,9 @@ module BranchNameList =
   struct
     type nonrec t = BranchName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BranchName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1681,6 +1777,9 @@ module RepositoryTriggerEventList =
   struct
     type nonrec t = RepositoryTriggerEventEnum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryTriggerEventEnum.to_value)) |>
         (fun x -> `List x)
@@ -1720,8 +1819,8 @@ module DeleteFileEntry =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ~filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filePath = field_map_exn json "filePath" Path.of_json in
+    let of_json json__ =
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       make ~filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A file that is deleted as part of a commit."]
@@ -1765,12 +1864,12 @@ module ReplaceContentEntry =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?fileMode ?content ~replacementType ~filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let content = field_map json "content" FileContent.of_json in
+    let of_json json__ =
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let content = field_map json__ "content" FileContent.of_json in
       let replacementType =
-        field_map_exn json "replacementType" ReplacementTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
+        field_map_exn json__ "replacementType" ReplacementTypeEnum.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       make ?fileMode ?content ~replacementType ~filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1798,9 +1897,9 @@ module SetFileModeEntry =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ~fileMode ~filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMode = field_map_exn json "fileMode" FileModeTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
+    let of_json json__ =
+      let fileMode = field_map_exn json__ "fileMode" FileModeTypeEnum.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       make ~fileMode ~filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about the file mode changes."]
@@ -1816,6 +1915,115 @@ module RepositoryId =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"RepositoryId" j
     let to_json = simple_to_json to_value
+  end
+module Commit =
+  struct
+    type nonrec t =
+      {
+      commitId: ObjectId.t option
+        [@ocaml.doc "The full SHA ID of the specified commit."];
+      treeId: ObjectId.t option
+        [@ocaml.doc "Tree information for the specified commit."];
+      parents: ParentList.t option
+        [@ocaml.doc
+          "A list of parent commits for the specified commit. Each parent commit ID is the full commit ID."];
+      message: Message.t option
+        [@ocaml.doc
+          "The commit message associated with the specified commit."];
+      author: UserInfo.t option
+        [@ocaml.doc
+          "Information about the author of the specified commit. Information includes the date in timestamp format with GMT offset, the name of the author, and the email address for the author, as configured in Git."];
+      committer: UserInfo.t option
+        [@ocaml.doc
+          "Information about the person who committed the specified commit, also known as the committer. Information includes the date in timestamp format with GMT offset, the name of the committer, and the email address for the committer, as configured in Git. For more information about the difference between an author and a committer in Git, see Viewing the Commit History in Pro Git by Scott Chacon and Ben Straub."];
+      additionalData: AdditionalData.t option
+        [@ocaml.doc "Any other data associated with the specified commit."]}
+    let make ?commitId =
+      fun ?treeId ->
+        fun ?parents ->
+          fun ?message ->
+            fun ?author ->
+              fun ?committer ->
+                fun ?additionalData ->
+                  fun () ->
+                    {
+                      commitId;
+                      treeId;
+                      parents;
+                      message;
+                      author;
+                      committer;
+                      additionalData
+                    }
+    let to_value x =
+      structure_to_value
+        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
+        ("treeId", (Option.map x.treeId ~f:ObjectId.to_value));
+        ("parents", (Option.map x.parents ~f:ParentList.to_value));
+        ("message", (Option.map x.message ~f:Message.to_value));
+        ("author", (Option.map x.author ~f:UserInfo.to_value));
+        ("committer", (Option.map x.committer ~f:UserInfo.to_value));
+        ("additionalData",
+          (Option.map x.additionalData ~f:AdditionalData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let additionalData =
+        (Option.map ~f:AdditionalData.of_xml)
+          (Xml.child xml_arg0 "additionalData") in
+      let committer =
+        (Option.map ~f:UserInfo.of_xml) (Xml.child xml_arg0 "committer") in
+      let author =
+        (Option.map ~f:UserInfo.of_xml) (Xml.child xml_arg0 "author") in
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
+      let parents =
+        (Option.map ~f:ParentList.of_xml) (Xml.child xml_arg0 "parents") in
+      let treeId =
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
+      let commitId =
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
+      make ?additionalData ?committer ?author ?message ?parents ?treeId
+        ?commitId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let additionalData =
+        field_map json__ "additionalData" AdditionalData.of_json in
+      let committer = field_map json__ "committer" UserInfo.of_json in
+      let author = field_map json__ "author" UserInfo.of_json in
+      let message = field_map json__ "message" Message.of_json in
+      let parents = field_map json__ "parents" ParentList.of_json in
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
+      make ?additionalData ?committer ?author ?message ?parents ?treeId
+        ?commitId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a specific commit."]
+module RevisionChildren =
+  struct
+    type nonrec t = RevisionId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RevisionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RevisionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RevisionChildren" ~of_json:RevisionId.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module BlobMetadata =
   struct
@@ -1842,10 +2050,10 @@ module BlobMetadata =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?mode ?path ?blobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mode = field_map json "mode" Mode.of_json in
-      let path = field_map json "path" Path.of_json in
-      let blobId = field_map json "blobId" ObjectId.of_json in
+    let of_json json__ =
+      let mode = field_map json__ "mode" Mode.of_json in
+      let path = field_map json__ "path" Path.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
       make ?mode ?path ?blobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a specific Git blob object."]
@@ -1853,6 +2061,9 @@ module Comments =
   struct
     type nonrec t = Comment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Comment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1907,11 +2118,12 @@ module Location =
         (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "filePath") in
       make ?relativeFileVersion ?filePosition ?filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let relativeFileVersion =
-        field_map json "relativeFileVersion" RelativeFileVersionEnum.of_json in
-      let filePosition = field_map json "filePosition" Position.of_json in
-      let filePath = field_map json "filePath" Path.of_json in
+        field_map json__ "relativeFileVersion"
+          RelativeFileVersionEnum.of_json in
+      let filePosition = field_map json__ "filePosition" Position.of_json in
+      let filePath = field_map json__ "filePath" Path.of_json in
       make ?relativeFileVersion ?filePosition ?filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1933,6 +2145,9 @@ module ReactionUsersList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1984,14 +2199,14 @@ module ReactionValueFormats =
         (Option.map ~f:ReactionEmoji.of_xml) (Xml.child xml_arg0 "emoji") in
       make ?unicode ?shortCode ?emoji ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unicode = field_map json "unicode" ReactionUnicode.of_json in
-      let shortCode = field_map json "shortCode" ReactionShortCode.of_json in
-      let emoji = field_map json "emoji" ReactionEmoji.of_json in
+    let of_json json__ =
+      let unicode = field_map json__ "unicode" ReactionUnicode.of_json in
+      let shortCode = field_map json__ "shortCode" ReactionShortCode.of_json in
+      let emoji = field_map json__ "emoji" ReactionEmoji.of_json in
       make ?unicode ?shortCode ?emoji ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the values for reactions to a comment. AWS CodeCommit supports a limited set of reactions."]
+       "Information about the values for reactions to a comment. CodeCommit supports a limited set of reactions."]
 module ApprovalRuleEventMetadata =
   struct
     type nonrec t =
@@ -2027,13 +2242,13 @@ module ApprovalRuleEventMetadata =
           (Xml.child xml_arg0 "approvalRuleName") in
       make ?approvalRuleContent ?approvalRuleId ?approvalRuleName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleContent =
-        field_map json "approvalRuleContent" ApprovalRuleContent.of_json in
+        field_map json__ "approvalRuleContent" ApprovalRuleContent.of_json in
       let approvalRuleId =
-        field_map json "approvalRuleId" ApprovalRuleId.of_json in
+        field_map json__ "approvalRuleId" ApprovalRuleId.of_json in
       let approvalRuleName =
-        field_map json "approvalRuleName" ApprovalRuleName.of_json in
+        field_map json__ "approvalRuleName" ApprovalRuleName.of_json in
       make ?approvalRuleContent ?approvalRuleId ?approvalRuleName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about an event for an approval rule."]
@@ -2062,10 +2277,10 @@ module ApprovalRuleOverriddenEventMetadata =
         (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?overrideStatus ?revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrideStatus =
-        field_map json "overrideStatus" OverrideStatus.of_json in
-      let revisionId = field_map json "revisionId" RevisionId.of_json in
+        field_map json__ "overrideStatus" OverrideStatus.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
       make ?overrideStatus ?revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2095,10 +2310,10 @@ module ApprovalStateChangedEventMetadata =
         (Option.map ~f:RevisionId.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?approvalStatus ?revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalStatus =
-        field_map json "approvalStatus" ApprovalState.of_json in
-      let revisionId = field_map json "revisionId" RevisionId.of_json in
+        field_map json__ "approvalStatus" ApprovalState.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
       make ?approvalStatus ?revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2165,13 +2380,13 @@ module PullRequestCreatedEventMetadata =
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeBase ?destinationCommitId ?sourceCommitId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mergeBase = field_map json "mergeBase" CommitId.of_json in
+    let of_json json__ =
+      let mergeBase = field_map json__ "mergeBase" CommitId.of_json in
       let destinationCommitId =
-        field_map json "destinationCommitId" CommitId.of_json in
-      let sourceCommitId = field_map json "sourceCommitId" CommitId.of_json in
+        field_map json__ "destinationCommitId" CommitId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?mergeBase ?destinationCommitId ?sourceCommitId ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2274,13 +2489,13 @@ module PullRequestMergedStateChangedEventMetadata =
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeMetadata ?destinationReference ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mergeMetadata =
-        field_map json "mergeMetadata" MergeMetadata.of_json in
+        field_map json__ "mergeMetadata" MergeMetadata.of_json in
       let destinationReference =
-        field_map json "destinationReference" ReferenceName.of_json in
+        field_map json__ "destinationReference" ReferenceName.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?mergeMetadata ?destinationReference ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2328,12 +2543,12 @@ module PullRequestSourceReferenceUpdatedEventMetadata =
           (Xml.child xml_arg0 "repositoryName") in
       make ?mergeBase ?afterCommitId ?beforeCommitId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mergeBase = field_map json "mergeBase" CommitId.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let mergeBase = field_map json__ "mergeBase" CommitId.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?mergeBase ?afterCommitId ?beforeCommitId ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2356,9 +2571,9 @@ module PullRequestStatusChangedEventMetadata =
           (Xml.child xml_arg0 "pullRequestStatus") in
       make ?pullRequestStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pullRequestStatus =
-        field_map json "pullRequestStatus" PullRequestStatusEnum.of_json in
+        field_map json__ "pullRequestStatus" PullRequestStatusEnum.of_json in
       make ?pullRequestStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2387,13 +2602,72 @@ module SourceFileSpecifier =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?isMove ~filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isMove = field_map json "isMove" IsMove.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
+    let of_json json__ =
+      let isMove = field_map json__ "isMove" IsMove.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       make ?isMove ~filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a source file that is part of changes made in a commit."]
+module BatchGetRepositoriesErrorCodeEnum =
+  struct
+    type nonrec t =
+      | EncryptionIntegrityChecksFailedException 
+      | EncryptionKeyAccessDeniedException 
+      | EncryptionKeyDisabledException 
+      | EncryptionKeyNotFoundException 
+      | EncryptionKeyUnavailableException 
+      | RepositoryDoesNotExistException 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EncryptionIntegrityChecksFailedException ->
+          "EncryptionIntegrityChecksFailedException"
+      | EncryptionKeyAccessDeniedException ->
+          "EncryptionKeyAccessDeniedException"
+      | EncryptionKeyDisabledException -> "EncryptionKeyDisabledException"
+      | EncryptionKeyNotFoundException -> "EncryptionKeyNotFoundException"
+      | EncryptionKeyUnavailableException ->
+          "EncryptionKeyUnavailableException"
+      | RepositoryDoesNotExistException -> "RepositoryDoesNotExistException"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EncryptionIntegrityChecksFailedException" ->
+          EncryptionIntegrityChecksFailedException
+      | "EncryptionKeyAccessDeniedException" ->
+          EncryptionKeyAccessDeniedException
+      | "EncryptionKeyDisabledException" -> EncryptionKeyDisabledException
+      | "EncryptionKeyNotFoundException" -> EncryptionKeyNotFoundException
+      | "EncryptionKeyUnavailableException" ->
+          EncryptionKeyUnavailableException
+      | "RepositoryDoesNotExistException" -> RepositoryDoesNotExistException
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration BatchGetRepositoriesErrorCodeEnum"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"BatchGetRepositoriesErrorCodeEnum" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
 module AccountId =
   struct
     type nonrec t = string
@@ -2433,6 +2707,21 @@ module CloneUrlSsh =
     let of_json j = string_of_json ~kind:"CloneUrlSsh" j
     let to_json = simple_to_json to_value
   end
+module KmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[a-zA-Z0-9:/_-]+$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
 module RepositoryDescription =
   struct
     type nonrec t = string
@@ -2460,102 +2749,6 @@ module ErrorCode =
     let of_json j = string_of_json ~kind:"ErrorCode" j
     let to_json = simple_to_json to_value
   end
-module ErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
-module AdditionalData =
-  struct
-    type nonrec t = string
-    let context_ = "AdditionalData"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"AdditionalData" j
-    let to_json = simple_to_json to_value
-  end
-module Message =
-  struct
-    type nonrec t = string
-    let context_ = "Message"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Message" j
-    let to_json = simple_to_json to_value
-  end
-module ParentList =
-  struct
-    type nonrec t = ObjectId.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ObjectId.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ObjectId.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ParentList" ~of_json:ObjectId.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module UserInfo =
-  struct
-    type nonrec t =
-      {
-      name: Name.t option
-        [@ocaml.doc "The name of the user who made the specified commit."];
-      email: Email.t option
-        [@ocaml.doc
-          "The email address associated with the user who made the commit, if any."];
-      date: Date.t option
-        [@ocaml.doc
-          "The date when the specified commit was commited, in timestamp format with GMT offset."]}
-    let make ?name =
-      fun ?email -> fun ?date -> fun () -> { name; email; date }
-    let to_value x =
-      structure_to_value
-        [("name", (Option.map x.name ~f:Name.to_value));
-        ("email", (Option.map x.email ~f:Email.to_value));
-        ("date", (Option.map x.date ~f:Date.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let date = (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "date") in
-      let email = (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "email") in
-      let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "name") in
-      make ?date ?email ?name ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let date = field_map json "date" Date.of_json in
-      let email = field_map json "email" Email.of_json in
-      let name = field_map json "name" Name.of_json in
-      make ?date ?email ?name ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about the user who made a specified commit."]
 module ExceptionName =
   struct
     type nonrec t = string
@@ -2675,22 +2868,22 @@ module ConflictMetadata =
         ?contentConflict ?isBinaryFile ?numberOfConflicts ?objectTypes
         ?fileModes ?fileSizes ?filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mergeOperations =
-        field_map json "mergeOperations" MergeOperations.of_json in
+        field_map json__ "mergeOperations" MergeOperations.of_json in
       let objectTypeConflict =
-        field_map json "objectTypeConflict" IsObjectTypeConflict.of_json in
+        field_map json__ "objectTypeConflict" IsObjectTypeConflict.of_json in
       let fileModeConflict =
-        field_map json "fileModeConflict" IsFileModeConflict.of_json in
+        field_map json__ "fileModeConflict" IsFileModeConflict.of_json in
       let contentConflict =
-        field_map json "contentConflict" IsContentConflict.of_json in
-      let isBinaryFile = field_map json "isBinaryFile" IsBinaryFile.of_json in
+        field_map json__ "contentConflict" IsContentConflict.of_json in
+      let isBinaryFile = field_map json__ "isBinaryFile" IsBinaryFile.of_json in
       let numberOfConflicts =
-        field_map json "numberOfConflicts" NumberOfConflicts.of_json in
-      let objectTypes = field_map json "objectTypes" ObjectTypes.of_json in
-      let fileModes = field_map json "fileModes" FileModes.of_json in
-      let fileSizes = field_map json "fileSizes" FileSizes.of_json in
-      let filePath = field_map json "filePath" Path.of_json in
+        field_map json__ "numberOfConflicts" NumberOfConflicts.of_json in
+      let objectTypes = field_map json__ "objectTypes" ObjectTypes.of_json in
+      let fileModes = field_map json__ "fileModes" FileModes.of_json in
+      let fileSizes = field_map json__ "fileSizes" FileSizes.of_json in
+      let filePath = field_map json__ "filePath" Path.of_json in
       make ?mergeOperations ?objectTypeConflict ?fileModeConflict
         ?contentConflict ?isBinaryFile ?numberOfConflicts ?objectTypes
         ?fileModes ?fileSizes ?filePath ()
@@ -2701,6 +2894,9 @@ module MergeHunks =
   struct
     type nonrec t = MergeHunk.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MergeHunk.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2725,6 +2921,9 @@ module ApprovalRulesList =
   struct
     type nonrec t = ApprovalRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApprovalRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2763,6 +2962,9 @@ module PullRequestTargetList =
   struct
     type nonrec t = PullRequestTarget.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PullRequestTarget.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2880,11 +3082,11 @@ module RepositoryTriggerExecutionFailure =
           (Xml.child xml_arg0 "trigger") in
       make ?failureMessage ?trigger ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failureMessage =
-        field_map json "failureMessage"
+        field_map json__ "failureMessage"
           RepositoryTriggerExecutionFailureMessage.of_json in
-      let trigger = field_map json "trigger" RepositoryTriggerName.of_json in
+      let trigger = field_map json__ "trigger" RepositoryTriggerName.of_json in
       make ?failureMessage ?trigger ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A trigger failed to run."]
@@ -2939,17 +3141,18 @@ module RepositoryTrigger =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~events ?branches ?customData ~destinationArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let events =
-        field_map_exn json "events" RepositoryTriggerEventList.of_json in
-      let branches = field_map json "branches" BranchNameList.of_json in
+        field_map_exn json__ "events" RepositoryTriggerEventList.of_json in
+      let branches = field_map json__ "branches" BranchNameList.of_json in
       let customData =
-        field_map json "customData" RepositoryTriggerCustomData.of_json in
-      let destinationArn = field_map_exn json "destinationArn" Arn.of_json in
-      let name = field_map_exn json "name" RepositoryTriggerName.of_json in
+        field_map json__ "customData" RepositoryTriggerCustomData.of_json in
+      let destinationArn = field_map_exn json__ "destinationArn" Arn.of_json in
+      let name = field_map_exn json__ "name" RepositoryTriggerName.of_json in
       make ~events ?branches ?customData ~destinationArn ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about a trigger for a repository."]
+  end[@@ocaml.doc
+       "Information about a trigger for a repository. If you want to receive notifications about repository events, consider using notifications instead of triggers. For more information, see Configuring notifications for repository events."]
 module TagValue =
   struct
     type nonrec t = string
@@ -2972,6 +3175,9 @@ module DeleteFileEntries =
   struct
     type nonrec t = DeleteFileEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeleteFileEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2997,6 +3203,9 @@ module ReplaceContentEntries =
   struct
     type nonrec t = ReplaceContentEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReplaceContentEntry.to_value)) |>
         (fun x -> `List x)
@@ -3023,6 +3232,9 @@ module SetFileModeEntries =
   struct
     type nonrec t = SetFileModeEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SetFileModeEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3070,13 +3282,60 @@ module RepositoryNameIdPair =
           (Xml.child xml_arg0 "repositoryName") in
       make ?repositoryId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
+    let of_json json__ =
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?repositoryId ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a repository name and ID."]
+module FileVersion =
+  struct
+    type nonrec t =
+      {
+      commit: Commit.t option ;
+      blobId: ObjectId.t option
+        [@ocaml.doc
+          "The blob ID of the object that represents the content of the file in this version."];
+      path: Path.t option
+        [@ocaml.doc
+          "The name and path of the file at which this blob is indexed which contains the data for this version of the file. This value will vary between file versions if a file is renamed or if its path changes."];
+      revisionChildren: RevisionChildren.t option
+        [@ocaml.doc
+          "An array of commit IDs that contain more recent versions of this file. If there are no additional versions of the file, this array will be empty."]}
+    let make ?commit =
+      fun ?blobId ->
+        fun ?path ->
+          fun ?revisionChildren ->
+            fun () -> { commit; blobId; path; revisionChildren }
+    let to_value x =
+      structure_to_value
+        [("commit", (Option.map x.commit ~f:Commit.to_value));
+        ("blobId", (Option.map x.blobId ~f:ObjectId.to_value));
+        ("path", (Option.map x.path ~f:Path.to_value));
+        ("revisionChildren",
+          (Option.map x.revisionChildren ~f:RevisionChildren.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revisionChildren =
+        (Option.map ~f:RevisionChildren.of_xml)
+          (Xml.child xml_arg0 "revisionChildren") in
+      let path = (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "path") in
+      let blobId =
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
+      let commit =
+        (Option.map ~f:Commit.of_xml) (Xml.child xml_arg0 "commit") in
+      make ?revisionChildren ?path ?blobId ?commit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revisionChildren =
+        field_map json__ "revisionChildren" RevisionChildren.of_json in
+      let path = field_map json__ "path" Path.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
+      let commit = field_map json__ "commit" Commit.of_json in
+      make ?revisionChildren ?path ?blobId ?commit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a version of a file."]
 module Approval =
   struct
     type nonrec t =
@@ -3101,10 +3360,10 @@ module Approval =
       let userArn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "userArn") in
       make ?approvalState ?userArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalState =
-        field_map json "approvalState" ApprovalState.of_json in
-      let userArn = field_map json "userArn" Arn.of_json in
+        field_map json__ "approvalState" ApprovalState.of_json in
+      let userArn = field_map json__ "userArn" Arn.of_json in
       make ?approvalState ?userArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3148,11 +3407,11 @@ module File =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let relativePath = field_map json "relativePath" Path.of_json in
-      let absolutePath = field_map json "absolutePath" Path.of_json in
-      let blobId = field_map json "blobId" ObjectId.of_json in
+    let of_json json__ =
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let relativePath = field_map json__ "relativePath" Path.of_json in
+      let absolutePath = field_map json__ "absolutePath" Path.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a file in a repository."]
@@ -3187,10 +3446,10 @@ module Folder =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
       make ?relativePath ?absolutePath ?treeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let relativePath = field_map json "relativePath" Path.of_json in
-      let absolutePath = field_map json "absolutePath" Path.of_json in
-      let treeId = field_map json "treeId" ObjectId.of_json in
+    let of_json json__ =
+      let relativePath = field_map json__ "relativePath" Path.of_json in
+      let absolutePath = field_map json__ "absolutePath" Path.of_json in
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
       make ?relativePath ?absolutePath ?treeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a folder in a repository."]
@@ -3226,10 +3485,10 @@ module SubModule =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?relativePath ?absolutePath ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let relativePath = field_map json "relativePath" Path.of_json in
-      let absolutePath = field_map json "absolutePath" Path.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let relativePath = field_map json__ "relativePath" Path.of_json in
+      let absolutePath = field_map json__ "absolutePath" Path.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?relativePath ?absolutePath ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3274,11 +3533,11 @@ module SymbolicLink =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let relativePath = field_map json "relativePath" Path.of_json in
-      let absolutePath = field_map json "absolutePath" Path.of_json in
-      let blobId = field_map json "blobId" ObjectId.of_json in
+    let of_json json__ =
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let relativePath = field_map json__ "relativePath" Path.of_json in
+      let absolutePath = field_map json__ "absolutePath" Path.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
       make ?fileMode ?relativePath ?absolutePath ?blobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3315,10 +3574,10 @@ module Difference =
         (Option.map ~f:BlobMetadata.of_xml) (Xml.child xml_arg0 "beforeBlob") in
       make ?changeType ?afterBlob ?beforeBlob ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeType = field_map json "changeType" ChangeTypeEnum.of_json in
-      let afterBlob = field_map json "afterBlob" BlobMetadata.of_json in
-      let beforeBlob = field_map json "beforeBlob" BlobMetadata.of_json in
+    let of_json json__ =
+      let changeType = field_map json__ "changeType" ChangeTypeEnum.of_json in
+      let afterBlob = field_map json__ "afterBlob" BlobMetadata.of_json in
+      let beforeBlob = field_map json__ "beforeBlob" BlobMetadata.of_json in
       make ?changeType ?afterBlob ?beforeBlob ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3405,17 +3664,17 @@ module CommentsForPullRequest =
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ?pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comments = field_map json "comments" Comments.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterBlobId = field_map json "afterBlobId" ObjectId.of_json in
-      let beforeBlobId = field_map json "beforeBlobId" ObjectId.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let comments = field_map json__ "comments" Comments.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterBlobId = field_map json__ "afterBlobId" ObjectId.of_json in
+      let beforeBlobId = field_map json__ "beforeBlobId" ObjectId.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map json "pullRequestId" PullRequestId.of_json in
+        field_map json__ "pullRequestId" PullRequestId.of_json in
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ?pullRequestId ()
     let to_json v = composed_to_json to_value v
@@ -3493,15 +3752,15 @@ module CommentsForComparedCommit =
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comments = field_map json "comments" Comments.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterBlobId = field_map json "afterBlobId" ObjectId.of_json in
-      let beforeBlobId = field_map json "beforeBlobId" ObjectId.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let comments = field_map json__ "comments" Comments.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterBlobId = field_map json__ "afterBlobId" ObjectId.of_json in
+      let beforeBlobId = field_map json__ "beforeBlobId" ObjectId.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?comments ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -3545,12 +3804,12 @@ module ReactionForComment =
           (Xml.child xml_arg0 "reaction") in
       make ?reactionsFromDeletedUsersCount ?reactionUsers ?reaction ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reactionsFromDeletedUsersCount =
-        field_map json "reactionsFromDeletedUsersCount" Count.of_json in
+        field_map json__ "reactionsFromDeletedUsersCount" Count.of_json in
       let reactionUsers =
-        field_map json "reactionUsers" ReactionUsersList.of_json in
-      let reaction = field_map json "reaction" ReactionValueFormats.of_json in
+        field_map json__ "reactionUsers" ReactionUsersList.of_json in
+      let reaction = field_map json__ "reaction" ReactionValueFormats.of_json in
       make ?reactionsFromDeletedUsersCount ?reactionUsers ?reaction ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3559,6 +3818,9 @@ module ApprovalRulesNotSatisfiedList =
   struct
     type nonrec t = ApprovalRuleName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApprovalRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3584,6 +3846,9 @@ module ApprovalRulesSatisfiedList =
   struct
     type nonrec t = ApprovalRuleName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApprovalRuleName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3768,34 +4033,34 @@ module PullRequestEvent =
         ?pullRequestCreatedEventMetadata ?actorArn ?pullRequestEventType
         ?eventDate ?pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleOverriddenEventMetadata =
-        field_map json "approvalRuleOverriddenEventMetadata"
+        field_map json__ "approvalRuleOverriddenEventMetadata"
           ApprovalRuleOverriddenEventMetadata.of_json in
       let approvalStateChangedEventMetadata =
-        field_map json "approvalStateChangedEventMetadata"
+        field_map json__ "approvalStateChangedEventMetadata"
           ApprovalStateChangedEventMetadata.of_json in
       let approvalRuleEventMetadata =
-        field_map json "approvalRuleEventMetadata"
+        field_map json__ "approvalRuleEventMetadata"
           ApprovalRuleEventMetadata.of_json in
       let pullRequestMergedStateChangedEventMetadata =
-        field_map json "pullRequestMergedStateChangedEventMetadata"
+        field_map json__ "pullRequestMergedStateChangedEventMetadata"
           PullRequestMergedStateChangedEventMetadata.of_json in
       let pullRequestSourceReferenceUpdatedEventMetadata =
-        field_map json "pullRequestSourceReferenceUpdatedEventMetadata"
+        field_map json__ "pullRequestSourceReferenceUpdatedEventMetadata"
           PullRequestSourceReferenceUpdatedEventMetadata.of_json in
       let pullRequestStatusChangedEventMetadata =
-        field_map json "pullRequestStatusChangedEventMetadata"
+        field_map json__ "pullRequestStatusChangedEventMetadata"
           PullRequestStatusChangedEventMetadata.of_json in
       let pullRequestCreatedEventMetadata =
-        field_map json "pullRequestCreatedEventMetadata"
+        field_map json__ "pullRequestCreatedEventMetadata"
           PullRequestCreatedEventMetadata.of_json in
-      let actorArn = field_map json "actorArn" Arn.of_json in
+      let actorArn = field_map json__ "actorArn" Arn.of_json in
       let pullRequestEventType =
-        field_map json "pullRequestEventType" PullRequestEventType.of_json in
-      let eventDate = field_map json "eventDate" EventDate.of_json in
+        field_map json__ "pullRequestEventType" PullRequestEventType.of_json in
+      let eventDate = field_map json__ "eventDate" EventDate.of_json in
       let pullRequestId =
-        field_map json "pullRequestId" PullRequestId.of_json in
+        field_map json__ "pullRequestId" PullRequestId.of_json in
       make ?approvalRuleOverriddenEventMetadata
         ?approvalStateChangedEventMetadata ?approvalRuleEventMetadata
         ?pullRequestMergedStateChangedEventMetadata
@@ -3844,13 +4109,13 @@ module Target =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?destinationReference ~sourceReference ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationReference =
-        field_map json "destinationReference" ReferenceName.of_json in
+        field_map json__ "destinationReference" ReferenceName.of_json in
       let sourceReference =
-        field_map_exn json "sourceReference" ReferenceName.of_json in
+        field_map_exn json__ "sourceReference" ReferenceName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?destinationReference ~sourceReference ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a target for a pull request."]
@@ -3885,10 +4150,10 @@ module FileMetadata =
         (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "absolutePath") in
       make ?fileMode ?blobId ?absolutePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let blobId = field_map json "blobId" ObjectId.of_json in
-      let absolutePath = field_map json "absolutePath" Path.of_json in
+    let of_json json__ =
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
+      let absolutePath = field_map json__ "absolutePath" Path.of_json in
       make ?fileMode ?blobId ?absolutePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3936,23 +4201,83 @@ module PutFileEntry =
         Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
       make ?sourceFile ?fileContent ?fileMode ~filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sourceFile =
-        field_map json "sourceFile" SourceFileSpecifier.of_json in
-      let fileContent = field_map json "fileContent" FileContent.of_json in
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
+        field_map json__ "sourceFile" SourceFileSpecifier.of_json in
+      let fileContent = field_map json__ "fileContent" FileContent.of_json in
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       make ?sourceFile ?fileContent ?fileMode ~filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a file added or updated as part of a commit."]
+module BatchGetRepositoriesError =
+  struct
+    type nonrec t =
+      {
+      repositoryId: RepositoryId.t option
+        [@ocaml.doc
+          "The ID of a repository that either could not be found or was not in a valid state."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc
+          "The name of a repository that either could not be found or was not in a valid state."];
+      errorCode: BatchGetRepositoriesErrorCodeEnum.t option
+        [@ocaml.doc "An error code that specifies the type of failure."];
+      errorMessage: ErrorMessage.t option
+        [@ocaml.doc
+          "An error message that provides detail about why the repository either was not found or was not in a valid state."]}
+    let make ?repositoryId =
+      fun ?repositoryName ->
+        fun ?errorCode ->
+          fun ?errorMessage ->
+            fun () ->
+              { repositoryId; repositoryName; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("repositoryId",
+           (Option.map x.repositoryId ~f:RepositoryId.to_value));
+        ("repositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("errorCode",
+          (Option.map x.errorCode
+             ~f:BatchGetRepositoriesErrorCodeEnum.to_value));
+        ("errorMessage",
+          (Option.map x.errorMessage ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "errorMessage") in
+      let errorCode =
+        (Option.map ~f:BatchGetRepositoriesErrorCodeEnum.of_xml)
+          (Xml.child xml_arg0 "errorCode") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      let repositoryId =
+        (Option.map ~f:RepositoryId.of_xml)
+          (Xml.child xml_arg0 "repositoryId") in
+      make ?errorMessage ?errorCode ?repositoryName ?repositoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode =
+        field_map json__ "errorCode"
+          BatchGetRepositoriesErrorCodeEnum.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
+      make ?errorMessage ?errorCode ?repositoryName ?repositoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns information about errors in a BatchGetRepositories operation."]
 module RepositoryMetadata =
   struct
     type nonrec t =
       {
       accountId: AccountId.t option
         [@ocaml.doc
-          "The ID of the AWS account associated with the repository."];
+          "The ID of the Amazon Web Services account associated with the repository."];
       repositoryId: RepositoryId.t option
         [@ocaml.doc "The ID of the repository."];
       repositoryName: RepositoryName.t option
@@ -3972,7 +4297,10 @@ module RepositoryMetadata =
       cloneUrlSsh: CloneUrlSsh.t option
         [@ocaml.doc "The URL to use for cloning the repository over SSH."];
       arn: Arn.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the repository."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the repository."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The ID of the Key Management Service encryption key used to encrypt and decrypt the repository."]}
     let make ?accountId =
       fun ?repositoryId ->
         fun ?repositoryName ->
@@ -3983,19 +4311,21 @@ module RepositoryMetadata =
                   fun ?cloneUrlHttp ->
                     fun ?cloneUrlSsh ->
                       fun ?arn ->
-                        fun () ->
-                          {
-                            accountId;
-                            repositoryId;
-                            repositoryName;
-                            repositoryDescription;
-                            defaultBranch;
-                            lastModifiedDate;
-                            creationDate;
-                            cloneUrlHttp;
-                            cloneUrlSsh;
-                            arn
-                          }
+                        fun ?kmsKeyId ->
+                          fun () ->
+                            {
+                              accountId;
+                              repositoryId;
+                              repositoryName;
+                              repositoryDescription;
+                              defaultBranch;
+                              lastModifiedDate;
+                              creationDate;
+                              cloneUrlHttp;
+                              cloneUrlSsh;
+                              arn;
+                              kmsKeyId
+                            }
     let to_value x =
       structure_to_value
         [("accountId", (Option.map x.accountId ~f:AccountId.to_value));
@@ -4015,9 +4345,12 @@ module RepositoryMetadata =
         ("cloneUrlHttp",
           (Option.map x.cloneUrlHttp ~f:CloneUrlHttp.to_value));
         ("cloneUrlSsh", (Option.map x.cloneUrlSsh ~f:CloneUrlSsh.to_value));
-        ("Arn", (Option.map x.arn ~f:Arn.to_value))]
+        ("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
       let cloneUrlSsh =
         (Option.map ~f:CloneUrlSsh.of_xml) (Xml.child xml_arg0 "cloneUrlSsh") in
@@ -4044,27 +4377,29 @@ module RepositoryMetadata =
           (Xml.child xml_arg0 "repositoryId") in
       let accountId =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "accountId") in
-      make ?arn ?cloneUrlSsh ?cloneUrlHttp ?creationDate ?lastModifiedDate
-        ?defaultBranch ?repositoryDescription ?repositoryName ?repositoryId
-        ?accountId ()
+      make ?kmsKeyId ?arn ?cloneUrlSsh ?cloneUrlHttp ?creationDate
+        ?lastModifiedDate ?defaultBranch ?repositoryDescription
+        ?repositoryName ?repositoryId ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" Arn.of_json in
-      let cloneUrlSsh = field_map json "cloneUrlSsh" CloneUrlSsh.of_json in
-      let cloneUrlHttp = field_map json "cloneUrlHttp" CloneUrlHttp.of_json in
-      let creationDate = field_map json "creationDate" CreationDate.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let cloneUrlSsh = field_map json__ "cloneUrlSsh" CloneUrlSsh.of_json in
+      let cloneUrlHttp = field_map json__ "cloneUrlHttp" CloneUrlHttp.of_json in
+      let creationDate = field_map json__ "creationDate" CreationDate.of_json in
       let lastModifiedDate =
-        field_map json "lastModifiedDate" LastModifiedDate.of_json in
-      let defaultBranch = field_map json "defaultBranch" BranchName.of_json in
+        field_map json__ "lastModifiedDate" LastModifiedDate.of_json in
+      let defaultBranch = field_map json__ "defaultBranch" BranchName.of_json in
       let repositoryDescription =
-        field_map json "repositoryDescription" RepositoryDescription.of_json in
+        field_map json__ "repositoryDescription"
+          RepositoryDescription.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
-      let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
-      let accountId = field_map json "accountId" AccountId.of_json in
-      make ?arn ?cloneUrlSsh ?cloneUrlHttp ?creationDate ?lastModifiedDate
-        ?defaultBranch ?repositoryDescription ?repositoryName ?repositoryId
-        ?accountId ()
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
+      let accountId = field_map json__ "accountId" AccountId.of_json in
+      make ?kmsKeyId ?arn ?cloneUrlSsh ?cloneUrlHttp ?creationDate
+        ?lastModifiedDate ?defaultBranch ?repositoryDescription
+        ?repositoryName ?repositoryId ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a repository."]
 module BatchGetCommitsError =
@@ -4100,96 +4435,14 @@ module BatchGetCommitsError =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?errorMessage ?errorCode ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?errorMessage ?errorCode ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about errors in a BatchGetCommits operation."]
-module Commit =
-  struct
-    type nonrec t =
-      {
-      commitId: ObjectId.t option
-        [@ocaml.doc "The full SHA ID of the specified commit."];
-      treeId: ObjectId.t option
-        [@ocaml.doc "Tree information for the specified commit."];
-      parents: ParentList.t option
-        [@ocaml.doc
-          "A list of parent commits for the specified commit. Each parent commit ID is the full commit ID."];
-      message: Message.t option
-        [@ocaml.doc
-          "The commit message associated with the specified commit."];
-      author: UserInfo.t option
-        [@ocaml.doc
-          "Information about the author of the specified commit. Information includes the date in timestamp format with GMT offset, the name of the author, and the email address for the author, as configured in Git."];
-      committer: UserInfo.t option
-        [@ocaml.doc
-          "Information about the person who committed the specified commit, also known as the committer. Information includes the date in timestamp format with GMT offset, the name of the committer, and the email address for the committer, as configured in Git. For more information about the difference between an author and a committer in Git, see Viewing the Commit History in Pro Git by Scott Chacon and Ben Straub."];
-      additionalData: AdditionalData.t option
-        [@ocaml.doc "Any other data associated with the specified commit."]}
-    let make ?commitId =
-      fun ?treeId ->
-        fun ?parents ->
-          fun ?message ->
-            fun ?author ->
-              fun ?committer ->
-                fun ?additionalData ->
-                  fun () ->
-                    {
-                      commitId;
-                      treeId;
-                      parents;
-                      message;
-                      author;
-                      committer;
-                      additionalData
-                    }
-    let to_value x =
-      structure_to_value
-        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
-        ("treeId", (Option.map x.treeId ~f:ObjectId.to_value));
-        ("parents", (Option.map x.parents ~f:ParentList.to_value));
-        ("message", (Option.map x.message ~f:Message.to_value));
-        ("author", (Option.map x.author ~f:UserInfo.to_value));
-        ("committer", (Option.map x.committer ~f:UserInfo.to_value));
-        ("additionalData",
-          (Option.map x.additionalData ~f:AdditionalData.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let additionalData =
-        (Option.map ~f:AdditionalData.of_xml)
-          (Xml.child xml_arg0 "additionalData") in
-      let committer =
-        (Option.map ~f:UserInfo.of_xml) (Xml.child xml_arg0 "committer") in
-      let author =
-        (Option.map ~f:UserInfo.of_xml) (Xml.child xml_arg0 "author") in
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
-      let parents =
-        (Option.map ~f:ParentList.of_xml) (Xml.child xml_arg0 "parents") in
-      let treeId =
-        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
-      let commitId =
-        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
-      make ?additionalData ?committer ?author ?message ?parents ?treeId
-        ?commitId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let additionalData =
-        field_map json "additionalData" AdditionalData.of_json in
-      let committer = field_map json "committer" UserInfo.of_json in
-      let author = field_map json "author" UserInfo.of_json in
-      let message = field_map json "message" Message.of_json in
-      let parents = field_map json "parents" ParentList.of_json in
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
-      make ?additionalData ?committer ?author ?message ?parents ?treeId
-        ?commitId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns information about a specific commit."]
 module BatchDisassociateApprovalRuleTemplateFromRepositoriesError =
   struct
     type nonrec t =
@@ -4226,11 +4479,11 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesError =
           (Xml.child xml_arg0 "repositoryName") in
       make ?errorMessage ?errorCode ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?errorMessage ?errorCode ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4239,37 +4492,37 @@ module BatchDescribeMergeConflictsError =
   struct
     type nonrec t =
       {
-      filePath: Path.t [@ocaml.doc "The path to the file."];
-      exceptionName: ExceptionName.t
+      filePath: Path.t option [@ocaml.doc "The path to the file."];
+      exceptionName: ExceptionName.t option
         [@ocaml.doc "The name of the exception."];
-      message: Message.t
+      message: Message.t option
         [@ocaml.doc "The message provided by the exception."]}
-    let context_ = "BatchDescribeMergeConflictsError"
-    let make ~filePath =
-      fun ~exceptionName ->
-        fun ~message -> fun () -> { filePath; exceptionName; message }
+    let make ?filePath =
+      fun ?exceptionName ->
+        fun ?message -> fun () -> { filePath; exceptionName; message }
     let to_value x =
       structure_to_value
-        [("filePath", (Some (Path.to_value x.filePath)));
-        ("exceptionName", (Some (ExceptionName.to_value x.exceptionName)));
-        ("message", (Some (Message.to_value x.message)))]
+        [("filePath", (Option.map x.filePath ~f:Path.to_value));
+        ("exceptionName",
+          (Option.map x.exceptionName ~f:ExceptionName.to_value));
+        ("message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Message.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "message") in
       let exceptionName =
-        ExceptionName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "exceptionName") in
+        (Option.map ~f:ExceptionName.of_xml)
+          (Xml.child xml_arg0 "exceptionName") in
       let filePath =
-        Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
-      make ~message ~exceptionName ~filePath ()
+        (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "filePath") in
+      make ?message ?exceptionName ?filePath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" Message.of_json in
       let exceptionName =
-        field_map_exn json "exceptionName" ExceptionName.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      make ~message ~exceptionName ~filePath ()
+        field_map json__ "exceptionName" ExceptionName.of_json in
+      let filePath = field_map json__ "filePath" Path.of_json in
+      make ?message ?exceptionName ?filePath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about errors in a BatchDescribeMergeConflicts operation."]
@@ -4298,10 +4551,10 @@ module Conflict =
           (Xml.child xml_arg0 "conflictMetadata") in
       make ?mergeHunks ?conflictMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mergeHunks = field_map json "mergeHunks" MergeHunks.of_json in
+    let of_json json__ =
+      let mergeHunks = field_map json__ "mergeHunks" MergeHunks.of_json in
       let conflictMetadata =
-        field_map json "conflictMetadata" ConflictMetadata.of_json in
+        field_map json__ "conflictMetadata" ConflictMetadata.of_json in
       make ?mergeHunks ?conflictMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about conflicts in a merge operation."]
@@ -4341,15 +4594,150 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesError =
           (Xml.child xml_arg0 "repositoryName") in
       make ?errorMessage ?errorCode ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorCode = field_map json "errorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorCode = field_map json__ "errorCode" ErrorCode.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?errorMessage ?errorCode ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about errors in a BatchAssociateApprovalRuleTemplateWithRepositories operation."]
+module EncryptionIntegrityChecksFailedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An encryption integrity check failed."]
+module EncryptionKeyAccessDeniedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An encryption key could not be accessed."]
+module EncryptionKeyDisabledException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The encryption key is disabled."]
+module EncryptionKeyInvalidIdException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Key Management Service encryption key is not valid."]
+module EncryptionKeyInvalidUsageException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A KMS encryption key was used to try and encrypt or decrypt a repository, but either the repository or the key was not in a valid state to support the operation."]
+module EncryptionKeyNotFoundException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "No encryption key was found."]
+module EncryptionKeyRequiredException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A KMS encryption key ID is required but was not specified."]
+module EncryptionKeyUnavailableException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The encryption key is not available."]
+module InvalidRepositoryNameException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A specified repository name is not valid. This exception occurs only when a specified repository name is not valid. Other exceptions occur when a required repository parameter is missing, or when a specified repository does not exist."]
+module RepositoryDoesNotExistException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified repository does not exist."]
+module RepositoryNameRequiredException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A repository name is required, but was not specified."]
 module InvalidPullRequestIdException =
   struct
     type nonrec t = unit
@@ -4489,24 +4877,24 @@ module PullRequest =
         ?authorArn ?pullRequestStatus ?creationDate ?lastActivityDate
         ?description ?title ?pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRules =
-        field_map json "approvalRules" ApprovalRulesList.of_json in
-      let revisionId = field_map json "revisionId" RevisionId.of_json in
+        field_map json__ "approvalRules" ApprovalRulesList.of_json in
+      let revisionId = field_map json__ "revisionId" RevisionId.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
       let pullRequestTargets =
-        field_map json "pullRequestTargets" PullRequestTargetList.of_json in
-      let authorArn = field_map json "authorArn" Arn.of_json in
+        field_map json__ "pullRequestTargets" PullRequestTargetList.of_json in
+      let authorArn = field_map json__ "authorArn" Arn.of_json in
       let pullRequestStatus =
-        field_map json "pullRequestStatus" PullRequestStatusEnum.of_json in
-      let creationDate = field_map json "creationDate" CreationDate.of_json in
+        field_map json__ "pullRequestStatus" PullRequestStatusEnum.of_json in
+      let creationDate = field_map json__ "creationDate" CreationDate.of_json in
       let lastActivityDate =
-        field_map json "lastActivityDate" LastModifiedDate.of_json in
-      let description = field_map json "description" Description.of_json in
-      let title = field_map json "title" Title.of_json in
+        field_map json__ "lastActivityDate" LastModifiedDate.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let title = field_map json__ "title" Title.of_json in
       let pullRequestId =
-        field_map json "pullRequestId" PullRequestId.of_json in
+        field_map json__ "pullRequestId" PullRequestId.of_json in
       make ?approvalRules ?revisionId ?clientRequestToken ?pullRequestTargets
         ?authorArn ?pullRequestStatus ?creationDate ?lastActivityDate
         ?description ?title ?pullRequestId ()
@@ -4563,66 +4951,6 @@ module TitleRequiredException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A pull request title is required. It cannot be empty or null."]
-module EncryptionIntegrityChecksFailedException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An encryption integrity check failed."]
-module EncryptionKeyAccessDeniedException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An encryption key could not be accessed."]
-module EncryptionKeyDisabledException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The encryption key is disabled."]
-module EncryptionKeyNotFoundException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "No encryption key was found."]
-module EncryptionKeyUnavailableException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The encryption key is not available."]
 module InvalidPullRequestStatusException =
   struct
     type nonrec t = unit
@@ -4788,7 +5116,7 @@ module CommentContentSizeLimitExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The comment is too large. Comments are limited to 1,000 characters."]
+       "The comment is too large. Comments are limited to 10,240 characters."]
 module CommentDeletedException =
   struct
     type nonrec t = unit
@@ -4949,24 +5277,24 @@ module ApprovalRuleTemplate =
         ?approvalRuleTemplateDescription ?approvalRuleTemplateName
         ?approvalRuleTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModifiedUser = field_map json "lastModifiedUser" Arn.of_json in
-      let creationDate = field_map json "creationDate" CreationDate.of_json in
+    let of_json json__ =
+      let lastModifiedUser = field_map json__ "lastModifiedUser" Arn.of_json in
+      let creationDate = field_map json__ "creationDate" CreationDate.of_json in
       let lastModifiedDate =
-        field_map json "lastModifiedDate" LastModifiedDate.of_json in
+        field_map json__ "lastModifiedDate" LastModifiedDate.of_json in
       let ruleContentSha256 =
-        field_map json "ruleContentSha256" RuleContentSha256.of_json in
+        field_map json__ "ruleContentSha256" RuleContentSha256.of_json in
       let approvalRuleTemplateContent =
-        field_map json "approvalRuleTemplateContent"
+        field_map json__ "approvalRuleTemplateContent"
           ApprovalRuleTemplateContent.of_json in
       let approvalRuleTemplateDescription =
-        field_map json "approvalRuleTemplateDescription"
+        field_map json__ "approvalRuleTemplateDescription"
           ApprovalRuleTemplateDescription.of_json in
       let approvalRuleTemplateName =
-        field_map json "approvalRuleTemplateName"
+        field_map json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       let approvalRuleTemplateId =
-        field_map json "approvalRuleTemplateId"
+        field_map json__ "approvalRuleTemplateId"
           ApprovalRuleTemplateId.of_json in
       make ?lastModifiedUser ?creationDate ?lastModifiedDate
         ?ruleContentSha256 ?approvalRuleTemplateContent
@@ -4986,7 +5314,7 @@ module ApprovalRuleTemplateDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified approval rule template does not exist. Verify that the name is correct and that you are signed in to the AWS Region where the template was created, and then try again."]
+       "The specified approval rule template does not exist. Verify that the name is correct and that you are signed in to the Amazon Web Services Region where the template was created, and then try again."]
 module ApprovalRuleTemplateNameAlreadyExistsException =
   struct
     type nonrec t = unit
@@ -4999,7 +5327,7 @@ module ApprovalRuleTemplateNameAlreadyExistsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You cannot create an approval rule template with that name because a template with that name already exists in this AWS Region for your AWS account. Approval rule template names must be unique."]
+       "You cannot create an approval rule template with that name because a template with that name already exists in this Amazon Web Services Region for your Amazon Web Services account. Approval rule template names must be unique."]
 module ApprovalRuleTemplateNameRequiredException =
   struct
     type nonrec t = unit
@@ -5025,7 +5353,7 @@ module InvalidApprovalRuleTemplateNameException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The name of the approval rule template is not valid. Template names must be between 1 and 100 valid characters in length. For more information about limits in AWS CodeCommit, see AWS CodeCommit User Guide."]
+       "The name of the approval rule template is not valid. Template names must be between 1 and 100 valid characters in length. For more information about limits in CodeCommit, see Quotas in the CodeCommit User Guide."]
 module InvalidApprovalRuleTemplateDescriptionException =
   struct
     type nonrec t = unit
@@ -5038,7 +5366,7 @@ module InvalidApprovalRuleTemplateDescriptionException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The description for the approval rule template is not valid because it exceeds the maximum characters allowed for a description. For more information about limits in AWS CodeCommit, see AWS CodeCommit User Guide."]
+       "The description for the approval rule template is not valid because it exceeds the maximum characters allowed for a description. For more information about limits in CodeCommit, see Quotas in the CodeCommit User Guide."]
 module ApprovalRuleTemplateContentRequiredException =
   struct
     type nonrec t = unit
@@ -5081,6 +5409,9 @@ module TagKeysList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5101,19 +5432,6 @@ module TagKeysList =
       list_of_json ~kind:"TagKeysList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
-module InvalidRepositoryNameException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A specified repository name is not valid. This exception occurs only when a specified repository name is not valid. Other exceptions occur when a required repository parameter is missing, or when a specified repository does not exist."]
 module InvalidRepositoryTriggerBranchNameException =
   struct
     type nonrec t = unit
@@ -5189,7 +5507,7 @@ module InvalidRepositoryTriggerRegionException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The AWS Region for the trigger target does not match the AWS Region for the repository. Triggers must be created in the same Region as the target for the trigger."]
+       "The Amazon Web Services Region for the trigger target does not match the Amazon Web Services Region for the repository. Triggers must be created in the same Amazon Web Services Region as the target for the trigger."]
 module MaximumBranchesExceededException =
   struct
     type nonrec t = unit
@@ -5215,30 +5533,6 @@ module MaximumRepositoryTriggersExceededException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The number of triggers allowed for the repository was exceeded."]
-module RepositoryDoesNotExistException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified repository does not exist."]
-module RepositoryNameRequiredException =
-  struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A repository name is required, but was not specified."]
 module RepositoryTriggerBranchNameListRequiredException =
   struct
     type nonrec t = unit
@@ -5282,6 +5576,9 @@ module RepositoryTriggerExecutionFailureList =
   struct
     type nonrec t = RepositoryTriggerExecutionFailure.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryTriggerExecutionFailure.to_value)) |>
         (fun x -> `List x)
@@ -5309,6 +5606,9 @@ module RepositoryTriggerNameList =
   struct
     type nonrec t = RepositoryTriggerName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryTriggerName.to_value)) |>
         (fun x -> `List x)
@@ -5361,6 +5661,9 @@ module RepositoryTriggersList =
   struct
     type nonrec t = RepositoryTrigger.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryTrigger.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5403,6 +5706,8 @@ module TagsMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6125,13 +6430,13 @@ module ConflictResolution =
           (Xml.child xml_arg0 "replaceContents") in
       make ?setFileModes ?deleteFiles ?replaceContents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let setFileModes =
-        field_map json "setFileModes" SetFileModeEntries.of_json in
+        field_map json__ "setFileModes" SetFileModeEntries.of_json in
       let deleteFiles =
-        field_map json "deleteFiles" DeleteFileEntries.of_json in
+        field_map json__ "deleteFiles" DeleteFileEntries.of_json in
       let replaceContents =
-        field_map json "replaceContents" ReplaceContentEntries.of_json in
+        field_map json__ "replaceContents" ReplaceContentEntries.of_json in
       make ?setFileModes ?deleteFiles ?replaceContents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6270,7 +6575,7 @@ module InvalidResourceArnException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The value for the resource ARN is not valid. For more information about resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "The value for the resource ARN is not valid. For more information about resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module NextToken =
   struct
     type nonrec t = string
@@ -6296,7 +6601,7 @@ module ResourceArnRequiredException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A valid Amazon Resource Name (ARN) for an AWS CodeCommit resource is required. For a list of valid resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "A valid Amazon Resource Name (ARN) for an CodeCommit resource is required. For a list of valid resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module InvalidContinuationTokenException =
   struct
     type nonrec t = unit
@@ -6337,6 +6642,9 @@ module RepositoryNameIdPairList =
   struct
     type nonrec t = RepositoryNameIdPair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryNameIdPair.to_value)) |>
         (fun x -> `List x)
@@ -6425,6 +6733,9 @@ module RepositoryNameList =
   struct
     type nonrec t = RepositoryName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6472,7 +6783,7 @@ module AuthorDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified Amazon Resource Name (ARN) does not exist in the AWS account."]
+       "The specified Amazon Resource Name (ARN) does not exist in the Amazon Web Services account."]
 module InvalidAuthorArnException =
   struct
     type nonrec t = unit
@@ -6490,6 +6801,9 @@ module PullRequestIdList =
   struct
     type nonrec t = PullRequestId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PullRequestId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6510,10 +6824,53 @@ module PullRequestIdList =
       list_of_json ~kind:"PullRequestIdList" ~of_json:PullRequestId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module RevisionDag =
+  struct
+    type nonrec t = FileVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileVersion.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FileVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RevisionDag" ~of_json:FileVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Limit =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Limit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ApprovalRuleTemplateNameList =
   struct
     type nonrec t = ApprovalRuleTemplateName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApprovalRuleTemplateName.to_value)) |>
         (fun x -> `List x)
@@ -6565,6 +6922,9 @@ module ApprovalList =
   struct
     type nonrec t = Approval.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Approval.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6589,6 +6949,9 @@ module MergeOptions =
   struct
     type nonrec t = MergeOptionTypeEnum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MergeOptionTypeEnum.to_value)) |>
         (fun x -> `List x)
@@ -6615,6 +6978,9 @@ module ConflictMetadataList =
   struct
     type nonrec t = ConflictMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConflictMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6718,6 +7084,9 @@ module FileList =
   struct
     type nonrec t = File.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:File.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6754,6 +7123,9 @@ module FolderList =
   struct
     type nonrec t = Folder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Folder.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6777,6 +7149,9 @@ module SubModuleList =
   struct
     type nonrec t = SubModule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubModule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6801,6 +7176,9 @@ module SymbolicLinkList =
   struct
     type nonrec t = SymbolicLink.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SymbolicLink.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6846,7 +7224,7 @@ module FileTooLargeException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified file exceeds the file size limit for AWS CodeCommit. For more information about limits in AWS CodeCommit, see AWS CodeCommit User Guide."]
+       "The specified file exceeds the file size limit for CodeCommit. For more information about limits in CodeCommit, see Quotas in the CodeCommit User Guide."]
 module ObjectSize =
   struct
     type nonrec t = Int64.t
@@ -6864,6 +7242,9 @@ module DifferenceList =
   struct
     type nonrec t = Difference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Difference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6884,19 +7265,6 @@ module DifferenceList =
       list_of_json ~kind:"DifferenceList" ~of_json:Difference.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Limit =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Limit" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module CommitIdDoesNotExistException =
   struct
     type nonrec t = unit
@@ -6913,6 +7281,9 @@ module CommentsForPullRequestData =
   struct
     type nonrec t = CommentsForPullRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CommentsForPullRequest.to_value)) |>
         (fun x -> `List x)
@@ -6939,6 +7310,9 @@ module CommentsForComparedCommitData =
   struct
     type nonrec t = CommentsForComparedCommit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CommentsForComparedCommit.to_value)) |>
         (fun x -> `List x)
@@ -6978,6 +7352,9 @@ module ReactionsForCommentList =
   struct
     type nonrec t = ReactionForComment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReactionForComment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7020,9 +7397,9 @@ module BranchInfo =
         (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "branchName") in
       make ?commitId ?branchName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commitId = field_map json "commitId" CommitId.of_json in
-      let branchName = field_map json "branchName" BranchName.of_json in
+    let of_json json__ =
+      let commitId = field_map json__ "commitId" CommitId.of_json in
+      let branchName = field_map json__ "branchName" BranchName.of_json in
       make ?commitId ?branchName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a branch."]
@@ -7125,15 +7502,15 @@ module Evaluation =
       make ?approvalRulesNotSatisfied ?approvalRulesSatisfied ?overridden
         ?approved ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRulesNotSatisfied =
-        field_map json "approvalRulesNotSatisfied"
+        field_map json__ "approvalRulesNotSatisfied"
           ApprovalRulesNotSatisfiedList.of_json in
       let approvalRulesSatisfied =
-        field_map json "approvalRulesSatisfied"
+        field_map json__ "approvalRulesSatisfied"
           ApprovalRulesSatisfiedList.of_json in
-      let overridden = field_map json "overridden" Overridden.of_json in
-      let approved = field_map json "approved" Approved.of_json in
+      let overridden = field_map json__ "overridden" Overridden.of_json in
+      let approved = field_map json__ "approved" Approved.of_json in
       make ?approvalRulesNotSatisfied ?approvalRulesSatisfied ?overridden
         ?approved ()
     let to_json v = composed_to_json to_value v
@@ -7164,7 +7541,7 @@ module ActorDoesNotExistException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified Amazon Resource Name (ARN) does not exist in the AWS account."]
+       "The specified Amazon Resource Name (ARN) does not exist in the Amazon Web Services account."]
 module InvalidActorArnException =
   struct
     type nonrec t = unit
@@ -7194,6 +7571,9 @@ module PullRequestEventList =
   struct
     type nonrec t = PullRequestEvent.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PullRequestEvent.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7304,6 +7684,18 @@ module InvalidTagsMapException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The map of tags is not valid."]
+module OperationNotAllowedException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The requested action is not allowed."]
 module RepositoryLimitExceededException =
   struct
     type nonrec t = unit
@@ -7352,7 +7744,7 @@ module TooManyTagsException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The maximum number of tags for an AWS CodeCommit resource has been exceeded."]
+       "The maximum number of tags for an CodeCommit resource has been exceeded."]
 module InvalidReferenceNameException =
   struct
     type nonrec t = unit
@@ -7365,7 +7757,7 @@ module InvalidReferenceNameException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The specified reference name format is not valid. Reference names must conform to the Git references format (for example, refs/heads/master). For more information, see Git Internals - Git References or consult your Git documentation."]
+       "The specified reference name format is not valid. Reference names must conform to the Git references format (for example, refs/heads/main). For more information, see Git Internals - Git References or consult your Git documentation."]
 module InvalidTargetException =
   struct
     type nonrec t = unit
@@ -7485,6 +7877,9 @@ module TargetList =
   struct
     type nonrec t = Target.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Target.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7560,6 +7955,9 @@ module FilesMetadata =
   struct
     type nonrec t = FileMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FileMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7662,6 +8060,9 @@ module PutFileEntries =
   struct
     type nonrec t = PutFileEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PutFileEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7694,7 +8095,36 @@ module NumberOfRuleTemplatesExceededException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The maximum number of approval rule templates has been exceeded for this AWS Region."]
+       "The maximum number of approval rule templates has been exceeded for this Amazon Web Services Region."]
+module BatchGetRepositoriesErrorsList =
+  struct
+    type nonrec t = BatchGetRepositoriesError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:BatchGetRepositoriesError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:BatchGetRepositoriesError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"BatchGetRepositoriesErrorsList"
+        ~of_json:BatchGetRepositoriesError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MaximumRepositoryNamesExceededException =
   struct
     type nonrec t = unit
@@ -7712,6 +8142,9 @@ module RepositoryMetadataList =
   struct
     type nonrec t = RepositoryMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryMetadata.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7750,6 +8183,9 @@ module RepositoryNotFoundList =
   struct
     type nonrec t = RepositoryName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7775,6 +8211,9 @@ module BatchGetCommitsErrorsList =
   struct
     type nonrec t = BatchGetCommitsError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchGetCommitsError.to_value)) |>
         (fun x -> `List x)
@@ -7827,6 +8266,9 @@ module CommitObjectsList =
   struct
     type nonrec t = Commit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Commit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7851,6 +8293,9 @@ module CommitIdsInputList =
   struct
     type nonrec t = ObjectId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ObjectId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7876,6 +8321,9 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList =
     type nonrec t =
       BatchDisassociateApprovalRuleTemplateFromRepositoriesError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -7907,6 +8355,9 @@ module BatchDescribeMergeConflictsErrors =
   struct
     type nonrec t = BatchDescribeMergeConflictsError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BatchDescribeMergeConflictsError.to_value)) |>
         (fun x -> `List x)
@@ -7934,6 +8385,9 @@ module Conflicts =
   struct
     type nonrec t = Conflict.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Conflict.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7958,6 +8412,9 @@ module FilePaths =
   struct
     type nonrec t = Path.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Path.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7982,6 +8439,9 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList =
     type nonrec t =
       BatchAssociateApprovalRuleTemplateWithRepositoriesError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map
@@ -8033,13 +8493,235 @@ module UpdateRepositoryNameInput =
           (Xml.child_exn ~context:context_ xml_arg0 "oldName") in
       make ~newName ~oldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let newName = field_map_exn json "newName" RepositoryName.of_json in
-      let oldName = field_map_exn json "oldName" RepositoryName.of_json in
+    let of_json json__ =
+      let newName = field_map_exn json__ "newName" RepositoryName.of_json in
+      let oldName = field_map_exn json__ "oldName" RepositoryName.of_json in
       make ~newName ~oldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the input of an update repository description operation."]
+module UpdateRepositoryEncryptionKeyOutput =
+  struct
+    type nonrec t =
+      {
+      repositoryId: RepositoryId.t option
+        [@ocaml.doc "The ID of the repository."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc "The ID of the encryption key."];
+      originalKmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The ID of the encryption key formerly used to encrypt and decrypt the repository."]}
+    type nonrec error =
+      [
+        `EncryptionIntegrityChecksFailedException of
+          EncryptionIntegrityChecksFailedException.t 
+      | `EncryptionKeyAccessDeniedException of
+          EncryptionKeyAccessDeniedException.t 
+      | `EncryptionKeyDisabledException of EncryptionKeyDisabledException.t 
+      | `EncryptionKeyInvalidIdException of EncryptionKeyInvalidIdException.t 
+      | `EncryptionKeyInvalidUsageException of
+          EncryptionKeyInvalidUsageException.t 
+      | `EncryptionKeyNotFoundException of EncryptionKeyNotFoundException.t 
+      | `EncryptionKeyRequiredException of EncryptionKeyRequiredException.t 
+      | `EncryptionKeyUnavailableException of
+          EncryptionKeyUnavailableException.t 
+      | `InvalidRepositoryNameException of InvalidRepositoryNameException.t 
+      | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
+      | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryId =
+      fun ?kmsKeyId ->
+        fun ?originalKmsKeyId ->
+          fun () -> { repositoryId; kmsKeyId; originalKmsKeyId }
+    let error_of_json name json =
+      match name with
+      | "EncryptionIntegrityChecksFailedException" ->
+          `EncryptionIntegrityChecksFailedException
+            (EncryptionIntegrityChecksFailedException.of_json json)
+      | "EncryptionKeyAccessDeniedException" ->
+          `EncryptionKeyAccessDeniedException
+            (EncryptionKeyAccessDeniedException.of_json json)
+      | "EncryptionKeyDisabledException" ->
+          `EncryptionKeyDisabledException
+            (EncryptionKeyDisabledException.of_json json)
+      | "EncryptionKeyInvalidIdException" ->
+          `EncryptionKeyInvalidIdException
+            (EncryptionKeyInvalidIdException.of_json json)
+      | "EncryptionKeyInvalidUsageException" ->
+          `EncryptionKeyInvalidUsageException
+            (EncryptionKeyInvalidUsageException.of_json json)
+      | "EncryptionKeyNotFoundException" ->
+          `EncryptionKeyNotFoundException
+            (EncryptionKeyNotFoundException.of_json json)
+      | "EncryptionKeyRequiredException" ->
+          `EncryptionKeyRequiredException
+            (EncryptionKeyRequiredException.of_json json)
+      | "EncryptionKeyUnavailableException" ->
+          `EncryptionKeyUnavailableException
+            (EncryptionKeyUnavailableException.of_json json)
+      | "InvalidRepositoryNameException" ->
+          `InvalidRepositoryNameException
+            (InvalidRepositoryNameException.of_json json)
+      | "RepositoryDoesNotExistException" ->
+          `RepositoryDoesNotExistException
+            (RepositoryDoesNotExistException.of_json json)
+      | "RepositoryNameRequiredException" ->
+          `RepositoryNameRequiredException
+            (RepositoryNameRequiredException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "EncryptionIntegrityChecksFailedException" ->
+          `EncryptionIntegrityChecksFailedException
+            (EncryptionIntegrityChecksFailedException.of_xml xml)
+      | "EncryptionKeyAccessDeniedException" ->
+          `EncryptionKeyAccessDeniedException
+            (EncryptionKeyAccessDeniedException.of_xml xml)
+      | "EncryptionKeyDisabledException" ->
+          `EncryptionKeyDisabledException
+            (EncryptionKeyDisabledException.of_xml xml)
+      | "EncryptionKeyInvalidIdException" ->
+          `EncryptionKeyInvalidIdException
+            (EncryptionKeyInvalidIdException.of_xml xml)
+      | "EncryptionKeyInvalidUsageException" ->
+          `EncryptionKeyInvalidUsageException
+            (EncryptionKeyInvalidUsageException.of_xml xml)
+      | "EncryptionKeyNotFoundException" ->
+          `EncryptionKeyNotFoundException
+            (EncryptionKeyNotFoundException.of_xml xml)
+      | "EncryptionKeyRequiredException" ->
+          `EncryptionKeyRequiredException
+            (EncryptionKeyRequiredException.of_xml xml)
+      | "EncryptionKeyUnavailableException" ->
+          `EncryptionKeyUnavailableException
+            (EncryptionKeyUnavailableException.of_xml xml)
+      | "InvalidRepositoryNameException" ->
+          `InvalidRepositoryNameException
+            (InvalidRepositoryNameException.of_xml xml)
+      | "RepositoryDoesNotExistException" ->
+          `RepositoryDoesNotExistException
+            (RepositoryDoesNotExistException.of_xml xml)
+      | "RepositoryNameRequiredException" ->
+          `RepositoryNameRequiredException
+            (RepositoryNameRequiredException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `EncryptionIntegrityChecksFailedException e ->
+          `Assoc
+            [("error", (`String "EncryptionIntegrityChecksFailedException"));
+            ("details", (EncryptionIntegrityChecksFailedException.to_json e))]
+      | `EncryptionKeyAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyAccessDeniedException"));
+            ("details", (EncryptionKeyAccessDeniedException.to_json e))]
+      | `EncryptionKeyDisabledException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyDisabledException"));
+            ("details", (EncryptionKeyDisabledException.to_json e))]
+      | `EncryptionKeyInvalidIdException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyInvalidIdException"));
+            ("details", (EncryptionKeyInvalidIdException.to_json e))]
+      | `EncryptionKeyInvalidUsageException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyInvalidUsageException"));
+            ("details", (EncryptionKeyInvalidUsageException.to_json e))]
+      | `EncryptionKeyNotFoundException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyNotFoundException"));
+            ("details", (EncryptionKeyNotFoundException.to_json e))]
+      | `EncryptionKeyRequiredException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyRequiredException"));
+            ("details", (EncryptionKeyRequiredException.to_json e))]
+      | `EncryptionKeyUnavailableException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyUnavailableException"));
+            ("details", (EncryptionKeyUnavailableException.to_json e))]
+      | `InvalidRepositoryNameException e ->
+          `Assoc
+            [("error", (`String "InvalidRepositoryNameException"));
+            ("details", (InvalidRepositoryNameException.to_json e))]
+      | `RepositoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "RepositoryDoesNotExistException"));
+            ("details", (RepositoryDoesNotExistException.to_json e))]
+      | `RepositoryNameRequiredException e ->
+          `Assoc
+            [("error", (`String "RepositoryNameRequiredException"));
+            ("details", (RepositoryNameRequiredException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("repositoryId",
+           (Option.map x.repositoryId ~f:RepositoryId.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("originalKmsKeyId",
+          (Option.map x.originalKmsKeyId ~f:KmsKeyId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originalKmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml)
+          (Xml.child xml_arg0 "originalKmsKeyId") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let repositoryId =
+        (Option.map ~f:RepositoryId.of_xml)
+          (Xml.child xml_arg0 "repositoryId") in
+      make ?originalKmsKeyId ?kmsKeyId ?repositoryId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originalKmsKeyId =
+        field_map json__ "originalKmsKeyId" KmsKeyId.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
+      make ?originalKmsKeyId ?kmsKeyId ?repositoryId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the Key Management Service encryption key used to encrypt and decrypt a CodeCommit repository."]
+module UpdateRepositoryEncryptionKeyInput =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository for which you want to update the KMS encryption key used to encrypt and decrypt the repository."];
+      kmsKeyId: KmsKeyId.t
+        [@ocaml.doc
+          "The ID of the encryption key. You can view the ID of an encryption key in the KMS console, or use the KMS APIs to programmatically retrieve a key ID. For more information about acceptable values for keyID, see KeyId in the Decrypt API description in the Key Management Service API Reference."]}
+    let context_ = "UpdateRepositoryEncryptionKeyInput"
+    let make ~repositoryName =
+      fun ~kmsKeyId -> fun () -> { repositoryName; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Some (RepositoryName.to_value x.repositoryName)));
+        ("kmsKeyId", (Some (KmsKeyId.to_value x.kmsKeyId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kmsKeyId =
+        KmsKeyId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "kmsKeyId") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      make ~kmsKeyId ~repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kmsKeyId = field_map_exn json__ "kmsKeyId" KmsKeyId.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      make ~kmsKeyId ~repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the Key Management Service encryption key used to encrypt and decrypt a CodeCommit repository."]
 module UpdateRepositoryDescriptionInput =
   struct
     type nonrec t =
@@ -8071,11 +8753,12 @@ module UpdateRepositoryDescriptionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?repositoryDescription ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryDescription =
-        field_map json "repositoryDescription" RepositoryDescription.of_json in
+        field_map json__ "repositoryDescription"
+          RepositoryDescription.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?repositoryDescription ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8084,7 +8767,7 @@ module UpdatePullRequestTitleOutput =
   struct
     type nonrec t =
       {
-      pullRequest: PullRequest.t
+      pullRequest: PullRequest.t option
         [@ocaml.doc "Information about the updated pull request."]}
     type nonrec error =
       [ `InvalidPullRequestIdException of InvalidPullRequestIdException.t 
@@ -8096,8 +8779,7 @@ module UpdatePullRequestTitleOutput =
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `TitleRequiredException of TitleRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePullRequestTitleOutput"
-    let make ~pullRequest = fun () -> { pullRequest }
+    let make ?pullRequest = fun () -> { pullRequest }
     let error_of_json name json =
       match name with
       | "InvalidPullRequestIdException" ->
@@ -8172,17 +8854,16 @@ module UpdatePullRequestTitleOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pullRequest", (Some (PullRequest.to_value x.pullRequest)))]
+        [("pullRequest", (Option.map x.pullRequest ~f:PullRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pullRequest =
-        PullRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
-      make ~pullRequest ()
+        (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
+      make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
-      make ~pullRequest ()
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
+      make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Replaces the title of a pull request."]
 module UpdatePullRequestTitleInput =
@@ -8211,10 +8892,10 @@ module UpdatePullRequestTitleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~title ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let title = field_map_exn json "title" Title.of_json in
+    let of_json json__ =
+      let title = field_map_exn json__ "title" Title.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~title ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Replaces the title of a pull request."]
@@ -8222,7 +8903,7 @@ module UpdatePullRequestStatusOutput =
   struct
     type nonrec t =
       {
-      pullRequest: PullRequest.t
+      pullRequest: PullRequest.t option
         [@ocaml.doc "Information about the pull request."]}
     type nonrec error =
       [
@@ -8245,8 +8926,7 @@ module UpdatePullRequestStatusOutput =
       | `PullRequestStatusRequiredException of
           PullRequestStatusRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePullRequestStatusOutput"
-    let make ~pullRequest = fun () -> { pullRequest }
+    let make ?pullRequest = fun () -> { pullRequest }
     let error_of_json name json =
       match name with
       | "EncryptionIntegrityChecksFailedException" ->
@@ -8375,17 +9055,16 @@ module UpdatePullRequestStatusOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pullRequest", (Some (PullRequest.to_value x.pullRequest)))]
+        [("pullRequest", (Option.map x.pullRequest ~f:PullRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pullRequest =
-        PullRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
-      make ~pullRequest ()
+        (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
+      make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
-      make ~pullRequest ()
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
+      make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the status of a pull request."]
 module UpdatePullRequestStatusInput =
@@ -8417,11 +9096,12 @@ module UpdatePullRequestStatusInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~pullRequestStatus ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pullRequestStatus =
-        field_map_exn json "pullRequestStatus" PullRequestStatusEnum.of_json in
+        field_map_exn json__ "pullRequestStatus"
+          PullRequestStatusEnum.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~pullRequestStatus ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the status of a pull request."]
@@ -8429,7 +9109,7 @@ module UpdatePullRequestDescriptionOutput =
   struct
     type nonrec t =
       {
-      pullRequest: PullRequest.t
+      pullRequest: PullRequest.t option
         [@ocaml.doc "Information about the updated pull request."]}
     type nonrec error =
       [ `InvalidDescriptionException of InvalidDescriptionException.t 
@@ -8440,8 +9120,7 @@ module UpdatePullRequestDescriptionOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePullRequestDescriptionOutput"
-    let make ~pullRequest = fun () -> { pullRequest }
+    let make ?pullRequest = fun () -> { pullRequest }
     let error_of_json name json =
       match name with
       | "InvalidDescriptionException" ->
@@ -8510,17 +9189,16 @@ module UpdatePullRequestDescriptionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pullRequest", (Some (PullRequest.to_value x.pullRequest)))]
+        [("pullRequest", (Option.map x.pullRequest ~f:PullRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pullRequest =
-        PullRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
-      make ~pullRequest ()
+        (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
+      make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
-      make ~pullRequest ()
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
+      make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Replaces the contents of the description of a pull request."]
@@ -8551,10 +9229,11 @@ module UpdatePullRequestDescriptionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~description ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map_exn json "description" Description.of_json in
+    let of_json json__ =
+      let description =
+        field_map_exn json__ "description" Description.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~description ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8593,12 +9272,12 @@ module UpdatePullRequestApprovalStateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalState ~revisionId ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalState =
-        field_map_exn json "approvalState" ApprovalState.of_json in
-      let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
+        field_map_exn json__ "approvalState" ApprovalState.of_json in
+      let revisionId = field_map_exn json__ "revisionId" RevisionId.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~approvalState ~revisionId ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8607,7 +9286,7 @@ module UpdatePullRequestApprovalRuleContentOutput =
   struct
     type nonrec t =
       {
-      approvalRule: ApprovalRule.t
+      approvalRule: ApprovalRule.t option
         [@ocaml.doc "Information about the updated approval rule."]}
     type nonrec error =
       [
@@ -8640,8 +9319,7 @@ module UpdatePullRequestApprovalRuleContentOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdatePullRequestApprovalRuleContentOutput"
-    let make ~approvalRule = fun () -> { approvalRule }
+    let make ?approvalRule = fun () -> { approvalRule }
     let error_of_json name json =
       match name with
       | "ApprovalRuleContentRequiredException" ->
@@ -8822,18 +9500,18 @@ module UpdatePullRequestApprovalRuleContentOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("approvalRule", (Some (ApprovalRule.to_value x.approvalRule)))]
+        [("approvalRule",
+           (Option.map x.approvalRule ~f:ApprovalRule.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRule =
-        ApprovalRule.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRule") in
-      make ~approvalRule ()
+        (Option.map ~f:ApprovalRule.of_xml)
+          (Xml.child xml_arg0 "approvalRule") in
+      make ?approvalRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let approvalRule =
-        field_map_exn json "approvalRule" ApprovalRule.of_json in
-      make ~approvalRule ()
+    let of_json json__ =
+      let approvalRule = field_map json__ "approvalRule" ApprovalRule.of_json in
+      make ?approvalRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the structure of an approval rule created specifically for a pull request. For example, you can change the number of required approvers and the approval pool for approvers."]
@@ -8850,7 +9528,7 @@ module UpdatePullRequestApprovalRuleContentInput =
           "The SHA-256 hash signature for the content of the approval rule. You can retrieve this information by using GetPullRequest."];
       newRuleContent: ApprovalRuleContent.t
         [@ocaml.doc
-          "The updated content for the approval rule. When you update the content of the approval rule, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an AWS account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the AWS account 123456789012 and Mary_Major, all of the following are counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."]}
+          "The updated content for the approval rule. When you update the content of the approval rule, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an Amazon Web Services account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the Amazon Web Services account 123456789012 and Mary_Major, all of the following are counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."]}
     let context_ = "UpdatePullRequestApprovalRuleContentInput"
     let make ?existingRuleContentSha256 =
       fun ~pullRequestId ->
@@ -8890,15 +9568,16 @@ module UpdatePullRequestApprovalRuleContentInput =
       make ~newRuleContent ?existingRuleContentSha256 ~approvalRuleName
         ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newRuleContent =
-        field_map_exn json "newRuleContent" ApprovalRuleContent.of_json in
+        field_map_exn json__ "newRuleContent" ApprovalRuleContent.of_json in
       let existingRuleContentSha256 =
-        field_map json "existingRuleContentSha256" RuleContentSha256.of_json in
+        field_map json__ "existingRuleContentSha256"
+          RuleContentSha256.of_json in
       let approvalRuleName =
-        field_map_exn json "approvalRuleName" ApprovalRuleName.of_json in
+        field_map_exn json__ "approvalRuleName" ApprovalRuleName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~newRuleContent ?existingRuleContentSha256 ~approvalRuleName
         ~pullRequestId ()
     let to_json v = composed_to_json to_value v
@@ -8910,9 +9589,9 @@ module UpdateDefaultBranchInput =
       {
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository to set or change the default branch for."];
+          "The name of the repository for which you want to set or change the default branch."];
       defaultBranchName: BranchName.t
-        [@ocaml.doc "The name of the branch to set as the default."]}
+        [@ocaml.doc "The name of the branch to set as the default branch."]}
     let context_ = "UpdateDefaultBranchInput"
     let make ~repositoryName =
       fun ~defaultBranchName ->
@@ -8933,11 +9612,11 @@ module UpdateDefaultBranchInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~defaultBranchName ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultBranchName =
-        field_map_exn json "defaultBranchName" BranchName.of_json in
+        field_map_exn json__ "defaultBranchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~defaultBranchName ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9051,8 +9730,8 @@ module UpdateCommentOutput =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
       make ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Replaces the contents of a comment."]
@@ -9081,9 +9760,9 @@ module UpdateCommentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~content ~commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map_exn json "content" Content.of_json in
-      let commentId = field_map_exn json "commentId" CommentId.of_json in
+    let of_json json__ =
+      let content = field_map_exn json__ "content" Content.of_json in
+      let commentId = field_map_exn json__ "commentId" CommentId.of_json in
       make ~content ~commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Replaces the contents of a comment."]
@@ -9091,7 +9770,7 @@ module UpdateApprovalRuleTemplateNameOutput =
   struct
     type nonrec t =
       {
-      approvalRuleTemplate: ApprovalRuleTemplate.t
+      approvalRuleTemplate: ApprovalRuleTemplate.t option
         [@ocaml.doc
           "The structure and content of the updated approval rule template."]}
     type nonrec error =
@@ -9105,8 +9784,7 @@ module UpdateApprovalRuleTemplateNameOutput =
       | `InvalidApprovalRuleTemplateNameException of
           InvalidApprovalRuleTemplateNameException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateApprovalRuleTemplateNameOutput"
-    let make ~approvalRuleTemplate = fun () -> { approvalRuleTemplate }
+    let make ?approvalRuleTemplate = fun () -> { approvalRuleTemplate }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateDoesNotExistException" ->
@@ -9170,19 +9848,19 @@ module UpdateApprovalRuleTemplateNameOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplate",
-           (Some (ApprovalRuleTemplate.to_value x.approvalRuleTemplate)))]
+           (Option.map x.approvalRuleTemplate
+              ~f:ApprovalRuleTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplate =
-        ApprovalRuleTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
-      make ~approvalRuleTemplate ()
+        (Option.map ~f:ApprovalRuleTemplate.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplate") in
+      make ?approvalRuleTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplate =
-        field_map_exn json "approvalRuleTemplate"
-          ApprovalRuleTemplate.of_json in
-      make ~approvalRuleTemplate ()
+        field_map json__ "approvalRuleTemplate" ApprovalRuleTemplate.of_json in
+      make ?approvalRuleTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the name of a specified approval rule template."]
 module UpdateApprovalRuleTemplateNameInput =
@@ -9220,12 +9898,12 @@ module UpdateApprovalRuleTemplateNameInput =
              "oldApprovalRuleTemplateName") in
       make ~newApprovalRuleTemplateName ~oldApprovalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let newApprovalRuleTemplateName =
-        field_map_exn json "newApprovalRuleTemplateName"
+        field_map_exn json__ "newApprovalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       let oldApprovalRuleTemplateName =
-        field_map_exn json "oldApprovalRuleTemplateName"
+        field_map_exn json__ "oldApprovalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~newApprovalRuleTemplateName ~oldApprovalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -9234,7 +9912,7 @@ module UpdateApprovalRuleTemplateDescriptionOutput =
   struct
     type nonrec t =
       {
-      approvalRuleTemplate: ApprovalRuleTemplate.t
+      approvalRuleTemplate: ApprovalRuleTemplate.t option
         [@ocaml.doc
           "The structure and content of the updated approval rule template."]}
     type nonrec error =
@@ -9248,8 +9926,7 @@ module UpdateApprovalRuleTemplateDescriptionOutput =
       | `InvalidApprovalRuleTemplateNameException of
           InvalidApprovalRuleTemplateNameException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateApprovalRuleTemplateDescriptionOutput"
-    let make ~approvalRuleTemplate = fun () -> { approvalRuleTemplate }
+    let make ?approvalRuleTemplate = fun () -> { approvalRuleTemplate }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateDoesNotExistException" ->
@@ -9313,19 +9990,19 @@ module UpdateApprovalRuleTemplateDescriptionOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplate",
-           (Some (ApprovalRuleTemplate.to_value x.approvalRuleTemplate)))]
+           (Option.map x.approvalRuleTemplate
+              ~f:ApprovalRuleTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplate =
-        ApprovalRuleTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
-      make ~approvalRuleTemplate ()
+        (Option.map ~f:ApprovalRuleTemplate.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplate") in
+      make ?approvalRuleTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplate =
-        field_map_exn json "approvalRuleTemplate"
-          ApprovalRuleTemplate.of_json in
-      make ~approvalRuleTemplate ()
+        field_map json__ "approvalRuleTemplate" ApprovalRuleTemplate.of_json in
+      make ?approvalRuleTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the description for a specified approval rule template."]
@@ -9364,12 +10041,12 @@ module UpdateApprovalRuleTemplateDescriptionInput =
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateDescription ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateDescription =
-        field_map_exn json "approvalRuleTemplateDescription"
+        field_map_exn json__ "approvalRuleTemplateDescription"
           ApprovalRuleTemplateDescription.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~approvalRuleTemplateDescription ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -9378,7 +10055,7 @@ module UpdateApprovalRuleTemplateDescriptionInput =
 module UpdateApprovalRuleTemplateContentOutput =
   struct
     type nonrec t = {
-      approvalRuleTemplate: ApprovalRuleTemplate.t }
+      approvalRuleTemplate: ApprovalRuleTemplate.t option }
     type nonrec error =
       [
         `ApprovalRuleTemplateContentRequiredException of
@@ -9394,8 +10071,7 @@ module UpdateApprovalRuleTemplateContentOutput =
       | `InvalidRuleContentSha256Exception of
           InvalidRuleContentSha256Exception.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateApprovalRuleTemplateContentOutput"
-    let make ~approvalRuleTemplate = fun () -> { approvalRuleTemplate }
+    let make ?approvalRuleTemplate = fun () -> { approvalRuleTemplate }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateContentRequiredException" ->
@@ -9481,19 +10157,19 @@ module UpdateApprovalRuleTemplateContentOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplate",
-           (Some (ApprovalRuleTemplate.to_value x.approvalRuleTemplate)))]
+           (Option.map x.approvalRuleTemplate
+              ~f:ApprovalRuleTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplate =
-        ApprovalRuleTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
-      make ~approvalRuleTemplate ()
+        (Option.map ~f:ApprovalRuleTemplate.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplate") in
+      make ?approvalRuleTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplate =
-        field_map_exn json "approvalRuleTemplate"
-          ApprovalRuleTemplate.of_json in
-      make ~approvalRuleTemplate ()
+        field_map json__ "approvalRuleTemplate" ApprovalRuleTemplate.of_json in
+      make ?approvalRuleTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates the content of an approval rule template. You can change the number of required approvals, the membership of the approval rule, and whether an approval pool is defined."]
@@ -9545,14 +10221,15 @@ module UpdateApprovalRuleTemplateContentInput =
       make ?existingRuleContentSha256 ~newRuleContent
         ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let existingRuleContentSha256 =
-        field_map json "existingRuleContentSha256" RuleContentSha256.of_json in
+        field_map json__ "existingRuleContentSha256"
+          RuleContentSha256.of_json in
       let newRuleContent =
-        field_map_exn json "newRuleContent"
+        field_map_exn json__ "newRuleContent"
           ApprovalRuleTemplateContent.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ?existingRuleContentSha256 ~newRuleContent
         ~approvalRuleTemplateName ()
@@ -9586,13 +10263,14 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeysList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeysList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes tags for a resource in AWS CodeCommit. For a list of valid resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "Removes tags for a resource in CodeCommit. For a list of valid resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module TestRepositoryTriggersOutput =
   struct
     type nonrec t =
@@ -9904,12 +10582,12 @@ module TestRepositoryTriggersOutput =
           (Xml.child xml_arg0 "successfulExecutions") in
       make ?failedExecutions ?successfulExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedExecutions =
-        field_map json "failedExecutions"
+        field_map json__ "failedExecutions"
           RepositoryTriggerExecutionFailureList.of_json in
       let successfulExecutions =
-        field_map json "successfulExecutions"
+        field_map json__ "successfulExecutions"
           RepositoryTriggerNameList.of_json in
       make ?failedExecutions ?successfulExecutions ()
     let to_json v = composed_to_json to_value v
@@ -9942,11 +10620,11 @@ module TestRepositoryTriggersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~triggers ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let triggers =
-        field_map_exn json "triggers" RepositoryTriggersList.of_json in
+        field_map_exn json__ "triggers" RepositoryTriggersList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~triggers ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9988,13 +10666,14 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagsMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates tags for a resource in AWS CodeCommit. For a list of valid resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "Adds or updates tags for a resource in CodeCommit. For a list of valid resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module TagKeysListRequiredException =
   struct
     type nonrec t = unit
@@ -10333,9 +11012,9 @@ module PutRepositoryTriggersOutput =
           (Xml.child xml_arg0 "configurationId") in
       make ?configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationId =
-        field_map json "configurationId"
+        field_map json__ "configurationId"
           RepositoryTriggersConfigurationId.of_json in
       make ?configurationId ()
     let to_json v = composed_to_json to_value v
@@ -10369,11 +11048,11 @@ module PutRepositoryTriggersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~triggers ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let triggers =
-        field_map_exn json "triggers" RepositoryTriggersList.of_json in
+        field_map_exn json__ "triggers" RepositoryTriggersList.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~triggers ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10382,12 +11061,12 @@ module PutFileOutput =
   struct
     type nonrec t =
       {
-      commitId: ObjectId.t
+      commitId: ObjectId.t option
         [@ocaml.doc
           "The full SHA ID of the commit that contains this file change."];
-      blobId: ObjectId.t
+      blobId: ObjectId.t option
         [@ocaml.doc "The ID of the blob, which is its SHA-1 pointer."];
-      treeId: ObjectId.t
+      treeId: ObjectId.t option
         [@ocaml.doc
           "The full SHA-1 pointer of the tree information for the commit that contains this file change."]}
     type nonrec error =
@@ -10433,9 +11112,8 @@ module PutFileOutput =
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `SameFileContentException of SameFileContentException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutFileOutput"
-    let make ~commitId =
-      fun ~blobId -> fun ~treeId -> fun () -> { commitId; blobId; treeId }
+    let make ?commitId =
+      fun ?blobId -> fun ?treeId -> fun () -> { commitId; blobId; treeId }
     let error_of_json name json =
       match name with
       | "BranchDoesNotExistException" ->
@@ -10749,27 +11427,27 @@ module PutFileOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("commitId", (Some (ObjectId.to_value x.commitId)));
-        ("blobId", (Some (ObjectId.to_value x.blobId)));
-        ("treeId", (Some (ObjectId.to_value x.treeId)))]
+        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
+        ("blobId", (Option.map x.blobId ~f:ObjectId.to_value));
+        ("treeId", (Option.map x.treeId ~f:ObjectId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let treeId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "treeId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
       let blobId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "blobId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       let commitId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
-      make ~treeId ~blobId ~commitId ()
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
+      make ?treeId ?blobId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let treeId = field_map_exn json "treeId" ObjectId.of_json in
-      let blobId = field_map_exn json "blobId" ObjectId.of_json in
-      let commitId = field_map_exn json "commitId" ObjectId.of_json in
-      make ~treeId ~blobId ~commitId ()
+    let of_json json__ =
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
+      make ?treeId ?blobId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates a file in a branch in an AWS CodeCommit repository, and generates a commit for the addition in the specified branch."]
+       "Adds or updates a file in a branch in an CodeCommit repository, and generates a commit for the addition in the specified branch."]
 module PutFileInput =
   struct
     type nonrec t =
@@ -10860,22 +11538,23 @@ module PutFileInput =
       make ?email ?name ?commitMessage ?parentCommitId ?fileMode ~filePath
         ~fileContent ~branchName ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map json "email" Email.of_json in
-      let name = field_map json "name" Name.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
-      let parentCommitId = field_map json "parentCommitId" CommitId.of_json in
-      let fileMode = field_map json "fileMode" FileModeTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      let fileContent = field_map_exn json "fileContent" FileContent.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
+    let of_json json__ =
+      let email = field_map json__ "email" Email.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
+      let parentCommitId = field_map json__ "parentCommitId" CommitId.of_json in
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
+      let fileContent =
+        field_map_exn json__ "fileContent" FileContent.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?email ?name ?commitMessage ?parentCommitId ?fileMode ~filePath
         ~fileContent ~branchName ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds or updates a file in a branch in an AWS CodeCommit repository, and generates a commit for the addition in the specified branch."]
+       "Adds or updates a file in a branch in an CodeCommit repository, and generates a commit for the addition in the specified branch."]
 module PutCommentReactionInput =
   struct
     type nonrec t =
@@ -10885,7 +11564,7 @@ module PutCommentReactionInput =
           "The ID of the comment to which you want to add or update a reaction."];
       reactionValue: ReactionValue.t
         [@ocaml.doc
-          "The emoji reaction you want to add or update. To remove a reaction, provide a value of blank or null. You can also provide the value of none. For information about emoji reaction values supported in AWS CodeCommit, see the AWS CodeCommit User Guide."]}
+          "The emoji reaction you want to add or update. To remove a reaction, provide a value of blank or null. You can also provide the value of none. For information about emoji reaction values supported in CodeCommit, see the CodeCommit User Guide."]}
     let context_ = "PutCommentReactionInput"
     let make ~commentId =
       fun ~reactionValue -> fun () -> { commentId; reactionValue }
@@ -10903,10 +11582,10 @@ module PutCommentReactionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~reactionValue ~commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reactionValue =
-        field_map_exn json "reactionValue" ReactionValue.of_json in
-      let commentId = field_map_exn json "commentId" CommentId.of_json in
+        field_map_exn json__ "reactionValue" ReactionValue.of_json in
+      let commentId = field_map_exn json__ "commentId" CommentId.of_json in
       make ~reactionValue ~commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11048,8 +11727,8 @@ module PostCommentReplyOutput =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
       make ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11088,11 +11767,11 @@ module PostCommentReplyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "inReplyTo") in
       make ~content ?clientRequestToken ~inReplyTo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map_exn json "content" Content.of_json in
+    let of_json json__ =
+      let content = field_map_exn json__ "content" Content.of_json in
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let inReplyTo = field_map_exn json "inReplyTo" CommentId.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let inReplyTo = field_map_exn json__ "inReplyTo" CommentId.of_json in
       make ~content ?clientRequestToken ~inReplyTo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11499,17 +12178,17 @@ module PostCommentForPullRequestOutput =
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?pullRequestId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterBlobId = field_map json "afterBlobId" ObjectId.of_json in
-      let beforeBlobId = field_map json "beforeBlobId" ObjectId.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterBlobId = field_map json__ "afterBlobId" ObjectId.of_json in
+      let beforeBlobId = field_map json__ "beforeBlobId" ObjectId.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let pullRequestId =
-        field_map json "pullRequestId" PullRequestId.of_json in
+        field_map json__ "pullRequestId" PullRequestId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?pullRequestId ?repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -11590,18 +12269,19 @@ module PostCommentForPullRequestInput =
       make ?clientRequestToken ~content ?location ~afterCommitId
         ~beforeCommitId ~repositoryName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let content = field_map_exn json "content" Content.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterCommitId = field_map_exn json "afterCommitId" CommitId.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let content = field_map_exn json__ "content" Content.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterCommitId =
+        field_map_exn json__ "afterCommitId" CommitId.of_json in
       let beforeCommitId =
-        field_map_exn json "beforeCommitId" CommitId.of_json in
+        field_map_exn json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?clientRequestToken ~content ?location ~afterCommitId
         ~beforeCommitId ~repositoryName ~pullRequestId ()
     let to_json v = composed_to_json to_value v
@@ -11951,15 +12631,15 @@ module PostCommentForComparedCommitOutput =
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterBlobId = field_map json "afterBlobId" ObjectId.of_json in
-      let beforeBlobId = field_map json "beforeBlobId" ObjectId.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterBlobId = field_map json__ "afterBlobId" ObjectId.of_json in
+      let beforeBlobId = field_map json__ "beforeBlobId" ObjectId.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?comment ?location ?afterBlobId ?beforeBlobId ?afterCommitId
         ?beforeCommitId ?repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -12032,15 +12712,16 @@ module PostCommentForComparedCommitInput =
       make ?clientRequestToken ~content ?location ~afterCommitId
         ?beforeCommitId ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let content = field_map_exn json "content" Content.of_json in
-      let location = field_map json "location" Location.of_json in
-      let afterCommitId = field_map_exn json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let content = field_map_exn json__ "content" Content.of_json in
+      let location = field_map json__ "location" Location.of_json in
+      let afterCommitId =
+        field_map_exn json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?clientRequestToken ~content ?location ~afterCommitId
         ?beforeCommitId ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -12094,12 +12775,12 @@ module OverridePullRequestApprovalRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~overrideStatus ~revisionId ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrideStatus =
-        field_map_exn json "overrideStatus" OverrideStatus.of_json in
-      let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
+        field_map_exn json__ "overrideStatus" OverrideStatus.of_json in
+      let revisionId = field_map_exn json__ "revisionId" RevisionId.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~overrideStatus ~revisionId ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12591,8 +13272,8 @@ module MergePullRequestByThreeWayOutput =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map json "pullRequest" PullRequest.of_json in
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12705,25 +13386,25 @@ module MergePullRequestByThreeWayInput =
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolution =
-        field_map json "conflictResolution" ConflictResolution.of_json in
+        field_map json__ "conflictResolution" ConflictResolution.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let sourceCommitId = field_map json "sourceCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?conflictResolution ?keepEmptyFolders ?email ?authorName
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
@@ -13204,8 +13885,8 @@ module MergePullRequestBySquashOutput =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map json "pullRequest" PullRequest.of_json in
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13318,25 +13999,25 @@ module MergePullRequestBySquashInput =
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolution =
-        field_map json "conflictResolution" ConflictResolution.of_json in
+        field_map json__ "conflictResolution" ConflictResolution.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let sourceCommitId = field_map json "sourceCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?conflictResolution ?keepEmptyFolders ?email ?authorName
         ?commitMessage ?conflictResolutionStrategy ?conflictDetailLevel
         ?sourceCommitId ~repositoryName ~pullRequestId ()
@@ -13599,8 +14280,8 @@ module MergePullRequestByFastForwardOutput =
         (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
       make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map json "pullRequest" PullRequest.of_json in
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
       make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13641,12 +14322,12 @@ module MergePullRequestByFastForwardInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ?sourceCommitId ~repositoryName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceCommitId = field_map json "sourceCommitId" ObjectId.of_json in
+    let of_json json__ =
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?sourceCommitId ~repositoryName ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14130,9 +14811,9 @@ module MergeBranchesByThreeWayOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?treeId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -14257,27 +14938,27 @@ module MergeBranchesByThreeWayInput =
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolution =
-        field_map json "conflictResolution" ConflictResolution.of_json in
+        field_map json__ "conflictResolution" ConflictResolution.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let targetBranch = field_map json "targetBranch" BranchName.of_json in
+      let targetBranch = field_map json__ "targetBranch" BranchName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?conflictResolution ?keepEmptyFolders ?commitMessage ?email
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
@@ -14764,9 +15445,9 @@ module MergeBranchesBySquashOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?treeId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Merges two branches using the squash merge strategy."]
@@ -14889,27 +15570,27 @@ module MergeBranchesBySquashInput =
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolution =
-        field_map json "conflictResolution" ConflictResolution.of_json in
+        field_map json__ "conflictResolution" ConflictResolution.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let targetBranch = field_map json "targetBranch" BranchName.of_json in
+      let targetBranch = field_map json__ "targetBranch" BranchName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?conflictResolution ?keepEmptyFolders ?commitMessage ?email
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
@@ -15165,9 +15846,9 @@ module MergeBranchesByFastForwardOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?treeId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15225,14 +15906,14 @@ module MergeBranchesByFastForwardInput =
       make ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetBranch = field_map json "targetBranch" BranchName.of_json in
+    let of_json json__ =
+      let targetBranch = field_map json__ "targetBranch" BranchName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?targetBranch ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -15348,13 +16029,13 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS tags for a specified Amazon Resource Name (ARN) in AWS CodeCommit. For a list of valid resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "Gets information about Amazon Web Servicestags for a specified Amazon Resource Name (ARN) in CodeCommit. For a list of valid resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module ListTagsForResourceInput =
   struct
     type nonrec t =
@@ -15381,13 +16062,14 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?nextToken ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ?nextToken ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS tags for a specified Amazon Resource Name (ARN) in AWS CodeCommit. For a list of valid resources in AWS CodeCommit, see CodeCommit Resources and Operations in the AWS CodeCommit User Guide."]
+       "Gets information about Amazon Web Servicestags for a specified Amazon Resource Name (ARN) in CodeCommit. For a list of valid resources in CodeCommit, see CodeCommit Resources and Operations in the CodeCommit User Guide."]
 module ListRepositoriesOutput =
   struct
     type nonrec t =
@@ -15397,7 +16079,7 @@ module ListRepositoriesOutput =
           "Lists the repositories called by the list repositories operation."];
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An enumeration token that allows the operation to batch the results of the operation. Batch sizes are 1,000 for list repository operations. When the client sends the token back to AWS CodeCommit, another page of 1,000 records is retrieved."]}
+          "An enumeration token that allows the operation to batch the results of the operation. Batch sizes are 1,000 for list repository operations. When the client sends the token back to CodeCommit, another page of 1,000 records is retrieved."]}
     type nonrec error =
       [
         `InvalidContinuationTokenException of
@@ -15463,10 +16145,10 @@ module ListRepositoriesOutput =
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositories =
-        field_map json "repositories" RepositoryNameIdPairList.of_json in
+        field_map json__ "repositories" RepositoryNameIdPairList.of_json in
       make ?nextToken ?repositories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a list repositories operation."]
@@ -15476,7 +16158,7 @@ module ListRepositoriesInput =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "An enumeration token that allows the operation to batch the results of the operation. Batch sizes are 1,000 for list repository operations. When the client sends the token back to AWS CodeCommit, another page of 1,000 records is retrieved."];
+          "An enumeration token that allows the operation to batch the results of the operation. Batch sizes are 1,000 for list repository operations. When the client sends the token back to CodeCommit, another page of 1,000 records is retrieved."];
       sortBy: SortByEnum.t option
         [@ocaml.doc
           "The criteria used to sort the results of a list repositories operation."];
@@ -15500,10 +16182,10 @@ module ListRepositoriesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?order ?sortBy ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let order = field_map json "order" OrderEnum.of_json in
-      let sortBy = field_map json "sortBy" SortByEnum.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let order = field_map json__ "order" OrderEnum.of_json in
+      let sortBy = field_map json__ "sortBy" SortByEnum.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?order ?sortBy ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a list repositories operation."]
@@ -15670,10 +16352,10 @@ module ListRepositoriesForApprovalRuleTemplateOutput =
           (Xml.child xml_arg0 "repositoryNames") in
       make ?nextToken ?repositoryNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryNames =
-        field_map json "repositoryNames" RepositoryNameList.of_json in
+        field_map json__ "repositoryNames" RepositoryNameList.of_json in
       make ?nextToken ?repositoryNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -15715,11 +16397,11 @@ module ListRepositoriesForApprovalRuleTemplateInput =
              "approvalRuleTemplateName") in
       make ?maxResults ?nextToken ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ?maxResults ?nextToken ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -15729,7 +16411,7 @@ module ListPullRequestsOutput =
   struct
     type nonrec t =
       {
-      pullRequestIds: PullRequestIdList.t
+      pullRequestIds: PullRequestIdList.t option
         [@ocaml.doc "The system-generated IDs of the pull requests."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -15754,9 +16436,8 @@ module ListPullRequestsOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPullRequestsOutput"
-    let make ?nextToken =
-      fun ~pullRequestIds -> fun () -> { nextToken; pullRequestIds }
+    let make ?pullRequestIds =
+      fun ?nextToken -> fun () -> { pullRequestIds; nextToken }
     let error_of_json name json =
       match name with
       | "AuthorDoesNotExistException" ->
@@ -15903,22 +16584,22 @@ module ListPullRequestsOutput =
     let to_value x =
       structure_to_value
         [("pullRequestIds",
-           (Some (PullRequestIdList.to_value x.pullRequestIds)));
+           (Option.map x.pullRequestIds ~f:PullRequestIdList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let pullRequestIds =
-        PullRequestIdList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequestIds") in
-      make ?nextToken ~pullRequestIds ()
+        (Option.map ~f:PullRequestIdList.of_xml)
+          (Xml.child xml_arg0 "pullRequestIds") in
+      make ?nextToken ?pullRequestIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let pullRequestIds =
-        field_map_exn json "pullRequestIds" PullRequestIdList.of_json in
-      make ?nextToken ~pullRequestIds ()
+        field_map json__ "pullRequestIds" PullRequestIdList.of_json in
+      make ?nextToken ?pullRequestIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of pull requests for a specified repository. The return list can be refined by pull request status or pull request author ARN."]
@@ -15981,19 +16662,292 @@ module ListPullRequestsInput =
       make ?maxResults ?nextToken ?pullRequestStatus ?authorArn
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let pullRequestStatus =
-        field_map json "pullRequestStatus" PullRequestStatusEnum.of_json in
-      let authorArn = field_map json "authorArn" Arn.of_json in
+        field_map json__ "pullRequestStatus" PullRequestStatusEnum.of_json in
+      let authorArn = field_map json__ "authorArn" Arn.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?maxResults ?nextToken ?pullRequestStatus ?authorArn
         ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of pull requests for a specified repository. The return list can be refined by pull request status or pull request author ARN."]
+module ListFileCommitHistoryResponse =
+  struct
+    type nonrec t =
+      {
+      revisionDag: RevisionDag.t option
+        [@ocaml.doc
+          "An array of FileVersion objects that form a directed acyclic graph (DAG) of the changes to the file made by the commits that changed the file."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An enumeration token that can be used to return the next batch of results."]}
+    type nonrec error =
+      [ `CommitDoesNotExistException of CommitDoesNotExistException.t 
+      | `CommitRequiredException of CommitRequiredException.t 
+      | `EncryptionIntegrityChecksFailedException of
+          EncryptionIntegrityChecksFailedException.t 
+      | `EncryptionKeyAccessDeniedException of
+          EncryptionKeyAccessDeniedException.t 
+      | `EncryptionKeyDisabledException of EncryptionKeyDisabledException.t 
+      | `EncryptionKeyNotFoundException of EncryptionKeyNotFoundException.t 
+      | `EncryptionKeyUnavailableException of
+          EncryptionKeyUnavailableException.t 
+      | `InvalidCommitException of InvalidCommitException.t 
+      | `InvalidContinuationTokenException of
+          InvalidContinuationTokenException.t 
+      | `InvalidMaxResultsException of InvalidMaxResultsException.t 
+      | `InvalidRepositoryNameException of InvalidRepositoryNameException.t 
+      | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
+      | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
+      | `TipsDivergenceExceededException of TipsDivergenceExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?revisionDag =
+      fun ?nextToken -> fun () -> { revisionDag; nextToken }
+    let error_of_json name json =
+      match name with
+      | "CommitDoesNotExistException" ->
+          `CommitDoesNotExistException
+            (CommitDoesNotExistException.of_json json)
+      | "CommitRequiredException" ->
+          `CommitRequiredException (CommitRequiredException.of_json json)
+      | "EncryptionIntegrityChecksFailedException" ->
+          `EncryptionIntegrityChecksFailedException
+            (EncryptionIntegrityChecksFailedException.of_json json)
+      | "EncryptionKeyAccessDeniedException" ->
+          `EncryptionKeyAccessDeniedException
+            (EncryptionKeyAccessDeniedException.of_json json)
+      | "EncryptionKeyDisabledException" ->
+          `EncryptionKeyDisabledException
+            (EncryptionKeyDisabledException.of_json json)
+      | "EncryptionKeyNotFoundException" ->
+          `EncryptionKeyNotFoundException
+            (EncryptionKeyNotFoundException.of_json json)
+      | "EncryptionKeyUnavailableException" ->
+          `EncryptionKeyUnavailableException
+            (EncryptionKeyUnavailableException.of_json json)
+      | "InvalidCommitException" ->
+          `InvalidCommitException (InvalidCommitException.of_json json)
+      | "InvalidContinuationTokenException" ->
+          `InvalidContinuationTokenException
+            (InvalidContinuationTokenException.of_json json)
+      | "InvalidMaxResultsException" ->
+          `InvalidMaxResultsException
+            (InvalidMaxResultsException.of_json json)
+      | "InvalidRepositoryNameException" ->
+          `InvalidRepositoryNameException
+            (InvalidRepositoryNameException.of_json json)
+      | "RepositoryDoesNotExistException" ->
+          `RepositoryDoesNotExistException
+            (RepositoryDoesNotExistException.of_json json)
+      | "RepositoryNameRequiredException" ->
+          `RepositoryNameRequiredException
+            (RepositoryNameRequiredException.of_json json)
+      | "TipsDivergenceExceededException" ->
+          `TipsDivergenceExceededException
+            (TipsDivergenceExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "CommitDoesNotExistException" ->
+          `CommitDoesNotExistException
+            (CommitDoesNotExistException.of_xml xml)
+      | "CommitRequiredException" ->
+          `CommitRequiredException (CommitRequiredException.of_xml xml)
+      | "EncryptionIntegrityChecksFailedException" ->
+          `EncryptionIntegrityChecksFailedException
+            (EncryptionIntegrityChecksFailedException.of_xml xml)
+      | "EncryptionKeyAccessDeniedException" ->
+          `EncryptionKeyAccessDeniedException
+            (EncryptionKeyAccessDeniedException.of_xml xml)
+      | "EncryptionKeyDisabledException" ->
+          `EncryptionKeyDisabledException
+            (EncryptionKeyDisabledException.of_xml xml)
+      | "EncryptionKeyNotFoundException" ->
+          `EncryptionKeyNotFoundException
+            (EncryptionKeyNotFoundException.of_xml xml)
+      | "EncryptionKeyUnavailableException" ->
+          `EncryptionKeyUnavailableException
+            (EncryptionKeyUnavailableException.of_xml xml)
+      | "InvalidCommitException" ->
+          `InvalidCommitException (InvalidCommitException.of_xml xml)
+      | "InvalidContinuationTokenException" ->
+          `InvalidContinuationTokenException
+            (InvalidContinuationTokenException.of_xml xml)
+      | "InvalidMaxResultsException" ->
+          `InvalidMaxResultsException (InvalidMaxResultsException.of_xml xml)
+      | "InvalidRepositoryNameException" ->
+          `InvalidRepositoryNameException
+            (InvalidRepositoryNameException.of_xml xml)
+      | "RepositoryDoesNotExistException" ->
+          `RepositoryDoesNotExistException
+            (RepositoryDoesNotExistException.of_xml xml)
+      | "RepositoryNameRequiredException" ->
+          `RepositoryNameRequiredException
+            (RepositoryNameRequiredException.of_xml xml)
+      | "TipsDivergenceExceededException" ->
+          `TipsDivergenceExceededException
+            (TipsDivergenceExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `CommitDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "CommitDoesNotExistException"));
+            ("details", (CommitDoesNotExistException.to_json e))]
+      | `CommitRequiredException e ->
+          `Assoc
+            [("error", (`String "CommitRequiredException"));
+            ("details", (CommitRequiredException.to_json e))]
+      | `EncryptionIntegrityChecksFailedException e ->
+          `Assoc
+            [("error", (`String "EncryptionIntegrityChecksFailedException"));
+            ("details", (EncryptionIntegrityChecksFailedException.to_json e))]
+      | `EncryptionKeyAccessDeniedException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyAccessDeniedException"));
+            ("details", (EncryptionKeyAccessDeniedException.to_json e))]
+      | `EncryptionKeyDisabledException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyDisabledException"));
+            ("details", (EncryptionKeyDisabledException.to_json e))]
+      | `EncryptionKeyNotFoundException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyNotFoundException"));
+            ("details", (EncryptionKeyNotFoundException.to_json e))]
+      | `EncryptionKeyUnavailableException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyUnavailableException"));
+            ("details", (EncryptionKeyUnavailableException.to_json e))]
+      | `InvalidCommitException e ->
+          `Assoc
+            [("error", (`String "InvalidCommitException"));
+            ("details", (InvalidCommitException.to_json e))]
+      | `InvalidContinuationTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidContinuationTokenException"));
+            ("details", (InvalidContinuationTokenException.to_json e))]
+      | `InvalidMaxResultsException e ->
+          `Assoc
+            [("error", (`String "InvalidMaxResultsException"));
+            ("details", (InvalidMaxResultsException.to_json e))]
+      | `InvalidRepositoryNameException e ->
+          `Assoc
+            [("error", (`String "InvalidRepositoryNameException"));
+            ("details", (InvalidRepositoryNameException.to_json e))]
+      | `RepositoryDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "RepositoryDoesNotExistException"));
+            ("details", (RepositoryDoesNotExistException.to_json e))]
+      | `RepositoryNameRequiredException e ->
+          `Assoc
+            [("error", (`String "RepositoryNameRequiredException"));
+            ("details", (RepositoryNameRequiredException.to_json e))]
+      | `TipsDivergenceExceededException e ->
+          `Assoc
+            [("error", (`String "TipsDivergenceExceededException"));
+            ("details", (TipsDivergenceExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("revisionDag", (Option.map x.revisionDag ~f:RevisionDag.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let revisionDag =
+        (Option.map ~f:RevisionDag.of_xml) (Xml.child xml_arg0 "revisionDag") in
+      make ?nextToken ?revisionDag ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let revisionDag = field_map json__ "revisionDag" RevisionDag.of_json in
+      make ?nextToken ?revisionDag ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of commits and changes to a specified file."]
+module ListFileCommitHistoryRequest =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t
+        [@ocaml.doc "The name of the repository that contains the file."];
+      commitSpecifier: CommitName.t option
+        [@ocaml.doc
+          "The fully quaified reference that identifies the commit that contains the file. For example, you can specify a full commit ID, a tag, a branch name, or a reference such as refs/heads/main. If none is provided, the head commit is used."];
+      filePath: Path.t
+        [@ocaml.doc
+          "The full path of the file whose history you want to retrieve, including the name of the file."];
+      maxResults: Limit.t option
+        [@ocaml.doc
+          "A non-zero, non-negative integer used to limit the number of returned results."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An enumeration token that allows the operation to batch the results."]}
+    let context_ = "ListFileCommitHistoryRequest"
+    let make ?commitSpecifier =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~repositoryName ->
+            fun ~filePath ->
+              fun () ->
+                {
+                  commitSpecifier;
+                  maxResults;
+                  nextToken;
+                  repositoryName;
+                  filePath
+                }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Some (RepositoryName.to_value x.repositoryName)));
+        ("commitSpecifier",
+          (Option.map x.commitSpecifier ~f:CommitName.to_value));
+        ("filePath", (Some (Path.to_value x.filePath)));
+        ("maxResults", (Option.map x.maxResults ~f:Limit.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Limit.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let filePath =
+        Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
+      let commitSpecifier =
+        (Option.map ~f:CommitName.of_xml)
+          (Xml.child xml_arg0 "commitSpecifier") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
+      make ?nextToken ?maxResults ~filePath ?commitSpecifier ~repositoryName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" Limit.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
+      let commitSpecifier =
+        field_map json__ "commitSpecifier" CommitName.of_json in
+      let repositoryName =
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      make ?nextToken ?maxResults ~filePath ?commitSpecifier ~repositoryName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of commits and changes to a specified file."]
 module ListBranchesOutput =
   struct
     type nonrec t =
@@ -16138,9 +17092,9 @@ module ListBranchesOutput =
         (Option.map ~f:BranchNameList.of_xml) (Xml.child xml_arg0 "branches") in
       make ?nextToken ?branches ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let branches = field_map json "branches" BranchNameList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let branches = field_map json__ "branches" BranchNameList.of_json in
       make ?nextToken ?branches ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a list branches operation."]
@@ -16170,10 +17124,10 @@ module ListBranchesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?nextToken ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?nextToken ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a list branches operation."]
@@ -16336,10 +17290,10 @@ module ListAssociatedApprovalRuleTemplatesForRepositoryOutput =
           (Xml.child xml_arg0 "approvalRuleTemplateNames") in
       make ?nextToken ?approvalRuleTemplateNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let approvalRuleTemplateNames =
-        field_map json "approvalRuleTemplateNames"
+        field_map json__ "approvalRuleTemplateNames"
           ApprovalRuleTemplateNameList.of_json in
       make ?nextToken ?approvalRuleTemplateNames ()
     let to_json v = composed_to_json to_value v
@@ -16380,11 +17334,11 @@ module ListAssociatedApprovalRuleTemplatesForRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ?maxResults ?nextToken ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?maxResults ?nextToken ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16395,7 +17349,7 @@ module ListApprovalRuleTemplatesOutput =
       {
       approvalRuleTemplateNames: ApprovalRuleTemplateNameList.t option
         [@ocaml.doc
-          "The names of all the approval rule templates found in the AWS Region for your AWS account."];
+          "The names of all the approval rule templates found in the Amazon Web Services Region for your Amazon Web Services account."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "An enumeration token that allows the operation to batch the next results of the operation."]}
@@ -16457,15 +17411,15 @@ module ListApprovalRuleTemplatesOutput =
           (Xml.child xml_arg0 "approvalRuleTemplateNames") in
       make ?nextToken ?approvalRuleTemplateNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let approvalRuleTemplateNames =
-        field_map json "approvalRuleTemplateNames"
+        field_map json__ "approvalRuleTemplateNames"
           ApprovalRuleTemplateNameList.of_json in
       make ?nextToken ?approvalRuleTemplateNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all approval rule templates in the specified AWS Region in your AWS account. If an AWS Region is not specified, the AWS Region where you are signed in is used."]
+       "Lists all approval rule templates in the specified Amazon Web Services Region in your Amazon Web Services account. If an Amazon Web Services Region is not specified, the Amazon Web Services Region where you are signed in is used."]
 module ListApprovalRuleTemplatesInput =
   struct
     type nonrec t =
@@ -16490,13 +17444,13 @@ module ListApprovalRuleTemplatesInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all approval rule templates in the specified AWS Region in your AWS account. If an AWS Region is not specified, the AWS Region where you are signed in is used."]
+       "Lists all approval rule templates in the specified Amazon Web Services Region in your Amazon Web Services account. If an Amazon Web Services Region is not specified, the Amazon Web Services Region where you are signed in is used."]
 module InvalidTagKeysListException =
   struct
     type nonrec t = unit
@@ -16521,7 +17475,7 @@ module InvalidReactionValueException =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The value of the reaction is not valid. For more information, see the AWS CodeCommit User Guide."]
+       "The value of the reaction is not valid. For more information, see the CodeCommit User Guide."]
 module InvalidOverrideStatusException =
   struct
     type nonrec t = unit
@@ -16686,10 +17640,11 @@ module GetRepositoryTriggersOutput =
           (Xml.child xml_arg0 "configurationId") in
       make ?triggers ?configurationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let triggers = field_map json "triggers" RepositoryTriggersList.of_json in
+    let of_json json__ =
+      let triggers =
+        field_map json__ "triggers" RepositoryTriggersList.of_json in
       let configurationId =
-        field_map json "configurationId"
+        field_map json__ "configurationId"
           RepositoryTriggersConfigurationId.of_json in
       make ?triggers ?configurationId ()
     let to_json v = composed_to_json to_value v
@@ -16715,9 +17670,9 @@ module GetRepositoryTriggersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -16850,9 +17805,9 @@ module GetRepositoryOutput =
           (Xml.child xml_arg0 "repositoryMetadata") in
       make ?repositoryMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryMetadata =
-        field_map json "repositoryMetadata" RepositoryMetadata.of_json in
+        field_map json__ "repositoryMetadata" RepositoryMetadata.of_json in
       make ?repositoryMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a get repository operation."]
@@ -16875,9 +17830,9 @@ module GetRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a get repository operation."]
@@ -17037,9 +17992,9 @@ module GetPullRequestOverrideStateOutput =
         (Option.map ~f:Overridden.of_xml) (Xml.child xml_arg0 "overridden") in
       make ?overrider ?overridden ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let overrider = field_map json "overrider" Arn.of_json in
-      let overridden = field_map json "overridden" Overridden.of_json in
+    let of_json json__ =
+      let overrider = field_map json__ "overrider" Arn.of_json in
+      let overridden = field_map json__ "overridden" Overridden.of_json in
       make ?overrider ?overridden ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17071,10 +18026,10 @@ module GetPullRequestOverrideStateInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
+    let of_json json__ =
+      let revisionId = field_map_exn json__ "revisionId" RevisionId.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~revisionId ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17083,7 +18038,7 @@ module GetPullRequestOutput =
   struct
     type nonrec t =
       {
-      pullRequest: PullRequest.t
+      pullRequest: PullRequest.t option
         [@ocaml.doc "Information about the specified pull request."]}
     type nonrec error =
       [
@@ -17100,8 +18055,7 @@ module GetPullRequestOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetPullRequestOutput"
-    let make ~pullRequest = fun () -> { pullRequest }
+    let make ?pullRequest = fun () -> { pullRequest }
     let error_of_json name json =
       match name with
       | "EncryptionIntegrityChecksFailedException" ->
@@ -17200,17 +18154,16 @@ module GetPullRequestOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pullRequest", (Some (PullRequest.to_value x.pullRequest)))]
+        [("pullRequest", (Option.map x.pullRequest ~f:PullRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pullRequest =
-        PullRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
-      make ~pullRequest ()
+        (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
+      make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
-      make ~pullRequest ()
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
+      make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about a pull request in a specified repository."]
@@ -17233,9 +18186,9 @@ module GetPullRequestInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17389,8 +18342,8 @@ module GetPullRequestApprovalStatesOutput =
         (Option.map ~f:ApprovalList.of_xml) (Xml.child xml_arg0 "approvals") in
       make ?approvals ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let approvals = field_map json "approvals" ApprovalList.of_json in
+    let of_json json__ =
+      let approvals = field_map json__ "approvals" ApprovalList.of_json in
       make ?approvals ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17420,10 +18373,10 @@ module GetPullRequestApprovalStatesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
+    let of_json json__ =
+      let revisionId = field_map_exn json__ "revisionId" RevisionId.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~revisionId ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17432,15 +18385,15 @@ module GetMergeOptionsOutput =
   struct
     type nonrec t =
       {
-      mergeOptions: MergeOptions.t
+      mergeOptions: MergeOptions.t option
         [@ocaml.doc "The merge option or strategy used to merge the code."];
-      sourceCommitId: ObjectId.t
+      sourceCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the source commit specifier that was used in the merge evaluation."];
-      destinationCommitId: ObjectId.t
+      destinationCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the destination commit specifier that was used in the merge evaluation."];
-      baseCommitId: ObjectId.t
+      baseCommitId: ObjectId.t option
         [@ocaml.doc "The commit ID of the merge base."]}
     type nonrec error =
       [ `CommitDoesNotExistException of CommitDoesNotExistException.t 
@@ -17467,11 +18420,10 @@ module GetMergeOptionsOutput =
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `TipsDivergenceExceededException of TipsDivergenceExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetMergeOptionsOutput"
-    let make ~mergeOptions =
-      fun ~sourceCommitId ->
-        fun ~destinationCommitId ->
-          fun ~baseCommitId ->
+    let make ?mergeOptions =
+      fun ?sourceCommitId ->
+        fun ?destinationCommitId ->
+          fun ?baseCommitId ->
             fun () ->
               {
                 mergeOptions;
@@ -17656,37 +18608,35 @@ module GetMergeOptionsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("mergeOptions", (Some (MergeOptions.to_value x.mergeOptions)));
-        ("sourceCommitId", (Some (ObjectId.to_value x.sourceCommitId)));
+        [("mergeOptions",
+           (Option.map x.mergeOptions ~f:MergeOptions.to_value));
+        ("sourceCommitId",
+          (Option.map x.sourceCommitId ~f:ObjectId.to_value));
         ("destinationCommitId",
-          (Some (ObjectId.to_value x.destinationCommitId)));
-        ("baseCommitId", (Some (ObjectId.to_value x.baseCommitId)))]
+          (Option.map x.destinationCommitId ~f:ObjectId.to_value));
+        ("baseCommitId", (Option.map x.baseCommitId ~f:ObjectId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let baseCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "baseCommitId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "baseCommitId") in
       let destinationCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationCommitId") in
+        (Option.map ~f:ObjectId.of_xml)
+          (Xml.child xml_arg0 "destinationCommitId") in
       let sourceCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceCommitId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "sourceCommitId") in
       let mergeOptions =
-        MergeOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "mergeOptions") in
-      make ~baseCommitId ~destinationCommitId ~sourceCommitId ~mergeOptions
+        (Option.map ~f:MergeOptions.of_xml)
+          (Xml.child xml_arg0 "mergeOptions") in
+      make ?baseCommitId ?destinationCommitId ?sourceCommitId ?mergeOptions
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseCommitId = field_map_exn json "baseCommitId" ObjectId.of_json in
+    let of_json json__ =
+      let baseCommitId = field_map json__ "baseCommitId" ObjectId.of_json in
       let destinationCommitId =
-        field_map_exn json "destinationCommitId" ObjectId.of_json in
-      let sourceCommitId =
-        field_map_exn json "sourceCommitId" ObjectId.of_json in
-      let mergeOptions =
-        field_map_exn json "mergeOptions" MergeOptions.of_json in
-      make ~baseCommitId ~destinationCommitId ~sourceCommitId ~mergeOptions
+        field_map json__ "destinationCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
+      let mergeOptions = field_map json__ "mergeOptions" MergeOptions.of_json in
+      make ?baseCommitId ?destinationCommitId ?sourceCommitId ?mergeOptions
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -17759,19 +18709,19 @@ module GetMergeOptionsInput =
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -17781,18 +18731,18 @@ module GetMergeConflictsOutput =
   struct
     type nonrec t =
       {
-      mergeable: IsMergeable.t
+      mergeable: IsMergeable.t option
         [@ocaml.doc
           "A Boolean value that indicates whether the code is mergeable by the specified merge option."];
-      destinationCommitId: ObjectId.t
+      destinationCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the destination commit specifier that was used in the merge evaluation."];
-      sourceCommitId: ObjectId.t
+      sourceCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the source commit specifier that was used in the merge evaluation."];
       baseCommitId: ObjectId.t option
         [@ocaml.doc "The commit ID of the merge base."];
-      conflictMetadataList: ConflictMetadataList.t
+      conflictMetadataList: ConflictMetadataList.t option
         [@ocaml.doc
           "A list of metadata for any conflicting files. If the specified merge strategy is FAST_FORWARD_MERGE, this list is always empty."];
       nextToken: NextToken.t option
@@ -17833,21 +18783,20 @@ module GetMergeConflictsOutput =
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `TipsDivergenceExceededException of TipsDivergenceExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetMergeConflictsOutput"
-    let make ?baseCommitId =
-      fun ?nextToken ->
-        fun ~mergeable ->
-          fun ~destinationCommitId ->
-            fun ~sourceCommitId ->
-              fun ~conflictMetadataList ->
+    let make ?mergeable =
+      fun ?destinationCommitId ->
+        fun ?sourceCommitId ->
+          fun ?baseCommitId ->
+            fun ?conflictMetadataList ->
+              fun ?nextToken ->
                 fun () ->
                   {
-                    baseCommitId;
-                    nextToken;
                     mergeable;
                     destinationCommitId;
                     sourceCommitId;
-                    conflictMetadataList
+                    baseCommitId;
+                    conflictMetadataList;
+                    nextToken
                   }
     let error_of_json name json =
       match name with
@@ -18088,48 +19037,45 @@ module GetMergeConflictsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("mergeable", (Some (IsMergeable.to_value x.mergeable)));
+        [("mergeable", (Option.map x.mergeable ~f:IsMergeable.to_value));
         ("destinationCommitId",
-          (Some (ObjectId.to_value x.destinationCommitId)));
-        ("sourceCommitId", (Some (ObjectId.to_value x.sourceCommitId)));
+          (Option.map x.destinationCommitId ~f:ObjectId.to_value));
+        ("sourceCommitId",
+          (Option.map x.sourceCommitId ~f:ObjectId.to_value));
         ("baseCommitId", (Option.map x.baseCommitId ~f:ObjectId.to_value));
         ("conflictMetadataList",
-          (Some (ConflictMetadataList.to_value x.conflictMetadataList)));
+          (Option.map x.conflictMetadataList ~f:ConflictMetadataList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let conflictMetadataList =
-        ConflictMetadataList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "conflictMetadataList") in
+        (Option.map ~f:ConflictMetadataList.of_xml)
+          (Xml.child xml_arg0 "conflictMetadataList") in
       let baseCommitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "baseCommitId") in
       let sourceCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceCommitId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "sourceCommitId") in
       let destinationCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationCommitId") in
+        (Option.map ~f:ObjectId.of_xml)
+          (Xml.child xml_arg0 "destinationCommitId") in
       let mergeable =
-        IsMergeable.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "mergeable") in
-      make ?nextToken ~conflictMetadataList ?baseCommitId ~sourceCommitId
-        ~destinationCommitId ~mergeable ()
+        (Option.map ~f:IsMergeable.of_xml) (Xml.child xml_arg0 "mergeable") in
+      make ?nextToken ?conflictMetadataList ?baseCommitId ?sourceCommitId
+        ?destinationCommitId ?mergeable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let conflictMetadataList =
-        field_map_exn json "conflictMetadataList"
-          ConflictMetadataList.of_json in
-      let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
-      let sourceCommitId =
-        field_map_exn json "sourceCommitId" ObjectId.of_json in
+        field_map json__ "conflictMetadataList" ConflictMetadataList.of_json in
+      let baseCommitId = field_map json__ "baseCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let destinationCommitId =
-        field_map_exn json "destinationCommitId" ObjectId.of_json in
-      let mergeable = field_map_exn json "mergeable" IsMergeable.of_json in
-      make ?nextToken ~conflictMetadataList ?baseCommitId ~sourceCommitId
-        ~destinationCommitId ~mergeable ()
+        field_map json__ "destinationCommitId" ObjectId.of_json in
+      let mergeable = field_map json__ "mergeable" IsMergeable.of_json in
+      make ?nextToken ?conflictMetadataList ?baseCommitId ?sourceCommitId
+        ?destinationCommitId ?mergeable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about merge conflicts between the before and after commit IDs for a pull request in a repository."]
@@ -18228,24 +19174,24 @@ module GetMergeConflictsInput =
         ?conflictDetailLevel ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let maxConflictFiles =
-        field_map json "maxConflictFiles" MaxResults.of_json in
+        field_map json__ "maxConflictFiles" MaxResults.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
       let mergeOption =
-        field_map_exn json "mergeOption" MergeOptionTypeEnum.of_json in
+        field_map_exn json__ "mergeOption" MergeOptionTypeEnum.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?nextToken ?conflictResolutionStrategy ?maxConflictFiles
         ?conflictDetailLevel ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
@@ -18465,12 +19411,12 @@ module GetMergeCommitOutput =
       make ?mergedCommitId ?baseCommitId ?destinationCommitId ?sourceCommitId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mergedCommitId = field_map json "mergedCommitId" ObjectId.of_json in
-      let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
+    let of_json json__ =
+      let mergedCommitId = field_map json__ "mergedCommitId" ObjectId.of_json in
+      let baseCommitId = field_map json__ "baseCommitId" ObjectId.of_json in
       let destinationCommitId =
-        field_map json "destinationCommitId" ObjectId.of_json in
-      let sourceCommitId = field_map json "sourceCommitId" ObjectId.of_json in
+        field_map json__ "destinationCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       make ?mergedCommitId ?baseCommitId ?destinationCommitId ?sourceCommitId
         ()
     let to_json v = composed_to_json to_value v
@@ -18543,19 +19489,19 @@ module GetMergeCommitInput =
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?conflictResolutionStrategy ?conflictDetailLevel
         ~destinationCommitSpecifier ~sourceCommitSpecifier ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -18564,10 +19510,10 @@ module GetFolderOutput =
   struct
     type nonrec t =
       {
-      commitId: ObjectId.t
+      commitId: ObjectId.t option
         [@ocaml.doc
           "The full commit ID used as a reference for the returned version of the folder content."];
-      folderPath: Path.t
+      folderPath: Path.t option
         [@ocaml.doc
           "The fully qualified path of the folder whose contents are returned."];
       treeId: ObjectId.t option
@@ -18602,23 +19548,22 @@ module GetFolderOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetFolderOutput"
-    let make ?treeId =
-      fun ?subFolders ->
-        fun ?files ->
-          fun ?symbolicLinks ->
-            fun ?subModules ->
-              fun ~commitId ->
-                fun ~folderPath ->
+    let make ?commitId =
+      fun ?folderPath ->
+        fun ?treeId ->
+          fun ?subFolders ->
+            fun ?files ->
+              fun ?symbolicLinks ->
+                fun ?subModules ->
                   fun () ->
                     {
+                      commitId;
+                      folderPath;
                       treeId;
                       subFolders;
                       files;
                       symbolicLinks;
-                      subModules;
-                      commitId;
-                      folderPath
+                      subModules
                     }
     let error_of_json name json =
       match name with
@@ -18762,8 +19707,8 @@ module GetFolderOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("commitId", (Some (ObjectId.to_value x.commitId)));
-        ("folderPath", (Some (Path.to_value x.folderPath)));
+        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
+        ("folderPath", (Option.map x.folderPath ~f:Path.to_value));
         ("treeId", (Option.map x.treeId ~f:ObjectId.to_value));
         ("subFolders", (Option.map x.subFolders ~f:FolderList.to_value));
         ("files", (Option.map x.files ~f:FileList.to_value));
@@ -18785,23 +19730,23 @@ module GetFolderOutput =
       let treeId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
       let folderPath =
-        Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "folderPath") in
+        (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "folderPath") in
       let commitId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
-      make ?subModules ?symbolicLinks ?files ?subFolders ?treeId ~folderPath
-        ~commitId ()
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
+      make ?subModules ?symbolicLinks ?files ?subFolders ?treeId ?folderPath
+        ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let subModules = field_map json "subModules" SubModuleList.of_json in
+    let of_json json__ =
+      let subModules = field_map json__ "subModules" SubModuleList.of_json in
       let symbolicLinks =
-        field_map json "symbolicLinks" SymbolicLinkList.of_json in
-      let files = field_map json "files" FileList.of_json in
-      let subFolders = field_map json "subFolders" FolderList.of_json in
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let folderPath = field_map_exn json "folderPath" Path.of_json in
-      let commitId = field_map_exn json "commitId" ObjectId.of_json in
-      make ?subModules ?symbolicLinks ?files ?subFolders ?treeId ~folderPath
-        ~commitId ()
+        field_map json__ "symbolicLinks" SymbolicLinkList.of_json in
+      let files = field_map json__ "files" FileList.of_json in
+      let subFolders = field_map json__ "subFolders" FolderList.of_json in
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let folderPath = field_map json__ "folderPath" Path.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
+      make ?subModules ?symbolicLinks ?files ?subFolders ?treeId ?folderPath
+        ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the contents of a specified folder in a repository."]
@@ -18841,12 +19786,12 @@ module GetFolderInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~folderPath ?commitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let folderPath = field_map_exn json "folderPath" Path.of_json in
+    let of_json json__ =
+      let folderPath = field_map_exn json__ "folderPath" Path.of_json in
       let commitSpecifier =
-        field_map json "commitSpecifier" CommitName.of_json in
+        field_map json__ "commitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~folderPath ?commitSpecifier ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -18855,21 +19800,21 @@ module GetFileOutput =
   struct
     type nonrec t =
       {
-      commitId: ObjectId.t
+      commitId: ObjectId.t option
         [@ocaml.doc
           "The full commit ID of the commit that contains the content returned by GetFile."];
-      blobId: ObjectId.t
+      blobId: ObjectId.t option
         [@ocaml.doc
           "The blob ID of the object that represents the file content."];
-      filePath: Path.t
+      filePath: Path.t option
         [@ocaml.doc
           "The fully qualified path to the specified file. Returns the name and extension of the file."];
-      fileMode: FileModeTypeEnum.t
+      fileMode: FileModeTypeEnum.t option
         [@ocaml.doc
           "The extrapolated file mode permissions of the blob. Valid values include strings such as EXECUTABLE and not numeric values. The file mode permissions returned by this API are not the standard file mode permission values, such as 100644, but rather extrapolated values. See the supported return values."];
-      fileSize: ObjectSize.t
+      fileSize: ObjectSize.t option
         [@ocaml.doc "The size of the contents of the file, in bytes."];
-      fileContent: FileContent.t
+      fileContent: FileContent.t option
         [@ocaml.doc
           "The base-64 encoded binary data object that represents the content of the file."]}
     type nonrec error =
@@ -18891,13 +19836,12 @@ module GetFileOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetFileOutput"
-    let make ~commitId =
-      fun ~blobId ->
-        fun ~filePath ->
-          fun ~fileMode ->
-            fun ~fileSize ->
-              fun ~fileContent ->
+    let make ?commitId =
+      fun ?blobId ->
+        fun ?filePath ->
+          fun ?fileMode ->
+            fun ?fileSize ->
+              fun ?fileContent ->
                 fun () ->
                   {
                     commitId;
@@ -19055,39 +19999,37 @@ module GetFileOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("commitId", (Some (ObjectId.to_value x.commitId)));
-        ("blobId", (Some (ObjectId.to_value x.blobId)));
-        ("filePath", (Some (Path.to_value x.filePath)));
-        ("fileMode", (Some (FileModeTypeEnum.to_value x.fileMode)));
-        ("fileSize", (Some (ObjectSize.to_value x.fileSize)));
-        ("fileContent", (Some (FileContent.to_value x.fileContent)))]
+        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
+        ("blobId", (Option.map x.blobId ~f:ObjectId.to_value));
+        ("filePath", (Option.map x.filePath ~f:Path.to_value));
+        ("fileMode", (Option.map x.fileMode ~f:FileModeTypeEnum.to_value));
+        ("fileSize", (Option.map x.fileSize ~f:ObjectSize.to_value));
+        ("fileContent", (Option.map x.fileContent ~f:FileContent.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let fileContent =
-        FileContent.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fileContent") in
+        (Option.map ~f:FileContent.of_xml) (Xml.child xml_arg0 "fileContent") in
       let fileSize =
-        ObjectSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fileSize") in
+        (Option.map ~f:ObjectSize.of_xml) (Xml.child xml_arg0 "fileSize") in
       let fileMode =
-        FileModeTypeEnum.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fileMode") in
+        (Option.map ~f:FileModeTypeEnum.of_xml)
+          (Xml.child xml_arg0 "fileMode") in
       let filePath =
-        Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
+        (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "filePath") in
       let blobId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "blobId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       let commitId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
-      make ~fileContent ~fileSize ~fileMode ~filePath ~blobId ~commitId ()
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
+      make ?fileContent ?fileSize ?fileMode ?filePath ?blobId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileContent = field_map_exn json "fileContent" FileContent.of_json in
-      let fileSize = field_map_exn json "fileSize" ObjectSize.of_json in
-      let fileMode = field_map_exn json "fileMode" FileModeTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      let blobId = field_map_exn json "blobId" ObjectId.of_json in
-      let commitId = field_map_exn json "commitId" ObjectId.of_json in
-      make ~fileContent ~fileSize ~fileMode ~filePath ~blobId ~commitId ()
+    let of_json json__ =
+      let fileContent = field_map json__ "fileContent" FileContent.of_json in
+      let fileSize = field_map json__ "fileSize" ObjectSize.of_json in
+      let fileMode = field_map json__ "fileMode" FileModeTypeEnum.of_json in
+      let filePath = field_map json__ "filePath" Path.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
+      make ?fileContent ?fileSize ?fileMode ?filePath ?blobId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the base-64 encoded contents of a specified file and its metadata."]
@@ -19099,7 +20041,7 @@ module GetFileInput =
         [@ocaml.doc "The name of the repository that contains the file."];
       commitSpecifier: CommitName.t option
         [@ocaml.doc
-          "The fully quaified reference that identifies the commit that contains the file. For example, you can specify a full commit ID, a tag, a branch name, or a reference such as refs/heads/master. If none is provided, the head commit is used."];
+          "The fully quaified reference that identifies the commit that contains the file. For example, you can specify a full commit ID, a tag, a branch name, or a reference such as refs/heads/main. If none is provided, the head commit is used."];
       filePath: Path.t
         [@ocaml.doc
           "The fully qualified path to the file, including the full name and extension of the file. For example, /examples/file.md is the fully qualified path to a file named file.md in a folder named examples."]}
@@ -19127,12 +20069,12 @@ module GetFileInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~filePath ?commitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filePath = field_map_exn json "filePath" Path.of_json in
+    let of_json json__ =
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
       let commitSpecifier =
-        field_map json "commitSpecifier" CommitName.of_json in
+        field_map json__ "commitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~filePath ?commitSpecifier ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19350,9 +20292,9 @@ module GetDifferencesOutput =
           (Xml.child xml_arg0 "differences") in
       make ?nextToken ?differences ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let differences = field_map json "differences" DifferenceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let differences = field_map json__ "differences" DifferenceList.of_json in
       make ?nextToken ?differences ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -19434,17 +20376,17 @@ module GetDifferencesInput =
       make ?nextToken ?maxResults ?afterPath ?beforePath
         ~afterCommitSpecifier ?beforeCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" Limit.of_json in
-      let afterPath = field_map json "afterPath" Path.of_json in
-      let beforePath = field_map json "beforePath" Path.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" Limit.of_json in
+      let afterPath = field_map json__ "afterPath" Path.of_json in
+      let beforePath = field_map json__ "beforePath" Path.of_json in
       let afterCommitSpecifier =
-        field_map_exn json "afterCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "afterCommitSpecifier" CommitName.of_json in
       let beforeCommitSpecifier =
-        field_map json "beforeCommitSpecifier" CommitName.of_json in
+        field_map json__ "beforeCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?nextToken ?maxResults ?afterPath ?beforePath
         ~afterCommitSpecifier ?beforeCommitSpecifier ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -19454,7 +20396,7 @@ module GetCommitOutput =
   struct
     type nonrec t =
       {
-      commit: Commit.t
+      commit: Commit.t option
         [@ocaml.doc
           "A commit data type object that contains information about the specified commit."]}
     type nonrec error =
@@ -19473,8 +20415,7 @@ module GetCommitOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetCommitOutput"
-    let make ~commit = fun () -> { commit }
+    let make ?commit = fun () -> { commit }
     let error_of_json name json =
       match name with
       | "CommitIdDoesNotExistException" ->
@@ -19598,16 +20539,17 @@ module GetCommitOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("commit", (Some (Commit.to_value x.commit)))]
+      structure_to_value
+        [("commit", (Option.map x.commit ~f:Commit.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let commit =
-        Commit.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commit") in
-      make ~commit ()
+        (Option.map ~f:Commit.of_xml) (Xml.child xml_arg0 "commit") in
+      make ?commit ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commit = field_map_exn json "commit" Commit.of_json in
-      make ~commit ()
+    let of_json json__ =
+      let commit = field_map json__ "commit" Commit.of_json in
+      make ?commit ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a get commit operation."]
 module GetCommitInput =
@@ -19637,10 +20579,10 @@ module GetCommitInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~commitId ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commitId = field_map_exn json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let commitId = field_map_exn json__ "commitId" ObjectId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~commitId ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a get commit operation."]
@@ -19878,10 +20820,10 @@ module GetCommentsForPullRequestOutput =
           (Xml.child xml_arg0 "commentsForPullRequestData") in
       make ?nextToken ?commentsForPullRequestData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let commentsForPullRequestData =
-        field_map json "commentsForPullRequestData"
+        field_map json__ "commentsForPullRequestData"
           CommentsForPullRequestData.of_json in
       make ?nextToken ?commentsForPullRequestData ()
     let to_json v = composed_to_json to_value v
@@ -19896,13 +20838,13 @@ module GetCommentsForPullRequestInput =
           "The system-generated ID of the pull request. To get this ID, use ListPullRequests."];
       repositoryName: RepositoryName.t option
         [@ocaml.doc
-          "The name of the repository that contains the pull request."];
+          "The name of the repository that contains the pull request. Requirement is conditional: repositoryName must be specified when beforeCommitId and afterCommitId are included."];
       beforeCommitId: CommitId.t option
         [@ocaml.doc
-          "The full commit ID of the commit in the destination branch that was the tip of the branch at the time the pull request was created."];
+          "The full commit ID of the commit in the destination branch that was the tip of the branch at the time the pull request was created. Requirement is conditional: beforeCommitId must be specified when repositoryName is included."];
       afterCommitId: CommitId.t option
         [@ocaml.doc
-          "The full commit ID of the commit in the source branch that was the tip of the branch at the time the comment was made."];
+          "The full commit ID of the commit in the source branch that was the tip of the branch at the time the comment was made. Requirement is conditional: afterCommitId must be specified when repositoryName is included."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "An enumeration token that, when provided in a request, returns the next batch of the results."];
@@ -19954,15 +20896,15 @@ module GetCommentsForPullRequestInput =
       make ?maxResults ?nextToken ?afterCommitId ?beforeCommitId
         ?repositoryName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let afterCommitId = field_map json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let afterCommitId = field_map json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?maxResults ?nextToken ?afterCommitId ?beforeCommitId
         ?repositoryName ~pullRequestId ()
     let to_json v = composed_to_json to_value v
@@ -20155,10 +21097,10 @@ module GetCommentsForComparedCommitOutput =
           (Xml.child xml_arg0 "commentsForComparedCommitData") in
       make ?nextToken ?commentsForComparedCommitData ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let commentsForComparedCommitData =
-        field_map json "commentsForComparedCommitData"
+        field_map json__ "commentsForComparedCommitData"
           CommentsForComparedCommitData.of_json in
       make ?nextToken ?commentsForComparedCommitData ()
     let to_json v = composed_to_json to_value v
@@ -20223,13 +21165,14 @@ module GetCommentsForComparedCommitInput =
       make ?maxResults ?nextToken ~afterCommitId ?beforeCommitId
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let afterCommitId = field_map_exn json "afterCommitId" CommitId.of_json in
-      let beforeCommitId = field_map json "beforeCommitId" CommitId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let afterCommitId =
+        field_map_exn json__ "afterCommitId" CommitId.of_json in
+      let beforeCommitId = field_map json__ "beforeCommitId" CommitId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?maxResults ?nextToken ~afterCommitId ?beforeCommitId
         ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -20239,7 +21182,7 @@ module GetCommentReactionsOutput =
   struct
     type nonrec t =
       {
-      reactionsForComment: ReactionsForCommentList.t
+      reactionsForComment: ReactionsForCommentList.t option
         [@ocaml.doc "An array of reactions to the specified comment."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -20254,10 +21197,8 @@ module GetCommentReactionsOutput =
       | `InvalidMaxResultsException of InvalidMaxResultsException.t 
       | `InvalidReactionUserArnException of InvalidReactionUserArnException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetCommentReactionsOutput"
-    let make ?nextToken =
-      fun ~reactionsForComment ->
-        fun () -> { nextToken; reactionsForComment }
+    let make ?reactionsForComment =
+      fun ?nextToken -> fun () -> { reactionsForComment; nextToken }
     let error_of_json name json =
       match name with
       | "CommentDeletedException" ->
@@ -20341,23 +21282,24 @@ module GetCommentReactionsOutput =
     let to_value x =
       structure_to_value
         [("reactionsForComment",
-           (Some (ReactionsForCommentList.to_value x.reactionsForComment)));
+           (Option.map x.reactionsForComment
+              ~f:ReactionsForCommentList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let reactionsForComment =
-        ReactionsForCommentList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "reactionsForComment") in
-      make ?nextToken ~reactionsForComment ()
+        (Option.map ~f:ReactionsForCommentList.of_xml)
+          (Xml.child xml_arg0 "reactionsForComment") in
+      make ?nextToken ?reactionsForComment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let reactionsForComment =
-        field_map_exn json "reactionsForComment"
+        field_map json__ "reactionsForComment"
           ReactionsForCommentList.of_json in
-      make ?nextToken ~reactionsForComment ()
+      make ?nextToken ?reactionsForComment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about reactions to a specified comment ID. Reactions from users who have been deleted will not be included in the count."]
@@ -20402,11 +21344,11 @@ module GetCommentReactionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ?maxResults ?nextToken ?reactionUserArn ~commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let reactionUserArn = field_map json "reactionUserArn" Arn.of_json in
-      let commentId = field_map_exn json "commentId" CommentId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let reactionUserArn = field_map json__ "reactionUserArn" Arn.of_json in
+      let commentId = field_map_exn json__ "commentId" CommentId.of_json in
       make ?maxResults ?nextToken ?reactionUserArn ~commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20541,8 +21483,8 @@ module GetCommentOutput =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
       make ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20566,8 +21508,8 @@ module GetCommentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commentId = field_map_exn json "commentId" CommentId.of_json in
+    let of_json json__ =
+      let commentId = field_map_exn json__ "commentId" CommentId.of_json in
       make ~commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -20728,8 +21670,8 @@ module GetBranchOutput =
         (Option.map ~f:BranchInfo.of_xml) (Xml.child xml_arg0 "branch") in
       make ?branch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branch = field_map json "branch" BranchInfo.of_json in
+    let of_json json__ =
+      let branch = field_map json__ "branch" BranchInfo.of_json in
       make ?branch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a get branch operation."]
@@ -20759,10 +21701,10 @@ module GetBranchInput =
           (Xml.child xml_arg0 "repositoryName") in
       make ?branchName ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map json "branchName" BranchName.of_json in
+    let of_json json__ =
+      let branchName = field_map json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?branchName ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a get branch operation."]
@@ -20770,7 +21712,8 @@ module GetBlobOutput =
   struct
     type nonrec t =
       {
-      content: Blob.t [@ocaml.doc "The content of the blob, usually a file."]}
+      content: Blob.t option
+        [@ocaml.doc "The content of the blob, usually a file."]}
     type nonrec error =
       [ `BlobIdDoesNotExistException of BlobIdDoesNotExistException.t 
       | `BlobIdRequiredException of BlobIdRequiredException.t 
@@ -20788,8 +21731,7 @@ module GetBlobOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBlobOutput"
-    let make ~content = fun () -> { content }
+    let make ?content = fun () -> { content }
     let error_of_json name json =
       match name with
       | "BlobIdDoesNotExistException" ->
@@ -20920,19 +21862,20 @@ module GetBlobOutput =
             ((match msg with
               | None -> []
               | Some m -> [("message", (`String m))])))
-    let of_header_and_body = ((fun (xs, pipe) -> make ~content:pipe ())
-      [@warning "-27"])
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?content:(Some pipe) ())[@warning "-27"])
     let to_value x =
-      structure_to_value [("content", (Some (Blob.to_value x.content)))]
+      structure_to_value
+        [("content", (Option.map x.content ~f:Blob.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let content =
-        Blob.of_xml (Xml.child_exn ~context:context_ xml_arg0 "content") in
-      make ~content ()
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "content") in
+      make ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map_exn json "content" Blob.of_json in
-      make ~content ()
+    let of_json json__ =
+      let content = field_map json__ "content" Blob.of_json in
+      make ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a get blob operation."]
 module GetBlobInput =
@@ -20960,10 +21903,10 @@ module GetBlobInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~blobId ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let blobId = field_map_exn json "blobId" ObjectId.of_json in
+    let of_json json__ =
+      let blobId = field_map_exn json__ "blobId" ObjectId.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~blobId ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a get blob operation."]
@@ -20971,7 +21914,7 @@ module GetApprovalRuleTemplateOutput =
   struct
     type nonrec t =
       {
-      approvalRuleTemplate: ApprovalRuleTemplate.t
+      approvalRuleTemplate: ApprovalRuleTemplate.t option
         [@ocaml.doc
           "The content and structure of the approval rule template."]}
     type nonrec error =
@@ -20983,8 +21926,7 @@ module GetApprovalRuleTemplateOutput =
       | `InvalidApprovalRuleTemplateNameException of
           InvalidApprovalRuleTemplateNameException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetApprovalRuleTemplateOutput"
-    let make ~approvalRuleTemplate = fun () -> { approvalRuleTemplate }
+    let make ?approvalRuleTemplate = fun () -> { approvalRuleTemplate }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateDoesNotExistException" ->
@@ -21036,19 +21978,19 @@ module GetApprovalRuleTemplateOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplate",
-           (Some (ApprovalRuleTemplate.to_value x.approvalRuleTemplate)))]
+           (Option.map x.approvalRuleTemplate
+              ~f:ApprovalRuleTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplate =
-        ApprovalRuleTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
-      make ~approvalRuleTemplate ()
+        (Option.map ~f:ApprovalRuleTemplate.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplate") in
+      make ?approvalRuleTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplate =
-        field_map_exn json "approvalRuleTemplate"
-          ApprovalRuleTemplate.of_json in
-      make ~approvalRuleTemplate ()
+        field_map json__ "approvalRuleTemplate" ApprovalRuleTemplate.of_json in
+      make ?approvalRuleTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about a specified approval rule template."]
@@ -21075,9 +22017,9 @@ module GetApprovalRuleTemplateInput =
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -21087,7 +22029,7 @@ module EvaluatePullRequestApprovalRulesOutput =
   struct
     type nonrec t =
       {
-      evaluation: Evaluation.t
+      evaluation: Evaluation.t option
         [@ocaml.doc
           "The result of the evaluation, including the names of the rules whose conditions have been met (if any), the names of the rules whose conditions have not been met (if any), whether the pull request is in the approved state, and whether the pull request approval rule has been set aside by an override."]}
     type nonrec error =
@@ -21108,8 +22050,7 @@ module EvaluatePullRequestApprovalRulesOutput =
       | `RevisionIdRequiredException of RevisionIdRequiredException.t 
       | `RevisionNotCurrentException of RevisionNotCurrentException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "EvaluatePullRequestApprovalRulesOutput"
-    let make ~evaluation = fun () -> { evaluation }
+    let make ?evaluation = fun () -> { evaluation }
     let error_of_json name json =
       match name with
       | "EncryptionIntegrityChecksFailedException" ->
@@ -21237,17 +22178,16 @@ module EvaluatePullRequestApprovalRulesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("evaluation", (Some (Evaluation.to_value x.evaluation)))]
+        [("evaluation", (Option.map x.evaluation ~f:Evaluation.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let evaluation =
-        Evaluation.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "evaluation") in
-      make ~evaluation ()
+        (Option.map ~f:Evaluation.of_xml) (Xml.child xml_arg0 "evaluation") in
+      make ?evaluation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let evaluation = field_map_exn json "evaluation" Evaluation.of_json in
-      make ~evaluation ()
+    let of_json json__ =
+      let evaluation = field_map json__ "evaluation" Evaluation.of_json in
+      make ?evaluation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Evaluates whether a pull request has met all the conditions specified in its associated approval rules."]
@@ -21278,10 +22218,10 @@ module EvaluatePullRequestApprovalRulesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~revisionId ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map_exn json "revisionId" RevisionId.of_json in
+    let of_json json__ =
+      let revisionId = field_map_exn json__ "revisionId" RevisionId.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~revisionId ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -21317,11 +22257,11 @@ module DisassociateApprovalRuleTemplateFromRepositoryInput =
              "approvalRuleTemplateName") in
       make ~repositoryName ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~repositoryName ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -21331,7 +22271,7 @@ module DescribePullRequestEventsOutput =
   struct
     type nonrec t =
       {
-      pullRequestEvents: PullRequestEventList.t
+      pullRequestEvents: PullRequestEventList.t option
         [@ocaml.doc "Information about the pull request events."];
       nextToken: NextToken.t option
         [@ocaml.doc
@@ -21357,9 +22297,8 @@ module DescribePullRequestEventsOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribePullRequestEventsOutput"
-    let make ?nextToken =
-      fun ~pullRequestEvents -> fun () -> { nextToken; pullRequestEvents }
+    let make ?pullRequestEvents =
+      fun ?nextToken -> fun () -> { pullRequestEvents; nextToken }
     let error_of_json name json =
       match name with
       | "ActorDoesNotExistException" ->
@@ -21505,22 +22444,22 @@ module DescribePullRequestEventsOutput =
     let to_value x =
       structure_to_value
         [("pullRequestEvents",
-           (Some (PullRequestEventList.to_value x.pullRequestEvents)));
+           (Option.map x.pullRequestEvents ~f:PullRequestEventList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let pullRequestEvents =
-        PullRequestEventList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequestEvents") in
-      make ?nextToken ~pullRequestEvents ()
+        (Option.map ~f:PullRequestEventList.of_xml)
+          (Xml.child xml_arg0 "pullRequestEvents") in
+      make ?nextToken ?pullRequestEvents ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let pullRequestEvents =
-        field_map_exn json "pullRequestEvents" PullRequestEventList.of_json in
-      make ?nextToken ~pullRequestEvents ()
+        field_map json__ "pullRequestEvents" PullRequestEventList.of_json in
+      make ?nextToken ?pullRequestEvents ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about one or more pull request events."]
@@ -21582,14 +22521,14 @@ module DescribePullRequestEventsInput =
       make ?maxResults ?nextToken ?actorArn ?pullRequestEventType
         ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let actorArn = field_map json "actorArn" Arn.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let actorArn = field_map json__ "actorArn" Arn.of_json in
       let pullRequestEventType =
-        field_map json "pullRequestEventType" PullRequestEventType.of_json in
+        field_map json__ "pullRequestEventType" PullRequestEventType.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ?maxResults ?nextToken ?actorArn ?pullRequestEventType
         ~pullRequestId ()
     let to_json v = composed_to_json to_value v
@@ -21599,19 +22538,19 @@ module DescribeMergeConflictsOutput =
   struct
     type nonrec t =
       {
-      conflictMetadata: ConflictMetadata.t
+      conflictMetadata: ConflictMetadata.t option
         [@ocaml.doc
           "Contains metadata about the conflicts found in the merge."];
-      mergeHunks: MergeHunks.t
+      mergeHunks: MergeHunks.t option
         [@ocaml.doc
           "A list of merge hunks of the differences between the files or lines."];
       nextToken: NextToken.t option
         [@ocaml.doc
           "An enumeration token that can be used in a request to return the next batch of the results."];
-      destinationCommitId: ObjectId.t
+      destinationCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the destination commit specifier that was used in the merge evaluation."];
-      sourceCommitId: ObjectId.t
+      sourceCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the source commit specifier that was used in the merge evaluation."];
       baseCommitId: ObjectId.t option
@@ -21649,21 +22588,20 @@ module DescribeMergeConflictsOutput =
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `TipsDivergenceExceededException of TipsDivergenceExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeMergeConflictsOutput"
-    let make ?nextToken =
-      fun ?baseCommitId ->
-        fun ~conflictMetadata ->
-          fun ~mergeHunks ->
-            fun ~destinationCommitId ->
-              fun ~sourceCommitId ->
+    let make ?conflictMetadata =
+      fun ?mergeHunks ->
+        fun ?nextToken ->
+          fun ?destinationCommitId ->
+            fun ?sourceCommitId ->
+              fun ?baseCommitId ->
                 fun () ->
                   {
-                    nextToken;
-                    baseCommitId;
                     conflictMetadata;
                     mergeHunks;
+                    nextToken;
                     destinationCommitId;
-                    sourceCommitId
+                    sourceCommitId;
+                    baseCommitId
                   }
     let error_of_json name json =
       match name with
@@ -21907,46 +22845,44 @@ module DescribeMergeConflictsOutput =
     let to_value x =
       structure_to_value
         [("conflictMetadata",
-           (Some (ConflictMetadata.to_value x.conflictMetadata)));
-        ("mergeHunks", (Some (MergeHunks.to_value x.mergeHunks)));
+           (Option.map x.conflictMetadata ~f:ConflictMetadata.to_value));
+        ("mergeHunks", (Option.map x.mergeHunks ~f:MergeHunks.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("destinationCommitId",
-          (Some (ObjectId.to_value x.destinationCommitId)));
-        ("sourceCommitId", (Some (ObjectId.to_value x.sourceCommitId)));
+          (Option.map x.destinationCommitId ~f:ObjectId.to_value));
+        ("sourceCommitId",
+          (Option.map x.sourceCommitId ~f:ObjectId.to_value));
         ("baseCommitId", (Option.map x.baseCommitId ~f:ObjectId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let baseCommitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "baseCommitId") in
       let sourceCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceCommitId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "sourceCommitId") in
       let destinationCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationCommitId") in
+        (Option.map ~f:ObjectId.of_xml)
+          (Xml.child xml_arg0 "destinationCommitId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let mergeHunks =
-        MergeHunks.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "mergeHunks") in
+        (Option.map ~f:MergeHunks.of_xml) (Xml.child xml_arg0 "mergeHunks") in
       let conflictMetadata =
-        ConflictMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "conflictMetadata") in
-      make ?baseCommitId ~sourceCommitId ~destinationCommitId ?nextToken
-        ~mergeHunks ~conflictMetadata ()
+        (Option.map ~f:ConflictMetadata.of_xml)
+          (Xml.child xml_arg0 "conflictMetadata") in
+      make ?baseCommitId ?sourceCommitId ?destinationCommitId ?nextToken
+        ?mergeHunks ?conflictMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
-      let sourceCommitId =
-        field_map_exn json "sourceCommitId" ObjectId.of_json in
+    let of_json json__ =
+      let baseCommitId = field_map json__ "baseCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let destinationCommitId =
-        field_map_exn json "destinationCommitId" ObjectId.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let mergeHunks = field_map_exn json "mergeHunks" MergeHunks.of_json in
+        field_map json__ "destinationCommitId" ObjectId.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let mergeHunks = field_map json__ "mergeHunks" MergeHunks.of_json in
       let conflictMetadata =
-        field_map_exn json "conflictMetadata" ConflictMetadata.of_json in
-      make ?baseCommitId ~sourceCommitId ~destinationCommitId ?nextToken
-        ~mergeHunks ~conflictMetadata ()
+        field_map json__ "conflictMetadata" ConflictMetadata.of_json in
+      make ?baseCommitId ?sourceCommitId ?destinationCommitId ?nextToken
+        ?mergeHunks ?conflictMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about one or more merge conflicts in the attempted merge of two commit specifiers using the squash or three-way merge strategy. If the merge option for the attempted merge is specified as FAST_FORWARD_MERGE, an exception is thrown."]
@@ -22054,24 +22990,24 @@ module DescribeMergeConflictsInput =
         ~filePath ?maxMergeHunks ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      let maxMergeHunks = field_map json "maxMergeHunks" MaxResults.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
+      let maxMergeHunks = field_map json__ "maxMergeHunks" MaxResults.of_json in
       let mergeOption =
-        field_map_exn json "mergeOption" MergeOptionTypeEnum.of_json in
+        field_map_exn json__ "mergeOption" MergeOptionTypeEnum.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?nextToken ?conflictResolutionStrategy ?conflictDetailLevel
         ~filePath ?maxMergeHunks ~mergeOption ~sourceCommitSpecifier
         ~destinationCommitSpecifier ~repositoryName ()
@@ -22195,8 +23131,8 @@ module DeleteRepositoryOutput =
           (Xml.child xml_arg0 "repositoryId") in
       make ?repositoryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repositoryId = field_map json "repositoryId" RepositoryId.of_json in
+    let of_json json__ =
+      let repositoryId = field_map json__ "repositoryId" RepositoryId.of_json in
       make ?repositoryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a delete repository operation."]
@@ -22219,9 +23155,9 @@ module DeleteRepositoryInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a delete repository operation."]
@@ -22229,7 +23165,7 @@ module DeletePullRequestApprovalRuleOutput =
   struct
     type nonrec t =
       {
-      approvalRuleId: ApprovalRuleId.t
+      approvalRuleId: ApprovalRuleId.t option
         [@ocaml.doc
           "The ID of the deleted approval rule. If the approval rule was deleted in an earlier API call, the response is 200 OK without content."]}
     type nonrec error =
@@ -22255,8 +23191,7 @@ module DeletePullRequestApprovalRuleOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeletePullRequestApprovalRuleOutput"
-    let make ~approvalRuleId = fun () -> { approvalRuleId }
+    let make ?approvalRuleId = fun () -> { approvalRuleId }
     let error_of_json name json =
       match name with
       | "ApprovalRuleNameRequiredException" ->
@@ -22398,18 +23333,18 @@ module DeletePullRequestApprovalRuleOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleId",
-           (Some (ApprovalRuleId.to_value x.approvalRuleId)))]
+           (Option.map x.approvalRuleId ~f:ApprovalRuleId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleId =
-        ApprovalRuleId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleId") in
-      make ~approvalRuleId ()
+        (Option.map ~f:ApprovalRuleId.of_xml)
+          (Xml.child xml_arg0 "approvalRuleId") in
+      make ?approvalRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleId =
-        field_map_exn json "approvalRuleId" ApprovalRuleId.of_json in
-      make ~approvalRuleId ()
+        field_map json__ "approvalRuleId" ApprovalRuleId.of_json in
+      make ?approvalRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes an approval rule from a specified pull request. Approval rules can be deleted from a pull request only if the pull request is open, and if the approval rule was created specifically for a pull request and not generated from an approval rule template associated with the repository where the pull request was created. You cannot delete an approval rule from a merged or closed pull request."]
@@ -22440,11 +23375,11 @@ module DeletePullRequestApprovalRuleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalRuleName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleName =
-        field_map_exn json "approvalRuleName" ApprovalRuleName.of_json in
+        field_map_exn json__ "approvalRuleName" ApprovalRuleName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~approvalRuleName ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22453,16 +23388,16 @@ module DeleteFileOutput =
   struct
     type nonrec t =
       {
-      commitId: ObjectId.t
+      commitId: ObjectId.t option
         [@ocaml.doc
           "The full commit ID of the commit that contains the change that deletes the file."];
-      blobId: ObjectId.t
+      blobId: ObjectId.t option
         [@ocaml.doc
           "The blob ID removed from the tree as part of deleting the file."];
-      treeId: ObjectId.t
+      treeId: ObjectId.t option
         [@ocaml.doc
           "The full SHA-1 pointer of the tree information for the commit that contains the delete file change."];
-      filePath: Path.t
+      filePath: Path.t option
         [@ocaml.doc
           "The fully qualified path to the file to be deleted, including the full name and extension of that file."]}
     type nonrec error =
@@ -22494,11 +23429,10 @@ module DeleteFileOutput =
       | `RepositoryDoesNotExistException of RepositoryDoesNotExistException.t 
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteFileOutput"
-    let make ~commitId =
-      fun ~blobId ->
-        fun ~treeId ->
-          fun ~filePath -> fun () -> { commitId; blobId; treeId; filePath }
+    let make ?commitId =
+      fun ?blobId ->
+        fun ?treeId ->
+          fun ?filePath -> fun () -> { commitId; blobId; treeId; filePath }
     let error_of_json name json =
       match name with
       | "BranchDoesNotExistException" ->
@@ -22728,28 +23662,28 @@ module DeleteFileOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("commitId", (Some (ObjectId.to_value x.commitId)));
-        ("blobId", (Some (ObjectId.to_value x.blobId)));
-        ("treeId", (Some (ObjectId.to_value x.treeId)));
-        ("filePath", (Some (Path.to_value x.filePath)))]
+        [("commitId", (Option.map x.commitId ~f:ObjectId.to_value));
+        ("blobId", (Option.map x.blobId ~f:ObjectId.to_value));
+        ("treeId", (Option.map x.treeId ~f:ObjectId.to_value));
+        ("filePath", (Option.map x.filePath ~f:Path.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let filePath =
-        Path.of_xml (Xml.child_exn ~context:context_ xml_arg0 "filePath") in
+        (Option.map ~f:Path.of_xml) (Xml.child xml_arg0 "filePath") in
       let treeId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "treeId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "treeId") in
       let blobId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "blobId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "blobId") in
       let commitId =
-        ObjectId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "commitId") in
-      make ~filePath ~treeId ~blobId ~commitId ()
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
+      make ?filePath ?treeId ?blobId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      let treeId = field_map_exn json "treeId" ObjectId.of_json in
-      let blobId = field_map_exn json "blobId" ObjectId.of_json in
-      let commitId = field_map_exn json "commitId" ObjectId.of_json in
-      make ~filePath ~treeId ~blobId ~commitId ()
+    let of_json json__ =
+      let filePath = field_map json__ "filePath" Path.of_json in
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let blobId = field_map json__ "blobId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
+      make ?filePath ?treeId ?blobId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a specified file from a specified branch. A commit is created on the branch that contains the revision. The file still exists in the commits earlier to the commit that contains the deletion."]
@@ -22836,18 +23770,18 @@ module DeleteFileInput =
       make ?email ?name ?commitMessage ?keepEmptyFolders ~parentCommitId
         ~filePath ~branchName ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map json "email" Email.of_json in
-      let name = field_map json "name" Name.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
+    let of_json json__ =
+      let email = field_map json__ "email" Email.of_json in
+      let name = field_map json__ "name" Name.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
       let parentCommitId =
-        field_map_exn json "parentCommitId" CommitId.of_json in
-      let filePath = field_map_exn json "filePath" Path.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
+        field_map_exn json__ "parentCommitId" CommitId.of_json in
+      let filePath = field_map_exn json__ "filePath" Path.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?email ?name ?commitMessage ?keepEmptyFolders ~parentCommitId
         ~filePath ~branchName ~repositoryName ()
     let to_json v = composed_to_json to_value v
@@ -22926,8 +23860,8 @@ module DeleteCommentContentOutput =
         (Option.map ~f:Comment.of_xml) (Xml.child xml_arg0 "comment") in
       make ?comment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let comment = field_map json "comment" Comment.of_json in
+    let of_json json__ =
+      let comment = field_map json__ "comment" Comment.of_json in
       make ?comment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -22951,8 +23885,8 @@ module DeleteCommentContentInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commentId") in
       make ~commentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commentId = field_map_exn json "commentId" CommentId.of_json in
+    let of_json json__ =
+      let commentId = field_map_exn json__ "commentId" CommentId.of_json in
       make ~commentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23118,8 +24052,8 @@ module DeleteBranchOutput =
           (Xml.child xml_arg0 "deletedBranch") in
       make ?deletedBranch ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let deletedBranch = field_map json "deletedBranch" BranchInfo.of_json in
+    let of_json json__ =
+      let deletedBranch = field_map json__ "deletedBranch" BranchInfo.of_json in
       make ?deletedBranch ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a delete branch operation."]
@@ -23150,10 +24084,10 @@ module DeleteBranchInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~branchName ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
+    let of_json json__ =
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~branchName ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a delete branch operation."]
@@ -23161,7 +24095,7 @@ module DeleteApprovalRuleTemplateOutput =
   struct
     type nonrec t =
       {
-      approvalRuleTemplateId: ApprovalRuleTemplateId.t
+      approvalRuleTemplateId: ApprovalRuleTemplateId.t option
         [@ocaml.doc
           "The system-generated ID of the deleted approval rule template. If the template has been previously deleted, the only response is a 200 OK."]}
     type nonrec error =
@@ -23173,8 +24107,7 @@ module DeleteApprovalRuleTemplateOutput =
       | `InvalidApprovalRuleTemplateNameException of
           InvalidApprovalRuleTemplateNameException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DeleteApprovalRuleTemplateOutput"
-    let make ~approvalRuleTemplateId = fun () -> { approvalRuleTemplateId }
+    let make ?approvalRuleTemplateId = fun () -> { approvalRuleTemplateId }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateInUseException" ->
@@ -23225,19 +24158,20 @@ module DeleteApprovalRuleTemplateOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplateId",
-           (Some (ApprovalRuleTemplateId.to_value x.approvalRuleTemplateId)))]
+           (Option.map x.approvalRuleTemplateId
+              ~f:ApprovalRuleTemplateId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplateId =
-        ApprovalRuleTemplateId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplateId") in
-      make ~approvalRuleTemplateId ()
+        (Option.map ~f:ApprovalRuleTemplateId.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplateId") in
+      make ?approvalRuleTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateId =
-        field_map_exn json "approvalRuleTemplateId"
+        field_map json__ "approvalRuleTemplateId"
           ApprovalRuleTemplateId.of_json in
-      make ~approvalRuleTemplateId ()
+      make ?approvalRuleTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a specified approval rule template. Deleting a template does not remove approval rules on pull requests already created with the template."]
@@ -23263,9 +24197,9 @@ module DeleteApprovalRuleTemplateInput =
              "approvalRuleTemplateName") in
       make ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -23718,9 +24652,9 @@ module CreateUnreferencedMergeCommitOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?treeId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?treeId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -23846,28 +24780,28 @@ module CreateUnreferencedMergeCommitInput =
         ~mergeOption ~destinationCommitSpecifier ~sourceCommitSpecifier
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let conflictResolution =
-        field_map json "conflictResolution" ConflictResolution.of_json in
+        field_map json__ "conflictResolution" ConflictResolution.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
       let mergeOption =
-        field_map_exn json "mergeOption" MergeOptionTypeEnum.of_json in
+        field_map_exn json__ "mergeOption" MergeOptionTypeEnum.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?conflictResolution ?keepEmptyFolders ?commitMessage ?email
         ?authorName ?conflictResolutionStrategy ?conflictDetailLevel
         ~mergeOption ~destinationCommitSpecifier ~sourceCommitSpecifier
@@ -23888,6 +24822,9 @@ module CreateRepositoryOutput =
       | `EncryptionKeyAccessDeniedException of
           EncryptionKeyAccessDeniedException.t 
       | `EncryptionKeyDisabledException of EncryptionKeyDisabledException.t 
+      | `EncryptionKeyInvalidIdException of EncryptionKeyInvalidIdException.t 
+      | `EncryptionKeyInvalidUsageException of
+          EncryptionKeyInvalidUsageException.t 
       | `EncryptionKeyNotFoundException of EncryptionKeyNotFoundException.t 
       | `EncryptionKeyUnavailableException of
           EncryptionKeyUnavailableException.t 
@@ -23896,6 +24833,7 @@ module CreateRepositoryOutput =
       | `InvalidRepositoryNameException of InvalidRepositoryNameException.t 
       | `InvalidSystemTagUsageException of InvalidSystemTagUsageException.t 
       | `InvalidTagsMapException of InvalidTagsMapException.t 
+      | `OperationNotAllowedException of OperationNotAllowedException.t 
       | `RepositoryLimitExceededException of
           RepositoryLimitExceededException.t 
       | `RepositoryNameExistsException of RepositoryNameExistsException.t 
@@ -23915,6 +24853,12 @@ module CreateRepositoryOutput =
       | "EncryptionKeyDisabledException" ->
           `EncryptionKeyDisabledException
             (EncryptionKeyDisabledException.of_json json)
+      | "EncryptionKeyInvalidIdException" ->
+          `EncryptionKeyInvalidIdException
+            (EncryptionKeyInvalidIdException.of_json json)
+      | "EncryptionKeyInvalidUsageException" ->
+          `EncryptionKeyInvalidUsageException
+            (EncryptionKeyInvalidUsageException.of_json json)
       | "EncryptionKeyNotFoundException" ->
           `EncryptionKeyNotFoundException
             (EncryptionKeyNotFoundException.of_json json)
@@ -23932,6 +24876,9 @@ module CreateRepositoryOutput =
             (InvalidSystemTagUsageException.of_json json)
       | "InvalidTagsMapException" ->
           `InvalidTagsMapException (InvalidTagsMapException.of_json json)
+      | "OperationNotAllowedException" ->
+          `OperationNotAllowedException
+            (OperationNotAllowedException.of_json json)
       | "RepositoryLimitExceededException" ->
           `RepositoryLimitExceededException
             (RepositoryLimitExceededException.of_json json)
@@ -23959,6 +24906,12 @@ module CreateRepositoryOutput =
       | "EncryptionKeyDisabledException" ->
           `EncryptionKeyDisabledException
             (EncryptionKeyDisabledException.of_xml xml)
+      | "EncryptionKeyInvalidIdException" ->
+          `EncryptionKeyInvalidIdException
+            (EncryptionKeyInvalidIdException.of_xml xml)
+      | "EncryptionKeyInvalidUsageException" ->
+          `EncryptionKeyInvalidUsageException
+            (EncryptionKeyInvalidUsageException.of_xml xml)
       | "EncryptionKeyNotFoundException" ->
           `EncryptionKeyNotFoundException
             (EncryptionKeyNotFoundException.of_xml xml)
@@ -23976,6 +24929,9 @@ module CreateRepositoryOutput =
             (InvalidSystemTagUsageException.of_xml xml)
       | "InvalidTagsMapException" ->
           `InvalidTagsMapException (InvalidTagsMapException.of_xml xml)
+      | "OperationNotAllowedException" ->
+          `OperationNotAllowedException
+            (OperationNotAllowedException.of_xml xml)
       | "RepositoryLimitExceededException" ->
           `RepositoryLimitExceededException
             (RepositoryLimitExceededException.of_xml xml)
@@ -24005,6 +24961,14 @@ module CreateRepositoryOutput =
           `Assoc
             [("error", (`String "EncryptionKeyDisabledException"));
             ("details", (EncryptionKeyDisabledException.to_json e))]
+      | `EncryptionKeyInvalidIdException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyInvalidIdException"));
+            ("details", (EncryptionKeyInvalidIdException.to_json e))]
+      | `EncryptionKeyInvalidUsageException e ->
+          `Assoc
+            [("error", (`String "EncryptionKeyInvalidUsageException"));
+            ("details", (EncryptionKeyInvalidUsageException.to_json e))]
       | `EncryptionKeyNotFoundException e ->
           `Assoc
             [("error", (`String "EncryptionKeyNotFoundException"));
@@ -24029,6 +24993,10 @@ module CreateRepositoryOutput =
           `Assoc
             [("error", (`String "InvalidTagsMapException"));
             ("details", (InvalidTagsMapException.to_json e))]
+      | `OperationNotAllowedException e ->
+          `Assoc
+            [("error", (`String "OperationNotAllowedException"));
+            ("details", (OperationNotAllowedException.to_json e))]
       | `RepositoryLimitExceededException e ->
           `Assoc
             [("error", (`String "RepositoryLimitExceededException"));
@@ -24065,9 +25033,9 @@ module CreateRepositoryOutput =
           (Xml.child xml_arg0 "repositoryMetadata") in
       make ?repositoryMetadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryMetadata =
-        field_map json "repositoryMetadata" RepositoryMetadata.of_json in
+        field_map json__ "repositoryMetadata" RepositoryMetadata.of_json in
       make ?repositoryMetadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the output of a create repository operation."]
@@ -24077,18 +25045,23 @@ module CreateRepositoryInput =
       {
       repositoryName: RepositoryName.t
         [@ocaml.doc
-          "The name of the new repository to be created. The repository name must be unique across the calling AWS account. Repository names are limited to 100 alphanumeric, dash, and underscore characters, and cannot include certain characters. For more information about the limits on repository names, see Limits in the AWS CodeCommit User Guide. The suffix .git is prohibited."];
+          "The name of the new repository to be created. The repository name must be unique across the calling Amazon Web Services account. Repository names are limited to 100 alphanumeric, dash, and underscore characters, and cannot include certain characters. For more information about the limits on repository names, see Quotas in the CodeCommit User Guide. The suffix .git is prohibited."];
       repositoryDescription: RepositoryDescription.t option
         [@ocaml.doc
           "A comment or description about the new repository. The description field for a repository accepts all HTML characters and all valid Unicode characters. Applications that do not HTML-encode the description and display it in a webpage can expose users to potentially malicious code. Make sure that you HTML-encode the description field in any application that uses this API to display the repository description on a webpage."];
       tags: TagsMap.t option
         [@ocaml.doc
-          "One or more tag key-value pairs to use when tagging this repository."]}
+          "One or more tag key-value pairs to use when tagging this repository."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The ID of the encryption key. You can view the ID of an encryption key in the KMS console, or use the KMS APIs to programmatically retrieve a key ID. For more information about acceptable values for kmsKeyID, see KeyId in the Decrypt API description in the Key Management Service API Reference. If no key is specified, the default aws/codecommit Amazon Web Services managed key is used."]}
     let context_ = "CreateRepositoryInput"
     let make ?repositoryDescription =
       fun ?tags ->
-        fun ~repositoryName ->
-          fun () -> { repositoryDescription; tags; repositoryName }
+        fun ?kmsKeyId ->
+          fun ~repositoryName ->
+            fun () ->
+              { repositoryDescription; tags; kmsKeyId; repositoryName }
     let to_value x =
       structure_to_value
         [("repositoryName",
@@ -24096,9 +25069,12 @@ module CreateRepositoryInput =
         ("repositoryDescription",
           (Option.map x.repositoryDescription
              ~f:RepositoryDescription.to_value));
-        ("tags", (Option.map x.tags ~f:TagsMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
       let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let repositoryDescription =
         (Option.map ~f:RepositoryDescription.of_xml)
@@ -24106,22 +25082,24 @@ module CreateRepositoryInput =
       let repositoryName =
         RepositoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
-      make ?tags ?repositoryDescription ~repositoryName ()
+      make ?kmsKeyId ?tags ?repositoryDescription ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagsMap.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
       let repositoryDescription =
-        field_map json "repositoryDescription" RepositoryDescription.of_json in
+        field_map json__ "repositoryDescription"
+          RepositoryDescription.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
-      make ?tags ?repositoryDescription ~repositoryName ()
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
+      make ?kmsKeyId ?tags ?repositoryDescription ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a create repository operation."]
 module CreatePullRequestOutput =
   struct
     type nonrec t =
       {
-      pullRequest: PullRequest.t
+      pullRequest: PullRequest.t option
         [@ocaml.doc "Information about the newly created pull request."]}
     type nonrec error =
       [
@@ -24161,8 +25139,7 @@ module CreatePullRequestOutput =
       | `TargetsRequiredException of TargetsRequiredException.t 
       | `TitleRequiredException of TitleRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreatePullRequestOutput"
-    let make ~pullRequest = fun () -> { pullRequest }
+    let make ?pullRequest = fun () -> { pullRequest }
     let error_of_json name json =
       match name with
       | "ClientRequestTokenRequiredException" ->
@@ -24421,17 +25398,16 @@ module CreatePullRequestOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pullRequest", (Some (PullRequest.to_value x.pullRequest)))]
+        [("pullRequest", (Option.map x.pullRequest ~f:PullRequest.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pullRequest =
-        PullRequest.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pullRequest") in
-      make ~pullRequest ()
+        (Option.map ~f:PullRequest.of_xml) (Xml.child xml_arg0 "pullRequest") in
+      make ?pullRequest ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pullRequest = field_map_exn json "pullRequest" PullRequest.of_json in
-      make ~pullRequest ()
+    let of_json json__ =
+      let pullRequest = field_map json__ "pullRequest" PullRequest.of_json in
+      make ?pullRequest ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a pull request in the specified repository."]
 module CreatePullRequestInput =
@@ -24448,7 +25424,7 @@ module CreatePullRequestInput =
           "The targets for the pull request, including the source of the code to be reviewed (the source branch) and the destination where the creator of the pull request intends the code to be merged after the pull request is closed (the destination branch)."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A unique, client-generated idempotency token that, when provided in a request, ensures the request cannot be repeated with a changed parameter. If a request is received with the same parameters and a token is included, the request returns information about the initial request that used that token. The AWS SDKs prepopulate client request tokens. If you are using an AWS SDK, an idempotency token is created for you."]}
+          "A unique, client-generated idempotency token that, when provided in a request, ensures the request cannot be repeated with a changed parameter. If a request is received with the same parameters and a token is included, the request returns information about the initial request that used that token. The Amazon Web ServicesSDKs prepopulate client request tokens. If you are using an Amazon Web ServicesSDK, an idempotency token is created for you."]}
     let context_ = "CreatePullRequestInput"
     let make ?description =
       fun ?clientRequestToken ->
@@ -24476,12 +25452,12 @@ module CreatePullRequestInput =
         Title.of_xml (Xml.child_exn ~context:context_ xml_arg0 "title") in
       make ?clientRequestToken ~targets ?description ~title ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "clientRequestToken" ClientRequestToken.of_json in
-      let targets = field_map_exn json "targets" TargetList.of_json in
-      let description = field_map json "description" Description.of_json in
-      let title = field_map_exn json "title" Title.of_json in
+        field_map json__ "clientRequestToken" ClientRequestToken.of_json in
+      let targets = field_map_exn json__ "targets" TargetList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let title = field_map_exn json__ "title" Title.of_json in
       make ?clientRequestToken ~targets ?description ~title ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a pull request in the specified repository."]
@@ -24489,7 +25465,7 @@ module CreatePullRequestApprovalRuleOutput =
   struct
     type nonrec t =
       {
-      approvalRule: ApprovalRule.t
+      approvalRule: ApprovalRule.t option
         [@ocaml.doc "Information about the created approval rule."]}
     type nonrec error =
       [
@@ -24519,8 +25495,7 @@ module CreatePullRequestApprovalRuleOutput =
           PullRequestDoesNotExistException.t 
       | `PullRequestIdRequiredException of PullRequestIdRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreatePullRequestApprovalRuleOutput"
-    let make ~approvalRule = fun () -> { approvalRule }
+    let make ?approvalRule = fun () -> { approvalRule }
     let error_of_json name json =
       match name with
       | "ApprovalRuleContentRequiredException" ->
@@ -24689,18 +25664,18 @@ module CreatePullRequestApprovalRuleOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("approvalRule", (Some (ApprovalRule.to_value x.approvalRule)))]
+        [("approvalRule",
+           (Option.map x.approvalRule ~f:ApprovalRule.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRule =
-        ApprovalRule.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRule") in
-      make ~approvalRule ()
+        (Option.map ~f:ApprovalRule.of_xml)
+          (Xml.child xml_arg0 "approvalRule") in
+      make ?approvalRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let approvalRule =
-        field_map_exn json "approvalRule" ApprovalRule.of_json in
-      make ~approvalRule ()
+    let of_json json__ =
+      let approvalRule = field_map json__ "approvalRule" ApprovalRule.of_json in
+      make ?approvalRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an approval rule for a pull request."]
 module CreatePullRequestApprovalRuleInput =
@@ -24714,7 +25689,7 @@ module CreatePullRequestApprovalRuleInput =
         [@ocaml.doc "The name for the approval rule."];
       approvalRuleContent: ApprovalRuleContent.t
         [@ocaml.doc
-          "The content of the approval rule, including the number of approvals needed and the structure of an approval pool defined for approvals, if any. For more information about approval pools, see the AWS CodeCommit User Guide. When you create the content of the approval rule, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an AWS account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the AWS account 123456789012 and Mary_Major, all of the following would be counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."]}
+          "The content of the approval rule, including the number of approvals needed and the structure of an approval pool defined for approvals, if any. For more information about approval pools, see the CodeCommit User Guide. When you create the content of the approval rule, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an Amazon Web Services account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the Amazon Web Services account 123456789012 and Mary_Major, all of the following would be counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."]}
     let context_ = "CreatePullRequestApprovalRuleInput"
     let make ~pullRequestId =
       fun ~approvalRuleName ->
@@ -24740,13 +25715,14 @@ module CreatePullRequestApprovalRuleInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pullRequestId") in
       make ~approvalRuleContent ~approvalRuleName ~pullRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleContent =
-        field_map_exn json "approvalRuleContent" ApprovalRuleContent.of_json in
+        field_map_exn json__ "approvalRuleContent"
+          ApprovalRuleContent.of_json in
       let approvalRuleName =
-        field_map_exn json "approvalRuleName" ApprovalRuleName.of_json in
+        field_map_exn json__ "approvalRuleName" ApprovalRuleName.of_json in
       let pullRequestId =
-        field_map_exn json "pullRequestId" PullRequestId.of_json in
+        field_map_exn json__ "pullRequestId" PullRequestId.of_json in
       make ~approvalRuleContent ~approvalRuleName ~pullRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an approval rule for a pull request."]
@@ -25241,12 +26217,14 @@ module CreateCommitOutput =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "commitId") in
       make ?filesDeleted ?filesUpdated ?filesAdded ?treeId ?commitId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filesDeleted = field_map json "filesDeleted" FilesMetadata.of_json in
-      let filesUpdated = field_map json "filesUpdated" FilesMetadata.of_json in
-      let filesAdded = field_map json "filesAdded" FilesMetadata.of_json in
-      let treeId = field_map json "treeId" ObjectId.of_json in
-      let commitId = field_map json "commitId" ObjectId.of_json in
+    let of_json json__ =
+      let filesDeleted =
+        field_map json__ "filesDeleted" FilesMetadata.of_json in
+      let filesUpdated =
+        field_map json__ "filesUpdated" FilesMetadata.of_json in
+      let filesAdded = field_map json__ "filesAdded" FilesMetadata.of_json in
+      let treeId = field_map json__ "treeId" ObjectId.of_json in
+      let commitId = field_map json__ "commitId" ObjectId.of_json in
       make ?filesDeleted ?filesUpdated ?filesAdded ?treeId ?commitId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25353,21 +26331,21 @@ module CreateCommitInput =
         ?commitMessage ?email ?authorName ?parentCommitId ~branchName
         ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let setFileModes =
-        field_map json "setFileModes" SetFileModeEntries.of_json in
+        field_map json__ "setFileModes" SetFileModeEntries.of_json in
       let deleteFiles =
-        field_map json "deleteFiles" DeleteFileEntries.of_json in
-      let putFiles = field_map json "putFiles" PutFileEntries.of_json in
+        field_map json__ "deleteFiles" DeleteFileEntries.of_json in
+      let putFiles = field_map json__ "putFiles" PutFileEntries.of_json in
       let keepEmptyFolders =
-        field_map json "keepEmptyFolders" KeepEmptyFolders.of_json in
-      let commitMessage = field_map json "commitMessage" Message.of_json in
-      let email = field_map json "email" Email.of_json in
-      let authorName = field_map json "authorName" Name.of_json in
-      let parentCommitId = field_map json "parentCommitId" CommitId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
+        field_map json__ "keepEmptyFolders" KeepEmptyFolders.of_json in
+      let commitMessage = field_map json__ "commitMessage" Message.of_json in
+      let email = field_map json__ "email" Email.of_json in
+      let authorName = field_map json__ "authorName" Name.of_json in
+      let parentCommitId = field_map json__ "parentCommitId" CommitId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?setFileModes ?deleteFiles ?putFiles ?keepEmptyFolders
         ?commitMessage ?email ?authorName ?parentCommitId ~branchName
         ~repositoryName ()
@@ -25407,11 +26385,11 @@ module CreateBranchInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~commitId ~branchName ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let commitId = field_map_exn json "commitId" CommitId.of_json in
-      let branchName = field_map_exn json "branchName" BranchName.of_json in
+    let of_json json__ =
+      let commitId = field_map_exn json__ "commitId" CommitId.of_json in
+      let branchName = field_map_exn json__ "branchName" BranchName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~commitId ~branchName ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the input of a create branch operation."]
@@ -25419,7 +26397,7 @@ module CreateApprovalRuleTemplateOutput =
   struct
     type nonrec t =
       {
-      approvalRuleTemplate: ApprovalRuleTemplate.t
+      approvalRuleTemplate: ApprovalRuleTemplate.t option
         [@ocaml.doc
           "The content and structure of the created approval rule template."]}
     type nonrec error =
@@ -25439,8 +26417,7 @@ module CreateApprovalRuleTemplateOutput =
       | `NumberOfRuleTemplatesExceededException of
           NumberOfRuleTemplatesExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateApprovalRuleTemplateOutput"
-    let make ~approvalRuleTemplate = fun () -> { approvalRuleTemplate }
+    let make ?approvalRuleTemplate = fun () -> { approvalRuleTemplate }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateContentRequiredException" ->
@@ -25539,22 +26516,22 @@ module CreateApprovalRuleTemplateOutput =
     let to_value x =
       structure_to_value
         [("approvalRuleTemplate",
-           (Some (ApprovalRuleTemplate.to_value x.approvalRuleTemplate)))]
+           (Option.map x.approvalRuleTemplate
+              ~f:ApprovalRuleTemplate.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let approvalRuleTemplate =
-        ApprovalRuleTemplate.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "approvalRuleTemplate") in
-      make ~approvalRuleTemplate ()
+        (Option.map ~f:ApprovalRuleTemplate.of_xml)
+          (Xml.child xml_arg0 "approvalRuleTemplate") in
+      make ?approvalRuleTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplate =
-        field_map_exn json "approvalRuleTemplate"
-          ApprovalRuleTemplate.of_json in
-      make ~approvalRuleTemplate ()
+        field_map json__ "approvalRuleTemplate" ApprovalRuleTemplate.of_json in
+      make ?approvalRuleTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a template for approval rules that can then be associated with one or more repositories in your AWS account. When you associate a template with a repository, AWS CodeCommit creates an approval rule that matches the conditions of the template for all pull requests that meet the conditions of the template. For more information, see AssociateApprovalRuleTemplateWithRepository."]
+       "Creates a template for approval rules that can then be associated with one or more repositories in your Amazon Web Services account. When you associate a template with a repository, CodeCommit creates an approval rule that matches the conditions of the template for all pull requests that meet the conditions of the template. For more information, see AssociateApprovalRuleTemplateWithRepository."]
 module CreateApprovalRuleTemplateInput =
   struct
     type nonrec t =
@@ -25564,7 +26541,7 @@ module CreateApprovalRuleTemplateInput =
           "The name of the approval rule template. Provide descriptive names, because this name is applied to the approval rules created automatically in associated repositories."];
       approvalRuleTemplateContent: ApprovalRuleTemplateContent.t
         [@ocaml.doc
-          "The content of the approval rule that is created on pull requests in associated repositories. If you specify one or more destination references (branches), approval rules are created in an associated repository only if their destination references (branches) match those specified in the template. When you create the content of the approval rule template, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an AWS account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the AWS account 123456789012 and Mary_Major, all of the following are counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."];
+          "The content of the approval rule that is created on pull requests in associated repositories. If you specify one or more destination references (branches), approval rules are created in an associated repository only if their destination references (branches) match those specified in the template. When you create the content of the approval rule template, you can specify approvers in an approval pool in one of two ways: CodeCommitApprovers: This option only requires an Amazon Web Services account and a resource. It can be used for both IAM users and federated access users whose name matches the provided resource name. This is a very powerful option that offers a great deal of flexibility. For example, if you specify the Amazon Web Services account 123456789012 and Mary_Major, all of the following are counted as approvals coming from that user: An IAM user in the account (arn:aws:iam::123456789012:user/Mary_Major) A federated user identified in IAM as Mary_Major (arn:aws:sts::123456789012:federated-user/Mary_Major) This option does not recognize an active session of someone assuming the role of CodeCommitReview with a role session name of Mary_Major (arn:aws:sts::123456789012:assumed-role/CodeCommitReview/Mary_Major) unless you include a wildcard (*Mary_Major). Fully qualified ARN: This option allows you to specify the fully qualified Amazon Resource Name (ARN) of the IAM user or role. For more information about IAM ARNs, wildcards, and formats, see IAM Identifiers in the IAM User Guide."];
       approvalRuleTemplateDescription:
         ApprovalRuleTemplateDescription.t option
         [@ocaml.doc
@@ -25607,21 +26584,21 @@ module CreateApprovalRuleTemplateInput =
       make ?approvalRuleTemplateDescription ~approvalRuleTemplateContent
         ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let approvalRuleTemplateDescription =
-        field_map json "approvalRuleTemplateDescription"
+        field_map json__ "approvalRuleTemplateDescription"
           ApprovalRuleTemplateDescription.of_json in
       let approvalRuleTemplateContent =
-        field_map_exn json "approvalRuleTemplateContent"
+        field_map_exn json__ "approvalRuleTemplateContent"
           ApprovalRuleTemplateContent.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ?approvalRuleTemplateDescription ~approvalRuleTemplateContent
         ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a template for approval rules that can then be associated with one or more repositories in your AWS account. When you associate a template with a repository, AWS CodeCommit creates an approval rule that matches the conditions of the template for all pull requests that meet the conditions of the template. For more information, see AssociateApprovalRuleTemplateWithRepository."]
+       "Creates a template for approval rules that can then be associated with one or more repositories in your Amazon Web Services account. When you associate a template with a repository, CodeCommit creates an approval rule that matches the conditions of the template for all pull requests that meet the conditions of the template. For more information, see AssociateApprovalRuleTemplateWithRepository."]
 module BranchNameExistsException =
   struct
     type nonrec t = unit
@@ -25644,7 +26621,10 @@ module BatchGetRepositoriesOutput =
           "A list of repositories returned by the batch get repositories operation."];
       repositoriesNotFound: RepositoryNotFoundList.t option
         [@ocaml.doc
-          "Returns a list of repository names for which information could not be found."]}
+          "Returns a list of repository names for which information could not be found."];
+      errors: BatchGetRepositoriesErrorsList.t option
+        [@ocaml.doc
+          "Returns information about any errors returned when attempting to retrieve information about the repositories."]}
     type nonrec error =
       [
         `EncryptionIntegrityChecksFailedException of
@@ -25663,7 +26643,8 @@ module BatchGetRepositoriesOutput =
       | `Unknown_operation_error of (string * string option) ]
     let make ?repositories =
       fun ?repositoriesNotFound ->
-        fun () -> { repositories; repositoriesNotFound }
+        fun ?errors ->
+          fun () -> { repositories; repositoriesNotFound; errors }
     let error_of_json name json =
       match name with
       | "EncryptionIntegrityChecksFailedException" ->
@@ -25766,23 +26747,31 @@ module BatchGetRepositoriesOutput =
            (Option.map x.repositories ~f:RepositoryMetadataList.to_value));
         ("repositoriesNotFound",
           (Option.map x.repositoriesNotFound
-             ~f:RepositoryNotFoundList.to_value))]
+             ~f:RepositoryNotFoundList.to_value));
+        ("errors",
+          (Option.map x.errors ~f:BatchGetRepositoriesErrorsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:BatchGetRepositoriesErrorsList.of_xml)
+          (Xml.child xml_arg0 "errors") in
       let repositoriesNotFound =
         (Option.map ~f:RepositoryNotFoundList.of_xml)
           (Xml.child xml_arg0 "repositoriesNotFound") in
       let repositories =
         (Option.map ~f:RepositoryMetadataList.of_xml)
           (Xml.child xml_arg0 "repositories") in
-      make ?repositoriesNotFound ?repositories ()
+      make ?errors ?repositoriesNotFound ?repositories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let errors =
+        field_map json__ "errors" BatchGetRepositoriesErrorsList.of_json in
       let repositoriesNotFound =
-        field_map json "repositoriesNotFound" RepositoryNotFoundList.of_json in
+        field_map json__ "repositoriesNotFound"
+          RepositoryNotFoundList.of_json in
       let repositories =
-        field_map json "repositories" RepositoryMetadataList.of_json in
-      make ?repositoriesNotFound ?repositories ()
+        field_map json__ "repositories" RepositoryMetadataList.of_json in
+      make ?errors ?repositoriesNotFound ?repositories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents the output of a batch get repositories operation."]
@@ -25806,9 +26795,9 @@ module BatchGetRepositoriesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryNames") in
       make ~repositoryNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryNames =
-        field_map_exn json "repositoryNames" RepositoryNameList.of_json in
+        field_map_exn json__ "repositoryNames" RepositoryNameList.of_json in
       make ~repositoryNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -25971,9 +26960,10 @@ module BatchGetCommitsOutput =
           (Xml.child xml_arg0 "commits") in
       make ?errors ?commits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" BatchGetCommitsErrorsList.of_json in
-      let commits = field_map json "commits" CommitObjectsList.of_json in
+    let of_json json__ =
+      let errors =
+        field_map json__ "errors" BatchGetCommitsErrorsList.of_json in
+      let commits = field_map json__ "commits" CommitObjectsList.of_json in
       make ?errors ?commits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26004,11 +26994,11 @@ module BatchGetCommitsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "commitIds") in
       make ~repositoryName ~commitIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let commitIds =
-        field_map_exn json "commitIds" CommitIdsInputList.of_json in
+        field_map_exn json__ "commitIds" CommitIdsInputList.of_json in
       make ~repositoryName ~commitIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -26017,11 +27007,12 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput =
   struct
     type nonrec t =
       {
-      disassociatedRepositoryNames: RepositoryNameList.t
+      disassociatedRepositoryNames: RepositoryNameList.t option
         [@ocaml.doc
           "A list of repository names that have had their association with the template removed."];
       errors:
         BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.t
+          option
         [@ocaml.doc
           "A list of any errors that might have occurred while attempting to remove the association between the template and the repositories."]}
     type nonrec error =
@@ -26045,10 +27036,8 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput =
       | `RepositoryNamesRequiredException of
           RepositoryNamesRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ =
-      "BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput"
-    let make ~disassociatedRepositoryNames =
-      fun ~errors -> fun () -> { disassociatedRepositoryNames; errors }
+    let make ?disassociatedRepositoryNames =
+      fun ?errors -> fun () -> { disassociatedRepositoryNames; errors }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateDoesNotExistException" ->
@@ -26170,30 +27159,30 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesOutput =
     let to_value x =
       structure_to_value
         [("disassociatedRepositoryNames",
-           (Some (RepositoryNameList.to_value x.disassociatedRepositoryNames)));
+           (Option.map x.disassociatedRepositoryNames
+              ~f:RepositoryNameList.to_value));
         ("errors",
-          (Some
-             (BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.to_value
-                x.errors)))]
+          (Option.map x.errors
+             ~f:BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errors") in
+        (Option.map
+           ~f:BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.of_xml)
+          (Xml.child xml_arg0 "errors") in
       let disassociatedRepositoryNames =
-        RepositoryNameList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "disassociatedRepositoryNames") in
-      make ~errors ~disassociatedRepositoryNames ()
+        (Option.map ~f:RepositoryNameList.of_xml)
+          (Xml.child xml_arg0 "disassociatedRepositoryNames") in
+      make ?errors ?disassociatedRepositoryNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map_exn json "errors"
+        field_map json__ "errors"
           BatchDisassociateApprovalRuleTemplateFromRepositoriesErrorsList.of_json in
       let disassociatedRepositoryNames =
-        field_map_exn json "disassociatedRepositoryNames"
+        field_map json__ "disassociatedRepositoryNames"
           RepositoryNameList.of_json in
-      make ~errors ~disassociatedRepositoryNames ()
+      make ?errors ?disassociatedRepositoryNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the association between an approval rule template and one or more specified repositories."]
@@ -26230,11 +27219,11 @@ module BatchDisassociateApprovalRuleTemplateFromRepositoriesInput =
              "approvalRuleTemplateName") in
       make ~repositoryNames ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryNames =
-        field_map_exn json "repositoryNames" RepositoryNameList.of_json in
+        field_map_exn json__ "repositoryNames" RepositoryNameList.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~repositoryNames ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -26244,7 +27233,7 @@ module BatchDescribeMergeConflictsOutput =
   struct
     type nonrec t =
       {
-      conflicts: Conflicts.t
+      conflicts: Conflicts.t option
         [@ocaml.doc
           "A list of conflicts for each file, including the conflict metadata and the hunks of the differences between the files."];
       nextToken: NextToken.t option
@@ -26253,10 +27242,10 @@ module BatchDescribeMergeConflictsOutput =
       errors: BatchDescribeMergeConflictsErrors.t option
         [@ocaml.doc
           "A list of any errors returned while describing the merge conflicts for each file."];
-      destinationCommitId: ObjectId.t
+      destinationCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the destination commit specifier that was used in the merge evaluation."];
-      sourceCommitId: ObjectId.t
+      sourceCommitId: ObjectId.t option
         [@ocaml.doc
           "The commit ID of the source commit specifier that was used in the merge evaluation."];
       baseCommitId: ObjectId.t option
@@ -26293,21 +27282,20 @@ module BatchDescribeMergeConflictsOutput =
       | `RepositoryNameRequiredException of RepositoryNameRequiredException.t 
       | `TipsDivergenceExceededException of TipsDivergenceExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchDescribeMergeConflictsOutput"
-    let make ?nextToken =
-      fun ?errors ->
-        fun ?baseCommitId ->
-          fun ~conflicts ->
-            fun ~destinationCommitId ->
-              fun ~sourceCommitId ->
+    let make ?conflicts =
+      fun ?nextToken ->
+        fun ?errors ->
+          fun ?destinationCommitId ->
+            fun ?sourceCommitId ->
+              fun ?baseCommitId ->
                 fun () ->
                   {
+                    conflicts;
                     nextToken;
                     errors;
-                    baseCommitId;
-                    conflicts;
                     destinationCommitId;
-                    sourceCommitId
+                    sourceCommitId;
+                    baseCommitId
                   }
     let error_of_json name json =
       match name with
@@ -26536,47 +27524,45 @@ module BatchDescribeMergeConflictsOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("conflicts", (Some (Conflicts.to_value x.conflicts)));
+        [("conflicts", (Option.map x.conflicts ~f:Conflicts.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("errors",
           (Option.map x.errors ~f:BatchDescribeMergeConflictsErrors.to_value));
         ("destinationCommitId",
-          (Some (ObjectId.to_value x.destinationCommitId)));
-        ("sourceCommitId", (Some (ObjectId.to_value x.sourceCommitId)));
+          (Option.map x.destinationCommitId ~f:ObjectId.to_value));
+        ("sourceCommitId",
+          (Option.map x.sourceCommitId ~f:ObjectId.to_value));
         ("baseCommitId", (Option.map x.baseCommitId ~f:ObjectId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let baseCommitId =
         (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "baseCommitId") in
       let sourceCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "sourceCommitId") in
+        (Option.map ~f:ObjectId.of_xml) (Xml.child xml_arg0 "sourceCommitId") in
       let destinationCommitId =
-        ObjectId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "destinationCommitId") in
+        (Option.map ~f:ObjectId.of_xml)
+          (Xml.child xml_arg0 "destinationCommitId") in
       let errors =
         (Option.map ~f:BatchDescribeMergeConflictsErrors.of_xml)
           (Xml.child xml_arg0 "errors") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let conflicts =
-        Conflicts.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "conflicts") in
-      make ?baseCommitId ~sourceCommitId ~destinationCommitId ?errors
-        ?nextToken ~conflicts ()
+        (Option.map ~f:Conflicts.of_xml) (Xml.child xml_arg0 "conflicts") in
+      make ?baseCommitId ?sourceCommitId ?destinationCommitId ?errors
+        ?nextToken ?conflicts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let baseCommitId = field_map json "baseCommitId" ObjectId.of_json in
-      let sourceCommitId =
-        field_map_exn json "sourceCommitId" ObjectId.of_json in
+    let of_json json__ =
+      let baseCommitId = field_map json__ "baseCommitId" ObjectId.of_json in
+      let sourceCommitId = field_map json__ "sourceCommitId" ObjectId.of_json in
       let destinationCommitId =
-        field_map_exn json "destinationCommitId" ObjectId.of_json in
+        field_map json__ "destinationCommitId" ObjectId.of_json in
       let errors =
-        field_map json "errors" BatchDescribeMergeConflictsErrors.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let conflicts = field_map_exn json "conflicts" Conflicts.of_json in
-      make ?baseCommitId ~sourceCommitId ~destinationCommitId ?errors
-        ?nextToken ~conflicts ()
+        field_map json__ "errors" BatchDescribeMergeConflictsErrors.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let conflicts = field_map json__ "conflicts" Conflicts.of_json in
+      make ?baseCommitId ?sourceCommitId ?destinationCommitId ?errors
+        ?nextToken ?conflicts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about one or more merge conflicts in the attempted merge of two commit specifiers using the squash or three-way merge strategy."]
@@ -26693,26 +27679,26 @@ module BatchDescribeMergeConflictsInput =
         ?filePaths ?maxConflictFiles ?maxMergeHunks ~mergeOption
         ~sourceCommitSpecifier ~destinationCommitSpecifier ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let conflictResolutionStrategy =
-        field_map json "conflictResolutionStrategy"
+        field_map json__ "conflictResolutionStrategy"
           ConflictResolutionStrategyTypeEnum.of_json in
       let conflictDetailLevel =
-        field_map json "conflictDetailLevel"
+        field_map json__ "conflictDetailLevel"
           ConflictDetailLevelTypeEnum.of_json in
-      let filePaths = field_map json "filePaths" FilePaths.of_json in
+      let filePaths = field_map json__ "filePaths" FilePaths.of_json in
       let maxConflictFiles =
-        field_map json "maxConflictFiles" MaxResults.of_json in
-      let maxMergeHunks = field_map json "maxMergeHunks" MaxResults.of_json in
+        field_map json__ "maxConflictFiles" MaxResults.of_json in
+      let maxMergeHunks = field_map json__ "maxMergeHunks" MaxResults.of_json in
       let mergeOption =
-        field_map_exn json "mergeOption" MergeOptionTypeEnum.of_json in
+        field_map_exn json__ "mergeOption" MergeOptionTypeEnum.of_json in
       let sourceCommitSpecifier =
-        field_map_exn json "sourceCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "sourceCommitSpecifier" CommitName.of_json in
       let destinationCommitSpecifier =
-        field_map_exn json "destinationCommitSpecifier" CommitName.of_json in
+        field_map_exn json__ "destinationCommitSpecifier" CommitName.of_json in
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ?nextToken ?conflictResolutionStrategy ?conflictDetailLevel
         ?filePaths ?maxConflictFiles ?maxMergeHunks ~mergeOption
         ~sourceCommitSpecifier ~destinationCommitSpecifier ~repositoryName ()
@@ -26723,10 +27709,11 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesOutput =
   struct
     type nonrec t =
       {
-      associatedRepositoryNames: RepositoryNameList.t
+      associatedRepositoryNames: RepositoryNameList.t option
         [@ocaml.doc
           "A list of names of the repositories that have been associated with the template."];
-      errors: BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.t
+      errors:
+        BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.t option
         [@ocaml.doc
           "A list of any errors that might have occurred while attempting to create the association between the template and the repositories."]}
     type nonrec error =
@@ -26750,9 +27737,8 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesOutput =
       | `RepositoryNamesRequiredException of
           RepositoryNamesRequiredException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "BatchAssociateApprovalRuleTemplateWithRepositoriesOutput"
-    let make ~associatedRepositoryNames =
-      fun ~errors -> fun () -> { associatedRepositoryNames; errors }
+    let make ?associatedRepositoryNames =
+      fun ?errors -> fun () -> { associatedRepositoryNames; errors }
     let error_of_json name json =
       match name with
       | "ApprovalRuleTemplateDoesNotExistException" ->
@@ -26874,30 +27860,30 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesOutput =
     let to_value x =
       structure_to_value
         [("associatedRepositoryNames",
-           (Some (RepositoryNameList.to_value x.associatedRepositoryNames)));
+           (Option.map x.associatedRepositoryNames
+              ~f:RepositoryNameList.to_value));
         ("errors",
-          (Some
-             (BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.to_value
-                x.errors)))]
+          (Option.map x.errors
+             ~f:BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errors =
-        BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "errors") in
+        (Option.map
+           ~f:BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.of_xml)
+          (Xml.child xml_arg0 "errors") in
       let associatedRepositoryNames =
-        RepositoryNameList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "associatedRepositoryNames") in
-      make ~errors ~associatedRepositoryNames ()
+        (Option.map ~f:RepositoryNameList.of_xml)
+          (Xml.child xml_arg0 "associatedRepositoryNames") in
+      make ?errors ?associatedRepositoryNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errors =
-        field_map_exn json "errors"
+        field_map json__ "errors"
           BatchAssociateApprovalRuleTemplateWithRepositoriesErrorsList.of_json in
       let associatedRepositoryNames =
-        field_map_exn json "associatedRepositoryNames"
+        field_map json__ "associatedRepositoryNames"
           RepositoryNameList.of_json in
-      make ~errors ~associatedRepositoryNames ()
+      make ?errors ?associatedRepositoryNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an association between an approval rule template and one or more specified repositories."]
@@ -26933,11 +27919,11 @@ module BatchAssociateApprovalRuleTemplateWithRepositoriesInput =
              "approvalRuleTemplateName") in
       make ~repositoryNames ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryNames =
-        field_map_exn json "repositoryNames" RepositoryNameList.of_json in
+        field_map_exn json__ "repositoryNames" RepositoryNameList.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~repositoryNames ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v
@@ -26973,11 +27959,11 @@ module AssociateApprovalRuleTemplateWithRepositoryInput =
              "approvalRuleTemplateName") in
       make ~repositoryName ~approvalRuleTemplateName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       let approvalRuleTemplateName =
-        field_map_exn json "approvalRuleTemplateName"
+        field_map_exn json__ "approvalRuleTemplateName"
           ApprovalRuleTemplateName.of_json in
       make ~repositoryName ~approvalRuleTemplateName ()
     let to_json v = composed_to_json to_value v

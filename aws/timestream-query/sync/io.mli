@@ -14,6 +14,12 @@ val create_scheduled_query :
 val delete_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteScheduledQueryRequest.t -> (unit, unit) Result.t
+val describe_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeAccountSettingsRequest.t ->
+        (DescribeAccountSettingsResponse.t,
+          DescribeAccountSettingsResponse.error) Result.t
 val describe_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -61,6 +67,12 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+val update_account_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAccountSettingsRequest.t ->
+        (UpdateAccountSettingsResponse.t,
+          UpdateAccountSettingsResponse.error) Result.t
 val update_scheduled_query :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> UpdateScheduledQueryRequest.t -> (unit, unit) Result.t

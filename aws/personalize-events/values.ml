@@ -41,6 +41,44 @@ module ItemId =
     let of_json j = string_of_json ~kind:"ItemId" j
     let to_json = simple_to_json to_value
   end
+module EventAttributionSource =
+  struct
+    type nonrec t = string
+    let context_ = "EventAttributionSource"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () ->
+                check_pattern i
+                  ~pattern:"^[\\x20-\\x7E]*[\\x21-\\x7E]+[\\x20-\\x7E]*$"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EventAttributionSource" j
+    let to_json = simple_to_json to_value
+  end
+module ActionId =
+  struct
+    type nonrec t = string
+    let context_ = "ActionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ActionId" j
+    let to_json = simple_to_json to_value
+  end
 module StringType =
   struct
     type nonrec t = string
@@ -66,7 +104,7 @@ module UserProperties =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:4096) >>=
+          ((check_string_max i ~max:24000) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -84,7 +122,7 @@ module ItemProperties =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:24262) >>=
+          ((check_string_max i ~max:32000) >>=
              (fun () -> check_string_min i ~min:1));
         i
     let of_string x = x
@@ -146,6 +184,9 @@ module Impression =
         ok_or_failwith
           ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ItemId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -165,6 +206,33 @@ module Impression =
     let of_json j = list_of_json ~kind:"Impression" ~of_json:ItemId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module MetricAttribution =
+  struct
+    type nonrec t =
+      {
+      eventAttributionSource: EventAttributionSource.t
+        [@ocaml.doc "The source of the event, such as a third party."]}
+    let context_ = "MetricAttribution"
+    let make ~eventAttributionSource = fun () -> { eventAttributionSource }
+    let to_value x =
+      structure_to_value
+        [("eventAttributionSource",
+           (Some (EventAttributionSource.to_value x.eventAttributionSource)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventAttributionSource =
+        EventAttributionSource.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eventAttributionSource") in
+      make ~eventAttributionSource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventAttributionSource =
+        field_map_exn json__ "eventAttributionSource"
+          EventAttributionSource.of_json in
+      make ~eventAttributionSource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about a metric attribution associated with an event. For more information about metric attributions, see Measuring impact of recommendations."]
 module RecommendationId =
   struct
     type nonrec t = string
@@ -181,6 +249,91 @@ module RecommendationId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"RecommendationId" j
+    let to_json = simple_to_json to_value
+  end
+module ActionProperties =
+  struct
+    type nonrec t = string
+    let context_ = "ActionProperties"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ActionProperties" j
+    let to_json = simple_to_json to_value
+  end
+module ActionImpression =
+  struct
+    type nonrec t = ActionId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:25) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ActionId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ActionId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ActionImpression" ~of_json:ActionId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ActionInteractionProperties =
+  struct
+    type nonrec t = string
+    let context_ = "ActionInteractionProperties"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ActionInteractionProperties" j
+    let to_json = simple_to_json to_value
+  end
+module UserId =
+  struct
+    type nonrec t = string
+    let context_ = "UserId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UserId" j
     let to_json = simple_to_json to_value
   end
 module User =
@@ -206,13 +359,13 @@ module User =
         StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?properties ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let properties = field_map json "properties" UserProperties.of_json in
-      let userId = field_map_exn json "userId" StringType.of_json in
+    let of_json json__ =
+      let properties = field_map json__ "properties" UserProperties.of_json in
+      let userId = field_map_exn json__ "userId" StringType.of_json in
       make ?properties ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents user metadata added to a Users dataset using the PutUsers API. For more information see Importing Users Incrementally."]
+       "Represents user metadata added to a Users dataset using the PutUsers API. For more information see Importing users individually."]
 module Item =
   struct
     type nonrec t =
@@ -236,40 +389,44 @@ module Item =
         StringType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "itemId") in
       make ?properties ~itemId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let properties = field_map json "properties" ItemProperties.of_json in
-      let itemId = field_map_exn json "itemId" StringType.of_json in
+    let of_json json__ =
+      let properties = field_map json__ "properties" ItemProperties.of_json in
+      let itemId = field_map_exn json__ "itemId" StringType.of_json in
       make ?properties ~itemId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents item metadata added to an Items dataset using the PutItems API. For more information see Importing Items Incrementally."]
+       "Represents item metadata added to an Items dataset using the PutItems API. For more information see Importing items individually."]
 module Event =
   struct
     type nonrec t =
       {
       eventId: StringType.t option
         [@ocaml.doc
-          "An ID associated with the event. If an event ID is not provided, Amazon Personalize generates a unique ID for the event. An event ID is not used as an input to the model. Amazon Personalize uses the event ID to distinquish unique events. Any subsequent events after the first with the same event ID are not used in model training."];
+          "An ID associated with the event. If an event ID is not provided, Amazon Personalize generates a unique ID for the event. An event ID is not used as an input to the model. Amazon Personalize uses the event ID to distinguish unique events. Any subsequent events after the first with the same event ID are not used in model training."];
       eventType: StringType.t
         [@ocaml.doc
-          "The type of event, such as click or download. This property corresponds to the EVENT_TYPE field of your Interactions schema and depends on the types of events you are tracking."];
+          "The type of event, such as click or download. This property corresponds to the EVENT_TYPE field of your Item interactions dataset's schema and depends on the types of events you are tracking."];
       eventValue: FloatType.t option
         [@ocaml.doc
-          "The event value that corresponds to the EVENT_VALUE field of the Interactions schema."];
+          "The event value that corresponds to the EVENT_VALUE field of the Item interactions schema."];
       itemId: ItemId.t option
         [@ocaml.doc
-          "The item ID key that corresponds to the ITEM_ID field of the Interactions schema."];
+          "The item ID key that corresponds to the ITEM_ID field of the Item interactions dataset's schema."];
       properties: EventPropertiesJSON.t option
         [@ocaml.doc
-          "A string map of event-specific data that you might choose to record. For example, if a user rates a movie on your site, other than movie ID (itemId) and rating (eventValue) , you might also send the number of movie ratings made by the user. Each item in the map consists of a key-value pair. For example, \\{\"numberOfRatings\": \"12\"\\} The keys use camel case names that match the fields in the Interactions schema. In the above example, the numberOfRatings would match the 'NUMBER_OF_RATINGS' field defined in the Interactions schema."];
+          "A string map of event-specific data that you might choose to record. For example, if a user rates a movie on your site, other than movie ID (itemId) and rating (eventValue) , you might also send the number of movie ratings made by the user. Each item in the map consists of a key-value pair. For example, \\{\"numberOfRatings\": \"12\"\\} The keys use camel case names that match the fields in the Item interactions dataset's schema. In the above example, the numberOfRatings would match the 'NUMBER_OF_RATINGS' field defined in the Item interactions dataset's schema. The following can't be included as a keyword for properties (case insensitive). userId sessionId eventType timestamp recommendationId impression"];
       sentAt: Date.t
         [@ocaml.doc
           "The timestamp (in Unix time) on the client side when the event occurred."];
       recommendationId: RecommendationId.t option
-        [@ocaml.doc "The ID of the recommendation."];
+        [@ocaml.doc
+          "The ID of the list of recommendations that contains the item the user interacted with. Provide a recommendationId to have Amazon Personalize implicitly record the recommendations you show your user as impressions data. Or provide a recommendationId if you use a metric attribution to measure the impact of recommendations. For more information on recording impressions data, see Recording impressions data. For more information on creating a metric attribution see Measuring impact of recommendations."];
       impression: Impression.t option
         [@ocaml.doc
-          "A list of item IDs that represents the sequence of items you have shown the user. For example, \\[\"itemId1\", \"itemId2\", \"itemId3\"\\]."]}
+          "A list of item IDs that represents the sequence of items you have shown the user. For example, \\[\"itemId1\", \"itemId2\", \"itemId3\"\\]. Provide a list of items to manually record impressions data for an event. For more information on recording impressions data, see Recording impressions data."];
+      metricAttribution: MetricAttribution.t option
+        [@ocaml.doc
+          "Contains information about the metric attribution associated with an event. For more information about metric attributions, see Measuring impact of recommendations."]}
     let context_ = "Event"
     let make ?eventId =
       fun ?eventValue ->
@@ -277,19 +434,21 @@ module Event =
           fun ?properties ->
             fun ?recommendationId ->
               fun ?impression ->
-                fun ~eventType ->
-                  fun ~sentAt ->
-                    fun () ->
-                      {
-                        eventId;
-                        eventValue;
-                        itemId;
-                        properties;
-                        recommendationId;
-                        impression;
-                        eventType;
-                        sentAt
-                      }
+                fun ?metricAttribution ->
+                  fun ~eventType ->
+                    fun ~sentAt ->
+                      fun () ->
+                        {
+                          eventId;
+                          eventValue;
+                          itemId;
+                          properties;
+                          recommendationId;
+                          impression;
+                          metricAttribution;
+                          eventType;
+                          sentAt
+                        }
     let to_value x =
       structure_to_value
         [("eventId", (Option.map x.eventId ~f:StringType.to_value));
@@ -301,9 +460,14 @@ module Event =
         ("sentAt", (Some (Date.to_value x.sentAt)));
         ("recommendationId",
           (Option.map x.recommendationId ~f:RecommendationId.to_value));
-        ("impression", (Option.map x.impression ~f:Impression.to_value))]
+        ("impression", (Option.map x.impression ~f:Impression.to_value));
+        ("metricAttribution",
+          (Option.map x.metricAttribution ~f:MetricAttribution.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let metricAttribution =
+        (Option.map ~f:MetricAttribution.of_xml)
+          (Xml.child xml_arg0 "metricAttribution") in
       let impression =
         (Option.map ~f:Impression.of_xml) (Xml.child xml_arg0 "impression") in
       let recommendationId =
@@ -323,25 +487,173 @@ module Event =
           (Xml.child_exn ~context:context_ xml_arg0 "eventType") in
       let eventId =
         (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "eventId") in
-      make ?impression ?recommendationId ~sentAt ?properties ?itemId
-        ?eventValue ~eventType ?eventId ()
+      make ?metricAttribution ?impression ?recommendationId ~sentAt
+        ?properties ?itemId ?eventValue ~eventType ?eventId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let impression = field_map json "impression" Impression.of_json in
+    let of_json json__ =
+      let metricAttribution =
+        field_map json__ "metricAttribution" MetricAttribution.of_json in
+      let impression = field_map json__ "impression" Impression.of_json in
       let recommendationId =
-        field_map json "recommendationId" RecommendationId.of_json in
-      let sentAt = field_map_exn json "sentAt" Date.of_json in
+        field_map json__ "recommendationId" RecommendationId.of_json in
+      let sentAt = field_map_exn json__ "sentAt" Date.of_json in
       let properties =
-        field_map json "properties" EventPropertiesJSON.of_json in
-      let itemId = field_map json "itemId" ItemId.of_json in
-      let eventValue = field_map json "eventValue" FloatType.of_json in
-      let eventType = field_map_exn json "eventType" StringType.of_json in
-      let eventId = field_map json "eventId" StringType.of_json in
-      make ?impression ?recommendationId ~sentAt ?properties ?itemId
-        ?eventValue ~eventType ?eventId ()
+        field_map json__ "properties" EventPropertiesJSON.of_json in
+      let itemId = field_map json__ "itemId" ItemId.of_json in
+      let eventValue = field_map json__ "eventValue" FloatType.of_json in
+      let eventType = field_map_exn json__ "eventType" StringType.of_json in
+      let eventId = field_map json__ "eventId" StringType.of_json in
+      make ?metricAttribution ?impression ?recommendationId ~sentAt
+        ?properties ?itemId ?eventValue ~eventType ?eventId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents user interaction event information sent using the PutEvents API."]
+       "Represents item interaction event information sent using the PutEvents API."]
+module Action =
+  struct
+    type nonrec t =
+      {
+      actionId: StringType.t
+        [@ocaml.doc "The ID associated with the action."];
+      properties: ActionProperties.t option
+        [@ocaml.doc
+          "A string map of action-specific metadata. Each element in the map consists of a key-value pair. For example, \\{\"value\": \"100\"\\}. The keys use camel case names that match the fields in the schema for the Actions dataset. In the previous example, the value matches the 'VALUE' field defined in the Actions schema. For categorical string data, to include multiple categories for a single action, separate each category with a pipe separator (|). For example, \\\"Deluxe|Premium\\\"."]}
+    let context_ = "Action"
+    let make ?properties =
+      fun ~actionId -> fun () -> { properties; actionId }
+    let to_value x =
+      structure_to_value
+        [("actionId", (Some (StringType.to_value x.actionId)));
+        ("properties",
+          (Option.map x.properties ~f:ActionProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let properties =
+        (Option.map ~f:ActionProperties.of_xml)
+          (Xml.child xml_arg0 "properties") in
+      let actionId =
+        StringType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
+      make ?properties ~actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let properties = field_map json__ "properties" ActionProperties.of_json in
+      let actionId = field_map_exn json__ "actionId" StringType.of_json in
+      make ?properties ~actionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents action metadata added to an Action dataset using the PutActions API. For more information see Importing actions individually."]
+module ActionInteraction =
+  struct
+    type nonrec t =
+      {
+      actionId: ActionId.t
+        [@ocaml.doc
+          "The ID of the action the user interacted with. This corresponds to the ACTION_ID field of the Action interaction schema."];
+      userId: UserId.t option
+        [@ocaml.doc
+          "The ID of the user who interacted with the action. This corresponds to the USER_ID field of the Action interaction schema."];
+      sessionId: StringType.t
+        [@ocaml.doc
+          "The ID associated with the user's visit. Your application generates a unique sessionId when a user first visits your website or uses your application."];
+      timestamp: Date.t
+        [@ocaml.doc
+          "The timestamp for when the action interaction event occurred. Timestamps must be in Unix epoch time format, in seconds."];
+      eventType: StringType.t
+        [@ocaml.doc
+          "The type of action interaction event. You can specify Viewed, Taken, and Not Taken event types. For more information about action interaction event type data, see Event type data."];
+      eventId: StringType.t option
+        [@ocaml.doc
+          "An ID associated with the event. If an event ID is not provided, Amazon Personalize generates a unique ID for the event. An event ID is not used as an input to the model. Amazon Personalize uses the event ID to distinguish unique events. Any subsequent events after the first with the same event ID are not used in model training."];
+      recommendationId: RecommendationId.t option
+        [@ocaml.doc
+          "The ID of the list of recommendations that contains the action the user interacted with."];
+      impression: ActionImpression.t option
+        [@ocaml.doc
+          "A list of action IDs that represents the sequence of actions you have shown the user. For example, \\[\"actionId1\", \"actionId2\", \"actionId3\"\\]. Amazon Personalize doesn't use impressions data from action interaction events. Instead, record multiple events for each action and use the Viewed event type."];
+      properties: ActionInteractionProperties.t option
+        [@ocaml.doc
+          "A string map of event-specific data that you might choose to record. For example, if a user takes an action, other than the action ID, you might also send the number of actions taken by the user. Each item in the map consists of a key-value pair. For example, \\{\"numberOfActions\": \"12\"\\} The keys use camel case names that match the fields in the Action interactions schema. In the above example, the numberOfActions would match the 'NUMBER_OF_ACTIONS' field defined in the Action interactions schema. The following can't be included as a keyword for properties (case insensitive). userId sessionId eventType timestamp recommendationId impression"]}
+    let context_ = "ActionInteraction"
+    let make ?userId =
+      fun ?eventId ->
+        fun ?recommendationId ->
+          fun ?impression ->
+            fun ?properties ->
+              fun ~actionId ->
+                fun ~sessionId ->
+                  fun ~timestamp ->
+                    fun ~eventType ->
+                      fun () ->
+                        {
+                          userId;
+                          eventId;
+                          recommendationId;
+                          impression;
+                          properties;
+                          actionId;
+                          sessionId;
+                          timestamp;
+                          eventType
+                        }
+    let to_value x =
+      structure_to_value
+        [("actionId", (Some (ActionId.to_value x.actionId)));
+        ("userId", (Option.map x.userId ~f:UserId.to_value));
+        ("sessionId", (Some (StringType.to_value x.sessionId)));
+        ("timestamp", (Some (Date.to_value x.timestamp)));
+        ("eventType", (Some (StringType.to_value x.eventType)));
+        ("eventId", (Option.map x.eventId ~f:StringType.to_value));
+        ("recommendationId",
+          (Option.map x.recommendationId ~f:RecommendationId.to_value));
+        ("impression",
+          (Option.map x.impression ~f:ActionImpression.to_value));
+        ("properties",
+          (Option.map x.properties ~f:ActionInteractionProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let properties =
+        (Option.map ~f:ActionInteractionProperties.of_xml)
+          (Xml.child xml_arg0 "properties") in
+      let impression =
+        (Option.map ~f:ActionImpression.of_xml)
+          (Xml.child xml_arg0 "impression") in
+      let recommendationId =
+        (Option.map ~f:RecommendationId.of_xml)
+          (Xml.child xml_arg0 "recommendationId") in
+      let eventId =
+        (Option.map ~f:StringType.of_xml) (Xml.child xml_arg0 "eventId") in
+      let eventType =
+        StringType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eventType") in
+      let timestamp =
+        Date.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
+      let sessionId =
+        StringType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "sessionId") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
+      let actionId =
+        ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
+      make ?properties ?impression ?recommendationId ?eventId ~eventType
+        ~timestamp ~sessionId ?userId ~actionId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let properties =
+        field_map json__ "properties" ActionInteractionProperties.of_json in
+      let impression = field_map json__ "impression" ActionImpression.of_json in
+      let recommendationId =
+        field_map json__ "recommendationId" RecommendationId.of_json in
+      let eventId = field_map json__ "eventId" StringType.of_json in
+      let eventType = field_map_exn json__ "eventType" StringType.of_json in
+      let timestamp = field_map_exn json__ "timestamp" Date.of_json in
+      let sessionId = field_map_exn json__ "sessionId" StringType.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
+      let actionId = field_map_exn json__ "actionId" ActionId.of_json in
+      make ?properties ?impression ?recommendationId ?eventId ~eventType
+        ~timestamp ~sessionId ?userId ~actionId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents an action interaction event sent using the PutActionInteractions API."]
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -383,6 +695,9 @@ module UserList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -410,6 +725,9 @@ module ItemList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Item.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -437,6 +755,9 @@ module EventList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Event.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -456,23 +777,67 @@ module EventList =
     let of_json j = list_of_json ~kind:"EventList" ~of_json:Event.of_json j
     let to_json v = composed_to_json to_value v
   end
-module UserId =
+module ActionList =
   struct
-    type nonrec t = string
-    let context_ = "UserId"
+    type nonrec t = Action.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Action.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"UserId" j
-    let to_json = simple_to_json to_value
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Action.of_xml)
+    let of_json j = list_of_json ~kind:"ActionList" ~of_json:Action.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ActionInteractionsList =
+  struct
+    type nonrec t = ActionInteraction.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ActionInteraction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ActionInteraction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ActionInteractionsList"
+        ~of_json:ActionInteraction.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ResourceNotFoundException =
   struct
@@ -488,8 +853,8 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Could not find the specified resource."]
@@ -507,8 +872,8 @@ module ResourceInUseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource is in use."]
@@ -534,13 +899,13 @@ module PutUsersRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~users ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let users = field_map_exn json "users" UserList.of_json in
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let users = field_map_exn json__ "users" UserList.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
       make ~users ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more users to a Users dataset. For more information see Importing Users Incrementally."]
+       "Adds one or more users to a Users dataset. For more information see Importing users individually."]
 module PutItemsRequest =
   struct
     type nonrec t =
@@ -563,13 +928,13 @@ module PutItemsRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
       make ~items ~datasetArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let items = field_map_exn json "items" ItemList.of_json in
-      let datasetArn = field_map_exn json "datasetArn" Arn.of_json in
+    let of_json json__ =
+      let items = field_map_exn json__ "items" ItemList.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
       make ~items ~datasetArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more items to an Items dataset. For more information see Importing Items Incrementally."]
+       "Adds one or more items to an Items dataset. For more information see Importing items individually."]
 module PutEventsRequest =
   struct
     type nonrec t =
@@ -581,7 +946,7 @@ module PutEventsRequest =
         [@ocaml.doc "The user associated with the event."];
       sessionId: StringType.t
         [@ocaml.doc
-          "The session ID associated with the user's visit. Your application generates the sessionId when a user first visits your website or uses your application. Amazon Personalize uses the sessionId to associate events with the user before they log in. For more information, see Recording Events."];
+          "The session ID associated with the user's visit. Your application generates the sessionId when a user first visits your website or uses your application. Amazon Personalize uses the sessionId to associate events with the user before they log in. For more information, see Recording item interaction events."];
       eventList: EventList.t
         [@ocaml.doc "A list of event data from the session."]}
     let context_ = "PutEventsRequest"
@@ -611,15 +976,81 @@ module PutEventsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "trackingId") in
       make ~eventList ~sessionId ?userId ~trackingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventList = field_map_exn json "eventList" EventList.of_json in
-      let sessionId = field_map_exn json "sessionId" StringType.of_json in
-      let userId = field_map json "userId" UserId.of_json in
-      let trackingId = field_map_exn json "trackingId" StringType.of_json in
+    let of_json json__ =
+      let eventList = field_map_exn json__ "eventList" EventList.of_json in
+      let sessionId = field_map_exn json__ "sessionId" StringType.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
+      let trackingId = field_map_exn json__ "trackingId" StringType.of_json in
       make ~eventList ~sessionId ?userId ~trackingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Records user interaction event data. For more information see Recording Events."]
+       "Records item interaction event data. For more information see Recording item interaction events."]
+module PutActionsRequest =
+  struct
+    type nonrec t =
+      {
+      datasetArn: Arn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Actions dataset you are adding the action or actions to."];
+      actions: ActionList.t [@ocaml.doc "A list of action data."]}
+    let context_ = "PutActionsRequest"
+    let make ~datasetArn = fun ~actions -> fun () -> { datasetArn; actions }
+    let to_value x =
+      structure_to_value
+        [("datasetArn", (Some (Arn.to_value x.datasetArn)));
+        ("actions", (Some (ActionList.to_value x.actions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actions =
+        ActionList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actions") in
+      let datasetArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "datasetArn") in
+      make ~actions ~datasetArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actions = field_map_exn json__ "actions" ActionList.of_json in
+      let datasetArn = field_map_exn json__ "datasetArn" Arn.of_json in
+      make ~actions ~datasetArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds one or more actions to an Actions dataset. For more information see Importing actions individually."]
+module PutActionInteractionsRequest =
+  struct
+    type nonrec t =
+      {
+      trackingId: StringType.t
+        [@ocaml.doc
+          "The ID of your action interaction event tracker. When you create an Action interactions dataset, Amazon Personalize creates an action interaction event tracker for you. For more information, see Action interaction event tracker ID."];
+      actionInteractions: ActionInteractionsList.t
+        [@ocaml.doc "A list of action interaction events from the session."]}
+    let context_ = "PutActionInteractionsRequest"
+    let make ~trackingId =
+      fun ~actionInteractions -> fun () -> { trackingId; actionInteractions }
+    let to_value x =
+      structure_to_value
+        [("trackingId", (Some (StringType.to_value x.trackingId)));
+        ("actionInteractions",
+          (Some (ActionInteractionsList.to_value x.actionInteractions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionInteractions =
+        ActionInteractionsList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "actionInteractions") in
+      let trackingId =
+        StringType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "trackingId") in
+      make ~actionInteractions ~trackingId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionInteractions =
+        field_map_exn json__ "actionInteractions"
+          ActionInteractionsList.of_json in
+      let trackingId = field_map_exn json__ "trackingId" StringType.of_json in
+      make ~actionInteractions ~trackingId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Records action interaction event data. An action interaction event is an interaction between a user and an action. For example, a user taking an action, such a enrolling in a membership program or downloading your app. For more information about recording action interactions, see Recording action interaction events. For more information about actions in an Actions dataset, see Actions dataset."]
 module InvalidInputException =
   struct
     type nonrec t = {
@@ -634,8 +1065,8 @@ module InvalidInputException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provide a valid value for the field or parameter."]

@@ -76,6 +76,36 @@ let create_app_instance_admin =
               ~appInstanceArn ())
            (Some Values.CreateAppInstanceAdminResponse.to_json)
            (Some Values.CreateAppInstanceAdminResponse.error_to_json)])
+let create_app_instance_bot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and name = flag "name" (optional string) ~doc:"STRING ResourceName"
+       and metadata =
+         flag "metadata" (optional string) ~doc:"STRING Metadata"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and appInstanceArn =
+         flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn"
+       and clientRequestToken =
+         flag "client-request-token" (required string)
+           ~doc:"STRING ClientRequestToken"
+       and configuration =
+         flag "configuration" (required json_arg) ~doc:"JSON Configuration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_app_instance_bot
+           (Values.CreateAppInstanceBotRequest.make ?name ?metadata
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~appInstanceArn ~clientRequestToken
+              ~configuration:(Values.Configuration.of_json configuration) ())
+           (Some Values.CreateAppInstanceBotResponse.to_json)
+           (Some Values.CreateAppInstanceBotResponse.error_to_json)])
 let create_app_instance_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -89,6 +119,9 @@ let create_app_instance_user =
        and metadata =
          flag "metadata" (optional string) ~doc:"STRING Metadata"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and expirationSettings =
+         flag "expiration-settings" (optional json_arg)
+           ~doc:"JSON ExpirationSettings"
        and appInstanceArn =
          flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn"
        and appInstanceUserId =
@@ -102,7 +135,10 @@ let create_app_instance_user =
            Io.create_app_instance_user
            (Values.CreateAppInstanceUserRequest.make ?metadata
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~appInstanceArn ~appInstanceUserId ~name ~clientRequestToken ())
+              ?expirationSettings:(Option.map
+                                     ~f:Values.ExpirationSettings.of_json
+                                     expirationSettings) ~appInstanceArn
+              ~appInstanceUserId ~name ~clientRequestToken ())
            (Some Values.CreateAppInstanceUserResponse.to_json)
            (Some Values.CreateAppInstanceUserResponse.error_to_json)])
 let delete_app_instance =
@@ -142,6 +178,23 @@ let delete_app_instance_admin =
            Io.delete_app_instance_admin
            (Values.DeleteAppInstanceAdminRequest.make ~appInstanceAdminArn
               ~appInstanceArn ()) None None])
+let delete_app_instance_bot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appInstanceBotArn =
+         flag "app-instance-bot-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_app_instance_bot
+           (Values.DeleteAppInstanceBotRequest.make ~appInstanceBotArn ())
+           None None])
 let delete_app_instance_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -172,9 +225,9 @@ let deregister_app_instance_user_endpoint =
            ~doc:"URL override endpoint url"
        and appInstanceUserArn =
          flag "app-instance-user-arn" (required string)
-           ~doc:"STRING SensitiveChimeArn"
+           ~doc:"STRING ChimeArn"
        and endpointId =
-         flag "endpoint-id" (required string) ~doc:"STRING SensitiveString64" in
+         flag "endpoint-id" (required string) ~doc:"STRING String64" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.deregister_app_instance_user_endpoint
@@ -220,6 +273,24 @@ let describe_app_instance_admin =
               ~appInstanceArn ())
            (Some Values.DescribeAppInstanceAdminResponse.to_json)
            (Some Values.DescribeAppInstanceAdminResponse.error_to_json)])
+let describe_app_instance_bot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and appInstanceBotArn =
+         flag "app-instance-bot-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_app_instance_bot
+           (Values.DescribeAppInstanceBotRequest.make ~appInstanceBotArn ())
+           (Some Values.DescribeAppInstanceBotResponse.to_json)
+           (Some Values.DescribeAppInstanceBotResponse.error_to_json)])
 let describe_app_instance_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -251,9 +322,9 @@ let describe_app_instance_user_endpoint =
            ~doc:"URL override endpoint url"
        and appInstanceUserArn =
          flag "app-instance-user-arn" (required string)
-           ~doc:"STRING SensitiveString1600"
+           ~doc:"STRING String1600"
        and endpointId =
-         flag "endpoint-id" (required string) ~doc:"STRING SensitiveString64" in
+         flag "endpoint-id" (required string) ~doc:"STRING String64" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_app_instance_user_endpoint
@@ -303,6 +374,29 @@ let list_app_instance_admins =
               ~appInstanceArn ())
            (Some Values.ListAppInstanceAdminsResponse.to_json)
            (Some Values.ListAppInstanceAdminsResponse.error_to_json)])
+let list_app_instance_bots =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and appInstanceArn =
+         flag "app-instance-arn" (required string) ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_app_instance_bots
+           (Values.ListAppInstanceBotsRequest.make ?maxResults ?nextToken
+              ~appInstanceArn ())
+           (Some Values.ListAppInstanceBotsResponse.to_json)
+           (Some Values.ListAppInstanceBotsResponse.error_to_json)])
 let list_app_instance_user_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -413,6 +507,33 @@ let put_app_instance_retention_settings =
               ())
            (Some Values.PutAppInstanceRetentionSettingsResponse.to_json)
            (Some Values.PutAppInstanceRetentionSettingsResponse.error_to_json)])
+let put_app_instance_user_expiration_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expirationSettings =
+         flag "expiration-settings" (optional json_arg)
+           ~doc:"JSON ExpirationSettings"
+       and appInstanceUserArn =
+         flag "app-instance-user-arn" (required string)
+           ~doc:"STRING ChimeArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_app_instance_user_expiration_settings
+           (Values.PutAppInstanceUserExpirationSettingsRequest.make
+              ?expirationSettings:(Option.map
+                                     ~f:Values.ExpirationSettings.of_json
+                                     expirationSettings) ~appInstanceUserArn
+              ())
+           (Some Values.PutAppInstanceUserExpirationSettingsResponse.to_json)
+           (Some
+              Values.PutAppInstanceUserExpirationSettingsResponse.error_to_json)])
 let register_app_instance_user_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -434,8 +555,7 @@ let register_app_instance_user_endpoint =
          flag "type-" (required json_arg)
            ~doc:"JSON AppInstanceUserEndpointType"
        and resourceArn =
-         flag "resource-arn" (required string)
-           ~doc:"STRING SensitiveChimeArn"
+         flag "resource-arn" (required string) ~doc:"STRING ChimeArn"
        and endpointAttributes =
          flag "endpoint-attributes" (required json_arg)
            ~doc:"JSON EndpointAttributes"
@@ -514,6 +634,32 @@ let update_app_instance =
            (Values.UpdateAppInstanceRequest.make ~appInstanceArn ~name
               ~metadata ()) (Some Values.UpdateAppInstanceResponse.to_json)
            (Some Values.UpdateAppInstanceResponse.error_to_json)])
+let update_app_instance_bot =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and configuration =
+         flag "configuration" (optional json_arg) ~doc:"JSON Configuration"
+       and appInstanceBotArn =
+         flag "app-instance-bot-arn" (required string) ~doc:"STRING ChimeArn"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and metadata =
+         flag "metadata" (required string) ~doc:"STRING Metadata" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_app_instance_bot
+           (Values.UpdateAppInstanceBotRequest.make
+              ?configuration:(Option.map ~f:Values.Configuration.of_json
+                                configuration) ~appInstanceBotArn ~name
+              ~metadata ())
+           (Some Values.UpdateAppInstanceBotResponse.to_json)
+           (Some Values.UpdateAppInstanceBotResponse.error_to_json)])
 let update_app_instance_user =
   Command.async ~summary:""
     ([%map_open.Command
@@ -553,9 +699,9 @@ let update_app_instance_user_endpoint =
          flag "allow-messages" (optional json_arg) ~doc:"JSON AllowMessages"
        and appInstanceUserArn =
          flag "app-instance-user-arn" (required string)
-           ~doc:"STRING SensitiveChimeArn"
+           ~doc:"STRING ChimeArn"
        and endpointId =
-         flag "endpoint-id" (required string) ~doc:"STRING SensitiveString64" in
+         flag "endpoint-id" (required string) ~doc:"STRING String64" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_app_instance_user_endpoint
@@ -570,30 +716,37 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-app-instance", create_app_instance);
     ("create-app-instance-admin", create_app_instance_admin);
+    ("create-app-instance-bot", create_app_instance_bot);
     ("create-app-instance-user", create_app_instance_user);
     ("delete-app-instance", delete_app_instance);
     ("delete-app-instance-admin", delete_app_instance_admin);
+    ("delete-app-instance-bot", delete_app_instance_bot);
     ("delete-app-instance-user", delete_app_instance_user);
     ("deregister-app-instance-user-endpoint",
       deregister_app_instance_user_endpoint);
     ("describe-app-instance", describe_app_instance);
     ("describe-app-instance-admin", describe_app_instance_admin);
+    ("describe-app-instance-bot", describe_app_instance_bot);
     ("describe-app-instance-user", describe_app_instance_user);
     ("describe-app-instance-user-endpoint",
       describe_app_instance_user_endpoint);
     ("get-app-instance-retention-settings",
       get_app_instance_retention_settings);
     ("list-app-instance-admins", list_app_instance_admins);
+    ("list-app-instance-bots", list_app_instance_bots);
     ("list-app-instance-user-endpoints", list_app_instance_user_endpoints);
     ("list-app-instance-users", list_app_instance_users);
     ("list-app-instances", list_app_instances);
     ("list-tags-for-resource", list_tags_for_resource);
     ("put-app-instance-retention-settings",
       put_app_instance_retention_settings);
+    ("put-app-instance-user-expiration-settings",
+      put_app_instance_user_expiration_settings);
     ("register-app-instance-user-endpoint",
       register_app_instance_user_endpoint);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-app-instance", update_app_instance);
+    ("update-app-instance-bot", update_app_instance_bot);
     ("update-app-instance-user", update_app_instance_user);
     ("update-app-instance-user-endpoint", update_app_instance_user_endpoint)]

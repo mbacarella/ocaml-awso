@@ -9,6 +9,8 @@ type ('i, 'o, 'e) t =
   | GetHLSStreamingSessionURL: (GetHLSStreamingSessionURLInput.t,
   GetHLSStreamingSessionURLOutput.t, GetHLSStreamingSessionURLOutput.error) t
   
+  | GetImages: (GetImagesInput.t, GetImagesOutput.t, GetImagesOutput.error) t
+  
   | GetMediaForFragmentList: (GetMediaForFragmentListInput.t,
   GetMediaForFragmentListOutput.t, GetMediaForFragmentListOutput.error) t 
   | ListFragments: (ListFragmentsInput.t, ListFragmentsOutput.t,
@@ -18,6 +20,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetClip -> `POST
   | GetDASHStreamingSessionURL -> `POST
   | GetHLSStreamingSessionURL -> `POST
+  | GetImages -> `POST
   | GetMediaForFragmentList -> `POST
   | ListFragments -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -28,6 +31,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/getDASHStreamingSessionURL"
       | GetHLSStreamingSessionURL ->
           (Format.kasprintf Uri.of_string) "/getHLSStreamingSessionURL"
+      | GetImages -> (Format.kasprintf Uri.of_string) "/getImages"
       | GetMediaForFragmentList ->
           (Format.kasprintf Uri.of_string) "/getMediaForFragmentList"
       | ListFragments -> (Format.kasprintf Uri.of_string) "/listFragments")
@@ -152,6 +156,59 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ~f:(fun x ->
                               ("MaxMediaPlaylistFragmentResults",
                                 (HLSMaxResults.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetImages ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.GetImagesInput.streamName
+                         ~f:(fun x -> ("StreamName", (StreamName.to_value x)));
+                      Option.map req.GetImagesInput.streamARN
+                        ~f:(fun x -> ("StreamARN", (ResourceARN.to_value x)));
+                      Some
+                        ("ImageSelectorType",
+                          (ImageSelectorType.to_value
+                             req.GetImagesInput.imageSelectorType));
+                      Some
+                        ("StartTimestamp",
+                          (Timestamp.to_value
+                             req.GetImagesInput.startTimestamp));
+                      Some
+                        ("EndTimestamp",
+                          (Timestamp.to_value req.GetImagesInput.endTimestamp));
+                      Option.map req.GetImagesInput.samplingInterval
+                        ~f:(fun x ->
+                              ("SamplingInterval",
+                                (SamplingInterval.to_value x)));
+                      Some
+                        ("Format",
+                          (Format_.to_value req.GetImagesInput.format));
+                      Option.map req.GetImagesInput.formatConfig
+                        ~f:(fun x ->
+                              ("FormatConfig", (FormatConfig.to_value x)));
+                      Option.map req.GetImagesInput.widthPixels
+                        ~f:(fun x ->
+                              ("WidthPixels", (WidthPixels.to_value x)));
+                      Option.map req.GetImagesInput.heightPixels
+                        ~f:(fun x ->
+                              ("HeightPixels", (HeightPixels.to_value x)));
+                      Option.map req.GetImagesInput.maxResults
+                        ~f:(fun x ->
+                              ("MaxResults",
+                                (GetImagesMaxResults.to_value x)));
+                      Option.map req.GetImagesInput.nextToken
+                        ~f:(fun x -> ("NextToken", (NextToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -285,6 +342,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetHLSStreamingSessionURLOutput.error_of_json))
+  | GetImages ->
+      if is_success
+      then Ok (GetImagesOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetImagesOutput.error_of_json))
   | GetMediaForFragmentList ->
       if is_success
       then

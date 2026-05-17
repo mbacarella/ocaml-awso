@@ -46,6 +46,8 @@ let create_cluster_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClusterSnapshot input
 let create_cluster_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateClusterSubnetGroup input
+let create_custom_domain_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCustomDomainAssociation input
 let create_endpoint_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateEndpointAccess input
 let create_event_subscription ?endpoint_url ?cfg input =
@@ -54,6 +56,10 @@ let create_hsm_client_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateHsmClientCertificate input
 let create_hsm_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateHsmConfiguration input
+let create_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateIntegration input
+let create_redshift_idc_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateRedshiftIdcApplication input
 let create_scheduled_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateScheduledAction input
 let create_snapshot_copy_grant ?endpoint_url ?cfg input =
@@ -78,6 +84,8 @@ let delete_cluster_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClusterSnapshot input
 let delete_cluster_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteClusterSubnetGroup input
+let delete_custom_domain_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCustomDomainAssociation input
 let delete_endpoint_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteEndpointAccess input
 let delete_event_subscription ?endpoint_url ?cfg input =
@@ -86,8 +94,14 @@ let delete_hsm_client_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHsmClientCertificate input
 let delete_hsm_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteHsmConfiguration input
+let delete_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteIntegration input
 let delete_partner ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePartner input
+let delete_redshift_idc_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteRedshiftIdcApplication input
+let delete_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteResourcePolicy input
 let delete_scheduled_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteScheduledAction input
 let delete_snapshot_copy_grant ?endpoint_url ?cfg input =
@@ -98,6 +112,8 @@ let delete_tags ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTags input
 let delete_usage_limit ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteUsageLimit input
+let deregister_namespace ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeregisterNamespace input
 let describe_account_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeAccountAttributes input
 let describe_authentication_profiles ?endpoint_url ?cfg input =
@@ -120,6 +136,8 @@ let describe_cluster_versions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusterVersions input
 let describe_clusters ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeClusters input
+let describe_custom_domain_associations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCustomDomainAssociations input
 let describe_data_shares ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDataShares input
 let describe_data_shares_for_consumer ?endpoint_url ?cfg input =
@@ -142,6 +160,10 @@ let describe_hsm_client_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeHsmClientCertificates input
 let describe_hsm_configurations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeHsmConfigurations input
+let describe_inbound_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeInboundIntegrations input
+let describe_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeIntegrations input
 let describe_logging_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLoggingStatus input
 let describe_node_configuration_options ?endpoint_url ?cfg input =
@@ -150,6 +172,8 @@ let describe_orderable_cluster_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeOrderableClusterOptions input
 let describe_partners ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribePartners input
+let describe_redshift_idc_applications ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeRedshiftIdcApplications input
 let describe_reserved_node_exchange_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReservedNodeExchangeStatus input
 let describe_reserved_node_offerings ?endpoint_url ?cfg input =
@@ -182,14 +206,24 @@ let enable_logging ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableLogging input
 let enable_snapshot_copy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableSnapshotCopy input
+let failover_primary_compute ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.FailoverPrimaryCompute input
 let get_cluster_credentials ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetClusterCredentials input
+let get_cluster_credentials_with_i_a_m ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetClusterCredentialsWithIAM input
+let get_identity_center_auth_token ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetIdentityCenterAuthToken input
 let get_reserved_node_exchange_configuration_options ?endpoint_url ?cfg input
   =
   eval ?endpoint_url ?cfg
     Endpoints.GetReservedNodeExchangeConfigurationOptions input
 let get_reserved_node_exchange_offerings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetReservedNodeExchangeOfferings input
+let get_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePolicy input
+let list_recommendations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListRecommendations input
 let modify_aqua_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyAquaConfiguration input
 let modify_authentication_profile ?endpoint_url ?cfg input =
@@ -210,10 +244,18 @@ let modify_cluster_snapshot_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyClusterSnapshotSchedule input
 let modify_cluster_subnet_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyClusterSubnetGroup input
+let modify_custom_domain_association ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyCustomDomainAssociation input
 let modify_endpoint_access ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyEndpointAccess input
 let modify_event_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyEventSubscription input
+let modify_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyIntegration input
+let modify_lakehouse_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyLakehouseConfiguration input
+let modify_redshift_idc_application ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ModifyRedshiftIdcApplication input
 let modify_scheduled_action ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ModifyScheduledAction input
 let modify_snapshot_copy_retention_period ?endpoint_url ?cfg input =
@@ -226,8 +268,12 @@ let pause_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PauseCluster input
 let purchase_reserved_node_offering ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PurchaseReservedNodeOffering input
+let put_resource_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutResourcePolicy input
 let reboot_cluster ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RebootCluster input
+let register_namespace ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RegisterNamespace input
 let reject_data_share ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RejectDataShare input
 let reset_cluster_parameter_group ?endpoint_url ?cfg input =

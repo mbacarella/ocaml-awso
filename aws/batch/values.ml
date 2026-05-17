@@ -67,37 +67,13 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
-module EFSAuthorizationConfigIAM =
-  struct
-    type nonrec t =
-      | ENABLED 
-      | DISABLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration EFSAuthorizationConfigIAM" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"EFSAuthorizationConfigIAM" j)
-    let to_json = simple_to_json to_value
-  end
 module DeviceCgroupPermissions =
   struct
     type nonrec t = DeviceCgroupPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeviceCgroupPermission.to_value)) |>
         (fun x -> `List x)
@@ -137,6 +113,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -156,63 +135,6 @@ module StringList =
     let of_json j =
       list_of_json ~kind:"StringList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module EFSAuthorizationConfig =
-  struct
-    type nonrec t =
-      {
-      accessPointId: String_.t option
-        [@ocaml.doc
-          "The Amazon EFS access point ID to use. If an access point is specified, the root directory value specified in the EFSVolumeConfiguration must either be omitted or set to / which will enforce the path set on the EFS access point. If an access point is used, transit encryption must be enabled in the EFSVolumeConfiguration. For more information, see Working with Amazon EFS Access Points in the Amazon Elastic File System User Guide."];
-      iam: EFSAuthorizationConfigIAM.t option
-        [@ocaml.doc
-          "Whether or not to use the Batch job IAM role defined in a job definition when mounting the Amazon EFS file system. If enabled, transit encryption must be enabled in the EFSVolumeConfiguration. If this parameter is omitted, the default value of DISABLED is used. For more information, see Using Amazon EFS Access Points in the Batch User Guide. EFS IAM authorization requires that TransitEncryption be ENABLED and that a JobRoleArn is specified."]}
-    let make ?accessPointId = fun ?iam -> fun () -> { accessPointId; iam }
-    let to_value x =
-      structure_to_value
-        [("accessPointId", (Option.map x.accessPointId ~f:String_.to_value));
-        ("iam", (Option.map x.iam ~f:EFSAuthorizationConfigIAM.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let iam =
-        (Option.map ~f:EFSAuthorizationConfigIAM.of_xml)
-          (Xml.child xml_arg0 "iam") in
-      let accessPointId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointId") in
-      make ?iam ?accessPointId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iam = field_map json "iam" EFSAuthorizationConfigIAM.of_json in
-      let accessPointId = field_map json "accessPointId" String_.of_json in
-      make ?iam ?accessPointId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The authorization configuration details for the Amazon EFS file system."]
-module EFSTransitEncryption =
-  struct
-    type nonrec t =
-      | ENABLED 
-      | DISABLED 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration EFSTransitEncryption" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"EFSTransitEncryption" j)
-    let to_json = simple_to_json to_value
   end
 module Device =
   struct
@@ -248,15 +170,15 @@ module Device =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hostPath") in
       make ?permissions ?containerPath ~hostPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissions =
-        field_map json "permissions" DeviceCgroupPermissions.of_json in
-      let containerPath = field_map json "containerPath" String_.of_json in
-      let hostPath = field_map_exn json "hostPath" String_.of_json in
+        field_map json__ "permissions" DeviceCgroupPermissions.of_json in
+      let containerPath = field_map json__ "containerPath" String_.of_json in
+      let hostPath = field_map_exn json__ "hostPath" String_.of_json in
       make ?permissions ?containerPath ~hostPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing a container instance host device. This object isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."]
+       "An object that represents a container instance host device. This object isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."]
 module Tmpfs =
   struct
     type nonrec t =
@@ -288,10 +210,11 @@ module Tmpfs =
           (Xml.child_exn ~context:context_ xml_arg0 "containerPath") in
       make ?mountOptions ~size ~containerPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let mountOptions = field_map json "mountOptions" StringList.of_json in
-      let size = field_map_exn json "size" Integer.of_json in
-      let containerPath = field_map_exn json "containerPath" String_.of_json in
+    let of_json json__ =
+      let mountOptions = field_map json__ "mountOptions" StringList.of_json in
+      let size = field_map_exn json__ "size" Integer.of_json in
+      let containerPath =
+        field_map_exn json__ "containerPath" String_.of_json in
       make ?mountOptions ~size ~containerPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -303,7 +226,7 @@ module Secret =
       name: String_.t [@ocaml.doc "The name of the secret."];
       valueFrom: String_.t
         [@ocaml.doc
-          "The secret to expose to the container. The supported values are either the full ARN of the Secrets Manager secret or the full ARN of the parameter in the Amazon Web Services Systems Manager Parameter Store. If the Amazon Web Services Systems Manager Parameter Store parameter exists in the same Region as the job you're launching, then you can use either the full ARN or name of the parameter. If the parameter exists in a different Region, then the full ARN must be specified."]}
+          "The secret to expose to the container. The supported values are either the full Amazon Resource Name (ARN) of the Secrets Manager secret or the full ARN of the parameter in the Amazon Web Services Systems Manager Parameter Store. If the Amazon Web Services Systems Manager Parameter Store parameter exists in the same Region as the job you're launching, then you can use either the full Amazon Resource Name (ARN) or name of the parameter. If the parameter exists in a different Region, then the full ARN must be specified."]}
     let context_ = "Secret"
     let make ~name = fun ~valueFrom -> fun () -> { name; valueFrom }
     let to_value x =
@@ -318,13 +241,13 @@ module Secret =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ~valueFrom ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let valueFrom = field_map_exn json "valueFrom" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
+    let of_json json__ =
+      let valueFrom = field_map_exn json__ "valueFrom" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
       make ~valueFrom ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the secret to expose to your container. Secrets can be exposed to a container in the following ways: To inject sensitive data into your containers as environment variables, use the secrets container definition parameter. To reference sensitive information in the log configuration of a container, use the secretOptions container definition parameter. For more information, see Specifying sensitive data in the Batch User Guide."]
+       "An object that represents the secret to expose to your container. Secrets can be exposed to a container in the following ways: To inject sensitive data into your containers as environment variables, use the secrets container definition parameter. To reference sensitive information in the log configuration of a container, use the secretOptions container definition parameter. For more information, see Specifying sensitive data in the Batch User Guide."]
 module Boolean =
   struct
     type nonrec t = bool
@@ -366,105 +289,33 @@ module ResourceType =
     let of_json j = of_string (string_of_json ~kind:"ResourceType" j)
     let to_json = simple_to_json to_value
   end
-module EFSVolumeConfiguration =
+module EFSAuthorizationConfigIAM =
   struct
     type nonrec t =
-      {
-      fileSystemId: String_.t
-        [@ocaml.doc "The Amazon EFS file system ID to use."];
-      rootDirectory: String_.t option
-        [@ocaml.doc
-          "The directory within the Amazon EFS file system to mount as the root directory inside the host. If this parameter is omitted, the root of the Amazon EFS volume is used instead. Specifying / has the same effect as omitting this parameter. The maximum length is 4,096 characters. If an EFS access point is specified in the authorizationConfig, the root directory parameter must either be omitted or set to /, which enforces the path set on the Amazon EFS access point."];
-      transitEncryption: EFSTransitEncryption.t option
-        [@ocaml.doc
-          "Determines whether to enable encryption for Amazon EFS data in transit between the Amazon ECS host and the Amazon EFS server. Transit encryption must be enabled if Amazon EFS IAM authorization is used. If this parameter is omitted, the default value of DISABLED is used. For more information, see Encrypting data in transit in the Amazon Elastic File System User Guide."];
-      transitEncryptionPort: Integer.t option
-        [@ocaml.doc
-          "The port to use when sending encrypted data between the Amazon ECS host and the Amazon EFS server. If you don't specify a transit encryption port, it uses the port selection strategy that the Amazon EFS mount helper uses. The value must be between 0 and 65,535. For more information, see EFS Mount Helper in the Amazon Elastic File System User Guide."];
-      authorizationConfig: EFSAuthorizationConfig.t option
-        [@ocaml.doc
-          "The authorization configuration details for the Amazon EFS file system."]}
-    let context_ = "EFSVolumeConfiguration"
-    let make ?rootDirectory =
-      fun ?transitEncryption ->
-        fun ?transitEncryptionPort ->
-          fun ?authorizationConfig ->
-            fun ~fileSystemId ->
-              fun () ->
-                {
-                  rootDirectory;
-                  transitEncryption;
-                  transitEncryptionPort;
-                  authorizationConfig;
-                  fileSystemId
-                }
-    let to_value x =
-      structure_to_value
-        [("fileSystemId", (Some (String_.to_value x.fileSystemId)));
-        ("rootDirectory", (Option.map x.rootDirectory ~f:String_.to_value));
-        ("transitEncryption",
-          (Option.map x.transitEncryption ~f:EFSTransitEncryption.to_value));
-        ("transitEncryptionPort",
-          (Option.map x.transitEncryptionPort ~f:Integer.to_value));
-        ("authorizationConfig",
-          (Option.map x.authorizationConfig
-             ~f:EFSAuthorizationConfig.to_value))]
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      let authorizationConfig =
-        (Option.map ~f:EFSAuthorizationConfig.of_xml)
-          (Xml.child xml_arg0 "authorizationConfig") in
-      let transitEncryptionPort =
-        (Option.map ~f:Integer.of_xml)
-          (Xml.child xml_arg0 "transitEncryptionPort") in
-      let transitEncryption =
-        (Option.map ~f:EFSTransitEncryption.of_xml)
-          (Xml.child xml_arg0 "transitEncryption") in
-      let rootDirectory =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rootDirectory") in
-      let fileSystemId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "fileSystemId") in
-      make ?authorizationConfig ?transitEncryptionPort ?transitEncryption
-        ?rootDirectory ~fileSystemId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authorizationConfig =
-        field_map json "authorizationConfig" EFSAuthorizationConfig.of_json in
-      let transitEncryptionPort =
-        field_map json "transitEncryptionPort" Integer.of_json in
-      let transitEncryption =
-        field_map json "transitEncryption" EFSTransitEncryption.of_json in
-      let rootDirectory = field_map json "rootDirectory" String_.of_json in
-      let fileSystemId = field_map_exn json "fileSystemId" String_.of_json in
-      make ?authorizationConfig ?transitEncryptionPort ?transitEncryption
-        ?rootDirectory ~fileSystemId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "This is used when you're using an Amazon Elastic File System file system for job storage. For more information, see Amazon EFS Volumes in the Batch User Guide."]
-module Host =
-  struct
-    type nonrec t =
-      {
-      sourcePath: String_.t option
-        [@ocaml.doc
-          "The path on the host container instance that's presented to the container. If this parameter is empty, then the Docker daemon has assigned a host path for you. If this parameter contains a file location, then the data volume persists at the specified location on the host container instance until you delete it manually. If the source path location doesn't exist on the host container instance, the Docker daemon creates it. If the location does exist, the contents of the source path folder are exported. This parameter isn't applicable to jobs that run on Fargate resources and shouldn't be provided."]}
-    let make ?sourcePath = fun () -> { sourcePath }
-    let to_value x =
-      structure_to_value
-        [("sourcePath", (Option.map x.sourcePath ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let sourcePath =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourcePath") in
-      make ?sourcePath ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourcePath = field_map json "sourcePath" String_.of_json in
-      make ?sourcePath ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Determine whether your data volume persists on the host container instance and where it is stored. If this parameter is empty, then the Docker daemon assigns a host path for your data volume, but the data isn't guaranteed to persist after the containers associated with it stop running."]
+      of_string
+        (string_of_xml ~kind:"enumeration EFSAuthorizationConfigIAM" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EFSAuthorizationConfigIAM" j)
+    let to_json = simple_to_json to_value
+  end
 module KeyValuePair =
   struct
     type nonrec t =
@@ -486,16 +337,76 @@ module KeyValuePair =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" String_.of_json in
-      let name = field_map json "name" String_.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A key-value pair object."]
+module FirelensConfigurationOptionsMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FirelensConfigurationType =
+  struct
+    type nonrec t =
+      | Fluentd 
+      | Fluentbit 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Fluentd -> "fluentd"
+      | Fluentbit -> "fluentbit"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "fluentd" -> Fluentd
+      | "fluentbit" -> Fluentbit
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FirelensConfigurationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FirelensConfigurationType" j)
+    let to_json = simple_to_json to_value
+  end
 module DevicesList =
   struct
     type nonrec t = Device.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Device.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -520,6 +431,9 @@ module TmpfsList =
   struct
     type nonrec t = Tmpfs.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tmpfs.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -560,6 +474,8 @@ module LogConfigurationOptionsMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -577,6 +493,7 @@ module LogDriver =
       | Fluentd 
       | Awslogs 
       | Splunk 
+      | Awsfirelens 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -588,6 +505,7 @@ module LogDriver =
       | Fluentd -> "fluentd"
       | Awslogs -> "awslogs"
       | Splunk -> "splunk"
+      | Awsfirelens -> "awsfirelens"
       | Non_static_id s -> s
     let of_string =
       function
@@ -598,6 +516,7 @@ module LogDriver =
       | "fluentd" -> Fluentd
       | "awslogs" -> Awslogs
       | "splunk" -> Splunk
+      | "awsfirelens" -> Awsfirelens
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -611,6 +530,9 @@ module SecretList =
   struct
     type nonrec t = Secret.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Secret.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -661,15 +583,141 @@ module MountPoint =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "containerPath") in
       make ?sourceVolume ?readOnly ?containerPath ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sourceVolume = field_map json "sourceVolume" String_.of_json in
-      let readOnly = field_map json "readOnly" Boolean.of_json in
-      let containerPath = field_map json "containerPath" String_.of_json in
+    let of_json json__ =
+      let sourceVolume = field_map json__ "sourceVolume" String_.of_json in
+      let readOnly = field_map json__ "readOnly" Boolean.of_json in
+      let containerPath = field_map json__ "containerPath" String_.of_json in
       make ?sourceVolume ?readOnly ?containerPath ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details on a Docker volume mount point that's used in a job's container properties. This parameter maps to Volumes in the Create a container section of the Docker Remote API and the --volume option to docker run."]
-module AssignPublicIp =
+       "Details for a Docker volume mount point that's used in a job's container properties. This parameter maps to Volumes in the Create a container section of the Docker Remote API and the --volume option to docker run."]
+module ResourceRequirement =
+  struct
+    type nonrec t =
+      {
+      value: String_.t
+        [@ocaml.doc
+          "The quantity of the specified resource to reserve for the container. The values vary based on the type specified. type=\"GPU\" The number of physical GPUs to reserve for the container. Make sure that the number of GPUs reserved for all containers in a job doesn't exceed the number of available GPUs on the compute resource that the job is launched on. GPUs aren't available for jobs that are running on Fargate resources. type=\"MEMORY\" The memory hard limit (in MiB) present to the container. This parameter is supported for jobs that are running on Amazon EC2 resources. If your container attempts to exceed the memory specified, the container is terminated. This parameter maps to Memory in the Create a container section of the Docker Remote API and the --memory option to docker run. You must specify at least 4 MiB of memory for a job. This is required but can be specified in several places for multi-node parallel (MNP) jobs. It must be specified for each node at least once. This parameter maps to Memory in the Create a container section of the Docker Remote API and the --memory option to docker run. If you're trying to maximize your resource utilization by providing your jobs as much memory as possible for a particular instance type, see Memory management in the Batch User Guide. For jobs that are running on Fargate resources, then value is the hard limit (in MiB), and must match one of the supported values and the VCPU values must be one of the values supported for that memory value. value = 512 VCPU = 0.25 value = 1024 VCPU = 0.25 or 0.5 value = 2048 VCPU = 0.25, 0.5, or 1 value = 3072 VCPU = 0.5, or 1 value = 4096 VCPU = 0.5, 1, or 2 value = 5120, 6144, or 7168 VCPU = 1 or 2 value = 8192 VCPU = 1, 2, or 4 value = 9216, 10240, 11264, 12288, 13312, 14336, or 15360 VCPU = 2 or 4 value = 16384 VCPU = 2, 4, or 8 value = 17408, 18432, 19456, 21504, 22528, 23552, 25600, 26624, 27648, 29696, or 30720 VCPU = 4 value = 20480, 24576, or 28672 VCPU = 4 or 8 value = 36864, 45056, 53248, or 61440 VCPU = 8 value = 32768, 40960, 49152, or 57344 VCPU = 8 or 16 value = 65536, 73728, 81920, 90112, 98304, 106496, 114688, or 122880 VCPU = 16 type=\"VCPU\" The number of vCPUs reserved for the container. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. Each vCPU is equivalent to 1,024 CPU shares. For Amazon EC2 resources, you must specify at least one vCPU. This is required but can be specified in several places; it must be specified for each node at least once. The default for the Fargate On-Demand vCPU resource count quota is 6 vCPUs. For more information about Fargate quotas, see Fargate quotas in the Amazon Web Services General Reference. For jobs that are running on Fargate resources, then value must match one of the supported values and the MEMORY values must be one of the values supported for that VCPU value. The supported values are 0.25, 0.5, 1, 2, 4, 8, and 16 value = 0.25 MEMORY = 512, 1024, or 2048 value = 0.5 MEMORY = 1024, 2048, 3072, or 4096 value = 1 MEMORY = 2048, 3072, 4096, 5120, 6144, 7168, or 8192 value = 2 MEMORY = 4096, 5120, 6144, 7168, 8192, 9216, 10240, 11264, 12288, 13312, 14336, 15360, or 16384 value = 4 MEMORY = 8192, 9216, 10240, 11264, 12288, 13312, 14336, 15360, 16384, 17408, 18432, 19456, 20480, 21504, 22528, 23552, 24576, 25600, 26624, 27648, 28672, 29696, or 30720 value = 8 MEMORY = 16384, 20480, 24576, 28672, 32768, 36864, 40960, 45056, 49152, 53248, 57344, or 61440 value = 16 MEMORY = 32768, 40960, 49152, 57344, 65536, 73728, 81920, 90112, 98304, 106496, 114688, or 122880"];
+      type_: ResourceType.t
+        [@ocaml.doc
+          "The type of resource to assign to a container. The supported resources include GPU, MEMORY, and VCPU."]}
+    let context_ = "ResourceRequirement"
+    let make ~value = fun ~type_ -> fun () -> { value; type_ }
+    let to_value x =
+      structure_to_value
+        [("value", (Some (String_.to_value x.value)));
+        ("type", (Some (ResourceType.to_value x.type_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ =
+        ResourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let value =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
+      make ~type_ ~value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map_exn json__ "type" ResourceType.of_json in
+      let value = field_map_exn json__ "value" String_.of_json in
+      make ~type_ ~value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The type and amount of a resource to assign to a container. The supported resources include GPU, MEMORY, and VCPU."]
+module TaskContainerDependency =
+  struct
+    type nonrec t =
+      {
+      containerName: String_.t option
+        [@ocaml.doc "A unique identifier for the container."];
+      condition: String_.t option
+        [@ocaml.doc
+          "The dependency condition of the container. The following are the available conditions and their behavior: START - This condition emulates the behavior of links and volumes today. It validates that a dependent container is started before permitting other containers to start. COMPLETE - This condition validates that a dependent container runs to completion (exits) before permitting other containers to start. This can be useful for nonessential containers that run a script and then exit. This condition can't be set on an essential container. SUCCESS - This condition is the same as COMPLETE, but it also requires that the container exits with a zero status. This condition can't be set on an essential container."]}
+    let make ?containerName =
+      fun ?condition -> fun () -> { containerName; condition }
+    let to_value x =
+      structure_to_value
+        [("containerName", (Option.map x.containerName ~f:String_.to_value));
+        ("condition", (Option.map x.condition ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let condition =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "condition") in
+      let containerName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "containerName") in
+      make ?condition ?containerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let condition = field_map json__ "condition" String_.of_json in
+      let containerName = field_map json__ "containerName" String_.of_json in
+      make ?condition ?containerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of containers that this task depends on."]
+module Ulimit =
+  struct
+    type nonrec t =
+      {
+      hardLimit: Integer.t [@ocaml.doc "The hard limit for the ulimit type."];
+      name: String_.t
+        [@ocaml.doc
+          "The type of the ulimit. Valid values are: core | cpu | data | fsize | locks | memlock | msgqueue | nice | nofile | nproc | rss | rtprio | rttime | sigpending | stack."];
+      softLimit: Integer.t [@ocaml.doc "The soft limit for the ulimit type."]}
+    let context_ = "Ulimit"
+    let make ~hardLimit =
+      fun ~name -> fun ~softLimit -> fun () -> { hardLimit; name; softLimit }
+    let to_value x =
+      structure_to_value
+        [("hardLimit", (Some (Integer.to_value x.hardLimit)));
+        ("name", (Some (String_.to_value x.name)));
+        ("softLimit", (Some (Integer.to_value x.softLimit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let softLimit =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "softLimit") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      let hardLimit =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hardLimit") in
+      make ~softLimit ~name ~hardLimit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let softLimit = field_map_exn json__ "softLimit" Integer.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      let hardLimit = field_map_exn json__ "hardLimit" Integer.of_json in
+      make ~softLimit ~name ~hardLimit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The ulimit settings to pass to the container. For more information, see Ulimit. This object isn't applicable to jobs that are running on Fargate resources."]
+module EFSAuthorizationConfig =
+  struct
+    type nonrec t =
+      {
+      accessPointId: String_.t option
+        [@ocaml.doc
+          "The Amazon EFS access point ID to use. If an access point is specified, the root directory value specified in the EFSVolumeConfiguration must either be omitted or set to / which enforces the path set on the EFS access point. If an access point is used, transit encryption must be enabled in the EFSVolumeConfiguration. For more information, see Working with Amazon EFS access points in the Amazon Elastic File System User Guide."];
+      iam: EFSAuthorizationConfigIAM.t option
+        [@ocaml.doc
+          "Whether or not to use the Batch job IAM role defined in a job definition when mounting the Amazon EFS file system. If enabled, transit encryption must be enabled in the EFSVolumeConfiguration. If this parameter is omitted, the default value of DISABLED is used. For more information, see Using Amazon EFS access points in the Batch User Guide. EFS IAM authorization requires that TransitEncryption be ENABLED and that a JobRoleArn is specified."]}
+    let make ?accessPointId = fun ?iam -> fun () -> { accessPointId; iam }
+    let to_value x =
+      structure_to_value
+        [("accessPointId", (Option.map x.accessPointId ~f:String_.to_value));
+        ("iam", (Option.map x.iam ~f:EFSAuthorizationConfigIAM.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iam =
+        (Option.map ~f:EFSAuthorizationConfigIAM.of_xml)
+          (Xml.child xml_arg0 "iam") in
+      let accessPointId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointId") in
+      make ?iam ?accessPointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iam = field_map json__ "iam" EFSAuthorizationConfigIAM.of_json in
+      let accessPointId = field_map json__ "accessPointId" String_.of_json in
+      make ?iam ?accessPointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The authorization configuration details for the Amazon EFS file system."]
+module EFSTransitEncryption =
   struct
     type nonrec t =
       | ENABLED 
@@ -690,160 +738,36 @@ module AssignPublicIp =
     let to_query v = to_query to_value v
     let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration AssignPublicIp" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"AssignPublicIp" j)
+      of_string
+        (string_of_xml ~kind:"enumeration EFSTransitEncryption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EFSTransitEncryption" j)
     let to_json = simple_to_json to_value
   end
-module ResourceRequirement =
+module Quantity =
   struct
-    type nonrec t =
-      {
-      value: String_.t
-        [@ocaml.doc
-          "The quantity of the specified resource to reserve for the container. The values vary based on the type specified. type=\"GPU\" The number of physical GPUs to reserve for the container. The number of GPUs reserved for all containers in a job shouldn't exceed the number of available GPUs on the compute resource that the job is launched on. GPUs are not available for jobs that are running on Fargate resources. type=\"MEMORY\" The memory hard limit (in MiB) present to the container. This parameter is supported for jobs that are running on EC2 resources. If your container attempts to exceed the memory specified, the container is terminated. This parameter maps to Memory in the Create a container section of the Docker Remote API and the --memory option to docker run. You must specify at least 4 MiB of memory for a job. This is required but can be specified in several places for multi-node parallel (MNP) jobs. It must be specified for each node at least once. This parameter maps to Memory in the Create a container section of the Docker Remote API and the --memory option to docker run. If you're trying to maximize your resource utilization by providing your jobs as much memory as possible for a particular instance type, see Memory Management in the Batch User Guide. For jobs that are running on Fargate resources, then value is the hard limit (in MiB), and must match one of the supported values and the VCPU values must be one of the values supported for that memory value. value = 512 VCPU = 0.25 value = 1024 VCPU = 0.25 or 0.5 value = 2048 VCPU = 0.25, 0.5, or 1 value = 3072 VCPU = 0.5, or 1 value = 4096 VCPU = 0.5, 1, or 2 value = 5120, 6144, or 7168 VCPU = 1 or 2 value = 8192 VCPU = 1, 2, or 4 value = 9216, 10240, 11264, 12288, 13312, 14336, 15360, or 16384 VCPU = 2 or 4 value = 17408, 18432, 19456, 20480, 21504, 22528, 23552, 24576, 25600, 26624, 27648, 28672, 29696, or 30720 VCPU = 4 type=\"VCPU\" The number of vCPUs reserved for the container. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. Each vCPU is equivalent to 1,024 CPU shares. For EC2 resources, you must specify at least one vCPU. This is required but can be specified in several places; it must be specified for each node at least once. For jobs that are running on Fargate resources, then value must match one of the supported values and the MEMORY values must be one of the values supported for that VCPU value. The supported values are 0.25, 0.5, 1, 2, and 4 value = 0.25 MEMORY = 512, 1024, or 2048 value = 0.5 MEMORY = 1024, 2048, 3072, or 4096 value = 1 MEMORY = 2048, 3072, 4096, 5120, 6144, 7168, or 8192 value = 2 MEMORY = 4096, 5120, 6144, 7168, 8192, 9216, 10240, 11264, 12288, 13312, 14336, 15360, or 16384 value = 4 MEMORY = 8192, 9216, 10240, 11264, 12288, 13312, 14336, 15360, 16384, 17408, 18432, 19456, 20480, 21504, 22528, 23552, 24576, 25600, 26624, 27648, 28672, 29696, or 30720"];
-      type_: ResourceType.t
-        [@ocaml.doc
-          "The type of resource to assign to a container. The supported resources include GPU, MEMORY, and VCPU."]}
-    let context_ = "ResourceRequirement"
-    let make ~value = fun ~type_ -> fun () -> { value; type_ }
-    let to_value x =
-      structure_to_value
-        [("value", (Some (String_.to_value x.value)));
-        ("type", (Some (ResourceType.to_value x.type_)))]
+    type nonrec t = string
+    let context_ = "Quantity"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
     let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let type_ =
-        ResourceType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      let value =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "value") in
-      make ~type_ ~value ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "type" ResourceType.of_json in
-      let value = field_map_exn json "value" String_.of_json in
-      make ~type_ ~value ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The type and amount of a resource to assign to a container. The supported resources include GPU, MEMORY, and VCPU."]
-module Ulimit =
-  struct
-    type nonrec t =
-      {
-      hardLimit: Integer.t [@ocaml.doc "The hard limit for the ulimit type."];
-      name: String_.t [@ocaml.doc "The type of the ulimit."];
-      softLimit: Integer.t [@ocaml.doc "The soft limit for the ulimit type."]}
-    let context_ = "Ulimit"
-    let make ~hardLimit =
-      fun ~name -> fun ~softLimit -> fun () -> { hardLimit; name; softLimit }
-    let to_value x =
-      structure_to_value
-        [("hardLimit", (Some (Integer.to_value x.hardLimit)));
-        ("name", (Some (String_.to_value x.name)));
-        ("softLimit", (Some (Integer.to_value x.softLimit)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let softLimit =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "softLimit") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let hardLimit =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "hardLimit") in
-      make ~softLimit ~name ~hardLimit ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let softLimit = field_map_exn json "softLimit" Integer.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      let hardLimit = field_map_exn json "hardLimit" Integer.of_json in
-      make ~softLimit ~name ~hardLimit ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The ulimit settings to pass to the container. This object isn't applicable to jobs that are running on Fargate resources."]
-module Volume =
-  struct
-    type nonrec t =
-      {
-      host: Host.t option
-        [@ocaml.doc
-          "The contents of the host parameter determine whether your data volume persists on the host container instance and where it is stored. If the host parameter is empty, then the Docker daemon assigns a host path for your data volume. However, the data isn't guaranteed to persist after the containers associated with it stop running. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
-      name: String_.t option
-        [@ocaml.doc
-          "The name of the volume. It can be up to 255 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_). This name is referenced in the sourceVolume parameter of container definition mountPoints."];
-      efsVolumeConfiguration: EFSVolumeConfiguration.t option
-        [@ocaml.doc
-          "This parameter is specified when you are using an Amazon Elastic File System file system for job storage. Jobs that are running on Fargate resources must specify a platformVersion of at least 1.4.0."]}
-    let make ?host =
-      fun ?name ->
-        fun ?efsVolumeConfiguration ->
-          fun () -> { host; name; efsVolumeConfiguration }
-    let to_value x =
-      structure_to_value
-        [("host", (Option.map x.host ~f:Host.to_value));
-        ("name", (Option.map x.name ~f:String_.to_value));
-        ("efsVolumeConfiguration",
-          (Option.map x.efsVolumeConfiguration
-             ~f:EFSVolumeConfiguration.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let efsVolumeConfiguration =
-        (Option.map ~f:EFSVolumeConfiguration.of_xml)
-          (Xml.child xml_arg0 "efsVolumeConfiguration") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "host") in
-      make ?efsVolumeConfiguration ?name ?host ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let efsVolumeConfiguration =
-        field_map json "efsVolumeConfiguration"
-          EFSVolumeConfiguration.of_json in
-      let name = field_map json "name" String_.of_json in
-      let host = field_map json "host" Host.of_json in
-      make ?efsVolumeConfiguration ?name ?host ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A data volume used in a job's container properties."]
-module NetworkInterface =
-  struct
-    type nonrec t =
-      {
-      attachmentId: String_.t option
-        [@ocaml.doc "The attachment ID for the network interface."];
-      ipv6Address: String_.t option
-        [@ocaml.doc "The private IPv6 address for the network interface."];
-      privateIpv4Address: String_.t option
-        [@ocaml.doc "The private IPv4 address for the network interface."]}
-    let make ?attachmentId =
-      fun ?ipv6Address ->
-        fun ?privateIpv4Address ->
-          fun () -> { attachmentId; ipv6Address; privateIpv4Address }
-    let to_value x =
-      structure_to_value
-        [("attachmentId", (Option.map x.attachmentId ~f:String_.to_value));
-        ("ipv6Address", (Option.map x.ipv6Address ~f:String_.to_value));
-        ("privateIpv4Address",
-          (Option.map x.privateIpv4Address ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let privateIpv4Address =
-        (Option.map ~f:String_.of_xml)
-          (Xml.child xml_arg0 "privateIpv4Address") in
-      let ipv6Address =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipv6Address") in
-      let attachmentId =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
-      make ?privateIpv4Address ?ipv6Address ?attachmentId ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let privateIpv4Address =
-        field_map json "privateIpv4Address" String_.of_json in
-      let ipv6Address = field_map json "ipv6Address" String_.of_json in
-      let attachmentId = field_map json "attachmentId" String_.of_json in
-      make ?privateIpv4Address ?ipv6Address ?attachmentId ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object representing the elastic network interface for a multi-node parallel job node."]
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Quantity" j
+    let to_json = simple_to_json to_value
+  end
 module EnvironmentVariables =
   struct
     type nonrec t = KeyValuePair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyValuePair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -865,52 +789,64 @@ module EnvironmentVariables =
         j
     let to_json v = composed_to_json to_value v
   end
-module FargatePlatformConfiguration =
+module FirelensConfiguration =
   struct
     type nonrec t =
       {
-      platformVersion: String_.t option
+      type_: FirelensConfigurationType.t
         [@ocaml.doc
-          "The Fargate platform version where the jobs are running. A platform version is specified only for jobs that are running on Fargate resources. If one isn't specified, the LATEST platform version is used by default. This uses a recent, approved version of the Fargate platform for compute resources. For more information, see Fargate platform versions in the Amazon Elastic Container Service Developer Guide."]}
-    let make ?platformVersion = fun () -> { platformVersion }
+          "The log router to use. The valid values are fluentd or fluentbit."];
+      options: FirelensConfigurationOptionsMap.t option
+        [@ocaml.doc
+          "The options to use when configuring the log router. This field is optional and can be used to specify a custom configuration file or to add additional metadata, such as the task, task definition, cluster, and container instance details to the log event. If specified, the syntax to use is \"options\":\\{\"enable-ecs-log-metadata\":\"true|false\",\"config-file-type:\"s3|file\",\"config-file-value\":\"arn:aws:s3:::mybucket/fluent.conf|filepath\"\\}. For more information, see Creating a task definition that uses a FireLens configuration in the Amazon Elastic Container Service Developer Guide."]}
+    let context_ = "FirelensConfiguration"
+    let make ?options = fun ~type_ -> fun () -> { options; type_ }
     let to_value x =
       structure_to_value
-        [("platformVersion",
-           (Option.map x.platformVersion ~f:String_.to_value))]
+        [("type", (Some (FirelensConfigurationType.to_value x.type_)));
+        ("options",
+          (Option.map x.options ~f:FirelensConfigurationOptionsMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let platformVersion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "platformVersion") in
-      make ?platformVersion ()
+      let options =
+        (Option.map ~f:FirelensConfigurationOptionsMap.of_xml)
+          (Xml.child xml_arg0 "options") in
+      let type_ =
+        FirelensConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ?options ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let platformVersion = field_map json "platformVersion" String_.of_json in
-      make ?platformVersion ()
+    let of_json json__ =
+      let options =
+        field_map json__ "options" FirelensConfigurationOptionsMap.of_json in
+      let type_ =
+        field_map_exn json__ "type" FirelensConfigurationType.of_json in
+      make ?options ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The platform configuration for jobs that are running on Fargate resources. Jobs that run on EC2 resources must not specify this parameter."]
+       "The FireLens configuration for the container. This is used to specify and configure a log router for container logs. For more information, see Custom log routing in the Amazon Elastic Container Service Developer Guide."]
 module LinuxParameters =
   struct
     type nonrec t =
       {
       devices: DevicesList.t option
         [@ocaml.doc
-          "Any host devices to expose to the container. This parameter maps to Devices in the Create a container section of the Docker Remote API and the --device option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
+          "Any of the host devices to expose to the container. This parameter maps to Devices in the Create a container section of the Docker Remote API and the --device option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide it for these jobs."];
       initProcessEnabled: Boolean.t option
         [@ocaml.doc
-          "If true, run an init process inside the container that forwards signals and reaps processes. This parameter maps to the --init option to docker run. This parameter requires version 1.25 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log into your container instance and run the following command: sudo docker version | grep \"Server API version\""];
+          "If true, run an init process inside the container that forwards signals and reaps processes. This parameter maps to the --init option to docker run. This parameter requires version 1.25 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version | grep \"Server API version\""];
       sharedMemorySize: Integer.t option
         [@ocaml.doc
-          "The value for the size (in MiB) of the /dev/shm volume. This parameter maps to the --shm-size option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
+          "The value for the size (in MiB) of the /dev/shm volume. This parameter maps to the --shm-size option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide it for these jobs."];
       tmpfs: TmpfsList.t option
         [@ocaml.doc
-          "The container path, mount options, and size (in MiB) of the tmpfs mount. This parameter maps to the --tmpfs option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
+          "The container path, mount options, and size (in MiB) of the tmpfs mount. This parameter maps to the --tmpfs option to docker run. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide this parameter for this resource type."];
       maxSwap: Integer.t option
         [@ocaml.doc
-          "The total amount of swap memory (in MiB) a container can use. This parameter is translated to the --memory-swap option to docker run where the value is the sum of the container memory plus the maxSwap value. For more information, see --memory-swap details in the Docker documentation. If a maxSwap value of 0 is specified, the container doesn't use swap. Accepted values are 0 or any positive integer. If the maxSwap parameter is omitted, the container doesn't use the swap configuration for the container instance it is running on. A maxSwap value must be set for the swappiness parameter to be used. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
+          "The total amount of swap memory (in MiB) a container can use. This parameter is translated to the --memory-swap option to docker run where the value is the sum of the container memory plus the maxSwap value. For more information, see --memory-swap details in the Docker documentation. If a maxSwap value of 0 is specified, the container doesn't use swap. Accepted values are 0 or any positive integer. If the maxSwap parameter is omitted, the container doesn't use the swap configuration for the container instance on which it runs. A maxSwap value must be set for the swappiness parameter to be used. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide it for these jobs."];
       swappiness: Integer.t option
         [@ocaml.doc
-          "This allows you to tune a container's memory swappiness behavior. A swappiness value of 0 causes swapping not to happen unless absolutely necessary. A swappiness value of 100 causes pages to be swapped very aggressively. Accepted values are whole numbers between 0 and 100. If the swappiness parameter isn't specified, a default value of 60 is used. If a value isn't specified for maxSwap, then this parameter is ignored. If maxSwap is set to 0, the container doesn't use swap. This parameter maps to the --memory-swappiness option to docker run. Consider the following when you use a per-container swap configuration. Swap space must be enabled and allocated on the container instance for the containers to use. The Amazon ECS optimized AMIs don't have swap enabled by default. You must enable swap on the instance to use this feature. For more information, see Instance Store Swap Volumes in the Amazon EC2 User Guide for Linux Instances or How do I allocate memory to work as swap space in an Amazon EC2 instance by using a swap file? The swap space parameters are only supported for job definitions using EC2 resources. If the maxSwap and swappiness parameters are omitted from a job definition, each container will have a default swappiness value of 60, and the total swap usage will be limited to two times the memory reservation of the container. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."]}
+          "You can use this parameter to tune a container's memory swappiness behavior. A swappiness value of 0 causes swapping to not occur unless absolutely necessary. A swappiness value of 100 causes pages to be swapped aggressively. Valid values are whole numbers between 0 and 100. If the swappiness parameter isn't specified, a default value of 60 is used. If a value isn't specified for maxSwap, then this parameter is ignored. If maxSwap is set to 0, the container doesn't use swap. This parameter maps to the --memory-swappiness option to docker run. Consider the following when you use a per-container swap configuration. Swap space must be enabled and allocated on the container instance for the containers to use. By default, the Amazon ECS optimized AMIs don't have swap enabled. You must enable swap on the instance to use this feature. For more information, see Instance store swap volumes in the Amazon EC2 User Guide for Linux Instances or How do I allocate memory to work as swap space in an Amazon EC2 instance by using a swap file? The swap space parameters are only supported for job definitions using EC2 resources. If the maxSwap and swappiness parameters are omitted from a job definition, each container has a default swappiness value of 60. Moreover, the total swap usage is limited to two times the memory reservation of the container. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide it for these jobs."]}
     let make ?devices =
       fun ?initProcessEnabled ->
         fun ?sharedMemorySize ->
@@ -955,15 +891,15 @@ module LinuxParameters =
       make ?swappiness ?maxSwap ?tmpfs ?sharedMemorySize ?initProcessEnabled
         ?devices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let swappiness = field_map json "swappiness" Integer.of_json in
-      let maxSwap = field_map json "maxSwap" Integer.of_json in
-      let tmpfs = field_map json "tmpfs" TmpfsList.of_json in
+    let of_json json__ =
+      let swappiness = field_map json__ "swappiness" Integer.of_json in
+      let maxSwap = field_map json__ "maxSwap" Integer.of_json in
+      let tmpfs = field_map json__ "tmpfs" TmpfsList.of_json in
       let sharedMemorySize =
-        field_map json "sharedMemorySize" Integer.of_json in
+        field_map json__ "sharedMemorySize" Integer.of_json in
       let initProcessEnabled =
-        field_map json "initProcessEnabled" Boolean.of_json in
-      let devices = field_map json "devices" DevicesList.of_json in
+        field_map json__ "initProcessEnabled" Boolean.of_json in
+      let devices = field_map json__ "devices" DevicesList.of_json in
       make ?swappiness ?maxSwap ?tmpfs ?sharedMemorySize ?initProcessEnabled
         ?devices ()
     let to_json v = composed_to_json to_value v
@@ -975,13 +911,13 @@ module LogConfiguration =
       {
       logDriver: LogDriver.t
         [@ocaml.doc
-          "The log driver to use for the container. The valid values listed for this parameter are log drivers that the Amazon ECS container agent can communicate with by default. The supported log drivers are awslogs, fluentd, gelf, json-file, journald, logentries, syslog, and splunk. Jobs that are running on Fargate resources are restricted to the awslogs and splunk log drivers. awslogs Specifies the Amazon CloudWatch Logs logging driver. For more information, see Using the awslogs Log Driver in the Batch User Guide and Amazon CloudWatch Logs logging driver in the Docker documentation. fluentd Specifies the Fluentd logging driver. For more information, including usage and options, see Fluentd logging driver in the Docker documentation. gelf Specifies the Graylog Extended Format (GELF) logging driver. For more information, including usage and options, see Graylog Extended Format logging driver in the Docker documentation. journald Specifies the journald logging driver. For more information, including usage and options, see Journald logging driver in the Docker documentation. json-file Specifies the JSON file logging driver. For more information, including usage and options, see JSON File logging driver in the Docker documentation. splunk Specifies the Splunk logging driver. For more information, including usage and options, see Splunk logging driver in the Docker documentation. syslog Specifies the syslog logging driver. For more information, including usage and options, see Syslog logging driver in the Docker documentation. If you have a custom driver that's not listed earlier that you want to work with the Amazon ECS container agent, you can fork the Amazon ECS container agent project that's available on GitHub and customize it to work with that driver. We encourage you to submit pull requests for changes that you want to have included. However, Amazon Web Services doesn't currently support running modified copies of this software. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log into your container instance and run the following command: sudo docker version | grep \"Server API version\""];
+          "The log driver to use for the container. The valid values that are listed for this parameter are log drivers that the Amazon ECS container agent can communicate with by default. The supported log drivers are awsfirelens, awslogs, fluentd, gelf, json-file, journald, logentries, syslog, and splunk. Jobs that are running on Fargate resources are restricted to the awslogs and splunk log drivers. awsfirelens Specifies the firelens logging driver. For more information on configuring Firelens, see Send Amazon ECS logs to an Amazon Web Services service or Amazon Web Services Partner in the Amazon Elastic Container Service Developer Guide. awslogs Specifies the Amazon CloudWatch Logs logging driver. For more information, see Using the awslogs log driver in the Batch User Guide and Amazon CloudWatch Logs logging driver in the Docker documentation. fluentd Specifies the Fluentd logging driver. For more information including usage and options, see Fluentd logging driver in the Docker documentation. gelf Specifies the Graylog Extended Format (GELF) logging driver. For more information including usage and options, see Graylog Extended Format logging driver in the Docker documentation. journald Specifies the journald logging driver. For more information including usage and options, see Journald logging driver in the Docker documentation. json-file Specifies the JSON file logging driver. For more information including usage and options, see JSON File logging driver in the Docker documentation. splunk Specifies the Splunk logging driver. For more information including usage and options, see Splunk logging driver in the Docker documentation. syslog Specifies the syslog logging driver. For more information including usage and options, see Syslog logging driver in the Docker documentation. If you have a custom driver that's not listed earlier that you want to work with the Amazon ECS container agent, you can fork the Amazon ECS container agent project that's available on GitHub and customize it to work with that driver. We encourage you to submit pull requests for changes that you want to have included. However, Amazon Web Services doesn't currently support running modified copies of this software. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version | grep \"Server API version\""];
       options: LogConfigurationOptionsMap.t option
         [@ocaml.doc
-          "The configuration options to send to the log driver. This parameter requires version 1.19 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log into your container instance and run the following command: sudo docker version | grep \"Server API version\""];
+          "The configuration options to send to the log driver. This parameter requires version 1.19 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version | grep \"Server API version\""];
       secretOptions: SecretList.t option
         [@ocaml.doc
-          "The secrets to pass to the log configuration. For more information, see Specifying Sensitive Data in the Batch User Guide."]}
+          "The secrets to pass to the log configuration. For more information, see Specifying sensitive data in the Batch User Guide."]}
     let context_ = "LogConfiguration"
     let make ?options =
       fun ?secretOptions ->
@@ -1006,11 +942,11 @@ module LogConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "logDriver") in
       make ?secretOptions ?options ~logDriver ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let secretOptions = field_map json "secretOptions" SecretList.of_json in
+    let of_json json__ =
+      let secretOptions = field_map json__ "secretOptions" SecretList.of_json in
       let options =
-        field_map json "options" LogConfigurationOptionsMap.of_json in
-      let logDriver = field_map_exn json "logDriver" LogDriver.of_json in
+        field_map json__ "options" LogConfigurationOptionsMap.of_json in
+      let logDriver = field_map_exn json__ "logDriver" LogDriver.of_json in
       make ?secretOptions ?options ~logDriver ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1019,6 +955,9 @@ module MountPoints =
   struct
     type nonrec t = MountPoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MountPoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1039,36 +978,40 @@ module MountPoints =
       list_of_json ~kind:"MountPoints" ~of_json:MountPoint.of_json j
     let to_json v = composed_to_json to_value v
   end
-module NetworkConfiguration =
+module RepositoryCredentials =
   struct
     type nonrec t =
       {
-      assignPublicIp: AssignPublicIp.t option
+      credentialsParameter: String_.t
         [@ocaml.doc
-          "Indicates whether the job should have a public IP address. For a job that is running on Fargate resources in a private subnet to send outbound traffic to the internet (for example, to pull container images), the private subnet requires a NAT gateway be attached to route requests to the internet. For more information, see Amazon ECS task networking. The default value is \"DISABLED\"."]}
-    let make ?assignPublicIp = fun () -> { assignPublicIp }
+          "The Amazon Resource Name (ARN) of the secret containing the private repository credentials."]}
+    let context_ = "RepositoryCredentials"
+    let make ~credentialsParameter = fun () -> { credentialsParameter }
     let to_value x =
       structure_to_value
-        [("assignPublicIp",
-           (Option.map x.assignPublicIp ~f:AssignPublicIp.to_value))]
+        [("credentialsParameter",
+           (Some (String_.to_value x.credentialsParameter)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let assignPublicIp =
-        (Option.map ~f:AssignPublicIp.of_xml)
-          (Xml.child xml_arg0 "assignPublicIp") in
-      make ?assignPublicIp ()
+      let credentialsParameter =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "credentialsParameter") in
+      make ~credentialsParameter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assignPublicIp =
-        field_map json "assignPublicIp" AssignPublicIp.of_json in
-      make ?assignPublicIp ()
+    let of_json json__ =
+      let credentialsParameter =
+        field_map_exn json__ "credentialsParameter" String_.of_json in
+      make ~credentialsParameter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The network configuration for jobs that are running on Fargate resources. Jobs that are running on EC2 resources must not specify this parameter."]
+       "The repository credentials for private registry authentication."]
 module ResourceRequirements =
   struct
     type nonrec t = ResourceRequirement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceRequirement.to_value)) |>
         (fun x -> `List x)
@@ -1091,10 +1034,42 @@ module ResourceRequirements =
         ~of_json:ResourceRequirement.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TaskContainerDependencyList =
+  struct
+    type nonrec t = TaskContainerDependency.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TaskContainerDependency.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TaskContainerDependency.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TaskContainerDependencyList"
+        ~of_json:TaskContainerDependency.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Ulimits =
   struct
     type nonrec t = Ulimit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ulimit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1114,12 +1089,671 @@ module Ulimits =
     let of_json j = list_of_json ~kind:"Ulimits" ~of_json:Ulimit.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Volumes =
+module EFSVolumeConfiguration =
   struct
-    type nonrec t = Volume.t list
+    type nonrec t =
+      {
+      fileSystemId: String_.t
+        [@ocaml.doc "The Amazon EFS file system ID to use."];
+      rootDirectory: String_.t option
+        [@ocaml.doc
+          "The directory within the Amazon EFS file system to mount as the root directory inside the host. If this parameter is omitted, the root of the Amazon EFS volume is used instead. Specifying / has the same effect as omitting this parameter. The maximum length is 4,096 characters. If an EFS access point is specified in the authorizationConfig, the root directory parameter must either be omitted or set to /, which enforces the path set on the Amazon EFS access point."];
+      transitEncryption: EFSTransitEncryption.t option
+        [@ocaml.doc
+          "Determines whether to enable encryption for Amazon EFS data in transit between the Amazon ECS host and the Amazon EFS server. Transit encryption must be enabled if Amazon EFS IAM authorization is used. If this parameter is omitted, the default value of DISABLED is used. For more information, see Encrypting data in transit in the Amazon Elastic File System User Guide."];
+      transitEncryptionPort: Integer.t option
+        [@ocaml.doc
+          "The port to use when sending encrypted data between the Amazon ECS host and the Amazon EFS server. If you don't specify a transit encryption port, it uses the port selection strategy that the Amazon EFS mount helper uses. The value must be between 0 and 65,535. For more information, see EFS mount helper in the Amazon Elastic File System User Guide."];
+      authorizationConfig: EFSAuthorizationConfig.t option
+        [@ocaml.doc
+          "The authorization configuration details for the Amazon EFS file system."]}
+    let context_ = "EFSVolumeConfiguration"
+    let make ?rootDirectory =
+      fun ?transitEncryption ->
+        fun ?transitEncryptionPort ->
+          fun ?authorizationConfig ->
+            fun ~fileSystemId ->
+              fun () ->
+                {
+                  rootDirectory;
+                  transitEncryption;
+                  transitEncryptionPort;
+                  authorizationConfig;
+                  fileSystemId
+                }
+    let to_value x =
+      structure_to_value
+        [("fileSystemId", (Some (String_.to_value x.fileSystemId)));
+        ("rootDirectory", (Option.map x.rootDirectory ~f:String_.to_value));
+        ("transitEncryption",
+          (Option.map x.transitEncryption ~f:EFSTransitEncryption.to_value));
+        ("transitEncryptionPort",
+          (Option.map x.transitEncryptionPort ~f:Integer.to_value));
+        ("authorizationConfig",
+          (Option.map x.authorizationConfig
+             ~f:EFSAuthorizationConfig.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizationConfig =
+        (Option.map ~f:EFSAuthorizationConfig.of_xml)
+          (Xml.child xml_arg0 "authorizationConfig") in
+      let transitEncryptionPort =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "transitEncryptionPort") in
+      let transitEncryption =
+        (Option.map ~f:EFSTransitEncryption.of_xml)
+          (Xml.child xml_arg0 "transitEncryption") in
+      let rootDirectory =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rootDirectory") in
+      let fileSystemId =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fileSystemId") in
+      make ?authorizationConfig ?transitEncryptionPort ?transitEncryption
+        ?rootDirectory ~fileSystemId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizationConfig =
+        field_map json__ "authorizationConfig" EFSAuthorizationConfig.of_json in
+      let transitEncryptionPort =
+        field_map json__ "transitEncryptionPort" Integer.of_json in
+      let transitEncryption =
+        field_map json__ "transitEncryption" EFSTransitEncryption.of_json in
+      let rootDirectory = field_map json__ "rootDirectory" String_.of_json in
+      let fileSystemId = field_map_exn json__ "fileSystemId" String_.of_json in
+      make ?authorizationConfig ?transitEncryptionPort ?transitEncryption
+        ?rootDirectory ~fileSystemId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is used when you're using an Amazon Elastic File System file system for job storage. For more information, see Amazon EFS Volumes in the Batch User Guide."]
+module Host =
+  struct
+    type nonrec t =
+      {
+      sourcePath: String_.t option
+        [@ocaml.doc
+          "The path on the host container instance that's presented to the container. If this parameter is empty, then the Docker daemon has assigned a host path for you. If this parameter contains a file location, then the data volume persists at the specified location on the host container instance until you delete it manually. If the source path location doesn't exist on the host container instance, the Docker daemon creates it. If the location does exist, the contents of the source path folder are exported. This parameter isn't applicable to jobs that run on Fargate resources. Don't provide this for these jobs."]}
+    let make ?sourcePath = fun () -> { sourcePath }
+    let to_value x =
+      structure_to_value
+        [("sourcePath", (Option.map x.sourcePath ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sourcePath =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "sourcePath") in
+      make ?sourcePath ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sourcePath = field_map json__ "sourcePath" String_.of_json in
+      make ?sourcePath ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Determine whether your data volume persists on the host container instance and where it's stored. If this parameter is empty, then the Docker daemon assigns a host path for your data volume. However, the data isn't guaranteed to persist after the containers that are associated with it stop running."]
+module S3FilesVolumeConfiguration =
+  struct
+    type nonrec t =
+      {
+      fileSystemArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3Files file system to use."];
+      rootDirectory: String_.t option
+        [@ocaml.doc
+          "The directory within the S3Files file system to mount as the root directory."];
+      transitEncryptionPort: Integer.t option
+        [@ocaml.doc
+          "The port to use when sending encrypted data between the Amazon ECS host and the S3Files file system server."];
+      accessPointArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the S3Files access point to use."]}
+    let context_ = "S3FilesVolumeConfiguration"
+    let make ?rootDirectory =
+      fun ?transitEncryptionPort ->
+        fun ?accessPointArn ->
+          fun ~fileSystemArn ->
+            fun () ->
+              {
+                rootDirectory;
+                transitEncryptionPort;
+                accessPointArn;
+                fileSystemArn
+              }
+    let to_value x =
+      structure_to_value
+        [("fileSystemArn", (Some (String_.to_value x.fileSystemArn)));
+        ("rootDirectory", (Option.map x.rootDirectory ~f:String_.to_value));
+        ("transitEncryptionPort",
+          (Option.map x.transitEncryptionPort ~f:Integer.to_value));
+        ("accessPointArn", (Option.map x.accessPointArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accessPointArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "accessPointArn") in
+      let transitEncryptionPort =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "transitEncryptionPort") in
+      let rootDirectory =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "rootDirectory") in
+      let fileSystemArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "fileSystemArn") in
+      make ?accessPointArn ?transitEncryptionPort ?rootDirectory
+        ~fileSystemArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accessPointArn = field_map json__ "accessPointArn" String_.of_json in
+      let transitEncryptionPort =
+        field_map json__ "transitEncryptionPort" Integer.of_json in
+      let rootDirectory = field_map json__ "rootDirectory" String_.of_json in
+      let fileSystemArn =
+        field_map_exn json__ "fileSystemArn" String_.of_json in
+      make ?accessPointArn ?transitEncryptionPort ?rootDirectory
+        ~fileSystemArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This is used when you're using an S3Files file system for job storage."]
+module EksContainerEnvironmentVariable =
+  struct
+    type nonrec t =
+      {
+      name: String_.t [@ocaml.doc "The name of the environment variable."];
+      value: String_.t option
+        [@ocaml.doc "The value of the environment variable."]}
+    let context_ = "EksContainerEnvironmentVariable"
+    let make ?value = fun ~name -> fun () -> { value; name }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.name)));
+        ("value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?value ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?value ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An environment variable."]
+module EksLimits =
+  struct
+    type nonrec t = (String_.t * Quantity.t) list
     let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (Quantity.of_string v))))))
     let to_value xs =
-      (xs |> (List.map ~f:Volume.to_value)) |> (fun x -> `List x)
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (Quantity.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:Quantity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksRequests =
+  struct
+    type nonrec t = (String_.t * Quantity.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (Quantity.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (Quantity.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:Quantity.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Long =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module EksContainerVolumeMount =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name the volume mount. This must match the name of one of the volumes in the pod."];
+      mountPath: String_.t option
+        [@ocaml.doc "The path on the container where the volume is mounted."];
+      subPath: String_.t option
+        [@ocaml.doc
+          "A sub-path inside the referenced volume instead of its root."];
+      readOnly: Boolean.t option
+        [@ocaml.doc
+          "If this value is true, the container has read-only access to the volume. Otherwise, the container can write to the volume. The default value is false."]}
+    let make ?name =
+      fun ?mountPath ->
+        fun ?subPath ->
+          fun ?readOnly -> fun () -> { name; mountPath; subPath; readOnly }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("mountPath", (Option.map x.mountPath ~f:String_.to_value));
+        ("subPath", (Option.map x.subPath ~f:String_.to_value));
+        ("readOnly", (Option.map x.readOnly ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "readOnly") in
+      let subPath =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "subPath") in
+      let mountPath =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "mountPath") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?readOnly ?subPath ?mountPath ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readOnly = field_map json__ "readOnly" Boolean.of_json in
+      let subPath = field_map json__ "subPath" String_.of_json in
+      let mountPath = field_map json__ "mountPath" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?readOnly ?subPath ?mountPath ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The volume mounts for a container for an Amazon EKS job. For more information about volumes and volume mounts in Kubernetes, see Volumes in the Kubernetes documentation."]
+module NetworkInterface =
+  struct
+    type nonrec t =
+      {
+      attachmentId: String_.t option
+        [@ocaml.doc "The attachment ID for the network interface."];
+      ipv6Address: String_.t option
+        [@ocaml.doc "The private IPv6 address for the network interface."];
+      privateIpv4Address: String_.t option
+        [@ocaml.doc "The private IPv4 address for the network interface."]}
+    let make ?attachmentId =
+      fun ?ipv6Address ->
+        fun ?privateIpv4Address ->
+          fun () -> { attachmentId; ipv6Address; privateIpv4Address }
+    let to_value x =
+      structure_to_value
+        [("attachmentId", (Option.map x.attachmentId ~f:String_.to_value));
+        ("ipv6Address", (Option.map x.ipv6Address ~f:String_.to_value));
+        ("privateIpv4Address",
+          (Option.map x.privateIpv4Address ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let privateIpv4Address =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "privateIpv4Address") in
+      let ipv6Address =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipv6Address") in
+      let attachmentId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "attachmentId") in
+      make ?privateIpv4Address ?ipv6Address ?attachmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let privateIpv4Address =
+        field_map json__ "privateIpv4Address" String_.of_json in
+      let ipv6Address = field_map json__ "ipv6Address" String_.of_json in
+      let attachmentId = field_map json__ "attachmentId" String_.of_json in
+      make ?privateIpv4Address ?ipv6Address ?attachmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the elastic network interface for a multi-node parallel job node."]
+module TaskContainerProperties =
+  struct
+    type nonrec t =
+      {
+      command: StringList.t option
+        [@ocaml.doc
+          "The command that's passed to the container. This parameter maps to Cmd in the Create a container section of the Docker Remote API and the COMMAND parameter to docker run. For more information, see Dockerfile reference: CMD."];
+      dependsOn: TaskContainerDependencyList.t option
+        [@ocaml.doc "A list of containers that this container depends on."];
+      environment: EnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to pass to a container. This parameter maps to Env in the Create a container section of the Docker Remote API and the --env parameter to docker run. We don't recommend using plaintext environment variables for sensitive information, such as credential data. Environment variables cannot start with AWS_BATCH. This naming convention is reserved for variables that Batch sets."];
+      essential: Boolean.t option
+        [@ocaml.doc
+          "If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped. If the essential parameter of a container is marked as false, its failure doesn't affect the rest of the containers in a task. If this parameter is omitted, a container is assumed to be essential. All jobs must have at least one essential container. If you have an application that's composed of multiple containers, group containers that are used for a common purpose into components, and separate the different components into multiple task definitions. For more information, see Application Architecture in the Amazon Elastic Container Service Developer Guide."];
+      firelensConfiguration: FirelensConfiguration.t option
+        [@ocaml.doc
+          "The FireLens configuration for the container. This is used to specify and configure a log router for container logs. For more information, see Custom log routing in the Amazon Elastic Container Service Developer Guide."];
+      image: String_.t
+        [@ocaml.doc
+          "The image used to start a container. This string is passed directly to the Docker daemon. By default, images in the Docker Hub registry are available. Other repositories are specified with either repository-url/image:tag or repository-url/image\\@digest. Up to 255 letters (uppercase and lowercase), numbers, hyphens, underscores, colons, periods, forward slashes, and number signs are allowed. This parameter maps to Image in the Create a container section of the Docker Remote API and the IMAGE parameter of the docker run ."];
+      linuxParameters: LinuxParameters.t option
+        [@ocaml.doc
+          "Linux-specific modifications that are applied to the container, such as Linux kernel capabilities. For more information, see KernelCapabilities."];
+      logConfiguration: LogConfiguration.t option
+        [@ocaml.doc
+          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However the container can use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance (or on a different log server for remote logging options). For more information about the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Amazon ECS currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). Additional log drivers may be available in future releases of the Amazon ECS container agent. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version --format '\\{\\{.Server.APIVersion\\}\\}' The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS container agent configuration in the Amazon Elastic Container Service Developer Guide."];
+      mountPoints: MountPoints.t option
+        [@ocaml.doc
+          "The mount points for data volumes in your container. This parameter maps to Volumes in the Create a container section of the Docker Remote API and the --volume option to docker run. Windows containers can mount whole directories on the same drive as $env:ProgramData. Windows containers can't mount directories on a different drive, and mount point can't be across drives."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name of a container. The name can be used as a unique identifier to target your dependsOn and Overrides objects."];
+      privileged: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given elevated privileges on the host container instance (similar to the root user). This parameter maps to Privileged in the Create a container section of the Docker Remote API and the --privileged option to docker run. This parameter is not supported for Windows containers or tasks run on Fargate."];
+      readonlyRootFilesystem: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given read-only access to its root file system. This parameter maps to ReadonlyRootfs in the Create a container section of the Docker Remote API and the --read-only option to docker run. This parameter is not supported for Windows containers."];
+      repositoryCredentials: RepositoryCredentials.t option
+        [@ocaml.doc
+          "The private repository authentication credentials to use."];
+      resourceRequirements: ResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of a resource to assign to a container. The only supported resource is a GPU."];
+      secrets: SecretList.t option
+        [@ocaml.doc
+          "The secrets to pass to the container. For more information, see Specifying Sensitive Data in the Amazon Elastic Container Service Developer Guide."];
+      ulimits: Ulimits.t option
+        [@ocaml.doc
+          "A list of ulimits to set in the container. If a ulimit value is specified in a task definition, it overrides the default values set by Docker. This parameter maps to Ulimits in the Create a container section of the Docker Remote API and the --ulimit option to docker run. Amazon ECS tasks hosted on Fargate use the default resource limit values set by the operating system with the exception of the nofile resource limit parameter which Fargate overrides. The nofile resource limit sets a restriction on the number of open files that a container can use. The default nofile soft limit is 1024 and the default hard limit is 65535. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version --format '\\{\\{.Server.APIVersion\\}\\}' This parameter is not supported for Windows containers."];
+      user: String_.t option
+        [@ocaml.doc
+          "The user to use inside the container. This parameter maps to User in the Create a container section of the Docker Remote API and the --user option to docker run. When running tasks using the host network mode, don't run containers using the root user (UID 0). We recommend using a non-root user for better security. You can specify the user using the following formats. If specifying a UID or GID, you must specify it as a positive integer. user user:group uid uid:gid user:gi uid:group This parameter is not supported for Windows containers."];
+      startTimeout: Integer.t option
+        [@ocaml.doc
+          "Time duration (in seconds) to wait before giving up on resolving dependencies for a container. The minimum value is 2 seconds and the maximum value for Fargate is 120 seconds."];
+      stopTimeout: Integer.t option
+        [@ocaml.doc
+          "Time duration (in seconds) to wait before the container is forcefully killed if it doesn't exit normally on its own. The minimum value is 2 seconds and the maximum value for Fargate is 120 seconds. If the parameter is not specified, the default value of 30 seconds is used. For tasks that use the EC2 launch type, if the stopTimeout parameter isn't specified, the value set for the Amazon ECS container agent configuration variable ECS_CONTAINER_STOP_TIMEOUT is used. If neither the stopTimeout parameter nor the ECS_CONTAINER_STOP_TIMEOUT agent configuration variable are set, then the default value of 30 seconds is used."]}
+    let context_ = "TaskContainerProperties"
+    let make ?command =
+      fun ?dependsOn ->
+        fun ?environment ->
+          fun ?essential ->
+            fun ?firelensConfiguration ->
+              fun ?linuxParameters ->
+                fun ?logConfiguration ->
+                  fun ?mountPoints ->
+                    fun ?name ->
+                      fun ?privileged ->
+                        fun ?readonlyRootFilesystem ->
+                          fun ?repositoryCredentials ->
+                            fun ?resourceRequirements ->
+                              fun ?secrets ->
+                                fun ?ulimits ->
+                                  fun ?user ->
+                                    fun ?startTimeout ->
+                                      fun ?stopTimeout ->
+                                        fun ~image ->
+                                          fun () ->
+                                            {
+                                              command;
+                                              dependsOn;
+                                              environment;
+                                              essential;
+                                              firelensConfiguration;
+                                              linuxParameters;
+                                              logConfiguration;
+                                              mountPoints;
+                                              name;
+                                              privileged;
+                                              readonlyRootFilesystem;
+                                              repositoryCredentials;
+                                              resourceRequirements;
+                                              secrets;
+                                              ulimits;
+                                              user;
+                                              startTimeout;
+                                              stopTimeout;
+                                              image
+                                            }
+    let to_value x =
+      structure_to_value
+        [("command", (Option.map x.command ~f:StringList.to_value));
+        ("dependsOn",
+          (Option.map x.dependsOn ~f:TaskContainerDependencyList.to_value));
+        ("environment",
+          (Option.map x.environment ~f:EnvironmentVariables.to_value));
+        ("essential", (Option.map x.essential ~f:Boolean.to_value));
+        ("firelensConfiguration",
+          (Option.map x.firelensConfiguration
+             ~f:FirelensConfiguration.to_value));
+        ("image", (Some (String_.to_value x.image)));
+        ("linuxParameters",
+          (Option.map x.linuxParameters ~f:LinuxParameters.to_value));
+        ("logConfiguration",
+          (Option.map x.logConfiguration ~f:LogConfiguration.to_value));
+        ("mountPoints", (Option.map x.mountPoints ~f:MountPoints.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("privileged", (Option.map x.privileged ~f:Boolean.to_value));
+        ("readonlyRootFilesystem",
+          (Option.map x.readonlyRootFilesystem ~f:Boolean.to_value));
+        ("repositoryCredentials",
+          (Option.map x.repositoryCredentials
+             ~f:RepositoryCredentials.to_value));
+        ("resourceRequirements",
+          (Option.map x.resourceRequirements ~f:ResourceRequirements.to_value));
+        ("secrets", (Option.map x.secrets ~f:SecretList.to_value));
+        ("ulimits", (Option.map x.ulimits ~f:Ulimits.to_value));
+        ("user", (Option.map x.user ~f:String_.to_value));
+        ("startTimeout", (Option.map x.startTimeout ~f:Integer.to_value));
+        ("stopTimeout", (Option.map x.stopTimeout ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stopTimeout =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "stopTimeout") in
+      let startTimeout =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "startTimeout") in
+      let user = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "user") in
+      let ulimits =
+        (Option.map ~f:Ulimits.of_xml) (Xml.child xml_arg0 "ulimits") in
+      let secrets =
+        (Option.map ~f:SecretList.of_xml) (Xml.child xml_arg0 "secrets") in
+      let resourceRequirements =
+        (Option.map ~f:ResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resourceRequirements") in
+      let repositoryCredentials =
+        (Option.map ~f:RepositoryCredentials.of_xml)
+          (Xml.child xml_arg0 "repositoryCredentials") in
+      let readonlyRootFilesystem =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "readonlyRootFilesystem") in
+      let privileged =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "privileged") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let mountPoints =
+        (Option.map ~f:MountPoints.of_xml) (Xml.child xml_arg0 "mountPoints") in
+      let logConfiguration =
+        (Option.map ~f:LogConfiguration.of_xml)
+          (Xml.child xml_arg0 "logConfiguration") in
+      let linuxParameters =
+        (Option.map ~f:LinuxParameters.of_xml)
+          (Xml.child xml_arg0 "linuxParameters") in
+      let image =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "image") in
+      let firelensConfiguration =
+        (Option.map ~f:FirelensConfiguration.of_xml)
+          (Xml.child xml_arg0 "firelensConfiguration") in
+      let essential =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "essential") in
+      let environment =
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environment") in
+      let dependsOn =
+        (Option.map ~f:TaskContainerDependencyList.of_xml)
+          (Xml.child xml_arg0 "dependsOn") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      make ?stopTimeout ?startTimeout ?user ?ulimits ?secrets
+        ?resourceRequirements ?repositoryCredentials ?readonlyRootFilesystem
+        ?privileged ?name ?mountPoints ?logConfiguration ?linuxParameters
+        ~image ?firelensConfiguration ?essential ?environment ?dependsOn
+        ?command ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stopTimeout = field_map json__ "stopTimeout" Integer.of_json in
+      let startTimeout = field_map json__ "startTimeout" Integer.of_json in
+      let user = field_map json__ "user" String_.of_json in
+      let ulimits = field_map json__ "ulimits" Ulimits.of_json in
+      let secrets = field_map json__ "secrets" SecretList.of_json in
+      let resourceRequirements =
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
+      let repositoryCredentials =
+        field_map json__ "repositoryCredentials"
+          RepositoryCredentials.of_json in
+      let readonlyRootFilesystem =
+        field_map json__ "readonlyRootFilesystem" Boolean.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let mountPoints = field_map json__ "mountPoints" MountPoints.of_json in
+      let logConfiguration =
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
+      let linuxParameters =
+        field_map json__ "linuxParameters" LinuxParameters.of_json in
+      let image = field_map_exn json__ "image" String_.of_json in
+      let firelensConfiguration =
+        field_map json__ "firelensConfiguration"
+          FirelensConfiguration.of_json in
+      let essential = field_map json__ "essential" Boolean.of_json in
+      let environment =
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let dependsOn =
+        field_map json__ "dependsOn" TaskContainerDependencyList.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      make ?stopTimeout ?startTimeout ?user ?ulimits ?secrets
+        ?resourceRequirements ?repositoryCredentials ?readonlyRootFilesystem
+        ?privileged ?name ?mountPoints ?logConfiguration ?linuxParameters
+        ~image ?firelensConfiguration ?essential ?environment ?dependsOn
+        ?command ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container properties are used for Amazon ECS-based job definitions. These properties to describe the container that's launched as part of a job."]
+module AssignPublicIp =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AssignPublicIp" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AssignPublicIp" j)
+    let to_json = simple_to_json to_value
+  end
+module Volume =
+  struct
+    type nonrec t =
+      {
+      host: Host.t option
+        [@ocaml.doc
+          "The contents of the host parameter determine whether your data volume persists on the host container instance and where it's stored. If the host parameter is empty, then the Docker daemon assigns a host path for your data volume. However, the data isn't guaranteed to persist after the containers that are associated with it stop running. This parameter isn't applicable to jobs that are running on Fargate resources and shouldn't be provided."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the volume. It can be up to 255 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_). This name is referenced in the sourceVolume parameter of container definition mountPoints."];
+      efsVolumeConfiguration: EFSVolumeConfiguration.t option
+        [@ocaml.doc
+          "This parameter is specified when you're using an Amazon Elastic File System file system for job storage. Jobs that are running on Fargate resources must specify a platformVersion of at least 1.4.0."];
+      s3filesVolumeConfiguration: S3FilesVolumeConfiguration.t option
+        [@ocaml.doc
+          "This parameter is specified when you're using an S3Files file system for job storage."]}
+    let make ?host =
+      fun ?name ->
+        fun ?efsVolumeConfiguration ->
+          fun ?s3filesVolumeConfiguration ->
+            fun () ->
+              {
+                host;
+                name;
+                efsVolumeConfiguration;
+                s3filesVolumeConfiguration
+              }
+    let to_value x =
+      structure_to_value
+        [("host", (Option.map x.host ~f:Host.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("efsVolumeConfiguration",
+          (Option.map x.efsVolumeConfiguration
+             ~f:EFSVolumeConfiguration.to_value));
+        ("s3filesVolumeConfiguration",
+          (Option.map x.s3filesVolumeConfiguration
+             ~f:S3FilesVolumeConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3filesVolumeConfiguration =
+        (Option.map ~f:S3FilesVolumeConfiguration.of_xml)
+          (Xml.child xml_arg0 "s3filesVolumeConfiguration") in
+      let efsVolumeConfiguration =
+        (Option.map ~f:EFSVolumeConfiguration.of_xml)
+          (Xml.child xml_arg0 "efsVolumeConfiguration") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let host = (Option.map ~f:Host.of_xml) (Xml.child xml_arg0 "host") in
+      make ?s3filesVolumeConfiguration ?efsVolumeConfiguration ?name ?host ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3filesVolumeConfiguration =
+        field_map json__ "s3filesVolumeConfiguration"
+          S3FilesVolumeConfiguration.of_json in
+      let efsVolumeConfiguration =
+        field_map json__ "efsVolumeConfiguration"
+          EFSVolumeConfiguration.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let host = field_map json__ "host" Host.of_json in
+      make ?s3filesVolumeConfiguration ?efsVolumeConfiguration ?name ?host ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A data volume that's used in a job's container properties."]
+module EksContainerEnvironmentVariables =
+  struct
+    type nonrec t = EksContainerEnvironmentVariable.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksContainerEnvironmentVariable.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -1133,27 +1767,272 @@ module Volumes =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Volume.of_xml)
-    let of_json j = list_of_json ~kind:"Volumes" ~of_json:Volume.of_json j
+                     | _ -> true))) ~f:EksContainerEnvironmentVariable.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksContainerEnvironmentVariables"
+        ~of_json:EksContainerEnvironmentVariable.of_json j
     let to_json v = composed_to_json to_value v
   end
-module Float =
+module EksContainerResourceRequirements =
   struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Float x
+    type nonrec t =
+      {
+      limits: EksLimits.t option
+        [@ocaml.doc
+          "The type and quantity of the resources to reserve for the container. The values vary based on the name that's specified. Resources can be requested using either the limits or the requests objects. memory The memory hard limit (in MiB) for the container, using whole integers, with a \"Mi\" suffix. If your container attempts to exceed the memory specified, the container is terminated. You must specify at least 4 MiB of memory for a job. memory can be specified in limits, requests, or both. If memory is specified in both places, then the value that's specified in limits must be equal to the value that's specified in requests. To maximize your resource utilization, provide your jobs with as much memory as possible for the specific instance type that you are using. To learn how, see Memory management in the Batch User Guide. cpu The number of CPUs that's reserved for the container. Values must be an even multiple of 0.25. cpu can be specified in limits, requests, or both. If cpu is specified in both places, then the value that's specified in limits must be at least as large as the value that's specified in requests. nvidia.com/gpu The number of GPUs that's reserved for the container. Values must be a whole integer. memory can be specified in limits, requests, or both. If memory is specified in both places, then the value that's specified in limits must be equal to the value that's specified in requests."];
+      requests: EksRequests.t option
+        [@ocaml.doc
+          "The type and quantity of the resources to request for the container. The values vary based on the name that's specified. Resources can be requested by using either the limits or the requests objects. memory The memory hard limit (in MiB) for the container, using whole integers, with a \"Mi\" suffix. If your container attempts to exceed the memory specified, the container is terminated. You must specify at least 4 MiB of memory for a job. memory can be specified in limits, requests, or both. If memory is specified in both, then the value that's specified in limits must be equal to the value that's specified in requests. If you're trying to maximize your resource utilization by providing your jobs as much memory as possible for a particular instance type, see Memory management in the Batch User Guide. cpu The number of CPUs that are reserved for the container. Values must be an even multiple of 0.25. cpu can be specified in limits, requests, or both. If cpu is specified in both, then the value that's specified in limits must be at least as large as the value that's specified in requests. nvidia.com/gpu The number of GPUs that are reserved for the container. Values must be a whole integer. nvidia.com/gpu can be specified in limits, requests, or both. If nvidia.com/gpu is specified in both, then the value that's specified in limits must be equal to the value that's specified in requests."]}
+    let make ?limits = fun ?requests -> fun () -> { limits; requests }
+    let to_value x =
+      structure_to_value
+        [("limits", (Option.map x.limits ~f:EksLimits.to_value));
+        ("requests", (Option.map x.requests ~f:EksRequests.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
     let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
-    let of_json j = float_of_json ~kind:"a float" j
-    let to_json = simple_to_json to_value
+      let requests =
+        (Option.map ~f:EksRequests.of_xml) (Xml.child xml_arg0 "requests") in
+      let limits =
+        (Option.map ~f:EksLimits.of_xml) (Xml.child xml_arg0 "limits") in
+      make ?requests ?limits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requests = field_map json__ "requests" EksRequests.of_json in
+      let limits = field_map json__ "limits" EksLimits.of_json in
+      make ?requests ?limits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The type and amount of resources to assign to a container. The supported resources include memory, cpu, and nvidia.com/gpu. For more information, see Resource management for pods and containers in the Kubernetes documentation."]
+module EksContainerSecurityContext =
+  struct
+    type nonrec t =
+      {
+      runAsUser: Long.t option
+        [@ocaml.doc
+          "When this parameter is specified, the container is run as the specified user ID (uid). If this parameter isn't specified, the default is the user that's specified in the image metadata. This parameter maps to RunAsUser and MustRanAs policy in the Users and groups pod security policies in the Kubernetes documentation."];
+      runAsGroup: Long.t option
+        [@ocaml.doc
+          "When this parameter is specified, the container is run as the specified group ID (gid). If this parameter isn't specified, the default is the group that's specified in the image metadata. This parameter maps to RunAsGroup and MustRunAs policy in the Users and groups pod security policies in the Kubernetes documentation."];
+      privileged: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given elevated permissions on the host container instance. The level of permissions are similar to the root user permissions. The default value is false. This parameter maps to privileged policy in the Privileged pod security policies in the Kubernetes documentation."];
+      allowPrivilegeEscalation: Boolean.t option
+        [@ocaml.doc
+          "Whether or not a container or a Kubernetes pod is allowed to gain more privileges than its parent process. The default value is false."];
+      readOnlyRootFilesystem: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given read-only access to its root file system. The default value is false. This parameter maps to ReadOnlyRootFilesystem policy in the Volumes and file systems pod security policies in the Kubernetes documentation."];
+      runAsNonRoot: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is specified, the container is run as a user with a uid other than 0. If this parameter isn't specified, so such rule is enforced. This parameter maps to RunAsUser and MustRunAsNonRoot policy in the Users and groups pod security policies in the Kubernetes documentation."]}
+    let make ?runAsUser =
+      fun ?runAsGroup ->
+        fun ?privileged ->
+          fun ?allowPrivilegeEscalation ->
+            fun ?readOnlyRootFilesystem ->
+              fun ?runAsNonRoot ->
+                fun () ->
+                  {
+                    runAsUser;
+                    runAsGroup;
+                    privileged;
+                    allowPrivilegeEscalation;
+                    readOnlyRootFilesystem;
+                    runAsNonRoot
+                  }
+    let to_value x =
+      structure_to_value
+        [("runAsUser", (Option.map x.runAsUser ~f:Long.to_value));
+        ("runAsGroup", (Option.map x.runAsGroup ~f:Long.to_value));
+        ("privileged", (Option.map x.privileged ~f:Boolean.to_value));
+        ("allowPrivilegeEscalation",
+          (Option.map x.allowPrivilegeEscalation ~f:Boolean.to_value));
+        ("readOnlyRootFilesystem",
+          (Option.map x.readOnlyRootFilesystem ~f:Boolean.to_value));
+        ("runAsNonRoot", (Option.map x.runAsNonRoot ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let runAsNonRoot =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "runAsNonRoot") in
+      let readOnlyRootFilesystem =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "readOnlyRootFilesystem") in
+      let allowPrivilegeEscalation =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "allowPrivilegeEscalation") in
+      let privileged =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "privileged") in
+      let runAsGroup =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "runAsGroup") in
+      let runAsUser =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "runAsUser") in
+      make ?runAsNonRoot ?readOnlyRootFilesystem ?allowPrivilegeEscalation
+        ?privileged ?runAsGroup ?runAsUser ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let runAsNonRoot = field_map json__ "runAsNonRoot" Boolean.of_json in
+      let readOnlyRootFilesystem =
+        field_map json__ "readOnlyRootFilesystem" Boolean.of_json in
+      let allowPrivilegeEscalation =
+        field_map json__ "allowPrivilegeEscalation" Boolean.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
+      let runAsGroup = field_map json__ "runAsGroup" Long.of_json in
+      let runAsUser = field_map json__ "runAsUser" Long.of_json in
+      make ?runAsNonRoot ?readOnlyRootFilesystem ?allowPrivilegeEscalation
+        ?privileged ?runAsGroup ?runAsUser ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The security context for a job. For more information, see Configure a security context for a pod or container in the Kubernetes documentation."]
+module EksContainerVolumeMounts =
+  struct
+    type nonrec t = EksContainerVolumeMount.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksContainerVolumeMount.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksContainerVolumeMount.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksContainerVolumeMounts"
+        ~of_json:EksContainerVolumeMount.of_json j
+    let to_json v = composed_to_json to_value v
   end
+module EksEmptyDir =
+  struct
+    type nonrec t =
+      {
+      medium: String_.t option
+        [@ocaml.doc
+          "The medium to store the volume. The default value is an empty string, which uses the storage of the node. \"\" (Default) Use the disk storage of the node. \"Memory\" Use the tmpfs volume that's backed by the RAM of the node. Contents of the volume are lost when the node reboots, and any storage on the volume counts against the container's memory limit."];
+      sizeLimit: Quantity.t option
+        [@ocaml.doc
+          "The maximum size of the volume. By default, there's no maximum size defined."]}
+    let make ?medium = fun ?sizeLimit -> fun () -> { medium; sizeLimit }
+    let to_value x =
+      structure_to_value
+        [("medium", (Option.map x.medium ~f:String_.to_value));
+        ("sizeLimit", (Option.map x.sizeLimit ~f:Quantity.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeLimit =
+        (Option.map ~f:Quantity.of_xml) (Xml.child xml_arg0 "sizeLimit") in
+      let medium =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "medium") in
+      make ?sizeLimit ?medium ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeLimit = field_map json__ "sizeLimit" Quantity.of_json in
+      let medium = field_map json__ "medium" String_.of_json in
+      make ?sizeLimit ?medium ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration of a Kubernetes emptyDir volume. An emptyDir volume is first created when a pod is assigned to a node. It exists as long as that pod is running on that node. The emptyDir volume is initially empty. All containers in the pod can read and write the files in the emptyDir volume. However, the emptyDir volume can be mounted at the same or different paths in each container. When a pod is removed from a node for any reason, the data in the emptyDir is deleted permanently. For more information, see emptyDir in the Kubernetes documentation."]
+module EksHostPath =
+  struct
+    type nonrec t =
+      {
+      path: String_.t option
+        [@ocaml.doc
+          "The path of the file or directory on the host to mount into containers on the pod."]}
+    let make ?path = fun () -> { path }
+    let to_value x =
+      structure_to_value [("path", (Option.map x.path ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let path = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "path") in
+      make ?path ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let path = field_map json__ "path" String_.of_json in make ?path ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration of a Kubernetes hostPath volume. A hostPath volume mounts an existing file or directory from the host node's filesystem into your pod. For more information, see hostPath in the Kubernetes documentation."]
+module EksPersistentVolumeClaim =
+  struct
+    type nonrec t =
+      {
+      claimName: String_.t
+        [@ocaml.doc
+          "The name of the persistentVolumeClaim bounded to a persistentVolume. For more information, see Persistent Volume Claims in the Kubernetes documentation."];
+      readOnly: Boolean.t option
+        [@ocaml.doc
+          "An optional boolean value indicating if the mount is read only. Default is false. For more information, see Read Only Mounts in the Kubernetes documentation."]}
+    let context_ = "EksPersistentVolumeClaim"
+    let make ?readOnly = fun ~claimName -> fun () -> { readOnly; claimName }
+    let to_value x =
+      structure_to_value
+        [("claimName", (Some (String_.to_value x.claimName)));
+        ("readOnly", (Option.map x.readOnly ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let readOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "readOnly") in
+      let claimName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "claimName") in
+      make ?readOnly ~claimName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let readOnly = field_map json__ "readOnly" Boolean.of_json in
+      let claimName = field_map_exn json__ "claimName" String_.of_json in
+      make ?readOnly ~claimName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A persistentVolumeClaim volume is used to mount a PersistentVolume into a Pod. PersistentVolumeClaims are a way for users to \"claim\" durable storage without knowing the details of the particular cloud environment. See the information about PersistentVolumes in the Kubernetes documentation."]
+module EksSecret =
+  struct
+    type nonrec t =
+      {
+      secretName: String_.t
+        [@ocaml.doc
+          "The name of the secret. The name must be allowed as a DNS subdomain name. For more information, see DNS subdomain names in the Kubernetes documentation."];
+      optional: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the secret or the secret's keys must be defined."]}
+    let context_ = "EksSecret"
+    let make ?optional =
+      fun ~secretName -> fun () -> { optional; secretName }
+    let to_value x =
+      structure_to_value
+        [("secretName", (Some (String_.to_value x.secretName)));
+        ("optional", (Option.map x.optional ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let optional =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "optional") in
+      let secretName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "secretName") in
+      make ?optional ~secretName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let optional = field_map json__ "optional" Boolean.of_json in
+      let secretName = field_map_exn json__ "secretName" String_.of_json in
+      make ?optional ~secretName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the configuration of a Kubernetes secret volume. For more information, see secret in the Kubernetes documentation."]
 module NetworkInterfaceList =
   struct
     type nonrec t = NetworkInterface.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NetworkInterface.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1175,25 +2054,1855 @@ module NetworkInterfaceList =
         ~of_json:NetworkInterface.of_json j
     let to_json v = composed_to_json to_value v
   end
+module EphemeralStorage =
+  struct
+    type nonrec t =
+      {
+      sizeInGiB: Integer.t
+        [@ocaml.doc
+          "The total amount, in GiB, of ephemeral storage to set for the task. The minimum supported value is 21 GiB and the maximum supported value is 200 GiB."]}
+    let context_ = "EphemeralStorage"
+    let make ~sizeInGiB = fun () -> { sizeInGiB }
+    let to_value x =
+      structure_to_value
+        [("sizeInGiB", (Some (Integer.to_value x.sizeInGiB)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeInGiB =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "sizeInGiB") in
+      make ~sizeInGiB ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeInGiB = field_map_exn json__ "sizeInGiB" Integer.of_json in
+      make ~sizeInGiB ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The amount of ephemeral storage to allocate for the task. This parameter is used to expand the total amount of ephemeral storage available, beyond the default amount, for tasks hosted on Fargate."]
+module ListTaskContainerProperties =
+  struct
+    type nonrec t = TaskContainerProperties.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TaskContainerProperties.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TaskContainerProperties.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListTaskContainerProperties"
+        ~of_json:TaskContainerProperties.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module NetworkConfiguration =
+  struct
+    type nonrec t =
+      {
+      assignPublicIp: AssignPublicIp.t option
+        [@ocaml.doc
+          "Indicates whether the job has a public IP address. For a job that's running on Fargate resources in a private subnet to send outbound traffic to the internet (for example, to pull container images), the private subnet requires a NAT gateway be attached to route requests to the internet. For more information, see Amazon ECS task networking in the Amazon Elastic Container Service Developer Guide. The default value is \"DISABLED\"."]}
+    let make ?assignPublicIp = fun () -> { assignPublicIp }
+    let to_value x =
+      structure_to_value
+        [("assignPublicIp",
+           (Option.map x.assignPublicIp ~f:AssignPublicIp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let assignPublicIp =
+        (Option.map ~f:AssignPublicIp.of_xml)
+          (Xml.child xml_arg0 "assignPublicIp") in
+      make ?assignPublicIp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let assignPublicIp =
+        field_map json__ "assignPublicIp" AssignPublicIp.of_json in
+      make ?assignPublicIp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The network configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."]
+module RuntimePlatform =
+  struct
+    type nonrec t =
+      {
+      operatingSystemFamily: String_.t option
+        [@ocaml.doc
+          "The operating system for the compute environment. Valid values are: LINUX (default), WINDOWS_SERVER_2019_CORE, WINDOWS_SERVER_2019_FULL, WINDOWS_SERVER_2022_CORE, and WINDOWS_SERVER_2022_FULL. The following parameters can\226\128\153t be set for Windows containers: linuxParameters, privileged, user, ulimits, readonlyRootFilesystem, and efsVolumeConfiguration. The Batch Scheduler checks the compute environments that are attached to the job queue before registering a task definition with Fargate. In this scenario, the job queue is where the job is submitted. If the job requires a Windows container and the first compute environment is LINUX, the compute environment is skipped and the next compute environment is checked until a Windows-based compute environment is found. Fargate Spot is not supported on Windows-based containers on Fargate. A job queue will be blocked if a Windows job is submitted to a job queue with only Fargate Spot compute environments. However, you can attach both FARGATE and FARGATE_SPOT compute environments to the same job queue."];
+      cpuArchitecture: String_.t option
+        [@ocaml.doc
+          "The vCPU architecture. The default value is X86_64. Valid values are X86_64 and ARM64. This parameter must be set to X86_64 for Windows containers. Fargate Spot is not supported on Windows-based containers on Fargate. A job queue will be blocked if a Windows job is submitted to a job queue with only Fargate Spot compute environments. However, you can attach both FARGATE and FARGATE_SPOT compute environments to the same job queue."]}
+    let make ?operatingSystemFamily =
+      fun ?cpuArchitecture ->
+        fun () -> { operatingSystemFamily; cpuArchitecture }
+    let to_value x =
+      structure_to_value
+        [("operatingSystemFamily",
+           (Option.map x.operatingSystemFamily ~f:String_.to_value));
+        ("cpuArchitecture",
+          (Option.map x.cpuArchitecture ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cpuArchitecture =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "cpuArchitecture") in
+      let operatingSystemFamily =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "operatingSystemFamily") in
+      make ?cpuArchitecture ?operatingSystemFamily ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpuArchitecture =
+        field_map json__ "cpuArchitecture" String_.of_json in
+      let operatingSystemFamily =
+        field_map json__ "operatingSystemFamily" String_.of_json in
+      make ?cpuArchitecture ?operatingSystemFamily ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the compute environment architecture for Batch jobs on Fargate."]
+module Volumes =
+  struct
+    type nonrec t = Volume.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Volume.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Volume.of_xml)
+    let of_json j = list_of_json ~kind:"Volumes" ~of_json:Volume.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksContainer =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the container. If the name isn't specified, the default name \"Default\" is used. Each container in a pod must have a unique name."];
+      image: String_.t
+        [@ocaml.doc "The Docker image used to start the container."];
+      imagePullPolicy: String_.t option
+        [@ocaml.doc
+          "The image pull policy for the container. Supported values are Always, IfNotPresent, and Never. This parameter defaults to IfNotPresent. However, if the :latest tag is specified, it defaults to Always. For more information, see Updating images in the Kubernetes documentation."];
+      command: StringList.t option
+        [@ocaml.doc
+          "The entrypoint for the container. This isn't run within a shell. If this isn't specified, the ENTRYPOINT of the container image is used. Environment variable references are expanded using the container's environment. If the referenced environment variable doesn't exist, the reference in the command isn't changed. For example, if the reference is to \"$(NAME1)\" and the NAME1 environment variable doesn't exist, the command string will remain \"$(NAME1).\" $$ is replaced with $ and the resulting string isn't expanded. For example, $$(VAR_NAME) will be passed as $(VAR_NAME) whether or not the VAR_NAME environment variable exists. The entrypoint can't be updated. For more information, see ENTRYPOINT in the Dockerfile reference and Define a command and arguments for a container and Entrypoint in the Kubernetes documentation."];
+      args: StringList.t option
+        [@ocaml.doc
+          "An array of arguments to the entrypoint. If this isn't specified, the CMD of the container image is used. This corresponds to the args member in the Entrypoint portion of the Pod in Kubernetes. Environment variable references are expanded using the container's environment. If the referenced environment variable doesn't exist, the reference in the command isn't changed. For example, if the reference is to \"$(NAME1)\" and the NAME1 environment variable doesn't exist, the command string will remain \"$(NAME1).\" $$ is replaced with $, and the resulting string isn't expanded. For example, $$(VAR_NAME) is passed as $(VAR_NAME) whether or not the VAR_NAME environment variable exists. For more information, see Dockerfile reference: CMD and Define a command and arguments for a pod in the Kubernetes documentation."];
+      env: EksContainerEnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to pass to a container. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
+      resources: EksContainerResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of resources to assign to a container. The supported resources include memory, cpu, and nvidia.com/gpu. For more information, see Resource management for pods and containers in the Kubernetes documentation."];
+      volumeMounts: EksContainerVolumeMounts.t option
+        [@ocaml.doc
+          "The volume mounts for the container. Batch supports emptyDir, hostPath, and secret volume types. For more information about volumes and volume mounts in Kubernetes, see Volumes in the Kubernetes documentation."];
+      securityContext: EksContainerSecurityContext.t option
+        [@ocaml.doc
+          "The security context for a job. For more information, see Configure a security context for a pod or container in the Kubernetes documentation."]}
+    let context_ = "EksContainer"
+    let make ?name =
+      fun ?imagePullPolicy ->
+        fun ?command ->
+          fun ?args ->
+            fun ?env ->
+              fun ?resources ->
+                fun ?volumeMounts ->
+                  fun ?securityContext ->
+                    fun ~image ->
+                      fun () ->
+                        {
+                          name;
+                          imagePullPolicy;
+                          command;
+                          args;
+                          env;
+                          resources;
+                          volumeMounts;
+                          securityContext;
+                          image
+                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("image", (Some (String_.to_value x.image)));
+        ("imagePullPolicy",
+          (Option.map x.imagePullPolicy ~f:String_.to_value));
+        ("command", (Option.map x.command ~f:StringList.to_value));
+        ("args", (Option.map x.args ~f:StringList.to_value));
+        ("env",
+          (Option.map x.env ~f:EksContainerEnvironmentVariables.to_value));
+        ("resources",
+          (Option.map x.resources
+             ~f:EksContainerResourceRequirements.to_value));
+        ("volumeMounts",
+          (Option.map x.volumeMounts ~f:EksContainerVolumeMounts.to_value));
+        ("securityContext",
+          (Option.map x.securityContext
+             ~f:EksContainerSecurityContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityContext =
+        (Option.map ~f:EksContainerSecurityContext.of_xml)
+          (Xml.child xml_arg0 "securityContext") in
+      let volumeMounts =
+        (Option.map ~f:EksContainerVolumeMounts.of_xml)
+          (Xml.child xml_arg0 "volumeMounts") in
+      let resources =
+        (Option.map ~f:EksContainerResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let env =
+        (Option.map ~f:EksContainerEnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "env") in
+      let args =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "args") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      let imagePullPolicy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imagePullPolicy") in
+      let image =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "image") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?securityContext ?volumeMounts ?resources ?env ?args ?command
+        ?imagePullPolicy ~image ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityContext =
+        field_map json__ "securityContext"
+          EksContainerSecurityContext.of_json in
+      let volumeMounts =
+        field_map json__ "volumeMounts" EksContainerVolumeMounts.of_json in
+      let resources =
+        field_map json__ "resources" EksContainerResourceRequirements.of_json in
+      let env =
+        field_map json__ "env" EksContainerEnvironmentVariables.of_json in
+      let args = field_map json__ "args" StringList.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let imagePullPolicy =
+        field_map json__ "imagePullPolicy" String_.of_json in
+      let image = field_map_exn json__ "image" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?securityContext ?volumeMounts ?resources ?env ?args ?command
+        ?imagePullPolicy ~image ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "EKS container properties are used in job definitions for Amazon EKS based job definitions to describe the properties for a container node in the pod that's launched as part of a job. This can't be specified for Amazon ECS based job definitions."]
+module EksAnnotationsMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksLabelsMap =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksVolume =
+  struct
+    type nonrec t =
+      {
+      name: String_.t
+        [@ocaml.doc
+          "The name of the volume. The name must be allowed as a DNS subdomain name. For more information, see DNS subdomain names in the Kubernetes documentation."];
+      hostPath: EksHostPath.t option
+        [@ocaml.doc
+          "Specifies the configuration of a Kubernetes hostPath volume. For more information, see hostPath in the Kubernetes documentation."];
+      emptyDir: EksEmptyDir.t option
+        [@ocaml.doc
+          "Specifies the configuration of a Kubernetes emptyDir volume. For more information, see emptyDir in the Kubernetes documentation."];
+      secret: EksSecret.t option
+        [@ocaml.doc
+          "Specifies the configuration of a Kubernetes secret volume. For more information, see secret in the Kubernetes documentation."];
+      persistentVolumeClaim: EksPersistentVolumeClaim.t option
+        [@ocaml.doc
+          "Specifies the configuration of a Kubernetes persistentVolumeClaim bounded to a persistentVolume. For more information, see Persistent Volume Claims in the Kubernetes documentation."]}
+    let context_ = "EksVolume"
+    let make ?hostPath =
+      fun ?emptyDir ->
+        fun ?secret ->
+          fun ?persistentVolumeClaim ->
+            fun ~name ->
+              fun () ->
+                { hostPath; emptyDir; secret; persistentVolumeClaim; name }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (String_.to_value x.name)));
+        ("hostPath", (Option.map x.hostPath ~f:EksHostPath.to_value));
+        ("emptyDir", (Option.map x.emptyDir ~f:EksEmptyDir.to_value));
+        ("secret", (Option.map x.secret ~f:EksSecret.to_value));
+        ("persistentVolumeClaim",
+          (Option.map x.persistentVolumeClaim
+             ~f:EksPersistentVolumeClaim.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let persistentVolumeClaim =
+        (Option.map ~f:EksPersistentVolumeClaim.of_xml)
+          (Xml.child xml_arg0 "persistentVolumeClaim") in
+      let secret =
+        (Option.map ~f:EksSecret.of_xml) (Xml.child xml_arg0 "secret") in
+      let emptyDir =
+        (Option.map ~f:EksEmptyDir.of_xml) (Xml.child xml_arg0 "emptyDir") in
+      let hostPath =
+        (Option.map ~f:EksHostPath.of_xml) (Xml.child xml_arg0 "hostPath") in
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?persistentVolumeClaim ?secret ?emptyDir ?hostPath ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let persistentVolumeClaim =
+        field_map json__ "persistentVolumeClaim"
+          EksPersistentVolumeClaim.of_json in
+      let secret = field_map json__ "secret" EksSecret.of_json in
+      let emptyDir = field_map json__ "emptyDir" EksEmptyDir.of_json in
+      let hostPath = field_map json__ "hostPath" EksHostPath.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?persistentVolumeClaim ?secret ?emptyDir ?hostPath ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies an Amazon EKS volume for a job definition."]
+module ImagePullSecret =
+  struct
+    type nonrec t =
+      {
+      name: String_.t
+        [@ocaml.doc
+          "Provides a unique identifier for the ImagePullSecret. This object is required when EksPodProperties$imagePullSecrets is used."]}
+    let context_ = "ImagePullSecret"
+    let make ~name = fun () -> { name }
+    let to_value x =
+      structure_to_value [("name", (Some (String_.to_value x.name)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let name =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let name = field_map_exn json__ "name" String_.of_json in make ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "References a Kubernetes secret resource. This name of the secret must start and end with an alphanumeric character, is required to be lowercase, can include periods (.) and hyphens (-), and can't contain more than 253 characters."]
+module TaskContainerOverrides =
+  struct
+    type nonrec t =
+      {
+      command: StringList.t option
+        [@ocaml.doc
+          "The command to send to the container that overrides the default command from the Docker image or the job definition. This parameter can't contain an empty string."];
+      environment: EnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to send to the container. You can add new environment variables, which are added to the container at launch, or you can override the existing environment variables from the Docker image or the job definition. Environment variables cannot start with AWS_BATCH. This naming convention is reserved for variables that Batch sets."];
+      name: String_.t option
+        [@ocaml.doc
+          "A pointer to the container that you want to override. The container's name provides a unique identifier for the container being used."];
+      resourceRequirements: ResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of resources to assign to a container. This overrides the settings in the job definition. The supported resources include GPU, MEMORY, and VCPU."]}
+    let make ?command =
+      fun ?environment ->
+        fun ?name ->
+          fun ?resourceRequirements ->
+            fun () -> { command; environment; name; resourceRequirements }
+    let to_value x =
+      structure_to_value
+        [("command", (Option.map x.command ~f:StringList.to_value));
+        ("environment",
+          (Option.map x.environment ~f:EnvironmentVariables.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("resourceRequirements",
+          (Option.map x.resourceRequirements ~f:ResourceRequirements.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceRequirements =
+        (Option.map ~f:ResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resourceRequirements") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let environment =
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environment") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      make ?resourceRequirements ?name ?environment ?command ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceRequirements =
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let environment =
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      make ?resourceRequirements ?name ?environment ?command ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The overrides that should be sent to a container. For information about using Batch overrides when you connect event sources to targets, see BatchContainerOverrides."]
+module AttemptTaskContainerDetails =
+  struct
+    type nonrec t =
+      {
+      exitCode: Integer.t option
+        [@ocaml.doc
+          "The exit code for the container\226\128\153s attempt. A non-zero exit code is considered failed."];
+      name: String_.t option [@ocaml.doc "The name of a container."];
+      reason: String_.t option
+        [@ocaml.doc
+          "A short (255 max characters) string that's easy to understand and provides additional details for a running or stopped container."];
+      logStreamName: String_.t option
+        [@ocaml.doc
+          "The name of the Amazon CloudWatch Logs log stream that's associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
+      networkInterfaces: NetworkInterfaceList.t option
+        [@ocaml.doc
+          "The network interfaces that are associated with the job attempt."]}
+    let make ?exitCode =
+      fun ?name ->
+        fun ?reason ->
+          fun ?logStreamName ->
+            fun ?networkInterfaces ->
+              fun () ->
+                { exitCode; name; reason; logStreamName; networkInterfaces }
+    let to_value x =
+      structure_to_value
+        [("exitCode", (Option.map x.exitCode ~f:Integer.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value));
+        ("logStreamName", (Option.map x.logStreamName ~f:String_.to_value));
+        ("networkInterfaces",
+          (Option.map x.networkInterfaces ~f:NetworkInterfaceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkInterfaces =
+        (Option.map ~f:NetworkInterfaceList.of_xml)
+          (Xml.child xml_arg0 "networkInterfaces") in
+      let logStreamName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "logStreamName") in
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let exitCode =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
+      make ?networkInterfaces ?logStreamName ?reason ?name ?exitCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkInterfaces =
+        field_map json__ "networkInterfaces" NetworkInterfaceList.of_json in
+      let logStreamName = field_map json__ "logStreamName" String_.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      make ?networkInterfaces ?logStreamName ?reason ?name ?exitCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the details of a container that's part of a job attempt."]
+module ConsumableResourceRequirement =
+  struct
+    type nonrec t =
+      {
+      consumableResource: String_.t option
+        [@ocaml.doc "The name or ARN of the consumable resource."];
+      quantity: Long.t option
+        [@ocaml.doc
+          "The quantity of the consumable resource that is needed."]}
+    let make ?consumableResource =
+      fun ?quantity -> fun () -> { consumableResource; quantity }
+    let to_value x =
+      structure_to_value
+        [("consumableResource",
+           (Option.map x.consumableResource ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "quantity") in
+      let consumableResource =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResource") in
+      make ?quantity ?consumableResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Long.of_json in
+      let consumableResource =
+        field_map json__ "consumableResource" String_.of_json in
+      make ?quantity ?consumableResource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a consumable resource required to run a job."]
+module EcsTaskProperties =
+  struct
+    type nonrec t =
+      {
+      containers: ListTaskContainerProperties.t
+        [@ocaml.doc "This object is a list of containers."];
+      ephemeralStorage: EphemeralStorage.t option
+        [@ocaml.doc
+          "The amount of ephemeral storage to allocate for the task. This parameter is used to expand the total amount of ephemeral storage available, beyond the default amount, for tasks hosted on Fargate."];
+      executionRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution role that Batch can assume. For jobs that run on Fargate resources, you must provide an execution role. For more information, see Batch execution IAM role in the Batch User Guide."];
+      platformVersion: String_.t option
+        [@ocaml.doc
+          "The Fargate platform version where the jobs are running. A platform version is specified only for jobs that are running on Fargate resources. If one isn't specified, the LATEST platform version is used by default. This uses a recent, approved version of the Fargate platform for compute resources. For more information, see Fargate platform versions in the Amazon Elastic Container Service Developer Guide."];
+      ipcMode: String_.t option
+        [@ocaml.doc
+          "The IPC resource namespace to use for the containers in the task. The valid values are host, task, or none. If host is specified, all containers within the tasks that specified the host IPC mode on the same container instance share the same IPC resources with the host Amazon EC2 instance. If task is specified, all containers within the specified task share the same IPC resources. If none is specified, the IPC resources within the containers of a task are private, and are not shared with other containers in a task or on the container instance. If no value is specified, then the IPC resource namespace sharing depends on the Docker daemon setting on the container instance. For more information, see IPC settings in the Docker run reference."];
+      taskRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that's associated with the Amazon ECS task. This is object is comparable to ContainerProperties:jobRoleArn."];
+      pidMode: String_.t option
+        [@ocaml.doc
+          "The process namespace to use for the containers in the task. The valid values are host or task. For example, monitoring sidecars might need pidMode to access information about other containers running in the same task. If host is specified, all containers within the tasks that specified the host PID mode on the same container instance share the process namespace with the host Amazon EC2 instance. If task is specified, all containers within the specified task share the same process namespace. If no value is specified, the default is a private namespace for each container. For more information, see PID settings in the Docker run reference."];
+      networkConfiguration: NetworkConfiguration.t option
+        [@ocaml.doc
+          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
+      runtimePlatform: RuntimePlatform.t option
+        [@ocaml.doc
+          "An object that represents the compute environment architecture for Batch jobs on Fargate."];
+      volumes: Volumes.t option
+        [@ocaml.doc "A list of volumes that are associated with the job."];
+      enableExecuteCommand: Boolean.t option
+        [@ocaml.doc
+          "Determines whether execute command functionality is turned on for this task. If true, execute command functionality is turned on all the containers in the task."]}
+    let context_ = "EcsTaskProperties"
+    let make ?ephemeralStorage =
+      fun ?executionRoleArn ->
+        fun ?platformVersion ->
+          fun ?ipcMode ->
+            fun ?taskRoleArn ->
+              fun ?pidMode ->
+                fun ?networkConfiguration ->
+                  fun ?runtimePlatform ->
+                    fun ?volumes ->
+                      fun ?enableExecuteCommand ->
+                        fun ~containers ->
+                          fun () ->
+                            {
+                              ephemeralStorage;
+                              executionRoleArn;
+                              platformVersion;
+                              ipcMode;
+                              taskRoleArn;
+                              pidMode;
+                              networkConfiguration;
+                              runtimePlatform;
+                              volumes;
+                              enableExecuteCommand;
+                              containers
+                            }
+    let to_value x =
+      structure_to_value
+        [("containers",
+           (Some (ListTaskContainerProperties.to_value x.containers)));
+        ("ephemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorage.to_value));
+        ("executionRoleArn",
+          (Option.map x.executionRoleArn ~f:String_.to_value));
+        ("platformVersion",
+          (Option.map x.platformVersion ~f:String_.to_value));
+        ("ipcMode", (Option.map x.ipcMode ~f:String_.to_value));
+        ("taskRoleArn", (Option.map x.taskRoleArn ~f:String_.to_value));
+        ("pidMode", (Option.map x.pidMode ~f:String_.to_value));
+        ("networkConfiguration",
+          (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
+        ("runtimePlatform",
+          (Option.map x.runtimePlatform ~f:RuntimePlatform.to_value));
+        ("volumes", (Option.map x.volumes ~f:Volumes.to_value));
+        ("enableExecuteCommand",
+          (Option.map x.enableExecuteCommand ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let enableExecuteCommand =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableExecuteCommand") in
+      let volumes =
+        (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let runtimePlatform =
+        (Option.map ~f:RuntimePlatform.of_xml)
+          (Xml.child xml_arg0 "runtimePlatform") in
+      let networkConfiguration =
+        (Option.map ~f:NetworkConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkConfiguration") in
+      let pidMode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "pidMode") in
+      let taskRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskRoleArn") in
+      let ipcMode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipcMode") in
+      let platformVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "platformVersion") in
+      let executionRoleArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "executionRoleArn") in
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorage.of_xml)
+          (Xml.child xml_arg0 "ephemeralStorage") in
+      let containers =
+        ListTaskContainerProperties.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "containers") in
+      make ?enableExecuteCommand ?volumes ?runtimePlatform
+        ?networkConfiguration ?pidMode ?taskRoleArn ?ipcMode ?platformVersion
+        ?executionRoleArn ?ephemeralStorage ~containers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableExecuteCommand =
+        field_map json__ "enableExecuteCommand" Boolean.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let runtimePlatform =
+        field_map json__ "runtimePlatform" RuntimePlatform.of_json in
+      let networkConfiguration =
+        field_map json__ "networkConfiguration" NetworkConfiguration.of_json in
+      let pidMode = field_map json__ "pidMode" String_.of_json in
+      let taskRoleArn = field_map json__ "taskRoleArn" String_.of_json in
+      let ipcMode = field_map json__ "ipcMode" String_.of_json in
+      let platformVersion =
+        field_map json__ "platformVersion" String_.of_json in
+      let executionRoleArn =
+        field_map json__ "executionRoleArn" String_.of_json in
+      let ephemeralStorage =
+        field_map json__ "ephemeralStorage" EphemeralStorage.of_json in
+      let containers =
+        field_map_exn json__ "containers" ListTaskContainerProperties.of_json in
+      make ?enableExecuteCommand ?volumes ?runtimePlatform
+        ?networkConfiguration ?pidMode ?taskRoleArn ?ipcMode ?platformVersion
+        ?executionRoleArn ?ephemeralStorage ~containers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The properties for a task definition that describes the container and volume definitions of an Amazon ECS task. You can specify which Docker images to use, the required resources, and other configurations related to launching the task definition through an Amazon ECS service or task."]
+module EksContainers =
+  struct
+    type nonrec t = EksContainer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksContainer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksContainer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksContainers" ~of_json:EksContainer.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksMetadata =
+  struct
+    type nonrec t =
+      {
+      labels: EksLabelsMap.t option
+        [@ocaml.doc
+          "Key-value pairs used to identify, sort, and organize cube resources. Can contain up to 63 uppercase letters, lowercase letters, numbers, hyphens (-), and underscores (_). Labels can be added or modified at any time. Each resource can have multiple labels, but each key must be unique for a given object."];
+      annotations: EksAnnotationsMap.t option
+        [@ocaml.doc
+          "Key-value pairs used to attach arbitrary, non-identifying metadata to Kubernetes objects. Valid annotation keys have two segments: an optional prefix and a name, separated by a slash (/). The prefix is optional and must be 253 characters or less. If specified, the prefix must be a DNS subdomain\226\136\146 a series of DNS labels separated by dots (.), and it must end with a slash (/). The name segment is required and must be 63 characters or less. It can include alphanumeric characters (\\[a-z0-9A-Z\\]), dashes (-), underscores (_), and dots (.), but must begin and end with an alphanumeric character. Annotation values must be 255 characters or less. Annotations can be added or modified at any time. Each resource can have multiple annotations."];
+      namespace: String_.t option
+        [@ocaml.doc
+          "The namespace of the Amazon EKS cluster. In Kubernetes, namespaces provide a mechanism for isolating groups of resources within a single cluster. Names of resources need to be unique within a namespace, but not across namespaces. Batch places Batch Job pods in this namespace. If this field is provided, the value can't be empty or null. It must meet the following requirements: 1-63 characters long Can't be set to default Can't start with kube Must match the following regular expression: ^\\[a-z0-9\\](\\[-a-z0-9\\]*\\[a-z0-9\\])?$ For more information, see Namespaces in the Kubernetes documentation. This namespace can be different from the kubernetesNamespace set in the compute environment's EksConfiguration, but must have identical role-based access control (RBAC) roles as the compute environment's kubernetesNamespace. For multi-node parallel jobs, the same value must be provided across all the node ranges."]}
+    let make ?labels =
+      fun ?annotations ->
+        fun ?namespace -> fun () -> { labels; annotations; namespace }
+    let to_value x =
+      structure_to_value
+        [("labels", (Option.map x.labels ~f:EksLabelsMap.to_value));
+        ("annotations",
+          (Option.map x.annotations ~f:EksAnnotationsMap.to_value));
+        ("namespace", (Option.map x.namespace ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let namespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "namespace") in
+      let annotations =
+        (Option.map ~f:EksAnnotationsMap.of_xml)
+          (Xml.child xml_arg0 "annotations") in
+      let labels =
+        (Option.map ~f:EksLabelsMap.of_xml) (Xml.child xml_arg0 "labels") in
+      make ?namespace ?annotations ?labels ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let namespace = field_map json__ "namespace" String_.of_json in
+      let annotations =
+        field_map json__ "annotations" EksAnnotationsMap.of_json in
+      let labels = field_map json__ "labels" EksLabelsMap.of_json in
+      make ?namespace ?annotations ?labels ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes and uniquely identifies Kubernetes resources. For example, the compute environment that a pod runs in or the jobID for a job running in the pod. For more information, see Understanding Kubernetes Objects in the Kubernetes documentation."]
+module EksVolumes =
+  struct
+    type nonrec t = EksVolume.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksVolume.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksVolume.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksVolumes" ~of_json:EksVolume.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ImagePullSecrets =
+  struct
+    type nonrec t = ImagePullSecret.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ImagePullSecret.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ImagePullSecret.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ImagePullSecrets" ~of_json:ImagePullSecret.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTaskContainerOverrides =
+  struct
+    type nonrec t = TaskContainerOverrides.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TaskContainerOverrides.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TaskContainerOverrides.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListTaskContainerOverrides"
+        ~of_json:TaskContainerOverrides.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksContainerOverride =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "A pointer to the container that you want to override. The name must match a unique container name that you wish to override."];
+      image: String_.t option
+        [@ocaml.doc
+          "The override of the Docker image that's used to start the container."];
+      command: StringList.t option
+        [@ocaml.doc
+          "The command to send to the container that overrides the default command from the Docker image or the job definition."];
+      args: StringList.t option
+        [@ocaml.doc
+          "The arguments to the entrypoint to send to the container that overrides the default arguments from the Docker image or the job definition. For more information, see Dockerfile reference: CMD and Define a command an arguments for a pod in the Kubernetes documentation."];
+      env: EksContainerEnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to send to the container. You can add new environment variables, which are added to the container at launch. Or, you can override the existing environment variables from the Docker image or the job definition. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
+      resources: EksContainerResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of resources to assign to a container. These override the settings in the job definition. The supported resources include memory, cpu, and nvidia.com/gpu. For more information, see Resource management for pods and containers in the Kubernetes documentation."]}
+    let make ?name =
+      fun ?image ->
+        fun ?command ->
+          fun ?args ->
+            fun ?env ->
+              fun ?resources ->
+                fun () -> { name; image; command; args; env; resources }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("image", (Option.map x.image ~f:String_.to_value));
+        ("command", (Option.map x.command ~f:StringList.to_value));
+        ("args", (Option.map x.args ~f:StringList.to_value));
+        ("env",
+          (Option.map x.env ~f:EksContainerEnvironmentVariables.to_value));
+        ("resources",
+          (Option.map x.resources
+             ~f:EksContainerResourceRequirements.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resources =
+        (Option.map ~f:EksContainerResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let env =
+        (Option.map ~f:EksContainerEnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "env") in
+      let args =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "args") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      let image = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "image") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?resources ?env ?args ?command ?image ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resources =
+        field_map json__ "resources" EksContainerResourceRequirements.of_json in
+      let env =
+        field_map json__ "env" EksContainerEnvironmentVariables.of_json in
+      let args = field_map json__ "args" StringList.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?resources ?env ?args ?command ?image ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Object representing any Kubernetes overrides to a job definition that's used in a SubmitJob API operation."]
+module Double =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module ListAttemptTaskContainerDetails =
+  struct
+    type nonrec t = AttemptTaskContainerDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttemptTaskContainerDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttemptTaskContainerDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListAttemptTaskContainerDetails"
+        ~of_json:AttemptTaskContainerDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TaskContainerDetails =
+  struct
+    type nonrec t =
+      {
+      command: StringList.t option
+        [@ocaml.doc
+          "The command that's passed to the container. This parameter maps to Cmd in the Create a container section of the Docker Remote API and the COMMAND parameter to docker run. For more information, see https://docs.docker.com/engine/reference/builder/#cmd."];
+      dependsOn: TaskContainerDependencyList.t option
+        [@ocaml.doc "A list of containers that this container depends on."];
+      environment: EnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to pass to a container. This parameter maps to Env in the Create a container section of the Docker Remote API and the --env option to docker run. We don't recommend using plaintext environment variables for sensitive information, such as credential data."];
+      essential: Boolean.t option
+        [@ocaml.doc
+          "If the essential parameter of a container is marked as true, and that container fails or stops for any reason, all other containers that are part of the task are stopped. If the essential parameter of a container is marked as false, its failure doesn't affect the rest of the containers in a task. If this parameter is omitted, a container is assumed to be essential. All jobs must have at least one essential container. If you have an application that's composed of multiple containers, group containers that are used for a common purpose into components, and separate the different components into multiple task definitions. For more information, see Application Architecture in the Amazon Elastic Container Service Developer Guide."];
+      firelensConfiguration: FirelensConfiguration.t option
+        [@ocaml.doc
+          "The FireLens configuration for the container. This is used to specify and configure a log router for container logs. For more information, see Custom log routing in the Amazon Elastic Container Service Developer Guide."];
+      image: String_.t option
+        [@ocaml.doc
+          "The image used to start a container. This string is passed directly to the Docker daemon. By default, images in the Docker Hub registry are available. Other repositories are specified with either repository-url/image:tag or repository-url/image\\@digest. Up to 255 letters (uppercase and lowercase), numbers, hyphens, underscores, colons, periods, forward slashes, and number signs are allowed. This parameter maps to Image in the Create a container section of the Docker Remote API and the IMAGE parameter of the docker run ."];
+      linuxParameters: LinuxParameters.t option
+        [@ocaml.doc
+          "Linux-specific modifications that are applied to the container, such as Linux kernel capabilities. For more information, see KernelCapabilities. This parameter is not supported for Windows containers."];
+      logConfiguration: LogConfiguration.t option
+        [@ocaml.doc
+          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However the container can use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance (or on a different log server for remote logging options). For more information about the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Amazon ECS currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). Additional log drivers may be available in future releases of the Amazon ECS container agent. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version --format '\\{\\{.Server.APIVersion\\}\\}' The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS container agent configuration in the Amazon Elastic Container Service Developer Guide."];
+      mountPoints: MountPoints.t option
+        [@ocaml.doc
+          "The mount points for data volumes in your container. This parameter maps to Volumes in the Create a container section of the Docker Remote API and the --volume option to docker run. Windows containers can mount whole directories on the same drive as $env:ProgramData. Windows containers can't mount directories on a different drive, and mount point can't be across drives."];
+      name: String_.t option [@ocaml.doc "The name of a container."];
+      privileged: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given elevated privileges on the host container instance (similar to the root user). This parameter maps to Privileged in the Create a container section of the Docker Remote API and the --privileged option to docker run. This parameter is not supported for Windows containers or tasks run on Fargate."];
+      readonlyRootFilesystem: Boolean.t option
+        [@ocaml.doc
+          "When this parameter is true, the container is given read-only access to its root file system. This parameter maps to ReadonlyRootfs in the Create a container section of the Docker Remote API and the --read-only option to docker run. This parameter is not supported for Windows containers."];
+      repositoryCredentials: RepositoryCredentials.t option
+        [@ocaml.doc
+          "The private repository authentication credentials to use."];
+      resourceRequirements: ResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of a resource to assign to a container. The only supported resource is a GPU."];
+      secrets: SecretList.t option
+        [@ocaml.doc
+          "The secrets to pass to the container. For more information, see Specifying Sensitive Data in the Amazon Elastic Container Service Developer Guide."];
+      ulimits: Ulimits.t option
+        [@ocaml.doc
+          "A list of ulimits to set in the container. If a ulimit value is specified in a task definition, it overrides the default values set by Docker. This parameter maps to Ulimits in the Create a container section of the Docker Remote API and the --ulimit option to docker run. Amazon ECS tasks hosted on Fargate use the default resource limit values set by the operating system with the exception of the nofile resource limit parameter which Fargate overrides. The nofile resource limit sets a restriction on the number of open files that a container can use. The default nofile soft limit is 1024 and the default hard limit is 65535. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version --format '\\{\\{.Server.APIVersion\\}\\}' This parameter is not supported for Windows containers."];
+      user: String_.t option
+        [@ocaml.doc
+          "The user to use inside the container. This parameter maps to User in the Create a container section of the Docker Remote API and the --user option to docker run. When running tasks using the host network mode, don't run containers using the root user (UID 0). We recommend using a non-root user for better security. You can specify the user using the following formats. If specifying a UID or GID, you must specify it as a positive integer. user user:group uid uid:gid user:gi uid:group This parameter is not supported for Windows containers."];
+      startTimeout: Integer.t option
+        [@ocaml.doc
+          "Time duration (in seconds) to wait before giving up on resolving dependencies for a container. The minimum value is 2 seconds and the maximum value for Fargate is 120 seconds."];
+      stopTimeout: Integer.t option
+        [@ocaml.doc
+          "Time duration (in seconds) to wait before the container is forcefully killed if it doesn't exit normally on its own. The minimum value is 2 seconds and the maximum value for Fargate is 120 seconds. If the parameter is not specified, the default value of 30 seconds is used. For tasks that use the EC2 launch type, if the stopTimeout parameter isn't specified, the value set for the Amazon ECS container agent configuration variable ECS_CONTAINER_STOP_TIMEOUT is used. If neither the stopTimeout parameter nor the ECS_CONTAINER_STOP_TIMEOUT agent configuration variable are set, then the default value of 30 seconds is used."];
+      exitCode: Integer.t option
+        [@ocaml.doc "The exit code returned upon completion."];
+      reason: String_.t option
+        [@ocaml.doc
+          "A short (255 max characters) human-readable string to provide additional details for a running or stopped container."];
+      logStreamName: String_.t option
+        [@ocaml.doc
+          "The name of the CloudWatch Logs log stream that's associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
+      networkInterfaces: NetworkInterfaceList.t option
+        [@ocaml.doc
+          "The network interfaces that are associated with the job."]}
+    let make ?command =
+      fun ?dependsOn ->
+        fun ?environment ->
+          fun ?essential ->
+            fun ?firelensConfiguration ->
+              fun ?image ->
+                fun ?linuxParameters ->
+                  fun ?logConfiguration ->
+                    fun ?mountPoints ->
+                      fun ?name ->
+                        fun ?privileged ->
+                          fun ?readonlyRootFilesystem ->
+                            fun ?repositoryCredentials ->
+                              fun ?resourceRequirements ->
+                                fun ?secrets ->
+                                  fun ?ulimits ->
+                                    fun ?user ->
+                                      fun ?startTimeout ->
+                                        fun ?stopTimeout ->
+                                          fun ?exitCode ->
+                                            fun ?reason ->
+                                              fun ?logStreamName ->
+                                                fun ?networkInterfaces ->
+                                                  fun () ->
+                                                    {
+                                                      command;
+                                                      dependsOn;
+                                                      environment;
+                                                      essential;
+                                                      firelensConfiguration;
+                                                      image;
+                                                      linuxParameters;
+                                                      logConfiguration;
+                                                      mountPoints;
+                                                      name;
+                                                      privileged;
+                                                      readonlyRootFilesystem;
+                                                      repositoryCredentials;
+                                                      resourceRequirements;
+                                                      secrets;
+                                                      ulimits;
+                                                      user;
+                                                      startTimeout;
+                                                      stopTimeout;
+                                                      exitCode;
+                                                      reason;
+                                                      logStreamName;
+                                                      networkInterfaces
+                                                    }
+    let to_value x =
+      structure_to_value
+        [("command", (Option.map x.command ~f:StringList.to_value));
+        ("dependsOn",
+          (Option.map x.dependsOn ~f:TaskContainerDependencyList.to_value));
+        ("environment",
+          (Option.map x.environment ~f:EnvironmentVariables.to_value));
+        ("essential", (Option.map x.essential ~f:Boolean.to_value));
+        ("firelensConfiguration",
+          (Option.map x.firelensConfiguration
+             ~f:FirelensConfiguration.to_value));
+        ("image", (Option.map x.image ~f:String_.to_value));
+        ("linuxParameters",
+          (Option.map x.linuxParameters ~f:LinuxParameters.to_value));
+        ("logConfiguration",
+          (Option.map x.logConfiguration ~f:LogConfiguration.to_value));
+        ("mountPoints", (Option.map x.mountPoints ~f:MountPoints.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("privileged", (Option.map x.privileged ~f:Boolean.to_value));
+        ("readonlyRootFilesystem",
+          (Option.map x.readonlyRootFilesystem ~f:Boolean.to_value));
+        ("repositoryCredentials",
+          (Option.map x.repositoryCredentials
+             ~f:RepositoryCredentials.to_value));
+        ("resourceRequirements",
+          (Option.map x.resourceRequirements ~f:ResourceRequirements.to_value));
+        ("secrets", (Option.map x.secrets ~f:SecretList.to_value));
+        ("ulimits", (Option.map x.ulimits ~f:Ulimits.to_value));
+        ("user", (Option.map x.user ~f:String_.to_value));
+        ("startTimeout", (Option.map x.startTimeout ~f:Integer.to_value));
+        ("stopTimeout", (Option.map x.stopTimeout ~f:Integer.to_value));
+        ("exitCode", (Option.map x.exitCode ~f:Integer.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value));
+        ("logStreamName", (Option.map x.logStreamName ~f:String_.to_value));
+        ("networkInterfaces",
+          (Option.map x.networkInterfaces ~f:NetworkInterfaceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkInterfaces =
+        (Option.map ~f:NetworkInterfaceList.of_xml)
+          (Xml.child xml_arg0 "networkInterfaces") in
+      let logStreamName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "logStreamName") in
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let exitCode =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
+      let stopTimeout =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "stopTimeout") in
+      let startTimeout =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "startTimeout") in
+      let user = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "user") in
+      let ulimits =
+        (Option.map ~f:Ulimits.of_xml) (Xml.child xml_arg0 "ulimits") in
+      let secrets =
+        (Option.map ~f:SecretList.of_xml) (Xml.child xml_arg0 "secrets") in
+      let resourceRequirements =
+        (Option.map ~f:ResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resourceRequirements") in
+      let repositoryCredentials =
+        (Option.map ~f:RepositoryCredentials.of_xml)
+          (Xml.child xml_arg0 "repositoryCredentials") in
+      let readonlyRootFilesystem =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "readonlyRootFilesystem") in
+      let privileged =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "privileged") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let mountPoints =
+        (Option.map ~f:MountPoints.of_xml) (Xml.child xml_arg0 "mountPoints") in
+      let logConfiguration =
+        (Option.map ~f:LogConfiguration.of_xml)
+          (Xml.child xml_arg0 "logConfiguration") in
+      let linuxParameters =
+        (Option.map ~f:LinuxParameters.of_xml)
+          (Xml.child xml_arg0 "linuxParameters") in
+      let image = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "image") in
+      let firelensConfiguration =
+        (Option.map ~f:FirelensConfiguration.of_xml)
+          (Xml.child xml_arg0 "firelensConfiguration") in
+      let essential =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "essential") in
+      let environment =
+        (Option.map ~f:EnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "environment") in
+      let dependsOn =
+        (Option.map ~f:TaskContainerDependencyList.of_xml)
+          (Xml.child xml_arg0 "dependsOn") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      make ?networkInterfaces ?logStreamName ?reason ?exitCode ?stopTimeout
+        ?startTimeout ?user ?ulimits ?secrets ?resourceRequirements
+        ?repositoryCredentials ?readonlyRootFilesystem ?privileged ?name
+        ?mountPoints ?logConfiguration ?linuxParameters ?image
+        ?firelensConfiguration ?essential ?environment ?dependsOn ?command ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkInterfaces =
+        field_map json__ "networkInterfaces" NetworkInterfaceList.of_json in
+      let logStreamName = field_map json__ "logStreamName" String_.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      let stopTimeout = field_map json__ "stopTimeout" Integer.of_json in
+      let startTimeout = field_map json__ "startTimeout" Integer.of_json in
+      let user = field_map json__ "user" String_.of_json in
+      let ulimits = field_map json__ "ulimits" Ulimits.of_json in
+      let secrets = field_map json__ "secrets" SecretList.of_json in
+      let resourceRequirements =
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
+      let repositoryCredentials =
+        field_map json__ "repositoryCredentials"
+          RepositoryCredentials.of_json in
+      let readonlyRootFilesystem =
+        field_map json__ "readonlyRootFilesystem" Boolean.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let mountPoints = field_map json__ "mountPoints" MountPoints.of_json in
+      let logConfiguration =
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
+      let linuxParameters =
+        field_map json__ "linuxParameters" LinuxParameters.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      let firelensConfiguration =
+        field_map json__ "firelensConfiguration"
+          FirelensConfiguration.of_json in
+      let essential = field_map json__ "essential" Boolean.of_json in
+      let environment =
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let dependsOn =
+        field_map json__ "dependsOn" TaskContainerDependencyList.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      make ?networkInterfaces ?logStreamName ?reason ?exitCode ?stopTimeout
+        ?startTimeout ?user ?ulimits ?secrets ?resourceRequirements
+        ?repositoryCredentials ?readonlyRootFilesystem ?privileged ?name
+        ?mountPoints ?logConfiguration ?linuxParameters ?image
+        ?firelensConfiguration ?essential ?environment ?dependsOn ?command ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details for the container in this task attempt."]
+module ConsumableResourceList =
+  struct
+    type nonrec t = ConsumableResourceRequirement.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConsumableResourceRequirement.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConsumableResourceRequirement.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConsumableResourceList"
+        ~of_json:ConsumableResourceRequirement.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FargatePlatformConfiguration =
+  struct
+    type nonrec t =
+      {
+      platformVersion: String_.t option
+        [@ocaml.doc
+          "The Fargate platform version where the jobs are running. A platform version is specified only for jobs that are running on Fargate resources. If one isn't specified, the LATEST platform version is used by default. This uses a recent, approved version of the Fargate platform for compute resources. For more information, see Fargate platform versions in the Amazon Elastic Container Service Developer Guide."]}
+    let make ?platformVersion = fun () -> { platformVersion }
+    let to_value x =
+      structure_to_value
+        [("platformVersion",
+           (Option.map x.platformVersion ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let platformVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "platformVersion") in
+      make ?platformVersion ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let platformVersion =
+        field_map json__ "platformVersion" String_.of_json in
+      make ?platformVersion ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The platform configuration for jobs that are running on Fargate resources. Jobs that run on Amazon EC2 resources must not specify this parameter."]
+module ListEcsTaskProperties =
+  struct
+    type nonrec t = EcsTaskProperties.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EcsTaskProperties.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EcsTaskProperties.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListEcsTaskProperties"
+        ~of_json:EcsTaskProperties.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksPodProperties =
+  struct
+    type nonrec t =
+      {
+      serviceAccountName: String_.t option
+        [@ocaml.doc
+          "The name of the service account that's used to run the pod. For more information, see Kubernetes service accounts and Configure a Kubernetes service account to assume an IAM role in the Amazon EKS User Guide and Configure service accounts for pods in the Kubernetes documentation."];
+      hostNetwork: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the pod uses the hosts' network IP address. The default value is true. Setting this to false enables the Kubernetes pod networking model. Most Batch workloads are egress-only and don't require the overhead of IP allocation for each pod for incoming connections. For more information, see Host namespaces and Pod networking in the Kubernetes documentation."];
+      dnsPolicy: String_.t option
+        [@ocaml.doc
+          "The DNS policy for the pod. The default value is ClusterFirst. If the hostNetwork parameter is not specified, the default is ClusterFirstWithHostNet. ClusterFirst indicates that any DNS query that does not match the configured cluster domain suffix is forwarded to the upstream nameserver inherited from the node. For more information, see Pod's DNS policy in the Kubernetes documentation. Valid values: Default | ClusterFirst | ClusterFirstWithHostNet"];
+      imagePullSecrets: ImagePullSecrets.t option
+        [@ocaml.doc
+          "References a Kubernetes secret resource. It holds a list of secrets. These secrets help to gain access to pull an images from a private registry. ImagePullSecret$name is required when this object is used."];
+      containers: EksContainers.t option
+        [@ocaml.doc
+          "The properties of the container that's used on the Amazon EKS pod. This object is limited to 10 elements."];
+      initContainers: EksContainers.t option
+        [@ocaml.doc
+          "These containers run before application containers, always runs to completion, and must complete successfully before the next container starts. These containers are registered with the Amazon EKS Connector agent and persists the registration information in the Kubernetes backend data store. For more information, see Init Containers in the Kubernetes documentation. This object is limited to 10 elements."];
+      volumes: EksVolumes.t option
+        [@ocaml.doc
+          "Specifies the volumes for a job definition that uses Amazon EKS resources."];
+      metadata: EksMetadata.t option
+        [@ocaml.doc
+          "Metadata about the Kubernetes pod. For more information, see Understanding Kubernetes Objects in the Kubernetes documentation."];
+      shareProcessNamespace: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the processes in a container are shared, or visible, to other containers in the same pod. For more information, see Share Process Namespace between Containers in a Pod."]}
+    let make ?serviceAccountName =
+      fun ?hostNetwork ->
+        fun ?dnsPolicy ->
+          fun ?imagePullSecrets ->
+            fun ?containers ->
+              fun ?initContainers ->
+                fun ?volumes ->
+                  fun ?metadata ->
+                    fun ?shareProcessNamespace ->
+                      fun () ->
+                        {
+                          serviceAccountName;
+                          hostNetwork;
+                          dnsPolicy;
+                          imagePullSecrets;
+                          containers;
+                          initContainers;
+                          volumes;
+                          metadata;
+                          shareProcessNamespace
+                        }
+    let to_value x =
+      structure_to_value
+        [("serviceAccountName",
+           (Option.map x.serviceAccountName ~f:String_.to_value));
+        ("hostNetwork", (Option.map x.hostNetwork ~f:Boolean.to_value));
+        ("dnsPolicy", (Option.map x.dnsPolicy ~f:String_.to_value));
+        ("imagePullSecrets",
+          (Option.map x.imagePullSecrets ~f:ImagePullSecrets.to_value));
+        ("containers", (Option.map x.containers ~f:EksContainers.to_value));
+        ("initContainers",
+          (Option.map x.initContainers ~f:EksContainers.to_value));
+        ("volumes", (Option.map x.volumes ~f:EksVolumes.to_value));
+        ("metadata", (Option.map x.metadata ~f:EksMetadata.to_value));
+        ("shareProcessNamespace",
+          (Option.map x.shareProcessNamespace ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shareProcessNamespace =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "shareProcessNamespace") in
+      let metadata =
+        (Option.map ~f:EksMetadata.of_xml) (Xml.child xml_arg0 "metadata") in
+      let volumes =
+        (Option.map ~f:EksVolumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let initContainers =
+        (Option.map ~f:EksContainers.of_xml)
+          (Xml.child xml_arg0 "initContainers") in
+      let containers =
+        (Option.map ~f:EksContainers.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      let imagePullSecrets =
+        (Option.map ~f:ImagePullSecrets.of_xml)
+          (Xml.child xml_arg0 "imagePullSecrets") in
+      let dnsPolicy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "dnsPolicy") in
+      let hostNetwork =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "hostNetwork") in
+      let serviceAccountName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountName") in
+      make ?shareProcessNamespace ?metadata ?volumes ?initContainers
+        ?containers ?imagePullSecrets ?dnsPolicy ?hostNetwork
+        ?serviceAccountName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shareProcessNamespace =
+        field_map json__ "shareProcessNamespace" Boolean.of_json in
+      let metadata = field_map json__ "metadata" EksMetadata.of_json in
+      let volumes = field_map json__ "volumes" EksVolumes.of_json in
+      let initContainers =
+        field_map json__ "initContainers" EksContainers.of_json in
+      let containers = field_map json__ "containers" EksContainers.of_json in
+      let imagePullSecrets =
+        field_map json__ "imagePullSecrets" ImagePullSecrets.of_json in
+      let dnsPolicy = field_map json__ "dnsPolicy" String_.of_json in
+      let hostNetwork = field_map json__ "hostNetwork" Boolean.of_json in
+      let serviceAccountName =
+        field_map json__ "serviceAccountName" String_.of_json in
+      make ?shareProcessNamespace ?metadata ?volumes ?initContainers
+        ?containers ?imagePullSecrets ?dnsPolicy ?hostNetwork
+        ?serviceAccountName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The properties for the pod."]
+module UserdataType =
+  struct
+    type nonrec t =
+      | EKS_BOOTSTRAP_SH 
+      | EKS_NODEADM 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EKS_BOOTSTRAP_SH -> "EKS_BOOTSTRAP_SH"
+      | EKS_NODEADM -> "EKS_NODEADM"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EKS_BOOTSTRAP_SH" -> EKS_BOOTSTRAP_SH
+      | "EKS_NODEADM" -> EKS_NODEADM
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration UserdataType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"UserdataType" j)
+    let to_json = simple_to_json to_value
+  end
+module TaskPropertiesOverride =
+  struct
+    type nonrec t =
+      {
+      containers: ListTaskContainerOverrides.t option
+        [@ocaml.doc "The overrides for the container definition of a job."]}
+    let make ?containers = fun () -> { containers }
+    let to_value x =
+      structure_to_value
+        [("containers",
+           (Option.map x.containers ~f:ListTaskContainerOverrides.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containers =
+        (Option.map ~f:ListTaskContainerOverrides.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      make ?containers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containers =
+        field_map json__ "containers" ListTaskContainerOverrides.of_json in
+      make ?containers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains overrides for the task definition of a job."]
+module EksContainerOverrideList =
+  struct
+    type nonrec t = EksContainerOverride.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksContainerOverride.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksContainerOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksContainerOverrideList"
+        ~of_json:EksContainerOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FairshareCapacityUsage =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the capacity usage. For compute jobs, this is VCPU for Amazon EC2 and cpu for Amazon EKS. For service jobs, this is the instance type."];
+      quantity: Double.t option
+        [@ocaml.doc
+          "The quantity of capacity being used, measured in the units specified by capacityUnit."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The capacity usage for a fairshare scheduling job queue."]
+module QuotaShareCapacityUsage =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc "The unit of compute capacity for the capacity usage."];
+      quantity: Double.t option
+        [@ocaml.doc "The quantity of capacity being used."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity usage for a quota share, including units of compute capacity and quantity of resources being used."]
+module Float_ =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
+module AttemptEcsTaskDetails =
+  struct
+    type nonrec t =
+      {
+      containerInstanceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the container instance that hosts the task."];
+      taskArn: String_.t option
+        [@ocaml.doc "The ARN of the Amazon ECS task."];
+      containers: ListAttemptTaskContainerDetails.t option
+        [@ocaml.doc
+          "A list of containers that are included in the taskProperties list."]}
+    let make ?containerInstanceArn =
+      fun ?taskArn ->
+        fun ?containers ->
+          fun () -> { containerInstanceArn; taskArn; containers }
+    let to_value x =
+      structure_to_value
+        [("containerInstanceArn",
+           (Option.map x.containerInstanceArn ~f:String_.to_value));
+        ("taskArn", (Option.map x.taskArn ~f:String_.to_value));
+        ("containers",
+          (Option.map x.containers
+             ~f:ListAttemptTaskContainerDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let containers =
+        (Option.map ~f:ListAttemptTaskContainerDetails.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      let taskArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskArn") in
+      let containerInstanceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "containerInstanceArn") in
+      make ?containers ?taskArn ?containerInstanceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let containers =
+        field_map json__ "containers" ListAttemptTaskContainerDetails.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
+      let containerInstanceArn =
+        field_map json__ "containerInstanceArn" String_.of_json in
+      make ?containers ?taskArn ?containerInstanceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object that represents the details of a task."]
+module ListTaskContainerDetails =
+  struct
+    type nonrec t = TaskContainerDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TaskContainerDetails.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TaskContainerDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListTaskContainerDetails"
+        ~of_json:TaskContainerDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksAttemptContainerDetail =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option [@ocaml.doc "The name of a container."];
+      containerID: String_.t option [@ocaml.doc "The ID for the container."];
+      exitCode: Integer.t option
+        [@ocaml.doc
+          "The exit code returned for the job attempt. A non-zero exit code is considered failed."];
+      reason: String_.t option
+        [@ocaml.doc
+          "A short (255 max characters) human-readable string to provide additional details for a running or stopped container."]}
+    let make ?name =
+      fun ?containerID ->
+        fun ?exitCode ->
+          fun ?reason -> fun () -> { name; containerID; exitCode; reason }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("containerID", (Option.map x.containerID ~f:String_.to_value));
+        ("exitCode", (Option.map x.exitCode ~f:Integer.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let exitCode =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
+      let containerID =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "containerID") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?reason ?exitCode ?containerID ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      let containerID = field_map json__ "containerID" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?reason ?exitCode ?containerID ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the details for an attempt for a job attempt that an Amazon EKS container runs."]
+module EksContainerDetail =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the container. If the name isn't specified, the default name \"Default\" is used. Each container in a pod must have a unique name."];
+      image: String_.t option
+        [@ocaml.doc "The Docker image used to start the container."];
+      imagePullPolicy: String_.t option
+        [@ocaml.doc
+          "The image pull policy for the container. Supported values are Always, IfNotPresent, and Never. This parameter defaults to Always if the :latest tag is specified, IfNotPresent otherwise. For more information, see Updating images in the Kubernetes documentation."];
+      command: StringList.t option
+        [@ocaml.doc
+          "The entrypoint for the container. For more information, see Entrypoint in the Kubernetes documentation."];
+      args: StringList.t option
+        [@ocaml.doc
+          "An array of arguments to the entrypoint. If this isn't specified, the CMD of the container image is used. This corresponds to the args member in the Entrypoint portion of the Pod in Kubernetes. Environment variable references are expanded using the container's environment. If the referenced environment variable doesn't exist, the reference in the command isn't changed. For example, if the reference is to \"$(NAME1)\" and the NAME1 environment variable doesn't exist, the command string will remain \"$(NAME1)\". $$ is replaced with $ and the resulting string isn't expanded. For example, $$(VAR_NAME) is passed as $(VAR_NAME) whether or not the VAR_NAME environment variable exists. For more information, see Dockerfile reference: CMD and Define a command and arguments for a pod in the Kubernetes documentation."];
+      env: EksContainerEnvironmentVariables.t option
+        [@ocaml.doc
+          "The environment variables to pass to a container. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
+      resources: EksContainerResourceRequirements.t option
+        [@ocaml.doc
+          "The type and amount of resources to assign to a container. The supported resources include memory, cpu, and nvidia.com/gpu. For more information, see Resource management for pods and containers in the Kubernetes documentation."];
+      exitCode: Integer.t option
+        [@ocaml.doc
+          "The exit code returned for the job attempt. A non-zero exit code is considered failed."];
+      reason: String_.t option
+        [@ocaml.doc
+          "A short human-readable string to provide additional details for a running or stopped container. It can be up to 255 characters long."];
+      volumeMounts: EksContainerVolumeMounts.t option
+        [@ocaml.doc
+          "The volume mounts for the container. Batch supports emptyDir, hostPath, and secret volume types. For more information about volumes and volume mounts in Kubernetes, see Volumes in the Kubernetes documentation."];
+      securityContext: EksContainerSecurityContext.t option
+        [@ocaml.doc
+          "The security context for a job. For more information, see Configure a security context for a pod or container in the Kubernetes documentation."]}
+    let make ?name =
+      fun ?image ->
+        fun ?imagePullPolicy ->
+          fun ?command ->
+            fun ?args ->
+              fun ?env ->
+                fun ?resources ->
+                  fun ?exitCode ->
+                    fun ?reason ->
+                      fun ?volumeMounts ->
+                        fun ?securityContext ->
+                          fun () ->
+                            {
+                              name;
+                              image;
+                              imagePullPolicy;
+                              command;
+                              args;
+                              env;
+                              resources;
+                              exitCode;
+                              reason;
+                              volumeMounts;
+                              securityContext
+                            }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("image", (Option.map x.image ~f:String_.to_value));
+        ("imagePullPolicy",
+          (Option.map x.imagePullPolicy ~f:String_.to_value));
+        ("command", (Option.map x.command ~f:StringList.to_value));
+        ("args", (Option.map x.args ~f:StringList.to_value));
+        ("env",
+          (Option.map x.env ~f:EksContainerEnvironmentVariables.to_value));
+        ("resources",
+          (Option.map x.resources
+             ~f:EksContainerResourceRequirements.to_value));
+        ("exitCode", (Option.map x.exitCode ~f:Integer.to_value));
+        ("reason", (Option.map x.reason ~f:String_.to_value));
+        ("volumeMounts",
+          (Option.map x.volumeMounts ~f:EksContainerVolumeMounts.to_value));
+        ("securityContext",
+          (Option.map x.securityContext
+             ~f:EksContainerSecurityContext.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityContext =
+        (Option.map ~f:EksContainerSecurityContext.of_xml)
+          (Xml.child xml_arg0 "securityContext") in
+      let volumeMounts =
+        (Option.map ~f:EksContainerVolumeMounts.of_xml)
+          (Xml.child xml_arg0 "volumeMounts") in
+      let reason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
+      let exitCode =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
+      let resources =
+        (Option.map ~f:EksContainerResourceRequirements.of_xml)
+          (Xml.child xml_arg0 "resources") in
+      let env =
+        (Option.map ~f:EksContainerEnvironmentVariables.of_xml)
+          (Xml.child xml_arg0 "env") in
+      let args =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "args") in
+      let command =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "command") in
+      let imagePullPolicy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imagePullPolicy") in
+      let image = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "image") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?securityContext ?volumeMounts ?reason ?exitCode ?resources ?env
+        ?args ?command ?imagePullPolicy ?image ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityContext =
+        field_map json__ "securityContext"
+          EksContainerSecurityContext.of_json in
+      let volumeMounts =
+        field_map json__ "volumeMounts" EksContainerVolumeMounts.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      let resources =
+        field_map json__ "resources" EksContainerResourceRequirements.of_json in
+      let env =
+        field_map json__ "env" EksContainerEnvironmentVariables.of_json in
+      let args = field_map json__ "args" StringList.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let imagePullPolicy =
+        field_map json__ "imagePullPolicy" String_.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?securityContext ?volumeMounts ?reason ?exitCode ?resources ?env
+        ?args ?command ?imagePullPolicy ?image ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details for container properties that are returned by DescribeJobs for jobs that use Amazon EKS."]
+module ConsumableResourceProperties =
+  struct
+    type nonrec t =
+      {
+      consumableResourceList: ConsumableResourceList.t option
+        [@ocaml.doc "The list of consumable resources required by a job."]}
+    let make ?consumableResourceList = fun () -> { consumableResourceList }
+    let to_value x =
+      structure_to_value
+        [("consumableResourceList",
+           (Option.map x.consumableResourceList
+              ~f:ConsumableResourceList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumableResourceList =
+        (Option.map ~f:ConsumableResourceList.of_xml)
+          (Xml.child xml_arg0 "consumableResourceList") in
+      make ?consumableResourceList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumableResourceList =
+        field_map json__ "consumableResourceList"
+          ConsumableResourceList.of_json in
+      make ?consumableResourceList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a list of consumable resources required by a job."]
 module ContainerProperties =
   struct
     type nonrec t =
       {
       image: String_.t option
         [@ocaml.doc
-          "The image used to start a container. This string is passed directly to the Docker daemon. Images in the Docker Hub registry are available by default. Other repositories are specified with repository-url/image:tag . Up to 255 letters (uppercase and lowercase), numbers, hyphens, underscores, colons, periods, forward slashes, and number signs are allowed. This parameter maps to Image in the Create a container section of the Docker Remote API and the IMAGE parameter of docker run. Docker image architecture must match the processor architecture of the compute resources that they're scheduled on. For example, ARM-based Docker images can only run on ARM-based compute resources. Images in Amazon ECR Public repositories use the full registry/repository\\[:tag\\] or registry/repository\\[\\@digest\\] naming conventions. For example, public.ecr.aws/registry_alias/my-web-app:latest . Images in Amazon ECR repositories use the full registry and repository URI (for example, 012345678910.dkr.ecr.<region-name>.amazonaws.com/<repository-name>). Images in official repositories on Docker Hub use a single name (for example, ubuntu or mongo). Images in other repositories on Docker Hub are qualified with an organization name (for example, amazon/amazon-ecs-agent). Images in other online repositories are qualified further by a domain name (for example, quay.io/assemblyline/ubuntu)."];
+          "Required. The image used to start a container. This string is passed directly to the Docker daemon. Images in the Docker Hub registry are available by default. Other repositories are specified with repository-url/image:tag . It can be 255 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), underscores (_), colons (:), periods (.), forward slashes (/), and number signs (#). This parameter maps to Image in the Create a container section of the Docker Remote API and the IMAGE parameter of docker run. Docker image architecture must match the processor architecture of the compute resources that they're scheduled on. For example, ARM-based Docker images can only run on ARM-based compute resources. Images in Amazon ECR Public repositories use the full registry/repository\\[:tag\\] or registry/repository\\[\\@digest\\] naming conventions. For example, public.ecr.aws/registry_alias/my-web-app:latest . Images in Amazon ECR repositories use the full registry and repository URI (for example, 123456789012.dkr.ecr.<region-name>.amazonaws.com/<repository-name>). Images in official repositories on Docker Hub use a single name (for example, ubuntu or mongo). Images in other repositories on Docker Hub are qualified with an organization name (for example, amazon/amazon-ecs-agent). Images in other online repositories are qualified further by a domain name (for example, quay.io/assemblyline/ubuntu)."];
       vcpus: Integer.t option
         [@ocaml.doc
-          "This parameter is deprecated, use resourceRequirements to specify the vCPU requirements for the job definition. It's not supported for jobs running on Fargate resources. For jobs running on EC2 resources, it specifies the number of vCPUs reserved for the job. Each vCPU is equivalent to 1,024 CPU shares. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. The number of vCPUs must be specified but can be specified in several places. You must specify it at least once for each node."];
+          "This parameter is deprecated, use resourceRequirements to specify the vCPU requirements for the job definition. It's not supported for jobs running on Fargate resources. For jobs running on Amazon EC2 resources, it specifies the number of vCPUs reserved for the job. Each vCPU is equivalent to 1,024 CPU shares. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. The number of vCPUs must be specified but can be specified in several places. You must specify it at least once for each node."];
       memory: Integer.t option
         [@ocaml.doc
-          "This parameter is deprecated, use resourceRequirements to specify the memory requirements for the job definition. It's not supported for jobs running on Fargate resources. For jobs running on EC2 resources, it specifies the memory hard limit (in MiB) for a container. If your container attempts to exceed the specified number, it's terminated. You must specify at least 4 MiB of memory for a job using this parameter. The memory hard limit can be specified in several places. It must be specified for each node at least once."];
+          "This parameter is deprecated, use resourceRequirements to specify the memory requirements for the job definition. It's not supported for jobs running on Fargate resources. For jobs that run on Amazon EC2 resources, it specifies the memory hard limit (in MiB) for a container. If your container attempts to exceed the specified number, it's terminated. You must specify at least 4 MiB of memory for a job using this parameter. The memory hard limit can be specified in several places. It must be specified for each node at least once."];
       command: StringList.t option
         [@ocaml.doc
           "The command that's passed to the container. This parameter maps to Cmd in the Create a container section of the Docker Remote API and the COMMAND parameter to docker run. For more information, see https://docs.docker.com/engine/reference/builder/#cmd."];
       jobRoleArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the IAM role that the container can assume for Amazon Web Services permissions. For more information, see IAM Roles for Tasks in the Amazon Elastic Container Service Developer Guide."];
+          "The Amazon Resource Name (ARN) of the IAM role that the container can assume for Amazon Web Services permissions. For more information, see IAM roles for tasks in the Amazon Elastic Container Service Developer Guide."];
       executionRoleArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the execution role that Batch can assume. For jobs that run on Fargate resources, you must provide an execution role. For more information, see Batch execution IAM role in the Batch User Guide."];
@@ -1201,7 +3910,7 @@ module ContainerProperties =
         [@ocaml.doc "A list of data volumes used in a job."];
       environment: EnvironmentVariables.t option
         [@ocaml.doc
-          "The environment variables to pass to a container. This parameter maps to Env in the Create a container section of the Docker Remote API and the --env option to docker run. We don't recommend using plaintext environment variables for sensitive information, such as credential data. Environment variables must not start with AWS_BATCH; this naming convention is reserved for variables that are set by the Batch service."];
+          "The environment variables to pass to a container. This parameter maps to Env in the Create a container section of the Docker Remote API and the --env option to docker run. We don't recommend using plaintext environment variables for sensitive information, such as credential data. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
       mountPoints: MountPoints.t option
         [@ocaml.doc
           "The mount points for data volumes in your container. This parameter maps to Volumes in the Create a container section of the Docker Remote API and the --volume option to docker run."];
@@ -1228,16 +3937,28 @@ module ContainerProperties =
           "Linux-specific modifications that are applied to the container, such as details for device mappings."];
       logConfiguration: LogConfiguration.t option
         [@ocaml.doc
-          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However the container might use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance (or on a different log server for remote logging options). For more information on the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Batch currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log into your container instance and run the following command: sudo docker version | grep \"Server API version\" The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS Container Agent Configuration in the Amazon Elastic Container Service Developer Guide."];
+          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However the container might use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance (or on a different log server for remote logging options). For more information on the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Batch currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version | grep \"Server API version\" The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS container agent configuration in the Amazon Elastic Container Service Developer Guide."];
       secrets: SecretList.t option
         [@ocaml.doc
           "The secrets for the container. For more information, see Specifying sensitive data in the Batch User Guide."];
       networkConfiguration: NetworkConfiguration.t option
         [@ocaml.doc
-          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on EC2 resources must not specify this parameter."];
+          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
       fargatePlatformConfiguration: FargatePlatformConfiguration.t option
         [@ocaml.doc
-          "The platform configuration for jobs that are running on Fargate resources. Jobs that are running on EC2 resources must not specify this parameter."]}
+          "The platform configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
+      enableExecuteCommand: Boolean.t option
+        [@ocaml.doc
+          "Determines whether execute command functionality is turned on for this task. If true, execute command functionality is turned on all the containers in the task."];
+      ephemeralStorage: EphemeralStorage.t option
+        [@ocaml.doc
+          "The amount of ephemeral storage to allocate for the task. This parameter is used to expand the total amount of ephemeral storage available, beyond the default amount, for tasks hosted on Fargate."];
+      runtimePlatform: RuntimePlatform.t option
+        [@ocaml.doc
+          "An object that represents the compute environment architecture for Batch jobs on Fargate."];
+      repositoryCredentials: RepositoryCredentials.t option
+        [@ocaml.doc
+          "The private repository authentication credentials to use."]}
     let make ?image =
       fun ?vcpus ->
         fun ?memory ->
@@ -1259,29 +3980,38 @@ module ContainerProperties =
                                         fun ?networkConfiguration ->
                                           fun ?fargatePlatformConfiguration
                                             ->
-                                            fun () ->
-                                              {
-                                                image;
-                                                vcpus;
-                                                memory;
-                                                command;
-                                                jobRoleArn;
-                                                executionRoleArn;
-                                                volumes;
-                                                environment;
-                                                mountPoints;
-                                                readonlyRootFilesystem;
-                                                privileged;
-                                                ulimits;
-                                                user;
-                                                instanceType;
-                                                resourceRequirements;
-                                                linuxParameters;
-                                                logConfiguration;
-                                                secrets;
-                                                networkConfiguration;
-                                                fargatePlatformConfiguration
-                                              }
+                                            fun ?enableExecuteCommand ->
+                                              fun ?ephemeralStorage ->
+                                                fun ?runtimePlatform ->
+                                                  fun ?repositoryCredentials
+                                                    ->
+                                                    fun () ->
+                                                      {
+                                                        image;
+                                                        vcpus;
+                                                        memory;
+                                                        command;
+                                                        jobRoleArn;
+                                                        executionRoleArn;
+                                                        volumes;
+                                                        environment;
+                                                        mountPoints;
+                                                        readonlyRootFilesystem;
+                                                        privileged;
+                                                        ulimits;
+                                                        user;
+                                                        instanceType;
+                                                        resourceRequirements;
+                                                        linuxParameters;
+                                                        logConfiguration;
+                                                        secrets;
+                                                        networkConfiguration;
+                                                        fargatePlatformConfiguration;
+                                                        enableExecuteCommand;
+                                                        ephemeralStorage;
+                                                        runtimePlatform;
+                                                        repositoryCredentials
+                                                      }
     let to_value x =
       structure_to_value
         [("image", (Option.map x.image ~f:String_.to_value));
@@ -1312,9 +4042,30 @@ module ContainerProperties =
           (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
         ("fargatePlatformConfiguration",
           (Option.map x.fargatePlatformConfiguration
-             ~f:FargatePlatformConfiguration.to_value))]
+             ~f:FargatePlatformConfiguration.to_value));
+        ("enableExecuteCommand",
+          (Option.map x.enableExecuteCommand ~f:Boolean.to_value));
+        ("ephemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorage.to_value));
+        ("runtimePlatform",
+          (Option.map x.runtimePlatform ~f:RuntimePlatform.to_value));
+        ("repositoryCredentials",
+          (Option.map x.repositoryCredentials
+             ~f:RepositoryCredentials.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let repositoryCredentials =
+        (Option.map ~f:RepositoryCredentials.of_xml)
+          (Xml.child xml_arg0 "repositoryCredentials") in
+      let runtimePlatform =
+        (Option.map ~f:RuntimePlatform.of_xml)
+          (Xml.child xml_arg0 "runtimePlatform") in
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorage.of_xml)
+          (Xml.child xml_arg0 "ephemeralStorage") in
+      let enableExecuteCommand =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableExecuteCommand") in
       let fargatePlatformConfiguration =
         (Option.map ~f:FargatePlatformConfiguration.of_xml)
           (Xml.child xml_arg0 "fargatePlatformConfiguration") in
@@ -1360,50 +4111,114 @@ module ContainerProperties =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "memory") in
       let vcpus = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "vcpus") in
       let image = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "image") in
-      make ?fargatePlatformConfiguration ?networkConfiguration ?secrets
-        ?logConfiguration ?linuxParameters ?resourceRequirements
-        ?instanceType ?user ?ulimits ?privileged ?readonlyRootFilesystem
-        ?mountPoints ?environment ?volumes ?executionRoleArn ?jobRoleArn
-        ?command ?memory ?vcpus ?image ()
+      make ?repositoryCredentials ?runtimePlatform ?ephemeralStorage
+        ?enableExecuteCommand ?fargatePlatformConfiguration
+        ?networkConfiguration ?secrets ?logConfiguration ?linuxParameters
+        ?resourceRequirements ?instanceType ?user ?ulimits ?privileged
+        ?readonlyRootFilesystem ?mountPoints ?environment ?volumes
+        ?executionRoleArn ?jobRoleArn ?command ?memory ?vcpus ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let repositoryCredentials =
+        field_map json__ "repositoryCredentials"
+          RepositoryCredentials.of_json in
+      let runtimePlatform =
+        field_map json__ "runtimePlatform" RuntimePlatform.of_json in
+      let ephemeralStorage =
+        field_map json__ "ephemeralStorage" EphemeralStorage.of_json in
+      let enableExecuteCommand =
+        field_map json__ "enableExecuteCommand" Boolean.of_json in
       let fargatePlatformConfiguration =
-        field_map json "fargatePlatformConfiguration"
+        field_map json__ "fargatePlatformConfiguration"
           FargatePlatformConfiguration.of_json in
       let networkConfiguration =
-        field_map json "networkConfiguration" NetworkConfiguration.of_json in
-      let secrets = field_map json "secrets" SecretList.of_json in
+        field_map json__ "networkConfiguration" NetworkConfiguration.of_json in
+      let secrets = field_map json__ "secrets" SecretList.of_json in
       let logConfiguration =
-        field_map json "logConfiguration" LogConfiguration.of_json in
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
       let linuxParameters =
-        field_map json "linuxParameters" LinuxParameters.of_json in
+        field_map json__ "linuxParameters" LinuxParameters.of_json in
       let resourceRequirements =
-        field_map json "resourceRequirements" ResourceRequirements.of_json in
-      let instanceType = field_map json "instanceType" String_.of_json in
-      let user = field_map json "user" String_.of_json in
-      let ulimits = field_map json "ulimits" Ulimits.of_json in
-      let privileged = field_map json "privileged" Boolean.of_json in
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let user = field_map json__ "user" String_.of_json in
+      let ulimits = field_map json__ "ulimits" Ulimits.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
       let readonlyRootFilesystem =
-        field_map json "readonlyRootFilesystem" Boolean.of_json in
-      let mountPoints = field_map json "mountPoints" MountPoints.of_json in
+        field_map json__ "readonlyRootFilesystem" Boolean.of_json in
+      let mountPoints = field_map json__ "mountPoints" MountPoints.of_json in
       let environment =
-        field_map json "environment" EnvironmentVariables.of_json in
-      let volumes = field_map json "volumes" Volumes.of_json in
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
       let executionRoleArn =
-        field_map json "executionRoleArn" String_.of_json in
-      let jobRoleArn = field_map json "jobRoleArn" String_.of_json in
-      let command = field_map json "command" StringList.of_json in
-      let memory = field_map json "memory" Integer.of_json in
-      let vcpus = field_map json "vcpus" Integer.of_json in
-      let image = field_map json "image" String_.of_json in
-      make ?fargatePlatformConfiguration ?networkConfiguration ?secrets
-        ?logConfiguration ?linuxParameters ?resourceRequirements
-        ?instanceType ?user ?ulimits ?privileged ?readonlyRootFilesystem
-        ?mountPoints ?environment ?volumes ?executionRoleArn ?jobRoleArn
-        ?command ?memory ?vcpus ?image ()
+        field_map json__ "executionRoleArn" String_.of_json in
+      let jobRoleArn = field_map json__ "jobRoleArn" String_.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let memory = field_map json__ "memory" Integer.of_json in
+      let vcpus = field_map json__ "vcpus" Integer.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      make ?repositoryCredentials ?runtimePlatform ?ephemeralStorage
+        ?enableExecuteCommand ?fargatePlatformConfiguration
+        ?networkConfiguration ?secrets ?logConfiguration ?linuxParameters
+        ?resourceRequirements ?instanceType ?user ?ulimits ?privileged
+        ?readonlyRootFilesystem ?mountPoints ?environment ?volumes
+        ?executionRoleArn ?jobRoleArn ?command ?memory ?vcpus ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Container properties are used in job definitions to describe the container that's launched as part of a job."]
+       "Container properties are used for Amazon ECS based job definitions. These properties to describe the container that's launched as part of a job."]
+module EcsProperties =
+  struct
+    type nonrec t =
+      {
+      taskProperties: ListEcsTaskProperties.t
+        [@ocaml.doc
+          "An object that contains the properties for the Amazon ECS task definition of a job. This object is currently limited to one task element. However, the task element can run up to 10 containers."]}
+    let context_ = "EcsProperties"
+    let make ~taskProperties = fun () -> { taskProperties }
+    let to_value x =
+      structure_to_value
+        [("taskProperties",
+           (Some (ListEcsTaskProperties.to_value x.taskProperties)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskProperties =
+        ListEcsTaskProperties.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "taskProperties") in
+      make ~taskProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskProperties =
+        field_map_exn json__ "taskProperties" ListEcsTaskProperties.of_json in
+      make ~taskProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the properties for the Amazon ECS resources of a job."]
+module EksProperties =
+  struct
+    type nonrec t =
+      {
+      podProperties: EksPodProperties.t option
+        [@ocaml.doc
+          "The properties for the Kubernetes pod resources of a job."]}
+    let make ?podProperties = fun () -> { podProperties }
+    let to_value x =
+      structure_to_value
+        [("podProperties",
+           (Option.map x.podProperties ~f:EksPodProperties.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let podProperties =
+        (Option.map ~f:EksPodProperties.of_xml)
+          (Xml.child xml_arg0 "podProperties") in
+      make ?podProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let podProperties =
+        field_map json__ "podProperties" EksPodProperties.of_json in
+      make ?podProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the properties for the Kubernetes resources of a job."]
 module RetryAction =
   struct
     type nonrec t =
@@ -1459,40 +4274,286 @@ module ImageType =
     let of_json j = string_of_json ~kind:"ImageType" j
     let to_json = simple_to_json to_value
   end
+module KubernetesVersion =
+  struct
+    type nonrec t = string
+    let context_ = "KubernetesVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KubernetesVersion" j
+    let to_json = simple_to_json to_value
+  end
+module LaunchTemplateSpecificationOverride =
+  struct
+    type nonrec t =
+      {
+      launchTemplateId: String_.t option
+        [@ocaml.doc
+          "The ID of the launch template. Note: If you specify the launchTemplateId you can't specify the launchTemplateName as well."];
+      launchTemplateName: String_.t option
+        [@ocaml.doc
+          "The name of the launch template. Note: If you specify the launchTemplateName you can't specify the launchTemplateId as well."];
+      version: String_.t option
+        [@ocaml.doc
+          "The version number of the launch template, $Default, or $Latest. If the value is $Default, the default version of the launch template is used. If the value is $Latest, the latest version of the launch template is used. If the AMI ID that's used in a compute environment is from the launch template, the AMI isn't changed when the compute environment is updated. It's only changed if the updateToLatestImageVersion parameter for the compute environment is set to true. During an infrastructure update, if either $Default or $Latest is specified, Batch re-evaluates the launch template version, and it might use a different version of the launch template. This is the case even if the launch template isn't specified in the update. When updating a compute environment, changing the launch template requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. Default: $Default Latest: $Latest"];
+      targetInstanceTypes: StringList.t option
+        [@ocaml.doc
+          "The instance type or family that this override launch template should be applied to. This parameter is required when defining a launch template override. Information included in this parameter must meet the following requirements: Must be a valid Amazon EC2 instance type or family. The following Batch InstanceTypes are not allowed: optimal, default_x86_64, and default_arm64. targetInstanceTypes can target only instance types and families that are included within the ComputeResource.instanceTypes set. targetInstanceTypes doesn't need to include all of the instances from the instanceType set, but at least a subset. For example, if ComputeResource.instanceTypes includes \\[m5, g5\\], targetInstanceTypes can include \\[m5.2xlarge\\] and \\[m5.large\\] but not \\[c5.large\\]. targetInstanceTypes included within the same launch template override or across launch template overrides can't overlap for the same compute environment. For example, you can't define one launch template override to target an instance family and another define an instance type within this same family."];
+      userdataType: UserdataType.t option
+        [@ocaml.doc
+          "The EKS node initialization process to use. You only need to specify this value if you are using a custom AMI. The default value is EKS_BOOTSTRAP_SH. If imageType is a custom AMI based on EKS_AL2023 or EKS_AL2023_NVIDIA then you must choose EKS_NODEADM."]}
+    let make ?launchTemplateId =
+      fun ?launchTemplateName ->
+        fun ?version ->
+          fun ?targetInstanceTypes ->
+            fun ?userdataType ->
+              fun () ->
+                {
+                  launchTemplateId;
+                  launchTemplateName;
+                  version;
+                  targetInstanceTypes;
+                  userdataType
+                }
+    let to_value x =
+      structure_to_value
+        [("launchTemplateId",
+           (Option.map x.launchTemplateId ~f:String_.to_value));
+        ("launchTemplateName",
+          (Option.map x.launchTemplateName ~f:String_.to_value));
+        ("version", (Option.map x.version ~f:String_.to_value));
+        ("targetInstanceTypes",
+          (Option.map x.targetInstanceTypes ~f:StringList.to_value));
+        ("userdataType",
+          (Option.map x.userdataType ~f:UserdataType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let userdataType =
+        (Option.map ~f:UserdataType.of_xml)
+          (Xml.child xml_arg0 "userdataType") in
+      let targetInstanceTypes =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "targetInstanceTypes") in
+      let version =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
+      let launchTemplateName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "launchTemplateName") in
+      let launchTemplateId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "launchTemplateId") in
+      make ?userdataType ?targetInstanceTypes ?version ?launchTemplateName
+        ?launchTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let userdataType = field_map json__ "userdataType" UserdataType.of_json in
+      let targetInstanceTypes =
+        field_map json__ "targetInstanceTypes" StringList.of_json in
+      let version = field_map json__ "version" String_.of_json in
+      let launchTemplateName =
+        field_map json__ "launchTemplateName" String_.of_json in
+      let launchTemplateId =
+        field_map json__ "launchTemplateId" String_.of_json in
+      make ?userdataType ?targetInstanceTypes ?version ?launchTemplateName
+        ?launchTemplateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents a launch template to use in place of the default launch template. You must specify either the launch template ID or launch template name in the request, but not both. If security groups are specified using both the securityGroupIds parameter of CreateComputeEnvironment and the launch template, the values in the securityGroupIds parameter of CreateComputeEnvironment will be used. You can define up to ten (10) overrides for each compute environment. This object isn't applicable to jobs that are running on Fargate resources. To unset all override templates for a compute environment, you can pass an empty array to the UpdateComputeEnvironment.overrides parameter, or not include the overrides parameter when submitting the UpdateComputeEnvironment API operation."]
+module ListTaskPropertiesOverride =
+  struct
+    type nonrec t = TaskPropertiesOverride.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TaskPropertiesOverride.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TaskPropertiesOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListTaskPropertiesOverride"
+        ~of_json:TaskPropertiesOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksPodPropertiesOverride =
+  struct
+    type nonrec t =
+      {
+      containers: EksContainerOverrideList.t option
+        [@ocaml.doc
+          "The overrides for the container that's used on the Amazon EKS pod."];
+      initContainers: EksContainerOverrideList.t option
+        [@ocaml.doc
+          "The overrides for the initContainers defined in the Amazon EKS pod. These containers run before application containers, always run to completion, and must complete successfully before the next container starts. These containers are registered with the Amazon EKS Connector agent and persists the registration information in the Kubernetes backend data store. For more information, see Init Containers in the Kubernetes documentation."];
+      metadata: EksMetadata.t option
+        [@ocaml.doc
+          "Metadata about the overrides for the container that's used on the Amazon EKS pod."]}
+    let make ?containers =
+      fun ?initContainers ->
+        fun ?metadata -> fun () -> { containers; initContainers; metadata }
+    let to_value x =
+      structure_to_value
+        [("containers",
+           (Option.map x.containers ~f:EksContainerOverrideList.to_value));
+        ("initContainers",
+          (Option.map x.initContainers ~f:EksContainerOverrideList.to_value));
+        ("metadata", (Option.map x.metadata ~f:EksMetadata.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metadata =
+        (Option.map ~f:EksMetadata.of_xml) (Xml.child xml_arg0 "metadata") in
+      let initContainers =
+        (Option.map ~f:EksContainerOverrideList.of_xml)
+          (Xml.child xml_arg0 "initContainers") in
+      let containers =
+        (Option.map ~f:EksContainerOverrideList.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      make ?metadata ?initContainers ?containers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metadata = field_map json__ "metadata" EksMetadata.of_json in
+      let initContainers =
+        field_map json__ "initContainers" EksContainerOverrideList.of_json in
+      let containers =
+        field_map json__ "containers" EksContainerOverrideList.of_json in
+      make ?metadata ?initContainers ?containers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains overrides for the Kubernetes pod properties of a job."]
+module ServiceResourceIdName =
+  struct
+    type nonrec t =
+      | TrainingJobArn 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | TrainingJobArn -> "TrainingJobArn" | Non_static_id s -> s
+    let of_string =
+      function | "TrainingJobArn" -> TrainingJobArn | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceResourceIdName" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceResourceIdName" j)
+    let to_json = simple_to_json to_value
+  end
+module FairshareCapacityUsageList =
+  struct
+    type nonrec t = FairshareCapacityUsage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FairshareCapacityUsage.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FairshareCapacityUsage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FairshareCapacityUsageList"
+        ~of_json:FairshareCapacityUsage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuotaShareCapacityUsageList =
+  struct
+    type nonrec t = QuotaShareCapacityUsage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaShareCapacityUsage.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaShareCapacityUsage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaShareCapacityUsageList"
+        ~of_json:QuotaShareCapacityUsage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ShareAttributes =
   struct
     type nonrec t =
       {
       shareIdentifier: String_.t
         [@ocaml.doc
-          "A fair share identifier or fair share identifier prefix. If the string ends with an asterisk (*), this entry specifies the weight factor to use for fair share identifiers that start with that prefix. The list of fair share identifiers in a fair share policy cannot overlap. For example, you can't have one that specifies a shareIdentifier of UserA* and another that specifies a shareIdentifier of UserA-1. There can be no more than 500 fair share identifiers active in a job queue. The string is limited to 255 alphanumeric characters, optionally followed by an asterisk (*)."];
-      weightFactor: Float.t option
+          "A share identifier or share identifier prefix. If the string ends with an asterisk (*), this entry specifies the weight factor to use for share identifiers that start with that prefix. The list of share identifiers in a fair-share policy can't overlap. For example, you can't have one that specifies a shareIdentifier of UserA* and another that specifies a shareIdentifier of UserA1. There can be no more than 500 share identifiers active in a job queue. The string is limited to 255 alphanumeric characters, and can be followed by an asterisk (*)."];
+      weightFactor: Float_.t option
         [@ocaml.doc
-          "The weight factor for the fair share identifier. The default value is 1.0. A lower value has a higher priority for compute resources. For example, jobs that use a share identifier with a weight factor of 0.125 (1/8) get 8 times the compute resources of jobs that use a share identifier with a weight factor of 1. The smallest supported value is 0.0001, and the largest supported value is 999.9999."]}
+          "The weight factor for the share identifier. The default value is 1.0. A lower value has a higher priority for compute resources. For example, jobs that use a share identifier with a weight factor of 0.125 (1/8) get 8 times the compute resources of jobs that use a share identifier with a weight factor of 1. The smallest supported value is 0.0001, and the largest supported value is 999.9999."]}
     let context_ = "ShareAttributes"
     let make ?weightFactor =
       fun ~shareIdentifier -> fun () -> { weightFactor; shareIdentifier }
     let to_value x =
       structure_to_value
         [("shareIdentifier", (Some (String_.to_value x.shareIdentifier)));
-        ("weightFactor", (Option.map x.weightFactor ~f:Float.to_value))]
+        ("weightFactor", (Option.map x.weightFactor ~f:Float_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let weightFactor =
-        (Option.map ~f:Float.of_xml) (Xml.child xml_arg0 "weightFactor") in
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "weightFactor") in
       let shareIdentifier =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "shareIdentifier") in
       make ?weightFactor ~shareIdentifier ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let weightFactor = field_map json "weightFactor" Float.of_json in
+    let of_json json__ =
+      let weightFactor = field_map json__ "weightFactor" Float_.of_json in
       let shareIdentifier =
-        field_map_exn json "shareIdentifier" String_.of_json in
+        field_map_exn json__ "shareIdentifier" String_.of_json in
       make ?weightFactor ~shareIdentifier ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the weights for the fair share identifiers for the fair share policy. Fair share identifiers that aren't included have a default weight of 1.0."]
+       "Specifies the weights for the share identifiers for the fair-share policy. Share identifiers that aren't included have a default weight of 1.0."]
 module AttemptContainerDetail =
   struct
     type nonrec t =
@@ -1505,16 +4566,16 @@ module AttemptContainerDetail =
           "The Amazon Resource Name (ARN) of the Amazon ECS task that's associated with the job attempt. Each container attempt receives a task ARN when they reach the STARTING status."];
       exitCode: Integer.t option
         [@ocaml.doc
-          "The exit code for the job attempt. A non-zero exit code is considered a failure."];
+          "The exit code for the job attempt. A non-zero exit code is considered failed."];
       reason: String_.t option
         [@ocaml.doc
-          "A short (255 max characters) human-readable string to provide additional details about a running or stopped container."];
+          "A short (255 max characters) human-readable string to provide additional details for a running or stopped container."];
       logStreamName: String_.t option
         [@ocaml.doc
-          "The name of the CloudWatch Logs log stream associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
+          "The name of the CloudWatch Logs log stream that's associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
       networkInterfaces: NetworkInterfaceList.t option
         [@ocaml.doc
-          "The network interfaces associated with the job attempt."]}
+          "The network interfaces that are associated with the job attempt."]}
     let make ?containerInstanceArn =
       fun ?taskArn ->
         fun ?exitCode ->
@@ -1559,32 +4620,267 @@ module AttemptContainerDetail =
       make ?networkInterfaces ?logStreamName ?reason ?exitCode ?taskArn
         ?containerInstanceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkInterfaces =
-        field_map json "networkInterfaces" NetworkInterfaceList.of_json in
-      let logStreamName = field_map json "logStreamName" String_.of_json in
-      let reason = field_map json "reason" String_.of_json in
-      let exitCode = field_map json "exitCode" Integer.of_json in
-      let taskArn = field_map json "taskArn" String_.of_json in
+        field_map json__ "networkInterfaces" NetworkInterfaceList.of_json in
+      let logStreamName = field_map json__ "logStreamName" String_.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
       let containerInstanceArn =
-        field_map json "containerInstanceArn" String_.of_json in
+        field_map json__ "containerInstanceArn" String_.of_json in
       make ?networkInterfaces ?logStreamName ?reason ?exitCode ?taskArn
         ?containerInstanceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the details of a container that's part of a job attempt."]
-module Long =
+       "An object that represents the details of a container that's part of a job attempt."]
+module ListAttemptEcsTaskDetails =
   struct
-    type nonrec t = Int64.t
+    type nonrec t = AttemptEcsTaskDetails.t list
     let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AttemptEcsTaskDetails.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AttemptEcsTaskDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListAttemptEcsTaskDetails"
+        ~of_json:AttemptEcsTaskDetails.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EcsTaskDetails =
+  struct
+    type nonrec t =
+      {
+      containers: ListTaskContainerDetails.t option
+        [@ocaml.doc
+          "A list of containers that are included in the taskProperties list."];
+      containerInstanceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the container instance that hosts the task."];
+      taskArn: String_.t option
+        [@ocaml.doc "The ARN of the Amazon ECS task."];
+      ephemeralStorage: EphemeralStorage.t option
+        [@ocaml.doc
+          "The amount of ephemeral storage allocated for the task."];
+      executionRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the execution role that Batch can assume. For more information, see Batch execution IAM role in the Batch User Guide."];
+      platformVersion: String_.t option
+        [@ocaml.doc
+          "The Fargate platform version where the jobs are running."];
+      ipcMode: String_.t option
+        [@ocaml.doc
+          "The IPC resource namespace to use for the containers in the task. The valid values are host, task, or none. For more information see ipcMode in EcsTaskProperties."];
+      taskRoleArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role that the container can assume for Amazon Web Services permissions. For more information, see IAM roles for tasks in the Amazon Elastic Container Service Developer Guide. This is object is comparable to ContainerProperties:jobRoleArn."];
+      pidMode: String_.t option
+        [@ocaml.doc
+          "The process namespace to use for the containers in the task. The valid values are host, or task. For more information see pidMode in EcsTaskProperties."];
+      networkConfiguration: NetworkConfiguration.t option
+        [@ocaml.doc
+          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
+      runtimePlatform: RuntimePlatform.t option
+        [@ocaml.doc
+          "An object that represents the compute environment architecture for Batch jobs on Fargate."];
+      volumes: Volumes.t option
+        [@ocaml.doc "A list of data volumes used in a job."];
+      enableExecuteCommand: Boolean.t option
+        [@ocaml.doc
+          "Determines whether execute command functionality is turned on for this task. If true, execute command functionality is turned on all the containers in the task."]}
+    let make ?containers =
+      fun ?containerInstanceArn ->
+        fun ?taskArn ->
+          fun ?ephemeralStorage ->
+            fun ?executionRoleArn ->
+              fun ?platformVersion ->
+                fun ?ipcMode ->
+                  fun ?taskRoleArn ->
+                    fun ?pidMode ->
+                      fun ?networkConfiguration ->
+                        fun ?runtimePlatform ->
+                          fun ?volumes ->
+                            fun ?enableExecuteCommand ->
+                              fun () ->
+                                {
+                                  containers;
+                                  containerInstanceArn;
+                                  taskArn;
+                                  ephemeralStorage;
+                                  executionRoleArn;
+                                  platformVersion;
+                                  ipcMode;
+                                  taskRoleArn;
+                                  pidMode;
+                                  networkConfiguration;
+                                  runtimePlatform;
+                                  volumes;
+                                  enableExecuteCommand
+                                }
+    let to_value x =
+      structure_to_value
+        [("containers",
+           (Option.map x.containers ~f:ListTaskContainerDetails.to_value));
+        ("containerInstanceArn",
+          (Option.map x.containerInstanceArn ~f:String_.to_value));
+        ("taskArn", (Option.map x.taskArn ~f:String_.to_value));
+        ("ephemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorage.to_value));
+        ("executionRoleArn",
+          (Option.map x.executionRoleArn ~f:String_.to_value));
+        ("platformVersion",
+          (Option.map x.platformVersion ~f:String_.to_value));
+        ("ipcMode", (Option.map x.ipcMode ~f:String_.to_value));
+        ("taskRoleArn", (Option.map x.taskRoleArn ~f:String_.to_value));
+        ("pidMode", (Option.map x.pidMode ~f:String_.to_value));
+        ("networkConfiguration",
+          (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
+        ("runtimePlatform",
+          (Option.map x.runtimePlatform ~f:RuntimePlatform.to_value));
+        ("volumes", (Option.map x.volumes ~f:Volumes.to_value));
+        ("enableExecuteCommand",
+          (Option.map x.enableExecuteCommand ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
+      let enableExecuteCommand =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableExecuteCommand") in
+      let volumes =
+        (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let runtimePlatform =
+        (Option.map ~f:RuntimePlatform.of_xml)
+          (Xml.child xml_arg0 "runtimePlatform") in
+      let networkConfiguration =
+        (Option.map ~f:NetworkConfiguration.of_xml)
+          (Xml.child xml_arg0 "networkConfiguration") in
+      let pidMode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "pidMode") in
+      let taskRoleArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskRoleArn") in
+      let ipcMode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ipcMode") in
+      let platformVersion =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "platformVersion") in
+      let executionRoleArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "executionRoleArn") in
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorage.of_xml)
+          (Xml.child xml_arg0 "ephemeralStorage") in
+      let taskArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "taskArn") in
+      let containerInstanceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "containerInstanceArn") in
+      let containers =
+        (Option.map ~f:ListTaskContainerDetails.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      make ?enableExecuteCommand ?volumes ?runtimePlatform
+        ?networkConfiguration ?pidMode ?taskRoleArn ?ipcMode ?platformVersion
+        ?executionRoleArn ?ephemeralStorage ?taskArn ?containerInstanceArn
+        ?containers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let enableExecuteCommand =
+        field_map json__ "enableExecuteCommand" Boolean.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let runtimePlatform =
+        field_map json__ "runtimePlatform" RuntimePlatform.of_json in
+      let networkConfiguration =
+        field_map json__ "networkConfiguration" NetworkConfiguration.of_json in
+      let pidMode = field_map json__ "pidMode" String_.of_json in
+      let taskRoleArn = field_map json__ "taskRoleArn" String_.of_json in
+      let ipcMode = field_map json__ "ipcMode" String_.of_json in
+      let platformVersion =
+        field_map json__ "platformVersion" String_.of_json in
+      let executionRoleArn =
+        field_map json__ "executionRoleArn" String_.of_json in
+      let ephemeralStorage =
+        field_map json__ "ephemeralStorage" EphemeralStorage.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
+      let containerInstanceArn =
+        field_map json__ "containerInstanceArn" String_.of_json in
+      let containers =
+        field_map json__ "containers" ListTaskContainerDetails.of_json in
+      make ?enableExecuteCommand ?volumes ?runtimePlatform
+        ?networkConfiguration ?pidMode ?taskRoleArn ?ipcMode ?platformVersion
+        ?executionRoleArn ?ephemeralStorage ?taskArn ?containerInstanceArn
+        ?containers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The details of a task definition that describes the container and volume definitions of an Amazon ECS task."]
+module EksAttemptContainerDetails =
+  struct
+    type nonrec t = EksAttemptContainerDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksAttemptContainerDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksAttemptContainerDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksAttemptContainerDetails"
+        ~of_json:EksAttemptContainerDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksContainerDetails =
+  struct
+    type nonrec t = EksContainerDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksContainerDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksContainerDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksContainerDetails"
+        ~of_json:EksContainerDetail.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module ArrayJobDependency =
   struct
@@ -1618,47 +4914,104 @@ module NodeRangeProperty =
       {
       targetNodes: String_.t
         [@ocaml.doc
-          "The range of nodes, using node index values. A range of 0:3 indicates nodes with index values of 0 through 3. If the starting range value is omitted (:n), then 0 is used to start the range. If the ending range value is omitted (n:), then the highest possible node index is used to end the range. Your accumulative node ranges must account for all nodes (0:n). You can nest node ranges, for example 0:10 and 4:5, in which case the 4:5 range properties override the 0:10 properties."];
+          "The range of nodes, using node index values. A range of 0:3 indicates nodes with index values of 0 through 3. If the starting range value is omitted (:n), then 0 is used to start the range. If the ending range value is omitted (n:), then the highest possible node index is used to end the range. Your accumulative node ranges must account for all nodes (0:n). You can nest node ranges (for example, 0:10 and 4:5). In this case, the 4:5 range properties override the 0:10 properties."];
       container: ContainerProperties.t option
-        [@ocaml.doc "The container details for the node range."]}
+        [@ocaml.doc "The container details for the node range."];
+      instanceTypes: StringList.t option
+        [@ocaml.doc
+          "The instance types of the underlying host infrastructure of a multi-node parallel job. This parameter isn't applicable to jobs that are running on Fargate resources. In addition, this list object is currently limited to one element."];
+      ecsProperties: EcsProperties.t option
+        [@ocaml.doc
+          "This is an object that represents the properties of the node range for a multi-node parallel job."];
+      eksProperties: EksProperties.t option
+        [@ocaml.doc
+          "This is an object that represents the properties of the node range for a multi-node parallel job."];
+      consumableResourceProperties: ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "Contains a list of consumable resources required by a job."]}
     let context_ = "NodeRangeProperty"
     let make ?container =
-      fun ~targetNodes -> fun () -> { container; targetNodes }
+      fun ?instanceTypes ->
+        fun ?ecsProperties ->
+          fun ?eksProperties ->
+            fun ?consumableResourceProperties ->
+              fun ~targetNodes ->
+                fun () ->
+                  {
+                    container;
+                    instanceTypes;
+                    ecsProperties;
+                    eksProperties;
+                    consumableResourceProperties;
+                    targetNodes
+                  }
     let to_value x =
       structure_to_value
         [("targetNodes", (Some (String_.to_value x.targetNodes)));
         ("container",
-          (Option.map x.container ~f:ContainerProperties.to_value))]
+          (Option.map x.container ~f:ContainerProperties.to_value));
+        ("instanceTypes",
+          (Option.map x.instanceTypes ~f:StringList.to_value));
+        ("ecsProperties",
+          (Option.map x.ecsProperties ~f:EcsProperties.to_value));
+        ("eksProperties",
+          (Option.map x.eksProperties ~f:EksProperties.to_value));
+        ("consumableResourceProperties",
+          (Option.map x.consumableResourceProperties
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourceProperties =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourceProperties") in
+      let eksProperties =
+        (Option.map ~f:EksProperties.of_xml)
+          (Xml.child xml_arg0 "eksProperties") in
+      let ecsProperties =
+        (Option.map ~f:EcsProperties.of_xml)
+          (Xml.child xml_arg0 "ecsProperties") in
+      let instanceTypes =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "instanceTypes") in
       let container =
         (Option.map ~f:ContainerProperties.of_xml)
           (Xml.child xml_arg0 "container") in
       let targetNodes =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetNodes") in
-      make ?container ~targetNodes ()
+      make ?consumableResourceProperties ?eksProperties ?ecsProperties
+        ?instanceTypes ?container ~targetNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let container = field_map json "container" ContainerProperties.of_json in
-      let targetNodes = field_map_exn json "targetNodes" String_.of_json in
-      make ?container ~targetNodes ()
+    let of_json json__ =
+      let consumableResourceProperties =
+        field_map json__ "consumableResourceProperties"
+          ConsumableResourceProperties.of_json in
+      let eksProperties =
+        field_map json__ "eksProperties" EksProperties.of_json in
+      let ecsProperties =
+        field_map json__ "ecsProperties" EcsProperties.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
+      let container =
+        field_map json__ "container" ContainerProperties.of_json in
+      let targetNodes = field_map_exn json__ "targetNodes" String_.of_json in
+      make ?consumableResourceProperties ?eksProperties ?ecsProperties
+        ?instanceTypes ?container ~targetNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the properties of the node range for a multi-node parallel job."]
+       "This is an object that represents the properties of the node range for a multi-node parallel job."]
 module EvaluateOnExit =
   struct
     type nonrec t =
       {
       onStatusReason: String_.t option
         [@ocaml.doc
-          "Contains a glob pattern to match against the StatusReason returned for a job. The pattern can be up to 512 characters in length. It can contain letters, numbers, periods (.), colons (:), and white space (including spaces or tabs). It can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match. The string can be between 1 and 512 characters in length."];
+          "Contains a glob pattern to match against the StatusReason returned for a job. The pattern can contain up to 512 characters. It can contain letters, numbers, periods (.), colons (:), and white spaces (including spaces or tabs). It can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match."];
       onReason: String_.t option
         [@ocaml.doc
-          "Contains a glob pattern to match against the Reason returned for a job. The pattern can be up to 512 characters in length. It can contain letters, numbers, periods (.), colons (:), and white space (including spaces and tabs). It can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match. The string can be between 1 and 512 characters in length."];
+          "Contains a glob pattern to match against the Reason returned for a job. The pattern can contain up to 512 characters. It can contain letters, numbers, periods (.), colons (:), and white space (including spaces and tabs). It can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match."];
       onExitCode: String_.t option
         [@ocaml.doc
-          "Contains a glob pattern to match against the decimal representation of the ExitCode returned for a job. The pattern can be up to 512 characters in length. It can contain only numbers, and can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match. The string can be between 1 and 512 characters in length."];
+          "Contains a glob pattern to match against the decimal representation of the ExitCode returned for a job. The pattern can be up to 512 characters long. It can contain only numbers, and can end with an asterisk (*) so that only the start of the string needs to be an exact match. The string can contain up to 512 characters."];
       action: RetryAction.t
         [@ocaml.doc
           "Specifies the action to take if all of the specified conditions (onStatusReason, onReason, and onExitCode) are met. The values aren't case sensitive."]}
@@ -1688,70 +5041,199 @@ module EvaluateOnExit =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "onStatusReason") in
       make ~action ?onExitCode ?onReason ?onStatusReason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map_exn json "action" RetryAction.of_json in
-      let onExitCode = field_map json "onExitCode" String_.of_json in
-      let onReason = field_map json "onReason" String_.of_json in
-      let onStatusReason = field_map json "onStatusReason" String_.of_json in
+    let of_json json__ =
+      let action = field_map_exn json__ "action" RetryAction.of_json in
+      let onExitCode = field_map json__ "onExitCode" String_.of_json in
+      let onReason = field_map json__ "onReason" String_.of_json in
+      let onStatusReason = field_map json__ "onStatusReason" String_.of_json in
       make ~action ?onExitCode ?onReason ?onStatusReason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a set of conditions to be met, and an action to take (RETRY or EXIT) if all conditions are met."]
+       "Specifies an array of up to 5 conditions to be met, and an action to take (RETRY or EXIT) if all conditions are met. If none of the EvaluateOnExit conditions in a RetryStrategy match, then the job is retried."]
+module JobStateTimeLimitActionsAction =
+  struct
+    type nonrec t =
+      | CANCEL 
+      | TERMINATE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CANCEL -> "CANCEL"
+      | TERMINATE -> "TERMINATE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CANCEL" -> CANCEL
+      | "TERMINATE" -> TERMINATE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration JobStateTimeLimitActionsAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"JobStateTimeLimitActionsAction" j)
+    let to_json = simple_to_json to_value
+  end
+module JobStateTimeLimitActionsState =
+  struct
+    type nonrec t =
+      | RUNNABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | RUNNABLE -> "RUNNABLE" | Non_static_id s -> s
+    let of_string = function | "RUNNABLE" -> RUNNABLE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration JobStateTimeLimitActionsState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"JobStateTimeLimitActionsState" j)
+    let to_json = simple_to_json to_value
+  end
 module Ec2Configuration =
   struct
     type nonrec t =
       {
       imageType: ImageType.t
         [@ocaml.doc
-          "The image type to match with the instance type to select an AMI. If the imageIdOverride parameter isn't specified, then a recent Amazon ECS-optimized Amazon Linux 2 AMI (ECS_AL2) is used. ECS_AL2 Amazon Linux 2\226\136\146 Default for all non-GPU instance families. ECS_AL2_NVIDIA Amazon Linux 2 (GPU)\226\136\146Default for all GPU instance families (for example P4 and G4) and can be used for all non Amazon Web Services Graviton-based instance types. ECS_AL1 Amazon Linux. Amazon Linux is reaching the end-of-life of standard support. For more information, see Amazon Linux AMI."];
+          "The image type to match with the instance type to select an AMI. The supported values are different for ECS and EKS resources. ECS If the imageIdOverride parameter isn't specified, then a recent Amazon ECS-optimized Amazon Linux 2023 AMI (ECS_AL2023) is used. If a new image type is specified in an update, but neither an imageId nor a imageIdOverride parameter is specified, then the latest Amazon ECS optimized AMI for that image type that's supported by Batch is used. Amazon Web Services is ending support for Amazon ECS Amazon Linux 2-optimized and accelerated AMIs on June 30, 2026. On January 12, 2026, Batch changed the default AMI for new Amazon ECS compute environments from Amazon Linux 2 to Amazon Linux 2023. Effective June 30, 2026, Batch will block creation of new Amazon ECS compute environments using Batch-provided Amazon Linux 2 AMIs. We strongly recommend migrating your existing Batch Amazon ECS compute environments to Amazon Linux 2023 prior to June 30, 2026. For more information on upgrading from AL2 to AL2023, see How to migrate from ECS AL2 to ECS AL2023 in the Batch User Guide. ECS_AL2 Amazon Linux 2: Used for non-GPU instance families. ECS_AL2_NVIDIA Amazon Linux 2 (GPU): Used for GPU instance families (for example P4 and G4) and non Amazon Web Services Graviton-based instance types. ECS_AL2023 Amazon Linux 2023: Default for all non-GPU instance families. Amazon Linux 2023 does not support A1 instances. ECS_AL2023_NVIDIA Amazon Linux 2023 (GPU): Default for all GPU instance families and can be used for all non Amazon Web Services Graviton-based instance types. ECS_AL2023_NVIDIA doesn't support p3 and g3 instance types. EKS If the imageIdOverride parameter isn't specified, then a recent Amazon EKS-optimized Amazon Linux 2023 AMI (EKS_AL2023) is used. If a new image type is specified in an update, but neither an imageId nor a imageIdOverride parameter is specified, then the latest Amazon EKS optimized AMI for that image type that Batch supports is used. Amazon Linux 2023 AMIs are the default on Batch for Amazon EKS. Amazon Web Services ended support for Amazon EKS AL2-optimized and AL2-accelerated AMIs on November 26, 2025. Batch Amazon EKS compute environments using Amazon Linux 2 will no longer receive software updates, security patches, or bug fixes from Amazon Web Services. We recommend migrating to Amazon Linux 2023. For more information on upgrading from AL2 to AL2023, see How to upgrade from EKS AL2 to EKS AL2023 in the Batch User Guide. EKS_AL2 Amazon Linux 2: Used for non-GPU instance families. EKS_AL2_NVIDIA Amazon Linux 2 (accelerated): Used for GPU instance families (for example, P4 and G4) and can be used for all non Amazon Web Services Graviton-based instance types. EKS_AL2023 Amazon Linux 2023: Default for non-GPU instance families. Amazon Linux 2023 does not support A1 instances. EKS_AL2023_NVIDIA Amazon Linux 2023 (accelerated): Default for GPU instance families and can be used for all non Amazon Web Services Graviton-based instance types."];
       imageIdOverride: ImageIdOverride.t option
         [@ocaml.doc
-          "The AMI ID used for instances launched in the compute environment that match the image type. This setting overrides the imageId set in the computeResource object."]}
+          "The AMI ID used for instances launched in the compute environment that match the image type. This setting overrides the imageId set in the computeResource object. The AMI that you choose for a compute environment must match the architecture of the instance types that you intend to use for that compute environment. For example, if your compute environment uses A1 instance types, the compute resource AMI that you choose must support ARM instances. Amazon ECS vends both x86 and ARM versions of the Amazon ECS-optimized Amazon Linux 2023 AMI. For more information, see Amazon ECS-optimized Amazon Linux 2023 AMI in the Amazon Elastic Container Service Developer Guide."];
+      batchImageStatus: String_.t option
+        [@ocaml.doc
+          "The status of the Batch-provided default AMIs associated with the imageType. The field only appears after the compute environment has begun scaling instances using the imageType. The field is not present when an image is specified in ComputeResources.imageId (deprecated), the default launch template, or Ec2Configuration.imageIdOverride. The field is also not present when the compute environment has a launch template override. For more information on image selection, see AMI selection order. This field is read-only and only appears in the DescribeComputeEnvironments response. LATEST \226\136\146 Using the most recent AMI supported UPDATE_AVAILABLE \226\136\146 An updated AMI is available If a compute environment has multiple AMIs for the imageType and any one AMI has UPDATE_AVAILABLE, the status shows UPDATE_AVAILABLE. For compute environments that use BEST_FIT as their allocation strategy, you can perform a blue/green update to update the AMI. For all other compute environments, you can perform an AMI version update to update the AMI to the latest version."];
+      imageKubernetesVersion: KubernetesVersion.t option
+        [@ocaml.doc
+          "The Kubernetes version for the compute environment. If you don't specify a value, the latest version that Batch supports is used."]}
     let context_ = "Ec2Configuration"
     let make ?imageIdOverride =
-      fun ~imageType -> fun () -> { imageIdOverride; imageType }
+      fun ?batchImageStatus ->
+        fun ?imageKubernetesVersion ->
+          fun ~imageType ->
+            fun () ->
+              {
+                imageIdOverride;
+                batchImageStatus;
+                imageKubernetesVersion;
+                imageType
+              }
     let to_value x =
       structure_to_value
         [("imageType", (Some (ImageType.to_value x.imageType)));
         ("imageIdOverride",
-          (Option.map x.imageIdOverride ~f:ImageIdOverride.to_value))]
+          (Option.map x.imageIdOverride ~f:ImageIdOverride.to_value));
+        ("batchImageStatus",
+          (Option.map x.batchImageStatus ~f:String_.to_value));
+        ("imageKubernetesVersion",
+          (Option.map x.imageKubernetesVersion ~f:KubernetesVersion.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let imageKubernetesVersion =
+        (Option.map ~f:KubernetesVersion.of_xml)
+          (Xml.child xml_arg0 "imageKubernetesVersion") in
+      let batchImageStatus =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "batchImageStatus") in
       let imageIdOverride =
         (Option.map ~f:ImageIdOverride.of_xml)
           (Xml.child xml_arg0 "imageIdOverride") in
       let imageType =
         ImageType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "imageType") in
-      make ?imageIdOverride ~imageType ()
+      make ?imageKubernetesVersion ?batchImageStatus ?imageIdOverride
+        ~imageType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let imageKubernetesVersion =
+        field_map json__ "imageKubernetesVersion" KubernetesVersion.of_json in
+      let batchImageStatus =
+        field_map json__ "batchImageStatus" String_.of_json in
       let imageIdOverride =
-        field_map json "imageIdOverride" ImageIdOverride.of_json in
-      let imageType = field_map_exn json "imageType" ImageType.of_json in
-      make ?imageIdOverride ~imageType ()
+        field_map json__ "imageIdOverride" ImageIdOverride.of_json in
+      let imageType = field_map_exn json__ "imageType" ImageType.of_json in
+      make ?imageKubernetesVersion ?batchImageStatus ?imageIdOverride
+        ~imageType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information used to select Amazon Machine Images (AMIs) for instances in the compute environment. If Ec2Configuration isn't specified, the default is ECS_AL2 (Amazon Linux 2). This object isn't applicable to jobs that are running on Fargate resources."]
+       "Provides information used to select Amazon Machine Images (AMIs) for instances in the compute environment. If Ec2Configuration isn't specified, the default is ECS_AL2023 (Amazon ECS-optimized Amazon Linux 2023) for EC2 (ECS) compute environments and EKS_AL2023 (Amazon EKS-optimized Amazon Linux 2023 AMI) for EKS compute environments. This object isn't applicable to jobs that are running on Fargate resources."]
+module LaunchTemplateSpecificationOverrideList =
+  struct
+    type nonrec t = LaunchTemplateSpecificationOverride.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:LaunchTemplateSpecificationOverride.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:LaunchTemplateSpecificationOverride.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LaunchTemplateSpecificationOverrideList"
+        ~of_json:LaunchTemplateSpecificationOverride.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceJobRetryAction =
+  struct
+    type nonrec t =
+      | RETRY 
+      | EXIT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RETRY -> "RETRY" | EXIT -> "EXIT" | Non_static_id s -> s
+    let of_string =
+      function | "RETRY" -> RETRY | "EXIT" -> EXIT | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceJobRetryAction" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceJobRetryAction" j)
+    let to_json = simple_to_json to_value
+  end
 module ContainerOverrides =
   struct
     type nonrec t =
       {
       vcpus: Integer.t option
         [@ocaml.doc
-          "This parameter is deprecated, use resourceRequirements to override the vcpus parameter that's set in the job definition. It's not supported for jobs running on Fargate resources. For jobs running on EC2 resources, it overrides the vcpus parameter set in the job definition, but doesn't override any vCPU requirement specified in the resourceRequirements structure in the job definition. To override vCPU requirements that are specified in the resourceRequirements structure in the job definition, resourceRequirements must be specified in the SubmitJob request, with type set to VCPU and value set to the new value. For more information, see Can't override job definition resource requirements in the Batch User Guide."];
+          "This parameter is deprecated, use resourceRequirements to override the vcpus parameter that's set in the job definition. It's not supported for jobs running on Fargate resources. For jobs that run on Amazon EC2 resources, it overrides the vcpus parameter set in the job definition, but doesn't override any vCPU requirement specified in the resourceRequirements structure in the job definition. To override vCPU requirements that are specified in the resourceRequirements structure in the job definition, resourceRequirements must be specified in the SubmitJob request, with type set to VCPU and value set to the new value. For more information, see Can't override job definition resource requirements in the Batch User Guide."];
       memory: Integer.t option
         [@ocaml.doc
-          "This parameter is deprecated, use resourceRequirements to override the memory requirements specified in the job definition. It's not supported for jobs running on Fargate resources. For jobs running on EC2 resources, it overrides the memory parameter set in the job definition, but doesn't override any memory requirement specified in the resourceRequirements structure in the job definition. To override memory requirements that are specified in the resourceRequirements structure in the job definition, resourceRequirements must be specified in the SubmitJob request, with type set to MEMORY and value set to the new value. For more information, see Can't override job definition resource requirements in the Batch User Guide."];
+          "This parameter is deprecated, use resourceRequirements to override the memory requirements specified in the job definition. It's not supported for jobs running on Fargate resources. For jobs that run on Amazon EC2 resources, it overrides the memory parameter set in the job definition, but doesn't override any memory requirement that's specified in the resourceRequirements structure in the job definition. To override memory requirements that are specified in the resourceRequirements structure in the job definition, resourceRequirements must be specified in the SubmitJob request, with type set to MEMORY and value set to the new value. For more information, see Can't override job definition resource requirements in the Batch User Guide."];
       command: StringList.t option
         [@ocaml.doc
-          "The command to send to the container that overrides the default command from the Docker image or the job definition."];
+          "The command to send to the container that overrides the default command from the Docker image or the job definition. This parameter can't contain an empty string."];
       instanceType: String_.t option
         [@ocaml.doc
           "The instance type to use for a multi-node parallel job. This parameter isn't applicable to single-node container jobs or jobs that run on Fargate resources, and shouldn't be provided."];
       environment: EnvironmentVariables.t option
         [@ocaml.doc
-          "The environment variables to send to the container. You can add new environment variables, which are added to the container at launch, or you can override the existing environment variables from the Docker image or the job definition. Environment variables must not start with AWS_BATCH; this naming convention is reserved for variables that are set by the Batch service."];
+          "The environment variables to send to the container. You can add new environment variables, which are added to the container at launch, or you can override the existing environment variables from the Docker image or the job definition. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
       resourceRequirements: ResourceRequirements.t option
         [@ocaml.doc
           "The type and amount of resources to assign to a container. This overrides the settings in the job definition. The supported resources include GPU, MEMORY, and VCPU."]}
@@ -1798,44 +5280,420 @@ module ContainerOverrides =
       make ?resourceRequirements ?environment ?instanceType ?command ?memory
         ?vcpus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceRequirements =
-        field_map json "resourceRequirements" ResourceRequirements.of_json in
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
       let environment =
-        field_map json "environment" EnvironmentVariables.of_json in
-      let instanceType = field_map json "instanceType" String_.of_json in
-      let command = field_map json "command" StringList.of_json in
-      let memory = field_map json "memory" Integer.of_json in
-      let vcpus = field_map json "vcpus" Integer.of_json in
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let memory = field_map json__ "memory" Integer.of_json in
+      let vcpus = field_map json__ "vcpus" Integer.of_json in
       make ?resourceRequirements ?environment ?instanceType ?command ?memory
         ?vcpus ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The overrides that should be sent to a container."]
-module ShareAttributesList =
+  end[@@ocaml.doc
+       "The overrides that should be sent to a container. For information about using Batch overrides when you connect event sources to targets, see BatchContainerOverrides."]
+module EcsPropertiesOverride =
   struct
-    type nonrec t = ShareAttributes.t list
+    type nonrec t =
+      {
+      taskProperties: ListTaskPropertiesOverride.t option
+        [@ocaml.doc
+          "The overrides for the Amazon ECS task definition of a job. This object is currently limited to one element."]}
+    let make ?taskProperties = fun () -> { taskProperties }
+    let to_value x =
+      structure_to_value
+        [("taskProperties",
+           (Option.map x.taskProperties
+              ~f:ListTaskPropertiesOverride.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskProperties =
+        (Option.map ~f:ListTaskPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "taskProperties") in
+      make ?taskProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskProperties =
+        field_map json__ "taskProperties" ListTaskPropertiesOverride.of_json in
+      make ?taskProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains overrides for the Amazon ECS task definition of a job."]
+module EksPropertiesOverride =
+  struct
+    type nonrec t =
+      {
+      podProperties: EksPodPropertiesOverride.t option
+        [@ocaml.doc
+          "The overrides for the Kubernetes pod resources of a job."]}
+    let make ?podProperties = fun () -> { podProperties }
+    let to_value x =
+      structure_to_value
+        [("podProperties",
+           (Option.map x.podProperties ~f:EksPodPropertiesOverride.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let podProperties =
+        (Option.map ~f:EksPodPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "podProperties") in
+      make ?podProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let podProperties =
+        field_map json__ "podProperties" EksPodPropertiesOverride.of_json in
+      make ?podProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains overrides for the Kubernetes resources of a job."]
+module ServiceResourceId =
+  struct
+    type nonrec t =
+      {
+      name: ServiceResourceIdName.t option
+        [@ocaml.doc "The name of the resource identifier."];
+      value: String_.t option
+        [@ocaml.doc "The value of the resource identifier."]}
+    let make ?name = fun ?value -> fun () -> { name; value }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:ServiceResourceIdName.to_value));
+        ("value", (Option.map x.value ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "value") in
+      let name =
+        (Option.map ~f:ServiceResourceIdName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?value ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" String_.of_json in
+      let name = field_map json__ "name" ServiceResourceIdName.of_json in
+      make ?value ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Batch unique identifier."]
+module ServiceJobCapacityUsageSummary =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the service job capacity usage. For service jobs, this is the instance type."];
+      quantity: Double.t option
+        [@ocaml.doc
+          "The quantity of capacity being used by the service job, measured in the units specified by capacityUnit."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity usage for a service job, including the unit of measure and quantity of resources being used."]
+module QuotaShareCapacityLimit =
+  struct
+    type nonrec t =
+      {
+      maxCapacity: Integer.t
+        [@ocaml.doc
+          "The maximum capacity available for the quota share. This value represents the maximum quantity of a resource that can be allocated to jobs in the quota share without borrowing."];
+      capacityUnit: String_.t
+        [@ocaml.doc
+          "The unit of compute capacity for the capacityLimit. For example, ml.m5.large."]}
+    let context_ = "QuotaShareCapacityLimit"
+    let make ~maxCapacity =
+      fun ~capacityUnit -> fun () -> { maxCapacity; capacityUnit }
+    let to_value x =
+      structure_to_value
+        [("maxCapacity", (Some (Integer.to_value x.maxCapacity)));
+        ("capacityUnit", (Some (String_.to_value x.capacityUnit)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityUnit =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capacityUnit") in
+      let maxCapacity =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxCapacity") in
+      make ~capacityUnit ~maxCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityUnit = field_map_exn json__ "capacityUnit" String_.of_json in
+      let maxCapacity = field_map_exn json__ "maxCapacity" Integer.of_json in
+      make ~capacityUnit ~maxCapacity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the capacity limit for a quota share, or the type and maximum quantity of a particular resource that can be allocated to jobs in the quota share without borrowing."]
+module QuotaShareInSharePreemptionState =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
     let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuotaShareInSharePreemptionState"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"QuotaShareInSharePreemptionState" j)
+    let to_json = simple_to_json to_value
+  end
+module QuotaShareResourceSharingStrategy =
+  struct
+    type nonrec t =
+      | RESERVE 
+      | LEND 
+      | LEND_AND_BORROW 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RESERVE -> "RESERVE"
+      | LEND -> "LEND"
+      | LEND_AND_BORROW -> "LEND_AND_BORROW"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RESERVE" -> RESERVE
+      | "LEND" -> LEND
+      | "LEND_AND_BORROW" -> LEND_AND_BORROW
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QuotaShareResourceSharingStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"QuotaShareResourceSharingStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module ArrayJobStatusSummary =
+  struct
+    type nonrec t = (String_.t * Integer.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (Integer.of_string v))))))
     let to_value xs =
-      (xs |> (List.map ~f:ShareAttributes.to_value)) |> (fun x -> `List x)
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (Integer.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
     let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ShareAttributes.of_xml)
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
-      list_of_json ~kind:"ShareAttributesList"
-        ~of_json:ShareAttributes.of_json j
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:Integer.of_json j
     let to_json v = composed_to_json to_value v
   end
+module JobCapacityUsageSummary =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the capacity usage. This is VCPU for Amazon EC2 and cpu for Amazon EKS."];
+      quantity: Double.t option
+        [@ocaml.doc
+          "The quantity of capacity being used by the job, measured in the units specified by capacityUnit."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity usage for a job, including the unit of measure and quantity of resources being used."]
+module FrontOfQuotaShareJobSummary =
+  struct
+    type nonrec t =
+      {
+      jobArn: String_.t option
+        [@ocaml.doc "The ARN for a job in a named quota share."];
+      earliestTimeAtPosition: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the job transitioned to its current position in the quota share."]}
+    let make ?jobArn =
+      fun ?earliestTimeAtPosition ->
+        fun () -> { jobArn; earliestTimeAtPosition }
+    let to_value x =
+      structure_to_value
+        [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("earliestTimeAtPosition",
+          (Option.map x.earliestTimeAtPosition ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let earliestTimeAtPosition =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "earliestTimeAtPosition") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?earliestTimeAtPosition ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let earliestTimeAtPosition =
+        field_map json__ "earliestTimeAtPosition" Long.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?earliestTimeAtPosition ?jobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents summary details for the first RUNNABLE job in a quota share."]
+module FairshareCapacityUtilization =
+  struct
+    type nonrec t =
+      {
+      shareIdentifier: String_.t option
+        [@ocaml.doc
+          "The share identifier for the fairshare scheduling job queue."];
+      capacityUsage: FairshareCapacityUsageList.t option
+        [@ocaml.doc
+          "The capacity usage information for this share, including the unit of measure and quantity being used. This is VCPU for Amazon EC2 and cpu for Amazon EKS."]}
+    let make ?shareIdentifier =
+      fun ?capacityUsage -> fun () -> { shareIdentifier; capacityUsage }
+    let to_value x =
+      structure_to_value
+        [("shareIdentifier",
+           (Option.map x.shareIdentifier ~f:String_.to_value));
+        ("capacityUsage",
+          (Option.map x.capacityUsage ~f:FairshareCapacityUsageList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityUsage =
+        (Option.map ~f:FairshareCapacityUsageList.of_xml)
+          (Xml.child xml_arg0 "capacityUsage") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      make ?capacityUsage ?shareIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityUsage =
+        field_map json__ "capacityUsage" FairshareCapacityUsageList.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      make ?capacityUsage ?shareIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity utilization for a specific share in a fairshare scheduling job queue, including the share identifier and its current usage."]
+module QuotaShareCapacityUtilization =
+  struct
+    type nonrec t =
+      {
+      quotaShareName: String_.t option
+        [@ocaml.doc "The name of the quota share."];
+      capacityUsage: QuotaShareCapacityUsageList.t option
+        [@ocaml.doc
+          "The capacity usage information for this quota share, including the units of compute capacity and quantity being used."]}
+    let make ?quotaShareName =
+      fun ?capacityUsage -> fun () -> { quotaShareName; capacityUsage }
+    let to_value x =
+      structure_to_value
+        [("quotaShareName",
+           (Option.map x.quotaShareName ~f:String_.to_value));
+        ("capacityUsage",
+          (Option.map x.capacityUsage ~f:QuotaShareCapacityUsageList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityUsage =
+        (Option.map ~f:QuotaShareCapacityUsageList.of_xml)
+          (Xml.child xml_arg0 "capacityUsage") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      make ?capacityUsage ?quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityUsage =
+        field_map json__ "capacityUsage" QuotaShareCapacityUsageList.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      make ?capacityUsage ?quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity utilization for a specific quota share, including the quota share name and its current usage."]
+module CapacityLimit =
+  struct
+    type nonrec t =
+      {
+      maxCapacity: Integer.t option
+        [@ocaml.doc
+          "The maximum capacity available for the service environment. For a quota management enabled service environment, this value represents the maximum quantity of a particular resource type (specified by capacityUnit) that can be allocated to service jobs. For other service environments, this value represents the maximum quantity of all resources that can be allocated to service jobs. For example, if maxCapacity=50 and capacityUnit=NUM_INSTANCES, you can run up to 50 instances concurrently. If you run 5 SageMaker Training jobs that each use 10 instances, a subsequent job requiring 10 instances waits in the queue until capacity is available. In a quota management enabled service environment with capacityUnit=ml.m5.large, only ml.m5.large instances count against this limit, and jobs requiring other instance types wait until a matching capacity limit is configured."];
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the capacity limit, which defines how maxCapacity is interpreted. For SAGEMAKER_TRAINING jobs in a quota management enabled service environment, specify the instance type (for example, ml.m5.large). Otherwise, use NUM_INSTANCES."]}
+    let make ?maxCapacity =
+      fun ?capacityUnit -> fun () -> { maxCapacity; capacityUnit }
+    let to_value x =
+      structure_to_value
+        [("maxCapacity", (Option.map x.maxCapacity ~f:Integer.to_value));
+        ("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      let maxCapacity =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxCapacity") in
+      make ?capacityUnit ?maxCapacity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      let maxCapacity = field_map json__ "maxCapacity" Integer.of_json in
+      make ?capacityUnit ?maxCapacity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the type and maximum quantity of resources that can be allocated to service jobs in a service environment."]
 module TagKey =
   struct
     type nonrec t = string
@@ -1868,40 +5726,61 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
-module ArrayJobStatusSummary =
+module ShareAttributesList =
   struct
-    type nonrec t = (String_.t * Integer.t) list
+    type nonrec t = ShareAttributes.t list
     let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((String_.of_string chopped),
-                              (Integer.of_string v))))))
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x -> (Integer.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
+      (xs |> (List.map ~f:ShareAttributes.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ShareAttributes.of_xml)
     let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:Integer.of_json j
+      list_of_json ~kind:"ShareAttributesList"
+        ~of_json:ShareAttributes.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module QuotaShareIdleResourceAssignmentStrategy =
+  struct
+    type nonrec t =
+      | FIFO 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | FIFO -> "FIFO" | Non_static_id s -> s
+    let of_string = function | "FIFO" -> FIFO | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration QuotaShareIdleResourceAssignmentStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"QuotaShareIdleResourceAssignmentStrategy" j)
+    let to_json = simple_to_json to_value
   end
 module AttemptDetail =
   struct
     type nonrec t =
       {
       container: AttemptContainerDetail.t option
-        [@ocaml.doc "Details about the container in this job attempt."];
+        [@ocaml.doc "The details for the container in this job attempt."];
       startedAt: Long.t option
         [@ocaml.doc
           "The Unix timestamp (in milliseconds) for when the attempt was started (when the attempt transitioned from the STARTING state to the RUNNING state)."];
@@ -1910,16 +5789,146 @@ module AttemptDetail =
           "The Unix timestamp (in milliseconds) for when the attempt was stopped (when the attempt transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED)."];
       statusReason: String_.t option
         [@ocaml.doc
-          "A short, human-readable string to provide additional details about the current status of the job attempt."]}
+          "A short, human-readable string to provide additional details for the current status of the job attempt."];
+      taskProperties: ListAttemptEcsTaskDetails.t option
+        [@ocaml.doc
+          "The properties for a task definition that describes the container and volume definitions of an Amazon ECS task."]}
     let make ?container =
       fun ?startedAt ->
         fun ?stoppedAt ->
           fun ?statusReason ->
-            fun () -> { container; startedAt; stoppedAt; statusReason }
+            fun ?taskProperties ->
+              fun () ->
+                {
+                  container;
+                  startedAt;
+                  stoppedAt;
+                  statusReason;
+                  taskProperties
+                }
     let to_value x =
       structure_to_value
         [("container",
            (Option.map x.container ~f:AttemptContainerDetail.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
+        ("taskProperties",
+          (Option.map x.taskProperties ~f:ListAttemptEcsTaskDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskProperties =
+        (Option.map ~f:ListAttemptEcsTaskDetails.of_xml)
+          (Xml.child xml_arg0 "taskProperties") in
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let stoppedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let container =
+        (Option.map ~f:AttemptContainerDetail.of_xml)
+          (Xml.child xml_arg0 "container") in
+      make ?taskProperties ?statusReason ?stoppedAt ?startedAt ?container ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskProperties =
+        field_map json__ "taskProperties" ListAttemptEcsTaskDetails.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let container =
+        field_map json__ "container" AttemptContainerDetail.of_json in
+      make ?taskProperties ?statusReason ?stoppedAt ?startedAt ?container ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An object that represents a job attempt."]
+module ListEcsTaskDetails =
+  struct
+    type nonrec t = EcsTaskDetails.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EcsTaskDetails.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EcsTaskDetails.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListEcsTaskDetails" ~of_json:EcsTaskDetails.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module EksAttemptDetail =
+  struct
+    type nonrec t =
+      {
+      containers: EksAttemptContainerDetails.t option
+        [@ocaml.doc
+          "The details for the final status of the containers for this job attempt."];
+      initContainers: EksAttemptContainerDetails.t option
+        [@ocaml.doc "The details for the init containers."];
+      eksClusterArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon EKS cluster."];
+      podName: String_.t option
+        [@ocaml.doc "The name of the pod for this job attempt."];
+      podNamespace: String_.t option
+        [@ocaml.doc
+          "The namespace of the Amazon EKS cluster that the pod exists in."];
+      nodeName: String_.t option
+        [@ocaml.doc "The name of the node for this job attempt."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the attempt was started (when the attempt transitioned from the STARTING state to the RUNNING state)."];
+      stoppedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the attempt was stopped. This happens when the attempt transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A short, human-readable string to provide additional details for the current status of the job attempt."]}
+    let make ?containers =
+      fun ?initContainers ->
+        fun ?eksClusterArn ->
+          fun ?podName ->
+            fun ?podNamespace ->
+              fun ?nodeName ->
+                fun ?startedAt ->
+                  fun ?stoppedAt ->
+                    fun ?statusReason ->
+                      fun () ->
+                        {
+                          containers;
+                          initContainers;
+                          eksClusterArn;
+                          podName;
+                          podNamespace;
+                          nodeName;
+                          startedAt;
+                          stoppedAt;
+                          statusReason
+                        }
+    let to_value x =
+      structure_to_value
+        [("containers",
+           (Option.map x.containers ~f:EksAttemptContainerDetails.to_value));
+        ("initContainers",
+          (Option.map x.initContainers ~f:EksAttemptContainerDetails.to_value));
+        ("eksClusterArn", (Option.map x.eksClusterArn ~f:String_.to_value));
+        ("podName", (Option.map x.podName ~f:String_.to_value));
+        ("podNamespace", (Option.map x.podNamespace ~f:String_.to_value));
+        ("nodeName", (Option.map x.nodeName ~f:String_.to_value));
         ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
         ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
@@ -1931,27 +5940,180 @@ module AttemptDetail =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
       let startedAt =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
-      let container =
-        (Option.map ~f:AttemptContainerDetail.of_xml)
-          (Xml.child xml_arg0 "container") in
-      make ?statusReason ?stoppedAt ?startedAt ?container ()
+      let nodeName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodeName") in
+      let podNamespace =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "podNamespace") in
+      let podName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "podName") in
+      let eksClusterArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "eksClusterArn") in
+      let initContainers =
+        (Option.map ~f:EksAttemptContainerDetails.of_xml)
+          (Xml.child xml_arg0 "initContainers") in
+      let containers =
+        (Option.map ~f:EksAttemptContainerDetails.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      make ?statusReason ?stoppedAt ?startedAt ?nodeName ?podNamespace
+        ?podName ?eksClusterArn ?initContainers ?containers ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let stoppedAt = field_map json "stoppedAt" Long.of_json in
-      let startedAt = field_map json "startedAt" Long.of_json in
-      let container =
-        field_map json "container" AttemptContainerDetail.of_json in
-      make ?statusReason ?stoppedAt ?startedAt ?container ()
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let nodeName = field_map json__ "nodeName" String_.of_json in
+      let podNamespace = field_map json__ "podNamespace" String_.of_json in
+      let podName = field_map json__ "podName" String_.of_json in
+      let eksClusterArn = field_map json__ "eksClusterArn" String_.of_json in
+      let initContainers =
+        field_map json__ "initContainers" EksAttemptContainerDetails.of_json in
+      let containers =
+        field_map json__ "containers" EksAttemptContainerDetails.of_json in
+      make ?statusReason ?stoppedAt ?startedAt ?nodeName ?podNamespace
+        ?podName ?eksClusterArn ?initContainers ?containers ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing a job attempt."]
+  end[@@ocaml.doc
+       "An object that represents the details of a job attempt for a job attempt by an Amazon EKS container."]
+module EksPodPropertiesDetail =
+  struct
+    type nonrec t =
+      {
+      serviceAccountName: String_.t option
+        [@ocaml.doc
+          "The name of the service account that's used to run the pod. For more information, see Kubernetes service accounts and Configure a Kubernetes service account to assume an IAM role in the Amazon EKS User Guide and Configure service accounts for pods in the Kubernetes documentation."];
+      hostNetwork: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the pod uses the hosts' network IP address. The default value is true. Setting this to false enables the Kubernetes pod networking model. Most Batch workloads are egress-only and don't require the overhead of IP allocation for each pod for incoming connections. For more information, see Host namespaces and Pod networking in the Kubernetes documentation."];
+      dnsPolicy: String_.t option
+        [@ocaml.doc
+          "The DNS policy for the pod. The default value is ClusterFirst. If the hostNetwork parameter is not specified, the default is ClusterFirstWithHostNet. ClusterFirst indicates that any DNS query that does not match the configured cluster domain suffix is forwarded to the upstream nameserver inherited from the node. If no value was specified for dnsPolicy in the RegisterJobDefinition API operation, then no value will be returned for dnsPolicy by either of DescribeJobDefinitions or DescribeJobs API operations. The pod spec setting will contain either ClusterFirst or ClusterFirstWithHostNet, depending on the value of the hostNetwork parameter. For more information, see Pod's DNS policy in the Kubernetes documentation. Valid values: Default | ClusterFirst | ClusterFirstWithHostNet"];
+      imagePullSecrets: ImagePullSecrets.t option
+        [@ocaml.doc
+          "Displays the reference pointer to the Kubernetes secret resource. These secrets help to gain access to pull an images from a private registry."];
+      containers: EksContainerDetails.t option
+        [@ocaml.doc
+          "The properties of the container that's used on the Amazon EKS pod."];
+      initContainers: EksContainerDetails.t option
+        [@ocaml.doc
+          "The container registered with the Amazon EKS Connector agent and persists the registration information in the Kubernetes backend data store."];
+      volumes: EksVolumes.t option
+        [@ocaml.doc
+          "Specifies the volumes for a job definition using Amazon EKS resources."];
+      podName: String_.t option
+        [@ocaml.doc "The name of the pod for this job."];
+      nodeName: String_.t option
+        [@ocaml.doc "The name of the node for this job."];
+      metadata: EksMetadata.t option
+        [@ocaml.doc
+          "Describes and uniquely identifies Kubernetes resources. For example, the compute environment that a pod runs in or the jobID for a job running in the pod. For more information, see Understanding Kubernetes Objects in the Kubernetes documentation."];
+      shareProcessNamespace: Boolean.t option
+        [@ocaml.doc
+          "Indicates if the processes in a container are shared, or visible, to other containers in the same pod. For more information, see Share Process Namespace between Containers in a Pod."]}
+    let make ?serviceAccountName =
+      fun ?hostNetwork ->
+        fun ?dnsPolicy ->
+          fun ?imagePullSecrets ->
+            fun ?containers ->
+              fun ?initContainers ->
+                fun ?volumes ->
+                  fun ?podName ->
+                    fun ?nodeName ->
+                      fun ?metadata ->
+                        fun ?shareProcessNamespace ->
+                          fun () ->
+                            {
+                              serviceAccountName;
+                              hostNetwork;
+                              dnsPolicy;
+                              imagePullSecrets;
+                              containers;
+                              initContainers;
+                              volumes;
+                              podName;
+                              nodeName;
+                              metadata;
+                              shareProcessNamespace
+                            }
+    let to_value x =
+      structure_to_value
+        [("serviceAccountName",
+           (Option.map x.serviceAccountName ~f:String_.to_value));
+        ("hostNetwork", (Option.map x.hostNetwork ~f:Boolean.to_value));
+        ("dnsPolicy", (Option.map x.dnsPolicy ~f:String_.to_value));
+        ("imagePullSecrets",
+          (Option.map x.imagePullSecrets ~f:ImagePullSecrets.to_value));
+        ("containers",
+          (Option.map x.containers ~f:EksContainerDetails.to_value));
+        ("initContainers",
+          (Option.map x.initContainers ~f:EksContainerDetails.to_value));
+        ("volumes", (Option.map x.volumes ~f:EksVolumes.to_value));
+        ("podName", (Option.map x.podName ~f:String_.to_value));
+        ("nodeName", (Option.map x.nodeName ~f:String_.to_value));
+        ("metadata", (Option.map x.metadata ~f:EksMetadata.to_value));
+        ("shareProcessNamespace",
+          (Option.map x.shareProcessNamespace ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let shareProcessNamespace =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "shareProcessNamespace") in
+      let metadata =
+        (Option.map ~f:EksMetadata.of_xml) (Xml.child xml_arg0 "metadata") in
+      let nodeName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nodeName") in
+      let podName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "podName") in
+      let volumes =
+        (Option.map ~f:EksVolumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let initContainers =
+        (Option.map ~f:EksContainerDetails.of_xml)
+          (Xml.child xml_arg0 "initContainers") in
+      let containers =
+        (Option.map ~f:EksContainerDetails.of_xml)
+          (Xml.child xml_arg0 "containers") in
+      let imagePullSecrets =
+        (Option.map ~f:ImagePullSecrets.of_xml)
+          (Xml.child xml_arg0 "imagePullSecrets") in
+      let dnsPolicy =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "dnsPolicy") in
+      let hostNetwork =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "hostNetwork") in
+      let serviceAccountName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceAccountName") in
+      make ?shareProcessNamespace ?metadata ?nodeName ?podName ?volumes
+        ?initContainers ?containers ?imagePullSecrets ?dnsPolicy ?hostNetwork
+        ?serviceAccountName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let shareProcessNamespace =
+        field_map json__ "shareProcessNamespace" Boolean.of_json in
+      let metadata = field_map json__ "metadata" EksMetadata.of_json in
+      let nodeName = field_map json__ "nodeName" String_.of_json in
+      let podName = field_map json__ "podName" String_.of_json in
+      let volumes = field_map json__ "volumes" EksVolumes.of_json in
+      let initContainers =
+        field_map json__ "initContainers" EksContainerDetails.of_json in
+      let containers =
+        field_map json__ "containers" EksContainerDetails.of_json in
+      let imagePullSecrets =
+        field_map json__ "imagePullSecrets" ImagePullSecrets.of_json in
+      let dnsPolicy = field_map json__ "dnsPolicy" String_.of_json in
+      let hostNetwork = field_map json__ "hostNetwork" Boolean.of_json in
+      let serviceAccountName =
+        field_map json__ "serviceAccountName" String_.of_json in
+      make ?shareProcessNamespace ?metadata ?nodeName ?podName ?volumes
+        ?initContainers ?containers ?imagePullSecrets ?dnsPolicy ?hostNetwork
+        ?serviceAccountName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details for the pod."]
 module JobDependency =
   struct
     type nonrec t =
       {
       jobId: String_.t option
         [@ocaml.doc
-          "The job ID of the Batch job associated with this dependency."];
+          "The job ID of the Batch job that's associated with this dependency."];
       type_: ArrayJobDependency.t option
         [@ocaml.doc "The type of the job dependency."]}
     let make ?jobId = fun ?type_ -> fun () -> { jobId; type_ }
@@ -1966,16 +6128,19 @@ module JobDependency =
       let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?type_ ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ArrayJobDependency.of_json in
-      let jobId = field_map json "jobId" String_.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" ArrayJobDependency.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
       make ?type_ ?jobId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Batch job dependency."]
+  end[@@ocaml.doc "An object that represents an Batch job dependency."]
 module NodeRangeProperties =
   struct
     type nonrec t = NodeRangeProperty.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodeRangeProperty.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2021,6 +6186,9 @@ module EvaluateOnExitList =
   struct
     type nonrec t = EvaluateOnExit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EvaluateOnExit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2069,20 +6237,108 @@ module ComputeEnvironmentOrder =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "order") in
       make ~computeEnvironment ~order ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeEnvironment =
-        field_map_exn json "computeEnvironment" String_.of_json in
-      let order = field_map_exn json "order" Integer.of_json in
+        field_map_exn json__ "computeEnvironment" String_.of_json in
+      let order = field_map_exn json__ "order" Integer.of_json in
       make ~computeEnvironment ~order ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The order in which compute environments are tried for job placement within a queue. Compute environments are tried in ascending order. For example, if two compute environments are associated with a job queue, the compute environment with a lower order integer value is tried for job placement first. Compute environments must be in the VALID state before you can associate them with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."]
+       "The order that compute environments are tried in for job placement within a queue. Compute environments are tried in ascending order. For example, if two compute environments are associated with a job queue, the compute environment with a lower order integer value is tried for job placement first. Compute environments must be in the VALID state before you can associate them with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); Amazon EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."]
+module JobStateTimeLimitAction =
+  struct
+    type nonrec t =
+      {
+      reason: String_.t
+        [@ocaml.doc "The reason to log for the action being taken."];
+      state: JobStateTimeLimitActionsState.t
+        [@ocaml.doc
+          "The state of the job needed to trigger the action. The only supported value is RUNNABLE."];
+      maxTimeSeconds: Integer.t
+        [@ocaml.doc
+          "The approximate amount of time, in seconds, that must pass with the job in the specified state before the action is taken. The minimum value is 600 (10 minutes) and the maximum value is 86,400 (24 hours)."];
+      action: JobStateTimeLimitActionsAction.t
+        [@ocaml.doc
+          "The action to take when a job is at the head of the job queue in the specified state for the specified period of time. For job queues connected to a ECS, FARGATE or EKS compute environment, the only supported value is CANCEL, which will cancel the job. For job queues connected to a SAGEMAKER_TRAINING service environment, the only supported value is TERMINATE, which will terminate the job."]}
+    let context_ = "JobStateTimeLimitAction"
+    let make ~reason =
+      fun ~state ->
+        fun ~maxTimeSeconds ->
+          fun ~action -> fun () -> { reason; state; maxTimeSeconds; action }
+    let to_value x =
+      structure_to_value
+        [("reason", (Some (String_.to_value x.reason)));
+        ("state", (Some (JobStateTimeLimitActionsState.to_value x.state)));
+        ("maxTimeSeconds", (Some (Integer.to_value x.maxTimeSeconds)));
+        ("action", (Some (JobStateTimeLimitActionsAction.to_value x.action)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let action =
+        JobStateTimeLimitActionsAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "action") in
+      let maxTimeSeconds =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxTimeSeconds") in
+      let state =
+        JobStateTimeLimitActionsState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+      let reason =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reason") in
+      make ~action ~maxTimeSeconds ~state ~reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let action =
+        field_map_exn json__ "action" JobStateTimeLimitActionsAction.of_json in
+      let maxTimeSeconds =
+        field_map_exn json__ "maxTimeSeconds" Integer.of_json in
+      let state =
+        field_map_exn json__ "state" JobStateTimeLimitActionsState.of_json in
+      let reason = field_map_exn json__ "reason" String_.of_json in
+      make ~action ~maxTimeSeconds ~state ~reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies an action that Batch will take after the job has remained at the head of the queue in the specified state for longer than the specified time."]
+module ServiceEnvironmentOrder =
+  struct
+    type nonrec t =
+      {
+      order: Integer.t
+        [@ocaml.doc
+          "The order of the service environment. Job queues with a higher priority are evaluated first when associated with the same service environment."];
+      serviceEnvironment: String_.t
+        [@ocaml.doc "The name or ARN of the service environment."]}
+    let context_ = "ServiceEnvironmentOrder"
+    let make ~order =
+      fun ~serviceEnvironment -> fun () -> { order; serviceEnvironment }
+    let to_value x =
+      structure_to_value
+        [("order", (Some (Integer.to_value x.order)));
+        ("serviceEnvironment",
+          (Some (String_.to_value x.serviceEnvironment)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceEnvironment =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceEnvironment") in
+      let order =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "order") in
+      make ~serviceEnvironment ~order ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceEnvironment =
+        field_map_exn json__ "serviceEnvironment" String_.of_json in
+      let order = field_map_exn json__ "order" Integer.of_json in
+      make ~serviceEnvironment ~order ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the order of a service environment for a job queue. This determines the priority order when multiple service environments are associated with the same job queue."]
 module CRAllocationStrategy =
   struct
     type nonrec t =
       | BEST_FIT 
       | BEST_FIT_PROGRESSIVE 
       | SPOT_CAPACITY_OPTIMIZED 
+      | SPOT_PRICE_CAPACITY_OPTIMIZED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2090,12 +6346,14 @@ module CRAllocationStrategy =
       | BEST_FIT -> "BEST_FIT"
       | BEST_FIT_PROGRESSIVE -> "BEST_FIT_PROGRESSIVE"
       | SPOT_CAPACITY_OPTIMIZED -> "SPOT_CAPACITY_OPTIMIZED"
+      | SPOT_PRICE_CAPACITY_OPTIMIZED -> "SPOT_PRICE_CAPACITY_OPTIMIZED"
       | Non_static_id s -> s
     let of_string =
       function
       | "BEST_FIT" -> BEST_FIT
       | "BEST_FIT_PROGRESSIVE" -> BEST_FIT_PROGRESSIVE
       | "SPOT_CAPACITY_OPTIMIZED" -> SPOT_CAPACITY_OPTIMIZED
+      | "SPOT_PRICE_CAPACITY_OPTIMIZED" -> SPOT_PRICE_CAPACITY_OPTIMIZED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2137,10 +6395,40 @@ module CRType =
     let of_json j = of_string (string_of_json ~kind:"CRType" j)
     let to_json = simple_to_json to_value
   end
+module ComputeScalingPolicy =
+  struct
+    type nonrec t =
+      {
+      minScaleDownDelayMinutes: Integer.t option
+        [@ocaml.doc
+          "The minimum time (in minutes) that Batch keeps instances running in the compute environment after their jobs complete. For each instance, the delay period begins when the last job finishes. If no new jobs are placed on the instance during this delay, Batch terminates the instance once the delay expires. Valid Range: Minimum value of 20. Maximum value of 10080. Use 0 to unset and disable the scale down delay. Idle instances retained during the scale-down delay period are billable at standard EC2 pricing. The scale down delay does not apply to: Instances being replaced during infrastructure updates Newly launched instances that have not yet run any jobs Spot instances reclaimed due to interruption"]}
+    let make ?minScaleDownDelayMinutes =
+      fun () -> { minScaleDownDelayMinutes }
+    let to_value x =
+      structure_to_value
+        [("minScaleDownDelayMinutes",
+           (Option.map x.minScaleDownDelayMinutes ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let minScaleDownDelayMinutes =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "minScaleDownDelayMinutes") in
+      make ?minScaleDownDelayMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let minScaleDownDelayMinutes =
+        field_map json__ "minScaleDownDelayMinutes" Integer.of_json in
+      make ?minScaleDownDelayMinutes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents a scaling policy for a compute environment."]
 module Ec2ConfigurationList =
   struct
     type nonrec t = Ec2Configuration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Ec2Configuration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2172,20 +6460,46 @@ module LaunchTemplateSpecification =
         [@ocaml.doc "The name of the launch template."];
       version: String_.t option
         [@ocaml.doc
-          "The version number of the launch template, $Latest, or $Default. If the value is $Latest, the latest version of the launch template is used. If the value is $Default, the default version of the launch template is used. After the compute environment is created, the launch template version that's used isn't changed, even if the $Default or $Latest version for the launch template is updated. To use a new launch template version, create a new compute environment, add the new compute environment to the existing job queue, remove the old compute environment from the job queue, and delete the old compute environment. Default: $Default."]}
+          "The version number of the launch template, $Default, or $Latest. If the value is $Default, the default version of the launch template is used. If the value is $Latest, the latest version of the launch template is used. If the AMI ID that's used in a compute environment is from the launch template, the AMI isn't changed when the compute environment is updated. It's only changed if the updateToLatestImageVersion parameter for the compute environment is set to true. During an infrastructure update, if either $Default or $Latest is specified, Batch re-evaluates the launch template version, and it might use a different version of the launch template. This is the case even if the launch template isn't specified in the update. When updating a compute environment, changing the launch template requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. Default: $Default Latest: $Latest"];
+      overrides: LaunchTemplateSpecificationOverrideList.t option
+        [@ocaml.doc
+          "A launch template to use in place of the default launch template. You must specify either the launch template ID or launch template name in the request, but not both. You can specify up to ten (10) launch template overrides that are associated to unique instance types or families for each compute environment. To unset all override templates for a compute environment, you can pass an empty array to the UpdateComputeEnvironment.overrides parameter, or not include the overrides parameter when submitting the UpdateComputeEnvironment API operation."];
+      userdataType: UserdataType.t option
+        [@ocaml.doc
+          "The EKS node initialization process to use. You only need to specify this value if you are using a custom AMI. The default value is EKS_BOOTSTRAP_SH. If imageType is a custom AMI based on EKS_AL2023 or EKS_AL2023_NVIDIA then you must choose EKS_NODEADM."]}
     let make ?launchTemplateId =
       fun ?launchTemplateName ->
         fun ?version ->
-          fun () -> { launchTemplateId; launchTemplateName; version }
+          fun ?overrides ->
+            fun ?userdataType ->
+              fun () ->
+                {
+                  launchTemplateId;
+                  launchTemplateName;
+                  version;
+                  overrides;
+                  userdataType
+                }
     let to_value x =
       structure_to_value
         [("launchTemplateId",
            (Option.map x.launchTemplateId ~f:String_.to_value));
         ("launchTemplateName",
           (Option.map x.launchTemplateName ~f:String_.to_value));
-        ("version", (Option.map x.version ~f:String_.to_value))]
+        ("version", (Option.map x.version ~f:String_.to_value));
+        ("overrides",
+          (Option.map x.overrides
+             ~f:LaunchTemplateSpecificationOverrideList.to_value));
+        ("userdataType",
+          (Option.map x.userdataType ~f:UserdataType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let userdataType =
+        (Option.map ~f:UserdataType.of_xml)
+          (Xml.child xml_arg0 "userdataType") in
+      let overrides =
+        (Option.map ~f:LaunchTemplateSpecificationOverrideList.of_xml)
+          (Xml.child xml_arg0 "overrides") in
       let version =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "version") in
       let launchTemplateName =
@@ -2194,18 +6508,24 @@ module LaunchTemplateSpecification =
       let launchTemplateId =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "launchTemplateId") in
-      make ?version ?launchTemplateName ?launchTemplateId ()
+      make ?userdataType ?overrides ?version ?launchTemplateName
+        ?launchTemplateId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" String_.of_json in
+    let of_json json__ =
+      let userdataType = field_map json__ "userdataType" UserdataType.of_json in
+      let overrides =
+        field_map json__ "overrides"
+          LaunchTemplateSpecificationOverrideList.of_json in
+      let version = field_map json__ "version" String_.of_json in
       let launchTemplateName =
-        field_map json "launchTemplateName" String_.of_json in
+        field_map json__ "launchTemplateName" String_.of_json in
       let launchTemplateId =
-        field_map json "launchTemplateId" String_.of_json in
-      make ?version ?launchTemplateName ?launchTemplateId ()
+        field_map json__ "launchTemplateId" String_.of_json in
+      make ?userdataType ?overrides ?version ?launchTemplateName
+        ?launchTemplateId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing a launch template associated with a compute resource. You must specify either the launch template ID or launch template name in the request, but not both. If security groups are specified using both the securityGroupIds parameter of CreateComputeEnvironment and the launch template, the values in the securityGroupIds parameter of CreateComputeEnvironment will be used. This object isn't applicable to jobs that are running on Fargate resources."]
+       "An object that represents a launch template that's associated with a compute resource. You must specify either the launch template ID or launch template name in the request, but not both. If security groups are specified using both the securityGroupIds parameter of CreateComputeEnvironment and the launch template, the values in the securityGroupIds parameter of CreateComputeEnvironment will be used. This object isn't applicable to jobs that are running on Fargate resources."]
 module TagsMap =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -2227,6 +6547,8 @@ module TagsMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2234,6 +6556,56 @@ module TagsMap =
         ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module JobExecutionTimeoutMinutes =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int64_max i ~max:360L) >>=
+             (fun () -> check_int64_min i ~min:1L));
+        i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceJobEvaluateOnExit =
+  struct
+    type nonrec t =
+      {
+      action: ServiceJobRetryAction.t option
+        [@ocaml.doc
+          "The action to take if the service job exits with the specified condition. Valid values are RETRY and EXIT."];
+      onStatusReason: String_.t option
+        [@ocaml.doc
+          "Contains a glob pattern to match against the StatusReason returned for a job. The pattern can contain up to 512 characters and can contain all printable characters. It can optionally end with an asterisk (*) so that only the start of the string needs to be an exact match."]}
+    let make ?action =
+      fun ?onStatusReason -> fun () -> { action; onStatusReason }
+    let to_value x =
+      structure_to_value
+        [("action", (Option.map x.action ~f:ServiceJobRetryAction.to_value));
+        ("onStatusReason", (Option.map x.onStatusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let onStatusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "onStatusReason") in
+      let action =
+        (Option.map ~f:ServiceJobRetryAction.of_xml)
+          (Xml.child xml_arg0 "action") in
+      make ?onStatusReason ?action ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let onStatusReason = field_map json__ "onStatusReason" String_.of_json in
+      let action = field_map json__ "action" ServiceJobRetryAction.of_json in
+      make ?onStatusReason ?action ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies conditions for when to exit or retry a service job based on the exit status or status reason."]
 module NodePropertyOverride =
   struct
     type nonrec t =
@@ -2242,33 +6614,369 @@ module NodePropertyOverride =
         [@ocaml.doc
           "The range of nodes, using node index values, that's used to override. A range of 0:3 indicates nodes with index values of 0 through 3. If the starting range value is omitted (:n), then 0 is used to start the range. If the ending range value is omitted (n:), then the highest possible node index is used to end the range."];
       containerOverrides: ContainerOverrides.t option
-        [@ocaml.doc "The overrides that should be sent to a node range."]}
+        [@ocaml.doc "The overrides that are sent to a node range."];
+      ecsPropertiesOverride: EcsPropertiesOverride.t option
+        [@ocaml.doc
+          "An object that contains the properties that you want to replace for the existing Amazon ECS resources of a job."];
+      instanceTypes: StringList.t option
+        [@ocaml.doc
+          "An object that contains the instance types that you want to replace for the existing resources of a job."];
+      eksPropertiesOverride: EksPropertiesOverride.t option
+        [@ocaml.doc
+          "An object that contains the properties that you want to replace for the existing Amazon EKS resources of a job."];
+      consumableResourcePropertiesOverride:
+        ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "An object that contains overrides for the consumable resources of a job."]}
     let context_ = "NodePropertyOverride"
     let make ?containerOverrides =
-      fun ~targetNodes -> fun () -> { containerOverrides; targetNodes }
+      fun ?ecsPropertiesOverride ->
+        fun ?instanceTypes ->
+          fun ?eksPropertiesOverride ->
+            fun ?consumableResourcePropertiesOverride ->
+              fun ~targetNodes ->
+                fun () ->
+                  {
+                    containerOverrides;
+                    ecsPropertiesOverride;
+                    instanceTypes;
+                    eksPropertiesOverride;
+                    consumableResourcePropertiesOverride;
+                    targetNodes
+                  }
     let to_value x =
       structure_to_value
         [("targetNodes", (Some (String_.to_value x.targetNodes)));
         ("containerOverrides",
-          (Option.map x.containerOverrides ~f:ContainerOverrides.to_value))]
+          (Option.map x.containerOverrides ~f:ContainerOverrides.to_value));
+        ("ecsPropertiesOverride",
+          (Option.map x.ecsPropertiesOverride
+             ~f:EcsPropertiesOverride.to_value));
+        ("instanceTypes",
+          (Option.map x.instanceTypes ~f:StringList.to_value));
+        ("eksPropertiesOverride",
+          (Option.map x.eksPropertiesOverride
+             ~f:EksPropertiesOverride.to_value));
+        ("consumableResourcePropertiesOverride",
+          (Option.map x.consumableResourcePropertiesOverride
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourcePropertiesOverride =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourcePropertiesOverride") in
+      let eksPropertiesOverride =
+        (Option.map ~f:EksPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "eksPropertiesOverride") in
+      let instanceTypes =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "instanceTypes") in
+      let ecsPropertiesOverride =
+        (Option.map ~f:EcsPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "ecsPropertiesOverride") in
       let containerOverrides =
         (Option.map ~f:ContainerOverrides.of_xml)
           (Xml.child xml_arg0 "containerOverrides") in
       let targetNodes =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "targetNodes") in
-      make ?containerOverrides ~targetNodes ()
+      make ?consumableResourcePropertiesOverride ?eksPropertiesOverride
+        ?instanceTypes ?ecsPropertiesOverride ?containerOverrides
+        ~targetNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let consumableResourcePropertiesOverride =
+        field_map json__ "consumableResourcePropertiesOverride"
+          ConsumableResourceProperties.of_json in
+      let eksPropertiesOverride =
+        field_map json__ "eksPropertiesOverride"
+          EksPropertiesOverride.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
+      let ecsPropertiesOverride =
+        field_map json__ "ecsPropertiesOverride"
+          EcsPropertiesOverride.of_json in
       let containerOverrides =
-        field_map json "containerOverrides" ContainerOverrides.of_json in
-      let targetNodes = field_map_exn json "targetNodes" String_.of_json in
-      make ?containerOverrides ~targetNodes ()
+        field_map json__ "containerOverrides" ContainerOverrides.of_json in
+      let targetNodes = field_map_exn json__ "targetNodes" String_.of_json in
+      make ?consumableResourcePropertiesOverride ?eksPropertiesOverride
+        ?instanceTypes ?ecsPropertiesOverride ?containerOverrides
+        ~targetNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Object representing any node overrides to a job definition that's used in a SubmitJob API operation."]
+       "The object that represents any node overrides to a job definition that's used in a SubmitJob API operation."]
+module LatestServiceJobAttempt =
+  struct
+    type nonrec t =
+      {
+      serviceResourceId: ServiceResourceId.t option
+        [@ocaml.doc
+          "The service resource identifier associated with the service job attempt."]}
+    let make ?serviceResourceId = fun () -> { serviceResourceId }
+    let to_value x =
+      structure_to_value
+        [("serviceResourceId",
+           (Option.map x.serviceResourceId ~f:ServiceResourceId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceResourceId =
+        (Option.map ~f:ServiceResourceId.of_xml)
+          (Xml.child xml_arg0 "serviceResourceId") in
+      make ?serviceResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceResourceId =
+        field_map json__ "serviceResourceId" ServiceResourceId.of_json in
+      make ?serviceResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the latest attempt of a service job. A Service job can transition from SCHEDULED back to RUNNABLE state when they encounter capacity constraints."]
+module ServiceJobCapacityUsageSummaryList =
+  struct
+    type nonrec t = ServiceJobCapacityUsageSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobCapacityUsageSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobCapacityUsageSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobCapacityUsageSummaryList"
+        ~of_json:ServiceJobCapacityUsageSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceJobStatus =
+  struct
+    type nonrec t =
+      | SUBMITTED 
+      | PENDING 
+      | RUNNABLE 
+      | SCHEDULED 
+      | STARTING 
+      | RUNNING 
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUBMITTED -> "SUBMITTED"
+      | PENDING -> "PENDING"
+      | RUNNABLE -> "RUNNABLE"
+      | SCHEDULED -> "SCHEDULED"
+      | STARTING -> "STARTING"
+      | RUNNING -> "RUNNING"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUBMITTED" -> SUBMITTED
+      | "PENDING" -> PENDING
+      | "RUNNABLE" -> RUNNABLE
+      | "SCHEDULED" -> SCHEDULED
+      | "STARTING" -> STARTING
+      | "RUNNING" -> RUNNING
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceJobStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceJobStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceJobType =
+  struct
+    type nonrec t =
+      | SAGEMAKER_TRAINING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SAGEMAKER_TRAINING -> "SAGEMAKER_TRAINING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SAGEMAKER_TRAINING" -> SAGEMAKER_TRAINING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceJobType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceJobType" j)
+    let to_json = simple_to_json to_value
+  end
+module QuotaShareCapacityLimits =
+  struct
+    type nonrec t = QuotaShareCapacityLimit.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaShareCapacityLimit.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaShareCapacityLimit.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaShareCapacityLimits"
+        ~of_json:QuotaShareCapacityLimit.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuotaSharePreemptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      inSharePreemption: QuotaShareInSharePreemptionState.t
+        [@ocaml.doc
+          "Specifies whether jobs within a quota share can be preempted by another, higher priority job in the same quota share."]}
+    let context_ = "QuotaSharePreemptionConfiguration"
+    let make ~inSharePreemption = fun () -> { inSharePreemption }
+    let to_value x =
+      structure_to_value
+        [("inSharePreemption",
+           (Some
+              (QuotaShareInSharePreemptionState.to_value x.inSharePreemption)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let inSharePreemption =
+        QuotaShareInSharePreemptionState.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "inSharePreemption") in
+      make ~inSharePreemption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let inSharePreemption =
+        field_map_exn json__ "inSharePreemption"
+          QuotaShareInSharePreemptionState.of_json in
+      make ~inSharePreemption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the preemption behavior for jobs in a quota share."]
+module QuotaShareResourceSharingConfiguration =
+  struct
+    type nonrec t =
+      {
+      strategy: QuotaShareResourceSharingStrategy.t
+        [@ocaml.doc
+          "The resource sharing strategy for the quota share. The RESERVE strategy allows a quota share to reserve idle capacity for itself. LEND configures the share to lend its idle capacity to another share in need of capacity. The LEND_AND_BORROW strategy configures the share to borrow idle capacity from an underutilized share, as well as lend to another share."];
+      borrowLimit: Integer.t option
+        [@ocaml.doc
+          "The maximum percentage of additional capacity that the quota share can borrow from other shares. borrowLimit can only be applied to quota shares with a strategy of LEND_AND_BORROW. This value is expressed as a percentage of the quota share's configured CapacityLimits. The borrowLimit is applied uniformly across all capacity units. For example, if the borrowLimit is 200, the quota share can borrow up to 200% of its configured maxCapacity for each capacity unit. The default borrowLimit is -1, which indicates unlimited borrowing."]}
+    let context_ = "QuotaShareResourceSharingConfiguration"
+    let make ?borrowLimit =
+      fun ~strategy -> fun () -> { borrowLimit; strategy }
+    let to_value x =
+      structure_to_value
+        [("strategy",
+           (Some (QuotaShareResourceSharingStrategy.to_value x.strategy)));
+        ("borrowLimit", (Option.map x.borrowLimit ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let borrowLimit =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "borrowLimit") in
+      let strategy =
+        QuotaShareResourceSharingStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "strategy") in
+      make ?borrowLimit ~strategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let borrowLimit = field_map json__ "borrowLimit" Integer.of_json in
+      let strategy =
+        field_map_exn json__ "strategy"
+          QuotaShareResourceSharingStrategy.of_json in
+      make ?borrowLimit ~strategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies whether a quota share reserves, lends, or both lends and borrows idle compute capacity."]
+module QuotaShareState =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuotaShareState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuotaShareState" j)
+    let to_json = simple_to_json to_value
+  end
+module QuotaShareStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | VALID 
+      | INVALID 
+      | UPDATING 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | VALID -> "VALID"
+      | INVALID -> "INVALID"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "VALID" -> VALID
+      | "INVALID" -> INVALID
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuotaShareStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuotaShareStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ArrayPropertiesSummary =
   struct
     type nonrec t =
@@ -2278,24 +6986,49 @@ module ArrayPropertiesSummary =
           "The size of the array job. This parameter is returned for parent array jobs."];
       index: Integer.t option
         [@ocaml.doc
-          "The job index within the array that's associated with this job. This parameter is returned for children of array jobs."]}
-    let make ?size = fun ?index -> fun () -> { size; index }
+          "The job index within the array that's associated with this job. This parameter is returned for children of array jobs."];
+      statusSummary: ArrayJobStatusSummary.t option
+        [@ocaml.doc
+          "A summary of the number of array job children in each available job status. This parameter is returned for parent array jobs."];
+      statusSummaryLastUpdatedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the statusSummary was last updated."]}
+    let make ?size =
+      fun ?index ->
+        fun ?statusSummary ->
+          fun ?statusSummaryLastUpdatedAt ->
+            fun () ->
+              { size; index; statusSummary; statusSummaryLastUpdatedAt }
     let to_value x =
       structure_to_value
         [("size", (Option.map x.size ~f:Integer.to_value));
-        ("index", (Option.map x.index ~f:Integer.to_value))]
+        ("index", (Option.map x.index ~f:Integer.to_value));
+        ("statusSummary",
+          (Option.map x.statusSummary ~f:ArrayJobStatusSummary.to_value));
+        ("statusSummaryLastUpdatedAt",
+          (Option.map x.statusSummaryLastUpdatedAt ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statusSummaryLastUpdatedAt =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "statusSummaryLastUpdatedAt") in
+      let statusSummary =
+        (Option.map ~f:ArrayJobStatusSummary.of_xml)
+          (Xml.child xml_arg0 "statusSummary") in
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "index") in
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
-      make ?index ?size ()
+      make ?statusSummaryLastUpdatedAt ?statusSummary ?index ?size ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let index = field_map json "index" Integer.of_json in
-      let size = field_map json "size" Integer.of_json in
-      make ?index ?size ()
+    let of_json json__ =
+      let statusSummaryLastUpdatedAt =
+        field_map json__ "statusSummaryLastUpdatedAt" Long.of_json in
+      let statusSummary =
+        field_map json__ "statusSummary" ArrayJobStatusSummary.of_json in
+      let index = field_map json__ "index" Integer.of_json in
+      let size = field_map json__ "size" Integer.of_json in
+      make ?statusSummaryLastUpdatedAt ?statusSummary ?index ?size ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing the array properties of a job."]
+  end[@@ocaml.doc "An object that represents the array properties of a job."]
 module ContainerSummary =
   struct
     type nonrec t =
@@ -2304,7 +7037,7 @@ module ContainerSummary =
         [@ocaml.doc "The exit code to return upon completion."];
       reason: String_.t option
         [@ocaml.doc
-          "A short (255 max characters) human-readable string to provide additional details about a running or stopped container."]}
+          "A short (255 max characters) human-readable string to provide additional details for a running or stopped container."]}
     let make ?exitCode = fun ?reason -> fun () -> { exitCode; reason }
     let to_value x =
       structure_to_value
@@ -2318,13 +7051,42 @@ module ContainerSummary =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "exitCode") in
       make ?reason ?exitCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" String_.of_json in
-      let exitCode = field_map json "exitCode" Integer.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
       make ?reason ?exitCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing summary details of a container within a job."]
+       "An object that represents summary details of a container within a job."]
+module JobCapacityUsageSummaryList =
+  struct
+    type nonrec t = JobCapacityUsageSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JobCapacityUsageSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:JobCapacityUsageSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JobCapacityUsageSummaryList"
+        ~of_json:JobCapacityUsageSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module JobStatus =
   struct
     type nonrec t =
@@ -2374,7 +7136,7 @@ module NodePropertiesSummary =
           "Specifies whether the current node is the main node for a multi-node parallel job."];
       numNodes: Integer.t option
         [@ocaml.doc
-          "The number of nodes associated with a multi-node parallel job."];
+          "The number of nodes that are associated with a multi-node parallel job."];
       nodeIndex: Integer.t option
         [@ocaml.doc
           "The node index for the node. Node index numbering begins at zero. This index is also available on the node with the AWS_BATCH_JOB_NODE_INDEX environment variable."]}
@@ -2396,27 +7158,382 @@ module NodePropertiesSummary =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isMainNode") in
       make ?nodeIndex ?numNodes ?isMainNode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nodeIndex = field_map json "nodeIndex" Integer.of_json in
-      let numNodes = field_map json "numNodes" Integer.of_json in
-      let isMainNode = field_map json "isMainNode" Boolean.of_json in
+    let of_json json__ =
+      let nodeIndex = field_map json__ "nodeIndex" Integer.of_json in
+      let numNodes = field_map json__ "numNodes" Integer.of_json in
+      let isMainNode = field_map json__ "isMainNode" Boolean.of_json in
       make ?nodeIndex ?numNodes ?isMainNode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the properties of a node that's associated with a multi-node parallel job."]
+       "An object that represents the properties of a node that's associated with a multi-node parallel job."]
+module FrontOfQueueJobSummary =
+  struct
+    type nonrec t =
+      {
+      jobArn: String_.t option
+        [@ocaml.doc "The ARN for a job in a named job queue."];
+      earliestTimeAtPosition: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the job transitioned to its current position in the job queue."]}
+    let make ?jobArn =
+      fun ?earliestTimeAtPosition ->
+        fun () -> { jobArn; earliestTimeAtPosition }
+    let to_value x =
+      structure_to_value
+        [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("earliestTimeAtPosition",
+          (Option.map x.earliestTimeAtPosition ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let earliestTimeAtPosition =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "earliestTimeAtPosition") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?earliestTimeAtPosition ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let earliestTimeAtPosition =
+        field_map json__ "earliestTimeAtPosition" Long.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?earliestTimeAtPosition ?jobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents summary details for the first 100 RUNNABLE jobs in a job queue."]
+module FrontOfQuotaShareJobSummaryList =
+  struct
+    type nonrec t = FrontOfQuotaShareJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FrontOfQuotaShareJobSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FrontOfQuotaShareJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FrontOfQuotaShareJobSummaryList"
+        ~of_json:FrontOfQuotaShareJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FairshareCapacityUtilizationList =
+  struct
+    type nonrec t = FairshareCapacityUtilization.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FairshareCapacityUtilization.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FairshareCapacityUtilization.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FairshareCapacityUtilizationList"
+        ~of_json:FairshareCapacityUtilization.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QueueSnapshotCapacityUsage =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the capacity usage. For compute jobs, this is VCPU for Amazon EC2 and cpu for Amazon EKS. For service jobs, this is the instance type."];
+      quantity: Double.t option
+        [@ocaml.doc
+          "The quantity of capacity being used in the queue snapshot, measured in the units specified by capacityUnit."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configured capacity usage for a job queue snapshot, including the unit of measure and quantity of resources being used."]
+module QuotaShareCapacityUtilizationList =
+  struct
+    type nonrec t = QuotaShareCapacityUtilization.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaShareCapacityUtilization.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaShareCapacityUtilization.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaShareCapacityUtilizationList"
+        ~of_json:QuotaShareCapacityUtilization.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceJobPreemptedAttempt =
+  struct
+    type nonrec t =
+      {
+      serviceResourceId: ServiceResourceId.t option
+        [@ocaml.doc
+          "The service resource identifier associated with the service job attempt."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job attempt was started."];
+      stoppedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job attempt stopped running."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A string that provides additional details for the current status of the service job attempt."]}
+    let make ?serviceResourceId =
+      fun ?startedAt ->
+        fun ?stoppedAt ->
+          fun ?statusReason ->
+            fun () ->
+              { serviceResourceId; startedAt; stoppedAt; statusReason }
+    let to_value x =
+      structure_to_value
+        [("serviceResourceId",
+           (Option.map x.serviceResourceId ~f:ServiceResourceId.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let stoppedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let serviceResourceId =
+        (Option.map ~f:ServiceResourceId.of_xml)
+          (Xml.child xml_arg0 "serviceResourceId") in
+      make ?statusReason ?stoppedAt ?startedAt ?serviceResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let serviceResourceId =
+        field_map json__ "serviceResourceId" ServiceResourceId.of_json in
+      make ?statusReason ?stoppedAt ?startedAt ?serviceResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed information about a preempted attempt of a service job."]
+module CapacityLimits =
+  struct
+    type nonrec t = CapacityLimit.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CapacityLimit.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CapacityLimit.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CapacityLimits" ~of_json:CapacityLimit.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceEnvironmentState =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceEnvironmentState" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceEnvironmentState" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceEnvironmentStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | UPDATING 
+      | DELETING 
+      | DELETED 
+      | VALID 
+      | INVALID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | VALID -> "VALID"
+      | INVALID -> "INVALID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | "VALID" -> VALID
+      | "INVALID" -> INVALID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceEnvironmentStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceEnvironmentStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceEnvironmentType =
+  struct
+    type nonrec t =
+      | SAGEMAKER_TRAINING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SAGEMAKER_TRAINING -> "SAGEMAKER_TRAINING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SAGEMAKER_TRAINING" -> SAGEMAKER_TRAINING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ServiceEnvironmentType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ServiceEnvironmentType" j)
+    let to_json = simple_to_json to_value
+  end
+module TagrisTagsMap =
+  struct
+    type nonrec t = (TagKey.t * TagValue.t) list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TagKey.of_string chopped),
+                              (TagValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TagKey.to_value x) |>
+                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TagKey.of_string
+        ~of_json:TagValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FairsharePolicy =
   struct
     type nonrec t =
       {
       shareDecaySeconds: Integer.t option
         [@ocaml.doc
-          "The time period to use to calculate a fair share percentage for each fair share identifier in use, in seconds. A value of zero (0) indicates that only current usage should be measured. The decay allows for more recently run jobs to have more weight than jobs that ran earlier. The maximum supported value is 604800 (1 week)."];
+          "The amount of time (in seconds) to use to calculate a fair-share percentage for each share identifier in use. A value of zero (0) indicates the default minimum time window (600 seconds). The maximum supported value is 604800 (1 week). The decay allows for more recently run jobs to have more weight than jobs that ran earlier. Consider adjusting this number if you have jobs that (on average) run longer than ten minutes, or a large difference in job count or job run times between share identifiers, and the allocation of resources doesn't meet your needs."];
       computeReservation: Integer.t option
         [@ocaml.doc
-          "A value used to reserve some of the available maximum vCPU for fair share identifiers that have not yet been used. The reserved ratio is (computeReservation/100)^ActiveFairShares where ActiveFairShares is the number of active fair share identifiers. For example, a computeReservation value of 50 indicates that Batch should reserve 50% of the maximum available vCPU if there is only one fair share identifier, 25% if there are two fair share identifiers, and 12.5% if there are three fair share identifiers. A computeReservation value of 25 indicates that Batch should reserve 25% of the maximum available vCPU if there is only one fair share identifier, 6.25% if there are two fair share identifiers, and 1.56% if there are three fair share identifiers. The minimum value is 0 and the maximum value is 99."];
+          "A value used to reserve some of the available maximum vCPU for share identifiers that aren't already used. The reserved ratio is (computeReservation/100)^ActiveFairShares where ActiveFairShares is the number of active share identifiers. For example, a computeReservation value of 50 indicates that Batch reserves 50% of the maximum available vCPU if there's only one share identifier. It reserves 25% if there are two share identifiers. It reserves 12.5% if there are three share identifiers. A computeReservation value of 25 indicates that Batch should reserve 25% of the maximum available vCPU if there's only one share identifier, 6.25% if there are two fair share identifiers, and 1.56% if there are three share identifiers. The minimum value is 0 and the maximum value is 99."];
       shareDistribution: ShareAttributesList.t option
         [@ocaml.doc
-          "An array of SharedIdentifier objects that contain the weights for the fair share identifiers for the fair share policy. Fair share identifiers that aren't included have a default weight of 1.0."]}
+          "An array of SharedIdentifier objects that contain the weights for the share identifiers for the fair-share policy. Share identifiers that aren't included have a default weight of 1.0."]}
     let make ?shareDecaySeconds =
       fun ?computeReservation ->
         fun ?shareDistribution ->
@@ -2443,48 +7560,49 @@ module FairsharePolicy =
           (Xml.child xml_arg0 "shareDecaySeconds") in
       make ?shareDistribution ?computeReservation ?shareDecaySeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let shareDistribution =
-        field_map json "shareDistribution" ShareAttributesList.of_json in
+        field_map json__ "shareDistribution" ShareAttributesList.of_json in
       let computeReservation =
-        field_map json "computeReservation" Integer.of_json in
+        field_map json__ "computeReservation" Integer.of_json in
       let shareDecaySeconds =
-        field_map json "shareDecaySeconds" Integer.of_json in
+        field_map json__ "shareDecaySeconds" Integer.of_json in
       make ?shareDistribution ?computeReservation ?shareDecaySeconds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The fair share policy for a scheduling policy."]
-module TagrisTagsMap =
+  end[@@ocaml.doc "The fair-share scheduling policy details."]
+module QuotaSharePolicy =
   struct
-    type nonrec t = (TagKey.t * TagValue.t) list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((TagKey.of_string chopped),
-                              (TagValue.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (TagKey.to_value x) |>
-                    (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
+    type nonrec t =
+      {
+      idleResourceAssignmentStrategy:
+        QuotaShareIdleResourceAssignmentStrategy.t
+        [@ocaml.doc
+          "The strategy that determines how idle resources are assigned to quota shares that are borrowing capacity. Currently, only FIFO is supported."]}
+    let context_ = "QuotaSharePolicy"
+    let make ~idleResourceAssignmentStrategy =
+      fun () -> { idleResourceAssignmentStrategy }
+    let to_value x =
+      structure_to_value
+        [("idleResourceAssignmentStrategy",
+           (Some
+              (QuotaShareIdleResourceAssignmentStrategy.to_value
+                 x.idleResourceAssignmentStrategy)))]
     let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:TagKey.of_string
-        ~of_json:TagValue.of_json j
+    let of_xml xml_arg0 =
+      let idleResourceAssignmentStrategy =
+        QuotaShareIdleResourceAssignmentStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "idleResourceAssignmentStrategy") in
+      make ~idleResourceAssignmentStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let idleResourceAssignmentStrategy =
+        field_map_exn json__ "idleResourceAssignmentStrategy"
+          QuotaShareIdleResourceAssignmentStrategy.of_json in
+      make ~idleResourceAssignmentStrategy ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "The quota share scheduling policy details for a job queue."]
 module ArrayPropertiesDetail =
   struct
     type nonrec t =
@@ -2492,6 +7610,9 @@ module ArrayPropertiesDetail =
       statusSummary: ArrayJobStatusSummary.t option
         [@ocaml.doc
           "A summary of the number of array job children in each available job status. This parameter is returned for parent array jobs."];
+      statusSummaryLastUpdatedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the statusSummary was last updated."];
       size: Integer.t option
         [@ocaml.doc
           "The size of the array job. This parameter is returned for parent array jobs."];
@@ -2499,34 +7620,48 @@ module ArrayPropertiesDetail =
         [@ocaml.doc
           "The job index within the array that's associated with this job. This parameter is returned for array job children."]}
     let make ?statusSummary =
-      fun ?size -> fun ?index -> fun () -> { statusSummary; size; index }
+      fun ?statusSummaryLastUpdatedAt ->
+        fun ?size ->
+          fun ?index ->
+            fun () ->
+              { statusSummary; statusSummaryLastUpdatedAt; size; index }
     let to_value x =
       structure_to_value
         [("statusSummary",
            (Option.map x.statusSummary ~f:ArrayJobStatusSummary.to_value));
+        ("statusSummaryLastUpdatedAt",
+          (Option.map x.statusSummaryLastUpdatedAt ~f:Long.to_value));
         ("size", (Option.map x.size ~f:Integer.to_value));
         ("index", (Option.map x.index ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let index = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "index") in
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
+      let statusSummaryLastUpdatedAt =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "statusSummaryLastUpdatedAt") in
       let statusSummary =
         (Option.map ~f:ArrayJobStatusSummary.of_xml)
           (Xml.child xml_arg0 "statusSummary") in
-      make ?index ?size ?statusSummary ()
+      make ?index ?size ?statusSummaryLastUpdatedAt ?statusSummary ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let index = field_map json "index" Integer.of_json in
-      let size = field_map json "size" Integer.of_json in
+    let of_json json__ =
+      let index = field_map json__ "index" Integer.of_json in
+      let size = field_map json__ "size" Integer.of_json in
+      let statusSummaryLastUpdatedAt =
+        field_map json__ "statusSummaryLastUpdatedAt" Long.of_json in
       let statusSummary =
-        field_map json "statusSummary" ArrayJobStatusSummary.of_json in
-      make ?index ?size ?statusSummary ()
+        field_map json__ "statusSummary" ArrayJobStatusSummary.of_json in
+      make ?index ?size ?statusSummaryLastUpdatedAt ?statusSummary ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing the array properties of a job."]
+  end[@@ocaml.doc "An object that represents the array properties of a job."]
 module AttemptDetails =
   struct
     type nonrec t = AttemptDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttemptDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2555,23 +7690,23 @@ module ContainerDetail =
         [@ocaml.doc "The image used to start the container."];
       vcpus: Integer.t option
         [@ocaml.doc
-          "The number of vCPUs reserved for the container. For jobs that run on EC2 resources, you can specify the vCPU requirement for the job using resourceRequirements, but you can't specify the vCPU requirements in both the vcpus and resourceRequirements object. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. Each vCPU is equivalent to 1,024 CPU shares. You must specify at least one vCPU. This is required but can be specified in several places. It must be specified for each node at least once. This parameter isn't applicable to jobs that run on Fargate resources. For jobs that run on Fargate resources, you must specify the vCPU requirement for the job using resourceRequirements."];
+          "The number of vCPUs reserved for the container. For jobs that run on Amazon EC2 resources, you can specify the vCPU requirement for the job using resourceRequirements, but you can't specify the vCPU requirements in both the vcpus and resourceRequirements object. This parameter maps to CpuShares in the Create a container section of the Docker Remote API and the --cpu-shares option to docker run. Each vCPU is equivalent to 1,024 CPU shares. You must specify at least one vCPU. This is required but can be specified in several places. It must be specified for each node at least once. This parameter isn't applicable to jobs that run on Fargate resources. For jobs that run on Fargate resources, you must specify the vCPU requirement for the job using resourceRequirements."];
       memory: Integer.t option
         [@ocaml.doc
-          "For jobs running on EC2 resources that didn't specify memory requirements using resourceRequirements, the number of MiB of memory reserved for the job. For other jobs, including all run on Fargate resources, see resourceRequirements."];
+          "For jobs running on Amazon EC2 resources that didn't specify memory requirements using resourceRequirements, the number of MiB of memory reserved for the job. For other jobs, including all run on Fargate resources, see resourceRequirements."];
       command: StringList.t option
         [@ocaml.doc "The command that's passed to the container."];
       jobRoleArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) associated with the job upon execution."];
+          "The Amazon Resource Name (ARN) that's associated with the job when run."];
       executionRoleArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the execution role that Batch can assume. For more information, see Batch execution IAM role in the Batch User Guide."];
       volumes: Volumes.t option
-        [@ocaml.doc "A list of volumes associated with the job."];
+        [@ocaml.doc "A list of volumes that are associated with the job."];
       environment: EnvironmentVariables.t option
         [@ocaml.doc
-          "The environment variables to pass to a container. Environment variables must not start with AWS_BATCH; this naming convention is reserved for variables that are set by the Batch service."];
+          "The environment variables to pass to a container. Environment variables cannot start with \"AWS_BATCH\". This naming convention is reserved for variables that Batch sets."];
       mountPoints: MountPoints.t option
         [@ocaml.doc "The mount points for data volumes in your container."];
       readonlyRootFilesystem: Boolean.t option
@@ -2587,10 +7722,10 @@ module ContainerDetail =
         [@ocaml.doc
           "The user name to use inside the container. This parameter maps to User in the Create a container section of the Docker Remote API and the --user option to docker run."];
       exitCode: Integer.t option
-        [@ocaml.doc "The exit code to return upon completion."];
+        [@ocaml.doc "The exit code returned upon completion."];
       reason: String_.t option
         [@ocaml.doc
-          "A short (255 max characters) human-readable string to provide additional details about a running or stopped container."];
+          "A short (255 max characters) human-readable string to provide additional details for a running or stopped container."];
       containerInstanceArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the container instance that the container is running on."];
@@ -2599,12 +7734,13 @@ module ContainerDetail =
           "The Amazon Resource Name (ARN) of the Amazon ECS task that's associated with the container job. Each container attempt receives a task ARN when they reach the STARTING status."];
       logStreamName: String_.t option
         [@ocaml.doc
-          "The name of the CloudWatch Logs log stream associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
+          "The name of the Amazon CloudWatch Logs log stream that's associated with the container. The log group for Batch jobs is /aws/batch/job. Each container attempt receives a log stream name when they reach the RUNNING status."];
       instanceType: String_.t option
         [@ocaml.doc
           "The instance type of the underlying host infrastructure of a multi-node parallel job. This parameter isn't applicable to jobs that are running on Fargate resources."];
       networkInterfaces: NetworkInterfaceList.t option
-        [@ocaml.doc "The network interfaces associated with the job."];
+        [@ocaml.doc
+          "The network interfaces that are associated with the job."];
       resourceRequirements: ResourceRequirements.t option
         [@ocaml.doc
           "The type and amount of resources to assign to a container. The supported resources include GPU, MEMORY, and VCPU."];
@@ -2613,16 +7749,28 @@ module ContainerDetail =
           "Linux-specific modifications that are applied to the container, such as details for device mappings."];
       logConfiguration: LogConfiguration.t option
         [@ocaml.doc
-          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However, the container might use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance. Or, alternatively, it must be configured on a different log server for remote logging options. For more information on the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Batch currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). Additional log drivers might be available in future releases of the Amazon ECS container agent. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log into your container instance and run the following command: sudo docker version | grep \"Server API version\" The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS Container Agent Configuration in the Amazon Elastic Container Service Developer Guide."];
+          "The log configuration specification for the container. This parameter maps to LogConfig in the Create a container section of the Docker Remote API and the --log-driver option to docker run. By default, containers use the same logging driver that the Docker daemon uses. However, the container might use a different logging driver than the Docker daemon by specifying a log driver with this parameter in the container definition. To use a different logging driver for a container, the log system must be configured properly on the container instance. Or, alternatively, it must be configured on a different log server for remote logging options. For more information on the options for different supported log drivers, see Configure logging drivers in the Docker documentation. Batch currently supports a subset of the logging drivers available to the Docker daemon (shown in the LogConfiguration data type). Additional log drivers might be available in future releases of the Amazon ECS container agent. This parameter requires version 1.18 of the Docker Remote API or greater on your container instance. To check the Docker Remote API version on your container instance, log in to your container instance and run the following command: sudo docker version | grep \"Server API version\" The Amazon ECS container agent running on a container instance must register the logging drivers available on that instance with the ECS_AVAILABLE_LOGGING_DRIVERS environment variable before containers placed on that instance can use these log configuration options. For more information, see Amazon ECS container agent configuration in the Amazon Elastic Container Service Developer Guide."];
       secrets: SecretList.t option
         [@ocaml.doc
           "The secrets to pass to the container. For more information, see Specifying sensitive data in the Batch User Guide."];
       networkConfiguration: NetworkConfiguration.t option
         [@ocaml.doc
-          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on EC2 resources must not specify this parameter."];
+          "The network configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
       fargatePlatformConfiguration: FargatePlatformConfiguration.t option
         [@ocaml.doc
-          "The platform configuration for jobs that are running on Fargate resources. Jobs that are running on EC2 resources must not specify this parameter."]}
+          "The platform configuration for jobs that are running on Fargate resources. Jobs that are running on Amazon EC2 resources must not specify this parameter."];
+      ephemeralStorage: EphemeralStorage.t option
+        [@ocaml.doc
+          "The amount of ephemeral storage allocated for the task. This parameter is used to expand the total amount of ephemeral storage available, beyond the default amount, for tasks hosted on Fargate."];
+      runtimePlatform: RuntimePlatform.t option
+        [@ocaml.doc
+          "An object that represents the compute environment architecture for Batch jobs on Fargate."];
+      repositoryCredentials: RepositoryCredentials.t option
+        [@ocaml.doc
+          "The private repository authentication credentials to use."];
+      enableExecuteCommand: Boolean.t option
+        [@ocaml.doc
+          "Determines whether execute command functionality is turned on for this task. If true, execute command functionality is turned on all the containers in the task."]}
     let make ?image =
       fun ?vcpus ->
         fun ?memory ->
@@ -2652,35 +7800,50 @@ module ContainerDetail =
                                                       fun
                                                         ?fargatePlatformConfiguration
                                                         ->
-                                                        fun () ->
-                                                          {
-                                                            image;
-                                                            vcpus;
-                                                            memory;
-                                                            command;
-                                                            jobRoleArn;
-                                                            executionRoleArn;
-                                                            volumes;
-                                                            environment;
-                                                            mountPoints;
-                                                            readonlyRootFilesystem;
-                                                            ulimits;
-                                                            privileged;
-                                                            user;
-                                                            exitCode;
-                                                            reason;
-                                                            containerInstanceArn;
-                                                            taskArn;
-                                                            logStreamName;
-                                                            instanceType;
-                                                            networkInterfaces;
-                                                            resourceRequirements;
-                                                            linuxParameters;
-                                                            logConfiguration;
-                                                            secrets;
-                                                            networkConfiguration;
-                                                            fargatePlatformConfiguration
-                                                          }
+                                                        fun ?ephemeralStorage
+                                                          ->
+                                                          fun
+                                                            ?runtimePlatform
+                                                            ->
+                                                            fun
+                                                              ?repositoryCredentials
+                                                              ->
+                                                              fun
+                                                                ?enableExecuteCommand
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    image;
+                                                                    vcpus;
+                                                                    memory;
+                                                                    command;
+                                                                    jobRoleArn;
+                                                                    executionRoleArn;
+                                                                    volumes;
+                                                                    environment;
+                                                                    mountPoints;
+                                                                    readonlyRootFilesystem;
+                                                                    ulimits;
+                                                                    privileged;
+                                                                    user;
+                                                                    exitCode;
+                                                                    reason;
+                                                                    containerInstanceArn;
+                                                                    taskArn;
+                                                                    logStreamName;
+                                                                    instanceType;
+                                                                    networkInterfaces;
+                                                                    resourceRequirements;
+                                                                    linuxParameters;
+                                                                    logConfiguration;
+                                                                    secrets;
+                                                                    networkConfiguration;
+                                                                    fargatePlatformConfiguration;
+                                                                    ephemeralStorage;
+                                                                    runtimePlatform;
+                                                                    repositoryCredentials;
+                                                                    enableExecuteCommand
+                                                                  }
     let to_value x =
       structure_to_value
         [("image", (Option.map x.image ~f:String_.to_value));
@@ -2719,9 +7882,30 @@ module ContainerDetail =
           (Option.map x.networkConfiguration ~f:NetworkConfiguration.to_value));
         ("fargatePlatformConfiguration",
           (Option.map x.fargatePlatformConfiguration
-             ~f:FargatePlatformConfiguration.to_value))]
+             ~f:FargatePlatformConfiguration.to_value));
+        ("ephemeralStorage",
+          (Option.map x.ephemeralStorage ~f:EphemeralStorage.to_value));
+        ("runtimePlatform",
+          (Option.map x.runtimePlatform ~f:RuntimePlatform.to_value));
+        ("repositoryCredentials",
+          (Option.map x.repositoryCredentials
+             ~f:RepositoryCredentials.to_value));
+        ("enableExecuteCommand",
+          (Option.map x.enableExecuteCommand ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let enableExecuteCommand =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "enableExecuteCommand") in
+      let repositoryCredentials =
+        (Option.map ~f:RepositoryCredentials.of_xml)
+          (Xml.child xml_arg0 "repositoryCredentials") in
+      let runtimePlatform =
+        (Option.map ~f:RuntimePlatform.of_xml)
+          (Xml.child xml_arg0 "runtimePlatform") in
+      let ephemeralStorage =
+        (Option.map ~f:EphemeralStorage.of_xml)
+          (Xml.child xml_arg0 "ephemeralStorage") in
       let fargatePlatformConfiguration =
         (Option.map ~f:FargatePlatformConfiguration.of_xml)
           (Xml.child xml_arg0 "fargatePlatformConfiguration") in
@@ -2781,64 +7965,158 @@ module ContainerDetail =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "memory") in
       let vcpus = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "vcpus") in
       let image = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "image") in
-      make ?fargatePlatformConfiguration ?networkConfiguration ?secrets
-        ?logConfiguration ?linuxParameters ?resourceRequirements
+      make ?enableExecuteCommand ?repositoryCredentials ?runtimePlatform
+        ?ephemeralStorage ?fargatePlatformConfiguration ?networkConfiguration
+        ?secrets ?logConfiguration ?linuxParameters ?resourceRequirements
         ?networkInterfaces ?instanceType ?logStreamName ?taskArn
         ?containerInstanceArn ?reason ?exitCode ?user ?privileged ?ulimits
         ?readonlyRootFilesystem ?mountPoints ?environment ?volumes
         ?executionRoleArn ?jobRoleArn ?command ?memory ?vcpus ?image ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let enableExecuteCommand =
+        field_map json__ "enableExecuteCommand" Boolean.of_json in
+      let repositoryCredentials =
+        field_map json__ "repositoryCredentials"
+          RepositoryCredentials.of_json in
+      let runtimePlatform =
+        field_map json__ "runtimePlatform" RuntimePlatform.of_json in
+      let ephemeralStorage =
+        field_map json__ "ephemeralStorage" EphemeralStorage.of_json in
       let fargatePlatformConfiguration =
-        field_map json "fargatePlatformConfiguration"
+        field_map json__ "fargatePlatformConfiguration"
           FargatePlatformConfiguration.of_json in
       let networkConfiguration =
-        field_map json "networkConfiguration" NetworkConfiguration.of_json in
-      let secrets = field_map json "secrets" SecretList.of_json in
+        field_map json__ "networkConfiguration" NetworkConfiguration.of_json in
+      let secrets = field_map json__ "secrets" SecretList.of_json in
       let logConfiguration =
-        field_map json "logConfiguration" LogConfiguration.of_json in
+        field_map json__ "logConfiguration" LogConfiguration.of_json in
       let linuxParameters =
-        field_map json "linuxParameters" LinuxParameters.of_json in
+        field_map json__ "linuxParameters" LinuxParameters.of_json in
       let resourceRequirements =
-        field_map json "resourceRequirements" ResourceRequirements.of_json in
+        field_map json__ "resourceRequirements" ResourceRequirements.of_json in
       let networkInterfaces =
-        field_map json "networkInterfaces" NetworkInterfaceList.of_json in
-      let instanceType = field_map json "instanceType" String_.of_json in
-      let logStreamName = field_map json "logStreamName" String_.of_json in
-      let taskArn = field_map json "taskArn" String_.of_json in
+        field_map json__ "networkInterfaces" NetworkInterfaceList.of_json in
+      let instanceType = field_map json__ "instanceType" String_.of_json in
+      let logStreamName = field_map json__ "logStreamName" String_.of_json in
+      let taskArn = field_map json__ "taskArn" String_.of_json in
       let containerInstanceArn =
-        field_map json "containerInstanceArn" String_.of_json in
-      let reason = field_map json "reason" String_.of_json in
-      let exitCode = field_map json "exitCode" Integer.of_json in
-      let user = field_map json "user" String_.of_json in
-      let privileged = field_map json "privileged" Boolean.of_json in
-      let ulimits = field_map json "ulimits" Ulimits.of_json in
+        field_map json__ "containerInstanceArn" String_.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
+      let exitCode = field_map json__ "exitCode" Integer.of_json in
+      let user = field_map json__ "user" String_.of_json in
+      let privileged = field_map json__ "privileged" Boolean.of_json in
+      let ulimits = field_map json__ "ulimits" Ulimits.of_json in
       let readonlyRootFilesystem =
-        field_map json "readonlyRootFilesystem" Boolean.of_json in
-      let mountPoints = field_map json "mountPoints" MountPoints.of_json in
+        field_map json__ "readonlyRootFilesystem" Boolean.of_json in
+      let mountPoints = field_map json__ "mountPoints" MountPoints.of_json in
       let environment =
-        field_map json "environment" EnvironmentVariables.of_json in
-      let volumes = field_map json "volumes" Volumes.of_json in
+        field_map json__ "environment" EnvironmentVariables.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
       let executionRoleArn =
-        field_map json "executionRoleArn" String_.of_json in
-      let jobRoleArn = field_map json "jobRoleArn" String_.of_json in
-      let command = field_map json "command" StringList.of_json in
-      let memory = field_map json "memory" Integer.of_json in
-      let vcpus = field_map json "vcpus" Integer.of_json in
-      let image = field_map json "image" String_.of_json in
-      make ?fargatePlatformConfiguration ?networkConfiguration ?secrets
-        ?logConfiguration ?linuxParameters ?resourceRequirements
+        field_map json__ "executionRoleArn" String_.of_json in
+      let jobRoleArn = field_map json__ "jobRoleArn" String_.of_json in
+      let command = field_map json__ "command" StringList.of_json in
+      let memory = field_map json__ "memory" Integer.of_json in
+      let vcpus = field_map json__ "vcpus" Integer.of_json in
+      let image = field_map json__ "image" String_.of_json in
+      make ?enableExecuteCommand ?repositoryCredentials ?runtimePlatform
+        ?ephemeralStorage ?fargatePlatformConfiguration ?networkConfiguration
+        ?secrets ?logConfiguration ?linuxParameters ?resourceRequirements
         ?networkInterfaces ?instanceType ?logStreamName ?taskArn
         ?containerInstanceArn ?reason ?exitCode ?user ?privileged ?ulimits
         ?readonlyRootFilesystem ?mountPoints ?environment ?volumes
         ?executionRoleArn ?jobRoleArn ?command ?memory ?vcpus ?image ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the details of a container that's part of a job."]
+       "An object that represents the details of a container that's part of a job."]
+module EcsPropertiesDetail =
+  struct
+    type nonrec t =
+      {
+      taskProperties: ListEcsTaskDetails.t option
+        [@ocaml.doc
+          "The properties for the Amazon ECS task definition of a job."]}
+    let make ?taskProperties = fun () -> { taskProperties }
+    let to_value x =
+      structure_to_value
+        [("taskProperties",
+           (Option.map x.taskProperties ~f:ListEcsTaskDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let taskProperties =
+        (Option.map ~f:ListEcsTaskDetails.of_xml)
+          (Xml.child xml_arg0 "taskProperties") in
+      make ?taskProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let taskProperties =
+        field_map json__ "taskProperties" ListEcsTaskDetails.of_json in
+      make ?taskProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the details for the Amazon ECS resources of a job."]
+module EksAttemptDetails =
+  struct
+    type nonrec t = EksAttemptDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:EksAttemptDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:EksAttemptDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EksAttemptDetails"
+        ~of_json:EksAttemptDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module EksPropertiesDetail =
+  struct
+    type nonrec t =
+      {
+      podProperties: EksPodPropertiesDetail.t option
+        [@ocaml.doc
+          "The properties for the Kubernetes pod resources of a job."]}
+    let make ?podProperties = fun () -> { podProperties }
+    let to_value x =
+      structure_to_value
+        [("podProperties",
+           (Option.map x.podProperties ~f:EksPodPropertiesDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let podProperties =
+        (Option.map ~f:EksPodPropertiesDetail.of_xml)
+          (Xml.child xml_arg0 "podProperties") in
+      make ?podProperties ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let podProperties =
+        field_map json__ "podProperties" EksPodPropertiesDetail.of_json in
+      make ?podProperties ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the details for the Kubernetes resources of a job."]
 module JobDependencyList =
   struct
     type nonrec t = JobDependency.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobDependency.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2865,7 +8143,7 @@ module JobTimeout =
       {
       attemptDurationSeconds: Integer.t option
         [@ocaml.doc
-          "The time duration in seconds (measured from the job attempt's startedAt timestamp) after which Batch terminates your jobs if they have not finished. The minimum value for the timeout is 60 seconds."]}
+          "The job timeout time (in seconds) that's measured from the job attempt's startedAt timestamp. After this time passes, Batch terminates your jobs if they aren't finished. The minimum value for the timeout is 60 seconds. For array jobs, the timeout applies to the child jobs, not to the parent array job. For multi-node parallel (MNP) jobs, the timeout applies to the whole job, not to the individual nodes."]}
     let make ?attemptDurationSeconds = fun () -> { attemptDurationSeconds }
     let to_value x =
       structure_to_value
@@ -2878,19 +8156,19 @@ module JobTimeout =
           (Xml.child xml_arg0 "attemptDurationSeconds") in
       make ?attemptDurationSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attemptDurationSeconds =
-        field_map json "attemptDurationSeconds" Integer.of_json in
+        field_map json__ "attemptDurationSeconds" Integer.of_json in
       make ?attemptDurationSeconds ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing a job timeout configuration."]
+  end[@@ocaml.doc "An object that represents a job timeout configuration."]
 module NodeDetails =
   struct
     type nonrec t =
       {
       nodeIndex: Integer.t option
         [@ocaml.doc
-          "The node index for the node. Node index numbering begins at zero. This index is also available on the node with the AWS_BATCH_JOB_NODE_INDEX environment variable."];
+          "The node index for the node. Node index numbering starts at zero. This index is also available on the node with the AWS_BATCH_JOB_NODE_INDEX environment variable."];
       isMainNode: Boolean.t option
         [@ocaml.doc
           "Specifies whether the current node is the main node for a multi-node parallel job."]}
@@ -2908,26 +8186,26 @@ module NodeDetails =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "nodeIndex") in
       make ?isMainNode ?nodeIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let isMainNode = field_map json "isMainNode" Boolean.of_json in
-      let nodeIndex = field_map json "nodeIndex" Integer.of_json in
+    let of_json json__ =
+      let isMainNode = field_map json__ "isMainNode" Boolean.of_json in
+      let nodeIndex = field_map json__ "nodeIndex" Integer.of_json in
       make ?isMainNode ?nodeIndex ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the details of a multi-node parallel job node."]
+       "An object that represents the details of a multi-node parallel job node."]
 module NodeProperties =
   struct
     type nonrec t =
       {
       numNodes: Integer.t
         [@ocaml.doc
-          "The number of nodes associated with a multi-node parallel job."];
+          "The number of nodes that are associated with a multi-node parallel job."];
       mainNode: Integer.t
         [@ocaml.doc
           "Specifies the node index for the main node of a multi-node parallel job. This node index value must be fewer than the number of nodes."];
       nodeRangeProperties: NodeRangeProperties.t
         [@ocaml.doc
-          "A list of node ranges and their properties associated with a multi-node parallel job."]}
+          "A list of node ranges and their properties that are associated with a multi-node parallel job."]}
     let context_ = "NodeProperties"
     let make ~numNodes =
       fun ~mainNode ->
@@ -2950,15 +8228,16 @@ module NodeProperties =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "numNodes") in
       make ~nodeRangeProperties ~mainNode ~numNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodeRangeProperties =
-        field_map_exn json "nodeRangeProperties" NodeRangeProperties.of_json in
-      let mainNode = field_map_exn json "mainNode" Integer.of_json in
-      let numNodes = field_map_exn json "numNodes" Integer.of_json in
+        field_map_exn json__ "nodeRangeProperties"
+          NodeRangeProperties.of_json in
+      let mainNode = field_map_exn json__ "mainNode" Integer.of_json in
+      let numNodes = field_map_exn json__ "numNodes" Integer.of_json in
       make ~nodeRangeProperties ~mainNode ~numNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the node properties of a multi-node parallel job."]
+       "An object that represents the node properties of a multi-node parallel job. Node properties can't be specified for Amazon EKS based job definitions."]
 module ParametersMap =
   struct
     type nonrec t = (String_.t * String_.t) list
@@ -2980,6 +8259,8 @@ module ParametersMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2991,6 +8272,9 @@ module PlatformCapabilityList =
   struct
     type nonrec t = PlatformCapability.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlatformCapability.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3021,7 +8305,7 @@ module RetryStrategy =
           "The number of times to move a job to the RUNNABLE status. You can specify between 1 and 10 attempts. If the value of attempts is greater than one, the job is retried on failure the same number of attempts as the value."];
       evaluateOnExit: EvaluateOnExitList.t option
         [@ocaml.doc
-          "Array of up to 5 objects that specify conditions under which the job should be retried or failed. If this parameter is specified, then the attempts parameter must also be specified."]}
+          "Array of up to 5 objects that specify the conditions where jobs are retried or failed. If this parameter is specified, then the attempts parameter must also be specified. If none of the listed conditions match, then the job is retried."]}
     let make ?attempts =
       fun ?evaluateOnExit -> fun () -> { attempts; evaluateOnExit }
     let to_value x =
@@ -3038,18 +8322,21 @@ module RetryStrategy =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "attempts") in
       make ?evaluateOnExit ?attempts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluateOnExit =
-        field_map json "evaluateOnExit" EvaluateOnExitList.of_json in
-      let attempts = field_map json "attempts" Integer.of_json in
+        field_map json__ "evaluateOnExit" EvaluateOnExitList.of_json in
+      let attempts = field_map json__ "attempts" Integer.of_json in
       make ?evaluateOnExit ?attempts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The retry strategy associated with a job. For more information, see Automated job retries in the Batch User Guide."]
+       "The retry strategy that's associated with a job. For more information, see Automated job retries in the Batch User Guide."]
 module ComputeEnvironmentOrders =
   struct
     type nonrec t = ComputeEnvironmentOrder.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComputeEnvironmentOrder.to_value)) |>
         (fun x -> `List x)
@@ -3132,6 +8419,115 @@ module JQStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration JQStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"JQStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module JobQueueType =
+  struct
+    type nonrec t =
+      | EKS 
+      | ECS 
+      | ECS_FARGATE 
+      | SAGEMAKER_TRAINING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EKS -> "EKS"
+      | ECS -> "ECS"
+      | ECS_FARGATE -> "ECS_FARGATE"
+      | SAGEMAKER_TRAINING -> "SAGEMAKER_TRAINING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EKS" -> EKS
+      | "ECS" -> ECS
+      | "ECS_FARGATE" -> ECS_FARGATE
+      | "SAGEMAKER_TRAINING" -> SAGEMAKER_TRAINING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration JobQueueType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"JobQueueType" j)
+    let to_json = simple_to_json to_value
+  end
+module JobStateTimeLimitActions =
+  struct
+    type nonrec t = JobStateTimeLimitAction.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:JobStateTimeLimitAction.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:JobStateTimeLimitAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"JobStateTimeLimitActions"
+        ~of_json:JobStateTimeLimitAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceEnvironmentOrders =
+  struct
+    type nonrec t = ServiceEnvironmentOrder.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceEnvironmentOrder.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceEnvironmentOrder.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceEnvironmentOrders"
+        ~of_json:ServiceEnvironmentOrder.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OrchestrationType =
+  struct
+    type nonrec t =
+      | ECS 
+      | EKS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ECS -> "ECS" | EKS -> "EKS" | Non_static_id s -> s
+    let of_string =
+      function | "ECS" -> ECS | "EKS" -> EKS | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OrchestrationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OrchestrationType" j)
     let to_json = simple_to_json to_value
   end
 module CEState =
@@ -3227,55 +8623,58 @@ module ComputeResource =
       {
       type_: CRType.t
         [@ocaml.doc
-          "The type of compute environment: EC2, SPOT, FARGATE, or FARGATE_SPOT. For more information, see Compute Environments in the Batch User Guide. If you choose SPOT, you must also specify an Amazon EC2 Spot Fleet role with the spotIamFleetRole parameter. For more information, see Amazon EC2 Spot Fleet role in the Batch User Guide."];
+          "The type of compute environment: EC2, SPOT, FARGATE, or FARGATE_SPOT. For more information, see Compute environments in the Batch User Guide. If you choose SPOT, you must also specify an Amazon EC2 Spot Fleet role with the spotIamFleetRole parameter. For more information, see Amazon EC2 spot fleet role in the Batch User Guide. Multi-node parallel jobs aren't supported on Spot Instances."];
       allocationStrategy: CRAllocationStrategy.t option
         [@ocaml.doc
-          "The allocation strategy to use for the compute resource if not enough instances of the best fitting instance type can be allocated. This might be because of availability of the instance type in the Region or Amazon EC2 service limits. For more information, see Allocation Strategies in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified. BEST_FIT (default) Batch selects an instance type that best fits the needs of the jobs with a preference for the lowest-cost instance type. If additional instances of the selected instance type aren't available, Batch waits for the additional instances to be available. If there aren't enough instances available, or if the user is reaching Amazon EC2 service limits then additional jobs aren't run until the currently running jobs have completed. This allocation strategy keeps costs lower but can limit scaling. If you are using Spot Fleets with BEST_FIT then the Spot Fleet IAM Role must be specified. BEST_FIT_PROGRESSIVE Batch will select additional instance types that are large enough to meet the requirements of the jobs in the queue, with a preference for instance types with a lower cost per unit vCPU. If additional instances of the previously selected instance types aren't available, Batch will select new instance types. SPOT_CAPACITY_OPTIMIZED Batch will select one or more instance types that are large enough to meet the requirements of the jobs in the queue, with a preference for instance types that are less likely to be interrupted. This allocation strategy is only available for Spot Instance compute resources. With both BEST_FIT_PROGRESSIVE and SPOT_CAPACITY_OPTIMIZED strategies, Batch might need to go above maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance."];
+          "The allocation strategy to use for the compute resource if not enough instances of the best fitting instance type can be allocated. This might be because of availability of the instance type in the Region or Amazon EC2 service limits. For more information, see Allocation strategies in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. BEST_FIT (default) Batch selects an instance type that best fits the needs of the jobs with a preference for the lowest-cost instance type. If additional instances of the selected instance type aren't available, Batch waits for the additional instances to be available. If there aren't enough instances available or the user is reaching Amazon EC2 service limits, additional jobs aren't run until the currently running jobs are completed. This allocation strategy keeps costs lower but can limit scaling. If you're using Spot Fleets with BEST_FIT, the Spot Fleet IAM Role must be specified. Compute resources that use a BEST_FIT allocation strategy don't support infrastructure updates and can't update some parameters. For more information, see Updating compute environments in the Batch User Guide. BEST_FIT_PROGRESSIVE Batch selects additional instance types that are large enough to meet the requirements of the jobs in the queue. Its preference is for instance types with lower cost vCPUs. If additional instances of the previously selected instance types aren't available, Batch selects new instance types. SPOT_CAPACITY_OPTIMIZED Batch selects one or more instance types that are large enough to meet the requirements of the jobs in the queue. Its preference is for instance types that are less likely to be interrupted. This allocation strategy is only available for Spot Instance compute resources. SPOT_PRICE_CAPACITY_OPTIMIZED The price and capacity optimized allocation strategy looks at both price and capacity to select the Spot Instance pools that are the least likely to be interrupted and have the lowest possible price. This allocation strategy is only available for Spot Instance compute resources. With BEST_FIT_PROGRESSIVE,SPOT_CAPACITY_OPTIMIZED and SPOT_PRICE_CAPACITY_OPTIMIZED (recommended) strategies using On-Demand or Spot Instances, and the BEST_FIT strategy using Spot Instances, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance."];
       minvCpus: Integer.t option
         [@ocaml.doc
-          "The minimum number of Amazon EC2 vCPUs that an environment should maintain (even if the compute environment is DISABLED). This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The minimum number of vCPUs that a compute environment should maintain (even if the compute environment is DISABLED). This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       maxvCpus: Integer.t
         [@ocaml.doc
-          "The maximum number of Amazon EC2 vCPUs that a compute environment can reach. With both BEST_FIT_PROGRESSIVE and SPOT_CAPACITY_OPTIMIZED allocation strategies, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance. For example, no more than a single instance from among those specified in your compute environment is allocated."];
+          "The maximum number of vCPUs that a compute environment can support. With BEST_FIT_PROGRESSIVE,SPOT_CAPACITY_OPTIMIZED and SPOT_PRICE_CAPACITY_OPTIMIZED (recommended) strategies using On-Demand or Spot Instances, and the BEST_FIT strategy using Spot Instances, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance."];
       desiredvCpus: Integer.t option
         [@ocaml.doc
-          "The desired number of Amazon EC2 vCPUS in the compute environment. Batch modifies this value between the minimum and maximum values, based on job queue demand. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The desired number of vCPUS in the compute environment. Batch modifies this value between the minimum and maximum values based on job queue demand. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       instanceTypes: StringList.t option
         [@ocaml.doc
-          "The instances types that can be launched. You can specify instance families to launch any instance type within those families (for example, c5 or p3), or you can specify specific sizes within a family (such as c5.8xlarge). You can also choose optimal to select instance types (from the C4, M4, and R4 instance families) that match the demand of your job queues. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified. When you create a compute environment, the instance types that you select for the compute environment must share the same architecture. For example, you can't mix x86 and ARM instances in the same compute environment. Currently, optimal uses instance types from the C4, M4, and R4 instance families. In Regions that don't have instance types from those instance families, instance types from the C5, M5. and R5 instance families are used."];
+          "The instances types that can be launched. You can specify instance families to launch any instance type within those families (for example, c5 or p3), or you can specify specific sizes within a family (such as c5.8xlarge). Batch can select the instance type for you if you choose one of the following: optimal to select instance types (from the c4, m4, r4, c5, m5, and r5 instance families) that match the demand of your job queues. default_x86_64 to choose x86 based instance types (from the m6i, c6i, r6i, and c7i instance families) that matches the resource demands of the job queue. default_arm64 to choose ARM based instance types (from the m6g, c6g, r6g, and c7g instance families) that matches the resource demands of the job queue. Starting on 11/01/2025 the behavior of optimal is going to be changed to match default_x86_64. During the change your instance families could be updated to a newer generation. You do not need to perform any actions for the upgrade to happen. For more information about change, see Optimal instance type configuration to receive automatic instance family updates. Instance family availability varies by Amazon Web Services Region. For example, some Amazon Web Services Regions may not have any fourth generation instance families but have fifth and sixth generation instance families. When using default_x86_64 or default_arm64 instance bundles, Batch selects instance families based on a balance of cost-effectiveness and performance. While newer generation instances often provide better price-performance, Batch may choose an earlier generation instance family if it provides the optimal combination of availability, cost, and performance for your workload. For example, in an Amazon Web Services Region where both c6i and c7i instances are available, Batch might select c6i instances if they offer better cost-effectiveness for your specific job requirements. For more information on Batch instance types and Amazon Web Services Region availability, see Instance type compute table in the Batch User Guide. Batch periodically updates your instances in default bundles to newer, more cost-effective options. Updates happen automatically without requiring any action from you. Your workloads continue running during updates with no interruption This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. When you create a compute environment, the instance types that you select for the compute environment must share the same architecture. For example, you can't mix x86 and ARM instances in the same compute environment."];
       imageId: String_.t option
         [@ocaml.doc
-          "The Amazon Machine Image (AMI) ID used for instances launched in the compute environment. This parameter is overridden by the imageIdOverride member of the Ec2Configuration structure. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified. The AMI that you choose for a compute environment must match the architecture of the instance types that you intend to use for that compute environment. For example, if your compute environment uses A1 instance types, the compute resource AMI that you choose must support ARM instances. Amazon ECS vends both x86 and ARM versions of the Amazon ECS-optimized Amazon Linux 2 AMI. For more information, see Amazon ECS-optimized Amazon Linux 2 AMI in the Amazon Elastic Container Service Developer Guide."];
+          "The Amazon Machine Image (AMI) ID used for instances launched in the compute environment. This parameter is overridden by the imageIdOverride member of the Ec2Configuration structure. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. The AMI that you choose for a compute environment must match the architecture of the instance types that you intend to use for that compute environment. For example, if your compute environment uses A1 instance types, the compute resource AMI that you choose must support ARM instances. Amazon ECS vends both x86 and ARM versions of the Amazon ECS-optimized Amazon Linux 2023 AMI. For more information, see Amazon ECS-optimized Amazon Linux 2023 AMI in the Amazon Elastic Container Service Developer Guide."];
       subnets: StringList.t
         [@ocaml.doc
-          "The VPC subnets where the compute resources are launched. These subnets must be within the same VPC. Fargate compute resources can contain up to 16 subnets. For more information, see VPCs and Subnets in the Amazon VPC User Guide."];
+          "The VPC subnets where the compute resources are launched. These subnets must be within the same VPC. Fargate compute resources can contain up to 16 subnets. For more information, see VPCs and subnets in the Amazon VPC User Guide. Batch on Amazon EC2 and Batch on Amazon EKS support Local Zones. For more information, see Local Zones in the Amazon EC2 User Guide for Linux Instances, Amazon EKS and Amazon Web Services Local Zones in the Amazon EKS User Guide and Amazon ECS clusters in Local Zones, Wavelength Zones, and Amazon Web Services Outposts in the Amazon ECS Developer Guide. Batch on Fargate doesn't currently support Local Zones."];
       securityGroupIds: StringList.t option
         [@ocaml.doc
-          "The Amazon EC2 security groups associated with instances launched in the compute environment. One or more security groups must be specified, either in securityGroupIds or using a launch template referenced in launchTemplate. This parameter is required for jobs that are running on Fargate resources and must contain at least one security group. Fargate doesn't support launch templates. If security groups are specified using both securityGroupIds and launchTemplate, the values in securityGroupIds are used."];
+          "The Amazon EC2 security groups that are associated with instances launched in the compute environment. One or more security groups must be specified, either in securityGroupIds or using a launch template referenced in launchTemplate. This parameter is required for jobs that are running on Fargate resources and must contain at least one security group. Fargate doesn't support launch templates. If security groups are specified using both securityGroupIds and launchTemplate, the values in securityGroupIds are used."];
       ec2KeyPair: String_.t option
         [@ocaml.doc
-          "The Amazon EC2 key pair that's used for instances launched in the compute environment. You can use this key pair to log in to your instances with SSH. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The Amazon EC2 key pair that's used for instances launched in the compute environment. You can use this key pair to log in to your instances with SSH. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       instanceRole: String_.t option
         [@ocaml.doc
-          "The Amazon ECS instance profile applied to Amazon EC2 instances in a compute environment. You can specify the short name or full Amazon Resource Name (ARN) of an instance profile. For example, ecsInstanceRole or arn:aws:iam::<aws_account_id>:instance-profile/ecsInstanceRole . For more information, see Amazon ECS Instance Role in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The Amazon ECS instance profile applied to Amazon EC2 instances in a compute environment. This parameter is required for Amazon EC2 instances types. You can specify the short name or full Amazon Resource Name (ARN) of an instance profile. For example, ecsInstanceRole or arn:aws:iam::<aws_account_id>:instance-profile/ecsInstanceRole . For more information, see Amazon ECS instance role in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       tags: TagsMap.t option
         [@ocaml.doc
-          "Key-value pair tags to be applied to EC2 resources that are launched in the compute environment. For Batch, these take the form of \"String1\": \"String2\", where String1 is the tag key and String2 is the tag value\226\136\146for example, \\{ \"Name\": \"Batch Instance - C4OnDemand\" \\}. This is helpful for recognizing your Batch instances in the Amazon EC2 console. These tags can't be updated or removed after the compute environment is created. Any changes to these tags require that you create a new compute environment and remove the old compute environment. These tags aren't seen when using the Batch ListTagsForResource API operation. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "Key-value pair tags to be applied to Amazon EC2 resources that are launched in the compute environment. For Batch, these take the form of \"String1\": \"String2\", where String1 is the tag key and String2 is the tag value (for example, \\{ \"Name\": \"Batch Instance - C4OnDemand\" \\}). This is helpful for recognizing your Batch instances in the Amazon EC2 console. Updating these tags requires an infrastructure update to the compute environment. For more information, see Updating compute environments in the Batch User Guide. These tags aren't seen when using the Batch ListTagsForResource API operation. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       placementGroup: String_.t option
         [@ocaml.doc
-          "The Amazon EC2 placement group to associate with your compute resources. If you intend to submit multi-node parallel jobs to your compute environment, you should consider creating a cluster placement group and associate it with your compute resources. This keeps your multi-node parallel job on a logical grouping of instances within a single Availability Zone with high network flow potential. For more information, see Placement Groups in the Amazon EC2 User Guide for Linux Instances. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The Amazon EC2 placement group to associate with your compute resources. If you intend to submit multi-node parallel jobs to your compute environment, you should consider creating a cluster placement group and associate it with your compute resources. This keeps your multi-node parallel job on a logical grouping of instances within a single Availability Zone with high network flow potential. For more information, see Placement groups in the Amazon EC2 User Guide for Linux Instances. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       bidPercentage: Integer.t option
         [@ocaml.doc
-          "The maximum percentage that a Spot Instance price can be when compared with the On-Demand price for that instance type before instances are launched. For example, if your maximum percentage is 20%, then the Spot price must be less than 20% of the current On-Demand price for that Amazon EC2 instance. You always pay the lowest (market) price and never more than your maximum percentage. If you leave this field empty, the default value is 100% of the On-Demand price. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The maximum percentage that a Spot Instance price can be when compared with the On-Demand price for that instance type before instances are launched. For example, if your maximum percentage is 20%, then the Spot price must be less than 20% of the current On-Demand price for that Amazon EC2 instance. You always pay the lowest (market) price and never more than your maximum percentage. If you leave this field empty, the default value is 100% of the On-Demand price. For most use cases, we recommend leaving this field empty. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       spotIamFleetRole: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Amazon EC2 Spot Fleet IAM role applied to a SPOT compute environment. This role is required if the allocation strategy set to BEST_FIT or if the allocation strategy isn't specified. For more information, see Amazon EC2 Spot Fleet Role in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified. To tag your Spot Instances on creation, the Spot Fleet IAM role specified here must use the newer AmazonEC2SpotFleetTaggingRole managed policy. The previously recommended AmazonEC2SpotFleetRole managed policy doesn't have the required permissions to tag Spot Instances. For more information, see Spot Instances not tagged on creation in the Batch User Guide."];
+          "The Amazon Resource Name (ARN) of the Amazon EC2 Spot Fleet IAM role applied to a SPOT compute environment. This role is required if the allocation strategy set to BEST_FIT or if the allocation strategy isn't specified. For more information, see Amazon EC2 spot fleet role in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. To tag your Spot Instances on creation, the Spot Fleet IAM role specified here must use the newer AmazonEC2SpotFleetTaggingRole managed policy. The previously recommended AmazonEC2SpotFleetRole managed policy doesn't have the required permissions to tag Spot Instances. For more information, see Spot instances not tagged on creation in the Batch User Guide."];
       launchTemplate: LaunchTemplateSpecification.t option
         [@ocaml.doc
-          "The launch template to use for your compute resources. Any other compute resource parameters that you specify in a CreateComputeEnvironment API operation override the same parameters in the launch template. You must specify either the launch template ID or launch template name in the request, but not both. For more information, see Launch Template Support in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The launch template to use for your compute resources. Any other compute resource parameters that you specify in a CreateComputeEnvironment API operation override the same parameters in the launch template. You must specify either the launch template ID or launch template name in the request, but not both. For more information, see Launch template support in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       ec2Configuration: Ec2ConfigurationList.t option
         [@ocaml.doc
-          "Provides information used to select Amazon Machine Images (AMIs) for EC2 instances in the compute environment. If Ec2Configuration isn't specified, the default is ECS_AL2. One or two values can be provided. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."]}
+          "Provides information that's used to select Amazon Machine Images (AMIs) for Amazon EC2 instances in the compute environment. If Ec2Configuration isn't specified, the default is ECS_AL2023 for EC2 (ECS) compute environments and EKS_AL2023 for EKS compute environments. One or two values can be provided. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      scalingPolicy: ComputeScalingPolicy.t option
+        [@ocaml.doc
+          "The scaling policy configuration for the compute environment. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."]}
     let context_ = "ComputeResource"
     let make ?allocationStrategy =
       fun ?minvCpus ->
@@ -3291,29 +8690,31 @@ module ComputeResource =
                           fun ?spotIamFleetRole ->
                             fun ?launchTemplate ->
                               fun ?ec2Configuration ->
-                                fun ~type_ ->
-                                  fun ~maxvCpus ->
-                                    fun ~subnets ->
-                                      fun () ->
-                                        {
-                                          allocationStrategy;
-                                          minvCpus;
-                                          desiredvCpus;
-                                          instanceTypes;
-                                          imageId;
-                                          securityGroupIds;
-                                          ec2KeyPair;
-                                          instanceRole;
-                                          tags;
-                                          placementGroup;
-                                          bidPercentage;
-                                          spotIamFleetRole;
-                                          launchTemplate;
-                                          ec2Configuration;
-                                          type_;
-                                          maxvCpus;
-                                          subnets
-                                        }
+                                fun ?scalingPolicy ->
+                                  fun ~type_ ->
+                                    fun ~maxvCpus ->
+                                      fun ~subnets ->
+                                        fun () ->
+                                          {
+                                            allocationStrategy;
+                                            minvCpus;
+                                            desiredvCpus;
+                                            instanceTypes;
+                                            imageId;
+                                            securityGroupIds;
+                                            ec2KeyPair;
+                                            instanceRole;
+                                            tags;
+                                            placementGroup;
+                                            bidPercentage;
+                                            spotIamFleetRole;
+                                            launchTemplate;
+                                            ec2Configuration;
+                                            scalingPolicy;
+                                            type_;
+                                            maxvCpus;
+                                            subnets
+                                          }
     let to_value x =
       structure_to_value
         [("type", (Some (CRType.to_value x.type_)));
@@ -3339,9 +8740,14 @@ module ComputeResource =
           (Option.map x.launchTemplate
              ~f:LaunchTemplateSpecification.to_value));
         ("ec2Configuration",
-          (Option.map x.ec2Configuration ~f:Ec2ConfigurationList.to_value))]
+          (Option.map x.ec2Configuration ~f:Ec2ConfigurationList.to_value));
+        ("scalingPolicy",
+          (Option.map x.scalingPolicy ~f:ComputeScalingPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scalingPolicy =
+        (Option.map ~f:ComputeScalingPolicy.of_xml)
+          (Xml.child xml_arg0 "scalingPolicy") in
       let ec2Configuration =
         (Option.map ~f:Ec2ConfigurationList.of_xml)
           (Xml.child xml_arg0 "ec2Configuration") in
@@ -3382,45 +8788,188 @@ module ComputeResource =
           (Xml.child xml_arg0 "allocationStrategy") in
       let type_ =
         CRType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
-      make ?ec2Configuration ?launchTemplate ?spotIamFleetRole ?bidPercentage
-        ?placementGroup ?tags ?instanceRole ?ec2KeyPair ?securityGroupIds
-        ~subnets ?imageId ?instanceTypes ?desiredvCpus ~maxvCpus ?minvCpus
-        ?allocationStrategy ~type_ ()
+      make ?scalingPolicy ?ec2Configuration ?launchTemplate ?spotIamFleetRole
+        ?bidPercentage ?placementGroup ?tags ?instanceRole ?ec2KeyPair
+        ?securityGroupIds ~subnets ?imageId ?instanceTypes ?desiredvCpus
+        ~maxvCpus ?minvCpus ?allocationStrategy ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scalingPolicy =
+        field_map json__ "scalingPolicy" ComputeScalingPolicy.of_json in
       let ec2Configuration =
-        field_map json "ec2Configuration" Ec2ConfigurationList.of_json in
+        field_map json__ "ec2Configuration" Ec2ConfigurationList.of_json in
       let launchTemplate =
-        field_map json "launchTemplate" LaunchTemplateSpecification.of_json in
+        field_map json__ "launchTemplate" LaunchTemplateSpecification.of_json in
       let spotIamFleetRole =
-        field_map json "spotIamFleetRole" String_.of_json in
-      let bidPercentage = field_map json "bidPercentage" Integer.of_json in
-      let placementGroup = field_map json "placementGroup" String_.of_json in
-      let tags = field_map json "tags" TagsMap.of_json in
-      let instanceRole = field_map json "instanceRole" String_.of_json in
-      let ec2KeyPair = field_map json "ec2KeyPair" String_.of_json in
+        field_map json__ "spotIamFleetRole" String_.of_json in
+      let bidPercentage = field_map json__ "bidPercentage" Integer.of_json in
+      let placementGroup = field_map json__ "placementGroup" String_.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let instanceRole = field_map json__ "instanceRole" String_.of_json in
+      let ec2KeyPair = field_map json__ "ec2KeyPair" String_.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" StringList.of_json in
-      let subnets = field_map_exn json "subnets" StringList.of_json in
-      let imageId = field_map json "imageId" String_.of_json in
-      let instanceTypes = field_map json "instanceTypes" StringList.of_json in
-      let desiredvCpus = field_map json "desiredvCpus" Integer.of_json in
-      let maxvCpus = field_map_exn json "maxvCpus" Integer.of_json in
-      let minvCpus = field_map json "minvCpus" Integer.of_json in
+        field_map json__ "securityGroupIds" StringList.of_json in
+      let subnets = field_map_exn json__ "subnets" StringList.of_json in
+      let imageId = field_map json__ "imageId" String_.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
+      let desiredvCpus = field_map json__ "desiredvCpus" Integer.of_json in
+      let maxvCpus = field_map_exn json__ "maxvCpus" Integer.of_json in
+      let minvCpus = field_map json__ "minvCpus" Integer.of_json in
       let allocationStrategy =
-        field_map json "allocationStrategy" CRAllocationStrategy.of_json in
-      let type_ = field_map_exn json "type" CRType.of_json in
-      make ?ec2Configuration ?launchTemplate ?spotIamFleetRole ?bidPercentage
-        ?placementGroup ?tags ?instanceRole ?ec2KeyPair ?securityGroupIds
-        ~subnets ?imageId ?instanceTypes ?desiredvCpus ~maxvCpus ?minvCpus
-        ?allocationStrategy ~type_ ()
+        field_map json__ "allocationStrategy" CRAllocationStrategy.of_json in
+      let type_ = field_map_exn json__ "type" CRType.of_json in
+      make ?scalingPolicy ?ec2Configuration ?launchTemplate ?spotIamFleetRole
+        ?bidPercentage ?placementGroup ?tags ?instanceRole ?ec2KeyPair
+        ?securityGroupIds ~subnets ?imageId ?instanceTypes ?desiredvCpus
+        ~maxvCpus ?minvCpus ?allocationStrategy ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing an Batch compute resource. For more information, see Compute Environments in the Batch User Guide."]
+       "An object that represents an Batch compute resource. For more information, see Compute environments in the Batch User Guide."]
+module EksConfiguration =
+  struct
+    type nonrec t =
+      {
+      eksClusterArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon EKS cluster. An example is arn:aws:eks:us-east-1:123456789012:cluster/ClusterForBatch ."];
+      kubernetesNamespace: String_.t
+        [@ocaml.doc
+          "The namespace of the Amazon EKS cluster. Batch manages pods in this namespace. The value can't left empty or null. It must be fewer than 64 characters long, can't be set to default, can't start with \"kube-,\" and must match this regular expression: ^\\[a-z0-9\\](\\[-a-z0-9\\]*\\[a-z0-9\\])?$. For more information, see Namespaces in the Kubernetes documentation."]}
+    let context_ = "EksConfiguration"
+    let make ~eksClusterArn =
+      fun ~kubernetesNamespace ->
+        fun () -> { eksClusterArn; kubernetesNamespace }
+    let to_value x =
+      structure_to_value
+        [("eksClusterArn", (Some (String_.to_value x.eksClusterArn)));
+        ("kubernetesNamespace",
+          (Some (String_.to_value x.kubernetesNamespace)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let kubernetesNamespace =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "kubernetesNamespace") in
+      let eksClusterArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "eksClusterArn") in
+      make ~kubernetesNamespace ~eksClusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let kubernetesNamespace =
+        field_map_exn json__ "kubernetesNamespace" String_.of_json in
+      let eksClusterArn =
+        field_map_exn json__ "eksClusterArn" String_.of_json in
+      make ~kubernetesNamespace ~eksClusterArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for the Amazon EKS cluster that supports the Batch compute environment. The cluster must exist before the compute environment can be created."]
+module UpdatePolicy =
+  struct
+    type nonrec t =
+      {
+      terminateJobsOnUpdate: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether jobs are automatically terminated when the compute environment infrastructure is updated. The default value is false."];
+      jobExecutionTimeoutMinutes: JobExecutionTimeoutMinutes.t option
+        [@ocaml.doc
+          "Specifies the job timeout (in minutes) when the compute environment infrastructure is updated. The default value is 30."]}
+    let make ?terminateJobsOnUpdate =
+      fun ?jobExecutionTimeoutMinutes ->
+        fun () -> { terminateJobsOnUpdate; jobExecutionTimeoutMinutes }
+    let to_value x =
+      structure_to_value
+        [("terminateJobsOnUpdate",
+           (Option.map x.terminateJobsOnUpdate ~f:Boolean.to_value));
+        ("jobExecutionTimeoutMinutes",
+          (Option.map x.jobExecutionTimeoutMinutes
+             ~f:JobExecutionTimeoutMinutes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobExecutionTimeoutMinutes =
+        (Option.map ~f:JobExecutionTimeoutMinutes.of_xml)
+          (Xml.child xml_arg0 "jobExecutionTimeoutMinutes") in
+      let terminateJobsOnUpdate =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "terminateJobsOnUpdate") in
+      make ?jobExecutionTimeoutMinutes ?terminateJobsOnUpdate ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobExecutionTimeoutMinutes =
+        field_map json__ "jobExecutionTimeoutMinutes"
+          JobExecutionTimeoutMinutes.of_json in
+      let terminateJobsOnUpdate =
+        field_map json__ "terminateJobsOnUpdate" Boolean.of_json in
+      make ?jobExecutionTimeoutMinutes ?terminateJobsOnUpdate ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the infrastructure update policy for the Amazon EC2 compute environment. For more information about infrastructure updates, see Updating compute environments in the Batch User Guide."]
+module CRUpdateAllocationStrategy =
+  struct
+    type nonrec t =
+      | BEST_FIT_PROGRESSIVE 
+      | SPOT_CAPACITY_OPTIMIZED 
+      | SPOT_PRICE_CAPACITY_OPTIMIZED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BEST_FIT_PROGRESSIVE -> "BEST_FIT_PROGRESSIVE"
+      | SPOT_CAPACITY_OPTIMIZED -> "SPOT_CAPACITY_OPTIMIZED"
+      | SPOT_PRICE_CAPACITY_OPTIMIZED -> "SPOT_PRICE_CAPACITY_OPTIMIZED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BEST_FIT_PROGRESSIVE" -> BEST_FIT_PROGRESSIVE
+      | "SPOT_CAPACITY_OPTIMIZED" -> SPOT_CAPACITY_OPTIMIZED
+      | "SPOT_PRICE_CAPACITY_OPTIMIZED" -> SPOT_PRICE_CAPACITY_OPTIMIZED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CRUpdateAllocationStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CRUpdateAllocationStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceJobEvaluateOnExitList =
+  struct
+    type nonrec t = ServiceJobEvaluateOnExit.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobEvaluateOnExit.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobEvaluateOnExit.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobEvaluateOnExitList"
+        ~of_json:ServiceJobEvaluateOnExit.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NodePropertyOverrides =
   struct
     type nonrec t = NodePropertyOverride.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NodePropertyOverride.to_value)) |>
         (fun x -> `List x)
@@ -3443,94 +8992,393 @@ module NodePropertyOverrides =
         ~of_json:NodePropertyOverride.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ServiceJobSummary =
+  struct
+    type nonrec t =
+      {
+      latestAttempt: LatestServiceJobAttempt.t option
+        [@ocaml.doc
+          "Information about the latest attempt for the service job."];
+      capacityUsage: ServiceJobCapacityUsageSummaryList.t option
+        [@ocaml.doc
+          "The capacity usage information for this service job, including the unit of measure and quantity of resources being used."];
+      createdAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was created."];
+      jobArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the service job."];
+      jobId: String_.t option [@ocaml.doc "The job ID for the service job."];
+      jobName: String_.t option [@ocaml.doc "The name of the service job."];
+      scheduledAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was scheduled for execution."];
+      serviceJobType: ServiceJobType.t option
+        [@ocaml.doc
+          "The type of service job. For SageMaker Training jobs, this value is SAGEMAKER_TRAINING."];
+      shareIdentifier: String_.t option
+        [@ocaml.doc "The share identifier for the job."];
+      quotaShareName: String_.t option
+        [@ocaml.doc "The quota share for the service job."];
+      status: ServiceJobStatus.t option
+        [@ocaml.doc "The current status of the service job."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A short string to provide more details on the current status of the service job."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was started."];
+      stoppedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job stopped running."]}
+    let make ?latestAttempt =
+      fun ?capacityUsage ->
+        fun ?createdAt ->
+          fun ?jobArn ->
+            fun ?jobId ->
+              fun ?jobName ->
+                fun ?scheduledAt ->
+                  fun ?serviceJobType ->
+                    fun ?shareIdentifier ->
+                      fun ?quotaShareName ->
+                        fun ?status ->
+                          fun ?statusReason ->
+                            fun ?startedAt ->
+                              fun ?stoppedAt ->
+                                fun () ->
+                                  {
+                                    latestAttempt;
+                                    capacityUsage;
+                                    createdAt;
+                                    jobArn;
+                                    jobId;
+                                    jobName;
+                                    scheduledAt;
+                                    serviceJobType;
+                                    shareIdentifier;
+                                    quotaShareName;
+                                    status;
+                                    statusReason;
+                                    startedAt;
+                                    stoppedAt
+                                  }
+    let to_value x =
+      structure_to_value
+        [("latestAttempt",
+           (Option.map x.latestAttempt ~f:LatestServiceJobAttempt.to_value));
+        ("capacityUsage",
+          (Option.map x.capacityUsage
+             ~f:ServiceJobCapacityUsageSummaryList.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
+        ("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("scheduledAt", (Option.map x.scheduledAt ~f:Long.to_value));
+        ("serviceJobType",
+          (Option.map x.serviceJobType ~f:ServiceJobType.to_value));
+        ("shareIdentifier",
+          (Option.map x.shareIdentifier ~f:String_.to_value));
+        ("quotaShareName", (Option.map x.quotaShareName ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:ServiceJobStatus.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let stoppedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:ServiceJobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      let serviceJobType =
+        (Option.map ~f:ServiceJobType.of_xml)
+          (Xml.child xml_arg0 "serviceJobType") in
+      let scheduledAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "scheduledAt") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      let createdAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let capacityUsage =
+        (Option.map ~f:ServiceJobCapacityUsageSummaryList.of_xml)
+          (Xml.child xml_arg0 "capacityUsage") in
+      let latestAttempt =
+        (Option.map ~f:LatestServiceJobAttempt.of_xml)
+          (Xml.child xml_arg0 "latestAttempt") in
+      make ?stoppedAt ?startedAt ?statusReason ?status ?quotaShareName
+        ?shareIdentifier ?serviceJobType ?scheduledAt ?jobName ?jobId ?jobArn
+        ?createdAt ?capacityUsage ?latestAttempt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" ServiceJobStatus.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let serviceJobType =
+        field_map json__ "serviceJobType" ServiceJobType.of_json in
+      let scheduledAt = field_map json__ "scheduledAt" Long.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let capacityUsage =
+        field_map json__ "capacityUsage"
+          ServiceJobCapacityUsageSummaryList.of_json in
+      let latestAttempt =
+        field_map json__ "latestAttempt" LatestServiceJobAttempt.of_json in
+      make ?stoppedAt ?startedAt ?statusReason ?status ?quotaShareName
+        ?shareIdentifier ?serviceJobType ?scheduledAt ?jobName ?jobId ?jobArn
+        ?createdAt ?capacityUsage ?latestAttempt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Summary information about a service job."]
+module KeyValuesPair =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the filter. Filter names are case sensitive."];
+      values: StringList.t option [@ocaml.doc "The filter values."]}
+    let make ?name = fun ?values -> fun () -> { name; values }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("values", (Option.map x.values ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let values =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "values") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?values ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let values = field_map json__ "values" StringList.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?values ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A filter name and value pair that's used to return a more specific list of results from a ListJobs or ListJobsByConsumableResource API operation."]
 module SchedulingPolicyListingDetail =
   struct
     type nonrec t =
       {
-      arn: String_.t
+      arn: String_.t option
         [@ocaml.doc "Amazon Resource Name (ARN) of the scheduling policy."]}
-    let context_ = "SchedulingPolicyListingDetail"
-    let make ~arn = fun () -> { arn }
+    let make ?arn = fun () -> { arn }
     let to_value x =
-      structure_to_value [("arn", (Some (String_.to_value x.arn)))]
+      structure_to_value [("arn", (Option.map x.arn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let arn =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ~arn ()
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" String_.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map json__ "arn" String_.of_json in make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains the details of a scheduling policy that's returned in a ListSchedulingPolicy action."]
+module QuotaShareDetail =
+  struct
+    type nonrec t =
+      {
+      quotaShareName: String_.t option
+        [@ocaml.doc "The name of the quota share."];
+      quotaShareArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."];
+      jobQueueArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the job queue associated with the quota share."];
+      capacityLimits: QuotaShareCapacityLimits.t option
+        [@ocaml.doc
+          "A list that specifies the quantity and type of compute capacity allocated to the quota share."];
+      resourceSharingConfiguration:
+        QuotaShareResourceSharingConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether a quota share reserves, lends, or both lends and borrows idle compute capacity."];
+      preemptionConfiguration: QuotaSharePreemptionConfiguration.t option
+        [@ocaml.doc
+          "Specifies the preemption behavior for jobs in a quota share."];
+      state: QuotaShareState.t option
+        [@ocaml.doc "The state of the quota share."];
+      status: QuotaShareStatus.t option
+        [@ocaml.doc "The current status of the quota share."]}
+    let make ?quotaShareName =
+      fun ?quotaShareArn ->
+        fun ?jobQueueArn ->
+          fun ?capacityLimits ->
+            fun ?resourceSharingConfiguration ->
+              fun ?preemptionConfiguration ->
+                fun ?state ->
+                  fun ?status ->
+                    fun () ->
+                      {
+                        quotaShareName;
+                        quotaShareArn;
+                        jobQueueArn;
+                        capacityLimits;
+                        resourceSharingConfiguration;
+                        preemptionConfiguration;
+                        state;
+                        status
+                      }
+    let to_value x =
+      structure_to_value
+        [("quotaShareName",
+           (Option.map x.quotaShareName ~f:String_.to_value));
+        ("quotaShareArn", (Option.map x.quotaShareArn ~f:String_.to_value));
+        ("jobQueueArn", (Option.map x.jobQueueArn ~f:String_.to_value));
+        ("capacityLimits",
+          (Option.map x.capacityLimits ~f:QuotaShareCapacityLimits.to_value));
+        ("resourceSharingConfiguration",
+          (Option.map x.resourceSharingConfiguration
+             ~f:QuotaShareResourceSharingConfiguration.to_value));
+        ("preemptionConfiguration",
+          (Option.map x.preemptionConfiguration
+             ~f:QuotaSharePreemptionConfiguration.to_value));
+        ("state", (Option.map x.state ~f:QuotaShareState.to_value));
+        ("status", (Option.map x.status ~f:QuotaShareStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:QuotaShareStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let state =
+        (Option.map ~f:QuotaShareState.of_xml) (Xml.child xml_arg0 "state") in
+      let preemptionConfiguration =
+        (Option.map ~f:QuotaSharePreemptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "preemptionConfiguration") in
+      let resourceSharingConfiguration =
+        (Option.map ~f:QuotaShareResourceSharingConfiguration.of_xml)
+          (Xml.child xml_arg0 "resourceSharingConfiguration") in
+      let capacityLimits =
+        (Option.map ~f:QuotaShareCapacityLimits.of_xml)
+          (Xml.child xml_arg0 "capacityLimits") in
+      let jobQueueArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueArn") in
+      let quotaShareArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareArn") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      make ?status ?state ?preemptionConfiguration
+        ?resourceSharingConfiguration ?capacityLimits ?jobQueueArn
+        ?quotaShareArn ?quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" QuotaShareStatus.of_json in
+      let state = field_map json__ "state" QuotaShareState.of_json in
+      let preemptionConfiguration =
+        field_map json__ "preemptionConfiguration"
+          QuotaSharePreemptionConfiguration.of_json in
+      let resourceSharingConfiguration =
+        field_map json__ "resourceSharingConfiguration"
+          QuotaShareResourceSharingConfiguration.of_json in
+      let capacityLimits =
+        field_map json__ "capacityLimits" QuotaShareCapacityLimits.of_json in
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let quotaShareArn = field_map json__ "quotaShareArn" String_.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      make ?status ?state ?preemptionConfiguration
+        ?resourceSharingConfiguration ?capacityLimits ?jobQueueArn
+        ?quotaShareArn ?quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed information about a quota share, including its configuration, state, and capacity limits."]
 module JobSummary =
   struct
     type nonrec t =
       {
       jobArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the job."];
-      jobId: String_.t [@ocaml.doc "The ID of the job."];
-      jobName: String_.t [@ocaml.doc "The name of the job."];
+      jobId: String_.t option [@ocaml.doc "The job ID."];
+      jobName: String_.t option [@ocaml.doc "The job name."];
+      capacityUsage: JobCapacityUsageSummaryList.t option
+        [@ocaml.doc
+          "The configured capacity usage information for this job, including the unit of measure and quantity of resources."];
       createdAt: Long.t option
         [@ocaml.doc
           "The Unix timestamp (in milliseconds) for when the job was created. For non-array jobs and parent array jobs, this is when the job entered the SUBMITTED state (at the time SubmitJob was called). For array child jobs, this is when the child job was spawned by its parent and entered the PENDING state."];
+      scheduledAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the job was scheduled for execution. For more information on job statues, see Service job status in the Batch User Guide."];
+      shareIdentifier: String_.t option
+        [@ocaml.doc
+          "The share identifier for the fairshare scheduling queue that this job is associated with."];
       status: JobStatus.t option
         [@ocaml.doc "The current status for the job."];
       statusReason: String_.t option
         [@ocaml.doc
-          "A short, human-readable string to provide additional details about the current status of the job."];
+          "A short, human-readable string to provide more details for the current status of the job."];
       startedAt: Long.t option
         [@ocaml.doc
-          "The Unix timestamp for when the job was started (when the job transitioned from the STARTING state to the RUNNING state)."];
+          "The Unix timestamp for when the job was started. More specifically, it's when the job transitioned from the STARTING state to the RUNNING state."];
       stoppedAt: Long.t option
         [@ocaml.doc
-          "The Unix timestamp for when the job was stopped (when the job transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED)."];
+          "The Unix timestamp for when the job was stopped. More specifically, it's when the job transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED."];
       container: ContainerSummary.t option
         [@ocaml.doc
-          "An object representing the details of the container that's associated with the job."];
+          "An object that represents the details of the container that's associated with the job."];
       arrayProperties: ArrayPropertiesSummary.t option
-        [@ocaml.doc
-          "The array properties of the job, if it is an array job."];
+        [@ocaml.doc "The array properties of the job, if it's an array job."];
       nodeProperties: NodePropertiesSummary.t option
         [@ocaml.doc
           "The node properties for a single node in a job summary list. This isn't applicable to jobs that are running on Fargate resources."];
       jobDefinition: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the job definition."]}
-    let context_ = "JobSummary"
     let make ?jobArn =
-      fun ?createdAt ->
-        fun ?status ->
-          fun ?statusReason ->
-            fun ?startedAt ->
-              fun ?stoppedAt ->
-                fun ?container ->
-                  fun ?arrayProperties ->
-                    fun ?nodeProperties ->
-                      fun ?jobDefinition ->
-                        fun ~jobId ->
-                          fun ~jobName ->
-                            fun () ->
-                              {
-                                jobArn;
-                                createdAt;
-                                status;
-                                statusReason;
-                                startedAt;
-                                stoppedAt;
-                                container;
-                                arrayProperties;
-                                nodeProperties;
-                                jobDefinition;
-                                jobId;
-                                jobName
-                              }
+      fun ?jobId ->
+        fun ?jobName ->
+          fun ?capacityUsage ->
+            fun ?createdAt ->
+              fun ?scheduledAt ->
+                fun ?shareIdentifier ->
+                  fun ?status ->
+                    fun ?statusReason ->
+                      fun ?startedAt ->
+                        fun ?stoppedAt ->
+                          fun ?container ->
+                            fun ?arrayProperties ->
+                              fun ?nodeProperties ->
+                                fun ?jobDefinition ->
+                                  fun () ->
+                                    {
+                                      jobArn;
+                                      jobId;
+                                      jobName;
+                                      capacityUsage;
+                                      createdAt;
+                                      scheduledAt;
+                                      shareIdentifier;
+                                      status;
+                                      statusReason;
+                                      startedAt;
+                                      stoppedAt;
+                                      container;
+                                      arrayProperties;
+                                      nodeProperties;
+                                      jobDefinition
+                                    }
     let to_value x =
       structure_to_value
         [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
-        ("jobId", (Some (String_.to_value x.jobId)));
-        ("jobName", (Some (String_.to_value x.jobName)));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("capacityUsage",
+          (Option.map x.capacityUsage ~f:JobCapacityUsageSummaryList.to_value));
         ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
+        ("scheduledAt", (Option.map x.scheduledAt ~f:Long.to_value));
+        ("shareIdentifier",
+          (Option.map x.shareIdentifier ~f:String_.to_value));
         ("status", (Option.map x.status ~f:JobStatus.to_value));
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
         ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
@@ -3562,87 +9410,640 @@ module JobSummary =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
       let status =
         (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      let scheduledAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "scheduledAt") in
       let createdAt =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let capacityUsage =
+        (Option.map ~f:JobCapacityUsageSummaryList.of_xml)
+          (Xml.child xml_arg0 "capacityUsage") in
       let jobName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      let jobId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
       let jobArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
       make ?jobDefinition ?nodeProperties ?arrayProperties ?container
-        ?stoppedAt ?startedAt ?statusReason ?status ?createdAt ~jobName
-        ~jobId ?jobArn ()
+        ?stoppedAt ?startedAt ?statusReason ?status ?shareIdentifier
+        ?scheduledAt ?createdAt ?capacityUsage ?jobName ?jobId ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDefinition = field_map json "jobDefinition" String_.of_json in
+    let of_json json__ =
+      let jobDefinition = field_map json__ "jobDefinition" String_.of_json in
       let nodeProperties =
-        field_map json "nodeProperties" NodePropertiesSummary.of_json in
+        field_map json__ "nodeProperties" NodePropertiesSummary.of_json in
       let arrayProperties =
-        field_map json "arrayProperties" ArrayPropertiesSummary.of_json in
-      let container = field_map json "container" ContainerSummary.of_json in
-      let stoppedAt = field_map json "stoppedAt" Long.of_json in
-      let startedAt = field_map json "startedAt" Long.of_json in
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let status = field_map json "status" JobStatus.of_json in
-      let createdAt = field_map json "createdAt" Long.of_json in
-      let jobName = field_map_exn json "jobName" String_.of_json in
-      let jobId = field_map_exn json "jobId" String_.of_json in
-      let jobArn = field_map json "jobArn" String_.of_json in
+        field_map json__ "arrayProperties" ArrayPropertiesSummary.of_json in
+      let container = field_map json__ "container" ContainerSummary.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let scheduledAt = field_map json__ "scheduledAt" Long.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let capacityUsage =
+        field_map json__ "capacityUsage" JobCapacityUsageSummaryList.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
       make ?jobDefinition ?nodeProperties ?arrayProperties ?container
-        ?stoppedAt ?startedAt ?statusReason ?status ?createdAt ~jobName
-        ~jobId ?jobArn ()
+        ?stoppedAt ?startedAt ?statusReason ?status ?shareIdentifier
+        ?scheduledAt ?createdAt ?capacityUsage ?jobName ?jobId ?jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing summary details of a job."]
-module KeyValuesPair =
+  end[@@ocaml.doc "An object that represents summary details of a job."]
+module ListJobsByConsumableResourceSummary =
   struct
     type nonrec t =
       {
-      name: String_.t option
+      jobArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the job."];
+      jobQueueArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the job queue."];
+      jobName: String_.t option [@ocaml.doc "The name of the job."];
+      jobDefinitionArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the job definition."];
+      shareIdentifier: String_.t option
+        [@ocaml.doc "The fair-share scheduling identifier for the job."];
+      jobStatus: String_.t option
         [@ocaml.doc
-          "The name of the filter. Filter names are case sensitive."];
-      values: StringList.t option [@ocaml.doc "The filter values."]}
-    let make ?name = fun ?values -> fun () -> { name; values }
+          "The status of the job. Can be one of: SUBMITTED PENDING RUNNABLE STARTING RUNNING SUCCEEDED FAILED"];
+      quantity: Long.t option
+        [@ocaml.doc
+          "The total amount of the consumable resource that is available."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A short, human-readable string to provide more details for the current status of the job."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp for when the job was started. More specifically, it's when the job transitioned from the STARTING state to the RUNNING state."];
+      createdAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the consumable resource was created."];
+      consumableResourceProperties: ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "Contains a list of consumable resources required by the job."]}
+    let make ?jobArn =
+      fun ?jobQueueArn ->
+        fun ?jobName ->
+          fun ?jobDefinitionArn ->
+            fun ?shareIdentifier ->
+              fun ?jobStatus ->
+                fun ?quantity ->
+                  fun ?statusReason ->
+                    fun ?startedAt ->
+                      fun ?createdAt ->
+                        fun ?consumableResourceProperties ->
+                          fun () ->
+                            {
+                              jobArn;
+                              jobQueueArn;
+                              jobName;
+                              jobDefinitionArn;
+                              shareIdentifier;
+                              jobStatus;
+                              quantity;
+                              statusReason;
+                              startedAt;
+                              createdAt;
+                              consumableResourceProperties
+                            }
     let to_value x =
       structure_to_value
-        [("name", (Option.map x.name ~f:String_.to_value));
-        ("values", (Option.map x.values ~f:StringList.to_value))]
+        [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("jobQueueArn", (Option.map x.jobQueueArn ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobDefinitionArn",
+          (Option.map x.jobDefinitionArn ~f:String_.to_value));
+        ("shareIdentifier",
+          (Option.map x.shareIdentifier ~f:String_.to_value));
+        ("jobStatus", (Option.map x.jobStatus ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Long.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
+        ("consumableResourceProperties",
+          (Option.map x.consumableResourceProperties
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let values =
-        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "values") in
-      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
-      make ?values ?name ()
+      let consumableResourceProperties =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourceProperties") in
+      let createdAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let quantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "quantity") in
+      let jobStatus =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobStatus") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      let jobDefinitionArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "jobDefinitionArn") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobQueueArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueArn") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?consumableResourceProperties ?createdAt ?startedAt ?statusReason
+        ?quantity ?jobStatus ?shareIdentifier ?jobDefinitionArn ?jobName
+        ?jobQueueArn ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" StringList.of_json in
-      let name = field_map json "name" String_.of_json in
-      make ?values ?name ()
+    let of_json json__ =
+      let consumableResourceProperties =
+        field_map json__ "consumableResourceProperties"
+          ConsumableResourceProperties.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let quantity = field_map json__ "quantity" Long.of_json in
+      let jobStatus = field_map json__ "jobStatus" String_.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let jobDefinitionArn =
+        field_map json__ "jobDefinitionArn" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?consumableResourceProperties ?createdAt ?startedAt ?statusReason
+        ?quantity ?jobStatus ?shareIdentifier ?jobDefinitionArn ?jobName
+        ?jobQueueArn ?jobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A filter name and value pair that's used to return a more specific list of results from a ListJobs API operation."]
+       "Current information about a consumable resource required by a job."]
+module ConsumableResourceSummary =
+  struct
+    type nonrec t =
+      {
+      consumableResourceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the consumable resource."];
+      consumableResourceName: String_.t option
+        [@ocaml.doc "The name of the consumable resource."];
+      totalQuantity: Long.t option
+        [@ocaml.doc
+          "The total amount of the consumable resource that is available."];
+      inUseQuantity: Long.t option
+        [@ocaml.doc
+          "The amount of the consumable resource that is currently in use."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "Indicates whether the resource is available to be re-used after a job completes. Can be one of: REPLENISHABLE NON_REPLENISHABLE"]}
+    let make ?consumableResourceArn =
+      fun ?consumableResourceName ->
+        fun ?totalQuantity ->
+          fun ?inUseQuantity ->
+            fun ?resourceType ->
+              fun () ->
+                {
+                  consumableResourceArn;
+                  consumableResourceName;
+                  totalQuantity;
+                  inUseQuantity;
+                  resourceType
+                }
+    let to_value x =
+      structure_to_value
+        [("consumableResourceArn",
+           (Option.map x.consumableResourceArn ~f:String_.to_value));
+        ("consumableResourceName",
+          (Option.map x.consumableResourceName ~f:String_.to_value));
+        ("totalQuantity", (Option.map x.totalQuantity ~f:Long.to_value));
+        ("inUseQuantity", (Option.map x.inUseQuantity ~f:Long.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let inUseQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "inUseQuantity") in
+      let totalQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "totalQuantity") in
+      let consumableResourceName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceName") in
+      let consumableResourceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceArn") in
+      make ?resourceType ?inUseQuantity ?totalQuantity
+        ?consumableResourceName ?consumableResourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let inUseQuantity = field_map json__ "inUseQuantity" Long.of_json in
+      let totalQuantity = field_map json__ "totalQuantity" Long.of_json in
+      let consumableResourceName =
+        field_map json__ "consumableResourceName" String_.of_json in
+      let consumableResourceArn =
+        field_map json__ "consumableResourceArn" String_.of_json in
+      make ?resourceType ?inUseQuantity ?totalQuantity
+        ?consumableResourceName ?consumableResourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Current information about a consumable resource."]
+module FrontOfQueueJobSummaryList =
+  struct
+    type nonrec t = FrontOfQueueJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FrontOfQueueJobSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FrontOfQueueJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FrontOfQueueJobSummaryList"
+        ~of_json:FrontOfQueueJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FrontOfQuotaSharesJobSummaryMap =
+  struct
+    type nonrec t = (String_.t * FrontOfQuotaShareJobSummaryList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String FrontOfQuotaShareJobSummaryList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (FrontOfQuotaShareJobSummaryList.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:FrontOfQuotaShareJobSummaryList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FairshareUtilizationDetail =
+  struct
+    type nonrec t =
+      {
+      activeShareCount: Long.t option
+        [@ocaml.doc
+          "The total number of active shares in the fairshare scheduling job queue that are currently utilizing capacity."];
+      topCapacityUtilization: FairshareCapacityUtilizationList.t option
+        [@ocaml.doc
+          "A list of the top 20 shares with the highest capacity utilization, ordered by usage amount."]}
+    let make ?activeShareCount =
+      fun ?topCapacityUtilization ->
+        fun () -> { activeShareCount; topCapacityUtilization }
+    let to_value x =
+      structure_to_value
+        [("activeShareCount",
+           (Option.map x.activeShareCount ~f:Long.to_value));
+        ("topCapacityUtilization",
+          (Option.map x.topCapacityUtilization
+             ~f:FairshareCapacityUtilizationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topCapacityUtilization =
+        (Option.map ~f:FairshareCapacityUtilizationList.of_xml)
+          (Xml.child xml_arg0 "topCapacityUtilization") in
+      let activeShareCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "activeShareCount") in
+      make ?topCapacityUtilization ?activeShareCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topCapacityUtilization =
+        field_map json__ "topCapacityUtilization"
+          FairshareCapacityUtilizationList.of_json in
+      let activeShareCount = field_map json__ "activeShareCount" Long.of_json in
+      make ?topCapacityUtilization ?activeShareCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The fairshare utilization for a job queue, including the number of active shares and top capacity utilization."]
+module QueueSnapshotCapacityUsageList =
+  struct
+    type nonrec t = QueueSnapshotCapacityUsage.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QueueSnapshotCapacityUsage.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QueueSnapshotCapacityUsage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QueueSnapshotCapacityUsageList"
+        ~of_json:QueueSnapshotCapacityUsage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module QuotaShareUtilizationDetail =
+  struct
+    type nonrec t =
+      {
+      topCapacityUtilization: QuotaShareCapacityUtilizationList.t option
+        [@ocaml.doc
+          "A list of the top capacity utilizations across quota shares associated with a job queue."]}
+    let make ?topCapacityUtilization = fun () -> { topCapacityUtilization }
+    let to_value x =
+      structure_to_value
+        [("topCapacityUtilization",
+           (Option.map x.topCapacityUtilization
+              ~f:QuotaShareCapacityUtilizationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topCapacityUtilization =
+        (Option.map ~f:QuotaShareCapacityUtilizationList.of_xml)
+          (Xml.child xml_arg0 "topCapacityUtilization") in
+      make ?topCapacityUtilization ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topCapacityUtilization =
+        field_map json__ "topCapacityUtilization"
+          QuotaShareCapacityUtilizationList.of_json in
+      make ?topCapacityUtilization ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the capacity utilization details of all quota shares associated with a single job queue."]
+module ServiceJobAttemptDetail =
+  struct
+    type nonrec t =
+      {
+      serviceResourceId: ServiceResourceId.t option
+        [@ocaml.doc
+          "The service resource identifier associated with the service job attempt."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job attempt was started."];
+      stoppedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job attempt stopped running."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A string that provides additional details for the current status of the service job attempt."]}
+    let make ?serviceResourceId =
+      fun ?startedAt ->
+        fun ?stoppedAt ->
+          fun ?statusReason ->
+            fun () ->
+              { serviceResourceId; startedAt; stoppedAt; statusReason }
+    let to_value x =
+      structure_to_value
+        [("serviceResourceId",
+           (Option.map x.serviceResourceId ~f:ServiceResourceId.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let stoppedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let serviceResourceId =
+        (Option.map ~f:ServiceResourceId.of_xml)
+          (Xml.child xml_arg0 "serviceResourceId") in
+      make ?statusReason ?stoppedAt ?startedAt ?serviceResourceId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let serviceResourceId =
+        field_map json__ "serviceResourceId" ServiceResourceId.of_json in
+      make ?statusReason ?stoppedAt ?startedAt ?serviceResourceId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed information about an attempt to run a service job."]
+module ServiceJobCapacityUsageDetail =
+  struct
+    type nonrec t =
+      {
+      capacityUnit: String_.t option
+        [@ocaml.doc
+          "The unit of measure for the service job capacity usage. For service jobs, this is the instance type."];
+      quantity: Double.t option
+        [@ocaml.doc
+          "The quantity of capacity being used by the service job, measured in the units specified by capacityUnit."]}
+    let make ?capacityUnit =
+      fun ?quantity -> fun () -> { capacityUnit; quantity }
+    let to_value x =
+      structure_to_value
+        [("capacityUnit", (Option.map x.capacityUnit ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quantity =
+        (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "quantity") in
+      let capacityUnit =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "capacityUnit") in
+      make ?quantity ?capacityUnit ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quantity = field_map json__ "quantity" Double.of_json in
+      let capacityUnit = field_map json__ "capacityUnit" String_.of_json in
+      make ?quantity ?capacityUnit ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The capacity usage for a service job, including the unit of measure and quantity of resources being consumed."]
+module ServiceJobRecentPreemptedAttemptList =
+  struct
+    type nonrec t = ServiceJobPreemptedAttempt.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobPreemptedAttempt.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobPreemptedAttempt.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobRecentPreemptedAttemptList"
+        ~of_json:ServiceJobPreemptedAttempt.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceEnvironmentDetail =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironmentName: String_.t option
+        [@ocaml.doc "The name of the service environment."];
+      serviceEnvironmentArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service environment."];
+      serviceEnvironmentType: ServiceEnvironmentType.t option
+        [@ocaml.doc
+          "The type of service environment. For SageMaker Training jobs, this value is SAGEMAKER_TRAINING."];
+      state: ServiceEnvironmentState.t option
+        [@ocaml.doc
+          "The state of the service environment. Valid values are ENABLED and DISABLED."];
+      status: ServiceEnvironmentStatus.t option
+        [@ocaml.doc "The current status of the service environment."];
+      capacityLimits: CapacityLimits.t option
+        [@ocaml.doc
+          "The capacity limits for the service environment. This defines the maximum resources that can be used by service jobs in this environment."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags associated with the service environment. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."]}
+    let make ?serviceEnvironmentName =
+      fun ?serviceEnvironmentArn ->
+        fun ?serviceEnvironmentType ->
+          fun ?state ->
+            fun ?status ->
+              fun ?capacityLimits ->
+                fun ?tags ->
+                  fun () ->
+                    {
+                      serviceEnvironmentName;
+                      serviceEnvironmentArn;
+                      serviceEnvironmentType;
+                      state;
+                      status;
+                      capacityLimits;
+                      tags
+                    }
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironmentName",
+           (Option.map x.serviceEnvironmentName ~f:String_.to_value));
+        ("serviceEnvironmentArn",
+          (Option.map x.serviceEnvironmentArn ~f:String_.to_value));
+        ("serviceEnvironmentType",
+          (Option.map x.serviceEnvironmentType
+             ~f:ServiceEnvironmentType.to_value));
+        ("state", (Option.map x.state ~f:ServiceEnvironmentState.to_value));
+        ("status",
+          (Option.map x.status ~f:ServiceEnvironmentStatus.to_value));
+        ("capacityLimits",
+          (Option.map x.capacityLimits ~f:CapacityLimits.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let capacityLimits =
+        (Option.map ~f:CapacityLimits.of_xml)
+          (Xml.child xml_arg0 "capacityLimits") in
+      let status =
+        (Option.map ~f:ServiceEnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let state =
+        (Option.map ~f:ServiceEnvironmentState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let serviceEnvironmentType =
+        (Option.map ~f:ServiceEnvironmentType.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentType") in
+      let serviceEnvironmentArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentArn") in
+      let serviceEnvironmentName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentName") in
+      make ?tags ?capacityLimits ?status ?state ?serviceEnvironmentType
+        ?serviceEnvironmentArn ?serviceEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let capacityLimits =
+        field_map json__ "capacityLimits" CapacityLimits.of_json in
+      let status = field_map json__ "status" ServiceEnvironmentStatus.of_json in
+      let state = field_map json__ "state" ServiceEnvironmentState.of_json in
+      let serviceEnvironmentType =
+        field_map json__ "serviceEnvironmentType"
+          ServiceEnvironmentType.of_json in
+      let serviceEnvironmentArn =
+        field_map json__ "serviceEnvironmentArn" String_.of_json in
+      let serviceEnvironmentName =
+        field_map json__ "serviceEnvironmentName" String_.of_json in
+      make ?tags ?capacityLimits ?status ?state ?serviceEnvironmentType
+        ?serviceEnvironmentArn ?serviceEnvironmentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Detailed information about a service environment, including its configuration, state, and capacity limits."]
 module SchedulingPolicyDetail =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the scheduling policy."];
-      arn: String_.t
+      name: String_.t option
+        [@ocaml.doc "The name of the fair-share scheduling policy."];
+      arn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the scheduling policy. An example is arn:aws:batch:us-east-1:123456789012:scheduling-policy/HighPriority ."];
+      quotaSharePolicy: QuotaSharePolicy.t option
+        [@ocaml.doc "The quota share scheduling policy details."];
       fairsharePolicy: FairsharePolicy.t option
-        [@ocaml.doc "The fair share policy for the scheduling policy."];
+        [@ocaml.doc "The fair-share scheduling policy details."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
-          "The tags that you apply to the scheduling policy to categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference."]}
-    let context_ = "SchedulingPolicyDetail"
-    let make ?fairsharePolicy =
-      fun ?tags ->
-        fun ~name ->
-          fun ~arn -> fun () -> { fairsharePolicy; tags; name; arn }
+          "The tags that you apply to the fair-share scheduling policy to categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services resources in Amazon Web Services General Reference."]}
+    let make ?name =
+      fun ?arn ->
+        fun ?quotaSharePolicy ->
+          fun ?fairsharePolicy ->
+            fun ?tags ->
+              fun () ->
+                { name; arn; quotaSharePolicy; fairsharePolicy; tags }
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("arn", (Some (String_.to_value x.arn)));
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value));
+        ("quotaSharePolicy",
+          (Option.map x.quotaSharePolicy ~f:QuotaSharePolicy.to_value));
         ("fairsharePolicy",
           (Option.map x.fairsharePolicy ~f:FairsharePolicy.to_value));
         ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
@@ -3653,19 +10054,22 @@ module SchedulingPolicyDetail =
       let fairsharePolicy =
         (Option.map ~f:FairsharePolicy.of_xml)
           (Xml.child xml_arg0 "fairsharePolicy") in
-      let arn =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tags ?fairsharePolicy ~arn ~name ()
+      let quotaSharePolicy =
+        (Option.map ~f:QuotaSharePolicy.of_xml)
+          (Xml.child xml_arg0 "quotaSharePolicy") in
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?tags ?fairsharePolicy ?quotaSharePolicy ?arn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
       let fairsharePolicy =
-        field_map json "fairsharePolicy" FairsharePolicy.of_json in
-      let arn = field_map_exn json "arn" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?tags ?fairsharePolicy ~arn ~name ()
+        field_map json__ "fairsharePolicy" FairsharePolicy.of_json in
+      let quotaSharePolicy =
+        field_map json__ "quotaSharePolicy" QuotaSharePolicy.of_json in
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?tags ?fairsharePolicy ?quotaSharePolicy ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that represents a scheduling policy."]
 module JobDetail =
@@ -3674,124 +10078,156 @@ module JobDetail =
       {
       jobArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the job."];
-      jobName: String_.t [@ocaml.doc "The name of the job."];
-      jobId: String_.t [@ocaml.doc "The ID for the job."];
-      jobQueue: String_.t
+      jobName: String_.t option [@ocaml.doc "The job name."];
+      jobId: String_.t option [@ocaml.doc "The job ID."];
+      jobQueue: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the job queue that the job is associated with."];
-      status: JobStatus.t
+      status: JobStatus.t option
         [@ocaml.doc
-          "The current status for the job. If your jobs don't progress to STARTING, see Jobs Stuck in RUNNABLE Status in the troubleshooting section of the Batch User Guide."];
+          "The current status for the job. If your jobs don't progress to STARTING, see Jobs stuck in RUNNABLE status in the troubleshooting section of the Batch User Guide."];
       shareIdentifier: String_.t option
         [@ocaml.doc "The share identifier for the job."];
       schedulingPriority: Integer.t option
         [@ocaml.doc
-          "The scheduling policy of the job definition. This only affects jobs in job queues with a fair share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority."];
+          "The scheduling policy of the job definition. This only affects jobs in job queues with a fair-share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority."];
       attempts: AttemptDetails.t option
-        [@ocaml.doc "A list of job attempts associated with this job."];
+        [@ocaml.doc
+          "A list of job attempts that are associated with this job."];
       statusReason: String_.t option
         [@ocaml.doc
-          "A short, human-readable string to provide additional details about the current status of the job."];
+          "A short, human-readable string to provide more details for the current status of the job. CAPACITY:INSUFFICIENT_INSTANCE_CAPACITY - All compute environments have insufficient capacity to service the job. MISCONFIGURATION:COMPUTE_ENVIRONMENT_MAX_RESOURCE - All compute environments have a maxVcpu setting that is smaller than the job requirements. MISCONFIGURATION:JOB_RESOURCE_REQUIREMENT - All compute environments have no connected instances that meet the job requirements. MISCONFIGURATION:SERVICE_ROLE_PERMISSIONS - All compute environments have problems with the service role permissions."];
       createdAt: Long.t option
         [@ocaml.doc
-          "The Unix timestamp (in milliseconds) for when the job was created. For non-array jobs and parent array jobs, this is when the job entered the SUBMITTED state (at the time SubmitJob was called). For array child jobs, this is when the child job was spawned by its parent and entered the PENDING state."];
+          "The Unix timestamp (in milliseconds) for when the job was created. For non-array jobs and parent array jobs, this is when the job entered the SUBMITTED state. This is specifically at the time SubmitJob was called. For array child jobs, this is when the child job was spawned by its parent and entered the PENDING state."];
       retryStrategy: RetryStrategy.t option
         [@ocaml.doc
           "The retry strategy to use for this job if an attempt fails."];
-      startedAt: Long.t
+      startedAt: Long.t option
         [@ocaml.doc
-          "The Unix timestamp (in milliseconds) for when the job was started (when the job transitioned from the STARTING state to the RUNNING state). This parameter isn't provided for child jobs of array jobs or multi-node parallel jobs."];
+          "The Unix timestamp (in milliseconds) for when the job was started. More specifically, it's when the job transitioned from the STARTING state to the RUNNING state."];
       stoppedAt: Long.t option
         [@ocaml.doc
-          "The Unix timestamp (in milliseconds) for when the job was stopped (when the job transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED)."];
+          "The Unix timestamp (in milliseconds) for when the job was stopped. More specifically, it's when the job transitioned from the RUNNING state to a terminal state, such as SUCCEEDED or FAILED."];
       dependsOn: JobDependencyList.t option
         [@ocaml.doc "A list of job IDs that this job depends on."];
-      jobDefinition: String_.t
-        [@ocaml.doc "The job definition that's used by this job."];
+      jobDefinition: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the job definition that this job uses."];
       parameters: ParametersMap.t option
         [@ocaml.doc
-          "Additional parameters passed to the job that replace parameter substitution placeholders or override any corresponding parameter defaults from the job definition."];
+          "Additional parameters that are passed to the job that replace parameter substitution placeholders or override any corresponding parameter defaults from the job definition."];
       container: ContainerDetail.t option
         [@ocaml.doc
-          "An object representing the details of the container that's associated with the job."];
+          "An object that represents the details for the container that's associated with the job. If the details are for a multiple-container job, this object will be empty."];
       nodeDetails: NodeDetails.t option
         [@ocaml.doc
-          "An object representing the details of a node that's associated with a multi-node parallel job."];
+          "An object that represents the details of a node that's associated with a multi-node parallel job."];
       nodeProperties: NodeProperties.t option
         [@ocaml.doc
-          "An object representing the node properties of a multi-node parallel job. This isn't applicable to jobs that are running on Fargate resources."];
+          "An object that represents the node properties of a multi-node parallel job. This isn't applicable to jobs that are running on Fargate resources."];
       arrayProperties: ArrayPropertiesDetail.t option
-        [@ocaml.doc
-          "The array properties of the job, if it is an array job."];
+        [@ocaml.doc "The array properties of the job, if it's an array job."];
       timeout: JobTimeout.t option
         [@ocaml.doc "The timeout configuration for the job."];
       tags: TagrisTagsMap.t option
-        [@ocaml.doc "The tags applied to the job."];
+        [@ocaml.doc "The tags that are applied to the job."];
       propagateTags: Boolean.t option
         [@ocaml.doc
-          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags aren't propagated. Tags can only be propagated to the tasks during task creation. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state."];
+          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags aren't propagated. Tags can only be propagated to the tasks when the tasks are created. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state."];
       platformCapabilities: PlatformCapabilityList.t option
         [@ocaml.doc
-          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. Jobs run on Fargate resources specify FARGATE."]}
-    let context_ = "JobDetail"
+          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. Jobs run on Fargate resources specify FARGATE."];
+      eksProperties: EksPropertiesDetail.t option
+        [@ocaml.doc
+          "An object with various properties that are specific to Amazon EKS based jobs."];
+      eksAttempts: EksAttemptDetails.t option
+        [@ocaml.doc
+          "A list of job attempts that are associated with this job."];
+      ecsProperties: EcsPropertiesDetail.t option
+        [@ocaml.doc
+          "An object with properties that are specific to Amazon ECS-based jobs."];
+      isCancelled: Boolean.t option
+        [@ocaml.doc "Indicates whether the job is canceled."];
+      isTerminated: Boolean.t option
+        [@ocaml.doc "Indicates whether the job is terminated."];
+      consumableResourceProperties: ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "Contains a list of consumable resources required by the job."]}
     let make ?jobArn =
-      fun ?shareIdentifier ->
-        fun ?schedulingPriority ->
-          fun ?attempts ->
-            fun ?statusReason ->
-              fun ?createdAt ->
-                fun ?retryStrategy ->
-                  fun ?stoppedAt ->
-                    fun ?dependsOn ->
-                      fun ?parameters ->
-                        fun ?container ->
-                          fun ?nodeDetails ->
-                            fun ?nodeProperties ->
-                              fun ?arrayProperties ->
-                                fun ?timeout ->
-                                  fun ?tags ->
-                                    fun ?propagateTags ->
-                                      fun ?platformCapabilities ->
-                                        fun ~jobName ->
-                                          fun ~jobId ->
-                                            fun ~jobQueue ->
-                                              fun ~status ->
-                                                fun ~startedAt ->
-                                                  fun ~jobDefinition ->
-                                                    fun () ->
-                                                      {
-                                                        jobArn;
-                                                        shareIdentifier;
-                                                        schedulingPriority;
-                                                        attempts;
-                                                        statusReason;
-                                                        createdAt;
-                                                        retryStrategy;
-                                                        stoppedAt;
-                                                        dependsOn;
-                                                        parameters;
-                                                        container;
-                                                        nodeDetails;
-                                                        nodeProperties;
-                                                        arrayProperties;
-                                                        timeout;
-                                                        tags;
-                                                        propagateTags;
-                                                        platformCapabilities;
-                                                        jobName;
-                                                        jobId;
-                                                        jobQueue;
-                                                        status;
-                                                        startedAt;
-                                                        jobDefinition
-                                                      }
+      fun ?jobName ->
+        fun ?jobId ->
+          fun ?jobQueue ->
+            fun ?status ->
+              fun ?shareIdentifier ->
+                fun ?schedulingPriority ->
+                  fun ?attempts ->
+                    fun ?statusReason ->
+                      fun ?createdAt ->
+                        fun ?retryStrategy ->
+                          fun ?startedAt ->
+                            fun ?stoppedAt ->
+                              fun ?dependsOn ->
+                                fun ?jobDefinition ->
+                                  fun ?parameters ->
+                                    fun ?container ->
+                                      fun ?nodeDetails ->
+                                        fun ?nodeProperties ->
+                                          fun ?arrayProperties ->
+                                            fun ?timeout ->
+                                              fun ?tags ->
+                                                fun ?propagateTags ->
+                                                  fun ?platformCapabilities
+                                                    ->
+                                                    fun ?eksProperties ->
+                                                      fun ?eksAttempts ->
+                                                        fun ?ecsProperties ->
+                                                          fun ?isCancelled ->
+                                                            fun ?isTerminated
+                                                              ->
+                                                              fun
+                                                                ?consumableResourceProperties
+                                                                ->
+                                                                fun () ->
+                                                                  {
+                                                                    jobArn;
+                                                                    jobName;
+                                                                    jobId;
+                                                                    jobQueue;
+                                                                    status;
+                                                                    shareIdentifier;
+                                                                    schedulingPriority;
+                                                                    attempts;
+                                                                    statusReason;
+                                                                    createdAt;
+                                                                    retryStrategy;
+                                                                    startedAt;
+                                                                    stoppedAt;
+                                                                    dependsOn;
+                                                                    jobDefinition;
+                                                                    parameters;
+                                                                    container;
+                                                                    nodeDetails;
+                                                                    nodeProperties;
+                                                                    arrayProperties;
+                                                                    timeout;
+                                                                    tags;
+                                                                    propagateTags;
+                                                                    platformCapabilities;
+                                                                    eksProperties;
+                                                                    eksAttempts;
+                                                                    ecsProperties;
+                                                                    isCancelled;
+                                                                    isTerminated;
+                                                                    consumableResourceProperties
+                                                                  }
     let to_value x =
       structure_to_value
         [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
-        ("jobName", (Some (String_.to_value x.jobName)));
-        ("jobId", (Some (String_.to_value x.jobId)));
-        ("jobQueue", (Some (String_.to_value x.jobQueue)));
-        ("status", (Some (JobStatus.to_value x.status)));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value));
+        ("jobQueue", (Option.map x.jobQueue ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:JobStatus.to_value));
         ("shareIdentifier",
           (Option.map x.shareIdentifier ~f:String_.to_value));
         ("schedulingPriority",
@@ -3801,10 +10237,10 @@ module JobDetail =
         ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
         ("retryStrategy",
           (Option.map x.retryStrategy ~f:RetryStrategy.to_value));
-        ("startedAt", (Some (Long.to_value x.startedAt)));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
         ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
         ("dependsOn", (Option.map x.dependsOn ~f:JobDependencyList.to_value));
-        ("jobDefinition", (Some (String_.to_value x.jobDefinition)));
+        ("jobDefinition", (Option.map x.jobDefinition ~f:String_.to_value));
         ("parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
         ("container", (Option.map x.container ~f:ContainerDetail.to_value));
         ("nodeDetails", (Option.map x.nodeDetails ~f:NodeDetails.to_value));
@@ -3817,9 +10253,36 @@ module JobDetail =
         ("propagateTags", (Option.map x.propagateTags ~f:Boolean.to_value));
         ("platformCapabilities",
           (Option.map x.platformCapabilities
-             ~f:PlatformCapabilityList.to_value))]
+             ~f:PlatformCapabilityList.to_value));
+        ("eksProperties",
+          (Option.map x.eksProperties ~f:EksPropertiesDetail.to_value));
+        ("eksAttempts",
+          (Option.map x.eksAttempts ~f:EksAttemptDetails.to_value));
+        ("ecsProperties",
+          (Option.map x.ecsProperties ~f:EcsPropertiesDetail.to_value));
+        ("isCancelled", (Option.map x.isCancelled ~f:Boolean.to_value));
+        ("isTerminated", (Option.map x.isTerminated ~f:Boolean.to_value));
+        ("consumableResourceProperties",
+          (Option.map x.consumableResourceProperties
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourceProperties =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourceProperties") in
+      let isTerminated =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isTerminated") in
+      let isCancelled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isCancelled") in
+      let ecsProperties =
+        (Option.map ~f:EcsPropertiesDetail.of_xml)
+          (Xml.child xml_arg0 "ecsProperties") in
+      let eksAttempts =
+        (Option.map ~f:EksAttemptDetails.of_xml)
+          (Xml.child xml_arg0 "eksAttempts") in
+      let eksProperties =
+        (Option.map ~f:EksPropertiesDetail.of_xml)
+          (Xml.child xml_arg0 "eksProperties") in
       let platformCapabilities =
         (Option.map ~f:PlatformCapabilityList.of_xml)
           (Xml.child xml_arg0 "platformCapabilities") in
@@ -3844,15 +10307,14 @@ module JobDetail =
         (Option.map ~f:ParametersMap.of_xml)
           (Xml.child xml_arg0 "parameters") in
       let jobDefinition =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDefinition") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobDefinition") in
       let dependsOn =
         (Option.map ~f:JobDependencyList.of_xml)
           (Xml.child xml_arg0 "dependsOn") in
       let stoppedAt =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
       let startedAt =
-        Long.of_xml (Xml.child_exn ~context:context_ xml_arg0 "startedAt") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
       let retryStrategy =
         (Option.map ~f:RetryStrategy.of_xml)
           (Xml.child xml_arg0 "retryStrategy") in
@@ -3868,130 +10330,178 @@ module JobDetail =
       let shareIdentifier =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
       let status =
-        JobStatus.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:JobStatus.of_xml) (Xml.child xml_arg0 "status") in
       let jobQueue =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
-      let jobId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueue") in
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
       let jobName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
       let jobArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
-      make ?platformCapabilities ?propagateTags ?tags ?timeout
-        ?arrayProperties ?nodeProperties ?nodeDetails ?container ?parameters
-        ~jobDefinition ?dependsOn ?stoppedAt ~startedAt ?retryStrategy
-        ?createdAt ?statusReason ?attempts ?schedulingPriority
-        ?shareIdentifier ~status ~jobQueue ~jobId ~jobName ?jobArn ()
+      make ?consumableResourceProperties ?isTerminated ?isCancelled
+        ?ecsProperties ?eksAttempts ?eksProperties ?platformCapabilities
+        ?propagateTags ?tags ?timeout ?arrayProperties ?nodeProperties
+        ?nodeDetails ?container ?parameters ?jobDefinition ?dependsOn
+        ?stoppedAt ?startedAt ?retryStrategy ?createdAt ?statusReason
+        ?attempts ?schedulingPriority ?shareIdentifier ?status ?jobQueue
+        ?jobId ?jobName ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let consumableResourceProperties =
+        field_map json__ "consumableResourceProperties"
+          ConsumableResourceProperties.of_json in
+      let isTerminated = field_map json__ "isTerminated" Boolean.of_json in
+      let isCancelled = field_map json__ "isCancelled" Boolean.of_json in
+      let ecsProperties =
+        field_map json__ "ecsProperties" EcsPropertiesDetail.of_json in
+      let eksAttempts =
+        field_map json__ "eksAttempts" EksAttemptDetails.of_json in
+      let eksProperties =
+        field_map json__ "eksProperties" EksPropertiesDetail.of_json in
       let platformCapabilities =
-        field_map json "platformCapabilities" PlatformCapabilityList.of_json in
-      let propagateTags = field_map json "propagateTags" Boolean.of_json in
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
-      let timeout = field_map json "timeout" JobTimeout.of_json in
+        field_map json__ "platformCapabilities"
+          PlatformCapabilityList.of_json in
+      let propagateTags = field_map json__ "propagateTags" Boolean.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let timeout = field_map json__ "timeout" JobTimeout.of_json in
       let arrayProperties =
-        field_map json "arrayProperties" ArrayPropertiesDetail.of_json in
+        field_map json__ "arrayProperties" ArrayPropertiesDetail.of_json in
       let nodeProperties =
-        field_map json "nodeProperties" NodeProperties.of_json in
-      let nodeDetails = field_map json "nodeDetails" NodeDetails.of_json in
-      let container = field_map json "container" ContainerDetail.of_json in
-      let parameters = field_map json "parameters" ParametersMap.of_json in
-      let jobDefinition = field_map_exn json "jobDefinition" String_.of_json in
-      let dependsOn = field_map json "dependsOn" JobDependencyList.of_json in
-      let stoppedAt = field_map json "stoppedAt" Long.of_json in
-      let startedAt = field_map_exn json "startedAt" Long.of_json in
+        field_map json__ "nodeProperties" NodeProperties.of_json in
+      let nodeDetails = field_map json__ "nodeDetails" NodeDetails.of_json in
+      let container = field_map json__ "container" ContainerDetail.of_json in
+      let parameters = field_map json__ "parameters" ParametersMap.of_json in
+      let jobDefinition = field_map json__ "jobDefinition" String_.of_json in
+      let dependsOn = field_map json__ "dependsOn" JobDependencyList.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
       let retryStrategy =
-        field_map json "retryStrategy" RetryStrategy.of_json in
-      let createdAt = field_map json "createdAt" Long.of_json in
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let attempts = field_map json "attempts" AttemptDetails.of_json in
+        field_map json__ "retryStrategy" RetryStrategy.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let attempts = field_map json__ "attempts" AttemptDetails.of_json in
       let schedulingPriority =
-        field_map json "schedulingPriority" Integer.of_json in
-      let shareIdentifier = field_map json "shareIdentifier" String_.of_json in
-      let status = field_map_exn json "status" JobStatus.of_json in
-      let jobQueue = field_map_exn json "jobQueue" String_.of_json in
-      let jobId = field_map_exn json "jobId" String_.of_json in
-      let jobName = field_map_exn json "jobName" String_.of_json in
-      let jobArn = field_map json "jobArn" String_.of_json in
-      make ?platformCapabilities ?propagateTags ?tags ?timeout
-        ?arrayProperties ?nodeProperties ?nodeDetails ?container ?parameters
-        ~jobDefinition ?dependsOn ?stoppedAt ~startedAt ?retryStrategy
-        ?createdAt ?statusReason ?attempts ?schedulingPriority
-        ?shareIdentifier ~status ~jobQueue ~jobId ~jobName ?jobArn ()
+        field_map json__ "schedulingPriority" Integer.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let status = field_map json__ "status" JobStatus.of_json in
+      let jobQueue = field_map json__ "jobQueue" String_.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?consumableResourceProperties ?isTerminated ?isCancelled
+        ?ecsProperties ?eksAttempts ?eksProperties ?platformCapabilities
+        ?propagateTags ?tags ?timeout ?arrayProperties ?nodeProperties
+        ?nodeDetails ?container ?parameters ?jobDefinition ?dependsOn
+        ?stoppedAt ?startedAt ?retryStrategy ?createdAt ?statusReason
+        ?attempts ?schedulingPriority ?shareIdentifier ?status ?jobQueue
+        ?jobId ?jobName ?jobArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Batch job."]
+  end[@@ocaml.doc "An object that represents an Batch job."]
 module JobQueueDetail =
   struct
     type nonrec t =
       {
-      jobQueueName: String_.t [@ocaml.doc "The name of the job queue."];
-      jobQueueArn: String_.t
+      jobQueueName: String_.t option [@ocaml.doc "The job queue name."];
+      jobQueueArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the job queue."];
-      state: JQState.t
+      state: JQState.t option
         [@ocaml.doc
-          "Describes the ability of the queue to accept new jobs. If the job queue state is ENABLED, it's able to accept jobs. If the job queue state is DISABLED, new jobs can't be added to the queue, but jobs already in the queue can finish."];
+          "Describes the ability of the queue to accept new jobs. If the job queue state is ENABLED, it can accept jobs. If the job queue state is DISABLED, new jobs can't be added to the queue, but jobs already in the queue can finish."];
       schedulingPolicyArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the scheduling policy. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:012345678910:scheduling-policy/MySchedulingPolicy."];
+          "The Amazon Resource Name (ARN) of the scheduling policy. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:123456789012:scheduling-policy/MySchedulingPolicy."];
       status: JQStatus.t option
         [@ocaml.doc
           "The status of the job queue (for example, CREATING or VALID)."];
       statusReason: String_.t option
         [@ocaml.doc
-          "A short, human-readable string to provide additional details about the current status of the job queue."];
-      priority: Integer.t
+          "A short, human-readable string to provide additional details for the current status of the job queue."];
+      priority: Integer.t option
         [@ocaml.doc
-          "The priority of the job queue. Job queues with a higher priority (or a higher integer value for the priority parameter) are evaluated first when associated with the same compute environment. Priority is determined in descending order, for example, a job queue with a priority value of 10 is given scheduling preference over a job queue with a priority value of 1. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); EC2 and Fargate compute environments can't be mixed."];
-      computeEnvironmentOrder: ComputeEnvironmentOrders.t
+          "The priority of the job queue. Job queue priority determines the order that job queues are evaluated when multiple queues dispatch jobs within a shared compute environment. A higher value for priority indicates a higher priority. Queues are evaluated in cycles, in descending order by priority. For example, a job queue with a priority value of 10 is evaluated before a queue with a priority value of 1. All of the compute environments must be either Amazon EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT). Amazon EC2 and Fargate compute environments can't be mixed. Job queue priority doesn't guarantee that a particular job executes before a job in a lower priority queue. Jobs added to higher priority queues during the queue evaluation cycle might not be evaluated until the next cycle. A job is dispatched from a queue only if resources are available when the queue is evaluated. If there are insufficient resources available at that time, the cycle proceeds to the next queue. This means that jobs added to higher priority queues might have to wait for jobs in multiple lower priority queues to complete before they are dispatched. You can use job dependencies to control the order for jobs from queues with different priorities. For more information, see Job Dependencies in the Batch User Guide."];
+      computeEnvironmentOrder: ComputeEnvironmentOrders.t option
         [@ocaml.doc
           "The compute environments that are attached to the job queue and the order that job placement is preferred. Compute environments are selected for job placement in ascending order."];
+      serviceEnvironmentOrder: ServiceEnvironmentOrders.t option
+        [@ocaml.doc
+          "The order of the service environment associated with the job queue. Job queues with a higher priority are evaluated first when associated with the same service environment."];
+      jobQueueType: JobQueueType.t option
+        [@ocaml.doc
+          "The type of job queue. For service jobs that run on SageMaker Training, this value is SAGEMAKER_TRAINING. For regular container jobs, this value is EKS, ECS, or ECS_FARGATE depending on the compute environment."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
-          "The tags applied to the job queue. For more information, see Tagging your Batch resources in Batch User Guide."]}
-    let context_ = "JobQueueDetail"
-    let make ?schedulingPolicyArn =
-      fun ?status ->
-        fun ?statusReason ->
-          fun ?tags ->
-            fun ~jobQueueName ->
-              fun ~jobQueueArn ->
-                fun ~state ->
-                  fun ~priority ->
-                    fun ~computeEnvironmentOrder ->
-                      fun () ->
-                        {
-                          schedulingPolicyArn;
-                          status;
-                          statusReason;
-                          tags;
-                          jobQueueName;
-                          jobQueueArn;
-                          state;
-                          priority;
-                          computeEnvironmentOrder
-                        }
+          "The tags that are applied to the job queue. For more information, see Tagging your Batch resources in Batch User Guide."];
+      jobStateTimeLimitActions: JobStateTimeLimitActions.t option
+        [@ocaml.doc
+          "The set of actions that Batch perform on jobs that remain at the head of the job queue in the specified state longer than specified times. Batch will perform each action after maxTimeSeconds has passed."]}
+    let make ?jobQueueName =
+      fun ?jobQueueArn ->
+        fun ?state ->
+          fun ?schedulingPolicyArn ->
+            fun ?status ->
+              fun ?statusReason ->
+                fun ?priority ->
+                  fun ?computeEnvironmentOrder ->
+                    fun ?serviceEnvironmentOrder ->
+                      fun ?jobQueueType ->
+                        fun ?tags ->
+                          fun ?jobStateTimeLimitActions ->
+                            fun () ->
+                              {
+                                jobQueueName;
+                                jobQueueArn;
+                                state;
+                                schedulingPolicyArn;
+                                status;
+                                statusReason;
+                                priority;
+                                computeEnvironmentOrder;
+                                serviceEnvironmentOrder;
+                                jobQueueType;
+                                tags;
+                                jobStateTimeLimitActions
+                              }
     let to_value x =
       structure_to_value
-        [("jobQueueName", (Some (String_.to_value x.jobQueueName)));
-        ("jobQueueArn", (Some (String_.to_value x.jobQueueArn)));
-        ("state", (Some (JQState.to_value x.state)));
+        [("jobQueueName", (Option.map x.jobQueueName ~f:String_.to_value));
+        ("jobQueueArn", (Option.map x.jobQueueArn ~f:String_.to_value));
+        ("state", (Option.map x.state ~f:JQState.to_value));
         ("schedulingPolicyArn",
           (Option.map x.schedulingPolicyArn ~f:String_.to_value));
         ("status", (Option.map x.status ~f:JQStatus.to_value));
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
-        ("priority", (Some (Integer.to_value x.priority)));
+        ("priority", (Option.map x.priority ~f:Integer.to_value));
         ("computeEnvironmentOrder",
-          (Some (ComputeEnvironmentOrders.to_value x.computeEnvironmentOrder)));
-        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+          (Option.map x.computeEnvironmentOrder
+             ~f:ComputeEnvironmentOrders.to_value));
+        ("serviceEnvironmentOrder",
+          (Option.map x.serviceEnvironmentOrder
+             ~f:ServiceEnvironmentOrders.to_value));
+        ("jobQueueType",
+          (Option.map x.jobQueueType ~f:JobQueueType.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("jobStateTimeLimitActions",
+          (Option.map x.jobStateTimeLimitActions
+             ~f:JobStateTimeLimitActions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobStateTimeLimitActions =
+        (Option.map ~f:JobStateTimeLimitActions.of_xml)
+          (Xml.child xml_arg0 "jobStateTimeLimitActions") in
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let jobQueueType =
+        (Option.map ~f:JobQueueType.of_xml)
+          (Xml.child xml_arg0 "jobQueueType") in
+      let serviceEnvironmentOrder =
+        (Option.map ~f:ServiceEnvironmentOrders.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentOrder") in
       let computeEnvironmentOrder =
-        ComputeEnvironmentOrders.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentOrder") in
+        (Option.map ~f:ComputeEnvironmentOrders.of_xml)
+          (Xml.child xml_arg0 "computeEnvironmentOrder") in
       let priority =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "priority") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "priority") in
       let statusReason =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
       let status =
@@ -3999,114 +10509,144 @@ module JobQueueDetail =
       let schedulingPolicyArn =
         (Option.map ~f:String_.of_xml)
           (Xml.child xml_arg0 "schedulingPolicyArn") in
-      let state =
-        JQState.of_xml (Xml.child_exn ~context:context_ xml_arg0 "state") in
+      let state = (Option.map ~f:JQState.of_xml) (Xml.child xml_arg0 "state") in
       let jobQueueArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobQueueArn") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueArn") in
       let jobQueueName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
-      make ?tags ~computeEnvironmentOrder ~priority ?statusReason ?status
-        ?schedulingPolicyArn ~state ~jobQueueArn ~jobQueueName ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueName") in
+      make ?jobStateTimeLimitActions ?tags ?jobQueueType
+        ?serviceEnvironmentOrder ?computeEnvironmentOrder ?priority
+        ?statusReason ?status ?schedulingPolicyArn ?state ?jobQueueArn
+        ?jobQueueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
+    let of_json json__ =
+      let jobStateTimeLimitActions =
+        field_map json__ "jobStateTimeLimitActions"
+          JobStateTimeLimitActions.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let jobQueueType = field_map json__ "jobQueueType" JobQueueType.of_json in
+      let serviceEnvironmentOrder =
+        field_map json__ "serviceEnvironmentOrder"
+          ServiceEnvironmentOrders.of_json in
       let computeEnvironmentOrder =
-        field_map_exn json "computeEnvironmentOrder"
+        field_map json__ "computeEnvironmentOrder"
           ComputeEnvironmentOrders.of_json in
-      let priority = field_map_exn json "priority" Integer.of_json in
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let status = field_map json "status" JQStatus.of_json in
+      let priority = field_map json__ "priority" Integer.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" JQStatus.of_json in
       let schedulingPolicyArn =
-        field_map json "schedulingPolicyArn" String_.of_json in
-      let state = field_map_exn json "state" JQState.of_json in
-      let jobQueueArn = field_map_exn json "jobQueueArn" String_.of_json in
-      let jobQueueName = field_map_exn json "jobQueueName" String_.of_json in
-      make ?tags ~computeEnvironmentOrder ~priority ?statusReason ?status
-        ?schedulingPolicyArn ~state ~jobQueueArn ~jobQueueName ()
+        field_map json__ "schedulingPolicyArn" String_.of_json in
+      let state = field_map json__ "state" JQState.of_json in
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let jobQueueName = field_map json__ "jobQueueName" String_.of_json in
+      make ?jobStateTimeLimitActions ?tags ?jobQueueType
+        ?serviceEnvironmentOrder ?computeEnvironmentOrder ?priority
+        ?statusReason ?status ?schedulingPolicyArn ?state ?jobQueueArn
+        ?jobQueueName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the details of an Batch job queue."]
+       "An object that represents the details for an Batch job queue."]
 module JobDefinition =
   struct
     type nonrec t =
       {
-      jobDefinitionName: String_.t
+      jobDefinitionName: String_.t option
         [@ocaml.doc "The name of the job definition."];
-      jobDefinitionArn: String_.t
+      jobDefinitionArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) for the job definition."];
-      revision: Integer.t [@ocaml.doc "The revision of the job definition."];
+      revision: Integer.t option
+        [@ocaml.doc "The revision of the job definition."];
       status: String_.t option
         [@ocaml.doc "The status of the job definition."];
-      type_: String_.t
+      type_: String_.t option
         [@ocaml.doc
-          "The type of job definition, either container or multinode. If the job is run on Fargate resources, then multinode isn't supported. For more information about multi-node parallel jobs, see Creating a multi-node parallel job definition in the Batch User Guide."];
+          "The type of job definition. It's either container or multinode. If the job is run on Fargate resources, then multinode isn't supported. For more information about multi-node parallel jobs, see Creating a multi-node parallel job definition in the Batch User Guide."];
       schedulingPriority: Integer.t option
         [@ocaml.doc
-          "The scheduling priority of the job definition. This only affects jobs in job queues with a fair share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority."];
+          "The scheduling priority of the job definition. This only affects jobs in job queues with a fair-share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority."];
       parameters: ParametersMap.t option
         [@ocaml.doc
-          "Default parameters or parameter substitution placeholders that are set in the job definition. Parameters are specified as a key-value pair mapping. Parameters in a SubmitJob request override any corresponding parameter defaults from the job definition. For more information about specifying parameters, see Job Definition Parameters in the Batch User Guide."];
+          "Default parameters or parameter substitution placeholders that are set in the job definition. Parameters are specified as a key-value pair mapping. Parameters in a SubmitJob request override any corresponding parameter defaults from the job definition. For more information about specifying parameters, see Job definition parameters in the Batch User Guide."];
       retryStrategy: RetryStrategy.t option
         [@ocaml.doc
           "The retry strategy to use for failed jobs that are submitted with this job definition."];
       containerProperties: ContainerProperties.t option
         [@ocaml.doc
-          "An object with various properties specific to container-based jobs."];
+          "An object with properties specific to Amazon ECS-based jobs. When containerProperties is used in the job definition, it can't be used in addition to eksProperties, ecsProperties, or nodeProperties."];
       timeout: JobTimeout.t option
         [@ocaml.doc
-          "The timeout configuration for jobs that are submitted with this job definition. You can specify a timeout duration after which Batch terminates your jobs if they haven't finished."];
+          "The timeout time for jobs that are submitted with this job definition. After the amount of time you specify passes, Batch terminates your jobs if they aren't finished."];
       nodeProperties: NodeProperties.t option
         [@ocaml.doc
-          "An object with various properties specific to multi-node parallel jobs. If the job runs on Fargate resources, then you must not specify nodeProperties; use containerProperties instead."];
+          "An object with properties that are specific to multi-node parallel jobs. When nodeProperties is used in the job definition, it can't be used in addition to containerProperties, ecsProperties, or eksProperties. If the job runs on Fargate resources, don't specify nodeProperties. Use containerProperties instead."];
       tags: TagrisTagsMap.t option
-        [@ocaml.doc "The tags applied to the job definition."];
+        [@ocaml.doc "The tags that are applied to the job definition."];
       propagateTags: Boolean.t option
         [@ocaml.doc
-          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags aren't propagated. Tags can only be propagated to the tasks during task creation. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state."];
+          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags aren't propagated. Tags can only be propagated to the tasks when the tasks are created. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state."];
       platformCapabilities: PlatformCapabilityList.t option
         [@ocaml.doc
-          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. Jobs run on Fargate resources specify FARGATE."]}
-    let context_ = "JobDefinition"
-    let make ?status =
-      fun ?schedulingPriority ->
-        fun ?parameters ->
-          fun ?retryStrategy ->
-            fun ?containerProperties ->
-              fun ?timeout ->
-                fun ?nodeProperties ->
-                  fun ?tags ->
-                    fun ?propagateTags ->
-                      fun ?platformCapabilities ->
-                        fun ~jobDefinitionName ->
-                          fun ~jobDefinitionArn ->
-                            fun ~revision ->
-                              fun ~type_ ->
-                                fun () ->
-                                  {
-                                    status;
-                                    schedulingPriority;
-                                    parameters;
-                                    retryStrategy;
-                                    containerProperties;
-                                    timeout;
-                                    nodeProperties;
-                                    tags;
-                                    propagateTags;
-                                    platformCapabilities;
-                                    jobDefinitionName;
-                                    jobDefinitionArn;
-                                    revision;
-                                    type_
-                                  }
+          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. Jobs run on Fargate resources specify FARGATE."];
+      ecsProperties: EcsProperties.t option
+        [@ocaml.doc
+          "An object that contains the properties for the Amazon ECS resources of a job.When ecsProperties is used in the job definition, it can't be used in addition to containerProperties, eksProperties, or nodeProperties."];
+      eksProperties: EksProperties.t option
+        [@ocaml.doc
+          "An object with properties that are specific to Amazon EKS-based jobs. When eksProperties is used in the job definition, it can't be used in addition to containerProperties, ecsProperties, or nodeProperties."];
+      containerOrchestrationType: OrchestrationType.t option
+        [@ocaml.doc
+          "The orchestration type of the compute environment. The valid values are ECS (default) or EKS."];
+      consumableResourceProperties: ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "Contains a list of consumable resources required by the job."]}
+    let make ?jobDefinitionName =
+      fun ?jobDefinitionArn ->
+        fun ?revision ->
+          fun ?status ->
+            fun ?type_ ->
+              fun ?schedulingPriority ->
+                fun ?parameters ->
+                  fun ?retryStrategy ->
+                    fun ?containerProperties ->
+                      fun ?timeout ->
+                        fun ?nodeProperties ->
+                          fun ?tags ->
+                            fun ?propagateTags ->
+                              fun ?platformCapabilities ->
+                                fun ?ecsProperties ->
+                                  fun ?eksProperties ->
+                                    fun ?containerOrchestrationType ->
+                                      fun ?consumableResourceProperties ->
+                                        fun () ->
+                                          {
+                                            jobDefinitionName;
+                                            jobDefinitionArn;
+                                            revision;
+                                            status;
+                                            type_;
+                                            schedulingPriority;
+                                            parameters;
+                                            retryStrategy;
+                                            containerProperties;
+                                            timeout;
+                                            nodeProperties;
+                                            tags;
+                                            propagateTags;
+                                            platformCapabilities;
+                                            ecsProperties;
+                                            eksProperties;
+                                            containerOrchestrationType;
+                                            consumableResourceProperties
+                                          }
     let to_value x =
       structure_to_value
-        [("jobDefinitionName", (Some (String_.to_value x.jobDefinitionName)));
-        ("jobDefinitionArn", (Some (String_.to_value x.jobDefinitionArn)));
-        ("revision", (Some (Integer.to_value x.revision)));
+        [("jobDefinitionName",
+           (Option.map x.jobDefinitionName ~f:String_.to_value));
+        ("jobDefinitionArn",
+          (Option.map x.jobDefinitionArn ~f:String_.to_value));
+        ("revision", (Option.map x.revision ~f:Integer.to_value));
         ("status", (Option.map x.status ~f:String_.to_value));
-        ("type", (Some (String_.to_value x.type_)));
+        ("type", (Option.map x.type_ ~f:String_.to_value));
         ("schedulingPriority",
           (Option.map x.schedulingPriority ~f:Integer.to_value));
         ("parameters", (Option.map x.parameters ~f:ParametersMap.to_value));
@@ -4121,9 +10661,31 @@ module JobDefinition =
         ("propagateTags", (Option.map x.propagateTags ~f:Boolean.to_value));
         ("platformCapabilities",
           (Option.map x.platformCapabilities
-             ~f:PlatformCapabilityList.to_value))]
+             ~f:PlatformCapabilityList.to_value));
+        ("ecsProperties",
+          (Option.map x.ecsProperties ~f:EcsProperties.to_value));
+        ("eksProperties",
+          (Option.map x.eksProperties ~f:EksProperties.to_value));
+        ("containerOrchestrationType",
+          (Option.map x.containerOrchestrationType
+             ~f:OrchestrationType.to_value));
+        ("consumableResourceProperties",
+          (Option.map x.consumableResourceProperties
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourceProperties =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourceProperties") in
+      let containerOrchestrationType =
+        (Option.map ~f:OrchestrationType.of_xml)
+          (Xml.child xml_arg0 "containerOrchestrationType") in
+      let eksProperties =
+        (Option.map ~f:EksProperties.of_xml)
+          (Xml.child xml_arg0 "eksProperties") in
+      let ecsProperties =
+        (Option.map ~f:EcsProperties.of_xml)
+          (Xml.child xml_arg0 "ecsProperties") in
       let platformCapabilities =
         (Option.map ~f:PlatformCapabilityList.of_xml)
           (Xml.child xml_arg0 "platformCapabilities") in
@@ -4148,121 +10710,154 @@ module JobDefinition =
       let schedulingPriority =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "schedulingPriority") in
-      let type_ =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "type") in
       let status =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       let revision =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "revision") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "revision") in
       let jobDefinitionArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionArn") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "jobDefinitionArn") in
       let jobDefinitionName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionName") in
-      make ?platformCapabilities ?propagateTags ?tags ?nodeProperties
-        ?timeout ?containerProperties ?retryStrategy ?parameters
-        ?schedulingPriority ~type_ ?status ~revision ~jobDefinitionArn
-        ~jobDefinitionName ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "jobDefinitionName") in
+      make ?consumableResourceProperties ?containerOrchestrationType
+        ?eksProperties ?ecsProperties ?platformCapabilities ?propagateTags
+        ?tags ?nodeProperties ?timeout ?containerProperties ?retryStrategy
+        ?parameters ?schedulingPriority ?type_ ?status ?revision
+        ?jobDefinitionArn ?jobDefinitionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let consumableResourceProperties =
+        field_map json__ "consumableResourceProperties"
+          ConsumableResourceProperties.of_json in
+      let containerOrchestrationType =
+        field_map json__ "containerOrchestrationType"
+          OrchestrationType.of_json in
+      let eksProperties =
+        field_map json__ "eksProperties" EksProperties.of_json in
+      let ecsProperties =
+        field_map json__ "ecsProperties" EcsProperties.of_json in
       let platformCapabilities =
-        field_map json "platformCapabilities" PlatformCapabilityList.of_json in
-      let propagateTags = field_map json "propagateTags" Boolean.of_json in
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
+        field_map json__ "platformCapabilities"
+          PlatformCapabilityList.of_json in
+      let propagateTags = field_map json__ "propagateTags" Boolean.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
       let nodeProperties =
-        field_map json "nodeProperties" NodeProperties.of_json in
-      let timeout = field_map json "timeout" JobTimeout.of_json in
+        field_map json__ "nodeProperties" NodeProperties.of_json in
+      let timeout = field_map json__ "timeout" JobTimeout.of_json in
       let containerProperties =
-        field_map json "containerProperties" ContainerProperties.of_json in
+        field_map json__ "containerProperties" ContainerProperties.of_json in
       let retryStrategy =
-        field_map json "retryStrategy" RetryStrategy.of_json in
-      let parameters = field_map json "parameters" ParametersMap.of_json in
+        field_map json__ "retryStrategy" RetryStrategy.of_json in
+      let parameters = field_map json__ "parameters" ParametersMap.of_json in
       let schedulingPriority =
-        field_map json "schedulingPriority" Integer.of_json in
-      let type_ = field_map_exn json "type" String_.of_json in
-      let status = field_map json "status" String_.of_json in
-      let revision = field_map_exn json "revision" Integer.of_json in
+        field_map json__ "schedulingPriority" Integer.of_json in
+      let type_ = field_map json__ "type" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let revision = field_map json__ "revision" Integer.of_json in
       let jobDefinitionArn =
-        field_map_exn json "jobDefinitionArn" String_.of_json in
+        field_map json__ "jobDefinitionArn" String_.of_json in
       let jobDefinitionName =
-        field_map_exn json "jobDefinitionName" String_.of_json in
-      make ?platformCapabilities ?propagateTags ?tags ?nodeProperties
-        ?timeout ?containerProperties ?retryStrategy ?parameters
-        ?schedulingPriority ~type_ ?status ~revision ~jobDefinitionArn
-        ~jobDefinitionName ()
+        field_map json__ "jobDefinitionName" String_.of_json in
+      make ?consumableResourceProperties ?containerOrchestrationType
+        ?eksProperties ?ecsProperties ?platformCapabilities ?propagateTags
+        ?tags ?nodeProperties ?timeout ?containerProperties ?retryStrategy
+        ?parameters ?schedulingPriority ?type_ ?status ?revision
+        ?jobDefinitionArn ?jobDefinitionName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Batch job definition."]
+  end[@@ocaml.doc "An object that represents an Batch job definition."]
 module ComputeEnvironmentDetail =
   struct
     type nonrec t =
       {
-      computeEnvironmentName: String_.t
+      computeEnvironmentName: String_.t option
         [@ocaml.doc
-          "The name of the compute environment. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
-      computeEnvironmentArn: String_.t
+          "The name of the compute environment. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+      computeEnvironmentArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the compute environment."];
       unmanagedvCpus: Integer.t option
         [@ocaml.doc
           "The maximum number of VCPUs expected to be used for an unmanaged compute environment."];
-      ecsClusterArn: String_.t
+      ecsClusterArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the underlying Amazon ECS cluster used by the compute environment."];
+          "The Amazon Resource Name (ARN) of the underlying Amazon ECS cluster that the compute environment uses."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc "The tags applied to the compute environment."];
       type_: CEType.t option
         [@ocaml.doc
-          "The type of the compute environment: MANAGED or UNMANAGED. For more information, see Compute Environments in the Batch User Guide."];
+          "The type of the compute environment: MANAGED or UNMANAGED. For more information, see Compute environments in the Batch User Guide."];
       state: CEState.t option
         [@ocaml.doc
-          "The state of the compute environment. The valid values are ENABLED or DISABLED. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically, based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. However, they scale in to minvCpus value after instances become idle."];
+          "The state of the compute environment. The valid values are ENABLED or DISABLED. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. Compute environments in a DISABLED state may continue to incur billing charges, for example, if they have running instances due to jobs that are still executing or a non-zero minvCpus setting. To prevent additional charges, disable and delete the compute environment. When an instance is idle, the instance scales down to the minvCpus value. However, the instance size doesn't change. For example, consider a c5.8xlarge instance with a minvCpus value of 4 and a desiredvCpus value of 36. This instance doesn't scale down to a c5.large instance."];
       status: CEStatus.t option
         [@ocaml.doc
           "The current status of the compute environment (for example, CREATING or VALID)."];
       statusReason: String_.t option
         [@ocaml.doc
-          "A short, human-readable string to provide additional details about the current status of the compute environment."];
+          "A short, human-readable string to provide additional details for the current status of the compute environment."];
       computeResources: ComputeResource.t option
         [@ocaml.doc
-          "The compute resources defined for the compute environment. For more information, see Compute Environments in the Batch User Guide."];
+          "The compute resources defined for the compute environment. For more information, see Compute environments in the Batch User Guide."];
       serviceRole: String_.t option
         [@ocaml.doc
-          "The service role associated with the compute environment that allows Batch to make calls to Amazon Web Services API operations on your behalf. For more information, see Batch service IAM role in the Batch User Guide."]}
-    let context_ = "ComputeEnvironmentDetail"
-    let make ?unmanagedvCpus =
-      fun ?tags ->
-        fun ?type_ ->
-          fun ?state ->
-            fun ?status ->
-              fun ?statusReason ->
-                fun ?computeResources ->
-                  fun ?serviceRole ->
-                    fun ~computeEnvironmentName ->
-                      fun ~computeEnvironmentArn ->
-                        fun ~ecsClusterArn ->
-                          fun () ->
-                            {
-                              unmanagedvCpus;
-                              tags;
-                              type_;
-                              state;
-                              status;
-                              statusReason;
-                              computeResources;
-                              serviceRole;
-                              computeEnvironmentName;
-                              computeEnvironmentArn;
-                              ecsClusterArn
-                            }
+          "The service role that's associated with the compute environment that allows Batch to make calls to Amazon Web Services API operations on your behalf. For more information, see Batch service IAM role in the Batch User Guide."];
+      updatePolicy: UpdatePolicy.t option
+        [@ocaml.doc
+          "Specifies the infrastructure update policy for the compute environment. For more information about infrastructure updates, see Updating compute environments in the Batch User Guide."];
+      eksConfiguration: EksConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the Amazon EKS cluster that supports the Batch compute environment. Only specify this parameter if the containerOrchestrationType is EKS."];
+      containerOrchestrationType: OrchestrationType.t option
+        [@ocaml.doc
+          "The orchestration type of the compute environment. The valid values are ECS (default) or EKS."];
+      uuid: String_.t option
+        [@ocaml.doc "Unique identifier for the compute environment."];
+      context: String_.t option [@ocaml.doc "Reserved."]}
+    let make ?computeEnvironmentName =
+      fun ?computeEnvironmentArn ->
+        fun ?unmanagedvCpus ->
+          fun ?ecsClusterArn ->
+            fun ?tags ->
+              fun ?type_ ->
+                fun ?state ->
+                  fun ?status ->
+                    fun ?statusReason ->
+                      fun ?computeResources ->
+                        fun ?serviceRole ->
+                          fun ?updatePolicy ->
+                            fun ?eksConfiguration ->
+                              fun ?containerOrchestrationType ->
+                                fun ?uuid ->
+                                  fun ?context ->
+                                    fun () ->
+                                      {
+                                        computeEnvironmentName;
+                                        computeEnvironmentArn;
+                                        unmanagedvCpus;
+                                        ecsClusterArn;
+                                        tags;
+                                        type_;
+                                        state;
+                                        status;
+                                        statusReason;
+                                        computeResources;
+                                        serviceRole;
+                                        updatePolicy;
+                                        eksConfiguration;
+                                        containerOrchestrationType;
+                                        uuid;
+                                        context
+                                      }
     let to_value x =
       structure_to_value
         [("computeEnvironmentName",
-           (Some (String_.to_value x.computeEnvironmentName)));
+           (Option.map x.computeEnvironmentName ~f:String_.to_value));
         ("computeEnvironmentArn",
-          (Some (String_.to_value x.computeEnvironmentArn)));
+          (Option.map x.computeEnvironmentArn ~f:String_.to_value));
         ("unmanagedvCpus", (Option.map x.unmanagedvCpus ~f:Integer.to_value));
-        ("ecsClusterArn", (Some (String_.to_value x.ecsClusterArn)));
+        ("ecsClusterArn", (Option.map x.ecsClusterArn ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
         ("type", (Option.map x.type_ ~f:CEType.to_value));
         ("state", (Option.map x.state ~f:CEState.to_value));
@@ -4270,9 +10865,30 @@ module ComputeEnvironmentDetail =
         ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
         ("computeResources",
           (Option.map x.computeResources ~f:ComputeResource.to_value));
-        ("serviceRole", (Option.map x.serviceRole ~f:String_.to_value))]
+        ("serviceRole", (Option.map x.serviceRole ~f:String_.to_value));
+        ("updatePolicy",
+          (Option.map x.updatePolicy ~f:UpdatePolicy.to_value));
+        ("eksConfiguration",
+          (Option.map x.eksConfiguration ~f:EksConfiguration.to_value));
+        ("containerOrchestrationType",
+          (Option.map x.containerOrchestrationType
+             ~f:OrchestrationType.to_value));
+        ("uuid", (Option.map x.uuid ~f:String_.to_value));
+        ("context", (Option.map x.context ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
+      let uuid = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "uuid") in
+      let containerOrchestrationType =
+        (Option.map ~f:OrchestrationType.of_xml)
+          (Xml.child xml_arg0 "containerOrchestrationType") in
+      let eksConfiguration =
+        (Option.map ~f:EksConfiguration.of_xml)
+          (Xml.child xml_arg0 "eksConfiguration") in
+      let updatePolicy =
+        (Option.map ~f:UpdatePolicy.of_xml)
+          (Xml.child xml_arg0 "updatePolicy") in
       let serviceRole =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceRole") in
       let computeResources =
@@ -4287,40 +10903,49 @@ module ComputeEnvironmentDetail =
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let ecsClusterArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ecsClusterArn") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ecsClusterArn") in
       let unmanagedvCpus =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "unmanagedvCpus") in
       let computeEnvironmentArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentArn") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "computeEnvironmentArn") in
       let computeEnvironmentName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentName") in
-      make ?serviceRole ?computeResources ?statusReason ?status ?state ?type_
-        ?tags ~ecsClusterArn ?unmanagedvCpus ~computeEnvironmentArn
-        ~computeEnvironmentName ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "computeEnvironmentName") in
+      make ?context ?uuid ?containerOrchestrationType ?eksConfiguration
+        ?updatePolicy ?serviceRole ?computeResources ?statusReason ?status
+        ?state ?type_ ?tags ?ecsClusterArn ?unmanagedvCpus
+        ?computeEnvironmentArn ?computeEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceRole = field_map json "serviceRole" String_.of_json in
+    let of_json json__ =
+      let context = field_map json__ "context" String_.of_json in
+      let uuid = field_map json__ "uuid" String_.of_json in
+      let containerOrchestrationType =
+        field_map json__ "containerOrchestrationType"
+          OrchestrationType.of_json in
+      let eksConfiguration =
+        field_map json__ "eksConfiguration" EksConfiguration.of_json in
+      let updatePolicy = field_map json__ "updatePolicy" UpdatePolicy.of_json in
+      let serviceRole = field_map json__ "serviceRole" String_.of_json in
       let computeResources =
-        field_map json "computeResources" ComputeResource.of_json in
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let status = field_map json "status" CEStatus.of_json in
-      let state = field_map json "state" CEState.of_json in
-      let type_ = field_map json "type" CEType.of_json in
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
-      let ecsClusterArn = field_map_exn json "ecsClusterArn" String_.of_json in
-      let unmanagedvCpus = field_map json "unmanagedvCpus" Integer.of_json in
+        field_map json__ "computeResources" ComputeResource.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" CEStatus.of_json in
+      let state = field_map json__ "state" CEState.of_json in
+      let type_ = field_map json__ "type" CEType.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let ecsClusterArn = field_map json__ "ecsClusterArn" String_.of_json in
+      let unmanagedvCpus = field_map json__ "unmanagedvCpus" Integer.of_json in
       let computeEnvironmentArn =
-        field_map_exn json "computeEnvironmentArn" String_.of_json in
+        field_map json__ "computeEnvironmentArn" String_.of_json in
       let computeEnvironmentName =
-        field_map_exn json "computeEnvironmentName" String_.of_json in
-      make ?serviceRole ?computeResources ?statusReason ?status ?state ?type_
-        ?tags ~ecsClusterArn ?unmanagedvCpus ~computeEnvironmentArn
-        ~computeEnvironmentName ()
+        field_map json__ "computeEnvironmentName" String_.of_json in
+      make ?context ?uuid ?containerOrchestrationType ?eksConfiguration
+        ?updatePolicy ?serviceRole ?computeResources ?statusReason ?status
+        ?state ?type_ ?tags ?ecsClusterArn ?unmanagedvCpus
+        ?computeEnvironmentArn ?computeEnvironmentName ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Batch compute environment."]
+  end[@@ocaml.doc "An object that represents an Batch compute environment."]
 module ClientException =
   struct
     type nonrec t = {
@@ -4335,12 +10960,12 @@ module ClientException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "These errors are usually caused by a client action, such as using an action or resource on behalf of a user that doesn't have permissions to use the action or resource, or specifying an identifier that's not valid."]
+       "These errors are usually caused by a client action. One example cause is using an action or resource on behalf of a user that doesn't have permissions to use the action or resource. Another cause is specifying an identifier that's not valid."]
 module ServerException =
   struct
     type nonrec t = {
@@ -4355,38 +10980,126 @@ module ServerException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "These errors are usually caused by a server issue."]
+module ClientRequestToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientRequestToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientRequestToken" j
+    let to_json = simple_to_json to_value
+  end
 module ComputeResourceUpdate =
   struct
     type nonrec t =
       {
       minvCpus: Integer.t option
         [@ocaml.doc
-          "The minimum number of Amazon EC2 vCPUs that an environment should maintain. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The minimum number of vCPUs that an environment should maintain (even if the compute environment is DISABLED). This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
       maxvCpus: Integer.t option
         [@ocaml.doc
-          "The maximum number of Amazon EC2 vCPUs that an environment can reach. With both BEST_FIT_PROGRESSIVE and SPOT_CAPACITY_OPTIMIZED allocation strategies, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance. That is, no more than a single instance from among those specified in your compute environment."];
+          "The maximum number of Amazon EC2 vCPUs that an environment can reach. With BEST_FIT_PROGRESSIVE,SPOT_CAPACITY_OPTIMIZED and SPOT_PRICE_CAPACITY_OPTIMIZED (recommended) strategies using On-Demand or Spot Instances, and the BEST_FIT strategy using Spot Instances, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance."];
       desiredvCpus: Integer.t option
         [@ocaml.doc
-          "The desired number of Amazon EC2 vCPUS in the compute environment. This parameter isn't applicable to jobs that are running on Fargate resources, and shouldn't be specified."];
+          "The desired number of vCPUS in the compute environment. Batch modifies this value between the minimum and maximum values based on job queue demand. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. Batch doesn't support changing the desired number of vCPUs of an existing compute environment. Don't specify this parameter for compute environments using Amazon EKS clusters. When you update the desiredvCpus setting, the value must be between the minvCpus and maxvCpus values. Additionally, the updated desiredvCpus value must be greater than or equal to the current desiredvCpus value. For more information, see Troubleshooting Batch in the Batch User Guide."];
       subnets: StringList.t option
         [@ocaml.doc
-          "The VPC subnets where the compute resources are launched. Fargate compute resources can contain up to 16 subnets. Providing an empty list will be handled as if this parameter wasn't specified and no change is made. This can't be specified for EC2 compute resources. For more information, see VPCs and Subnets in the Amazon VPC User Guide."];
+          "The VPC subnets where the compute resources are launched. Fargate compute resources can contain up to 16 subnets. For Fargate compute resources, providing an empty list will be handled as if this parameter wasn't specified and no change is made. For Amazon EC2 compute resources, providing an empty list removes the VPC subnets from the compute resource. For more information, see VPCs and subnets in the Amazon VPC User Guide. When updating a compute environment, changing the VPC subnets requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. Batch on Amazon EC2 and Batch on Amazon EKS support Local Zones. For more information, see Local Zones in the Amazon EC2 User Guide for Linux Instances, Amazon EKS and Amazon Web Services Local Zones in the Amazon EKS User Guide and Amazon ECS clusters in Local Zones, Wavelength Zones, and Amazon Web Services Outposts in the Amazon ECS Developer Guide. Batch on Fargate doesn't currently support Local Zones."];
       securityGroupIds: StringList.t option
         [@ocaml.doc
-          "The Amazon EC2 security groups associated with instances launched in the compute environment. This parameter is required for Fargate compute resources, where it can contain up to 5 security groups. This can't be specified for EC2 compute resources. Providing an empty list is handled as if this parameter wasn't specified and no change is made."]}
+          "The Amazon EC2 security groups that are associated with instances launched in the compute environment. This parameter is required for Fargate compute resources, where it can contain up to 5 security groups. For Fargate compute resources, providing an empty list is handled as if this parameter wasn't specified and no change is made. For Amazon EC2 compute resources, providing an empty list removes the security groups from the compute resource. When updating a compute environment, changing the Amazon EC2 security groups requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide."];
+      allocationStrategy: CRUpdateAllocationStrategy.t option
+        [@ocaml.doc
+          "The allocation strategy to use for the compute resource if there's not enough instances of the best fitting instance type that can be allocated. This might be because of availability of the instance type in the Region or Amazon EC2 service limits. For more information, see Allocation strategies in the Batch User Guide. When updating a compute environment, changing the allocation strategy requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. BEST_FIT isn't supported when updating a compute environment. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. BEST_FIT_PROGRESSIVE Batch selects additional instance types that are large enough to meet the requirements of the jobs in the queue. Its preference is for instance types with lower cost vCPUs. If additional instances of the previously selected instance types aren't available, Batch selects new instance types. SPOT_CAPACITY_OPTIMIZED Batch selects one or more instance types that are large enough to meet the requirements of the jobs in the queue. Its preference is for instance types that are less likely to be interrupted. This allocation strategy is only available for Spot Instance compute resources. SPOT_PRICE_CAPACITY_OPTIMIZED The price and capacity optimized allocation strategy looks at both price and capacity to select the Spot Instance pools that are the least likely to be interrupted and have the lowest possible price. This allocation strategy is only available for Spot Instance compute resources. With BEST_FIT_PROGRESSIVE,SPOT_CAPACITY_OPTIMIZED and SPOT_PRICE_CAPACITY_OPTIMIZED (recommended) strategies using On-Demand or Spot Instances, and the BEST_FIT strategy using Spot Instances, Batch might need to exceed maxvCpus to meet your capacity requirements. In this event, Batch never exceeds maxvCpus by more than a single instance."];
+      instanceTypes: StringList.t option
+        [@ocaml.doc
+          "The instances types that can be launched. You can specify instance families to launch any instance type within those families (for example, c5 or p3), or you can specify specific sizes within a family (such as c5.8xlarge). Batch can select the instance type for you if you choose one of the following: optimal to select instance types (from the c4, m4, r4, c5, m5, and r5 instance families) that match the demand of your job queues. default_x86_64 to choose x86 based instance types (from the m6i, c6i, r6i, and c7i instance families) that matches the resource demands of the job queue. default_arm64 to choose x86 based instance types (from the m6g, c6g, r6g, and c7g instance families) that matches the resource demands of the job queue. Starting on 11/01/2025 the behavior of optimal is going to be changed to match default_x86_64. During the change your instance families could be updated to a newer generation. You do not need to perform any actions for the upgrade to happen. For more information about change, see Optimal instance type configuration to receive automatic instance family updates. Instance family availability varies by Amazon Web Services Region. For example, some Amazon Web Services Regions may not have any fourth generation instance families but have fifth and sixth generation instance families. When using default_x86_64 or default_arm64 instance bundles, Batch selects instance families based on a balance of cost-effectiveness and performance. While newer generation instances often provide better price-performance, Batch may choose an earlier generation instance family if it provides the optimal combination of availability, cost, and performance for your workload. For example, in an Amazon Web Services Region where both c6i and c7i instances are available, Batch might select c6i instances if they offer better cost-effectiveness for your specific job requirements. For more information on Batch instance types and Amazon Web Services Region availability, see Instance type compute table in the Batch User Guide. Batch periodically updates your instances in default bundles to newer, more cost-effective options. Updates happen automatically without requiring any action from you. Your workloads continue running during updates with no interruption This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. When you create a compute environment, the instance types that you select for the compute environment must share the same architecture. For example, you can't mix x86 and ARM instances in the same compute environment."];
+      ec2KeyPair: String_.t option
+        [@ocaml.doc
+          "The Amazon EC2 key pair that's used for instances launched in the compute environment. You can use this key pair to log in to your instances with SSH. To remove the Amazon EC2 key pair, set this value to an empty string. When updating a compute environment, changing the Amazon EC2 key pair requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      instanceRole: String_.t option
+        [@ocaml.doc
+          "The Amazon ECS instance profile applied to Amazon EC2 instances in a compute environment. Required for Amazon EC2 instances. You can specify the short name or full Amazon Resource Name (ARN) of an instance profile. For example, ecsInstanceRole or arn:aws:iam::<aws_account_id>:instance-profile/ecsInstanceRole . For more information, see Amazon ECS instance role in the Batch User Guide. When updating a compute environment, changing this setting requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      tags: TagsMap.t option
+        [@ocaml.doc
+          "Key-value pair tags to be applied to Amazon EC2 resources that are launched in the compute environment. For Batch, these take the form of \"String1\": \"String2\", where String1 is the tag key and String2 is the tag value (for example, \\{ \"Name\": \"Batch Instance - C4OnDemand\" \\}). This is helpful for recognizing your Batch instances in the Amazon EC2 console. These tags aren't seen when using the Batch ListTagsForResource API operation. When updating a compute environment, changing this setting requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      placementGroup: String_.t option
+        [@ocaml.doc
+          "The Amazon EC2 placement group to associate with your compute resources. If you intend to submit multi-node parallel jobs to your compute environment, you should consider creating a cluster placement group and associate it with your compute resources. This keeps your multi-node parallel job on a logical grouping of instances within a single Availability Zone with high network flow potential. For more information, see Placement groups in the Amazon EC2 User Guide for Linux Instances. When updating a compute environment, changing the placement group requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      bidPercentage: Integer.t option
+        [@ocaml.doc
+          "The maximum percentage that a Spot Instance price can be when compared with the On-Demand price for that instance type before instances are launched. For example, if your maximum percentage is 20%, the Spot price must be less than 20% of the current On-Demand price for that Amazon EC2 instance. You always pay the lowest (market) price and never more than your maximum percentage. For most use cases, we recommend leaving this field empty. When updating a compute environment, changing the bid percentage requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      launchTemplate: LaunchTemplateSpecification.t option
+        [@ocaml.doc
+          "The updated launch template to use for your compute resources. You must specify either the launch template ID or launch template name in the request, but not both. For more information, see Launch template support in the Batch User Guide. To remove the custom launch template and use the default launch template, set launchTemplateId or launchTemplateName member of the launch template specification to an empty string. Removing the launch template from a compute environment will not remove the AMI specified in the launch template. In order to update the AMI specified in a launch template, the updateToLatestImageVersion parameter must be set to true. When updating a compute environment, changing the launch template requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      ec2Configuration: Ec2ConfigurationList.t option
+        [@ocaml.doc
+          "Provides information used to select Amazon Machine Images (AMIs) for Amazon EC2 instances in the compute environment. If Ec2Configuration isn't specified, the default is ECS_AL2023 for EC2 (ECS) compute environments and EKS_AL2023 for EKS compute environments. When updating a compute environment, changing this setting requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. To remove the Amazon EC2 configuration and any custom AMI ID specified in imageIdOverride, set this value to an empty string. One or two values can be provided. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."];
+      updateToLatestImageVersion: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether the AMI ID is updated to the latest one that's supported by Batch when the compute environment has an infrastructure update. The default value is false. An AMI ID can either be specified in the imageId or imageIdOverride parameters or be determined by the launch template that's specified in the launchTemplate parameter. If an AMI ID is specified any of these ways, this parameter is ignored. For more information about to update AMI IDs during an infrastructure update, see Updating the AMI ID in the Batch User Guide. When updating a compute environment, changing this setting requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide."];
+      type_: CRType.t option
+        [@ocaml.doc
+          "The type of compute environment: EC2, SPOT, FARGATE, or FARGATE_SPOT. For more information, see Compute environments in the Batch User Guide. If you choose SPOT, you must also specify an Amazon EC2 Spot Fleet role with the spotIamFleetRole parameter. For more information, see Amazon EC2 spot fleet role in the Batch User Guide. When updating a compute environment, changing the type of a compute environment requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide."];
+      imageId: String_.t option
+        [@ocaml.doc
+          "The Amazon Machine Image (AMI) ID used for instances launched in the compute environment. This parameter is overridden by the imageIdOverride member of the Ec2Configuration structure. To remove the custom AMI ID and use the default AMI ID, set this value to an empty string. When updating a compute environment, changing the AMI ID requires an infrastructure update of the compute environment. For more information, see Updating compute environments in the Batch User Guide. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it. The AMI that you choose for a compute environment must match the architecture of the instance types that you intend to use for that compute environment. For example, if your compute environment uses A1 instance types, the compute resource AMI that you choose must support ARM instances. Amazon ECS vends both x86 and ARM versions of the Amazon ECS-optimized Amazon Linux 2023 AMI. For more information, see Amazon ECS-optimized Amazon Linux 2023 AMI in the Amazon Elastic Container Service Developer Guide."];
+      scalingPolicy: ComputeScalingPolicy.t option
+        [@ocaml.doc
+          "The scaling policy configuration for the compute environment. This parameter isn't applicable to jobs that are running on Fargate resources. Don't specify it."]}
     let make ?minvCpus =
       fun ?maxvCpus ->
         fun ?desiredvCpus ->
           fun ?subnets ->
             fun ?securityGroupIds ->
-              fun () ->
-                { minvCpus; maxvCpus; desiredvCpus; subnets; securityGroupIds
-                }
+              fun ?allocationStrategy ->
+                fun ?instanceTypes ->
+                  fun ?ec2KeyPair ->
+                    fun ?instanceRole ->
+                      fun ?tags ->
+                        fun ?placementGroup ->
+                          fun ?bidPercentage ->
+                            fun ?launchTemplate ->
+                              fun ?ec2Configuration ->
+                                fun ?updateToLatestImageVersion ->
+                                  fun ?type_ ->
+                                    fun ?imageId ->
+                                      fun ?scalingPolicy ->
+                                        fun () ->
+                                          {
+                                            minvCpus;
+                                            maxvCpus;
+                                            desiredvCpus;
+                                            subnets;
+                                            securityGroupIds;
+                                            allocationStrategy;
+                                            instanceTypes;
+                                            ec2KeyPair;
+                                            instanceRole;
+                                            tags;
+                                            placementGroup;
+                                            bidPercentage;
+                                            launchTemplate;
+                                            ec2Configuration;
+                                            updateToLatestImageVersion;
+                                            type_;
+                                            imageId;
+                                            scalingPolicy
+                                          }
     let to_value x =
       structure_to_value
         [("minvCpus", (Option.map x.minvCpus ~f:Integer.to_value));
@@ -4394,9 +11107,60 @@ module ComputeResourceUpdate =
         ("desiredvCpus", (Option.map x.desiredvCpus ~f:Integer.to_value));
         ("subnets", (Option.map x.subnets ~f:StringList.to_value));
         ("securityGroupIds",
-          (Option.map x.securityGroupIds ~f:StringList.to_value))]
+          (Option.map x.securityGroupIds ~f:StringList.to_value));
+        ("allocationStrategy",
+          (Option.map x.allocationStrategy
+             ~f:CRUpdateAllocationStrategy.to_value));
+        ("instanceTypes",
+          (Option.map x.instanceTypes ~f:StringList.to_value));
+        ("ec2KeyPair", (Option.map x.ec2KeyPair ~f:String_.to_value));
+        ("instanceRole", (Option.map x.instanceRole ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagsMap.to_value));
+        ("placementGroup", (Option.map x.placementGroup ~f:String_.to_value));
+        ("bidPercentage", (Option.map x.bidPercentage ~f:Integer.to_value));
+        ("launchTemplate",
+          (Option.map x.launchTemplate
+             ~f:LaunchTemplateSpecification.to_value));
+        ("ec2Configuration",
+          (Option.map x.ec2Configuration ~f:Ec2ConfigurationList.to_value));
+        ("updateToLatestImageVersion",
+          (Option.map x.updateToLatestImageVersion ~f:Boolean.to_value));
+        ("type", (Option.map x.type_ ~f:CRType.to_value));
+        ("imageId", (Option.map x.imageId ~f:String_.to_value));
+        ("scalingPolicy",
+          (Option.map x.scalingPolicy ~f:ComputeScalingPolicy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scalingPolicy =
+        (Option.map ~f:ComputeScalingPolicy.of_xml)
+          (Xml.child xml_arg0 "scalingPolicy") in
+      let imageId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "imageId") in
+      let type_ = (Option.map ~f:CRType.of_xml) (Xml.child xml_arg0 "type") in
+      let updateToLatestImageVersion =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "updateToLatestImageVersion") in
+      let ec2Configuration =
+        (Option.map ~f:Ec2ConfigurationList.of_xml)
+          (Xml.child xml_arg0 "ec2Configuration") in
+      let launchTemplate =
+        (Option.map ~f:LaunchTemplateSpecification.of_xml)
+          (Xml.child xml_arg0 "launchTemplate") in
+      let bidPercentage =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "bidPercentage") in
+      let placementGroup =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "placementGroup") in
+      let tags = (Option.map ~f:TagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let instanceRole =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "instanceRole") in
+      let ec2KeyPair =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ec2KeyPair") in
+      let instanceTypes =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "instanceTypes") in
+      let allocationStrategy =
+        (Option.map ~f:CRUpdateAllocationStrategy.of_xml)
+          (Xml.child xml_arg0 "allocationStrategy") in
       let securityGroupIds =
         (Option.map ~f:StringList.of_xml)
           (Xml.child xml_arg0 "securityGroupIds") in
@@ -4408,19 +11172,44 @@ module ComputeResourceUpdate =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxvCpus") in
       let minvCpus =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "minvCpus") in
-      make ?securityGroupIds ?subnets ?desiredvCpus ?maxvCpus ?minvCpus ()
+      make ?scalingPolicy ?imageId ?type_ ?updateToLatestImageVersion
+        ?ec2Configuration ?launchTemplate ?bidPercentage ?placementGroup
+        ?tags ?instanceRole ?ec2KeyPair ?instanceTypes ?allocationStrategy
+        ?securityGroupIds ?subnets ?desiredvCpus ?maxvCpus ?minvCpus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scalingPolicy =
+        field_map json__ "scalingPolicy" ComputeScalingPolicy.of_json in
+      let imageId = field_map json__ "imageId" String_.of_json in
+      let type_ = field_map json__ "type" CRType.of_json in
+      let updateToLatestImageVersion =
+        field_map json__ "updateToLatestImageVersion" Boolean.of_json in
+      let ec2Configuration =
+        field_map json__ "ec2Configuration" Ec2ConfigurationList.of_json in
+      let launchTemplate =
+        field_map json__ "launchTemplate" LaunchTemplateSpecification.of_json in
+      let bidPercentage = field_map json__ "bidPercentage" Integer.of_json in
+      let placementGroup = field_map json__ "placementGroup" String_.of_json in
+      let tags = field_map json__ "tags" TagsMap.of_json in
+      let instanceRole = field_map json__ "instanceRole" String_.of_json in
+      let ec2KeyPair = field_map json__ "ec2KeyPair" String_.of_json in
+      let instanceTypes = field_map json__ "instanceTypes" StringList.of_json in
+      let allocationStrategy =
+        field_map json__ "allocationStrategy"
+          CRUpdateAllocationStrategy.of_json in
       let securityGroupIds =
-        field_map json "securityGroupIds" StringList.of_json in
-      let subnets = field_map json "subnets" StringList.of_json in
-      let desiredvCpus = field_map json "desiredvCpus" Integer.of_json in
-      let maxvCpus = field_map json "maxvCpus" Integer.of_json in
-      let minvCpus = field_map json "minvCpus" Integer.of_json in
-      make ?securityGroupIds ?subnets ?desiredvCpus ?maxvCpus ?minvCpus ()
+        field_map json__ "securityGroupIds" StringList.of_json in
+      let subnets = field_map json__ "subnets" StringList.of_json in
+      let desiredvCpus = field_map json__ "desiredvCpus" Integer.of_json in
+      let maxvCpus = field_map json__ "maxvCpus" Integer.of_json in
+      let minvCpus = field_map json__ "minvCpus" Integer.of_json in
+      make ?scalingPolicy ?imageId ?type_ ?updateToLatestImageVersion
+        ?ec2Configuration ?launchTemplate ?bidPercentage ?placementGroup
+        ?tags ?instanceRole ?ec2KeyPair ?instanceTypes ?allocationStrategy
+        ?securityGroupIds ?subnets ?desiredvCpus ?maxvCpus ?minvCpus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An object representing the attributes of a compute environment that can be updated. For more information, see Compute Environments in the Batch User Guide."]
+       "An object that represents the attributes of a compute environment that can be updated. For more information, see Updating compute environments in the Batch User Guide."]
 module TagKeysList =
   struct
     type nonrec t = TagKey.t list
@@ -4429,6 +11218,9 @@ module TagKeysList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4449,6 +11241,95 @@ module TagKeysList =
       list_of_json ~kind:"TagKeysList" ~of_json:TagKey.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ServiceJobPreemptionConfiguration =
+  struct
+    type nonrec t =
+      {
+      preemptionRetriesBeforeTermination: Integer.t option
+        [@ocaml.doc
+          "The number of times a service job can be retried after it is preempted. A job will be terminated when preemption retries have been exhausted. If this field is unset, preempted jobs will be requeued an unlimited number of times."]}
+    let make ?preemptionRetriesBeforeTermination =
+      fun () -> { preemptionRetriesBeforeTermination }
+    let to_value x =
+      structure_to_value
+        [("preemptionRetriesBeforeTermination",
+           (Option.map x.preemptionRetriesBeforeTermination
+              ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let preemptionRetriesBeforeTermination =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "preemptionRetriesBeforeTermination") in
+      make ?preemptionRetriesBeforeTermination ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let preemptionRetriesBeforeTermination =
+        field_map json__ "preemptionRetriesBeforeTermination" Integer.of_json in
+      make ?preemptionRetriesBeforeTermination ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the service job behavior when preempted."]
+module ServiceJobRetryStrategy =
+  struct
+    type nonrec t =
+      {
+      attempts: Integer.t
+        [@ocaml.doc
+          "The number of times to move a service job to RUNNABLE status. You can specify between 1 and 10 attempts."];
+      evaluateOnExit: ServiceJobEvaluateOnExitList.t option
+        [@ocaml.doc
+          "Array of ServiceJobEvaluateOnExit objects that specify conditions under which the service job should be retried or failed."]}
+    let context_ = "ServiceJobRetryStrategy"
+    let make ?evaluateOnExit =
+      fun ~attempts -> fun () -> { evaluateOnExit; attempts }
+    let to_value x =
+      structure_to_value
+        [("attempts", (Some (Integer.to_value x.attempts)));
+        ("evaluateOnExit",
+          (Option.map x.evaluateOnExit
+             ~f:ServiceJobEvaluateOnExitList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let evaluateOnExit =
+        (Option.map ~f:ServiceJobEvaluateOnExitList.of_xml)
+          (Xml.child xml_arg0 "evaluateOnExit") in
+      let attempts =
+        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "attempts") in
+      make ?evaluateOnExit ~attempts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let evaluateOnExit =
+        field_map json__ "evaluateOnExit"
+          ServiceJobEvaluateOnExitList.of_json in
+      let attempts = field_map_exn json__ "attempts" Integer.of_json in
+      make ?evaluateOnExit ~attempts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The retry strategy for service jobs. This defines how many times to retry a failed service job and under what conditions. For more information, see Service job retry strategies in the Batch User Guide."]
+module ServiceJobTimeout =
+  struct
+    type nonrec t =
+      {
+      attemptDurationSeconds: Integer.t option
+        [@ocaml.doc
+          "The maximum duration in seconds that a service job attempt can run. After this time is reached, Batch terminates the service job attempt."]}
+    let make ?attemptDurationSeconds = fun () -> { attemptDurationSeconds }
+    let to_value x =
+      structure_to_value
+        [("attemptDurationSeconds",
+           (Option.map x.attemptDurationSeconds ~f:Integer.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attemptDurationSeconds =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "attemptDurationSeconds") in
+      make ?attemptDurationSeconds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attemptDurationSeconds =
+        field_map json__ "attemptDurationSeconds" Integer.of_json in
+      make ?attemptDurationSeconds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The timeout configuration for service jobs."]
 module ArrayProperties =
   struct
     type nonrec t =
@@ -4462,17 +11343,17 @@ module ArrayProperties =
       let size = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "size") in
       make ?size ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "size" Integer.of_json in make ?size ()
+    let of_json json__ =
+      let size = field_map json__ "size" Integer.of_json in make ?size ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An object representing an Batch array job."]
+  end[@@ocaml.doc "An object that represents an Batch array job."]
 module NodeOverrides =
   struct
     type nonrec t =
       {
       numNodes: Integer.t option
         [@ocaml.doc
-          "The number of nodes to use with a multi-node parallel job. This value overrides the number of nodes that are specified in the job definition. To use this override: There must be at least one node range in your job definition that has an open upper boundary (such as : or n:). The lower boundary of the node range specified in the job definition must be fewer than the number of nodes specified in the override. The main node index specified in the job definition must be fewer than the number of nodes specified in the override."];
+          "The number of nodes to use with a multi-node parallel job. This value overrides the number of nodes that are specified in the job definition. To use this override, you must meet the following conditions: There must be at least one node range in your job definition that has an open upper boundary, such as : or n:. The lower boundary of the node range that's specified in the job definition must be fewer than the number of nodes specified in the override. The main node index that's specified in the job definition must be fewer than the number of nodes specified in the override."];
       nodePropertyOverrides: NodePropertyOverrides.t option
         [@ocaml.doc "The node property overrides for the job."]}
     let make ?numNodes =
@@ -4493,14 +11374,15 @@ module NodeOverrides =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "numNodes") in
       make ?nodePropertyOverrides ?numNodes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nodePropertyOverrides =
-        field_map json "nodePropertyOverrides" NodePropertyOverrides.of_json in
-      let numNodes = field_map json "numNodes" Integer.of_json in
+        field_map json__ "nodePropertyOverrides"
+          NodePropertyOverrides.of_json in
+      let numNodes = field_map json__ "numNodes" Integer.of_json in
       make ?nodePropertyOverrides ?numNodes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Object representing any node overrides to a job definition that's used in a SubmitJob API operation. This isn't applicable to jobs that are running on Fargate resources and shouldn't be provided; use containerOverrides instead."]
+       "An object that represents any node overrides to a job definition that's used in a SubmitJob API operation. This parameter isn't applicable to jobs that are running on Fargate resources. Don't provide it for these jobs. Rather, use containerOverrides instead."]
 module JobDefinitionType =
   struct
     type nonrec t =
@@ -4527,10 +11409,69 @@ module JobDefinitionType =
     let of_json j = of_string (string_of_json ~kind:"JobDefinitionType" j)
     let to_json = simple_to_json to_value
   end
+module ServiceJobSummaryList =
+  struct
+    type nonrec t = ServiceJobSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobSummaryList"
+        ~of_json:ServiceJobSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListJobsFilterList =
+  struct
+    type nonrec t = KeyValuesPair.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyValuesPair.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyValuesPair.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListJobsFilterList" ~of_json:KeyValuesPair.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module SchedulingPolicyListingDetailList =
   struct
     type nonrec t = SchedulingPolicyListingDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchedulingPolicyListingDetail.to_value)) |>
         (fun x -> `List x)
@@ -4553,10 +11494,40 @@ module SchedulingPolicyListingDetailList =
         ~of_json:SchedulingPolicyListingDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module QuotaShareList =
+  struct
+    type nonrec t = QuotaShareDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:QuotaShareDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:QuotaShareDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"QuotaShareList" ~of_json:QuotaShareDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module JobSummaryList =
   struct
     type nonrec t = JobSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4577,10 +11548,43 @@ module JobSummaryList =
       list_of_json ~kind:"JobSummaryList" ~of_json:JobSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ListJobsFilterList =
+module ListJobsByConsumableResourceSummaryList =
+  struct
+    type nonrec t = ListJobsByConsumableResourceSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ListJobsByConsumableResourceSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ListJobsByConsumableResourceSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListJobsByConsumableResourceSummaryList"
+        ~of_json:ListJobsByConsumableResourceSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListJobsByConsumableResourceFilterList =
   struct
     type nonrec t = KeyValuesPair.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyValuesPair.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4598,14 +11602,338 @@ module ListJobsFilterList =
                           | _ -> true)
                      | _ -> true))) ~f:KeyValuesPair.of_xml)
     let of_json j =
-      list_of_json ~kind:"ListJobsFilterList" ~of_json:KeyValuesPair.of_json
-        j
+      list_of_json ~kind:"ListJobsByConsumableResourceFilterList"
+        ~of_json:KeyValuesPair.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ConsumableResourceSummaryList =
+  struct
+    type nonrec t = ConsumableResourceSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ConsumableResourceSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ConsumableResourceSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ConsumableResourceSummaryList"
+        ~of_json:ConsumableResourceSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListConsumableResourcesFilterList =
+  struct
+    type nonrec t = KeyValuesPair.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KeyValuesPair.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KeyValuesPair.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ListConsumableResourcesFilterList"
+        ~of_json:KeyValuesPair.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FrontOfQueueDetail =
+  struct
+    type nonrec t =
+      {
+      jobs: FrontOfQueueJobSummaryList.t option
+        [@ocaml.doc
+          "The Amazon Resource Names (ARNs) of the first 100 RUNNABLE jobs in a named job queue. For first-in-first-out (FIFO) job queues, jobs are ordered based on their submission time. For fair-share scheduling (FSS) job queues, jobs are ordered based on their job priority and share usage."];
+      lastUpdatedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when each of the first 100 RUNNABLE jobs were last updated."]}
+    let make ?jobs = fun ?lastUpdatedAt -> fun () -> { jobs; lastUpdatedAt }
+    let to_value x =
+      structure_to_value
+        [("jobs", (Option.map x.jobs ~f:FrontOfQueueJobSummaryList.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
+      let jobs =
+        (Option.map ~f:FrontOfQueueJobSummaryList.of_xml)
+          (Xml.child xml_arg0 "jobs") in
+      make ?lastUpdatedAt ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Long.of_json in
+      let jobs = field_map json__ "jobs" FrontOfQueueJobSummaryList.of_json in
+      make ?lastUpdatedAt ?jobs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains a list of the first 100 RUNNABLE jobs associated to a single job queue."]
+module FrontOfQuotaSharesDetail =
+  struct
+    type nonrec t =
+      {
+      quotaShares: FrontOfQuotaSharesJobSummaryMap.t option
+        [@ocaml.doc
+          "Contains a list of the first RUNNABLE job in each named quota share."];
+      lastUpdatedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the first RUNNABLE job per quota share were all last updated."]}
+    let make ?quotaShares =
+      fun ?lastUpdatedAt -> fun () -> { quotaShares; lastUpdatedAt }
+    let to_value x =
+      structure_to_value
+        [("quotaShares",
+           (Option.map x.quotaShares
+              ~f:FrontOfQuotaSharesJobSummaryMap.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
+      let quotaShares =
+        (Option.map ~f:FrontOfQuotaSharesJobSummaryMap.of_xml)
+          (Xml.child xml_arg0 "quotaShares") in
+      make ?lastUpdatedAt ?quotaShares ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Long.of_json in
+      let quotaShares =
+        field_map json__ "quotaShares"
+          FrontOfQuotaSharesJobSummaryMap.of_json in
+      make ?lastUpdatedAt ?quotaShares ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that represents the details of the first RUNNABLE job in each named quota share associated with a single job queue."]
+module QueueSnapshotUtilizationDetail =
+  struct
+    type nonrec t =
+      {
+      totalCapacityUsage: QueueSnapshotCapacityUsageList.t option
+        [@ocaml.doc "The total capacity usage for the entire job queue."];
+      fairshareUtilization: FairshareUtilizationDetail.t option
+        [@ocaml.doc
+          "The utilization information for a fairshare scheduling job queues, including active share count and top capacity utilization by share."];
+      quotaShareUtilization: QuotaShareUtilizationDetail.t option
+        [@ocaml.doc
+          "The utilization information for a job queue with a quota share scheduling policy."];
+      lastUpdatedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the queue utilization information was last updated."]}
+    let make ?totalCapacityUsage =
+      fun ?fairshareUtilization ->
+        fun ?quotaShareUtilization ->
+          fun ?lastUpdatedAt ->
+            fun () ->
+              {
+                totalCapacityUsage;
+                fairshareUtilization;
+                quotaShareUtilization;
+                lastUpdatedAt
+              }
+    let to_value x =
+      structure_to_value
+        [("totalCapacityUsage",
+           (Option.map x.totalCapacityUsage
+              ~f:QueueSnapshotCapacityUsageList.to_value));
+        ("fairshareUtilization",
+          (Option.map x.fairshareUtilization
+             ~f:FairshareUtilizationDetail.to_value));
+        ("quotaShareUtilization",
+          (Option.map x.quotaShareUtilization
+             ~f:QuotaShareUtilizationDetail.to_value));
+        ("lastUpdatedAt", (Option.map x.lastUpdatedAt ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "lastUpdatedAt") in
+      let quotaShareUtilization =
+        (Option.map ~f:QuotaShareUtilizationDetail.of_xml)
+          (Xml.child xml_arg0 "quotaShareUtilization") in
+      let fairshareUtilization =
+        (Option.map ~f:FairshareUtilizationDetail.of_xml)
+          (Xml.child xml_arg0 "fairshareUtilization") in
+      let totalCapacityUsage =
+        (Option.map ~f:QueueSnapshotCapacityUsageList.of_xml)
+          (Xml.child xml_arg0 "totalCapacityUsage") in
+      make ?lastUpdatedAt ?quotaShareUtilization ?fairshareUtilization
+        ?totalCapacityUsage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedAt = field_map json__ "lastUpdatedAt" Long.of_json in
+      let quotaShareUtilization =
+        field_map json__ "quotaShareUtilization"
+          QuotaShareUtilizationDetail.of_json in
+      let fairshareUtilization =
+        field_map json__ "fairshareUtilization"
+          FairshareUtilizationDetail.of_json in
+      let totalCapacityUsage =
+        field_map json__ "totalCapacityUsage"
+          QueueSnapshotCapacityUsageList.of_json in
+      make ?lastUpdatedAt ?quotaShareUtilization ?fairshareUtilization
+        ?totalCapacityUsage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The job queue utilization at a specific point in time, including total capacity usage, and quota share or fairshare utilization breakdown depending on the job queue scheduling policy."]
+module ServiceJobAttemptDetails =
+  struct
+    type nonrec t = ServiceJobAttemptDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobAttemptDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobAttemptDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobAttemptDetails"
+        ~of_json:ServiceJobAttemptDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceJobCapacityUsageDetailList =
+  struct
+    type nonrec t = ServiceJobCapacityUsageDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceJobCapacityUsageDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceJobCapacityUsageDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceJobCapacityUsageDetailList"
+        ~of_json:ServiceJobCapacityUsageDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ServiceJobPreemptionSummary =
+  struct
+    type nonrec t =
+      {
+      preemptedAttemptCount: Integer.t option
+        [@ocaml.doc
+          "The total number of times the service job has been preempted."];
+      recentPreemptedAttempts: ServiceJobRecentPreemptedAttemptList.t option
+        [@ocaml.doc
+          "A list of the most recent preemption attempts for the service job."]}
+    let make ?preemptedAttemptCount =
+      fun ?recentPreemptedAttempts ->
+        fun () -> { preemptedAttemptCount; recentPreemptedAttempts }
+    let to_value x =
+      structure_to_value
+        [("preemptedAttemptCount",
+           (Option.map x.preemptedAttemptCount ~f:Integer.to_value));
+        ("recentPreemptedAttempts",
+          (Option.map x.recentPreemptedAttempts
+             ~f:ServiceJobRecentPreemptedAttemptList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recentPreemptedAttempts =
+        (Option.map ~f:ServiceJobRecentPreemptedAttemptList.of_xml)
+          (Xml.child xml_arg0 "recentPreemptedAttempts") in
+      let preemptedAttemptCount =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "preemptedAttemptCount") in
+      make ?recentPreemptedAttempts ?preemptedAttemptCount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recentPreemptedAttempts =
+        field_map json__ "recentPreemptedAttempts"
+          ServiceJobRecentPreemptedAttemptList.of_json in
+      let preemptedAttemptCount =
+        field_map json__ "preemptedAttemptCount" Integer.of_json in
+      make ?recentPreemptedAttempts ?preemptedAttemptCount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summarizes the preemptions of the service job. This field appears on a service job when it has been preempted."]
+module ServiceEnvironmentDetailList =
+  struct
+    type nonrec t = ServiceEnvironmentDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ServiceEnvironmentDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ServiceEnvironmentDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ServiceEnvironmentDetailList"
+        ~of_json:ServiceEnvironmentDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
 module SchedulingPolicyDetailList =
   struct
     type nonrec t = SchedulingPolicyDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SchedulingPolicyDetail.to_value)) |>
         (fun x -> `List x)
@@ -4632,6 +11960,9 @@ module JobDetailList =
   struct
     type nonrec t = JobDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4656,6 +11987,9 @@ module JobQueueDetailList =
   struct
     type nonrec t = JobQueueDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobQueueDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4681,6 +12015,9 @@ module JobDefinitionList =
   struct
     type nonrec t = JobDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4705,6 +12042,9 @@ module ComputeEnvironmentDetailList =
   struct
     type nonrec t = ComputeEnvironmentDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ComputeEnvironmentDetail.to_value)) |>
         (fun x -> `List x)
@@ -4727,6 +12067,219 @@ module ComputeEnvironmentDetailList =
         ~of_json:ComputeEnvironmentDetail.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateServiceJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the job."];
+      jobName: String_.t option [@ocaml.doc "The name of the job."];
+      jobId: String_.t option
+        [@ocaml.doc "The unique identifier for the job."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobArn =
+      fun ?jobName -> fun ?jobId -> fun () -> { jobArn; jobName; jobId }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?jobId ?jobName ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?jobId ?jobName ?jobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the priority of a specified service job in an Batch job queue."]
+module UpdateServiceJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: String_.t [@ocaml.doc "The Batch job ID of the job to update."];
+      schedulingPriority: Integer.t
+        [@ocaml.doc
+          "The scheduling priority for the job. This only affects jobs in job queues with a quota-share or fair-share scheduling policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority within a share. The minimum supported value is 0 and the maximum supported value is 9999."]}
+    let context_ = "UpdateServiceJobRequest"
+    let make ~jobId =
+      fun ~schedulingPriority -> fun () -> { jobId; schedulingPriority }
+    let to_value x =
+      structure_to_value
+        [("jobId", (Some (String_.to_value x.jobId)));
+        ("schedulingPriority",
+          (Some (Integer.to_value x.schedulingPriority)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let schedulingPriority =
+        Integer.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "schedulingPriority") in
+      let jobId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+      make ~schedulingPriority ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let schedulingPriority =
+        field_map_exn json__ "schedulingPriority" Integer.of_json in
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
+      make ~schedulingPriority ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the priority of a specified service job in an Batch job queue."]
+module UpdateServiceEnvironmentResponse =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironmentName: String_.t option
+        [@ocaml.doc "The name of the service environment that was updated."];
+      serviceEnvironmentArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the service environment that was updated."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceEnvironmentName =
+      fun ?serviceEnvironmentArn ->
+        fun () -> { serviceEnvironmentName; serviceEnvironmentArn }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironmentName",
+           (Option.map x.serviceEnvironmentName ~f:String_.to_value));
+        ("serviceEnvironmentArn",
+          (Option.map x.serviceEnvironmentArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceEnvironmentArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentArn") in
+      let serviceEnvironmentName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentName") in
+      make ?serviceEnvironmentArn ?serviceEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceEnvironmentArn =
+        field_map json__ "serviceEnvironmentArn" String_.of_json in
+      let serviceEnvironmentName =
+        field_map json__ "serviceEnvironmentName" String_.of_json in
+      make ?serviceEnvironmentArn ?serviceEnvironmentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a service environment. You can update the state of a service environment from ENABLED to DISABLED to prevent new service jobs from being placed in the service environment."]
+module UpdateServiceEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironment: String_.t
+        [@ocaml.doc "The name or ARN of the service environment to update."];
+      state: ServiceEnvironmentState.t option
+        [@ocaml.doc "The state of the service environment."];
+      capacityLimits: CapacityLimits.t option
+        [@ocaml.doc
+          "The capacity limits for the service environment. This defines the maximum resources that can be used by service jobs in this environment."]}
+    let context_ = "UpdateServiceEnvironmentRequest"
+    let make ?state =
+      fun ?capacityLimits ->
+        fun ~serviceEnvironment ->
+          fun () -> { state; capacityLimits; serviceEnvironment }
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironment",
+           (Some (String_.to_value x.serviceEnvironment)));
+        ("state", (Option.map x.state ~f:ServiceEnvironmentState.to_value));
+        ("capacityLimits",
+          (Option.map x.capacityLimits ~f:CapacityLimits.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityLimits =
+        (Option.map ~f:CapacityLimits.of_xml)
+          (Xml.child xml_arg0 "capacityLimits") in
+      let state =
+        (Option.map ~f:ServiceEnvironmentState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let serviceEnvironment =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceEnvironment") in
+      make ?capacityLimits ?state ~serviceEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityLimits =
+        field_map json__ "capacityLimits" CapacityLimits.of_json in
+      let state = field_map json__ "state" ServiceEnvironmentState.of_json in
+      let serviceEnvironment =
+        field_map_exn json__ "serviceEnvironment" String_.of_json in
+      make ?capacityLimits ?state ~serviceEnvironment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a service environment. You can update the state of a service environment from ENABLED to DISABLED to prevent new service jobs from being placed in the service environment."]
 module UpdateSchedulingPolicyResponse =
   struct
     type nonrec t = unit
@@ -4778,14 +12331,21 @@ module UpdateSchedulingPolicyRequest =
       arn: String_.t
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the scheduling policy to update."];
+      quotaSharePolicy: QuotaSharePolicy.t option
+        [@ocaml.doc
+          "The quota share scheduling policy details. Once set during creation, a quotaSharePolicy cannot be removed or changed to a fairsharePolicy."];
       fairsharePolicy: FairsharePolicy.t option
-        [@ocaml.doc "The fair share policy."]}
+        [@ocaml.doc
+          "The fair-share policy scheduling details. Once set during creation, a fairsharePolicy cannot be removed or changed to a quotaSharePolicy."]}
     let context_ = "UpdateSchedulingPolicyRequest"
-    let make ?fairsharePolicy =
-      fun ~arn -> fun () -> { fairsharePolicy; arn }
+    let make ?quotaSharePolicy =
+      fun ?fairsharePolicy ->
+        fun ~arn -> fun () -> { quotaSharePolicy; fairsharePolicy; arn }
     let to_value x =
       structure_to_value
         [("arn", (Some (String_.to_value x.arn)));
+        ("quotaSharePolicy",
+          (Option.map x.quotaSharePolicy ~f:QuotaSharePolicy.to_value));
         ("fairsharePolicy",
           (Option.map x.fairsharePolicy ~f:FairsharePolicy.to_value))]
     let to_query v = to_query to_value v
@@ -4793,17 +12353,164 @@ module UpdateSchedulingPolicyRequest =
       let fairsharePolicy =
         (Option.map ~f:FairsharePolicy.of_xml)
           (Xml.child xml_arg0 "fairsharePolicy") in
+      let quotaSharePolicy =
+        (Option.map ~f:QuotaSharePolicy.of_xml)
+          (Xml.child xml_arg0 "quotaSharePolicy") in
       let arn =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      make ?fairsharePolicy ~arn ()
+      make ?fairsharePolicy ?quotaSharePolicy ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let fairsharePolicy =
-        field_map json "fairsharePolicy" FairsharePolicy.of_json in
-      let arn = field_map_exn json "arn" String_.of_json in
-      make ?fairsharePolicy ~arn ()
+        field_map json__ "fairsharePolicy" FairsharePolicy.of_json in
+      let quotaSharePolicy =
+        field_map json__ "quotaSharePolicy" QuotaSharePolicy.of_json in
+      let arn = field_map_exn json__ "arn" String_.of_json in
+      make ?fairsharePolicy ?quotaSharePolicy ~arn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates a scheduling policy."]
+  end[@@ocaml.doc "Contains the parameters for UpdateSchedulingPolicy."]
+module UpdateQuotaShareResponse =
+  struct
+    type nonrec t =
+      {
+      quotaShareName: String_.t option
+        [@ocaml.doc "The name of the quota share."];
+      quotaShareArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quotaShareName =
+      fun ?quotaShareArn -> fun () -> { quotaShareName; quotaShareArn }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quotaShareName",
+           (Option.map x.quotaShareName ~f:String_.to_value));
+        ("quotaShareArn", (Option.map x.quotaShareArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaShareArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareArn") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      make ?quotaShareArn ?quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaShareArn = field_map json__ "quotaShareArn" String_.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      make ?quotaShareArn ?quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a quota share."]
+module UpdateQuotaShareRequest =
+  struct
+    type nonrec t =
+      {
+      quotaShareArn: String_.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the quota share to update."];
+      capacityLimits: QuotaShareCapacityLimits.t option
+        [@ocaml.doc
+          "A list that specifies the quantity and type of compute capacity allocated to the quota share."];
+      resourceSharingConfiguration:
+        QuotaShareResourceSharingConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether a quota share reserves, lends, or both lends and borrows idle compute capacity."];
+      preemptionConfiguration: QuotaSharePreemptionConfiguration.t option
+        [@ocaml.doc
+          "Specifies the preemption behavior for jobs in a quota share."];
+      state: QuotaShareState.t option
+        [@ocaml.doc
+          "The state of the quota share. If the quota share is ENABLED, it is able to accept jobs. If the quota share is DISABLED, new jobs won't be accepted but jobs already submitted can finish."]}
+    let context_ = "UpdateQuotaShareRequest"
+    let make ?capacityLimits =
+      fun ?resourceSharingConfiguration ->
+        fun ?preemptionConfiguration ->
+          fun ?state ->
+            fun ~quotaShareArn ->
+              fun () ->
+                {
+                  capacityLimits;
+                  resourceSharingConfiguration;
+                  preemptionConfiguration;
+                  state;
+                  quotaShareArn
+                }
+    let to_value x =
+      structure_to_value
+        [("quotaShareArn", (Some (String_.to_value x.quotaShareArn)));
+        ("capacityLimits",
+          (Option.map x.capacityLimits ~f:QuotaShareCapacityLimits.to_value));
+        ("resourceSharingConfiguration",
+          (Option.map x.resourceSharingConfiguration
+             ~f:QuotaShareResourceSharingConfiguration.to_value));
+        ("preemptionConfiguration",
+          (Option.map x.preemptionConfiguration
+             ~f:QuotaSharePreemptionConfiguration.to_value));
+        ("state", (Option.map x.state ~f:QuotaShareState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:QuotaShareState.of_xml) (Xml.child xml_arg0 "state") in
+      let preemptionConfiguration =
+        (Option.map ~f:QuotaSharePreemptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "preemptionConfiguration") in
+      let resourceSharingConfiguration =
+        (Option.map ~f:QuotaShareResourceSharingConfiguration.of_xml)
+          (Xml.child xml_arg0 "resourceSharingConfiguration") in
+      let capacityLimits =
+        (Option.map ~f:QuotaShareCapacityLimits.of_xml)
+          (Xml.child xml_arg0 "capacityLimits") in
+      let quotaShareArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quotaShareArn") in
+      make ?state ?preemptionConfiguration ?resourceSharingConfiguration
+        ?capacityLimits ~quotaShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "state" QuotaShareState.of_json in
+      let preemptionConfiguration =
+        field_map json__ "preemptionConfiguration"
+          QuotaSharePreemptionConfiguration.of_json in
+      let resourceSharingConfiguration =
+        field_map json__ "resourceSharingConfiguration"
+          QuotaShareResourceSharingConfiguration.of_json in
+      let capacityLimits =
+        field_map json__ "capacityLimits" QuotaShareCapacityLimits.of_json in
+      let quotaShareArn =
+        field_map_exn json__ "quotaShareArn" String_.of_json in
+      make ?state ?preemptionConfiguration ?resourceSharingConfiguration
+        ?capacityLimits ~quotaShareArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a quota share."]
 module UpdateJobQueueResponse =
   struct
     type nonrec t =
@@ -4858,9 +12565,9 @@ module UpdateJobQueueResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueName") in
       make ?jobQueueArn ?jobQueueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobQueueArn = field_map json "jobQueueArn" String_.of_json in
-      let jobQueueName = field_map json "jobQueueName" String_.of_json in
+    let of_json json__ =
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let jobQueueName = field_map json__ "jobQueueName" String_.of_json in
       make ?jobQueueArn ?jobQueueName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates a job queue."]
@@ -4876,27 +12583,37 @@ module UpdateJobQueueRequest =
           "Describes the queue's ability to accept new jobs. If the job queue state is ENABLED, it can accept jobs. If the job queue state is DISABLED, new jobs can't be added to the queue, but jobs already in the queue can finish."];
       schedulingPolicyArn: String_.t option
         [@ocaml.doc
-          "Amazon Resource Name (ARN) of the fair share scheduling policy. Once a job queue is created, the fair share scheduling policy can be replaced but not removed. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:012345678910:scheduling-policy/MySchedulingPolicy."];
+          "Amazon Resource Name (ARN) of the fair-share scheduling policy. Once a job queue is created, the fair-share scheduling policy can be replaced but not removed. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:123456789012:scheduling-policy/MySchedulingPolicy."];
       priority: Integer.t option
         [@ocaml.doc
-          "The priority of the job queue. Job queues with a higher priority (or a higher integer value for the priority parameter) are evaluated first when associated with the same compute environment. Priority is determined in descending order, for example, a job queue with a priority value of 10 is given scheduling preference over a job queue with a priority value of 1. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT). EC2 and Fargate compute environments can't be mixed."];
+          "The priority of the job queue. Job queues with a higher priority (or a higher integer value for the priority parameter) are evaluated first when associated with the same compute environment. Priority is determined in descending order. For example, a job queue with a priority value of 10 is given scheduling preference over a job queue with a priority value of 1. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT). EC2 and Fargate compute environments can't be mixed."];
       computeEnvironmentOrder: ComputeEnvironmentOrders.t option
         [@ocaml.doc
-          "Details the set of compute environments mapped to a job queue and their order relative to each other. This is one of the parameters used by the job scheduler to determine which compute environment should run a given job. Compute environments must be in the VALID state before you can associate them with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT). EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."]}
+          "Details the set of compute environments mapped to a job queue and their order relative to each other. This is one of the parameters used by the job scheduler to determine which compute environment runs a given job. Compute environments must be in the VALID state before you can associate them with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT). EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."];
+      serviceEnvironmentOrder: ServiceEnvironmentOrders.t option
+        [@ocaml.doc
+          "The order of the service environment associated with the job queue. Job queues with a higher priority are evaluated first when associated with the same service environment."];
+      jobStateTimeLimitActions: JobStateTimeLimitActions.t option
+        [@ocaml.doc
+          "The set of actions that Batch perform on jobs that remain at the head of the job queue in the specified state longer than specified times. Batch will perform each action after maxTimeSeconds has passed. (Note: The minimum value for maxTimeSeconds is 600 (10 minutes) and its maximum value is 86,400 (24 hours).)"]}
     let context_ = "UpdateJobQueueRequest"
     let make ?state =
       fun ?schedulingPolicyArn ->
         fun ?priority ->
           fun ?computeEnvironmentOrder ->
-            fun ~jobQueue ->
-              fun () ->
-                {
-                  state;
-                  schedulingPolicyArn;
-                  priority;
-                  computeEnvironmentOrder;
-                  jobQueue
-                }
+            fun ?serviceEnvironmentOrder ->
+              fun ?jobStateTimeLimitActions ->
+                fun ~jobQueue ->
+                  fun () ->
+                    {
+                      state;
+                      schedulingPolicyArn;
+                      priority;
+                      computeEnvironmentOrder;
+                      serviceEnvironmentOrder;
+                      jobStateTimeLimitActions;
+                      jobQueue
+                    }
     let to_value x =
       structure_to_value
         [("jobQueue", (Some (String_.to_value x.jobQueue)));
@@ -4906,9 +12623,21 @@ module UpdateJobQueueRequest =
         ("priority", (Option.map x.priority ~f:Integer.to_value));
         ("computeEnvironmentOrder",
           (Option.map x.computeEnvironmentOrder
-             ~f:ComputeEnvironmentOrders.to_value))]
+             ~f:ComputeEnvironmentOrders.to_value));
+        ("serviceEnvironmentOrder",
+          (Option.map x.serviceEnvironmentOrder
+             ~f:ServiceEnvironmentOrders.to_value));
+        ("jobStateTimeLimitActions",
+          (Option.map x.jobStateTimeLimitActions
+             ~f:JobStateTimeLimitActions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobStateTimeLimitActions =
+        (Option.map ~f:JobStateTimeLimitActions.of_xml)
+          (Xml.child xml_arg0 "jobStateTimeLimitActions") in
+      let serviceEnvironmentOrder =
+        (Option.map ~f:ServiceEnvironmentOrders.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentOrder") in
       let computeEnvironmentOrder =
         (Option.map ~f:ComputeEnvironmentOrders.of_xml)
           (Xml.child xml_arg0 "computeEnvironmentOrder") in
@@ -4920,29 +12649,169 @@ module UpdateJobQueueRequest =
       let state = (Option.map ~f:JQState.of_xml) (Xml.child xml_arg0 "state") in
       let jobQueue =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
-      make ?computeEnvironmentOrder ?priority ?schedulingPolicyArn ?state
+      make ?jobStateTimeLimitActions ?serviceEnvironmentOrder
+        ?computeEnvironmentOrder ?priority ?schedulingPolicyArn ?state
         ~jobQueue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let jobStateTimeLimitActions =
+        field_map json__ "jobStateTimeLimitActions"
+          JobStateTimeLimitActions.of_json in
+      let serviceEnvironmentOrder =
+        field_map json__ "serviceEnvironmentOrder"
+          ServiceEnvironmentOrders.of_json in
       let computeEnvironmentOrder =
-        field_map json "computeEnvironmentOrder"
+        field_map json__ "computeEnvironmentOrder"
           ComputeEnvironmentOrders.of_json in
-      let priority = field_map json "priority" Integer.of_json in
+      let priority = field_map json__ "priority" Integer.of_json in
       let schedulingPolicyArn =
-        field_map json "schedulingPolicyArn" String_.of_json in
-      let state = field_map json "state" JQState.of_json in
-      let jobQueue = field_map_exn json "jobQueue" String_.of_json in
-      make ?computeEnvironmentOrder ?priority ?schedulingPolicyArn ?state
+        field_map json__ "schedulingPolicyArn" String_.of_json in
+      let state = field_map json__ "state" JQState.of_json in
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      make ?jobStateTimeLimitActions ?serviceEnvironmentOrder
+        ?computeEnvironmentOrder ?priority ?schedulingPolicyArn ?state
         ~jobQueue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for UpdateJobQueue."]
+module UpdateConsumableResourceResponse =
+  struct
+    type nonrec t =
+      {
+      consumableResourceName: String_.t option
+        [@ocaml.doc "The name of the consumable resource to be updated."];
+      consumableResourceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the consumable resource."];
+      totalQuantity: Long.t option
+        [@ocaml.doc
+          "The total amount of the consumable resource that is available."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?consumableResourceName =
+      fun ?consumableResourceArn ->
+        fun ?totalQuantity ->
+          fun () ->
+            { consumableResourceName; consumableResourceArn; totalQuantity }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("consumableResourceName",
+           (Option.map x.consumableResourceName ~f:String_.to_value));
+        ("consumableResourceArn",
+          (Option.map x.consumableResourceArn ~f:String_.to_value));
+        ("totalQuantity", (Option.map x.totalQuantity ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let totalQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "totalQuantity") in
+      let consumableResourceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceArn") in
+      let consumableResourceName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceName") in
+      make ?totalQuantity ?consumableResourceArn ?consumableResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let totalQuantity = field_map json__ "totalQuantity" Long.of_json in
+      let consumableResourceArn =
+        field_map json__ "consumableResourceArn" String_.of_json in
+      let consumableResourceName =
+        field_map json__ "consumableResourceName" String_.of_json in
+      make ?totalQuantity ?consumableResourceArn ?consumableResourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a consumable resource."]
+module UpdateConsumableResourceRequest =
+  struct
+    type nonrec t =
+      {
+      consumableResource: String_.t
+        [@ocaml.doc
+          "The name or ARN of the consumable resource to be updated."];
+      operation: String_.t option
+        [@ocaml.doc
+          "Indicates how the quantity of the consumable resource will be updated. Must be one of: SET Sets the quantity of the resource to the value specified by the quantity parameter. ADD Increases the quantity of the resource by the value specified by the quantity parameter. REMOVE Reduces the quantity of the resource by the value specified by the quantity parameter."];
+      quantity: Long.t option
+        [@ocaml.doc
+          "The change in the total quantity of the consumable resource. The operation parameter determines whether the value specified here will be the new total quantity, or the amount by which the total quantity will be increased or reduced. Must be a non-negative value."];
+      clientToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "If this parameter is specified and two update requests with identical payloads and clientTokens are received, these requests are considered the same request. Both requests will succeed, but the update will only happen once. A clientToken is valid for 8 hours."]}
+    let context_ = "UpdateConsumableResourceRequest"
+    let make ?operation =
+      fun ?quantity ->
+        fun ?clientToken ->
+          fun ~consumableResource ->
+            fun () ->
+              { operation; quantity; clientToken; consumableResource }
+    let to_value x =
+      structure_to_value
+        [("consumableResource",
+           (Some (String_.to_value x.consumableResource)));
+        ("operation", (Option.map x.operation ~f:String_.to_value));
+        ("quantity", (Option.map x.quantity ~f:Long.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let quantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "quantity") in
+      let operation =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "operation") in
+      let consumableResource =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "consumableResource") in
+      make ?clientToken ?quantity ?operation ~consumableResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientRequestToken.of_json in
+      let quantity = field_map json__ "quantity" Long.of_json in
+      let operation = field_map json__ "operation" String_.of_json in
+      let consumableResource =
+        field_map_exn json__ "consumableResource" String_.of_json in
+      make ?clientToken ?quantity ?operation ~consumableResource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates a consumable resource."]
 module UpdateComputeEnvironmentResponse =
   struct
     type nonrec t =
       {
       computeEnvironmentName: String_.t option
         [@ocaml.doc
-          "The name of the compute environment. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+          "The name of the compute environment. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
       computeEnvironmentArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the compute environment."]}
@@ -4997,11 +12866,11 @@ module UpdateComputeEnvironmentResponse =
           (Xml.child xml_arg0 "computeEnvironmentName") in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeEnvironmentArn =
-        field_map json "computeEnvironmentArn" String_.of_json in
+        field_map json__ "computeEnvironmentArn" String_.of_json in
       let computeEnvironmentName =
-        field_map json "computeEnvironmentName" String_.of_json in
+        field_map json__ "computeEnvironmentName" String_.of_json in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates an Batch compute environment."]
@@ -5014,30 +12883,38 @@ module UpdateComputeEnvironmentRequest =
           "The name or full Amazon Resource Name (ARN) of the compute environment to update."];
       state: CEState.t option
         [@ocaml.doc
-          "The state of the compute environment. Compute environments in the ENABLED state can accept jobs from a queue and scale in or out automatically based on the workload demand of its associated queues. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically, based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. However, they scale in to minvCpus value after instances become idle."];
+          "The state of the compute environment. Compute environments in the ENABLED state can accept jobs from a queue and scale in or out automatically based on the workload demand of its associated queues. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically, based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. Compute environments in a DISABLED state may continue to incur billing charges, for example, if they have running instances due to jobs that are still executing or a non-zero minvCpus setting. To prevent additional charges, disable and delete the compute environment. When an instance is idle, the instance scales down to the minvCpus value. However, the instance size doesn't change. For example, consider a c5.8xlarge instance with a minvCpus value of 4 and a desiredvCpus value of 36. This instance doesn't scale down to a c5.large instance."];
       unmanagedvCpus: Integer.t option
         [@ocaml.doc
-          "The maximum number of vCPUs expected to be used for an unmanaged compute environment. This parameter should not be specified for a managed compute environment. This parameter is only used for fair share scheduling to reserve vCPU capacity for new share identifiers. If this parameter is not provided for a fair share job queue, no vCPU capacity will be reserved."];
+          "The maximum number of vCPUs expected to be used for an unmanaged compute environment. Don't specify this parameter for a managed compute environment. This parameter is only used for fair-share scheduling to reserve vCPU capacity for new share identifiers. If this parameter isn't provided for a fair-share job queue, no vCPU capacity is reserved."];
       computeResources: ComputeResourceUpdate.t option
         [@ocaml.doc
           "Details of the compute resources managed by the compute environment. Required for a managed compute environment. For more information, see Compute Environments in the Batch User Guide."];
       serviceRole: String_.t option
         [@ocaml.doc
-          "The full Amazon Resource Name (ARN) of the IAM role that allows Batch to make calls to other Amazon Web Services services on your behalf. For more information, see Batch service IAM role in the Batch User Guide. If the compute environment has a service-linked role, it can't be changed to use a regular IAM role. Likewise, if the compute environment has a regular IAM role, it can't be changed to use a service-linked role. If your specified role has a path other than /, then you must either specify the full role ARN (this is recommended) or prefix the role name with the path. Depending on how you created your Batch service role, its ARN might contain the service-role path prefix. When you only specify the name of the service role, Batch assumes that your ARN doesn't use the service-role path prefix. Because of this, we recommend that you specify the full ARN of your service role when you create compute environments."]}
+          "The full Amazon Resource Name (ARN) of the IAM role that allows Batch to make calls to other Amazon Web Services services on your behalf. For more information, see Batch service IAM role in the Batch User Guide. If the compute environment has a service-linked role, it can't be changed to use a regular IAM role. Likewise, if the compute environment has a regular IAM role, it can't be changed to use a service-linked role. To update the parameters for the compute environment that require an infrastructure update to change, the AWSServiceRoleForBatch service-linked role must be used. For more information, see Updating compute environments in the Batch User Guide. If your specified role has a path other than /, then you must either specify the full role ARN (recommended) or prefix the role name with the path. Depending on how you created your Batch service role, its ARN might contain the service-role path prefix. When you only specify the name of the service role, Batch assumes that your ARN doesn't use the service-role path prefix. Because of this, we recommend that you specify the full ARN of your service role when you create compute environments."];
+      updatePolicy: UpdatePolicy.t option
+        [@ocaml.doc
+          "Specifies the updated infrastructure update policy for the compute environment. For more information about infrastructure updates, see Updating compute environments in the Batch User Guide."];
+      context: String_.t option [@ocaml.doc "Reserved."]}
     let context_ = "UpdateComputeEnvironmentRequest"
     let make ?state =
       fun ?unmanagedvCpus ->
         fun ?computeResources ->
           fun ?serviceRole ->
-            fun ~computeEnvironment ->
-              fun () ->
-                {
-                  state;
-                  unmanagedvCpus;
-                  computeResources;
-                  serviceRole;
-                  computeEnvironment
-                }
+            fun ?updatePolicy ->
+              fun ?context ->
+                fun ~computeEnvironment ->
+                  fun () ->
+                    {
+                      state;
+                      unmanagedvCpus;
+                      computeResources;
+                      serviceRole;
+                      updatePolicy;
+                      context;
+                      computeEnvironment
+                    }
     let to_value x =
       structure_to_value
         [("computeEnvironment",
@@ -5046,9 +12923,17 @@ module UpdateComputeEnvironmentRequest =
         ("unmanagedvCpus", (Option.map x.unmanagedvCpus ~f:Integer.to_value));
         ("computeResources",
           (Option.map x.computeResources ~f:ComputeResourceUpdate.to_value));
-        ("serviceRole", (Option.map x.serviceRole ~f:String_.to_value))]
+        ("serviceRole", (Option.map x.serviceRole ~f:String_.to_value));
+        ("updatePolicy",
+          (Option.map x.updatePolicy ~f:UpdatePolicy.to_value));
+        ("context", (Option.map x.context ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
+      let updatePolicy =
+        (Option.map ~f:UpdatePolicy.of_xml)
+          (Xml.child xml_arg0 "updatePolicy") in
       let serviceRole =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "serviceRole") in
       let computeResources =
@@ -5060,19 +12945,21 @@ module UpdateComputeEnvironmentRequest =
       let computeEnvironment =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironment") in
-      make ?serviceRole ?computeResources ?unmanagedvCpus ?state
-        ~computeEnvironment ()
+      make ?context ?updatePolicy ?serviceRole ?computeResources
+        ?unmanagedvCpus ?state ~computeEnvironment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let serviceRole = field_map json "serviceRole" String_.of_json in
+    let of_json json__ =
+      let context = field_map json__ "context" String_.of_json in
+      let updatePolicy = field_map json__ "updatePolicy" UpdatePolicy.of_json in
+      let serviceRole = field_map json__ "serviceRole" String_.of_json in
       let computeResources =
-        field_map json "computeResources" ComputeResourceUpdate.of_json in
-      let unmanagedvCpus = field_map json "unmanagedvCpus" Integer.of_json in
-      let state = field_map json "state" CEState.of_json in
+        field_map json__ "computeResources" ComputeResourceUpdate.of_json in
+      let unmanagedvCpus = field_map json__ "unmanagedvCpus" Integer.of_json in
+      let state = field_map json__ "state" CEState.of_json in
       let computeEnvironment =
-        field_map_exn json "computeEnvironment" String_.of_json in
-      make ?serviceRole ?computeResources ?unmanagedvCpus ?state
-        ~computeEnvironment ()
+        field_map_exn json__ "computeEnvironment" String_.of_json in
+      make ?context ?updatePolicy ?serviceRole ?computeResources
+        ?unmanagedvCpus ?state ~computeEnvironment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for UpdateComputeEnvironment."]
 module UntagResourceResponse =
@@ -5125,7 +13012,7 @@ module UntagResourceRequest =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource from which to delete tags. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."];
+          "The Amazon Resource Name (ARN) of the resource from which to delete tags. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs aren't supported."];
       tagKeys: TagKeysList.t
         [@ocaml.doc "The keys of the tags to be removed."]}
     let context_ = "UntagResourceRequest"
@@ -5145,12 +13032,85 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeysList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeysList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Deletes specified tags from an Batch resource."]
+  end[@@ocaml.doc "Contains the parameters for UntagResource."]
+module TerminateServiceJobResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Terminates a service job in a job queue."]
+module TerminateServiceJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: String_.t
+        [@ocaml.doc "The service job ID of the service job to terminate."];
+      reason: String_.t
+        [@ocaml.doc
+          "A message to attach to the service job that explains the reason for canceling it. This message is returned by DescribeServiceJob operations on the service job."]}
+    let context_ = "TerminateServiceJobRequest"
+    let make ~jobId = fun ~reason -> fun () -> { jobId; reason }
+    let to_value x =
+      structure_to_value
+        [("jobId", (Some (String_.to_value x.jobId)));
+        ("reason", (Some (String_.to_value x.reason)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "reason") in
+      let jobId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+      make ~reason ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map_exn json__ "reason" String_.of_json in
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
+      make ~reason ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Terminates a service job in a job queue."]
 module TerminateJobResponse =
   struct
     type nonrec t = unit
@@ -5204,7 +13164,7 @@ module TerminateJobRequest =
         [@ocaml.doc "The Batch job ID of the job to terminate."];
       reason: String_.t
         [@ocaml.doc
-          "A message to attach to the job that explains the reason for canceling it. This message is returned by future DescribeJobs operations on the job. This message is also recorded in the Batch activity logs."]}
+          "A message to attach to the job that explains the reason for canceling it. This message is returned by future DescribeJobs operations on the job. It is also recorded in the Batch activity logs. This parameter has as limit of 1024 characters."]}
     let context_ = "TerminateJobRequest"
     let make ~jobId = fun ~reason -> fun () -> { jobId; reason }
     let to_value x =
@@ -5219,9 +13179,9 @@ module TerminateJobRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "reason" String_.of_json in
-      let jobId = field_map_exn json "jobId" String_.of_json in
+    let of_json json__ =
+      let reason = field_map_exn json__ "reason" String_.of_json in
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
       make ~reason ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for TerminateJob."]
@@ -5269,14 +13229,14 @@ module TagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource aren't specified in the request parameters, they aren't changed. When a resource is deleted, the tags that are associated with that resource are deleted as well. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."]
+       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource aren't specified in the request parameters, they aren't changed. When a resource is deleted, the tags that are associated with that resource are deleted as well. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs aren't supported."]
 module TagResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource that tags are added to. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."];
+          "The Amazon Resource Name (ARN) of the resource that tags are added to. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs aren't supported."];
       tags: TagrisTagsMap.t
         [@ocaml.doc
           "The tags that you apply to the resource to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference."]}
@@ -5296,28 +13256,27 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagrisTagsMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagrisTagsMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Associates the specified tags to a resource with the specified resourceArn. If existing tags on a resource aren't specified in the request parameters, they aren't changed. When a resource is deleted, the tags that are associated with that resource are deleted as well. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."]
-module SubmitJobResponse =
+  end[@@ocaml.doc "Contains the parameters for TagResource."]
+module SubmitServiceJobResponse =
   struct
     type nonrec t =
       {
       jobArn: String_.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) for the job."];
-      jobName: String_.t [@ocaml.doc "The name of the job."];
-      jobId: String_.t [@ocaml.doc "The unique identifier for the job."]}
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the service job."];
+      jobName: String_.t option [@ocaml.doc "The name of the service job."];
+      jobId: String_.t option
+        [@ocaml.doc "The unique identifier for the service job."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "SubmitJobResponse"
     let make ?jobArn =
-      fun ~jobName -> fun ~jobId -> fun () -> { jobArn; jobName; jobId }
+      fun ?jobName -> fun ?jobId -> fun () -> { jobArn; jobName; jobId }
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
@@ -5349,26 +13308,246 @@ module SubmitJobResponse =
     let to_value x =
       structure_to_value
         [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
-        ("jobName", (Some (String_.to_value x.jobName)));
-        ("jobId", (Some (String_.to_value x.jobId)))]
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let jobId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
       let jobName =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
       let jobArn =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
-      make ~jobId ~jobName ?jobArn ()
+      make ?jobId ?jobName ?jobArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" String_.of_json in
-      let jobName = field_map_exn json "jobName" String_.of_json in
-      let jobArn = field_map json "jobArn" String_.of_json in
-      make ~jobId ~jobName ?jobArn ()
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?jobId ?jobName ?jobArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Submits an Batch job from a job definition. Parameters that are specified during SubmitJob override parameters defined in the job definition. vCPU and memory requirements that are specified in the resourceRequirements objects in the job definition are the exception. They can't be overridden this way using the memory and vcpus parameters. Rather, you must specify updates to job definition parameters in a resourceRequirements object that's included in the containerOverrides parameter. Job queues with a scheduling policy are limited to 500 active fair share identifiers at a time. Jobs that run on Fargate resources can't be guaranteed to run for more than 14 days. This is because, after 14 days, Fargate resources might become unavailable and job might be terminated."]
+       "Submits a service job to a specified job queue to run on SageMaker AI. A service job is a unit of work that you submit to Batch for execution on SageMaker AI."]
+module SubmitServiceJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobName: String_.t
+        [@ocaml.doc
+          "The name of the service job. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+      jobQueue: String_.t
+        [@ocaml.doc
+          "The job queue into which the service job is submitted. You can specify either the name or the ARN of the queue. The job queue must have the type SAGEMAKER_TRAINING."];
+      retryStrategy: ServiceJobRetryStrategy.t option
+        [@ocaml.doc
+          "The retry strategy to use for failed service jobs that are submitted with this service job request."];
+      schedulingPriority: Integer.t option
+        [@ocaml.doc
+          "The scheduling priority of the service job. Valid values are integers between 0 and 9999."];
+      serviceRequestPayload: String_.t
+        [@ocaml.doc
+          "The request, in JSON, for the service that the SubmitServiceJob operation is queueing."];
+      serviceJobType: ServiceJobType.t
+        [@ocaml.doc
+          "The type of service job. For SageMaker Training jobs, specify SAGEMAKER_TRAINING."];
+      shareIdentifier: String_.t option
+        [@ocaml.doc
+          "The share identifier for the service job. Don't specify this parameter if the job queue doesn't have a fair-share scheduling policy. If the job queue has a fair-share scheduling policy, then this parameter must be specified."];
+      quotaShareName: String_.t option
+        [@ocaml.doc
+          "The quota share for the service job. Don't specify this parameter if the job queue doesn't have a quota share scheduling policy. If the job queue has a quota share scheduling policy, then this parameter must be specified."];
+      preemptionConfiguration: ServiceJobPreemptionConfiguration.t option
+        [@ocaml.doc "Specifies the service job behavior when preempted."];
+      timeoutConfig: ServiceJobTimeout.t option
+        [@ocaml.doc
+          "The timeout configuration for the service job. If none is specified, Batch defers to the default timeout of the underlying service handling the job."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that you apply to the service job request. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."];
+      clientToken: ClientRequestToken.t option
+        [@ocaml.doc
+          "A unique identifier for the request. This token is used to ensure idempotency of requests. If this parameter is specified and two submit requests with identical payloads and clientTokens are received, these requests are considered the same request and the second request is rejected."]}
+    let context_ = "SubmitServiceJobRequest"
+    let make ?retryStrategy =
+      fun ?schedulingPriority ->
+        fun ?shareIdentifier ->
+          fun ?quotaShareName ->
+            fun ?preemptionConfiguration ->
+              fun ?timeoutConfig ->
+                fun ?tags ->
+                  fun ?clientToken ->
+                    fun ~jobName ->
+                      fun ~jobQueue ->
+                        fun ~serviceRequestPayload ->
+                          fun ~serviceJobType ->
+                            fun () ->
+                              {
+                                retryStrategy;
+                                schedulingPriority;
+                                shareIdentifier;
+                                quotaShareName;
+                                preemptionConfiguration;
+                                timeoutConfig;
+                                tags;
+                                clientToken;
+                                jobName;
+                                jobQueue;
+                                serviceRequestPayload;
+                                serviceJobType
+                              }
+    let to_value x =
+      structure_to_value
+        [("jobName", (Some (String_.to_value x.jobName)));
+        ("jobQueue", (Some (String_.to_value x.jobQueue)));
+        ("retryStrategy",
+          (Option.map x.retryStrategy ~f:ServiceJobRetryStrategy.to_value));
+        ("schedulingPriority",
+          (Option.map x.schedulingPriority ~f:Integer.to_value));
+        ("serviceRequestPayload",
+          (Some (String_.to_value x.serviceRequestPayload)));
+        ("serviceJobType", (Some (ServiceJobType.to_value x.serviceJobType)));
+        ("shareIdentifier",
+          (Option.map x.shareIdentifier ~f:String_.to_value));
+        ("quotaShareName", (Option.map x.quotaShareName ~f:String_.to_value));
+        ("preemptionConfiguration",
+          (Option.map x.preemptionConfiguration
+             ~f:ServiceJobPreemptionConfiguration.to_value));
+        ("timeoutConfig",
+          (Option.map x.timeoutConfig ~f:ServiceJobTimeout.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientRequestToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientRequestToken.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let timeoutConfig =
+        (Option.map ~f:ServiceJobTimeout.of_xml)
+          (Xml.child xml_arg0 "timeoutConfig") in
+      let preemptionConfiguration =
+        (Option.map ~f:ServiceJobPreemptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "preemptionConfiguration") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      let serviceJobType =
+        ServiceJobType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceJobType") in
+      let serviceRequestPayload =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceRequestPayload") in
+      let schedulingPriority =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "schedulingPriority") in
+      let retryStrategy =
+        (Option.map ~f:ServiceJobRetryStrategy.of_xml)
+          (Xml.child xml_arg0 "retryStrategy") in
+      let jobQueue =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
+      let jobName =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
+      make ?clientToken ?tags ?timeoutConfig ?preemptionConfiguration
+        ?quotaShareName ?shareIdentifier ~serviceJobType
+        ~serviceRequestPayload ?schedulingPriority ?retryStrategy ~jobQueue
+        ~jobName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientRequestToken.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let timeoutConfig =
+        field_map json__ "timeoutConfig" ServiceJobTimeout.of_json in
+      let preemptionConfiguration =
+        field_map json__ "preemptionConfiguration"
+          ServiceJobPreemptionConfiguration.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let serviceJobType =
+        field_map_exn json__ "serviceJobType" ServiceJobType.of_json in
+      let serviceRequestPayload =
+        field_map_exn json__ "serviceRequestPayload" String_.of_json in
+      let schedulingPriority =
+        field_map json__ "schedulingPriority" Integer.of_json in
+      let retryStrategy =
+        field_map json__ "retryStrategy" ServiceJobRetryStrategy.of_json in
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      let jobName = field_map_exn json__ "jobName" String_.of_json in
+      make ?clientToken ?tags ?timeoutConfig ?preemptionConfiguration
+        ?quotaShareName ?shareIdentifier ~serviceJobType
+        ~serviceRequestPayload ?schedulingPriority ?retryStrategy ~jobQueue
+        ~jobName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits a service job to a specified job queue to run on SageMaker AI. A service job is a unit of work that you submit to Batch for execution on SageMaker AI."]
+module SubmitJobResponse =
+  struct
+    type nonrec t =
+      {
+      jobArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) for the job."];
+      jobName: String_.t option [@ocaml.doc "The name of the job."];
+      jobId: String_.t option
+        [@ocaml.doc "The unique identifier for the job."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobArn =
+      fun ?jobName -> fun ?jobId -> fun () -> { jobArn; jobName; jobId }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      make ?jobId ?jobName ?jobArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      make ?jobId ?jobName ?jobArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Submits an Batch job from a job definition. Parameters that are specified during SubmitJob override parameters defined in the job definition. vCPU and memory requirements that are specified in the resourceRequirements objects in the job definition are the exception. They can't be overridden this way using the memory and vcpus parameters. Rather, you must specify updates to job definition parameters in a resourceRequirements object that's included in the containerOverrides parameter. Job queues with a scheduling policy are limited to 500 active share identifiers at a time. Jobs that run on Fargate resources can't be guaranteed to run for more than 14 days. This is because, after 14 days, Fargate resources might become unavailable and job might be terminated."]
 module SubmitJobRequest =
   struct
     type nonrec t =
@@ -5380,10 +13559,11 @@ module SubmitJobRequest =
         [@ocaml.doc
           "The job queue where the job is submitted. You can specify either the name or the Amazon Resource Name (ARN) of the queue."];
       shareIdentifier: String_.t option
-        [@ocaml.doc "The share identifier for the job."];
+        [@ocaml.doc
+          "The share identifier for the job. Don't specify this parameter if the job queue doesn't have a fair-share scheduling policy. If the job queue has a fair-share scheduling policy, then this parameter must be specified. This string is limited to 255 alphanumeric characters, and can be followed by an asterisk (*)."];
       schedulingPriorityOverride: Integer.t option
         [@ocaml.doc
-          "The scheduling priority for the job. This will only affect jobs in job queues with a fair share policy. Jobs with a higher scheduling priority will be scheduled before jobs with a lower scheduling priority. This will override any scheduling priority in the job definition. The minimum supported value is 0 and the maximum supported value is 9999."];
+          "The scheduling priority for the job. This only affects jobs in job queues with a fair-share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority. This overrides any scheduling priority in the job definition and works only within a single share identifier. The minimum supported value is 0 and the maximum supported value is 9999."];
       arrayProperties: ArrayProperties.t option
         [@ocaml.doc
           "The array properties for the submitted job, such as the size of the array. The array size can be between 2 and 10,000. If you specify array properties for a job, it becomes an array job. For more information, see Array Jobs in the Batch User Guide."];
@@ -5392,13 +13572,13 @@ module SubmitJobRequest =
           "A list of dependencies for the job. A job can depend upon a maximum of 20 jobs. You can specify a SEQUENTIAL type dependency without specifying a job ID for array jobs so that each child array job completes sequentially, starting at index 0. You can also specify an N_TO_N type dependency with a job ID for array jobs. In that case, each index child of this job must wait for the corresponding index child of each dependency to complete before it can begin."];
       jobDefinition: String_.t
         [@ocaml.doc
-          "The job definition used by this job. This value can be one of name, name:revision, or the Amazon Resource Name (ARN) for the job definition. If name is specified without a revision then the latest active revision is used."];
+          "The job definition used by this job. This value can be one of definition-name, definition-name:revision, or the Amazon Resource Name (ARN) for the job definition, with or without the revision (arn:aws:batch:region:account:job-definition/definition-name:revision , or arn:aws:batch:region:account:job-definition/definition-name ). If the revision is not specified, then the latest active revision is used."];
       parameters: ParametersMap.t option
         [@ocaml.doc
           "Additional parameters passed to the job that replace parameter substitution placeholders that are set in the job definition. Parameters are specified as a key and value pair mapping. Parameters in a SubmitJob request override any corresponding parameter defaults from the job definition."];
       containerOverrides: ContainerOverrides.t option
         [@ocaml.doc
-          "A list of container overrides in the JSON format that specify the name of a container in the specified job definition and the overrides it should receive. You can override the default command for a container, which is specified in the job definition or the Docker image, with a command override. You can also override existing environment variables on a container or add new environment variables to it with an environment override."];
+          "An object with properties that override the defaults for the job definition that specify the name of a container in the specified job definition and the overrides it should receive. You can override the default command for a container, which is specified in the job definition or the Docker image, with a command override. You can also override existing environment variables on a container or add new environment variables to it with an environment override."];
       nodeOverrides: NodeOverrides.t option
         [@ocaml.doc
           "A list of node overrides in JSON format that specify the node range to target and the container overrides for that node range. This parameter isn't applicable to jobs that are running on Fargate resources; use containerOverrides instead."];
@@ -5413,7 +13593,17 @@ module SubmitJobRequest =
           "The timeout configuration for this SubmitJob operation. You can specify a timeout duration after which Batch terminates your jobs if they haven't finished. If a job is terminated due to a timeout, it isn't retried. The minimum value for the timeout is 60 seconds. This configuration overrides any timeout configuration specified in the job definition. For array jobs, child jobs have the same timeout configuration as the parent job. For more information, see Job Timeouts in the Amazon Elastic Container Service Developer Guide."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
-          "The tags that you apply to the job request to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference."]}
+          "The tags that you apply to the job request to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference."];
+      eksPropertiesOverride: EksPropertiesOverride.t option
+        [@ocaml.doc
+          "An object, with properties that override defaults for the job definition, can only be specified for jobs that are run on Amazon EKS resources."];
+      ecsPropertiesOverride: EcsPropertiesOverride.t option
+        [@ocaml.doc
+          "An object, with properties that override defaults for the job definition, can only be specified for jobs that are run on Amazon ECS resources."];
+      consumableResourcePropertiesOverride:
+        ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "An object that contains overrides for the consumable resources of a job."]}
     let context_ = "SubmitJobRequest"
     let make ?shareIdentifier =
       fun ?schedulingPriorityOverride ->
@@ -5426,26 +13616,32 @@ module SubmitJobRequest =
                     fun ?propagateTags ->
                       fun ?timeout ->
                         fun ?tags ->
-                          fun ~jobName ->
-                            fun ~jobQueue ->
-                              fun ~jobDefinition ->
-                                fun () ->
-                                  {
-                                    shareIdentifier;
-                                    schedulingPriorityOverride;
-                                    arrayProperties;
-                                    dependsOn;
-                                    parameters;
-                                    containerOverrides;
-                                    nodeOverrides;
-                                    retryStrategy;
-                                    propagateTags;
-                                    timeout;
-                                    tags;
-                                    jobName;
-                                    jobQueue;
-                                    jobDefinition
-                                  }
+                          fun ?eksPropertiesOverride ->
+                            fun ?ecsPropertiesOverride ->
+                              fun ?consumableResourcePropertiesOverride ->
+                                fun ~jobName ->
+                                  fun ~jobQueue ->
+                                    fun ~jobDefinition ->
+                                      fun () ->
+                                        {
+                                          shareIdentifier;
+                                          schedulingPriorityOverride;
+                                          arrayProperties;
+                                          dependsOn;
+                                          parameters;
+                                          containerOverrides;
+                                          nodeOverrides;
+                                          retryStrategy;
+                                          propagateTags;
+                                          timeout;
+                                          tags;
+                                          eksPropertiesOverride;
+                                          ecsPropertiesOverride;
+                                          consumableResourcePropertiesOverride;
+                                          jobName;
+                                          jobQueue;
+                                          jobDefinition
+                                        }
     let to_value x =
       structure_to_value
         [("jobName", (Some (String_.to_value x.jobName)));
@@ -5467,9 +13663,27 @@ module SubmitJobRequest =
           (Option.map x.retryStrategy ~f:RetryStrategy.to_value));
         ("propagateTags", (Option.map x.propagateTags ~f:Boolean.to_value));
         ("timeout", (Option.map x.timeout ~f:JobTimeout.to_value));
-        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("eksPropertiesOverride",
+          (Option.map x.eksPropertiesOverride
+             ~f:EksPropertiesOverride.to_value));
+        ("ecsPropertiesOverride",
+          (Option.map x.ecsPropertiesOverride
+             ~f:EcsPropertiesOverride.to_value));
+        ("consumableResourcePropertiesOverride",
+          (Option.map x.consumableResourcePropertiesOverride
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourcePropertiesOverride =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourcePropertiesOverride") in
+      let ecsPropertiesOverride =
+        (Option.map ~f:EcsPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "ecsPropertiesOverride") in
+      let eksPropertiesOverride =
+        (Option.map ~f:EksPropertiesOverride.of_xml)
+          (Xml.child xml_arg0 "eksPropertiesOverride") in
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let timeout =
@@ -5506,54 +13720,67 @@ module SubmitJobRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
       let jobName =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobName") in
-      make ?tags ?timeout ?propagateTags ?retryStrategy ?nodeOverrides
-        ?containerOverrides ?parameters ~jobDefinition ?dependsOn
-        ?arrayProperties ?schedulingPriorityOverride ?shareIdentifier
-        ~jobQueue ~jobName ()
+      make ?consumableResourcePropertiesOverride ?ecsPropertiesOverride
+        ?eksPropertiesOverride ?tags ?timeout ?propagateTags ?retryStrategy
+        ?nodeOverrides ?containerOverrides ?parameters ~jobDefinition
+        ?dependsOn ?arrayProperties ?schedulingPriorityOverride
+        ?shareIdentifier ~jobQueue ~jobName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
-      let timeout = field_map json "timeout" JobTimeout.of_json in
-      let propagateTags = field_map json "propagateTags" Boolean.of_json in
+    let of_json json__ =
+      let consumableResourcePropertiesOverride =
+        field_map json__ "consumableResourcePropertiesOverride"
+          ConsumableResourceProperties.of_json in
+      let ecsPropertiesOverride =
+        field_map json__ "ecsPropertiesOverride"
+          EcsPropertiesOverride.of_json in
+      let eksPropertiesOverride =
+        field_map json__ "eksPropertiesOverride"
+          EksPropertiesOverride.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let timeout = field_map json__ "timeout" JobTimeout.of_json in
+      let propagateTags = field_map json__ "propagateTags" Boolean.of_json in
       let retryStrategy =
-        field_map json "retryStrategy" RetryStrategy.of_json in
+        field_map json__ "retryStrategy" RetryStrategy.of_json in
       let nodeOverrides =
-        field_map json "nodeOverrides" NodeOverrides.of_json in
+        field_map json__ "nodeOverrides" NodeOverrides.of_json in
       let containerOverrides =
-        field_map json "containerOverrides" ContainerOverrides.of_json in
-      let parameters = field_map json "parameters" ParametersMap.of_json in
-      let jobDefinition = field_map_exn json "jobDefinition" String_.of_json in
-      let dependsOn = field_map json "dependsOn" JobDependencyList.of_json in
+        field_map json__ "containerOverrides" ContainerOverrides.of_json in
+      let parameters = field_map json__ "parameters" ParametersMap.of_json in
+      let jobDefinition =
+        field_map_exn json__ "jobDefinition" String_.of_json in
+      let dependsOn = field_map json__ "dependsOn" JobDependencyList.of_json in
       let arrayProperties =
-        field_map json "arrayProperties" ArrayProperties.of_json in
+        field_map json__ "arrayProperties" ArrayProperties.of_json in
       let schedulingPriorityOverride =
-        field_map json "schedulingPriorityOverride" Integer.of_json in
-      let shareIdentifier = field_map json "shareIdentifier" String_.of_json in
-      let jobQueue = field_map_exn json "jobQueue" String_.of_json in
-      let jobName = field_map_exn json "jobName" String_.of_json in
-      make ?tags ?timeout ?propagateTags ?retryStrategy ?nodeOverrides
-        ?containerOverrides ?parameters ~jobDefinition ?dependsOn
-        ?arrayProperties ?schedulingPriorityOverride ?shareIdentifier
-        ~jobQueue ~jobName ()
+        field_map json__ "schedulingPriorityOverride" Integer.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      let jobName = field_map_exn json__ "jobName" String_.of_json in
+      make ?consumableResourcePropertiesOverride ?ecsPropertiesOverride
+        ?eksPropertiesOverride ?tags ?timeout ?propagateTags ?retryStrategy
+        ?nodeOverrides ?containerOverrides ?parameters ~jobDefinition
+        ?dependsOn ?arrayProperties ?schedulingPriorityOverride
+        ?shareIdentifier ~jobQueue ~jobName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for SubmitJob."]
 module RegisterJobDefinitionResponse =
   struct
     type nonrec t =
       {
-      jobDefinitionName: String_.t
+      jobDefinitionName: String_.t option
         [@ocaml.doc "The name of the job definition."];
-      jobDefinitionArn: String_.t
+      jobDefinitionArn: String_.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the job definition."];
-      revision: Integer.t [@ocaml.doc "The revision of the job definition."]}
+      revision: Integer.t option
+        [@ocaml.doc "The revision of the job definition."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RegisterJobDefinitionResponse"
-    let make ~jobDefinitionName =
-      fun ~jobDefinitionArn ->
-        fun ~revision ->
+    let make ?jobDefinitionName =
+      fun ?jobDefinitionArn ->
+        fun ?revision ->
           fun () -> { jobDefinitionName; jobDefinitionArn; revision }
     let error_of_json name json =
       match name with
@@ -5585,28 +13812,30 @@ module RegisterJobDefinitionResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobDefinitionName", (Some (String_.to_value x.jobDefinitionName)));
-        ("jobDefinitionArn", (Some (String_.to_value x.jobDefinitionArn)));
-        ("revision", (Some (Integer.to_value x.revision)))]
+        [("jobDefinitionName",
+           (Option.map x.jobDefinitionName ~f:String_.to_value));
+        ("jobDefinitionArn",
+          (Option.map x.jobDefinitionArn ~f:String_.to_value));
+        ("revision", (Option.map x.revision ~f:Integer.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let revision =
-        Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "revision") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "revision") in
       let jobDefinitionArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionArn") in
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "jobDefinitionArn") in
       let jobDefinitionName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionName") in
-      make ~revision ~jobDefinitionArn ~jobDefinitionName ()
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "jobDefinitionName") in
+      make ?revision ?jobDefinitionArn ?jobDefinitionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revision = field_map_exn json "revision" Integer.of_json in
+    let of_json json__ =
+      let revision = field_map json__ "revision" Integer.of_json in
       let jobDefinitionArn =
-        field_map_exn json "jobDefinitionArn" String_.of_json in
+        field_map json__ "jobDefinitionArn" String_.of_json in
       let jobDefinitionName =
-        field_map_exn json "jobDefinitionName" String_.of_json in
-      make ~revision ~jobDefinitionArn ~jobDefinitionName ()
+        field_map json__ "jobDefinitionName" String_.of_json in
+      make ?revision ?jobDefinitionArn ?jobDefinitionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Registers an Batch job definition."]
 module RegisterJobDefinitionRequest =
@@ -5618,25 +13847,25 @@ module RegisterJobDefinitionRequest =
           "The name of the job definition to register. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
       type_: JobDefinitionType.t
         [@ocaml.doc
-          "The type of job definition. For more information about multi-node parallel jobs, see Creating a multi-node parallel job definition in the Batch User Guide. If the job is run on Fargate resources, then multinode isn't supported."];
+          "The type of job definition. For more information about multi-node parallel jobs, see Creating a multi-node parallel job definition in the Batch User Guide. If the value is container, then one of the following is required: containerProperties, ecsProperties, or eksProperties. If the value is multinode, then nodeProperties is required. If the job is run on Fargate resources, then multinode isn't supported."];
       parameters: ParametersMap.t option
         [@ocaml.doc
           "Default parameter substitution placeholders to set in the job definition. Parameters are specified as a key-value pair mapping. Parameters in a SubmitJob request override any corresponding parameter defaults from the job definition."];
       schedulingPriority: Integer.t option
         [@ocaml.doc
-          "The scheduling priority for jobs that are submitted with this job definition. This will only affect jobs in job queues with a fair share policy. Jobs with a higher scheduling priority will be scheduled before jobs with a lower scheduling priority. The minimum supported value is 0 and the maximum supported value is 9999."];
+          "The scheduling priority for jobs that are submitted with this job definition. This only affects jobs in job queues with a fair-share policy. Jobs with a higher scheduling priority are scheduled before jobs with a lower scheduling priority. The minimum supported value is 0 and the maximum supported value is 9999."];
       containerProperties: ContainerProperties.t option
         [@ocaml.doc
-          "An object with various properties specific to single-node container-based jobs. If the job definition's type parameter is container, then you must specify either containerProperties or nodeProperties. If the job runs on Fargate resources, then you must not specify nodeProperties; use only containerProperties."];
+          "An object with properties specific to Amazon ECS-based single-node container-based jobs. If the job definition's type parameter is container, then you must specify either containerProperties or nodeProperties. This must not be specified for Amazon EKS-based job definitions. If the job runs on Fargate resources, then you must not specify nodeProperties; use only containerProperties."];
       nodeProperties: NodeProperties.t option
         [@ocaml.doc
-          "An object with various properties specific to multi-node parallel jobs. If you specify node properties for a job, it becomes a multi-node parallel job. For more information, see Multi-node Parallel Jobs in the Batch User Guide. If the job definition's type parameter is container, then you must specify either containerProperties or nodeProperties. If the job runs on Fargate resources, then you must not specify nodeProperties; use containerProperties instead."];
+          "An object with properties specific to multi-node parallel jobs. If you specify node properties for a job, it becomes a multi-node parallel job. For more information, see Multi-node Parallel Jobs in the Batch User Guide. If the job runs on Fargate resources, then you must not specify nodeProperties; use containerProperties instead. If the job runs on Amazon EKS resources, then you must not specify nodeProperties."];
       retryStrategy: RetryStrategy.t option
         [@ocaml.doc
           "The retry strategy to use for failed jobs that are submitted with this job definition. Any retry strategy that's specified during a SubmitJob operation overrides the retry strategy defined here. If a job is terminated due to a timeout, it isn't retried."];
       propagateTags: Boolean.t option
         [@ocaml.doc
-          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags are not propagated. Tags can only be propagated to the tasks during task creation. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state."];
+          "Specifies whether to propagate the tags from the job or job definition to the corresponding Amazon ECS task. If no value is specified, the tags are not propagated. Tags can only be propagated to the tasks during task creation. For tags with the same name, job tags are given priority over job definitions tags. If the total number of combined tags from the job and job definition is over 50, the job is moved to the FAILED state. If the job runs on Amazon EKS resources, then you must not specify propagateTags."];
       timeout: JobTimeout.t option
         [@ocaml.doc
           "The timeout configuration for jobs that are submitted with this job definition, after which Batch terminates your jobs if they have not finished. If a job is terminated due to a timeout, it isn't retried. The minimum value for the timeout is 60 seconds. Any timeout configuration that's specified during a SubmitJob operation overrides the timeout configuration defined here. For more information, see Job Timeouts in the Batch User Guide."];
@@ -5645,7 +13874,16 @@ module RegisterJobDefinitionRequest =
           "The tags that you apply to the job definition to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Batch User Guide."];
       platformCapabilities: PlatformCapabilityList.t option
         [@ocaml.doc
-          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. To run the job on Fargate resources, specify FARGATE."]}
+          "The platform capabilities required by the job definition. If no value is specified, it defaults to EC2. To run the job on Fargate resources, specify FARGATE. If the job runs on Amazon EKS resources, then you must not specify platformCapabilities."];
+      eksProperties: EksProperties.t option
+        [@ocaml.doc
+          "An object with properties that are specific to Amazon EKS-based jobs. This must not be specified for Amazon ECS based job definitions."];
+      ecsProperties: EcsProperties.t option
+        [@ocaml.doc
+          "An object with properties that are specific to Amazon ECS-based jobs. This must not be specified for Amazon EKS-based job definitions."];
+      consumableResourceProperties: ConsumableResourceProperties.t option
+        [@ocaml.doc
+          "Contains a list of consumable resources required by the job."]}
     let context_ = "RegisterJobDefinitionRequest"
     let make ?parameters =
       fun ?schedulingPriority ->
@@ -5656,22 +13894,28 @@ module RegisterJobDefinitionRequest =
                 fun ?timeout ->
                   fun ?tags ->
                     fun ?platformCapabilities ->
-                      fun ~jobDefinitionName ->
-                        fun ~type_ ->
-                          fun () ->
-                            {
-                              parameters;
-                              schedulingPriority;
-                              containerProperties;
-                              nodeProperties;
-                              retryStrategy;
-                              propagateTags;
-                              timeout;
-                              tags;
-                              platformCapabilities;
-                              jobDefinitionName;
-                              type_
-                            }
+                      fun ?eksProperties ->
+                        fun ?ecsProperties ->
+                          fun ?consumableResourceProperties ->
+                            fun ~jobDefinitionName ->
+                              fun ~type_ ->
+                                fun () ->
+                                  {
+                                    parameters;
+                                    schedulingPriority;
+                                    containerProperties;
+                                    nodeProperties;
+                                    retryStrategy;
+                                    propagateTags;
+                                    timeout;
+                                    tags;
+                                    platformCapabilities;
+                                    eksProperties;
+                                    ecsProperties;
+                                    consumableResourceProperties;
+                                    jobDefinitionName;
+                                    type_
+                                  }
     let to_value x =
       structure_to_value
         [("jobDefinitionName", (Some (String_.to_value x.jobDefinitionName)));
@@ -5690,9 +13934,25 @@ module RegisterJobDefinitionRequest =
         ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
         ("platformCapabilities",
           (Option.map x.platformCapabilities
-             ~f:PlatformCapabilityList.to_value))]
+             ~f:PlatformCapabilityList.to_value));
+        ("eksProperties",
+          (Option.map x.eksProperties ~f:EksProperties.to_value));
+        ("ecsProperties",
+          (Option.map x.ecsProperties ~f:EcsProperties.to_value));
+        ("consumableResourceProperties",
+          (Option.map x.consumableResourceProperties
+             ~f:ConsumableResourceProperties.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let consumableResourceProperties =
+        (Option.map ~f:ConsumableResourceProperties.of_xml)
+          (Xml.child xml_arg0 "consumableResourceProperties") in
+      let ecsProperties =
+        (Option.map ~f:EcsProperties.of_xml)
+          (Xml.child xml_arg0 "ecsProperties") in
+      let eksProperties =
+        (Option.map ~f:EksProperties.of_xml)
+          (Xml.child xml_arg0 "eksProperties") in
       let platformCapabilities =
         (Option.map ~f:PlatformCapabilityList.of_xml)
           (Xml.child xml_arg0 "platformCapabilities") in
@@ -5723,29 +13983,39 @@ module RegisterJobDefinitionRequest =
       let jobDefinitionName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobDefinitionName") in
-      make ?platformCapabilities ?tags ?timeout ?propagateTags ?retryStrategy
+      make ?consumableResourceProperties ?ecsProperties ?eksProperties
+        ?platformCapabilities ?tags ?timeout ?propagateTags ?retryStrategy
         ?nodeProperties ?containerProperties ?schedulingPriority ?parameters
         ~type_ ~jobDefinitionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let consumableResourceProperties =
+        field_map json__ "consumableResourceProperties"
+          ConsumableResourceProperties.of_json in
+      let ecsProperties =
+        field_map json__ "ecsProperties" EcsProperties.of_json in
+      let eksProperties =
+        field_map json__ "eksProperties" EksProperties.of_json in
       let platformCapabilities =
-        field_map json "platformCapabilities" PlatformCapabilityList.of_json in
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
-      let timeout = field_map json "timeout" JobTimeout.of_json in
-      let propagateTags = field_map json "propagateTags" Boolean.of_json in
+        field_map json__ "platformCapabilities"
+          PlatformCapabilityList.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let timeout = field_map json__ "timeout" JobTimeout.of_json in
+      let propagateTags = field_map json__ "propagateTags" Boolean.of_json in
       let retryStrategy =
-        field_map json "retryStrategy" RetryStrategy.of_json in
+        field_map json__ "retryStrategy" RetryStrategy.of_json in
       let nodeProperties =
-        field_map json "nodeProperties" NodeProperties.of_json in
+        field_map json__ "nodeProperties" NodeProperties.of_json in
       let containerProperties =
-        field_map json "containerProperties" ContainerProperties.of_json in
+        field_map json__ "containerProperties" ContainerProperties.of_json in
       let schedulingPriority =
-        field_map json "schedulingPriority" Integer.of_json in
-      let parameters = field_map json "parameters" ParametersMap.of_json in
-      let type_ = field_map_exn json "type" JobDefinitionType.of_json in
+        field_map json__ "schedulingPriority" Integer.of_json in
+      let parameters = field_map json__ "parameters" ParametersMap.of_json in
+      let type_ = field_map_exn json__ "type" JobDefinitionType.of_json in
       let jobDefinitionName =
-        field_map_exn json "jobDefinitionName" String_.of_json in
-      make ?platformCapabilities ?tags ?timeout ?propagateTags ?retryStrategy
+        field_map_exn json__ "jobDefinitionName" String_.of_json in
+      make ?consumableResourceProperties ?ecsProperties ?eksProperties
+        ?platformCapabilities ?tags ?timeout ?propagateTags ?retryStrategy
         ?nodeProperties ?containerProperties ?schedulingPriority ?parameters
         ~type_ ~jobDefinitionName ()
     let to_json v = composed_to_json to_value v
@@ -5797,18 +14067,19 @@ module ListTagsForResourceResponse =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags for an Batch resource. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."]
+       "Lists the tags for an Batch resource. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs aren't supported."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
       resourceArn: String_.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) that identifies the resource that tags are listed for. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."]}
+          "The Amazon Resource Name (ARN) that identifies the resource that tags are listed for. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs aren't supported."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
@@ -5821,12 +14092,135 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the parameters for ListTagsForResource."]
+module ListServiceJobsResponse =
+  struct
+    type nonrec t =
+      {
+      jobSummaryList: ServiceJobSummaryList.t option
+        [@ocaml.doc "A list of service job summaries."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListServiceJobs request. When the results of a ListServiceJobs request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobSummaryList =
+      fun ?nextToken -> fun () -> { jobSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobSummaryList",
+           (Option.map x.jobSummaryList ~f:ServiceJobSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let jobSummaryList =
+        (Option.map ~f:ServiceJobSummaryList.of_xml)
+          (Xml.child xml_arg0 "jobSummaryList") in
+      make ?nextToken ?jobSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let jobSummaryList =
+        field_map json__ "jobSummaryList" ServiceJobSummaryList.of_json in
+      make ?nextToken ?jobSummaryList ()
+    let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists the tags for an Batch resource. Batch resources that support tags are compute environments, jobs, job definitions, job queues, and scheduling policies. ARNs for child jobs of array and multi-node parallel (MNP) jobs are not supported."]
+       "Returns a list of service jobs for a specified job queue."]
+module ListServiceJobsRequest =
+  struct
+    type nonrec t =
+      {
+      jobQueue: String_.t option
+        [@ocaml.doc
+          "The name or ARN of the job queue with which to list service jobs."];
+      jobStatus: ServiceJobStatus.t option
+        [@ocaml.doc
+          "The job status used to filter service jobs in the specified queue. If the filters parameter is specified, the jobStatus parameter is ignored and jobs with any status are returned. The exceptions are the SHARE_IDENTIFIER filter and QUOTA_SHARE_NAME filter, which can be used with jobStatus. If you don't specify a status, only RUNNING jobs are returned. The SHARE_IDENTIFIER filter or QUOTA_SHARE_NAME filter can be used with the jobStatus field to filter results."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results returned by ListServiceJobs in paginated output. When this parameter is used, ListServiceJobs only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another ListServiceJobs request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then ListServiceJobs returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListServiceJobs request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."];
+      filters: ListJobsFilterList.t option
+        [@ocaml.doc
+          "The filter to apply to the query. Only one filter can be used at a time. When the filter is used, jobStatus is ignored with the exception that SHARE_IDENTIFIER or QUOTA_SHARE_NAME and jobStatus can be used together. The results are sorted by the createdAt field, with the most recent jobs being first. The SHARE_IDENTIFIER or QUOTA_SHARE_NAME filter and the jobStatus field can be used together to filter results. JOB_NAME The value of the filter is a case-insensitive match for the job name. If the value ends with an asterisk (*), the filter matches any job name that begins with the string before the '*'. This corresponds to the jobName value. For example, test1 matches both Test1 and test1, and test1* matches both test1 and Test10. When the JOB_NAME filter is used, the results are grouped by the job name and version. BEFORE_CREATED_AT The value for the filter is the time that's before the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970. AFTER_CREATED_AT The value for the filter is the time that's after the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970. SHARE_IDENTIFIER The value for the filter is the fairshare scheduling share identifier. QUOTA_SHARE_NAME The value for the filter is the quota management share name."]}
+    let make ?jobQueue =
+      fun ?jobStatus ->
+        fun ?maxResults ->
+          fun ?nextToken ->
+            fun ?filters ->
+              fun () ->
+                { jobQueue; jobStatus; maxResults; nextToken; filters }
+    let to_value x =
+      structure_to_value
+        [("jobQueue", (Option.map x.jobQueue ~f:String_.to_value));
+        ("jobStatus", (Option.map x.jobStatus ~f:ServiceJobStatus.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("filters", (Option.map x.filters ~f:ListJobsFilterList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filters =
+        (Option.map ~f:ListJobsFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let jobStatus =
+        (Option.map ~f:ServiceJobStatus.of_xml)
+          (Xml.child xml_arg0 "jobStatus") in
+      let jobQueue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueue") in
+      make ?filters ?nextToken ?maxResults ?jobStatus ?jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filters = field_map json__ "filters" ListJobsFilterList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let jobStatus = field_map json__ "jobStatus" ServiceJobStatus.of_json in
+      let jobQueue = field_map json__ "jobQueue" String_.of_json in
+      make ?filters ?nextToken ?maxResults ?jobStatus ?jobQueue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of service jobs for a specified job queue."]
 module ListSchedulingPoliciesResponse =
   struct
     type nonrec t =
@@ -5885,10 +14279,10 @@ module ListSchedulingPoliciesResponse =
           (Xml.child xml_arg0 "schedulingPolicies") in
       make ?nextToken ?schedulingPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let schedulingPolicies =
-        field_map json "schedulingPolicies"
+        field_map json__ "schedulingPolicies"
           SchedulingPolicyListingDetailList.of_json in
       make ?nextToken ?schedulingPolicies ()
     let to_json v = composed_to_json to_value v
@@ -5902,7 +14296,7 @@ module ListSchedulingPoliciesRequest =
           "The maximum number of results that's returned by ListSchedulingPolicies in paginated output. When this parameter is used, ListSchedulingPolicies only returns maxResults results in a single page and a nextToken response element. You can see the remaining results of the initial request by sending another ListSchedulingPolicies request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, ListSchedulingPolicies returns up to 100 results and a nextToken value if applicable."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value that's returned from a previous paginated ListSchedulingPolicies request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value that's returned from a previous paginated ListSchedulingPolicies request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
     let make ?maxResults =
       fun ?nextToken -> fun () -> { maxResults; nextToken }
     let to_value x =
@@ -5917,17 +14311,121 @@ module ListSchedulingPoliciesRequest =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Returns a list of Batch scheduling policies."]
+  end[@@ocaml.doc "Contains the parameters for ListSchedulingPolicies."]
+module ListQuotaSharesResponse =
+  struct
+    type nonrec t =
+      {
+      quotaShares: QuotaShareList.t option
+        [@ocaml.doc "A list of quota shares that match the request."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListQuotaShares request. When the results of a ListQuotaShares request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quotaShares =
+      fun ?nextToken -> fun () -> { quotaShares; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quotaShares",
+           (Option.map x.quotaShares ~f:QuotaShareList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let quotaShares =
+        (Option.map ~f:QuotaShareList.of_xml)
+          (Xml.child xml_arg0 "quotaShares") in
+      make ?nextToken ?quotaShares ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let quotaShares = field_map json__ "quotaShares" QuotaShareList.of_json in
+      make ?nextToken ?quotaShares ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of Batch quota shares associated with a job queue."]
+module ListQuotaSharesRequest =
+  struct
+    type nonrec t =
+      {
+      jobQueue: String_.t
+        [@ocaml.doc
+          "The name or full Amazon Resource Name (ARN) of the job queue used to list quota shares."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results returned by ListQuotaShares in paginated output. When this parameter is used, ListQuotaShares only returns maxResults results in a single page and a nextToken response element. You can see the remaining results of the initial request by sending another ListQuotaShares request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, ListQuotaShares returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value that's returned from a previous paginated ListQuotaShares request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+    let context_ = "ListQuotaSharesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~jobQueue -> fun () -> { maxResults; nextToken; jobQueue }
+    let to_value x =
+      structure_to_value
+        [("jobQueue", (Some (String_.to_value x.jobQueue)));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let jobQueue =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
+      make ?nextToken ?maxResults ~jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      make ?nextToken ?maxResults ~jobQueue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of Batch quota shares associated with a job queue."]
 module ListJobsResponse =
   struct
     type nonrec t =
       {
-      jobSummaryList: JobSummaryList.t
+      jobSummaryList: JobSummaryList.t option
         [@ocaml.doc "A list of job summaries that match the request."];
       nextToken: String_.t option
         [@ocaml.doc
@@ -5936,9 +14434,8 @@ module ListJobsResponse =
       [ `ClientException of ClientException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListJobsResponse"
-    let make ?nextToken =
-      fun ~jobSummaryList -> fun () -> { nextToken; jobSummaryList }
+    let make ?jobSummaryList =
+      fun ?nextToken -> fun () -> { jobSummaryList; nextToken }
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
@@ -5970,25 +14467,25 @@ module ListJobsResponse =
     let to_value x =
       structure_to_value
         [("jobSummaryList",
-           (Some (JobSummaryList.to_value x.jobSummaryList)));
+           (Option.map x.jobSummaryList ~f:JobSummaryList.to_value));
         ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
       let jobSummaryList =
-        JobSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobSummaryList") in
-      make ?nextToken ~jobSummaryList ()
+        (Option.map ~f:JobSummaryList.of_xml)
+          (Xml.child xml_arg0 "jobSummaryList") in
+      make ?nextToken ?jobSummaryList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let jobSummaryList =
-        field_map_exn json "jobSummaryList" JobSummaryList.of_json in
-      make ?nextToken ~jobSummaryList ()
+        field_map json__ "jobSummaryList" JobSummaryList.of_json in
+      make ?nextToken ?jobSummaryList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of Batch jobs. You must specify only one of the following items: A job queue ID to return a list of jobs in that job queue A multi-node parallel job ID to return a list of nodes for that job An array job ID to return a list of the children for that job You can filter the results by job status with the jobStatus parameter. If you don't specify a status, only RUNNING jobs are returned."]
+       "Returns a list of Batch jobs. You must specify only one of the following items: A job queue ID to return a list of jobs in that job queue A multi-node parallel job ID to return a list of nodes for that job An array job ID to return a list of the children for that job"]
 module ListJobsRequest =
   struct
     type nonrec t =
@@ -6004,16 +14501,16 @@ module ListJobsRequest =
           "The job ID for a multi-node parallel job. Specifying a multi-node parallel job ID with this parameter lists all nodes that are associated with the specified job."];
       jobStatus: JobStatus.t option
         [@ocaml.doc
-          "The job status used to filter jobs in the specified queue. If the filters parameter is specified, the jobStatus parameter is ignored and jobs with any status are returned. If you don't specify a status, only RUNNING jobs are returned."];
+          "The job status used to filter jobs in the specified queue. If the filters parameter is specified, the jobStatus parameter is ignored and jobs with any status are returned. The exception is the SHARE_IDENTIFIER filter and jobStatus can be used together. If you don't specify a status, only RUNNING jobs are returned. Array job parents are updated to PENDING when any child job is updated to RUNNABLE and remain in PENDING status while child jobs are running. To view these jobs, filter by PENDING status until all child jobs reach a terminal state."];
       maxResults: Integer.t option
         [@ocaml.doc
-          "The maximum number of results returned by ListJobs in paginated output. When this parameter is used, ListJobs only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another ListJobs request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then ListJobs returns up to 100 results and a nextToken value if applicable."];
+          "The maximum number of results returned by ListJobs in a paginated output. When this parameter is used, ListJobs returns up to maxResults results in a single page and a nextToken response element, if applicable. The remaining results of the initial request can be seen by sending another ListJobs request with the returned nextToken value. The following outlines key parameters and limitations: The minimum value is 1. When --job-status is used, Batch returns up to 1000 values. When --filters is used, Batch returns up to 100 values. If neither parameter is used, then ListJobs returns up to 1000 results (jobs that are in the RUNNING status) and a nextToken value, if applicable."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated ListJobs request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."];
+          "The nextToken value returned from a previous paginated ListJobs request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."];
       filters: ListJobsFilterList.t option
         [@ocaml.doc
-          "The filter to apply to the query. Only one filter can be used at a time. When the filter is used, jobStatus is ignored. The filter doesn't apply to child jobs in an array or multi-node parallel (MNP) jobs. The results are sorted by the createdAt field, with the most recent jobs being first. JOB_NAME The value of the filter is a case-insensitive match for the job name. If the value ends with an asterisk (*), the filter will match any job name that begins with the string before the '*'. This corresponds to the jobName value. For example, test1 matches both Test1 and test1, and test1* matches both test1 and Test10. When the JOB_NAME filter is used, the results are grouped by the job name and version. JOB_DEFINITION The value for the filter is the name or Amazon Resource Name (ARN) of the job definition. This corresponds to the jobDefinition value. The value is case sensitive. When the value for the filter is the job definition name, the results include all the jobs that used any revision of that job definition name. If the value ends with an asterisk (*), the filter will match any job definition name that begins with the string before the '*'. For example, jd1 matches only jd1, and jd1* matches both jd1 and jd1A. The version of the job definition that's used doesn't affect the sort order. When the JOB_DEFINITION filter is used and the ARN is used (which is in the form arn:$\\{Partition\\}:batch:$\\{Region\\}:$\\{Account\\}:job-definition/$\\{JobDefinitionName\\}:$\\{Revision\\}), the results include jobs that used the specified revision of the job definition. Asterisk (*) is not supported when the ARN is used. BEFORE_CREATED_AT The value for the filter is the time that's before the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970. AFTER_CREATED_AT The value for the filter is the time that's after the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970."]}
+          "The filter to apply to the query. Only one filter can be used at a time. When the filter is used, jobStatus is ignored with the exception that SHARE_IDENTIFIER and jobStatus can be used together. The filter doesn't apply to child jobs in an array or multi-node parallel (MNP) jobs. The results are sorted by the createdAt field, with the most recent jobs being first. The SHARE_IDENTIFIER filter and the jobStatus field can be used together to filter results. JOB_NAME The value of the filter is a case-insensitive match for the job name. If the value ends with an asterisk (*), the filter matches any job name that begins with the string before the '*'. This corresponds to the jobName value. For example, test1 matches both Test1 and test1, and test1* matches both test1 and Test10. When the JOB_NAME filter is used, the results are grouped by the job name and version. JOB_DEFINITION The value for the filter is the name or Amazon Resource Name (ARN) of the job definition. This corresponds to the jobDefinition value. The value is case sensitive. When the value for the filter is the job definition name, the results include all the jobs that used any revision of that job definition name. If the value ends with an asterisk (*), the filter matches any job definition name that begins with the string before the '*'. For example, jd1 matches only jd1, and jd1* matches both jd1 and jd1A. The version of the job definition that's used doesn't affect the sort order. When the JOB_DEFINITION filter is used and the ARN is used (which is in the form arn:$\\{Partition\\}:batch:$\\{Region\\}:$\\{Account\\}:job-definition/$\\{JobDefinitionName\\}:$\\{Revision\\}), the results include jobs that used the specified revision of the job definition. Asterisk (*) isn't supported when the ARN is used. BEFORE_CREATED_AT The value for the filter is the time that's before the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970. AFTER_CREATED_AT The value for the filter is the time that's after the job was created. This corresponds to the createdAt value. The value is a string representation of the number of milliseconds since 00:00:00 UTC (midnight) on January 1, 1970. SHARE_IDENTIFIER The value for the filter is the fairshare scheduling share identifier."]}
     let make ?jobQueue =
       fun ?arrayJobId ->
         fun ?multiNodeJobId ->
@@ -6060,18 +14557,787 @@ module ListJobsRequest =
       make ?filters ?nextToken ?maxResults ?jobStatus ?multiNodeJobId
         ?arrayJobId ?jobQueue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "filters" ListJobsFilterList.of_json in
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let jobStatus = field_map json "jobStatus" JobStatus.of_json in
-      let multiNodeJobId = field_map json "multiNodeJobId" String_.of_json in
-      let arrayJobId = field_map json "arrayJobId" String_.of_json in
-      let jobQueue = field_map json "jobQueue" String_.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "filters" ListJobsFilterList.of_json in
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let jobStatus = field_map json__ "jobStatus" JobStatus.of_json in
+      let multiNodeJobId = field_map json__ "multiNodeJobId" String_.of_json in
+      let arrayJobId = field_map json__ "arrayJobId" String_.of_json in
+      let jobQueue = field_map json__ "jobQueue" String_.of_json in
       make ?filters ?nextToken ?maxResults ?jobStatus ?multiNodeJobId
         ?arrayJobId ?jobQueue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ListJobs."]
+module ListJobsByConsumableResourceResponse =
+  struct
+    type nonrec t =
+      {
+      jobs: ListJobsByConsumableResourceSummaryList.t option
+        [@ocaml.doc
+          "The list of jobs that require the specified consumable resources."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListJobsByConsumableResource request. When the results of a ListJobsByConsumableResource request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobs = fun ?nextToken -> fun () -> { jobs; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobs",
+           (Option.map x.jobs
+              ~f:ListJobsByConsumableResourceSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let jobs =
+        (Option.map ~f:ListJobsByConsumableResourceSummaryList.of_xml)
+          (Xml.child xml_arg0 "jobs") in
+      make ?nextToken ?jobs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let jobs =
+        field_map json__ "jobs"
+          ListJobsByConsumableResourceSummaryList.of_json in
+      make ?nextToken ?jobs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of Batch jobs that require a specific consumable resource."]
+module ListJobsByConsumableResourceRequest =
+  struct
+    type nonrec t =
+      {
+      consumableResource: String_.t
+        [@ocaml.doc "The name or ARN of the consumable resource."];
+      filters: ListJobsByConsumableResourceFilterList.t option
+        [@ocaml.doc
+          "The filters to apply to the job list query. If used, only those jobs requiring the specified consumable resource (consumableResource) and that match the value of the filters are listed. The filter names and values can be: name: JOB_STATUS values: SUBMITTED | PENDING | RUNNABLE | STARTING | RUNNING | SUCCEEDED | FAILED name: JOB_NAME The values are case-insensitive matches for the job name. If a filter value ends with an asterisk (*), it matches any job name that begins with the string before the '*'."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results returned by ListJobsByConsumableResource in paginated output. When this parameter is used, ListJobsByConsumableResource only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another ListJobsByConsumableResource request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then ListJobsByConsumableResource returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListJobsByConsumableResource request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+    let context_ = "ListJobsByConsumableResourceRequest"
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~consumableResource ->
+            fun () -> { filters; maxResults; nextToken; consumableResource }
+    let to_value x =
+      structure_to_value
+        [("consumableResource",
+           (Some (String_.to_value x.consumableResource)));
+        ("filters",
+          (Option.map x.filters
+             ~f:ListJobsByConsumableResourceFilterList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:ListJobsByConsumableResourceFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      let consumableResource =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "consumableResource") in
+      make ?nextToken ?maxResults ?filters ~consumableResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters =
+        field_map json__ "filters"
+          ListJobsByConsumableResourceFilterList.of_json in
+      let consumableResource =
+        field_map_exn json__ "consumableResource" String_.of_json in
+      make ?nextToken ?maxResults ?filters ~consumableResource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of Batch jobs that require a specific consumable resource."]
+module ListConsumableResourcesResponse =
+  struct
+    type nonrec t =
+      {
+      consumableResources: ConsumableResourceSummaryList.t option
+        [@ocaml.doc "A list of consumable resources that match the request."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future ListConsumableResources request. When the results of a ListConsumableResources request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?consumableResources =
+      fun ?nextToken -> fun () -> { consumableResources; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("consumableResources",
+           (Option.map x.consumableResources
+              ~f:ConsumableResourceSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let consumableResources =
+        (Option.map ~f:ConsumableResourceSummaryList.of_xml)
+          (Xml.child xml_arg0 "consumableResources") in
+      make ?nextToken ?consumableResources ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let consumableResources =
+        field_map json__ "consumableResources"
+          ConsumableResourceSummaryList.of_json in
+      make ?nextToken ?consumableResources ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of Batch consumable resources."]
+module ListConsumableResourcesRequest =
+  struct
+    type nonrec t =
+      {
+      filters: ListConsumableResourcesFilterList.t option
+        [@ocaml.doc
+          "The filters to apply to the consumable resource list query. If used, only those consumable resources that match the filter are listed. Filter names and values can be: name: CONSUMABLE_RESOURCE_NAME values: case-insensitive matches for the consumable resource name. If a filter value ends with an asterisk (*), it matches any consumable resource name that begins with the string before the '*'."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results returned by ListConsumableResources in paginated output. When this parameter is used, ListConsumableResources only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another ListConsumableResources request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then ListConsumableResources returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated ListConsumableResources request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+    let make ?filters =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { filters; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("filters",
+           (Option.map x.filters
+              ~f:ListConsumableResourcesFilterList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let filters =
+        (Option.map ~f:ListConsumableResourcesFilterList.of_xml)
+          (Xml.child xml_arg0 "filters") in
+      make ?nextToken ?maxResults ?filters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let filters =
+        field_map json__ "filters" ListConsumableResourcesFilterList.of_json in
+      make ?nextToken ?maxResults ?filters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of Batch consumable resources."]
+module GetJobQueueSnapshotResponse =
+  struct
+    type nonrec t =
+      {
+      frontOfQueue: FrontOfQueueDetail.t option
+        [@ocaml.doc
+          "The list of the first 100 RUNNABLE jobs in each job queue. For first-in-first-out (FIFO) job queues, jobs are ordered based on their submission time. For job queues with an attached fair-share scheduling (FSS) or quota-share policy, jobs are ordered based on their job priority and share usage."];
+      frontOfQuotaShares: FrontOfQuotaSharesDetail.t option
+        [@ocaml.doc
+          "The first RUNNABLE job in each quota share. Jobs are ordered based on their job priority and share usage."];
+      queueUtilization: QueueSnapshotUtilizationDetail.t option
+        [@ocaml.doc
+          "The job queue's capacity utilization, including total usage and breakdown per given share."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?frontOfQueue =
+      fun ?frontOfQuotaShares ->
+        fun ?queueUtilization ->
+          fun () -> { frontOfQueue; frontOfQuotaShares; queueUtilization }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("frontOfQueue",
+           (Option.map x.frontOfQueue ~f:FrontOfQueueDetail.to_value));
+        ("frontOfQuotaShares",
+          (Option.map x.frontOfQuotaShares
+             ~f:FrontOfQuotaSharesDetail.to_value));
+        ("queueUtilization",
+          (Option.map x.queueUtilization
+             ~f:QueueSnapshotUtilizationDetail.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queueUtilization =
+        (Option.map ~f:QueueSnapshotUtilizationDetail.of_xml)
+          (Xml.child xml_arg0 "queueUtilization") in
+      let frontOfQuotaShares =
+        (Option.map ~f:FrontOfQuotaSharesDetail.of_xml)
+          (Xml.child xml_arg0 "frontOfQuotaShares") in
+      let frontOfQueue =
+        (Option.map ~f:FrontOfQueueDetail.of_xml)
+          (Xml.child xml_arg0 "frontOfQueue") in
+      make ?queueUtilization ?frontOfQuotaShares ?frontOfQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queueUtilization =
+        field_map json__ "queueUtilization"
+          QueueSnapshotUtilizationDetail.of_json in
+      let frontOfQuotaShares =
+        field_map json__ "frontOfQuotaShares"
+          FrontOfQuotaSharesDetail.of_json in
+      let frontOfQueue =
+        field_map json__ "frontOfQueue" FrontOfQueueDetail.of_json in
+      make ?queueUtilization ?frontOfQuotaShares ?frontOfQueue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a snapshot of job queue state, including ordering of RUNNABLE jobs, as well as capacity utilization for already dispatched jobs. The first 100 RUNNABLE jobs in the job queue are listed in order of dispatch. For job queues with an attached quota-share policy, the first RUNNABLE job in each quota share is also listed. Capacity utilization for the job queue is provided, as well as break downs by share for job queues with attached fair-share or quota-share scheduling policies."]
+module GetJobQueueSnapshotRequest =
+  struct
+    type nonrec t =
+      {
+      jobQueue: String_.t
+        [@ocaml.doc
+          "The job queue\226\128\153s name or full queue Amazon Resource Name (ARN)."]}
+    let context_ = "GetJobQueueSnapshotRequest"
+    let make ~jobQueue = fun () -> { jobQueue }
+    let to_value x =
+      structure_to_value [("jobQueue", (Some (String_.to_value x.jobQueue)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobQueue =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
+      make ~jobQueue ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      make ~jobQueue ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides a snapshot of job queue state, including ordering of RUNNABLE jobs, as well as capacity utilization for already dispatched jobs. The first 100 RUNNABLE jobs in the job queue are listed in order of dispatch. For job queues with an attached quota-share policy, the first RUNNABLE job in each quota share is also listed. Capacity utilization for the job queue is provided, as well as break downs by share for job queues with attached fair-share or quota-share scheduling policies."]
+module DescribeServiceJobResponse =
+  struct
+    type nonrec t =
+      {
+      attempts: ServiceJobAttemptDetails.t option
+        [@ocaml.doc
+          "A list of job attempts associated with the service job."];
+      capacityUsage: ServiceJobCapacityUsageDetailList.t option
+        [@ocaml.doc
+          "The configured capacity for the service job, such as the number of instances. The number of instances should be the same value as the serviceRequestPayload.InstanceCount field."];
+      createdAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was created."];
+      isTerminated: Boolean.t option
+        [@ocaml.doc "Indicates whether the service job has been terminated."];
+      jobArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the service job."];
+      jobId: String_.t option [@ocaml.doc "The job ID for the service job."];
+      jobName: String_.t option [@ocaml.doc "The name of the service job."];
+      jobQueue: String_.t option
+        [@ocaml.doc
+          "The ARN of the job queue that the service job is associated with."];
+      latestAttempt: LatestServiceJobAttempt.t option
+        [@ocaml.doc "The latest attempt associated with the service job."];
+      retryStrategy: ServiceJobRetryStrategy.t option
+        [@ocaml.doc
+          "The retry strategy to use for failed service jobs that are submitted with this service job."];
+      scheduledAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was scheduled. This represents when the service job was dispatched to SageMaker and the service job transitioned to the SCHEDULED state."];
+      schedulingPriority: Integer.t option
+        [@ocaml.doc "The scheduling priority of the service job."];
+      serviceRequestPayload: String_.t option
+        [@ocaml.doc
+          "The request, in JSON, for the service that the SubmitServiceJob operation is queueing."];
+      serviceJobType: ServiceJobType.t option
+        [@ocaml.doc
+          "The type of service job. For SageMaker Training jobs, this value is SAGEMAKER_TRAINING."];
+      shareIdentifier: String_.t option
+        [@ocaml.doc
+          "The share identifier for the service job. This is used for fair-share scheduling."];
+      quotaShareName: String_.t option
+        [@ocaml.doc
+          "The name of the quota share that the service job is associated with."];
+      preemptionConfiguration: ServiceJobPreemptionConfiguration.t option
+        [@ocaml.doc "Specifies the service job behavior when preempted."];
+      preemptionSummary: ServiceJobPreemptionSummary.t option
+        [@ocaml.doc
+          "Summarizes the preemptions of the service job. This field appears on a service job when it has been preempted."];
+      startedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job was started."];
+      status: ServiceJobStatus.t option
+        [@ocaml.doc "The current status of the service job."];
+      statusReason: String_.t option
+        [@ocaml.doc
+          "A short, human-readable string to provide more details for the current status of the service job."];
+      stoppedAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the service job stopped running."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that are associated with the service job. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."];
+      timeoutConfig: ServiceJobTimeout.t option
+        [@ocaml.doc "The timeout configuration for the service job."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?attempts =
+      fun ?capacityUsage ->
+        fun ?createdAt ->
+          fun ?isTerminated ->
+            fun ?jobArn ->
+              fun ?jobId ->
+                fun ?jobName ->
+                  fun ?jobQueue ->
+                    fun ?latestAttempt ->
+                      fun ?retryStrategy ->
+                        fun ?scheduledAt ->
+                          fun ?schedulingPriority ->
+                            fun ?serviceRequestPayload ->
+                              fun ?serviceJobType ->
+                                fun ?shareIdentifier ->
+                                  fun ?quotaShareName ->
+                                    fun ?preemptionConfiguration ->
+                                      fun ?preemptionSummary ->
+                                        fun ?startedAt ->
+                                          fun ?status ->
+                                            fun ?statusReason ->
+                                              fun ?stoppedAt ->
+                                                fun ?tags ->
+                                                  fun ?timeoutConfig ->
+                                                    fun () ->
+                                                      {
+                                                        attempts;
+                                                        capacityUsage;
+                                                        createdAt;
+                                                        isTerminated;
+                                                        jobArn;
+                                                        jobId;
+                                                        jobName;
+                                                        jobQueue;
+                                                        latestAttempt;
+                                                        retryStrategy;
+                                                        scheduledAt;
+                                                        schedulingPriority;
+                                                        serviceRequestPayload;
+                                                        serviceJobType;
+                                                        shareIdentifier;
+                                                        quotaShareName;
+                                                        preemptionConfiguration;
+                                                        preemptionSummary;
+                                                        startedAt;
+                                                        status;
+                                                        statusReason;
+                                                        stoppedAt;
+                                                        tags;
+                                                        timeoutConfig
+                                                      }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("attempts",
+           (Option.map x.attempts ~f:ServiceJobAttemptDetails.to_value));
+        ("capacityUsage",
+          (Option.map x.capacityUsage
+             ~f:ServiceJobCapacityUsageDetailList.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
+        ("isTerminated", (Option.map x.isTerminated ~f:Boolean.to_value));
+        ("jobArn", (Option.map x.jobArn ~f:String_.to_value));
+        ("jobId", (Option.map x.jobId ~f:String_.to_value));
+        ("jobName", (Option.map x.jobName ~f:String_.to_value));
+        ("jobQueue", (Option.map x.jobQueue ~f:String_.to_value));
+        ("latestAttempt",
+          (Option.map x.latestAttempt ~f:LatestServiceJobAttempt.to_value));
+        ("retryStrategy",
+          (Option.map x.retryStrategy ~f:ServiceJobRetryStrategy.to_value));
+        ("scheduledAt", (Option.map x.scheduledAt ~f:Long.to_value));
+        ("schedulingPriority",
+          (Option.map x.schedulingPriority ~f:Integer.to_value));
+        ("serviceRequestPayload",
+          (Option.map x.serviceRequestPayload ~f:String_.to_value));
+        ("serviceJobType",
+          (Option.map x.serviceJobType ~f:ServiceJobType.to_value));
+        ("shareIdentifier",
+          (Option.map x.shareIdentifier ~f:String_.to_value));
+        ("quotaShareName", (Option.map x.quotaShareName ~f:String_.to_value));
+        ("preemptionConfiguration",
+          (Option.map x.preemptionConfiguration
+             ~f:ServiceJobPreemptionConfiguration.to_value));
+        ("preemptionSummary",
+          (Option.map x.preemptionSummary
+             ~f:ServiceJobPreemptionSummary.to_value));
+        ("startedAt", (Option.map x.startedAt ~f:Long.to_value));
+        ("status", (Option.map x.status ~f:ServiceJobStatus.to_value));
+        ("statusReason", (Option.map x.statusReason ~f:String_.to_value));
+        ("stoppedAt", (Option.map x.stoppedAt ~f:Long.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("timeoutConfig",
+          (Option.map x.timeoutConfig ~f:ServiceJobTimeout.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let timeoutConfig =
+        (Option.map ~f:ServiceJobTimeout.of_xml)
+          (Xml.child xml_arg0 "timeoutConfig") in
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let stoppedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "stoppedAt") in
+      let statusReason =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:ServiceJobStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let startedAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "startedAt") in
+      let preemptionSummary =
+        (Option.map ~f:ServiceJobPreemptionSummary.of_xml)
+          (Xml.child xml_arg0 "preemptionSummary") in
+      let preemptionConfiguration =
+        (Option.map ~f:ServiceJobPreemptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "preemptionConfiguration") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      let shareIdentifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "shareIdentifier") in
+      let serviceJobType =
+        (Option.map ~f:ServiceJobType.of_xml)
+          (Xml.child xml_arg0 "serviceJobType") in
+      let serviceRequestPayload =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceRequestPayload") in
+      let schedulingPriority =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "schedulingPriority") in
+      let scheduledAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "scheduledAt") in
+      let retryStrategy =
+        (Option.map ~f:ServiceJobRetryStrategy.of_xml)
+          (Xml.child xml_arg0 "retryStrategy") in
+      let latestAttempt =
+        (Option.map ~f:LatestServiceJobAttempt.of_xml)
+          (Xml.child xml_arg0 "latestAttempt") in
+      let jobQueue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueue") in
+      let jobName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobName") in
+      let jobId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobId") in
+      let jobArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobArn") in
+      let isTerminated =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isTerminated") in
+      let createdAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let capacityUsage =
+        (Option.map ~f:ServiceJobCapacityUsageDetailList.of_xml)
+          (Xml.child xml_arg0 "capacityUsage") in
+      let attempts =
+        (Option.map ~f:ServiceJobAttemptDetails.of_xml)
+          (Xml.child xml_arg0 "attempts") in
+      make ?timeoutConfig ?tags ?stoppedAt ?statusReason ?status ?startedAt
+        ?preemptionSummary ?preemptionConfiguration ?quotaShareName
+        ?shareIdentifier ?serviceJobType ?serviceRequestPayload
+        ?schedulingPriority ?scheduledAt ?retryStrategy ?latestAttempt
+        ?jobQueue ?jobName ?jobId ?jobArn ?isTerminated ?createdAt
+        ?capacityUsage ?attempts ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let timeoutConfig =
+        field_map json__ "timeoutConfig" ServiceJobTimeout.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let stoppedAt = field_map json__ "stoppedAt" Long.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" ServiceJobStatus.of_json in
+      let startedAt = field_map json__ "startedAt" Long.of_json in
+      let preemptionSummary =
+        field_map json__ "preemptionSummary"
+          ServiceJobPreemptionSummary.of_json in
+      let preemptionConfiguration =
+        field_map json__ "preemptionConfiguration"
+          ServiceJobPreemptionConfiguration.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      let shareIdentifier =
+        field_map json__ "shareIdentifier" String_.of_json in
+      let serviceJobType =
+        field_map json__ "serviceJobType" ServiceJobType.of_json in
+      let serviceRequestPayload =
+        field_map json__ "serviceRequestPayload" String_.of_json in
+      let schedulingPriority =
+        field_map json__ "schedulingPriority" Integer.of_json in
+      let scheduledAt = field_map json__ "scheduledAt" Long.of_json in
+      let retryStrategy =
+        field_map json__ "retryStrategy" ServiceJobRetryStrategy.of_json in
+      let latestAttempt =
+        field_map json__ "latestAttempt" LatestServiceJobAttempt.of_json in
+      let jobQueue = field_map json__ "jobQueue" String_.of_json in
+      let jobName = field_map json__ "jobName" String_.of_json in
+      let jobId = field_map json__ "jobId" String_.of_json in
+      let jobArn = field_map json__ "jobArn" String_.of_json in
+      let isTerminated = field_map json__ "isTerminated" Boolean.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let capacityUsage =
+        field_map json__ "capacityUsage"
+          ServiceJobCapacityUsageDetailList.of_json in
+      let attempts =
+        field_map json__ "attempts" ServiceJobAttemptDetails.of_json in
+      make ?timeoutConfig ?tags ?stoppedAt ?statusReason ?status ?startedAt
+        ?preemptionSummary ?preemptionConfiguration ?quotaShareName
+        ?shareIdentifier ?serviceJobType ?serviceRequestPayload
+        ?schedulingPriority ?scheduledAt ?retryStrategy ?latestAttempt
+        ?jobQueue ?jobName ?jobId ?jobArn ?isTerminated ?createdAt
+        ?capacityUsage ?attempts ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of a service job."]
+module DescribeServiceJobRequest =
+  struct
+    type nonrec t =
+      {
+      jobId: String_.t
+        [@ocaml.doc "The job ID for the service job to describe."]}
+    let context_ = "DescribeServiceJobRequest"
+    let make ~jobId = fun () -> { jobId }
+    let to_value x =
+      structure_to_value [("jobId", (Some (String_.to_value x.jobId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let jobId =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
+      make ~jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
+      make ~jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of a service job."]
+module DescribeServiceEnvironmentsResponse =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironments: ServiceEnvironmentDetailList.t option
+        [@ocaml.doc
+          "The list of service environments that match the request."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value to include in a future DescribeServiceEnvironments request. When the results of a DescribeServiceEnvironments request exceed maxResults, this value can be used to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?serviceEnvironments =
+      fun ?nextToken -> fun () -> { serviceEnvironments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironments",
+           (Option.map x.serviceEnvironments
+              ~f:ServiceEnvironmentDetailList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let serviceEnvironments =
+        (Option.map ~f:ServiceEnvironmentDetailList.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironments") in
+      make ?nextToken ?serviceEnvironments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let serviceEnvironments =
+        field_map json__ "serviceEnvironments"
+          ServiceEnvironmentDetailList.of_json in
+      make ?nextToken ?serviceEnvironments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes one or more of your service environments."]
+module DescribeServiceEnvironmentsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironments: StringList.t option
+        [@ocaml.doc "An array of service environment names or ARN entries."];
+      maxResults: Integer.t option
+        [@ocaml.doc
+          "The maximum number of results returned by DescribeServiceEnvironments in paginated output. When this parameter is used, DescribeServiceEnvironments only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeServiceEnvironments request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then DescribeServiceEnvironments returns up to 100 results and a nextToken value if applicable."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The nextToken value returned from a previous paginated DescribeServiceEnvironments request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+    let make ?serviceEnvironments =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun () -> { serviceEnvironments; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironments",
+           (Option.map x.serviceEnvironments ~f:StringList.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:Integer.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let serviceEnvironments =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironments") in
+      make ?nextToken ?maxResults ?serviceEnvironments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let serviceEnvironments =
+        field_map json__ "serviceEnvironments" StringList.of_json in
+      make ?nextToken ?maxResults ?serviceEnvironments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes one or more of your service environments."]
 module DescribeSchedulingPoliciesResponse =
   struct
     type nonrec t =
@@ -6123,9 +15389,9 @@ module DescribeSchedulingPoliciesResponse =
           (Xml.child xml_arg0 "schedulingPolicies") in
       make ?schedulingPolicies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schedulingPolicies =
-        field_map json "schedulingPolicies"
+        field_map json__ "schedulingPolicies"
           SchedulingPolicyDetailList.of_json in
       make ?schedulingPolicies ()
     let to_json v = composed_to_json to_value v
@@ -6147,11 +15413,179 @@ module DescribeSchedulingPoliciesRequest =
         StringList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arns") in
       make ~arns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arns = field_map_exn json "arns" StringList.of_json in
+    let of_json json__ =
+      let arns = field_map_exn json__ "arns" StringList.of_json in
       make ~arns ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Describes one or more of your scheduling policies."]
+  end[@@ocaml.doc "Contains the parameters for DescribeSchedulingPolicies."]
+module DescribeQuotaShareResponse =
+  struct
+    type nonrec t =
+      {
+      quotaShareName: String_.t option
+        [@ocaml.doc "The name of the quota share."];
+      quotaShareArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."];
+      jobQueueArn: String_.t option
+        [@ocaml.doc
+          "The ARN of the job queue associated with the quota share."];
+      capacityLimits: QuotaShareCapacityLimits.t option
+        [@ocaml.doc
+          "A list that specifies the quantity and type of compute capacity allocated to the quota share."];
+      resourceSharingConfiguration:
+        QuotaShareResourceSharingConfiguration.t option
+        [@ocaml.doc
+          "Specifies whether a quota share reserves, lends, or both lends and borrows idle compute capacity."];
+      preemptionConfiguration: QuotaSharePreemptionConfiguration.t option
+        [@ocaml.doc
+          "Specifies the preemption behavior for jobs in a quota share."];
+      state: QuotaShareState.t option
+        [@ocaml.doc "The state of the quota share."];
+      status: QuotaShareStatus.t option
+        [@ocaml.doc "The current status of the quota share."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc "The tags applied to the quota share."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?quotaShareName =
+      fun ?quotaShareArn ->
+        fun ?jobQueueArn ->
+          fun ?capacityLimits ->
+            fun ?resourceSharingConfiguration ->
+              fun ?preemptionConfiguration ->
+                fun ?state ->
+                  fun ?status ->
+                    fun ?tags ->
+                      fun () ->
+                        {
+                          quotaShareName;
+                          quotaShareArn;
+                          jobQueueArn;
+                          capacityLimits;
+                          resourceSharingConfiguration;
+                          preemptionConfiguration;
+                          state;
+                          status;
+                          tags
+                        }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("quotaShareName",
+           (Option.map x.quotaShareName ~f:String_.to_value));
+        ("quotaShareArn", (Option.map x.quotaShareArn ~f:String_.to_value));
+        ("jobQueueArn", (Option.map x.jobQueueArn ~f:String_.to_value));
+        ("capacityLimits",
+          (Option.map x.capacityLimits ~f:QuotaShareCapacityLimits.to_value));
+        ("resourceSharingConfiguration",
+          (Option.map x.resourceSharingConfiguration
+             ~f:QuotaShareResourceSharingConfiguration.to_value));
+        ("preemptionConfiguration",
+          (Option.map x.preemptionConfiguration
+             ~f:QuotaSharePreemptionConfiguration.to_value));
+        ("state", (Option.map x.state ~f:QuotaShareState.to_value));
+        ("status", (Option.map x.status ~f:QuotaShareStatus.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let status =
+        (Option.map ~f:QuotaShareStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let state =
+        (Option.map ~f:QuotaShareState.of_xml) (Xml.child xml_arg0 "state") in
+      let preemptionConfiguration =
+        (Option.map ~f:QuotaSharePreemptionConfiguration.of_xml)
+          (Xml.child xml_arg0 "preemptionConfiguration") in
+      let resourceSharingConfiguration =
+        (Option.map ~f:QuotaShareResourceSharingConfiguration.of_xml)
+          (Xml.child xml_arg0 "resourceSharingConfiguration") in
+      let capacityLimits =
+        (Option.map ~f:QuotaShareCapacityLimits.of_xml)
+          (Xml.child xml_arg0 "capacityLimits") in
+      let jobQueueArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueArn") in
+      let quotaShareArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareArn") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      make ?tags ?status ?state ?preemptionConfiguration
+        ?resourceSharingConfiguration ?capacityLimits ?jobQueueArn
+        ?quotaShareArn ?quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let status = field_map json__ "status" QuotaShareStatus.of_json in
+      let state = field_map json__ "state" QuotaShareState.of_json in
+      let preemptionConfiguration =
+        field_map json__ "preemptionConfiguration"
+          QuotaSharePreemptionConfiguration.of_json in
+      let resourceSharingConfiguration =
+        field_map json__ "resourceSharingConfiguration"
+          QuotaShareResourceSharingConfiguration.of_json in
+      let capacityLimits =
+        field_map json__ "capacityLimits" QuotaShareCapacityLimits.of_json in
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let quotaShareArn = field_map json__ "quotaShareArn" String_.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      make ?tags ?status ?state ?preemptionConfiguration
+        ?resourceSharingConfiguration ?capacityLimits ?jobQueueArn
+        ?quotaShareArn ?quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a description of the specified quota share."]
+module DescribeQuotaShareRequest =
+  struct
+    type nonrec t =
+      {
+      quotaShareArn: String_.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."]}
+    let context_ = "DescribeQuotaShareRequest"
+    let make ~quotaShareArn = fun () -> { quotaShareArn }
+    let to_value x =
+      structure_to_value
+        [("quotaShareArn", (Some (String_.to_value x.quotaShareArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaShareArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quotaShareArn") in
+      make ~quotaShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaShareArn =
+        field_map_exn json__ "quotaShareArn" String_.of_json in
+      make ~quotaShareArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a description of the specified quota share."]
 module DescribeJobsResponse =
   struct
     type nonrec t =
@@ -6199,8 +15633,9 @@ module DescribeJobsResponse =
         (Option.map ~f:JobDetailList.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobs = field_map json "jobs" JobDetailList.of_json in make ?jobs ()
+    let of_json json__ =
+      let jobs = field_map json__ "jobs" JobDetailList.of_json in
+      make ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a list of Batch jobs."]
 module DescribeJobsRequest =
@@ -6218,8 +15653,8 @@ module DescribeJobsRequest =
         StringList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobs") in
       make ~jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobs = field_map_exn json "jobs" StringList.of_json in
+    let of_json json__ =
+      let jobs = field_map_exn json__ "jobs" StringList.of_json in
       make ~jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeJobs."]
@@ -6280,9 +15715,9 @@ module DescribeJobQueuesResponse =
           (Xml.child xml_arg0 "jobQueues") in
       make ?nextToken ?jobQueues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let jobQueues = field_map json "jobQueues" JobQueueDetailList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let jobQueues = field_map json__ "jobQueues" JobQueueDetailList.of_json in
       make ?nextToken ?jobQueues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes one or more of your job queues."]
@@ -6298,7 +15733,7 @@ module DescribeJobQueuesRequest =
           "The maximum number of results returned by DescribeJobQueues in paginated output. When this parameter is used, DescribeJobQueues only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeJobQueues request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then DescribeJobQueues returns up to 100 results and a nextToken value if applicable."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeJobQueues request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value returned from a previous paginated DescribeJobQueues request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
     let make ?jobQueues =
       fun ?maxResults ->
         fun ?nextToken -> fun () -> { jobQueues; maxResults; nextToken }
@@ -6317,10 +15752,10 @@ module DescribeJobQueuesRequest =
         (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "jobQueues") in
       make ?nextToken ?maxResults ?jobQueues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let jobQueues = field_map json "jobQueues" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let jobQueues = field_map json__ "jobQueues" StringList.of_json in
       make ?nextToken ?maxResults ?jobQueues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeJobQueues."]
@@ -6381,10 +15816,10 @@ module DescribeJobDefinitionsResponse =
           (Xml.child xml_arg0 "jobDefinitions") in
       make ?nextToken ?jobDefinitions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let jobDefinitions =
-        field_map json "jobDefinitions" JobDefinitionList.of_json in
+        field_map json__ "jobDefinitions" JobDefinitionList.of_json in
       make ?nextToken ?jobDefinitions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6395,7 +15830,7 @@ module DescribeJobDefinitionsRequest =
       {
       jobDefinitions: StringList.t option
         [@ocaml.doc
-          "A list of up to 100 job definitions. Each entry in the list can either be an ARN in the format arn:aws:batch:$\\{Region\\}:$\\{Account\\}:job-definition/$\\{JobDefinitionName\\}:$\\{Revision\\} or a short version using the form $\\{JobDefinitionName\\}:$\\{Revision\\}."];
+          "A list of up to 100 job definitions. Each entry in the list can either be an ARN in the format arn:aws:batch:$\\{Region\\}:$\\{Account\\}:job-definition/$\\{JobDefinitionName\\}:$\\{Revision\\} or a short version using the form $\\{JobDefinitionName\\}:$\\{Revision\\}. This parameter can't be used with other parameters."];
       maxResults: Integer.t option
         [@ocaml.doc
           "The maximum number of results returned by DescribeJobDefinitions in paginated output. When this parameter is used, DescribeJobDefinitions only returns maxResults results in a single page and a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeJobDefinitions request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then DescribeJobDefinitions returns up to 100 results and a nextToken value if applicable."];
@@ -6405,7 +15840,7 @@ module DescribeJobDefinitionsRequest =
         [@ocaml.doc "The status used to filter job definitions."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeJobDefinitions request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value returned from a previous paginated DescribeJobDefinitions request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
     let make ?jobDefinitions =
       fun ?maxResults ->
         fun ?jobDefinitionName ->
@@ -6445,17 +15880,176 @@ module DescribeJobDefinitionsRequest =
       make ?nextToken ?status ?jobDefinitionName ?maxResults ?jobDefinitions
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let status = field_map json "status" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
       let jobDefinitionName =
-        field_map json "jobDefinitionName" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
-      let jobDefinitions = field_map json "jobDefinitions" StringList.of_json in
+        field_map json__ "jobDefinitionName" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
+      let jobDefinitions =
+        field_map json__ "jobDefinitions" StringList.of_json in
       make ?nextToken ?status ?jobDefinitionName ?maxResults ?jobDefinitions
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeJobDefinitions."]
+module DescribeConsumableResourceResponse =
+  struct
+    type nonrec t =
+      {
+      consumableResourceName: String_.t option
+        [@ocaml.doc "The name of the consumable resource."];
+      consumableResourceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the consumable resource."];
+      totalQuantity: Long.t option
+        [@ocaml.doc
+          "The total amount of the consumable resource that is available."];
+      inUseQuantity: Long.t option
+        [@ocaml.doc
+          "The amount of the consumable resource that is currently in use."];
+      availableQuantity: Long.t option
+        [@ocaml.doc
+          "The amount of the consumable resource that is currently available to use."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "Indicates whether the resource is available to be re-used after a job completes. Can be one of: REPLENISHABLE NON_REPLENISHABLE"];
+      createdAt: Long.t option
+        [@ocaml.doc
+          "The Unix timestamp (in milliseconds) for when the consumable resource was created."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that you apply to the consumable resource to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?consumableResourceName =
+      fun ?consumableResourceArn ->
+        fun ?totalQuantity ->
+          fun ?inUseQuantity ->
+            fun ?availableQuantity ->
+              fun ?resourceType ->
+                fun ?createdAt ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        consumableResourceName;
+                        consumableResourceArn;
+                        totalQuantity;
+                        inUseQuantity;
+                        availableQuantity;
+                        resourceType;
+                        createdAt;
+                        tags
+                      }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("consumableResourceName",
+           (Option.map x.consumableResourceName ~f:String_.to_value));
+        ("consumableResourceArn",
+          (Option.map x.consumableResourceArn ~f:String_.to_value));
+        ("totalQuantity", (Option.map x.totalQuantity ~f:Long.to_value));
+        ("inUseQuantity", (Option.map x.inUseQuantity ~f:Long.to_value));
+        ("availableQuantity",
+          (Option.map x.availableQuantity ~f:Long.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("createdAt", (Option.map x.createdAt ~f:Long.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let createdAt =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "createdAt") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let availableQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "availableQuantity") in
+      let inUseQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "inUseQuantity") in
+      let totalQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "totalQuantity") in
+      let consumableResourceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceArn") in
+      let consumableResourceName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceName") in
+      make ?tags ?createdAt ?resourceType ?availableQuantity ?inUseQuantity
+        ?totalQuantity ?consumableResourceArn ?consumableResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let createdAt = field_map json__ "createdAt" Long.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let availableQuantity =
+        field_map json__ "availableQuantity" Long.of_json in
+      let inUseQuantity = field_map json__ "inUseQuantity" Long.of_json in
+      let totalQuantity = field_map json__ "totalQuantity" Long.of_json in
+      let consumableResourceArn =
+        field_map json__ "consumableResourceArn" String_.of_json in
+      let consumableResourceName =
+        field_map json__ "consumableResourceName" String_.of_json in
+      make ?tags ?createdAt ?resourceType ?availableQuantity ?inUseQuantity
+        ?totalQuantity ?consumableResourceArn ?consumableResourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a description of the specified consumable resource."]
+module DescribeConsumableResourceRequest =
+  struct
+    type nonrec t =
+      {
+      consumableResource: String_.t
+        [@ocaml.doc
+          "The name or ARN of the consumable resource whose description will be returned."]}
+    let context_ = "DescribeConsumableResourceRequest"
+    let make ~consumableResource = fun () -> { consumableResource }
+    let to_value x =
+      structure_to_value
+        [("consumableResource",
+           (Some (String_.to_value x.consumableResource)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumableResource =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "consumableResource") in
+      make ~consumableResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumableResource =
+        field_map_exn json__ "consumableResource" String_.of_json in
+      make ~consumableResource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a description of the specified consumable resource."]
 module DescribeComputeEnvironmentsResponse =
   struct
     type nonrec t =
@@ -6514,15 +16108,15 @@ module DescribeComputeEnvironmentsResponse =
           (Xml.child xml_arg0 "computeEnvironments") in
       make ?nextToken ?computeEnvironments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
       let computeEnvironments =
-        field_map json "computeEnvironments"
+        field_map json__ "computeEnvironments"
           ComputeEnvironmentDetailList.of_json in
       make ?nextToken ?computeEnvironments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes one or more of your compute environments. If you're using an unmanaged compute environment, you can use the DescribeComputeEnvironment operation to determine the ecsClusterArn that you should launch your Amazon ECS container instances into."]
+       "Describes one or more of your compute environments. If you're using an unmanaged compute environment, you can use the DescribeComputeEnvironment operation to determine the ecsClusterArn that you launch your Amazon ECS container instances into."]
 module DescribeComputeEnvironmentsRequest =
   struct
     type nonrec t =
@@ -6535,7 +16129,7 @@ module DescribeComputeEnvironmentsRequest =
           "The maximum number of cluster results returned by DescribeComputeEnvironments in paginated output. When this parameter is used, DescribeComputeEnvironments only returns maxResults results in a single page along with a nextToken response element. The remaining results of the initial request can be seen by sending another DescribeComputeEnvironments request with the returned nextToken value. This value can be between 1 and 100. If this parameter isn't used, then DescribeComputeEnvironments returns up to 100 results and a nextToken value if applicable."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The nextToken value returned from a previous paginated DescribeComputeEnvironments request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. This token should be treated as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
+          "The nextToken value returned from a previous paginated DescribeComputeEnvironments request where maxResults was used and the results exceeded the value of that parameter. Pagination continues from the end of the previous results that returned the nextToken value. This value is null when there are no more results to return. Treat this token as an opaque identifier that's only used to retrieve the next items in a list and not for other programmatic purposes."]}
     let make ?computeEnvironments =
       fun ?maxResults ->
         fun ?nextToken ->
@@ -6557,11 +16151,11 @@ module DescribeComputeEnvironmentsRequest =
           (Xml.child xml_arg0 "computeEnvironments") in
       make ?nextToken ?maxResults ?computeEnvironments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" Integer.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" Integer.of_json in
       let computeEnvironments =
-        field_map json "computeEnvironments" StringList.of_json in
+        field_map json__ "computeEnvironments" StringList.of_json in
       make ?nextToken ?maxResults ?computeEnvironments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeComputeEnvironments."]
@@ -6629,12 +16223,84 @@ module DeregisterJobDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "jobDefinition") in
       make ~jobDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobDefinition = field_map_exn json "jobDefinition" String_.of_json in
+    let of_json json__ =
+      let jobDefinition =
+        field_map_exn json__ "jobDefinition" String_.of_json in
       make ~jobDefinition ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deregisters an Batch job definition. Job definitions are permanently deleted after 180 days."]
+module DeleteServiceEnvironmentResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a Service environment. Before you can delete a service environment, you must first set its state to DISABLED with the UpdateServiceEnvironment API operation and disassociate it from any job queues with the UpdateJobQueue API operation."]
+module DeleteServiceEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironment: String_.t
+        [@ocaml.doc "The name or ARN of the service environment to delete."]}
+    let context_ = "DeleteServiceEnvironmentRequest"
+    let make ~serviceEnvironment = fun () -> { serviceEnvironment }
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironment",
+           (Some (String_.to_value x.serviceEnvironment)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceEnvironment =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceEnvironment") in
+      make ~serviceEnvironment ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceEnvironment =
+        field_map_exn json__ "serviceEnvironment" String_.of_json in
+      make ~serviceEnvironment ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a Service environment. Before you can delete a service environment, you must first set its state to DISABLED with the UpdateServiceEnvironment API operation and disassociate it from any job queues with the UpdateJobQueue API operation."]
 module DeleteSchedulingPolicyResponse =
   struct
     type nonrec t = unit
@@ -6697,11 +16363,80 @@ module DeleteSchedulingPolicyRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" String_.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "arn" String_.of_json in make ~arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains the parameters for DeleteSchedulingPolicy."]
+module DeleteQuotaShareResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified scheduling policy. You can't delete a scheduling policy that's used in any job queues."]
+       "Deletes the specified quota share. You must first disable submissions for the share by updating the state to DISABLED using the UpdateQuotaShare operation. All jobs in the share are eventually terminated when you delete a quota share."]
+module DeleteQuotaShareRequest =
+  struct
+    type nonrec t =
+      {
+      quotaShareArn: String_.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."]}
+    let context_ = "DeleteQuotaShareRequest"
+    let make ~quotaShareArn = fun () -> { quotaShareArn }
+    let to_value x =
+      structure_to_value
+        [("quotaShareArn", (Some (String_.to_value x.quotaShareArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaShareArn =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quotaShareArn") in
+      make ~quotaShareArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaShareArn =
+        field_map_exn json__ "quotaShareArn" String_.of_json in
+      make ~quotaShareArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified quota share. You must first disable submissions for the share by updating the state to DISABLED using the UpdateQuotaShare operation. All jobs in the share are eventually terminated when you delete a quota share."]
 module DeleteJobQueueResponse =
   struct
     type nonrec t = unit
@@ -6746,7 +16481,7 @@ module DeleteJobQueueResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the specified job queue. You must first disable submissions for a queue with the UpdateJobQueue operation. All jobs in the queue are eventually terminated when you delete a job queue. The jobs are terminated at a rate of about 16 jobs each second. It's not necessary to disassociate compute environments from a queue before submitting a DeleteJobQueue request."]
+       "Deletes the specified job queue. You must first disable submissions for a queue with the UpdateJobQueue operation. All jobs in the queue are eventually terminated when you delete a job queue. It's not necessary to disassociate compute environments from a queue before submitting a DeleteJobQueue request."]
 module DeleteJobQueueRequest =
   struct
     type nonrec t =
@@ -6764,11 +16499,81 @@ module DeleteJobQueueRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
       make ~jobQueue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobQueue = field_map_exn json "jobQueue" String_.of_json in
+    let of_json json__ =
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
       make ~jobQueue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeleteJobQueue."]
+module DeleteConsumableResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified consumable resource."]
+module DeleteConsumableResourceRequest =
+  struct
+    type nonrec t =
+      {
+      consumableResource: String_.t
+        [@ocaml.doc
+          "The name or ARN of the consumable resource that will be deleted."]}
+    let context_ = "DeleteConsumableResourceRequest"
+    let make ~consumableResource = fun () -> { consumableResource }
+    let to_value x =
+      structure_to_value
+        [("consumableResource",
+           (Some (String_.to_value x.consumableResource)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumableResource =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "consumableResource") in
+      make ~consumableResource ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumableResource =
+        field_map_exn json__ "consumableResource" String_.of_json in
+      make ~consumableResource ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified consumable resource."]
 module DeleteComputeEnvironmentResponse =
   struct
     type nonrec t = unit
@@ -6834,26 +16639,28 @@ module DeleteComputeEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironment") in
       make ~computeEnvironment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeEnvironment =
-        field_map_exn json "computeEnvironment" String_.of_json in
+        field_map_exn json__ "computeEnvironment" String_.of_json in
       make ~computeEnvironment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeleteComputeEnvironment."]
-module CreateSchedulingPolicyResponse =
+module CreateServiceEnvironmentResponse =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "The name of the scheduling policy."];
-      arn: String_.t
+      serviceEnvironmentName: String_.t option
+        [@ocaml.doc "The name of the service environment."];
+      serviceEnvironmentArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the scheduling policy. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:012345678910:scheduling-policy/MySchedulingPolicy."]}
+          "The Amazon Resource Name (ARN) of the service environment."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateSchedulingPolicyResponse"
-    let make ~name = fun ~arn -> fun () -> { name; arn }
+    let make ?serviceEnvironmentName =
+      fun ?serviceEnvironmentArn ->
+        fun () -> { serviceEnvironmentName; serviceEnvironmentArn }
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
@@ -6884,20 +16691,161 @@ module CreateSchedulingPolicyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("name", (Some (String_.to_value x.name)));
-        ("arn", (Some (String_.to_value x.arn)))]
+        [("serviceEnvironmentName",
+           (Option.map x.serviceEnvironmentName ~f:String_.to_value));
+        ("serviceEnvironmentArn",
+          (Option.map x.serviceEnvironmentArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let arn =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ~arn ~name ()
+      let serviceEnvironmentArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentArn") in
+      let serviceEnvironmentName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentName") in
+      make ?serviceEnvironmentArn ?serviceEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "arn" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ~arn ~name ()
+    let of_json json__ =
+      let serviceEnvironmentArn =
+        field_map json__ "serviceEnvironmentArn" String_.of_json in
+      let serviceEnvironmentName =
+        field_map json__ "serviceEnvironmentName" String_.of_json in
+      make ?serviceEnvironmentArn ?serviceEnvironmentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service environment for running service jobs. Service environments define capacity limits for specific service types such as SageMaker Training jobs."]
+module CreateServiceEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      serviceEnvironmentName: String_.t
+        [@ocaml.doc
+          "The name for the service environment. It can be up to 128 characters long and can contain letters, numbers, hyphens (-), and underscores (_)."];
+      serviceEnvironmentType: ServiceEnvironmentType.t
+        [@ocaml.doc
+          "The type of service environment. For SageMaker Training jobs, specify SAGEMAKER_TRAINING."];
+      state: ServiceEnvironmentState.t option
+        [@ocaml.doc
+          "The state of the service environment. Valid values are ENABLED and DISABLED. The default value is ENABLED."];
+      capacityLimits: CapacityLimits.t
+        [@ocaml.doc
+          "The capacity limits for the service environment. The number of instances a job consumes is the total number of instances requested in the submit training job request resource configuration."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that you apply to the service environment to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."]}
+    let context_ = "CreateServiceEnvironmentRequest"
+    let make ?state =
+      fun ?tags ->
+        fun ~serviceEnvironmentName ->
+          fun ~serviceEnvironmentType ->
+            fun ~capacityLimits ->
+              fun () ->
+                {
+                  state;
+                  tags;
+                  serviceEnvironmentName;
+                  serviceEnvironmentType;
+                  capacityLimits
+                }
+    let to_value x =
+      structure_to_value
+        [("serviceEnvironmentName",
+           (Some (String_.to_value x.serviceEnvironmentName)));
+        ("serviceEnvironmentType",
+          (Some (ServiceEnvironmentType.to_value x.serviceEnvironmentType)));
+        ("state", (Option.map x.state ~f:ServiceEnvironmentState.to_value));
+        ("capacityLimits", (Some (CapacityLimits.to_value x.capacityLimits)));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let capacityLimits =
+        CapacityLimits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capacityLimits") in
+      let state =
+        (Option.map ~f:ServiceEnvironmentState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      let serviceEnvironmentType =
+        ServiceEnvironmentType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceEnvironmentType") in
+      let serviceEnvironmentName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceEnvironmentName") in
+      make ?tags ~capacityLimits ?state ~serviceEnvironmentType
+        ~serviceEnvironmentName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let capacityLimits =
+        field_map_exn json__ "capacityLimits" CapacityLimits.of_json in
+      let state = field_map json__ "state" ServiceEnvironmentState.of_json in
+      let serviceEnvironmentType =
+        field_map_exn json__ "serviceEnvironmentType"
+          ServiceEnvironmentType.of_json in
+      let serviceEnvironmentName =
+        field_map_exn json__ "serviceEnvironmentName" String_.of_json in
+      make ?tags ~capacityLimits ?state ~serviceEnvironmentType
+        ~serviceEnvironmentName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a service environment for running service jobs. Service environments define capacity limits for specific service types such as SageMaker Training jobs."]
+module CreateSchedulingPolicyResponse =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc "The name of the scheduling policy."];
+      arn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the scheduling policy. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . For example, aws:aws:batch:us-west-2:123456789012:scheduling-policy/MySchedulingPolicy."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name = fun ?arn -> fun () -> { name; arn }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:String_.to_value));
+        ("arn", (Option.map x.arn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let arn = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "arn") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      make ?arn ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let arn = field_map json__ "arn" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?arn ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates an Batch scheduling policy."]
 module CreateSchedulingPolicyRequest =
@@ -6906,18 +16854,27 @@ module CreateSchedulingPolicyRequest =
       {
       name: String_.t
         [@ocaml.doc
-          "The name of the scheduling policy. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+          "The name of the fair-share scheduling policy. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+      quotaSharePolicy: QuotaSharePolicy.t option
+        [@ocaml.doc
+          "The quota share scheduling policy details. Only one of fairsharePolicy or quotaSharePolicy can be set. Once set, this policy type cannot be removed or changed to a fairSharePolicy."];
       fairsharePolicy: FairsharePolicy.t option
-        [@ocaml.doc "The fair share policy of the scheduling policy."];
+        [@ocaml.doc
+          "The fair-share scheduling policy details. Only one of fairsharePolicy or quotaSharePolicy can be set. Once set, this policy type cannot be removed or changed to a quotaSharePolicy."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
           "The tags that you apply to the scheduling policy to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference. These tags can be updated or removed using the TagResource and UntagResource API operations."]}
     let context_ = "CreateSchedulingPolicyRequest"
-    let make ?fairsharePolicy =
-      fun ?tags -> fun ~name -> fun () -> { fairsharePolicy; tags; name }
+    let make ?quotaSharePolicy =
+      fun ?fairsharePolicy ->
+        fun ?tags ->
+          fun ~name ->
+            fun () -> { quotaSharePolicy; fairsharePolicy; tags; name }
     let to_value x =
       structure_to_value
         [("name", (Some (String_.to_value x.name)));
+        ("quotaSharePolicy",
+          (Option.map x.quotaSharePolicy ~f:QuotaSharePolicy.to_value));
         ("fairsharePolicy",
           (Option.map x.fairsharePolicy ~f:FairsharePolicy.to_value));
         ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
@@ -6928,32 +16885,37 @@ module CreateSchedulingPolicyRequest =
       let fairsharePolicy =
         (Option.map ~f:FairsharePolicy.of_xml)
           (Xml.child xml_arg0 "fairsharePolicy") in
+      let quotaSharePolicy =
+        (Option.map ~f:QuotaSharePolicy.of_xml)
+          (Xml.child xml_arg0 "quotaSharePolicy") in
       let name =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?tags ?fairsharePolicy ~name ()
+      make ?tags ?fairsharePolicy ?quotaSharePolicy ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
       let fairsharePolicy =
-        field_map json "fairsharePolicy" FairsharePolicy.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      make ?tags ?fairsharePolicy ~name ()
+        field_map json__ "fairsharePolicy" FairsharePolicy.of_json in
+      let quotaSharePolicy =
+        field_map json__ "quotaSharePolicy" QuotaSharePolicy.of_json in
+      let name = field_map_exn json__ "name" String_.of_json in
+      make ?tags ?fairsharePolicy ?quotaSharePolicy ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Creates an Batch scheduling policy."]
-module CreateJobQueueResponse =
+  end[@@ocaml.doc "Contains the parameters for CreateSchedulingPolicy."]
+module CreateQuotaShareResponse =
   struct
     type nonrec t =
       {
-      jobQueueName: String_.t [@ocaml.doc "The name of the job queue."];
-      jobQueueArn: String_.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the job queue."]}
+      quotaShareName: String_.t option
+        [@ocaml.doc "The name of the quota share."];
+      quotaShareArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the quota share."]}
     type nonrec error =
       [ `ClientException of ClientException.t 
       | `ServerException of ServerException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateJobQueueResponse"
-    let make ~jobQueueName =
-      fun ~jobQueueArn -> fun () -> { jobQueueName; jobQueueArn }
+    let make ?quotaShareName =
+      fun ?quotaShareArn -> fun () -> { quotaShareName; quotaShareArn }
     let error_of_json name json =
       match name with
       | "ClientException" -> `ClientException (ClientException.of_json json)
@@ -6984,22 +16946,187 @@ module CreateJobQueueResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("jobQueueName", (Some (String_.to_value x.jobQueueName)));
-        ("jobQueueArn", (Some (String_.to_value x.jobQueueArn)))]
+        [("quotaShareName",
+           (Option.map x.quotaShareName ~f:String_.to_value));
+        ("quotaShareArn", (Option.map x.quotaShareArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let quotaShareArn =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareArn") in
+      let quotaShareName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "quotaShareName") in
+      make ?quotaShareArn ?quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let quotaShareArn = field_map json__ "quotaShareArn" String_.of_json in
+      let quotaShareName = field_map json__ "quotaShareName" String_.of_json in
+      make ?quotaShareArn ?quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Batch quota share. Each quota share operates as a virtual queue with a configured compute capacity, resource sharing strategy, and borrow limits."]
+module CreateQuotaShareRequest =
+  struct
+    type nonrec t =
+      {
+      quotaShareName: String_.t
+        [@ocaml.doc
+          "The name of the quota share. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+      jobQueue: String_.t
+        [@ocaml.doc
+          "The Batch job queue associated with the quota share. This can be the job queue name or ARN. A job queue must be in the VALID state before you can associate it with a quota share."];
+      capacityLimits: QuotaShareCapacityLimits.t
+        [@ocaml.doc
+          "A list that specifies the quantity and type of compute capacity allocated to the quota share."];
+      resourceSharingConfiguration: QuotaShareResourceSharingConfiguration.t
+        [@ocaml.doc
+          "Specifies whether a quota share reserves, lends, or both lends and borrows idle compute capacity."];
+      preemptionConfiguration: QuotaSharePreemptionConfiguration.t
+        [@ocaml.doc
+          "Specifies the preemption behavior for jobs in a quota share."];
+      state: QuotaShareState.t option
+        [@ocaml.doc
+          "The state of the quota share. If the quota share is ENABLED, it is able to accept jobs. If the quota share is DISABLED, new jobs won't be accepted but jobs already submitted can finish. The default state is ENABLED."];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that you apply to the quota share to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources in Batch User Guide."]}
+    let context_ = "CreateQuotaShareRequest"
+    let make ?state =
+      fun ?tags ->
+        fun ~quotaShareName ->
+          fun ~jobQueue ->
+            fun ~capacityLimits ->
+              fun ~resourceSharingConfiguration ->
+                fun ~preemptionConfiguration ->
+                  fun () ->
+                    {
+                      state;
+                      tags;
+                      quotaShareName;
+                      jobQueue;
+                      capacityLimits;
+                      resourceSharingConfiguration;
+                      preemptionConfiguration
+                    }
+    let to_value x =
+      structure_to_value
+        [("quotaShareName", (Some (String_.to_value x.quotaShareName)));
+        ("jobQueue", (Some (String_.to_value x.jobQueue)));
+        ("capacityLimits",
+          (Some (QuotaShareCapacityLimits.to_value x.capacityLimits)));
+        ("resourceSharingConfiguration",
+          (Some
+             (QuotaShareResourceSharingConfiguration.to_value
+                x.resourceSharingConfiguration)));
+        ("preemptionConfiguration",
+          (Some
+             (QuotaSharePreemptionConfiguration.to_value
+                x.preemptionConfiguration)));
+        ("state", (Option.map x.state ~f:QuotaShareState.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let state =
+        (Option.map ~f:QuotaShareState.of_xml) (Xml.child xml_arg0 "state") in
+      let preemptionConfiguration =
+        QuotaSharePreemptionConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "preemptionConfiguration") in
+      let resourceSharingConfiguration =
+        QuotaShareResourceSharingConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "resourceSharingConfiguration") in
+      let capacityLimits =
+        QuotaShareCapacityLimits.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "capacityLimits") in
+      let jobQueue =
+        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobQueue") in
+      let quotaShareName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "quotaShareName") in
+      make ?tags ?state ~preemptionConfiguration
+        ~resourceSharingConfiguration ~capacityLimits ~jobQueue
+        ~quotaShareName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let state = field_map json__ "state" QuotaShareState.of_json in
+      let preemptionConfiguration =
+        field_map_exn json__ "preemptionConfiguration"
+          QuotaSharePreemptionConfiguration.of_json in
+      let resourceSharingConfiguration =
+        field_map_exn json__ "resourceSharingConfiguration"
+          QuotaShareResourceSharingConfiguration.of_json in
+      let capacityLimits =
+        field_map_exn json__ "capacityLimits"
+          QuotaShareCapacityLimits.of_json in
+      let jobQueue = field_map_exn json__ "jobQueue" String_.of_json in
+      let quotaShareName =
+        field_map_exn json__ "quotaShareName" String_.of_json in
+      make ?tags ?state ~preemptionConfiguration
+        ~resourceSharingConfiguration ~capacityLimits ~jobQueue
+        ~quotaShareName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates an Batch quota share. Each quota share operates as a virtual queue with a configured compute capacity, resource sharing strategy, and borrow limits."]
+module CreateJobQueueResponse =
+  struct
+    type nonrec t =
+      {
+      jobQueueName: String_.t option
+        [@ocaml.doc "The name of the job queue."];
+      jobQueueArn: String_.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the job queue."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobQueueName =
+      fun ?jobQueueArn -> fun () -> { jobQueueName; jobQueueArn }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobQueueName", (Option.map x.jobQueueName ~f:String_.to_value));
+        ("jobQueueArn", (Option.map x.jobQueueArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let jobQueueArn =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobQueueArn") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueArn") in
       let jobQueueName =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
-      make ~jobQueueArn ~jobQueueName ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "jobQueueName") in
+      make ?jobQueueArn ?jobQueueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobQueueArn = field_map_exn json "jobQueueArn" String_.of_json in
-      let jobQueueName = field_map_exn json "jobQueueName" String_.of_json in
-      make ~jobQueueArn ~jobQueueName ()
+    let of_json json__ =
+      let jobQueueArn = field_map json__ "jobQueueArn" String_.of_json in
+      let jobQueueName = field_map json__ "jobQueueName" String_.of_json in
+      make ?jobQueueArn ?jobQueueName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates an Batch job queue. When you create a job queue, you associate one or more compute environments to the queue and assign an order of preference for the compute environments. You also set a priority to the job queue that determines the order that the Batch scheduler places jobs onto its associated compute environments. For example, if a compute environment is associated with more than one job queue, the job queue with a higher priority is given preference for scheduling jobs to that compute environment."]
@@ -7015,32 +17142,47 @@ module CreateJobQueueRequest =
           "The state of the job queue. If the job queue state is ENABLED, it is able to accept jobs. If the job queue state is DISABLED, new jobs can't be added to the queue, but jobs already in the queue can finish."];
       schedulingPolicyArn: String_.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the fair share scheduling policy. If this parameter is specified, the job queue uses a fair share scheduling policy. If this parameter isn't specified, the job queue uses a first in, first out (FIFO) scheduling policy. After a job queue is created, you can replace but can't remove the fair share scheduling policy. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . An example is aws:aws:batch:us-west-2:012345678910:scheduling-policy/MySchedulingPolicy."];
+          "The Amazon Resource Name (ARN) of the fair-share scheduling policy. Job queues that don't have a fair-share scheduling policy are scheduled in a first-in, first-out (FIFO) model. After a job queue has a fair-share scheduling policy, it can be replaced but can't be removed. The format is aws:Partition:batch:Region:Account:scheduling-policy/Name . An example is aws:aws:batch:us-west-2:123456789012:scheduling-policy/MySchedulingPolicy. A job queue without a fair-share scheduling policy is scheduled as a FIFO job queue and can't have a fair-share scheduling policy added. Jobs queues with a fair-share scheduling policy can have a maximum of 500 active share identifiers. When the limit has been reached, submissions of any jobs that add a new share identifier fail."];
       priority: Integer.t
         [@ocaml.doc
           "The priority of the job queue. Job queues with a higher priority (or a higher integer value for the priority parameter) are evaluated first when associated with the same compute environment. Priority is determined in descending order. For example, a job queue with a priority value of 10 is given scheduling preference over a job queue with a priority value of 1. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); EC2 and Fargate compute environments can't be mixed."];
-      computeEnvironmentOrder: ComputeEnvironmentOrders.t
+      computeEnvironmentOrder: ComputeEnvironmentOrders.t option
         [@ocaml.doc
-          "The set of compute environments mapped to a job queue and their order relative to each other. The job scheduler uses this parameter to determine which compute environment should run a specific job. Compute environments must be in the VALID state before you can associate them with a job queue. You can associate up to three compute environments with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."];
+          "The set of compute environments mapped to a job queue and their order relative to each other. The job scheduler uses this parameter to determine which compute environment runs a specific job. Compute environments must be in the VALID state before you can associate them with a job queue. You can associate up to three compute environments with a job queue. All of the compute environments must be either EC2 (EC2 or SPOT) or Fargate (FARGATE or FARGATE_SPOT); EC2 and Fargate compute environments can't be mixed. All compute environments that are associated with a job queue must share the same architecture. Batch doesn't support mixing compute environment architecture types in a single job queue."];
+      serviceEnvironmentOrder: ServiceEnvironmentOrders.t option
+        [@ocaml.doc
+          "A list of service environments that this job queue can use to allocate jobs. All serviceEnvironments must have the same type. A job queue can't have both a serviceEnvironmentOrder and a computeEnvironmentOrder field."];
+      jobQueueType: JobQueueType.t option
+        [@ocaml.doc
+          "The type of job queue. For service jobs that run on SageMaker Training, this value is SAGEMAKER_TRAINING. For regular container jobs, this value is EKS, ECS, or ECS_FARGATE depending on the compute environment."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
-          "The tags that you apply to the job queue to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources in Batch User Guide."]}
+          "The tags that you apply to the job queue to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources in Batch User Guide."];
+      jobStateTimeLimitActions: JobStateTimeLimitActions.t option
+        [@ocaml.doc
+          "The set of actions that Batch performs on jobs that remain at the head of the job queue in the specified state longer than specified times. Batch will perform each action after maxTimeSeconds has passed. (Note: The minimum value for maxTimeSeconds is 600 (10 minutes) and its maximum value is 86,400 (24 hours).)"]}
     let context_ = "CreateJobQueueRequest"
     let make ?state =
       fun ?schedulingPolicyArn ->
-        fun ?tags ->
-          fun ~jobQueueName ->
-            fun ~priority ->
-              fun ~computeEnvironmentOrder ->
-                fun () ->
-                  {
-                    state;
-                    schedulingPolicyArn;
-                    tags;
-                    jobQueueName;
-                    priority;
-                    computeEnvironmentOrder
-                  }
+        fun ?computeEnvironmentOrder ->
+          fun ?serviceEnvironmentOrder ->
+            fun ?jobQueueType ->
+              fun ?tags ->
+                fun ?jobStateTimeLimitActions ->
+                  fun ~jobQueueName ->
+                    fun ~priority ->
+                      fun () ->
+                        {
+                          state;
+                          schedulingPolicyArn;
+                          computeEnvironmentOrder;
+                          serviceEnvironmentOrder;
+                          jobQueueType;
+                          tags;
+                          jobStateTimeLimitActions;
+                          jobQueueName;
+                          priority
+                        }
     let to_value x =
       structure_to_value
         [("jobQueueName", (Some (String_.to_value x.jobQueueName)));
@@ -7049,15 +17191,33 @@ module CreateJobQueueRequest =
           (Option.map x.schedulingPolicyArn ~f:String_.to_value));
         ("priority", (Some (Integer.to_value x.priority)));
         ("computeEnvironmentOrder",
-          (Some (ComputeEnvironmentOrders.to_value x.computeEnvironmentOrder)));
-        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+          (Option.map x.computeEnvironmentOrder
+             ~f:ComputeEnvironmentOrders.to_value));
+        ("serviceEnvironmentOrder",
+          (Option.map x.serviceEnvironmentOrder
+             ~f:ServiceEnvironmentOrders.to_value));
+        ("jobQueueType",
+          (Option.map x.jobQueueType ~f:JobQueueType.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("jobStateTimeLimitActions",
+          (Option.map x.jobStateTimeLimitActions
+             ~f:JobStateTimeLimitActions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let jobStateTimeLimitActions =
+        (Option.map ~f:JobStateTimeLimitActions.of_xml)
+          (Xml.child xml_arg0 "jobStateTimeLimitActions") in
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let jobQueueType =
+        (Option.map ~f:JobQueueType.of_xml)
+          (Xml.child xml_arg0 "jobQueueType") in
+      let serviceEnvironmentOrder =
+        (Option.map ~f:ServiceEnvironmentOrders.of_xml)
+          (Xml.child xml_arg0 "serviceEnvironmentOrder") in
       let computeEnvironmentOrder =
-        ComputeEnvironmentOrders.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentOrder") in
+        (Option.map ~f:ComputeEnvironmentOrders.of_xml)
+          (Xml.child xml_arg0 "computeEnvironmentOrder") in
       let priority =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "priority") in
       let schedulingPolicyArn =
@@ -7067,30 +17227,158 @@ module CreateJobQueueRequest =
       let jobQueueName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "jobQueueName") in
-      make ?tags ~computeEnvironmentOrder ~priority ?schedulingPolicyArn
-        ?state ~jobQueueName ()
+      make ?jobStateTimeLimitActions ?tags ?jobQueueType
+        ?serviceEnvironmentOrder ?computeEnvironmentOrder ~priority
+        ?schedulingPolicyArn ?state ~jobQueueName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
+    let of_json json__ =
+      let jobStateTimeLimitActions =
+        field_map json__ "jobStateTimeLimitActions"
+          JobStateTimeLimitActions.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let jobQueueType = field_map json__ "jobQueueType" JobQueueType.of_json in
+      let serviceEnvironmentOrder =
+        field_map json__ "serviceEnvironmentOrder"
+          ServiceEnvironmentOrders.of_json in
       let computeEnvironmentOrder =
-        field_map_exn json "computeEnvironmentOrder"
+        field_map json__ "computeEnvironmentOrder"
           ComputeEnvironmentOrders.of_json in
-      let priority = field_map_exn json "priority" Integer.of_json in
+      let priority = field_map_exn json__ "priority" Integer.of_json in
       let schedulingPolicyArn =
-        field_map json "schedulingPolicyArn" String_.of_json in
-      let state = field_map json "state" JQState.of_json in
-      let jobQueueName = field_map_exn json "jobQueueName" String_.of_json in
-      make ?tags ~computeEnvironmentOrder ~priority ?schedulingPolicyArn
-        ?state ~jobQueueName ()
+        field_map json__ "schedulingPolicyArn" String_.of_json in
+      let state = field_map json__ "state" JQState.of_json in
+      let jobQueueName = field_map_exn json__ "jobQueueName" String_.of_json in
+      make ?jobStateTimeLimitActions ?tags ?jobQueueType
+        ?serviceEnvironmentOrder ?computeEnvironmentOrder ~priority
+        ?schedulingPolicyArn ?state ~jobQueueName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CreateJobQueue."]
+module CreateConsumableResourceResponse =
+  struct
+    type nonrec t =
+      {
+      consumableResourceName: String_.t option
+        [@ocaml.doc "The name of the consumable resource."];
+      consumableResourceArn: String_.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the consumable resource."]}
+    type nonrec error =
+      [ `ClientException of ClientException.t 
+      | `ServerException of ServerException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?consumableResourceName =
+      fun ?consumableResourceArn ->
+        fun () -> { consumableResourceName; consumableResourceArn }
+    let error_of_json name json =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_json json)
+      | "ServerException" -> `ServerException (ServerException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ClientException" -> `ClientException (ClientException.of_xml xml)
+      | "ServerException" -> `ServerException (ServerException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ClientException e ->
+          `Assoc
+            [("error", (`String "ClientException"));
+            ("details", (ClientException.to_json e))]
+      | `ServerException e ->
+          `Assoc
+            [("error", (`String "ServerException"));
+            ("details", (ServerException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("consumableResourceName",
+           (Option.map x.consumableResourceName ~f:String_.to_value));
+        ("consumableResourceArn",
+          (Option.map x.consumableResourceArn ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let consumableResourceArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceArn") in
+      let consumableResourceName =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "consumableResourceName") in
+      make ?consumableResourceArn ?consumableResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let consumableResourceArn =
+        field_map json__ "consumableResourceArn" String_.of_json in
+      let consumableResourceName =
+        field_map json__ "consumableResourceName" String_.of_json in
+      make ?consumableResourceArn ?consumableResourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates an Batch consumable resource."]
+module CreateConsumableResourceRequest =
+  struct
+    type nonrec t =
+      {
+      consumableResourceName: String_.t
+        [@ocaml.doc "The name of the consumable resource. Must be unique."];
+      totalQuantity: Long.t option
+        [@ocaml.doc
+          "The total amount of the consumable resource that is available. Must be non-negative."];
+      resourceType: String_.t option
+        [@ocaml.doc
+          "Indicates whether the resource is available to be re-used after a job completes. Can be one of: REPLENISHABLE (default) NON_REPLENISHABLE"];
+      tags: TagrisTagsMap.t option
+        [@ocaml.doc
+          "The tags that you apply to the consumable resource to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging your Batch resources."]}
+    let context_ = "CreateConsumableResourceRequest"
+    let make ?totalQuantity =
+      fun ?resourceType ->
+        fun ?tags ->
+          fun ~consumableResourceName ->
+            fun () ->
+              { totalQuantity; resourceType; tags; consumableResourceName }
+    let to_value x =
+      structure_to_value
+        [("consumableResourceName",
+           (Some (String_.to_value x.consumableResourceName)));
+        ("totalQuantity", (Option.map x.totalQuantity ~f:Long.to_value));
+        ("resourceType", (Option.map x.resourceType ~f:String_.to_value));
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let resourceType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceType") in
+      let totalQuantity =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "totalQuantity") in
+      let consumableResourceName =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "consumableResourceName") in
+      make ?tags ?resourceType ?totalQuantity ~consumableResourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let resourceType = field_map json__ "resourceType" String_.of_json in
+      let totalQuantity = field_map json__ "totalQuantity" Long.of_json in
+      let consumableResourceName =
+        field_map_exn json__ "consumableResourceName" String_.of_json in
+      make ?tags ?resourceType ?totalQuantity ~consumableResourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates an Batch consumable resource."]
 module CreateComputeEnvironmentResponse =
   struct
     type nonrec t =
       {
       computeEnvironmentName: String_.t option
         [@ocaml.doc
-          "The name of the compute environment. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+          "The name of the compute environment. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
       computeEnvironmentArn: String_.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the compute environment."]}
@@ -7145,58 +17433,66 @@ module CreateComputeEnvironmentResponse =
           (Xml.child xml_arg0 "computeEnvironmentName") in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let computeEnvironmentArn =
-        field_map json "computeEnvironmentArn" String_.of_json in
+        field_map json__ "computeEnvironmentArn" String_.of_json in
       let computeEnvironmentName =
-        field_map json "computeEnvironmentName" String_.of_json in
+        field_map json__ "computeEnvironmentName" String_.of_json in
       make ?computeEnvironmentArn ?computeEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an Batch compute environment. You can create MANAGED or UNMANAGED compute environments. MANAGED compute environments can use Amazon EC2 or Fargate resources. UNMANAGED compute environments can only use EC2 resources. In a managed compute environment, Batch manages the capacity and instance types of the compute resources within the environment. This is based on the compute resource specification that you define or the launch template that you specify when you create the compute environment. Either, you can choose to use EC2 On-Demand Instances and EC2 Spot Instances. Or, you can use Fargate and Fargate Spot capacity in your managed compute environment. You can optionally set a maximum price so that Spot Instances only launch when the Spot Instance price is less than a specified percentage of the On-Demand price. Multi-node parallel jobs aren't supported on Spot Instances. In an unmanaged compute environment, you can manage your own EC2 compute resources and have a lot of flexibility with how you configure your compute resources. For example, you can use custom AMIs. However, you must verify that each of your AMIs meet the Amazon ECS container instance AMI specification. For more information, see container instance AMIs in the Amazon Elastic Container Service Developer Guide. After you created your unmanaged compute environment, you can use the DescribeComputeEnvironments operation to find the Amazon ECS cluster that's associated with it. Then, launch your container instances into that Amazon ECS cluster. For more information, see Launching an Amazon ECS container instance in the Amazon Elastic Container Service Developer Guide. Batch doesn't upgrade the AMIs in a compute environment after the environment is created. For example, it doesn't update the AMIs when a newer version of the Amazon ECS optimized AMI is available. Therefore, you're responsible for managing the guest operating system (including its updates and security patches) and any additional application software or utilities that you install on the compute resources. To use a new AMI for your Batch jobs, complete these steps: Create a new compute environment with the new AMI. Add the compute environment to an existing job queue. Remove the earlier compute environment from your job queue. Delete the earlier compute environment."]
+       "Creates an Batch compute environment. You can create MANAGED or UNMANAGED compute environments. MANAGED compute environments can use Amazon EC2 or Fargate resources. UNMANAGED compute environments can only use EC2 resources. In a managed compute environment, Batch manages the capacity and instance types of the compute resources within the environment. This is based on the compute resource specification that you define or the launch template that you specify when you create the compute environment. Either, you can choose to use EC2 On-Demand Instances and EC2 Spot Instances. Or, you can use Fargate and Fargate Spot capacity in your managed compute environment. You can optionally set a maximum price so that Spot Instances only launch when the Spot Instance price is less than a specified percentage of the On-Demand price. In an unmanaged compute environment, you can manage your own EC2 compute resources and have flexibility with how you configure your compute resources. For example, you can use custom AMIs. However, you must verify that each of your AMIs meet the Amazon ECS container instance AMI specification. For more information, see container instance AMIs in the Amazon Elastic Container Service Developer Guide. After you created your unmanaged compute environment, you can use the DescribeComputeEnvironments operation to find the Amazon ECS cluster that's associated with it. Then, launch your container instances into that Amazon ECS cluster. For more information, see Launching an Amazon ECS container instance in the Amazon Elastic Container Service Developer Guide. Batch doesn't automatically upgrade the AMIs in a compute environment after it's created. For more information on how to update a compute environment's AMI, see Updating compute environments in the Batch User Guide."]
 module CreateComputeEnvironmentRequest =
   struct
     type nonrec t =
       {
       computeEnvironmentName: String_.t
         [@ocaml.doc
-          "The name for your compute environment. It can be up to 128 letters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
+          "The name for your compute environment. It can be up to 128 characters long. It can contain uppercase and lowercase letters, numbers, hyphens (-), and underscores (_)."];
       type_: CEType.t
         [@ocaml.doc
           "The type of the compute environment: MANAGED or UNMANAGED. For more information, see Compute Environments in the Batch User Guide."];
       state: CEState.t option
         [@ocaml.doc
-          "The state of the compute environment. If the state is ENABLED, then the compute environment accepts jobs from a queue and can scale out automatically based on queues. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically, based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. However, they scale in to minvCpus value after instances become idle."];
+          "The state of the compute environment. If the state is ENABLED, then the compute environment accepts jobs from a queue and can scale out automatically based on queues. If the state is ENABLED, then the Batch scheduler can attempt to place jobs from an associated job queue on the compute resources within the environment. If the compute environment is managed, then it can scale its instances out or in automatically, based on the job queue demand. If the state is DISABLED, then the Batch scheduler doesn't attempt to place jobs within the environment. Jobs in a STARTING or RUNNING state continue to progress normally. Managed compute environments in the DISABLED state don't scale out. Compute environments in a DISABLED state may continue to incur billing charges, for example, if they have running instances due to jobs that are still executing or a non-zero minvCpus setting. To prevent additional charges, disable and delete the compute environment. When an instance is idle, the instance scales down to the minvCpus value. However, the instance size doesn't change. For example, consider a c5.8xlarge instance with a minvCpus value of 4 and a desiredvCpus value of 36. This instance doesn't scale down to a c5.large instance."];
       unmanagedvCpus: Integer.t option
         [@ocaml.doc
-          "The maximum number of vCPUs for an unmanaged compute environment. This parameter is only used for fair share scheduling to reserve vCPU capacity for new share identifiers. If this parameter isn't provided for a fair share job queue, no vCPU capacity is reserved. This parameter is only supported when the type parameter is set to UNMANAGED."];
+          "The maximum number of vCPUs for an unmanaged compute environment. This parameter is only used for fair-share scheduling to reserve vCPU capacity for new share identifiers. If this parameter isn't provided for a fair-share job queue, no vCPU capacity is reserved. This parameter is only supported when the type parameter is set to UNMANAGED."];
       computeResources: ComputeResource.t option
         [@ocaml.doc
           "Details about the compute resources managed by the compute environment. This parameter is required for managed compute environments. For more information, see Compute Environments in the Batch User Guide."];
       serviceRole: String_.t option
         [@ocaml.doc
-          "The full Amazon Resource Name (ARN) of the IAM role that allows Batch to make calls to other Amazon Web Services services on your behalf. For more information, see Batch service IAM role in the Batch User Guide. If your account already created the Batch service-linked role, that role is used by default for your compute environment unless you specify a different role here. If the Batch service-linked role doesn't exist in your account, and no role is specified here, the service attempts to create the Batch service-linked role in your account. If your specified role has a path other than /, then you must specify either the full role ARN (recommended) or prefix the role name with the path. For example, if a role with the name bar has a path of /foo/ then you would specify /foo/bar as the role name. For more information, see Friendly names and paths in the IAM User Guide. Depending on how you created your Batch service role, its ARN might contain the service-role path prefix. When you only specify the name of the service role, Batch assumes that your ARN doesn't use the service-role path prefix. Because of this, we recommend that you specify the full ARN of your service role when you create compute environments."];
+          "The full Amazon Resource Name (ARN) of the IAM role that allows Batch to make calls to other Amazon Web Services services on your behalf. For more information, see Batch service IAM role in the Batch User Guide. If your account already created the Batch service-linked role, that role is used by default for your compute environment unless you specify a different role here. If the Batch service-linked role doesn't exist in your account, and no role is specified here, the service attempts to create the Batch service-linked role in your account. If your specified role has a path other than /, then you must specify either the full role ARN (recommended) or prefix the role name with the path. For example, if a role with the name bar has a path of /foo/, specify /foo/bar as the role name. For more information, see Friendly names and paths in the IAM User Guide. Depending on how you created your Batch service role, its ARN might contain the service-role path prefix. When you only specify the name of the service role, Batch assumes that your ARN doesn't use the service-role path prefix. Because of this, we recommend that you specify the full ARN of your service role when you create compute environments."];
       tags: TagrisTagsMap.t option
         [@ocaml.doc
-          "The tags that you apply to the compute environment to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference. These tags can be updated or removed using the TagResource and UntagResource API operations. These tags don't propagate to the underlying compute resources."]}
+          "The tags that you apply to the compute environment to help you categorize and organize your resources. Each tag consists of a key and an optional value. For more information, see Tagging Amazon Web Services Resources in Amazon Web Services General Reference. These tags can be updated or removed using the TagResource and UntagResource API operations. These tags don't propagate to the underlying compute resources."];
+      eksConfiguration: EksConfiguration.t option
+        [@ocaml.doc
+          "The details for the Amazon EKS cluster that supports the compute environment. To create a compute environment that uses EKS resources, the caller must have permissions to call eks:DescribeCluster."];
+      context: String_.t option [@ocaml.doc "Reserved."]}
     let context_ = "CreateComputeEnvironmentRequest"
     let make ?state =
       fun ?unmanagedvCpus ->
         fun ?computeResources ->
           fun ?serviceRole ->
             fun ?tags ->
-              fun ~computeEnvironmentName ->
-                fun ~type_ ->
-                  fun () ->
-                    {
-                      state;
-                      unmanagedvCpus;
-                      computeResources;
-                      serviceRole;
-                      tags;
-                      computeEnvironmentName;
-                      type_
-                    }
+              fun ?eksConfiguration ->
+                fun ?context ->
+                  fun ~computeEnvironmentName ->
+                    fun ~type_ ->
+                      fun () ->
+                        {
+                          state;
+                          unmanagedvCpus;
+                          computeResources;
+                          serviceRole;
+                          tags;
+                          eksConfiguration;
+                          context;
+                          computeEnvironmentName;
+                          type_
+                        }
     let to_value x =
       structure_to_value
         [("computeEnvironmentName",
@@ -7207,9 +17503,17 @@ module CreateComputeEnvironmentRequest =
         ("computeResources",
           (Option.map x.computeResources ~f:ComputeResource.to_value));
         ("serviceRole", (Option.map x.serviceRole ~f:String_.to_value));
-        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagrisTagsMap.to_value));
+        ("eksConfiguration",
+          (Option.map x.eksConfiguration ~f:EksConfiguration.to_value));
+        ("context", (Option.map x.context ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "context") in
+      let eksConfiguration =
+        (Option.map ~f:EksConfiguration.of_xml)
+          (Xml.child xml_arg0 "eksConfiguration") in
       let tags =
         (Option.map ~f:TagrisTagsMap.of_xml) (Xml.child xml_arg0 "tags") in
       let serviceRole =
@@ -7225,21 +17529,24 @@ module CreateComputeEnvironmentRequest =
       let computeEnvironmentName =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "computeEnvironmentName") in
-      make ?tags ?serviceRole ?computeResources ?unmanagedvCpus ?state ~type_
-        ~computeEnvironmentName ()
+      make ?context ?eksConfiguration ?tags ?serviceRole ?computeResources
+        ?unmanagedvCpus ?state ~type_ ~computeEnvironmentName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagrisTagsMap.of_json in
-      let serviceRole = field_map json "serviceRole" String_.of_json in
+    let of_json json__ =
+      let context = field_map json__ "context" String_.of_json in
+      let eksConfiguration =
+        field_map json__ "eksConfiguration" EksConfiguration.of_json in
+      let tags = field_map json__ "tags" TagrisTagsMap.of_json in
+      let serviceRole = field_map json__ "serviceRole" String_.of_json in
       let computeResources =
-        field_map json "computeResources" ComputeResource.of_json in
-      let unmanagedvCpus = field_map json "unmanagedvCpus" Integer.of_json in
-      let state = field_map json "state" CEState.of_json in
-      let type_ = field_map_exn json "type" CEType.of_json in
+        field_map json__ "computeResources" ComputeResource.of_json in
+      let unmanagedvCpus = field_map json__ "unmanagedvCpus" Integer.of_json in
+      let state = field_map json__ "state" CEState.of_json in
+      let type_ = field_map_exn json__ "type" CEType.of_json in
       let computeEnvironmentName =
-        field_map_exn json "computeEnvironmentName" String_.of_json in
-      make ?tags ?serviceRole ?computeResources ?unmanagedvCpus ?state ~type_
-        ~computeEnvironmentName ()
+        field_map_exn json__ "computeEnvironmentName" String_.of_json in
+      make ?context ?eksConfiguration ?tags ?serviceRole ?computeResources
+        ?unmanagedvCpus ?state ~type_ ~computeEnvironmentName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CreateComputeEnvironment."]
 module CancelJobResponse =
@@ -7286,7 +17593,7 @@ module CancelJobResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Cancels a job in an Batch job queue. Jobs that are in the SUBMITTED, PENDING, or RUNNABLE state are canceled. Jobs that have progressed to STARTING or RUNNING aren't canceled, but the API operation still succeeds, even if no job is canceled. These jobs must be terminated with the TerminateJob operation."]
+       "Cancels a job in an Batch job queue. Jobs that are in a SUBMITTED, PENDING, or RUNNABLE state are cancelled and the job status is updated to FAILED. A PENDING job is canceled after all dependency jobs are completed. Therefore, it may take longer than expected to cancel a job in PENDING status. When you try to cancel an array parent job in PENDING, Batch attempts to cancel all child jobs. The array parent job is canceled when all child jobs are completed. Jobs that progressed to the STARTING or RUNNING state aren't canceled. However, the API operation still succeeds, even if no job is canceled. These jobs must be terminated with the TerminateJob operation."]
 module CancelJobRequest =
   struct
     type nonrec t =
@@ -7294,7 +17601,7 @@ module CancelJobRequest =
       jobId: String_.t [@ocaml.doc "The Batch job ID of the job to cancel."];
       reason: String_.t
         [@ocaml.doc
-          "A message to attach to the job that explains the reason for canceling it. This message is returned by future DescribeJobs operations on the job. This message is also recorded in the Batch activity logs."]}
+          "A message to attach to the job that explains the reason for canceling it. This message is returned by future DescribeJobs operations on the job. It is also recorded in the Batch activity logs. This parameter has as limit of 1024 characters."]}
     let context_ = "CancelJobRequest"
     let make ~jobId = fun ~reason -> fun () -> { jobId; reason }
     let to_value x =
@@ -7309,9 +17616,9 @@ module CancelJobRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "reason" String_.of_json in
-      let jobId = field_map_exn json "jobId" String_.of_json in
+    let of_json json__ =
+      let reason = field_map_exn json__ "reason" String_.of_json in
+      let jobId = field_map_exn json__ "jobId" String_.of_json in
       make ~reason ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CancelJob."]

@@ -11,6 +11,8 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_user_to_permission_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateUserToPermissionGroup input
 let create_changeset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateChangeset input
 let create_data_view ?endpoint_url ?cfg input =
@@ -27,6 +29,8 @@ let delete_permission_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeletePermissionGroup input
 let disable_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableUser input
+let disassociate_user_from_permission_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisassociateUserFromPermissionGroup input
 let enable_user ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableUser input
 let get_changeset ?endpoint_url ?cfg input =
@@ -35,6 +39,10 @@ let get_data_view ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataView input
 let get_dataset ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDataset input
+let get_external_data_view_access_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetExternalDataViewAccessDetails input
+let get_permission_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPermissionGroup input
 let get_programmatic_access_credentials ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetProgrammaticAccessCredentials input
 let get_user ?endpoint_url ?cfg input =
@@ -49,8 +57,12 @@ let list_datasets ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDatasets input
 let list_permission_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPermissionGroups input
+let list_permission_groups_by_user ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPermissionGroupsByUser input
 let list_users ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsers input
+let list_users_by_permission_group ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListUsersByPermissionGroup input
 let reset_user_password ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResetUserPassword input
 let update_changeset ?endpoint_url ?cfg input =

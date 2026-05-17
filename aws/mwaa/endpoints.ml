@@ -12,6 +12,8 @@ type ('i, 'o, 'e) t =
   DeleteEnvironmentOutput.error) t 
   | GetEnvironment: (GetEnvironmentInput.t, GetEnvironmentOutput.t,
   GetEnvironmentOutput.error) t 
+  | InvokeRestApi: (InvokeRestApiRequest.t, InvokeRestApiResponse.t,
+  InvokeRestApiResponse.error) t 
   | ListEnvironments: (ListEnvironmentsInput.t, ListEnvironmentsOutput.t,
   ListEnvironmentsOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
@@ -31,6 +33,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateWebLoginToken -> `POST
   | DeleteEnvironment -> `DELETE
   | GetEnvironment -> `GET
+  | InvokeRestApi -> `POST
   | ListEnvironments -> `GET
   | ListTagsForResource -> `GET
   | PublishMetrics -> `POST
@@ -55,18 +58,21 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | GetEnvironment ->
           (Format.kasprintf Uri.of_string) "/environments/%s"
             (EnvironmentName.to_header x.GetEnvironmentInput.name)
+      | InvokeRestApi ->
+          (Format.kasprintf Uri.of_string) "/restapi/%s"
+            (EnvironmentName.to_header x.InvokeRestApiRequest.name)
       | ListEnvironments ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/environments")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v ->
-                        ("MaxResults",
-                          (ListEnvironmentsInputMaxResultsInteger.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("NextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (ListEnvironmentsInputMaxResultsInteger.to_header v)))
+                 x.maxResults])
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (EnvironmentArn.to_header x.ListTagsForResourceInput.resourceArn)
@@ -99,6 +105,36 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteEnvironment -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetEnvironment ->
       let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | InvokeRestApi ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Path",
+                           (RestApiPath.to_value
+                              req.InvokeRestApiRequest.path));
+                      Some
+                        ("Method",
+                          (RestApiMethod.to_value
+                             req.InvokeRestApiRequest.method_));
+                      Option.map req.InvokeRestApiRequest.queryParameters
+                        ~f:(fun x ->
+                              ("QueryParameters", (Document.to_value x)));
+                      Option.map req.InvokeRestApiRequest.body
+                        ~f:(fun x ->
+                              ("Body", (RestApiRequestBody.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListEnvironments ->
       let (headers, body) = (None, None) in
@@ -223,6 +259,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetEnvironmentOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetEnvironmentOutput.error_of_json))
+  | InvokeRestApi ->
+      if is_success
+      then Ok (InvokeRestApiResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some InvokeRestApiResponse.error_of_json))
   | ListEnvironments ->
       if is_success
       then Ok (ListEnvironmentsOutput.of_json (response_to_json resp))

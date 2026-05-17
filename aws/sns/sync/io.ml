@@ -33,6 +33,8 @@ let delete_s_m_s_sandbox_phone_number ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSMSSandboxPhoneNumber input
 let delete_topic ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteTopic input
+let get_data_protection_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetDataProtectionPolicy input
 let get_endpoint_attributes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetEndpointAttributes input
 let get_platform_application_attributes ?endpoint_url ?cfg input =
@@ -69,6 +71,8 @@ let publish ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Publish input
 let publish_batch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PublishBatch input
+let put_data_protection_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutDataProtectionPolicy input
 let remove_permission ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RemovePermission input
 let set_endpoint_attributes ?endpoint_url ?cfg input =

@@ -24,6 +24,663 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module DbPath =
+  struct
+    type nonrec t = string
+    let context_ = "DbPath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1025) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(\\*)*[\\/\\?\\*]([^\\/]+\\/){0,2}[^\\/]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DbPath" j
+    let to_json = simple_to_json to_value
+  end
+module IcmpTypeOrCode =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for IcmpTypeOrCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Port =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:65535) >>=
+             (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Port" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KxVolumeName =
+  struct
+    type nonrec t = string
+    let context_ = "KxVolumeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxVolumeName" j
+    let to_json = simple_to_json to_value
+  end
+module SegmentConfigurationDbPathList =
+  struct
+    type nonrec t = DbPath.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DbPath.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DbPath.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SegmentConfigurationDbPathList"
+        ~of_json:DbPath.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BooleanValue =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module IcmpTypeCode =
+  struct
+    type nonrec t =
+      {
+      type_: IcmpTypeOrCode.t
+        [@ocaml.doc "The ICMP type. A value of -1 means all types."];
+      code: IcmpTypeOrCode.t
+        [@ocaml.doc
+          "The ICMP code. A value of -1 means all codes for the specified ICMP type."]}
+    let context_ = "IcmpTypeCode"
+    let make ~type_ = fun ~code -> fun () -> { type_; code }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (IcmpTypeOrCode.to_value x.type_)));
+        ("code", (Some (IcmpTypeOrCode.to_value x.code)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let code =
+        IcmpTypeOrCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "code") in
+      let type_ =
+        IcmpTypeOrCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ~code ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let code = field_map_exn json__ "code" IcmpTypeOrCode.of_json in
+      let type_ = field_map_exn json__ "type" IcmpTypeOrCode.of_json in
+      make ~code ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the ICMP protocol that consists of the ICMP type and code."]
+module PortRange =
+  struct
+    type nonrec t =
+      {
+      from: Port.t [@ocaml.doc "The first port in the range."];
+      to_: Port.t [@ocaml.doc "The last port in the range."]}
+    let context_ = "PortRange"
+    let make ~from = fun ~to_ -> fun () -> { from; to_ }
+    let to_value x =
+      structure_to_value
+        [("from", (Some (Port.to_value x.from)));
+        ("to", (Some (Port.to_value x.to_)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let to_ = Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "to") in
+      let from =
+        Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "from") in
+      make ~to_ ~from ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let to_ = field_map_exn json__ "to" Port.of_json in
+      let from = field_map_exn json__ "from" Port.of_json in
+      make ~to_ ~from ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The range of ports the rule applies to."]
+module Protocol =
+  struct
+    type nonrec t = string
+    let context_ = "Protocol"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:5) >>=
+                  (fun () -> check_pattern i ~pattern:"^-1|[0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Protocol" j
+    let to_json = simple_to_json to_value
+  end
+module RuleAction =
+  struct
+    type nonrec t =
+      | Allow 
+      | Deny 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Allow -> "allow" | Deny -> "deny" | Non_static_id s -> s
+    let of_string =
+      function | "allow" -> Allow | "deny" -> Deny | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration RuleAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RuleAction" j)
+    let to_json = simple_to_json to_value
+  end
+module RuleNumber =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:32766) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RuleNumber" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidCIDRBlock =
+  struct
+    type nonrec t = string
+    let context_ = "ValidCIDRBlock"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:18) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?:\\d{1,3}\\.){3}\\d{1,3}(?:\\/(?:3[0-2]|[12]\\d|\\d))$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidCIDRBlock" j
+    let to_json = simple_to_json to_value
+  end
+module KxClusterName =
+  struct
+    type nonrec t = string
+    let context_ = "KxClusterName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxClusterName" j
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewSegmentConfiguration =
+  struct
+    type nonrec t =
+      {
+      dbPaths: SegmentConfigurationDbPathList.t
+        [@ocaml.doc
+          "The database path of the data that you want to place on each selected volume for the segment. Each segment must have a unique database path for each volume."];
+      volumeName: KxVolumeName.t
+        [@ocaml.doc "The name of the volume where you want to add data."];
+      onDemand: BooleanValue.t option
+        [@ocaml.doc
+          "Enables on-demand caching on the selected database path when a particular file or a column of the database is accessed. When on demand caching is True, dataviews perform minimal loading of files on the filesystem as needed. When it is set to False, everything is cached. The default value is False."]}
+    let context_ = "KxDataviewSegmentConfiguration"
+    let make ?onDemand =
+      fun ~dbPaths ->
+        fun ~volumeName -> fun () -> { onDemand; dbPaths; volumeName }
+    let to_value x =
+      structure_to_value
+        [("dbPaths",
+           (Some (SegmentConfigurationDbPathList.to_value x.dbPaths)));
+        ("volumeName", (Some (KxVolumeName.to_value x.volumeName)));
+        ("onDemand", (Option.map x.onDemand ~f:BooleanValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let onDemand =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "onDemand") in
+      let volumeName =
+        KxVolumeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeName") in
+      let dbPaths =
+        SegmentConfigurationDbPathList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dbPaths") in
+      make ?onDemand ~volumeName ~dbPaths ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let onDemand = field_map json__ "onDemand" BooleanValue.of_json in
+      let volumeName = field_map_exn json__ "volumeName" KxVolumeName.of_json in
+      let dbPaths =
+        field_map_exn json__ "dbPaths" SegmentConfigurationDbPathList.of_json in
+      make ?onDemand ~volumeName ~dbPaths ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."]
+module DbPaths =
+  struct
+    type nonrec t = DbPath.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DbPath.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DbPath.of_xml)
+    let of_json j = list_of_json ~kind:"DbPaths" ~of_json:DbPath.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxCacheStorageType =
+  struct
+    type nonrec t = string
+    let context_ = "KxCacheStorageType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:10) >>=
+             (fun () -> check_string_min i ~min:8));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxCacheStorageType" j
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewName =
+  struct
+    type nonrec t = string
+    let context_ = "KxDataviewName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxDataviewName" j
+    let to_json = simple_to_json to_value
+  end
+module ValidHostname =
+  struct
+    type nonrec t = string
+    let context_ = "ValidHostname"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])(\\.([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]))*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidHostname" j
+    let to_json = simple_to_json to_value
+  end
+module ValidIPAddress =
+  struct
+    type nonrec t = string
+    let context_ = "ValidIPAddress"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidIPAddress" j
+    let to_json = simple_to_json to_value
+  end
+module NetworkACLEntry =
+  struct
+    type nonrec t =
+      {
+      ruleNumber: RuleNumber.t
+        [@ocaml.doc
+          "The rule number for the entry. For example 100. All the network ACL entries are processed in ascending order by rule number."];
+      protocol: Protocol.t
+        [@ocaml.doc
+          "The protocol number. A value of -1 means all the protocols."];
+      ruleAction: RuleAction.t
+        [@ocaml.doc
+          "Indicates whether to allow or deny the traffic that matches the rule."];
+      portRange: PortRange.t option
+        [@ocaml.doc "The range of ports the rule applies to."];
+      icmpTypeCode: IcmpTypeCode.t option
+        [@ocaml.doc
+          "Defines the ICMP protocol that consists of the ICMP type and code."];
+      cidrBlock: ValidCIDRBlock.t
+        [@ocaml.doc
+          "The IPv4 network range to allow or deny, in CIDR notation. For example, 172.16.0.0/24. We modify the specified CIDR block to its canonical form. For example, if you specify 100.68.0.18/18, we modify it to 100.68.0.0/18."]}
+    let context_ = "NetworkACLEntry"
+    let make ?portRange =
+      fun ?icmpTypeCode ->
+        fun ~ruleNumber ->
+          fun ~protocol ->
+            fun ~ruleAction ->
+              fun ~cidrBlock ->
+                fun () ->
+                  {
+                    portRange;
+                    icmpTypeCode;
+                    ruleNumber;
+                    protocol;
+                    ruleAction;
+                    cidrBlock
+                  }
+    let to_value x =
+      structure_to_value
+        [("ruleNumber", (Some (RuleNumber.to_value x.ruleNumber)));
+        ("protocol", (Some (Protocol.to_value x.protocol)));
+        ("ruleAction", (Some (RuleAction.to_value x.ruleAction)));
+        ("portRange", (Option.map x.portRange ~f:PortRange.to_value));
+        ("icmpTypeCode",
+          (Option.map x.icmpTypeCode ~f:IcmpTypeCode.to_value));
+        ("cidrBlock", (Some (ValidCIDRBlock.to_value x.cidrBlock)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cidrBlock =
+        ValidCIDRBlock.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "cidrBlock") in
+      let icmpTypeCode =
+        (Option.map ~f:IcmpTypeCode.of_xml)
+          (Xml.child xml_arg0 "icmpTypeCode") in
+      let portRange =
+        (Option.map ~f:PortRange.of_xml) (Xml.child xml_arg0 "portRange") in
+      let ruleAction =
+        RuleAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ruleAction") in
+      let protocol =
+        Protocol.of_xml (Xml.child_exn ~context:context_ xml_arg0 "protocol") in
+      let ruleNumber =
+        RuleNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ruleNumber") in
+      make ~cidrBlock ?icmpTypeCode ?portRange ~ruleAction ~protocol
+        ~ruleNumber ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cidrBlock = field_map_exn json__ "cidrBlock" ValidCIDRBlock.of_json in
+      let icmpTypeCode = field_map json__ "icmpTypeCode" IcmpTypeCode.of_json in
+      let portRange = field_map json__ "portRange" PortRange.of_json in
+      let ruleAction = field_map_exn json__ "ruleAction" RuleAction.of_json in
+      let protocol = field_map_exn json__ "protocol" Protocol.of_json in
+      let ruleNumber = field_map_exn json__ "ruleNumber" RuleNumber.of_json in
+      make ~cidrBlock ?icmpTypeCode ?portRange ~ruleAction ~protocol
+        ~ruleNumber ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The network access control list (ACL) is an optional layer of security for your VPC that acts as a firewall for controlling traffic in and out of one or more subnets. The entry is a set of numbered ingress and egress rules that determine whether a packet should be allowed in or out of a subnet associated with the ACL. We process the entries in the ACL according to the rule numbers, in ascending order."]
+module AttachedClusterList =
+  struct
+    type nonrec t = KxClusterName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxClusterName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxClusterName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AttachedClusterList" ~of_json:KxClusterName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ChangesetId =
+  struct
+    type nonrec t = string
+    let context_ = "ChangesetId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:26) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ChangesetId" j
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewSegmentConfigurationList =
+  struct
+    type nonrec t = KxDataviewSegmentConfiguration.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDataviewSegmentConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDataviewSegmentConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDataviewSegmentConfigurationList"
+        ~of_json:KxDataviewSegmentConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module VersionId =
+  struct
+    type nonrec t = string
+    let context_ = "VersionId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:26) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VersionId" j
+    let to_json = simple_to_json to_value
+  end
+module VolumeName =
+  struct
+    type nonrec t = string
+    let context_ = "VolumeName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VolumeName" j
+    let to_json = simple_to_json to_value
+  end
+module VolumeType =
+  struct
+    type nonrec t =
+      | NAS_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | NAS_1 -> "NAS_1" | Non_static_id s -> s
+    let of_string = function | "NAS_1" -> NAS_1 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration VolumeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VolumeType" j)
+    let to_json = simple_to_json to_value
+  end
 module FederationAttributeKey =
   struct
     type nonrec t = string
@@ -44,31 +701,299 @@ module FederationAttributeKey =
     let of_json j = string_of_json ~kind:"FederationAttributeKey" j
     let to_json = simple_to_json to_value
   end
-module Url =
+module FederationAttributeValue =
   struct
     type nonrec t = string
-    let context_ = "url"
+    let context_ = "FederationAttributeValue"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1000) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^https?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")));
+                  (fun () -> check_pattern i ~pattern:".*")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"url" j
+    let of_json j = string_of_json ~kind:"FederationAttributeValue" j
     let to_json = simple_to_json to_value
   end
+module KxDatabaseCacheConfiguration =
+  struct
+    type nonrec t =
+      {
+      cacheType: KxCacheStorageType.t
+        [@ocaml.doc
+          "The type of disk cache. This parameter is used to map the database path to cache storage. The valid values are: CACHE_1000 \226\128\147 This type provides at least 1000 MB/s disk access throughput."];
+      dbPaths: DbPaths.t
+        [@ocaml.doc
+          "Specifies the portions of database that will be loaded into the cache for access."];
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc
+          "The name of the dataview to be used for caching historical data on disk."]}
+    let context_ = "KxDatabaseCacheConfiguration"
+    let make ?dataviewName =
+      fun ~cacheType ->
+        fun ~dbPaths -> fun () -> { dataviewName; cacheType; dbPaths }
+    let to_value x =
+      structure_to_value
+        [("cacheType", (Some (KxCacheStorageType.to_value x.cacheType)));
+        ("dbPaths", (Some (DbPaths.to_value x.dbPaths)));
+        ("dataviewName",
+          (Option.map x.dataviewName ~f:KxDataviewName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      let dbPaths =
+        DbPaths.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dbPaths") in
+      let cacheType =
+        KxCacheStorageType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "cacheType") in
+      make ?dataviewName ~dbPaths ~cacheType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      let dbPaths = field_map_exn json__ "dbPaths" DbPaths.of_json in
+      let cacheType =
+        field_map_exn json__ "cacheType" KxCacheStorageType.of_json in
+      make ?dataviewName ~dbPaths ~cacheType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure of database cache configuration that is used for mapping database paths to cache types in clusters."]
+module AvailabilityZoneId =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityZoneId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:8) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityZoneId" j
+    let to_json = simple_to_json to_value
+  end
+module CustomDNSServer =
+  struct
+    type nonrec t =
+      {
+      customDNSServerName: ValidHostname.t
+        [@ocaml.doc "The name of the DNS server."];
+      customDNSServerIP: ValidIPAddress.t
+        [@ocaml.doc "The IP address of the DNS server."]}
+    let context_ = "CustomDNSServer"
+    let make ~customDNSServerName =
+      fun ~customDNSServerIP ->
+        fun () -> { customDNSServerName; customDNSServerIP }
+    let to_value x =
+      structure_to_value
+        [("customDNSServerName",
+           (Some (ValidHostname.to_value x.customDNSServerName)));
+        ("customDNSServerIP",
+          (Some (ValidIPAddress.to_value x.customDNSServerIP)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let customDNSServerIP =
+        ValidIPAddress.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "customDNSServerIP") in
+      let customDNSServerName =
+        ValidHostname.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "customDNSServerName") in
+      make ~customDNSServerIP ~customDNSServerName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let customDNSServerIP =
+        field_map_exn json__ "customDNSServerIP" ValidIPAddress.of_json in
+      let customDNSServerName =
+        field_map_exn json__ "customDNSServerName" ValidHostname.of_json in
+      make ~customDNSServerIP ~customDNSServerName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."]
+module NetworkACLConfiguration =
+  struct
+    type nonrec t = NetworkACLEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:NetworkACLEntry.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:NetworkACLEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"NetworkACLConfiguration"
+        ~of_json:NetworkACLEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TransitGatewayID =
+  struct
+    type nonrec t = string
+    let context_ = "TransitGatewayID"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TransitGatewayID" j
+    let to_json = simple_to_json to_value
+  end
+module ValidCIDRSpace =
+  struct
+    type nonrec t = string
+    let context_ = "ValidCIDRSpace"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidCIDRSpace" j
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewActiveVersion =
+  struct
+    type nonrec t =
+      {
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      attachedClusters: AttachedClusterList.t option
+        [@ocaml.doc
+          "The list of clusters that are currently using this dataview."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the dataview version was active. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      versionId: VersionId.t option
+        [@ocaml.doc "A unique identifier of the active version."]}
+    let make ?changesetId =
+      fun ?segmentConfigurations ->
+        fun ?attachedClusters ->
+          fun ?createdTimestamp ->
+            fun ?versionId ->
+              fun () ->
+                {
+                  changesetId;
+                  segmentConfigurations;
+                  attachedClusters;
+                  createdTimestamp;
+                  versionId
+                }
+    let to_value x =
+      structure_to_value
+        [("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("attachedClusters",
+          (Option.map x.attachedClusters ~f:AttachedClusterList.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("versionId", (Option.map x.versionId ~f:VersionId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let versionId =
+        (Option.map ~f:VersionId.of_xml) (Xml.child xml_arg0 "versionId") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let attachedClusters =
+        (Option.map ~f:AttachedClusterList.of_xml)
+          (Xml.child xml_arg0 "attachedClusters") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      make ?versionId ?createdTimestamp ?attachedClusters
+        ?segmentConfigurations ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let versionId = field_map json__ "versionId" VersionId.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let attachedClusters =
+        field_map json__ "attachedClusters" AttachedClusterList.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      make ?versionId ?createdTimestamp ?attachedClusters
+        ?segmentConfigurations ?changesetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The active version of the dataview that is currently in use by this cluster."]
+module Volume =
+  struct
+    type nonrec t =
+      {
+      volumeName: VolumeName.t option
+        [@ocaml.doc "A unique identifier for the volume."];
+      volumeType: VolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."]}
+    let make ?volumeName =
+      fun ?volumeType -> fun () -> { volumeName; volumeType }
+    let to_value x =
+      structure_to_value
+        [("volumeName", (Option.map x.volumeName ~f:VolumeName.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:VolumeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeType =
+        (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeName =
+        (Option.map ~f:VolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      make ?volumeType ?volumeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeType = field_map json__ "volumeType" VolumeType.of_json in
+      let volumeName = field_map json__ "volumeName" VolumeName.of_json in
+      make ?volumeType ?volumeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The structure that consists of name and type of volume."]
 module AttributeMap =
   struct
-    type nonrec t = (FederationAttributeKey.t * Url.t) list
+    type nonrec t =
+      (FederationAttributeKey.t * FederationAttributeValue.t) list
     let make i = i
     let of_header xs =
       make
@@ -78,20 +1003,24 @@ module AttributeMap =
                    (Option.map
                       ~f:(fun chopped ->
                             ((FederationAttributeKey.of_string chopped),
-                              (Url.of_string v))))))
+                              (FederationAttributeValue.of_string v))))))
     let to_value xs =
       (xs |>
          (List.map
             ~f:(fun (x, y) ->
                   (FederationAttributeKey.to_value x) |>
-                    (fun x -> (Url.to_value y) |> (fun y -> (x, y))))))
+                    (fun x ->
+                       (FederationAttributeValue.to_value y) |>
+                         (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:FederationAttributeKey.of_string
-        ~of_json:Url.of_json j
+        ~of_json:FederationAttributeValue.of_json j
     let to_json v = composed_to_json to_value v
   end
 module FederationProviderName =
@@ -136,6 +1065,28 @@ module SamlMetadataDocument =
     let of_json j = string_of_json ~kind:"SamlMetadataDocument" j
     let to_json = simple_to_json to_value
   end
+module Url =
+  struct
+    type nonrec t = string
+    let context_ = "url"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^https?://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"url" j
+    let to_json = simple_to_json to_value
+  end
 module Urn =
   struct
     type nonrec t = string
@@ -157,6 +1108,269 @@ module Urn =
     let of_json j = string_of_json ~kind:"urn" j
     let to_json = simple_to_json to_value
   end
+module KxClusterStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | CREATING 
+      | CREATE_FAILED 
+      | RUNNING 
+      | UPDATING 
+      | DELETING 
+      | DELETED 
+      | DELETE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | RUNNING -> "RUNNING"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "RUNNING" -> RUNNING
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxClusterStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxClusterStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module KxClusterType =
+  struct
+    type nonrec t =
+      | HDB 
+      | RDB 
+      | GATEWAY 
+      | GP 
+      | TICKERPLANT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | HDB -> "HDB"
+      | RDB -> "RDB"
+      | GATEWAY -> "GATEWAY"
+      | GP -> "GP"
+      | TICKERPLANT -> "TICKERPLANT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "HDB" -> HDB
+      | "RDB" -> RDB
+      | "GATEWAY" -> GATEWAY
+      | "GP" -> GP
+      | "TICKERPLANT" -> TICKERPLANT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxClusterType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxClusterType" j)
+    let to_json = simple_to_json to_value
+  end
+module DatabaseName =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseName" j
+    let to_json = simple_to_json to_value
+  end
+module KxDatabaseCacheConfigurations =
+  struct
+    type nonrec t = KxDatabaseCacheConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDatabaseCacheConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDatabaseCacheConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDatabaseCacheConfigurations"
+        ~of_json:KxDatabaseCacheConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxDataviewConfiguration =
+  struct
+    type nonrec t =
+      {
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc "The unique identifier of the dataview."];
+      dataviewVersionId: VersionId.t option
+        [@ocaml.doc
+          "The version of the dataview corresponding to a given changeset."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The db path and volume configuration for the segmented database."]}
+    let make ?dataviewName =
+      fun ?dataviewVersionId ->
+        fun ?changesetId ->
+          fun ?segmentConfigurations ->
+            fun () ->
+              {
+                dataviewName;
+                dataviewVersionId;
+                changesetId;
+                segmentConfigurations
+              }
+    let to_value x =
+      structure_to_value
+        [("dataviewName",
+           (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("dataviewVersionId",
+          (Option.map x.dataviewVersionId ~f:VersionId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let dataviewVersionId =
+        (Option.map ~f:VersionId.of_xml)
+          (Xml.child xml_arg0 "dataviewVersionId") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      make ?segmentConfigurations ?changesetId ?dataviewVersionId
+        ?dataviewName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let dataviewVersionId =
+        field_map json__ "dataviewVersionId" VersionId.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      make ?segmentConfigurations ?changesetId ?dataviewVersionId
+        ?dataviewName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that stores the configuration details of a dataview."]
+module KxCommandLineArgumentKey =
+  struct
+    type nonrec t = string
+    let context_ = "KxCommandLineArgumentKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(?![Aa][Ww][Ss])(s|([a-zA-Z][a-zA-Z0-9_]+))|(AWS_ZIP_DEFAULT)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxCommandLineArgumentKey" j
+    let to_json = simple_to_json to_value
+  end
+module KxCommandLineArgumentValue =
+  struct
+    type nonrec t = string
+    let context_ = "KxCommandLineArgumentValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_:./,; ]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxCommandLineArgumentValue" j
+    let to_json = simple_to_json to_value
+  end
+module AvailabilityZoneIds =
+  struct
+    type nonrec t = AvailabilityZoneId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AvailabilityZoneId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AvailabilityZoneId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AvailabilityZoneIds"
+        ~of_json:AvailabilityZoneId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Description =
   struct
     type nonrec t = string
@@ -177,6 +1391,328 @@ module Description =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"Description" j
     let to_json = simple_to_json to_value
+  end
+module KxAzMode =
+  struct
+    type nonrec t =
+      | SINGLE 
+      | MULTI 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SINGLE -> "SINGLE" | MULTI -> "MULTI" | Non_static_id s -> s
+    let of_string =
+      function | "SINGLE" -> SINGLE | "MULTI" -> MULTI | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxAzMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxAzMode" j)
+    let to_json = simple_to_json to_value
+  end
+module KxVolumeStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATE_FAILED 
+      | ACTIVE 
+      | UPDATING 
+      | UPDATED 
+      | UPDATE_FAILED 
+      | DELETING 
+      | DELETED 
+      | DELETE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | UPDATED -> "UPDATED"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "UPDATED" -> UPDATED
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxVolumeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxVolumeStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module KxVolumeStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "KxVolumeStatusReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\_\\-\\.\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxVolumeStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module KxVolumeType =
+  struct
+    type nonrec t =
+      | NAS_1 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | NAS_1 -> "NAS_1" | Non_static_id s -> s
+    let of_string = function | "NAS_1" -> NAS_1 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxVolumeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxVolumeType" j)
+    let to_json = simple_to_json to_value
+  end
+module KxUserArn =
+  struct
+    type nonrec t = string
+    let context_ = "KxUserArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws:finspace:[A-Za-z0-9_/.-]{0,63}:\\d+:kxEnvironment/[0-9A-Za-z_-]{1,128}/kxUser/[0-9A-Za-z_-]{1,128}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxUserArn" j
+    let to_json = simple_to_json to_value
+  end
+module KxUserNameString =
+  struct
+    type nonrec t = string
+    let context_ = "KxUserNameString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:50) >>=
+                  (fun () -> check_pattern i ~pattern:"^[0-9A-Za-z_-]{1,50}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxUserNameString" j
+    let to_json = simple_to_json to_value
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z\\-]*:iam::\\d{12}:role/?[a-zA-Z_0-9+=,.@\\-_/]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module KxClusterNameList =
+  struct
+    type nonrec t = KxClusterName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxClusterName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxClusterName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxClusterNameList" ~of_json:KxClusterName.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxClusterStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "KxClusterStatusReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\_\\-\\.\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxClusterStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module KxHostType =
+  struct
+    type nonrec t = string
+    let context_ = "KxHostType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxHostType" j
+    let to_json = simple_to_json to_value
+  end
+module KxScalingGroupName =
+  struct
+    type nonrec t = string
+    let context_ = "KxScalingGroupName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxScalingGroupName" j
+    let to_json = simple_to_json to_value
+  end
+module KxScalingGroupStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATE_FAILED 
+      | ACTIVE 
+      | DELETING 
+      | DELETED 
+      | DELETE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | DELETING -> "DELETING"
+      | DELETED -> "DELETED"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "ACTIVE" -> ACTIVE
+      | "DELETING" -> DELETING
+      | "DELETED" -> DELETED
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration KxScalingGroupStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxScalingGroupStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CustomDNSConfiguration =
+  struct
+    type nonrec t = CustomDNSServer.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CustomDNSServer.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CustomDNSServer.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CustomDNSConfiguration"
+        ~of_json:CustomDNSServer.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module EnvironmentArn =
   struct
@@ -200,26 +1736,25 @@ module EnvironmentArn =
     let of_json j = string_of_json ~kind:"EnvironmentArn" j
     let to_json = simple_to_json to_value
   end
-module EnvironmentName =
+module EnvironmentErrorMessage =
   struct
     type nonrec t = string
-    let context_ = "EnvironmentName"
+    let context_ = "EnvironmentErrorMessage"
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
+          ((check_string_min i ~min:0) >>=
              (fun () ->
-                (check_string_max i ~max:255) >>=
+                (check_string_max i ~max:1000) >>=
                   (fun () ->
-                     check_pattern i
-                       ~pattern:"^[a-zA-Z0-9]+[a-zA-Z0-9-]*[a-zA-Z0-9]$")));
+                     check_pattern i ~pattern:"^[a-zA-Z0-9. ]{1,1000}$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"EnvironmentName" j
+    let of_json j = string_of_json ~kind:"EnvironmentErrorMessage" j
     let to_json = simple_to_json to_value
   end
 module EnvironmentStatus =
@@ -234,6 +1769,9 @@ module EnvironmentStatus =
       | FAILED_CREATION 
       | RETRY_DELETION 
       | FAILED_DELETION 
+      | UPDATE_NETWORK_REQUESTED 
+      | UPDATING_NETWORK 
+      | FAILED_UPDATING_NETWORK 
       | SUSPENDED 
       | Non_static_id of string 
     let make i = i
@@ -248,6 +1786,9 @@ module EnvironmentStatus =
       | FAILED_CREATION -> "FAILED_CREATION"
       | RETRY_DELETION -> "RETRY_DELETION"
       | FAILED_DELETION -> "FAILED_DELETION"
+      | UPDATE_NETWORK_REQUESTED -> "UPDATE_NETWORK_REQUESTED"
+      | UPDATING_NETWORK -> "UPDATING_NETWORK"
+      | FAILED_UPDATING_NETWORK -> "FAILED_UPDATING_NETWORK"
       | SUSPENDED -> "SUSPENDED"
       | Non_static_id s -> s
     let of_string =
@@ -261,6 +1802,9 @@ module EnvironmentStatus =
       | "FAILED_CREATION" -> FAILED_CREATION
       | "RETRY_DELETION" -> RETRY_DELETION
       | "FAILED_DELETION" -> FAILED_DELETION
+      | "UPDATE_NETWORK_REQUESTED" -> UPDATE_NETWORK_REQUESTED
+      | "UPDATING_NETWORK" -> UPDATING_NETWORK
+      | "FAILED_UPDATING_NETWORK" -> FAILED_UPDATING_NETWORK
       | "SUSPENDED" -> SUSPENDED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
@@ -270,6 +1814,528 @@ module EnvironmentStatus =
       of_string
         (string_of_xml ~kind:"enumeration EnvironmentStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"EnvironmentStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module IdType =
+  struct
+    type nonrec t = string
+    let context_ = "IdType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:26) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9]{1,26}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdType" j
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z-0-9-:\\/]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module KxEnvironmentName =
+  struct
+    type nonrec t = string
+    let context_ = "KxEnvironmentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxEnvironmentName" j
+    let to_json = simple_to_json to_value
+  end
+module TransitGatewayConfiguration =
+  struct
+    type nonrec t =
+      {
+      transitGatewayID: TransitGatewayID.t
+        [@ocaml.doc
+          "The identifier of the transit gateway created by the customer to connect outbound traffics from kdb network to your internal network."];
+      routableCIDRSpace: ValidCIDRSpace.t
+        [@ocaml.doc
+          "The routing CIDR on behalf of kdb environment. It could be any \"/26 range in the 100.64.0.0 CIDR space. After providing, it will be added to the customer's transit gateway routing table so that the traffics could be routed to kdb network."];
+      attachmentNetworkAclConfiguration: NetworkACLConfiguration.t option
+        [@ocaml.doc
+          "The rules that define how you manage the outbound traffic from kdb network to your internal network."]}
+    let context_ = "TransitGatewayConfiguration"
+    let make ?attachmentNetworkAclConfiguration =
+      fun ~transitGatewayID ->
+        fun ~routableCIDRSpace ->
+          fun () ->
+            {
+              attachmentNetworkAclConfiguration;
+              transitGatewayID;
+              routableCIDRSpace
+            }
+    let to_value x =
+      structure_to_value
+        [("transitGatewayID",
+           (Some (TransitGatewayID.to_value x.transitGatewayID)));
+        ("routableCIDRSpace",
+          (Some (ValidCIDRSpace.to_value x.routableCIDRSpace)));
+        ("attachmentNetworkAclConfiguration",
+          (Option.map x.attachmentNetworkAclConfiguration
+             ~f:NetworkACLConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachmentNetworkAclConfiguration =
+        (Option.map ~f:NetworkACLConfiguration.of_xml)
+          (Xml.child xml_arg0 "attachmentNetworkAclConfiguration") in
+      let routableCIDRSpace =
+        ValidCIDRSpace.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "routableCIDRSpace") in
+      let transitGatewayID =
+        TransitGatewayID.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "transitGatewayID") in
+      make ?attachmentNetworkAclConfiguration ~routableCIDRSpace
+        ~transitGatewayID ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachmentNetworkAclConfiguration =
+        field_map json__ "attachmentNetworkAclConfiguration"
+          NetworkACLConfiguration.of_json in
+      let routableCIDRSpace =
+        field_map_exn json__ "routableCIDRSpace" ValidCIDRSpace.of_json in
+      let transitGatewayID =
+        field_map_exn json__ "transitGatewayID" TransitGatewayID.of_json in
+      make ?attachmentNetworkAclConfiguration ~routableCIDRSpace
+        ~transitGatewayID ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure of the transit gateway and network configuration that is used to connect the kdb environment to an internal network."]
+module DnsStatus =
+  struct
+    type nonrec t =
+      | NONE 
+      | UPDATE_REQUESTED 
+      | UPDATING 
+      | FAILED_UPDATE 
+      | SUCCESSFULLY_UPDATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | UPDATE_REQUESTED -> "UPDATE_REQUESTED"
+      | UPDATING -> "UPDATING"
+      | FAILED_UPDATE -> "FAILED_UPDATE"
+      | SUCCESSFULLY_UPDATED -> "SUCCESSFULLY_UPDATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "UPDATE_REQUESTED" -> UPDATE_REQUESTED
+      | "UPDATING" -> UPDATING
+      | "FAILED_UPDATE" -> FAILED_UPDATE
+      | "SUCCESSFULLY_UPDATED" -> SUCCESSFULLY_UPDATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration dnsStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"dnsStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module StringValueLength1to255 =
+  struct
+    type nonrec t = string
+    let context_ = "stringValueLength1to255"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"stringValueLength1to255" j
+    let to_json = simple_to_json to_value
+  end
+module TgwStatus =
+  struct
+    type nonrec t =
+      | NONE 
+      | UPDATE_REQUESTED 
+      | UPDATING 
+      | FAILED_UPDATE 
+      | SUCCESSFULLY_UPDATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NONE -> "NONE"
+      | UPDATE_REQUESTED -> "UPDATE_REQUESTED"
+      | UPDATING -> "UPDATING"
+      | FAILED_UPDATE -> "FAILED_UPDATE"
+      | SUCCESSFULLY_UPDATED -> "SUCCESSFULLY_UPDATED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NONE" -> NONE
+      | "UPDATE_REQUESTED" -> UPDATE_REQUESTED
+      | "UPDATING" -> UPDATING
+      | "FAILED_UPDATE" -> FAILED_UPDATE
+      | "SUCCESSFULLY_UPDATED" -> SUCCESSFULLY_UPDATED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration tgwStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"tgwStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EnvironmentId =
+  struct
+    type nonrec t = string
+    let context_ = "EnvironmentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EnvironmentId" j
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewActiveVersionList =
+  struct
+    type nonrec t = KxDataviewActiveVersion.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDataviewActiveVersion.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDataviewActiveVersion.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDataviewActiveVersionList"
+        ~of_json:KxDataviewActiveVersion.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxDataviewStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | ACTIVE 
+      | UPDATING 
+      | FAILED 
+      | DELETING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | FAILED -> "FAILED"
+      | DELETING -> "DELETING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "FAILED" -> FAILED
+      | "DELETING" -> DELETING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxDataviewStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxDataviewStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module KxDataviewStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "KxDataviewStatusReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:250) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\_\\-\\.\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxDataviewStatusReason" j
+    let to_json = simple_to_json to_value
+  end
+module ExecutionRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "ExecutionRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z0-9-]*:iam::\\d{12}:role\\/[\\w-\\/.@+=,]{1,1017}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExecutionRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module InitializationScriptFilePath =
+  struct
+    type nonrec t = string
+    let context_ = "InitializationScriptFilePath"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\_\\-\\.\\/\\\\]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"InitializationScriptFilePath" j
+    let to_json = simple_to_json to_value
+  end
+module KxClusterDescription =
+  struct
+    type nonrec t = string
+    let context_ = "KxClusterDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9\\_\\-\\.\\s]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxClusterDescription" j
+    let to_json = simple_to_json to_value
+  end
+module ReleaseLabel =
+  struct
+    type nonrec t = string
+    let context_ = "ReleaseLabel"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:16) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReleaseLabel" j
+    let to_json = simple_to_json to_value
+  end
+module Volumes =
+  struct
+    type nonrec t = Volume.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Volume.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Volume.of_xml)
+    let of_json j = list_of_json ~kind:"Volumes" ~of_json:Volume.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxClusterNodeIdString =
+  struct
+    type nonrec t = string
+    let context_ = "KxClusterNodeIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:40) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxClusterNodeIdString" j
+    let to_json = simple_to_json to_value
+  end
+module KxNodeStatus =
+  struct
+    type nonrec t =
+      | RUNNING 
+      | PROVISIONING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUNNING -> "RUNNING"
+      | PROVISIONING -> "PROVISIONING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUNNING" -> RUNNING
+      | "PROVISIONING" -> PROVISIONING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxNodeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxNodeStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ChangesetStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | PROCESSING 
+      | FAILED 
+      | COMPLETED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | PROCESSING -> "PROCESSING"
+      | FAILED -> "FAILED"
+      | COMPLETED -> "COMPLETED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "PROCESSING" -> PROCESSING
+      | "FAILED" -> FAILED
+      | "COMPLETED" -> COMPLETED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChangesetStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChangesetStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module EnvironmentName =
+  struct
+    type nonrec t = string
+    let context_ = "EnvironmentName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EnvironmentName" j
     let to_json = simple_to_json to_value
   end
 module FederationMode =
@@ -368,62 +2434,22 @@ module FederationParameters =
       make ?attributeMap ?federationProviderName ?federationURN
         ?applicationCallBackURL ?samlMetadataURL ?samlMetadataDocument ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributeMap = field_map json "attributeMap" AttributeMap.of_json in
+    let of_json json__ =
+      let attributeMap = field_map json__ "attributeMap" AttributeMap.of_json in
       let federationProviderName =
-        field_map json "federationProviderName"
+        field_map json__ "federationProviderName"
           FederationProviderName.of_json in
-      let federationURN = field_map json "federationURN" Urn.of_json in
+      let federationURN = field_map json__ "federationURN" Urn.of_json in
       let applicationCallBackURL =
-        field_map json "applicationCallBackURL" Url.of_json in
-      let samlMetadataURL = field_map json "samlMetadataURL" Url.of_json in
+        field_map json__ "applicationCallBackURL" Url.of_json in
+      let samlMetadataURL = field_map json__ "samlMetadataURL" Url.of_json in
       let samlMetadataDocument =
-        field_map json "samlMetadataDocument" SamlMetadataDocument.of_json in
+        field_map json__ "samlMetadataDocument" SamlMetadataDocument.of_json in
       make ?attributeMap ?federationProviderName ?federationURN
         ?applicationCallBackURL ?samlMetadataURL ?samlMetadataDocument ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Configuration information when authentication mode is FEDERATED."]
-module IdType =
-  struct
-    type nonrec t = string
-    let context_ = "IdType"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:26) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9]{1,26}$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IdType" j
-    let to_json = simple_to_json to_value
-  end
-module KmsKeyId =
-  struct
-    type nonrec t = string
-    let context_ = "KmsKeyId"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z-0-9-:\\/]*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"KmsKeyId" j
-    let to_json = simple_to_json to_value
-  end
 module SmsDomainUrl =
   struct
     type nonrec t = string
@@ -444,19 +2470,437 @@ module SmsDomainUrl =
     let of_json j = string_of_json ~kind:"SmsDomainUrl" j
     let to_json = simple_to_json to_value
   end
-module ErrorMessage =
+module KxCacheStorageSize =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for KxCacheStorageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SecurityGroupIdString =
   struct
     type nonrec t = string
-    let context_ = "errorMessage"
+    let context_ = "SecurityGroupIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^sg-([a-z0-9]{8}$|[a-z0-9]{17}$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecurityGroupIdString" j
+    let to_json = simple_to_json to_value
+  end
+module SubnetIdString =
+  struct
+    type nonrec t = string
+    let context_ = "SubnetIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^subnet-([a-z0-9]{8}$|[a-z0-9]{17}$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SubnetIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ChangeType =
+  struct
+    type nonrec t =
+      | PUT 
+      | DELETE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | PUT -> "PUT" | DELETE -> "DELETE" | Non_static_id s -> s
+    let of_string =
+      function | "PUT" -> PUT | "DELETE" -> DELETE | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ChangeType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ChangeType" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Path =
+  struct
+    type nonrec t = string
+    let context_ = "S3Path"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:9) >>=
+             (fun () ->
+                (check_string_max i ~max:1093) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^s3:\\/\\/[a-z0-9][a-z0-9-.]{1,61}[a-z0-9]\\/([^\\/]+\\/)*[^\\/]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Path" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage__lc1 =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage__lc1"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"errorMessage" j
+    let of_json j = string_of_json ~kind:"ErrorMessage__lc1" j
     let to_json = simple_to_json to_value
   end
+module KxAttachedCluster =
+  struct
+    type nonrec t =
+      {
+      clusterName: KxClusterName.t option
+        [@ocaml.doc "A unique name for the attached cluster."];
+      clusterType: KxClusterType.t option
+        [@ocaml.doc
+          "Specifies the type of cluster. The volume for TP and RDB cluster types will be used for TP logs."];
+      clusterStatus: KxClusterStatus.t option
+        [@ocaml.doc
+          "The status of the attached cluster. PENDING \226\128\147 The cluster is pending creation. CREATING \226\128\147 The cluster creation process is in progress. CREATE_FAILED \226\128\147 The cluster creation process has failed. RUNNING \226\128\147 The cluster creation process is running. UPDATING \226\128\147 The cluster is in the process of being updated. DELETING \226\128\147 The cluster is in the process of being deleted. DELETED \226\128\147 The cluster has been deleted. DELETE_FAILED \226\128\147 The cluster failed to delete."]}
+    let make ?clusterName =
+      fun ?clusterType ->
+        fun ?clusterStatus ->
+          fun () -> { clusterName; clusterType; clusterStatus }
+    let to_value x =
+      structure_to_value
+        [("clusterName",
+           (Option.map x.clusterName ~f:KxClusterName.to_value));
+        ("clusterType", (Option.map x.clusterType ~f:KxClusterType.to_value));
+        ("clusterStatus",
+          (Option.map x.clusterStatus ~f:KxClusterStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterStatus =
+        (Option.map ~f:KxClusterStatus.of_xml)
+          (Xml.child xml_arg0 "clusterStatus") in
+      let clusterType =
+        (Option.map ~f:KxClusterType.of_xml)
+          (Xml.child xml_arg0 "clusterType") in
+      let clusterName =
+        (Option.map ~f:KxClusterName.of_xml)
+          (Xml.child xml_arg0 "clusterName") in
+      make ?clusterStatus ?clusterType ?clusterName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterStatus =
+        field_map json__ "clusterStatus" KxClusterStatus.of_json in
+      let clusterType = field_map json__ "clusterType" KxClusterType.of_json in
+      let clusterName = field_map json__ "clusterName" KxClusterName.of_json in
+      make ?clusterStatus ?clusterType ?clusterName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure containing the metadata of the attached clusters."]
+module KxNAS1Size =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1200); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for KxNAS1Size" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KxNAS1Type =
+  struct
+    type nonrec t =
+      | SSD_1000 
+      | SSD_250 
+      | HDD_12 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SSD_1000 -> "SSD_1000"
+      | SSD_250 -> "SSD_250"
+      | HDD_12 -> "HDD_12"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SSD_1000" -> SSD_1000
+      | "SSD_250" -> SSD_250
+      | "HDD_12" -> HDD_12
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration KxNAS1Type" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxNAS1Type" j)
+    let to_json = simple_to_json to_value
+  end
+module KxDatabaseConfiguration =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t
+        [@ocaml.doc
+          "The name of the kdb database. When this parameter is specified in the structure, S3 with the whole database is included by default."];
+      cacheConfigurations: KxDatabaseCacheConfigurations.t option
+        [@ocaml.doc
+          "Configuration details for the disk cache used to increase performance reading from a kdb database mounted to the cluster."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc
+          "A unique identifier of the changeset that is associated with the cluster."];
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc
+          "The name of the dataview to be used for caching historical data on disk."];
+      dataviewConfiguration: KxDataviewConfiguration.t option
+        [@ocaml.doc
+          "The configuration of the dataview to be used with specified cluster."]}
+    let context_ = "KxDatabaseConfiguration"
+    let make ?cacheConfigurations =
+      fun ?changesetId ->
+        fun ?dataviewName ->
+          fun ?dataviewConfiguration ->
+            fun ~databaseName ->
+              fun () ->
+                {
+                  cacheConfigurations;
+                  changesetId;
+                  dataviewName;
+                  dataviewConfiguration;
+                  databaseName
+                }
+    let to_value x =
+      structure_to_value
+        [("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("cacheConfigurations",
+          (Option.map x.cacheConfigurations
+             ~f:KxDatabaseCacheConfigurations.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("dataviewName",
+          (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("dataviewConfiguration",
+          (Option.map x.dataviewConfiguration
+             ~f:KxDataviewConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataviewConfiguration =
+        (Option.map ~f:KxDataviewConfiguration.of_xml)
+          (Xml.child xml_arg0 "dataviewConfiguration") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let cacheConfigurations =
+        (Option.map ~f:KxDatabaseCacheConfigurations.of_xml)
+          (Xml.child xml_arg0 "cacheConfigurations") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      make ?dataviewConfiguration ?dataviewName ?changesetId
+        ?cacheConfigurations ~databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataviewConfiguration =
+        field_map json__ "dataviewConfiguration"
+          KxDataviewConfiguration.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let cacheConfigurations =
+        field_map json__ "cacheConfigurations"
+          KxDatabaseCacheConfigurations.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      make ?dataviewConfiguration ?dataviewName ?changesetId
+        ?cacheConfigurations ~databaseName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration of data that is available for querying from this database."]
+module KxDeploymentStrategy =
+  struct
+    type nonrec t =
+      | NO_RESTART 
+      | ROLLING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_RESTART -> "NO_RESTART"
+      | ROLLING -> "ROLLING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_RESTART" -> NO_RESTART
+      | "ROLLING" -> ROLLING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration KxDeploymentStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"KxDeploymentStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module S3Bucket =
+  struct
+    type nonrec t = string
+    let context_ = "S3Bucket"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-z0-9][a-z0-9\\.\\-]*[a-z0-9]$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Bucket" j
+    let to_json = simple_to_json to_value
+  end
+module S3Key =
+  struct
+    type nonrec t = string
+    let context_ = "S3Key"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[a-zA-Z0-9\\/\\!\\-_\\.\\*'\\(\\)]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Key" j
+    let to_json = simple_to_json to_value
+  end
+module S3ObjectVersion =
+  struct
+    type nonrec t = string
+    let context_ = "S3ObjectVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3ObjectVersion" j
+    let to_json = simple_to_json to_value
+  end
+module KxClusterCodeDeploymentStrategy =
+  struct
+    type nonrec t =
+      | NO_RESTART 
+      | ROLLING 
+      | FORCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_RESTART -> "NO_RESTART"
+      | ROLLING -> "ROLLING"
+      | FORCE -> "FORCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_RESTART" -> NO_RESTART
+      | "ROLLING" -> ROLLING
+      | "FORCE" -> FORCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration KxClusterCodeDeploymentStrategy"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"KxClusterCodeDeploymentStrategy" j)
+    let to_json = simple_to_json to_value
+  end
+module KxCommandLineArgument =
+  struct
+    type nonrec t =
+      {
+      key: KxCommandLineArgumentKey.t option
+        [@ocaml.doc "The name of the key."];
+      value: KxCommandLineArgumentValue.t option
+        [@ocaml.doc "The value of the key."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("key", (Option.map x.key ~f:KxCommandLineArgumentKey.to_value));
+        ("value",
+          (Option.map x.value ~f:KxCommandLineArgumentValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:KxCommandLineArgumentValue.of_xml)
+          (Xml.child xml_arg0 "value") in
+      let key =
+        (Option.map ~f:KxCommandLineArgumentKey.of_xml)
+          (Xml.child xml_arg0 "key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "value" KxCommandLineArgumentValue.of_json in
+      let key = field_map json__ "key" KxCommandLineArgumentKey.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Defines the key-value pairs to make them available inside the cluster."]
 module TagKey =
   struct
     type nonrec t = string
@@ -499,6 +2943,998 @@ module TagValue =
     let of_json j = string_of_json ~kind:"TagValue" j
     let to_json = simple_to_json to_value
   end
+module KxVolume =
+  struct
+    type nonrec t =
+      {
+      volumeName: KxVolumeName.t option
+        [@ocaml.doc "A unique identifier for the volume."];
+      volumeType: KxVolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."];
+      status: KxVolumeStatus.t option
+        [@ocaml.doc
+          "The status of volume. CREATING \226\128\147 The volume creation is in progress. CREATE_FAILED \226\128\147 The volume creation has failed. ACTIVE \226\128\147 The volume is active. UPDATING \226\128\147 The volume is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. UPDATED \226\128\147 The volume is successfully updated. DELETING \226\128\147 The volume is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the volume. DELETED \226\128\147 The volume is successfully deleted."];
+      description: Description.t option
+        [@ocaml.doc "A description of the volume."];
+      statusReason: KxVolumeStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the volume was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the volume was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    let make ?volumeName =
+      fun ?volumeType ->
+        fun ?status ->
+          fun ?description ->
+            fun ?statusReason ->
+              fun ?azMode ->
+                fun ?availabilityZoneIds ->
+                  fun ?createdTimestamp ->
+                    fun ?lastModifiedTimestamp ->
+                      fun () ->
+                        {
+                          volumeName;
+                          volumeType;
+                          status;
+                          description;
+                          statusReason;
+                          azMode;
+                          availabilityZoneIds;
+                          createdTimestamp;
+                          lastModifiedTimestamp
+                        }
+    let to_value x =
+      structure_to_value
+        [("volumeName", (Option.map x.volumeName ~f:KxVolumeName.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:KxVolumeType.to_value));
+        ("status", (Option.map x.status ~f:KxVolumeStatus.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxVolumeStatusReason.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let statusReason =
+        (Option.map ~f:KxVolumeStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let status =
+        (Option.map ~f:KxVolumeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let volumeType =
+        (Option.map ~f:KxVolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeName =
+        (Option.map ~f:KxVolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      make ?lastModifiedTimestamp ?createdTimestamp ?availabilityZoneIds
+        ?azMode ?statusReason ?description ?status ?volumeType ?volumeName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxVolumeStatusReason.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" KxVolumeStatus.of_json in
+      let volumeType = field_map json__ "volumeType" KxVolumeType.of_json in
+      let volumeName = field_map json__ "volumeName" KxVolumeName.of_json in
+      make ?lastModifiedTimestamp ?createdTimestamp ?availabilityZoneIds
+        ?azMode ?statusReason ?description ?status ?volumeType ?volumeName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The structure that contains the metadata of the volume."]
+module KxUser =
+  struct
+    type nonrec t =
+      {
+      userArn: KxUserArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
+      userName: KxUserNameString.t option
+        [@ocaml.doc "A unique identifier for the user."];
+      iamRole: RoleArn.t option
+        [@ocaml.doc "The IAM role ARN that is associated with the user."];
+      createTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp at which the kdb user was created."];
+      updateTimestamp: Timestamp.t option
+        [@ocaml.doc "The timestamp at which the kdb user was updated."]}
+    let make ?userArn =
+      fun ?userName ->
+        fun ?iamRole ->
+          fun ?createTimestamp ->
+            fun ?updateTimestamp ->
+              fun () ->
+                {
+                  userArn;
+                  userName;
+                  iamRole;
+                  createTimestamp;
+                  updateTimestamp
+                }
+    let to_value x =
+      structure_to_value
+        [("userArn", (Option.map x.userArn ~f:KxUserArn.to_value));
+        ("userName", (Option.map x.userName ~f:KxUserNameString.to_value));
+        ("iamRole", (Option.map x.iamRole ~f:RoleArn.to_value));
+        ("createTimestamp",
+          (Option.map x.createTimestamp ~f:Timestamp.to_value));
+        ("updateTimestamp",
+          (Option.map x.updateTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let updateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "updateTimestamp") in
+      let createTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createTimestamp") in
+      let iamRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "iamRole") in
+      let userName =
+        (Option.map ~f:KxUserNameString.of_xml)
+          (Xml.child xml_arg0 "userName") in
+      let userArn =
+        (Option.map ~f:KxUserArn.of_xml) (Xml.child xml_arg0 "userArn") in
+      make ?updateTimestamp ?createTimestamp ?iamRole ?userName ?userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let updateTimestamp =
+        field_map json__ "updateTimestamp" Timestamp.of_json in
+      let createTimestamp =
+        field_map json__ "createTimestamp" Timestamp.of_json in
+      let iamRole = field_map json__ "iamRole" RoleArn.of_json in
+      let userName = field_map json__ "userName" KxUserNameString.of_json in
+      let userArn = field_map json__ "userArn" KxUserArn.of_json in
+      make ?updateTimestamp ?createTimestamp ?iamRole ?userName ?userArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure that stores metadata for a kdb user."]
+module KxScalingGroup =
+  struct
+    type nonrec t =
+      {
+      scalingGroupName: KxScalingGroupName.t option
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      hostType: KxHostType.t option
+        [@ocaml.doc
+          "The memory and CPU capabilities of the scaling group host on which FinSpace Managed kdb clusters will be placed. You can add one of the following values: kx.sg.large \226\128\147 The host type with a configuration of 16 GiB memory and 2 vCPUs. kx.sg.xlarge \226\128\147 The host type with a configuration of 32 GiB memory and 4 vCPUs. kx.sg.2xlarge \226\128\147 The host type with a configuration of 64 GiB memory and 8 vCPUs. kx.sg.4xlarge \226\128\147 The host type with a configuration of 108 GiB memory and 16 vCPUs. kx.sg.8xlarge \226\128\147 The host type with a configuration of 216 GiB memory and 32 vCPUs. kx.sg.16xlarge \226\128\147 The host type with a configuration of 432 GiB memory and 64 vCPUs. kx.sg.32xlarge \226\128\147 The host type with a configuration of 864 GiB memory and 128 vCPUs. kx.sg1.16xlarge \226\128\147 The host type with a configuration of 1949 GiB memory and 64 vCPUs. kx.sg1.24xlarge \226\128\147 The host type with a configuration of 2948 GiB memory and 96 vCPUs."];
+      clusters: KxClusterNameList.t option
+        [@ocaml.doc
+          "The list of clusters currently active in a given scaling group."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      status: KxScalingGroupStatus.t option
+        [@ocaml.doc "The status of scaling groups."];
+      statusReason: KxClusterStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the scaling group was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the scaling group was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    let make ?scalingGroupName =
+      fun ?hostType ->
+        fun ?clusters ->
+          fun ?availabilityZoneId ->
+            fun ?status ->
+              fun ?statusReason ->
+                fun ?lastModifiedTimestamp ->
+                  fun ?createdTimestamp ->
+                    fun () ->
+                      {
+                        scalingGroupName;
+                        hostType;
+                        clusters;
+                        availabilityZoneId;
+                        status;
+                        statusReason;
+                        lastModifiedTimestamp;
+                        createdTimestamp
+                      }
+    let to_value x =
+      structure_to_value
+        [("scalingGroupName",
+           (Option.map x.scalingGroupName ~f:KxScalingGroupName.to_value));
+        ("hostType", (Option.map x.hostType ~f:KxHostType.to_value));
+        ("clusters", (Option.map x.clusters ~f:KxClusterNameList.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("status", (Option.map x.status ~f:KxScalingGroupStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxClusterStatusReason.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let statusReason =
+        (Option.map ~f:KxClusterStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxScalingGroupStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let clusters =
+        (Option.map ~f:KxClusterNameList.of_xml)
+          (Xml.child xml_arg0 "clusters") in
+      let hostType =
+        (Option.map ~f:KxHostType.of_xml) (Xml.child xml_arg0 "hostType") in
+      let scalingGroupName =
+        (Option.map ~f:KxScalingGroupName.of_xml)
+          (Xml.child xml_arg0 "scalingGroupName") in
+      make ?createdTimestamp ?lastModifiedTimestamp ?statusReason ?status
+        ?availabilityZoneId ?clusters ?hostType ?scalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxClusterStatusReason.of_json in
+      let status = field_map json__ "status" KxScalingGroupStatus.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let clusters = field_map json__ "clusters" KxClusterNameList.of_json in
+      let hostType = field_map json__ "hostType" KxHostType.of_json in
+      let scalingGroupName =
+        field_map json__ "scalingGroupName" KxScalingGroupName.of_json in
+      make ?createdTimestamp ?lastModifiedTimestamp ?statusReason ?status
+        ?availabilityZoneId ?clusters ?hostType ?scalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure for storing metadata of scaling group."]
+module KxEnvironment =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      awsAccountId: IdType.t option
+        [@ocaml.doc
+          "The unique identifier of the AWS account in which you create the kdb environment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc
+          "The status of the environment creation. CREATE_REQUESTED \226\128\147 Environment creation has been requested. CREATING \226\128\147 Environment is in the process of being created. FAILED_CREATION \226\128\147 Environment creation has failed. CREATED \226\128\147 Environment is successfully created and is currently active. DELETE REQUESTED \226\128\147 Environment deletion has been requested. DELETING \226\128\147 Environment is in the process of being deleted. RETRY_DELETION \226\128\147 Initial environment deletion failed, system is reattempting delete. DELETED \226\128\147 Environment has been deleted. FAILED_DELETION \226\128\147 Environment deletion has failed."];
+      tgwStatus: TgwStatus.t option
+        [@ocaml.doc "The status of the network configuration."];
+      dnsStatus: DnsStatus.t option
+        [@ocaml.doc "The status of DNS configuration."];
+      errorMessage__lc1: EnvironmentErrorMessage.t option
+        [@ocaml.doc
+          "Specifies the error message that appears if a flow fails."];
+      description: Description.t option
+        [@ocaml.doc "A description of the kdb environment."];
+      environmentArn: EnvironmentArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of your kdb environment."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc "The unique identifier of the KMS key."];
+      dedicatedServiceAccountId: IdType.t option
+        [@ocaml.doc
+          "A unique identifier for the AWS environment infrastructure account."];
+      transitGatewayConfiguration: TransitGatewayConfiguration.t option
+        [@ocaml.doc
+          "Specifies the transit gateway and network configuration to connect the kdb environment to an internal network."];
+      customDNSConfiguration: CustomDNSConfiguration.t option
+        [@ocaml.doc
+          "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      updateTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was modified in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "The identifier of the availability zones where subnets for the environment are created."];
+      certificateAuthorityArn: StringValueLength1to255.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the certificate authority:"]}
+    let make ?name =
+      fun ?environmentId ->
+        fun ?awsAccountId ->
+          fun ?status ->
+            fun ?tgwStatus ->
+              fun ?dnsStatus ->
+                fun ?errorMessage__lc1 ->
+                  fun ?description ->
+                    fun ?environmentArn ->
+                      fun ?kmsKeyId ->
+                        fun ?dedicatedServiceAccountId ->
+                          fun ?transitGatewayConfiguration ->
+                            fun ?customDNSConfiguration ->
+                              fun ?creationTimestamp ->
+                                fun ?updateTimestamp ->
+                                  fun ?availabilityZoneIds ->
+                                    fun ?certificateAuthorityArn ->
+                                      fun () ->
+                                        {
+                                          name;
+                                          environmentId;
+                                          awsAccountId;
+                                          status;
+                                          tgwStatus;
+                                          dnsStatus;
+                                          errorMessage__lc1;
+                                          description;
+                                          environmentArn;
+                                          kmsKeyId;
+                                          dedicatedServiceAccountId;
+                                          transitGatewayConfiguration;
+                                          customDNSConfiguration;
+                                          creationTimestamp;
+                                          updateTimestamp;
+                                          availabilityZoneIds;
+                                          certificateAuthorityArn
+                                        }
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:IdType.to_value));
+        ("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("tgwStatus", (Option.map x.tgwStatus ~f:TgwStatus.to_value));
+        ("dnsStatus", (Option.map x.dnsStatus ~f:DnsStatus.to_value));
+        ("ErrorMessage__lc1",
+          (Option.map x.errorMessage__lc1 ~f:EnvironmentErrorMessage.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentArn",
+          (Option.map x.environmentArn ~f:EnvironmentArn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("dedicatedServiceAccountId",
+          (Option.map x.dedicatedServiceAccountId ~f:IdType.to_value));
+        ("transitGatewayConfiguration",
+          (Option.map x.transitGatewayConfiguration
+             ~f:TransitGatewayConfiguration.to_value));
+        ("customDNSConfiguration",
+          (Option.map x.customDNSConfiguration
+             ~f:CustomDNSConfiguration.to_value));
+        ("creationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("updateTimestamp",
+          (Option.map x.updateTimestamp ~f:Timestamp.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("certificateAuthorityArn",
+          (Option.map x.certificateAuthorityArn
+             ~f:StringValueLength1to255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateAuthorityArn =
+        (Option.map ~f:StringValueLength1to255.of_xml)
+          (Xml.child xml_arg0 "certificateAuthorityArn") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let updateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "updateTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
+      let customDNSConfiguration =
+        (Option.map ~f:CustomDNSConfiguration.of_xml)
+          (Xml.child xml_arg0 "customDNSConfiguration") in
+      let transitGatewayConfiguration =
+        (Option.map ~f:TransitGatewayConfiguration.of_xml)
+          (Xml.child xml_arg0 "transitGatewayConfiguration") in
+      let dedicatedServiceAccountId =
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "dedicatedServiceAccountId") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let environmentArn =
+        (Option.map ~f:EnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "environmentArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let errorMessage__lc1 =
+        (Option.map ~f:EnvironmentErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      let dnsStatus =
+        (Option.map ~f:DnsStatus.of_xml) (Xml.child xml_arg0 "dnsStatus") in
+      let tgwStatus =
+        (Option.map ~f:TgwStatus.of_xml) (Xml.child xml_arg0 "tgwStatus") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let awsAccountId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?certificateAuthorityArn ?availabilityZoneIds ?updateTimestamp
+        ?creationTimestamp ?customDNSConfiguration
+        ?transitGatewayConfiguration ?dedicatedServiceAccountId ?kmsKeyId
+        ?environmentArn ?description ?errorMessage__lc1 ?dnsStatus ?tgwStatus
+        ?status ?awsAccountId ?environmentId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateAuthorityArn =
+        field_map json__ "certificateAuthorityArn"
+          StringValueLength1to255.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let updateTimestamp =
+        field_map json__ "updateTimestamp" Timestamp.of_json in
+      let creationTimestamp =
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let customDNSConfiguration =
+        field_map json__ "customDNSConfiguration"
+          CustomDNSConfiguration.of_json in
+      let transitGatewayConfiguration =
+        field_map json__ "transitGatewayConfiguration"
+          TransitGatewayConfiguration.of_json in
+      let dedicatedServiceAccountId =
+        field_map json__ "dedicatedServiceAccountId" IdType.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let environmentArn =
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" EnvironmentErrorMessage.of_json in
+      let dnsStatus = field_map json__ "dnsStatus" DnsStatus.of_json in
+      let tgwStatus = field_map json__ "tgwStatus" TgwStatus.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" IdType.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      make ?certificateAuthorityArn ?availabilityZoneIds ?updateTimestamp
+        ?creationTimestamp ?customDNSConfiguration
+        ?transitGatewayConfiguration ?dedicatedServiceAccountId ?kmsKeyId
+        ?environmentArn ?description ?errorMessage__lc1 ?dnsStatus ?tgwStatus
+        ?status ?awsAccountId ?environmentId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of a kdb environment."]
+module KxDataviewListEntry =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "A unique identifier of the database."];
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc "A unique identifier of the dataview."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      activeVersions: KxDataviewActiveVersionList.t option
+        [@ocaml.doc
+          "The active changeset versions for the given dataview entry."];
+      status: KxDataviewStatus.t option
+        [@ocaml.doc "The status of a given dataview entry."];
+      description: Description.t option
+        [@ocaml.doc "A description for the dataview list entry."];
+      autoUpdate: BooleanValue.t option
+        [@ocaml.doc
+          "The option to specify whether you want to apply all the future additions and corrections automatically to the dataview when you ingest new changesets. The default value is false."];
+      readWrite: BooleanValue.t option
+        [@ocaml.doc
+          "Returns True if the dataview is created as writeable and False otherwise."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the dataview list entry was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the dataview list was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      statusReason: KxDataviewStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."]}
+    let make ?environmentId =
+      fun ?databaseName ->
+        fun ?dataviewName ->
+          fun ?azMode ->
+            fun ?availabilityZoneId ->
+              fun ?changesetId ->
+                fun ?segmentConfigurations ->
+                  fun ?activeVersions ->
+                    fun ?status ->
+                      fun ?description ->
+                        fun ?autoUpdate ->
+                          fun ?readWrite ->
+                            fun ?createdTimestamp ->
+                              fun ?lastModifiedTimestamp ->
+                                fun ?statusReason ->
+                                  fun () ->
+                                    {
+                                      environmentId;
+                                      databaseName;
+                                      dataviewName;
+                                      azMode;
+                                      availabilityZoneId;
+                                      changesetId;
+                                      segmentConfigurations;
+                                      activeVersions;
+                                      status;
+                                      description;
+                                      autoUpdate;
+                                      readWrite;
+                                      createdTimestamp;
+                                      lastModifiedTimestamp;
+                                      statusReason
+                                    }
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("dataviewName",
+          (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("activeVersions",
+          (Option.map x.activeVersions
+             ~f:KxDataviewActiveVersionList.to_value));
+        ("status", (Option.map x.status ~f:KxDataviewStatus.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("autoUpdate", (Option.map x.autoUpdate ~f:BooleanValue.to_value));
+        ("readWrite", (Option.map x.readWrite ~f:BooleanValue.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxDataviewStatusReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:KxDataviewStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let readWrite =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "readWrite") in
+      let autoUpdate =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "autoUpdate") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let status =
+        (Option.map ~f:KxDataviewStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let activeVersions =
+        (Option.map ~f:KxDataviewActiveVersionList.of_xml)
+          (Xml.child xml_arg0 "activeVersions") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?statusReason ?lastModifiedTimestamp ?createdTimestamp ?readWrite
+        ?autoUpdate ?description ?status ?activeVersions
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ?azMode
+        ?dataviewName ?databaseName ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason =
+        field_map json__ "statusReason" KxDataviewStatusReason.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let readWrite = field_map json__ "readWrite" BooleanValue.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" BooleanValue.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" KxDataviewStatus.of_json in
+      let activeVersions =
+        field_map json__ "activeVersions" KxDataviewActiveVersionList.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      make ?statusReason ?lastModifiedTimestamp ?createdTimestamp ?readWrite
+        ?autoUpdate ?description ?status ?activeVersions
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ?azMode
+        ?dataviewName ?databaseName ?environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A collection of kdb dataview entries."]
+module KxDatabaseListEntry =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the kdb database."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the database was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the database was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    let make ?databaseName =
+      fun ?createdTimestamp ->
+        fun ?lastModifiedTimestamp ->
+          fun () -> { databaseName; createdTimestamp; lastModifiedTimestamp }
+    let to_value x =
+      structure_to_value
+        [("databaseName",
+           (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      make ?lastModifiedTimestamp ?createdTimestamp ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      make ?lastModifiedTimestamp ?createdTimestamp ?databaseName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a FinSpace managed kdb database"]
+module KxCluster =
+  struct
+    type nonrec t =
+      {
+      status: KxClusterStatus.t option
+        [@ocaml.doc
+          "The status of a cluster. PENDING \226\128\147 The cluster is pending creation. CREATING \226\128\147The cluster creation process is in progress. CREATE_FAILED\226\128\147 The cluster creation process has failed. RUNNING \226\128\147 The cluster creation process is running. UPDATING \226\128\147 The cluster is in the process of being updated. DELETING \226\128\147 The cluster is in the process of being deleted. DELETED \226\128\147 The cluster has been deleted. DELETE_FAILED \226\128\147 The cluster failed to delete."];
+      statusReason: KxClusterStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      clusterName: KxClusterName.t option
+        [@ocaml.doc "A unique name for the cluster."];
+      clusterType: KxClusterType.t option
+        [@ocaml.doc
+          "Specifies the type of KDB database that is being created. The following types are available: HDB \226\128\147 A Historical Database. The data is only accessible with read-only permissions from one of the FinSpace managed kdb databases mounted to the cluster. RDB \226\128\147 A Realtime Database. This type of database captures all the data from a ticker plant and stores it in memory until the end of day, after which it writes all of its data to a disk and reloads the HDB. This cluster type requires local storage for temporary storage of data during the savedown process. If you specify this field in your request, you must provide the savedownStorageConfiguration parameter. GATEWAY \226\128\147 A gateway cluster allows you to access data across processes in kdb systems. It allows you to create your own routing logic using the initialization scripts and custom code. This type of cluster does not require a writable local storage. GP \226\128\147 A general purpose cluster allows you to quickly iterate on code during development by granting greater access to system commands and enabling a fast reload of custom code. This cluster type can optionally mount databases including cache and savedown storage. For this cluster type, the node count is fixed at 1. It does not support autoscaling and supports only SINGLE AZ mode. Tickerplant \226\128\147 A tickerplant cluster allows you to subscribe to feed handlers based on IAM permissions. It can publish to RDBs, other Tickerplants, and real-time subscribers (RTS). Tickerplants can persist messages to log, which is readable by any RDB environment. It supports only single-node that is only one kdb process."];
+      clusterDescription: KxClusterDescription.t option
+        [@ocaml.doc "A description of the cluster."];
+      releaseLabel: ReleaseLabel.t option
+        [@ocaml.doc "A version of the FinSpace managed kdb to run."];
+      volumes: Volumes.t option
+        [@ocaml.doc "A list of volumes attached to the cluster."];
+      initializationScript: InitializationScriptFilePath.t option
+        [@ocaml.doc
+          "Specifies a Q program that will be run at launch of a cluster. It is a relative path within .zip file that contains the custom code, which will be loaded on the cluster. It must include the file name itself. For example, somedir/init.q."];
+      executionRole: ExecutionRoleArn.t option
+        [@ocaml.doc
+          "An IAM role that defines a set of permissions associated with a cluster. These permissions are assumed when a cluster attempts to access another cluster."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones assigned per cluster. This can be one of the following: SINGLE \226\128\147 Assigns one availability zone per cluster. MULTI \226\128\147 Assigns all the availability zones per cluster."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The availability zone identifiers for the requested regions."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the cluster was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the cluster was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    let make ?status =
+      fun ?statusReason ->
+        fun ?clusterName ->
+          fun ?clusterType ->
+            fun ?clusterDescription ->
+              fun ?releaseLabel ->
+                fun ?volumes ->
+                  fun ?initializationScript ->
+                    fun ?executionRole ->
+                      fun ?azMode ->
+                        fun ?availabilityZoneId ->
+                          fun ?lastModifiedTimestamp ->
+                            fun ?createdTimestamp ->
+                              fun () ->
+                                {
+                                  status;
+                                  statusReason;
+                                  clusterName;
+                                  clusterType;
+                                  clusterDescription;
+                                  releaseLabel;
+                                  volumes;
+                                  initializationScript;
+                                  executionRole;
+                                  azMode;
+                                  availabilityZoneId;
+                                  lastModifiedTimestamp;
+                                  createdTimestamp
+                                }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:KxClusterStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxClusterStatusReason.to_value));
+        ("clusterName", (Option.map x.clusterName ~f:KxClusterName.to_value));
+        ("clusterType", (Option.map x.clusterType ~f:KxClusterType.to_value));
+        ("clusterDescription",
+          (Option.map x.clusterDescription ~f:KxClusterDescription.to_value));
+        ("releaseLabel",
+          (Option.map x.releaseLabel ~f:ReleaseLabel.to_value));
+        ("volumes", (Option.map x.volumes ~f:Volumes.to_value));
+        ("initializationScript",
+          (Option.map x.initializationScript
+             ~f:InitializationScriptFilePath.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:ExecutionRoleArn.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let executionRole =
+        (Option.map ~f:ExecutionRoleArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let initializationScript =
+        (Option.map ~f:InitializationScriptFilePath.of_xml)
+          (Xml.child xml_arg0 "initializationScript") in
+      let volumes =
+        (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let releaseLabel =
+        (Option.map ~f:ReleaseLabel.of_xml)
+          (Xml.child xml_arg0 "releaseLabel") in
+      let clusterDescription =
+        (Option.map ~f:KxClusterDescription.of_xml)
+          (Xml.child xml_arg0 "clusterDescription") in
+      let clusterType =
+        (Option.map ~f:KxClusterType.of_xml)
+          (Xml.child xml_arg0 "clusterType") in
+      let clusterName =
+        (Option.map ~f:KxClusterName.of_xml)
+          (Xml.child xml_arg0 "clusterName") in
+      let statusReason =
+        (Option.map ~f:KxClusterStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxClusterStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?createdTimestamp ?lastModifiedTimestamp ?availabilityZoneId
+        ?azMode ?executionRole ?initializationScript ?volumes ?releaseLabel
+        ?clusterDescription ?clusterType ?clusterName ?statusReason ?status
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let executionRole =
+        field_map json__ "executionRole" ExecutionRoleArn.of_json in
+      let initializationScript =
+        field_map json__ "initializationScript"
+          InitializationScriptFilePath.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
+      let clusterDescription =
+        field_map json__ "clusterDescription" KxClusterDescription.of_json in
+      let clusterType = field_map json__ "clusterType" KxClusterType.of_json in
+      let clusterName = field_map json__ "clusterName" KxClusterName.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxClusterStatusReason.of_json in
+      let status = field_map json__ "status" KxClusterStatus.of_json in
+      make ?createdTimestamp ?lastModifiedTimestamp ?availabilityZoneId
+        ?azMode ?executionRole ?initializationScript ?volumes ?releaseLabel
+        ?clusterDescription ?clusterType ?clusterName ?statusReason ?status
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of a kdb cluster."]
+module KxNode =
+  struct
+    type nonrec t =
+      {
+      nodeId: KxClusterNodeIdString.t option
+        [@ocaml.doc "A unique identifier for the node."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The identifier of the availability zones where subnets for the environment are created."];
+      launchTime: Timestamp.t option
+        [@ocaml.doc
+          "The time when a particular node is started. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: KxNodeStatus.t option
+        [@ocaml.doc
+          "Specifies the status of the cluster nodes. RUNNING \226\128\147 The node is actively serving. PROVISIONING \226\128\147 The node is being prepared."]}
+    let make ?nodeId =
+      fun ?availabilityZoneId ->
+        fun ?launchTime ->
+          fun ?status ->
+            fun () -> { nodeId; availabilityZoneId; launchTime; status }
+    let to_value x =
+      structure_to_value
+        [("nodeId", (Option.map x.nodeId ~f:KxClusterNodeIdString.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("launchTime", (Option.map x.launchTime ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:KxNodeStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:KxNodeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let launchTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "launchTime") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let nodeId =
+        (Option.map ~f:KxClusterNodeIdString.of_xml)
+          (Xml.child xml_arg0 "nodeId") in
+      make ?status ?launchTime ?availabilityZoneId ?nodeId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" KxNodeStatus.of_json in
+      let launchTime = field_map json__ "launchTime" Timestamp.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let nodeId = field_map json__ "nodeId" KxClusterNodeIdString.of_json in
+      make ?status ?launchTime ?availabilityZoneId ?nodeId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A structure that stores metadata for a kdb node."]
+module KxChangesetListEntry =
+  struct
+    type nonrec t =
+      {
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      activeFromTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "Beginning time from which the changeset is active. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: ChangesetStatus.t option
+        [@ocaml.doc
+          "Status of the changeset. Pending \226\128\147 Changeset creation is pending. Processing \226\128\147 Changeset creation is running. Failed \226\128\147 Changeset creation has failed. Complete \226\128\147 Changeset creation has succeeded."]}
+    let make ?changesetId =
+      fun ?createdTimestamp ->
+        fun ?activeFromTimestamp ->
+          fun ?lastModifiedTimestamp ->
+            fun ?status ->
+              fun () ->
+                {
+                  changesetId;
+                  createdTimestamp;
+                  activeFromTimestamp;
+                  lastModifiedTimestamp;
+                  status
+                }
+    let to_value x =
+      structure_to_value
+        [("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("activeFromTimestamp",
+          (Option.map x.activeFromTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:ChangesetStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:ChangesetStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let activeFromTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "activeFromTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      make ?status ?lastModifiedTimestamp ?activeFromTimestamp
+        ?createdTimestamp ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" ChangesetStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let activeFromTimestamp =
+        field_map json__ "activeFromTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      make ?status ?lastModifiedTimestamp ?activeFromTimestamp
+        ?createdTimestamp ?changesetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details of changeset."]
 module Environment =
   struct
     type nonrec t =
@@ -515,7 +3951,7 @@ module Environment =
           "The current status of creation of the FinSpace environment."];
       environmentUrl: Url.t option
         [@ocaml.doc
-          "The sign-in url for the web application of your FinSpace environment."];
+          "The sign-in URL for the web application of your FinSpace environment."];
       description: Description.t option
         [@ocaml.doc "The description of the FinSpace environment."];
       environmentArn: EnvironmentArn.t option
@@ -523,7 +3959,7 @@ module Environment =
           "The Amazon Resource Name (ARN) of your FinSpace environment."];
       sageMakerStudioDomainUrl: SmsDomainUrl.t option
         [@ocaml.doc
-          "The url of the integrated FinSpace notebook environment in your web application."];
+          "The URL of the integrated FinSpace notebook environment in your web application."];
       kmsKeyId: KmsKeyId.t option
         [@ocaml.doc
           "The KMS key id used to encrypt in the FinSpace environment."];
@@ -617,29 +4053,468 @@ module Environment =
         ?kmsKeyId ?sageMakerStudioDomainUrl ?environmentArn ?description
         ?environmentUrl ?status ?awsAccountId ?environmentId ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let federationParameters =
-        field_map json "federationParameters" FederationParameters.of_json in
+        field_map json__ "federationParameters" FederationParameters.of_json in
       let federationMode =
-        field_map json "federationMode" FederationMode.of_json in
+        field_map json__ "federationMode" FederationMode.of_json in
       let dedicatedServiceAccountId =
-        field_map json "dedicatedServiceAccountId" IdType.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" KmsKeyId.of_json in
+        field_map json__ "dedicatedServiceAccountId" IdType.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
       let sageMakerStudioDomainUrl =
-        field_map json "sageMakerStudioDomainUrl" SmsDomainUrl.of_json in
+        field_map json__ "sageMakerStudioDomainUrl" SmsDomainUrl.of_json in
       let environmentArn =
-        field_map json "environmentArn" EnvironmentArn.of_json in
-      let description = field_map json "description" Description.of_json in
-      let environmentUrl = field_map json "environmentUrl" Url.of_json in
-      let status = field_map json "status" EnvironmentStatus.of_json in
-      let awsAccountId = field_map json "awsAccountId" IdType.of_json in
-      let environmentId = field_map json "environmentId" IdType.of_json in
-      let name = field_map json "name" EnvironmentName.of_json in
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let environmentUrl = field_map json__ "environmentUrl" Url.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" IdType.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let name = field_map json__ "name" EnvironmentName.of_json in
       make ?federationParameters ?federationMode ?dedicatedServiceAccountId
         ?kmsKeyId ?sageMakerStudioDomainUrl ?environmentArn ?description
         ?environmentUrl ?status ?awsAccountId ?environmentId ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents an FinSpace environment."]
+module AutoScalingMetric =
+  struct
+    type nonrec t =
+      | CPU_UTILIZATION_PERCENTAGE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CPU_UTILIZATION_PERCENTAGE -> "CPU_UTILIZATION_PERCENTAGE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CPU_UTILIZATION_PERCENTAGE" -> CPU_UTILIZATION_PERCENTAGE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration AutoScalingMetric" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AutoScalingMetric" j)
+    let to_json = simple_to_json to_value
+  end
+module AutoScalingMetricTarget =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100.) >>=
+             (fun () -> check_float_min i ~min:1.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module CooldownTime =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:100000.) >>=
+             (fun () -> check_float_min i ~min:0.));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module NodeCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for NodeCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NodeType =
+  struct
+    type nonrec t = string
+    let context_ = "NodeType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9._]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NodeType" j
+    let to_json = simple_to_json to_value
+  end
+module KxCacheStorageConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: KxCacheStorageType.t
+        [@ocaml.doc
+          "The type of cache storage. The valid values are: CACHE_1000 \226\128\147 This type provides at least 1000 MB/s disk access throughput. CACHE_250 \226\128\147 This type provides at least 250 MB/s disk access throughput. CACHE_12 \226\128\147 This type provides at least 12 MB/s disk access throughput. For cache type CACHE_1000 and CACHE_250 you can select cache size as 1200 GB or increments of 2400 GB. For cache type CACHE_12 you can select the cache size in increments of 6000 GB."];
+      size: KxCacheStorageSize.t
+        [@ocaml.doc "The size of cache in Gigabytes."]}
+    let context_ = "KxCacheStorageConfiguration"
+    let make ~type_ = fun ~size -> fun () -> { type_; size }
+    let to_value x =
+      structure_to_value
+        [("type", (Some (KxCacheStorageType.to_value x.type_)));
+        ("size", (Some (KxCacheStorageSize.to_value x.size)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let size =
+        KxCacheStorageSize.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "size") in
+      let type_ =
+        KxCacheStorageType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "type") in
+      make ~size ~type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let size = field_map_exn json__ "size" KxCacheStorageSize.of_json in
+      let type_ = field_map_exn json__ "type" KxCacheStorageType.of_json in
+      make ~size ~type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for read only disk cache associated with a cluster."]
+module KxSavedownStorageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:16000) >>=
+             (fun () -> check_int_min i ~min:10));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for KxSavedownStorageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KxSavedownStorageType =
+  struct
+    type nonrec t =
+      | SDS01 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | SDS01 -> "SDS01" | Non_static_id s -> s
+    let of_string = function | "SDS01" -> SDS01 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration KxSavedownStorageType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"KxSavedownStorageType" j)
+    let to_json = simple_to_json to_value
+  end
+module ClusterNodeCount =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:1); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ClusterNodeCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module CpuCount =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.1); i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module MemoryMib =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:6); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for MemoryMib" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module TickerplantLogVolumes =
+  struct
+    type nonrec t = VolumeName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VolumeName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VolumeName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TickerplantLogVolumes" ~of_json:VolumeName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module IPAddressType =
+  struct
+    type nonrec t =
+      | IP_V4 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | IP_V4 -> "IP_V4" | Non_static_id s -> s
+    let of_string = function | "IP_V4" -> IP_V4 | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration IPAddressType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IPAddressType" j)
+    let to_json = simple_to_json to_value
+  end
+module SecurityGroupIdList =
+  struct
+    type nonrec t = SecurityGroupIdString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SecurityGroupIdString.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SecurityGroupIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SecurityGroupIdList"
+        ~of_json:SecurityGroupIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SubnetIdList =
+  struct
+    type nonrec t = SubnetIdString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SubnetIdString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SubnetIdString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SubnetIdList" ~of_json:SubnetIdString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcIdString =
+  struct
+    type nonrec t = string
+    let context_ = "VpcIdString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^vpc-([a-z0-9]{8}$|[a-z0-9]{17}$)")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcIdString" j
+    let to_json = simple_to_json to_value
+  end
+module ChangeRequest =
+  struct
+    type nonrec t =
+      {
+      changeType: ChangeType.t
+        [@ocaml.doc
+          "Defines the type of change request. A changeType can have the following values: PUT \226\128\147 Adds or updates files in a database. DELETE \226\128\147 Deletes files in a database."];
+      s3Path: S3Path.t option
+        [@ocaml.doc
+          "Defines the S3 path of the source file that is required to add or update files in a database."];
+      dbPath: DbPath.t
+        [@ocaml.doc "Defines the path within the database directory."]}
+    let context_ = "ChangeRequest"
+    let make ?s3Path =
+      fun ~changeType ->
+        fun ~dbPath -> fun () -> { s3Path; changeType; dbPath }
+    let to_value x =
+      structure_to_value
+        [("changeType", (Some (ChangeType.to_value x.changeType)));
+        ("s3Path", (Option.map x.s3Path ~f:S3Path.to_value));
+        ("dbPath", (Some (DbPath.to_value x.dbPath)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dbPath =
+        DbPath.of_xml (Xml.child_exn ~context:context_ xml_arg0 "dbPath") in
+      let s3Path =
+        (Option.map ~f:S3Path.of_xml) (Xml.child xml_arg0 "s3Path") in
+      let changeType =
+        ChangeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "changeType") in
+      make ~dbPath ?s3Path ~changeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dbPath = field_map_exn json__ "dbPath" DbPath.of_json in
+      let s3Path = field_map json__ "s3Path" S3Path.of_json in
+      let changeType = field_map_exn json__ "changeType" ChangeType.of_json in
+      make ~dbPath ?s3Path ~changeType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A list of change request objects."]
+module ErrorDetails =
+  struct
+    type nonrec t =
+      | The_inputs_to_this_request_are_invalid_ 
+      | Service_limits_have_been_exceeded_ 
+      | Missing_required_permission_to_perform_this_request_ 
+      | One_or_more_inputs_to_this_request_were_not_found_ 
+      |
+      The_system_temporarily_lacks_sufficient_resources_to_process_the_request_
+      
+      | An_internal_error_has_occurred_ 
+      | Cancelled 
+      | A_user_recoverable_error_has_occurred 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | The_inputs_to_this_request_are_invalid_ ->
+          "The inputs to this request are invalid."
+      | Service_limits_have_been_exceeded_ ->
+          "Service limits have been exceeded."
+      | Missing_required_permission_to_perform_this_request_ ->
+          "Missing required permission to perform this request."
+      | One_or_more_inputs_to_this_request_were_not_found_ ->
+          "One or more inputs to this request were not found."
+      | The_system_temporarily_lacks_sufficient_resources_to_process_the_request_
+          ->
+          "The system temporarily lacks sufficient resources to process the request."
+      | An_internal_error_has_occurred_ -> "An internal error has occurred."
+      | Cancelled -> "Cancelled"
+      | A_user_recoverable_error_has_occurred ->
+          "A user recoverable error has occurred"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "The inputs to this request are invalid." ->
+          The_inputs_to_this_request_are_invalid_
+      | "Service limits have been exceeded." ->
+          Service_limits_have_been_exceeded_
+      | "Missing required permission to perform this request." ->
+          Missing_required_permission_to_perform_this_request_
+      | "One or more inputs to this request were not found." ->
+          One_or_more_inputs_to_this_request_were_not_found_
+      | "The system temporarily lacks sufficient resources to process the request."
+          ->
+          The_system_temporarily_lacks_sufficient_resources_to_process_the_request_
+      | "An internal error has occurred." -> An_internal_error_has_occurred_
+      | "Cancelled" -> Cancelled
+      | "A user recoverable error has occurred" ->
+          A_user_recoverable_error_has_occurred
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ErrorDetails" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ErrorDetails" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:1000); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
 module DataBundleArn =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -707,108 +4582,513 @@ module NameString =
   end
 module AccessDeniedException =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
-    let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "You do not have sufficient access to perform this action."]
-module InternalServerException =
-  struct
     type nonrec t = {
-      message: ErrorMessage.t option }
+      message: ErrorMessage__lc1.t option }
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You do not have sufficient access to perform this action."]
+module ConflictException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage__lc1.t option ;
+      reason: ErrorMessage__lc1.t option
+        [@ocaml.doc "The reason for the conflict exception."]}
+    let make ?message = fun ?reason -> fun () -> { message; reason }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value));
+        ("reason", (Option.map x.reason ~f:ErrorMessage__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" ErrorMessage__lc1.of_json in
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
+      make ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "There was a conflict with this action, and it could not be completed."]
+module InternalServerException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request processing has failed because of an unknown error, exception or failure."]
-module ResourceNotFoundException =
+module KxAttachedClusters =
+  struct
+    type nonrec t = KxAttachedCluster.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxAttachedCluster.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxAttachedCluster.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxAttachedClusters"
+        ~of_json:KxAttachedCluster.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxEnvironmentId =
+  struct
+    type nonrec t = string
+    let context_ = "KxEnvironmentId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:32) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-z0-9]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxEnvironmentId" j
+    let to_json = simple_to_json to_value
+  end
+module KxNAS1Configuration =
+  struct
+    type nonrec t =
+      {
+      type_: KxNAS1Type.t option
+        [@ocaml.doc "The type of the network attached storage."];
+      size: KxNAS1Size.t option
+        [@ocaml.doc
+          "The size of the network attached storage. For storage type SSD_1000 and SSD_250 you can select the minimum size as 1200 GB or increments of 2400 GB. For storage type HDD_12 you can select the minimum size as 6000 GB or increments of 6000 GB."]}
+    let make ?type_ = fun ?size -> fun () -> { type_; size }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:KxNAS1Type.to_value));
+        ("size", (Option.map x.size ~f:KxNAS1Size.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let size =
+        (Option.map ~f:KxNAS1Size.of_xml) (Xml.child xml_arg0 "size") in
+      let type_ =
+        (Option.map ~f:KxNAS1Type.of_xml) (Xml.child xml_arg0 "type") in
+      make ?size ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let size = field_map json__ "size" KxNAS1Size.of_json in
+      let type_ = field_map json__ "type" KxNAS1Type.of_json in
+      make ?size ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure containing the size and type of the network attached storage (NAS_1) file system volume."]
+module KxVolumeArn =
+  struct
+    type nonrec t = string
+    let context_ = "KxVolumeArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws:finspace:[A-Za-z0-9_/.-]{0,63}:\\d+:kxEnvironment/[0-9A-Za-z_-]{1,128}(/kxSharedVolume/[a-zA-Z0-9_-]{1,255})?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KxVolumeArn" j
+    let to_json = simple_to_json to_value
+  end
+module LimitExceededException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t option }
+      message: ErrorMessage__lc1.t option }
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A service limit or quota is exceeded."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more resources can't be found."]
 module ThrottlingException =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = {
+      message: ErrorMessage__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was denied due to request throttling."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t option }
+      message: ErrorMessage__lc1.t option }
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input fails to satisfy the constraints specified by an AWS service."]
-module InvalidRequestException =
+module ClientTokenString =
+  struct
+    type nonrec t = string
+    let context_ = "ClientTokenString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientTokenString" j
+    let to_json = simple_to_json to_value
+  end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceAlreadyExistsException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t option }
+      message: ErrorMessage__lc1.t option }
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource group already exists."]
+module KxDatabaseConfigurations =
+  struct
+    type nonrec t = KxDatabaseConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDatabaseConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDatabaseConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDatabaseConfigurations"
+        ~of_json:KxDatabaseConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxDeploymentConfiguration =
+  struct
+    type nonrec t =
+      {
+      deploymentStrategy: KxDeploymentStrategy.t
+        [@ocaml.doc
+          "The type of deployment that you want on a cluster. ROLLING \226\128\147 This options updates the cluster by stopping the exiting q process and starting a new q process with updated configuration. NO_RESTART \226\128\147 This option updates the cluster without stopping the running q process. It is only available for HDB type cluster. This option is quicker as it reduces the turn around time to update configuration on a cluster. With this deployment mode, you cannot update the initializationScript and commandLineArguments parameters."]}
+    let context_ = "KxDeploymentConfiguration"
+    let make ~deploymentStrategy = fun () -> { deploymentStrategy }
+    let to_value x =
+      structure_to_value
+        [("deploymentStrategy",
+           (Some (KxDeploymentStrategy.to_value x.deploymentStrategy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentStrategy =
+        KxDeploymentStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStrategy") in
+      make ~deploymentStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentStrategy =
+        field_map_exn json__ "deploymentStrategy"
+          KxDeploymentStrategy.of_json in
+      make ~deploymentStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that allows you to choose how you want to update the databases on a cluster. Depending on the option you choose, you can reduce the time it takes to update the cluster."]
+module CodeConfiguration =
+  struct
+    type nonrec t =
+      {
+      s3Bucket: S3Bucket.t option
+        [@ocaml.doc "A unique name for the S3 bucket."];
+      s3Key: S3Key.t option
+        [@ocaml.doc
+          "The full S3 path (excluding bucket) to the .zip file. This file contains the code that is loaded onto the cluster when it's started."];
+      s3ObjectVersion: S3ObjectVersion.t option
+        [@ocaml.doc "The version of an S3 object."]}
+    let make ?s3Bucket =
+      fun ?s3Key ->
+        fun ?s3ObjectVersion ->
+          fun () -> { s3Bucket; s3Key; s3ObjectVersion }
+    let to_value x =
+      structure_to_value
+        [("s3Bucket", (Option.map x.s3Bucket ~f:S3Bucket.to_value));
+        ("s3Key", (Option.map x.s3Key ~f:S3Key.to_value));
+        ("s3ObjectVersion",
+          (Option.map x.s3ObjectVersion ~f:S3ObjectVersion.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3ObjectVersion =
+        (Option.map ~f:S3ObjectVersion.of_xml)
+          (Xml.child xml_arg0 "s3ObjectVersion") in
+      let s3Key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "s3Key") in
+      let s3Bucket =
+        (Option.map ~f:S3Bucket.of_xml) (Xml.child xml_arg0 "s3Bucket") in
+      make ?s3ObjectVersion ?s3Key ?s3Bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3ObjectVersion =
+        field_map json__ "s3ObjectVersion" S3ObjectVersion.of_json in
+      let s3Key = field_map json__ "s3Key" S3Key.of_json in
+      let s3Bucket = field_map json__ "s3Bucket" S3Bucket.of_json in
+      make ?s3ObjectVersion ?s3Key ?s3Bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure of the customer code available within the running cluster."]
+module KxClusterCodeDeploymentConfiguration =
+  struct
+    type nonrec t =
+      {
+      deploymentStrategy: KxClusterCodeDeploymentStrategy.t
+        [@ocaml.doc
+          "The type of deployment that you want on a cluster. ROLLING \226\128\147 This options updates the cluster by stopping the exiting q process and starting a new q process with updated configuration. NO_RESTART \226\128\147 This option updates the cluster without stopping the running q process. It is only available for GP type cluster. This option is quicker as it reduces the turn around time to update configuration on a cluster. With this deployment mode, you cannot update the initializationScript and commandLineArguments parameters. FORCE \226\128\147 This option updates the cluster by immediately stopping all the running processes before starting up new ones with the updated configuration."]}
+    let context_ = "KxClusterCodeDeploymentConfiguration"
+    let make ~deploymentStrategy = fun () -> { deploymentStrategy }
+    let to_value x =
+      structure_to_value
+        [("deploymentStrategy",
+           (Some
+              (KxClusterCodeDeploymentStrategy.to_value x.deploymentStrategy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentStrategy =
+        KxClusterCodeDeploymentStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "deploymentStrategy") in
+      make ~deploymentStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentStrategy =
+        field_map_exn json__ "deploymentStrategy"
+          KxClusterCodeDeploymentStrategy.of_json in
+      make ~deploymentStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration that allows you to choose how you want to update code on a cluster. Depending on the option you choose, you can reduce the time it takes to update the cluster."]
+module KxCommandLineArguments =
+  struct
+    type nonrec t = KxCommandLineArgument.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxCommandLineArgument.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxCommandLineArgument.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxCommandLineArguments"
+        ~of_json:KxCommandLineArgument.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module InvalidRequestException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage__lc1.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The request is invalid. Something is wrong with the input to the request."]
+module FinSpaceTaggableArn =
+  struct
+    type nonrec t = string
+    let context_ = "FinSpaceTaggableArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws:finspace:[A-Za-z0-9_/.-]{0,63}:\\d+:(environment|kxEnvironment)/[0-9A-Za-z_-]{1,128}(/(kxCluster|kxUser|kxVolume|kxScalingGroup)/[a-zA-Z0-9_-]{1,255}|/(kxDatabase/[a-zA-Z0-9_-]{1,255}(/kxDataview/[a-zA-Z0-9_-]{1,255})?))?$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FinSpaceTaggableArn" j
+    let to_json = simple_to_json to_value
+  end
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -817,6 +5097,9 @@ module TagKeyList =
         ok_or_failwith
           ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -861,6 +5144,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -868,12 +5153,15 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
-module EnvironmentList =
+module KxVolumes =
   struct
-    type nonrec t = Environment.t list
+    type nonrec t = KxVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:Environment.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:KxVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -887,9 +5175,9 @@ module EnvironmentList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:Environment.of_xml)
+                     | _ -> true))) ~f:KxVolume.of_xml)
     let of_json j =
-      list_of_json ~kind:"EnvironmentList" ~of_json:Environment.of_json j
+      list_of_json ~kind:"KxVolumes" ~of_json:KxVolume.of_json j
     let to_json v = composed_to_json to_value v
   end
 module PaginationToken =
@@ -912,6 +5200,50 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KxUserList =
+  struct
+    type nonrec t = KxUser.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxUser.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxUser.of_xml)
+    let of_json j = list_of_json ~kind:"KxUserList" ~of_json:KxUser.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResultLimit =
   struct
     type nonrec t = int
@@ -930,49 +5262,783 @@ module ResultLimit =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module LimitExceededException =
+module KxScalingGroupList =
   struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
+    type nonrec t = KxScalingGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxScalingGroup.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxScalingGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxScalingGroupList" ~of_json:KxScalingGroup.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module KxEnvironmentList =
+  struct
+    type nonrec t = KxEnvironment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxEnvironment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxEnvironment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxEnvironmentList" ~of_json:KxEnvironment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module BoxedInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for BoxedInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module KxDataviews =
+  struct
+    type nonrec t = KxDataviewListEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDataviewListEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDataviewListEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDataviews" ~of_json:KxDataviewListEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxDatabases =
+  struct
+    type nonrec t = KxDatabaseListEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxDatabaseListEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxDatabaseListEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxDatabases" ~of_json:KxDatabaseListEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxClusters =
+  struct
+    type nonrec t = KxCluster.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxCluster.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxCluster.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxClusters" ~of_json:KxCluster.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxNodeSummaries =
+  struct
+    type nonrec t = KxNode.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxNode.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxNode.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxNodeSummaries" ~of_json:KxNode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxChangesets =
+  struct
+    type nonrec t = KxChangesetListEntry.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxChangesetListEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxChangesetListEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxChangesets" ~of_json:KxChangesetListEntry.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module EnvironmentList =
+  struct
+    type nonrec t = Environment.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Environment.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Environment.of_xml)
+    let of_json j =
+      list_of_json ~kind:"EnvironmentList" ~of_json:Environment.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"^arn:*:*:*:*:*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"arn" j
+    let to_json = simple_to_json to_value
+  end
+module DatabaseArn =
+  struct
+    type nonrec t = string
+    let context_ = "DatabaseArn"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DatabaseArn" j
+    let to_json = simple_to_json to_value
+  end
+module NumBytes =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module NumChangesets =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for numChangesets" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module NumFiles =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for numFiles" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SignedKxConnectionString =
+  struct
+    type nonrec t = string
+    let context_ = "SignedKxConnectionString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^(:|:tcps:\\/\\/)[a-zA-Z0-9-\\.\\_]+:\\d+:[a-zA-Z0-9-\\.\\_]+:\\S+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SignedKxConnectionString" j
+    let to_json = simple_to_json to_value
+  end
+module AutoScalingConfiguration =
+  struct
+    type nonrec t =
+      {
+      minNodeCount: NodeCount.t option
+        [@ocaml.doc
+          "The lowest number of nodes to scale. This value must be at least 1 and less than the maxNodeCount. If the nodes in a cluster belong to multiple availability zones, then minNodeCount must be at least 3."];
+      maxNodeCount: NodeCount.t option
+        [@ocaml.doc
+          "The highest number of nodes to scale. This value cannot be greater than 5."];
+      autoScalingMetric: AutoScalingMetric.t option
+        [@ocaml.doc
+          "The metric your cluster will track in order to scale in and out. For example, CPU_UTILIZATION_PERCENTAGE is the average CPU usage across all the nodes in a cluster."];
+      metricTarget: AutoScalingMetricTarget.t option
+        [@ocaml.doc
+          "The desired value of the chosen autoScalingMetric. When the metric drops below this value, the cluster will scale in. When the metric goes above this value, the cluster will scale out. You can set the target value between 1 and 100 percent."];
+      scaleInCooldownSeconds: CooldownTime.t option
+        [@ocaml.doc
+          "The duration in seconds that FinSpace will wait after a scale in event before initiating another scaling event."];
+      scaleOutCooldownSeconds: CooldownTime.t option
+        [@ocaml.doc
+          "The duration in seconds that FinSpace will wait after a scale out event before initiating another scaling event."]}
+    let make ?minNodeCount =
+      fun ?maxNodeCount ->
+        fun ?autoScalingMetric ->
+          fun ?metricTarget ->
+            fun ?scaleInCooldownSeconds ->
+              fun ?scaleOutCooldownSeconds ->
+                fun () ->
+                  {
+                    minNodeCount;
+                    maxNodeCount;
+                    autoScalingMetric;
+                    metricTarget;
+                    scaleInCooldownSeconds;
+                    scaleOutCooldownSeconds
+                  }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("minNodeCount", (Option.map x.minNodeCount ~f:NodeCount.to_value));
+        ("maxNodeCount", (Option.map x.maxNodeCount ~f:NodeCount.to_value));
+        ("autoScalingMetric",
+          (Option.map x.autoScalingMetric ~f:AutoScalingMetric.to_value));
+        ("metricTarget",
+          (Option.map x.metricTarget ~f:AutoScalingMetricTarget.to_value));
+        ("scaleInCooldownSeconds",
+          (Option.map x.scaleInCooldownSeconds ~f:CooldownTime.to_value));
+        ("scaleOutCooldownSeconds",
+          (Option.map x.scaleOutCooldownSeconds ~f:CooldownTime.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      let scaleOutCooldownSeconds =
+        (Option.map ~f:CooldownTime.of_xml)
+          (Xml.child xml_arg0 "scaleOutCooldownSeconds") in
+      let scaleInCooldownSeconds =
+        (Option.map ~f:CooldownTime.of_xml)
+          (Xml.child xml_arg0 "scaleInCooldownSeconds") in
+      let metricTarget =
+        (Option.map ~f:AutoScalingMetricTarget.of_xml)
+          (Xml.child xml_arg0 "metricTarget") in
+      let autoScalingMetric =
+        (Option.map ~f:AutoScalingMetric.of_xml)
+          (Xml.child xml_arg0 "autoScalingMetric") in
+      let maxNodeCount =
+        (Option.map ~f:NodeCount.of_xml) (Xml.child xml_arg0 "maxNodeCount") in
+      let minNodeCount =
+        (Option.map ~f:NodeCount.of_xml) (Xml.child xml_arg0 "minNodeCount") in
+      make ?scaleOutCooldownSeconds ?scaleInCooldownSeconds ?metricTarget
+        ?autoScalingMetric ?maxNodeCount ?minNodeCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let scaleOutCooldownSeconds =
+        field_map json__ "scaleOutCooldownSeconds" CooldownTime.of_json in
+      let scaleInCooldownSeconds =
+        field_map json__ "scaleInCooldownSeconds" CooldownTime.of_json in
+      let metricTarget =
+        field_map json__ "metricTarget" AutoScalingMetricTarget.of_json in
+      let autoScalingMetric =
+        field_map json__ "autoScalingMetric" AutoScalingMetric.of_json in
+      let maxNodeCount = field_map json__ "maxNodeCount" NodeCount.of_json in
+      let minNodeCount = field_map json__ "minNodeCount" NodeCount.of_json in
+      make ?scaleOutCooldownSeconds ?scaleInCooldownSeconds ?metricTarget
+        ?autoScalingMetric ?maxNodeCount ?minNodeCount ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "A service limit or quota is exceeded."]
+  end[@@ocaml.doc
+       "The configuration based on which FinSpace will scale in or scale out nodes in your cluster."]
+module CapacityConfiguration =
+  struct
+    type nonrec t =
+      {
+      nodeType: NodeType.t option
+        [@ocaml.doc
+          "The type that determines the hardware of the host computer used for your cluster instance. Each node type offers different memory and storage capabilities. Choose a node type based on the requirements of the application or software that you plan to run on your instance. You can only specify one of the following values: kx.s.large \226\128\147 The node type with a configuration of 12 GiB memory and 2 vCPUs. kx.s.xlarge \226\128\147 The node type with a configuration of 27 GiB memory and 4 vCPUs. kx.s.2xlarge \226\128\147 The node type with a configuration of 54 GiB memory and 8 vCPUs. kx.s.4xlarge \226\128\147 The node type with a configuration of 108 GiB memory and 16 vCPUs. kx.s.8xlarge \226\128\147 The node type with a configuration of 216 GiB memory and 32 vCPUs. kx.s.16xlarge \226\128\147 The node type with a configuration of 432 GiB memory and 64 vCPUs. kx.s.32xlarge \226\128\147 The node type with a configuration of 864 GiB memory and 128 vCPUs."];
+      nodeCount: NodeCount.t option
+        [@ocaml.doc "The number of instances running in a cluster."]}
+    let make ?nodeType = fun ?nodeCount -> fun () -> { nodeType; nodeCount }
+    let to_value x =
+      structure_to_value
+        [("nodeType", (Option.map x.nodeType ~f:NodeType.to_value));
+        ("nodeCount", (Option.map x.nodeCount ~f:NodeCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeCount =
+        (Option.map ~f:NodeCount.of_xml) (Xml.child xml_arg0 "nodeCount") in
+      let nodeType =
+        (Option.map ~f:NodeType.of_xml) (Xml.child xml_arg0 "nodeType") in
+      make ?nodeCount ?nodeType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeCount = field_map json__ "nodeCount" NodeCount.of_json in
+      let nodeType = field_map json__ "nodeType" NodeType.of_json in
+      make ?nodeCount ?nodeType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A structure for the metadata of a cluster. It includes information like the CPUs needed, memory of instances, and number of instances."]
+module KxCacheStorageConfigurations =
+  struct
+    type nonrec t = KxCacheStorageConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:KxCacheStorageConfiguration.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:KxCacheStorageConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"KxCacheStorageConfigurations"
+        ~of_json:KxCacheStorageConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module KxSavedownStorageConfiguration =
+  struct
+    type nonrec t =
+      {
+      type_: KxSavedownStorageType.t option
+        [@ocaml.doc
+          "The type of writeable storage space for temporarily storing your savedown data. The valid values are: SDS01 \226\128\147 This type represents 3000 IOPS and io2 ebs volume type."];
+      size: KxSavedownStorageSize.t option
+        [@ocaml.doc "The size of temporary storage in gibibytes."];
+      volumeName: KxVolumeName.t option
+        [@ocaml.doc
+          "The name of the kdb volume that you want to use as writeable save-down storage for clusters."]}
+    let make ?type_ =
+      fun ?size -> fun ?volumeName -> fun () -> { type_; size; volumeName }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:KxSavedownStorageType.to_value));
+        ("size", (Option.map x.size ~f:KxSavedownStorageSize.to_value));
+        ("volumeName", (Option.map x.volumeName ~f:KxVolumeName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeName =
+        (Option.map ~f:KxVolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      let size =
+        (Option.map ~f:KxSavedownStorageSize.of_xml)
+          (Xml.child xml_arg0 "size") in
+      let type_ =
+        (Option.map ~f:KxSavedownStorageType.of_xml)
+          (Xml.child xml_arg0 "type") in
+      make ?volumeName ?size ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeName = field_map json__ "volumeName" KxVolumeName.of_json in
+      let size = field_map json__ "size" KxSavedownStorageSize.of_json in
+      let type_ = field_map json__ "type" KxSavedownStorageType.of_json in
+      make ?volumeName ?size ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The size and type of temporary storage that is used to hold data during the savedown process. All the data written to this storage space is lost when the cluster node is restarted."]
+module KxScalingGroupConfiguration =
+  struct
+    type nonrec t =
+      {
+      scalingGroupName: KxScalingGroupName.t
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      memoryLimit: MemoryMib.t option
+        [@ocaml.doc
+          "An optional hard limit on the amount of memory a kdb cluster can use."];
+      memoryReservation: MemoryMib.t
+        [@ocaml.doc
+          "A reservation of the minimum amount of memory that should be available on the scaling group for a kdb cluster to be successfully placed in a scaling group."];
+      nodeCount: ClusterNodeCount.t
+        [@ocaml.doc "The number of kdb cluster nodes."];
+      cpu: CpuCount.t option
+        [@ocaml.doc
+          "The number of vCPUs that you want to reserve for each node of this kdb cluster on the scaling group host."]}
+    let context_ = "KxScalingGroupConfiguration"
+    let make ?memoryLimit =
+      fun ?cpu ->
+        fun ~scalingGroupName ->
+          fun ~memoryReservation ->
+            fun ~nodeCount ->
+              fun () ->
+                {
+                  memoryLimit;
+                  cpu;
+                  scalingGroupName;
+                  memoryReservation;
+                  nodeCount
+                }
+    let to_value x =
+      structure_to_value
+        [("scalingGroupName",
+           (Some (KxScalingGroupName.to_value x.scalingGroupName)));
+        ("memoryLimit", (Option.map x.memoryLimit ~f:MemoryMib.to_value));
+        ("memoryReservation",
+          (Some (MemoryMib.to_value x.memoryReservation)));
+        ("nodeCount", (Some (ClusterNodeCount.to_value x.nodeCount)));
+        ("cpu", (Option.map x.cpu ~f:CpuCount.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cpu = (Option.map ~f:CpuCount.of_xml) (Xml.child xml_arg0 "cpu") in
+      let nodeCount =
+        ClusterNodeCount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "nodeCount") in
+      let memoryReservation =
+        MemoryMib.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "memoryReservation") in
+      let memoryLimit =
+        (Option.map ~f:MemoryMib.of_xml) (Xml.child xml_arg0 "memoryLimit") in
+      let scalingGroupName =
+        KxScalingGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scalingGroupName") in
+      make ?cpu ~nodeCount ~memoryReservation ?memoryLimit ~scalingGroupName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cpu = field_map json__ "cpu" CpuCount.of_json in
+      let nodeCount =
+        field_map_exn json__ "nodeCount" ClusterNodeCount.of_json in
+      let memoryReservation =
+        field_map_exn json__ "memoryReservation" MemoryMib.of_json in
+      let memoryLimit = field_map json__ "memoryLimit" MemoryMib.of_json in
+      let scalingGroupName =
+        field_map_exn json__ "scalingGroupName" KxScalingGroupName.of_json in
+      make ?cpu ~nodeCount ~memoryReservation ?memoryLimit ~scalingGroupName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure that stores the capacity configuration details of a scaling group."]
+module TickerplantLogConfiguration =
+  struct
+    type nonrec t =
+      {
+      tickerplantLogVolumes: TickerplantLogVolumes.t option
+        [@ocaml.doc "The name of the volumes for tickerplant logs."]}
+    let make ?tickerplantLogVolumes = fun () -> { tickerplantLogVolumes }
+    let to_value x =
+      structure_to_value
+        [("tickerplantLogVolumes",
+           (Option.map x.tickerplantLogVolumes
+              ~f:TickerplantLogVolumes.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tickerplantLogVolumes =
+        (Option.map ~f:TickerplantLogVolumes.of_xml)
+          (Xml.child xml_arg0 "tickerplantLogVolumes") in
+      make ?tickerplantLogVolumes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tickerplantLogVolumes =
+        field_map json__ "tickerplantLogVolumes"
+          TickerplantLogVolumes.of_json in
+      make ?tickerplantLogVolumes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A configuration to store the Tickerplant logs. It consists of a list of volumes that will be mounted to your cluster. For the cluster type Tickerplant, the location of the TP volume on the cluster will be available by using the global variable .aws.tp_log_path."]
+module VpcConfiguration =
+  struct
+    type nonrec t =
+      {
+      vpcId: VpcIdString.t option
+        [@ocaml.doc "The identifier of the VPC endpoint."];
+      securityGroupIds: SecurityGroupIdList.t option
+        [@ocaml.doc
+          "The unique identifier of the VPC security group applied to the VPC endpoint ENI for the cluster."];
+      subnetIds: SubnetIdList.t option
+        [@ocaml.doc
+          "The identifier of the subnet that the Privatelink VPC endpoint uses to connect to the cluster."];
+      ipAddressType: IPAddressType.t option
+        [@ocaml.doc
+          "The IP address type for cluster network configuration parameters. The following type is available: IP_V4 \226\128\147 IP address version 4"]}
+    let make ?vpcId =
+      fun ?securityGroupIds ->
+        fun ?subnetIds ->
+          fun ?ipAddressType ->
+            fun () -> { vpcId; securityGroupIds; subnetIds; ipAddressType }
+    let to_value x =
+      structure_to_value
+        [("vpcId", (Option.map x.vpcId ~f:VpcIdString.to_value));
+        ("securityGroupIds",
+          (Option.map x.securityGroupIds ~f:SecurityGroupIdList.to_value));
+        ("subnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
+        ("ipAddressType",
+          (Option.map x.ipAddressType ~f:IPAddressType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipAddressType =
+        (Option.map ~f:IPAddressType.of_xml)
+          (Xml.child xml_arg0 "ipAddressType") in
+      let subnetIds =
+        (Option.map ~f:SubnetIdList.of_xml) (Xml.child xml_arg0 "subnetIds") in
+      let securityGroupIds =
+        (Option.map ~f:SecurityGroupIdList.of_xml)
+          (Xml.child xml_arg0 "securityGroupIds") in
+      let vpcId =
+        (Option.map ~f:VpcIdString.of_xml) (Xml.child xml_arg0 "vpcId") in
+      make ?ipAddressType ?subnetIds ?securityGroupIds ?vpcId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipAddressType =
+        field_map json__ "ipAddressType" IPAddressType.of_json in
+      let subnetIds = field_map json__ "subnetIds" SubnetIdList.of_json in
+      let securityGroupIds =
+        field_map json__ "securityGroupIds" SecurityGroupIdList.of_json in
+      let vpcId = field_map json__ "vpcId" VpcIdString.of_json in
+      make ?ipAddressType ?subnetIds ?securityGroupIds ?vpcId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration details about the network where the Privatelink endpoint of the cluster resides."]
+module ChangeRequests =
+  struct
+    type nonrec t = ChangeRequest.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:32) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ChangeRequest.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ChangeRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ChangeRequests" ~of_json:ChangeRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ErrorInfo =
+  struct
+    type nonrec t =
+      {
+      errorMessage__lc1: ErrorMessage.t option
+        [@ocaml.doc
+          "Specifies the error message that appears if a flow fails."];
+      errorType: ErrorDetails.t option
+        [@ocaml.doc "Specifies the type of error."]}
+    let make ?errorMessage__lc1 =
+      fun ?errorType -> fun () -> { errorMessage__lc1; errorType }
+    let to_value x =
+      structure_to_value
+        [("ErrorMessage__lc1",
+           (Option.map x.errorMessage__lc1 ~f:ErrorMessage.to_value));
+        ("errorType", (Option.map x.errorType ~f:ErrorDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorType =
+        (Option.map ~f:ErrorDetails.of_xml) (Xml.child xml_arg0 "errorType") in
+      let errorMessage__lc1 =
+        (Option.map ~f:ErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      make ?errorType ?errorMessage__lc1 ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorType = field_map json__ "errorType" ErrorDetails.of_json in
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
+      make ?errorType ?errorMessage__lc1 ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides details in the event of a failed flow, including the error type and the related error message."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: ErrorMessage.t option }
+      message: ErrorMessage__lc1.t option }
     let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("message", (Option.map x.message ~f:ErrorMessage__lc1.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+        (Option.map ~f:ErrorMessage__lc1.of_xml)
+          (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You have exceeded your service quota. To perform the requested action, remove some of the relevant resources, or use Service Quotas to request a service quota increase."]
+module KmsKeyARN =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyARN"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"^arn:aws:kms:.*:\\d+:.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyARN" j
+    let to_json = simple_to_json to_value
+  end
 module DataBundleArns =
   struct
     type nonrec t = DataBundleArn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataBundleArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1023,13 +6089,2035 @@ module SuperuserParameters =
           (Xml.child_exn ~context:context_ xml_arg0 "emailAddress") in
       make ~lastName ~firstName ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastName = field_map_exn json "lastName" NameString.of_json in
-      let firstName = field_map_exn json "firstName" NameString.of_json in
-      let emailAddress = field_map_exn json "emailAddress" EmailId.of_json in
+    let of_json json__ =
+      let lastName = field_map_exn json__ "lastName" NameString.of_json in
+      let firstName = field_map_exn json__ "firstName" NameString.of_json in
+      let emailAddress = field_map_exn json__ "emailAddress" EmailId.of_json in
       make ~lastName ~firstName ~emailAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration information for the superuser."]
+module UpdateKxVolumeResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment where you want to update the volume."];
+      volumeName: KxVolumeName.t option
+        [@ocaml.doc
+          "A unique identifier for the volume that you want to update."];
+      volumeType: KxVolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."];
+      volumeArn: KxVolumeArn.t option
+        [@ocaml.doc "The ARN identifier of the volume."];
+      nas1Configuration: KxNAS1Configuration.t option
+        [@ocaml.doc
+          "Specifies the configuration for the Network attached storage (NAS_1) file system volume."];
+      status: KxVolumeStatus.t option
+        [@ocaml.doc
+          "The status of the volume. CREATING \226\128\147 The volume creation is in progress. CREATE_FAILED \226\128\147 The volume creation has failed. ACTIVE \226\128\147 The volume is active. UPDATING \226\128\147 The volume is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. UPDATED \226\128\147 The volume is successfully updated. DELETING \226\128\147 The volume is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the volume. DELETED \226\128\147 The volume is successfully deleted."];
+      description: Description.t option
+        [@ocaml.doc "The description for the volume."];
+      statusReason: KxVolumeStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the volume was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the volume was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      attachedClusters: KxAttachedClusters.t option
+        [@ocaml.doc "Specifies the clusters that a volume is attached to."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?volumeName ->
+        fun ?volumeType ->
+          fun ?volumeArn ->
+            fun ?nas1Configuration ->
+              fun ?status ->
+                fun ?description ->
+                  fun ?statusReason ->
+                    fun ?createdTimestamp ->
+                      fun ?azMode ->
+                        fun ?availabilityZoneIds ->
+                          fun ?lastModifiedTimestamp ->
+                            fun ?attachedClusters ->
+                              fun () ->
+                                {
+                                  environmentId;
+                                  volumeName;
+                                  volumeType;
+                                  volumeArn;
+                                  nas1Configuration;
+                                  status;
+                                  description;
+                                  statusReason;
+                                  createdTimestamp;
+                                  azMode;
+                                  availabilityZoneIds;
+                                  lastModifiedTimestamp;
+                                  attachedClusters
+                                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:KxEnvironmentId.to_value));
+        ("volumeName", (Option.map x.volumeName ~f:KxVolumeName.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:KxVolumeType.to_value));
+        ("volumeArn", (Option.map x.volumeArn ~f:KxVolumeArn.to_value));
+        ("nas1Configuration",
+          (Option.map x.nas1Configuration ~f:KxNAS1Configuration.to_value));
+        ("status", (Option.map x.status ~f:KxVolumeStatus.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxVolumeStatusReason.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("attachedClusters",
+          (Option.map x.attachedClusters ~f:KxAttachedClusters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachedClusters =
+        (Option.map ~f:KxAttachedClusters.of_xml)
+          (Xml.child xml_arg0 "attachedClusters") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let statusReason =
+        (Option.map ~f:KxVolumeStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let status =
+        (Option.map ~f:KxVolumeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let nas1Configuration =
+        (Option.map ~f:KxNAS1Configuration.of_xml)
+          (Xml.child xml_arg0 "nas1Configuration") in
+      let volumeArn =
+        (Option.map ~f:KxVolumeArn.of_xml) (Xml.child xml_arg0 "volumeArn") in
+      let volumeType =
+        (Option.map ~f:KxVolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeName =
+        (Option.map ~f:KxVolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      let environmentId =
+        (Option.map ~f:KxEnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?attachedClusters ?lastModifiedTimestamp ?availabilityZoneIds
+        ?azMode ?createdTimestamp ?statusReason ?description ?status
+        ?nas1Configuration ?volumeArn ?volumeType ?volumeName ?environmentId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachedClusters =
+        field_map json__ "attachedClusters" KxAttachedClusters.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxVolumeStatusReason.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let status = field_map json__ "status" KxVolumeStatus.of_json in
+      let nas1Configuration =
+        field_map json__ "nas1Configuration" KxNAS1Configuration.of_json in
+      let volumeArn = field_map json__ "volumeArn" KxVolumeArn.of_json in
+      let volumeType = field_map json__ "volumeType" KxVolumeType.of_json in
+      let volumeName = field_map json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" KxEnvironmentId.of_json in
+      make ?attachedClusters ?lastModifiedTimestamp ?availabilityZoneIds
+        ?azMode ?createdTimestamp ?statusReason ?description ?status
+        ?nas1Configuration ?volumeArn ?volumeType ?volumeName ?environmentId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the throughput or capacity of a volume. During the update process, the filesystem might be unavailable for a few minutes. You can retry any operations after the update is complete."]
+module UpdateKxVolumeRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment where you created the storage volume."];
+      volumeName: KxVolumeName.t
+        [@ocaml.doc "A unique identifier for the volume."];
+      description: Description.t option
+        [@ocaml.doc "A description of the volume."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      nas1Configuration: KxNAS1Configuration.t option
+        [@ocaml.doc
+          "Specifies the configuration for the Network attached storage (NAS_1) file system volume."]}
+    let context_ = "UpdateKxVolumeRequest"
+    let make ?description =
+      fun ?clientToken ->
+        fun ?nas1Configuration ->
+          fun ~environmentId ->
+            fun ~volumeName ->
+              fun () ->
+                {
+                  description;
+                  clientToken;
+                  nas1Configuration;
+                  environmentId;
+                  volumeName
+                }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("volumeName", (Some (KxVolumeName.to_value x.volumeName)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value));
+        ("nas1Configuration",
+          (Option.map x.nas1Configuration ~f:KxNAS1Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nas1Configuration =
+        (Option.map ~f:KxNAS1Configuration.of_xml)
+          (Xml.child xml_arg0 "nas1Configuration") in
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let volumeName =
+        KxVolumeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?nas1Configuration ?clientToken ?description ~volumeName
+        ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nas1Configuration =
+        field_map json__ "nas1Configuration" KxNAS1Configuration.of_json in
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let volumeName = field_map_exn json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?nas1Configuration ?clientToken ?description ~volumeName
+        ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the throughput or capacity of a volume. During the update process, the filesystem might be unavailable for a few minutes. You can retry any operations after the update is complete."]
+module UpdateKxUserResponse =
+  struct
+    type nonrec t =
+      {
+      userName: KxUserNameString.t option
+        [@ocaml.doc "A unique identifier for the user."];
+      userArn: KxUserArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      iamRole: RoleArn.t option
+        [@ocaml.doc "The IAM role ARN that is associated with the user."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userName =
+      fun ?userArn ->
+        fun ?environmentId ->
+          fun ?iamRole ->
+            fun () -> { userName; userArn; environmentId; iamRole }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("userName", (Option.map x.userName ~f:KxUserNameString.to_value));
+        ("userArn", (Option.map x.userArn ~f:KxUserArn.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("iamRole", (Option.map x.iamRole ~f:RoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "iamRole") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let userArn =
+        (Option.map ~f:KxUserArn.of_xml) (Xml.child xml_arg0 "userArn") in
+      let userName =
+        (Option.map ~f:KxUserNameString.of_xml)
+          (Xml.child xml_arg0 "userName") in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRole = field_map json__ "iamRole" RoleArn.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let userArn = field_map json__ "userArn" KxUserArn.of_json in
+      let userName = field_map json__ "userName" KxUserNameString.of_json in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the user details. You can only update the IAM role associated with a user."]
+module UpdateKxUserRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      userName: KxUserNameString.t
+        [@ocaml.doc "A unique identifier for the user."];
+      iamRole: RoleArn.t
+        [@ocaml.doc "The IAM role ARN that is associated with the user."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "UpdateKxUserRequest"
+    let make ?clientToken =
+      fun ~environmentId ->
+        fun ~userName ->
+          fun ~iamRole ->
+            fun () -> { clientToken; environmentId; userName; iamRole }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("userName", (Some (KxUserNameString.to_value x.userName)));
+        ("iamRole", (Some (RoleArn.to_value x.iamRole)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let iamRole =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "iamRole") in
+      let userName =
+        KxUserNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "userName") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ~iamRole ~userName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let iamRole = field_map_exn json__ "iamRole" RoleArn.of_json in
+      let userName = field_map_exn json__ "userName" KxUserNameString.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?clientToken ~iamRole ~userName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the user details. You can only update the IAM role associated with a user."]
+module UpdateKxEnvironmentResponse =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      awsAccountId: IdType.t option
+        [@ocaml.doc
+          "The unique identifier of the AWS account that is used to create the kdb environment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc "The status of the kdb environment."];
+      tgwStatus: TgwStatus.t option
+        [@ocaml.doc "The status of the network configuration."];
+      dnsStatus: DnsStatus.t option
+        [@ocaml.doc "The status of DNS configuration."];
+      errorMessage__lc1: EnvironmentErrorMessage.t option
+        [@ocaml.doc
+          "Specifies the error message that appears if a flow fails."];
+      description: Description.t option
+        [@ocaml.doc "The description of the environment."];
+      environmentArn: EnvironmentArn.t option
+        [@ocaml.doc "The ARN identifier of the environment."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key ID to encrypt your data in the FinSpace environment."];
+      dedicatedServiceAccountId: IdType.t option
+        [@ocaml.doc
+          "A unique identifier for the AWS environment infrastructure account."];
+      transitGatewayConfiguration: TransitGatewayConfiguration.t option ;
+      customDNSConfiguration: CustomDNSConfiguration.t option
+        [@ocaml.doc
+          "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was created in FinSpace."];
+      updateTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was updated."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "The identifier of the availability zones where subnets for the environment are created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?environmentId ->
+        fun ?awsAccountId ->
+          fun ?status ->
+            fun ?tgwStatus ->
+              fun ?dnsStatus ->
+                fun ?errorMessage__lc1 ->
+                  fun ?description ->
+                    fun ?environmentArn ->
+                      fun ?kmsKeyId ->
+                        fun ?dedicatedServiceAccountId ->
+                          fun ?transitGatewayConfiguration ->
+                            fun ?customDNSConfiguration ->
+                              fun ?creationTimestamp ->
+                                fun ?updateTimestamp ->
+                                  fun ?availabilityZoneIds ->
+                                    fun () ->
+                                      {
+                                        name;
+                                        environmentId;
+                                        awsAccountId;
+                                        status;
+                                        tgwStatus;
+                                        dnsStatus;
+                                        errorMessage__lc1;
+                                        description;
+                                        environmentArn;
+                                        kmsKeyId;
+                                        dedicatedServiceAccountId;
+                                        transitGatewayConfiguration;
+                                        customDNSConfiguration;
+                                        creationTimestamp;
+                                        updateTimestamp;
+                                        availabilityZoneIds
+                                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:IdType.to_value));
+        ("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("tgwStatus", (Option.map x.tgwStatus ~f:TgwStatus.to_value));
+        ("dnsStatus", (Option.map x.dnsStatus ~f:DnsStatus.to_value));
+        ("ErrorMessage__lc1",
+          (Option.map x.errorMessage__lc1 ~f:EnvironmentErrorMessage.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentArn",
+          (Option.map x.environmentArn ~f:EnvironmentArn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("dedicatedServiceAccountId",
+          (Option.map x.dedicatedServiceAccountId ~f:IdType.to_value));
+        ("transitGatewayConfiguration",
+          (Option.map x.transitGatewayConfiguration
+             ~f:TransitGatewayConfiguration.to_value));
+        ("customDNSConfiguration",
+          (Option.map x.customDNSConfiguration
+             ~f:CustomDNSConfiguration.to_value));
+        ("creationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("updateTimestamp",
+          (Option.map x.updateTimestamp ~f:Timestamp.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let updateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "updateTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
+      let customDNSConfiguration =
+        (Option.map ~f:CustomDNSConfiguration.of_xml)
+          (Xml.child xml_arg0 "customDNSConfiguration") in
+      let transitGatewayConfiguration =
+        (Option.map ~f:TransitGatewayConfiguration.of_xml)
+          (Xml.child xml_arg0 "transitGatewayConfiguration") in
+      let dedicatedServiceAccountId =
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "dedicatedServiceAccountId") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let environmentArn =
+        (Option.map ~f:EnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "environmentArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let errorMessage__lc1 =
+        (Option.map ~f:EnvironmentErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      let dnsStatus =
+        (Option.map ~f:DnsStatus.of_xml) (Xml.child xml_arg0 "dnsStatus") in
+      let tgwStatus =
+        (Option.map ~f:TgwStatus.of_xml) (Xml.child xml_arg0 "tgwStatus") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let awsAccountId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?availabilityZoneIds ?updateTimestamp ?creationTimestamp
+        ?customDNSConfiguration ?transitGatewayConfiguration
+        ?dedicatedServiceAccountId ?kmsKeyId ?environmentArn ?description
+        ?errorMessage__lc1 ?dnsStatus ?tgwStatus ?status ?awsAccountId
+        ?environmentId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let updateTimestamp =
+        field_map json__ "updateTimestamp" Timestamp.of_json in
+      let creationTimestamp =
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let customDNSConfiguration =
+        field_map json__ "customDNSConfiguration"
+          CustomDNSConfiguration.of_json in
+      let transitGatewayConfiguration =
+        field_map json__ "transitGatewayConfiguration"
+          TransitGatewayConfiguration.of_json in
+      let dedicatedServiceAccountId =
+        field_map json__ "dedicatedServiceAccountId" IdType.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let environmentArn =
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" EnvironmentErrorMessage.of_json in
+      let dnsStatus = field_map json__ "dnsStatus" DnsStatus.of_json in
+      let tgwStatus = field_map json__ "tgwStatus" TgwStatus.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" IdType.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      make ?availabilityZoneIds ?updateTimestamp ?creationTimestamp
+        ?customDNSConfiguration ?transitGatewayConfiguration
+        ?dedicatedServiceAccountId ?kmsKeyId ?environmentArn ?description
+        ?errorMessage__lc1 ?dnsStatus ?tgwStatus ?status ?awsAccountId
+        ?environmentId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates information for the given kdb environment."]
+module UpdateKxEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      description: Description.t option
+        [@ocaml.doc "A description of the kdb environment."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "UpdateKxEnvironmentRequest"
+    let make ?name =
+      fun ?description ->
+        fun ?clientToken ->
+          fun ~environmentId ->
+            fun () -> { name; description; clientToken; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ?description ?name ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?clientToken ?description ?name ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates information for the given kdb environment."]
+module UpdateKxEnvironmentNetworkResponse =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      awsAccountId: IdType.t option
+        [@ocaml.doc
+          "The unique identifier of the AWS account that is used to create the kdb environment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc "The status of the kdb environment."];
+      tgwStatus: TgwStatus.t option
+        [@ocaml.doc "The status of the network configuration."];
+      dnsStatus: DnsStatus.t option
+        [@ocaml.doc "The status of DNS configuration."];
+      errorMessage__lc1: EnvironmentErrorMessage.t option
+        [@ocaml.doc
+          "Specifies the error message that appears if a flow fails."];
+      description: Description.t option
+        [@ocaml.doc "The description of the environment."];
+      environmentArn: EnvironmentArn.t option
+        [@ocaml.doc "The ARN identifier of the environment."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key ID to encrypt your data in the FinSpace environment."];
+      dedicatedServiceAccountId: IdType.t option
+        [@ocaml.doc
+          "A unique identifier for the AWS environment infrastructure account."];
+      transitGatewayConfiguration: TransitGatewayConfiguration.t option ;
+      customDNSConfiguration: CustomDNSConfiguration.t option
+        [@ocaml.doc
+          "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was created in FinSpace."];
+      updateTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was updated."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "The identifier of the availability zones where subnets for the environment are created."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?environmentId ->
+        fun ?awsAccountId ->
+          fun ?status ->
+            fun ?tgwStatus ->
+              fun ?dnsStatus ->
+                fun ?errorMessage__lc1 ->
+                  fun ?description ->
+                    fun ?environmentArn ->
+                      fun ?kmsKeyId ->
+                        fun ?dedicatedServiceAccountId ->
+                          fun ?transitGatewayConfiguration ->
+                            fun ?customDNSConfiguration ->
+                              fun ?creationTimestamp ->
+                                fun ?updateTimestamp ->
+                                  fun ?availabilityZoneIds ->
+                                    fun () ->
+                                      {
+                                        name;
+                                        environmentId;
+                                        awsAccountId;
+                                        status;
+                                        tgwStatus;
+                                        dnsStatus;
+                                        errorMessage__lc1;
+                                        description;
+                                        environmentArn;
+                                        kmsKeyId;
+                                        dedicatedServiceAccountId;
+                                        transitGatewayConfiguration;
+                                        customDNSConfiguration;
+                                        creationTimestamp;
+                                        updateTimestamp;
+                                        availabilityZoneIds
+                                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:IdType.to_value));
+        ("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("tgwStatus", (Option.map x.tgwStatus ~f:TgwStatus.to_value));
+        ("dnsStatus", (Option.map x.dnsStatus ~f:DnsStatus.to_value));
+        ("ErrorMessage__lc1",
+          (Option.map x.errorMessage__lc1 ~f:EnvironmentErrorMessage.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentArn",
+          (Option.map x.environmentArn ~f:EnvironmentArn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("dedicatedServiceAccountId",
+          (Option.map x.dedicatedServiceAccountId ~f:IdType.to_value));
+        ("transitGatewayConfiguration",
+          (Option.map x.transitGatewayConfiguration
+             ~f:TransitGatewayConfiguration.to_value));
+        ("customDNSConfiguration",
+          (Option.map x.customDNSConfiguration
+             ~f:CustomDNSConfiguration.to_value));
+        ("creationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("updateTimestamp",
+          (Option.map x.updateTimestamp ~f:Timestamp.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let updateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "updateTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
+      let customDNSConfiguration =
+        (Option.map ~f:CustomDNSConfiguration.of_xml)
+          (Xml.child xml_arg0 "customDNSConfiguration") in
+      let transitGatewayConfiguration =
+        (Option.map ~f:TransitGatewayConfiguration.of_xml)
+          (Xml.child xml_arg0 "transitGatewayConfiguration") in
+      let dedicatedServiceAccountId =
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "dedicatedServiceAccountId") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let environmentArn =
+        (Option.map ~f:EnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "environmentArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let errorMessage__lc1 =
+        (Option.map ~f:EnvironmentErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      let dnsStatus =
+        (Option.map ~f:DnsStatus.of_xml) (Xml.child xml_arg0 "dnsStatus") in
+      let tgwStatus =
+        (Option.map ~f:TgwStatus.of_xml) (Xml.child xml_arg0 "tgwStatus") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let awsAccountId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?availabilityZoneIds ?updateTimestamp ?creationTimestamp
+        ?customDNSConfiguration ?transitGatewayConfiguration
+        ?dedicatedServiceAccountId ?kmsKeyId ?environmentArn ?description
+        ?errorMessage__lc1 ?dnsStatus ?tgwStatus ?status ?awsAccountId
+        ?environmentId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let updateTimestamp =
+        field_map json__ "updateTimestamp" Timestamp.of_json in
+      let creationTimestamp =
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let customDNSConfiguration =
+        field_map json__ "customDNSConfiguration"
+          CustomDNSConfiguration.of_json in
+      let transitGatewayConfiguration =
+        field_map json__ "transitGatewayConfiguration"
+          TransitGatewayConfiguration.of_json in
+      let dedicatedServiceAccountId =
+        field_map json__ "dedicatedServiceAccountId" IdType.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let environmentArn =
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" EnvironmentErrorMessage.of_json in
+      let dnsStatus = field_map json__ "dnsStatus" DnsStatus.of_json in
+      let tgwStatus = field_map json__ "tgwStatus" TgwStatus.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" IdType.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      make ?availabilityZoneIds ?updateTimestamp ?creationTimestamp
+        ?customDNSConfiguration ?transitGatewayConfiguration
+        ?dedicatedServiceAccountId ?kmsKeyId ?environmentArn ?description
+        ?errorMessage__lc1 ?dnsStatus ?tgwStatus ?status ?awsAccountId
+        ?environmentId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates environment network to connect to your internal network by using a transit gateway. This API supports request to create a transit gateway attachment from FinSpace VPC to your transit gateway ID and create a custom Route-53 outbound resolvers. Once you send a request to update a network, you cannot change it again. Network update might require termination of any clusters that are running in the existing network."]
+module UpdateKxEnvironmentNetworkRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      transitGatewayConfiguration: TransitGatewayConfiguration.t option
+        [@ocaml.doc
+          "Specifies the transit gateway and network configuration to connect the kdb environment to an internal network."];
+      customDNSConfiguration: CustomDNSConfiguration.t option
+        [@ocaml.doc
+          "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "UpdateKxEnvironmentNetworkRequest"
+    let make ?transitGatewayConfiguration =
+      fun ?customDNSConfiguration ->
+        fun ?clientToken ->
+          fun ~environmentId ->
+            fun () ->
+              {
+                transitGatewayConfiguration;
+                customDNSConfiguration;
+                clientToken;
+                environmentId
+              }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("transitGatewayConfiguration",
+          (Option.map x.transitGatewayConfiguration
+             ~f:TransitGatewayConfiguration.to_value));
+        ("customDNSConfiguration",
+          (Option.map x.customDNSConfiguration
+             ~f:CustomDNSConfiguration.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let customDNSConfiguration =
+        (Option.map ~f:CustomDNSConfiguration.of_xml)
+          (Xml.child xml_arg0 "customDNSConfiguration") in
+      let transitGatewayConfiguration =
+        (Option.map ~f:TransitGatewayConfiguration.of_xml)
+          (Xml.child xml_arg0 "transitGatewayConfiguration") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ?customDNSConfiguration ?transitGatewayConfiguration
+        ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let customDNSConfiguration =
+        field_map json__ "customDNSConfiguration"
+          CustomDNSConfiguration.of_json in
+      let transitGatewayConfiguration =
+        field_map json__ "transitGatewayConfiguration"
+          TransitGatewayConfiguration.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?clientToken ?customDNSConfiguration ?transitGatewayConfiguration
+        ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates environment network to connect to your internal network by using a transit gateway. This API supports request to create a transit gateway attachment from FinSpace VPC to your transit gateway ID and create a custom Route-53 outbound resolvers. Once you send a request to update a network, you cannot change it again. Network update might require termination of any clusters that are running in the existing network."]
+module UpdateKxDataviewResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you want to update the dataview."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the database."];
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc
+          "The name of the database under which the dataview was created."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      activeVersions: KxDataviewActiveVersionList.t option
+        [@ocaml.doc
+          "The current active changeset versions of the database on the given dataview."];
+      status: KxDataviewStatus.t option
+        [@ocaml.doc
+          "The status of dataview creation. CREATING \226\128\147 The dataview creation is in progress. UPDATING \226\128\147 The dataview is in the process of being updated. ACTIVE \226\128\147 The dataview is active."];
+      autoUpdate: BooleanValue.t option
+        [@ocaml.doc
+          "The option to specify whether you want to apply all the future additions and corrections automatically to the dataview when new changesets are ingested. The default value is false."];
+      readWrite: BooleanValue.t option
+        [@ocaml.doc
+          "Returns True if the dataview is created as writeable and False otherwise."];
+      description: Description.t option
+        [@ocaml.doc "A description of the dataview."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the dataview was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the dataview was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?databaseName ->
+        fun ?dataviewName ->
+          fun ?azMode ->
+            fun ?availabilityZoneId ->
+              fun ?changesetId ->
+                fun ?segmentConfigurations ->
+                  fun ?activeVersions ->
+                    fun ?status ->
+                      fun ?autoUpdate ->
+                        fun ?readWrite ->
+                          fun ?description ->
+                            fun ?createdTimestamp ->
+                              fun ?lastModifiedTimestamp ->
+                                fun () ->
+                                  {
+                                    environmentId;
+                                    databaseName;
+                                    dataviewName;
+                                    azMode;
+                                    availabilityZoneId;
+                                    changesetId;
+                                    segmentConfigurations;
+                                    activeVersions;
+                                    status;
+                                    autoUpdate;
+                                    readWrite;
+                                    description;
+                                    createdTimestamp;
+                                    lastModifiedTimestamp
+                                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("dataviewName",
+          (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("activeVersions",
+          (Option.map x.activeVersions
+             ~f:KxDataviewActiveVersionList.to_value));
+        ("status", (Option.map x.status ~f:KxDataviewStatus.to_value));
+        ("autoUpdate", (Option.map x.autoUpdate ~f:BooleanValue.to_value));
+        ("readWrite", (Option.map x.readWrite ~f:BooleanValue.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let readWrite =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "readWrite") in
+      let autoUpdate =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "autoUpdate") in
+      let status =
+        (Option.map ~f:KxDataviewStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let activeVersions =
+        (Option.map ~f:KxDataviewActiveVersionList.of_xml)
+          (Xml.child xml_arg0 "activeVersions") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?lastModifiedTimestamp ?createdTimestamp ?description ?readWrite
+        ?autoUpdate ?status ?activeVersions ?segmentConfigurations
+        ?changesetId ?availabilityZoneId ?azMode ?dataviewName ?databaseName
+        ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let readWrite = field_map json__ "readWrite" BooleanValue.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" BooleanValue.of_json in
+      let status = field_map json__ "status" KxDataviewStatus.of_json in
+      let activeVersions =
+        field_map json__ "activeVersions" KxDataviewActiveVersionList.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      make ?lastModifiedTimestamp ?createdTimestamp ?description ?readWrite
+        ?autoUpdate ?status ?activeVersions ?segmentConfigurations
+        ?changesetId ?availabilityZoneId ?azMode ?dataviewName ?databaseName
+        ?environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified dataview. The dataviews get automatically updated when any new changesets are ingested. Each update of the dataview creates a new version, including changeset details and cache configurations"]
+module UpdateKxDataviewRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you want to update the dataview."];
+      databaseName: DatabaseName.t [@ocaml.doc "The name of the database."];
+      dataviewName: KxDataviewName.t
+        [@ocaml.doc "The name of the dataview that you want to update."];
+      description: Description.t option
+        [@ocaml.doc "The description for a dataview."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "UpdateKxDataviewRequest"
+    let make ?description =
+      fun ?changesetId ->
+        fun ?segmentConfigurations ->
+          fun ~environmentId ->
+            fun ~databaseName ->
+              fun ~dataviewName ->
+                fun ~clientToken ->
+                  fun () ->
+                    {
+                      description;
+                      changesetId;
+                      segmentConfigurations;
+                      environmentId;
+                      databaseName;
+                      dataviewName;
+                      clientToken
+                    }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("dataviewName", (Some (KxDataviewName.to_value x.dataviewName)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let dataviewName =
+        KxDataviewName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataviewName") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ?segmentConfigurations ?changesetId ?description
+        ~dataviewName ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let dataviewName =
+        field_map_exn json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ?segmentConfigurations ?changesetId ?description
+        ~dataviewName ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the specified dataview. The dataviews get automatically updated when any new changesets are ingested. Each update of the dataview creates a new version, including changeset details and cache configurations"]
+module UpdateKxDatabaseResponse =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the kdb database."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      description: Description.t option
+        [@ocaml.doc "A description of the database."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the database was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?databaseName =
+      fun ?environmentId ->
+        fun ?description ->
+          fun ?lastModifiedTimestamp ->
+            fun () ->
+              {
+                databaseName;
+                environmentId;
+                description;
+                lastModifiedTimestamp
+              }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("databaseName",
+           (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      make ?lastModifiedTimestamp ?description ?environmentId ?databaseName
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      make ?lastModifiedTimestamp ?description ?environmentId ?databaseName
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates information for the given kdb database."]
+module UpdateKxDatabaseRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."];
+      description: Description.t option
+        [@ocaml.doc "A description of the database."];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "UpdateKxDatabaseRequest"
+    let make ?description =
+      fun ~environmentId ->
+        fun ~databaseName ->
+          fun ~clientToken ->
+            fun () ->
+              { description; environmentId; databaseName; clientToken }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ?description ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ?description ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates information for the given kdb database."]
+module UpdateKxClusterDatabasesResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the databases mounted on a kdb cluster, which includes the changesetId and all the dbPaths to be cached. This API does not allow you to change a database name or add a database if you created a cluster without one. Using this API you can point a cluster to a different changeset and modify a list of partitions being cached."]
+module UpdateKxClusterDatabasesRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "The unique identifier of a kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc "A unique name for the cluster that you want to modify."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      databases: KxDatabaseConfigurations.t
+        [@ocaml.doc "The structure of databases mounted on the cluster."];
+      deploymentConfiguration: KxDeploymentConfiguration.t option
+        [@ocaml.doc
+          "The configuration that allows you to choose how you want to update the databases on a cluster."]}
+    let context_ = "UpdateKxClusterDatabasesRequest"
+    let make ?clientToken =
+      fun ?deploymentConfiguration ->
+        fun ~environmentId ->
+          fun ~clusterName ->
+            fun ~databases ->
+              fun () ->
+                {
+                  clientToken;
+                  deploymentConfiguration;
+                  environmentId;
+                  clusterName;
+                  databases
+                }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value));
+        ("databases", (Some (KxDatabaseConfigurations.to_value x.databases)));
+        ("deploymentConfiguration",
+          (Option.map x.deploymentConfiguration
+             ~f:KxDeploymentConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentConfiguration =
+        (Option.map ~f:KxDeploymentConfiguration.of_xml)
+          (Xml.child xml_arg0 "deploymentConfiguration") in
+      let databases =
+        KxDatabaseConfigurations.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databases") in
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?deploymentConfiguration ~databases ?clientToken ~clusterName
+        ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentConfiguration =
+        field_map json__ "deploymentConfiguration"
+          KxDeploymentConfiguration.of_json in
+      let databases =
+        field_map_exn json__ "databases" KxDatabaseConfigurations.of_json in
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?deploymentConfiguration ~databases ?clientToken ~clusterName
+        ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the databases mounted on a kdb cluster, which includes the changesetId and all the dbPaths to be cached. This API does not allow you to change a database name or add a database if you created a cluster without one. Using this API you can point a cluster to a different changeset and modify a list of partitions being cached."]
+module UpdateKxClusterCodeConfigurationResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update code configuration on a running cluster. By using this API you can update the code, the initialization script path, and the command line arguments for a specific cluster. The configuration that you want to update will override any existing configurations on the cluster."]
+module UpdateKxClusterCodeConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier of the kdb environment."];
+      clusterName: KxClusterName.t [@ocaml.doc "The name of the cluster."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      code: CodeConfiguration.t ;
+      initializationScript: InitializationScriptFilePath.t option
+        [@ocaml.doc
+          "Specifies a Q program that will be run at launch of a cluster. It is a relative path within .zip file that contains the custom code, which will be loaded on the cluster. It must include the file name itself. For example, somedir/init.q. You cannot update this parameter for a NO_RESTART deployment."];
+      commandLineArguments: KxCommandLineArguments.t option
+        [@ocaml.doc
+          "Specifies the key-value pairs to make them available inside the cluster. You cannot update this parameter for a NO_RESTART deployment."];
+      deploymentConfiguration: KxClusterCodeDeploymentConfiguration.t option
+        [@ocaml.doc
+          "The configuration that allows you to choose how you want to update the code on a cluster."]}
+    let context_ = "UpdateKxClusterCodeConfigurationRequest"
+    let make ?clientToken =
+      fun ?initializationScript ->
+        fun ?commandLineArguments ->
+          fun ?deploymentConfiguration ->
+            fun ~environmentId ->
+              fun ~clusterName ->
+                fun ~code ->
+                  fun () ->
+                    {
+                      clientToken;
+                      initializationScript;
+                      commandLineArguments;
+                      deploymentConfiguration;
+                      environmentId;
+                      clusterName;
+                      code
+                    }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value));
+        ("code", (Some (CodeConfiguration.to_value x.code)));
+        ("initializationScript",
+          (Option.map x.initializationScript
+             ~f:InitializationScriptFilePath.to_value));
+        ("commandLineArguments",
+          (Option.map x.commandLineArguments
+             ~f:KxCommandLineArguments.to_value));
+        ("deploymentConfiguration",
+          (Option.map x.deploymentConfiguration
+             ~f:KxClusterCodeDeploymentConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentConfiguration =
+        (Option.map ~f:KxClusterCodeDeploymentConfiguration.of_xml)
+          (Xml.child xml_arg0 "deploymentConfiguration") in
+      let commandLineArguments =
+        (Option.map ~f:KxCommandLineArguments.of_xml)
+          (Xml.child xml_arg0 "commandLineArguments") in
+      let initializationScript =
+        (Option.map ~f:InitializationScriptFilePath.of_xml)
+          (Xml.child xml_arg0 "initializationScript") in
+      let code =
+        CodeConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "code") in
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?deploymentConfiguration ?commandLineArguments
+        ?initializationScript ~code ?clientToken ~clusterName ~environmentId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentConfiguration =
+        field_map json__ "deploymentConfiguration"
+          KxClusterCodeDeploymentConfiguration.of_json in
+      let commandLineArguments =
+        field_map json__ "commandLineArguments"
+          KxCommandLineArguments.of_json in
+      let initializationScript =
+        field_map json__ "initializationScript"
+          InitializationScriptFilePath.of_json in
+      let code = field_map_exn json__ "code" CodeConfiguration.of_json in
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?deploymentConfiguration ?commandLineArguments
+        ?initializationScript ~code ?clientToken ~clusterName ~environmentId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update code configuration on a running cluster. By using this API you can update the code, the initialization script path, and the command line arguments for a specific cluster. The configuration that you want to update will override any existing configurations on the cluster."]
 module UpdateEnvironmentResponse =
   struct
     type nonrec t =
@@ -1109,8 +8197,8 @@ module UpdateEnvironmentResponse =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
       make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map json "environment" Environment.of_json in
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
       make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update your FinSpace environment."]
@@ -1169,14 +8257,14 @@ module UpdateEnvironmentRequest =
       make ?federationParameters ?federationMode ?description ?name
         ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let federationParameters =
-        field_map json "federationParameters" FederationParameters.of_json in
+        field_map json__ "federationParameters" FederationParameters.of_json in
       let federationMode =
-        field_map json "federationMode" FederationMode.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map json "name" EnvironmentName.of_json in
-      let environmentId = field_map_exn json "environmentId" IdType.of_json in
+        field_map json__ "federationMode" FederationMode.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map json__ "name" EnvironmentName.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
       make ?federationParameters ?federationMode ?description ?name
         ~environmentId ()
     let to_json v = composed_to_json to_value v
@@ -1242,7 +8330,7 @@ module UntagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: EnvironmentArn.t
+      resourceArn: FinSpaceTaggableArn.t
         [@ocaml.doc
           "A FinSpace resource from which you want to remove a tag or tags. The value for this parameter is an Amazon Resource Name (ARN)."];
       tagKeys: TagKeyList.t
@@ -1253,7 +8341,7 @@ module UntagResourceRequest =
       fun ~tagKeys -> fun () -> { resourceArn; tagKeys }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (EnvironmentArn.to_value x.resourceArn)));
+        [("resourceArn", (Some (FinSpaceTaggableArn.to_value x.resourceArn)));
         ("tagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -1261,14 +8349,14 @@ module UntagResourceRequest =
         TagKeyList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
       let resourceArn =
-        EnvironmentArn.of_xml
+        FinSpaceTaggableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "resourceArn" FinSpaceTaggableArn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes metadata tags from a FinSpace resource."]
@@ -1333,7 +8421,7 @@ module TagResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: EnvironmentArn.t
+      resourceArn: FinSpaceTaggableArn.t
         [@ocaml.doc "The Amazon Resource Name (ARN) for the resource."];
       tags: TagMap.t
         [@ocaml.doc "One or more tags to be assigned to the resource."]}
@@ -1341,21 +8429,21 @@ module TagResourceRequest =
     let make ~resourceArn = fun ~tags -> fun () -> { resourceArn; tags }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (EnvironmentArn.to_value x.resourceArn)));
+        [("resourceArn", (Some (FinSpaceTaggableArn.to_value x.resourceArn)));
         ("tags", (Some (TagMap.to_value x.tags)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags =
         TagMap.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tags") in
       let resourceArn =
-        EnvironmentArn.of_xml
+        FinSpaceTaggableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
       let resourceArn =
-        field_map_exn json "resourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "resourceArn" FinSpaceTaggableArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds metadata tags to a FinSpace resource."]
@@ -1417,34 +8505,1348 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of all tags for a resource."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
       {
-      resourceArn: EnvironmentArn.t
+      resourceArn: FinSpaceTaggableArn.t
         [@ocaml.doc "The Amazon Resource Name of the resource."]}
     let context_ = "ListTagsForResourceRequest"
     let make ~resourceArn = fun () -> { resourceArn }
     let to_value x =
       structure_to_value
-        [("resourceArn", (Some (EnvironmentArn.to_value x.resourceArn)))]
+        [("resourceArn", (Some (FinSpaceTaggableArn.to_value x.resourceArn)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourceArn =
-        EnvironmentArn.of_xml
+        FinSpaceTaggableArn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "resourceArn" EnvironmentArn.of_json in
+        field_map_exn json__ "resourceArn" FinSpaceTaggableArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of all tags for a resource."]
+module ListKxVolumesResponse =
+  struct
+    type nonrec t =
+      {
+      kxVolumeSummaries: KxVolumes.t option
+        [@ocaml.doc "A summary of volumes."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?kxVolumeSummaries =
+      fun ?nextToken -> fun () -> { kxVolumeSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("kxVolumeSummaries",
+           (Option.map x.kxVolumeSummaries ~f:KxVolumes.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let kxVolumeSummaries =
+        (Option.map ~f:KxVolumes.of_xml)
+          (Xml.child xml_arg0 "kxVolumeSummaries") in
+      make ?nextToken ?kxVolumeSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let kxVolumeSummaries =
+        field_map json__ "kxVolumeSummaries" KxVolumes.of_json in
+      make ?nextToken ?kxVolumeSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the volumes in a kdb environment."]
+module ListKxVolumesRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      volumeType: KxVolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."]}
+    let context_ = "ListKxVolumesRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?volumeType ->
+          fun ~environmentId ->
+            fun () -> { maxResults; nextToken; volumeType; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:KxVolumeType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeType =
+        (Option.map ~f:KxVolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?volumeType ?nextToken ?maxResults ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeType = field_map json__ "volumeType" KxVolumeType.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?volumeType ?nextToken ?maxResults ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the volumes in a kdb environment."]
+module ListKxUsersResponse =
+  struct
+    type nonrec t =
+      {
+      users: KxUserList.t option
+        [@ocaml.doc "A list of users in a kdb environment."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?users = fun ?nextToken -> fun () -> { users; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("users", (Option.map x.users ~f:KxUserList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let users =
+        (Option.map ~f:KxUserList.of_xml) (Xml.child xml_arg0 "users") in
+      make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let users = field_map json__ "users" KxUserList.of_json in
+      make ?nextToken ?users ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the users in a kdb environment."]
+module ListKxUsersRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: ResultLimit.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListKxUsersRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~environmentId ->
+          fun () -> { nextToken; maxResults; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:ResultLimit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ResultLimit.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?maxResults ?nextToken ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?maxResults ?nextToken ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the users in a kdb environment."]
+module ListKxScalingGroupsResponse =
+  struct
+    type nonrec t =
+      {
+      scalingGroups: KxScalingGroupList.t option
+        [@ocaml.doc
+          "A list of scaling groups available in a kdb environment."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scalingGroups =
+      fun ?nextToken -> fun () -> { scalingGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scalingGroups",
+           (Option.map x.scalingGroups ~f:KxScalingGroupList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let scalingGroups =
+        (Option.map ~f:KxScalingGroupList.of_xml)
+          (Xml.child xml_arg0 "scalingGroups") in
+      make ?nextToken ?scalingGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let scalingGroups =
+        field_map json__ "scalingGroups" KxScalingGroupList.of_json in
+      make ?nextToken ?scalingGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of scaling groups in a kdb environment."]
+module ListKxScalingGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, for which you want to retrieve a list of scaling groups."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    let context_ = "ListKxScalingGroupsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~environmentId ->
+          fun () -> { maxResults; nextToken; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?nextToken ?maxResults ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?nextToken ?maxResults ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of scaling groups in a kdb environment."]
+module ListKxEnvironmentsResponse =
+  struct
+    type nonrec t =
+      {
+      environments: KxEnvironmentList.t option
+        [@ocaml.doc "A list of environments in an account."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environments =
+      fun ?nextToken -> fun () -> { environments; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environments",
+           (Option.map x.environments ~f:KxEnvironmentList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let environments =
+        (Option.map ~f:KxEnvironmentList.of_xml)
+          (Xml.child xml_arg0 "environments") in
+      make ?nextToken ?environments ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let environments =
+        field_map json__ "environments" KxEnvironmentList.of_json in
+      make ?nextToken ?environments ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of kdb environments created in an account."]
+module ListKxEnvironmentsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: BoxedInteger.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:BoxedInteger.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:BoxedInteger.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" BoxedInteger.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of kdb environments created in an account."]
+module ListKxDataviewsResponse =
+  struct
+    type nonrec t =
+      {
+      kxDataviews: KxDataviews.t option
+        [@ocaml.doc
+          "The list of kdb dataviews that are currently active for the given database."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?kxDataviews =
+      fun ?nextToken -> fun () -> { kxDataviews; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("kxDataviews", (Option.map x.kxDataviews ~f:KxDataviews.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let kxDataviews =
+        (Option.map ~f:KxDataviews.of_xml) (Xml.child xml_arg0 "kxDataviews") in
+      make ?nextToken ?kxDataviews ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let kxDataviews = field_map json__ "kxDataviews" KxDataviews.of_json in
+      make ?nextToken ?kxDataviews ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of all the dataviews in the database."]
+module ListKxDataviewsRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, for which you want to retrieve a list of dataviews."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc
+          "The name of the database where the dataviews were created."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListKxDataviewsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~environmentId ->
+          fun ~databaseName ->
+            fun () -> { nextToken; maxResults; environmentId; databaseName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?maxResults ?nextToken ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ?maxResults ?nextToken ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of all the dataviews in the database."]
+module ListKxDatabasesResponse =
+  struct
+    type nonrec t =
+      {
+      kxDatabases: KxDatabases.t option
+        [@ocaml.doc "A list of databases in the kdb environment."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?kxDatabases =
+      fun ?nextToken -> fun () -> { kxDatabases; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("kxDatabases", (Option.map x.kxDatabases ~f:KxDatabases.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let kxDatabases =
+        (Option.map ~f:KxDatabases.of_xml) (Xml.child xml_arg0 "kxDatabases") in
+      make ?nextToken ?kxDatabases ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let kxDatabases = field_map json__ "kxDatabases" KxDatabases.of_json in
+      make ?nextToken ?kxDatabases ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all the databases in the kdb environment."]
+module ListKxDatabasesRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListKxDatabasesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~environmentId ->
+          fun () -> { nextToken; maxResults; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?maxResults ?nextToken ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ?maxResults ?nextToken ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of all the databases in the kdb environment."]
+module ListKxClustersResponse =
+  struct
+    type nonrec t =
+      {
+      kxClusterSummaries: KxClusters.t option
+        [@ocaml.doc "Lists the cluster details."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?kxClusterSummaries =
+      fun ?nextToken -> fun () -> { kxClusterSummaries; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("kxClusterSummaries",
+           (Option.map x.kxClusterSummaries ~f:KxClusters.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let kxClusterSummaries =
+        (Option.map ~f:KxClusters.of_xml)
+          (Xml.child xml_arg0 "kxClusterSummaries") in
+      make ?nextToken ?kxClusterSummaries ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let kxClusterSummaries =
+        field_map json__ "kxClusterSummaries" KxClusters.of_json in
+      make ?nextToken ?kxClusterSummaries ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of clusters."]
+module ListKxClustersRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterType: KxClusterType.t option
+        [@ocaml.doc
+          "Specifies the type of KDB database that is being created. The following types are available: HDB \226\128\147 A Historical Database. The data is only accessible with read-only permissions from one of the FinSpace managed kdb databases mounted to the cluster. RDB \226\128\147 A Realtime Database. This type of database captures all the data from a ticker plant and stores it in memory until the end of day, after which it writes all of its data to a disk and reloads the HDB. This cluster type requires local storage for temporary storage of data during the savedown process. If you specify this field in your request, you must provide the savedownStorageConfiguration parameter. GATEWAY \226\128\147 A gateway cluster allows you to access data across processes in kdb systems. It allows you to create your own routing logic using the initialization scripts and custom code. This type of cluster does not require a writable local storage. GP \226\128\147 A general purpose cluster allows you to quickly iterate on code during development by granting greater access to system commands and enabling a fast reload of custom code. This cluster type can optionally mount databases including cache and savedown storage. For this cluster type, the node count is fixed at 1. It does not support autoscaling and supports only SINGLE AZ mode. Tickerplant \226\128\147 A tickerplant cluster allows you to subscribe to feed handlers based on IAM permissions. It can publish to RDBs, other Tickerplants, and real-time subscribers (RTS). Tickerplants can persist messages to log, which is readable by any RDB environment. It supports only single-node that is only one kdb process."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    let context_ = "ListKxClustersRequest"
+    let make ?clusterType =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~environmentId ->
+            fun () -> { clusterType; maxResults; nextToken; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterType", (Option.map x.clusterType ~f:KxClusterType.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let clusterType =
+        (Option.map ~f:KxClusterType.of_xml)
+          (Xml.child xml_arg0 "clusterType") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?nextToken ?maxResults ?clusterType ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let clusterType = field_map json__ "clusterType" KxClusterType.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?nextToken ?maxResults ?clusterType ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of clusters."]
+module ListKxClusterNodesResponse =
+  struct
+    type nonrec t =
+      {
+      nodes: KxNodeSummaries.t option
+        [@ocaml.doc "A list of nodes associated with the cluster."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?nodes = fun ?nextToken -> fun () -> { nodes; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("nodes", (Option.map x.nodes ~f:KxNodeSummaries.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let nodes =
+        (Option.map ~f:KxNodeSummaries.of_xml) (Xml.child xml_arg0 "nodes") in
+      make ?nextToken ?nodes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let nodes = field_map json__ "nodes" KxNodeSummaries.of_json in
+      make ?nextToken ?nodes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the nodes in a kdb cluster."]
+module ListKxClusterNodesRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc "A unique name for the cluster."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: ResultLimit.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListKxClusterNodesRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~environmentId ->
+          fun ~clusterName ->
+            fun () -> { nextToken; maxResults; environmentId; clusterName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:ResultLimit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:ResultLimit.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?maxResults ?nextToken ~clusterName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?maxResults ?nextToken ~clusterName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists all the nodes in a kdb cluster."]
+module ListKxChangesetsResponse =
+  struct
+    type nonrec t =
+      {
+      kxChangesets: KxChangesets.t option
+        [@ocaml.doc "A list of changesets for a database."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?kxChangesets =
+      fun ?nextToken -> fun () -> { kxChangesets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("kxChangesets",
+           (Option.map x.kxChangesets ~f:KxChangesets.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let kxChangesets =
+        (Option.map ~f:KxChangesets.of_xml)
+          (Xml.child xml_arg0 "kxChangesets") in
+      make ?nextToken ?kxChangesets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let kxChangesets = field_map json__ "kxChangesets" KxChangesets.of_json in
+      make ?nextToken ?kxChangesets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of all the changesets for a database."]
+module ListKxChangesetsRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in this request."]}
+    let context_ = "ListKxChangesetsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~environmentId ->
+          fun ~databaseName ->
+            fun () -> { nextToken; maxResults; environmentId; databaseName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?maxResults ?nextToken ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ?maxResults ?nextToken ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of all the changesets for a database."]
 module ListEnvironmentsResponse =
   struct
     type nonrec t =
@@ -1455,13 +9857,16 @@ module ListEnvironmentsResponse =
         [@ocaml.doc
           "A token that you can use in a subsequent call to retrieve the next set of results."]}
     type nonrec error =
-      [ `InternalServerException of InternalServerException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?environments =
       fun ?nextToken -> fun () -> { environments; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_json json)
       | "ValidationException" ->
@@ -1471,6 +9876,8 @@ module ListEnvironmentsResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServerException" ->
           `InternalServerException (InternalServerException.of_xml xml)
       | "ValidationException" ->
@@ -1479,6 +9886,10 @@ module ListEnvironmentsResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServerException e ->
           `Assoc
             [("error", (`String "InternalServerException"));
@@ -1507,10 +9918,10 @@ module ListEnvironmentsResponse =
           (Xml.child xml_arg0 "environments") in
       make ?nextToken ?environments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let environments =
-        field_map json "environments" EnvironmentList.of_json in
+        field_map json__ "environments" EnvironmentList.of_json in
       make ?nextToken ?environments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of all of your FinSpace environments."]
@@ -1520,7 +9931,7 @@ module ListEnvironmentsRequest =
       {
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "A token generated by FinSpace that specifies where to continue pagination if a previous request was truncated. To get the next set of pages, pass in the nextToken value from the response object of the previous page call."];
+          "A token generated by FinSpace that specifies where to continue pagination if a previous request was truncated. To get the next set of pages, pass in the nextTokennextToken value from the response object of the previous page call."];
       maxResults: ResultLimit.t option
         [@ocaml.doc
           "The maximum number of results to return in this request."]}
@@ -1539,12 +9950,2217 @@ module ListEnvironmentsRequest =
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ResultLimit.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of all of your FinSpace environments."]
+module GetKxVolumeResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      volumeName: KxVolumeName.t option
+        [@ocaml.doc "A unique identifier for the volume."];
+      volumeType: KxVolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."];
+      volumeArn: KxVolumeArn.t option
+        [@ocaml.doc "The ARN identifier of the volume."];
+      nas1Configuration: KxNAS1Configuration.t option
+        [@ocaml.doc
+          "Specifies the configuration for the Network attached storage (NAS_1) file system volume."];
+      status: KxVolumeStatus.t option
+        [@ocaml.doc
+          "The status of volume creation. CREATING \226\128\147 The volume creation is in progress. CREATE_FAILED \226\128\147 The volume creation has failed. ACTIVE \226\128\147 The volume is active. UPDATING \226\128\147 The volume is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. UPDATED \226\128\147 The volume is successfully updated. DELETING \226\128\147 The volume is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the volume. DELETED \226\128\147 The volume is successfully deleted."];
+      statusReason: KxVolumeStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the volume was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      description: Description.t option
+        [@ocaml.doc "A description of the volume."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the volume was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      attachedClusters: KxAttachedClusters.t option
+        [@ocaml.doc
+          "A list of cluster identifiers that a volume is attached to."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?volumeName ->
+        fun ?volumeType ->
+          fun ?volumeArn ->
+            fun ?nas1Configuration ->
+              fun ?status ->
+                fun ?statusReason ->
+                  fun ?createdTimestamp ->
+                    fun ?description ->
+                      fun ?azMode ->
+                        fun ?availabilityZoneIds ->
+                          fun ?lastModifiedTimestamp ->
+                            fun ?attachedClusters ->
+                              fun () ->
+                                {
+                                  environmentId;
+                                  volumeName;
+                                  volumeType;
+                                  volumeArn;
+                                  nas1Configuration;
+                                  status;
+                                  statusReason;
+                                  createdTimestamp;
+                                  description;
+                                  azMode;
+                                  availabilityZoneIds;
+                                  lastModifiedTimestamp;
+                                  attachedClusters
+                                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:KxEnvironmentId.to_value));
+        ("volumeName", (Option.map x.volumeName ~f:KxVolumeName.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:KxVolumeType.to_value));
+        ("volumeArn", (Option.map x.volumeArn ~f:KxVolumeArn.to_value));
+        ("nas1Configuration",
+          (Option.map x.nas1Configuration ~f:KxNAS1Configuration.to_value));
+        ("status", (Option.map x.status ~f:KxVolumeStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxVolumeStatusReason.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("attachedClusters",
+          (Option.map x.attachedClusters ~f:KxAttachedClusters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let attachedClusters =
+        (Option.map ~f:KxAttachedClusters.of_xml)
+          (Xml.child xml_arg0 "attachedClusters") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let statusReason =
+        (Option.map ~f:KxVolumeStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxVolumeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let nas1Configuration =
+        (Option.map ~f:KxNAS1Configuration.of_xml)
+          (Xml.child xml_arg0 "nas1Configuration") in
+      let volumeArn =
+        (Option.map ~f:KxVolumeArn.of_xml) (Xml.child xml_arg0 "volumeArn") in
+      let volumeType =
+        (Option.map ~f:KxVolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeName =
+        (Option.map ~f:KxVolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      let environmentId =
+        (Option.map ~f:KxEnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?attachedClusters ?lastModifiedTimestamp ?availabilityZoneIds
+        ?azMode ?description ?createdTimestamp ?statusReason ?status
+        ?nas1Configuration ?volumeArn ?volumeType ?volumeName ?environmentId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let attachedClusters =
+        field_map json__ "attachedClusters" KxAttachedClusters.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxVolumeStatusReason.of_json in
+      let status = field_map json__ "status" KxVolumeStatus.of_json in
+      let nas1Configuration =
+        field_map json__ "nas1Configuration" KxNAS1Configuration.of_json in
+      let volumeArn = field_map json__ "volumeArn" KxVolumeArn.of_json in
+      let volumeType = field_map json__ "volumeType" KxVolumeType.of_json in
+      let volumeName = field_map json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" KxEnvironmentId.of_json in
+      make ?attachedClusters ?lastModifiedTimestamp ?availabilityZoneIds
+        ?azMode ?description ?createdTimestamp ?statusReason ?status
+        ?nas1Configuration ?volumeArn ?volumeType ?volumeName ?environmentId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the information about the volume."]
+module GetKxVolumeRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      volumeName: KxVolumeName.t
+        [@ocaml.doc "A unique identifier for the volume."]}
+    let context_ = "GetKxVolumeRequest"
+    let make ~environmentId =
+      fun ~volumeName -> fun () -> { environmentId; volumeName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("volumeName", (Some (KxVolumeName.to_value x.volumeName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let volumeName =
+        KxVolumeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~volumeName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let volumeName = field_map_exn json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ~volumeName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the information about the volume."]
+module GetKxUserResponse =
+  struct
+    type nonrec t =
+      {
+      userName: IdType.t option
+        [@ocaml.doc "A unique identifier for the user."];
+      userArn: KxUserArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      iamRole: RoleArn.t option
+        [@ocaml.doc "The IAM role ARN that is associated with the user."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userName =
+      fun ?userArn ->
+        fun ?environmentId ->
+          fun ?iamRole ->
+            fun () -> { userName; userArn; environmentId; iamRole }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("userName", (Option.map x.userName ~f:IdType.to_value));
+        ("userArn", (Option.map x.userArn ~f:KxUserArn.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("iamRole", (Option.map x.iamRole ~f:RoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "iamRole") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let userArn =
+        (Option.map ~f:KxUserArn.of_xml) (Xml.child xml_arg0 "userArn") in
+      let userName =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "userName") in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRole = field_map json__ "iamRole" RoleArn.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let userArn = field_map json__ "userArn" KxUserArn.of_json in
+      let userName = field_map json__ "userName" IdType.of_json in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves information about the specified kdb user."]
+module GetKxUserRequest =
+  struct
+    type nonrec t =
+      {
+      userName: KxUserNameString.t
+        [@ocaml.doc "A unique identifier for the user."];
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."]}
+    let context_ = "GetKxUserRequest"
+    let make ~userName =
+      fun ~environmentId -> fun () -> { userName; environmentId }
+    let to_value x =
+      structure_to_value
+        [("userName", (Some (KxUserNameString.to_value x.userName)));
+        ("environmentId", (Some (IdType.to_value x.environmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let userName =
+        KxUserNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "userName") in
+      make ~environmentId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      let userName = field_map_exn json__ "userName" KxUserNameString.of_json in
+      make ~environmentId ~userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves information about the specified kdb user."]
+module GetKxScalingGroupResponse =
+  struct
+    type nonrec t =
+      {
+      scalingGroupName: KxScalingGroupName.t option
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      scalingGroupArn: Arn.t option
+        [@ocaml.doc "The ARN identifier for the scaling group."];
+      hostType: KxHostType.t option
+        [@ocaml.doc
+          "The memory and CPU capabilities of the scaling group host on which FinSpace Managed kdb clusters will be placed. It can have one of the following values: kx.sg.large \226\128\147 The host type with a configuration of 16 GiB memory and 2 vCPUs. kx.sg.xlarge \226\128\147 The host type with a configuration of 32 GiB memory and 4 vCPUs. kx.sg.2xlarge \226\128\147 The host type with a configuration of 64 GiB memory and 8 vCPUs. kx.sg.4xlarge \226\128\147 The host type with a configuration of 108 GiB memory and 16 vCPUs. kx.sg.8xlarge \226\128\147 The host type with a configuration of 216 GiB memory and 32 vCPUs. kx.sg.16xlarge \226\128\147 The host type with a configuration of 432 GiB memory and 64 vCPUs. kx.sg.32xlarge \226\128\147 The host type with a configuration of 864 GiB memory and 128 vCPUs. kx.sg1.16xlarge \226\128\147 The host type with a configuration of 1949 GiB memory and 64 vCPUs. kx.sg1.24xlarge \226\128\147 The host type with a configuration of 2948 GiB memory and 96 vCPUs."];
+      clusters: KxClusterNameList.t option
+        [@ocaml.doc
+          "The list of Managed kdb clusters that are currently active in the given scaling group."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      status: KxScalingGroupStatus.t option
+        [@ocaml.doc
+          "The status of scaling group. CREATING \226\128\147 The scaling group creation is in progress. CREATE_FAILED \226\128\147 The scaling group creation has failed. ACTIVE \226\128\147 The scaling group is active. UPDATING \226\128\147 The scaling group is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. DELETING \226\128\147 The scaling group is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the scaling group. DELETED \226\128\147 The scaling group is successfully deleted."];
+      statusReason: KxClusterStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the scaling group was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the scaling group was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?scalingGroupName =
+      fun ?scalingGroupArn ->
+        fun ?hostType ->
+          fun ?clusters ->
+            fun ?availabilityZoneId ->
+              fun ?status ->
+                fun ?statusReason ->
+                  fun ?lastModifiedTimestamp ->
+                    fun ?createdTimestamp ->
+                      fun () ->
+                        {
+                          scalingGroupName;
+                          scalingGroupArn;
+                          hostType;
+                          clusters;
+                          availabilityZoneId;
+                          status;
+                          statusReason;
+                          lastModifiedTimestamp;
+                          createdTimestamp
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("scalingGroupName",
+           (Option.map x.scalingGroupName ~f:KxScalingGroupName.to_value));
+        ("scalingGroupArn", (Option.map x.scalingGroupArn ~f:Arn.to_value));
+        ("hostType", (Option.map x.hostType ~f:KxHostType.to_value));
+        ("clusters", (Option.map x.clusters ~f:KxClusterNameList.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("status", (Option.map x.status ~f:KxScalingGroupStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxClusterStatusReason.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let statusReason =
+        (Option.map ~f:KxClusterStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxScalingGroupStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let clusters =
+        (Option.map ~f:KxClusterNameList.of_xml)
+          (Xml.child xml_arg0 "clusters") in
+      let hostType =
+        (Option.map ~f:KxHostType.of_xml) (Xml.child xml_arg0 "hostType") in
+      let scalingGroupArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "scalingGroupArn") in
+      let scalingGroupName =
+        (Option.map ~f:KxScalingGroupName.of_xml)
+          (Xml.child xml_arg0 "scalingGroupName") in
+      make ?createdTimestamp ?lastModifiedTimestamp ?statusReason ?status
+        ?availabilityZoneId ?clusters ?hostType ?scalingGroupArn
+        ?scalingGroupName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxClusterStatusReason.of_json in
+      let status = field_map json__ "status" KxScalingGroupStatus.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let clusters = field_map json__ "clusters" KxClusterNameList.of_json in
+      let hostType = field_map json__ "hostType" KxHostType.of_json in
+      let scalingGroupArn = field_map json__ "scalingGroupArn" Arn.of_json in
+      let scalingGroupName =
+        field_map json__ "scalingGroupName" KxScalingGroupName.of_json in
+      make ?createdTimestamp ?lastModifiedTimestamp ?statusReason ?status
+        ?availabilityZoneId ?clusters ?hostType ?scalingGroupArn
+        ?scalingGroupName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves details of a scaling group."]
+module GetKxScalingGroupRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      scalingGroupName: KxScalingGroupName.t
+        [@ocaml.doc "A unique identifier for the kdb scaling group."]}
+    let context_ = "GetKxScalingGroupRequest"
+    let make ~environmentId =
+      fun ~scalingGroupName -> fun () -> { environmentId; scalingGroupName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("scalingGroupName",
+          (Some (KxScalingGroupName.to_value x.scalingGroupName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingGroupName =
+        KxScalingGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scalingGroupName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~scalingGroupName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingGroupName =
+        field_map_exn json__ "scalingGroupName" KxScalingGroupName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ~scalingGroupName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves details of a scaling group."]
+module GetKxEnvironmentResponse =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      awsAccountId: IdType.t option
+        [@ocaml.doc
+          "The unique identifier of the AWS account that is used to create the kdb environment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc "The status of the kdb environment."];
+      tgwStatus: TgwStatus.t option
+        [@ocaml.doc "The status of the network configuration."];
+      dnsStatus: DnsStatus.t option
+        [@ocaml.doc "The status of DNS configuration."];
+      errorMessage__lc1: EnvironmentErrorMessage.t option
+        [@ocaml.doc
+          "Specifies the error message that appears if a flow fails."];
+      description: Description.t option
+        [@ocaml.doc "A description for the kdb environment."];
+      environmentArn: EnvironmentArn.t option
+        [@ocaml.doc "The ARN identifier of the environment."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key ID to encrypt your data in the FinSpace environment."];
+      dedicatedServiceAccountId: IdType.t option
+        [@ocaml.doc
+          "A unique identifier for the AWS environment infrastructure account."];
+      transitGatewayConfiguration: TransitGatewayConfiguration.t option ;
+      customDNSConfiguration: CustomDNSConfiguration.t option
+        [@ocaml.doc
+          "A list of DNS server name and server IP. This is used to set up Route-53 outbound resolvers."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was created in FinSpace."];
+      updateTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was updated."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc
+          "The identifier of the availability zones where subnets for the environment are created."];
+      certificateAuthorityArn: StringValueLength1to255.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the certificate authority of the kdb environment."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?environmentId ->
+        fun ?awsAccountId ->
+          fun ?status ->
+            fun ?tgwStatus ->
+              fun ?dnsStatus ->
+                fun ?errorMessage__lc1 ->
+                  fun ?description ->
+                    fun ?environmentArn ->
+                      fun ?kmsKeyId ->
+                        fun ?dedicatedServiceAccountId ->
+                          fun ?transitGatewayConfiguration ->
+                            fun ?customDNSConfiguration ->
+                              fun ?creationTimestamp ->
+                                fun ?updateTimestamp ->
+                                  fun ?availabilityZoneIds ->
+                                    fun ?certificateAuthorityArn ->
+                                      fun () ->
+                                        {
+                                          name;
+                                          environmentId;
+                                          awsAccountId;
+                                          status;
+                                          tgwStatus;
+                                          dnsStatus;
+                                          errorMessage__lc1;
+                                          description;
+                                          environmentArn;
+                                          kmsKeyId;
+                                          dedicatedServiceAccountId;
+                                          transitGatewayConfiguration;
+                                          customDNSConfiguration;
+                                          creationTimestamp;
+                                          updateTimestamp;
+                                          availabilityZoneIds;
+                                          certificateAuthorityArn
+                                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("awsAccountId", (Option.map x.awsAccountId ~f:IdType.to_value));
+        ("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("tgwStatus", (Option.map x.tgwStatus ~f:TgwStatus.to_value));
+        ("dnsStatus", (Option.map x.dnsStatus ~f:DnsStatus.to_value));
+        ("ErrorMessage__lc1",
+          (Option.map x.errorMessage__lc1 ~f:EnvironmentErrorMessage.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentArn",
+          (Option.map x.environmentArn ~f:EnvironmentArn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("dedicatedServiceAccountId",
+          (Option.map x.dedicatedServiceAccountId ~f:IdType.to_value));
+        ("transitGatewayConfiguration",
+          (Option.map x.transitGatewayConfiguration
+             ~f:TransitGatewayConfiguration.to_value));
+        ("customDNSConfiguration",
+          (Option.map x.customDNSConfiguration
+             ~f:CustomDNSConfiguration.to_value));
+        ("creationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value));
+        ("updateTimestamp",
+          (Option.map x.updateTimestamp ~f:Timestamp.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("certificateAuthorityArn",
+          (Option.map x.certificateAuthorityArn
+             ~f:StringValueLength1to255.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateAuthorityArn =
+        (Option.map ~f:StringValueLength1to255.of_xml)
+          (Xml.child xml_arg0 "certificateAuthorityArn") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let updateTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "updateTimestamp") in
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
+      let customDNSConfiguration =
+        (Option.map ~f:CustomDNSConfiguration.of_xml)
+          (Xml.child xml_arg0 "customDNSConfiguration") in
+      let transitGatewayConfiguration =
+        (Option.map ~f:TransitGatewayConfiguration.of_xml)
+          (Xml.child xml_arg0 "transitGatewayConfiguration") in
+      let dedicatedServiceAccountId =
+        (Option.map ~f:IdType.of_xml)
+          (Xml.child xml_arg0 "dedicatedServiceAccountId") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let environmentArn =
+        (Option.map ~f:EnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "environmentArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let errorMessage__lc1 =
+        (Option.map ~f:EnvironmentErrorMessage.of_xml)
+          (Xml.child xml_arg0 "ErrorMessage__lc1") in
+      let dnsStatus =
+        (Option.map ~f:DnsStatus.of_xml) (Xml.child xml_arg0 "dnsStatus") in
+      let tgwStatus =
+        (Option.map ~f:TgwStatus.of_xml) (Xml.child xml_arg0 "tgwStatus") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let awsAccountId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "awsAccountId") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?certificateAuthorityArn ?availabilityZoneIds ?updateTimestamp
+        ?creationTimestamp ?customDNSConfiguration
+        ?transitGatewayConfiguration ?dedicatedServiceAccountId ?kmsKeyId
+        ?environmentArn ?description ?errorMessage__lc1 ?dnsStatus ?tgwStatus
+        ?status ?awsAccountId ?environmentId ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateAuthorityArn =
+        field_map json__ "certificateAuthorityArn"
+          StringValueLength1to255.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let updateTimestamp =
+        field_map json__ "updateTimestamp" Timestamp.of_json in
+      let creationTimestamp =
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let customDNSConfiguration =
+        field_map json__ "customDNSConfiguration"
+          CustomDNSConfiguration.of_json in
+      let transitGatewayConfiguration =
+        field_map json__ "transitGatewayConfiguration"
+          TransitGatewayConfiguration.of_json in
+      let dedicatedServiceAccountId =
+        field_map json__ "dedicatedServiceAccountId" IdType.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let environmentArn =
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let errorMessage__lc1 =
+        field_map json__ "ErrorMessage__lc1" EnvironmentErrorMessage.of_json in
+      let dnsStatus = field_map json__ "dnsStatus" DnsStatus.of_json in
+      let tgwStatus = field_map json__ "tgwStatus" TgwStatus.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let awsAccountId = field_map json__ "awsAccountId" IdType.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      make ?certificateAuthorityArn ?availabilityZoneIds ?updateTimestamp
+        ?creationTimestamp ?customDNSConfiguration
+        ?transitGatewayConfiguration ?dedicatedServiceAccountId ?kmsKeyId
+        ?environmentArn ?description ?errorMessage__lc1 ?dnsStatus ?tgwStatus
+        ?status ?awsAccountId ?environmentId ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all the information for the specified kdb environment."]
+module GetKxEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."]}
+    let context_ = "GetKxEnvironmentRequest"
+    let make ~environmentId = fun () -> { environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all the information for the specified kdb environment."]
+module GetKxDataviewResponse =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t option
+        [@ocaml.doc
+          "The name of the database where you created the dataview."];
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc "A unique identifier for the dataview."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc
+          "A unique identifier of the changeset that you want to use to ingest data."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      activeVersions: KxDataviewActiveVersionList.t option
+        [@ocaml.doc
+          "The current active changeset versions of the database on the given dataview."];
+      description: Description.t option
+        [@ocaml.doc "A description of the dataview."];
+      autoUpdate: BooleanValue.t option
+        [@ocaml.doc
+          "The option to specify whether you want to apply all the future additions and corrections automatically to the dataview when new changesets are ingested. The default value is false."];
+      readWrite: BooleanValue.t option
+        [@ocaml.doc
+          "Returns True if the dataview is created as writeable and False otherwise."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, from where you want to retrieve the dataview details."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the dataview was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the dataview was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: KxDataviewStatus.t option
+        [@ocaml.doc
+          "The status of dataview creation. CREATING \226\128\147 The dataview creation is in progress. UPDATING \226\128\147 The dataview is in the process of being updated. ACTIVE \226\128\147 The dataview is active."];
+      statusReason: KxDataviewStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?databaseName =
+      fun ?dataviewName ->
+        fun ?azMode ->
+          fun ?availabilityZoneId ->
+            fun ?changesetId ->
+              fun ?segmentConfigurations ->
+                fun ?activeVersions ->
+                  fun ?description ->
+                    fun ?autoUpdate ->
+                      fun ?readWrite ->
+                        fun ?environmentId ->
+                          fun ?createdTimestamp ->
+                            fun ?lastModifiedTimestamp ->
+                              fun ?status ->
+                                fun ?statusReason ->
+                                  fun () ->
+                                    {
+                                      databaseName;
+                                      dataviewName;
+                                      azMode;
+                                      availabilityZoneId;
+                                      changesetId;
+                                      segmentConfigurations;
+                                      activeVersions;
+                                      description;
+                                      autoUpdate;
+                                      readWrite;
+                                      environmentId;
+                                      createdTimestamp;
+                                      lastModifiedTimestamp;
+                                      status;
+                                      statusReason
+                                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("databaseName",
+           (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("dataviewName",
+          (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("activeVersions",
+          (Option.map x.activeVersions
+             ~f:KxDataviewActiveVersionList.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("autoUpdate", (Option.map x.autoUpdate ~f:BooleanValue.to_value));
+        ("readWrite", (Option.map x.readWrite ~f:BooleanValue.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:KxDataviewStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxDataviewStatusReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusReason =
+        (Option.map ~f:KxDataviewStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxDataviewStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let readWrite =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "readWrite") in
+      let autoUpdate =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "autoUpdate") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let activeVersions =
+        (Option.map ~f:KxDataviewActiveVersionList.of_xml)
+          (Xml.child xml_arg0 "activeVersions") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      make ?statusReason ?status ?lastModifiedTimestamp ?createdTimestamp
+        ?environmentId ?readWrite ?autoUpdate ?description ?activeVersions
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ?azMode
+        ?dataviewName ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusReason =
+        field_map json__ "statusReason" KxDataviewStatusReason.of_json in
+      let status = field_map json__ "status" KxDataviewStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let readWrite = field_map json__ "readWrite" BooleanValue.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" BooleanValue.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let activeVersions =
+        field_map json__ "activeVersions" KxDataviewActiveVersionList.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      make ?statusReason ?status ?lastModifiedTimestamp ?createdTimestamp
+        ?environmentId ?readWrite ?autoUpdate ?description ?activeVersions
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ?azMode
+        ?dataviewName ?databaseName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves details of the dataview."]
+module GetKxDataviewRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, from where you want to retrieve the dataview details."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc
+          "The name of the database where you created the dataview."];
+      dataviewName: KxDataviewName.t
+        [@ocaml.doc "A unique identifier for the dataview."]}
+    let context_ = "GetKxDataviewRequest"
+    let make ~environmentId =
+      fun ~databaseName ->
+        fun ~dataviewName ->
+          fun () -> { environmentId; databaseName; dataviewName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("dataviewName", (Some (KxDataviewName.to_value x.dataviewName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataviewName =
+        KxDataviewName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataviewName") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~dataviewName ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataviewName =
+        field_map_exn json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~dataviewName ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves details of the dataview."]
+module GetKxDatabaseResponse =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t option
+        [@ocaml.doc
+          "The name of the kdb database for which the information is retrieved."];
+      databaseArn: DatabaseArn.t option
+        [@ocaml.doc "The ARN identifier of the database."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      description: Description.t option
+        [@ocaml.doc "A description of the database."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the database is created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the database was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastCompletedChangesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      numBytes: NumBytes.t option
+        [@ocaml.doc "The total number of bytes in the database."];
+      numChangesets: NumChangesets.t option
+        [@ocaml.doc "The total number of changesets in the database."];
+      numFiles: NumFiles.t option
+        [@ocaml.doc "The total number of files in the database."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?databaseName =
+      fun ?databaseArn ->
+        fun ?environmentId ->
+          fun ?description ->
+            fun ?createdTimestamp ->
+              fun ?lastModifiedTimestamp ->
+                fun ?lastCompletedChangesetId ->
+                  fun ?numBytes ->
+                    fun ?numChangesets ->
+                      fun ?numFiles ->
+                        fun () ->
+                          {
+                            databaseName;
+                            databaseArn;
+                            environmentId;
+                            description;
+                            createdTimestamp;
+                            lastModifiedTimestamp;
+                            lastCompletedChangesetId;
+                            numBytes;
+                            numChangesets;
+                            numFiles
+                          }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("databaseName",
+           (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("databaseArn", (Option.map x.databaseArn ~f:DatabaseArn.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("lastCompletedChangesetId",
+          (Option.map x.lastCompletedChangesetId ~f:ChangesetId.to_value));
+        ("numBytes", (Option.map x.numBytes ~f:NumBytes.to_value));
+        ("numChangesets",
+          (Option.map x.numChangesets ~f:NumChangesets.to_value));
+        ("numFiles", (Option.map x.numFiles ~f:NumFiles.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let numFiles =
+        (Option.map ~f:NumFiles.of_xml) (Xml.child xml_arg0 "numFiles") in
+      let numChangesets =
+        (Option.map ~f:NumChangesets.of_xml)
+          (Xml.child xml_arg0 "numChangesets") in
+      let numBytes =
+        (Option.map ~f:NumBytes.of_xml) (Xml.child xml_arg0 "numBytes") in
+      let lastCompletedChangesetId =
+        (Option.map ~f:ChangesetId.of_xml)
+          (Xml.child xml_arg0 "lastCompletedChangesetId") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseArn =
+        (Option.map ~f:DatabaseArn.of_xml) (Xml.child xml_arg0 "databaseArn") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      make ?numFiles ?numChangesets ?numBytes ?lastCompletedChangesetId
+        ?lastModifiedTimestamp ?createdTimestamp ?description ?environmentId
+        ?databaseArn ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let numFiles = field_map json__ "numFiles" NumFiles.of_json in
+      let numChangesets =
+        field_map json__ "numChangesets" NumChangesets.of_json in
+      let numBytes = field_map json__ "numBytes" NumBytes.of_json in
+      let lastCompletedChangesetId =
+        field_map json__ "lastCompletedChangesetId" ChangesetId.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseArn = field_map json__ "databaseArn" DatabaseArn.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      make ?numFiles ?numChangesets ?numBytes ?lastCompletedChangesetId
+        ?lastModifiedTimestamp ?createdTimestamp ?description ?environmentId
+        ?databaseArn ?databaseName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns database information for the specified environment ID."]
+module GetKxDatabaseRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."]}
+    let context_ = "GetKxDatabaseRequest"
+    let make ~environmentId =
+      fun ~databaseName -> fun () -> { environmentId; databaseName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns database information for the specified environment ID."]
+module GetKxConnectionStringResponse =
+  struct
+    type nonrec t =
+      {
+      signedConnectionString: SignedKxConnectionString.t option
+        [@ocaml.doc
+          "The signed connection string that you can use to connect to clusters."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?signedConnectionString = fun () -> { signedConnectionString }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("signedConnectionString",
+           (Option.map x.signedConnectionString
+              ~f:SignedKxConnectionString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signedConnectionString =
+        (Option.map ~f:SignedKxConnectionString.of_xml)
+          (Xml.child xml_arg0 "signedConnectionString") in
+      make ?signedConnectionString ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signedConnectionString =
+        field_map json__ "signedConnectionString"
+          SignedKxConnectionString.of_json in
+      make ?signedConnectionString ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a connection string for a user to connect to a kdb cluster. You must call this API using the same role that you have defined while creating a user."]
+module GetKxConnectionStringRequest =
+  struct
+    type nonrec t =
+      {
+      userArn: KxUserArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t [@ocaml.doc "A name of the kdb cluster."]}
+    let context_ = "GetKxConnectionStringRequest"
+    let make ~userArn =
+      fun ~environmentId ->
+        fun ~clusterName -> fun () -> { userArn; environmentId; clusterName }
+    let to_value x =
+      structure_to_value
+        [("userArn", (Some (KxUserArn.to_value x.userArn)));
+        ("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let userArn =
+        KxUserArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userArn") in
+      make ~clusterName ~environmentId ~userArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      let userArn = field_map_exn json__ "userArn" KxUserArn.of_json in
+      make ~clusterName ~environmentId ~userArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a connection string for a user to connect to a kdb cluster. You must call this API using the same role that you have defined while creating a user."]
+module GetKxClusterResponse =
+  struct
+    type nonrec t =
+      {
+      status: KxClusterStatus.t option
+        [@ocaml.doc
+          "The status of cluster creation. PENDING \226\128\147 The cluster is pending creation. CREATING \226\128\147 The cluster creation process is in progress. CREATE_FAILED \226\128\147 The cluster creation process has failed. RUNNING \226\128\147 The cluster creation process is running. UPDATING \226\128\147 The cluster is in the process of being updated. DELETING \226\128\147 The cluster is in the process of being deleted. DELETED \226\128\147 The cluster has been deleted. DELETE_FAILED \226\128\147 The cluster failed to delete."];
+      statusReason: KxClusterStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      clusterName: KxClusterName.t option
+        [@ocaml.doc "A unique name for the cluster."];
+      clusterType: KxClusterType.t option
+        [@ocaml.doc
+          "Specifies the type of KDB database that is being created. The following types are available: HDB \226\128\147 A Historical Database. The data is only accessible with read-only permissions from one of the FinSpace managed kdb databases mounted to the cluster. RDB \226\128\147 A Realtime Database. This type of database captures all the data from a ticker plant and stores it in memory until the end of day, after which it writes all of its data to a disk and reloads the HDB. This cluster type requires local storage for temporary storage of data during the savedown process. If you specify this field in your request, you must provide the savedownStorageConfiguration parameter. GATEWAY \226\128\147 A gateway cluster allows you to access data across processes in kdb systems. It allows you to create your own routing logic using the initialization scripts and custom code. This type of cluster does not require a writable local storage. GP \226\128\147 A general purpose cluster allows you to quickly iterate on code during development by granting greater access to system commands and enabling a fast reload of custom code. This cluster type can optionally mount databases including cache and savedown storage. For this cluster type, the node count is fixed at 1. It does not support autoscaling and supports only SINGLE AZ mode. Tickerplant \226\128\147 A tickerplant cluster allows you to subscribe to feed handlers based on IAM permissions. It can publish to RDBs, other Tickerplants, and real-time subscribers (RTS). Tickerplants can persist messages to log, which is readable by any RDB environment. It supports only single-node that is only one kdb process."];
+      tickerplantLogConfiguration: TickerplantLogConfiguration.t option ;
+      volumes: Volumes.t option
+        [@ocaml.doc "A list of volumes attached to the cluster."];
+      databases: KxDatabaseConfigurations.t option
+        [@ocaml.doc "A list of databases mounted on the cluster."];
+      cacheStorageConfigurations: KxCacheStorageConfigurations.t option
+        [@ocaml.doc
+          "The configurations for a read only cache storage associated with a cluster. This cache will be stored as an FSx Lustre that reads from the S3 store."];
+      autoScalingConfiguration: AutoScalingConfiguration.t option
+        [@ocaml.doc
+          "The configuration based on which FinSpace will scale in or scale out nodes in your cluster."];
+      clusterDescription: KxClusterDescription.t option
+        [@ocaml.doc "A description of the cluster."];
+      capacityConfiguration: CapacityConfiguration.t option
+        [@ocaml.doc
+          "A structure for the metadata of a cluster. It includes information like the CPUs needed, memory of instances, and number of instances."];
+      releaseLabel: ReleaseLabel.t option
+        [@ocaml.doc "The version of FinSpace managed kdb to run."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration details about the network where the Privatelink endpoint of the cluster resides."];
+      initializationScript: InitializationScriptFilePath.t option
+        [@ocaml.doc
+          "Specifies a Q program that will be run at launch of a cluster. It is a relative path within .zip file that contains the custom code, which will be loaded on the cluster. It must include the file name itself. For example, somedir/init.q."];
+      commandLineArguments: KxCommandLineArguments.t option
+        [@ocaml.doc
+          "Defines key-value pairs to make them available inside the cluster."];
+      code: CodeConfiguration.t option
+        [@ocaml.doc
+          "The details of the custom code that you want to use inside a cluster when analyzing a data. It consists of the S3 source bucket, location, S3 object version, and the relative path from where the custom code is loaded into the cluster."];
+      executionRole: ExecutionRoleArn.t option
+        [@ocaml.doc
+          "An IAM role that defines a set of permissions associated with a cluster. These permissions are assumed when a cluster attempts to access another cluster."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the cluster was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      savedownStorageConfiguration: KxSavedownStorageConfiguration.t option
+        [@ocaml.doc
+          "The size and type of the temporary storage that is used to hold data during the savedown process. This parameter is required when you choose clusterType as RDB. All the data written to this storage space is lost when the cluster node is restarted."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per cluster. This can be one of the following SINGLE \226\128\147 Assigns one availability zone per cluster. MULTI \226\128\147 Assigns all the availability zones per cluster."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The availability zone identifiers for the requested regions."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the cluster was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      scalingGroupConfiguration: KxScalingGroupConfiguration.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?status =
+      fun ?statusReason ->
+        fun ?clusterName ->
+          fun ?clusterType ->
+            fun ?tickerplantLogConfiguration ->
+              fun ?volumes ->
+                fun ?databases ->
+                  fun ?cacheStorageConfigurations ->
+                    fun ?autoScalingConfiguration ->
+                      fun ?clusterDescription ->
+                        fun ?capacityConfiguration ->
+                          fun ?releaseLabel ->
+                            fun ?vpcConfiguration ->
+                              fun ?initializationScript ->
+                                fun ?commandLineArguments ->
+                                  fun ?code ->
+                                    fun ?executionRole ->
+                                      fun ?lastModifiedTimestamp ->
+                                        fun ?savedownStorageConfiguration ->
+                                          fun ?azMode ->
+                                            fun ?availabilityZoneId ->
+                                              fun ?createdTimestamp ->
+                                                fun
+                                                  ?scalingGroupConfiguration
+                                                  ->
+                                                  fun () ->
+                                                    {
+                                                      status;
+                                                      statusReason;
+                                                      clusterName;
+                                                      clusterType;
+                                                      tickerplantLogConfiguration;
+                                                      volumes;
+                                                      databases;
+                                                      cacheStorageConfigurations;
+                                                      autoScalingConfiguration;
+                                                      clusterDescription;
+                                                      capacityConfiguration;
+                                                      releaseLabel;
+                                                      vpcConfiguration;
+                                                      initializationScript;
+                                                      commandLineArguments;
+                                                      code;
+                                                      executionRole;
+                                                      lastModifiedTimestamp;
+                                                      savedownStorageConfiguration;
+                                                      azMode;
+                                                      availabilityZoneId;
+                                                      createdTimestamp;
+                                                      scalingGroupConfiguration
+                                                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:KxClusterStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxClusterStatusReason.to_value));
+        ("clusterName", (Option.map x.clusterName ~f:KxClusterName.to_value));
+        ("clusterType", (Option.map x.clusterType ~f:KxClusterType.to_value));
+        ("tickerplantLogConfiguration",
+          (Option.map x.tickerplantLogConfiguration
+             ~f:TickerplantLogConfiguration.to_value));
+        ("volumes", (Option.map x.volumes ~f:Volumes.to_value));
+        ("databases",
+          (Option.map x.databases ~f:KxDatabaseConfigurations.to_value));
+        ("cacheStorageConfigurations",
+          (Option.map x.cacheStorageConfigurations
+             ~f:KxCacheStorageConfigurations.to_value));
+        ("autoScalingConfiguration",
+          (Option.map x.autoScalingConfiguration
+             ~f:AutoScalingConfiguration.to_value));
+        ("clusterDescription",
+          (Option.map x.clusterDescription ~f:KxClusterDescription.to_value));
+        ("capacityConfiguration",
+          (Option.map x.capacityConfiguration
+             ~f:CapacityConfiguration.to_value));
+        ("releaseLabel",
+          (Option.map x.releaseLabel ~f:ReleaseLabel.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("initializationScript",
+          (Option.map x.initializationScript
+             ~f:InitializationScriptFilePath.to_value));
+        ("commandLineArguments",
+          (Option.map x.commandLineArguments
+             ~f:KxCommandLineArguments.to_value));
+        ("code", (Option.map x.code ~f:CodeConfiguration.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:ExecutionRoleArn.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("savedownStorageConfiguration",
+          (Option.map x.savedownStorageConfiguration
+             ~f:KxSavedownStorageConfiguration.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("scalingGroupConfiguration",
+          (Option.map x.scalingGroupConfiguration
+             ~f:KxScalingGroupConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingGroupConfiguration =
+        (Option.map ~f:KxScalingGroupConfiguration.of_xml)
+          (Xml.child xml_arg0 "scalingGroupConfiguration") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let savedownStorageConfiguration =
+        (Option.map ~f:KxSavedownStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "savedownStorageConfiguration") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let executionRole =
+        (Option.map ~f:ExecutionRoleArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let code =
+        (Option.map ~f:CodeConfiguration.of_xml) (Xml.child xml_arg0 "code") in
+      let commandLineArguments =
+        (Option.map ~f:KxCommandLineArguments.of_xml)
+          (Xml.child xml_arg0 "commandLineArguments") in
+      let initializationScript =
+        (Option.map ~f:InitializationScriptFilePath.of_xml)
+          (Xml.child xml_arg0 "initializationScript") in
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      let releaseLabel =
+        (Option.map ~f:ReleaseLabel.of_xml)
+          (Xml.child xml_arg0 "releaseLabel") in
+      let capacityConfiguration =
+        (Option.map ~f:CapacityConfiguration.of_xml)
+          (Xml.child xml_arg0 "capacityConfiguration") in
+      let clusterDescription =
+        (Option.map ~f:KxClusterDescription.of_xml)
+          (Xml.child xml_arg0 "clusterDescription") in
+      let autoScalingConfiguration =
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "autoScalingConfiguration") in
+      let cacheStorageConfigurations =
+        (Option.map ~f:KxCacheStorageConfigurations.of_xml)
+          (Xml.child xml_arg0 "cacheStorageConfigurations") in
+      let databases =
+        (Option.map ~f:KxDatabaseConfigurations.of_xml)
+          (Xml.child xml_arg0 "databases") in
+      let volumes =
+        (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let tickerplantLogConfiguration =
+        (Option.map ~f:TickerplantLogConfiguration.of_xml)
+          (Xml.child xml_arg0 "tickerplantLogConfiguration") in
+      let clusterType =
+        (Option.map ~f:KxClusterType.of_xml)
+          (Xml.child xml_arg0 "clusterType") in
+      let clusterName =
+        (Option.map ~f:KxClusterName.of_xml)
+          (Xml.child xml_arg0 "clusterName") in
+      let statusReason =
+        (Option.map ~f:KxClusterStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxClusterStatus.of_xml) (Xml.child xml_arg0 "status") in
+      make ?scalingGroupConfiguration ?createdTimestamp ?availabilityZoneId
+        ?azMode ?savedownStorageConfiguration ?lastModifiedTimestamp
+        ?executionRole ?code ?commandLineArguments ?initializationScript
+        ?vpcConfiguration ?releaseLabel ?capacityConfiguration
+        ?clusterDescription ?autoScalingConfiguration
+        ?cacheStorageConfigurations ?databases ?volumes
+        ?tickerplantLogConfiguration ?clusterType ?clusterName ?statusReason
+        ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingGroupConfiguration =
+        field_map json__ "scalingGroupConfiguration"
+          KxScalingGroupConfiguration.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let savedownStorageConfiguration =
+        field_map json__ "savedownStorageConfiguration"
+          KxSavedownStorageConfiguration.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let executionRole =
+        field_map json__ "executionRole" ExecutionRoleArn.of_json in
+      let code = field_map json__ "code" CodeConfiguration.of_json in
+      let commandLineArguments =
+        field_map json__ "commandLineArguments"
+          KxCommandLineArguments.of_json in
+      let initializationScript =
+        field_map json__ "initializationScript"
+          InitializationScriptFilePath.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
+      let capacityConfiguration =
+        field_map json__ "capacityConfiguration"
+          CapacityConfiguration.of_json in
+      let clusterDescription =
+        field_map json__ "clusterDescription" KxClusterDescription.of_json in
+      let autoScalingConfiguration =
+        field_map json__ "autoScalingConfiguration"
+          AutoScalingConfiguration.of_json in
+      let cacheStorageConfigurations =
+        field_map json__ "cacheStorageConfigurations"
+          KxCacheStorageConfigurations.of_json in
+      let databases =
+        field_map json__ "databases" KxDatabaseConfigurations.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let tickerplantLogConfiguration =
+        field_map json__ "tickerplantLogConfiguration"
+          TickerplantLogConfiguration.of_json in
+      let clusterType = field_map json__ "clusterType" KxClusterType.of_json in
+      let clusterName = field_map json__ "clusterName" KxClusterName.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxClusterStatusReason.of_json in
+      let status = field_map json__ "status" KxClusterStatus.of_json in
+      make ?scalingGroupConfiguration ?createdTimestamp ?availabilityZoneId
+        ?azMode ?savedownStorageConfiguration ?lastModifiedTimestamp
+        ?executionRole ?code ?commandLineArguments ?initializationScript
+        ?vpcConfiguration ?releaseLabel ?capacityConfiguration
+        ?clusterDescription ?autoScalingConfiguration
+        ?cacheStorageConfigurations ?databases ?volumes
+        ?tickerplantLogConfiguration ?clusterType ?clusterName ?statusReason
+        ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves information about a kdb cluster."]
+module GetKxClusterRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc "The name of the cluster that you want to retrieve."]}
+    let context_ = "GetKxClusterRequest"
+    let make ~environmentId =
+      fun ~clusterName -> fun () -> { environmentId; clusterName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clusterName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ~clusterName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves information about a kdb cluster."]
+module GetKxChangesetResponse =
+  struct
+    type nonrec t =
+      {
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the kdb database."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      changeRequests: ChangeRequests.t option
+        [@ocaml.doc
+          "A list of change request objects that are run in order."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      activeFromTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "Beginning time from which the changeset is active. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: ChangesetStatus.t option
+        [@ocaml.doc
+          "Status of the changeset creation process. Pending \226\128\147 Changeset creation is pending. Processing \226\128\147 Changeset creation is running. Failed \226\128\147 Changeset creation has failed. Complete \226\128\147 Changeset creation has succeeded."];
+      errorInfo: ErrorInfo.t option
+        [@ocaml.doc
+          "Provides details in the event of a failed flow, including the error type and the related error message."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?changesetId =
+      fun ?databaseName ->
+        fun ?environmentId ->
+          fun ?changeRequests ->
+            fun ?createdTimestamp ->
+              fun ?activeFromTimestamp ->
+                fun ?lastModifiedTimestamp ->
+                  fun ?status ->
+                    fun ?errorInfo ->
+                      fun () ->
+                        {
+                          changesetId;
+                          databaseName;
+                          environmentId;
+                          changeRequests;
+                          createdTimestamp;
+                          activeFromTimestamp;
+                          lastModifiedTimestamp;
+                          status;
+                          errorInfo
+                        }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("changeRequests",
+          (Option.map x.changeRequests ~f:ChangeRequests.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("activeFromTimestamp",
+          (Option.map x.activeFromTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:ChangesetStatus.to_value));
+        ("errorInfo", (Option.map x.errorInfo ~f:ErrorInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorInfo =
+        (Option.map ~f:ErrorInfo.of_xml) (Xml.child xml_arg0 "errorInfo") in
+      let status =
+        (Option.map ~f:ChangesetStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let activeFromTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "activeFromTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let changeRequests =
+        (Option.map ~f:ChangeRequests.of_xml)
+          (Xml.child xml_arg0 "changeRequests") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      make ?errorInfo ?status ?lastModifiedTimestamp ?activeFromTimestamp
+        ?createdTimestamp ?changeRequests ?environmentId ?databaseName
+        ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorInfo = field_map json__ "errorInfo" ErrorInfo.of_json in
+      let status = field_map json__ "status" ChangesetStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let activeFromTimestamp =
+        field_map json__ "activeFromTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let changeRequests =
+        field_map json__ "changeRequests" ChangeRequests.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      make ?errorInfo ?status ?lastModifiedTimestamp ?activeFromTimestamp
+        ?createdTimestamp ?changeRequests ?environmentId ?databaseName
+        ?changesetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a kdb changeset."]
+module GetKxChangesetRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."];
+      changesetId: ChangesetId.t
+        [@ocaml.doc
+          "A unique identifier of the changeset for which you want to retrieve data."]}
+    let context_ = "GetKxChangesetRequest"
+    let make ~environmentId =
+      fun ~databaseName ->
+        fun ~changesetId ->
+          fun () -> { environmentId; databaseName; changesetId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("changesetId", (Some (ChangesetId.to_value x.changesetId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let changesetId =
+        ChangesetId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "changesetId") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~changesetId ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let changesetId =
+        field_map_exn json__ "changesetId" ChangesetId.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~changesetId ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns information about a kdb changeset."]
 module GetEnvironmentResponse =
   struct
     type nonrec t =
@@ -1615,8 +12231,8 @@ module GetEnvironmentResponse =
         (Option.map ~f:Environment.of_xml) (Xml.child xml_arg0 "environment") in
       make ?environment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environment = field_map json "environment" Environment.of_json in
+    let of_json json__ =
+      let environment = field_map json__ "environment" Environment.of_json in
       make ?environment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the FinSpace environment object."]
@@ -1638,11 +12254,1064 @@ module GetEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environmentId = field_map_exn json "environmentId" IdType.of_json in
+    let of_json json__ =
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
       make ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the FinSpace environment object."]
+module DeleteKxVolumeResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a volume. You can only delete a volume if it's not attached to a cluster or a dataview. When a volume is deleted, any data on the volume is lost. This action is irreversible."]
+module DeleteKxVolumeRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      volumeName: KxVolumeName.t
+        [@ocaml.doc "The name of the volume that you want to delete."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxVolumeRequest"
+    let make ?clientToken =
+      fun ~environmentId ->
+        fun ~volumeName ->
+          fun () -> { clientToken; environmentId; volumeName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("volumeName", (Some (KxVolumeName.to_value x.volumeName)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let volumeName =
+        KxVolumeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ~volumeName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let volumeName = field_map_exn json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?clientToken ~volumeName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a volume. You can only delete a volume if it's not attached to a cluster or a dataview. When a volume is deleted, any data on the volume is lost. This action is irreversible."]
+module DeleteKxUserResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a user in the specified kdb environment."]
+module DeleteKxUserRequest =
+  struct
+    type nonrec t =
+      {
+      userName: KxUserNameString.t
+        [@ocaml.doc
+          "A unique identifier for the user that you want to delete."];
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxUserRequest"
+    let make ?clientToken =
+      fun ~userName ->
+        fun ~environmentId ->
+          fun () -> { clientToken; userName; environmentId }
+    let to_value x =
+      structure_to_value
+        [("userName", (Some (KxUserNameString.to_value x.userName)));
+        ("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let userName =
+        KxUserNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "userName") in
+      make ?clientToken ~environmentId ~userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      let userName = field_map_exn json__ "userName" KxUserNameString.of_json in
+      make ?clientToken ~environmentId ~userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a user in the specified kdb environment."]
+module DeleteKxScalingGroupResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified scaling group. This action is irreversible. You cannot delete a scaling group until all the clusters running on it have been deleted."]
+module DeleteKxScalingGroupRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, from where you want to delete the dataview."];
+      scalingGroupName: KxScalingGroupName.t
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxScalingGroupRequest"
+    let make ?clientToken =
+      fun ~environmentId ->
+        fun ~scalingGroupName ->
+          fun () -> { clientToken; environmentId; scalingGroupName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("scalingGroupName",
+          (Some (KxScalingGroupName.to_value x.scalingGroupName)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let scalingGroupName =
+        KxScalingGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scalingGroupName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ~scalingGroupName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let scalingGroupName =
+        field_map_exn json__ "scalingGroupName" KxScalingGroupName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?clientToken ~scalingGroupName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified scaling group. This action is irreversible. You cannot delete a scaling group until all the clusters running on it have been deleted."]
+module DeleteKxEnvironmentResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the kdb environment. This action is irreversible. Deleting a kdb environment will remove all the associated data and any services running in it."]
+module DeleteKxEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxEnvironmentRequest"
+    let make ?clientToken =
+      fun ~environmentId -> fun () -> { clientToken; environmentId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?clientToken ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the kdb environment. This action is irreversible. Deleting a kdb environment will remove all the associated data and any services running in it."]
+module DeleteKxDataviewResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified dataview. Before deleting a dataview, make sure that it is not in use by any cluster."]
+module DeleteKxDataviewRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, from where you want to delete the dataview."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc
+          "The name of the database whose dataview you want to delete."];
+      dataviewName: KxDataviewName.t
+        [@ocaml.doc "The name of the dataview that you want to delete."];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxDataviewRequest"
+    let make ~environmentId =
+      fun ~databaseName ->
+        fun ~dataviewName ->
+          fun ~clientToken ->
+            fun () ->
+              { environmentId; databaseName; dataviewName; clientToken }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("dataviewName", (Some (KxDataviewName.to_value x.dataviewName)));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let dataviewName =
+        KxDataviewName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataviewName") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ~dataviewName ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let dataviewName =
+        field_map_exn json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ~dataviewName ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified dataview. Before deleting a dataview, make sure that it is not in use by any cluster."]
+module DeleteKxDatabaseResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified database and all of its associated data. This action is irreversible. You must copy any data out of the database before deleting it if the data is to be retained."]
+module DeleteKxDatabaseRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database that you want to delete."];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxDatabaseRequest"
+    let make ~environmentId =
+      fun ~databaseName ->
+        fun ~clientToken ->
+          fun () -> { environmentId; databaseName; clientToken }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified database and all of its associated data. This action is irreversible. You must copy any data out of the database before deleting it if the data is to be retained."]
+module DeleteKxClusterResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a kdb cluster."]
+module DeleteKxClusterRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc "The name of the cluster that you want to delete."];
+      clientToken: ClientTokenString.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DeleteKxClusterRequest"
+    let make ?clientToken =
+      fun ~environmentId ->
+        fun ~clusterName ->
+          fun () -> { clientToken; environmentId; clusterName }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("clientToken",
+          (Option.map x.clientToken ~f:ClientTokenString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientTokenString.of_xml)
+          (Xml.child xml_arg0 "clientToken") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ~clusterName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map json__ "clientToken" ClientTokenString.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ?clientToken ~clusterName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a kdb cluster."]
+module DeleteKxClusterNodeResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified nodes from a cluster."]
+module DeleteKxClusterNodeRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc
+          "The name of the cluster, for which you want to delete the nodes."];
+      nodeId: KxClusterNodeIdString.t
+        [@ocaml.doc
+          "A unique identifier for the node that you want to delete."]}
+    let context_ = "DeleteKxClusterNodeRequest"
+    let make ~environmentId =
+      fun ~clusterName ->
+        fun ~nodeId -> fun () -> { environmentId; clusterName; nodeId }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("nodeId", (Some (KxClusterNodeIdString.to_value x.nodeId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nodeId =
+        KxClusterNodeIdString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "nodeId") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~nodeId ~clusterName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nodeId =
+        field_map_exn json__ "nodeId" KxClusterNodeIdString.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      make ~nodeId ~clusterName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes the specified nodes from a cluster."]
 module DeleteEnvironmentResponse =
   struct
     type nonrec t = unit
@@ -1736,11 +13405,2558 @@ module DeleteEnvironmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
       make ~environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environmentId = field_map_exn json "environmentId" IdType.of_json in
+    let of_json json__ =
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
       make ~environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete an FinSpace environment."]
+module CreateKxVolumeResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      volumeName: KxVolumeName.t option
+        [@ocaml.doc "A unique identifier for the volume."];
+      volumeType: KxVolumeType.t option
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type."];
+      volumeArn: KxVolumeArn.t option
+        [@ocaml.doc "The ARN identifier of the volume."];
+      nas1Configuration: KxNAS1Configuration.t option
+        [@ocaml.doc
+          "Specifies the configuration for the Network attached storage (NAS_1) file system volume."];
+      status: KxVolumeStatus.t option
+        [@ocaml.doc
+          "The status of volume creation. CREATING \226\128\147 The volume creation is in progress. CREATE_FAILED \226\128\147 The volume creation has failed. ACTIVE \226\128\147 The volume is active. UPDATING \226\128\147 The volume is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. UPDATED \226\128\147 The volume is successfully updated. DELETING \226\128\147 The volume is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the volume. DELETED \226\128\147 The volume is successfully deleted."];
+      statusReason: KxVolumeStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      description: Description.t option
+        [@ocaml.doc "A description of the volume."];
+      availabilityZoneIds: AvailabilityZoneIds.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the volume was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?volumeName ->
+        fun ?volumeType ->
+          fun ?volumeArn ->
+            fun ?nas1Configuration ->
+              fun ?status ->
+                fun ?statusReason ->
+                  fun ?azMode ->
+                    fun ?description ->
+                      fun ?availabilityZoneIds ->
+                        fun ?createdTimestamp ->
+                          fun () ->
+                            {
+                              environmentId;
+                              volumeName;
+                              volumeType;
+                              volumeArn;
+                              nas1Configuration;
+                              status;
+                              statusReason;
+                              azMode;
+                              description;
+                              availabilityZoneIds;
+                              createdTimestamp
+                            }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:KxEnvironmentId.to_value));
+        ("volumeName", (Option.map x.volumeName ~f:KxVolumeName.to_value));
+        ("volumeType", (Option.map x.volumeType ~f:KxVolumeType.to_value));
+        ("volumeArn", (Option.map x.volumeArn ~f:KxVolumeArn.to_value));
+        ("nas1Configuration",
+          (Option.map x.nas1Configuration ~f:KxNAS1Configuration.to_value));
+        ("status", (Option.map x.status ~f:KxVolumeStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxVolumeStatusReason.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("availabilityZoneIds",
+          (Option.map x.availabilityZoneIds ~f:AvailabilityZoneIds.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let availabilityZoneIds =
+        (Option.map ~f:AvailabilityZoneIds.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneIds") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let statusReason =
+        (Option.map ~f:KxVolumeStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxVolumeStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let nas1Configuration =
+        (Option.map ~f:KxNAS1Configuration.of_xml)
+          (Xml.child xml_arg0 "nas1Configuration") in
+      let volumeArn =
+        (Option.map ~f:KxVolumeArn.of_xml) (Xml.child xml_arg0 "volumeArn") in
+      let volumeType =
+        (Option.map ~f:KxVolumeType.of_xml) (Xml.child xml_arg0 "volumeType") in
+      let volumeName =
+        (Option.map ~f:KxVolumeName.of_xml) (Xml.child xml_arg0 "volumeName") in
+      let environmentId =
+        (Option.map ~f:KxEnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?createdTimestamp ?availabilityZoneIds ?description ?azMode
+        ?statusReason ?status ?nas1Configuration ?volumeArn ?volumeType
+        ?volumeName ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let availabilityZoneIds =
+        field_map json__ "availabilityZoneIds" AvailabilityZoneIds.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxVolumeStatusReason.of_json in
+      let status = field_map json__ "status" KxVolumeStatus.of_json in
+      let nas1Configuration =
+        field_map json__ "nas1Configuration" KxNAS1Configuration.of_json in
+      let volumeArn = field_map json__ "volumeArn" KxVolumeArn.of_json in
+      let volumeType = field_map json__ "volumeType" KxVolumeType.of_json in
+      let volumeName = field_map json__ "volumeName" KxVolumeName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" KxEnvironmentId.of_json in
+      make ?createdTimestamp ?availabilityZoneIds ?description ?azMode
+        ?statusReason ?status ?nas1Configuration ?volumeArn ?volumeType
+        ?volumeName ?environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new volume with a specific amount of throughput and storage capacity."]
+module CreateKxVolumeRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, whose clusters can attach to the volume."];
+      volumeType: KxVolumeType.t
+        [@ocaml.doc
+          "The type of file system volume. Currently, FinSpace only supports NAS_1 volume type. When you select NAS_1 volume type, you must also provide nas1Configuration."];
+      volumeName: KxVolumeName.t
+        [@ocaml.doc "A unique identifier for the volume."];
+      description: Description.t option
+        [@ocaml.doc "A description of the volume."];
+      nas1Configuration: KxNAS1Configuration.t option
+        [@ocaml.doc
+          "Specifies the configuration for the Network attached storage (NAS_1) file system volume. This parameter is required when you choose volumeType as NAS_1."];
+      azMode: KxAzMode.t
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneIds: AvailabilityZoneIds.t
+        [@ocaml.doc "The identifier of the availability zones."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the volume. You can add up to 50 tags to a volume."]}
+    let context_ = "CreateKxVolumeRequest"
+    let make ?clientToken =
+      fun ?description ->
+        fun ?nas1Configuration ->
+          fun ?tags ->
+            fun ~environmentId ->
+              fun ~volumeType ->
+                fun ~volumeName ->
+                  fun ~azMode ->
+                    fun ~availabilityZoneIds ->
+                      fun () ->
+                        {
+                          clientToken;
+                          description;
+                          nas1Configuration;
+                          tags;
+                          environmentId;
+                          volumeType;
+                          volumeName;
+                          azMode;
+                          availabilityZoneIds
+                        }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("volumeType", (Some (KxVolumeType.to_value x.volumeType)));
+        ("volumeName", (Some (KxVolumeName.to_value x.volumeName)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("nas1Configuration",
+          (Option.map x.nas1Configuration ~f:KxNAS1Configuration.to_value));
+        ("azMode", (Some (KxAzMode.to_value x.azMode)));
+        ("availabilityZoneIds",
+          (Some (AvailabilityZoneIds.to_value x.availabilityZoneIds)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let availabilityZoneIds =
+        AvailabilityZoneIds.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "availabilityZoneIds") in
+      let azMode =
+        KxAzMode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "azMode") in
+      let nas1Configuration =
+        (Option.map ~f:KxNAS1Configuration.of_xml)
+          (Xml.child xml_arg0 "nas1Configuration") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let volumeName =
+        KxVolumeName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeName") in
+      let volumeType =
+        KxVolumeType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "volumeType") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?tags ~availabilityZoneIds ~azMode ?nas1Configuration ?description
+        ~volumeName ~volumeType ~environmentId ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let availabilityZoneIds =
+        field_map_exn json__ "availabilityZoneIds"
+          AvailabilityZoneIds.of_json in
+      let azMode = field_map_exn json__ "azMode" KxAzMode.of_json in
+      let nas1Configuration =
+        field_map json__ "nas1Configuration" KxNAS1Configuration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let volumeName = field_map_exn json__ "volumeName" KxVolumeName.of_json in
+      let volumeType = field_map_exn json__ "volumeType" KxVolumeType.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?tags ~availabilityZoneIds ~azMode ?nas1Configuration ?description
+        ~volumeName ~volumeType ~environmentId ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new volume with a specific amount of throughput and storage capacity."]
+module CreateKxUserResponse =
+  struct
+    type nonrec t =
+      {
+      userName: KxUserNameString.t option
+        [@ocaml.doc "A unique identifier for the user."];
+      userArn: KxUserArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that identifies the user. For more information about ARNs and how to use ARNs in policies, see IAM Identifiers in the IAM User Guide."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      iamRole: RoleArn.t option
+        [@ocaml.doc
+          "The IAM role ARN that will be associated with the user."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?userName =
+      fun ?userArn ->
+        fun ?environmentId ->
+          fun ?iamRole ->
+            fun () -> { userName; userArn; environmentId; iamRole }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("userName", (Option.map x.userName ~f:KxUserNameString.to_value));
+        ("userArn", (Option.map x.userArn ~f:KxUserArn.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("iamRole", (Option.map x.iamRole ~f:RoleArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let iamRole =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "iamRole") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let userArn =
+        (Option.map ~f:KxUserArn.of_xml) (Xml.child xml_arg0 "userArn") in
+      let userName =
+        (Option.map ~f:KxUserNameString.of_xml)
+          (Xml.child xml_arg0 "userName") in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let iamRole = field_map json__ "iamRole" RoleArn.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let userArn = field_map json__ "userArn" KxUserArn.of_json in
+      let userName = field_map json__ "userName" KxUserNameString.of_json in
+      make ?iamRole ?environmentId ?userArn ?userName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a user in FinSpace kdb environment with an associated IAM role."]
+module CreateKxUserRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: IdType.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment where you want to create a user."];
+      userName: KxUserNameString.t
+        [@ocaml.doc "A unique identifier for the user."];
+      iamRole: RoleArn.t
+        [@ocaml.doc
+          "The IAM role ARN that will be associated with the user."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the user. You can add up to 50 tags to a user."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "CreateKxUserRequest"
+    let make ?tags =
+      fun ?clientToken ->
+        fun ~environmentId ->
+          fun ~userName ->
+            fun ~iamRole ->
+              fun () ->
+                { tags; clientToken; environmentId; userName; iamRole }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (IdType.to_value x.environmentId)));
+        ("userName", (Some (KxUserNameString.to_value x.userName)));
+        ("iamRole", (Some (RoleArn.to_value x.iamRole)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let iamRole =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "iamRole") in
+      let userName =
+        KxUserNameString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "userName") in
+      let environmentId =
+        IdType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ?clientToken ?tags ~iamRole ~userName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let iamRole = field_map_exn json__ "iamRole" RoleArn.of_json in
+      let userName = field_map_exn json__ "userName" KxUserNameString.of_json in
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
+      make ?clientToken ?tags ~iamRole ~userName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a user in FinSpace kdb environment with an associated IAM role."]
+module CreateKxScalingGroupResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you create the scaling group."];
+      scalingGroupName: KxScalingGroupName.t option
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      hostType: KxHostType.t option
+        [@ocaml.doc
+          "The memory and CPU capabilities of the scaling group host on which FinSpace Managed kdb clusters will be placed."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      status: KxScalingGroupStatus.t option
+        [@ocaml.doc
+          "The status of scaling group. CREATING \226\128\147 The scaling group creation is in progress. CREATE_FAILED \226\128\147 The scaling group creation has failed. ACTIVE \226\128\147 The scaling group is active. UPDATING \226\128\147 The scaling group is in the process of being updated. UPDATE_FAILED \226\128\147 The update action failed. DELETING \226\128\147 The scaling group is in the process of being deleted. DELETE_FAILED \226\128\147 The system failed to delete the scaling group. DELETED \226\128\147 The scaling group is successfully deleted."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the scaling group was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the scaling group was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?scalingGroupName ->
+        fun ?hostType ->
+          fun ?availabilityZoneId ->
+            fun ?status ->
+              fun ?lastModifiedTimestamp ->
+                fun ?createdTimestamp ->
+                  fun () ->
+                    {
+                      environmentId;
+                      scalingGroupName;
+                      hostType;
+                      availabilityZoneId;
+                      status;
+                      lastModifiedTimestamp;
+                      createdTimestamp
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:KxEnvironmentId.to_value));
+        ("scalingGroupName",
+          (Option.map x.scalingGroupName ~f:KxScalingGroupName.to_value));
+        ("hostType", (Option.map x.hostType ~f:KxHostType.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("status", (Option.map x.status ~f:KxScalingGroupStatus.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let status =
+        (Option.map ~f:KxScalingGroupStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let hostType =
+        (Option.map ~f:KxHostType.of_xml) (Xml.child xml_arg0 "hostType") in
+      let scalingGroupName =
+        (Option.map ~f:KxScalingGroupName.of_xml)
+          (Xml.child xml_arg0 "scalingGroupName") in
+      let environmentId =
+        (Option.map ~f:KxEnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?createdTimestamp ?lastModifiedTimestamp ?status
+        ?availabilityZoneId ?hostType ?scalingGroupName ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let status = field_map json__ "status" KxScalingGroupStatus.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let hostType = field_map json__ "hostType" KxHostType.of_json in
+      let scalingGroupName =
+        field_map json__ "scalingGroupName" KxScalingGroupName.of_json in
+      let environmentId =
+        field_map json__ "environmentId" KxEnvironmentId.of_json in
+      make ?createdTimestamp ?lastModifiedTimestamp ?status
+        ?availabilityZoneId ?hostType ?scalingGroupName ?environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new scaling group."]
+module CreateKxScalingGroupRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you want to create the scaling group."];
+      scalingGroupName: KxScalingGroupName.t
+        [@ocaml.doc "A unique identifier for the kdb scaling group."];
+      hostType: KxHostType.t
+        [@ocaml.doc
+          "The memory and CPU capabilities of the scaling group host on which FinSpace Managed kdb clusters will be placed. You can add one of the following values: kx.sg.large \226\128\147 The host type with a configuration of 16 GiB memory and 2 vCPUs. kx.sg.xlarge \226\128\147 The host type with a configuration of 32 GiB memory and 4 vCPUs. kx.sg.2xlarge \226\128\147 The host type with a configuration of 64 GiB memory and 8 vCPUs. kx.sg.4xlarge \226\128\147 The host type with a configuration of 108 GiB memory and 16 vCPUs. kx.sg.8xlarge \226\128\147 The host type with a configuration of 216 GiB memory and 32 vCPUs. kx.sg.16xlarge \226\128\147 The host type with a configuration of 432 GiB memory and 64 vCPUs. kx.sg.32xlarge \226\128\147 The host type with a configuration of 864 GiB memory and 128 vCPUs. kx.sg1.16xlarge \226\128\147 The host type with a configuration of 1949 GiB memory and 64 vCPUs. kx.sg1.24xlarge \226\128\147 The host type with a configuration of 2948 GiB memory and 96 vCPUs."];
+      availabilityZoneId: AvailabilityZoneId.t
+        [@ocaml.doc "The identifier of the availability zones."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the scaling group. You can add up to 50 tags to a scaling group."]}
+    let context_ = "CreateKxScalingGroupRequest"
+    let make ?tags =
+      fun ~clientToken ->
+        fun ~environmentId ->
+          fun ~scalingGroupName ->
+            fun ~hostType ->
+              fun ~availabilityZoneId ->
+                fun () ->
+                  {
+                    tags;
+                    clientToken;
+                    environmentId;
+                    scalingGroupName;
+                    hostType;
+                    availabilityZoneId
+                  }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Some (ClientToken.to_value x.clientToken)));
+        ("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("scalingGroupName",
+          (Some (KxScalingGroupName.to_value x.scalingGroupName)));
+        ("hostType", (Some (KxHostType.to_value x.hostType)));
+        ("availabilityZoneId",
+          (Some (AvailabilityZoneId.to_value x.availabilityZoneId)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let availabilityZoneId =
+        AvailabilityZoneId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "availabilityZoneId") in
+      let hostType =
+        KxHostType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "hostType") in
+      let scalingGroupName =
+        KxScalingGroupName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "scalingGroupName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let clientToken =
+        ClientToken.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      make ?tags ~availabilityZoneId ~hostType ~scalingGroupName
+        ~environmentId ~clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let availabilityZoneId =
+        field_map_exn json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let hostType = field_map_exn json__ "hostType" KxHostType.of_json in
+      let scalingGroupName =
+        field_map_exn json__ "scalingGroupName" KxScalingGroupName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      make ?tags ~availabilityZoneId ~hostType ~scalingGroupName
+        ~environmentId ~clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new scaling group."]
+module CreateKxEnvironmentResponse =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t option
+        [@ocaml.doc "The name of the kdb environment."];
+      status: EnvironmentStatus.t option
+        [@ocaml.doc "The status of the kdb environment."];
+      environmentId: IdType.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      description: Description.t option
+        [@ocaml.doc "A description for the kdb environment."];
+      environmentArn: EnvironmentArn.t option
+        [@ocaml.doc "The ARN identifier of the environment."];
+      kmsKeyId: KmsKeyId.t option
+        [@ocaml.doc
+          "The KMS key ID to encrypt your data in the FinSpace environment."];
+      creationTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the kdb environment was created in FinSpace."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?status ->
+        fun ?environmentId ->
+          fun ?description ->
+            fun ?environmentArn ->
+              fun ?kmsKeyId ->
+                fun ?creationTimestamp ->
+                  fun () ->
+                    {
+                      name;
+                      status;
+                      environmentId;
+                      description;
+                      environmentArn;
+                      kmsKeyId;
+                      creationTimestamp
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("name", (Option.map x.name ~f:KxEnvironmentName.to_value));
+        ("status", (Option.map x.status ~f:EnvironmentStatus.to_value));
+        ("environmentId", (Option.map x.environmentId ~f:IdType.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("environmentArn",
+          (Option.map x.environmentArn ~f:EnvironmentArn.to_value));
+        ("kmsKeyId", (Option.map x.kmsKeyId ~f:KmsKeyId.to_value));
+        ("creationTimestamp",
+          (Option.map x.creationTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let creationTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "creationTimestamp") in
+      let kmsKeyId =
+        (Option.map ~f:KmsKeyId.of_xml) (Xml.child xml_arg0 "kmsKeyId") in
+      let environmentArn =
+        (Option.map ~f:EnvironmentArn.of_xml)
+          (Xml.child xml_arg0 "environmentArn") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let environmentId =
+        (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
+      let status =
+        (Option.map ~f:EnvironmentStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let name =
+        (Option.map ~f:KxEnvironmentName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?creationTimestamp ?kmsKeyId ?environmentArn ?description
+        ?environmentId ?status ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let creationTimestamp =
+        field_map json__ "creationTimestamp" Timestamp.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let environmentArn =
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
+      let status = field_map json__ "status" EnvironmentStatus.of_json in
+      let name = field_map json__ "name" KxEnvironmentName.of_json in
+      make ?creationTimestamp ?kmsKeyId ?environmentArn ?description
+        ?environmentId ?status ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a managed kdb environment for the account."]
+module CreateKxEnvironmentRequest =
+  struct
+    type nonrec t =
+      {
+      name: KxEnvironmentName.t
+        [@ocaml.doc
+          "The name of the kdb environment that you want to create."];
+      description: Description.t option
+        [@ocaml.doc "A description for the kdb environment."];
+      kmsKeyId: KmsKeyARN.t
+        [@ocaml.doc
+          "The KMS key ID to encrypt your data in the FinSpace environment."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the kdb environment. You can add up to 50 tags to your kdb environment."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "CreateKxEnvironmentRequest"
+    let make ?description =
+      fun ?tags ->
+        fun ?clientToken ->
+          fun ~name ->
+            fun ~kmsKeyId ->
+              fun () -> { description; tags; clientToken; name; kmsKeyId }
+    let to_value x =
+      structure_to_value
+        [("name", (Some (KxEnvironmentName.to_value x.name)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("kmsKeyId", (Some (KmsKeyARN.to_value x.kmsKeyId)));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let kmsKeyId =
+        KmsKeyARN.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "kmsKeyId") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let name =
+        KxEnvironmentName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "name") in
+      make ?clientToken ?tags ~kmsKeyId ?description ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kmsKeyId = field_map_exn json__ "kmsKeyId" KmsKeyARN.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" KxEnvironmentName.of_json in
+      make ?clientToken ?tags ~kmsKeyId ?description ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a managed kdb environment for the account."]
+module CreateKxDataviewResponse =
+  struct
+    type nonrec t =
+      {
+      dataviewName: KxDataviewName.t option
+        [@ocaml.doc "A unique identifier for the dataview."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc
+          "The name of the database where you want to create a dataview."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you want to create the dataview."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      description: Description.t option
+        [@ocaml.doc "A description of the dataview."];
+      autoUpdate: BooleanValue.t option
+        [@ocaml.doc
+          "The option to select whether you want to apply all the future additions and corrections automatically to the dataview when you ingest new changesets. The default value is false."];
+      readWrite: BooleanValue.t option
+        [@ocaml.doc
+          "Returns True if the dataview is created as writeable and False otherwise."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the dataview was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the dataview was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: KxDataviewStatus.t option
+        [@ocaml.doc
+          "The status of dataview creation. CREATING \226\128\147 The dataview creation is in progress. UPDATING \226\128\147 The dataview is in the process of being updated. ACTIVE \226\128\147 The dataview is active."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dataviewName =
+      fun ?databaseName ->
+        fun ?environmentId ->
+          fun ?azMode ->
+            fun ?availabilityZoneId ->
+              fun ?changesetId ->
+                fun ?segmentConfigurations ->
+                  fun ?description ->
+                    fun ?autoUpdate ->
+                      fun ?readWrite ->
+                        fun ?createdTimestamp ->
+                          fun ?lastModifiedTimestamp ->
+                            fun ?status ->
+                              fun () ->
+                                {
+                                  dataviewName;
+                                  databaseName;
+                                  environmentId;
+                                  azMode;
+                                  availabilityZoneId;
+                                  changesetId;
+                                  segmentConfigurations;
+                                  description;
+                                  autoUpdate;
+                                  readWrite;
+                                  createdTimestamp;
+                                  lastModifiedTimestamp;
+                                  status
+                                }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("dataviewName",
+           (Option.map x.dataviewName ~f:KxDataviewName.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("autoUpdate", (Option.map x.autoUpdate ~f:BooleanValue.to_value));
+        ("readWrite", (Option.map x.readWrite ~f:BooleanValue.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:KxDataviewStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:KxDataviewStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let readWrite =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "readWrite") in
+      let autoUpdate =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "autoUpdate") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let dataviewName =
+        (Option.map ~f:KxDataviewName.of_xml)
+          (Xml.child xml_arg0 "dataviewName") in
+      make ?status ?lastModifiedTimestamp ?createdTimestamp ?readWrite
+        ?autoUpdate ?description ?segmentConfigurations ?changesetId
+        ?availabilityZoneId ?azMode ?environmentId ?databaseName
+        ?dataviewName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "status" KxDataviewStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let readWrite = field_map json__ "readWrite" BooleanValue.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" BooleanValue.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let dataviewName =
+        field_map json__ "dataviewName" KxDataviewName.of_json in
+      make ?status ?lastModifiedTimestamp ?createdTimestamp ?readWrite
+        ?autoUpdate ?description ?segmentConfigurations ?changesetId
+        ?availabilityZoneId ?azMode ?environmentId ?databaseName
+        ?dataviewName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a snapshot of kdb database with tiered storage capabilities and a pre-warmed cache, ready for mounting on kdb clusters. Dataviews are only available for clusters running on a scaling group. They are not supported on dedicated clusters."]
+module CreateKxDataviewRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc
+          "A unique identifier for the kdb environment, where you want to create the dataview."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc
+          "The name of the database where you want to create a dataview."];
+      dataviewName: KxDataviewName.t
+        [@ocaml.doc "A unique identifier for the dataview."];
+      azMode: KxAzMode.t
+        [@ocaml.doc
+          "The number of availability zones you want to assign per volume. Currently, FinSpace only supports SINGLE for volumes. This places dataview in a single AZ."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc "The identifier of the availability zones."];
+      changesetId: ChangesetId.t option
+        [@ocaml.doc
+          "A unique identifier of the changeset that you want to use to ingest data."];
+      segmentConfigurations: KxDataviewSegmentConfigurationList.t option
+        [@ocaml.doc
+          "The configuration that contains the database path of the data that you want to place on each selected volume. Each segment must have a unique database path for each volume. If you do not explicitly specify any database path for a volume, they are accessible from the cluster through the default S3/object store segment."];
+      autoUpdate: BooleanValue.t option
+        [@ocaml.doc
+          "The option to specify whether you want to apply all the future additions and corrections automatically to the dataview, when you ingest new changesets. The default value is false."];
+      readWrite: BooleanValue.t option
+        [@ocaml.doc
+          "The option to specify whether you want to make the dataview writable to perform database maintenance. The following are some considerations related to writable dataviews.&#x2028;&#x2028; You cannot create partial writable dataviews. When you create writeable dataviews you must provide the entire database path. You cannot perform updates on a writeable dataview. Hence, autoUpdate must be set as False if readWrite is True for a dataview. You must also use a unique volume for creating a writeable dataview. So, if you choose a volume that is already in use by another dataview, the dataview creation fails. Once you create a dataview as writeable, you cannot change it to read-only. So, you cannot update the readWrite parameter later."];
+      description: Description.t option
+        [@ocaml.doc "A description of the dataview."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the dataview. You can add up to 50 tags to a dataview."];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "CreateKxDataviewRequest"
+    let make ?availabilityZoneId =
+      fun ?changesetId ->
+        fun ?segmentConfigurations ->
+          fun ?autoUpdate ->
+            fun ?readWrite ->
+              fun ?description ->
+                fun ?tags ->
+                  fun ~environmentId ->
+                    fun ~databaseName ->
+                      fun ~dataviewName ->
+                        fun ~azMode ->
+                          fun ~clientToken ->
+                            fun () ->
+                              {
+                                availabilityZoneId;
+                                changesetId;
+                                segmentConfigurations;
+                                autoUpdate;
+                                readWrite;
+                                description;
+                                tags;
+                                environmentId;
+                                databaseName;
+                                dataviewName;
+                                azMode;
+                                clientToken
+                              }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("dataviewName", (Some (KxDataviewName.to_value x.dataviewName)));
+        ("azMode", (Some (KxAzMode.to_value x.azMode)));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("segmentConfigurations",
+          (Option.map x.segmentConfigurations
+             ~f:KxDataviewSegmentConfigurationList.to_value));
+        ("autoUpdate", (Option.map x.autoUpdate ~f:BooleanValue.to_value));
+        ("readWrite", (Option.map x.readWrite ~f:BooleanValue.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let readWrite =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "readWrite") in
+      let autoUpdate =
+        (Option.map ~f:BooleanValue.of_xml) (Xml.child xml_arg0 "autoUpdate") in
+      let segmentConfigurations =
+        (Option.map ~f:KxDataviewSegmentConfigurationList.of_xml)
+          (Xml.child xml_arg0 "segmentConfigurations") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        KxAzMode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "azMode") in
+      let dataviewName =
+        KxDataviewName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataviewName") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ?tags ?description ?readWrite ?autoUpdate
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ~azMode
+        ~dataviewName ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let readWrite = field_map json__ "readWrite" BooleanValue.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" BooleanValue.of_json in
+      let segmentConfigurations =
+        field_map json__ "segmentConfigurations"
+          KxDataviewSegmentConfigurationList.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map_exn json__ "azMode" KxAzMode.of_json in
+      let dataviewName =
+        field_map_exn json__ "dataviewName" KxDataviewName.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ?tags ?description ?readWrite ?autoUpdate
+        ?segmentConfigurations ?changesetId ?availabilityZoneId ~azMode
+        ~dataviewName ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a snapshot of kdb database with tiered storage capabilities and a pre-warmed cache, ready for mounting on kdb clusters. Dataviews are only available for clusters running on a scaling group. They are not supported on dedicated clusters."]
+module CreateKxDatabaseResponse =
+  struct
+    type nonrec t =
+      {
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the kdb database."];
+      databaseArn: DatabaseArn.t option
+        [@ocaml.doc "The ARN identifier of the database."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      description: Description.t option
+        [@ocaml.doc "A description of the database."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the database is created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the database was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?databaseName =
+      fun ?databaseArn ->
+        fun ?environmentId ->
+          fun ?description ->
+            fun ?createdTimestamp ->
+              fun ?lastModifiedTimestamp ->
+                fun () ->
+                  {
+                    databaseName;
+                    databaseArn;
+                    environmentId;
+                    description;
+                    createdTimestamp;
+                    lastModifiedTimestamp
+                  }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("databaseName",
+           (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("databaseArn", (Option.map x.databaseArn ~f:DatabaseArn.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseArn =
+        (Option.map ~f:DatabaseArn.of_xml) (Xml.child xml_arg0 "databaseArn") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      make ?lastModifiedTimestamp ?createdTimestamp ?description
+        ?environmentId ?databaseArn ?databaseName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseArn = field_map json__ "databaseArn" DatabaseArn.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      make ?lastModifiedTimestamp ?createdTimestamp ?description
+        ?environmentId ?databaseArn ?databaseName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new kdb database in the environment."]
+module CreateKxDatabaseRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."];
+      description: Description.t option
+        [@ocaml.doc "A description of the database."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the kdb database. You can add up to 50 tags to your kdb database"];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "CreateKxDatabaseRequest"
+    let make ?description =
+      fun ?tags ->
+        fun ~environmentId ->
+          fun ~databaseName ->
+            fun ~clientToken ->
+              fun () ->
+                { description; tags; environmentId; databaseName; clientToken
+                }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ?tags ?description ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ?tags ?description ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new kdb database in the environment."]
+module CreateKxClusterResponse =
+  struct
+    type nonrec t =
+      {
+      environmentId: KxEnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      status: KxClusterStatus.t option
+        [@ocaml.doc
+          "The status of cluster creation. PENDING \226\128\147 The cluster is pending creation. CREATING \226\128\147 The cluster creation process is in progress. CREATE_FAILED \226\128\147 The cluster creation process has failed. RUNNING \226\128\147 The cluster creation process is running. UPDATING \226\128\147 The cluster is in the process of being updated. DELETING \226\128\147 The cluster is in the process of being deleted. DELETED \226\128\147 The cluster has been deleted. DELETE_FAILED \226\128\147 The cluster failed to delete."];
+      statusReason: KxClusterStatusReason.t option
+        [@ocaml.doc "The error message when a failed state occurs."];
+      clusterName: KxClusterName.t option
+        [@ocaml.doc "A unique name for the cluster."];
+      clusterType: KxClusterType.t option
+        [@ocaml.doc
+          "Specifies the type of KDB database that is being created. The following types are available: HDB \226\128\147 A Historical Database. The data is only accessible with read-only permissions from one of the FinSpace managed kdb databases mounted to the cluster. RDB \226\128\147 A Realtime Database. This type of database captures all the data from a ticker plant and stores it in memory until the end of day, after which it writes all of its data to a disk and reloads the HDB. This cluster type requires local storage for temporary storage of data during the savedown process. If you specify this field in your request, you must provide the savedownStorageConfiguration parameter. GATEWAY \226\128\147 A gateway cluster allows you to access data across processes in kdb systems. It allows you to create your own routing logic using the initialization scripts and custom code. This type of cluster does not require a writable local storage. GP \226\128\147 A general purpose cluster allows you to quickly iterate on code during development by granting greater access to system commands and enabling a fast reload of custom code. This cluster type can optionally mount databases including cache and savedown storage. For this cluster type, the node count is fixed at 1. It does not support autoscaling and supports only SINGLE AZ mode. Tickerplant \226\128\147 A tickerplant cluster allows you to subscribe to feed handlers based on IAM permissions. It can publish to RDBs, other Tickerplants, and real-time subscribers (RTS). Tickerplants can persist messages to log, which is readable by any RDB environment. It supports only single-node that is only one kdb process."];
+      tickerplantLogConfiguration: TickerplantLogConfiguration.t option ;
+      volumes: Volumes.t option
+        [@ocaml.doc "A list of volumes mounted on the cluster."];
+      databases: KxDatabaseConfigurations.t option
+        [@ocaml.doc
+          "A list of databases that will be available for querying."];
+      cacheStorageConfigurations: KxCacheStorageConfigurations.t option
+        [@ocaml.doc
+          "The configurations for a read only cache storage associated with a cluster. This cache will be stored as an FSx Lustre that reads from the S3 store."];
+      autoScalingConfiguration: AutoScalingConfiguration.t option
+        [@ocaml.doc
+          "The configuration based on which FinSpace will scale in or scale out nodes in your cluster."];
+      clusterDescription: KxClusterDescription.t option
+        [@ocaml.doc "A description of the cluster."];
+      capacityConfiguration: CapacityConfiguration.t option
+        [@ocaml.doc
+          "A structure for the metadata of a cluster. It includes information like the CPUs needed, memory of instances, and number of instances."];
+      releaseLabel: ReleaseLabel.t option
+        [@ocaml.doc "A version of the FinSpace managed kdb to run."];
+      vpcConfiguration: VpcConfiguration.t option
+        [@ocaml.doc
+          "Configuration details about the network where the Privatelink endpoint of the cluster resides."];
+      initializationScript: InitializationScriptFilePath.t option
+        [@ocaml.doc
+          "Specifies a Q program that will be run at launch of a cluster. It is a relative path within .zip file that contains the custom code, which will be loaded on the cluster. It must include the file name itself. For example, somedir/init.q."];
+      commandLineArguments: KxCommandLineArguments.t option
+        [@ocaml.doc
+          "Defines the key-value pairs to make them available inside the cluster."];
+      code: CodeConfiguration.t option
+        [@ocaml.doc
+          "The details of the custom code that you want to use inside a cluster when analyzing a data. It consists of the S3 source bucket, location, S3 object version, and the relative path from where the custom code is loaded into the cluster."];
+      executionRole: ExecutionRoleArn.t option
+        [@ocaml.doc
+          "An IAM role that defines a set of permissions associated with a cluster. These permissions are assumed when a cluster attempts to access another cluster."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The last time that the cluster was modified. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      savedownStorageConfiguration: KxSavedownStorageConfiguration.t option
+        [@ocaml.doc
+          "The size and type of the temporary storage that is used to hold data during the savedown process. This parameter is required when you choose clusterType as RDB. All the data written to this storage space is lost when the cluster node is restarted."];
+      azMode: KxAzMode.t option
+        [@ocaml.doc
+          "The number of availability zones you want to assign per cluster. This can be one of the following SINGLE \226\128\147 Assigns one availability zone per cluster. MULTI \226\128\147 Assigns all the availability zones per cluster."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The availability zone identifiers for the requested regions."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the cluster was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      scalingGroupConfiguration: KxScalingGroupConfiguration.t option
+        [@ocaml.doc
+          "The structure that stores the configuration details of a scaling group."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?environmentId =
+      fun ?status ->
+        fun ?statusReason ->
+          fun ?clusterName ->
+            fun ?clusterType ->
+              fun ?tickerplantLogConfiguration ->
+                fun ?volumes ->
+                  fun ?databases ->
+                    fun ?cacheStorageConfigurations ->
+                      fun ?autoScalingConfiguration ->
+                        fun ?clusterDescription ->
+                          fun ?capacityConfiguration ->
+                            fun ?releaseLabel ->
+                              fun ?vpcConfiguration ->
+                                fun ?initializationScript ->
+                                  fun ?commandLineArguments ->
+                                    fun ?code ->
+                                      fun ?executionRole ->
+                                        fun ?lastModifiedTimestamp ->
+                                          fun ?savedownStorageConfiguration
+                                            ->
+                                            fun ?azMode ->
+                                              fun ?availabilityZoneId ->
+                                                fun ?createdTimestamp ->
+                                                  fun
+                                                    ?scalingGroupConfiguration
+                                                    ->
+                                                    fun () ->
+                                                      {
+                                                        environmentId;
+                                                        status;
+                                                        statusReason;
+                                                        clusterName;
+                                                        clusterType;
+                                                        tickerplantLogConfiguration;
+                                                        volumes;
+                                                        databases;
+                                                        cacheStorageConfigurations;
+                                                        autoScalingConfiguration;
+                                                        clusterDescription;
+                                                        capacityConfiguration;
+                                                        releaseLabel;
+                                                        vpcConfiguration;
+                                                        initializationScript;
+                                                        commandLineArguments;
+                                                        code;
+                                                        executionRole;
+                                                        lastModifiedTimestamp;
+                                                        savedownStorageConfiguration;
+                                                        azMode;
+                                                        availabilityZoneId;
+                                                        createdTimestamp;
+                                                        scalingGroupConfiguration
+                                                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("environmentId",
+           (Option.map x.environmentId ~f:KxEnvironmentId.to_value));
+        ("status", (Option.map x.status ~f:KxClusterStatus.to_value));
+        ("statusReason",
+          (Option.map x.statusReason ~f:KxClusterStatusReason.to_value));
+        ("clusterName", (Option.map x.clusterName ~f:KxClusterName.to_value));
+        ("clusterType", (Option.map x.clusterType ~f:KxClusterType.to_value));
+        ("tickerplantLogConfiguration",
+          (Option.map x.tickerplantLogConfiguration
+             ~f:TickerplantLogConfiguration.to_value));
+        ("volumes", (Option.map x.volumes ~f:Volumes.to_value));
+        ("databases",
+          (Option.map x.databases ~f:KxDatabaseConfigurations.to_value));
+        ("cacheStorageConfigurations",
+          (Option.map x.cacheStorageConfigurations
+             ~f:KxCacheStorageConfigurations.to_value));
+        ("autoScalingConfiguration",
+          (Option.map x.autoScalingConfiguration
+             ~f:AutoScalingConfiguration.to_value));
+        ("clusterDescription",
+          (Option.map x.clusterDescription ~f:KxClusterDescription.to_value));
+        ("capacityConfiguration",
+          (Option.map x.capacityConfiguration
+             ~f:CapacityConfiguration.to_value));
+        ("releaseLabel",
+          (Option.map x.releaseLabel ~f:ReleaseLabel.to_value));
+        ("vpcConfiguration",
+          (Option.map x.vpcConfiguration ~f:VpcConfiguration.to_value));
+        ("initializationScript",
+          (Option.map x.initializationScript
+             ~f:InitializationScriptFilePath.to_value));
+        ("commandLineArguments",
+          (Option.map x.commandLineArguments
+             ~f:KxCommandLineArguments.to_value));
+        ("code", (Option.map x.code ~f:CodeConfiguration.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:ExecutionRoleArn.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("savedownStorageConfiguration",
+          (Option.map x.savedownStorageConfiguration
+             ~f:KxSavedownStorageConfiguration.to_value));
+        ("azMode", (Option.map x.azMode ~f:KxAzMode.to_value));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("scalingGroupConfiguration",
+          (Option.map x.scalingGroupConfiguration
+             ~f:KxScalingGroupConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingGroupConfiguration =
+        (Option.map ~f:KxScalingGroupConfiguration.of_xml)
+          (Xml.child xml_arg0 "scalingGroupConfiguration") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        (Option.map ~f:KxAzMode.of_xml) (Xml.child xml_arg0 "azMode") in
+      let savedownStorageConfiguration =
+        (Option.map ~f:KxSavedownStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "savedownStorageConfiguration") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let executionRole =
+        (Option.map ~f:ExecutionRoleArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let code =
+        (Option.map ~f:CodeConfiguration.of_xml) (Xml.child xml_arg0 "code") in
+      let commandLineArguments =
+        (Option.map ~f:KxCommandLineArguments.of_xml)
+          (Xml.child xml_arg0 "commandLineArguments") in
+      let initializationScript =
+        (Option.map ~f:InitializationScriptFilePath.of_xml)
+          (Xml.child xml_arg0 "initializationScript") in
+      let vpcConfiguration =
+        (Option.map ~f:VpcConfiguration.of_xml)
+          (Xml.child xml_arg0 "vpcConfiguration") in
+      let releaseLabel =
+        (Option.map ~f:ReleaseLabel.of_xml)
+          (Xml.child xml_arg0 "releaseLabel") in
+      let capacityConfiguration =
+        (Option.map ~f:CapacityConfiguration.of_xml)
+          (Xml.child xml_arg0 "capacityConfiguration") in
+      let clusterDescription =
+        (Option.map ~f:KxClusterDescription.of_xml)
+          (Xml.child xml_arg0 "clusterDescription") in
+      let autoScalingConfiguration =
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "autoScalingConfiguration") in
+      let cacheStorageConfigurations =
+        (Option.map ~f:KxCacheStorageConfigurations.of_xml)
+          (Xml.child xml_arg0 "cacheStorageConfigurations") in
+      let databases =
+        (Option.map ~f:KxDatabaseConfigurations.of_xml)
+          (Xml.child xml_arg0 "databases") in
+      let volumes =
+        (Option.map ~f:Volumes.of_xml) (Xml.child xml_arg0 "volumes") in
+      let tickerplantLogConfiguration =
+        (Option.map ~f:TickerplantLogConfiguration.of_xml)
+          (Xml.child xml_arg0 "tickerplantLogConfiguration") in
+      let clusterType =
+        (Option.map ~f:KxClusterType.of_xml)
+          (Xml.child xml_arg0 "clusterType") in
+      let clusterName =
+        (Option.map ~f:KxClusterName.of_xml)
+          (Xml.child xml_arg0 "clusterName") in
+      let statusReason =
+        (Option.map ~f:KxClusterStatusReason.of_xml)
+          (Xml.child xml_arg0 "statusReason") in
+      let status =
+        (Option.map ~f:KxClusterStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let environmentId =
+        (Option.map ~f:KxEnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      make ?scalingGroupConfiguration ?createdTimestamp ?availabilityZoneId
+        ?azMode ?savedownStorageConfiguration ?lastModifiedTimestamp
+        ?executionRole ?code ?commandLineArguments ?initializationScript
+        ?vpcConfiguration ?releaseLabel ?capacityConfiguration
+        ?clusterDescription ?autoScalingConfiguration
+        ?cacheStorageConfigurations ?databases ?volumes
+        ?tickerplantLogConfiguration ?clusterType ?clusterName ?statusReason
+        ?status ?environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingGroupConfiguration =
+        field_map json__ "scalingGroupConfiguration"
+          KxScalingGroupConfiguration.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map json__ "azMode" KxAzMode.of_json in
+      let savedownStorageConfiguration =
+        field_map json__ "savedownStorageConfiguration"
+          KxSavedownStorageConfiguration.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let executionRole =
+        field_map json__ "executionRole" ExecutionRoleArn.of_json in
+      let code = field_map json__ "code" CodeConfiguration.of_json in
+      let commandLineArguments =
+        field_map json__ "commandLineArguments"
+          KxCommandLineArguments.of_json in
+      let initializationScript =
+        field_map json__ "initializationScript"
+          InitializationScriptFilePath.of_json in
+      let vpcConfiguration =
+        field_map json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let releaseLabel = field_map json__ "releaseLabel" ReleaseLabel.of_json in
+      let capacityConfiguration =
+        field_map json__ "capacityConfiguration"
+          CapacityConfiguration.of_json in
+      let clusterDescription =
+        field_map json__ "clusterDescription" KxClusterDescription.of_json in
+      let autoScalingConfiguration =
+        field_map json__ "autoScalingConfiguration"
+          AutoScalingConfiguration.of_json in
+      let cacheStorageConfigurations =
+        field_map json__ "cacheStorageConfigurations"
+          KxCacheStorageConfigurations.of_json in
+      let databases =
+        field_map json__ "databases" KxDatabaseConfigurations.of_json in
+      let volumes = field_map json__ "volumes" Volumes.of_json in
+      let tickerplantLogConfiguration =
+        field_map json__ "tickerplantLogConfiguration"
+          TickerplantLogConfiguration.of_json in
+      let clusterType = field_map json__ "clusterType" KxClusterType.of_json in
+      let clusterName = field_map json__ "clusterName" KxClusterName.of_json in
+      let statusReason =
+        field_map json__ "statusReason" KxClusterStatusReason.of_json in
+      let status = field_map json__ "status" KxClusterStatus.of_json in
+      let environmentId =
+        field_map json__ "environmentId" KxEnvironmentId.of_json in
+      make ?scalingGroupConfiguration ?createdTimestamp ?availabilityZoneId
+        ?azMode ?savedownStorageConfiguration ?lastModifiedTimestamp
+        ?executionRole ?code ?commandLineArguments ?initializationScript
+        ?vpcConfiguration ?releaseLabel ?capacityConfiguration
+        ?clusterDescription ?autoScalingConfiguration
+        ?cacheStorageConfigurations ?databases ?volumes
+        ?tickerplantLogConfiguration ?clusterType ?clusterName ?statusReason
+        ?status ?environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new kdb cluster."]
+module CreateKxClusterRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."];
+      environmentId: KxEnvironmentId.t
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      clusterName: KxClusterName.t
+        [@ocaml.doc "A unique name for the cluster that you want to create."];
+      clusterType: KxClusterType.t
+        [@ocaml.doc
+          "Specifies the type of KDB database that is being created. The following types are available: HDB \226\128\147 A Historical Database. The data is only accessible with read-only permissions from one of the FinSpace managed kdb databases mounted to the cluster. RDB \226\128\147 A Realtime Database. This type of database captures all the data from a ticker plant and stores it in memory until the end of day, after which it writes all of its data to a disk and reloads the HDB. This cluster type requires local storage for temporary storage of data during the savedown process. If you specify this field in your request, you must provide the savedownStorageConfiguration parameter. GATEWAY \226\128\147 A gateway cluster allows you to access data across processes in kdb systems. It allows you to create your own routing logic using the initialization scripts and custom code. This type of cluster does not require a writable local storage. GP \226\128\147 A general purpose cluster allows you to quickly iterate on code during development by granting greater access to system commands and enabling a fast reload of custom code. This cluster type can optionally mount databases including cache and savedown storage. For this cluster type, the node count is fixed at 1. It does not support autoscaling and supports only SINGLE AZ mode. Tickerplant \226\128\147 A tickerplant cluster allows you to subscribe to feed handlers based on IAM permissions. It can publish to RDBs, other Tickerplants, and real-time subscribers (RTS). Tickerplants can persist messages to log, which is readable by any RDB environment. It supports only single-node that is only one kdb process."];
+      tickerplantLogConfiguration: TickerplantLogConfiguration.t option
+        [@ocaml.doc
+          "A configuration to store Tickerplant logs. It consists of a list of volumes that will be mounted to your cluster. For the cluster type Tickerplant, the location of the TP volume on the cluster will be available by using the global variable .aws.tp_log_path."];
+      databases: KxDatabaseConfigurations.t option
+        [@ocaml.doc
+          "A list of databases that will be available for querying."];
+      cacheStorageConfigurations: KxCacheStorageConfigurations.t option
+        [@ocaml.doc
+          "The configurations for a read only cache storage associated with a cluster. This cache will be stored as an FSx Lustre that reads from the S3 store."];
+      autoScalingConfiguration: AutoScalingConfiguration.t option
+        [@ocaml.doc
+          "The configuration based on which FinSpace will scale in or scale out nodes in your cluster."];
+      clusterDescription: KxClusterDescription.t option
+        [@ocaml.doc "A description of the cluster."];
+      capacityConfiguration: CapacityConfiguration.t option
+        [@ocaml.doc
+          "A structure for the metadata of a cluster. It includes information like the CPUs needed, memory of instances, and number of instances."];
+      releaseLabel: ReleaseLabel.t
+        [@ocaml.doc "The version of FinSpace managed kdb to run."];
+      vpcConfiguration: VpcConfiguration.t
+        [@ocaml.doc
+          "Configuration details about the network where the Privatelink endpoint of the cluster resides."];
+      initializationScript: InitializationScriptFilePath.t option
+        [@ocaml.doc
+          "Specifies a Q program that will be run at launch of a cluster. It is a relative path within .zip file that contains the custom code, which will be loaded on the cluster. It must include the file name itself. For example, somedir/init.q."];
+      commandLineArguments: KxCommandLineArguments.t option
+        [@ocaml.doc
+          "Defines the key-value pairs to make them available inside the cluster."];
+      code: CodeConfiguration.t option
+        [@ocaml.doc
+          "The details of the custom code that you want to use inside a cluster when analyzing a data. It consists of the S3 source bucket, location, S3 object version, and the relative path from where the custom code is loaded into the cluster."];
+      executionRole: ExecutionRoleArn.t option
+        [@ocaml.doc
+          "An IAM role that defines a set of permissions associated with a cluster. These permissions are assumed when a cluster attempts to access another cluster."];
+      savedownStorageConfiguration: KxSavedownStorageConfiguration.t option
+        [@ocaml.doc
+          "The size and type of the temporary storage that is used to hold data during the savedown process. This parameter is required when you choose clusterType as RDB. All the data written to this storage space is lost when the cluster node is restarted."];
+      azMode: KxAzMode.t
+        [@ocaml.doc
+          "The number of availability zones you want to assign per cluster. This can be one of the following SINGLE \226\128\147 Assigns one availability zone per cluster. MULTI \226\128\147 Assigns all the availability zones per cluster."];
+      availabilityZoneId: AvailabilityZoneId.t option
+        [@ocaml.doc
+          "The availability zone identifiers for the requested regions."];
+      tags: TagMap.t option
+        [@ocaml.doc
+          "A list of key-value pairs to label the cluster. You can add up to 50 tags to a cluster."];
+      scalingGroupConfiguration: KxScalingGroupConfiguration.t option
+        [@ocaml.doc
+          "The structure that stores the configuration details of a scaling group."]}
+    let context_ = "CreateKxClusterRequest"
+    let make ?clientToken =
+      fun ?tickerplantLogConfiguration ->
+        fun ?databases ->
+          fun ?cacheStorageConfigurations ->
+            fun ?autoScalingConfiguration ->
+              fun ?clusterDescription ->
+                fun ?capacityConfiguration ->
+                  fun ?initializationScript ->
+                    fun ?commandLineArguments ->
+                      fun ?code ->
+                        fun ?executionRole ->
+                          fun ?savedownStorageConfiguration ->
+                            fun ?availabilityZoneId ->
+                              fun ?tags ->
+                                fun ?scalingGroupConfiguration ->
+                                  fun ~environmentId ->
+                                    fun ~clusterName ->
+                                      fun ~clusterType ->
+                                        fun ~releaseLabel ->
+                                          fun ~vpcConfiguration ->
+                                            fun ~azMode ->
+                                              fun () ->
+                                                {
+                                                  clientToken;
+                                                  tickerplantLogConfiguration;
+                                                  databases;
+                                                  cacheStorageConfigurations;
+                                                  autoScalingConfiguration;
+                                                  clusterDescription;
+                                                  capacityConfiguration;
+                                                  initializationScript;
+                                                  commandLineArguments;
+                                                  code;
+                                                  executionRole;
+                                                  savedownStorageConfiguration;
+                                                  availabilityZoneId;
+                                                  tags;
+                                                  scalingGroupConfiguration;
+                                                  environmentId;
+                                                  clusterName;
+                                                  clusterType;
+                                                  releaseLabel;
+                                                  vpcConfiguration;
+                                                  azMode
+                                                }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("environmentId", (Some (KxEnvironmentId.to_value x.environmentId)));
+        ("clusterName", (Some (KxClusterName.to_value x.clusterName)));
+        ("clusterType", (Some (KxClusterType.to_value x.clusterType)));
+        ("tickerplantLogConfiguration",
+          (Option.map x.tickerplantLogConfiguration
+             ~f:TickerplantLogConfiguration.to_value));
+        ("databases",
+          (Option.map x.databases ~f:KxDatabaseConfigurations.to_value));
+        ("cacheStorageConfigurations",
+          (Option.map x.cacheStorageConfigurations
+             ~f:KxCacheStorageConfigurations.to_value));
+        ("autoScalingConfiguration",
+          (Option.map x.autoScalingConfiguration
+             ~f:AutoScalingConfiguration.to_value));
+        ("clusterDescription",
+          (Option.map x.clusterDescription ~f:KxClusterDescription.to_value));
+        ("capacityConfiguration",
+          (Option.map x.capacityConfiguration
+             ~f:CapacityConfiguration.to_value));
+        ("releaseLabel", (Some (ReleaseLabel.to_value x.releaseLabel)));
+        ("vpcConfiguration",
+          (Some (VpcConfiguration.to_value x.vpcConfiguration)));
+        ("initializationScript",
+          (Option.map x.initializationScript
+             ~f:InitializationScriptFilePath.to_value));
+        ("commandLineArguments",
+          (Option.map x.commandLineArguments
+             ~f:KxCommandLineArguments.to_value));
+        ("code", (Option.map x.code ~f:CodeConfiguration.to_value));
+        ("executionRole",
+          (Option.map x.executionRole ~f:ExecutionRoleArn.to_value));
+        ("savedownStorageConfiguration",
+          (Option.map x.savedownStorageConfiguration
+             ~f:KxSavedownStorageConfiguration.to_value));
+        ("azMode", (Some (KxAzMode.to_value x.azMode)));
+        ("availabilityZoneId",
+          (Option.map x.availabilityZoneId ~f:AvailabilityZoneId.to_value));
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("scalingGroupConfiguration",
+          (Option.map x.scalingGroupConfiguration
+             ~f:KxScalingGroupConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let scalingGroupConfiguration =
+        (Option.map ~f:KxScalingGroupConfiguration.of_xml)
+          (Xml.child xml_arg0 "scalingGroupConfiguration") in
+      let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let availabilityZoneId =
+        (Option.map ~f:AvailabilityZoneId.of_xml)
+          (Xml.child xml_arg0 "availabilityZoneId") in
+      let azMode =
+        KxAzMode.of_xml (Xml.child_exn ~context:context_ xml_arg0 "azMode") in
+      let savedownStorageConfiguration =
+        (Option.map ~f:KxSavedownStorageConfiguration.of_xml)
+          (Xml.child xml_arg0 "savedownStorageConfiguration") in
+      let executionRole =
+        (Option.map ~f:ExecutionRoleArn.of_xml)
+          (Xml.child xml_arg0 "executionRole") in
+      let code =
+        (Option.map ~f:CodeConfiguration.of_xml) (Xml.child xml_arg0 "code") in
+      let commandLineArguments =
+        (Option.map ~f:KxCommandLineArguments.of_xml)
+          (Xml.child xml_arg0 "commandLineArguments") in
+      let initializationScript =
+        (Option.map ~f:InitializationScriptFilePath.of_xml)
+          (Xml.child xml_arg0 "initializationScript") in
+      let vpcConfiguration =
+        VpcConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "vpcConfiguration") in
+      let releaseLabel =
+        ReleaseLabel.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "releaseLabel") in
+      let capacityConfiguration =
+        (Option.map ~f:CapacityConfiguration.of_xml)
+          (Xml.child xml_arg0 "capacityConfiguration") in
+      let clusterDescription =
+        (Option.map ~f:KxClusterDescription.of_xml)
+          (Xml.child xml_arg0 "clusterDescription") in
+      let autoScalingConfiguration =
+        (Option.map ~f:AutoScalingConfiguration.of_xml)
+          (Xml.child xml_arg0 "autoScalingConfiguration") in
+      let cacheStorageConfigurations =
+        (Option.map ~f:KxCacheStorageConfigurations.of_xml)
+          (Xml.child xml_arg0 "cacheStorageConfigurations") in
+      let databases =
+        (Option.map ~f:KxDatabaseConfigurations.of_xml)
+          (Xml.child xml_arg0 "databases") in
+      let tickerplantLogConfiguration =
+        (Option.map ~f:TickerplantLogConfiguration.of_xml)
+          (Xml.child xml_arg0 "tickerplantLogConfiguration") in
+      let clusterType =
+        KxClusterType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterType") in
+      let clusterName =
+        KxClusterName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clusterName") in
+      let environmentId =
+        KxEnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?scalingGroupConfiguration ?tags ?availabilityZoneId ~azMode
+        ?savedownStorageConfiguration ?executionRole ?code
+        ?commandLineArguments ?initializationScript ~vpcConfiguration
+        ~releaseLabel ?capacityConfiguration ?clusterDescription
+        ?autoScalingConfiguration ?cacheStorageConfigurations ?databases
+        ?tickerplantLogConfiguration ~clusterType ~clusterName ~environmentId
+        ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let scalingGroupConfiguration =
+        field_map json__ "scalingGroupConfiguration"
+          KxScalingGroupConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let availabilityZoneId =
+        field_map json__ "availabilityZoneId" AvailabilityZoneId.of_json in
+      let azMode = field_map_exn json__ "azMode" KxAzMode.of_json in
+      let savedownStorageConfiguration =
+        field_map json__ "savedownStorageConfiguration"
+          KxSavedownStorageConfiguration.of_json in
+      let executionRole =
+        field_map json__ "executionRole" ExecutionRoleArn.of_json in
+      let code = field_map json__ "code" CodeConfiguration.of_json in
+      let commandLineArguments =
+        field_map json__ "commandLineArguments"
+          KxCommandLineArguments.of_json in
+      let initializationScript =
+        field_map json__ "initializationScript"
+          InitializationScriptFilePath.of_json in
+      let vpcConfiguration =
+        field_map_exn json__ "vpcConfiguration" VpcConfiguration.of_json in
+      let releaseLabel =
+        field_map_exn json__ "releaseLabel" ReleaseLabel.of_json in
+      let capacityConfiguration =
+        field_map json__ "capacityConfiguration"
+          CapacityConfiguration.of_json in
+      let clusterDescription =
+        field_map json__ "clusterDescription" KxClusterDescription.of_json in
+      let autoScalingConfiguration =
+        field_map json__ "autoScalingConfiguration"
+          AutoScalingConfiguration.of_json in
+      let cacheStorageConfigurations =
+        field_map json__ "cacheStorageConfigurations"
+          KxCacheStorageConfigurations.of_json in
+      let databases =
+        field_map json__ "databases" KxDatabaseConfigurations.of_json in
+      let tickerplantLogConfiguration =
+        field_map json__ "tickerplantLogConfiguration"
+          TickerplantLogConfiguration.of_json in
+      let clusterType =
+        field_map_exn json__ "clusterType" KxClusterType.of_json in
+      let clusterName =
+        field_map_exn json__ "clusterName" KxClusterName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" KxEnvironmentId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?scalingGroupConfiguration ?tags ?availabilityZoneId ~azMode
+        ?savedownStorageConfiguration ?executionRole ?code
+        ?commandLineArguments ?initializationScript ~vpcConfiguration
+        ~releaseLabel ?capacityConfiguration ?clusterDescription
+        ?autoScalingConfiguration ?cacheStorageConfigurations ?databases
+        ?tickerplantLogConfiguration ~clusterType ~clusterName ~environmentId
+        ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a new kdb cluster."]
+module CreateKxChangesetResponse =
+  struct
+    type nonrec t =
+      {
+      changesetId: ChangesetId.t option
+        [@ocaml.doc "A unique identifier for the changeset."];
+      databaseName: DatabaseName.t option
+        [@ocaml.doc "The name of the kdb database."];
+      environmentId: EnvironmentId.t option
+        [@ocaml.doc "A unique identifier for the kdb environment."];
+      changeRequests: ChangeRequests.t option
+        [@ocaml.doc "A list of change requests."];
+      createdTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was created in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      lastModifiedTimestamp: Timestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the changeset was updated in FinSpace. The value is determined as epoch time in milliseconds. For example, the value for Monday, November 1, 2021 12:00:00 PM UTC is specified as 1635768000000."];
+      status: ChangesetStatus.t option
+        [@ocaml.doc
+          "Status of the changeset creation process. Pending \226\128\147 Changeset creation is pending. Processing \226\128\147 Changeset creation is running. Failed \226\128\147 Changeset creation has failed. Complete \226\128\147 Changeset creation has succeeded."];
+      errorInfo: ErrorInfo.t option
+        [@ocaml.doc
+          "The details of the error that you receive when creating a changeset. It consists of the type of error and the error message."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?changesetId =
+      fun ?databaseName ->
+        fun ?environmentId ->
+          fun ?changeRequests ->
+            fun ?createdTimestamp ->
+              fun ?lastModifiedTimestamp ->
+                fun ?status ->
+                  fun ?errorInfo ->
+                    fun () ->
+                      {
+                        changesetId;
+                        databaseName;
+                        environmentId;
+                        changeRequests;
+                        createdTimestamp;
+                        lastModifiedTimestamp;
+                        status;
+                        errorInfo
+                      }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("changesetId", (Option.map x.changesetId ~f:ChangesetId.to_value));
+        ("databaseName",
+          (Option.map x.databaseName ~f:DatabaseName.to_value));
+        ("environmentId",
+          (Option.map x.environmentId ~f:EnvironmentId.to_value));
+        ("changeRequests",
+          (Option.map x.changeRequests ~f:ChangeRequests.to_value));
+        ("createdTimestamp",
+          (Option.map x.createdTimestamp ~f:Timestamp.to_value));
+        ("lastModifiedTimestamp",
+          (Option.map x.lastModifiedTimestamp ~f:Timestamp.to_value));
+        ("status", (Option.map x.status ~f:ChangesetStatus.to_value));
+        ("errorInfo", (Option.map x.errorInfo ~f:ErrorInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorInfo =
+        (Option.map ~f:ErrorInfo.of_xml) (Xml.child xml_arg0 "errorInfo") in
+      let status =
+        (Option.map ~f:ChangesetStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let lastModifiedTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "lastModifiedTimestamp") in
+      let createdTimestamp =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "createdTimestamp") in
+      let changeRequests =
+        (Option.map ~f:ChangeRequests.of_xml)
+          (Xml.child xml_arg0 "changeRequests") in
+      let environmentId =
+        (Option.map ~f:EnvironmentId.of_xml)
+          (Xml.child xml_arg0 "environmentId") in
+      let databaseName =
+        (Option.map ~f:DatabaseName.of_xml)
+          (Xml.child xml_arg0 "databaseName") in
+      let changesetId =
+        (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
+      make ?errorInfo ?status ?lastModifiedTimestamp ?createdTimestamp
+        ?changeRequests ?environmentId ?databaseName ?changesetId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorInfo = field_map json__ "errorInfo" ErrorInfo.of_json in
+      let status = field_map json__ "status" ChangesetStatus.of_json in
+      let lastModifiedTimestamp =
+        field_map json__ "lastModifiedTimestamp" Timestamp.of_json in
+      let createdTimestamp =
+        field_map json__ "createdTimestamp" Timestamp.of_json in
+      let changeRequests =
+        field_map json__ "changeRequests" ChangeRequests.of_json in
+      let environmentId =
+        field_map json__ "environmentId" EnvironmentId.of_json in
+      let databaseName = field_map json__ "databaseName" DatabaseName.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      make ?errorInfo ?status ?lastModifiedTimestamp ?createdTimestamp
+        ?changeRequests ?environmentId ?databaseName ?changesetId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a changeset for a kdb database. A changeset allows you to add and delete existing files by using an ordered list of change requests."]
+module CreateKxChangesetRequest =
+  struct
+    type nonrec t =
+      {
+      environmentId: EnvironmentId.t
+        [@ocaml.doc "A unique identifier of the kdb environment."];
+      databaseName: DatabaseName.t
+        [@ocaml.doc "The name of the kdb database."];
+      changeRequests: ChangeRequests.t
+        [@ocaml.doc
+          "A list of change request objects that are run in order. A change request object consists of changeType , s3Path, and dbPath. A changeType can have the following values: PUT \226\128\147 Adds or updates files in a database. DELETE \226\128\147 Deletes files in a database. All the change requests require a mandatory dbPath attribute that defines the path within the database directory. All database paths must start with a leading / and end with a trailing /. The s3Path attribute defines the s3 source file path and is required for a PUT change type. The s3path must end with a trailing / if it is a directory and must end without a trailing / if it is a file. Here are few examples of how you can use the change request object: This request adds a single sym file at database root location. \\{ \"changeType\": \"PUT\", \"s3Path\":\"s3://bucket/db/sym\", \"dbPath\":\"/\"\\} This request adds files in the given s3Path under the 2020.01.02 partition of the database. \\{ \"changeType\": \"PUT\", \"s3Path\":\"s3://bucket/db/2020.01.02/\", \"dbPath\":\"/2020.01.02/\"\\} This request adds files in the given s3Path under the taq table partition of the database. \\[ \\{ \"changeType\": \"PUT\", \"s3Path\":\"s3://bucket/db/2020.01.02/taq/\", \"dbPath\":\"/2020.01.02/taq/\"\\}\\] This request deletes the 2020.01.02 partition of the database. \\[\\{ \"changeType\": \"DELETE\", \"dbPath\": \"/2020.01.02/\"\\} \\] The DELETE request allows you to delete the existing files under the 2020.01.02 partition of the database, and the PUT request adds a new taq table under it. \\[ \\{\"changeType\": \"DELETE\", \"dbPath\":\"/2020.01.02/\"\\}, \\{\"changeType\": \"PUT\", \"s3Path\":\"s3://bucket/db/2020.01.02/taq/\", \"dbPath\":\"/2020.01.02/taq/\"\\}\\]"];
+      clientToken: ClientTokenString.t
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "CreateKxChangesetRequest"
+    let make ~environmentId =
+      fun ~databaseName ->
+        fun ~changeRequests ->
+          fun ~clientToken ->
+            fun () ->
+              { environmentId; databaseName; changeRequests; clientToken }
+    let to_value x =
+      structure_to_value
+        [("environmentId", (Some (EnvironmentId.to_value x.environmentId)));
+        ("databaseName", (Some (DatabaseName.to_value x.databaseName)));
+        ("changeRequests", (Some (ChangeRequests.to_value x.changeRequests)));
+        ("clientToken", (Some (ClientTokenString.to_value x.clientToken)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        ClientTokenString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
+      let changeRequests =
+        ChangeRequests.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "changeRequests") in
+      let databaseName =
+        DatabaseName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "databaseName") in
+      let environmentId =
+        EnvironmentId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "environmentId") in
+      make ~clientToken ~changeRequests ~databaseName ~environmentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientTokenString.of_json in
+      let changeRequests =
+        field_map_exn json__ "changeRequests" ChangeRequests.of_json in
+      let databaseName =
+        field_map_exn json__ "databaseName" DatabaseName.of_json in
+      let environmentId =
+        field_map_exn json__ "environmentId" EnvironmentId.of_json in
+      make ~clientToken ~changeRequests ~databaseName ~environmentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a changeset for a kdb database. A changeset allows you to add and delete existing files by using an ordered list of change requests."]
 module CreateEnvironmentResponse =
   struct
     type nonrec t =
@@ -1753,7 +15969,7 @@ module CreateEnvironmentResponse =
           "The Amazon Resource Name (ARN) of the FinSpace environment that you created."];
       environmentUrl: Url.t option
         [@ocaml.doc
-          "The sign-in url for the web application of the FinSpace environment you created."]}
+          "The sign-in URL for the web application of the FinSpace environment you created."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServerException of InternalServerException.t 
@@ -1849,11 +16065,11 @@ module CreateEnvironmentResponse =
         (Option.map ~f:IdType.of_xml) (Xml.child xml_arg0 "environmentId") in
       make ?environmentUrl ?environmentArn ?environmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environmentUrl = field_map json "environmentUrl" Url.of_json in
+    let of_json json__ =
+      let environmentUrl = field_map json__ "environmentUrl" Url.of_json in
       let environmentArn =
-        field_map json "environmentArn" EnvironmentArn.of_json in
-      let environmentId = field_map json "environmentId" IdType.of_json in
+        field_map json__ "environmentArn" EnvironmentArn.of_json in
+      let environmentId = field_map json__ "environmentId" IdType.of_json in
       make ?environmentUrl ?environmentArn ?environmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Create a new FinSpace environment."]
@@ -1941,18 +16157,18 @@ module CreateEnvironmentRequest =
       make ?dataBundles ?superuserParameters ?federationParameters
         ?federationMode ?tags ?kmsKeyId ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataBundles = field_map json "dataBundles" DataBundleArns.of_json in
+    let of_json json__ =
+      let dataBundles = field_map json__ "dataBundles" DataBundleArns.of_json in
       let superuserParameters =
-        field_map json "superuserParameters" SuperuserParameters.of_json in
+        field_map json__ "superuserParameters" SuperuserParameters.of_json in
       let federationParameters =
-        field_map json "federationParameters" FederationParameters.of_json in
+        field_map json__ "federationParameters" FederationParameters.of_json in
       let federationMode =
-        field_map json "federationMode" FederationMode.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let kmsKeyId = field_map json "kmsKeyId" KmsKeyId.of_json in
-      let description = field_map json "description" Description.of_json in
-      let name = field_map_exn json "name" EnvironmentName.of_json in
+        field_map json__ "federationMode" FederationMode.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let kmsKeyId = field_map json__ "kmsKeyId" KmsKeyId.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let name = field_map_exn json__ "name" EnvironmentName.of_json in
       make ?dataBundles ?superuserParameters ?federationParameters
         ?federationMode ?tags ?kmsKeyId ?description ~name ()
     let to_json v = composed_to_json to_value v

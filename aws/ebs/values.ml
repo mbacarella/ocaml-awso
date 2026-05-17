@@ -170,18 +170,24 @@ module ResourceNotFoundExceptionReason =
   struct
     type nonrec t =
       | SNAPSHOT_NOT_FOUND 
+      | GRANT_NOT_FOUND 
       | DEPENDENCY_RESOURCE_NOT_FOUND 
+      | IMAGE_NOT_FOUND 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | SNAPSHOT_NOT_FOUND -> "SNAPSHOT_NOT_FOUND"
+      | GRANT_NOT_FOUND -> "GRANT_NOT_FOUND"
       | DEPENDENCY_RESOURCE_NOT_FOUND -> "DEPENDENCY_RESOURCE_NOT_FOUND"
+      | IMAGE_NOT_FOUND -> "IMAGE_NOT_FOUND"
       | Non_static_id s -> s
     let of_string =
       function
       | "SNAPSHOT_NOT_FOUND" -> SNAPSHOT_NOT_FOUND
+      | "GRANT_NOT_FOUND" -> GRANT_NOT_FOUND
       | "DEPENDENCY_RESOURCE_NOT_FOUND" -> DEPENDENCY_RESOURCE_NOT_FOUND
+      | "IMAGE_NOT_FOUND" -> IMAGE_NOT_FOUND
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -240,9 +246,9 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a tag."]
 module ValidationExceptionReason =
@@ -251,6 +257,7 @@ module ValidationExceptionReason =
       | INVALID_CUSTOMER_KEY 
       | INVALID_PAGE_TOKEN 
       | INVALID_BLOCK_TOKEN 
+      | INVALID_GRANT_TOKEN 
       | INVALID_SNAPSHOT_ID 
       | UNRELATED_SNAPSHOTS 
       | INVALID_BLOCK 
@@ -260,6 +267,8 @@ module ValidationExceptionReason =
       | INVALID_PARAMETER_VALUE 
       | INVALID_VOLUME_SIZE 
       | CONFLICTING_BLOCK_UPDATE 
+      | INVALID_IMAGE_ID 
+      | WRITE_REQUEST_TIMEOUT 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -267,6 +276,7 @@ module ValidationExceptionReason =
       | INVALID_CUSTOMER_KEY -> "INVALID_CUSTOMER_KEY"
       | INVALID_PAGE_TOKEN -> "INVALID_PAGE_TOKEN"
       | INVALID_BLOCK_TOKEN -> "INVALID_BLOCK_TOKEN"
+      | INVALID_GRANT_TOKEN -> "INVALID_GRANT_TOKEN"
       | INVALID_SNAPSHOT_ID -> "INVALID_SNAPSHOT_ID"
       | UNRELATED_SNAPSHOTS -> "UNRELATED_SNAPSHOTS"
       | INVALID_BLOCK -> "INVALID_BLOCK"
@@ -276,12 +286,15 @@ module ValidationExceptionReason =
       | INVALID_PARAMETER_VALUE -> "INVALID_PARAMETER_VALUE"
       | INVALID_VOLUME_SIZE -> "INVALID_VOLUME_SIZE"
       | CONFLICTING_BLOCK_UPDATE -> "CONFLICTING_BLOCK_UPDATE"
+      | INVALID_IMAGE_ID -> "INVALID_IMAGE_ID"
+      | WRITE_REQUEST_TIMEOUT -> "WRITE_REQUEST_TIMEOUT"
       | Non_static_id s -> s
     let of_string =
       function
       | "INVALID_CUSTOMER_KEY" -> INVALID_CUSTOMER_KEY
       | "INVALID_PAGE_TOKEN" -> INVALID_PAGE_TOKEN
       | "INVALID_BLOCK_TOKEN" -> INVALID_BLOCK_TOKEN
+      | "INVALID_GRANT_TOKEN" -> INVALID_GRANT_TOKEN
       | "INVALID_SNAPSHOT_ID" -> INVALID_SNAPSHOT_ID
       | "UNRELATED_SNAPSHOTS" -> UNRELATED_SNAPSHOTS
       | "INVALID_BLOCK" -> INVALID_BLOCK
@@ -291,6 +304,8 @@ module ValidationExceptionReason =
       | "INVALID_PARAMETER_VALUE" -> INVALID_PARAMETER_VALUE
       | "INVALID_VOLUME_SIZE" -> INVALID_VOLUME_SIZE
       | "CONFLICTING_BLOCK_UPDATE" -> CONFLICTING_BLOCK_UPDATE
+      | "INVALID_IMAGE_ID" -> INVALID_IMAGE_ID
+      | "WRITE_REQUEST_TIMEOUT" -> WRITE_REQUEST_TIMEOUT
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -323,9 +338,9 @@ module Block =
         (Option.map ~f:BlockIndex.of_xml) (Xml.child xml_arg0 "BlockIndex") in
       make ?blockToken ?blockIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let blockToken = field_map json "BlockToken" BlockToken.of_json in
-      let blockIndex = field_map json "BlockIndex" BlockIndex.of_json in
+    let of_json json__ =
+      let blockToken = field_map json__ "BlockToken" BlockToken.of_json in
+      let blockIndex = field_map json__ "BlockIndex" BlockIndex.of_json in
       make ?blockToken ?blockIndex ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -364,12 +379,12 @@ module ChangedBlock =
         (Option.map ~f:BlockIndex.of_xml) (Xml.child xml_arg0 "BlockIndex") in
       make ?secondBlockToken ?firstBlockToken ?blockIndex ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let secondBlockToken =
-        field_map json "SecondBlockToken" BlockToken.of_json in
+        field_map json__ "SecondBlockToken" BlockToken.of_json in
       let firstBlockToken =
-        field_map json "FirstBlockToken" BlockToken.of_json in
-      let blockIndex = field_map json "BlockIndex" BlockIndex.of_json in
+        field_map json__ "FirstBlockToken" BlockToken.of_json in
+      let blockIndex = field_map json__ "BlockIndex" BlockIndex.of_json in
       make ?secondBlockToken ?firstBlockToken ?blockIndex ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -379,28 +394,28 @@ module AccessDeniedException =
     type nonrec t =
       {
       message: ErrorMessage.t option ;
-      reason: AccessDeniedExceptionReason.t
+      reason: AccessDeniedExceptionReason.t option
         [@ocaml.doc "The reason for the exception."]}
-    let context_ = "AccessDeniedException"
-    let make ?message = fun ~reason -> fun () -> { message; reason }
+    let make ?message = fun ?reason -> fun () -> { message; reason }
     let to_value x =
       structure_to_value
         [("Message", (Option.map x.message ~f:ErrorMessage.to_value));
-        ("Reason", (Some (AccessDeniedExceptionReason.to_value x.reason)))]
+        ("Reason",
+          (Option.map x.reason ~f:AccessDeniedExceptionReason.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let reason =
-        AccessDeniedExceptionReason.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Reason") in
+        (Option.map ~f:AccessDeniedExceptionReason.of_xml)
+          (Xml.child xml_arg0 "Reason") in
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
-      make ~reason ?message ()
+      make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map_exn json "Reason" AccessDeniedExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      make ~reason ?message ()
+        field_map json__ "Reason" AccessDeniedExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "You do not have sufficient access to perform this action."]
@@ -431,8 +446,8 @@ module ConcurrentLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -451,8 +466,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -489,11 +504,12 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An internal error has occurred."]
+  end[@@ocaml.doc
+       "An internal error has occurred. For more information see Error retries."]
 module KmsKeyArn =
   struct
     type nonrec t = string
@@ -558,14 +574,14 @@ module RequestThrottledException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" RequestThrottledExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "Reason" RequestThrottledExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The number of API requests has exceed the maximum allowed API request throttling limit."]
+       "The number of API requests has exceeded the maximum allowed API request throttling limit for the snapshot. For more information see Error retries."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -588,13 +604,41 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" ResourceNotFoundExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "Reason" ResourceNotFoundExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource does not exist."]
+module SSEType =
+  struct
+    type nonrec t =
+      | Sse_ebs 
+      | Sse_kms 
+      | None 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Sse_ebs -> "sse-ebs"
+      | Sse_kms -> "sse-kms"
+      | None -> "none"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "sse-ebs" -> Sse_ebs
+      | "sse-kms" -> Sse_kms
+      | "none" -> None
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration SSEType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SSEType" j)
+    let to_json = simple_to_json to_value
+  end
 module ServiceQuotaExceededException =
   struct
     type nonrec t =
@@ -618,10 +662,10 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "Reason" ServiceQuotaExceededExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "Reason" ServiceQuotaExceededExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -678,6 +722,9 @@ module Tags =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -731,9 +778,10 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" ValidationExceptionReason.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let reason =
+        field_map json__ "Reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -883,6 +931,9 @@ module Blocks =
   struct
     type nonrec t = Block.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Block.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -943,6 +994,9 @@ module ChangedBlocks =
   struct
     type nonrec t = ChangedBlock.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangedBlock.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1020,7 +1074,8 @@ module StartSnapshotResponse =
         [@ocaml.doc "The ID of the parent snapshot."];
       kmsKeyArn: KmsKeyArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the Key Management Service (KMS) key used to encrypt the snapshot."]}
+          "The Amazon Resource Name (ARN) of the Key Management Service (KMS) key used to encrypt the snapshot."];
+      sseType: SSEType.t option [@ocaml.doc "Reserved for future use."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConcurrentLimitExceededException of
@@ -1042,19 +1097,21 @@ module StartSnapshotResponse =
                   fun ?tags ->
                     fun ?parentSnapshotId ->
                       fun ?kmsKeyArn ->
-                        fun () ->
-                          {
-                            description;
-                            snapshotId;
-                            ownerId;
-                            status;
-                            startTime;
-                            volumeSize;
-                            blockSize;
-                            tags;
-                            parentSnapshotId;
-                            kmsKeyArn
-                          }
+                        fun ?sseType ->
+                          fun () ->
+                            {
+                              description;
+                              snapshotId;
+                              ownerId;
+                              status;
+                              startTime;
+                              volumeSize;
+                              blockSize;
+                              tags;
+                              parentSnapshotId;
+                              kmsKeyArn;
+                              sseType
+                            }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1151,9 +1208,12 @@ module StartSnapshotResponse =
         ("Tags", (Option.map x.tags ~f:Tags.to_value));
         ("ParentSnapshotId",
           (Option.map x.parentSnapshotId ~f:SnapshotId.to_value));
-        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value))]
+        ("KmsKeyArn", (Option.map x.kmsKeyArn ~f:KmsKeyArn.to_value));
+        ("SseType", (Option.map x.sseType ~f:SSEType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sseType =
+        (Option.map ~f:SSEType.of_xml) (Xml.child xml_arg0 "SseType") in
       let kmsKeyArn =
         (Option.map ~f:KmsKeyArn.of_xml) (Xml.child xml_arg0 "KmsKeyArn") in
       let parentSnapshotId =
@@ -1174,26 +1234,27 @@ module StartSnapshotResponse =
         (Option.map ~f:SnapshotId.of_xml) (Xml.child xml_arg0 "SnapshotId") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
-      make ?kmsKeyArn ?parentSnapshotId ?tags ?blockSize ?volumeSize
+      make ?sseType ?kmsKeyArn ?parentSnapshotId ?tags ?blockSize ?volumeSize
         ?startTime ?status ?ownerId ?snapshotId ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
+    let of_json json__ =
+      let sseType = field_map json__ "SseType" SSEType.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
       let parentSnapshotId =
-        field_map json "ParentSnapshotId" SnapshotId.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
-      let blockSize = field_map json "BlockSize" BlockSize.of_json in
-      let volumeSize = field_map json "VolumeSize" VolumeSize.of_json in
-      let startTime = field_map json "StartTime" TimeStamp.of_json in
-      let status = field_map json "Status" Status.of_json in
-      let ownerId = field_map json "OwnerId" OwnerId.of_json in
-      let snapshotId = field_map json "SnapshotId" SnapshotId.of_json in
-      let description = field_map json "Description" Description.of_json in
-      make ?kmsKeyArn ?parentSnapshotId ?tags ?blockSize ?volumeSize
+        field_map json__ "ParentSnapshotId" SnapshotId.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
+      let blockSize = field_map json__ "BlockSize" BlockSize.of_json in
+      let volumeSize = field_map json__ "VolumeSize" VolumeSize.of_json in
+      let startTime = field_map json__ "StartTime" TimeStamp.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
+      let snapshotId = field_map json__ "SnapshotId" SnapshotId.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      make ?sseType ?kmsKeyArn ?parentSnapshotId ?tags ?blockSize ?volumeSize
         ?startTime ?status ?ownerId ?snapshotId ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon EBS snapshot. The new snapshot enters the pending state after the request completes. After creating the snapshot, use PutSnapshotBlock to write blocks of data to the snapshot."]
+       "Creates a new Amazon EBS snapshot. The new snapshot enters the pending state after the request completes. After creating the snapshot, use PutSnapshotBlock to write blocks of data to the snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module StartSnapshotRequest =
   struct
     type nonrec t =
@@ -1274,21 +1335,22 @@ module StartSnapshotRequest =
       make ?timeout ?kmsKeyArn ?encrypted ?clientToken ?description ?tags
         ?parentSnapshotId ~volumeSize ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeout = field_map json "Timeout" Timeout.of_json in
-      let kmsKeyArn = field_map json "KmsKeyArn" KmsKeyArn.of_json in
-      let encrypted = field_map json "Encrypted" Boolean.of_json in
-      let clientToken = field_map json "ClientToken" IdempotencyToken.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let timeout = field_map json__ "Timeout" Timeout.of_json in
+      let kmsKeyArn = field_map json__ "KmsKeyArn" KmsKeyArn.of_json in
+      let encrypted = field_map json__ "Encrypted" Boolean.of_json in
+      let clientToken =
+        field_map json__ "ClientToken" IdempotencyToken.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let parentSnapshotId =
-        field_map json "ParentSnapshotId" SnapshotId.of_json in
-      let volumeSize = field_map_exn json "VolumeSize" VolumeSize.of_json in
+        field_map json__ "ParentSnapshotId" SnapshotId.of_json in
+      let volumeSize = field_map_exn json__ "VolumeSize" VolumeSize.of_json in
       make ?timeout ?kmsKeyArn ?encrypted ?clientToken ?description ?tags
         ?parentSnapshotId ~volumeSize ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Amazon EBS snapshot. The new snapshot enters the pending state after the request completes. After creating the snapshot, use PutSnapshotBlock to write blocks of data to the snapshot."]
+       "Creates a new Amazon EBS snapshot. The new snapshot enters the pending state after the request completes. After creating the snapshot, use PutSnapshotBlock to write blocks of data to the snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module PutSnapshotBlockResponse =
   struct
     type nonrec t =
@@ -1401,14 +1463,14 @@ module PutSnapshotBlockResponse =
         (Option.map ~f:Checksum.of_xml) (Xml.child xml_arg0 "x-amz-Checksum") in
       make ?checksumAlgorithm ?checksum ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checksumAlgorithm =
-        field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
-      let checksum = field_map json "Checksum" Checksum.of_json in
+        field_map json__ "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
+      let checksum = field_map json__ "Checksum" Checksum.of_json in
       make ?checksumAlgorithm ?checksum ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes a block of data to a snapshot. If the specified block contains data, the existing data is overwritten. The target snapshot must be in the pending state. Data written to a snapshot must be aligned with 512-KiB sectors."]
+       "Writes a block of data to a snapshot. If the specified block contains data, the existing data is overwritten. The target snapshot must be in the pending state. Data written to a snapshot must be aligned with 512-KiB sectors. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module PutSnapshotBlockRequest =
   struct
     type nonrec t =
@@ -1510,20 +1572,20 @@ module PutSnapshotBlockRequest =
       make ~checksumAlgorithm ~checksum ?progress ~dataLength ~blockData
         ~blockIndex ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checksumAlgorithm =
-        field_map_exn json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
-      let checksum = field_map_exn json "Checksum" Checksum.of_json in
-      let progress = field_map json "Progress" Progress.of_json in
-      let dataLength = field_map_exn json "DataLength" DataLength.of_json in
-      let blockData = field_map_exn json "BlockData" BlockData.of_json in
-      let blockIndex = field_map_exn json "BlockIndex" BlockIndex.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+        field_map_exn json__ "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
+      let checksum = field_map_exn json__ "Checksum" Checksum.of_json in
+      let progress = field_map json__ "Progress" Progress.of_json in
+      let dataLength = field_map_exn json__ "DataLength" DataLength.of_json in
+      let blockData = field_map_exn json__ "BlockData" BlockData.of_json in
+      let blockIndex = field_map_exn json__ "BlockIndex" BlockIndex.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ~checksumAlgorithm ~checksum ?progress ~dataLength ~blockData
         ~blockIndex ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Writes a block of data to a snapshot. If the specified block contains data, the existing data is overwritten. The target snapshot must be in the pending state. Data written to a snapshot must be aligned with 512-KiB sectors."]
+       "Writes a block of data to a snapshot. If the specified block contains data, the existing data is overwritten. The target snapshot must be in the pending state. Data written to a snapshot must be aligned with 512-KiB sectors. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module ListSnapshotBlocksResponse =
   struct
     type nonrec t =
@@ -1642,16 +1704,16 @@ module ListSnapshotBlocksResponse =
         (Option.map ~f:Blocks.of_xml) (Xml.child xml_arg0 "Blocks") in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?blocks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PageToken.of_json in
-      let blockSize = field_map json "BlockSize" BlockSize.of_json in
-      let volumeSize = field_map json "VolumeSize" VolumeSize.of_json in
-      let expiryTime = field_map json "ExpiryTime" TimeStamp.of_json in
-      let blocks = field_map json "Blocks" Blocks.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
+      let blockSize = field_map json__ "BlockSize" BlockSize.of_json in
+      let volumeSize = field_map json__ "VolumeSize" VolumeSize.of_json in
+      let expiryTime = field_map json__ "ExpiryTime" TimeStamp.of_json in
+      let blocks = field_map json__ "Blocks" Blocks.of_json in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?blocks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the blocks in an Amazon Elastic Block Store snapshot."]
+       "Returns information about the blocks in an Amazon Elastic Block Store snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module ListSnapshotBlocksRequest =
   struct
     type nonrec t =
@@ -1696,16 +1758,16 @@ module ListSnapshotBlocksRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ?startingBlockIndex ?maxResults ?nextToken ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startingBlockIndex =
-        field_map json "StartingBlockIndex" BlockIndex.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PageToken.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+        field_map json__ "StartingBlockIndex" BlockIndex.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ?startingBlockIndex ?maxResults ?nextToken ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the blocks in an Amazon Elastic Block Store snapshot."]
+       "Returns information about the blocks in an Amazon Elastic Block Store snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module ListChangedBlocksResponse =
   struct
     type nonrec t =
@@ -1827,17 +1889,17 @@ module ListChangedBlocksResponse =
           (Xml.child xml_arg0 "ChangedBlocks") in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?changedBlocks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PageToken.of_json in
-      let blockSize = field_map json "BlockSize" BlockSize.of_json in
-      let volumeSize = field_map json "VolumeSize" VolumeSize.of_json in
-      let expiryTime = field_map json "ExpiryTime" TimeStamp.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
+      let blockSize = field_map json__ "BlockSize" BlockSize.of_json in
+      let volumeSize = field_map json__ "VolumeSize" VolumeSize.of_json in
+      let expiryTime = field_map json__ "ExpiryTime" TimeStamp.of_json in
       let changedBlocks =
-        field_map json "ChangedBlocks" ChangedBlocks.of_json in
+        field_map json__ "ChangedBlocks" ChangedBlocks.of_json in
       make ?nextToken ?blockSize ?volumeSize ?expiryTime ?changedBlocks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the blocks that are different between two Amazon Elastic Block Store snapshots of the same volume/snapshot lineage."]
+       "Returns information about the blocks that are different between two Amazon Elastic Block Store snapshots of the same volume/snapshot lineage. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module ListChangedBlocksRequest =
   struct
     type nonrec t =
@@ -1898,20 +1960,20 @@ module ListChangedBlocksRequest =
       make ?startingBlockIndex ?maxResults ?nextToken ~secondSnapshotId
         ?firstSnapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startingBlockIndex =
-        field_map json "StartingBlockIndex" BlockIndex.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" PageToken.of_json in
+        field_map json__ "StartingBlockIndex" BlockIndex.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" PageToken.of_json in
       let secondSnapshotId =
-        field_map_exn json "SecondSnapshotId" SnapshotId.of_json in
+        field_map_exn json__ "SecondSnapshotId" SnapshotId.of_json in
       let firstSnapshotId =
-        field_map json "FirstSnapshotId" SnapshotId.of_json in
+        field_map json__ "FirstSnapshotId" SnapshotId.of_json in
       make ?startingBlockIndex ?maxResults ?nextToken ~secondSnapshotId
         ?firstSnapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about the blocks that are different between two Amazon Elastic Block Store snapshots of the same volume/snapshot lineage."]
+       "Returns information about the blocks that are different between two Amazon Elastic Block Store snapshots of the same volume/snapshot lineage. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module GetSnapshotBlockResponse =
   struct
     type nonrec t =
@@ -2043,16 +2105,16 @@ module GetSnapshotBlockResponse =
           (Xml.child xml_arg0 "x-amz-Data-Length") in
       make ?checksumAlgorithm ?checksum ?blockData ?dataLength ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checksumAlgorithm =
-        field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
-      let checksum = field_map json "Checksum" Checksum.of_json in
-      let blockData = field_map json "BlockData" BlockData.of_json in
-      let dataLength = field_map json "DataLength" DataLength.of_json in
+        field_map json__ "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
+      let checksum = field_map json__ "Checksum" Checksum.of_json in
+      let blockData = field_map json__ "BlockData" BlockData.of_json in
+      let dataLength = field_map json__ "DataLength" DataLength.of_json in
       make ?checksumAlgorithm ?checksum ?blockData ?dataLength ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the data in a block in an Amazon Elastic Block Store snapshot."]
+       "Returns the data in a block in an Amazon Elastic Block Store snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module GetSnapshotBlockRequest =
   struct
     type nonrec t =
@@ -2088,14 +2150,14 @@ module GetSnapshotBlockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "snapshotId") in
       make ~blockToken ~blockIndex ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let blockToken = field_map_exn json "BlockToken" BlockToken.of_json in
-      let blockIndex = field_map_exn json "BlockIndex" BlockIndex.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+    let of_json json__ =
+      let blockToken = field_map_exn json__ "BlockToken" BlockToken.of_json in
+      let blockIndex = field_map_exn json__ "BlockIndex" BlockIndex.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ~blockToken ~blockIndex ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the data in a block in an Amazon Elastic Block Store snapshot."]
+       "Returns the data in a block in an Amazon Elastic Block Store snapshot. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module CompleteSnapshotResponse =
   struct
     type nonrec t =
@@ -2185,11 +2247,12 @@ module CompleteSnapshotResponse =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in make ?status ()
+    let of_json json__ =
+      let status = field_map json__ "Status" Status.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Seals and completes the snapshot after all of the required blocks of data have been written to it. Completing the snapshot changes the status to completed. You cannot write new blocks to a snapshot after it has been completed."]
+       "Seals and completes the snapshot after all of the required blocks of data have been written to it. Completing the snapshot changes the status to completed. You cannot write new blocks to a snapshot after it has been completed. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]
 module CompleteSnapshotRequest =
   struct
     type nonrec t =
@@ -2252,18 +2315,18 @@ module CompleteSnapshotRequest =
       make ?checksumAggregationMethod ?checksumAlgorithm ?checksum
         ~changedBlocksCount ~snapshotId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let checksumAggregationMethod =
-        field_map json "ChecksumAggregationMethod"
+        field_map json__ "ChecksumAggregationMethod"
           ChecksumAggregationMethod.of_json in
       let checksumAlgorithm =
-        field_map json "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
-      let checksum = field_map json "Checksum" Checksum.of_json in
+        field_map json__ "ChecksumAlgorithm" ChecksumAlgorithm.of_json in
+      let checksum = field_map json__ "Checksum" Checksum.of_json in
       let changedBlocksCount =
-        field_map_exn json "ChangedBlocksCount" ChangedBlocksCount.of_json in
-      let snapshotId = field_map_exn json "SnapshotId" SnapshotId.of_json in
+        field_map_exn json__ "ChangedBlocksCount" ChangedBlocksCount.of_json in
+      let snapshotId = field_map_exn json__ "SnapshotId" SnapshotId.of_json in
       make ?checksumAggregationMethod ?checksumAlgorithm ?checksum
         ~changedBlocksCount ~snapshotId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Seals and completes the snapshot after all of the required blocks of data have been written to it. Completing the snapshot changes the status to completed. You cannot write new blocks to a snapshot after it has been completed."]
+       "Seals and completes the snapshot after all of the required blocks of data have been written to it. Completing the snapshot changes the status to completed. You cannot write new blocks to a snapshot after it has been completed. You should always retry requests that receive server (5xx) error responses, and ThrottlingException and RequestThrottledException client error responses. For more information see Error retries in the Amazon Elastic Compute Cloud User Guide."]

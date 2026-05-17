@@ -66,7 +66,7 @@ let batch_delete_image =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and registryId =
-         flag "registry-id" (optional string) ~doc:"STRING RegistryId"
+         flag "registry-id" (optional string) ~doc:"STRING RegistryIdOrAlias"
        and repositoryName =
          flag "repository-name" (required string)
            ~doc:"STRING RepositoryName"

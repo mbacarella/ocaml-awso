@@ -89,6 +89,8 @@ let create_cluster =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and resources =
+         flag "resources" (optional json_arg) ~doc:"JSON JobResource"
        and onDeviceServiceConfiguration =
          flag "on-device-service-configuration" (optional json_arg)
            ~doc:"JSON OnDeviceServiceConfiguration"
@@ -96,6 +98,8 @@ let create_cluster =
          flag "description" (optional string) ~doc:"STRING String"
        and kmsKeyARN =
          flag "kms-key-a-r-n" (optional string) ~doc:"STRING KmsKeyARN"
+       and roleARN =
+         flag "role-a-r-n" (optional string) ~doc:"STRING RoleARN"
        and notification =
          flag "notification" (optional json_arg) ~doc:"JSON Notification"
        and forwardingAddressId =
@@ -106,13 +110,20 @@ let create_cluster =
        and remoteManagement =
          flag "remote-management" (optional json_arg)
            ~doc:"JSON RemoteManagement"
+       and initialClusterSize =
+         flag "initial-cluster-size" (optional int)
+           ~doc:"INT InitialClusterSize"
+       and forceCreateJobs =
+         flag "force-create-jobs" (optional bool) ~doc:"BOOL Boolean"
+       and longTermPricingIds =
+         flag "long-term-pricing-ids" (optional json_arg)
+           ~doc:"JSON LongTermPricingIdList"
+       and snowballCapacityPreference =
+         flag "snowball-capacity-preference" (optional json_arg)
+           ~doc:"JSON SnowballCapacity"
        and jobType = flag "job-type" (required json_arg) ~doc:"JSON JobType"
-       and resources =
-         flag "resources" (required json_arg) ~doc:"JSON JobResource"
        and addressId =
          flag "address-id" (required string) ~doc:"STRING AddressId"
-       and roleARN =
-         flag "role-a-r-n" (required string) ~doc:"STRING RoleARN"
        and snowballType =
          flag "snowball-type" (required json_arg) ~doc:"JSON SnowballType"
        and shippingOption =
@@ -122,20 +133,26 @@ let create_cluster =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cluster
            (Values.CreateClusterRequest.make
+              ?resources:(Option.map ~f:Values.JobResource.of_json resources)
               ?onDeviceServiceConfiguration:(Option.map
                                                ~f:Values.OnDeviceServiceConfiguration.of_json
                                                onDeviceServiceConfiguration)
-              ?description ?kmsKeyARN
+              ?description ?kmsKeyARN ?roleARN
               ?notification:(Option.map ~f:Values.Notification.of_json
                                notification) ?forwardingAddressId
               ?taxDocuments:(Option.map ~f:Values.TaxDocuments.of_json
                                taxDocuments)
               ?remoteManagement:(Option.map
                                    ~f:Values.RemoteManagement.of_json
-                                   remoteManagement)
-              ~jobType:(Values.JobType.of_json jobType)
-              ~resources:(Values.JobResource.of_json resources) ~addressId
-              ~roleARN
+                                   remoteManagement) ?initialClusterSize
+              ?forceCreateJobs
+              ?longTermPricingIds:(Option.map
+                                     ~f:Values.LongTermPricingIdList.of_json
+                                     longTermPricingIds)
+              ?snowballCapacityPreference:(Option.map
+                                             ~f:Values.SnowballCapacity.of_json
+                                             snowballCapacityPreference)
+              ~jobType:(Values.JobType.of_json jobType) ~addressId
               ~snowballType:(Values.SnowballType.of_json snowballType)
               ~shippingOption:(Values.ShippingOption.of_json shippingOption)
               ()) (Some Values.CreateClusterResult.to_json)
@@ -189,7 +206,11 @@ let create_job =
            ~doc:"JSON RemoteManagement"
        and longTermPricingId =
          flag "long-term-pricing-id" (optional string)
-           ~doc:"STRING LongTermPricingId" in
+           ~doc:"STRING LongTermPricingId"
+       and impactLevel =
+         flag "impact-level" (optional json_arg) ~doc:"JSON ImpactLevel"
+       and pickupDetails =
+         flag "pickup-details" (optional json_arg) ~doc:"JSON PickupDetails" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_job
@@ -216,7 +237,11 @@ let create_job =
                                       deviceConfiguration)
               ?remoteManagement:(Option.map
                                    ~f:Values.RemoteManagement.of_json
-                                   remoteManagement) ?longTermPricingId ())
+                                   remoteManagement) ?longTermPricingId
+              ?impactLevel:(Option.map ~f:Values.ImpactLevel.of_json
+                              impactLevel)
+              ?pickupDetails:(Option.map ~f:Values.PickupDetails.of_json
+                                pickupDetails) ())
            (Some Values.CreateJobResult.to_json)
            (Some Values.CreateJobResult.error_to_json)])
 let create_long_term_pricing =
@@ -232,20 +257,19 @@ let create_long_term_pricing =
        and isLongTermPricingAutoRenew =
          flag "is-long-term-pricing-auto-renew" (optional bool)
            ~doc:"BOOL JavaBoolean"
-       and snowballType =
-         flag "snowball-type" (optional json_arg) ~doc:"JSON SnowballType"
        and longTermPricingType =
          flag "long-term-pricing-type" (required json_arg)
-           ~doc:"JSON LongTermPricingType" in
+           ~doc:"JSON LongTermPricingType"
+       and snowballType =
+         flag "snowball-type" (required json_arg) ~doc:"JSON SnowballType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_long_term_pricing
            (Values.CreateLongTermPricingRequest.make
               ?isLongTermPricingAutoRenew
-              ?snowballType:(Option.map ~f:Values.SnowballType.of_json
-                               snowballType)
               ~longTermPricingType:(Values.LongTermPricingType.of_json
-                                      longTermPricingType) ())
+                                      longTermPricingType)
+              ~snowballType:(Values.SnowballType.of_json snowballType) ())
            (Some Values.CreateLongTermPricingResult.to_json)
            (Some Values.CreateLongTermPricingResult.error_to_json)])
 let create_return_shipping_label =
@@ -527,6 +551,55 @@ let list_long_term_pricing =
            (Values.ListLongTermPricingRequest.make ?maxResults ?nextToken ())
            (Some Values.ListLongTermPricingResult.to_json)
            (Some Values.ListLongTermPricingResult.error_to_json)])
+let list_pickup_locations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_pickup_locations
+           (Values.ListPickupLocationsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListPickupLocationsResult.to_json)
+           (Some Values.ListPickupLocationsResult.error_to_json)])
+let list_service_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and dependentServices =
+         flag "dependent-services" (optional json_arg)
+           ~doc:"JSON DependentServiceList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT ListLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and serviceName =
+         flag "service-name" (required json_arg) ~doc:"JSON ServiceName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_service_versions
+           (Values.ListServiceVersionsRequest.make
+              ?dependentServices:(Option.map
+                                    ~f:Values.DependentServiceList.of_json
+                                    dependentServices) ?maxResults ?nextToken
+              ~serviceName:(Values.ServiceName.of_json serviceName) ())
+           (Some Values.ListServiceVersionsResult.to_json)
+           (Some Values.ListServiceVersionsResult.error_to_json)])
 let update_cluster =
   Command.async ~summary:""
     ([%map_open.Command
@@ -605,6 +678,8 @@ let update_job =
        and forwardingAddressId =
          flag "forwarding-address-id" (optional string)
            ~doc:"STRING AddressId"
+       and pickupDetails =
+         flag "pickup-details" (optional json_arg) ~doc:"JSON PickupDetails"
        and jobId = flag "job-id" (required string) ~doc:"STRING JobId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -622,7 +697,9 @@ let update_job =
               ?snowballCapacityPreference:(Option.map
                                              ~f:Values.SnowballCapacity.of_json
                                              snowballCapacityPreference)
-              ?forwardingAddressId ~jobId ())
+              ?forwardingAddressId
+              ?pickupDetails:(Option.map ~f:Values.PickupDetails.of_json
+                                pickupDetails) ~jobId ())
            (Some Values.UpdateJobResult.to_json)
            (Some Values.UpdateJobResult.error_to_json)])
 let update_job_shipment_state =
@@ -694,6 +771,8 @@ let main =
     ("list-compatible-images", list_compatible_images);
     ("list-jobs", list_jobs);
     ("list-long-term-pricing", list_long_term_pricing);
+    ("list-pickup-locations", list_pickup_locations);
+    ("list-service-versions", list_service_versions);
     ("update-cluster", update_cluster);
     ("update-job", update_job);
     ("update-job-shipment-state", update_job_shipment_state);

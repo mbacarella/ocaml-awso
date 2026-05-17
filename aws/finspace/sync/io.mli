@@ -6,22 +6,203 @@ val create_environment :
       CreateEnvironmentRequest.t ->
         (CreateEnvironmentResponse.t, CreateEnvironmentResponse.error)
           Result.t
+val create_kx_changeset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxChangesetRequest.t ->
+        (CreateKxChangesetResponse.t, CreateKxChangesetResponse.error)
+          Result.t
+val create_kx_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxClusterRequest.t ->
+        (CreateKxClusterResponse.t, CreateKxClusterResponse.error) Result.t
+val create_kx_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxDatabaseRequest.t ->
+        (CreateKxDatabaseResponse.t, CreateKxDatabaseResponse.error) Result.t
+val create_kx_dataview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxDataviewRequest.t ->
+        (CreateKxDataviewResponse.t, CreateKxDataviewResponse.error) Result.t
+val create_kx_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxEnvironmentRequest.t ->
+        (CreateKxEnvironmentResponse.t, CreateKxEnvironmentResponse.error)
+          Result.t
+val create_kx_scaling_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxScalingGroupRequest.t ->
+        (CreateKxScalingGroupResponse.t, CreateKxScalingGroupResponse.error)
+          Result.t
+val create_kx_user :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxUserRequest.t ->
+        (CreateKxUserResponse.t, CreateKxUserResponse.error) Result.t
+val create_kx_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKxVolumeRequest.t ->
+        (CreateKxVolumeResponse.t, CreateKxVolumeResponse.error) Result.t
 val delete_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteEnvironmentRequest.t ->
         (DeleteEnvironmentResponse.t, DeleteEnvironmentResponse.error)
           Result.t
+val delete_kx_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxClusterRequest.t ->
+        (DeleteKxClusterResponse.t, DeleteKxClusterResponse.error) Result.t
+val delete_kx_cluster_node :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxClusterNodeRequest.t ->
+        (DeleteKxClusterNodeResponse.t, DeleteKxClusterNodeResponse.error)
+          Result.t
+val delete_kx_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxDatabaseRequest.t ->
+        (DeleteKxDatabaseResponse.t, DeleteKxDatabaseResponse.error) Result.t
+val delete_kx_dataview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxDataviewRequest.t ->
+        (DeleteKxDataviewResponse.t, DeleteKxDataviewResponse.error) Result.t
+val delete_kx_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxEnvironmentRequest.t ->
+        (DeleteKxEnvironmentResponse.t, DeleteKxEnvironmentResponse.error)
+          Result.t
+val delete_kx_scaling_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxScalingGroupRequest.t ->
+        (DeleteKxScalingGroupResponse.t, DeleteKxScalingGroupResponse.error)
+          Result.t
+val delete_kx_user :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxUserRequest.t ->
+        (DeleteKxUserResponse.t, DeleteKxUserResponse.error) Result.t
+val delete_kx_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKxVolumeRequest.t ->
+        (DeleteKxVolumeResponse.t, DeleteKxVolumeResponse.error) Result.t
 val get_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetEnvironmentRequest.t ->
         (GetEnvironmentResponse.t, GetEnvironmentResponse.error) Result.t
+val get_kx_changeset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxChangesetRequest.t ->
+        (GetKxChangesetResponse.t, GetKxChangesetResponse.error) Result.t
+val get_kx_cluster :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxClusterRequest.t ->
+        (GetKxClusterResponse.t, GetKxClusterResponse.error) Result.t
+val get_kx_connection_string :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxConnectionStringRequest.t ->
+        (GetKxConnectionStringResponse.t,
+          GetKxConnectionStringResponse.error) Result.t
+val get_kx_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxDatabaseRequest.t ->
+        (GetKxDatabaseResponse.t, GetKxDatabaseResponse.error) Result.t
+val get_kx_dataview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxDataviewRequest.t ->
+        (GetKxDataviewResponse.t, GetKxDataviewResponse.error) Result.t
+val get_kx_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxEnvironmentRequest.t ->
+        (GetKxEnvironmentResponse.t, GetKxEnvironmentResponse.error) Result.t
+val get_kx_scaling_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxScalingGroupRequest.t ->
+        (GetKxScalingGroupResponse.t, GetKxScalingGroupResponse.error)
+          Result.t
+val get_kx_user :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxUserRequest.t ->
+        (GetKxUserResponse.t, GetKxUserResponse.error) Result.t
+val get_kx_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetKxVolumeRequest.t ->
+        (GetKxVolumeResponse.t, GetKxVolumeResponse.error) Result.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListEnvironmentsRequest.t ->
         (ListEnvironmentsResponse.t, ListEnvironmentsResponse.error) Result.t
+val list_kx_changesets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxChangesetsRequest.t ->
+        (ListKxChangesetsResponse.t, ListKxChangesetsResponse.error) Result.t
+val list_kx_cluster_nodes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxClusterNodesRequest.t ->
+        (ListKxClusterNodesResponse.t, ListKxClusterNodesResponse.error)
+          Result.t
+val list_kx_clusters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxClustersRequest.t ->
+        (ListKxClustersResponse.t, ListKxClustersResponse.error) Result.t
+val list_kx_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxDatabasesRequest.t ->
+        (ListKxDatabasesResponse.t, ListKxDatabasesResponse.error) Result.t
+val list_kx_dataviews :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxDataviewsRequest.t ->
+        (ListKxDataviewsResponse.t, ListKxDataviewsResponse.error) Result.t
+val list_kx_environments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxEnvironmentsRequest.t ->
+        (ListKxEnvironmentsResponse.t, ListKxEnvironmentsResponse.error)
+          Result.t
+val list_kx_scaling_groups :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxScalingGroupsRequest.t ->
+        (ListKxScalingGroupsResponse.t, ListKxScalingGroupsResponse.error)
+          Result.t
+val list_kx_users :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxUsersRequest.t ->
+        (ListKxUsersResponse.t, ListKxUsersResponse.error) Result.t
+val list_kx_volumes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKxVolumesRequest.t ->
+        (ListKxVolumesResponse.t, ListKxVolumesResponse.error) Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -44,3 +225,47 @@ val update_environment :
       UpdateEnvironmentRequest.t ->
         (UpdateEnvironmentResponse.t, UpdateEnvironmentResponse.error)
           Result.t
+val update_kx_cluster_code_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxClusterCodeConfigurationRequest.t ->
+        (UpdateKxClusterCodeConfigurationResponse.t,
+          UpdateKxClusterCodeConfigurationResponse.error) Result.t
+val update_kx_cluster_databases :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxClusterDatabasesRequest.t ->
+        (UpdateKxClusterDatabasesResponse.t,
+          UpdateKxClusterDatabasesResponse.error) Result.t
+val update_kx_database :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxDatabaseRequest.t ->
+        (UpdateKxDatabaseResponse.t, UpdateKxDatabaseResponse.error) Result.t
+val update_kx_dataview :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxDataviewRequest.t ->
+        (UpdateKxDataviewResponse.t, UpdateKxDataviewResponse.error) Result.t
+val update_kx_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxEnvironmentRequest.t ->
+        (UpdateKxEnvironmentResponse.t, UpdateKxEnvironmentResponse.error)
+          Result.t
+val update_kx_environment_network :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxEnvironmentNetworkRequest.t ->
+        (UpdateKxEnvironmentNetworkResponse.t,
+          UpdateKxEnvironmentNetworkResponse.error) Result.t
+val update_kx_user :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxUserRequest.t ->
+        (UpdateKxUserResponse.t, UpdateKxUserResponse.error) Result.t
+val update_kx_volume :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKxVolumeRequest.t ->
+        (UpdateKxVolumeResponse.t, UpdateKxVolumeResponse.error) Result.t

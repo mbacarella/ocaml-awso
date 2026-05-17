@@ -39,5 +39,9 @@ let request_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RequestCertificate input
 let resend_validation_email ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ResendValidationEmail input
+let revoke_certificate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.RevokeCertificate input
+let search_certificates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchCertificates input
 let update_certificate_options ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateCertificateOptions input

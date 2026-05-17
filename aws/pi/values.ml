@@ -25,53 +25,58 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
-module String_ =
+module AcceptLanguage =
   struct
-    type nonrec t = string
-    let context_ = "String"
+    type nonrec t =
+      | EN_US 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | EN_US -> "EN_US" | Non_static_id s -> s
+    let of_string = function | "EN_US" -> EN_US | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AcceptLanguage" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AcceptLanguage" j)
+    let to_json = simple_to_json to_value
+  end
+module SanitizedString =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "A generic string type that forbids characters that could expose our service (or services downstream) to security risks around injections."]
+    let context_ = "SanitizedString"
     let make i =
       let open Result in
         ok_or_failwith
           ((check_string_min i ~min:0) >>=
              (fun () ->
                 (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+                  (fun () ->
+                     check_pattern i ~pattern:"^[a-zA-Z0-9-_\\.:/*)( ]+$")));
         i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"String" j
+    let of_json j = string_of_json ~kind:"SanitizedString" j
     let to_json = simple_to_json to_value
-  end
-module DimensionDetail =
+  end[@@ocaml.doc
+       "A generic string type that forbids characters that could expose our service (or services downstream) to security risks around injections."]
+module AdditionalMetricsList =
   struct
-    type nonrec t =
-      {
-      identifier: String_.t option
-        [@ocaml.doc "The identifier of a dimension."]}
-    let make ?identifier = fun () -> { identifier }
-    let to_value x =
-      structure_to_value
-        [("Identifier", (Option.map x.identifier ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let identifier =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
-      make ?identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map json "Identifier" String_.of_json in
-      make ?identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The information about a dimension."]
-module DimensionDetailList =
-  struct
-    type nonrec t = DimensionDetail.t list
-    let make i = i
+    type nonrec t = SanitizedString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:DimensionDetail.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:SanitizedString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -85,36 +90,11 @@ module DimensionDetailList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:DimensionDetail.of_xml)
+                     | _ -> true))) ~f:SanitizedString.of_xml)
     let of_json j =
-      list_of_json ~kind:"DimensionDetailList"
-        ~of_json:DimensionDetail.of_json j
+      list_of_json ~kind:"AdditionalMetricsList"
+        ~of_json:SanitizedString.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module Double =
-  struct
-    type nonrec t = float
-    let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
-  end
-module ISOTimestamp =
-  struct
-    type nonrec t = string
-    let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
-    let to_json = simple_to_json to_value
   end
 module RequestString =
   struct
@@ -136,369 +116,17 @@ module RequestString =
     let of_json j = string_of_json ~kind:"RequestString" j
     let to_json = simple_to_json to_value
   end
-module DimensionGroupDetail =
+module Double =
   struct
-    type nonrec t =
-      {
-      group: String_.t option [@ocaml.doc "The name of the dimension group."];
-      dimensions: DimensionDetailList.t option
-        [@ocaml.doc "The dimensions within a dimension group."]}
-    let make ?group = fun ?dimensions -> fun () -> { group; dimensions }
-    let to_value x =
-      structure_to_value
-        [("Group", (Option.map x.group ~f:String_.to_value));
-        ("Dimensions",
-          (Option.map x.dimensions ~f:DimensionDetailList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dimensions =
-        (Option.map ~f:DimensionDetailList.of_xml)
-          (Xml.child xml_arg0 "Dimensions") in
-      let group = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Group") in
-      make ?dimensions ?group ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions =
-        field_map json "Dimensions" DimensionDetailList.of_json in
-      let group = field_map json "Group" String_.of_json in
-      make ?dimensions ?group ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Information about dimensions within a dimension group."]
-module DataPoint =
-  struct
-    type nonrec t =
-      {
-      timestamp: ISOTimestamp.t
-        [@ocaml.doc
-          "The time, in epoch format, associated with a particular Value."];
-      value: Double.t
-        [@ocaml.doc
-          "The actual value associated with a particular Timestamp."]}
-    let context_ = "DataPoint"
-    let make ~timestamp = fun ~value -> fun () -> { timestamp; value }
-    let to_value x =
-      structure_to_value
-        [("Timestamp", (Some (ISOTimestamp.to_value x.timestamp)));
-        ("Value", (Some (Double.to_value x.value)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let value =
-        Double.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let timestamp =
-        ISOTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Timestamp") in
-      make ~value ~timestamp ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" Double.of_json in
-      let timestamp = field_map_exn json "Timestamp" ISOTimestamp.of_json in
-      make ~value ~timestamp ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A timestamp, and a single numerical value, which together represent a measurement at a particular point in time."]
-module DimensionMap =
-  struct
-    type nonrec t = (RequestString.t * RequestString.t) list
+    type nonrec t = float
     let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((RequestString.of_string chopped),
-                              (RequestString.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (RequestString.to_value x) |>
-                    (fun x -> (RequestString.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
+    let of_string = Float.of_string
+    let to_value x = `Double x
     let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:RequestString.of_string
-        ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Limit =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
+    let to_header x = Stdlib.Float.to_string x
     let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Limit" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module RequestStringList =
-  struct
-    type nonrec t = RequestString.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:RequestString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RequestString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"RequestStringList" ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Description =
-  struct
-    type nonrec t = string
-    let context_ = "Description"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:2048) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Description" j
-    let to_json = simple_to_json to_value
-  end
-module DimensionGroupDetailList =
-  struct
-    type nonrec t = DimensionGroupDetail.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DimensionGroupDetail.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DimensionGroupDetail.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DimensionGroupDetailList"
-        ~of_json:DimensionGroupDetail.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DataPointsList =
-  struct
-    type nonrec t = DataPoint.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DataPoint.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DataPoint.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DataPointsList" ~of_json:DataPoint.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ResponseResourceMetricKey =
-  struct
-    type nonrec t =
-      {
-      metric: String_.t
-        [@ocaml.doc
-          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. The counter metrics listed in Performance Insights operating system counters in the Amazon Aurora User Guide. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
-      dimensions: DimensionMap.t option
-        [@ocaml.doc "The valid dimensions for the metric."]}
-    let context_ = "ResponseResourceMetricKey"
-    let make ?dimensions = fun ~metric -> fun () -> { dimensions; metric }
-    let to_value x =
-      structure_to_value
-        [("Metric", (Some (String_.to_value x.metric)));
-        ("Dimensions", (Option.map x.dimensions ~f:DimensionMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dimensions =
-        (Option.map ~f:DimensionMap.of_xml) (Xml.child xml_arg0 "Dimensions") in
-      let metric =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
-      make ?dimensions ~metric ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions = field_map json "Dimensions" DimensionMap.of_json in
-      let metric = field_map_exn json "Metric" String_.of_json in
-      make ?dimensions ~metric ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object describing a Performance Insights metric and one or more dimensions for that metric."]
-module DimensionGroup =
-  struct
-    type nonrec t =
-      {
-      group: RequestString.t
-        [@ocaml.doc
-          "The name of the dimension group. Valid values are as follows: db - The name of the database to which the client is connected. The following values are permitted: Aurora PostgreSQL Amazon RDS PostgreSQL Aurora MySQL Amazon RDS MySQL Amazon RDS MariaDB Amazon DocumentDB db.application - The name of the application that is connected to the database. The following values are permitted: Aurora PostgreSQL Amazon RDS PostgreSQL Amazon DocumentDB db.host - The host name of the connected client (all engines). db.query - The query that is currently running (only Amazon DocumentDB). db.query_tokenized - The digest query (only Amazon DocumentDB). db.session_type - The type of the current session (only Aurora PostgreSQL and RDS PostgreSQL). db.sql - The text of the SQL statement that is currently running (all engines except Amazon DocumentDB). db.sql_tokenized - The SQL digest (all engines except Amazon DocumentDB). db.user - The user logged in to the database (all engines except Amazon DocumentDB). db.wait_event - The event for which the database backend is waiting (all engines except Amazon DocumentDB). db.wait_event_type - The type of event for which the database backend is waiting (all engines except Amazon DocumentDB). db.wait_state - The event for which the database backend is waiting (only Amazon DocumentDB)."];
-      dimensions: RequestStringList.t option
-        [@ocaml.doc
-          "A list of specific dimensions from a dimension group. If this parameter is not present, then it signifies that all of the dimensions in the group were requested, or are present in the response. Valid values for elements in the Dimensions array are: db.application.name - The name of the application that is connected to the database. Valid values are as follows: Aurora PostgreSQL Amazon RDS PostgreSQL Amazon DocumentDB db.host.id - The host ID of the connected client (all engines). db.host.name - The host name of the connected client (all engines). db.name - The name of the database to which the client is connected. Valid values are as follows: Aurora PostgreSQL Amazon RDS PostgreSQL Aurora MySQL Amazon RDS MySQL Amazon RDS MariaDB Amazon DocumentDB db.query.id - The query ID generated by Performance Insights (only Amazon DocumentDB). db.query.db_id - The query ID generated by the database (only Amazon DocumentDB). db.query.statement - The text of the query that is being run (only Amazon DocumentDB). db.query.tokenized_id db.query.tokenized.id - The query digest ID generated by Performance Insights (only Amazon DocumentDB). db.query.tokenized.db_id - The query digest ID generated by Performance Insights (only Amazon DocumentDB). db.query.tokenized.statement - The text of the query digest (only Amazon DocumentDB). db.session_type.name - The type of the current session (only Amazon DocumentDB). db.sql.id - The hash of the full, non-tokenized SQL statement generated by Performance Insights (all engines except Amazon DocumentDB). db.sql.db_id - Either the SQL ID generated by the database engine, or a value generated by Performance Insights that begins with pi- (all engines except Amazon DocumentDB). db.sql.statement - The full text of the SQL statement that is running, as in SELECT * FROM employees (all engines except Amazon DocumentDB) db.sql.tokenized_id db.sql_tokenized.id - The hash of the SQL digest generated by Performance Insights (all engines except Amazon DocumentDB). In the console, db.sql_tokenized.id is called the Support ID because Amazon Web Services Support can look at this data to help you troubleshoot database issues. db.sql_tokenized.db_id - Either the native database ID used to refer to the SQL statement, or a synthetic ID such as pi-2372568224 that Performance Insights generates if the native database ID isn't available (all engines except Amazon DocumentDB). db.sql_tokenized.statement - The text of the SQL digest, as in SELECT * FROM employees WHERE employee_id = ? (all engines except Amazon DocumentDB) db.user.id - The ID of the user logged in to the database (all engines except Amazon DocumentDB). db.user.name - The name of the user logged in to the database (all engines except Amazon DocumentDB). db.wait_event.name - The event for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_event.type - The type of event for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_event_type.name - The name of the event type for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_state.name - The event for which the backend is waiting (only Amazon DocumentDB)."];
-      limit: Limit.t option
-        [@ocaml.doc
-          "The maximum number of items to fetch for this dimension group."]}
-    let context_ = "DimensionGroup"
-    let make ?dimensions =
-      fun ?limit -> fun ~group -> fun () -> { dimensions; limit; group }
-    let to_value x =
-      structure_to_value
-        [("Group", (Some (RequestString.to_value x.group)));
-        ("Dimensions",
-          (Option.map x.dimensions ~f:RequestStringList.to_value));
-        ("Limit", (Option.map x.limit ~f:Limit.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let limit = (Option.map ~f:Limit.of_xml) (Xml.child xml_arg0 "Limit") in
-      let dimensions =
-        (Option.map ~f:RequestStringList.of_xml)
-          (Xml.child xml_arg0 "Dimensions") in
-      let group =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
-      make ?limit ?dimensions ~group ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "Limit" Limit.of_json in
-      let dimensions = field_map json "Dimensions" RequestStringList.of_json in
-      let group = field_map_exn json "Group" RequestString.of_json in
-      make ?limit ?dimensions ~group ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A logical grouping of Performance Insights metrics for a related subject area. For example, the db.sql dimension group consists of the following dimensions: db.sql.id - The hash of a running SQL statement, generated by Performance Insights. db.sql.db_id - Either the SQL ID generated by the database engine, or a value generated by Performance Insights that begins with pi-. db.sql.statement - The full text of the SQL statement that is running, for example, SELECT * FROM employees. db.sql_tokenized.id - The hash of the SQL digest generated by Performance Insights. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
-module MetricQueryFilterMap =
-  struct
-    type nonrec t = (RequestString.t * RequestString.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            ((RequestString.of_string chopped),
-                              (RequestString.of_string v))))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (RequestString.to_value x) |>
-                    (fun x -> (RequestString.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:RequestString.of_string
-        ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module FeatureStatus =
-  struct
-    type nonrec t =
-      | ENABLED 
-      | DISABLED 
-      | UNSUPPORTED 
-      | ENABLED_PENDING_REBOOT 
-      | DISABLED_PENDING_REBOOT 
-      | UNKNOWN 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLED -> "ENABLED"
-      | DISABLED -> "DISABLED"
-      | UNSUPPORTED -> "UNSUPPORTED"
-      | ENABLED_PENDING_REBOOT -> "ENABLED_PENDING_REBOOT"
-      | DISABLED_PENDING_REBOOT -> "DISABLED_PENDING_REBOOT"
-      | UNKNOWN -> "UNKNOWN"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLED" -> ENABLED
-      | "DISABLED" -> DISABLED
-      | "UNSUPPORTED" -> UNSUPPORTED
-      | "ENABLED_PENDING_REBOOT" -> ENABLED_PENDING_REBOOT
-      | "DISABLED_PENDING_REBOOT" -> DISABLED_PENDING_REBOOT
-      | "UNKNOWN" -> UNKNOWN
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration FeatureStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"FeatureStatus" j)
-    let to_json = simple_to_json to_value
-  end
-module DetailStatus =
-  struct
-    type nonrec t =
-      | AVAILABLE 
-      | PROCESSING 
-      | UNAVAILABLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | AVAILABLE -> "AVAILABLE"
-      | PROCESSING -> "PROCESSING"
-      | UNAVAILABLE -> "UNAVAILABLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "AVAILABLE" -> AVAILABLE
-      | "PROCESSING" -> PROCESSING
-      | "UNAVAILABLE" -> UNAVAILABLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration DetailStatus" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"DetailStatus" j)
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
     let to_json = simple_to_json to_value
   end
 module AdditionalMetricsMap =
@@ -522,6 +150,8 @@ module AdditionalMetricsMap =
                     (fun x -> (Double.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -529,10 +159,1798 @@ module AdditionalMetricsMap =
         ~of_json:Double.of_json j
     let to_json v = composed_to_json to_value v
   end
+module AmazonResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "AmazonResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"^arn:.*:pi:.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AmazonResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module ServiceType =
+  struct
+    type nonrec t =
+      | RDS 
+      | DOCDB 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | RDS -> "RDS" | DOCDB -> "DOCDB" | Non_static_id s -> s
+    let of_string =
+      function | "RDS" -> RDS | "DOCDB" -> DOCDB | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceType" j)
+    let to_json = simple_to_json to_value
+  end
+module String_ =
+  struct
+    type nonrec t = string
+    let context_ = "String"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"String" j
+    let to_json = simple_to_json to_value
+  end
+module Severity =
+  struct
+    type nonrec t =
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Severity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Severity" j)
+    let to_json = simple_to_json to_value
+  end
+module MarkdownString =
+  struct
+    type nonrec t = string
+    let context_ = "MarkdownString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:8000) >>=
+                  (fun () -> check_pattern i ~pattern:"(.|\\n)*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MarkdownString" j
+    let to_json = simple_to_json to_value
+  end
+module Recommendation =
+  struct
+    type nonrec t =
+      {
+      recommendationId: String_.t option
+        [@ocaml.doc "The unique identifier for the recommendation."];
+      recommendationDescription: MarkdownString.t option
+        [@ocaml.doc
+          "The recommendation details to help resolve the performance issue. For example, Investigate the following SQLs that contributed to 100% of the total DBLoad during that time period: sql-id"]}
+    let make ?recommendationId =
+      fun ?recommendationDescription ->
+        fun () -> { recommendationId; recommendationDescription }
+    let to_value x =
+      structure_to_value
+        [("RecommendationId",
+           (Option.map x.recommendationId ~f:String_.to_value));
+        ("RecommendationDescription",
+          (Option.map x.recommendationDescription ~f:MarkdownString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationDescription =
+        (Option.map ~f:MarkdownString.of_xml)
+          (Xml.child xml_arg0 "RecommendationDescription") in
+      let recommendationId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "RecommendationId") in
+      make ?recommendationDescription ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationDescription =
+        field_map json__ "RecommendationDescription" MarkdownString.of_json in
+      let recommendationId =
+        field_map json__ "RecommendationId" String_.of_json in
+      make ?recommendationDescription ?recommendationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The list of recommendations for the insight."]
+module RecommendationList =
+  struct
+    type nonrec t = Recommendation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Recommendation.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Recommendation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationList" ~of_json:Recommendation.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ISOTimestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module DescriptiveString =
+  struct
+    type nonrec t = string
+    let context_ = "DescriptiveString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2000) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DescriptiveString" j
+    let to_json = simple_to_json to_value
+  end
+module DescriptiveMap =
+  struct
+    type nonrec t = (DescriptiveString.t * DescriptiveString.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((DescriptiveString.of_string chopped),
+                              (DescriptiveString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (DescriptiveString.to_value x) |>
+                    (fun x ->
+                       (DescriptiveString.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:DescriptiveString.of_string
+        ~of_json:DescriptiveString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PerformanceInsightsMetric =
+  struct
+    type nonrec t =
+      {
+      metric: DescriptiveString.t option
+        [@ocaml.doc "The Performance Insights metric."];
+      displayName: DescriptiveString.t option
+        [@ocaml.doc "The Performance Insights metric name."];
+      dimensions: DescriptiveMap.t option
+        [@ocaml.doc
+          "A dimension map that contains the dimensions for this partition."];
+      filter: DescriptiveMap.t option
+        [@ocaml.doc "The filter for the Performance Insights metric."];
+      value: Double.t option
+        [@ocaml.doc
+          "The value of the metric. For example, 9 for db.load.avg."]}
+    let make ?metric =
+      fun ?displayName ->
+        fun ?dimensions ->
+          fun ?filter ->
+            fun ?value ->
+              fun () -> { metric; displayName; dimensions; filter; value }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Option.map x.metric ~f:DescriptiveString.to_value));
+        ("DisplayName",
+          (Option.map x.displayName ~f:DescriptiveString.to_value));
+        ("Dimensions", (Option.map x.dimensions ~f:DescriptiveMap.to_value));
+        ("Filter", (Option.map x.filter ~f:DescriptiveMap.to_value));
+        ("Value", (Option.map x.value ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
+      let filter =
+        (Option.map ~f:DescriptiveMap.of_xml) (Xml.child xml_arg0 "Filter") in
+      let dimensions =
+        (Option.map ~f:DescriptiveMap.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      let displayName =
+        (Option.map ~f:DescriptiveString.of_xml)
+          (Xml.child xml_arg0 "DisplayName") in
+      let metric =
+        (Option.map ~f:DescriptiveString.of_xml)
+          (Xml.child xml_arg0 "Metric") in
+      make ?value ?filter ?dimensions ?displayName ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" Double.of_json in
+      let filter = field_map json__ "Filter" DescriptiveMap.of_json in
+      let dimensions = field_map json__ "Dimensions" DescriptiveMap.of_json in
+      let displayName =
+        field_map json__ "DisplayName" DescriptiveString.of_json in
+      let metric = field_map json__ "Metric" DescriptiveString.of_json in
+      make ?value ?filter ?dimensions ?displayName ?metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This data type helps to determine Performance Insights metric to render for the insight."]
+module Data =
+  struct
+    type nonrec t =
+      {
+      performanceInsightsMetric: PerformanceInsightsMetric.t option
+        [@ocaml.doc
+          "This field determines the Performance Insights metric to render for the insight. The name field refers to a Performance Insights metric."]}
+    let make ?performanceInsightsMetric =
+      fun () -> { performanceInsightsMetric }
+    let to_value x =
+      structure_to_value
+        [("PerformanceInsightsMetric",
+           (Option.map x.performanceInsightsMetric
+              ~f:PerformanceInsightsMetric.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let performanceInsightsMetric =
+        (Option.map ~f:PerformanceInsightsMetric.of_xml)
+          (Xml.child xml_arg0 "PerformanceInsightsMetric") in
+      make ?performanceInsightsMetric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let performanceInsightsMetric =
+        field_map json__ "PerformanceInsightsMetric"
+          PerformanceInsightsMetric.of_json in
+      make ?performanceInsightsMetric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "List of data objects which provide details about source metrics. This field can be used to determine the PI metric to render for the insight. This data type also includes static values for the metrics for the Insight that were calculated and included in text and annotations on the DB load chart."]
+module DataList =
+  struct
+    type nonrec t = Data.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Data.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Data.of_xml)
+    let of_json j = list_of_json ~kind:"DataList" ~of_json:Data.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ContextType =
+  struct
+    type nonrec t =
+      | CAUSAL 
+      | CONTEXTUAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CAUSAL -> "CAUSAL"
+      | CONTEXTUAL -> "CONTEXTUAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CAUSAL" -> CAUSAL
+      | "CONTEXTUAL" -> CONTEXTUAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ContextType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ContextType" j)
+    let to_json = simple_to_json to_value
+  end
+module rec
+  Insight:sig
+            type nonrec t =
+              {
+              insightId: String_.t option
+                [@ocaml.doc
+                  "The unique identifier for the insight. For example, insight-12345678901234567."];
+              insightType: String_.t option
+                [@ocaml.doc
+                  "The type of insight. For example, HighDBLoad, HighCPU, or DominatingSQLs."];
+              context: ContextType.t option
+                [@ocaml.doc
+                  "Indicates if the insight is causal or correlated insight."];
+              startTime: ISOTimestamp.t option
+                [@ocaml.doc
+                  "The start time of the insight. For example, 2018-10-30T00:00:00Z."];
+              endTime: ISOTimestamp.t option
+                [@ocaml.doc
+                  "The end time of the insight. For example, 2018-10-30T00:00:00Z."];
+              severity: Severity.t option
+                [@ocaml.doc
+                  "The severity of the insight. The values are: Low, Medium, or High."];
+              supportingInsights: InsightList.t option
+                [@ocaml.doc
+                  "List of supporting insights that provide additional factors for the insight."];
+              description: MarkdownString.t option
+                [@ocaml.doc
+                  "Description of the insight. For example: A high severity Insight found between 02:00 to 02:30, where there was an unusually high DB load 600x above baseline. Likely performance impact."];
+              recommendations: RecommendationList.t option
+                [@ocaml.doc
+                  "List of recommendations for the insight. For example, Investigate the following SQLs that contributed to 100% of the total DBLoad during that time period: sql-id."];
+              insightData: DataList.t option
+                [@ocaml.doc
+                  "List of data objects containing metrics and references from the time range while generating the insight."];
+              baselineData: DataList.t option
+                [@ocaml.doc
+                  "Metric names and values from the timeframe used as baseline to generate the insight."]}
+            val make :
+              ?insightId:String_.t ->
+                ?insightType:String_.t ->
+                  ?context:ContextType.t ->
+                    ?startTime:ISOTimestamp.t ->
+                      ?endTime:ISOTimestamp.t ->
+                        ?severity:Severity.t ->
+                          ?supportingInsights:InsightList.t ->
+                            ?description:MarkdownString.t ->
+                              ?recommendations:RecommendationList.t ->
+                                ?insightData:DataList.t ->
+                                  ?baselineData:DataList.t -> unit -> t
+            val to_value : t -> Botodata.value
+            val to_query : t -> Client.Query.t
+            val of_xml : Xml.t -> t
+            val of_json : Yojson.Safe.t -> t
+            val to_json : t -> Yojson.Safe.t
+          end =
+  struct
+    type nonrec t =
+      {
+      insightId: String_.t option
+        [@ocaml.doc
+          "The unique identifier for the insight. For example, insight-12345678901234567."];
+      insightType: String_.t option
+        [@ocaml.doc
+          "The type of insight. For example, HighDBLoad, HighCPU, or DominatingSQLs."];
+      context: ContextType.t option
+        [@ocaml.doc
+          "Indicates if the insight is causal or correlated insight."];
+      startTime: ISOTimestamp.t option
+        [@ocaml.doc
+          "The start time of the insight. For example, 2018-10-30T00:00:00Z."];
+      endTime: ISOTimestamp.t option
+        [@ocaml.doc
+          "The end time of the insight. For example, 2018-10-30T00:00:00Z."];
+      severity: Severity.t option
+        [@ocaml.doc
+          "The severity of the insight. The values are: Low, Medium, or High."];
+      supportingInsights: InsightList.t option
+        [@ocaml.doc
+          "List of supporting insights that provide additional factors for the insight."];
+      description: MarkdownString.t option
+        [@ocaml.doc
+          "Description of the insight. For example: A high severity Insight found between 02:00 to 02:30, where there was an unusually high DB load 600x above baseline. Likely performance impact."];
+      recommendations: RecommendationList.t option
+        [@ocaml.doc
+          "List of recommendations for the insight. For example, Investigate the following SQLs that contributed to 100% of the total DBLoad during that time period: sql-id."];
+      insightData: DataList.t option
+        [@ocaml.doc
+          "List of data objects containing metrics and references from the time range while generating the insight."];
+      baselineData: DataList.t option
+        [@ocaml.doc
+          "Metric names and values from the timeframe used as baseline to generate the insight."]}
+    let make ?insightId =
+      fun ?insightType ->
+        fun ?context ->
+          fun ?startTime ->
+            fun ?endTime ->
+              fun ?severity ->
+                fun ?supportingInsights ->
+                  fun ?description ->
+                    fun ?recommendations ->
+                      fun ?insightData ->
+                        fun ?baselineData ->
+                          fun () ->
+                            {
+                              insightId;
+                              insightType;
+                              context;
+                              startTime;
+                              endTime;
+                              severity;
+                              supportingInsights;
+                              description;
+                              recommendations;
+                              insightData;
+                              baselineData
+                            }
+    let to_value x =
+      structure_to_value
+        [("InsightId", (Option.map x.insightId ~f:String_.to_value));
+        ("InsightType", (Option.map x.insightType ~f:String_.to_value));
+        ("Context", (Option.map x.context ~f:ContextType.to_value));
+        ("StartTime", (Option.map x.startTime ~f:ISOTimestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:ISOTimestamp.to_value));
+        ("Severity", (Option.map x.severity ~f:Severity.to_value));
+        ("SupportingInsights",
+          (Option.map x.supportingInsights ~f:InsightList.to_value));
+        ("Description",
+          (Option.map x.description ~f:MarkdownString.to_value));
+        ("Recommendations",
+          (Option.map x.recommendations ~f:RecommendationList.to_value));
+        ("InsightData", (Option.map x.insightData ~f:DataList.to_value));
+        ("BaselineData", (Option.map x.baselineData ~f:DataList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let baselineData =
+        (Option.map ~f:DataList.of_xml) (Xml.child xml_arg0 "BaselineData") in
+      let insightData =
+        (Option.map ~f:DataList.of_xml) (Xml.child xml_arg0 "InsightData") in
+      let recommendations =
+        (Option.map ~f:RecommendationList.of_xml)
+          (Xml.child xml_arg0 "Recommendations") in
+      let description =
+        (Option.map ~f:MarkdownString.of_xml)
+          (Xml.child xml_arg0 "Description") in
+      let supportingInsights =
+        (Option.map ~f:InsightList.of_xml)
+          (Xml.child xml_arg0 "SupportingInsights") in
+      let severity =
+        (Option.map ~f:Severity.of_xml) (Xml.child xml_arg0 "Severity") in
+      let endTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let context =
+        (Option.map ~f:ContextType.of_xml) (Xml.child xml_arg0 "Context") in
+      let insightType =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "InsightType") in
+      let insightId =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "InsightId") in
+      make ?baselineData ?insightData ?recommendations ?description
+        ?supportingInsights ?severity ?endTime ?startTime ?context
+        ?insightType ?insightId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let baselineData = field_map json__ "BaselineData" DataList.of_json in
+      let insightData = field_map json__ "InsightData" DataList.of_json in
+      let recommendations =
+        field_map json__ "Recommendations" RecommendationList.of_json in
+      let description = field_map json__ "Description" MarkdownString.of_json in
+      let supportingInsights =
+        field_map json__ "SupportingInsights" InsightList.of_json in
+      let severity = field_map json__ "Severity" Severity.of_json in
+      let endTime = field_map json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" ISOTimestamp.of_json in
+      let context = field_map json__ "Context" ContextType.of_json in
+      let insightType = field_map json__ "InsightType" String_.of_json in
+      let insightId = field_map json__ "InsightId" String_.of_json in
+      make ?baselineData ?insightData ?recommendations ?description
+        ?supportingInsights ?severity ?endTime ?startTime ?context
+        ?insightType ?insightId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the list of performance issues which are identified."]
+ and
+  InsightList:sig
+                type nonrec t = Insight.t list
+                val make : Insight.t list -> t
+                val to_value : t -> Botodata.value
+                val to_query : t -> Client.Query.t
+                val of_xml : Xml.t -> Insight.t list
+                val of_json : Yojson.Safe.t -> t
+                val to_json : t -> Yojson.Safe.t
+                val to_header : t -> string
+              end =
+  struct
+    type nonrec t = Insight.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Insight.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Insight.of_xml)
+    let of_json j =
+      list_of_json ~kind:"InsightList" ~of_json:Insight.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module IdentifierString =
+  struct
+    type nonrec t = string
+    let context_ = "IdentifierString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IdentifierString" j
+    let to_json = simple_to_json to_value
+  end
+module AnalysisStatus =
+  struct
+    type nonrec t =
+      | RUNNING 
+      | SUCCEEDED 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | RUNNING -> "RUNNING"
+      | SUCCEEDED -> "SUCCEEDED"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "RUNNING" -> RUNNING
+      | "SUCCEEDED" -> SUCCEEDED
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AnalysisStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnalysisStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AnalysisReportId =
+  struct
+    type nonrec t = string
+    let context_ = "AnalysisReportId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () -> check_pattern i ~pattern:"report-[0-9a-f]{17}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnalysisReportId" j
+    let to_json = simple_to_json to_value
+  end
+module AnalysisReport =
+  struct
+    type nonrec t =
+      {
+      analysisReportId: AnalysisReportId.t option
+        [@ocaml.doc "The name of the analysis report."];
+      identifier: IdentifierString.t option
+        [@ocaml.doc "The unique identifier of the analysis report."];
+      serviceType: ServiceType.t option
+        [@ocaml.doc
+          "List the tags for the Amazon Web Services service for which Performance Insights returns metrics. Valid values are as follows: RDS DOCDB"];
+      createTime: ISOTimestamp.t option
+        [@ocaml.doc "The time you created the analysis report."];
+      startTime: ISOTimestamp.t option
+        [@ocaml.doc "The analysis start time in the report."];
+      endTime: ISOTimestamp.t option
+        [@ocaml.doc "The analysis end time in the report."];
+      status: AnalysisStatus.t option
+        [@ocaml.doc "The status of the created analysis report."];
+      insights: InsightList.t option
+        [@ocaml.doc
+          "The list of identified insights in the analysis report."]}
+    let make ?analysisReportId =
+      fun ?identifier ->
+        fun ?serviceType ->
+          fun ?createTime ->
+            fun ?startTime ->
+              fun ?endTime ->
+                fun ?status ->
+                  fun ?insights ->
+                    fun () ->
+                      {
+                        analysisReportId;
+                        identifier;
+                        serviceType;
+                        createTime;
+                        startTime;
+                        endTime;
+                        status;
+                        insights
+                      }
+    let to_value x =
+      structure_to_value
+        [("AnalysisReportId",
+           (Option.map x.analysisReportId ~f:AnalysisReportId.to_value));
+        ("Identifier",
+          (Option.map x.identifier ~f:IdentifierString.to_value));
+        ("ServiceType", (Option.map x.serviceType ~f:ServiceType.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:ISOTimestamp.to_value));
+        ("StartTime", (Option.map x.startTime ~f:ISOTimestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:ISOTimestamp.to_value));
+        ("Status", (Option.map x.status ~f:AnalysisStatus.to_value));
+        ("Insights", (Option.map x.insights ~f:InsightList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let insights =
+        (Option.map ~f:InsightList.of_xml) (Xml.child xml_arg0 "Insights") in
+      let status =
+        (Option.map ~f:AnalysisStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let endTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let createTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let serviceType =
+        (Option.map ~f:ServiceType.of_xml) (Xml.child xml_arg0 "ServiceType") in
+      let identifier =
+        (Option.map ~f:IdentifierString.of_xml)
+          (Xml.child xml_arg0 "Identifier") in
+      let analysisReportId =
+        (Option.map ~f:AnalysisReportId.of_xml)
+          (Xml.child xml_arg0 "AnalysisReportId") in
+      make ?insights ?status ?endTime ?startTime ?createTime ?serviceType
+        ?identifier ?analysisReportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let insights = field_map json__ "Insights" InsightList.of_json in
+      let status = field_map json__ "Status" AnalysisStatus.of_json in
+      let endTime = field_map json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" ISOTimestamp.of_json in
+      let createTime = field_map json__ "CreateTime" ISOTimestamp.of_json in
+      let serviceType = field_map json__ "ServiceType" ServiceType.of_json in
+      let identifier = field_map json__ "Identifier" IdentifierString.of_json in
+      let analysisReportId =
+        field_map json__ "AnalysisReportId" AnalysisReportId.of_json in
+      make ?insights ?status ?endTime ?startTime ?createTime ?serviceType
+        ?identifier ?analysisReportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the summary of the performance analysis report created for a time period."]
+module TagValue =
+  struct
+    type nonrec t = string
+    let context_ = "TagValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module TagKey =
+  struct
+    type nonrec t = string
+    let context_ = "TagKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TagKey" j
+    let to_json = simple_to_json to_value
+  end
+module Tag =
+  struct
+    type nonrec t =
+      {
+      key: TagKey.t
+        [@ocaml.doc
+          "A key is the required name of the tag. The string value can be from 1 to 128 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '\\@' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\@\\]*)$\")."];
+      value: TagValue.t
+        [@ocaml.doc
+          "A value is the optional value of the tag. The string value can be from 1 to 256 Unicode characters in length and can't be prefixed with aws: or rds:. The string can only contain only the set of Unicode letters, digits, white-space, '_', '.', ':', '/', '=', '+', '-', '\\@' (Java regex: \"^(\\[\\\\p\\{L\\}\\\\p\\{Z\\}\\\\p\\{N\\}_.:/=+\\\\-\\@\\]*)$\")."]}
+    let context_ = "Tag"
+    let make ~key = fun ~value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Some (TagKey.to_value x.key)));
+        ("Value", (Some (TagValue.to_value x.value)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        TagValue.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+      let key =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
+      make ~value ~key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
+      make ~value ~key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Metadata assigned to an Amazon RDS resource consisting of a key-value pair."]
+module TagList =
+  struct
+    type nonrec t = Tag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Tag.of_xml)
+    let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AnalysisReportSummary =
+  struct
+    type nonrec t =
+      {
+      analysisReportId: String_.t option
+        [@ocaml.doc "The name of the analysis report."];
+      createTime: ISOTimestamp.t option
+        [@ocaml.doc "The time you created the analysis report."];
+      startTime: ISOTimestamp.t option
+        [@ocaml.doc "The start time of the analysis in the report."];
+      endTime: ISOTimestamp.t option
+        [@ocaml.doc "The end time of the analysis in the report."];
+      status: AnalysisStatus.t option
+        [@ocaml.doc "The status of the analysis report."];
+      tags: TagList.t option
+        [@ocaml.doc "List of all the tags added to the analysis report."]}
+    let make ?analysisReportId =
+      fun ?createTime ->
+        fun ?startTime ->
+          fun ?endTime ->
+            fun ?status ->
+              fun ?tags ->
+                fun () ->
+                  {
+                    analysisReportId;
+                    createTime;
+                    startTime;
+                    endTime;
+                    status;
+                    tags
+                  }
+    let to_value x =
+      structure_to_value
+        [("AnalysisReportId",
+           (Option.map x.analysisReportId ~f:String_.to_value));
+        ("CreateTime", (Option.map x.createTime ~f:ISOTimestamp.to_value));
+        ("StartTime", (Option.map x.startTime ~f:ISOTimestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:ISOTimestamp.to_value));
+        ("Status", (Option.map x.status ~f:AnalysisStatus.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let status =
+        (Option.map ~f:AnalysisStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let endTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "StartTime") in
+      let createTime =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "CreateTime") in
+      let analysisReportId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "AnalysisReportId") in
+      make ?tags ?status ?endTime ?startTime ?createTime ?analysisReportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let status = field_map json__ "Status" AnalysisStatus.of_json in
+      let endTime = field_map json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" ISOTimestamp.of_json in
+      let createTime = field_map json__ "CreateTime" ISOTimestamp.of_json in
+      let analysisReportId =
+        field_map json__ "AnalysisReportId" String_.of_json in
+      make ?tags ?status ?endTime ?startTime ?createTime ?analysisReportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the details of the performance analysis report."]
+module AnalysisReportSummaryList =
+  struct
+    type nonrec t = AnalysisReportSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnalysisReportSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnalysisReportSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnalysisReportSummaryList"
+        ~of_json:AnalysisReportSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FineGrainedAction =
+  struct
+    type nonrec t =
+      | DescribeDimensionKeys 
+      | GetDimensionKeyDetails 
+      | GetResourceMetrics 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DescribeDimensionKeys -> "DescribeDimensionKeys"
+      | GetDimensionKeyDetails -> "GetDimensionKeyDetails"
+      | GetResourceMetrics -> "GetResourceMetrics"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DescribeDimensionKeys" -> DescribeDimensionKeys
+      | "GetDimensionKeyDetails" -> GetDimensionKeyDetails
+      | "GetResourceMetrics" -> GetResourceMetrics
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FineGrainedAction" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FineGrainedAction" j)
+    let to_json = simple_to_json to_value
+  end
+module AuthorizedActionsList =
+  struct
+    type nonrec t = FineGrainedAction.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:3) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FineGrainedAction.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FineGrainedAction.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AuthorizedActionsList"
+        ~of_json:FineGrainedAction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Boolean =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module CreatePerformanceAnalysisReportRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights will return metrics. Valid value is RDS."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable, Amazon Web Services Region-unique identifier for a data source. Performance Insights gathers metrics from this data source. To use an Amazon RDS instance as a data source, you specify its DbiResourceId value. For example, specify db-ADECBTYHKTSAUMUZQYPDS2GW4A."];
+      startTime: ISOTimestamp.t
+        [@ocaml.doc "The start time defined for the analysis report."];
+      endTime: ISOTimestamp.t
+        [@ocaml.doc "The end time defined for the analysis report."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The metadata assigned to the analysis report consisting of a key-value pair."]}
+    let context_ = "CreatePerformanceAnalysisReportRequest"
+    let make ?tags =
+      fun ~serviceType ->
+        fun ~identifier ->
+          fun ~startTime ->
+            fun ~endTime ->
+              fun () -> { tags; serviceType; identifier; startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("StartTime", (Some (ISOTimestamp.to_value x.startTime)));
+        ("EndTime", (Some (ISOTimestamp.to_value x.endTime)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let endTime =
+        ISOTimestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
+      let startTime =
+        ISOTimestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?tags ~endTime ~startTime ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let endTime = field_map_exn json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" ISOTimestamp.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?tags ~endTime ~startTime ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new performance analysis report for a specific time period for the DB instance."]
+module ErrorString =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorString"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorString" j
+    let to_json = simple_to_json to_value
+  end
+module NotAuthorizedException =
+  struct
+    type nonrec t = {
+      message: ErrorString.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The user is not authorized to perform this request."]
+module InvalidArgumentException =
+  struct
+    type nonrec t = {
+      message: ErrorString.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One of the arguments provided is invalid for this request."]
+module InternalServiceError =
+  struct
+    type nonrec t = {
+      message: ErrorString.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorString.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request failed due to an unknown error."]
+module CreatePerformanceAnalysisReportResponse =
+  struct
+    type nonrec t =
+      {
+      analysisReportId: AnalysisReportId.t option
+        [@ocaml.doc "A unique identifier for the created analysis report."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analysisReportId = fun () -> { analysisReportId }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AnalysisReportId",
+           (Option.map x.analysisReportId ~f:AnalysisReportId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisReportId =
+        (Option.map ~f:AnalysisReportId.of_xml)
+          (Xml.child xml_arg0 "AnalysisReportId") in
+      make ?analysisReportId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisReportId =
+        field_map json__ "AnalysisReportId" AnalysisReportId.of_json in
+      make ?analysisReportId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new performance analysis report for a specific time period for the DB instance."]
+module DataPoint =
+  struct
+    type nonrec t =
+      {
+      timestamp: ISOTimestamp.t option
+        [@ocaml.doc
+          "The time, in epoch format, associated with a particular Value."];
+      value: Double.t option
+        [@ocaml.doc
+          "The actual value associated with a particular Timestamp."]}
+    let make ?timestamp = fun ?value -> fun () -> { timestamp; value }
+    let to_value x =
+      structure_to_value
+        [("Timestamp", (Option.map x.timestamp ~f:ISOTimestamp.to_value));
+        ("Value", (Option.map x.value ~f:Double.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
+      let timestamp =
+        (Option.map ~f:ISOTimestamp.of_xml) (Xml.child xml_arg0 "Timestamp") in
+      make ?value ?timestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" Double.of_json in
+      let timestamp = field_map json__ "Timestamp" ISOTimestamp.of_json in
+      make ?value ?timestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A timestamp, and a single numerical value, which together represent a measurement at a particular point in time."]
+module DataPointsList =
+  struct
+    type nonrec t = DataPoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DataPoint.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DataPoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DataPointsList" ~of_json:DataPoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DeletePerformanceAnalysisReportRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights will return metrics. Valid value is RDS."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      analysisReportId: AnalysisReportId.t
+        [@ocaml.doc
+          "The unique identifier of the analysis report for deletion."]}
+    let context_ = "DeletePerformanceAnalysisReportRequest"
+    let make ~serviceType =
+      fun ~identifier ->
+        fun ~analysisReportId ->
+          fun () -> { serviceType; identifier; analysisReportId }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("AnalysisReportId",
+          (Some (AnalysisReportId.to_value x.analysisReportId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisReportId =
+        AnalysisReportId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AnalysisReportId") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ~analysisReportId ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisReportId =
+        field_map_exn json__ "AnalysisReportId" AnalysisReportId.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ~analysisReportId ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a performance analysis report."]
+module DeletePerformanceAnalysisReportResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a performance analysis report."]
+module NextToken =
+  struct
+    type nonrec t = string
+    let context_ = "NextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:8192) >>=
+                  (fun () -> check_pattern i ~pattern:"^[a-zA-Z0-9_=-]+$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end
+module MetricQueryFilterMap =
+  struct
+    type nonrec t = (SanitizedString.t * RequestString.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((SanitizedString.of_string chopped),
+                              (RequestString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (SanitizedString.to_value x) |>
+                    (fun x -> (RequestString.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:SanitizedString.of_string
+        ~of_json:RequestString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Integer =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module SanitizedStringList =
+  struct
+    type nonrec t = SanitizedString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SanitizedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SanitizedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SanitizedStringList"
+        ~of_json:SanitizedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Limit =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:25) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for Limit" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DimensionGroup =
+  struct
+    type nonrec t =
+      {
+      group: SanitizedString.t
+        [@ocaml.doc
+          "The name of the dimension group. Valid values are as follows: db - The name of the database to which the client is connected. The following values are permitted: Aurora PostgreSQL Amazon RDS PostgreSQL Aurora MySQL Amazon RDS MySQL Amazon RDS MariaDB Amazon DocumentDB db.application - The name of the application that is connected to the database. The following values are permitted: Aurora PostgreSQL Amazon RDS PostgreSQL Amazon DocumentDB db.blocking_sql - The SQL queries blocking the most DB load. db.blocking_session - The sessions blocking the most DB load. db.blocking_object - The object resources acquired by other sessions that are blocking the most DB load. db.host - The host name of the connected client (all engines). db.plans - The execution plans for the query (only Aurora PostgreSQL). db.query - The query that is currently running (only Amazon DocumentDB). db.query_tokenized - The digest query (only Amazon DocumentDB). db.session_type - The type of the current session (only Aurora PostgreSQL and RDS PostgreSQL). db.sql - The text of the SQL statement that is currently running (all engines except Amazon DocumentDB). db.sql_tokenized - The SQL digest (all engines except Amazon DocumentDB). db.user - The user logged in to the database (all engines except Amazon DocumentDB). db.wait_event - The event for which the database backend is waiting (all engines except Amazon DocumentDB). db.wait_event_type - The type of event for which the database backend is waiting (all engines except Amazon DocumentDB). db.wait_state - The event for which the database backend is waiting (only Amazon DocumentDB)."];
+      dimensions: SanitizedStringList.t option
+        [@ocaml.doc
+          "A list of specific dimensions from a dimension group. If this parameter is not present, then it signifies that all of the dimensions in the group were requested, or are present in the response. Valid values for elements in the Dimensions array are: db.application.name - The name of the application that is connected to the database. Valid values are as follows: Aurora PostgreSQL Amazon RDS PostgreSQL Amazon DocumentDB db.blocking_sql.id - The ID for each of the SQL queries blocking the most DB load. db.blocking_sql.sql - The SQL text for each of the SQL queries blocking the most DB load. db.blocking_session.id - The ID for each of the sessions blocking the most DB load. db.blocking_object.id - The ID for each of the object resources acquired by other sessions that are blocking the most DB load. db.blocking_object.type - The object type for each of the object resources acquired by other sessions that are blocking the most DB load. db.blocking_object.value - The value for each of the object resources acquired by other sessions that are blocking the most DB load. db.host.id - The host ID of the connected client (all engines). db.host.name - The host name of the connected client (all engines). db.name - The name of the database to which the client is connected. Valid values are as follows: Aurora PostgreSQL Amazon RDS PostgreSQL Aurora MySQL Amazon RDS MySQL Amazon RDS MariaDB Amazon DocumentDB db.query.id - The query ID generated by Performance Insights (only Amazon DocumentDB). db.query.db_id - The query ID generated by the database (only Amazon DocumentDB). db.query.statement - The text of the query that is being run (only Amazon DocumentDB). db.query.tokenized_id db.query.tokenized.id - The query digest ID generated by Performance Insights (only Amazon DocumentDB). db.query.tokenized.db_id - The query digest ID generated by Performance Insights (only Amazon DocumentDB). db.query.tokenized.statement - The text of the query digest (only Amazon DocumentDB). db.session_type.name - The type of the current session (only Amazon DocumentDB). db.sql.id - The hash of the full, non-tokenized SQL statement generated by Performance Insights (all engines except Amazon DocumentDB). db.sql.db_id - Either the SQL ID generated by the database engine, or a value generated by Performance Insights that begins with pi- (all engines except Amazon DocumentDB). db.sql.statement - The full text of the SQL statement that is running, as in SELECT * FROM employees (all engines except Amazon DocumentDB) db.sql.tokenized_id - The hash of the SQL digest generated by Performance Insights (all engines except Amazon DocumentDB). The db.sql.tokenized_id dimension fetches the value of the db.sql_tokenized.id dimension. Amazon RDS returns db.sql.tokenized_id from the db.sql dimension group. db.sql_tokenized.id - The hash of the SQL digest generated by Performance Insights (all engines except Amazon DocumentDB). In the console, db.sql_tokenized.id is called the Support ID because Amazon Web Services Support can look at this data to help you troubleshoot database issues. db.sql_tokenized.db_id - Either the native database ID used to refer to the SQL statement, or a synthetic ID such as pi-2372568224 that Performance Insights generates if the native database ID isn't available (all engines except Amazon DocumentDB). db.sql_tokenized.statement - The text of the SQL digest, as in SELECT * FROM employees WHERE employee_id = ? (all engines except Amazon DocumentDB) db.user.id - The ID of the user logged in to the database (all engines except Amazon DocumentDB). db.user.name - The name of the user logged in to the database (all engines except Amazon DocumentDB). db.wait_event.name - The event for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_event.type - The type of event for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_event_type.name - The name of the event type for which the backend is waiting (all engines except Amazon DocumentDB). db.wait_state.name - The event for which the backend is waiting (only Amazon DocumentDB)."];
+      limit: Limit.t option
+        [@ocaml.doc
+          "The maximum number of items to fetch for this dimension group."]}
+    let context_ = "DimensionGroup"
+    let make ?dimensions =
+      fun ?limit -> fun ~group -> fun () -> { dimensions; limit; group }
+    let to_value x =
+      structure_to_value
+        [("Group", (Some (SanitizedString.to_value x.group)));
+        ("Dimensions",
+          (Option.map x.dimensions ~f:SanitizedStringList.to_value));
+        ("Limit", (Option.map x.limit ~f:Limit.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let limit = (Option.map ~f:Limit.of_xml) (Xml.child xml_arg0 "Limit") in
+      let dimensions =
+        (Option.map ~f:SanitizedStringList.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      let group =
+        SanitizedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+      make ?limit ?dimensions ~group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let limit = field_map json__ "Limit" Limit.of_json in
+      let dimensions =
+        field_map json__ "Dimensions" SanitizedStringList.of_json in
+      let group = field_map_exn json__ "Group" SanitizedString.of_json in
+      make ?limit ?dimensions ~group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A logical grouping of Performance Insights metrics for a related subject area. For example, the db.sql dimension group consists of the following dimensions: db.sql.id - The hash of a running SQL statement, generated by Performance Insights. db.sql.db_id - Either the SQL ID generated by the database engine, or a value generated by Performance Insights that begins with pi-. db.sql.statement - The full text of the SQL statement that is running, for example, SELECT * FROM employees. db.sql_tokenized.id - The hash of the SQL digest generated by Performance Insights. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
+module DescribeDimensionKeysRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights will return metrics. Valid values are as follows: RDS DOCDB"];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable, Amazon Web Services Region-unique identifier for a data source. Performance Insights gathers metrics from this data source. To use an Amazon RDS instance as a data source, you specify its DbiResourceId value. For example, specify db-FAIHNTYBKTGAUSUZQYPDS2GW4A."];
+      startTime: ISOTimestamp.t
+        [@ocaml.doc
+          "The date and time specifying the beginning of the requested time series data. You must specify a StartTime within the past 7 days. The value specified is inclusive, which means that data points equal to or greater than StartTime are returned. The value for StartTime must be earlier than the value for EndTime."];
+      endTime: ISOTimestamp.t
+        [@ocaml.doc
+          "The date and time specifying the end of the requested time series data. The value specified is exclusive, which means that data points less than (but not equal to) EndTime are returned. The value for EndTime must be later than the value for StartTime."];
+      metric: RequestString.t
+        [@ocaml.doc
+          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
+      periodInSeconds: Integer.t option
+        [@ocaml.doc
+          "The granularity, in seconds, of the data points returned from Performance Insights. A period can be as short as one second, or as long as one day (86400 seconds). Valid values are: 1 (one second) 60 (one minute) 300 (five minutes) 3600 (one hour) 86400 (twenty-four hours) If you don't specify PeriodInSeconds, then Performance Insights chooses a value for you, with a goal of returning roughly 100-200 data points in the response."];
+      groupBy: DimensionGroup.t
+        [@ocaml.doc
+          "A specification for how to aggregate the data points from a query result. You must specify a valid dimension group. Performance Insights returns all dimensions within this group, unless you provide the names of specific dimensions within this group. You can also request that Performance Insights return a limited number of values for a dimension."];
+      additionalMetrics: AdditionalMetricsList.t option
+        [@ocaml.doc
+          "Additional metrics for the top N dimension keys. If the specified dimension group in the GroupBy parameter is db.sql_tokenized, you can specify per-SQL metrics to get the values for the top N SQL digests. The response syntax is as follows: \"AdditionalMetrics\" : \\{ \"string\" : \"string\" \\}. The only supported statistic function is .avg."];
+      partitionBy: DimensionGroup.t option
+        [@ocaml.doc
+          "For each dimension specified in GroupBy, specify a secondary dimension to further subdivide the partition keys in the response."];
+      filter: MetricQueryFilterMap.t option
+        [@ocaml.doc
+          "One or more filters to apply in the request. Restrictions: Any number of filters by the same dimension, as specified in the GroupBy or Partition parameters. A single filter for any other dimension in this dimension group. The db.sql.db_id filter isn't available for RDS for SQL Server DB instances."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more items exist than the specified MaxRecords value, a pagination token is included in the response so that the remaining results can be retrieved."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
+    let context_ = "DescribeDimensionKeysRequest"
+    let make ?periodInSeconds =
+      fun ?additionalMetrics ->
+        fun ?partitionBy ->
+          fun ?filter ->
+            fun ?maxResults ->
+              fun ?nextToken ->
+                fun ~serviceType ->
+                  fun ~identifier ->
+                    fun ~startTime ->
+                      fun ~endTime ->
+                        fun ~metric ->
+                          fun ~groupBy ->
+                            fun () ->
+                              {
+                                periodInSeconds;
+                                additionalMetrics;
+                                partitionBy;
+                                filter;
+                                maxResults;
+                                nextToken;
+                                serviceType;
+                                identifier;
+                                startTime;
+                                endTime;
+                                metric;
+                                groupBy
+                              }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("StartTime", (Some (ISOTimestamp.to_value x.startTime)));
+        ("EndTime", (Some (ISOTimestamp.to_value x.endTime)));
+        ("Metric", (Some (RequestString.to_value x.metric)));
+        ("PeriodInSeconds",
+          (Option.map x.periodInSeconds ~f:Integer.to_value));
+        ("GroupBy", (Some (DimensionGroup.to_value x.groupBy)));
+        ("AdditionalMetrics",
+          (Option.map x.additionalMetrics ~f:AdditionalMetricsList.to_value));
+        ("PartitionBy",
+          (Option.map x.partitionBy ~f:DimensionGroup.to_value));
+        ("Filter", (Option.map x.filter ~f:MetricQueryFilterMap.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let filter =
+        (Option.map ~f:MetricQueryFilterMap.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      let partitionBy =
+        (Option.map ~f:DimensionGroup.of_xml)
+          (Xml.child xml_arg0 "PartitionBy") in
+      let additionalMetrics =
+        (Option.map ~f:AdditionalMetricsList.of_xml)
+          (Xml.child xml_arg0 "AdditionalMetrics") in
+      let groupBy =
+        DimensionGroup.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupBy") in
+      let periodInSeconds =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "PeriodInSeconds") in
+      let metric =
+        RequestString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      let endTime =
+        ISOTimestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
+      let startTime =
+        ISOTimestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?nextToken ?maxResults ?filter ?partitionBy ?additionalMetrics
+        ~groupBy ?periodInSeconds ~metric ~endTime ~startTime ~identifier
+        ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filter = field_map json__ "Filter" MetricQueryFilterMap.of_json in
+      let partitionBy = field_map json__ "PartitionBy" DimensionGroup.of_json in
+      let additionalMetrics =
+        field_map json__ "AdditionalMetrics" AdditionalMetricsList.of_json in
+      let groupBy = field_map_exn json__ "GroupBy" DimensionGroup.of_json in
+      let periodInSeconds =
+        field_map json__ "PeriodInSeconds" Integer.of_json in
+      let metric = field_map_exn json__ "Metric" RequestString.of_json in
+      let endTime = field_map_exn json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" ISOTimestamp.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?nextToken ?maxResults ?filter ?partitionBy ?additionalMetrics
+        ~groupBy ?periodInSeconds ~metric ~endTime ~startTime ~identifier
+        ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "For a specific time period, retrieve the top N dimension keys for a metric. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
+module DimensionMap =
+  struct
+    type nonrec t = (RequestString.t * RequestString.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((RequestString.of_string chopped),
+                              (RequestString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (RequestString.to_value x) |>
+                    (fun x -> (RequestString.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:RequestString.of_string
+        ~of_json:RequestString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResponsePartitionKey =
+  struct
+    type nonrec t =
+      {
+      dimensions: DimensionMap.t option
+        [@ocaml.doc
+          "A dimension map that contains the dimensions for this partition."]}
+    let make ?dimensions = fun () -> { dimensions }
+    let to_value x =
+      structure_to_value
+        [("Dimensions", (Option.map x.dimensions ~f:DimensionMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dimensions =
+        (Option.map ~f:DimensionMap.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      make ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dimensions = field_map json__ "Dimensions" DimensionMap.of_json in
+      make ?dimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "If PartitionBy was specified in a DescribeDimensionKeys request, the dimensions are returned in an array. Each element in the array specifies one dimension."]
+module ResponsePartitionKeyList =
+  struct
+    type nonrec t = ResponsePartitionKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResponsePartitionKey.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResponsePartitionKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponsePartitionKeyList"
+        ~of_json:ResponsePartitionKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module MetricValuesList =
   struct
     type nonrec t = Double.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Double.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -553,214 +1971,6 @@ module MetricValuesList =
       list_of_json ~kind:"MetricValuesList" ~of_json:Double.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ErrorString =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorString"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorString" j
-    let to_json = simple_to_json to_value
-  end
-module ResponseResourceMetric =
-  struct
-    type nonrec t =
-      {
-      metric: String_.t option [@ocaml.doc "The full name of the metric."];
-      description: Description.t option
-        [@ocaml.doc "The description of the metric."];
-      unit: String_.t option [@ocaml.doc "The unit of the metric."]}
-    let make ?metric =
-      fun ?description ->
-        fun ?unit -> fun () -> { metric; description; unit }
-    let to_value x =
-      structure_to_value
-        [("Metric", (Option.map x.metric ~f:String_.to_value));
-        ("Description", (Option.map x.description ~f:Description.to_value));
-        ("Unit", (Option.map x.unit ~f:String_.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let unit = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Unit") in
-      let description =
-        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
-      let metric =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
-      make ?unit ?description ?metric ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" String_.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let metric = field_map json "Metric" String_.of_json in
-      make ?unit ?description ?metric ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object that contains the full name, description, and unit of a metric."]
-module MetricDimensionGroups =
-  struct
-    type nonrec t =
-      {
-      metric: String_.t option
-        [@ocaml.doc
-          "The metric type to which the dimension information belongs."];
-      groups: DimensionGroupDetailList.t option
-        [@ocaml.doc "The available dimension groups for a metric type."]}
-    let make ?metric = fun ?groups -> fun () -> { metric; groups }
-    let to_value x =
-      structure_to_value
-        [("Metric", (Option.map x.metric ~f:String_.to_value));
-        ("Groups",
-          (Option.map x.groups ~f:DimensionGroupDetailList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let groups =
-        (Option.map ~f:DimensionGroupDetailList.of_xml)
-          (Xml.child xml_arg0 "Groups") in
-      let metric =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
-      make ?groups ?metric ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let groups = field_map json "Groups" DimensionGroupDetailList.of_json in
-      let metric = field_map json "Metric" String_.of_json in
-      make ?groups ?metric ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The available dimension information for a metric type."]
-module MetricKeyDataPoints =
-  struct
-    type nonrec t =
-      {
-      key: ResponseResourceMetricKey.t option
-        [@ocaml.doc "The dimensions to which the data points apply."];
-      dataPoints: DataPointsList.t option
-        [@ocaml.doc
-          "An array of timestamp-value pairs, representing measurements over a period of time."]}
-    let make ?key = fun ?dataPoints -> fun () -> { key; dataPoints }
-    let to_value x =
-      structure_to_value
-        [("Key", (Option.map x.key ~f:ResponseResourceMetricKey.to_value));
-        ("DataPoints", (Option.map x.dataPoints ~f:DataPointsList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dataPoints =
-        (Option.map ~f:DataPointsList.of_xml)
-          (Xml.child xml_arg0 "DataPoints") in
-      let key =
-        (Option.map ~f:ResponseResourceMetricKey.of_xml)
-          (Xml.child xml_arg0 "Key") in
-      make ?dataPoints ?key ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataPoints = field_map json "DataPoints" DataPointsList.of_json in
-      let key = field_map json "Key" ResponseResourceMetricKey.of_json in
-      make ?dataPoints ?key ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A time-ordered series of data points, corresponding to a dimension of a Performance Insights metric."]
-module MetricQuery =
-  struct
-    type nonrec t =
-      {
-      metric: RequestString.t
-        [@ocaml.doc
-          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. The counter metrics listed in Performance Insights operating system counters in the Amazon Aurora User Guide. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
-      groupBy: DimensionGroup.t option
-        [@ocaml.doc
-          "A specification for how to aggregate the data points from a query result. You must specify a valid dimension group. Performance Insights will return all of the dimensions within that group, unless you provide the names of specific dimensions within that group. You can also request that Performance Insights return a limited number of values for a dimension."];
-      filter: MetricQueryFilterMap.t option
-        [@ocaml.doc
-          "One or more filters to apply in the request. Restrictions: Any number of filters by the same dimension, as specified in the GroupBy parameter. A single filter for any other dimension in this dimension group."]}
-    let context_ = "MetricQuery"
-    let make ?groupBy =
-      fun ?filter -> fun ~metric -> fun () -> { groupBy; filter; metric }
-    let to_value x =
-      structure_to_value
-        [("Metric", (Some (RequestString.to_value x.metric)));
-        ("GroupBy", (Option.map x.groupBy ~f:DimensionGroup.to_value));
-        ("Filter", (Option.map x.filter ~f:MetricQueryFilterMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let filter =
-        (Option.map ~f:MetricQueryFilterMap.of_xml)
-          (Xml.child xml_arg0 "Filter") in
-      let groupBy =
-        (Option.map ~f:DimensionGroup.of_xml) (Xml.child xml_arg0 "GroupBy") in
-      let metric =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
-      make ?filter ?groupBy ~metric ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "Filter" MetricQueryFilterMap.of_json in
-      let groupBy = field_map json "GroupBy" DimensionGroup.of_json in
-      let metric = field_map_exn json "Metric" RequestString.of_json in
-      make ?filter ?groupBy ~metric ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "A single query to be processed. You must provide the metric to query. If no other parameters are specified, Performance Insights returns all data points for the specified metric. Optionally, you can request that the data points be aggregated by dimension group (GroupBy), and return only those data points that match your criteria (Filter)."]
-module FeatureMetadata =
-  struct
-    type nonrec t =
-      {
-      status: FeatureStatus.t option
-        [@ocaml.doc
-          "The status of the feature on the DB instance. Possible values include the following: ENABLED - The feature is enabled on the instance. DISABLED - The feature is disabled on the instance. UNSUPPORTED - The feature isn't supported on the instance. ENABLED_PENDING_REBOOT - The feature is enabled on the instance but requires a reboot to take effect. DISABLED_PENDING_REBOOT - The feature is disabled on the instance but requires a reboot to take effect. UNKNOWN - The feature status couldn't be determined."]}
-    let make ?status = fun () -> { status }
-    let to_value x =
-      structure_to_value
-        [("Status", (Option.map x.status ~f:FeatureStatus.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let status =
-        (Option.map ~f:FeatureStatus.of_xml) (Xml.child xml_arg0 "Status") in
-      make ?status ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" FeatureStatus.of_json in
-      make ?status ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The metadata for a feature. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
-module DimensionKeyDetail =
-  struct
-    type nonrec t =
-      {
-      value: String_.t option
-        [@ocaml.doc
-          "The value of the dimension detail data. Depending on the return status, this value is either the full or truncated SQL query for the following dimensions: db.query.statement (Amazon DocumentDB) db.sql.statement (Amazon RDS and Aurora)"];
-      dimension: String_.t option
-        [@ocaml.doc
-          "The full name of the dimension. The full name includes the group name and key name. The following values are valid: db.query.statement (Amazon DocumentDB) db.sql.statement (Amazon RDS and Aurora)"];
-      status: DetailStatus.t option
-        [@ocaml.doc
-          "The status of the dimension detail data. Possible values include the following: AVAILABLE - The dimension detail data is ready to be retrieved. PROCESSING - The dimension detail data isn't ready to be retrieved because more processing time is required. If the requested detail data has the status PROCESSING, Performance Insights returns the truncated query. UNAVAILABLE - The dimension detail data could not be collected successfully."]}
-    let make ?value =
-      fun ?dimension -> fun ?status -> fun () -> { value; dimension; status }
-    let to_value x =
-      structure_to_value
-        [("Value", (Option.map x.value ~f:String_.to_value));
-        ("Dimension", (Option.map x.dimension ~f:String_.to_value));
-        ("Status", (Option.map x.status ~f:DetailStatus.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let status =
-        (Option.map ~f:DetailStatus.of_xml) (Xml.child xml_arg0 "Status") in
-      let dimension =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Dimension") in
-      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
-      make ?status ?dimension ?value ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" DetailStatus.of_json in
-      let dimension = field_map json "Dimension" String_.of_json in
-      let value = field_map json "Value" String_.of_json in
-      make ?status ?dimension ?value ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An object that describes the details for a specified dimension."]
 module DimensionKeyDescription =
   struct
     type nonrec t =
@@ -803,437 +2013,23 @@ module DimensionKeyDescription =
         (Option.map ~f:DimensionMap.of_xml) (Xml.child xml_arg0 "Dimensions") in
       make ?partitions ?additionalMetrics ?total ?dimensions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let partitions = field_map json "Partitions" MetricValuesList.of_json in
+    let of_json json__ =
+      let partitions = field_map json__ "Partitions" MetricValuesList.of_json in
       let additionalMetrics =
-        field_map json "AdditionalMetrics" AdditionalMetricsMap.of_json in
-      let total = field_map json "Total" Double.of_json in
-      let dimensions = field_map json "Dimensions" DimensionMap.of_json in
+        field_map json__ "AdditionalMetrics" AdditionalMetricsMap.of_json in
+      let total = field_map json__ "Total" Double.of_json in
+      let dimensions = field_map json__ "Dimensions" DimensionMap.of_json in
       make ?partitions ?additionalMetrics ?total ?dimensions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that includes the requested dimension key values and aggregated metric values within a dimension group."]
-module ResponsePartitionKey =
-  struct
-    type nonrec t =
-      {
-      dimensions: DimensionMap.t
-        [@ocaml.doc
-          "A dimension map that contains the dimensions for this partition."]}
-    let context_ = "ResponsePartitionKey"
-    let make ~dimensions = fun () -> { dimensions }
-    let to_value x =
-      structure_to_value
-        [("Dimensions", (Some (DimensionMap.to_value x.dimensions)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dimensions =
-        DimensionMap.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Dimensions") in
-      make ~dimensions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions = field_map_exn json "Dimensions" DimensionMap.of_json in
-      make ~dimensions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "If PartitionBy was specified in a DescribeDimensionKeys request, the dimensions are returned in an array. Each element in the array specifies one dimension."]
-module InternalServiceError =
-  struct
-    type nonrec t = {
-      message: ErrorString.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorString.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request failed due to an unknown error."]
-module InvalidArgumentException =
-  struct
-    type nonrec t = {
-      message: ErrorString.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorString.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One of the arguments provided is invalid for this request."]
-module NextToken =
-  struct
-    type nonrec t = string
-    let context_ = "NextToken"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:8192) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end
-module NotAuthorizedException =
-  struct
-    type nonrec t = {
-      message: ErrorString.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:ErrorString.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorString.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorString.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The user is not authorized to perform this request."]
-module ResponseResourceMetricList =
-  struct
-    type nonrec t = ResponseResourceMetric.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ResponseResourceMetric.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ResponseResourceMetric.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ResponseResourceMetricList"
-        ~of_json:ResponseResourceMetric.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:20) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MetricTypeList =
-  struct
-    type nonrec t = RequestString.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:RequestString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RequestString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricTypeList" ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ServiceType =
-  struct
-    type nonrec t =
-      | RDS 
-      | DOCDB 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | RDS -> "RDS" | DOCDB -> "DOCDB" | Non_static_id s -> s
-    let of_string =
-      function | "RDS" -> RDS | "DOCDB" -> DOCDB | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ServiceType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ServiceType" j)
-    let to_json = simple_to_json to_value
-  end
-module MetricDimensionsList =
-  struct
-    type nonrec t = MetricDimensionGroups.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:MetricDimensionGroups.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MetricDimensionGroups.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricDimensionsList"
-        ~of_json:MetricDimensionGroups.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DimensionsMetricList =
-  struct
-    type nonrec t = RequestString.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:RequestString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RequestString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DimensionsMetricList"
-        ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module MetricKeyDataPointsList =
-  struct
-    type nonrec t = MetricKeyDataPoints.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:MetricKeyDataPoints.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MetricKeyDataPoints.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricKeyDataPointsList"
-        ~of_json:MetricKeyDataPoints.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module Integer =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string (string_of_xml ~kind:"an integer for Integer" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
-module MetricQueryList =
-  struct
-    type nonrec t = MetricQuery.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:MetricQuery.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:MetricQuery.of_xml)
-    let of_json j =
-      list_of_json ~kind:"MetricQueryList" ~of_json:MetricQuery.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module FeatureMetadataMap =
-  struct
-    type nonrec t = (String_.t * FeatureMetadata.t) list
-    let make i = i
-    let of_header xs =
-      make
-        (List.filter_map xs
-           ~f:(fun (k, v) ->
-                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
-                   (Option.map
-                      ~f:(fun chopped ->
-                            let (_ : string) = v in
-                            let (_ : string) = chopped in
-                            failwith
-                              "no of_header for complex types String FeatureMetadata"))))
-    let to_value xs =
-      (xs |>
-         (List.map
-            ~f:(fun (x, y) ->
-                  (String_.to_value x) |>
-                    (fun x ->
-                       (FeatureMetadata.to_value y) |> (fun y -> (x, y))))))
-        |> (fun x -> `Map x)
-    let to_query v = to_query to_value v
-    let of_xml _ =
-      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
-    let of_json j =
-      object_of_json ~key_of_string:String_.of_string
-        ~of_json:FeatureMetadata.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module DimensionKeyDetailList =
-  struct
-    type nonrec t = DimensionKeyDetail.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:DimensionKeyDetail.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:DimensionKeyDetail.of_xml)
-    let of_json j =
-      list_of_json ~kind:"DimensionKeyDetailList"
-        ~of_json:DimensionKeyDetail.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module IdentifierString =
-  struct
-    type nonrec t = string
-    let context_ = "IdentifierString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () -> check_pattern i ~pattern:"^db-[a-zA-Z0-9-]*$")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IdentifierString" j
-    let to_json = simple_to_json to_value
-  end
-module RequestedDimensionList =
-  struct
-    type nonrec t = RequestString.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:RequestString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RequestString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"RequestedDimensionList"
-        ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
 module DimensionKeyDescriptionList =
   struct
     type nonrec t = DimensionKeyDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DimensionKeyDescription.to_value)) |>
         (fun x -> `List x)
@@ -1256,819 +2052,6 @@ module DimensionKeyDescriptionList =
         ~of_json:DimensionKeyDescription.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ResponsePartitionKeyList =
-  struct
-    type nonrec t = ResponsePartitionKey.t list
-    let make i = i
-    let to_value xs =
-      (xs |> (List.map ~f:ResponsePartitionKey.to_value)) |>
-        (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:ResponsePartitionKey.of_xml)
-    let of_json j =
-      list_of_json ~kind:"ResponsePartitionKeyList"
-        ~of_json:ResponsePartitionKey.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module AdditionalMetricsList =
-  struct
-    type nonrec t = RequestString.t list
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_list_max i ~max:30) >>= (fun () -> check_list_min i ~min:1));
-        i
-    let to_value xs =
-      (xs |> (List.map ~f:RequestString.to_value)) |> (fun x -> `List x)
-    let to_query v = to_query to_value v
-    let to_header _ =
-      failwithf "to_header is not implemented for List_shape objects" ()
-    let of_xml x =
-      make
-        (List.map
-           ((Xml.all_children x) |>
-              (List.filter
-                 ~f:(function
-                     | `Data s ->
-                         (match Stdlib.String.trim s with
-                          | "" -> false
-                          | _ -> true)
-                     | _ -> true))) ~f:RequestString.of_xml)
-    let of_json j =
-      list_of_json ~kind:"AdditionalMetricsList"
-        ~of_json:RequestString.of_json j
-    let to_json v = composed_to_json to_value v
-  end
-module ListAvailableResourceMetricsResponse =
-  struct
-    type nonrec t =
-      {
-      metrics: ResponseResourceMetricList.t option
-        [@ocaml.doc
-          "An array of metrics available to query. Each array element contains the full name, description, and unit of the metric."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "A pagination token that indicates the response didn\226\128\153t return all available records because MaxRecords was specified in the previous request. To get the remaining records, specify NextToken in a separate request with this value."]}
-    type nonrec error =
-      [ `InternalServiceError of InternalServiceError.t 
-      | `InvalidArgumentException of InvalidArgumentException.t 
-      | `NotAuthorizedException of NotAuthorizedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?metrics = fun ?nextToken -> fun () -> { metrics; nextToken }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_json json)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_json json)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_xml xml)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceError e ->
-          `Assoc
-            [("error", (`String "InternalServiceError"));
-            ("details", (InternalServiceError.to_json e))]
-      | `InvalidArgumentException e ->
-          `Assoc
-            [("error", (`String "InvalidArgumentException"));
-            ("details", (InvalidArgumentException.to_json e))]
-      | `NotAuthorizedException e ->
-          `Assoc
-            [("error", (`String "NotAuthorizedException"));
-            ("details", (NotAuthorizedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Metrics",
-           (Option.map x.metrics ~f:ResponseResourceMetricList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let metrics =
-        (Option.map ~f:ResponseResourceMetricList.of_xml)
-          (Xml.child xml_arg0 "Metrics") in
-      make ?nextToken ?metrics ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metrics =
-        field_map json "Metrics" ResponseResourceMetricList.of_json in
-      make ?nextToken ?metrics ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve metrics of the specified types that can be queried for a specified DB instance."]
-module ListAvailableResourceMetricsRequest =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceType.t
-        [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights returns metrics."];
-      identifier: RequestString.t
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique within an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use an Amazon RDS DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VWZ."];
-      metricTypes: MetricTypeList.t
-        [@ocaml.doc
-          "The types of metrics to return in the response. Valid values in the array include the following: os (OS counter metrics) - All engines db (DB load metrics) - All engines except for Amazon DocumentDB db.sql.stats (per-SQL metrics) - All engines except for Amazon DocumentDB db.sql_tokenized.stats (per-SQL digest metrics) - All engines except for Amazon DocumentDB"];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of items to return. If the MaxRecords value is less than the number of existing items, the response includes a pagination token."]}
-    let context_ = "ListAvailableResourceMetricsRequest"
-    let make ?nextToken =
-      fun ?maxResults ->
-        fun ~serviceType ->
-          fun ~identifier ->
-            fun ~metricTypes ->
-              fun () ->
-                { nextToken; maxResults; serviceType; identifier; metricTypes
-                }
-    let to_value x =
-      structure_to_value
-        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (RequestString.to_value x.identifier)));
-        ("MetricTypes", (Some (MetricTypeList.to_value x.metricTypes)));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let metricTypes =
-        MetricTypeList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricTypes") in
-      let identifier =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      let serviceType =
-        ServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ?maxResults ?nextToken ~metricTypes ~identifier ~serviceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metricTypes =
-        field_map_exn json "MetricTypes" MetricTypeList.of_json in
-      let identifier = field_map_exn json "Identifier" RequestString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ?maxResults ?nextToken ~metricTypes ~identifier ~serviceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve metrics of the specified types that can be queried for a specified DB instance."]
-module ListAvailableResourceDimensionsResponse =
-  struct
-    type nonrec t =
-      {
-      metricDimensions: MetricDimensionsList.t option
-        [@ocaml.doc
-          "The dimension information returned for requested metric types."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
-    type nonrec error =
-      [ `InternalServiceError of InternalServiceError.t 
-      | `InvalidArgumentException of InvalidArgumentException.t 
-      | `NotAuthorizedException of NotAuthorizedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?metricDimensions =
-      fun ?nextToken -> fun () -> { metricDimensions; nextToken }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_json json)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_json json)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_xml xml)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceError e ->
-          `Assoc
-            [("error", (`String "InternalServiceError"));
-            ("details", (InternalServiceError.to_json e))]
-      | `InvalidArgumentException e ->
-          `Assoc
-            [("error", (`String "InvalidArgumentException"));
-            ("details", (InvalidArgumentException.to_json e))]
-      | `NotAuthorizedException e ->
-          `Assoc
-            [("error", (`String "NotAuthorizedException"));
-            ("details", (NotAuthorizedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("MetricDimensions",
-           (Option.map x.metricDimensions ~f:MetricDimensionsList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let metricDimensions =
-        (Option.map ~f:MetricDimensionsList.of_xml)
-          (Xml.child xml_arg0 "MetricDimensions") in
-      make ?nextToken ?metricDimensions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metricDimensions =
-        field_map json "MetricDimensions" MetricDimensionsList.of_json in
-      make ?nextToken ?metricDimensions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve the dimensions that can be queried for each specified metric type on a specified DB instance."]
-module ListAvailableResourceDimensionsRequest =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceType.t
-        [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights returns metrics."];
-      identifier: RequestString.t
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique within an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use an Amazon RDS DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VWZ."];
-      metrics: DimensionsMetricList.t
-        [@ocaml.doc
-          "The types of metrics for which to retrieve dimensions. Valid values include db.load."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of items to return in the response. If more items exist than the specified MaxRecords value, a pagination token is included in the response so that the remaining results can be retrieved."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
-    let context_ = "ListAvailableResourceDimensionsRequest"
-    let make ?maxResults =
-      fun ?nextToken ->
-        fun ~serviceType ->
-          fun ~identifier ->
-            fun ~metrics ->
-              fun () ->
-                { maxResults; nextToken; serviceType; identifier; metrics }
-    let to_value x =
-      structure_to_value
-        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (RequestString.to_value x.identifier)));
-        ("Metrics", (Some (DimensionsMetricList.to_value x.metrics)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let metrics =
-        DimensionsMetricList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Metrics") in
-      let identifier =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      let serviceType =
-        ServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ?nextToken ?maxResults ~metrics ~identifier ~serviceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let metrics = field_map_exn json "Metrics" DimensionsMetricList.of_json in
-      let identifier = field_map_exn json "Identifier" RequestString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ?nextToken ?maxResults ~metrics ~identifier ~serviceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve the dimensions that can be queried for each specified metric type on a specified DB instance."]
-module GetResourceMetricsResponse =
-  struct
-    type nonrec t =
-      {
-      alignedStartTime: ISOTimestamp.t option
-        [@ocaml.doc
-          "The start time for the returned metrics, after alignment to a granular boundary (as specified by PeriodInSeconds). AlignedStartTime will be less than or equal to the value of the user-specified StartTime."];
-      alignedEndTime: ISOTimestamp.t option
-        [@ocaml.doc
-          "The end time for the returned metrics, after alignment to a granular boundary (as specified by PeriodInSeconds). AlignedEndTime will be greater than or equal to the value of the user-specified Endtime."];
-      identifier: String_.t option
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId."];
-      metricList: MetricKeyDataPointsList.t option
-        [@ocaml.doc
-          "An array of metric results, where each array element contains all of the data points for a particular dimension."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
-    type nonrec error =
-      [ `InternalServiceError of InternalServiceError.t 
-      | `InvalidArgumentException of InvalidArgumentException.t 
-      | `NotAuthorizedException of NotAuthorizedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?alignedStartTime =
-      fun ?alignedEndTime ->
-        fun ?identifier ->
-          fun ?metricList ->
-            fun ?nextToken ->
-              fun () ->
-                {
-                  alignedStartTime;
-                  alignedEndTime;
-                  identifier;
-                  metricList;
-                  nextToken
-                }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_json json)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_json json)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_xml xml)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceError e ->
-          `Assoc
-            [("error", (`String "InternalServiceError"));
-            ("details", (InternalServiceError.to_json e))]
-      | `InvalidArgumentException e ->
-          `Assoc
-            [("error", (`String "InvalidArgumentException"));
-            ("details", (InvalidArgumentException.to_json e))]
-      | `NotAuthorizedException e ->
-          `Assoc
-            [("error", (`String "NotAuthorizedException"));
-            ("details", (NotAuthorizedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("AlignedStartTime",
-           (Option.map x.alignedStartTime ~f:ISOTimestamp.to_value));
-        ("AlignedEndTime",
-          (Option.map x.alignedEndTime ~f:ISOTimestamp.to_value));
-        ("Identifier", (Option.map x.identifier ~f:String_.to_value));
-        ("MetricList",
-          (Option.map x.metricList ~f:MetricKeyDataPointsList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let metricList =
-        (Option.map ~f:MetricKeyDataPointsList.of_xml)
-          (Xml.child xml_arg0 "MetricList") in
-      let identifier =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
-      let alignedEndTime =
-        (Option.map ~f:ISOTimestamp.of_xml)
-          (Xml.child xml_arg0 "AlignedEndTime") in
-      let alignedStartTime =
-        (Option.map ~f:ISOTimestamp.of_xml)
-          (Xml.child xml_arg0 "AlignedStartTime") in
-      make ?nextToken ?metricList ?identifier ?alignedEndTime
-        ?alignedStartTime ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let metricList =
-        field_map json "MetricList" MetricKeyDataPointsList.of_json in
-      let identifier = field_map json "Identifier" String_.of_json in
-      let alignedEndTime =
-        field_map json "AlignedEndTime" ISOTimestamp.of_json in
-      let alignedStartTime =
-        field_map json "AlignedStartTime" ISOTimestamp.of_json in
-      make ?nextToken ?metricList ?identifier ?alignedEndTime
-        ?alignedStartTime ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve Performance Insights metrics for a set of data sources over a time period. You can provide specific dimension groups and dimensions, and provide aggregation and filtering criteria for each group. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
-module GetResourceMetricsRequest =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceType.t
-        [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights returns metrics. Valid values are as follows: RDS DOCDB"];
-      identifier: RequestString.t
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
-      metricQueries: MetricQueryList.t
-        [@ocaml.doc
-          "An array of one or more queries to perform. Each query must specify a Performance Insights metric, and can optionally specify aggregation and filtering criteria."];
-      startTime: ISOTimestamp.t
-        [@ocaml.doc
-          "The date and time specifying the beginning of the requested time series query range. You can't specify a StartTime that is earlier than 7 days ago. By default, Performance Insights has 7 days of retention, but you can extend this range up to 2 years. The value specified is inclusive. Thus, the command returns data points equal to or greater than StartTime. The value for StartTime must be earlier than the value for EndTime."];
-      endTime: ISOTimestamp.t
-        [@ocaml.doc
-          "The date and time specifying the end of the requested time series query range. The value specified is exclusive. Thus, the command returns data points less than (but not equal to) EndTime. The value for EndTime must be later than the value for StartTime."];
-      periodInSeconds: Integer.t option
-        [@ocaml.doc
-          "The granularity, in seconds, of the data points returned from Performance Insights. A period can be as short as one second, or as long as one day (86400 seconds). Valid values are: 1 (one second) 60 (one minute) 300 (five minutes) 3600 (one hour) 86400 (twenty-four hours) If you don't specify PeriodInSeconds, then Performance Insights will choose a value for you, with a goal of returning roughly 100-200 data points in the response."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of items to return in the response. If more items exist than the specified MaxRecords value, a pagination token is included in the response so that the remaining results can be retrieved."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
-    let context_ = "GetResourceMetricsRequest"
-    let make ?periodInSeconds =
-      fun ?maxResults ->
-        fun ?nextToken ->
-          fun ~serviceType ->
-            fun ~identifier ->
-              fun ~metricQueries ->
-                fun ~startTime ->
-                  fun ~endTime ->
-                    fun () ->
-                      {
-                        periodInSeconds;
-                        maxResults;
-                        nextToken;
-                        serviceType;
-                        identifier;
-                        metricQueries;
-                        startTime;
-                        endTime
-                      }
-    let to_value x =
-      structure_to_value
-        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (RequestString.to_value x.identifier)));
-        ("MetricQueries", (Some (MetricQueryList.to_value x.metricQueries)));
-        ("StartTime", (Some (ISOTimestamp.to_value x.startTime)));
-        ("EndTime", (Some (ISOTimestamp.to_value x.endTime)));
-        ("PeriodInSeconds",
-          (Option.map x.periodInSeconds ~f:Integer.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
-      let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let periodInSeconds =
-        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "PeriodInSeconds") in
-      let endTime =
-        ISOTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
-      let startTime =
-        ISOTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
-      let metricQueries =
-        MetricQueryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MetricQueries") in
-      let identifier =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      let serviceType =
-        ServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ?nextToken ?maxResults ?periodInSeconds ~endTime ~startTime
-        ~metricQueries ~identifier ~serviceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let periodInSeconds = field_map json "PeriodInSeconds" Integer.of_json in
-      let endTime = field_map_exn json "EndTime" ISOTimestamp.of_json in
-      let startTime = field_map_exn json "StartTime" ISOTimestamp.of_json in
-      let metricQueries =
-        field_map_exn json "MetricQueries" MetricQueryList.of_json in
-      let identifier = field_map_exn json "Identifier" RequestString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ?nextToken ?maxResults ?periodInSeconds ~endTime ~startTime
-        ~metricQueries ~identifier ~serviceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve Performance Insights metrics for a set of data sources over a time period. You can provide specific dimension groups and dimensions, and provide aggregation and filtering criteria for each group. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
-module GetResourceMetadataResponse =
-  struct
-    type nonrec t =
-      {
-      identifier: String_.t option
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
-      features: FeatureMetadataMap.t option
-        [@ocaml.doc
-          "The metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]}
-    type nonrec error =
-      [ `InternalServiceError of InternalServiceError.t 
-      | `InvalidArgumentException of InvalidArgumentException.t 
-      | `NotAuthorizedException of NotAuthorizedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?identifier =
-      fun ?features -> fun () -> { identifier; features }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_json json)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_json json)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_xml xml)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceError e ->
-          `Assoc
-            [("error", (`String "InternalServiceError"));
-            ("details", (InternalServiceError.to_json e))]
-      | `InvalidArgumentException e ->
-          `Assoc
-            [("error", (`String "InvalidArgumentException"));
-            ("details", (InvalidArgumentException.to_json e))]
-      | `NotAuthorizedException e ->
-          `Assoc
-            [("error", (`String "NotAuthorizedException"));
-            ("details", (NotAuthorizedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Identifier", (Option.map x.identifier ~f:String_.to_value));
-        ("Features", (Option.map x.features ~f:FeatureMetadataMap.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let features =
-        (Option.map ~f:FeatureMetadataMap.of_xml)
-          (Xml.child xml_arg0 "Features") in
-      let identifier =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
-      make ?features ?identifier ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let features = field_map json "Features" FeatureMetadataMap.of_json in
-      let identifier = field_map json "Identifier" String_.of_json in
-      make ?features ?identifier ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve the metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
-module GetResourceMetadataRequest =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceType.t
-        [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights returns metrics."];
-      identifier: RequestString.t
-        [@ocaml.doc
-          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."]}
-    let context_ = "GetResourceMetadataRequest"
-    let make ~serviceType =
-      fun ~identifier -> fun () -> { serviceType; identifier }
-    let to_value x =
-      structure_to_value
-        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (RequestString.to_value x.identifier)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let identifier =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      let serviceType =
-        ServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ~identifier ~serviceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let identifier = field_map_exn json "Identifier" RequestString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ~identifier ~serviceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Retrieve the metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
-module GetDimensionKeyDetailsResponse =
-  struct
-    type nonrec t =
-      {
-      dimensions: DimensionKeyDetailList.t option
-        [@ocaml.doc "The details for the requested dimensions."]}
-    type nonrec error =
-      [ `InternalServiceError of InternalServiceError.t 
-      | `InvalidArgumentException of InvalidArgumentException.t 
-      | `NotAuthorizedException of NotAuthorizedException.t 
-      | `Unknown_operation_error of (string * string option) ]
-    let make ?dimensions = fun () -> { dimensions }
-    let error_of_json name json =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_json json)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_json json)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_json json)
-      | name ->
-          `Unknown_operation_error
-            (name, (Some (Yojson.Safe.to_string json)))
-    let error_of_xml name xml =
-      match name with
-      | "InternalServiceError" ->
-          `InternalServiceError (InternalServiceError.of_xml xml)
-      | "InvalidArgumentException" ->
-          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
-      | "NotAuthorizedException" ->
-          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
-      | name ->
-          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
-    let error_to_json : error -> Yojson.Safe.t =
-      function
-      | `InternalServiceError e ->
-          `Assoc
-            [("error", (`String "InternalServiceError"));
-            ("details", (InternalServiceError.to_json e))]
-      | `InvalidArgumentException e ->
-          `Assoc
-            [("error", (`String "InvalidArgumentException"));
-            ("details", (InvalidArgumentException.to_json e))]
-      | `NotAuthorizedException e ->
-          `Assoc
-            [("error", (`String "NotAuthorizedException"));
-            ("details", (NotAuthorizedException.to_json e))]
-      | `Unknown_operation_error (code, msg) ->
-          `Assoc (("error", (`String code)) ::
-            ((match msg with
-              | None -> []
-              | Some m -> [("message", (`String m))])))
-    let to_value x =
-      structure_to_value
-        [("Dimensions",
-           (Option.map x.dimensions ~f:DimensionKeyDetailList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let dimensions =
-        (Option.map ~f:DimensionKeyDetailList.of_xml)
-          (Xml.child xml_arg0 "Dimensions") in
-      make ?dimensions ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensions =
-        field_map json "Dimensions" DimensionKeyDetailList.of_json in
-      make ?dimensions ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Get the attributes of the specified dimension group for a DB instance or data source. For example, if you specify a SQL ID, GetDimensionKeyDetails retrieves the full text of the dimension db.sql.statement associated with this ID. This operation is useful because GetResourceMetrics and DescribeDimensionKeys don't support retrieval of large SQL statement text."]
-module GetDimensionKeyDetailsRequest =
-  struct
-    type nonrec t =
-      {
-      serviceType: ServiceType.t
-        [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights returns data. The only valid value is RDS."];
-      identifier: IdentifierString.t
-        [@ocaml.doc
-          "The ID for a data source from which to gather dimension data. This ID must be immutable and unique within an Amazon Web Services Region. When a DB instance is the data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
-      group: RequestString.t
-        [@ocaml.doc
-          "The name of the dimension group. Performance Insights searches the specified group for the dimension group ID. The following group name values are valid: db.query (Amazon DocumentDB only) db.sql (Amazon RDS and Aurora only)"];
-      groupIdentifier: RequestString.t
-        [@ocaml.doc
-          "The ID of the dimension group from which to retrieve dimension details. For dimension group db.sql, the group ID is db.sql.id. The following group ID values are valid: db.sql.id for dimension group db.sql (Aurora and RDS only) db.query.id for dimension group db.query (DocumentDB only)"];
-      requestedDimensions: RequestedDimensionList.t option
-        [@ocaml.doc
-          "A list of dimensions to retrieve the detail data for within the given dimension group. If you don't specify this parameter, Performance Insights returns all dimension data within the specified dimension group. Specify dimension names for the following dimension groups: db.sql - Specify either the full dimension name db.sql.statement or the short dimension name statement (Aurora and RDS only). db.query - Specify either the full dimension name db.query.statement or the short dimension name statement (DocumentDB only)."]}
-    let context_ = "GetDimensionKeyDetailsRequest"
-    let make ?requestedDimensions =
-      fun ~serviceType ->
-        fun ~identifier ->
-          fun ~group ->
-            fun ~groupIdentifier ->
-              fun () ->
-                {
-                  requestedDimensions;
-                  serviceType;
-                  identifier;
-                  group;
-                  groupIdentifier
-                }
-    let to_value x =
-      structure_to_value
-        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
-        ("Group", (Some (RequestString.to_value x.group)));
-        ("GroupIdentifier",
-          (Some (RequestString.to_value x.groupIdentifier)));
-        ("RequestedDimensions",
-          (Option.map x.requestedDimensions
-             ~f:RequestedDimensionList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let requestedDimensions =
-        (Option.map ~f:RequestedDimensionList.of_xml)
-          (Xml.child xml_arg0 "RequestedDimensions") in
-      let groupIdentifier =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupIdentifier") in
-      let group =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
-      let identifier =
-        IdentifierString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
-      let serviceType =
-        ServiceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ?requestedDimensions ~groupIdentifier ~group ~identifier
-        ~serviceType ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let requestedDimensions =
-        field_map json "RequestedDimensions" RequestedDimensionList.of_json in
-      let groupIdentifier =
-        field_map_exn json "GroupIdentifier" RequestString.of_json in
-      let group = field_map_exn json "Group" RequestString.of_json in
-      let identifier =
-        field_map_exn json "Identifier" IdentifierString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ?requestedDimensions ~groupIdentifier ~group ~identifier
-        ~serviceType ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Get the attributes of the specified dimension group for a DB instance or data source. For example, if you specify a SQL ID, GetDimensionKeyDetails retrieves the full text of the dimension db.sql.statement associated with this ID. This operation is useful because GetResourceMetrics and DescribeDimensionKeys don't support retrieval of large SQL statement text."]
 module DescribeDimensionKeysResponse =
   struct
     type nonrec t =
@@ -2174,161 +2157,2176 @@ module DescribeDimensionKeysResponse =
       make ?nextToken ?keys ?partitionKeys ?alignedEndTime ?alignedStartTime
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let keys = field_map json "Keys" DimensionKeyDescriptionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let keys = field_map json__ "Keys" DimensionKeyDescriptionList.of_json in
       let partitionKeys =
-        field_map json "PartitionKeys" ResponsePartitionKeyList.of_json in
+        field_map json__ "PartitionKeys" ResponsePartitionKeyList.of_json in
       let alignedEndTime =
-        field_map json "AlignedEndTime" ISOTimestamp.of_json in
+        field_map json__ "AlignedEndTime" ISOTimestamp.of_json in
       let alignedStartTime =
-        field_map json "AlignedStartTime" ISOTimestamp.of_json in
+        field_map json__ "AlignedStartTime" ISOTimestamp.of_json in
       make ?nextToken ?keys ?partitionKeys ?alignedEndTime ?alignedStartTime
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For a specific time period, retrieve the top N dimension keys for a metric. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
-module DescribeDimensionKeysRequest =
+module Description =
+  struct
+    type nonrec t = string
+    let context_ = "Description"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Description" j
+    let to_json = simple_to_json to_value
+  end
+module DetailStatus =
+  struct
+    type nonrec t =
+      | AVAILABLE 
+      | PROCESSING 
+      | UNAVAILABLE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AVAILABLE -> "AVAILABLE"
+      | PROCESSING -> "PROCESSING"
+      | UNAVAILABLE -> "UNAVAILABLE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AVAILABLE" -> AVAILABLE
+      | "PROCESSING" -> PROCESSING
+      | "UNAVAILABLE" -> UNAVAILABLE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration DetailStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DetailStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module DimensionDetail =
+  struct
+    type nonrec t =
+      {
+      identifier: String_.t option
+        [@ocaml.doc "The identifier of a dimension."]}
+    let make ?identifier = fun () -> { identifier }
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Option.map x.identifier ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
+      make ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier = field_map json__ "Identifier" String_.of_json in
+      make ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The information about a dimension."]
+module DimensionDetailList =
+  struct
+    type nonrec t = DimensionDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DimensionDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DimensionDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionDetailList"
+        ~of_json:DimensionDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DimensionGroupDetail =
+  struct
+    type nonrec t =
+      {
+      group: String_.t option [@ocaml.doc "The name of the dimension group."];
+      dimensions: DimensionDetailList.t option
+        [@ocaml.doc "The dimensions within a dimension group."]}
+    let make ?group = fun ?dimensions -> fun () -> { group; dimensions }
+    let to_value x =
+      structure_to_value
+        [("Group", (Option.map x.group ~f:String_.to_value));
+        ("Dimensions",
+          (Option.map x.dimensions ~f:DimensionDetailList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dimensions =
+        (Option.map ~f:DimensionDetailList.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      let group = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Group") in
+      make ?dimensions ?group ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dimensions =
+        field_map json__ "Dimensions" DimensionDetailList.of_json in
+      let group = field_map json__ "Group" String_.of_json in
+      make ?dimensions ?group ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about dimensions within a dimension group."]
+module DimensionGroupDetailList =
+  struct
+    type nonrec t = DimensionGroupDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DimensionGroupDetail.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DimensionGroupDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionGroupDetailList"
+        ~of_json:DimensionGroupDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DimensionKeyDetail =
+  struct
+    type nonrec t =
+      {
+      value: String_.t option
+        [@ocaml.doc
+          "The value of the dimension detail data. Depending on the return status, this value is either the full or truncated SQL query for the following dimensions: db.query.statement (Amazon DocumentDB) db.sql.statement (Amazon RDS and Aurora)"];
+      dimension: String_.t option
+        [@ocaml.doc
+          "The full name of the dimension. The full name includes the group name and key name. The following values are valid: db.query.statement (Amazon DocumentDB) db.sql.statement (Amazon RDS and Aurora)"];
+      status: DetailStatus.t option
+        [@ocaml.doc
+          "The status of the dimension detail data. Possible values include the following: AVAILABLE - The dimension detail data is ready to be retrieved. PROCESSING - The dimension detail data isn't ready to be retrieved because more processing time is required. If the requested detail data has the status PROCESSING, Performance Insights returns the truncated query. UNAVAILABLE - The dimension detail data could not be collected successfully."]}
+    let make ?value =
+      fun ?dimension -> fun ?status -> fun () -> { value; dimension; status }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:String_.to_value));
+        ("Dimension", (Option.map x.dimension ~f:String_.to_value));
+        ("Status", (Option.map x.status ~f:DetailStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:DetailStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let dimension =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Dimension") in
+      let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?status ?dimension ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" DetailStatus.of_json in
+      let dimension = field_map json__ "Dimension" String_.of_json in
+      let value = field_map json__ "Value" String_.of_json in
+      make ?status ?dimension ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that describes the details for a specified dimension."]
+module DimensionKeyDetailList =
+  struct
+    type nonrec t = DimensionKeyDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DimensionKeyDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DimensionKeyDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionKeyDetailList"
+        ~of_json:DimensionKeyDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module DimensionsMetricList =
+  struct
+    type nonrec t = SanitizedString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SanitizedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SanitizedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DimensionsMetricList"
+        ~of_json:SanitizedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module FeatureStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | UNSUPPORTED 
+      | ENABLED_PENDING_REBOOT 
+      | DISABLED_PENDING_REBOOT 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | UNSUPPORTED -> "UNSUPPORTED"
+      | ENABLED_PENDING_REBOOT -> "ENABLED_PENDING_REBOOT"
+      | DISABLED_PENDING_REBOOT -> "DISABLED_PENDING_REBOOT"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | "UNSUPPORTED" -> UNSUPPORTED
+      | "ENABLED_PENDING_REBOOT" -> ENABLED_PENDING_REBOOT
+      | "DISABLED_PENDING_REBOOT" -> DISABLED_PENDING_REBOOT
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration FeatureStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"FeatureStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module FeatureMetadata =
+  struct
+    type nonrec t =
+      {
+      status: FeatureStatus.t option
+        [@ocaml.doc
+          "The status of the feature on the DB instance. Possible values include the following: ENABLED - The feature is enabled on the instance. DISABLED - The feature is disabled on the instance. UNSUPPORTED - The feature isn't supported on the instance. ENABLED_PENDING_REBOOT - The feature is enabled on the instance but requires a reboot to take effect. DISABLED_PENDING_REBOOT - The feature is disabled on the instance but requires a reboot to take effect. UNKNOWN - The feature status couldn't be determined."]}
+    let make ?status = fun () -> { status }
+    let to_value x =
+      structure_to_value
+        [("Status", (Option.map x.status ~f:FeatureStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:FeatureStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      make ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" FeatureStatus.of_json in
+      make ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The metadata for a feature. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
+module FeatureMetadataMap =
+  struct
+    type nonrec t = (String_.t * FeatureMetadata.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types String FeatureMetadata"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x ->
+                       (FeatureMetadata.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:FeatureMetadata.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RequestedDimensionList =
+  struct
+    type nonrec t = SanitizedString.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SanitizedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SanitizedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RequestedDimensionList"
+        ~of_json:SanitizedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetDimensionKeyDetailsRequest =
   struct
     type nonrec t =
       {
       serviceType: ServiceType.t
         [@ocaml.doc
-          "The Amazon Web Services service for which Performance Insights will return metrics. Valid values are as follows: RDS DOCDB"];
-      identifier: RequestString.t
+          "The Amazon Web Services service for which Performance Insights returns data. The only valid value is RDS."];
+      identifier: IdentifierString.t
         [@ocaml.doc
-          "An immutable, Amazon Web Services Region-unique identifier for a data source. Performance Insights gathers metrics from this data source. To use an Amazon RDS instance as a data source, you specify its DbiResourceId value. For example, specify db-FAIHNTYBKTGAUSUZQYPDS2GW4A."];
-      startTime: ISOTimestamp.t
+          "The ID for a data source from which to gather dimension data. This ID must be immutable and unique within an Amazon Web Services Region. When a DB instance is the data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      group: RequestString.t
         [@ocaml.doc
-          "The date and time specifying the beginning of the requested time series data. You must specify a StartTime within the past 7 days. The value specified is inclusive, which means that data points equal to or greater than StartTime are returned. The value for StartTime must be earlier than the value for EndTime."];
-      endTime: ISOTimestamp.t
+          "The name of the dimension group. Performance Insights searches the specified group for the dimension group ID. The following group name values are valid: db.execution_plan (Amazon RDS and Aurora only) db.lock_snapshot (Aurora only) db.query (Amazon DocumentDB only) db.sql (Amazon RDS and Aurora only)"];
+      groupIdentifier: RequestString.t
         [@ocaml.doc
-          "The date and time specifying the end of the requested time series data. The value specified is exclusive, which means that data points less than (but not equal to) EndTime are returned. The value for EndTime must be later than the value for StartTime."];
-      metric: RequestString.t
+          "The ID of the dimension group from which to retrieve dimension details. For dimension group db.sql, the group ID is db.sql.id. The following group ID values are valid: db.execution_plan.id for dimension group db.execution_plan (Aurora and RDS only) db.sql.id for dimension group db.sql (Aurora and RDS only) db.query.id for dimension group db.query (DocumentDB only) For the dimension group db.lock_snapshot, the GroupIdentifier is the epoch timestamp when Performance Insights captured the snapshot, in seconds. You can retrieve this value with the GetResourceMetrics operation for a 1 second period."];
+      requestedDimensions: RequestedDimensionList.t option
         [@ocaml.doc
-          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
-      periodInSeconds: Integer.t option
-        [@ocaml.doc
-          "The granularity, in seconds, of the data points returned from Performance Insights. A period can be as short as one second, or as long as one day (86400 seconds). Valid values are: 1 (one second) 60 (one minute) 300 (five minutes) 3600 (one hour) 86400 (twenty-four hours) If you don't specify PeriodInSeconds, then Performance Insights chooses a value for you, with a goal of returning roughly 100-200 data points in the response."];
-      groupBy: DimensionGroup.t
-        [@ocaml.doc
-          "A specification for how to aggregate the data points from a query result. You must specify a valid dimension group. Performance Insights returns all dimensions within this group, unless you provide the names of specific dimensions within this group. You can also request that Performance Insights return a limited number of values for a dimension."];
-      additionalMetrics: AdditionalMetricsList.t option
-        [@ocaml.doc
-          "Additional metrics for the top N dimension keys. If the specified dimension group in the GroupBy parameter is db.sql_tokenized, you can specify per-SQL metrics to get the values for the top N SQL digests. The response syntax is as follows: \"AdditionalMetrics\" : \\{ \"string\" : \"string\" \\}."];
-      partitionBy: DimensionGroup.t option
-        [@ocaml.doc
-          "For each dimension specified in GroupBy, specify a secondary dimension to further subdivide the partition keys in the response."];
-      filter: MetricQueryFilterMap.t option
-        [@ocaml.doc
-          "One or more filters to apply in the request. Restrictions: Any number of filters by the same dimension, as specified in the GroupBy or Partition parameters. A single filter for any other dimension in this dimension group."];
-      maxResults: MaxResults.t option
-        [@ocaml.doc
-          "The maximum number of items to return in the response. If more items exist than the specified MaxRecords value, a pagination token is included in the response so that the remaining results can be retrieved."];
-      nextToken: NextToken.t option
-        [@ocaml.doc
-          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
-    let context_ = "DescribeDimensionKeysRequest"
-    let make ?periodInSeconds =
-      fun ?additionalMetrics ->
-        fun ?partitionBy ->
-          fun ?filter ->
-            fun ?maxResults ->
-              fun ?nextToken ->
-                fun ~serviceType ->
-                  fun ~identifier ->
-                    fun ~startTime ->
-                      fun ~endTime ->
-                        fun ~metric ->
-                          fun ~groupBy ->
-                            fun () ->
-                              {
-                                periodInSeconds;
-                                additionalMetrics;
-                                partitionBy;
-                                filter;
-                                maxResults;
-                                nextToken;
-                                serviceType;
-                                identifier;
-                                startTime;
-                                endTime;
-                                metric;
-                                groupBy
-                              }
+          "A list of dimensions to retrieve the detail data for within the given dimension group. If you don't specify this parameter, Performance Insights returns all dimension data within the specified dimension group. Specify dimension names for the following dimension groups: db.execution_plan - Specify the dimension name db.execution_plan.raw_plan or the short dimension name raw_plan (Amazon RDS and Aurora only) db.lock_snapshot - Specify the dimension name db.lock_snapshot.lock_trees or the short dimension name lock_trees. (Aurora only) db.sql - Specify either the full dimension name db.sql.statement or the short dimension name statement (Aurora and RDS only). db.query - Specify either the full dimension name db.query.statement or the short dimension name statement (DocumentDB only)."]}
+    let context_ = "GetDimensionKeyDetailsRequest"
+    let make ?requestedDimensions =
+      fun ~serviceType ->
+        fun ~identifier ->
+          fun ~group ->
+            fun ~groupIdentifier ->
+              fun () ->
+                {
+                  requestedDimensions;
+                  serviceType;
+                  identifier;
+                  group;
+                  groupIdentifier
+                }
     let to_value x =
       structure_to_value
         [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
-        ("Identifier", (Some (RequestString.to_value x.identifier)));
-        ("StartTime", (Some (ISOTimestamp.to_value x.startTime)));
-        ("EndTime", (Some (ISOTimestamp.to_value x.endTime)));
-        ("Metric", (Some (RequestString.to_value x.metric)));
-        ("PeriodInSeconds",
-          (Option.map x.periodInSeconds ~f:Integer.to_value));
-        ("GroupBy", (Some (DimensionGroup.to_value x.groupBy)));
-        ("AdditionalMetrics",
-          (Option.map x.additionalMetrics ~f:AdditionalMetricsList.to_value));
-        ("PartitionBy",
-          (Option.map x.partitionBy ~f:DimensionGroup.to_value));
-        ("Filter", (Option.map x.filter ~f:MetricQueryFilterMap.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("Group", (Some (RequestString.to_value x.group)));
+        ("GroupIdentifier",
+          (Some (RequestString.to_value x.groupIdentifier)));
+        ("RequestedDimensions",
+          (Option.map x.requestedDimensions
+             ~f:RequestedDimensionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let requestedDimensions =
+        (Option.map ~f:RequestedDimensionList.of_xml)
+          (Xml.child xml_arg0 "RequestedDimensions") in
+      let groupIdentifier =
+        RequestString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "GroupIdentifier") in
+      let group =
+        RequestString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Group") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?requestedDimensions ~groupIdentifier ~group ~identifier
+        ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestedDimensions =
+        field_map json__ "RequestedDimensions" RequestedDimensionList.of_json in
+      let groupIdentifier =
+        field_map_exn json__ "GroupIdentifier" RequestString.of_json in
+      let group = field_map_exn json__ "Group" RequestString.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?requestedDimensions ~groupIdentifier ~group ~identifier
+        ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the attributes of the specified dimension group for a DB instance or data source. For example, if you specify a SQL ID, GetDimensionKeyDetails retrieves the full text of the dimension db.sql.statement associated with this ID. This operation is useful because GetResourceMetrics and DescribeDimensionKeys don't support retrieval of large SQL statement text, lock snapshots, and execution plans."]
+module GetDimensionKeyDetailsResponse =
+  struct
+    type nonrec t =
+      {
+      dimensions: DimensionKeyDetailList.t option
+        [@ocaml.doc "The details for the requested dimensions."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dimensions = fun () -> { dimensions }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Dimensions",
+           (Option.map x.dimensions ~f:DimensionKeyDetailList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dimensions =
+        (Option.map ~f:DimensionKeyDetailList.of_xml)
+          (Xml.child xml_arg0 "Dimensions") in
+      make ?dimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dimensions =
+        field_map json__ "Dimensions" DimensionKeyDetailList.of_json in
+      make ?dimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get the attributes of the specified dimension group for a DB instance or data source. For example, if you specify a SQL ID, GetDimensionKeyDetails retrieves the full text of the dimension db.sql.statement associated with this ID. This operation is useful because GetResourceMetrics and DescribeDimensionKeys don't support retrieval of large SQL statement text, lock snapshots, and execution plans."]
+module TextFormat =
+  struct
+    type nonrec t =
+      | PLAIN_TEXT 
+      | MARKDOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PLAIN_TEXT -> "PLAIN_TEXT"
+      | MARKDOWN -> "MARKDOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PLAIN_TEXT" -> PLAIN_TEXT
+      | "MARKDOWN" -> MARKDOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TextFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TextFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module GetPerformanceAnalysisReportRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights will return metrics. Valid value is RDS."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      analysisReportId: AnalysisReportId.t
+        [@ocaml.doc
+          "A unique identifier of the created analysis report. For example, report-12345678901234567"];
+      textFormat: TextFormat.t option
+        [@ocaml.doc
+          "Indicates the text format in the report. The options are PLAIN_TEXT or MARKDOWN. The default value is plain text."];
+      acceptLanguage: AcceptLanguage.t option
+        [@ocaml.doc
+          "The text language in the report. The default language is EN_US (English)."]}
+    let context_ = "GetPerformanceAnalysisReportRequest"
+    let make ?textFormat =
+      fun ?acceptLanguage ->
+        fun ~serviceType ->
+          fun ~identifier ->
+            fun ~analysisReportId ->
+              fun () ->
+                {
+                  textFormat;
+                  acceptLanguage;
+                  serviceType;
+                  identifier;
+                  analysisReportId
+                }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("AnalysisReportId",
+          (Some (AnalysisReportId.to_value x.analysisReportId)));
+        ("TextFormat", (Option.map x.textFormat ~f:TextFormat.to_value));
+        ("AcceptLanguage",
+          (Option.map x.acceptLanguage ~f:AcceptLanguage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let acceptLanguage =
+        (Option.map ~f:AcceptLanguage.of_xml)
+          (Xml.child xml_arg0 "AcceptLanguage") in
+      let textFormat =
+        (Option.map ~f:TextFormat.of_xml) (Xml.child xml_arg0 "TextFormat") in
+      let analysisReportId =
+        AnalysisReportId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AnalysisReportId") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?acceptLanguage ?textFormat ~analysisReportId ~identifier
+        ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let acceptLanguage =
+        field_map json__ "AcceptLanguage" AcceptLanguage.of_json in
+      let textFormat = field_map json__ "TextFormat" TextFormat.of_json in
+      let analysisReportId =
+        field_map_exn json__ "AnalysisReportId" AnalysisReportId.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?acceptLanguage ?textFormat ~analysisReportId ~identifier
+        ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the report including the report ID, status, time details, and the insights with recommendations. The report status can be RUNNING, SUCCEEDED, or FAILED. The insights include the description and recommendation fields."]
+module GetPerformanceAnalysisReportResponse =
+  struct
+    type nonrec t =
+      {
+      analysisReport: AnalysisReport.t option
+        [@ocaml.doc
+          "The summary of the performance analysis report created for a time period."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analysisReport = fun () -> { analysisReport }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AnalysisReport",
+           (Option.map x.analysisReport ~f:AnalysisReport.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisReport =
+        (Option.map ~f:AnalysisReport.of_xml)
+          (Xml.child xml_arg0 "AnalysisReport") in
+      make ?analysisReport ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisReport =
+        field_map json__ "AnalysisReport" AnalysisReport.of_json in
+      make ?analysisReport ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the report including the report ID, status, time details, and the insights with recommendations. The report status can be RUNNING, SUCCEEDED, or FAILED. The insights include the description and recommendation fields."]
+module GetResourceMetadataRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."]}
+    let context_ = "GetResourceMetadataRequest"
+    let make ~serviceType =
+      fun ~identifier -> fun () -> { serviceType; identifier }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
+module GetResourceMetadataResponse =
+  struct
+    type nonrec t =
+      {
+      identifier: String_.t option
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      features: FeatureMetadataMap.t option
+        [@ocaml.doc
+          "The metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?identifier =
+      fun ?features -> fun () -> { identifier; features }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Identifier", (Option.map x.identifier ~f:String_.to_value));
+        ("Features", (Option.map x.features ~f:FeatureMetadataMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let features =
+        (Option.map ~f:FeatureMetadataMap.of_xml)
+          (Xml.child xml_arg0 "Features") in
+      let identifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
+      make ?features ?identifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let features = field_map json__ "Features" FeatureMetadataMap.of_json in
+      let identifier = field_map json__ "Identifier" String_.of_json in
+      make ?features ?identifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the metadata for different features. For example, the metadata might indicate that a feature is turned on or off on a specific DB instance."]
+module PeriodAlignment =
+  struct
+    type nonrec t =
+      | END_TIME 
+      | START_TIME 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | END_TIME -> "END_TIME"
+      | START_TIME -> "START_TIME"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "END_TIME" -> END_TIME
+      | "START_TIME" -> START_TIME
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PeriodAlignment" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PeriodAlignment" j)
+    let to_json = simple_to_json to_value
+  end
+module MetricQuery =
+  struct
+    type nonrec t =
+      {
+      metric: SanitizedString.t
+        [@ocaml.doc
+          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. The counter metrics listed in Performance Insights operating system counters in the Amazon Aurora User Guide. The counter metrics listed in Performance Insights operating system counters in the Amazon RDS User Guide. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
+      groupBy: DimensionGroup.t option
+        [@ocaml.doc
+          "A specification for how to aggregate the data points from a query result. You must specify a valid dimension group. Performance Insights will return all of the dimensions within that group, unless you provide the names of specific dimensions within that group. You can also request that Performance Insights return a limited number of values for a dimension."];
+      filter: MetricQueryFilterMap.t option
+        [@ocaml.doc
+          "One or more filters to apply in the request. Restrictions: Any number of filters by the same dimension, as specified in the GroupBy parameter. A single filter for any other dimension in this dimension group. The db.sql.db_id filter isn't available for RDS for SQL Server DB instances."]}
+    let context_ = "MetricQuery"
+    let make ?groupBy =
+      fun ?filter -> fun ~metric -> fun () -> { groupBy; filter; metric }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Some (SanitizedString.to_value x.metric)));
+        ("GroupBy", (Option.map x.groupBy ~f:DimensionGroup.to_value));
+        ("Filter", (Option.map x.filter ~f:MetricQueryFilterMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let filter =
+        (Option.map ~f:MetricQueryFilterMap.of_xml)
+          (Xml.child xml_arg0 "Filter") in
+      let groupBy =
+        (Option.map ~f:DimensionGroup.of_xml) (Xml.child xml_arg0 "GroupBy") in
+      let metric =
+        SanitizedString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
+      make ?filter ?groupBy ~metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let filter = field_map json__ "Filter" MetricQueryFilterMap.of_json in
+      let groupBy = field_map json__ "GroupBy" DimensionGroup.of_json in
+      let metric = field_map_exn json__ "Metric" SanitizedString.of_json in
+      make ?filter ?groupBy ~metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A single query to be processed. You must provide the metric to query and append an aggregate function to the metric. For example, to find the average for the metric db.load you must use db.load.avg. Valid values for aggregate functions include .avg, .min, .max, and .sum. If no other parameters are specified, Performance Insights returns all data points for the specified metric. Optionally, you can request that the data points be aggregated by dimension group (GroupBy), and return only those data points that match your criteria (Filter)."]
+module MetricQueryList =
+  struct
+    type nonrec t = MetricQuery.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:15) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricQuery.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricQuery.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricQueryList" ~of_json:MetricQuery.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetResourceMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics. Valid values are as follows: RDS DOCDB"];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      metricQueries: MetricQueryList.t
+        [@ocaml.doc
+          "An array of one or more queries to perform. Each query must specify a Performance Insights metric and specify an aggregate function, and you can provide filtering criteria. You must append the aggregate function to the metric. For example, to find the average for the metric db.load you must use db.load.avg. Valid values for aggregate functions include .avg, .min, .max, and .sum."];
+      startTime: ISOTimestamp.t
+        [@ocaml.doc
+          "The date and time specifying the beginning of the requested time series query range. You can't specify a StartTime that is earlier than 7 days ago. By default, Performance Insights has 7 days of retention, but you can extend this range up to 2 years. The value specified is inclusive. Thus, the command returns data points equal to or greater than StartTime. The value for StartTime must be earlier than the value for EndTime."];
+      endTime: ISOTimestamp.t
+        [@ocaml.doc
+          "The date and time specifying the end of the requested time series query range. The value specified is exclusive. Thus, the command returns data points less than (but not equal to) EndTime. The value for EndTime must be later than the value for StartTime."];
+      periodInSeconds: Integer.t option
+        [@ocaml.doc
+          "The granularity, in seconds, of the data points returned from Performance Insights. A period can be as short as one second, or as long as one day (86400 seconds). Valid values are: 1 (one second) 60 (one minute) 300 (five minutes) 3600 (one hour) 86400 (twenty-four hours) If you don't specify PeriodInSeconds, then Performance Insights will choose a value for you, with a goal of returning roughly 100-200 data points in the response."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc "The maximum number of items to return in the response."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."];
+      periodAlignment: PeriodAlignment.t option
+        [@ocaml.doc
+          "The returned timestamp which is the start or end time of the time periods. The default value is END_TIME."]}
+    let context_ = "GetResourceMetricsRequest"
+    let make ?periodInSeconds =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?periodAlignment ->
+            fun ~serviceType ->
+              fun ~identifier ->
+                fun ~metricQueries ->
+                  fun ~startTime ->
+                    fun ~endTime ->
+                      fun () ->
+                        {
+                          periodInSeconds;
+                          maxResults;
+                          nextToken;
+                          periodAlignment;
+                          serviceType;
+                          identifier;
+                          metricQueries;
+                          startTime;
+                          endTime
+                        }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("MetricQueries", (Some (MetricQueryList.to_value x.metricQueries)));
+        ("StartTime", (Some (ISOTimestamp.to_value x.startTime)));
+        ("EndTime", (Some (ISOTimestamp.to_value x.endTime)));
+        ("PeriodInSeconds",
+          (Option.map x.periodInSeconds ~f:Integer.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("PeriodAlignment",
+          (Option.map x.periodAlignment ~f:PeriodAlignment.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let periodAlignment =
+        (Option.map ~f:PeriodAlignment.of_xml)
+          (Xml.child xml_arg0 "PeriodAlignment") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
-      let filter =
-        (Option.map ~f:MetricQueryFilterMap.of_xml)
-          (Xml.child xml_arg0 "Filter") in
-      let partitionBy =
-        (Option.map ~f:DimensionGroup.of_xml)
-          (Xml.child xml_arg0 "PartitionBy") in
-      let additionalMetrics =
-        (Option.map ~f:AdditionalMetricsList.of_xml)
-          (Xml.child xml_arg0 "AdditionalMetrics") in
-      let groupBy =
-        DimensionGroup.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GroupBy") in
       let periodInSeconds =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "PeriodInSeconds") in
-      let metric =
-        RequestString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Metric") in
       let endTime =
         ISOTimestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "EndTime") in
       let startTime =
         ISOTimestamp.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StartTime") in
+      let metricQueries =
+        MetricQueryList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricQueries") in
       let identifier =
-        RequestString.of_xml
+        IdentifierString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
       let serviceType =
         ServiceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
-      make ?nextToken ?maxResults ?filter ?partitionBy ?additionalMetrics
-        ~groupBy ?periodInSeconds ~metric ~endTime ~startTime ~identifier
+      make ?periodAlignment ?nextToken ?maxResults ?periodInSeconds ~endTime
+        ~startTime ~metricQueries ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let periodAlignment =
+        field_map json__ "PeriodAlignment" PeriodAlignment.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let periodInSeconds =
+        field_map json__ "PeriodInSeconds" Integer.of_json in
+      let endTime = field_map_exn json__ "EndTime" ISOTimestamp.of_json in
+      let startTime = field_map_exn json__ "StartTime" ISOTimestamp.of_json in
+      let metricQueries =
+        field_map_exn json__ "MetricQueries" MetricQueryList.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?periodAlignment ?nextToken ?maxResults ?periodInSeconds ~endTime
+        ~startTime ~metricQueries ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve Performance Insights metrics for a set of data sources over a time period. You can provide specific dimension groups and dimensions, and provide filtering criteria for each group. You must specify an aggregate function for each metric. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
+module ResponseResourceMetricKey =
+  struct
+    type nonrec t =
+      {
+      metric: String_.t option
+        [@ocaml.doc
+          "The name of a Performance Insights metric to be measured. Valid values for Metric are: db.load.avg - A scaled representation of the number of active sessions for the database engine. db.sampledload.avg - The raw number of active sessions for the database engine. The counter metrics listed in Performance Insights operating system counters in the Amazon Aurora User Guide. The counter metrics listed in Performance Insights operating system counters in the Amazon RDS User Guide. If the number of active sessions is less than an internal Performance Insights threshold, db.load.avg and db.sampledload.avg are the same value. If the number of active sessions is greater than the internal threshold, Performance Insights samples the active sessions, with db.load.avg showing the scaled values, db.sampledload.avg showing the raw values, and db.sampledload.avg less than db.load.avg. For most use cases, you can query db.load.avg only."];
+      dimensions: DimensionMap.t option
+        [@ocaml.doc "The valid dimensions for the metric."]}
+    let make ?metric = fun ?dimensions -> fun () -> { metric; dimensions }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Option.map x.metric ~f:String_.to_value));
+        ("Dimensions", (Option.map x.dimensions ~f:DimensionMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dimensions =
+        (Option.map ~f:DimensionMap.of_xml) (Xml.child xml_arg0 "Dimensions") in
+      let metric =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
+      make ?dimensions ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dimensions = field_map json__ "Dimensions" DimensionMap.of_json in
+      let metric = field_map json__ "Metric" String_.of_json in
+      make ?dimensions ?metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object describing a Performance Insights metric and one or more dimensions for that metric."]
+module MetricKeyDataPoints =
+  struct
+    type nonrec t =
+      {
+      key: ResponseResourceMetricKey.t option
+        [@ocaml.doc "The dimensions to which the data points apply."];
+      dataPoints: DataPointsList.t option
+        [@ocaml.doc
+          "An array of timestamp-value pairs, representing measurements over a period of time."]}
+    let make ?key = fun ?dataPoints -> fun () -> { key; dataPoints }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:ResponseResourceMetricKey.to_value));
+        ("DataPoints", (Option.map x.dataPoints ~f:DataPointsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dataPoints =
+        (Option.map ~f:DataPointsList.of_xml)
+          (Xml.child xml_arg0 "DataPoints") in
+      let key =
+        (Option.map ~f:ResponseResourceMetricKey.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?dataPoints ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dataPoints = field_map json__ "DataPoints" DataPointsList.of_json in
+      let key = field_map json__ "Key" ResponseResourceMetricKey.of_json in
+      make ?dataPoints ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A time-ordered series of data points, corresponding to a dimension of a Performance Insights metric."]
+module MetricKeyDataPointsList =
+  struct
+    type nonrec t = MetricKeyDataPoints.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricKeyDataPoints.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricKeyDataPoints.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricKeyDataPointsList"
+        ~of_json:MetricKeyDataPoints.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GetResourceMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      alignedStartTime: ISOTimestamp.t option
+        [@ocaml.doc
+          "The start time for the returned metrics, after alignment to a granular boundary (as specified by PeriodInSeconds). AlignedStartTime will be less than or equal to the value of the user-specified StartTime."];
+      alignedEndTime: ISOTimestamp.t option
+        [@ocaml.doc
+          "The end time for the returned metrics, after alignment to a granular boundary (as specified by PeriodInSeconds). AlignedEndTime will be greater than or equal to the value of the user-specified Endtime."];
+      identifier: String_.t option
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId."];
+      metricList: MetricKeyDataPointsList.t option
+        [@ocaml.doc
+          "An array of metric results, where each array element contains all of the data points for a particular dimension."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?alignedStartTime =
+      fun ?alignedEndTime ->
+        fun ?identifier ->
+          fun ?metricList ->
+            fun ?nextToken ->
+              fun () ->
+                {
+                  alignedStartTime;
+                  alignedEndTime;
+                  identifier;
+                  metricList;
+                  nextToken
+                }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AlignedStartTime",
+           (Option.map x.alignedStartTime ~f:ISOTimestamp.to_value));
+        ("AlignedEndTime",
+          (Option.map x.alignedEndTime ~f:ISOTimestamp.to_value));
+        ("Identifier", (Option.map x.identifier ~f:String_.to_value));
+        ("MetricList",
+          (Option.map x.metricList ~f:MetricKeyDataPointsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metricList =
+        (Option.map ~f:MetricKeyDataPointsList.of_xml)
+          (Xml.child xml_arg0 "MetricList") in
+      let identifier =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Identifier") in
+      let alignedEndTime =
+        (Option.map ~f:ISOTimestamp.of_xml)
+          (Xml.child xml_arg0 "AlignedEndTime") in
+      let alignedStartTime =
+        (Option.map ~f:ISOTimestamp.of_xml)
+          (Xml.child xml_arg0 "AlignedStartTime") in
+      make ?nextToken ?metricList ?identifier ?alignedEndTime
+        ?alignedStartTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metricList =
+        field_map json__ "MetricList" MetricKeyDataPointsList.of_json in
+      let identifier = field_map json__ "Identifier" String_.of_json in
+      let alignedEndTime =
+        field_map json__ "AlignedEndTime" ISOTimestamp.of_json in
+      let alignedStartTime =
+        field_map json__ "AlignedStartTime" ISOTimestamp.of_json in
+      make ?nextToken ?metricList ?identifier ?alignedEndTime
+        ?alignedStartTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve Performance Insights metrics for a set of data sources over a time period. You can provide specific dimension groups and dimensions, and provide filtering criteria for each group. You must specify an aggregate function for each metric. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
+module ListAvailableResourceDimensionsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique within an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use an Amazon RDS DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VWZ."];
+      metrics: DimensionsMetricList.t
+        [@ocaml.doc
+          "The types of metrics for which to retrieve dimensions. Valid values include db.load."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more items exist than the specified MaxRecords value, a pagination token is included in the response so that the remaining results can be retrieved."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."];
+      authorizedActions: AuthorizedActionsList.t option
+        [@ocaml.doc
+          "The actions to discover the dimensions you are authorized to access. If you specify multiple actions, then the response will contain the dimensions common for all the actions. When you don't specify this request parameter or provide an empty list, the response contains all the available dimensions for the target database engine whether or not you are authorized to access them."]}
+    let context_ = "ListAvailableResourceDimensionsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?authorizedActions ->
+          fun ~serviceType ->
+            fun ~identifier ->
+              fun ~metrics ->
+                fun () ->
+                  {
+                    maxResults;
+                    nextToken;
+                    authorizedActions;
+                    serviceType;
+                    identifier;
+                    metrics
+                  }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("Metrics", (Some (DimensionsMetricList.to_value x.metrics)));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("AuthorizedActions",
+          (Option.map x.authorizedActions ~f:AuthorizedActionsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizedActions =
+        (Option.map ~f:AuthorizedActionsList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedActions") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let metrics =
+        DimensionsMetricList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Metrics") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?authorizedActions ?nextToken ?maxResults ~metrics ~identifier
         ~serviceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filter = field_map json "Filter" MetricQueryFilterMap.of_json in
-      let partitionBy = field_map json "PartitionBy" DimensionGroup.of_json in
-      let additionalMetrics =
-        field_map json "AdditionalMetrics" AdditionalMetricsList.of_json in
-      let groupBy = field_map_exn json "GroupBy" DimensionGroup.of_json in
-      let periodInSeconds = field_map json "PeriodInSeconds" Integer.of_json in
-      let metric = field_map_exn json "Metric" RequestString.of_json in
-      let endTime = field_map_exn json "EndTime" ISOTimestamp.of_json in
-      let startTime = field_map_exn json "StartTime" ISOTimestamp.of_json in
-      let identifier = field_map_exn json "Identifier" RequestString.of_json in
-      let serviceType = field_map_exn json "ServiceType" ServiceType.of_json in
-      make ?nextToken ?maxResults ?filter ?partitionBy ?additionalMetrics
-        ~groupBy ?periodInSeconds ~metric ~endTime ~startTime ~identifier
+    let of_json json__ =
+      let authorizedActions =
+        field_map json__ "AuthorizedActions" AuthorizedActionsList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let metrics =
+        field_map_exn json__ "Metrics" DimensionsMetricList.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?authorizedActions ?nextToken ?maxResults ~metrics ~identifier
         ~serviceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "For a specific time period, retrieve the top N dimension keys for a metric. Each response element returns a maximum of 500 bytes. For larger elements, such as SQL statements, only the first 500 bytes are returned."]
+       "Retrieve the dimensions that can be queried for each specified metric type on a specified DB instance."]
+module MetricDimensionGroups =
+  struct
+    type nonrec t =
+      {
+      metric: String_.t option
+        [@ocaml.doc
+          "The metric type to which the dimension information belongs."];
+      groups: DimensionGroupDetailList.t option
+        [@ocaml.doc "The available dimension groups for a metric type."]}
+    let make ?metric = fun ?groups -> fun () -> { metric; groups }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Option.map x.metric ~f:String_.to_value));
+        ("Groups",
+          (Option.map x.groups ~f:DimensionGroupDetailList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let groups =
+        (Option.map ~f:DimensionGroupDetailList.of_xml)
+          (Xml.child xml_arg0 "Groups") in
+      let metric =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
+      make ?groups ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let groups = field_map json__ "Groups" DimensionGroupDetailList.of_json in
+      let metric = field_map json__ "Metric" String_.of_json in
+      make ?groups ?metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The available dimension information for a metric type."]
+module MetricDimensionsList =
+  struct
+    type nonrec t = MetricDimensionGroups.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricDimensionGroups.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricDimensionGroups.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricDimensionsList"
+        ~of_json:MetricDimensionGroups.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAvailableResourceDimensionsResponse =
+  struct
+    type nonrec t =
+      {
+      metricDimensions: MetricDimensionsList.t option
+        [@ocaml.doc
+          "The dimension information returned for requested metric types."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metricDimensions =
+      fun ?nextToken -> fun () -> { metricDimensions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MetricDimensions",
+           (Option.map x.metricDimensions ~f:MetricDimensionsList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metricDimensions =
+        (Option.map ~f:MetricDimensionsList.of_xml)
+          (Xml.child xml_arg0 "MetricDimensions") in
+      make ?nextToken ?metricDimensions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metricDimensions =
+        field_map json__ "MetricDimensions" MetricDimensionsList.of_json in
+      make ?nextToken ?metricDimensions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve the dimensions that can be queried for each specified metric type on a specified DB instance."]
+module MetricTypeList =
+  struct
+    type nonrec t = SanitizedString.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SanitizedString.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SanitizedString.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricTypeList" ~of_json:SanitizedString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAvailableResourceMetricsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique within an Amazon Web Services Region. Performance Insights gathers metrics from this data source. To use an Amazon RDS DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VWZ."];
+      metricTypes: MetricTypeList.t
+        [@ocaml.doc
+          "The types of metrics to return in the response. Valid values in the array include the following: os (OS counter metrics) - All engines db (DB load metrics) - All engines except for Amazon DocumentDB db.sql.stats (per-SQL metrics) - All engines except for Amazon DocumentDB db.sql_tokenized.stats (per-SQL digest metrics) - All engines except for Amazon DocumentDB"];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxRecords."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return. If the MaxRecords value is less than the number of existing items, the response includes a pagination token."]}
+    let context_ = "ListAvailableResourceMetricsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ~serviceType ->
+          fun ~identifier ->
+            fun ~metricTypes ->
+              fun () ->
+                { nextToken; maxResults; serviceType; identifier; metricTypes
+                }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("MetricTypes", (Some (MetricTypeList.to_value x.metricTypes)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metricTypes =
+        MetricTypeList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricTypes") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?maxResults ?nextToken ~metricTypes ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metricTypes =
+        field_map_exn json__ "MetricTypes" MetricTypeList.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?maxResults ?nextToken ~metricTypes ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve metrics of the specified types that can be queried for a specified DB instance."]
+module ResponseResourceMetric =
+  struct
+    type nonrec t =
+      {
+      metric: String_.t option [@ocaml.doc "The full name of the metric."];
+      description: Description.t option
+        [@ocaml.doc "The description of the metric."];
+      unit: String_.t option [@ocaml.doc "The unit of the metric."]}
+    let make ?metric =
+      fun ?description ->
+        fun ?unit -> fun () -> { metric; description; unit }
+    let to_value x =
+      structure_to_value
+        [("Metric", (Option.map x.metric ~f:String_.to_value));
+        ("Description", (Option.map x.description ~f:Description.to_value));
+        ("Unit", (Option.map x.unit ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Unit") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "Description") in
+      let metric =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Metric") in
+      make ?unit ?description ?metric ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" String_.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let metric = field_map json__ "Metric" String_.of_json in
+      make ?unit ?description ?metric ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An object that contains the full name, description, and unit of a metric."]
+module ResponseResourceMetricList =
+  struct
+    type nonrec t = ResponseResourceMetric.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResponseResourceMetric.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResponseResourceMetric.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResponseResourceMetricList"
+        ~of_json:ResponseResourceMetric.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAvailableResourceMetricsResponse =
+  struct
+    type nonrec t =
+      {
+      metrics: ResponseResourceMetricList.t option
+        [@ocaml.doc
+          "An array of metrics available to query. Each array element contains the full name, description, and unit of the metric."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "A pagination token that indicates the response didn\226\128\153t return all available records because MaxRecords was specified in the previous request. To get the remaining records, specify NextToken in a separate request with this value."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?metrics = fun ?nextToken -> fun () -> { metrics; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Metrics",
+           (Option.map x.metrics ~f:ResponseResourceMetricList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let metrics =
+        (Option.map ~f:ResponseResourceMetricList.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      make ?nextToken ?metrics ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let metrics =
+        field_map json__ "Metrics" ResponseResourceMetricList.of_json in
+      make ?nextToken ?metrics ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieve metrics of the specified types that can be queried for a specified DB instance."]
+module ListPerformanceAnalysisReportsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics. Valid value is RDS."];
+      identifier: IdentifierString.t
+        [@ocaml.doc
+          "An immutable identifier for a data source that is unique for an Amazon Web Services Region. Performance Insights gathers metrics from this data source. In the console, the identifier is shown as ResourceID. When you call DescribeDBInstances, the identifier is returned as DbiResourceId. To use a DB instance as a data source, specify its DbiResourceId value. For example, specify db-ABCDEFGHIJKLMNOPQRSTU1VW2X."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxResults."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of items to return in the response. If more items exist than the specified MaxResults value, a pagination token is included in the response so that the remaining results can be retrieved."];
+      listTags: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether or not to include the list of tags in the response."]}
+    let context_ = "ListPerformanceAnalysisReportsRequest"
+    let make ?nextToken =
+      fun ?maxResults ->
+        fun ?listTags ->
+          fun ~serviceType ->
+            fun ~identifier ->
+              fun () ->
+                { nextToken; maxResults; listTags; serviceType; identifier }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("Identifier", (Some (IdentifierString.to_value x.identifier)));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("ListTags", (Option.map x.listTags ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let listTags =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ListTags") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let identifier =
+        IdentifierString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Identifier") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ?listTags ?maxResults ?nextToken ~identifier ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let listTags = field_map json__ "ListTags" Boolean.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let identifier =
+        field_map_exn json__ "Identifier" IdentifierString.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ?listTags ?maxResults ?nextToken ~identifier ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the analysis reports created for the DB instance. The reports are sorted based on the start time of each report."]
+module ListPerformanceAnalysisReportsResponse =
+  struct
+    type nonrec t =
+      {
+      analysisReports: AnalysisReportSummaryList.t option
+        [@ocaml.doc
+          "List of reports including the report identifier, start and end time, creation time, and status."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "An optional pagination token provided by a previous request. If this parameter is specified, the response includes only records beyond the token, up to the value specified by MaxResults."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analysisReports =
+      fun ?nextToken -> fun () -> { analysisReports; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AnalysisReports",
+           (Option.map x.analysisReports
+              ~f:AnalysisReportSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let analysisReports =
+        (Option.map ~f:AnalysisReportSummaryList.of_xml)
+          (Xml.child xml_arg0 "AnalysisReports") in
+      make ?nextToken ?analysisReports ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let analysisReports =
+        field_map json__ "AnalysisReports" AnalysisReportSummaryList.of_json in
+      make ?nextToken ?analysisReports ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the analysis reports created for the DB instance. The reports are sorted based on the start time of each report."]
+module ListTagsForResourceRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "List the tags for the Amazon Web Services service for which Performance Insights returns metrics. Valid value is RDS."];
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "Lists all the tags for the Amazon RDS Performance Insights resource. This value is an Amazon Resource Name (ARN). For information about creating an ARN, see Constructing an RDS Amazon Resource Name (ARN)."]}
+    let context_ = "ListTagsForResourceRequest"
+    let make ~serviceType =
+      fun ~resourceARN -> fun () -> { serviceType; resourceARN }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ~resourceARN ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ~resourceARN ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all the metadata tags associated with Amazon RDS Performance Insights resource."]
+module ListTagsForResourceResponse =
+  struct
+    type nonrec t =
+      {
+      tags: TagList.t option
+        [@ocaml.doc
+          "The metadata assigned to an Amazon RDS resource consisting of a key-value pair."]}
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?tags = fun () -> { tags }
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves all the metadata tags associated with Amazon RDS Performance Insights resource."]
+module TagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:200) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j = list_of_json ~kind:"TagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "The Amazon Web Services service for which Performance Insights returns metrics. Valid value is RDS."];
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon RDS Performance Insights resource that the tags are added to. This value is an Amazon Resource Name (ARN). For information about creating an ARN, see Constructing an RDS Amazon Resource Name (ARN)."];
+      tags: TagList.t
+        [@ocaml.doc
+          "The metadata assigned to an Amazon RDS resource consisting of a key-value pair."]}
+    let context_ = "TagResourceRequest"
+    let make ~serviceType =
+      fun ~resourceARN ->
+        fun ~tags -> fun () -> { serviceType; resourceARN; tags }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("Tags", (Some (TagList.to_value x.tags)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags =
+        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ~tags ~resourceARN ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ~tags ~resourceARN ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds metadata tags to the Amazon RDS Performance Insights resource."]
+module TagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds metadata tags to the Amazon RDS Performance Insights resource."]
+module UntagResourceRequest =
+  struct
+    type nonrec t =
+      {
+      serviceType: ServiceType.t
+        [@ocaml.doc
+          "List the tags for the Amazon Web Services service for which Performance Insights returns metrics. Valid value is RDS."];
+      resourceARN: AmazonResourceName.t
+        [@ocaml.doc
+          "The Amazon RDS Performance Insights resource that the tags are added to. This value is an Amazon Resource Name (ARN). For information about creating an ARN, see Constructing an RDS Amazon Resource Name (ARN)."];
+      tagKeys: TagKeyList.t
+        [@ocaml.doc
+          "The metadata assigned to an Amazon RDS Performance Insights resource consisting of a key-value pair."]}
+    let context_ = "UntagResourceRequest"
+    let make ~serviceType =
+      fun ~resourceARN ->
+        fun ~tagKeys -> fun () -> { serviceType; resourceARN; tagKeys }
+    let to_value x =
+      structure_to_value
+        [("ServiceType", (Some (ServiceType.to_value x.serviceType)));
+        ("ResourceARN", (Some (AmazonResourceName.to_value x.resourceARN)));
+        ("TagKeys", (Some (TagKeyList.to_value x.tagKeys)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tagKeys =
+        TagKeyList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+      let resourceARN =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
+      let serviceType =
+        ServiceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceType") in
+      make ~tagKeys ~resourceARN ~serviceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceARN =
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
+      let serviceType =
+        field_map_exn json__ "ServiceType" ServiceType.of_json in
+      make ~tagKeys ~resourceARN ~serviceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the metadata tags from the Amazon RDS Performance Insights resource."]
+module UntagResourceResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `InternalServiceError of InternalServiceError.t 
+      | `InvalidArgumentException of InvalidArgumentException.t 
+      | `NotAuthorizedException of NotAuthorizedException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_json json)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_json json)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServiceError" ->
+          `InternalServiceError (InternalServiceError.of_xml xml)
+      | "InvalidArgumentException" ->
+          `InvalidArgumentException (InvalidArgumentException.of_xml xml)
+      | "NotAuthorizedException" ->
+          `NotAuthorizedException (NotAuthorizedException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServiceError e ->
+          `Assoc
+            [("error", (`String "InternalServiceError"));
+            ("details", (InternalServiceError.to_json e))]
+      | `InvalidArgumentException e ->
+          `Assoc
+            [("error", (`String "InvalidArgumentException"));
+            ("details", (InvalidArgumentException.to_json e))]
+      | `NotAuthorizedException e ->
+          `Assoc
+            [("error", (`String "NotAuthorizedException"));
+            ("details", (NotAuthorizedException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the metadata tags from the Amazon RDS Performance Insights resource."]

@@ -114,6 +114,23 @@ let delete_scheduled_query =
            Io.delete_scheduled_query
            (Values.DeleteScheduledQueryRequest.make ~scheduledQueryArn ())
            None None])
+let describe_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_account_settings
+           (Values.DescribeAccountSettingsRequest.make ())
+           (Some Values.DescribeAccountSettingsResponse.to_json)
+           (Some Values.DescribeAccountSettingsResponse.error_to_json)])
 let describe_endpoints =
   Command.async ~summary:""
     ([%map_open.Command
@@ -161,6 +178,9 @@ let execute_scheduled_query =
            ~doc:"URL override endpoint url"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and queryInsights =
+         flag "query-insights" (optional json_arg)
+           ~doc:"JSON ScheduledQueryInsights"
        and scheduledQueryArn =
          flag "scheduled-query-arn" (required string)
            ~doc:"STRING AmazonResourceName"
@@ -170,7 +190,9 @@ let execute_scheduled_query =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.execute_scheduled_query
            (Values.ExecuteScheduledQueryRequest.make ?clientToken
-              ~scheduledQueryArn
+              ?queryInsights:(Option.map
+                                ~f:Values.ScheduledQueryInsights.of_json
+                                queryInsights) ~scheduledQueryArn
               ~invocationTime:(Values.Time.of_json invocationTime) ()) None
            None])
 let list_scheduled_queries =
@@ -258,12 +280,16 @@ let query =
          flag "next-token" (optional string) ~doc:"STRING PaginationToken"
        and maxRows =
          flag "max-rows" (optional int) ~doc:"INT MaxQueryResults"
+       and queryInsights =
+         flag "query-insights" (optional json_arg) ~doc:"JSON QueryInsights"
        and queryString =
          flag "query-string" (required string) ~doc:"STRING QueryString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region Io.query
            (Values.QueryRequest.make ?clientToken ?nextToken ?maxRows
-              ~queryString ()) (Some Values.QueryResponse.to_json)
+              ?queryInsights:(Option.map ~f:Values.QueryInsights.of_json
+                                queryInsights) ~queryString ())
+           (Some Values.QueryResponse.to_json)
            (Some Values.QueryResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
@@ -308,6 +334,35 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxQueryTCU =
+         flag "max-query-t-c-u" (optional int) ~doc:"INT MaxQueryCapacity"
+       and queryPricingModel =
+         flag "query-pricing-model" (optional json_arg)
+           ~doc:"JSON QueryPricingModel"
+       and queryCompute =
+         flag "query-compute" (optional json_arg)
+           ~doc:"JSON QueryComputeRequest" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_account_settings
+           (Values.UpdateAccountSettingsRequest.make ?maxQueryTCU
+              ?queryPricingModel:(Option.map
+                                    ~f:Values.QueryPricingModel.of_json
+                                    queryPricingModel)
+              ?queryCompute:(Option.map ~f:Values.QueryComputeRequest.of_json
+                               queryCompute) ())
+           (Some Values.UpdateAccountSettingsResponse.to_json)
+           (Some Values.UpdateAccountSettingsResponse.error_to_json)])
 let update_scheduled_query =
   Command.async ~summary:""
     ([%map_open.Command
@@ -334,6 +389,7 @@ let main =
     [("cancel-query", cancel_query);
     ("create-scheduled-query", create_scheduled_query);
     ("delete-scheduled-query", delete_scheduled_query);
+    ("describe-account-settings", describe_account_settings);
     ("describe-endpoints", describe_endpoints);
     ("describe-scheduled-query", describe_scheduled_query);
     ("execute-scheduled-query", execute_scheduled_query);
@@ -343,4 +399,5 @@ let main =
     ("query", query);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
+    ("update-account-settings", update_account_settings);
     ("update-scheduled-query", update_scheduled_query)]

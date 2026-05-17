@@ -43,6 +43,24 @@ module Ip =
     let of_json j = string_of_json ~kind:"Ip" j
     let to_json = simple_to_json to_value
   end
+module Ipv6 =
+  struct
+    type nonrec t = string
+    let context_ = "Ipv6"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:39) >>=
+             (fun () -> check_string_min i ~min:7));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Ipv6" j
+    let to_json = simple_to_json to_value
+  end
 module Port =
   struct
     type nonrec t = int
@@ -61,31 +79,105 @@ module Port =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module Protocol =
+  struct
+    type nonrec t =
+      | DoH 
+      | Do53 
+      | DoH_FIPS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DoH -> "DoH"
+      | Do53 -> "Do53"
+      | DoH_FIPS -> "DoH-FIPS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DoH" -> DoH
+      | "Do53" -> Do53
+      | "DoH-FIPS" -> DoH_FIPS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Protocol" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Protocol" j)
+    let to_json = simple_to_json to_value
+  end
+module ServerNameIndication =
+  struct
+    type nonrec t = string
+    let context_ = "ServerNameIndication"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServerNameIndication" j
+    let to_json = simple_to_json to_value
+  end
 module TargetAddress =
   struct
     type nonrec t =
       {
-      ip: Ip.t
+      ip: Ip.t option
         [@ocaml.doc
-          "One IP address that you want to forward DNS queries to. You can specify only IPv4 addresses."];
+          "One IPv4 address that you want to forward DNS queries to."];
       port: Port.t option
         [@ocaml.doc
-          "The port at Ip that you want to forward DNS queries to."]}
-    let context_ = "TargetAddress"
-    let make ?port = fun ~ip -> fun () -> { port; ip }
+          "The port at Ip that you want to forward DNS queries to."];
+      ipv6: Ipv6.t option
+        [@ocaml.doc
+          "One IPv6 address that you want to forward DNS queries to."];
+      protocol: Protocol.t option
+        [@ocaml.doc
+          "The protocols for the target address. The protocol you choose needs to be supported by the outbound endpoint of the Resolver rule."];
+      serverNameIndication: ServerNameIndication.t option
+        [@ocaml.doc
+          "The Server Name Indication of the DoH server that you want to forward queries to. This is only used if the Protocol of the TargetAddress is DoH."]}
+    let make ?ip =
+      fun ?port ->
+        fun ?ipv6 ->
+          fun ?protocol ->
+            fun ?serverNameIndication ->
+              fun () -> { ip; port; ipv6; protocol; serverNameIndication }
     let to_value x =
       structure_to_value
-        [("Ip", (Some (Ip.to_value x.ip)));
-        ("Port", (Option.map x.port ~f:Port.to_value))]
+        [("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("Port", (Option.map x.port ~f:Port.to_value));
+        ("Ipv6", (Option.map x.ipv6 ~f:Ipv6.to_value));
+        ("Protocol", (Option.map x.protocol ~f:Protocol.to_value));
+        ("ServerNameIndication",
+          (Option.map x.serverNameIndication ~f:ServerNameIndication.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let serverNameIndication =
+        (Option.map ~f:ServerNameIndication.of_xml)
+          (Xml.child xml_arg0 "ServerNameIndication") in
+      let protocol =
+        (Option.map ~f:Protocol.of_xml) (Xml.child xml_arg0 "Protocol") in
+      let ipv6 = (Option.map ~f:Ipv6.of_xml) (Xml.child xml_arg0 "Ipv6") in
       let port = (Option.map ~f:Port.of_xml) (Xml.child xml_arg0 "Port") in
-      let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ip") in
-      make ?port ~ip ()
+      let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
+      make ?serverNameIndication ?protocol ?ipv6 ?port ?ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let port = field_map json "Port" Port.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in make ?port ~ip ()
+    let of_json json__ =
+      let serverNameIndication =
+        field_map json__ "ServerNameIndication" ServerNameIndication.of_json in
+      let protocol = field_map json__ "Protocol" Protocol.of_json in
+      let ipv6 = field_map json__ "Ipv6" Ipv6.of_json in
+      let port = field_map json__ "Port" Port.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      make ?serverNameIndication ?protocol ?ipv6 ?port ?ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In a CreateResolverRule request, an array of the IPs that you want to forward DNS queries to."]
@@ -215,6 +307,24 @@ module CreatorRequestId =
     let of_json j = string_of_json ~kind:"CreatorRequestId" j
     let to_json = simple_to_json to_value
   end
+module DelegationRecord =
+  struct
+    type nonrec t = string
+    let context_ = "DelegationRecord"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DelegationRecord" j
+    let to_json = simple_to_json to_value
+  end
 module DomainName =
   struct
     type nonrec t = string
@@ -308,6 +418,7 @@ module RuleTypeOption =
       | FORWARD 
       | SYSTEM 
       | RECURSIVE 
+      | DELEGATE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -315,12 +426,14 @@ module RuleTypeOption =
       | FORWARD -> "FORWARD"
       | SYSTEM -> "SYSTEM"
       | RECURSIVE -> "RECURSIVE"
+      | DELEGATE -> "DELEGATE"
       | Non_static_id s -> s
     let of_string =
       function
       | "FORWARD" -> FORWARD
       | "SYSTEM" -> SYSTEM
       | "RECURSIVE" -> RECURSIVE
+      | "DELEGATE" -> DELEGATE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -377,6 +490,9 @@ module TargetList =
     type nonrec t = TargetAddress.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -419,6 +535,9 @@ module FilterValues =
   struct
     type nonrec t = FilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -652,6 +771,19 @@ module ResolverQueryLogConfigAssociationStatus =
         (string_of_json ~kind:"ResolverQueryLogConfigAssociationStatus" j)
     let to_json = simple_to_json to_value
   end
+module Dns64Enabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module IpAddressCount =
   struct
     type nonrec t = int
@@ -666,22 +798,109 @@ module IpAddressCount =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module Ipv6InternetAccessEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module OutpostArn =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws([a-z-]+)?:outposts:[a-z\\d-]+:\\d{12}:outpost/op-[a-f0-9]{17}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostArn" j
+    let to_json = simple_to_json to_value
+  end
+module OutpostInstanceType =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostInstanceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostInstanceType" j
+    let to_json = simple_to_json to_value
+  end
+module ProtocolList =
+  struct
+    type nonrec t = Protocol.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:2) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:Protocol.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:Protocol.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ProtocolList" ~of_json:Protocol.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ResolverEndpointDirection =
   struct
     type nonrec t =
       | INBOUND 
       | OUTBOUND 
+      | INBOUND_DELEGATION 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | INBOUND -> "INBOUND"
       | OUTBOUND -> "OUTBOUND"
+      | INBOUND_DELEGATION -> "INBOUND_DELEGATION"
       | Non_static_id s -> s
     let of_string =
       function
       | "INBOUND" -> INBOUND
       | "OUTBOUND" -> OUTBOUND
+      | "INBOUND_DELEGATION" -> INBOUND_DELEGATION
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -732,10 +951,55 @@ module ResolverEndpointStatus =
       of_string (string_of_json ~kind:"ResolverEndpointStatus" j)
     let to_json = simple_to_json to_value
   end
+module ResolverEndpointType =
+  struct
+    type nonrec t =
+      | IPV6 
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV6 -> "IPV6"
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV6" -> IPV6
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResolverEndpointType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResolverEndpointType" j)
+    let to_json = simple_to_json to_value
+  end
+module RniEnhancedMetricsEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module SecurityGroupIds =
   struct
     type nonrec t = ResourceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -756,6 +1020,19 @@ module SecurityGroupIds =
       list_of_json ~kind:"SecurityGroupIds" ~of_json:ResourceId.of_json j
     let to_json v = composed_to_json to_value v
   end
+module TargetNameServerMetricsEnabled =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module IpAddressStatus =
   struct
     type nonrec t =
@@ -769,6 +1046,9 @@ module IpAddressStatus =
       | FAILED_RESOURCE_GONE 
       | DELETING 
       | DELETE_FAILED_FAS_EXPIRED 
+      | UPDATING 
+      | UPDATE_FAILED 
+      | ISOLATED 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -783,6 +1063,9 @@ module IpAddressStatus =
       | FAILED_RESOURCE_GONE -> "FAILED_RESOURCE_GONE"
       | DELETING -> "DELETING"
       | DELETE_FAILED_FAS_EXPIRED -> "DELETE_FAILED_FAS_EXPIRED"
+      | UPDATING -> "UPDATING"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | ISOLATED -> "ISOLATED"
       | Non_static_id s -> s
     let of_string =
       function
@@ -796,6 +1079,9 @@ module IpAddressStatus =
       | "FAILED_RESOURCE_GONE" -> FAILED_RESOURCE_GONE
       | "DELETING" -> DELETING
       | "DELETE_FAILED_FAS_EXPIRED" -> DELETE_FAILED_FAS_EXPIRED
+      | "UPDATING" -> UPDATING
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "ISOLATED" -> ISOLATED
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -830,6 +1116,8 @@ module ResolverDNSSECValidationStatus =
       | ENABLED 
       | DISABLING 
       | DISABLED 
+      | UPDATING_TO_USE_LOCAL_RESOURCE_SETTING 
+      | USE_LOCAL_RESOURCE_SETTING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -838,6 +1126,9 @@ module ResolverDNSSECValidationStatus =
       | ENABLED -> "ENABLED"
       | DISABLING -> "DISABLING"
       | DISABLED -> "DISABLED"
+      | UPDATING_TO_USE_LOCAL_RESOURCE_SETTING ->
+          "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING"
+      | USE_LOCAL_RESOURCE_SETTING -> "USE_LOCAL_RESOURCE_SETTING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -845,6 +1136,9 @@ module ResolverDNSSECValidationStatus =
       | "ENABLED" -> ENABLED
       | "DISABLING" -> DISABLING
       | "DISABLED" -> DISABLED
+      | "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING" ->
+          UPDATING_TO_USE_LOCAL_RESOURCE_SETTING
+      | "USE_LOCAL_RESOURCE_SETTING" -> USE_LOCAL_RESOURCE_SETTING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -864,6 +1158,8 @@ module ResolverAutodefinedReverseStatus =
       | ENABLED 
       | DISABLING 
       | DISABLED 
+      | UPDATING_TO_USE_LOCAL_RESOURCE_SETTING 
+      | USE_LOCAL_RESOURCE_SETTING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -872,6 +1168,9 @@ module ResolverAutodefinedReverseStatus =
       | ENABLED -> "ENABLED"
       | DISABLING -> "DISABLING"
       | DISABLED -> "DISABLED"
+      | UPDATING_TO_USE_LOCAL_RESOURCE_SETTING ->
+          "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING"
+      | USE_LOCAL_RESOURCE_SETTING -> "USE_LOCAL_RESOURCE_SETTING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -879,6 +1178,9 @@ module ResolverAutodefinedReverseStatus =
       | "ENABLED" -> ENABLED
       | "DISABLING" -> DISABLING
       | "DISABLED" -> DISABLED
+      | "UPDATING_TO_USE_LOCAL_RESOURCE_SETTING" ->
+          UPDATING_TO_USE_LOCAL_RESOURCE_SETTING
+      | "USE_LOCAL_RESOURCE_SETTING" -> USE_LOCAL_RESOURCE_SETTING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -889,6 +1191,94 @@ module ResolverAutodefinedReverseStatus =
            xml_arg0)
     let of_json j =
       of_string (string_of_json ~kind:"ResolverAutodefinedReverseStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module InstanceCount =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for InstanceCount" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module OutpostResolverName =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostResolverName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostResolverName" j
+    let to_json = simple_to_json to_value
+  end
+module OutpostResolverStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | OPERATIONAL 
+      | UPDATING 
+      | DELETING 
+      | ACTION_NEEDED 
+      | FAILED_CREATION 
+      | FAILED_DELETION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | OPERATIONAL -> "OPERATIONAL"
+      | UPDATING -> "UPDATING"
+      | DELETING -> "DELETING"
+      | ACTION_NEEDED -> "ACTION_NEEDED"
+      | FAILED_CREATION -> "FAILED_CREATION"
+      | FAILED_DELETION -> "FAILED_DELETION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "OPERATIONAL" -> OPERATIONAL
+      | "UPDATING" -> UPDATING
+      | "DELETING" -> DELETING
+      | "ACTION_NEEDED" -> ACTION_NEEDED
+      | "FAILED_CREATION" -> FAILED_CREATION
+      | "FAILED_DELETION" -> FAILED_DELETION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OutpostResolverStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"OutpostResolverStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module OutpostResolverStatusMessage =
+  struct
+    type nonrec t = string
+    let context_ = "OutpostResolverStatusMessage"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:4096); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OutpostResolverStatusMessage" j
     let to_json = simple_to_json to_value
   end
 module Action =
@@ -982,6 +1372,92 @@ module BlockResponse =
     let of_json j = of_string (string_of_json ~kind:"BlockResponse" j)
     let to_json = simple_to_json to_value
   end
+module ConfidenceThreshold =
+  struct
+    type nonrec t =
+      | LOW 
+      | MEDIUM 
+      | HIGH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | LOW -> "LOW"
+      | MEDIUM -> "MEDIUM"
+      | HIGH -> "HIGH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "LOW" -> LOW
+      | "MEDIUM" -> MEDIUM
+      | "HIGH" -> HIGH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConfidenceThreshold" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConfidenceThreshold" j)
+    let to_json = simple_to_json to_value
+  end
+module DnsThreatProtection =
+  struct
+    type nonrec t =
+      | DGA 
+      | DNS_TUNNELING 
+      | DICTIONARY_DGA 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DGA -> "DGA"
+      | DNS_TUNNELING -> "DNS_TUNNELING"
+      | DICTIONARY_DGA -> "DICTIONARY_DGA"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DGA" -> DGA
+      | "DNS_TUNNELING" -> DNS_TUNNELING
+      | "DICTIONARY_DGA" -> DICTIONARY_DGA
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DnsThreatProtection" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DnsThreatProtection" j)
+    let to_json = simple_to_json to_value
+  end
+module FirewallDomainRedirectionAction =
+  struct
+    type nonrec t =
+      | INSPECT_REDIRECTION_DOMAIN 
+      | TRUST_REDIRECTION_DOMAIN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INSPECT_REDIRECTION_DOMAIN -> "INSPECT_REDIRECTION_DOMAIN"
+      | TRUST_REDIRECTION_DOMAIN -> "TRUST_REDIRECTION_DOMAIN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INSPECT_REDIRECTION_DOMAIN" -> INSPECT_REDIRECTION_DOMAIN
+      | "TRUST_REDIRECTION_DOMAIN" -> TRUST_REDIRECTION_DOMAIN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration FirewallDomainRedirectionAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"FirewallDomainRedirectionAction" j)
+    let to_json = simple_to_json to_value
+  end
 module Priority =
   struct
     type nonrec t = int
@@ -993,6 +1469,24 @@ module Priority =
     let of_xml xml_arg0 =
       Int.of_string (string_of_xml ~kind:"an integer for Priority" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module Qtype =
+  struct
+    type nonrec t = string
+    let context_ = "Qtype"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:16) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Qtype" j
     let to_json = simple_to_json to_value
   end
 module Unsigned =
@@ -1089,17 +1583,20 @@ module FirewallFailOpenStatus =
     type nonrec t =
       | ENABLED 
       | DISABLED 
+      | USE_LOCAL_RESOURCE_SETTING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ENABLED -> "ENABLED"
       | DISABLED -> "DISABLED"
+      | USE_LOCAL_RESOURCE_SETTING -> "USE_LOCAL_RESOURCE_SETTING"
       | Non_static_id s -> s
     let of_string =
       function
       | "ENABLED" -> ENABLED
       | "DISABLED" -> DISABLED
+      | "USE_LOCAL_RESOURCE_SETTING" -> USE_LOCAL_RESOURCE_SETTING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1137,6 +1634,36 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module UpdateIpAddress =
+  struct
+    type nonrec t =
+      {
+      ipId: ResourceId.t
+        [@ocaml.doc
+          "The ID of the IP address, specified by the ResolverEndpointId."];
+      ipv6: Ipv6.t
+        [@ocaml.doc "The IPv6 address that you want to use for DNS queries."]}
+    let context_ = "UpdateIpAddress"
+    let make ~ipId = fun ~ipv6 -> fun () -> { ipId; ipv6 }
+    let to_value x =
+      structure_to_value
+        [("IpId", (Some (ResourceId.to_value x.ipId)));
+        ("Ipv6", (Some (Ipv6.to_value x.ipv6)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let ipv6 =
+        Ipv6.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ipv6") in
+      let ipId =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IpId") in
+      make ~ipv6 ~ipId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let ipv6 = field_map_exn json__ "Ipv6" Ipv6.of_json in
+      let ipId = field_map_exn json__ "IpId" ResourceId.of_json in
+      make ~ipv6 ~ipId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides information about the IP address type in response to UpdateResolverEndpoint."]
 module FirewallDomainName =
   struct
     type nonrec t = string
@@ -1179,9 +1706,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1210,13 +1737,13 @@ module ResolverRule =
           "A detailed description of the status of a Resolver rule."];
       ruleType: RuleTypeOption.t option
         [@ocaml.doc
-          "When you want to forward DNS queries for specified domain name to resolvers on your network, specify FORWARD. When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify SYSTEM. For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify FORWARD for RuleType. To then have Resolver process queries for apex.example.com, you create a rule and specify SYSTEM for RuleType. Currently, only Resolver can create rules that have a value of RECURSIVE for RuleType."];
+          "When you want to forward DNS queries for specified domain name to resolvers on your network, specify FORWARD or DELEGATE. If a query matches multiple Resolver rules (example.com and www.example.com), outbound DNS queries are routed using the Resolver rule that contains the most specific domain name (www.example.com). When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify SYSTEM. For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify FORWARD for RuleType. To then have Resolver process queries for apex.example.com, you create a rule and specify SYSTEM for RuleType. Currently, only Resolver can create rules that have a value of RECURSIVE for RuleType."];
       name: Name.t option
         [@ocaml.doc
-          "The name for the Resolver rule, which you specified when you created the Resolver rule."];
+          "The name for the Resolver rule, which you specified when you created the Resolver rule. The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers."];
       targetIps: TargetList.t option
         [@ocaml.doc
-          "An array that contains the IP addresses and ports that an outbound endpoint forwards DNS queries to. Typically, these are the IP addresses of DNS resolvers on your network. Specify IPv4 addresses. IPv6 is not supported."];
+          "An array that contains the IP addresses and ports that an outbound endpoint forwards DNS queries to. Typically, these are the IP addresses of DNS resolvers on your network."];
       resolverEndpointId: ResourceId.t option
         [@ocaml.doc
           "The ID of the endpoint that the rule is associated with."];
@@ -1231,7 +1758,10 @@ module ResolverRule =
           "The date and time that the Resolver rule was created, in Unix time format and Coordinated Universal Time (UTC)."];
       modificationTime: Rfc3339TimeString.t option
         [@ocaml.doc
-          "The date and time that the Resolver rule was last updated, in Unix time format and Coordinated Universal Time (UTC)."]}
+          "The date and time that the Resolver rule was last updated, in Unix time format and Coordinated Universal Time (UTC)."];
+      delegationRecord: DelegationRecord.t option
+        [@ocaml.doc
+          "DNS queries with delegation records that point to this domain name are forwarded to resolvers on your network."]}
     let make ?id =
       fun ?creatorRequestId ->
         fun ?arn ->
@@ -1246,23 +1776,25 @@ module ResolverRule =
                           fun ?shareStatus ->
                             fun ?creationTime ->
                               fun ?modificationTime ->
-                                fun () ->
-                                  {
-                                    id;
-                                    creatorRequestId;
-                                    arn;
-                                    domainName;
-                                    status;
-                                    statusMessage;
-                                    ruleType;
-                                    name;
-                                    targetIps;
-                                    resolverEndpointId;
-                                    ownerId;
-                                    shareStatus;
-                                    creationTime;
-                                    modificationTime
-                                  }
+                                fun ?delegationRecord ->
+                                  fun () ->
+                                    {
+                                      id;
+                                      creatorRequestId;
+                                      arn;
+                                      domainName;
+                                      status;
+                                      statusMessage;
+                                      ruleType;
+                                      name;
+                                      targetIps;
+                                      resolverEndpointId;
+                                      ownerId;
+                                      shareStatus;
+                                      creationTime;
+                                      modificationTime;
+                                      delegationRecord
+                                    }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
@@ -1283,9 +1815,14 @@ module ResolverRule =
         ("CreationTime",
           (Option.map x.creationTime ~f:Rfc3339TimeString.to_value));
         ("ModificationTime",
-          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value))]
+          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value));
+        ("DelegationRecord",
+          (Option.map x.delegationRecord ~f:DelegationRecord.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let delegationRecord =
+        (Option.map ~f:DelegationRecord.of_xml)
+          (Xml.child xml_arg0 "DelegationRecord") in
       let modificationTime =
         (Option.map ~f:Rfc3339TimeString.of_xml)
           (Xml.child xml_arg0 "ModificationTime") in
@@ -1317,33 +1854,35 @@ module ResolverRule =
         (Option.map ~f:CreatorRequestId.of_xml)
           (Xml.child xml_arg0 "CreatorRequestId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?modificationTime ?creationTime ?shareStatus ?ownerId
-        ?resolverEndpointId ?targetIps ?name ?ruleType ?statusMessage ?status
-        ?domainName ?arn ?creatorRequestId ?id ()
+      make ?delegationRecord ?modificationTime ?creationTime ?shareStatus
+        ?ownerId ?resolverEndpointId ?targetIps ?name ?ruleType
+        ?statusMessage ?status ?domainName ?arn ?creatorRequestId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let delegationRecord =
+        field_map json__ "DelegationRecord" DelegationRecord.of_json in
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
       let resolverEndpointId =
-        field_map json "ResolverEndpointId" ResourceId.of_json in
-      let targetIps = field_map json "TargetIps" TargetList.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let ruleType = field_map json "RuleType" RuleTypeOption.of_json in
+        field_map json__ "ResolverEndpointId" ResourceId.of_json in
+      let targetIps = field_map json__ "TargetIps" TargetList.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let ruleType = field_map json__ "RuleType" RuleTypeOption.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" ResolverRuleStatus.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ResolverRuleStatus.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ?modificationTime ?creationTime ?shareStatus ?ownerId
-        ?resolverEndpointId ?targetIps ?name ?ruleType ?statusMessage ?status
-        ?domainName ?arn ?creatorRequestId ?id ()
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?delegationRecord ?modificationTime ?creationTime ?shareStatus
+        ?ownerId ?resolverEndpointId ?targetIps ?name ?ruleType
+        ?statusMessage ?status ?domainName ?arn ?creatorRequestId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For queries that originate in your VPC, detailed information about a Resolver rule, which specifies how to route DNS queries out of the VPC. The ResolverRule parameter appears in the response to a CreateResolverRule, DeleteResolverRule, GetResolverRule, ListResolverRules, or UpdateResolverRule request."]
@@ -1370,9 +1909,9 @@ module Filter =
         (Option.map ~f:FilterName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" FilterValues.of_json in
-      let name = field_map json "Name" FilterName.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" FilterValues.of_json in
+      let name = field_map json__ "Name" FilterName.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1389,7 +1928,7 @@ module ResolverRuleAssociation =
           "The ID of the Resolver rule that you associated with the VPC that is specified by VPCId."];
       name: Name.t option
         [@ocaml.doc
-          "The name of an association between a Resolver rule and a VPC."];
+          "The name of an association between a Resolver rule and a VPC. The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers."];
       vPCId: ResourceId.t option
         [@ocaml.doc
           "The ID of the VPC that you associated the Resolver rule with."];
@@ -1435,15 +1974,16 @@ module ResolverRuleAssociation =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?vPCId ?name ?resolverRuleId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
       let status =
-        field_map json "Status" ResolverRuleAssociationStatus.of_json in
-      let vPCId = field_map json "VPCId" ResourceId.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let resolverRuleId = field_map json "ResolverRuleId" ResourceId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "Status" ResolverRuleAssociationStatus.of_json in
+      let vPCId = field_map json__ "VPCId" ResourceId.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let resolverRuleId =
+        field_map json__ "ResolverRuleId" ResourceId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?statusMessage ?status ?vPCId ?name ?resolverRuleId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1547,21 +2087,22 @@ module ResolverQueryLogConfig =
       make ?creationTime ?creatorRequestId ?destinationArn ?name ?arn
         ?associationCount ?shareStatus ?status ?ownerId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
       let destinationArn =
-        field_map json "DestinationArn" DestinationArn.of_json in
-      let name = field_map json "Name" ResolverQueryLogConfigName.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let associationCount = field_map json "AssociationCount" Count.of_json in
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
+        field_map json__ "DestinationArn" DestinationArn.of_json in
+      let name = field_map json__ "Name" ResolverQueryLogConfigName.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let associationCount =
+        field_map json__ "AssociationCount" Count.of_json in
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
       let status =
-        field_map json "Status" ResolverQueryLogConfigStatus.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "Status" ResolverQueryLogConfigStatus.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?creationTime ?creatorRequestId ?destinationArn ?name ?arn
         ?associationCount ?shareStatus ?status ?ownerId ?id ()
     let to_json v = composed_to_json to_value v
@@ -1581,7 +2122,7 @@ module ResolverQueryLogConfigAssociation =
           "The ID of the Amazon VPC that is associated with the query logging configuration."];
       status: ResolverQueryLogConfigAssociationStatus.t option
         [@ocaml.doc
-          "The status of the specified query logging association. Valid values include the following: CREATING: Resolver is creating an association between an Amazon VPC and a query logging configuration. CREATED: The association between an Amazon VPC and a query logging configuration was successfully created. Resolver is logging queries that originate in the specified VPC. DELETING: Resolver is deleting this query logging association. FAILED: Resolver either couldn't create or couldn't delete the query logging association."];
+          "The status of the specified query logging association. Valid values include the following: CREATING: Resolver is creating an association between an Amazon VPC and a query logging configuration. ACTIVE: The association between an Amazon VPC and a query logging configuration was successfully created. Resolver is logging queries that originate in the specified VPC. DELETING: Resolver is deleting this query logging association. FAILED: Resolver either couldn't create or couldn't delete the query logging association."];
       error: ResolverQueryLogConfigAssociationError.t option
         [@ocaml.doc
           "If the value of Status is FAILED, the value of Error indicates the cause: DESTINATION_NOT_FOUND: The specified destination (for example, an Amazon S3 bucket) was deleted. ACCESS_DENIED: Permissions don't allow sending logs to the destination. If the value of Status is a value other than FAILED, Error is null."];
@@ -1648,21 +2189,22 @@ module ResolverQueryLogConfigAssociation =
       make ?creationTime ?errorMessage ?error ?status ?resourceId
         ?resolverQueryLogConfigId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let errorMessage =
-        field_map json "ErrorMessage"
+        field_map json__ "ErrorMessage"
           ResolverQueryLogConfigAssociationErrorMessage.of_json in
       let error =
-        field_map json "Error" ResolverQueryLogConfigAssociationError.of_json in
+        field_map json__ "Error"
+          ResolverQueryLogConfigAssociationError.of_json in
       let status =
-        field_map json "Status"
+        field_map json__ "Status"
           ResolverQueryLogConfigAssociationStatus.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
       let resolverQueryLogConfigId =
-        field_map json "ResolverQueryLogConfigId" ResourceId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "ResolverQueryLogConfigId" ResourceId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?creationTime ?errorMessage ?error ?status ?resourceId
         ?resolverQueryLogConfigId ?id ()
     let to_json v = composed_to_json to_value v
@@ -1687,7 +2229,7 @@ module ResolverEndpoint =
           "The ID of one or more security groups that control access to this VPC. The security group must include one or more inbound rules (for inbound endpoints) or outbound rules (for outbound endpoints). Inbound and outbound rules must allow TCP and UDP access. For inbound access, open port 53. For outbound access, open the port that you're using for DNS queries on your network."];
       direction: ResolverEndpointDirection.t option
         [@ocaml.doc
-          "Indicates whether the Resolver endpoint allows inbound or outbound DNS queries: INBOUND: allows DNS queries to your VPC from your network OUTBOUND: allows DNS queries from your VPC to your network"];
+          "Indicates whether the Resolver endpoint allows inbound or outbound DNS queries: INBOUND: allows DNS queries to your VPC from your network OUTBOUND: allows DNS queries from your VPC to your network INBOUND_DELEGATION: Resolver delegates queries to Route 53 private hosted zones from your network."];
       ipAddressCount: IpAddressCount.t option
         [@ocaml.doc
           "The number of IP addresses that the Resolver endpoint can use for DNS queries."];
@@ -1705,7 +2247,28 @@ module ResolverEndpoint =
           "The date and time that the endpoint was created, in Unix time format and Coordinated Universal Time (UTC)."];
       modificationTime: Rfc3339TimeString.t option
         [@ocaml.doc
-          "The date and time that the endpoint was last modified, in Unix time format and Coordinated Universal Time (UTC)."]}
+          "The date and time that the endpoint was last modified, in Unix time format and Coordinated Universal Time (UTC)."];
+      outpostArn: OutpostArn.t option
+        [@ocaml.doc "The ARN (Amazon Resource Name) for the Outpost."];
+      preferredInstanceType: OutpostInstanceType.t option
+        [@ocaml.doc "The Amazon EC2 instance type."];
+      resolverEndpointType: ResolverEndpointType.t option
+        [@ocaml.doc "The Resolver endpoint IP address type."];
+      protocols: ProtocolList.t option
+        [@ocaml.doc
+          "Protocols used for the endpoint. DoH-FIPS is applicable for a default inbound endpoints only. For an inbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 and DoH-FIPS in combination. Do53 alone. DoH alone. DoH-FIPS alone. None, which is treated as Do53. For a delegation inbound endpoint you can use Do53 only. For an outbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 alone. DoH alone. None, which is treated as Do53."];
+      rniEnhancedMetricsEnabled: RniEnhancedMetricsEnabled.t option
+        [@ocaml.doc
+          "Indicates whether RNI enhanced metrics are enabled for the Resolver endpoint. When enabled, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When disabled, these metrics are not published."];
+      targetNameServerMetricsEnabled: TargetNameServerMetricsEnabled.t option
+        [@ocaml.doc
+          "Indicates whether target name server metrics are enabled for the outbound Resolver endpoint. When enabled, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When disabled, these metrics are not published. This feature is not supported for inbound Resolver endpoint."];
+      dns64Enabled: Dns64Enabled.t option
+        [@ocaml.doc
+          "Indicates whether DNS64 is enabled for the inbound Resolver endpoint. When true, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the 64:ff9b::/96 prefix to the IPv4 address."];
+      ipv6InternetAccessEnabled: Ipv6InternetAccessEnabled.t option
+        [@ocaml.doc
+          "Indicates whether IPv6 internet access is enabled for the outbound Resolver endpoint. When true, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway."]}
     let make ?id =
       fun ?creatorRequestId ->
         fun ?arn ->
@@ -1718,21 +2281,37 @@ module ResolverEndpoint =
                       fun ?statusMessage ->
                         fun ?creationTime ->
                           fun ?modificationTime ->
-                            fun () ->
-                              {
-                                id;
-                                creatorRequestId;
-                                arn;
-                                name;
-                                securityGroupIds;
-                                direction;
-                                ipAddressCount;
-                                hostVPCId;
-                                status;
-                                statusMessage;
-                                creationTime;
-                                modificationTime
-                              }
+                            fun ?outpostArn ->
+                              fun ?preferredInstanceType ->
+                                fun ?resolverEndpointType ->
+                                  fun ?protocols ->
+                                    fun ?rniEnhancedMetricsEnabled ->
+                                      fun ?targetNameServerMetricsEnabled ->
+                                        fun ?dns64Enabled ->
+                                          fun ?ipv6InternetAccessEnabled ->
+                                            fun () ->
+                                              {
+                                                id;
+                                                creatorRequestId;
+                                                arn;
+                                                name;
+                                                securityGroupIds;
+                                                direction;
+                                                ipAddressCount;
+                                                hostVPCId;
+                                                status;
+                                                statusMessage;
+                                                creationTime;
+                                                modificationTime;
+                                                outpostArn;
+                                                preferredInstanceType;
+                                                resolverEndpointType;
+                                                protocols;
+                                                rniEnhancedMetricsEnabled;
+                                                targetNameServerMetricsEnabled;
+                                                dns64Enabled;
+                                                ipv6InternetAccessEnabled
+                                              }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ResourceId.to_value));
@@ -1753,9 +2332,48 @@ module ResolverEndpoint =
         ("CreationTime",
           (Option.map x.creationTime ~f:Rfc3339TimeString.to_value));
         ("ModificationTime",
-          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value))]
+          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value));
+        ("OutpostArn", (Option.map x.outpostArn ~f:OutpostArn.to_value));
+        ("PreferredInstanceType",
+          (Option.map x.preferredInstanceType ~f:OutpostInstanceType.to_value));
+        ("ResolverEndpointType",
+          (Option.map x.resolverEndpointType ~f:ResolverEndpointType.to_value));
+        ("Protocols", (Option.map x.protocols ~f:ProtocolList.to_value));
+        ("RniEnhancedMetricsEnabled",
+          (Option.map x.rniEnhancedMetricsEnabled
+             ~f:RniEnhancedMetricsEnabled.to_value));
+        ("TargetNameServerMetricsEnabled",
+          (Option.map x.targetNameServerMetricsEnabled
+             ~f:TargetNameServerMetricsEnabled.to_value));
+        ("Dns64Enabled",
+          (Option.map x.dns64Enabled ~f:Dns64Enabled.to_value));
+        ("Ipv6InternetAccessEnabled",
+          (Option.map x.ipv6InternetAccessEnabled
+             ~f:Ipv6InternetAccessEnabled.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6InternetAccessEnabled =
+        (Option.map ~f:Ipv6InternetAccessEnabled.of_xml)
+          (Xml.child xml_arg0 "Ipv6InternetAccessEnabled") in
+      let dns64Enabled =
+        (Option.map ~f:Dns64Enabled.of_xml)
+          (Xml.child xml_arg0 "Dns64Enabled") in
+      let targetNameServerMetricsEnabled =
+        (Option.map ~f:TargetNameServerMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "TargetNameServerMetricsEnabled") in
+      let rniEnhancedMetricsEnabled =
+        (Option.map ~f:RniEnhancedMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "RniEnhancedMetricsEnabled") in
+      let protocols =
+        (Option.map ~f:ProtocolList.of_xml) (Xml.child xml_arg0 "Protocols") in
+      let resolverEndpointType =
+        (Option.map ~f:ResolverEndpointType.of_xml)
+          (Xml.child xml_arg0 "ResolverEndpointType") in
+      let preferredInstanceType =
+        (Option.map ~f:OutpostInstanceType.of_xml)
+          (Xml.child xml_arg0 "PreferredInstanceType") in
+      let outpostArn =
+        (Option.map ~f:OutpostArn.of_xml) (Xml.child xml_arg0 "OutpostArn") in
       let modificationTime =
         (Option.map ~f:Rfc3339TimeString.of_xml)
           (Xml.child xml_arg0 "ModificationTime") in
@@ -1785,36 +2403,58 @@ module ResolverEndpoint =
         (Option.map ~f:CreatorRequestId.of_xml)
           (Xml.child xml_arg0 "CreatorRequestId") in
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?modificationTime ?creationTime ?statusMessage ?status ?hostVPCId
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?resolverEndpointType ?preferredInstanceType ?outpostArn
+        ?modificationTime ?creationTime ?statusMessage ?status ?hostVPCId
         ?ipAddressCount ?direction ?securityGroupIds ?name ?arn
         ?creatorRequestId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let ipv6InternetAccessEnabled =
+        field_map json__ "Ipv6InternetAccessEnabled"
+          Ipv6InternetAccessEnabled.of_json in
+      let dns64Enabled = field_map json__ "Dns64Enabled" Dns64Enabled.of_json in
+      let targetNameServerMetricsEnabled =
+        field_map json__ "TargetNameServerMetricsEnabled"
+          TargetNameServerMetricsEnabled.of_json in
+      let rniEnhancedMetricsEnabled =
+        field_map json__ "RniEnhancedMetricsEnabled"
+          RniEnhancedMetricsEnabled.of_json in
+      let protocols = field_map json__ "Protocols" ProtocolList.of_json in
+      let resolverEndpointType =
+        field_map json__ "ResolverEndpointType" ResolverEndpointType.of_json in
+      let preferredInstanceType =
+        field_map json__ "PreferredInstanceType" OutpostInstanceType.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" ResolverEndpointStatus.of_json in
-      let hostVPCId = field_map json "HostVPCId" ResourceId.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" ResolverEndpointStatus.of_json in
+      let hostVPCId = field_map json__ "HostVPCId" ResourceId.of_json in
       let ipAddressCount =
-        field_map json "IpAddressCount" IpAddressCount.of_json in
+        field_map json__ "IpAddressCount" IpAddressCount.of_json in
       let direction =
-        field_map json "Direction" ResolverEndpointDirection.of_json in
+        field_map json__ "Direction" ResolverEndpointDirection.of_json in
       let securityGroupIds =
-        field_map json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
+        field_map json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
-      make ?modificationTime ?creationTime ?statusMessage ?status ?hostVPCId
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?resolverEndpointType ?preferredInstanceType ?outpostArn
+        ?modificationTime ?creationTime ?statusMessage ?status ?hostVPCId
         ?ipAddressCount ?direction ?securityGroupIds ?name ?arn
         ?creatorRequestId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "In the response to a CreateResolverEndpoint, DeleteResolverEndpoint, GetResolverEndpoint, ListResolverEndpoints, or UpdateResolverEndpoint request, a complex type that contains settings for an existing inbound or outbound Resolver endpoint."]
+       "In the response to a CreateResolverEndpoint, DeleteResolverEndpoint, GetResolverEndpoint, Updates the name, or ResolverEndpointType for an endpoint, or UpdateResolverEndpoint request, a complex type that contains settings for an existing inbound or outbound Resolver endpoint."]
 module IpAddressResponse =
   struct
     type nonrec t =
@@ -1823,7 +2463,10 @@ module IpAddressResponse =
       subnetId: SubnetId.t option [@ocaml.doc "The ID of one subnet."];
       ip: Ip.t option
         [@ocaml.doc
-          "One IP address that the Resolver endpoint uses for DNS queries."];
+          "One IPv4 address that the Resolver endpoint uses for DNS queries."];
+      ipv6: Ipv6.t option
+        [@ocaml.doc
+          "One IPv6 address that the Resolver endpoint uses for DNS queries."];
       status: IpAddressStatus.t option
         [@ocaml.doc
           "A status code that gives the current status of the request."];
@@ -1839,25 +2482,28 @@ module IpAddressResponse =
     let make ?ipId =
       fun ?subnetId ->
         fun ?ip ->
-          fun ?status ->
-            fun ?statusMessage ->
-              fun ?creationTime ->
-                fun ?modificationTime ->
-                  fun () ->
-                    {
-                      ipId;
-                      subnetId;
-                      ip;
-                      status;
-                      statusMessage;
-                      creationTime;
-                      modificationTime
-                    }
+          fun ?ipv6 ->
+            fun ?status ->
+              fun ?statusMessage ->
+                fun ?creationTime ->
+                  fun ?modificationTime ->
+                    fun () ->
+                      {
+                        ipId;
+                        subnetId;
+                        ip;
+                        ipv6;
+                        status;
+                        statusMessage;
+                        creationTime;
+                        modificationTime
+                      }
     let to_value x =
       structure_to_value
         [("IpId", (Option.map x.ipId ~f:ResourceId.to_value));
         ("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
         ("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("Ipv6", (Option.map x.ipv6 ~f:Ipv6.to_value));
         ("Status", (Option.map x.status ~f:IpAddressStatus.to_value));
         ("StatusMessage",
           (Option.map x.statusMessage ~f:StatusMessage.to_value));
@@ -1878,26 +2524,28 @@ module IpAddressResponse =
           (Xml.child xml_arg0 "StatusMessage") in
       let status =
         (Option.map ~f:IpAddressStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let ipv6 = (Option.map ~f:Ipv6.of_xml) (Xml.child xml_arg0 "Ipv6") in
       let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
       let subnetId =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let ipId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "IpId") in
-      make ?modificationTime ?creationTime ?statusMessage ?status ?ip
+      make ?modificationTime ?creationTime ?statusMessage ?status ?ipv6 ?ip
         ?subnetId ?ipId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" IpAddressStatus.of_json in
-      let ip = field_map json "Ip" Ip.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let ipId = field_map json "IpId" ResourceId.of_json in
-      make ?modificationTime ?creationTime ?statusMessage ?status ?ip
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" IpAddressStatus.of_json in
+      let ipv6 = field_map json__ "Ipv6" Ipv6.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let ipId = field_map json__ "IpId" ResourceId.of_json in
+      make ?modificationTime ?creationTime ?statusMessage ?status ?ipv6 ?ip
         ?subnetId ?ipId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1942,13 +2590,13 @@ module ResolverDnssecConfig =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?validationStatus ?resourceId ?ownerId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validationStatus =
-        field_map json "ValidationStatus"
+        field_map json__ "ValidationStatus"
           ResolverDNSSECValidationStatus.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?validationStatus ?resourceId ?ownerId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1961,13 +2609,13 @@ module ResolverConfig =
         [@ocaml.doc "ID for the Resolver configuration."];
       resourceId: ResourceId.t option
         [@ocaml.doc
-          "The ID of the Amazon Virtual Private Cloud VPC that you're configuring Resolver for."];
+          "The ID of the Amazon Virtual Private Cloud VPC or a Route 53 Profile that you're configuring Resolver for."];
       ownerId: AccountId.t option
         [@ocaml.doc
           "The owner account ID of the Amazon Virtual Private Cloud VPC."];
       autodefinedReverse: ResolverAutodefinedReverseStatus.t option
         [@ocaml.doc
-          "The status of whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. The status can be one of following: Status of the rules generated by VPCs based on CIDR/Region for reverse DNS resolution. The status can be one of following: ENABLING: Autodefined rules for reverse DNS lookups are being enabled but are not complete. ENABLED: Autodefined rules for reverse DNS lookups are enabled. DISABLING: Autodefined rules for reverse DNS lookups are being disabled but are not complete. DISABLED: Autodefined rules for reverse DNS lookups are disabled."]}
+          "The status of whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. The status can be one of following: ENABLING: Autodefined rules for reverse DNS lookups are being enabled but are not complete. ENABLED: Autodefined rules for reverse DNS lookups are enabled. DISABLING: Autodefined rules for reverse DNS lookups are being disabled but are not complete. DISABLED: Autodefined rules for reverse DNS lookups are disabled."]}
     let make ?id =
       fun ?resourceId ->
         fun ?ownerId ->
@@ -1993,33 +2641,168 @@ module ResolverConfig =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?autodefinedReverse ?ownerId ?resourceId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autodefinedReverse =
-        field_map json "AutodefinedReverse"
+        field_map json__ "AutodefinedReverse"
           ResolverAutodefinedReverseStatus.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?autodefinedReverse ?ownerId ?resourceId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about a Resolver configuration for a VPC."]
+module OutpostResolver =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option
+        [@ocaml.doc
+          "The ARN (Amazon Resource Name) for the Resolver on an Outpost."];
+      creationTime: Rfc3339TimeString.t option
+        [@ocaml.doc
+          "The date and time that the Outpost Resolver was created, in Unix time format and Coordinated Universal Time (UTC)."];
+      modificationTime: Rfc3339TimeString.t option
+        [@ocaml.doc
+          "The date and time that the Outpost Resolver was modified, in Unix time format and Coordinated Universal Time (UTC)."];
+      creatorRequestId: CreatorRequestId.t option
+        [@ocaml.doc
+          "A unique string that identifies the request that created the Resolver endpoint. The CreatorRequestId allows failed requests to be retried without the risk of running the operation twice."];
+      id: ResourceId.t option
+        [@ocaml.doc "The ID of the Resolver on Outpost."];
+      instanceCount: InstanceCount.t option
+        [@ocaml.doc
+          "Amazon EC2 instance count for the Resolver on the Outpost."];
+      preferredInstanceType: OutpostInstanceType.t option
+        [@ocaml.doc "The Amazon EC2 instance type."];
+      name: OutpostResolverName.t option [@ocaml.doc "Name of the Resolver."];
+      status: OutpostResolverStatus.t option
+        [@ocaml.doc "Status of the Resolver."];
+      statusMessage: OutpostResolverStatusMessage.t option
+        [@ocaml.doc "A detailed description of the Resolver."];
+      outpostArn: OutpostArn.t option
+        [@ocaml.doc "The ARN (Amazon Resource Name) for the Outpost."]}
+    let make ?arn =
+      fun ?creationTime ->
+        fun ?modificationTime ->
+          fun ?creatorRequestId ->
+            fun ?id ->
+              fun ?instanceCount ->
+                fun ?preferredInstanceType ->
+                  fun ?name ->
+                    fun ?status ->
+                      fun ?statusMessage ->
+                        fun ?outpostArn ->
+                          fun () ->
+                            {
+                              arn;
+                              creationTime;
+                              modificationTime;
+                              creatorRequestId;
+                              id;
+                              instanceCount;
+                              preferredInstanceType;
+                              name;
+                              status;
+                              statusMessage;
+                              outpostArn
+                            }
+    let to_value x =
+      structure_to_value
+        [("Arn", (Option.map x.arn ~f:Arn.to_value));
+        ("CreationTime",
+          (Option.map x.creationTime ~f:Rfc3339TimeString.to_value));
+        ("ModificationTime",
+          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value));
+        ("CreatorRequestId",
+          (Option.map x.creatorRequestId ~f:CreatorRequestId.to_value));
+        ("Id", (Option.map x.id ~f:ResourceId.to_value));
+        ("InstanceCount",
+          (Option.map x.instanceCount ~f:InstanceCount.to_value));
+        ("PreferredInstanceType",
+          (Option.map x.preferredInstanceType ~f:OutpostInstanceType.to_value));
+        ("Name", (Option.map x.name ~f:OutpostResolverName.to_value));
+        ("Status", (Option.map x.status ~f:OutpostResolverStatus.to_value));
+        ("StatusMessage",
+          (Option.map x.statusMessage
+             ~f:OutpostResolverStatusMessage.to_value));
+        ("OutpostArn", (Option.map x.outpostArn ~f:OutpostArn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostArn =
+        (Option.map ~f:OutpostArn.of_xml) (Xml.child xml_arg0 "OutpostArn") in
+      let statusMessage =
+        (Option.map ~f:OutpostResolverStatusMessage.of_xml)
+          (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:OutpostResolverStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let name =
+        (Option.map ~f:OutpostResolverName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let preferredInstanceType =
+        (Option.map ~f:OutpostInstanceType.of_xml)
+          (Xml.child xml_arg0 "PreferredInstanceType") in
+      let instanceCount =
+        (Option.map ~f:InstanceCount.of_xml)
+          (Xml.child xml_arg0 "InstanceCount") in
+      let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
+      let creatorRequestId =
+        (Option.map ~f:CreatorRequestId.of_xml)
+          (Xml.child xml_arg0 "CreatorRequestId") in
+      let modificationTime =
+        (Option.map ~f:Rfc3339TimeString.of_xml)
+          (Xml.child xml_arg0 "ModificationTime") in
+      let creationTime =
+        (Option.map ~f:Rfc3339TimeString.of_xml)
+          (Xml.child xml_arg0 "CreationTime") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?outpostArn ?statusMessage ?status ?name ?preferredInstanceType
+        ?instanceCount ?id ?creatorRequestId ?modificationTime ?creationTime
+        ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
+      let statusMessage =
+        field_map json__ "StatusMessage" OutpostResolverStatusMessage.of_json in
+      let status = field_map json__ "Status" OutpostResolverStatus.of_json in
+      let name = field_map json__ "Name" OutpostResolverName.of_json in
+      let preferredInstanceType =
+        field_map json__ "PreferredInstanceType" OutpostInstanceType.of_json in
+      let instanceCount =
+        field_map json__ "InstanceCount" InstanceCount.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
+      let creatorRequestId =
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let modificationTime =
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
+      let creationTime =
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      make ?outpostArn ?statusMessage ?status ?name ?preferredInstanceType
+        ?instanceCount ?id ?creatorRequestId ?modificationTime ?creationTime
+        ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A complex type that contains settings for an existing Resolver on an Outpost."]
 module FirewallRule =
   struct
     type nonrec t =
       {
       firewallRuleGroupId: ResourceId.t option
         [@ocaml.doc
-          "The unique identifier of the firewall rule group of the rule."];
+          "The unique identifier of the Firewall rule group of the rule."];
       firewallDomainListId: ResourceId.t option
         [@ocaml.doc "The ID of the domain list that's used in the rule."];
+      firewallThreatProtectionId: ResourceId.t option
+        [@ocaml.doc "ID of the DNS Firewall Advanced rule."];
       name: Name.t option [@ocaml.doc "The name of the rule."];
       priority: Priority.t option
         [@ocaml.doc
           "The priority of the rule in the rule group. This value must be unique within the rule group. DNS Firewall processes the rules in a rule group by order of priority, starting from the lowest setting."];
       action: Action.t option
         [@ocaml.doc
-          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list: ALLOW - Permit the request to go through. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. If this is specified, additional handling details are provided in the rule's BlockResponse setting."];
+          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule: ALLOW - Permit the request to go through. Not available for DNS Firewall Advanced rules. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. If this is specified, additional handling details are provided in the rule's BlockResponse setting."];
       blockResponse: BlockResponse.t option
         [@ocaml.doc
           "The way that you want DNS Firewall to block the request. Used for the rule action setting BLOCK. NODATA - Respond indicating that the query was successful, but no response is available for it. NXDOMAIN - Respond indicating that the domain name that's in the query doesn't exist. OVERRIDE - Provide a custom override in the response. This option requires custom handling details in the rule's BlockOverride* settings."];
@@ -2040,40 +2823,65 @@ module FirewallRule =
           "The date and time that the rule was created, in Unix time format and Coordinated Universal Time (UTC)."];
       modificationTime: Rfc3339TimeString.t option
         [@ocaml.doc
-          "The date and time that the rule was last modified, in Unix time format and Coordinated Universal Time (UTC)."]}
+          "The date and time that the rule was last modified, in Unix time format and Coordinated Universal Time (UTC)."];
+      firewallDomainRedirectionAction:
+        FirewallDomainRedirectionAction.t option
+        [@ocaml.doc
+          "How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. INSPECT_REDIRECTION_DOMAIN: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list. TRUST_REDIRECTION_DOMAIN: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list."];
+      qtype: Qtype.t option
+        [@ocaml.doc
+          "The DNS query type you want the rule to evaluate. Allowed values are; A: Returns an IPv4 address. AAAA: Returns an Ipv6 address. CAA: Restricts CAs that can create SSL/TLS certifications for the domain. CNAME: Returns another domain name. DS: Record that identifies the DNSSEC signing key of a delegated zone. MX: Specifies mail servers. NAPTR: Regular-expression-based rewriting of domain names. NS: Authoritative name servers. PTR: Maps an IP address to a domain name. SOA: Start of authority record for the zone. SPF: Lists the servers authorized to send emails from a domain. SRV: Application specific values that identify servers. TXT: Verifies email senders and application-specific values. A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see List of DNS record types."];
+      dnsThreatProtection: DnsThreatProtection.t option
+        [@ocaml.doc
+          "The type of the DNS Firewall Advanced rule. Valid values are: DGA: Domain generation algorithms detection. DGAs are used by attackers to generate a large number of domains to to launch malware attacks. DNS_TUNNELING: DNS tunneling detection. DNS tunneling is used by attackers to exfiltrate data from the client by using the DNS tunnel without making a network connection to the client."];
+      confidenceThreshold: ConfidenceThreshold.t option
+        [@ocaml.doc
+          "The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: LOW: Provides the highest detection rate for threats, but also increases false positives. MEDIUM: Provides a balance between detecting threats and false positives. HIGH: Detects only the most well corroborated threats with a low rate of false positives."]}
     let make ?firewallRuleGroupId =
       fun ?firewallDomainListId ->
-        fun ?name ->
-          fun ?priority ->
-            fun ?action ->
-              fun ?blockResponse ->
-                fun ?blockOverrideDomain ->
-                  fun ?blockOverrideDnsType ->
-                    fun ?blockOverrideTtl ->
-                      fun ?creatorRequestId ->
-                        fun ?creationTime ->
-                          fun ?modificationTime ->
-                            fun () ->
-                              {
-                                firewallRuleGroupId;
-                                firewallDomainListId;
-                                name;
-                                priority;
-                                action;
-                                blockResponse;
-                                blockOverrideDomain;
-                                blockOverrideDnsType;
-                                blockOverrideTtl;
-                                creatorRequestId;
-                                creationTime;
-                                modificationTime
-                              }
+        fun ?firewallThreatProtectionId ->
+          fun ?name ->
+            fun ?priority ->
+              fun ?action ->
+                fun ?blockResponse ->
+                  fun ?blockOverrideDomain ->
+                    fun ?blockOverrideDnsType ->
+                      fun ?blockOverrideTtl ->
+                        fun ?creatorRequestId ->
+                          fun ?creationTime ->
+                            fun ?modificationTime ->
+                              fun ?firewallDomainRedirectionAction ->
+                                fun ?qtype ->
+                                  fun ?dnsThreatProtection ->
+                                    fun ?confidenceThreshold ->
+                                      fun () ->
+                                        {
+                                          firewallRuleGroupId;
+                                          firewallDomainListId;
+                                          firewallThreatProtectionId;
+                                          name;
+                                          priority;
+                                          action;
+                                          blockResponse;
+                                          blockOverrideDomain;
+                                          blockOverrideDnsType;
+                                          blockOverrideTtl;
+                                          creatorRequestId;
+                                          creationTime;
+                                          modificationTime;
+                                          firewallDomainRedirectionAction;
+                                          qtype;
+                                          dnsThreatProtection;
+                                          confidenceThreshold
+                                        }
     let to_value x =
       structure_to_value
         [("FirewallRuleGroupId",
            (Option.map x.firewallRuleGroupId ~f:ResourceId.to_value));
         ("FirewallDomainListId",
           (Option.map x.firewallDomainListId ~f:ResourceId.to_value));
+        ("FirewallThreatProtectionId",
+          (Option.map x.firewallThreatProtectionId ~f:ResourceId.to_value));
         ("Name", (Option.map x.name ~f:Name.to_value));
         ("Priority", (Option.map x.priority ~f:Priority.to_value));
         ("Action", (Option.map x.action ~f:Action.to_value));
@@ -2090,9 +2898,27 @@ module FirewallRule =
         ("CreationTime",
           (Option.map x.creationTime ~f:Rfc3339TimeString.to_value));
         ("ModificationTime",
-          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value))]
+          (Option.map x.modificationTime ~f:Rfc3339TimeString.to_value));
+        ("FirewallDomainRedirectionAction",
+          (Option.map x.firewallDomainRedirectionAction
+             ~f:FirewallDomainRedirectionAction.to_value));
+        ("Qtype", (Option.map x.qtype ~f:Qtype.to_value));
+        ("DnsThreatProtection",
+          (Option.map x.dnsThreatProtection ~f:DnsThreatProtection.to_value));
+        ("ConfidenceThreshold",
+          (Option.map x.confidenceThreshold ~f:ConfidenceThreshold.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let confidenceThreshold =
+        (Option.map ~f:ConfidenceThreshold.of_xml)
+          (Xml.child xml_arg0 "ConfidenceThreshold") in
+      let dnsThreatProtection =
+        (Option.map ~f:DnsThreatProtection.of_xml)
+          (Xml.child xml_arg0 "DnsThreatProtection") in
+      let qtype = (Option.map ~f:Qtype.of_xml) (Xml.child xml_arg0 "Qtype") in
+      let firewallDomainRedirectionAction =
+        (Option.map ~f:FirewallDomainRedirectionAction.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainRedirectionAction") in
       let modificationTime =
         (Option.map ~f:Rfc3339TimeString.of_xml)
           (Xml.child xml_arg0 "ModificationTime") in
@@ -2119,42 +2945,59 @@ module FirewallRule =
       let priority =
         (Option.map ~f:Priority.of_xml) (Xml.child xml_arg0 "Priority") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
+      let firewallThreatProtectionId =
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallThreatProtectionId") in
       let firewallDomainListId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "FirewallDomainListId") in
       let firewallRuleGroupId =
         (Option.map ~f:ResourceId.of_xml)
           (Xml.child xml_arg0 "FirewallRuleGroupId") in
-      make ?modificationTime ?creationTime ?creatorRequestId
-        ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ?action ?priority ?name ?firewallDomainListId
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ?modificationTime ?creationTime
+        ?creatorRequestId ?blockOverrideTtl ?blockOverrideDnsType
+        ?blockOverrideDomain ?blockResponse ?action ?priority ?name
+        ?firewallThreatProtectionId ?firewallDomainListId
         ?firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let confidenceThreshold =
+        field_map json__ "ConfidenceThreshold" ConfidenceThreshold.of_json in
+      let dnsThreatProtection =
+        field_map json__ "DnsThreatProtection" DnsThreatProtection.of_json in
+      let qtype = field_map json__ "Qtype" Qtype.of_json in
+      let firewallDomainRedirectionAction =
+        field_map json__ "FirewallDomainRedirectionAction"
+          FirewallDomainRedirectionAction.of_json in
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
       let blockOverrideTtl =
-        field_map json "BlockOverrideTtl" Unsigned.of_json in
+        field_map json__ "BlockOverrideTtl" Unsigned.of_json in
       let blockOverrideDnsType =
-        field_map json "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
+        field_map json__ "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
       let blockOverrideDomain =
-        field_map json "BlockOverrideDomain" BlockOverrideDomain.of_json in
+        field_map json__ "BlockOverrideDomain" BlockOverrideDomain.of_json in
       let blockResponse =
-        field_map json "BlockResponse" BlockResponse.of_json in
-      let action = field_map json "Action" Action.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "BlockResponse" BlockResponse.of_json in
+      let action = field_map json__ "Action" Action.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let firewallThreatProtectionId =
+        field_map json__ "FirewallThreatProtectionId" ResourceId.of_json in
       let firewallDomainListId =
-        field_map json "FirewallDomainListId" ResourceId.of_json in
+        field_map json__ "FirewallDomainListId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map json "FirewallRuleGroupId" ResourceId.of_json in
-      make ?modificationTime ?creationTime ?creatorRequestId
-        ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ?action ?priority ?name ?firewallDomainListId
+        field_map json__ "FirewallRuleGroupId" ResourceId.of_json in
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ?modificationTime ?creationTime
+        ?creatorRequestId ?blockOverrideTtl ?blockOverrideDnsType
+        ?blockOverrideDomain ?blockResponse ?action ?priority ?name
+        ?firewallThreatProtectionId ?firewallDomainListId
         ?firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A single firewall rule in a rule group."]
@@ -2206,14 +3049,14 @@ module FirewallRuleGroupMetadata =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?shareStatus ?creatorRequestId ?ownerId ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
+    let of_json json__ =
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?shareStatus ?creatorRequestId ?ownerId ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2346,28 +3189,29 @@ module FirewallRuleGroupAssociation =
         ?status ?managedOwnerName ?mutationProtection ?priority ?name ?vpcId
         ?firewallRuleGroupId ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
       let status =
-        field_map json "Status" FirewallRuleGroupAssociationStatus.of_json in
+        field_map json__ "Status" FirewallRuleGroupAssociationStatus.of_json in
       let managedOwnerName =
-        field_map json "ManagedOwnerName" ServicePrinciple.of_json in
+        field_map json__ "ManagedOwnerName" ServicePrinciple.of_json in
       let mutationProtection =
-        field_map json "MutationProtection" MutationProtectionStatus.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+        field_map json__ "MutationProtection"
+          MutationProtectionStatus.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map json "FirewallRuleGroupId" ResourceId.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "FirewallRuleGroupId" ResourceId.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?modificationTime ?creationTime ?creatorRequestId ?statusMessage
         ?status ?managedOwnerName ?mutationProtection ?priority ?name ?vpcId
         ?firewallRuleGroupId ?arn ?id ()
@@ -2417,14 +3261,14 @@ module FirewallDomainListMetadata =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?managedOwnerName ?creatorRequestId ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedOwnerName =
-        field_map json "ManagedOwnerName" ServicePrinciple.of_json in
+        field_map json__ "ManagedOwnerName" ServicePrinciple.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?managedOwnerName ?creatorRequestId ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2468,12 +3312,12 @@ module FirewallConfig =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?firewallFailOpen ?ownerId ?resourceId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallFailOpen =
-        field_map json "FirewallFailOpen" FirewallFailOpenStatus.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
-      let resourceId = field_map json "ResourceId" ResourceId.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "FirewallFailOpen" FirewallFailOpenStatus.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
+      let resourceId = field_map json__ "ResourceId" ResourceId.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?firewallFailOpen ?ownerId ?resourceId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2551,27 +3395,54 @@ module IpAddressRequest =
       subnetId: SubnetId.t
         [@ocaml.doc "The ID of the subnet that contains the IP address."];
       ip: Ip.t option
-        [@ocaml.doc "The IP address that you want to use for DNS queries."]}
+        [@ocaml.doc "The IPv4 address that you want to use for DNS queries."];
+      ipv6: Ipv6.t option
+        [@ocaml.doc "The IPv6 address that you want to use for DNS queries."]}
     let context_ = "IpAddressRequest"
-    let make ?ip = fun ~subnetId -> fun () -> { ip; subnetId }
+    let make ?ip =
+      fun ?ipv6 -> fun ~subnetId -> fun () -> { ip; ipv6; subnetId }
     let to_value x =
       structure_to_value
         [("SubnetId", (Some (SubnetId.to_value x.subnetId)));
-        ("Ip", (Option.map x.ip ~f:Ip.to_value))]
+        ("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("Ipv6", (Option.map x.ipv6 ~f:Ipv6.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6 = (Option.map ~f:Ipv6.of_xml) (Xml.child xml_arg0 "Ipv6") in
       let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
       let subnetId =
         SubnetId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SubnetId") in
-      make ?ip ~subnetId ()
+      make ?ipv6 ?ip ~subnetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ip = field_map json "Ip" Ip.of_json in
-      let subnetId = field_map_exn json "SubnetId" SubnetId.of_json in
-      make ?ip ~subnetId ()
+    let of_json json__ =
+      let ipv6 = field_map json__ "Ipv6" Ipv6.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      let subnetId = field_map_exn json__ "SubnetId" SubnetId.of_json in
+      make ?ipv6 ?ip ~subnetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In a CreateResolverEndpoint request, the IP address that DNS queries originate from (for outbound endpoints) or that you forward DNS queries to (for inbound endpoints). IpAddressRequest also includes the ID of the subnet that contains the IP address."]
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The current account doesn't have the IAM permissions required to perform the specified Resolver operation. This error can also be thrown when a customer has reached the 5120 character limit for a resource policy for CloudWatch Logs."]
 module InternalServiceErrorException =
   struct
     type nonrec t = {
@@ -2587,8 +3458,8 @@ module InternalServiceErrorException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2597,29 +3468,28 @@ module InvalidParameterException =
   struct
     type nonrec t =
       {
-      message: ExceptionMessage.t ;
+      message: ExceptionMessage.t option ;
       fieldName: String_.t option
         [@ocaml.doc
           "For an InvalidParameterException error, the name of the parameter that's invalid."]}
-    let context_ = "InvalidParameterException"
-    let make ?fieldName = fun ~message -> fun () -> { fieldName; message }
+    let make ?message = fun ?fieldName -> fun () -> { message; fieldName }
     let to_value x =
       structure_to_value
-        [("Message", (Some (ExceptionMessage.to_value x.message)));
+        [("Message", (Option.map x.message ~f:ExceptionMessage.to_value));
         ("FieldName", (Option.map x.fieldName ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let fieldName =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FieldName") in
       let message =
-        ExceptionMessage.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Message") in
-      make ?fieldName ~message ()
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "Message") in
+      make ?fieldName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fieldName = field_map json "FieldName" String_.of_json in
-      let message = field_map_exn json "Message" ExceptionMessage.of_json in
-      make ?fieldName ~message ()
+    let of_json json__ =
+      let fieldName = field_map json__ "FieldName" String_.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
+      make ?fieldName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters in this request are not valid."]
 module InvalidRequestException =
@@ -2637,8 +3507,8 @@ module InvalidRequestException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is invalid."]
@@ -2664,9 +3534,9 @@ module LimitExceededException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request caused one or more limits to be exceeded."]
@@ -2692,9 +3562,9 @@ module ResourceNotFoundException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource doesn't exist."]
@@ -2720,9 +3590,9 @@ module ResourceUnavailableException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource isn't available."]
@@ -2741,8 +3611,8 @@ module ThrottlingException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request was throttled. Try again in a few minutes."]
@@ -2752,7 +3622,7 @@ module ResolverRuleConfig =
       {
       name: Name.t option
         [@ocaml.doc
-          "The new name for the Resolver rule. The name that you specify appears in the Resolver dashboard in the Route 53 console."];
+          "The new name for the Resolver rule. The name that you specify appears in the Resolver dashboard in the Route 53 console. The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers."];
       targetIps: TargetList.t option
         [@ocaml.doc
           "For DNS queries that originate in your VPC, the new IP addresses that you want to route outbound DNS queries to."];
@@ -2779,16 +3649,76 @@ module ResolverRuleConfig =
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       make ?resolverEndpointId ?targetIps ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpointId =
-        field_map json "ResolverEndpointId" ResourceId.of_json in
-      let targetIps = field_map json "TargetIps" TargetList.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "ResolverEndpointId" ResourceId.of_json in
+      let targetIps = field_map json__ "TargetIps" TargetList.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       make ?resolverEndpointId ?targetIps ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In an UpdateResolverRule request, information about the changes that you want to make."]
-module AccessDeniedException =
+module UpdateIpAddresses =
+  struct
+    type nonrec t = UpdateIpAddress.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UpdateIpAddress.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UpdateIpAddress.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UpdateIpAddresses" ~of_json:UpdateIpAddress.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module Validation =
+  struct
+    type nonrec t =
+      | ENABLE 
+      | DISABLE 
+      | USE_LOCAL_RESOURCE_SETTING 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLE -> "ENABLE"
+      | DISABLE -> "DISABLE"
+      | USE_LOCAL_RESOURCE_SETTING -> "USE_LOCAL_RESOURCE_SETTING"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLE" -> ENABLE
+      | "DISABLE" -> DISABLE
+      | "USE_LOCAL_RESOURCE_SETTING" -> USE_LOCAL_RESOURCE_SETTING
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Validation" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Validation" j)
+    let to_json = simple_to_json to_value
+  end
+module ValidationException =
   struct
     type nonrec t = {
       message: ExceptionMessage.t option }
@@ -2803,53 +3733,31 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The current account doesn't have the IAM permissions required to perform the specified Resolver operation."]
-module Validation =
-  struct
-    type nonrec t =
-      | ENABLE 
-      | DISABLE 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ENABLE -> "ENABLE"
-      | DISABLE -> "DISABLE"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ENABLE" -> ENABLE
-      | "DISABLE" -> DISABLE
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Validation" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Validation" j)
-    let to_json = simple_to_json to_value
-  end
+       "You have provided an invalid command. If you ran the UpdateFirewallDomains request. supported values are ADD, REMOVE, or REPLACE a domain."]
 module AutodefinedReverseFlag =
   struct
     type nonrec t =
       | ENABLE 
       | DISABLE 
+      | USE_LOCAL_RESOURCE_SETTING 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | ENABLE -> "ENABLE"
       | DISABLE -> "DISABLE"
+      | USE_LOCAL_RESOURCE_SETTING -> "USE_LOCAL_RESOURCE_SETTING"
       | Non_static_id s -> s
     let of_string =
       function
       | "ENABLE" -> ENABLE
       | "DISABLE" -> DISABLE
+      | "USE_LOCAL_RESOURCE_SETTING" -> USE_LOCAL_RESOURCE_SETTING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2876,12 +3784,13 @@ module ConflictException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
-module ValidationException =
+  end[@@ocaml.doc
+       "The requested state transition isn't valid. For example, you can't delete a firewall domain list if it is in the process of being deleted, or you can't import domains into a domain list that is in the process of being deleted."]
+module ServiceQuotaExceededException =
   struct
     type nonrec t = {
       message: ExceptionMessage.t option }
@@ -2896,11 +3805,12 @@ module ValidationException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end
+  end[@@ocaml.doc
+       "Fulfilling the request would cause one or more quotas to be exceeded."]
 module BlockOverrideTtl =
   struct
     type nonrec t = int
@@ -2955,6 +3865,9 @@ module FirewallDomains =
   struct
     type nonrec t = FirewallDomainName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallDomainName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2981,6 +3894,9 @@ module TagKeyList =
     type nonrec t = TagKey.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3015,8 +3931,8 @@ module InvalidTagException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified tag is invalid."]
@@ -3025,6 +3941,9 @@ module TagList =
     type nonrec t = Tag.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:200); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3072,8 +3991,8 @@ module InvalidPolicyDocument =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified Resolver rule policy is invalid."]
@@ -3092,8 +4011,8 @@ module UnknownResourceException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified resource doesn't exist."]
@@ -3102,7 +4021,7 @@ module ResolverRulePolicy =
     type nonrec t = string
     let context_ = "ResolverRulePolicy"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:5000); i
+      let open Result in ok_or_failwith (check_string_max i ~max:30000); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -3153,8 +4072,8 @@ module InvalidNextTokenException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3194,6 +4113,9 @@ module ResolverRules =
   struct
     type nonrec t = ResolverRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3218,6 +4140,9 @@ module Filters =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3241,6 +4166,9 @@ module ResolverRuleAssociations =
   struct
     type nonrec t = ResolverRuleAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverRuleAssociation.to_value)) |>
         (fun x -> `List x)
@@ -3267,6 +4195,9 @@ module ResolverQueryLogConfigList =
   struct
     type nonrec t = ResolverQueryLogConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverQueryLogConfig.to_value)) |>
         (fun x -> `List x)
@@ -3336,6 +4267,9 @@ module ResolverQueryLogConfigAssociationList =
   struct
     type nonrec t = ResolverQueryLogConfigAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverQueryLogConfigAssociation.to_value)) |>
         (fun x -> `List x)
@@ -3363,6 +4297,9 @@ module ResolverEndpoints =
   struct
     type nonrec t = ResolverEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3388,6 +4325,9 @@ module IpAddressesResponse =
   struct
     type nonrec t = IpAddressResponse.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddressResponse.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3413,6 +4353,9 @@ module ResolverDnssecConfigList =
   struct
     type nonrec t = ResolverDnssecConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverDnssecConfig.to_value)) |>
         (fun x -> `List x)
@@ -3439,6 +4382,9 @@ module ResolverConfigList =
   struct
     type nonrec t = ResolverConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResolverConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3479,10 +4425,41 @@ module ListResolverConfigsMaxResult =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module OutpostResolverList =
+  struct
+    type nonrec t = OutpostResolver.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OutpostResolver.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OutpostResolver.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OutpostResolverList"
+        ~of_json:OutpostResolver.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module FirewallRules =
   struct
     type nonrec t = FirewallRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3507,6 +4484,9 @@ module FirewallRuleGroupMetadataList =
   struct
     type nonrec t = FirewallRuleGroupMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallRuleGroupMetadata.to_value)) |>
         (fun x -> `List x)
@@ -3533,6 +4513,9 @@ module FirewallRuleGroupAssociations =
   struct
     type nonrec t = FirewallRuleGroupAssociation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallRuleGroupAssociation.to_value)) |>
         (fun x -> `List x)
@@ -3577,6 +4560,9 @@ module FirewallDomainListMetadataList =
   struct
     type nonrec t = FirewallDomainListMetadata.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallDomainListMetadata.to_value)) |>
         (fun x -> `List x)
@@ -3603,6 +4589,9 @@ module FirewallConfigList =
   struct
     type nonrec t = FirewallConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FirewallConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3781,22 +4770,22 @@ module FirewallRuleGroup =
       make ?modificationTime ?creationTime ?shareStatus ?creatorRequestId
         ?ownerId ?statusMessage ?status ?ruleCount ?name ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
-      let shareStatus = field_map json "ShareStatus" ShareStatus.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
+      let shareStatus = field_map json__ "ShareStatus" ShareStatus.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
-      let ownerId = field_map json "OwnerId" AccountId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
+      let ownerId = field_map json__ "OwnerId" AccountId.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" FirewallRuleGroupStatus.of_json in
-      let ruleCount = field_map json "RuleCount" Unsigned.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" FirewallRuleGroupStatus.of_json in
+      let ruleCount = field_map json__ "RuleCount" Unsigned.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?modificationTime ?creationTime ?shareStatus ?creatorRequestId
         ?ownerId ?statusMessage ?status ?ruleCount ?name ?arn ?id ()
     let to_json v = composed_to_json to_value v
@@ -3901,22 +4890,22 @@ module FirewallDomainList =
         ?managedOwnerName ?statusMessage ?status ?domainCount ?name ?arn ?id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let modificationTime =
-        field_map json "ModificationTime" Rfc3339TimeString.of_json in
+        field_map json__ "ModificationTime" Rfc3339TimeString.of_json in
       let creationTime =
-        field_map json "CreationTime" Rfc3339TimeString.of_json in
+        field_map json__ "CreationTime" Rfc3339TimeString.of_json in
       let creatorRequestId =
-        field_map json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map json__ "CreatorRequestId" CreatorRequestId.of_json in
       let managedOwnerName =
-        field_map json "ManagedOwnerName" ServicePrinciple.of_json in
+        field_map json__ "ManagedOwnerName" ServicePrinciple.of_json in
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" FirewallDomainListStatus.of_json in
-      let domainCount = field_map json "DomainCount" Unsigned.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let arn = field_map json "Arn" Arn.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" FirewallDomainListStatus.of_json in
+      let domainCount = field_map json__ "DomainCount" Unsigned.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let arn = field_map json__ "Arn" Arn.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?modificationTime ?creationTime ?creatorRequestId
         ?managedOwnerName ?statusMessage ?status ?domainCount ?name ?arn ?id
         ()
@@ -3945,9 +4934,9 @@ module ResourceExistsException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource that you tried to create already exists."]
@@ -3961,28 +4950,33 @@ module IpAddressUpdate =
       subnetId: SubnetId.t option
         [@ocaml.doc
           "The ID of the subnet that includes the IP address that you want to update. To get this ID, use GetResolverEndpoint."];
-      ip: Ip.t option [@ocaml.doc "The new IP address."]}
+      ip: Ip.t option [@ocaml.doc "The new IPv4 address."];
+      ipv6: Ipv6.t option [@ocaml.doc "The new IPv6 address."]}
     let make ?ipId =
-      fun ?subnetId -> fun ?ip -> fun () -> { ipId; subnetId; ip }
+      fun ?subnetId ->
+        fun ?ip -> fun ?ipv6 -> fun () -> { ipId; subnetId; ip; ipv6 }
     let to_value x =
       structure_to_value
         [("IpId", (Option.map x.ipId ~f:ResourceId.to_value));
         ("SubnetId", (Option.map x.subnetId ~f:SubnetId.to_value));
-        ("Ip", (Option.map x.ip ~f:Ip.to_value))]
+        ("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("Ipv6", (Option.map x.ipv6 ~f:Ipv6.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6 = (Option.map ~f:Ipv6.of_xml) (Xml.child xml_arg0 "Ipv6") in
       let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
       let subnetId =
         (Option.map ~f:SubnetId.of_xml) (Xml.child xml_arg0 "SubnetId") in
       let ipId =
         (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "IpId") in
-      make ?ip ?subnetId ?ipId ()
+      make ?ipv6 ?ip ?subnetId ?ipId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ip = field_map json "Ip" Ip.of_json in
-      let subnetId = field_map json "SubnetId" SubnetId.of_json in
-      let ipId = field_map json "IpId" ResourceId.of_json in
-      make ?ip ?subnetId ?ipId ()
+    let of_json json__ =
+      let ipv6 = field_map json__ "Ipv6" Ipv6.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      let subnetId = field_map json__ "SubnetId" SubnetId.of_json in
+      let ipId = field_map json__ "IpId" ResourceId.of_json in
+      make ?ipv6 ?ip ?subnetId ?ipId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In an UpdateResolverEndpoint request, information about an IP address to update."]
@@ -4008,9 +5002,9 @@ module ResourceInUseException =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceType ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
       make ?resourceType ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4021,8 +5015,11 @@ module IpAddressesRequest =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:2));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IpAddressRequest.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4051,7 +5048,8 @@ module UpdateResolverRuleResponse =
       resolverRule: ResolverRule.t option
         [@ocaml.doc "The response to an UpdateResolverRule request."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -4062,6 +5060,8 @@ module UpdateResolverRuleResponse =
     let make ?resolverRule = fun () -> { resolverRule }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -4083,6 +5083,8 @@ module UpdateResolverRuleResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -4103,6 +5105,10 @@ module UpdateResolverRuleResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -4147,8 +5153,8 @@ module UpdateResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
+    let of_json json__ =
+      let resolverRule = field_map json__ "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4178,10 +5184,10 @@ module UpdateResolverRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~config ~resolverRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let config = field_map_exn json "Config" ResolverRuleConfig.of_json in
+    let of_json json__ =
+      let config = field_map_exn json__ "Config" ResolverRuleConfig.of_json in
       let resolverRuleId =
-        field_map_exn json "ResolverRuleId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleId" ResourceId.of_json in
       make ~config ~resolverRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4193,7 +5199,8 @@ module UpdateResolverEndpointResponse =
       resolverEndpoint: ResolverEndpoint.t option
         [@ocaml.doc "The response to an UpdateResolverEndpoint request."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -4202,6 +5209,8 @@ module UpdateResolverEndpointResponse =
     let make ?resolverEndpoint = fun () -> { resolverEndpoint }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -4218,6 +5227,8 @@ module UpdateResolverEndpointResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -4233,6 +5244,10 @@ module UpdateResolverEndpointResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -4269,13 +5284,13 @@ module UpdateResolverEndpointResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the name of an inbound or an outbound Resolver endpoint."]
+       "Updates the name, or endpoint type for an inbound or an outbound Resolver endpoint. You can only update between IPV4 and DUALSTACK, IPV6 endpoint type can't be updated to other type."]
 module UpdateResolverEndpointRequest =
   struct
     type nonrec t =
@@ -4285,31 +5300,126 @@ module UpdateResolverEndpointRequest =
           "The ID of the Resolver endpoint that you want to update."];
       name: Name.t option
         [@ocaml.doc
-          "The name of the Resolver endpoint that you want to update."]}
+          "The name of the Resolver endpoint that you want to update."];
+      resolverEndpointType: ResolverEndpointType.t option
+        [@ocaml.doc
+          "Specifies the endpoint type for what type of IP address the endpoint uses to forward DNS queries. Updating to IPV6 type isn't currently supported."];
+      updateIpAddresses: UpdateIpAddresses.t option
+        [@ocaml.doc
+          "Specifies the IPv6 address when you update the Resolver endpoint from IPv4 to dual-stack. If you don't specify an IPv6 address, one will be automatically chosen from your subnet."];
+      protocols: ProtocolList.t option
+        [@ocaml.doc
+          "The protocols you want to use for the endpoint. DoH-FIPS is applicable for default inbound endpoints only. For a default inbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 and DoH-FIPS in combination. Do53 alone. DoH alone. DoH-FIPS alone. None, which is treated as Do53. For a delegation inbound endpoint you can use Do53 only. For an outbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 alone. DoH alone. None, which is treated as Do53. You can't change the protocol of an inbound endpoint directly from only Do53 to only DoH, or DoH-FIPS. This is to prevent a sudden disruption to incoming traffic that relies on Do53. To change the protocol from Do53 to DoH, or DoH-FIPS, you must first enable both Do53 and DoH, or Do53 and DoH-FIPS, to make sure that all incoming traffic has transferred to using the DoH protocol, or DoH-FIPS, and then remove the Do53."];
+      rniEnhancedMetricsEnabled: RniEnhancedMetricsEnabled.t option
+        [@ocaml.doc
+          "Updates whether RNI enhanced metrics are enabled for the Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When set to false, metrics are not published. Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint RNI enhanced metrics. For more information, see Detailed metrics."];
+      targetNameServerMetricsEnabled: TargetNameServerMetricsEnabled.t option
+        [@ocaml.doc
+          "Updates whether target name server metrics are enabled for the outbound Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When set to false, metrics are not published. This setting is not supported for inbound Resolver endpoints. Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint target name server metrics. For more information, see Detailed metrics."];
+      dns64Enabled: Dns64Enabled.t option
+        [@ocaml.doc
+          "Specifies whether DNS64 is enabled for the inbound Resolver endpoint. When set to true, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the 64:ff9b::/96 prefix to the IPv4 address. This enables IPv6-only clients that send queries through the inbound endpoint to reach IPv4-only services. DNS64 works with NAT64 to provide complete IPv6-to-IPv4 translation."];
+      ipv6InternetAccessEnabled: Ipv6InternetAccessEnabled.t option
+        [@ocaml.doc
+          "Specifies whether IPv6 internet access is enabled for the outbound Resolver endpoint. When set to true, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway. When you enable IPv6 internet access, use network controls like security groups, NACLs, or egress-only internet gateways to protect the endpoint ENIs from unsolicited ingress traffic. Be aware that some network controls can affect DNS query throughput due to connection tracking. For more information, see Amazon EC2 security group connection tracking and Resolver endpoint scaling."]}
     let context_ = "UpdateResolverEndpointRequest"
     let make ?name =
-      fun ~resolverEndpointId -> fun () -> { name; resolverEndpointId }
+      fun ?resolverEndpointType ->
+        fun ?updateIpAddresses ->
+          fun ?protocols ->
+            fun ?rniEnhancedMetricsEnabled ->
+              fun ?targetNameServerMetricsEnabled ->
+                fun ?dns64Enabled ->
+                  fun ?ipv6InternetAccessEnabled ->
+                    fun ~resolverEndpointId ->
+                      fun () ->
+                        {
+                          name;
+                          resolverEndpointType;
+                          updateIpAddresses;
+                          protocols;
+                          rniEnhancedMetricsEnabled;
+                          targetNameServerMetricsEnabled;
+                          dns64Enabled;
+                          ipv6InternetAccessEnabled;
+                          resolverEndpointId
+                        }
     let to_value x =
       structure_to_value
         [("ResolverEndpointId",
            (Some (ResourceId.to_value x.resolverEndpointId)));
-        ("Name", (Option.map x.name ~f:Name.to_value))]
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("ResolverEndpointType",
+          (Option.map x.resolverEndpointType ~f:ResolverEndpointType.to_value));
+        ("UpdateIpAddresses",
+          (Option.map x.updateIpAddresses ~f:UpdateIpAddresses.to_value));
+        ("Protocols", (Option.map x.protocols ~f:ProtocolList.to_value));
+        ("RniEnhancedMetricsEnabled",
+          (Option.map x.rniEnhancedMetricsEnabled
+             ~f:RniEnhancedMetricsEnabled.to_value));
+        ("TargetNameServerMetricsEnabled",
+          (Option.map x.targetNameServerMetricsEnabled
+             ~f:TargetNameServerMetricsEnabled.to_value));
+        ("Dns64Enabled",
+          (Option.map x.dns64Enabled ~f:Dns64Enabled.to_value));
+        ("Ipv6InternetAccessEnabled",
+          (Option.map x.ipv6InternetAccessEnabled
+             ~f:Ipv6InternetAccessEnabled.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6InternetAccessEnabled =
+        (Option.map ~f:Ipv6InternetAccessEnabled.of_xml)
+          (Xml.child xml_arg0 "Ipv6InternetAccessEnabled") in
+      let dns64Enabled =
+        (Option.map ~f:Dns64Enabled.of_xml)
+          (Xml.child xml_arg0 "Dns64Enabled") in
+      let targetNameServerMetricsEnabled =
+        (Option.map ~f:TargetNameServerMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "TargetNameServerMetricsEnabled") in
+      let rniEnhancedMetricsEnabled =
+        (Option.map ~f:RniEnhancedMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "RniEnhancedMetricsEnabled") in
+      let protocols =
+        (Option.map ~f:ProtocolList.of_xml) (Xml.child xml_arg0 "Protocols") in
+      let updateIpAddresses =
+        (Option.map ~f:UpdateIpAddresses.of_xml)
+          (Xml.child xml_arg0 "UpdateIpAddresses") in
+      let resolverEndpointType =
+        (Option.map ~f:ResolverEndpointType.of_xml)
+          (Xml.child xml_arg0 "ResolverEndpointType") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let resolverEndpointId =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
-      make ?name ~resolverEndpointId ()
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?updateIpAddresses ?resolverEndpointType ?name ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Name.of_json in
+    let of_json json__ =
+      let ipv6InternetAccessEnabled =
+        field_map json__ "Ipv6InternetAccessEnabled"
+          Ipv6InternetAccessEnabled.of_json in
+      let dns64Enabled = field_map json__ "Dns64Enabled" Dns64Enabled.of_json in
+      let targetNameServerMetricsEnabled =
+        field_map json__ "TargetNameServerMetricsEnabled"
+          TargetNameServerMetricsEnabled.of_json in
+      let rniEnhancedMetricsEnabled =
+        field_map json__ "RniEnhancedMetricsEnabled"
+          RniEnhancedMetricsEnabled.of_json in
+      let protocols = field_map json__ "Protocols" ProtocolList.of_json in
+      let updateIpAddresses =
+        field_map json__ "UpdateIpAddresses" UpdateIpAddresses.of_json in
+      let resolverEndpointType =
+        field_map json__ "ResolverEndpointType" ResolverEndpointType.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
-      make ?name ~resolverEndpointId ()
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?updateIpAddresses ?resolverEndpointType ?name ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the name of an inbound or an outbound Resolver endpoint."]
+       "Updates the name, or endpoint type for an inbound or an outbound Resolver endpoint. You can only update between IPV4 and DUALSTACK, IPV6 endpoint type can't be updated to other type."]
 module UpdateResolverDnssecConfigResponse =
   struct
     type nonrec t =
@@ -4404,9 +5514,9 @@ module UpdateResolverDnssecConfigResponse =
           (Xml.child xml_arg0 "ResolverDNSSECConfig") in
       make ?resolverDNSSECConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverDNSSECConfig =
-        field_map json "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
+        field_map json__ "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
       make ?resolverDNSSECConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4438,9 +5548,9 @@ module UpdateResolverDnssecConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~validation ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let validation = field_map_exn json "Validation" Validation.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let validation = field_map_exn json__ "Validation" Validation.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~validation ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4461,6 +5571,7 @@ module UpdateResolverConfigResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resolverConfig = fun () -> { resolverConfig }
     let error_of_json name json =
@@ -4483,6 +5594,8 @@ module UpdateResolverConfigResponse =
             (ResourceUnavailableException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -4506,6 +5619,8 @@ module UpdateResolverConfigResponse =
             (ResourceUnavailableException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -4542,6 +5657,10 @@ module UpdateResolverConfigResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -4558,23 +5677,23 @@ module UpdateResolverConfigResponse =
           (Xml.child xml_arg0 "ResolverConfig") in
       make ?resolverConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverConfig =
-        field_map json "ResolverConfig" ResolverConfig.of_json in
+        field_map json__ "ResolverConfig" ResolverConfig.of_json in
       make ?resolverConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+       "Updates the behavior configuration of Route\194\16053 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
 module UpdateResolverConfigRequest =
   struct
     type nonrec t =
       {
       resourceId: ResourceId.t
         [@ocaml.doc
-          "Resource ID of the Amazon VPC that you want to update the Resolver configuration for."];
+          "The ID of the Amazon Virtual Private Cloud VPC or a Route 53 Profile that you're configuring Resolver for."];
       autodefinedReverseFlag: AutodefinedReverseFlag.t
         [@ocaml.doc
-          "Indicates whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. Disabling this option will also affect EC2-Classic instances using ClassicLink. For more information, see ClassicLink in the Amazon EC2 guide. It can take some time for the status change to be completed."]}
+          "Indicates whether or not the Resolver will create autodefined rules for reverse DNS lookups. This is enabled by default. Disabling this option will also affect EC2-Classic instances using ClassicLink. For more information, see ClassicLink in the Amazon EC2 guide. We are retiring EC2-Classic on August 15, 2022. We recommend that you migrate from EC2-Classic to a VPC. For more information, see Migrate from EC2-Classic to a VPC in the Amazon EC2 guide and the blog EC2-Classic Networking is Retiring \226\128\147 Here\226\128\153s How to Prepare. It can take some time for the status change to be completed."]}
     let context_ = "UpdateResolverConfigRequest"
     let make ~resourceId =
       fun ~autodefinedReverseFlag ->
@@ -4594,15 +5713,179 @@ module UpdateResolverConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~autodefinedReverseFlag ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autodefinedReverseFlag =
-        field_map_exn json "AutodefinedReverseFlag"
+        field_map_exn json__ "AutodefinedReverseFlag"
           AutodefinedReverseFlag.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~autodefinedReverseFlag ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+       "Updates the behavior configuration of Route\194\16053 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+module UpdateOutpostResolverResponse =
+  struct
+    type nonrec t =
+      {
+      outpostResolver: OutpostResolver.t option
+        [@ocaml.doc "The response to an UpdateOutpostResolver request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outpostResolver = fun () -> { outpostResolver }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OutpostResolver",
+           (Option.map x.outpostResolver ~f:OutpostResolver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostResolver =
+        (Option.map ~f:OutpostResolver.of_xml)
+          (Xml.child xml_arg0 "OutpostResolver") in
+      make ?outpostResolver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostResolver =
+        field_map json__ "OutpostResolver" OutpostResolver.of_json in
+      make ?outpostResolver ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can use UpdateOutpostResolver to update the instance count, type, or name of a Resolver on an Outpost."]
+module UpdateOutpostResolverRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceId.t
+        [@ocaml.doc
+          "A unique string that identifies Resolver on an Outpost."];
+      name: OutpostResolverName.t option
+        [@ocaml.doc "Name of the Resolver on the Outpost."];
+      instanceCount: InstanceCount.t option
+        [@ocaml.doc
+          "The Amazon EC2 instance count for a Resolver on the Outpost."];
+      preferredInstanceType: OutpostInstanceType.t option
+        [@ocaml.doc "Amazon EC2 instance type."]}
+    let context_ = "UpdateOutpostResolverRequest"
+    let make ?name =
+      fun ?instanceCount ->
+        fun ?preferredInstanceType ->
+          fun ~id ->
+            fun () -> { name; instanceCount; preferredInstanceType; id }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (ResourceId.to_value x.id)));
+        ("Name", (Option.map x.name ~f:OutpostResolverName.to_value));
+        ("InstanceCount",
+          (Option.map x.instanceCount ~f:InstanceCount.to_value));
+        ("PreferredInstanceType",
+          (Option.map x.preferredInstanceType ~f:OutpostInstanceType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let preferredInstanceType =
+        (Option.map ~f:OutpostInstanceType.of_xml)
+          (Xml.child xml_arg0 "PreferredInstanceType") in
+      let instanceCount =
+        (Option.map ~f:InstanceCount.of_xml)
+          (Xml.child xml_arg0 "InstanceCount") in
+      let name =
+        (Option.map ~f:OutpostResolverName.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let id =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ?preferredInstanceType ?instanceCount ?name ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let preferredInstanceType =
+        field_map json__ "PreferredInstanceType" OutpostInstanceType.of_json in
+      let instanceCount =
+        field_map json__ "InstanceCount" InstanceCount.of_json in
+      let name = field_map json__ "Name" OutpostResolverName.of_json in
+      let id = field_map_exn json__ "Id" ResourceId.of_json in
+      make ?preferredInstanceType ?instanceCount ?name ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can use UpdateOutpostResolver to update the instance count, type, or name of a Resolver on an Outpost."]
 module UpdateFirewallRuleResponse =
   struct
     type nonrec t =
@@ -4695,8 +5978,8 @@ module UpdateFirewallRuleResponse =
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
+    let of_json json__ =
+      let firewallRule = field_map json__ "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified firewall rule."]
@@ -4707,14 +5990,16 @@ module UpdateFirewallRuleRequest =
       firewallRuleGroupId: ResourceId.t
         [@ocaml.doc
           "The unique identifier of the firewall rule group for the rule."];
-      firewallDomainListId: ResourceId.t
+      firewallDomainListId: ResourceId.t option
         [@ocaml.doc "The ID of the domain list to use in the rule."];
+      firewallThreatProtectionId: ResourceId.t option
+        [@ocaml.doc "The DNS Firewall Advanced rule ID."];
       priority: Priority.t option
         [@ocaml.doc
           "The setting that determines the processing order of the rule in the rule group. DNS Firewall processes the rules in a rule group by order of priority, starting from the lowest setting. You must specify a unique priority for each rule in a rule group. To make it easier to insert rules later, leave space between the numbers, for example, use 100, 200, and so on. You can change the priority setting for the rules in a rule group at any time."];
       action: Action.t option
         [@ocaml.doc
-          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list: ALLOW - Permit the request to go through. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. This option requires additional details in the rule's BlockResponse."];
+          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule: ALLOW - Permit the request to go through. Not available for DNS Firewall Advanced rules. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. This option requires additional details in the rule's BlockResponse."];
       blockResponse: BlockResponse.t option
         [@ocaml.doc
           "The way that you want DNS Firewall to block the request. Used for the rule action setting BLOCK. NODATA - Respond indicating that the query was successful, but no response is available for it. NXDOMAIN - Respond indicating that the domain name that's in the query doesn't exist. OVERRIDE - Provide a custom override in the response. This option requires custom handling details in the rule's BlockOverride* settings."];
@@ -4727,35 +6012,60 @@ module UpdateFirewallRuleRequest =
       blockOverrideTtl: BlockOverrideTtl.t option
         [@ocaml.doc
           "The recommended amount of time, in seconds, for the DNS resolver or web browser to cache the provided override record. Used for the rule action BLOCK with a BlockResponse setting of OVERRIDE."];
-      name: Name.t option [@ocaml.doc "The name of the rule."]}
+      name: Name.t option [@ocaml.doc "The name of the rule."];
+      firewallDomainRedirectionAction:
+        FirewallDomainRedirectionAction.t option
+        [@ocaml.doc
+          "How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. INSPECT_REDIRECTION_DOMAIN: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list. TRUST_REDIRECTION_DOMAIN: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list."];
+      qtype: Qtype.t option
+        [@ocaml.doc
+          "The DNS query type you want the rule to evaluate. Allowed values are; A: Returns an IPv4 address. AAAA: Returns an Ipv6 address. CAA: Restricts CAs that can create SSL/TLS certifications for the domain. CNAME: Returns another domain name. DS: Record that identifies the DNSSEC signing key of a delegated zone. MX: Specifies mail servers. NAPTR: Regular-expression-based rewriting of domain names. NS: Authoritative name servers. PTR: Maps an IP address to a domain name. SOA: Start of authority record for the zone. SPF: Lists the servers authorized to send emails from a domain. SRV: Application specific values that identify servers. TXT: Verifies email senders and application-specific values. A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see List of DNS record types. If you set up a firewall BLOCK rule with action NXDOMAIN on query type equals AAAA, this action will not be applied to synthetic IPv6 addresses generated when DNS64 is enabled."];
+      dnsThreatProtection: DnsThreatProtection.t option
+        [@ocaml.doc
+          "The type of the DNS Firewall Advanced rule. Valid values are: DGA: Domain generation algorithms detection. DGAs are used by attackers to generate a large number of domains to to launch malware attacks. DNS_TUNNELING: DNS tunneling detection. DNS tunneling is used by attackers to exfiltrate data from the client by using the DNS tunnel without making a network connection to the client."];
+      confidenceThreshold: ConfidenceThreshold.t option
+        [@ocaml.doc
+          "The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: LOW: Provides the highest detection rate for threats, but also increases false positives. MEDIUM: Provides a balance between detecting threats and false positives. HIGH: Detects only the most well corroborated threats with a low rate of false positives."]}
     let context_ = "UpdateFirewallRuleRequest"
-    let make ?priority =
-      fun ?action ->
-        fun ?blockResponse ->
-          fun ?blockOverrideDomain ->
-            fun ?blockOverrideDnsType ->
-              fun ?blockOverrideTtl ->
-                fun ?name ->
-                  fun ~firewallRuleGroupId ->
-                    fun ~firewallDomainListId ->
-                      fun () ->
-                        {
-                          priority;
-                          action;
-                          blockResponse;
-                          blockOverrideDomain;
-                          blockOverrideDnsType;
-                          blockOverrideTtl;
-                          name;
-                          firewallRuleGroupId;
-                          firewallDomainListId
-                        }
+    let make ?firewallDomainListId =
+      fun ?firewallThreatProtectionId ->
+        fun ?priority ->
+          fun ?action ->
+            fun ?blockResponse ->
+              fun ?blockOverrideDomain ->
+                fun ?blockOverrideDnsType ->
+                  fun ?blockOverrideTtl ->
+                    fun ?name ->
+                      fun ?firewallDomainRedirectionAction ->
+                        fun ?qtype ->
+                          fun ?dnsThreatProtection ->
+                            fun ?confidenceThreshold ->
+                              fun ~firewallRuleGroupId ->
+                                fun () ->
+                                  {
+                                    firewallDomainListId;
+                                    firewallThreatProtectionId;
+                                    priority;
+                                    action;
+                                    blockResponse;
+                                    blockOverrideDomain;
+                                    blockOverrideDnsType;
+                                    blockOverrideTtl;
+                                    name;
+                                    firewallDomainRedirectionAction;
+                                    qtype;
+                                    dnsThreatProtection;
+                                    confidenceThreshold;
+                                    firewallRuleGroupId
+                                  }
     let to_value x =
       structure_to_value
         [("FirewallRuleGroupId",
            (Some (ResourceId.to_value x.firewallRuleGroupId)));
         ("FirewallDomainListId",
-          (Some (ResourceId.to_value x.firewallDomainListId)));
+          (Option.map x.firewallDomainListId ~f:ResourceId.to_value));
+        ("FirewallThreatProtectionId",
+          (Option.map x.firewallThreatProtectionId ~f:ResourceId.to_value));
         ("Priority", (Option.map x.priority ~f:Priority.to_value));
         ("Action", (Option.map x.action ~f:Action.to_value));
         ("BlockResponse",
@@ -4766,9 +6076,27 @@ module UpdateFirewallRuleRequest =
           (Option.map x.blockOverrideDnsType ~f:BlockOverrideDnsType.to_value));
         ("BlockOverrideTtl",
           (Option.map x.blockOverrideTtl ~f:BlockOverrideTtl.to_value));
-        ("Name", (Option.map x.name ~f:Name.to_value))]
+        ("Name", (Option.map x.name ~f:Name.to_value));
+        ("FirewallDomainRedirectionAction",
+          (Option.map x.firewallDomainRedirectionAction
+             ~f:FirewallDomainRedirectionAction.to_value));
+        ("Qtype", (Option.map x.qtype ~f:Qtype.to_value));
+        ("DnsThreatProtection",
+          (Option.map x.dnsThreatProtection ~f:DnsThreatProtection.to_value));
+        ("ConfidenceThreshold",
+          (Option.map x.confidenceThreshold ~f:ConfidenceThreshold.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let confidenceThreshold =
+        (Option.map ~f:ConfidenceThreshold.of_xml)
+          (Xml.child xml_arg0 "ConfidenceThreshold") in
+      let dnsThreatProtection =
+        (Option.map ~f:DnsThreatProtection.of_xml)
+          (Xml.child xml_arg0 "DnsThreatProtection") in
+      let qtype = (Option.map ~f:Qtype.of_xml) (Xml.child xml_arg0 "Qtype") in
+      let firewallDomainRedirectionAction =
+        (Option.map ~f:FirewallDomainRedirectionAction.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainRedirectionAction") in
       let name = (Option.map ~f:Name.of_xml) (Xml.child xml_arg0 "Name") in
       let blockOverrideTtl =
         (Option.map ~f:BlockOverrideTtl.of_xml)
@@ -4786,34 +6114,51 @@ module UpdateFirewallRuleRequest =
         (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "Action") in
       let priority =
         (Option.map ~f:Priority.of_xml) (Xml.child xml_arg0 "Priority") in
+      let firewallThreatProtectionId =
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallThreatProtectionId") in
       let firewallDomainListId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainListId") in
       let firewallRuleGroupId =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
-      make ?name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ?action ?priority ~firewallDomainListId
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ?name ?blockOverrideTtl
+        ?blockOverrideDnsType ?blockOverrideDomain ?blockResponse ?action
+        ?priority ?firewallThreatProtectionId ?firewallDomainListId
         ~firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Name.of_json in
+    let of_json json__ =
+      let confidenceThreshold =
+        field_map json__ "ConfidenceThreshold" ConfidenceThreshold.of_json in
+      let dnsThreatProtection =
+        field_map json__ "DnsThreatProtection" DnsThreatProtection.of_json in
+      let qtype = field_map json__ "Qtype" Qtype.of_json in
+      let firewallDomainRedirectionAction =
+        field_map json__ "FirewallDomainRedirectionAction"
+          FirewallDomainRedirectionAction.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let blockOverrideTtl =
-        field_map json "BlockOverrideTtl" BlockOverrideTtl.of_json in
+        field_map json__ "BlockOverrideTtl" BlockOverrideTtl.of_json in
       let blockOverrideDnsType =
-        field_map json "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
+        field_map json__ "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
       let blockOverrideDomain =
-        field_map json "BlockOverrideDomain" BlockOverrideDomain.of_json in
+        field_map json__ "BlockOverrideDomain" BlockOverrideDomain.of_json in
       let blockResponse =
-        field_map json "BlockResponse" BlockResponse.of_json in
-      let action = field_map json "Action" Action.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
+        field_map json__ "BlockResponse" BlockResponse.of_json in
+      let action = field_map json__ "Action" Action.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
+      let firewallThreatProtectionId =
+        field_map json__ "FirewallThreatProtectionId" ResourceId.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map json__ "FirewallDomainListId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
-      make ?name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ?action ?priority ~firewallDomainListId
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ?name ?blockOverrideTtl
+        ?blockOverrideDnsType ?blockOverrideDomain ?blockResponse ?action
+        ?priority ?firewallThreatProtectionId ?firewallDomainListId
         ~firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified firewall rule."]
@@ -4911,9 +6256,9 @@ module UpdateFirewallRuleGroupAssociationResponse =
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociation =
-        field_map json "FirewallRuleGroupAssociation"
+        field_map json__ "FirewallRuleGroupAssociation"
           FirewallRuleGroupAssociation.of_json in
       make ?firewallRuleGroupAssociation ()
     let to_json v = composed_to_json to_value v
@@ -4969,13 +6314,14 @@ module UpdateFirewallRuleGroupAssociationRequest =
       make ?name ?mutationProtection ?priority
         ~firewallRuleGroupAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" Name.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" Name.of_json in
       let mutationProtection =
-        field_map json "MutationProtection" MutationProtectionStatus.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
+        field_map json__ "MutationProtection"
+          MutationProtectionStatus.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
       let firewallRuleGroupAssociationId =
-        field_map_exn json "FirewallRuleGroupAssociationId"
+        field_map_exn json__ "FirewallRuleGroupAssociationId"
           ResourceId.of_json in
       make ?name ?mutationProtection ?priority
         ~firewallRuleGroupAssociationId ()
@@ -4990,7 +6336,8 @@ module UpdateFirewallDomainsResponse =
         [@ocaml.doc
           "The ID of the firewall domain list that DNS Firewall just updated."];
       name: Name.t option [@ocaml.doc "The name of the domain list."];
-      status: FirewallDomainListStatus.t option ;
+      status: FirewallDomainListStatus.t option
+        [@ocaml.doc "Status of the UpdateFirewallDomains request."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc
           "Additional information about the status of the list, if available."]}
@@ -5101,12 +6448,12 @@ module UpdateFirewallDomainsResponse =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" FirewallDomainListStatus.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" FirewallDomainListStatus.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?statusMessage ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5123,7 +6470,7 @@ module UpdateFirewallDomainsRequest =
           "What you want DNS Firewall to do with the domains that you are providing: ADD - Add the domains to the ones that are already in the domain list. REMOVE - Search the domain list for the domains and remove them from the list. REPLACE - Update the domain list to exactly match the list that you are providing."];
       domains: FirewallDomains.t
         [@ocaml.doc
-          "A list of domains to use in the update operation. Each domain specification in your domain list must satisfy the following requirements: It can optionally start with * (asterisk). With the exception of the optional starting asterisk, it must only contain the following characters: A-Z, a-z, 0-9, - (hyphen). It must be from 1-255 characters in length."]}
+          "A list of domains to use in the update operation. There is a limit of 1000 domains per request. Each domain specification in your domain list must satisfy the following requirements: It can optionally start with * (asterisk). With the exception of the optional starting asterisk, it must only contain the following characters: A-Z, a-z, 0-9, - (hyphen). It must be from 1-255 characters in length."]}
     let context_ = "UpdateFirewallDomainsRequest"
     let make ~firewallDomainListId =
       fun ~operation ->
@@ -5149,12 +6496,13 @@ module UpdateFirewallDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~domains ~operation ~firewallDomainListId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domains = field_map_exn json "Domains" FirewallDomains.of_json in
+    let of_json json__ =
+      let domains = field_map_exn json__ "Domains" FirewallDomains.of_json in
       let operation =
-        field_map_exn json "Operation" FirewallDomainUpdateOperation.of_json in
+        field_map_exn json__ "Operation"
+          FirewallDomainUpdateOperation.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map_exn json__ "FirewallDomainListId" ResourceId.of_json in
       make ~domains ~operation ~firewallDomainListId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5243,9 +6591,9 @@ module UpdateFirewallConfigResponse =
           (Xml.child xml_arg0 "FirewallConfig") in
       make ?firewallConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallConfig =
-        field_map json "FirewallConfig" FirewallConfig.of_json in
+        field_map json__ "FirewallConfig" FirewallConfig.of_json in
       make ?firewallConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5277,10 +6625,11 @@ module UpdateFirewallConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~firewallFailOpen ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallFailOpen =
-        field_map_exn json "FirewallFailOpen" FirewallFailOpenStatus.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+        field_map_exn json__ "FirewallFailOpen"
+          FirewallFailOpenStatus.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~firewallFailOpen ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5388,9 +6737,9 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes one or more tags from a specified resource."]
@@ -5513,9 +6862,9 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds one or more tags to a specified resource."]
@@ -5527,7 +6876,8 @@ module PutResolverRulePolicyResponse =
         [@ocaml.doc
           "Whether the PutResolverRulePolicy request was successful."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidPolicyDocument of InvalidPolicyDocument.t 
       | `UnknownResourceException of UnknownResourceException.t 
@@ -5535,6 +6885,8 @@ module PutResolverRulePolicyResponse =
     let make ?returnValue = fun () -> { returnValue }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -5549,6 +6901,8 @@ module PutResolverRulePolicyResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -5562,6 +6916,10 @@ module PutResolverRulePolicyResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -5592,8 +6950,8 @@ module PutResolverRulePolicyResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnValue = field_map json "ReturnValue" Boolean.of_json in
+    let of_json json__ =
+      let returnValue = field_map json__ "ReturnValue" Boolean.of_json in
       make ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response to a PutResolverRulePolicy request."]
@@ -5623,10 +6981,10 @@ module PutResolverRulePolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~resolverRulePolicy ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRulePolicy =
-        field_map_exn json "ResolverRulePolicy" ResolverRulePolicy.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+        field_map_exn json__ "ResolverRulePolicy" ResolverRulePolicy.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
       make ~resolverRulePolicy ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5722,8 +7080,8 @@ module PutResolverQueryLogConfigPolicyResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnValue = field_map json "ReturnValue" Boolean.of_json in
+    let of_json json__ =
+      let returnValue = field_map json__ "ReturnValue" Boolean.of_json in
       make ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5737,7 +7095,7 @@ module PutResolverQueryLogConfigPolicyRequest =
           "The Amazon Resource Name (ARN) of the account that you want to share rules with."];
       resolverQueryLogConfigPolicy: ResolverQueryLogConfigPolicy.t
         [@ocaml.doc
-          "An Identity and Access Management policy statement that lists the query logging configurations that you want to share with another Amazon Web Services account and the operations that you want the account to be able to perform. You can specify the following operations in the Actions section of the statement: route53resolver:AssociateResolverQueryLogConfig route53resolver:DisassociateResolverQueryLogConfig route53resolver:ListResolverQueryLogConfigAssociations route53resolver:ListResolverQueryLogConfigs In the Resource section of the statement, you specify the ARNs for the query logging configurations that you want to share with the account that you specified in Arn."]}
+          "An Identity and Access Management policy statement that lists the query logging configurations that you want to share with another Amazon Web Services account and the operations that you want the account to be able to perform. You can specify the following operations in the Actions section of the statement: route53resolver:AssociateResolverQueryLogConfig route53resolver:DisassociateResolverQueryLogConfig route53resolver:ListResolverQueryLogConfigs In the Resource section of the statement, you specify the ARNs for the query logging configurations that you want to share with the account that you specified in Arn."]}
     let context_ = "PutResolverQueryLogConfigPolicyRequest"
     let make ~arn =
       fun ~resolverQueryLogConfigPolicy ->
@@ -5758,11 +7116,11 @@ module PutResolverQueryLogConfigPolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~resolverQueryLogConfigPolicy ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigPolicy =
-        field_map_exn json "ResolverQueryLogConfigPolicy"
+        field_map_exn json__ "ResolverQueryLogConfigPolicy"
           ResolverQueryLogConfigPolicy.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
       make ~resolverQueryLogConfigPolicy ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5846,8 +7204,8 @@ module PutFirewallRuleGroupPolicyResponse =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "ReturnValue") in
       make ?returnValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let returnValue = field_map json "ReturnValue" Boolean.of_json in
+    let of_json json__ =
+      let returnValue = field_map json__ "ReturnValue" Boolean.of_json in
       make ?returnValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5879,11 +7237,11 @@ module PutFirewallRuleGroupPolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~firewallRuleGroupPolicy ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupPolicy =
-        field_map_exn json "FirewallRuleGroupPolicy"
+        field_map_exn json__ "FirewallRuleGroupPolicy"
           FirewallRuleGroupPolicy.of_json in
-      let arn = field_map_exn json "Arn" Arn.of_json in
+      let arn = field_map_exn json__ "Arn" Arn.of_json in
       make ~firewallRuleGroupPolicy ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5984,9 +7342,9 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6023,10 +7381,10 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ?nextToken ?maxResults ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ?nextToken ?maxResults ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6130,11 +7488,11 @@ module ListResolverRulesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverRules ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRules =
-        field_map json "ResolverRules" ResolverRules.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ResolverRules" ResolverRules.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverRules ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6170,10 +7528,10 @@ module ListResolverRulesRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6278,12 +7636,12 @@ module ListResolverRuleAssociationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverRuleAssociations ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleAssociations =
-        field_map json "ResolverRuleAssociations"
+        field_map json__ "ResolverRuleAssociations"
           ResolverRuleAssociations.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverRuleAssociations ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6319,10 +7677,10 @@ module ListResolverRuleAssociationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6452,14 +7810,14 @@ module ListResolverQueryLogConfigsResponse =
       make ?resolverQueryLogConfigs ?totalFilteredCount ?totalCount
         ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigs =
-        field_map json "ResolverQueryLogConfigs"
+        field_map json__ "ResolverQueryLogConfigs"
           ResolverQueryLogConfigList.of_json in
       let totalFilteredCount =
-        field_map json "TotalFilteredCount" Count.of_json in
-      let totalCount = field_map json "TotalCount" Count.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "TotalFilteredCount" Count.of_json in
+      let totalCount = field_map json__ "TotalCount" Count.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverQueryLogConfigs ?totalFilteredCount ?totalCount
         ?nextToken ()
     let to_json v = composed_to_json to_value v
@@ -6511,12 +7869,12 @@ module ListResolverQueryLogConfigsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" SortByKey.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SortByKey.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6647,14 +8005,14 @@ module ListResolverQueryLogConfigAssociationsResponse =
       make ?resolverQueryLogConfigAssociations ?totalFilteredCount
         ?totalCount ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigAssociations =
-        field_map json "ResolverQueryLogConfigAssociations"
+        field_map json__ "ResolverQueryLogConfigAssociations"
           ResolverQueryLogConfigAssociationList.of_json in
       let totalFilteredCount =
-        field_map json "TotalFilteredCount" Count.of_json in
-      let totalCount = field_map json "TotalCount" Count.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "TotalFilteredCount" Count.of_json in
+      let totalCount = field_map json__ "TotalCount" Count.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverQueryLogConfigAssociations ?totalFilteredCount
         ?totalCount ?nextToken ()
     let to_json v = composed_to_json to_value v
@@ -6706,12 +8064,12 @@ module ListResolverQueryLogConfigAssociationsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let sortBy = field_map json "SortBy" SortByKey.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy = field_map json__ "SortBy" SortByKey.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?sortOrder ?sortBy ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6815,11 +8173,11 @@ module ListResolverEndpointsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverEndpoints ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoints =
-        field_map json "ResolverEndpoints" ResolverEndpoints.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ResolverEndpoints" ResolverEndpoints.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverEndpoints ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6855,10 +8213,10 @@ module ListResolverEndpointsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6961,11 +8319,11 @@ module ListResolverEndpointIpAddressesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?ipAddresses ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ipAddresses =
-        field_map json "IpAddresses" IpAddressesResponse.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "IpAddresses" IpAddressesResponse.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?ipAddresses ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the IP addresses for a specified Resolver endpoint."]
@@ -7004,11 +8362,11 @@ module ListResolverEndpointIpAddressesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ?nextToken ?maxResults ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
       make ?nextToken ?maxResults ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets the IP addresses for a specified Resolver endpoint."]
@@ -7021,7 +8379,7 @@ module ListResolverDnssecConfigsResponse =
           "If a response includes the last of the DNSSEC configurations that are associated with the current Amazon Web Services account, NextToken doesn't appear in the response. If a response doesn't include the last of the configurations, you can get more configurations by submitting another ListResolverDnssecConfigs request. Get the value of NextToken that Amazon Route 53 returned in the previous response and include it in NextToken in the next request."];
       resolverDnssecConfigs: ResolverDnssecConfigList.t option
         [@ocaml.doc
-          "An array that contains one ResolverDnssecConfig element for each configuration for DNSSEC validation that is associated with the current Amazon Web Services account."]}
+          "An array that contains one ResolverDnssecConfig element for each configuration for DNSSEC validation that is associated with the current Amazon Web Services account. It doesn't contain disabled DNSSEC configurations for the resource."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
@@ -7114,11 +8472,11 @@ module ListResolverDnssecConfigsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverDnssecConfigs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverDnssecConfigs =
-        field_map json "ResolverDnssecConfigs"
+        field_map json__ "ResolverDnssecConfigs"
           ResolverDnssecConfigList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverDnssecConfigs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7154,10 +8512,10 @@ module ListResolverDnssecConfigsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?filters ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filters = field_map json "Filters" Filters.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?filters ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7168,7 +8526,7 @@ module ListResolverConfigsResponse =
       {
       nextToken: NextToken.t option
         [@ocaml.doc
-          "If a response includes the last of the Resolver configurations that are associated with the current Amazon Web Services account, NextToken doesn't appear in the response. If a response doesn't include the last of the configurations, you can get more configurations by submitting another ListResolverConfigs request. Get the value of NextToken that Amazon Route 53 returned in the previous response and include it in NextToken in the next request."];
+          "If a response includes the last of the Resolver configurations that are associated with the current Amazon Web Services account, NextToken doesn't appear in the response. If a response doesn't include the last of the configurations, you can get more configurations by submitting another ListResolverConfigs request. Get the value of NextToken that Amazon Route\194\16053 returned in the previous response and include it in NextToken in the next request."];
       resolverConfigs: ResolverConfigList.t option
         [@ocaml.doc
           "An array that contains one ResolverConfigs element for each Resolver configuration that is associated with the current Amazon Web Services account."]}
@@ -7179,6 +8537,7 @@ module ListResolverConfigsResponse =
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?nextToken =
       fun ?resolverConfigs -> fun () -> { nextToken; resolverConfigs }
@@ -7197,6 +8556,8 @@ module ListResolverConfigsResponse =
           `InvalidRequestException (InvalidRequestException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -7215,6 +8576,8 @@ module ListResolverConfigsResponse =
           `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -7243,6 +8606,10 @@ module ListResolverConfigsResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7262,14 +8629,14 @@ module ListResolverConfigsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?resolverConfigs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverConfigs =
-        field_map json "ResolverConfigs" ResolverConfigList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "ResolverConfigs" ResolverConfigList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?resolverConfigs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Resolver configurations that you have defined. Route 53 Resolver uses the configurations to manage DNS resolution behavior for your VPCs."]
+       "Retrieves the Resolver configurations that you have defined. Route\194\16053 Resolver uses the configurations to manage DNS resolution behavior for your VPCs."]
 module ListResolverConfigsRequest =
   struct
     type nonrec t =
@@ -7296,14 +8663,151 @@ module ListResolverConfigsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListResolverConfigsMaxResult.of_json in
+        field_map json__ "MaxResults" ListResolverConfigsMaxResult.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Resolver configurations that you have defined. Route 53 Resolver uses the configurations to manage DNS resolution behavior for your VPCs."]
+       "Retrieves the Resolver configurations that you have defined. Route\194\16053 Resolver uses the configurations to manage DNS resolution behavior for your VPCs."]
+module ListOutpostResolversResponse =
+  struct
+    type nonrec t =
+      {
+      outpostResolvers: OutpostResolverList.t option
+        [@ocaml.doc
+          "The Resolvers on Outposts that were created by using the current Amazon Web Services account, and that match the specified filters, if any."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "If more than MaxResults Resolvers match the specified criteria, you can submit another ListOutpostResolver request to get the next group of results. In the next request, specify the value of NextToken from the previous response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outpostResolvers =
+      fun ?nextToken -> fun () -> { outpostResolvers; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OutpostResolvers",
+           (Option.map x.outpostResolvers ~f:OutpostResolverList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let outpostResolvers =
+        (Option.map ~f:OutpostResolverList.of_xml)
+          (Xml.child xml_arg0 "OutpostResolvers") in
+      make ?nextToken ?outpostResolvers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let outpostResolvers =
+        field_map json__ "OutpostResolvers" OutpostResolverList.of_json in
+      make ?nextToken ?outpostResolvers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the Resolvers on Outposts that were created using the current Amazon Web Services account."]
+module ListOutpostResolversRequest =
+  struct
+    type nonrec t =
+      {
+      outpostArn: OutpostArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the Outpost."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of Resolvers on the Outpost that you want to return in the response to a ListOutpostResolver request. If you don't specify a value for MaxResults, the request returns up to 100 Resolvers."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "For the first ListOutpostResolver request, omit this value."]}
+    let make ?outpostArn =
+      fun ?maxResults ->
+        fun ?nextToken -> fun () -> { outpostArn; maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("OutpostArn", (Option.map x.outpostArn ~f:OutpostArn.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let outpostArn =
+        (Option.map ~f:OutpostArn.of_xml) (Xml.child xml_arg0 "OutpostArn") in
+      make ?nextToken ?maxResults ?outpostArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
+      make ?nextToken ?maxResults ?outpostArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the Resolvers on Outposts that were created using the current Amazon Web Services account."]
 module ListFirewallRulesResponse =
   struct
     type nonrec t =
@@ -7395,10 +8899,10 @@ module ListFirewallRulesResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRules ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRules =
-        field_map json "FirewallRules" FirewallRules.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "FirewallRules" FirewallRules.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?firewallRules ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7415,7 +8919,7 @@ module ListFirewallRulesRequest =
           "Optional additional filter for the rules to retrieve. The setting that determines the processing order of the rules in a rule group. DNS Firewall processes the rules in a rule group by order of priority, starting from the lowest setting."];
       action: Action.t option
         [@ocaml.doc
-          "Optional additional filter for the rules to retrieve. The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list: ALLOW - Permit the request to go through. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. If this is specified, additional handling details are provided in the rule's BlockResponse setting."];
+          "Optional additional filter for the rules to retrieve. The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule: ALLOW - Permit the request to go through. Not availabe for DNS Firewall Advanced rules. ALERT - Permit the request to go through but send an alert to the logs. BLOCK - Disallow the request. If this is specified, additional handling details are provided in the rule's BlockResponse setting."];
       maxResults: MaxResults.t option
         [@ocaml.doc
           "The maximum number of objects that you want Resolver to return for this request. If more objects are available, in the response, Resolver provides a NextToken value that you can use in a subsequent call to get the next batch of objects. If you don't specify a value for MaxResults, Resolver returns up to 100 objects."];
@@ -7459,13 +8963,13 @@ module ListFirewallRulesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ?nextToken ?maxResults ?action ?priority ~firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let action = field_map json "Action" Action.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let action = field_map json__ "Action" Action.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
       make ?nextToken ?maxResults ?action ?priority ~firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7553,11 +9057,11 @@ module ListFirewallRuleGroupsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRuleGroups ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroups =
-        field_map json "FirewallRuleGroups"
+        field_map json__ "FirewallRuleGroups"
           FirewallRuleGroupMetadataList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?firewallRuleGroups ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7586,9 +9090,9 @@ module ListFirewallRuleGroupsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7677,11 +9181,11 @@ module ListFirewallRuleGroupAssociationsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallRuleGroupAssociations ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociations =
-        field_map json "FirewallRuleGroupAssociations"
+        field_map json__ "FirewallRuleGroupAssociations"
           FirewallRuleGroupAssociations.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?firewallRuleGroupAssociations ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7752,15 +9256,15 @@ module ListFirewallRuleGroupAssociationsRequest =
       make ?nextToken ?maxResults ?status ?priority ?vpcId
         ?firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let status =
-        field_map json "Status" FirewallRuleGroupAssociationStatus.of_json in
-      let priority = field_map json "Priority" Priority.of_json in
-      let vpcId = field_map json "VpcId" ResourceId.of_json in
+        field_map json__ "Status" FirewallRuleGroupAssociationStatus.of_json in
+      let priority = field_map json__ "Priority" Priority.of_json in
+      let vpcId = field_map json__ "VpcId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map json__ "FirewallRuleGroupId" ResourceId.of_json in
       make ?nextToken ?maxResults ?status ?priority ?vpcId
         ?firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
@@ -7854,9 +9358,9 @@ module ListFirewallDomainsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?domains ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domains = field_map json "Domains" FirewallDomains.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let domains = field_map json__ "Domains" FirewallDomains.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?domains ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7898,12 +9402,12 @@ module ListFirewallDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ?nextToken ?maxResults ~firewallDomainListId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListDomainMaxResults.of_json in
+        field_map json__ "MaxResults" ListDomainMaxResults.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map_exn json__ "FirewallDomainListId" ResourceId.of_json in
       make ?nextToken ?maxResults ~firewallDomainListId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7992,11 +9496,11 @@ module ListFirewallDomainListsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallDomainLists ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainLists =
-        field_map json "FirewallDomainLists"
+        field_map json__ "FirewallDomainLists"
           FirewallDomainListMetadataList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?firewallDomainLists ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8025,9 +9529,9 @@ module ListFirewallDomainListsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8114,10 +9618,10 @@ module ListFirewallConfigsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?firewallConfigs ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallConfigs =
-        field_map json "FirewallConfigs" FirewallConfigList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "FirewallConfigs" FirewallConfigList.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?firewallConfigs ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8148,10 +9652,10 @@ module ListFirewallConfigsRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let maxResults =
-        field_map json "MaxResults" ListFirewallConfigsMaxResult.of_json in
+        field_map json__ "MaxResults" ListFirewallConfigsMaxResult.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8164,7 +9668,8 @@ module ImportFirewallDomainsResponse =
         [@ocaml.doc
           "The Id of the firewall domain list that DNS Firewall just updated."];
       name: Name.t option [@ocaml.doc "The name of the domain list."];
-      status: FirewallDomainListStatus.t option ;
+      status: FirewallDomainListStatus.t option
+        [@ocaml.doc "Status of the import request."];
       statusMessage: StatusMessage.t option
         [@ocaml.doc
           "Additional information about the status of the list, if available."]}
@@ -8275,12 +9780,12 @@ module ImportFirewallDomainsResponse =
       let id = (Option.map ~f:ResourceId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?statusMessage ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" StatusMessage.of_json in
-      let status = field_map json "Status" FirewallDomainListStatus.of_json in
-      let name = field_map json "Name" Name.of_json in
-      let id = field_map json "Id" ResourceId.of_json in
+        field_map json__ "StatusMessage" StatusMessage.of_json in
+      let status = field_map json__ "Status" FirewallDomainListStatus.of_json in
+      let name = field_map json__ "Name" Name.of_json in
+      let id = field_map json__ "Id" ResourceId.of_json in
       make ?statusMessage ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8324,13 +9829,14 @@ module ImportFirewallDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~domainFileUrl ~operation ~firewallDomainListId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainFileUrl =
-        field_map_exn json "DomainFileUrl" DomainListFileUrl.of_json in
+        field_map_exn json__ "DomainFileUrl" DomainListFileUrl.of_json in
       let operation =
-        field_map_exn json "Operation" FirewallDomainImportOperation.of_json in
+        field_map_exn json__ "Operation"
+          FirewallDomainImportOperation.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map_exn json__ "FirewallDomainListId" ResourceId.of_json in
       make ~domainFileUrl ~operation ~firewallDomainListId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8410,8 +9916,8 @@ module GetResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
+    let of_json json__ =
+      let resolverRule = field_map json__ "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8435,9 +9941,9 @@ module GetResolverRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~resolverRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleId =
-        field_map_exn json "ResolverRuleId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleId" ResourceId.of_json in
       make ~resolverRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8450,13 +9956,16 @@ module GetResolverRulePolicyResponse =
         [@ocaml.doc
           "The Resolver rule policy for the rule that you specified in a GetResolverRulePolicy request."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `UnknownResourceException of UnknownResourceException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resolverRulePolicy = fun () -> { resolverRulePolicy }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -8469,6 +9978,8 @@ module GetResolverRulePolicyResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -8480,6 +9991,10 @@ module GetResolverRulePolicyResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -8508,9 +10023,9 @@ module GetResolverRulePolicyResponse =
           (Xml.child xml_arg0 "ResolverRulePolicy") in
       make ?resolverRulePolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRulePolicy =
-        field_map json "ResolverRulePolicy" ResolverRulePolicy.of_json in
+        field_map json__ "ResolverRulePolicy" ResolverRulePolicy.of_json in
       make ?resolverRulePolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8531,8 +10046,8 @@ module GetResolverRulePolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the Resolver rule policy for a specified rule. A Resolver rule policy includes the rule that you want to share with another account, the account that you want to share the rule with, and the Resolver operations that you want to allow the account to use."]
@@ -8612,9 +10127,9 @@ module GetResolverRuleAssociationResponse =
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleAssociation =
-        field_map json "ResolverRuleAssociation"
+        field_map json__ "ResolverRuleAssociation"
           ResolverRuleAssociation.of_json in
       make ?resolverRuleAssociation ()
     let to_json v = composed_to_json to_value v
@@ -8642,9 +10157,9 @@ module GetResolverRuleAssociationRequest =
              "ResolverRuleAssociationId") in
       make ~resolverRuleAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleAssociationId =
-        field_map_exn json "ResolverRuleAssociationId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleAssociationId" ResourceId.of_json in
       make ~resolverRuleAssociationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8743,9 +10258,9 @@ module GetResolverQueryLogConfigResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfig =
-        field_map json "ResolverQueryLogConfig"
+        field_map json__ "ResolverQueryLogConfig"
           ResolverQueryLogConfig.of_json in
       make ?resolverQueryLogConfig ()
     let to_json v = composed_to_json to_value v
@@ -8773,9 +10288,9 @@ module GetResolverQueryLogConfigRequest =
              "ResolverQueryLogConfigId") in
       make ~resolverQueryLogConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigId =
-        field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
+        field_map_exn json__ "ResolverQueryLogConfigId" ResourceId.of_json in
       make ~resolverQueryLogConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8866,9 +10381,9 @@ module GetResolverQueryLogConfigPolicyResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfigPolicy") in
       make ?resolverQueryLogConfigPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigPolicy =
-        field_map json "ResolverQueryLogConfigPolicy"
+        field_map json__ "ResolverQueryLogConfigPolicy"
           ResolverQueryLogConfigPolicy.of_json in
       make ?resolverQueryLogConfigPolicy ()
     let to_json v = composed_to_json to_value v
@@ -8890,8 +10405,8 @@ module GetResolverQueryLogConfigPolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about a query logging policy. A query logging policy specifies the Resolver query logging operations and resources that you want to allow another Amazon Web Services account to be able to use."]
@@ -8991,9 +10506,9 @@ module GetResolverQueryLogConfigAssociationResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigAssociation =
-        field_map json "ResolverQueryLogConfigAssociation"
+        field_map json__ "ResolverQueryLogConfigAssociation"
           ResolverQueryLogConfigAssociation.of_json in
       make ?resolverQueryLogConfigAssociation ()
     let to_json v = composed_to_json to_value v
@@ -9021,9 +10536,9 @@ module GetResolverQueryLogConfigAssociationRequest =
              "ResolverQueryLogConfigAssociationId") in
       make ~resolverQueryLogConfigAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigAssociationId =
-        field_map_exn json "ResolverQueryLogConfigAssociationId"
+        field_map_exn json__ "ResolverQueryLogConfigAssociationId"
           ResourceId.of_json in
       make ~resolverQueryLogConfigAssociationId ()
     let to_json v = composed_to_json to_value v
@@ -9104,9 +10619,9 @@ module GetResolverEndpointResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9131,9 +10646,9 @@ module GetResolverEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
       make ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9232,9 +10747,9 @@ module GetResolverDnssecConfigResponse =
           (Xml.child xml_arg0 "ResolverDNSSECConfig") in
       make ?resolverDNSSECConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverDNSSECConfig =
-        field_map json "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
+        field_map json__ "ResolverDNSSECConfig" ResolverDnssecConfig.of_json in
       make ?resolverDNSSECConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9258,8 +10773,8 @@ module GetResolverDnssecConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9270,13 +10785,14 @@ module GetResolverConfigResponse =
       {
       resolverConfig: ResolverConfig.t option
         [@ocaml.doc
-          "Information about the behavior configuration of Route 53 Resolver behavior for the VPC you specified in the GetResolverConfig request."]}
+          "Information about the behavior configuration of Route\194\16053 Resolver behavior for the VPC you specified in the GetResolverConfig request."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?resolverConfig = fun () -> { resolverConfig }
     let error_of_json name json =
@@ -9292,6 +10808,8 @@ module GetResolverConfigResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -9308,6 +10826,8 @@ module GetResolverConfigResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -9332,6 +10852,10 @@ module GetResolverConfigResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -9348,13 +10872,13 @@ module GetResolverConfigResponse =
           (Xml.child xml_arg0 "ResolverConfig") in
       make ?resolverConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverConfig =
-        field_map json "ResolverConfig" ResolverConfig.of_json in
+        field_map json__ "ResolverConfig" ResolverConfig.of_json in
       make ?resolverConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+       "Retrieves the behavior configuration of Route\194\16053 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
 module GetResolverConfigRequest =
   struct
     type nonrec t =
@@ -9374,12 +10898,123 @@ module GetResolverConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the behavior configuration of Route 53 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+       "Retrieves the behavior configuration of Route\194\16053 Resolver behavior for a single VPC from Amazon Virtual Private Cloud."]
+module GetOutpostResolverResponse =
+  struct
+    type nonrec t =
+      {
+      outpostResolver: OutpostResolver.t option
+        [@ocaml.doc
+          "Information about the GetOutpostResolver request, including the status of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outpostResolver = fun () -> { outpostResolver }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OutpostResolver",
+           (Option.map x.outpostResolver ~f:OutpostResolver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostResolver =
+        (Option.map ~f:OutpostResolver.of_xml)
+          (Xml.child xml_arg0 "OutpostResolver") in
+      make ?outpostResolver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostResolver =
+        field_map json__ "OutpostResolver" OutpostResolver.of_json in
+      make ?outpostResolver ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about a specified Resolver on the Outpost, such as its instance count and type, name, and the current status of the Resolver."]
+module GetOutpostResolverRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceId.t [@ocaml.doc "The ID of the Resolver on the Outpost."]}
+    let context_ = "GetOutpostResolverRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about a specified Resolver on the Outpost, such as its instance count and type, name, and the current status of the Resolver."]
 module GetFirewallRuleGroupResponse =
   struct
     type nonrec t =
@@ -9455,9 +11090,9 @@ module GetFirewallRuleGroupResponse =
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroup =
-        field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
+        field_map json__ "FirewallRuleGroup" FirewallRuleGroup.of_json in
       make ?firewallRuleGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified firewall rule group."]
@@ -9480,9 +11115,9 @@ module GetFirewallRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ~firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
       make ~firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified firewall rule group."]
@@ -9571,9 +11206,9 @@ module GetFirewallRuleGroupPolicyResponse =
           (Xml.child xml_arg0 "FirewallRuleGroupPolicy") in
       make ?firewallRuleGroupPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupPolicy =
-        field_map json "FirewallRuleGroupPolicy"
+        field_map json__ "FirewallRuleGroupPolicy"
           FirewallRuleGroupPolicy.of_json in
       make ?firewallRuleGroupPolicy ()
     let to_json v = composed_to_json to_value v
@@ -9594,8 +11229,8 @@ module GetFirewallRuleGroupPolicyRequest =
       let arn = Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" Arn.of_json in make ~arn ()
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" Arn.of_json in make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the Identity and Access Management (Amazon Web Services IAM) policy for sharing the specified rule group. You can use the policy to share the rule group using Resource Access Manager (RAM)."]
@@ -9675,9 +11310,9 @@ module GetFirewallRuleGroupAssociationResponse =
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociation =
-        field_map json "FirewallRuleGroupAssociation"
+        field_map json__ "FirewallRuleGroupAssociation"
           FirewallRuleGroupAssociation.of_json in
       make ?firewallRuleGroupAssociation ()
     let to_json v = composed_to_json to_value v
@@ -9704,9 +11339,9 @@ module GetFirewallRuleGroupAssociationRequest =
              "FirewallRuleGroupAssociationId") in
       make ~firewallRuleGroupAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociationId =
-        field_map_exn json "FirewallRuleGroupAssociationId"
+        field_map_exn json__ "FirewallRuleGroupAssociationId"
           ResourceId.of_json in
       make ~firewallRuleGroupAssociationId ()
     let to_json v = composed_to_json to_value v
@@ -9786,9 +11421,9 @@ module GetFirewallDomainListResponse =
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainList =
-        field_map json "FirewallDomainList" FirewallDomainList.of_json in
+        field_map json__ "FirewallDomainList" FirewallDomainList.of_json in
       make ?firewallDomainList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified firewall domain list."]
@@ -9811,9 +11446,9 @@ module GetFirewallDomainListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~firewallDomainListId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map_exn json__ "FirewallDomainListId" ResourceId.of_json in
       make ~firewallDomainListId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves the specified firewall domain list."]
@@ -9901,9 +11536,9 @@ module GetFirewallConfigResponse =
           (Xml.child xml_arg0 "FirewallConfig") in
       make ?firewallConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallConfig =
-        field_map json "FirewallConfig" FirewallConfig.of_json in
+        field_map json__ "FirewallConfig" FirewallConfig.of_json in
       make ?firewallConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9927,8 +11562,8 @@ module GetFirewallConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9943,6 +11578,7 @@ module DisassociateResolverRuleResponse =
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -9954,6 +11590,8 @@ module DisassociateResolverRuleResponse =
             (InternalServiceErrorException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
@@ -9968,6 +11606,8 @@ module DisassociateResolverRuleResponse =
             (InternalServiceErrorException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
@@ -9984,6 +11624,10 @@ module DisassociateResolverRuleResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -10009,9 +11653,9 @@ module DisassociateResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleAssociation =
-        field_map json "ResolverRuleAssociation"
+        field_map json__ "ResolverRuleAssociation"
           ResolverRuleAssociation.of_json in
       make ?resolverRuleAssociation ()
     let to_json v = composed_to_json to_value v
@@ -10043,10 +11687,10 @@ module DisassociateResolverRuleRequest =
         ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VPCId") in
       make ~resolverRuleId ~vPCId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleId =
-        field_map_exn json "ResolverRuleId" ResourceId.of_json in
-      let vPCId = field_map_exn json "VPCId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleId" ResourceId.of_json in
+      let vPCId = field_map_exn json__ "VPCId" ResourceId.of_json in
       make ~resolverRuleId ~vPCId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10147,9 +11791,9 @@ module DisassociateResolverQueryLogConfigResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigAssociation =
-        field_map json "ResolverQueryLogConfigAssociation"
+        field_map json__ "ResolverQueryLogConfigAssociation"
           ResolverQueryLogConfigAssociation.of_json in
       make ?resolverQueryLogConfigAssociation ()
     let to_json v = composed_to_json to_value v
@@ -10184,10 +11828,10 @@ module DisassociateResolverQueryLogConfigRequest =
              "ResolverQueryLogConfigId") in
       make ~resourceId ~resolverQueryLogConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let resolverQueryLogConfigId =
-        field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
+        field_map_exn json__ "ResolverQueryLogConfigId" ResourceId.of_json in
       make ~resourceId ~resolverQueryLogConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10285,9 +11929,9 @@ module DisassociateResolverEndpointIpAddressResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10320,10 +11964,11 @@ module DisassociateResolverEndpointIpAddressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~ipAddress ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddress = field_map_exn json "IpAddress" IpAddressUpdate.of_json in
+    let of_json json__ =
+      let ipAddress =
+        field_map_exn json__ "IpAddress" IpAddressUpdate.of_json in
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
       make ~ipAddress ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10423,9 +12068,9 @@ module DisassociateFirewallRuleGroupResponse =
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociation =
-        field_map json "FirewallRuleGroupAssociation"
+        field_map json__ "FirewallRuleGroupAssociation"
           FirewallRuleGroupAssociation.of_json in
       make ?firewallRuleGroupAssociation ()
     let to_json v = composed_to_json to_value v
@@ -10452,9 +12097,9 @@ module DisassociateFirewallRuleGroupRequest =
              "FirewallRuleGroupAssociationId") in
       make ~firewallRuleGroupAssociationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociationId =
-        field_map_exn json "FirewallRuleGroupAssociationId"
+        field_map_exn json__ "FirewallRuleGroupAssociationId"
           ResourceId.of_json in
       make ~firewallRuleGroupAssociationId ()
     let to_json v = composed_to_json to_value v
@@ -10470,6 +12115,7 @@ module DeleteResolverRuleResponse =
     type nonrec error =
       [ `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
       | `ResourceInUseException of ResourceInUseException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
@@ -10482,6 +12128,8 @@ module DeleteResolverRuleResponse =
             (InternalServiceErrorException.of_json json)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_json json)
       | "ResourceNotFoundException" ->
@@ -10498,6 +12146,8 @@ module DeleteResolverRuleResponse =
             (InternalServiceErrorException.of_xml xml)
       | "InvalidParameterException" ->
           `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
       | "ResourceInUseException" ->
           `ResourceInUseException (ResourceInUseException.of_xml xml)
       | "ResourceNotFoundException" ->
@@ -10516,6 +12166,10 @@ module DeleteResolverRuleResponse =
           `Assoc
             [("error", (`String "InvalidParameterException"));
             ("details", (InvalidParameterException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
       | `ResourceInUseException e ->
           `Assoc
             [("error", (`String "ResourceInUseException"));
@@ -10544,8 +12198,8 @@ module DeleteResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
+    let of_json json__ =
+      let resolverRule = field_map json__ "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10568,9 +12222,9 @@ module DeleteResolverRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~resolverRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleId =
-        field_map_exn json "ResolverRuleId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleId" ResourceId.of_json in
       make ~resolverRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10669,9 +12323,9 @@ module DeleteResolverQueryLogConfigResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfig =
-        field_map json "ResolverQueryLogConfig"
+        field_map json__ "ResolverQueryLogConfig"
           ResolverQueryLogConfig.of_json in
       make ?resolverQueryLogConfig ()
     let to_json v = composed_to_json to_value v
@@ -10699,9 +12353,9 @@ module DeleteResolverQueryLogConfigRequest =
              "ResolverQueryLogConfigId") in
       make ~resolverQueryLogConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigId =
-        field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
+        field_map_exn json__ "ResolverQueryLogConfigId" ResourceId.of_json in
       make ~resolverQueryLogConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10790,9 +12444,9 @@ module DeleteResolverEndpointResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10817,13 +12471,133 @@ module DeleteResolverEndpointRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
       make ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a Resolver endpoint. The effect of deleting a Resolver endpoint depends on whether it's an inbound or an outbound Resolver endpoint: Inbound: DNS queries from your network are no longer routed to the DNS service for the specified VPC. Outbound: DNS queries from a VPC are no longer routed to your network."]
+module DeleteOutpostResolverResponse =
+  struct
+    type nonrec t =
+      {
+      outpostResolver: OutpostResolver.t option
+        [@ocaml.doc
+          "Information about the DeleteOutpostResolver request, including the status of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outpostResolver = fun () -> { outpostResolver }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OutpostResolver",
+           (Option.map x.outpostResolver ~f:OutpostResolver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostResolver =
+        (Option.map ~f:OutpostResolver.of_xml)
+          (Xml.child xml_arg0 "OutpostResolver") in
+      make ?outpostResolver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostResolver =
+        field_map json__ "OutpostResolver" OutpostResolver.of_json in
+      make ?outpostResolver ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a Resolver on the Outpost."]
+module DeleteOutpostResolverRequest =
+  struct
+    type nonrec t =
+      {
+      id: ResourceId.t
+        [@ocaml.doc
+          "A unique string that identifies the Resolver on the Outpost."]}
+    let context_ = "DeleteOutpostResolverRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("Id", (Some (ResourceId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        ResourceId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" ResourceId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Deletes a Resolver on the Outpost."]
 module DeleteFirewallRuleResponse =
   struct
     type nonrec t =
@@ -10836,6 +12610,7 @@ module DeleteFirewallRuleResponse =
       | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?firewallRule = fun () -> { firewallRule }
     let error_of_json name json =
@@ -10849,6 +12624,8 @@ module DeleteFirewallRuleResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -10863,6 +12640,8 @@ module DeleteFirewallRuleResponse =
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ThrottlingException" ->
           `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -10883,6 +12662,10 @@ module DeleteFirewallRuleResponse =
           `Assoc
             [("error", (`String "ThrottlingException"));
             ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -10899,8 +12682,8 @@ module DeleteFirewallRuleResponse =
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
+    let of_json json__ =
+      let firewallRule = field_map json__ "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified firewall rule."]
@@ -10911,34 +12694,60 @@ module DeleteFirewallRuleRequest =
       firewallRuleGroupId: ResourceId.t
         [@ocaml.doc
           "The unique identifier of the firewall rule group that you want to delete the rule from."];
-      firewallDomainListId: ResourceId.t
-        [@ocaml.doc "The ID of the domain list that's used in the rule."]}
+      firewallDomainListId: ResourceId.t option
+        [@ocaml.doc "The ID of the domain list that's used in the rule."];
+      firewallThreatProtectionId: ResourceId.t option
+        [@ocaml.doc
+          "The ID that is created for a DNS Firewall Advanced rule."];
+      qtype: Qtype.t option
+        [@ocaml.doc
+          "The DNS query type that the rule you are deleting evaluates. Allowed values are; A: Returns an IPv4 address. AAAA: Returns an Ipv6 address. CAA: Restricts CAs that can create SSL/TLS certifications for the domain. CNAME: Returns another domain name. DS: Record that identifies the DNSSEC signing key of a delegated zone. MX: Specifies mail servers. NAPTR: Regular-expression-based rewriting of domain names. NS: Authoritative name servers. PTR: Maps an IP address to a domain name. SOA: Start of authority record for the zone. SPF: Lists the servers authorized to send emails from a domain. SRV: Application specific values that identify servers. TXT: Verifies email senders and application-specific values. A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see List of DNS record types."]}
     let context_ = "DeleteFirewallRuleRequest"
-    let make ~firewallRuleGroupId =
-      fun ~firewallDomainListId ->
-        fun () -> { firewallRuleGroupId; firewallDomainListId }
+    let make ?firewallDomainListId =
+      fun ?firewallThreatProtectionId ->
+        fun ?qtype ->
+          fun ~firewallRuleGroupId ->
+            fun () ->
+              {
+                firewallDomainListId;
+                firewallThreatProtectionId;
+                qtype;
+                firewallRuleGroupId
+              }
     let to_value x =
       structure_to_value
         [("FirewallRuleGroupId",
            (Some (ResourceId.to_value x.firewallRuleGroupId)));
         ("FirewallDomainListId",
-          (Some (ResourceId.to_value x.firewallDomainListId)))]
+          (Option.map x.firewallDomainListId ~f:ResourceId.to_value));
+        ("FirewallThreatProtectionId",
+          (Option.map x.firewallThreatProtectionId ~f:ResourceId.to_value));
+        ("Qtype", (Option.map x.qtype ~f:Qtype.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let qtype = (Option.map ~f:Qtype.of_xml) (Xml.child xml_arg0 "Qtype") in
+      let firewallThreatProtectionId =
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallThreatProtectionId") in
       let firewallDomainListId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainListId") in
       let firewallRuleGroupId =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
-      make ~firewallDomainListId ~firewallRuleGroupId ()
+      make ?qtype ?firewallThreatProtectionId ?firewallDomainListId
+        ~firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let qtype = field_map json__ "Qtype" Qtype.of_json in
+      let firewallThreatProtectionId =
+        field_map json__ "FirewallThreatProtectionId" ResourceId.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map json__ "FirewallDomainListId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
-      make ~firewallDomainListId ~firewallRuleGroupId ()
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
+      make ?qtype ?firewallThreatProtectionId ?firewallDomainListId
+        ~firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified firewall rule."]
 module DeleteFirewallRuleGroupResponse =
@@ -11034,9 +12843,9 @@ module DeleteFirewallRuleGroupResponse =
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroup =
-        field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
+        field_map json__ "FirewallRuleGroup" FirewallRuleGroup.of_json in
       make ?firewallRuleGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified firewall rule group."]
@@ -11060,9 +12869,9 @@ module DeleteFirewallRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       make ~firewallRuleGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
       make ~firewallRuleGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified firewall rule group."]
@@ -11149,9 +12958,9 @@ module DeleteFirewallDomainListResponse =
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainList =
-        field_map json "FirewallDomainList" FirewallDomainList.of_json in
+        field_map json__ "FirewallDomainList" FirewallDomainList.of_json in
       make ?firewallDomainList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified domain list."]
@@ -11174,9 +12983,9 @@ module DeleteFirewallDomainListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
       make ~firewallDomainListId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map_exn json__ "FirewallDomainListId" ResourceId.of_json in
       make ~firewallDomainListId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified domain list."]
@@ -11188,7 +12997,8 @@ module CreateResolverRuleResponse =
         [@ocaml.doc
           "Information about the CreateResolverRule request, including the status of the request."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -11200,6 +13010,8 @@ module CreateResolverRuleResponse =
     let make ?resolverRule = fun () -> { resolverRule }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -11223,6 +13035,8 @@ module CreateResolverRuleResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -11245,6 +13059,10 @@ module CreateResolverRuleResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -11293,8 +13111,8 @@ module CreateResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRule") in
       make ?resolverRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resolverRule = field_map json "ResolverRule" ResolverRule.of_json in
+    let of_json json__ =
+      let resolverRule = field_map json__ "ResolverRule" ResolverRule.of_json in
       make ?resolverRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11308,53 +13126,63 @@ module CreateResolverRuleRequest =
           "A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string, for example, a date/time stamp."];
       name: Name.t option
         [@ocaml.doc
-          "A friendly name that lets you easily find a rule in the Resolver dashboard in the Route 53 console."];
+          "A friendly name that lets you easily find a rule in the Resolver dashboard in the Route 53 console. The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers."];
       ruleType: RuleTypeOption.t
         [@ocaml.doc
-          "When you want to forward DNS queries for specified domain name to resolvers on your network, specify FORWARD. When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify SYSTEM. For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify FORWARD for RuleType. To then have Resolver process queries for apex.example.com, you create a rule and specify SYSTEM for RuleType. Currently, only Resolver can create rules that have a value of RECURSIVE for RuleType."];
-      domainName: DomainName.t
+          "When you want to forward DNS queries for specified domain name to resolvers on your network, specify FORWARD or DELEGATE. When you have a forwarding rule to forward DNS queries for a domain to your network and you want Resolver to process queries for a subdomain of that domain, specify SYSTEM. For example, to forward DNS queries for example.com to resolvers on your network, you create a rule and specify FORWARD for RuleType. To then have Resolver process queries for apex.example.com, you create a rule and specify SYSTEM for RuleType. Currently, only Resolver can create rules that have a value of RECURSIVE for RuleType."];
+      domainName: DomainName.t option
         [@ocaml.doc
           "DNS queries for this domain name are forwarded to the IP addresses that you specify in TargetIps. If a query matches multiple Resolver rules (example.com and www.example.com), outbound DNS queries are routed using the Resolver rule that contains the most specific domain name (www.example.com)."];
       targetIps: TargetList.t option
         [@ocaml.doc
-          "The IPs that you want Resolver to forward DNS queries to. You can specify only IPv4 addresses. Separate IP addresses with a space. TargetIps is available only when the value of Rule type is FORWARD."];
+          "The IPs that you want Resolver to forward DNS queries to. You can specify either Ipv4 or Ipv6 addresses but not both in the same rule. Separate IP addresses with a space. TargetIps is available only when the value of Rule type is FORWARD. You should not provide TargetIps when the Rule type is DELEGATE. when creating a DELEGATE rule, you must not provide the TargetIps parameter. If you provide the TargetIps, you may receive an ERROR message similar to \"Delegate resolver rules need to specify a nameserver name\". This error means you should not provide TargetIps."];
       resolverEndpointId: ResourceId.t option
         [@ocaml.doc
           "The ID of the outbound Resolver endpoint that you want to use to route DNS queries to the IP addresses that you specify in TargetIps."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of the tag keys and values that you want to associate with the endpoint."]}
+          "A list of the tag keys and values that you want to associate with the endpoint."];
+      delegationRecord: DelegationRecord.t option
+        [@ocaml.doc
+          "DNS queries with the delegation records that match this domain name are forwarded to the resolvers on your network."]}
     let context_ = "CreateResolverRuleRequest"
     let make ?name =
-      fun ?targetIps ->
-        fun ?resolverEndpointId ->
-          fun ?tags ->
-            fun ~creatorRequestId ->
-              fun ~ruleType ->
-                fun ~domainName ->
-                  fun () ->
-                    {
-                      name;
-                      targetIps;
-                      resolverEndpointId;
-                      tags;
-                      creatorRequestId;
-                      ruleType;
-                      domainName
-                    }
+      fun ?domainName ->
+        fun ?targetIps ->
+          fun ?resolverEndpointId ->
+            fun ?tags ->
+              fun ?delegationRecord ->
+                fun ~creatorRequestId ->
+                  fun ~ruleType ->
+                    fun () ->
+                      {
+                        name;
+                        domainName;
+                        targetIps;
+                        resolverEndpointId;
+                        tags;
+                        delegationRecord;
+                        creatorRequestId;
+                        ruleType
+                      }
     let to_value x =
       structure_to_value
         [("CreatorRequestId",
            (Some (CreatorRequestId.to_value x.creatorRequestId)));
         ("Name", (Option.map x.name ~f:Name.to_value));
         ("RuleType", (Some (RuleTypeOption.to_value x.ruleType)));
-        ("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("TargetIps", (Option.map x.targetIps ~f:TargetList.to_value));
         ("ResolverEndpointId",
           (Option.map x.resolverEndpointId ~f:ResourceId.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("DelegationRecord",
+          (Option.map x.delegationRecord ~f:DelegationRecord.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let delegationRecord =
+        (Option.map ~f:DelegationRecord.of_xml)
+          (Xml.child xml_arg0 "DelegationRecord") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let resolverEndpointId =
         (Option.map ~f:ResourceId.of_xml)
@@ -11362,8 +13190,7 @@ module CreateResolverRuleRequest =
       let targetIps =
         (Option.map ~f:TargetList.of_xml) (Xml.child xml_arg0 "TargetIps") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       let ruleType =
         RuleTypeOption.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleType") in
@@ -11371,21 +13198,23 @@ module CreateResolverRuleRequest =
       let creatorRequestId =
         CreatorRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
-      make ?tags ?resolverEndpointId ?targetIps ~domainName ~ruleType ?name
-        ~creatorRequestId ()
+      make ?delegationRecord ?tags ?resolverEndpointId ?targetIps ?domainName
+        ~ruleType ?name ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let delegationRecord =
+        field_map json__ "DelegationRecord" DelegationRecord.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let resolverEndpointId =
-        field_map json "ResolverEndpointId" ResourceId.of_json in
-      let targetIps = field_map json "TargetIps" TargetList.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let ruleType = field_map_exn json "RuleType" RuleTypeOption.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map json__ "ResolverEndpointId" ResourceId.of_json in
+      let targetIps = field_map json__ "TargetIps" TargetList.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let ruleType = field_map_exn json__ "RuleType" RuleTypeOption.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
-      make ?tags ?resolverEndpointId ?targetIps ~domainName ~ruleType ?name
-        ~creatorRequestId ()
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
+      make ?delegationRecord ?tags ?resolverEndpointId ?targetIps ?domainName
+        ~ruleType ?name ~creatorRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "For DNS queries that originate in your VPCs, specifies which Resolver endpoint the queries pass through, one domain name that you want to forward to your network, and the IP addresses of the DNS resolvers in your network."]
@@ -11501,9 +13330,9 @@ module CreateResolverQueryLogConfigResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfig") in
       make ?resolverQueryLogConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfig =
-        field_map json "ResolverQueryLogConfig"
+        field_map json__ "ResolverQueryLogConfig"
           ResolverQueryLogConfig.of_json in
       make ?resolverQueryLogConfig ()
     let to_json v = composed_to_json to_value v
@@ -11518,7 +13347,7 @@ module CreateResolverQueryLogConfigRequest =
           "The name that you want to give the query logging configuration."];
       destinationArn: DestinationArn.t
         [@ocaml.doc
-          "The ARN of the resource that you want Resolver to send query logs. You can send query logs to an S3 bucket, a CloudWatch Logs log group, or a Kinesis Data Firehose delivery stream. Examples of valid values include the following: S3 bucket: arn:aws:s3:::examplebucket You can optionally append a file prefix to the end of the ARN. arn:aws:s3:::examplebucket/development/ CloudWatch Logs log group: arn:aws:logs:us-west-1:123456789012:log-group:/mystack-testgroup-12ABC1AB12A1:* Kinesis Data Firehose delivery stream: arn:aws:kinesis:us-east-2:0123456789:stream/my_stream_name"];
+          "The ARN of the resource that you want Resolver to send query logs. You can send query logs to an S3 bucket, a CloudWatch Logs log group, or a Kinesis Data Firehose delivery stream. Examples of valid values include the following: S3 bucket: arn:aws:s3:::amzn-s3-demo-bucket You can optionally append a file prefix to the end of the ARN. arn:aws:s3:::amzn-s3-demo-bucket/development/ CloudWatch Logs log group: arn:aws:logs:us-west-1:123456789012:log-group:/mystack-testgroup-12ABC1AB12A1:* Kinesis Data Firehose delivery stream: arn:aws:kinesis:us-east-2:0123456789:stream/my_stream_name"];
       creatorRequestId: CreatorRequestId.t
         [@ocaml.doc
           "A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string, for example, a date/time stamp."];
@@ -11552,13 +13381,14 @@ module CreateResolverQueryLogConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ~creatorRequestId ~destinationArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
       let destinationArn =
-        field_map_exn json "DestinationArn" DestinationArn.of_json in
-      let name = field_map_exn json "Name" ResolverQueryLogConfigName.of_json in
+        field_map_exn json__ "DestinationArn" DestinationArn.of_json in
+      let name =
+        field_map_exn json__ "Name" ResolverQueryLogConfigName.of_json in
       make ?tags ~creatorRequestId ~destinationArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11571,7 +13401,8 @@ module CreateResolverEndpointResponse =
         [@ocaml.doc
           "Information about the CreateResolverEndpoint request, including the status of the request."]}
     type nonrec error =
-      [ `InternalServiceErrorException of InternalServiceErrorException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -11582,6 +13413,8 @@ module CreateResolverEndpointResponse =
     let make ?resolverEndpoint = fun () -> { resolverEndpoint }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_json json)
@@ -11602,6 +13435,8 @@ module CreateResolverEndpointResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "InternalServiceErrorException" ->
           `InternalServiceErrorException
             (InternalServiceErrorException.of_xml xml)
@@ -11621,6 +13456,10 @@ module CreateResolverEndpointResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `InternalServiceErrorException e ->
           `Assoc
             [("error", (`String "InternalServiceErrorException"));
@@ -11665,9 +13504,9 @@ module CreateResolverEndpointResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11684,32 +13523,72 @@ module CreateResolverEndpointRequest =
           "A friendly name that lets you easily find a configuration in the Resolver dashboard in the Route 53 console."];
       securityGroupIds: SecurityGroupIds.t
         [@ocaml.doc
-          "The ID of one or more security groups that you want to use to control access to this VPC. The security group that you specify must include one or more inbound rules (for inbound Resolver endpoints) or outbound rules (for outbound Resolver endpoints). Inbound and outbound rules must allow TCP and UDP access. For inbound access, open port 53. For outbound access, open the port that you're using for DNS queries on your network."];
+          "The ID of one or more security groups that you want to use to control access to this VPC. The security group that you specify must include one or more inbound rules (for inbound Resolver endpoints) or outbound rules (for outbound Resolver endpoints). Inbound and outbound rules must allow TCP and UDP access. For inbound access, open port 53. For outbound access, open the port that you're using for DNS queries on your network. Some security group rules will cause your connection to be tracked. For outbound resolver endpoint, it can potentially impact the maximum queries per second from outbound endpoint to your target name server. For inbound resolver endpoint, it can bring down the overall maximum queries per second per IP address to as low as 1500. To avoid connection tracking caused by security group, see Untracked connections."];
       direction: ResolverEndpointDirection.t
         [@ocaml.doc
-          "Specify the applicable value: INBOUND: Resolver forwards DNS queries to the DNS service for a VPC from your network OUTBOUND: Resolver forwards DNS queries from the DNS service for a VPC to your network"];
+          "Specify the applicable value: INBOUND: Resolver forwards DNS queries to the DNS service for a VPC from your network. OUTBOUND: Resolver forwards DNS queries from the DNS service for a VPC to your network. INBOUND_DELEGATION: Resolver delegates queries to Route 53 private hosted zones from your network."];
       ipAddresses: IpAddressesRequest.t
         [@ocaml.doc
-          "The subnets and IP addresses in your VPC that DNS queries originate from (for outbound endpoints) or that you forward DNS queries to (for inbound endpoints). The subnet ID uniquely identifies a VPC."];
+          "The subnets and IP addresses in your VPC that DNS queries originate from (for outbound endpoints) or that you forward DNS queries to (for inbound endpoints). The subnet ID uniquely identifies a VPC. Even though the minimum is 1, Route\194\16053 requires that you create at least two."];
+      outpostArn: OutpostArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Outpost. If you specify this, you must also specify a value for the PreferredInstanceType."];
+      preferredInstanceType: OutpostInstanceType.t option
+        [@ocaml.doc
+          "The instance type. If you specify this, you must also specify a value for the OutpostArn."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of the tag keys and values that you want to associate with the endpoint."]}
+          "A list of the tag keys and values that you want to associate with the endpoint."];
+      resolverEndpointType: ResolverEndpointType.t option
+        [@ocaml.doc
+          "For the endpoint type you can choose either IPv4, IPv6, or dual-stack. A dual-stack endpoint means that it will resolve via both IPv4 and IPv6. This endpoint type is applied to all IP addresses."];
+      protocols: ProtocolList.t option
+        [@ocaml.doc
+          "The protocols you want to use for the endpoint. DoH-FIPS is applicable for default inbound endpoints only. For a default inbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 and DoH-FIPS in combination. Do53 alone. DoH alone. DoH-FIPS alone. None, which is treated as Do53. For a delegation inbound endpoint you can use Do53 only. For an outbound endpoint you can apply the protocols as follows: Do53 and DoH in combination. Do53 alone. DoH alone. None, which is treated as Do53."];
+      rniEnhancedMetricsEnabled: RniEnhancedMetricsEnabled.t option
+        [@ocaml.doc
+          "Specifies whether RNI enhanced metrics are enabled for the Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each RNI associated with this endpoint. When set to false, metrics are not published. Default is false. Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint RNI enhanced metrics. For more information, see Detailed metrics."];
+      targetNameServerMetricsEnabled: TargetNameServerMetricsEnabled.t option
+        [@ocaml.doc
+          "Specifies whether target name server metrics are enabled for the outbound Resolver endpoints. When set to true, one-minute granular metrics are published in CloudWatch for each target name server associated with this endpoint. When set to false, metrics are not published. Default is false. This is not supported for inbound Resolver endpoints. Standard CloudWatch pricing and charges are applied for using the Route 53 Resolver endpoint target name server metrics. For more information, see Detailed metrics."];
+      dns64Enabled: Dns64Enabled.t option
+        [@ocaml.doc
+          "Specifies whether DNS64 is enabled for the inbound Resolver endpoint. When set to true, Route 53 Resolver synthesizes AAAA (IPv6) records for IPv4-only services by prepending the 64:ff9b::/96 prefix to the IPv4 address. This enables IPv6-only clients that send queries through the inbound endpoint to reach IPv4-only services. DNS64 works with NAT64 to provide complete IPv6-to-IPv4 translation. Default is false."];
+      ipv6InternetAccessEnabled: Ipv6InternetAccessEnabled.t option
+        [@ocaml.doc
+          "Specifies whether IPv6 internet access is enabled for the outbound Resolver endpoint. When set to true, the endpoint elastic network interfaces (ENIs) can forward DNS queries to public IPv6 targets through an internet gateway. Default is false. When you enable IPv6 internet access, use network controls like security groups, NACLs, or egress-only internet gateways to protect the endpoint ENIs from unsolicited ingress traffic. Be aware that some network controls can affect DNS query throughput due to connection tracking. For more information, see Amazon EC2 security group connection tracking and Resolver endpoint scaling."]}
     let context_ = "CreateResolverEndpointRequest"
     let make ?name =
-      fun ?tags ->
-        fun ~creatorRequestId ->
-          fun ~securityGroupIds ->
-            fun ~direction ->
-              fun ~ipAddresses ->
-                fun () ->
-                  {
-                    name;
-                    tags;
-                    creatorRequestId;
-                    securityGroupIds;
-                    direction;
-                    ipAddresses
-                  }
+      fun ?outpostArn ->
+        fun ?preferredInstanceType ->
+          fun ?tags ->
+            fun ?resolverEndpointType ->
+              fun ?protocols ->
+                fun ?rniEnhancedMetricsEnabled ->
+                  fun ?targetNameServerMetricsEnabled ->
+                    fun ?dns64Enabled ->
+                      fun ?ipv6InternetAccessEnabled ->
+                        fun ~creatorRequestId ->
+                          fun ~securityGroupIds ->
+                            fun ~direction ->
+                              fun ~ipAddresses ->
+                                fun () ->
+                                  {
+                                    name;
+                                    outpostArn;
+                                    preferredInstanceType;
+                                    tags;
+                                    resolverEndpointType;
+                                    protocols;
+                                    rniEnhancedMetricsEnabled;
+                                    targetNameServerMetricsEnabled;
+                                    dns64Enabled;
+                                    ipv6InternetAccessEnabled;
+                                    creatorRequestId;
+                                    securityGroupIds;
+                                    direction;
+                                    ipAddresses
+                                  }
     let to_value x =
       structure_to_value
         [("CreatorRequestId",
@@ -11720,10 +13599,49 @@ module CreateResolverEndpointRequest =
         ("Direction",
           (Some (ResolverEndpointDirection.to_value x.direction)));
         ("IpAddresses", (Some (IpAddressesRequest.to_value x.ipAddresses)));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("OutpostArn", (Option.map x.outpostArn ~f:OutpostArn.to_value));
+        ("PreferredInstanceType",
+          (Option.map x.preferredInstanceType ~f:OutpostInstanceType.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ResolverEndpointType",
+          (Option.map x.resolverEndpointType ~f:ResolverEndpointType.to_value));
+        ("Protocols", (Option.map x.protocols ~f:ProtocolList.to_value));
+        ("RniEnhancedMetricsEnabled",
+          (Option.map x.rniEnhancedMetricsEnabled
+             ~f:RniEnhancedMetricsEnabled.to_value));
+        ("TargetNameServerMetricsEnabled",
+          (Option.map x.targetNameServerMetricsEnabled
+             ~f:TargetNameServerMetricsEnabled.to_value));
+        ("Dns64Enabled",
+          (Option.map x.dns64Enabled ~f:Dns64Enabled.to_value));
+        ("Ipv6InternetAccessEnabled",
+          (Option.map x.ipv6InternetAccessEnabled
+             ~f:Ipv6InternetAccessEnabled.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let ipv6InternetAccessEnabled =
+        (Option.map ~f:Ipv6InternetAccessEnabled.of_xml)
+          (Xml.child xml_arg0 "Ipv6InternetAccessEnabled") in
+      let dns64Enabled =
+        (Option.map ~f:Dns64Enabled.of_xml)
+          (Xml.child xml_arg0 "Dns64Enabled") in
+      let targetNameServerMetricsEnabled =
+        (Option.map ~f:TargetNameServerMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "TargetNameServerMetricsEnabled") in
+      let rniEnhancedMetricsEnabled =
+        (Option.map ~f:RniEnhancedMetricsEnabled.of_xml)
+          (Xml.child xml_arg0 "RniEnhancedMetricsEnabled") in
+      let protocols =
+        (Option.map ~f:ProtocolList.of_xml) (Xml.child xml_arg0 "Protocols") in
+      let resolverEndpointType =
+        (Option.map ~f:ResolverEndpointType.of_xml)
+          (Xml.child xml_arg0 "ResolverEndpointType") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let preferredInstanceType =
+        (Option.map ~f:OutpostInstanceType.of_xml)
+          (Xml.child xml_arg0 "PreferredInstanceType") in
+      let outpostArn =
+        (Option.map ~f:OutpostArn.of_xml) (Xml.child xml_arg0 "OutpostArn") in
       let ipAddresses =
         IpAddressesRequest.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "IpAddresses") in
@@ -11737,25 +13655,231 @@ module CreateResolverEndpointRequest =
       let creatorRequestId =
         CreatorRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
-      make ?tags ~ipAddresses ~direction ~securityGroupIds ?name
-        ~creatorRequestId ()
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?resolverEndpointType ?tags ?preferredInstanceType ?outpostArn
+        ~ipAddresses ~direction ~securityGroupIds ?name ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let ipv6InternetAccessEnabled =
+        field_map json__ "Ipv6InternetAccessEnabled"
+          Ipv6InternetAccessEnabled.of_json in
+      let dns64Enabled = field_map json__ "Dns64Enabled" Dns64Enabled.of_json in
+      let targetNameServerMetricsEnabled =
+        field_map json__ "TargetNameServerMetricsEnabled"
+          TargetNameServerMetricsEnabled.of_json in
+      let rniEnhancedMetricsEnabled =
+        field_map json__ "RniEnhancedMetricsEnabled"
+          RniEnhancedMetricsEnabled.of_json in
+      let protocols = field_map json__ "Protocols" ProtocolList.of_json in
+      let resolverEndpointType =
+        field_map json__ "ResolverEndpointType" ResolverEndpointType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let preferredInstanceType =
+        field_map json__ "PreferredInstanceType" OutpostInstanceType.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OutpostArn.of_json in
       let ipAddresses =
-        field_map_exn json "IpAddresses" IpAddressesRequest.of_json in
+        field_map_exn json__ "IpAddresses" IpAddressesRequest.of_json in
       let direction =
-        field_map_exn json "Direction" ResolverEndpointDirection.of_json in
+        field_map_exn json__ "Direction" ResolverEndpointDirection.of_json in
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let name = field_map json "Name" Name.of_json in
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
-      make ?tags ~ipAddresses ~direction ~securityGroupIds ?name
-        ~creatorRequestId ()
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
+      make ?ipv6InternetAccessEnabled ?dns64Enabled
+        ?targetNameServerMetricsEnabled ?rniEnhancedMetricsEnabled ?protocols
+        ?resolverEndpointType ?tags ?preferredInstanceType ?outpostArn
+        ~ipAddresses ~direction ~securityGroupIds ?name ~creatorRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a Resolver endpoint. There are two types of Resolver endpoints, inbound and outbound: An inbound Resolver endpoint forwards DNS queries to the DNS service for a VPC from your network. An outbound Resolver endpoint forwards DNS queries from the DNS service for a VPC to your network."]
+module CreateOutpostResolverResponse =
+  struct
+    type nonrec t =
+      {
+      outpostResolver: OutpostResolver.t option
+        [@ocaml.doc
+          "Information about the CreateOutpostResolver request, including the status of the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?outpostResolver = fun () -> { outpostResolver }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OutpostResolver",
+           (Option.map x.outpostResolver ~f:OutpostResolver.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outpostResolver =
+        (Option.map ~f:OutpostResolver.of_xml)
+          (Xml.child xml_arg0 "OutpostResolver") in
+      make ?outpostResolver ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outpostResolver =
+        field_map json__ "OutpostResolver" OutpostResolver.of_json in
+      make ?outpostResolver ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a Route\194\16053 Resolver on an Outpost."]
+module CreateOutpostResolverRequest =
+  struct
+    type nonrec t =
+      {
+      creatorRequestId: CreatorRequestId.t
+        [@ocaml.doc
+          "A unique string that identifies the request and that allows failed requests to be retried without the risk of running the operation twice. CreatorRequestId can be any unique string, for example, a date/time stamp."];
+      name: OutpostResolverName.t
+        [@ocaml.doc
+          "A friendly name that lets you easily find a configuration in the Resolver dashboard in the Route\194\16053 console."];
+      instanceCount: InstanceCount.t option
+        [@ocaml.doc
+          "Number of Amazon EC2 instances for the Resolver on Outpost. The default and minimal value is 4."];
+      preferredInstanceType: OutpostInstanceType.t
+        [@ocaml.doc
+          "The Amazon EC2 instance type. If you specify this, you must also specify a value for the OutpostArn."];
+      outpostArn: OutpostArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Outpost. If you specify this, you must also specify a value for the PreferredInstanceType."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A string that helps identify the Route\194\16053 Resolvers on Outpost."]}
+    let context_ = "CreateOutpostResolverRequest"
+    let make ?instanceCount =
+      fun ?tags ->
+        fun ~creatorRequestId ->
+          fun ~name ->
+            fun ~preferredInstanceType ->
+              fun ~outpostArn ->
+                fun () ->
+                  {
+                    instanceCount;
+                    tags;
+                    creatorRequestId;
+                    name;
+                    preferredInstanceType;
+                    outpostArn
+                  }
+    let to_value x =
+      structure_to_value
+        [("CreatorRequestId",
+           (Some (CreatorRequestId.to_value x.creatorRequestId)));
+        ("Name", (Some (OutpostResolverName.to_value x.name)));
+        ("InstanceCount",
+          (Option.map x.instanceCount ~f:InstanceCount.to_value));
+        ("PreferredInstanceType",
+          (Some (OutpostInstanceType.to_value x.preferredInstanceType)));
+        ("OutpostArn", (Some (OutpostArn.to_value x.outpostArn)));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let outpostArn =
+        OutpostArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OutpostArn") in
+      let preferredInstanceType =
+        OutpostInstanceType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PreferredInstanceType") in
+      let instanceCount =
+        (Option.map ~f:InstanceCount.of_xml)
+          (Xml.child xml_arg0 "InstanceCount") in
+      let name =
+        OutpostResolverName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      let creatorRequestId =
+        CreatorRequestId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
+      make ?tags ~outpostArn ~preferredInstanceType ?instanceCount ~name
+        ~creatorRequestId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let outpostArn = field_map_exn json__ "OutpostArn" OutpostArn.of_json in
+      let preferredInstanceType =
+        field_map_exn json__ "PreferredInstanceType"
+          OutpostInstanceType.of_json in
+      let instanceCount =
+        field_map json__ "InstanceCount" InstanceCount.of_json in
+      let name = field_map_exn json__ "Name" OutpostResolverName.of_json in
+      let creatorRequestId =
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
+      make ?tags ~outpostArn ~preferredInstanceType ?instanceCount ~name
+        ~creatorRequestId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a Route\194\16053 Resolver on an Outpost."]
 module CreateFirewallRuleResponse =
   struct
     type nonrec t =
@@ -11848,8 +13972,8 @@ module CreateFirewallRuleResponse =
           (Xml.child xml_arg0 "FirewallRule") in
       make ?firewallRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let firewallRule = field_map json "FirewallRule" FirewallRule.of_json in
+    let of_json json__ =
+      let firewallRule = field_map json__ "FirewallRule" FirewallRule.of_json in
       make ?firewallRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11864,15 +13988,15 @@ module CreateFirewallRuleRequest =
       firewallRuleGroupId: ResourceId.t
         [@ocaml.doc
           "The unique identifier of the firewall rule group where you want to create the rule."];
-      firewallDomainListId: ResourceId.t
+      firewallDomainListId: ResourceId.t option
         [@ocaml.doc
-          "The ID of the domain list that you want to use in the rule."];
+          "The ID of the domain list that you want to use in the rule. Can't be used together with DnsThreatProtecton."];
       priority: Priority.t
         [@ocaml.doc
           "The setting that determines the processing order of the rule in the rule group. DNS Firewall processes the rules in a rule group by order of priority, starting from the lowest setting. You must specify a unique priority for each rule in a rule group. To make it easier to insert rules later, leave space between the numbers, for example, use 100, 200, and so on. You can change the priority setting for the rules in a rule group at any time."];
       action: Action.t
         [@ocaml.doc
-          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list: ALLOW - Permit the request to go through. ALERT - Permit the request and send metrics and logs to Cloud Watch. BLOCK - Disallow the request. This option requires additional details in the rule's BlockResponse."];
+          "The action that DNS Firewall should take on a DNS query when it matches one of the domains in the rule's domain list, or a threat in a DNS Firewall Advanced rule: ALLOW - Permit the request to go through. Not available for DNS Firewall Advanced rules. ALERT - Permit the request and send metrics and logs to Cloud Watch. BLOCK - Disallow the request. This option requires additional details in the rule's BlockResponse."];
       blockResponse: BlockResponse.t option
         [@ocaml.doc
           "The way that you want DNS Firewall to block the request, used with the rule action setting BLOCK. NODATA - Respond indicating that the query was successful, but no response is available for it. NXDOMAIN - Respond indicating that the domain name that's in the query doesn't exist. OVERRIDE - Provide a custom override in the response. This option requires custom handling details in the rule's BlockOverride* settings. This setting is required if the rule action setting is BLOCK."];
@@ -11887,31 +14011,51 @@ module CreateFirewallRuleRequest =
           "The recommended amount of time, in seconds, for the DNS resolver or web browser to cache the provided override record. Used for the rule action BLOCK with a BlockResponse setting of OVERRIDE. This setting is required if the BlockResponse setting is OVERRIDE."];
       name: Name.t
         [@ocaml.doc
-          "A name that lets you identify the rule in the rule group."]}
+          "A name that lets you identify the rule in the rule group."];
+      firewallDomainRedirectionAction:
+        FirewallDomainRedirectionAction.t option
+        [@ocaml.doc
+          "How you want the the rule to evaluate DNS redirection in the DNS redirection chain, such as CNAME or DNAME. INSPECT_REDIRECTION_DOMAIN: (Default) inspects all domains in the redirection chain. The individual domains in the redirection chain must be added to the domain list. TRUST_REDIRECTION_DOMAIN: Inspects only the first domain in the redirection chain. You don't need to add the subsequent domains in the domain in the redirection list to the domain list."];
+      qtype: Qtype.t option
+        [@ocaml.doc
+          "The DNS query type you want the rule to evaluate. Allowed values are; A: Returns an IPv4 address. AAAA: Returns an Ipv6 address. CAA: Restricts CAs that can create SSL/TLS certifications for the domain. CNAME: Returns another domain name. DS: Record that identifies the DNSSEC signing key of a delegated zone. MX: Specifies mail servers. NAPTR: Regular-expression-based rewriting of domain names. NS: Authoritative name servers. PTR: Maps an IP address to a domain name. SOA: Start of authority record for the zone. SPF: Lists the servers authorized to send emails from a domain. SRV: Application specific values that identify servers. TXT: Verifies email senders and application-specific values. A query type you define by using the DNS type ID, for example 28 for AAAA. The values must be defined as TYPENUMBER, where the NUMBER can be 1-65334, for example, TYPE28. For more information, see List of DNS record types."];
+      dnsThreatProtection: DnsThreatProtection.t option
+        [@ocaml.doc "Use to create a DNS Firewall Advanced rule."];
+      confidenceThreshold: ConfidenceThreshold.t option
+        [@ocaml.doc
+          "The confidence threshold for DNS Firewall Advanced. You must provide this value when you create a DNS Firewall Advanced rule. The confidence level values mean: LOW: Provides the highest detection rate for threats, but also increases false positives. MEDIUM: Provides a balance between detecting threats and false positives. HIGH: Detects only the most well corroborated threats with a low rate of false positives."]}
     let context_ = "CreateFirewallRuleRequest"
-    let make ?blockResponse =
-      fun ?blockOverrideDomain ->
-        fun ?blockOverrideDnsType ->
-          fun ?blockOverrideTtl ->
-            fun ~creatorRequestId ->
-              fun ~firewallRuleGroupId ->
-                fun ~firewallDomainListId ->
-                  fun ~priority ->
-                    fun ~action ->
-                      fun ~name ->
-                        fun () ->
-                          {
-                            blockResponse;
-                            blockOverrideDomain;
-                            blockOverrideDnsType;
-                            blockOverrideTtl;
-                            creatorRequestId;
-                            firewallRuleGroupId;
-                            firewallDomainListId;
-                            priority;
-                            action;
-                            name
-                          }
+    let make ?firewallDomainListId =
+      fun ?blockResponse ->
+        fun ?blockOverrideDomain ->
+          fun ?blockOverrideDnsType ->
+            fun ?blockOverrideTtl ->
+              fun ?firewallDomainRedirectionAction ->
+                fun ?qtype ->
+                  fun ?dnsThreatProtection ->
+                    fun ?confidenceThreshold ->
+                      fun ~creatorRequestId ->
+                        fun ~firewallRuleGroupId ->
+                          fun ~priority ->
+                            fun ~action ->
+                              fun ~name ->
+                                fun () ->
+                                  {
+                                    firewallDomainListId;
+                                    blockResponse;
+                                    blockOverrideDomain;
+                                    blockOverrideDnsType;
+                                    blockOverrideTtl;
+                                    firewallDomainRedirectionAction;
+                                    qtype;
+                                    dnsThreatProtection;
+                                    confidenceThreshold;
+                                    creatorRequestId;
+                                    firewallRuleGroupId;
+                                    priority;
+                                    action;
+                                    name
+                                  }
     let to_value x =
       structure_to_value
         [("CreatorRequestId",
@@ -11919,7 +14063,7 @@ module CreateFirewallRuleRequest =
         ("FirewallRuleGroupId",
           (Some (ResourceId.to_value x.firewallRuleGroupId)));
         ("FirewallDomainListId",
-          (Some (ResourceId.to_value x.firewallDomainListId)));
+          (Option.map x.firewallDomainListId ~f:ResourceId.to_value));
         ("Priority", (Some (Priority.to_value x.priority)));
         ("Action", (Some (Action.to_value x.action)));
         ("BlockResponse",
@@ -11930,9 +14074,27 @@ module CreateFirewallRuleRequest =
           (Option.map x.blockOverrideDnsType ~f:BlockOverrideDnsType.to_value));
         ("BlockOverrideTtl",
           (Option.map x.blockOverrideTtl ~f:BlockOverrideTtl.to_value));
-        ("Name", (Some (Name.to_value x.name)))]
+        ("Name", (Some (Name.to_value x.name)));
+        ("FirewallDomainRedirectionAction",
+          (Option.map x.firewallDomainRedirectionAction
+             ~f:FirewallDomainRedirectionAction.to_value));
+        ("Qtype", (Option.map x.qtype ~f:Qtype.to_value));
+        ("DnsThreatProtection",
+          (Option.map x.dnsThreatProtection ~f:DnsThreatProtection.to_value));
+        ("ConfidenceThreshold",
+          (Option.map x.confidenceThreshold ~f:ConfidenceThreshold.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let confidenceThreshold =
+        (Option.map ~f:ConfidenceThreshold.of_xml)
+          (Xml.child xml_arg0 "ConfidenceThreshold") in
+      let dnsThreatProtection =
+        (Option.map ~f:DnsThreatProtection.of_xml)
+          (Xml.child xml_arg0 "DnsThreatProtection") in
+      let qtype = (Option.map ~f:Qtype.of_xml) (Xml.child xml_arg0 "Qtype") in
+      let firewallDomainRedirectionAction =
+        (Option.map ~f:FirewallDomainRedirectionAction.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainRedirectionAction") in
       let name =
         Name.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       let blockOverrideTtl =
@@ -11952,39 +14114,51 @@ module CreateFirewallRuleRequest =
       let priority =
         Priority.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Priority") in
       let firewallDomainListId =
-        ResourceId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "FirewallDomainListId") in
+        (Option.map ~f:ResourceId.of_xml)
+          (Xml.child xml_arg0 "FirewallDomainListId") in
       let firewallRuleGroupId =
         ResourceId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "FirewallRuleGroupId") in
       let creatorRequestId =
         CreatorRequestId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
-      make ~name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ~action ~priority ~firewallDomainListId
-        ~firewallRuleGroupId ~creatorRequestId ()
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ~name ?blockOverrideTtl
+        ?blockOverrideDnsType ?blockOverrideDomain ?blockResponse ~action
+        ~priority ?firewallDomainListId ~firewallRuleGroupId
+        ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let confidenceThreshold =
+        field_map json__ "ConfidenceThreshold" ConfidenceThreshold.of_json in
+      let dnsThreatProtection =
+        field_map json__ "DnsThreatProtection" DnsThreatProtection.of_json in
+      let qtype = field_map json__ "Qtype" Qtype.of_json in
+      let firewallDomainRedirectionAction =
+        field_map json__ "FirewallDomainRedirectionAction"
+          FirewallDomainRedirectionAction.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       let blockOverrideTtl =
-        field_map json "BlockOverrideTtl" BlockOverrideTtl.of_json in
+        field_map json__ "BlockOverrideTtl" BlockOverrideTtl.of_json in
       let blockOverrideDnsType =
-        field_map json "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
+        field_map json__ "BlockOverrideDnsType" BlockOverrideDnsType.of_json in
       let blockOverrideDomain =
-        field_map json "BlockOverrideDomain" BlockOverrideDomain.of_json in
+        field_map json__ "BlockOverrideDomain" BlockOverrideDomain.of_json in
       let blockResponse =
-        field_map json "BlockResponse" BlockResponse.of_json in
-      let action = field_map_exn json "Action" Action.of_json in
-      let priority = field_map_exn json "Priority" Priority.of_json in
+        field_map json__ "BlockResponse" BlockResponse.of_json in
+      let action = field_map_exn json__ "Action" Action.of_json in
+      let priority = field_map_exn json__ "Priority" Priority.of_json in
       let firewallDomainListId =
-        field_map_exn json "FirewallDomainListId" ResourceId.of_json in
+        field_map json__ "FirewallDomainListId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
-      make ~name ?blockOverrideTtl ?blockOverrideDnsType ?blockOverrideDomain
-        ?blockResponse ~action ~priority ~firewallDomainListId
-        ~firewallRuleGroupId ~creatorRequestId ()
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
+      make ?confidenceThreshold ?dnsThreatProtection ?qtype
+        ?firewallDomainRedirectionAction ~name ?blockOverrideTtl
+        ?blockOverrideDnsType ?blockOverrideDomain ?blockResponse ~action
+        ~priority ?firewallDomainListId ~firewallRuleGroupId
+        ~creatorRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a single DNS Firewall rule in the specified rule group, using the specified domain list."]
@@ -12072,9 +14246,9 @@ module CreateFirewallRuleGroupResponse =
           (Xml.child xml_arg0 "FirewallRuleGroup") in
       make ?firewallRuleGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroup =
-        field_map json "FirewallRuleGroup" FirewallRuleGroup.of_json in
+        field_map json__ "FirewallRuleGroup" FirewallRuleGroup.of_json in
       make ?firewallRuleGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12112,11 +14286,11 @@ module CreateFirewallRuleGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ~name ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
       make ?tags ~name ~creatorRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12204,9 +14378,9 @@ module CreateFirewallDomainListResponse =
           (Xml.child xml_arg0 "FirewallDomainList") in
       make ?firewallDomainList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallDomainList =
-        field_map json "FirewallDomainList" FirewallDomainList.of_json in
+        field_map json__ "FirewallDomainList" FirewallDomainList.of_json in
       make ?firewallDomainList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12244,11 +14418,11 @@ module CreateFirewallDomainListRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CreatorRequestId") in
       make ?tags ~name ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
       make ?tags ~name ~creatorRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12367,9 +14541,9 @@ module AssociateResolverRuleResponse =
           (Xml.child xml_arg0 "ResolverRuleAssociation") in
       make ?resolverRuleAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverRuleAssociation =
-        field_map json "ResolverRuleAssociation"
+        field_map json__ "ResolverRuleAssociation"
           ResolverRuleAssociation.of_json in
       make ?resolverRuleAssociation ()
     let to_json v = composed_to_json to_value v
@@ -12384,7 +14558,7 @@ module AssociateResolverRuleRequest =
           "The ID of the Resolver rule that you want to associate with the VPC. To list the existing Resolver rules, use ListResolverRules."];
       name: Name.t option
         [@ocaml.doc
-          "A name for the association that you're creating between a Resolver rule and a VPC."];
+          "A name for the association that you're creating between a Resolver rule and a VPC. The name can be up to 64 characters long and can contain letters (a-z, A-Z), numbers (0-9), hyphens (-), underscores (_), and spaces. The name cannot consist of only numbers."];
       vPCId: ResourceId.t
         [@ocaml.doc
           "The ID of the VPC that you want to associate the Resolver rule with."]}
@@ -12407,11 +14581,11 @@ module AssociateResolverRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverRuleId") in
       make ~vPCId ?name ~resolverRuleId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vPCId = field_map_exn json "VPCId" ResourceId.of_json in
-      let name = field_map json "Name" Name.of_json in
+    let of_json json__ =
+      let vPCId = field_map_exn json__ "VPCId" ResourceId.of_json in
+      let name = field_map json__ "Name" Name.of_json in
       let resolverRuleId =
-        field_map_exn json "ResolverRuleId" ResourceId.of_json in
+        field_map_exn json__ "ResolverRuleId" ResourceId.of_json in
       make ~vPCId ?name ~resolverRuleId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12530,9 +14704,9 @@ module AssociateResolverQueryLogConfigResponse =
           (Xml.child xml_arg0 "ResolverQueryLogConfigAssociation") in
       make ?resolverQueryLogConfigAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverQueryLogConfigAssociation =
-        field_map json "ResolverQueryLogConfigAssociation"
+        field_map json__ "ResolverQueryLogConfigAssociation"
           ResolverQueryLogConfigAssociation.of_json in
       make ?resolverQueryLogConfigAssociation ()
     let to_json v = composed_to_json to_value v
@@ -12567,10 +14741,10 @@ module AssociateResolverQueryLogConfigRequest =
              "ResolverQueryLogConfigId") in
       make ~resourceId ~resolverQueryLogConfigId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       let resolverQueryLogConfigId =
-        field_map_exn json "ResolverQueryLogConfigId" ResourceId.of_json in
+        field_map_exn json__ "ResolverQueryLogConfigId" ResourceId.of_json in
       make ~resourceId ~resolverQueryLogConfigId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12677,9 +14851,9 @@ module AssociateResolverEndpointIpAddressResponse =
           (Xml.child xml_arg0 "ResolverEndpoint") in
       make ?resolverEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resolverEndpoint =
-        field_map json "ResolverEndpoint" ResolverEndpoint.of_json in
+        field_map json__ "ResolverEndpoint" ResolverEndpoint.of_json in
       make ?resolverEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12712,10 +14886,11 @@ module AssociateResolverEndpointIpAddressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResolverEndpointId") in
       make ~ipAddress ~resolverEndpointId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ipAddress = field_map_exn json "IpAddress" IpAddressUpdate.of_json in
+    let of_json json__ =
+      let ipAddress =
+        field_map_exn json__ "IpAddress" IpAddressUpdate.of_json in
       let resolverEndpointId =
-        field_map_exn json "ResolverEndpointId" ResourceId.of_json in
+        field_map_exn json__ "ResolverEndpointId" ResourceId.of_json in
       make ~ipAddress ~resolverEndpointId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12824,9 +14999,9 @@ module AssociateFirewallRuleGroupResponse =
           (Xml.child xml_arg0 "FirewallRuleGroupAssociation") in
       make ?firewallRuleGroupAssociation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let firewallRuleGroupAssociation =
-        field_map json "FirewallRuleGroupAssociation"
+        field_map json__ "FirewallRuleGroupAssociation"
           FirewallRuleGroupAssociation.of_json in
       make ?firewallRuleGroupAssociation ()
     let to_json v = composed_to_json to_value v
@@ -12908,17 +15083,18 @@ module AssociateFirewallRuleGroupRequest =
       make ?tags ?mutationProtection ~name ~priority ~vpcId
         ~firewallRuleGroupId ~creatorRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let mutationProtection =
-        field_map json "MutationProtection" MutationProtectionStatus.of_json in
-      let name = field_map_exn json "Name" Name.of_json in
-      let priority = field_map_exn json "Priority" Priority.of_json in
-      let vpcId = field_map_exn json "VpcId" ResourceId.of_json in
+        field_map json__ "MutationProtection"
+          MutationProtectionStatus.of_json in
+      let name = field_map_exn json__ "Name" Name.of_json in
+      let priority = field_map_exn json__ "Priority" Priority.of_json in
+      let vpcId = field_map_exn json__ "VpcId" ResourceId.of_json in
       let firewallRuleGroupId =
-        field_map_exn json "FirewallRuleGroupId" ResourceId.of_json in
+        field_map_exn json__ "FirewallRuleGroupId" ResourceId.of_json in
       let creatorRequestId =
-        field_map_exn json "CreatorRequestId" CreatorRequestId.of_json in
+        field_map_exn json__ "CreatorRequestId" CreatorRequestId.of_json in
       make ?tags ?mutationProtection ~name ~priority ~vpcId
         ~firewallRuleGroupId ~creatorRequestId ()
     let to_json v = composed_to_json to_value v

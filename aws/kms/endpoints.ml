@@ -17,8 +17,11 @@ type ('i, 'o, 'e) t =
   | DeleteAlias: (DeleteAliasRequest.t, unit, unit) t 
   | DeleteCustomKeyStore: (DeleteCustomKeyStoreRequest.t,
   DeleteCustomKeyStoreResponse.t, DeleteCustomKeyStoreResponse.error) t 
-  | DeleteImportedKeyMaterial: (DeleteImportedKeyMaterialRequest.t, unit,
-  unit) t 
+  | DeleteImportedKeyMaterial: (DeleteImportedKeyMaterialRequest.t,
+  DeleteImportedKeyMaterialResponse.t,
+  DeleteImportedKeyMaterialResponse.error) t 
+  | DeriveSharedSecret: (DeriveSharedSecretRequest.t,
+  DeriveSharedSecretResponse.t, DeriveSharedSecretResponse.error) t 
   | DescribeCustomKeyStores: (DescribeCustomKeyStoresRequest.t,
   DescribeCustomKeyStoresResponse.t, DescribeCustomKeyStoresResponse.error) t
   
@@ -44,8 +47,12 @@ type ('i, 'o, 'e) t =
   (GenerateDataKeyWithoutPlaintextRequest.t,
   GenerateDataKeyWithoutPlaintextResponse.t,
   GenerateDataKeyWithoutPlaintextResponse.error) t 
+  | GenerateMac: (GenerateMacRequest.t, GenerateMacResponse.t,
+  GenerateMacResponse.error) t 
   | GenerateRandom: (GenerateRandomRequest.t, GenerateRandomResponse.t,
   GenerateRandomResponse.error) t 
+  | GetKeyLastUsage: (GetKeyLastUsageRequest.t, GetKeyLastUsageResponse.t,
+  GetKeyLastUsageResponse.error) t 
   | GetKeyPolicy: (GetKeyPolicyRequest.t, GetKeyPolicyResponse.t,
   GetKeyPolicyResponse.error) t 
   | GetKeyRotationStatus: (GetKeyRotationStatusRequest.t,
@@ -62,6 +69,8 @@ type ('i, 'o, 'e) t =
   ListGrantsResponse.error) t 
   | ListKeyPolicies: (ListKeyPoliciesRequest.t, ListKeyPoliciesResponse.t,
   ListKeyPoliciesResponse.error) t 
+  | ListKeyRotations: (ListKeyRotationsRequest.t, ListKeyRotationsResponse.t,
+  ListKeyRotationsResponse.error) t 
   | ListKeys: (ListKeysRequest.t, ListKeysResponse.t, ListKeysResponse.error)
   t 
   | ListResourceTags: (ListResourceTagsRequest.t, ListResourceTagsResponse.t,
@@ -75,6 +84,8 @@ type ('i, 'o, 'e) t =
   ReplicateKeyResponse.error) t 
   | RetireGrant: (RetireGrantRequest.t, unit, unit) t 
   | RevokeGrant: (RevokeGrantRequest.t, unit, unit) t 
+  | RotateKeyOnDemand: (RotateKeyOnDemandRequest.t,
+  RotateKeyOnDemandResponse.t, RotateKeyOnDemandResponse.error) t 
   | ScheduleKeyDeletion: (ScheduleKeyDeletionRequest.t,
   ScheduleKeyDeletionResponse.t, ScheduleKeyDeletionResponse.error) t 
   | Sign: (SignRequest.t, SignResponse.t, SignResponse.error) t 
@@ -86,6 +97,8 @@ type ('i, 'o, 'e) t =
   | UpdateKeyDescription: (UpdateKeyDescriptionRequest.t, unit, unit) t 
   | UpdatePrimaryRegion: (UpdatePrimaryRegionRequest.t, unit, unit) t 
   | Verify: (VerifyRequest.t, VerifyResponse.t, VerifyResponse.error) t 
+  | VerifyMac: (VerifyMacRequest.t, VerifyMacResponse.t,
+  VerifyMacResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelKeyDeletion -> `POST
@@ -98,6 +111,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteAlias -> `POST
   | DeleteCustomKeyStore -> `POST
   | DeleteImportedKeyMaterial -> `POST
+  | DeriveSharedSecret -> `POST
   | DescribeCustomKeyStores -> `POST
   | DescribeKey -> `POST
   | DisableKey -> `POST
@@ -110,7 +124,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GenerateDataKeyPair -> `POST
   | GenerateDataKeyPairWithoutPlaintext -> `POST
   | GenerateDataKeyWithoutPlaintext -> `POST
+  | GenerateMac -> `POST
   | GenerateRandom -> `POST
+  | GetKeyLastUsage -> `POST
   | GetKeyPolicy -> `POST
   | GetKeyRotationStatus -> `POST
   | GetParametersForImport -> `POST
@@ -119,6 +135,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListAliases -> `POST
   | ListGrants -> `POST
   | ListKeyPolicies -> `POST
+  | ListKeyRotations -> `POST
   | ListKeys -> `POST
   | ListResourceTags -> `POST
   | ListRetirableGrants -> `POST
@@ -127,6 +144,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ReplicateKey -> `POST
   | RetireGrant -> `POST
   | RevokeGrant -> `POST
+  | RotateKeyOnDemand -> `POST
   | ScheduleKeyDeletion -> `POST
   | Sign -> `POST
   | TagResource -> `POST
@@ -136,6 +154,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | UpdateKeyDescription -> `POST
   | UpdatePrimaryRegion -> `POST
   | Verify -> `POST
+  | VerifyMac -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -149,6 +168,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteAlias -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCustomKeyStore -> (Format.kasprintf Uri.of_string) "/"
       | DeleteImportedKeyMaterial -> (Format.kasprintf Uri.of_string) "/"
+      | DeriveSharedSecret -> (Format.kasprintf Uri.of_string) "/"
       | DescribeCustomKeyStores -> (Format.kasprintf Uri.of_string) "/"
       | DescribeKey -> (Format.kasprintf Uri.of_string) "/"
       | DisableKey -> (Format.kasprintf Uri.of_string) "/"
@@ -163,7 +183,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | GenerateDataKeyWithoutPlaintext ->
           (Format.kasprintf Uri.of_string) "/"
+      | GenerateMac -> (Format.kasprintf Uri.of_string) "/"
       | GenerateRandom -> (Format.kasprintf Uri.of_string) "/"
+      | GetKeyLastUsage -> (Format.kasprintf Uri.of_string) "/"
       | GetKeyPolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetKeyRotationStatus -> (Format.kasprintf Uri.of_string) "/"
       | GetParametersForImport -> (Format.kasprintf Uri.of_string) "/"
@@ -172,6 +194,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListAliases -> (Format.kasprintf Uri.of_string) "/"
       | ListGrants -> (Format.kasprintf Uri.of_string) "/"
       | ListKeyPolicies -> (Format.kasprintf Uri.of_string) "/"
+      | ListKeyRotations -> (Format.kasprintf Uri.of_string) "/"
       | ListKeys -> (Format.kasprintf Uri.of_string) "/"
       | ListResourceTags -> (Format.kasprintf Uri.of_string) "/"
       | ListRetirableGrants -> (Format.kasprintf Uri.of_string) "/"
@@ -180,6 +203,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ReplicateKey -> (Format.kasprintf Uri.of_string) "/"
       | RetireGrant -> (Format.kasprintf Uri.of_string) "/"
       | RevokeGrant -> (Format.kasprintf Uri.of_string) "/"
+      | RotateKeyOnDemand -> (Format.kasprintf Uri.of_string) "/"
       | ScheduleKeyDeletion -> (Format.kasprintf Uri.of_string) "/"
       | Sign -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
@@ -188,7 +212,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateCustomKeyStore -> (Format.kasprintf Uri.of_string) "/"
       | UpdateKeyDescription -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePrimaryRegion -> (Format.kasprintf Uri.of_string) "/"
-      | Verify -> (Format.kasprintf Uri.of_string) "/")
+      | Verify -> (Format.kasprintf Uri.of_string) "/"
+      | VerifyMac -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -271,6 +296,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.DeleteImportedKeyMaterial")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeriveSharedSecret ->
+      let json = DeriveSharedSecretRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.DeriveSharedSecret")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeCustomKeyStores ->
       let json = DescribeCustomKeyStoresRequest.to_json req in
@@ -369,6 +402,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.GenerateDataKeyWithoutPlaintext")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GenerateMac ->
+      let json = GenerateMacRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.GenerateMac")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GenerateRandom ->
       let json = GenerateRandomRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -376,6 +417,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.GenerateRandom")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetKeyLastUsage ->
+      let json = GetKeyLastUsageRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.GetKeyLastUsage")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetKeyPolicy ->
       let json = GetKeyPolicyRequest.to_json req in
@@ -441,6 +490,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.ListKeyPolicies")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListKeyRotations ->
+      let json = ListKeyRotationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.ListKeyRotations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListKeys ->
       let json = ListKeysRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -504,6 +561,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.RevokeGrant")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RotateKeyOnDemand ->
+      let json = RotateKeyOnDemandRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.RotateKeyOnDemand")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ScheduleKeyDeletion ->
       let json = ScheduleKeyDeletionRequest.to_json req in
@@ -576,6 +641,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "TrentService.Verify")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | VerifyMac ->
+      let json = VerifyMacRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "TrentService.VerifyMac")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -653,7 +726,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error (Some DeleteCustomKeyStoreResponse.error_of_json))
   | DeleteImportedKeyMaterial ->
-      if is_success then Ok () else Error (parse_aws_error None)
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteImportedKeyMaterialResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteImportedKeyMaterialResponse.error_of_json))
+  | DeriveSharedSecret ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeriveSharedSecretResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DeriveSharedSecretResponse.error_of_json))
   | DescribeCustomKeyStores ->
       if is_success
       then
@@ -723,6 +811,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GenerateDataKeyWithoutPlaintextResponse.error_of_json))
+  | GenerateMac ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GenerateMacResponse.of_json json)
+      else Error (parse_aws_error (Some GenerateMacResponse.error_of_json))
   | GenerateRandom ->
       if is_success
       then
@@ -730,6 +824,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (GenerateRandomResponse.of_json json)
       else
         Error (parse_aws_error (Some GenerateRandomResponse.error_of_json))
+  | GetKeyLastUsage ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetKeyLastUsageResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetKeyLastUsageResponse.error_of_json))
   | GetKeyPolicy ->
       if is_success
       then
@@ -786,6 +887,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListKeyPoliciesResponse.of_json json)
       else
         Error (parse_aws_error (Some ListKeyPoliciesResponse.error_of_json))
+  | ListKeyRotations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListKeyRotationsResponse.of_json json)
+      else
+        Error (parse_aws_error (Some ListKeyRotationsResponse.error_of_json))
   | ListKeys ->
       if is_success
       then
@@ -821,6 +929,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some ReplicateKeyResponse.error_of_json))
   | RetireGrant -> if is_success then Ok () else Error (parse_aws_error None)
   | RevokeGrant -> if is_success then Ok () else Error (parse_aws_error None)
+  | RotateKeyOnDemand ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RotateKeyOnDemandResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some RotateKeyOnDemandResponse.error_of_json))
   | ScheduleKeyDeletion ->
       if is_success
       then
@@ -857,3 +973,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (VerifyResponse.of_json json)
       else Error (parse_aws_error (Some VerifyResponse.error_of_json))
+  | VerifyMac ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (VerifyMacResponse.of_json json)
+      else Error (parse_aws_error (Some VerifyMacResponse.error_of_json))

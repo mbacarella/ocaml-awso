@@ -11,34 +11,68 @@ val create_compute_environment :
       CreateComputeEnvironmentRequest.t ->
         (CreateComputeEnvironmentResponse.t,
           CreateComputeEnvironmentResponse.error) Result.t
+val create_consumable_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateConsumableResourceRequest.t ->
+        (CreateConsumableResourceResponse.t,
+          CreateConsumableResourceResponse.error) Result.t
 val create_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateJobQueueRequest.t ->
         (CreateJobQueueResponse.t, CreateJobQueueResponse.error) Result.t
+val create_quota_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateQuotaShareRequest.t ->
+        (CreateQuotaShareResponse.t, CreateQuotaShareResponse.error) Result.t
 val create_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateSchedulingPolicyRequest.t ->
         (CreateSchedulingPolicyResponse.t,
           CreateSchedulingPolicyResponse.error) Result.t
+val create_service_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateServiceEnvironmentRequest.t ->
+        (CreateServiceEnvironmentResponse.t,
+          CreateServiceEnvironmentResponse.error) Result.t
 val delete_compute_environment :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteComputeEnvironmentRequest.t ->
         (DeleteComputeEnvironmentResponse.t,
           DeleteComputeEnvironmentResponse.error) Result.t
+val delete_consumable_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConsumableResourceRequest.t ->
+        (DeleteConsumableResourceResponse.t,
+          DeleteConsumableResourceResponse.error) Result.t
 val delete_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteJobQueueRequest.t ->
         (DeleteJobQueueResponse.t, DeleteJobQueueResponse.error) Result.t
+val delete_quota_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteQuotaShareRequest.t ->
+        (DeleteQuotaShareResponse.t, DeleteQuotaShareResponse.error) Result.t
 val delete_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteSchedulingPolicyRequest.t ->
         (DeleteSchedulingPolicyResponse.t,
           DeleteSchedulingPolicyResponse.error) Result.t
+val delete_service_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteServiceEnvironmentRequest.t ->
+        (DeleteServiceEnvironmentResponse.t,
+          DeleteServiceEnvironmentResponse.error) Result.t
 val deregister_job_definition :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -51,6 +85,12 @@ val describe_compute_environments :
       DescribeComputeEnvironmentsRequest.t ->
         (DescribeComputeEnvironmentsResponse.t,
           DescribeComputeEnvironmentsResponse.error) Result.t
+val describe_consumable_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConsumableResourceRequest.t ->
+        (DescribeConsumableResourceResponse.t,
+          DescribeConsumableResourceResponse.error) Result.t
 val describe_job_definitions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -68,23 +108,69 @@ val describe_jobs :
     ?cfg:Awso.Cfg.t ->
       DescribeJobsRequest.t ->
         (DescribeJobsResponse.t, DescribeJobsResponse.error) Result.t
+val describe_quota_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeQuotaShareRequest.t ->
+        (DescribeQuotaShareResponse.t, DescribeQuotaShareResponse.error)
+          Result.t
 val describe_scheduling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeSchedulingPoliciesRequest.t ->
         (DescribeSchedulingPoliciesResponse.t,
           DescribeSchedulingPoliciesResponse.error) Result.t
+val describe_service_environments :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServiceEnvironmentsRequest.t ->
+        (DescribeServiceEnvironmentsResponse.t,
+          DescribeServiceEnvironmentsResponse.error) Result.t
+val describe_service_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeServiceJobRequest.t ->
+        (DescribeServiceJobResponse.t, DescribeServiceJobResponse.error)
+          Result.t
+val get_job_queue_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetJobQueueSnapshotRequest.t ->
+        (GetJobQueueSnapshotResponse.t, GetJobQueueSnapshotResponse.error)
+          Result.t
+val list_consumable_resources :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConsumableResourcesRequest.t ->
+        (ListConsumableResourcesResponse.t,
+          ListConsumableResourcesResponse.error) Result.t
 val list_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListJobsRequest.t ->
         (ListJobsResponse.t, ListJobsResponse.error) Result.t
+val list_jobs_by_consumable_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListJobsByConsumableResourceRequest.t ->
+        (ListJobsByConsumableResourceResponse.t,
+          ListJobsByConsumableResourceResponse.error) Result.t
+val list_quota_shares :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListQuotaSharesRequest.t ->
+        (ListQuotaSharesResponse.t, ListQuotaSharesResponse.error) Result.t
 val list_scheduling_policies :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListSchedulingPoliciesRequest.t ->
         (ListSchedulingPoliciesResponse.t,
           ListSchedulingPoliciesResponse.error) Result.t
+val list_service_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListServiceJobsRequest.t ->
+        (ListServiceJobsResponse.t, ListServiceJobsResponse.error) Result.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -102,6 +188,11 @@ val submit_job :
     ?cfg:Awso.Cfg.t ->
       SubmitJobRequest.t ->
         (SubmitJobResponse.t, SubmitJobResponse.error) Result.t
+val submit_service_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      SubmitServiceJobRequest.t ->
+        (SubmitServiceJobResponse.t, SubmitServiceJobResponse.error) Result.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -112,6 +203,12 @@ val terminate_job :
     ?cfg:Awso.Cfg.t ->
       TerminateJobRequest.t ->
         (TerminateJobResponse.t, TerminateJobResponse.error) Result.t
+val terminate_service_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TerminateServiceJobRequest.t ->
+        (TerminateServiceJobResponse.t, TerminateServiceJobResponse.error)
+          Result.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -123,14 +220,36 @@ val update_compute_environment :
       UpdateComputeEnvironmentRequest.t ->
         (UpdateComputeEnvironmentResponse.t,
           UpdateComputeEnvironmentResponse.error) Result.t
+val update_consumable_resource :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateConsumableResourceRequest.t ->
+        (UpdateConsumableResourceResponse.t,
+          UpdateConsumableResourceResponse.error) Result.t
 val update_job_queue :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobQueueRequest.t ->
         (UpdateJobQueueResponse.t, UpdateJobQueueResponse.error) Result.t
+val update_quota_share :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateQuotaShareRequest.t ->
+        (UpdateQuotaShareResponse.t, UpdateQuotaShareResponse.error) Result.t
 val update_scheduling_policy :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateSchedulingPolicyRequest.t ->
         (UpdateSchedulingPolicyResponse.t,
           UpdateSchedulingPolicyResponse.error) Result.t
+val update_service_environment :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateServiceEnvironmentRequest.t ->
+        (UpdateServiceEnvironmentResponse.t,
+          UpdateServiceEnvironmentResponse.error) Result.t
+val update_service_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateServiceJobRequest.t ->
+        (UpdateServiceJobResponse.t, UpdateServiceJobResponse.error) Result.t

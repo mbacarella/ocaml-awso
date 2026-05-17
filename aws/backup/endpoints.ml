@@ -2,6 +2,10 @@
 open! Awso_common.Jane_compat
 open Values
 type ('i, 'o, 'e) t =
+  | AssociateBackupVaultMpaApprovalTeam:
+  (AssociateBackupVaultMpaApprovalTeamInput.t, unit, unit) t 
+  | CancelLegalHold: (CancelLegalHoldInput.t, CancelLegalHoldOutput.t,
+  CancelLegalHoldOutput.error) t 
   | CreateBackupPlan: (CreateBackupPlanInput.t, CreateBackupPlanOutput.t,
   CreateBackupPlanOutput.error) t 
   | CreateBackupSelection: (CreateBackupSelectionInput.t,
@@ -10,8 +14,25 @@ type ('i, 'o, 'e) t =
   CreateBackupVaultOutput.error) t 
   | CreateFramework: (CreateFrameworkInput.t, CreateFrameworkOutput.t,
   CreateFrameworkOutput.error) t 
+  | CreateLegalHold: (CreateLegalHoldInput.t, CreateLegalHoldOutput.t,
+  CreateLegalHoldOutput.error) t 
+  | CreateLogicallyAirGappedBackupVault:
+  (CreateLogicallyAirGappedBackupVaultInput.t,
+  CreateLogicallyAirGappedBackupVaultOutput.t,
+  CreateLogicallyAirGappedBackupVaultOutput.error) t 
   | CreateReportPlan: (CreateReportPlanInput.t, CreateReportPlanOutput.t,
   CreateReportPlanOutput.error) t 
+  | CreateRestoreAccessBackupVault: (CreateRestoreAccessBackupVaultInput.t,
+  CreateRestoreAccessBackupVaultOutput.t,
+  CreateRestoreAccessBackupVaultOutput.error) t 
+  | CreateRestoreTestingPlan: (CreateRestoreTestingPlanInput.t,
+  CreateRestoreTestingPlanOutput.t, CreateRestoreTestingPlanOutput.error) t 
+  | CreateRestoreTestingSelection: (CreateRestoreTestingSelectionInput.t,
+  CreateRestoreTestingSelectionOutput.t,
+  CreateRestoreTestingSelectionOutput.error) t 
+  | CreateTieringConfiguration: (CreateTieringConfigurationInput.t,
+  CreateTieringConfigurationOutput.t, CreateTieringConfigurationOutput.error)
+  t 
   | DeleteBackupPlan: (DeleteBackupPlanInput.t, DeleteBackupPlanOutput.t,
   DeleteBackupPlanOutput.error) t 
   | DeleteBackupSelection: (DeleteBackupSelectionInput.t, unit, unit) t 
@@ -25,6 +46,13 @@ type ('i, 'o, 'e) t =
   | DeleteFramework: (DeleteFrameworkInput.t, unit, unit) t 
   | DeleteRecoveryPoint: (DeleteRecoveryPointInput.t, unit, unit) t 
   | DeleteReportPlan: (DeleteReportPlanInput.t, unit, unit) t 
+  | DeleteRestoreTestingPlan: (DeleteRestoreTestingPlanInput.t, unit, 
+  unit) t 
+  | DeleteRestoreTestingSelection: (DeleteRestoreTestingSelectionInput.t,
+  unit, unit) t 
+  | DeleteTieringConfiguration: (DeleteTieringConfigurationInput.t,
+  DeleteTieringConfigurationOutput.t, DeleteTieringConfigurationOutput.error)
+  t 
   | DescribeBackupJob: (DescribeBackupJobInput.t, DescribeBackupJobOutput.t,
   DescribeBackupJobOutput.error) t 
   | DescribeBackupVault: (DescribeBackupVaultInput.t,
@@ -48,8 +76,14 @@ type ('i, 'o, 'e) t =
   DescribeReportPlanOutput.t, DescribeReportPlanOutput.error) t 
   | DescribeRestoreJob: (DescribeRestoreJobInput.t,
   DescribeRestoreJobOutput.t, DescribeRestoreJobOutput.error) t 
+  | DescribeScanJob: (DescribeScanJobInput.t, DescribeScanJobOutput.t,
+  DescribeScanJobOutput.error) t 
+  | DisassociateBackupVaultMpaApprovalTeam:
+  (DisassociateBackupVaultMpaApprovalTeamInput.t, unit, unit) t 
   | DisassociateRecoveryPoint: (DisassociateRecoveryPointInput.t, unit, 
   unit) t 
+  | DisassociateRecoveryPointFromParent:
+  (DisassociateRecoveryPointFromParentInput.t, unit, unit) t 
   | ExportBackupPlanTemplate: (ExportBackupPlanTemplateInput.t,
   ExportBackupPlanTemplateOutput.t, ExportBackupPlanTemplateOutput.error) t 
   | GetBackupPlan: (GetBackupPlanInput.t, GetBackupPlanOutput.t,
@@ -67,11 +101,31 @@ type ('i, 'o, 'e) t =
   | GetBackupVaultNotifications: (GetBackupVaultNotificationsInput.t,
   GetBackupVaultNotificationsOutput.t,
   GetBackupVaultNotificationsOutput.error) t 
+  | GetLegalHold: (GetLegalHoldInput.t, GetLegalHoldOutput.t,
+  GetLegalHoldOutput.error) t 
+  | GetRecoveryPointIndexDetails: (GetRecoveryPointIndexDetailsInput.t,
+  GetRecoveryPointIndexDetailsOutput.t,
+  GetRecoveryPointIndexDetailsOutput.error) t 
   | GetRecoveryPointRestoreMetadata: (GetRecoveryPointRestoreMetadataInput.t,
   GetRecoveryPointRestoreMetadataOutput.t,
   GetRecoveryPointRestoreMetadataOutput.error) t 
+  | GetRestoreJobMetadata: (GetRestoreJobMetadataInput.t,
+  GetRestoreJobMetadataOutput.t, GetRestoreJobMetadataOutput.error) t 
+  | GetRestoreTestingInferredMetadata:
+  (GetRestoreTestingInferredMetadataInput.t,
+  GetRestoreTestingInferredMetadataOutput.t,
+  GetRestoreTestingInferredMetadataOutput.error) t 
+  | GetRestoreTestingPlan: (GetRestoreTestingPlanInput.t,
+  GetRestoreTestingPlanOutput.t, GetRestoreTestingPlanOutput.error) t 
+  | GetRestoreTestingSelection: (GetRestoreTestingSelectionInput.t,
+  GetRestoreTestingSelectionOutput.t, GetRestoreTestingSelectionOutput.error)
+  t 
   | GetSupportedResourceTypes: (unit, GetSupportedResourceTypesOutput.t,
   GetSupportedResourceTypesOutput.error) t 
+  | GetTieringConfiguration: (GetTieringConfigurationInput.t,
+  GetTieringConfigurationOutput.t, GetTieringConfigurationOutput.error) t 
+  | ListBackupJobSummaries: (ListBackupJobSummariesInput.t,
+  ListBackupJobSummariesOutput.t, ListBackupJobSummariesOutput.error) t 
   | ListBackupJobs: (ListBackupJobsInput.t, ListBackupJobsOutput.t,
   ListBackupJobsOutput.error) t 
   | ListBackupPlanTemplates: (ListBackupPlanTemplatesInput.t,
@@ -84,15 +138,29 @@ type ('i, 'o, 'e) t =
   ListBackupSelectionsOutput.t, ListBackupSelectionsOutput.error) t 
   | ListBackupVaults: (ListBackupVaultsInput.t, ListBackupVaultsOutput.t,
   ListBackupVaultsOutput.error) t 
+  | ListCopyJobSummaries: (ListCopyJobSummariesInput.t,
+  ListCopyJobSummariesOutput.t, ListCopyJobSummariesOutput.error) t 
   | ListCopyJobs: (ListCopyJobsInput.t, ListCopyJobsOutput.t,
   ListCopyJobsOutput.error) t 
   | ListFrameworks: (ListFrameworksInput.t, ListFrameworksOutput.t,
   ListFrameworksOutput.error) t 
+  | ListIndexedRecoveryPoints: (ListIndexedRecoveryPointsInput.t,
+  ListIndexedRecoveryPointsOutput.t, ListIndexedRecoveryPointsOutput.error) t
+  
+  | ListLegalHolds: (ListLegalHoldsInput.t, ListLegalHoldsOutput.t,
+  ListLegalHoldsOutput.error) t 
   | ListProtectedResources: (ListProtectedResourcesInput.t,
   ListProtectedResourcesOutput.t, ListProtectedResourcesOutput.error) t 
+  | ListProtectedResourcesByBackupVault:
+  (ListProtectedResourcesByBackupVaultInput.t,
+  ListProtectedResourcesByBackupVaultOutput.t,
+  ListProtectedResourcesByBackupVaultOutput.error) t 
   | ListRecoveryPointsByBackupVault: (ListRecoveryPointsByBackupVaultInput.t,
   ListRecoveryPointsByBackupVaultOutput.t,
   ListRecoveryPointsByBackupVaultOutput.error) t 
+  | ListRecoveryPointsByLegalHold: (ListRecoveryPointsByLegalHoldInput.t,
+  ListRecoveryPointsByLegalHoldOutput.t,
+  ListRecoveryPointsByLegalHoldOutput.error) t 
   | ListRecoveryPointsByResource: (ListRecoveryPointsByResourceInput.t,
   ListRecoveryPointsByResourceOutput.t,
   ListRecoveryPointsByResourceOutput.error) t 
@@ -100,14 +168,39 @@ type ('i, 'o, 'e) t =
   ListReportJobsOutput.error) t 
   | ListReportPlans: (ListReportPlansInput.t, ListReportPlansOutput.t,
   ListReportPlansOutput.error) t 
+  | ListRestoreAccessBackupVaults: (ListRestoreAccessBackupVaultsInput.t,
+  ListRestoreAccessBackupVaultsOutput.t,
+  ListRestoreAccessBackupVaultsOutput.error) t 
+  | ListRestoreJobSummaries: (ListRestoreJobSummariesInput.t,
+  ListRestoreJobSummariesOutput.t, ListRestoreJobSummariesOutput.error) t 
   | ListRestoreJobs: (ListRestoreJobsInput.t, ListRestoreJobsOutput.t,
   ListRestoreJobsOutput.error) t 
+  | ListRestoreJobsByProtectedResource:
+  (ListRestoreJobsByProtectedResourceInput.t,
+  ListRestoreJobsByProtectedResourceOutput.t,
+  ListRestoreJobsByProtectedResourceOutput.error) t 
+  | ListRestoreTestingPlans: (ListRestoreTestingPlansInput.t,
+  ListRestoreTestingPlansOutput.t, ListRestoreTestingPlansOutput.error) t 
+  | ListRestoreTestingSelections: (ListRestoreTestingSelectionsInput.t,
+  ListRestoreTestingSelectionsOutput.t,
+  ListRestoreTestingSelectionsOutput.error) t 
+  | ListScanJobSummaries: (ListScanJobSummariesInput.t,
+  ListScanJobSummariesOutput.t, ListScanJobSummariesOutput.error) t 
+  | ListScanJobs: (ListScanJobsInput.t, ListScanJobsOutput.t,
+  ListScanJobsOutput.error) t 
   | ListTags: (ListTagsInput.t, ListTagsOutput.t, ListTagsOutput.error) t 
+  | ListTieringConfigurations: (ListTieringConfigurationsInput.t,
+  ListTieringConfigurationsOutput.t, ListTieringConfigurationsOutput.error) t
+  
   | PutBackupVaultAccessPolicy: (PutBackupVaultAccessPolicyInput.t, unit,
   unit) t 
   | PutBackupVaultLockConfiguration: (PutBackupVaultLockConfigurationInput.t,
   unit, unit) t 
   | PutBackupVaultNotifications: (PutBackupVaultNotificationsInput.t, 
+  unit, unit) t 
+  | PutRestoreValidationResult: (PutRestoreValidationResultInput.t, unit,
+  unit) t 
+  | RevokeRestoreAccessBackupVault: (RevokeRestoreAccessBackupVaultInput.t,
   unit, unit) t 
   | StartBackupJob: (StartBackupJobInput.t, StartBackupJobOutput.t,
   StartBackupJobOutput.error) t 
@@ -117,6 +210,8 @@ type ('i, 'o, 'e) t =
   StartReportJobOutput.error) t 
   | StartRestoreJob: (StartRestoreJobInput.t, StartRestoreJobOutput.t,
   StartRestoreJobOutput.error) t 
+  | StartScanJob: (StartScanJobInput.t, StartScanJobOutput.t,
+  StartScanJobOutput.error) t 
   | StopBackupJob: (StopBackupJobInput.t, unit, unit) t 
   | TagResource: (TagResourceInput.t, unit, unit) t 
   | UntagResource: (UntagResourceInput.t, unit, unit) t 
@@ -125,19 +220,39 @@ type ('i, 'o, 'e) t =
   | UpdateFramework: (UpdateFrameworkInput.t, UpdateFrameworkOutput.t,
   UpdateFrameworkOutput.error) t 
   | UpdateGlobalSettings: (UpdateGlobalSettingsInput.t, unit, unit) t 
+  | UpdateRecoveryPointIndexSettings:
+  (UpdateRecoveryPointIndexSettingsInput.t,
+  UpdateRecoveryPointIndexSettingsOutput.t,
+  UpdateRecoveryPointIndexSettingsOutput.error) t 
   | UpdateRecoveryPointLifecycle: (UpdateRecoveryPointLifecycleInput.t,
   UpdateRecoveryPointLifecycleOutput.t,
   UpdateRecoveryPointLifecycleOutput.error) t 
   | UpdateRegionSettings: (UpdateRegionSettingsInput.t, unit, unit) t 
   | UpdateReportPlan: (UpdateReportPlanInput.t, UpdateReportPlanOutput.t,
   UpdateReportPlanOutput.error) t 
+  | UpdateRestoreTestingPlan: (UpdateRestoreTestingPlanInput.t,
+  UpdateRestoreTestingPlanOutput.t, UpdateRestoreTestingPlanOutput.error) t 
+  | UpdateRestoreTestingSelection: (UpdateRestoreTestingSelectionInput.t,
+  UpdateRestoreTestingSelectionOutput.t,
+  UpdateRestoreTestingSelectionOutput.error) t 
+  | UpdateTieringConfiguration: (UpdateTieringConfigurationInput.t,
+  UpdateTieringConfigurationOutput.t, UpdateTieringConfigurationOutput.error)
+  t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
+  | AssociateBackupVaultMpaApprovalTeam -> `PUT
+  | CancelLegalHold -> `DELETE
   | CreateBackupPlan -> `PUT
   | CreateBackupSelection -> `PUT
   | CreateBackupVault -> `PUT
   | CreateFramework -> `POST
+  | CreateLegalHold -> `POST
+  | CreateLogicallyAirGappedBackupVault -> `PUT
   | CreateReportPlan -> `POST
+  | CreateRestoreAccessBackupVault -> `PUT
+  | CreateRestoreTestingPlan -> `PUT
+  | CreateRestoreTestingSelection -> `PUT
+  | CreateTieringConfiguration -> `PUT
   | DeleteBackupPlan -> `DELETE
   | DeleteBackupSelection -> `DELETE
   | DeleteBackupVault -> `DELETE
@@ -147,6 +262,9 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteFramework -> `DELETE
   | DeleteRecoveryPoint -> `DELETE
   | DeleteReportPlan -> `DELETE
+  | DeleteRestoreTestingPlan -> `DELETE
+  | DeleteRestoreTestingSelection -> `DELETE
+  | DeleteTieringConfiguration -> `DELETE
   | DescribeBackupJob -> `GET
   | DescribeBackupVault -> `GET
   | DescribeCopyJob -> `GET
@@ -158,7 +276,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeReportJob -> `GET
   | DescribeReportPlan -> `GET
   | DescribeRestoreJob -> `GET
+  | DescribeScanJob -> `GET
+  | DisassociateBackupVaultMpaApprovalTeam -> `POST
   | DisassociateRecoveryPoint -> `POST
+  | DisassociateRecoveryPointFromParent -> `DELETE
   | ExportBackupPlanTemplate -> `GET
   | GetBackupPlan -> `GET
   | GetBackupPlanFromJSON -> `POST
@@ -166,64 +287,125 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | GetBackupSelection -> `GET
   | GetBackupVaultAccessPolicy -> `GET
   | GetBackupVaultNotifications -> `GET
+  | GetLegalHold -> `GET
+  | GetRecoveryPointIndexDetails -> `GET
   | GetRecoveryPointRestoreMetadata -> `GET
+  | GetRestoreJobMetadata -> `GET
+  | GetRestoreTestingInferredMetadata -> `GET
+  | GetRestoreTestingPlan -> `GET
+  | GetRestoreTestingSelection -> `GET
   | GetSupportedResourceTypes -> `GET
+  | GetTieringConfiguration -> `GET
+  | ListBackupJobSummaries -> `GET
   | ListBackupJobs -> `GET
   | ListBackupPlanTemplates -> `GET
   | ListBackupPlanVersions -> `GET
   | ListBackupPlans -> `GET
   | ListBackupSelections -> `GET
   | ListBackupVaults -> `GET
+  | ListCopyJobSummaries -> `GET
   | ListCopyJobs -> `GET
   | ListFrameworks -> `GET
+  | ListIndexedRecoveryPoints -> `GET
+  | ListLegalHolds -> `GET
   | ListProtectedResources -> `GET
+  | ListProtectedResourcesByBackupVault -> `GET
   | ListRecoveryPointsByBackupVault -> `GET
+  | ListRecoveryPointsByLegalHold -> `GET
   | ListRecoveryPointsByResource -> `GET
   | ListReportJobs -> `GET
   | ListReportPlans -> `GET
+  | ListRestoreAccessBackupVaults -> `GET
+  | ListRestoreJobSummaries -> `GET
   | ListRestoreJobs -> `GET
+  | ListRestoreJobsByProtectedResource -> `GET
+  | ListRestoreTestingPlans -> `GET
+  | ListRestoreTestingSelections -> `GET
+  | ListScanJobSummaries -> `GET
+  | ListScanJobs -> `GET
   | ListTags -> `GET
+  | ListTieringConfigurations -> `GET
   | PutBackupVaultAccessPolicy -> `PUT
   | PutBackupVaultLockConfiguration -> `PUT
   | PutBackupVaultNotifications -> `PUT
+  | PutRestoreValidationResult -> `PUT
+  | RevokeRestoreAccessBackupVault -> `DELETE
   | StartBackupJob -> `PUT
   | StartCopyJob -> `PUT
   | StartReportJob -> `POST
   | StartRestoreJob -> `PUT
+  | StartScanJob -> `PUT
   | StopBackupJob -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateBackupPlan -> `POST
   | UpdateFramework -> `PUT
   | UpdateGlobalSettings -> `PUT
+  | UpdateRecoveryPointIndexSettings -> `POST
   | UpdateRecoveryPointLifecycle -> `POST
   | UpdateRegionSettings -> `PUT
   | UpdateReportPlan -> `PUT
+  | UpdateRestoreTestingPlan -> `PUT
+  | UpdateRestoreTestingSelection -> `PUT
+  | UpdateTieringConfiguration -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
+      | AssociateBackupVaultMpaApprovalTeam ->
+          (Format.kasprintf Uri.of_string)
+            "/backup-vaults/%s/mpaApprovalTeam"
+            (BackupVaultName.to_header
+               x.AssociateBackupVaultMpaApprovalTeamInput.backupVaultName)
+      | CancelLegalHold ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/legal-holds/%s"
+               (String__lc1.to_header x.CancelLegalHoldInput.legalHoldId))
+            (List.filter_opt
+               [Some
+                  ("cancelDescription",
+                    (String__lc1.to_header x.cancelDescription));
+               Option.map
+                 ~f:(fun v -> ("retainRecordInDays", (Long.to_header v)))
+                 x.retainRecordInDays])
       | CreateBackupPlan -> (Format.kasprintf Uri.of_string) "/backup/plans/"
       | CreateBackupSelection ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s/selections/"
-            (String_.to_header x.CreateBackupSelectionInput.backupPlanId)
+            (String__lc1.to_header x.CreateBackupSelectionInput.backupPlanId)
       | CreateBackupVault ->
           (Format.kasprintf Uri.of_string) "/backup-vaults/%s"
             (BackupVaultName.to_header
                x.CreateBackupVaultInput.backupVaultName)
       | CreateFramework ->
           (Format.kasprintf Uri.of_string) "/audit/frameworks"
+      | CreateLegalHold -> (Format.kasprintf Uri.of_string) "/legal-holds/"
+      | CreateLogicallyAirGappedBackupVault ->
+          (Format.kasprintf Uri.of_string)
+            "/logically-air-gapped-backup-vaults/%s"
+            (BackupVaultName.to_header
+               x.CreateLogicallyAirGappedBackupVaultInput.backupVaultName)
       | CreateReportPlan ->
           (Format.kasprintf Uri.of_string) "/audit/report-plans"
+      | CreateRestoreAccessBackupVault ->
+          (Format.kasprintf Uri.of_string) "/restore-access-backup-vaults"
+      | CreateRestoreTestingPlan ->
+          (Format.kasprintf Uri.of_string) "/restore-testing/plans"
+      | CreateRestoreTestingSelection ->
+          (Format.kasprintf Uri.of_string)
+            "/restore-testing/plans/%s/selections"
+            (String_.to_header
+               x.CreateRestoreTestingSelectionInput.restoreTestingPlanName)
+      | CreateTieringConfiguration ->
+          (Format.kasprintf Uri.of_string) "/tiering-configurations"
       | DeleteBackupPlan ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s"
-            (String_.to_header x.DeleteBackupPlanInput.backupPlanId)
+            (String__lc1.to_header x.DeleteBackupPlanInput.backupPlanId)
       | DeleteBackupSelection ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s/selections/%s"
-            (String_.to_header x.DeleteBackupSelectionInput.backupPlanId)
-            (String_.to_header x.DeleteBackupSelectionInput.selectionId)
+            (String__lc1.to_header x.DeleteBackupSelectionInput.backupPlanId)
+            (String__lc1.to_header x.DeleteBackupSelectionInput.selectionId)
       | DeleteBackupVault ->
           (Format.kasprintf Uri.of_string) "/backup-vaults/%s"
-            (String_.to_header x.DeleteBackupVaultInput.backupVaultName)
+            (String__lc1.to_header x.DeleteBackupVaultInput.backupVaultName)
       | DeleteBackupVaultAccessPolicy ->
           (Format.kasprintf Uri.of_string) "/backup-vaults/%s/access-policy"
             (BackupVaultName.to_header
@@ -249,15 +431,37 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteReportPlan ->
           (Format.kasprintf Uri.of_string) "/audit/report-plans/%s"
             (ReportPlanName.to_header x.DeleteReportPlanInput.reportPlanName)
+      | DeleteRestoreTestingPlan ->
+          (Format.kasprintf Uri.of_string) "/restore-testing/plans/%s"
+            (String_.to_header
+               x.DeleteRestoreTestingPlanInput.restoreTestingPlanName)
+      | DeleteRestoreTestingSelection ->
+          (Format.kasprintf Uri.of_string)
+            "/restore-testing/plans/%s/selections/%s"
+            (String_.to_header
+               x.DeleteRestoreTestingSelectionInput.restoreTestingPlanName)
+            (String_.to_header
+               x.DeleteRestoreTestingSelectionInput.restoreTestingSelectionName)
+      | DeleteTieringConfiguration ->
+          (Format.kasprintf Uri.of_string) "/tiering-configurations/%s"
+            (TieringConfigurationName.to_header
+               x.DeleteTieringConfigurationInput.tieringConfigurationName)
       | DescribeBackupJob ->
           (Format.kasprintf Uri.of_string) "/backup-jobs/%s"
-            (String_.to_header x.DescribeBackupJobInput.backupJobId)
+            (String__lc1.to_header x.DescribeBackupJobInput.backupJobId)
       | DescribeBackupVault ->
-          (Format.kasprintf Uri.of_string) "/backup-vaults/%s"
-            (String_.to_header x.DescribeBackupVaultInput.backupVaultName)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/backup-vaults/%s"
+               (String__lc1.to_header
+                  x.DescribeBackupVaultInput.backupVaultName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("backupVaultAccountId", (String__lc1.to_header v)))
+                  x.backupVaultAccountId])
       | DescribeCopyJob ->
           (Format.kasprintf Uri.of_string) "/copy-jobs/%s"
-            (String_.to_header x.DescribeCopyJobInput.copyJobId)
+            (String__lc1.to_header x.DescribeCopyJobInput.copyJobId)
       | DescribeFramework ->
           (Format.kasprintf Uri.of_string) "/audit/frameworks/%s"
             (FrameworkName.to_header x.DescribeFrameworkInput.frameworkName)
@@ -267,11 +471,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/resources/%s"
             (ARN.to_header x.DescribeProtectedResourceInput.resourceArn)
       | DescribeRecoveryPoint ->
-          (Format.kasprintf Uri.of_string)
-            "/backup-vaults/%s/recovery-points/%s"
-            (BackupVaultName.to_header
-               x.DescribeRecoveryPointInput.backupVaultName)
-            (ARN.to_header x.DescribeRecoveryPointInput.recoveryPointArn)
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/backup-vaults/%s/recovery-points/%s"
+               (BackupVaultName.to_header
+                  x.DescribeRecoveryPointInput.backupVaultName)
+               (ARN.to_header x.DescribeRecoveryPointInput.recoveryPointArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("backupVaultAccountId", (AccountId.to_header v)))
+                  x.backupVaultAccountId])
       | DescribeRegionSettings ->
           (Format.kasprintf Uri.of_string) "/account-settings"
       | DescribeReportJob ->
@@ -284,32 +494,54 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeRestoreJob ->
           (Format.kasprintf Uri.of_string) "/restore-jobs/%s"
             (RestoreJobId.to_header x.DescribeRestoreJobInput.restoreJobId)
+      | DescribeScanJob ->
+          (Format.kasprintf Uri.of_string) "/scan/jobs/%s"
+            (String_.to_header x.DescribeScanJobInput.scanJobId)
+      | DisassociateBackupVaultMpaApprovalTeam ->
+          (Format.kasprintf Uri.of_string)
+            "/backup-vaults/%s/mpaApprovalTeam?delete"
+            (BackupVaultName.to_header
+               x.DisassociateBackupVaultMpaApprovalTeamInput.backupVaultName)
       | DisassociateRecoveryPoint ->
           (Format.kasprintf Uri.of_string)
             "/backup-vaults/%s/recovery-points/%s/disassociate"
             (BackupVaultName.to_header
                x.DisassociateRecoveryPointInput.backupVaultName)
             (ARN.to_header x.DisassociateRecoveryPointInput.recoveryPointArn)
+      | DisassociateRecoveryPointFromParent ->
+          (Format.kasprintf Uri.of_string)
+            "/backup-vaults/%s/recovery-points/%s/parentAssociation"
+            (BackupVaultName.to_header
+               x.DisassociateRecoveryPointFromParentInput.backupVaultName)
+            (ARN.to_header
+               x.DisassociateRecoveryPointFromParentInput.recoveryPointArn)
       | ExportBackupPlanTemplate ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s/toTemplate/"
-            (String_.to_header x.ExportBackupPlanTemplateInput.backupPlanId)
+            (String__lc1.to_header
+               x.ExportBackupPlanTemplateInput.backupPlanId)
       | GetBackupPlan ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup/plans/%s/"
-               (String_.to_header x.GetBackupPlanInput.backupPlanId))
+               (String__lc1.to_header x.GetBackupPlanInput.backupPlanId))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("versionId", (String_.to_header v)))
-                  x.versionId])
+               [Option.map
+                  ~f:(fun v -> ("versionId", (String__lc1.to_header v)))
+                  x.versionId;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxScheduledRunsPreview",
+                         (MaxScheduledRunsPreview.to_header v)))
+                 x.maxScheduledRunsPreview])
       | GetBackupPlanFromJSON ->
           (Format.kasprintf Uri.of_string) "/backup/template/json/toPlan"
       | GetBackupPlanFromTemplate ->
           (Format.kasprintf Uri.of_string) "/backup/template/plans/%s/toPlan"
-            (String_.to_header
+            (String__lc1.to_header
                x.GetBackupPlanFromTemplateInput.backupPlanTemplateId)
       | GetBackupSelection ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s/selections/%s"
-            (String_.to_header x.GetBackupSelectionInput.backupPlanId)
-            (String_.to_header x.GetBackupSelectionInput.selectionId)
+            (String__lc1.to_header x.GetBackupSelectionInput.backupPlanId)
+            (String__lc1.to_header x.GetBackupSelectionInput.selectionId)
       | GetBackupVaultAccessPolicy ->
           (Format.kasprintf Uri.of_string) "/backup-vaults/%s/access-policy"
             (BackupVaultName.to_header
@@ -319,20 +551,95 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/backup-vaults/%s/notification-configuration"
             (BackupVaultName.to_header
                x.GetBackupVaultNotificationsInput.backupVaultName)
-      | GetRecoveryPointRestoreMetadata ->
+      | GetLegalHold ->
+          (Format.kasprintf Uri.of_string) "/legal-holds/%s/"
+            (String__lc1.to_header x.GetLegalHoldInput.legalHoldId)
+      | GetRecoveryPointIndexDetails ->
           (Format.kasprintf Uri.of_string)
-            "/backup-vaults/%s/recovery-points/%s/restore-metadata"
+            "/backup-vaults/%s/recovery-points/%s/index"
             (BackupVaultName.to_header
-               x.GetRecoveryPointRestoreMetadataInput.backupVaultName)
+               x.GetRecoveryPointIndexDetailsInput.backupVaultName)
             (ARN.to_header
-               x.GetRecoveryPointRestoreMetadataInput.recoveryPointArn)
+               x.GetRecoveryPointIndexDetailsInput.recoveryPointArn)
+      | GetRecoveryPointRestoreMetadata ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/backup-vaults/%s/recovery-points/%s/restore-metadata"
+               (BackupVaultName.to_header
+                  x.GetRecoveryPointRestoreMetadataInput.backupVaultName)
+               (ARN.to_header
+                  x.GetRecoveryPointRestoreMetadataInput.recoveryPointArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("backupVaultAccountId", (AccountId.to_header v)))
+                  x.backupVaultAccountId])
+      | GetRestoreJobMetadata ->
+          (Format.kasprintf Uri.of_string) "/restore-jobs/%s/metadata"
+            (RestoreJobId.to_header x.GetRestoreJobMetadataInput.restoreJobId)
+      | GetRestoreTestingInferredMetadata ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/restore-testing/inferred-metadata")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("BackupVaultAccountId", (String_.to_header v)))
+                  x.backupVaultAccountId;
+               Some
+                 ("BackupVaultName", (String_.to_header x.backupVaultName));
+               Some
+                 ("RecoveryPointArn", (String_.to_header x.recoveryPointArn))])
+      | GetRestoreTestingPlan ->
+          (Format.kasprintf Uri.of_string) "/restore-testing/plans/%s"
+            (String_.to_header
+               x.GetRestoreTestingPlanInput.restoreTestingPlanName)
+      | GetRestoreTestingSelection ->
+          (Format.kasprintf Uri.of_string)
+            "/restore-testing/plans/%s/selections/%s"
+            (String_.to_header
+               x.GetRestoreTestingSelectionInput.restoreTestingPlanName)
+            (String_.to_header
+               x.GetRestoreTestingSelectionInput.restoreTestingSelectionName)
       | GetSupportedResourceTypes ->
           (Format.kasprintf Uri.of_string) "/supported-resource-types"
+      | GetTieringConfiguration ->
+          (Format.kasprintf Uri.of_string) "/tiering-configurations/%s"
+            (TieringConfigurationName.to_header
+               x.GetTieringConfigurationInput.tieringConfigurationName)
+      | ListBackupJobSummaries ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/audit/backup-job-summaries")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("AccountId", (AccountId.to_header v)))
+                  x.accountId;
+               Option.map
+                 ~f:(fun v -> ("State", (BackupJobStatus.to_header v)))
+                 x.state;
+               Option.map
+                 ~f:(fun v -> ("ResourceType", (ResourceType.to_header v)))
+                 x.resourceType;
+               Option.map
+                 ~f:(fun v ->
+                       ("MessageCategory", (MessageCategory.to_header v)))
+                 x.messageCategory;
+               Option.map
+                 ~f:(fun v ->
+                       ("AggregationPeriod", (AggregationPeriod.to_header v)))
+                 x.aggregationPeriod;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
+                 x.nextToken])
       | ListBackupJobs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup-jobs/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -347,22 +654,36 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                        ("backupVaultName", (BackupVaultName.to_header v)))
                  x.byBackupVaultName;
                Option.map
-                 ~f:(fun v -> ("createdBefore", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdBefore", (Timestamp__lc1.to_header v)))
                  x.byCreatedBefore;
                Option.map
-                 ~f:(fun v -> ("createdAfter", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdAfter", (Timestamp__lc1.to_header v)))
                  x.byCreatedAfter;
                Option.map
                  ~f:(fun v -> ("resourceType", (ResourceType.to_header v)))
                  x.byResourceType;
                Option.map
                  ~f:(fun v -> ("accountId", (AccountId.to_header v)))
-                 x.byAccountId])
+                 x.byAccountId;
+               Option.map
+                 ~f:(fun v -> ("completeAfter", (Timestamp__lc1.to_header v)))
+                 x.byCompleteAfter;
+               Option.map
+                 ~f:(fun v ->
+                       ("completeBefore", (Timestamp__lc1.to_header v)))
+                 x.byCompleteBefore;
+               Option.map
+                 ~f:(fun v -> ("parentJobId", (String__lc1.to_header v)))
+                 x.byParentJobId;
+               Option.map
+                 ~f:(fun v -> ("messageCategory", (String__lc1.to_header v)))
+                 x.byMessageCategory])
       | ListBackupPlanTemplates ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup/template/plans")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -370,9 +691,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListBackupPlanVersions ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup/plans/%s/versions/"
-               (String_.to_header x.ListBackupPlanVersionsInput.backupPlanId))
+               (String__lc1.to_header
+                  x.ListBackupPlanVersionsInput.backupPlanId))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -381,7 +704,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup/plans/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -392,9 +716,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListBackupSelections ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup/plans/%s/selections/"
-               (String_.to_header x.ListBackupSelectionsInput.backupPlanId))
+               (String__lc1.to_header
+                  x.ListBackupSelectionsInput.backupPlanId))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -403,16 +729,51 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/backup-vaults/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
-                  x.nextToken;
+               [Option.map
+                  ~f:(fun v -> ("vaultType", (VaultType.to_header v)))
+                  x.byVaultType;
+               Option.map
+                 ~f:(fun v -> ("shared", (Boolean__lc1.to_header v)))
+                 x.byShared;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                 x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListCopyJobSummaries ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/audit/copy-job-summaries")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("AccountId", (AccountId.to_header v)))
+                  x.accountId;
+               Option.map
+                 ~f:(fun v -> ("State", (CopyJobStatus.to_header v))) 
+                 x.state;
+               Option.map
+                 ~f:(fun v -> ("ResourceType", (ResourceType.to_header v)))
+                 x.resourceType;
+               Option.map
+                 ~f:(fun v ->
+                       ("MessageCategory", (MessageCategory.to_header v)))
+                 x.messageCategory;
+               Option.map
+                 ~f:(fun v ->
+                       ("AggregationPeriod", (AggregationPeriod.to_header v)))
+                 x.aggregationPeriod;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
+                 x.nextToken])
       | ListCopyJobs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/copy-jobs/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -422,20 +783,38 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map ~f:(fun v -> ("state", (CopyJobState.to_header v)))
                  x.byState;
                Option.map
-                 ~f:(fun v -> ("createdBefore", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdBefore", (Timestamp__lc1.to_header v)))
                  x.byCreatedBefore;
                Option.map
-                 ~f:(fun v -> ("createdAfter", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdAfter", (Timestamp__lc1.to_header v)))
                  x.byCreatedAfter;
                Option.map
                  ~f:(fun v -> ("resourceType", (ResourceType.to_header v)))
                  x.byResourceType;
                Option.map
-                 ~f:(fun v -> ("destinationVaultArn", (String_.to_header v)))
+                 ~f:(fun v ->
+                       ("destinationVaultArn", (String__lc1.to_header v)))
                  x.byDestinationVaultArn;
                Option.map
                  ~f:(fun v -> ("accountId", (AccountId.to_header v)))
-                 x.byAccountId])
+                 x.byAccountId;
+               Option.map
+                 ~f:(fun v ->
+                       ("completeBefore", (Timestamp__lc1.to_header v)))
+                 x.byCompleteBefore;
+               Option.map
+                 ~f:(fun v -> ("completeAfter", (Timestamp__lc1.to_header v)))
+                 x.byCompleteAfter;
+               Option.map
+                 ~f:(fun v -> ("parentJobId", (String__lc1.to_header v)))
+                 x.byParentJobId;
+               Option.map
+                 ~f:(fun v -> ("messageCategory", (String__lc1.to_header v)))
+                 x.byMessageCategory;
+               Option.map
+                 ~f:(fun v ->
+                       ("sourceRecoveryPointArn", (String__lc1.to_header v)))
+                 x.bySourceRecoveryPointArn])
       | ListFrameworks ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/audit/frameworks")
@@ -444,14 +823,67 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   ~f:(fun v ->
                         ("MaxResults", (MaxFrameworkInputs.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
                  x.nextToken])
+      | ListIndexedRecoveryPoints ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/indexes/recovery-point/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("sourceResourceArn", (ARN.to_header v)))
+                 x.sourceResourceArn;
+               Option.map
+                 ~f:(fun v -> ("createdBefore", (Timestamp__lc1.to_header v)))
+                 x.createdBefore;
+               Option.map
+                 ~f:(fun v -> ("createdAfter", (Timestamp__lc1.to_header v)))
+                 x.createdAfter;
+               Option.map
+                 ~f:(fun v -> ("resourceType", (ResourceType.to_header v)))
+                 x.resourceType;
+               Option.map
+                 ~f:(fun v -> ("indexStatus", (IndexStatus.to_header v)))
+                 x.indexStatus])
+      | ListLegalHolds ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/legal-holds/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListProtectedResources ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/resources/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListProtectedResourcesByBackupVault ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/backup-vaults/%s/resources/"
+               (BackupVaultName.to_header
+                  x.ListProtectedResourcesByBackupVaultInput.backupVaultName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("backupVaultAccountId", (AccountId.to_header v)))
+                  x.backupVaultAccountId;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                 x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
@@ -462,8 +894,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                (BackupVaultName.to_header
                   x.ListRecoveryPointsByBackupVaultInput.backupVaultName))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
-                  x.nextToken;
+               [Option.map
+                  ~f:(fun v ->
+                        ("backupVaultAccountId", (AccountId.to_header v)))
+                  x.backupVaultAccountId;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                 x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults;
@@ -473,25 +910,46 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("resourceType", (ResourceType.to_header v)))
                  x.byResourceType;
                Option.map
-                 ~f:(fun v -> ("backupPlanId", (String_.to_header v)))
+                 ~f:(fun v -> ("backupPlanId", (String__lc1.to_header v)))
                  x.byBackupPlanId;
                Option.map
-                 ~f:(fun v -> ("createdBefore", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdBefore", (Timestamp__lc1.to_header v)))
                  x.byCreatedBefore;
                Option.map
-                 ~f:(fun v -> ("createdAfter", (Timestamp.to_header v)))
-                 x.byCreatedAfter])
+                 ~f:(fun v -> ("createdAfter", (Timestamp__lc1.to_header v)))
+                 x.byCreatedAfter;
+               Option.map
+                 ~f:(fun v -> ("parentRecoveryPointArn", (ARN.to_header v)))
+                 x.byParentRecoveryPointArn])
+      | ListRecoveryPointsByLegalHold ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/legal-holds/%s/recovery-points"
+               (String__lc1.to_header
+                  x.ListRecoveryPointsByLegalHoldInput.legalHoldId))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListRecoveryPointsByResource ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string)
                "/resources/%s/recovery-points/"
                (ARN.to_header x.ListRecoveryPointsByResourceInput.resourceArn))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                 x.maxResults])
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v ->
+                       ("managedByAWSBackupOnly", (Boolean__lc1.to_header v)))
+                 x.managedByAWSBackupOnly])
       | ListReportJobs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/audit/report-jobs")
@@ -501,17 +959,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                         ("ReportPlanName", (ReportPlanName.to_header v)))
                   x.byReportPlanName;
                Option.map
-                 ~f:(fun v -> ("CreationBefore", (Timestamp.to_header v)))
+                 ~f:(fun v ->
+                       ("CreationBefore", (Timestamp__lc1.to_header v)))
                  x.byCreationBefore;
                Option.map
-                 ~f:(fun v -> ("CreationAfter", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("CreationAfter", (Timestamp__lc1.to_header v)))
                  x.byCreationAfter;
-               Option.map ~f:(fun v -> ("Status", (String_.to_header v)))
+               Option.map ~f:(fun v -> ("Status", (String__lc1.to_header v)))
                  x.byStatus;
                Option.map
                  ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
                  x.maxResults;
-               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
                  x.nextToken])
       | ListReportPlans ->
           Uri.add_query_params'
@@ -520,13 +980,51 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Option.map
                   ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
                   x.maxResults;
-               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
+                 x.nextToken])
+      | ListRestoreAccessBackupVaults ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/logically-air-gapped-backup-vaults/%s/restore-access-backup-vaults/"
+               (BackupVaultName.to_header
+                  x.ListRestoreAccessBackupVaultsInput.backupVaultName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListRestoreJobSummaries ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/audit/restore-job-summaries")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("AccountId", (AccountId.to_header v)))
+                  x.accountId;
+               Option.map
+                 ~f:(fun v -> ("State", (RestoreJobState.to_header v)))
+                 x.state;
+               Option.map
+                 ~f:(fun v -> ("ResourceType", (ResourceType.to_header v)))
+                 x.resourceType;
+               Option.map
+                 ~f:(fun v ->
+                       ("AggregationPeriod", (AggregationPeriod.to_header v)))
+                 x.aggregationPeriod;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
                  x.nextToken])
       | ListRestoreJobs ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/restore-jobs/")
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
@@ -535,24 +1033,175 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  ~f:(fun v -> ("accountId", (AccountId.to_header v)))
                  x.byAccountId;
                Option.map
-                 ~f:(fun v -> ("createdBefore", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("resourceType", (ResourceType.to_header v)))
+                 x.byResourceType;
+               Option.map
+                 ~f:(fun v -> ("createdBefore", (Timestamp__lc1.to_header v)))
                  x.byCreatedBefore;
                Option.map
-                 ~f:(fun v -> ("createdAfter", (Timestamp.to_header v)))
+                 ~f:(fun v -> ("createdAfter", (Timestamp__lc1.to_header v)))
                  x.byCreatedAfter;
                Option.map
                  ~f:(fun v -> ("status", (RestoreJobStatus.to_header v)))
-                 x.byStatus])
+                 x.byStatus;
+               Option.map
+                 ~f:(fun v ->
+                       ("completeBefore", (Timestamp__lc1.to_header v)))
+                 x.byCompleteBefore;
+               Option.map
+                 ~f:(fun v -> ("completeAfter", (Timestamp__lc1.to_header v)))
+                 x.byCompleteAfter;
+               Option.map
+                 ~f:(fun v -> ("restoreTestingPlanArn", (ARN.to_header v)))
+                 x.byRestoreTestingPlanArn;
+               Option.map
+                 ~f:(fun v -> ("parentJobId", (String__lc1.to_header v)))
+                 x.byParentJobId])
+      | ListRestoreJobsByProtectedResource ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/resources/%s/restore-jobs/"
+               (ARN.to_header
+                  x.ListRestoreJobsByProtectedResourceInput.resourceArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("status", (RestoreJobStatus.to_header v)))
+                  x.byStatus;
+               Option.map
+                 ~f:(fun v ->
+                       ("recoveryPointCreationDateAfter",
+                         (Timestamp__lc1.to_header v)))
+                 x.byRecoveryPointCreationDateAfter;
+               Option.map
+                 ~f:(fun v ->
+                       ("recoveryPointCreationDateBefore",
+                         (Timestamp__lc1.to_header v)))
+                 x.byRecoveryPointCreationDateBefore;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListRestoreTestingPlans ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/restore-testing/plans")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("MaxResults",
+                          (ListRestoreTestingPlansInputMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListRestoreTestingSelections ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/restore-testing/plans/%s/selections"
+               (String_.to_header
+                  x.ListRestoreTestingSelectionsInput.restoreTestingPlanName))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("MaxResults",
+                          (ListRestoreTestingSelectionsInputMaxResultsInteger.to_header
+                             v))) x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+                 x.nextToken])
+      | ListScanJobSummaries ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/audit/scan-job-summaries")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("AccountId", (AccountId.to_header v)))
+                  x.accountId;
+               Option.map
+                 ~f:(fun v -> ("ResourceType", (ResourceType.to_header v)))
+                 x.resourceType;
+               Option.map
+                 ~f:(fun v ->
+                       ("MalwareScanner", (MalwareScanner.to_header v)))
+                 x.malwareScanner;
+               Option.map
+                 ~f:(fun v ->
+                       ("ScanResultStatus", (ScanResultStatus.to_header v)))
+                 x.scanResultStatus;
+               Option.map
+                 ~f:(fun v -> ("State", (ScanJobStatus.to_header v))) 
+                 x.state;
+               Option.map
+                 ~f:(fun v ->
+                       ("AggregationPeriod", (AggregationPeriod.to_header v)))
+                 x.aggregationPeriod;
+               Option.map
+                 ~f:(fun v -> ("MaxResults", (MaxResults.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("NextToken", (String__lc1.to_header v)))
+                 x.nextToken])
+      | ListScanJobs ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/scan/jobs")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("ByAccountId", (String_.to_header v)))
+                  x.byAccountId;
+               Option.map
+                 ~f:(fun v -> ("ByBackupVaultName", (String_.to_header v)))
+                 x.byBackupVaultName;
+               Option.map
+                 ~f:(fun v -> ("ByCompleteAfter", (Timestamp.to_header v)))
+                 x.byCompleteAfter;
+               Option.map
+                 ~f:(fun v -> ("ByCompleteBefore", (Timestamp.to_header v)))
+                 x.byCompleteBefore;
+               Option.map
+                 ~f:(fun v ->
+                       ("ByMalwareScanner", (MalwareScanner.to_header v)))
+                 x.byMalwareScanner;
+               Option.map
+                 ~f:(fun v -> ("ByRecoveryPointArn", (String_.to_header v)))
+                 x.byRecoveryPointArn;
+               Option.map
+                 ~f:(fun v -> ("ByResourceArn", (String_.to_header v)))
+                 x.byResourceArn;
+               Option.map
+                 ~f:(fun v ->
+                       ("ByResourceType", (ScanResourceType.to_header v)))
+                 x.byResourceType;
+               Option.map
+                 ~f:(fun v ->
+                       ("ByScanResultStatus", (ScanResultStatus.to_header v)))
+                 x.byScanResultStatus;
+               Option.map ~f:(fun v -> ("ByState", (ScanState.to_header v)))
+                 x.byState;
+               Option.map
+                 ~f:(fun v ->
+                       ("MaxResults",
+                         (ListScanJobsInputMaxResultsInteger.to_header v)))
+                 x.maxResults;
+               Option.map ~f:(fun v -> ("NextToken", (String_.to_header v)))
+                 x.nextToken])
       | ListTags ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/tags/%s/"
                (ARN.to_header x.ListTagsInput.resourceArn))
             (List.filter_opt
-               [Option.map ~f:(fun v -> ("nextToken", (String_.to_header v)))
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
                   x.nextToken;
                Option.map
                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
                  x.maxResults])
+      | ListTieringConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/tiering-configurations/")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                  x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (String__lc1.to_header v)))
+                 x.nextToken])
       | PutBackupVaultAccessPolicy ->
           (Format.kasprintf Uri.of_string) "/backup-vaults/%s/access-policy"
             (BackupVaultName.to_header
@@ -566,15 +1215,33 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/backup-vaults/%s/notification-configuration"
             (BackupVaultName.to_header
                x.PutBackupVaultNotificationsInput.backupVaultName)
+      | PutRestoreValidationResult ->
+          (Format.kasprintf Uri.of_string) "/restore-jobs/%s/validations"
+            (RestoreJobId.to_header
+               x.PutRestoreValidationResultInput.restoreJobId)
+      | RevokeRestoreAccessBackupVault ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/logically-air-gapped-backup-vaults/%s/restore-access-backup-vaults/%s"
+               (BackupVaultName.to_header
+                  x.RevokeRestoreAccessBackupVaultInput.backupVaultName)
+               (ARN.to_header
+                  x.RevokeRestoreAccessBackupVaultInput.restoreAccessBackupVaultArn))
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v ->
+                        ("requesterComment", (RequesterComment.to_header v)))
+                  x.requesterComment])
       | StartBackupJob -> (Format.kasprintf Uri.of_string) "/backup-jobs"
       | StartCopyJob -> (Format.kasprintf Uri.of_string) "/copy-jobs"
       | StartReportJob ->
           (Format.kasprintf Uri.of_string) "/audit/report-jobs/%s"
             (ReportPlanName.to_header x.StartReportJobInput.reportPlanName)
       | StartRestoreJob -> (Format.kasprintf Uri.of_string) "/restore-jobs"
+      | StartScanJob -> (Format.kasprintf Uri.of_string) "/scan/job"
       | StopBackupJob ->
           (Format.kasprintf Uri.of_string) "/backup-jobs/%s"
-            (String_.to_header x.StopBackupJobInput.backupJobId)
+            (String__lc1.to_header x.StopBackupJobInput.backupJobId)
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.TagResourceInput.resourceArn)
@@ -583,12 +1250,19 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ARN.to_header x.UntagResourceInput.resourceArn)
       | UpdateBackupPlan ->
           (Format.kasprintf Uri.of_string) "/backup/plans/%s"
-            (String_.to_header x.UpdateBackupPlanInput.backupPlanId)
+            (String__lc1.to_header x.UpdateBackupPlanInput.backupPlanId)
       | UpdateFramework ->
           (Format.kasprintf Uri.of_string) "/audit/frameworks/%s"
             (FrameworkName.to_header x.UpdateFrameworkInput.frameworkName)
       | UpdateGlobalSettings ->
           (Format.kasprintf Uri.of_string) "/global-settings"
+      | UpdateRecoveryPointIndexSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/backup-vaults/%s/recovery-points/%s/index"
+            (BackupVaultName.to_header
+               x.UpdateRecoveryPointIndexSettingsInput.backupVaultName)
+            (ARN.to_header
+               x.UpdateRecoveryPointIndexSettingsInput.recoveryPointArn)
       | UpdateRecoveryPointLifecycle ->
           (Format.kasprintf Uri.of_string)
             "/backup-vaults/%s/recovery-points/%s"
@@ -600,11 +1274,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/account-settings"
       | UpdateReportPlan ->
           (Format.kasprintf Uri.of_string) "/audit/report-plans/%s"
-            (ReportPlanName.to_header x.UpdateReportPlanInput.reportPlanName))
+            (ReportPlanName.to_header x.UpdateReportPlanInput.reportPlanName)
+      | UpdateRestoreTestingPlan ->
+          (Format.kasprintf Uri.of_string) "/restore-testing/plans/%s"
+            (String_.to_header
+               x.UpdateRestoreTestingPlanInput.restoreTestingPlanName)
+      | UpdateRestoreTestingSelection ->
+          (Format.kasprintf Uri.of_string)
+            "/restore-testing/plans/%s/selections/%s"
+            (String_.to_header
+               x.UpdateRestoreTestingSelectionInput.restoreTestingPlanName)
+            (String_.to_header
+               x.UpdateRestoreTestingSelectionInput.restoreTestingSelectionName)
+      | UpdateTieringConfiguration ->
+          (Format.kasprintf Uri.of_string) "/tiering-configurations/%s"
+            (TieringConfigurationName.to_header
+               x.UpdateTieringConfigurationInput.tieringConfigurationName))
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
+  | AssociateBackupVaultMpaApprovalTeam ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CancelLegalHold -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBackupPlan -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBackupSelection -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBackupVault -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -632,7 +1324,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                              req.CreateFrameworkInput.frameworkControls));
                       Option.map req.CreateFrameworkInput.idempotencyToken
                         ~f:(fun x ->
-                              ("IdempotencyToken", (String_.to_value x)));
+                              ("IdempotencyToken", (String__lc1.to_value x)));
                       Option.map req.CreateFrameworkInput.frameworkTags
                         ~f:(fun x ->
                               ("FrameworkTags", (StringMap.to_value x)))])
@@ -643,6 +1335,42 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLegalHold ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Title",
+                           (String__lc1.to_value
+                              req.CreateLegalHoldInput.title));
+                      Some
+                        ("Description",
+                          (String__lc1.to_value
+                             req.CreateLegalHoldInput.description));
+                      Option.map req.CreateLegalHoldInput.idempotencyToken
+                        ~f:(fun x ->
+                              ("IdempotencyToken", (String__lc1.to_value x)));
+                      Option.map
+                        req.CreateLegalHoldInput.recoveryPointSelection
+                        ~f:(fun x ->
+                              ("RecoveryPointSelection",
+                                (RecoveryPointSelection.to_value x)));
+                      Option.map req.CreateLegalHoldInput.tags
+                        ~f:(fun x -> ("Tags", (Tags.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLogicallyAirGappedBackupVault ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | CreateReportPlan ->
       let (headers, body) =
         let headers =
@@ -674,7 +1402,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("ReportPlanTags", (StringMap.to_value x)));
                       Option.map req.CreateReportPlanInput.idempotencyToken
                         ~f:(fun x ->
-                              ("IdempotencyToken", (String_.to_value x)))])
+                              ("IdempotencyToken", (String__lc1.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -682,6 +1410,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateRestoreAccessBackupVault ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateRestoreTestingPlan ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateRestoreTestingSelection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateTieringConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBackupPlan -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBackupSelection -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteBackupVault -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -694,6 +1430,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteFramework -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteRecoveryPoint -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteReportPlan -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRestoreTestingPlan ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteRestoreTestingSelection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteTieringConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeBackupJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -727,9 +1469,35 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DescribeRestoreJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeScanJob ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateBackupVaultMpaApprovalTeam ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DisassociateBackupVaultMpaApprovalTeamInput.requesterComment
+                         ~f:(fun x ->
+                               ("RequesterComment",
+                                 (RequesterComment.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DisassociateRecoveryPoint ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DisassociateRecoveryPointFromParent ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | ExportBackupPlanTemplate ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -747,7 +1515,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Some
                          ("BackupPlanTemplateJson",
-                           (String_.to_value
+                           (String__lc1.to_value
                               req.GetBackupPlanFromJSONInput.backupPlanTemplateJson))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -768,10 +1536,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetBackupVaultNotifications ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetLegalHold ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRecoveryPointIndexDetails ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetRecoveryPointRestoreMetadata ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRestoreJobMetadata ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRestoreTestingInferredMetadata ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRestoreTestingPlan ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetRestoreTestingSelection ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetSupportedResourceTypes ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTieringConfiguration ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListBackupJobSummaries ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListBackupJobs ->
@@ -792,16 +1584,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListBackupVaults ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListCopyJobSummaries ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListCopyJobs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListFrameworks ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIndexedRecoveryPoints ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLegalHolds ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListProtectedResources ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListProtectedResourcesByBackupVault ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRecoveryPointsByBackupVault ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRecoveryPointsByLegalHold ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRecoveryPointsByResource ->
@@ -813,10 +1620,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListReportPlans ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRestoreAccessBackupVaults ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRestoreJobSummaries ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListRestoreJobs ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRestoreJobsByProtectedResource ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRestoreTestingPlans ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListRestoreTestingSelections ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListScanJobSummaries ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListScanJobs ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTags ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListTieringConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | PutBackupVaultAccessPolicy ->
@@ -824,6 +1655,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | PutBackupVaultLockConfiguration ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | PutBackupVaultNotifications ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | PutRestoreValidationResult ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | RevokeRestoreAccessBackupVault ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | StartBackupJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | StartCopyJob -> Awso.Http.Request.make (method_of_endpoint endp)
@@ -838,7 +1673,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                    (List.filter_opt
                       [Option.map req.StartReportJobInput.idempotencyToken
                          ~f:(fun x ->
-                               ("IdempotencyToken", (String_.to_value x)))])
+                               ("IdempotencyToken", (String__lc1.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -847,6 +1682,7 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | StartRestoreJob -> Awso.Http.Request.make (method_of_endpoint endp)
+  | StartScanJob -> Awso.Http.Request.make (method_of_endpoint endp)
   | StopBackupJob ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
@@ -910,6 +1746,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateFramework -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateGlobalSettings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRecoveryPointIndexSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateRecoveryPointIndexSettingsInput.iamRoleArn
+                         ~f:(fun x -> ("IamRoleArn", (IAMRoleArn.to_value x)));
+                      Some
+                        ("Index",
+                          (Index.to_value
+                             req.UpdateRecoveryPointIndexSettingsInput.index))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateRecoveryPointLifecycle ->
       let (headers, body) =
         let headers =
@@ -931,6 +1790,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateRegionSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateReportPlan -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRestoreTestingPlan ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateRestoreTestingSelection ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateTieringConfiguration ->
+      Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
   let code = Awso.Http.Status.to_code (Awso.Http.Response.status resp) in
@@ -979,6 +1844,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   let _ = response_to_json in
   let _ = resp in
   match endpoint with
+  | AssociateBackupVaultMpaApprovalTeam ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | CancelLegalHold ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CancelLegalHoldOutput.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some CancelLegalHoldOutput.error_of_json))
   | CreateBackupPlan ->
       if is_success
       then Ok (CreateBackupPlanOutput.of_json (response_to_json resp))
@@ -999,11 +1873,61 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreateFrameworkOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreateFrameworkOutput.error_of_json))
+  | CreateLegalHold ->
+      if is_success
+      then Ok (CreateLegalHoldOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some CreateLegalHoldOutput.error_of_json))
+  | CreateLogicallyAirGappedBackupVault ->
+      if is_success
+      then
+        Ok
+          (CreateLogicallyAirGappedBackupVaultOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLogicallyAirGappedBackupVaultOutput.error_of_json))
   | CreateReportPlan ->
       if is_success
       then Ok (CreateReportPlanOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateReportPlanOutput.error_of_json))
+  | CreateRestoreAccessBackupVault ->
+      if is_success
+      then
+        Ok
+          (CreateRestoreAccessBackupVaultOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRestoreAccessBackupVaultOutput.error_of_json))
+  | CreateRestoreTestingPlan ->
+      if is_success
+      then
+        Ok (CreateRestoreTestingPlanOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRestoreTestingPlanOutput.error_of_json))
+  | CreateRestoreTestingSelection ->
+      if is_success
+      then
+        Ok
+          (CreateRestoreTestingSelectionOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateRestoreTestingSelectionOutput.error_of_json))
+  | CreateTieringConfiguration ->
+      if is_success
+      then
+        Ok (CreateTieringConfigurationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateTieringConfigurationOutput.error_of_json))
   | DeleteBackupPlan ->
       if is_success
       then Ok (DeleteBackupPlanOutput.of_json (response_to_json resp))
@@ -1025,6 +1949,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeleteReportPlan ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRestoreTestingPlan ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteRestoreTestingSelection ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteTieringConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteTieringConfigurationOutput.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteTieringConfigurationOutput.error_of_json))
   | DescribeBackupJob ->
       if is_success
       then Ok (DescribeBackupJobOutput.of_json (response_to_json resp))
@@ -1086,7 +2025,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeRestoreJobOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeRestoreJobOutput.error_of_json))
+  | DescribeScanJob ->
+      if is_success
+      then Ok (DescribeScanJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some DescribeScanJobOutput.error_of_json))
+  | DisassociateBackupVaultMpaApprovalTeam ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DisassociateRecoveryPoint ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | DisassociateRecoveryPointFromParent ->
       if is_success then Ok () else Error (parse_aws_error None)
   | ExportBackupPlanTemplate ->
       if is_success
@@ -1136,6 +2083,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetBackupVaultNotificationsOutput.error_of_json))
+  | GetLegalHold ->
+      if is_success
+      then Ok (GetLegalHoldOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetLegalHoldOutput.error_of_json))
+  | GetRecoveryPointIndexDetails ->
+      if is_success
+      then
+        Ok
+          (GetRecoveryPointIndexDetailsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRecoveryPointIndexDetailsOutput.error_of_json))
   | GetRecoveryPointRestoreMetadata ->
       if is_success
       then
@@ -1146,6 +2106,36 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetRecoveryPointRestoreMetadataOutput.error_of_json))
+  | GetRestoreJobMetadata ->
+      if is_success
+      then Ok (GetRestoreJobMetadataOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRestoreJobMetadataOutput.error_of_json))
+  | GetRestoreTestingInferredMetadata ->
+      if is_success
+      then
+        Ok
+          (GetRestoreTestingInferredMetadataOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRestoreTestingInferredMetadataOutput.error_of_json))
+  | GetRestoreTestingPlan ->
+      if is_success
+      then Ok (GetRestoreTestingPlanOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetRestoreTestingPlanOutput.error_of_json))
+  | GetRestoreTestingSelection ->
+      if is_success
+      then
+        Ok (GetRestoreTestingSelectionOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetRestoreTestingSelectionOutput.error_of_json))
   | GetSupportedResourceTypes ->
       if is_success
       then
@@ -1154,6 +2144,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetSupportedResourceTypesOutput.error_of_json))
+  | GetTieringConfiguration ->
+      if is_success
+      then Ok (GetTieringConfigurationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetTieringConfigurationOutput.error_of_json))
+  | ListBackupJobSummaries ->
+      if is_success
+      then Ok (ListBackupJobSummariesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListBackupJobSummariesOutput.error_of_json))
   | ListBackupJobs ->
       if is_success
       then Ok (ListBackupJobsOutput.of_json (response_to_json resp))
@@ -1185,6 +2187,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListBackupVaultsOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListBackupVaultsOutput.error_of_json))
+  | ListCopyJobSummaries ->
+      if is_success
+      then Ok (ListCopyJobSummariesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListCopyJobSummariesOutput.error_of_json))
   | ListCopyJobs ->
       if is_success
       then Ok (ListCopyJobsOutput.of_json (response_to_json resp))
@@ -1193,12 +2201,34 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListFrameworksOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListFrameworksOutput.error_of_json))
+  | ListIndexedRecoveryPoints ->
+      if is_success
+      then
+        Ok (ListIndexedRecoveryPointsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListIndexedRecoveryPointsOutput.error_of_json))
+  | ListLegalHolds ->
+      if is_success
+      then Ok (ListLegalHoldsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListLegalHoldsOutput.error_of_json))
   | ListProtectedResources ->
       if is_success
       then Ok (ListProtectedResourcesOutput.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListProtectedResourcesOutput.error_of_json))
+  | ListProtectedResourcesByBackupVault ->
+      if is_success
+      then
+        Ok
+          (ListProtectedResourcesByBackupVaultOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListProtectedResourcesByBackupVaultOutput.error_of_json))
   | ListRecoveryPointsByBackupVault ->
       if is_success
       then
@@ -1209,6 +2239,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListRecoveryPointsByBackupVaultOutput.error_of_json))
+  | ListRecoveryPointsByLegalHold ->
+      if is_success
+      then
+        Ok
+          (ListRecoveryPointsByLegalHoldOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRecoveryPointsByLegalHoldOutput.error_of_json))
   | ListRecoveryPointsByResource ->
       if is_success
       then
@@ -1226,19 +2266,82 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListReportPlansOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListReportPlansOutput.error_of_json))
+  | ListRestoreAccessBackupVaults ->
+      if is_success
+      then
+        Ok
+          (ListRestoreAccessBackupVaultsOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRestoreAccessBackupVaultsOutput.error_of_json))
+  | ListRestoreJobSummaries ->
+      if is_success
+      then Ok (ListRestoreJobSummariesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRestoreJobSummariesOutput.error_of_json))
   | ListRestoreJobs ->
       if is_success
       then Ok (ListRestoreJobsOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListRestoreJobsOutput.error_of_json))
+  | ListRestoreJobsByProtectedResource ->
+      if is_success
+      then
+        Ok
+          (ListRestoreJobsByProtectedResourceOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRestoreJobsByProtectedResourceOutput.error_of_json))
+  | ListRestoreTestingPlans ->
+      if is_success
+      then Ok (ListRestoreTestingPlansOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListRestoreTestingPlansOutput.error_of_json))
+  | ListRestoreTestingSelections ->
+      if is_success
+      then
+        Ok
+          (ListRestoreTestingSelectionsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListRestoreTestingSelectionsOutput.error_of_json))
+  | ListScanJobSummaries ->
+      if is_success
+      then Ok (ListScanJobSummariesOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListScanJobSummariesOutput.error_of_json))
+  | ListScanJobs ->
+      if is_success
+      then Ok (ListScanJobsOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListScanJobsOutput.error_of_json))
   | ListTags ->
       if is_success
       then Ok (ListTagsOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListTagsOutput.error_of_json))
+  | ListTieringConfigurations ->
+      if is_success
+      then
+        Ok (ListTieringConfigurationsOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListTieringConfigurationsOutput.error_of_json))
   | PutBackupVaultAccessPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutBackupVaultLockConfiguration ->
       if is_success then Ok () else Error (parse_aws_error None)
   | PutBackupVaultNotifications ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | PutRestoreValidationResult ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | RevokeRestoreAccessBackupVault ->
       if is_success then Ok () else Error (parse_aws_error None)
   | StartBackupJob ->
       if is_success
@@ -1256,6 +2359,10 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (StartRestoreJobOutput.of_json (response_to_json resp))
       else Error (parse_aws_error (Some StartRestoreJobOutput.error_of_json))
+  | StartScanJob ->
+      if is_success
+      then Ok (StartScanJobOutput.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some StartScanJobOutput.error_of_json))
   | StopBackupJob ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
@@ -1272,6 +2379,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else Error (parse_aws_error (Some UpdateFrameworkOutput.error_of_json))
   | UpdateGlobalSettings ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateRecoveryPointIndexSettings ->
+      if is_success
+      then
+        Ok
+          (UpdateRecoveryPointIndexSettingsOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRecoveryPointIndexSettingsOutput.error_of_json))
   | UpdateRecoveryPointLifecycle ->
       if is_success
       then
@@ -1288,3 +2405,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (UpdateReportPlanOutput.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateReportPlanOutput.error_of_json))
+  | UpdateRestoreTestingPlan ->
+      if is_success
+      then
+        Ok (UpdateRestoreTestingPlanOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRestoreTestingPlanOutput.error_of_json))
+  | UpdateRestoreTestingSelection ->
+      if is_success
+      then
+        Ok
+          (UpdateRestoreTestingSelectionOutput.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateRestoreTestingSelectionOutput.error_of_json))
+  | UpdateTieringConfiguration ->
+      if is_success
+      then
+        Ok (UpdateTieringConfigurationOutput.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateTieringConfigurationOutput.error_of_json))

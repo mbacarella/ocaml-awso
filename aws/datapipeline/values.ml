@@ -172,6 +172,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -224,10 +227,11 @@ module Field =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ?refValue ?stringValue ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let refValue = field_map json "refValue" FieldNameString.of_json in
-      let stringValue = field_map json "stringValue" FieldStringValue.of_json in
-      let key = field_map_exn json "key" FieldNameString.of_json in
+    let of_json json__ =
+      let refValue = field_map json__ "refValue" FieldNameString.of_json in
+      let stringValue =
+        field_map json__ "stringValue" FieldStringValue.of_json in
+      let key = field_map_exn json__ "key" FieldNameString.of_json in
       make ?refValue ?stringValue ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -313,10 +317,10 @@ module ParameterAttribute =
           (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~stringValue ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stringValue =
-        field_map_exn json "stringValue" AttributeValueString.of_json in
-      let key = field_map_exn json "key" AttributeNameString.of_json in
+        field_map_exn json__ "stringValue" AttributeValueString.of_json in
+      let key = field_map_exn json__ "key" AttributeNameString.of_json in
       make ~stringValue ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -344,9 +348,9 @@ module Operator =
         (Option.map ~f:OperatorType.of_xml) (Xml.child xml_arg0 "type") in
       make ?values ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "values" StringList.of_json in
-      let type_ = field_map json "type" OperatorType.of_json in
+    let of_json json__ =
+      let values = field_map json__ "values" StringList.of_json in
+      let type_ = field_map json__ "type" OperatorType.of_json in
       make ?values ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -355,6 +359,9 @@ module FieldList =
   struct
     type nonrec t = Field.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Field.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -420,9 +427,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -431,6 +438,9 @@ module ValidationMessages =
   struct
     type nonrec t = ValidationMessage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationMessage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -456,6 +466,9 @@ module ParameterAttributeList =
   struct
     type nonrec t = ParameterAttribute.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterAttribute.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -498,9 +511,9 @@ module Selector =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "fieldName") in
       make ?operator ?fieldName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operator = field_map json "operator" Operator.of_json in
-      let fieldName = field_map json "fieldName" String_.of_json in
+    let of_json json__ =
+      let operator = field_map json__ "operator" Operator.of_json in
+      let fieldName = field_map json__ "fieldName" String_.of_json in
       make ?operator ?fieldName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -529,10 +542,10 @@ module PipelineObject =
       let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~fields ~name ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fields = field_map_exn json "fields" FieldList.of_json in
-      let name = field_map_exn json "name" Id.of_json in
-      let id = field_map_exn json "id" Id.of_json in
+    let of_json json__ =
+      let fields = field_map_exn json__ "fields" FieldList.of_json in
+      let name = field_map_exn json__ "name" Id.of_json in
+      let id = field_map_exn json__ "id" Id.of_json in
       make ~fields ~name ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -545,6 +558,9 @@ module TagList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -599,9 +615,9 @@ module ValidationError =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "id") in
       make ?errors ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errors = field_map json "errors" ValidationMessages.of_json in
-      let id = field_map json "id" Id.of_json in make ?errors ?id ()
+    let of_json json__ =
+      let errors = field_map json__ "errors" ValidationMessages.of_json in
+      let id = field_map json__ "id" Id.of_json in make ?errors ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a validation error. Validation errors prevent pipeline activation. The set of validation errors that can be returned are defined by AWS Data Pipeline."]
@@ -627,9 +643,9 @@ module ValidationWarning =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "id") in
       make ?warnings ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let warnings = field_map json "warnings" ValidationMessages.of_json in
-      let id = field_map json "id" Id.of_json in make ?warnings ?id ()
+    let of_json json__ =
+      let warnings = field_map json__ "warnings" ValidationMessages.of_json in
+      let id = field_map json__ "id" Id.of_json in make ?warnings ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Defines a validation warning. Validation warnings do not prevent pipeline activation. The set of validation warnings that can be returned are defined by AWS Data Pipeline."]
@@ -656,10 +672,10 @@ module ParameterObject =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~attributes ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributes =
-        field_map_exn json "attributes" ParameterAttributeList.of_json in
-      let id = field_map_exn json "id" FieldNameString.of_json in
+        field_map_exn json__ "attributes" ParameterAttributeList.of_json in
+      let id = field_map_exn json__ "id" FieldNameString.of_json in
       make ~attributes ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains information about a parameter object."]
@@ -686,10 +702,10 @@ module ParameterValue =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~stringValue ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stringValue =
-        field_map_exn json "stringValue" FieldStringValue.of_json in
-      let id = field_map_exn json "id" FieldNameString.of_json in
+        field_map_exn json__ "stringValue" FieldStringValue.of_json in
+      let id = field_map_exn json__ "id" FieldNameString.of_json in
       make ~stringValue ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A value or list of parameter values."]
@@ -697,6 +713,9 @@ module SelectorList =
   struct
     type nonrec t = Selector.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Selector.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -741,6 +760,8 @@ module PipelineObjectMap =
                        (PipelineObject.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -789,20 +810,20 @@ module PipelineIdName =
       let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "id") in
       make ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" Id.of_json in
-      let id = field_map json "id" Id.of_json in make ?name ?id ()
+    let of_json json__ =
+      let name = field_map json__ "name" Id.of_json in
+      let id = field_map json__ "id" Id.of_json in make ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the name and identifier of a pipeline."]
 module PipelineDescription =
   struct
     type nonrec t =
       {
-      pipelineId: Id.t
+      pipelineId: Id.t option
         [@ocaml.doc
           "The pipeline identifier that was assigned by AWS Data Pipeline. This is a string of the form df-297EG78HU43EEXAMPLE."];
-      name: Id.t [@ocaml.doc "The name of the pipeline."];
-      fields: FieldList.t
+      name: Id.t option [@ocaml.doc "The name of the pipeline."];
+      fields: FieldList.t option
         [@ocaml.doc
           "A list of read-only fields that contain metadata about the pipeline: \\@userId, \\@accountId, and \\@pipelineState."];
       description: String_.t option
@@ -810,18 +831,17 @@ module PipelineDescription =
       tags: TagList.t option
         [@ocaml.doc
           "A list of tags to associated with a pipeline. Tags let you control access to pipelines. For more information, see Controlling User Access to Pipelines in the AWS Data Pipeline Developer Guide."]}
-    let context_ = "PipelineDescription"
-    let make ?description =
-      fun ?tags ->
-        fun ~pipelineId ->
-          fun ~name ->
-            fun ~fields ->
-              fun () -> { description; tags; pipelineId; name; fields }
+    let make ?pipelineId =
+      fun ?name ->
+        fun ?fields ->
+          fun ?description ->
+            fun ?tags ->
+              fun () -> { pipelineId; name; fields; description; tags }
     let to_value x =
       structure_to_value
-        [("pipelineId", (Some (Id.to_value x.pipelineId)));
-        ("name", (Some (Id.to_value x.name)));
-        ("fields", (Some (FieldList.to_value x.fields)));
+        [("pipelineId", (Option.map x.pipelineId ~f:Id.to_value));
+        ("name", (Option.map x.name ~f:Id.to_value));
+        ("fields", (Option.map x.fields ~f:FieldList.to_value));
         ("description", (Option.map x.description ~f:String_.to_value));
         ("tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
@@ -830,19 +850,19 @@ module PipelineDescription =
       let description =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
       let fields =
-        FieldList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "fields") in
-      let name = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
+        (Option.map ~f:FieldList.of_xml) (Xml.child xml_arg0 "fields") in
+      let name = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "name") in
       let pipelineId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
-      make ?tags ?description ~fields ~name ~pipelineId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "pipelineId") in
+      make ?tags ?description ?fields ?name ?pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let description = field_map json "description" String_.of_json in
-      let fields = field_map_exn json "fields" FieldList.of_json in
-      let name = field_map_exn json "name" Id.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
-      make ?tags ?description ~fields ~name ~pipelineId ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let fields = field_map json__ "fields" FieldList.of_json in
+      let name = field_map json__ "name" Id.of_json in
+      let pipelineId = field_map json__ "pipelineId" Id.of_json in
+      make ?tags ?description ?fields ?name ?pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains pipeline metadata."]
 module InternalServiceError =
@@ -861,8 +881,8 @@ module InternalServiceError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal service error occurred."]
@@ -882,8 +902,8 @@ module InvalidRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -904,8 +924,8 @@ module PipelineDeletedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified pipeline has been deleted."]
@@ -925,8 +945,8 @@ module PipelineNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -935,6 +955,9 @@ module ValidationErrors =
   struct
     type nonrec t = ValidationError.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -960,6 +983,9 @@ module ValidationWarnings =
   struct
     type nonrec t = ValidationWarning.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ValidationWarning.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -998,6 +1024,9 @@ module ParameterObjectList =
   struct
     type nonrec t = ParameterObject.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterObject.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1023,6 +1052,9 @@ module ParameterValueList =
   struct
     type nonrec t = ParameterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1048,6 +1080,9 @@ module PipelineObjectList =
   struct
     type nonrec t = PipelineObject.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PipelineObject.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1085,8 +1120,8 @@ module TaskNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified task was not found."]
@@ -1122,6 +1157,9 @@ module IdList =
   struct
     type nonrec t = Id.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Id.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -1157,12 +1195,12 @@ module Query =
         (Option.map ~f:SelectorList.of_xml) (Xml.child xml_arg0 "selectors") in
       make ?selectors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let selectors = field_map json "selectors" SelectorList.of_json in
+    let of_json json__ =
+      let selectors = field_map json__ "selectors" SelectorList.of_json in
       make ?selectors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Defines the query to run against an object."]
-module Int =
+module Int_ =
   struct
     type nonrec t = int
     let make i = i
@@ -1214,11 +1252,11 @@ module TaskObject =
         (Option.map ~f:TaskId.of_xml) (Xml.child xml_arg0 "taskId") in
       make ?objects ?attemptId ?pipelineId ?taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objects = field_map json "objects" PipelineObjectMap.of_json in
-      let attemptId = field_map json "attemptId" Id.of_json in
-      let pipelineId = field_map json "pipelineId" Id.of_json in
-      let taskId = field_map json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let objects = field_map json__ "objects" PipelineObjectMap.of_json in
+      let attemptId = field_map json__ "attemptId" Id.of_json in
+      let pipelineId = field_map json__ "pipelineId" Id.of_json in
+      let taskId = field_map json__ "taskId" TaskId.of_json in
       make ?objects ?attemptId ?pipelineId ?taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1246,9 +1284,9 @@ module InstanceIdentity =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "document") in
       make ?signature ?document ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signature = field_map json "signature" String_.of_json in
-      let document = field_map json "document" String_.of_json in
+    let of_json json__ =
+      let signature = field_map json__ "signature" String_.of_json in
+      let document = field_map json__ "document" String_.of_json in
       make ?signature ?document ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1257,6 +1295,9 @@ module PipelineList =
   struct
     type nonrec t = PipelineIdName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PipelineIdName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1303,6 +1344,9 @@ module PipelineDescriptionList =
   struct
     type nonrec t = PipelineDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PipelineDescription.to_value)) |>
         (fun x -> `List x)
@@ -1358,7 +1402,7 @@ module ValidatePipelineDefinitionOutput =
         [@ocaml.doc "Any validation errors that were found."];
       validationWarnings: ValidationWarnings.t option
         [@ocaml.doc "Any validation warnings that were found."];
-      errored: Boolean.t
+      errored: Boolean.t option
         [@ocaml.doc "Indicates whether there were validation errors."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
@@ -1366,10 +1410,9 @@ module ValidatePipelineDefinitionOutput =
       | `PipelineDeletedException of PipelineDeletedException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ValidatePipelineDefinitionOutput"
     let make ?validationErrors =
       fun ?validationWarnings ->
-        fun ~errored ->
+        fun ?errored ->
           fun () -> { validationErrors; validationWarnings; errored }
     let error_of_json name json =
       match name with
@@ -1425,26 +1468,26 @@ module ValidatePipelineDefinitionOutput =
            (Option.map x.validationErrors ~f:ValidationErrors.to_value));
         ("validationWarnings",
           (Option.map x.validationWarnings ~f:ValidationWarnings.to_value));
-        ("errored", (Some (Boolean.to_value x.errored)))]
+        ("errored", (Option.map x.errored ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errored =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "errored") in
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "errored") in
       let validationWarnings =
         (Option.map ~f:ValidationWarnings.of_xml)
           (Xml.child xml_arg0 "validationWarnings") in
       let validationErrors =
         (Option.map ~f:ValidationErrors.of_xml)
           (Xml.child xml_arg0 "validationErrors") in
-      make ~errored ?validationWarnings ?validationErrors ()
+      make ?errored ?validationWarnings ?validationErrors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errored = field_map_exn json "errored" Boolean.of_json in
+    let of_json json__ =
+      let errored = field_map json__ "errored" Boolean.of_json in
       let validationWarnings =
-        field_map json "validationWarnings" ValidationWarnings.of_json in
+        field_map json__ "validationWarnings" ValidationWarnings.of_json in
       let validationErrors =
-        field_map json "validationErrors" ValidationErrors.of_json in
-      make ~errored ?validationWarnings ?validationErrors ()
+        field_map json__ "validationErrors" ValidationErrors.of_json in
+      make ?errored ?validationWarnings ?validationErrors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ValidatePipelineDefinition."]
 module ValidatePipelineDefinitionInput =
@@ -1495,14 +1538,14 @@ module ValidatePipelineDefinitionInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?parameterValues ?parameterObjects ~pipelineObjects ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterValues =
-        field_map json "parameterValues" ParameterValueList.of_json in
+        field_map json__ "parameterValues" ParameterValueList.of_json in
       let parameterObjects =
-        field_map json "parameterObjects" ParameterObjectList.of_json in
+        field_map json__ "parameterObjects" ParameterObjectList.of_json in
       let pipelineObjects =
-        field_map_exn json "pipelineObjects" PipelineObjectList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+        field_map_exn json__ "pipelineObjects" PipelineObjectList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?parameterValues ?parameterObjects ~pipelineObjects ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ValidatePipelineDefinition."]
@@ -1634,12 +1677,13 @@ module SetTaskStatusInput =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
       make ?errorStackTrace ?errorMessage ?errorId ~taskStatus ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorStackTrace = field_map json "errorStackTrace" String_.of_json in
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
-      let errorId = field_map json "errorId" String_.of_json in
-      let taskStatus = field_map_exn json "taskStatus" TaskStatus.of_json in
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let errorStackTrace =
+        field_map json__ "errorStackTrace" String_.of_json in
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
+      let errorId = field_map json__ "errorId" String_.of_json in
+      let taskStatus = field_map_exn json__ "taskStatus" TaskStatus.of_json in
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
       make ?errorStackTrace ?errorMessage ?errorId ~taskStatus ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for SetTaskStatus."]
@@ -1674,10 +1718,10 @@ module SetStatusInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ~status ~objectIds ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" String_.of_json in
-      let objectIds = field_map_exn json "objectIds" IdList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let status = field_map_exn json__ "status" String_.of_json in
+      let objectIds = field_map_exn json__ "objectIds" IdList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ~status ~objectIds ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for SetStatus."]
@@ -1685,15 +1729,14 @@ module ReportTaskRunnerHeartbeatOutput =
   struct
     type nonrec t =
       {
-      terminate: Boolean.t
+      terminate: Boolean.t option
         [@ocaml.doc
           "Indicates whether the calling task runner should terminate."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ReportTaskRunnerHeartbeatOutput"
-    let make ~terminate = fun () -> { terminate }
+    let make ?terminate = fun () -> { terminate }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -1728,16 +1771,16 @@ module ReportTaskRunnerHeartbeatOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("terminate", (Some (Boolean.to_value x.terminate)))]
+        [("terminate", (Option.map x.terminate ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let terminate =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "terminate") in
-      make ~terminate ()
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "terminate") in
+      make ?terminate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let terminate = field_map_exn json "terminate" Boolean.of_json in
-      make ~terminate ()
+    let of_json json__ =
+      let terminate = field_map json__ "terminate" Boolean.of_json in
+      make ?terminate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ReportTaskRunnerHeartbeat."]
 module ReportTaskRunnerHeartbeatInput =
@@ -1772,10 +1815,10 @@ module ReportTaskRunnerHeartbeatInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskrunnerId") in
       make ?hostname ?workerGroup ~taskrunnerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostname = field_map json "hostname" Id.of_json in
-      let workerGroup = field_map json "workerGroup" String_.of_json in
-      let taskrunnerId = field_map_exn json "taskrunnerId" Id.of_json in
+    let of_json json__ =
+      let hostname = field_map json__ "hostname" Id.of_json in
+      let workerGroup = field_map json__ "workerGroup" String_.of_json in
+      let taskrunnerId = field_map_exn json__ "taskrunnerId" Id.of_json in
       make ?hostname ?workerGroup ~taskrunnerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ReportTaskRunnerHeartbeat."]
@@ -1783,7 +1826,7 @@ module ReportTaskProgressOutput =
   struct
     type nonrec t =
       {
-      canceled: Boolean.t
+      canceled: Boolean.t option
         [@ocaml.doc
           "If true, the calling task runner should cancel processing of the task. The task runner does not need to call SetTaskStatus for canceled tasks."]}
     type nonrec error =
@@ -1793,8 +1836,7 @@ module ReportTaskProgressOutput =
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `TaskNotFoundException of TaskNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ReportTaskProgressOutput"
-    let make ~canceled = fun () -> { canceled }
+    let make ?canceled = fun () -> { canceled }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -1852,16 +1894,17 @@ module ReportTaskProgressOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("canceled", (Some (Boolean.to_value x.canceled)))]
+      structure_to_value
+        [("canceled", (Option.map x.canceled ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let canceled =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "canceled") in
-      make ~canceled ()
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "canceled") in
+      make ?canceled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let canceled = field_map_exn json "canceled" Boolean.of_json in
-      make ~canceled ()
+    let of_json json__ =
+      let canceled = field_map json__ "canceled" Boolean.of_json in
+      make ?canceled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ReportTaskProgress."]
 module ReportTaskProgressInput =
@@ -1888,9 +1931,9 @@ module ReportTaskProgressInput =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "taskId") in
       make ?fields ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fields = field_map json "fields" FieldList.of_json in
-      let taskId = field_map_exn json "taskId" TaskId.of_json in
+    let of_json json__ =
+      let fields = field_map json__ "fields" FieldList.of_json in
+      let taskId = field_map_exn json__ "taskId" TaskId.of_json in
       make ?fields ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ReportTaskProgress."]
@@ -1981,9 +2024,9 @@ module RemoveTagsInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ~tagKeys ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" StringList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" StringList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ~tagKeys ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for RemoveTags."]
@@ -2070,10 +2113,10 @@ module QueryObjectsOutput =
       let ids = (Option.map ~f:IdList.of_xml) (Xml.child xml_arg0 "ids") in
       make ?hasMoreResults ?marker ?ids ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hasMoreResults = field_map json "hasMoreResults" Boolean.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let ids = field_map json "ids" IdList.of_json in
+    let of_json json__ =
+      let hasMoreResults = field_map json__ "hasMoreResults" Boolean.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let ids = field_map json__ "ids" IdList.of_json in
       make ?hasMoreResults ?marker ?ids ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of QueryObjects."]
@@ -2091,7 +2134,7 @@ module QueryObjectsInput =
       marker: String_.t option
         [@ocaml.doc
           "The starting point for the results to be returned. For the first call, this value should be empty. As long as there are more results, continue to call QueryObjects with the marker value from the previous call to retrieve the next set of results."];
-      limit: Int.t option
+      limit: Int_.t option
         [@ocaml.doc
           "The maximum number of object names that QueryObjects will return in a single call. The default value is 100."]}
     let context_ = "QueryObjectsInput"
@@ -2107,10 +2150,10 @@ module QueryObjectsInput =
         ("query", (Option.map x.query ~f:Query.to_value));
         ("sphere", (Some (String_.to_value x.sphere)));
         ("marker", (Option.map x.marker ~f:String_.to_value));
-        ("limit", (Option.map x.limit ~f:Int.to_value))]
+        ("limit", (Option.map x.limit ~f:Int_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let limit = (Option.map ~f:Int.of_xml) (Xml.child xml_arg0 "limit") in
+      let limit = (Option.map ~f:Int_.of_xml) (Xml.child xml_arg0 "limit") in
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "marker") in
       let sphere =
@@ -2120,12 +2163,12 @@ module QueryObjectsInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?limit ?marker ~sphere ?query ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limit = field_map json "limit" Int.of_json in
-      let marker = field_map json "marker" String_.of_json in
-      let sphere = field_map_exn json "sphere" String_.of_json in
-      let query = field_map json "query" Query.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let limit = field_map json__ "limit" Int_.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
+      let sphere = field_map_exn json__ "sphere" String_.of_json in
+      let query = field_map json__ "query" Query.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?limit ?marker ~sphere ?query ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for QueryObjects."]
@@ -2139,7 +2182,7 @@ module PutPipelineDefinitionOutput =
       validationWarnings: ValidationWarnings.t option
         [@ocaml.doc
           "The validation warnings that are associated with the objects defined in pipelineObjects."];
-      errored: Boolean.t
+      errored: Boolean.t option
         [@ocaml.doc
           "Indicates whether there were validation errors, and the pipeline definition is stored but cannot be activated until you correct the pipeline and call PutPipelineDefinition to commit the corrected pipeline."]}
     type nonrec error =
@@ -2148,10 +2191,9 @@ module PutPipelineDefinitionOutput =
       | `PipelineDeletedException of PipelineDeletedException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PutPipelineDefinitionOutput"
     let make ?validationErrors =
       fun ?validationWarnings ->
-        fun ~errored ->
+        fun ?errored ->
           fun () -> { validationErrors; validationWarnings; errored }
     let error_of_json name json =
       match name with
@@ -2207,26 +2249,26 @@ module PutPipelineDefinitionOutput =
            (Option.map x.validationErrors ~f:ValidationErrors.to_value));
         ("validationWarnings",
           (Option.map x.validationWarnings ~f:ValidationWarnings.to_value));
-        ("errored", (Some (Boolean.to_value x.errored)))]
+        ("errored", (Option.map x.errored ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let errored =
-        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "errored") in
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "errored") in
       let validationWarnings =
         (Option.map ~f:ValidationWarnings.of_xml)
           (Xml.child xml_arg0 "validationWarnings") in
       let validationErrors =
         (Option.map ~f:ValidationErrors.of_xml)
           (Xml.child xml_arg0 "validationErrors") in
-      make ~errored ?validationWarnings ?validationErrors ()
+      make ?errored ?validationWarnings ?validationErrors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errored = field_map_exn json "errored" Boolean.of_json in
+    let of_json json__ =
+      let errored = field_map json__ "errored" Boolean.of_json in
       let validationWarnings =
-        field_map json "validationWarnings" ValidationWarnings.of_json in
+        field_map json__ "validationWarnings" ValidationWarnings.of_json in
       let validationErrors =
-        field_map json "validationErrors" ValidationErrors.of_json in
-      make ~errored ?validationWarnings ?validationErrors ()
+        field_map json__ "validationErrors" ValidationErrors.of_json in
+      make ?errored ?validationWarnings ?validationErrors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of PutPipelineDefinition."]
 module PutPipelineDefinitionInput =
@@ -2277,14 +2319,14 @@ module PutPipelineDefinitionInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?parameterValues ?parameterObjects ~pipelineObjects ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterValues =
-        field_map json "parameterValues" ParameterValueList.of_json in
+        field_map json__ "parameterValues" ParameterValueList.of_json in
       let parameterObjects =
-        field_map json "parameterObjects" ParameterObjectList.of_json in
+        field_map json__ "parameterObjects" ParameterObjectList.of_json in
       let pipelineObjects =
-        field_map_exn json "pipelineObjects" PipelineObjectList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+        field_map_exn json__ "pipelineObjects" PipelineObjectList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?parameterValues ?parameterObjects ~pipelineObjects ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for PutPipelineDefinition."]
@@ -2350,8 +2392,8 @@ module PollForTaskOutput =
         (Option.map ~f:TaskObject.of_xml) (Xml.child xml_arg0 "taskObject") in
       make ?taskObject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskObject = field_map json "taskObject" TaskObject.of_json in
+    let of_json json__ =
+      let taskObject = field_map json__ "taskObject" TaskObject.of_json in
       make ?taskObject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of PollForTask."]
@@ -2390,11 +2432,11 @@ module PollForTaskInput =
           (Xml.child_exn ~context:context_ xml_arg0 "workerGroup") in
       make ?instanceIdentity ?hostname ~workerGroup ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceIdentity =
-        field_map json "instanceIdentity" InstanceIdentity.of_json in
-      let hostname = field_map json "hostname" Id.of_json in
-      let workerGroup = field_map_exn json "workerGroup" String_.of_json in
+        field_map json__ "instanceIdentity" InstanceIdentity.of_json in
+      let hostname = field_map json__ "hostname" Id.of_json in
+      let workerGroup = field_map_exn json__ "workerGroup" String_.of_json in
       make ?instanceIdentity ?hostname ~workerGroup ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for PollForTask."]
@@ -2402,7 +2444,7 @@ module ListPipelinesOutput =
   struct
     type nonrec t =
       {
-      pipelineIdList: PipelineList.t
+      pipelineIdList: PipelineList.t option
         [@ocaml.doc
           "The pipeline identifiers. If you require additional information about the pipelines, you can use these identifiers to call DescribePipelines and GetPipelineDefinition."];
       marker: String_.t option
@@ -2415,11 +2457,10 @@ module ListPipelinesOutput =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPipelinesOutput"
-    let make ?marker =
-      fun ?hasMoreResults ->
-        fun ~pipelineIdList ->
-          fun () -> { marker; hasMoreResults; pipelineIdList }
+    let make ?pipelineIdList =
+      fun ?marker ->
+        fun ?hasMoreResults ->
+          fun () -> { pipelineIdList; marker; hasMoreResults }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -2454,7 +2495,8 @@ module ListPipelinesOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("pipelineIdList", (Some (PipelineList.to_value x.pipelineIdList)));
+        [("pipelineIdList",
+           (Option.map x.pipelineIdList ~f:PipelineList.to_value));
         ("marker", (Option.map x.marker ~f:String_.to_value));
         ("hasMoreResults", (Option.map x.hasMoreResults ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
@@ -2464,16 +2506,16 @@ module ListPipelinesOutput =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "marker") in
       let pipelineIdList =
-        PipelineList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipelineIdList") in
-      make ?hasMoreResults ?marker ~pipelineIdList ()
+        (Option.map ~f:PipelineList.of_xml)
+          (Xml.child xml_arg0 "pipelineIdList") in
+      make ?hasMoreResults ?marker ?pipelineIdList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hasMoreResults = field_map json "hasMoreResults" Boolean.of_json in
-      let marker = field_map json "marker" String_.of_json in
+    let of_json json__ =
+      let hasMoreResults = field_map json__ "hasMoreResults" Boolean.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
       let pipelineIdList =
-        field_map_exn json "pipelineIdList" PipelineList.of_json in
-      make ?hasMoreResults ?marker ~pipelineIdList ()
+        field_map json__ "pipelineIdList" PipelineList.of_json in
+      make ?hasMoreResults ?marker ?pipelineIdList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of ListPipelines."]
 module ListPipelinesInput =
@@ -2493,8 +2535,9 @@ module ListPipelinesInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "marker") in
       make ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "marker" String_.of_json in make ?marker ()
+    let of_json json__ =
+      let marker = field_map json__ "marker" String_.of_json in
+      make ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ListPipelines."]
 module GetPipelineDefinitionOutput =
@@ -2586,13 +2629,13 @@ module GetPipelineDefinitionOutput =
           (Xml.child xml_arg0 "pipelineObjects") in
       make ?parameterValues ?parameterObjects ?pipelineObjects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameterValues =
-        field_map json "parameterValues" ParameterValueList.of_json in
+        field_map json__ "parameterValues" ParameterValueList.of_json in
       let parameterObjects =
-        field_map json "parameterObjects" ParameterObjectList.of_json in
+        field_map json__ "parameterObjects" ParameterObjectList.of_json in
       let pipelineObjects =
-        field_map json "pipelineObjects" PipelineObjectList.of_json in
+        field_map json__ "pipelineObjects" PipelineObjectList.of_json in
       make ?parameterValues ?parameterObjects ?pipelineObjects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of GetPipelineDefinition."]
@@ -2618,9 +2661,9 @@ module GetPipelineDefinitionInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?version ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "version" String_.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let version = field_map json__ "version" String_.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?version ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for GetPipelineDefinition."]
@@ -2628,7 +2671,7 @@ module EvaluateExpressionOutput =
   struct
     type nonrec t =
       {
-      evaluatedExpression: LongString.t
+      evaluatedExpression: LongString.t option
         [@ocaml.doc "The evaluated expression."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
@@ -2637,8 +2680,7 @@ module EvaluateExpressionOutput =
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `TaskNotFoundException of TaskNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "EvaluateExpressionOutput"
-    let make ~evaluatedExpression = fun () -> { evaluatedExpression }
+    let make ?evaluatedExpression = fun () -> { evaluatedExpression }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -2698,18 +2740,18 @@ module EvaluateExpressionOutput =
     let to_value x =
       structure_to_value
         [("evaluatedExpression",
-           (Some (LongString.to_value x.evaluatedExpression)))]
+           (Option.map x.evaluatedExpression ~f:LongString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let evaluatedExpression =
-        LongString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "evaluatedExpression") in
-      make ~evaluatedExpression ()
+        (Option.map ~f:LongString.of_xml)
+          (Xml.child xml_arg0 "evaluatedExpression") in
+      make ?evaluatedExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let evaluatedExpression =
-        field_map_exn json "evaluatedExpression" LongString.of_json in
-      make ~evaluatedExpression ()
+        field_map json__ "evaluatedExpression" LongString.of_json in
+      make ?evaluatedExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of EvaluateExpression."]
 module EvaluateExpressionInput =
@@ -2739,10 +2781,10 @@ module EvaluateExpressionInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ~expression ~objectId ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expression = field_map_exn json "expression" LongString.of_json in
-      let objectId = field_map_exn json "objectId" Id.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let expression = field_map_exn json__ "expression" LongString.of_json in
+      let objectId = field_map_exn json__ "objectId" Id.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ~expression ~objectId ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for EvaluateExpression."]
@@ -2750,7 +2792,7 @@ module DescribePipelinesOutput =
   struct
     type nonrec t =
       {
-      pipelineDescriptionList: PipelineDescriptionList.t
+      pipelineDescriptionList: PipelineDescriptionList.t option
         [@ocaml.doc "An array of descriptions for the specified pipelines."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
@@ -2758,8 +2800,7 @@ module DescribePipelinesOutput =
       | `PipelineDeletedException of PipelineDeletedException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribePipelinesOutput"
-    let make ~pipelineDescriptionList = fun () -> { pipelineDescriptionList }
+    let make ?pipelineDescriptionList = fun () -> { pipelineDescriptionList }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -2811,19 +2852,20 @@ module DescribePipelinesOutput =
     let to_value x =
       structure_to_value
         [("pipelineDescriptionList",
-           (Some (PipelineDescriptionList.to_value x.pipelineDescriptionList)))]
+           (Option.map x.pipelineDescriptionList
+              ~f:PipelineDescriptionList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipelineDescriptionList =
-        PipelineDescriptionList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipelineDescriptionList") in
-      make ~pipelineDescriptionList ()
+        (Option.map ~f:PipelineDescriptionList.of_xml)
+          (Xml.child xml_arg0 "pipelineDescriptionList") in
+      make ?pipelineDescriptionList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pipelineDescriptionList =
-        field_map_exn json "pipelineDescriptionList"
+        field_map json__ "pipelineDescriptionList"
           PipelineDescriptionList.of_json in
-      make ~pipelineDescriptionList ()
+      make ?pipelineDescriptionList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of DescribePipelines."]
 module DescribePipelinesInput =
@@ -2845,8 +2887,8 @@ module DescribePipelinesInput =
           (Xml.child_exn ~context:context_ xml_arg0 "pipelineIds") in
       make ~pipelineIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipelineIds = field_map_exn json "pipelineIds" IdList.of_json in
+    let of_json json__ =
+      let pipelineIds = field_map_exn json__ "pipelineIds" IdList.of_json in
       make ~pipelineIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribePipelines."]
@@ -2854,7 +2896,7 @@ module DescribeObjectsOutput =
   struct
     type nonrec t =
       {
-      pipelineObjects: PipelineObjectList.t
+      pipelineObjects: PipelineObjectList.t option
         [@ocaml.doc "An array of object definitions."];
       marker: String_.t option
         [@ocaml.doc
@@ -2867,11 +2909,10 @@ module DescribeObjectsOutput =
       | `PipelineDeletedException of PipelineDeletedException.t 
       | `PipelineNotFoundException of PipelineNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeObjectsOutput"
-    let make ?marker =
-      fun ?hasMoreResults ->
-        fun ~pipelineObjects ->
-          fun () -> { marker; hasMoreResults; pipelineObjects }
+    let make ?pipelineObjects =
+      fun ?marker ->
+        fun ?hasMoreResults ->
+          fun () -> { pipelineObjects; marker; hasMoreResults }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -2923,7 +2964,7 @@ module DescribeObjectsOutput =
     let to_value x =
       structure_to_value
         [("pipelineObjects",
-           (Some (PipelineObjectList.to_value x.pipelineObjects)));
+           (Option.map x.pipelineObjects ~f:PipelineObjectList.to_value));
         ("marker", (Option.map x.marker ~f:String_.to_value));
         ("hasMoreResults", (Option.map x.hasMoreResults ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
@@ -2933,16 +2974,16 @@ module DescribeObjectsOutput =
       let marker =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "marker") in
       let pipelineObjects =
-        PipelineObjectList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "pipelineObjects") in
-      make ?hasMoreResults ?marker ~pipelineObjects ()
+        (Option.map ~f:PipelineObjectList.of_xml)
+          (Xml.child xml_arg0 "pipelineObjects") in
+      make ?hasMoreResults ?marker ?pipelineObjects ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hasMoreResults = field_map json "hasMoreResults" Boolean.of_json in
-      let marker = field_map json "marker" String_.of_json in
+    let of_json json__ =
+      let hasMoreResults = field_map json__ "hasMoreResults" Boolean.of_json in
+      let marker = field_map json__ "marker" String_.of_json in
       let pipelineObjects =
-        field_map_exn json "pipelineObjects" PipelineObjectList.of_json in
-      make ?hasMoreResults ?marker ~pipelineObjects ()
+        field_map json__ "pipelineObjects" PipelineObjectList.of_json in
+      make ?hasMoreResults ?marker ?pipelineObjects ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of DescribeObjects."]
 module DescribeObjectsInput =
@@ -2987,12 +3028,12 @@ module DescribeObjectsInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?marker ?evaluateExpressions ~objectIds ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "marker" String_.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "marker" String_.of_json in
       let evaluateExpressions =
-        field_map json "evaluateExpressions" Boolean.of_json in
-      let objectIds = field_map_exn json "objectIds" IdList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+        field_map json__ "evaluateExpressions" Boolean.of_json in
+      let objectIds = field_map_exn json__ "objectIds" IdList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?marker ?evaluateExpressions ~objectIds ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DescribeObjects."]
@@ -3010,8 +3051,8 @@ module DeletePipelineInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeletePipeline."]
@@ -3106,9 +3147,9 @@ module DeactivatePipelineInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?cancelActive ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cancelActive = field_map json "cancelActive" CancelActive.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let cancelActive = field_map json__ "cancelActive" CancelActive.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?cancelActive ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for DeactivatePipeline."]
@@ -3116,15 +3157,14 @@ module CreatePipelineOutput =
   struct
     type nonrec t =
       {
-      pipelineId: Id.t
+      pipelineId: Id.t option
         [@ocaml.doc
           "The ID that AWS Data Pipeline assigns the newly created pipeline. For example, df-06372391ZG65EXAMPLE."]}
     type nonrec error =
       [ `InternalServiceError of InternalServiceError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreatePipelineOutput"
-    let make ~pipelineId = fun () -> { pipelineId }
+    let make ?pipelineId = fun () -> { pipelineId }
     let error_of_json name json =
       match name with
       | "InternalServiceError" ->
@@ -3158,16 +3198,17 @@ module CreatePipelineOutput =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("pipelineId", (Some (Id.to_value x.pipelineId)))]
+      structure_to_value
+        [("pipelineId", (Option.map x.pipelineId ~f:Id.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let pipelineId =
-        Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
-      make ~pipelineId ()
+        (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "pipelineId") in
+      make ?pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
-      make ~pipelineId ()
+    let of_json json__ =
+      let pipelineId = field_map json__ "pipelineId" Id.of_json in
+      make ?pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the output of CreatePipeline."]
 module CreatePipelineInput =
@@ -3206,11 +3247,11 @@ module CreatePipelineInput =
       let name = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?tags ?description ~uniqueId ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let description = field_map json "description" String_.of_json in
-      let uniqueId = field_map_exn json "uniqueId" Id.of_json in
-      let name = field_map_exn json "name" Id.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let uniqueId = field_map_exn json__ "uniqueId" Id.of_json in
+      let name = field_map_exn json__ "name" Id.of_json in
       make ?tags ?description ~uniqueId ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for CreatePipeline."]
@@ -3300,9 +3341,9 @@ module AddTagsInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ~tags ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ~tags ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for AddTags."]
@@ -3407,11 +3448,12 @@ module ActivatePipelineInput =
         Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "pipelineId") in
       make ?startTimestamp ?parameterValues ~pipelineId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let startTimestamp = field_map json "startTimestamp" Timestamp.of_json in
+    let of_json json__ =
+      let startTimestamp =
+        field_map json__ "startTimestamp" Timestamp.of_json in
       let parameterValues =
-        field_map json "parameterValues" ParameterValueList.of_json in
-      let pipelineId = field_map_exn json "pipelineId" Id.of_json in
+        field_map json__ "parameterValues" ParameterValueList.of_json in
+      let pipelineId = field_map_exn json__ "pipelineId" Id.of_json in
       make ?startTimestamp ?parameterValues ~pipelineId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the parameters for ActivatePipeline."]

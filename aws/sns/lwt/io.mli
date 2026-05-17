@@ -54,6 +54,12 @@ val delete_s_m_s_sandbox_phone_number :
 val delete_topic :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> DeleteTopicInput.t -> (unit, unit) Result.t Lwt.t
+val get_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataProtectionPolicyInput.t ->
+        (GetDataProtectionPolicyResponse.t,
+          GetDataProtectionPolicyResponse.error) Result.t Lwt.t
 val get_endpoint_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -159,6 +165,10 @@ val publish_batch :
     ?cfg:Awso.Cfg.t ->
       PublishBatchInput.t ->
         (PublishBatchResponse.t, PublishBatchResponse.error) Result.t Lwt.t
+val put_data_protection_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDataProtectionPolicyInput.t -> (unit, unit) Result.t Lwt.t
 val remove_permission :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t -> RemovePermissionInput.t -> (unit, unit) Result.t Lwt.t

@@ -18,9 +18,7 @@ let dispatch_exn ~name ~error_to_json ~f =
    normal default (~/.aws/credentials etc), so we don't need to pre-fetch. *)
 let suite_main ~sso bucket () =
   let%bind cfg =
-    if sso
-    then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some
-    else Lwt.return None
+    if sso then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some else Lwt.return None
   in
   let%bind () =
     pr "=== EC2 ===";
@@ -69,7 +67,7 @@ let suite_main ~sso bucket () =
         ~name:"ecr.describe_repositories"
         ~error_to_json:Ecr.DescribeRepositoriesResponse.error_to_json
         ~f:(fun () ->
-        Ecr.describe_repositories ?cfg (Ecr.DescribeRepositoriesRequest.make ()))
+          Ecr.describe_repositories ?cfg (Ecr.DescribeRepositoriesRequest.make ()))
       >>= fun v ->
       Option.value_map
         v.Ecr.DescribeRepositoriesResponse.repositories
@@ -116,7 +114,7 @@ let suite_main ~sso bucket () =
       dispatch_exn
         ~name:"s3.list_buckets"
         ~error_to_json:S3.ListBucketsOutput.error_to_json
-        ~f:(fun () -> S3.list_buckets ?cfg ())
+        ~f:(fun () -> S3.list_buckets ?cfg (S3.ListBucketsRequest.make ()))
       >|= fun _ -> ()
     in
     dispatch_exn
@@ -154,9 +152,7 @@ let read_slice ~start ~end_ fn =
 
 let multipart_main ~sso bucket key file () =
   let%bind cfg =
-    if sso
-    then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some
-    else Lwt.return None
+    if sso then Awso_sso_lwt.Util.Cfg.get_exn () >|= Option.some else Lwt.return None
   in
   Lwt_unix.stat file
   >>= fun { st_size = file_size; _ } ->

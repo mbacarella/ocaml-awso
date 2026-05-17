@@ -42,6 +42,7 @@ let create_parallel_data =
          flag "description" (optional string) ~doc:"STRING Description"
        and encryptionKey =
          flag "encryption-key" (optional json_arg) ~doc:"JSON EncryptionKey"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and parallelDataConfig =
          flag "parallel-data-config" (required json_arg)
@@ -54,7 +55,8 @@ let create_parallel_data =
            Io.create_parallel_data
            (Values.CreateParallelDataRequest.make ?description
               ?encryptionKey:(Option.map ~f:Values.EncryptionKey.of_json
-                                encryptionKey) ~name
+                                encryptionKey)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
               ~parallelDataConfig:(Values.ParallelDataConfig.of_json
                                      parallelDataConfig) ~clientToken ())
            (Some Values.CreateParallelDataResponse.to_json)
@@ -161,6 +163,7 @@ let import_terminology =
          flag "description" (optional string) ~doc:"STRING Description"
        and encryptionKey =
          flag "encryption-key" (optional json_arg) ~doc:"JSON EncryptionKey"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and mergeStrategy =
          flag "merge-strategy" (required json_arg) ~doc:"JSON MergeStrategy"
@@ -172,12 +175,39 @@ let import_terminology =
            Io.import_terminology
            (Values.ImportTerminologyRequest.make ?description
               ?encryptionKey:(Option.map ~f:Values.EncryptionKey.of_json
-                                encryptionKey) ~name
+                                encryptionKey)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
               ~mergeStrategy:(Values.MergeStrategy.of_json mergeStrategy)
               ~terminologyData:(Values.TerminologyData.of_json
                                   terminologyData) ())
            (Some Values.ImportTerminologyResponse.to_json)
            (Some Values.ImportTerminologyResponse.error_to_json)])
+let list_languages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and displayLanguageCode =
+         flag "display-language-code" (optional json_arg)
+           ~doc:"JSON DisplayLanguageCode"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResultsInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_languages
+           (Values.ListLanguagesRequest.make
+              ?displayLanguageCode:(Option.map
+                                      ~f:Values.DisplayLanguageCode.of_json
+                                      displayLanguageCode) ?nextToken
+              ?maxResults ()) (Some Values.ListLanguagesResponse.to_json)
+           (Some Values.ListLanguagesResponse.error_to_json)])
 let list_parallel_data =
   Command.async ~summary:""
     ([%map_open.Command
@@ -198,6 +228,24 @@ let list_parallel_data =
            (Values.ListParallelDataRequest.make ?nextToken ?maxResults ())
            (Some Values.ListParallelDataResponse.to_json)
            (Some Values.ListParallelDataResponse.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceRequest.make ~resourceArn ())
+           (Some Values.ListTagsForResourceResponse.to_json)
+           (Some Values.ListTagsForResourceResponse.error_to_json)])
 let list_terminologies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -318,6 +366,62 @@ let stop_text_translation_job =
            (Values.StopTextTranslationJobRequest.make ~jobId ())
            (Some Values.StopTextTranslationJobResponse.to_json)
            (Some Values.StopTextTranslationJobResponse.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceRequest.make ~resourceArn
+              ~tags:(Values.TagList.of_json tags) ())
+           (Some Values.TagResourceResponse.to_json)
+           (Some Values.TagResourceResponse.error_to_json)])
+let translate_document =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and terminologyNames =
+         flag "terminology-names" (optional json_arg)
+           ~doc:"JSON ResourceNameList"
+       and settings =
+         flag "settings" (optional json_arg) ~doc:"JSON TranslationSettings"
+       and document =
+         flag "document" (required json_arg) ~doc:"JSON Document"
+       and sourceLanguageCode =
+         flag "source-language-code" (required string)
+           ~doc:"STRING LanguageCodeString"
+       and targetLanguageCode =
+         flag "target-language-code" (required string)
+           ~doc:"STRING LanguageCodeString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.translate_document
+           (Values.TranslateDocumentRequest.make
+              ?terminologyNames:(Option.map
+                                   ~f:Values.ResourceNameList.of_json
+                                   terminologyNames)
+              ?settings:(Option.map ~f:Values.TranslationSettings.of_json
+                           settings)
+              ~document:(Values.Document.of_json document)
+              ~sourceLanguageCode ~targetLanguageCode ())
+           (Some Values.TranslateDocumentResponse.to_json)
+           (Some Values.TranslateDocumentResponse.error_to_json)])
 let translate_text =
   Command.async ~summary:""
     ([%map_open.Command
@@ -353,6 +457,27 @@ let translate_text =
               ~targetLanguageCode ())
            (Some Values.TranslateTextResponse.to_json)
            (Some Values.TranslateTextResponse.error_to_json)])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceRequest.make ~resourceArn
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
+           (Some Values.UntagResourceResponse.to_json)
+           (Some Values.UntagResourceResponse.error_to_json)])
 let update_parallel_data =
   Command.async ~summary:""
     ([%map_open.Command
@@ -390,10 +515,15 @@ let main =
     ("get-parallel-data", get_parallel_data);
     ("get-terminology", get_terminology);
     ("import-terminology", import_terminology);
+    ("list-languages", list_languages);
     ("list-parallel-data", list_parallel_data);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("list-terminologies", list_terminologies);
     ("list-text-translation-jobs", list_text_translation_jobs);
     ("start-text-translation-job", start_text_translation_job);
     ("stop-text-translation-job", stop_text_translation_job);
+    ("tag-resource", tag_resource);
+    ("translate-document", translate_document);
     ("translate-text", translate_text);
+    ("untag-resource", untag_resource);
     ("update-parallel-data", update_parallel_data)]

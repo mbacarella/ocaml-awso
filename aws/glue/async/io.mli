@@ -42,6 +42,18 @@ val batch_get_crawlers :
       BatchGetCrawlersRequest.t ->
         (BatchGetCrawlersResponse.t, BatchGetCrawlersResponse.error) Result.t
           Async.Deferred.t
+val batch_get_custom_entity_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetCustomEntityTypesRequest.t ->
+        (BatchGetCustomEntityTypesResponse.t,
+          BatchGetCustomEntityTypesResponse.error) Result.t Async.Deferred.t
+val batch_get_data_quality_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetDataQualityResultRequest.t ->
+        (BatchGetDataQualityResultResponse.t,
+          BatchGetDataQualityResultResponse.error) Result.t Async.Deferred.t
 val batch_get_dev_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -60,6 +72,12 @@ val batch_get_partition :
       BatchGetPartitionRequest.t ->
         (BatchGetPartitionResponse.t, BatchGetPartitionResponse.error)
           Result.t Async.Deferred.t
+val batch_get_table_optimizer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetTableOptimizerRequest.t ->
+        (BatchGetTableOptimizerResponse.t,
+          BatchGetTableOptimizerResponse.error) Result.t Async.Deferred.t
 val batch_get_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -72,6 +90,13 @@ val batch_get_workflows :
       BatchGetWorkflowsRequest.t ->
         (BatchGetWorkflowsResponse.t, BatchGetWorkflowsResponse.error)
           Result.t Async.Deferred.t
+val batch_put_data_quality_statistic_annotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchPutDataQualityStatisticAnnotationRequest.t ->
+        (BatchPutDataQualityStatisticAnnotationResponse.t,
+          BatchPutDataQualityStatisticAnnotationResponse.error) Result.t
+          Async.Deferred.t
 val batch_stop_job_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -84,6 +109,20 @@ val batch_update_partition :
       BatchUpdatePartitionRequest.t ->
         (BatchUpdatePartitionResponse.t, BatchUpdatePartitionResponse.error)
           Result.t Async.Deferred.t
+val cancel_data_quality_rule_recommendation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelDataQualityRuleRecommendationRunRequest.t ->
+        (CancelDataQualityRuleRecommendationRunResponse.t,
+          CancelDataQualityRuleRecommendationRunResponse.error) Result.t
+          Async.Deferred.t
+val cancel_data_quality_ruleset_evaluation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelDataQualityRulesetEvaluationRunRequest.t ->
+        (CancelDataQualityRulesetEvaluationRunResponse.t,
+          CancelDataQualityRulesetEvaluationRunResponse.error) Result.t
+          Async.Deferred.t
 val cancel_m_l_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -108,11 +147,24 @@ val create_blueprint :
       CreateBlueprintRequest.t ->
         (CreateBlueprintResponse.t, CreateBlueprintResponse.error) Result.t
           Async.Deferred.t
+val create_catalog :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCatalogRequest.t ->
+        (CreateCatalogResponse.t, CreateCatalogResponse.error) Result.t
+          Async.Deferred.t
 val create_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateClassifierRequest.t ->
         (CreateClassifierResponse.t, CreateClassifierResponse.error) Result.t
+          Async.Deferred.t
+val create_column_statistics_task_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateColumnStatisticsTaskSettingsRequest.t ->
+        (CreateColumnStatisticsTaskSettingsResponse.t,
+          CreateColumnStatisticsTaskSettingsResponse.error) Result.t
           Async.Deferred.t
 val create_connection :
   ?endpoint_url:string ->
@@ -126,6 +178,18 @@ val create_crawler :
       CreateCrawlerRequest.t ->
         (CreateCrawlerResponse.t, CreateCrawlerResponse.error) Result.t
           Async.Deferred.t
+val create_custom_entity_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCustomEntityTypeRequest.t ->
+        (CreateCustomEntityTypeResponse.t,
+          CreateCustomEntityTypeResponse.error) Result.t Async.Deferred.t
+val create_data_quality_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDataQualityRulesetRequest.t ->
+        (CreateDataQualityRulesetResponse.t,
+          CreateDataQualityRulesetResponse.error) Result.t Async.Deferred.t
 val create_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -138,6 +202,33 @@ val create_dev_endpoint :
       CreateDevEndpointRequest.t ->
         (CreateDevEndpointResponse.t, CreateDevEndpointResponse.error)
           Result.t Async.Deferred.t
+val create_glue_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateGlueIdentityCenterConfigurationRequest.t ->
+        (CreateGlueIdentityCenterConfigurationResponse.t,
+          CreateGlueIdentityCenterConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val create_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIntegrationRequest.t ->
+        (CreateIntegrationResponse.t, CreateIntegrationResponse.error)
+          Result.t Async.Deferred.t
+val create_integration_resource_property :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIntegrationResourcePropertyRequest.t ->
+        (CreateIntegrationResourcePropertyResponse.t,
+          CreateIntegrationResourcePropertyResponse.error) Result.t
+          Async.Deferred.t
+val create_integration_table_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIntegrationTablePropertiesRequest.t ->
+        (CreateIntegrationTablePropertiesResponse.t,
+          CreateIntegrationTablePropertiesResponse.error) Result.t
+          Async.Deferred.t
 val create_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -199,12 +290,24 @@ val create_table :
       CreateTableRequest.t ->
         (CreateTableResponse.t, CreateTableResponse.error) Result.t
           Async.Deferred.t
+val create_table_optimizer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateTableOptimizerRequest.t ->
+        (CreateTableOptimizerResponse.t, CreateTableOptimizerResponse.error)
+          Result.t Async.Deferred.t
 val create_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateTriggerRequest.t ->
         (CreateTriggerResponse.t, CreateTriggerResponse.error) Result.t
           Async.Deferred.t
+val create_usage_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateUsageProfileRequest.t ->
+        (CreateUsageProfileResponse.t, CreateUsageProfileResponse.error)
+          Result.t Async.Deferred.t
 val create_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -222,6 +325,12 @@ val delete_blueprint :
     ?cfg:Awso.Cfg.t ->
       DeleteBlueprintRequest.t ->
         (DeleteBlueprintResponse.t, DeleteBlueprintResponse.error) Result.t
+          Async.Deferred.t
+val delete_catalog :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCatalogRequest.t ->
+        (DeleteCatalogResponse.t, DeleteCatalogResponse.error) Result.t
           Async.Deferred.t
 val delete_classifier :
   ?endpoint_url:string ->
@@ -243,18 +352,43 @@ val delete_column_statistics_for_table :
         (DeleteColumnStatisticsForTableResponse.t,
           DeleteColumnStatisticsForTableResponse.error) Result.t
           Async.Deferred.t
+val delete_column_statistics_task_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteColumnStatisticsTaskSettingsRequest.t ->
+        (DeleteColumnStatisticsTaskSettingsResponse.t,
+          DeleteColumnStatisticsTaskSettingsResponse.error) Result.t
+          Async.Deferred.t
 val delete_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteConnectionRequest.t ->
         (DeleteConnectionResponse.t, DeleteConnectionResponse.error) Result.t
           Async.Deferred.t
+val delete_connection_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteConnectionTypeRequest.t ->
+        (DeleteConnectionTypeResponse.t, DeleteConnectionTypeResponse.error)
+          Result.t Async.Deferred.t
 val delete_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteCrawlerRequest.t ->
         (DeleteCrawlerResponse.t, DeleteCrawlerResponse.error) Result.t
           Async.Deferred.t
+val delete_custom_entity_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCustomEntityTypeRequest.t ->
+        (DeleteCustomEntityTypeResponse.t,
+          DeleteCustomEntityTypeResponse.error) Result.t Async.Deferred.t
+val delete_data_quality_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDataQualityRulesetRequest.t ->
+        (DeleteDataQualityRulesetResponse.t,
+          DeleteDataQualityRulesetResponse.error) Result.t Async.Deferred.t
 val delete_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -267,6 +401,33 @@ val delete_dev_endpoint :
       DeleteDevEndpointRequest.t ->
         (DeleteDevEndpointResponse.t, DeleteDevEndpointResponse.error)
           Result.t Async.Deferred.t
+val delete_glue_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteGlueIdentityCenterConfigurationRequest.t ->
+        (DeleteGlueIdentityCenterConfigurationResponse.t,
+          DeleteGlueIdentityCenterConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val delete_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIntegrationRequest.t ->
+        (DeleteIntegrationResponse.t, DeleteIntegrationResponse.error)
+          Result.t Async.Deferred.t
+val delete_integration_resource_property :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIntegrationResourcePropertyRequest.t ->
+        (DeleteIntegrationResourcePropertyResponse.t,
+          DeleteIntegrationResourcePropertyResponse.error) Result.t
+          Async.Deferred.t
+val delete_integration_table_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIntegrationTablePropertiesRequest.t ->
+        (DeleteIntegrationTablePropertiesResponse.t,
+          DeleteIntegrationTablePropertiesResponse.error) Result.t
+          Async.Deferred.t
 val delete_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -334,6 +495,12 @@ val delete_table :
       DeleteTableRequest.t ->
         (DeleteTableResponse.t, DeleteTableResponse.error) Result.t
           Async.Deferred.t
+val delete_table_optimizer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteTableOptimizerRequest.t ->
+        (DeleteTableOptimizerResponse.t, DeleteTableOptimizerResponse.error)
+          Result.t Async.Deferred.t
 val delete_table_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -346,6 +513,12 @@ val delete_trigger :
       DeleteTriggerRequest.t ->
         (DeleteTriggerResponse.t, DeleteTriggerResponse.error) Result.t
           Async.Deferred.t
+val delete_usage_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteUsageProfileRequest.t ->
+        (DeleteUsageProfileResponse.t, DeleteUsageProfileResponse.error)
+          Result.t Async.Deferred.t
 val delete_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -358,6 +531,31 @@ val delete_workflow :
       DeleteWorkflowRequest.t ->
         (DeleteWorkflowResponse.t, DeleteWorkflowResponse.error) Result.t
           Async.Deferred.t
+val describe_connection_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeConnectionTypeRequest.t ->
+        (DescribeConnectionTypeResponse.t,
+          DescribeConnectionTypeResponse.error) Result.t Async.Deferred.t
+val describe_entity :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEntityRequest.t ->
+        (DescribeEntityResponse.t, DescribeEntityResponse.error) Result.t
+          Async.Deferred.t
+val describe_inbound_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInboundIntegrationsRequest.t ->
+        (DescribeInboundIntegrationsResponse.t,
+          DescribeInboundIntegrationsResponse.error) Result.t
+          Async.Deferred.t
+val describe_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeIntegrationsRequest.t ->
+        (DescribeIntegrationsResponse.t, DescribeIntegrationsResponse.error)
+          Result.t Async.Deferred.t
 val get_blueprint :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -376,12 +574,24 @@ val get_blueprint_runs :
       GetBlueprintRunsRequest.t ->
         (GetBlueprintRunsResponse.t, GetBlueprintRunsResponse.error) Result.t
           Async.Deferred.t
+val get_catalog :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCatalogRequest.t ->
+        (GetCatalogResponse.t, GetCatalogResponse.error) Result.t
+          Async.Deferred.t
 val get_catalog_import_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetCatalogImportStatusRequest.t ->
         (GetCatalogImportStatusResponse.t,
           GetCatalogImportStatusResponse.error) Result.t Async.Deferred.t
+val get_catalogs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCatalogsRequest.t ->
+        (GetCatalogsResponse.t, GetCatalogsResponse.error) Result.t
+          Async.Deferred.t
 val get_classifier :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -407,6 +617,26 @@ val get_column_statistics_for_table :
       GetColumnStatisticsForTableRequest.t ->
         (GetColumnStatisticsForTableResponse.t,
           GetColumnStatisticsForTableResponse.error) Result.t
+          Async.Deferred.t
+val get_column_statistics_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetColumnStatisticsTaskRunRequest.t ->
+        (GetColumnStatisticsTaskRunResponse.t,
+          GetColumnStatisticsTaskRunResponse.error) Result.t Async.Deferred.t
+val get_column_statistics_task_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetColumnStatisticsTaskRunsRequest.t ->
+        (GetColumnStatisticsTaskRunsResponse.t,
+          GetColumnStatisticsTaskRunsResponse.error) Result.t
+          Async.Deferred.t
+val get_column_statistics_task_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetColumnStatisticsTaskSettingsRequest.t ->
+        (GetColumnStatisticsTaskSettingsResponse.t,
+          GetColumnStatisticsTaskSettingsResponse.error) Result.t
           Async.Deferred.t
 val get_connection :
   ?endpoint_url:string ->
@@ -438,12 +668,56 @@ val get_crawlers :
       GetCrawlersRequest.t ->
         (GetCrawlersResponse.t, GetCrawlersResponse.error) Result.t
           Async.Deferred.t
+val get_custom_entity_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCustomEntityTypeRequest.t ->
+        (GetCustomEntityTypeResponse.t, GetCustomEntityTypeResponse.error)
+          Result.t Async.Deferred.t
 val get_data_catalog_encryption_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDataCatalogEncryptionSettingsRequest.t ->
         (GetDataCatalogEncryptionSettingsResponse.t,
           GetDataCatalogEncryptionSettingsResponse.error) Result.t
+          Async.Deferred.t
+val get_data_quality_model :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityModelRequest.t ->
+        (GetDataQualityModelResponse.t, GetDataQualityModelResponse.error)
+          Result.t Async.Deferred.t
+val get_data_quality_model_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityModelResultRequest.t ->
+        (GetDataQualityModelResultResponse.t,
+          GetDataQualityModelResultResponse.error) Result.t Async.Deferred.t
+val get_data_quality_result :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityResultRequest.t ->
+        (GetDataQualityResultResponse.t, GetDataQualityResultResponse.error)
+          Result.t Async.Deferred.t
+val get_data_quality_rule_recommendation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityRuleRecommendationRunRequest.t ->
+        (GetDataQualityRuleRecommendationRunResponse.t,
+          GetDataQualityRuleRecommendationRunResponse.error) Result.t
+          Async.Deferred.t
+val get_data_quality_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityRulesetRequest.t ->
+        (GetDataQualityRulesetResponse.t,
+          GetDataQualityRulesetResponse.error) Result.t Async.Deferred.t
+val get_data_quality_ruleset_evaluation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDataQualityRulesetEvaluationRunRequest.t ->
+        (GetDataQualityRulesetEvaluationRunResponse.t,
+          GetDataQualityRulesetEvaluationRunResponse.error) Result.t
           Async.Deferred.t
 val get_database :
   ?endpoint_url:string ->
@@ -474,6 +748,33 @@ val get_dev_endpoints :
     ?cfg:Awso.Cfg.t ->
       GetDevEndpointsRequest.t ->
         (GetDevEndpointsResponse.t, GetDevEndpointsResponse.error) Result.t
+          Async.Deferred.t
+val get_entity_records :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEntityRecordsRequest.t ->
+        (GetEntityRecordsResponse.t, GetEntityRecordsResponse.error) Result.t
+          Async.Deferred.t
+val get_glue_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetGlueIdentityCenterConfigurationRequest.t ->
+        (GetGlueIdentityCenterConfigurationResponse.t,
+          GetGlueIdentityCenterConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val get_integration_resource_property :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIntegrationResourcePropertyRequest.t ->
+        (GetIntegrationResourcePropertyResponse.t,
+          GetIntegrationResourcePropertyResponse.error) Result.t
+          Async.Deferred.t
+val get_integration_table_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIntegrationTablePropertiesRequest.t ->
+        (GetIntegrationTablePropertiesResponse.t,
+          GetIntegrationTablePropertiesResponse.error) Result.t
           Async.Deferred.t
 val get_job :
   ?endpoint_url:string ->
@@ -532,6 +833,13 @@ val get_mapping :
     ?cfg:Awso.Cfg.t ->
       GetMappingRequest.t ->
         (GetMappingResponse.t, GetMappingResponse.error) Result.t
+          Async.Deferred.t
+val get_materialized_view_refresh_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetMaterializedViewRefreshTaskRunRequest.t ->
+        (GetMaterializedViewRefreshTaskRunResponse.t,
+          GetMaterializedViewRefreshTaskRunResponse.error) Result.t
           Async.Deferred.t
 val get_partition :
   ?endpoint_url:string ->
@@ -628,6 +936,12 @@ val get_table :
       GetTableRequest.t ->
         (GetTableResponse.t, GetTableResponse.error) Result.t
           Async.Deferred.t
+val get_table_optimizer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetTableOptimizerRequest.t ->
+        (GetTableOptimizerResponse.t, GetTableOptimizerResponse.error)
+          Result.t Async.Deferred.t
 val get_table_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -683,6 +997,12 @@ val get_unfiltered_table_metadata :
       GetUnfilteredTableMetadataRequest.t ->
         (GetUnfilteredTableMetadataResponse.t,
           GetUnfilteredTableMetadataResponse.error) Result.t Async.Deferred.t
+val get_usage_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetUsageProfileRequest.t ->
+        (GetUsageProfileResponse.t, GetUsageProfileResponse.error) Result.t
+          Async.Deferred.t
 val get_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -731,17 +1051,94 @@ val list_blueprints :
       ListBlueprintsRequest.t ->
         (ListBlueprintsResponse.t, ListBlueprintsResponse.error) Result.t
           Async.Deferred.t
+val list_column_statistics_task_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListColumnStatisticsTaskRunsRequest.t ->
+        (ListColumnStatisticsTaskRunsResponse.t,
+          ListColumnStatisticsTaskRunsResponse.error) Result.t
+          Async.Deferred.t
+val list_connection_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListConnectionTypesRequest.t ->
+        (ListConnectionTypesResponse.t, ListConnectionTypesResponse.error)
+          Result.t Async.Deferred.t
 val list_crawlers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCrawlersRequest.t ->
         (ListCrawlersResponse.t, ListCrawlersResponse.error) Result.t
           Async.Deferred.t
+val list_crawls :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCrawlsRequest.t ->
+        (ListCrawlsResponse.t, ListCrawlsResponse.error) Result.t
+          Async.Deferred.t
+val list_custom_entity_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCustomEntityTypesRequest.t ->
+        (ListCustomEntityTypesResponse.t,
+          ListCustomEntityTypesResponse.error) Result.t Async.Deferred.t
+val list_data_quality_results :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityResultsRequest.t ->
+        (ListDataQualityResultsResponse.t,
+          ListDataQualityResultsResponse.error) Result.t Async.Deferred.t
+val list_data_quality_rule_recommendation_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityRuleRecommendationRunsRequest.t ->
+        (ListDataQualityRuleRecommendationRunsResponse.t,
+          ListDataQualityRuleRecommendationRunsResponse.error) Result.t
+          Async.Deferred.t
+val list_data_quality_ruleset_evaluation_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityRulesetEvaluationRunsRequest.t ->
+        (ListDataQualityRulesetEvaluationRunsResponse.t,
+          ListDataQualityRulesetEvaluationRunsResponse.error) Result.t
+          Async.Deferred.t
+val list_data_quality_rulesets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityRulesetsRequest.t ->
+        (ListDataQualityRulesetsResponse.t,
+          ListDataQualityRulesetsResponse.error) Result.t Async.Deferred.t
+val list_data_quality_statistic_annotations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityStatisticAnnotationsRequest.t ->
+        (ListDataQualityStatisticAnnotationsResponse.t,
+          ListDataQualityStatisticAnnotationsResponse.error) Result.t
+          Async.Deferred.t
+val list_data_quality_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDataQualityStatisticsRequest.t ->
+        (ListDataQualityStatisticsResponse.t,
+          ListDataQualityStatisticsResponse.error) Result.t Async.Deferred.t
 val list_dev_endpoints :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDevEndpointsRequest.t ->
         (ListDevEndpointsResponse.t, ListDevEndpointsResponse.error) Result.t
+          Async.Deferred.t
+val list_entities :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEntitiesRequest.t ->
+        (ListEntitiesResponse.t, ListEntitiesResponse.error) Result.t
+          Async.Deferred.t
+val list_integration_resource_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListIntegrationResourcePropertiesRequest.t ->
+        (ListIntegrationResourcePropertiesResponse.t,
+          ListIntegrationResourcePropertiesResponse.error) Result.t
           Async.Deferred.t
 val list_jobs :
   ?endpoint_url:string ->
@@ -754,6 +1151,13 @@ val list_m_l_transforms :
     ?cfg:Awso.Cfg.t ->
       ListMLTransformsRequest.t ->
         (ListMLTransformsResponse.t, ListMLTransformsResponse.error) Result.t
+          Async.Deferred.t
+val list_materialized_view_refresh_task_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListMaterializedViewRefreshTaskRunsRequest.t ->
+        (ListMaterializedViewRefreshTaskRunsResponse.t,
+          ListMaterializedViewRefreshTaskRunsResponse.error) Result.t
           Async.Deferred.t
 val list_registries :
   ?endpoint_url:string ->
@@ -785,24 +1189,49 @@ val list_statements :
       ListStatementsRequest.t ->
         (ListStatementsResponse.t, ListStatementsResponse.error) Result.t
           Async.Deferred.t
+val list_table_optimizer_runs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListTableOptimizerRunsRequest.t ->
+        (ListTableOptimizerRunsResponse.t,
+          ListTableOptimizerRunsResponse.error) Result.t Async.Deferred.t
 val list_triggers :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTriggersRequest.t ->
         (ListTriggersResponse.t, ListTriggersResponse.error) Result.t
           Async.Deferred.t
+val list_usage_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListUsageProfilesRequest.t ->
+        (ListUsageProfilesResponse.t, ListUsageProfilesResponse.error)
+          Result.t Async.Deferred.t
 val list_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListWorkflowsRequest.t ->
         (ListWorkflowsResponse.t, ListWorkflowsResponse.error) Result.t
           Async.Deferred.t
+val modify_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyIntegrationRequest.t ->
+        (ModifyIntegrationResponse.t, ModifyIntegrationResponse.error)
+          Result.t Async.Deferred.t
 val put_data_catalog_encryption_settings :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PutDataCatalogEncryptionSettingsRequest.t ->
         (PutDataCatalogEncryptionSettingsResponse.t,
           PutDataCatalogEncryptionSettingsResponse.error) Result.t
+          Async.Deferred.t
+val put_data_quality_profile_annotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDataQualityProfileAnnotationRequest.t ->
+        (PutDataQualityProfileAnnotationResponse.t,
+          PutDataQualityProfileAnnotationResponse.error) Result.t
           Async.Deferred.t
 val put_resource_policy :
   ?endpoint_url:string ->
@@ -828,6 +1257,12 @@ val query_schema_version_metadata :
       QuerySchemaVersionMetadataInput.t ->
         (QuerySchemaVersionMetadataResponse.t,
           QuerySchemaVersionMetadataResponse.error) Result.t Async.Deferred.t
+val register_connection_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterConnectionTypeRequest.t ->
+        (RegisterConnectionTypeResponse.t,
+          RegisterConnectionTypeResponse.error) Result.t Async.Deferred.t
 val register_schema_version :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -871,6 +1306,20 @@ val start_blueprint_run :
       StartBlueprintRunRequest.t ->
         (StartBlueprintRunResponse.t, StartBlueprintRunResponse.error)
           Result.t Async.Deferred.t
+val start_column_statistics_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartColumnStatisticsTaskRunRequest.t ->
+        (StartColumnStatisticsTaskRunResponse.t,
+          StartColumnStatisticsTaskRunResponse.error) Result.t
+          Async.Deferred.t
+val start_column_statistics_task_run_schedule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartColumnStatisticsTaskRunScheduleRequest.t ->
+        (StartColumnStatisticsTaskRunScheduleResponse.t,
+          StartColumnStatisticsTaskRunScheduleResponse.error) Result.t
+          Async.Deferred.t
 val start_crawler :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -883,6 +1332,20 @@ val start_crawler_schedule :
       StartCrawlerScheduleRequest.t ->
         (StartCrawlerScheduleResponse.t, StartCrawlerScheduleResponse.error)
           Result.t Async.Deferred.t
+val start_data_quality_rule_recommendation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDataQualityRuleRecommendationRunRequest.t ->
+        (StartDataQualityRuleRecommendationRunResponse.t,
+          StartDataQualityRuleRecommendationRunResponse.error) Result.t
+          Async.Deferred.t
+val start_data_quality_ruleset_evaluation_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartDataQualityRulesetEvaluationRunRequest.t ->
+        (StartDataQualityRulesetEvaluationRunResponse.t,
+          StartDataQualityRulesetEvaluationRunResponse.error) Result.t
+          Async.Deferred.t
 val start_export_labels_task_run :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -914,6 +1377,13 @@ val start_m_l_labeling_set_generation_task_run :
         (StartMLLabelingSetGenerationTaskRunResponse.t,
           StartMLLabelingSetGenerationTaskRunResponse.error) Result.t
           Async.Deferred.t
+val start_materialized_view_refresh_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartMaterializedViewRefreshTaskRunRequest.t ->
+        (StartMaterializedViewRefreshTaskRunResponse.t,
+          StartMaterializedViewRefreshTaskRunResponse.error) Result.t
+          Async.Deferred.t
 val start_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -925,6 +1395,20 @@ val start_workflow_run :
     ?cfg:Awso.Cfg.t ->
       StartWorkflowRunRequest.t ->
         (StartWorkflowRunResponse.t, StartWorkflowRunResponse.error) Result.t
+          Async.Deferred.t
+val stop_column_statistics_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopColumnStatisticsTaskRunRequest.t ->
+        (StopColumnStatisticsTaskRunResponse.t,
+          StopColumnStatisticsTaskRunResponse.error) Result.t
+          Async.Deferred.t
+val stop_column_statistics_task_run_schedule :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopColumnStatisticsTaskRunScheduleRequest.t ->
+        (StopColumnStatisticsTaskRunScheduleResponse.t,
+          StopColumnStatisticsTaskRunScheduleResponse.error) Result.t
           Async.Deferred.t
 val stop_crawler :
   ?endpoint_url:string ->
@@ -938,6 +1422,13 @@ val stop_crawler_schedule :
       StopCrawlerScheduleRequest.t ->
         (StopCrawlerScheduleResponse.t, StopCrawlerScheduleResponse.error)
           Result.t Async.Deferred.t
+val stop_materialized_view_refresh_task_run :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopMaterializedViewRefreshTaskRunRequest.t ->
+        (StopMaterializedViewRefreshTaskRunResponse.t,
+          StopMaterializedViewRefreshTaskRunResponse.error) Result.t
+          Async.Deferred.t
 val stop_session :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -962,6 +1453,12 @@ val tag_resource :
       TagResourceRequest.t ->
         (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
+val test_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestConnectionRequest.t ->
+        (TestConnectionResponse.t, TestConnectionResponse.error) Result.t
+          Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -973,6 +1470,12 @@ val update_blueprint :
     ?cfg:Awso.Cfg.t ->
       UpdateBlueprintRequest.t ->
         (UpdateBlueprintResponse.t, UpdateBlueprintResponse.error) Result.t
+          Async.Deferred.t
+val update_catalog :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCatalogRequest.t ->
+        (UpdateCatalogResponse.t, UpdateCatalogResponse.error) Result.t
           Async.Deferred.t
 val update_classifier :
   ?endpoint_url:string ->
@@ -994,6 +1497,13 @@ val update_column_statistics_for_table :
         (UpdateColumnStatisticsForTableResponse.t,
           UpdateColumnStatisticsForTableResponse.error) Result.t
           Async.Deferred.t
+val update_column_statistics_task_settings :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateColumnStatisticsTaskSettingsRequest.t ->
+        (UpdateColumnStatisticsTaskSettingsResponse.t,
+          UpdateColumnStatisticsTaskSettingsResponse.error) Result.t
+          Async.Deferred.t
 val update_connection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1012,6 +1522,12 @@ val update_crawler_schedule :
       UpdateCrawlerScheduleRequest.t ->
         (UpdateCrawlerScheduleResponse.t,
           UpdateCrawlerScheduleResponse.error) Result.t Async.Deferred.t
+val update_data_quality_ruleset :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDataQualityRulesetRequest.t ->
+        (UpdateDataQualityRulesetResponse.t,
+          UpdateDataQualityRulesetResponse.error) Result.t Async.Deferred.t
 val update_database :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1024,12 +1540,39 @@ val update_dev_endpoint :
       UpdateDevEndpointRequest.t ->
         (UpdateDevEndpointResponse.t, UpdateDevEndpointResponse.error)
           Result.t Async.Deferred.t
+val update_glue_identity_center_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateGlueIdentityCenterConfigurationRequest.t ->
+        (UpdateGlueIdentityCenterConfigurationResponse.t,
+          UpdateGlueIdentityCenterConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val update_integration_resource_property :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateIntegrationResourcePropertyRequest.t ->
+        (UpdateIntegrationResourcePropertyResponse.t,
+          UpdateIntegrationResourcePropertyResponse.error) Result.t
+          Async.Deferred.t
+val update_integration_table_properties :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateIntegrationTablePropertiesRequest.t ->
+        (UpdateIntegrationTablePropertiesResponse.t,
+          UpdateIntegrationTablePropertiesResponse.error) Result.t
+          Async.Deferred.t
 val update_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateJobRequest.t ->
         (UpdateJobResponse.t, UpdateJobResponse.error) Result.t
           Async.Deferred.t
+val update_job_from_source_control :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateJobFromSourceControlRequest.t ->
+        (UpdateJobFromSourceControlResponse.t,
+          UpdateJobFromSourceControlResponse.error) Result.t Async.Deferred.t
 val update_m_l_transform :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -1054,18 +1597,36 @@ val update_schema :
       UpdateSchemaInput.t ->
         (UpdateSchemaResponse.t, UpdateSchemaResponse.error) Result.t
           Async.Deferred.t
+val update_source_control_from_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateSourceControlFromJobRequest.t ->
+        (UpdateSourceControlFromJobResponse.t,
+          UpdateSourceControlFromJobResponse.error) Result.t Async.Deferred.t
 val update_table :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTableRequest.t ->
         (UpdateTableResponse.t, UpdateTableResponse.error) Result.t
           Async.Deferred.t
+val update_table_optimizer :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateTableOptimizerRequest.t ->
+        (UpdateTableOptimizerResponse.t, UpdateTableOptimizerResponse.error)
+          Result.t Async.Deferred.t
 val update_trigger :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateTriggerRequest.t ->
         (UpdateTriggerResponse.t, UpdateTriggerResponse.error) Result.t
           Async.Deferred.t
+val update_usage_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateUsageProfileRequest.t ->
+        (UpdateUsageProfileResponse.t, UpdateUsageProfileResponse.error)
+          Result.t Async.Deferred.t
 val update_user_defined_function :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

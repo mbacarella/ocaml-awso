@@ -18,6 +18,18 @@ val batch_get_builds :
       BatchGetBuildsInput.t ->
         (BatchGetBuildsOutput.t, BatchGetBuildsOutput.error) Result.t
           Async.Deferred.t
+val batch_get_command_executions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetCommandExecutionsInput.t ->
+        (BatchGetCommandExecutionsOutput.t,
+          BatchGetCommandExecutionsOutput.error) Result.t Async.Deferred.t
+val batch_get_fleets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetFleetsInput.t ->
+        (BatchGetFleetsOutput.t, BatchGetFleetsOutput.error) Result.t
+          Async.Deferred.t
 val batch_get_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -35,6 +47,18 @@ val batch_get_reports :
     ?cfg:Awso.Cfg.t ->
       BatchGetReportsInput.t ->
         (BatchGetReportsOutput.t, BatchGetReportsOutput.error) Result.t
+          Async.Deferred.t
+val batch_get_sandboxes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetSandboxesInput.t ->
+        (BatchGetSandboxesOutput.t, BatchGetSandboxesOutput.error) Result.t
+          Async.Deferred.t
+val create_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateFleetInput.t ->
+        (CreateFleetOutput.t, CreateFleetOutput.error) Result.t
           Async.Deferred.t
 val create_project :
   ?endpoint_url:string ->
@@ -59,6 +83,12 @@ val delete_build_batch :
     ?cfg:Awso.Cfg.t ->
       DeleteBuildBatchInput.t ->
         (DeleteBuildBatchOutput.t, DeleteBuildBatchOutput.error) Result.t
+          Async.Deferred.t
+val delete_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteFleetInput.t ->
+        (DeleteFleetOutput.t, DeleteFleetOutput.error) Result.t
           Async.Deferred.t
 val delete_project :
   ?endpoint_url:string ->
@@ -156,12 +186,25 @@ val list_builds_for_project :
       ListBuildsForProjectInput.t ->
         (ListBuildsForProjectOutput.t, ListBuildsForProjectOutput.error)
           Result.t Async.Deferred.t
+val list_command_executions_for_sandbox :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCommandExecutionsForSandboxInput.t ->
+        (ListCommandExecutionsForSandboxOutput.t,
+          ListCommandExecutionsForSandboxOutput.error) Result.t
+          Async.Deferred.t
 val list_curated_environment_images :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListCuratedEnvironmentImagesInput.t ->
         (ListCuratedEnvironmentImagesOutput.t,
           ListCuratedEnvironmentImagesOutput.error) Result.t Async.Deferred.t
+val list_fleets :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListFleetsInput.t ->
+        (ListFleetsOutput.t, ListFleetsOutput.error) Result.t
+          Async.Deferred.t
 val list_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -186,6 +229,18 @@ val list_reports_for_report_group :
       ListReportsForReportGroupInput.t ->
         (ListReportsForReportGroupOutput.t,
           ListReportsForReportGroupOutput.error) Result.t Async.Deferred.t
+val list_sandboxes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSandboxesInput.t ->
+        (ListSandboxesOutput.t, ListSandboxesOutput.error) Result.t
+          Async.Deferred.t
+val list_sandboxes_for_project :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSandboxesForProjectInput.t ->
+        (ListSandboxesForProjectOutput.t,
+          ListSandboxesForProjectOutput.error) Result.t Async.Deferred.t
 val list_shared_projects :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -234,6 +289,24 @@ val start_build_batch :
       StartBuildBatchInput.t ->
         (StartBuildBatchOutput.t, StartBuildBatchOutput.error) Result.t
           Async.Deferred.t
+val start_command_execution :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartCommandExecutionInput.t ->
+        (StartCommandExecutionOutput.t, StartCommandExecutionOutput.error)
+          Result.t Async.Deferred.t
+val start_sandbox :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSandboxInput.t ->
+        (StartSandboxOutput.t, StartSandboxOutput.error) Result.t
+          Async.Deferred.t
+val start_sandbox_connection :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartSandboxConnectionInput.t ->
+        (StartSandboxConnectionOutput.t, StartSandboxConnectionOutput.error)
+          Result.t Async.Deferred.t
 val stop_build :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -244,6 +317,18 @@ val stop_build_batch :
     ?cfg:Awso.Cfg.t ->
       StopBuildBatchInput.t ->
         (StopBuildBatchOutput.t, StopBuildBatchOutput.error) Result.t
+          Async.Deferred.t
+val stop_sandbox :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopSandboxInput.t ->
+        (StopSandboxOutput.t, StopSandboxOutput.error) Result.t
+          Async.Deferred.t
+val update_fleet :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateFleetInput.t ->
+        (UpdateFleetOutput.t, UpdateFleetOutput.error) Result.t
           Async.Deferred.t
 val update_project :
   ?endpoint_url:string ->

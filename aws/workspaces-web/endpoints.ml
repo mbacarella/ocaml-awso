@@ -5,52 +5,108 @@ type ('i, 'o, 'e) t =
   | AssociateBrowserSettings: (AssociateBrowserSettingsRequest.t,
   AssociateBrowserSettingsResponse.t, AssociateBrowserSettingsResponse.error)
   t 
+  | AssociateDataProtectionSettings:
+  (AssociateDataProtectionSettingsRequest.t,
+  AssociateDataProtectionSettingsResponse.t,
+  AssociateDataProtectionSettingsResponse.error) t 
+  | AssociateIpAccessSettings: (AssociateIpAccessSettingsRequest.t,
+  AssociateIpAccessSettingsResponse.t,
+  AssociateIpAccessSettingsResponse.error) t 
   | AssociateNetworkSettings: (AssociateNetworkSettingsRequest.t,
   AssociateNetworkSettingsResponse.t, AssociateNetworkSettingsResponse.error)
   t 
+  | AssociateSessionLogger: (AssociateSessionLoggerRequest.t,
+  AssociateSessionLoggerResponse.t, AssociateSessionLoggerResponse.error) t 
   | AssociateTrustStore: (AssociateTrustStoreRequest.t,
   AssociateTrustStoreResponse.t, AssociateTrustStoreResponse.error) t 
+  | AssociateUserAccessLoggingSettings:
+  (AssociateUserAccessLoggingSettingsRequest.t,
+  AssociateUserAccessLoggingSettingsResponse.t,
+  AssociateUserAccessLoggingSettingsResponse.error) t 
   | AssociateUserSettings: (AssociateUserSettingsRequest.t,
   AssociateUserSettingsResponse.t, AssociateUserSettingsResponse.error) t 
   | CreateBrowserSettings: (CreateBrowserSettingsRequest.t,
   CreateBrowserSettingsResponse.t, CreateBrowserSettingsResponse.error) t 
+  | CreateDataProtectionSettings: (CreateDataProtectionSettingsRequest.t,
+  CreateDataProtectionSettingsResponse.t,
+  CreateDataProtectionSettingsResponse.error) t 
   | CreateIdentityProvider: (CreateIdentityProviderRequest.t,
   CreateIdentityProviderResponse.t, CreateIdentityProviderResponse.error) t 
+  | CreateIpAccessSettings: (CreateIpAccessSettingsRequest.t,
+  CreateIpAccessSettingsResponse.t, CreateIpAccessSettingsResponse.error) t 
   | CreateNetworkSettings: (CreateNetworkSettingsRequest.t,
   CreateNetworkSettingsResponse.t, CreateNetworkSettingsResponse.error) t 
   | CreatePortal: (CreatePortalRequest.t, CreatePortalResponse.t,
   CreatePortalResponse.error) t 
+  | CreateSessionLogger: (CreateSessionLoggerRequest.t,
+  CreateSessionLoggerResponse.t, CreateSessionLoggerResponse.error) t 
   | CreateTrustStore: (CreateTrustStoreRequest.t, CreateTrustStoreResponse.t,
   CreateTrustStoreResponse.error) t 
+  | CreateUserAccessLoggingSettings:
+  (CreateUserAccessLoggingSettingsRequest.t,
+  CreateUserAccessLoggingSettingsResponse.t,
+  CreateUserAccessLoggingSettingsResponse.error) t 
   | CreateUserSettings: (CreateUserSettingsRequest.t,
   CreateUserSettingsResponse.t, CreateUserSettingsResponse.error) t 
   | DeleteBrowserSettings: (DeleteBrowserSettingsRequest.t,
   DeleteBrowserSettingsResponse.t, DeleteBrowserSettingsResponse.error) t 
+  | DeleteDataProtectionSettings: (DeleteDataProtectionSettingsRequest.t,
+  DeleteDataProtectionSettingsResponse.t,
+  DeleteDataProtectionSettingsResponse.error) t 
   | DeleteIdentityProvider: (DeleteIdentityProviderRequest.t,
   DeleteIdentityProviderResponse.t, DeleteIdentityProviderResponse.error) t 
+  | DeleteIpAccessSettings: (DeleteIpAccessSettingsRequest.t,
+  DeleteIpAccessSettingsResponse.t, DeleteIpAccessSettingsResponse.error) t 
   | DeleteNetworkSettings: (DeleteNetworkSettingsRequest.t,
   DeleteNetworkSettingsResponse.t, DeleteNetworkSettingsResponse.error) t 
   | DeletePortal: (DeletePortalRequest.t, DeletePortalResponse.t,
   DeletePortalResponse.error) t 
+  | DeleteSessionLogger: (DeleteSessionLoggerRequest.t,
+  DeleteSessionLoggerResponse.t, DeleteSessionLoggerResponse.error) t 
   | DeleteTrustStore: (DeleteTrustStoreRequest.t, DeleteTrustStoreResponse.t,
   DeleteTrustStoreResponse.error) t 
+  | DeleteUserAccessLoggingSettings:
+  (DeleteUserAccessLoggingSettingsRequest.t,
+  DeleteUserAccessLoggingSettingsResponse.t,
+  DeleteUserAccessLoggingSettingsResponse.error) t 
   | DeleteUserSettings: (DeleteUserSettingsRequest.t,
   DeleteUserSettingsResponse.t, DeleteUserSettingsResponse.error) t 
   | DisassociateBrowserSettings: (DisassociateBrowserSettingsRequest.t,
   DisassociateBrowserSettingsResponse.t,
   DisassociateBrowserSettingsResponse.error) t 
+  | DisassociateDataProtectionSettings:
+  (DisassociateDataProtectionSettingsRequest.t,
+  DisassociateDataProtectionSettingsResponse.t,
+  DisassociateDataProtectionSettingsResponse.error) t 
+  | DisassociateIpAccessSettings: (DisassociateIpAccessSettingsRequest.t,
+  DisassociateIpAccessSettingsResponse.t,
+  DisassociateIpAccessSettingsResponse.error) t 
   | DisassociateNetworkSettings: (DisassociateNetworkSettingsRequest.t,
   DisassociateNetworkSettingsResponse.t,
   DisassociateNetworkSettingsResponse.error) t 
+  | DisassociateSessionLogger: (DisassociateSessionLoggerRequest.t,
+  DisassociateSessionLoggerResponse.t,
+  DisassociateSessionLoggerResponse.error) t 
   | DisassociateTrustStore: (DisassociateTrustStoreRequest.t,
   DisassociateTrustStoreResponse.t, DisassociateTrustStoreResponse.error) t 
+  | DisassociateUserAccessLoggingSettings:
+  (DisassociateUserAccessLoggingSettingsRequest.t,
+  DisassociateUserAccessLoggingSettingsResponse.t,
+  DisassociateUserAccessLoggingSettingsResponse.error) t 
   | DisassociateUserSettings: (DisassociateUserSettingsRequest.t,
   DisassociateUserSettingsResponse.t, DisassociateUserSettingsResponse.error)
   t 
+  | ExpireSession: (ExpireSessionRequest.t, ExpireSessionResponse.t,
+  ExpireSessionResponse.error) t 
   | GetBrowserSettings: (GetBrowserSettingsRequest.t,
   GetBrowserSettingsResponse.t, GetBrowserSettingsResponse.error) t 
+  | GetDataProtectionSettings: (GetDataProtectionSettingsRequest.t,
+  GetDataProtectionSettingsResponse.t,
+  GetDataProtectionSettingsResponse.error) t 
   | GetIdentityProvider: (GetIdentityProviderRequest.t,
   GetIdentityProviderResponse.t, GetIdentityProviderResponse.error) t 
+  | GetIpAccessSettings: (GetIpAccessSettingsRequest.t,
+  GetIpAccessSettingsResponse.t, GetIpAccessSettingsResponse.error) t 
   | GetNetworkSettings: (GetNetworkSettingsRequest.t,
   GetNetworkSettingsResponse.t, GetNetworkSettingsResponse.error) t 
   | GetPortal: (GetPortalRequest.t, GetPortalResponse.t,
@@ -59,21 +115,37 @@ type ('i, 'o, 'e) t =
   (GetPortalServiceProviderMetadataRequest.t,
   GetPortalServiceProviderMetadataResponse.t,
   GetPortalServiceProviderMetadataResponse.error) t 
+  | GetSession: (GetSessionRequest.t, GetSessionResponse.t,
+  GetSessionResponse.error) t 
+  | GetSessionLogger: (GetSessionLoggerRequest.t, GetSessionLoggerResponse.t,
+  GetSessionLoggerResponse.error) t 
   | GetTrustStore: (GetTrustStoreRequest.t, GetTrustStoreResponse.t,
   GetTrustStoreResponse.error) t 
   | GetTrustStoreCertificate: (GetTrustStoreCertificateRequest.t,
   GetTrustStoreCertificateResponse.t, GetTrustStoreCertificateResponse.error)
   t 
+  | GetUserAccessLoggingSettings: (GetUserAccessLoggingSettingsRequest.t,
+  GetUserAccessLoggingSettingsResponse.t,
+  GetUserAccessLoggingSettingsResponse.error) t 
   | GetUserSettings: (GetUserSettingsRequest.t, GetUserSettingsResponse.t,
   GetUserSettingsResponse.error) t 
   | ListBrowserSettings: (ListBrowserSettingsRequest.t,
   ListBrowserSettingsResponse.t, ListBrowserSettingsResponse.error) t 
+  | ListDataProtectionSettings: (ListDataProtectionSettingsRequest.t,
+  ListDataProtectionSettingsResponse.t,
+  ListDataProtectionSettingsResponse.error) t 
   | ListIdentityProviders: (ListIdentityProvidersRequest.t,
   ListIdentityProvidersResponse.t, ListIdentityProvidersResponse.error) t 
+  | ListIpAccessSettings: (ListIpAccessSettingsRequest.t,
+  ListIpAccessSettingsResponse.t, ListIpAccessSettingsResponse.error) t 
   | ListNetworkSettings: (ListNetworkSettingsRequest.t,
   ListNetworkSettingsResponse.t, ListNetworkSettingsResponse.error) t 
   | ListPortals: (ListPortalsRequest.t, ListPortalsResponse.t,
   ListPortalsResponse.error) t 
+  | ListSessionLoggers: (ListSessionLoggersRequest.t,
+  ListSessionLoggersResponse.t, ListSessionLoggersResponse.error) t 
+  | ListSessions: (ListSessionsRequest.t, ListSessionsResponse.t,
+  ListSessionsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListTrustStoreCertificates: (ListTrustStoreCertificatesRequest.t,
@@ -81,6 +153,9 @@ type ('i, 'o, 'e) t =
   ListTrustStoreCertificatesResponse.error) t 
   | ListTrustStores: (ListTrustStoresRequest.t, ListTrustStoresResponse.t,
   ListTrustStoresResponse.error) t 
+  | ListUserAccessLoggingSettings: (ListUserAccessLoggingSettingsRequest.t,
+  ListUserAccessLoggingSettingsResponse.t,
+  ListUserAccessLoggingSettingsResponse.error) t 
   | ListUserSettings: (ListUserSettingsRequest.t, ListUserSettingsResponse.t,
   ListUserSettingsResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -89,61 +164,103 @@ type ('i, 'o, 'e) t =
   UntagResourceResponse.error) t 
   | UpdateBrowserSettings: (UpdateBrowserSettingsRequest.t,
   UpdateBrowserSettingsResponse.t, UpdateBrowserSettingsResponse.error) t 
+  | UpdateDataProtectionSettings: (UpdateDataProtectionSettingsRequest.t,
+  UpdateDataProtectionSettingsResponse.t,
+  UpdateDataProtectionSettingsResponse.error) t 
   | UpdateIdentityProvider: (UpdateIdentityProviderRequest.t,
   UpdateIdentityProviderResponse.t, UpdateIdentityProviderResponse.error) t 
+  | UpdateIpAccessSettings: (UpdateIpAccessSettingsRequest.t,
+  UpdateIpAccessSettingsResponse.t, UpdateIpAccessSettingsResponse.error) t 
   | UpdateNetworkSettings: (UpdateNetworkSettingsRequest.t,
   UpdateNetworkSettingsResponse.t, UpdateNetworkSettingsResponse.error) t 
   | UpdatePortal: (UpdatePortalRequest.t, UpdatePortalResponse.t,
   UpdatePortalResponse.error) t 
+  | UpdateSessionLogger: (UpdateSessionLoggerRequest.t,
+  UpdateSessionLoggerResponse.t, UpdateSessionLoggerResponse.error) t 
   | UpdateTrustStore: (UpdateTrustStoreRequest.t, UpdateTrustStoreResponse.t,
   UpdateTrustStoreResponse.error) t 
+  | UpdateUserAccessLoggingSettings:
+  (UpdateUserAccessLoggingSettingsRequest.t,
+  UpdateUserAccessLoggingSettingsResponse.t,
+  UpdateUserAccessLoggingSettingsResponse.error) t 
   | UpdateUserSettings: (UpdateUserSettingsRequest.t,
   UpdateUserSettingsResponse.t, UpdateUserSettingsResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateBrowserSettings -> `PUT
+  | AssociateDataProtectionSettings -> `PUT
+  | AssociateIpAccessSettings -> `PUT
   | AssociateNetworkSettings -> `PUT
+  | AssociateSessionLogger -> `PUT
   | AssociateTrustStore -> `PUT
+  | AssociateUserAccessLoggingSettings -> `PUT
   | AssociateUserSettings -> `PUT
   | CreateBrowserSettings -> `POST
+  | CreateDataProtectionSettings -> `POST
   | CreateIdentityProvider -> `POST
+  | CreateIpAccessSettings -> `POST
   | CreateNetworkSettings -> `POST
   | CreatePortal -> `POST
+  | CreateSessionLogger -> `POST
   | CreateTrustStore -> `POST
+  | CreateUserAccessLoggingSettings -> `POST
   | CreateUserSettings -> `POST
   | DeleteBrowserSettings -> `DELETE
+  | DeleteDataProtectionSettings -> `DELETE
   | DeleteIdentityProvider -> `DELETE
+  | DeleteIpAccessSettings -> `DELETE
   | DeleteNetworkSettings -> `DELETE
   | DeletePortal -> `DELETE
+  | DeleteSessionLogger -> `DELETE
   | DeleteTrustStore -> `DELETE
+  | DeleteUserAccessLoggingSettings -> `DELETE
   | DeleteUserSettings -> `DELETE
   | DisassociateBrowserSettings -> `DELETE
+  | DisassociateDataProtectionSettings -> `DELETE
+  | DisassociateIpAccessSettings -> `DELETE
   | DisassociateNetworkSettings -> `DELETE
+  | DisassociateSessionLogger -> `DELETE
   | DisassociateTrustStore -> `DELETE
+  | DisassociateUserAccessLoggingSettings -> `DELETE
   | DisassociateUserSettings -> `DELETE
+  | ExpireSession -> `DELETE
   | GetBrowserSettings -> `GET
+  | GetDataProtectionSettings -> `GET
   | GetIdentityProvider -> `GET
+  | GetIpAccessSettings -> `GET
   | GetNetworkSettings -> `GET
   | GetPortal -> `GET
   | GetPortalServiceProviderMetadata -> `GET
+  | GetSession -> `GET
+  | GetSessionLogger -> `GET
   | GetTrustStore -> `GET
   | GetTrustStoreCertificate -> `GET
+  | GetUserAccessLoggingSettings -> `GET
   | GetUserSettings -> `GET
   | ListBrowserSettings -> `GET
+  | ListDataProtectionSettings -> `GET
   | ListIdentityProviders -> `GET
+  | ListIpAccessSettings -> `GET
   | ListNetworkSettings -> `GET
   | ListPortals -> `GET
+  | ListSessionLoggers -> `GET
+  | ListSessions -> `GET
   | ListTagsForResource -> `GET
   | ListTrustStoreCertificates -> `GET
   | ListTrustStores -> `GET
+  | ListUserAccessLoggingSettings -> `GET
   | ListUserSettings -> `GET
   | TagResource -> `POST
   | UntagResource -> `DELETE
   | UpdateBrowserSettings -> `PATCH
+  | UpdateDataProtectionSettings -> `PATCH
   | UpdateIdentityProvider -> `PATCH
+  | UpdateIpAccessSettings -> `PATCH
   | UpdateNetworkSettings -> `PATCH
   | UpdatePortal -> `PUT
+  | UpdateSessionLogger -> `POST
   | UpdateTrustStore -> `PATCH
+  | UpdateUserAccessLoggingSettings -> `PATCH
   | UpdateUserSettings -> `PATCH
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
@@ -156,6 +273,24 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("browserSettingsArn",
                     (ARN.to_header x.browserSettingsArn))])
+      | AssociateDataProtectionSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/portals/%s/dataProtectionSettings"
+               (ARN.to_header
+                  x.AssociateDataProtectionSettingsRequest.portalArn))
+            (List.filter_opt
+               [Some
+                  ("dataProtectionSettingsArn",
+                    (ARN.to_header x.dataProtectionSettingsArn))])
+      | AssociateIpAccessSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/portals/%s/ipAccessSettings"
+               (ARN.to_header x.AssociateIpAccessSettingsRequest.portalArn))
+            (List.filter_opt
+               [Some
+                  ("ipAccessSettingsArn",
+                    (ARN.to_header x.ipAccessSettingsArn))])
       | AssociateNetworkSettings ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/portals/%s/networkSettings"
@@ -164,12 +299,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("networkSettingsArn",
                     (ARN.to_header x.networkSettingsArn))])
+      | AssociateSessionLogger ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/portals/%s/sessionLogger"
+               (ARN.to_header x.AssociateSessionLoggerRequest.portalArn))
+            (List.filter_opt
+               [Some ("sessionLoggerArn", (ARN.to_header x.sessionLoggerArn))])
       | AssociateTrustStore ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/portals/%s/trustStores"
                (ARN.to_header x.AssociateTrustStoreRequest.portalArn))
             (List.filter_opt
                [Some ("trustStoreArn", (ARN.to_header x.trustStoreArn))])
+      | AssociateUserAccessLoggingSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/portals/%s/userAccessLoggingSettings"
+               (ARN.to_header
+                  x.AssociateUserAccessLoggingSettingsRequest.portalArn))
+            (List.filter_opt
+               [Some
+                  ("userAccessLoggingSettingsArn",
+                    (ARN.to_header x.userAccessLoggingSettingsArn))])
       | AssociateUserSettings ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/portals/%s/userSettings"
@@ -178,51 +329,102 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some ("userSettingsArn", (ARN.to_header x.userSettingsArn))])
       | CreateBrowserSettings ->
           (Format.kasprintf Uri.of_string) "/browserSettings"
+      | CreateDataProtectionSettings ->
+          (Format.kasprintf Uri.of_string) "/dataProtectionSettings"
       | CreateIdentityProvider ->
           (Format.kasprintf Uri.of_string) "/identityProviders"
+      | CreateIpAccessSettings ->
+          (Format.kasprintf Uri.of_string) "/ipAccessSettings"
       | CreateNetworkSettings ->
           (Format.kasprintf Uri.of_string) "/networkSettings"
       | CreatePortal -> (Format.kasprintf Uri.of_string) "/portals"
+      | CreateSessionLogger ->
+          (Format.kasprintf Uri.of_string) "/sessionLoggers"
       | CreateTrustStore -> (Format.kasprintf Uri.of_string) "/trustStores"
+      | CreateUserAccessLoggingSettings ->
+          (Format.kasprintf Uri.of_string) "/userAccessLoggingSettings"
       | CreateUserSettings ->
           (Format.kasprintf Uri.of_string) "/userSettings"
       | DeleteBrowserSettings ->
           (Format.kasprintf Uri.of_string) "/browserSettings/%s"
             (ARN.to_header x.DeleteBrowserSettingsRequest.browserSettingsArn)
+      | DeleteDataProtectionSettings ->
+          (Format.kasprintf Uri.of_string) "/dataProtectionSettings/%s"
+            (ARN.to_header
+               x.DeleteDataProtectionSettingsRequest.dataProtectionSettingsArn)
       | DeleteIdentityProvider ->
           (Format.kasprintf Uri.of_string) "/identityProviders/%s"
-            (ARN.to_header
+            (SubresourceARN.to_header
                x.DeleteIdentityProviderRequest.identityProviderArn)
+      | DeleteIpAccessSettings ->
+          (Format.kasprintf Uri.of_string) "/ipAccessSettings/%s"
+            (ARN.to_header
+               x.DeleteIpAccessSettingsRequest.ipAccessSettingsArn)
       | DeleteNetworkSettings ->
           (Format.kasprintf Uri.of_string) "/networkSettings/%s"
             (ARN.to_header x.DeleteNetworkSettingsRequest.networkSettingsArn)
       | DeletePortal ->
           (Format.kasprintf Uri.of_string) "/portals/%s"
             (ARN.to_header x.DeletePortalRequest.portalArn)
+      | DeleteSessionLogger ->
+          (Format.kasprintf Uri.of_string) "/sessionLoggers/%s"
+            (ARN.to_header x.DeleteSessionLoggerRequest.sessionLoggerArn)
       | DeleteTrustStore ->
           (Format.kasprintf Uri.of_string) "/trustStores/%s"
             (ARN.to_header x.DeleteTrustStoreRequest.trustStoreArn)
+      | DeleteUserAccessLoggingSettings ->
+          (Format.kasprintf Uri.of_string) "/userAccessLoggingSettings/%s"
+            (ARN.to_header
+               x.DeleteUserAccessLoggingSettingsRequest.userAccessLoggingSettingsArn)
       | DeleteUserSettings ->
           (Format.kasprintf Uri.of_string) "/userSettings/%s"
             (ARN.to_header x.DeleteUserSettingsRequest.userSettingsArn)
       | DisassociateBrowserSettings ->
           (Format.kasprintf Uri.of_string) "/portals/%s/browserSettings"
             (ARN.to_header x.DisassociateBrowserSettingsRequest.portalArn)
+      | DisassociateDataProtectionSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/portals/%s/dataProtectionSettings"
+            (ARN.to_header
+               x.DisassociateDataProtectionSettingsRequest.portalArn)
+      | DisassociateIpAccessSettings ->
+          (Format.kasprintf Uri.of_string) "/portals/%s/ipAccessSettings"
+            (ARN.to_header x.DisassociateIpAccessSettingsRequest.portalArn)
       | DisassociateNetworkSettings ->
           (Format.kasprintf Uri.of_string) "/portals/%s/networkSettings"
             (ARN.to_header x.DisassociateNetworkSettingsRequest.portalArn)
+      | DisassociateSessionLogger ->
+          (Format.kasprintf Uri.of_string) "/portals/%s/sessionLogger"
+            (ARN.to_header x.DisassociateSessionLoggerRequest.portalArn)
       | DisassociateTrustStore ->
           (Format.kasprintf Uri.of_string) "/portals/%s/trustStores"
             (ARN.to_header x.DisassociateTrustStoreRequest.portalArn)
+      | DisassociateUserAccessLoggingSettings ->
+          (Format.kasprintf Uri.of_string)
+            "/portals/%s/userAccessLoggingSettings"
+            (ARN.to_header
+               x.DisassociateUserAccessLoggingSettingsRequest.portalArn)
       | DisassociateUserSettings ->
           (Format.kasprintf Uri.of_string) "/portals/%s/userSettings"
             (ARN.to_header x.DisassociateUserSettingsRequest.portalArn)
+      | ExpireSession ->
+          (Format.kasprintf Uri.of_string) "/portals/%s/sessions/%s"
+            (PortalId.to_header x.ExpireSessionRequest.portalId)
+            (SessionId.to_header x.ExpireSessionRequest.sessionId)
       | GetBrowserSettings ->
           (Format.kasprintf Uri.of_string) "/browserSettings/%s"
             (ARN.to_header x.GetBrowserSettingsRequest.browserSettingsArn)
+      | GetDataProtectionSettings ->
+          (Format.kasprintf Uri.of_string) "/dataProtectionSettings/%s"
+            (ARN.to_header
+               x.GetDataProtectionSettingsRequest.dataProtectionSettingsArn)
       | GetIdentityProvider ->
           (Format.kasprintf Uri.of_string) "/identityProviders/%s"
-            (ARN.to_header x.GetIdentityProviderRequest.identityProviderArn)
+            (SubresourceARN.to_header
+               x.GetIdentityProviderRequest.identityProviderArn)
+      | GetIpAccessSettings ->
+          (Format.kasprintf Uri.of_string) "/ipAccessSettings/%s"
+            (ARN.to_header x.GetIpAccessSettingsRequest.ipAccessSettingsArn)
       | GetNetworkSettings ->
           (Format.kasprintf Uri.of_string) "/networkSettings/%s"
             (ARN.to_header x.GetNetworkSettingsRequest.networkSettingsArn)
@@ -233,6 +435,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/portalIdp/%s"
             (ARN.to_header
                x.GetPortalServiceProviderMetadataRequest.portalArn)
+      | GetSession ->
+          (Format.kasprintf Uri.of_string) "/portals/%s/sessions/%s"
+            (PortalId.to_header x.GetSessionRequest.portalId)
+            (SessionId.to_header x.GetSessionRequest.sessionId)
+      | GetSessionLogger ->
+          (Format.kasprintf Uri.of_string) "/sessionLoggers/%s"
+            (ARN.to_header x.GetSessionLoggerRequest.sessionLoggerArn)
       | GetTrustStore ->
           (Format.kasprintf Uri.of_string) "/trustStores/%s"
             (ARN.to_header x.GetTrustStoreRequest.trustStoreArn)
@@ -244,6 +453,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                [Some
                   ("thumbprint",
                     (CertificateThumbprint.to_header x.thumbprint))])
+      | GetUserAccessLoggingSettings ->
+          (Format.kasprintf Uri.of_string) "/userAccessLoggingSettings/%s"
+            (ARN.to_header
+               x.GetUserAccessLoggingSettingsRequest.userAccessLoggingSettingsArn)
       | GetUserSettings ->
           (Format.kasprintf Uri.of_string) "/userSettings/%s"
             (ARN.to_header x.GetUserSettingsRequest.userSettingsArn)
@@ -252,38 +465,90 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             ((Format.kasprintf Uri.of_string) "/browserSettings")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListDataProtectionSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/dataProtectionSettings")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListIdentityProviders ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/portals/%s/identityProviders"
                (ARN.to_header x.ListIdentityProvidersRequest.portalArn))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListIpAccessSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/ipAccessSettings")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListNetworkSettings ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/networkSettings")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListPortals ->
           Uri.add_query_params' ((Format.kasprintf Uri.of_string) "/portals")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListSessionLoggers ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/sessionLoggers")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListSessions ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/portals/%s/sessions"
+               (PortalId.to_header x.ListSessionsRequest.portalId))
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("username", (Username.to_header v)))
+                  x.username;
+               Option.map
+                 ~f:(fun v -> ("sessionId", (SessionId.to_header v)))
+                 x.sessionId;
+               Option.map
+                 ~f:(fun v -> ("sortBy", (SessionSortBy.to_header v)))
+                 x.sortBy;
+               Option.map
+                 ~f:(fun v -> ("status", (SessionStatus.to_header v)))
+                 x.status;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
                  x.nextToken])
@@ -297,31 +562,41 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                   x.ListTrustStoreCertificatesRequest.trustStoreArn))
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListTrustStores ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/trustStores")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
+      | ListUserAccessLoggingSettings ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/userAccessLoggingSettings")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | ListUserSettings ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/userSettings")
             (List.filter_opt
                [Option.map
-                  ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
-                  x.maxResults;
+                  ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
+                  x.nextToken;
                Option.map
-                 ~f:(fun v -> ("nextToken", (PaginationToken.to_header v)))
-                 x.nextToken])
+                 ~f:(fun v -> ("maxResults", (MaxResults.to_header v)))
+                 x.maxResults])
       | TagResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
             (ARN.to_header x.TagResourceRequest.resourceArn)
@@ -334,19 +609,34 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | UpdateBrowserSettings ->
           (Format.kasprintf Uri.of_string) "/browserSettings/%s"
             (ARN.to_header x.UpdateBrowserSettingsRequest.browserSettingsArn)
+      | UpdateDataProtectionSettings ->
+          (Format.kasprintf Uri.of_string) "/dataProtectionSettings/%s"
+            (ARN.to_header
+               x.UpdateDataProtectionSettingsRequest.dataProtectionSettingsArn)
       | UpdateIdentityProvider ->
           (Format.kasprintf Uri.of_string) "/identityProviders/%s"
-            (ARN.to_header
+            (SubresourceARN.to_header
                x.UpdateIdentityProviderRequest.identityProviderArn)
+      | UpdateIpAccessSettings ->
+          (Format.kasprintf Uri.of_string) "/ipAccessSettings/%s"
+            (ARN.to_header
+               x.UpdateIpAccessSettingsRequest.ipAccessSettingsArn)
       | UpdateNetworkSettings ->
           (Format.kasprintf Uri.of_string) "/networkSettings/%s"
             (ARN.to_header x.UpdateNetworkSettingsRequest.networkSettingsArn)
       | UpdatePortal ->
           (Format.kasprintf Uri.of_string) "/portals/%s"
             (ARN.to_header x.UpdatePortalRequest.portalArn)
+      | UpdateSessionLogger ->
+          (Format.kasprintf Uri.of_string) "/sessionLoggers/%s"
+            (ARN.to_header x.UpdateSessionLoggerRequest.sessionLoggerArn)
       | UpdateTrustStore ->
           (Format.kasprintf Uri.of_string) "/trustStores/%s"
             (ARN.to_header x.UpdateTrustStoreRequest.trustStoreArn)
+      | UpdateUserAccessLoggingSettings ->
+          (Format.kasprintf Uri.of_string) "/userAccessLoggingSettings/%s"
+            (ARN.to_header
+               x.UpdateUserAccessLoggingSettingsRequest.userAccessLoggingSettingsArn)
       | UpdateUserSettings ->
           (Format.kasprintf Uri.of_string) "/userSettings/%s"
             (ARN.to_header x.UpdateUserSettingsRequest.userSettingsArn))
@@ -356,9 +646,17 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
   | AssociateBrowserSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateDataProtectionSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateIpAccessSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateNetworkSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateSessionLogger ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | AssociateUserAccessLoggingSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | AssociateUserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | CreateBrowserSettings ->
       let (headers, body) =
@@ -369,24 +667,73 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateBrowserSettingsRequest.additionalEncryptionContext
-                         ~f:(fun x ->
-                               ("additionalEncryptionContext",
-                                 (EncryptionContextMap.to_value x)));
-                      Some
-                        ("browserPolicy",
-                          (BrowserPolicy.to_value
-                             req.CreateBrowserSettingsRequest.browserPolicy));
-                      Option.map req.CreateBrowserSettingsRequest.clientToken
-                        ~f:(fun x ->
-                              ("clientToken", (ClientToken.to_value x)));
+                      [Option.map req.CreateBrowserSettingsRequest.tags
+                         ~f:(fun x -> ("tags", (TagList.to_value x)));
                       Option.map
                         req.CreateBrowserSettingsRequest.customerManagedKey
                         ~f:(fun x ->
                               ("customerManagedKey", (KeyArn.to_value x)));
-                      Option.map req.CreateBrowserSettingsRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                      Option.map
+                        req.CreateBrowserSettingsRequest.additionalEncryptionContext
+                        ~f:(fun x ->
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Option.map
+                        req.CreateBrowserSettingsRequest.browserPolicy
+                        ~f:(fun x ->
+                              ("browserPolicy", (BrowserPolicy.to_value x)));
+                      Option.map req.CreateBrowserSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.CreateBrowserSettingsRequest.webContentFilteringPolicy
+                        ~f:(fun x ->
+                              ("webContentFilteringPolicy",
+                                (WebContentFilteringPolicy.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateDataProtectionSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateDataProtectionSettingsRequest.displayName
+                         ~f:(fun x ->
+                               ("displayName", (DisplayNameSafe.to_value x)));
+                      Option.map
+                        req.CreateDataProtectionSettingsRequest.description
+                        ~f:(fun x ->
+                              ("description", (DescriptionSafe.to_value x)));
+                      Option.map req.CreateDataProtectionSettingsRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateDataProtectionSettingsRequest.customerManagedKey
+                        ~f:(fun x ->
+                              ("customerManagedKey", (KeyArn.to_value x)));
+                      Option.map
+                        req.CreateDataProtectionSettingsRequest.additionalEncryptionContext
+                        ~f:(fun x ->
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Option.map
+                        req.CreateDataProtectionSettingsRequest.inlineRedactionConfiguration
+                        ~f:(fun x ->
+                              ("inlineRedactionConfiguration",
+                                (InlineRedactionConfiguration.to_value x)));
+                      Option.map
+                        req.CreateDataProtectionSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -403,14 +750,10 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateIdentityProviderRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
-                      Some
-                        ("identityProviderDetails",
-                          (IdentityProviderDetails.to_value
-                             req.CreateIdentityProviderRequest.identityProviderDetails));
+                      [Some
+                         ("portalArn",
+                           (ARN.to_value
+                              req.CreateIdentityProviderRequest.portalArn));
                       Some
                         ("identityProviderName",
                           (IdentityProviderName.to_value
@@ -420,9 +763,58 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (IdentityProviderType.to_value
                              req.CreateIdentityProviderRequest.identityProviderType));
                       Some
-                        ("portalArn",
-                          (ARN.to_value
-                             req.CreateIdentityProviderRequest.portalArn))])
+                        ("identityProviderDetails",
+                          (IdentityProviderDetails.to_value
+                             req.CreateIdentityProviderRequest.identityProviderDetails));
+                      Option.map
+                        req.CreateIdentityProviderRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreateIdentityProviderRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateIpAccessSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateIpAccessSettingsRequest.displayName
+                         ~f:(fun x ->
+                               ("displayName", (DisplayName.to_value x)));
+                      Option.map
+                        req.CreateIpAccessSettingsRequest.description
+                        ~f:(fun x ->
+                              ("description", (Description.to_value x)));
+                      Option.map req.CreateIpAccessSettingsRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateIpAccessSettingsRequest.customerManagedKey
+                        ~f:(fun x ->
+                              ("customerManagedKey", (KeyArn.to_value x)));
+                      Option.map
+                        req.CreateIpAccessSettingsRequest.additionalEncryptionContext
+                        ~f:(fun x ->
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Some
+                        ("ipRules",
+                          (IpRuleList.to_value
+                             req.CreateIpAccessSettingsRequest.ipRules));
+                      Option.map
+                        req.CreateIpAccessSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -439,24 +831,23 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreateNetworkSettingsRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
-                      Some
-                        ("securityGroupIds",
-                          (SecurityGroupIdList.to_value
-                             req.CreateNetworkSettingsRequest.securityGroupIds));
+                      [Some
+                         ("vpcId",
+                           (VpcId.to_value
+                              req.CreateNetworkSettingsRequest.vpcId));
                       Some
                         ("subnetIds",
                           (SubnetIdList.to_value
                              req.CreateNetworkSettingsRequest.subnetIds));
+                      Some
+                        ("securityGroupIds",
+                          (SecurityGroupIdList.to_value
+                             req.CreateNetworkSettingsRequest.securityGroupIds));
                       Option.map req.CreateNetworkSettingsRequest.tags
                         ~f:(fun x -> ("tags", (TagList.to_value x)));
-                      Some
-                        ("vpcId",
-                          (VpcId.to_value
-                             req.CreateNetworkSettingsRequest.vpcId))])
+                      Option.map req.CreateNetworkSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -473,22 +864,79 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map
-                         req.CreatePortalRequest.additionalEncryptionContext
+                      [Option.map req.CreatePortalRequest.displayName
                          ~f:(fun x ->
-                               ("additionalEncryptionContext",
-                                 (EncryptionContextMap.to_value x)));
-                      Option.map req.CreatePortalRequest.clientToken
-                        ~f:(fun x ->
-                              ("clientToken", (ClientToken.to_value x)));
+                               ("displayName", (DisplayName.to_value x)));
+                      Option.map req.CreatePortalRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
                       Option.map req.CreatePortalRequest.customerManagedKey
                         ~f:(fun x ->
                               ("customerManagedKey", (KeyArn.to_value x)));
-                      Option.map req.CreatePortalRequest.displayName
+                      Option.map
+                        req.CreatePortalRequest.additionalEncryptionContext
                         ~f:(fun x ->
-                              ("displayName", (DisplayName.to_value x)));
-                      Option.map req.CreatePortalRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Option.map req.CreatePortalRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map req.CreatePortalRequest.authenticationType
+                        ~f:(fun x ->
+                              ("authenticationType",
+                                (AuthenticationType.to_value x)));
+                      Option.map req.CreatePortalRequest.instanceType
+                        ~f:(fun x ->
+                              ("instanceType", (InstanceType.to_value x)));
+                      Option.map
+                        req.CreatePortalRequest.maxConcurrentSessions
+                        ~f:(fun x ->
+                              ("maxConcurrentSessions",
+                                (MaxConcurrentSessions.to_value x)));
+                      Option.map req.CreatePortalRequest.portalCustomDomain
+                        ~f:(fun x ->
+                              ("portalCustomDomain",
+                                (PortalCustomDomain.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSessionLogger ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("eventFilter",
+                           (EventFilter.to_value
+                              req.CreateSessionLoggerRequest.eventFilter));
+                      Some
+                        ("logConfiguration",
+                          (LogConfiguration.to_value
+                             req.CreateSessionLoggerRequest.logConfiguration));
+                      Option.map req.CreateSessionLoggerRequest.displayName
+                        ~f:(fun x ->
+                              ("displayName", (DisplayNameSafe.to_value x)));
+                      Option.map
+                        req.CreateSessionLoggerRequest.customerManagedKey
+                        ~f:(fun x ->
+                              ("customerManagedKey", (KeyArn.to_value x)));
+                      Option.map
+                        req.CreateSessionLoggerRequest.additionalEncryptionContext
+                        ~f:(fun x ->
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Option.map req.CreateSessionLoggerRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map req.CreateSessionLoggerRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -509,11 +957,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("certificateList",
                            (CertificateList.to_value
                               req.CreateTrustStoreRequest.certificateList));
+                      Option.map req.CreateTrustStoreRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
                       Option.map req.CreateTrustStoreRequest.clientToken
                         ~f:(fun x ->
-                              ("clientToken", (ClientToken.to_value x)));
-                      Option.map req.CreateTrustStoreRequest.tags
-                        ~f:(fun x -> ("tags", (TagList.to_value x)))])
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateUserAccessLoggingSettings ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("kinesisStreamArn",
+                           (KinesisStreamArn.to_value
+                              req.CreateUserAccessLoggingSettingsRequest.kinesisStreamArn));
+                      Option.map
+                        req.CreateUserAccessLoggingSettingsRequest.tags
+                        ~f:(fun x -> ("tags", (TagList.to_value x)));
+                      Option.map
+                        req.CreateUserAccessLoggingSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -530,31 +1005,74 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.CreateUserSettingsRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
+                      [Some
+                         ("copyAllowed",
+                           (EnabledType.to_value
+                              req.CreateUserSettingsRequest.copyAllowed));
                       Some
-                        ("copyAllowed",
+                        ("pasteAllowed",
                           (EnabledType.to_value
-                             req.CreateUserSettingsRequest.copyAllowed));
+                             req.CreateUserSettingsRequest.pasteAllowed));
                       Some
                         ("downloadAllowed",
                           (EnabledType.to_value
                              req.CreateUserSettingsRequest.downloadAllowed));
                       Some
-                        ("pasteAllowed",
+                        ("uploadAllowed",
                           (EnabledType.to_value
-                             req.CreateUserSettingsRequest.pasteAllowed));
+                             req.CreateUserSettingsRequest.uploadAllowed));
                       Some
                         ("printAllowed",
                           (EnabledType.to_value
                              req.CreateUserSettingsRequest.printAllowed));
                       Option.map req.CreateUserSettingsRequest.tags
                         ~f:(fun x -> ("tags", (TagList.to_value x)));
-                      Some
-                        ("uploadAllowed",
-                          (EnabledType.to_value
-                             req.CreateUserSettingsRequest.uploadAllowed))])
+                      Option.map
+                        req.CreateUserSettingsRequest.disconnectTimeoutInMinutes
+                        ~f:(fun x ->
+                              ("disconnectTimeoutInMinutes",
+                                (DisconnectTimeoutInMinutes.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.idleDisconnectTimeoutInMinutes
+                        ~f:(fun x ->
+                              ("idleDisconnectTimeoutInMinutes",
+                                (IdleDisconnectTimeoutInMinutes.to_value x)));
+                      Option.map req.CreateUserSettingsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.cookieSynchronizationConfiguration
+                        ~f:(fun x ->
+                              ("cookieSynchronizationConfiguration",
+                                (CookieSynchronizationConfiguration.to_value
+                                   x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.customerManagedKey
+                        ~f:(fun x ->
+                              ("customerManagedKey", (KeyArn.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.additionalEncryptionContext
+                        ~f:(fun x ->
+                              ("additionalEncryptionContext",
+                                (EncryptionContextMap.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.deepLinkAllowed
+                        ~f:(fun x ->
+                              ("deepLinkAllowed", (EnabledType.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.toolbarConfiguration
+                        ~f:(fun x ->
+                              ("toolbarConfiguration",
+                                (ToolbarConfiguration.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.brandingConfigurationInput
+                        ~f:(fun x ->
+                              ("brandingConfigurationInput",
+                                (BrandingConfigurationCreateInput.to_value x)));
+                      Option.map
+                        req.CreateUserSettingsRequest.webAuthnAllowed
+                        ~f:(fun x ->
+                              ("webAuthnAllowed", (EnabledType.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -563,24 +1081,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteBrowserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteDataProtectionSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteIdentityProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteIpAccessSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteNetworkSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeletePortal -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteSessionLogger -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | DeleteUserAccessLoggingSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteUserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateBrowserSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateDataProtectionSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateIpAccessSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateNetworkSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateSessionLogger ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateTrustStore ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | DisassociateUserAccessLoggingSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | DisassociateUserSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
+  | ExpireSession -> Awso.Http.Request.make (method_of_endpoint endp)
   | GetBrowserSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDataProtectionSettings ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetIdentityProvider ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetIpAccessSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetNetworkSettings ->
@@ -592,10 +1132,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | GetPortalServiceProviderMetadata ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSession ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetSessionLogger ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTrustStore ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTrustStoreCertificate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetUserAccessLoggingSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetUserSettings ->
@@ -604,13 +1153,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | ListBrowserSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListDataProtectionSettings ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListIdentityProviders ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListIpAccessSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListNetworkSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListPortals ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSessionLoggers ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSessions ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -620,6 +1181,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTrustStores ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListUserAccessLoggingSettings ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListUserSettings ->
@@ -634,12 +1198,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
             ((`Assoc
                 (List.map
                    (List.filter_opt
-                      [Option.map req.TagResourceRequest.clientToken
-                         ~f:(fun x ->
-                               ("clientToken", (ClientToken.to_value x)));
-                      Some
-                        ("tags",
-                          (TagList.to_value req.TagResourceRequest.tags))])
+                      [Some
+                         ("tags",
+                           (TagList.to_value req.TagResourceRequest.tags));
+                      Option.map req.TagResourceRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -649,11 +1213,44 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UntagResource -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateBrowserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateDataProtectionSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateIdentityProvider ->
+      Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateIpAccessSettings ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateNetworkSettings -> Awso.Http.Request.make (method_of_endpoint endp)
   | UpdatePortal -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateSessionLogger ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.UpdateSessionLoggerRequest.eventFilter
+                         ~f:(fun x ->
+                               ("eventFilter", (EventFilter.to_value x)));
+                      Option.map
+                        req.UpdateSessionLoggerRequest.logConfiguration
+                        ~f:(fun x ->
+                              ("logConfiguration",
+                                (LogConfiguration.to_value x)));
+                      Option.map req.UpdateSessionLoggerRequest.displayName
+                        ~f:(fun x ->
+                              ("displayName", (DisplayNameSafe.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateTrustStore -> Awso.Http.Request.make (method_of_endpoint endp)
+  | UpdateUserAccessLoggingSettings ->
+      Awso.Http.Request.make (method_of_endpoint endp)
   | UpdateUserSettings -> Awso.Http.Request.make (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -711,6 +1308,25 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateBrowserSettingsResponse.error_of_json))
+  | AssociateDataProtectionSettings ->
+      if is_success
+      then
+        Ok
+          (AssociateDataProtectionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateDataProtectionSettingsResponse.error_of_json))
+  | AssociateIpAccessSettings ->
+      if is_success
+      then
+        Ok
+          (AssociateIpAccessSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateIpAccessSettingsResponse.error_of_json))
   | AssociateNetworkSettings ->
       if is_success
       then
@@ -719,12 +1335,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateNetworkSettingsResponse.error_of_json))
+  | AssociateSessionLogger ->
+      if is_success
+      then
+        Ok (AssociateSessionLoggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateSessionLoggerResponse.error_of_json))
   | AssociateTrustStore ->
       if is_success
       then Ok (AssociateTrustStoreResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some AssociateTrustStoreResponse.error_of_json))
+  | AssociateUserAccessLoggingSettings ->
+      if is_success
+      then
+        Ok
+          (AssociateUserAccessLoggingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssociateUserAccessLoggingSettingsResponse.error_of_json))
   | AssociateUserSettings ->
       if is_success
       then Ok (AssociateUserSettingsResponse.of_json (response_to_json resp))
@@ -737,6 +1371,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreateBrowserSettingsResponse.error_of_json))
+  | CreateDataProtectionSettings ->
+      if is_success
+      then
+        Ok
+          (CreateDataProtectionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateDataProtectionSettingsResponse.error_of_json))
   | CreateIdentityProvider ->
       if is_success
       then
@@ -745,6 +1389,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateIdentityProviderResponse.error_of_json))
+  | CreateIpAccessSettings ->
+      if is_success
+      then
+        Ok (CreateIpAccessSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIpAccessSettingsResponse.error_of_json))
   | CreateNetworkSettings ->
       if is_success
       then Ok (CreateNetworkSettingsResponse.of_json (response_to_json resp))
@@ -755,11 +1407,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CreatePortalResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CreatePortalResponse.error_of_json))
+  | CreateSessionLogger ->
+      if is_success
+      then Ok (CreateSessionLoggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateSessionLoggerResponse.error_of_json))
   | CreateTrustStore ->
       if is_success
       then Ok (CreateTrustStoreResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some CreateTrustStoreResponse.error_of_json))
+  | CreateUserAccessLoggingSettings ->
+      if is_success
+      then
+        Ok
+          (CreateUserAccessLoggingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateUserAccessLoggingSettingsResponse.error_of_json))
   | CreateUserSettings ->
       if is_success
       then Ok (CreateUserSettingsResponse.of_json (response_to_json resp))
@@ -775,6 +1443,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteBrowserSettingsResponse.error_of_json))
+  | DeleteDataProtectionSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteDataProtectionSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteDataProtectionSettingsResponse.error_of_json))
   | DeleteIdentityProvider ->
       if is_success
       then
@@ -785,6 +1465,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteIdentityProviderResponse.error_of_json))
+  | DeleteIpAccessSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteIpAccessSettingsResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIpAccessSettingsResponse.error_of_json))
   | DeleteNetworkSettings ->
       if is_success
       then
@@ -801,6 +1491,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeletePortalResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeletePortalResponse.error_of_json))
+  | DeleteSessionLogger ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteSessionLoggerResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteSessionLoggerResponse.error_of_json))
   | DeleteTrustStore ->
       if is_success
       then
@@ -809,6 +1508,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteTrustStoreResponse.of_header_and_body (headers, ()))
       else
         Error (parse_aws_error (Some DeleteTrustStoreResponse.error_of_json))
+  | DeleteUserAccessLoggingSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteUserAccessLoggingSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteUserAccessLoggingSettingsResponse.error_of_json))
   | DeleteUserSettings ->
       if is_success
       then
@@ -830,6 +1541,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateBrowserSettingsResponse.error_of_json))
+  | DisassociateDataProtectionSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateDataProtectionSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateDataProtectionSettingsResponse.error_of_json))
+  | DisassociateIpAccessSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateIpAccessSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateIpAccessSettingsResponse.error_of_json))
   | DisassociateNetworkSettings ->
       if is_success
       then
@@ -842,6 +1577,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateNetworkSettingsResponse.error_of_json))
+  | DisassociateSessionLogger ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateSessionLoggerResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DisassociateSessionLoggerResponse.error_of_json))
   | DisassociateTrustStore ->
       if is_success
       then
@@ -852,6 +1598,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateTrustStoreResponse.error_of_json))
+  | DisassociateUserAccessLoggingSettings ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DisassociateUserAccessLoggingSettingsResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DisassociateUserAccessLoggingSettingsResponse.error_of_json))
   | DisassociateUserSettings ->
       if is_success
       then
@@ -863,18 +1622,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DisassociateUserSettingsResponse.error_of_json))
+  | ExpireSession ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (ExpireSessionResponse.of_header_and_body (headers, ()))
+      else Error (parse_aws_error (Some ExpireSessionResponse.error_of_json))
   | GetBrowserSettings ->
       if is_success
       then Ok (GetBrowserSettingsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetBrowserSettingsResponse.error_of_json))
+  | GetDataProtectionSettings ->
+      if is_success
+      then
+        Ok
+          (GetDataProtectionSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetDataProtectionSettingsResponse.error_of_json))
   | GetIdentityProvider ->
       if is_success
       then Ok (GetIdentityProviderResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some GetIdentityProviderResponse.error_of_json))
+  | GetIpAccessSettings ->
+      if is_success
+      then Ok (GetIpAccessSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetIpAccessSettingsResponse.error_of_json))
   | GetNetworkSettings ->
       if is_success
       then Ok (GetNetworkSettingsResponse.of_json (response_to_json resp))
@@ -895,6 +1676,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetPortalServiceProviderMetadataResponse.error_of_json))
+  | GetSession ->
+      if is_success
+      then Ok (GetSessionResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some GetSessionResponse.error_of_json))
+  | GetSessionLogger ->
+      if is_success
+      then Ok (GetSessionLoggerResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some GetSessionLoggerResponse.error_of_json))
   | GetTrustStore ->
       if is_success
       then Ok (GetTrustStoreResponse.of_json (response_to_json resp))
@@ -907,6 +1697,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetTrustStoreCertificateResponse.error_of_json))
+  | GetUserAccessLoggingSettings ->
+      if is_success
+      then
+        Ok
+          (GetUserAccessLoggingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetUserAccessLoggingSettingsResponse.error_of_json))
   | GetUserSettings ->
       if is_success
       then Ok (GetUserSettingsResponse.of_json (response_to_json resp))
@@ -918,12 +1718,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListBrowserSettingsResponse.error_of_json))
+  | ListDataProtectionSettings ->
+      if is_success
+      then
+        Ok
+          (ListDataProtectionSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListDataProtectionSettingsResponse.error_of_json))
   | ListIdentityProviders ->
       if is_success
       then Ok (ListIdentityProvidersResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListIdentityProvidersResponse.error_of_json))
+  | ListIpAccessSettings ->
+      if is_success
+      then Ok (ListIpAccessSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListIpAccessSettingsResponse.error_of_json))
   | ListNetworkSettings ->
       if is_success
       then Ok (ListNetworkSettingsResponse.of_json (response_to_json resp))
@@ -934,6 +1749,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (ListPortalsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListPortalsResponse.error_of_json))
+  | ListSessionLoggers ->
+      if is_success
+      then Ok (ListSessionLoggersResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListSessionLoggersResponse.error_of_json))
+  | ListSessions ->
+      if is_success
+      then Ok (ListSessionsResponse.of_json (response_to_json resp))
+      else Error (parse_aws_error (Some ListSessionsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))
@@ -954,6 +1779,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (ListTrustStoresResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some ListTrustStoresResponse.error_of_json))
+  | ListUserAccessLoggingSettings ->
+      if is_success
+      then
+        Ok
+          (ListUserAccessLoggingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListUserAccessLoggingSettingsResponse.error_of_json))
   | ListUserSettings ->
       if is_success
       then Ok (ListUserSettingsResponse.of_json (response_to_json resp))
@@ -979,6 +1814,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some UpdateBrowserSettingsResponse.error_of_json))
+  | UpdateDataProtectionSettings ->
+      if is_success
+      then
+        Ok
+          (UpdateDataProtectionSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateDataProtectionSettingsResponse.error_of_json))
   | UpdateIdentityProvider ->
       if is_success
       then
@@ -987,6 +1832,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateIdentityProviderResponse.error_of_json))
+  | UpdateIpAccessSettings ->
+      if is_success
+      then
+        Ok (UpdateIpAccessSettingsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateIpAccessSettingsResponse.error_of_json))
   | UpdateNetworkSettings ->
       if is_success
       then Ok (UpdateNetworkSettingsResponse.of_json (response_to_json resp))
@@ -997,11 +1850,27 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (UpdatePortalResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some UpdatePortalResponse.error_of_json))
+  | UpdateSessionLogger ->
+      if is_success
+      then Ok (UpdateSessionLoggerResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some UpdateSessionLoggerResponse.error_of_json))
   | UpdateTrustStore ->
       if is_success
       then Ok (UpdateTrustStoreResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some UpdateTrustStoreResponse.error_of_json))
+  | UpdateUserAccessLoggingSettings ->
+      if is_success
+      then
+        Ok
+          (UpdateUserAccessLoggingSettingsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateUserAccessLoggingSettingsResponse.error_of_json))
   | UpdateUserSettings ->
       if is_success
       then Ok (UpdateUserSettingsResponse.of_json (response_to_json resp))

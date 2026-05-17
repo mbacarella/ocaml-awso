@@ -97,6 +97,12 @@ val create_cluster_subnet_group :
       CreateClusterSubnetGroupMessage.t ->
         (CreateClusterSubnetGroupResult.t,
           CreateClusterSubnetGroupResult.error) Result.t Lwt.t
+val create_custom_domain_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCustomDomainAssociationMessage.t ->
+        (CreateCustomDomainAssociationResult.t,
+          CreateCustomDomainAssociationResult.error) Result.t Lwt.t
 val create_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -120,6 +126,17 @@ val create_hsm_configuration :
       CreateHsmConfigurationMessage.t ->
         (CreateHsmConfigurationResult.t, CreateHsmConfigurationResult.error)
           Result.t Lwt.t
+val create_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Lwt.t
+val create_redshift_idc_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRedshiftIdcApplicationMessage.t ->
+        (CreateRedshiftIdcApplicationResult.t,
+          CreateRedshiftIdcApplicationResult.error) Result.t Lwt.t
 val create_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -178,6 +195,10 @@ val delete_cluster_subnet_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteClusterSubnetGroupMessage.t -> (unit, unit) Result.t Lwt.t
+val delete_custom_domain_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCustomDomainAssociationMessage.t -> (unit, unit) Result.t Lwt.t
 val delete_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -195,12 +216,25 @@ val delete_hsm_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteHsmConfigurationMessage.t -> (unit, unit) Result.t Lwt.t
+val delete_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Lwt.t
 val delete_partner :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       PartnerIntegrationInputMessage.t ->
         (PartnerIntegrationOutputMessage.t,
           PartnerIntegrationOutputMessage.error) Result.t Lwt.t
+val delete_redshift_idc_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRedshiftIdcApplicationMessage.t -> (unit, unit) Result.t Lwt.t
+val delete_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteResourcePolicyMessage.t -> (unit, unit) Result.t Lwt.t
 val delete_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -220,6 +254,12 @@ val delete_usage_limit :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteUsageLimitMessage.t -> (unit, unit) Result.t Lwt.t
+val deregister_namespace :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeregisterNamespaceInputMessage.t ->
+        (DeregisterNamespaceOutputMessage.t,
+          DeregisterNamespaceOutputMessage.error) Result.t Lwt.t
 val describe_account_attributes :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -282,6 +322,12 @@ val describe_clusters :
     ?cfg:Awso.Cfg.t ->
       DescribeClustersMessage.t ->
         (ClustersMessage.t, ClustersMessage.error) Result.t Lwt.t
+val describe_custom_domain_associations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCustomDomainAssociationsMessage.t ->
+        (CustomDomainAssociationsMessage.t,
+          CustomDomainAssociationsMessage.error) Result.t Lwt.t
 val describe_data_shares :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -346,6 +392,17 @@ val describe_hsm_configurations :
       DescribeHsmConfigurationsMessage.t ->
         (HsmConfigurationMessage.t, HsmConfigurationMessage.error) Result.t
           Lwt.t
+val describe_inbound_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeInboundIntegrationsMessage.t ->
+        (InboundIntegrationsMessage.t, InboundIntegrationsMessage.error)
+          Result.t Lwt.t
+val describe_integrations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeIntegrationsMessage.t ->
+        (IntegrationsMessage.t, IntegrationsMessage.error) Result.t Lwt.t
 val describe_logging_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -369,6 +426,12 @@ val describe_partners :
       DescribePartnersInputMessage.t ->
         (DescribePartnersOutputMessage.t,
           DescribePartnersOutputMessage.error) Result.t Lwt.t
+val describe_redshift_idc_applications :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeRedshiftIdcApplicationsMessage.t ->
+        (DescribeRedshiftIdcApplicationsResult.t,
+          DescribeRedshiftIdcApplicationsResult.error) Result.t Lwt.t
 val describe_reserved_node_exchange_status :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -460,11 +523,29 @@ val enable_snapshot_copy :
       EnableSnapshotCopyMessage.t ->
         (EnableSnapshotCopyResult.t, EnableSnapshotCopyResult.error) Result.t
           Lwt.t
+val failover_primary_compute :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      FailoverPrimaryComputeInputMessage.t ->
+        (FailoverPrimaryComputeResult.t, FailoverPrimaryComputeResult.error)
+          Result.t Lwt.t
 val get_cluster_credentials :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetClusterCredentialsMessage.t ->
         (ClusterCredentials.t, ClusterCredentials.error) Result.t Lwt.t
+val get_cluster_credentials_with_i_a_m :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetClusterCredentialsWithIAMMessage.t ->
+        (ClusterExtendedCredentials.t, ClusterExtendedCredentials.error)
+          Result.t Lwt.t
+val get_identity_center_auth_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetIdentityCenterAuthTokenRequest.t ->
+        (GetIdentityCenterAuthTokenResponse.t,
+          GetIdentityCenterAuthTokenResponse.error) Result.t Lwt.t
 val get_reserved_node_exchange_configuration_options :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -478,6 +559,18 @@ val get_reserved_node_exchange_offerings :
       GetReservedNodeExchangeOfferingsInputMessage.t ->
         (GetReservedNodeExchangeOfferingsOutputMessage.t,
           GetReservedNodeExchangeOfferingsOutputMessage.error) Result.t Lwt.t
+val get_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetResourcePolicyMessage.t ->
+        (GetResourcePolicyResult.t, GetResourcePolicyResult.error) Result.t
+          Lwt.t
+val list_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRecommendationsMessage.t ->
+        (ListRecommendationsResult.t, ListRecommendationsResult.error)
+          Result.t Lwt.t
 val modify_aqua_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -535,6 +628,12 @@ val modify_cluster_subnet_group :
       ModifyClusterSubnetGroupMessage.t ->
         (ModifyClusterSubnetGroupResult.t,
           ModifyClusterSubnetGroupResult.error) Result.t Lwt.t
+val modify_custom_domain_association :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyCustomDomainAssociationMessage.t ->
+        (ModifyCustomDomainAssociationResult.t,
+          ModifyCustomDomainAssociationResult.error) Result.t Lwt.t
 val modify_endpoint_access :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -546,6 +645,23 @@ val modify_event_subscription :
       ModifyEventSubscriptionMessage.t ->
         (ModifyEventSubscriptionResult.t,
           ModifyEventSubscriptionResult.error) Result.t Lwt.t
+val modify_integration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyIntegrationMessage.t ->
+        (Integration.t, Integration.error) Result.t Lwt.t
+val modify_lakehouse_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyLakehouseConfigurationMessage.t ->
+        (LakehouseConfiguration.t, LakehouseConfiguration.error) Result.t
+          Lwt.t
+val modify_redshift_idc_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ModifyRedshiftIdcApplicationMessage.t ->
+        (ModifyRedshiftIdcApplicationResult.t,
+          ModifyRedshiftIdcApplicationResult.error) Result.t Lwt.t
 val modify_scheduled_action :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -578,11 +694,23 @@ val purchase_reserved_node_offering :
       PurchaseReservedNodeOfferingMessage.t ->
         (PurchaseReservedNodeOfferingResult.t,
           PurchaseReservedNodeOfferingResult.error) Result.t Lwt.t
+val put_resource_policy :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutResourcePolicyMessage.t ->
+        (PutResourcePolicyResult.t, PutResourcePolicyResult.error) Result.t
+          Lwt.t
 val reboot_cluster :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       RebootClusterMessage.t ->
         (RebootClusterResult.t, RebootClusterResult.error) Result.t Lwt.t
+val register_namespace :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      RegisterNamespaceInputMessage.t ->
+        (RegisterNamespaceOutputMessage.t,
+          RegisterNamespaceOutputMessage.error) Result.t Lwt.t
 val reject_data_share :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

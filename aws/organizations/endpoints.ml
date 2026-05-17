@@ -25,6 +25,7 @@ type ('i, 'o, 'e) t =
   | DeleteOrganizationalUnit: (DeleteOrganizationalUnitRequest.t, unit, 
   unit) t 
   | DeletePolicy: (DeletePolicyRequest.t, unit, unit) t 
+  | DeleteResourcePolicy: (unit, unit, unit) t 
   | DeregisterDelegatedAdministrator:
   (DeregisterDelegatedAdministratorRequest.t, unit, unit) t 
   | DescribeAccount: (DescribeAccountRequest.t, DescribeAccountResponse.t,
@@ -44,6 +45,11 @@ type ('i, 'o, 'e) t =
   DescribeOrganizationalUnitResponse.error) t 
   | DescribePolicy: (DescribePolicyRequest.t, DescribePolicyResponse.t,
   DescribePolicyResponse.error) t 
+  | DescribeResourcePolicy: (unit, DescribeResourcePolicyResponse.t,
+  DescribeResourcePolicyResponse.error) t 
+  | DescribeResponsibilityTransfer: (DescribeResponsibilityTransferRequest.t,
+  DescribeResponsibilityTransferResponse.t,
+  DescribeResponsibilityTransferResponse.error) t 
   | DetachPolicy: (DetachPolicyRequest.t, unit, unit) t 
   | DisableAWSServiceAccess: (DisableAWSServiceAccessRequest.t, unit, 
   unit) t 
@@ -57,6 +63,10 @@ type ('i, 'o, 'e) t =
   | InviteAccountToOrganization: (InviteAccountToOrganizationRequest.t,
   InviteAccountToOrganizationResponse.t,
   InviteAccountToOrganizationResponse.error) t 
+  | InviteOrganizationToTransferResponsibility:
+  (InviteOrganizationToTransferResponsibilityRequest.t,
+  InviteOrganizationToTransferResponsibilityResponse.t,
+  InviteOrganizationToTransferResponsibilityResponse.error) t 
   | LeaveOrganization: (unit, unit, unit) t 
   | ListAWSServiceAccessForOrganization:
   (ListAWSServiceAccessForOrganizationRequest.t,
@@ -66,6 +76,10 @@ type ('i, 'o, 'e) t =
   ListAccountsResponse.error) t 
   | ListAccountsForParent: (ListAccountsForParentRequest.t,
   ListAccountsForParentResponse.t, ListAccountsForParentResponse.error) t 
+  | ListAccountsWithInvalidEffectivePolicy:
+  (ListAccountsWithInvalidEffectivePolicyRequest.t,
+  ListAccountsWithInvalidEffectivePolicyResponse.t,
+  ListAccountsWithInvalidEffectivePolicyResponse.error) t 
   | ListChildren: (ListChildrenRequest.t, ListChildrenResponse.t,
   ListChildrenResponse.error) t 
   | ListCreateAccountStatus: (ListCreateAccountStatusRequest.t,
@@ -78,16 +92,28 @@ type ('i, 'o, 'e) t =
   (ListDelegatedServicesForAccountRequest.t,
   ListDelegatedServicesForAccountResponse.t,
   ListDelegatedServicesForAccountResponse.error) t 
+  | ListEffectivePolicyValidationErrors:
+  (ListEffectivePolicyValidationErrorsRequest.t,
+  ListEffectivePolicyValidationErrorsResponse.t,
+  ListEffectivePolicyValidationErrorsResponse.error) t 
   | ListHandshakesForAccount: (ListHandshakesForAccountRequest.t,
   ListHandshakesForAccountResponse.t, ListHandshakesForAccountResponse.error)
   t 
   | ListHandshakesForOrganization: (ListHandshakesForOrganizationRequest.t,
   ListHandshakesForOrganizationResponse.t,
   ListHandshakesForOrganizationResponse.error) t 
+  | ListInboundResponsibilityTransfers:
+  (ListInboundResponsibilityTransfersRequest.t,
+  ListInboundResponsibilityTransfersResponse.t,
+  ListInboundResponsibilityTransfersResponse.error) t 
   | ListOrganizationalUnitsForParent:
   (ListOrganizationalUnitsForParentRequest.t,
   ListOrganizationalUnitsForParentResponse.t,
   ListOrganizationalUnitsForParentResponse.error) t 
+  | ListOutboundResponsibilityTransfers:
+  (ListOutboundResponsibilityTransfersRequest.t,
+  ListOutboundResponsibilityTransfersResponse.t,
+  ListOutboundResponsibilityTransfersResponse.error) t 
   | ListParents: (ListParentsRequest.t, ListParentsResponse.t,
   ListParentsResponse.error) t 
   | ListPolicies: (ListPoliciesRequest.t, ListPoliciesResponse.t,
@@ -101,17 +127,26 @@ type ('i, 'o, 'e) t =
   | ListTargetsForPolicy: (ListTargetsForPolicyRequest.t,
   ListTargetsForPolicyResponse.t, ListTargetsForPolicyResponse.error) t 
   | MoveAccount: (MoveAccountRequest.t, unit, unit) t 
+  | PutResourcePolicy: (PutResourcePolicyRequest.t,
+  PutResourcePolicyResponse.t, PutResourcePolicyResponse.error) t 
   | RegisterDelegatedAdministrator: (RegisterDelegatedAdministratorRequest.t,
   unit, unit) t 
   | RemoveAccountFromOrganization: (RemoveAccountFromOrganizationRequest.t,
   unit, unit) t 
   | TagResource: (TagResourceRequest.t, unit, unit) t 
+  | TerminateResponsibilityTransfer:
+  (TerminateResponsibilityTransferRequest.t,
+  TerminateResponsibilityTransferResponse.t,
+  TerminateResponsibilityTransferResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, unit, unit) t 
   | UpdateOrganizationalUnit: (UpdateOrganizationalUnitRequest.t,
   UpdateOrganizationalUnitResponse.t, UpdateOrganizationalUnitResponse.error)
   t 
   | UpdatePolicy: (UpdatePolicyRequest.t, UpdatePolicyResponse.t,
   UpdatePolicyResponse.error) t 
+  | UpdateResponsibilityTransfer: (UpdateResponsibilityTransferRequest.t,
+  UpdateResponsibilityTransferResponse.t,
+  UpdateResponsibilityTransferResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AcceptHandshake -> `POST
@@ -127,6 +162,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteOrganization -> `POST
   | DeleteOrganizationalUnit -> `POST
   | DeletePolicy -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeregisterDelegatedAdministrator -> `POST
   | DescribeAccount -> `POST
   | DescribeCreateAccountStatus -> `POST
@@ -135,6 +171,8 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeOrganization -> `POST
   | DescribeOrganizationalUnit -> `POST
   | DescribePolicy -> `POST
+  | DescribeResourcePolicy -> `POST
+  | DescribeResponsibilityTransfer -> `POST
   | DetachPolicy -> `POST
   | DisableAWSServiceAccess -> `POST
   | DisablePolicyType -> `POST
@@ -142,17 +180,22 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | EnableAllFeatures -> `POST
   | EnablePolicyType -> `POST
   | InviteAccountToOrganization -> `POST
+  | InviteOrganizationToTransferResponsibility -> `POST
   | LeaveOrganization -> `POST
   | ListAWSServiceAccessForOrganization -> `POST
   | ListAccounts -> `POST
   | ListAccountsForParent -> `POST
+  | ListAccountsWithInvalidEffectivePolicy -> `POST
   | ListChildren -> `POST
   | ListCreateAccountStatus -> `POST
   | ListDelegatedAdministrators -> `POST
   | ListDelegatedServicesForAccount -> `POST
+  | ListEffectivePolicyValidationErrors -> `POST
   | ListHandshakesForAccount -> `POST
   | ListHandshakesForOrganization -> `POST
+  | ListInboundResponsibilityTransfers -> `POST
   | ListOrganizationalUnitsForParent -> `POST
+  | ListOutboundResponsibilityTransfers -> `POST
   | ListParents -> `POST
   | ListPolicies -> `POST
   | ListPoliciesForTarget -> `POST
@@ -160,12 +203,15 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `POST
   | ListTargetsForPolicy -> `POST
   | MoveAccount -> `POST
+  | PutResourcePolicy -> `POST
   | RegisterDelegatedAdministrator -> `POST
   | RemoveAccountFromOrganization -> `POST
   | TagResource -> `POST
+  | TerminateResponsibilityTransfer -> `POST
   | UntagResource -> `POST
   | UpdateOrganizationalUnit -> `POST
   | UpdatePolicy -> `POST
+  | UpdateResponsibilityTransfer -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
@@ -182,6 +228,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteOrganization -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOrganizationalUnit -> (Format.kasprintf Uri.of_string) "/"
       | DeletePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterDelegatedAdministrator ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeAccount -> (Format.kasprintf Uri.of_string) "/"
@@ -191,6 +238,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeOrganization -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOrganizationalUnit -> (Format.kasprintf Uri.of_string) "/"
       | DescribePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeResponsibilityTransfer ->
+          (Format.kasprintf Uri.of_string) "/"
       | DetachPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DisableAWSServiceAccess -> (Format.kasprintf Uri.of_string) "/"
       | DisablePolicyType -> (Format.kasprintf Uri.of_string) "/"
@@ -198,19 +248,29 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | EnableAllFeatures -> (Format.kasprintf Uri.of_string) "/"
       | EnablePolicyType -> (Format.kasprintf Uri.of_string) "/"
       | InviteAccountToOrganization -> (Format.kasprintf Uri.of_string) "/"
+      | InviteOrganizationToTransferResponsibility ->
+          (Format.kasprintf Uri.of_string) "/"
       | LeaveOrganization -> (Format.kasprintf Uri.of_string) "/"
       | ListAWSServiceAccessForOrganization ->
           (Format.kasprintf Uri.of_string) "/"
       | ListAccounts -> (Format.kasprintf Uri.of_string) "/"
       | ListAccountsForParent -> (Format.kasprintf Uri.of_string) "/"
+      | ListAccountsWithInvalidEffectivePolicy ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListChildren -> (Format.kasprintf Uri.of_string) "/"
       | ListCreateAccountStatus -> (Format.kasprintf Uri.of_string) "/"
       | ListDelegatedAdministrators -> (Format.kasprintf Uri.of_string) "/"
       | ListDelegatedServicesForAccount ->
           (Format.kasprintf Uri.of_string) "/"
+      | ListEffectivePolicyValidationErrors ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListHandshakesForAccount -> (Format.kasprintf Uri.of_string) "/"
       | ListHandshakesForOrganization -> (Format.kasprintf Uri.of_string) "/"
+      | ListInboundResponsibilityTransfers ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListOrganizationalUnitsForParent ->
+          (Format.kasprintf Uri.of_string) "/"
+      | ListOutboundResponsibilityTransfers ->
           (Format.kasprintf Uri.of_string) "/"
       | ListParents -> (Format.kasprintf Uri.of_string) "/"
       | ListPolicies -> (Format.kasprintf Uri.of_string) "/"
@@ -219,13 +279,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTargetsForPolicy -> (Format.kasprintf Uri.of_string) "/"
       | MoveAccount -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | RegisterDelegatedAdministrator ->
           (Format.kasprintf Uri.of_string) "/"
       | RemoveAccountFromOrganization -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TerminateResponsibilityTransfer ->
+          (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateOrganizationalUnit -> (Format.kasprintf Uri.of_string) "/"
-      | UpdatePolicy -> (Format.kasprintf Uri.of_string) "/")
+      | UpdatePolicy -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateResponsibilityTransfer -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -335,6 +399,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.DeletePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = (fun () -> `Assoc []) req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSOrganizationsV20161128.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeregisterDelegatedAdministrator ->
       let json = DeregisterDelegatedAdministratorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -403,6 +475,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.DescribePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeResourcePolicy ->
+      let json = (fun () -> `Assoc []) req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.DescribeResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeResponsibilityTransfer ->
+      let json = DescribeResponsibilityTransferRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.DescribeResponsibilityTransfer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DetachPolicy ->
       let json = DetachPolicyRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -462,6 +552,16 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSOrganizationsV20161128.InviteAccountToOrganization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | InviteOrganizationToTransferResponsibility ->
+      let json =
+        InviteOrganizationToTransferResponsibilityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.InviteOrganizationToTransferResponsibility")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | LeaveOrganization ->
       let json = (fun () -> `Assoc []) req in
       let body = Yojson.Safe.to_string json in
@@ -494,6 +594,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.ListAccountsForParent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAccountsWithInvalidEffectivePolicy ->
+      let json = ListAccountsWithInvalidEffectivePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.ListAccountsWithInvalidEffectivePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListChildren ->
       let json = ListChildrenRequest.to_json req in
@@ -530,6 +639,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSOrganizationsV20161128.ListDelegatedServicesForAccount")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListEffectivePolicyValidationErrors ->
+      let json = ListEffectivePolicyValidationErrorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.ListEffectivePolicyValidationErrors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListHandshakesForAccount ->
       let json = ListHandshakesForAccountRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -548,6 +666,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSOrganizationsV20161128.ListHandshakesForOrganization")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListInboundResponsibilityTransfers ->
+      let json = ListInboundResponsibilityTransfersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.ListInboundResponsibilityTransfers")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListOrganizationalUnitsForParent ->
       let json = ListOrganizationalUnitsForParentRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -556,6 +683,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSOrganizationsV20161128.ListOrganizationalUnitsForParent")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListOutboundResponsibilityTransfers ->
+      let json = ListOutboundResponsibilityTransfersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.ListOutboundResponsibilityTransfers")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListParents ->
       let json = ListParentsRequest.to_json req in
@@ -613,6 +749,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.MoveAccount")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSOrganizationsV20161128.PutResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterDelegatedAdministrator ->
       let json = RegisterDelegatedAdministratorRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -639,6 +783,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TerminateResponsibilityTransfer ->
+      let json = TerminateResponsibilityTransferRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.TerminateResponsibilityTransfer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -663,6 +816,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSOrganizationsV20161128.UpdatePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateResponsibilityTransfer ->
+      let json = UpdateResponsibilityTransferRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSOrganizationsV20161128.UpdateResponsibilityTransfer")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -755,6 +917,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DeletePolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeregisterDelegatedAdministrator ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DescribeAccount ->
@@ -814,6 +978,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribePolicyResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribePolicyResponse.error_of_json))
+  | DescribeResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResourcePolicyResponse.error_of_json))
+  | DescribeResponsibilityTransfer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeResponsibilityTransferResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeResponsibilityTransferResponse.error_of_json))
   | DetachPolicy ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DisableAWSServiceAccess ->
@@ -852,6 +1034,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some InviteAccountToOrganizationResponse.error_of_json))
+  | InviteOrganizationToTransferResponsibility ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (InviteOrganizationToTransferResponsibilityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                InviteOrganizationToTransferResponsibilityResponse.error_of_json))
   | LeaveOrganization ->
       if is_success then Ok () else Error (parse_aws_error None)
   | ListAWSServiceAccessForOrganization ->
@@ -877,6 +1069,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListAccountsForParentResponse.error_of_json))
+  | ListAccountsWithInvalidEffectivePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAccountsWithInvalidEffectivePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                ListAccountsWithInvalidEffectivePolicyResponse.error_of_json))
   | ListChildren ->
       if is_success
       then
@@ -910,6 +1112,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListDelegatedServicesForAccountResponse.error_of_json))
+  | ListEffectivePolicyValidationErrors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListEffectivePolicyValidationErrorsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListEffectivePolicyValidationErrorsResponse.error_of_json))
   | ListHandshakesForAccount ->
       if is_success
       then
@@ -928,6 +1139,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListHandshakesForOrganizationResponse.error_of_json))
+  | ListInboundResponsibilityTransfers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListInboundResponsibilityTransfersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListInboundResponsibilityTransfersResponse.error_of_json))
   | ListOrganizationalUnitsForParent ->
       if is_success
       then
@@ -937,6 +1157,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some ListOrganizationalUnitsForParentResponse.error_of_json))
+  | ListOutboundResponsibilityTransfers ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListOutboundResponsibilityTransfersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListOutboundResponsibilityTransfersResponse.error_of_json))
   | ListParents ->
       if is_success
       then
@@ -980,11 +1209,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error (Some ListTargetsForPolicyResponse.error_of_json))
   | MoveAccount -> if is_success then Ok () else Error (parse_aws_error None)
+  | PutResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutResourcePolicyResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some PutResourcePolicyResponse.error_of_json))
   | RegisterDelegatedAdministrator ->
       if is_success then Ok () else Error (parse_aws_error None)
   | RemoveAccountFromOrganization ->
       if is_success then Ok () else Error (parse_aws_error None)
   | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | TerminateResponsibilityTransfer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TerminateResponsibilityTransferResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some TerminateResponsibilityTransferResponse.error_of_json))
   | UntagResource ->
       if is_success then Ok () else Error (parse_aws_error None)
   | UpdateOrganizationalUnit ->
@@ -1002,3 +1248,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdatePolicyResponse.of_json json)
       else Error (parse_aws_error (Some UpdatePolicyResponse.error_of_json))
+  | UpdateResponsibilityTransfer ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateResponsibilityTransferResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateResponsibilityTransferResponse.error_of_json))

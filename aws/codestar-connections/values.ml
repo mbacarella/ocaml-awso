@@ -25,6 +25,32 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module SyncBlockerContextKey =
+  struct
+    type nonrec t = string
+    let context_ = "SyncBlockerContextKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SyncBlockerContextKey" j
+    let to_json = simple_to_json to_value
+  end
+module SyncBlockerContextValue =
+  struct
+    type nonrec t = string
+    let context_ = "SyncBlockerContextValue"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SyncBlockerContextValue" j
+    let to_json = simple_to_json to_value
+  end
 module SecurityGroupId =
   struct
     type nonrec t = string
@@ -66,6 +92,37 @@ module SubnetId =
     let of_json j = string_of_json ~kind:"SubnetId" j
     let to_json = simple_to_json to_value
   end
+module SyncBlockerContext =
+  struct
+    type nonrec t =
+      {
+      key: SyncBlockerContextKey.t option
+        [@ocaml.doc
+          "The key provided for a context key-value pair for a specific sync blocker."];
+      value: SyncBlockerContextValue.t option
+        [@ocaml.doc
+          "The value provided for a context key-value pair for a specific sync blocker."]}
+    let make ?key = fun ?value -> fun () -> { key; value }
+    let to_value x =
+      structure_to_value
+        [("Key", (Option.map x.key ~f:SyncBlockerContextKey.to_value));
+        ("Value", (Option.map x.value ~f:SyncBlockerContextValue.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let value =
+        (Option.map ~f:SyncBlockerContextValue.of_xml)
+          (Xml.child xml_arg0 "Value") in
+      let key =
+        (Option.map ~f:SyncBlockerContextKey.of_xml)
+          (Xml.child xml_arg0 "Key") in
+      make ?value ?key ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let value = field_map json__ "Value" SyncBlockerContextValue.of_json in
+      let key = field_map json__ "Key" SyncBlockerContextKey.of_json in
+      make ?value ?key ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The context for a specific sync blocker."]
 module SecurityGroupIds =
   struct
     type nonrec t = SecurityGroupId.t list
@@ -74,6 +131,9 @@ module SecurityGroupIds =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityGroupId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -103,6 +163,9 @@ module SubnetIds =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SubnetId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -163,6 +226,177 @@ module VpcId =
     let of_json j = string_of_json ~kind:"VpcId" j
     let to_json = simple_to_json to_value
   end
+module BlockerStatus =
+  struct
+    type nonrec t =
+      | ACTIVE 
+      | RESOLVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ACTIVE -> "ACTIVE"
+      | RESOLVED -> "RESOLVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ACTIVE" -> ACTIVE
+      | "RESOLVED" -> RESOLVED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockerStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockerStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module BlockerType =
+  struct
+    type nonrec t =
+      | AUTOMATED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | AUTOMATED -> "AUTOMATED" | Non_static_id s -> s
+    let of_string =
+      function | "AUTOMATED" -> AUTOMATED | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration BlockerType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"BlockerType" j)
+    let to_json = simple_to_json to_value
+  end
+module CreatedReason =
+  struct
+    type nonrec t = string
+    let context_ = "CreatedReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CreatedReason" j
+    let to_json = simple_to_json to_value
+  end
+module Id =
+  struct
+    type nonrec t = string
+    let context_ = "Id"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:50) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Id" j
+    let to_json = simple_to_json to_value
+  end
+module ResolvedReason =
+  struct
+    type nonrec t = string
+    let context_ = "ResolvedReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:250) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResolvedReason" j
+    let to_json = simple_to_json to_value
+  end
+module SyncBlockerContextList =
+  struct
+    type nonrec t = SyncBlockerContext.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SyncBlockerContext.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SyncBlockerContext.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SyncBlockerContextList"
+        ~of_json:SyncBlockerContext.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module Event =
+  struct
+    type nonrec t = string
+    let context_ = "Event"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Event" j
+    let to_json = simple_to_json to_value
+  end
+module ExternalId =
+  struct
+    type nonrec t = string
+    let context_ = "ExternalId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExternalId" j
+    let to_json = simple_to_json to_value
+  end
+module Type =
+  struct
+    type nonrec t = string
+    let context_ = "Type"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Type" j
+    let to_json = simple_to_json to_value
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -201,6 +435,350 @@ module TagValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TagValue" j
+    let to_json = simple_to_json to_value
+  end
+module BranchName =
+  struct
+    type nonrec t = string
+    let context_ = "BranchName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BranchName" j
+    let to_json = simple_to_json to_value
+  end
+module DeploymentFilePath =
+  struct
+    type nonrec t = string
+    let context_ = "DeploymentFilePath"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DeploymentFilePath" j
+    let to_json = simple_to_json to_value
+  end
+module IamRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IamRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[\\w]+)*:iam::\\d{12}:role/[a-zA-Z_0-9+=,.@\\-_/]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IamRoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module OwnerId =
+  struct
+    type nonrec t = string
+    let context_ = "OwnerId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"OwnerId" j
+    let to_json = simple_to_json to_value
+  end
+module ProviderType =
+  struct
+    type nonrec t =
+      | Bitbucket 
+      | GitHub 
+      | GitHubEnterpriseServer 
+      | GitLab 
+      | GitLabSelfManaged 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Bitbucket -> "Bitbucket"
+      | GitHub -> "GitHub"
+      | GitHubEnterpriseServer -> "GitHubEnterpriseServer"
+      | GitLab -> "GitLab"
+      | GitLabSelfManaged -> "GitLabSelfManaged"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Bitbucket" -> Bitbucket
+      | "GitHub" -> GitHub
+      | "GitHubEnterpriseServer" -> GitHubEnterpriseServer
+      | "GitLab" -> GitLab
+      | "GitLabSelfManaged" -> GitLabSelfManaged
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProviderType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProviderType" j)
+    let to_json = simple_to_json to_value
+  end
+module PublishDeploymentStatus =
+  struct
+    type nonrec t =
+      | ENABLED 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED -> "ENABLED"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED" -> ENABLED
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PublishDeploymentStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PublishDeploymentStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RepositoryLinkId =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryLinkId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryLinkId" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryName =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryName" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceName =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[0-9A-Za-z]+[0-9A-Za-z_\\\\-]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceName" j
+    let to_json = simple_to_json to_value
+  end
+module SyncConfigurationType =
+  struct
+    type nonrec t =
+      | CFN_STACK_SYNC 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | CFN_STACK_SYNC -> "CFN_STACK_SYNC" | Non_static_id s -> s
+    let of_string =
+      function | "CFN_STACK_SYNC" -> CFN_STACK_SYNC | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SyncConfigurationType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SyncConfigurationType" j)
+    let to_json = simple_to_json to_value
+  end
+module TriggerResourceUpdateOn =
+  struct
+    type nonrec t =
+      | ANY_CHANGE 
+      | FILE_CHANGE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ANY_CHANGE -> "ANY_CHANGE"
+      | FILE_CHANGE -> "FILE_CHANGE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ANY_CHANGE" -> ANY_CHANGE
+      | "FILE_CHANGE" -> FILE_CHANGE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration TriggerResourceUpdateOn" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"TriggerResourceUpdateOn" j)
+    let to_json = simple_to_json to_value
+  end
+module Directory =
+  struct
+    type nonrec t = string
+    let context_ = "Directory"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Directory" j
+    let to_json = simple_to_json to_value
+  end
+module Parent =
+  struct
+    type nonrec t = string
+    let context_ = "Parent"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Parent" j
+    let to_json = simple_to_json to_value
+  end
+module Target =
+  struct
+    type nonrec t = string
+    let context_ = "Target"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Target" j
+    let to_json = simple_to_json to_value
+  end
+module ConnectionArn =
+  struct
+    type nonrec t = string
+    let context_ = "ConnectionArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[\\w]+)*:.+:.+:[0-9]{12}:.+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ConnectionArn" j
+    let to_json = simple_to_json to_value
+  end
+module KmsKeyArn =
+  struct
+    type nonrec t = string
+    let context_ = "KmsKeyArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws(-[\\w]+)*:kms:[a-z\\-0-9]+:\\d{12}:key/[a-zA-Z0-9\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"KmsKeyArn" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryLinkArn =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryLinkArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i
+             ~pattern:"^arn:aws(?:-[a-z]+)*:codestar-connections:[a-z\\-0-9]+:\\d{12}:repository-link\\/[a-zA-Z0-9\\-:/]+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryLinkArn" j
     let to_json = simple_to_json to_value
   end
 module HostArn =
@@ -278,34 +856,6 @@ module HostStatusMessage =
     let of_json j = string_of_json ~kind:"HostStatusMessage" j
     let to_json = simple_to_json to_value
   end
-module ProviderType =
-  struct
-    type nonrec t =
-      | Bitbucket 
-      | GitHub 
-      | GitHubEnterpriseServer 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | Bitbucket -> "Bitbucket"
-      | GitHub -> "GitHub"
-      | GitHubEnterpriseServer -> "GitHubEnterpriseServer"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "Bitbucket" -> Bitbucket
-      | "GitHub" -> GitHub
-      | "GitHubEnterpriseServer" -> GitHubEnterpriseServer
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration ProviderType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"ProviderType" j)
-    let to_json = simple_to_json to_value
-  end
 module Url =
   struct
     type nonrec t = string
@@ -371,13 +921,13 @@ module VpcConfiguration =
         VpcId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "VpcId") in
       make ?tlsCertificate ~securityGroupIds ~subnetIds ~vpcId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tlsCertificate =
-        field_map json "TlsCertificate" TlsCertificate.of_json in
+        field_map json__ "TlsCertificate" TlsCertificate.of_json in
       let securityGroupIds =
-        field_map_exn json "SecurityGroupIds" SecurityGroupIds.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIds.of_json in
-      let vpcId = field_map_exn json "VpcId" VpcId.of_json in
+        field_map_exn json__ "SecurityGroupIds" SecurityGroupIds.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIds.of_json in
+      let vpcId = field_map_exn json__ "VpcId" VpcId.of_json in
       make ?tlsCertificate ~securityGroupIds ~subnetIds ~vpcId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The VPC configuration provisioned for the host."]
@@ -399,28 +949,6 @@ module AccountId =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"AccountId" j
-    let to_json = simple_to_json to_value
-  end
-module ConnectionArn =
-  struct
-    type nonrec t = string
-    let context_ = "ConnectionArn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:256) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"arn:aws(-[\\w]+)*:.+:.+:[0-9]{12}:.+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ConnectionArn" j
     let to_json = simple_to_json to_value
   end
 module ConnectionName =
@@ -471,6 +999,191 @@ module ConnectionStatus =
     let of_json j = of_string (string_of_json ~kind:"ConnectionStatus" j)
     let to_json = simple_to_json to_value
   end
+module SyncBlocker =
+  struct
+    type nonrec t =
+      {
+      id: Id.t option [@ocaml.doc "The ID for a specific sync blocker."];
+      type_: BlockerType.t option [@ocaml.doc "The sync blocker type."];
+      status: BlockerStatus.t option
+        [@ocaml.doc "The status for a specific sync blocker."];
+      createdReason: CreatedReason.t option
+        [@ocaml.doc "The provided reason for a specific sync blocker."];
+      createdAt: Timestamp.t option
+        [@ocaml.doc "The creation time for a specific sync blocker."];
+      contexts: SyncBlockerContextList.t option
+        [@ocaml.doc "The contexts for a specific sync blocker."];
+      resolvedReason: ResolvedReason.t option
+        [@ocaml.doc "The resolved reason for a specific sync blocker."];
+      resolvedAt: Timestamp.t option
+        [@ocaml.doc "The time that a specific sync blocker was resolved."]}
+    let make ?id =
+      fun ?type_ ->
+        fun ?status ->
+          fun ?createdReason ->
+            fun ?createdAt ->
+              fun ?contexts ->
+                fun ?resolvedReason ->
+                  fun ?resolvedAt ->
+                    fun () ->
+                      {
+                        id;
+                        type_;
+                        status;
+                        createdReason;
+                        createdAt;
+                        contexts;
+                        resolvedReason;
+                        resolvedAt
+                      }
+    let to_value x =
+      structure_to_value
+        [("Id", (Option.map x.id ~f:Id.to_value));
+        ("Type", (Option.map x.type_ ~f:BlockerType.to_value));
+        ("Status", (Option.map x.status ~f:BlockerStatus.to_value));
+        ("CreatedReason",
+          (Option.map x.createdReason ~f:CreatedReason.to_value));
+        ("CreatedAt", (Option.map x.createdAt ~f:Timestamp.to_value));
+        ("Contexts",
+          (Option.map x.contexts ~f:SyncBlockerContextList.to_value));
+        ("ResolvedReason",
+          (Option.map x.resolvedReason ~f:ResolvedReason.to_value));
+        ("ResolvedAt", (Option.map x.resolvedAt ~f:Timestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resolvedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "ResolvedAt") in
+      let resolvedReason =
+        (Option.map ~f:ResolvedReason.of_xml)
+          (Xml.child xml_arg0 "ResolvedReason") in
+      let contexts =
+        (Option.map ~f:SyncBlockerContextList.of_xml)
+          (Xml.child xml_arg0 "Contexts") in
+      let createdAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "CreatedAt") in
+      let createdReason =
+        (Option.map ~f:CreatedReason.of_xml)
+          (Xml.child xml_arg0 "CreatedReason") in
+      let status =
+        (Option.map ~f:BlockerStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:BlockerType.of_xml) (Xml.child xml_arg0 "Type") in
+      let id = (Option.map ~f:Id.of_xml) (Xml.child xml_arg0 "Id") in
+      make ?resolvedAt ?resolvedReason ?contexts ?createdAt ?createdReason
+        ?status ?type_ ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resolvedAt = field_map json__ "ResolvedAt" Timestamp.of_json in
+      let resolvedReason =
+        field_map json__ "ResolvedReason" ResolvedReason.of_json in
+      let contexts =
+        field_map json__ "Contexts" SyncBlockerContextList.of_json in
+      let createdAt = field_map json__ "CreatedAt" Timestamp.of_json in
+      let createdReason =
+        field_map json__ "CreatedReason" CreatedReason.of_json in
+      let status = field_map json__ "Status" BlockerStatus.of_json in
+      let type_ = field_map json__ "Type" BlockerType.of_json in
+      let id = field_map json__ "Id" Id.of_json in
+      make ?resolvedAt ?resolvedReason ?contexts ?createdAt ?createdReason
+        ?status ?type_ ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a blocker for a sync event."]
+module ResourceSyncEvent =
+  struct
+    type nonrec t =
+      {
+      event: Event.t option
+        [@ocaml.doc "The event for a resource sync event."];
+      externalId: ExternalId.t option
+        [@ocaml.doc "The ID for a resource sync event."];
+      time: Timestamp.t option
+        [@ocaml.doc "The time that a resource sync event occurred."];
+      type_: Type.t option [@ocaml.doc "The type of resource sync event."]}
+    let make ?event =
+      fun ?externalId ->
+        fun ?time ->
+          fun ?type_ -> fun () -> { event; externalId; time; type_ }
+    let to_value x =
+      structure_to_value
+        [("Event", (Option.map x.event ~f:Event.to_value));
+        ("ExternalId", (Option.map x.externalId ~f:ExternalId.to_value));
+        ("Time", (Option.map x.time ~f:Timestamp.to_value));
+        ("Type", (Option.map x.type_ ~f:Type.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      let time = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Time") in
+      let externalId =
+        (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "ExternalId") in
+      let event = (Option.map ~f:Event.of_xml) (Xml.child xml_arg0 "Event") in
+      make ?type_ ?time ?externalId ?event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let time = field_map json__ "Time" Timestamp.of_json in
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let event = field_map json__ "Event" Event.of_json in
+      make ?type_ ?time ?externalId ?event ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a resource sync event for the resource associated with a sync configuration."]
+module SHA =
+  struct
+    type nonrec t = string
+    let context_ = "SHA"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SHA" j
+    let to_json = simple_to_json to_value
+  end
+module RepositorySyncEvent =
+  struct
+    type nonrec t =
+      {
+      event: Event.t option
+        [@ocaml.doc "A description of a repository sync event."];
+      externalId: ExternalId.t option
+        [@ocaml.doc "The ID for a repository sync event."];
+      time: Timestamp.t option
+        [@ocaml.doc "The time that a repository sync event occurred."];
+      type_: Type.t option
+        [@ocaml.doc "The event type for a repository sync event."]}
+    let make ?event =
+      fun ?externalId ->
+        fun ?time ->
+          fun ?type_ -> fun () -> { event; externalId; time; type_ }
+    let to_value x =
+      structure_to_value
+        [("Event", (Option.map x.event ~f:Event.to_value));
+        ("ExternalId", (Option.map x.externalId ~f:ExternalId.to_value));
+        ("Time", (Option.map x.time ~f:Timestamp.to_value));
+        ("Type", (Option.map x.type_ ~f:Type.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      let time = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Time") in
+      let externalId =
+        (Option.map ~f:ExternalId.of_xml) (Xml.child xml_arg0 "ExternalId") in
+      let event = (Option.map ~f:Event.of_xml) (Xml.child xml_arg0 "Event") in
+      make ?type_ ?time ?externalId ?event ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let time = field_map json__ "Time" Timestamp.of_json in
+      let externalId = field_map json__ "ExternalId" ExternalId.of_json in
+      let event = field_map json__ "Event" Event.of_json in
+      make ?type_ ?time ?externalId ?event ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a repository sync event."]
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -505,13 +1218,302 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a key-value pair that is used to manage the resource. This tag is available for use by AWS services that support tags."]
+       "A tag is a key-value pair that is used to manage the resource. This tag is available for use by Amazon Web Services services that support tags."]
+module SyncConfiguration =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t option
+        [@ocaml.doc
+          "The branch associated with a specific sync configuration."];
+      configFile: DeploymentFilePath.t option
+        [@ocaml.doc
+          "The file path to the configuration file associated with a specific sync configuration. The path should point to an actual file in the sync configurations linked repository."];
+      ownerId: OwnerId.t option
+        [@ocaml.doc
+          "The owner ID for the repository associated with a specific sync configuration, such as the owner ID in GitHub."];
+      providerType: ProviderType.t option
+        [@ocaml.doc
+          "The connection provider type associated with a specific sync configuration, such as GitHub."];
+      repositoryLinkId: RepositoryLinkId.t option
+        [@ocaml.doc
+          "The ID of the repository link associated with a specific sync configuration."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc
+          "The name of the repository associated with a specific sync configuration."];
+      resourceName: ResourceName.t option
+        [@ocaml.doc
+          "The name of the connection resource associated with a specific sync configuration."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the IAM role associated with a specific sync configuration."];
+      syncType: SyncConfigurationType.t option
+        [@ocaml.doc "The type of sync for a specific sync configuration."];
+      publishDeploymentStatus: PublishDeploymentStatus.t option
+        [@ocaml.doc
+          "Whether to enable or disable publishing of deployment status to source providers."];
+      triggerResourceUpdateOn: TriggerResourceUpdateOn.t option
+        [@ocaml.doc "When to trigger Git sync to begin the stack update."]}
+    let make ?branch =
+      fun ?configFile ->
+        fun ?ownerId ->
+          fun ?providerType ->
+            fun ?repositoryLinkId ->
+              fun ?repositoryName ->
+                fun ?resourceName ->
+                  fun ?roleArn ->
+                    fun ?syncType ->
+                      fun ?publishDeploymentStatus ->
+                        fun ?triggerResourceUpdateOn ->
+                          fun () ->
+                            {
+                              branch;
+                              configFile;
+                              ownerId;
+                              providerType;
+                              repositoryLinkId;
+                              repositoryName;
+                              resourceName;
+                              roleArn;
+                              syncType;
+                              publishDeploymentStatus;
+                              triggerResourceUpdateOn
+                            }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Option.map x.branch ~f:BranchName.to_value));
+        ("ConfigFile",
+          (Option.map x.configFile ~f:DeploymentFilePath.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:OwnerId.to_value));
+        ("ProviderType",
+          (Option.map x.providerType ~f:ProviderType.to_value));
+        ("RepositoryLinkId",
+          (Option.map x.repositoryLinkId ~f:RepositoryLinkId.to_value));
+        ("RepositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("ResourceName",
+          (Option.map x.resourceName ~f:ResourceName.to_value));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("SyncType",
+          (Option.map x.syncType ~f:SyncConfigurationType.to_value));
+        ("PublishDeploymentStatus",
+          (Option.map x.publishDeploymentStatus
+             ~f:PublishDeploymentStatus.to_value));
+        ("TriggerResourceUpdateOn",
+          (Option.map x.triggerResourceUpdateOn
+             ~f:TriggerResourceUpdateOn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let triggerResourceUpdateOn =
+        (Option.map ~f:TriggerResourceUpdateOn.of_xml)
+          (Xml.child xml_arg0 "TriggerResourceUpdateOn") in
+      let publishDeploymentStatus =
+        (Option.map ~f:PublishDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "PublishDeploymentStatus") in
+      let syncType =
+        (Option.map ~f:SyncConfigurationType.of_xml)
+          (Xml.child xml_arg0 "SyncType") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let resourceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "RepositoryName") in
+      let repositoryLinkId =
+        (Option.map ~f:RepositoryLinkId.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkId") in
+      let providerType =
+        (Option.map ~f:ProviderType.of_xml)
+          (Xml.child xml_arg0 "ProviderType") in
+      let ownerId =
+        (Option.map ~f:OwnerId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      let configFile =
+        (Option.map ~f:DeploymentFilePath.of_xml)
+          (Xml.child xml_arg0 "ConfigFile") in
+      let branch =
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "Branch") in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ?syncType
+        ?roleArn ?resourceName ?repositoryName ?repositoryLinkId
+        ?providerType ?ownerId ?configFile ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let triggerResourceUpdateOn =
+        field_map json__ "TriggerResourceUpdateOn"
+          TriggerResourceUpdateOn.of_json in
+      let publishDeploymentStatus =
+        field_map json__ "PublishDeploymentStatus"
+          PublishDeploymentStatus.of_json in
+      let syncType =
+        field_map json__ "SyncType" SyncConfigurationType.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      let repositoryName =
+        field_map json__ "RepositoryName" RepositoryName.of_json in
+      let repositoryLinkId =
+        field_map json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
+      let configFile =
+        field_map json__ "ConfigFile" DeploymentFilePath.of_json in
+      let branch = field_map json__ "Branch" BranchName.of_json in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ?syncType
+        ?roleArn ?resourceName ?repositoryName ?repositoryLinkId
+        ?providerType ?ownerId ?configFile ?branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information, such as repository, branch, provider, and resource names for a specific sync configuration."]
+module RepositorySyncDefinition =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t option
+        [@ocaml.doc "The branch specified for a repository sync definition."];
+      directory: Directory.t option
+        [@ocaml.doc
+          "The configuration file for a repository sync definition. This value comes from creating or updating the config-file field of a sync-configuration."];
+      parent: Parent.t option
+        [@ocaml.doc
+          "The parent resource specified for a repository sync definition."];
+      target: Target.t option
+        [@ocaml.doc
+          "The target resource specified for a repository sync definition. In some cases, such as CFN_STACK_SYNC, the parent and target resource are the same."]}
+    let make ?branch =
+      fun ?directory ->
+        fun ?parent ->
+          fun ?target -> fun () -> { branch; directory; parent; target }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Option.map x.branch ~f:BranchName.to_value));
+        ("Directory", (Option.map x.directory ~f:Directory.to_value));
+        ("Parent", (Option.map x.parent ~f:Parent.to_value));
+        ("Target", (Option.map x.target ~f:Target.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let target =
+        (Option.map ~f:Target.of_xml) (Xml.child xml_arg0 "Target") in
+      let parent =
+        (Option.map ~f:Parent.of_xml) (Xml.child xml_arg0 "Parent") in
+      let directory =
+        (Option.map ~f:Directory.of_xml) (Xml.child xml_arg0 "Directory") in
+      let branch =
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "Branch") in
+      make ?target ?parent ?directory ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let target = field_map json__ "Target" Target.of_json in
+      let parent = field_map json__ "Parent" Parent.of_json in
+      let directory = field_map json__ "Directory" Directory.of_json in
+      let branch = field_map json__ "Branch" BranchName.of_json in
+      make ?target ?parent ?directory ?branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The definition for a repository with a sync configuration."]
+module RepositoryLinkInfo =
+  struct
+    type nonrec t =
+      {
+      connectionArn: ConnectionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connection associated with the repository link."];
+      encryptionKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the encryption key for the repository associated with the repository link."];
+      ownerId: OwnerId.t option
+        [@ocaml.doc
+          "The owner ID for the repository associated with the repository link, such as the owner ID in GitHub."];
+      providerType: ProviderType.t option
+        [@ocaml.doc
+          "The provider type for the connection, such as GitHub, associated with the repository link."];
+      repositoryLinkArn: RepositoryLinkArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the repository link."];
+      repositoryLinkId: RepositoryLinkId.t option
+        [@ocaml.doc "The ID of the repository link."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc
+          "The name of the repository associated with the repository link."]}
+    let make ?connectionArn =
+      fun ?encryptionKeyArn ->
+        fun ?ownerId ->
+          fun ?providerType ->
+            fun ?repositoryLinkArn ->
+              fun ?repositoryLinkId ->
+                fun ?repositoryName ->
+                  fun () ->
+                    {
+                      connectionArn;
+                      encryptionKeyArn;
+                      ownerId;
+                      providerType;
+                      repositoryLinkArn;
+                      repositoryLinkId;
+                      repositoryName
+                    }
+    let to_value x =
+      structure_to_value
+        [("ConnectionArn",
+           (Option.map x.connectionArn ~f:ConnectionArn.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:KmsKeyArn.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:OwnerId.to_value));
+        ("ProviderType",
+          (Option.map x.providerType ~f:ProviderType.to_value));
+        ("RepositoryLinkArn",
+          (Option.map x.repositoryLinkArn ~f:RepositoryLinkArn.to_value));
+        ("RepositoryLinkId",
+          (Option.map x.repositoryLinkId ~f:RepositoryLinkId.to_value));
+        ("RepositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "RepositoryName") in
+      let repositoryLinkId =
+        (Option.map ~f:RepositoryLinkId.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkId") in
+      let repositoryLinkArn =
+        (Option.map ~f:RepositoryLinkArn.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkArn") in
+      let providerType =
+        (Option.map ~f:ProviderType.of_xml)
+          (Xml.child xml_arg0 "ProviderType") in
+      let ownerId =
+        (Option.map ~f:OwnerId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      let encryptionKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let connectionArn =
+        (Option.map ~f:ConnectionArn.of_xml)
+          (Xml.child xml_arg0 "ConnectionArn") in
+      make ?repositoryName ?repositoryLinkId ?repositoryLinkArn ?providerType
+        ?ownerId ?encryptionKeyArn ?connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryName =
+        field_map json__ "RepositoryName" RepositoryName.of_json in
+      let repositoryLinkId =
+        field_map json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let repositoryLinkArn =
+        field_map json__ "RepositoryLinkArn" RepositoryLinkArn.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" KmsKeyArn.of_json in
+      let connectionArn =
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      make ?repositoryName ?repositoryLinkId ?repositoryLinkArn ?providerType
+        ?ownerId ?encryptionKeyArn ?connectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the repository link resource, such as the repository link ARN, the associated connection ARN, encryption key ARN, and owner ID."]
 module Host =
   struct
     type nonrec t =
@@ -582,16 +1584,16 @@ module Host =
       make ?statusMessage ?status ?vpcConfiguration ?providerEndpoint
         ?providerType ?hostArn ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statusMessage =
-        field_map json "StatusMessage" HostStatusMessage.of_json in
-      let status = field_map json "Status" HostStatus.of_json in
+        field_map json__ "StatusMessage" HostStatusMessage.of_json in
+      let status = field_map json__ "Status" HostStatus.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
-      let providerEndpoint = field_map json "ProviderEndpoint" Url.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let hostArn = field_map json "HostArn" HostArn.of_json in
-      let name = field_map json "Name" HostName.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
+      let providerEndpoint = field_map json__ "ProviderEndpoint" Url.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let hostArn = field_map json__ "HostArn" HostArn.of_json in
+      let name = field_map json__ "Name" HostName.of_json in
       make ?statusMessage ?status ?vpcConfiguration ?providerEndpoint
         ?providerType ?hostArn ?name ()
     let to_json v = composed_to_json to_value v
@@ -603,10 +1605,10 @@ module Connection =
       {
       connectionName: ConnectionName.t option
         [@ocaml.doc
-          "The name of the connection. Connection names must be unique in an AWS user account."];
+          "The name of the connection. Connection names must be unique in an Amazon Web Services account."];
       connectionArn: ConnectionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the connection. The ARN is used as the connection reference when the connection is shared between AWS services. The ARN is never reused if the connection is deleted."];
+          "The Amazon Resource Name (ARN) of the connection. The ARN is used as the connection reference when the connection is shared between Amazon Web Services services. The ARN is never reused if the connection is deleted."];
       providerType: ProviderType.t option
         [@ocaml.doc
           "The name of the external provider where your third-party code repository is configured."];
@@ -668,22 +1670,247 @@ module Connection =
       make ?hostArn ?connectionStatus ?ownerAccountId ?providerType
         ?connectionArn ?connectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostArn = field_map json "HostArn" HostArn.of_json in
+    let of_json json__ =
+      let hostArn = field_map json__ "HostArn" HostArn.of_json in
       let connectionStatus =
-        field_map json "ConnectionStatus" ConnectionStatus.of_json in
-      let ownerAccountId = field_map json "OwnerAccountId" AccountId.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
+        field_map json__ "ConnectionStatus" ConnectionStatus.of_json in
+      let ownerAccountId =
+        field_map json__ "OwnerAccountId" AccountId.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
       let connectionArn =
-        field_map json "ConnectionArn" ConnectionArn.of_json in
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
       let connectionName =
-        field_map json "ConnectionName" ConnectionName.of_json in
+        field_map json__ "ConnectionName" ConnectionName.of_json in
       make ?hostArn ?connectionStatus ?ownerAccountId ?providerType
         ?connectionArn ?connectionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A resource that is used to connect third-party source providers with services like AWS CodePipeline. Note: A connection created through CloudFormation, the CLI, or the SDK is in `PENDING` status by default. You can make its status `AVAILABLE` by updating the connection in the console."]
-module ConflictException =
+       "A resource that is used to connect third-party source providers with services like CodePipeline. Note: A connection created through CloudFormation, the CLI, or the SDK is in `PENDING` status by default. You can make its status `AVAILABLE` by updating the connection in the console."]
+module LatestSyncBlockerList =
+  struct
+    type nonrec t = SyncBlocker.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SyncBlocker.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SyncBlocker.of_xml)
+    let of_json j =
+      list_of_json ~kind:"LatestSyncBlockerList" ~of_json:SyncBlocker.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceSyncEventList =
+  struct
+    type nonrec t = ResourceSyncEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceSyncEvent.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceSyncEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceSyncEventList"
+        ~of_json:ResourceSyncEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResourceSyncStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | INITIATED 
+      | IN_PROGRESS 
+      | SUCCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | INITIATED -> "INITIATED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCEEDED -> "SUCCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "INITIATED" -> INITIATED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCEEDED" -> SUCCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ResourceSyncStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ResourceSyncStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module Revision =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t option
+        [@ocaml.doc "The branch name for a specific revision."];
+      directory: Directory.t option
+        [@ocaml.doc "The directory, if any, for a specific revision."];
+      ownerId: OwnerId.t option
+        [@ocaml.doc
+          "The owner ID for a specific revision, such as the GitHub owner ID for a GitHub repository."];
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The repository name for a specific revision."];
+      providerType: ProviderType.t option
+        [@ocaml.doc "The provider type for a revision, such as GitHub."];
+      sha: SHA.t option
+        [@ocaml.doc
+          "The SHA, such as the commit ID, for a specific revision."]}
+    let make ?branch =
+      fun ?directory ->
+        fun ?ownerId ->
+          fun ?repositoryName ->
+            fun ?providerType ->
+              fun ?sha ->
+                fun () ->
+                  {
+                    branch;
+                    directory;
+                    ownerId;
+                    repositoryName;
+                    providerType;
+                    sha
+                  }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Option.map x.branch ~f:BranchName.to_value));
+        ("Directory", (Option.map x.directory ~f:Directory.to_value));
+        ("OwnerId", (Option.map x.ownerId ~f:OwnerId.to_value));
+        ("RepositoryName",
+          (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("ProviderType",
+          (Option.map x.providerType ~f:ProviderType.to_value));
+        ("Sha", (Option.map x.sha ~f:SHA.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sha = (Option.map ~f:SHA.of_xml) (Xml.child xml_arg0 "Sha") in
+      let providerType =
+        (Option.map ~f:ProviderType.of_xml)
+          (Xml.child xml_arg0 "ProviderType") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "RepositoryName") in
+      let ownerId =
+        (Option.map ~f:OwnerId.of_xml) (Xml.child xml_arg0 "OwnerId") in
+      let directory =
+        (Option.map ~f:Directory.of_xml) (Xml.child xml_arg0 "Directory") in
+      let branch =
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "Branch") in
+      make ?sha ?providerType ?repositoryName ?ownerId ?directory ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sha = field_map json__ "Sha" SHA.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let repositoryName =
+        field_map json__ "RepositoryName" RepositoryName.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
+      let directory = field_map json__ "Directory" Directory.of_json in
+      let branch = field_map json__ "Branch" BranchName.of_json in
+      make ?sha ?providerType ?repositoryName ?ownerId ?directory ?branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the revision for a specific sync event, such as the branch, owner ID, and name of the repository."]
+module RepositorySyncEventList =
+  struct
+    type nonrec t = RepositorySyncEvent.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositorySyncEvent.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositorySyncEvent.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositorySyncEventList"
+        ~of_json:RepositorySyncEvent.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RepositorySyncStatus =
+  struct
+    type nonrec t =
+      | FAILED 
+      | INITIATED 
+      | IN_PROGRESS 
+      | SUCCEEDED 
+      | QUEUED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | FAILED -> "FAILED"
+      | INITIATED -> "INITIATED"
+      | IN_PROGRESS -> "IN_PROGRESS"
+      | SUCCEEDED -> "SUCCEEDED"
+      | QUEUED -> "QUEUED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "FAILED" -> FAILED
+      | "INITIATED" -> INITIATED
+      | "IN_PROGRESS" -> IN_PROGRESS
+      | "SUCCEEDED" -> SUCCEEDED
+      | "QUEUED" -> QUEUED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration RepositorySyncStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"RepositorySyncStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module AccessDeniedException =
   struct
     type nonrec t = {
       message: ErrorMessage.t option }
@@ -697,12 +1924,71 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Two conflicting operations have been made on the same resource."]
+       "You do not have sufficient access to perform this action."]
+module ConcurrentModificationException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Exception thrown as a result of concurrent modification to an application. For example, two individuals attempting to edit the same application at the same time."]
+module InternalServerException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Received an internal server exception. Try again later."]
+module InvalidInputException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input is not valid. Verify that the action is typed correctly."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -717,12 +2003,127 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Resource not found. Verify the connection resource ARN and try again."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied due to request throttling."]
+module UpdateOutOfSyncException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The update is out of sync. Try syncing again."]
+module RetryLatestCommitFailedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrying the latest commit failed. Try again later."]
+module SyncBlockerDoesNotExistException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Unable to continue. The sync blocker does not exist."]
+module ConditionalCheckFailedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The conditional check failed. Try again later."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Two conflicting operations have been made on the same resource."]
 module ResourceUnavailableException =
   struct
     type nonrec t = {
@@ -737,8 +2138,8 @@ module ResourceUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -757,8 +2158,8 @@ module UnsupportedOperationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -794,6 +2195,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -827,8 +2231,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Exceeded the maximum limit for connections."]
@@ -841,6 +2245,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -860,10 +2267,136 @@ module TagList =
     let of_json j = list_of_json ~kind:"TagList" ~of_json:Tag.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SharpNextToken =
+  struct
+    type nonrec t = string
+    let context_ = "SharpNextToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SharpNextToken" j
+    let to_json = simple_to_json to_value
+  end
+module SyncConfigurationList =
+  struct
+    type nonrec t = SyncConfiguration.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SyncConfiguration.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SyncConfiguration.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SyncConfigurationList"
+        ~of_json:SyncConfiguration.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module MaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module RepositorySyncDefinitionList =
+  struct
+    type nonrec t = RepositorySyncDefinition.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositorySyncDefinition.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositorySyncDefinition.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositorySyncDefinitionList"
+        ~of_json:RepositorySyncDefinition.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module RepositoryLinkList =
+  struct
+    type nonrec t = RepositoryLinkInfo.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositoryLinkInfo.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositoryLinkInfo.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositoryLinkList"
+        ~of_json:RepositoryLinkInfo.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module HostList =
   struct
     type nonrec t = Host.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Host.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -893,7 +2426,7 @@ module NextToken =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:".*")));
+                  (fun () -> check_pattern i ~pattern:"^.*$")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -903,28 +2436,13 @@ module NextToken =
     let of_json j = string_of_json ~kind:"NextToken" j
     let to_json = simple_to_json to_value
   end
-module MaxResults =
-  struct
-    type nonrec t = int
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:0));
-        i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
-    let to_json = simple_to_json to_value
-  end
 module ConnectionList =
   struct
     type nonrec t = Connection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Connection.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -945,6 +2463,779 @@ module ConnectionList =
       list_of_json ~kind:"ConnectionList" ~of_json:Connection.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SyncBlockerSummary =
+  struct
+    type nonrec t =
+      {
+      resourceName: ResourceName.t option
+        [@ocaml.doc "The resource name for sync blocker summary."];
+      parentResourceName: ResourceName.t option
+        [@ocaml.doc "The parent resource name for a sync blocker summary."];
+      latestBlockers: LatestSyncBlockerList.t option
+        [@ocaml.doc "The latest events for a sync blocker summary."]}
+    let make ?resourceName =
+      fun ?parentResourceName ->
+        fun ?latestBlockers ->
+          fun () -> { resourceName; parentResourceName; latestBlockers }
+    let to_value x =
+      structure_to_value
+        [("ResourceName",
+           (Option.map x.resourceName ~f:ResourceName.to_value));
+        ("ParentResourceName",
+          (Option.map x.parentResourceName ~f:ResourceName.to_value));
+        ("LatestBlockers",
+          (Option.map x.latestBlockers ~f:LatestSyncBlockerList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestBlockers =
+        (Option.map ~f:LatestSyncBlockerList.of_xml)
+          (Xml.child xml_arg0 "LatestBlockers") in
+      let parentResourceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "ParentResourceName") in
+      let resourceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      make ?latestBlockers ?parentResourceName ?resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestBlockers =
+        field_map json__ "LatestBlockers" LatestSyncBlockerList.of_json in
+      let parentResourceName =
+        field_map json__ "ParentResourceName" ResourceName.of_json in
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      make ?latestBlockers ?parentResourceName ?resourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary for sync blockers."]
+module ResourceSyncAttempt =
+  struct
+    type nonrec t =
+      {
+      events: ResourceSyncEventList.t option
+        [@ocaml.doc "The events related to a resource sync attempt."];
+      initialRevision: Revision.t option
+        [@ocaml.doc
+          "The current state of the resource as defined in the resource's config-file in the linked repository."];
+      startedAt: Timestamp.t option
+        [@ocaml.doc "The start time for a resource sync attempt."];
+      status: ResourceSyncStatus.t option
+        [@ocaml.doc
+          "The status for a resource sync attempt. The follow are valid statuses: SYNC-INITIATED - A resource sync attempt has been created and will begin soon. SYNCING - Syncing has started and work is being done to reconcile state. SYNCED - Syncing has completed successfully. SYNC_FAILED - A resource sync attempt has failed."];
+      targetRevision: Revision.t option
+        [@ocaml.doc
+          "The desired state of the resource as defined in the resource's config-file in the linked repository. Git sync attempts to update the resource to this state."];
+      target: Target.t option
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource that is attempted to be synchronized."]}
+    let make ?events =
+      fun ?initialRevision ->
+        fun ?startedAt ->
+          fun ?status ->
+            fun ?targetRevision ->
+              fun ?target ->
+                fun () ->
+                  {
+                    events;
+                    initialRevision;
+                    startedAt;
+                    status;
+                    targetRevision;
+                    target
+                  }
+    let to_value x =
+      structure_to_value
+        [("Events", (Option.map x.events ~f:ResourceSyncEventList.to_value));
+        ("InitialRevision",
+          (Option.map x.initialRevision ~f:Revision.to_value));
+        ("StartedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:ResourceSyncStatus.to_value));
+        ("TargetRevision",
+          (Option.map x.targetRevision ~f:Revision.to_value));
+        ("Target", (Option.map x.target ~f:Target.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let target =
+        (Option.map ~f:Target.of_xml) (Xml.child xml_arg0 "Target") in
+      let targetRevision =
+        (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "TargetRevision") in
+      let status =
+        (Option.map ~f:ResourceSyncStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let startedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartedAt") in
+      let initialRevision =
+        (Option.map ~f:Revision.of_xml)
+          (Xml.child xml_arg0 "InitialRevision") in
+      let events =
+        (Option.map ~f:ResourceSyncEventList.of_xml)
+          (Xml.child xml_arg0 "Events") in
+      make ?target ?targetRevision ?status ?startedAt ?initialRevision
+        ?events ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let target = field_map json__ "Target" Target.of_json in
+      let targetRevision = field_map json__ "TargetRevision" Revision.of_json in
+      let status = field_map json__ "Status" ResourceSyncStatus.of_json in
+      let startedAt = field_map json__ "StartedAt" Timestamp.of_json in
+      let initialRevision =
+        field_map json__ "InitialRevision" Revision.of_json in
+      let events = field_map json__ "Events" ResourceSyncEventList.of_json in
+      make ?target ?targetRevision ?status ?startedAt ?initialRevision
+        ?events ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a resource sync attempt."]
+module RepositorySyncAttempt =
+  struct
+    type nonrec t =
+      {
+      startedAt: Timestamp.t option
+        [@ocaml.doc "The start time of a specific sync attempt."];
+      status: RepositorySyncStatus.t option
+        [@ocaml.doc
+          "The status of a specific sync attempt. The following are valid statuses: INITIATED - A repository sync attempt has been created and will begin soon. IN_PROGRESS - A repository sync attempt has started and work is being done to reconcile the branch. SUCCEEDED - The repository sync attempt has completed successfully. FAILED - The repository sync attempt has failed. QUEUED - The repository sync attempt didn't execute and was queued."];
+      events: RepositorySyncEventList.t option
+        [@ocaml.doc "The events associated with a specific sync attempt."]}
+    let make ?startedAt =
+      fun ?status -> fun ?events -> fun () -> { startedAt; status; events }
+    let to_value x =
+      structure_to_value
+        [("StartedAt", (Option.map x.startedAt ~f:Timestamp.to_value));
+        ("Status", (Option.map x.status ~f:RepositorySyncStatus.to_value));
+        ("Events", (Option.map x.events ~f:RepositorySyncEventList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let events =
+        (Option.map ~f:RepositorySyncEventList.of_xml)
+          (Xml.child xml_arg0 "Events") in
+      let status =
+        (Option.map ~f:RepositorySyncStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let startedAt =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartedAt") in
+      make ?events ?status ?startedAt ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let events = field_map json__ "Events" RepositorySyncEventList.of_json in
+      let status = field_map json__ "Status" RepositorySyncStatus.of_json in
+      let startedAt = field_map json__ "StartedAt" Timestamp.of_json in
+      make ?events ?status ?startedAt ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a repository sync attempt for a repository with a sync configuration."]
+module SyncConfigurationStillExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Unable to continue. The sync blocker still exists."]
+module UnsupportedProviderTypeException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified provider type is not supported for connections."]
+module ResourceAlreadyExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Unable to create resource. Resource already exists."]
+module UpdateSyncConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      syncConfiguration: SyncConfiguration.t option
+        [@ocaml.doc
+          "The information returned for the sync configuration to be updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UpdateOutOfSyncException of UpdateOutOfSyncException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?syncConfiguration = fun () -> { syncConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UpdateOutOfSyncException" ->
+          `UpdateOutOfSyncException (UpdateOutOfSyncException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UpdateOutOfSyncException" ->
+          `UpdateOutOfSyncException (UpdateOutOfSyncException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UpdateOutOfSyncException e ->
+          `Assoc
+            [("error", (`String "UpdateOutOfSyncException"));
+            ("details", (UpdateOutOfSyncException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SyncConfiguration",
+           (Option.map x.syncConfiguration ~f:SyncConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncConfiguration =
+        (Option.map ~f:SyncConfiguration.of_xml)
+          (Xml.child xml_arg0 "SyncConfiguration") in
+      make ?syncConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncConfiguration =
+        field_map json__ "SyncConfiguration" SyncConfiguration.of_json in
+      make ?syncConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the sync configuration for your connection and a specified external Git repository."]
+module UpdateSyncConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t option
+        [@ocaml.doc "The branch for the sync configuration to be updated."];
+      configFile: DeploymentFilePath.t option
+        [@ocaml.doc
+          "The configuration file for the sync configuration to be updated."];
+      repositoryLinkId: RepositoryLinkId.t option
+        [@ocaml.doc
+          "The ID of the repository link for the sync configuration to be updated."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource for the sync configuration to be updated."];
+      roleArn: IamRoleArn.t option
+        [@ocaml.doc
+          "The ARN of the IAM role for the sync configuration to be updated."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc
+          "The sync type for the sync configuration to be updated."];
+      publishDeploymentStatus: PublishDeploymentStatus.t option
+        [@ocaml.doc
+          "Whether to enable or disable publishing of deployment status to source providers."];
+      triggerResourceUpdateOn: TriggerResourceUpdateOn.t option
+        [@ocaml.doc "When to trigger Git sync to begin the stack update."]}
+    let context_ = "UpdateSyncConfigurationInput"
+    let make ?branch =
+      fun ?configFile ->
+        fun ?repositoryLinkId ->
+          fun ?roleArn ->
+            fun ?publishDeploymentStatus ->
+              fun ?triggerResourceUpdateOn ->
+                fun ~resourceName ->
+                  fun ~syncType ->
+                    fun () ->
+                      {
+                        branch;
+                        configFile;
+                        repositoryLinkId;
+                        roleArn;
+                        publishDeploymentStatus;
+                        triggerResourceUpdateOn;
+                        resourceName;
+                        syncType
+                      }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Option.map x.branch ~f:BranchName.to_value));
+        ("ConfigFile",
+          (Option.map x.configFile ~f:DeploymentFilePath.to_value));
+        ("RepositoryLinkId",
+          (Option.map x.repositoryLinkId ~f:RepositoryLinkId.to_value));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)));
+        ("RoleArn", (Option.map x.roleArn ~f:IamRoleArn.to_value));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("PublishDeploymentStatus",
+          (Option.map x.publishDeploymentStatus
+             ~f:PublishDeploymentStatus.to_value));
+        ("TriggerResourceUpdateOn",
+          (Option.map x.triggerResourceUpdateOn
+             ~f:TriggerResourceUpdateOn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let triggerResourceUpdateOn =
+        (Option.map ~f:TriggerResourceUpdateOn.of_xml)
+          (Xml.child xml_arg0 "TriggerResourceUpdateOn") in
+      let publishDeploymentStatus =
+        (Option.map ~f:PublishDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "PublishDeploymentStatus") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let roleArn =
+        (Option.map ~f:IamRoleArn.of_xml) (Xml.child xml_arg0 "RoleArn") in
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let repositoryLinkId =
+        (Option.map ~f:RepositoryLinkId.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkId") in
+      let configFile =
+        (Option.map ~f:DeploymentFilePath.of_xml)
+          (Xml.child xml_arg0 "ConfigFile") in
+      let branch =
+        (Option.map ~f:BranchName.of_xml) (Xml.child xml_arg0 "Branch") in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ~syncType
+        ?roleArn ~resourceName ?repositoryLinkId ?configFile ?branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let triggerResourceUpdateOn =
+        field_map json__ "TriggerResourceUpdateOn"
+          TriggerResourceUpdateOn.of_json in
+      let publishDeploymentStatus =
+        field_map json__ "PublishDeploymentStatus"
+          PublishDeploymentStatus.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let roleArn = field_map json__ "RoleArn" IamRoleArn.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let repositoryLinkId =
+        field_map json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let configFile =
+        field_map json__ "ConfigFile" DeploymentFilePath.of_json in
+      let branch = field_map json__ "Branch" BranchName.of_json in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ~syncType
+        ?roleArn ~resourceName ?repositoryLinkId ?configFile ?branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the sync configuration for your connection and a specified external Git repository."]
+module UpdateSyncBlockerOutput =
+  struct
+    type nonrec t =
+      {
+      resourceName: ResourceName.t option
+        [@ocaml.doc "The resource name for the sync blocker."];
+      parentResourceName: ResourceName.t option
+        [@ocaml.doc "The parent resource name for the sync blocker."];
+      syncBlocker: SyncBlocker.t option
+        [@ocaml.doc "Information about the sync blocker to be updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `RetryLatestCommitFailedException of
+          RetryLatestCommitFailedException.t 
+      | `SyncBlockerDoesNotExistException of
+          SyncBlockerDoesNotExistException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resourceName =
+      fun ?parentResourceName ->
+        fun ?syncBlocker ->
+          fun () -> { resourceName; parentResourceName; syncBlocker }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "RetryLatestCommitFailedException" ->
+          `RetryLatestCommitFailedException
+            (RetryLatestCommitFailedException.of_json json)
+      | "SyncBlockerDoesNotExistException" ->
+          `SyncBlockerDoesNotExistException
+            (SyncBlockerDoesNotExistException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "RetryLatestCommitFailedException" ->
+          `RetryLatestCommitFailedException
+            (RetryLatestCommitFailedException.of_xml xml)
+      | "SyncBlockerDoesNotExistException" ->
+          `SyncBlockerDoesNotExistException
+            (SyncBlockerDoesNotExistException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `RetryLatestCommitFailedException e ->
+          `Assoc
+            [("error", (`String "RetryLatestCommitFailedException"));
+            ("details", (RetryLatestCommitFailedException.to_json e))]
+      | `SyncBlockerDoesNotExistException e ->
+          `Assoc
+            [("error", (`String "SyncBlockerDoesNotExistException"));
+            ("details", (SyncBlockerDoesNotExistException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("ResourceName",
+           (Option.map x.resourceName ~f:ResourceName.to_value));
+        ("ParentResourceName",
+          (Option.map x.parentResourceName ~f:ResourceName.to_value));
+        ("SyncBlocker", (Option.map x.syncBlocker ~f:SyncBlocker.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncBlocker =
+        (Option.map ~f:SyncBlocker.of_xml) (Xml.child xml_arg0 "SyncBlocker") in
+      let parentResourceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "ParentResourceName") in
+      let resourceName =
+        (Option.map ~f:ResourceName.of_xml)
+          (Xml.child xml_arg0 "ResourceName") in
+      make ?syncBlocker ?parentResourceName ?resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncBlocker = field_map json__ "SyncBlocker" SyncBlocker.of_json in
+      let parentResourceName =
+        field_map json__ "ParentResourceName" ResourceName.of_json in
+      let resourceName = field_map json__ "ResourceName" ResourceName.of_json in
+      make ?syncBlocker ?parentResourceName ?resourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update the status of a sync blocker, resolving the blocker and allowing syncing to continue."]
+module UpdateSyncBlockerInput =
+  struct
+    type nonrec t =
+      {
+      id: Id.t [@ocaml.doc "The ID of the sync blocker to be updated."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc "The sync type of the sync blocker to be updated."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the resource for the sync blocker to be updated."];
+      resolvedReason: ResolvedReason.t
+        [@ocaml.doc "The reason for resolving the sync blocker."]}
+    let context_ = "UpdateSyncBlockerInput"
+    let make ~id =
+      fun ~syncType ->
+        fun ~resourceName ->
+          fun ~resolvedReason ->
+            fun () -> { id; syncType; resourceName; resolvedReason }
+    let to_value x =
+      structure_to_value
+        [("Id", (Some (Id.to_value x.id)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)));
+        ("ResolvedReason", (Some (ResolvedReason.to_value x.resolvedReason)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resolvedReason =
+        ResolvedReason.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResolvedReason") in
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let id = Id.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      make ~resolvedReason ~resourceName ~syncType ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resolvedReason =
+        field_map_exn json__ "ResolvedReason" ResolvedReason.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let id = field_map_exn json__ "Id" Id.of_json in
+      make ~resolvedReason ~resourceName ~syncType ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Allows you to update the status of a sync blocker, resolving the blocker and allowing syncing to continue."]
+module UpdateRepositoryLinkOutput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkInfo: RepositoryLinkInfo.t option
+        [@ocaml.doc "Information about the repository link to be updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConditionalCheckFailedException of ConditionalCheckFailedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UpdateOutOfSyncException of UpdateOutOfSyncException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryLinkInfo = fun () -> { repositoryLinkInfo }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConditionalCheckFailedException" ->
+          `ConditionalCheckFailedException
+            (ConditionalCheckFailedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UpdateOutOfSyncException" ->
+          `UpdateOutOfSyncException (UpdateOutOfSyncException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConditionalCheckFailedException" ->
+          `ConditionalCheckFailedException
+            (ConditionalCheckFailedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UpdateOutOfSyncException" ->
+          `UpdateOutOfSyncException (UpdateOutOfSyncException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConditionalCheckFailedException e ->
+          `Assoc
+            [("error", (`String "ConditionalCheckFailedException"));
+            ("details", (ConditionalCheckFailedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UpdateOutOfSyncException e ->
+          `Assoc
+            [("error", (`String "UpdateOutOfSyncException"));
+            ("details", (UpdateOutOfSyncException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkInfo",
+           (Option.map x.repositoryLinkInfo ~f:RepositoryLinkInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkInfo =
+        (Option.map ~f:RepositoryLinkInfo.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkInfo") in
+      make ?repositoryLinkInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkInfo =
+        field_map json__ "RepositoryLinkInfo" RepositoryLinkInfo.of_json in
+      make ?repositoryLinkInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the association between your connection and a specified external Git repository. A repository link allows Git sync to monitor and sync changes to files in a specified Git repository."]
+module UpdateRepositoryLinkInput =
+  struct
+    type nonrec t =
+      {
+      connectionArn: ConnectionArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connection for the repository link to be updated. The updated connection ARN must have the same providerType (such as GitHub) as the original connection ARN for the repo link."];
+      encryptionKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the encryption key for the repository link to be updated."];
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc "The ID of the repository link to be updated."]}
+    let context_ = "UpdateRepositoryLinkInput"
+    let make ?connectionArn =
+      fun ?encryptionKeyArn ->
+        fun ~repositoryLinkId ->
+          fun () -> { connectionArn; encryptionKeyArn; repositoryLinkId }
+    let to_value x =
+      structure_to_value
+        [("ConnectionArn",
+           (Option.map x.connectionArn ~f:ConnectionArn.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:KmsKeyArn.to_value));
+        ("RepositoryLinkId",
+          (Some (RepositoryLinkId.to_value x.repositoryLinkId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      let encryptionKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let connectionArn =
+        (Option.map ~f:ConnectionArn.of_xml)
+          (Xml.child xml_arg0 "ConnectionArn") in
+      make ~repositoryLinkId ?encryptionKeyArn ?connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" KmsKeyArn.of_json in
+      let connectionArn =
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      make ~repositoryLinkId ?encryptionKeyArn ?connectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the association between your connection and a specified external Git repository. A repository link allows Git sync to monitor and sync changes to files in a specified Git repository."]
 module UpdateHostOutput =
   struct
     type nonrec t = unit
@@ -1050,11 +3341,11 @@ module UpdateHostInput =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ?vpcConfiguration ?providerEndpoint ~hostArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
-      let providerEndpoint = field_map json "ProviderEndpoint" Url.of_json in
-      let hostArn = field_map_exn json "HostArn" HostArn.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
+      let providerEndpoint = field_map json__ "ProviderEndpoint" Url.of_json in
+      let hostArn = field_map_exn json__ "HostArn" HostArn.of_json in
       make ?vpcConfiguration ?providerEndpoint ~hostArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1097,7 +3388,7 @@ module UntagResourceOutput =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an AWS resource."]
+  end[@@ocaml.doc "Removes tags from an Amazon Web Services resource."]
 module UntagResourceInput =
   struct
     type nonrec t =
@@ -1125,13 +3416,13 @@ module UntagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from an AWS resource."]
+  end[@@ocaml.doc "Removes tags from an Amazon Web Services resource."]
 module TagResourceOutput =
   struct
     type nonrec t = unit
@@ -1205,10 +3496,10 @@ module TagResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1255,8 +3546,8 @@ module ListTagsForResourceOutput =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the set of key-value pairs (metadata) that are used to manage the resource."]
@@ -1279,13 +3570,444 @@ module ListTagsForResourceInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets the set of key-value pairs (metadata) that are used to manage the resource."]
+module ListSyncConfigurationsOutput =
+  struct
+    type nonrec t =
+      {
+      syncConfigurations: SyncConfigurationList.t option
+        [@ocaml.doc
+          "The list of repository sync definitions returned by the request."];
+      nextToken: SharpNextToken.t option
+        [@ocaml.doc
+          "An enumeration token that allows the operation to batch the next results of the operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?syncConfigurations =
+      fun ?nextToken -> fun () -> { syncConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SyncConfigurations",
+           (Option.map x.syncConfigurations ~f:SyncConfigurationList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:SharpNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SharpNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let syncConfigurations =
+        (Option.map ~f:SyncConfigurationList.of_xml)
+          (Xml.child xml_arg0 "SyncConfigurations") in
+      make ?nextToken ?syncConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" SharpNextToken.of_json in
+      let syncConfigurations =
+        field_map json__ "SyncConfigurations" SyncConfigurationList.of_json in
+      make ?nextToken ?syncConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of sync configurations for a specified repository."]
+module ListSyncConfigurationsInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "A non-zero, non-negative integer used to limit the number of returned results."];
+      nextToken: SharpNextToken.t option
+        [@ocaml.doc
+          "An enumeration token that allows the operation to batch the results of the operation."];
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc
+          "The ID of the repository link for the requested list of sync configurations."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc
+          "The sync type for the requested list of sync configurations."]}
+    let context_ = "ListSyncConfigurationsInput"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~repositoryLinkId ->
+          fun ~syncType ->
+            fun () -> { maxResults; nextToken; repositoryLinkId; syncType }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:SharpNextToken.to_value));
+        ("RepositoryLinkId",
+          (Some (RepositoryLinkId.to_value x.repositoryLinkId)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      let nextToken =
+        (Option.map ~f:SharpNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ~syncType ~repositoryLinkId ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let nextToken = field_map json__ "NextToken" SharpNextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ~syncType ~repositoryLinkId ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of sync configurations for a specified repository."]
+module ListRepositorySyncDefinitionsOutput =
+  struct
+    type nonrec t =
+      {
+      repositorySyncDefinitions: RepositorySyncDefinitionList.t option
+        [@ocaml.doc
+          "The list of repository sync definitions returned by the request. A RepositorySyncDefinition is a mapping from a repository branch to all the Amazon Web Services resources that are being synced from that branch."];
+      nextToken: SharpNextToken.t option
+        [@ocaml.doc
+          "An enumeration token that, when provided in a request, returns the next batch of the results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositorySyncDefinitions =
+      fun ?nextToken -> fun () -> { repositorySyncDefinitions; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RepositorySyncDefinitions",
+           (Option.map x.repositorySyncDefinitions
+              ~f:RepositorySyncDefinitionList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:SharpNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SharpNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let repositorySyncDefinitions =
+        (Option.map ~f:RepositorySyncDefinitionList.of_xml)
+          (Xml.child xml_arg0 "RepositorySyncDefinitions") in
+      make ?nextToken ?repositorySyncDefinitions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" SharpNextToken.of_json in
+      let repositorySyncDefinitions =
+        field_map json__ "RepositorySyncDefinitions"
+          RepositorySyncDefinitionList.of_json in
+      make ?nextToken ?repositorySyncDefinitions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repository sync definitions for repository links in your account."]
+module ListRepositorySyncDefinitionsInput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc
+          "The ID of the repository link for the sync definition for which you want to retrieve information."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc
+          "The sync type of the repository link for the the sync definition for which you want to retrieve information."]}
+    let context_ = "ListRepositorySyncDefinitionsInput"
+    let make ~repositoryLinkId =
+      fun ~syncType -> fun () -> { repositoryLinkId; syncType }
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkId",
+           (Some (RepositoryLinkId.to_value x.repositoryLinkId)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      make ~syncType ~repositoryLinkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      make ~syncType ~repositoryLinkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repository sync definitions for repository links in your account."]
+module ListRepositoryLinksOutput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinks: RepositoryLinkList.t option
+        [@ocaml.doc
+          "Lists the repository links called by the list repository links operation."];
+      nextToken: SharpNextToken.t option
+        [@ocaml.doc
+          "An enumeration token that allows the operation to batch the results of the operation."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryLinks =
+      fun ?nextToken -> fun () -> { repositoryLinks; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinks",
+           (Option.map x.repositoryLinks ~f:RepositoryLinkList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:SharpNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SharpNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let repositoryLinks =
+        (Option.map ~f:RepositoryLinkList.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinks") in
+      make ?nextToken ?repositoryLinks ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" SharpNextToken.of_json in
+      let repositoryLinks =
+        field_map json__ "RepositoryLinks" RepositoryLinkList.of_json in
+      make ?nextToken ?repositoryLinks ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repository links created for connections in your account."]
+module ListRepositoryLinksInput =
+  struct
+    type nonrec t =
+      {
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "A non-zero, non-negative integer used to limit the number of returned results."];
+      nextToken: SharpNextToken.t option
+        [@ocaml.doc
+          "An enumeration token that, when provided in a request, returns the next batch of the results."]}
+    let make ?maxResults =
+      fun ?nextToken -> fun () -> { maxResults; nextToken }
+    let to_value x =
+      structure_to_value
+        [("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:SharpNextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:SharpNextToken.of_xml)
+          (Xml.child xml_arg0 "NextToken") in
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      make ?nextToken ?maxResults ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" SharpNextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      make ?nextToken ?maxResults ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repository links created for connections in your account."]
 module ListHostsOutput =
   struct
     type nonrec t =
@@ -1327,9 +4049,9 @@ module ListHostsOutput =
         (Option.map ~f:HostList.of_xml) (Xml.child xml_arg0 "Hosts") in
       make ?nextToken ?hosts ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let hosts = field_map json "Hosts" HostList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let hosts = field_map json__ "Hosts" HostList.of_json in
       make ?nextToken ?hosts ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the hosts associated with your account."]
@@ -1357,9 +4079,9 @@ module ListHostsInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the hosts associated with your account."]
@@ -1374,20 +4096,29 @@ module ListConnectionsOutput =
         [@ocaml.doc
           "A token that can be used in the next ListConnections call. To view all items in the list, continue to call this operation with each subsequent token until no more nextToken values are returned."]}
     type nonrec error =
-      [ `Unknown_operation_error of (string * string option) ]
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
     let make ?connections =
       fun ?nextToken -> fun () -> { connections; nextToken }
     let error_of_json name json =
       match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -1407,9 +4138,9 @@ module ListConnectionsOutput =
           (Xml.child xml_arg0 "Connections") in
       make ?nextToken ?connections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let connections = field_map json "Connections" ConnectionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let connections = field_map json__ "Connections" ConnectionList.of_json in
       make ?nextToken ?connections ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the connections associated with your account."]
@@ -1455,15 +4186,665 @@ module ListConnectionsInput =
           (Xml.child xml_arg0 "ProviderTypeFilter") in
       make ?nextToken ?maxResults ?hostArnFilter ?providerTypeFilter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let hostArnFilter = field_map json "HostArnFilter" HostArn.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let hostArnFilter = field_map json__ "HostArnFilter" HostArn.of_json in
       let providerTypeFilter =
-        field_map json "ProviderTypeFilter" ProviderType.of_json in
+        field_map json__ "ProviderTypeFilter" ProviderType.of_json in
       make ?nextToken ?maxResults ?hostArnFilter ?providerTypeFilter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the connections associated with your account."]
+module GetSyncConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      syncConfiguration: SyncConfiguration.t option
+        [@ocaml.doc
+          "The details about the sync configuration for which you want to retrieve information."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?syncConfiguration = fun () -> { syncConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SyncConfiguration",
+           (Option.map x.syncConfiguration ~f:SyncConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncConfiguration =
+        (Option.map ~f:SyncConfiguration.of_xml)
+          (Xml.child xml_arg0 "SyncConfiguration") in
+      make ?syncConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncConfiguration =
+        field_map json__ "SyncConfiguration" SyncConfiguration.of_json in
+      make ?syncConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a sync configuration, including the sync type and resource name. A sync configuration allows the configuration to sync (push and pull) changes from the remote repository for a specified branch in a Git repository."]
+module GetSyncConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc
+          "The sync type for the sync configuration for which you want to retrieve information."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource for the sync configuration for which you want to retrieve information."]}
+    let context_ = "GetSyncConfigurationInput"
+    let make ~syncType =
+      fun ~resourceName -> fun () -> { syncType; resourceName }
+    let to_value x =
+      structure_to_value
+        [("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      make ~resourceName ~syncType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      make ~resourceName ~syncType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a sync configuration, including the sync type and resource name. A sync configuration allows the configuration to sync (push and pull) changes from the remote repository for a specified branch in a Git repository."]
+module GetSyncBlockerSummaryOutput =
+  struct
+    type nonrec t =
+      {
+      syncBlockerSummary: SyncBlockerSummary.t option
+        [@ocaml.doc "The list of sync blockers for a specified resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?syncBlockerSummary = fun () -> { syncBlockerSummary }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SyncBlockerSummary",
+           (Option.map x.syncBlockerSummary ~f:SyncBlockerSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncBlockerSummary =
+        (Option.map ~f:SyncBlockerSummary.of_xml)
+          (Xml.child xml_arg0 "SyncBlockerSummary") in
+      make ?syncBlockerSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncBlockerSummary =
+        field_map json__ "SyncBlockerSummary" SyncBlockerSummary.of_json in
+      make ?syncBlockerSummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of the most recent sync blockers."]
+module GetSyncBlockerSummaryInput =
+  struct
+    type nonrec t =
+      {
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc "The sync type for the sync blocker summary."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource currently blocked from automatically being synced from a Git repository."]}
+    let context_ = "GetSyncBlockerSummaryInput"
+    let make ~syncType =
+      fun ~resourceName -> fun () -> { syncType; resourceName }
+    let to_value x =
+      structure_to_value
+        [("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      make ~resourceName ~syncType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      make ~resourceName ~syncType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Returns a list of the most recent sync blockers."]
+module GetResourceSyncStatusOutput =
+  struct
+    type nonrec t =
+      {
+      desiredState: Revision.t option
+        [@ocaml.doc
+          "The desired state of the Amazon Web Services resource for the sync status with the Git repository."];
+      latestSuccessfulSync: ResourceSyncAttempt.t option
+        [@ocaml.doc
+          "The latest successful sync for the sync status with the Git repository."];
+      latestSync: ResourceSyncAttempt.t option
+        [@ocaml.doc
+          "The latest sync for the sync status with the Git repository, whether successful or not."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?desiredState =
+      fun ?latestSuccessfulSync ->
+        fun ?latestSync ->
+          fun () -> { desiredState; latestSuccessfulSync; latestSync }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DesiredState", (Option.map x.desiredState ~f:Revision.to_value));
+        ("LatestSuccessfulSync",
+          (Option.map x.latestSuccessfulSync ~f:ResourceSyncAttempt.to_value));
+        ("LatestSync",
+          (Option.map x.latestSync ~f:ResourceSyncAttempt.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestSync =
+        (Option.map ~f:ResourceSyncAttempt.of_xml)
+          (Xml.child xml_arg0 "LatestSync") in
+      let latestSuccessfulSync =
+        (Option.map ~f:ResourceSyncAttempt.of_xml)
+          (Xml.child xml_arg0 "LatestSuccessfulSync") in
+      let desiredState =
+        (Option.map ~f:Revision.of_xml) (Xml.child xml_arg0 "DesiredState") in
+      make ?latestSync ?latestSuccessfulSync ?desiredState ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestSync =
+        field_map json__ "LatestSync" ResourceSyncAttempt.of_json in
+      let latestSuccessfulSync =
+        field_map json__ "LatestSuccessfulSync" ResourceSyncAttempt.of_json in
+      let desiredState = field_map json__ "DesiredState" Revision.of_json in
+      make ?latestSync ?latestSuccessfulSync ?desiredState ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the status of the sync with the Git repository for a specific Amazon Web Services resource."]
+module GetResourceSyncStatusInput =
+  struct
+    type nonrec t =
+      {
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource for the sync status with the Git repository."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc
+          "The sync type for the sync status with the Git repository."]}
+    let context_ = "GetResourceSyncStatusInput"
+    let make ~resourceName =
+      fun ~syncType -> fun () -> { resourceName; syncType }
+    let to_value x =
+      structure_to_value
+        [("ResourceName", (Some (ResourceName.to_value x.resourceName)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      make ~syncType ~resourceName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      make ~syncType ~resourceName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the status of the sync with the Git repository for a specific Amazon Web Services resource."]
+module GetRepositorySyncStatusOutput =
+  struct
+    type nonrec t =
+      {
+      latestSync: RepositorySyncAttempt.t option
+        [@ocaml.doc
+          "The status of the latest sync returned for a specified repository and branch."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?latestSync = fun () -> { latestSync }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("LatestSync",
+           (Option.map x.latestSync ~f:RepositorySyncAttempt.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let latestSync =
+        (Option.map ~f:RepositorySyncAttempt.of_xml)
+          (Xml.child xml_arg0 "LatestSync") in
+      make ?latestSync ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let latestSync =
+        field_map json__ "LatestSync" RepositorySyncAttempt.of_json in
+      make ?latestSync ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about the sync status for a repository. A repository sync uses Git sync to push and pull changes from your remote repository."]
+module GetRepositorySyncStatusInput =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t
+        [@ocaml.doc
+          "The branch of the repository link for the requested repository sync status."];
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc
+          "The repository link ID for the requested repository sync status."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc "The sync type of the requested sync status."]}
+    let context_ = "GetRepositorySyncStatusInput"
+    let make ~branch =
+      fun ~repositoryLinkId ->
+        fun ~syncType -> fun () -> { branch; repositoryLinkId; syncType }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Some (BranchName.to_value x.branch)));
+        ("RepositoryLinkId",
+          (Some (RepositoryLinkId.to_value x.repositoryLinkId)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      let branch =
+        BranchName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Branch") in
+      make ~syncType ~repositoryLinkId ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let branch = field_map_exn json__ "Branch" BranchName.of_json in
+      make ~syncType ~repositoryLinkId ~branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about the sync status for a repository. A repository sync uses Git sync to push and pull changes from your remote repository."]
+module GetRepositoryLinkOutput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkInfo: RepositoryLinkInfo.t option
+        [@ocaml.doc
+          "The information returned for a specified repository link."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryLinkInfo = fun () -> { repositoryLinkInfo }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkInfo",
+           (Option.map x.repositoryLinkInfo ~f:RepositoryLinkInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkInfo =
+        (Option.map ~f:RepositoryLinkInfo.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkInfo") in
+      make ?repositoryLinkInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkInfo =
+        field_map json__ "RepositoryLinkInfo" RepositoryLinkInfo.of_json in
+      make ?repositoryLinkInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a repository link. A repository link allows Git sync to monitor and sync changes from files in a specified Git repository."]
+module GetRepositoryLinkInput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc "The ID of the repository link to get."]}
+    let context_ = "GetRepositoryLinkInput"
+    let make ~repositoryLinkId = fun () -> { repositoryLinkId }
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkId",
+           (Some (RepositoryLinkId.to_value x.repositoryLinkId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      make ~repositoryLinkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      make ~repositoryLinkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns details about a repository link. A repository link allows Git sync to monitor and sync changes from files in a specified Git repository."]
 module GetHostOutput =
   struct
     type nonrec t =
@@ -1554,13 +4935,13 @@ module GetHostOutput =
       let name = (Option.map ~f:HostName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?vpcConfiguration ?providerEndpoint ?providerType ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
-      let providerEndpoint = field_map json "ProviderEndpoint" Url.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
-      let status = field_map json "Status" HostStatus.of_json in
-      let name = field_map json "Name" HostName.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
+      let providerEndpoint = field_map json__ "ProviderEndpoint" Url.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
+      let status = field_map json__ "Status" HostStatus.of_json in
+      let name = field_map json__ "Name" HostName.of_json in
       make ?vpcConfiguration ?providerEndpoint ?providerType ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1581,8 +4962,8 @@ module GetHostInput =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ~hostArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostArn = field_map_exn json "HostArn" HostArn.of_json in
+    let of_json json__ =
+      let hostArn = field_map_exn json__ "HostArn" HostArn.of_json in
       make ~hostArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1642,8 +5023,8 @@ module GetConnectionOutput =
         (Option.map ~f:Connection.of_xml) (Xml.child xml_arg0 "Connection") in
       make ?connection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let connection = field_map json "Connection" Connection.of_json in
+    let of_json json__ =
+      let connection = field_map json__ "Connection" Connection.of_json in
       make ?connection ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1666,13 +5047,272 @@ module GetConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionArn =
-        field_map_exn json "ConnectionArn" ConnectionArn.of_json in
+        field_map_exn json__ "ConnectionArn" ConnectionArn.of_json in
       make ~connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the connection ARN and details such as status, owner, and provider type."]
+module DeleteSyncConfigurationOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the sync configuration for a specified repository and connection."]
+module DeleteSyncConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc "The type of sync configuration to be deleted."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource associated with the sync configuration to be deleted."]}
+    let context_ = "DeleteSyncConfigurationInput"
+    let make ~syncType =
+      fun ~resourceName -> fun () -> { syncType; resourceName }
+    let to_value x =
+      structure_to_value
+        [("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      make ~resourceName ~syncType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      make ~resourceName ~syncType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the sync configuration for a specified repository and connection."]
+module DeleteRepositoryLinkOutput =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `SyncConfigurationStillExistsException of
+          SyncConfigurationStillExistsException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `UnsupportedProviderTypeException of
+          UnsupportedProviderTypeException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "SyncConfigurationStillExistsException" ->
+          `SyncConfigurationStillExistsException
+            (SyncConfigurationStillExistsException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "UnsupportedProviderTypeException" ->
+          `UnsupportedProviderTypeException
+            (UnsupportedProviderTypeException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "SyncConfigurationStillExistsException" ->
+          `SyncConfigurationStillExistsException
+            (SyncConfigurationStillExistsException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "UnsupportedProviderTypeException" ->
+          `UnsupportedProviderTypeException
+            (UnsupportedProviderTypeException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `SyncConfigurationStillExistsException e ->
+          `Assoc
+            [("error", (`String "SyncConfigurationStillExistsException"));
+            ("details", (SyncConfigurationStillExistsException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `UnsupportedProviderTypeException e ->
+          `Assoc
+            [("error", (`String "UnsupportedProviderTypeException"));
+            ("details", (UnsupportedProviderTypeException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the association between your connection and a specified external Git repository."]
+module DeleteRepositoryLinkInput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc "The ID of the repository link to be deleted."]}
+    let context_ = "DeleteRepositoryLinkInput"
+    let make ~repositoryLinkId = fun () -> { repositoryLinkId }
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkId",
+           (Some (RepositoryLinkId.to_value x.repositoryLinkId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      make ~repositoryLinkId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      make ~repositoryLinkId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the association between your connection and a specified external Git repository."]
 module DeleteHostOutput =
   struct
     type nonrec t = unit
@@ -1741,8 +5381,8 @@ module DeleteHostInput =
         HostArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HostArn") in
       make ~hostArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostArn = field_map_exn json "HostArn" HostArn.of_json in
+    let of_json json__ =
+      let hostArn = field_map_exn json__ "HostArn" HostArn.of_json in
       make ~hostArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1805,12 +5445,415 @@ module DeleteConnectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
       make ~connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionArn =
-        field_map_exn json "ConnectionArn" ConnectionArn.of_json in
+        field_map_exn json__ "ConnectionArn" ConnectionArn.of_json in
       make ~connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The connection to be deleted."]
+module CreateSyncConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      syncConfiguration: SyncConfiguration.t option
+        [@ocaml.doc
+          "The created sync configuration for the connection. A sync configuration allows Amazon Web Services to sync content from a Git repository to update a specified Amazon Web Services resource."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?syncConfiguration = fun () -> { syncConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SyncConfiguration",
+           (Option.map x.syncConfiguration ~f:SyncConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let syncConfiguration =
+        (Option.map ~f:SyncConfiguration.of_xml)
+          (Xml.child xml_arg0 "SyncConfiguration") in
+      make ?syncConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let syncConfiguration =
+        field_map json__ "SyncConfiguration" SyncConfiguration.of_json in
+      make ?syncConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a sync configuration which allows Amazon Web Services to sync content from a Git repository to update a specified Amazon Web Services resource. Parameters for the sync configuration are determined by the sync type."]
+module CreateSyncConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      branch: BranchName.t
+        [@ocaml.doc
+          "The branch in the repository from which changes will be synced."];
+      configFile: DeploymentFilePath.t
+        [@ocaml.doc
+          "The file name of the configuration file that manages syncing between the connection and the repository. This configuration file is stored in the repository."];
+      repositoryLinkId: RepositoryLinkId.t
+        [@ocaml.doc
+          "The ID of the repository link created for the connection. A repository link allows Git sync to monitor and sync changes to files in a specified Git repository."];
+      resourceName: ResourceName.t
+        [@ocaml.doc
+          "The name of the Amazon Web Services resource (for example, a CloudFormation stack in the case of CFN_STACK_SYNC) that will be synchronized from the linked repository."];
+      roleArn: IamRoleArn.t
+        [@ocaml.doc
+          "The ARN of the IAM role that grants permission for Amazon Web Services to use Git sync to update a given Amazon Web Services resource on your behalf."];
+      syncType: SyncConfigurationType.t
+        [@ocaml.doc "The type of sync configuration."];
+      publishDeploymentStatus: PublishDeploymentStatus.t option
+        [@ocaml.doc
+          "Whether to enable or disable publishing of deployment status to source providers."];
+      triggerResourceUpdateOn: TriggerResourceUpdateOn.t option
+        [@ocaml.doc "When to trigger Git sync to begin the stack update."]}
+    let context_ = "CreateSyncConfigurationInput"
+    let make ?publishDeploymentStatus =
+      fun ?triggerResourceUpdateOn ->
+        fun ~branch ->
+          fun ~configFile ->
+            fun ~repositoryLinkId ->
+              fun ~resourceName ->
+                fun ~roleArn ->
+                  fun ~syncType ->
+                    fun () ->
+                      {
+                        publishDeploymentStatus;
+                        triggerResourceUpdateOn;
+                        branch;
+                        configFile;
+                        repositoryLinkId;
+                        resourceName;
+                        roleArn;
+                        syncType
+                      }
+    let to_value x =
+      structure_to_value
+        [("Branch", (Some (BranchName.to_value x.branch)));
+        ("ConfigFile", (Some (DeploymentFilePath.to_value x.configFile)));
+        ("RepositoryLinkId",
+          (Some (RepositoryLinkId.to_value x.repositoryLinkId)));
+        ("ResourceName", (Some (ResourceName.to_value x.resourceName)));
+        ("RoleArn", (Some (IamRoleArn.to_value x.roleArn)));
+        ("SyncType", (Some (SyncConfigurationType.to_value x.syncType)));
+        ("PublishDeploymentStatus",
+          (Option.map x.publishDeploymentStatus
+             ~f:PublishDeploymentStatus.to_value));
+        ("TriggerResourceUpdateOn",
+          (Option.map x.triggerResourceUpdateOn
+             ~f:TriggerResourceUpdateOn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let triggerResourceUpdateOn =
+        (Option.map ~f:TriggerResourceUpdateOn.of_xml)
+          (Xml.child xml_arg0 "TriggerResourceUpdateOn") in
+      let publishDeploymentStatus =
+        (Option.map ~f:PublishDeploymentStatus.of_xml)
+          (Xml.child xml_arg0 "PublishDeploymentStatus") in
+      let syncType =
+        SyncConfigurationType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SyncType") in
+      let roleArn =
+        IamRoleArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+      let resourceName =
+        ResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceName") in
+      let repositoryLinkId =
+        RepositoryLinkId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryLinkId") in
+      let configFile =
+        DeploymentFilePath.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConfigFile") in
+      let branch =
+        BranchName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Branch") in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ~syncType
+        ~roleArn ~resourceName ~repositoryLinkId ~configFile ~branch ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let triggerResourceUpdateOn =
+        field_map json__ "TriggerResourceUpdateOn"
+          TriggerResourceUpdateOn.of_json in
+      let publishDeploymentStatus =
+        field_map json__ "PublishDeploymentStatus"
+          PublishDeploymentStatus.of_json in
+      let syncType =
+        field_map_exn json__ "SyncType" SyncConfigurationType.of_json in
+      let roleArn = field_map_exn json__ "RoleArn" IamRoleArn.of_json in
+      let resourceName =
+        field_map_exn json__ "ResourceName" ResourceName.of_json in
+      let repositoryLinkId =
+        field_map_exn json__ "RepositoryLinkId" RepositoryLinkId.of_json in
+      let configFile =
+        field_map_exn json__ "ConfigFile" DeploymentFilePath.of_json in
+      let branch = field_map_exn json__ "Branch" BranchName.of_json in
+      make ?triggerResourceUpdateOn ?publishDeploymentStatus ~syncType
+        ~roleArn ~resourceName ~repositoryLinkId ~configFile ~branch ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a sync configuration which allows Amazon Web Services to sync content from a Git repository to update a specified Amazon Web Services resource. Parameters for the sync configuration are determined by the sync type."]
+module CreateRepositoryLinkOutput =
+  struct
+    type nonrec t =
+      {
+      repositoryLinkInfo: RepositoryLinkInfo.t option
+        [@ocaml.doc
+          "The returned information about the created repository link."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidInputException of InvalidInputException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceAlreadyExistsException of ResourceAlreadyExistsException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?repositoryLinkInfo = fun () -> { repositoryLinkInfo }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConcurrentModificationException" ->
+          `ConcurrentModificationException
+            (ConcurrentModificationException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidInputException" ->
+          `InvalidInputException (InvalidInputException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceAlreadyExistsException" ->
+          `ResourceAlreadyExistsException
+            (ResourceAlreadyExistsException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConcurrentModificationException e ->
+          `Assoc
+            [("error", (`String "ConcurrentModificationException"));
+            ("details", (ConcurrentModificationException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidInputException e ->
+          `Assoc
+            [("error", (`String "InvalidInputException"));
+            ("details", (InvalidInputException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceAlreadyExistsException e ->
+          `Assoc
+            [("error", (`String "ResourceAlreadyExistsException"));
+            ("details", (ResourceAlreadyExistsException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RepositoryLinkInfo",
+           (Option.map x.repositoryLinkInfo ~f:RepositoryLinkInfo.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoryLinkInfo =
+        (Option.map ~f:RepositoryLinkInfo.of_xml)
+          (Xml.child xml_arg0 "RepositoryLinkInfo") in
+      make ?repositoryLinkInfo ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoryLinkInfo =
+        field_map json__ "RepositoryLinkInfo" RepositoryLinkInfo.of_json in
+      make ?repositoryLinkInfo ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a link to a specified external Git repository. A repository link allows Git sync to monitor and sync changes to files in a specified Git repository."]
+module CreateRepositoryLinkInput =
+  struct
+    type nonrec t =
+      {
+      connectionArn: ConnectionArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the connection to be associated with the repository link."];
+      ownerId: OwnerId.t
+        [@ocaml.doc
+          "The owner ID for the repository associated with a specific sync configuration, such as the owner ID in GitHub."];
+      repositoryName: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository to be associated with the repository link."];
+      encryptionKeyArn: KmsKeyArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) encryption key for the repository to be associated with the repository link."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "The tags for the repository to be associated with the repository link."]}
+    let context_ = "CreateRepositoryLinkInput"
+    let make ?encryptionKeyArn =
+      fun ?tags ->
+        fun ~connectionArn ->
+          fun ~ownerId ->
+            fun ~repositoryName ->
+              fun () ->
+                {
+                  encryptionKeyArn;
+                  tags;
+                  connectionArn;
+                  ownerId;
+                  repositoryName
+                }
+    let to_value x =
+      structure_to_value
+        [("ConnectionArn", (Some (ConnectionArn.to_value x.connectionArn)));
+        ("OwnerId", (Some (OwnerId.to_value x.ownerId)));
+        ("RepositoryName", (Some (RepositoryName.to_value x.repositoryName)));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:KmsKeyArn.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let encryptionKeyArn =
+        (Option.map ~f:KmsKeyArn.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let repositoryName =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RepositoryName") in
+      let ownerId =
+        OwnerId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "OwnerId") in
+      let connectionArn =
+        ConnectionArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
+      make ?tags ?encryptionKeyArn ~repositoryName ~ownerId ~connectionArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" KmsKeyArn.of_json in
+      let repositoryName =
+        field_map_exn json__ "RepositoryName" RepositoryName.of_json in
+      let ownerId = field_map_exn json__ "OwnerId" OwnerId.of_json in
+      let connectionArn =
+        field_map_exn json__ "ConnectionArn" ConnectionArn.of_json in
+      make ?tags ?encryptionKeyArn ~repositoryName ~ownerId ~connectionArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a link to a specified external Git repository. A repository link allows Git sync to monitor and sync changes to files in a specified Git repository."]
 module CreateHostOutput =
   struct
     type nonrec t =
@@ -1818,7 +5861,7 @@ module CreateHostOutput =
       hostArn: HostArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the host to be created."];
-      tags: TagList.t option }
+      tags: TagList.t option [@ocaml.doc "Tags for the created host."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1858,9 +5901,9 @@ module CreateHostOutput =
         (Option.map ~f:HostArn.of_xml) (Xml.child xml_arg0 "HostArn") in
       make ?tags ?hostArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let hostArn = field_map json "HostArn" HostArn.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let hostArn = field_map json__ "HostArn" HostArn.of_json in
       make ?tags ?hostArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1869,9 +5912,7 @@ module CreateHostInput =
   struct
     type nonrec t =
       {
-      name: HostName.t
-        [@ocaml.doc
-          "The name of the host to be created. The name must be unique in the calling AWS account."];
+      name: HostName.t [@ocaml.doc "The name of the host to be created."];
       providerType: ProviderType.t
         [@ocaml.doc
           "The name of the installed provider to be associated with your connection. The host resource represents the infrastructure where your provider type is installed. The valid provider type is GitHub Enterprise Server."];
@@ -1881,7 +5922,7 @@ module CreateHostInput =
       vpcConfiguration: VpcConfiguration.t option
         [@ocaml.doc
           "The VPC configuration to be provisioned for the host. A VPC must be configured and the infrastructure to be represented by the host must already be connected to the VPC."];
-      tags: TagList.t option }
+      tags: TagList.t option [@ocaml.doc "Tags for the host to be created."]}
     let context_ = "CreateHostInput"
     let make ?vpcConfiguration =
       fun ?tags ->
@@ -1920,15 +5961,15 @@ module CreateHostInput =
         HostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?tags ?vpcConfiguration ~providerEndpoint ~providerType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let vpcConfiguration =
-        field_map json "VpcConfiguration" VpcConfiguration.of_json in
+        field_map json__ "VpcConfiguration" VpcConfiguration.of_json in
       let providerEndpoint =
-        field_map_exn json "ProviderEndpoint" Url.of_json in
+        field_map_exn json__ "ProviderEndpoint" Url.of_json in
       let providerType =
-        field_map_exn json "ProviderType" ProviderType.of_json in
-      let name = field_map_exn json "Name" HostName.of_json in
+        field_map_exn json__ "ProviderType" ProviderType.of_json in
+      let name = field_map_exn json__ "Name" HostName.of_json in
       make ?tags ?vpcConfiguration ~providerEndpoint ~providerType ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1937,9 +5978,9 @@ module CreateConnectionOutput =
   struct
     type nonrec t =
       {
-      connectionArn: ConnectionArn.t
+      connectionArn: ConnectionArn.t option
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the connection to be created. The ARN is used as the connection reference when the connection is shared between AWS services. The ARN is never reused if the connection is deleted."];
+          "The Amazon Resource Name (ARN) of the connection to be created. The ARN is used as the connection reference when the connection is shared between Amazon Web Services services. The ARN is never reused if the connection is deleted."];
       tags: TagList.t option
         [@ocaml.doc "Specifies the tags applied to the resource."]}
     type nonrec error =
@@ -1947,8 +5988,7 @@ module CreateConnectionOutput =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ResourceUnavailableException of ResourceUnavailableException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateConnectionOutput"
-    let make ?tags = fun ~connectionArn -> fun () -> { tags; connectionArn }
+    let make ?connectionArn = fun ?tags -> fun () -> { connectionArn; tags }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -1993,24 +6033,25 @@ module CreateConnectionOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ConnectionArn", (Some (ConnectionArn.to_value x.connectionArn)));
+        [("ConnectionArn",
+           (Option.map x.connectionArn ~f:ConnectionArn.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let connectionArn =
-        ConnectionArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ConnectionArn") in
-      make ?tags ~connectionArn ()
+        (Option.map ~f:ConnectionArn.of_xml)
+          (Xml.child xml_arg0 "ConnectionArn") in
+      make ?tags ?connectionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let connectionArn =
-        field_map_exn json "ConnectionArn" ConnectionArn.of_json in
-      make ?tags ~connectionArn ()
+        field_map json__ "ConnectionArn" ConnectionArn.of_json in
+      make ?tags ?connectionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a connection that can then be given to other AWS services like CodePipeline so that it can access third-party code repositories. The connection is in pending status until the third-party connection handshake is completed from the console."]
+       "Creates a connection that can then be given to other Amazon Web Services services like CodePipeline so that it can access third-party code repositories. The connection is in pending status until the third-party connection handshake is completed from the console."]
 module CreateConnectionInput =
   struct
     type nonrec t =
@@ -2019,8 +6060,7 @@ module CreateConnectionInput =
         [@ocaml.doc
           "The name of the external provider where your third-party code repository is configured."];
       connectionName: ConnectionName.t
-        [@ocaml.doc
-          "The name of the connection to be created. The name must be unique in the calling AWS account."];
+        [@ocaml.doc "The name of the connection to be created."];
       tags: TagList.t option
         [@ocaml.doc "The key-value pair to use when tagging the resource."];
       hostArn: HostArn.t option
@@ -2052,13 +6092,13 @@ module CreateConnectionInput =
           (Xml.child xml_arg0 "ProviderType") in
       make ?hostArn ?tags ~connectionName ?providerType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hostArn = field_map json "HostArn" HostArn.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let hostArn = field_map json__ "HostArn" HostArn.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let connectionName =
-        field_map_exn json "ConnectionName" ConnectionName.of_json in
-      let providerType = field_map json "ProviderType" ProviderType.of_json in
+        field_map_exn json__ "ConnectionName" ConnectionName.of_json in
+      let providerType = field_map json__ "ProviderType" ProviderType.of_json in
       make ?hostArn ?tags ~connectionName ?providerType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a connection that can then be given to other AWS services like CodePipeline so that it can access third-party code repositories. The connection is in pending status until the third-party connection handshake is completed from the console."]
+       "Creates a connection that can then be given to other Amazon Web Services services like CodePipeline so that it can access third-party code repositories. The connection is in pending status until the third-party connection handshake is completed from the console."]

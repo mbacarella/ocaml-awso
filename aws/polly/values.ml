@@ -23,6 +23,141 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module CoralAvailabilityThrottledResource =
+  struct
+    type nonrec t = string
+    let context_ = "CoralAvailabilityThrottledResource"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CoralAvailabilityThrottledResource" j
+    let to_json = simple_to_json to_value
+  end
+module CoralAvailabilityThrottlingReason =
+  struct
+    type nonrec t = string
+    let context_ = "CoralAvailabilityThrottlingReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"CoralAvailabilityThrottlingReason" j
+    let to_json = simple_to_json to_value
+  end
+module ValidationExceptionFieldMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ValidationExceptionFieldMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidationExceptionFieldMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ValidationExceptionFieldName =
+  struct
+    type nonrec t = string
+    let context_ = "ValidationExceptionFieldName"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidationExceptionFieldName" j
+    let to_json = simple_to_json to_value
+  end
+module ThrottlingReason =
+  struct
+    type nonrec t =
+      {
+      reason: CoralAvailabilityThrottlingReason.t option
+        [@ocaml.doc
+          "The reason code explaining why the request was throttled."];
+      resource: CoralAvailabilityThrottledResource.t option
+        [@ocaml.doc "The resource that caused the throttling."]}
+    let make ?reason = fun ?resource -> fun () -> { reason; resource }
+    let to_value x =
+      structure_to_value
+        [("reason",
+           (Option.map x.reason ~f:CoralAvailabilityThrottlingReason.to_value));
+        ("resource",
+          (Option.map x.resource
+             ~f:CoralAvailabilityThrottledResource.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resource =
+        (Option.map ~f:CoralAvailabilityThrottledResource.of_xml)
+          (Xml.child xml_arg0 "resource") in
+      let reason =
+        (Option.map ~f:CoralAvailabilityThrottlingReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      make ?resource ?reason ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resource =
+        field_map json__ "resource"
+          CoralAvailabilityThrottledResource.of_json in
+      let reason =
+        field_map json__ "reason" CoralAvailabilityThrottlingReason.of_json in
+      make ?resource ?reason ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides information about a specific throttling reason."]
+module ValidationExceptionField =
+  struct
+    type nonrec t =
+      {
+      name: ValidationExceptionFieldName.t option
+        [@ocaml.doc "The name of the field that failed validation."];
+      message: ValidationExceptionFieldMessage.t option
+        [@ocaml.doc "A message describing why the field failed validation."]}
+    let make ?name = fun ?message -> fun () -> { name; message }
+    let to_value x =
+      structure_to_value
+        [("name",
+           (Option.map x.name ~f:ValidationExceptionFieldName.to_value));
+        ("message",
+          (Option.map x.message ~f:ValidationExceptionFieldMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ValidationExceptionFieldMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      let name =
+        (Option.map ~f:ValidationExceptionFieldName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      make ?message ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message" ValidationExceptionFieldMessage.of_json in
+      let name = field_map json__ "name" ValidationExceptionFieldName.of_json in
+      make ?message ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about a field that failed validation."]
+module Force =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
 module LexiconName =
   struct
     type nonrec t = string
@@ -117,6 +252,16 @@ module LanguageCode =
       | En_NZ 
       | En_ZA 
       | Ca_ES 
+      | De_AT 
+      | Yue_CN 
+      | Ar_AE 
+      | Fi_FI 
+      | En_IE 
+      | Nl_BE 
+      | Fr_BE 
+      | Cs_CZ 
+      | De_CH 
+      | En_SG 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -153,6 +298,16 @@ module LanguageCode =
       | En_NZ -> "en-NZ"
       | En_ZA -> "en-ZA"
       | Ca_ES -> "ca-ES"
+      | De_AT -> "de-AT"
+      | Yue_CN -> "yue-CN"
+      | Ar_AE -> "ar-AE"
+      | Fi_FI -> "fi-FI"
+      | En_IE -> "en-IE"
+      | Nl_BE -> "nl-BE"
+      | Fr_BE -> "fr-BE"
+      | Cs_CZ -> "cs-CZ"
+      | De_CH -> "de-CH"
+      | En_SG -> "en-SG"
       | Non_static_id s -> s
     let of_string =
       function
@@ -188,6 +343,16 @@ module LanguageCode =
       | "en-NZ" -> En_NZ
       | "en-ZA" -> En_ZA
       | "ca-ES" -> Ca_ES
+      | "de-AT" -> De_AT
+      | "yue-CN" -> Yue_CN
+      | "ar-AE" -> Ar_AE
+      | "fi-FI" -> Fi_FI
+      | "en-IE" -> En_IE
+      | "nl-BE" -> Nl_BE
+      | "fr-BE" -> Fr_BE
+      | "cs-CZ" -> Cs_CZ
+      | "de-CH" -> De_CH
+      | "en-SG" -> En_SG
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -254,17 +419,23 @@ module Engine =
     type nonrec t =
       | Standard 
       | Neural 
+      | Long_form 
+      | Generative 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Standard -> "standard"
       | Neural -> "neural"
+      | Long_form -> "long-form"
+      | Generative -> "generative"
       | Non_static_id s -> s
     let of_string =
       function
       | "standard" -> Standard
       | "neural" -> Neural
+      | "long-form" -> Long_form
+      | "generative" -> Generative
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -272,6 +443,243 @@ module Engine =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration Engine" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"Engine" j)
+    let to_json = simple_to_json to_value
+  end
+module AudioChunk =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module QuotaCode =
+  struct
+    type nonrec t =
+      | Input_stream_inbound_event_timeout 
+      | Input_stream_timeout 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Input_stream_inbound_event_timeout ->
+          "input-stream-inbound-event-timeout"
+      | Input_stream_timeout -> "input-stream-timeout"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "input-stream-inbound-event-timeout" ->
+          Input_stream_inbound_event_timeout
+      | "input-stream-timeout" -> Input_stream_timeout
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration QuotaCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QuotaCode" j)
+    let to_json = simple_to_json to_value
+  end
+module ServiceCode =
+  struct
+    type nonrec t =
+      | Polly 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | Polly -> "polly" | Non_static_id s -> s
+    let of_string = function | "polly" -> Polly | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ServiceCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ServiceCode" j)
+    let to_json = simple_to_json to_value
+  end
+module RequestCharacters =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RequestCharacters" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module AvailabilityErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module ThrottlingReasonList =
+  struct
+    type nonrec t = ThrottlingReason.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ThrottlingReason.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ThrottlingReason.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ThrottlingReasonList"
+        ~of_json:ThrottlingReason.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidationExceptionFieldList =
+  struct
+    type nonrec t = ValidationExceptionField.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ValidationExceptionField.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ValidationExceptionField.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ValidationExceptionFieldList"
+        ~of_json:ValidationExceptionField.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidationExceptionReason =
+  struct
+    type nonrec t =
+      | UnsupportedOperation 
+      | FieldValidationFailed 
+      | Other 
+      | InvalidInboundEvent 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | UnsupportedOperation -> "unsupportedOperation"
+      | FieldValidationFailed -> "fieldValidationFailed"
+      | Other -> "other"
+      | InvalidInboundEvent -> "invalidInboundEvent"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "unsupportedOperation" -> UnsupportedOperation
+      | "fieldValidationFailed" -> FieldValidationFailed
+      | "other" -> Other
+      | "invalidInboundEvent" -> InvalidInboundEvent
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ValidationExceptionReason" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ValidationExceptionReason" j)
+    let to_json = simple_to_json to_value
+  end
+module FlushStreamConfiguration =
+  struct
+    type nonrec t =
+      {
+      force: Force.t option
+        [@ocaml.doc
+          "Specifies whether to force the synthesis engine to immediately write buffered audio data to the output stream."]}
+    let make ?force = fun () -> { force }
+    let to_value x =
+      structure_to_value [("Force", (Option.map x.force ~f:Force.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let force = (Option.map ~f:Force.of_xml) (Xml.child xml_arg0 "Force") in
+      make ?force ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let force = field_map json__ "Force" Force.of_json in make ?force ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration that controls when synthesized audio data is sent on the output stream."]
+module Text =
+  struct
+    type nonrec t = string
+    let context_ = "Text"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Text" j
+    let to_json = simple_to_json to_value
+  end
+module TextType =
+  struct
+    type nonrec t =
+      | Ssml 
+      | Text 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Ssml -> "ssml" | Text -> "text" | Non_static_id s -> s
+    let of_string =
+      function | "ssml" -> Ssml | "text" -> Text | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TextType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TextType" j)
     let to_json = simple_to_json to_value
   end
 module DateTime =
@@ -291,6 +699,9 @@ module LexiconNameList =
     type nonrec t = LexiconName.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LexiconName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -316,23 +727,32 @@ module OutputFormat =
     type nonrec t =
       | Json 
       | Mp3 
+      | Ogg_opus 
       | Ogg_vorbis 
       | Pcm 
+      | Mulaw 
+      | Alaw 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Json -> "json"
       | Mp3 -> "mp3"
+      | Ogg_opus -> "ogg_opus"
       | Ogg_vorbis -> "ogg_vorbis"
       | Pcm -> "pcm"
+      | Mulaw -> "mulaw"
+      | Alaw -> "alaw"
       | Non_static_id s -> s
     let of_string =
       function
       | "json" -> Json
       | "mp3" -> Mp3
+      | "ogg_opus" -> Ogg_opus
       | "ogg_vorbis" -> Ogg_vorbis
       | "pcm" -> Pcm
+      | "mulaw" -> Mulaw
+      | "alaw" -> Alaw
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -353,20 +773,6 @@ module OutputUri =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"OutputUri" j
-    let to_json = simple_to_json to_value
-  end
-module RequestCharacters =
-  struct
-    type nonrec t = int
-    let make i = i
-    let of_string = Int.of_string
-    let to_value x = `Integer x
-    let to_query v = to_query to_value v
-    let to_header x = Int.to_string x
-    let of_xml xml_arg0 =
-      Int.of_string
-        (string_of_xml ~kind:"an integer for RequestCharacters" xml_arg0)
-    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module SampleRate =
@@ -390,7 +796,7 @@ module SnsTopicArn =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^arn:aws(-(cn|iso(-b)?|us-gov))?:sns:[a-z0-9_-]{1,50}:\\d{12}:[a-zA-Z0-9_-]{1,256}$");
+             ~pattern:"^arn:aws(-(cn|iso(-b)?|us-gov))?:sns:[a-z0-9_-]{1,50}:\\d{12}:[a-zA-Z0-9_-]{1,251}([a-zA-Z0-9_-]{0,5}|\\.fifo)$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -405,6 +811,9 @@ module SpeechMarkTypeList =
     type nonrec t = SpeechMarkType.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:4); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SpeechMarkType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -485,25 +894,6 @@ module TaskStatusReason =
     let of_json j = string_of_json ~kind:"TaskStatusReason" j
     let to_json = simple_to_json to_value
   end
-module TextType =
-  struct
-    type nonrec t =
-      | Ssml 
-      | Text 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function | Ssml -> "ssml" | Text -> "text" | Non_static_id s -> s
-    let of_string =
-      function | "ssml" -> Ssml | "text" -> Text | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TextType" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TextType" j)
-    let to_json = simple_to_json to_value
-  end
 module VoiceId =
   struct
     type nonrec t =
@@ -573,6 +963,46 @@ module VoiceId =
       | Aria 
       | Ayanda 
       | Arlet 
+      | Hannah 
+      | Arthur 
+      | Daniel 
+      | Liam 
+      | Pedro 
+      | Kajal 
+      | Hiujin 
+      | Laura 
+      | Elin 
+      | Ida 
+      | Suvi 
+      | Ola 
+      | Hala 
+      | Andres 
+      | Sergio 
+      | Remi 
+      | Adriano 
+      | Thiago 
+      | Ruth 
+      | Stephen 
+      | Kazuha 
+      | Tomoko 
+      | Niamh 
+      | Sofie 
+      | Lisa 
+      | Isabelle 
+      | Zayd 
+      | Danielle 
+      | Gregory 
+      | Burcu 
+      | Jitka 
+      | Sabrina 
+      | Jasmine 
+      | Jihye 
+      | Ambre 
+      | Beatrice 
+      | Florian 
+      | Lennart 
+      | Lorenzo 
+      | Tiffany 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -643,6 +1073,46 @@ module VoiceId =
       | Aria -> "Aria"
       | Ayanda -> "Ayanda"
       | Arlet -> "Arlet"
+      | Hannah -> "Hannah"
+      | Arthur -> "Arthur"
+      | Daniel -> "Daniel"
+      | Liam -> "Liam"
+      | Pedro -> "Pedro"
+      | Kajal -> "Kajal"
+      | Hiujin -> "Hiujin"
+      | Laura -> "Laura"
+      | Elin -> "Elin"
+      | Ida -> "Ida"
+      | Suvi -> "Suvi"
+      | Ola -> "Ola"
+      | Hala -> "Hala"
+      | Andres -> "Andres"
+      | Sergio -> "Sergio"
+      | Remi -> "Remi"
+      | Adriano -> "Adriano"
+      | Thiago -> "Thiago"
+      | Ruth -> "Ruth"
+      | Stephen -> "Stephen"
+      | Kazuha -> "Kazuha"
+      | Tomoko -> "Tomoko"
+      | Niamh -> "Niamh"
+      | Sofie -> "Sofie"
+      | Lisa -> "Lisa"
+      | Isabelle -> "Isabelle"
+      | Zayd -> "Zayd"
+      | Danielle -> "Danielle"
+      | Gregory -> "Gregory"
+      | Burcu -> "Burcu"
+      | Jitka -> "Jitka"
+      | Sabrina -> "Sabrina"
+      | Jasmine -> "Jasmine"
+      | Jihye -> "Jihye"
+      | Ambre -> "Ambre"
+      | Beatrice -> "Beatrice"
+      | Florian -> "Florian"
+      | Lennart -> "Lennart"
+      | Lorenzo -> "Lorenzo"
+      | Tiffany -> "Tiffany"
       | Non_static_id s -> s
     let of_string =
       function
@@ -712,6 +1182,46 @@ module VoiceId =
       | "Aria" -> Aria
       | "Ayanda" -> Ayanda
       | "Arlet" -> Arlet
+      | "Hannah" -> Hannah
+      | "Arthur" -> Arthur
+      | "Daniel" -> Daniel
+      | "Liam" -> Liam
+      | "Pedro" -> Pedro
+      | "Kajal" -> Kajal
+      | "Hiujin" -> Hiujin
+      | "Laura" -> Laura
+      | "Elin" -> Elin
+      | "Ida" -> Ida
+      | "Suvi" -> Suvi
+      | "Ola" -> Ola
+      | "Hala" -> Hala
+      | "Andres" -> Andres
+      | "Sergio" -> Sergio
+      | "Remi" -> Remi
+      | "Adriano" -> Adriano
+      | "Thiago" -> Thiago
+      | "Ruth" -> Ruth
+      | "Stephen" -> Stephen
+      | "Kazuha" -> Kazuha
+      | "Tomoko" -> Tomoko
+      | "Niamh" -> Niamh
+      | "Sofie" -> Sofie
+      | "Lisa" -> Lisa
+      | "Isabelle" -> Isabelle
+      | "Zayd" -> Zayd
+      | "Danielle" -> Danielle
+      | "Gregory" -> Gregory
+      | "Burcu" -> Burcu
+      | "Jitka" -> Jitka
+      | "Sabrina" -> Sabrina
+      | "Jasmine" -> Jasmine
+      | "Jihye" -> Jihye
+      | "Ambre" -> Ambre
+      | "Beatrice" -> Beatrice
+      | "Florian" -> Florian
+      | "Lennart" -> Lennart
+      | "Lorenzo" -> Lorenzo
+      | "Tiffany" -> Tiffany
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -784,13 +1294,13 @@ module LexiconAttributes =
       make ?size ?lexemesCount ?lexiconArn ?lastModified ?languageCode
         ?alphabet ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let size = field_map json "Size" Size.of_json in
-      let lexemesCount = field_map json "LexemesCount" LexemesCount.of_json in
-      let lexiconArn = field_map json "LexiconArn" LexiconArn.of_json in
-      let lastModified = field_map json "LastModified" LastModified.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let alphabet = field_map json "Alphabet" Alphabet.of_json in
+    let of_json json__ =
+      let size = field_map json__ "Size" Size.of_json in
+      let lexemesCount = field_map json__ "LexemesCount" LexemesCount.of_json in
+      let lexiconArn = field_map json__ "LexiconArn" LexiconArn.of_json in
+      let lastModified = field_map json__ "LastModified" LastModified.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let alphabet = field_map json__ "Alphabet" Alphabet.of_json in
       make ?size ?lexemesCount ?lexiconArn ?lastModified ?languageCode
         ?alphabet ()
     let to_json v = composed_to_json to_value v
@@ -800,6 +1310,9 @@ module EngineList =
   struct
     type nonrec t = Engine.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Engine.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -842,6 +1355,9 @@ module LanguageCodeList =
   struct
     type nonrec t = LanguageCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LanguageCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -888,26 +1404,247 @@ module VoiceName =
     let of_json j = string_of_json ~kind:"VoiceName" j
     let to_json = simple_to_json to_value
   end
-module ErrorMessage =
+module AudioEvent =
   struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      audioChunk: AudioChunk.t option
+        [@ocaml.doc
+          "A chunk of synthesized audio data encoded in the format specified by the OutputFormat parameter."]}
+    let make ?audioChunk = fun () -> { audioChunk }
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?audioChunk:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("AudioChunk", (Option.map x.audioChunk ~f:AudioChunk.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let audioChunk =
+        (Option.map ~f:AudioChunk.of_xml) (Xml.child xml_arg0 "AudioChunk") in
+      make ?audioChunk ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let audioChunk = field_map json__ "AudioChunk" AudioChunk.of_json in
+      make ?audioChunk ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains a chunk of synthesized audio data."]
+module ServiceFailureException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "An unknown condition has caused a service failure."]
+module ServiceQuotaExceededException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      quotaCode: QuotaCode.t option
+        [@ocaml.doc "The quota code identifying the specific quota."];
+      serviceCode: ServiceCode.t option
+        [@ocaml.doc "The service code identifying the originating service."]}
+    let make ?message =
+      fun ?quotaCode ->
+        fun ?serviceCode -> fun () -> { message; quotaCode; serviceCode }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("quotaCode", (Option.map x.quotaCode ~f:QuotaCode.to_value));
+        ("serviceCode", (Option.map x.serviceCode ~f:ServiceCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let serviceCode =
+        (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "serviceCode") in
+      let quotaCode =
+        (Option.map ~f:QuotaCode.of_xml) (Xml.child xml_arg0 "quotaCode") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?serviceCode ?quotaCode ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let serviceCode = field_map json__ "serviceCode" ServiceCode.of_json in
+      let quotaCode = field_map json__ "quotaCode" QuotaCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?serviceCode ?quotaCode ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request would cause a service quota to be exceeded."]
+module StreamClosedEvent =
+  struct
+    type nonrec t =
+      {
+      requestCharacters: RequestCharacters.t option
+        [@ocaml.doc
+          "The total number of characters synthesized during the streaming session."]}
+    let make ?requestCharacters = fun () -> { requestCharacters }
+    let to_value x =
+      structure_to_value
+        [("RequestCharacters",
+           (Option.map x.requestCharacters ~f:RequestCharacters.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let requestCharacters =
+        (Option.map ~f:RequestCharacters.of_xml)
+          (Xml.child xml_arg0 "RequestCharacters") in
+      make ?requestCharacters ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let requestCharacters =
+        field_map json__ "RequestCharacters" RequestCharacters.of_json in
+      make ?requestCharacters ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates that the synthesis stream is closed and provides summary information."]
+module ThrottlingException =
+  struct
+    type nonrec t =
+      {
+      message: AvailabilityErrorMessage.t option ;
+      throttlingReasons: ThrottlingReasonList.t option
+        [@ocaml.doc
+          "A list of reasons explaining why the request was throttled."]}
+    let make ?message =
+      fun ?throttlingReasons -> fun () -> { message; throttlingReasons }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:AvailabilityErrorMessage.to_value));
+        ("throttlingReasons",
+          (Option.map x.throttlingReasons ~f:ThrottlingReasonList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throttlingReasons =
+        (Option.map ~f:ThrottlingReasonList.of_xml)
+          (Xml.child xml_arg0 "throttlingReasons") in
+      let message =
+        (Option.map ~f:AvailabilityErrorMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?throttlingReasons ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throttlingReasons =
+        field_map json__ "throttlingReasons" ThrottlingReasonList.of_json in
+      let message =
+        field_map json__ "message" AvailabilityErrorMessage.of_json in
+      make ?throttlingReasons ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The request was denied because of request throttling."]
+module ValidationException =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option ;
+      reason: ValidationExceptionReason.t option
+        [@ocaml.doc "The reason the request failed validation."];
+      fields: ValidationExceptionFieldList.t option
+        [@ocaml.doc "The fields that caused the validation error."]}
+    let make ?message =
+      fun ?reason -> fun ?fields -> fun () -> { message; reason; fields }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("reason",
+          (Option.map x.reason ~f:ValidationExceptionReason.to_value));
+        ("fields",
+          (Option.map x.fields ~f:ValidationExceptionFieldList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fields =
+        (Option.map ~f:ValidationExceptionFieldList.of_xml)
+          (Xml.child xml_arg0 "fields") in
+      let reason =
+        (Option.map ~f:ValidationExceptionReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?fields ?reason ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fields =
+        field_map json__ "fields" ValidationExceptionFieldList.of_json in
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?fields ?reason ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The input fails to satisfy the constraints specified by the service."]
+module CloseStreamEvent =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Indicates the end of the input stream. After sending this event, the input stream will be closed and all audio will be returned."]
+module TextEvent =
+  struct
+    type nonrec t =
+      {
+      text: Text.t
+        [@ocaml.doc
+          "The text content to synthesize. If you specify ssml as the TextType, follow the SSML format for the input text."];
+      textType: TextType.t option
+        [@ocaml.doc
+          "Specifies whether the input text is plain text or SSML. Default: plain text."];
+      flushStreamConfiguration: FlushStreamConfiguration.t option
+        [@ocaml.doc
+          "Configuration for controlling when synthesized audio flushes to the output stream."]}
+    let context_ = "TextEvent"
+    let make ?textType =
+      fun ?flushStreamConfiguration ->
+        fun ~text -> fun () -> { textType; flushStreamConfiguration; text }
+    let to_value x =
+      structure_to_value
+        [("Text", (Some (Text.to_value x.text)));
+        ("TextType", (Option.map x.textType ~f:TextType.to_value));
+        ("FlushStreamConfiguration",
+          (Option.map x.flushStreamConfiguration
+             ~f:FlushStreamConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let flushStreamConfiguration =
+        (Option.map ~f:FlushStreamConfiguration.of_xml)
+          (Xml.child xml_arg0 "FlushStreamConfiguration") in
+      let textType =
+        (Option.map ~f:TextType.of_xml) (Xml.child xml_arg0 "TextType") in
+      let text =
+        Text.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Text") in
+      make ?flushStreamConfiguration ?textType ~text ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let flushStreamConfiguration =
+        field_map json__ "FlushStreamConfiguration"
+          FlushStreamConfiguration.of_json in
+      let textType = field_map json__ "TextType" TextType.of_json in
+      let text = field_map_exn json__ "Text" Text.of_json in
+      make ?flushStreamConfiguration ?textType ~text ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Contains text content to be synthesized into speech."]
 module SynthesisTask =
   struct
     type nonrec t =
       {
       engine: Engine.t option
         [@ocaml.doc
-          "Specifies the engine (standard or neural) for Amazon Polly to use when processing input text for speech synthesis. Using a voice that is not supported for the engine selected will result in an error."];
+          "Specifies the engine (standard, neural, long-form or generative) for Amazon Polly to use when processing input text for speech synthesis. Using a voice that is not supported for the engine selected will result in an error."];
       taskId: TaskId.t option
         [@ocaml.doc
           "The Amazon Polly generated identifier for a speech synthesis task."];
@@ -931,10 +1668,10 @@ module SynthesisTask =
           "List of one or more pronunciation lexicon names you want the service to apply during synthesis. Lexicons are applied only if the language of the lexicon is the same as the language of the voice."];
       outputFormat: OutputFormat.t option
         [@ocaml.doc
-          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, or pcm. For speech marks, this will be json."];
+          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, ogg_opus, mu-law, a-law, or pcm. For speech marks, this will be json."];
       sampleRate: SampleRate.t option
         [@ocaml.doc
-          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", and \"24000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\"."];
+          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", and \"24000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". The default value for long-form voices is \"24000\". The default value for generative voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\". Valid value for ogg_opus is \"48000\". Valid value for mu-law and a-law is \"8000\"."];
       speechMarkTypes: SpeechMarkTypeList.t option
         [@ocaml.doc "The type of speech marks returned for the input text."];
       textType: TextType.t option
@@ -1044,26 +1781,26 @@ module SynthesisTask =
         ?creationTime ?outputUri ?taskStatusReason ?taskStatus ?taskId
         ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let voiceId = field_map json "VoiceId" VoiceId.of_json in
-      let textType = field_map json "TextType" TextType.of_json in
+    let of_json json__ =
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let voiceId = field_map json__ "VoiceId" VoiceId.of_json in
+      let textType = field_map json__ "TextType" TextType.of_json in
       let speechMarkTypes =
-        field_map json "SpeechMarkTypes" SpeechMarkTypeList.of_json in
-      let sampleRate = field_map json "SampleRate" SampleRate.of_json in
-      let outputFormat = field_map json "OutputFormat" OutputFormat.of_json in
+        field_map json__ "SpeechMarkTypes" SpeechMarkTypeList.of_json in
+      let sampleRate = field_map json__ "SampleRate" SampleRate.of_json in
+      let outputFormat = field_map json__ "OutputFormat" OutputFormat.of_json in
       let lexiconNames =
-        field_map json "LexiconNames" LexiconNameList.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" SnsTopicArn.of_json in
+        field_map json__ "LexiconNames" LexiconNameList.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" SnsTopicArn.of_json in
       let requestCharacters =
-        field_map json "RequestCharacters" RequestCharacters.of_json in
-      let creationTime = field_map json "CreationTime" DateTime.of_json in
-      let outputUri = field_map json "OutputUri" OutputUri.of_json in
+        field_map json__ "RequestCharacters" RequestCharacters.of_json in
+      let creationTime = field_map json__ "CreationTime" DateTime.of_json in
+      let outputUri = field_map json__ "OutputUri" OutputUri.of_json in
       let taskStatusReason =
-        field_map json "TaskStatusReason" TaskStatusReason.of_json in
-      let taskStatus = field_map json "TaskStatus" TaskStatus.of_json in
-      let taskId = field_map json "TaskId" TaskId.of_json in
-      let engine = field_map json "Engine" Engine.of_json in
+        field_map json__ "TaskStatusReason" TaskStatusReason.of_json in
+      let taskStatus = field_map json__ "TaskStatus" TaskStatus.of_json in
+      let taskId = field_map json__ "TaskId" TaskId.of_json in
+      let engine = field_map json__ "Engine" Engine.of_json in
       make ?languageCode ?voiceId ?textType ?speechMarkTypes ?sampleRate
         ?outputFormat ?lexiconNames ?snsTopicArn ?requestCharacters
         ?creationTime ?outputUri ?taskStatusReason ?taskStatus ?taskId
@@ -1093,9 +1830,10 @@ module LexiconDescription =
         (Option.map ~f:LexiconName.of_xml) (Xml.child xml_arg0 "Name") in
       make ?attributes ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" LexiconAttributes.of_json in
-      let name = field_map json "Name" LexiconName.of_json in
+    let of_json json__ =
+      let attributes =
+        field_map json__ "Attributes" LexiconAttributes.of_json in
+      let name = field_map json__ "Name" LexiconName.of_json in
       make ?attributes ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the content of the lexicon."]
@@ -1132,7 +1870,7 @@ module Voice =
           "Additional codes for languages available for the specified voice in addition to its default language. For example, the default language for Aditi is Indian English (en-IN) because it was first used for that language. Since Aditi is bilingual and fluent in both Indian English and Hindi, this parameter would show the code hi-IN."];
       supportedEngines: EngineList.t option
         [@ocaml.doc
-          "Specifies which engines (standard or neural) that are supported by a given voice."]}
+          "Specifies which engines (standard, neural, long-form or generative) are supported by a given voice."]}
     let make ?gender =
       fun ?id ->
         fun ?languageCode ->
@@ -1184,16 +1922,16 @@ module Voice =
       make ?supportedEngines ?additionalLanguageCodes ?name ?languageName
         ?languageCode ?id ?gender ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let supportedEngines =
-        field_map json "SupportedEngines" EngineList.of_json in
+        field_map json__ "SupportedEngines" EngineList.of_json in
       let additionalLanguageCodes =
-        field_map json "AdditionalLanguageCodes" LanguageCodeList.of_json in
-      let name = field_map json "Name" VoiceName.of_json in
-      let languageName = field_map json "LanguageName" LanguageName.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let id = field_map json "Id" VoiceId.of_json in
-      let gender = field_map json "Gender" Gender.of_json in
+        field_map json__ "AdditionalLanguageCodes" LanguageCodeList.of_json in
+      let name = field_map json__ "Name" VoiceName.of_json in
+      let languageName = field_map json__ "LanguageName" LanguageName.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let id = field_map json__ "Id" VoiceId.of_json in
+      let gender = field_map json__ "Gender" Gender.of_json in
       make ?supportedEngines ?additionalLanguageCodes ?name ?languageName
         ?languageCode ?id ?gender ()
     let to_json v = composed_to_json to_value v
@@ -1237,8 +1975,8 @@ module EngineNotSupportedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1257,8 +1995,8 @@ module InvalidSampleRateException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified sample rate is not valid."]
@@ -1276,8 +2014,8 @@ module InvalidSsmlException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1296,8 +2034,8 @@ module LanguageNotSupportedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1316,8 +2054,8 @@ module LexiconNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1336,31 +2074,12 @@ module MarksNotSupportedForFormatException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Speech marks are not supported for the OutputFormat selected. Speech marks are only available for content in json format."]
-module ServiceFailureException =
-  struct
-    type nonrec t = {
-      message: ErrorMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An unknown condition has caused a service failure."]
 module SsmlMarksNotSupportedForTextTypeException =
   struct
     type nonrec t = {
@@ -1375,8 +2094,8 @@ module SsmlMarksNotSupportedForTextTypeException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1395,25 +2114,12 @@ module TextLengthExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The value of the \"Text\" parameter is longer than the accepted limits. For the SynthesizeSpeech API, the limit for input text is a maximum of 6000 characters total, of which no more than 3000 can be billed characters. For the StartSpeechSynthesisTask API, the maximum is 200,000 characters, of which no more than 100,000 can be billed characters. SSML tags are not counted as billed characters."]
-module Text =
-  struct
-    type nonrec t = string
-    let context_ = "Text"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Text" j
-    let to_json = simple_to_json to_value
-  end
 module InvalidS3BucketException =
   struct
     type nonrec t = {
@@ -1428,8 +2134,8 @@ module InvalidS3BucketException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1448,8 +2154,8 @@ module InvalidS3KeyException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1468,8 +2174,8 @@ module InvalidSnsTopicArnException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1509,6 +2215,128 @@ module OutputS3KeyPrefix =
     let of_json j = string_of_json ~kind:"OutputS3KeyPrefix" j
     let to_json = simple_to_json to_value
   end
+module StartSpeechSynthesisStreamEventStream =
+  struct
+    type nonrec t =
+      {
+      audioEvent: AudioEvent.t option
+        [@ocaml.doc "An audio event containing synthesized speech."];
+      streamClosedEvent: StreamClosedEvent.t option
+        [@ocaml.doc
+          "An event, with summary information, indicating the stream has closed."];
+      validationException: ValidationException.t option
+        [@ocaml.doc "An exception indicating the input failed validation."];
+      serviceQuotaExceededException: ServiceQuotaExceededException.t option
+        [@ocaml.doc
+          "An exception indicating a service quota would be exceeded."];
+      serviceFailureException: ServiceFailureException.t option ;
+      throttlingException: ThrottlingException.t option
+        [@ocaml.doc "An exception indicating the request was throttled."]}
+    let make ?audioEvent =
+      fun ?streamClosedEvent ->
+        fun ?validationException ->
+          fun ?serviceQuotaExceededException ->
+            fun ?serviceFailureException ->
+              fun ?throttlingException ->
+                fun () ->
+                  {
+                    audioEvent;
+                    streamClosedEvent;
+                    validationException;
+                    serviceQuotaExceededException;
+                    serviceFailureException;
+                    throttlingException
+                  }
+    let to_value x =
+      structure_to_value
+        [("AudioEvent", (Option.map x.audioEvent ~f:AudioEvent.to_value));
+        ("StreamClosedEvent",
+          (Option.map x.streamClosedEvent ~f:StreamClosedEvent.to_value));
+        ("ValidationException",
+          (Option.map x.validationException ~f:ValidationException.to_value));
+        ("ServiceQuotaExceededException",
+          (Option.map x.serviceQuotaExceededException
+             ~f:ServiceQuotaExceededException.to_value));
+        ("ServiceFailureException",
+          (Option.map x.serviceFailureException
+             ~f:ServiceFailureException.to_value));
+        ("ThrottlingException",
+          (Option.map x.throttlingException ~f:ThrottlingException.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let throttlingException =
+        (Option.map ~f:ThrottlingException.of_xml)
+          (Xml.child xml_arg0 "ThrottlingException") in
+      let serviceFailureException =
+        (Option.map ~f:ServiceFailureException.of_xml)
+          (Xml.child xml_arg0 "ServiceFailureException") in
+      let serviceQuotaExceededException =
+        (Option.map ~f:ServiceQuotaExceededException.of_xml)
+          (Xml.child xml_arg0 "ServiceQuotaExceededException") in
+      let validationException =
+        (Option.map ~f:ValidationException.of_xml)
+          (Xml.child xml_arg0 "ValidationException") in
+      let streamClosedEvent =
+        (Option.map ~f:StreamClosedEvent.of_xml)
+          (Xml.child xml_arg0 "StreamClosedEvent") in
+      let audioEvent =
+        (Option.map ~f:AudioEvent.of_xml) (Xml.child xml_arg0 "AudioEvent") in
+      make ?throttlingException ?serviceFailureException
+        ?serviceQuotaExceededException ?validationException
+        ?streamClosedEvent ?audioEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let throttlingException =
+        field_map json__ "ThrottlingException" ThrottlingException.of_json in
+      let serviceFailureException =
+        field_map json__ "ServiceFailureException"
+          ServiceFailureException.of_json in
+      let serviceQuotaExceededException =
+        field_map json__ "ServiceQuotaExceededException"
+          ServiceQuotaExceededException.of_json in
+      let validationException =
+        field_map json__ "ValidationException" ValidationException.of_json in
+      let streamClosedEvent =
+        field_map json__ "StreamClosedEvent" StreamClosedEvent.of_json in
+      let audioEvent = field_map json__ "AudioEvent" AudioEvent.of_json in
+      make ?throttlingException ?serviceFailureException
+        ?serviceQuotaExceededException ?validationException
+        ?streamClosedEvent ?audioEvent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Outbound event stream that contains synthesized audio data and stream status events."]
+module StartSpeechSynthesisStreamActionStream =
+  struct
+    type nonrec t =
+      {
+      textEvent: TextEvent.t option
+        [@ocaml.doc "A text event containing content to be synthesized."];
+      closeStreamEvent: CloseStreamEvent.t option
+        [@ocaml.doc "An event indicating the end of the input stream."]}
+    let make ?textEvent =
+      fun ?closeStreamEvent -> fun () -> { textEvent; closeStreamEvent }
+    let to_value x =
+      structure_to_value
+        [("TextEvent", (Option.map x.textEvent ~f:TextEvent.to_value));
+        ("CloseStreamEvent",
+          (Option.map x.closeStreamEvent ~f:CloseStreamEvent.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let closeStreamEvent =
+        (Option.map ~f:CloseStreamEvent.of_xml)
+          (Xml.child xml_arg0 "CloseStreamEvent") in
+      let textEvent =
+        (Option.map ~f:TextEvent.of_xml) (Xml.child xml_arg0 "TextEvent") in
+      make ?closeStreamEvent ?textEvent ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let closeStreamEvent =
+        field_map json__ "CloseStreamEvent" CloseStreamEvent.of_json in
+      let textEvent = field_map json__ "TextEvent" TextEvent.of_json in
+      make ?closeStreamEvent ?textEvent ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Inbound event stream for sending input and control events to manage bidirectional speech synthesis."]
 module InvalidLexiconException =
   struct
     type nonrec t = {
@@ -1523,8 +2351,8 @@ module InvalidLexiconException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1543,8 +2371,8 @@ module LexiconSizeExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1563,8 +2391,8 @@ module MaxLexemeLengthExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1583,8 +2411,8 @@ module MaxLexiconsNumberExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1603,8 +2431,8 @@ module UnsupportedPlsAlphabetException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1623,8 +2451,8 @@ module UnsupportedPlsLanguageException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1643,8 +2471,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1671,6 +2499,9 @@ module SynthesisTasks =
   struct
     type nonrec t = SynthesisTask.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SynthesisTask.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1713,6 +2544,9 @@ module LexiconDescriptionList =
   struct
     type nonrec t = LexiconDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LexiconDescription.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1748,8 +2582,8 @@ module InvalidTaskIdException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1768,8 +2602,8 @@ module SynthesisTaskNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1795,9 +2629,9 @@ module Lexicon =
         (Option.map ~f:LexiconContent.of_xml) (Xml.child xml_arg0 "Content") in
       make ?name ?content ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "Name" LexiconName.of_json in
-      let content = field_map json "Content" LexiconContent.of_json in
+    let of_json json__ =
+      let name = field_map json__ "Name" LexiconName.of_json in
+      let content = field_map json__ "Content" LexiconContent.of_json in
       make ?name ?content ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1806,6 +2640,9 @@ module VoiceList =
   struct
     type nonrec t = Voice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Voice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1846,7 +2683,7 @@ module SynthesizeSpeechOutput =
         [@ocaml.doc "Stream containing the synthesized speech."];
       contentType: ContentType.t option
         [@ocaml.doc
-          "Specifies the type audio stream. This should reflect the OutputFormat parameter in your request. If you request mp3 as the OutputFormat, the ContentType returned is audio/mpeg. If you request ogg_vorbis as the OutputFormat, the ContentType returned is audio/ogg. If you request pcm as the OutputFormat, the ContentType returned is audio/pcm in a signed 16-bit, 1 channel (mono), little-endian format. If you request json as the OutputFormat, the ContentType returned is application/x-json-stream."];
+          "Specifies the type audio stream. This should reflect the OutputFormat parameter in your request. If you request mp3 as the OutputFormat, the ContentType returned is audio/mpeg. If you request ogg_vorbis as the OutputFormat, the ContentType returned is audio/ogg. If you request ogg_opus as the OutputFormat, the ContentType returned is audio/ogg. If you request pcm as the OutputFormat, the ContentType returned is audio/pcm in a signed 16-bit, 1 channel (mono), little-endian format. If you request mu-law as the OutputFormat, the ContentType returned is audio/mulaw. If you request a-law as the OutputFormat, the ContentType returned is audio/alaw. If you request json as the OutputFormat, the ContentType returned is application/x-json-stream."];
       requestCharacters: RequestCharacters.t option
         [@ocaml.doc "Number of characters synthesized."]}
     type nonrec error =
@@ -1996,11 +2833,11 @@ module SynthesizeSpeechOutput =
         (Option.map ~f:AudioStream.of_xml) (Xml.child xml_arg0 "AudioStream") in
       make ?requestCharacters ?contentType ?audioStream ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requestCharacters =
-        field_map json "RequestCharacters" RequestCharacters.of_json in
-      let contentType = field_map json "ContentType" ContentType.of_json in
-      let audioStream = field_map json "AudioStream" AudioStream.of_json in
+        field_map json__ "RequestCharacters" RequestCharacters.of_json in
+      let contentType = field_map json__ "ContentType" ContentType.of_json in
+      let audioStream = field_map json__ "AudioStream" AudioStream.of_json in
       make ?requestCharacters ?contentType ?audioStream ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2011,7 +2848,7 @@ module SynthesizeSpeechInput =
       {
       engine: Engine.t option
         [@ocaml.doc
-          "Specifies the engine (standard or neural) for Amazon Polly to use when processing input text for speech synthesis. For information on Amazon Polly voices and which voices are available in standard-only, NTTS-only, and both standard and NTTS formats, see Available Voices. NTTS-only voices When using NTTS-only voices such as Kevin (en-US), this parameter is required and must be set to neural. If the engine is not specified, or is set to standard, this will result in an error. Type: String Valid Values: standard | neural Required: Yes Standard voices For standard voices, this is not required; the engine parameter defaults to standard. If the engine is not specified, or is set to standard and an NTTS-only voice is selected, this will result in an error."];
+          "Specifies the engine (standard, neural, long-form, or generative) for Amazon Polly to use when processing input text for speech synthesis. Provide an engine that is supported by the voice you select. If you don't provide an engine, the standard engine is selected by default. If a chosen voice isn't supported by the standard engine, this will result in an error. For information on Amazon Polly voices and which voices are available for each engine, see Available Voices."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
           "Optional language code for the Synthesize Speech request. This is only necessary if using a bilingual voice, such as Aditi, which can be used for either Indian English (en-IN) or Hindi (hi-IN). If a bilingual voice is used and no language code is specified, Amazon Polly uses the default language of the bilingual voice. The default language for any voice is the one returned by the DescribeVoices operation for the LanguageCode parameter. For example, if no language code is specified, Aditi will use Indian English rather than Hindi."];
@@ -2020,10 +2857,10 @@ module SynthesizeSpeechInput =
           "List of one or more pronunciation lexicon names you want the service to apply during synthesis. Lexicons are applied only if the language of the lexicon is the same as the language of the voice. For information about storing lexicons, see PutLexicon."];
       outputFormat: OutputFormat.t
         [@ocaml.doc
-          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, or pcm. For speech marks, this will be json. When pcm is used, the content returned is audio/pcm in a signed 16-bit, 1 channel (mono), little-endian format."];
+          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, ogg_opus, mu-law, a-law or pcm. For speech marks, this will be json. When pcm is used, the content returned is audio/pcm in a signed 16-bit, 1 channel (mono), little-endian format."];
       sampleRate: SampleRate.t option
         [@ocaml.doc
-          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", and \"24000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\"."];
+          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", \"24000\", \"44100\" and \"48000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". The default value for long-form voices is \"24000\". The default value for generative voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\". Valid value for ogg_opus is \"48000\". Valid value for mu-law and a-law is \"8000\"."];
       speechMarkTypes: SpeechMarkTypeList.t option
         [@ocaml.doc "The type of speech marks returned for the input text."];
       text: Text.t
@@ -2098,19 +2935,19 @@ module SynthesizeSpeechInput =
       make ~voiceId ?textType ~text ?speechMarkTypes ?sampleRate
         ~outputFormat ?lexiconNames ?languageCode ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let voiceId = field_map_exn json "VoiceId" VoiceId.of_json in
-      let textType = field_map json "TextType" TextType.of_json in
-      let text = field_map_exn json "Text" Text.of_json in
+    let of_json json__ =
+      let voiceId = field_map_exn json__ "VoiceId" VoiceId.of_json in
+      let textType = field_map json__ "TextType" TextType.of_json in
+      let text = field_map_exn json__ "Text" Text.of_json in
       let speechMarkTypes =
-        field_map json "SpeechMarkTypes" SpeechMarkTypeList.of_json in
-      let sampleRate = field_map json "SampleRate" SampleRate.of_json in
+        field_map json__ "SpeechMarkTypes" SpeechMarkTypeList.of_json in
+      let sampleRate = field_map json__ "SampleRate" SampleRate.of_json in
       let outputFormat =
-        field_map_exn json "OutputFormat" OutputFormat.of_json in
+        field_map_exn json__ "OutputFormat" OutputFormat.of_json in
       let lexiconNames =
-        field_map json "LexiconNames" LexiconNameList.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let engine = field_map json "Engine" Engine.of_json in
+        field_map json__ "LexiconNames" LexiconNameList.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let engine = field_map json__ "Engine" Engine.of_json in
       make ~voiceId ?textType ~text ?speechMarkTypes ?sampleRate
         ~outputFormat ?lexiconNames ?languageCode ?engine ()
     let to_json v = composed_to_json to_value v
@@ -2277,9 +3114,9 @@ module StartSpeechSynthesisTaskOutput =
           (Xml.child xml_arg0 "SynthesisTask") in
       make ?synthesisTask ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let synthesisTask =
-        field_map json "SynthesisTask" SynthesisTask.of_json in
+        field_map json__ "SynthesisTask" SynthesisTask.of_json in
       make ?synthesisTask ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2290,7 +3127,7 @@ module StartSpeechSynthesisTaskInput =
       {
       engine: Engine.t option
         [@ocaml.doc
-          "Specifies the engine (standard or neural) for Amazon Polly to use when processing input text for speech synthesis. Using a voice that is not supported for the engine selected will result in an error."];
+          "Specifies the engine (standard, neural, long-form or generative) for Amazon Polly to use when processing input text for speech synthesis. Using a voice that is not supported for the engine selected will result in an error."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
           "Optional language code for the Speech Synthesis request. This is only necessary if using a bilingual voice, such as Aditi, which can be used for either Indian English (en-IN) or Hindi (hi-IN). If a bilingual voice is used and no language code is specified, Amazon Polly uses the default language of the bilingual voice. The default language for any voice is the one returned by the DescribeVoices operation for the LanguageCode parameter. For example, if no language code is specified, Aditi will use Indian English rather than Hindi."];
@@ -2299,7 +3136,7 @@ module StartSpeechSynthesisTaskInput =
           "List of one or more pronunciation lexicon names you want the service to apply during synthesis. Lexicons are applied only if the language of the lexicon is the same as the language of the voice."];
       outputFormat: OutputFormat.t
         [@ocaml.doc
-          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, or pcm. For speech marks, this will be json."];
+          "The format in which the returned output will be encoded. For audio stream, this will be mp3, ogg_vorbis, ogg_opus, mu-law, a-law, or pcm. For speech marks, this will be json."];
       outputS3BucketName: OutputS3BucketName.t
         [@ocaml.doc
           "Amazon S3 bucket name to which the output file will be saved."];
@@ -2307,7 +3144,7 @@ module StartSpeechSynthesisTaskInput =
         [@ocaml.doc "The Amazon S3 key prefix for the output speech file."];
       sampleRate: SampleRate.t option
         [@ocaml.doc
-          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", and \"24000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\"."];
+          "The audio frequency specified in Hz. The valid values for mp3 and ogg_vorbis are \"8000\", \"16000\", \"22050\", and \"24000\". The default value for standard voices is \"22050\". The default value for neural voices is \"24000\". The default value for long-form voices is \"24000\". The default value for generative voices is \"24000\". Valid values for pcm are \"8000\" and \"16000\" The default value is \"16000\". Valid value for ogg_opus is \"48000\". Valid value for mu-law and a-law is \"8000\"."];
       snsTopicArn: SnsTopicArn.t option
         [@ocaml.doc
           "ARN for the SNS topic optionally used for providing status notification for a speech synthesis task."];
@@ -2403,30 +3240,241 @@ module StartSpeechSynthesisTaskInput =
         ?outputS3KeyPrefix ~outputS3BucketName ~outputFormat ?lexiconNames
         ?languageCode ?engine ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let voiceId = field_map_exn json "VoiceId" VoiceId.of_json in
-      let textType = field_map json "TextType" TextType.of_json in
-      let text = field_map_exn json "Text" Text.of_json in
+    let of_json json__ =
+      let voiceId = field_map_exn json__ "VoiceId" VoiceId.of_json in
+      let textType = field_map json__ "TextType" TextType.of_json in
+      let text = field_map_exn json__ "Text" Text.of_json in
       let speechMarkTypes =
-        field_map json "SpeechMarkTypes" SpeechMarkTypeList.of_json in
-      let snsTopicArn = field_map json "SnsTopicArn" SnsTopicArn.of_json in
-      let sampleRate = field_map json "SampleRate" SampleRate.of_json in
+        field_map json__ "SpeechMarkTypes" SpeechMarkTypeList.of_json in
+      let snsTopicArn = field_map json__ "SnsTopicArn" SnsTopicArn.of_json in
+      let sampleRate = field_map json__ "SampleRate" SampleRate.of_json in
       let outputS3KeyPrefix =
-        field_map json "OutputS3KeyPrefix" OutputS3KeyPrefix.of_json in
+        field_map json__ "OutputS3KeyPrefix" OutputS3KeyPrefix.of_json in
       let outputS3BucketName =
-        field_map_exn json "OutputS3BucketName" OutputS3BucketName.of_json in
+        field_map_exn json__ "OutputS3BucketName" OutputS3BucketName.of_json in
       let outputFormat =
-        field_map_exn json "OutputFormat" OutputFormat.of_json in
+        field_map_exn json__ "OutputFormat" OutputFormat.of_json in
       let lexiconNames =
-        field_map json "LexiconNames" LexiconNameList.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let engine = field_map json "Engine" Engine.of_json in
+        field_map json__ "LexiconNames" LexiconNameList.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let engine = field_map json__ "Engine" Engine.of_json in
       make ~voiceId ?textType ~text ?speechMarkTypes ?snsTopicArn ?sampleRate
         ?outputS3KeyPrefix ~outputS3BucketName ~outputFormat ?lexiconNames
         ?languageCode ?engine ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows the creation of an asynchronous synthesis task, by starting a new SpeechSynthesisTask. This operation requires all the standard information needed for speech synthesis, plus the name of an Amazon S3 bucket for the service to store the output of the synthesis task and two optional parameters (OutputS3KeyPrefix and SnsTopicArn). Once the synthesis task is created, this operation will return a SpeechSynthesisTask object, which will include an identifier of this task as well as the current status. The SpeechSynthesisTask object is available for 72 hours after starting the asynchronous synthesis task."]
+module StartSpeechSynthesisStreamOutput =
+  struct
+    type nonrec t =
+      {
+      eventStream: StartSpeechSynthesisStreamEventStream.t option
+        [@ocaml.doc
+          "The output event stream that contains synthesized audio events and stream status events."]}
+    type nonrec error =
+      [ `ServiceFailureException of ServiceFailureException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?eventStream = fun () -> { eventStream }
+    let error_of_json name json =
+      match name with
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ServiceFailureException" ->
+          `ServiceFailureException (ServiceFailureException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ServiceFailureException e ->
+          `Assoc
+            [("error", (`String "ServiceFailureException"));
+            ("details", (ServiceFailureException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body =
+      ((fun (xs, pipe) -> make ?eventStream:(Some pipe) ())[@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("EventStream",
+           (Option.map x.eventStream
+              ~f:StartSpeechSynthesisStreamEventStream.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let eventStream =
+        (Option.map ~f:StartSpeechSynthesisStreamEventStream.of_xml)
+          (Xml.child xml_arg0 "EventStream") in
+      make ?eventStream ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let eventStream =
+        field_map json__ "EventStream"
+          StartSpeechSynthesisStreamEventStream.of_json in
+      make ?eventStream ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Synthesizes UTF-8 input, plain text, or SSML over a bidirectional streaming connection. Specify synthesis parameters in HTTP/2 headers, send text incrementally as events on the input stream, and receive synthesized audio as it becomes available. This operation serves as a bidirectional counterpart to SynthesizeSpeech: SynthesizeSpeech"]
+module StartSpeechSynthesisStreamInput =
+  struct
+    type nonrec t =
+      {
+      engine: Engine.t
+        [@ocaml.doc
+          "Specifies the engine for Amazon Polly to use when processing input text for speech synthesis. Currently, only the generative engine is supported. If you specify a voice that the selected engine doesn't support, Amazon Polly returns an error."];
+      languageCode: LanguageCode.t option
+        [@ocaml.doc
+          "An optional parameter that sets the language code for the speech synthesis request. Specify this parameter only when using a bilingual voice. If a bilingual voice is used and no language code is specified, Amazon Polly uses the default language of the bilingual voice."];
+      lexiconNames: LexiconNameList.t option
+        [@ocaml.doc
+          "The names of one or more pronunciation lexicons for the service to apply during synthesis. Amazon Polly applies lexicons only when the lexicon language matches the voice language."];
+      outputFormat: OutputFormat.t
+        [@ocaml.doc
+          "The audio format for the synthesized speech. Currently, Amazon Polly does not support JSON speech marks."];
+      sampleRate: SampleRate.t option
+        [@ocaml.doc "The audio frequency, specified in Hz."];
+      voiceId: VoiceId.t
+        [@ocaml.doc
+          "The voice to use in synthesis. To get a list of available voice IDs, use the DescribeVoices operation."];
+      actionStream: StartSpeechSynthesisStreamActionStream.t option
+        [@ocaml.doc
+          "The input event stream that contains text events and stream control events."]}
+    let context_ = "StartSpeechSynthesisStreamInput"
+    let make ?languageCode =
+      fun ?lexiconNames ->
+        fun ?sampleRate ->
+          fun ?actionStream ->
+            fun ~engine ->
+              fun ~outputFormat ->
+                fun ~voiceId ->
+                  fun () ->
+                    {
+                      languageCode;
+                      lexiconNames;
+                      sampleRate;
+                      actionStream;
+                      engine;
+                      outputFormat;
+                      voiceId
+                    }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~engine:(Engine.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "x-amzn-Engine"))
+            ?languageCode:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amzn-LanguageCode")
+                             ~f:LanguageCode.of_string)
+            ?lexiconNames:(Option.map
+                             ((List.Assoc.find ~equal:String.Caseless.equal)
+                                xs "x-amzn-LexiconNames")
+                             ~f:LexiconNameList.of_string)
+            ~outputFormat:(OutputFormat.of_string
+                             ((List.Assoc.find_exn
+                                 ~equal:String.Caseless.equal) xs
+                                "x-amzn-OutputFormat"))
+            ?sampleRate:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "x-amzn-SampleRate") ~f:SampleRate.of_string)
+            ~voiceId:(VoiceId.of_string
+                        ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                           xs "x-amzn-VoiceId")) ?actionStream:(Some pipe) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("x-amzn-Engine", (Some (Engine.to_value x.engine)));
+        ("x-amzn-LanguageCode",
+          (Option.map x.languageCode ~f:LanguageCode.to_value));
+        ("x-amzn-LexiconNames",
+          (Option.map x.lexiconNames ~f:LexiconNameList.to_value));
+        ("x-amzn-OutputFormat",
+          (Some (OutputFormat.to_value x.outputFormat)));
+        ("x-amzn-SampleRate",
+          (Option.map x.sampleRate ~f:SampleRate.to_value));
+        ("x-amzn-VoiceId", (Some (VoiceId.to_value x.voiceId)));
+        ("ActionStream",
+          (Option.map x.actionStream
+             ~f:StartSpeechSynthesisStreamActionStream.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionStream =
+        (Option.map ~f:StartSpeechSynthesisStreamActionStream.of_xml)
+          (Xml.child xml_arg0 "ActionStream") in
+      let voiceId =
+        VoiceId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "x-amzn-VoiceId") in
+      let sampleRate =
+        (Option.map ~f:SampleRate.of_xml)
+          (Xml.child xml_arg0 "x-amzn-SampleRate") in
+      let outputFormat =
+        OutputFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "x-amzn-OutputFormat") in
+      let lexiconNames =
+        (Option.map ~f:LexiconNameList.of_xml)
+          (Xml.child xml_arg0 "x-amzn-LexiconNames") in
+      let languageCode =
+        (Option.map ~f:LanguageCode.of_xml)
+          (Xml.child xml_arg0 "x-amzn-LanguageCode") in
+      let engine =
+        Engine.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "x-amzn-Engine") in
+      make ?actionStream ~voiceId ?sampleRate ~outputFormat ?lexiconNames
+        ?languageCode ~engine ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionStream =
+        field_map json__ "ActionStream"
+          StartSpeechSynthesisStreamActionStream.of_json in
+      let voiceId = field_map_exn json__ "VoiceId" VoiceId.of_json in
+      let sampleRate = field_map json__ "SampleRate" SampleRate.of_json in
+      let outputFormat =
+        field_map_exn json__ "OutputFormat" OutputFormat.of_json in
+      let lexiconNames =
+        field_map json__ "LexiconNames" LexiconNameList.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let engine = field_map_exn json__ "Engine" Engine.of_json in
+      make ?actionStream ~voiceId ?sampleRate ~outputFormat ?lexiconNames
+        ?languageCode ~engine ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Synthesizes UTF-8 input, plain text, or SSML over a bidirectional streaming connection. Specify synthesis parameters in HTTP/2 headers, send text incrementally as events on the input stream, and receive synthesized audio as it becomes available. This operation serves as a bidirectional counterpart to SynthesizeSpeech: SynthesizeSpeech"]
 module PutLexiconOutput =
   struct
     type nonrec t = unit
@@ -2558,9 +3606,9 @@ module PutLexiconInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~content ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let content = field_map_exn json "Content" LexiconContent.of_json in
-      let name = field_map_exn json "Name" LexiconName.of_json in
+    let of_json json__ =
+      let content = field_map_exn json__ "Content" LexiconContent.of_json in
+      let name = field_map_exn json__ "Name" LexiconName.of_json in
       make ~content ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2627,10 +3675,10 @@ module ListSpeechSynthesisTasksOutput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?synthesisTasks ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let synthesisTasks =
-        field_map json "SynthesisTasks" SynthesisTasks.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "SynthesisTasks" SynthesisTasks.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?synthesisTasks ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2666,10 +3714,10 @@ module ListSpeechSynthesisTasksInput =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?status ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" TaskStatus.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" TaskStatus.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?status ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2734,9 +3782,10 @@ module ListLexiconsOutput =
           (Xml.child xml_arg0 "Lexicons") in
       make ?nextToken ?lexicons ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let lexicons = field_map json "Lexicons" LexiconDescriptionList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let lexicons =
+        field_map json__ "Lexicons" LexiconDescriptionList.of_json in
       make ?nextToken ?lexicons ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2758,8 +3807,8 @@ module ListLexiconsInput =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2830,9 +3879,9 @@ module GetSpeechSynthesisTaskOutput =
           (Xml.child xml_arg0 "SynthesisTask") in
       make ?synthesisTask ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let synthesisTask =
-        field_map json "SynthesisTask" SynthesisTask.of_json in
+        field_map json__ "SynthesisTask" SynthesisTask.of_json in
       make ?synthesisTask ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2854,8 +3903,8 @@ module GetSpeechSynthesisTaskInput =
         TaskId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TaskId") in
       make ~taskId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let taskId = field_map_exn json "TaskId" TaskId.of_json in
+    let of_json json__ =
+      let taskId = field_map_exn json__ "TaskId" TaskId.of_json in
       make ~taskId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2922,10 +3971,10 @@ module GetLexiconOutput =
         (Option.map ~f:Lexicon.of_xml) (Xml.child xml_arg0 "Lexicon") in
       make ?lexiconAttributes ?lexicon ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lexiconAttributes =
-        field_map json "LexiconAttributes" LexiconAttributes.of_json in
-      let lexicon = field_map json "Lexicon" Lexicon.of_json in
+        field_map json__ "LexiconAttributes" LexiconAttributes.of_json in
+      let lexicon = field_map json__ "Lexicon" Lexicon.of_json in
       make ?lexiconAttributes ?lexicon ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2946,8 +3995,8 @@ module GetLexiconInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" LexiconName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" LexiconName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3010,9 +4059,9 @@ module DescribeVoicesOutput =
         (Option.map ~f:VoiceList.of_xml) (Xml.child xml_arg0 "Voices") in
       make ?nextToken ?voices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let voices = field_map json "Voices" VoiceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let voices = field_map json__ "Voices" VoiceList.of_json in
       make ?nextToken ?voices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3023,7 +4072,7 @@ module DescribeVoicesInput =
       {
       engine: Engine.t option
         [@ocaml.doc
-          "Specifies the engine (standard or neural) used by Amazon Polly when processing input text for speech synthesis."];
+          "Specifies the engine (standard, neural, long-form or generative) used by Amazon Polly when processing input text for speech synthesis."];
       languageCode: LanguageCode.t option
         [@ocaml.doc
           "The language identification tag (ISO 639 code for the language name-ISO 3166 country code) for filtering the list of voices returned. If you don't specify this optional parameter, all available voices are returned."];
@@ -3068,13 +4117,13 @@ module DescribeVoicesInput =
       make ?nextToken ?includeAdditionalLanguageCodes ?languageCode ?engine
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let includeAdditionalLanguageCodes =
-        field_map json "IncludeAdditionalLanguageCodes"
+        field_map json__ "IncludeAdditionalLanguageCodes"
           IncludeAdditionalLanguageCodes.of_json in
-      let languageCode = field_map json "LanguageCode" LanguageCode.of_json in
-      let engine = field_map json "Engine" Engine.of_json in
+      let languageCode = field_map json__ "LanguageCode" LanguageCode.of_json in
+      let engine = field_map json__ "Engine" Engine.of_json in
       make ?nextToken ?includeAdditionalLanguageCodes ?languageCode ?engine
         ()
     let to_json v = composed_to_json to_value v
@@ -3148,8 +4197,8 @@ module DeleteLexiconInput =
           (Xml.child_exn ~context:context_ xml_arg0 "LexiconName") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" LexiconName.of_json in
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" LexiconName.of_json in
       make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

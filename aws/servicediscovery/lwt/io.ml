@@ -23,10 +23,14 @@ let delete_namespace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteNamespace input
 let delete_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteService input
+let delete_service_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteServiceAttributes input
 let deregister_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterInstance input
 let discover_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DiscoverInstances input
+let discover_instances_revision ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DiscoverInstancesRevision input
 let get_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetInstance input
 let get_instances_health_status ?endpoint_url ?cfg input =
@@ -37,6 +41,8 @@ let get_operation ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetOperation input
 let get_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetService input
+let get_service_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetServiceAttributes input
 let list_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListInstances input
 let list_namespaces ?endpoint_url ?cfg input =
@@ -63,3 +69,5 @@ let update_public_dns_namespace ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePublicDnsNamespace input
 let update_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateService input
+let update_service_attributes ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateServiceAttributes input

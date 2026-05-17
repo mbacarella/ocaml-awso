@@ -6,9 +6,12 @@ type ('i, 'o, 'e) t =
   | CreateStream: (CreateStreamInput.t, unit, unit) t 
   | DecreaseStreamRetentionPeriod: (DecreaseStreamRetentionPeriodInput.t,
   unit, unit) t 
+  | DeleteResourcePolicy: (DeleteResourcePolicyInput.t, unit, unit) t 
   | DeleteStream: (DeleteStreamInput.t, unit, unit) t 
   | DeregisterStreamConsumer: (DeregisterStreamConsumerInput.t, unit, 
   unit) t 
+  | DescribeAccountSettings: (DescribeAccountSettingsInput.t,
+  DescribeAccountSettingsOutput.t, DescribeAccountSettingsOutput.error) t 
   | DescribeLimits: (DescribeLimitsInput.t, DescribeLimitsOutput.t,
   DescribeLimitsOutput.error) t 
   | DescribeStream: (DescribeStreamInput.t, DescribeStreamOutput.t,
@@ -23,6 +26,8 @@ type ('i, 'o, 'e) t =
   EnhancedMonitoringOutput.t, EnhancedMonitoringOutput.error) t 
   | GetRecords: (GetRecordsInput.t, GetRecordsOutput.t,
   GetRecordsOutput.error) t 
+  | GetResourcePolicy: (GetResourcePolicyInput.t, GetResourcePolicyOutput.t,
+  GetResourcePolicyOutput.error) t 
   | GetShardIterator: (GetShardIteratorInput.t, GetShardIteratorOutput.t,
   GetShardIteratorOutput.error) t 
   | IncreaseStreamRetentionPeriod: (IncreaseStreamRetentionPeriodInput.t,
@@ -33,6 +38,8 @@ type ('i, 'o, 'e) t =
   ListStreamConsumersOutput.t, ListStreamConsumersOutput.error) t 
   | ListStreams: (ListStreamsInput.t, ListStreamsOutput.t,
   ListStreamsOutput.error) t 
+  | ListTagsForResource: (ListTagsForResourceInput.t,
+  ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | ListTagsForStream: (ListTagsForStreamInput.t, ListTagsForStreamOutput.t,
   ListTagsForStreamOutput.error) t 
   | MergeShards: (MergeShardsInput.t, unit, unit) t 
@@ -40,6 +47,7 @@ type ('i, 'o, 'e) t =
   
   | PutRecords: (PutRecordsInput.t, PutRecordsOutput.t,
   PutRecordsOutput.error) t 
+  | PutResourcePolicy: (PutResourcePolicyInput.t, unit, unit) t 
   | RegisterStreamConsumer: (RegisterStreamConsumerInput.t,
   RegisterStreamConsumerOutput.t, RegisterStreamConsumerOutput.error) t 
   | RemoveTagsFromStream: (RemoveTagsFromStreamInput.t, unit, unit) t 
@@ -48,16 +56,26 @@ type ('i, 'o, 'e) t =
   | StopStreamEncryption: (StopStreamEncryptionInput.t, unit, unit) t 
   | SubscribeToShard: (SubscribeToShardInput.t, SubscribeToShardOutput.t,
   SubscribeToShardOutput.error) t 
+  | TagResource: (TagResourceInput.t, unit, unit) t 
+  | UntagResource: (UntagResourceInput.t, unit, unit) t 
+  | UpdateAccountSettings: (UpdateAccountSettingsInput.t,
+  UpdateAccountSettingsOutput.t, UpdateAccountSettingsOutput.error) t 
+  | UpdateMaxRecordSize: (UpdateMaxRecordSizeInput.t, unit, unit) t 
   | UpdateShardCount: (UpdateShardCountInput.t, UpdateShardCountOutput.t,
   UpdateShardCountOutput.error) t 
   | UpdateStreamMode: (UpdateStreamModeInput.t, unit, unit) t 
+  | UpdateStreamWarmThroughput: (UpdateStreamWarmThroughputInput.t,
+  UpdateStreamWarmThroughputOutput.t, UpdateStreamWarmThroughputOutput.error)
+  t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddTagsToStream -> `POST
   | CreateStream -> `POST
   | DecreaseStreamRetentionPeriod -> `POST
+  | DeleteResourcePolicy -> `POST
   | DeleteStream -> `POST
   | DeregisterStreamConsumer -> `POST
+  | DescribeAccountSettings -> `POST
   | DescribeLimits -> `POST
   | DescribeStream -> `POST
   | DescribeStreamConsumer -> `POST
@@ -65,31 +83,41 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisableEnhancedMonitoring -> `POST
   | EnableEnhancedMonitoring -> `POST
   | GetRecords -> `POST
+  | GetResourcePolicy -> `POST
   | GetShardIterator -> `POST
   | IncreaseStreamRetentionPeriod -> `POST
   | ListShards -> `POST
   | ListStreamConsumers -> `POST
   | ListStreams -> `POST
+  | ListTagsForResource -> `POST
   | ListTagsForStream -> `POST
   | MergeShards -> `POST
   | PutRecord -> `POST
   | PutRecords -> `POST
+  | PutResourcePolicy -> `POST
   | RegisterStreamConsumer -> `POST
   | RemoveTagsFromStream -> `POST
   | SplitShard -> `POST
   | StartStreamEncryption -> `POST
   | StopStreamEncryption -> `POST
   | SubscribeToShard -> `POST
+  | TagResource -> `POST
+  | UntagResource -> `POST
+  | UpdateAccountSettings -> `POST
+  | UpdateMaxRecordSize -> `POST
   | UpdateShardCount -> `POST
   | UpdateStreamMode -> `POST
+  | UpdateStreamWarmThroughput -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AddTagsToStream -> (Format.kasprintf Uri.of_string) "/"
       | CreateStream -> (Format.kasprintf Uri.of_string) "/"
       | DecreaseStreamRetentionPeriod -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStream -> (Format.kasprintf Uri.of_string) "/"
       | DeregisterStreamConsumer -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeAccountSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeLimits -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStream -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStreamConsumer -> (Format.kasprintf Uri.of_string) "/"
@@ -97,23 +125,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisableEnhancedMonitoring -> (Format.kasprintf Uri.of_string) "/"
       | EnableEnhancedMonitoring -> (Format.kasprintf Uri.of_string) "/"
       | GetRecords -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | GetShardIterator -> (Format.kasprintf Uri.of_string) "/"
       | IncreaseStreamRetentionPeriod -> (Format.kasprintf Uri.of_string) "/"
       | ListShards -> (Format.kasprintf Uri.of_string) "/"
       | ListStreamConsumers -> (Format.kasprintf Uri.of_string) "/"
       | ListStreams -> (Format.kasprintf Uri.of_string) "/"
+      | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForStream -> (Format.kasprintf Uri.of_string) "/"
       | MergeShards -> (Format.kasprintf Uri.of_string) "/"
       | PutRecord -> (Format.kasprintf Uri.of_string) "/"
       | PutRecords -> (Format.kasprintf Uri.of_string) "/"
+      | PutResourcePolicy -> (Format.kasprintf Uri.of_string) "/"
       | RegisterStreamConsumer -> (Format.kasprintf Uri.of_string) "/"
       | RemoveTagsFromStream -> (Format.kasprintf Uri.of_string) "/"
       | SplitShard -> (Format.kasprintf Uri.of_string) "/"
       | StartStreamEncryption -> (Format.kasprintf Uri.of_string) "/"
       | StopStreamEncryption -> (Format.kasprintf Uri.of_string) "/"
       | SubscribeToShard -> (Format.kasprintf Uri.of_string) "/"
+      | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAccountSettings -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMaxRecordSize -> (Format.kasprintf Uri.of_string) "/"
       | UpdateShardCount -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateStreamMode -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateStreamMode -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateStreamWarmThroughput -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -141,6 +177,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.DecreaseStreamRetentionPeriod")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteResourcePolicy ->
+      let json = DeleteResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.DeleteResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteStream ->
       let json = DeleteStreamInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -156,6 +200,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.DeregisterStreamConsumer")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeAccountSettings ->
+      let json = DescribeAccountSettingsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.DescribeAccountSettings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeLimits ->
       let json = DescribeLimitsInput.to_json req in
@@ -213,6 +265,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.GetRecords")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourcePolicy ->
+      let json = GetResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.GetResourcePolicy")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetShardIterator ->
       let json = GetShardIteratorInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -253,6 +313,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.ListStreams")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListTagsForResource ->
+      let json = ListTagsForResourceInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.ListTagsForResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTagsForStream ->
       let json = ListTagsForStreamInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -284,6 +352,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.PutRecords")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutResourcePolicy ->
+      let json = PutResourcePolicyInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.PutResourcePolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | RegisterStreamConsumer ->
       let json = RegisterStreamConsumerInput.to_json req in
@@ -333,6 +409,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.SubscribeToShard")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TagResource ->
+      let json = TagResourceInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.TagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UntagResource ->
+      let json = UntagResourceInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAccountSettings ->
+      let json = UpdateAccountSettingsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.UpdateAccountSettings")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMaxRecordSize ->
+      let json = UpdateMaxRecordSizeInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.UpdateMaxRecordSize")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateShardCount ->
       let json = UpdateShardCountInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -348,6 +456,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "Kinesis_20131202.UpdateStreamMode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateStreamWarmThroughput ->
+      let json = UpdateStreamWarmThroughputInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "Kinesis_20131202.UpdateStreamWarmThroughput")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -378,10 +494,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success then Ok () else Error (parse_aws_error None)
   | DecreaseStreamRetentionPeriod ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DeleteResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | DeleteStream ->
       if is_success then Ok () else Error (parse_aws_error None)
   | DeregisterStreamConsumer ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | DescribeAccountSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeAccountSettingsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeAccountSettingsOutput.error_of_json))
   | DescribeLimits ->
       if is_success
       then
@@ -430,6 +556,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetRecordsOutput.of_json json)
       else Error (parse_aws_error (Some GetRecordsOutput.error_of_json))
+  | GetResourcePolicy ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourcePolicyOutput.of_json json)
+      else
+        Error (parse_aws_error (Some GetResourcePolicyOutput.error_of_json))
   | GetShardIterator ->
       if is_success
       then
@@ -459,6 +592,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListStreamsOutput.of_json json)
       else Error (parse_aws_error (Some ListStreamsOutput.error_of_json))
+  | ListTagsForResource ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListTagsForResourceOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListTagsForResourceOutput.error_of_json))
   | ListTagsForStream ->
       if is_success
       then
@@ -479,6 +620,8 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (PutRecordsOutput.of_json json)
       else Error (parse_aws_error (Some PutRecordsOutput.error_of_json))
+  | PutResourcePolicy ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | RegisterStreamConsumer ->
       if is_success
       then
@@ -501,6 +644,19 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (SubscribeToShardOutput.of_json json)
       else
         Error (parse_aws_error (Some SubscribeToShardOutput.error_of_json))
+  | TagResource -> if is_success then Ok () else Error (parse_aws_error None)
+  | UntagResource ->
+      if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateAccountSettings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAccountSettingsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateAccountSettingsOutput.error_of_json))
+  | UpdateMaxRecordSize ->
+      if is_success then Ok () else Error (parse_aws_error None)
   | UpdateShardCount ->
       if is_success
       then
@@ -510,3 +666,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error (parse_aws_error (Some UpdateShardCountOutput.error_of_json))
   | UpdateStreamMode ->
       if is_success then Ok () else Error (parse_aws_error None)
+  | UpdateStreamWarmThroughput ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateStreamWarmThroughputOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateStreamWarmThroughputOutput.error_of_json))

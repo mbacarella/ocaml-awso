@@ -40,6 +40,8 @@ let create_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFuotaTask input
 let create_multicast_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateMulticastGroup input
+let create_network_analyzer_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateNetworkAnalyzerConfiguration input
 let create_service_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateServiceProfile input
 let create_wireless_device ?endpoint_url ?cfg input =
@@ -58,18 +60,24 @@ let delete_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFuotaTask input
 let delete_multicast_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteMulticastGroup input
+let delete_network_analyzer_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteNetworkAnalyzerConfiguration input
 let delete_queued_messages ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteQueuedMessages input
 let delete_service_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteServiceProfile input
 let delete_wireless_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWirelessDevice input
+let delete_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteWirelessDeviceImportTask input
 let delete_wireless_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWirelessGateway input
 let delete_wireless_gateway_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWirelessGatewayTask input
 let delete_wireless_gateway_task_definition ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteWirelessGatewayTaskDefinition input
+let deregister_wireless_device ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeregisterWirelessDevice input
 let disassociate_aws_account_from_partner_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateAwsAccountFromPartnerAccount
     input
@@ -95,10 +103,17 @@ let get_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDestination input
 let get_device_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDeviceProfile input
+let get_event_configuration_by_resource_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEventConfigurationByResourceTypes
+    input
 let get_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFuotaTask input
 let get_log_levels_by_resource_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetLogLevelsByResourceTypes input
+let get_metric_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMetricConfiguration input
+let get_metrics ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetMetrics input
 let get_multicast_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMulticastGroup input
 let get_multicast_group_session ?endpoint_url ?cfg input =
@@ -107,16 +122,26 @@ let get_network_analyzer_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetNetworkAnalyzerConfiguration input
 let get_partner_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetPartnerAccount input
+let get_position ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPosition input
+let get_position_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPositionConfiguration input
+let get_position_estimate ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetPositionEstimate input
 let get_resource_event_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceEventConfiguration input
 let get_resource_log_level ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetResourceLogLevel input
+let get_resource_position ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetResourcePosition input
 let get_service_endpoint ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceEndpoint input
 let get_service_profile ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetServiceProfile input
 let get_wireless_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWirelessDevice input
+let get_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetWirelessDeviceImportTask input
 let get_wireless_device_statistics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetWirelessDeviceStatistics input
 let get_wireless_gateway ?endpoint_url ?cfg input =
@@ -136,26 +161,39 @@ let list_destinations ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDestinations input
 let list_device_profiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDeviceProfiles input
+let list_devices_for_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListDevicesForWirelessDeviceImportTask
+    input
+let list_event_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListEventConfigurations input
 let list_fuota_tasks ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFuotaTasks input
 let list_multicast_groups ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMulticastGroups input
 let list_multicast_groups_by_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListMulticastGroupsByFuotaTask input
+let list_network_analyzer_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListNetworkAnalyzerConfigurations input
 let list_partner_accounts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListPartnerAccounts input
+let list_position_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListPositionConfigurations input
 let list_queued_messages ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListQueuedMessages input
 let list_service_profiles ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListServiceProfiles input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let list_wireless_device_import_tasks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListWirelessDeviceImportTasks input
 let list_wireless_devices ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWirelessDevices input
 let list_wireless_gateway_task_definitions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWirelessGatewayTaskDefinitions input
 let list_wireless_gateways ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListWirelessGateways input
+let put_position_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutPositionConfiguration input
 let put_resource_log_level ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutResourceLogLevel input
 let reset_all_resource_log_levels ?endpoint_url ?cfg input =
@@ -178,6 +216,10 @@ let start_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartFuotaTask input
 let start_multicast_group_session ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartMulticastGroupSession input
+let start_single_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSingleWirelessDeviceImportTask input
+let start_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartWirelessDeviceImportTask input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let test_wireless_device ?endpoint_url ?cfg input =
@@ -186,19 +228,30 @@ let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
 let update_destination ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDestination input
+let update_event_configuration_by_resource_types ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEventConfigurationByResourceTypes
+    input
 let update_fuota_task ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFuotaTask input
 let update_log_levels_by_resource_types ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLogLevelsByResourceTypes input
+let update_metric_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateMetricConfiguration input
 let update_multicast_group ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateMulticastGroup input
 let update_network_analyzer_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateNetworkAnalyzerConfiguration input
 let update_partner_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdatePartnerAccount input
+let update_position ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdatePosition input
 let update_resource_event_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateResourceEventConfiguration input
+let update_resource_position ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateResourcePosition input
 let update_wireless_device ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWirelessDevice input
+let update_wireless_device_import_task ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateWirelessDeviceImportTask input
 let update_wireless_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateWirelessGateway input

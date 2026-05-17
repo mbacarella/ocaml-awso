@@ -51,6 +51,7 @@ let authenticate ~user_pool_id ~client_id ~username ~password =
       ; challengeName
       ; authenticationResult = _
       ; session = _
+      ; _
       } -> (
     let challengeName =
       Option.value_exn

@@ -97,10 +97,10 @@ module Locale =
           (Xml.child_exn ~context:context_ xml_arg0 "Country") in
       make ?subdivision ~country ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subdivision =
-        field_map json "Subdivision" CountryParameters.of_json in
-      let country = field_map_exn json "Country" CountryParameters.of_json in
+        field_map json__ "Subdivision" CountryParameters.of_json in
+      let country = field_map_exn json__ "Country" CountryParameters.of_json in
       make ?subdivision ~country ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -109,6 +109,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -223,6 +226,9 @@ module IntegerList =
   struct
     type nonrec t = Integer.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Integer.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -247,6 +253,9 @@ module LocaleList =
   struct
     type nonrec t = Locale.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Locale.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -288,9 +297,10 @@ module ParameterMapEntry =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" StringList.of_json in
-      let key = field_map json "Key" String_.of_json in make ?values ?key ()
+    let of_json json__ =
+      let values = field_map json__ "Values" StringList.of_json in
+      let key = field_map json__ "Key" String_.of_json in
+      make ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This data structure is the data type for the AnswerKey parameter of the ScoreMyKnownAnswers/2011-09-01 Review Policy."]
@@ -365,16 +375,17 @@ module QualificationRequirement =
       make ?actionsGuarded ?requiredToPreview ?localeValues ?integerValues
         ~comparator ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let actionsGuarded =
-        field_map json "ActionsGuarded" HITAccessActions.of_json in
+        field_map json__ "ActionsGuarded" HITAccessActions.of_json in
       let requiredToPreview =
-        field_map json "RequiredToPreview" Boolean.of_json in
-      let localeValues = field_map json "LocaleValues" LocaleList.of_json in
-      let integerValues = field_map json "IntegerValues" IntegerList.of_json in
-      let comparator = field_map_exn json "Comparator" Comparator.of_json in
+        field_map json__ "RequiredToPreview" Boolean.of_json in
+      let localeValues = field_map json__ "LocaleValues" LocaleList.of_json in
+      let integerValues =
+        field_map json__ "IntegerValues" IntegerList.of_json in
+      let comparator = field_map_exn json__ "Comparator" Comparator.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" String_.of_json in
+        field_map_exn json__ "QualificationTypeId" String_.of_json in
       make ?actionsGuarded ?requiredToPreview ?localeValues ?integerValues
         ~comparator ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
@@ -384,6 +395,9 @@ module ParameterMapEntryList =
   struct
     type nonrec t = ParameterMapEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterMapEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -696,6 +710,9 @@ module QualificationRequirementList =
   struct
     type nonrec t = QualificationRequirement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QualificationRequirement.to_value)) |>
         (fun x -> `List x)
@@ -746,11 +763,11 @@ module PolicyParameter =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?mapEntries ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let mapEntries =
-        field_map json "MapEntries" ParameterMapEntryList.of_json in
-      let values = field_map json "Values" StringList.of_json in
-      let key = field_map json "Key" String_.of_json in
+        field_map json__ "MapEntries" ParameterMapEntryList.of_json in
+      let values = field_map json__ "Values" StringList.of_json in
+      let key = field_map json__ "Key" String_.of_json in
       make ?mapEntries ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Name of the parameter from the Review policy."]
@@ -828,15 +845,15 @@ module ReviewActionDetail =
       make ?errorCode ?result ?completeTime ?status ?targetType ?targetId
         ?actionName ?actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorCode = field_map json "ErrorCode" String_.of_json in
-      let result = field_map json "Result" String_.of_json in
-      let completeTime = field_map json "CompleteTime" Timestamp.of_json in
-      let status = field_map json "Status" ReviewActionStatus.of_json in
-      let targetType = field_map json "TargetType" String_.of_json in
-      let targetId = field_map json "TargetId" EntityId.of_json in
-      let actionName = field_map json "ActionName" String_.of_json in
-      let actionId = field_map json "ActionId" EntityId.of_json in
+    let of_json json__ =
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      let result = field_map json__ "Result" String_.of_json in
+      let completeTime = field_map json__ "CompleteTime" Timestamp.of_json in
+      let status = field_map json__ "Status" ReviewActionStatus.of_json in
+      let targetType = field_map json__ "TargetType" String_.of_json in
+      let targetId = field_map json__ "TargetId" EntityId.of_json in
+      let actionName = field_map json__ "ActionName" String_.of_json in
+      let actionId = field_map json__ "ActionId" EntityId.of_json in
       make ?errorCode ?result ?completeTime ?status ?targetType ?targetId
         ?actionName ?actionId ()
     let to_json v = composed_to_json to_value v
@@ -893,13 +910,13 @@ module ReviewResultDetail =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "ActionId") in
       make ?value ?key ?questionId ?subjectType ?subjectId ?actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in
-      let questionId = field_map json "QuestionId" EntityId.of_json in
-      let subjectType = field_map json "SubjectType" String_.of_json in
-      let subjectId = field_map json "SubjectId" EntityId.of_json in
-      let actionId = field_map json "ActionId" EntityId.of_json in
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in
+      let questionId = field_map json__ "QuestionId" EntityId.of_json in
+      let subjectType = field_map json__ "SubjectType" String_.of_json in
+      let subjectId = field_map json__ "SubjectId" EntityId.of_json in
+      let actionId = field_map json__ "ActionId" EntityId.of_json in
       make ?value ?key ?questionId ?subjectType ?subjectId ?actionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -989,6 +1006,9 @@ module EventTypeList =
   struct
     type nonrec t = EventType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1076,12 +1096,12 @@ module NotifyWorkersFailureStatus =
       make ?workerId ?notifyWorkersFailureMessage ?notifyWorkersFailureCode
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
       let notifyWorkersFailureMessage =
-        field_map json "NotifyWorkersFailureMessage" String_.of_json in
+        field_map json__ "NotifyWorkersFailureMessage" String_.of_json in
       let notifyWorkersFailureCode =
-        field_map json "NotifyWorkersFailureCode"
+        field_map json__ "NotifyWorkersFailureCode"
           NotifyWorkersFailureCode.of_json in
       make ?workerId ?notifyWorkersFailureMessage ?notifyWorkersFailureCode
         ()
@@ -1150,14 +1170,14 @@ module Qualification =
       make ?status ?localeValue ?integerValue ?grantTime ?workerId
         ?qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" QualificationStatus.of_json in
-      let localeValue = field_map json "LocaleValue" Locale.of_json in
-      let integerValue = field_map json "IntegerValue" Integer.of_json in
-      let grantTime = field_map json "GrantTime" Timestamp.of_json in
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" QualificationStatus.of_json in
+      let localeValue = field_map json__ "LocaleValue" Locale.of_json in
+      let integerValue = field_map json__ "IntegerValue" Integer.of_json in
+      let grantTime = field_map json__ "GrantTime" Timestamp.of_json in
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
       let qualificationTypeId =
-        field_map json "QualificationTypeId" EntityId.of_json in
+        field_map json__ "QualificationTypeId" EntityId.of_json in
       make ?status ?localeValue ?integerValue ?grantTime ?workerId
         ?qualificationTypeId ()
     let to_json v = composed_to_json to_value v
@@ -1185,9 +1205,9 @@ module WorkerBlock =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "WorkerId") in
       make ?reason ?workerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
       make ?reason ?workerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1385,37 +1405,37 @@ module HIT =
         ?reward ?maxAssignments ?hITStatus ?keywords ?question ?description
         ?title ?creationTime ?hITLayoutId ?hITGroupId ?hITTypeId ?hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let numberOfAssignmentsCompleted =
-        field_map json "NumberOfAssignmentsCompleted" Integer.of_json in
+        field_map json__ "NumberOfAssignmentsCompleted" Integer.of_json in
       let numberOfAssignmentsAvailable =
-        field_map json "NumberOfAssignmentsAvailable" Integer.of_json in
+        field_map json__ "NumberOfAssignmentsAvailable" Integer.of_json in
       let numberOfAssignmentsPending =
-        field_map json "NumberOfAssignmentsPending" Integer.of_json in
+        field_map json__ "NumberOfAssignmentsPending" Integer.of_json in
       let hITReviewStatus =
-        field_map json "HITReviewStatus" HITReviewStatus.of_json in
+        field_map json__ "HITReviewStatus" HITReviewStatus.of_json in
       let qualificationRequirements =
-        field_map json "QualificationRequirements"
+        field_map json__ "QualificationRequirements"
           QualificationRequirementList.of_json in
       let requesterAnnotation =
-        field_map json "RequesterAnnotation" String_.of_json in
+        field_map json__ "RequesterAnnotation" String_.of_json in
       let assignmentDurationInSeconds =
-        field_map json "AssignmentDurationInSeconds" Long.of_json in
-      let expiration = field_map json "Expiration" Timestamp.of_json in
+        field_map json__ "AssignmentDurationInSeconds" Long.of_json in
+      let expiration = field_map json__ "Expiration" Timestamp.of_json in
       let autoApprovalDelayInSeconds =
-        field_map json "AutoApprovalDelayInSeconds" Long.of_json in
-      let reward = field_map json "Reward" CurrencyAmount.of_json in
-      let maxAssignments = field_map json "MaxAssignments" Integer.of_json in
-      let hITStatus = field_map json "HITStatus" HITStatus.of_json in
-      let keywords = field_map json "Keywords" String_.of_json in
-      let question = field_map json "Question" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let title = field_map json "Title" String_.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
-      let hITLayoutId = field_map json "HITLayoutId" EntityId.of_json in
-      let hITGroupId = field_map json "HITGroupId" EntityId.of_json in
-      let hITTypeId = field_map json "HITTypeId" EntityId.of_json in
-      let hITId = field_map json "HITId" EntityId.of_json in
+        field_map json__ "AutoApprovalDelayInSeconds" Long.of_json in
+      let reward = field_map json__ "Reward" CurrencyAmount.of_json in
+      let maxAssignments = field_map json__ "MaxAssignments" Integer.of_json in
+      let hITStatus = field_map json__ "HITStatus" HITStatus.of_json in
+      let keywords = field_map json__ "Keywords" String_.of_json in
+      let question = field_map json__ "Question" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let title = field_map json__ "Title" String_.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
+      let hITLayoutId = field_map json__ "HITLayoutId" EntityId.of_json in
+      let hITGroupId = field_map json__ "HITGroupId" EntityId.of_json in
+      let hITTypeId = field_map json__ "HITTypeId" EntityId.of_json in
+      let hITId = field_map json__ "HITId" EntityId.of_json in
       make ?numberOfAssignmentsCompleted ?numberOfAssignmentsAvailable
         ?numberOfAssignmentsPending ?hITReviewStatus
         ?qualificationRequirements ?requesterAnnotation
@@ -1429,6 +1449,9 @@ module PolicyParameterList =
   struct
     type nonrec t = PolicyParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PolicyParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1454,6 +1477,9 @@ module ReviewActionDetailList =
   struct
     type nonrec t = ReviewActionDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReviewActionDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1479,6 +1505,9 @@ module ReviewResultDetailList =
   struct
     type nonrec t = ReviewResultDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReviewResultDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1652,26 +1681,26 @@ module QualificationType =
         ?answerKey ?testDurationInSeconds ?test ?qualificationTypeStatus
         ?keywords ?description ?name ?creationTime ?qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoGrantedValue =
-        field_map json "AutoGrantedValue" Integer.of_json in
-      let autoGranted = field_map json "AutoGranted" Boolean.of_json in
-      let isRequestable = field_map json "IsRequestable" Boolean.of_json in
+        field_map json__ "AutoGrantedValue" Integer.of_json in
+      let autoGranted = field_map json__ "AutoGranted" Boolean.of_json in
+      let isRequestable = field_map json__ "IsRequestable" Boolean.of_json in
       let retryDelayInSeconds =
-        field_map json "RetryDelayInSeconds" Long.of_json in
-      let answerKey = field_map json "AnswerKey" String_.of_json in
+        field_map json__ "RetryDelayInSeconds" Long.of_json in
+      let answerKey = field_map json__ "AnswerKey" String_.of_json in
       let testDurationInSeconds =
-        field_map json "TestDurationInSeconds" Long.of_json in
-      let test = field_map json "Test" String_.of_json in
+        field_map json__ "TestDurationInSeconds" Long.of_json in
+      let test = field_map json__ "Test" String_.of_json in
       let qualificationTypeStatus =
-        field_map json "QualificationTypeStatus"
+        field_map json__ "QualificationTypeStatus"
           QualificationTypeStatus.of_json in
-      let keywords = field_map json "Keywords" String_.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let creationTime = field_map json "CreationTime" Timestamp.of_json in
+      let keywords = field_map json__ "Keywords" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let creationTime = field_map json__ "CreationTime" Timestamp.of_json in
       let qualificationTypeId =
-        field_map json "QualificationTypeId" EntityId.of_json in
+        field_map json__ "QualificationTypeId" EntityId.of_json in
       make ?autoGrantedValue ?autoGranted ?isRequestable ?retryDelayInSeconds
         ?answerKey ?testDurationInSeconds ?test ?qualificationTypeStatus
         ?keywords ?description ?name ?creationTime ?qualificationTypeId ()
@@ -1742,15 +1771,15 @@ module QualificationRequest =
       make ?submitTime ?answer ?test ?workerId ?qualificationTypeId
         ?qualificationRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let answer = field_map json "Answer" String_.of_json in
-      let test = field_map json "Test" String_.of_json in
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let answer = field_map json__ "Answer" String_.of_json in
+      let test = field_map json__ "Test" String_.of_json in
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
       let qualificationTypeId =
-        field_map json "QualificationTypeId" EntityId.of_json in
+        field_map json__ "QualificationTypeId" EntityId.of_json in
       let qualificationRequestId =
-        field_map json "QualificationRequestId" String_.of_json in
+        field_map json__ "QualificationRequestId" String_.of_json in
       make ?submitTime ?answer ?test ?workerId ?qualificationTypeId
         ?qualificationRequestId ()
     let to_json v = composed_to_json to_value v
@@ -1801,12 +1830,12 @@ module BonusPayment =
         (Option.map ~f:CustomerId.of_xml) (Xml.child xml_arg0 "WorkerId") in
       make ?grantTime ?reason ?assignmentId ?bonusAmount ?workerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let grantTime = field_map json "GrantTime" Timestamp.of_json in
-      let reason = field_map json "Reason" String_.of_json in
-      let assignmentId = field_map json "AssignmentId" EntityId.of_json in
-      let bonusAmount = field_map json "BonusAmount" CurrencyAmount.of_json in
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let grantTime = field_map json__ "GrantTime" Timestamp.of_json in
+      let reason = field_map json__ "Reason" String_.of_json in
+      let assignmentId = field_map json__ "AssignmentId" EntityId.of_json in
+      let bonusAmount = field_map json__ "BonusAmount" CurrencyAmount.of_json in
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
       make ?grantTime ?reason ?assignmentId ?bonusAmount ?workerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object representing a Bonus payment paid to a Worker."]
@@ -1921,22 +1950,22 @@ module Assignment =
         ?submitTime ?acceptTime ?autoApprovalTime ?assignmentStatus ?hITId
         ?workerId ?assignmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requesterFeedback =
-        field_map json "RequesterFeedback" String_.of_json in
-      let answer = field_map json "Answer" String_.of_json in
-      let deadline = field_map json "Deadline" Timestamp.of_json in
-      let rejectionTime = field_map json "RejectionTime" Timestamp.of_json in
-      let approvalTime = field_map json "ApprovalTime" Timestamp.of_json in
-      let submitTime = field_map json "SubmitTime" Timestamp.of_json in
-      let acceptTime = field_map json "AcceptTime" Timestamp.of_json in
+        field_map json__ "RequesterFeedback" String_.of_json in
+      let answer = field_map json__ "Answer" String_.of_json in
+      let deadline = field_map json__ "Deadline" Timestamp.of_json in
+      let rejectionTime = field_map json__ "RejectionTime" Timestamp.of_json in
+      let approvalTime = field_map json__ "ApprovalTime" Timestamp.of_json in
+      let submitTime = field_map json__ "SubmitTime" Timestamp.of_json in
+      let acceptTime = field_map json__ "AcceptTime" Timestamp.of_json in
       let autoApprovalTime =
-        field_map json "AutoApprovalTime" Timestamp.of_json in
+        field_map json__ "AutoApprovalTime" Timestamp.of_json in
       let assignmentStatus =
-        field_map json "AssignmentStatus" AssignmentStatus.of_json in
-      let hITId = field_map json "HITId" EntityId.of_json in
-      let workerId = field_map json "WorkerId" CustomerId.of_json in
-      let assignmentId = field_map json "AssignmentId" EntityId.of_json in
+        field_map json__ "AssignmentStatus" AssignmentStatus.of_json in
+      let hITId = field_map json__ "HITId" EntityId.of_json in
+      let workerId = field_map json__ "WorkerId" CustomerId.of_json in
+      let assignmentId = field_map json__ "AssignmentId" EntityId.of_json in
       make ?requesterFeedback ?answer ?deadline ?rejectionTime ?approvalTime
         ?submitTime ?acceptTime ?autoApprovalTime ?assignmentStatus ?hITId
         ?workerId ?assignmentId ()
@@ -1966,9 +1995,9 @@ module HITLayoutParameter =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1996,10 +2025,10 @@ module RequestError =
           (Xml.child xml_arg0 "Message") in
       make ?turkErrorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let turkErrorCode =
-        field_map json "TurkErrorCode" TurkErrorCode.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+        field_map json__ "TurkErrorCode" TurkErrorCode.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?turkErrorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Your request is invalid."]
@@ -2026,10 +2055,10 @@ module ServiceFault =
           (Xml.child xml_arg0 "Message") in
       make ?turkErrorCode ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let turkErrorCode =
-        field_map json "TurkErrorCode" TurkErrorCode.of_json in
-      let message = field_map json "Message" ExceptionMessage.of_json in
+        field_map json__ "TurkErrorCode" TurkErrorCode.of_json in
+      let message = field_map json__ "Message" ExceptionMessage.of_json in
       make ?turkErrorCode ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2077,12 +2106,13 @@ module NotificationSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "Destination") in
       make ~eventTypes ~version ~transport ~destination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let eventTypes = field_map_exn json "EventTypes" EventTypeList.of_json in
-      let version = field_map_exn json "Version" String_.of_json in
+    let of_json json__ =
+      let eventTypes =
+        field_map_exn json__ "EventTypes" EventTypeList.of_json in
+      let version = field_map_exn json__ "Version" String_.of_json in
       let transport =
-        field_map_exn json "Transport" NotificationTransport.of_json in
-      let destination = field_map_exn json "Destination" String_.of_json in
+        field_map_exn json__ "Transport" NotificationTransport.of_json in
+      let destination = field_map_exn json__ "Destination" String_.of_json in
       make ~eventTypes ~version ~transport ~destination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2109,6 +2139,9 @@ module NotifyWorkersFailureStatusList =
   struct
     type nonrec t = NotifyWorkersFailureStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotifyWorkersFailureStatus.to_value)) |>
         (fun x -> `List x)
@@ -2135,6 +2168,9 @@ module CustomerIdList =
   struct
     type nonrec t = CustomerId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CustomerId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2179,6 +2215,9 @@ module QualificationList =
   struct
     type nonrec t = Qualification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Qualification.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2221,6 +2260,9 @@ module WorkerBlockList =
   struct
     type nonrec t = WorkerBlock.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:WorkerBlock.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2245,6 +2287,9 @@ module HITList =
   struct
     type nonrec t = HIT.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HIT.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2317,10 +2362,10 @@ module ReviewPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "PolicyName") in
       make ?parameters ~policyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters" PolicyParameterList.of_json in
-      let policyName = field_map_exn json "PolicyName" String_.of_json in
+        field_map json__ "Parameters" PolicyParameterList.of_json in
+      let policyName = field_map_exn json__ "PolicyName" String_.of_json in
       make ?parameters ~policyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2353,11 +2398,11 @@ module ReviewReport =
           (Xml.child xml_arg0 "ReviewResults") in
       make ?reviewActions ?reviewResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reviewActions =
-        field_map json "ReviewActions" ReviewActionDetailList.of_json in
+        field_map json__ "ReviewActions" ReviewActionDetailList.of_json in
       let reviewResults =
-        field_map json "ReviewResults" ReviewResultDetailList.of_json in
+        field_map json__ "ReviewResults" ReviewResultDetailList.of_json in
       make ?reviewActions ?reviewResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2366,6 +2411,9 @@ module ReviewPolicyLevelList =
   struct
     type nonrec t = ReviewPolicyLevel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReviewPolicyLevel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2391,6 +2439,9 @@ module QualificationTypeList =
   struct
     type nonrec t = QualificationType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QualificationType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2416,6 +2467,9 @@ module QualificationRequestList =
   struct
     type nonrec t = QualificationRequest.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:QualificationRequest.to_value)) |>
         (fun x -> `List x)
@@ -2442,6 +2496,9 @@ module BonusPaymentList =
   struct
     type nonrec t = BonusPayment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BonusPayment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2466,6 +2523,9 @@ module AssignmentList =
   struct
     type nonrec t = Assignment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Assignment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2490,6 +2550,9 @@ module AssignmentStatusList =
   struct
     type nonrec t = AssignmentStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssignmentStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2515,6 +2578,9 @@ module HITLayoutParameterList =
   struct
     type nonrec t = HITLayoutParameter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HITLayoutParameter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2585,9 +2651,9 @@ module UpdateQualificationTypeResponse =
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationType =
-        field_map json "QualificationType" QualificationType.of_json in
+        field_map json__ "QualificationType" QualificationType.of_json in
       make ?qualificationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2688,22 +2754,22 @@ module UpdateQualificationTypeRequest =
         ?testDurationInSeconds ?answerKey ?test ?qualificationTypeStatus
         ?description ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoGrantedValue =
-        field_map json "AutoGrantedValue" Integer.of_json in
-      let autoGranted = field_map json "AutoGranted" Boolean.of_json in
+        field_map json__ "AutoGrantedValue" Integer.of_json in
+      let autoGranted = field_map json__ "AutoGranted" Boolean.of_json in
       let retryDelayInSeconds =
-        field_map json "RetryDelayInSeconds" Long.of_json in
+        field_map json__ "RetryDelayInSeconds" Long.of_json in
       let testDurationInSeconds =
-        field_map json "TestDurationInSeconds" Long.of_json in
-      let answerKey = field_map json "AnswerKey" String_.of_json in
-      let test = field_map json "Test" String_.of_json in
+        field_map json__ "TestDurationInSeconds" Long.of_json in
+      let answerKey = field_map json__ "AnswerKey" String_.of_json in
+      let test = field_map json__ "Test" String_.of_json in
       let qualificationTypeStatus =
-        field_map json "QualificationTypeStatus"
+        field_map json__ "QualificationTypeStatus"
           QualificationTypeStatus.of_json in
-      let description = field_map json "Description" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ?autoGrantedValue ?autoGranted ?retryDelayInSeconds
         ?testDurationInSeconds ?answerKey ?test ?qualificationTypeStatus
         ?description ~qualificationTypeId ()
@@ -2788,11 +2854,11 @@ module UpdateNotificationSettingsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "HITTypeId") in
       make ?active ?notification ~hITTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let active = field_map json "Active" Boolean.of_json in
+    let of_json json__ =
+      let active = field_map json__ "Active" Boolean.of_json in
       let notification =
-        field_map json "Notification" NotificationSpecification.of_json in
-      let hITTypeId = field_map_exn json "HITTypeId" EntityId.of_json in
+        field_map json__ "Notification" NotificationSpecification.of_json in
+      let hITTypeId = field_map_exn json__ "HITTypeId" EntityId.of_json in
       make ?active ?notification ~hITTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2862,9 +2928,9 @@ module UpdateHITTypeOfHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITTypeId ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITTypeId = field_map_exn json "HITTypeId" EntityId.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let hITTypeId = field_map_exn json__ "HITTypeId" EntityId.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ~hITTypeId ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2935,9 +3001,9 @@ module UpdateHITReviewStatusRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?revert ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revert = field_map json "Revert" Boolean.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let revert = field_map json__ "Revert" Boolean.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ?revert ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3008,9 +3074,9 @@ module UpdateExpirationForHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~expireAt ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expireAt = field_map_exn json "ExpireAt" Timestamp.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let expireAt = field_map_exn json__ "ExpireAt" Timestamp.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ~expireAt ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3087,11 +3153,11 @@ module SendTestEventNotificationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Notification") in
       make ~testEventType ~notification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let testEventType =
-        field_map_exn json "TestEventType" EventType.of_json in
+        field_map_exn json__ "TestEventType" EventType.of_json in
       let notification =
-        field_map_exn json "Notification" NotificationSpecification.of_json in
+        field_map_exn json__ "Notification" NotificationSpecification.of_json in
       make ~testEventType ~notification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3198,14 +3264,14 @@ module SendBonusRequest =
       make ?uniqueRequestToken ~reason ~assignmentId ~bonusAmount ~workerId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uniqueRequestToken =
-        field_map json "UniqueRequestToken" IdempotencyToken.of_json in
-      let reason = field_map_exn json "Reason" String_.of_json in
-      let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
+        field_map json__ "UniqueRequestToken" IdempotencyToken.of_json in
+      let reason = field_map_exn json__ "Reason" String_.of_json in
+      let assignmentId = field_map_exn json__ "AssignmentId" EntityId.of_json in
       let bonusAmount =
-        field_map_exn json "BonusAmount" CurrencyAmount.of_json in
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+        field_map_exn json__ "BonusAmount" CurrencyAmount.of_json in
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       make ?uniqueRequestToken ~reason ~assignmentId ~bonusAmount ~workerId
         ()
     let to_json v = composed_to_json to_value v
@@ -3283,10 +3349,10 @@ module RejectQualificationRequestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationRequestId") in
       make ?reason ~qualificationRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
       let qualificationRequestId =
-        field_map_exn json "QualificationRequestId" String_.of_json in
+        field_map_exn json__ "QualificationRequestId" String_.of_json in
       make ?reason ~qualificationRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3362,10 +3428,10 @@ module RejectAssignmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~requesterFeedback ~assignmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let requesterFeedback =
-        field_map_exn json "RequesterFeedback" String_.of_json in
-      let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
+        field_map_exn json__ "RequesterFeedback" String_.of_json in
+      let assignmentId = field_map_exn json__ "AssignmentId" EntityId.of_json in
       make ~requesterFeedback ~assignmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3422,9 +3488,9 @@ module NotifyWorkersResponse =
           (Xml.child xml_arg0 "NotifyWorkersFailureStatuses") in
       make ?notifyWorkersFailureStatuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notifyWorkersFailureStatuses =
-        field_map json "NotifyWorkersFailureStatuses"
+        field_map json__ "NotifyWorkersFailureStatuses"
           NotifyWorkersFailureStatusList.of_json in
       make ?notifyWorkersFailureStatuses ()
     let to_json v = composed_to_json to_value v
@@ -3464,10 +3530,10 @@ module NotifyWorkersRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~workerIds ~messageText ~subject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerIds = field_map_exn json "WorkerIds" CustomerIdList.of_json in
-      let messageText = field_map_exn json "MessageText" String_.of_json in
-      let subject = field_map_exn json "Subject" String_.of_json in
+    let of_json json__ =
+      let workerIds = field_map_exn json__ "WorkerIds" CustomerIdList.of_json in
+      let messageText = field_map_exn json__ "MessageText" String_.of_json in
+      let subject = field_map_exn json__ "Subject" String_.of_json in
       make ~workerIds ~messageText ~subject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3536,11 +3602,11 @@ module ListWorkersWithQualificationTypeResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?qualifications ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualifications =
-        field_map json "Qualifications" QualificationList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "Qualifications" QualificationList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?qualifications ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3586,12 +3652,12 @@ module ListWorkersWithQualificationTypeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ?status ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let status = field_map json "Status" QualificationStatus.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let status = field_map json__ "Status" QualificationStatus.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ?maxResults ?nextToken ?status ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3660,11 +3726,11 @@ module ListWorkerBlocksResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?workerBlocks ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let workerBlocks =
-        field_map json "WorkerBlocks" WorkerBlockList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+        field_map json__ "WorkerBlocks" WorkerBlockList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?workerBlocks ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3690,9 +3756,9 @@ module ListWorkerBlocksRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3756,10 +3822,10 @@ module ListReviewableHITsResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITs = field_map json "HITs" HITList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let hITs = field_map json__ "HITs" HITList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?hITs ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3802,11 +3868,11 @@ module ListReviewableHITsRequest =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITTypeId") in
       make ?maxResults ?nextToken ?status ?hITTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let status = field_map json "Status" ReviewableHITStatus.of_json in
-      let hITTypeId = field_map json "HITTypeId" EntityId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let status = field_map json__ "Status" ReviewableHITStatus.of_json in
+      let hITTypeId = field_map json__ "HITTypeId" EntityId.of_json in
       make ?maxResults ?nextToken ?status ?hITTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3911,17 +3977,17 @@ module ListReviewPolicyResultsForHITResponse =
       make ?nextToken ?hITReviewReport ?assignmentReviewReport
         ?hITReviewPolicy ?assignmentReviewPolicy ?hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let hITReviewReport =
-        field_map json "HITReviewReport" ReviewReport.of_json in
+        field_map json__ "HITReviewReport" ReviewReport.of_json in
       let assignmentReviewReport =
-        field_map json "AssignmentReviewReport" ReviewReport.of_json in
+        field_map json__ "AssignmentReviewReport" ReviewReport.of_json in
       let hITReviewPolicy =
-        field_map json "HITReviewPolicy" ReviewPolicy.of_json in
+        field_map json__ "HITReviewPolicy" ReviewPolicy.of_json in
       let assignmentReviewPolicy =
-        field_map json "AssignmentReviewPolicy" ReviewPolicy.of_json in
-      let hITId = field_map json "HITId" EntityId.of_json in
+        field_map json__ "AssignmentReviewPolicy" ReviewPolicy.of_json in
+      let hITId = field_map json__ "HITId" EntityId.of_json in
       make ?nextToken ?hITReviewReport ?assignmentReviewReport
         ?hITReviewPolicy ?assignmentReviewPolicy ?hITId ()
     let to_json v = composed_to_json to_value v
@@ -3992,14 +4058,16 @@ module ListReviewPolicyResultsForHITRequest =
       make ?maxResults ?nextToken ?retrieveResults ?retrieveActions
         ?policyLevels ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let retrieveResults = field_map json "RetrieveResults" Boolean.of_json in
-      let retrieveActions = field_map json "RetrieveActions" Boolean.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let retrieveResults =
+        field_map json__ "RetrieveResults" Boolean.of_json in
+      let retrieveActions =
+        field_map json__ "RetrieveActions" Boolean.of_json in
       let policyLevels =
-        field_map json "PolicyLevels" ReviewPolicyLevelList.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+        field_map json__ "PolicyLevels" ReviewPolicyLevelList.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ?maxResults ?nextToken ?retrieveResults ?retrieveActions
         ?policyLevels ~hITId ()
     let to_json v = composed_to_json to_value v
@@ -4069,11 +4137,11 @@ module ListQualificationTypesResponse =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?qualificationTypes ?nextToken ?numResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationTypes =
-        field_map json "QualificationTypes" QualificationTypeList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
+        field_map json__ "QualificationTypes" QualificationTypeList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
       make ?qualificationTypes ?nextToken ?numResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4134,14 +4202,14 @@ module ListQualificationTypesRequest =
       make ?maxResults ?nextToken ?mustBeOwnedByCaller ~mustBeRequestable
         ?query ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let mustBeOwnedByCaller =
-        field_map json "MustBeOwnedByCaller" Boolean.of_json in
+        field_map json__ "MustBeOwnedByCaller" Boolean.of_json in
       let mustBeRequestable =
-        field_map_exn json "MustBeRequestable" Boolean.of_json in
-      let query = field_map json "Query" String_.of_json in
+        field_map_exn json__ "MustBeRequestable" Boolean.of_json in
+      let query = field_map json__ "Query" String_.of_json in
       make ?maxResults ?nextToken ?mustBeOwnedByCaller ~mustBeRequestable
         ?query ()
     let to_json v = composed_to_json to_value v
@@ -4212,12 +4280,12 @@ module ListQualificationRequestsResponse =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?qualificationRequests ?nextToken ?numResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationRequests =
-        field_map json "QualificationRequests"
+        field_map json__ "QualificationRequests"
           QualificationRequestList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
       make ?qualificationRequests ?nextToken ?numResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4254,11 +4322,11 @@ module ListQualificationRequestsRequest =
           (Xml.child xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ?qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let qualificationTypeId =
-        field_map json "QualificationTypeId" EntityId.of_json in
+        field_map json__ "QualificationTypeId" EntityId.of_json in
       make ?maxResults ?nextToken ?qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4322,10 +4390,10 @@ module ListHITsResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITs = field_map json "HITs" HITList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let hITs = field_map json__ "HITs" HITList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?hITs ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4351,9 +4419,9 @@ module ListHITsRequest =
           (Xml.child xml_arg0 "NextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4417,10 +4485,10 @@ module ListHITsForQualificationTypeResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?hITs ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITs = field_map json "HITs" HITList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let hITs = field_map json__ "HITs" HITList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?hITs ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4458,11 +4526,11 @@ module ListHITsForQualificationTypeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?maxResults ?nextToken ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ?maxResults ?nextToken ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4531,11 +4599,11 @@ module ListBonusPaymentsResponse =
         (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumResults") in
       make ?bonusPayments ?nextToken ?numResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bonusPayments =
-        field_map json "BonusPayments" BonusPaymentList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
+        field_map json__ "BonusPayments" BonusPaymentList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
       make ?bonusPayments ?nextToken ?numResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4576,11 +4644,11 @@ module ListBonusPaymentsRequest =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITId") in
       make ?maxResults ?nextToken ?assignmentId ?hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let assignmentId = field_map json "AssignmentId" EntityId.of_json in
-      let hITId = field_map json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let assignmentId = field_map json__ "AssignmentId" EntityId.of_json in
+      let hITId = field_map json__ "HITId" EntityId.of_json in
       make ?maxResults ?nextToken ?assignmentId ?hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4648,10 +4716,10 @@ module ListAssignmentsForHITResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?assignments ?numResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assignments = field_map json "Assignments" AssignmentList.of_json in
-      let numResults = field_map json "NumResults" Integer.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let assignments = field_map json__ "Assignments" AssignmentList.of_json in
+      let numResults = field_map json__ "NumResults" Integer.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       make ?assignments ?numResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4693,12 +4761,12 @@ module ListAssignmentsForHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?assignmentStatuses ?maxResults ?nextToken ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let assignmentStatuses =
-        field_map json "AssignmentStatuses" AssignmentStatusList.of_json in
-      let maxResults = field_map json "MaxResults" ResultSize.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+        field_map json__ "AssignmentStatuses" AssignmentStatusList.of_json in
+      let maxResults = field_map json__ "MaxResults" ResultSize.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ?assignmentStatuses ?maxResults ?nextToken ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4752,9 +4820,9 @@ module GetQualificationTypeResponse =
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationType =
-        field_map json "QualificationType" QualificationType.of_json in
+        field_map json__ "QualificationType" QualificationType.of_json in
       make ?qualificationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4778,9 +4846,9 @@ module GetQualificationTypeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4835,9 +4903,9 @@ module GetQualificationScoreResponse =
           (Xml.child xml_arg0 "Qualification") in
       make ?qualification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualification =
-        field_map json "Qualification" Qualification.of_json in
+        field_map json__ "Qualification" Qualification.of_json in
       make ?qualification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4869,10 +4937,10 @@ module GetQualificationScoreRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~workerId ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ~workerId ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4921,8 +4989,8 @@ module GetHITResponse =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
+    let of_json json__ =
+      let hIT = field_map json__ "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The GetHIT operation retrieves the details of the specified HIT."]
@@ -4941,8 +5009,8 @@ module GetHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4995,8 +5063,8 @@ module GetFileUploadURLResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FileUploadURL") in
       make ?fileUploadURL ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileUploadURL = field_map json "FileUploadURL" String_.of_json in
+    let of_json json__ =
+      let fileUploadURL = field_map json__ "FileUploadURL" String_.of_json in
       make ?fileUploadURL ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5030,10 +5098,10 @@ module GetFileUploadURLRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~questionIdentifier ~assignmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let questionIdentifier =
-        field_map_exn json "QuestionIdentifier" String_.of_json in
-      let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
+        field_map_exn json__ "QuestionIdentifier" String_.of_json in
+      let assignmentId = field_map_exn json__ "AssignmentId" EntityId.of_json in
       make ~questionIdentifier ~assignmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5091,9 +5159,9 @@ module GetAssignmentResponse =
         (Option.map ~f:Assignment.of_xml) (Xml.child xml_arg0 "Assignment") in
       make ?hIT ?assignment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hIT = field_map json "HIT" HIT.of_json in
-      let assignment = field_map json "Assignment" Assignment.of_json in
+    let of_json json__ =
+      let hIT = field_map json__ "HIT" HIT.of_json in
+      let assignment = field_map json__ "Assignment" Assignment.of_json in
       make ?hIT ?assignment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5116,8 +5184,8 @@ module GetAssignmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ~assignmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
+    let of_json json__ =
+      let assignmentId = field_map_exn json__ "AssignmentId" EntityId.of_json in
       make ~assignmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5177,11 +5245,11 @@ module GetAccountBalanceResponse =
           (Xml.child xml_arg0 "AvailableBalance") in
       make ?onHoldBalance ?availableBalance ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onHoldBalance =
-        field_map json "OnHoldBalance" CurrencyAmount.of_json in
+        field_map json__ "OnHoldBalance" CurrencyAmount.of_json in
       let availableBalance =
-        field_map json "AvailableBalance" CurrencyAmount.of_json in
+        field_map json__ "AvailableBalance" CurrencyAmount.of_json in
       make ?onHoldBalance ?availableBalance ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5279,11 +5347,11 @@ module DisassociateQualificationFromWorkerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ?reason ~qualificationTypeId ~workerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       make ?reason ~qualificationTypeId ~workerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5355,9 +5423,9 @@ module DeleteWorkerBlockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ?reason ~workerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       make ?reason ~workerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5425,9 +5493,9 @@ module DeleteQualificationTypeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5491,8 +5559,8 @@ module DeleteHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+    let of_json json__ =
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5564,9 +5632,9 @@ module CreateWorkerBlockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "WorkerId") in
       make ~reason ~workerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "Reason" String_.of_json in
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+    let of_json json__ =
+      let reason = field_map_exn json__ "Reason" String_.of_json in
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       make ~reason ~workerId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5621,9 +5689,9 @@ module CreateQualificationTypeResponse =
           (Xml.child xml_arg0 "QualificationType") in
       make ?qualificationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationType =
-        field_map json "QualificationType" QualificationType.of_json in
+        field_map json__ "QualificationType" QualificationType.of_json in
       make ?qualificationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5732,22 +5800,22 @@ module CreateQualificationTypeRequest =
         ?test ?retryDelayInSeconds ~qualificationTypeStatus ~description
         ?keywords ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoGrantedValue =
-        field_map json "AutoGrantedValue" Integer.of_json in
-      let autoGranted = field_map json "AutoGranted" Boolean.of_json in
+        field_map json__ "AutoGrantedValue" Integer.of_json in
+      let autoGranted = field_map json__ "AutoGranted" Boolean.of_json in
       let testDurationInSeconds =
-        field_map json "TestDurationInSeconds" Long.of_json in
-      let answerKey = field_map json "AnswerKey" String_.of_json in
-      let test = field_map json "Test" String_.of_json in
+        field_map json__ "TestDurationInSeconds" Long.of_json in
+      let answerKey = field_map json__ "AnswerKey" String_.of_json in
+      let test = field_map json__ "Test" String_.of_json in
       let retryDelayInSeconds =
-        field_map json "RetryDelayInSeconds" Long.of_json in
+        field_map json__ "RetryDelayInSeconds" Long.of_json in
       let qualificationTypeStatus =
-        field_map_exn json "QualificationTypeStatus"
+        field_map_exn json__ "QualificationTypeStatus"
           QualificationTypeStatus.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
-      let keywords = field_map json "Keywords" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
+      let keywords = field_map json__ "Keywords" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ?autoGrantedValue ?autoGranted ?testDurationInSeconds ?answerKey
         ?test ?retryDelayInSeconds ~qualificationTypeStatus ~description
         ?keywords ~name ()
@@ -5800,8 +5868,8 @@ module CreateHITWithHITTypeResponse =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
+    let of_json json__ =
+      let hIT = field_map json__ "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The CreateHITWithHITType operation creates a new Human Intelligence Task (HIT) using an existing HITTypeID generated by the CreateHITType operation. This is an alternative way to create HITs from the CreateHIT operation. This is the recommended best practice for Requesters who are creating large numbers of HITs. CreateHITWithHITType also supports several ways to provide question data: by providing a value for the Question parameter that fully specifies the contents of the HIT, or by providing a HitLayoutId and associated HitLayoutParameters. If a HIT is created with 10 or more maximum assignments, there is an additional fee. For more information, see Amazon Mechanical Turk Pricing."]
@@ -5913,23 +5981,23 @@ module CreateHITWithHITTypeRequest =
         ?assignmentReviewPolicy ?uniqueRequestToken ?requesterAnnotation
         ?question ~lifetimeInSeconds ?maxAssignments ~hITTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hITLayoutParameters =
-        field_map json "HITLayoutParameters" HITLayoutParameterList.of_json in
-      let hITLayoutId = field_map json "HITLayoutId" EntityId.of_json in
+        field_map json__ "HITLayoutParameters" HITLayoutParameterList.of_json in
+      let hITLayoutId = field_map json__ "HITLayoutId" EntityId.of_json in
       let hITReviewPolicy =
-        field_map json "HITReviewPolicy" ReviewPolicy.of_json in
+        field_map json__ "HITReviewPolicy" ReviewPolicy.of_json in
       let assignmentReviewPolicy =
-        field_map json "AssignmentReviewPolicy" ReviewPolicy.of_json in
+        field_map json__ "AssignmentReviewPolicy" ReviewPolicy.of_json in
       let uniqueRequestToken =
-        field_map json "UniqueRequestToken" IdempotencyToken.of_json in
+        field_map json__ "UniqueRequestToken" IdempotencyToken.of_json in
       let requesterAnnotation =
-        field_map json "RequesterAnnotation" String_.of_json in
-      let question = field_map json "Question" String_.of_json in
+        field_map json__ "RequesterAnnotation" String_.of_json in
+      let question = field_map json__ "Question" String_.of_json in
       let lifetimeInSeconds =
-        field_map_exn json "LifetimeInSeconds" Long.of_json in
-      let maxAssignments = field_map json "MaxAssignments" Integer.of_json in
-      let hITTypeId = field_map_exn json "HITTypeId" EntityId.of_json in
+        field_map_exn json__ "LifetimeInSeconds" Long.of_json in
+      let maxAssignments = field_map json__ "MaxAssignments" Integer.of_json in
+      let hITTypeId = field_map_exn json__ "HITTypeId" EntityId.of_json in
       make ?hITLayoutParameters ?hITLayoutId ?hITReviewPolicy
         ?assignmentReviewPolicy ?uniqueRequestToken ?requesterAnnotation
         ?question ~lifetimeInSeconds ?maxAssignments ~hITTypeId ()
@@ -5983,8 +6051,8 @@ module CreateHITTypeResponse =
         (Option.map ~f:EntityId.of_xml) (Xml.child xml_arg0 "HITTypeId") in
       make ?hITTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hITTypeId = field_map json "HITTypeId" EntityId.of_json in
+    let of_json json__ =
+      let hITTypeId = field_map json__ "HITTypeId" EntityId.of_json in
       make ?hITTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6070,18 +6138,18 @@ module CreateHITTypeRequest =
       make ?qualificationRequirements ~description ?keywords ~title ~reward
         ~assignmentDurationInSeconds ?autoApprovalDelayInSeconds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let qualificationRequirements =
-        field_map json "QualificationRequirements"
+        field_map json__ "QualificationRequirements"
           QualificationRequirementList.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
-      let keywords = field_map json "Keywords" String_.of_json in
-      let title = field_map_exn json "Title" String_.of_json in
-      let reward = field_map_exn json "Reward" CurrencyAmount.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
+      let keywords = field_map json__ "Keywords" String_.of_json in
+      let title = field_map_exn json__ "Title" String_.of_json in
+      let reward = field_map_exn json__ "Reward" CurrencyAmount.of_json in
       let assignmentDurationInSeconds =
-        field_map_exn json "AssignmentDurationInSeconds" Long.of_json in
+        field_map_exn json__ "AssignmentDurationInSeconds" Long.of_json in
       let autoApprovalDelayInSeconds =
-        field_map json "AutoApprovalDelayInSeconds" Long.of_json in
+        field_map json__ "AutoApprovalDelayInSeconds" Long.of_json in
       make ?qualificationRequirements ~description ?keywords ~title ~reward
         ~assignmentDurationInSeconds ?autoApprovalDelayInSeconds ()
     let to_json v = composed_to_json to_value v
@@ -6133,8 +6201,8 @@ module CreateHITResponse =
       let hIT = (Option.map ~f:HIT.of_xml) (Xml.child xml_arg0 "HIT") in
       make ?hIT ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hIT = field_map json "HIT" HIT.of_json in make ?hIT ()
+    let of_json json__ =
+      let hIT = field_map json__ "HIT" HIT.of_json in make ?hIT ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The CreateHIT operation creates a new Human Intelligence Task (HIT). The new HIT is made available for Workers to find and accept on the Amazon Mechanical Turk website. This operation allows you to specify a new HIT by passing in values for the properties of the HIT, such as its title, reward amount and number of assignments. When you pass these values to CreateHIT, a new HIT is created for you, with a new HITTypeID. The HITTypeID can be used to create additional HITs in the future without needing to specify common parameters such as the title, description and reward amount each time. An alternative way to create HITs is to first generate a HITTypeID using the CreateHITType operation and then call the CreateHITWithHITType operation. This is the recommended best practice for Requesters who are creating large numbers of HITs. CreateHIT also supports several ways to provide question data: by providing a value for the Question parameter that fully specifies the contents of the HIT, or by providing a HitLayoutId and associated HitLayoutParameters. If a HIT is created with 10 or more maximum assignments, there is an additional fee. For more information, see Amazon Mechanical Turk Pricing."]
@@ -6307,33 +6375,33 @@ module CreateHITRequest =
         ~description ?keywords ~title ~reward ~assignmentDurationInSeconds
         ~lifetimeInSeconds ?autoApprovalDelayInSeconds ?maxAssignments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hITLayoutParameters =
-        field_map json "HITLayoutParameters" HITLayoutParameterList.of_json in
-      let hITLayoutId = field_map json "HITLayoutId" EntityId.of_json in
+        field_map json__ "HITLayoutParameters" HITLayoutParameterList.of_json in
+      let hITLayoutId = field_map json__ "HITLayoutId" EntityId.of_json in
       let hITReviewPolicy =
-        field_map json "HITReviewPolicy" ReviewPolicy.of_json in
+        field_map json__ "HITReviewPolicy" ReviewPolicy.of_json in
       let assignmentReviewPolicy =
-        field_map json "AssignmentReviewPolicy" ReviewPolicy.of_json in
+        field_map json__ "AssignmentReviewPolicy" ReviewPolicy.of_json in
       let uniqueRequestToken =
-        field_map json "UniqueRequestToken" IdempotencyToken.of_json in
+        field_map json__ "UniqueRequestToken" IdempotencyToken.of_json in
       let qualificationRequirements =
-        field_map json "QualificationRequirements"
+        field_map json__ "QualificationRequirements"
           QualificationRequirementList.of_json in
       let requesterAnnotation =
-        field_map json "RequesterAnnotation" String_.of_json in
-      let question = field_map json "Question" String_.of_json in
-      let description = field_map_exn json "Description" String_.of_json in
-      let keywords = field_map json "Keywords" String_.of_json in
-      let title = field_map_exn json "Title" String_.of_json in
-      let reward = field_map_exn json "Reward" CurrencyAmount.of_json in
+        field_map json__ "RequesterAnnotation" String_.of_json in
+      let question = field_map json__ "Question" String_.of_json in
+      let description = field_map_exn json__ "Description" String_.of_json in
+      let keywords = field_map json__ "Keywords" String_.of_json in
+      let title = field_map_exn json__ "Title" String_.of_json in
+      let reward = field_map_exn json__ "Reward" CurrencyAmount.of_json in
       let assignmentDurationInSeconds =
-        field_map_exn json "AssignmentDurationInSeconds" Long.of_json in
+        field_map_exn json__ "AssignmentDurationInSeconds" Long.of_json in
       let lifetimeInSeconds =
-        field_map_exn json "LifetimeInSeconds" Long.of_json in
+        field_map_exn json__ "LifetimeInSeconds" Long.of_json in
       let autoApprovalDelayInSeconds =
-        field_map json "AutoApprovalDelayInSeconds" Long.of_json in
-      let maxAssignments = field_map json "MaxAssignments" Integer.of_json in
+        field_map json__ "AutoApprovalDelayInSeconds" Long.of_json in
+      let maxAssignments = field_map json__ "MaxAssignments" Integer.of_json in
       make ?hITLayoutParameters ?hITLayoutId ?hITReviewPolicy
         ?assignmentReviewPolicy ?uniqueRequestToken
         ?qualificationRequirements ?requesterAnnotation ?question
@@ -6423,12 +6491,12 @@ module CreateAdditionalAssignmentsForHITRequest =
         EntityId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "HITId") in
       make ?uniqueRequestToken ~numberOfAdditionalAssignments ~hITId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let uniqueRequestToken =
-        field_map json "UniqueRequestToken" IdempotencyToken.of_json in
+        field_map json__ "UniqueRequestToken" IdempotencyToken.of_json in
       let numberOfAdditionalAssignments =
-        field_map_exn json "NumberOfAdditionalAssignments" Integer.of_json in
-      let hITId = field_map_exn json "HITId" EntityId.of_json in
+        field_map_exn json__ "NumberOfAdditionalAssignments" Integer.of_json in
+      let hITId = field_map_exn json__ "HITId" EntityId.of_json in
       make ?uniqueRequestToken ~numberOfAdditionalAssignments ~hITId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6523,13 +6591,13 @@ module AssociateQualificationWithWorkerRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationTypeId") in
       make ?sendNotification ?integerValue ~workerId ~qualificationTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sendNotification =
-        field_map json "SendNotification" Boolean.of_json in
-      let integerValue = field_map json "IntegerValue" Integer.of_json in
-      let workerId = field_map_exn json "WorkerId" CustomerId.of_json in
+        field_map json__ "SendNotification" Boolean.of_json in
+      let integerValue = field_map json__ "IntegerValue" Integer.of_json in
+      let workerId = field_map_exn json__ "WorkerId" CustomerId.of_json in
       let qualificationTypeId =
-        field_map_exn json "QualificationTypeId" EntityId.of_json in
+        field_map_exn json__ "QualificationTypeId" EntityId.of_json in
       make ?sendNotification ?integerValue ~workerId ~qualificationTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6616,12 +6684,12 @@ module ApproveAssignmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AssignmentId") in
       make ?overrideRejection ?requesterFeedback ~assignmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let overrideRejection =
-        field_map json "OverrideRejection" Boolean.of_json in
+        field_map json__ "OverrideRejection" Boolean.of_json in
       let requesterFeedback =
-        field_map json "RequesterFeedback" String_.of_json in
-      let assignmentId = field_map_exn json "AssignmentId" EntityId.of_json in
+        field_map json__ "RequesterFeedback" String_.of_json in
+      let assignmentId = field_map_exn json__ "AssignmentId" EntityId.of_json in
       make ?overrideRejection ?requesterFeedback ~assignmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6698,10 +6766,10 @@ module AcceptQualificationRequestRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QualificationRequestId") in
       make ?integerValue ~qualificationRequestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let integerValue = field_map json "IntegerValue" Integer.of_json in
+    let of_json json__ =
+      let integerValue = field_map json__ "IntegerValue" Integer.of_json in
       let qualificationRequestId =
-        field_map_exn json "QualificationRequestId" String_.of_json in
+        field_map_exn json__ "QualificationRequestId" String_.of_json in
       make ?integerValue ~qualificationRequestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

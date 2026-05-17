@@ -25,6 +25,26 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module AccountId =
+  struct
+    type nonrec t = string
+    let context_ = "AccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9]{12}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccountId" j
+    let to_json = simple_to_json to_value
+  end
 module AccountScope =
   struct
     type nonrec t =
@@ -70,6 +90,953 @@ module AmortizedUpfrontFee =
     let of_json j = string_of_json ~kind:"AmortizedUpfrontFee" j
     let to_json = simple_to_json to_value
   end
+module AnalysesPageSize =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:600) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for AnalysesPageSize" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ZonedDateTime =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "The period of time that you want the usage and costs for."]
+    let context_ = "ZonedDateTime"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:25) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(([+-]\\d\\d:\\d\\d)|Z)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ZonedDateTime" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "The period of time that you want the usage and costs for."]
+module GenericString =
+  struct
+    type nonrec t = string
+    let context_ = "GenericString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GenericString" j
+    let to_json = simple_to_json to_value
+  end
+module RecommendationDetailHourlyMetrics =
+  struct
+    type nonrec t =
+      {
+      startTime: ZonedDateTime.t option ;
+      estimatedOnDemandCost: GenericString.t option
+        [@ocaml.doc
+          "The remaining On-Demand cost estimated to not be covered by the recommended Savings Plan, over the length of the lookback period."];
+      currentCoverage: GenericString.t option
+        [@ocaml.doc
+          "The current amount of Savings Plans eligible usage that the Savings Plan covered."];
+      estimatedCoverage: GenericString.t option
+        [@ocaml.doc
+          "The estimated coverage amount based on the recommended Savings Plan."];
+      estimatedNewCommitmentUtilization: GenericString.t option
+        [@ocaml.doc
+          "The estimated utilization for the recommended Savings Plan."]}
+    let make ?startTime =
+      fun ?estimatedOnDemandCost ->
+        fun ?currentCoverage ->
+          fun ?estimatedCoverage ->
+            fun ?estimatedNewCommitmentUtilization ->
+              fun () ->
+                {
+                  startTime;
+                  estimatedOnDemandCost;
+                  currentCoverage;
+                  estimatedCoverage;
+                  estimatedNewCommitmentUtilization
+                }
+    let to_value x =
+      structure_to_value
+        [("StartTime", (Option.map x.startTime ~f:ZonedDateTime.to_value));
+        ("EstimatedOnDemandCost",
+          (Option.map x.estimatedOnDemandCost ~f:GenericString.to_value));
+        ("CurrentCoverage",
+          (Option.map x.currentCoverage ~f:GenericString.to_value));
+        ("EstimatedCoverage",
+          (Option.map x.estimatedCoverage ~f:GenericString.to_value));
+        ("EstimatedNewCommitmentUtilization",
+          (Option.map x.estimatedNewCommitmentUtilization
+             ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedNewCommitmentUtilization =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedNewCommitmentUtilization") in
+      let estimatedCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedCoverage") in
+      let currentCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentCoverage") in
+      let estimatedOnDemandCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedOnDemandCost") in
+      let startTime =
+        (Option.map ~f:ZonedDateTime.of_xml) (Xml.child xml_arg0 "StartTime") in
+      make ?estimatedNewCommitmentUtilization ?estimatedCoverage
+        ?currentCoverage ?estimatedOnDemandCost ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedNewCommitmentUtilization =
+        field_map json__ "EstimatedNewCommitmentUtilization"
+          GenericString.of_json in
+      let estimatedCoverage =
+        field_map json__ "EstimatedCoverage" GenericString.of_json in
+      let currentCoverage =
+        field_map json__ "CurrentCoverage" GenericString.of_json in
+      let estimatedOnDemandCost =
+        field_map json__ "EstimatedOnDemandCost" GenericString.of_json in
+      let startTime = field_map json__ "StartTime" ZonedDateTime.of_json in
+      make ?estimatedNewCommitmentUtilization ?estimatedCoverage
+        ?currentCoverage ?estimatedOnDemandCost ?startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the hourly metrics for the given recommendation over the lookback period."]
+module MetricsOverLookbackPeriod =
+  struct
+    type nonrec t = RecommendationDetailHourlyMetrics.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecommendationDetailHourlyMetrics.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:RecommendationDetailHourlyMetrics.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricsOverLookbackPeriod"
+        ~of_json:RecommendationDetailHourlyMetrics.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SavingsPlansPurchaseAnalysisDetails =
+  struct
+    type nonrec t =
+      {
+      currencyCode: GenericString.t option
+        [@ocaml.doc "The currency code used for the analysis."];
+      lookbackPeriodInHours: GenericString.t option
+        [@ocaml.doc
+          "The lookback period in hours that's used to generate the analysis."];
+      currentAverageCoverage: GenericString.t option
+        [@ocaml.doc
+          "The average value of hourly coverage over the lookback period."];
+      currentAverageHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The average value of hourly On-Demand spend over the lookback period."];
+      currentMaximumHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The highest value of hourly On-Demand spend over the lookback period."];
+      currentMinimumHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The lowest value of hourly On-Demand spend over the lookback period."];
+      currentOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The current total On-Demand spend over the lookback period."];
+      existingHourlyCommitment: GenericString.t option
+        [@ocaml.doc
+          "The existing hourly commitment for the Savings Plan type."];
+      hourlyCommitmentToPurchase: GenericString.t option
+        [@ocaml.doc "The recommended or custom hourly commitment."];
+      estimatedAverageCoverage: GenericString.t option
+        [@ocaml.doc "The estimated coverage of the Savings Plan."];
+      estimatedAverageUtilization: GenericString.t option
+        [@ocaml.doc "The estimated utilization of the Savings Plan."];
+      estimatedMonthlySavingsAmount: GenericString.t option
+        [@ocaml.doc
+          "The estimated monthly savings amount based on the Savings Plan."];
+      estimatedOnDemandCost: GenericString.t option
+        [@ocaml.doc
+          "The remaining On-Demand cost estimated to not be covered by the Savings Plan over the length of the lookback period."];
+      estimatedOnDemandCostWithCurrentCommitment: GenericString.t option
+        [@ocaml.doc
+          "The estimated On-Demand cost you expect with no additional commitment based on your usage of the selected time period and the Savings Plan you own."];
+      estimatedROI: GenericString.t option
+        [@ocaml.doc
+          "The estimated return on investment that's based on the Savings Plan and estimated savings. This is calculated as estimatedSavingsAmount/estimatedSPCost*100."];
+      estimatedSavingsAmount: GenericString.t option
+        [@ocaml.doc
+          "The estimated savings amount that's based on the Savings Plan over the length of the lookback period."];
+      estimatedSavingsPercentage: GenericString.t option
+        [@ocaml.doc
+          "The estimated savings percentage relative to the total cost over the cost calculation lookback period."];
+      estimatedCommitmentCost: GenericString.t option
+        [@ocaml.doc
+          "The estimated cost of the Savings Plan over the length of the lookback period."];
+      latestUsageTimestamp: GenericString.t option
+        [@ocaml.doc
+          "The date and time of the last hour that went into the analysis."];
+      upfrontCost: GenericString.t option
+        [@ocaml.doc
+          "The upfront cost of the Savings Plan based on the selected payment option."];
+      additionalMetadata: GenericString.t option
+        [@ocaml.doc
+          "Additional metadata that might be applicable to the commitment."];
+      metricsOverLookbackPeriod: MetricsOverLookbackPeriod.t option
+        [@ocaml.doc
+          "The related hourly cost, coverage, and utilization metrics over the lookback period."]}
+    let make ?currencyCode =
+      fun ?lookbackPeriodInHours ->
+        fun ?currentAverageCoverage ->
+          fun ?currentAverageHourlyOnDemandSpend ->
+            fun ?currentMaximumHourlyOnDemandSpend ->
+              fun ?currentMinimumHourlyOnDemandSpend ->
+                fun ?currentOnDemandSpend ->
+                  fun ?existingHourlyCommitment ->
+                    fun ?hourlyCommitmentToPurchase ->
+                      fun ?estimatedAverageCoverage ->
+                        fun ?estimatedAverageUtilization ->
+                          fun ?estimatedMonthlySavingsAmount ->
+                            fun ?estimatedOnDemandCost ->
+                              fun ?estimatedOnDemandCostWithCurrentCommitment
+                                ->
+                                fun ?estimatedROI ->
+                                  fun ?estimatedSavingsAmount ->
+                                    fun ?estimatedSavingsPercentage ->
+                                      fun ?estimatedCommitmentCost ->
+                                        fun ?latestUsageTimestamp ->
+                                          fun ?upfrontCost ->
+                                            fun ?additionalMetadata ->
+                                              fun ?metricsOverLookbackPeriod
+                                                ->
+                                                fun () ->
+                                                  {
+                                                    currencyCode;
+                                                    lookbackPeriodInHours;
+                                                    currentAverageCoverage;
+                                                    currentAverageHourlyOnDemandSpend;
+                                                    currentMaximumHourlyOnDemandSpend;
+                                                    currentMinimumHourlyOnDemandSpend;
+                                                    currentOnDemandSpend;
+                                                    existingHourlyCommitment;
+                                                    hourlyCommitmentToPurchase;
+                                                    estimatedAverageCoverage;
+                                                    estimatedAverageUtilization;
+                                                    estimatedMonthlySavingsAmount;
+                                                    estimatedOnDemandCost;
+                                                    estimatedOnDemandCostWithCurrentCommitment;
+                                                    estimatedROI;
+                                                    estimatedSavingsAmount;
+                                                    estimatedSavingsPercentage;
+                                                    estimatedCommitmentCost;
+                                                    latestUsageTimestamp;
+                                                    upfrontCost;
+                                                    additionalMetadata;
+                                                    metricsOverLookbackPeriod
+                                                  }
+    let to_value x =
+      structure_to_value
+        [("CurrencyCode",
+           (Option.map x.currencyCode ~f:GenericString.to_value));
+        ("LookbackPeriodInHours",
+          (Option.map x.lookbackPeriodInHours ~f:GenericString.to_value));
+        ("CurrentAverageCoverage",
+          (Option.map x.currentAverageCoverage ~f:GenericString.to_value));
+        ("CurrentAverageHourlyOnDemandSpend",
+          (Option.map x.currentAverageHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("CurrentMaximumHourlyOnDemandSpend",
+          (Option.map x.currentMaximumHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("CurrentMinimumHourlyOnDemandSpend",
+          (Option.map x.currentMinimumHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("CurrentOnDemandSpend",
+          (Option.map x.currentOnDemandSpend ~f:GenericString.to_value));
+        ("ExistingHourlyCommitment",
+          (Option.map x.existingHourlyCommitment ~f:GenericString.to_value));
+        ("HourlyCommitmentToPurchase",
+          (Option.map x.hourlyCommitmentToPurchase ~f:GenericString.to_value));
+        ("EstimatedAverageCoverage",
+          (Option.map x.estimatedAverageCoverage ~f:GenericString.to_value));
+        ("EstimatedAverageUtilization",
+          (Option.map x.estimatedAverageUtilization ~f:GenericString.to_value));
+        ("EstimatedMonthlySavingsAmount",
+          (Option.map x.estimatedMonthlySavingsAmount
+             ~f:GenericString.to_value));
+        ("EstimatedOnDemandCost",
+          (Option.map x.estimatedOnDemandCost ~f:GenericString.to_value));
+        ("EstimatedOnDemandCostWithCurrentCommitment",
+          (Option.map x.estimatedOnDemandCostWithCurrentCommitment
+             ~f:GenericString.to_value));
+        ("EstimatedROI",
+          (Option.map x.estimatedROI ~f:GenericString.to_value));
+        ("EstimatedSavingsAmount",
+          (Option.map x.estimatedSavingsAmount ~f:GenericString.to_value));
+        ("EstimatedSavingsPercentage",
+          (Option.map x.estimatedSavingsPercentage ~f:GenericString.to_value));
+        ("EstimatedCommitmentCost",
+          (Option.map x.estimatedCommitmentCost ~f:GenericString.to_value));
+        ("LatestUsageTimestamp",
+          (Option.map x.latestUsageTimestamp ~f:GenericString.to_value));
+        ("UpfrontCost", (Option.map x.upfrontCost ~f:GenericString.to_value));
+        ("AdditionalMetadata",
+          (Option.map x.additionalMetadata ~f:GenericString.to_value));
+        ("MetricsOverLookbackPeriod",
+          (Option.map x.metricsOverLookbackPeriod
+             ~f:MetricsOverLookbackPeriod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricsOverLookbackPeriod =
+        (Option.map ~f:MetricsOverLookbackPeriod.of_xml)
+          (Xml.child xml_arg0 "MetricsOverLookbackPeriod") in
+      let additionalMetadata =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AdditionalMetadata") in
+      let upfrontCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "UpfrontCost") in
+      let latestUsageTimestamp =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "LatestUsageTimestamp") in
+      let estimatedCommitmentCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedCommitmentCost") in
+      let estimatedSavingsPercentage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedSavingsPercentage") in
+      let estimatedSavingsAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedSavingsAmount") in
+      let estimatedROI =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedROI") in
+      let estimatedOnDemandCostWithCurrentCommitment =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedOnDemandCostWithCurrentCommitment") in
+      let estimatedOnDemandCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedOnDemandCost") in
+      let estimatedMonthlySavingsAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedMonthlySavingsAmount") in
+      let estimatedAverageUtilization =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedAverageUtilization") in
+      let estimatedAverageCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedAverageCoverage") in
+      let hourlyCommitmentToPurchase =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "HourlyCommitmentToPurchase") in
+      let existingHourlyCommitment =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "ExistingHourlyCommitment") in
+      let currentOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentOnDemandSpend") in
+      let currentMinimumHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentMinimumHourlyOnDemandSpend") in
+      let currentMaximumHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentMaximumHourlyOnDemandSpend") in
+      let currentAverageHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentAverageHourlyOnDemandSpend") in
+      let currentAverageCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentAverageCoverage") in
+      let lookbackPeriodInHours =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "LookbackPeriodInHours") in
+      let currencyCode =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrencyCode") in
+      make ?metricsOverLookbackPeriod ?additionalMetadata ?upfrontCost
+        ?latestUsageTimestamp ?estimatedCommitmentCost
+        ?estimatedSavingsPercentage ?estimatedSavingsAmount ?estimatedROI
+        ?estimatedOnDemandCostWithCurrentCommitment ?estimatedOnDemandCost
+        ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
+        ?estimatedAverageCoverage ?hourlyCommitmentToPurchase
+        ?existingHourlyCommitment ?currentOnDemandSpend
+        ?currentMinimumHourlyOnDemandSpend ?currentMaximumHourlyOnDemandSpend
+        ?currentAverageHourlyOnDemandSpend ?currentAverageCoverage
+        ?lookbackPeriodInHours ?currencyCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricsOverLookbackPeriod =
+        field_map json__ "MetricsOverLookbackPeriod"
+          MetricsOverLookbackPeriod.of_json in
+      let additionalMetadata =
+        field_map json__ "AdditionalMetadata" GenericString.of_json in
+      let upfrontCost = field_map json__ "UpfrontCost" GenericString.of_json in
+      let latestUsageTimestamp =
+        field_map json__ "LatestUsageTimestamp" GenericString.of_json in
+      let estimatedCommitmentCost =
+        field_map json__ "EstimatedCommitmentCost" GenericString.of_json in
+      let estimatedSavingsPercentage =
+        field_map json__ "EstimatedSavingsPercentage" GenericString.of_json in
+      let estimatedSavingsAmount =
+        field_map json__ "EstimatedSavingsAmount" GenericString.of_json in
+      let estimatedROI =
+        field_map json__ "EstimatedROI" GenericString.of_json in
+      let estimatedOnDemandCostWithCurrentCommitment =
+        field_map json__ "EstimatedOnDemandCostWithCurrentCommitment"
+          GenericString.of_json in
+      let estimatedOnDemandCost =
+        field_map json__ "EstimatedOnDemandCost" GenericString.of_json in
+      let estimatedMonthlySavingsAmount =
+        field_map json__ "EstimatedMonthlySavingsAmount"
+          GenericString.of_json in
+      let estimatedAverageUtilization =
+        field_map json__ "EstimatedAverageUtilization" GenericString.of_json in
+      let estimatedAverageCoverage =
+        field_map json__ "EstimatedAverageCoverage" GenericString.of_json in
+      let hourlyCommitmentToPurchase =
+        field_map json__ "HourlyCommitmentToPurchase" GenericString.of_json in
+      let existingHourlyCommitment =
+        field_map json__ "ExistingHourlyCommitment" GenericString.of_json in
+      let currentOnDemandSpend =
+        field_map json__ "CurrentOnDemandSpend" GenericString.of_json in
+      let currentMinimumHourlyOnDemandSpend =
+        field_map json__ "CurrentMinimumHourlyOnDemandSpend"
+          GenericString.of_json in
+      let currentMaximumHourlyOnDemandSpend =
+        field_map json__ "CurrentMaximumHourlyOnDemandSpend"
+          GenericString.of_json in
+      let currentAverageHourlyOnDemandSpend =
+        field_map json__ "CurrentAverageHourlyOnDemandSpend"
+          GenericString.of_json in
+      let currentAverageCoverage =
+        field_map json__ "CurrentAverageCoverage" GenericString.of_json in
+      let lookbackPeriodInHours =
+        field_map json__ "LookbackPeriodInHours" GenericString.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
+      make ?metricsOverLookbackPeriod ?additionalMetadata ?upfrontCost
+        ?latestUsageTimestamp ?estimatedCommitmentCost
+        ?estimatedSavingsPercentage ?estimatedSavingsAmount ?estimatedROI
+        ?estimatedOnDemandCostWithCurrentCommitment ?estimatedOnDemandCost
+        ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
+        ?estimatedAverageCoverage ?hourlyCommitmentToPurchase
+        ?existingHourlyCommitment ?currentOnDemandSpend
+        ?currentMinimumHourlyOnDemandSpend ?currentMaximumHourlyOnDemandSpend
+        ?currentAverageHourlyOnDemandSpend ?currentAverageCoverage
+        ?lookbackPeriodInHours ?currencyCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the Savings Plans purchase analysis."]
+module AnalysisDetails =
+  struct
+    type nonrec t =
+      {
+      savingsPlansPurchaseAnalysisDetails:
+        SavingsPlansPurchaseAnalysisDetails.t option
+        [@ocaml.doc "Details about the Savings Plans purchase analysis."]}
+    let make ?savingsPlansPurchaseAnalysisDetails =
+      fun () -> { savingsPlansPurchaseAnalysisDetails }
+    let to_value x =
+      structure_to_value
+        [("SavingsPlansPurchaseAnalysisDetails",
+           (Option.map x.savingsPlansPurchaseAnalysisDetails
+              ~f:SavingsPlansPurchaseAnalysisDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsPlansPurchaseAnalysisDetails =
+        (Option.map ~f:SavingsPlansPurchaseAnalysisDetails.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansPurchaseAnalysisDetails") in
+      make ?savingsPlansPurchaseAnalysisDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsPlansPurchaseAnalysisDetails =
+        field_map json__ "SavingsPlansPurchaseAnalysisDetails"
+          SavingsPlansPurchaseAnalysisDetails.of_json in
+      make ?savingsPlansPurchaseAnalysisDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about the analysis."]
+module AnalysisId =
+  struct
+    type nonrec t = string
+    let context_ = "AnalysisId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[\\S\\s]{8}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AnalysisId" j
+    let to_json = simple_to_json to_value
+  end
+module AnalysisIds =
+  struct
+    type nonrec t = AnalysisId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:600) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnalysisId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnalysisId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnalysisIds" ~of_json:AnalysisId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
+module AnalysisNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The requested analysis can't be found."]
+module AnalysisStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | PROCESSING 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | PROCESSING -> "PROCESSING"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "PROCESSING" -> PROCESSING
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AnalysisStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnalysisStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ErrorCode =
+  struct
+    type nonrec t =
+      | NO_USAGE_FOUND 
+      | INTERNAL_FAILURE 
+      | INVALID_SAVINGS_PLANS_TO_ADD 
+      | INVALID_SAVINGS_PLANS_TO_EXCLUDE 
+      | INVALID_ACCOUNT_ID 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_USAGE_FOUND -> "NO_USAGE_FOUND"
+      | INTERNAL_FAILURE -> "INTERNAL_FAILURE"
+      | INVALID_SAVINGS_PLANS_TO_ADD -> "INVALID_SAVINGS_PLANS_TO_ADD"
+      | INVALID_SAVINGS_PLANS_TO_EXCLUDE ->
+          "INVALID_SAVINGS_PLANS_TO_EXCLUDE"
+      | INVALID_ACCOUNT_ID -> "INVALID_ACCOUNT_ID"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_USAGE_FOUND" -> NO_USAGE_FOUND
+      | "INTERNAL_FAILURE" -> INTERNAL_FAILURE
+      | "INVALID_SAVINGS_PLANS_TO_ADD" -> INVALID_SAVINGS_PLANS_TO_ADD
+      | "INVALID_SAVINGS_PLANS_TO_EXCLUDE" ->
+          INVALID_SAVINGS_PLANS_TO_EXCLUDE
+      | "INVALID_ACCOUNT_ID" -> INVALID_ACCOUNT_ID
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module SavingsPlansId =
+  struct
+    type nonrec t = string
+    let context_ = "SavingsPlansId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[\\S\\s]{8}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SavingsPlansId" j
+    let to_json = simple_to_json to_value
+  end
+module SavingsPlansToExclude =
+  struct
+    type nonrec t = SavingsPlansId.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SavingsPlansId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SavingsPlansId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SavingsPlansToExclude"
+        ~of_json:SavingsPlansId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TermInYears =
+  struct
+    type nonrec t =
+      | ONE_YEAR 
+      | THREE_YEARS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ONE_YEAR -> "ONE_YEAR"
+      | THREE_YEARS -> "THREE_YEARS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ONE_YEAR" -> ONE_YEAR
+      | "THREE_YEARS" -> THREE_YEARS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration TermInYears" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"TermInYears" j)
+    let to_json = simple_to_json to_value
+  end
+module SupportedSavingsPlansType =
+  struct
+    type nonrec t =
+      | COMPUTE_SP 
+      | EC2_INSTANCE_SP 
+      | SAGEMAKER_SP 
+      | DATABASE_SP 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | COMPUTE_SP -> "COMPUTE_SP"
+      | EC2_INSTANCE_SP -> "EC2_INSTANCE_SP"
+      | SAGEMAKER_SP -> "SAGEMAKER_SP"
+      | DATABASE_SP -> "DATABASE_SP"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "COMPUTE_SP" -> COMPUTE_SP
+      | "EC2_INSTANCE_SP" -> EC2_INSTANCE_SP
+      | "SAGEMAKER_SP" -> SAGEMAKER_SP
+      | "DATABASE_SP" -> DATABASE_SP
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SupportedSavingsPlansType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SupportedSavingsPlansType" j)
+    let to_json = simple_to_json to_value
+  end
+module SavingsPlansCommitment =
+  struct
+    type nonrec t = float
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_float_min i ~min:5000.) >>=
+             (fun () -> check_float_min i ~min:0.001));
+        i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module PaymentOption =
+  struct
+    type nonrec t =
+      | NO_UPFRONT 
+      | PARTIAL_UPFRONT 
+      | ALL_UPFRONT 
+      | LIGHT_UTILIZATION 
+      | MEDIUM_UTILIZATION 
+      | HEAVY_UTILIZATION 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | NO_UPFRONT -> "NO_UPFRONT"
+      | PARTIAL_UPFRONT -> "PARTIAL_UPFRONT"
+      | ALL_UPFRONT -> "ALL_UPFRONT"
+      | LIGHT_UTILIZATION -> "LIGHT_UTILIZATION"
+      | MEDIUM_UTILIZATION -> "MEDIUM_UTILIZATION"
+      | HEAVY_UTILIZATION -> "HEAVY_UTILIZATION"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "NO_UPFRONT" -> NO_UPFRONT
+      | "PARTIAL_UPFRONT" -> PARTIAL_UPFRONT
+      | "ALL_UPFRONT" -> ALL_UPFRONT
+      | "LIGHT_UTILIZATION" -> LIGHT_UTILIZATION
+      | "MEDIUM_UTILIZATION" -> MEDIUM_UTILIZATION
+      | "HEAVY_UTILIZATION" -> HEAVY_UTILIZATION
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PaymentOption" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PaymentOption" j)
+    let to_json = simple_to_json to_value
+  end
+module SavingsPlans =
+  struct
+    type nonrec t =
+      {
+      paymentOption: PaymentOption.t option
+        [@ocaml.doc "The payment option for the Savings Plans commitment."];
+      savingsPlansType: SupportedSavingsPlansType.t option
+        [@ocaml.doc "The Savings Plans type."];
+      region: GenericString.t option
+        [@ocaml.doc
+          "The Region associated with the Savings Plans commitment."];
+      instanceFamily: GenericString.t option
+        [@ocaml.doc "The instance family of the Savings Plans commitment."];
+      termInYears: TermInYears.t option
+        [@ocaml.doc
+          "The term that you want the Savings Plans commitment for."];
+      savingsPlansCommitment: SavingsPlansCommitment.t option
+        [@ocaml.doc "The Savings Plans commitment."];
+      offeringId: GenericString.t option
+        [@ocaml.doc
+          "The unique ID that's used to distinguish Savings Plans commitments from one another."]}
+    let make ?paymentOption =
+      fun ?savingsPlansType ->
+        fun ?region ->
+          fun ?instanceFamily ->
+            fun ?termInYears ->
+              fun ?savingsPlansCommitment ->
+                fun ?offeringId ->
+                  fun () ->
+                    {
+                      paymentOption;
+                      savingsPlansType;
+                      region;
+                      instanceFamily;
+                      termInYears;
+                      savingsPlansCommitment;
+                      offeringId
+                    }
+    let to_value x =
+      structure_to_value
+        [("PaymentOption",
+           (Option.map x.paymentOption ~f:PaymentOption.to_value));
+        ("SavingsPlansType",
+          (Option.map x.savingsPlansType
+             ~f:SupportedSavingsPlansType.to_value));
+        ("Region", (Option.map x.region ~f:GenericString.to_value));
+        ("InstanceFamily",
+          (Option.map x.instanceFamily ~f:GenericString.to_value));
+        ("TermInYears", (Option.map x.termInYears ~f:TermInYears.to_value));
+        ("SavingsPlansCommitment",
+          (Option.map x.savingsPlansCommitment
+             ~f:SavingsPlansCommitment.to_value));
+        ("OfferingId", (Option.map x.offeringId ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let offeringId =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "OfferingId") in
+      let savingsPlansCommitment =
+        (Option.map ~f:SavingsPlansCommitment.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansCommitment") in
+      let termInYears =
+        (Option.map ~f:TermInYears.of_xml) (Xml.child xml_arg0 "TermInYears") in
+      let instanceFamily =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "InstanceFamily") in
+      let region =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
+      let savingsPlansType =
+        (Option.map ~f:SupportedSavingsPlansType.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansType") in
+      let paymentOption =
+        (Option.map ~f:PaymentOption.of_xml)
+          (Xml.child xml_arg0 "PaymentOption") in
+      make ?offeringId ?savingsPlansCommitment ?termInYears ?instanceFamily
+        ?region ?savingsPlansType ?paymentOption ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let offeringId = field_map json__ "OfferingId" GenericString.of_json in
+      let savingsPlansCommitment =
+        field_map json__ "SavingsPlansCommitment"
+          SavingsPlansCommitment.of_json in
+      let termInYears = field_map json__ "TermInYears" TermInYears.of_json in
+      let instanceFamily =
+        field_map json__ "InstanceFamily" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let savingsPlansType =
+        field_map json__ "SavingsPlansType" SupportedSavingsPlansType.of_json in
+      let paymentOption =
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      make ?offeringId ?savingsPlansCommitment ?termInYears ?instanceFamily
+        ?region ?savingsPlansType ?paymentOption ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The Savings Plans commitment details."]
+module SavingsPlansToAdd =
+  struct
+    type nonrec t = SavingsPlans.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SavingsPlans.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SavingsPlans.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SavingsPlansToAdd" ~of_json:SavingsPlans.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module YearMonthDay =
   struct
     type nonrec t = string
@@ -92,26 +1059,338 @@ module YearMonthDay =
     let of_json j = string_of_json ~kind:"YearMonthDay" j
     let to_json = simple_to_json to_value
   end
-module GenericString =
+module DateInterval =
   struct
-    type nonrec t = string
-    let context_ = "GenericString"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      {
+      start: YearMonthDay.t
+        [@ocaml.doc
+          "The beginning of the time period. The start date is inclusive. For example, if start is 2017-01-01, Amazon Web Services retrieves cost and usage data starting at 2017-01-01 up to the end date. The start date must be equal to or no later than the current date to avoid a validation error."];
+      end_: YearMonthDay.t
+        [@ocaml.doc
+          "The end of the time period. The end date is exclusive. For example, if end is 2017-05-01, Amazon Web Services retrieves cost and usage data from the start date up to, but not including, 2017-05-01."]}
+    let context_ = "DateInterval"
+    let make ~start = fun ~end_ -> fun () -> { start; end_ }
+    let to_value x =
+      structure_to_value
+        [("Start", (Some (YearMonthDay.to_value x.start)));
+        ("End", (Some (YearMonthDay.to_value x.end_)))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"GenericString" j
+    let of_xml xml_arg0 =
+      let end_ =
+        YearMonthDay.of_xml (Xml.child_exn ~context:context_ xml_arg0 "End") in
+      let start =
+        YearMonthDay.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Start") in
+      make ~end_ ~start ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let end_ = field_map_exn json__ "End" YearMonthDay.of_json in
+      let start = field_map_exn json__ "Start" YearMonthDay.of_json in
+      make ~end_ ~start ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The time period of the request."]
+module AnalysisType =
+  struct
+    type nonrec t =
+      | MAX_SAVINGS 
+      | CUSTOM_COMMITMENT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | MAX_SAVINGS -> "MAX_SAVINGS"
+      | CUSTOM_COMMITMENT -> "CUSTOM_COMMITMENT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "MAX_SAVINGS" -> MAX_SAVINGS
+      | "CUSTOM_COMMITMENT" -> CUSTOM_COMMITMENT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AnalysisType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AnalysisType" j)
     let to_json = simple_to_json to_value
   end
+module SavingsPlansPurchaseAnalysisConfiguration =
+  struct
+    type nonrec t =
+      {
+      accountScope: AccountScope.t option
+        [@ocaml.doc "The account scope that you want your analysis for."];
+      accountId: AccountId.t option
+        [@ocaml.doc "The account that the analysis is for."];
+      analysisType: AnalysisType.t [@ocaml.doc "The type of analysis."];
+      savingsPlansToAdd: SavingsPlansToAdd.t
+        [@ocaml.doc "Savings Plans to include in the analysis."];
+      savingsPlansToExclude: SavingsPlansToExclude.t option
+        [@ocaml.doc "Savings Plans to exclude from the analysis."];
+      lookBackTimePeriod: DateInterval.t
+        [@ocaml.doc "The time period associated with the analysis."]}
+    let context_ = "SavingsPlansPurchaseAnalysisConfiguration"
+    let make ?accountScope =
+      fun ?accountId ->
+        fun ?savingsPlansToExclude ->
+          fun ~analysisType ->
+            fun ~savingsPlansToAdd ->
+              fun ~lookBackTimePeriod ->
+                fun () ->
+                  {
+                    accountScope;
+                    accountId;
+                    savingsPlansToExclude;
+                    analysisType;
+                    savingsPlansToAdd;
+                    lookBackTimePeriod
+                  }
+    let to_value x =
+      structure_to_value
+        [("AccountScope",
+           (Option.map x.accountScope ~f:AccountScope.to_value));
+        ("AccountId", (Option.map x.accountId ~f:AccountId.to_value));
+        ("AnalysisType", (Some (AnalysisType.to_value x.analysisType)));
+        ("SavingsPlansToAdd",
+          (Some (SavingsPlansToAdd.to_value x.savingsPlansToAdd)));
+        ("SavingsPlansToExclude",
+          (Option.map x.savingsPlansToExclude
+             ~f:SavingsPlansToExclude.to_value));
+        ("LookBackTimePeriod",
+          (Some (DateInterval.to_value x.lookBackTimePeriod)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lookBackTimePeriod =
+        DateInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "LookBackTimePeriod") in
+      let savingsPlansToExclude =
+        (Option.map ~f:SavingsPlansToExclude.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansToExclude") in
+      let savingsPlansToAdd =
+        SavingsPlansToAdd.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SavingsPlansToAdd") in
+      let analysisType =
+        AnalysisType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AnalysisType") in
+      let accountId =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let accountScope =
+        (Option.map ~f:AccountScope.of_xml)
+          (Xml.child xml_arg0 "AccountScope") in
+      make ~lookBackTimePeriod ?savingsPlansToExclude ~savingsPlansToAdd
+        ~analysisType ?accountId ?accountScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lookBackTimePeriod =
+        field_map_exn json__ "LookBackTimePeriod" DateInterval.of_json in
+      let savingsPlansToExclude =
+        field_map json__ "SavingsPlansToExclude"
+          SavingsPlansToExclude.of_json in
+      let savingsPlansToAdd =
+        field_map_exn json__ "SavingsPlansToAdd" SavingsPlansToAdd.of_json in
+      let analysisType =
+        field_map_exn json__ "AnalysisType" AnalysisType.of_json in
+      let accountId = field_map json__ "AccountId" AccountId.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
+      make ~lookBackTimePeriod ?savingsPlansToExclude ~savingsPlansToAdd
+        ~analysisType ?accountId ?accountScope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The configuration for the Savings Plans purchase analysis."]
+module CommitmentPurchaseAnalysisConfiguration =
+  struct
+    type nonrec t =
+      {
+      savingsPlansPurchaseAnalysisConfiguration:
+        SavingsPlansPurchaseAnalysisConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the Savings Plans purchase analysis."]}
+    let make ?savingsPlansPurchaseAnalysisConfiguration =
+      fun () -> { savingsPlansPurchaseAnalysisConfiguration }
+    let to_value x =
+      structure_to_value
+        [("SavingsPlansPurchaseAnalysisConfiguration",
+           (Option.map x.savingsPlansPurchaseAnalysisConfiguration
+              ~f:SavingsPlansPurchaseAnalysisConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let savingsPlansPurchaseAnalysisConfiguration =
+        (Option.map ~f:SavingsPlansPurchaseAnalysisConfiguration.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansPurchaseAnalysisConfiguration") in
+      make ?savingsPlansPurchaseAnalysisConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let savingsPlansPurchaseAnalysisConfiguration =
+        field_map json__ "SavingsPlansPurchaseAnalysisConfiguration"
+          SavingsPlansPurchaseAnalysisConfiguration.of_json in
+      make ?savingsPlansPurchaseAnalysisConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The configuration for the commitment purchase analysis."]
+module AnalysisSummary =
+  struct
+    type nonrec t =
+      {
+      estimatedCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "The estimated time for when the analysis will complete."];
+      analysisCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc "The completion time of the analysis."];
+      analysisStartedTime: ZonedDateTime.t option
+        [@ocaml.doc "The start time of the analysis."];
+      analysisStatus: AnalysisStatus.t option
+        [@ocaml.doc "The status of the analysis."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc "The error code used for the analysis."];
+      analysisId: AnalysisId.t option
+        [@ocaml.doc
+          "The analysis ID that's associated with the commitment purchase analysis."];
+      commitmentPurchaseAnalysisConfiguration:
+        CommitmentPurchaseAnalysisConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the commitment purchase analysis."]}
+    let make ?estimatedCompletionTime =
+      fun ?analysisCompletionTime ->
+        fun ?analysisStartedTime ->
+          fun ?analysisStatus ->
+            fun ?errorCode ->
+              fun ?analysisId ->
+                fun ?commitmentPurchaseAnalysisConfiguration ->
+                  fun () ->
+                    {
+                      estimatedCompletionTime;
+                      analysisCompletionTime;
+                      analysisStartedTime;
+                      analysisStatus;
+                      errorCode;
+                      analysisId;
+                      commitmentPurchaseAnalysisConfiguration
+                    }
+    let to_value x =
+      structure_to_value
+        [("EstimatedCompletionTime",
+           (Option.map x.estimatedCompletionTime ~f:ZonedDateTime.to_value));
+        ("AnalysisCompletionTime",
+          (Option.map x.analysisCompletionTime ~f:ZonedDateTime.to_value));
+        ("AnalysisStartedTime",
+          (Option.map x.analysisStartedTime ~f:ZonedDateTime.to_value));
+        ("AnalysisStatus",
+          (Option.map x.analysisStatus ~f:AnalysisStatus.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("AnalysisId", (Option.map x.analysisId ~f:AnalysisId.to_value));
+        ("CommitmentPurchaseAnalysisConfiguration",
+          (Option.map x.commitmentPurchaseAnalysisConfiguration
+             ~f:CommitmentPurchaseAnalysisConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commitmentPurchaseAnalysisConfiguration =
+        (Option.map ~f:CommitmentPurchaseAnalysisConfiguration.of_xml)
+          (Xml.child xml_arg0 "CommitmentPurchaseAnalysisConfiguration") in
+      let analysisId =
+        (Option.map ~f:AnalysisId.of_xml) (Xml.child xml_arg0 "AnalysisId") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let analysisStatus =
+        (Option.map ~f:AnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "AnalysisStatus") in
+      let analysisStartedTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "AnalysisStartedTime") in
+      let analysisCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "AnalysisCompletionTime") in
+      let estimatedCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EstimatedCompletionTime") in
+      make ?commitmentPurchaseAnalysisConfiguration ?analysisId ?errorCode
+        ?analysisStatus ?analysisStartedTime ?analysisCompletionTime
+        ?estimatedCompletionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commitmentPurchaseAnalysisConfiguration =
+        field_map json__ "CommitmentPurchaseAnalysisConfiguration"
+          CommitmentPurchaseAnalysisConfiguration.of_json in
+      let analysisId = field_map json__ "AnalysisId" AnalysisId.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let analysisStatus =
+        field_map json__ "AnalysisStatus" AnalysisStatus.of_json in
+      let analysisStartedTime =
+        field_map json__ "AnalysisStartedTime" ZonedDateTime.of_json in
+      let analysisCompletionTime =
+        field_map json__ "AnalysisCompletionTime" ZonedDateTime.of_json in
+      let estimatedCompletionTime =
+        field_map json__ "EstimatedCompletionTime" ZonedDateTime.of_json in
+      make ?commitmentPurchaseAnalysisConfiguration ?analysisId ?errorCode
+        ?analysisStatus ?analysisStartedTime ?analysisCompletionTime
+        ?estimatedCompletionTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A summary of the analysis."]
+module AnalysisSummaryList =
+  struct
+    type nonrec t = AnalysisSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AnalysisSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AnalysisSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AnalysisSummaryList"
+        ~of_json:AnalysisSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GenericDouble =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module RootCauseImpact =
+  struct
+    type nonrec t =
+      {
+      contribution: GenericDouble.t option
+        [@ocaml.doc
+          "The dollar amount that this root cause contributed to the anomaly's TotalImpact."]}
+    let make ?contribution = fun () -> { contribution }
+    let to_value x =
+      structure_to_value
+        [("Contribution",
+           (Option.map x.contribution ~f:GenericDouble.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let contribution =
+        (Option.map ~f:GenericDouble.of_xml)
+          (Xml.child xml_arg0 "Contribution") in
+      make ?contribution ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let contribution =
+        field_map json__ "Contribution" GenericDouble.of_json in
+      make ?contribution ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The dollar value of the root cause."]
 module RootCause =
   struct
     type nonrec t =
@@ -125,25 +1404,48 @@ module RootCause =
       linkedAccount: GenericString.t option
         [@ocaml.doc
           "The member account value that's associated with the cost anomaly."];
+      linkedAccountName: GenericString.t option
+        [@ocaml.doc
+          "The member account name value that's associated with the cost anomaly."];
       usageType: GenericString.t option
         [@ocaml.doc
-          "The UsageType value that's associated with the cost anomaly."]}
+          "The UsageType value that's associated with the cost anomaly."];
+      impact: RootCauseImpact.t option
+        [@ocaml.doc "The dollar impact for the root cause."]}
     let make ?service =
       fun ?region ->
         fun ?linkedAccount ->
-          fun ?usageType ->
-            fun () -> { service; region; linkedAccount; usageType }
+          fun ?linkedAccountName ->
+            fun ?usageType ->
+              fun ?impact ->
+                fun () ->
+                  {
+                    service;
+                    region;
+                    linkedAccount;
+                    linkedAccountName;
+                    usageType;
+                    impact
+                  }
     let to_value x =
       structure_to_value
         [("Service", (Option.map x.service ~f:GenericString.to_value));
         ("Region", (Option.map x.region ~f:GenericString.to_value));
         ("LinkedAccount",
           (Option.map x.linkedAccount ~f:GenericString.to_value));
-        ("UsageType", (Option.map x.usageType ~f:GenericString.to_value))]
+        ("LinkedAccountName",
+          (Option.map x.linkedAccountName ~f:GenericString.to_value));
+        ("UsageType", (Option.map x.usageType ~f:GenericString.to_value));
+        ("Impact", (Option.map x.impact ~f:RootCauseImpact.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let impact =
+        (Option.map ~f:RootCauseImpact.of_xml) (Xml.child xml_arg0 "Impact") in
       let usageType =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "UsageType") in
+      let linkedAccountName =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "LinkedAccountName") in
       let linkedAccount =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "LinkedAccount") in
@@ -151,22 +1453,30 @@ module RootCause =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
       let service =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Service") in
-      make ?usageType ?linkedAccount ?region ?service ()
+      make ?impact ?usageType ?linkedAccountName ?linkedAccount ?region
+        ?service ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let usageType = field_map json "UsageType" GenericString.of_json in
+    let of_json json__ =
+      let impact = field_map json__ "Impact" RootCauseImpact.of_json in
+      let usageType = field_map json__ "UsageType" GenericString.of_json in
+      let linkedAccountName =
+        field_map json__ "LinkedAccountName" GenericString.of_json in
       let linkedAccount =
-        field_map json "LinkedAccount" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let service = field_map json "Service" GenericString.of_json in
-      make ?usageType ?linkedAccount ?region ?service ()
+        field_map json__ "LinkedAccount" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let service = field_map json__ "Service" GenericString.of_json in
+      make ?impact ?usageType ?linkedAccountName ?linkedAccount ?region
+        ?service ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The combination of Amazon Web Services service, linked account, Region, and usage type where a cost anomaly is observed."]
+       "The combination of Amazon Web Services service, linked account, linked account name, Region, and usage type where a cost anomaly is observed, along with the dollar and percentage amount of the anomaly impact. The linked account name will only be available when the account name can be identified."]
 module RootCauses =
   struct
     type nonrec t = RootCause.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RootCause.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -187,10 +1497,11 @@ module RootCauses =
       list_of_json ~kind:"RootCauses" ~of_json:RootCause.of_json j
     let to_json v = composed_to_json to_value v
   end
-module GenericDouble =
+module NullableNonNegativeDouble =
   struct
     type nonrec t = float
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
     let of_string = Float.of_string
     let to_value x = `Double x
     let to_query v = to_query to_value v
@@ -204,65 +1515,111 @@ module Impact =
   struct
     type nonrec t =
       {
-      maxImpact: GenericDouble.t
+      maxImpact: GenericDouble.t option
         [@ocaml.doc
           "The maximum dollar value that's observed for an anomaly."];
       totalImpact: GenericDouble.t option
         [@ocaml.doc
-          "The cumulative dollar value that's observed for an anomaly."]}
-    let context_ = "Impact"
-    let make ?totalImpact =
-      fun ~maxImpact -> fun () -> { totalImpact; maxImpact }
+          "The cumulative dollar difference between the total actual spend and total expected spend. It is calculated as TotalActualSpend - TotalExpectedSpend."];
+      totalActualSpend: NullableNonNegativeDouble.t option
+        [@ocaml.doc
+          "The cumulative dollar amount that was actually spent during the anomaly."];
+      totalExpectedSpend: NullableNonNegativeDouble.t option
+        [@ocaml.doc
+          "The cumulative dollar amount that was expected to be spent during the anomaly. It is calculated using advanced machine learning models to determine the typical spending pattern based on historical data for a customer."];
+      totalImpactPercentage: NullableNonNegativeDouble.t option
+        [@ocaml.doc
+          "The cumulative percentage difference between the total actual spend and total expected spend. It is calculated as (TotalImpact / TotalExpectedSpend) * 100. When TotalExpectedSpend is zero, this field is omitted. Expected spend can be zero in situations such as when you start to use a service for the first time."]}
+    let make ?maxImpact =
+      fun ?totalImpact ->
+        fun ?totalActualSpend ->
+          fun ?totalExpectedSpend ->
+            fun ?totalImpactPercentage ->
+              fun () ->
+                {
+                  maxImpact;
+                  totalImpact;
+                  totalActualSpend;
+                  totalExpectedSpend;
+                  totalImpactPercentage
+                }
     let to_value x =
       structure_to_value
-        [("MaxImpact", (Some (GenericDouble.to_value x.maxImpact)));
-        ("TotalImpact", (Option.map x.totalImpact ~f:GenericDouble.to_value))]
+        [("MaxImpact", (Option.map x.maxImpact ~f:GenericDouble.to_value));
+        ("TotalImpact", (Option.map x.totalImpact ~f:GenericDouble.to_value));
+        ("TotalActualSpend",
+          (Option.map x.totalActualSpend
+             ~f:NullableNonNegativeDouble.to_value));
+        ("TotalExpectedSpend",
+          (Option.map x.totalExpectedSpend
+             ~f:NullableNonNegativeDouble.to_value));
+        ("TotalImpactPercentage",
+          (Option.map x.totalImpactPercentage
+             ~f:NullableNonNegativeDouble.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let totalImpactPercentage =
+        (Option.map ~f:NullableNonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "TotalImpactPercentage") in
+      let totalExpectedSpend =
+        (Option.map ~f:NullableNonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "TotalExpectedSpend") in
+      let totalActualSpend =
+        (Option.map ~f:NullableNonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "TotalActualSpend") in
       let totalImpact =
         (Option.map ~f:GenericDouble.of_xml)
           (Xml.child xml_arg0 "TotalImpact") in
       let maxImpact =
-        GenericDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxImpact") in
-      make ?totalImpact ~maxImpact ()
+        (Option.map ~f:GenericDouble.of_xml) (Xml.child xml_arg0 "MaxImpact") in
+      make ?totalImpactPercentage ?totalExpectedSpend ?totalActualSpend
+        ?totalImpact ?maxImpact ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalImpact = field_map json "TotalImpact" GenericDouble.of_json in
-      let maxImpact = field_map_exn json "MaxImpact" GenericDouble.of_json in
-      make ?totalImpact ~maxImpact ()
+    let of_json json__ =
+      let totalImpactPercentage =
+        field_map json__ "TotalImpactPercentage"
+          NullableNonNegativeDouble.of_json in
+      let totalExpectedSpend =
+        field_map json__ "TotalExpectedSpend"
+          NullableNonNegativeDouble.of_json in
+      let totalActualSpend =
+        field_map json__ "TotalActualSpend" NullableNonNegativeDouble.of_json in
+      let totalImpact = field_map json__ "TotalImpact" GenericDouble.of_json in
+      let maxImpact = field_map json__ "MaxImpact" GenericDouble.of_json in
+      make ?totalImpactPercentage ?totalExpectedSpend ?totalActualSpend
+        ?totalImpact ?maxImpact ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The dollar value of the anomaly."]
 module AnomalyScore =
   struct
     type nonrec t =
       {
-      maxScore: GenericDouble.t
+      maxScore: GenericDouble.t option
         [@ocaml.doc
           "The maximum score that's observed during the AnomalyDateInterval."];
-      currentScore: GenericDouble.t [@ocaml.doc "The last observed score."]}
-    let context_ = "AnomalyScore"
-    let make ~maxScore =
-      fun ~currentScore -> fun () -> { maxScore; currentScore }
+      currentScore: GenericDouble.t option
+        [@ocaml.doc "The last observed score."]}
+    let make ?maxScore =
+      fun ?currentScore -> fun () -> { maxScore; currentScore }
     let to_value x =
       structure_to_value
-        [("MaxScore", (Some (GenericDouble.to_value x.maxScore)));
-        ("CurrentScore", (Some (GenericDouble.to_value x.currentScore)))]
+        [("MaxScore", (Option.map x.maxScore ~f:GenericDouble.to_value));
+        ("CurrentScore",
+          (Option.map x.currentScore ~f:GenericDouble.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let currentScore =
-        GenericDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CurrentScore") in
+        (Option.map ~f:GenericDouble.of_xml)
+          (Xml.child xml_arg0 "CurrentScore") in
       let maxScore =
-        GenericDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MaxScore") in
-      make ~currentScore ~maxScore ()
+        (Option.map ~f:GenericDouble.of_xml) (Xml.child xml_arg0 "MaxScore") in
+      make ?currentScore ?maxScore ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentScore =
-        field_map_exn json "CurrentScore" GenericDouble.of_json in
-      let maxScore = field_map_exn json "MaxScore" GenericDouble.of_json in
-      make ~currentScore ~maxScore ()
+        field_map json__ "CurrentScore" GenericDouble.of_json in
+      let maxScore = field_map json__ "MaxScore" GenericDouble.of_json in
+      make ?currentScore ?maxScore ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Quantifies the anomaly. The higher score means that it's more anomalous."]
@@ -299,7 +1656,7 @@ module Anomaly =
   struct
     type nonrec t =
       {
-      anomalyId: GenericString.t
+      anomalyId: GenericString.t option
         [@ocaml.doc "The unique identifier for the anomaly."];
       anomalyStartDate: YearMonthDay.t option
         [@ocaml.doc "The first day the anomaly is detected."];
@@ -310,39 +1667,39 @@ module Anomaly =
           "The dimension for the anomaly (for example, an Amazon Web Services service in a service monitor)."];
       rootCauses: RootCauses.t option
         [@ocaml.doc "The list of identified root causes for the anomaly."];
-      anomalyScore: AnomalyScore.t
+      anomalyScore: AnomalyScore.t option
         [@ocaml.doc "The latest and maximum score for the anomaly."];
-      impact: Impact.t [@ocaml.doc "The dollar impact for the anomaly."];
-      monitorArn: GenericString.t
+      impact: Impact.t option
+        [@ocaml.doc "The dollar impact for the anomaly."];
+      monitorArn: GenericString.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the cost monitor that generated this anomaly."];
       feedback: AnomalyFeedbackType.t option
         [@ocaml.doc "The feedback value."]}
-    let context_ = "Anomaly"
-    let make ?anomalyStartDate =
-      fun ?anomalyEndDate ->
-        fun ?dimensionValue ->
-          fun ?rootCauses ->
-            fun ?feedback ->
-              fun ~anomalyId ->
-                fun ~anomalyScore ->
-                  fun ~impact ->
-                    fun ~monitorArn ->
+    let make ?anomalyId =
+      fun ?anomalyStartDate ->
+        fun ?anomalyEndDate ->
+          fun ?dimensionValue ->
+            fun ?rootCauses ->
+              fun ?anomalyScore ->
+                fun ?impact ->
+                  fun ?monitorArn ->
+                    fun ?feedback ->
                       fun () ->
                         {
+                          anomalyId;
                           anomalyStartDate;
                           anomalyEndDate;
                           dimensionValue;
                           rootCauses;
-                          feedback;
-                          anomalyId;
                           anomalyScore;
                           impact;
-                          monitorArn
+                          monitorArn;
+                          feedback
                         }
     let to_value x =
       structure_to_value
-        [("AnomalyId", (Some (GenericString.to_value x.anomalyId)));
+        [("AnomalyId", (Option.map x.anomalyId ~f:GenericString.to_value));
         ("AnomalyStartDate",
           (Option.map x.anomalyStartDate ~f:YearMonthDay.to_value));
         ("AnomalyEndDate",
@@ -350,9 +1707,10 @@ module Anomaly =
         ("DimensionValue",
           (Option.map x.dimensionValue ~f:GenericString.to_value));
         ("RootCauses", (Option.map x.rootCauses ~f:RootCauses.to_value));
-        ("AnomalyScore", (Some (AnomalyScore.to_value x.anomalyScore)));
-        ("Impact", (Some (Impact.to_value x.impact)));
-        ("MonitorArn", (Some (GenericString.to_value x.monitorArn)));
+        ("AnomalyScore",
+          (Option.map x.anomalyScore ~f:AnomalyScore.to_value));
+        ("Impact", (Option.map x.impact ~f:Impact.to_value));
+        ("MonitorArn", (Option.map x.monitorArn ~f:GenericString.to_value));
         ("Feedback", (Option.map x.feedback ~f:AnomalyFeedbackType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
@@ -360,13 +1718,13 @@ module Anomaly =
         (Option.map ~f:AnomalyFeedbackType.of_xml)
           (Xml.child xml_arg0 "Feedback") in
       let monitorArn =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "MonitorArn") in
       let impact =
-        Impact.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Impact") in
+        (Option.map ~f:Impact.of_xml) (Xml.child xml_arg0 "Impact") in
       let anomalyScore =
-        AnomalyScore.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AnomalyScore") in
+        (Option.map ~f:AnomalyScore.of_xml)
+          (Xml.child xml_arg0 "AnomalyScore") in
       let rootCauses =
         (Option.map ~f:RootCauses.of_xml) (Xml.child xml_arg0 "RootCauses") in
       let dimensionValue =
@@ -379,27 +1737,25 @@ module Anomaly =
         (Option.map ~f:YearMonthDay.of_xml)
           (Xml.child xml_arg0 "AnomalyStartDate") in
       let anomalyId =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
-      make ?feedback ~monitorArn ~impact ~anomalyScore ?rootCauses
-        ?dimensionValue ?anomalyEndDate ?anomalyStartDate ~anomalyId ()
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "AnomalyId") in
+      make ?feedback ?monitorArn ?impact ?anomalyScore ?rootCauses
+        ?dimensionValue ?anomalyEndDate ?anomalyStartDate ?anomalyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let feedback = field_map json "Feedback" AnomalyFeedbackType.of_json in
-      let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
-      let impact = field_map_exn json "Impact" Impact.of_json in
-      let anomalyScore =
-        field_map_exn json "AnomalyScore" AnomalyScore.of_json in
-      let rootCauses = field_map json "RootCauses" RootCauses.of_json in
+    let of_json json__ =
+      let feedback = field_map json__ "Feedback" AnomalyFeedbackType.of_json in
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
+      let impact = field_map json__ "Impact" Impact.of_json in
+      let anomalyScore = field_map json__ "AnomalyScore" AnomalyScore.of_json in
+      let rootCauses = field_map json__ "RootCauses" RootCauses.of_json in
       let dimensionValue =
-        field_map json "DimensionValue" GenericString.of_json in
+        field_map json__ "DimensionValue" GenericString.of_json in
       let anomalyEndDate =
-        field_map json "AnomalyEndDate" YearMonthDay.of_json in
+        field_map json__ "AnomalyEndDate" YearMonthDay.of_json in
       let anomalyStartDate =
-        field_map json "AnomalyStartDate" YearMonthDay.of_json in
-      let anomalyId = field_map_exn json "AnomalyId" GenericString.of_json in
-      make ?feedback ~monitorArn ~impact ~anomalyScore ?rootCauses
-        ?dimensionValue ?anomalyEndDate ?anomalyStartDate ~anomalyId ()
+        field_map json__ "AnomalyStartDate" YearMonthDay.of_json in
+      let anomalyId = field_map json__ "AnomalyId" GenericString.of_json in
+      make ?feedback ?monitorArn ?impact ?anomalyScore ?rootCauses
+        ?dimensionValue ?anomalyEndDate ?anomalyStartDate ?anomalyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An unusual cost pattern. This consists of the detailed metadata and the current status of the anomaly object."]
@@ -407,6 +1763,9 @@ module Anomalies =
   struct
     type nonrec t = Anomaly.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Anomaly.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -449,9 +1808,9 @@ module AnomalyDateInterval =
           (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
       make ?endDate ~startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDate = field_map json "EndDate" YearMonthDay.of_json in
-      let startDate = field_map_exn json "StartDate" YearMonthDay.of_json in
+    let of_json json__ =
+      let endDate = field_map json__ "EndDate" YearMonthDay.of_json in
+      let startDate = field_map_exn json__ "StartDate" YearMonthDay.of_json in
       make ?endDate ~startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The time period for an anomaly."]
@@ -499,10 +1858,25 @@ module MonitorDimension =
   struct
     type nonrec t =
       | SERVICE 
+      | LINKED_ACCOUNT 
+      | TAG 
+      | COST_CATEGORY 
       | Non_static_id of string 
     let make i = i
-    let to_string = function | SERVICE -> "SERVICE" | Non_static_id s -> s
-    let of_string = function | "SERVICE" -> SERVICE | x -> Non_static_id x
+    let to_string =
+      function
+      | SERVICE -> "SERVICE"
+      | LINKED_ACCOUNT -> "LINKED_ACCOUNT"
+      | TAG -> "TAG"
+      | COST_CATEGORY -> "COST_CATEGORY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVICE" -> SERVICE
+      | "LINKED_ACCOUNT" -> LINKED_ACCOUNT
+      | "TAG" -> TAG
+      | "COST_CATEGORY" -> COST_CATEGORY
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -535,6 +1909,9 @@ module Values =
   struct
     type nonrec t = Value.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -584,6 +1961,7 @@ module MatchOption =
       | CONTAINS 
       | CASE_SENSITIVE 
       | CASE_INSENSITIVE 
+      | GREATER_THAN_OR_EQUAL 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -595,6 +1973,7 @@ module MatchOption =
       | CONTAINS -> "CONTAINS"
       | CASE_SENSITIVE -> "CASE_SENSITIVE"
       | CASE_INSENSITIVE -> "CASE_INSENSITIVE"
+      | GREATER_THAN_OR_EQUAL -> "GREATER_THAN_OR_EQUAL"
       | Non_static_id s -> s
     let of_string =
       function
@@ -605,6 +1984,7 @@ module MatchOption =
       | "CONTAINS" -> CONTAINS
       | "CASE_SENSITIVE" -> CASE_SENSITIVE
       | "CASE_INSENSITIVE" -> CASE_INSENSITIVE
+      | "GREATER_THAN_OR_EQUAL" -> GREATER_THAN_OR_EQUAL
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -618,6 +1998,9 @@ module MatchOptions =
   struct
     type nonrec t = MatchOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MatchOption.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -646,7 +2029,7 @@ module TagValues =
       values: Values.t option [@ocaml.doc "The specific value of the tag."];
       matchOptions: MatchOptions.t option
         [@ocaml.doc
-          "The match options that you can use to filter your results. MatchOptions is only applicable for actions related to Cost Category. The default values for MatchOptions are EQUALS and CASE_SENSITIVE."]}
+          "The match options that you can use to filter your results. MatchOptions is only applicable for actions related to cost category. The default values for MatchOptions are EQUALS and CASE_SENSITIVE."]}
     let make ?key =
       fun ?values ->
         fun ?matchOptions -> fun () -> { key; values; matchOptions }
@@ -666,20 +2049,21 @@ module TagValues =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
-      let values = field_map json "Values" Values.of_json in
-      let key = field_map json "Key" TagKey.of_json in
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in
       make ?matchOptions ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The values that are available for a tag. If Values and Key aren't specified, the ABSENT MatchOption is applied to all tags. That is, it's filtered on resources with no tags. If Values is provided and Key isn't specified, the ABSENT MatchOption is applied to the tag Key only. That is, it's filtered on resources without the given tag key."]
+       "The values that are available for a tag. If Values and Key aren't specified, the ABSENT MatchOption is applied to all tags. That is, it's filtered on resources with no tags. If Key is provided and Values isn't specified, the ABSENT MatchOption is applied to the tag Key only. That is, it's filtered on resources without the given tag key."]
 module Dimension =
   struct
     type nonrec t =
       | AZ 
       | INSTANCE_TYPE 
       | LINKED_ACCOUNT 
+      | PAYER_ACCOUNT 
       | LINKED_ACCOUNT_NAME 
       | OPERATION 
       | PURCHASE_TYPE 
@@ -709,6 +2093,8 @@ module Dimension =
       | AGREEMENT_END_DATE_TIME_AFTER 
       | AGREEMENT_END_DATE_TIME_BEFORE 
       | INVOICING_ENTITY 
+      | ANOMALY_TOTAL_IMPACT_ABSOLUTE 
+      | ANOMALY_TOTAL_IMPACT_PERCENTAGE 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -716,6 +2102,7 @@ module Dimension =
       | AZ -> "AZ"
       | INSTANCE_TYPE -> "INSTANCE_TYPE"
       | LINKED_ACCOUNT -> "LINKED_ACCOUNT"
+      | PAYER_ACCOUNT -> "PAYER_ACCOUNT"
       | LINKED_ACCOUNT_NAME -> "LINKED_ACCOUNT_NAME"
       | OPERATION -> "OPERATION"
       | PURCHASE_TYPE -> "PURCHASE_TYPE"
@@ -745,12 +2132,15 @@ module Dimension =
       | AGREEMENT_END_DATE_TIME_AFTER -> "AGREEMENT_END_DATE_TIME_AFTER"
       | AGREEMENT_END_DATE_TIME_BEFORE -> "AGREEMENT_END_DATE_TIME_BEFORE"
       | INVOICING_ENTITY -> "INVOICING_ENTITY"
+      | ANOMALY_TOTAL_IMPACT_ABSOLUTE -> "ANOMALY_TOTAL_IMPACT_ABSOLUTE"
+      | ANOMALY_TOTAL_IMPACT_PERCENTAGE -> "ANOMALY_TOTAL_IMPACT_PERCENTAGE"
       | Non_static_id s -> s
     let of_string =
       function
       | "AZ" -> AZ
       | "INSTANCE_TYPE" -> INSTANCE_TYPE
       | "LINKED_ACCOUNT" -> LINKED_ACCOUNT
+      | "PAYER_ACCOUNT" -> PAYER_ACCOUNT
       | "LINKED_ACCOUNT_NAME" -> LINKED_ACCOUNT_NAME
       | "OPERATION" -> OPERATION
       | "PURCHASE_TYPE" -> PURCHASE_TYPE
@@ -780,6 +2170,8 @@ module Dimension =
       | "AGREEMENT_END_DATE_TIME_AFTER" -> AGREEMENT_END_DATE_TIME_AFTER
       | "AGREEMENT_END_DATE_TIME_BEFORE" -> AGREEMENT_END_DATE_TIME_BEFORE
       | "INVOICING_ENTITY" -> INVOICING_ENTITY
+      | "ANOMALY_TOTAL_IMPACT_ABSOLUTE" -> ANOMALY_TOTAL_IMPACT_ABSOLUTE
+      | "ANOMALY_TOTAL_IMPACT_PERCENTAGE" -> ANOMALY_TOTAL_IMPACT_PERCENTAGE
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -795,13 +2187,13 @@ module DimensionValues =
       {
       key: Dimension.t option
         [@ocaml.doc
-          "The names of the metadata types that you can use to filter and group your results. For example, AZ returns a list of Availability Zones."];
+          "The names of the metadata types that you can use to filter and group your results. For example, AZ returns a list of Availability Zones. Not all dimensions are supported in each API. Refer to the documentation for each specific API to see what is supported. LINKED_ACCOUNT_NAME and SERVICE_CODE can only be used in CostCategoryRule. ANOMALY_TOTAL_IMPACT_ABSOLUTE and ANOMALY_TOTAL_IMPACT_PERCENTAGE can only be used in AnomalySubscriptions."];
       values: Values.t option
         [@ocaml.doc
           "The metadata values that you can use to filter and group your results. You can use GetDimensionValues to find specific values."];
       matchOptions: MatchOptions.t option
         [@ocaml.doc
-          "The match options that you can use to filter your results. MatchOptions is only applicable for actions related to Cost Category. The default values for MatchOptions are EQUALS and CASE_SENSITIVE."]}
+          "The match options that you can use to filter your results. MatchOptions is only applicable for actions related to cost category and Anomaly Subscriptions. Refer to the documentation for each specific API to see what is supported. The default values for MatchOptions are EQUALS and CASE_SENSITIVE."]}
     let make ?key =
       fun ?values ->
         fun ?matchOptions -> fun () -> { key; values; matchOptions }
@@ -821,10 +2213,10 @@ module DimensionValues =
       let key = (Option.map ~f:Dimension.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
-      let values = field_map json "Values" Values.of_json in
-      let key = field_map json "Key" Dimension.of_json in
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let key = field_map json__ "Key" Dimension.of_json in
       make ?matchOptions ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -832,7 +2224,7 @@ module DimensionValues =
 module CostCategoryName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "The unique name of the Cost Category."]
+                            "The unique name of the cost category."]
     let context_ = "CostCategoryName"
     let make i =
       let open Result in
@@ -851,14 +2243,14 @@ module CostCategoryName =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"CostCategoryName" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The unique name of the Cost Category."]
+  end[@@ocaml.doc "The unique name of the cost category."]
 module CostCategoryValues =
   struct
     type nonrec t =
       {
       key: CostCategoryName.t option ;
       values: Values.t option
-        [@ocaml.doc "The specific value of the Cost Category."];
+        [@ocaml.doc "The specific value of the cost category."];
       matchOptions: MatchOptions.t option
         [@ocaml.doc
           "The match options that you can use to filter your results. MatchOptions is only applicable for actions related to cost category. The default values for MatchOptions is EQUALS and CASE_SENSITIVE."]}
@@ -882,10 +2274,10 @@ module CostCategoryValues =
         (Option.map ~f:CostCategoryName.of_xml) (Xml.child xml_arg0 "Key") in
       make ?matchOptions ?values ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let matchOptions = field_map json "MatchOptions" MatchOptions.of_json in
-      let values = field_map json "Values" Values.of_json in
-      let key = field_map json "Key" CostCategoryName.of_json in
+    let of_json json__ =
+      let matchOptions = field_map json__ "MatchOptions" MatchOptions.of_json in
+      let values = field_map json__ "Values" Values.of_json in
+      let key = field_map json__ "Key" CostCategoryName.of_json in
       make ?matchOptions ?values ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -971,18 +2363,18 @@ module rec
       let or_ = (Option.map ~f:Expressions.of_xml) (Xml.child xml_arg0 "Or") in
       make ?costCategories ?tags ?dimensions ?not ?and_ ?or_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let costCategories =
-        field_map json "CostCategories" CostCategoryValues.of_json in
-      let tags = field_map json "Tags" TagValues.of_json in
-      let dimensions = field_map json "Dimensions" DimensionValues.of_json in
-      let not = field_map json "Not" Expression.of_json in
-      let and_ = field_map json "And" Expressions.of_json in
-      let or_ = field_map json "Or" Expressions.of_json in
+        field_map json__ "CostCategories" CostCategoryValues.of_json in
+      let tags = field_map json__ "Tags" TagValues.of_json in
+      let dimensions = field_map json__ "Dimensions" DimensionValues.of_json in
+      let not = field_map json__ "Not" Expression.of_json in
+      let and_ = field_map json__ "And" Expressions.of_json in
+      let or_ = field_map json__ "Or" Expressions.of_json in
       make ?costCategories ?tags ?dimensions ?not ?and_ ?or_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use Expression to filter by cost or by usage. There are two patterns: Simple dimension values - You can set the dimension name and values for the filters that you plan to use. For example, you can filter for REGION==us-east-1 OR REGION==us-west-1. For GetRightsizingRecommendation, the Region is a full name (for example, REGION==US East (N. Virginia). The Expression example is as follows: \\{ \"Dimensions\": \\{ \"Key\": \"REGION\", \"Values\": \\[ \"us-east-1\", \226\128\156us-west-1\226\128\157 \\] \\} \\} The list of dimension values are OR'd together to retrieve cost or usage data. You can create Expression and DimensionValues objects using either with* methods or set* methods in multiple lines. Compound dimension values with logical operations - You can use multiple Expression types and the logical operators AND/OR/NOT to create a list of one or more Expression objects. By doing this, you can filter on more advanced options. For example, you can filter on ((REGION == us-east-1 OR REGION == us-west-1) OR (TAG.Type == Type1)) AND (USAGE_TYPE != DataTransfer). The Expression for that is as follows: \\{ \"And\": \\[ \\{\"Or\": \\[ \\{\"Dimensions\": \\{ \"Key\": \"REGION\", \"Values\": \\[ \"us-east-1\", \"us-west-1\" \\] \\}\\}, \\{\"Tags\": \\{ \"Key\": \"TagName\", \"Values\": \\[\"Value1\"\\] \\} \\} \\]\\}, \\{\"Not\": \\{\"Dimensions\": \\{ \"Key\": \"USAGE_TYPE\", \"Values\": \\[\"DataTransfer\"\\] \\}\\}\\} \\] \\} Because each Expression can have only one operator, the service returns an error if more than one is specified. The following example shows an Expression object that creates an error. \\{ \"And\": \\[ ... \\], \"DimensionValues\": \\{ \"Dimension\": \"USAGE_TYPE\", \"Values\": \\[ \"DataTransfer\" \\] \\} \\} For the GetRightsizingRecommendation action, a combination of OR and NOT isn't supported. OR isn't supported between different dimensions, or dimensions and tags. NOT operators aren't supported. Dimensions are also limited to LINKED_ACCOUNT, REGION, or RIGHTSIZING_TYPE. For the GetReservationPurchaseRecommendation action, only NOT is supported. AND and OR aren't supported. Dimensions are limited to LINKED_ACCOUNT."]
+       "Use Expression to filter in various Cost Explorer APIs. Not all Expression types are supported in each API. Refer to the documentation for each specific API to see what is supported. There are two patterns: Simple dimension values. There are three types of simple dimension values: CostCategories, Tags, and Dimensions. Specify the CostCategories field to define a filter that acts on Cost Categories. Specify the Tags field to define a filter that acts on Cost Allocation Tags. Specify the Dimensions field to define a filter that acts on the DimensionValues . For each filter type, you can set the dimension name and values for the filters that you plan to use. For example, you can filter for REGION==us-east-1 OR REGION==us-west-1. For GetRightsizingRecommendation, the Region is a full name (for example, REGION==US East (N. Virginia). The corresponding Expression for this example is as follows: \\{ \"Dimensions\": \\{ \"Key\": \"REGION\", \"Values\": \\[ \"us-east-1\", \"us-west-1\" \\] \\} \\} As shown in the previous example, lists of dimension values are combined with OR when applying the filter. You can also set different match options to further control how the filter behaves. Not all APIs support match options. Refer to the documentation for each specific API to see what is supported. For example, you can filter for linked account names that start with \"a\". The corresponding Expression for this example is as follows: \\{ \"Dimensions\": \\{ \"Key\": \"LINKED_ACCOUNT_NAME\", \"MatchOptions\": \\[ \"STARTS_WITH\" \\], \"Values\": \\[ \"a\" \\] \\} \\} Compound Expression types with logical operations. You can use multiple Expression types and the logical operators AND/OR/NOT to create a list of one or more Expression objects. By doing this, you can filter by more advanced options. For example, you can filter by ((REGION == us-east-1 OR REGION == us-west-1) OR (TAG.Type == Type1)) AND (USAGE_TYPE != DataTransfer). The corresponding Expression for this example is as follows: \\{ \"And\": \\[ \\{\"Or\": \\[ \\{\"Dimensions\": \\{ \"Key\": \"REGION\", \"Values\": \\[ \"us-east-1\", \"us-west-1\" \\] \\}\\}, \\{\"Tags\": \\{ \"Key\": \"TagName\", \"Values\": \\[\"Value1\"\\] \\} \\} \\]\\}, \\{\"Not\": \\{\"Dimensions\": \\{ \"Key\": \"USAGE_TYPE\", \"Values\": \\[\"DataTransfer\"\\] \\}\\}\\} \\] \\} Because each Expression can have only one operator, the service returns an error if more than one is specified. The following example shows an Expression object that creates an error: \\{ \"And\": \\[ ... \\], \"Dimensions\": \\{ \"Key\": \"USAGE_TYPE\", \"Values\": \\[ \"DataTransfer\" \\] \\} \\} The following is an example of the corresponding error message: \"Expression has more than one roots. Only one root operator is allowed for each expression: And, Or, Not, Dimensions, Tags, CostCategories\" For the GetRightsizingRecommendation action, a combination of OR and NOT isn't supported. OR isn't supported between different dimensions, or dimensions and tags. NOT operators aren't supported. Dimensions are also limited to LINKED_ACCOUNT, REGION, or RIGHTSIZING_TYPE. For the GetReservationPurchaseRecommendation action, only NOT is supported. AND and OR aren't supported. Dimensions are limited to LINKED_ACCOUNT."]
  and
   Expressions:sig
                 type nonrec t = Expression.t list
@@ -997,6 +2389,9 @@ module rec
   struct
     type nonrec t = Expression.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Expression.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1031,10 +2426,15 @@ module AnomalyMonitor =
       lastEvaluatedDate: YearMonthDay.t option
         [@ocaml.doc
           "The date when the monitor last evaluated for anomalies."];
-      monitorType: MonitorType.t [@ocaml.doc "The possible type values."];
+      monitorType: MonitorType.t
+        [@ocaml.doc
+          "The type of the monitor. Set this to DIMENSIONAL for an Amazon Web Services managed monitor. Amazon Web Services managed monitors automatically track up to the top 5,000 values by cost within a dimension of your choosing. Each dimension value is evaluated independently. If you start incurring cost in a new value of your chosen dimension, it will automatically be analyzed by an Amazon Web Services managed monitor. Set this to CUSTOM for a customer managed monitor. Customer managed monitors let you select specific dimension values that get monitored in aggregate. For more information about monitor types, see Monitor types in the Billing and Cost Management User Guide."];
       monitorDimension: MonitorDimension.t option
-        [@ocaml.doc "The dimensions to evaluate."];
-      monitorSpecification: Expression.t option ;
+        [@ocaml.doc
+          "For customer managed monitors, do not specify this field. For Amazon Web Services managed monitors, this field controls which cost dimension is automatically analyzed by the monitor. For TAG and COST_CATEGORY dimensions, you must also specify MonitorSpecification to configure the specific tag or cost category key to analyze."];
+      monitorSpecification: Expression.t option
+        [@ocaml.doc
+          "An Expression object used to control what costs the monitor analyzes for anomalies. For Amazon Web Services managed monitors: If MonitorDimension is SERVICE or LINKED_ACCOUNT, do not specify this field If MonitorDimension is TAG, set this field to \\{ \"Tags\": \\{ \"Key\": \"your tag key\" \\} \\} If MonitorDimension is COST_CATEGORY, set this field to \\{ \"CostCategories\": \\{ \"Key\": \"your cost category key\" \\} \\} For customer managed monitors: To track linked accounts, set this field to \\{ \"Dimensions\": \\{ \"Key\": \"LINKED_ACCOUNT\", \"Values\": \\[ \"your list of up to 10 account IDs\" \\] \\} \\} To track cost allocation tags, set this field to \\{ \"Tags\": \\{ \"Key\": \"your tag key\", \"Values\": \\[ \"your list of up to 10 tag values\" \\] \\} \\} To track cost categories, set this field to\\{ \"CostCategories\": \\{ \"Key\": \"your cost category key\", \"Values\": \\[ \"your cost category value\" \\] \\} \\}"];
       dimensionalValueCount: NonNegativeInteger.t option
         [@ocaml.doc "The value for evaluated dimensions."]}
     let context_ = "AnomalyMonitor"
@@ -1109,22 +2509,23 @@ module AnomalyMonitor =
         ~monitorType ?lastEvaluatedDate ?lastUpdatedDate ?creationDate
         ~monitorName ?monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionalValueCount =
-        field_map json "DimensionalValueCount" NonNegativeInteger.of_json in
+        field_map json__ "DimensionalValueCount" NonNegativeInteger.of_json in
       let monitorSpecification =
-        field_map json "MonitorSpecification" Expression.of_json in
+        field_map json__ "MonitorSpecification" Expression.of_json in
       let monitorDimension =
-        field_map json "MonitorDimension" MonitorDimension.of_json in
-      let monitorType = field_map_exn json "MonitorType" MonitorType.of_json in
+        field_map json__ "MonitorDimension" MonitorDimension.of_json in
+      let monitorType =
+        field_map_exn json__ "MonitorType" MonitorType.of_json in
       let lastEvaluatedDate =
-        field_map json "LastEvaluatedDate" YearMonthDay.of_json in
+        field_map json__ "LastEvaluatedDate" YearMonthDay.of_json in
       let lastUpdatedDate =
-        field_map json "LastUpdatedDate" YearMonthDay.of_json in
-      let creationDate = field_map json "CreationDate" YearMonthDay.of_json in
+        field_map json__ "LastUpdatedDate" YearMonthDay.of_json in
+      let creationDate = field_map json__ "CreationDate" YearMonthDay.of_json in
       let monitorName =
-        field_map_exn json "MonitorName" GenericString.of_json in
-      let monitorArn = field_map json "MonitorArn" GenericString.of_json in
+        field_map_exn json__ "MonitorName" GenericString.of_json in
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
       make ?dimensionalValueCount ?monitorSpecification ?monitorDimension
         ~monitorType ?lastEvaluatedDate ?lastUpdatedDate ?creationDate
         ~monitorName ?monitorArn ()
@@ -1135,6 +2536,9 @@ module AnomalyMonitors =
   struct
     type nonrec t = AnomalyMonitor.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnomalyMonitor.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1250,10 +2654,10 @@ module Subscriber =
           (Xml.child xml_arg0 "Address") in
       make ?status ?type_ ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" SubscriberStatus.of_json in
-      let type_ = field_map json "Type" SubscriberType.of_json in
-      let address = field_map json "Address" SubscriberAddress.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" SubscriberStatus.of_json in
+      let type_ = field_map json__ "Type" SubscriberType.of_json in
+      let address = field_map json__ "Address" SubscriberAddress.of_json in
       make ?status ?type_ ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The recipient of AnomalySubscription notifications."]
@@ -1261,6 +2665,9 @@ module Subscribers =
   struct
     type nonrec t = Subscriber.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Subscriber.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1280,20 +2687,6 @@ module Subscribers =
     let of_json j =
       list_of_json ~kind:"Subscribers" ~of_json:Subscriber.of_json j
     let to_json v = composed_to_json to_value v
-  end
-module NullableNonNegativeDouble =
-  struct
-    type nonrec t = float
-    let make i =
-      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
-    let of_string = Float.of_string
-    let to_value x = `Double x
-    let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
-    let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
-    let to_json = simple_to_json to_value
   end
 module Arn =
   struct
@@ -1321,6 +2714,9 @@ module MonitorArnList =
   struct
     type nonrec t = Arn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Arn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1384,32 +2780,37 @@ module AnomalySubscription =
         [@ocaml.doc "A list of cost anomaly monitors."];
       subscribers: Subscribers.t
         [@ocaml.doc "A list of subscribers to notify."];
-      threshold: NullableNonNegativeDouble.t
+      threshold: NullableNonNegativeDouble.t option
         [@ocaml.doc
-          "The dollar value that triggers a notification if the threshold is exceeded."];
+          "(deprecated) An absolute dollar value that must be exceeded by the anomaly's total impact (see Impact for more details) for an anomaly notification to be generated. This field has been deprecated. To specify a threshold, use ThresholdExpression. Continued use of Threshold will be treated as shorthand syntax for a ThresholdExpression. One of Threshold or ThresholdExpression is required for this resource. You cannot specify both."];
       frequency: AnomalySubscriptionFrequency.t
         [@ocaml.doc
-          "The frequency that anomaly reports are sent over email."];
+          "The frequency that anomaly notifications are sent. Notifications are sent either over email (for DAILY and WEEKLY frequencies) or SNS (for IMMEDIATE frequency). For more information, see Creating an Amazon SNS topic for anomaly notifications."];
       subscriptionName: GenericString.t
-        [@ocaml.doc "The name for the subscription."]}
+        [@ocaml.doc "The name for the subscription."];
+      thresholdExpression: Expression.t option
+        [@ocaml.doc
+          "An Expression object used to specify the anomalies that you want to generate alerts for. This supports dimensions and nested expressions. The supported dimensions are ANOMALY_TOTAL_IMPACT_ABSOLUTE and ANOMALY_TOTAL_IMPACT_PERCENTAGE, corresponding to an anomaly\226\128\153s TotalImpact and TotalImpactPercentage, respectively (see Impact for more details). The supported nested expression types are AND and OR. The match option GREATER_THAN_OR_EQUAL is required. Values must be numbers between 0 and 10,000,000,000 in string format. One of Threshold or ThresholdExpression is required for this resource. You cannot specify both. The following are examples of valid ThresholdExpressions: Absolute threshold: \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} Percentage threshold: \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} AND two thresholds together: \\{ \"And\": \\[ \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\}, \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} \\] \\} OR two thresholds together: \\{ \"Or\": \\[ \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\}, \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} \\] \\}"]}
     let context_ = "AnomalySubscription"
     let make ?subscriptionArn =
       fun ?accountId ->
-        fun ~monitorArnList ->
-          fun ~subscribers ->
-            fun ~threshold ->
-              fun ~frequency ->
-                fun ~subscriptionName ->
-                  fun () ->
-                    {
-                      subscriptionArn;
-                      accountId;
-                      monitorArnList;
-                      subscribers;
-                      threshold;
-                      frequency;
-                      subscriptionName
-                    }
+        fun ?threshold ->
+          fun ?thresholdExpression ->
+            fun ~monitorArnList ->
+              fun ~subscribers ->
+                fun ~frequency ->
+                  fun ~subscriptionName ->
+                    fun () ->
+                      {
+                        subscriptionArn;
+                        accountId;
+                        threshold;
+                        thresholdExpression;
+                        monitorArnList;
+                        subscribers;
+                        frequency;
+                        subscriptionName
+                      }
     let to_value x =
       structure_to_value
         [("SubscriptionArn",
@@ -1418,13 +2819,18 @@ module AnomalySubscription =
         ("MonitorArnList", (Some (MonitorArnList.to_value x.monitorArnList)));
         ("Subscribers", (Some (Subscribers.to_value x.subscribers)));
         ("Threshold",
-          (Some (NullableNonNegativeDouble.to_value x.threshold)));
+          (Option.map x.threshold ~f:NullableNonNegativeDouble.to_value));
         ("Frequency",
           (Some (AnomalySubscriptionFrequency.to_value x.frequency)));
         ("SubscriptionName",
-          (Some (GenericString.to_value x.subscriptionName)))]
+          (Some (GenericString.to_value x.subscriptionName)));
+        ("ThresholdExpression",
+          (Option.map x.thresholdExpression ~f:Expression.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let thresholdExpression =
+        (Option.map ~f:Expression.of_xml)
+          (Xml.child xml_arg0 "ThresholdExpression") in
       let subscriptionName =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionName") in
@@ -1432,8 +2838,8 @@ module AnomalySubscription =
         AnomalySubscriptionFrequency.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Frequency") in
       let threshold =
-        NullableNonNegativeDouble.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Threshold") in
+        (Option.map ~f:NullableNonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "Threshold") in
       let subscribers =
         Subscribers.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Subscribers") in
@@ -1445,31 +2851,37 @@ module AnomalySubscription =
       let subscriptionArn =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "SubscriptionArn") in
-      make ~subscriptionName ~frequency ~threshold ~subscribers
-        ~monitorArnList ?accountId ?subscriptionArn ()
+      make ?thresholdExpression ~subscriptionName ~frequency ?threshold
+        ~subscribers ~monitorArnList ?accountId ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let thresholdExpression =
+        field_map json__ "ThresholdExpression" Expression.of_json in
       let subscriptionName =
-        field_map_exn json "SubscriptionName" GenericString.of_json in
+        field_map_exn json__ "SubscriptionName" GenericString.of_json in
       let frequency =
-        field_map_exn json "Frequency" AnomalySubscriptionFrequency.of_json in
+        field_map_exn json__ "Frequency" AnomalySubscriptionFrequency.of_json in
       let threshold =
-        field_map_exn json "Threshold" NullableNonNegativeDouble.of_json in
-      let subscribers = field_map_exn json "Subscribers" Subscribers.of_json in
+        field_map json__ "Threshold" NullableNonNegativeDouble.of_json in
+      let subscribers =
+        field_map_exn json__ "Subscribers" Subscribers.of_json in
       let monitorArnList =
-        field_map_exn json "MonitorArnList" MonitorArnList.of_json in
-      let accountId = field_map json "AccountId" GenericString.of_json in
+        field_map_exn json__ "MonitorArnList" MonitorArnList.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
       let subscriptionArn =
-        field_map json "SubscriptionArn" GenericString.of_json in
-      make ~subscriptionName ~frequency ~threshold ~subscribers
-        ~monitorArnList ?accountId ?subscriptionArn ()
+        field_map json__ "SubscriptionArn" GenericString.of_json in
+      make ?thresholdExpression ~subscriptionName ~frequency ?threshold
+        ~subscribers ~monitorArnList ?accountId ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The association between a monitor, threshold, and list of subscribers used to deliver notifications about anomalies detected by a monitor that exceeds a threshold. The content consists of the detailed metadata and the current status of the AnomalySubscription object."]
+       "An AnomalySubscription resource (also referred to as an alert subscription) sends notifications about specific anomalies that meet an alerting criteria defined by you. You can specify the frequency of the alerts and the subscribers to notify. Anomaly subscriptions can be associated with one or more AnomalyMonitor resources, and they only send notifications about anomalies detected by those associated monitors. You can also configure a threshold to further control which anomalies are included in the notifications. Anomalies that don\226\128\153t exceed the chosen threshold and therefore don\226\128\153t trigger notifications from an anomaly subscription will still be available on the console and from the GetAnomalies API."]
 module AnomalySubscriptions =
   struct
     type nonrec t = AnomalySubscription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AnomalySubscription.to_value)) |>
         (fun x -> `List x)
@@ -1491,6 +2903,78 @@ module AnomalySubscriptions =
       list_of_json ~kind:"AnomalySubscriptions"
         ~of_json:AnomalySubscription.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module NonNegativeLong =
+  struct
+    type nonrec t = Int64.t
+    let make i =
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module ApproximateUsageRecordsPerService =
+  struct
+    type nonrec t = (GenericString.t * NonNegativeLong.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((GenericString.of_string chopped),
+                              (NonNegativeLong.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (GenericString.to_value x) |>
+                    (fun x ->
+                       (NonNegativeLong.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:GenericString.of_string
+        ~of_json:NonNegativeLong.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ApproximationDimension =
+  struct
+    type nonrec t =
+      | SERVICE 
+      | RESOURCE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SERVICE -> "SERVICE"
+      | RESOURCE -> "RESOURCE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SERVICE" -> SERVICE
+      | "RESOURCE" -> RESOURCE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ApproximationDimension" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ApproximationDimension" j)
+    let to_json = simple_to_json to_value
   end
 module AttributeType =
   struct
@@ -1540,6 +3024,8 @@ module Attributes =
                        (AttributeValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1547,19 +3033,26 @@ module Attributes =
         ~of_json:AttributeValue.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ErrorMessage =
+module BackfillLimitExceededException =
   struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to backfill is already in progress. Once the previous request is complete, you can create another request."]
 module BillExpirationException =
   struct
     type nonrec t = {
@@ -1574,12 +3067,171 @@ module BillExpirationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The requested report expired. Update the date interval and try again."]
+module BillingViewArn =
+  struct
+    type nonrec t = string
+    let context_ = "BillingViewArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:aws[a-z-]*:(billing)::[0-9]{12}:billingview/[-a-zA-Z0-9/:_+=.-@]{1,43}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"BillingViewArn" j
+    let to_json = simple_to_json to_value
+  end
+module BillingViewHealthStatusException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The billing view status must be HEALTHY to perform this action. Try again when the status is HEALTHY."]
+module ComparisonMetricValue =
+  struct
+    type nonrec t =
+      {
+      baselineTimePeriodAmount: GenericString.t option
+        [@ocaml.doc
+          "The numeric value for the baseline time period measurement."];
+      comparisonTimePeriodAmount: GenericString.t option
+        [@ocaml.doc
+          "The numeric value for the comparison time period measurement."];
+      difference: GenericString.t option
+        [@ocaml.doc
+          "The calculated difference between ComparisonTimePeriodAmount and BaselineTimePeriodAmount."];
+      unit: GenericString.t option
+        [@ocaml.doc
+          "The unit of measurement applicable to all numeric values in this comparison."]}
+    let make ?baselineTimePeriodAmount =
+      fun ?comparisonTimePeriodAmount ->
+        fun ?difference ->
+          fun ?unit ->
+            fun () ->
+              {
+                baselineTimePeriodAmount;
+                comparisonTimePeriodAmount;
+                difference;
+                unit
+              }
+    let to_value x =
+      structure_to_value
+        [("BaselineTimePeriodAmount",
+           (Option.map x.baselineTimePeriodAmount ~f:GenericString.to_value));
+        ("ComparisonTimePeriodAmount",
+          (Option.map x.comparisonTimePeriodAmount ~f:GenericString.to_value));
+        ("Difference", (Option.map x.difference ~f:GenericString.to_value));
+        ("Unit", (Option.map x.unit ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unit =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Unit") in
+      let difference =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "Difference") in
+      let comparisonTimePeriodAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "ComparisonTimePeriodAmount") in
+      let baselineTimePeriodAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "BaselineTimePeriodAmount") in
+      make ?unit ?difference ?comparisonTimePeriodAmount
+        ?baselineTimePeriodAmount ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unit = field_map json__ "Unit" GenericString.of_json in
+      let difference = field_map json__ "Difference" GenericString.of_json in
+      let comparisonTimePeriodAmount =
+        field_map json__ "ComparisonTimePeriodAmount" GenericString.of_json in
+      let baselineTimePeriodAmount =
+        field_map json__ "BaselineTimePeriodAmount" GenericString.of_json in
+      make ?unit ?difference ?comparisonTimePeriodAmount
+        ?baselineTimePeriodAmount ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains cost or usage metric values for comparing two time periods. Each value includes amounts for the baseline and comparison time periods, their difference, and the unit of measurement."]
+module MetricName =
+  struct
+    type nonrec t = string
+    let context_ = "MetricName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"MetricName" j
+    let to_json = simple_to_json to_value
+  end
+module ComparisonMetrics =
+  struct
+    type nonrec t = (MetricName.t * ComparisonMetricValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types MetricName ComparisonMetricValue"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (MetricName.to_value x) |>
+                    (fun x ->
+                       (ComparisonMetricValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:MetricName.of_string
+        ~of_json:ComparisonMetricValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module Context =
   struct
     type nonrec t =
@@ -1608,29 +3260,490 @@ module Context =
     let of_json j = of_string (string_of_json ~kind:"Context" j)
     let to_json = simple_to_json to_value
   end
-module ZonedDateTime =
+module CostAllocationTagType =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "The time period that you want the usage and costs for."]
-    let context_ = "ZonedDateTime"
+    type nonrec t =
+      | AWSGenerated 
+      | UserDefined 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWSGenerated -> "AWSGenerated"
+      | UserDefined -> "UserDefined"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWSGenerated" -> AWSGenerated
+      | "UserDefined" -> UserDefined
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CostAllocationTagType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CostAllocationTagType" j)
+    let to_json = simple_to_json to_value
+  end
+module CostAllocationTagStatus =
+  struct
+    type nonrec t =
+      | Active 
+      | Inactive 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Inactive -> "Inactive"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Inactive" -> Inactive
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CostAllocationTagStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CostAllocationTagStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CostAllocationTag =
+  struct
+    type nonrec t =
+      {
+      tagKey: TagKey.t option
+        [@ocaml.doc "The key for the cost allocation tag."];
+      type_: CostAllocationTagType.t option
+        [@ocaml.doc
+          "The type of cost allocation tag. You can use AWSGenerated or UserDefined type tags. AWSGenerated type tags are tags that Amazon Web Services defines and applies to support Amazon Web Services resources for cost allocation purposes. UserDefined type tags are tags that you define, create, and apply to resources."];
+      status: CostAllocationTagStatus.t option
+        [@ocaml.doc "The status of a cost allocation tag."];
+      lastUpdatedDate: ZonedDateTime.t option
+        [@ocaml.doc
+          "The last date that the tag was either activated or deactivated."];
+      lastUsedDate: ZonedDateTime.t option
+        [@ocaml.doc
+          "The last month that the tag was used on an Amazon Web Services resource."]}
+    let make ?tagKey =
+      fun ?type_ ->
+        fun ?status ->
+          fun ?lastUpdatedDate ->
+            fun ?lastUsedDate ->
+              fun () ->
+                { tagKey; type_; status; lastUpdatedDate; lastUsedDate }
+    let to_value x =
+      structure_to_value
+        [("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("Type", (Option.map x.type_ ~f:CostAllocationTagType.to_value));
+        ("Status", (Option.map x.status ~f:CostAllocationTagStatus.to_value));
+        ("LastUpdatedDate",
+          (Option.map x.lastUpdatedDate ~f:ZonedDateTime.to_value));
+        ("LastUsedDate",
+          (Option.map x.lastUsedDate ~f:ZonedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUsedDate =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUsedDate") in
+      let lastUpdatedDate =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDate") in
+      let status =
+        (Option.map ~f:CostAllocationTagStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let type_ =
+        (Option.map ~f:CostAllocationTagType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      make ?lastUsedDate ?lastUpdatedDate ?status ?type_ ?tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUsedDate =
+        field_map json__ "LastUsedDate" ZonedDateTime.of_json in
+      let lastUpdatedDate =
+        field_map json__ "LastUpdatedDate" ZonedDateTime.of_json in
+      let status = field_map json__ "Status" CostAllocationTagStatus.of_json in
+      let type_ = field_map json__ "Type" CostAllocationTagType.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      make ?lastUsedDate ?lastUpdatedDate ?status ?type_ ?tagKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The cost allocation tag structure. This includes detailed metadata for the CostAllocationTag object."]
+module CostAllocationTagBackfillStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | PROCESSING 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | PROCESSING -> "PROCESSING"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "PROCESSING" -> PROCESSING
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration CostAllocationTagBackfillStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"CostAllocationTagBackfillStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module CostAllocationTagBackfillRequest =
+  struct
+    type nonrec t =
+      {
+      backfillFrom: ZonedDateTime.t option
+        [@ocaml.doc "The date the backfill starts from."];
+      requestedAt: ZonedDateTime.t option
+        [@ocaml.doc "The time when the backfill was requested."];
+      completedAt: ZonedDateTime.t option
+        [@ocaml.doc "The backfill completion time."];
+      backfillStatus: CostAllocationTagBackfillStatus.t option
+        [@ocaml.doc
+          "The status of the cost allocation tag backfill request."];
+      lastUpdatedAt: ZonedDateTime.t option
+        [@ocaml.doc "The time when the backfill status was last updated."]}
+    let make ?backfillFrom =
+      fun ?requestedAt ->
+        fun ?completedAt ->
+          fun ?backfillStatus ->
+            fun ?lastUpdatedAt ->
+              fun () ->
+                {
+                  backfillFrom;
+                  requestedAt;
+                  completedAt;
+                  backfillStatus;
+                  lastUpdatedAt
+                }
+    let to_value x =
+      structure_to_value
+        [("BackfillFrom",
+           (Option.map x.backfillFrom ~f:ZonedDateTime.to_value));
+        ("RequestedAt", (Option.map x.requestedAt ~f:ZonedDateTime.to_value));
+        ("CompletedAt", (Option.map x.completedAt ~f:ZonedDateTime.to_value));
+        ("BackfillStatus",
+          (Option.map x.backfillStatus
+             ~f:CostAllocationTagBackfillStatus.to_value));
+        ("LastUpdatedAt",
+          (Option.map x.lastUpdatedAt ~f:ZonedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdatedAt =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedAt") in
+      let backfillStatus =
+        (Option.map ~f:CostAllocationTagBackfillStatus.of_xml)
+          (Xml.child xml_arg0 "BackfillStatus") in
+      let completedAt =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "CompletedAt") in
+      let requestedAt =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "RequestedAt") in
+      let backfillFrom =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "BackfillFrom") in
+      make ?lastUpdatedAt ?backfillStatus ?completedAt ?requestedAt
+        ?backfillFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdatedAt =
+        field_map json__ "LastUpdatedAt" ZonedDateTime.of_json in
+      let backfillStatus =
+        field_map json__ "BackfillStatus"
+          CostAllocationTagBackfillStatus.of_json in
+      let completedAt = field_map json__ "CompletedAt" ZonedDateTime.of_json in
+      let requestedAt = field_map json__ "RequestedAt" ZonedDateTime.of_json in
+      let backfillFrom =
+        field_map json__ "BackfillFrom" ZonedDateTime.of_json in
+      make ?lastUpdatedAt ?backfillStatus ?completedAt ?requestedAt
+        ?backfillFrom ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The cost allocation tag backfill request structure that contains metadata and details of a certain backfill."]
+module CostAllocationTagBackfillRequestList =
+  struct
+    type nonrec t = CostAllocationTagBackfillRequest.t list
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:25) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"^\\d{4}-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\d(([+-]\\d\\d:\\d\\d)|Z)$")));
+          ((check_list_max i ~max:1000) >>=
+             (fun () -> check_list_min i ~min:0));
         i
-    let of_string x = x
-    let to_value x = `String x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostAllocationTagBackfillRequest.to_value)) |>
+        (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ZonedDateTime" j
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:CostAllocationTagBackfillRequest.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostAllocationTagBackfillRequestList"
+        ~of_json:CostAllocationTagBackfillRequest.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostAllocationTagKeyList =
+  struct
+    type nonrec t = TagKey.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:TagKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostAllocationTagKeyList" ~of_json:TagKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostAllocationTagList =
+  struct
+    type nonrec t = CostAllocationTag.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostAllocationTag.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostAllocationTag.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostAllocationTagList"
+        ~of_json:CostAllocationTag.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostAllocationTagStatusEntry =
+  struct
+    type nonrec t =
+      {
+      tagKey: TagKey.t [@ocaml.doc "The key for the cost allocation tag."];
+      status: CostAllocationTagStatus.t
+        [@ocaml.doc "The status of a cost allocation tag."]}
+    let context_ = "CostAllocationTagStatusEntry"
+    let make ~tagKey = fun ~status -> fun () -> { tagKey; status }
+    let to_value x =
+      structure_to_value
+        [("TagKey", (Some (TagKey.to_value x.tagKey)));
+        ("Status", (Some (CostAllocationTagStatus.to_value x.status)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        CostAllocationTagStatus.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+      let tagKey =
+        TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagKey") in
+      make ~status ~tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status =
+        field_map_exn json__ "Status" CostAllocationTagStatus.of_json in
+      let tagKey = field_map_exn json__ "TagKey" TagKey.of_json in
+      make ~status ~tagKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The cost allocation tag status. The status of a key can either be active or inactive."]
+module CostAllocationTagStatusList =
+  struct
+    type nonrec t = CostAllocationTagStatusEntry.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostAllocationTagStatusEntry.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostAllocationTagStatusEntry.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostAllocationTagStatusList"
+        ~of_json:CostAllocationTagStatusEntry.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostAllocationTagsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CostAllocationTagsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "The time period that you want the usage and costs for."]
+  end
+module CostAndUsageComparison =
+  struct
+    type nonrec t =
+      {
+      costAndUsageSelector: Expression.t option ;
+      metrics: ComparisonMetrics.t option
+        [@ocaml.doc "A mapping of metric names to their comparison values."]}
+    let make ?costAndUsageSelector =
+      fun ?metrics -> fun () -> { costAndUsageSelector; metrics }
+    let to_value x =
+      structure_to_value
+        [("CostAndUsageSelector",
+           (Option.map x.costAndUsageSelector ~f:Expression.to_value));
+        ("Metrics", (Option.map x.metrics ~f:ComparisonMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metrics =
+        (Option.map ~f:ComparisonMetrics.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      let costAndUsageSelector =
+        (Option.map ~f:Expression.of_xml)
+          (Xml.child xml_arg0 "CostAndUsageSelector") in
+      make ?metrics ?costAndUsageSelector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" ComparisonMetrics.of_json in
+      let costAndUsageSelector =
+        field_map json__ "CostAndUsageSelector" Expression.of_json in
+      make ?metrics ?costAndUsageSelector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a comparison of cost and usage metrics between two time periods."]
+module CostAndUsageComparisons =
+  struct
+    type nonrec t = CostAndUsageComparison.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostAndUsageComparison.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostAndUsageComparison.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostAndUsageComparisons"
+        ~of_json:CostAndUsageComparison.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostAndUsageComparisonsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:2000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for CostAndUsageComparisonsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module CostCategoryValue =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -1663,6 +3776,9 @@ module CostCategorySplitChargeRuleTargetsList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GenericString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1693,6 +3809,9 @@ module CostCategorySplitChargeRuleParameterValuesList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GenericString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1769,12 +3888,12 @@ module CostCategorySplitChargeRuleParameter =
           (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~values ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "Values"
+        field_map_exn json__ "Values"
           CostCategorySplitChargeRuleParameterValuesList.of_json in
       let type_ =
-        field_map_exn json "Type"
+        field_map_exn json__ "Type"
           CostCategorySplitChargeRuleParameterType.of_json in
       make ~values ~type_ ()
     let to_json v = composed_to_json to_value v
@@ -1787,6 +3906,9 @@ module CostCategorySplitChargeRuleParametersList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategorySplitChargeRuleParameter.to_value)) |>
         (fun x -> `List x)
@@ -1847,10 +3969,10 @@ module CostCategorySplitChargeRule =
       {
       source: GenericString.t
         [@ocaml.doc
-          "The Cost Category value that you want to split. That value can't be used as a source or a target in other split charge rules. To indicate uncategorized costs, you can use an empty string as the source."];
+          "The cost category value that you want to split. That value can't be used as a source or a target in other split charge rules. To indicate uncategorized costs, you can use an empty string as the source."];
       targets: CostCategorySplitChargeRuleTargetsList.t
         [@ocaml.doc
-          "The Cost Category values that you want to split costs across. These values can't be used as a source in other split charge rules."];
+          "The cost category values that you want to split costs across. These values can't be used as a source in other split charge rules."];
       method_: CostCategorySplitChargeMethod.t
         [@ocaml.doc
           "The method that's used to define how to split your source costs across your targets. Proportional - Allocates charges across your targets based on the proportional weighted cost of each target. Fixed - Allocates charges across your targets based on your defined allocation percentage. >Even - Allocates costs evenly across all targets."];
@@ -1887,20 +4009,20 @@ module CostCategorySplitChargeRule =
           (Xml.child_exn ~context:context_ xml_arg0 "Source") in
       make ?parameters ~method_ ~targets ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "Parameters"
+        field_map json__ "Parameters"
           CostCategorySplitChargeRuleParametersList.of_json in
       let method_ =
-        field_map_exn json "Method" CostCategorySplitChargeMethod.of_json in
+        field_map_exn json__ "Method" CostCategorySplitChargeMethod.of_json in
       let targets =
-        field_map_exn json "Targets"
+        field_map_exn json__ "Targets"
           CostCategorySplitChargeRuleTargetsList.of_json in
-      let source = field_map_exn json "Source" GenericString.of_json in
+      let source = field_map_exn json__ "Source" GenericString.of_json in
       make ?parameters ~method_ ~targets ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Use the split charge rule to split the cost of one Cost Category value across several other target values."]
+       "Use the split charge rule to split the cost of one cost category value across several other target values."]
 module CostCategorySplitChargeRulesList =
   struct
     type nonrec t = CostCategorySplitChargeRule.t list
@@ -1909,6 +4031,9 @@ module CostCategorySplitChargeRulesList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategorySplitChargeRule.to_value)) |>
         (fun x -> `List x)
@@ -1993,7 +4118,7 @@ module CostCategoryInheritedValueDimension =
       {
       dimensionName: CostCategoryInheritedValueDimensionName.t option
         [@ocaml.doc
-          "The name of the dimension that's used to group costs. If you specify LINKED_ACCOUNT_NAME, the cost category value is based on account name. If you specify TAG, the cost category value will be based on the value of the specified tag key."];
+          "The name of the dimension that's used to group costs. If you specify LINKED_ACCOUNT_NAME, the cost category value is based on account name. If you specify TAG, the cost category value is based on the value of the specified tag key."];
       dimensionKey: GenericString.t option
         [@ocaml.doc "The key to extract cost category values."]}
     let make ?dimensionName =
@@ -2015,15 +4140,16 @@ module CostCategoryInheritedValueDimension =
           (Xml.child xml_arg0 "DimensionName") in
       make ?dimensionKey ?dimensionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dimensionKey = field_map json "DimensionKey" GenericString.of_json in
+    let of_json json__ =
+      let dimensionKey =
+        field_map json__ "DimensionKey" GenericString.of_json in
       let dimensionName =
-        field_map json "DimensionName"
+        field_map json__ "DimensionName"
           CostCategoryInheritedValueDimensionName.of_json in
       make ?dimensionKey ?dimensionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "When creating or updating a cost category, you can define the CostCategoryRule rule type as INHERITED_VALUE. This rule type adds the flexibility of defining a rule that dynamically inherits the cost category value from the dimension value defined by CostCategoryInheritedValueDimension. For example, if you want to dynamically group costs that are based on the value of a specific tag key, first choose an inherited value rule type, then choose the tag dimension and specify the tag key to use."]
+       "When you create or update a cost category, you can define the CostCategoryRule rule type as INHERITED_VALUE. This rule type adds the flexibility to define a rule that dynamically inherits the cost category value from the dimension value that's defined by CostCategoryInheritedValueDimension. For example, suppose that you want to dynamically group costs that are based on the value of a specific tag key. First, choose an inherited value rule type, and then choose the tag dimension and specify the tag key to use."]
 module CostCategoryRule =
   struct
     type nonrec t =
@@ -2031,13 +4157,13 @@ module CostCategoryRule =
       value: CostCategoryValue.t option ;
       rule: Expression.t option
         [@ocaml.doc
-          "An Expression object used to categorize costs. This supports dimensions, tags, and nested expressions. Currently the only dimensions supported are LINKED_ACCOUNT, SERVICE_CODE, RECORD_TYPE, and LINKED_ACCOUNT_NAME. Root level OR isn't supported. We recommend that you create a separate rule instead. RECORD_TYPE is a dimension used for Cost Explorer APIs, and is also supported for Cost Category expressions. This dimension uses different terms, depending on whether you're using the console or API/JSON editor. For a detailed comparison, see Term Comparisons in the Billing and Cost Management User Guide."];
+          "An Expression object used to categorize costs. This supports dimensions, tags, and nested expressions. Currently the only dimensions supported are LINKED_ACCOUNT, SERVICE_CODE, RECORD_TYPE, LINKED_ACCOUNT_NAME, REGION, and USAGE_TYPE. RECORD_TYPE is a dimension used for Cost Explorer APIs, and is also supported for cost category expressions. This dimension uses different terms, depending on whether you're using the console or API/JSON editor. For a detailed comparison, see Term Comparisons in the Billing and Cost Management User Guide."];
       inheritedValue: CostCategoryInheritedValueDimension.t option
         [@ocaml.doc
           "The value the line item is categorized as if the line item contains the matched dimension."];
       type_: CostCategoryRuleType.t option
         [@ocaml.doc
-          "You can define the CostCategoryRule rule type as either REGULAR or INHERITED_VALUE. The INHERITED_VALUE rule type adds the flexibility of defining a rule that dynamically inherits the cost category value from the dimension value defined by CostCategoryInheritedValueDimension. For example, if you want to dynamically group costs based on the value of a specific tag key, first choose an inherited value rule type, then choose the tag dimension and specify the tag key to use."]}
+          "You can define the CostCategoryRule rule type as either REGULAR or INHERITED_VALUE. The INHERITED_VALUE rule type adds the flexibility to define a rule that dynamically inherits the cost category value. This value is from the dimension value that's defined by CostCategoryInheritedValueDimension. For example, suppose that you want to costs to be dynamically grouped based on the value of a specific tag key. First, choose an inherited value rule type, and then choose the tag dimension and specify the tag key to use."]}
     let make ?value =
       fun ?rule ->
         fun ?inheritedValue ->
@@ -2064,17 +4190,17 @@ module CostCategoryRule =
         (Option.map ~f:CostCategoryValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?type_ ?inheritedValue ?rule ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "Type" CostCategoryRuleType.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "Type" CostCategoryRuleType.of_json in
       let inheritedValue =
-        field_map json "InheritedValue"
+        field_map json__ "InheritedValue"
           CostCategoryInheritedValueDimension.of_json in
-      let rule = field_map json "Rule" Expression.of_json in
-      let value = field_map json "Value" CostCategoryValue.of_json in
+      let rule = field_map json__ "Rule" Expression.of_json in
+      let value = field_map json__ "Value" CostCategoryValue.of_json in
       make ?type_ ?inheritedValue ?rule ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Rules are processed in order. If there are multiple rules that match the line item, then the first rule to match is used to determine that Cost Category value."]
+       "Rules are processed in order. If there are multiple rules that match the line item, then the first rule to match is used to determine that cost category value."]
 module CostCategoryRulesList =
   struct
     type nonrec t = CostCategoryRule.t list
@@ -2084,6 +4210,9 @@ module CostCategoryRulesList =
           ((check_list_max i ~max:500) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategoryRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2201,10 +4330,10 @@ module CostCategoryProcessingStatus =
           (Xml.child xml_arg0 "Component") in
       make ?status ?component ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" CostCategoryStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" CostCategoryStatus.of_json in
       let component =
-        field_map json "Component" CostCategoryStatusComponent.of_json in
+        field_map json__ "Component" CostCategoryStatusComponent.of_json in
       make ?status ?component ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2213,6 +4342,9 @@ module CostCategoryProcessingStatusList =
   struct
     type nonrec t = CostCategoryProcessingStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategoryProcessingStatus.to_value)) |>
         (fun x -> `List x)
@@ -2239,56 +4371,56 @@ module CostCategory =
   struct
     type nonrec t =
       {
-      costCategoryArn: Arn.t
-        [@ocaml.doc "The unique identifier for your Cost Category."];
-      effectiveStart: ZonedDateTime.t
-        [@ocaml.doc "The effective state data of your Cost Category."];
+      costCategoryArn: Arn.t option
+        [@ocaml.doc "The unique identifier for your cost category."];
+      effectiveStart: ZonedDateTime.t option
+        [@ocaml.doc "The effective start date of your cost category."];
       effectiveEnd: ZonedDateTime.t option
-        [@ocaml.doc "The effective end data of your Cost Category."];
-      name: CostCategoryName.t ;
-      ruleVersion: CostCategoryRuleVersion.t ;
-      rules: CostCategoryRulesList.t
+        [@ocaml.doc "The effective end date of your cost category."];
+      name: CostCategoryName.t option ;
+      ruleVersion: CostCategoryRuleVersion.t option ;
+      rules: CostCategoryRulesList.t option
         [@ocaml.doc
-          "The rules are processed in order. If there are multiple rules that match the line item, then the first rule to match is used to determine that Cost Category value."];
+          "The rules are processed in order. If there are multiple rules that match the line item, then the first rule to match is used to determine that cost category value."];
       splitChargeRules: CostCategorySplitChargeRulesList.t option
         [@ocaml.doc
-          "The split charge rules that are used to allocate your charges between your Cost Category values."];
+          "The split charge rules that are used to allocate your charges between your cost category values."];
       processingStatus: CostCategoryProcessingStatusList.t option
         [@ocaml.doc
           "The list of processing statuses for Cost Management products for a specific cost category."];
       defaultValue: CostCategoryValue.t option }
-    let context_ = "CostCategory"
-    let make ?effectiveEnd =
-      fun ?splitChargeRules ->
-        fun ?processingStatus ->
-          fun ?defaultValue ->
-            fun ~costCategoryArn ->
-              fun ~effectiveStart ->
-                fun ~name ->
-                  fun ~ruleVersion ->
-                    fun ~rules ->
+    let make ?costCategoryArn =
+      fun ?effectiveStart ->
+        fun ?effectiveEnd ->
+          fun ?name ->
+            fun ?ruleVersion ->
+              fun ?rules ->
+                fun ?splitChargeRules ->
+                  fun ?processingStatus ->
+                    fun ?defaultValue ->
                       fun () ->
                         {
-                          effectiveEnd;
-                          splitChargeRules;
-                          processingStatus;
-                          defaultValue;
                           costCategoryArn;
                           effectiveStart;
+                          effectiveEnd;
                           name;
                           ruleVersion;
-                          rules
+                          rules;
+                          splitChargeRules;
+                          processingStatus;
+                          defaultValue
                         }
     let to_value x =
       structure_to_value
-        [("CostCategoryArn", (Some (Arn.to_value x.costCategoryArn)));
-        ("EffectiveStart", (Some (ZonedDateTime.to_value x.effectiveStart)));
+        [("CostCategoryArn", (Option.map x.costCategoryArn ~f:Arn.to_value));
+        ("EffectiveStart",
+          (Option.map x.effectiveStart ~f:ZonedDateTime.to_value));
         ("EffectiveEnd",
           (Option.map x.effectiveEnd ~f:ZonedDateTime.to_value));
-        ("Name", (Some (CostCategoryName.to_value x.name)));
+        ("Name", (Option.map x.name ~f:CostCategoryName.to_value));
         ("RuleVersion",
-          (Some (CostCategoryRuleVersion.to_value x.ruleVersion)));
-        ("Rules", (Some (CostCategoryRulesList.to_value x.rules)));
+          (Option.map x.ruleVersion ~f:CostCategoryRuleVersion.to_value));
+        ("Rules", (Option.map x.rules ~f:CostCategoryRulesList.to_value));
         ("SplitChargeRules",
           (Option.map x.splitChargeRules
              ~f:CostCategorySplitChargeRulesList.to_value));
@@ -2309,45 +4441,44 @@ module CostCategory =
         (Option.map ~f:CostCategorySplitChargeRulesList.of_xml)
           (Xml.child xml_arg0 "SplitChargeRules") in
       let rules =
-        CostCategoryRulesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Rules") in
+        (Option.map ~f:CostCategoryRulesList.of_xml)
+          (Xml.child xml_arg0 "Rules") in
       let ruleVersion =
-        CostCategoryRuleVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RuleVersion") in
+        (Option.map ~f:CostCategoryRuleVersion.of_xml)
+          (Xml.child xml_arg0 "RuleVersion") in
       let name =
-        CostCategoryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:CostCategoryName.of_xml) (Xml.child xml_arg0 "Name") in
       let effectiveEnd =
         (Option.map ~f:ZonedDateTime.of_xml)
           (Xml.child xml_arg0 "EffectiveEnd") in
       let effectiveStart =
-        ZonedDateTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EffectiveStart") in
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EffectiveStart") in
       let costCategoryArn =
-        Arn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
-      make ?defaultValue ?processingStatus ?splitChargeRules ~rules
-        ~ruleVersion ~name ?effectiveEnd ~effectiveStart ~costCategoryArn ()
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
+      make ?defaultValue ?processingStatus ?splitChargeRules ?rules
+        ?ruleVersion ?name ?effectiveEnd ?effectiveStart ?costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultValue =
-        field_map json "DefaultValue" CostCategoryValue.of_json in
+        field_map json__ "DefaultValue" CostCategoryValue.of_json in
       let processingStatus =
-        field_map json "ProcessingStatus"
+        field_map json__ "ProcessingStatus"
           CostCategoryProcessingStatusList.of_json in
       let splitChargeRules =
-        field_map json "SplitChargeRules"
+        field_map json__ "SplitChargeRules"
           CostCategorySplitChargeRulesList.of_json in
-      let rules = field_map_exn json "Rules" CostCategoryRulesList.of_json in
+      let rules = field_map json__ "Rules" CostCategoryRulesList.of_json in
       let ruleVersion =
-        field_map_exn json "RuleVersion" CostCategoryRuleVersion.of_json in
-      let name = field_map_exn json "Name" CostCategoryName.of_json in
-      let effectiveEnd = field_map json "EffectiveEnd" ZonedDateTime.of_json in
+        field_map json__ "RuleVersion" CostCategoryRuleVersion.of_json in
+      let name = field_map json__ "Name" CostCategoryName.of_json in
+      let effectiveEnd =
+        field_map json__ "EffectiveEnd" ZonedDateTime.of_json in
       let effectiveStart =
-        field_map_exn json "EffectiveStart" ZonedDateTime.of_json in
-      let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
-      make ?defaultValue ?processingStatus ?splitChargeRules ~rules
-        ~ruleVersion ~name ?effectiveEnd ~effectiveStart ~costCategoryArn ()
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
+      make ?defaultValue ?processingStatus ?splitChargeRules ?rules
+        ?ruleVersion ?name ?effectiveEnd ?effectiveStart ?costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The structure of Cost Categories. This includes detailed metadata and the set of rules for the CostCategory object."]
@@ -2373,6 +4504,9 @@ module CostCategoryNamesList =
   struct
     type nonrec t = CostCategoryName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategoryName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2394,10 +4528,57 @@ module CostCategoryNamesList =
         ~of_json:CostCategoryName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ResourceType =
+  struct
+    type nonrec t = string
+    let context_ = "ResourceType"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          (check_pattern i ~pattern:"^[-a-zA-Z0-9/_]+:[-a-zA-Z0-9/_]+");
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ResourceType" j
+    let to_json = simple_to_json to_value
+  end
+module ResourceTypes =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypes" ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module CostCategoryValuesList =
   struct
     type nonrec t = CostCategoryValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategoryValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2424,22 +4605,25 @@ module CostCategoryReference =
     type nonrec t =
       {
       costCategoryArn: Arn.t option
-        [@ocaml.doc "The unique identifier for your Cost Category."];
+        [@ocaml.doc "The unique identifier for your cost category."];
       name: CostCategoryName.t option ;
       effectiveStart: ZonedDateTime.t option
-        [@ocaml.doc "The Cost Category's effective start date."];
+        [@ocaml.doc "The cost category's effective start date."];
       effectiveEnd: ZonedDateTime.t option
-        [@ocaml.doc "The Cost Category's effective end date."];
+        [@ocaml.doc "The cost category's effective end date."];
       numberOfRules: NonNegativeInteger.t option
         [@ocaml.doc
-          "The number of rules that are associated with a specific Cost Category."];
+          "The number of rules that are associated with a specific cost category."];
       processingStatus: CostCategoryProcessingStatusList.t option
         [@ocaml.doc
           "The list of processing statuses for Cost Management products for a specific cost category."];
       values: CostCategoryValuesList.t option
         [@ocaml.doc
           "A list of unique cost category values in a specific cost category."];
-      defaultValue: CostCategoryValue.t option }
+      defaultValue: CostCategoryValue.t option ;
+      supportedResourceTypes: ResourceTypes.t option
+        [@ocaml.doc
+          "The resource types supported by a specific cost category."]}
     let make ?costCategoryArn =
       fun ?name ->
         fun ?effectiveStart ->
@@ -2448,17 +4632,19 @@ module CostCategoryReference =
               fun ?processingStatus ->
                 fun ?values ->
                   fun ?defaultValue ->
-                    fun () ->
-                      {
-                        costCategoryArn;
-                        name;
-                        effectiveStart;
-                        effectiveEnd;
-                        numberOfRules;
-                        processingStatus;
-                        values;
-                        defaultValue
-                      }
+                    fun ?supportedResourceTypes ->
+                      fun () ->
+                        {
+                          costCategoryArn;
+                          name;
+                          effectiveStart;
+                          effectiveEnd;
+                          numberOfRules;
+                          processingStatus;
+                          values;
+                          defaultValue;
+                          supportedResourceTypes
+                        }
     let to_value x =
       structure_to_value
         [("CostCategoryArn", (Option.map x.costCategoryArn ~f:Arn.to_value));
@@ -2474,9 +4660,14 @@ module CostCategoryReference =
              ~f:CostCategoryProcessingStatusList.to_value));
         ("Values", (Option.map x.values ~f:CostCategoryValuesList.to_value));
         ("DefaultValue",
-          (Option.map x.defaultValue ~f:CostCategoryValue.to_value))]
+          (Option.map x.defaultValue ~f:CostCategoryValue.to_value));
+        ("SupportedResourceTypes",
+          (Option.map x.supportedResourceTypes ~f:ResourceTypes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedResourceTypes =
+        (Option.map ~f:ResourceTypes.of_xml)
+          (Xml.child xml_arg0 "SupportedResourceTypes") in
       let defaultValue =
         (Option.map ~f:CostCategoryValue.of_xml)
           (Xml.child xml_arg0 "DefaultValue") in
@@ -2499,32 +4690,40 @@ module CostCategoryReference =
         (Option.map ~f:CostCategoryName.of_xml) (Xml.child xml_arg0 "Name") in
       let costCategoryArn =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
-      make ?defaultValue ?values ?processingStatus ?numberOfRules
-        ?effectiveEnd ?effectiveStart ?name ?costCategoryArn ()
+      make ?supportedResourceTypes ?defaultValue ?values ?processingStatus
+        ?numberOfRules ?effectiveEnd ?effectiveStart ?name ?costCategoryArn
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedResourceTypes =
+        field_map json__ "SupportedResourceTypes" ResourceTypes.of_json in
       let defaultValue =
-        field_map json "DefaultValue" CostCategoryValue.of_json in
-      let values = field_map json "Values" CostCategoryValuesList.of_json in
+        field_map json__ "DefaultValue" CostCategoryValue.of_json in
+      let values = field_map json__ "Values" CostCategoryValuesList.of_json in
       let processingStatus =
-        field_map json "ProcessingStatus"
+        field_map json__ "ProcessingStatus"
           CostCategoryProcessingStatusList.of_json in
       let numberOfRules =
-        field_map json "NumberOfRules" NonNegativeInteger.of_json in
-      let effectiveEnd = field_map json "EffectiveEnd" ZonedDateTime.of_json in
+        field_map json__ "NumberOfRules" NonNegativeInteger.of_json in
+      let effectiveEnd =
+        field_map json__ "EffectiveEnd" ZonedDateTime.of_json in
       let effectiveStart =
-        field_map json "EffectiveStart" ZonedDateTime.of_json in
-      let name = field_map json "Name" CostCategoryName.of_json in
-      let costCategoryArn = field_map json "CostCategoryArn" Arn.of_json in
-      make ?defaultValue ?values ?processingStatus ?numberOfRules
-        ?effectiveEnd ?effectiveStart ?name ?costCategoryArn ()
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let name = field_map json__ "Name" CostCategoryName.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
+      make ?supportedResourceTypes ?defaultValue ?values ?processingStatus
+        ?numberOfRules ?effectiveEnd ?effectiveStart ?name ?costCategoryArn
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A reference to a Cost Category containing only enough information to identify the Cost Category. You can use this information to retrieve the full Cost Category information using DescribeCostCategory."]
+       "A reference to a cost category containing only enough information to identify the Cost Category. You can use this information to retrieve the full cost category information using DescribeCostCategory."]
 module CostCategoryReferencesList =
   struct
     type nonrec t = CostCategoryReference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CostCategoryReference.to_value)) |>
         (fun x -> `List x)
@@ -2546,6 +4745,246 @@ module CostCategoryReferencesList =
       list_of_json ~kind:"CostCategoryReferencesList"
         ~of_json:CostCategoryReference.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module GenericArn =
+  struct
+    type nonrec t = string
+    let context_ = "GenericArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws[-a-z0-9]*:[a-z0-9]+:[-a-z0-9]*:[0-9]{12}:[-a-zA-Z0-9/:_]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"GenericArn" j
+    let to_json = simple_to_json to_value
+  end
+module CostCategoryResourceAssociation =
+  struct
+    type nonrec t =
+      {
+      resourceArn: GenericArn.t option
+        [@ocaml.doc "The unique identifier for an associated resource."];
+      costCategoryName: CostCategoryName.t option ;
+      costCategoryArn: Arn.t option
+        [@ocaml.doc "The unique identifier for your cost category."]}
+    let make ?resourceArn =
+      fun ?costCategoryName ->
+        fun ?costCategoryArn ->
+          fun () -> { resourceArn; costCategoryName; costCategoryArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Option.map x.resourceArn ~f:GenericArn.to_value));
+        ("CostCategoryName",
+          (Option.map x.costCategoryName ~f:CostCategoryName.to_value));
+        ("CostCategoryArn", (Option.map x.costCategoryArn ~f:Arn.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let costCategoryArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
+      let costCategoryName =
+        (Option.map ~f:CostCategoryName.of_xml)
+          (Xml.child xml_arg0 "CostCategoryName") in
+      let resourceArn =
+        (Option.map ~f:GenericArn.of_xml) (Xml.child xml_arg0 "ResourceArn") in
+      make ?costCategoryArn ?costCategoryName ?resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
+      let costCategoryName =
+        field_map json__ "CostCategoryName" CostCategoryName.of_json in
+      let resourceArn = field_map json__ "ResourceArn" GenericArn.of_json in
+      make ?costCategoryArn ?costCategoryName ?resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A reference to a cost category association that contains information on an associated resource."]
+module CostCategoryResourceAssociations =
+  struct
+    type nonrec t = CostCategoryResourceAssociation.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostCategoryResourceAssociation.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostCategoryResourceAssociation.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostCategoryResourceAssociations"
+        ~of_json:CostCategoryResourceAssociation.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostDriver =
+  struct
+    type nonrec t =
+      {
+      type_: GenericString.t option
+        [@ocaml.doc
+          "The category or classification of the cost driver. Values include: BUNDLED_DISCOUNT, CREDIT, OUT_OF_CYCLE_CHARGE, REFUND, RECURRING_RESERVATION_FEE, RESERVATION_USAGE, RI_VOLUME_DISCOUNT, SAVINGS_PLAN_USAGE, SAVINGS_PLAN_RECURRING_FEE, SUPPORT_FEE, TAX, UPFRONT_RESERVATION_FEE, USAGE_CHANGE, COMMITMENT"];
+      name: GenericString.t option
+        [@ocaml.doc "The specific identifier of the cost driver."];
+      metrics: ComparisonMetrics.t option
+        [@ocaml.doc
+          "A mapping of metric names to their comparison values, measuring the impact of this cost driver."]}
+    let make ?type_ =
+      fun ?name -> fun ?metrics -> fun () -> { type_; name; metrics }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:GenericString.to_value));
+        ("Name", (Option.map x.name ~f:GenericString.to_value));
+        ("Metrics", (Option.map x.metrics ~f:ComparisonMetrics.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metrics =
+        (Option.map ~f:ComparisonMetrics.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      let name =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Name") in
+      let type_ =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?metrics ?name ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" ComparisonMetrics.of_json in
+      let name = field_map json__ "Name" GenericString.of_json in
+      let type_ = field_map json__ "Type" GenericString.of_json in
+      make ?metrics ?name ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents factors that contribute to cost variations between the baseline and comparison time periods, including the type of driver, an identifier of the driver, and associated metrics."]
+module CostDrivers =
+  struct
+    type nonrec t = CostDriver.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostDriver.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostDriver.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostDrivers" ~of_json:CostDriver.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostComparisonDriver =
+  struct
+    type nonrec t =
+      {
+      costSelector: Expression.t option ;
+      metrics: ComparisonMetrics.t option
+        [@ocaml.doc "A mapping of metric names to their comparison values."];
+      costDrivers: CostDrivers.t option
+        [@ocaml.doc
+          "An array of cost drivers, each representing a cost difference between the baseline and comparison time periods. Each entry also includes a metric delta (for example, usage change) that contributed to the cost variance, along with the identifier and type of change."]}
+    let make ?costSelector =
+      fun ?metrics ->
+        fun ?costDrivers -> fun () -> { costSelector; metrics; costDrivers }
+    let to_value x =
+      structure_to_value
+        [("CostSelector", (Option.map x.costSelector ~f:Expression.to_value));
+        ("Metrics", (Option.map x.metrics ~f:ComparisonMetrics.to_value));
+        ("CostDrivers", (Option.map x.costDrivers ~f:CostDrivers.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let costDrivers =
+        (Option.map ~f:CostDrivers.of_xml) (Xml.child xml_arg0 "CostDrivers") in
+      let metrics =
+        (Option.map ~f:ComparisonMetrics.of_xml)
+          (Xml.child xml_arg0 "Metrics") in
+      let costSelector =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "CostSelector") in
+      make ?costDrivers ?metrics ?costSelector ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let costDrivers = field_map json__ "CostDrivers" CostDrivers.of_json in
+      let metrics = field_map json__ "Metrics" ComparisonMetrics.of_json in
+      let costSelector = field_map json__ "CostSelector" Expression.of_json in
+      make ?costDrivers ?metrics ?costSelector ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Represents a collection of cost drivers and their associated metrics for cost comparison analysis."]
+module CostComparisonDrivers =
+  struct
+    type nonrec t = CostComparisonDriver.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CostComparisonDriver.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CostComparisonDriver.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CostComparisonDrivers"
+        ~of_json:CostComparisonDriver.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CostComparisonDriversMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for CostComparisonDriversMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
   end
 module TotalRunningNormalizedUnits =
   struct
@@ -2658,18 +5097,18 @@ module CoverageNormalizedUnits =
       make ?coverageNormalizedUnitsPercentage ?totalRunningNormalizedUnits
         ?reservedNormalizedUnits ?onDemandNormalizedUnits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coverageNormalizedUnitsPercentage =
-        field_map json "CoverageNormalizedUnitsPercentage"
+        field_map json__ "CoverageNormalizedUnitsPercentage"
           CoverageNormalizedUnitsPercentage.of_json in
       let totalRunningNormalizedUnits =
-        field_map json "TotalRunningNormalizedUnits"
+        field_map json__ "TotalRunningNormalizedUnits"
           TotalRunningNormalizedUnits.of_json in
       let reservedNormalizedUnits =
-        field_map json "ReservedNormalizedUnits"
+        field_map json__ "ReservedNormalizedUnits"
           ReservedNormalizedUnits.of_json in
       let onDemandNormalizedUnits =
-        field_map json "OnDemandNormalizedUnits"
+        field_map json__ "OnDemandNormalizedUnits"
           OnDemandNormalizedUnits.of_json in
       make ?coverageNormalizedUnitsPercentage ?totalRunningNormalizedUnits
         ?reservedNormalizedUnits ?onDemandNormalizedUnits ()
@@ -2782,16 +5221,16 @@ module CoverageHours =
       make ?coverageHoursPercentage ?totalRunningHours ?reservedHours
         ?onDemandHours ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coverageHoursPercentage =
-        field_map json "CoverageHoursPercentage"
+        field_map json__ "CoverageHoursPercentage"
           CoverageHoursPercentage.of_json in
       let totalRunningHours =
-        field_map json "TotalRunningHours" TotalRunningHours.of_json in
+        field_map json__ "TotalRunningHours" TotalRunningHours.of_json in
       let reservedHours =
-        field_map json "ReservedHours" ReservedHours.of_json in
+        field_map json__ "ReservedHours" ReservedHours.of_json in
       let onDemandHours =
-        field_map json "OnDemandHours" OnDemandHours.of_json in
+        field_map json__ "OnDemandHours" OnDemandHours.of_json in
       make ?coverageHoursPercentage ?totalRunningHours ?reservedHours
         ?onDemandHours ()
     let to_json v = composed_to_json to_value v
@@ -2828,8 +5267,8 @@ module CoverageCost =
           (Xml.child xml_arg0 "OnDemandCost") in
       make ?onDemandCost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let onDemandCost = field_map json "OnDemandCost" OnDemandCost.of_json in
+    let of_json json__ =
+      let onDemandCost = field_map json__ "OnDemandCost" OnDemandCost.of_json in
       make ?onDemandCost ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "How much it costs to run an instance."]
@@ -2871,13 +5310,13 @@ module Coverage =
           (Xml.child xml_arg0 "CoverageHours") in
       make ?coverageCost ?coverageNormalizedUnits ?coverageHours ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coverageCost = field_map json "CoverageCost" CoverageCost.of_json in
+    let of_json json__ =
+      let coverageCost = field_map json__ "CoverageCost" CoverageCost.of_json in
       let coverageNormalizedUnits =
-        field_map json "CoverageNormalizedUnits"
+        field_map json__ "CoverageNormalizedUnits"
           CoverageNormalizedUnits.of_json in
       let coverageHours =
-        field_map json "CoverageHours" CoverageHours.of_json in
+        field_map json__ "CoverageHours" CoverageHours.of_json in
       make ?coverageCost ?coverageNormalizedUnits ?coverageHours ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The amount of instance usage that a reservation covered."]
@@ -2904,9 +5343,9 @@ module ReservationCoverageGroup =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?coverage ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coverage = field_map json "Coverage" Coverage.of_json in
-      let attributes = field_map json "Attributes" Attributes.of_json in
+    let of_json json__ =
+      let coverage = field_map json__ "Coverage" Coverage.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
       make ?coverage ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A group of reservations that share a set of attributes."]
@@ -2914,6 +5353,9 @@ module ReservationCoverageGroups =
   struct
     type nonrec t = ReservationCoverageGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservationCoverageGroup.to_value)) |>
         (fun x -> `List x)
@@ -2936,37 +5378,6 @@ module ReservationCoverageGroups =
         ~of_json:ReservationCoverageGroup.of_json j
     let to_json v = composed_to_json to_value v
   end
-module DateInterval =
-  struct
-    type nonrec t =
-      {
-      start: YearMonthDay.t
-        [@ocaml.doc
-          "The beginning of the time period. The start date is inclusive. For example, if start is 2017-01-01, Amazon Web Services retrieves cost and usage data starting at 2017-01-01 up to the end date. The start date must be equal to or no later than the current date to avoid a validation error."];
-      end_: YearMonthDay.t
-        [@ocaml.doc
-          "The end of the time period. The end date is exclusive. For example, if end is 2017-05-01, Amazon Web Services retrieves cost and usage data from the start date up to, but not including, 2017-05-01."]}
-    let context_ = "DateInterval"
-    let make ~start = fun ~end_ -> fun () -> { start; end_ }
-    let to_value x =
-      structure_to_value
-        [("Start", (Some (YearMonthDay.to_value x.start)));
-        ("End", (Some (YearMonthDay.to_value x.end_)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let end_ =
-        YearMonthDay.of_xml (Xml.child_exn ~context:context_ xml_arg0 "End") in
-      let start =
-        YearMonthDay.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Start") in
-      make ~end_ ~start ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let end_ = field_map_exn json "End" YearMonthDay.of_json in
-      let start = field_map_exn json "Start" YearMonthDay.of_json in
-      make ~end_ ~start ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The time period of the request."]
 module CoverageByTime =
   struct
     type nonrec t =
@@ -2996,10 +5407,11 @@ module CoverageByTime =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?total ?groups ?timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let total = field_map json "Total" Coverage.of_json in
-      let groups = field_map json "Groups" ReservationCoverageGroups.of_json in
-      let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let total = field_map json__ "Total" Coverage.of_json in
+      let groups =
+        field_map json__ "Groups" ReservationCoverageGroups.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       make ?total ?groups ?timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Reservation coverage for a specified period, in hours."]
@@ -3007,6 +5419,9 @@ module CoveragesByTime =
   struct
     type nonrec t = CoverageByTime.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CoverageByTime.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3076,9 +5491,9 @@ module ResourceTag =
     type nonrec t =
       {
       key: ResourceTagKey.t
-        [@ocaml.doc "The key that is associated with the tag."];
+        [@ocaml.doc "The key that's associated with the tag."];
       value: ResourceTagValue.t
-        [@ocaml.doc "The value that is associated with the tag."]}
+        [@ocaml.doc "The value that's associated with the tag."]}
     let context_ = "ResourceTag"
     let make ~key = fun ~value -> fun () -> { key; value }
     let to_value x =
@@ -3095,9 +5510,9 @@ module ResourceTag =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ResourceTagValue.of_json in
-      let key = field_map_exn json "Key" ResourceTagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ResourceTagValue.of_json in
+      let key = field_map_exn json__ "Key" ResourceTagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3111,6 +5526,9 @@ module ResourceTagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3140,7 +5558,7 @@ module CreateAnomalyMonitorRequest =
           "The cost anomaly detection monitor object that you want to create."];
       resourceTags: ResourceTagList.t option
         [@ocaml.doc
-          "An optional list of tags to associate with the specified AnomalyMonitor . You can use resource tags to control access to your monitor using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Valid characters for keys and values are: A-Z, a-z, spaces, _.:/=+- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
+          "An optional list of tags to associate with the specified AnomalyMonitor . You can use resource tags to control access to your monitor using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Keys and values can only contain alphanumeric characters, spaces, and any of the following: _.:/=+\\@- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
     let context_ = "CreateAnomalyMonitorRequest"
     let make ?resourceTags =
       fun ~anomalyMonitor -> fun () -> { resourceTags; anomalyMonitor }
@@ -3160,11 +5578,11 @@ module CreateAnomalyMonitorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyMonitor") in
       make ?resourceTags ~anomalyMonitor ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map json "ResourceTags" ResourceTagList.of_json in
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
       let anomalyMonitor =
-        field_map_exn json "AnomalyMonitor" AnomalyMonitor.of_json in
+        field_map_exn json__ "AnomalyMonitor" AnomalyMonitor.of_json in
       make ?resourceTags ~anomalyMonitor ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3183,8 +5601,8 @@ module LimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3193,14 +5611,13 @@ module CreateAnomalyMonitorResponse =
   struct
     type nonrec t =
       {
-      monitorArn: GenericString.t
+      monitorArn: GenericString.t option
         [@ocaml.doc
           "The unique identifier of your newly created cost anomaly detection monitor."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAnomalyMonitorResponse"
-    let make ~monitorArn = fun () -> { monitorArn }
+    let make ?monitorArn = fun () -> { monitorArn }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -3227,17 +5644,17 @@ module CreateAnomalyMonitorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("MonitorArn", (Some (GenericString.to_value x.monitorArn)))]
+        [("MonitorArn", (Option.map x.monitorArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let monitorArn =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
-      make ~monitorArn ()
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "MonitorArn") in
+      make ?monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
-      make ~monitorArn ()
+    let of_json json__ =
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
+      make ?monitorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new cost anomaly detection monitor with the requested type and monitor specification."]
@@ -3250,7 +5667,7 @@ module CreateAnomalySubscriptionRequest =
           "The cost anomaly subscription object that you want to create."];
       resourceTags: ResourceTagList.t option
         [@ocaml.doc
-          "An optional list of tags to associate with the specified AnomalySubscription . You can use resource tags to control access to your subscription using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Valid characters for keys and values are: A-Z, a-z, spaces, _.:/=+- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
+          "An optional list of tags to associate with the specified AnomalySubscription . You can use resource tags to control access to your subscription using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Keys and values can only contain alphanumeric characters, spaces, and any of the following: _.:/=+\\@- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
     let context_ = "CreateAnomalySubscriptionRequest"
     let make ?resourceTags =
       fun ~anomalySubscription ->
@@ -3271,15 +5688,16 @@ module CreateAnomalySubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalySubscription") in
       make ?resourceTags ~anomalySubscription ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map json "ResourceTags" ResourceTagList.of_json in
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
       let anomalySubscription =
-        field_map_exn json "AnomalySubscription" AnomalySubscription.of_json in
+        field_map_exn json__ "AnomalySubscription"
+          AnomalySubscription.of_json in
       make ?resourceTags ~anomalySubscription ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a subscription to a cost anomaly detection monitor. You can use each subscription to define subscribers with email or SNS notifications. Email subscribers can set a dollar threshold and a time frequency for receiving notifications."]
+       "Adds an alert subscription to a cost anomaly detection monitor. You can use each subscription to define subscribers with email or SNS notifications. Email subscribers can set an absolute or percentage threshold and a time frequency for receiving notifications."]
 module UnknownMonitorException =
   struct
     type nonrec t = {
@@ -3294,8 +5712,8 @@ module UnknownMonitorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The cost anomaly monitor does not exist for the account."]
@@ -3303,15 +5721,14 @@ module CreateAnomalySubscriptionResponse =
   struct
     type nonrec t =
       {
-      subscriptionArn: GenericString.t
+      subscriptionArn: GenericString.t option
         [@ocaml.doc
           "The unique identifier of your newly created cost anomaly subscription."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `UnknownMonitorException of UnknownMonitorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateAnomalySubscriptionResponse"
-    let make ~subscriptionArn = fun () -> { subscriptionArn }
+    let make ?subscriptionArn = fun () -> { subscriptionArn }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -3347,56 +5764,63 @@ module CreateAnomalySubscriptionResponse =
     let to_value x =
       structure_to_value
         [("SubscriptionArn",
-           (Some (GenericString.to_value x.subscriptionArn)))]
+           (Option.map x.subscriptionArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let subscriptionArn =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
-      make ~subscriptionArn ()
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "SubscriptionArn") in
+      make ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" GenericString.of_json in
-      make ~subscriptionArn ()
+        field_map json__ "SubscriptionArn" GenericString.of_json in
+      make ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds a subscription to a cost anomaly detection monitor. You can use each subscription to define subscribers with email or SNS notifications. Email subscribers can set a dollar threshold and a time frequency for receiving notifications."]
+       "Adds an alert subscription to a cost anomaly detection monitor. You can use each subscription to define subscribers with email or SNS notifications. Email subscribers can set an absolute or percentage threshold and a time frequency for receiving notifications."]
 module CreateCostCategoryDefinitionRequest =
   struct
     type nonrec t =
       {
       name: CostCategoryName.t ;
+      effectiveStart: ZonedDateTime.t option
+        [@ocaml.doc
+          "The cost category's effective start date. It can only be a billing start date (first day of the month). If the date isn't provided, it's the first day of the current month. Dates can't be before the previous twelve months, or in the future."];
       ruleVersion: CostCategoryRuleVersion.t ;
       rules: CostCategoryRulesList.t
         [@ocaml.doc
-          "The Cost Category rules used to categorize costs. For more information, see CostCategoryRule."];
+          "The cost category rules used to categorize costs. For more information, see CostCategoryRule."];
       defaultValue: CostCategoryValue.t option ;
       splitChargeRules: CostCategorySplitChargeRulesList.t option
         [@ocaml.doc
-          "The split charge rules used to allocate your charges between your Cost Category values."];
+          "The split charge rules used to allocate your charges between your cost category values."];
       resourceTags: ResourceTagList.t option
         [@ocaml.doc
-          "An optional list of tags to associate with the specified CostCategory . You can use resource tags to control access to your cost category using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Valid characters for keys and values are: A-Z, a-z, spaces, _.:/=+- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
+          "An optional list of tags to associate with the specified CostCategory . You can use resource tags to control access to your cost category using IAM policies. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Keys and values can only contain alphanumeric characters, spaces, and any of the following: _.:/=+\\@- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
     let context_ = "CreateCostCategoryDefinitionRequest"
-    let make ?defaultValue =
-      fun ?splitChargeRules ->
-        fun ?resourceTags ->
-          fun ~name ->
-            fun ~ruleVersion ->
-              fun ~rules ->
-                fun () ->
-                  {
-                    defaultValue;
-                    splitChargeRules;
-                    resourceTags;
-                    name;
-                    ruleVersion;
-                    rules
-                  }
+    let make ?effectiveStart =
+      fun ?defaultValue ->
+        fun ?splitChargeRules ->
+          fun ?resourceTags ->
+            fun ~name ->
+              fun ~ruleVersion ->
+                fun ~rules ->
+                  fun () ->
+                    {
+                      effectiveStart;
+                      defaultValue;
+                      splitChargeRules;
+                      resourceTags;
+                      name;
+                      ruleVersion;
+                      rules
+                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (CostCategoryName.to_value x.name)));
+        ("EffectiveStart",
+          (Option.map x.effectiveStart ~f:ZonedDateTime.to_value));
         ("RuleVersion",
           (Some (CostCategoryRuleVersion.to_value x.ruleVersion)));
         ("Rules", (Some (CostCategoryRulesList.to_value x.rules)));
@@ -3424,29 +5848,34 @@ module CreateCostCategoryDefinitionRequest =
       let ruleVersion =
         CostCategoryRuleVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleVersion") in
+      let effectiveStart =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EffectiveStart") in
       let name =
         CostCategoryName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?resourceTags ?splitChargeRules ?defaultValue ~rules ~ruleVersion
-        ~name ()
+        ?effectiveStart ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map json "ResourceTags" ResourceTagList.of_json in
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
       let splitChargeRules =
-        field_map json "SplitChargeRules"
+        field_map json__ "SplitChargeRules"
           CostCategorySplitChargeRulesList.of_json in
       let defaultValue =
-        field_map json "DefaultValue" CostCategoryValue.of_json in
-      let rules = field_map_exn json "Rules" CostCategoryRulesList.of_json in
+        field_map json__ "DefaultValue" CostCategoryValue.of_json in
+      let rules = field_map_exn json__ "Rules" CostCategoryRulesList.of_json in
       let ruleVersion =
-        field_map_exn json "RuleVersion" CostCategoryRuleVersion.of_json in
-      let name = field_map_exn json "Name" CostCategoryName.of_json in
+        field_map_exn json__ "RuleVersion" CostCategoryRuleVersion.of_json in
+      let effectiveStart =
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let name = field_map_exn json__ "Name" CostCategoryName.of_json in
       make ?resourceTags ?splitChargeRules ?defaultValue ~rules ~ruleVersion
-        ~name ()
+        ?effectiveStart ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Cost Category with the requested name and rules."]
+       "Creates a new cost category with the requested name and rules."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -3461,8 +5890,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3473,9 +5902,10 @@ module CreateCostCategoryDefinitionResponse =
       {
       costCategoryArn: Arn.t option
         [@ocaml.doc
-          "The unique identifier for your newly created Cost Category."];
+          "The unique identifier for your newly created cost category."];
       effectiveStart: ZonedDateTime.t option
-        [@ocaml.doc "The Cost Category's effective start date."]}
+        [@ocaml.doc
+          "The cost category's effective start date. It can only be a billing start date (first day of the month)."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
@@ -3530,18 +5960,21 @@ module CreateCostCategoryDefinitionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveStart ?costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let effectiveStart =
-        field_map json "EffectiveStart" ZonedDateTime.of_json in
-      let costCategoryArn = field_map json "CostCategoryArn" Arn.of_json in
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
       make ?effectiveStart ?costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a new Cost Category with the requested name and rules."]
+       "Creates a new cost category with the requested name and rules."]
 module TagValuesList =
   struct
     type nonrec t = TagValues.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagValues.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3568,16 +6001,16 @@ module NetworkResourceUtilization =
       {
       networkInBytesPerSecond: GenericString.t option
         [@ocaml.doc
-          "The network inbound throughput utilization measured in Bytes per second."];
+          "The network inbound throughput utilization measured in Bytes per second (Bps)."];
       networkOutBytesPerSecond: GenericString.t option
         [@ocaml.doc
-          "The network outbound throughput utilization measured in Bytes per second."];
+          "The network outbound throughput utilization measured in Bytes per second (Bps)."];
       networkPacketsInPerSecond: GenericString.t option
         [@ocaml.doc
-          "The network ingress packets that are measured in packets per second."];
+          "The network inbound packets that are measured in packets per second."];
       networkPacketsOutPerSecond: GenericString.t option
         [@ocaml.doc
-          "The network outgress packets that are measured in packets per second."]}
+          "The network outbound packets that are measured in packets per second."]}
     let make ?networkInBytesPerSecond =
       fun ?networkOutBytesPerSecond ->
         fun ?networkPacketsInPerSecond ->
@@ -3616,15 +6049,15 @@ module NetworkResourceUtilization =
       make ?networkPacketsOutPerSecond ?networkPacketsInPerSecond
         ?networkOutBytesPerSecond ?networkInBytesPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkPacketsOutPerSecond =
-        field_map json "NetworkPacketsOutPerSecond" GenericString.of_json in
+        field_map json__ "NetworkPacketsOutPerSecond" GenericString.of_json in
       let networkPacketsInPerSecond =
-        field_map json "NetworkPacketsInPerSecond" GenericString.of_json in
+        field_map json__ "NetworkPacketsInPerSecond" GenericString.of_json in
       let networkOutBytesPerSecond =
-        field_map json "NetworkOutBytesPerSecond" GenericString.of_json in
+        field_map json__ "NetworkOutBytesPerSecond" GenericString.of_json in
       let networkInBytesPerSecond =
-        field_map json "NetworkInBytesPerSecond" GenericString.of_json in
+        field_map json__ "NetworkInBytesPerSecond" GenericString.of_json in
       make ?networkPacketsOutPerSecond ?networkPacketsInPerSecond
         ?networkOutBytesPerSecond ?networkInBytesPerSecond ()
     let to_json v = composed_to_json to_value v
@@ -3680,15 +6113,15 @@ module EBSResourceUtilization =
       make ?ebsWriteBytesPerSecond ?ebsReadBytesPerSecond
         ?ebsWriteOpsPerSecond ?ebsReadOpsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let ebsWriteBytesPerSecond =
-        field_map json "EbsWriteBytesPerSecond" GenericString.of_json in
+        field_map json__ "EbsWriteBytesPerSecond" GenericString.of_json in
       let ebsReadBytesPerSecond =
-        field_map json "EbsReadBytesPerSecond" GenericString.of_json in
+        field_map json__ "EbsReadBytesPerSecond" GenericString.of_json in
       let ebsWriteOpsPerSecond =
-        field_map json "EbsWriteOpsPerSecond" GenericString.of_json in
+        field_map json__ "EbsWriteOpsPerSecond" GenericString.of_json in
       let ebsReadOpsPerSecond =
-        field_map json "EbsReadOpsPerSecond" GenericString.of_json in
+        field_map json__ "EbsReadOpsPerSecond" GenericString.of_json in
       make ?ebsWriteBytesPerSecond ?ebsReadBytesPerSecond
         ?ebsWriteOpsPerSecond ?ebsReadOpsPerSecond ()
     let to_json v = composed_to_json to_value v
@@ -3744,15 +6177,15 @@ module DiskResourceUtilization =
       make ?diskWriteBytesPerSecond ?diskReadBytesPerSecond
         ?diskWriteOpsPerSecond ?diskReadOpsPerSecond ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let diskWriteBytesPerSecond =
-        field_map json "DiskWriteBytesPerSecond" GenericString.of_json in
+        field_map json__ "DiskWriteBytesPerSecond" GenericString.of_json in
       let diskReadBytesPerSecond =
-        field_map json "DiskReadBytesPerSecond" GenericString.of_json in
+        field_map json__ "DiskReadBytesPerSecond" GenericString.of_json in
       let diskWriteOpsPerSecond =
-        field_map json "DiskWriteOpsPerSecond" GenericString.of_json in
+        field_map json__ "DiskWriteOpsPerSecond" GenericString.of_json in
       let diskReadOpsPerSecond =
-        field_map json "DiskReadOpsPerSecond" GenericString.of_json in
+        field_map json__ "DiskReadOpsPerSecond" GenericString.of_json in
       make ?diskWriteBytesPerSecond ?diskReadBytesPerSecond
         ?diskWriteOpsPerSecond ?diskReadOpsPerSecond ()
     let to_json v = composed_to_json to_value v
@@ -3839,28 +6272,29 @@ module EC2ResourceUtilization =
         ?eBSResourceUtilization ?maxStorageUtilizationPercentage
         ?maxMemoryUtilizationPercentage ?maxCpuUtilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let networkResourceUtilization =
-        field_map json "NetworkResourceUtilization"
+        field_map json__ "NetworkResourceUtilization"
           NetworkResourceUtilization.of_json in
       let diskResourceUtilization =
-        field_map json "DiskResourceUtilization"
+        field_map json__ "DiskResourceUtilization"
           DiskResourceUtilization.of_json in
       let eBSResourceUtilization =
-        field_map json "EBSResourceUtilization"
+        field_map json__ "EBSResourceUtilization"
           EBSResourceUtilization.of_json in
       let maxStorageUtilizationPercentage =
-        field_map json "MaxStorageUtilizationPercentage"
+        field_map json__ "MaxStorageUtilizationPercentage"
           GenericString.of_json in
       let maxMemoryUtilizationPercentage =
-        field_map json "MaxMemoryUtilizationPercentage" GenericString.of_json in
+        field_map json__ "MaxMemoryUtilizationPercentage"
+          GenericString.of_json in
       let maxCpuUtilizationPercentage =
-        field_map json "MaxCpuUtilizationPercentage" GenericString.of_json in
+        field_map json__ "MaxCpuUtilizationPercentage" GenericString.of_json in
       make ?networkResourceUtilization ?diskResourceUtilization
         ?eBSResourceUtilization ?maxStorageUtilizationPercentage
         ?maxMemoryUtilizationPercentage ?maxCpuUtilizationPercentage ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Utilization metrics of the instance."]
+  end[@@ocaml.doc "Utilization metrics for the instance."]
 module ResourceUtilization =
   struct
     type nonrec t =
@@ -3880,9 +6314,9 @@ module ResourceUtilization =
           (Xml.child xml_arg0 "EC2ResourceUtilization") in
       make ?eC2ResourceUtilization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2ResourceUtilization =
-        field_map json "EC2ResourceUtilization"
+        field_map json__ "EC2ResourceUtilization"
           EC2ResourceUtilization.of_json in
       make ?eC2ResourceUtilization ()
     let to_json v = composed_to_json to_value v
@@ -3975,18 +6409,19 @@ module EC2ResourceDetails =
       make ?vcpu ?storage ?networkPerformance ?memory ?sku ?region ?platform
         ?instanceType ?hourlyOnDemandRate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let vcpu = field_map json "Vcpu" GenericString.of_json in
-      let storage = field_map json "Storage" GenericString.of_json in
+    let of_json json__ =
+      let vcpu = field_map json__ "Vcpu" GenericString.of_json in
+      let storage = field_map json__ "Storage" GenericString.of_json in
       let networkPerformance =
-        field_map json "NetworkPerformance" GenericString.of_json in
-      let memory = field_map json "Memory" GenericString.of_json in
-      let sku = field_map json "Sku" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let platform = field_map json "Platform" GenericString.of_json in
-      let instanceType = field_map json "InstanceType" GenericString.of_json in
+        field_map json__ "NetworkPerformance" GenericString.of_json in
+      let memory = field_map json__ "Memory" GenericString.of_json in
+      let sku = field_map json__ "Sku" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let platform = field_map json__ "Platform" GenericString.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" GenericString.of_json in
       let hourlyOnDemandRate =
-        field_map json "HourlyOnDemandRate" GenericString.of_json in
+        field_map json__ "HourlyOnDemandRate" GenericString.of_json in
       make ?vcpu ?storage ?networkPerformance ?memory ?sku ?region ?platform
         ?instanceType ?hourlyOnDemandRate ()
     let to_json v = composed_to_json to_value v
@@ -3996,7 +6431,7 @@ module ResourceDetails =
     type nonrec t =
       {
       eC2ResourceDetails: EC2ResourceDetails.t option
-        [@ocaml.doc "Details on the Amazon EC2 resource."]}
+        [@ocaml.doc "Details for the Amazon EC2 resource."]}
     let make ?eC2ResourceDetails = fun () -> { eC2ResourceDetails }
     let to_value x =
       structure_to_value
@@ -4009,12 +6444,12 @@ module ResourceDetails =
           (Xml.child xml_arg0 "EC2ResourceDetails") in
       make ?eC2ResourceDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2ResourceDetails =
-        field_map json "EC2ResourceDetails" EC2ResourceDetails.of_json in
+        field_map json__ "EC2ResourceDetails" EC2ResourceDetails.of_json in
       make ?eC2ResourceDetails ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Details on the resource."]
+  end[@@ocaml.doc "Details for the resource."]
 module CurrentInstance =
   struct
     type nonrec t =
@@ -4140,27 +6575,30 @@ module CurrentInstance =
         ?reservationCoveredHoursInLookbackPeriod ?resourceUtilization
         ?resourceDetails ?tags ?instanceName ?resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
-      let monthlyCost = field_map json "MonthlyCost" GenericString.of_json in
+    let of_json json__ =
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
+      let monthlyCost = field_map json__ "MonthlyCost" GenericString.of_json in
       let totalRunningHoursInLookbackPeriod =
-        field_map json "TotalRunningHoursInLookbackPeriod"
+        field_map json__ "TotalRunningHoursInLookbackPeriod"
           GenericString.of_json in
       let onDemandHoursInLookbackPeriod =
-        field_map json "OnDemandHoursInLookbackPeriod" GenericString.of_json in
+        field_map json__ "OnDemandHoursInLookbackPeriod"
+          GenericString.of_json in
       let savingsPlansCoveredHoursInLookbackPeriod =
-        field_map json "SavingsPlansCoveredHoursInLookbackPeriod"
+        field_map json__ "SavingsPlansCoveredHoursInLookbackPeriod"
           GenericString.of_json in
       let reservationCoveredHoursInLookbackPeriod =
-        field_map json "ReservationCoveredHoursInLookbackPeriod"
+        field_map json__ "ReservationCoveredHoursInLookbackPeriod"
           GenericString.of_json in
       let resourceUtilization =
-        field_map json "ResourceUtilization" ResourceUtilization.of_json in
+        field_map json__ "ResourceUtilization" ResourceUtilization.of_json in
       let resourceDetails =
-        field_map json "ResourceDetails" ResourceDetails.of_json in
-      let tags = field_map json "Tags" TagValuesList.of_json in
-      let instanceName = field_map json "InstanceName" GenericString.of_json in
-      let resourceId = field_map json "ResourceId" GenericString.of_json in
+        field_map json__ "ResourceDetails" ResourceDetails.of_json in
+      let tags = field_map json__ "Tags" TagValuesList.of_json in
+      let instanceName =
+        field_map json__ "InstanceName" GenericString.of_json in
+      let resourceId = field_map json__ "ResourceId" GenericString.of_json in
       make ?currencyCode ?monthlyCost ?totalRunningHoursInLookbackPeriod
         ?onDemandHoursInLookbackPeriod
         ?savingsPlansCoveredHoursInLookbackPeriod
@@ -4182,8 +6620,8 @@ module DataUnavailableException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested data is unavailable."]
@@ -4206,8 +6644,9 @@ module DeleteAnomalyMonitorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ~monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
+    let of_json json__ =
+      let monitorArn =
+        field_map_exn json__ "MonitorArn" GenericString.of_json in
       make ~monitorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a cost anomaly monitor."]
@@ -4279,9 +6718,9 @@ module DeleteAnomalySubscriptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
       make ~subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" GenericString.of_json in
+        field_map_exn json__ "SubscriptionArn" GenericString.of_json in
       make ~subscriptionArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a cost anomaly subscription."]
@@ -4299,8 +6738,8 @@ module UnknownSubscriptionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4360,7 +6799,7 @@ module DeleteCostCategoryDefinitionRequest =
     type nonrec t =
       {
       costCategoryArn: Arn.t
-        [@ocaml.doc "The unique identifier for your Cost Category."]}
+        [@ocaml.doc "The unique identifier for your cost category."]}
     let context_ = "DeleteCostCategoryDefinitionRequest"
     let make ~costCategoryArn = fun () -> { costCategoryArn }
     let to_value x =
@@ -4373,12 +6812,13 @@ module DeleteCostCategoryDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ~costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
+    let of_json json__ =
+      let costCategoryArn =
+        field_map_exn json__ "CostCategoryArn" Arn.of_json in
       make ~costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a Cost Category. Expenses from this month going forward will no longer be categorized with this Cost Category."]
+       "Deletes a cost category. Expenses from this month going forward will no longer be categorized with this cost category."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
@@ -4399,9 +6839,9 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Arn.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Arn.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The specified ARN in the request doesn't exist."]
@@ -4410,10 +6850,10 @@ module DeleteCostCategoryDefinitionResponse =
     type nonrec t =
       {
       costCategoryArn: Arn.t option
-        [@ocaml.doc "The unique identifier for your Cost Category."];
+        [@ocaml.doc "The unique identifier for your cost category."];
       effectiveEnd: ZonedDateTime.t option
         [@ocaml.doc
-          "The effective end date of the Cost Category as a result of deleting it. No costs after this date will be categorized by the deleted Cost Category."]}
+          "The effective end date of the cost category as a result of deleting it. No costs after this date is categorized by the deleted cost category."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -4466,21 +6906,22 @@ module DeleteCostCategoryDefinitionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveEnd ?costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let effectiveEnd = field_map json "EffectiveEnd" ZonedDateTime.of_json in
-      let costCategoryArn = field_map json "CostCategoryArn" Arn.of_json in
+    let of_json json__ =
+      let effectiveEnd =
+        field_map json__ "EffectiveEnd" ZonedDateTime.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
       make ?effectiveEnd ?costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes a Cost Category. Expenses from this month going forward will no longer be categorized with this Cost Category."]
+       "Deletes a cost category. Expenses from this month going forward will no longer be categorized with this cost category."]
 module DescribeCostCategoryDefinitionRequest =
   struct
     type nonrec t =
       {
       costCategoryArn: Arn.t
-        [@ocaml.doc "The unique identifier for your Cost Category."];
+        [@ocaml.doc "The unique identifier for your cost category."];
       effectiveOn: ZonedDateTime.t option
-        [@ocaml.doc "The date when the Cost Category was effective."]}
+        [@ocaml.doc "The date when the cost category was effective."]}
     let context_ = "DescribeCostCategoryDefinitionRequest"
     let make ?effectiveOn =
       fun ~costCategoryArn -> fun () -> { effectiveOn; costCategoryArn }
@@ -4498,13 +6939,14 @@ module DescribeCostCategoryDefinitionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ?effectiveOn ~costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let effectiveOn = field_map json "EffectiveOn" ZonedDateTime.of_json in
-      let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
+    let of_json json__ =
+      let effectiveOn = field_map json__ "EffectiveOn" ZonedDateTime.of_json in
+      let costCategoryArn =
+        field_map_exn json__ "CostCategoryArn" Arn.of_json in
       make ?effectiveOn ~costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name, ARN, rules, definition, and effective dates of a Cost Category that's defined in the account. You have the option to use EffectiveOn to return a Cost Category that is active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see a Cost Category that is effective on the current date. If Cost Category is still effective, EffectiveEnd is omitted in the response."]
+       "Returns the name, Amazon Resource Name (ARN), rules, definition, and effective dates of a cost category that's defined in the account. You have the option to use EffectiveOn to return a cost category that's active on a specific date. If there's no EffectiveOn specified, you see a Cost Category that's effective on the current date. If cost category is still effective, EffectiveEnd is omitted in the response."]
 module DescribeCostCategoryDefinitionResponse =
   struct
     type nonrec t = {
@@ -4557,12 +6999,12 @@ module DescribeCostCategoryDefinitionResponse =
           (Xml.child xml_arg0 "CostCategory") in
       make ?costCategory ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let costCategory = field_map json "CostCategory" CostCategory.of_json in
+    let of_json json__ =
+      let costCategory = field_map json__ "CostCategory" CostCategory.of_json in
       make ?costCategory ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name, ARN, rules, definition, and effective dates of a Cost Category that's defined in the account. You have the option to use EffectiveOn to return a Cost Category that is active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see a Cost Category that is effective on the current date. If Cost Category is still effective, EffectiveEnd is omitted in the response."]
+       "Returns the name, Amazon Resource Name (ARN), rules, definition, and effective dates of a cost category that's defined in the account. You have the option to use EffectiveOn to return a cost category that's active on a specific date. If there's no EffectiveOn specified, you see a Cost Category that's effective on the current date. If cost category is still effective, EffectiveEnd is omitted in the response."]
 module DimensionValuesWithAttributes =
   struct
     type nonrec t =
@@ -4583,9 +7025,9 @@ module DimensionValuesWithAttributes =
       let value = (Option.map ~f:Value.of_xml) (Xml.child xml_arg0 "Value") in
       make ?attributes ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attributes = field_map json "Attributes" Attributes.of_json in
-      let value = field_map json "Value" Value.of_json in
+    let of_json json__ =
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
+      let value = field_map json__ "Value" Value.of_json in
       make ?attributes ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4594,6 +7036,9 @@ module DimensionValuesWithAttributesList =
   struct
     type nonrec t = DimensionValuesWithAttributes.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DimensionValuesWithAttributes.to_value)) |>
         (fun x -> `List x)
@@ -4616,6 +7061,39 @@ module DimensionValuesWithAttributesList =
         ~of_json:DimensionValuesWithAttributes.of_json j
     let to_json v = composed_to_json to_value v
   end
+module DynamoDBCapacityDetails =
+  struct
+    type nonrec t =
+      {
+      capacityUnits: GenericString.t option
+        [@ocaml.doc "The capacity unit of the recommended reservation."];
+      region: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region of the recommended reservation."]}
+    let make ?capacityUnits =
+      fun ?region -> fun () -> { capacityUnits; region }
+    let to_value x =
+      structure_to_value
+        [("CapacityUnits",
+           (Option.map x.capacityUnits ~f:GenericString.to_value));
+        ("Region", (Option.map x.region ~f:GenericString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let region =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
+      let capacityUnits =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CapacityUnits") in
+      make ?region ?capacityUnits ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let region = field_map json__ "Region" GenericString.of_json in
+      let capacityUnits =
+        field_map json__ "CapacityUnits" GenericString.of_json in
+      make ?region ?capacityUnits ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The DynamoDB reservations that Amazon Web Services recommends that you purchase."]
 module GenericBoolean =
   struct
     type nonrec t = bool
@@ -4713,23 +7191,24 @@ module EC2InstanceDetails =
       make ?sizeFlexEligible ?currentGeneration ?tenancy ?platform
         ?availabilityZone ?region ?instanceType ?family ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeFlexEligible =
-        field_map json "SizeFlexEligible" GenericBoolean.of_json in
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
       let currentGeneration =
-        field_map json "CurrentGeneration" GenericBoolean.of_json in
-      let tenancy = field_map json "Tenancy" GenericString.of_json in
-      let platform = field_map json "Platform" GenericString.of_json in
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
+      let tenancy = field_map json__ "Tenancy" GenericString.of_json in
+      let platform = field_map json__ "Platform" GenericString.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let instanceType = field_map json "InstanceType" GenericString.of_json in
-      let family = field_map json "Family" GenericString.of_json in
+        field_map json__ "AvailabilityZone" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" GenericString.of_json in
+      let family = field_map json__ "Family" GenericString.of_json in
       make ?sizeFlexEligible ?currentGeneration ?tenancy ?platform
         ?availabilityZone ?region ?instanceType ?family ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the Amazon EC2 instances that Amazon Web Services recommends that you purchase."]
+       "Details about the Amazon EC2 reservations that Amazon Web Services recommends that you purchase."]
 module OfferingClass =
   struct
     type nonrec t =
@@ -4774,9 +7253,9 @@ module EC2Specification =
           (Xml.child xml_arg0 "OfferingClass") in
       make ?offeringClass ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let offeringClass =
-        field_map json "OfferingClass" OfferingClass.of_json in
+        field_map json__ "OfferingClass" OfferingClass.of_json in
       make ?offeringClass ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4843,20 +7322,21 @@ module ESInstanceDetails =
       make ?sizeFlexEligible ?currentGeneration ?region ?instanceSize
         ?instanceClass ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeFlexEligible =
-        field_map json "SizeFlexEligible" GenericBoolean.of_json in
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
       let currentGeneration =
-        field_map json "CurrentGeneration" GenericBoolean.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let instanceSize = field_map json "InstanceSize" GenericString.of_json in
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let instanceSize =
+        field_map json__ "InstanceSize" GenericString.of_json in
       let instanceClass =
-        field_map json "InstanceClass" GenericString.of_json in
+        field_map json__ "InstanceClass" GenericString.of_json in
       make ?sizeFlexEligible ?currentGeneration ?region ?instanceSize
         ?instanceClass ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the Amazon OpenSearch Service instances that Amazon Web Services recommends that you purchase."]
+       "Details about the Amazon OpenSearch Service reservations that Amazon Web Services recommends that you purchase."]
 module ElastiCacheInstanceDetails =
   struct
     type nonrec t =
@@ -4922,21 +7402,21 @@ module ElastiCacheInstanceDetails =
       make ?sizeFlexEligible ?currentGeneration ?productDescription ?region
         ?nodeType ?family ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeFlexEligible =
-        field_map json "SizeFlexEligible" GenericBoolean.of_json in
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
       let currentGeneration =
-        field_map json "CurrentGeneration" GenericBoolean.of_json in
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
       let productDescription =
-        field_map json "ProductDescription" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let nodeType = field_map json "NodeType" GenericString.of_json in
-      let family = field_map json "Family" GenericString.of_json in
+        field_map json__ "ProductDescription" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let nodeType = field_map json__ "NodeType" GenericString.of_json in
+      let family = field_map json__ "Family" GenericString.of_json in
       make ?sizeFlexEligible ?currentGeneration ?productDescription ?region
         ?nodeType ?family ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the Amazon ElastiCache instances that Amazon Web Services recommends that you purchase."]
+       "Details about the Amazon ElastiCache reservations that Amazon Web Services recommends that you purchase."]
 module Entity =
   struct
     type nonrec t = string
@@ -5045,6 +7525,9 @@ module FindingReasonCodes =
   struct
     type nonrec t = FindingReasonCode.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FindingReasonCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5114,13 +7597,13 @@ module ForecastResult =
       make ?predictionIntervalUpperBound ?predictionIntervalLowerBound
         ?meanValue ?timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictionIntervalUpperBound =
-        field_map json "PredictionIntervalUpperBound" GenericString.of_json in
+        field_map json__ "PredictionIntervalUpperBound" GenericString.of_json in
       let predictionIntervalLowerBound =
-        field_map json "PredictionIntervalLowerBound" GenericString.of_json in
-      let meanValue = field_map json "MeanValue" GenericString.of_json in
-      let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
+        field_map json__ "PredictionIntervalLowerBound" GenericString.of_json in
+      let meanValue = field_map json__ "MeanValue" GenericString.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       make ?predictionIntervalUpperBound ?predictionIntervalLowerBound
         ?meanValue ?timePeriod ()
     let to_json v = composed_to_json to_value v
@@ -5129,6 +7612,9 @@ module ForecastResultsByTime =
   struct
     type nonrec t = ForecastResult.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ForecastResult.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5148,6 +7634,183 @@ module ForecastResultsByTime =
     let of_json j =
       list_of_json ~kind:"ForecastResultsByTime"
         ~of_json:ForecastResult.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GenerationExistsException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to generate a recommendation or analysis is already in progress."]
+module GenerationStatus =
+  struct
+    type nonrec t =
+      | SUCCEEDED 
+      | PROCESSING 
+      | FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SUCCEEDED -> "SUCCEEDED"
+      | PROCESSING -> "PROCESSING"
+      | FAILED -> "FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SUCCEEDED" -> SUCCEEDED
+      | "PROCESSING" -> PROCESSING
+      | "FAILED" -> FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration GenerationStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"GenerationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module RecommendationId =
+  struct
+    type nonrec t = string
+    let context_ = "RecommendationId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[\\S\\s]{8}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RecommendationId" j
+    let to_json = simple_to_json to_value
+  end
+module GenerationSummary =
+  struct
+    type nonrec t =
+      {
+      recommendationId: RecommendationId.t option
+        [@ocaml.doc "Indicates the ID for this specific recommendation."];
+      generationStatus: GenerationStatus.t option
+        [@ocaml.doc
+          "Indicates whether the recommendation generation succeeded, is processing, or failed."];
+      generationStartedTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "Indicates the start time of the recommendation generation."];
+      generationCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "Indicates the completion time of the recommendation generation."];
+      estimatedCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "Indicates the estimated time for when the recommendation generation will complete."]}
+    let make ?recommendationId =
+      fun ?generationStatus ->
+        fun ?generationStartedTime ->
+          fun ?generationCompletionTime ->
+            fun ?estimatedCompletionTime ->
+              fun () ->
+                {
+                  recommendationId;
+                  generationStatus;
+                  generationStartedTime;
+                  generationCompletionTime;
+                  estimatedCompletionTime
+                }
+    let to_value x =
+      structure_to_value
+        [("RecommendationId",
+           (Option.map x.recommendationId ~f:RecommendationId.to_value));
+        ("GenerationStatus",
+          (Option.map x.generationStatus ~f:GenerationStatus.to_value));
+        ("GenerationStartedTime",
+          (Option.map x.generationStartedTime ~f:ZonedDateTime.to_value));
+        ("GenerationCompletionTime",
+          (Option.map x.generationCompletionTime ~f:ZonedDateTime.to_value));
+        ("EstimatedCompletionTime",
+          (Option.map x.estimatedCompletionTime ~f:ZonedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EstimatedCompletionTime") in
+      let generationCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "GenerationCompletionTime") in
+      let generationStartedTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "GenerationStartedTime") in
+      let generationStatus =
+        (Option.map ~f:GenerationStatus.of_xml)
+          (Xml.child xml_arg0 "GenerationStatus") in
+      let recommendationId =
+        (Option.map ~f:RecommendationId.of_xml)
+          (Xml.child xml_arg0 "RecommendationId") in
+      make ?estimatedCompletionTime ?generationCompletionTime
+        ?generationStartedTime ?generationStatus ?recommendationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedCompletionTime =
+        field_map json__ "EstimatedCompletionTime" ZonedDateTime.of_json in
+      let generationCompletionTime =
+        field_map json__ "GenerationCompletionTime" ZonedDateTime.of_json in
+      let generationStartedTime =
+        field_map json__ "GenerationStartedTime" ZonedDateTime.of_json in
+      let generationStatus =
+        field_map json__ "GenerationStatus" GenerationStatus.of_json in
+      let recommendationId =
+        field_map json__ "RecommendationId" RecommendationId.of_json in
+      make ?estimatedCompletionTime ?generationCompletionTime
+        ?generationStartedTime ?generationStatus ?recommendationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The summary of the Savings Plans recommendation generation."]
+module GenerationSummaryList =
+  struct
+    type nonrec t = GenerationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GenerationSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GenerationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"GenerationSummaryList"
+        ~of_json:GenerationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
 module NumericOperator =
@@ -5222,11 +7885,12 @@ module TotalImpactFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "NumericOperator") in
       make ?endValue ~startValue ~numericOperator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endValue = field_map json "EndValue" GenericDouble.of_json in
-      let startValue = field_map_exn json "StartValue" GenericDouble.of_json in
+    let of_json json__ =
+      let endValue = field_map json__ "EndValue" GenericDouble.of_json in
+      let startValue =
+        field_map_exn json__ "StartValue" GenericDouble.of_json in
       let numericOperator =
-        field_map_exn json "NumericOperator" NumericOperator.of_json in
+        field_map_exn json__ "NumericOperator" NumericOperator.of_json in
       make ?endValue ~startValue ~numericOperator ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Filters cost anomalies based on the total impact."]
@@ -5333,21 +7997,21 @@ module GetAnomaliesRequest =
       make ?maxResults ?nextPageToken ?totalImpact ?feedback ~dateInterval
         ?monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let totalImpact =
-        field_map json "TotalImpact" TotalImpactFilter.of_json in
-      let feedback = field_map json "Feedback" AnomalyFeedbackType.of_json in
+        field_map json__ "TotalImpact" TotalImpactFilter.of_json in
+      let feedback = field_map json__ "Feedback" AnomalyFeedbackType.of_json in
       let dateInterval =
-        field_map_exn json "DateInterval" AnomalyDateInterval.of_json in
-      let monitorArn = field_map json "MonitorArn" GenericString.of_json in
+        field_map_exn json__ "DateInterval" AnomalyDateInterval.of_json in
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
       make ?maxResults ?nextPageToken ?totalImpact ?feedback ~dateInterval
         ?monitorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves all of the cost anomalies detected on your account during the time period that's specified by the DateInterval object."]
+       "Retrieves all of the cost anomalies detected on your account during the time period that's specified by the DateInterval object. Anomalies are available for up to 90 days."]
 module InvalidNextTokenException =
   struct
     type nonrec t = {
@@ -5362,8 +8026,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5372,7 +8036,7 @@ module GetAnomaliesResponse =
   struct
     type nonrec t =
       {
-      anomalies: Anomalies.t [@ocaml.doc "A list of cost anomalies."];
+      anomalies: Anomalies.t option [@ocaml.doc "A list of cost anomalies."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -5380,9 +8044,8 @@ module GetAnomaliesResponse =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAnomaliesResponse"
-    let make ?nextPageToken =
-      fun ~anomalies -> fun () -> { nextPageToken; anomalies }
+    let make ?anomalies =
+      fun ?nextPageToken -> fun () -> { anomalies; nextPageToken }
     let error_of_json name json =
       match name with
       | "InvalidNextTokenException" ->
@@ -5417,7 +8080,7 @@ module GetAnomaliesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Anomalies", (Some (Anomalies.to_value x.anomalies)));
+        [("Anomalies", (Option.map x.anomalies ~f:Anomalies.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -5426,18 +8089,17 @@ module GetAnomaliesResponse =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let anomalies =
-        Anomalies.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Anomalies") in
-      make ?nextPageToken ~anomalies ()
+        (Option.map ~f:Anomalies.of_xml) (Xml.child xml_arg0 "Anomalies") in
+      make ?nextPageToken ?anomalies ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let anomalies = field_map_exn json "Anomalies" Anomalies.of_json in
-      make ?nextPageToken ~anomalies ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let anomalies = field_map json__ "Anomalies" Anomalies.of_json in
+      make ?nextPageToken ?anomalies ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves all of the cost anomalies detected on your account during the time period that's specified by the DateInterval object."]
+       "Retrieves all of the cost anomalies detected on your account during the time period that's specified by the DateInterval object. Anomalies are available for up to 90 days."]
 module GetAnomalyMonitorsRequest =
   struct
     type nonrec t =
@@ -5471,11 +8133,11 @@ module GetAnomalyMonitorsRequest =
         (Option.map ~f:Values.of_xml) (Xml.child xml_arg0 "MonitorArnList") in
       make ?maxResults ?nextPageToken ?monitorArnList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let monitorArnList = field_map json "MonitorArnList" Values.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let monitorArnList = field_map json__ "MonitorArnList" Values.of_json in
       make ?maxResults ?nextPageToken ?monitorArnList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5484,7 +8146,7 @@ module GetAnomalyMonitorsResponse =
   struct
     type nonrec t =
       {
-      anomalyMonitors: AnomalyMonitors.t
+      anomalyMonitors: AnomalyMonitors.t option
         [@ocaml.doc
           "A list of cost anomaly monitors that includes the detailed metadata for each monitor."];
       nextPageToken: NextPageToken.t option
@@ -5495,9 +8157,8 @@ module GetAnomalyMonitorsResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `UnknownMonitorException of UnknownMonitorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAnomalyMonitorsResponse"
-    let make ?nextPageToken =
-      fun ~anomalyMonitors -> fun () -> { nextPageToken; anomalyMonitors }
+    let make ?anomalyMonitors =
+      fun ?nextPageToken -> fun () -> { anomalyMonitors; nextPageToken }
     let error_of_json name json =
       match name with
       | "InvalidNextTokenException" ->
@@ -5541,7 +8202,7 @@ module GetAnomalyMonitorsResponse =
     let to_value x =
       structure_to_value
         [("AnomalyMonitors",
-           (Some (AnomalyMonitors.to_value x.anomalyMonitors)));
+           (Option.map x.anomalyMonitors ~f:AnomalyMonitors.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -5550,16 +8211,16 @@ module GetAnomalyMonitorsResponse =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let anomalyMonitors =
-        AnomalyMonitors.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AnomalyMonitors") in
-      make ?nextPageToken ~anomalyMonitors ()
+        (Option.map ~f:AnomalyMonitors.of_xml)
+          (Xml.child xml_arg0 "AnomalyMonitors") in
+      make ?nextPageToken ?anomalyMonitors ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let anomalyMonitors =
-        field_map_exn json "AnomalyMonitors" AnomalyMonitors.of_json in
-      make ?nextPageToken ~anomalyMonitors ()
+        field_map json__ "AnomalyMonitors" AnomalyMonitors.of_json in
+      make ?nextPageToken ?anomalyMonitors ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the cost anomaly monitor definitions for your account. You can filter using a list of cost anomaly monitor Amazon Resource Names (ARNs)."]
@@ -5605,13 +8266,13 @@ module GetAnomalySubscriptionsRequest =
           (Xml.child xml_arg0 "SubscriptionArnList") in
       make ?maxResults ?nextPageToken ?monitorArn ?subscriptionArnList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" PageSize.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" PageSize.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let monitorArn = field_map json "MonitorArn" GenericString.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
       let subscriptionArnList =
-        field_map json "SubscriptionArnList" Values.of_json in
+        field_map json__ "SubscriptionArnList" Values.of_json in
       make ?maxResults ?nextPageToken ?monitorArn ?subscriptionArnList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5620,7 +8281,7 @@ module GetAnomalySubscriptionsResponse =
   struct
     type nonrec t =
       {
-      anomalySubscriptions: AnomalySubscriptions.t
+      anomalySubscriptions: AnomalySubscriptions.t option
         [@ocaml.doc
           "A list of cost anomaly subscriptions that includes the detailed metadata for each one."];
       nextPageToken: NextPageToken.t option
@@ -5631,10 +8292,8 @@ module GetAnomalySubscriptionsResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `UnknownSubscriptionException of UnknownSubscriptionException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetAnomalySubscriptionsResponse"
-    let make ?nextPageToken =
-      fun ~anomalySubscriptions ->
-        fun () -> { nextPageToken; anomalySubscriptions }
+    let make ?anomalySubscriptions =
+      fun ?nextPageToken -> fun () -> { anomalySubscriptions; nextPageToken }
     let error_of_json name json =
       match name with
       | "InvalidNextTokenException" ->
@@ -5680,7 +8339,8 @@ module GetAnomalySubscriptionsResponse =
     let to_value x =
       structure_to_value
         [("AnomalySubscriptions",
-           (Some (AnomalySubscriptions.to_value x.anomalySubscriptions)));
+           (Option.map x.anomalySubscriptions
+              ~f:AnomalySubscriptions.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -5689,46 +8349,28 @@ module GetAnomalySubscriptionsResponse =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let anomalySubscriptions =
-        AnomalySubscriptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AnomalySubscriptions") in
-      make ?nextPageToken ~anomalySubscriptions ()
+        (Option.map ~f:AnomalySubscriptions.of_xml)
+          (Xml.child xml_arg0 "AnomalySubscriptions") in
+      make ?nextPageToken ?anomalySubscriptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let anomalySubscriptions =
-        field_map_exn json "AnomalySubscriptions"
-          AnomalySubscriptions.of_json in
-      make ?nextPageToken ~anomalySubscriptions ()
+        field_map json__ "AnomalySubscriptions" AnomalySubscriptions.of_json in
+      make ?nextPageToken ?anomalySubscriptions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the cost anomaly subscription objects for your account. You can filter using a list of cost anomaly monitor Amazon Resource Names (ARNs)."]
-module MetricName =
+module UsageServices =
   struct
-    type nonrec t = string
-    let context_ = "MetricName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:0) >>=
-             (fun () ->
-                (check_string_max i ~max:1024) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S\\s]*")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"MetricName" j
-    let to_json = simple_to_json to_value
-  end
-module MetricNames =
-  struct
-    type nonrec t = MetricName.t list
+    type nonrec t = GenericString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:MetricName.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:GenericString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -5742,11 +8384,351 @@ module MetricNames =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:MetricName.of_xml)
+                     | _ -> true))) ~f:GenericString.of_xml)
     let of_json j =
-      list_of_json ~kind:"MetricNames" ~of_json:MetricName.of_json j
+      list_of_json ~kind:"UsageServices" ~of_json:GenericString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Granularity =
+  struct
+    type nonrec t =
+      | DAILY 
+      | MONTHLY 
+      | HOURLY 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DAILY -> "DAILY"
+      | MONTHLY -> "MONTHLY"
+      | HOURLY -> "HOURLY"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DAILY" -> DAILY
+      | "MONTHLY" -> MONTHLY
+      | "HOURLY" -> HOURLY
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration Granularity" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"Granularity" j)
+    let to_json = simple_to_json to_value
+  end
+module GetApproximateUsageRecordsRequest =
+  struct
+    type nonrec t =
+      {
+      granularity: Granularity.t
+        [@ocaml.doc
+          "How granular you want the data to be. You can enable data at hourly or daily granularity."];
+      services: UsageServices.t option
+        [@ocaml.doc
+          "The service metadata for the service or services you want to query. If not specified, all elements are returned."];
+      approximationDimension: ApproximationDimension.t
+        [@ocaml.doc
+          "The service to evaluate for the usage records. You can choose resource-level data at daily granularity, or hourly granularity with or without resource-level data."]}
+    let context_ = "GetApproximateUsageRecordsRequest"
+    let make ?services =
+      fun ~granularity ->
+        fun ~approximationDimension ->
+          fun () -> { services; granularity; approximationDimension }
+    let to_value x =
+      structure_to_value
+        [("Granularity", (Some (Granularity.to_value x.granularity)));
+        ("Services", (Option.map x.services ~f:UsageServices.to_value));
+        ("ApproximationDimension",
+          (Some (ApproximationDimension.to_value x.approximationDimension)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let approximationDimension =
+        ApproximationDimension.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ApproximationDimension") in
+      let services =
+        (Option.map ~f:UsageServices.of_xml) (Xml.child xml_arg0 "Services") in
+      let granularity =
+        Granularity.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Granularity") in
+      make ~approximationDimension ?services ~granularity ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let approximationDimension =
+        field_map_exn json__ "ApproximationDimension"
+          ApproximationDimension.of_json in
+      let services = field_map json__ "Services" UsageServices.of_json in
+      let granularity =
+        field_map_exn json__ "Granularity" Granularity.of_json in
+      make ~approximationDimension ?services ~granularity ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves estimated usage records for hourly granularity or resource-level data at daily granularity."]
+module GetApproximateUsageRecordsResponse =
+  struct
+    type nonrec t =
+      {
+      services: ApproximateUsageRecordsPerService.t option
+        [@ocaml.doc
+          "The service metadata for the service or services in the response."];
+      totalRecords: NonNegativeLong.t option
+        [@ocaml.doc
+          "The total number of usage records for all services in the services list."];
+      lookbackPeriod: DateInterval.t option
+        [@ocaml.doc "The lookback period that's used for the estimation."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?services =
+      fun ?totalRecords ->
+        fun ?lookbackPeriod ->
+          fun () -> { services; totalRecords; lookbackPeriod }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Services",
+           (Option.map x.services
+              ~f:ApproximateUsageRecordsPerService.to_value));
+        ("TotalRecords",
+          (Option.map x.totalRecords ~f:NonNegativeLong.to_value));
+        ("LookbackPeriod",
+          (Option.map x.lookbackPeriod ~f:DateInterval.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lookbackPeriod =
+        (Option.map ~f:DateInterval.of_xml)
+          (Xml.child xml_arg0 "LookbackPeriod") in
+      let totalRecords =
+        (Option.map ~f:NonNegativeLong.of_xml)
+          (Xml.child xml_arg0 "TotalRecords") in
+      let services =
+        (Option.map ~f:ApproximateUsageRecordsPerService.of_xml)
+          (Xml.child xml_arg0 "Services") in
+      make ?lookbackPeriod ?totalRecords ?services ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lookbackPeriod =
+        field_map json__ "LookbackPeriod" DateInterval.of_json in
+      let totalRecords =
+        field_map json__ "TotalRecords" NonNegativeLong.of_json in
+      let services =
+        field_map json__ "Services" ApproximateUsageRecordsPerService.of_json in
+      make ?lookbackPeriod ?totalRecords ?services ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves estimated usage records for hourly granularity or resource-level data at daily granularity."]
+module GetCommitmentPurchaseAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      analysisId: AnalysisId.t
+        [@ocaml.doc
+          "The analysis ID that's associated with the commitment purchase analysis."]}
+    let context_ = "GetCommitmentPurchaseAnalysisRequest"
+    let make ~analysisId = fun () -> { analysisId }
+    let to_value x =
+      structure_to_value
+        [("AnalysisId", (Some (AnalysisId.to_value x.analysisId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisId =
+        AnalysisId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "AnalysisId") in
+      make ~analysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisId = field_map_exn json__ "AnalysisId" AnalysisId.of_json in
+      make ~analysisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a commitment purchase analysis result based on the AnalysisId."]
+module GetCommitmentPurchaseAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      estimatedCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "The estimated time for when the analysis will complete."];
+      analysisCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc "The completion time of the analysis."];
+      analysisStartedTime: ZonedDateTime.t option
+        [@ocaml.doc "The start time of the analysis."];
+      analysisId: AnalysisId.t option
+        [@ocaml.doc
+          "The analysis ID that's associated with the commitment purchase analysis."];
+      analysisStatus: AnalysisStatus.t option
+        [@ocaml.doc "The status of the analysis."];
+      errorCode: ErrorCode.t option
+        [@ocaml.doc "The error code used for the analysis."];
+      analysisDetails: AnalysisDetails.t option
+        [@ocaml.doc "Details about the analysis."];
+      commitmentPurchaseAnalysisConfiguration:
+        CommitmentPurchaseAnalysisConfiguration.t option
+        [@ocaml.doc
+          "The configuration for the commitment purchase analysis."]}
+    type nonrec error =
+      [ `AnalysisNotFoundException of AnalysisNotFoundException.t 
+      | `DataUnavailableException of DataUnavailableException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?estimatedCompletionTime =
+      fun ?analysisCompletionTime ->
+        fun ?analysisStartedTime ->
+          fun ?analysisId ->
+            fun ?analysisStatus ->
+              fun ?errorCode ->
+                fun ?analysisDetails ->
+                  fun ?commitmentPurchaseAnalysisConfiguration ->
+                    fun () ->
+                      {
+                        estimatedCompletionTime;
+                        analysisCompletionTime;
+                        analysisStartedTime;
+                        analysisId;
+                        analysisStatus;
+                        errorCode;
+                        analysisDetails;
+                        commitmentPurchaseAnalysisConfiguration
+                      }
+    let error_of_json name json =
+      match name with
+      | "AnalysisNotFoundException" ->
+          `AnalysisNotFoundException (AnalysisNotFoundException.of_json json)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AnalysisNotFoundException" ->
+          `AnalysisNotFoundException (AnalysisNotFoundException.of_xml xml)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AnalysisNotFoundException e ->
+          `Assoc
+            [("error", (`String "AnalysisNotFoundException"));
+            ("details", (AnalysisNotFoundException.to_json e))]
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("EstimatedCompletionTime",
+           (Option.map x.estimatedCompletionTime ~f:ZonedDateTime.to_value));
+        ("AnalysisCompletionTime",
+          (Option.map x.analysisCompletionTime ~f:ZonedDateTime.to_value));
+        ("AnalysisStartedTime",
+          (Option.map x.analysisStartedTime ~f:ZonedDateTime.to_value));
+        ("AnalysisId", (Option.map x.analysisId ~f:AnalysisId.to_value));
+        ("AnalysisStatus",
+          (Option.map x.analysisStatus ~f:AnalysisStatus.to_value));
+        ("ErrorCode", (Option.map x.errorCode ~f:ErrorCode.to_value));
+        ("AnalysisDetails",
+          (Option.map x.analysisDetails ~f:AnalysisDetails.to_value));
+        ("CommitmentPurchaseAnalysisConfiguration",
+          (Option.map x.commitmentPurchaseAnalysisConfiguration
+             ~f:CommitmentPurchaseAnalysisConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commitmentPurchaseAnalysisConfiguration =
+        (Option.map ~f:CommitmentPurchaseAnalysisConfiguration.of_xml)
+          (Xml.child xml_arg0 "CommitmentPurchaseAnalysisConfiguration") in
+      let analysisDetails =
+        (Option.map ~f:AnalysisDetails.of_xml)
+          (Xml.child xml_arg0 "AnalysisDetails") in
+      let errorCode =
+        (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      let analysisStatus =
+        (Option.map ~f:AnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "AnalysisStatus") in
+      let analysisId =
+        (Option.map ~f:AnalysisId.of_xml) (Xml.child xml_arg0 "AnalysisId") in
+      let analysisStartedTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "AnalysisStartedTime") in
+      let analysisCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "AnalysisCompletionTime") in
+      let estimatedCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EstimatedCompletionTime") in
+      make ?commitmentPurchaseAnalysisConfiguration ?analysisDetails
+        ?errorCode ?analysisStatus ?analysisId ?analysisStartedTime
+        ?analysisCompletionTime ?estimatedCompletionTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commitmentPurchaseAnalysisConfiguration =
+        field_map json__ "CommitmentPurchaseAnalysisConfiguration"
+          CommitmentPurchaseAnalysisConfiguration.of_json in
+      let analysisDetails =
+        field_map json__ "AnalysisDetails" AnalysisDetails.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
+      let analysisStatus =
+        field_map json__ "AnalysisStatus" AnalysisStatus.of_json in
+      let analysisId = field_map json__ "AnalysisId" AnalysisId.of_json in
+      let analysisStartedTime =
+        field_map json__ "AnalysisStartedTime" ZonedDateTime.of_json in
+      let analysisCompletionTime =
+        field_map json__ "AnalysisCompletionTime" ZonedDateTime.of_json in
+      let estimatedCompletionTime =
+        field_map json__ "EstimatedCompletionTime" ZonedDateTime.of_json in
+      make ?commitmentPurchaseAnalysisConfiguration ?analysisDetails
+        ?errorCode ?analysisStatus ?analysisId ?analysisStartedTime
+        ?analysisCompletionTime ?estimatedCompletionTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a commitment purchase analysis result based on the AnalysisId."]
 module GroupDefinitionType =
   struct
     type nonrec t =
@@ -5819,9 +8801,9 @@ module GroupDefinition =
           (Xml.child xml_arg0 "Type") in
       make ?key ?type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "Key" GroupDefinitionKey.of_json in
-      let type_ = field_map json "Type" GroupDefinitionType.of_json in
+    let of_json json__ =
+      let key = field_map json__ "Key" GroupDefinitionKey.of_json in
+      let type_ = field_map json__ "Type" GroupDefinitionType.of_json in
       make ?key ?type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5830,6 +8812,9 @@ module GroupDefinitions =
   struct
     type nonrec t = GroupDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GroupDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5851,33 +8836,263 @@ module GroupDefinitions =
         j
     let to_json v = composed_to_json to_value v
   end
-module Granularity =
+module GetCostAndUsageComparisonsRequest =
   struct
     type nonrec t =
-      | DAILY 
-      | MONTHLY 
-      | HOURLY 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | DAILY -> "DAILY"
-      | MONTHLY -> "MONTHLY"
-      | HOURLY -> "HOURLY"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "DAILY" -> DAILY
-      | "MONTHLY" -> MONTHLY
-      | "HOURLY" -> HOURLY
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+      {
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
+      baselineTimePeriod: DateInterval.t
+        [@ocaml.doc
+          "The reference time period for comparison. This time period serves as the baseline against which other cost and usage data will be compared. The interval must start and end on the first day of a month, with a duration of exactly one month."];
+      comparisonTimePeriod: DateInterval.t
+        [@ocaml.doc
+          "The comparison time period for analysis. This time period's cost and usage data will be compared against the baseline time period. The interval must start and end on the first day of a month, with a duration of exactly one month."];
+      metricForComparison: MetricName.t
+        [@ocaml.doc
+          "The cost and usage metric to compare. Valid values are AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity."];
+      filter: Expression.t option ;
+      groupBy: GroupDefinitions.t option
+        [@ocaml.doc
+          "You can group results using the attributes DIMENSION, TAG, and COST_CATEGORY."];
+      maxResults: CostAndUsageComparisonsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned for the request."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of paginated results."]}
+    let context_ = "GetCostAndUsageComparisonsRequest"
+    let make ?billingViewArn =
+      fun ?filter ->
+        fun ?groupBy ->
+          fun ?maxResults ->
+            fun ?nextPageToken ->
+              fun ~baselineTimePeriod ->
+                fun ~comparisonTimePeriod ->
+                  fun ~metricForComparison ->
+                    fun () ->
+                      {
+                        billingViewArn;
+                        filter;
+                        groupBy;
+                        maxResults;
+                        nextPageToken;
+                        baselineTimePeriod;
+                        comparisonTimePeriod;
+                        metricForComparison
+                      }
+    let to_value x =
+      structure_to_value
+        [("BillingViewArn",
+           (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
+        ("BaselineTimePeriod",
+          (Some (DateInterval.to_value x.baselineTimePeriod)));
+        ("ComparisonTimePeriod",
+          (Some (DateInterval.to_value x.comparisonTimePeriod)));
+        ("MetricForComparison",
+          (Some (MetricName.to_value x.metricForComparison)));
+        ("Filter", (Option.map x.filter ~f:Expression.to_value));
+        ("GroupBy", (Option.map x.groupBy ~f:GroupDefinitions.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:CostAndUsageComparisonsMaxResults.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
-    let to_header x = to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration Granularity" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"Granularity" j)
-    let to_json = simple_to_json to_value
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let maxResults =
+        (Option.map ~f:CostAndUsageComparisonsMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let groupBy =
+        (Option.map ~f:GroupDefinitions.of_xml)
+          (Xml.child xml_arg0 "GroupBy") in
+      let filter =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
+      let metricForComparison =
+        MetricName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricForComparison") in
+      let comparisonTimePeriod =
+        DateInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonTimePeriod") in
+      let baselineTimePeriod =
+        DateInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BaselineTimePeriod") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
+      make ?nextPageToken ?maxResults ?groupBy ?filter ~metricForComparison
+        ~comparisonTimePeriod ~baselineTimePeriod ?billingViewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults"
+          CostAndUsageComparisonsMaxResults.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let metricForComparison =
+        field_map_exn json__ "MetricForComparison" MetricName.of_json in
+      let comparisonTimePeriod =
+        field_map_exn json__ "ComparisonTimePeriod" DateInterval.of_json in
+      let baselineTimePeriod =
+        field_map_exn json__ "BaselineTimePeriod" DateInterval.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      make ?nextPageToken ?maxResults ?groupBy ?filter ~metricForComparison
+        ~comparisonTimePeriod ~baselineTimePeriod ?billingViewArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves cost and usage comparisons for your account between two periods within the last 13 months. If you have enabled multi-year data at monthly granularity, you can go back up to 38 months."]
+module GetCostAndUsageComparisonsResponse =
+  struct
+    type nonrec t =
+      {
+      costAndUsageComparisons: CostAndUsageComparisons.t option
+        [@ocaml.doc
+          "An array of comparison results showing cost and usage metrics between BaselineTimePeriod and ComparisonTimePeriod."];
+      totalCostAndUsage: ComparisonMetrics.t option
+        [@ocaml.doc
+          "A summary of the total cost and usage, comparing amounts between BaselineTimePeriod and ComparisonTimePeriod and their differences. This total represents the aggregate total across all paginated results, if the response spans multiple pages."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of paginated results."]}
+    type nonrec error =
+      [
+        `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `DataUnavailableException of DataUnavailableException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?costAndUsageComparisons =
+      fun ?totalCostAndUsage ->
+        fun ?nextPageToken ->
+          fun () ->
+            { costAndUsageComparisons; totalCostAndUsage; nextPageToken }
+    let error_of_json name json =
+      match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CostAndUsageComparisons",
+           (Option.map x.costAndUsageComparisons
+              ~f:CostAndUsageComparisons.to_value));
+        ("TotalCostAndUsage",
+          (Option.map x.totalCostAndUsage ~f:ComparisonMetrics.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let totalCostAndUsage =
+        (Option.map ~f:ComparisonMetrics.of_xml)
+          (Xml.child xml_arg0 "TotalCostAndUsage") in
+      let costAndUsageComparisons =
+        (Option.map ~f:CostAndUsageComparisons.of_xml)
+          (Xml.child xml_arg0 "CostAndUsageComparisons") in
+      make ?nextPageToken ?totalCostAndUsage ?costAndUsageComparisons ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let totalCostAndUsage =
+        field_map json__ "TotalCostAndUsage" ComparisonMetrics.of_json in
+      let costAndUsageComparisons =
+        field_map json__ "CostAndUsageComparisons"
+          CostAndUsageComparisons.of_json in
+      make ?nextPageToken ?totalCostAndUsage ?costAndUsageComparisons ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves cost and usage comparisons for your account between two periods within the last 13 months. If you have enabled multi-year data at monthly granularity, you can go back up to 38 months."]
+module MetricNames =
+  struct
+    type nonrec t = MetricName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:MetricName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:MetricName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"MetricNames" ~of_json:MetricName.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module GetCostAndUsageRequest =
   struct
@@ -5898,25 +9113,30 @@ module GetCostAndUsageRequest =
       groupBy: GroupDefinitions.t option
         [@ocaml.doc
           "You can group Amazon Web Services costs using up to two different groups, either dimensions, tag keys, cost categories, or any two group by types. Valid values for the DIMENSION type are AZ, INSTANCE_TYPE, LEGAL_ENTITY_NAME, INVOICING_ENTITY, LINKED_ACCOUNT, OPERATION, PLATFORM, PURCHASE_TYPE, SERVICE, TENANCY, RECORD_TYPE, and USAGE_TYPE. When you group by the TAG type and include a valid tag key, you get all tag values, including empty strings."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
     let context_ = "GetCostAndUsageRequest"
     let make ?filter =
       fun ?groupBy ->
-        fun ?nextPageToken ->
-          fun ~timePeriod ->
-            fun ~granularity ->
-              fun ~metrics ->
-                fun () ->
-                  {
-                    filter;
-                    groupBy;
-                    nextPageToken;
-                    timePeriod;
-                    granularity;
-                    metrics
-                  }
+        fun ?billingViewArn ->
+          fun ?nextPageToken ->
+            fun ~timePeriod ->
+              fun ~granularity ->
+                fun ~metrics ->
+                  fun () ->
+                    {
+                      filter;
+                      groupBy;
+                      billingViewArn;
+                      nextPageToken;
+                      timePeriod;
+                      granularity;
+                      metrics
+                    }
     let to_value x =
       structure_to_value
         [("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
@@ -5924,6 +9144,8 @@ module GetCostAndUsageRequest =
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
         ("Metrics", (Some (MetricNames.to_value x.metrics)));
         ("GroupBy", (Option.map x.groupBy ~f:GroupDefinitions.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -5931,6 +9153,9 @@ module GetCostAndUsageRequest =
       let nextPageToken =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let groupBy =
         (Option.map ~f:GroupDefinitions.of_xml)
           (Xml.child xml_arg0 "GroupBy") in
@@ -5945,19 +9170,22 @@ module GetCostAndUsageRequest =
       let timePeriod =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
-      make ?nextPageToken ?groupBy ~metrics ?filter ~granularity ~timePeriod
-        ()
+      make ?nextPageToken ?billingViewArn ?groupBy ~metrics ?filter
+        ~granularity ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let groupBy = field_map json "GroupBy" GroupDefinitions.of_json in
-      let metrics = field_map_exn json "Metrics" MetricNames.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map_exn json "Granularity" Granularity.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      make ?nextPageToken ?groupBy ~metrics ?filter ~granularity ~timePeriod
-        ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let metrics = field_map_exn json__ "Metrics" MetricNames.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity =
+        field_map_exn json__ "Granularity" Granularity.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      make ?nextPageToken ?billingViewArn ?groupBy ~metrics ?filter
+        ~granularity ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves cost and usage metrics for your account. You can specify which cost and usage-related metric that you want the request to return. For example, you can specify BlendedCosts or UsageQuantity. You can also filter and group your data by various dimensions, such as SERVICE or AZ, in a specific time range. For a complete list of valid dimensions, see the GetDimensionValues operation. Management account in an organization in Organizations have access to all member accounts. For information about filter limitations, see Quotas and restrictions in the Billing and Cost Management User Guide."]
@@ -6008,9 +9236,9 @@ module MetricValue =
         (Option.map ~f:MetricAmount.of_xml) (Xml.child xml_arg0 "Amount") in
       make ?unit ?amount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" MetricUnit.of_json in
-      let amount = field_map json "Amount" MetricAmount.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" MetricUnit.of_json in
+      let amount = field_map json__ "Amount" MetricAmount.of_json in
       make ?unit ?amount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The aggregated value for a metric."]
@@ -6037,6 +9265,8 @@ module Metrics =
                     (fun x -> (MetricValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6061,6 +9291,9 @@ module Keys =
   struct
     type nonrec t = Key.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Key.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6100,15 +9333,19 @@ module Group =
       let keys = (Option.map ~f:Keys.of_xml) (Xml.child xml_arg0 "Keys") in
       make ?metrics ?keys ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metrics = field_map json "Metrics" Metrics.of_json in
-      let keys = field_map json "Keys" Keys.of_json in make ?metrics ?keys ()
+    let of_json json__ =
+      let metrics = field_map json__ "Metrics" Metrics.of_json in
+      let keys = field_map json__ "Keys" Keys.of_json in
+      make ?metrics ?keys ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One level of grouped data in the results."]
 module Groups =
   struct
     type nonrec t = Group.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Group.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6163,11 +9400,11 @@ module ResultByTime =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?estimated ?groups ?total ?timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let estimated = field_map json "Estimated" Estimated.of_json in
-      let groups = field_map json "Groups" Groups.of_json in
-      let total = field_map json "Total" Metrics.of_json in
-      let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let estimated = field_map json__ "Estimated" Estimated.of_json in
+      let groups = field_map json__ "Groups" Groups.of_json in
+      let total = field_map json__ "Total" Metrics.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       make ?estimated ?groups ?total ?timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result that's associated with a time period."]
@@ -6175,6 +9412,9 @@ module ResultsByTime =
   struct
     type nonrec t = ResultByTime.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResultByTime.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6209,8 +9449,8 @@ module RequestChangedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6233,10 +9473,13 @@ module GetCostAndUsageResponse =
           "The attributes that apply to a specific dimension value. For example, if the value is a linked account, the attribute is that account name."]}
     type nonrec error =
       [ `BillExpirationException of BillExpirationException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `DataUnavailableException of DataUnavailableException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RequestChangedException of RequestChangedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?nextPageToken =
       fun ?groupDefinitions ->
@@ -6253,6 +9496,9 @@ module GetCostAndUsageResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "InvalidNextTokenException" ->
@@ -6261,6 +9507,8 @@ module GetCostAndUsageResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6268,6 +9516,9 @@ module GetCostAndUsageResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "InvalidNextTokenException" ->
@@ -6276,6 +9527,8 @@ module GetCostAndUsageResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6284,6 +9537,10 @@ module GetCostAndUsageResponse =
           `Assoc
             [("error", (`String "BillExpirationException"));
             ("details", (BillExpirationException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -6300,6 +9557,10 @@ module GetCostAndUsageResponse =
           `Assoc
             [("error", (`String "RequestChangedException"));
             ("details", (RequestChangedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6333,16 +9594,16 @@ module GetCostAndUsageResponse =
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionValueAttributes =
-        field_map json "DimensionValueAttributes"
+        field_map json__ "DimensionValueAttributes"
           DimensionValuesWithAttributesList.of_json in
       let resultsByTime =
-        field_map json "ResultsByTime" ResultsByTime.of_json in
+        field_map json__ "ResultsByTime" ResultsByTime.of_json in
       let groupDefinitions =
-        field_map json "GroupDefinitions" GroupDefinitions.of_json in
+        field_map json__ "GroupDefinitions" GroupDefinitions.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
     let to_json v = composed_to_json to_value v
@@ -6363,29 +9624,34 @@ module GetCostAndUsageWithResourcesRequest =
           "Filters Amazon Web Services costs by different dimensions. For example, you can specify SERVICE and LINKED_ACCOUNT and get the costs that are associated with that account's usage of that service. You can nest Expression objects to define any combination of dimension filters. For more information, see Expression. The GetCostAndUsageWithResources operation requires that you either group by or filter by a ResourceId. It requires the Expression \"SERVICE = Amazon Elastic Compute Cloud - Compute\" in the filter. Valid values for MatchOptions for Dimensions are EQUALS and CASE_SENSITIVE. Valid values for MatchOptions for CostCategories and Tags are EQUALS, ABSENT, and CASE_SENSITIVE. Default values are EQUALS and CASE_SENSITIVE."];
       metrics: MetricNames.t option
         [@ocaml.doc
-          "Which metrics are returned in the query. For more information about blended and unblended rates, see Why does the \"blended\" annotation appear on some line items in my bill?. Valid values are AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity. If you return the UsageQuantity metric, the service aggregates all usage numbers without taking the units into account. For example, if you aggregate usageQuantity across all of Amazon EC2, the results aren't meaningful because Amazon EC2 compute hours and data transfer are measured in different units (for example, hours vs. GB). To get more meaningful UsageQuantity metrics, filter by UsageType or UsageTypeGroups. Metrics is required for GetCostAndUsageWithResources requests."];
+          "Which metrics are returned in the query. For more information about blended and unblended rates, see Why does the \"blended\" annotation appear on some line items in my bill?. Valid values are AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity. If you return the UsageQuantity metric, the service aggregates all usage numbers without taking the units into account. For example, if you aggregate usageQuantity across all of Amazon EC2, the results aren't meaningful because Amazon EC2 compute hours and data transfer are measured in different units (for example, hour or GB). To get more meaningful UsageQuantity metrics, filter by UsageType or UsageTypeGroups. Metrics is required for GetCostAndUsageWithResources requests."];
       groupBy: GroupDefinitions.t option
         [@ocaml.doc
           "You can group Amazon Web Services costs using up to two different groups: DIMENSION, TAG, COST_CATEGORY."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
     let context_ = "GetCostAndUsageWithResourcesRequest"
     let make ?metrics =
       fun ?groupBy ->
-        fun ?nextPageToken ->
-          fun ~timePeriod ->
-            fun ~granularity ->
-              fun ~filter ->
-                fun () ->
-                  {
-                    metrics;
-                    groupBy;
-                    nextPageToken;
-                    timePeriod;
-                    granularity;
-                    filter
-                  }
+        fun ?billingViewArn ->
+          fun ?nextPageToken ->
+            fun ~timePeriod ->
+              fun ~granularity ->
+                fun ~filter ->
+                  fun () ->
+                    {
+                      metrics;
+                      groupBy;
+                      billingViewArn;
+                      nextPageToken;
+                      timePeriod;
+                      granularity;
+                      filter
+                    }
     let to_value x =
       structure_to_value
         [("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
@@ -6393,6 +9659,8 @@ module GetCostAndUsageWithResourcesRequest =
         ("Filter", (Some (Expression.to_value x.filter)));
         ("Metrics", (Option.map x.metrics ~f:MetricNames.to_value));
         ("GroupBy", (Option.map x.groupBy ~f:GroupDefinitions.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -6400,6 +9668,9 @@ module GetCostAndUsageWithResourcesRequest =
       let nextPageToken =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let groupBy =
         (Option.map ~f:GroupDefinitions.of_xml)
           (Xml.child xml_arg0 "GroupBy") in
@@ -6413,22 +9684,25 @@ module GetCostAndUsageWithResourcesRequest =
       let timePeriod =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
-      make ?nextPageToken ?groupBy ?metrics ~filter ~granularity ~timePeriod
-        ()
+      make ?nextPageToken ?billingViewArn ?groupBy ?metrics ~filter
+        ~granularity ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let groupBy = field_map json "GroupBy" GroupDefinitions.of_json in
-      let metrics = field_map json "Metrics" MetricNames.of_json in
-      let filter = field_map_exn json "Filter" Expression.of_json in
-      let granularity = field_map_exn json "Granularity" Granularity.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      make ?nextPageToken ?groupBy ?metrics ~filter ~granularity ~timePeriod
-        ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let metrics = field_map json__ "Metrics" MetricNames.of_json in
+      let filter = field_map_exn json__ "Filter" Expression.of_json in
+      let granularity =
+        field_map_exn json__ "Granularity" Granularity.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      make ?nextPageToken ?billingViewArn ?groupBy ?metrics ~filter
+        ~granularity ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves cost and usage metrics with resources for your account. You can specify which cost and usage-related metric, such as BlendedCosts or UsageQuantity, that you want the request to return. You can also filter and group your data by various dimensions, such as SERVICE or AZ, in a specific time range. For a complete list of valid dimensions, see the GetDimensionValues operation. Management account in an organization in Organizations have access to all member accounts. This API is currently available for the Amazon Elastic Compute Cloud \226\128\147 Compute service only. This is an opt-in only feature. You can enable this feature from the Cost Explorer Settings page. For information on how to access the Settings page, see Controlling Access for Cost Explorer in the Billing and Cost Management User Guide."]
+       "Retrieves cost and usage metrics with resources for your account. You can specify which cost and usage-related metric, such as BlendedCosts or UsageQuantity, that you want the request to return. You can also filter and group your data by various dimensions, such as SERVICE or AZ, in a specific time range. For a complete list of valid dimensions, see the GetDimensionValues operation. Management account in an organization in Organizations have access to all member accounts. Hourly granularity is only available for EC2-Instances (Elastic Compute Cloud) resource-level data. All other resource-level data is available at daily granularity. This is an opt-in only feature. You can enable this feature from the Cost Explorer Settings page. For information about how to access the Settings page, see Controlling Access for Cost Explorer in the Billing and Cost Management User Guide."]
 module GetCostAndUsageWithResourcesResponse =
   struct
     type nonrec t =
@@ -6441,16 +9715,19 @@ module GetCostAndUsageWithResourcesResponse =
           "The groups that are specified by the Filter or GroupBy parameters in the request."];
       resultsByTime: ResultsByTime.t option
         [@ocaml.doc
-          "The time period that is covered by the results in the response."];
+          "The time period that's covered by the results in the response."];
       dimensionValueAttributes: DimensionValuesWithAttributesList.t option
         [@ocaml.doc
           "The attributes that apply to a specific dimension value. For example, if the value is a linked account, the attribute is that account name."]}
     type nonrec error =
       [ `BillExpirationException of BillExpirationException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `DataUnavailableException of DataUnavailableException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RequestChangedException of RequestChangedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?nextPageToken =
       fun ?groupDefinitions ->
@@ -6467,6 +9744,9 @@ module GetCostAndUsageWithResourcesResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "InvalidNextTokenException" ->
@@ -6475,6 +9755,8 @@ module GetCostAndUsageWithResourcesResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6482,6 +9764,9 @@ module GetCostAndUsageWithResourcesResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "InvalidNextTokenException" ->
@@ -6490,6 +9775,8 @@ module GetCostAndUsageWithResourcesResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6498,6 +9785,10 @@ module GetCostAndUsageWithResourcesResponse =
           `Assoc
             [("error", (`String "BillExpirationException"));
             ("details", (BillExpirationException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -6514,6 +9805,10 @@ module GetCostAndUsageWithResourcesResponse =
           `Assoc
             [("error", (`String "RequestChangedException"));
             ("details", (RequestChangedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6547,21 +9842,21 @@ module GetCostAndUsageWithResourcesResponse =
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionValueAttributes =
-        field_map json "DimensionValueAttributes"
+        field_map json__ "DimensionValueAttributes"
           DimensionValuesWithAttributesList.of_json in
       let resultsByTime =
-        field_map json "ResultsByTime" ResultsByTime.of_json in
+        field_map json__ "ResultsByTime" ResultsByTime.of_json in
       let groupDefinitions =
-        field_map json "GroupDefinitions" GroupDefinitions.of_json in
+        field_map json__ "GroupDefinitions" GroupDefinitions.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       make ?dimensionValueAttributes ?resultsByTime ?groupDefinitions
         ?nextPageToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves cost and usage metrics with resources for your account. You can specify which cost and usage-related metric, such as BlendedCosts or UsageQuantity, that you want the request to return. You can also filter and group your data by various dimensions, such as SERVICE or AZ, in a specific time range. For a complete list of valid dimensions, see the GetDimensionValues operation. Management account in an organization in Organizations have access to all member accounts. This API is currently available for the Amazon Elastic Compute Cloud \226\128\147 Compute service only. This is an opt-in only feature. You can enable this feature from the Cost Explorer Settings page. For information on how to access the Settings page, see Controlling Access for Cost Explorer in the Billing and Cost Management User Guide."]
+       "Retrieves cost and usage metrics with resources for your account. You can specify which cost and usage-related metric, such as BlendedCosts or UsageQuantity, that you want the request to return. You can also filter and group your data by various dimensions, such as SERVICE or AZ, in a specific time range. For a complete list of valid dimensions, see the GetDimensionValues operation. Management account in an organization in Organizations have access to all member accounts. Hourly granularity is only available for EC2-Instances (Elastic Compute Cloud) resource-level data. All other resource-level data is available at daily granularity. This is an opt-in only feature. You can enable this feature from the Cost Explorer Settings page. For information about how to access the Settings page, see Controlling Access for Cost Explorer in the Billing and Cost Management User Guide."]
 module SortOrder =
   struct
     type nonrec t =
@@ -6630,16 +9925,19 @@ module SortDefinition =
           (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ?sortOrder ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map json "SortOrder" SortOrder.of_json in
-      let key = field_map_exn json "Key" SortDefinitionKey.of_json in
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let key = field_map_exn json__ "Key" SortDefinitionKey.of_json in
       make ?sortOrder ~key ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of how to sort the data."]
+  end[@@ocaml.doc "The details for how to sort the data."]
 module SortDefinitions =
   struct
     type nonrec t = SortDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SortDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6701,37 +9999,42 @@ module GetCostCategoriesRequest =
       {
       searchString: SearchString.t option
         [@ocaml.doc
-          "The value that you want to search the filter values for. If you do not specify a CostCategoryName, SearchString will be used to filter Cost Category names that match the SearchString pattern. If you do specifiy a CostCategoryName, SearchString will be used to filter Cost Category values that match the SearchString pattern."];
+          "The value that you want to search the filter values for. If you don't specify a CostCategoryName, SearchString is used to filter cost category names that match the SearchString pattern. If you specify a CostCategoryName, SearchString is used to filter cost category values that match the SearchString pattern."];
       timePeriod: DateInterval.t ;
       costCategoryName: CostCategoryName.t option ;
       filter: Expression.t option ;
       sortBy: SortDefinitions.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The key represents cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount Supported values for SortOrder are ASCENDING or DESCENDING. When using SortBy, NextPageToken and SearchString are not supported."];
+          "The value that you sort the data by. The key represents the cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount The supported key values for the SortOrder value are ASCENDING and DESCENDING. When you use the SortBy value, the NextPageToken and SearchString key values aren't supported."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "This field is only used when SortBy is provided in the request. The maximum number of objects that to be returned for this request. If MaxResults is not specified with SortBy, the request will return 1000 results as the default value for this parameter. For GetCostCategories, MaxResults has an upper limit of 1000."];
+          "This field is only used when the SortBy value is provided in the request. The maximum number of objects that are returned for this request. If MaxResults isn't specified with the SortBy value, the request returns 1000 results as the default value for this parameter. For GetCostCategories, MaxResults has an upper quota of 1000."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
-          "If the number of objects that are still available for retrieval exceeds the limit, Amazon Web Services returns a NextPageToken value in the response. To retrieve the next batch of objects, provide the NextPageToken from the prior call in your next request."]}
+          "If the number of objects that are still available for retrieval exceeds the quota, Amazon Web Services returns a NextPageToken value in the response. To retrieve the next batch of objects, provide the NextPageToken from the previous call in your next request."]}
     let context_ = "GetCostCategoriesRequest"
     let make ?searchString =
       fun ?costCategoryName ->
         fun ?filter ->
           fun ?sortBy ->
-            fun ?maxResults ->
-              fun ?nextPageToken ->
-                fun ~timePeriod ->
-                  fun () ->
-                    {
-                      searchString;
-                      costCategoryName;
-                      filter;
-                      sortBy;
-                      maxResults;
-                      nextPageToken;
-                      timePeriod
-                    }
+            fun ?billingViewArn ->
+              fun ?maxResults ->
+                fun ?nextPageToken ->
+                  fun ~timePeriod ->
+                    fun () ->
+                      {
+                        searchString;
+                        costCategoryName;
+                        filter;
+                        sortBy;
+                        billingViewArn;
+                        maxResults;
+                        nextPageToken;
+                        timePeriod
+                      }
     let to_value x =
       structure_to_value
         [("SearchString",
@@ -6741,6 +10044,8 @@ module GetCostCategoriesRequest =
           (Option.map x.costCategoryName ~f:CostCategoryName.to_value));
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
         ("SortBy", (Option.map x.sortBy ~f:SortDefinitions.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
@@ -6751,6 +10056,9 @@ module GetCostCategoriesRequest =
           (Xml.child xml_arg0 "NextPageToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let sortBy =
         (Option.map ~f:SortDefinitions.of_xml) (Xml.child xml_arg0 "SortBy") in
       let filter =
@@ -6764,51 +10072,57 @@ module GetCostCategoriesRequest =
       let searchString =
         (Option.map ~f:SearchString.of_xml)
           (Xml.child xml_arg0 "SearchString") in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?costCategoryName
-        ~timePeriod ?searchString ()
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter
+        ?costCategoryName ~timePeriod ?searchString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let sortBy = field_map json "SortBy" SortDefinitions.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let sortBy = field_map json__ "SortBy" SortDefinitions.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
       let costCategoryName =
-        field_map json "CostCategoryName" CostCategoryName.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      let searchString = field_map json "SearchString" SearchString.of_json in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?costCategoryName
-        ~timePeriod ?searchString ()
+        field_map json__ "CostCategoryName" CostCategoryName.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      let searchString = field_map json__ "SearchString" SearchString.of_json in
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter
+        ?costCategoryName ~timePeriod ?searchString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an array of Cost Category names and values incurred cost. If some Cost Category names and values are not associated with any cost, they will not be returned by this API."]
+       "Retrieves an array of cost category names and values incurred cost. If some cost category names and values are not associated with any cost, they will not be returned by this API."]
 module GetCostCategoriesResponse =
   struct
     type nonrec t =
       {
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
-          "If the number of objects that are still available for retrieval exceeds the limit, Amazon Web Services returns a NextPageToken value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
+          "If the number of objects that are still available for retrieval exceeds the quota, Amazon Web Services returns a NextPageToken value in the response. To retrieve the next batch of objects, provide the marker from the prior call in your next request."];
       costCategoryNames: CostCategoryNamesList.t option
-        [@ocaml.doc "The names of the Cost Categories."];
+        [@ocaml.doc "The names of the cost categories."];
       costCategoryValues: CostCategoryValuesList.t option
         [@ocaml.doc
-          "The Cost Category values. CostCategoryValues are not returned if CostCategoryName is not specified in the request."];
-      returnSize: PageSize.t [@ocaml.doc "The number of objects returned."];
-      totalSize: PageSize.t [@ocaml.doc "The total number of objects."]}
+          "The cost category values. If the CostCategoryName key isn't specified in the request, the CostCategoryValues fields aren't returned."];
+      returnSize: PageSize.t option
+        [@ocaml.doc "The number of objects that are returned."];
+      totalSize: PageSize.t option
+        [@ocaml.doc "The total number of objects."]}
     type nonrec error =
       [ `BillExpirationException of BillExpirationException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `DataUnavailableException of DataUnavailableException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RequestChangedException of RequestChangedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetCostCategoriesResponse"
     let make ?nextPageToken =
       fun ?costCategoryNames ->
         fun ?costCategoryValues ->
-          fun ~returnSize ->
-            fun ~totalSize ->
+          fun ?returnSize ->
+            fun ?totalSize ->
               fun () ->
                 {
                   nextPageToken;
@@ -6821,6 +10135,9 @@ module GetCostCategoriesResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "InvalidNextTokenException" ->
@@ -6829,6 +10146,8 @@ module GetCostCategoriesResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -6836,6 +10155,9 @@ module GetCostCategoriesResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "InvalidNextTokenException" ->
@@ -6844,6 +10166,8 @@ module GetCostCategoriesResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -6852,6 +10176,10 @@ module GetCostCategoriesResponse =
           `Assoc
             [("error", (`String "BillExpirationException"));
             ("details", (BillExpirationException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -6868,6 +10196,10 @@ module GetCostCategoriesResponse =
           `Assoc
             [("error", (`String "RequestChangedException"));
             ("details", (RequestChangedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -6881,16 +10213,14 @@ module GetCostCategoriesResponse =
           (Option.map x.costCategoryNames ~f:CostCategoryNamesList.to_value));
         ("CostCategoryValues",
           (Option.map x.costCategoryValues ~f:CostCategoryValuesList.to_value));
-        ("ReturnSize", (Some (PageSize.to_value x.returnSize)));
-        ("TotalSize", (Some (PageSize.to_value x.totalSize)))]
+        ("ReturnSize", (Option.map x.returnSize ~f:PageSize.to_value));
+        ("TotalSize", (Option.map x.totalSize ~f:PageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let totalSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TotalSize") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "TotalSize") in
       let returnSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReturnSize") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "ReturnSize") in
       let costCategoryValues =
         (Option.map ~f:CostCategoryValuesList.of_xml)
           (Xml.child xml_arg0 "CostCategoryValues") in
@@ -6900,23 +10230,241 @@ module GetCostCategoriesResponse =
       let nextPageToken =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
-      make ~totalSize ~returnSize ?costCategoryValues ?costCategoryNames
+      make ?totalSize ?returnSize ?costCategoryValues ?costCategoryNames
         ?nextPageToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalSize = field_map_exn json "TotalSize" PageSize.of_json in
-      let returnSize = field_map_exn json "ReturnSize" PageSize.of_json in
+    let of_json json__ =
+      let totalSize = field_map json__ "TotalSize" PageSize.of_json in
+      let returnSize = field_map json__ "ReturnSize" PageSize.of_json in
       let costCategoryValues =
-        field_map json "CostCategoryValues" CostCategoryValuesList.of_json in
+        field_map json__ "CostCategoryValues" CostCategoryValuesList.of_json in
       let costCategoryNames =
-        field_map json "CostCategoryNames" CostCategoryNamesList.of_json in
+        field_map json__ "CostCategoryNames" CostCategoryNamesList.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      make ~totalSize ~returnSize ?costCategoryValues ?costCategoryNames
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      make ?totalSize ?returnSize ?costCategoryValues ?costCategoryNames
         ?nextPageToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves an array of Cost Category names and values incurred cost. If some Cost Category names and values are not associated with any cost, they will not be returned by this API."]
+       "Retrieves an array of cost category names and values incurred cost. If some cost category names and values are not associated with any cost, they will not be returned by this API."]
+module GetCostComparisonDriversRequest =
+  struct
+    type nonrec t =
+      {
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
+      baselineTimePeriod: DateInterval.t
+        [@ocaml.doc
+          "The reference time period for comparison. This time period serves as the baseline against which other cost and usage data will be compared. The interval must start and end on the first day of a month, with a duration of exactly one month."];
+      comparisonTimePeriod: DateInterval.t
+        [@ocaml.doc
+          "The comparison time period for analysis. This time period's cost and usage data will be compared against the baseline time period. The interval must start and end on the first day of a month, with a duration of exactly one month."];
+      metricForComparison: MetricName.t
+        [@ocaml.doc
+          "The cost and usage metric to compare. Valid values are AmortizedCost, BlendedCost, NetAmortizedCost, NetUnblendedCost, NormalizedUsageAmount, UnblendedCost, and UsageQuantity."];
+      filter: Expression.t option ;
+      groupBy: GroupDefinitions.t option
+        [@ocaml.doc
+          "You can group results using the attributes DIMENSION, TAG, and COST_CATEGORY. Note that SERVICE and USAGE_TYPE dimensions are automatically included in the cost comparison drivers analysis."];
+      maxResults: CostComparisonDriversMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results that are returned for the request."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of paginated results."]}
+    let context_ = "GetCostComparisonDriversRequest"
+    let make ?billingViewArn =
+      fun ?filter ->
+        fun ?groupBy ->
+          fun ?maxResults ->
+            fun ?nextPageToken ->
+              fun ~baselineTimePeriod ->
+                fun ~comparisonTimePeriod ->
+                  fun ~metricForComparison ->
+                    fun () ->
+                      {
+                        billingViewArn;
+                        filter;
+                        groupBy;
+                        maxResults;
+                        nextPageToken;
+                        baselineTimePeriod;
+                        comparisonTimePeriod;
+                        metricForComparison
+                      }
+    let to_value x =
+      structure_to_value
+        [("BillingViewArn",
+           (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
+        ("BaselineTimePeriod",
+          (Some (DateInterval.to_value x.baselineTimePeriod)));
+        ("ComparisonTimePeriod",
+          (Some (DateInterval.to_value x.comparisonTimePeriod)));
+        ("MetricForComparison",
+          (Some (MetricName.to_value x.metricForComparison)));
+        ("Filter", (Option.map x.filter ~f:Expression.to_value));
+        ("GroupBy", (Option.map x.groupBy ~f:GroupDefinitions.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults
+             ~f:CostComparisonDriversMaxResults.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let maxResults =
+        (Option.map ~f:CostComparisonDriversMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let groupBy =
+        (Option.map ~f:GroupDefinitions.of_xml)
+          (Xml.child xml_arg0 "GroupBy") in
+      let filter =
+        (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
+      let metricForComparison =
+        MetricName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "MetricForComparison") in
+      let comparisonTimePeriod =
+        DateInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ComparisonTimePeriod") in
+      let baselineTimePeriod =
+        DateInterval.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BaselineTimePeriod") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
+      make ?nextPageToken ?maxResults ?groupBy ?filter ~metricForComparison
+        ~comparisonTimePeriod ~baselineTimePeriod ?billingViewArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let maxResults =
+        field_map json__ "MaxResults" CostComparisonDriversMaxResults.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let metricForComparison =
+        field_map_exn json__ "MetricForComparison" MetricName.of_json in
+      let comparisonTimePeriod =
+        field_map_exn json__ "ComparisonTimePeriod" DateInterval.of_json in
+      let baselineTimePeriod =
+        field_map_exn json__ "BaselineTimePeriod" DateInterval.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      make ?nextPageToken ?maxResults ?groupBy ?filter ~metricForComparison
+        ~comparisonTimePeriod ~baselineTimePeriod ?billingViewArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves key factors driving cost changes between two time periods within the last 13 months, such as usage changes, discount changes, and commitment-based savings. If you have enabled multi-year data at monthly granularity, you can go back up to 38 months."]
+module GetCostComparisonDriversResponse =
+  struct
+    type nonrec t =
+      {
+      costComparisonDrivers: CostComparisonDrivers.t option
+        [@ocaml.doc
+          "An array of comparison results showing factors that drive significant cost differences between BaselineTimePeriod and ComparisonTimePeriod."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of paginated results."]}
+    type nonrec error =
+      [
+        `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `DataUnavailableException of DataUnavailableException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?costComparisonDrivers =
+      fun ?nextPageToken ->
+        fun () -> { costComparisonDrivers; nextPageToken }
+    let error_of_json name json =
+      match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CostComparisonDrivers",
+           (Option.map x.costComparisonDrivers
+              ~f:CostComparisonDrivers.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let costComparisonDrivers =
+        (Option.map ~f:CostComparisonDrivers.of_xml)
+          (Xml.child xml_arg0 "CostComparisonDrivers") in
+      make ?nextPageToken ?costComparisonDrivers ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let costComparisonDrivers =
+        field_map json__ "CostComparisonDrivers"
+          CostComparisonDrivers.of_json in
+      make ?nextPageToken ?costComparisonDrivers ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves key factors driving cost changes between two time periods within the last 13 months, such as usage changes, discount changes, and commitment-based savings. If you have enabled multi-year data at monthly granularity, you can go back up to 38 months."]
 module PredictionIntervalLevel =
   struct
     type nonrec t = int
@@ -6988,33 +10536,40 @@ module GetCostForecastRequest =
           "Which metric Cost Explorer uses to create your forecast. For more information about blended and unblended rates, see Why does the \"blended\" annotation appear on some line items in my bill?. Valid values for a GetCostForecast call are the following: AMORTIZED_COST BLENDED_COST NET_AMORTIZED_COST NET_UNBLENDED_COST UNBLENDED_COST"];
       granularity: Granularity.t
         [@ocaml.doc
-          "How granular you want the forecast to be. You can get 3 months of DAILY forecasts or 12 months of MONTHLY forecasts. The GetCostForecast operation supports only DAILY and MONTHLY granularities."];
+          "How granular you want the forecast to be. You can get 3 months of DAILY forecasts or 18 months of MONTHLY forecasts. The GetCostForecast operation supports only DAILY and MONTHLY granularities."];
       filter: Expression.t option
         [@ocaml.doc
-          "The filters that you want to use to filter your forecast. The GetCostForecast API supports filtering by the following dimensions: AZ INSTANCE_TYPE LINKED_ACCOUNT LINKED_ACCOUNT_NAME OPERATION PURCHASE_TYPE REGION SERVICE USAGE_TYPE USAGE_TYPE_GROUP RECORD_TYPE OPERATING_SYSTEM TENANCY SCOPE PLATFORM SUBSCRIPTION_ID LEGAL_ENTITY_NAME DEPLOYMENT_OPTION DATABASE_ENGINE INSTANCE_TYPE_FAMILY BILLING_ENTITY RESERVATION_ID SAVINGS_PLAN_ARN"];
+          "The filters that you want to use to filter your forecast. The GetCostForecast API supports filtering by the following dimensions: AZ INSTANCE_TYPE LINKED_ACCOUNT OPERATION PURCHASE_TYPE REGION SERVICE USAGE_TYPE USAGE_TYPE_GROUP RECORD_TYPE OPERATING_SYSTEM TENANCY SCOPE PLATFORM SUBSCRIPTION_ID LEGAL_ENTITY_NAME DEPLOYMENT_OPTION DATABASE_ENGINE INSTANCE_TYPE_FAMILY BILLING_ENTITY RESERVATION_ID SAVINGS_PLAN_ARN"];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       predictionIntervalLevel: PredictionIntervalLevel.t option
         [@ocaml.doc
           "Cost Explorer always returns the mean forecast as a single point. You can request a prediction interval around the mean by specifying a confidence level. The higher the confidence level, the more confident Cost Explorer is about the actual value falling in the prediction interval. Higher confidence levels result in wider prediction intervals."]}
     let context_ = "GetCostForecastRequest"
     let make ?filter =
-      fun ?predictionIntervalLevel ->
-        fun ~timePeriod ->
-          fun ~metric ->
-            fun ~granularity ->
-              fun () ->
-                {
-                  filter;
-                  predictionIntervalLevel;
-                  timePeriod;
-                  metric;
-                  granularity
-                }
+      fun ?billingViewArn ->
+        fun ?predictionIntervalLevel ->
+          fun ~timePeriod ->
+            fun ~metric ->
+              fun ~granularity ->
+                fun () ->
+                  {
+                    filter;
+                    billingViewArn;
+                    predictionIntervalLevel;
+                    timePeriod;
+                    metric;
+                    granularity
+                  }
     let to_value x =
       structure_to_value
         [("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
         ("Metric", (Some (Metric.to_value x.metric)));
         ("Granularity", (Some (Granularity.to_value x.granularity)));
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("PredictionIntervalLevel",
           (Option.map x.predictionIntervalLevel
              ~f:PredictionIntervalLevel.to_value))]
@@ -7023,6 +10578,9 @@ module GetCostForecastRequest =
       let predictionIntervalLevel =
         (Option.map ~f:PredictionIntervalLevel.of_xml)
           (Xml.child xml_arg0 "PredictionIntervalLevel") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let filter =
         (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
       let granularity =
@@ -7033,19 +10591,22 @@ module GetCostForecastRequest =
       let timePeriod =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
-      make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
-        ()
+      make ?predictionIntervalLevel ?billingViewArn ?filter ~granularity
+        ~metric ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictionIntervalLevel =
-        field_map json "PredictionIntervalLevel"
+        field_map json__ "PredictionIntervalLevel"
           PredictionIntervalLevel.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map_exn json "Granularity" Granularity.of_json in
-      let metric = field_map_exn json "Metric" Metric.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
-        ()
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity =
+        field_map_exn json__ "Granularity" Granularity.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      make ?predictionIntervalLevel ?billingViewArn ?filter ~granularity
+        ~metric ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a forecast for how much Amazon Web Services predicts that you will spend over the forecast time period that you select, based on your past costs."]
@@ -7060,31 +10621,49 @@ module GetCostForecastResponse =
         [@ocaml.doc
           "The forecasts for your query, in order. For DAILY forecasts, this is a list of days. For MONTHLY forecasts, this is a list of months."]}
     type nonrec error =
-      [ `DataUnavailableException of DataUnavailableException.t 
+      [
+        `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `DataUnavailableException of DataUnavailableException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?total =
       fun ?forecastResultsByTime ->
         fun () -> { total; forecastResultsByTime }
     let error_of_json name json =
       match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -7093,6 +10672,10 @@ module GetCostForecastResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7113,10 +10696,11 @@ module GetCostForecastResponse =
         (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "Total") in
       make ?forecastResultsByTime ?total ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastResultsByTime =
-        field_map json "ForecastResultsByTime" ForecastResultsByTime.of_json in
-      let total = field_map json "Total" MetricValue.of_json in
+        field_map json__ "ForecastResultsByTime"
+          ForecastResultsByTime.of_json in
+      let total = field_map json__ "Total" MetricValue.of_json in
       make ?forecastResultsByTime ?total ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7133,17 +10717,20 @@ module GetDimensionValuesRequest =
           "The start date and end date for retrieving the dimension values. The start date is inclusive, but the end date is exclusive. For example, if start is 2017-01-01 and end is 2017-05-01, then the cost and usage data is retrieved from 2017-01-01 up to and including 2017-04-30 but not including 2017-05-01."];
       dimension: Dimension.t
         [@ocaml.doc
-          "The name of the dimension. Each Dimension is available for a different Context. For more information, see Context."];
+          "The name of the dimension. Each Dimension is available for a different Context. For more information, see Context. LINK_ACCOUNT_NAME and SERVICE_CODE can only be used in CostCategoryRule."];
       context: Context.t option
         [@ocaml.doc
-          "The context for the call to GetDimensionValues. This can be RESERVATIONS or COST_AND_USAGE. The default value is COST_AND_USAGE. If the context is set to RESERVATIONS, the resulting dimension values can be used in the GetReservationUtilization operation. If the context is set to COST_AND_USAGE, the resulting dimension values can be used in the GetCostAndUsage operation. If you set the context to COST_AND_USAGE, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. BILLING_ENTITY - The Amazon Web Services seller that your account is with. Possible values are the following: - Amazon Web Services(Amazon Web Services): The entity that sells Amazon Web Services services. - AISPL (Amazon Internet Services Pvt. Ltd.): The local Indian entity that is an acting reseller for Amazon Web Services services in India. - Amazon Web Services Marketplace: The entity that supports the sale of solutions built on Amazon Web Services by third-party software providers. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are Aurora or MySQL. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. INSTANCE_TYPE_FAMILY - A family of instance types optimized to fit different use cases. Examples are Compute Optimized (C4, C5, C6g, C7g etc.), Memory Optimization (R4, R5n, R5b, R6g etc). INVOICING_ENTITY - The name of the entity issuing the Amazon Web Services invoice. LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon Web Services services, such as Amazon Web Services. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. OPERATING_SYSTEM - The operating system. Examples are Windows or Linux. OPERATION - The action performed. Examples include RunInstance and CreateBucket. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. PURCHASE_TYPE - The reservation type of the purchase to which this usage is related. Examples include On-Demand Instances and Standard Reserved Instances. RESERVATION_ID - The unique identifier for an Amazon Web Services Reservation Instance. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans. SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute). SERVICE - The Amazon Web Services service such as Amazon DynamoDB. TENANCY - The tenancy of a resource. Examples are shared or dedicated. USAGE_TYPE - The type of usage. An example is DataTransfer-In-Bytes. The response for the GetDimensionValues operation includes a unit attribute. Examples include GB and Hrs. USAGE_TYPE_GROUP - The grouping of common usage types. An example is Amazon EC2: CloudWatch \226\128\147 Alarms. The response for this operation includes a unit attribute. REGION - The Amazon Web Services Region. RECORD_TYPE - The different types of charges such as RI fees, usage costs, tax refunds, and credits. RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in feature only available for last 14 days for EC2-Compute Service. If you set the context to RESERVATIONS, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. REGION - The Amazon Web Services Region. SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values are regional or a single Availability Zone. TAG (Coverage only) - The tags that are associated with a Reserved Instance (RI). TENANCY - The tenancy of a resource. Examples are shared or dedicated. If you set the context to SAVINGS_PLANS, you can use the following dimensions for searching: SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute) PAYMENT_OPTION - Payment option for the given Savings Plans (for example, All Upfront) REGION - The Amazon Web Services Region. INSTANCE_TYPE_FAMILY - The family of instances (For example, m5) LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans."];
+          "The context for the call to GetDimensionValues. This can be RESERVATIONS or COST_AND_USAGE. The default value is COST_AND_USAGE. If the context is set to RESERVATIONS, the resulting dimension values can be used in the GetReservationUtilization operation. If the context is set to COST_AND_USAGE, the resulting dimension values can be used in the GetCostAndUsage operation. If you set the context to COST_AND_USAGE, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. BILLING_ENTITY - The Amazon Web Services seller that your account is with. Possible values are the following: - Amazon Web Services(Amazon Web Services): The entity that sells Amazon Web Services services. - AISPL (Amazon Internet Services Pvt. Ltd.): The local Indian entity that's an acting reseller for Amazon Web Services services in India. - Amazon Web Services Marketplace: The entity that supports the sale of solutions that are built on Amazon Web Services by third-party software providers. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are Aurora or MySQL. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. INSTANCE_TYPE_FAMILY - A family of instance types optimized to fit different use cases. Examples are Compute Optimized (for example, C4, C5, C6g, and C7g), Memory Optimization (for example, R4, R5n, R5b, and R6g). INVOICING_ENTITY - The name of the entity that issues the Amazon Web Services invoice. LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon Web Services services, such as Amazon Web Services. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. OPERATING_SYSTEM - The operating system. Examples are Windows or Linux. OPERATION - The action performed. Examples include RunInstance and CreateBucket. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. PURCHASE_TYPE - The reservation type of the purchase that this usage is related to. Examples include On-Demand Instances and Standard Reserved Instances. RESERVATION_ID - The unique identifier for an Amazon Web Services Reservation Instance. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans. SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute). SERVICE - The Amazon Web Services service such as Amazon DynamoDB. TENANCY - The tenancy of a resource. Examples are shared or dedicated. USAGE_TYPE - The type of usage. An example is DataTransfer-In-Bytes. The response for the GetDimensionValues operation includes a unit attribute. Examples include GB and Hrs. USAGE_TYPE_GROUP - The grouping of common usage types. An example is Amazon EC2: CloudWatch \226\128\147 Alarms. The response for this operation includes a unit attribute. REGION - The Amazon Web Services Region. RECORD_TYPE - The different types of charges such as Reserved Instance (RI) fees, usage costs, tax refunds, and credits. RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in feature only available for last 14 days for EC2-Compute Service. If you set the context to RESERVATIONS, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. REGION - The Amazon Web Services Region. SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values are regional or a single Availability Zone. TAG (Coverage only) - The tags that are associated with a Reserved Instance (RI). TENANCY - The tenancy of a resource. Examples are shared or dedicated. If you set the context to SAVINGS_PLANS, you can use the following dimensions for searching: SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute) PAYMENT_OPTION - The payment option for the given Savings Plans (for example, All Upfront) REGION - The Amazon Web Services Region. INSTANCE_TYPE_FAMILY - The family of instances (For example, m5) LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plans."];
       filter: Expression.t option ;
       sortBy: SortDefinitions.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The key represents cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount Supported values for SortOrder are ASCENDING or DESCENDING. When you specify a SortBy paramater, the context must be COST_AND_USAGE. Further, when using SortBy, NextPageToken and SearchString are not supported."];
+          "The value that you want to sort the data by. The key represents cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount The supported values for the SortOrder key are ASCENDING or DESCENDING. When you specify a SortBy paramater, the context must be COST_AND_USAGE. Further, when using SortBy, NextPageToken and SearchString aren't supported."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "This field is only used when SortBy is provided in the request. The maximum number of objects that to be returned for this request. If MaxResults is not specified with SortBy, the request will return 1000 results as the default value for this parameter. For GetDimensionValues, MaxResults has an upper limit of 1000."];
+          "This field is only used when SortBy is provided in the request. The maximum number of objects that are returned for this request. If MaxResults isn't specified with SortBy, the request returns 1000 results as the default value for this parameter. For GetDimensionValues, MaxResults has an upper limit of 1000."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -7152,21 +10739,23 @@ module GetDimensionValuesRequest =
       fun ?context ->
         fun ?filter ->
           fun ?sortBy ->
-            fun ?maxResults ->
-              fun ?nextPageToken ->
-                fun ~timePeriod ->
-                  fun ~dimension ->
-                    fun () ->
-                      {
-                        searchString;
-                        context;
-                        filter;
-                        sortBy;
-                        maxResults;
-                        nextPageToken;
-                        timePeriod;
-                        dimension
-                      }
+            fun ?billingViewArn ->
+              fun ?maxResults ->
+                fun ?nextPageToken ->
+                  fun ~timePeriod ->
+                    fun ~dimension ->
+                      fun () ->
+                        {
+                          searchString;
+                          context;
+                          filter;
+                          sortBy;
+                          billingViewArn;
+                          maxResults;
+                          nextPageToken;
+                          timePeriod;
+                          dimension
+                        }
     let to_value x =
       structure_to_value
         [("SearchString",
@@ -7176,6 +10765,8 @@ module GetDimensionValuesRequest =
         ("Context", (Option.map x.context ~f:Context.to_value));
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
         ("SortBy", (Option.map x.sortBy ~f:SortDefinitions.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
@@ -7186,6 +10777,9 @@ module GetDimensionValuesRequest =
           (Xml.child xml_arg0 "NextPageToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let sortBy =
         (Option.map ~f:SortDefinitions.of_xml) (Xml.child xml_arg0 "SortBy") in
       let filter =
@@ -7201,21 +10795,23 @@ module GetDimensionValuesRequest =
       let searchString =
         (Option.map ~f:SearchString.of_xml)
           (Xml.child xml_arg0 "SearchString") in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?context ~dimension
-        ~timePeriod ?searchString ()
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter
+        ?context ~dimension ~timePeriod ?searchString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let sortBy = field_map json "SortBy" SortDefinitions.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let context = field_map json "Context" Context.of_json in
-      let dimension = field_map_exn json "Dimension" Dimension.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      let searchString = field_map json "SearchString" SearchString.of_json in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?context ~dimension
-        ~timePeriod ?searchString ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let sortBy = field_map json__ "SortBy" SortDefinitions.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let context = field_map json__ "Context" Context.of_json in
+      let dimension = field_map_exn json__ "Dimension" Dimension.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      let searchString = field_map json__ "SearchString" SearchString.of_json in
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter
+        ?context ~dimension ~timePeriod ?searchString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves all available filter values for a specified filter over a period of time. You can search the dimension values for an arbitrary string."]
@@ -7223,35 +10819,40 @@ module GetDimensionValuesResponse =
   struct
     type nonrec t =
       {
-      dimensionValues: DimensionValuesWithAttributesList.t
+      dimensionValues: DimensionValuesWithAttributesList.t option
         [@ocaml.doc
-          "The filters that you used to filter your request. Some dimensions are available only for a specific context. If you set the context to COST_AND_USAGE, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are Aurora or MySQL. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon Web Services services, such as Amazon Web Services. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. OPERATING_SYSTEM - The operating system. Examples are Windows or Linux. OPERATION - The action performed. Examples include RunInstance and CreateBucket. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. PURCHASE_TYPE - The reservation type of the purchase to which this usage is related. Examples include On-Demand Instances and Standard Reserved Instances. SERVICE - The Amazon Web Services service such as Amazon DynamoDB. USAGE_TYPE - The type of usage. An example is DataTransfer-In-Bytes. The response for the GetDimensionValues operation includes a unit attribute. Examples include GB and Hrs. USAGE_TYPE_GROUP - The grouping of common usage types. An example is Amazon EC2: CloudWatch \226\128\147 Alarms. The response for this operation includes a unit attribute. RECORD_TYPE - The different types of charges such as RI fees, usage costs, tax refunds, and credits. RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in feature only available for last 14 days for EC2-Compute Service. If you set the context to RESERVATIONS, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. REGION - The Amazon Web Services Region. SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values are regional or a single Availability Zone. TAG (Coverage only) - The tags that are associated with a Reserved Instance (RI). TENANCY - The tenancy of a resource. Examples are shared or dedicated. If you set the context to SAVINGS_PLANS, you can use the following dimensions for searching: SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute) PAYMENT_OPTION - Payment option for the given Savings Plans (for example, All Upfront) REGION - The Amazon Web Services Region. INSTANCE_TYPE_FAMILY - The family of instances (For example, m5) LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plan"];
-      returnSize: PageSize.t
+          "The filters that you used to filter your request. Some dimensions are available only for a specific context. If you set the context to COST_AND_USAGE, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. DATABASE_ENGINE - The Amazon Relational Database Service database. Examples are Aurora or MySQL. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LEGAL_ENTITY_NAME - The name of the organization that sells you Amazon Web Services services, such as Amazon Web Services. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. OPERATING_SYSTEM - The operating system. Examples are Windows or Linux. OPERATION - The action performed. Examples include RunInstance and CreateBucket. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. PURCHASE_TYPE - The reservation type of the purchase to which this usage is related. Examples include On-Demand Instances and Standard Reserved Instances. SERVICE - The Amazon Web Services service such as Amazon DynamoDB. USAGE_TYPE - The type of usage. An example is DataTransfer-In-Bytes. The response for the GetDimensionValues operation includes a unit attribute. Examples include GB and Hrs. USAGE_TYPE_GROUP - The grouping of common usage types. An example is Amazon EC2: CloudWatch \226\128\147 Alarms. The response for this operation includes a unit attribute. RECORD_TYPE - The different types of charges such as RI fees, usage costs, tax refunds, and credits. RESOURCE_ID - The unique identifier of the resource. ResourceId is an opt-in feature only available for last 14 days for EC2-Compute Service. You can opt-in by enabling Hourly and Resource Level Data in Cost Management Console preferences. If you set the context to RESERVATIONS, you can use the following dimensions for searching: AZ - The Availability Zone. An example is us-east-1a. CACHE_ENGINE - The Amazon ElastiCache operating system. Examples are Windows or Linux. DEPLOYMENT_OPTION - The scope of Amazon Relational Database Service deployments. Valid values are SingleAZ and MultiAZ. INSTANCE_TYPE - The type of Amazon EC2 instance. An example is m4.xlarge. LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. PLATFORM - The Amazon EC2 operating system. Examples are Windows or Linux. REGION - The Amazon Web Services Region. SCOPE (Utilization only) - The scope of a Reserved Instance (RI). Values are regional or a single Availability Zone. TAG (Coverage only) - The tags that are associated with a Reserved Instance (RI). TENANCY - The tenancy of a resource. Examples are shared or dedicated. If you set the context to SAVINGS_PLANS, you can use the following dimensions for searching: SAVINGS_PLANS_TYPE - Type of Savings Plans (EC2 Instance or Compute) PAYMENT_OPTION - Payment option for the given Savings Plans (for example, All Upfront) REGION - The Amazon Web Services Region. INSTANCE_TYPE_FAMILY - The family of instances (For example, m5) LINKED_ACCOUNT - The description in the attribute map that includes the full name of the member account. The value field contains the Amazon Web Services ID of the member account. SAVINGS_PLAN_ARN - The unique identifier for your Savings Plan"];
+      returnSize: PageSize.t option
         [@ocaml.doc
           "The number of results that Amazon Web Services returned at one time."];
-      totalSize: PageSize.t
+      totalSize: PageSize.t option
         [@ocaml.doc "The total number of search results."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token for the next set of retrievable results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
     type nonrec error =
       [ `BillExpirationException of BillExpirationException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `DataUnavailableException of DataUnavailableException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RequestChangedException of RequestChangedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDimensionValuesResponse"
-    let make ?nextPageToken =
-      fun ~dimensionValues ->
-        fun ~returnSize ->
-          fun ~totalSize ->
+    let make ?dimensionValues =
+      fun ?returnSize ->
+        fun ?totalSize ->
+          fun ?nextPageToken ->
             fun () ->
-              { nextPageToken; dimensionValues; returnSize; totalSize }
+              { dimensionValues; returnSize; totalSize; nextPageToken }
     let error_of_json name json =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "InvalidNextTokenException" ->
@@ -7260,6 +10861,8 @@ module GetDimensionValuesResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -7267,6 +10870,9 @@ module GetDimensionValuesResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "InvalidNextTokenException" ->
@@ -7275,6 +10881,8 @@ module GetDimensionValuesResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -7283,6 +10891,10 @@ module GetDimensionValuesResponse =
           `Assoc
             [("error", (`String "BillExpirationException"));
             ("details", (BillExpirationException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -7299,6 +10911,10 @@ module GetDimensionValuesResponse =
           `Assoc
             [("error", (`String "RequestChangedException"));
             ("details", (RequestChangedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -7307,10 +10923,10 @@ module GetDimensionValuesResponse =
     let to_value x =
       structure_to_value
         [("DimensionValues",
-           (Some
-              (DimensionValuesWithAttributesList.to_value x.dimensionValues)));
-        ("ReturnSize", (Some (PageSize.to_value x.returnSize)));
-        ("TotalSize", (Some (PageSize.to_value x.totalSize)));
+           (Option.map x.dimensionValues
+              ~f:DimensionValuesWithAttributesList.to_value));
+        ("ReturnSize", (Option.map x.returnSize ~f:PageSize.to_value));
+        ("TotalSize", (Option.map x.totalSize ~f:PageSize.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -7319,25 +10935,23 @@ module GetDimensionValuesResponse =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let totalSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TotalSize") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "TotalSize") in
       let returnSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReturnSize") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "ReturnSize") in
       let dimensionValues =
-        DimensionValuesWithAttributesList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DimensionValues") in
-      make ?nextPageToken ~totalSize ~returnSize ~dimensionValues ()
+        (Option.map ~f:DimensionValuesWithAttributesList.of_xml)
+          (Xml.child xml_arg0 "DimensionValues") in
+      make ?nextPageToken ?totalSize ?returnSize ?dimensionValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let totalSize = field_map_exn json "TotalSize" PageSize.of_json in
-      let returnSize = field_map_exn json "ReturnSize" PageSize.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let totalSize = field_map json__ "TotalSize" PageSize.of_json in
+      let returnSize = field_map json__ "ReturnSize" PageSize.of_json in
       let dimensionValues =
-        field_map_exn json "DimensionValues"
+        field_map json__ "DimensionValues"
           DimensionValuesWithAttributesList.of_json in
-      make ?nextPageToken ~totalSize ~returnSize ~dimensionValues ()
+      make ?nextPageToken ?totalSize ?returnSize ?dimensionValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves all available filter values for a specified filter over a period of time. You can search the dimension values for an arbitrary string."]
@@ -7424,16 +11038,16 @@ module GetReservationCoverageRequest =
       make ?maxResults ?sortBy ?nextPageToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let sortBy = field_map json "SortBy" SortDefinition.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let sortBy = field_map json__ "SortBy" SortDefinition.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let metrics = field_map json "Metrics" MetricNames.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map json "Granularity" Granularity.of_json in
-      let groupBy = field_map json "GroupBy" GroupDefinitions.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let metrics = field_map json__ "Metrics" MetricNames.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity = field_map json__ "Granularity" Granularity.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
       make ?maxResults ?sortBy ?nextPageToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
     let to_json v = composed_to_json to_value v
@@ -7443,7 +11057,7 @@ module GetReservationCoverageResponse =
   struct
     type nonrec t =
       {
-      coveragesByTime: CoveragesByTime.t
+      coveragesByTime: CoveragesByTime.t option
         [@ocaml.doc "The amount of time that your reservations covered."];
       total: Coverage.t option
         [@ocaml.doc
@@ -7456,11 +11070,10 @@ module GetReservationCoverageResponse =
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetReservationCoverageResponse"
-    let make ?total =
-      fun ?nextPageToken ->
-        fun ~coveragesByTime ->
-          fun () -> { total; nextPageToken; coveragesByTime }
+    let make ?coveragesByTime =
+      fun ?total ->
+        fun ?nextPageToken ->
+          fun () -> { coveragesByTime; total; nextPageToken }
     let error_of_json name json =
       match name with
       | "DataUnavailableException" ->
@@ -7504,7 +11117,7 @@ module GetReservationCoverageResponse =
     let to_value x =
       structure_to_value
         [("CoveragesByTime",
-           (Some (CoveragesByTime.to_value x.coveragesByTime)));
+           (Option.map x.coveragesByTime ~f:CoveragesByTime.to_value));
         ("Total", (Option.map x.total ~f:Coverage.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
@@ -7516,45 +11129,20 @@ module GetReservationCoverageResponse =
       let total =
         (Option.map ~f:Coverage.of_xml) (Xml.child xml_arg0 "Total") in
       let coveragesByTime =
-        CoveragesByTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CoveragesByTime") in
-      make ?nextPageToken ?total ~coveragesByTime ()
+        (Option.map ~f:CoveragesByTime.of_xml)
+          (Xml.child xml_arg0 "CoveragesByTime") in
+      make ?nextPageToken ?total ?coveragesByTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let total = field_map json "Total" Coverage.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let total = field_map json__ "Total" Coverage.of_json in
       let coveragesByTime =
-        field_map_exn json "CoveragesByTime" CoveragesByTime.of_json in
-      make ?nextPageToken ?total ~coveragesByTime ()
+        field_map json__ "CoveragesByTime" CoveragesByTime.of_json in
+      make ?nextPageToken ?total ?coveragesByTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the reservation coverage for your account. This enables you to see how much of your Amazon Elastic Compute Cloud, Amazon ElastiCache, Amazon Relational Database Service, or Amazon Redshift usage is covered by a reservation. An organization's management account can see the coverage of the associated member accounts. This supports dimensions, Cost Categories, and nested expressions. For any time period, you can filter data about reservation usage by the following dimensions: AZ CACHE_ENGINE DATABASE_ENGINE DEPLOYMENT_OPTION INSTANCE_TYPE LINKED_ACCOUNT OPERATING_SYSTEM PLATFORM REGION SERVICE TAG TENANCY To determine valid values for a dimension, use the GetDimensionValues operation."]
-module TermInYears =
-  struct
-    type nonrec t =
-      | ONE_YEAR 
-      | THREE_YEARS 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | ONE_YEAR -> "ONE_YEAR"
-      | THREE_YEARS -> "THREE_YEARS"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "ONE_YEAR" -> ONE_YEAR
-      | "THREE_YEARS" -> THREE_YEARS
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration TermInYears" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"TermInYears" j)
-    let to_json = simple_to_json to_value
-  end
+       "Retrieves the reservation coverage for your account, which you can use to see how much of your Amazon Elastic Compute Cloud, Amazon ElastiCache, Amazon Relational Database Service, or Amazon Redshift usage is covered by a reservation. An organization's management account can see the coverage of the associated member accounts. This supports dimensions, cost categories, and nested expressions. For any time period, you can filter data about reservation usage by the following dimensions: AZ CACHE_ENGINE DATABASE_ENGINE DEPLOYMENT_OPTION INSTANCE_TYPE LINKED_ACCOUNT OPERATING_SYSTEM PLATFORM REGION SERVICE TAG TENANCY To determine valid values for a dimension, use the GetDimensionValues operation."]
 module ServiceSpecification =
   struct
     type nonrec t =
@@ -7574,48 +11162,30 @@ module ServiceSpecification =
           (Xml.child xml_arg0 "EC2Specification") in
       make ?eC2Specification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eC2Specification =
-        field_map json "EC2Specification" EC2Specification.of_json in
+        field_map json__ "EC2Specification" EC2Specification.of_json in
       make ?eC2Specification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Hardware specifications for the service that you want recommendations for."]
-module PaymentOption =
+module RecommendationsPageSize =
   struct
-    type nonrec t =
-      | NO_UPFRONT 
-      | PARTIAL_UPFRONT 
-      | ALL_UPFRONT 
-      | LIGHT_UTILIZATION 
-      | MEDIUM_UTILIZATION 
-      | HEAVY_UTILIZATION 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | NO_UPFRONT -> "NO_UPFRONT"
-      | PARTIAL_UPFRONT -> "PARTIAL_UPFRONT"
-      | ALL_UPFRONT -> "ALL_UPFRONT"
-      | LIGHT_UTILIZATION -> "LIGHT_UTILIZATION"
-      | MEDIUM_UTILIZATION -> "MEDIUM_UTILIZATION"
-      | HEAVY_UTILIZATION -> "HEAVY_UTILIZATION"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "NO_UPFRONT" -> NO_UPFRONT
-      | "PARTIAL_UPFRONT" -> PARTIAL_UPFRONT
-      | "ALL_UPFRONT" -> ALL_UPFRONT
-      | "LIGHT_UTILIZATION" -> LIGHT_UTILIZATION
-      | "MEDIUM_UTILIZATION" -> MEDIUM_UTILIZATION
-      | "HEAVY_UTILIZATION" -> HEAVY_UTILIZATION
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:6000) >>= (fun () -> check_int_min i ~min:0));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = to_string x
+    let to_header x = Int.to_string x
     let of_xml xml_arg0 =
-      of_string (string_of_xml ~kind:"enumeration PaymentOption" xml_arg0)
-    let of_json j = of_string (string_of_json ~kind:"PaymentOption" j)
+      Int.of_string
+        (string_of_xml ~kind:"an integer for RecommendationsPageSize"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module LookbackPeriodInDays =
@@ -7653,7 +11223,7 @@ module GetReservationPurchaseRecommendationRequest =
       {
       accountId: GenericString.t option
         [@ocaml.doc
-          "The account ID that is associated with the recommendation."];
+          "The account ID that's associated with the recommendation."];
       service: GenericString.t
         [@ocaml.doc
           "The specific service that you want recommendations for."];
@@ -7673,7 +11243,7 @@ module GetReservationPurchaseRecommendationRequest =
       serviceSpecification: ServiceSpecification.t option
         [@ocaml.doc
           "The hardware specifications for the service instances that you want recommendations for, such as standard or convertible Amazon EC2 instances."];
-      pageSize: NonNegativeInteger.t option
+      pageSize: RecommendationsPageSize.t option
         [@ocaml.doc
           "The number of recommendations that you want returned in a single response object."];
       nextPageToken: NextPageToken.t option
@@ -7717,7 +11287,8 @@ module GetReservationPurchaseRecommendationRequest =
           (Option.map x.paymentOption ~f:PaymentOption.to_value));
         ("ServiceSpecification",
           (Option.map x.serviceSpecification ~f:ServiceSpecification.to_value));
-        ("PageSize", (Option.map x.pageSize ~f:NonNegativeInteger.to_value));
+        ("PageSize",
+          (Option.map x.pageSize ~f:RecommendationsPageSize.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -7726,7 +11297,7 @@ module GetReservationPurchaseRecommendationRequest =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let pageSize =
-        (Option.map ~f:NonNegativeInteger.of_xml)
+        (Option.map ~f:RecommendationsPageSize.of_xml)
           (Xml.child xml_arg0 "PageSize") in
       let serviceSpecification =
         (Option.map ~f:ServiceSpecification.of_xml)
@@ -7753,27 +11324,28 @@ module GetReservationPurchaseRecommendationRequest =
         ?termInYears ?lookbackPeriodInDays ?accountScope ?filter ~service
         ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let pageSize = field_map json "PageSize" NonNegativeInteger.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let pageSize =
+        field_map json__ "PageSize" RecommendationsPageSize.of_json in
       let serviceSpecification =
-        field_map json "ServiceSpecification" ServiceSpecification.of_json in
+        field_map json__ "ServiceSpecification" ServiceSpecification.of_json in
       let paymentOption =
-        field_map json "PaymentOption" PaymentOption.of_json in
-      let termInYears = field_map json "TermInYears" TermInYears.of_json in
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let termInYears = field_map json__ "TermInYears" TermInYears.of_json in
       let lookbackPeriodInDays =
-        field_map json "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
-      let accountScope = field_map json "AccountScope" AccountScope.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let service = field_map_exn json "Service" GenericString.of_json in
-      let accountId = field_map json "AccountId" GenericString.of_json in
+        field_map json__ "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let service = field_map_exn json__ "Service" GenericString.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
       make ?nextPageToken ?pageSize ?serviceSpecification ?paymentOption
         ?termInYears ?lookbackPeriodInDays ?accountScope ?filter ~service
         ?accountId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets recommendations for which reservations to purchase. These recommendations could help you reduce your costs. Reservations provide a discounted hourly rate (up to 75%) compared to On-Demand pricing. Amazon Web Services generates your recommendations by identifying your On-Demand usage during a specific time period and collecting your usage into categories that are eligible for a reservation. After Amazon Web Services has these categories, it simulates every combination of reservations in each category of usage to identify the best number of each type of RI to purchase to maximize your estimated savings. For example, Amazon Web Services automatically aggregates your Amazon EC2 Linux, shared tenancy, and c4 family usage in the US West (Oregon) Region and recommends that you buy size-flexible regional reservations to apply to the c4 family usage. Amazon Web Services recommends the smallest size instance in an instance family. This makes it easier to purchase a size-flexible RI. Amazon Web Services also shows the equal number of normalized units so that you can purchase any instance size that you want. For this example, your RI recommendation would be for c4.large because that is the smallest size instance in the c4 instance family."]
+       "Gets recommendations for reservation purchases. These recommendations might help you to reduce your costs. Reservations provide a discounted hourly rate (up to 75%) compared to On-Demand pricing. Amazon Web Services generates your recommendations by identifying your On-Demand usage during a specific time period and collecting your usage into categories that are eligible for a reservation. After Amazon Web Services has these categories, it simulates every combination of reservations in each category of usage to identify the best number of each type of Reserved Instance (RI) to purchase to maximize your estimated savings. For example, Amazon Web Services automatically aggregates your Amazon EC2 Linux, shared tenancy, and c4 family usage in the US West (Oregon) Region and recommends that you buy size-flexible regional reservations to apply to the c4 family usage. Amazon Web Services recommends the smallest size instance in an instance family. This makes it easier to purchase a size-flexible Reserved Instance (RI). Amazon Web Services also shows the equal number of normalized units. This way, you can purchase any instance size that you want. For this example, your RI recommendation is for c4.large because that is the smallest size instance in the c4 instance family."]
 module ReservationPurchaseRecommendationSummary =
   struct
     type nonrec t =
@@ -7819,19 +11391,48 @@ module ReservationPurchaseRecommendationSummary =
       make ?currencyCode ?totalEstimatedMonthlySavingsPercentage
         ?totalEstimatedMonthlySavingsAmount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
+    let of_json json__ =
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
       let totalEstimatedMonthlySavingsPercentage =
-        field_map json "TotalEstimatedMonthlySavingsPercentage"
+        field_map json__ "TotalEstimatedMonthlySavingsPercentage"
           GenericString.of_json in
       let totalEstimatedMonthlySavingsAmount =
-        field_map json "TotalEstimatedMonthlySavingsAmount"
+        field_map json__ "TotalEstimatedMonthlySavingsAmount"
           GenericString.of_json in
       make ?currencyCode ?totalEstimatedMonthlySavingsPercentage
         ?totalEstimatedMonthlySavingsAmount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary about this recommendation, such as the currency code, the amount that Amazon Web Services estimates that you could save, and the total amount of reservation to purchase."]
+module ReservedCapacityDetails =
+  struct
+    type nonrec t =
+      {
+      dynamoDBCapacityDetails: DynamoDBCapacityDetails.t option
+        [@ocaml.doc
+          "The DynamoDB reservations that Amazon Web Services recommends that you purchase."]}
+    let make ?dynamoDBCapacityDetails = fun () -> { dynamoDBCapacityDetails }
+    let to_value x =
+      structure_to_value
+        [("DynamoDBCapacityDetails",
+           (Option.map x.dynamoDBCapacityDetails
+              ~f:DynamoDBCapacityDetails.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dynamoDBCapacityDetails =
+        (Option.map ~f:DynamoDBCapacityDetails.of_xml)
+          (Xml.child xml_arg0 "DynamoDBCapacityDetails") in
+      make ?dynamoDBCapacityDetails ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dynamoDBCapacityDetails =
+        field_map json__ "DynamoDBCapacityDetails"
+          DynamoDBCapacityDetails.of_json in
+      make ?dynamoDBCapacityDetails ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the reservations that Amazon Web Services recommends that you purchase."]
 module RedshiftInstanceDetails =
   struct
     type nonrec t =
@@ -7887,18 +11488,18 @@ module RedshiftInstanceDetails =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
       make ?sizeFlexEligible ?currentGeneration ?region ?nodeType ?family ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sizeFlexEligible =
-        field_map json "SizeFlexEligible" GenericBoolean.of_json in
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
       let currentGeneration =
-        field_map json "CurrentGeneration" GenericBoolean.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let nodeType = field_map json "NodeType" GenericString.of_json in
-      let family = field_map json "Family" GenericString.of_json in
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let nodeType = field_map json__ "NodeType" GenericString.of_json in
+      let family = field_map json__ "Family" GenericString.of_json in
       make ?sizeFlexEligible ?currentGeneration ?region ?nodeType ?family ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the Amazon Redshift instances that Amazon Web Services recommends that you purchase."]
+       "Details about the Amazon Redshift reservations that Amazon Web Services recommends that you purchase."]
 module RDSInstanceDetails =
   struct
     type nonrec t =
@@ -7928,7 +11529,10 @@ module RDSInstanceDetails =
           "Determines whether the recommendation is for a current-generation instance."];
       sizeFlexEligible: GenericBoolean.t option
         [@ocaml.doc
-          "Determines whether the recommended reservation is size flexible."]}
+          "Determines whether the recommended reservation is size flexible."];
+      deploymentModel: GenericString.t option
+        [@ocaml.doc
+          "Determines whether the recommendation is for a reservation for RDS Custom."]}
     let make ?family =
       fun ?instanceType ->
         fun ?region ->
@@ -7938,18 +11542,20 @@ module RDSInstanceDetails =
                 fun ?licenseModel ->
                   fun ?currentGeneration ->
                     fun ?sizeFlexEligible ->
-                      fun () ->
-                        {
-                          family;
-                          instanceType;
-                          region;
-                          databaseEngine;
-                          databaseEdition;
-                          deploymentOption;
-                          licenseModel;
-                          currentGeneration;
-                          sizeFlexEligible
-                        }
+                      fun ?deploymentModel ->
+                        fun () ->
+                          {
+                            family;
+                            instanceType;
+                            region;
+                            databaseEngine;
+                            databaseEdition;
+                            deploymentOption;
+                            licenseModel;
+                            currentGeneration;
+                            sizeFlexEligible;
+                            deploymentModel
+                          }
     let to_value x =
       structure_to_value
         [("Family", (Option.map x.family ~f:GenericString.to_value));
@@ -7967,9 +11573,14 @@ module RDSInstanceDetails =
         ("CurrentGeneration",
           (Option.map x.currentGeneration ~f:GenericBoolean.to_value));
         ("SizeFlexEligible",
-          (Option.map x.sizeFlexEligible ~f:GenericBoolean.to_value))]
+          (Option.map x.sizeFlexEligible ~f:GenericBoolean.to_value));
+        ("DeploymentModel",
+          (Option.map x.deploymentModel ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let deploymentModel =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "DeploymentModel") in
       let sizeFlexEligible =
         (Option.map ~f:GenericBoolean.of_xml)
           (Xml.child xml_arg0 "SizeFlexEligible") in
@@ -7995,63 +11606,139 @@ module RDSInstanceDetails =
           (Xml.child xml_arg0 "InstanceType") in
       let family =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
-      make ?sizeFlexEligible ?currentGeneration ?licenseModel
-        ?deploymentOption ?databaseEdition ?databaseEngine ?region
-        ?instanceType ?family ()
+      make ?deploymentModel ?sizeFlexEligible ?currentGeneration
+        ?licenseModel ?deploymentOption ?databaseEdition ?databaseEngine
+        ?region ?instanceType ?family ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let deploymentModel =
+        field_map json__ "DeploymentModel" GenericString.of_json in
       let sizeFlexEligible =
-        field_map json "SizeFlexEligible" GenericBoolean.of_json in
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
       let currentGeneration =
-        field_map json "CurrentGeneration" GenericBoolean.of_json in
-      let licenseModel = field_map json "LicenseModel" GenericString.of_json in
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
+      let licenseModel =
+        field_map json__ "LicenseModel" GenericString.of_json in
       let deploymentOption =
-        field_map json "DeploymentOption" GenericString.of_json in
+        field_map json__ "DeploymentOption" GenericString.of_json in
       let databaseEdition =
-        field_map json "DatabaseEdition" GenericString.of_json in
+        field_map json__ "DatabaseEdition" GenericString.of_json in
       let databaseEngine =
-        field_map json "DatabaseEngine" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
-      let instanceType = field_map json "InstanceType" GenericString.of_json in
-      let family = field_map json "Family" GenericString.of_json in
-      make ?sizeFlexEligible ?currentGeneration ?licenseModel
-        ?deploymentOption ?databaseEdition ?databaseEngine ?region
-        ?instanceType ?family ()
+        field_map json__ "DatabaseEngine" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let instanceType =
+        field_map json__ "InstanceType" GenericString.of_json in
+      let family = field_map json__ "Family" GenericString.of_json in
+      make ?deploymentModel ?sizeFlexEligible ?currentGeneration
+        ?licenseModel ?deploymentOption ?databaseEdition ?databaseEngine
+        ?region ?instanceType ?family ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the Amazon RDS instances that Amazon Web Services recommends that you purchase."]
+       "Details about the Amazon RDS reservations that Amazon Web Services recommends that you purchase."]
+module MemoryDBInstanceDetails =
+  struct
+    type nonrec t =
+      {
+      family: GenericString.t option
+        [@ocaml.doc "The instance family of the recommended reservation."];
+      nodeType: GenericString.t option
+        [@ocaml.doc "The node type of the recommended reservation."];
+      region: GenericString.t option
+        [@ocaml.doc
+          "The Amazon Web Services Region of the recommended reservation."];
+      currentGeneration: GenericBoolean.t option
+        [@ocaml.doc
+          "Determines whether the recommendation is for a current generation instance."];
+      sizeFlexEligible: GenericBoolean.t option
+        [@ocaml.doc
+          "Determines whether the recommended reservation is size flexible."]}
+    let make ?family =
+      fun ?nodeType ->
+        fun ?region ->
+          fun ?currentGeneration ->
+            fun ?sizeFlexEligible ->
+              fun () ->
+                {
+                  family;
+                  nodeType;
+                  region;
+                  currentGeneration;
+                  sizeFlexEligible
+                }
+    let to_value x =
+      structure_to_value
+        [("Family", (Option.map x.family ~f:GenericString.to_value));
+        ("NodeType", (Option.map x.nodeType ~f:GenericString.to_value));
+        ("Region", (Option.map x.region ~f:GenericString.to_value));
+        ("CurrentGeneration",
+          (Option.map x.currentGeneration ~f:GenericBoolean.to_value));
+        ("SizeFlexEligible",
+          (Option.map x.sizeFlexEligible ~f:GenericBoolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let sizeFlexEligible =
+        (Option.map ~f:GenericBoolean.of_xml)
+          (Xml.child xml_arg0 "SizeFlexEligible") in
+      let currentGeneration =
+        (Option.map ~f:GenericBoolean.of_xml)
+          (Xml.child xml_arg0 "CurrentGeneration") in
+      let region =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
+      let nodeType =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "NodeType") in
+      let family =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Family") in
+      make ?sizeFlexEligible ?currentGeneration ?region ?nodeType ?family ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let sizeFlexEligible =
+        field_map json__ "SizeFlexEligible" GenericBoolean.of_json in
+      let currentGeneration =
+        field_map json__ "CurrentGeneration" GenericBoolean.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let nodeType = field_map json__ "NodeType" GenericString.of_json in
+      let family = field_map json__ "Family" GenericString.of_json in
+      make ?sizeFlexEligible ?currentGeneration ?region ?nodeType ?family ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the MemoryDB reservations that Amazon Web Services recommends that you purchase."]
 module InstanceDetails =
   struct
     type nonrec t =
       {
       eC2InstanceDetails: EC2InstanceDetails.t option
         [@ocaml.doc
-          "The Amazon EC2 instances that Amazon Web Services recommends that you purchase."];
+          "The Amazon EC2 reservations that Amazon Web Services recommends that you purchase."];
       rDSInstanceDetails: RDSInstanceDetails.t option
         [@ocaml.doc
-          "The Amazon RDS instances that Amazon Web Services recommends that you purchase."];
+          "The Amazon RDS reservations that Amazon Web Services recommends that you purchase."];
       redshiftInstanceDetails: RedshiftInstanceDetails.t option
         [@ocaml.doc
-          "The Amazon Redshift instances that Amazon Web Services recommends that you purchase."];
+          "The Amazon Redshift reservations that Amazon Web Services recommends that you purchase."];
       elastiCacheInstanceDetails: ElastiCacheInstanceDetails.t option
         [@ocaml.doc
-          "The ElastiCache instances that Amazon Web Services recommends that you purchase."];
+          "The ElastiCache reservations that Amazon Web Services recommends that you purchase."];
       eSInstanceDetails: ESInstanceDetails.t option
         [@ocaml.doc
-          "The Amazon OpenSearch Service instances that Amazon Web Services recommends that you purchase."]}
+          "The Amazon OpenSearch Service reservations that Amazon Web Services recommends that you purchase."];
+      memoryDBInstanceDetails: MemoryDBInstanceDetails.t option
+        [@ocaml.doc
+          "The MemoryDB reservations that Amazon Web Services recommends that you purchase."]}
     let make ?eC2InstanceDetails =
       fun ?rDSInstanceDetails ->
         fun ?redshiftInstanceDetails ->
           fun ?elastiCacheInstanceDetails ->
             fun ?eSInstanceDetails ->
-              fun () ->
-                {
-                  eC2InstanceDetails;
-                  rDSInstanceDetails;
-                  redshiftInstanceDetails;
-                  elastiCacheInstanceDetails;
-                  eSInstanceDetails
-                }
+              fun ?memoryDBInstanceDetails ->
+                fun () ->
+                  {
+                    eC2InstanceDetails;
+                    rDSInstanceDetails;
+                    redshiftInstanceDetails;
+                    elastiCacheInstanceDetails;
+                    eSInstanceDetails;
+                    memoryDBInstanceDetails
+                  }
     let to_value x =
       structure_to_value
         [("EC2InstanceDetails",
@@ -8065,9 +11752,15 @@ module InstanceDetails =
           (Option.map x.elastiCacheInstanceDetails
              ~f:ElastiCacheInstanceDetails.to_value));
         ("ESInstanceDetails",
-          (Option.map x.eSInstanceDetails ~f:ESInstanceDetails.to_value))]
+          (Option.map x.eSInstanceDetails ~f:ESInstanceDetails.to_value));
+        ("MemoryDBInstanceDetails",
+          (Option.map x.memoryDBInstanceDetails
+             ~f:MemoryDBInstanceDetails.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let memoryDBInstanceDetails =
+        (Option.map ~f:MemoryDBInstanceDetails.of_xml)
+          (Xml.child xml_arg0 "MemoryDBInstanceDetails") in
       let eSInstanceDetails =
         (Option.map ~f:ESInstanceDetails.of_xml)
           (Xml.child xml_arg0 "ESInstanceDetails") in
@@ -8083,36 +11776,42 @@ module InstanceDetails =
       let eC2InstanceDetails =
         (Option.map ~f:EC2InstanceDetails.of_xml)
           (Xml.child xml_arg0 "EC2InstanceDetails") in
-      make ?eSInstanceDetails ?elastiCacheInstanceDetails
-        ?redshiftInstanceDetails ?rDSInstanceDetails ?eC2InstanceDetails ()
+      make ?memoryDBInstanceDetails ?eSInstanceDetails
+        ?elastiCacheInstanceDetails ?redshiftInstanceDetails
+        ?rDSInstanceDetails ?eC2InstanceDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let memoryDBInstanceDetails =
+        field_map json__ "MemoryDBInstanceDetails"
+          MemoryDBInstanceDetails.of_json in
       let eSInstanceDetails =
-        field_map json "ESInstanceDetails" ESInstanceDetails.of_json in
+        field_map json__ "ESInstanceDetails" ESInstanceDetails.of_json in
       let elastiCacheInstanceDetails =
-        field_map json "ElastiCacheInstanceDetails"
+        field_map json__ "ElastiCacheInstanceDetails"
           ElastiCacheInstanceDetails.of_json in
       let redshiftInstanceDetails =
-        field_map json "RedshiftInstanceDetails"
+        field_map json__ "RedshiftInstanceDetails"
           RedshiftInstanceDetails.of_json in
       let rDSInstanceDetails =
-        field_map json "RDSInstanceDetails" RDSInstanceDetails.of_json in
+        field_map json__ "RDSInstanceDetails" RDSInstanceDetails.of_json in
       let eC2InstanceDetails =
-        field_map json "EC2InstanceDetails" EC2InstanceDetails.of_json in
-      make ?eSInstanceDetails ?elastiCacheInstanceDetails
-        ?redshiftInstanceDetails ?rDSInstanceDetails ?eC2InstanceDetails ()
+        field_map json__ "EC2InstanceDetails" EC2InstanceDetails.of_json in
+      make ?memoryDBInstanceDetails ?eSInstanceDetails
+        ?elastiCacheInstanceDetails ?redshiftInstanceDetails
+        ?rDSInstanceDetails ?eC2InstanceDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about the instances that Amazon Web Services recommends that you purchase."]
+       "Details about the reservations that Amazon Web Services recommends that you purchase."]
 module ReservationPurchaseRecommendationDetail =
   struct
     type nonrec t =
       {
       accountId: GenericString.t option
-        [@ocaml.doc "The account that this RI recommendation is for."];
+        [@ocaml.doc
+          "The account that this Reserved Instance (RI) recommendation is for."];
       instanceDetails: InstanceDetails.t option
         [@ocaml.doc
-          "Details about the instances that Amazon Web Services recommends that you purchase."];
+          "Details about the reservations that Amazon Web Services recommends that you purchase."];
       recommendedNumberOfInstancesToPurchase: GenericString.t option
         [@ocaml.doc
           "The number of instances that Amazon Web Services recommends that you purchase."];
@@ -8148,21 +11847,36 @@ module ReservationPurchaseRecommendationDetail =
           "The currency code that Amazon Web Services used to calculate the costs for this instance."];
       estimatedMonthlySavingsAmount: GenericString.t option
         [@ocaml.doc
-          "How much Amazon Web Services estimates that this specific recommendation could save you in a month."];
+          "How much Amazon Web Services estimates that this specific recommendation might save you in a month."];
       estimatedMonthlySavingsPercentage: GenericString.t option
         [@ocaml.doc
-          "How much Amazon Web Services estimates that this specific recommendation could save you in a month, as a percentage of your overall costs."];
+          "How much Amazon Web Services estimates that this specific recommendation might save you in a month, as a percentage of your overall costs."];
       estimatedMonthlyOnDemandCost: GenericString.t option
         [@ocaml.doc
           "How much Amazon Web Services estimates that you spend on On-Demand Instances in a month."];
       estimatedReservationCostForLookbackPeriod: GenericString.t option
         [@ocaml.doc
-          "How much Amazon Web Services estimates that you would have spent for all usage during the specified historical period if you had a reservation."];
+          "How much Amazon Web Services estimates that you might spend for all usage during the specified historical period if you had a reservation."];
       upfrontCost: GenericString.t option
         [@ocaml.doc "How much purchasing this instance costs you upfront."];
       recurringStandardMonthlyCost: GenericString.t option
         [@ocaml.doc
-          "How much purchasing this instance costs you on a monthly basis."]}
+          "How much purchasing this instance costs you on a monthly basis."];
+      reservedCapacityDetails: ReservedCapacityDetails.t option
+        [@ocaml.doc
+          "Details about the reservations that Amazon Web Services recommends that you purchase."];
+      recommendedNumberOfCapacityUnitsToPurchase: GenericString.t option
+        [@ocaml.doc
+          "The number of reserved capacity units that Amazon Web Services recommends that you purchase."];
+      minimumNumberOfCapacityUnitsUsedPerHour: GenericString.t option
+        [@ocaml.doc
+          "The minimum number of provisioned capacity units that you used in an hour during the historical period. Amazon Web Services uses this to calculate your recommended reservation purchases."];
+      maximumNumberOfCapacityUnitsUsedPerHour: GenericString.t option
+        [@ocaml.doc
+          "The maximum number of provisioned capacity units that you used in an hour during the historical period. Amazon Web Services uses this to calculate your recommended reservation purchases."];
+      averageNumberOfCapacityUnitsUsedPerHour: GenericString.t option
+        [@ocaml.doc
+          "The average number of provisioned capacity units that you used in an hour during the historical period. Amazon Web Services uses this to calculate your recommended reservation purchases."]}
     let make ?accountId =
       fun ?instanceDetails ->
         fun ?recommendedNumberOfInstancesToPurchase ->
@@ -8184,28 +11898,46 @@ module ReservationPurchaseRecommendationDetail =
                                       ->
                                       fun ?upfrontCost ->
                                         fun ?recurringStandardMonthlyCost ->
-                                          fun () ->
-                                            {
-                                              accountId;
-                                              instanceDetails;
-                                              recommendedNumberOfInstancesToPurchase;
-                                              recommendedNormalizedUnitsToPurchase;
-                                              minimumNumberOfInstancesUsedPerHour;
-                                              minimumNormalizedUnitsUsedPerHour;
-                                              maximumNumberOfInstancesUsedPerHour;
-                                              maximumNormalizedUnitsUsedPerHour;
-                                              averageNumberOfInstancesUsedPerHour;
-                                              averageNormalizedUnitsUsedPerHour;
-                                              averageUtilization;
-                                              estimatedBreakEvenInMonths;
-                                              currencyCode;
-                                              estimatedMonthlySavingsAmount;
-                                              estimatedMonthlySavingsPercentage;
-                                              estimatedMonthlyOnDemandCost;
-                                              estimatedReservationCostForLookbackPeriod;
-                                              upfrontCost;
-                                              recurringStandardMonthlyCost
-                                            }
+                                          fun ?reservedCapacityDetails ->
+                                            fun
+                                              ?recommendedNumberOfCapacityUnitsToPurchase
+                                              ->
+                                              fun
+                                                ?minimumNumberOfCapacityUnitsUsedPerHour
+                                                ->
+                                                fun
+                                                  ?maximumNumberOfCapacityUnitsUsedPerHour
+                                                  ->
+                                                  fun
+                                                    ?averageNumberOfCapacityUnitsUsedPerHour
+                                                    ->
+                                                    fun () ->
+                                                      {
+                                                        accountId;
+                                                        instanceDetails;
+                                                        recommendedNumberOfInstancesToPurchase;
+                                                        recommendedNormalizedUnitsToPurchase;
+                                                        minimumNumberOfInstancesUsedPerHour;
+                                                        minimumNormalizedUnitsUsedPerHour;
+                                                        maximumNumberOfInstancesUsedPerHour;
+                                                        maximumNormalizedUnitsUsedPerHour;
+                                                        averageNumberOfInstancesUsedPerHour;
+                                                        averageNormalizedUnitsUsedPerHour;
+                                                        averageUtilization;
+                                                        estimatedBreakEvenInMonths;
+                                                        currencyCode;
+                                                        estimatedMonthlySavingsAmount;
+                                                        estimatedMonthlySavingsPercentage;
+                                                        estimatedMonthlyOnDemandCost;
+                                                        estimatedReservationCostForLookbackPeriod;
+                                                        upfrontCost;
+                                                        recurringStandardMonthlyCost;
+                                                        reservedCapacityDetails;
+                                                        recommendedNumberOfCapacityUnitsToPurchase;
+                                                        minimumNumberOfCapacityUnitsUsedPerHour;
+                                                        maximumNumberOfCapacityUnitsUsedPerHour;
+                                                        averageNumberOfCapacityUnitsUsedPerHour
+                                                      }
     let to_value x =
       structure_to_value
         [("AccountId", (Option.map x.accountId ~f:GenericString.to_value));
@@ -8256,9 +11988,39 @@ module ReservationPurchaseRecommendationDetail =
         ("UpfrontCost", (Option.map x.upfrontCost ~f:GenericString.to_value));
         ("RecurringStandardMonthlyCost",
           (Option.map x.recurringStandardMonthlyCost
+             ~f:GenericString.to_value));
+        ("ReservedCapacityDetails",
+          (Option.map x.reservedCapacityDetails
+             ~f:ReservedCapacityDetails.to_value));
+        ("RecommendedNumberOfCapacityUnitsToPurchase",
+          (Option.map x.recommendedNumberOfCapacityUnitsToPurchase
+             ~f:GenericString.to_value));
+        ("MinimumNumberOfCapacityUnitsUsedPerHour",
+          (Option.map x.minimumNumberOfCapacityUnitsUsedPerHour
+             ~f:GenericString.to_value));
+        ("MaximumNumberOfCapacityUnitsUsedPerHour",
+          (Option.map x.maximumNumberOfCapacityUnitsUsedPerHour
+             ~f:GenericString.to_value));
+        ("AverageNumberOfCapacityUnitsUsedPerHour",
+          (Option.map x.averageNumberOfCapacityUnitsUsedPerHour
              ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let averageNumberOfCapacityUnitsUsedPerHour =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AverageNumberOfCapacityUnitsUsedPerHour") in
+      let maximumNumberOfCapacityUnitsUsedPerHour =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "MaximumNumberOfCapacityUnitsUsedPerHour") in
+      let minimumNumberOfCapacityUnitsUsedPerHour =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "MinimumNumberOfCapacityUnitsUsedPerHour") in
+      let recommendedNumberOfCapacityUnitsToPurchase =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "RecommendedNumberOfCapacityUnitsToPurchase") in
+      let reservedCapacityDetails =
+        (Option.map ~f:ReservedCapacityDetails.of_xml)
+          (Xml.child xml_arg0 "ReservedCapacityDetails") in
       let recurringStandardMonthlyCost =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "RecurringStandardMonthlyCost") in
@@ -8315,7 +12077,11 @@ module ReservationPurchaseRecommendationDetail =
           (Xml.child xml_arg0 "InstanceDetails") in
       let accountId =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "AccountId") in
-      make ?recurringStandardMonthlyCost ?upfrontCost
+      make ?averageNumberOfCapacityUnitsUsedPerHour
+        ?maximumNumberOfCapacityUnitsUsedPerHour
+        ?minimumNumberOfCapacityUnitsUsedPerHour
+        ?recommendedNumberOfCapacityUnitsToPurchase ?reservedCapacityDetails
+        ?recurringStandardMonthlyCost ?upfrontCost
         ?estimatedReservationCostForLookbackPeriod
         ?estimatedMonthlyOnDemandCost ?estimatedMonthlySavingsPercentage
         ?estimatedMonthlySavingsAmount ?currencyCode
@@ -8330,53 +12096,74 @@ module ReservationPurchaseRecommendationDetail =
         ?recommendedNumberOfInstancesToPurchase ?instanceDetails ?accountId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let averageNumberOfCapacityUnitsUsedPerHour =
+        field_map json__ "AverageNumberOfCapacityUnitsUsedPerHour"
+          GenericString.of_json in
+      let maximumNumberOfCapacityUnitsUsedPerHour =
+        field_map json__ "MaximumNumberOfCapacityUnitsUsedPerHour"
+          GenericString.of_json in
+      let minimumNumberOfCapacityUnitsUsedPerHour =
+        field_map json__ "MinimumNumberOfCapacityUnitsUsedPerHour"
+          GenericString.of_json in
+      let recommendedNumberOfCapacityUnitsToPurchase =
+        field_map json__ "RecommendedNumberOfCapacityUnitsToPurchase"
+          GenericString.of_json in
+      let reservedCapacityDetails =
+        field_map json__ "ReservedCapacityDetails"
+          ReservedCapacityDetails.of_json in
       let recurringStandardMonthlyCost =
-        field_map json "RecurringStandardMonthlyCost" GenericString.of_json in
-      let upfrontCost = field_map json "UpfrontCost" GenericString.of_json in
+        field_map json__ "RecurringStandardMonthlyCost" GenericString.of_json in
+      let upfrontCost = field_map json__ "UpfrontCost" GenericString.of_json in
       let estimatedReservationCostForLookbackPeriod =
-        field_map json "EstimatedReservationCostForLookbackPeriod"
+        field_map json__ "EstimatedReservationCostForLookbackPeriod"
           GenericString.of_json in
       let estimatedMonthlyOnDemandCost =
-        field_map json "EstimatedMonthlyOnDemandCost" GenericString.of_json in
+        field_map json__ "EstimatedMonthlyOnDemandCost" GenericString.of_json in
       let estimatedMonthlySavingsPercentage =
-        field_map json "EstimatedMonthlySavingsPercentage"
+        field_map json__ "EstimatedMonthlySavingsPercentage"
           GenericString.of_json in
       let estimatedMonthlySavingsAmount =
-        field_map json "EstimatedMonthlySavingsAmount" GenericString.of_json in
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
+        field_map json__ "EstimatedMonthlySavingsAmount"
+          GenericString.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
       let estimatedBreakEvenInMonths =
-        field_map json "EstimatedBreakEvenInMonths" GenericString.of_json in
+        field_map json__ "EstimatedBreakEvenInMonths" GenericString.of_json in
       let averageUtilization =
-        field_map json "AverageUtilization" GenericString.of_json in
+        field_map json__ "AverageUtilization" GenericString.of_json in
       let averageNormalizedUnitsUsedPerHour =
-        field_map json "AverageNormalizedUnitsUsedPerHour"
+        field_map json__ "AverageNormalizedUnitsUsedPerHour"
           GenericString.of_json in
       let averageNumberOfInstancesUsedPerHour =
-        field_map json "AverageNumberOfInstancesUsedPerHour"
+        field_map json__ "AverageNumberOfInstancesUsedPerHour"
           GenericString.of_json in
       let maximumNormalizedUnitsUsedPerHour =
-        field_map json "MaximumNormalizedUnitsUsedPerHour"
+        field_map json__ "MaximumNormalizedUnitsUsedPerHour"
           GenericString.of_json in
       let maximumNumberOfInstancesUsedPerHour =
-        field_map json "MaximumNumberOfInstancesUsedPerHour"
+        field_map json__ "MaximumNumberOfInstancesUsedPerHour"
           GenericString.of_json in
       let minimumNormalizedUnitsUsedPerHour =
-        field_map json "MinimumNormalizedUnitsUsedPerHour"
+        field_map json__ "MinimumNormalizedUnitsUsedPerHour"
           GenericString.of_json in
       let minimumNumberOfInstancesUsedPerHour =
-        field_map json "MinimumNumberOfInstancesUsedPerHour"
+        field_map json__ "MinimumNumberOfInstancesUsedPerHour"
           GenericString.of_json in
       let recommendedNormalizedUnitsToPurchase =
-        field_map json "RecommendedNormalizedUnitsToPurchase"
+        field_map json__ "RecommendedNormalizedUnitsToPurchase"
           GenericString.of_json in
       let recommendedNumberOfInstancesToPurchase =
-        field_map json "RecommendedNumberOfInstancesToPurchase"
+        field_map json__ "RecommendedNumberOfInstancesToPurchase"
           GenericString.of_json in
       let instanceDetails =
-        field_map json "InstanceDetails" InstanceDetails.of_json in
-      let accountId = field_map json "AccountId" GenericString.of_json in
-      make ?recurringStandardMonthlyCost ?upfrontCost
+        field_map json__ "InstanceDetails" InstanceDetails.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
+      make ?averageNumberOfCapacityUnitsUsedPerHour
+        ?maximumNumberOfCapacityUnitsUsedPerHour
+        ?minimumNumberOfCapacityUnitsUsedPerHour
+        ?recommendedNumberOfCapacityUnitsToPurchase ?reservedCapacityDetails
+        ?recurringStandardMonthlyCost ?upfrontCost
         ?estimatedReservationCostForLookbackPeriod
         ?estimatedMonthlyOnDemandCost ?estimatedMonthlySavingsPercentage
         ?estimatedMonthlySavingsAmount ?currencyCode
@@ -8396,6 +12183,9 @@ module ReservationPurchaseRecommendationDetails =
   struct
     type nonrec t = ReservationPurchaseRecommendationDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservationPurchaseRecommendationDetail.to_value))
         |> (fun x -> `List x)
@@ -8504,21 +12294,21 @@ module ReservationPurchaseRecommendation =
         ?serviceSpecification ?paymentOption ?termInYears
         ?lookbackPeriodInDays ?accountScope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recommendationSummary =
-        field_map json "RecommendationSummary"
+        field_map json__ "RecommendationSummary"
           ReservationPurchaseRecommendationSummary.of_json in
       let recommendationDetails =
-        field_map json "RecommendationDetails"
+        field_map json__ "RecommendationDetails"
           ReservationPurchaseRecommendationDetails.of_json in
       let serviceSpecification =
-        field_map json "ServiceSpecification" ServiceSpecification.of_json in
+        field_map json__ "ServiceSpecification" ServiceSpecification.of_json in
       let paymentOption =
-        field_map json "PaymentOption" PaymentOption.of_json in
-      let termInYears = field_map json "TermInYears" TermInYears.of_json in
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let termInYears = field_map json__ "TermInYears" TermInYears.of_json in
       let lookbackPeriodInDays =
-        field_map json "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
-      let accountScope = field_map json "AccountScope" AccountScope.of_json in
+        field_map json__ "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
       make ?recommendationSummary ?recommendationDetails
         ?serviceSpecification ?paymentOption ?termInYears
         ?lookbackPeriodInDays ?accountScope ()
@@ -8529,6 +12319,9 @@ module ReservationPurchaseRecommendations =
   struct
     type nonrec t = ReservationPurchaseRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservationPurchaseRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -8557,38 +12350,50 @@ module ReservationPurchaseRecommendationMetadata =
     type nonrec t =
       {
       recommendationId: GenericString.t option
-        [@ocaml.doc "The ID for this specific recommendation."];
+        [@ocaml.doc "The ID for the recommendation."];
       generationTimestamp: GenericString.t option
         [@ocaml.doc
-          "The timestamp for when Amazon Web Services made this recommendation."]}
+          "The timestamp for when Amazon Web Services made the recommendation."];
+      additionalMetadata: GenericString.t option
+        [@ocaml.doc
+          "Additional metadata that might be applicable to the recommendation."]}
     let make ?recommendationId =
       fun ?generationTimestamp ->
-        fun () -> { recommendationId; generationTimestamp }
+        fun ?additionalMetadata ->
+          fun () ->
+            { recommendationId; generationTimestamp; additionalMetadata }
     let to_value x =
       structure_to_value
         [("RecommendationId",
            (Option.map x.recommendationId ~f:GenericString.to_value));
         ("GenerationTimestamp",
-          (Option.map x.generationTimestamp ~f:GenericString.to_value))]
+          (Option.map x.generationTimestamp ~f:GenericString.to_value));
+        ("AdditionalMetadata",
+          (Option.map x.additionalMetadata ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let additionalMetadata =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "AdditionalMetadata") in
       let generationTimestamp =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "GenerationTimestamp") in
       let recommendationId =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "RecommendationId") in
-      make ?generationTimestamp ?recommendationId ()
+      make ?additionalMetadata ?generationTimestamp ?recommendationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let additionalMetadata =
+        field_map json__ "AdditionalMetadata" GenericString.of_json in
       let generationTimestamp =
-        field_map json "GenerationTimestamp" GenericString.of_json in
+        field_map json__ "GenerationTimestamp" GenericString.of_json in
       let recommendationId =
-        field_map json "RecommendationId" GenericString.of_json in
-      make ?generationTimestamp ?recommendationId ()
+        field_map json__ "RecommendationId" GenericString.of_json in
+      make ?additionalMetadata ?generationTimestamp ?recommendationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about this specific recommendation, such as the timestamp for when Amazon Web Services made a specific recommendation."]
+       "Information about a recommendation, such as the timestamp for when Amazon Web Services made a specific recommendation."]
 module GetReservationPurchaseRecommendationResponse =
   struct
     type nonrec t =
@@ -8673,26 +12478,26 @@ module GetReservationPurchaseRecommendationResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?nextPageToken ?recommendations ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let recommendations =
-        field_map json "Recommendations"
+        field_map json__ "Recommendations"
           ReservationPurchaseRecommendations.of_json in
       let metadata =
-        field_map json "Metadata"
+        field_map json__ "Metadata"
           ReservationPurchaseRecommendationMetadata.of_json in
       make ?nextPageToken ?recommendations ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets recommendations for which reservations to purchase. These recommendations could help you reduce your costs. Reservations provide a discounted hourly rate (up to 75%) compared to On-Demand pricing. Amazon Web Services generates your recommendations by identifying your On-Demand usage during a specific time period and collecting your usage into categories that are eligible for a reservation. After Amazon Web Services has these categories, it simulates every combination of reservations in each category of usage to identify the best number of each type of RI to purchase to maximize your estimated savings. For example, Amazon Web Services automatically aggregates your Amazon EC2 Linux, shared tenancy, and c4 family usage in the US West (Oregon) Region and recommends that you buy size-flexible regional reservations to apply to the c4 family usage. Amazon Web Services recommends the smallest size instance in an instance family. This makes it easier to purchase a size-flexible RI. Amazon Web Services also shows the equal number of normalized units so that you can purchase any instance size that you want. For this example, your RI recommendation would be for c4.large because that is the smallest size instance in the c4 instance family."]
+       "Gets recommendations for reservation purchases. These recommendations might help you to reduce your costs. Reservations provide a discounted hourly rate (up to 75%) compared to On-Demand pricing. Amazon Web Services generates your recommendations by identifying your On-Demand usage during a specific time period and collecting your usage into categories that are eligible for a reservation. After Amazon Web Services has these categories, it simulates every combination of reservations in each category of usage to identify the best number of each type of Reserved Instance (RI) to purchase to maximize your estimated savings. For example, Amazon Web Services automatically aggregates your Amazon EC2 Linux, shared tenancy, and c4 family usage in the US West (Oregon) Region and recommends that you buy size-flexible regional reservations to apply to the c4 family usage. Amazon Web Services recommends the smallest size instance in an instance family. This makes it easier to purchase a size-flexible Reserved Instance (RI). Amazon Web Services also shows the equal number of normalized units. This way, you can purchase any instance size that you want. For this example, your RI recommendation is for c4.large because that is the smallest size instance in the c4 instance family."]
 module GetReservationUtilizationRequest =
   struct
     type nonrec t =
       {
       timePeriod: DateInterval.t
         [@ocaml.doc
-          "Sets the start and end dates for retrieving RI utilization. The start date is inclusive, but the end date is exclusive. For example, if start is 2017-01-01 and end is 2017-05-01, then the cost and usage data is retrieved from 2017-01-01 up to and including 2017-04-30 but not including 2017-05-01."];
+          "Sets the start and end dates for retrieving Reserved Instance (RI) utilization. The start date is inclusive, but the end date is exclusive. For example, if start is 2017-01-01 and end is 2017-05-01, then the cost and usage data is retrieved from 2017-01-01 up to and including 2017-04-30 but not including 2017-05-01."];
       groupBy: GroupDefinitions.t option
         [@ocaml.doc "Groups only by SUBSCRIPTION_ID. Metadata is included."];
       granularity: Granularity.t option
@@ -8700,10 +12505,10 @@ module GetReservationUtilizationRequest =
           "If GroupBy is set, Granularity can't be set. If Granularity isn't set, the response object doesn't include Granularity, either MONTHLY or DAILY. If both GroupBy and Granularity aren't set, GetReservationUtilization defaults to DAILY. The GetReservationUtilization operation supports only DAILY and MONTHLY granularities."];
       filter: Expression.t option
         [@ocaml.doc
-          "Filters utilization data by dimensions. You can filter by the following dimensions: AZ CACHE_ENGINE DEPLOYMENT_OPTION INSTANCE_TYPE LINKED_ACCOUNT OPERATING_SYSTEM PLATFORM REGION SERVICE SCOPE TENANCY GetReservationUtilization uses the same Expression object as the other operations, but only AND is supported among each dimension, and nesting is supported up to only one level deep. If there are multiple values for a dimension, they are OR'd together."];
+          "Filters utilization data by dimensions. You can filter by the following dimensions: AZ CACHE_ENGINE DEPLOYMENT_OPTION INSTANCE_TYPE LINKED_ACCOUNT OPERATING_SYSTEM PLATFORM REGION SERVICE If not specified, the SERVICE filter defaults to Amazon Elastic Compute Cloud - Compute. Supported values for SERVICE are Amazon Elastic Compute Cloud - Compute, Amazon Relational Database Service, Amazon ElastiCache, Amazon Redshift, and Amazon Elasticsearch Service. The value for the SERVICE filter should not exceed \"1\". SCOPE TENANCY GetReservationUtilization uses the same Expression object as the other operations, but only AND is supported among each dimension, and nesting is supported up to only one level deep. If there are multiple values for a dimension, they are OR'd together."];
       sortBy: SortDefinition.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The following values are supported for Key: UtilizationPercentage UtilizationPercentageInUnits PurchasedHours PurchasedUnits TotalActualHours TotalActualUnits UnusedHours UnusedUnits OnDemandCostOfRIHoursUsed NetRISavings TotalPotentialRISavings AmortizedUpfrontFee AmortizedRecurringFee TotalAmortizedFee RICostForUnusedHours RealizedSavings UnrealizedSavings Supported values for SortOrder are ASCENDING or DESCENDING."];
+          "The value that you want to sort the data by. The following values are supported for Key: UtilizationPercentage UtilizationPercentageInUnits PurchasedHours PurchasedUnits TotalActualHours TotalActualUnits UnusedHours UnusedUnits OnDemandCostOfRIHoursUsed NetRISavings TotalPotentialRISavings AmortizedUpfrontFee AmortizedRecurringFee TotalAmortizedFee RICostForUnusedHours RealizedSavings UnrealizedSavings The supported values for SortOrder are ASCENDING and DESCENDING."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
@@ -8760,15 +12565,15 @@ module GetReservationUtilizationRequest =
       make ?maxResults ?nextPageToken ?sortBy ?filter ?granularity ?groupBy
         ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let sortBy = field_map json "SortBy" SortDefinition.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map json "Granularity" Granularity.of_json in
-      let groupBy = field_map json "GroupBy" GroupDefinitions.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let sortBy = field_map json__ "SortBy" SortDefinition.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity = field_map json__ "Granularity" Granularity.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
       make ?maxResults ?nextPageToken ?sortBy ?filter ?granularity ?groupBy
         ~timePeriod ()
     let to_json v = composed_to_json to_value v
@@ -9179,41 +12984,43 @@ module ReservationAggregates =
         ?purchasedUnits ?purchasedHours ?utilizationPercentageInUnits
         ?utilizationPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let unrealizedSavings =
-        field_map json "UnrealizedSavings" UnrealizedSavings.of_json in
+        field_map json__ "UnrealizedSavings" UnrealizedSavings.of_json in
       let realizedSavings =
-        field_map json "RealizedSavings" RealizedSavings.of_json in
+        field_map json__ "RealizedSavings" RealizedSavings.of_json in
       let rICostForUnusedHours =
-        field_map json "RICostForUnusedHours" RICostForUnusedHours.of_json in
+        field_map json__ "RICostForUnusedHours" RICostForUnusedHours.of_json in
       let totalAmortizedFee =
-        field_map json "TotalAmortizedFee" TotalAmortizedFee.of_json in
+        field_map json__ "TotalAmortizedFee" TotalAmortizedFee.of_json in
       let amortizedRecurringFee =
-        field_map json "AmortizedRecurringFee" AmortizedRecurringFee.of_json in
+        field_map json__ "AmortizedRecurringFee"
+          AmortizedRecurringFee.of_json in
       let amortizedUpfrontFee =
-        field_map json "AmortizedUpfrontFee" AmortizedUpfrontFee.of_json in
+        field_map json__ "AmortizedUpfrontFee" AmortizedUpfrontFee.of_json in
       let totalPotentialRISavings =
-        field_map json "TotalPotentialRISavings"
+        field_map json__ "TotalPotentialRISavings"
           TotalPotentialRISavings.of_json in
-      let netRISavings = field_map json "NetRISavings" NetRISavings.of_json in
+      let netRISavings = field_map json__ "NetRISavings" NetRISavings.of_json in
       let onDemandCostOfRIHoursUsed =
-        field_map json "OnDemandCostOfRIHoursUsed"
+        field_map json__ "OnDemandCostOfRIHoursUsed"
           OnDemandCostOfRIHoursUsed.of_json in
-      let unusedUnits = field_map json "UnusedUnits" UnusedUnits.of_json in
-      let unusedHours = field_map json "UnusedHours" UnusedHours.of_json in
+      let unusedUnits = field_map json__ "UnusedUnits" UnusedUnits.of_json in
+      let unusedHours = field_map json__ "UnusedHours" UnusedHours.of_json in
       let totalActualUnits =
-        field_map json "TotalActualUnits" TotalActualUnits.of_json in
+        field_map json__ "TotalActualUnits" TotalActualUnits.of_json in
       let totalActualHours =
-        field_map json "TotalActualHours" TotalActualHours.of_json in
+        field_map json__ "TotalActualHours" TotalActualHours.of_json in
       let purchasedUnits =
-        field_map json "PurchasedUnits" PurchasedUnits.of_json in
+        field_map json__ "PurchasedUnits" PurchasedUnits.of_json in
       let purchasedHours =
-        field_map json "PurchasedHours" PurchasedHours.of_json in
+        field_map json__ "PurchasedHours" PurchasedHours.of_json in
       let utilizationPercentageInUnits =
-        field_map json "UtilizationPercentageInUnits"
+        field_map json__ "UtilizationPercentageInUnits"
           UtilizationPercentageInUnits.of_json in
       let utilizationPercentage =
-        field_map json "UtilizationPercentage" UtilizationPercentage.of_json in
+        field_map json__ "UtilizationPercentage"
+          UtilizationPercentage.of_json in
       make ?unrealizedSavings ?realizedSavings ?rICostForUnusedHours
         ?totalAmortizedFee ?amortizedRecurringFee ?amortizedUpfrontFee
         ?totalPotentialRISavings ?netRISavings ?onDemandCostOfRIHoursUsed
@@ -9260,12 +13067,12 @@ module ReservationUtilizationGroup =
         (Option.map ~f:ReservationGroupKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?utilization ?attributes ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let utilization =
-        field_map json "Utilization" ReservationAggregates.of_json in
-      let attributes = field_map json "Attributes" Attributes.of_json in
-      let value = field_map json "Value" ReservationGroupValue.of_json in
-      let key = field_map json "Key" ReservationGroupKey.of_json in
+        field_map json__ "Utilization" ReservationAggregates.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
+      let value = field_map json__ "Value" ReservationGroupValue.of_json in
+      let key = field_map json__ "Key" ReservationGroupKey.of_json in
       make ?utilization ?attributes ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A group of reservations that share a set of attributes."]
@@ -9273,6 +13080,9 @@ module ReservationUtilizationGroups =
   struct
     type nonrec t = ReservationUtilizationGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservationUtilizationGroup.to_value)) |>
         (fun x -> `List x)
@@ -9325,11 +13135,11 @@ module UtilizationByTime =
         (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       make ?total ?groups ?timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let total = field_map json "Total" ReservationAggregates.of_json in
+    let of_json json__ =
+      let total = field_map json__ "Total" ReservationAggregates.of_json in
       let groups =
-        field_map json "Groups" ReservationUtilizationGroups.of_json in
-      let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
+        field_map json__ "Groups" ReservationUtilizationGroups.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       make ?total ?groups ?timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The amount of utilization, in hours."]
@@ -9337,6 +13147,9 @@ module UtilizationsByTime =
   struct
     type nonrec t = UtilizationByTime.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UtilizationByTime.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9362,10 +13175,12 @@ module GetReservationUtilizationResponse =
   struct
     type nonrec t =
       {
-      utilizationsByTime: UtilizationsByTime.t
-        [@ocaml.doc "The amount of time that you used your RIs."];
+      utilizationsByTime: UtilizationsByTime.t option
+        [@ocaml.doc
+          "The amount of time that you used your Reserved Instances (RIs)."];
       total: ReservationAggregates.t option
-        [@ocaml.doc "The total amount of time that you used your RIs."];
+        [@ocaml.doc
+          "The total amount of time that you used your Reserved Instances (RIs)."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token for the next set of retrievable results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -9374,11 +13189,10 @@ module GetReservationUtilizationResponse =
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetReservationUtilizationResponse"
-    let make ?total =
-      fun ?nextPageToken ->
-        fun ~utilizationsByTime ->
-          fun () -> { total; nextPageToken; utilizationsByTime }
+    let make ?utilizationsByTime =
+      fun ?total ->
+        fun ?nextPageToken ->
+          fun () -> { utilizationsByTime; total; nextPageToken }
     let error_of_json name json =
       match name with
       | "DataUnavailableException" ->
@@ -9422,7 +13236,7 @@ module GetReservationUtilizationResponse =
     let to_value x =
       structure_to_value
         [("UtilizationsByTime",
-           (Some (UtilizationsByTime.to_value x.utilizationsByTime)));
+           (Option.map x.utilizationsByTime ~f:UtilizationsByTime.to_value));
         ("Total", (Option.map x.total ~f:ReservationAggregates.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
@@ -9435,17 +13249,17 @@ module GetReservationUtilizationResponse =
         (Option.map ~f:ReservationAggregates.of_xml)
           (Xml.child xml_arg0 "Total") in
       let utilizationsByTime =
-        UtilizationsByTime.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UtilizationsByTime") in
-      make ?nextPageToken ?total ~utilizationsByTime ()
+        (Option.map ~f:UtilizationsByTime.of_xml)
+          (Xml.child xml_arg0 "UtilizationsByTime") in
+      make ?nextPageToken ?total ?utilizationsByTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let total = field_map json "Total" ReservationAggregates.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let total = field_map json__ "Total" ReservationAggregates.of_json in
       let utilizationsByTime =
-        field_map_exn json "UtilizationsByTime" UtilizationsByTime.of_json in
-      make ?nextPageToken ?total ~utilizationsByTime ()
+        field_map json__ "UtilizationsByTime" UtilizationsByTime.of_json in
+      make ?nextPageToken ?total ?utilizationsByTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves the reservation utilization for your account. Management account in an organization have access to member accounts. You can filter data by dimensions in a time period. You can use GetDimensionValues to determine the possible dimension values. Currently, you can group only by SUBSCRIPTION_ID."]
@@ -9505,16 +13319,16 @@ module RightsizingRecommendationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "RecommendationTarget") in
       make ~benefitsConsidered ~recommendationTarget ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let benefitsConsidered =
-        field_map_exn json "BenefitsConsidered" GenericBoolean.of_json in
+        field_map_exn json__ "BenefitsConsidered" GenericBoolean.of_json in
       let recommendationTarget =
-        field_map_exn json "RecommendationTarget"
+        field_map_exn json__ "RecommendationTarget"
           RecommendationTarget.of_json in
       make ~benefitsConsidered ~recommendationTarget ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "You can use RightsizingRecommendationConfiguration to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings that are associated with recommendations with consideration of existing Savings Plans or RI benefits, or neither."]
+       "You can use RightsizingRecommendationConfiguration to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings that are associated with recommendations with consideration of existing Savings Plans or Reserved Instance (RI) benefits, or neither."]
 module GetRightsizingRecommendationRequest =
   struct
     type nonrec t =
@@ -9522,11 +13336,11 @@ module GetRightsizingRecommendationRequest =
       filter: Expression.t option ;
       configuration: RightsizingRecommendationConfiguration.t option
         [@ocaml.doc
-          "Enables you to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings associated with recommendations with consideration of existing Savings Plans or RI benefits, or neither."];
+          "You can use Configuration to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings that are associated with recommendations with consideration of existing Savings Plans or RI benefits, or neither."];
       service: GenericString.t
         [@ocaml.doc
           "The specific service that you want recommendations for. The only valid value for GetRightsizingRecommendation is \"AmazonEC2\"."];
-      pageSize: NonNegativeInteger.t option
+      pageSize: RecommendationsPageSize.t option
         [@ocaml.doc
           "The number of recommendations that you want returned in a single response object."];
       nextPageToken: NextPageToken.t option
@@ -9547,7 +13361,8 @@ module GetRightsizingRecommendationRequest =
           (Option.map x.configuration
              ~f:RightsizingRecommendationConfiguration.to_value));
         ("Service", (Some (GenericString.to_value x.service)));
-        ("PageSize", (Option.map x.pageSize ~f:NonNegativeInteger.to_value));
+        ("PageSize",
+          (Option.map x.pageSize ~f:RecommendationsPageSize.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
@@ -9556,7 +13371,7 @@ module GetRightsizingRecommendationRequest =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
       let pageSize =
-        (Option.map ~f:NonNegativeInteger.of_xml)
+        (Option.map ~f:RecommendationsPageSize.of_xml)
           (Xml.child xml_arg0 "PageSize") in
       let service =
         GenericString.of_xml
@@ -9568,19 +13383,20 @@ module GetRightsizingRecommendationRequest =
         (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
       make ?nextPageToken ?pageSize ~service ?configuration ?filter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let pageSize = field_map json "PageSize" NonNegativeInteger.of_json in
-      let service = field_map_exn json "Service" GenericString.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let pageSize =
+        field_map json__ "PageSize" RecommendationsPageSize.of_json in
+      let service = field_map_exn json__ "Service" GenericString.of_json in
       let configuration =
-        field_map json "Configuration"
+        field_map json__ "Configuration"
           RightsizingRecommendationConfiguration.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
       make ?nextPageToken ?pageSize ~service ?configuration ?filter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates recommendations that help you save cost by identifying idle and underutilized Amazon EC2 instances. Recommendations are generated to either downsize or terminate instances, along with providing savings detail and metrics. For details on calculation and function, see Optimizing Your Cost with Rightsizing Recommendations in the Billing and Cost Management User Guide."]
+       "Creates recommendations that help you save cost by identifying idle and underutilized Amazon EC2 instances. Recommendations are generated to either downsize or terminate instances, along with providing savings detail and metrics. For more information about calculation and function, see Optimizing Your Cost with Rightsizing Recommendations in the Billing and Cost Management User Guide."]
 module RightsizingRecommendationSummary =
   struct
     type nonrec t =
@@ -9635,16 +13451,16 @@ module RightsizingRecommendationSummary =
       make ?savingsPercentage ?savingsCurrencyCode
         ?estimatedTotalMonthlySavingsAmount ?totalRecommendationCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let savingsPercentage =
-        field_map json "SavingsPercentage" GenericString.of_json in
+        field_map json__ "SavingsPercentage" GenericString.of_json in
       let savingsCurrencyCode =
-        field_map json "SavingsCurrencyCode" GenericString.of_json in
+        field_map json__ "SavingsCurrencyCode" GenericString.of_json in
       let estimatedTotalMonthlySavingsAmount =
-        field_map json "EstimatedTotalMonthlySavingsAmount"
+        field_map json__ "EstimatedTotalMonthlySavingsAmount"
           GenericString.of_json in
       let totalRecommendationCount =
-        field_map json "TotalRecommendationCount" GenericString.of_json in
+        field_map json__ "TotalRecommendationCount" GenericString.of_json in
       make ?savingsPercentage ?savingsCurrencyCode
         ?estimatedTotalMonthlySavingsAmount ?totalRecommendationCount ()
     let to_json v = composed_to_json to_value v
@@ -9654,13 +13470,13 @@ module RightsizingRecommendationMetadata =
     type nonrec t =
       {
       recommendationId: GenericString.t option
-        [@ocaml.doc "The ID for this specific recommendation."];
+        [@ocaml.doc "The ID for the recommendation."];
       generationTimestamp: GenericString.t option
         [@ocaml.doc
-          "The timestamp for when Amazon Web Services made this recommendation."];
+          "The timestamp for when Amazon Web Services made the recommendation."];
       lookbackPeriodInDays: LookbackPeriodInDays.t option
         [@ocaml.doc
-          "The number of days of previous usage that Amazon Web Services considers when making this recommendation."];
+          "The number of days of previous usage that Amazon Web Services considers when making the recommendation."];
       additionalMetadata: GenericString.t option
         [@ocaml.doc
           "Additional metadata that might be applicable to the recommendation."]}
@@ -9702,19 +13518,19 @@ module RightsizingRecommendationMetadata =
       make ?additionalMetadata ?lookbackPeriodInDays ?generationTimestamp
         ?recommendationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalMetadata =
-        field_map json "AdditionalMetadata" GenericString.of_json in
+        field_map json__ "AdditionalMetadata" GenericString.of_json in
       let lookbackPeriodInDays =
-        field_map json "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
+        field_map json__ "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
       let generationTimestamp =
-        field_map json "GenerationTimestamp" GenericString.of_json in
+        field_map json__ "GenerationTimestamp" GenericString.of_json in
       let recommendationId =
-        field_map json "RecommendationId" GenericString.of_json in
+        field_map json__ "RecommendationId" GenericString.of_json in
       make ?additionalMetadata ?lookbackPeriodInDays ?generationTimestamp
         ?recommendationId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Metadata for this recommendation set."]
+  end[@@ocaml.doc "Metadata for a recommendation set."]
 module TerminateRecommendationDetail =
   struct
     type nonrec t =
@@ -9744,10 +13560,11 @@ module TerminateRecommendationDetail =
           (Xml.child xml_arg0 "EstimatedMonthlySavings") in
       make ?currencyCode ?estimatedMonthlySavings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
+    let of_json json__ =
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
       let estimatedMonthlySavings =
-        field_map json "EstimatedMonthlySavings" GenericString.of_json in
+        field_map json__ "EstimatedMonthlySavings" GenericString.of_json in
       make ?currencyCode ?estimatedMonthlySavings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details on termination recommendation."]
@@ -9815,6 +13632,9 @@ module PlatformDifferences =
   struct
     type nonrec t = PlatformDifference.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlatformDifference.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9859,7 +13679,7 @@ module TargetInstance =
           "The expected utilization metrics for target instance type."];
       platformDifferences: PlatformDifferences.t option
         [@ocaml.doc
-          "Explains the actions you might need to take in order to successfully migrate your workloads from the current instance type to the recommended instance type."]}
+          "Explains the actions that you might need to take to successfully migrate your workloads from the current instance type to the recommended instance type."]}
     let make ?estimatedMonthlyCost =
       fun ?estimatedMonthlySavings ->
         fun ?currencyCode ->
@@ -9921,21 +13741,22 @@ module TargetInstance =
         ?defaultTargetInstance ?currencyCode ?estimatedMonthlySavings
         ?estimatedMonthlyCost ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let platformDifferences =
-        field_map json "PlatformDifferences" PlatformDifferences.of_json in
+        field_map json__ "PlatformDifferences" PlatformDifferences.of_json in
       let expectedResourceUtilization =
-        field_map json "ExpectedResourceUtilization"
+        field_map json__ "ExpectedResourceUtilization"
           ResourceUtilization.of_json in
       let resourceDetails =
-        field_map json "ResourceDetails" ResourceDetails.of_json in
+        field_map json__ "ResourceDetails" ResourceDetails.of_json in
       let defaultTargetInstance =
-        field_map json "DefaultTargetInstance" GenericBoolean.of_json in
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
+        field_map json__ "DefaultTargetInstance" GenericBoolean.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
       let estimatedMonthlySavings =
-        field_map json "EstimatedMonthlySavings" GenericString.of_json in
+        field_map json__ "EstimatedMonthlySavings" GenericString.of_json in
       let estimatedMonthlyCost =
-        field_map json "EstimatedMonthlyCost" GenericString.of_json in
+        field_map json__ "EstimatedMonthlyCost" GenericString.of_json in
       make ?platformDifferences ?expectedResourceUtilization ?resourceDetails
         ?defaultTargetInstance ?currencyCode ?estimatedMonthlySavings
         ?estimatedMonthlyCost ()
@@ -9945,6 +13766,9 @@ module TargetInstancesList =
   struct
     type nonrec t = TargetInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetInstance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9985,12 +13809,12 @@ module ModifyRecommendationDetail =
           (Xml.child xml_arg0 "TargetInstances") in
       make ?targetInstances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetInstances =
-        field_map json "TargetInstances" TargetInstancesList.of_json in
+        field_map json__ "TargetInstances" TargetInstancesList.of_json in
       make ?targetInstances ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Details on the modification recommendation."]
+  end[@@ocaml.doc "Details for the modification recommendation."]
 module RightsizingRecommendation =
   struct
     type nonrec t =
@@ -10008,7 +13832,7 @@ module RightsizingRecommendation =
         [@ocaml.doc "The details for termination recommendations."];
       findingReasonCodes: FindingReasonCodes.t option
         [@ocaml.doc
-          "The list of possible reasons why the recommendation is generated such as under or over utilization of specific metrics (for example, CPU, Memory, Network)."]}
+          "The list of possible reasons why the recommendation is generated, such as under- or over-utilization of specific metrics (for example, CPU, Memory, Network)."]}
     let make ?accountId =
       fun ?currentInstance ->
         fun ?rightsizingType ->
@@ -10062,20 +13886,20 @@ module RightsizingRecommendation =
         ?modifyRecommendationDetail ?rightsizingType ?currentInstance
         ?accountId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let findingReasonCodes =
-        field_map json "FindingReasonCodes" FindingReasonCodes.of_json in
+        field_map json__ "FindingReasonCodes" FindingReasonCodes.of_json in
       let terminateRecommendationDetail =
-        field_map json "TerminateRecommendationDetail"
+        field_map json__ "TerminateRecommendationDetail"
           TerminateRecommendationDetail.of_json in
       let modifyRecommendationDetail =
-        field_map json "ModifyRecommendationDetail"
+        field_map json__ "ModifyRecommendationDetail"
           ModifyRecommendationDetail.of_json in
       let rightsizingType =
-        field_map json "RightsizingType" RightsizingType.of_json in
+        field_map json__ "RightsizingType" RightsizingType.of_json in
       let currentInstance =
-        field_map json "CurrentInstance" CurrentInstance.of_json in
-      let accountId = field_map json "AccountId" GenericString.of_json in
+        field_map json__ "CurrentInstance" CurrentInstance.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
       make ?findingReasonCodes ?terminateRecommendationDetail
         ?modifyRecommendationDetail ?rightsizingType ?currentInstance
         ?accountId ()
@@ -10085,6 +13909,9 @@ module RightsizingRecommendationList =
   struct
     type nonrec t = RightsizingRecommendation.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RightsizingRecommendation.to_value)) |>
         (fun x -> `List x)
@@ -10122,7 +13949,7 @@ module GetRightsizingRecommendationResponse =
         [@ocaml.doc "The token to retrieve the next set of results."];
       configuration: RightsizingRecommendationConfiguration.t option
         [@ocaml.doc
-          "Enables you to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings associated with recommendations with consideration of existing Savings Plans or RI benefits, or neither."]}
+          "You can use Configuration to customize recommendations across two attributes. You can choose to view recommendations for instances within the same instance families or across different instance families. You can also choose to view your estimated savings that are associated with recommendations with consideration of existing Savings Plans or RI benefits, or neither."]}
     type nonrec error =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
@@ -10207,24 +14034,542 @@ module GetRightsizingRecommendationResponse =
       make ?configuration ?nextPageToken ?rightsizingRecommendations ?summary
         ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configuration =
-        field_map json "Configuration"
+        field_map json__ "Configuration"
           RightsizingRecommendationConfiguration.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let rightsizingRecommendations =
-        field_map json "RightsizingRecommendations"
+        field_map json__ "RightsizingRecommendations"
           RightsizingRecommendationList.of_json in
       let summary =
-        field_map json "Summary" RightsizingRecommendationSummary.of_json in
+        field_map json__ "Summary" RightsizingRecommendationSummary.of_json in
       let metadata =
-        field_map json "Metadata" RightsizingRecommendationMetadata.of_json in
+        field_map json__ "Metadata" RightsizingRecommendationMetadata.of_json in
       make ?configuration ?nextPageToken ?rightsizingRecommendations ?summary
         ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates recommendations that help you save cost by identifying idle and underutilized Amazon EC2 instances. Recommendations are generated to either downsize or terminate instances, along with providing savings detail and metrics. For details on calculation and function, see Optimizing Your Cost with Rightsizing Recommendations in the Billing and Cost Management User Guide."]
+       "Creates recommendations that help you save cost by identifying idle and underutilized Amazon EC2 instances. Recommendations are generated to either downsize or terminate instances, along with providing savings detail and metrics. For more information about calculation and function, see Optimizing Your Cost with Rightsizing Recommendations in the Billing and Cost Management User Guide."]
+module RecommendationDetailId =
+  struct
+    type nonrec t = string
+    let context_ = "RecommendationDetailId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:36) >>=
+             (fun () ->
+                (check_string_max i ~max:36) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^[\\S\\s]{8}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{4}-[\\S\\s]{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RecommendationDetailId" j
+    let to_json = simple_to_json to_value
+  end
+module GetSavingsPlanPurchaseRecommendationDetailsRequest =
+  struct
+    type nonrec t =
+      {
+      recommendationDetailId: RecommendationDetailId.t
+        [@ocaml.doc
+          "The ID that is associated with the Savings Plan recommendation."]}
+    let context_ = "GetSavingsPlanPurchaseRecommendationDetailsRequest"
+    let make ~recommendationDetailId = fun () -> { recommendationDetailId }
+    let to_value x =
+      structure_to_value
+        [("RecommendationDetailId",
+           (Some (RecommendationDetailId.to_value x.recommendationDetailId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationDetailId =
+        RecommendationDetailId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RecommendationDetailId") in
+      make ~recommendationDetailId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationDetailId =
+        field_map_exn json__ "RecommendationDetailId"
+          RecommendationDetailId.of_json in
+      make ~recommendationDetailId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the details for a Savings Plan recommendation. These details include the hourly data-points that construct the cost, coverage, and utilization charts."]
+module RecommendationDetailData =
+  struct
+    type nonrec t =
+      {
+      accountScope: AccountScope.t option
+        [@ocaml.doc
+          "The account scope that you want your recommendations for. Amazon Web Services calculates recommendations including the management account and member accounts if the value is set to PAYER. If the value is LINKED, recommendations are calculated for individual member accounts only."];
+      lookbackPeriodInDays: LookbackPeriodInDays.t option
+        [@ocaml.doc
+          "How many days of previous usage that Amazon Web Services considers when making this recommendation."];
+      savingsPlansType: SupportedSavingsPlansType.t option
+        [@ocaml.doc "The requested Savings Plan recommendation type."];
+      termInYears: TermInYears.t option
+        [@ocaml.doc "The term of the commitment in years."];
+      paymentOption: PaymentOption.t option
+        [@ocaml.doc
+          "The payment option for the commitment (for example, All Upfront or No Upfront)."];
+      accountId: GenericString.t option
+        [@ocaml.doc
+          "The AccountID that the recommendation is generated for."];
+      currencyCode: GenericString.t option
+        [@ocaml.doc
+          "The currency code that Amazon Web Services used to generate the recommendation and present potential savings."];
+      instanceFamily: GenericString.t option
+        [@ocaml.doc "The instance family of the recommended Savings Plan."];
+      region: GenericString.t option
+        [@ocaml.doc "The region the recommendation is generated for."];
+      offeringId: GenericString.t option
+        [@ocaml.doc
+          "The unique ID that's used to distinguish Savings Plans from one another."];
+      generationTimestamp: ZonedDateTime.t option ;
+      latestUsageTimestamp: ZonedDateTime.t option ;
+      currentAverageHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The average value of hourly On-Demand spend over the lookback period of the applicable usage type."];
+      currentMaximumHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The highest value of hourly On-Demand spend over the lookback period of the applicable usage type."];
+      currentMinimumHourlyOnDemandSpend: GenericString.t option
+        [@ocaml.doc
+          "The lowest value of hourly On-Demand spend over the lookback period of the applicable usage type."];
+      estimatedAverageUtilization: GenericString.t option
+        [@ocaml.doc
+          "The estimated utilization of the recommended Savings Plan."];
+      estimatedMonthlySavingsAmount: GenericString.t option
+        [@ocaml.doc
+          "The estimated monthly savings amount based on the recommended Savings Plan."];
+      estimatedOnDemandCost: GenericString.t option
+        [@ocaml.doc
+          "The remaining On-Demand cost estimated to not be covered by the recommended Savings Plan, over the length of the lookback period."];
+      estimatedOnDemandCostWithCurrentCommitment: GenericString.t option
+        [@ocaml.doc
+          "The estimated On-Demand costs you expect with no additional commitment, based on your usage of the selected time period and the Savings Plan you own."];
+      estimatedROI: GenericString.t option
+        [@ocaml.doc
+          "The estimated return on investment that's based on the recommended Savings Plan that you purchased. This is calculated as estimatedSavingsAmount/estimatedSPCost*100."];
+      estimatedSPCost: GenericString.t option
+        [@ocaml.doc
+          "The cost of the recommended Savings Plan over the length of the lookback period."];
+      estimatedSavingsAmount: GenericString.t option
+        [@ocaml.doc
+          "The estimated savings amount that's based on the recommended Savings Plan over the length of the lookback period."];
+      estimatedSavingsPercentage: GenericString.t option
+        [@ocaml.doc
+          "The estimated savings percentage relative to the total cost of applicable On-Demand usage over the lookback period."];
+      existingHourlyCommitment: GenericString.t option
+        [@ocaml.doc
+          "The existing hourly commitment for the Savings Plan type."];
+      hourlyCommitmentToPurchase: GenericString.t option
+        [@ocaml.doc
+          "The recommended hourly commitment level for the Savings Plan type and the configuration that's based on the usage during the lookback period."];
+      upfrontCost: GenericString.t option
+        [@ocaml.doc
+          "The upfront cost of the recommended Savings Plan, based on the selected payment option."];
+      currentAverageCoverage: GenericString.t option
+        [@ocaml.doc
+          "The average value of hourly coverage over the lookback period."];
+      estimatedAverageCoverage: GenericString.t option
+        [@ocaml.doc
+          "The estimated coverage of the recommended Savings Plan."];
+      metricsOverLookbackPeriod: MetricsOverLookbackPeriod.t option
+        [@ocaml.doc
+          "The related hourly cost, coverage, and utilization metrics over the lookback period."]}
+    let make ?accountScope =
+      fun ?lookbackPeriodInDays ->
+        fun ?savingsPlansType ->
+          fun ?termInYears ->
+            fun ?paymentOption ->
+              fun ?accountId ->
+                fun ?currencyCode ->
+                  fun ?instanceFamily ->
+                    fun ?region ->
+                      fun ?offeringId ->
+                        fun ?generationTimestamp ->
+                          fun ?latestUsageTimestamp ->
+                            fun ?currentAverageHourlyOnDemandSpend ->
+                              fun ?currentMaximumHourlyOnDemandSpend ->
+                                fun ?currentMinimumHourlyOnDemandSpend ->
+                                  fun ?estimatedAverageUtilization ->
+                                    fun ?estimatedMonthlySavingsAmount ->
+                                      fun ?estimatedOnDemandCost ->
+                                        fun
+                                          ?estimatedOnDemandCostWithCurrentCommitment
+                                          ->
+                                          fun ?estimatedROI ->
+                                            fun ?estimatedSPCost ->
+                                              fun ?estimatedSavingsAmount ->
+                                                fun
+                                                  ?estimatedSavingsPercentage
+                                                  ->
+                                                  fun
+                                                    ?existingHourlyCommitment
+                                                    ->
+                                                    fun
+                                                      ?hourlyCommitmentToPurchase
+                                                      ->
+                                                      fun ?upfrontCost ->
+                                                        fun
+                                                          ?currentAverageCoverage
+                                                          ->
+                                                          fun
+                                                            ?estimatedAverageCoverage
+                                                            ->
+                                                            fun
+                                                              ?metricsOverLookbackPeriod
+                                                              ->
+                                                              fun () ->
+                                                                {
+                                                                  accountScope;
+                                                                  lookbackPeriodInDays;
+                                                                  savingsPlansType;
+                                                                  termInYears;
+                                                                  paymentOption;
+                                                                  accountId;
+                                                                  currencyCode;
+                                                                  instanceFamily;
+                                                                  region;
+                                                                  offeringId;
+                                                                  generationTimestamp;
+                                                                  latestUsageTimestamp;
+                                                                  currentAverageHourlyOnDemandSpend;
+                                                                  currentMaximumHourlyOnDemandSpend;
+                                                                  currentMinimumHourlyOnDemandSpend;
+                                                                  estimatedAverageUtilization;
+                                                                  estimatedMonthlySavingsAmount;
+                                                                  estimatedOnDemandCost;
+                                                                  estimatedOnDemandCostWithCurrentCommitment;
+                                                                  estimatedROI;
+                                                                  estimatedSPCost;
+                                                                  estimatedSavingsAmount;
+                                                                  estimatedSavingsPercentage;
+                                                                  existingHourlyCommitment;
+                                                                  hourlyCommitmentToPurchase;
+                                                                  upfrontCost;
+                                                                  currentAverageCoverage;
+                                                                  estimatedAverageCoverage;
+                                                                  metricsOverLookbackPeriod
+                                                                }
+    let to_value x =
+      structure_to_value
+        [("AccountScope",
+           (Option.map x.accountScope ~f:AccountScope.to_value));
+        ("LookbackPeriodInDays",
+          (Option.map x.lookbackPeriodInDays ~f:LookbackPeriodInDays.to_value));
+        ("SavingsPlansType",
+          (Option.map x.savingsPlansType
+             ~f:SupportedSavingsPlansType.to_value));
+        ("TermInYears", (Option.map x.termInYears ~f:TermInYears.to_value));
+        ("PaymentOption",
+          (Option.map x.paymentOption ~f:PaymentOption.to_value));
+        ("AccountId", (Option.map x.accountId ~f:GenericString.to_value));
+        ("CurrencyCode",
+          (Option.map x.currencyCode ~f:GenericString.to_value));
+        ("InstanceFamily",
+          (Option.map x.instanceFamily ~f:GenericString.to_value));
+        ("Region", (Option.map x.region ~f:GenericString.to_value));
+        ("OfferingId", (Option.map x.offeringId ~f:GenericString.to_value));
+        ("GenerationTimestamp",
+          (Option.map x.generationTimestamp ~f:ZonedDateTime.to_value));
+        ("LatestUsageTimestamp",
+          (Option.map x.latestUsageTimestamp ~f:ZonedDateTime.to_value));
+        ("CurrentAverageHourlyOnDemandSpend",
+          (Option.map x.currentAverageHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("CurrentMaximumHourlyOnDemandSpend",
+          (Option.map x.currentMaximumHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("CurrentMinimumHourlyOnDemandSpend",
+          (Option.map x.currentMinimumHourlyOnDemandSpend
+             ~f:GenericString.to_value));
+        ("EstimatedAverageUtilization",
+          (Option.map x.estimatedAverageUtilization ~f:GenericString.to_value));
+        ("EstimatedMonthlySavingsAmount",
+          (Option.map x.estimatedMonthlySavingsAmount
+             ~f:GenericString.to_value));
+        ("EstimatedOnDemandCost",
+          (Option.map x.estimatedOnDemandCost ~f:GenericString.to_value));
+        ("EstimatedOnDemandCostWithCurrentCommitment",
+          (Option.map x.estimatedOnDemandCostWithCurrentCommitment
+             ~f:GenericString.to_value));
+        ("EstimatedROI",
+          (Option.map x.estimatedROI ~f:GenericString.to_value));
+        ("EstimatedSPCost",
+          (Option.map x.estimatedSPCost ~f:GenericString.to_value));
+        ("EstimatedSavingsAmount",
+          (Option.map x.estimatedSavingsAmount ~f:GenericString.to_value));
+        ("EstimatedSavingsPercentage",
+          (Option.map x.estimatedSavingsPercentage ~f:GenericString.to_value));
+        ("ExistingHourlyCommitment",
+          (Option.map x.existingHourlyCommitment ~f:GenericString.to_value));
+        ("HourlyCommitmentToPurchase",
+          (Option.map x.hourlyCommitmentToPurchase ~f:GenericString.to_value));
+        ("UpfrontCost", (Option.map x.upfrontCost ~f:GenericString.to_value));
+        ("CurrentAverageCoverage",
+          (Option.map x.currentAverageCoverage ~f:GenericString.to_value));
+        ("EstimatedAverageCoverage",
+          (Option.map x.estimatedAverageCoverage ~f:GenericString.to_value));
+        ("MetricsOverLookbackPeriod",
+          (Option.map x.metricsOverLookbackPeriod
+             ~f:MetricsOverLookbackPeriod.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let metricsOverLookbackPeriod =
+        (Option.map ~f:MetricsOverLookbackPeriod.of_xml)
+          (Xml.child xml_arg0 "MetricsOverLookbackPeriod") in
+      let estimatedAverageCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedAverageCoverage") in
+      let currentAverageCoverage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentAverageCoverage") in
+      let upfrontCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "UpfrontCost") in
+      let hourlyCommitmentToPurchase =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "HourlyCommitmentToPurchase") in
+      let existingHourlyCommitment =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "ExistingHourlyCommitment") in
+      let estimatedSavingsPercentage =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedSavingsPercentage") in
+      let estimatedSavingsAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedSavingsAmount") in
+      let estimatedSPCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedSPCost") in
+      let estimatedROI =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedROI") in
+      let estimatedOnDemandCostWithCurrentCommitment =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedOnDemandCostWithCurrentCommitment") in
+      let estimatedOnDemandCost =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedOnDemandCost") in
+      let estimatedMonthlySavingsAmount =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedMonthlySavingsAmount") in
+      let estimatedAverageUtilization =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "EstimatedAverageUtilization") in
+      let currentMinimumHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentMinimumHourlyOnDemandSpend") in
+      let currentMaximumHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentMaximumHourlyOnDemandSpend") in
+      let currentAverageHourlyOnDemandSpend =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrentAverageHourlyOnDemandSpend") in
+      let latestUsageTimestamp =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "LatestUsageTimestamp") in
+      let generationTimestamp =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "GenerationTimestamp") in
+      let offeringId =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "OfferingId") in
+      let region =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
+      let instanceFamily =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "InstanceFamily") in
+      let currencyCode =
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "CurrencyCode") in
+      let accountId =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "AccountId") in
+      let paymentOption =
+        (Option.map ~f:PaymentOption.of_xml)
+          (Xml.child xml_arg0 "PaymentOption") in
+      let termInYears =
+        (Option.map ~f:TermInYears.of_xml) (Xml.child xml_arg0 "TermInYears") in
+      let savingsPlansType =
+        (Option.map ~f:SupportedSavingsPlansType.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansType") in
+      let lookbackPeriodInDays =
+        (Option.map ~f:LookbackPeriodInDays.of_xml)
+          (Xml.child xml_arg0 "LookbackPeriodInDays") in
+      let accountScope =
+        (Option.map ~f:AccountScope.of_xml)
+          (Xml.child xml_arg0 "AccountScope") in
+      make ?metricsOverLookbackPeriod ?estimatedAverageCoverage
+        ?currentAverageCoverage ?upfrontCost ?hourlyCommitmentToPurchase
+        ?existingHourlyCommitment ?estimatedSavingsPercentage
+        ?estimatedSavingsAmount ?estimatedSPCost ?estimatedROI
+        ?estimatedOnDemandCostWithCurrentCommitment ?estimatedOnDemandCost
+        ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
+        ?currentMinimumHourlyOnDemandSpend ?currentMaximumHourlyOnDemandSpend
+        ?currentAverageHourlyOnDemandSpend ?latestUsageTimestamp
+        ?generationTimestamp ?offeringId ?region ?instanceFamily
+        ?currencyCode ?accountId ?paymentOption ?termInYears
+        ?savingsPlansType ?lookbackPeriodInDays ?accountScope ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let metricsOverLookbackPeriod =
+        field_map json__ "MetricsOverLookbackPeriod"
+          MetricsOverLookbackPeriod.of_json in
+      let estimatedAverageCoverage =
+        field_map json__ "EstimatedAverageCoverage" GenericString.of_json in
+      let currentAverageCoverage =
+        field_map json__ "CurrentAverageCoverage" GenericString.of_json in
+      let upfrontCost = field_map json__ "UpfrontCost" GenericString.of_json in
+      let hourlyCommitmentToPurchase =
+        field_map json__ "HourlyCommitmentToPurchase" GenericString.of_json in
+      let existingHourlyCommitment =
+        field_map json__ "ExistingHourlyCommitment" GenericString.of_json in
+      let estimatedSavingsPercentage =
+        field_map json__ "EstimatedSavingsPercentage" GenericString.of_json in
+      let estimatedSavingsAmount =
+        field_map json__ "EstimatedSavingsAmount" GenericString.of_json in
+      let estimatedSPCost =
+        field_map json__ "EstimatedSPCost" GenericString.of_json in
+      let estimatedROI =
+        field_map json__ "EstimatedROI" GenericString.of_json in
+      let estimatedOnDemandCostWithCurrentCommitment =
+        field_map json__ "EstimatedOnDemandCostWithCurrentCommitment"
+          GenericString.of_json in
+      let estimatedOnDemandCost =
+        field_map json__ "EstimatedOnDemandCost" GenericString.of_json in
+      let estimatedMonthlySavingsAmount =
+        field_map json__ "EstimatedMonthlySavingsAmount"
+          GenericString.of_json in
+      let estimatedAverageUtilization =
+        field_map json__ "EstimatedAverageUtilization" GenericString.of_json in
+      let currentMinimumHourlyOnDemandSpend =
+        field_map json__ "CurrentMinimumHourlyOnDemandSpend"
+          GenericString.of_json in
+      let currentMaximumHourlyOnDemandSpend =
+        field_map json__ "CurrentMaximumHourlyOnDemandSpend"
+          GenericString.of_json in
+      let currentAverageHourlyOnDemandSpend =
+        field_map json__ "CurrentAverageHourlyOnDemandSpend"
+          GenericString.of_json in
+      let latestUsageTimestamp =
+        field_map json__ "LatestUsageTimestamp" ZonedDateTime.of_json in
+      let generationTimestamp =
+        field_map json__ "GenerationTimestamp" ZonedDateTime.of_json in
+      let offeringId = field_map json__ "OfferingId" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
+      let instanceFamily =
+        field_map json__ "InstanceFamily" GenericString.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
+      let paymentOption =
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let termInYears = field_map json__ "TermInYears" TermInYears.of_json in
+      let savingsPlansType =
+        field_map json__ "SavingsPlansType" SupportedSavingsPlansType.of_json in
+      let lookbackPeriodInDays =
+        field_map json__ "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
+      make ?metricsOverLookbackPeriod ?estimatedAverageCoverage
+        ?currentAverageCoverage ?upfrontCost ?hourlyCommitmentToPurchase
+        ?existingHourlyCommitment ?estimatedSavingsPercentage
+        ?estimatedSavingsAmount ?estimatedSPCost ?estimatedROI
+        ?estimatedOnDemandCostWithCurrentCommitment ?estimatedOnDemandCost
+        ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
+        ?currentMinimumHourlyOnDemandSpend ?currentMaximumHourlyOnDemandSpend
+        ?currentAverageHourlyOnDemandSpend ?latestUsageTimestamp
+        ?generationTimestamp ?offeringId ?region ?instanceFamily
+        ?currencyCode ?accountId ?paymentOption ?termInYears
+        ?savingsPlansType ?lookbackPeriodInDays ?accountScope ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details and metrics for the given recommendation."]
+module GetSavingsPlanPurchaseRecommendationDetailsResponse =
+  struct
+    type nonrec t =
+      {
+      recommendationDetailId: RecommendationDetailId.t option
+        [@ocaml.doc
+          "The ID that is associated with the Savings Plan recommendation."];
+      recommendationDetailData: RecommendationDetailData.t option
+        [@ocaml.doc
+          "Contains detailed information about a specific Savings Plan recommendation."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommendationDetailId =
+      fun ?recommendationDetailData ->
+        fun () -> { recommendationDetailId; recommendationDetailData }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RecommendationDetailId",
+           (Option.map x.recommendationDetailId
+              ~f:RecommendationDetailId.to_value));
+        ("RecommendationDetailData",
+          (Option.map x.recommendationDetailData
+             ~f:RecommendationDetailData.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let recommendationDetailData =
+        (Option.map ~f:RecommendationDetailData.of_xml)
+          (Xml.child xml_arg0 "RecommendationDetailData") in
+      let recommendationDetailId =
+        (Option.map ~f:RecommendationDetailId.of_xml)
+          (Xml.child xml_arg0 "RecommendationDetailId") in
+      make ?recommendationDetailData ?recommendationDetailId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let recommendationDetailData =
+        field_map json__ "RecommendationDetailData"
+          RecommendationDetailData.of_json in
+      let recommendationDetailId =
+        field_map json__ "RecommendationDetailId"
+          RecommendationDetailId.of_json in
+      make ?recommendationDetailData ?recommendationDetailId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the details for a Savings Plan recommendation. These details include the hourly data-points that construct the cost, coverage, and utilization charts."]
 module GetSavingsPlansCoverageRequest =
   struct
     type nonrec t =
@@ -10252,7 +14597,7 @@ module GetSavingsPlansCoverageRequest =
           "The number of items to be returned in a response. The default is 20, with a minimum value of 1."];
       sortBy: SortDefinition.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The following values are supported for Key: SpendCoveredBySavingsPlan OnDemandCost CoveragePercentage TotalCost InstanceFamily Region Service Supported values for SortOrder are ASCENDING or DESCENDING."]}
+          "The value that you want to sort the data by. The following values are supported for Key: SpendCoveredBySavingsPlan OnDemandCost CoveragePercentage TotalCost InstanceFamily Region Service The supported values for SortOrder are ASCENDING and DESCENDING."]}
     let context_ = "GetSavingsPlansCoverageRequest"
     let make ?groupBy =
       fun ?granularity ->
@@ -10306,27 +14651,27 @@ module GetSavingsPlansCoverageRequest =
       make ?sortBy ?maxResults ?nextToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" SortDefinition.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
-      let metrics = field_map json "Metrics" MetricNames.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map json "Granularity" Granularity.of_json in
-      let groupBy = field_map json "GroupBy" GroupDefinitions.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" SortDefinition.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let metrics = field_map json__ "Metrics" MetricNames.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity = field_map json__ "Granularity" Granularity.of_json in
+      let groupBy = field_map json__ "GroupBy" GroupDefinitions.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
       make ?sortBy ?maxResults ?nextToken ?metrics ?filter ?granularity
         ?groupBy ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Savings Plans covered for your account. This enables you to see how much of your cost is covered by a Savings Plan. An organization\226\128\153s management account can see the coverage of the associated member accounts. This supports dimensions, Cost Categories, and nested expressions. For any time period, you can filter data for Savings Plans usage with the following dimensions: LINKED_ACCOUNT REGION SERVICE INSTANCE_FAMILY To determine valid values for a dimension, use the GetDimensionValues operation."]
+       "Retrieves the Savings Plans covered for your account. This enables you to see how much of your cost is covered by a Savings Plan. An organization\226\128\153s management account can see the coverage of the associated member accounts. This supports dimensions, cost categories, and nested expressions. For any time period, you can filter data for Savings Plans usage with the following dimensions: LINKED_ACCOUNT REGION SERVICE INSTANCE_FAMILY To determine valid values for a dimension, use the GetDimensionValues operation."]
 module SavingsPlansCoverageData =
   struct
     type nonrec t =
       {
       spendCoveredBySavingsPlans: GenericString.t option
         [@ocaml.doc
-          "The amount of your Amazon Web Services usage that is covered by a Savings Plans."];
+          "The amount of your Amazon Web Services usage that's covered by a Savings Plans."];
       onDemandCost: GenericString.t option
         [@ocaml.doc
           "The cost of your Amazon Web Services usage at the public On-Demand rate."];
@@ -10372,13 +14717,14 @@ module SavingsPlansCoverageData =
       make ?coveragePercentage ?totalCost ?onDemandCost
         ?spendCoveredBySavingsPlans ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coveragePercentage =
-        field_map json "CoveragePercentage" GenericString.of_json in
-      let totalCost = field_map json "TotalCost" GenericString.of_json in
-      let onDemandCost = field_map json "OnDemandCost" GenericString.of_json in
+        field_map json__ "CoveragePercentage" GenericString.of_json in
+      let totalCost = field_map json__ "TotalCost" GenericString.of_json in
+      let onDemandCost =
+        field_map json__ "OnDemandCost" GenericString.of_json in
       let spendCoveredBySavingsPlans =
-        field_map json "SpendCoveredBySavingsPlans" GenericString.of_json in
+        field_map json__ "SpendCoveredBySavingsPlans" GenericString.of_json in
       make ?coveragePercentage ?totalCost ?onDemandCost
         ?spendCoveredBySavingsPlans ()
     let to_json v = composed_to_json to_value v
@@ -10414,19 +14760,22 @@ module SavingsPlansCoverage =
         (Option.map ~f:Attributes.of_xml) (Xml.child xml_arg0 "Attributes") in
       make ?timePeriod ?coverage ?attributes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timePeriod = field_map json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       let coverage =
-        field_map json "Coverage" SavingsPlansCoverageData.of_json in
-      let attributes = field_map json "Attributes" Attributes.of_json in
+        field_map json__ "Coverage" SavingsPlansCoverageData.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
       make ?timePeriod ?coverage ?attributes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The amount of Savings Plans eligible usage that is covered by Savings Plans. All calculations consider the On-Demand equivalent of your Savings Plans usage."]
+       "The amount of Savings Plans eligible usage that's covered by Savings Plans. All calculations consider the On-Demand equivalent of your Savings Plans usage."]
 module SavingsPlansCoverages =
   struct
     type nonrec t = SavingsPlansCoverage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansCoverage.to_value)) |>
         (fun x -> `List x)
@@ -10453,7 +14802,7 @@ module GetSavingsPlansCoverageResponse =
   struct
     type nonrec t =
       {
-      savingsPlansCoverages: SavingsPlansCoverages.t
+      savingsPlansCoverages: SavingsPlansCoverages.t option
         [@ocaml.doc "The amount of spend that your Savings Plans covered."];
       nextToken: NextPageToken.t option
         [@ocaml.doc
@@ -10463,10 +14812,8 @@ module GetSavingsPlansCoverageResponse =
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetSavingsPlansCoverageResponse"
-    let make ?nextToken =
-      fun ~savingsPlansCoverages ->
-        fun () -> { nextToken; savingsPlansCoverages }
+    let make ?savingsPlansCoverages =
+      fun ?nextToken -> fun () -> { savingsPlansCoverages; nextToken }
     let error_of_json name json =
       match name with
       | "DataUnavailableException" ->
@@ -10510,83 +14857,55 @@ module GetSavingsPlansCoverageResponse =
     let to_value x =
       structure_to_value
         [("SavingsPlansCoverages",
-           (Some (SavingsPlansCoverages.to_value x.savingsPlansCoverages)));
+           (Option.map x.savingsPlansCoverages
+              ~f:SavingsPlansCoverages.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let savingsPlansCoverages =
-        SavingsPlansCoverages.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SavingsPlansCoverages") in
-      make ?nextToken ~savingsPlansCoverages ()
+        (Option.map ~f:SavingsPlansCoverages.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansCoverages") in
+      make ?nextToken ?savingsPlansCoverages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
       let savingsPlansCoverages =
-        field_map_exn json "SavingsPlansCoverages"
+        field_map json__ "SavingsPlansCoverages"
           SavingsPlansCoverages.of_json in
-      make ?nextToken ~savingsPlansCoverages ()
+      make ?nextToken ?savingsPlansCoverages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Savings Plans covered for your account. This enables you to see how much of your cost is covered by a Savings Plan. An organization\226\128\153s management account can see the coverage of the associated member accounts. This supports dimensions, Cost Categories, and nested expressions. For any time period, you can filter data for Savings Plans usage with the following dimensions: LINKED_ACCOUNT REGION SERVICE INSTANCE_FAMILY To determine valid values for a dimension, use the GetDimensionValues operation."]
-module SupportedSavingsPlansType =
-  struct
-    type nonrec t =
-      | COMPUTE_SP 
-      | EC2_INSTANCE_SP 
-      | SAGEMAKER_SP 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | COMPUTE_SP -> "COMPUTE_SP"
-      | EC2_INSTANCE_SP -> "EC2_INSTANCE_SP"
-      | SAGEMAKER_SP -> "SAGEMAKER_SP"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "COMPUTE_SP" -> COMPUTE_SP
-      | "EC2_INSTANCE_SP" -> EC2_INSTANCE_SP
-      | "SAGEMAKER_SP" -> SAGEMAKER_SP
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration SupportedSavingsPlansType" xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"SupportedSavingsPlansType" j)
-    let to_json = simple_to_json to_value
-  end
+       "Retrieves the Savings Plans covered for your account. This enables you to see how much of your cost is covered by a Savings Plan. An organization\226\128\153s management account can see the coverage of the associated member accounts. This supports dimensions, cost categories, and nested expressions. For any time period, you can filter data for Savings Plans usage with the following dimensions: LINKED_ACCOUNT REGION SERVICE INSTANCE_FAMILY To determine valid values for a dimension, use the GetDimensionValues operation."]
 module GetSavingsPlansPurchaseRecommendationRequest =
   struct
     type nonrec t =
       {
       savingsPlansType: SupportedSavingsPlansType.t
-        [@ocaml.doc "The Savings Plans recommendation type requested."];
+        [@ocaml.doc
+          "The Savings Plans recommendation type that's requested."];
       termInYears: TermInYears.t
         [@ocaml.doc
-          "The savings plan recommendation term used to generate these recommendations."];
+          "The savings plan recommendation term that's used to generate these recommendations."];
       paymentOption: PaymentOption.t
         [@ocaml.doc
-          "The payment option used to generate these recommendations."];
+          "The payment option that's used to generate these recommendations."];
       accountScope: AccountScope.t option
         [@ocaml.doc
           "The account scope that you want your recommendations for. Amazon Web Services calculates recommendations including the management account and member accounts if the value is set to PAYER. If the value is LINKED, recommendations are calculated for individual member accounts only."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
-      pageSize: NonNegativeInteger.t option
+      pageSize: RecommendationsPageSize.t option
         [@ocaml.doc
           "The number of recommendations that you want returned in a single response object."];
       lookbackPeriodInDays: LookbackPeriodInDays.t
         [@ocaml.doc
-          "The lookback period used to generate the recommendation."];
+          "The lookback period that's used to generate the recommendation."];
       filter: Expression.t option
         [@ocaml.doc
-          "You can filter your recommendations by Account ID with the LINKED_ACCOUNT dimension. To filter your recommendations by Account ID, specify Key as LINKED_ACCOUNT and Value as the comma-separated Acount ID(s) for which you want to see Savings Plans purchase recommendations. For GetSavingsPlansPurchaseRecommendation, the Filter does not include CostCategories or Tags. It only includes Dimensions. With Dimensions, Key must be LINKED_ACCOUNT and Value can be a single Account ID or multiple comma-separated Account IDs for which you want to see Savings Plans Purchase Recommendations. AND and OR operators are not supported."]}
+          "You can filter your recommendations by Account ID with the LINKED_ACCOUNT dimension. To filter your recommendations by Account ID, specify Key as LINKED_ACCOUNT and Value as the comma-separated Acount ID(s) that you want to see Savings Plans purchase recommendations for. For GetSavingsPlansPurchaseRecommendation, the Filter doesn't include CostCategories or Tags. It only includes Dimensions. With Dimensions, Key must be LINKED_ACCOUNT and Value can be a single Account ID or multiple comma-separated Account IDs that you want to see Savings Plans Purchase Recommendations for. AND and OR operators are not supported."]}
     let context_ = "GetSavingsPlansPurchaseRecommendationRequest"
     let make ?accountScope =
       fun ?nextPageToken ->
@@ -10617,7 +14936,8 @@ module GetSavingsPlansPurchaseRecommendationRequest =
           (Option.map x.accountScope ~f:AccountScope.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value));
-        ("PageSize", (Option.map x.pageSize ~f:NonNegativeInteger.to_value));
+        ("PageSize",
+          (Option.map x.pageSize ~f:RecommendationsPageSize.to_value));
         ("LookbackPeriodInDays",
           (Some (LookbackPeriodInDays.to_value x.lookbackPeriodInDays)));
         ("Filter", (Option.map x.filter ~f:Expression.to_value))]
@@ -10629,7 +14949,7 @@ module GetSavingsPlansPurchaseRecommendationRequest =
         LookbackPeriodInDays.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "LookbackPeriodInDays") in
       let pageSize =
-        (Option.map ~f:NonNegativeInteger.of_xml)
+        (Option.map ~f:RecommendationsPageSize.of_xml)
           (Xml.child xml_arg0 "PageSize") in
       let nextPageToken =
         (Option.map ~f:NextPageToken.of_xml)
@@ -10649,26 +14969,28 @@ module GetSavingsPlansPurchaseRecommendationRequest =
       make ?filter ~lookbackPeriodInDays ?pageSize ?nextPageToken
         ?accountScope ~paymentOption ~termInYears ~savingsPlansType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let filter = field_map json "Filter" Expression.of_json in
+    let of_json json__ =
+      let filter = field_map json__ "Filter" Expression.of_json in
       let lookbackPeriodInDays =
-        field_map_exn json "LookbackPeriodInDays"
+        field_map_exn json__ "LookbackPeriodInDays"
           LookbackPeriodInDays.of_json in
-      let pageSize = field_map json "PageSize" NonNegativeInteger.of_json in
+      let pageSize =
+        field_map json__ "PageSize" RecommendationsPageSize.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let accountScope = field_map json "AccountScope" AccountScope.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
       let paymentOption =
-        field_map_exn json "PaymentOption" PaymentOption.of_json in
-      let termInYears = field_map_exn json "TermInYears" TermInYears.of_json in
+        field_map_exn json__ "PaymentOption" PaymentOption.of_json in
+      let termInYears =
+        field_map_exn json__ "TermInYears" TermInYears.of_json in
       let savingsPlansType =
-        field_map_exn json "SavingsPlansType"
+        field_map_exn json__ "SavingsPlansType"
           SupportedSavingsPlansType.of_json in
       make ?filter ~lookbackPeriodInDays ?pageSize ?nextPageToken
         ?accountScope ~paymentOption ~termInYears ~savingsPlansType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves your request parameters, Savings Plan Recommendations Summary and Details."]
+       "Retrieves the Savings Plans recommendations for your account. First use StartSavingsPlansPurchaseRecommendationGeneration to generate a new set of recommendations, and then use GetSavingsPlansPurchaseRecommendation to retrieve them."]
 module SavingsPlansPurchaseRecommendationMetadata =
   struct
     type nonrec t =
@@ -10677,7 +14999,7 @@ module SavingsPlansPurchaseRecommendationMetadata =
         [@ocaml.doc "The unique identifier for the recommendation set."];
       generationTimestamp: GenericString.t option
         [@ocaml.doc
-          "The timestamp showing when the recommendations were generated."];
+          "The timestamp that shows when the recommendations were generated."];
       additionalMetadata: GenericString.t option
         [@ocaml.doc
           "Additional metadata that might be applicable to the recommendation."]}
@@ -10707,13 +15029,13 @@ module SavingsPlansPurchaseRecommendationMetadata =
           (Xml.child xml_arg0 "RecommendationId") in
       make ?additionalMetadata ?generationTimestamp ?recommendationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalMetadata =
-        field_map json "AdditionalMetadata" GenericString.of_json in
+        field_map json__ "AdditionalMetadata" GenericString.of_json in
       let generationTimestamp =
-        field_map json "GenerationTimestamp" GenericString.of_json in
+        field_map json__ "GenerationTimestamp" GenericString.of_json in
       let recommendationId =
-        field_map json "RecommendationId" GenericString.of_json in
+        field_map json__ "RecommendationId" GenericString.of_json in
       make ?additionalMetadata ?generationTimestamp ?recommendationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10754,7 +15076,7 @@ module SavingsPlansPurchaseRecommendationSummary =
           "The estimated monthly savings amount that's based on the recommended Savings Plans purchase."];
       estimatedOnDemandCostWithCurrentCommitment: GenericString.t option
         [@ocaml.doc
-          "The estimated On-Demand costs you would expect with no additional commitment. It's based on your usage of the selected time period and the Savings Plans you own."]}
+          "The estimated On-Demand costs you expect with no additional commitment. It's based on your usage of the selected time period and the Savings Plans you own."]}
     let make ?estimatedROI =
       fun ?currencyCode ->
         fun ?estimatedTotalCost ->
@@ -10848,28 +15170,31 @@ module SavingsPlansPurchaseRecommendationSummary =
         ?currentOnDemandSpend ?estimatedTotalCost ?currencyCode ?estimatedROI
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let estimatedOnDemandCostWithCurrentCommitment =
-        field_map json "EstimatedOnDemandCostWithCurrentCommitment"
+        field_map json__ "EstimatedOnDemandCostWithCurrentCommitment"
           GenericString.of_json in
       let estimatedMonthlySavingsAmount =
-        field_map json "EstimatedMonthlySavingsAmount" GenericString.of_json in
+        field_map json__ "EstimatedMonthlySavingsAmount"
+          GenericString.of_json in
       let estimatedSavingsPercentage =
-        field_map json "EstimatedSavingsPercentage" GenericString.of_json in
+        field_map json__ "EstimatedSavingsPercentage" GenericString.of_json in
       let hourlyCommitmentToPurchase =
-        field_map json "HourlyCommitmentToPurchase" GenericString.of_json in
+        field_map json__ "HourlyCommitmentToPurchase" GenericString.of_json in
       let dailyCommitmentToPurchase =
-        field_map json "DailyCommitmentToPurchase" GenericString.of_json in
+        field_map json__ "DailyCommitmentToPurchase" GenericString.of_json in
       let totalRecommendationCount =
-        field_map json "TotalRecommendationCount" GenericString.of_json in
+        field_map json__ "TotalRecommendationCount" GenericString.of_json in
       let estimatedSavingsAmount =
-        field_map json "EstimatedSavingsAmount" GenericString.of_json in
+        field_map json__ "EstimatedSavingsAmount" GenericString.of_json in
       let currentOnDemandSpend =
-        field_map json "CurrentOnDemandSpend" GenericString.of_json in
+        field_map json__ "CurrentOnDemandSpend" GenericString.of_json in
       let estimatedTotalCost =
-        field_map json "EstimatedTotalCost" GenericString.of_json in
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
-      let estimatedROI = field_map json "EstimatedROI" GenericString.of_json in
+        field_map json__ "EstimatedTotalCost" GenericString.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
+      let estimatedROI =
+        field_map json__ "EstimatedROI" GenericString.of_json in
       make ?estimatedOnDemandCostWithCurrentCommitment
         ?estimatedMonthlySavingsAmount ?estimatedSavingsPercentage
         ?hourlyCommitmentToPurchase ?dailyCommitmentToPurchase
@@ -10913,11 +15238,11 @@ module SavingsPlansDetails =
         (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Region") in
       make ?offeringId ?instanceFamily ?region ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let offeringId = field_map json "OfferingId" GenericString.of_json in
+    let of_json json__ =
+      let offeringId = field_map json__ "OfferingId" GenericString.of_json in
       let instanceFamily =
-        field_map json "InstanceFamily" GenericString.of_json in
-      let region = field_map json "Region" GenericString.of_json in
+        field_map json__ "InstanceFamily" GenericString.of_json in
+      let region = field_map json__ "Region" GenericString.of_json in
       make ?offeringId ?instanceFamily ?region ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The attribute details on a specific Savings Plan."]
@@ -10946,7 +15271,7 @@ module SavingsPlansPurchaseRecommendationDetail =
           "The remaining On-Demand cost estimated to not be covered by the recommended Savings Plans, over the length of the lookback period."];
       estimatedOnDemandCostWithCurrentCommitment: GenericString.t option
         [@ocaml.doc
-          "The estimated On-Demand costs you would expect with no additional commitment, based on your usage of the selected time period and the Savings Plans you own."];
+          "The estimated On-Demand costs you expect with no additional commitment, based on your usage of the selected time period and the Savings Plans you own."];
       estimatedSavingsAmount: GenericString.t option
         [@ocaml.doc
           "The estimated savings amount that's based on the recommended Savings Plans over the length of the lookback period."];
@@ -10970,7 +15295,10 @@ module SavingsPlansPurchaseRecommendationDetail =
           "The highest value of hourly On-Demand spend over the lookback period of the applicable usage type."];
       currentAverageHourlyOnDemandSpend: GenericString.t option
         [@ocaml.doc
-          "The average value of hourly On-Demand spend over the lookback period of the applicable usage type."]}
+          "The average value of hourly On-Demand spend over the lookback period of the applicable usage type."];
+      recommendationDetailId: RecommendationDetailId.t option
+        [@ocaml.doc
+          "Contains detailed information about a specific Savings Plan recommendation."]}
     let make ?savingsPlansDetails =
       fun ?accountId ->
         fun ?upfrontCost ->
@@ -10987,25 +15315,27 @@ module SavingsPlansPurchaseRecommendationDetail =
                               fun ?currentMinimumHourlyOnDemandSpend ->
                                 fun ?currentMaximumHourlyOnDemandSpend ->
                                   fun ?currentAverageHourlyOnDemandSpend ->
-                                    fun () ->
-                                      {
-                                        savingsPlansDetails;
-                                        accountId;
-                                        upfrontCost;
-                                        estimatedROI;
-                                        currencyCode;
-                                        estimatedSPCost;
-                                        estimatedOnDemandCost;
-                                        estimatedOnDemandCostWithCurrentCommitment;
-                                        estimatedSavingsAmount;
-                                        estimatedSavingsPercentage;
-                                        hourlyCommitmentToPurchase;
-                                        estimatedAverageUtilization;
-                                        estimatedMonthlySavingsAmount;
-                                        currentMinimumHourlyOnDemandSpend;
-                                        currentMaximumHourlyOnDemandSpend;
-                                        currentAverageHourlyOnDemandSpend
-                                      }
+                                    fun ?recommendationDetailId ->
+                                      fun () ->
+                                        {
+                                          savingsPlansDetails;
+                                          accountId;
+                                          upfrontCost;
+                                          estimatedROI;
+                                          currencyCode;
+                                          estimatedSPCost;
+                                          estimatedOnDemandCost;
+                                          estimatedOnDemandCostWithCurrentCommitment;
+                                          estimatedSavingsAmount;
+                                          estimatedSavingsPercentage;
+                                          hourlyCommitmentToPurchase;
+                                          estimatedAverageUtilization;
+                                          estimatedMonthlySavingsAmount;
+                                          currentMinimumHourlyOnDemandSpend;
+                                          currentMaximumHourlyOnDemandSpend;
+                                          currentAverageHourlyOnDemandSpend;
+                                          recommendationDetailId
+                                        }
     let to_value x =
       structure_to_value
         [("SavingsPlansDetails",
@@ -11042,9 +15372,15 @@ module SavingsPlansPurchaseRecommendationDetail =
              ~f:GenericString.to_value));
         ("CurrentAverageHourlyOnDemandSpend",
           (Option.map x.currentAverageHourlyOnDemandSpend
-             ~f:GenericString.to_value))]
+             ~f:GenericString.to_value));
+        ("RecommendationDetailId",
+          (Option.map x.recommendationDetailId
+             ~f:RecommendationDetailId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let recommendationDetailId =
+        (Option.map ~f:RecommendationDetailId.of_xml)
+          (Xml.child xml_arg0 "RecommendationDetailId") in
       let currentAverageHourlyOnDemandSpend =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "CurrentAverageHourlyOnDemandSpend") in
@@ -11092,7 +15428,7 @@ module SavingsPlansPurchaseRecommendationDetail =
       let savingsPlansDetails =
         (Option.map ~f:SavingsPlansDetails.of_xml)
           (Xml.child xml_arg0 "SavingsPlansDetails") in
-      make ?currentAverageHourlyOnDemandSpend
+      make ?recommendationDetailId ?currentAverageHourlyOnDemandSpend
         ?currentMaximumHourlyOnDemandSpend ?currentMinimumHourlyOnDemandSpend
         ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
         ?hourlyCommitmentToPurchase ?estimatedSavingsPercentage
@@ -11100,40 +15436,46 @@ module SavingsPlansPurchaseRecommendationDetail =
         ?estimatedOnDemandCost ?estimatedSPCost ?currencyCode ?estimatedROI
         ?upfrontCost ?accountId ?savingsPlansDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let recommendationDetailId =
+        field_map json__ "RecommendationDetailId"
+          RecommendationDetailId.of_json in
       let currentAverageHourlyOnDemandSpend =
-        field_map json "CurrentAverageHourlyOnDemandSpend"
+        field_map json__ "CurrentAverageHourlyOnDemandSpend"
           GenericString.of_json in
       let currentMaximumHourlyOnDemandSpend =
-        field_map json "CurrentMaximumHourlyOnDemandSpend"
+        field_map json__ "CurrentMaximumHourlyOnDemandSpend"
           GenericString.of_json in
       let currentMinimumHourlyOnDemandSpend =
-        field_map json "CurrentMinimumHourlyOnDemandSpend"
+        field_map json__ "CurrentMinimumHourlyOnDemandSpend"
           GenericString.of_json in
       let estimatedMonthlySavingsAmount =
-        field_map json "EstimatedMonthlySavingsAmount" GenericString.of_json in
+        field_map json__ "EstimatedMonthlySavingsAmount"
+          GenericString.of_json in
       let estimatedAverageUtilization =
-        field_map json "EstimatedAverageUtilization" GenericString.of_json in
+        field_map json__ "EstimatedAverageUtilization" GenericString.of_json in
       let hourlyCommitmentToPurchase =
-        field_map json "HourlyCommitmentToPurchase" GenericString.of_json in
+        field_map json__ "HourlyCommitmentToPurchase" GenericString.of_json in
       let estimatedSavingsPercentage =
-        field_map json "EstimatedSavingsPercentage" GenericString.of_json in
+        field_map json__ "EstimatedSavingsPercentage" GenericString.of_json in
       let estimatedSavingsAmount =
-        field_map json "EstimatedSavingsAmount" GenericString.of_json in
+        field_map json__ "EstimatedSavingsAmount" GenericString.of_json in
       let estimatedOnDemandCostWithCurrentCommitment =
-        field_map json "EstimatedOnDemandCostWithCurrentCommitment"
+        field_map json__ "EstimatedOnDemandCostWithCurrentCommitment"
           GenericString.of_json in
       let estimatedOnDemandCost =
-        field_map json "EstimatedOnDemandCost" GenericString.of_json in
+        field_map json__ "EstimatedOnDemandCost" GenericString.of_json in
       let estimatedSPCost =
-        field_map json "EstimatedSPCost" GenericString.of_json in
-      let currencyCode = field_map json "CurrencyCode" GenericString.of_json in
-      let estimatedROI = field_map json "EstimatedROI" GenericString.of_json in
-      let upfrontCost = field_map json "UpfrontCost" GenericString.of_json in
-      let accountId = field_map json "AccountId" GenericString.of_json in
+        field_map json__ "EstimatedSPCost" GenericString.of_json in
+      let currencyCode =
+        field_map json__ "CurrencyCode" GenericString.of_json in
+      let estimatedROI =
+        field_map json__ "EstimatedROI" GenericString.of_json in
+      let upfrontCost = field_map json__ "UpfrontCost" GenericString.of_json in
+      let accountId = field_map json__ "AccountId" GenericString.of_json in
       let savingsPlansDetails =
-        field_map json "SavingsPlansDetails" SavingsPlansDetails.of_json in
-      make ?currentAverageHourlyOnDemandSpend
+        field_map json__ "SavingsPlansDetails" SavingsPlansDetails.of_json in
+      make ?recommendationDetailId ?currentAverageHourlyOnDemandSpend
         ?currentMaximumHourlyOnDemandSpend ?currentMinimumHourlyOnDemandSpend
         ?estimatedMonthlySavingsAmount ?estimatedAverageUtilization
         ?hourlyCommitmentToPurchase ?estimatedSavingsPercentage
@@ -11146,6 +15488,9 @@ module SavingsPlansPurchaseRecommendationDetailList =
   struct
     type nonrec t = SavingsPlansPurchaseRecommendationDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansPurchaseRecommendationDetail.to_value))
         |> (fun x -> `List x)
@@ -11183,14 +15528,14 @@ module SavingsPlansPurchaseRecommendation =
           "The Savings Plans recommendation term in years. It's used to generate the recommendation."];
       paymentOption: PaymentOption.t option
         [@ocaml.doc
-          "The payment option used to generate the recommendation."];
+          "The payment option that's used to generate the recommendation."];
       lookbackPeriodInDays: LookbackPeriodInDays.t option
         [@ocaml.doc
-          "The lookback period in days, used to generate the recommendation."];
+          "The lookback period in days that's used to generate the recommendation."];
       savingsPlansPurchaseRecommendationDetails:
         SavingsPlansPurchaseRecommendationDetailList.t option
         [@ocaml.doc
-          "Details for the Savings Plans we recommend that you purchase to cover existing Savings Plans eligible workloads."];
+          "Details for the Savings Plans that we recommend that you purchase to cover existing Savings Plans eligible workloads."];
       savingsPlansPurchaseRecommendationSummary:
         SavingsPlansPurchaseRecommendationSummary.t option
         [@ocaml.doc
@@ -11256,21 +15601,21 @@ module SavingsPlansPurchaseRecommendation =
         ?savingsPlansPurchaseRecommendationDetails ?lookbackPeriodInDays
         ?paymentOption ?termInYears ?savingsPlansType ?accountScope ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let savingsPlansPurchaseRecommendationSummary =
-        field_map json "SavingsPlansPurchaseRecommendationSummary"
+        field_map json__ "SavingsPlansPurchaseRecommendationSummary"
           SavingsPlansPurchaseRecommendationSummary.of_json in
       let savingsPlansPurchaseRecommendationDetails =
-        field_map json "SavingsPlansPurchaseRecommendationDetails"
+        field_map json__ "SavingsPlansPurchaseRecommendationDetails"
           SavingsPlansPurchaseRecommendationDetailList.of_json in
       let lookbackPeriodInDays =
-        field_map json "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
+        field_map json__ "LookbackPeriodInDays" LookbackPeriodInDays.of_json in
       let paymentOption =
-        field_map json "PaymentOption" PaymentOption.of_json in
-      let termInYears = field_map json "TermInYears" TermInYears.of_json in
+        field_map json__ "PaymentOption" PaymentOption.of_json in
+      let termInYears = field_map json__ "TermInYears" TermInYears.of_json in
       let savingsPlansType =
-        field_map json "SavingsPlansType" SupportedSavingsPlansType.of_json in
-      let accountScope = field_map json "AccountScope" AccountScope.of_json in
+        field_map json__ "SavingsPlansType" SupportedSavingsPlansType.of_json in
+      let accountScope = field_map json__ "AccountScope" AccountScope.of_json in
       make ?savingsPlansPurchaseRecommendationSummary
         ?savingsPlansPurchaseRecommendationDetails ?lookbackPeriodInDays
         ?paymentOption ?termInYears ?savingsPlansType ?accountScope ()
@@ -11283,7 +15628,7 @@ module GetSavingsPlansPurchaseRecommendationResponse =
       {
       metadata: SavingsPlansPurchaseRecommendationMetadata.t option
         [@ocaml.doc
-          "Information regarding this specific recommendation set."];
+          "Information that regards this specific recommendation set."];
       savingsPlansPurchaseRecommendation:
         SavingsPlansPurchaseRecommendation.t option
         [@ocaml.doc
@@ -11355,19 +15700,19 @@ module GetSavingsPlansPurchaseRecommendationResponse =
           (Xml.child xml_arg0 "Metadata") in
       make ?nextPageToken ?savingsPlansPurchaseRecommendation ?metadata ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
+        field_map json__ "NextPageToken" NextPageToken.of_json in
       let savingsPlansPurchaseRecommendation =
-        field_map json "SavingsPlansPurchaseRecommendation"
+        field_map json__ "SavingsPlansPurchaseRecommendation"
           SavingsPlansPurchaseRecommendation.of_json in
       let metadata =
-        field_map json "Metadata"
+        field_map json__ "Metadata"
           SavingsPlansPurchaseRecommendationMetadata.of_json in
       make ?nextPageToken ?savingsPlansPurchaseRecommendation ?metadata ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves your request parameters, Savings Plan Recommendations Summary and Details."]
+       "Retrieves the Savings Plans recommendations for your account. First use StartSavingsPlansPurchaseRecommendationGeneration to generate a new set of recommendations, and then use GetSavingsPlansPurchaseRecommendation to retrieve them."]
 module SavingsPlansDataType =
   struct
     type nonrec t =
@@ -11404,6 +15749,9 @@ module SavingsPlansDataTypes =
   struct
     type nonrec t = SavingsPlansDataType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansDataType.to_value)) |>
         (fun x -> `List x)
@@ -11445,7 +15793,7 @@ module GetSavingsPlansUtilizationDetailsRequest =
           "The number of items to be returned in a response. The default is 20, with a minimum value of 1."];
       sortBy: SortDefinition.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The following values are supported for Key: UtilizationPercentage TotalCommitment UsedCommitment UnusedCommitment NetSavings AmortizedRecurringCommitment AmortizedUpfrontCommitment Supported values for SortOrder are ASCENDING or DESCENDING."]}
+          "The value that you want to sort the data by. The following values are supported for Key: UtilizationPercentage TotalCommitment UsedCommitment UnusedCommitment NetSavings AmortizedRecurringCommitment AmortizedUpfrontCommitment The supported values for SortOrder are ASCENDING and DESCENDING."]}
     let context_ = "GetSavingsPlansUtilizationDetailsRequest"
     let make ?filter =
       fun ?dataType ->
@@ -11489,13 +15837,14 @@ module GetSavingsPlansUtilizationDetailsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?sortBy ?maxResults ?nextToken ?dataType ?filter ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" SortDefinition.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
-      let dataType = field_map json "DataType" SavingsPlansDataTypes.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" SortDefinition.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let dataType =
+        field_map json__ "DataType" SavingsPlansDataTypes.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
       make ?sortBy ?maxResults ?nextToken ?dataType ?filter ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11554,15 +15903,15 @@ module SavingsPlansUtilization =
       make ?utilizationPercentage ?unusedCommitment ?usedCommitment
         ?totalCommitment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let utilizationPercentage =
-        field_map json "UtilizationPercentage" GenericString.of_json in
+        field_map json__ "UtilizationPercentage" GenericString.of_json in
       let unusedCommitment =
-        field_map json "UnusedCommitment" GenericString.of_json in
+        field_map json__ "UnusedCommitment" GenericString.of_json in
       let usedCommitment =
-        field_map json "UsedCommitment" GenericString.of_json in
+        field_map json__ "UsedCommitment" GenericString.of_json in
       let totalCommitment =
-        field_map json "TotalCommitment" GenericString.of_json in
+        field_map json__ "TotalCommitment" GenericString.of_json in
       make ?utilizationPercentage ?unusedCommitment ?usedCommitment
         ?totalCommitment ()
     let to_json v = composed_to_json to_value v
@@ -11596,10 +15945,10 @@ module SavingsPlansSavings =
           (Xml.child xml_arg0 "NetSavings") in
       make ?onDemandCostEquivalent ?netSavings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onDemandCostEquivalent =
-        field_map json "OnDemandCostEquivalent" GenericString.of_json in
-      let netSavings = field_map json "NetSavings" GenericString.of_json in
+        field_map json__ "OnDemandCostEquivalent" GenericString.of_json in
+      let netSavings = field_map json__ "NetSavings" GenericString.of_json in
       make ?onDemandCostEquivalent ?netSavings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11649,13 +15998,13 @@ module SavingsPlansAmortizedCommitment =
       make ?totalAmortizedCommitment ?amortizedUpfrontCommitment
         ?amortizedRecurringCommitment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let totalAmortizedCommitment =
-        field_map json "TotalAmortizedCommitment" GenericString.of_json in
+        field_map json__ "TotalAmortizedCommitment" GenericString.of_json in
       let amortizedUpfrontCommitment =
-        field_map json "AmortizedUpfrontCommitment" GenericString.of_json in
+        field_map json__ "AmortizedUpfrontCommitment" GenericString.of_json in
       let amortizedRecurringCommitment =
-        field_map json "AmortizedRecurringCommitment" GenericString.of_json in
+        field_map json__ "AmortizedRecurringCommitment" GenericString.of_json in
       make ?totalAmortizedCommitment ?amortizedUpfrontCommitment
         ?amortizedRecurringCommitment ()
     let to_json v = composed_to_json to_value v
@@ -11688,7 +16037,7 @@ module SavingsPlansUtilizationDetail =
           "A ratio of your effectiveness of using existing Savings Plans to apply to workloads that are Savings Plans eligible."];
       savings: SavingsPlansSavings.t option
         [@ocaml.doc
-          "The amount saved by using existing Savings Plans. Savings returns both net savings from savings plans as well as the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
+          "The amount saved by using existing Savings Plans. Savings returns both net savings from savings plans and also the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
       amortizedCommitment: SavingsPlansAmortizedCommitment.t option
         [@ocaml.doc
           "The total amortized commitment for a Savings Plans. Includes the sum of the upfront and recurring Savings Plans fees."]}
@@ -11735,25 +16084,28 @@ module SavingsPlansUtilizationDetail =
       make ?amortizedCommitment ?savings ?utilization ?attributes
         ?savingsPlanArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amortizedCommitment =
-        field_map json "AmortizedCommitment"
+        field_map json__ "AmortizedCommitment"
           SavingsPlansAmortizedCommitment.of_json in
-      let savings = field_map json "Savings" SavingsPlansSavings.of_json in
+      let savings = field_map json__ "Savings" SavingsPlansSavings.of_json in
       let utilization =
-        field_map json "Utilization" SavingsPlansUtilization.of_json in
-      let attributes = field_map json "Attributes" Attributes.of_json in
+        field_map json__ "Utilization" SavingsPlansUtilization.of_json in
+      let attributes = field_map json__ "Attributes" Attributes.of_json in
       let savingsPlanArn =
-        field_map json "SavingsPlanArn" SavingsPlanArn.of_json in
+        field_map json__ "SavingsPlanArn" SavingsPlanArn.of_json in
       make ?amortizedCommitment ?savings ?utilization ?attributes
         ?savingsPlanArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A single daily or monthly Savings Plans utilization rate, and details for your account. A management account in an organization have access to member accounts. You can use GetDimensionValues to determine the possible dimension values."]
+       "A single daily or monthly Savings Plans utilization rate and details for your account. A management account in an organization have access to member accounts. You can use GetDimensionValues to determine the possible dimension values."]
 module SavingsPlansUtilizationDetails =
   struct
     type nonrec t = SavingsPlansUtilizationDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansUtilizationDetail.to_value)) |>
         (fun x -> `List x)
@@ -11780,24 +16132,23 @@ module SavingsPlansUtilizationAggregates =
   struct
     type nonrec t =
       {
-      utilization: SavingsPlansUtilization.t
+      utilization: SavingsPlansUtilization.t option
         [@ocaml.doc
           "A ratio of your effectiveness of using existing Savings Plans to apply to workloads that are Savings Plans eligible."];
       savings: SavingsPlansSavings.t option
         [@ocaml.doc
-          "The amount saved by using existing Savings Plans. Savings returns both net savings from Savings Plans, as well as the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
+          "The amount that's saved by using existing Savings Plans. Savings returns both net savings from Savings Plans and also the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
       amortizedCommitment: SavingsPlansAmortizedCommitment.t option
         [@ocaml.doc
           "The total amortized commitment for a Savings Plans. This includes the sum of the upfront and recurring Savings Plans fees."]}
-    let context_ = "SavingsPlansUtilizationAggregates"
-    let make ?savings =
-      fun ?amortizedCommitment ->
-        fun ~utilization ->
-          fun () -> { savings; amortizedCommitment; utilization }
+    let make ?utilization =
+      fun ?savings ->
+        fun ?amortizedCommitment ->
+          fun () -> { utilization; savings; amortizedCommitment }
     let to_value x =
       structure_to_value
         [("Utilization",
-           (Some (SavingsPlansUtilization.to_value x.utilization)));
+           (Option.map x.utilization ~f:SavingsPlansUtilization.to_value));
         ("Savings", (Option.map x.savings ~f:SavingsPlansSavings.to_value));
         ("AmortizedCommitment",
           (Option.map x.amortizedCommitment
@@ -11811,18 +16162,18 @@ module SavingsPlansUtilizationAggregates =
         (Option.map ~f:SavingsPlansSavings.of_xml)
           (Xml.child xml_arg0 "Savings") in
       let utilization =
-        SavingsPlansUtilization.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Utilization") in
-      make ?amortizedCommitment ?savings ~utilization ()
+        (Option.map ~f:SavingsPlansUtilization.of_xml)
+          (Xml.child xml_arg0 "Utilization") in
+      make ?amortizedCommitment ?savings ?utilization ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amortizedCommitment =
-        field_map json "AmortizedCommitment"
+        field_map json__ "AmortizedCommitment"
           SavingsPlansAmortizedCommitment.of_json in
-      let savings = field_map json "Savings" SavingsPlansSavings.of_json in
+      let savings = field_map json__ "Savings" SavingsPlansSavings.of_json in
       let utilization =
-        field_map_exn json "Utilization" SavingsPlansUtilization.of_json in
-      make ?amortizedCommitment ?savings ~utilization ()
+        field_map json__ "Utilization" SavingsPlansUtilization.of_json in
+      make ?amortizedCommitment ?savings ?utilization ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The aggregated utilization metrics for your Savings Plans usage."]
@@ -11830,13 +16181,13 @@ module GetSavingsPlansUtilizationDetailsResponse =
   struct
     type nonrec t =
       {
-      savingsPlansUtilizationDetails: SavingsPlansUtilizationDetails.t
+      savingsPlansUtilizationDetails: SavingsPlansUtilizationDetails.t option
         [@ocaml.doc
           "Retrieves a single daily or monthly Savings Plans utilization rate and details for your account."];
       total: SavingsPlansUtilizationAggregates.t option
         [@ocaml.doc
           "The total Savings Plans utilization, regardless of time period."];
-      timePeriod: DateInterval.t ;
+      timePeriod: DateInterval.t option ;
       nextToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -11845,13 +16196,12 @@ module GetSavingsPlansUtilizationDetailsResponse =
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetSavingsPlansUtilizationDetailsResponse"
-    let make ?total =
-      fun ?nextToken ->
-        fun ~savingsPlansUtilizationDetails ->
-          fun ~timePeriod ->
+    let make ?savingsPlansUtilizationDetails =
+      fun ?total ->
+        fun ?timePeriod ->
+          fun ?nextToken ->
             fun () ->
-              { total; nextToken; savingsPlansUtilizationDetails; timePeriod
+              { savingsPlansUtilizationDetails; total; timePeriod; nextToken
               }
     let error_of_json name json =
       match name with
@@ -11896,38 +16246,35 @@ module GetSavingsPlansUtilizationDetailsResponse =
     let to_value x =
       structure_to_value
         [("SavingsPlansUtilizationDetails",
-           (Some
-              (SavingsPlansUtilizationDetails.to_value
-                 x.savingsPlansUtilizationDetails)));
+           (Option.map x.savingsPlansUtilizationDetails
+              ~f:SavingsPlansUtilizationDetails.to_value));
         ("Total",
           (Option.map x.total ~f:SavingsPlansUtilizationAggregates.to_value));
-        ("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
+        ("TimePeriod", (Option.map x.timePeriod ~f:DateInterval.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let timePeriod =
-        DateInterval.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
+        (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
       let total =
         (Option.map ~f:SavingsPlansUtilizationAggregates.of_xml)
           (Xml.child xml_arg0 "Total") in
       let savingsPlansUtilizationDetails =
-        SavingsPlansUtilizationDetails.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "SavingsPlansUtilizationDetails") in
-      make ?nextToken ~timePeriod ?total ~savingsPlansUtilizationDetails ()
+        (Option.map ~f:SavingsPlansUtilizationDetails.of_xml)
+          (Xml.child xml_arg0 "SavingsPlansUtilizationDetails") in
+      make ?nextToken ?timePeriod ?total ?savingsPlansUtilizationDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
       let total =
-        field_map json "Total" SavingsPlansUtilizationAggregates.of_json in
+        field_map json__ "Total" SavingsPlansUtilizationAggregates.of_json in
       let savingsPlansUtilizationDetails =
-        field_map_exn json "SavingsPlansUtilizationDetails"
+        field_map json__ "SavingsPlansUtilizationDetails"
           SavingsPlansUtilizationDetails.of_json in
-      make ?nextToken ~timePeriod ?total ~savingsPlansUtilizationDetails ()
+      make ?nextToken ?timePeriod ?total ?savingsPlansUtilizationDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves attribute data along with aggregate utilization and savings data for a given time period. This doesn't support granular or grouped data (daily/monthly) in response. You can't retrieve data by dates in a single response similar to GetSavingsPlanUtilization, but you have the option to make multiple calls to GetSavingsPlanUtilizationDetails by providing individual dates. You can use GetDimensionValues in SAVINGS_PLANS to determine the possible dimension values. GetSavingsPlanUtilizationDetails internally groups data by SavingsPlansArn."]
@@ -11946,7 +16293,7 @@ module GetSavingsPlansUtilizationRequest =
           "Filters Savings Plans utilization coverage data for active Savings Plans dimensions. You can filter data with the following dimensions: LINKED_ACCOUNT SAVINGS_PLAN_ARN SAVINGS_PLANS_TYPE REGION PAYMENT_OPTION INSTANCE_TYPE_FAMILY GetSavingsPlansUtilization uses the same Expression object as the other operations, but only AND is supported among each dimension."];
       sortBy: SortDefinition.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The following values are supported for Key: UtilizationPercentage TotalCommitment UsedCommitment UnusedCommitment NetSavings Supported values for SortOrder are ASCENDING or DESCENDING."]}
+          "The value that you want to sort the data by. The following values are supported for Key: UtilizationPercentage TotalCommitment UsedCommitment UnusedCommitment NetSavings The supported values for SortOrder are ASCENDING and DESCENDING."]}
     let context_ = "GetSavingsPlansUtilizationRequest"
     let make ?granularity =
       fun ?filter ->
@@ -11972,41 +16319,40 @@ module GetSavingsPlansUtilizationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
       make ?sortBy ?filter ?granularity ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortBy = field_map json "SortBy" SortDefinition.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map json "Granularity" Granularity.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
+    let of_json json__ =
+      let sortBy = field_map json__ "SortBy" SortDefinition.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity = field_map json__ "Granularity" Granularity.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
       make ?sortBy ?filter ?granularity ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Savings Plans utilization for your account across date ranges with daily or monthly granularity. Management account in an organization have access to member accounts. You can use GetDimensionValues in SAVINGS_PLANS to determine the possible dimension values. You cannot group by any dimension values for GetSavingsPlansUtilization."]
+       "Retrieves the Savings Plans utilization for your account across date ranges with daily or monthly granularity. Management account in an organization have access to member accounts. You can use GetDimensionValues in SAVINGS_PLANS to determine the possible dimension values. You can't group by any dimension values for GetSavingsPlansUtilization."]
 module SavingsPlansUtilizationByTime =
   struct
     type nonrec t =
       {
-      timePeriod: DateInterval.t ;
-      utilization: SavingsPlansUtilization.t
+      timePeriod: DateInterval.t option ;
+      utilization: SavingsPlansUtilization.t option
         [@ocaml.doc
           "A ratio of your effectiveness of using existing Savings Plans to apply to workloads that are Savings Plans eligible."];
       savings: SavingsPlansSavings.t option
         [@ocaml.doc
-          "The amount saved by using existing Savings Plans. Savings returns both net savings from Savings Plans as well as the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
+          "The amount that's saved by using existing Savings Plans. Savings returns both net savings from Savings Plans and also the onDemandCostEquivalent of the Savings Plans when considering the utilization rate."];
       amortizedCommitment: SavingsPlansAmortizedCommitment.t option
         [@ocaml.doc
           "The total amortized commitment for a Savings Plans. This includes the sum of the upfront and recurring Savings Plans fees."]}
-    let context_ = "SavingsPlansUtilizationByTime"
-    let make ?savings =
-      fun ?amortizedCommitment ->
-        fun ~timePeriod ->
-          fun ~utilization ->
+    let make ?timePeriod =
+      fun ?utilization ->
+        fun ?savings ->
+          fun ?amortizedCommitment ->
             fun () ->
-              { savings; amortizedCommitment; timePeriod; utilization }
+              { timePeriod; utilization; savings; amortizedCommitment }
     let to_value x =
       structure_to_value
-        [("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
+        [("TimePeriod", (Option.map x.timePeriod ~f:DateInterval.to_value));
         ("Utilization",
-          (Some (SavingsPlansUtilization.to_value x.utilization)));
+          (Option.map x.utilization ~f:SavingsPlansUtilization.to_value));
         ("Savings", (Option.map x.savings ~f:SavingsPlansSavings.to_value));
         ("AmortizedCommitment",
           (Option.map x.amortizedCommitment
@@ -12020,28 +16366,30 @@ module SavingsPlansUtilizationByTime =
         (Option.map ~f:SavingsPlansSavings.of_xml)
           (Xml.child xml_arg0 "Savings") in
       let utilization =
-        SavingsPlansUtilization.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Utilization") in
+        (Option.map ~f:SavingsPlansUtilization.of_xml)
+          (Xml.child xml_arg0 "Utilization") in
       let timePeriod =
-        DateInterval.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
-      make ?amortizedCommitment ?savings ~utilization ~timePeriod ()
+        (Option.map ~f:DateInterval.of_xml) (Xml.child xml_arg0 "TimePeriod") in
+      make ?amortizedCommitment ?savings ?utilization ?timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let amortizedCommitment =
-        field_map json "AmortizedCommitment"
+        field_map json__ "AmortizedCommitment"
           SavingsPlansAmortizedCommitment.of_json in
-      let savings = field_map json "Savings" SavingsPlansSavings.of_json in
+      let savings = field_map json__ "Savings" SavingsPlansSavings.of_json in
       let utilization =
-        field_map_exn json "Utilization" SavingsPlansUtilization.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      make ?amortizedCommitment ?savings ~utilization ~timePeriod ()
+        field_map json__ "Utilization" SavingsPlansUtilization.of_json in
+      let timePeriod = field_map json__ "TimePeriod" DateInterval.of_json in
+      make ?amortizedCommitment ?savings ?utilization ?timePeriod ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The amount of Savings Plans utilization, in hours."]
+  end[@@ocaml.doc "The amount of Savings Plans utilization (in hours)."]
 module SavingsPlansUtilizationsByTime =
   struct
     type nonrec t = SavingsPlansUtilizationByTime.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SavingsPlansUtilizationByTime.to_value)) |>
         (fun x -> `List x)
@@ -12070,17 +16418,16 @@ module GetSavingsPlansUtilizationResponse =
       {
       savingsPlansUtilizationsByTime: SavingsPlansUtilizationsByTime.t option
         [@ocaml.doc
-          "The amount of cost/commitment you used your Savings Plans. This allows you to specify date ranges."];
-      total: SavingsPlansUtilizationAggregates.t
+          "The amount of cost/commitment that you used your Savings Plans. You can use it to specify date ranges."];
+      total: SavingsPlansUtilizationAggregates.t option
         [@ocaml.doc
           "The total amount of cost/commitment that you used your Savings Plans, regardless of date ranges."]}
     type nonrec error =
       [ `DataUnavailableException of DataUnavailableException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetSavingsPlansUtilizationResponse"
     let make ?savingsPlansUtilizationsByTime =
-      fun ~total -> fun () -> { savingsPlansUtilizationsByTime; total }
+      fun ?total -> fun () -> { savingsPlansUtilizationsByTime; total }
     let error_of_json name json =
       match name with
       | "DataUnavailableException" ->
@@ -12119,27 +16466,27 @@ module GetSavingsPlansUtilizationResponse =
            (Option.map x.savingsPlansUtilizationsByTime
               ~f:SavingsPlansUtilizationsByTime.to_value));
         ("Total",
-          (Some (SavingsPlansUtilizationAggregates.to_value x.total)))]
+          (Option.map x.total ~f:SavingsPlansUtilizationAggregates.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let total =
-        SavingsPlansUtilizationAggregates.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Total") in
+        (Option.map ~f:SavingsPlansUtilizationAggregates.of_xml)
+          (Xml.child xml_arg0 "Total") in
       let savingsPlansUtilizationsByTime =
         (Option.map ~f:SavingsPlansUtilizationsByTime.of_xml)
           (Xml.child xml_arg0 "SavingsPlansUtilizationsByTime") in
-      make ~total ?savingsPlansUtilizationsByTime ()
+      make ?total ?savingsPlansUtilizationsByTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let total =
-        field_map_exn json "Total" SavingsPlansUtilizationAggregates.of_json in
+        field_map json__ "Total" SavingsPlansUtilizationAggregates.of_json in
       let savingsPlansUtilizationsByTime =
-        field_map json "SavingsPlansUtilizationsByTime"
+        field_map json__ "SavingsPlansUtilizationsByTime"
           SavingsPlansUtilizationsByTime.of_json in
-      make ~total ?savingsPlansUtilizationsByTime ()
+      make ?total ?savingsPlansUtilizationsByTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves the Savings Plans utilization for your account across date ranges with daily or monthly granularity. Management account in an organization have access to member accounts. You can use GetDimensionValues in SAVINGS_PLANS to determine the possible dimension values. You cannot group by any dimension values for GetSavingsPlansUtilization."]
+       "Retrieves the Savings Plans utilization for your account across date ranges with daily or monthly granularity. Management account in an organization have access to member accounts. You can use GetDimensionValues in SAVINGS_PLANS to determine the possible dimension values. You can't group by any dimension values for GetSavingsPlansUtilization."]
 module GetTagsRequest =
   struct
     type nonrec t =
@@ -12154,10 +16501,13 @@ module GetTagsRequest =
       filter: Expression.t option ;
       sortBy: SortDefinitions.t option
         [@ocaml.doc
-          "The value by which you want to sort the data. The key represents cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount Supported values for SortOrder are ASCENDING or DESCENDING. When using SortBy, NextPageToken and SearchString are not supported."];
+          "The value that you want to sort the data by. The key represents cost and usage metrics. The following values are supported: BlendedCost UnblendedCost AmortizedCost NetAmortizedCost NetUnblendedCost UsageQuantity NormalizedUsageAmount The supported values for SortOrder are ASCENDING and DESCENDING. When you use SortBy, NextPageToken and SearchString aren't supported."];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       maxResults: MaxResults.t option
         [@ocaml.doc
-          "This field is only used when SortBy is provided in the request. The maximum number of objects that to be returned for this request. If MaxResults is not specified with SortBy, the request will return 1000 results as the default value for this parameter. For GetTags, MaxResults has an upper limit of 1000."];
+          "This field is only used when SortBy is provided in the request. The maximum number of objects that are returned for this request. If MaxResults isn't specified with SortBy, the request returns 1000 results as the default value for this parameter. For GetTags, MaxResults has an upper quota of 1000."];
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -12166,19 +16516,21 @@ module GetTagsRequest =
       fun ?tagKey ->
         fun ?filter ->
           fun ?sortBy ->
-            fun ?maxResults ->
-              fun ?nextPageToken ->
-                fun ~timePeriod ->
-                  fun () ->
-                    {
-                      searchString;
-                      tagKey;
-                      filter;
-                      sortBy;
-                      maxResults;
-                      nextPageToken;
-                      timePeriod
-                    }
+            fun ?billingViewArn ->
+              fun ?maxResults ->
+                fun ?nextPageToken ->
+                  fun ~timePeriod ->
+                    fun () ->
+                      {
+                        searchString;
+                        tagKey;
+                        filter;
+                        sortBy;
+                        billingViewArn;
+                        maxResults;
+                        nextPageToken;
+                        timePeriod
+                      }
     let to_value x =
       structure_to_value
         [("SearchString",
@@ -12187,6 +16539,8 @@ module GetTagsRequest =
         ("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
         ("SortBy", (Option.map x.sortBy ~f:SortDefinitions.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("NextPageToken",
           (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
@@ -12197,6 +16551,9 @@ module GetTagsRequest =
           (Xml.child xml_arg0 "NextPageToken") in
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let sortBy =
         (Option.map ~f:SortDefinitions.of_xml) (Xml.child xml_arg0 "SortBy") in
       let filter =
@@ -12209,20 +16566,22 @@ module GetTagsRequest =
       let searchString =
         (Option.map ~f:SearchString.of_xml)
           (Xml.child xml_arg0 "SearchString") in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?tagKey ~timePeriod
-        ?searchString ()
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter ?tagKey
+        ~timePeriod ?searchString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let sortBy = field_map json "SortBy" SortDefinitions.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let tagKey = field_map json "TagKey" TagKey.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      let searchString = field_map json "SearchString" SearchString.of_json in
-      make ?nextPageToken ?maxResults ?sortBy ?filter ?tagKey ~timePeriod
-        ?searchString ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let sortBy = field_map json__ "SortBy" SortDefinitions.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      let searchString = field_map json__ "SearchString" SearchString.of_json in
+      make ?nextPageToken ?maxResults ?billingViewArn ?sortBy ?filter ?tagKey
+        ~timePeriod ?searchString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Queries for available tag keys and tag values for a specified period. You can search the tag values for an arbitrary string."]
@@ -12230,6 +16589,9 @@ module TagList =
   struct
     type nonrec t = Entity.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Entity.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12256,28 +16618,34 @@ module GetTagsResponse =
       nextPageToken: NextPageToken.t option
         [@ocaml.doc
           "The token for the next set of retrievable results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
-      tags: TagList.t [@ocaml.doc "The tags that match your request."];
-      returnSize: PageSize.t
+      tags: TagList.t option [@ocaml.doc "The tags that match your request."];
+      returnSize: PageSize.t option
         [@ocaml.doc
           "The number of query results that Amazon Web Services returns at a time."];
-      totalSize: PageSize.t [@ocaml.doc "The total number of query results."]}
+      totalSize: PageSize.t option
+        [@ocaml.doc "The total number of query results."]}
     type nonrec error =
       [ `BillExpirationException of BillExpirationException.t 
+      | `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
       | `DataUnavailableException of DataUnavailableException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `LimitExceededException of LimitExceededException.t 
       | `RequestChangedException of RequestChangedException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetTagsResponse"
     let make ?nextPageToken =
-      fun ~tags ->
-        fun ~returnSize ->
-          fun ~totalSize ->
+      fun ?tags ->
+        fun ?returnSize ->
+          fun ?totalSize ->
             fun () -> { nextPageToken; tags; returnSize; totalSize }
     let error_of_json name json =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_json json)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "InvalidNextTokenException" ->
@@ -12286,6 +16654,8 @@ module GetTagsResponse =
           `LimitExceededException (LimitExceededException.of_json json)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -12293,6 +16663,9 @@ module GetTagsResponse =
       match name with
       | "BillExpirationException" ->
           `BillExpirationException (BillExpirationException.of_xml xml)
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "InvalidNextTokenException" ->
@@ -12301,6 +16674,8 @@ module GetTagsResponse =
           `LimitExceededException (LimitExceededException.of_xml xml)
       | "RequestChangedException" ->
           `RequestChangedException (RequestChangedException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -12309,6 +16684,10 @@ module GetTagsResponse =
           `Assoc
             [("error", (`String "BillExpirationException"));
             ("details", (BillExpirationException.to_json e))]
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -12325,6 +16704,10 @@ module GetTagsResponse =
           `Assoc
             [("error", (`String "RequestChangedException"));
             ("details", (RequestChangedException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -12334,31 +16717,28 @@ module GetTagsResponse =
       structure_to_value
         [("NextPageToken",
            (Option.map x.nextPageToken ~f:NextPageToken.to_value));
-        ("Tags", (Some (TagList.to_value x.tags)));
-        ("ReturnSize", (Some (PageSize.to_value x.returnSize)));
-        ("TotalSize", (Some (PageSize.to_value x.totalSize)))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("ReturnSize", (Option.map x.returnSize ~f:PageSize.to_value));
+        ("TotalSize", (Option.map x.totalSize ~f:PageSize.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let totalSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TotalSize") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "TotalSize") in
       let returnSize =
-        PageSize.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ReturnSize") in
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
+        (Option.map ~f:PageSize.of_xml) (Xml.child xml_arg0 "ReturnSize") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let nextPageToken =
         (Option.map ~f:NextPageToken.of_xml)
           (Xml.child xml_arg0 "NextPageToken") in
-      make ~totalSize ~returnSize ~tags ?nextPageToken ()
+      make ?totalSize ?returnSize ?tags ?nextPageToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let totalSize = field_map_exn json "TotalSize" PageSize.of_json in
-      let returnSize = field_map_exn json "ReturnSize" PageSize.of_json in
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let totalSize = field_map json__ "TotalSize" PageSize.of_json in
+      let returnSize = field_map json__ "ReturnSize" PageSize.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let nextPageToken =
-        field_map json "NextPageToken" NextPageToken.of_json in
-      make ~totalSize ~returnSize ~tags ?nextPageToken ()
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      make ?totalSize ?returnSize ?tags ?nextPageToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Queries for available tag keys and tag values for a specified period. You can search the tag values for an arbitrary string."]
@@ -12368,39 +16748,46 @@ module GetUsageForecastRequest =
       {
       timePeriod: DateInterval.t
         [@ocaml.doc
-          "The start and end dates of the period that you want to retrieve usage forecast for. The start date is inclusive, but the end date is exclusive. For example, if start is 2017-01-01 and end is 2017-05-01, then the cost and usage data is retrieved from 2017-01-01 up to and including 2017-04-30 but not including 2017-05-01. The start date must be equal to or later than the current date to avoid a validation error."];
+          "The start and end dates of the period that you want to retrieve usage forecast for. The start date is included in the period, but the end date isn't included in the period. For example, if start is 2017-01-01 and end is 2017-05-01, then the cost and usage data is retrieved from 2017-01-01 up to and including 2017-04-30 but not including 2017-05-01. The start date must be equal to or later than the current date to avoid a validation error."];
       metric: Metric.t
         [@ocaml.doc
           "Which metric Cost Explorer uses to create your forecast. Valid values for a GetUsageForecast call are the following: USAGE_QUANTITY NORMALIZED_USAGE_AMOUNT"];
       granularity: Granularity.t
         [@ocaml.doc
-          "How granular you want the forecast to be. You can get 3 months of DAILY forecasts or 12 months of MONTHLY forecasts. The GetUsageForecast operation supports only DAILY and MONTHLY granularities."];
+          "How granular you want the forecast to be. You can get 3 months of DAILY forecasts or 18 months of MONTHLY forecasts. The GetUsageForecast operation supports only DAILY and MONTHLY granularities."];
       filter: Expression.t option
         [@ocaml.doc
           "The filters that you want to use to filter your forecast. The GetUsageForecast API supports filtering by the following dimensions: AZ INSTANCE_TYPE LINKED_ACCOUNT LINKED_ACCOUNT_NAME OPERATION PURCHASE_TYPE REGION SERVICE USAGE_TYPE USAGE_TYPE_GROUP RECORD_TYPE OPERATING_SYSTEM TENANCY SCOPE PLATFORM SUBSCRIPTION_ID LEGAL_ENTITY_NAME DEPLOYMENT_OPTION DATABASE_ENGINE INSTANCE_TYPE_FAMILY BILLING_ENTITY RESERVATION_ID SAVINGS_PLAN_ARN"];
+      billingViewArn: BillingViewArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) that uniquely identifies a specific billing view. The ARN is used to specify which particular billing view you want to interact with or retrieve information from when making API calls related to Amazon Web Services Billing and Cost Management features. The BillingViewArn can be retrieved by calling the ListBillingViews API."];
       predictionIntervalLevel: PredictionIntervalLevel.t option
         [@ocaml.doc
-          "Cost Explorer always returns the mean forecast as a single point. You can request a prediction interval around the mean by specifying a confidence level. The higher the confidence level, the more confident Cost Explorer is about the actual value falling in the prediction interval. Higher confidence levels result in wider prediction intervals."]}
+          "Amazon Web Services Cost Explorer always returns the mean forecast as a single point. You can request a prediction interval around the mean by specifying a confidence level. The higher the confidence level, the more confident Cost Explorer is about the actual value falling in the prediction interval. Higher confidence levels result in wider prediction intervals."]}
     let context_ = "GetUsageForecastRequest"
     let make ?filter =
-      fun ?predictionIntervalLevel ->
-        fun ~timePeriod ->
-          fun ~metric ->
-            fun ~granularity ->
-              fun () ->
-                {
-                  filter;
-                  predictionIntervalLevel;
-                  timePeriod;
-                  metric;
-                  granularity
-                }
+      fun ?billingViewArn ->
+        fun ?predictionIntervalLevel ->
+          fun ~timePeriod ->
+            fun ~metric ->
+              fun ~granularity ->
+                fun () ->
+                  {
+                    filter;
+                    billingViewArn;
+                    predictionIntervalLevel;
+                    timePeriod;
+                    metric;
+                    granularity
+                  }
     let to_value x =
       structure_to_value
         [("TimePeriod", (Some (DateInterval.to_value x.timePeriod)));
         ("Metric", (Some (Metric.to_value x.metric)));
         ("Granularity", (Some (Granularity.to_value x.granularity)));
         ("Filter", (Option.map x.filter ~f:Expression.to_value));
+        ("BillingViewArn",
+          (Option.map x.billingViewArn ~f:BillingViewArn.to_value));
         ("PredictionIntervalLevel",
           (Option.map x.predictionIntervalLevel
              ~f:PredictionIntervalLevel.to_value))]
@@ -12409,6 +16796,9 @@ module GetUsageForecastRequest =
       let predictionIntervalLevel =
         (Option.map ~f:PredictionIntervalLevel.of_xml)
           (Xml.child xml_arg0 "PredictionIntervalLevel") in
+      let billingViewArn =
+        (Option.map ~f:BillingViewArn.of_xml)
+          (Xml.child xml_arg0 "BillingViewArn") in
       let filter =
         (Option.map ~f:Expression.of_xml) (Xml.child xml_arg0 "Filter") in
       let granularity =
@@ -12419,19 +16809,22 @@ module GetUsageForecastRequest =
       let timePeriod =
         DateInterval.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "TimePeriod") in
-      make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
-        ()
+      make ?predictionIntervalLevel ?billingViewArn ?filter ~granularity
+        ~metric ~timePeriod ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let predictionIntervalLevel =
-        field_map json "PredictionIntervalLevel"
+        field_map json__ "PredictionIntervalLevel"
           PredictionIntervalLevel.of_json in
-      let filter = field_map json "Filter" Expression.of_json in
-      let granularity = field_map_exn json "Granularity" Granularity.of_json in
-      let metric = field_map_exn json "Metric" Metric.of_json in
-      let timePeriod = field_map_exn json "TimePeriod" DateInterval.of_json in
-      make ?predictionIntervalLevel ?filter ~granularity ~metric ~timePeriod
-        ()
+      let billingViewArn =
+        field_map json__ "BillingViewArn" BillingViewArn.of_json in
+      let filter = field_map json__ "Filter" Expression.of_json in
+      let granularity =
+        field_map_exn json__ "Granularity" Granularity.of_json in
+      let metric = field_map_exn json__ "Metric" Metric.of_json in
+      let timePeriod = field_map_exn json__ "TimePeriod" DateInterval.of_json in
+      make ?predictionIntervalLevel ?billingViewArn ?filter ~granularity
+        ~metric ~timePeriod ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a forecast for how much Amazon Web Services predicts that you will use over the forecast time period that you select, based on your past usage."]
@@ -12449,8 +16842,8 @@ module UnresolvableUsageUnitException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12466,8 +16859,12 @@ module GetUsageForecastResponse =
         [@ocaml.doc
           "The forecasts for your query, in order. For DAILY forecasts, this is a list of days. For MONTHLY forecasts, this is a list of months."]}
     type nonrec error =
-      [ `DataUnavailableException of DataUnavailableException.t 
+      [
+        `BillingViewHealthStatusException of
+          BillingViewHealthStatusException.t 
+      | `DataUnavailableException of DataUnavailableException.t 
       | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `UnresolvableUsageUnitException of UnresolvableUsageUnitException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?total =
@@ -12475,10 +16872,15 @@ module GetUsageForecastResponse =
         fun () -> { total; forecastResultsByTime }
     let error_of_json name json =
       match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_json json)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_json json)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "UnresolvableUsageUnitException" ->
           `UnresolvableUsageUnitException
             (UnresolvableUsageUnitException.of_json json)
@@ -12487,10 +16889,15 @@ module GetUsageForecastResponse =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "BillingViewHealthStatusException" ->
+          `BillingViewHealthStatusException
+            (BillingViewHealthStatusException.of_xml xml)
       | "DataUnavailableException" ->
           `DataUnavailableException (DataUnavailableException.of_xml xml)
       | "LimitExceededException" ->
           `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "UnresolvableUsageUnitException" ->
           `UnresolvableUsageUnitException
             (UnresolvableUsageUnitException.of_xml xml)
@@ -12498,6 +16905,10 @@ module GetUsageForecastResponse =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `BillingViewHealthStatusException e ->
+          `Assoc
+            [("error", (`String "BillingViewHealthStatusException"));
+            ("details", (BillingViewHealthStatusException.to_json e))]
       | `DataUnavailableException e ->
           `Assoc
             [("error", (`String "DataUnavailableException"));
@@ -12506,6 +16917,10 @@ module GetUsageForecastResponse =
           `Assoc
             [("error", (`String "LimitExceededException"));
             ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
       | `UnresolvableUsageUnitException e ->
           `Assoc
             [("error", (`String "UnresolvableUsageUnitException"));
@@ -12530,37 +16945,455 @@ module GetUsageForecastResponse =
         (Option.map ~f:MetricValue.of_xml) (Xml.child xml_arg0 "Total") in
       make ?forecastResultsByTime ?total ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forecastResultsByTime =
-        field_map json "ForecastResultsByTime" ForecastResultsByTime.of_json in
-      let total = field_map json "Total" MetricValue.of_json in
+        field_map json__ "ForecastResultsByTime"
+          ForecastResultsByTime.of_json in
+      let total = field_map json__ "Total" MetricValue.of_json in
       make ?forecastResultsByTime ?total ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieves a forecast for how much Amazon Web Services predicts that you will use over the forecast time period that you select, based on your past usage."]
+module ListCommitmentPurchaseAnalysesRequest =
+  struct
+    type nonrec t =
+      {
+      analysisStatus: AnalysisStatus.t option
+        [@ocaml.doc "The status of the analysis."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc "The token to retrieve the next set of results."];
+      pageSize: AnalysesPageSize.t option
+        [@ocaml.doc
+          "The number of analyses that you want returned in a single response object."];
+      analysisIds: AnalysisIds.t option
+        [@ocaml.doc
+          "The analysis IDs associated with the commitment purchase analyses."]}
+    let make ?analysisStatus =
+      fun ?nextPageToken ->
+        fun ?pageSize ->
+          fun ?analysisIds ->
+            fun () ->
+              { analysisStatus; nextPageToken; pageSize; analysisIds }
+    let to_value x =
+      structure_to_value
+        [("AnalysisStatus",
+           (Option.map x.analysisStatus ~f:AnalysisStatus.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value));
+        ("PageSize", (Option.map x.pageSize ~f:AnalysesPageSize.to_value));
+        ("AnalysisIds", (Option.map x.analysisIds ~f:AnalysisIds.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let analysisIds =
+        (Option.map ~f:AnalysisIds.of_xml) (Xml.child xml_arg0 "AnalysisIds") in
+      let pageSize =
+        (Option.map ~f:AnalysesPageSize.of_xml)
+          (Xml.child xml_arg0 "PageSize") in
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let analysisStatus =
+        (Option.map ~f:AnalysisStatus.of_xml)
+          (Xml.child xml_arg0 "AnalysisStatus") in
+      make ?analysisIds ?pageSize ?nextPageToken ?analysisStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let analysisIds = field_map json__ "AnalysisIds" AnalysisIds.of_json in
+      let pageSize = field_map json__ "PageSize" AnalysesPageSize.of_json in
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let analysisStatus =
+        field_map json__ "AnalysisStatus" AnalysisStatus.of_json in
+      make ?analysisIds ?pageSize ?nextPageToken ?analysisStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the commitment purchase analyses for your account."]
+module ListCommitmentPurchaseAnalysesResponse =
+  struct
+    type nonrec t =
+      {
+      analysisSummaryList: AnalysisSummaryList.t option
+        [@ocaml.doc "The list of analyses."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc "The token to retrieve the next set of results."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analysisSummaryList =
+      fun ?nextPageToken -> fun () -> { analysisSummaryList; nextPageToken }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AnalysisSummaryList",
+           (Option.map x.analysisSummaryList ~f:AnalysisSummaryList.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let analysisSummaryList =
+        (Option.map ~f:AnalysisSummaryList.of_xml)
+          (Xml.child xml_arg0 "AnalysisSummaryList") in
+      make ?nextPageToken ?analysisSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let analysisSummaryList =
+        field_map json__ "AnalysisSummaryList" AnalysisSummaryList.of_json in
+      make ?nextPageToken ?analysisSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Lists the commitment purchase analyses for your account."]
+module ListCostAllocationTagBackfillHistoryRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
+      maxResults: CostAllocationTagsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that are returned for this request."]}
+    let make ?nextToken =
+      fun ?maxResults -> fun () -> { nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:CostAllocationTagsMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:CostAllocationTagsMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      make ?maxResults ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" CostAllocationTagsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      make ?maxResults ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of your historical cost allocation tag backfill requests."]
+module ListCostAllocationTagBackfillHistoryResponse =
+  struct
+    type nonrec t =
+      {
+      backfillRequests: CostAllocationTagBackfillRequestList.t option
+        [@ocaml.doc
+          "The list of historical cost allocation tag backfill requests."];
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?backfillRequests =
+      fun ?nextToken -> fun () -> { backfillRequests; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BackfillRequests",
+           (Option.map x.backfillRequests
+              ~f:CostAllocationTagBackfillRequestList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let backfillRequests =
+        (Option.map ~f:CostAllocationTagBackfillRequestList.of_xml)
+          (Xml.child xml_arg0 "BackfillRequests") in
+      make ?nextToken ?backfillRequests ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let backfillRequests =
+        field_map json__ "BackfillRequests"
+          CostAllocationTagBackfillRequestList.of_json in
+      make ?nextToken ?backfillRequests ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of your historical cost allocation tag backfill requests."]
+module ListCostAllocationTagsRequest =
+  struct
+    type nonrec t =
+      {
+      status: CostAllocationTagStatus.t option
+        [@ocaml.doc
+          "The status of cost allocation tag keys that are returned for this request."];
+      tagKeys: CostAllocationTagKeyList.t option
+        [@ocaml.doc
+          "The list of cost allocation tag keys that are returned for this request."];
+      type_: CostAllocationTagType.t option
+        [@ocaml.doc
+          "The type of CostAllocationTag object that are returned for this request. The AWSGenerated type tags are tags that Amazon Web Services defines and applies to support Amazon Web Services resources for cost allocation purposes. The UserDefined type tags are tags that you define, create, and apply to resources."];
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
+      maxResults: CostAllocationTagsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of objects that are returned for this request. By default, the request returns 100 results."]}
+    let make ?status =
+      fun ?tagKeys ->
+        fun ?type_ ->
+          fun ?nextToken ->
+            fun ?maxResults ->
+              fun () -> { status; tagKeys; type_; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("Status",
+           (Option.map x.status ~f:CostAllocationTagStatus.to_value));
+        ("TagKeys",
+          (Option.map x.tagKeys ~f:CostAllocationTagKeyList.to_value));
+        ("Type", (Option.map x.type_ ~f:CostAllocationTagType.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:CostAllocationTagsMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:CostAllocationTagsMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let type_ =
+        (Option.map ~f:CostAllocationTagType.of_xml)
+          (Xml.child xml_arg0 "Type") in
+      let tagKeys =
+        (Option.map ~f:CostAllocationTagKeyList.of_xml)
+          (Xml.child xml_arg0 "TagKeys") in
+      let status =
+        (Option.map ~f:CostAllocationTagStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      make ?maxResults ?nextToken ?type_ ?tagKeys ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" CostAllocationTagsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let type_ = field_map json__ "Type" CostAllocationTagType.of_json in
+      let tagKeys =
+        field_map json__ "TagKeys" CostAllocationTagKeyList.of_json in
+      let status = field_map json__ "Status" CostAllocationTagStatus.of_json in
+      make ?maxResults ?nextToken ?type_ ?tagKeys ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of cost allocation tags. All inputs in the API are optional and serve as filters. By default, all cost allocation tags are returned."]
+module ListCostAllocationTagsResponse =
+  struct
+    type nonrec t =
+      {
+      costAllocationTags: CostAllocationTagList.t option
+        [@ocaml.doc
+          "A list of cost allocation tags that includes the detailed metadata for each one."];
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
+    type nonrec error =
+      [ `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?costAllocationTags =
+      fun ?nextToken -> fun () -> { costAllocationTags; nextToken }
+    let error_of_json name json =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CostAllocationTags",
+           (Option.map x.costAllocationTags ~f:CostAllocationTagList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let costAllocationTags =
+        (Option.map ~f:CostAllocationTagList.of_xml)
+          (Xml.child xml_arg0 "CostAllocationTags") in
+      make ?nextToken ?costAllocationTags ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let costAllocationTags =
+        field_map json__ "CostAllocationTags" CostAllocationTagList.of_json in
+      make ?nextToken ?costAllocationTags ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Get a list of cost allocation tags. All inputs in the API are optional and serve as filters. By default, all cost allocation tags are returned."]
+module ResourceTypesFilterInput =
+  struct
+    type nonrec t = ResourceType.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:5) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResourceType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResourceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResourceTypesFilterInput"
+        ~of_json:ResourceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ListCostCategoryDefinitionsRequest =
   struct
     type nonrec t =
       {
       effectiveOn: ZonedDateTime.t option
-        [@ocaml.doc "The date when the Cost Category was effective."];
+        [@ocaml.doc "The date when the cost category was effective."];
       nextToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
       maxResults: CostCategoryMaxResults.t option
-        [@ocaml.doc "The number of entries a paginated response contains."]}
+        [@ocaml.doc "The number of entries a paginated response contains."];
+      supportedResourceTypes: ResourceTypesFilterInput.t option
+        [@ocaml.doc
+          "Filter cost category definitions that are supported by given resource types based on the latest version. If the filter is present, the result only includes Cost Categories that supports input resource type. If the filter isn't provided, no filtering is applied. The valid values are billing:rispgroupsharing and billing:billingview."]}
     let make ?effectiveOn =
       fun ?nextToken ->
-        fun ?maxResults -> fun () -> { effectiveOn; nextToken; maxResults }
+        fun ?maxResults ->
+          fun ?supportedResourceTypes ->
+            fun () ->
+              { effectiveOn; nextToken; maxResults; supportedResourceTypes }
     let to_value x =
       structure_to_value
         [("EffectiveOn",
            (Option.map x.effectiveOn ~f:ZonedDateTime.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value));
         ("MaxResults",
-          (Option.map x.maxResults ~f:CostCategoryMaxResults.to_value))]
+          (Option.map x.maxResults ~f:CostCategoryMaxResults.to_value));
+        ("SupportedResourceTypes",
+          (Option.map x.supportedResourceTypes
+             ~f:ResourceTypesFilterInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let supportedResourceTypes =
+        (Option.map ~f:ResourceTypesFilterInput.of_xml)
+          (Xml.child xml_arg0 "SupportedResourceTypes") in
       let maxResults =
         (Option.map ~f:CostCategoryMaxResults.of_xml)
           (Xml.child xml_arg0 "MaxResults") in
@@ -12569,24 +17402,27 @@ module ListCostCategoryDefinitionsRequest =
       let effectiveOn =
         (Option.map ~f:ZonedDateTime.of_xml)
           (Xml.child xml_arg0 "EffectiveOn") in
-      make ?maxResults ?nextToken ?effectiveOn ()
+      make ?supportedResourceTypes ?maxResults ?nextToken ?effectiveOn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let supportedResourceTypes =
+        field_map json__ "SupportedResourceTypes"
+          ResourceTypesFilterInput.of_json in
       let maxResults =
-        field_map json "MaxResults" CostCategoryMaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
-      let effectiveOn = field_map json "EffectiveOn" ZonedDateTime.of_json in
-      make ?maxResults ?nextToken ?effectiveOn ()
+        field_map json__ "MaxResults" CostCategoryMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let effectiveOn = field_map json__ "EffectiveOn" ZonedDateTime.of_json in
+      make ?supportedResourceTypes ?maxResults ?nextToken ?effectiveOn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name, ARN, NumberOfRules and effective dates of all Cost Categories defined in the account. You have the option to use EffectiveOn to return a list of Cost Categories that were active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see Cost Categories that are effective on the current date. If Cost Category is still effective, EffectiveEnd is omitted in the response. ListCostCategoryDefinitions supports pagination. The request can have a MaxResults range up to 100."]
+       "Returns the name, Amazon Resource Name (ARN), NumberOfRules and effective dates of all cost categories defined in the account. You have the option to use EffectiveOn and SupportedResourceTypes to return a list of cost categories that were active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see cost categories that are effective on the current date. If cost category is still effective, EffectiveEnd is omitted in the response. ListCostCategoryDefinitions supports pagination. The request can have a MaxResults range up to 100."]
 module ListCostCategoryDefinitionsResponse =
   struct
     type nonrec t =
       {
       costCategoryReferences: CostCategoryReferencesList.t option
         [@ocaml.doc
-          "A reference to a Cost Category containing enough information to identify the Cost Category."];
+          "A reference to a cost category that contains enough information to identify the Cost Category."];
       nextToken: NextPageToken.t option
         [@ocaml.doc
           "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
@@ -12634,15 +17470,300 @@ module ListCostCategoryDefinitionsResponse =
           (Xml.child xml_arg0 "CostCategoryReferences") in
       make ?nextToken ?costCategoryReferences ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextPageToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
       let costCategoryReferences =
-        field_map json "CostCategoryReferences"
+        field_map json__ "CostCategoryReferences"
           CostCategoryReferencesList.of_json in
       make ?nextToken ?costCategoryReferences ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the name, ARN, NumberOfRules and effective dates of all Cost Categories defined in the account. You have the option to use EffectiveOn to return a list of Cost Categories that were active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see Cost Categories that are effective on the current date. If Cost Category is still effective, EffectiveEnd is omitted in the response. ListCostCategoryDefinitions supports pagination. The request can have a MaxResults range up to 100."]
+       "Returns the name, Amazon Resource Name (ARN), NumberOfRules and effective dates of all cost categories defined in the account. You have the option to use EffectiveOn and SupportedResourceTypes to return a list of cost categories that were active on a specific date. If there is no EffectiveOn specified, you\226\128\153ll see cost categories that are effective on the current date. If cost category is still effective, EffectiveEnd is omitted in the response. ListCostCategoryDefinitions supports pagination. The request can have a MaxResults range up to 100."]
+module ListCostCategoryResourceAssociationsRequest =
+  struct
+    type nonrec t =
+      {
+      costCategoryArn: Arn.t option
+        [@ocaml.doc "The unique identifier for your cost category."];
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."];
+      maxResults: CostCategoryMaxResults.t option
+        [@ocaml.doc "The number of entries a paginated response contains."]}
+    let make ?costCategoryArn =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun () -> { costCategoryArn; nextToken; maxResults }
+    let to_value x =
+      structure_to_value
+        [("CostCategoryArn", (Option.map x.costCategoryArn ~f:Arn.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value));
+        ("MaxResults",
+          (Option.map x.maxResults ~f:CostCategoryMaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:CostCategoryMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let costCategoryArn =
+        (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
+      make ?maxResults ?nextToken ?costCategoryArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" CostCategoryMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
+      make ?maxResults ?nextToken ?costCategoryArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns resource associations of all cost categories defined in the account. You have the option to use CostCategoryArn to get the association for a specific cost category. ListCostCategoryResourceAssociations supports pagination. The request can have a MaxResults range up to 100."]
+module ListCostCategoryResourceAssociationsResponse =
+  struct
+    type nonrec t =
+      {
+      costCategoryResourceAssociations:
+        CostCategoryResourceAssociations.t option
+        [@ocaml.doc
+          "A reference to a cost category association that contains information on an associated resource."];
+      nextToken: NextPageToken.t option
+        [@ocaml.doc
+          "The token to retrieve the next set of results. Amazon Web Services provides the token when the response from a previous call has more results than the maximum page size."]}
+    type nonrec error =
+      [ `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?costCategoryResourceAssociations =
+      fun ?nextToken ->
+        fun () -> { costCategoryResourceAssociations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("CostCategoryResourceAssociations",
+           (Option.map x.costCategoryResourceAssociations
+              ~f:CostCategoryResourceAssociations.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextPageToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let costCategoryResourceAssociations =
+        (Option.map ~f:CostCategoryResourceAssociations.of_xml)
+          (Xml.child xml_arg0 "CostCategoryResourceAssociations") in
+      make ?nextToken ?costCategoryResourceAssociations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextPageToken.of_json in
+      let costCategoryResourceAssociations =
+        field_map json__ "CostCategoryResourceAssociations"
+          CostCategoryResourceAssociations.of_json in
+      make ?nextToken ?costCategoryResourceAssociations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns resource associations of all cost categories defined in the account. You have the option to use CostCategoryArn to get the association for a specific cost category. ListCostCategoryResourceAssociations supports pagination. The request can have a MaxResults range up to 100."]
+module RecommendationIdList =
+  struct
+    type nonrec t = RecommendationId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RecommendationId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RecommendationId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RecommendationIdList"
+        ~of_json:RecommendationId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListSavingsPlansPurchaseRecommendationGenerationRequest =
+  struct
+    type nonrec t =
+      {
+      generationStatus: GenerationStatus.t option
+        [@ocaml.doc "The status of the recommendation generation."];
+      recommendationIds: RecommendationIdList.t option
+        [@ocaml.doc "The IDs for each specific recommendation."];
+      pageSize: RecommendationsPageSize.t option
+        [@ocaml.doc
+          "The number of recommendations that you want returned in a single response object."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc "The token to retrieve the next set of results."]}
+    let make ?generationStatus =
+      fun ?recommendationIds ->
+        fun ?pageSize ->
+          fun ?nextPageToken ->
+            fun () ->
+              { generationStatus; recommendationIds; pageSize; nextPageToken
+              }
+    let to_value x =
+      structure_to_value
+        [("GenerationStatus",
+           (Option.map x.generationStatus ~f:GenerationStatus.to_value));
+        ("RecommendationIds",
+          (Option.map x.recommendationIds ~f:RecommendationIdList.to_value));
+        ("PageSize",
+          (Option.map x.pageSize ~f:RecommendationsPageSize.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let pageSize =
+        (Option.map ~f:RecommendationsPageSize.of_xml)
+          (Xml.child xml_arg0 "PageSize") in
+      let recommendationIds =
+        (Option.map ~f:RecommendationIdList.of_xml)
+          (Xml.child xml_arg0 "RecommendationIds") in
+      let generationStatus =
+        (Option.map ~f:GenerationStatus.of_xml)
+          (Xml.child xml_arg0 "GenerationStatus") in
+      make ?nextPageToken ?pageSize ?recommendationIds ?generationStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let pageSize =
+        field_map json__ "PageSize" RecommendationsPageSize.of_json in
+      let recommendationIds =
+        field_map json__ "RecommendationIds" RecommendationIdList.of_json in
+      let generationStatus =
+        field_map json__ "GenerationStatus" GenerationStatus.of_json in
+      make ?nextPageToken ?pageSize ?recommendationIds ?generationStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of your historical recommendation generations within the past 30 days."]
+module ListSavingsPlansPurchaseRecommendationGenerationResponse =
+  struct
+    type nonrec t =
+      {
+      generationSummaryList: GenerationSummaryList.t option
+        [@ocaml.doc "The list of historical recommendation generations."];
+      nextPageToken: NextPageToken.t option
+        [@ocaml.doc "The token to retrieve the next set of results."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?generationSummaryList =
+      fun ?nextPageToken ->
+        fun () -> { generationSummaryList; nextPageToken }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("GenerationSummaryList",
+           (Option.map x.generationSummaryList
+              ~f:GenerationSummaryList.to_value));
+        ("NextPageToken",
+          (Option.map x.nextPageToken ~f:NextPageToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextPageToken =
+        (Option.map ~f:NextPageToken.of_xml)
+          (Xml.child xml_arg0 "NextPageToken") in
+      let generationSummaryList =
+        (Option.map ~f:GenerationSummaryList.of_xml)
+          (Xml.child xml_arg0 "GenerationSummaryList") in
+      make ?nextPageToken ?generationSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextPageToken =
+        field_map json__ "NextPageToken" NextPageToken.of_json in
+      let generationSummaryList =
+        field_map json__ "GenerationSummaryList"
+          GenerationSummaryList.of_json in
+      make ?nextPageToken ?generationSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves a list of your historical recommendation generations within the past 30 days."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -12661,8 +17782,8 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12673,7 +17794,7 @@ module ListTagsForResourceResponse =
       {
       resourceTags: ResourceTagList.t option
         [@ocaml.doc
-          "A list of tag key value pairs that are associated with the response."]}
+          "A list of tag key value pairs that are associated with the resource."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -12722,9 +17843,9 @@ module ListTagsForResourceResponse =
           (Xml.child xml_arg0 "ResourceTags") in
       make ?resourceTags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map json "ResourceTags" ResourceTagList.of_json in
+        field_map json__ "ResourceTags" ResourceTagList.of_json in
       make ?resourceTags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12753,10 +17874,10 @@ module ProvideAnomalyFeedbackRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
       make ~feedback ~anomalyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let feedback =
-        field_map_exn json "Feedback" AnomalyFeedbackType.of_json in
-      let anomalyId = field_map_exn json "AnomalyId" GenericString.of_json in
+        field_map_exn json__ "Feedback" AnomalyFeedbackType.of_json in
+      let anomalyId = field_map_exn json__ "AnomalyId" GenericString.of_json in
       make ~feedback ~anomalyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the feedback property of a given cost anomaly."]
@@ -12764,13 +17885,12 @@ module ProvideAnomalyFeedbackResponse =
   struct
     type nonrec t =
       {
-      anomalyId: GenericString.t
+      anomalyId: GenericString.t option
         [@ocaml.doc "The ID of the modified cost anomaly."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ProvideAnomalyFeedbackResponse"
-    let make ~anomalyId = fun () -> { anomalyId }
+    let make ?anomalyId = fun () -> { anomalyId }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -12797,17 +17917,16 @@ module ProvideAnomalyFeedbackResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AnomalyId", (Some (GenericString.to_value x.anomalyId)))]
+        [("AnomalyId", (Option.map x.anomalyId ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let anomalyId =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AnomalyId") in
-      make ~anomalyId ()
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "AnomalyId") in
+      make ?anomalyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let anomalyId = field_map_exn json "AnomalyId" GenericString.of_json in
-      make ~anomalyId ()
+    let of_json json__ =
+      let anomalyId = field_map json__ "AnomalyId" GenericString.of_json in
+      make ?anomalyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modifies the feedback property of a given cost anomaly."]
 module ResourceTagKeyList =
@@ -12819,6 +17938,9 @@ module ResourceTagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceTagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12840,6 +17962,356 @@ module ResourceTagKeyList =
         j
     let to_json v = composed_to_json to_value v
   end
+module StartCommitmentPurchaseAnalysisRequest =
+  struct
+    type nonrec t =
+      {
+      commitmentPurchaseAnalysisConfiguration:
+        CommitmentPurchaseAnalysisConfiguration.t
+        [@ocaml.doc
+          "The configuration for the commitment purchase analysis."]}
+    let context_ = "StartCommitmentPurchaseAnalysisRequest"
+    let make ~commitmentPurchaseAnalysisConfiguration =
+      fun () -> { commitmentPurchaseAnalysisConfiguration }
+    let to_value x =
+      structure_to_value
+        [("CommitmentPurchaseAnalysisConfiguration",
+           (Some
+              (CommitmentPurchaseAnalysisConfiguration.to_value
+                 x.commitmentPurchaseAnalysisConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let commitmentPurchaseAnalysisConfiguration =
+        CommitmentPurchaseAnalysisConfiguration.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CommitmentPurchaseAnalysisConfiguration") in
+      make ~commitmentPurchaseAnalysisConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let commitmentPurchaseAnalysisConfiguration =
+        field_map_exn json__ "CommitmentPurchaseAnalysisConfiguration"
+          CommitmentPurchaseAnalysisConfiguration.of_json in
+      make ~commitmentPurchaseAnalysisConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the parameters of a planned commitment purchase and starts the generation of the analysis. This enables you to estimate the cost, coverage, and utilization impact of your planned commitment purchases."]
+module StartCommitmentPurchaseAnalysisResponse =
+  struct
+    type nonrec t =
+      {
+      analysisId: AnalysisId.t option
+        [@ocaml.doc
+          "The analysis ID that's associated with the commitment purchase analysis."];
+      analysisStartedTime: ZonedDateTime.t option
+        [@ocaml.doc "The start time of the analysis."];
+      estimatedCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "The estimated time for when the analysis will complete."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `GenerationExistsException of GenerationExistsException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?analysisId =
+      fun ?analysisStartedTime ->
+        fun ?estimatedCompletionTime ->
+          fun () ->
+            { analysisId; analysisStartedTime; estimatedCompletionTime }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "GenerationExistsException" ->
+          `GenerationExistsException (GenerationExistsException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "GenerationExistsException" ->
+          `GenerationExistsException (GenerationExistsException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `GenerationExistsException e ->
+          `Assoc
+            [("error", (`String "GenerationExistsException"));
+            ("details", (GenerationExistsException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AnalysisId", (Option.map x.analysisId ~f:AnalysisId.to_value));
+        ("AnalysisStartedTime",
+          (Option.map x.analysisStartedTime ~f:ZonedDateTime.to_value));
+        ("EstimatedCompletionTime",
+          (Option.map x.estimatedCompletionTime ~f:ZonedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EstimatedCompletionTime") in
+      let analysisStartedTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "AnalysisStartedTime") in
+      let analysisId =
+        (Option.map ~f:AnalysisId.of_xml) (Xml.child xml_arg0 "AnalysisId") in
+      make ?estimatedCompletionTime ?analysisStartedTime ?analysisId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedCompletionTime =
+        field_map json__ "EstimatedCompletionTime" ZonedDateTime.of_json in
+      let analysisStartedTime =
+        field_map json__ "AnalysisStartedTime" ZonedDateTime.of_json in
+      let analysisId = field_map json__ "AnalysisId" AnalysisId.of_json in
+      make ?estimatedCompletionTime ?analysisStartedTime ?analysisId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the parameters of a planned commitment purchase and starts the generation of the analysis. This enables you to estimate the cost, coverage, and utilization impact of your planned commitment purchases."]
+module StartCostAllocationTagBackfillRequest =
+  struct
+    type nonrec t =
+      {
+      backfillFrom: ZonedDateTime.t
+        [@ocaml.doc
+          "The date you want the backfill to start from. The date can only be a first day of the month (a billing start date). Dates can't precede the previous twelve months, or in the future."]}
+    let context_ = "StartCostAllocationTagBackfillRequest"
+    let make ~backfillFrom = fun () -> { backfillFrom }
+    let to_value x =
+      structure_to_value
+        [("BackfillFrom", (Some (ZonedDateTime.to_value x.backfillFrom)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let backfillFrom =
+        ZonedDateTime.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "BackfillFrom") in
+      make ~backfillFrom ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let backfillFrom =
+        field_map_exn json__ "BackfillFrom" ZonedDateTime.of_json in
+      make ~backfillFrom ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Request a cost allocation tag backfill. This will backfill the activation status (either active or inactive) for all tag keys from para:BackfillFrom up to the time this request is made. You can request a backfill once every 24 hours."]
+module StartCostAllocationTagBackfillResponse =
+  struct
+    type nonrec t =
+      {
+      backfillRequest: CostAllocationTagBackfillRequest.t option
+        [@ocaml.doc
+          "An object containing detailed metadata of your new backfill request."]}
+    type nonrec error =
+      [ `BackfillLimitExceededException of BackfillLimitExceededException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?backfillRequest = fun () -> { backfillRequest }
+    let error_of_json name json =
+      match name with
+      | "BackfillLimitExceededException" ->
+          `BackfillLimitExceededException
+            (BackfillLimitExceededException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BackfillLimitExceededException" ->
+          `BackfillLimitExceededException
+            (BackfillLimitExceededException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BackfillLimitExceededException e ->
+          `Assoc
+            [("error", (`String "BackfillLimitExceededException"));
+            ("details", (BackfillLimitExceededException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("BackfillRequest",
+           (Option.map x.backfillRequest
+              ~f:CostAllocationTagBackfillRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let backfillRequest =
+        (Option.map ~f:CostAllocationTagBackfillRequest.of_xml)
+          (Xml.child xml_arg0 "BackfillRequest") in
+      make ?backfillRequest ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let backfillRequest =
+        field_map json__ "BackfillRequest"
+          CostAllocationTagBackfillRequest.of_json in
+      make ?backfillRequest ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Request a cost allocation tag backfill. This will backfill the activation status (either active or inactive) for all tag keys from para:BackfillFrom up to the time this request is made. You can request a backfill once every 24 hours."]
+module StartSavingsPlansPurchaseRecommendationGenerationRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests a Savings Plans recommendation generation. This enables you to calculate a fresh set of Savings Plans recommendations that takes your latest usage data and current Savings Plans inventory into account. You can refresh Savings Plans recommendations up to three times daily for a consolidated billing family. StartSavingsPlansPurchaseRecommendationGeneration has no request syntax because no input parameters are needed to support this operation."]
+module StartSavingsPlansPurchaseRecommendationGenerationResponse =
+  struct
+    type nonrec t =
+      {
+      recommendationId: RecommendationId.t option
+        [@ocaml.doc "The ID for this specific recommendation."];
+      generationStartedTime: ZonedDateTime.t option
+        [@ocaml.doc "The start time of the recommendation generation."];
+      estimatedCompletionTime: ZonedDateTime.t option
+        [@ocaml.doc
+          "The estimated time for when the recommendation generation will complete."]}
+    type nonrec error =
+      [ `DataUnavailableException of DataUnavailableException.t 
+      | `GenerationExistsException of GenerationExistsException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?recommendationId =
+      fun ?generationStartedTime ->
+        fun ?estimatedCompletionTime ->
+          fun () ->
+            {
+              recommendationId;
+              generationStartedTime;
+              estimatedCompletionTime
+            }
+    let error_of_json name json =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_json json)
+      | "GenerationExistsException" ->
+          `GenerationExistsException (GenerationExistsException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DataUnavailableException" ->
+          `DataUnavailableException (DataUnavailableException.of_xml xml)
+      | "GenerationExistsException" ->
+          `GenerationExistsException (GenerationExistsException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DataUnavailableException e ->
+          `Assoc
+            [("error", (`String "DataUnavailableException"));
+            ("details", (DataUnavailableException.to_json e))]
+      | `GenerationExistsException e ->
+          `Assoc
+            [("error", (`String "GenerationExistsException"));
+            ("details", (GenerationExistsException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("RecommendationId",
+           (Option.map x.recommendationId ~f:RecommendationId.to_value));
+        ("GenerationStartedTime",
+          (Option.map x.generationStartedTime ~f:ZonedDateTime.to_value));
+        ("EstimatedCompletionTime",
+          (Option.map x.estimatedCompletionTime ~f:ZonedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let estimatedCompletionTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EstimatedCompletionTime") in
+      let generationStartedTime =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "GenerationStartedTime") in
+      let recommendationId =
+        (Option.map ~f:RecommendationId.of_xml)
+          (Xml.child xml_arg0 "RecommendationId") in
+      make ?estimatedCompletionTime ?generationStartedTime ?recommendationId
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let estimatedCompletionTime =
+        field_map json__ "EstimatedCompletionTime" ZonedDateTime.of_json in
+      let generationStartedTime =
+        field_map json__ "GenerationStartedTime" ZonedDateTime.of_json in
+      let recommendationId =
+        field_map json__ "RecommendationId" RecommendationId.of_json in
+      make ?estimatedCompletionTime ?generationStartedTime ?recommendationId
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Requests a Savings Plans recommendation generation. This enables you to calculate a fresh set of Savings Plans recommendations that takes your latest usage data and current Savings Plans inventory into account. You can refresh Savings Plans recommendations up to three times daily for a consolidated billing family. StartSavingsPlansPurchaseRecommendationGeneration has no request syntax because no input parameters are needed to support this operation."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -12849,7 +18321,7 @@ module TagResourceRequest =
           "The Amazon Resource Name (ARN) of the resource. For a list of supported resources, see ResourceTag."];
       resourceTags: ResourceTagList.t
         [@ocaml.doc
-          "A list of tag key-value pairs to be added to the resource. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Valid characters for keys and values are: A-Z, a-z, spaces, _.:/=+- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
+          "A list of tag key-value pairs to be added to the resource. Each tag consists of a key and a value, and each key must be unique for the resource. The following restrictions apply to resource tags: Although the maximum number of array members is 200, you can assign a maximum of 50 user-tags to one resource. The remaining are reserved for Amazon Web Services use The maximum length of a key is 128 characters The maximum length of a value is 256 characters Keys and values can only contain alphanumeric characters, spaces, and any of the following: _.:/=+\\@- Keys and values are case sensitive Keys and values are trimmed for any leading or trailing whitespaces Don\226\128\153t use aws: as a prefix for your keys. This prefix is reserved for Amazon Web Services use"]}
     let context_ = "TagResourceRequest"
     let make ~resourceArn =
       fun ~resourceTags -> fun () -> { resourceArn; resourceTags }
@@ -12866,10 +18338,10 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceTags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTags =
-        field_map_exn json "ResourceTags" ResourceTagList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+        field_map_exn json__ "ResourceTags" ResourceTagList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceTags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12894,9 +18366,9 @@ module TooManyTagsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?resourceName ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceName = field_map json "ResourceName" Arn.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let resourceName = field_map json__ "ResourceName" Arn.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?resourceName ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12968,7 +18440,7 @@ module UntagResourceRequest =
           "The Amazon Resource Name (ARN) of the resource. For a list of supported resources, see ResourceTag."];
       resourceTagKeys: ResourceTagKeyList.t
         [@ocaml.doc
-          "A list of tag keys associated with tags that need to be removed from the resource. If you specify a tag key that does not exist, it is ignored. Although the maximum number of array members is 200, user-tag maximum is 50. The remaining are reserved for Amazon Web Services use."]}
+          "A list of tag keys associated with tags that need to be removed from the resource. If you specify a tag key that doesn't exist, it's ignored. Although the maximum number of array members is 200, user-tag maximum is 50. The remaining are reserved for Amazon Web Services use."]}
     let context_ = "UntagResourceRequest"
     let make ~resourceArn =
       fun ~resourceTagKeys -> fun () -> { resourceArn; resourceTagKeys }
@@ -12986,14 +18458,14 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceTagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceTagKeys =
-        field_map_exn json "ResourceTagKeys" ResourceTagKeyList.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Arn.of_json in
+        field_map_exn json__ "ResourceTagKeys" ResourceTagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Arn.of_json in
       make ~resourceTagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a resource. Specify only tag key(s) in your request. Do not specify the value."]
+       "Removes one or more tags from a resource. Specify only tag keys in your request. Don't specify the value."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -13042,7 +18514,7 @@ module UntagResourceResponse =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes one or more tags from a resource. Specify only tag key(s) in your request. Do not specify the value."]
+       "Removes one or more tags from a resource. Specify only tag keys in your request. Don't specify the value."]
 module UpdateAnomalyMonitorRequest =
   struct
     type nonrec t =
@@ -13068,9 +18540,10 @@ module UpdateAnomalyMonitorRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
       make ?monitorName ~monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let monitorName = field_map json "MonitorName" GenericString.of_json in
-      let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
+    let of_json json__ =
+      let monitorName = field_map json__ "MonitorName" GenericString.of_json in
+      let monitorArn =
+        field_map_exn json__ "MonitorArn" GenericString.of_json in
       make ?monitorName ~monitorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13079,13 +18552,13 @@ module UpdateAnomalyMonitorResponse =
   struct
     type nonrec t =
       {
-      monitorArn: GenericString.t [@ocaml.doc "A cost anomaly monitor ARN."]}
+      monitorArn: GenericString.t option
+        [@ocaml.doc "A cost anomaly monitor ARN."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `UnknownMonitorException of UnknownMonitorException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAnomalyMonitorResponse"
-    let make ~monitorArn = fun () -> { monitorArn }
+    let make ?monitorArn = fun () -> { monitorArn }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -13120,17 +18593,17 @@ module UpdateAnomalyMonitorResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("MonitorArn", (Some (GenericString.to_value x.monitorArn)))]
+        [("MonitorArn", (Option.map x.monitorArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let monitorArn =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MonitorArn") in
-      make ~monitorArn ()
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "MonitorArn") in
+      make ?monitorArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let monitorArn = field_map_exn json "MonitorArn" GenericString.of_json in
-      make ~monitorArn ()
+    let of_json json__ =
+      let monitorArn = field_map json__ "MonitorArn" GenericString.of_json in
+      make ?monitorArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an existing cost anomaly monitor. The changes made are applied going forward, and doesn't change anomalies detected in the past."]
@@ -13143,7 +18616,7 @@ module UpdateAnomalySubscriptionRequest =
           "A cost anomaly subscription Amazon Resource Name (ARN)."];
       threshold: NullableNonNegativeDouble.t option
         [@ocaml.doc
-          "The update to the threshold value for receiving notifications."];
+          "(deprecated) The update to the threshold value for receiving notifications. This field has been deprecated. To update a threshold, use ThresholdExpression. Continued use of Threshold will be treated as shorthand syntax for a ThresholdExpression. You can specify either Threshold or ThresholdExpression, but not both."];
       frequency: AnomalySubscriptionFrequency.t option
         [@ocaml.doc
           "The update to the frequency value that subscribers receive notifications."];
@@ -13152,23 +18625,28 @@ module UpdateAnomalySubscriptionRequest =
       subscribers: Subscribers.t option
         [@ocaml.doc "The update to the subscriber list."];
       subscriptionName: GenericString.t option
-        [@ocaml.doc "The new name of the subscription."]}
+        [@ocaml.doc "The new name of the subscription."];
+      thresholdExpression: Expression.t option
+        [@ocaml.doc
+          "The update to the Expression object used to specify the anomalies that you want to generate alerts for. This supports dimensions and nested expressions. The supported dimensions are ANOMALY_TOTAL_IMPACT_ABSOLUTE and ANOMALY_TOTAL_IMPACT_PERCENTAGE, corresponding to an anomaly\226\128\153s TotalImpact and TotalImpactPercentage, respectively (see Impact for more details). The supported nested expression types are AND and OR. The match option GREATER_THAN_OR_EQUAL is required. Values must be numbers between 0 and 10,000,000,000 in string format. You can specify either Threshold or ThresholdExpression, but not both. The following are examples of valid ThresholdExpressions: Absolute threshold: \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} Percentage threshold: \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} AND two thresholds together: \\{ \"And\": \\[ \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\}, \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} \\] \\} OR two thresholds together: \\{ \"Or\": \\[ \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_ABSOLUTE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\}, \\{ \"Dimensions\": \\{ \"Key\": \"ANOMALY_TOTAL_IMPACT_PERCENTAGE\", \"MatchOptions\": \\[ \"GREATER_THAN_OR_EQUAL\" \\], \"Values\": \\[ \"100\" \\] \\} \\} \\] \\}"]}
     let context_ = "UpdateAnomalySubscriptionRequest"
     let make ?threshold =
       fun ?frequency ->
         fun ?monitorArnList ->
           fun ?subscribers ->
             fun ?subscriptionName ->
-              fun ~subscriptionArn ->
-                fun () ->
-                  {
-                    threshold;
-                    frequency;
-                    monitorArnList;
-                    subscribers;
-                    subscriptionName;
-                    subscriptionArn
-                  }
+              fun ?thresholdExpression ->
+                fun ~subscriptionArn ->
+                  fun () ->
+                    {
+                      threshold;
+                      frequency;
+                      monitorArnList;
+                      subscribers;
+                      subscriptionName;
+                      thresholdExpression;
+                      subscriptionArn
+                    }
     let to_value x =
       structure_to_value
         [("SubscriptionArn",
@@ -13181,9 +18659,14 @@ module UpdateAnomalySubscriptionRequest =
           (Option.map x.monitorArnList ~f:MonitorArnList.to_value));
         ("Subscribers", (Option.map x.subscribers ~f:Subscribers.to_value));
         ("SubscriptionName",
-          (Option.map x.subscriptionName ~f:GenericString.to_value))]
+          (Option.map x.subscriptionName ~f:GenericString.to_value));
+        ("ThresholdExpression",
+          (Option.map x.thresholdExpression ~f:Expression.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let thresholdExpression =
+        (Option.map ~f:Expression.of_xml)
+          (Xml.child xml_arg0 "ThresholdExpression") in
       let subscriptionName =
         (Option.map ~f:GenericString.of_xml)
           (Xml.child xml_arg0 "SubscriptionName") in
@@ -13201,38 +18684,40 @@ module UpdateAnomalySubscriptionRequest =
       let subscriptionArn =
         GenericString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
-      make ?subscriptionName ?subscribers ?monitorArnList ?frequency
-        ?threshold ~subscriptionArn ()
+      make ?thresholdExpression ?subscriptionName ?subscribers
+        ?monitorArnList ?frequency ?threshold ~subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let thresholdExpression =
+        field_map json__ "ThresholdExpression" Expression.of_json in
       let subscriptionName =
-        field_map json "SubscriptionName" GenericString.of_json in
-      let subscribers = field_map json "Subscribers" Subscribers.of_json in
+        field_map json__ "SubscriptionName" GenericString.of_json in
+      let subscribers = field_map json__ "Subscribers" Subscribers.of_json in
       let monitorArnList =
-        field_map json "MonitorArnList" MonitorArnList.of_json in
+        field_map json__ "MonitorArnList" MonitorArnList.of_json in
       let frequency =
-        field_map json "Frequency" AnomalySubscriptionFrequency.of_json in
+        field_map json__ "Frequency" AnomalySubscriptionFrequency.of_json in
       let threshold =
-        field_map json "Threshold" NullableNonNegativeDouble.of_json in
+        field_map json__ "Threshold" NullableNonNegativeDouble.of_json in
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" GenericString.of_json in
-      make ?subscriptionName ?subscribers ?monitorArnList ?frequency
-        ?threshold ~subscriptionArn ()
+        field_map_exn json__ "SubscriptionArn" GenericString.of_json in
+      make ?thresholdExpression ?subscriptionName ?subscribers
+        ?monitorArnList ?frequency ?threshold ~subscriptionArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing cost anomaly monitor subscription."]
+  end[@@ocaml.doc
+       "Updates an existing cost anomaly subscription. Specify the fields that you want to update. Omitted fields are unchanged. The JSON below describes the generic construct for each type. See Request Parameters for possible values as they apply to AnomalySubscription."]
 module UpdateAnomalySubscriptionResponse =
   struct
     type nonrec t =
       {
-      subscriptionArn: GenericString.t
+      subscriptionArn: GenericString.t option
         [@ocaml.doc "A cost anomaly subscription ARN."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `UnknownMonitorException of UnknownMonitorException.t 
       | `UnknownSubscriptionException of UnknownSubscriptionException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateAnomalySubscriptionResponse"
-    let make ~subscriptionArn = fun () -> { subscriptionArn }
+    let make ?subscriptionArn = fun () -> { subscriptionArn }
     let error_of_json name json =
       match name with
       | "LimitExceededException" ->
@@ -13278,26 +18763,188 @@ module UpdateAnomalySubscriptionResponse =
     let to_value x =
       structure_to_value
         [("SubscriptionArn",
-           (Some (GenericString.to_value x.subscriptionArn)))]
+           (Option.map x.subscriptionArn ~f:GenericString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let subscriptionArn =
-        GenericString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubscriptionArn") in
-      make ~subscriptionArn ()
+        (Option.map ~f:GenericString.of_xml)
+          (Xml.child xml_arg0 "SubscriptionArn") in
+      make ?subscriptionArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscriptionArn =
-        field_map_exn json "SubscriptionArn" GenericString.of_json in
-      make ~subscriptionArn ()
+        field_map json__ "SubscriptionArn" GenericString.of_json in
+      make ?subscriptionArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates an existing cost anomaly monitor subscription."]
+  end[@@ocaml.doc
+       "Updates an existing cost anomaly subscription. Specify the fields that you want to update. Omitted fields are unchanged. The JSON below describes the generic construct for each type. See Request Parameters for possible values as they apply to AnomalySubscription."]
+module UpdateCostAllocationTagsStatusError =
+  struct
+    type nonrec t =
+      {
+      tagKey: TagKey.t option
+        [@ocaml.doc "The key for the cost allocation tag."];
+      code: GenericString.t option
+        [@ocaml.doc
+          "An error code representing why the action failed on this entry."];
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "A message explaining why the action failed on this entry."]}
+    let make ?tagKey =
+      fun ?code -> fun ?message -> fun () -> { tagKey; code; message }
+    let to_value x =
+      structure_to_value
+        [("TagKey", (Option.map x.tagKey ~f:TagKey.to_value));
+        ("Code", (Option.map x.code ~f:GenericString.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let code =
+        (Option.map ~f:GenericString.of_xml) (Xml.child xml_arg0 "Code") in
+      let tagKey =
+        (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "TagKey") in
+      make ?message ?code ?tagKey ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let code = field_map json__ "Code" GenericString.of_json in
+      let tagKey = field_map json__ "TagKey" TagKey.of_json in
+      make ?message ?code ?tagKey ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gives a detailed description of the result of an action. It's on each cost allocation tag entry in the request."]
+module UpdateCostAllocationTagsStatusErrors =
+  struct
+    type nonrec t = UpdateCostAllocationTagsStatusError.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:20) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UpdateCostAllocationTagsStatusError.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:UpdateCostAllocationTagsStatusError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UpdateCostAllocationTagsStatusErrors"
+        ~of_json:UpdateCostAllocationTagsStatusError.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module UpdateCostAllocationTagsStatusRequest =
+  struct
+    type nonrec t =
+      {
+      costAllocationTagsStatus: CostAllocationTagStatusList.t
+        [@ocaml.doc
+          "The list of CostAllocationTagStatusEntry objects that are used to update cost allocation tags status for this request."]}
+    let context_ = "UpdateCostAllocationTagsStatusRequest"
+    let make ~costAllocationTagsStatus =
+      fun () -> { costAllocationTagsStatus }
+    let to_value x =
+      structure_to_value
+        [("CostAllocationTagsStatus",
+           (Some
+              (CostAllocationTagStatusList.to_value
+                 x.costAllocationTagsStatus)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let costAllocationTagsStatus =
+        CostAllocationTagStatusList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "CostAllocationTagsStatus") in
+      make ~costAllocationTagsStatus ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let costAllocationTagsStatus =
+        field_map_exn json__ "CostAllocationTagsStatus"
+          CostAllocationTagStatusList.of_json in
+      make ~costAllocationTagsStatus ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates status for cost allocation tags in bulk, with maximum batch size of 20. If the tag status that's updated is the same as the existing tag status, the request doesn't fail. Instead, it doesn't have any effect on the tag status (for example, activating the active tag)."]
+module UpdateCostAllocationTagsStatusResponse =
+  struct
+    type nonrec t =
+      {
+      errors: UpdateCostAllocationTagsStatusErrors.t option
+        [@ocaml.doc
+          "A list of UpdateCostAllocationTagsStatusError objects with error details about each cost allocation tag that can't be updated. If there's no failure, an empty array returns."]}
+    type nonrec error =
+      [ `LimitExceededException of LimitExceededException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?errors = fun () -> { errors }
+    let error_of_json name json =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Errors",
+           (Option.map x.errors
+              ~f:UpdateCostAllocationTagsStatusErrors.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errors =
+        (Option.map ~f:UpdateCostAllocationTagsStatusErrors.of_xml)
+          (Xml.child xml_arg0 "Errors") in
+      make ?errors ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errors =
+        field_map json__ "Errors"
+          UpdateCostAllocationTagsStatusErrors.of_json in
+      make ?errors ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates status for cost allocation tags in bulk, with maximum batch size of 20. If the tag status that's updated is the same as the existing tag status, the request doesn't fail. Instead, it doesn't have any effect on the tag status (for example, activating the active tag)."]
 module UpdateCostCategoryDefinitionRequest =
   struct
     type nonrec t =
       {
       costCategoryArn: Arn.t
-        [@ocaml.doc "The unique identifier for your Cost Category."];
+        [@ocaml.doc "The unique identifier for your cost category."];
+      effectiveStart: ZonedDateTime.t option
+        [@ocaml.doc
+          "The cost category's effective start date. It can only be a billing start date (first day of the month). If the date isn't provided, it's the first day of the current month. Dates can't be before the previous twelve months, or in the future."];
       ruleVersion: CostCategoryRuleVersion.t ;
       rules: CostCategoryRulesList.t
         [@ocaml.doc
@@ -13305,24 +18952,28 @@ module UpdateCostCategoryDefinitionRequest =
       defaultValue: CostCategoryValue.t option ;
       splitChargeRules: CostCategorySplitChargeRulesList.t option
         [@ocaml.doc
-          "The split charge rules used to allocate your charges between your Cost Category values."]}
+          "The split charge rules used to allocate your charges between your cost category values."]}
     let context_ = "UpdateCostCategoryDefinitionRequest"
-    let make ?defaultValue =
-      fun ?splitChargeRules ->
-        fun ~costCategoryArn ->
-          fun ~ruleVersion ->
-            fun ~rules ->
-              fun () ->
-                {
-                  defaultValue;
-                  splitChargeRules;
-                  costCategoryArn;
-                  ruleVersion;
-                  rules
-                }
+    let make ?effectiveStart =
+      fun ?defaultValue ->
+        fun ?splitChargeRules ->
+          fun ~costCategoryArn ->
+            fun ~ruleVersion ->
+              fun ~rules ->
+                fun () ->
+                  {
+                    effectiveStart;
+                    defaultValue;
+                    splitChargeRules;
+                    costCategoryArn;
+                    ruleVersion;
+                    rules
+                  }
     let to_value x =
       structure_to_value
         [("CostCategoryArn", (Some (Arn.to_value x.costCategoryArn)));
+        ("EffectiveStart",
+          (Option.map x.effectiveStart ~f:ZonedDateTime.to_value));
         ("RuleVersion",
           (Some (CostCategoryRuleVersion.to_value x.ruleVersion)));
         ("Rules", (Some (CostCategoryRulesList.to_value x.rules)));
@@ -13345,35 +18996,42 @@ module UpdateCostCategoryDefinitionRequest =
       let ruleVersion =
         CostCategoryRuleVersion.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "RuleVersion") in
+      let effectiveStart =
+        (Option.map ~f:ZonedDateTime.of_xml)
+          (Xml.child xml_arg0 "EffectiveStart") in
       let costCategoryArn =
         Arn.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "CostCategoryArn") in
       make ?splitChargeRules ?defaultValue ~rules ~ruleVersion
-        ~costCategoryArn ()
+        ?effectiveStart ~costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let splitChargeRules =
-        field_map json "SplitChargeRules"
+        field_map json__ "SplitChargeRules"
           CostCategorySplitChargeRulesList.of_json in
       let defaultValue =
-        field_map json "DefaultValue" CostCategoryValue.of_json in
-      let rules = field_map_exn json "Rules" CostCategoryRulesList.of_json in
+        field_map json__ "DefaultValue" CostCategoryValue.of_json in
+      let rules = field_map_exn json__ "Rules" CostCategoryRulesList.of_json in
       let ruleVersion =
-        field_map_exn json "RuleVersion" CostCategoryRuleVersion.of_json in
-      let costCategoryArn = field_map_exn json "CostCategoryArn" Arn.of_json in
+        field_map_exn json__ "RuleVersion" CostCategoryRuleVersion.of_json in
+      let effectiveStart =
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let costCategoryArn =
+        field_map_exn json__ "CostCategoryArn" Arn.of_json in
       make ?splitChargeRules ?defaultValue ~rules ~ruleVersion
-        ~costCategoryArn ()
+        ?effectiveStart ~costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Cost Category. Changes made to the Cost Category rules will be used to categorize the current month\226\128\153s expenses and future expenses. This won\226\128\153t change categorization for the previous months."]
+       "Updates an existing cost category. Changes made to the cost category rules will be used to categorize the current month\226\128\153s expenses and future expenses. This won\226\128\153t change categorization for the previous months."]
 module UpdateCostCategoryDefinitionResponse =
   struct
     type nonrec t =
       {
       costCategoryArn: Arn.t option
-        [@ocaml.doc "The unique identifier for your Cost Category."];
+        [@ocaml.doc "The unique identifier for your cost category."];
       effectiveStart: ZonedDateTime.t option
-        [@ocaml.doc "The Cost Category's effective start date."]}
+        [@ocaml.doc
+          "The cost category's effective start date. It can only be a billing start date (first day of the month)."]}
     type nonrec error =
       [ `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
@@ -13437,11 +19095,11 @@ module UpdateCostCategoryDefinitionResponse =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "CostCategoryArn") in
       make ?effectiveStart ?costCategoryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let effectiveStart =
-        field_map json "EffectiveStart" ZonedDateTime.of_json in
-      let costCategoryArn = field_map json "CostCategoryArn" Arn.of_json in
+        field_map json__ "EffectiveStart" ZonedDateTime.of_json in
+      let costCategoryArn = field_map json__ "CostCategoryArn" Arn.of_json in
       make ?effectiveStart ?costCategoryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Updates an existing Cost Category. Changes made to the Cost Category rules will be used to categorize the current month\226\128\153s expenses and future expenses. This won\226\128\153t change categorization for the previous months."]
+       "Updates an existing cost category. Changes made to the cost category rules will be used to categorize the current month\226\128\153s expenses and future expenses. This won\226\128\153t change categorization for the previous months."]

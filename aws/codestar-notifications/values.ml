@@ -124,7 +124,8 @@ module ListTargetsFilterValue =
   struct
     type nonrec t = string
     let context_ = "ListTargetsFilterValue"
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -207,7 +208,8 @@ module ListNotificationRulesFilterValue =
   struct
     type nonrec t = string
     let context_ = "ListNotificationRulesFilterValue"
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:2048); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -337,9 +339,11 @@ module Target =
     type nonrec t =
       {
       targetType: TargetType.t option
-        [@ocaml.doc "The target type. Can be an Amazon SNS topic."];
+        [@ocaml.doc
+          "The target type. Can be an Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client. Amazon Q Developer in chat applications topics are specified as SNS. Amazon Q Developer in chat applications clients are specified as AWSChatbotSlack."];
       targetAddress: TargetAddress.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the SNS topic."]}
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client."]}
     let make ?targetType =
       fun ?targetAddress -> fun () -> { targetType; targetAddress }
     let to_value x =
@@ -356,14 +360,14 @@ module Target =
         (Option.map ~f:TargetType.of_xml) (Xml.child xml_arg0 "TargetType") in
       make ?targetAddress ?targetType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetAddress =
-        field_map json "TargetAddress" TargetAddress.of_json in
-      let targetType = field_map json "TargetType" TargetType.of_json in
+        field_map json__ "TargetAddress" TargetAddress.of_json in
+      let targetType = field_map json__ "TargetType" TargetType.of_json in
       make ?targetAddress ?targetType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the SNS topics associated with a notification rule."]
+       "Information about the Amazon Q Developer in chat applications topics or Amazon Q Developer in chat applications clients associated with a notification rule."]
 module TagKey =
   struct
     type nonrec t = string
@@ -411,9 +415,11 @@ module TargetSummary =
     type nonrec t =
       {
       targetAddress: TargetAddress.t option
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the SNS topic."];
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client."];
       targetType: TargetType.t option
-        [@ocaml.doc "The type of the target (for example, SNS)."];
+        [@ocaml.doc
+          "The type of the target (for example, SNS). Amazon Q Developer in chat applications topics are specified as SNS. Amazon Q Developer in chat applications clients are specified as AWSChatbotSlack."];
       targetStatus: TargetStatus.t option
         [@ocaml.doc "The status of the target."]}
     let make ?targetAddress =
@@ -439,11 +445,11 @@ module TargetSummary =
           (Xml.child xml_arg0 "TargetAddress") in
       make ?targetStatus ?targetType ?targetAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let targetStatus = field_map json "TargetStatus" TargetStatus.of_json in
-      let targetType = field_map json "TargetType" TargetType.of_json in
+    let of_json json__ =
+      let targetStatus = field_map json__ "TargetStatus" TargetStatus.of_json in
+      let targetType = field_map json__ "TargetType" TargetType.of_json in
       let targetAddress =
-        field_map json "TargetAddress" TargetAddress.of_json in
+        field_map json__ "TargetAddress" TargetAddress.of_json in
       make ?targetStatus ?targetType ?targetAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -474,13 +480,13 @@ module ListTargetsFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ListTargetsFilterValue.of_json in
-      let name = field_map_exn json "Name" ListTargetsFilterName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ListTargetsFilterValue.of_json in
+      let name = field_map_exn json__ "Name" ListTargetsFilterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about a filter to apply to the list of returned targets. You can filter by target type, address, or status. For example, to filter results to notification rules that have active Amazon SNS topics as targets, you could specify a ListTargetsFilter Name as TargetType and a Value of SNS, and a Name of TARGET_STATUS and a Value of ACTIVE."]
+       "Information about a filter to apply to the list of returned targets. You can filter by target type, address, or status. For example, to filter results to notification rules that have active Amazon Q Developer in chat applications topics as targets, you could specify a ListTargetsFilter Name as TargetType and a Value of SNS, and a Name of TARGET_STATUS and a Value of ACTIVE."]
 module NotificationRuleSummary =
   struct
     type nonrec t =
@@ -503,9 +509,9 @@ module NotificationRuleSummary =
         (Option.map ~f:NotificationRuleId.of_xml) (Xml.child xml_arg0 "Id") in
       make ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" NotificationRuleArn.of_json in
-      let id = field_map json "Id" NotificationRuleId.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
+      let id = field_map json__ "Id" NotificationRuleId.of_json in
       make ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a specified notification rule."]
@@ -518,7 +524,7 @@ module ListNotificationRulesFilter =
           "The name of the attribute you want to use to filter the returned notification rules."];
       value: ListNotificationRulesFilterValue.t
         [@ocaml.doc
-          "The value of the attribute you want to use to filter the returned notification rules. For example, if you specify filtering by RESOURCE in Name, you might specify the ARN of a pipeline in AWS CodePipeline for the value."]}
+          "The value of the attribute you want to use to filter the returned notification rules. For example, if you specify filtering by RESOURCE in Name, you might specify the ARN of a pipeline in CodePipeline for the value."]}
     let context_ = "ListNotificationRulesFilter"
     let make ~name = fun ~value -> fun () -> { name; value }
     let to_value x =
@@ -535,11 +541,11 @@ module ListNotificationRulesFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "Value" ListNotificationRulesFilterValue.of_json in
+        field_map_exn json__ "Value" ListNotificationRulesFilterValue.of_json in
       let name =
-        field_map_exn json "Name" ListNotificationRulesFilterName.of_json in
+        field_map_exn json__ "Name" ListNotificationRulesFilterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -549,7 +555,8 @@ module EventTypeSummary =
     type nonrec t =
       {
       eventTypeId: EventTypeId.t option
-        [@ocaml.doc "The system-generated ID of the event."];
+        [@ocaml.doc
+          "The system-generated ID of the event. For a complete list of event types and IDs, see Notification concepts in the Developer Tools Console User Guide."];
       serviceName: ServiceName.t option
         [@ocaml.doc "The name of the service for which the event applies."];
       eventTypeName: EventTypeName.t option
@@ -584,12 +591,12 @@ module EventTypeSummary =
         (Option.map ~f:EventTypeId.of_xml) (Xml.child xml_arg0 "EventTypeId") in
       make ?resourceType ?eventTypeName ?serviceName ?eventTypeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "ResourceType" ResourceType.of_json in
+    let of_json json__ =
+      let resourceType = field_map json__ "ResourceType" ResourceType.of_json in
       let eventTypeName =
-        field_map json "EventTypeName" EventTypeName.of_json in
-      let serviceName = field_map json "ServiceName" ServiceName.of_json in
-      let eventTypeId = field_map json "EventTypeId" EventTypeId.of_json in
+        field_map json__ "EventTypeName" EventTypeName.of_json in
+      let serviceName = field_map json__ "ServiceName" ServiceName.of_json in
+      let eventTypeId = field_map json__ "EventTypeId" EventTypeId.of_json in
       make ?resourceType ?eventTypeName ?serviceName ?eventTypeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -620,14 +627,34 @@ module ListEventTypesFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let value =
-        field_map_exn json "Value" ListEventTypesFilterValue.of_json in
-      let name = field_map_exn json "Name" ListEventTypesFilterName.of_json in
+        field_map_exn json__ "Value" ListEventTypesFilterValue.of_json in
+      let name = field_map_exn json__ "Name" ListEventTypesFilterName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a filter to apply to the list of returned event types. You can filter by resource type or service name."]
+module ConfigurationException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Some or all of the configuration is incomplete, missing, or not valid."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
@@ -642,12 +669,12 @@ module ResourceNotFoundException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AWS CodeStar Notifications can't find a resource that matches the provided ARN."]
+       "CodeStar Notifications can't find a resource that matches the provided ARN."]
 module ValidationException =
   struct
     type nonrec t = {
@@ -662,8 +689,8 @@ module ValidationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameter values are not valid."]
@@ -690,6 +717,9 @@ module EventTypeIds =
   struct
     type nonrec t = EventTypeId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTypeId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -762,6 +792,9 @@ module Targets =
     type nonrec t = Target.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:10); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Target.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -795,16 +828,39 @@ module ConcurrentModificationException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AWS CodeStar Notifications can't complete the request because the resource is being modified by another process. Wait a few minutes and try again."]
+       "CodeStar Notifications can't complete the request because the resource is being modified by another process. Wait a few minutes and try again."]
+module LimitExceededException =
+  struct
+    type nonrec t = {
+      message: Message.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:Message.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "One of the CodeStar Notifications limits has been exceeded. Limits apply to accounts, notification rules, notifications, resources, and targets. For more information, see Limits."]
 module TagKeys =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -845,6 +901,8 @@ module Tags =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -886,8 +944,8 @@ module InvalidNextTokenException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -911,6 +969,9 @@ module TargetsBatch =
   struct
     type nonrec t = TargetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -935,6 +996,9 @@ module ListTargetsFilters =
   struct
     type nonrec t = ListTargetsFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListTargetsFilter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -978,6 +1042,9 @@ module NotificationRuleBatch =
   struct
     type nonrec t = NotificationRuleSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotificationRuleSummary.to_value)) |>
         (fun x -> `List x)
@@ -1004,6 +1071,9 @@ module ListNotificationRulesFilters =
   struct
     type nonrec t = ListNotificationRulesFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListNotificationRulesFilter.to_value)) |>
         (fun x -> `List x)
@@ -1030,6 +1100,9 @@ module EventTypeBatch =
   struct
     type nonrec t = EventTypeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventTypeSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1054,6 +1127,9 @@ module ListEventTypesFilters =
   struct
     type nonrec t = ListEventTypesFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ListEventTypesFilter.to_value)) |>
         (fun x -> `List x)
@@ -1145,26 +1221,6 @@ module ForceUnsubscribeAll =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module LimitExceededException =
-  struct
-    type nonrec t = {
-      message: Message.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "One of the AWS CodeStar Notifications limits has been exceeded. Limits apply to accounts, notification rules, notifications, resources, and targets. For more information, see Limits."]
 module AccessDeniedException =
   struct
     type nonrec t = {
@@ -1179,32 +1235,12 @@ module AccessDeniedException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "AWS CodeStar Notifications can't create the notification rule because you do not have sufficient permissions."]
-module ConfigurationException =
-  struct
-    type nonrec t = {
-      message: Message.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("Message", (Option.map x.message ~f:Message.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Some or all of the configuration is incomplete, missing, or not valid."]
+       "CodeStar Notifications can't create the notification rule because you do not have sufficient permissions."]
 module ResourceAlreadyExistsException =
   struct
     type nonrec t = {
@@ -1219,22 +1255,25 @@ module ResourceAlreadyExistsException =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A resource with the same name or ID already exists. Notification rule names must be unique in your AWS account."]
+       "A resource with the same name or ID already exists. Notification rule names must be unique in your Amazon Web Services account."]
 module UpdateNotificationRuleResult =
   struct
     type nonrec t = unit
     type nonrec error =
-      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      [ `ConfigurationException of ConfigurationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make () = ()
     let error_of_json name json =
       match name with
+      | "ConfigurationException" ->
+          `ConfigurationException (ConfigurationException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -1244,6 +1283,8 @@ module UpdateNotificationRuleResult =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConfigurationException" ->
+          `ConfigurationException (ConfigurationException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -1252,6 +1293,10 @@ module UpdateNotificationRuleResult =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConfigurationException e ->
+          `Assoc
+            [("error", (`String "ConfigurationException"));
+            ("details", (ConfigurationException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1288,13 +1333,13 @@ module UpdateNotificationRuleRequest =
           "The status of the notification rule. Valid statuses include enabled (sending notifications) or disabled (not sending notifications)."];
       eventTypeIds: EventTypeIds.t option
         [@ocaml.doc
-          "A list of event types associated with this notification rule."];
+          "A list of event types associated with this notification rule. For a complete list of event types and IDs, see Notification concepts in the Developer Tools Console User Guide."];
       targets: Targets.t option
         [@ocaml.doc
           "The address and type of the targets to receive notifications from this notification rule."];
       detailType: DetailType.t option
         [@ocaml.doc
-          "The level of detail to include in the notifications for this resource. BASIC will include only the contents of the event as it would appear in AWS CloudWatch. FULL will include any supplemental information provided by AWS CodeStar Notifications and/or the service for the resource for which the notification is created."]}
+          "The level of detail to include in the notifications for this resource. BASIC will include only the contents of the event as it would appear in Amazon CloudWatch. FULL will include any supplemental information provided by CodeStar Notifications and/or the service for the resource for which the notification is created."]}
     let context_ = "UpdateNotificationRuleRequest"
     let make ?name =
       fun ?status ->
@@ -1333,13 +1378,13 @@ module UpdateNotificationRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?detailType ?targets ?eventTypeIds ?status ?name ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let detailType = field_map json "DetailType" DetailType.of_json in
-      let targets = field_map json "Targets" Targets.of_json in
-      let eventTypeIds = field_map json "EventTypeIds" EventTypeIds.of_json in
-      let status = field_map json "Status" NotificationRuleStatus.of_json in
-      let name = field_map json "Name" NotificationRuleName.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let detailType = field_map json__ "DetailType" DetailType.of_json in
+      let targets = field_map json__ "Targets" Targets.of_json in
+      let eventTypeIds = field_map json__ "EventTypeIds" EventTypeIds.of_json in
+      let status = field_map json__ "Status" NotificationRuleStatus.of_json in
+      let name = field_map json__ "Name" NotificationRuleName.of_json in
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ?detailType ?targets ?eventTypeIds ?status ?name ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1350,6 +1395,7 @@ module UntagResourceResult =
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1359,6 +1405,8 @@ module UntagResourceResult =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -1371,6 +1419,8 @@ module UntagResourceResult =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -1383,6 +1433,10 @@ module UntagResourceResult =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1417,20 +1471,20 @@ module UntagResourceRequest =
     let make ~arn = fun ~tagKeys -> fun () -> { arn; tagKeys }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (NotificationRuleArn.to_value x.arn)));
-        ("TagKeys", (Some (TagKeys.to_value x.tagKeys)))]
+        [("resourceArn", (Some (NotificationRuleArn.to_value x.arn)));
+        ("tagKeys", (Some (TagKeys.to_value x.tagKeys)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tagKeys =
-        TagKeys.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagKeys") in
+        TagKeys.of_xml (Xml.child_exn ~context:context_ xml_arg0 "tagKeys") in
       let arn =
         NotificationRuleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+          (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeys.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeys.of_json in
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~tagKeys ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1439,14 +1493,13 @@ module UnsubscribeResult =
   struct
     type nonrec t =
       {
-      arn: NotificationRuleArn.t
+      arn: NotificationRuleArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the the notification rule from which you have removed a subscription."]}
     type nonrec error =
       [ `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UnsubscribeResult"
-    let make ~arn = fun () -> { arn }
+    let make ?arn = fun () -> { arn }
     let error_of_json name json =
       match name with
       | "ValidationException" ->
@@ -1473,20 +1526,19 @@ module UnsubscribeResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Some (NotificationRuleArn.to_value x.arn)))]
+        [("Arn", (Option.map x.arn ~f:NotificationRuleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let arn =
-        NotificationRuleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ~arn ()
+        (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
-      make ~arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes an association between a notification rule and an Amazon SNS topic so that subscribers to that topic stop receiving notifications when the events described in the rule are triggered."]
+       "Removes an association between a notification rule and an Amazon Q Developer in chat applications topic so that subscribers to that topic stop receiving notifications when the events described in the rule are triggered."]
 module UnsubscribeRequest =
   struct
     type nonrec t =
@@ -1496,7 +1548,7 @@ module UnsubscribeRequest =
           "The Amazon Resource Name (ARN) of the notification rule."];
       targetAddress: TargetAddress.t
         [@ocaml.doc
-          "The ARN of the SNS topic to unsubscribe from the notification rule."]}
+          "The ARN of the Amazon Q Developer in chat applications topic to unsubscribe from the notification rule."]}
     let context_ = "UnsubscribeRequest"
     let make ~arn = fun ~targetAddress -> fun () -> { arn; targetAddress }
     let to_value x =
@@ -1513,14 +1565,14 @@ module UnsubscribeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~targetAddress ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetAddress =
-        field_map_exn json "TargetAddress" TargetAddress.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+        field_map_exn json__ "TargetAddress" TargetAddress.of_json in
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~targetAddress ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes an association between a notification rule and an Amazon SNS topic so that subscribers to that topic stop receiving notifications when the events described in the rule are triggered."]
+       "Removes an association between a notification rule and an Amazon Q Developer in chat applications topic so that subscribers to that topic stop receiving notifications when the events described in the rule are triggered."]
 module TagResourceResult =
   struct
     type nonrec t =
@@ -1530,6 +1582,7 @@ module TagResourceResult =
     type nonrec error =
       [
         `ConcurrentModificationException of ConcurrentModificationException.t 
+      | `LimitExceededException of LimitExceededException.t 
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -1539,6 +1592,8 @@ module TagResourceResult =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -1551,6 +1606,8 @@ module TagResourceResult =
       | "ConcurrentModificationException" ->
           `ConcurrentModificationException
             (ConcurrentModificationException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -1563,6 +1620,10 @@ module TagResourceResult =
           `Assoc
             [("error", (`String "ConcurrentModificationException"));
             ("details", (ConcurrentModificationException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1583,8 +1644,8 @@ module TagResourceResult =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Associates a set of provided tags with a notification rule."]
@@ -1613,9 +1674,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~tags ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" Tags.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" Tags.of_json in
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~tags ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1628,12 +1689,15 @@ module SubscribeResult =
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the notification rule for which you have created assocations."]}
     type nonrec error =
-      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      [ `ConfigurationException of ConfigurationException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?arn = fun () -> { arn }
     let error_of_json name json =
       match name with
+      | "ConfigurationException" ->
+          `ConfigurationException (ConfigurationException.of_json json)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_json json)
       | "ValidationException" ->
@@ -1643,6 +1707,8 @@ module SubscribeResult =
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "ConfigurationException" ->
+          `ConfigurationException (ConfigurationException.of_xml xml)
       | "ResourceNotFoundException" ->
           `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
       | "ValidationException" ->
@@ -1651,6 +1717,10 @@ module SubscribeResult =
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `ConfigurationException e ->
+          `Assoc
+            [("error", (`String "ConfigurationException"));
+            ("details", (ConfigurationException.to_json e))]
       | `ResourceNotFoundException e ->
           `Assoc
             [("error", (`String "ResourceNotFoundException"));
@@ -1673,12 +1743,12 @@ module SubscribeResult =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an association between a notification rule and an SNS topic so that the associated target can receive notifications when the events described in the rule are triggered."]
+       "Creates an association between a notification rule and an Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client so that the associated target can receive notifications when the events described in the rule are triggered."]
 module SubscribeRequest =
   struct
     type nonrec t =
@@ -1712,15 +1782,15 @@ module SubscribeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ?clientRequestToken ~target ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let target = field_map_exn json "Target" Target.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let target = field_map_exn json__ "Target" Target.of_json in
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ?clientRequestToken ~target ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an association between a notification rule and an SNS topic so that the associated target can receive notifications when the events described in the rule are triggered."]
+       "Creates an association between a notification rule and an Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client so that the associated target can receive notifications when the events described in the rule are triggered."]
 module ListTargetsResult =
   struct
     type nonrec t =
@@ -1779,13 +1849,13 @@ module ListTargetsResult =
         (Option.map ~f:TargetsBatch.of_xml) (Xml.child xml_arg0 "Targets") in
       make ?nextToken ?targets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let targets = field_map json "Targets" TargetsBatch.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let targets = field_map json__ "Targets" TargetsBatch.of_json in
       make ?nextToken ?targets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the notification rule targets for an AWS account."]
+       "Returns a list of the notification rule targets for an Amazon Web Services account."]
 module ListTargetsRequest =
   struct
     type nonrec t =
@@ -1818,14 +1888,14 @@ module ListTargetsRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filters = field_map json "Filters" ListTargetsFilters.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" ListTargetsFilters.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the notification rule targets for an AWS account."]
+       "Returns a list of the notification rule targets for an Amazon Web Services account."]
 module ListTagsForResourceResult =
   struct
     type nonrec t =
@@ -1876,8 +1946,8 @@ module ListTagsForResourceResult =
       let tags = (Option.map ~f:Tags.of_xml) (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the tags associated with a notification rule."]
@@ -1900,8 +1970,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1915,7 +1985,7 @@ module ListNotificationRulesResult =
           "An enumeration token that can be used in a request to return the next batch of the results."];
       notificationRules: NotificationRuleBatch.t option
         [@ocaml.doc
-          "The list of notification rules for the AWS account, by Amazon Resource Name (ARN) and ID."]}
+          "The list of notification rules for the Amazon Web Services account, by Amazon Resource Name (ARN) and ID."]}
     type nonrec error =
       [ `InvalidNextTokenException of InvalidNextTokenException.t 
       | `ValidationException of ValidationException.t 
@@ -1968,14 +2038,14 @@ module ListNotificationRulesResult =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?notificationRules ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notificationRules =
-        field_map json "NotificationRules" NotificationRuleBatch.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+        field_map json__ "NotificationRules" NotificationRuleBatch.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?notificationRules ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the notification rules for an AWS account."]
+       "Returns a list of the notification rules for an Amazon Web Services account."]
 module ListNotificationRulesRequest =
   struct
     type nonrec t =
@@ -2009,15 +2079,15 @@ module ListNotificationRulesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let filters =
-        field_map json "Filters" ListNotificationRulesFilters.of_json in
+        field_map json__ "Filters" ListNotificationRulesFilters.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of the notification rules for an AWS account."]
+       "Returns a list of the notification rules for an Amazon Web Services account."]
 module ListEventTypesResult =
   struct
     type nonrec t =
@@ -2079,9 +2149,9 @@ module ListEventTypesResult =
           (Xml.child xml_arg0 "EventTypes") in
       make ?nextToken ?eventTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let eventTypes = field_map json "EventTypes" EventTypeBatch.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let eventTypes = field_map json__ "EventTypes" EventTypeBatch.of_json in
       make ?nextToken ?eventTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2119,10 +2189,10 @@ module ListEventTypesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let filters = field_map json "Filters" ListEventTypesFilters.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let filters = field_map json__ "Filters" ListEventTypesFilters.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2131,7 +2201,7 @@ module DescribeNotificationRuleResult =
   struct
     type nonrec t =
       {
-      arn: NotificationRuleArn.t
+      arn: NotificationRuleArn.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) of the notification rule."];
       name: NotificationRuleName.t option
@@ -2144,10 +2214,10 @@ module DescribeNotificationRuleResult =
           "The Amazon Resource Name (ARN) of the resource associated with the notification rule."];
       targets: TargetsBatch.t option
         [@ocaml.doc
-          "A list of the SNS topics associated with the notification rule."];
+          "A list of the Amazon Q Developer in chat applications topics and Amazon Q Developer in chat applications clients associated with the notification rule."];
       detailType: DetailType.t option
         [@ocaml.doc
-          "The level of detail included in the notifications for this resource. BASIC will include only the contents of the event as it would appear in AWS CloudWatch. FULL will include any supplemental information provided by AWS CodeStar Notifications and/or the service for the resource for which the notification is created."];
+          "The level of detail included in the notifications for this resource. BASIC will include only the contents of the event as it would appear in Amazon CloudWatch. FULL will include any supplemental information provided by CodeStar Notifications and/or the service for the resource for which the notification is created."];
       createdBy: NotificationRuleCreatedBy.t option
         [@ocaml.doc
           "The name or email alias of the person who created the notification rule."];
@@ -2166,20 +2236,20 @@ module DescribeNotificationRuleResult =
       [ `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeNotificationRuleResult"
-    let make ?name =
-      fun ?eventTypes ->
-        fun ?resource ->
-          fun ?targets ->
-            fun ?detailType ->
-              fun ?createdBy ->
-                fun ?status ->
-                  fun ?createdTimestamp ->
-                    fun ?lastModifiedTimestamp ->
-                      fun ?tags ->
-                        fun ~arn ->
+    let make ?arn =
+      fun ?name ->
+        fun ?eventTypes ->
+          fun ?resource ->
+            fun ?targets ->
+              fun ?detailType ->
+                fun ?createdBy ->
+                  fun ?status ->
+                    fun ?createdTimestamp ->
+                      fun ?lastModifiedTimestamp ->
+                        fun ?tags ->
                           fun () ->
                             {
+                              arn;
                               name;
                               eventTypes;
                               resource;
@@ -2189,8 +2259,7 @@ module DescribeNotificationRuleResult =
                               status;
                               createdTimestamp;
                               lastModifiedTimestamp;
-                              tags;
-                              arn
+                              tags
                             }
     let error_of_json name json =
       match name with
@@ -2226,7 +2295,7 @@ module DescribeNotificationRuleResult =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Some (NotificationRuleArn.to_value x.arn)));
+        [("Arn", (Option.map x.arn ~f:NotificationRuleArn.to_value));
         ("Name", (Option.map x.name ~f:NotificationRuleName.to_value));
         ("EventTypes", (Option.map x.eventTypes ~f:EventTypeBatch.to_value));
         ("Resource",
@@ -2271,29 +2340,29 @@ module DescribeNotificationRuleResult =
         (Option.map ~f:NotificationRuleName.of_xml)
           (Xml.child xml_arg0 "Name") in
       let arn =
-        NotificationRuleArn.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?tags ?lastModifiedTimestamp ?createdTimestamp ?status ?createdBy
-        ?detailType ?targets ?resource ?eventTypes ?name ~arn ()
+        ?detailType ?targets ?resource ?eventTypes ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" Tags.of_json in
       let lastModifiedTimestamp =
-        field_map json "LastModifiedTimestamp" LastModifiedTimestamp.of_json in
+        field_map json__ "LastModifiedTimestamp"
+          LastModifiedTimestamp.of_json in
       let createdTimestamp =
-        field_map json "CreatedTimestamp" CreatedTimestamp.of_json in
-      let status = field_map json "Status" NotificationRuleStatus.of_json in
+        field_map json__ "CreatedTimestamp" CreatedTimestamp.of_json in
+      let status = field_map json__ "Status" NotificationRuleStatus.of_json in
       let createdBy =
-        field_map json "CreatedBy" NotificationRuleCreatedBy.of_json in
-      let detailType = field_map json "DetailType" DetailType.of_json in
-      let targets = field_map json "Targets" TargetsBatch.of_json in
+        field_map json__ "CreatedBy" NotificationRuleCreatedBy.of_json in
+      let detailType = field_map json__ "DetailType" DetailType.of_json in
+      let targets = field_map json__ "Targets" TargetsBatch.of_json in
       let resource =
-        field_map json "Resource" NotificationRuleResource.of_json in
-      let eventTypes = field_map json "EventTypes" EventTypeBatch.of_json in
-      let name = field_map json "Name" NotificationRuleName.of_json in
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+        field_map json__ "Resource" NotificationRuleResource.of_json in
+      let eventTypes = field_map json__ "EventTypes" EventTypeBatch.of_json in
+      let name = field_map json__ "Name" NotificationRuleName.of_json in
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
       make ?tags ?lastModifiedTimestamp ?createdTimestamp ?status ?createdBy
-        ?detailType ?targets ?resource ?eventTypes ?name ~arn ()
+        ?detailType ?targets ?resource ?eventTypes ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a specified notification rule."]
 module DescribeNotificationRuleRequest =
@@ -2315,8 +2384,8 @@ module DescribeNotificationRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a specified notification rule."]
@@ -2365,10 +2434,10 @@ module DeleteTargetRequest =
       {
       targetAddress: TargetAddress.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the SNS topic to delete."];
+          "The Amazon Resource Name (ARN) of the Amazon Q Developer in chat applications topic or Amazon Q Developer in chat applications client to delete."];
       forceUnsubscribeAll: ForceUnsubscribeAll.t option
         [@ocaml.doc
-          "A Boolean value that can be used to delete all associations with this SNS topic. The default value is FALSE. If set to TRUE, all associations between that target and every notification rule in your AWS account are deleted."]}
+          "A Boolean value that can be used to delete all associations with this Amazon Q Developer in chat applications topic. The default value is FALSE. If set to TRUE, all associations between that target and every notification rule in your Amazon Web Services account are deleted."]}
     let context_ = "DeleteTargetRequest"
     let make ?forceUnsubscribeAll =
       fun ~targetAddress -> fun () -> { forceUnsubscribeAll; targetAddress }
@@ -2387,11 +2456,11 @@ module DeleteTargetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "TargetAddress") in
       make ?forceUnsubscribeAll ~targetAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let forceUnsubscribeAll =
-        field_map json "ForceUnsubscribeAll" ForceUnsubscribeAll.of_json in
+        field_map json__ "ForceUnsubscribeAll" ForceUnsubscribeAll.of_json in
       let targetAddress =
-        field_map_exn json "TargetAddress" TargetAddress.of_json in
+        field_map_exn json__ "TargetAddress" TargetAddress.of_json in
       make ?forceUnsubscribeAll ~targetAddress ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a specified target for notifications."]
@@ -2460,8 +2529,8 @@ module DeleteNotificationRuleResult =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a notification rule for a resource."]
@@ -2484,8 +2553,8 @@ module DeleteNotificationRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
       make ~arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map_exn json__ "Arn" NotificationRuleArn.of_json in
       make ~arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a notification rule for a resource."]
@@ -2582,34 +2651,34 @@ module CreateNotificationRuleResult =
         (Option.map ~f:NotificationRuleArn.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map json "Arn" NotificationRuleArn.of_json in
+    let of_json json__ =
+      let arn = field_map json__ "Arn" NotificationRuleArn.of_json in
       make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a notification rule for a resource. The rule specifies the events you want notifications about and the targets (such as SNS topics) where you want to receive them."]
+       "Creates a notification rule for a resource. The rule specifies the events you want notifications about and the targets (such as Amazon Q Developer in chat applications topics or Amazon Q Developer in chat applications clients configured for Slack) where you want to receive them."]
 module CreateNotificationRuleRequest =
   struct
     type nonrec t =
       {
       name: NotificationRuleName.t
         [@ocaml.doc
-          "The name for the notification rule. Notifictaion rule names must be unique in your AWS account."];
+          "The name for the notification rule. Notification rule names must be unique in your Amazon Web Services account."];
       eventTypeIds: EventTypeIds.t
         [@ocaml.doc
           "A list of event types associated with this notification rule. For a list of allowed events, see EventTypeSummary."];
       resource: NotificationRuleResource.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) of the resource to associate with the notification rule. Supported resources include pipelines in AWS CodePipeline, repositories in AWS CodeCommit, and build projects in AWS CodeBuild."];
+          "The Amazon Resource Name (ARN) of the resource to associate with the notification rule. Supported resources include pipelines in CodePipeline, repositories in CodeCommit, and build projects in CodeBuild."];
       targets: Targets.t
         [@ocaml.doc
-          "A list of Amazon Resource Names (ARNs) of SNS topics to associate with the notification rule."];
+          "A list of Amazon Resource Names (ARNs) of Amazon Simple Notification Service topics and Amazon Q Developer in chat applications clients to associate with the notification rule."];
       detailType: DetailType.t
         [@ocaml.doc
-          "The level of detail to include in the notifications for this resource. BASIC will include only the contents of the event as it would appear in AWS CloudWatch. FULL will include any supplemental information provided by AWS CodeStar Notifications and/or the service for the resource for which the notification is created."];
+          "The level of detail to include in the notifications for this resource. BASIC will include only the contents of the event as it would appear in Amazon CloudWatch. FULL will include any supplemental information provided by CodeStar Notifications and/or the service for the resource for which the notification is created."];
       clientRequestToken: ClientRequestToken.t option
         [@ocaml.doc
-          "A unique, client-generated idempotency token that, when provided in a request, ensures the request cannot be repeated with a changed parameter. If a request with the same parameters is received and a token is included, the request returns information about the initial request that used that token. The AWS SDKs prepopulate client request tokens. If you are using an AWS SDK, an idempotency token is created for you."];
+          "A unique, client-generated idempotency token that, when provided in a request, ensures the request cannot be repeated with a changed parameter. If a request with the same parameters is received and a token is included, the request returns information about the initial request that used that token. The Amazon Web Services SDKs prepopulate client request tokens. If you are using an Amazon Web Services SDK, an idempotency token is created for you."];
       tags: Tags.t option
         [@ocaml.doc
           "A list of tags to apply to this notification rule. Key names cannot start with \"aws\"."];
@@ -2673,20 +2742,20 @@ module CreateNotificationRuleRequest =
       make ?status ?tags ?clientRequestToken ~detailType ~targets ~resource
         ~eventTypeIds ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" NotificationRuleStatus.of_json in
-      let tags = field_map json "Tags" Tags.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" NotificationRuleStatus.of_json in
+      let tags = field_map json__ "Tags" Tags.of_json in
       let clientRequestToken =
-        field_map json "ClientRequestToken" ClientRequestToken.of_json in
-      let detailType = field_map_exn json "DetailType" DetailType.of_json in
-      let targets = field_map_exn json "Targets" Targets.of_json in
+        field_map json__ "ClientRequestToken" ClientRequestToken.of_json in
+      let detailType = field_map_exn json__ "DetailType" DetailType.of_json in
+      let targets = field_map_exn json__ "Targets" Targets.of_json in
       let resource =
-        field_map_exn json "Resource" NotificationRuleResource.of_json in
+        field_map_exn json__ "Resource" NotificationRuleResource.of_json in
       let eventTypeIds =
-        field_map_exn json "EventTypeIds" EventTypeIds.of_json in
-      let name = field_map_exn json "Name" NotificationRuleName.of_json in
+        field_map_exn json__ "EventTypeIds" EventTypeIds.of_json in
+      let name = field_map_exn json__ "Name" NotificationRuleName.of_json in
       make ?status ?tags ?clientRequestToken ~detailType ~targets ~resource
         ~eventTypeIds ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a notification rule for a resource. The rule specifies the events you want notifications about and the targets (such as SNS topics) where you want to receive them."]
+       "Creates a notification rule for a resource. The rule specifies the events you want notifications about and the targets (such as Amazon Q Developer in chat applications topics or Amazon Q Developer in chat applications clients configured for Slack) where you want to receive them."]

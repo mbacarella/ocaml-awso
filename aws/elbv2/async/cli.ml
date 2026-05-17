@@ -70,6 +70,30 @@ let add_tags =
               ~tags:(Values.TagList.of_json tags) ())
            (Some Values.AddTagsOutput.to_json)
            (Some Values.AddTagsOutput.error_to_json)])
+let add_trust_store_revocations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and revocationContents =
+         flag "revocation-contents" (optional json_arg)
+           ~doc:"JSON RevocationContents"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.add_trust_store_revocations
+           (Values.AddTrustStoreRevocationsInput.make
+              ?revocationContents:(Option.map
+                                     ~f:Values.RevocationContents.of_json
+                                     revocationContents) ~trustStoreArn ())
+           (Some Values.AddTrustStoreRevocationsOutput.to_json)
+           (Some Values.AddTrustStoreRevocationsOutput.error_to_json)])
 let create_listener =
   Command.async ~summary:""
     ([%map_open.Command
@@ -90,6 +114,9 @@ let create_listener =
        and alpnPolicy =
          flag "alpn-policy" (optional json_arg) ~doc:"JSON AlpnPolicyName"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and mutualAuthentication =
+         flag "mutual-authentication" (optional json_arg)
+           ~doc:"JSON MutualAuthenticationAttributes"
        and loadBalancerArn =
          flag "load-balancer-arn" (required string)
            ~doc:"STRING LoadBalancerArn"
@@ -106,7 +133,9 @@ let create_listener =
               ?alpnPolicy:(Option.map ~f:Values.AlpnPolicyName.of_json
                              alpnPolicy)
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
-              ~loadBalancerArn
+              ?mutualAuthentication:(Option.map
+                                       ~f:Values.MutualAuthenticationAttributes.of_json
+                                       mutualAuthentication) ~loadBalancerArn
               ~defaultActions:(Values.Actions.of_json defaultActions) ())
            (Some Values.CreateListenerOutput.to_json)
            (Some Values.CreateListenerOutput.error_to_json)])
@@ -137,6 +166,11 @@ let create_load_balancer =
        and customerOwnedIpv4Pool =
          flag "customer-owned-ipv4-pool" (optional string)
            ~doc:"STRING CustomerOwnedIpv4Pool"
+       and enablePrefixForIpv6SourceNat =
+         flag "enable-prefix-for-ipv6-source-nat" (optional json_arg)
+           ~doc:"JSON EnablePrefixForIpv6SourceNatEnum"
+       and ipamPools =
+         flag "ipam-pools" (optional json_arg) ~doc:"JSON IpamPools"
        and name =
          flag "name" (required string) ~doc:"STRING LoadBalancerName" in
        fun () ->
@@ -153,8 +187,12 @@ let create_load_balancer =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?type_:(Option.map ~f:Values.LoadBalancerTypeEnum.of_json type_)
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
-                                ipAddressType) ?customerOwnedIpv4Pool ~name
-              ()) (Some Values.CreateLoadBalancerOutput.to_json)
+                                ipAddressType) ?customerOwnedIpv4Pool
+              ?enablePrefixForIpv6SourceNat:(Option.map
+                                               ~f:Values.EnablePrefixForIpv6SourceNatEnum.of_json
+                                               enablePrefixForIpv6SourceNat)
+              ?ipamPools:(Option.map ~f:Values.IpamPools.of_json ipamPools)
+              ~name ()) (Some Values.CreateLoadBalancerOutput.to_json)
            (Some Values.CreateLoadBalancerOutput.error_to_json)])
 let create_rule =
   Command.async ~summary:""
@@ -167,6 +205,8 @@ let create_rule =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and transforms =
+         flag "transforms" (optional json_arg) ~doc:"JSON RuleTransformList"
        and listenerArn =
          flag "listener-arn" (required string) ~doc:"STRING ListenerArn"
        and conditions =
@@ -177,7 +217,9 @@ let create_rule =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_rule
            (Values.CreateRuleInput.make
-              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~listenerArn
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?transforms:(Option.map ~f:Values.RuleTransformList.of_json
+                             transforms) ~listenerArn
               ~conditions:(Values.RuleConditionList.of_json conditions)
               ~priority ~actions:(Values.Actions.of_json actions) ())
            (Some Values.CreateRuleOutput.to_json)
@@ -229,6 +271,9 @@ let create_target_group =
        and ipAddressType =
          flag "ip-address-type" (optional json_arg)
            ~doc:"JSON TargetGroupIpAddressTypeEnum"
+       and targetControlPort =
+         flag "target-control-port" (optional int)
+           ~doc:"INT TargetControlPort"
        and name = flag "name" (required string) ~doc:"STRING TargetGroupName" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -247,9 +292,39 @@ let create_target_group =
               ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ?ipAddressType:(Option.map
                                 ~f:Values.TargetGroupIpAddressTypeEnum.of_json
-                                ipAddressType) ~name ())
+                                ipAddressType) ?targetControlPort ~name ())
            (Some Values.CreateTargetGroupOutput.to_json)
            (Some Values.CreateTargetGroupOutput.error_to_json)])
+let create_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and caCertificatesBundleS3ObjectVersion =
+         flag "ca-certificates-bundle-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name = flag "name" (required string) ~doc:"STRING TrustStoreName"
+       and caCertificatesBundleS3Bucket =
+         flag "ca-certificates-bundle-s3-bucket" (required string)
+           ~doc:"STRING S3Bucket"
+       and caCertificatesBundleS3Key =
+         flag "ca-certificates-bundle-s3-key" (required string)
+           ~doc:"STRING S3Key" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_trust_store
+           (Values.CreateTrustStoreInput.make
+              ?caCertificatesBundleS3ObjectVersion
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~caCertificatesBundleS3Bucket ~caCertificatesBundleS3Key ())
+           (Some Values.CreateTrustStoreOutput.to_json)
+           (Some Values.CreateTrustStoreOutput.error_to_json)])
 let delete_listener =
   Command.async ~summary:""
     ([%map_open.Command
@@ -303,6 +378,27 @@ let delete_rule =
            Io.delete_rule (Values.DeleteRuleInput.make ~ruleArn ())
            (Some Values.DeleteRuleOutput.to_json)
            (Some Values.DeleteRuleOutput.error_to_json)])
+let delete_shared_trust_store_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_shared_trust_store_association
+           (Values.DeleteSharedTrustStoreAssociationInput.make ~trustStoreArn
+              ~resourceArn ())
+           (Some Values.DeleteSharedTrustStoreAssociationOutput.to_json)
+           (Some Values.DeleteSharedTrustStoreAssociationOutput.error_to_json)])
 let delete_target_group =
   Command.async ~summary:""
     ([%map_open.Command
@@ -322,6 +418,24 @@ let delete_target_group =
            (Values.DeleteTargetGroupInput.make ~targetGroupArn ())
            (Some Values.DeleteTargetGroupOutput.to_json)
            (Some Values.DeleteTargetGroupOutput.error_to_json)])
+let delete_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_trust_store
+           (Values.DeleteTrustStoreInput.make ~trustStoreArn ())
+           (Some Values.DeleteTrustStoreOutput.to_json)
+           (Some Values.DeleteTrustStoreOutput.error_to_json)])
 let deregister_targets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -362,6 +476,43 @@ let describe_account_limits =
            (Values.DescribeAccountLimitsInput.make ?marker ?pageSize ())
            (Some Values.DescribeAccountLimitsOutput.to_json)
            (Some Values.DescribeAccountLimitsOutput.error_to_json)])
+let describe_capacity_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and loadBalancerArn =
+         flag "load-balancer-arn" (required string)
+           ~doc:"STRING LoadBalancerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_capacity_reservation
+           (Values.DescribeCapacityReservationInput.make ~loadBalancerArn ())
+           (Some Values.DescribeCapacityReservationOutput.to_json)
+           (Some Values.DescribeCapacityReservationOutput.error_to_json)])
+let describe_listener_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and listenerArn =
+         flag "listener-arn" (required string) ~doc:"STRING ListenerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_listener_attributes
+           (Values.DescribeListenerAttributesInput.make ~listenerArn ())
+           (Some Values.DescribeListenerAttributesOutput.to_json)
+           (Some Values.DescribeListenerAttributesOutput.error_to_json)])
 let describe_listener_certificates =
   Command.async ~summary:""
     ([%map_open.Command
@@ -586,6 +737,9 @@ let describe_target_health =
            ~doc:"URL override endpoint url"
        and targets =
          flag "targets" (optional json_arg) ~doc:"JSON TargetDescriptions"
+       and include_ =
+         flag "include-" (optional json_arg)
+           ~doc:"JSON ListOfDescribeTargetHealthIncludeOptions"
        and targetGroupArn =
          flag "target-group-arn" (required string)
            ~doc:"STRING TargetGroupArn" in
@@ -594,9 +748,199 @@ let describe_target_health =
            Io.describe_target_health
            (Values.DescribeTargetHealthInput.make
               ?targets:(Option.map ~f:Values.TargetDescriptions.of_json
-                          targets) ~targetGroupArn ())
+                          targets)
+              ?include_:(Option.map
+                           ~f:Values.ListOfDescribeTargetHealthIncludeOptions.of_json
+                           include_) ~targetGroupArn ())
            (Some Values.DescribeTargetHealthOutput.to_json)
            (Some Values.DescribeTargetHealthOutput.error_to_json)])
+let describe_trust_store_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT PageSize"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_trust_store_associations
+           (Values.DescribeTrustStoreAssociationsInput.make ?marker ?pageSize
+              ~trustStoreArn ())
+           (Some Values.DescribeTrustStoreAssociationsOutput.to_json)
+           (Some Values.DescribeTrustStoreAssociationsOutput.error_to_json)])
+let describe_trust_store_revocations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and revocationIds =
+         flag "revocation-ids" (optional json_arg) ~doc:"JSON RevocationIds"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT PageSize"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_trust_store_revocations
+           (Values.DescribeTrustStoreRevocationsInput.make
+              ?revocationIds:(Option.map ~f:Values.RevocationIds.of_json
+                                revocationIds) ?marker ?pageSize
+              ~trustStoreArn ())
+           (Some Values.DescribeTrustStoreRevocationsOutput.to_json)
+           (Some Values.DescribeTrustStoreRevocationsOutput.error_to_json)])
+let describe_trust_stores =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArns =
+         flag "trust-store-arns" (optional json_arg)
+           ~doc:"JSON TrustStoreArns"
+       and names =
+         flag "names" (optional json_arg) ~doc:"JSON TrustStoreNames"
+       and marker = flag "marker" (optional string) ~doc:"STRING Marker"
+       and pageSize = flag "page-size" (optional int) ~doc:"INT PageSize" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_trust_stores
+           (Values.DescribeTrustStoresInput.make
+              ?trustStoreArns:(Option.map ~f:Values.TrustStoreArns.of_json
+                                 trustStoreArns)
+              ?names:(Option.map ~f:Values.TrustStoreNames.of_json names)
+              ?marker ?pageSize ())
+           (Some Values.DescribeTrustStoresOutput.to_json)
+           (Some Values.DescribeTrustStoresOutput.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyInput.make ~resourceArn ())
+           (Some Values.GetResourcePolicyOutput.to_json)
+           (Some Values.GetResourcePolicyOutput.error_to_json)])
+let get_trust_store_ca_certificates_bundle =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_trust_store_ca_certificates_bundle
+           (Values.GetTrustStoreCaCertificatesBundleInput.make ~trustStoreArn
+              ())
+           (Some Values.GetTrustStoreCaCertificatesBundleOutput.to_json)
+           (Some Values.GetTrustStoreCaCertificatesBundleOutput.error_to_json)])
+let get_trust_store_revocation_content =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn"
+       and revocationId =
+         flag "revocation-id" (required json_arg) ~doc:"JSON RevocationId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_trust_store_revocation_content
+           (Values.GetTrustStoreRevocationContentInput.make ~trustStoreArn
+              ~revocationId:(Values.RevocationId.of_json revocationId) ())
+           (Some Values.GetTrustStoreRevocationContentOutput.to_json)
+           (Some Values.GetTrustStoreRevocationContentOutput.error_to_json)])
+let modify_capacity_reservation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and minimumLoadBalancerCapacity =
+         flag "minimum-load-balancer-capacity" (optional json_arg)
+           ~doc:"JSON MinimumLoadBalancerCapacity"
+       and resetCapacityReservation =
+         flag "reset-capacity-reservation" (optional bool)
+           ~doc:"BOOL ResetCapacityReservation"
+       and loadBalancerArn =
+         flag "load-balancer-arn" (required string)
+           ~doc:"STRING LoadBalancerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_capacity_reservation
+           (Values.ModifyCapacityReservationInput.make
+              ?minimumLoadBalancerCapacity:(Option.map
+                                              ~f:Values.MinimumLoadBalancerCapacity.of_json
+                                              minimumLoadBalancerCapacity)
+              ?resetCapacityReservation ~loadBalancerArn ())
+           (Some Values.ModifyCapacityReservationOutput.to_json)
+           (Some Values.ModifyCapacityReservationOutput.error_to_json)])
+let modify_ip_pools =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ipamPools =
+         flag "ipam-pools" (optional json_arg) ~doc:"JSON IpamPools"
+       and removeIpamPools =
+         flag "remove-ipam-pools" (optional json_arg)
+           ~doc:"JSON RemoveIpamPools"
+       and loadBalancerArn =
+         flag "load-balancer-arn" (required string)
+           ~doc:"STRING LoadBalancerArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_ip_pools
+           (Values.ModifyIpPoolsInput.make
+              ?ipamPools:(Option.map ~f:Values.IpamPools.of_json ipamPools)
+              ?removeIpamPools:(Option.map ~f:Values.RemoveIpamPools.of_json
+                                  removeIpamPools) ~loadBalancerArn ())
+           (Some Values.ModifyIpPoolsOutput.to_json)
+           (Some Values.ModifyIpPoolsOutput.error_to_json)])
 let modify_listener =
   Command.async ~summary:""
     ([%map_open.Command
@@ -618,6 +962,9 @@ let modify_listener =
          flag "default-actions" (optional json_arg) ~doc:"JSON Actions"
        and alpnPolicy =
          flag "alpn-policy" (optional json_arg) ~doc:"JSON AlpnPolicyName"
+       and mutualAuthentication =
+         flag "mutual-authentication" (optional json_arg)
+           ~doc:"JSON MutualAuthenticationAttributes"
        and listenerArn =
          flag "listener-arn" (required string) ~doc:"STRING ListenerArn" in
        fun () ->
@@ -631,9 +978,33 @@ let modify_listener =
               ?defaultActions:(Option.map ~f:Values.Actions.of_json
                                  defaultActions)
               ?alpnPolicy:(Option.map ~f:Values.AlpnPolicyName.of_json
-                             alpnPolicy) ~listenerArn ())
+                             alpnPolicy)
+              ?mutualAuthentication:(Option.map
+                                       ~f:Values.MutualAuthenticationAttributes.of_json
+                                       mutualAuthentication) ~listenerArn ())
            (Some Values.ModifyListenerOutput.to_json)
            (Some Values.ModifyListenerOutput.error_to_json)])
+let modify_listener_attributes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and listenerArn =
+         flag "listener-arn" (required string) ~doc:"STRING ListenerArn"
+       and attributes =
+         flag "attributes" (required json_arg) ~doc:"JSON ListenerAttributes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_listener_attributes
+           (Values.ModifyListenerAttributesInput.make ~listenerArn
+              ~attributes:(Values.ListenerAttributes.of_json attributes) ())
+           (Some Values.ModifyListenerAttributesOutput.to_json)
+           (Some Values.ModifyListenerAttributesOutput.error_to_json)])
 let modify_load_balancer_attributes =
   Command.async ~summary:""
     ([%map_open.Command
@@ -670,6 +1041,10 @@ let modify_rule =
        and conditions =
          flag "conditions" (optional json_arg) ~doc:"JSON RuleConditionList"
        and actions = flag "actions" (optional json_arg) ~doc:"JSON Actions"
+       and transforms =
+         flag "transforms" (optional json_arg) ~doc:"JSON RuleTransformList"
+       and resetTransforms =
+         flag "reset-transforms" (optional bool) ~doc:"BOOL ResetTransforms"
        and ruleArn = flag "rule-arn" (required string) ~doc:"STRING RuleArn" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -678,7 +1053,9 @@ let modify_rule =
               ?conditions:(Option.map ~f:Values.RuleConditionList.of_json
                              conditions)
               ?actions:(Option.map ~f:Values.Actions.of_json actions)
-              ~ruleArn ()) (Some Values.ModifyRuleOutput.to_json)
+              ?transforms:(Option.map ~f:Values.RuleTransformList.of_json
+                             transforms) ?resetTransforms ~ruleArn ())
+           (Some Values.ModifyRuleOutput.to_json)
            (Some Values.ModifyRuleOutput.error_to_json)])
 let modify_target_group =
   Command.async ~summary:""
@@ -753,6 +1130,35 @@ let modify_target_group_attributes =
               ~attributes:(Values.TargetGroupAttributes.of_json attributes)
               ()) (Some Values.ModifyTargetGroupAttributesOutput.to_json)
            (Some Values.ModifyTargetGroupAttributesOutput.error_to_json)])
+let modify_trust_store =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and caCertificatesBundleS3ObjectVersion =
+         flag "ca-certificates-bundle-s3-object-version" (optional string)
+           ~doc:"STRING S3ObjectVersion"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn"
+       and caCertificatesBundleS3Bucket =
+         flag "ca-certificates-bundle-s3-bucket" (required string)
+           ~doc:"STRING S3Bucket"
+       and caCertificatesBundleS3Key =
+         flag "ca-certificates-bundle-s3-key" (required string)
+           ~doc:"STRING S3Key" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.modify_trust_store
+           (Values.ModifyTrustStoreInput.make
+              ?caCertificatesBundleS3ObjectVersion ~trustStoreArn
+              ~caCertificatesBundleS3Bucket ~caCertificatesBundleS3Key ())
+           (Some Values.ModifyTrustStoreOutput.to_json)
+           (Some Values.ModifyTrustStoreOutput.error_to_json)])
 let register_targets =
   Command.async ~summary:""
     ([%map_open.Command
@@ -817,6 +1223,27 @@ let remove_tags =
               ~tagKeys:(Values.TagKeys.of_json tagKeys) ())
            (Some Values.RemoveTagsOutput.to_json)
            (Some Values.RemoveTagsOutput.error_to_json)])
+let remove_trust_store_revocations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and trustStoreArn =
+         flag "trust-store-arn" (required string) ~doc:"STRING TrustStoreArn"
+       and revocationIds =
+         flag "revocation-ids" (required json_arg) ~doc:"JSON RevocationIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_trust_store_revocations
+           (Values.RemoveTrustStoreRevocationsInput.make ~trustStoreArn
+              ~revocationIds:(Values.RevocationIds.of_json revocationIds) ())
+           (Some Values.RemoveTrustStoreRevocationsOutput.to_json)
+           (Some Values.RemoveTrustStoreRevocationsOutput.error_to_json)])
 let set_ip_address_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -869,6 +1296,10 @@ let set_security_groups =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and enforceSecurityGroupInboundRulesOnPrivateLinkTraffic =
+         flag "enforce-security-group-inbound-rules-on-private-link-traffic"
+           (optional json_arg)
+           ~doc:"JSON EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum"
        and loadBalancerArn =
          flag "load-balancer-arn" (required string)
            ~doc:"STRING LoadBalancerArn"
@@ -878,7 +1309,12 @@ let set_security_groups =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.set_security_groups
-           (Values.SetSecurityGroupsInput.make ~loadBalancerArn
+           (Values.SetSecurityGroupsInput.make
+              ?enforceSecurityGroupInboundRulesOnPrivateLinkTraffic:(
+              Option.map
+                ~f:Values.EnforceSecurityGroupInboundRulesOnPrivateLinkTrafficEnum.of_json
+                enforceSecurityGroupInboundRulesOnPrivateLinkTraffic)
+              ~loadBalancerArn
               ~securityGroups:(Values.SecurityGroups.of_json securityGroups)
               ()) (Some Values.SetSecurityGroupsOutput.to_json)
            (Some Values.SetSecurityGroupsOutput.error_to_json)])
@@ -898,6 +1334,9 @@ let set_subnets =
            ~doc:"JSON SubnetMappings"
        and ipAddressType =
          flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and enablePrefixForIpv6SourceNat =
+         flag "enable-prefix-for-ipv6-source-nat" (optional json_arg)
+           ~doc:"JSON EnablePrefixForIpv6SourceNatEnum"
        and loadBalancerArn =
          flag "load-balancer-arn" (required string)
            ~doc:"STRING LoadBalancerArn" in
@@ -909,24 +1348,34 @@ let set_subnets =
               ?subnetMappings:(Option.map ~f:Values.SubnetMappings.of_json
                                  subnetMappings)
               ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
-                                ipAddressType) ~loadBalancerArn ())
-           (Some Values.SetSubnetsOutput.to_json)
+                                ipAddressType)
+              ?enablePrefixForIpv6SourceNat:(Option.map
+                                               ~f:Values.EnablePrefixForIpv6SourceNatEnum.of_json
+                                               enablePrefixForIpv6SourceNat)
+              ~loadBalancerArn ()) (Some Values.SetSubnetsOutput.to_json)
            (Some Values.SetSubnetsOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-listener-certificates", add_listener_certificates);
     ("add-tags", add_tags);
+    ("add-trust-store-revocations", add_trust_store_revocations);
     ("create-listener", create_listener);
     ("create-load-balancer", create_load_balancer);
     ("create-rule", create_rule);
     ("create-target-group", create_target_group);
+    ("create-trust-store", create_trust_store);
     ("delete-listener", delete_listener);
     ("delete-load-balancer", delete_load_balancer);
     ("delete-rule", delete_rule);
+    ("delete-shared-trust-store-association",
+      delete_shared_trust_store_association);
     ("delete-target-group", delete_target_group);
+    ("delete-trust-store", delete_trust_store);
     ("deregister-targets", deregister_targets);
     ("describe-account-limits", describe_account_limits);
+    ("describe-capacity-reservation", describe_capacity_reservation);
+    ("describe-listener-attributes", describe_listener_attributes);
     ("describe-listener-certificates", describe_listener_certificates);
     ("describe-listeners", describe_listeners);
     ("describe-load-balancer-attributes", describe_load_balancer_attributes);
@@ -937,14 +1386,27 @@ let main =
     ("describe-target-group-attributes", describe_target_group_attributes);
     ("describe-target-groups", describe_target_groups);
     ("describe-target-health", describe_target_health);
+    ("describe-trust-store-associations", describe_trust_store_associations);
+    ("describe-trust-store-revocations", describe_trust_store_revocations);
+    ("describe-trust-stores", describe_trust_stores);
+    ("get-resource-policy", get_resource_policy);
+    ("get-trust-store-ca-certificates-bundle",
+      get_trust_store_ca_certificates_bundle);
+    ("get-trust-store-revocation-content",
+      get_trust_store_revocation_content);
+    ("modify-capacity-reservation", modify_capacity_reservation);
+    ("modify-ip-pools", modify_ip_pools);
     ("modify-listener", modify_listener);
+    ("modify-listener-attributes", modify_listener_attributes);
     ("modify-load-balancer-attributes", modify_load_balancer_attributes);
     ("modify-rule", modify_rule);
     ("modify-target-group", modify_target_group);
     ("modify-target-group-attributes", modify_target_group_attributes);
+    ("modify-trust-store", modify_trust_store);
     ("register-targets", register_targets);
     ("remove-listener-certificates", remove_listener_certificates);
     ("remove-tags", remove_tags);
+    ("remove-trust-store-revocations", remove_trust_store_revocations);
     ("set-ip-address-type", set_ip_address_type);
     ("set-rule-priorities", set_rule_priorities);
     ("set-security-groups", set_security_groups);

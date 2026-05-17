@@ -7,12 +7,26 @@ type ('i, 'o, 'e) t =
   AssociateDelegateToResourceResponse.error) t 
   | AssociateMemberToGroup: (AssociateMemberToGroupRequest.t,
   AssociateMemberToGroupResponse.t, AssociateMemberToGroupResponse.error) t 
+  | AssumeImpersonationRole: (AssumeImpersonationRoleRequest.t,
+  AssumeImpersonationRoleResponse.t, AssumeImpersonationRoleResponse.error) t
+  
   | CancelMailboxExportJob: (CancelMailboxExportJobRequest.t,
   CancelMailboxExportJobResponse.t, CancelMailboxExportJobResponse.error) t 
   | CreateAlias: (CreateAliasRequest.t, CreateAliasResponse.t,
   CreateAliasResponse.error) t 
+  | CreateAvailabilityConfiguration:
+  (CreateAvailabilityConfigurationRequest.t,
+  CreateAvailabilityConfigurationResponse.t,
+  CreateAvailabilityConfigurationResponse.error) t 
   | CreateGroup: (CreateGroupRequest.t, CreateGroupResponse.t,
   CreateGroupResponse.error) t 
+  | CreateIdentityCenterApplication:
+  (CreateIdentityCenterApplicationRequest.t,
+  CreateIdentityCenterApplicationResponse.t,
+  CreateIdentityCenterApplicationResponse.error) t 
+  | CreateImpersonationRole: (CreateImpersonationRoleRequest.t,
+  CreateImpersonationRoleResponse.t, CreateImpersonationRoleResponse.error) t
+  
   | CreateMobileDeviceAccessRule: (CreateMobileDeviceAccessRuleRequest.t,
   CreateMobileDeviceAccessRuleResponse.t,
   CreateMobileDeviceAccessRuleResponse.error) t 
@@ -27,12 +41,27 @@ type ('i, 'o, 'e) t =
   
   | DeleteAlias: (DeleteAliasRequest.t, DeleteAliasResponse.t,
   DeleteAliasResponse.error) t 
+  | DeleteAvailabilityConfiguration:
+  (DeleteAvailabilityConfigurationRequest.t,
+  DeleteAvailabilityConfigurationResponse.t,
+  DeleteAvailabilityConfigurationResponse.error) t 
   | DeleteEmailMonitoringConfiguration:
   (DeleteEmailMonitoringConfigurationRequest.t,
   DeleteEmailMonitoringConfigurationResponse.t,
   DeleteEmailMonitoringConfigurationResponse.error) t 
   | DeleteGroup: (DeleteGroupRequest.t, DeleteGroupResponse.t,
   DeleteGroupResponse.error) t 
+  | DeleteIdentityCenterApplication:
+  (DeleteIdentityCenterApplicationRequest.t,
+  DeleteIdentityCenterApplicationResponse.t,
+  DeleteIdentityCenterApplicationResponse.error) t 
+  | DeleteIdentityProviderConfiguration:
+  (DeleteIdentityProviderConfigurationRequest.t,
+  DeleteIdentityProviderConfigurationResponse.t,
+  DeleteIdentityProviderConfigurationResponse.error) t 
+  | DeleteImpersonationRole: (DeleteImpersonationRoleRequest.t,
+  DeleteImpersonationRoleResponse.t, DeleteImpersonationRoleResponse.error) t
+  
   | DeleteMailboxPermissions: (DeleteMailboxPermissionsRequest.t,
   DeleteMailboxPermissionsResponse.t, DeleteMailboxPermissionsResponse.error)
   t 
@@ -45,6 +74,9 @@ type ('i, 'o, 'e) t =
   DeleteMobileDeviceAccessRuleResponse.error) t 
   | DeleteOrganization: (DeleteOrganizationRequest.t,
   DeleteOrganizationResponse.t, DeleteOrganizationResponse.error) t 
+  | DeletePersonalAccessToken: (DeletePersonalAccessTokenRequest.t,
+  DeletePersonalAccessTokenResponse.t,
+  DeletePersonalAccessTokenResponse.error) t 
   | DeleteResource: (DeleteResourceRequest.t, DeleteResourceResponse.t,
   DeleteResourceResponse.error) t 
   | DeleteRetentionPolicy: (DeleteRetentionPolicyRequest.t,
@@ -59,8 +91,14 @@ type ('i, 'o, 'e) t =
   (DescribeEmailMonitoringConfigurationRequest.t,
   DescribeEmailMonitoringConfigurationResponse.t,
   DescribeEmailMonitoringConfigurationResponse.error) t 
+  | DescribeEntity: (DescribeEntityRequest.t, DescribeEntityResponse.t,
+  DescribeEntityResponse.error) t 
   | DescribeGroup: (DescribeGroupRequest.t, DescribeGroupResponse.t,
   DescribeGroupResponse.error) t 
+  | DescribeIdentityProviderConfiguration:
+  (DescribeIdentityProviderConfigurationRequest.t,
+  DescribeIdentityProviderConfigurationResponse.t,
+  DescribeIdentityProviderConfigurationResponse.error) t 
   | DescribeInboundDmarcSettings: (DescribeInboundDmarcSettingsRequest.t,
   DescribeInboundDmarcSettingsResponse.t,
   DescribeInboundDmarcSettingsResponse.error) t 
@@ -85,6 +123,11 @@ type ('i, 'o, 'e) t =
   | GetDefaultRetentionPolicy: (GetDefaultRetentionPolicyRequest.t,
   GetDefaultRetentionPolicyResponse.t,
   GetDefaultRetentionPolicyResponse.error) t 
+  | GetImpersonationRole: (GetImpersonationRoleRequest.t,
+  GetImpersonationRoleResponse.t, GetImpersonationRoleResponse.error) t 
+  | GetImpersonationRoleEffect: (GetImpersonationRoleEffectRequest.t,
+  GetImpersonationRoleEffectResponse.t,
+  GetImpersonationRoleEffectResponse.error) t 
   | GetMailDomain: (GetMailDomainRequest.t, GetMailDomainResponse.t,
   GetMailDomainResponse.error) t 
   | GetMailboxDetails: (GetMailboxDetailsRequest.t,
@@ -95,14 +138,24 @@ type ('i, 'o, 'e) t =
   | GetMobileDeviceAccessOverride: (GetMobileDeviceAccessOverrideRequest.t,
   GetMobileDeviceAccessOverrideResponse.t,
   GetMobileDeviceAccessOverrideResponse.error) t 
+  | GetPersonalAccessTokenMetadata: (GetPersonalAccessTokenMetadataRequest.t,
+  GetPersonalAccessTokenMetadataResponse.t,
+  GetPersonalAccessTokenMetadataResponse.error) t 
   | ListAccessControlRules: (ListAccessControlRulesRequest.t,
   ListAccessControlRulesResponse.t, ListAccessControlRulesResponse.error) t 
   | ListAliases: (ListAliasesRequest.t, ListAliasesResponse.t,
   ListAliasesResponse.error) t 
+  | ListAvailabilityConfigurations: (ListAvailabilityConfigurationsRequest.t,
+  ListAvailabilityConfigurationsResponse.t,
+  ListAvailabilityConfigurationsResponse.error) t 
   | ListGroupMembers: (ListGroupMembersRequest.t, ListGroupMembersResponse.t,
   ListGroupMembersResponse.error) t 
   | ListGroups: (ListGroupsRequest.t, ListGroupsResponse.t,
   ListGroupsResponse.error) t 
+  | ListGroupsForEntity: (ListGroupsForEntityRequest.t,
+  ListGroupsForEntityResponse.t, ListGroupsForEntityResponse.error) t 
+  | ListImpersonationRoles: (ListImpersonationRolesRequest.t,
+  ListImpersonationRolesResponse.t, ListImpersonationRolesResponse.error) t 
   | ListMailDomains: (ListMailDomainsRequest.t, ListMailDomainsResponse.t,
   ListMailDomainsResponse.error) t 
   | ListMailboxExportJobs: (ListMailboxExportJobsRequest.t,
@@ -118,6 +171,9 @@ type ('i, 'o, 'e) t =
   ListMobileDeviceAccessRulesResponse.error) t 
   | ListOrganizations: (ListOrganizationsRequest.t,
   ListOrganizationsResponse.t, ListOrganizationsResponse.error) t 
+  | ListPersonalAccessTokens: (ListPersonalAccessTokensRequest.t,
+  ListPersonalAccessTokensResponse.t, ListPersonalAccessTokensResponse.error)
+  t 
   | ListResourceDelegates: (ListResourceDelegatesRequest.t,
   ListResourceDelegatesResponse.t, ListResourceDelegatesResponse.error) t 
   | ListResources: (ListResourcesRequest.t, ListResourcesResponse.t,
@@ -132,6 +188,10 @@ type ('i, 'o, 'e) t =
   (PutEmailMonitoringConfigurationRequest.t,
   PutEmailMonitoringConfigurationResponse.t,
   PutEmailMonitoringConfigurationResponse.error) t 
+  | PutIdentityProviderConfiguration:
+  (PutIdentityProviderConfigurationRequest.t,
+  PutIdentityProviderConfigurationResponse.t,
+  PutIdentityProviderConfigurationResponse.error) t 
   | PutInboundDmarcSettings: (PutInboundDmarcSettingsRequest.t,
   PutInboundDmarcSettingsResponse.t, PutInboundDmarcSettingsResponse.error) t
   
@@ -152,10 +212,22 @@ type ('i, 'o, 'e) t =
   StartMailboxExportJobResponse.t, StartMailboxExportJobResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
+  | TestAvailabilityConfiguration: (TestAvailabilityConfigurationRequest.t,
+  TestAvailabilityConfigurationResponse.t,
+  TestAvailabilityConfigurationResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
   UntagResourceResponse.error) t 
+  | UpdateAvailabilityConfiguration:
+  (UpdateAvailabilityConfigurationRequest.t,
+  UpdateAvailabilityConfigurationResponse.t,
+  UpdateAvailabilityConfigurationResponse.error) t 
   | UpdateDefaultMailDomain: (UpdateDefaultMailDomainRequest.t,
   UpdateDefaultMailDomainResponse.t, UpdateDefaultMailDomainResponse.error) t
+  
+  | UpdateGroup: (UpdateGroupRequest.t, UpdateGroupResponse.t,
+  UpdateGroupResponse.error) t 
+  | UpdateImpersonationRole: (UpdateImpersonationRoleRequest.t,
+  UpdateImpersonationRoleResponse.t, UpdateImpersonationRoleResponse.error) t
   
   | UpdateMailboxQuota: (UpdateMailboxQuotaRequest.t,
   UpdateMailboxQuotaResponse.t, UpdateMailboxQuotaResponse.error) t 
@@ -167,32 +239,45 @@ type ('i, 'o, 'e) t =
   UpdatePrimaryEmailAddressResponse.error) t 
   | UpdateResource: (UpdateResourceRequest.t, UpdateResourceResponse.t,
   UpdateResourceResponse.error) t 
+  | UpdateUser: (UpdateUserRequest.t, UpdateUserResponse.t,
+  UpdateUserResponse.error) t 
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AssociateDelegateToResource -> `POST
   | AssociateMemberToGroup -> `POST
+  | AssumeImpersonationRole -> `POST
   | CancelMailboxExportJob -> `POST
   | CreateAlias -> `POST
+  | CreateAvailabilityConfiguration -> `POST
   | CreateGroup -> `POST
+  | CreateIdentityCenterApplication -> `POST
+  | CreateImpersonationRole -> `POST
   | CreateMobileDeviceAccessRule -> `POST
   | CreateOrganization -> `POST
   | CreateResource -> `POST
   | CreateUser -> `POST
   | DeleteAccessControlRule -> `POST
   | DeleteAlias -> `POST
+  | DeleteAvailabilityConfiguration -> `POST
   | DeleteEmailMonitoringConfiguration -> `POST
   | DeleteGroup -> `POST
+  | DeleteIdentityCenterApplication -> `POST
+  | DeleteIdentityProviderConfiguration -> `POST
+  | DeleteImpersonationRole -> `POST
   | DeleteMailboxPermissions -> `POST
   | DeleteMobileDeviceAccessOverride -> `POST
   | DeleteMobileDeviceAccessRule -> `POST
   | DeleteOrganization -> `POST
+  | DeletePersonalAccessToken -> `POST
   | DeleteResource -> `POST
   | DeleteRetentionPolicy -> `POST
   | DeleteUser -> `POST
   | DeregisterFromWorkMail -> `POST
   | DeregisterMailDomain -> `POST
   | DescribeEmailMonitoringConfiguration -> `POST
+  | DescribeEntity -> `POST
   | DescribeGroup -> `POST
+  | DescribeIdentityProviderConfiguration -> `POST
   | DescribeInboundDmarcSettings -> `POST
   | DescribeMailboxExportJob -> `POST
   | DescribeOrganization -> `POST
@@ -202,26 +287,34 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DisassociateMemberFromGroup -> `POST
   | GetAccessControlEffect -> `POST
   | GetDefaultRetentionPolicy -> `POST
+  | GetImpersonationRole -> `POST
+  | GetImpersonationRoleEffect -> `POST
   | GetMailDomain -> `POST
   | GetMailboxDetails -> `POST
   | GetMobileDeviceAccessEffect -> `POST
   | GetMobileDeviceAccessOverride -> `POST
+  | GetPersonalAccessTokenMetadata -> `POST
   | ListAccessControlRules -> `POST
   | ListAliases -> `POST
+  | ListAvailabilityConfigurations -> `POST
   | ListGroupMembers -> `POST
   | ListGroups -> `POST
+  | ListGroupsForEntity -> `POST
+  | ListImpersonationRoles -> `POST
   | ListMailDomains -> `POST
   | ListMailboxExportJobs -> `POST
   | ListMailboxPermissions -> `POST
   | ListMobileDeviceAccessOverrides -> `POST
   | ListMobileDeviceAccessRules -> `POST
   | ListOrganizations -> `POST
+  | ListPersonalAccessTokens -> `POST
   | ListResourceDelegates -> `POST
   | ListResources -> `POST
   | ListTagsForResource -> `POST
   | ListUsers -> `POST
   | PutAccessControlRule -> `POST
   | PutEmailMonitoringConfiguration -> `POST
+  | PutIdentityProviderConfiguration -> `POST
   | PutInboundDmarcSettings -> `POST
   | PutMailboxPermissions -> `POST
   | PutMobileDeviceAccessOverride -> `POST
@@ -231,34 +324,53 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ResetPassword -> `POST
   | StartMailboxExportJob -> `POST
   | TagResource -> `POST
+  | TestAvailabilityConfiguration -> `POST
   | UntagResource -> `POST
+  | UpdateAvailabilityConfiguration -> `POST
   | UpdateDefaultMailDomain -> `POST
+  | UpdateGroup -> `POST
+  | UpdateImpersonationRole -> `POST
   | UpdateMailboxQuota -> `POST
   | UpdateMobileDeviceAccessRule -> `POST
   | UpdatePrimaryEmailAddress -> `POST
   | UpdateResource -> `POST
+  | UpdateUser -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | AssociateDelegateToResource -> (Format.kasprintf Uri.of_string) "/"
       | AssociateMemberToGroup -> (Format.kasprintf Uri.of_string) "/"
+      | AssumeImpersonationRole -> (Format.kasprintf Uri.of_string) "/"
       | CancelMailboxExportJob -> (Format.kasprintf Uri.of_string) "/"
       | CreateAlias -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAvailabilityConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | CreateGroup -> (Format.kasprintf Uri.of_string) "/"
+      | CreateIdentityCenterApplication ->
+          (Format.kasprintf Uri.of_string) "/"
+      | CreateImpersonationRole -> (Format.kasprintf Uri.of_string) "/"
       | CreateMobileDeviceAccessRule -> (Format.kasprintf Uri.of_string) "/"
       | CreateOrganization -> (Format.kasprintf Uri.of_string) "/"
       | CreateResource -> (Format.kasprintf Uri.of_string) "/"
       | CreateUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAccessControlRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteAlias -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteAvailabilityConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DeleteEmailMonitoringConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteIdentityCenterApplication ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteIdentityProviderConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DeleteImpersonationRole -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMailboxPermissions -> (Format.kasprintf Uri.of_string) "/"
       | DeleteMobileDeviceAccessOverride ->
           (Format.kasprintf Uri.of_string) "/"
       | DeleteMobileDeviceAccessRule -> (Format.kasprintf Uri.of_string) "/"
       | DeleteOrganization -> (Format.kasprintf Uri.of_string) "/"
+      | DeletePersonalAccessToken -> (Format.kasprintf Uri.of_string) "/"
       | DeleteResource -> (Format.kasprintf Uri.of_string) "/"
       | DeleteRetentionPolicy -> (Format.kasprintf Uri.of_string) "/"
       | DeleteUser -> (Format.kasprintf Uri.of_string) "/"
@@ -266,7 +378,10 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeregisterMailDomain -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEmailMonitoringConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
+      | DescribeEntity -> (Format.kasprintf Uri.of_string) "/"
       | DescribeGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeIdentityProviderConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeInboundDmarcSettings -> (Format.kasprintf Uri.of_string) "/"
       | DescribeMailboxExportJob -> (Format.kasprintf Uri.of_string) "/"
       | DescribeOrganization -> (Format.kasprintf Uri.of_string) "/"
@@ -277,14 +392,22 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DisassociateMemberFromGroup -> (Format.kasprintf Uri.of_string) "/"
       | GetAccessControlEffect -> (Format.kasprintf Uri.of_string) "/"
       | GetDefaultRetentionPolicy -> (Format.kasprintf Uri.of_string) "/"
+      | GetImpersonationRole -> (Format.kasprintf Uri.of_string) "/"
+      | GetImpersonationRoleEffect -> (Format.kasprintf Uri.of_string) "/"
       | GetMailDomain -> (Format.kasprintf Uri.of_string) "/"
       | GetMailboxDetails -> (Format.kasprintf Uri.of_string) "/"
       | GetMobileDeviceAccessEffect -> (Format.kasprintf Uri.of_string) "/"
       | GetMobileDeviceAccessOverride -> (Format.kasprintf Uri.of_string) "/"
+      | GetPersonalAccessTokenMetadata ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListAccessControlRules -> (Format.kasprintf Uri.of_string) "/"
       | ListAliases -> (Format.kasprintf Uri.of_string) "/"
+      | ListAvailabilityConfigurations ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListGroupMembers -> (Format.kasprintf Uri.of_string) "/"
       | ListGroups -> (Format.kasprintf Uri.of_string) "/"
+      | ListGroupsForEntity -> (Format.kasprintf Uri.of_string) "/"
+      | ListImpersonationRoles -> (Format.kasprintf Uri.of_string) "/"
       | ListMailDomains -> (Format.kasprintf Uri.of_string) "/"
       | ListMailboxExportJobs -> (Format.kasprintf Uri.of_string) "/"
       | ListMailboxPermissions -> (Format.kasprintf Uri.of_string) "/"
@@ -292,12 +415,15 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/"
       | ListMobileDeviceAccessRules -> (Format.kasprintf Uri.of_string) "/"
       | ListOrganizations -> (Format.kasprintf Uri.of_string) "/"
+      | ListPersonalAccessTokens -> (Format.kasprintf Uri.of_string) "/"
       | ListResourceDelegates -> (Format.kasprintf Uri.of_string) "/"
       | ListResources -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListUsers -> (Format.kasprintf Uri.of_string) "/"
       | PutAccessControlRule -> (Format.kasprintf Uri.of_string) "/"
       | PutEmailMonitoringConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | PutIdentityProviderConfiguration ->
           (Format.kasprintf Uri.of_string) "/"
       | PutInboundDmarcSettings -> (Format.kasprintf Uri.of_string) "/"
       | PutMailboxPermissions -> (Format.kasprintf Uri.of_string) "/"
@@ -308,12 +434,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ResetPassword -> (Format.kasprintf Uri.of_string) "/"
       | StartMailboxExportJob -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TestAvailabilityConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateAvailabilityConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | UpdateDefaultMailDomain -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateGroup -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateImpersonationRole -> (Format.kasprintf Uri.of_string) "/"
       | UpdateMailboxQuota -> (Format.kasprintf Uri.of_string) "/"
       | UpdateMobileDeviceAccessRule -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePrimaryEmailAddress -> (Format.kasprintf Uri.of_string) "/"
-      | UpdateResource -> (Format.kasprintf Uri.of_string) "/")
+      | UpdateResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateUser -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
 let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   match endp with
@@ -333,6 +465,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.AssociateMemberToGroup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | AssumeImpersonationRole ->
+      let json = AssumeImpersonationRoleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.AssumeImpersonationRole")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CancelMailboxExportJob ->
       let json = CancelMailboxExportJobRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -349,6 +489,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.CreateAlias")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAvailabilityConfiguration ->
+      let json = CreateAvailabilityConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.CreateAvailabilityConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateGroup ->
       let json = CreateGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -356,6 +504,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.CreateGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateIdentityCenterApplication ->
+      let json = CreateIdentityCenterApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.CreateIdentityCenterApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateImpersonationRole ->
+      let json = CreateImpersonationRoleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.CreateImpersonationRole")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateMobileDeviceAccessRule ->
       let json = CreateMobileDeviceAccessRuleRequest.to_json req in
@@ -405,6 +569,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.DeleteAlias")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteAvailabilityConfiguration ->
+      let json = DeleteAvailabilityConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.DeleteAvailabilityConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteEmailMonitoringConfiguration ->
       let json = DeleteEmailMonitoringConfigurationRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -421,6 +593,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.DeleteGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIdentityCenterApplication ->
+      let json = DeleteIdentityCenterApplicationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.DeleteIdentityCenterApplication")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteIdentityProviderConfiguration ->
+      let json = DeleteIdentityProviderConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkMailService.DeleteIdentityProviderConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteImpersonationRole ->
+      let json = DeleteImpersonationRoleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.DeleteImpersonationRole")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteMailboxPermissions ->
       let json = DeleteMailboxPermissionsRequest.to_json req in
@@ -454,6 +651,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.DeleteOrganization")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeletePersonalAccessToken ->
+      let json = DeletePersonalAccessTokenRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.DeletePersonalAccessToken")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteResource ->
       let json = DeleteResourceRequest.to_json req in
@@ -504,6 +709,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "WorkMailService.DescribeEmailMonitoringConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeEntity ->
+      let json = DescribeEntityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.DescribeEntity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeGroup ->
       let json = DescribeGroupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -511,6 +724,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.DescribeGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeIdentityProviderConfiguration ->
+      let json = DescribeIdentityProviderConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkMailService.DescribeIdentityProviderConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeInboundDmarcSettings ->
       let json = DescribeInboundDmarcSettingsRequest.to_json req in
@@ -585,6 +807,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.GetDefaultRetentionPolicy")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetImpersonationRole ->
+      let json = GetImpersonationRoleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.GetImpersonationRole")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetImpersonationRoleEffect ->
+      let json = GetImpersonationRoleEffectRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.GetImpersonationRoleEffect")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetMailDomain ->
       let json = GetMailDomainRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -617,6 +855,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.GetMobileDeviceAccessOverride")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetPersonalAccessTokenMetadata ->
+      let json = GetPersonalAccessTokenMetadataRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.GetPersonalAccessTokenMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAccessControlRules ->
       let json = ListAccessControlRulesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -633,6 +879,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.ListAliases")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAvailabilityConfigurations ->
+      let json = ListAvailabilityConfigurationsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.ListAvailabilityConfigurations")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListGroupMembers ->
       let json = ListGroupMembersRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -648,6 +902,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.ListGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListGroupsForEntity ->
+      let json = ListGroupsForEntityRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.ListGroupsForEntity")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListImpersonationRoles ->
+      let json = ListImpersonationRolesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.ListImpersonationRoles")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListMailDomains ->
       let json = ListMailDomainsRequest.to_json req in
@@ -697,6 +967,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.ListOrganizations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListPersonalAccessTokens ->
+      let json = ListPersonalAccessTokensRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.ListPersonalAccessTokens")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListResourceDelegates ->
       let json = ListResourceDelegatesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -744,6 +1022,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.PutEmailMonitoringConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutIdentityProviderConfiguration ->
+      let json = PutIdentityProviderConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "WorkMailService.PutIdentityProviderConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | PutInboundDmarcSettings ->
       let json = PutInboundDmarcSettingsRequest.to_json req in
@@ -817,6 +1104,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TestAvailabilityConfiguration ->
+      let json = TestAvailabilityConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.TestAvailabilityConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -825,6 +1120,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.UntagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateAvailabilityConfiguration ->
+      let json = UpdateAvailabilityConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.UpdateAvailabilityConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateDefaultMailDomain ->
       let json = UpdateDefaultMailDomainRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -832,6 +1135,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.UpdateDefaultMailDomain")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateGroup ->
+      let json = UpdateGroupRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.UpdateGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateImpersonationRole ->
+      let json = UpdateImpersonationRoleRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.UpdateImpersonationRole")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateMailboxQuota ->
       let json = UpdateMailboxQuotaRequest.to_json req in
@@ -864,6 +1183,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "WorkMailService.UpdateResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateUser ->
+      let json = UpdateUserRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "WorkMailService.UpdateUser")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
 let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
   (resp : Awso.Http.Response.t) : (o, e) result=
@@ -906,6 +1233,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some AssociateMemberToGroupResponse.error_of_json))
+  | AssumeImpersonationRole ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (AssumeImpersonationRoleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some AssumeImpersonationRoleResponse.error_of_json))
   | CancelMailboxExportJob ->
       if is_success
       then
@@ -921,12 +1257,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateAliasResponse.of_json json)
       else Error (parse_aws_error (Some CreateAliasResponse.error_of_json))
+  | CreateAvailabilityConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAvailabilityConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAvailabilityConfigurationResponse.error_of_json))
   | CreateGroup ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateGroupResponse.of_json json)
       else Error (parse_aws_error (Some CreateGroupResponse.error_of_json))
+  | CreateIdentityCenterApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateIdentityCenterApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateIdentityCenterApplicationResponse.error_of_json))
+  | CreateImpersonationRole ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateImpersonationRoleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateImpersonationRoleResponse.error_of_json))
   | CreateMobileDeviceAccessRule ->
       if is_success
       then
@@ -972,6 +1335,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteAliasResponse.of_json json)
       else Error (parse_aws_error (Some DeleteAliasResponse.error_of_json))
+  | DeleteAvailabilityConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteAvailabilityConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteAvailabilityConfigurationResponse.error_of_json))
   | DeleteEmailMonitoringConfiguration ->
       if is_success
       then
@@ -987,6 +1359,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteGroupResponse.of_json json)
       else Error (parse_aws_error (Some DeleteGroupResponse.error_of_json))
+  | DeleteIdentityCenterApplication ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIdentityCenterApplicationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIdentityCenterApplicationResponse.error_of_json))
+  | DeleteIdentityProviderConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteIdentityProviderConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteIdentityProviderConfigurationResponse.error_of_json))
+  | DeleteImpersonationRole ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteImpersonationRoleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteImpersonationRoleResponse.error_of_json))
   | DeleteMailboxPermissions ->
       if is_success
       then
@@ -1022,6 +1421,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeleteOrganizationResponse.error_of_json))
+  | DeletePersonalAccessToken ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeletePersonalAccessTokenResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeletePersonalAccessTokenResponse.error_of_json))
   | DeleteResource ->
       if is_success
       then
@@ -1069,12 +1477,29 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeEmailMonitoringConfigurationResponse.error_of_json))
+  | DescribeEntity ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeEntityResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DescribeEntityResponse.error_of_json))
   | DescribeGroup ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DescribeGroupResponse.of_json json)
       else Error (parse_aws_error (Some DescribeGroupResponse.error_of_json))
+  | DescribeIdentityProviderConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeIdentityProviderConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeIdentityProviderConfigurationResponse.error_of_json))
   | DescribeInboundDmarcSettings ->
       if is_success
       then
@@ -1150,6 +1575,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetDefaultRetentionPolicyResponse.error_of_json))
+  | GetImpersonationRole ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetImpersonationRoleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetImpersonationRoleResponse.error_of_json))
+  | GetImpersonationRoleEffect ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetImpersonationRoleEffectResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetImpersonationRoleEffectResponse.error_of_json))
   | GetMailDomain ->
       if is_success
       then
@@ -1182,6 +1624,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetMobileDeviceAccessOverrideResponse.error_of_json))
+  | GetPersonalAccessTokenMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetPersonalAccessTokenMetadataResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetPersonalAccessTokenMetadataResponse.error_of_json))
   | ListAccessControlRules ->
       if is_success
       then
@@ -1197,6 +1648,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListAliasesResponse.of_json json)
       else Error (parse_aws_error (Some ListAliasesResponse.error_of_json))
+  | ListAvailabilityConfigurations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAvailabilityConfigurationsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAvailabilityConfigurationsResponse.error_of_json))
   | ListGroupMembers ->
       if is_success
       then
@@ -1210,6 +1670,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListGroupsResponse.of_json json)
       else Error (parse_aws_error (Some ListGroupsResponse.error_of_json))
+  | ListGroupsForEntity ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListGroupsForEntityResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListGroupsForEntityResponse.error_of_json))
+  | ListImpersonationRoles ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListImpersonationRolesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListImpersonationRolesResponse.error_of_json))
   | ListMailDomains ->
       if is_success
       then
@@ -1260,6 +1737,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListOrganizationsResponse.error_of_json))
+  | ListPersonalAccessTokens ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListPersonalAccessTokensResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListPersonalAccessTokensResponse.error_of_json))
   | ListResourceDelegates ->
       if is_success
       then
@@ -1305,6 +1791,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some PutEmailMonitoringConfigurationResponse.error_of_json))
+  | PutIdentityProviderConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutIdentityProviderConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutIdentityProviderConfigurationResponse.error_of_json))
   | PutInboundDmarcSettings ->
       if is_success
       then
@@ -1375,12 +1870,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TagResourceResponse.of_json json)
       else Error (parse_aws_error (Some TagResourceResponse.error_of_json))
+  | TestAvailabilityConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TestAvailabilityConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some TestAvailabilityConfigurationResponse.error_of_json))
   | UntagResource ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceResponse.of_json json)
       else Error (parse_aws_error (Some UntagResourceResponse.error_of_json))
+  | UpdateAvailabilityConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateAvailabilityConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateAvailabilityConfigurationResponse.error_of_json))
   | UpdateDefaultMailDomain ->
       if is_success
       then
@@ -1390,6 +1903,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateDefaultMailDomainResponse.error_of_json))
+  | UpdateGroup ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateGroupResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateGroupResponse.error_of_json))
+  | UpdateImpersonationRole ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateImpersonationRoleResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateImpersonationRoleResponse.error_of_json))
   | UpdateMailboxQuota ->
       if is_success
       then
@@ -1423,3 +1951,9 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateResourceResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateResourceResponse.error_of_json))
+  | UpdateUser ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateUserResponse.of_json json)
+      else Error (parse_aws_error (Some UpdateUserResponse.error_of_json))

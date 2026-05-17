@@ -53,11 +53,12 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ServiceErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ServiceErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You are not authorized to perform this action."]
+  end[@@ocaml.doc
+       "You do not have the necessary permissions to access the account settings."]
 module AmazonResourceName =
   struct
     type nonrec t = string
@@ -76,6 +77,66 @@ module AmazonResourceName =
     let of_json j = string_of_json ~kind:"AmazonResourceName" j
     let to_json = simple_to_json to_value
   end
+module SnsConfiguration =
+  struct
+    type nonrec t =
+      {
+      topicArn: AmazonResourceName.t
+        [@ocaml.doc
+          "SNS topic ARN that the scheduled query status notifications will be sent to."]}
+    let context_ = "SnsConfiguration"
+    let make ~topicArn = fun () -> { topicArn }
+    let to_value x =
+      structure_to_value
+        [("TopicArn", (Some (AmazonResourceName.to_value x.topicArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let topicArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
+      make ~topicArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let topicArn =
+        field_map_exn json__ "TopicArn" AmazonResourceName.of_json in
+      make ~topicArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details on SNS that are required to send the notification."]
+module AccountSettingsNotificationConfiguration =
+  struct
+    type nonrec t =
+      {
+      snsConfiguration: SnsConfiguration.t option ;
+      roleArn: AmazonResourceName.t
+        [@ocaml.doc
+          "An Amazon Resource Name (ARN) that grants Timestream permission to publish notifications. This field is only visible if SNS Topic is provided when updating the account settings."]}
+    let context_ = "AccountSettingsNotificationConfiguration"
+    let make ?snsConfiguration =
+      fun ~roleArn -> fun () -> { snsConfiguration; roleArn }
+    let to_value x =
+      structure_to_value
+        [("SnsConfiguration",
+           (Option.map x.snsConfiguration ~f:SnsConfiguration.to_value));
+        ("RoleArn", (Some (AmazonResourceName.to_value x.roleArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let roleArn =
+        AmazonResourceName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "RoleArn") in
+      let snsConfiguration =
+        (Option.map ~f:SnsConfiguration.of_xml)
+          (Xml.child xml_arg0 "SnsConfiguration") in
+      make ~roleArn ?snsConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let roleArn = field_map_exn json__ "RoleArn" AmazonResourceName.of_json in
+      let snsConfiguration =
+        field_map json__ "SnsConfiguration" SnsConfiguration.of_json in
+      make ~roleArn ?snsConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration settings for notifications related to account settings."]
 module QueryId =
   struct
     type nonrec t = string
@@ -113,8 +174,8 @@ module CancelQueryRequest =
         QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
       make ~queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryId = field_map_exn json "QueryId" QueryId.of_json in
+    let of_json json__ =
+      let queryId = field_map_exn json__ "QueryId" QueryId.of_json in
       make ~queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -146,8 +207,8 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Invalid or malformed request."]
@@ -165,11 +226,11 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The request was denied due to request throttling."]
+  end[@@ocaml.doc "The request was throttled due to excessive requests."]
 module String_ =
   struct
     type nonrec t = string
@@ -197,11 +258,11 @@ module InvalidEndpointException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The requested endpoint was not valid."]
+  end[@@ocaml.doc "The requested endpoint is invalid."]
 module InternalServerException =
   struct
     type nonrec t = {
@@ -216,12 +277,12 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Timestream was unable to fully process this request because of an internal server error."]
+       "An internal server error occurred while processing the request."]
 module CancelQueryResponse =
   struct
     type nonrec t =
@@ -304,9 +365,9 @@ module CancelQueryResponse =
           (Xml.child xml_arg0 "CancellationMessage") in
       make ?cancellationMessage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cancellationMessage =
-        field_map json "CancellationMessage" String_.of_json in
+        field_map json__ "CancellationMessage" String_.of_json in
       make ?cancellationMessage ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -406,10 +467,10 @@ module rec
                  name: String_.t option
                    [@ocaml.doc
                      "The name of the result set column. The name of the result set is available for columns of all data types except for arrays."];
-                 type_: Type.t
+                 type_: Type.t option
                    [@ocaml.doc
                      "The data type of the result set column. The data type can be a scalar or complex. Scalar data types are integers, strings, doubles, Booleans, and others. Complex data types are types such as arrays, rows, and others."]}
-               val make : ?name:String_.t -> type_:Type.t -> unit -> t
+               val make : ?name:String_.t -> ?type_:Type.t -> unit -> t
                val to_value : t -> Botodata.value
                val to_query : t -> Client.Query.t
                val of_xml : Xml.t -> t
@@ -422,26 +483,24 @@ module rec
       name: String_.t option
         [@ocaml.doc
           "The name of the result set column. The name of the result set is available for columns of all data types except for arrays."];
-      type_: Type.t
+      type_: Type.t option
         [@ocaml.doc
           "The data type of the result set column. The data type can be a scalar or complex. Scalar data types are integers, strings, doubles, Booleans, and others. Complex data types are types such as arrays, rows, and others."]}
-    let context_ = "ColumnInfo"
-    let make ?name = fun ~type_ -> fun () -> { name; type_ }
+    let make ?name = fun ?type_ -> fun () -> { name; type_ }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:String_.to_value));
-        ("Type", (Some (Type.to_value x.type_)))]
+        ("Type", (Option.map x.type_ ~f:Type.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
-      make ~type_ ?name ()
+      make ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let name = field_map json "Name" String_.of_json in
-      make ~type_ ?name ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains the metadata for query results such as the column names, data types, and other attributes."]
@@ -459,6 +518,9 @@ module rec
   struct
     type nonrec t = ColumnInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -484,7 +546,7 @@ module rec
                 {
                 scalarType: ScalarType.t option
                   [@ocaml.doc
-                    "Indicates if the column is of type string, integer, Boolean, double, timestamp, date, time."];
+                    "Indicates if the column is of type string, integer, Boolean, double, timestamp, date, time. For more information, see Supported data types."];
                 arrayColumnInfo: ColumnInfo.t option
                   [@ocaml.doc "Indicates if the column is an array."];
                 timeSeriesMeasureValueColumnInfo: ColumnInfo.t option
@@ -508,7 +570,7 @@ module rec
            {
            scalarType: ScalarType.t option
              [@ocaml.doc
-               "Indicates if the column is of type string, integer, Boolean, double, timestamp, date, time."];
+               "Indicates if the column is of type string, integer, Boolean, double, timestamp, date, time. For more information, see Supported data types."];
            arrayColumnInfo: ColumnInfo.t option
              [@ocaml.doc "Indicates if the column is an array."];
            timeSeriesMeasureValueColumnInfo: ColumnInfo.t option
@@ -556,20 +618,45 @@ module rec
              ?arrayColumnInfo ?scalarType ()
          let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
                                                                "-32"]
-         let of_json json =
+         let of_json json__ =
            let rowColumnInfo =
-             field_map json "RowColumnInfo" ColumnInfoList.of_json in
+             field_map json__ "RowColumnInfo" ColumnInfoList.of_json in
            let timeSeriesMeasureValueColumnInfo =
-             field_map json "TimeSeriesMeasureValueColumnInfo"
+             field_map json__ "TimeSeriesMeasureValueColumnInfo"
                ColumnInfo.of_json in
            let arrayColumnInfo =
-             field_map json "ArrayColumnInfo" ColumnInfo.of_json in
-           let scalarType = field_map json "ScalarType" ScalarType.of_json in
+             field_map json__ "ArrayColumnInfo" ColumnInfo.of_json in
+           let scalarType = field_map json__ "ScalarType" ScalarType.of_json in
            make ?rowColumnInfo ?timeSeriesMeasureValueColumnInfo
              ?arrayColumnInfo ?scalarType ()
          let to_json v = composed_to_json to_value v
        end[@@ocaml.doc
             "Contains the data type of a column in a query result set. The data type can be scalar or complex. The supported scalar data types are integers, Boolean, string, double, timestamp, date, time, and intervals. The supported complex data types are arrays, rows, and timeseries."]
+module ComputeMode =
+  struct
+    type nonrec t =
+      | ON_DEMAND 
+      | PROVISIONED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ON_DEMAND -> "ON_DEMAND"
+      | PROVISIONED -> "PROVISIONED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ON_DEMAND" -> ON_DEMAND
+      | "PROVISIONED" -> PROVISIONED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ComputeMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ComputeMode" j)
+    let to_json = simple_to_json to_value
+  end
 module ConflictException =
   struct
     type nonrec t = {
@@ -584,8 +671,8 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Unable to poll results for a cancelled query."]
@@ -693,12 +780,14 @@ module MultiMeasureAttributeMapping =
       make ~measureValueType ?targetMultiMeasureAttributeName ~sourceColumn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let measureValueType =
-        field_map_exn json "MeasureValueType" ScalarMeasureValueType.of_json in
+        field_map_exn json__ "MeasureValueType"
+          ScalarMeasureValueType.of_json in
       let targetMultiMeasureAttributeName =
-        field_map json "TargetMultiMeasureAttributeName" SchemaName.of_json in
-      let sourceColumn = field_map_exn json "SourceColumn" SchemaName.of_json in
+        field_map json__ "TargetMultiMeasureAttributeName" SchemaName.of_json in
+      let sourceColumn =
+        field_map_exn json__ "SourceColumn" SchemaName.of_json in
       make ~measureValueType ?targetMultiMeasureAttributeName ~sourceColumn
         ()
     let to_json v = composed_to_json to_value v
@@ -708,6 +797,9 @@ module MultiMeasureAttributeMappingList =
     type nonrec t = MultiMeasureAttributeMapping.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MultiMeasureAttributeMapping.to_value)) |>
         (fun x -> `List x)
@@ -763,12 +855,12 @@ module MultiMeasureMappings =
           (Xml.child xml_arg0 "TargetMultiMeasureName") in
       make ~multiMeasureAttributeMappings ?targetMultiMeasureName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multiMeasureAttributeMappings =
-        field_map_exn json "MultiMeasureAttributeMappings"
+        field_map_exn json__ "MultiMeasureAttributeMappings"
           MultiMeasureAttributeMappingList.of_json in
       let targetMultiMeasureName =
-        field_map json "TargetMultiMeasureName" SchemaName.of_json in
+        field_map json__ "TargetMultiMeasureName" SchemaName.of_json in
       make ~multiMeasureAttributeMappings ?targetMultiMeasureName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -870,16 +962,16 @@ module MixedMeasureMapping =
       make ?multiMeasureAttributeMappings ~measureValueType
         ?targetMeasureName ?sourceColumn ?measureName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let multiMeasureAttributeMappings =
-        field_map json "MultiMeasureAttributeMappings"
+        field_map json__ "MultiMeasureAttributeMappings"
           MultiMeasureAttributeMappingList.of_json in
       let measureValueType =
-        field_map_exn json "MeasureValueType" MeasureValueType.of_json in
+        field_map_exn json__ "MeasureValueType" MeasureValueType.of_json in
       let targetMeasureName =
-        field_map json "TargetMeasureName" SchemaName.of_json in
-      let sourceColumn = field_map json "SourceColumn" SchemaName.of_json in
-      let measureName = field_map json "MeasureName" SchemaName.of_json in
+        field_map json__ "TargetMeasureName" SchemaName.of_json in
+      let sourceColumn = field_map json__ "SourceColumn" SchemaName.of_json in
+      let measureName = field_map json__ "MeasureName" SchemaName.of_json in
       make ?multiMeasureAttributeMappings ~measureValueType
         ?targetMeasureName ?sourceColumn ?measureName ()
     let to_json v = composed_to_json to_value v
@@ -890,6 +982,9 @@ module MixedMeasureMappingList =
     type nonrec t = MixedMeasureMapping.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MixedMeasureMapping.to_value)) |>
         (fun x -> `List x)
@@ -953,10 +1048,10 @@ module DimensionMapping =
         SchemaName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~dimensionValueType ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionValueType =
-        field_map_exn json "DimensionValueType" DimensionValueType.of_json in
-      let name = field_map_exn json "Name" SchemaName.of_json in
+        field_map_exn json__ "DimensionValueType" DimensionValueType.of_json in
+      let name = field_map_exn json__ "Name" SchemaName.of_json in
       make ~dimensionValueType ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -965,6 +1060,9 @@ module DimensionMappingList =
   struct
     type nonrec t = DimensionMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DimensionMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1067,19 +1165,20 @@ module TimestreamConfiguration =
       make ?measureNameColumn ?mixedMeasureMappings ?multiMeasureMappings
         ~dimensionMappings ~timeColumn ~tableName ~databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let measureNameColumn =
-        field_map json "MeasureNameColumn" SchemaName.of_json in
+        field_map json__ "MeasureNameColumn" SchemaName.of_json in
       let mixedMeasureMappings =
-        field_map json "MixedMeasureMappings" MixedMeasureMappingList.of_json in
+        field_map json__ "MixedMeasureMappings"
+          MixedMeasureMappingList.of_json in
       let multiMeasureMappings =
-        field_map json "MultiMeasureMappings" MultiMeasureMappings.of_json in
+        field_map json__ "MultiMeasureMappings" MultiMeasureMappings.of_json in
       let dimensionMappings =
-        field_map_exn json "DimensionMappings" DimensionMappingList.of_json in
-      let timeColumn = field_map_exn json "TimeColumn" SchemaName.of_json in
-      let tableName = field_map_exn json "TableName" ResourceName.of_json in
+        field_map_exn json__ "DimensionMappings" DimensionMappingList.of_json in
+      let timeColumn = field_map_exn json__ "TimeColumn" SchemaName.of_json in
+      let tableName = field_map_exn json__ "TableName" ResourceName.of_json in
       let databaseName =
-        field_map_exn json "DatabaseName" ResourceName.of_json in
+        field_map_exn json__ "DatabaseName" ResourceName.of_json in
       make ?measureNameColumn ?mixedMeasureMappings ?multiMeasureMappings
         ~dimensionMappings ~timeColumn ~tableName ~databaseName ()
     let to_json v = composed_to_json to_value v
@@ -1105,9 +1204,9 @@ module TargetConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "TimestreamConfiguration") in
       make ~timestreamConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestreamConfiguration =
-        field_map_exn json "TimestreamConfiguration"
+        field_map_exn json__ "TimestreamConfiguration"
           TimestreamConfiguration.of_json in
       make ~timestreamConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -1171,9 +1270,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1187,6 +1286,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1234,7 +1336,9 @@ module ScheduledQueryName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:64) >>=
-                  (fun () -> check_pattern i ~pattern:"[a-zA-Z0-9_.-]+")));
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[a-zA-Z0-9|!\\-_*'\\(\\)]([a-zA-Z0-9]|[!\\-_*'\\(\\)\\/.])+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -1282,9 +1386,9 @@ module ScheduleConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduleExpression") in
       make ~scheduleExpression ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduleExpression =
-        field_map_exn json "ScheduleExpression" ScheduleExpression.of_json in
+        field_map_exn json__ "ScheduleExpression" ScheduleExpression.of_json in
       make ~scheduleExpression ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration of the schedule of the query."]
@@ -1306,37 +1410,13 @@ module QueryString =
     let of_json j = string_of_json ~kind:"QueryString" j
     let to_json = simple_to_json to_value
   end
-module SnsConfiguration =
-  struct
-    type nonrec t =
-      {
-      topicArn: AmazonResourceName.t
-        [@ocaml.doc
-          "SNS topic ARN that the scheduled query status notifications will be sent to."]}
-    let context_ = "SnsConfiguration"
-    let make ~topicArn = fun () -> { topicArn }
-    let to_value x =
-      structure_to_value
-        [("TopicArn", (Some (AmazonResourceName.to_value x.topicArn)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let topicArn =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
-      make ~topicArn ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
-      make ~topicArn ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Details on SNS that are required to send the notification."]
 module NotificationConfiguration =
   struct
     type nonrec t =
       {
       snsConfiguration: SnsConfiguration.t
-        [@ocaml.doc "Details on SNS configuration."]}
+        [@ocaml.doc
+          "Details about the Amazon Simple Notification Service (SNS) configuration. This field is visible only when SNS Topic is provided when updating the account settings."]}
     let context_ = "NotificationConfiguration"
     let make ~snsConfiguration = fun () -> { snsConfiguration }
     let to_value x =
@@ -1350,9 +1430,9 @@ module NotificationConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "SnsConfiguration") in
       make ~snsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let snsConfiguration =
-        field_map_exn json "SnsConfiguration" SnsConfiguration.of_json in
+        field_map_exn json__ "SnsConfiguration" SnsConfiguration.of_json in
       make ~snsConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1465,12 +1545,12 @@ module S3Configuration =
           (Xml.child_exn ~context:context_ xml_arg0 "BucketName") in
       make ?encryptionOption ?objectKeyPrefix ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let encryptionOption =
-        field_map json "EncryptionOption" S3EncryptionOption.of_json in
+        field_map json__ "EncryptionOption" S3EncryptionOption.of_json in
       let objectKeyPrefix =
-        field_map json "ObjectKeyPrefix" S3ObjectKeyPrefix.of_json in
-      let bucketName = field_map_exn json "BucketName" S3BucketName.of_json in
+        field_map json__ "ObjectKeyPrefix" S3ObjectKeyPrefix.of_json in
+      let bucketName = field_map_exn json__ "BucketName" S3BucketName.of_json in
       make ?encryptionOption ?objectKeyPrefix ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1494,9 +1574,9 @@ module ErrorReportConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "S3Configuration") in
       make ~s3Configuration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3Configuration =
-        field_map_exn json "S3Configuration" S3Configuration.of_json in
+        field_map_exn json__ "S3Configuration" S3Configuration.of_json in
       make ~s3Configuration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration required for error reporting."]
@@ -1611,26 +1691,27 @@ module CreateScheduledQueryRequest =
         ~notificationConfiguration ~scheduleConfiguration ~queryString ~name
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorReportConfiguration =
-        field_map_exn json "ErrorReportConfiguration"
+        field_map_exn json__ "ErrorReportConfiguration"
           ErrorReportConfiguration.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let scheduledQueryExecutionRoleArn =
-        field_map_exn json "ScheduledQueryExecutionRoleArn"
+        field_map_exn json__ "ScheduledQueryExecutionRoleArn"
           AmazonResourceName.of_json in
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
       let targetConfiguration =
-        field_map json "TargetConfiguration" TargetConfiguration.of_json in
+        field_map json__ "TargetConfiguration" TargetConfiguration.of_json in
       let notificationConfiguration =
-        field_map_exn json "NotificationConfiguration"
+        field_map_exn json__ "NotificationConfiguration"
           NotificationConfiguration.of_json in
       let scheduleConfiguration =
-        field_map_exn json "ScheduleConfiguration"
+        field_map_exn json__ "ScheduleConfiguration"
           ScheduleConfiguration.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      let name = field_map_exn json "Name" ScheduledQueryName.of_json in
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
+      let name = field_map_exn json__ "Name" ScheduledQueryName.of_json in
       make ~errorReportConfiguration ?kmsKeyId ?tags
         ~scheduledQueryExecutionRoleArn ?clientToken ?targetConfiguration
         ~notificationConfiguration ~scheduleConfiguration ~queryString ~name
@@ -1652,8 +1733,8 @@ module ServiceQuotaExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You have exceeded the service quota."]
@@ -1661,7 +1742,7 @@ module CreateScheduledQueryResponse =
   struct
     type nonrec t =
       {
-      arn: AmazonResourceName.t
+      arn: AmazonResourceName.t option
         [@ocaml.doc "ARN for the created scheduled query."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -1672,8 +1753,7 @@ module CreateScheduledQueryResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateScheduledQueryResponse"
-    let make ~arn = fun () -> { arn }
+    let make ?arn = fun () -> { arn }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -1750,17 +1830,16 @@ module CreateScheduledQueryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Arn", (Some (AmazonResourceName.to_value x.arn)))]
+        [("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let arn =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
-      make ~arn ()
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
+      make ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let arn = field_map_exn json "Arn" AmazonResourceName.of_json in
-      make ~arn ()
+    let of_json json__ =
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
+      make ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Create a scheduled query that will be run on your behalf at the configured schedule. Timestream assumes the execution role provided as part of the ScheduledQueryExecutionRoleArn parameter to run the query. You can use the NotificationConfiguration parameter to configure notification for your scheduled query operations."]
@@ -1882,13 +1961,13 @@ module rec
         (Option.map ~f:ScalarValue.of_xml) (Xml.child xml_arg0 "ScalarValue") in
       make ?nullValue ?rowValue ?arrayValue ?timeSeriesValue ?scalarValue ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nullValue = field_map json "NullValue" NullableBoolean.of_json in
-      let rowValue = field_map json "RowValue" Row.of_json in
-      let arrayValue = field_map json "ArrayValue" DatumList.of_json in
+    let of_json json__ =
+      let nullValue = field_map json__ "NullValue" NullableBoolean.of_json in
+      let rowValue = field_map json__ "RowValue" Row.of_json in
+      let arrayValue = field_map json__ "ArrayValue" DatumList.of_json in
       let timeSeriesValue =
-        field_map json "TimeSeriesValue" TimeSeriesDataPointList.of_json in
-      let scalarValue = field_map json "ScalarValue" ScalarValue.of_json in
+        field_map json__ "TimeSeriesValue" TimeSeriesDataPointList.of_json in
+      let scalarValue = field_map json__ "ScalarValue" ScalarValue.of_json in
       make ?nullValue ?rowValue ?arrayValue ?timeSeriesValue ?scalarValue ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Datum represents a single data point in a query result."]
@@ -1906,6 +1985,9 @@ module rec
   struct
     type nonrec t = Datum.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Datum.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1928,10 +2010,10 @@ module rec
        Row:sig
              type nonrec t =
                {
-               data: DatumList.t
+               data: DatumList.t option
                  [@ocaml.doc
                    "List of data points in a single row of the result set."]}
-             val make : data:DatumList.t -> unit -> t
+             val make : ?data:DatumList.t -> unit -> t
              val to_value : t -> Botodata.value
              val to_query : t -> Client.Query.t
              val of_xml : Xml.t -> t
@@ -1941,38 +2023,37 @@ module rec
        struct
          type nonrec t =
            {
-           data: DatumList.t
+           data: DatumList.t option
              [@ocaml.doc
                "List of data points in a single row of the result set."]}
-         let context_ = "Row"
-         let make ~data = fun () -> { data }
+         let make ?data = fun () -> { data }
          let to_value x =
-           structure_to_value [("Data", (Some (DatumList.to_value x.data)))]
+           structure_to_value
+             [("Data", (Option.map x.data ~f:DatumList.to_value))]
          let to_query v = to_query to_value v
          let of_xml xml_arg0 =
            let data =
-             DatumList.of_xml
-               (Xml.child_exn ~context:context_ xml_arg0 "Data") in
-           make ~data ()
+             (Option.map ~f:DatumList.of_xml) (Xml.child xml_arg0 "Data") in
+           make ?data ()
          let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning
                                                                "-32"]
-         let of_json json =
-           let data = field_map_exn json "Data" DatumList.of_json in
-           make ~data ()
+         let of_json json__ =
+           let data = field_map json__ "Data" DatumList.of_json in
+           make ?data ()
          let to_json v = composed_to_json to_value v
        end[@@ocaml.doc "Represents a single row in the query results."]
  and
   TimeSeriesDataPoint:sig
                         type nonrec t =
                           {
-                          time: Timestamp.t
+                          time: Timestamp.t option
                             [@ocaml.doc
                               "The timestamp when the measure value was collected."];
-                          value: Datum.t
+                          value: Datum.t option
                             [@ocaml.doc
                               "The measure value for the data point."]}
                         val make :
-                          time:Timestamp.t -> value:Datum.t -> unit -> t
+                          ?time:Timestamp.t -> ?value:Datum.t -> unit -> t
                         val to_value : t -> Botodata.value
                         val to_query : t -> Client.Query.t
                         val of_xml : Xml.t -> t
@@ -1982,27 +2063,25 @@ module rec
   struct
     type nonrec t =
       {
-      time: Timestamp.t
+      time: Timestamp.t option
         [@ocaml.doc "The timestamp when the measure value was collected."];
-      value: Datum.t [@ocaml.doc "The measure value for the data point."]}
-    let context_ = "TimeSeriesDataPoint"
-    let make ~time = fun ~value -> fun () -> { time; value }
+      value: Datum.t option
+        [@ocaml.doc "The measure value for the data point."]}
+    let make ?time = fun ?value -> fun () -> { time; value }
     let to_value x =
       structure_to_value
-        [("Time", (Some (Timestamp.to_value x.time)));
-        ("Value", (Some (Datum.to_value x.value)))]
+        [("Time", (Option.map x.time ~f:Timestamp.to_value));
+        ("Value", (Option.map x.value ~f:Datum.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let value =
-        Datum.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
-      let time =
-        Timestamp.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Time") in
-      make ~value ~time ()
+      let value = (Option.map ~f:Datum.of_xml) (Xml.child xml_arg0 "Value") in
+      let time = (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Time") in
+      make ?value ?time ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" Datum.of_json in
-      let time = field_map_exn json "Time" Timestamp.of_json in
-      make ~value ~time ()
+    let of_json json__ =
+      let value = field_map json__ "Value" Datum.of_json in
+      let time = field_map json__ "Time" Timestamp.of_json in
+      make ?value ?time ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The timeseries data type represents the values of a measure over time. A time series is an array of rows of timestamps and measure values, with rows sorted in ascending order of time. A TimeSeriesDataPoint is a single data point in the time series. It represents a tuple of (time, measure value) in a time series."]
@@ -2020,6 +2099,9 @@ module rec
   struct
     type nonrec t = TimeSeriesDataPoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TimeSeriesDataPoint.to_value)) |>
         (fun x -> `List x)
@@ -2061,13 +2143,335 @@ module DeleteScheduledQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~scheduledQueryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledQueryArn =
-        field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ScheduledQueryArn" AmazonResourceName.of_json in
       make ~scheduledQueryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Deletes a given scheduled query. This is an irreversible operation."]
+module DescribeAccountSettingsRequest =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the settings for your account that include the query pricing model and the configured maximum TCUs the service can use for your query workload. You're charged only for the duration of compute units used for your workloads."]
+module QueryPricingModel =
+  struct
+    type nonrec t =
+      | BYTES_SCANNED 
+      | COMPUTE_UNITS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | BYTES_SCANNED -> "BYTES_SCANNED"
+      | COMPUTE_UNITS -> "COMPUTE_UNITS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "BYTES_SCANNED" -> BYTES_SCANNED
+      | "COMPUTE_UNITS" -> COMPUTE_UNITS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QueryPricingModel" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryPricingModel" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryTCU =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string (string_of_xml ~kind:"an integer for QueryTCU" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module LastUpdateStatus =
+  struct
+    type nonrec t =
+      | PENDING 
+      | FAILED 
+      | SUCCEEDED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING -> "PENDING"
+      | FAILED -> "FAILED"
+      | SUCCEEDED -> "SUCCEEDED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING" -> PENDING
+      | "FAILED" -> FAILED
+      | "SUCCEEDED" -> SUCCEEDED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LastUpdateStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LastUpdateStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module LastUpdate =
+  struct
+    type nonrec t =
+      {
+      targetQueryTCU: QueryTCU.t option
+        [@ocaml.doc
+          "The number of TimeStream Compute Units (TCUs) requested in the last account settings update."];
+      status: LastUpdateStatus.t option
+        [@ocaml.doc
+          "The status of the last update. Can be either PENDING, FAILED, or SUCCEEDED."];
+      statusMessage: String_.t option
+        [@ocaml.doc
+          "Error message describing the last account settings update status, visible only if an error occurred."]}
+    let make ?targetQueryTCU =
+      fun ?status ->
+        fun ?statusMessage ->
+          fun () -> { targetQueryTCU; status; statusMessage }
+    let to_value x =
+      structure_to_value
+        [("TargetQueryTCU",
+           (Option.map x.targetQueryTCU ~f:QueryTCU.to_value));
+        ("Status", (Option.map x.status ~f:LastUpdateStatus.to_value));
+        ("StatusMessage", (Option.map x.statusMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "StatusMessage") in
+      let status =
+        (Option.map ~f:LastUpdateStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let targetQueryTCU =
+        (Option.map ~f:QueryTCU.of_xml) (Xml.child xml_arg0 "TargetQueryTCU") in
+      make ?statusMessage ?status ?targetQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusMessage = field_map json__ "StatusMessage" String_.of_json in
+      let status = field_map json__ "Status" LastUpdateStatus.of_json in
+      let targetQueryTCU = field_map json__ "TargetQueryTCU" QueryTCU.of_json in
+      make ?statusMessage ?status ?targetQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration object that contains the most recent account settings update, visible only if settings have been updated previously."]
+module ProvisionedCapacityResponse =
+  struct
+    type nonrec t =
+      {
+      activeQueryTCU: QueryTCU.t option
+        [@ocaml.doc
+          "The number of Timestream Compute Units (TCUs) provisioned in the account. This field is only visible when the compute mode is PROVISIONED."];
+      notificationConfiguration:
+        AccountSettingsNotificationConfiguration.t option
+        [@ocaml.doc
+          "An object that contains settings for notifications that are sent whenever the provisioned capacity settings are modified. This field is only visible when the compute mode is PROVISIONED."];
+      lastUpdate: LastUpdate.t option
+        [@ocaml.doc
+          "Information about the last update to the provisioned capacity settings."]}
+    let make ?activeQueryTCU =
+      fun ?notificationConfiguration ->
+        fun ?lastUpdate ->
+          fun () -> { activeQueryTCU; notificationConfiguration; lastUpdate }
+    let to_value x =
+      structure_to_value
+        [("ActiveQueryTCU",
+           (Option.map x.activeQueryTCU ~f:QueryTCU.to_value));
+        ("NotificationConfiguration",
+          (Option.map x.notificationConfiguration
+             ~f:AccountSettingsNotificationConfiguration.to_value));
+        ("LastUpdate", (Option.map x.lastUpdate ~f:LastUpdate.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let lastUpdate =
+        (Option.map ~f:LastUpdate.of_xml) (Xml.child xml_arg0 "LastUpdate") in
+      let notificationConfiguration =
+        (Option.map ~f:AccountSettingsNotificationConfiguration.of_xml)
+          (Xml.child xml_arg0 "NotificationConfiguration") in
+      let activeQueryTCU =
+        (Option.map ~f:QueryTCU.of_xml) (Xml.child xml_arg0 "ActiveQueryTCU") in
+      make ?lastUpdate ?notificationConfiguration ?activeQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let lastUpdate = field_map json__ "LastUpdate" LastUpdate.of_json in
+      let notificationConfiguration =
+        field_map json__ "NotificationConfiguration"
+          AccountSettingsNotificationConfiguration.of_json in
+      let activeQueryTCU = field_map json__ "ActiveQueryTCU" QueryTCU.of_json in
+      make ?lastUpdate ?notificationConfiguration ?activeQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response to a request to update the provisioned capacity settings for querying data."]
+module QueryComputeResponse =
+  struct
+    type nonrec t =
+      {
+      computeMode: ComputeMode.t option
+        [@ocaml.doc
+          "The mode in which Timestream Compute Units (TCUs) are allocated and utilized within an account. Note that in the Asia Pacific (Mumbai) region, the API operation only recognizes the value PROVISIONED."];
+      provisionedCapacity: ProvisionedCapacityResponse.t option
+        [@ocaml.doc
+          "Configuration object that contains settings for provisioned Timestream Compute Units (TCUs) in your account."]}
+    let make ?computeMode =
+      fun ?provisionedCapacity ->
+        fun () -> { computeMode; provisionedCapacity }
+    let to_value x =
+      structure_to_value
+        [("ComputeMode", (Option.map x.computeMode ~f:ComputeMode.to_value));
+        ("ProvisionedCapacity",
+          (Option.map x.provisionedCapacity
+             ~f:ProvisionedCapacityResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisionedCapacity =
+        (Option.map ~f:ProvisionedCapacityResponse.of_xml)
+          (Xml.child xml_arg0 "ProvisionedCapacity") in
+      let computeMode =
+        (Option.map ~f:ComputeMode.of_xml) (Xml.child xml_arg0 "ComputeMode") in
+      make ?provisionedCapacity ?computeMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisionedCapacity =
+        field_map json__ "ProvisionedCapacity"
+          ProvisionedCapacityResponse.of_json in
+      let computeMode = field_map json__ "ComputeMode" ComputeMode.of_json in
+      make ?provisionedCapacity ?computeMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The response to a request to retrieve or update the compute capacity settings for querying data."]
+module MaxQueryCapacity =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for MaxQueryCapacity" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module DescribeAccountSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      maxQueryTCU: MaxQueryCapacity.t option
+        [@ocaml.doc
+          "The maximum number of Timestream compute units (TCUs) the service will use at any point in time to serve your queries. To run queries, you must set a minimum capacity of 4 TCU. You can set the maximum number of TCU in multiples of 4, for example, 4, 8, 16, 32, and so on. This configuration is applicable only for on-demand usage of (TCUs)."];
+      queryPricingModel: QueryPricingModel.t option
+        [@ocaml.doc
+          "The pricing model for queries in your account. The QueryPricingModel parameter is used by several Timestream operations; however, the UpdateAccountSettings API operation doesn't recognize any values other than COMPUTE_UNITS."];
+      queryCompute: QueryComputeResponse.t option
+        [@ocaml.doc
+          "An object that contains the usage settings for Timestream Compute Units (TCUs) in your account for the query workload."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?maxQueryTCU =
+      fun ?queryPricingModel ->
+        fun ?queryCompute ->
+          fun () -> { maxQueryTCU; queryPricingModel; queryCompute }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MaxQueryTCU",
+           (Option.map x.maxQueryTCU ~f:MaxQueryCapacity.to_value));
+        ("QueryPricingModel",
+          (Option.map x.queryPricingModel ~f:QueryPricingModel.to_value));
+        ("QueryCompute",
+          (Option.map x.queryCompute ~f:QueryComputeResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryCompute =
+        (Option.map ~f:QueryComputeResponse.of_xml)
+          (Xml.child xml_arg0 "QueryCompute") in
+      let queryPricingModel =
+        (Option.map ~f:QueryPricingModel.of_xml)
+          (Xml.child xml_arg0 "QueryPricingModel") in
+      let maxQueryTCU =
+        (Option.map ~f:MaxQueryCapacity.of_xml)
+          (Xml.child xml_arg0 "MaxQueryTCU") in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryCompute =
+        field_map json__ "QueryCompute" QueryComputeResponse.of_json in
+      let queryPricingModel =
+        field_map json__ "QueryPricingModel" QueryPricingModel.of_json in
+      let maxQueryTCU =
+        field_map json__ "MaxQueryTCU" MaxQueryCapacity.of_json in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the settings for your account that include the query pricing model and the configured maximum TCUs the service can use for your query workload. You're charged only for the duration of compute units used for your workloads."]
 module DescribeEndpointsRequest =
   struct
     type nonrec t = unit
@@ -2098,32 +2502,31 @@ module Endpoint =
   struct
     type nonrec t =
       {
-      address: String_.t [@ocaml.doc "An endpoint address."];
-      cachePeriodInMinutes: Long.t
+      address: String_.t option [@ocaml.doc "An endpoint address."];
+      cachePeriodInMinutes: Long.t option
         [@ocaml.doc "The TTL for the endpoint, in minutes."]}
-    let context_ = "Endpoint"
-    let make ~address =
-      fun ~cachePeriodInMinutes ->
+    let make ?address =
+      fun ?cachePeriodInMinutes ->
         fun () -> { address; cachePeriodInMinutes }
     let to_value x =
       structure_to_value
-        [("Address", (Some (String_.to_value x.address)));
+        [("Address", (Option.map x.address ~f:String_.to_value));
         ("CachePeriodInMinutes",
-          (Some (Long.to_value x.cachePeriodInMinutes)))]
+          (Option.map x.cachePeriodInMinutes ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let cachePeriodInMinutes =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CachePeriodInMinutes") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "CachePeriodInMinutes") in
       let address =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Address") in
-      make ~cachePeriodInMinutes ~address ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Address") in
+      make ?cachePeriodInMinutes ?address ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cachePeriodInMinutes =
-        field_map_exn json "CachePeriodInMinutes" Long.of_json in
-      let address = field_map_exn json "Address" String_.of_json in
-      make ~cachePeriodInMinutes ~address ()
+        field_map json__ "CachePeriodInMinutes" Long.of_json in
+      let address = field_map json__ "Address" String_.of_json in
+      make ?cachePeriodInMinutes ?address ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Represents an available endpoint against which to make API calls against, as well as the TTL for that endpoint."]
@@ -2131,6 +2534,9 @@ module Endpoints =
   struct
     type nonrec t = Endpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Endpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2155,7 +2561,7 @@ module DescribeEndpointsResponse =
   struct
     type nonrec t =
       {
-      endpoints: Endpoints.t
+      endpoints: Endpoints.t option
         [@ocaml.doc
           "An Endpoints object is returned when a DescribeEndpoints request is made."]}
     type nonrec error =
@@ -2163,8 +2569,7 @@ module DescribeEndpointsResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeEndpointsResponse"
-    let make ~endpoints = fun () -> { endpoints }
+    let make ?endpoints = fun () -> { endpoints }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -2207,17 +2612,16 @@ module DescribeEndpointsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Endpoints", (Some (Endpoints.to_value x.endpoints)))]
+        [("Endpoints", (Option.map x.endpoints ~f:Endpoints.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let endpoints =
-        Endpoints.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Endpoints") in
-      make ~endpoints ()
+        (Option.map ~f:Endpoints.of_xml) (Xml.child xml_arg0 "Endpoints") in
+      make ?endpoints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endpoints = field_map_exn json "Endpoints" Endpoints.of_json in
-      make ~endpoints ()
+    let of_json json__ =
+      let endpoints = field_map json__ "Endpoints" Endpoints.of_json in
+      make ?endpoints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "DescribeEndpoints returns a list of available endpoints to make Timestream API calls against. This API is available through both Write and Query. Because the Timestream SDKs are designed to transparently work with the service\226\128\153s architecture, including the management and mapping of the service endpoints, it is not recommended that you use this API unless: You are using VPC endpoints (Amazon Web Services PrivateLink) with Timestream Your application uses a programming language that does not yet have SDK support You require better control over the client-side implementation For detailed information on how and when to use and implement DescribeEndpoints, see The Endpoint Discovery Pattern."]
@@ -2240,9 +2644,9 @@ module DescribeScheduledQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~scheduledQueryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledQueryArn =
-        field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ScheduledQueryArn" AmazonResourceName.of_json in
       make ~scheduledQueryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides detailed information about a scheduled query."]
@@ -2317,6 +2721,249 @@ module ScheduledQueryRunStatus =
       of_string (string_of_json ~kind:"ScheduledQueryRunStatus" j)
     let to_json = simple_to_json to_value
   end
+module QueryTemporalRangeMax =
+  struct
+    type nonrec t =
+      {
+      value: Long.t option
+        [@ocaml.doc
+          "The maximum duration in nanoseconds between the start and end of the query."];
+      tableArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the table which is queried with the largest time range."]}
+    let make ?value = fun ?tableArn -> fun () -> { value; tableArn }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:Long.to_value));
+        ("TableArn", (Option.map x.tableArn ~f:AmazonResourceName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tableArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "TableArn") in
+      let value = (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?tableArn ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tableArn = field_map json__ "TableArn" AmazonResourceName.of_json in
+      let value = field_map json__ "Value" Long.of_json in
+      make ?tableArn ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides insights into the table with the most sub-optimal temporal pruning scanned by your query."]
+module QueryTemporalRange =
+  struct
+    type nonrec t =
+      {
+      max: QueryTemporalRangeMax.t option
+        [@ocaml.doc
+          "Encapsulates the following properties that provide insights into the most sub-optimal performing table on the temporal axis: Value \226\128\147 The maximum duration in nanoseconds between the start and end of the query. TableArn \226\128\147 The Amazon Resource Name (ARN) of the table which is queried with the largest time range."]}
+    let make ?max = fun () -> { max }
+    let to_value x =
+      structure_to_value
+        [("Max", (Option.map x.max ~f:QueryTemporalRangeMax.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let max =
+        (Option.map ~f:QueryTemporalRangeMax.of_xml)
+          (Xml.child xml_arg0 "Max") in
+      make ?max ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let max = field_map json__ "Max" QueryTemporalRangeMax.of_json in
+      make ?max ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides insights into the temporal range of the query, including the table with the largest (max) time range."]
+module PartitionKey =
+  struct
+    type nonrec t = string
+    let context_ = "PartitionKey"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PartitionKey" j
+    let to_json = simple_to_json to_value
+  end
+module PartitionKeyList =
+  struct
+    type nonrec t = PartitionKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PartitionKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PartitionKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PartitionKeyList" ~of_json:PartitionKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Double =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Double x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
+    let of_json j = float_of_json ~kind:"a double" j
+    let to_json = simple_to_json to_value
+  end
+module QuerySpatialCoverageMax =
+  struct
+    type nonrec t =
+      {
+      value: Double.t option
+        [@ocaml.doc "The maximum ratio of spatial coverage."];
+      tableArn: AmazonResourceName.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the table with the most sub-optimal spatial pruning."];
+      partitionKey: PartitionKeyList.t option
+        [@ocaml.doc
+          "The partition key used for partitioning, which can be a default measure_name or a customer defined partition key."]}
+    let make ?value =
+      fun ?tableArn ->
+        fun ?partitionKey -> fun () -> { value; tableArn; partitionKey }
+    let to_value x =
+      structure_to_value
+        [("Value", (Option.map x.value ~f:Double.to_value));
+        ("TableArn", (Option.map x.tableArn ~f:AmazonResourceName.to_value));
+        ("PartitionKey",
+          (Option.map x.partitionKey ~f:PartitionKeyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let partitionKey =
+        (Option.map ~f:PartitionKeyList.of_xml)
+          (Xml.child xml_arg0 "PartitionKey") in
+      let tableArn =
+        (Option.map ~f:AmazonResourceName.of_xml)
+          (Xml.child xml_arg0 "TableArn") in
+      let value = (Option.map ~f:Double.of_xml) (Xml.child xml_arg0 "Value") in
+      make ?partitionKey ?tableArn ?value ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let partitionKey =
+        field_map json__ "PartitionKey" PartitionKeyList.of_json in
+      let tableArn = field_map json__ "TableArn" AmazonResourceName.of_json in
+      let value = field_map json__ "Value" Double.of_json in
+      make ?partitionKey ?tableArn ?value ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides insights into the table with the most sub-optimal spatial range scanned by your query."]
+module QuerySpatialCoverage =
+  struct
+    type nonrec t =
+      {
+      max: QuerySpatialCoverageMax.t option
+        [@ocaml.doc
+          "Provides insights into the spatial coverage of the executed query and the table with the most inefficient spatial pruning. Value \226\128\147 The maximum ratio of spatial coverage. TableArn \226\128\147 The Amazon Resource Name (ARN) of the table with sub-optimal spatial pruning. PartitionKey \226\128\147 The partition key used for partitioning, which can be a default measure_name or a CDPK."]}
+    let make ?max = fun () -> { max }
+    let to_value x =
+      structure_to_value
+        [("Max", (Option.map x.max ~f:QuerySpatialCoverageMax.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let max =
+        (Option.map ~f:QuerySpatialCoverageMax.of_xml)
+          (Xml.child xml_arg0 "Max") in
+      make ?max ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let max = field_map json__ "Max" QuerySpatialCoverageMax.of_json in
+      make ?max ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides insights into the spatial coverage of the query, including the table with sub-optimal (max) spatial pruning. This information can help you identify areas for improvement in your partitioning strategy to enhance spatial pruning For example, you can do the following with the QuerySpatialCoverage information: Add measure_name or use customer-defined partition key (CDPK) predicates. If you've already done the preceding action, remove functions around them or clauses, such as LIKE."]
+module ScheduledQueryInsightsResponse =
+  struct
+    type nonrec t =
+      {
+      querySpatialCoverage: QuerySpatialCoverage.t option
+        [@ocaml.doc
+          "Provides insights into the spatial coverage of the query, including the table with sub-optimal (max) spatial pruning. This information can help you identify areas for improvement in your partitioning strategy to enhance spatial pruning."];
+      queryTemporalRange: QueryTemporalRange.t option
+        [@ocaml.doc
+          "Provides insights into the temporal range of the query, including the table with the largest (max) time range. Following are some of the potential options for optimizing time-based pruning: Add missing time-predicates. Remove functions around the time predicates. Add time predicates to all the sub-queries."];
+      queryTableCount: Long.t option
+        [@ocaml.doc "Indicates the number of tables in the query."];
+      outputRows: Long.t option
+        [@ocaml.doc
+          "Indicates the total number of rows returned as part of the query result set. You can use this data to validate if the number of rows in the result set have changed as part of the query tuning exercise."];
+      outputBytes: Long.t option
+        [@ocaml.doc
+          "Indicates the size of query result set in bytes. You can use this data to validate if the result set has changed as part of the query tuning exercise."]}
+    let make ?querySpatialCoverage =
+      fun ?queryTemporalRange ->
+        fun ?queryTableCount ->
+          fun ?outputRows ->
+            fun ?outputBytes ->
+              fun () ->
+                {
+                  querySpatialCoverage;
+                  queryTemporalRange;
+                  queryTableCount;
+                  outputRows;
+                  outputBytes
+                }
+    let to_value x =
+      structure_to_value
+        [("QuerySpatialCoverage",
+           (Option.map x.querySpatialCoverage
+              ~f:QuerySpatialCoverage.to_value));
+        ("QueryTemporalRange",
+          (Option.map x.queryTemporalRange ~f:QueryTemporalRange.to_value));
+        ("QueryTableCount", (Option.map x.queryTableCount ~f:Long.to_value));
+        ("OutputRows", (Option.map x.outputRows ~f:Long.to_value));
+        ("OutputBytes", (Option.map x.outputBytes ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let outputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputBytes") in
+      let outputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputRows") in
+      let queryTableCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "QueryTableCount") in
+      let queryTemporalRange =
+        (Option.map ~f:QueryTemporalRange.of_xml)
+          (Xml.child xml_arg0 "QueryTemporalRange") in
+      let querySpatialCoverage =
+        (Option.map ~f:QuerySpatialCoverage.of_xml)
+          (Xml.child xml_arg0 "QuerySpatialCoverage") in
+      make ?outputBytes ?outputRows ?queryTableCount ?queryTemporalRange
+        ?querySpatialCoverage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let outputBytes = field_map json__ "OutputBytes" Long.of_json in
+      let outputRows = field_map json__ "OutputRows" Long.of_json in
+      let queryTableCount = field_map json__ "QueryTableCount" Long.of_json in
+      let queryTemporalRange =
+        field_map json__ "QueryTemporalRange" QueryTemporalRange.of_json in
+      let querySpatialCoverage =
+        field_map json__ "QuerySpatialCoverage" QuerySpatialCoverage.of_json in
+      make ?outputBytes ?outputRows ?queryTableCount ?queryTemporalRange
+        ?querySpatialCoverage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides various insights and metrics related to the ExecuteScheduledQueryRequest that was executed."]
 module ExecutionStats =
   struct
     type nonrec t =
@@ -2329,6 +2976,8 @@ module ExecutionStats =
           "Data writes metered for records ingested in a single scheduled query run."];
       bytesMetered: Long.t option
         [@ocaml.doc "Bytes metered for a single scheduled query run."];
+      cumulativeBytesScanned: Long.t option
+        [@ocaml.doc "Bytes scanned for a single scheduled query run."];
       recordsIngested: Long.t option
         [@ocaml.doc
           "The number of records ingested for a single scheduled query run."];
@@ -2338,22 +2987,26 @@ module ExecutionStats =
     let make ?executionTimeInMillis =
       fun ?dataWrites ->
         fun ?bytesMetered ->
-          fun ?recordsIngested ->
-            fun ?queryResultRows ->
-              fun () ->
-                {
-                  executionTimeInMillis;
-                  dataWrites;
-                  bytesMetered;
-                  recordsIngested;
-                  queryResultRows
-                }
+          fun ?cumulativeBytesScanned ->
+            fun ?recordsIngested ->
+              fun ?queryResultRows ->
+                fun () ->
+                  {
+                    executionTimeInMillis;
+                    dataWrites;
+                    bytesMetered;
+                    cumulativeBytesScanned;
+                    recordsIngested;
+                    queryResultRows
+                  }
     let to_value x =
       structure_to_value
         [("ExecutionTimeInMillis",
            (Option.map x.executionTimeInMillis ~f:Long.to_value));
         ("DataWrites", (Option.map x.dataWrites ~f:Long.to_value));
         ("BytesMetered", (Option.map x.bytesMetered ~f:Long.to_value));
+        ("CumulativeBytesScanned",
+          (Option.map x.cumulativeBytesScanned ~f:Long.to_value));
         ("RecordsIngested", (Option.map x.recordsIngested ~f:Long.to_value));
         ("QueryResultRows", (Option.map x.queryResultRows ~f:Long.to_value))]
     let to_query v = to_query to_value v
@@ -2362,6 +3015,9 @@ module ExecutionStats =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "QueryResultRows") in
       let recordsIngested =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "RecordsIngested") in
+      let cumulativeBytesScanned =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "CumulativeBytesScanned") in
       let bytesMetered =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "BytesMetered") in
       let dataWrites =
@@ -2369,18 +3025,20 @@ module ExecutionStats =
       let executionTimeInMillis =
         (Option.map ~f:Long.of_xml)
           (Xml.child xml_arg0 "ExecutionTimeInMillis") in
-      make ?queryResultRows ?recordsIngested ?bytesMetered ?dataWrites
-        ?executionTimeInMillis ()
+      make ?queryResultRows ?recordsIngested ?cumulativeBytesScanned
+        ?bytesMetered ?dataWrites ?executionTimeInMillis ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryResultRows = field_map json "QueryResultRows" Long.of_json in
-      let recordsIngested = field_map json "RecordsIngested" Long.of_json in
-      let bytesMetered = field_map json "BytesMetered" Long.of_json in
-      let dataWrites = field_map json "DataWrites" Long.of_json in
+    let of_json json__ =
+      let queryResultRows = field_map json__ "QueryResultRows" Long.of_json in
+      let recordsIngested = field_map json__ "RecordsIngested" Long.of_json in
+      let cumulativeBytesScanned =
+        field_map json__ "CumulativeBytesScanned" Long.of_json in
+      let bytesMetered = field_map json__ "BytesMetered" Long.of_json in
+      let dataWrites = field_map json__ "DataWrites" Long.of_json in
       let executionTimeInMillis =
-        field_map json "ExecutionTimeInMillis" Long.of_json in
-      make ?queryResultRows ?recordsIngested ?bytesMetered ?dataWrites
-        ?executionTimeInMillis ()
+        field_map json__ "ExecutionTimeInMillis" Long.of_json in
+      make ?queryResultRows ?recordsIngested ?cumulativeBytesScanned
+        ?bytesMetered ?dataWrites ?executionTimeInMillis ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Statistics for a single scheduled query run."]
 module S3ObjectKey =
@@ -2416,9 +3074,9 @@ module S3ReportLocation =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "BucketName") in
       make ?objectKey ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let objectKey = field_map json "ObjectKey" S3ObjectKey.of_json in
-      let bucketName = field_map json "BucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let objectKey = field_map json__ "ObjectKey" S3ObjectKey.of_json in
+      let bucketName = field_map json__ "BucketName" S3BucketName.of_json in
       make ?objectKey ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "S3 report location for the scheduled query run."]
@@ -2440,9 +3098,9 @@ module ErrorReportLocation =
           (Xml.child xml_arg0 "S3ReportLocation") in
       make ?s3ReportLocation ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3ReportLocation =
-        field_map json "S3ReportLocation" S3ReportLocation.of_json in
+        field_map json__ "S3ReportLocation" S3ReportLocation.of_json in
       make ?s3ReportLocation ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2460,6 +3118,9 @@ module ScheduledQueryRunSummary =
         [@ocaml.doc "The status of a scheduled query run."];
       executionStats: ExecutionStats.t option
         [@ocaml.doc "Runtime statistics for a scheduled run."];
+      queryInsightsResponse: ScheduledQueryInsightsResponse.t option
+        [@ocaml.doc
+          "Provides various insights and metrics related to the run summary of the scheduled query."];
       errorReportLocation: ErrorReportLocation.t option
         [@ocaml.doc "S3 location for error report."];
       failureReason: ErrorMessage.t option
@@ -2469,17 +3130,19 @@ module ScheduledQueryRunSummary =
       fun ?triggerTime ->
         fun ?runStatus ->
           fun ?executionStats ->
-            fun ?errorReportLocation ->
-              fun ?failureReason ->
-                fun () ->
-                  {
-                    invocationTime;
-                    triggerTime;
-                    runStatus;
-                    executionStats;
-                    errorReportLocation;
-                    failureReason
-                  }
+            fun ?queryInsightsResponse ->
+              fun ?errorReportLocation ->
+                fun ?failureReason ->
+                  fun () ->
+                    {
+                      invocationTime;
+                      triggerTime;
+                      runStatus;
+                      executionStats;
+                      queryInsightsResponse;
+                      errorReportLocation;
+                      failureReason
+                    }
     let to_value x =
       structure_to_value
         [("InvocationTime", (Option.map x.invocationTime ~f:Time.to_value));
@@ -2488,6 +3151,9 @@ module ScheduledQueryRunSummary =
           (Option.map x.runStatus ~f:ScheduledQueryRunStatus.to_value));
         ("ExecutionStats",
           (Option.map x.executionStats ~f:ExecutionStats.to_value));
+        ("QueryInsightsResponse",
+          (Option.map x.queryInsightsResponse
+             ~f:ScheduledQueryInsightsResponse.to_value));
         ("ErrorReportLocation",
           (Option.map x.errorReportLocation ~f:ErrorReportLocation.to_value));
         ("FailureReason",
@@ -2500,6 +3166,9 @@ module ScheduledQueryRunSummary =
       let errorReportLocation =
         (Option.map ~f:ErrorReportLocation.of_xml)
           (Xml.child xml_arg0 "ErrorReportLocation") in
+      let queryInsightsResponse =
+        (Option.map ~f:ScheduledQueryInsightsResponse.of_xml)
+          (Xml.child xml_arg0 "QueryInsightsResponse") in
       let executionStats =
         (Option.map ~f:ExecutionStats.of_xml)
           (Xml.child xml_arg0 "ExecutionStats") in
@@ -2510,27 +3179,34 @@ module ScheduledQueryRunSummary =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "TriggerTime") in
       let invocationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "InvocationTime") in
-      make ?failureReason ?errorReportLocation ?executionStats ?runStatus
-        ?triggerTime ?invocationTime ()
+      make ?failureReason ?errorReportLocation ?queryInsightsResponse
+        ?executionStats ?runStatus ?triggerTime ?invocationTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let failureReason = field_map json "FailureReason" ErrorMessage.of_json in
+    let of_json json__ =
+      let failureReason =
+        field_map json__ "FailureReason" ErrorMessage.of_json in
       let errorReportLocation =
-        field_map json "ErrorReportLocation" ErrorReportLocation.of_json in
+        field_map json__ "ErrorReportLocation" ErrorReportLocation.of_json in
+      let queryInsightsResponse =
+        field_map json__ "QueryInsightsResponse"
+          ScheduledQueryInsightsResponse.of_json in
       let executionStats =
-        field_map json "ExecutionStats" ExecutionStats.of_json in
+        field_map json__ "ExecutionStats" ExecutionStats.of_json in
       let runStatus =
-        field_map json "RunStatus" ScheduledQueryRunStatus.of_json in
-      let triggerTime = field_map json "TriggerTime" Time.of_json in
-      let invocationTime = field_map json "InvocationTime" Time.of_json in
-      make ?failureReason ?errorReportLocation ?executionStats ?runStatus
-        ?triggerTime ?invocationTime ()
+        field_map json__ "RunStatus" ScheduledQueryRunStatus.of_json in
+      let triggerTime = field_map json__ "TriggerTime" Time.of_json in
+      let invocationTime = field_map json__ "InvocationTime" Time.of_json in
+      make ?failureReason ?errorReportLocation ?queryInsightsResponse
+        ?executionStats ?runStatus ?triggerTime ?invocationTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Run summary for the scheduled query"]
 module ScheduledQueryRunSummaryList =
   struct
     type nonrec t = ScheduledQueryRunSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledQueryRunSummary.to_value)) |>
         (fun x -> `List x)
@@ -2557,20 +3233,21 @@ module ScheduledQueryDescription =
   struct
     type nonrec t =
       {
-      arn: AmazonResourceName.t [@ocaml.doc "Scheduled query ARN."];
-      name: ScheduledQueryName.t [@ocaml.doc "Name of the scheduled query."];
-      queryString: QueryString.t [@ocaml.doc "The query to be run."];
+      arn: AmazonResourceName.t option [@ocaml.doc "Scheduled query ARN."];
+      name: ScheduledQueryName.t option
+        [@ocaml.doc "Name of the scheduled query."];
+      queryString: QueryString.t option [@ocaml.doc "The query to be run."];
       creationTime: Time.t option
         [@ocaml.doc "Creation time of the scheduled query."];
-      state: ScheduledQueryState.t
+      state: ScheduledQueryState.t option
         [@ocaml.doc "State of the scheduled query."];
       previousInvocationTime: Time.t option
         [@ocaml.doc "Last time the query was run."];
       nextInvocationTime: Time.t option
         [@ocaml.doc "The next time the scheduled query is scheduled to run."];
-      scheduleConfiguration: ScheduleConfiguration.t
+      scheduleConfiguration: ScheduleConfiguration.t option
         [@ocaml.doc "Schedule configuration."];
-      notificationConfiguration: NotificationConfiguration.t
+      notificationConfiguration: NotificationConfiguration.t option
         [@ocaml.doc "Notification configuration."];
       targetConfiguration: TargetConfiguration.t option
         [@ocaml.doc "Scheduled query target store configuration."];
@@ -2587,56 +3264,56 @@ module ScheduledQueryDescription =
       recentlyFailedRuns: ScheduledQueryRunSummaryList.t option
         [@ocaml.doc
           "Runtime summary for the last five failed scheduled query runs."]}
-    let context_ = "ScheduledQueryDescription"
-    let make ?creationTime =
-      fun ?previousInvocationTime ->
-        fun ?nextInvocationTime ->
-          fun ?targetConfiguration ->
-            fun ?scheduledQueryExecutionRoleArn ->
-              fun ?kmsKeyId ->
-                fun ?errorReportConfiguration ->
-                  fun ?lastRunSummary ->
-                    fun ?recentlyFailedRuns ->
-                      fun ~arn ->
-                        fun ~name ->
-                          fun ~queryString ->
-                            fun ~state ->
-                              fun ~scheduleConfiguration ->
-                                fun ~notificationConfiguration ->
+    let make ?arn =
+      fun ?name ->
+        fun ?queryString ->
+          fun ?creationTime ->
+            fun ?state ->
+              fun ?previousInvocationTime ->
+                fun ?nextInvocationTime ->
+                  fun ?scheduleConfiguration ->
+                    fun ?notificationConfiguration ->
+                      fun ?targetConfiguration ->
+                        fun ?scheduledQueryExecutionRoleArn ->
+                          fun ?kmsKeyId ->
+                            fun ?errorReportConfiguration ->
+                              fun ?lastRunSummary ->
+                                fun ?recentlyFailedRuns ->
                                   fun () ->
                                     {
+                                      arn;
+                                      name;
+                                      queryString;
                                       creationTime;
+                                      state;
                                       previousInvocationTime;
                                       nextInvocationTime;
+                                      scheduleConfiguration;
+                                      notificationConfiguration;
                                       targetConfiguration;
                                       scheduledQueryExecutionRoleArn;
                                       kmsKeyId;
                                       errorReportConfiguration;
                                       lastRunSummary;
-                                      recentlyFailedRuns;
-                                      arn;
-                                      name;
-                                      queryString;
-                                      state;
-                                      scheduleConfiguration;
-                                      notificationConfiguration
+                                      recentlyFailedRuns
                                     }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (AmazonResourceName.to_value x.arn)));
-        ("Name", (Some (ScheduledQueryName.to_value x.name)));
-        ("QueryString", (Some (QueryString.to_value x.queryString)));
+        [("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("Name", (Option.map x.name ~f:ScheduledQueryName.to_value));
+        ("QueryString", (Option.map x.queryString ~f:QueryString.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
-        ("State", (Some (ScheduledQueryState.to_value x.state)));
+        ("State", (Option.map x.state ~f:ScheduledQueryState.to_value));
         ("PreviousInvocationTime",
           (Option.map x.previousInvocationTime ~f:Time.to_value));
         ("NextInvocationTime",
           (Option.map x.nextInvocationTime ~f:Time.to_value));
         ("ScheduleConfiguration",
-          (Some (ScheduleConfiguration.to_value x.scheduleConfiguration)));
+          (Option.map x.scheduleConfiguration
+             ~f:ScheduleConfiguration.to_value));
         ("NotificationConfiguration",
-          (Some
-             (NotificationConfiguration.to_value x.notificationConfiguration)));
+          (Option.map x.notificationConfiguration
+             ~f:NotificationConfiguration.to_value));
         ("TargetConfiguration",
           (Option.map x.targetConfiguration ~f:TargetConfiguration.to_value));
         ("ScheduledQueryExecutionRoleArn",
@@ -2672,71 +3349,67 @@ module ScheduledQueryDescription =
         (Option.map ~f:TargetConfiguration.of_xml)
           (Xml.child xml_arg0 "TargetConfiguration") in
       let notificationConfiguration =
-        NotificationConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "NotificationConfiguration") in
+        (Option.map ~f:NotificationConfiguration.of_xml)
+          (Xml.child xml_arg0 "NotificationConfiguration") in
       let scheduleConfiguration =
-        ScheduleConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduleConfiguration") in
+        (Option.map ~f:ScheduleConfiguration.of_xml)
+          (Xml.child xml_arg0 "ScheduleConfiguration") in
       let nextInvocationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "NextInvocationTime") in
       let previousInvocationTime =
         (Option.map ~f:Time.of_xml)
           (Xml.child xml_arg0 "PreviousInvocationTime") in
       let state =
-        ScheduledQueryState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:ScheduledQueryState.of_xml)
+          (Xml.child xml_arg0 "State") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let queryString =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
+        (Option.map ~f:QueryString.of_xml) (Xml.child xml_arg0 "QueryString") in
       let name =
-        ScheduledQueryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ScheduledQueryName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?recentlyFailedRuns ?lastRunSummary ?errorReportConfiguration
         ?kmsKeyId ?scheduledQueryExecutionRoleArn ?targetConfiguration
-        ~notificationConfiguration ~scheduleConfiguration ?nextInvocationTime
-        ?previousInvocationTime ~state ?creationTime ~queryString ~name ~arn
+        ?notificationConfiguration ?scheduleConfiguration ?nextInvocationTime
+        ?previousInvocationTime ?state ?creationTime ?queryString ?name ?arn
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recentlyFailedRuns =
-        field_map json "RecentlyFailedRuns"
+        field_map json__ "RecentlyFailedRuns"
           ScheduledQueryRunSummaryList.of_json in
       let lastRunSummary =
-        field_map json "LastRunSummary" ScheduledQueryRunSummary.of_json in
+        field_map json__ "LastRunSummary" ScheduledQueryRunSummary.of_json in
       let errorReportConfiguration =
-        field_map json "ErrorReportConfiguration"
+        field_map json__ "ErrorReportConfiguration"
           ErrorReportConfiguration.of_json in
-      let kmsKeyId = field_map json "KmsKeyId" StringValue2048.of_json in
+      let kmsKeyId = field_map json__ "KmsKeyId" StringValue2048.of_json in
       let scheduledQueryExecutionRoleArn =
-        field_map json "ScheduledQueryExecutionRoleArn"
+        field_map json__ "ScheduledQueryExecutionRoleArn"
           AmazonResourceName.of_json in
       let targetConfiguration =
-        field_map json "TargetConfiguration" TargetConfiguration.of_json in
+        field_map json__ "TargetConfiguration" TargetConfiguration.of_json in
       let notificationConfiguration =
-        field_map_exn json "NotificationConfiguration"
+        field_map json__ "NotificationConfiguration"
           NotificationConfiguration.of_json in
       let scheduleConfiguration =
-        field_map_exn json "ScheduleConfiguration"
+        field_map json__ "ScheduleConfiguration"
           ScheduleConfiguration.of_json in
       let nextInvocationTime =
-        field_map json "NextInvocationTime" Time.of_json in
+        field_map json__ "NextInvocationTime" Time.of_json in
       let previousInvocationTime =
-        field_map json "PreviousInvocationTime" Time.of_json in
-      let state = field_map_exn json "State" ScheduledQueryState.of_json in
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      let name = field_map_exn json "Name" ScheduledQueryName.of_json in
-      let arn = field_map_exn json "Arn" AmazonResourceName.of_json in
+        field_map json__ "PreviousInvocationTime" Time.of_json in
+      let state = field_map json__ "State" ScheduledQueryState.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      let name = field_map json__ "Name" ScheduledQueryName.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
       make ?recentlyFailedRuns ?lastRunSummary ?errorReportConfiguration
         ?kmsKeyId ?scheduledQueryExecutionRoleArn ?targetConfiguration
-        ~notificationConfiguration ~scheduleConfiguration ?nextInvocationTime
-        ?previousInvocationTime ~state ?creationTime ~queryString ~name ~arn
+        ?notificationConfiguration ?scheduleConfiguration ?nextInvocationTime
+        ?previousInvocationTime ?state ?creationTime ?queryString ?name ?arn
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Structure that describes scheduled query."]
@@ -2763,10 +3436,10 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?scheduledQueryArn ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledQueryArn =
-        field_map json "ScheduledQueryArn" AmazonResourceName.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
+        field_map json__ "ScheduledQueryArn" AmazonResourceName.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?scheduledQueryArn ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource could not be found."]
@@ -2774,7 +3447,7 @@ module DescribeScheduledQueryResponse =
   struct
     type nonrec t =
       {
-      scheduledQuery: ScheduledQueryDescription.t
+      scheduledQuery: ScheduledQueryDescription.t option
         [@ocaml.doc "The scheduled query."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
@@ -2784,8 +3457,7 @@ module DescribeScheduledQueryResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeScheduledQueryResponse"
-    let make ~scheduledQuery = fun () -> { scheduledQuery }
+    let make ?scheduledQuery = fun () -> { scheduledQuery }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -2853,33 +3525,74 @@ module DescribeScheduledQueryResponse =
     let to_value x =
       structure_to_value
         [("ScheduledQuery",
-           (Some (ScheduledQueryDescription.to_value x.scheduledQuery)))]
+           (Option.map x.scheduledQuery ~f:ScheduledQueryDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let scheduledQuery =
-        ScheduledQueryDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQuery") in
-      make ~scheduledQuery ()
+        (Option.map ~f:ScheduledQueryDescription.of_xml)
+          (Xml.child xml_arg0 "ScheduledQuery") in
+      make ?scheduledQuery ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledQuery =
-        field_map_exn json "ScheduledQuery" ScheduledQueryDescription.of_json in
-      make ~scheduledQuery ()
+        field_map json__ "ScheduledQuery" ScheduledQueryDescription.of_json in
+      make ?scheduledQuery ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides detailed information about a scheduled query."]
-module Double =
+module ScheduledQueryInsightsMode =
   struct
-    type nonrec t = float
+    type nonrec t =
+      | ENABLED_WITH_RATE_CONTROL 
+      | DISABLED 
+      | Non_static_id of string 
     let make i = i
-    let of_string = Float.of_string
-    let to_value x = `Double x
+    let to_string =
+      function
+      | ENABLED_WITH_RATE_CONTROL -> "ENABLED_WITH_RATE_CONTROL"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED_WITH_RATE_CONTROL" -> ENABLED_WITH_RATE_CONTROL
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = Stdlib.Float.to_string x
+    let to_header x = to_string x
     let of_xml xml_arg0 =
-      Float.of_string (string_of_xml ~kind:"a double" xml_arg0)
-    let of_json j = float_of_json ~kind:"a double" j
+      of_string
+        (string_of_xml ~kind:"enumeration ScheduledQueryInsightsMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ScheduledQueryInsightsMode" j)
     let to_json = simple_to_json to_value
   end
+module ScheduledQueryInsights =
+  struct
+    type nonrec t =
+      {
+      mode: ScheduledQueryInsightsMode.t
+        [@ocaml.doc
+          "Provides the following modes to enable ScheduledQueryInsights: ENABLED_WITH_RATE_CONTROL \226\128\147 Enables ScheduledQueryInsights for the queries being processed. This mode also includes a rate control mechanism, which limits the QueryInsights feature to 1 query per second (QPS). DISABLED \226\128\147 Disables ScheduledQueryInsights."]}
+    let context_ = "ScheduledQueryInsights"
+    let make ~mode = fun () -> { mode }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Some (ScheduledQueryInsightsMode.to_value x.mode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        ScheduledQueryInsightsMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+      make ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode =
+        field_map_exn json__ "Mode" ScheduledQueryInsightsMode.of_json in
+      make ~mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Encapsulates settings for enabling QueryInsights on an ExecuteScheduledQueryRequest."]
 module ExecuteScheduledQueryRequest =
   struct
     type nonrec t =
@@ -2889,20 +3602,31 @@ module ExecuteScheduledQueryRequest =
       invocationTime: Time.t
         [@ocaml.doc
           "The timestamp in UTC. Query will be run as if it was invoked at this timestamp."];
-      clientToken: ClientToken.t option [@ocaml.doc "Not used."]}
+      clientToken: ClientToken.t option [@ocaml.doc "Not used."];
+      queryInsights: ScheduledQueryInsights.t option
+        [@ocaml.doc
+          "Encapsulates settings for enabling QueryInsights. Enabling QueryInsights returns insights and metrics as a part of the Amazon SNS notification for the query that you executed. You can use QueryInsights to tune your query performance and cost."]}
     let context_ = "ExecuteScheduledQueryRequest"
     let make ?clientToken =
-      fun ~scheduledQueryArn ->
-        fun ~invocationTime ->
-          fun () -> { clientToken; scheduledQueryArn; invocationTime }
+      fun ?queryInsights ->
+        fun ~scheduledQueryArn ->
+          fun ~invocationTime ->
+            fun () ->
+              { clientToken; queryInsights; scheduledQueryArn; invocationTime
+              }
     let to_value x =
       structure_to_value
         [("ScheduledQueryArn",
            (Some (AmazonResourceName.to_value x.scheduledQueryArn)));
         ("InvocationTime", (Some (Time.to_value x.invocationTime)));
-        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("QueryInsights",
+          (Option.map x.queryInsights ~f:ScheduledQueryInsights.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let queryInsights =
+        (Option.map ~f:ScheduledQueryInsights.of_xml)
+          (Xml.child xml_arg0 "QueryInsights") in
       let clientToken =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
       let invocationTime =
@@ -2911,16 +3635,19 @@ module ExecuteScheduledQueryRequest =
       let scheduledQueryArn =
         AmazonResourceName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
-      make ?clientToken ~invocationTime ~scheduledQueryArn ()
+      make ?queryInsights ?clientToken ~invocationTime ~scheduledQueryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "ClientToken" ClientToken.of_json in
-      let invocationTime = field_map_exn json "InvocationTime" Time.of_json in
+    let of_json json__ =
+      let queryInsights =
+        field_map json__ "QueryInsights" ScheduledQueryInsights.of_json in
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let invocationTime = field_map_exn json__ "InvocationTime" Time.of_json in
       let scheduledQueryArn =
-        field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
-      make ?clientToken ~invocationTime ~scheduledQueryArn ()
+        field_map_exn json__ "ScheduledQueryArn" AmazonResourceName.of_json in
+      make ?queryInsights ?clientToken ~invocationTime ~scheduledQueryArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "You can use this API to run a scheduled query manually."]
+  end[@@ocaml.doc
+       "You can use this API to run a scheduled query manually. If you enabled QueryInsights, this API also returns insights and metrics related to the query that you executed as part of an Amazon SNS notification. QueryInsights helps with performance tuning of your query. For more information about QueryInsights, see Using query insights to optimize queries in Amazon Timestream."]
 module NextScheduledQueriesResultsToken =
   struct
     type nonrec t = string
@@ -2981,11 +3708,11 @@ module ListScheduledQueriesRequest =
           (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" NextScheduledQueriesResultsToken.of_json in
+        field_map json__ "NextToken" NextScheduledQueriesResultsToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxScheduledQueriesResults.of_json in
+        field_map json__ "MaxResults" MaxScheduledQueriesResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3013,9 +3740,9 @@ module TimestreamDestination =
           (Xml.child xml_arg0 "DatabaseName") in
       make ?tableName ?databaseName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tableName = field_map json "TableName" ResourceName.of_json in
-      let databaseName = field_map json "DatabaseName" ResourceName.of_json in
+    let of_json json__ =
+      let tableName = field_map json__ "TableName" ResourceName.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
       make ?tableName ?databaseName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Destination for scheduled query."]
@@ -3039,9 +3766,10 @@ module TargetDestination =
           (Xml.child xml_arg0 "TimestreamDestination") in
       make ?timestreamDestination ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let timestreamDestination =
-        field_map json "TimestreamDestination" TimestreamDestination.of_json in
+        field_map json__ "TimestreamDestination"
+          TimestreamDestination.of_json in
       make ?timestreamDestination ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3050,12 +3778,14 @@ module ScheduledQuery =
   struct
     type nonrec t =
       {
-      arn: AmazonResourceName.t [@ocaml.doc "The Amazon Resource Name."];
-      name: ScheduledQueryName.t
+      arn: AmazonResourceName.t option
+        [@ocaml.doc "The Amazon Resource Name."];
+      name: ScheduledQueryName.t option
         [@ocaml.doc "The name of the scheduled query."];
       creationTime: Time.t option
         [@ocaml.doc "The creation time of the scheduled query."];
-      state: ScheduledQueryState.t [@ocaml.doc "State of scheduled query."];
+      state: ScheduledQueryState.t option
+        [@ocaml.doc "State of scheduled query."];
       previousInvocationTime: Time.t option
         [@ocaml.doc "The last time the scheduled query was run."];
       nextInvocationTime: Time.t option
@@ -3067,34 +3797,33 @@ module ScheduledQuery =
           "Target data source where final scheduled query result will be written."];
       lastRunStatus: ScheduledQueryRunStatus.t option
         [@ocaml.doc "Status of the last scheduled query run."]}
-    let context_ = "ScheduledQuery"
-    let make ?creationTime =
-      fun ?previousInvocationTime ->
-        fun ?nextInvocationTime ->
-          fun ?errorReportConfiguration ->
-            fun ?targetDestination ->
-              fun ?lastRunStatus ->
-                fun ~arn ->
-                  fun ~name ->
-                    fun ~state ->
+    let make ?arn =
+      fun ?name ->
+        fun ?creationTime ->
+          fun ?state ->
+            fun ?previousInvocationTime ->
+              fun ?nextInvocationTime ->
+                fun ?errorReportConfiguration ->
+                  fun ?targetDestination ->
+                    fun ?lastRunStatus ->
                       fun () ->
                         {
+                          arn;
+                          name;
                           creationTime;
+                          state;
                           previousInvocationTime;
                           nextInvocationTime;
                           errorReportConfiguration;
                           targetDestination;
-                          lastRunStatus;
-                          arn;
-                          name;
-                          state
+                          lastRunStatus
                         }
     let to_value x =
       structure_to_value
-        [("Arn", (Some (AmazonResourceName.to_value x.arn)));
-        ("Name", (Some (ScheduledQueryName.to_value x.name)));
+        [("Arn", (Option.map x.arn ~f:AmazonResourceName.to_value));
+        ("Name", (Option.map x.name ~f:ScheduledQueryName.to_value));
         ("CreationTime", (Option.map x.creationTime ~f:Time.to_value));
-        ("State", (Some (ScheduledQueryState.to_value x.state)));
+        ("State", (Option.map x.state ~f:ScheduledQueryState.to_value));
         ("PreviousInvocationTime",
           (Option.map x.previousInvocationTime ~f:Time.to_value));
         ("NextInvocationTime",
@@ -3123,45 +3852,46 @@ module ScheduledQuery =
         (Option.map ~f:Time.of_xml)
           (Xml.child xml_arg0 "PreviousInvocationTime") in
       let state =
-        ScheduledQueryState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:ScheduledQueryState.of_xml)
+          (Xml.child xml_arg0 "State") in
       let creationTime =
         (Option.map ~f:Time.of_xml) (Xml.child xml_arg0 "CreationTime") in
       let name =
-        ScheduledQueryName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:ScheduledQueryName.of_xml) (Xml.child xml_arg0 "Name") in
       let arn =
-        AmazonResourceName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Arn") in
+        (Option.map ~f:AmazonResourceName.of_xml) (Xml.child xml_arg0 "Arn") in
       make ?lastRunStatus ?targetDestination ?errorReportConfiguration
-        ?nextInvocationTime ?previousInvocationTime ~state ?creationTime
-        ~name ~arn ()
+        ?nextInvocationTime ?previousInvocationTime ?state ?creationTime
+        ?name ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastRunStatus =
-        field_map json "LastRunStatus" ScheduledQueryRunStatus.of_json in
+        field_map json__ "LastRunStatus" ScheduledQueryRunStatus.of_json in
       let targetDestination =
-        field_map json "TargetDestination" TargetDestination.of_json in
+        field_map json__ "TargetDestination" TargetDestination.of_json in
       let errorReportConfiguration =
-        field_map json "ErrorReportConfiguration"
+        field_map json__ "ErrorReportConfiguration"
           ErrorReportConfiguration.of_json in
       let nextInvocationTime =
-        field_map json "NextInvocationTime" Time.of_json in
+        field_map json__ "NextInvocationTime" Time.of_json in
       let previousInvocationTime =
-        field_map json "PreviousInvocationTime" Time.of_json in
-      let state = field_map_exn json "State" ScheduledQueryState.of_json in
-      let creationTime = field_map json "CreationTime" Time.of_json in
-      let name = field_map_exn json "Name" ScheduledQueryName.of_json in
-      let arn = field_map_exn json "Arn" AmazonResourceName.of_json in
+        field_map json__ "PreviousInvocationTime" Time.of_json in
+      let state = field_map json__ "State" ScheduledQueryState.of_json in
+      let creationTime = field_map json__ "CreationTime" Time.of_json in
+      let name = field_map json__ "Name" ScheduledQueryName.of_json in
+      let arn = field_map json__ "Arn" AmazonResourceName.of_json in
       make ?lastRunStatus ?targetDestination ?errorReportConfiguration
-        ?nextInvocationTime ?previousInvocationTime ~state ?creationTime
-        ~name ~arn ()
+        ?nextInvocationTime ?previousInvocationTime ?state ?creationTime
+        ?name ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Scheduled Query"]
 module ScheduledQueryList =
   struct
     type nonrec t = ScheduledQuery.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScheduledQuery.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3187,7 +3917,7 @@ module ListScheduledQueriesResponse =
   struct
     type nonrec t =
       {
-      scheduledQueries: ScheduledQueryList.t
+      scheduledQueries: ScheduledQueryList.t option
         [@ocaml.doc "A list of scheduled queries."];
       nextToken: NextScheduledQueriesResultsToken.t option
         [@ocaml.doc
@@ -3199,9 +3929,8 @@ module ListScheduledQueriesResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListScheduledQueriesResponse"
-    let make ?nextToken =
-      fun ~scheduledQueries -> fun () -> { nextToken; scheduledQueries }
+    let make ?scheduledQueries =
+      fun ?nextToken -> fun () -> { scheduledQueries; nextToken }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3261,7 +3990,7 @@ module ListScheduledQueriesResponse =
     let to_value x =
       structure_to_value
         [("ScheduledQueries",
-           (Some (ScheduledQueryList.to_value x.scheduledQueries)));
+           (Option.map x.scheduledQueries ~f:ScheduledQueryList.to_value));
         ("NextToken",
           (Option.map x.nextToken
              ~f:NextScheduledQueriesResultsToken.to_value))]
@@ -3271,16 +4000,16 @@ module ListScheduledQueriesResponse =
         (Option.map ~f:NextScheduledQueriesResultsToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let scheduledQueries =
-        ScheduledQueryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueries") in
-      make ?nextToken ~scheduledQueries ()
+        (Option.map ~f:ScheduledQueryList.of_xml)
+          (Xml.child xml_arg0 "ScheduledQueries") in
+      make ?nextToken ?scheduledQueries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" NextScheduledQueriesResultsToken.of_json in
+        field_map json__ "NextToken" NextScheduledQueriesResultsToken.of_json in
       let scheduledQueries =
-        field_map_exn json "ScheduledQueries" ScheduledQueryList.of_json in
-      make ?nextToken ~scheduledQueries ()
+        field_map json__ "ScheduledQueries" ScheduledQueryList.of_json in
+      make ?nextToken ?scheduledQueries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets a list of all scheduled queries in the caller's Amazon account and Region. ListScheduledQueries is eventually consistent."]
@@ -3351,13 +4080,13 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ?nextToken ?maxResults ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" NextTagsForResourceResultsToken.of_json in
+        field_map json__ "NextToken" NextTagsForResourceResultsToken.of_json in
       let maxResults =
-        field_map json "MaxResults" MaxTagsForResourceResult.of_json in
+        field_map json__ "MaxResults" MaxTagsForResourceResult.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ?nextToken ?maxResults ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List all tags on a Timestream query resource."]
@@ -3365,7 +4094,7 @@ module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t
+      tags: TagList.t option
         [@ocaml.doc
           "The tags currently associated with the Timestream resource."];
       nextToken: NextTagsForResourceResultsToken.t option
@@ -3377,8 +4106,7 @@ module ListTagsForResourceResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ?nextToken = fun ~tags -> fun () -> { nextToken; tags }
+    let make ?tags = fun ?nextToken -> fun () -> { tags; nextToken }
     let error_of_json name json =
       match name with
       | "InvalidEndpointException" ->
@@ -3429,7 +4157,7 @@ module ListTagsForResourceResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Tags", (Some (TagList.to_value x.tags)));
+        [("Tags", (Option.map x.tags ~f:TagList.to_value));
         ("NextToken",
           (Option.map x.nextToken ~f:NextTagsForResourceResultsToken.to_value))]
     let to_query v = to_query to_value v
@@ -3437,15 +4165,14 @@ module ListTagsForResourceResponse =
       let nextToken =
         (Option.map ~f:NextTagsForResourceResultsToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ?nextToken ~tags ()
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?nextToken ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" NextTagsForResourceResultsToken.of_json in
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      make ?nextToken ~tags ()
+        field_map json__ "NextToken" NextTagsForResourceResultsToken.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      make ?nextToken ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "List all tags on a Timestream query resource."]
 module MaxQueryResults =
@@ -3488,32 +4215,32 @@ module ParameterMapping =
   struct
     type nonrec t =
       {
-      name: String_.t [@ocaml.doc "Parameter name."];
-      type_: Type.t }
-    let context_ = "ParameterMapping"
-    let make ~name = fun ~type_ -> fun () -> { name; type_ }
+      name: String_.t option [@ocaml.doc "Parameter name."];
+      type_: Type.t option }
+    let make ?name = fun ?type_ -> fun () -> { name; type_ }
     let to_value x =
       structure_to_value
-        [("Name", (Some (String_.to_value x.name)));
-        ("Type", (Some (Type.to_value x.type_)))]
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("Type", (Option.map x.type_ ~f:Type.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let type_ =
-        Type.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~type_ ~name ()
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "Type") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" Type.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
-      make ~type_ ~name ()
+    let of_json json__ =
+      let type_ = field_map json__ "Type" Type.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Mapping for named parameters."]
 module ParameterMappingList =
   struct
     type nonrec t = ParameterMapping.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ParameterMapping.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3563,14 +4290,15 @@ module PrepareQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
       make ?validateOnly ~queryString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let validateOnly =
-        field_map json "ValidateOnly" NullableBoolean.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
+        field_map json__ "ValidateOnly" NullableBoolean.of_json in
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
       make ?validateOnly ~queryString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A synchronous operation that allows you to submit a query with parameters to be stored by Timestream for later running. Timestream only supports using this operation with the PrepareQueryRequest$ValidateOnly set to true."]
+       "A synchronous operation that allows you to submit a query with parameters to be stored by Timestream for later running. Timestream only supports using this operation with ValidateOnly set to true."]
 module SelectColumn =
   struct
     type nonrec t =
@@ -3611,12 +4339,12 @@ module SelectColumn =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?aliased ?tableName ?databaseName ?type_ ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aliased = field_map json "Aliased" NullableBoolean.of_json in
-      let tableName = field_map json "TableName" ResourceName.of_json in
-      let databaseName = field_map json "DatabaseName" ResourceName.of_json in
-      let type_ = field_map json "Type" Type.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let aliased = field_map json__ "Aliased" NullableBoolean.of_json in
+      let tableName = field_map json__ "TableName" ResourceName.of_json in
+      let databaseName = field_map json__ "DatabaseName" ResourceName.of_json in
+      let type_ = field_map json__ "Type" Type.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?aliased ?tableName ?databaseName ?type_ ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the column that is returned by the query."]
@@ -3624,6 +4352,9 @@ module SelectColumnList =
   struct
     type nonrec t = SelectColumn.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SelectColumn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3648,12 +4379,12 @@ module PrepareQueryResponse =
   struct
     type nonrec t =
       {
-      queryString: QueryString.t
+      queryString: QueryString.t option
         [@ocaml.doc "The query string that you want prepare."];
-      columns: SelectColumnList.t
+      columns: SelectColumnList.t option
         [@ocaml.doc
           "A list of SELECT clause columns of the submitted query string."];
-      parameters: ParameterMappingList.t
+      parameters: ParameterMappingList.t option
         [@ocaml.doc
           "A list of parameters used in the submitted query string."]}
     type nonrec error =
@@ -3663,10 +4394,9 @@ module PrepareQueryResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "PrepareQueryResponse"
-    let make ~queryString =
-      fun ~columns ->
-        fun ~parameters -> fun () -> { queryString; columns; parameters }
+    let make ?queryString =
+      fun ?columns ->
+        fun ?parameters -> fun () -> { queryString; columns; parameters }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -3725,31 +4455,109 @@ module PrepareQueryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryString", (Some (QueryString.to_value x.queryString)));
-        ("Columns", (Some (SelectColumnList.to_value x.columns)));
-        ("Parameters", (Some (ParameterMappingList.to_value x.parameters)))]
+        [("QueryString", (Option.map x.queryString ~f:QueryString.to_value));
+        ("Columns", (Option.map x.columns ~f:SelectColumnList.to_value));
+        ("Parameters",
+          (Option.map x.parameters ~f:ParameterMappingList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let parameters =
-        ParameterMappingList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Parameters") in
+        (Option.map ~f:ParameterMappingList.of_xml)
+          (Xml.child xml_arg0 "Parameters") in
       let columns =
-        SelectColumnList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Columns") in
+        (Option.map ~f:SelectColumnList.of_xml)
+          (Xml.child xml_arg0 "Columns") in
       let queryString =
-        QueryString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      make ~parameters ~columns ~queryString ()
+        (Option.map ~f:QueryString.of_xml) (Xml.child xml_arg0 "QueryString") in
+      make ?parameters ?columns ?queryString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map_exn json "Parameters" ParameterMappingList.of_json in
-      let columns = field_map_exn json "Columns" SelectColumnList.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      make ~parameters ~columns ~queryString ()
+        field_map json__ "Parameters" ParameterMappingList.of_json in
+      let columns = field_map json__ "Columns" SelectColumnList.of_json in
+      let queryString = field_map json__ "QueryString" QueryString.of_json in
+      make ?parameters ?columns ?queryString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A synchronous operation that allows you to submit a query with parameters to be stored by Timestream for later running. Timestream only supports using this operation with the PrepareQueryRequest$ValidateOnly set to true."]
+       "A synchronous operation that allows you to submit a query with parameters to be stored by Timestream for later running. Timestream only supports using this operation with ValidateOnly set to true."]
+module ProvisionedCapacityRequest =
+  struct
+    type nonrec t =
+      {
+      targetQueryTCU: QueryTCU.t
+        [@ocaml.doc
+          "The target compute capacity for querying data, specified in Timestream Compute Units (TCUs)."];
+      notificationConfiguration:
+        AccountSettingsNotificationConfiguration.t option
+        [@ocaml.doc
+          "Configuration settings for notifications related to the provisioned capacity update."]}
+    let context_ = "ProvisionedCapacityRequest"
+    let make ?notificationConfiguration =
+      fun ~targetQueryTCU ->
+        fun () -> { notificationConfiguration; targetQueryTCU }
+    let to_value x =
+      structure_to_value
+        [("TargetQueryTCU", (Some (QueryTCU.to_value x.targetQueryTCU)));
+        ("NotificationConfiguration",
+          (Option.map x.notificationConfiguration
+             ~f:AccountSettingsNotificationConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let notificationConfiguration =
+        (Option.map ~f:AccountSettingsNotificationConfiguration.of_xml)
+          (Xml.child xml_arg0 "NotificationConfiguration") in
+      let targetQueryTCU =
+        QueryTCU.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetQueryTCU") in
+      make ?notificationConfiguration ~targetQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let notificationConfiguration =
+        field_map json__ "NotificationConfiguration"
+          AccountSettingsNotificationConfiguration.of_json in
+      let targetQueryTCU =
+        field_map_exn json__ "TargetQueryTCU" QueryTCU.of_json in
+      make ?notificationConfiguration ~targetQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to update the provisioned capacity settings for querying data."]
+module QueryComputeRequest =
+  struct
+    type nonrec t =
+      {
+      computeMode: ComputeMode.t option
+        [@ocaml.doc
+          "The mode in which Timestream Compute Units (TCUs) are allocated and utilized within an account. Note that in the Asia Pacific (Mumbai) region, the API operation only recognizes the value PROVISIONED."];
+      provisionedCapacity: ProvisionedCapacityRequest.t option
+        [@ocaml.doc
+          "Configuration object that contains settings for provisioned Timestream Compute Units (TCUs) in your account."]}
+    let make ?computeMode =
+      fun ?provisionedCapacity ->
+        fun () -> { computeMode; provisionedCapacity }
+    let to_value x =
+      structure_to_value
+        [("ComputeMode", (Option.map x.computeMode ~f:ComputeMode.to_value));
+        ("ProvisionedCapacity",
+          (Option.map x.provisionedCapacity
+             ~f:ProvisionedCapacityRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let provisionedCapacity =
+        (Option.map ~f:ProvisionedCapacityRequest.of_xml)
+          (Xml.child xml_arg0 "ProvisionedCapacity") in
+      let computeMode =
+        (Option.map ~f:ComputeMode.of_xml) (Xml.child xml_arg0 "ComputeMode") in
+      make ?provisionedCapacity ?computeMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let provisionedCapacity =
+        field_map json__ "ProvisionedCapacity"
+          ProvisionedCapacityRequest.of_json in
+      let computeMode = field_map json__ "ComputeMode" ComputeMode.of_json in
+      make ?provisionedCapacity ?computeMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A request to retrieve or update the compute capacity settings for querying data."]
 module QueryExecutionException =
   struct
     type nonrec t = {
@@ -3764,11 +4572,168 @@ module QueryExecutionException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Timestream was unable to run the query successfully."]
+module QueryInsightsMode =
+  struct
+    type nonrec t =
+      | ENABLED_WITH_RATE_CONTROL 
+      | DISABLED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENABLED_WITH_RATE_CONTROL -> "ENABLED_WITH_RATE_CONTROL"
+      | DISABLED -> "DISABLED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENABLED_WITH_RATE_CONTROL" -> ENABLED_WITH_RATE_CONTROL
+      | "DISABLED" -> DISABLED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration QueryInsightsMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"QueryInsightsMode" j)
+    let to_json = simple_to_json to_value
+  end
+module QueryInsights =
+  struct
+    type nonrec t =
+      {
+      mode: QueryInsightsMode.t
+        [@ocaml.doc
+          "Provides the following modes to enable QueryInsights: ENABLED_WITH_RATE_CONTROL \226\128\147 Enables QueryInsights for the queries being processed. This mode also includes a rate control mechanism, which limits the QueryInsights feature to 1 query per second (QPS). DISABLED \226\128\147 Disables QueryInsights."]}
+    let context_ = "QueryInsights"
+    let make ~mode = fun () -> { mode }
+    let to_value x =
+      structure_to_value
+        [("Mode", (Some (QueryInsightsMode.to_value x.mode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let mode =
+        QueryInsightsMode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Mode") in
+      make ~mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let mode = field_map_exn json__ "Mode" QueryInsightsMode.of_json in
+      make ~mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "QueryInsights is a performance tuning feature that helps you optimize your queries, reducing costs and improving performance. With QueryInsights, you can assess the pruning efficiency of your queries and identify areas for improvement to enhance query performance. With QueryInsights, you can also analyze the effectiveness of your queries in terms of temporal and spatial pruning, and identify opportunities to improve performance. Specifically, you can evaluate how well your queries use time-based and partition key-based indexing strategies to optimize data retrieval. To optimize query performance, it's essential that you fine-tune both the temporal and spatial parameters that govern query execution. The key metrics provided by QueryInsights are QuerySpatialCoverage and QueryTemporalRange. QuerySpatialCoverage indicates how much of the spatial axis the query scans, with lower values being more efficient. QueryTemporalRange shows the time range scanned, with narrower ranges being more performant. Benefits of QueryInsights The following are the key benefits of using QueryInsights: Identifying inefficient queries \226\128\147 QueryInsights provides information on the time-based and attribute-based pruning of the tables accessed by the query. This information helps you identify the tables that are sub-optimally accessed. Optimizing your data model and partitioning \226\128\147 You can use the QueryInsights information to access and fine-tune your data model and partitioning strategy. Tuning queries \226\128\147 QueryInsights highlights opportunities to use indexes more effectively. The maximum number of Query API requests you're allowed to make with QueryInsights enabled is 1 query per second (QPS). If you exceed this query rate, it might result in throttling."]
+module QueryInsightsResponse =
+  struct
+    type nonrec t =
+      {
+      querySpatialCoverage: QuerySpatialCoverage.t option
+        [@ocaml.doc
+          "Provides insights into the spatial coverage of the query, including the table with sub-optimal (max) spatial pruning. This information can help you identify areas for improvement in your partitioning strategy to enhance spatial pruning."];
+      queryTemporalRange: QueryTemporalRange.t option
+        [@ocaml.doc
+          "Provides insights into the temporal range of the query, including the table with the largest (max) time range. Following are some of the potential options for optimizing time-based pruning: Add missing time-predicates. Remove functions around the time predicates. Add time predicates to all the sub-queries."];
+      queryTableCount: Long.t option
+        [@ocaml.doc "Indicates the number of tables in the query."];
+      outputRows: Long.t option
+        [@ocaml.doc
+          "Indicates the total number of rows returned as part of the query result set. You can use this data to validate if the number of rows in the result set have changed as part of the query tuning exercise."];
+      outputBytes: Long.t option
+        [@ocaml.doc
+          "Indicates the size of query result set in bytes. You can use this data to validate if the result set has changed as part of the query tuning exercise."];
+      unloadPartitionCount: Long.t option
+        [@ocaml.doc
+          "Indicates the partitions created by the Unload operation."];
+      unloadWrittenRows: Long.t option
+        [@ocaml.doc "Indicates the rows written by the Unload query."];
+      unloadWrittenBytes: Long.t option
+        [@ocaml.doc
+          "Indicates the size, in bytes, written by the Unload operation."]}
+    let make ?querySpatialCoverage =
+      fun ?queryTemporalRange ->
+        fun ?queryTableCount ->
+          fun ?outputRows ->
+            fun ?outputBytes ->
+              fun ?unloadPartitionCount ->
+                fun ?unloadWrittenRows ->
+                  fun ?unloadWrittenBytes ->
+                    fun () ->
+                      {
+                        querySpatialCoverage;
+                        queryTemporalRange;
+                        queryTableCount;
+                        outputRows;
+                        outputBytes;
+                        unloadPartitionCount;
+                        unloadWrittenRows;
+                        unloadWrittenBytes
+                      }
+    let to_value x =
+      structure_to_value
+        [("QuerySpatialCoverage",
+           (Option.map x.querySpatialCoverage
+              ~f:QuerySpatialCoverage.to_value));
+        ("QueryTemporalRange",
+          (Option.map x.queryTemporalRange ~f:QueryTemporalRange.to_value));
+        ("QueryTableCount", (Option.map x.queryTableCount ~f:Long.to_value));
+        ("OutputRows", (Option.map x.outputRows ~f:Long.to_value));
+        ("OutputBytes", (Option.map x.outputBytes ~f:Long.to_value));
+        ("UnloadPartitionCount",
+          (Option.map x.unloadPartitionCount ~f:Long.to_value));
+        ("UnloadWrittenRows",
+          (Option.map x.unloadWrittenRows ~f:Long.to_value));
+        ("UnloadWrittenBytes",
+          (Option.map x.unloadWrittenBytes ~f:Long.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unloadWrittenBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "UnloadWrittenBytes") in
+      let unloadWrittenRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "UnloadWrittenRows") in
+      let unloadPartitionCount =
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "UnloadPartitionCount") in
+      let outputBytes =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputBytes") in
+      let outputRows =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "OutputRows") in
+      let queryTableCount =
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "QueryTableCount") in
+      let queryTemporalRange =
+        (Option.map ~f:QueryTemporalRange.of_xml)
+          (Xml.child xml_arg0 "QueryTemporalRange") in
+      let querySpatialCoverage =
+        (Option.map ~f:QuerySpatialCoverage.of_xml)
+          (Xml.child xml_arg0 "QuerySpatialCoverage") in
+      make ?unloadWrittenBytes ?unloadWrittenRows ?unloadPartitionCount
+        ?outputBytes ?outputRows ?queryTableCount ?queryTemporalRange
+        ?querySpatialCoverage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unloadWrittenBytes =
+        field_map json__ "UnloadWrittenBytes" Long.of_json in
+      let unloadWrittenRows =
+        field_map json__ "UnloadWrittenRows" Long.of_json in
+      let unloadPartitionCount =
+        field_map json__ "UnloadPartitionCount" Long.of_json in
+      let outputBytes = field_map json__ "OutputBytes" Long.of_json in
+      let outputRows = field_map json__ "OutputRows" Long.of_json in
+      let queryTableCount = field_map json__ "QueryTableCount" Long.of_json in
+      let queryTemporalRange =
+        field_map json__ "QueryTemporalRange" QueryTemporalRange.of_json in
+      let querySpatialCoverage =
+        field_map json__ "QuerySpatialCoverage" QuerySpatialCoverage.of_json in
+      make ?unloadWrittenBytes ?unloadWrittenRows ?unloadPartitionCount
+        ?outputBytes ?outputRows ?queryTableCount ?queryTemporalRange
+        ?querySpatialCoverage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides various insights and metrics related to the query that you executed."]
 module QueryRequest =
   struct
     type nonrec t =
@@ -3783,22 +4748,33 @@ module QueryRequest =
           "A pagination token used to return a set of results. When the Query API is invoked using NextToken, that particular invocation is assumed to be a subsequent invocation of a prior call to Query, and a result set is returned. However, if the Query invocation only contains the ClientToken, that invocation of Query is assumed to be a new query run. Note the following when using NextToken in a query: A pagination token can be used for up to five Query invocations, OR for a duration of up to 1 hour \226\128\147 whichever comes first. Using the same NextToken will return the same set of records. To keep paginating through the result set, you must to use the most recent nextToken. Suppose a Query invocation returns two NextToken values, TokenA and TokenB. If TokenB is used in a subsequent Query invocation, then TokenA is invalidated and cannot be reused. To request a previous result set from a query after pagination has begun, you must re-invoke the Query API. The latest NextToken should be used to paginate until null is returned, at which point a new NextToken should be used. If the IAM principal of the query initiator and the result reader are not the same and/or the query initiator and the result reader do not have the same query string in the query requests, the query will fail with an Invalid pagination token error."];
       maxRows: MaxQueryResults.t option
         [@ocaml.doc
-          "The total number of rows to be returned in the Query output. The initial run of Query with a MaxRows value specified will return the result set of the query in two cases: The size of the result is less than 1MB. The number of rows in the result set is less than the value of maxRows. Otherwise, the initial invocation of Query only returns a NextToken, which can then be used in subsequent calls to fetch the result set. To resume pagination, provide the NextToken value in the subsequent command. If the row size is large (e.g. a row has many columns), Timestream may return fewer rows to keep the response size from exceeding the 1 MB limit. If MaxRows is not provided, Timestream will send the necessary number of rows to meet the 1 MB limit."]}
+          "The total number of rows to be returned in the Query output. The initial run of Query with a MaxRows value specified will return the result set of the query in two cases: The size of the result is less than 1MB. The number of rows in the result set is less than the value of maxRows. Otherwise, the initial invocation of Query only returns a NextToken, which can then be used in subsequent calls to fetch the result set. To resume pagination, provide the NextToken value in the subsequent command. If the row size is large (e.g. a row has many columns), Timestream may return fewer rows to keep the response size from exceeding the 1 MB limit. If MaxRows is not provided, Timestream will send the necessary number of rows to meet the 1 MB limit."];
+      queryInsights: QueryInsights.t option
+        [@ocaml.doc
+          "Encapsulates settings for enabling QueryInsights. Enabling QueryInsights returns insights and metrics in addition to query results for the query that you executed. You can use QueryInsights to tune your query performance."]}
     let context_ = "QueryRequest"
     let make ?clientToken =
       fun ?nextToken ->
         fun ?maxRows ->
-          fun ~queryString ->
-            fun () -> { clientToken; nextToken; maxRows; queryString }
+          fun ?queryInsights ->
+            fun ~queryString ->
+              fun () ->
+                { clientToken; nextToken; maxRows; queryInsights; queryString
+                }
     let to_value x =
       structure_to_value
         [("QueryString", (Some (QueryString.to_value x.queryString)));
         ("ClientToken",
           (Option.map x.clientToken ~f:ClientRequestToken.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("MaxRows", (Option.map x.maxRows ~f:MaxQueryResults.to_value))]
+        ("MaxRows", (Option.map x.maxRows ~f:MaxQueryResults.to_value));
+        ("QueryInsights",
+          (Option.map x.queryInsights ~f:QueryInsights.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let queryInsights =
+        (Option.map ~f:QueryInsights.of_xml)
+          (Xml.child xml_arg0 "QueryInsights") in
       let maxRows =
         (Option.map ~f:MaxQueryResults.of_xml) (Xml.child xml_arg0 "MaxRows") in
       let nextToken =
@@ -3810,22 +4786,28 @@ module QueryRequest =
       let queryString =
         QueryString.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "QueryString") in
-      make ?maxRows ?nextToken ?clientToken ~queryString ()
+      make ?queryInsights ?maxRows ?nextToken ?clientToken ~queryString ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRows = field_map json "MaxRows" MaxQueryResults.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let queryInsights =
+        field_map json__ "QueryInsights" QueryInsights.of_json in
+      let maxRows = field_map json__ "MaxRows" MaxQueryResults.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
       let clientToken =
-        field_map json "ClientToken" ClientRequestToken.of_json in
-      let queryString = field_map_exn json "QueryString" QueryString.of_json in
-      make ?maxRows ?nextToken ?clientToken ~queryString ()
+        field_map json__ "ClientToken" ClientRequestToken.of_json in
+      let queryString =
+        field_map_exn json__ "QueryString" QueryString.of_json in
+      make ?queryInsights ?maxRows ?nextToken ?clientToken ~queryString ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Query is a synchronous operation that enables you to run a query against your Amazon Timestream data. Query will time out after 60 seconds. You must update the default timeout in the SDK to support a timeout of 60 seconds. See the code sample for details. Your query request will fail in the following cases: If you submit a Query request with the same client token outside of the 5-minute idempotency window. If you submit a Query request with the same client token, but change other parameters, within the 5-minute idempotency window. If the size of the row (including the query metadata) exceeds 1 MB, then the query will fail with the following error message: Query aborted as max page response size has been exceeded by the output result row If the IAM principal of the query initiator and the result reader are not the same and/or the query initiator and the result reader do not have the same query string in the query requests, the query will fail with an Invalid pagination token error."]
+       "Query is a synchronous operation that enables you to run a query against your Amazon Timestream data. If you enabled QueryInsights, this API also returns insights and metrics related to the query that you executed. QueryInsights helps with performance tuning of your query. For more information about QueryInsights, see Using query insights to optimize queries in Amazon Timestream. The maximum number of Query API requests you're allowed to make with QueryInsights enabled is 1 query per second (QPS). If you exceed this query rate, it might result in throttling. Query will time out after 60 seconds. You must update the default timeout in the SDK to support a timeout of 60 seconds. See the code sample for details. Your query request will fail in the following cases: If you submit a Query request with the same client token outside of the 5-minute idempotency window. If you submit a Query request with the same client token, but change other parameters, within the 5-minute idempotency window. If the size of the row (including the query metadata) exceeds 1 MB, then the query will fail with the following error message: Query aborted as max page response size has been exceeded by the output result row If the IAM principal of the query initiator and the result reader are not the same and/or the query initiator and the result reader do not have the same query string in the query requests, the query will fail with an Invalid pagination token error."]
 module RowList =
   struct
     type nonrec t = Row.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Row.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3888,13 +4870,13 @@ module QueryStatus =
       make ?cumulativeBytesMetered ?cumulativeBytesScanned
         ?progressPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cumulativeBytesMetered =
-        field_map json "CumulativeBytesMetered" Long.of_json in
+        field_map json__ "CumulativeBytesMetered" Long.of_json in
       let cumulativeBytesScanned =
-        field_map json "CumulativeBytesScanned" Long.of_json in
+        field_map json__ "CumulativeBytesScanned" Long.of_json in
       let progressPercentage =
-        field_map json "ProgressPercentage" Double.of_json in
+        field_map json__ "ProgressPercentage" Double.of_json in
       make ?cumulativeBytesMetered ?cumulativeBytesScanned
         ?progressPercentage ()
     let to_json v = composed_to_json to_value v
@@ -3904,17 +4886,21 @@ module QueryResponse =
   struct
     type nonrec t =
       {
-      queryId: QueryId.t [@ocaml.doc "A unique ID for the given query."];
+      queryId: QueryId.t option
+        [@ocaml.doc "A unique ID for the given query."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "A pagination token that can be used again on a Query call to get the next set of results."];
-      rows: RowList.t
+      rows: RowList.t option
         [@ocaml.doc "The result set rows returned by the query."];
-      columnInfo: ColumnInfoList.t
+      columnInfo: ColumnInfoList.t option
         [@ocaml.doc "The column data types of the returned result set."];
       queryStatus: QueryStatus.t option
         [@ocaml.doc
-          "Information about the status of the query, including progress and bytes scanned."]}
+          "Information about the status of the query, including progress and bytes scanned."];
+      queryInsightsResponse: QueryInsightsResponse.t option
+        [@ocaml.doc
+          "Encapsulates QueryInsights containing insights and metrics related to the query that you executed."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3924,13 +4910,21 @@ module QueryResponse =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "QueryResponse"
-    let make ?nextToken =
-      fun ?queryStatus ->
-        fun ~queryId ->
-          fun ~rows ->
-            fun ~columnInfo ->
-              fun () -> { nextToken; queryStatus; queryId; rows; columnInfo }
+    let make ?queryId =
+      fun ?nextToken ->
+        fun ?rows ->
+          fun ?columnInfo ->
+            fun ?queryStatus ->
+              fun ?queryInsightsResponse ->
+                fun () ->
+                  {
+                    queryId;
+                    nextToken;
+                    rows;
+                    columnInfo;
+                    queryStatus;
+                    queryInsightsResponse
+                  }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -4005,37 +4999,47 @@ module QueryResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("QueryId", (Some (QueryId.to_value x.queryId)));
+        [("QueryId", (Option.map x.queryId ~f:QueryId.to_value));
         ("NextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
-        ("Rows", (Some (RowList.to_value x.rows)));
-        ("ColumnInfo", (Some (ColumnInfoList.to_value x.columnInfo)));
-        ("QueryStatus", (Option.map x.queryStatus ~f:QueryStatus.to_value))]
+        ("Rows", (Option.map x.rows ~f:RowList.to_value));
+        ("ColumnInfo", (Option.map x.columnInfo ~f:ColumnInfoList.to_value));
+        ("QueryStatus", (Option.map x.queryStatus ~f:QueryStatus.to_value));
+        ("QueryInsightsResponse",
+          (Option.map x.queryInsightsResponse
+             ~f:QueryInsightsResponse.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let queryInsightsResponse =
+        (Option.map ~f:QueryInsightsResponse.of_xml)
+          (Xml.child xml_arg0 "QueryInsightsResponse") in
       let queryStatus =
         (Option.map ~f:QueryStatus.of_xml) (Xml.child xml_arg0 "QueryStatus") in
       let columnInfo =
-        ColumnInfoList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ColumnInfo") in
-      let rows =
-        RowList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Rows") in
+        (Option.map ~f:ColumnInfoList.of_xml)
+          (Xml.child xml_arg0 "ColumnInfo") in
+      let rows = (Option.map ~f:RowList.of_xml) (Xml.child xml_arg0 "Rows") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "NextToken") in
       let queryId =
-        QueryId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "QueryId") in
-      make ?queryStatus ~columnInfo ~rows ?nextToken ~queryId ()
+        (Option.map ~f:QueryId.of_xml) (Xml.child xml_arg0 "QueryId") in
+      make ?queryInsightsResponse ?queryStatus ?columnInfo ?rows ?nextToken
+        ?queryId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let queryStatus = field_map json "QueryStatus" QueryStatus.of_json in
-      let columnInfo = field_map_exn json "ColumnInfo" ColumnInfoList.of_json in
-      let rows = field_map_exn json "Rows" RowList.of_json in
-      let nextToken = field_map json "NextToken" PaginationToken.of_json in
-      let queryId = field_map_exn json "QueryId" QueryId.of_json in
-      make ?queryStatus ~columnInfo ~rows ?nextToken ~queryId ()
+    let of_json json__ =
+      let queryInsightsResponse =
+        field_map json__ "QueryInsightsResponse"
+          QueryInsightsResponse.of_json in
+      let queryStatus = field_map json__ "QueryStatus" QueryStatus.of_json in
+      let columnInfo = field_map json__ "ColumnInfo" ColumnInfoList.of_json in
+      let rows = field_map json__ "Rows" RowList.of_json in
+      let nextToken = field_map json__ "NextToken" PaginationToken.of_json in
+      let queryId = field_map json__ "QueryId" QueryId.of_json in
+      make ?queryInsightsResponse ?queryStatus ?columnInfo ?rows ?nextToken
+        ?queryId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Query is a synchronous operation that enables you to run a query against your Amazon Timestream data. Query will time out after 60 seconds. You must update the default timeout in the SDK to support a timeout of 60 seconds. See the code sample for details. Your query request will fail in the following cases: If you submit a Query request with the same client token outside of the 5-minute idempotency window. If you submit a Query request with the same client token, but change other parameters, within the 5-minute idempotency window. If the size of the row (including the query metadata) exceeds 1 MB, then the query will fail with the following error message: Query aborted as max page response size has been exceeded by the output result row If the IAM principal of the query initiator and the result reader are not the same and/or the query initiator and the result reader do not have the same query string in the query requests, the query will fail with an Invalid pagination token error."]
+       "Query is a synchronous operation that enables you to run a query against your Amazon Timestream data. If you enabled QueryInsights, this API also returns insights and metrics related to the query that you executed. QueryInsights helps with performance tuning of your query. For more information about QueryInsights, see Using query insights to optimize queries in Amazon Timestream. The maximum number of Query API requests you're allowed to make with QueryInsights enabled is 1 query per second (QPS). If you exceed this query rate, it might result in throttling. Query will time out after 60 seconds. You must update the default timeout in the SDK to support a timeout of 60 seconds. See the code sample for details. Your query request will fail in the following cases: If you submit a Query request with the same client token outside of the 5-minute idempotency window. If you submit a Query request with the same client token, but change other parameters, within the 5-minute idempotency window. If the size of the row (including the query metadata) exceeds 1 MB, then the query will fail with the following error message: Query aborted as max page response size has been exceeded by the output result row If the IAM principal of the query initiator and the result reader are not the same and/or the query initiator and the result reader do not have the same query string in the query requests, the query will fail with an Invalid pagination token error."]
 module TagKeyList =
   struct
     type nonrec t = TagKey.t list
@@ -4045,6 +5049,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4088,10 +5095,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tags ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tags ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4201,10 +5208,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceARN") in
       make ~tagKeys ~resourceARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceARN =
-        field_map_exn json "ResourceARN" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceARN" AmazonResourceName.of_json in
       make ~tagKeys ~resourceARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4276,6 +5283,166 @@ module UntagResourceResponse =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Removes the association of tags from a Timestream query resource."]
+module UpdateAccountSettingsRequest =
+  struct
+    type nonrec t =
+      {
+      maxQueryTCU: MaxQueryCapacity.t option
+        [@ocaml.doc
+          "The maximum number of compute units the service will use at any point in time to serve your queries. To run queries, you must set a minimum capacity of 4 TCU. You can set the maximum number of TCU in multiples of 4, for example, 4, 8, 16, 32, and so on. The maximum value supported for MaxQueryTCU is 1000. To request an increase to this soft limit, contact Amazon Web Services Support. For information about the default quota for maxQueryTCU, see Default quotas. This configuration is applicable only for on-demand usage of Timestream Compute Units (TCUs). The maximum value supported for MaxQueryTCU is 1000. To request an increase to this soft limit, contact Amazon Web Services Support. For information about the default quota for maxQueryTCU, see Default quotas."];
+      queryPricingModel: QueryPricingModel.t option
+        [@ocaml.doc
+          "The pricing model for queries in an account. The QueryPricingModel parameter is used by several Timestream operations; however, the UpdateAccountSettings API operation doesn't recognize any values other than COMPUTE_UNITS."];
+      queryCompute: QueryComputeRequest.t option
+        [@ocaml.doc
+          "Modifies the query compute settings configured in your account, including the query pricing model and provisioned Timestream Compute Units (TCUs) in your account. This API is idempotent, meaning that making the same request multiple times will have the same effect as making the request once."]}
+    let make ?maxQueryTCU =
+      fun ?queryPricingModel ->
+        fun ?queryCompute ->
+          fun () -> { maxQueryTCU; queryPricingModel; queryCompute }
+    let to_value x =
+      structure_to_value
+        [("MaxQueryTCU",
+           (Option.map x.maxQueryTCU ~f:MaxQueryCapacity.to_value));
+        ("QueryPricingModel",
+          (Option.map x.queryPricingModel ~f:QueryPricingModel.to_value));
+        ("QueryCompute",
+          (Option.map x.queryCompute ~f:QueryComputeRequest.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryCompute =
+        (Option.map ~f:QueryComputeRequest.of_xml)
+          (Xml.child xml_arg0 "QueryCompute") in
+      let queryPricingModel =
+        (Option.map ~f:QueryPricingModel.of_xml)
+          (Xml.child xml_arg0 "QueryPricingModel") in
+      let maxQueryTCU =
+        (Option.map ~f:MaxQueryCapacity.of_xml)
+          (Xml.child xml_arg0 "MaxQueryTCU") in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryCompute =
+        field_map json__ "QueryCompute" QueryComputeRequest.of_json in
+      let queryPricingModel =
+        field_map json__ "QueryPricingModel" QueryPricingModel.of_json in
+      let maxQueryTCU =
+        field_map json__ "MaxQueryTCU" MaxQueryCapacity.of_json in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transitions your account to use TCUs for query pricing and modifies the maximum query compute units that you've configured. If you reduce the value of MaxQueryTCU to a desired configuration, the new value can take up to 24 hours to be effective. After you've transitioned your account to use TCUs for query pricing, you can't transition to using bytes scanned for query pricing."]
+module UpdateAccountSettingsResponse =
+  struct
+    type nonrec t =
+      {
+      maxQueryTCU: MaxQueryCapacity.t option
+        [@ocaml.doc
+          "The configured maximum number of compute units the service will use at any point in time to serve your queries."];
+      queryPricingModel: QueryPricingModel.t option
+        [@ocaml.doc "The pricing model for an account."];
+      queryCompute: QueryComputeResponse.t option
+        [@ocaml.doc
+          "Confirms the updated account settings for querying data in your account."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `InvalidEndpointException of InvalidEndpointException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?maxQueryTCU =
+      fun ?queryPricingModel ->
+        fun ?queryCompute ->
+          fun () -> { maxQueryTCU; queryPricingModel; queryCompute }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidEndpointException" ->
+          `InvalidEndpointException (InvalidEndpointException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidEndpointException e ->
+          `Assoc
+            [("error", (`String "InvalidEndpointException"));
+            ("details", (InvalidEndpointException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("MaxQueryTCU",
+           (Option.map x.maxQueryTCU ~f:MaxQueryCapacity.to_value));
+        ("QueryPricingModel",
+          (Option.map x.queryPricingModel ~f:QueryPricingModel.to_value));
+        ("QueryCompute",
+          (Option.map x.queryCompute ~f:QueryComputeResponse.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let queryCompute =
+        (Option.map ~f:QueryComputeResponse.of_xml)
+          (Xml.child xml_arg0 "QueryCompute") in
+      let queryPricingModel =
+        (Option.map ~f:QueryPricingModel.of_xml)
+          (Xml.child xml_arg0 "QueryPricingModel") in
+      let maxQueryTCU =
+        (Option.map ~f:MaxQueryCapacity.of_xml)
+          (Xml.child xml_arg0 "MaxQueryTCU") in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let queryCompute =
+        field_map json__ "QueryCompute" QueryComputeResponse.of_json in
+      let queryPricingModel =
+        field_map json__ "QueryPricingModel" QueryPricingModel.of_json in
+      let maxQueryTCU =
+        field_map json__ "MaxQueryTCU" MaxQueryCapacity.of_json in
+      make ?queryCompute ?queryPricingModel ?maxQueryTCU ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Transitions your account to use TCUs for query pricing and modifies the maximum query compute units that you've configured. If you reduce the value of MaxQueryTCU to a desired configuration, the new value can take up to 24 hours to be effective. After you've transitioned your account to use TCUs for query pricing, you can't transition to using bytes scanned for query pricing."]
 module UpdateScheduledQueryRequest =
   struct
     type nonrec t =
@@ -4302,10 +5469,10 @@ module UpdateScheduledQueryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ScheduledQueryArn") in
       make ~state ~scheduledQueryArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let state = field_map_exn json "State" ScheduledQueryState.of_json in
+    let of_json json__ =
+      let state = field_map_exn json__ "State" ScheduledQueryState.of_json in
       let scheduledQueryArn =
-        field_map_exn json "ScheduledQueryArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ScheduledQueryArn" AmazonResourceName.of_json in
       make ~state ~scheduledQueryArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update a scheduled query."]

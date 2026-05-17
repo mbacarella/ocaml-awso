@@ -30,6 +30,12 @@ val get_environment :
       GetEnvironmentInput.t ->
         (GetEnvironmentOutput.t, GetEnvironmentOutput.error) Result.t
           Async.Deferred.t
+val invoke_rest_api :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      InvokeRestApiRequest.t ->
+        (InvokeRestApiResponse.t, InvokeRestApiResponse.error) Result.t
+          Async.Deferred.t
 val list_environments :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

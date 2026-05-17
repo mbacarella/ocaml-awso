@@ -4,25 +4,46 @@ open Values
 type ('i, 'o, 'e) t =
   | CancelJobRun: (CancelJobRunRequest.t, CancelJobRunResponse.t,
   CancelJobRunResponse.error) t 
+  | CreateJobTemplate: (CreateJobTemplateRequest.t,
+  CreateJobTemplateResponse.t, CreateJobTemplateResponse.error) t 
   | CreateManagedEndpoint: (CreateManagedEndpointRequest.t,
   CreateManagedEndpointResponse.t, CreateManagedEndpointResponse.error) t 
+  | CreateSecurityConfiguration: (CreateSecurityConfigurationRequest.t,
+  CreateSecurityConfigurationResponse.t,
+  CreateSecurityConfigurationResponse.error) t 
   | CreateVirtualCluster: (CreateVirtualClusterRequest.t,
   CreateVirtualClusterResponse.t, CreateVirtualClusterResponse.error) t 
+  | DeleteJobTemplate: (DeleteJobTemplateRequest.t,
+  DeleteJobTemplateResponse.t, DeleteJobTemplateResponse.error) t 
   | DeleteManagedEndpoint: (DeleteManagedEndpointRequest.t,
   DeleteManagedEndpointResponse.t, DeleteManagedEndpointResponse.error) t 
   | DeleteVirtualCluster: (DeleteVirtualClusterRequest.t,
   DeleteVirtualClusterResponse.t, DeleteVirtualClusterResponse.error) t 
   | DescribeJobRun: (DescribeJobRunRequest.t, DescribeJobRunResponse.t,
   DescribeJobRunResponse.error) t 
+  | DescribeJobTemplate: (DescribeJobTemplateRequest.t,
+  DescribeJobTemplateResponse.t, DescribeJobTemplateResponse.error) t 
   | DescribeManagedEndpoint: (DescribeManagedEndpointRequest.t,
   DescribeManagedEndpointResponse.t, DescribeManagedEndpointResponse.error) t
   
+  | DescribeSecurityConfiguration: (DescribeSecurityConfigurationRequest.t,
+  DescribeSecurityConfigurationResponse.t,
+  DescribeSecurityConfigurationResponse.error) t 
   | DescribeVirtualCluster: (DescribeVirtualClusterRequest.t,
   DescribeVirtualClusterResponse.t, DescribeVirtualClusterResponse.error) t 
+  | GetManagedEndpointSessionCredentials:
+  (GetManagedEndpointSessionCredentialsRequest.t,
+  GetManagedEndpointSessionCredentialsResponse.t,
+  GetManagedEndpointSessionCredentialsResponse.error) t 
   | ListJobRuns: (ListJobRunsRequest.t, ListJobRunsResponse.t,
   ListJobRunsResponse.error) t 
+  | ListJobTemplates: (ListJobTemplatesRequest.t, ListJobTemplatesResponse.t,
+  ListJobTemplatesResponse.error) t 
   | ListManagedEndpoints: (ListManagedEndpointsRequest.t,
   ListManagedEndpointsResponse.t, ListManagedEndpointsResponse.error) t 
+  | ListSecurityConfigurations: (ListSecurityConfigurationsRequest.t,
+  ListSecurityConfigurationsResponse.t,
+  ListSecurityConfigurationsResponse.error) t 
   | ListTagsForResource: (ListTagsForResourceRequest.t,
   ListTagsForResourceResponse.t, ListTagsForResourceResponse.error) t 
   | ListVirtualClusters: (ListVirtualClustersRequest.t,
@@ -36,15 +57,23 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | CancelJobRun -> `DELETE
+  | CreateJobTemplate -> `POST
   | CreateManagedEndpoint -> `POST
+  | CreateSecurityConfiguration -> `POST
   | CreateVirtualCluster -> `POST
+  | DeleteJobTemplate -> `DELETE
   | DeleteManagedEndpoint -> `DELETE
   | DeleteVirtualCluster -> `DELETE
   | DescribeJobRun -> `GET
+  | DescribeJobTemplate -> `GET
   | DescribeManagedEndpoint -> `GET
+  | DescribeSecurityConfiguration -> `GET
   | DescribeVirtualCluster -> `GET
+  | GetManagedEndpointSessionCredentials -> `POST
   | ListJobRuns -> `GET
+  | ListJobTemplates -> `GET
   | ListManagedEndpoints -> `GET
+  | ListSecurityConfigurations -> `GET
   | ListTagsForResource -> `GET
   | ListVirtualClusters -> `GET
   | StartJobRun -> `POST
@@ -58,12 +87,18 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceIdString.to_header
                x.CancelJobRunRequest.virtualClusterId)
             (ResourceIdString.to_header x.CancelJobRunRequest.id)
+      | CreateJobTemplate -> (Format.kasprintf Uri.of_string) "/jobtemplates"
       | CreateManagedEndpoint ->
           (Format.kasprintf Uri.of_string) "/virtualclusters/%s/endpoints"
             (ResourceIdString.to_header
                x.CreateManagedEndpointRequest.virtualClusterId)
+      | CreateSecurityConfiguration ->
+          (Format.kasprintf Uri.of_string) "/securityconfigurations"
       | CreateVirtualCluster ->
           (Format.kasprintf Uri.of_string) "/virtualclusters"
+      | DeleteJobTemplate ->
+          (Format.kasprintf Uri.of_string) "/jobtemplates/%s"
+            (ResourceIdString.to_header x.DeleteJobTemplateRequest.id)
       | DeleteManagedEndpoint ->
           (Format.kasprintf Uri.of_string) "/virtualclusters/%s/endpoints/%s"
             (ResourceIdString.to_header
@@ -77,14 +112,28 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             (ResourceIdString.to_header
                x.DescribeJobRunRequest.virtualClusterId)
             (ResourceIdString.to_header x.DescribeJobRunRequest.id)
+      | DescribeJobTemplate ->
+          (Format.kasprintf Uri.of_string) "/jobtemplates/%s"
+            (ResourceIdString.to_header x.DescribeJobTemplateRequest.id)
       | DescribeManagedEndpoint ->
           (Format.kasprintf Uri.of_string) "/virtualclusters/%s/endpoints/%s"
             (ResourceIdString.to_header
                x.DescribeManagedEndpointRequest.virtualClusterId)
             (ResourceIdString.to_header x.DescribeManagedEndpointRequest.id)
+      | DescribeSecurityConfiguration ->
+          (Format.kasprintf Uri.of_string) "/securityconfigurations/%s"
+            (ResourceIdString.to_header
+               x.DescribeSecurityConfigurationRequest.id)
       | DescribeVirtualCluster ->
           (Format.kasprintf Uri.of_string) "/virtualclusters/%s"
             (ResourceIdString.to_header x.DescribeVirtualClusterRequest.id)
+      | GetManagedEndpointSessionCredentials ->
+          (Format.kasprintf Uri.of_string)
+            "/virtualclusters/%s/endpoints/%s/credentials"
+            (String2048.to_header
+               x.GetManagedEndpointSessionCredentialsRequest.virtualClusterIdentifier)
+            (String2048.to_header
+               x.GetManagedEndpointSessionCredentialsRequest.endpointIdentifier)
       | ListJobRuns ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/virtualclusters/%s/jobruns"
@@ -108,6 +157,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
                  x.nextToken])
+      | ListJobTemplates ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/jobtemplates")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("createdAfter", (Date.to_header v)))
+                  x.createdAfter;
+               Option.map ~f:(fun v -> ("createdBefore", (Date.to_header v)))
+                 x.createdBefore;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (JavaInteger.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
       | ListManagedEndpoints ->
           Uri.add_query_params'
             ((Format.kasprintf Uri.of_string) "/virtualclusters/%s/endpoints"
@@ -125,6 +188,20 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v -> ("states", (EndpointStates.to_header v)))
                  x.states;
+               Option.map
+                 ~f:(fun v -> ("maxResults", (JavaInteger.to_header v)))
+                 x.maxResults;
+               Option.map
+                 ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
+                 x.nextToken])
+      | ListSecurityConfigurations ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string) "/securityconfigurations")
+            (List.filter_opt
+               [Option.map ~f:(fun v -> ("createdAfter", (Date.to_header v)))
+                  x.createdAfter;
+               Option.map ~f:(fun v -> ("createdBefore", (Date.to_header v)))
+                 x.createdBefore;
                Option.map
                  ~f:(fun v -> ("maxResults", (JavaInteger.to_header v)))
                  x.maxResults;
@@ -159,7 +236,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                  x.maxResults;
                Option.map
                  ~f:(fun v -> ("nextToken", (NextToken.to_header v)))
-                 x.nextToken])
+                 x.nextToken;
+               Option.map
+                 ~f:(fun v ->
+                       ("eksAccessEntryIntegrated", (Boolean.to_header v)))
+                 x.eksAccessEntryIntegrated])
       | StartJobRun ->
           (Format.kasprintf Uri.of_string) "/virtualclusters/%s/jobruns"
             (ResourceIdString.to_header x.StartJobRunRequest.virtualClusterId)
@@ -177,6 +258,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   let _req = req in
   match endp with
   | CancelJobRun -> Awso.Http.Request.make (method_of_endpoint endp)
+  | CreateJobTemplate ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("name",
+                           (ResourceNameString.to_value
+                              req.CreateJobTemplateRequest.name));
+                      Some
+                        ("clientToken",
+                          (ClientToken.to_value
+                             req.CreateJobTemplateRequest.clientToken));
+                      Some
+                        ("jobTemplateData",
+                          (JobTemplateData.to_value
+                             req.CreateJobTemplateRequest.jobTemplateData));
+                      Option.map req.CreateJobTemplateRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.CreateJobTemplateRequest.kmsKeyArn
+                        ~f:(fun x -> ("kmsKeyArn", (KmsKeyArn.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateManagedEndpoint ->
       let (headers, body) =
         let headers =
@@ -224,6 +337,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateSecurityConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("clientToken",
+                           (ClientToken.to_value
+                              req.CreateSecurityConfigurationRequest.clientToken));
+                      Some
+                        ("name",
+                          (ResourceNameString.to_value
+                             req.CreateSecurityConfigurationRequest.name));
+                      Option.map
+                        req.CreateSecurityConfigurationRequest.containerProvider
+                        ~f:(fun x ->
+                              ("containerProvider",
+                                (ContainerProvider.to_value x)));
+                      Some
+                        ("securityConfigurationData",
+                          (SecurityConfigurationData.to_value
+                             req.CreateSecurityConfigurationRequest.securityConfigurationData));
+                      Option.map req.CreateSecurityConfigurationRequest.tags
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | CreateVirtualCluster ->
       let (headers, body) =
         let headers =
@@ -246,7 +394,12 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                           (ClientToken.to_value
                              req.CreateVirtualClusterRequest.clientToken));
                       Option.map req.CreateVirtualClusterRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateVirtualClusterRequest.securityConfigurationId
+                        ~f:(fun x ->
+                              ("securityConfigurationId",
+                                (ResourceIdString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -254,21 +407,69 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteJobTemplate -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteManagedEndpoint -> Awso.Http.Request.make (method_of_endpoint endp)
   | DeleteVirtualCluster -> Awso.Http.Request.make (method_of_endpoint endp)
   | DescribeJobRun ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeJobTemplate ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeManagedEndpoint ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeSecurityConfiguration ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DescribeVirtualCluster ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetManagedEndpointSessionCredentials ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("executionRoleArn",
+                           (IAMRoleArn.to_value
+                              req.GetManagedEndpointSessionCredentialsRequest.executionRoleArn));
+                      Some
+                        ("credentialType",
+                          (CredentialType.to_value
+                             req.GetManagedEndpointSessionCredentialsRequest.credentialType));
+                      Option.map
+                        req.GetManagedEndpointSessionCredentialsRequest.durationInSeconds
+                        ~f:(fun x ->
+                              ("durationInSeconds", (JavaInteger.to_value x)));
+                      Option.map
+                        req.GetManagedEndpointSessionCredentialsRequest.logContext
+                        ~f:(fun x -> ("logContext", (LogContext.to_value x)));
+                      Option.map
+                        req.GetManagedEndpointSessionCredentialsRequest.clientToken
+                        ~f:(fun x ->
+                              ("clientToken", (ClientToken.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListJobRuns ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListJobTemplates ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListManagedEndpoints ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListSecurityConfigurations ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListTagsForResource ->
@@ -293,25 +494,34 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("clientToken",
                           (ClientToken.to_value
                              req.StartJobRunRequest.clientToken));
-                      Some
-                        ("executionRoleArn",
-                          (IAMRoleArn.to_value
-                             req.StartJobRunRequest.executionRoleArn));
-                      Some
-                        ("releaseLabel",
-                          (ReleaseLabel.to_value
-                             req.StartJobRunRequest.releaseLabel));
-                      Some
-                        ("jobDriver",
-                          (JobDriver.to_value
-                             req.StartJobRunRequest.jobDriver));
+                      Option.map req.StartJobRunRequest.executionRoleArn
+                        ~f:(fun x ->
+                              ("executionRoleArn", (IAMRoleArn.to_value x)));
+                      Option.map req.StartJobRunRequest.releaseLabel
+                        ~f:(fun x ->
+                              ("releaseLabel", (ReleaseLabel.to_value x)));
+                      Option.map req.StartJobRunRequest.jobDriver
+                        ~f:(fun x -> ("jobDriver", (JobDriver.to_value x)));
                       Option.map
                         req.StartJobRunRequest.configurationOverrides
                         ~f:(fun x ->
                               ("configurationOverrides",
                                 (ConfigurationOverrides.to_value x)));
                       Option.map req.StartJobRunRequest.tags
-                        ~f:(fun x -> ("tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("tags", (TagMap.to_value x)));
+                      Option.map req.StartJobRunRequest.jobTemplateId
+                        ~f:(fun x ->
+                              ("jobTemplateId",
+                                (ResourceIdString.to_value x)));
+                      Option.map req.StartJobRunRequest.jobTemplateParameters
+                        ~f:(fun x ->
+                              ("jobTemplateParameters",
+                                (TemplateParameterInputMap.to_value x)));
+                      Option.map
+                        req.StartJobRunRequest.retryPolicyConfiguration
+                        ~f:(fun x ->
+                              ("retryPolicyConfiguration",
+                                (RetryPolicyConfiguration.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -391,18 +601,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (CancelJobRunResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some CancelJobRunResponse.error_of_json))
+  | CreateJobTemplate ->
+      if is_success
+      then Ok (CreateJobTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some CreateJobTemplateResponse.error_of_json))
   | CreateManagedEndpoint ->
       if is_success
       then Ok (CreateManagedEndpointResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateManagedEndpointResponse.error_of_json))
+  | CreateSecurityConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateSecurityConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateSecurityConfigurationResponse.error_of_json))
   | CreateVirtualCluster ->
       if is_success
       then Ok (CreateVirtualClusterResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some CreateVirtualClusterResponse.error_of_json))
+  | DeleteJobTemplate ->
+      if is_success
+      then Ok (DeleteJobTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DeleteJobTemplateResponse.error_of_json))
   | DeleteManagedEndpoint ->
       if is_success
       then Ok (DeleteManagedEndpointResponse.of_json (response_to_json resp))
@@ -420,6 +652,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (DescribeJobRunResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some DescribeJobRunResponse.error_of_json))
+  | DescribeJobTemplate ->
+      if is_success
+      then Ok (DescribeJobTemplateResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some DescribeJobTemplateResponse.error_of_json))
   | DescribeManagedEndpoint ->
       if is_success
       then
@@ -428,6 +666,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeManagedEndpointResponse.error_of_json))
+  | DescribeSecurityConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeSecurityConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSecurityConfigurationResponse.error_of_json))
   | DescribeVirtualCluster ->
       if is_success
       then
@@ -436,16 +684,40 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeVirtualClusterResponse.error_of_json))
+  | GetManagedEndpointSessionCredentials ->
+      if is_success
+      then
+        Ok
+          (GetManagedEndpointSessionCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetManagedEndpointSessionCredentialsResponse.error_of_json))
   | ListJobRuns ->
       if is_success
       then Ok (ListJobRunsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListJobRunsResponse.error_of_json))
+  | ListJobTemplates ->
+      if is_success
+      then Ok (ListJobTemplatesResponse.of_json (response_to_json resp))
+      else
+        Error (parse_aws_error (Some ListJobTemplatesResponse.error_of_json))
   | ListManagedEndpoints ->
       if is_success
       then Ok (ListManagedEndpointsResponse.of_json (response_to_json resp))
       else
         Error
           (parse_aws_error (Some ListManagedEndpointsResponse.error_of_json))
+  | ListSecurityConfigurations ->
+      if is_success
+      then
+        Ok
+          (ListSecurityConfigurationsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListSecurityConfigurationsResponse.error_of_json))
   | ListTagsForResource ->
       if is_success
       then Ok (ListTagsForResourceResponse.of_json (response_to_json resp))

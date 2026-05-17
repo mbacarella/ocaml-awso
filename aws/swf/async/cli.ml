@@ -153,6 +153,44 @@ let count_pending_decision_tasks =
               ~taskList:(Values.TaskList.of_json taskList) ())
            (Some Values.PendingTaskCount.to_json)
            (Some Values.PendingTaskCount.error_to_json)])
+let delete_activity_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and activityType =
+         flag "activity-type" (required json_arg) ~doc:"JSON ActivityType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_activity_type
+           (Values.DeleteActivityTypeInput.make ~domain
+              ~activityType:(Values.ActivityType.of_json activityType) ())
+           None None])
+let delete_workflow_type =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and domain = flag "domain" (required string) ~doc:"STRING DomainName"
+       and workflowType =
+         flag "workflow-type" (required json_arg) ~doc:"JSON WorkflowType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_workflow_type
+           (Values.DeleteWorkflowTypeInput.make ~domain
+              ~workflowType:(Values.WorkflowType.of_json workflowType) ())
+           None None])
 let deprecate_activity_type =
   Command.async ~summary:""
     ([%map_open.Command
@@ -553,6 +591,9 @@ let poll_for_decision_task =
          flag "maximum-page-size" (optional int) ~doc:"INT PageSize"
        and reverseOrder =
          flag "reverse-order" (optional bool) ~doc:"BOOL ReverseOrder"
+       and startAtPreviousStartedEvent =
+         flag "start-at-previous-started-event" (optional bool)
+           ~doc:"BOOL StartAtPreviousStartedEvent"
        and domain = flag "domain" (required string) ~doc:"STRING DomainName"
        and taskList =
          flag "task-list" (required json_arg) ~doc:"JSON TaskList" in
@@ -560,8 +601,8 @@ let poll_for_decision_task =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.poll_for_decision_task
            (Values.PollForDecisionTaskInput.make ?identity ?nextPageToken
-              ?maximumPageSize ?reverseOrder ~domain
-              ~taskList:(Values.TaskList.of_json taskList) ())
+              ?maximumPageSize ?reverseOrder ?startAtPreviousStartedEvent
+              ~domain ~taskList:(Values.TaskList.of_json taskList) ())
            (Some Values.DecisionTask.to_json)
            (Some Values.DecisionTask.error_to_json)])
 let record_activity_task_heartbeat =
@@ -781,6 +822,11 @@ let respond_decision_task_completed =
          flag "decisions" (optional json_arg) ~doc:"JSON DecisionList"
        and executionContext =
          flag "execution-context" (optional string) ~doc:"STRING Data"
+       and taskList =
+         flag "task-list" (optional json_arg) ~doc:"JSON TaskList"
+       and taskListScheduleToStartTimeout =
+         flag "task-list-schedule-to-start-timeout" (optional string)
+           ~doc:"STRING DurationInSecondsOptional"
        and taskToken =
          flag "task-token" (required string) ~doc:"STRING TaskToken" in
        fun () ->
@@ -788,7 +834,9 @@ let respond_decision_task_completed =
            Io.respond_decision_task_completed
            (Values.RespondDecisionTaskCompletedInput.make
               ?decisions:(Option.map ~f:Values.DecisionList.of_json decisions)
-              ?executionContext ~taskToken ()) None None])
+              ?executionContext
+              ?taskList:(Option.map ~f:Values.TaskList.of_json taskList)
+              ?taskListScheduleToStartTimeout ~taskToken ()) None None])
 let signal_workflow_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -980,6 +1028,8 @@ let main =
     ("count-open-workflow-executions", count_open_workflow_executions);
     ("count-pending-activity-tasks", count_pending_activity_tasks);
     ("count-pending-decision-tasks", count_pending_decision_tasks);
+    ("delete-activity-type", delete_activity_type);
+    ("delete-workflow-type", delete_workflow_type);
     ("deprecate-activity-type", deprecate_activity_type);
     ("deprecate-domain", deprecate_domain);
     ("deprecate-workflow-type", deprecate_workflow_type);

@@ -29,6 +29,8 @@ let attach_volume ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AttachVolume input
 let cancel_archival ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelArchival input
+let cancel_cache_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelCacheReport input
 let cancel_retrieval ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelRetrieval input
 let create_cachedi_s_c_s_i_volume ?endpoint_url ?cfg input =
@@ -54,6 +56,8 @@ let delete_automatic_tape_creation_policy ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteAutomaticTapeCreationPolicy input
 let delete_bandwidth_rate_limit ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteBandwidthRateLimit input
+let delete_cache_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCacheReport input
 let delete_chap_credentials ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteChapCredentials input
 let delete_file_share ?endpoint_url ?cfg input =
@@ -78,6 +82,8 @@ let describe_bandwidth_rate_limit_schedule ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeBandwidthRateLimitSchedule input
 let describe_cache ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCache input
+let describe_cache_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCacheReport input
 let describe_cachedi_s_c_s_i_volumes ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCachediSCSIVolumes input
 let describe_chap_credentials ?endpoint_url ?cfg input =
@@ -116,10 +122,14 @@ let disable_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableGateway input
 let disassociate_file_system ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisassociateFileSystem input
+let evict_files_failing_upload ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EvictFilesFailingUpload input
 let join_domain ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.JoinDomain input
 let list_automatic_tape_creation_policies ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAutomaticTapeCreationPolicies input
+let list_cache_reports ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCacheReports input
 let list_file_shares ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFileShares input
 let list_file_system_associations ?endpoint_url ?cfg input =
@@ -160,6 +170,8 @@ let shutdown_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ShutdownGateway input
 let start_availability_monitor_test ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartAvailabilityMonitorTest input
+let start_cache_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCacheReport input
 let start_gateway ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartGateway input
 let update_automatic_tape_creation_policy ?endpoint_url ?cfg input =

@@ -17,24 +17,32 @@ let associate_personas_to_entities ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociatePersonasToEntities input
 let batch_delete_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchDeleteDocument input
+let batch_delete_featured_results_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchDeleteFeaturedResultsSet input
 let batch_get_document_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetDocumentStatus input
 let batch_put_document ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchPutDocument input
 let clear_query_suggestions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ClearQuerySuggestions input
+let create_access_control_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateAccessControlConfiguration input
 let create_data_source ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDataSource input
 let create_experience ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateExperience input
 let create_faq ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFaq input
+let create_featured_results_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateFeaturedResultsSet input
 let create_index ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateIndex input
 let create_query_suggestions_block_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateQuerySuggestionsBlockList input
 let create_thesaurus ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateThesaurus input
+let delete_access_control_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteAccessControlConfiguration input
 let delete_data_source ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteDataSource input
 let delete_experience ?endpoint_url ?cfg input =
@@ -49,12 +57,16 @@ let delete_query_suggestions_block_list ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteQuerySuggestionsBlockList input
 let delete_thesaurus ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteThesaurus input
+let describe_access_control_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeAccessControlConfiguration input
 let describe_data_source ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDataSource input
 let describe_experience ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeExperience input
 let describe_faq ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeFaq input
+let describe_featured_results_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeFeaturedResultsSet input
 let describe_index ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeIndex input
 let describe_principal_mapping ?endpoint_url ?cfg input =
@@ -73,6 +85,8 @@ let get_query_suggestions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetQuerySuggestions input
 let get_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSnapshots input
+let list_access_control_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListAccessControlConfigurations input
 let list_data_source_sync_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListDataSourceSyncJobs input
 let list_data_sources ?endpoint_url ?cfg input =
@@ -85,6 +99,8 @@ let list_experiences ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListExperiences input
 let list_faqs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListFaqs input
+let list_featured_results_sets ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListFeaturedResultsSets input
 let list_groups_older_than_ordering_id ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListGroupsOlderThanOrderingId input
 let list_indices ?endpoint_url ?cfg input =
@@ -99,6 +115,8 @@ let put_principal_mapping ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.PutPrincipalMapping input
 let query ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Query input
+let retrieve ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.Retrieve input
 let start_data_source_sync_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartDataSourceSyncJob input
 let stop_data_source_sync_job ?endpoint_url ?cfg input =
@@ -109,10 +127,14 @@ let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_access_control_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateAccessControlConfiguration input
 let update_data_source ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateDataSource input
 let update_experience ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateExperience input
+let update_featured_results_set ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateFeaturedResultsSet input
 let update_index ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateIndex input
 let update_query_suggestions_block_list ?endpoint_url ?cfg input =

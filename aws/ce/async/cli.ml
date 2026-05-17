@@ -87,6 +87,8 @@ let create_cost_category_definition =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and effectiveStart =
+         flag "effective-start" (optional string) ~doc:"STRING ZonedDateTime"
        and defaultValue =
          flag "default-value" (optional string)
            ~doc:"STRING CostCategoryValue"
@@ -105,7 +107,8 @@ let create_cost_category_definition =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cost_category_definition
-           (Values.CreateCostCategoryDefinitionRequest.make ?defaultValue
+           (Values.CreateCostCategoryDefinitionRequest.make ?effectiveStart
+              ?defaultValue
               ?splitChargeRules:(Option.map
                                    ~f:Values.CostCategorySplitChargeRulesList.of_json
                                    splitChargeRules)
@@ -275,6 +278,51 @@ let get_anomaly_subscriptions =
               ?nextPageToken ?maxResults ())
            (Some Values.GetAnomalySubscriptionsResponse.to_json)
            (Some Values.GetAnomalySubscriptionsResponse.error_to_json)])
+let get_approximate_usage_records =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and services =
+         flag "services" (optional json_arg) ~doc:"JSON UsageServices"
+       and granularity =
+         flag "granularity" (required json_arg) ~doc:"JSON Granularity"
+       and approximationDimension =
+         flag "approximation-dimension" (required json_arg)
+           ~doc:"JSON ApproximationDimension" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_approximate_usage_records
+           (Values.GetApproximateUsageRecordsRequest.make
+              ?services:(Option.map ~f:Values.UsageServices.of_json services)
+              ~granularity:(Values.Granularity.of_json granularity)
+              ~approximationDimension:(Values.ApproximationDimension.of_json
+                                         approximationDimension) ())
+           (Some Values.GetApproximateUsageRecordsResponse.to_json)
+           (Some Values.GetApproximateUsageRecordsResponse.error_to_json)])
+let get_commitment_purchase_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and analysisId =
+         flag "analysis-id" (required string) ~doc:"STRING AnalysisId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_commitment_purchase_analysis
+           (Values.GetCommitmentPurchaseAnalysisRequest.make ~analysisId ())
+           (Some Values.GetCommitmentPurchaseAnalysisResponse.to_json)
+           (Some Values.GetCommitmentPurchaseAnalysisResponse.error_to_json)])
 let get_cost_and_usage =
   Command.async ~summary:""
     ([%map_open.Command
@@ -288,6 +336,9 @@ let get_cost_and_usage =
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
        and groupBy =
          flag "group-by" (optional json_arg) ~doc:"JSON GroupDefinitions"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and nextPageToken =
          flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
        and timePeriod =
@@ -302,12 +353,56 @@ let get_cost_and_usage =
            (Values.GetCostAndUsageRequest.make
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
               ?groupBy:(Option.map ~f:Values.GroupDefinitions.of_json groupBy)
-              ?nextPageToken
+              ?billingViewArn ?nextPageToken
               ~timePeriod:(Values.DateInterval.of_json timePeriod)
               ~granularity:(Values.Granularity.of_json granularity)
               ~metrics:(Values.MetricNames.of_json metrics) ())
            (Some Values.GetCostAndUsageResponse.to_json)
            (Some Values.GetCostAndUsageResponse.error_to_json)])
+let get_cost_and_usage_comparisons =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
+       and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
+       and groupBy =
+         flag "group-by" (optional json_arg) ~doc:"JSON GroupDefinitions"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CostAndUsageComparisonsMaxResults"
+       and nextPageToken =
+         flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
+       and baselineTimePeriod =
+         flag "baseline-time-period" (required json_arg)
+           ~doc:"JSON DateInterval"
+       and comparisonTimePeriod =
+         flag "comparison-time-period" (required json_arg)
+           ~doc:"JSON DateInterval"
+       and metricForComparison =
+         flag "metric-for-comparison" (required string)
+           ~doc:"STRING MetricName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cost_and_usage_comparisons
+           (Values.GetCostAndUsageComparisonsRequest.make ?billingViewArn
+              ?filter:(Option.map ~f:Values.Expression.of_json filter)
+              ?groupBy:(Option.map ~f:Values.GroupDefinitions.of_json groupBy)
+              ?maxResults ?nextPageToken
+              ~baselineTimePeriod:(Values.DateInterval.of_json
+                                     baselineTimePeriod)
+              ~comparisonTimePeriod:(Values.DateInterval.of_json
+                                       comparisonTimePeriod)
+              ~metricForComparison ())
+           (Some Values.GetCostAndUsageComparisonsResponse.to_json)
+           (Some Values.GetCostAndUsageComparisonsResponse.error_to_json)])
 let get_cost_and_usage_with_resources =
   Command.async ~summary:""
     ([%map_open.Command
@@ -322,6 +417,9 @@ let get_cost_and_usage_with_resources =
          flag "metrics" (optional json_arg) ~doc:"JSON MetricNames"
        and groupBy =
          flag "group-by" (optional json_arg) ~doc:"JSON GroupDefinitions"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and nextPageToken =
          flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
        and timePeriod =
@@ -335,7 +433,7 @@ let get_cost_and_usage_with_resources =
            (Values.GetCostAndUsageWithResourcesRequest.make
               ?metrics:(Option.map ~f:Values.MetricNames.of_json metrics)
               ?groupBy:(Option.map ~f:Values.GroupDefinitions.of_json groupBy)
-              ?nextPageToken
+              ?billingViewArn ?nextPageToken
               ~timePeriod:(Values.DateInterval.of_json timePeriod)
               ~granularity:(Values.Granularity.of_json granularity)
               ~filter:(Values.Expression.of_json filter) ())
@@ -359,6 +457,9 @@ let get_cost_categories =
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
        and sortBy =
          flag "sort-by" (optional json_arg) ~doc:"JSON SortDefinitions"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextPageToken =
@@ -372,10 +473,54 @@ let get_cost_categories =
               ?costCategoryName
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
               ?sortBy:(Option.map ~f:Values.SortDefinitions.of_json sortBy)
-              ?maxResults ?nextPageToken
+              ?billingViewArn ?maxResults ?nextPageToken
               ~timePeriod:(Values.DateInterval.of_json timePeriod) ())
            (Some Values.GetCostCategoriesResponse.to_json)
            (Some Values.GetCostCategoriesResponse.error_to_json)])
+let get_cost_comparison_drivers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
+       and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
+       and groupBy =
+         flag "group-by" (optional json_arg) ~doc:"JSON GroupDefinitions"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CostComparisonDriversMaxResults"
+       and nextPageToken =
+         flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
+       and baselineTimePeriod =
+         flag "baseline-time-period" (required json_arg)
+           ~doc:"JSON DateInterval"
+       and comparisonTimePeriod =
+         flag "comparison-time-period" (required json_arg)
+           ~doc:"JSON DateInterval"
+       and metricForComparison =
+         flag "metric-for-comparison" (required string)
+           ~doc:"STRING MetricName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_cost_comparison_drivers
+           (Values.GetCostComparisonDriversRequest.make ?billingViewArn
+              ?filter:(Option.map ~f:Values.Expression.of_json filter)
+              ?groupBy:(Option.map ~f:Values.GroupDefinitions.of_json groupBy)
+              ?maxResults ?nextPageToken
+              ~baselineTimePeriod:(Values.DateInterval.of_json
+                                     baselineTimePeriod)
+              ~comparisonTimePeriod:(Values.DateInterval.of_json
+                                       comparisonTimePeriod)
+              ~metricForComparison ())
+           (Some Values.GetCostComparisonDriversResponse.to_json)
+           (Some Values.GetCostComparisonDriversResponse.error_to_json)])
 let get_cost_forecast =
   Command.async ~summary:""
     ([%map_open.Command
@@ -387,6 +532,9 @@ let get_cost_forecast =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and predictionIntervalLevel =
          flag "prediction-interval-level" (optional int)
            ~doc:"INT PredictionIntervalLevel"
@@ -400,7 +548,7 @@ let get_cost_forecast =
            Io.get_cost_forecast
            (Values.GetCostForecastRequest.make
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
-              ?predictionIntervalLevel
+              ?billingViewArn ?predictionIntervalLevel
               ~timePeriod:(Values.DateInterval.of_json timePeriod)
               ~metric:(Values.Metric.of_json metric)
               ~granularity:(Values.Granularity.of_json granularity) ())
@@ -422,6 +570,9 @@ let get_dimension_values =
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
        and sortBy =
          flag "sort-by" (optional json_arg) ~doc:"JSON SortDefinitions"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextPageToken =
@@ -437,7 +588,7 @@ let get_dimension_values =
               ?context:(Option.map ~f:Values.Context.of_json context)
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
               ?sortBy:(Option.map ~f:Values.SortDefinitions.of_json sortBy)
-              ?maxResults ?nextPageToken
+              ?billingViewArn ?maxResults ?nextPageToken
               ~timePeriod:(Values.DateInterval.of_json timePeriod)
               ~dimension:(Values.Dimension.of_json dimension) ())
            (Some Values.GetDimensionValuesResponse.to_json)
@@ -508,7 +659,7 @@ let get_reservation_purchase_recommendation =
          flag "service-specification" (optional json_arg)
            ~doc:"JSON ServiceSpecification"
        and pageSize =
-         flag "page-size" (optional int) ~doc:"INT NonNegativeInteger"
+         flag "page-size" (optional int) ~doc:"INT RecommendationsPageSize"
        and nextPageToken =
          flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
        and service =
@@ -586,7 +737,7 @@ let get_rightsizing_recommendation =
          flag "configuration" (optional json_arg)
            ~doc:"JSON RightsizingRecommendationConfiguration"
        and pageSize =
-         flag "page-size" (optional int) ~doc:"INT NonNegativeInteger"
+         flag "page-size" (optional int) ~doc:"INT RecommendationsPageSize"
        and nextPageToken =
          flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
        and service =
@@ -602,6 +753,28 @@ let get_rightsizing_recommendation =
               ~service ())
            (Some Values.GetRightsizingRecommendationResponse.to_json)
            (Some Values.GetRightsizingRecommendationResponse.error_to_json)])
+let get_savings_plan_purchase_recommendation_details =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and recommendationDetailId =
+         flag "recommendation-detail-id" (required string)
+           ~doc:"STRING RecommendationDetailId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_savings_plan_purchase_recommendation_details
+           (Values.GetSavingsPlanPurchaseRecommendationDetailsRequest.make
+              ~recommendationDetailId ())
+           (Some
+              Values.GetSavingsPlanPurchaseRecommendationDetailsResponse.to_json)
+           (Some
+              Values.GetSavingsPlanPurchaseRecommendationDetailsResponse.error_to_json)])
 let get_savings_plans_coverage =
   Command.async ~summary:""
     ([%map_open.Command
@@ -656,7 +829,7 @@ let get_savings_plans_purchase_recommendation =
        and nextPageToken =
          flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
        and pageSize =
-         flag "page-size" (optional int) ~doc:"INT NonNegativeInteger"
+         flag "page-size" (optional int) ~doc:"INT RecommendationsPageSize"
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
        and savingsPlansType =
          flag "savings-plans-type" (required json_arg)
@@ -762,6 +935,9 @@ let get_tags =
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
        and sortBy =
          flag "sort-by" (optional json_arg) ~doc:"JSON SortDefinitions"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT MaxResults"
        and nextPageToken =
@@ -774,7 +950,7 @@ let get_tags =
            (Values.GetTagsRequest.make ?searchString ?tagKey
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
               ?sortBy:(Option.map ~f:Values.SortDefinitions.of_json sortBy)
-              ?maxResults ?nextPageToken
+              ?billingViewArn ?maxResults ?nextPageToken
               ~timePeriod:(Values.DateInterval.of_json timePeriod) ())
            (Some Values.GetTagsResponse.to_json)
            (Some Values.GetTagsResponse.error_to_json)])
@@ -789,6 +965,9 @@ let get_usage_forecast =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and filter = flag "filter" (optional json_arg) ~doc:"JSON Expression"
+       and billingViewArn =
+         flag "billing-view-arn" (optional string)
+           ~doc:"STRING BillingViewArn"
        and predictionIntervalLevel =
          flag "prediction-interval-level" (optional int)
            ~doc:"INT PredictionIntervalLevel"
@@ -802,12 +981,99 @@ let get_usage_forecast =
            Io.get_usage_forecast
            (Values.GetUsageForecastRequest.make
               ?filter:(Option.map ~f:Values.Expression.of_json filter)
-              ?predictionIntervalLevel
+              ?billingViewArn ?predictionIntervalLevel
               ~timePeriod:(Values.DateInterval.of_json timePeriod)
               ~metric:(Values.Metric.of_json metric)
               ~granularity:(Values.Granularity.of_json granularity) ())
            (Some Values.GetUsageForecastResponse.to_json)
            (Some Values.GetUsageForecastResponse.error_to_json)])
+let list_commitment_purchase_analyses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and analysisStatus =
+         flag "analysis-status" (optional json_arg)
+           ~doc:"JSON AnalysisStatus"
+       and nextPageToken =
+         flag "next-page-token" (optional string) ~doc:"STRING NextPageToken"
+       and pageSize =
+         flag "page-size" (optional int) ~doc:"INT AnalysesPageSize"
+       and analysisIds =
+         flag "analysis-ids" (optional json_arg) ~doc:"JSON AnalysisIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_commitment_purchase_analyses
+           (Values.ListCommitmentPurchaseAnalysesRequest.make
+              ?analysisStatus:(Option.map ~f:Values.AnalysisStatus.of_json
+                                 analysisStatus) ?nextPageToken ?pageSize
+              ?analysisIds:(Option.map ~f:Values.AnalysisIds.of_json
+                              analysisIds) ())
+           (Some Values.ListCommitmentPurchaseAnalysesResponse.to_json)
+           (Some Values.ListCommitmentPurchaseAnalysesResponse.error_to_json)])
+let list_cost_allocation_tag_backfill_history =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextPageToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CostAllocationTagsMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cost_allocation_tag_backfill_history
+           (Values.ListCostAllocationTagBackfillHistoryRequest.make
+              ?nextToken ?maxResults ())
+           (Some Values.ListCostAllocationTagBackfillHistoryResponse.to_json)
+           (Some
+              Values.ListCostAllocationTagBackfillHistoryResponse.error_to_json)])
+let list_cost_allocation_tags =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON CostAllocationTagStatus"
+       and tagKeys =
+         flag "tag-keys" (optional json_arg)
+           ~doc:"JSON CostAllocationTagKeyList"
+       and type_ =
+         flag "type-" (optional json_arg) ~doc:"JSON CostAllocationTagType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextPageToken"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT CostAllocationTagsMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cost_allocation_tags
+           (Values.ListCostAllocationTagsRequest.make
+              ?status:(Option.map ~f:Values.CostAllocationTagStatus.of_json
+                         status)
+              ?tagKeys:(Option.map ~f:Values.CostAllocationTagKeyList.of_json
+                          tagKeys)
+              ?type_:(Option.map ~f:Values.CostAllocationTagType.of_json
+                        type_) ?nextToken ?maxResults ())
+           (Some Values.ListCostAllocationTagsResponse.to_json)
+           (Some Values.ListCostAllocationTagsResponse.error_to_json)])
 let list_cost_category_definitions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -823,14 +1089,79 @@ let list_cost_category_definitions =
        and nextToken =
          flag "next-token" (optional string) ~doc:"STRING NextPageToken"
        and maxResults =
-         flag "max-results" (optional int) ~doc:"INT CostCategoryMaxResults" in
+         flag "max-results" (optional int) ~doc:"INT CostCategoryMaxResults"
+       and supportedResourceTypes =
+         flag "supported-resource-types" (optional json_arg)
+           ~doc:"JSON ResourceTypesFilterInput" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_cost_category_definitions
            (Values.ListCostCategoryDefinitionsRequest.make ?effectiveOn
-              ?nextToken ?maxResults ())
+              ?nextToken ?maxResults
+              ?supportedResourceTypes:(Option.map
+                                         ~f:Values.ResourceTypesFilterInput.of_json
+                                         supportedResourceTypes) ())
            (Some Values.ListCostCategoryDefinitionsResponse.to_json)
            (Some Values.ListCostCategoryDefinitionsResponse.error_to_json)])
+let list_cost_category_resource_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and costCategoryArn =
+         flag "cost-category-arn" (optional string) ~doc:"STRING Arn"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextPageToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT CostCategoryMaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_cost_category_resource_associations
+           (Values.ListCostCategoryResourceAssociationsRequest.make
+              ?costCategoryArn ?nextToken ?maxResults ())
+           (Some Values.ListCostCategoryResourceAssociationsResponse.to_json)
+           (Some
+              Values.ListCostCategoryResourceAssociationsResponse.error_to_json)])
+let list_savings_plans_purchase_recommendation_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and generationStatus =
+         flag "generation-status" (optional json_arg)
+           ~doc:"JSON GenerationStatus"
+       and recommendationIds =
+         flag "recommendation-ids" (optional json_arg)
+           ~doc:"JSON RecommendationIdList"
+       and pageSize =
+         flag "page-size" (optional int) ~doc:"INT RecommendationsPageSize"
+       and nextPageToken =
+         flag "next-page-token" (optional string) ~doc:"STRING NextPageToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_savings_plans_purchase_recommendation_generation
+           (Values.ListSavingsPlansPurchaseRecommendationGenerationRequest.make
+              ?generationStatus:(Option.map
+                                   ~f:Values.GenerationStatus.of_json
+                                   generationStatus)
+              ?recommendationIds:(Option.map
+                                    ~f:Values.RecommendationIdList.of_json
+                                    recommendationIds) ?pageSize
+              ?nextPageToken ())
+           (Some
+              Values.ListSavingsPlansPurchaseRecommendationGenerationResponse.to_json)
+           (Some
+              Values.ListSavingsPlansPurchaseRecommendationGenerationResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -870,6 +1201,68 @@ let provide_anomaly_feedback =
               ~feedback:(Values.AnomalyFeedbackType.of_json feedback) ())
            (Some Values.ProvideAnomalyFeedbackResponse.to_json)
            (Some Values.ProvideAnomalyFeedbackResponse.error_to_json)])
+let start_commitment_purchase_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and commitmentPurchaseAnalysisConfiguration =
+         flag "commitment-purchase-analysis-configuration"
+           (required json_arg)
+           ~doc:"JSON CommitmentPurchaseAnalysisConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_commitment_purchase_analysis
+           (Values.StartCommitmentPurchaseAnalysisRequest.make
+              ~commitmentPurchaseAnalysisConfiguration:(Values.CommitmentPurchaseAnalysisConfiguration.of_json
+                                                          commitmentPurchaseAnalysisConfiguration)
+              ())
+           (Some Values.StartCommitmentPurchaseAnalysisResponse.to_json)
+           (Some Values.StartCommitmentPurchaseAnalysisResponse.error_to_json)])
+let start_cost_allocation_tag_backfill =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and backfillFrom =
+         flag "backfill-from" (required string) ~doc:"STRING ZonedDateTime" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_cost_allocation_tag_backfill
+           (Values.StartCostAllocationTagBackfillRequest.make ~backfillFrom
+              ())
+           (Some Values.StartCostAllocationTagBackfillResponse.to_json)
+           (Some Values.StartCostAllocationTagBackfillResponse.error_to_json)])
+let start_savings_plans_purchase_recommendation_generation =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_savings_plans_purchase_recommendation_generation
+           (Values.StartSavingsPlansPurchaseRecommendationGenerationRequest.make
+              ())
+           (Some
+              Values.StartSavingsPlansPurchaseRecommendationGenerationResponse.to_json)
+           (Some
+              Values.StartSavingsPlansPurchaseRecommendationGenerationResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -958,6 +1351,9 @@ let update_anomaly_subscription =
        and subscriptionName =
          flag "subscription-name" (optional string)
            ~doc:"STRING GenericString"
+       and thresholdExpression =
+         flag "threshold-expression" (optional json_arg)
+           ~doc:"JSON Expression"
        and subscriptionArn =
          flag "subscription-arn" (required string)
            ~doc:"STRING GenericString" in
@@ -971,9 +1367,32 @@ let update_anomaly_subscription =
               ?monitorArnList:(Option.map ~f:Values.MonitorArnList.of_json
                                  monitorArnList)
               ?subscribers:(Option.map ~f:Values.Subscribers.of_json
-                              subscribers) ?subscriptionName ~subscriptionArn
+                              subscribers) ?subscriptionName
+              ?thresholdExpression:(Option.map ~f:Values.Expression.of_json
+                                      thresholdExpression) ~subscriptionArn
               ()) (Some Values.UpdateAnomalySubscriptionResponse.to_json)
            (Some Values.UpdateAnomalySubscriptionResponse.error_to_json)])
+let update_cost_allocation_tags_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and costAllocationTagsStatus =
+         flag "cost-allocation-tags-status" (required json_arg)
+           ~doc:"JSON CostAllocationTagStatusList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_cost_allocation_tags_status
+           (Values.UpdateCostAllocationTagsStatusRequest.make
+              ~costAllocationTagsStatus:(Values.CostAllocationTagStatusList.of_json
+                                           costAllocationTagsStatus) ())
+           (Some Values.UpdateCostAllocationTagsStatusResponse.to_json)
+           (Some Values.UpdateCostAllocationTagsStatusResponse.error_to_json)])
 let update_cost_category_definition =
   Command.async ~summary:""
     ([%map_open.Command
@@ -984,6 +1403,8 @@ let update_cost_category_definition =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and effectiveStart =
+         flag "effective-start" (optional string) ~doc:"STRING ZonedDateTime"
        and defaultValue =
          flag "default-value" (optional string)
            ~doc:"STRING CostCategoryValue"
@@ -1000,7 +1421,8 @@ let update_cost_category_definition =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_cost_category_definition
-           (Values.UpdateCostCategoryDefinitionRequest.make ?defaultValue
+           (Values.UpdateCostCategoryDefinitionRequest.make ?effectiveStart
+              ?defaultValue
               ?splitChargeRules:(Option.map
                                    ~f:Values.CostCategorySplitChargeRulesList.of_json
                                    splitChargeRules) ~costCategoryArn
@@ -1022,9 +1444,13 @@ let main =
     ("get-anomalies", get_anomalies);
     ("get-anomaly-monitors", get_anomaly_monitors);
     ("get-anomaly-subscriptions", get_anomaly_subscriptions);
+    ("get-approximate-usage-records", get_approximate_usage_records);
+    ("get-commitment-purchase-analysis", get_commitment_purchase_analysis);
     ("get-cost-and-usage", get_cost_and_usage);
+    ("get-cost-and-usage-comparisons", get_cost_and_usage_comparisons);
     ("get-cost-and-usage-with-resources", get_cost_and_usage_with_resources);
     ("get-cost-categories", get_cost_categories);
+    ("get-cost-comparison-drivers", get_cost_comparison_drivers);
     ("get-cost-forecast", get_cost_forecast);
     ("get-dimension-values", get_dimension_values);
     ("get-reservation-coverage", get_reservation_coverage);
@@ -1032,6 +1458,8 @@ let main =
       get_reservation_purchase_recommendation);
     ("get-reservation-utilization", get_reservation_utilization);
     ("get-rightsizing-recommendation", get_rightsizing_recommendation);
+    ("get-savings-plan-purchase-recommendation-details",
+      get_savings_plan_purchase_recommendation_details);
     ("get-savings-plans-coverage", get_savings_plans_coverage);
     ("get-savings-plans-purchase-recommendation",
       get_savings_plans_purchase_recommendation);
@@ -1040,11 +1468,27 @@ let main =
       get_savings_plans_utilization_details);
     ("get-tags", get_tags);
     ("get-usage-forecast", get_usage_forecast);
+    ("list-commitment-purchase-analyses", list_commitment_purchase_analyses);
+    ("list-cost-allocation-tag-backfill-history",
+      list_cost_allocation_tag_backfill_history);
+    ("list-cost-allocation-tags", list_cost_allocation_tags);
     ("list-cost-category-definitions", list_cost_category_definitions);
+    ("list-cost-category-resource-associations",
+      list_cost_category_resource_associations);
+    ("list-savings-plans-purchase-recommendation-generation",
+      list_savings_plans_purchase_recommendation_generation);
     ("list-tags-for-resource", list_tags_for_resource);
     ("provide-anomaly-feedback", provide_anomaly_feedback);
+    ("start-commitment-purchase-analysis",
+      start_commitment_purchase_analysis);
+    ("start-cost-allocation-tag-backfill",
+      start_cost_allocation_tag_backfill);
+    ("start-savings-plans-purchase-recommendation-generation",
+      start_savings_plans_purchase_recommendation_generation);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-anomaly-monitor", update_anomaly_monitor);
     ("update-anomaly-subscription", update_anomaly_subscription);
+    ("update-cost-allocation-tags-status",
+      update_cost_allocation_tags_status);
     ("update-cost-category-definition", update_cost_category_definition)]

@@ -23,6 +23,252 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module Arn =
+  struct
+    type nonrec t = string
+    let context_ = "Arn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1011) >>=
+                  (fun () -> check_pattern i ~pattern:"\\S+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Arn" j
+    let to_json = simple_to_json to_value
+  end
+module PackageGroupPattern =
+  struct
+    type nonrec t = string
+    let context_ = "PackageGroupPattern"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:520) >>=
+                  (fun () ->
+                     check_pattern i ~pattern:"[^\\p{C}\\p{IsWhitespace}]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PackageGroupPattern" j
+    let to_json = simple_to_json to_value
+  end
+module LongOptional =
+  struct
+    type nonrec t = Int64.t
+    let make i = i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
+    let to_query v = to_query to_value v
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
+    let to_json = simple_to_json to_value
+  end
+module PackageGroupOriginRestrictionMode =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | ALLOW_SPECIFIC_REPOSITORIES 
+      | BLOCK 
+      | INHERIT 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ALLOW -> "ALLOW"
+      | ALLOW_SPECIFIC_REPOSITORIES -> "ALLOW_SPECIFIC_REPOSITORIES"
+      | BLOCK -> "BLOCK"
+      | INHERIT -> "INHERIT"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ALLOW" -> ALLOW
+      | "ALLOW_SPECIFIC_REPOSITORIES" -> ALLOW_SPECIFIC_REPOSITORIES
+      | "BLOCK" -> BLOCK
+      | "INHERIT" -> INHERIT
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PackageGroupOriginRestrictionMode"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PackageGroupOriginRestrictionMode" j)
+    let to_json = simple_to_json to_value
+  end
+module PackageGroupReference =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option [@ocaml.doc "The ARN of the package group."];
+      pattern: PackageGroupPattern.t option
+        [@ocaml.doc
+          "The pattern of the package group. The pattern determines which packages are associated with the package group, and is also the identifier of the package group."]}
+    let make ?arn = fun ?pattern -> fun () -> { arn; pattern }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("pattern", (Option.map x.pattern ~f:PackageGroupPattern.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let pattern =
+        (Option.map ~f:PackageGroupPattern.of_xml)
+          (Xml.child xml_arg0 "pattern") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?pattern ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let pattern = field_map json__ "pattern" PackageGroupPattern.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in make ?pattern ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Information about the identifiers of a package group."]
+module PackageGroupOriginRestriction =
+  struct
+    type nonrec t =
+      {
+      mode: PackageGroupOriginRestrictionMode.t option
+        [@ocaml.doc
+          "The package group origin restriction setting. If the value of mode is ALLOW, ALLOW_SPECIFIC_REPOSITORIES, or BLOCK, then the value of effectiveMode is the same. Otherwise, when the value is INHERIT, then the value of effectiveMode is the value of mode of the first parent group which does not have a value of INHERIT."];
+      effectiveMode: PackageGroupOriginRestrictionMode.t option
+        [@ocaml.doc
+          "The effective package group origin restriction setting. If the value of mode is ALLOW, ALLOW_SPECIFIC_REPOSITORIES, or BLOCK, then the value of effectiveMode is the same. Otherwise, when the value of mode is INHERIT, then the value of effectiveMode is the value of mode of the first parent group which does not have a value of INHERIT."];
+      inheritedFrom: PackageGroupReference.t option
+        [@ocaml.doc
+          "The parent package group that the package group origin restrictions are inherited from."];
+      repositoriesCount: LongOptional.t option
+        [@ocaml.doc
+          "The number of repositories in the allowed repository list."]}
+    let make ?mode =
+      fun ?effectiveMode ->
+        fun ?inheritedFrom ->
+          fun ?repositoriesCount ->
+            fun () ->
+              { mode; effectiveMode; inheritedFrom; repositoriesCount }
+    let to_value x =
+      structure_to_value
+        [("mode",
+           (Option.map x.mode ~f:PackageGroupOriginRestrictionMode.to_value));
+        ("effectiveMode",
+          (Option.map x.effectiveMode
+             ~f:PackageGroupOriginRestrictionMode.to_value));
+        ("inheritedFrom",
+          (Option.map x.inheritedFrom ~f:PackageGroupReference.to_value));
+        ("repositoriesCount",
+          (Option.map x.repositoriesCount ~f:LongOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let repositoriesCount =
+        (Option.map ~f:LongOptional.of_xml)
+          (Xml.child xml_arg0 "repositoriesCount") in
+      let inheritedFrom =
+        (Option.map ~f:PackageGroupReference.of_xml)
+          (Xml.child xml_arg0 "inheritedFrom") in
+      let effectiveMode =
+        (Option.map ~f:PackageGroupOriginRestrictionMode.of_xml)
+          (Xml.child xml_arg0 "effectiveMode") in
+      let mode =
+        (Option.map ~f:PackageGroupOriginRestrictionMode.of_xml)
+          (Xml.child xml_arg0 "mode") in
+      make ?repositoriesCount ?inheritedFrom ?effectiveMode ?mode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let repositoriesCount =
+        field_map json__ "repositoriesCount" LongOptional.of_json in
+      let inheritedFrom =
+        field_map json__ "inheritedFrom" PackageGroupReference.of_json in
+      let effectiveMode =
+        field_map json__ "effectiveMode"
+          PackageGroupOriginRestrictionMode.of_json in
+      let mode =
+        field_map json__ "mode" PackageGroupOriginRestrictionMode.of_json in
+      make ?repositoriesCount ?inheritedFrom ?effectiveMode ?mode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains information about the configured restrictions of the origin controls of a package group."]
+module PackageGroupOriginRestrictionType =
+  struct
+    type nonrec t =
+      | EXTERNAL_UPSTREAM 
+      | INTERNAL_UPSTREAM 
+      | PUBLISH 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | EXTERNAL_UPSTREAM -> "EXTERNAL_UPSTREAM"
+      | INTERNAL_UPSTREAM -> "INTERNAL_UPSTREAM"
+      | PUBLISH -> "PUBLISH"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "EXTERNAL_UPSTREAM" -> EXTERNAL_UPSTREAM
+      | "INTERNAL_UPSTREAM" -> INTERNAL_UPSTREAM
+      | "PUBLISH" -> PUBLISH
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PackageGroupOriginRestrictionType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PackageGroupOriginRestrictionType" j)
+    let to_json = simple_to_json to_value
+  end
+module AllowPublish =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | BLOCK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALLOW -> "ALLOW" | BLOCK -> "BLOCK" | Non_static_id s -> s
+    let of_string =
+      function | "ALLOW" -> ALLOW | "BLOCK" -> BLOCK | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AllowPublish" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AllowPublish" j)
+    let to_json = simple_to_json to_value
+  end
+module AllowUpstream =
+  struct
+    type nonrec t =
+      | ALLOW 
+      | BLOCK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | ALLOW -> "ALLOW" | BLOCK -> "BLOCK" | Non_static_id s -> s
+    let of_string =
+      function | "ALLOW" -> ALLOW | "BLOCK" -> BLOCK | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AllowUpstream" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AllowUpstream" j)
+    let to_json = simple_to_json to_value
+  end
 module ExternalConnectionName =
   struct
     type nonrec t = string
@@ -30,7 +276,12 @@ module ExternalConnectionName =
     let make i =
       let open Result in
         ok_or_failwith
-          (check_pattern i ~pattern:"[A-Za-z0-9][A-Za-z0-9._\\-:]{1,99}");
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9][A-Za-z0-9._\\-:]{1,99}")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -38,6 +289,28 @@ module ExternalConnectionName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ExternalConnectionName" j
+    let to_json = simple_to_json to_value
+  end
+module RepositoryName =
+  struct
+    type nonrec t = string
+    let context_ = "RepositoryName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:100) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[A-Za-z0-9][A-Za-z0-9._\\-]{1,99}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RepositoryName" j
     let to_json = simple_to_json to_value
   end
 module ExternalConnectionStatus =
@@ -67,6 +340,10 @@ module PackageFormat =
       | Pypi 
       | Maven 
       | Nuget 
+      | Generic 
+      | Ruby 
+      | Swift 
+      | Cargo 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -75,6 +352,10 @@ module PackageFormat =
       | Pypi -> "pypi"
       | Maven -> "maven"
       | Nuget -> "nuget"
+      | Generic -> "generic"
+      | Ruby -> "ruby"
+      | Swift -> "swift"
+      | Cargo -> "cargo"
       | Non_static_id s -> s
     let of_string =
       function
@@ -82,6 +363,10 @@ module PackageFormat =
       | "pypi" -> Pypi
       | "maven" -> Maven
       | "nuget" -> Nuget
+      | "generic" -> Generic
+      | "ruby" -> Ruby
+      | "swift" -> Swift
+      | "cargo" -> Cargo
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -91,26 +376,144 @@ module PackageFormat =
     let of_json j = of_string (string_of_json ~kind:"PackageFormat" j)
     let to_json = simple_to_json to_value
   end
-module RepositoryName =
+module PackageGroupOriginRestrictions =
   struct
-    type nonrec t = string
-    let context_ = "RepositoryName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:2) >>=
-             (fun () ->
-                (check_string_max i ~max:100) >>=
-                  (fun () ->
-                     check_pattern i
-                       ~pattern:"[A-Za-z0-9][A-Za-z0-9._\\-]{1,99}")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+    type nonrec t =
+      (PackageGroupOriginRestrictionType.t * PackageGroupOriginRestriction.t)
+        list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types PackageGroupOriginRestrictionType PackageGroupOriginRestriction"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PackageGroupOriginRestrictionType.to_value x) |>
+                    (fun x ->
+                       (PackageGroupOriginRestriction.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RepositoryName" j
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:PackageGroupOriginRestrictionType.of_string
+        ~of_json:PackageGroupOriginRestriction.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PackageOriginRestrictions =
+  struct
+    type nonrec t =
+      {
+      publish: AllowPublish.t
+        [@ocaml.doc
+          "The package origin configuration that determines if new versions of the package can be published directly to the repository."];
+      upstream: AllowUpstream.t
+        [@ocaml.doc
+          "The package origin configuration that determines if new versions of the package can be added to the repository from an external connection or upstream source."]}
+    let context_ = "PackageOriginRestrictions"
+    let make ~publish = fun ~upstream -> fun () -> { publish; upstream }
+    let to_value x =
+      structure_to_value
+        [("publish", (Some (AllowPublish.to_value x.publish)));
+        ("upstream", (Some (AllowUpstream.to_value x.upstream)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let upstream =
+        AllowUpstream.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "upstream") in
+      let publish =
+        AllowPublish.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "publish") in
+      make ~upstream ~publish ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let upstream = field_map_exn json__ "upstream" AllowUpstream.of_json in
+      let publish = field_map_exn json__ "publish" AllowPublish.of_json in
+      make ~upstream ~publish ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the origin restrictions set on the package. The package origin restrictions determine how new versions of a package can be added to a specific repository."]
+module DomainEntryPoint =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc
+          "The name of the repository that a package was originally published to."];
+      externalConnectionName: ExternalConnectionName.t option
+        [@ocaml.doc
+          "The name of the external connection that a package was ingested from."]}
+    let make ?repositoryName =
+      fun ?externalConnectionName ->
+        fun () -> { repositoryName; externalConnectionName }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("externalConnectionName",
+          (Option.map x.externalConnectionName
+             ~f:ExternalConnectionName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let externalConnectionName =
+        (Option.map ~f:ExternalConnectionName.of_xml)
+          (Xml.child xml_arg0 "externalConnectionName") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      make ?externalConnectionName ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let externalConnectionName =
+        field_map json__ "externalConnectionName"
+          ExternalConnectionName.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      make ?externalConnectionName ?repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about how a package originally entered the CodeArtifact domain. For packages published directly to CodeArtifact, the entry point is the repository it was published to. For packages ingested from an external repository, the entry point is the external connection that it was ingested from. An external connection is a CodeArtifact repository that is connected to an external repository such as the npm registry or NuGet gallery. If a package version exists in a repository and is updated, for example if a package of the same version is added with additional assets, the package version's DomainEntryPoint will not change from the original package version's value."]
+module PackageVersionOriginType =
+  struct
+    type nonrec t =
+      | INTERNAL 
+      | EXTERNAL 
+      | UNKNOWN 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | INTERNAL -> "INTERNAL"
+      | EXTERNAL -> "EXTERNAL"
+      | UNKNOWN -> "UNKNOWN"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "INTERNAL" -> INTERNAL
+      | "EXTERNAL" -> EXTERNAL
+      | "UNKNOWN" -> UNKNOWN
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PackageVersionOriginType" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PackageVersionOriginType" j)
     let to_json = simple_to_json to_value
   end
 module HashAlgorithm =
@@ -186,7 +589,7 @@ module RepositoryExternalConnectionInfo =
           "The name of the external connection associated with a repository."];
       packageFormat: PackageFormat.t option
         [@ocaml.doc
-          "The package format associated with a repository's external connection. The valid package formats are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+          "The package format associated with a repository's external connection. The valid package formats are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file. nuget: A NuGet package. generic: A generic package. ruby: A Ruby package. swift: A Swift package. cargo: A Cargo package."];
       status: ExternalConnectionStatus.t option
         [@ocaml.doc
           "The status of the external connection of a repository. There is one valid value, Available."]}
@@ -216,12 +619,12 @@ module RepositoryExternalConnectionInfo =
           (Xml.child xml_arg0 "externalConnectionName") in
       make ?status ?packageFormat ?externalConnectionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ExternalConnectionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ExternalConnectionStatus.of_json in
       let packageFormat =
-        field_map json "packageFormat" PackageFormat.of_json in
+        field_map json__ "packageFormat" PackageFormat.of_json in
       let externalConnectionName =
-        field_map json "externalConnectionName"
+        field_map json__ "externalConnectionName"
           ExternalConnectionName.of_json in
       make ?status ?packageFormat ?externalConnectionName ()
     let to_json v = composed_to_json to_value v
@@ -245,9 +648,9 @@ module UpstreamRepositoryInfo =
           (Xml.child xml_arg0 "repositoryName") in
       make ?repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map json "repositoryName" RepositoryName.of_json in
+        field_map json__ "repositoryName" RepositoryName.of_json in
       make ?repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an upstream repository."]
@@ -341,6 +744,64 @@ module PackageVersionStatus =
     let of_json j = of_string (string_of_json ~kind:"PackageVersionStatus" j)
     let to_json = simple_to_json to_value
   end
+module PackageGroupAllowedRepositoryUpdateType =
+  struct
+    type nonrec t =
+      | ADDED 
+      | REMOVED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ADDED -> "ADDED"
+      | REMOVED -> "REMOVED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ADDED" -> ADDED
+      | "REMOVED" -> REMOVED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml
+           ~kind:"enumeration PackageGroupAllowedRepositoryUpdateType"
+           xml_arg0)
+    let of_json j =
+      of_string
+        (string_of_json ~kind:"PackageGroupAllowedRepositoryUpdateType" j)
+    let to_json = simple_to_json to_value
+  end
+module RepositoryNameList =
+  struct
+    type nonrec t = RepositoryName.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:RepositoryName.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:RepositoryName.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RepositoryNameList" ~of_json:RepositoryName.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
 module TagKey =
   struct
     type nonrec t = string
@@ -348,8 +809,10 @@ module TagKey =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:128) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:128) >>=
+                  (fun () -> check_pattern i ~pattern:"\\P{C}+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -366,8 +829,10 @@ module TagValue =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:256) >>=
-             (fun () -> check_string_min i ~min:0));
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"\\P{C}*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -397,26 +862,6 @@ module AccountId =
     let of_json j = string_of_json ~kind:"AccountId" j
     let to_json = simple_to_json to_value
   end
-module Arn =
-  struct
-    type nonrec t = string
-    let context_ = "Arn"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1011) >>=
-                  (fun () -> check_pattern i ~pattern:"\\S+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Arn" j
-    let to_json = simple_to_json to_value
-  end
 module Description =
   struct
     type nonrec t = string
@@ -425,7 +870,7 @@ module Description =
       let open Result in
         ok_or_failwith
           ((check_string_max i ~max:1000) >>=
-             (fun () -> check_pattern i ~pattern:"\\P{C}+"));
+             (fun () -> check_pattern i ~pattern:"\\P{C}*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -457,6 +902,66 @@ module DomainName =
     let of_json j = string_of_json ~kind:"DomainName" j
     let to_json = simple_to_json to_value
   end
+module PackageGroupContactInfo =
+  struct
+    type nonrec t = string
+    let context_ = "PackageGroupContactInfo"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"\\P{C}*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PackageGroupContactInfo" j
+    let to_json = simple_to_json to_value
+  end
+module PackageGroupOriginConfiguration =
+  struct
+    type nonrec t =
+      {
+      restrictions: PackageGroupOriginRestrictions.t option
+        [@ocaml.doc
+          "The origin configuration settings that determine how package versions can enter repositories."]}
+    let make ?restrictions = fun () -> { restrictions }
+    let to_value x =
+      structure_to_value
+        [("restrictions",
+           (Option.map x.restrictions
+              ~f:PackageGroupOriginRestrictions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restrictions =
+        (Option.map ~f:PackageGroupOriginRestrictions.of_xml)
+          (Xml.child xml_arg0 "restrictions") in
+      make ?restrictions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restrictions =
+        field_map json__ "restrictions"
+          PackageGroupOriginRestrictions.of_json in
+      make ?restrictions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The package group origin configuration that determines how package versions can enter repositories."]
+module Timestamp =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
 module PackageName =
   struct
     type nonrec t = string
@@ -467,7 +972,7 @@ module PackageName =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[^!#/\\s]+")));
+                  (fun () -> check_pattern i ~pattern:"[^#/\\s]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -487,7 +992,7 @@ module PackageNamespace =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[^!#/\\s]+")));
+                  (fun () -> check_pattern i ~pattern:"[^#/\\s]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -497,6 +1002,32 @@ module PackageNamespace =
     let of_json j = string_of_json ~kind:"PackageNamespace" j
     let to_json = simple_to_json to_value
   end
+module PackageOriginConfiguration =
+  struct
+    type nonrec t =
+      {
+      restrictions: PackageOriginRestrictions.t option
+        [@ocaml.doc
+          "A PackageOriginRestrictions object that contains information about the upstream and publish package origin configuration for the package."]}
+    let make ?restrictions = fun () -> { restrictions }
+    let to_value x =
+      structure_to_value
+        [("restrictions",
+           (Option.map x.restrictions ~f:PackageOriginRestrictions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restrictions =
+        (Option.map ~f:PackageOriginRestrictions.of_xml)
+          (Xml.child xml_arg0 "restrictions") in
+      make ?restrictions ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restrictions =
+        field_map json__ "restrictions" PackageOriginRestrictions.of_json in
+      make ?restrictions ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about the package origin configuration of a package."]
 module PackageVersion =
   struct
     type nonrec t = string
@@ -507,7 +1038,7 @@ module PackageVersion =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:255) >>=
-                  (fun () -> check_pattern i ~pattern:"[^!#/\\s]+")));
+                  (fun () -> check_pattern i ~pattern:"[^#/\\s]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -517,6 +1048,43 @@ module PackageVersion =
     let of_json j = string_of_json ~kind:"PackageVersion" j
     let to_json = simple_to_json to_value
   end
+module PackageVersionOrigin =
+  struct
+    type nonrec t =
+      {
+      domainEntryPoint: DomainEntryPoint.t option
+        [@ocaml.doc
+          "A DomainEntryPoint object that contains information about from which repository or external connection the package version was added to the domain."];
+      originType: PackageVersionOriginType.t option
+        [@ocaml.doc
+          "Describes how the package version was originally added to the domain. An INTERNAL origin type means the package version was published directly to a repository in the domain. An EXTERNAL origin type means the package version was ingested from an external connection."]}
+    let make ?domainEntryPoint =
+      fun ?originType -> fun () -> { domainEntryPoint; originType }
+    let to_value x =
+      structure_to_value
+        [("domainEntryPoint",
+           (Option.map x.domainEntryPoint ~f:DomainEntryPoint.to_value));
+        ("originType",
+          (Option.map x.originType ~f:PackageVersionOriginType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originType =
+        (Option.map ~f:PackageVersionOriginType.of_xml)
+          (Xml.child xml_arg0 "originType") in
+      let domainEntryPoint =
+        (Option.map ~f:DomainEntryPoint.of_xml)
+          (Xml.child xml_arg0 "domainEntryPoint") in
+      make ?originType ?domainEntryPoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originType =
+        field_map json__ "originType" PackageVersionOriginType.of_json in
+      let domainEntryPoint =
+        field_map json__ "domainEntryPoint" DomainEntryPoint.of_json in
+      make ?originType ?domainEntryPoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about how a package version was added to a repository."]
 module PackageVersionRevision =
   struct
     type nonrec t = string
@@ -558,6 +1126,8 @@ module AssetHashes =
                     (fun x -> (HashValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -585,19 +1155,6 @@ module AssetName =
     let of_json j = string_of_json ~kind:"AssetName" j
     let to_json = simple_to_json to_value
   end
-module LongOptional =
-  struct
-    type nonrec t = Int64.t
-    let make i = i
-    let of_string = Int64.of_string
-    let to_value x = `Long x
-    let to_query v = to_query to_value v
-    let to_header x = Int64.to_string x
-    let of_xml xml_arg0 =
-      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
-    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
-    let to_json = simple_to_json to_value
-  end
 module DomainStatus =
   struct
     type nonrec t =
@@ -623,16 +1180,26 @@ module DomainStatus =
     let of_json j = of_string (string_of_json ~kind:"DomainStatus" j)
     let to_json = simple_to_json to_value
   end
-module Timestamp =
+module PackageGroupAssociationType =
   struct
-    type nonrec t = string
+    type nonrec t =
+      | STRONG 
+      | WEAK 
+      | Non_static_id of string 
     let make i = i
-    let of_string x = x
-    let to_value x = `Timestamp x
+    let to_string =
+      function | STRONG -> "STRONG" | WEAK -> "WEAK" | Non_static_id s -> s
+    let of_string =
+      function | "STRONG" -> STRONG | "WEAK" -> WEAK | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = string_of_xml ~kind:"a timestamp"
-    let of_json = timestamp_of_json
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PackageGroupAssociationType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PackageGroupAssociationType" j)
     let to_json = simple_to_json to_value
   end
 module LicenseInfo =
@@ -652,9 +1219,10 @@ module LicenseInfo =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
       make ?url ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "url" String_.of_json in
-      let name = field_map json "name" String_.of_json in make ?url ?name ()
+    let of_json json__ =
+      let url = field_map json__ "url" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      make ?url ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of the license data."]
 module ResourceType =
@@ -695,6 +1263,9 @@ module RepositoryExternalConnectionInfoList =
   struct
     type nonrec t = RepositoryExternalConnectionInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositoryExternalConnectionInfo.to_value)) |>
         (fun x -> `List x)
@@ -722,6 +1293,9 @@ module UpstreamRepositoryInfoList =
   struct
     type nonrec t = UpstreamRepositoryInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpstreamRepositoryInfo.to_value)) |>
         (fun x -> `List x)
@@ -813,9 +1387,9 @@ module UpstreamRepository =
           (Xml.child_exn ~context:context_ xml_arg0 "repositoryName") in
       make ~repositoryName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryName =
-        field_map_exn json "repositoryName" RepositoryName.of_json in
+        field_map_exn json__ "repositoryName" RepositoryName.of_json in
       make ~repositoryName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -847,13 +1421,13 @@ module PackageVersionError =
           (Xml.child xml_arg0 "errorCode") in
       make ?errorMessage ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "errorMessage" ErrorMessage.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "errorMessage" ErrorMessage.of_json in
       let errorCode =
-        field_map json "errorCode" PackageVersionErrorCode.of_json in
+        field_map json__ "errorCode" PackageVersionErrorCode.of_json in
       make ?errorMessage ?errorCode ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "An error associated with package."]
+  end[@@ocaml.doc "l An error associated with package."]
 module SuccessfulPackageVersionInfo =
   struct
     type nonrec t =
@@ -861,8 +1435,7 @@ module SuccessfulPackageVersionInfo =
       revision: String_.t option
         [@ocaml.doc "The revision of a package version."];
       status: PackageVersionStatus.t option
-        [@ocaml.doc
-          "The status of a package version. Valid statuses are: Published Unfinished Unlisted Archived Disposed"]}
+        [@ocaml.doc "The status of a package version."]}
     let make ?revision = fun ?status -> fun () -> { revision; status }
     let to_value x =
       structure_to_value
@@ -877,12 +1450,86 @@ module SuccessfulPackageVersionInfo =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revision") in
       make ?status ?revision ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" PackageVersionStatus.of_json in
-      let revision = field_map json "revision" String_.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" PackageVersionStatus.of_json in
+      let revision = field_map json__ "revision" String_.of_json in
       make ?status ?revision ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains the revision and status of a package version."]
+module PackageGroupAllowedRepositoryUpdate =
+  struct
+    type nonrec t =
+      (PackageGroupAllowedRepositoryUpdateType.t * RepositoryNameList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types PackageGroupAllowedRepositoryUpdateType RepositoryNameList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PackageGroupAllowedRepositoryUpdateType.to_value x) |>
+                    (fun x ->
+                       (RepositoryNameList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:PackageGroupAllowedRepositoryUpdateType.of_string
+        ~of_json:RepositoryNameList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PackageGroupAllowedRepository =
+  struct
+    type nonrec t =
+      {
+      repositoryName: RepositoryName.t option
+        [@ocaml.doc "The name of the allowed repository."];
+      originRestrictionType: PackageGroupOriginRestrictionType.t option
+        [@ocaml.doc
+          "The origin configuration restriction type of the allowed repository."]}
+    let make ?repositoryName =
+      fun ?originRestrictionType ->
+        fun () -> { repositoryName; originRestrictionType }
+    let to_value x =
+      structure_to_value
+        [("repositoryName",
+           (Option.map x.repositoryName ~f:RepositoryName.to_value));
+        ("originRestrictionType",
+          (Option.map x.originRestrictionType
+             ~f:PackageGroupOriginRestrictionType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originRestrictionType =
+        (Option.map ~f:PackageGroupOriginRestrictionType.of_xml)
+          (Xml.child xml_arg0 "originRestrictionType") in
+      let repositoryName =
+        (Option.map ~f:RepositoryName.of_xml)
+          (Xml.child xml_arg0 "repositoryName") in
+      make ?originRestrictionType ?repositoryName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originRestrictionType =
+        field_map json__ "originRestrictionType"
+          PackageGroupOriginRestrictionType.of_json in
+      let repositoryName =
+        field_map json__ "repositoryName" RepositoryName.of_json in
+      make ?originRestrictionType ?repositoryName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Details about an allowed repository for a package group, including its name and origin configuration."]
 module Tag =
   struct
     type nonrec t =
@@ -903,13 +1550,13 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "value" TagValue.of_json in
-      let key = field_map_exn json "key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "value" TagValue.of_json in
+      let key = field_map_exn json__ "key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A tag is a key-value pair that can be used to manage, search for, or filter resources in AWS CodeArtifact."]
+       "A tag is a key-value pair that can be used to manage, search for, or filter resources in CodeArtifact."]
 module PolicyDocument =
   struct
     type nonrec t = string
@@ -917,8 +1564,10 @@ module PolicyDocument =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_max i ~max:5120) >>=
-             (fun () -> check_string_min i ~min:1));
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:7168) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\P{C}\\s]+")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -948,6 +1597,109 @@ module PolicyRevision =
     let of_json j = string_of_json ~kind:"PolicyRevision" j
     let to_json = simple_to_json to_value
   end
+module PackageGroupSummary =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option [@ocaml.doc "The ARN of the package group."];
+      pattern: PackageGroupPattern.t option
+        [@ocaml.doc
+          "The pattern of the package group. The pattern determines which packages are associated with the package group."];
+      domainName: DomainName.t option
+        [@ocaml.doc "The domain that contains the package group."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp that represents the date and time the repository was created."];
+      contactInfo: PackageGroupContactInfo.t option
+        [@ocaml.doc "The contact information of the package group."];
+      description: Description.t option
+        [@ocaml.doc "The description of the package group."];
+      originConfiguration: PackageGroupOriginConfiguration.t option
+        [@ocaml.doc
+          "Details about the package origin configuration of a package group."];
+      parent: PackageGroupReference.t option
+        [@ocaml.doc "The direct parent package group of the package group."]}
+    let make ?arn =
+      fun ?pattern ->
+        fun ?domainName ->
+          fun ?domainOwner ->
+            fun ?createdTime ->
+              fun ?contactInfo ->
+                fun ?description ->
+                  fun ?originConfiguration ->
+                    fun ?parent ->
+                      fun () ->
+                        {
+                          arn;
+                          pattern;
+                          domainName;
+                          domainOwner;
+                          createdTime;
+                          contactInfo;
+                          description;
+                          originConfiguration;
+                          parent
+                        }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("pattern", (Option.map x.pattern ~f:PackageGroupPattern.to_value));
+        ("domainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("domainOwner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("createdTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("contactInfo",
+          (Option.map x.contactInfo ~f:PackageGroupContactInfo.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("originConfiguration",
+          (Option.map x.originConfiguration
+             ~f:PackageGroupOriginConfiguration.to_value));
+        ("parent", (Option.map x.parent ~f:PackageGroupReference.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parent =
+        (Option.map ~f:PackageGroupReference.of_xml)
+          (Xml.child xml_arg0 "parent") in
+      let originConfiguration =
+        (Option.map ~f:PackageGroupOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConfiguration") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let contactInfo =
+        (Option.map ~f:PackageGroupContactInfo.of_xml)
+          (Xml.child xml_arg0 "contactInfo") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdTime") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domainOwner") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
+      let pattern =
+        (Option.map ~f:PackageGroupPattern.of_xml)
+          (Xml.child xml_arg0 "pattern") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?parent ?originConfiguration ?description ?contactInfo
+        ?createdTime ?domainOwner ?domainName ?pattern ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parent = field_map json__ "parent" PackageGroupReference.of_json in
+      let originConfiguration =
+        field_map json__ "originConfiguration"
+          PackageGroupOriginConfiguration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let contactInfo =
+        field_map json__ "contactInfo" PackageGroupContactInfo.of_json in
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
+      let pattern = field_map json__ "pattern" PackageGroupPattern.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?parent ?originConfiguration ?description ?contactInfo
+        ?createdTime ?domainOwner ?domainName ?pattern ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a package group."]
 module RepositorySummary =
   struct
     type nonrec t =
@@ -955,30 +1707,36 @@ module RepositorySummary =
       name: RepositoryName.t option
         [@ocaml.doc "The name of the repository."];
       administratorAccount: AccountId.t option
-        [@ocaml.doc "The AWS account ID that manages the repository."];
+        [@ocaml.doc
+          "The Amazon Web Services account ID that manages the repository."];
       domainName: DomainName.t option
         [@ocaml.doc "The name of the domain that contains the repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       arn: Arn.t option [@ocaml.doc "The ARN of the repository."];
       description: Description.t option
-        [@ocaml.doc "The description of the repository."]}
+        [@ocaml.doc "The description of the repository."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp that represents the date and time the repository was created."]}
     let make ?name =
       fun ?administratorAccount ->
         fun ?domainName ->
           fun ?domainOwner ->
             fun ?arn ->
               fun ?description ->
-                fun () ->
-                  {
-                    name;
-                    administratorAccount;
-                    domainName;
-                    domainOwner;
-                    arn;
-                    description
-                  }
+                fun ?createdTime ->
+                  fun () ->
+                    {
+                      name;
+                      administratorAccount;
+                      domainName;
+                      domainOwner;
+                      arn;
+                      description;
+                      createdTime
+                    }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:RepositoryName.to_value));
@@ -987,9 +1745,12 @@ module RepositorySummary =
         ("domainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("domainOwner", (Option.map x.domainOwner ~f:AccountId.to_value));
         ("arn", (Option.map x.arn ~f:Arn.to_value));
-        ("description", (Option.map x.description ~f:Description.to_value))]
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("createdTime", (Option.map x.createdTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdTime") in
       let description =
         (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
       let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
@@ -1002,19 +1763,20 @@ module RepositorySummary =
           (Xml.child xml_arg0 "administratorAccount") in
       let name =
         (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?description ?arn ?domainOwner ?domainName ?administratorAccount
-        ?name ()
+      make ?createdTime ?description ?arn ?domainOwner ?domainName
+        ?administratorAccount ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let description = field_map json "description" Description.of_json in
-      let arn = field_map json "arn" Arn.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domainName = field_map json "domainName" DomainName.of_json in
+    let of_json json__ =
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       let administratorAccount =
-        field_map json "administratorAccount" AccountId.of_json in
-      let name = field_map json "name" RepositoryName.of_json in
-      make ?description ?arn ?domainOwner ?domainName ?administratorAccount
-        ?name ()
+        field_map json__ "administratorAccount" AccountId.of_json in
+      let name = field_map json__ "name" RepositoryName.of_json in
+      make ?createdTime ?description ?arn ?domainOwner ?domainName
+        ?administratorAccount ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about a repository, including its Amazon Resource Name (ARN), description, and domain information. The ListRepositories operation returns a list of RepositorySummary objects."]
@@ -1023,22 +1785,32 @@ module PackageSummary =
     type nonrec t =
       {
       format: PackageFormat.t option
-        [@ocaml.doc
-          "The format of the package. Valid values are: npm pypi maven"];
+        [@ocaml.doc "The format of the package."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
-      package: PackageName.t option [@ocaml.doc "The name of the package."]}
+          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t option [@ocaml.doc "The name of the package."];
+      originConfiguration: PackageOriginConfiguration.t option
+        [@ocaml.doc
+          "A PackageOriginConfiguration object that contains a PackageOriginRestrictions object that contains information about the upstream and publish package origin restrictions."]}
     let make ?format =
       fun ?namespace ->
-        fun ?package -> fun () -> { format; namespace; package }
+        fun ?package ->
+          fun ?originConfiguration ->
+            fun () -> { format; namespace; package; originConfiguration }
     let to_value x =
       structure_to_value
         [("format", (Option.map x.format ~f:PackageFormat.to_value));
         ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
-        ("package", (Option.map x.package ~f:PackageName.to_value))]
+        ("package", (Option.map x.package ~f:PackageName.to_value));
+        ("originConfiguration",
+          (Option.map x.originConfiguration
+             ~f:PackageOriginConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let originConfiguration =
+        (Option.map ~f:PackageOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConfiguration") in
       let package =
         (Option.map ~f:PackageName.of_xml) (Xml.child xml_arg0 "package") in
       let namespace =
@@ -1046,54 +1818,66 @@ module PackageSummary =
           (Xml.child xml_arg0 "namespace") in
       let format =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
-      make ?package ?namespace ?format ()
+      make ?originConfiguration ?package ?namespace ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
-      make ?package ?namespace ?format ()
+    let of_json json__ =
+      let originConfiguration =
+        field_map json__ "originConfiguration"
+          PackageOriginConfiguration.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      make ?originConfiguration ?package ?namespace ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details about a package, including its format, namespace, and name. The ListPackages operation returns a list of PackageSummary objects."]
+       "Details about a package, including its format, namespace, and name."]
 module PackageVersionSummary =
   struct
     type nonrec t =
       {
-      version: PackageVersion.t
+      version: PackageVersion.t option
         [@ocaml.doc "Information about a package version."];
       revision: PackageVersionRevision.t option
         [@ocaml.doc "The revision associated with a package version."];
-      status: PackageVersionStatus.t
+      status: PackageVersionStatus.t option
         [@ocaml.doc
-          "A string that contains the status of the package version. It can be one of the following: Published Unfinished Unlisted Archived Disposed"]}
-    let context_ = "PackageVersionSummary"
-    let make ?revision =
-      fun ~version -> fun ~status -> fun () -> { revision; version; status }
+          "A string that contains the status of the package version. It can be one of the following:"];
+      origin: PackageVersionOrigin.t option
+        [@ocaml.doc
+          "A PackageVersionOrigin object that contains information about how the package version was added to the repository."]}
+    let make ?version =
+      fun ?revision ->
+        fun ?status ->
+          fun ?origin -> fun () -> { version; revision; status; origin }
     let to_value x =
       structure_to_value
-        [("version", (Some (PackageVersion.to_value x.version)));
+        [("version", (Option.map x.version ~f:PackageVersion.to_value));
         ("revision",
           (Option.map x.revision ~f:PackageVersionRevision.to_value));
-        ("status", (Some (PackageVersionStatus.to_value x.status)))]
+        ("status", (Option.map x.status ~f:PackageVersionStatus.to_value));
+        ("origin", (Option.map x.origin ~f:PackageVersionOrigin.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let origin =
+        (Option.map ~f:PackageVersionOrigin.of_xml)
+          (Xml.child xml_arg0 "origin") in
       let status =
-        PackageVersionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:PackageVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
       let revision =
         (Option.map ~f:PackageVersionRevision.of_xml)
           (Xml.child xml_arg0 "revision") in
       let version =
-        PackageVersion.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "version") in
-      make ~status ?revision ~version ()
+        (Option.map ~f:PackageVersion.of_xml) (Xml.child xml_arg0 "version") in
+      make ?origin ?status ?revision ?version ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "status" PackageVersionStatus.of_json in
-      let revision = field_map json "revision" PackageVersionRevision.of_json in
-      let version = field_map_exn json "version" PackageVersion.of_json in
-      make ~status ?revision ~version ()
+    let of_json json__ =
+      let origin = field_map json__ "origin" PackageVersionOrigin.of_json in
+      let status = field_map json__ "status" PackageVersionStatus.of_json in
+      let revision =
+        field_map json__ "revision" PackageVersionRevision.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      make ?origin ?status ?revision ?version ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about a package version, including its status, version, and revision. The ListPackageVersions operation returns a list of PackageVersionSummary objects."]
@@ -1103,12 +1887,12 @@ module PackageDependency =
       {
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package that this package depends on. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t option
         [@ocaml.doc "The name of the package that this package depends on."];
       dependencyType: String_.t option
         [@ocaml.doc
-          "The type of a package dependency. The possible values depend on the package type. Example types are compile, runtime, and test for Maven packages, and dev, prod, and optional for npm packages."];
+          "The type of a package dependency. The possible values depend on the package type. npm: regular, dev, peer, optional maven: optional, parent, compile, runtime, test, system, provided. Note that parent is not a regular Maven dependency type; instead this is extracted from the <parent> element if one is defined in the package version's POM file. nuget: The dependencyType field is never set for NuGet packages. pypi: Requires-Dist"];
       versionRequirement: String_.t option
         [@ocaml.doc
           "The required version, or version range, of the package that this package depends on. The version format is specific to the package type. For example, the following are possible valid required versions: 1.2.3, ^2.3.4, or 4.x."]}
@@ -1139,12 +1923,12 @@ module PackageDependency =
           (Xml.child xml_arg0 "namespace") in
       make ?versionRequirement ?dependencyType ?package ?namespace ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let versionRequirement =
-        field_map json "versionRequirement" String_.of_json in
-      let dependencyType = field_map json "dependencyType" String_.of_json in
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
+        field_map json__ "versionRequirement" String_.of_json in
+      let dependencyType = field_map json__ "dependencyType" String_.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
       make ?versionRequirement ?dependencyType ?package ?namespace ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a package dependency."]
@@ -1152,15 +1936,14 @@ module AssetSummary =
   struct
     type nonrec t =
       {
-      name: AssetName.t [@ocaml.doc "The name of the asset."];
+      name: AssetName.t option [@ocaml.doc "The name of the asset."];
       size: LongOptional.t option [@ocaml.doc "The size of the asset."];
       hashes: AssetHashes.t option [@ocaml.doc "The hashes of the asset."]}
-    let context_ = "AssetSummary"
-    let make ?size =
-      fun ?hashes -> fun ~name -> fun () -> { size; hashes; name }
+    let make ?name =
+      fun ?size -> fun ?hashes -> fun () -> { name; size; hashes }
     let to_value x =
       structure_to_value
-        [("name", (Some (AssetName.to_value x.name)));
+        [("name", (Option.map x.name ~f:AssetName.to_value));
         ("size", (Option.map x.size ~f:LongOptional.to_value));
         ("hashes", (Option.map x.hashes ~f:AssetHashes.to_value))]
     let to_query v = to_query to_value v
@@ -1169,15 +1952,14 @@ module AssetSummary =
         (Option.map ~f:AssetHashes.of_xml) (Xml.child xml_arg0 "hashes") in
       let size =
         (Option.map ~f:LongOptional.of_xml) (Xml.child xml_arg0 "size") in
-      let name =
-        AssetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      make ?hashes ?size ~name ()
+      let name = (Option.map ~f:AssetName.of_xml) (Xml.child xml_arg0 "name") in
+      make ?hashes ?size ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let hashes = field_map json "hashes" AssetHashes.of_json in
-      let size = field_map json "size" LongOptional.of_json in
-      let name = field_map_exn json "name" AssetName.of_json in
-      make ?hashes ?size ~name ()
+    let of_json json__ =
+      let hashes = field_map json__ "hashes" AssetHashes.of_json in
+      let size = field_map json__ "size" LongOptional.of_json in
+      let name = field_map json__ "name" AssetName.of_json in
+      make ?hashes ?size ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Contains details about a package version asset."]
 module DomainSummary =
@@ -1187,11 +1969,10 @@ module DomainSummary =
       name: DomainName.t option [@ocaml.doc "The name of the domain."];
       owner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       arn: Arn.t option [@ocaml.doc "The ARN of the domain."];
       status: DomainStatus.t option
-        [@ocaml.doc
-          "A string that contains the status of the domain. The valid values are: Active Deleted"];
+        [@ocaml.doc "A string that contains the status of the domain."];
       createdTime: Timestamp.t option
         [@ocaml.doc
           "A timestamp that contains the date and time the domain was created."];
@@ -1228,21 +2009,76 @@ module DomainSummary =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "name") in
       make ?encryptionKey ?createdTime ?status ?arn ?owner ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let createdTime = field_map json "createdTime" Timestamp.of_json in
-      let status = field_map json "status" DomainStatus.of_json in
-      let arn = field_map json "arn" Arn.of_json in
-      let owner = field_map json "owner" AccountId.of_json in
-      let name = field_map json "name" DomainName.of_json in
+    let of_json json__ =
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let status = field_map json__ "status" DomainStatus.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let owner = field_map json__ "owner" AccountId.of_json in
+      let name = field_map json__ "name" DomainName.of_json in
       make ?encryptionKey ?createdTime ?status ?arn ?owner ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a domain, including its name, Amazon Resource Name (ARN), and status. The ListDomains operation returns a list of DomainSummary objects."]
+module AssociatedPackage =
+  struct
+    type nonrec t =
+      {
+      format: PackageFormat.t option
+        [@ocaml.doc
+          "A format that specifies the type of the associated package."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the associated package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t option
+        [@ocaml.doc "The name of the associated package."];
+      associationType: PackageGroupAssociationType.t option
+        [@ocaml.doc
+          "Describes the strength of the association between the package and package group. A strong match can be thought of as an exact match, and a weak match can be thought of as a variation match, for example, the package name matches a variation of the package group pattern. For more information about package group pattern matching, including strong and weak matches, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]}
+    let make ?format =
+      fun ?namespace ->
+        fun ?package ->
+          fun ?associationType ->
+            fun () -> { format; namespace; package; associationType }
+    let to_value x =
+      structure_to_value
+        [("format", (Option.map x.format ~f:PackageFormat.to_value));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Option.map x.package ~f:PackageName.to_value));
+        ("associationType",
+          (Option.map x.associationType
+             ~f:PackageGroupAssociationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associationType =
+        (Option.map ~f:PackageGroupAssociationType.of_xml)
+          (Xml.child xml_arg0 "associationType") in
+      let package =
+        (Option.map ~f:PackageName.of_xml) (Xml.child xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
+      make ?associationType ?package ?namespace ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associationType =
+        field_map json__ "associationType"
+          PackageGroupAssociationType.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      make ?associationType ?package ?namespace ?format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "A package associated with a package group."]
 module LicenseInfoList =
   struct
     type nonrec t = LicenseInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LicenseInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1310,20 +2146,20 @@ module Long =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because of an unauthorized access attempt."]
@@ -1331,17 +2167,16 @@ module ConflictException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
       resourceType: ResourceType.t option
-        [@ocaml.doc "The type of AWS resource."]}
-    let context_ = "ConflictException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message -> fun () -> { resourceId; resourceType; message }
+        [@ocaml.doc "The type of Amazon Web Services resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("resourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value))]
@@ -1353,37 +2188,37 @@ module ConflictException =
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because prerequisites are not met."]
 module InternalServerException =
   struct
     type nonrec t = {
-      message: String_.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: String_.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
-      structure_to_value [("message", (Some (String_.to_value x.message)))]
+      structure_to_value
+        [("message", (Option.map x.message ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "message" String_.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "message" String_.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The operation did not succeed because of an error that occurred inside AWS CodeArtifact."]
+       "The operation did not succeed because of an error that occurred inside CodeArtifact."]
 module RepositoryDescription =
   struct
     type nonrec t =
@@ -1392,22 +2227,25 @@ module RepositoryDescription =
         [@ocaml.doc "The name of the repository."];
       administratorAccount: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that manages the repository."];
+          "The 12-digit account number of the Amazon Web Services account that manages the repository."];
       domainName: DomainName.t option
         [@ocaml.doc "The name of the domain that contains the repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain that contains the repository. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain that contains the repository. It does not include dashes or spaces."];
       arn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the repository."];
       description: Description.t option
         [@ocaml.doc "A text description of the repository."];
       upstreams: UpstreamRepositoryInfoList.t option
         [@ocaml.doc
-          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when AWS CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."];
+          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."];
       externalConnections: RepositoryExternalConnectionInfoList.t option
         [@ocaml.doc
-          "An array of external connections associated with the repository."]}
+          "An array of external connections associated with the repository."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp that represents the date and time the repository was created."]}
     let make ?name =
       fun ?administratorAccount ->
         fun ?domainName ->
@@ -1416,17 +2254,19 @@ module RepositoryDescription =
               fun ?description ->
                 fun ?upstreams ->
                   fun ?externalConnections ->
-                    fun () ->
-                      {
-                        name;
-                        administratorAccount;
-                        domainName;
-                        domainOwner;
-                        arn;
-                        description;
-                        upstreams;
-                        externalConnections
-                      }
+                    fun ?createdTime ->
+                      fun () ->
+                        {
+                          name;
+                          administratorAccount;
+                          domainName;
+                          domainOwner;
+                          arn;
+                          description;
+                          upstreams;
+                          externalConnections;
+                          createdTime
+                        }
     let to_value x =
       structure_to_value
         [("name", (Option.map x.name ~f:RepositoryName.to_value));
@@ -1440,9 +2280,12 @@ module RepositoryDescription =
           (Option.map x.upstreams ~f:UpstreamRepositoryInfoList.to_value));
         ("externalConnections",
           (Option.map x.externalConnections
-             ~f:RepositoryExternalConnectionInfoList.to_value))]
+             ~f:RepositoryExternalConnectionInfoList.to_value));
+        ("createdTime", (Option.map x.createdTime ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdTime") in
       let externalConnections =
         (Option.map ~f:RepositoryExternalConnectionInfoList.of_xml)
           (Xml.child xml_arg0 "externalConnections") in
@@ -1461,42 +2304,42 @@ module RepositoryDescription =
           (Xml.child xml_arg0 "administratorAccount") in
       let name =
         (Option.map ~f:RepositoryName.of_xml) (Xml.child xml_arg0 "name") in
-      make ?externalConnections ?upstreams ?description ?arn ?domainOwner
-        ?domainName ?administratorAccount ?name ()
+      make ?createdTime ?externalConnections ?upstreams ?description ?arn
+        ?domainOwner ?domainName ?administratorAccount ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
       let externalConnections =
-        field_map json "externalConnections"
+        field_map json__ "externalConnections"
           RepositoryExternalConnectionInfoList.of_json in
       let upstreams =
-        field_map json "upstreams" UpstreamRepositoryInfoList.of_json in
-      let description = field_map json "description" Description.of_json in
-      let arn = field_map json "arn" Arn.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domainName = field_map json "domainName" DomainName.of_json in
+        field_map json__ "upstreams" UpstreamRepositoryInfoList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       let administratorAccount =
-        field_map json "administratorAccount" AccountId.of_json in
-      let name = field_map json "name" RepositoryName.of_json in
-      make ?externalConnections ?upstreams ?description ?arn ?domainOwner
-        ?domainName ?administratorAccount ?name ()
+        field_map json__ "administratorAccount" AccountId.of_json in
+      let name = field_map json__ "name" RepositoryName.of_json in
+      make ?createdTime ?externalConnections ?upstreams ?description ?arn
+        ?domainOwner ?domainName ?administratorAccount ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The details of a repository stored in AWS CodeArtifact. A CodeArtifact repository contains a set of package versions, each of which maps to a set of assets. Repositories are polyglot\226\128\148a single repository can contain packages of any supported type. Each repository exposes endpoints for fetching and publishing packages using tools like the npm CLI, the Maven CLI (mvn), and pip. You can create up to 100 repositories per AWS account."]
+       "The details of a repository stored in CodeArtifact. A CodeArtifact repository contains a set of package versions, each of which maps to a set of assets. Repositories are polyglot\226\128\148a single repository can contain packages of any supported type. Each repository exposes endpoints for fetching and publishing packages using tools like the npm CLI, the Maven CLI (mvn), and pip. You can create up to 100 repositories per Amazon Web Services account."]
 module ResourceNotFoundException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
       resourceType: ResourceType.t option
-        [@ocaml.doc "The type of AWS resource."]}
-    let context_ = "ResourceNotFoundException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message -> fun () -> { resourceId; resourceType; message }
+        [@ocaml.doc "The type of Amazon Web Services resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("resourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value))]
@@ -1508,14 +2351,14 @@ module ResourceNotFoundException =
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because the resource requested is not found in the service."]
@@ -1523,17 +2366,16 @@ module ServiceQuotaExceededException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       resourceId: String_.t option [@ocaml.doc "The ID of the resource."];
       resourceType: ResourceType.t option
-        [@ocaml.doc "The type of AWS resource."]}
-    let context_ = "ServiceQuotaExceededException"
-    let make ?resourceId =
-      fun ?resourceType ->
-        fun ~message -> fun () -> { resourceId; resourceType; message }
+        [@ocaml.doc "The type of Amazon Web Services resource."]}
+    let make ?message =
+      fun ?resourceId ->
+        fun ?resourceType -> fun () -> { message; resourceId; resourceType }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("resourceType",
           (Option.map x.resourceType ~f:ResourceType.to_value))]
@@ -1545,14 +2387,14 @@ module ServiceQuotaExceededException =
       let resourceId =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?resourceType ?resourceId ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?resourceType ?resourceId ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceType = field_map json "resourceType" ResourceType.of_json in
-      let resourceId = field_map json "resourceId" String_.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?resourceType ?resourceId ~message ()
+    let of_json json__ =
+      let resourceType = field_map json__ "resourceType" ResourceType.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?resourceType ?resourceId ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because it would have exceeded a service limit for your account."]
@@ -1560,16 +2402,15 @@ module ThrottlingException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       retryAfterSeconds: RetryAfterSeconds.t option
         [@ocaml.doc
           "The time period, in seconds, to wait before retrying the request."]}
-    let context_ = "ThrottlingException"
-    let make ?retryAfterSeconds =
-      fun ~message -> fun () -> { retryAfterSeconds; message }
+    let make ?message =
+      fun ?retryAfterSeconds -> fun () -> { message; retryAfterSeconds }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("Retry-After",
           (Option.map x.retryAfterSeconds ~f:RetryAfterSeconds.to_value))]
     let to_query v = to_query to_value v
@@ -1578,14 +2419,14 @@ module ThrottlingException =
         (Option.map ~f:RetryAfterSeconds.of_xml)
           (Xml.child xml_arg0 "Retry-After") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?retryAfterSeconds ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?retryAfterSeconds ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let retryAfterSeconds =
-        field_map json "retryAfterSeconds" RetryAfterSeconds.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?retryAfterSeconds ~message ()
+        field_map json__ "retryAfterSeconds" RetryAfterSeconds.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?retryAfterSeconds ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because too many requests are sent to the service."]
@@ -1593,13 +2434,12 @@ module ValidationException =
   struct
     type nonrec t =
       {
-      message: String_.t ;
+      message: String_.t option ;
       reason: ValidationExceptionReason.t option }
-    let context_ = "ValidationException"
-    let make ?reason = fun ~message -> fun () -> { reason; message }
+    let make ?message = fun ?reason -> fun () -> { message; reason }
     let to_value x =
       structure_to_value
-        [("message", (Some (String_.to_value x.message)));
+        [("message", (Option.map x.message ~f:String_.to_value));
         ("reason",
           (Option.map x.reason ~f:ValidationExceptionReason.to_value))]
     let to_query v = to_query to_value v
@@ -1608,13 +2448,14 @@ module ValidationException =
         (Option.map ~f:ValidationExceptionReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let message =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ?reason ~message ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "message") in
+      make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ValidationExceptionReason.of_json in
-      let message = field_map_exn json "message" String_.of_json in
-      make ?reason ~message ()
+    let of_json json__ =
+      let reason =
+        field_map json__ "reason" ValidationExceptionReason.of_json in
+      let message = field_map json__ "message" String_.of_json in
+      make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The operation did not succeed because a parameter in the request was sent with an invalid value."]
@@ -1622,6 +2463,9 @@ module UpstreamRepositoryList =
   struct
     type nonrec t = UpstreamRepository.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpstreamRepository.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1667,6 +2511,8 @@ module PackageVersionErrorMap =
                        (PackageVersionError.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1699,6 +2545,8 @@ module SuccessfulPackageVersionInfoMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1711,6 +2559,9 @@ module PackageVersionList =
     type nonrec t = PackageVersion.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageVersion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1755,11 +2606,219 @@ module PackageVersionRevisionMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:PackageVersion.of_string
         ~of_json:PackageVersionRevision.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PackageGroupDescription =
+  struct
+    type nonrec t =
+      {
+      arn: Arn.t option [@ocaml.doc "The ARN of the package group."];
+      pattern: PackageGroupPattern.t option
+        [@ocaml.doc
+          "The pattern of the package group. The pattern determines which packages are associated with the package group."];
+      domainName: DomainName.t option
+        [@ocaml.doc
+          "The name of the domain that contains the package group."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      createdTime: Timestamp.t option
+        [@ocaml.doc
+          "A timestamp that represents the date and time the package group was created."];
+      contactInfo: PackageGroupContactInfo.t option
+        [@ocaml.doc "The contact information of the package group."];
+      description: Description.t option
+        [@ocaml.doc "The description of the package group."];
+      originConfiguration: PackageGroupOriginConfiguration.t option
+        [@ocaml.doc
+          "The package group origin configuration that determines how package versions can enter repositories."];
+      parent: PackageGroupReference.t option
+        [@ocaml.doc "The direct parent package group of the package group."]}
+    let make ?arn =
+      fun ?pattern ->
+        fun ?domainName ->
+          fun ?domainOwner ->
+            fun ?createdTime ->
+              fun ?contactInfo ->
+                fun ?description ->
+                  fun ?originConfiguration ->
+                    fun ?parent ->
+                      fun () ->
+                        {
+                          arn;
+                          pattern;
+                          domainName;
+                          domainOwner;
+                          createdTime;
+                          contactInfo;
+                          description;
+                          originConfiguration;
+                          parent
+                        }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:Arn.to_value));
+        ("pattern", (Option.map x.pattern ~f:PackageGroupPattern.to_value));
+        ("domainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("domainOwner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("createdTime", (Option.map x.createdTime ~f:Timestamp.to_value));
+        ("contactInfo",
+          (Option.map x.contactInfo ~f:PackageGroupContactInfo.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("originConfiguration",
+          (Option.map x.originConfiguration
+             ~f:PackageGroupOriginConfiguration.to_value));
+        ("parent", (Option.map x.parent ~f:PackageGroupReference.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let parent =
+        (Option.map ~f:PackageGroupReference.of_xml)
+          (Xml.child xml_arg0 "parent") in
+      let originConfiguration =
+        (Option.map ~f:PackageGroupOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConfiguration") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let contactInfo =
+        (Option.map ~f:PackageGroupContactInfo.of_xml)
+          (Xml.child xml_arg0 "contactInfo") in
+      let createdTime =
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "createdTime") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domainOwner") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
+      let pattern =
+        (Option.map ~f:PackageGroupPattern.of_xml)
+          (Xml.child xml_arg0 "pattern") in
+      let arn = (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "arn") in
+      make ?parent ?originConfiguration ?description ?contactInfo
+        ?createdTime ?domainOwner ?domainName ?pattern ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let parent = field_map json__ "parent" PackageGroupReference.of_json in
+      let originConfiguration =
+        field_map json__ "originConfiguration"
+          PackageGroupOriginConfiguration.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let contactInfo =
+        field_map json__ "contactInfo" PackageGroupContactInfo.of_json in
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
+      let pattern = field_map json__ "pattern" PackageGroupPattern.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      make ?parent ?originConfiguration ?description ?contactInfo
+        ?createdTime ?domainOwner ?domainName ?pattern ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The description of the package group."]
+module PackageGroupAllowedRepositoryUpdates =
+  struct
+    type nonrec t =
+      (PackageGroupOriginRestrictionType.t *
+        PackageGroupAllowedRepositoryUpdate.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types PackageGroupOriginRestrictionType PackageGroupAllowedRepositoryUpdate"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PackageGroupOriginRestrictionType.to_value x) |>
+                    (fun x ->
+                       (PackageGroupAllowedRepositoryUpdate.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:PackageGroupOriginRestrictionType.of_string
+        ~of_json:PackageGroupAllowedRepositoryUpdate.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OriginRestrictions =
+  struct
+    type nonrec t =
+      (PackageGroupOriginRestrictionType.t *
+        PackageGroupOriginRestrictionMode.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((PackageGroupOriginRestrictionType.of_string
+                                chopped),
+                              (PackageGroupOriginRestrictionMode.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (PackageGroupOriginRestrictionType.to_value x) |>
+                    (fun x ->
+                       (PackageGroupOriginRestrictionMode.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json
+        ~key_of_string:PackageGroupOriginRestrictionType.of_string
+        ~of_json:PackageGroupOriginRestrictionMode.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PackageGroupAllowedRepositoryList =
+  struct
+    type nonrec t = PackageGroupAllowedRepository.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PackageGroupAllowedRepository.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PackageGroupAllowedRepository.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PackageGroupAllowedRepositoryList"
+        ~of_json:PackageGroupAllowedRepository.of_json j
     let to_json v = composed_to_json to_value v
   end
 module TagKeyList =
@@ -1771,6 +2830,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1799,6 +2861,9 @@ module TagList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1847,14 +2912,88 @@ module ResourcePolicy =
         (Option.map ~f:Arn.of_xml) (Xml.child xml_arg0 "resourceArn") in
       make ?document ?revision ?resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let document = field_map json "document" PolicyDocument.of_json in
-      let revision = field_map json "revision" PolicyRevision.of_json in
-      let resourceArn = field_map json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let document = field_map json__ "document" PolicyDocument.of_json in
+      let revision = field_map json__ "revision" PolicyRevision.of_json in
+      let resourceArn = field_map json__ "resourceArn" Arn.of_json in
       make ?document ?revision ?resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An AWS CodeArtifact resource policy that contains a resource ARN, document details, and a revision."]
+       "An CodeArtifact resource policy that contains a resource ARN, document details, and a revision."]
+module Asset =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module BooleanOptional =
+  struct
+    type nonrec t = bool
+    let make i = i
+    let of_string = Bool.of_string
+    let to_value x = `Boolean x
+    let to_query v = to_query to_value v
+    let to_header x = Bool.to_string x
+    let of_xml xml_arg0 =
+      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
+    let of_json = bool_of_json
+    let to_json = simple_to_json to_value
+  end
+module SHA256 =
+  struct
+    type nonrec t = string
+    let context_ = "SHA256"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:64) >>=
+             (fun () ->
+                (check_string_max i ~max:64) >>=
+                  (fun () -> check_pattern i ~pattern:"[0-9a-f]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SHA256" j
+    let to_json = simple_to_json to_value
+  end
+module PackageGroupSummaryList =
+  struct
+    type nonrec t = PackageGroupSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PackageGroupSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PackageGroupSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PackageGroupSummaryList"
+        ~of_json:PackageGroupSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PaginationToken =
   struct
     type nonrec t = string
@@ -1875,10 +3014,32 @@ module PaginationToken =
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
   end
+module ListPackageGroupsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListPackageGroupsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module RepositorySummaryList =
   struct
     type nonrec t = RepositorySummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RepositorySummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1942,6 +3103,9 @@ module PackageSummaryList =
   struct
     type nonrec t = PackageSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1985,6 +3149,9 @@ module PackageVersionSummaryList =
   struct
     type nonrec t = PackageVersionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageVersionSummary.to_value)) |>
         (fun x -> `List x)
@@ -2050,6 +3217,9 @@ module PackageDependencyList =
   struct
     type nonrec t = PackageDependency.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageDependency.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2075,6 +3245,9 @@ module AssetSummaryList =
   struct
     type nonrec t = AssetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AssetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2114,10 +3287,33 @@ module ListPackageVersionAssetsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module PackageGroupPatternPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "PackageGroupPatternPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:0) >>=
+             (fun () ->
+                (check_string_max i ~max:520) >>=
+                  (fun () -> check_pattern i ~pattern:"\\P{C}*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PackageGroupPatternPrefix" j
+    let to_json = simple_to_json to_value
+  end
 module DomainSummaryList =
   struct
     type nonrec t = DomainSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2156,16 +3352,77 @@ module ListDomainsMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
-module Asset =
+module AssociatedPackageList =
   struct
-    type nonrec t = string
+    type nonrec t = AssociatedPackage.t list
     let make i = i
-    let of_string x = x
-    let to_value x = `Blob x
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AssociatedPackage.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
-    let of_json j = string_of_json ~kind:"a blob" j
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AssociatedPackage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AssociatedPackageList"
+        ~of_json:AssociatedPackage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListAllowedRepositoriesForGroupMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:1000) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListAllowedRepositoriesForGroupMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module EndpointType =
+  struct
+    type nonrec t =
+      | Dualstack 
+      | Ipv4 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Dualstack -> "dualstack"
+      | Ipv4 -> "ipv4"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "dualstack" -> Dualstack
+      | "ipv4" -> Ipv4
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration EndpointType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"EndpointType" j)
     let to_json = simple_to_json to_value
   end
 module AuthorizationTokenDurationSeconds =
@@ -2191,11 +3448,10 @@ module PackageVersionDescription =
     type nonrec t =
       {
       format: PackageFormat.t option
-        [@ocaml.doc
-          "The format of the package version. The valid package formats are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+        [@ocaml.doc "The format of the package version."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       packageName: PackageName.t option
         [@ocaml.doc "The name of the requested package."];
       displayName: String255.t option
@@ -2221,7 +3477,10 @@ module PackageVersionDescription =
         [@ocaml.doc "The revision of the package version."];
       status: PackageVersionStatus.t option
         [@ocaml.doc
-          "A string that contains the status of the package version. It can be one of the following: Published Unfinished Unlisted Archived Disposed"]}
+          "A string that contains the status of the package version."];
+      origin: PackageVersionOrigin.t option
+        [@ocaml.doc
+          "A PackageVersionOrigin object that contains information about how the package version was added to the repository."]}
     let make ?format =
       fun ?namespace ->
         fun ?packageName ->
@@ -2234,21 +3493,23 @@ module PackageVersionDescription =
                       fun ?licenses ->
                         fun ?revision ->
                           fun ?status ->
-                            fun () ->
-                              {
-                                format;
-                                namespace;
-                                packageName;
-                                displayName;
-                                version;
-                                summary;
-                                homePage;
-                                sourceCodeRepository;
-                                publishedTime;
-                                licenses;
-                                revision;
-                                status
-                              }
+                            fun ?origin ->
+                              fun () ->
+                                {
+                                  format;
+                                  namespace;
+                                  packageName;
+                                  displayName;
+                                  version;
+                                  summary;
+                                  homePage;
+                                  sourceCodeRepository;
+                                  publishedTime;
+                                  licenses;
+                                  revision;
+                                  status;
+                                  origin
+                                }
     let to_value x =
       structure_to_value
         [("format", (Option.map x.format ~f:PackageFormat.to_value));
@@ -2264,9 +3525,13 @@ module PackageVersionDescription =
         ("licenses", (Option.map x.licenses ~f:LicenseInfoList.to_value));
         ("revision",
           (Option.map x.revision ~f:PackageVersionRevision.to_value));
-        ("status", (Option.map x.status ~f:PackageVersionStatus.to_value))]
+        ("status", (Option.map x.status ~f:PackageVersionStatus.to_value));
+        ("origin", (Option.map x.origin ~f:PackageVersionOrigin.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let origin =
+        (Option.map ~f:PackageVersionOrigin.of_xml)
+          (Xml.child xml_arg0 "origin") in
       let status =
         (Option.map ~f:PackageVersionStatus.of_xml)
           (Xml.child xml_arg0 "status") in
@@ -2296,47 +3561,98 @@ module PackageVersionDescription =
           (Xml.child xml_arg0 "namespace") in
       let format =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
-      make ?status ?revision ?licenses ?publishedTime ?sourceCodeRepository
-        ?homePage ?summary ?version ?displayName ?packageName ?namespace
-        ?format ()
+      make ?origin ?status ?revision ?licenses ?publishedTime
+        ?sourceCodeRepository ?homePage ?summary ?version ?displayName
+        ?packageName ?namespace ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" PackageVersionStatus.of_json in
-      let revision = field_map json "revision" PackageVersionRevision.of_json in
-      let licenses = field_map json "licenses" LicenseInfoList.of_json in
-      let publishedTime = field_map json "publishedTime" Timestamp.of_json in
+    let of_json json__ =
+      let origin = field_map json__ "origin" PackageVersionOrigin.of_json in
+      let status = field_map json__ "status" PackageVersionStatus.of_json in
+      let revision =
+        field_map json__ "revision" PackageVersionRevision.of_json in
+      let licenses = field_map json__ "licenses" LicenseInfoList.of_json in
+      let publishedTime = field_map json__ "publishedTime" Timestamp.of_json in
       let sourceCodeRepository =
-        field_map json "sourceCodeRepository" String_.of_json in
-      let homePage = field_map json "homePage" String_.of_json in
-      let summary = field_map json "summary" String_.of_json in
-      let version = field_map json "version" PackageVersion.of_json in
-      let displayName = field_map json "displayName" String255.of_json in
-      let packageName = field_map json "packageName" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
-      make ?status ?revision ?licenses ?publishedTime ?sourceCodeRepository
-        ?homePage ?summary ?version ?displayName ?packageName ?namespace
-        ?format ()
+        field_map json__ "sourceCodeRepository" String_.of_json in
+      let homePage = field_map json__ "homePage" String_.of_json in
+      let summary = field_map json__ "summary" String_.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      let displayName = field_map json__ "displayName" String255.of_json in
+      let packageName = field_map json__ "packageName" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      make ?origin ?status ?revision ?licenses ?publishedTime
+        ?sourceCodeRepository ?homePage ?summary ?version ?displayName
+        ?packageName ?namespace ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details about a package version."]
+module PackageDescription =
+  struct
+    type nonrec t =
+      {
+      format: PackageFormat.t option
+        [@ocaml.doc "A format that specifies the type of the package."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      name: PackageName.t option [@ocaml.doc "The name of the package."];
+      originConfiguration: PackageOriginConfiguration.t option
+        [@ocaml.doc "The package origin configuration for the package."]}
+    let make ?format =
+      fun ?namespace ->
+        fun ?name ->
+          fun ?originConfiguration ->
+            fun () -> { format; namespace; name; originConfiguration }
+    let to_value x =
+      structure_to_value
+        [("format", (Option.map x.format ~f:PackageFormat.to_value));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("name", (Option.map x.name ~f:PackageName.to_value));
+        ("originConfiguration",
+          (Option.map x.originConfiguration
+             ~f:PackageOriginConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originConfiguration =
+        (Option.map ~f:PackageOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConfiguration") in
+      let name =
+        (Option.map ~f:PackageName.of_xml) (Xml.child xml_arg0 "name") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
+      make ?originConfiguration ?name ?namespace ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originConfiguration =
+        field_map json__ "originConfiguration"
+          PackageOriginConfiguration.of_json in
+      let name = field_map json__ "name" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      make ?originConfiguration ?name ?namespace ?format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Details about a package."]
 module DomainDescription =
   struct
     type nonrec t =
       {
       name: DomainName.t option [@ocaml.doc "The name of the domain."];
       owner: AccountId.t option
-        [@ocaml.doc "The AWS account ID that owns the domain."];
+        [@ocaml.doc
+          "The Amazon Web Services account ID that owns the domain."];
       arn: Arn.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the domain."];
       status: DomainStatus.t option
-        [@ocaml.doc
-          "The current status of a domain. The valid values are Active Deleted"];
+        [@ocaml.doc "The current status of a domain."];
       createdTime: Timestamp.t option
         [@ocaml.doc
           "A timestamp that represents the date and time the domain was created."];
       encryptionKey: Arn.t option
         [@ocaml.doc
-          "The ARN of an AWS Key Management Service (AWS KMS) key associated with a domain."];
+          "The ARN of an Key Management Service (KMS) key associated with a domain."];
       repositoryCount: Integer.t option
         [@ocaml.doc "The number of repositories in the domain."];
       assetSizeBytes: Long.t option
@@ -2399,34 +3715,22 @@ module DomainDescription =
       make ?s3BucketArn ?assetSizeBytes ?repositoryCount ?encryptionKey
         ?createdTime ?status ?arn ?owner ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3BucketArn = field_map json "s3BucketArn" Arn.of_json in
-      let assetSizeBytes = field_map json "assetSizeBytes" Long.of_json in
-      let repositoryCount = field_map json "repositoryCount" Integer.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let createdTime = field_map json "createdTime" Timestamp.of_json in
-      let status = field_map json "status" DomainStatus.of_json in
-      let arn = field_map json "arn" Arn.of_json in
-      let owner = field_map json "owner" AccountId.of_json in
-      let name = field_map json "name" DomainName.of_json in
+    let of_json json__ =
+      let s3BucketArn = field_map json__ "s3BucketArn" Arn.of_json in
+      let assetSizeBytes = field_map json__ "assetSizeBytes" Long.of_json in
+      let repositoryCount =
+        field_map json__ "repositoryCount" Integer.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let createdTime = field_map json__ "createdTime" Timestamp.of_json in
+      let status = field_map json__ "status" DomainStatus.of_json in
+      let arn = field_map json__ "arn" Arn.of_json in
+      let owner = field_map json__ "owner" AccountId.of_json in
+      let name = field_map json__ "name" DomainName.of_json in
       make ?s3BucketArn ?assetSizeBytes ?repositoryCount ?encryptionKey
         ?createdTime ?status ?arn ?owner ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about a domain. A domain is a container for repositories. When you create a domain, it is empty until you add one or more repositories."]
-module BooleanOptional =
-  struct
-    type nonrec t = bool
-    let make i = i
-    let of_string = Bool.of_string
-    let to_value x = `Boolean x
-    let to_query v = to_query to_value v
-    let to_header x = Bool.to_string x
-    let of_xml xml_arg0 =
-      Bool.of_string (string_of_xml ~kind:"a boolean" xml_arg0)
-    let of_json = bool_of_json
-    let to_json = simple_to_json to_value
-  end
 module UpdateRepositoryResult =
   struct
     type nonrec t =
@@ -2528,9 +3832,9 @@ module UpdateRepositoryResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update the properties of a repository."]
@@ -2543,14 +3847,14 @@ module UpdateRepositoryRequest =
           "The name of the domain associated with the repository to update."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc "The name of the repository to update."];
       description: Description.t option
         [@ocaml.doc "An updated repository description."];
       upstreams: UpstreamRepositoryList.t option
         [@ocaml.doc
-          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when AWS CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."]}
+          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."]}
     let context_ = "UpdateRepositoryRequest"
     let make ?domainOwner =
       fun ?description ->
@@ -2583,13 +3887,14 @@ module UpdateRepositoryRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?upstreams ?description ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let upstreams =
-        field_map json "upstreams" UpstreamRepositoryList.of_json in
-      let description = field_map json "description" Description.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "upstreams" UpstreamRepositoryList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?upstreams ?description ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Update the properties of a repository."]
@@ -2694,15 +3999,16 @@ module UpdatePackageVersionsStatusResult =
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedVersions =
-        field_map json "failedVersions" PackageVersionErrorMap.of_json in
+        field_map json__ "failedVersions" PackageVersionErrorMap.of_json in
       let successfulVersions =
-        field_map json "successfulVersions"
+        field_map json__ "successfulVersions"
           SuccessfulPackageVersionInfoMap.of_json in
       make ?failedVersions ?successfulVersions ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the status of one or more versions of a package."]
+  end[@@ocaml.doc
+       "Updates the status of one or more versions of a package. Using UpdatePackageVersionsStatus, you can update the status of package versions to Archived, Published, or Unlisted. To set the status of a package version to Disposed, use DisposePackageVersions."]
 module UpdatePackageVersionsStatusRequest =
   struct
     type nonrec t =
@@ -2712,16 +4018,16 @@ module UpdatePackageVersionsStatusRequest =
           "The name of the domain that contains the repository that contains the package versions with a status to be updated."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The repository that contains the package versions with the status you want to update."];
       format: PackageFormat.t
         [@ocaml.doc
-          "A format that specifies the type of the package with the statuses to update. The valid values are: npm pypi maven"];
+          "A format that specifies the type of the package with the statuses to update."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version to be updated. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
           "The name of the package with the version statuses to update."];
@@ -2810,24 +4116,396 @@ module UpdatePackageVersionsStatusRequest =
       make ~targetStatus ?expectedStatus ?versionRevisions ~versions ~package
         ?namespace ~format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetStatus =
-        field_map_exn json "targetStatus" PackageVersionStatus.of_json in
+        field_map_exn json__ "targetStatus" PackageVersionStatus.of_json in
       let expectedStatus =
-        field_map json "expectedStatus" PackageVersionStatus.of_json in
+        field_map json__ "expectedStatus" PackageVersionStatus.of_json in
       let versionRevisions =
-        field_map json "versionRevisions" PackageVersionRevisionMap.of_json in
-      let versions = field_map_exn json "versions" PackageVersionList.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "versionRevisions" PackageVersionRevisionMap.of_json in
+      let versions =
+        field_map_exn json__ "versions" PackageVersionList.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~targetStatus ?expectedStatus ?versionRevisions ~versions ~package
         ?namespace ~format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Updates the status of one or more versions of a package."]
+  end[@@ocaml.doc
+       "Updates the status of one or more versions of a package. Using UpdatePackageVersionsStatus, you can update the status of package versions to Archived, Published, or Unlisted. To set the status of a package version to Disposed, use DisposePackageVersions."]
+module UpdatePackageGroupResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "The package group and information about it after the request has been processed."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup = fun () -> { packageGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a package group. This API cannot be used to update a package group's origin configuration or pattern. To update a package group's origin configuration, use UpdatePackageGroupOriginConfiguration."]
+module UpdatePackageGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain which contains the package group to be updated."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc "The pattern of the package group to be updated."];
+      contactInfo: PackageGroupContactInfo.t option
+        [@ocaml.doc
+          "Contact information which you want to update the requested package group with."];
+      description: Description.t option
+        [@ocaml.doc
+          "The description you want to update the requested package group with."]}
+    let context_ = "UpdatePackageGroupRequest"
+    let make ?domainOwner =
+      fun ?contactInfo ->
+        fun ?description ->
+          fun ~domain ->
+            fun ~packageGroup ->
+              fun () ->
+                { domainOwner; contactInfo; description; domain; packageGroup
+                }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("packageGroup",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("contactInfo",
+          (Option.map x.contactInfo ~f:PackageGroupContactInfo.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let contactInfo =
+        (Option.map ~f:PackageGroupContactInfo.of_xml)
+          (Xml.child xml_arg0 "contactInfo") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "packageGroup") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?description ?contactInfo ~packageGroup ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description = field_map json__ "description" Description.of_json in
+      let contactInfo =
+        field_map json__ "contactInfo" PackageGroupContactInfo.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?description ?contactInfo ~packageGroup ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates a package group. This API cannot be used to update a package group's origin configuration or pattern. To update a package group's origin configuration, use UpdatePackageGroupOriginConfiguration."]
+module UpdatePackageGroupOriginConfigurationResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "The package group and information about it after processing the request."];
+      allowedRepositoryUpdates: PackageGroupAllowedRepositoryUpdates.t option
+        [@ocaml.doc
+          "Information about the updated allowed repositories after processing the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup =
+      fun ?allowedRepositoryUpdates ->
+        fun () -> { packageGroup; allowedRepositoryUpdates }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value));
+        ("allowedRepositoryUpdates",
+          (Option.map x.allowedRepositoryUpdates
+             ~f:PackageGroupAllowedRepositoryUpdates.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allowedRepositoryUpdates =
+        (Option.map ~f:PackageGroupAllowedRepositoryUpdates.of_xml)
+          (Xml.child xml_arg0 "allowedRepositoryUpdates") in
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?allowedRepositoryUpdates ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allowedRepositoryUpdates =
+        field_map json__ "allowedRepositoryUpdates"
+          PackageGroupAllowedRepositoryUpdates.of_json in
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?allowedRepositoryUpdates ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the package origin configuration for a package group. The package origin configuration determines how new versions of a package can be added to a repository. You can allow or block direct publishing of new package versions, or ingestion and retaining of new package versions from an external connection or upstream source. For more information about package group origin controls and configuration, see Package group origin controls in the CodeArtifact User Guide."]
+module UpdatePackageGroupOriginConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain which contains the package group for which to update the origin configuration."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc
+          "The pattern of the package group for which to update the origin configuration."];
+      restrictions: OriginRestrictions.t option
+        [@ocaml.doc
+          "The origin configuration settings that determine how package versions can enter repositories."];
+      addAllowedRepositories: PackageGroupAllowedRepositoryList.t option
+        [@ocaml.doc
+          "The repository name and restrictions to add to the allowed repository list of the specified package group."];
+      removeAllowedRepositories: PackageGroupAllowedRepositoryList.t option
+        [@ocaml.doc
+          "The repository name and restrictions to remove from the allowed repository list of the specified package group."]}
+    let context_ = "UpdatePackageGroupOriginConfigurationRequest"
+    let make ?domainOwner =
+      fun ?restrictions ->
+        fun ?addAllowedRepositories ->
+          fun ?removeAllowedRepositories ->
+            fun ~domain ->
+              fun ~packageGroup ->
+                fun () ->
+                  {
+                    domainOwner;
+                    restrictions;
+                    addAllowedRepositories;
+                    removeAllowedRepositories;
+                    domain;
+                    packageGroup
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("restrictions",
+          (Option.map x.restrictions ~f:OriginRestrictions.to_value));
+        ("addAllowedRepositories",
+          (Option.map x.addAllowedRepositories
+             ~f:PackageGroupAllowedRepositoryList.to_value));
+        ("removeAllowedRepositories",
+          (Option.map x.removeAllowedRepositories
+             ~f:PackageGroupAllowedRepositoryList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let removeAllowedRepositories =
+        (Option.map ~f:PackageGroupAllowedRepositoryList.of_xml)
+          (Xml.child xml_arg0 "removeAllowedRepositories") in
+      let addAllowedRepositories =
+        (Option.map ~f:PackageGroupAllowedRepositoryList.of_xml)
+          (Xml.child xml_arg0 "addAllowedRepositories") in
+      let restrictions =
+        (Option.map ~f:OriginRestrictions.of_xml)
+          (Xml.child xml_arg0 "restrictions") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?removeAllowedRepositories ?addAllowedRepositories ?restrictions
+        ~packageGroup ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let removeAllowedRepositories =
+        field_map json__ "removeAllowedRepositories"
+          PackageGroupAllowedRepositoryList.of_json in
+      let addAllowedRepositories =
+        field_map json__ "addAllowedRepositories"
+          PackageGroupAllowedRepositoryList.of_json in
+      let restrictions =
+        field_map json__ "restrictions" OriginRestrictions.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?removeAllowedRepositories ?addAllowedRepositories ?restrictions
+        ~packageGroup ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the package origin configuration for a package group. The package origin configuration determines how new versions of a package can be added to a repository. You can allow or block direct publishing of new package versions, or ingestion and retaining of new package versions from an external connection or upstream source. For more information about package group origin controls and configuration, see Package group origin controls in the CodeArtifact User Guide."]
 module UntagResourceResult =
   struct
     type nonrec t = unit
@@ -2893,7 +4571,7 @@ module UntagResourceResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from a resource in AWS CodeArtifact."]
+  end[@@ocaml.doc "Removes tags from a resource in CodeArtifact."]
 module UntagResourceRequest =
   struct
     type nonrec t =
@@ -2920,12 +4598,12 @@ module UntagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Removes tags from a resource in AWS CodeArtifact."]
+  end[@@ocaml.doc "Removes tags from a resource in CodeArtifact."]
 module TagResourceResult =
   struct
     type nonrec t = unit
@@ -3002,7 +4680,7 @@ module TagResourceResult =
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds or updates tags for a resource in AWS CodeArtifact."]
+  end[@@ocaml.doc "Adds or updates tags for a resource in CodeArtifact."]
 module TagResourceRequest =
   struct
     type nonrec t =
@@ -3026,12 +4704,12 @@ module TagResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Adds or updates tags for a resource in AWS CodeArtifact."]
+  end[@@ocaml.doc "Adds or updates tags for a resource in CodeArtifact."]
 module PutRepositoryPermissionsPolicyResult =
   struct
     type nonrec t =
@@ -3132,8 +4810,8 @@ module PutRepositoryPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3147,7 +4825,7 @@ module PutRepositoryPermissionsPolicyRequest =
           "The name of the domain containing the repository to set the resource policy on."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository to set the resource policy on."];
@@ -3197,19 +4875,201 @@ module PutRepositoryPermissionsPolicyRequest =
       make ~policyDocument ?policyRevision ~repository ?domainOwner ~domain
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "policyDocument" PolicyDocument.of_json in
+        field_map_exn json__ "policyDocument" PolicyDocument.of_json in
       let policyRevision =
-        field_map json "policyRevision" PolicyRevision.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "policyRevision" PolicyRevision.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~policyDocument ?policyRevision ~repository ?domainOwner ~domain
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets the resource policy on a repository that specifies permissions to access it. When you call PutRepositoryPermissionsPolicy, the resource policy on the repository is ignored when evaluting permissions. This ensures that the owner of a repository cannot lock themselves out of the repository, which would prevent them from being able to update the resource policy."]
+module PutPackageOriginConfigurationResult =
+  struct
+    type nonrec t =
+      {
+      originConfiguration: PackageOriginConfiguration.t option
+        [@ocaml.doc
+          "A PackageOriginConfiguration object that describes the origin configuration set for the package. It contains a PackageOriginRestrictions object that describes how new versions of the package can be introduced to the repository."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?originConfiguration = fun () -> { originConfiguration }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("originConfiguration",
+           (Option.map x.originConfiguration
+              ~f:PackageOriginConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let originConfiguration =
+        (Option.map ~f:PackageOriginConfiguration.of_xml)
+          (Xml.child xml_arg0 "originConfiguration") in
+      make ?originConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let originConfiguration =
+        field_map json__ "originConfiguration"
+          PackageOriginConfiguration.of_json in
+      make ?originConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the package origin configuration for a package. The package origin configuration determines how new versions of a package can be added to a repository. You can allow or block direct publishing of new package versions, or ingestion and retaining of new package versions from an external connection or upstream source. For more information about package origin controls and configuration, see Editing package origin controls in the CodeArtifact User Guide. PutPackageOriginConfiguration can be called on a package that doesn't yet exist in the repository. When called on a package that does not exist, a package is created in the repository with no versions and the requested restrictions are set on the package. This can be used to preemptively block ingesting or retaining any versions from external connections or upstream repositories, or to block publishing any versions of the package into the repository before connecting any package managers or publishers to the repository."]
+module PutPackageOriginConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the repository that contains the package."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      repository: RepositoryName.t
+        [@ocaml.doc "The name of the repository that contains the package."];
+      format: PackageFormat.t
+        [@ocaml.doc
+          "A format that specifies the type of the package to be updated."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the package to be updated. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t
+        [@ocaml.doc "The name of the package to be updated."];
+      restrictions: PackageOriginRestrictions.t
+        [@ocaml.doc
+          "A PackageOriginRestrictions object that contains information about the upstream and publish package origin restrictions. The upstream restriction determines if new package versions can be ingested or retained from external connections or upstream repositories. The publish restriction determines if new package versions can be published directly to the repository. You must include both the desired upstream and publish restrictions."]}
+    let context_ = "PutPackageOriginConfigurationRequest"
+    let make ?domainOwner =
+      fun ?namespace ->
+        fun ~domain ->
+          fun ~repository ->
+            fun ~format ->
+              fun ~package ->
+                fun ~restrictions ->
+                  fun () ->
+                    {
+                      domainOwner;
+                      namespace;
+                      domain;
+                      repository;
+                      format;
+                      package;
+                      restrictions
+                    }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("repository", (Some (RepositoryName.to_value x.repository)));
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Some (PackageName.to_value x.package)));
+        ("restrictions",
+          (Some (PackageOriginRestrictions.to_value x.restrictions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let restrictions =
+        PackageOriginRestrictions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "restrictions") in
+      let package =
+        PackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        PackageFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+      let repository =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~restrictions ~package ?namespace ~format ~repository ?domainOwner
+        ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let restrictions =
+        field_map_exn json__ "restrictions" PackageOriginRestrictions.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~restrictions ~package ?namespace ~format ~repository ?domainOwner
+        ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Sets the package origin configuration for a package. The package origin configuration determines how new versions of a package can be added to a repository. You can allow or block direct publishing of new package versions, or ingestion and retaining of new package versions from an external connection or upstream source. For more information about package origin controls and configuration, see Editing package origin controls in the CodeArtifact User Guide. PutPackageOriginConfiguration can be called on a package that doesn't yet exist in the repository. When called on a package that does not exist, a package is created in the repository with no versions and the requested restrictions are set on the package. This can be used to preemptively block ingesting or retaining any versions from external connections or upstream repositories, or to block publishing any versions of the package into the repository before connecting any package managers or publishers to the repository."]
 module PutDomainPermissionsPolicyResult =
   struct
     type nonrec t =
@@ -3310,8 +5170,8 @@ module PutDomainPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3325,7 +5185,7 @@ module PutDomainPermissionsPolicyRequest =
           "The name of the domain on which to set the resource policy."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       policyRevision: PolicyRevision.t option
         [@ocaml.doc
           "The current revision of the resource policy to be set. This revision is used for optimistic locking, which prevents others from overwriting your changes to the domain's resource policy."];
@@ -3359,17 +5219,343 @@ module PutDomainPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~policyDocument ?policyRevision ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyDocument =
-        field_map_exn json "policyDocument" PolicyDocument.of_json in
+        field_map_exn json__ "policyDocument" PolicyDocument.of_json in
       let policyRevision =
-        field_map json "policyRevision" PolicyRevision.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "policyRevision" PolicyRevision.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~policyDocument ?policyRevision ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Sets a resource policy on a domain that specifies permissions to access it. When you call PutDomainPermissionsPolicy, the resource policy on the domain is ignored when evaluting permissions. This ensures that the owner of a domain cannot lock themselves out of the domain, which would prevent them from being able to update the resource policy."]
+module PublishPackageVersionResult =
+  struct
+    type nonrec t =
+      {
+      format: PackageFormat.t option
+        [@ocaml.doc "The format of the package version."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc "The namespace of the package version."];
+      package: PackageName.t option [@ocaml.doc "The name of the package."];
+      version: PackageVersion.t option
+        [@ocaml.doc "The version of the package."];
+      versionRevision: PackageVersionRevision.t option
+        [@ocaml.doc "The revision of the package version."];
+      status: PackageVersionStatus.t option
+        [@ocaml.doc
+          "A string that contains the status of the package version. For more information, see Package version status in the CodeArtifact User Guide."];
+      asset: AssetSummary.t option
+        [@ocaml.doc "An AssetSummary for the published asset."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?format =
+      fun ?namespace ->
+        fun ?package ->
+          fun ?version ->
+            fun ?versionRevision ->
+              fun ?status ->
+                fun ?asset ->
+                  fun () ->
+                    {
+                      format;
+                      namespace;
+                      package;
+                      version;
+                      versionRevision;
+                      status;
+                      asset
+                    }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("format", (Option.map x.format ~f:PackageFormat.to_value));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Option.map x.package ~f:PackageName.to_value));
+        ("version", (Option.map x.version ~f:PackageVersion.to_value));
+        ("versionRevision",
+          (Option.map x.versionRevision ~f:PackageVersionRevision.to_value));
+        ("status", (Option.map x.status ~f:PackageVersionStatus.to_value));
+        ("asset", (Option.map x.asset ~f:AssetSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let asset =
+        (Option.map ~f:AssetSummary.of_xml) (Xml.child xml_arg0 "asset") in
+      let status =
+        (Option.map ~f:PackageVersionStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      let versionRevision =
+        (Option.map ~f:PackageVersionRevision.of_xml)
+          (Xml.child xml_arg0 "versionRevision") in
+      let version =
+        (Option.map ~f:PackageVersion.of_xml) (Xml.child xml_arg0 "version") in
+      let package =
+        (Option.map ~f:PackageName.of_xml) (Xml.child xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
+      make ?asset ?status ?versionRevision ?version ?package ?namespace
+        ?format ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let asset = field_map json__ "asset" AssetSummary.of_json in
+      let status = field_map json__ "status" PackageVersionStatus.of_json in
+      let versionRevision =
+        field_map json__ "versionRevision" PackageVersionRevision.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      make ?asset ?status ?versionRevision ?version ?package ?namespace
+        ?format ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new package version containing one or more assets (or files). The unfinished flag can be used to keep the package version in the Unfinished state until all of its assets have been uploaded (see Package version status in the CodeArtifact user guide). To set the package version\226\128\153s status to Published, omit the unfinished flag when uploading the final asset, or set the status using UpdatePackageVersionStatus. Once a package version\226\128\153s status is set to Published, it cannot change back to Unfinished. Only generic packages can be published using this API. For more information, see Using generic packages in the CodeArtifact User Guide."]
+module PublishPackageVersionRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the repository that contains the package version to publish."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+      repository: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository that the package version will be published to."];
+      format: PackageFormat.t
+        [@ocaml.doc
+          "A format that specifies the type of the package version with the requested asset file. The only supported value is generic."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc "The namespace of the package version to publish."];
+      package: PackageName.t
+        [@ocaml.doc "The name of the package version to publish."];
+      packageVersion: PackageVersion.t
+        [@ocaml.doc "The package version to publish (for example, 3.5.2)."];
+      assetContent: Asset.t
+        [@ocaml.doc "The content of the asset to publish."];
+      assetName: AssetName.t
+        [@ocaml.doc
+          "The name of the asset to publish. Asset names can include Unicode letters and numbers, and the following special characters: ~ ! \\@ ^ & ( ) - ` _ + \\[ \\] \\{ \\} ; , . `"];
+      assetSHA256: SHA256.t
+        [@ocaml.doc
+          "The SHA256 hash of the assetContent to publish. This value must be calculated by the caller and provided with the request (see Publishing a generic package in the CodeArtifact User Guide). This value is used as an integrity check to verify that the assetContent has not changed after it was originally sent."];
+      unfinished: BooleanOptional.t option
+        [@ocaml.doc
+          "Specifies whether the package version should remain in the unfinished state. If omitted, the package version status will be set to Published (see Package version status in the CodeArtifact User Guide). Valid values: unfinished"]}
+    let context_ = "PublishPackageVersionRequest"
+    let make ?domainOwner =
+      fun ?namespace ->
+        fun ?unfinished ->
+          fun ~domain ->
+            fun ~repository ->
+              fun ~format ->
+                fun ~package ->
+                  fun ~packageVersion ->
+                    fun ~assetContent ->
+                      fun ~assetName ->
+                        fun ~assetSHA256 ->
+                          fun () ->
+                            {
+                              domainOwner;
+                              namespace;
+                              unfinished;
+                              domain;
+                              repository;
+                              format;
+                              package;
+                              packageVersion;
+                              assetContent;
+                              assetName;
+                              assetSHA256
+                            }
+    let of_header_and_body =
+      ((fun (xs, pipe) ->
+          make
+            ~domain:(DomainName.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "domain"))
+            ?domainOwner:(Option.map
+                            ((List.Assoc.find ~equal:String.Caseless.equal)
+                               xs "domain-owner") ~f:AccountId.of_string)
+            ~repository:(RepositoryName.of_string
+                           ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                              xs "repository"))
+            ~format:(PackageFormat.of_string
+                       ((List.Assoc.find_exn ~equal:String.Caseless.equal) xs
+                          "format"))
+            ?namespace:(Option.map
+                          ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                             "namespace") ~f:PackageNamespace.of_string)
+            ~package:(PackageName.of_string
+                        ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                           xs "package"))
+            ~packageVersion:(PackageVersion.of_string
+                               ((List.Assoc.find_exn
+                                   ~equal:String.Caseless.equal) xs "version"))
+            ~assetContent:pipe
+            ~assetName:(AssetName.of_string
+                          ((List.Assoc.find_exn ~equal:String.Caseless.equal)
+                             xs "asset"))
+            ~assetSHA256:(SHA256.of_string
+                            ((List.Assoc.find_exn
+                                ~equal:String.Caseless.equal) xs
+                               "x-amz-content-sha256"))
+            ?unfinished:(Option.map
+                           ((List.Assoc.find ~equal:String.Caseless.equal) xs
+                              "unfinished") ~f:BooleanOptional.of_string) ())
+      [@warning "-27"])
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("repository", (Some (RepositoryName.to_value x.repository)));
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Some (PackageName.to_value x.package)));
+        ("version", (Some (PackageVersion.to_value x.packageVersion)));
+        ("assetContent", (Some (Asset.to_value x.assetContent)));
+        ("asset", (Some (AssetName.to_value x.assetName)));
+        ("x-amz-content-sha256", (Some (SHA256.to_value x.assetSHA256)));
+        ("unfinished", (Option.map x.unfinished ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unfinished =
+        (Option.map ~f:BooleanOptional.of_xml)
+          (Xml.child xml_arg0 "unfinished") in
+      let assetSHA256 =
+        SHA256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "x-amz-content-sha256") in
+      let assetName =
+        AssetName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "asset") in
+      let assetContent =
+        Asset.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "assetContent") in
+      let packageVersion =
+        PackageVersion.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "version") in
+      let package =
+        PackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        PackageFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+      let repository =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?unfinished ~assetSHA256 ~assetName ~assetContent ~packageVersion
+        ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unfinished = field_map json__ "unfinished" BooleanOptional.of_json in
+      let assetSHA256 = field_map_exn json__ "assetSHA256" SHA256.of_json in
+      let assetName = field_map_exn json__ "assetName" AssetName.of_json in
+      let assetContent = field_map_exn json__ "assetContent" Asset.of_json in
+      let packageVersion =
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?unfinished ~assetSHA256 ~assetName ~assetContent ~packageVersion
+        ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a new package version containing one or more assets (or files). The unfinished flag can be used to keep the package version in the Unfinished state until all of its assets have been uploaded (see Package version status in the CodeArtifact user guide). To set the package version\226\128\153s status to Published, omit the unfinished flag when uploading the final asset, or set the status using UpdatePackageVersionStatus. Once a package version\226\128\153s status is set to Published, it cannot change back to Unfinished. Only generic packages can be published using this API. For more information, see Using generic packages in the CodeArtifact User Guide."]
 module ListTagsForResourceResult =
   struct
     type nonrec t =
@@ -3439,11 +5625,11 @@ module ListTagsForResourceResult =
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS tags for a specified Amazon Resource Name (ARN) in AWS CodeArtifact."]
+       "Gets information about Amazon Web Services tags for a specified Amazon Resource Name (ARN) in CodeArtifact."]
 module ListTagsForResourceRequest =
   struct
     type nonrec t =
@@ -3462,12 +5648,174 @@ module ListTagsForResourceRequest =
         Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" Arn.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" Arn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets information about AWS tags for a specified Amazon Resource Name (ARN) in AWS CodeArtifact."]
+       "Gets information about Amazon Web Services tags for a specified Amazon Resource Name (ARN) in CodeArtifact."]
+module ListSubPackageGroupsResult =
+  struct
+    type nonrec t =
+      {
+      packageGroups: PackageGroupSummaryList.t option
+        [@ocaml.doc
+          "A list of sub package groups for the requested package group."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "If there are additional results, this is the token for the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroups =
+      fun ?nextToken -> fun () -> { packageGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroups",
+           (Option.map x.packageGroups ~f:PackageGroupSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let packageGroups =
+        (Option.map ~f:PackageGroupSummaryList.of_xml)
+          (Xml.child xml_arg0 "packageGroups") in
+      make ?nextToken ?packageGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let packageGroups =
+        field_map json__ "packageGroups" PackageGroupSummaryList.of_json in
+      make ?nextToken ?packageGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of direct children of the specified package group. For information package group hierarchy, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
+module ListSubPackageGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain which contains the package group from which to list sub package groups."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc
+          "The pattern of the package group from which to list sub package groups."];
+      maxResults: ListPackageGroupsMaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    let context_ = "ListSubPackageGroupsRequest"
+    let make ?domainOwner =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~domain ->
+            fun ~packageGroup ->
+              fun () ->
+                { domainOwner; maxResults; nextToken; domain; packageGroup }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("max-results",
+          (Option.map x.maxResults ~f:ListPackageGroupsMaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:ListPackageGroupsMaxResults.of_xml)
+          (Xml.child xml_arg0 "max-results") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?nextToken ?maxResults ~packageGroup ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" ListPackageGroupsMaxResults.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?nextToken ?maxResults ~packageGroup ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of direct children of the specified package group. For information package group hierarchy, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
 module ListRepositoriesResult =
   struct
     type nonrec t =
@@ -3548,14 +5896,14 @@ module ListRepositoriesResult =
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let repositories =
-        field_map json "repositories" RepositorySummaryList.of_json in
+        field_map json__ "repositories" RepositorySummaryList.of_json in
       make ?nextToken ?repositories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of RepositorySummary objects. Each RepositorySummary contains information about a repository in the specified AWS account and that matches the input parameters."]
+       "Returns a list of RepositorySummary objects. Each RepositorySummary contains information about a repository in the specified Amazon Web Services account and that matches the input parameters."]
 module ListRepositoriesRequest =
   struct
     type nonrec t =
@@ -3592,16 +5940,16 @@ module ListRepositoriesRequest =
           (Xml.child xml_arg0 "repository-prefix") in
       make ?nextToken ?maxResults ?repositoryPrefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListRepositoriesMaxResults.of_json in
+        field_map json__ "maxResults" ListRepositoriesMaxResults.of_json in
       let repositoryPrefix =
-        field_map json "repositoryPrefix" RepositoryName.of_json in
+        field_map json__ "repositoryPrefix" RepositoryName.of_json in
       make ?nextToken ?maxResults ?repositoryPrefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of RepositorySummary objects. Each RepositorySummary contains information about a repository in the specified AWS account and that matches the input parameters."]
+       "Returns a list of RepositorySummary objects. Each RepositorySummary contains information about a repository in the specified Amazon Web Services account and that matches the input parameters."]
 module ListRepositoriesInDomainResult =
   struct
     type nonrec t =
@@ -3691,10 +6039,10 @@ module ListRepositoriesInDomainResult =
           (Xml.child xml_arg0 "repositories") in
       make ?nextToken ?repositories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let repositories =
-        field_map json "repositories" RepositorySummaryList.of_json in
+        field_map json__ "repositories" RepositorySummaryList.of_json in
       make ?nextToken ?repositories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3708,10 +6056,10 @@ module ListRepositoriesInDomainRequest =
           "The name of the domain that contains the returned list of repositories."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       administratorAccount: AccountId.t option
         [@ocaml.doc
-          "Filter the list of repositories to only include those that are managed by the AWS account ID."];
+          "Filter the list of repositories to only include those that are managed by the Amazon Web Services account ID."];
       repositoryPrefix: RepositoryName.t option
         [@ocaml.doc
           "A prefix used to filter returned repositories. Only repositories with names that start with repositoryPrefix are returned."];
@@ -3769,17 +6117,17 @@ module ListRepositoriesInDomainRequest =
       make ?nextToken ?maxResults ?repositoryPrefix ?administratorAccount
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListRepositoriesInDomainMaxResults.of_json in
       let repositoryPrefix =
-        field_map json "repositoryPrefix" RepositoryName.of_json in
+        field_map json__ "repositoryPrefix" RepositoryName.of_json in
       let administratorAccount =
-        field_map json "administratorAccount" AccountId.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "administratorAccount" AccountId.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?nextToken ?maxResults ?repositoryPrefix ?administratorAccount
         ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
@@ -3872,9 +6220,9 @@ module ListPackagesResult =
           (Xml.child xml_arg0 "packages") in
       make ?nextToken ?packages ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let packages = field_map json "packages" PackageSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let packages = field_map json__ "packages" PackageSummaryList.of_json in
       make ?nextToken ?packages ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3885,27 +6233,33 @@ module ListPackagesRequest =
       {
       domain: DomainName.t
         [@ocaml.doc
-          "The name of the domain that contains the repository that contains the requested list of packages."];
+          "The name of the domain that contains the repository that contains the requested packages."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository from which packages are to be listed."];
+          "The name of the repository that contains the requested packages."];
       format: PackageFormat.t option
         [@ocaml.doc
-          "The format of the packages. The valid package types are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+          "The format used to filter requested packages. Only packages from the provided format will be returned."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace prefix used to filter requested packages. Only packages with a namespace that starts with the provided string value are returned. Note that although this option is called --namespace and not --namespace-prefix, it has prefix-matching behavior. Each package format uses namespace as follows: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       packagePrefix: PackageName.t option
         [@ocaml.doc
-          "A prefix used to filter returned packages. Only packages with names that start with packagePrefix are returned."];
+          "A prefix used to filter requested packages. Only packages with names that start with packagePrefix are returned."];
       maxResults: ListPackagesMaxResults.t option
         [@ocaml.doc "The maximum number of results to return per page."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      publish: AllowPublish.t option
+        [@ocaml.doc
+          "The value of the Publish package origin control restriction used to filter requested packages. Only packages with the provided restriction are returned. For more information, see PackageOriginRestrictions."];
+      upstream: AllowUpstream.t option
+        [@ocaml.doc
+          "The value of the Upstream package origin control restriction used to filter requested packages. Only packages with the provided restriction are returned. For more information, see PackageOriginRestrictions."]}
     let context_ = "ListPackagesRequest"
     let make ?domainOwner =
       fun ?format ->
@@ -3913,19 +6267,23 @@ module ListPackagesRequest =
           fun ?packagePrefix ->
             fun ?maxResults ->
               fun ?nextToken ->
-                fun ~domain ->
-                  fun ~repository ->
-                    fun () ->
-                      {
-                        domainOwner;
-                        format;
-                        namespace;
-                        packagePrefix;
-                        maxResults;
-                        nextToken;
-                        domain;
-                        repository
-                      }
+                fun ?publish ->
+                  fun ?upstream ->
+                    fun ~domain ->
+                      fun ~repository ->
+                        fun () ->
+                          {
+                            domainOwner;
+                            format;
+                            namespace;
+                            packagePrefix;
+                            maxResults;
+                            nextToken;
+                            publish;
+                            upstream;
+                            domain;
+                            repository
+                          }
     let to_value x =
       structure_to_value
         [("domain", (Some (DomainName.to_value x.domain)));
@@ -3937,9 +6295,15 @@ module ListPackagesRequest =
           (Option.map x.packagePrefix ~f:PackageName.to_value));
         ("max-results",
           (Option.map x.maxResults ~f:ListPackagesMaxResults.to_value));
-        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("publish", (Option.map x.publish ~f:AllowPublish.to_value));
+        ("upstream", (Option.map x.upstream ~f:AllowUpstream.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let upstream =
+        (Option.map ~f:AllowUpstream.of_xml) (Xml.child xml_arg0 "upstream") in
+      let publish =
+        (Option.map ~f:AllowPublish.of_xml) (Xml.child xml_arg0 "publish") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "next-token") in
@@ -3961,21 +6325,25 @@ module ListPackagesRequest =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
-      make ?nextToken ?maxResults ?packagePrefix ?namespace ?format
-        ~repository ?domainOwner ~domain ()
+      make ?upstream ?publish ?nextToken ?maxResults ?packagePrefix
+        ?namespace ?format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let upstream = field_map json__ "upstream" AllowUpstream.of_json in
+      let publish = field_map json__ "publish" AllowPublish.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListPackagesMaxResults.of_json in
-      let packagePrefix = field_map json "packagePrefix" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
-      make ?nextToken ?maxResults ?packagePrefix ?namespace ?format
-        ~repository ?domainOwner ~domain ()
+        field_map json__ "maxResults" ListPackagesMaxResults.of_json in
+      let packagePrefix =
+        field_map json__ "packagePrefix" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?upstream ?publish ?nextToken ?maxResults ?packagePrefix
+        ?namespace ?format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of PackageSummary objects for packages in a repository that match the request parameters."]
@@ -3986,12 +6354,10 @@ module ListPackageVersionsResult =
       defaultDisplayVersion: PackageVersion.t option
         [@ocaml.doc
           "The default package version to display. This depends on the package format: For Maven and PyPI packages, it's the most recently published package version. For npm packages, it's the version referenced by the latest tag. If the latest tag is not set, it's the most recently published package version."];
-      format: PackageFormat.t option
-        [@ocaml.doc
-          "A format of the package. Valid package format values are: npm pypi maven"];
+      format: PackageFormat.t option [@ocaml.doc "A format of the package."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package that contains the requested package versions. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t option [@ocaml.doc "The name of the package."];
       versions: PackageVersionSummaryList.t option
         [@ocaml.doc "The returned list of PackageVersionSummary objects."];
@@ -4107,51 +6473,54 @@ module ListPackageVersionsResult =
       make ?nextToken ?versions ?package ?namespace ?format
         ?defaultDisplayVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let versions =
-        field_map json "versions" PackageVersionSummaryList.of_json in
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
+        field_map json__ "versions" PackageVersionSummaryList.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
       let defaultDisplayVersion =
-        field_map json "defaultDisplayVersion" PackageVersion.of_json in
+        field_map json__ "defaultDisplayVersion" PackageVersion.of_json in
       make ?nextToken ?versions ?package ?namespace ?format
         ?defaultDisplayVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of PackageVersionSummary objects for package versions in a repository that match the request parameters."]
+       "Returns a list of PackageVersionSummary objects for package versions in a repository that match the request parameters. Package versions of all statuses will be returned by default when calling list-package-versions with no --status parameter."]
 module ListPackageVersionsRequest =
   struct
     type nonrec t =
       {
       domain: DomainName.t
         [@ocaml.doc
-          "The name of the domain that contains the repository that contains the returned package versions."];
+          "The name of the domain that contains the repository that contains the requested package versions."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
-        [@ocaml.doc "The name of the repository that contains the package."];
-      format: PackageFormat.t
         [@ocaml.doc
-          "The format of the returned packages. The valid package types are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+          "The name of the repository that contains the requested package versions."];
+      format: PackageFormat.t
+        [@ocaml.doc "The format of the package versions you want to list."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package that contains the requested package versions. The package component that specifies its namespace depends on its type. For example: The namespace is required when deleting package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
-          "The name of the package for which you want to return a list of package versions."];
+          "The name of the package for which you want to request package versions."];
       status: PackageVersionStatus.t option
         [@ocaml.doc
-          "A string that specifies the status of the package versions to include in the returned list. It can be one of the following: Published Unfinished Unlisted Archived Disposed"];
+          "A string that filters the requested package versions by status."];
       sortBy: PackageVersionSortType.t option
-        [@ocaml.doc "How to sort the returned list of package versions."];
+        [@ocaml.doc "How to sort the requested list of package versions."];
       maxResults: ListPackageVersionsMaxResults.t option
         [@ocaml.doc "The maximum number of results to return per page."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
-          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      originType: PackageVersionOriginType.t option
+        [@ocaml.doc
+          "The originType used to filter package versions. Only package versions with the provided originType will be returned."]}
     let context_ = "ListPackageVersionsRequest"
     let make ?domainOwner =
       fun ?namespace ->
@@ -4159,23 +6528,25 @@ module ListPackageVersionsRequest =
           fun ?sortBy ->
             fun ?maxResults ->
               fun ?nextToken ->
-                fun ~domain ->
-                  fun ~repository ->
-                    fun ~format ->
-                      fun ~package ->
-                        fun () ->
-                          {
-                            domainOwner;
-                            namespace;
-                            status;
-                            sortBy;
-                            maxResults;
-                            nextToken;
-                            domain;
-                            repository;
-                            format;
-                            package
-                          }
+                fun ?originType ->
+                  fun ~domain ->
+                    fun ~repository ->
+                      fun ~format ->
+                        fun ~package ->
+                          fun () ->
+                            {
+                              domainOwner;
+                              namespace;
+                              status;
+                              sortBy;
+                              maxResults;
+                              nextToken;
+                              originType;
+                              domain;
+                              repository;
+                              format;
+                              package
+                            }
     let to_value x =
       structure_to_value
         [("domain", (Some (DomainName.to_value x.domain)));
@@ -4188,9 +6559,14 @@ module ListPackageVersionsRequest =
         ("sortBy", (Option.map x.sortBy ~f:PackageVersionSortType.to_value));
         ("max-results",
           (Option.map x.maxResults ~f:ListPackageVersionsMaxResults.to_value));
-        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("originType",
+          (Option.map x.originType ~f:PackageVersionOriginType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let originType =
+        (Option.map ~f:PackageVersionOriginType.of_xml)
+          (Xml.child xml_arg0 "originType") in
       let nextToken =
         (Option.map ~f:PaginationToken.of_xml)
           (Xml.child xml_arg0 "next-token") in
@@ -4219,36 +6595,39 @@ module ListPackageVersionsRequest =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
-      make ?nextToken ?maxResults ?sortBy ?status ~package ?namespace ~format
-        ~repository ?domainOwner ~domain ()
+      make ?originType ?nextToken ?maxResults ?sortBy ?status ~package
+        ?namespace ~format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let originType =
+        field_map json__ "originType" PackageVersionOriginType.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListPackageVersionsMaxResults.of_json in
-      let sortBy = field_map json "sortBy" PackageVersionSortType.of_json in
-      let status = field_map json "status" PackageVersionStatus.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
-      make ?nextToken ?maxResults ?sortBy ?status ~package ?namespace ~format
-        ~repository ?domainOwner ~domain ()
+        field_map json__ "maxResults" ListPackageVersionsMaxResults.of_json in
+      let sortBy = field_map json__ "sortBy" PackageVersionSortType.of_json in
+      let status = field_map json__ "status" PackageVersionStatus.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?originType ?nextToken ?maxResults ?sortBy ?status ~package
+        ?namespace ~format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of PackageVersionSummary objects for package versions in a repository that match the request parameters."]
+       "Returns a list of PackageVersionSummary objects for package versions in a repository that match the request parameters. Package versions of all statuses will be returned by default when calling list-package-versions with no --status parameter."]
 module ListPackageVersionDependenciesResult =
   struct
     type nonrec t =
       {
       format: PackageFormat.t option
         [@ocaml.doc
-          "A format that specifies the type of the package that contains the returned dependencies. The valid values are: npm pypi maven"];
+          "A format that specifies the type of the package that contains the returned dependencies."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version that contains the returned dependencies. The package component that specifies its namespace depends on its type. For example: The namespace is required when listing dependencies from package versions of the following formats: Maven The namespace of a Maven package version is its groupId. The namespace of an npm package version is its scope. Python and NuGet package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t option
         [@ocaml.doc
           "The name of the package that contains the returned package versions dependencies."];
@@ -4377,16 +6756,16 @@ module ListPackageVersionDependenciesResult =
       make ?dependencies ?nextToken ?versionRevision ?version ?package
         ?namespace ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dependencies =
-        field_map json "dependencies" PackageDependencyList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+        field_map json__ "dependencies" PackageDependencyList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let versionRevision =
-        field_map json "versionRevision" PackageVersionRevision.of_json in
-      let version = field_map json "version" PackageVersion.of_json in
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
+        field_map json__ "versionRevision" PackageVersionRevision.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
       make ?dependencies ?nextToken ?versionRevision ?version ?package
         ?namespace ?format ()
     let to_json v = composed_to_json to_value v
@@ -4401,16 +6780,16 @@ module ListPackageVersionDependenciesRequest =
           "The name of the domain that contains the repository that contains the requested package version dependencies."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that contains the requested package version."];
       format: PackageFormat.t
         [@ocaml.doc
-          "The format of the package with the requested dependencies. The valid package types are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+          "The format of the package with the requested dependencies."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version with the requested dependencies. The package component that specifies its namespace depends on its type. For example: The namespace is required when listing dependencies from package versions of the following formats: Maven The namespace of a Maven package version is its groupId. The namespace of an npm package version is its scope. Python and NuGet package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc "The name of the package versions' package."];
       packageVersion: PackageVersion.t
@@ -4476,16 +6855,17 @@ module ListPackageVersionDependenciesRequest =
       make ?nextToken ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersion.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?nextToken ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
@@ -4497,16 +6877,16 @@ module ListPackageVersionAssetsResult =
       {
       format: PackageFormat.t option
         [@ocaml.doc
-          "The format of the package that contains the returned package version assets."];
+          "The format of the package that contains the requested package version assets."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version that contains the requested package version assets. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t option
         [@ocaml.doc
-          "The name of the package that contains the returned package version assets."];
+          "The name of the package that contains the requested package version assets."];
       version: PackageVersion.t option
         [@ocaml.doc
-          "The version of the package associated with the returned assets."];
+          "The version of the package associated with the requested assets."];
       versionRevision: PackageVersionRevision.t option
         [@ocaml.doc
           "The current revision associated with the package version."];
@@ -4627,15 +7007,15 @@ module ListPackageVersionAssetsResult =
       make ?assets ?nextToken ?versionRevision ?version ?package ?namespace
         ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let assets = field_map json "assets" AssetSummaryList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let assets = field_map json__ "assets" AssetSummaryList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let versionRevision =
-        field_map json "versionRevision" PackageVersionRevision.of_json in
-      let version = field_map json "version" PackageVersion.of_json in
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
+        field_map json__ "versionRevision" PackageVersionRevision.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
       make ?assets ?nextToken ?versionRevision ?version ?package ?namespace
         ?format ()
     let to_json v = composed_to_json to_value v
@@ -4650,19 +7030,19 @@ module ListPackageVersionAssetsRequest =
           "The name of the domain that contains the repository associated with the package version assets."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository that contains the package that contains the returned package version assets."];
+          "The name of the repository that contains the package that contains the requested package version assets."];
       format: PackageFormat.t
         [@ocaml.doc
-          "The format of the package that contains the returned package version assets. The valid package types are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+          "The format of the package that contains the requested package version assets."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version that contains the requested package version assets. The package component that specifies its namespace depends on its type. For example: The namespace is required requesting assets from package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
-          "The name of the package that contains the returned package version assets."];
+          "The name of the package that contains the requested package version assets."];
       packageVersion: PackageVersion.t
         [@ocaml.doc
           "A string that contains the package version (for example, 3.5.2)."];
@@ -4736,24 +7116,185 @@ module ListPackageVersionAssetsRequest =
       make ?nextToken ?maxResults ~packageVersion ~package ?namespace ~format
         ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults"
+        field_map json__ "maxResults"
           ListPackageVersionAssetsMaxResults.of_json in
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersion.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?nextToken ?maxResults ~packageVersion ~package ?namespace ~format
         ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of AssetSummary objects for assets in a package version."]
+module ListPackageGroupsResult =
+  struct
+    type nonrec t =
+      {
+      packageGroups: PackageGroupSummaryList.t option
+        [@ocaml.doc "The list of package groups in the requested domain."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroups =
+      fun ?nextToken -> fun () -> { packageGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroups",
+           (Option.map x.packageGroups ~f:PackageGroupSummaryList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let packageGroups =
+        (Option.map ~f:PackageGroupSummaryList.of_xml)
+          (Xml.child xml_arg0 "packageGroups") in
+      make ?nextToken ?packageGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let packageGroups =
+        field_map json__ "packageGroups" PackageGroupSummaryList.of_json in
+      make ?nextToken ?packageGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of package groups in the requested domain."]
+module ListPackageGroupsRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc "The domain for which you want to list package groups."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      maxResults: ListPackageGroupsMaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      prefix: PackageGroupPatternPrefix.t option
+        [@ocaml.doc
+          "A prefix for which to search package groups. When included, ListPackageGroups will return only package groups with patterns that match the prefix."]}
+    let context_ = "ListPackageGroupsRequest"
+    let make ?domainOwner =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?prefix ->
+            fun ~domain ->
+              fun () ->
+                { domainOwner; maxResults; nextToken; prefix; domain }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("max-results",
+          (Option.map x.maxResults ~f:ListPackageGroupsMaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("prefix",
+          (Option.map x.prefix ~f:PackageGroupPatternPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:PackageGroupPatternPrefix.of_xml)
+          (Xml.child xml_arg0 "prefix") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:ListPackageGroupsMaxResults.of_xml)
+          (Xml.child xml_arg0 "max-results") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?prefix ?nextToken ?maxResults ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix =
+        field_map json__ "prefix" PackageGroupPatternPrefix.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" ListPackageGroupsMaxResults.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?prefix ?nextToken ?maxResults ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of package groups in the requested domain."]
 module ListDomainsResult =
   struct
     type nonrec t =
@@ -4832,13 +7373,13 @@ module ListDomainsResult =
           (Xml.child xml_arg0 "domains") in
       make ?nextToken ?domains ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let domains = field_map json "domains" DomainSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let domains = field_map json__ "domains" DomainSummaryList.of_json in
       make ?nextToken ?domains ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of DomainSummary objects for all domains owned by the AWS account that makes this call. Each returned DomainSummary object contains information about a domain."]
+       "Returns a list of DomainSummary objects for all domains owned by the Amazon Web Services account that makes this call. Each returned DomainSummary object contains information about a domain."]
 module ListDomainsRequest =
   struct
     type nonrec t =
@@ -4865,14 +7406,381 @@ module ListDomainsRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListDomainsMaxResults.of_json in
+        field_map json__ "maxResults" ListDomainsMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of DomainSummary objects for all domains owned by the AWS account that makes this call. Each returned DomainSummary object contains information about a domain."]
+       "Returns a list of DomainSummary objects for all domains owned by the Amazon Web Services account that makes this call. Each returned DomainSummary object contains information about a domain."]
+module ListAssociatedPackagesResult =
+  struct
+    type nonrec t =
+      {
+      packages: AssociatedPackageList.t option
+        [@ocaml.doc
+          "The list of packages associated with the requested package group."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packages = fun ?nextToken -> fun () -> { packages; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packages",
+           (Option.map x.packages ~f:AssociatedPackageList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let packages =
+        (Option.map ~f:AssociatedPackageList.of_xml)
+          (Xml.child xml_arg0 "packages") in
+      make ?nextToken ?packages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let packages =
+        field_map json__ "packages" AssociatedPackageList.of_json in
+      make ?nextToken ?packages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of packages associated with the requested package group. For information package group association and matching, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
+module ListAssociatedPackagesRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the package group from which to list associated packages."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc
+          "The pattern of the package group from which to list associated packages."];
+      maxResults: ListPackagesMaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."];
+      preview: BooleanOptional.t option
+        [@ocaml.doc
+          "When this flag is included, ListAssociatedPackages will return a list of packages that would be associated with a package group, even if it does not exist."]}
+    let context_ = "ListAssociatedPackagesRequest"
+    let make ?domainOwner =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ?preview ->
+            fun ~domain ->
+              fun ~packageGroup ->
+                fun () ->
+                  {
+                    domainOwner;
+                    maxResults;
+                    nextToken;
+                    preview;
+                    domain;
+                    packageGroup
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("max-results",
+          (Option.map x.maxResults ~f:ListPackagesMaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("preview", (Option.map x.preview ~f:BooleanOptional.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let preview =
+        (Option.map ~f:BooleanOptional.of_xml) (Xml.child xml_arg0 "preview") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:ListPackagesMaxResults.of_xml)
+          (Xml.child xml_arg0 "max-results") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?preview ?nextToken ?maxResults ~packageGroup ?domainOwner ~domain
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let preview = field_map json__ "preview" BooleanOptional.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults" ListPackagesMaxResults.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?preview ?nextToken ?maxResults ~packageGroup ?domainOwner ~domain
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of packages associated with the requested package group. For information package group association and matching, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
+module ListAllowedRepositoriesForGroupResult =
+  struct
+    type nonrec t =
+      {
+      allowedRepositories: RepositoryNameList.t option
+        [@ocaml.doc
+          "The list of allowed repositories for the package group and origin configuration restriction type."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?allowedRepositories =
+      fun ?nextToken -> fun () -> { allowedRepositories; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("allowedRepositories",
+           (Option.map x.allowedRepositories ~f:RepositoryNameList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let allowedRepositories =
+        (Option.map ~f:RepositoryNameList.of_xml)
+          (Xml.child xml_arg0 "allowedRepositories") in
+      make ?nextToken ?allowedRepositories ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let allowedRepositories =
+        field_map json__ "allowedRepositories" RepositoryNameList.of_json in
+      make ?nextToken ?allowedRepositories ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repositories in the added repositories list of the specified restriction type for a package group. For more information about restriction types and added repository lists, see Package group origin controls in the CodeArtifact User Guide."]
+module ListAllowedRepositoriesForGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the package group from which to list allowed repositories."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc
+          "The pattern of the package group from which to list allowed repositories."];
+      originRestrictionType: PackageGroupOriginRestrictionType.t
+        [@ocaml.doc
+          "The origin configuration restriction type of which to list allowed repositories."];
+      maxResults: ListAllowedRepositoriesForGroupMaxResults.t option
+        [@ocaml.doc "The maximum number of results to return per page."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "The token for the next set of results. Use the value returned in the previous response in the next request to retrieve the next set of results."]}
+    let context_ = "ListAllowedRepositoriesForGroupRequest"
+    let make ?domainOwner =
+      fun ?maxResults ->
+        fun ?nextToken ->
+          fun ~domain ->
+            fun ~packageGroup ->
+              fun ~originRestrictionType ->
+                fun () ->
+                  {
+                    domainOwner;
+                    maxResults;
+                    nextToken;
+                    domain;
+                    packageGroup;
+                    originRestrictionType
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("originRestrictionType",
+          (Some
+             (PackageGroupOriginRestrictionType.to_value
+                x.originRestrictionType)));
+        ("max-results",
+          (Option.map x.maxResults
+             ~f:ListAllowedRepositoriesForGroupMaxResults.to_value));
+        ("next-token", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "next-token") in
+      let maxResults =
+        (Option.map ~f:ListAllowedRepositoriesForGroupMaxResults.of_xml)
+          (Xml.child xml_arg0 "max-results") in
+      let originRestrictionType =
+        PackageGroupOriginRestrictionType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "originRestrictionType") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?nextToken ?maxResults ~originRestrictionType ~packageGroup
+        ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListAllowedRepositoriesForGroupMaxResults.of_json in
+      let originRestrictionType =
+        field_map_exn json__ "originRestrictionType"
+          PackageGroupOriginRestrictionType.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?nextToken ?maxResults ~originRestrictionType ~packageGroup
+        ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the repositories in the added repositories list of the specified restriction type for a package group. For more information about restriction types and added repository lists, see Package group origin controls in the CodeArtifact User Guide."]
 module GetRepositoryPermissionsPolicyResult =
   struct
     type nonrec t =
@@ -4952,8 +7860,8 @@ module GetRepositoryPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the resource policy that is set on a repository."]
@@ -4966,7 +7874,7 @@ module GetRepositoryPermissionsPolicyRequest =
           "The name of the domain containing the repository whose associated resource policy is to be retrieved."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository whose associated resource policy is to be retrieved."]}
@@ -4990,10 +7898,11 @@ module GetRepositoryPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns the resource policy that is set on a repository."]
@@ -5079,13 +7988,13 @@ module GetRepositoryEndpointResult =
           (Xml.child xml_arg0 "repositoryEndpoint") in
       make ?repositoryEndpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repositoryEndpoint =
-        field_map json "repositoryEndpoint" String_.of_json in
+        field_map json__ "repositoryEndpoint" String_.of_json in
       make ?repositoryEndpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the endpoint of a repository for a specific package format. A repository has one endpoint for each package format: npm pypi maven"]
+       "Returns the endpoint of a repository for a specific package format. A repository has one endpoint for each package format: cargo generic maven npm nuget pypi ruby swift"]
 module GetRepositoryEndpointRequest =
   struct
     type nonrec t =
@@ -5094,25 +8003,34 @@ module GetRepositoryEndpointRequest =
         [@ocaml.doc "The name of the domain that contains the repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain that contains the repository. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain that contains the repository. It does not include dashes or spaces."];
       repository: RepositoryName.t [@ocaml.doc "The name of the repository."];
       format: PackageFormat.t
         [@ocaml.doc
-          "Returns which endpoint of a repository to return. A repository has one endpoint for each package format: npm pypi maven"]}
+          "Returns which endpoint of a repository to return. A repository has one endpoint for each package format."];
+      endpointType: EndpointType.t option
+        [@ocaml.doc "A string that specifies the type of endpoint."]}
     let context_ = "GetRepositoryEndpointRequest"
     let make ?domainOwner =
-      fun ~domain ->
-        fun ~repository ->
-          fun ~format ->
-            fun () -> { domainOwner; domain; repository; format }
+      fun ?endpointType ->
+        fun ~domain ->
+          fun ~repository ->
+            fun ~format ->
+              fun () ->
+                { domainOwner; endpointType; domain; repository; format }
     let to_value x =
       structure_to_value
         [("domain", (Some (DomainName.to_value x.domain)));
         ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
         ("repository", (Some (RepositoryName.to_value x.repository)));
-        ("format", (Some (PackageFormat.to_value x.format)))]
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("endpointType",
+          (Option.map x.endpointType ~f:EndpointType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let endpointType =
+        (Option.map ~f:EndpointType.of_xml)
+          (Xml.child xml_arg0 "endpointType") in
       let format =
         PackageFormat.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "format") in
@@ -5123,27 +8041,29 @@ module GetRepositoryEndpointRequest =
         (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
       let domain =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
-      make ~format ~repository ?domainOwner ~domain ()
+      make ?endpointType ~format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
-      make ~format ~repository ?domainOwner ~domain ()
+    let of_json json__ =
+      let endpointType = field_map json__ "endpointType" EndpointType.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?endpointType ~format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the endpoint of a repository for a specific package format. A repository has one endpoint for each package format: npm pypi maven"]
+       "Returns the endpoint of a repository for a specific package format. A repository has one endpoint for each package format: cargo generic maven npm nuget pypi ruby swift"]
 module GetPackageVersionReadmeResult =
   struct
     type nonrec t =
       {
       format: PackageFormat.t option
         [@ocaml.doc
-          "The format of the package with the requested readme file. Valid format types are: npm pypi maven"];
+          "The format of the package with the requested readme file."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version with the requested readme file. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t option
         [@ocaml.doc
           "The name of the package that contains the returned readme file."];
@@ -5260,18 +8180,18 @@ module GetPackageVersionReadmeResult =
         (Option.map ~f:PackageFormat.of_xml) (Xml.child xml_arg0 "format") in
       make ?readme ?versionRevision ?version ?package ?namespace ?format ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let readme = field_map json "readme" String_.of_json in
+    let of_json json__ =
+      let readme = field_map json__ "readme" String_.of_json in
       let versionRevision =
-        field_map json "versionRevision" PackageVersionRevision.of_json in
-      let version = field_map json "version" PackageVersion.of_json in
-      let package = field_map json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map json "format" PackageFormat.of_json in
+        field_map json__ "versionRevision" PackageVersionRevision.of_json in
+      let version = field_map json__ "version" PackageVersion.of_json in
+      let package = field_map json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map json__ "format" PackageFormat.of_json in
       make ?readme ?versionRevision ?version ?package ?namespace ?format ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the readme file or descriptive text for a package version. For packages that do not contain a readme file, CodeArtifact extracts a description from a metadata file. For example, from the <description> element in the pom.xml file of a Maven package. The returned text might contain formatting. For example, it might contain formatting for Markdown or reStructuredText."]
+       "Gets the readme file or descriptive text for a package version. The returned text might contain formatting. For example, it might contain formatting for Markdown or reStructuredText."]
 module GetPackageVersionReadmeRequest =
   struct
     type nonrec t =
@@ -5281,16 +8201,16 @@ module GetPackageVersionReadmeRequest =
           "The name of the domain that contains the repository that contains the package version with the requested readme file."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The repository that contains the package with the requested readme file."];
       format: PackageFormat.t
         [@ocaml.doc
-          "A format that specifies the type of the package version with the requested readme file. The valid values are: npm pypi maven"];
+          "A format that specifies the type of the package version with the requested readme file."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version with the requested readme file. The package component that specifies its namespace depends on its type. For example: The namespace is required when requesting the readme from package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
           "The name of the package version that contains the requested readme file."];
@@ -5348,20 +8268,21 @@ module GetPackageVersionReadmeRequest =
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersion.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Gets the readme file or descriptive text for a package version. For packages that do not contain a readme file, CodeArtifact extracts a description from a metadata file. For example, from the <description> element in the pom.xml file of a Maven package. The returned text might contain formatting. For example, it might contain formatting for Markdown or reStructuredText."]
+       "Gets the readme file or descriptive text for a package version. The returned text might contain formatting. For example, it might contain formatting for Markdown or reStructuredText."]
 module GetPackageVersionAssetResult =
   struct
     type nonrec t =
@@ -5493,14 +8414,14 @@ module GetPackageVersionAssetResult =
       let asset = (Option.map ~f:Asset.of_xml) (Xml.child xml_arg0 "asset") in
       make ?packageVersionRevision ?packageVersion ?assetName ?asset ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersionRevision =
-        field_map json "packageVersionRevision"
+        field_map json__ "packageVersionRevision"
           PackageVersionRevision.of_json in
       let packageVersion =
-        field_map json "packageVersion" PackageVersion.of_json in
-      let assetName = field_map json "assetName" AssetName.of_json in
-      let asset = field_map json "asset" Asset.of_json in
+        field_map json__ "packageVersion" PackageVersion.of_json in
+      let assetName = field_map json__ "assetName" AssetName.of_json in
+      let asset = field_map json__ "asset" Asset.of_json in
       make ?packageVersionRevision ?packageVersion ?assetName ?asset ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5514,16 +8435,16 @@ module GetPackageVersionAssetRequest =
           "The name of the domain that contains the repository that contains the package version with the requested asset."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The repository that contains the package version with the requested asset."];
       format: PackageFormat.t
         [@ocaml.doc
-          "A format that specifies the type of the package version with the requested asset file. The valid values are: npm pypi maven"];
+          "A format that specifies the type of the package version with the requested asset file."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package version with the requested asset file. The package component that specifies its namespace depends on its type. For example: The namespace is required when requesting assets from package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
           "The name of the package that contains the requested asset."];
@@ -5598,19 +8519,20 @@ module GetPackageVersionAssetRequest =
       make ?packageVersionRevision ~asset ~packageVersion ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersionRevision =
-        field_map json "packageVersionRevision"
+        field_map json__ "packageVersionRevision"
           PackageVersionRevision.of_json in
-      let asset = field_map_exn json "asset" AssetName.of_json in
+      let asset = field_map_exn json__ "asset" AssetName.of_json in
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersion.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?packageVersionRevision ~asset ~packageVersion ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
@@ -5695,12 +8617,12 @@ module GetDomainPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the resource policy attached to the specified domain. The policy is a resource-based policy, not an identity-based policy. For more information, see Identity-based policies and resource-based policies in the AWS Identity and Access Management User Guide."]
+       "Returns the resource policy attached to the specified domain. The policy is a resource-based policy, not an identity-based policy. For more information, see Identity-based policies and resource-based policies in the IAM User Guide."]
 module GetDomainPermissionsPolicyRequest =
   struct
     type nonrec t =
@@ -5710,7 +8632,7 @@ module GetDomainPermissionsPolicyRequest =
           "The name of the domain to which the resource policy is attached."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."]}
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."]}
     let context_ = "GetDomainPermissionsPolicyRequest"
     let make ?domainOwner = fun ~domain -> fun () -> { domainOwner; domain }
     let to_value x =
@@ -5725,13 +8647,13 @@ module GetDomainPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the resource policy attached to the specified domain. The policy is a resource-based policy, not an identity-based policy. For more information, see Identity-based policies and resource-based policies in the AWS Identity and Access Management User Guide."]
+       "Returns the resource policy attached to the specified domain. The policy is a resource-based policy, not an identity-based policy. For more information, see Identity-based policies and resource-based policies in the IAM User Guide."]
 module GetAuthorizationTokenResult =
   struct
     type nonrec t =
@@ -5820,14 +8742,14 @@ module GetAuthorizationTokenResult =
           (Xml.child xml_arg0 "authorizationToken") in
       make ?expiration ?authorizationToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiration = field_map json "expiration" Timestamp.of_json in
+    let of_json json__ =
+      let expiration = field_map json__ "expiration" Timestamp.of_json in
       let authorizationToken =
-        field_map json "authorizationToken" String_.of_json in
+        field_map json__ "authorizationToken" String_.of_json in
       make ?expiration ?authorizationToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a temporary authorization token for accessing repositories in the domain. This API requires the codeartifact:GetAuthorizationToken and sts:GetServiceBearerToken permissions. For more information about authorization tokens, see AWS CodeArtifact authentication and tokens. CodeArtifact authorization tokens are valid for a period of 12 hours when created with the login command. You can call login periodically to refresh the token. When you create an authorization token with the GetAuthorizationToken API, you can set a custom authorization period, up to a maximum of 12 hours, with the durationSeconds parameter. The authorization period begins after login or GetAuthorizationToken is called. If login or GetAuthorizationToken is called while assuming a role, the token lifetime is independent of the maximum session duration of the role. For example, if you call sts assume-role and specify a session duration of 15 minutes, then generate a CodeArtifact authorization token, the token will be valid for the full authorization period even though this is longer than the 15-minute session duration. See Using IAM Roles for more information on controlling session duration."]
+       "Generates a temporary authorization token for accessing repositories in the domain. This API requires the codeartifact:GetAuthorizationToken and sts:GetServiceBearerToken permissions. For more information about authorization tokens, see CodeArtifact authentication and tokens. CodeArtifact authorization tokens are valid for a period of 12 hours when created with the login command. You can call login periodically to refresh the token. When you create an authorization token with the GetAuthorizationToken API, you can set a custom authorization period, up to a maximum of 12 hours, with the durationSeconds parameter. The authorization period begins after login or GetAuthorizationToken is called. If login or GetAuthorizationToken is called while assuming a role, the token lifetime is independent of the maximum session duration of the role. For example, if you call sts assume-role and specify a session duration of 15 minutes, then generate a CodeArtifact authorization token, the token will be valid for the full authorization period even though this is longer than the 15-minute session duration. See Using IAM Roles for more information on controlling session duration."]
 module GetAuthorizationTokenRequest =
   struct
     type nonrec t =
@@ -5837,7 +8759,7 @@ module GetAuthorizationTokenRequest =
           "The name of the domain that is in scope for the generated authorization token."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       durationSeconds: AuthorizationTokenDurationSeconds.t option
         [@ocaml.doc
           "The time, in seconds, that the generated authorization token is valid. Valid values are 0 and any number between 900 (15 minutes) and 43200 (12 hours). A value of 0 will set the expiration of the authorization token to the same expiration of the user's role's temporary credentials."]}
@@ -5863,16 +8785,169 @@ module GetAuthorizationTokenRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?durationSeconds ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationSeconds =
-        field_map json "durationSeconds"
+        field_map json__ "durationSeconds"
           AuthorizationTokenDurationSeconds.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?durationSeconds ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Generates a temporary authorization token for accessing repositories in the domain. This API requires the codeartifact:GetAuthorizationToken and sts:GetServiceBearerToken permissions. For more information about authorization tokens, see AWS CodeArtifact authentication and tokens. CodeArtifact authorization tokens are valid for a period of 12 hours when created with the login command. You can call login periodically to refresh the token. When you create an authorization token with the GetAuthorizationToken API, you can set a custom authorization period, up to a maximum of 12 hours, with the durationSeconds parameter. The authorization period begins after login or GetAuthorizationToken is called. If login or GetAuthorizationToken is called while assuming a role, the token lifetime is independent of the maximum session duration of the role. For example, if you call sts assume-role and specify a session duration of 15 minutes, then generate a CodeArtifact authorization token, the token will be valid for the full authorization period even though this is longer than the 15-minute session duration. See Using IAM Roles for more information on controlling session duration."]
+       "Generates a temporary authorization token for accessing repositories in the domain. This API requires the codeartifact:GetAuthorizationToken and sts:GetServiceBearerToken permissions. For more information about authorization tokens, see CodeArtifact authentication and tokens. CodeArtifact authorization tokens are valid for a period of 12 hours when created with the login command. You can call login periodically to refresh the token. When you create an authorization token with the GetAuthorizationToken API, you can set a custom authorization period, up to a maximum of 12 hours, with the durationSeconds parameter. The authorization period begins after login or GetAuthorizationToken is called. If login or GetAuthorizationToken is called while assuming a role, the token lifetime is independent of the maximum session duration of the role. For example, if you call sts assume-role and specify a session duration of 15 minutes, then generate a CodeArtifact authorization token, the token will be valid for the full authorization period even though this is longer than the 15-minute session duration. See Using IAM Roles for more information on controlling session duration."]
+module GetAssociatedPackageGroupResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "The package group that is associated with the requested package."];
+      associationType: PackageGroupAssociationType.t option
+        [@ocaml.doc
+          "Describes the strength of the association between the package and package group. A strong match is also known as an exact match, and a weak match is known as a relative match."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup =
+      fun ?associationType -> fun () -> { packageGroup; associationType }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value));
+        ("associationType",
+          (Option.map x.associationType
+             ~f:PackageGroupAssociationType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let associationType =
+        (Option.map ~f:PackageGroupAssociationType.of_xml)
+          (Xml.child xml_arg0 "associationType") in
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?associationType ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let associationType =
+        field_map json__ "associationType"
+          PackageGroupAssociationType.of_json in
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?associationType ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most closely associated package group to the specified package. This API does not require that the package exist in any repository in the domain. As such, GetAssociatedPackageGroup can be used to see which package group's origin configuration applies to a package before that package is in a repository. This can be helpful to check if public packages are blocked without ingesting them. For information package group association and matching, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
+module GetAssociatedPackageGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the package from which to get the associated package group."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      format: PackageFormat.t
+        [@ocaml.doc
+          "The format of the package from which to get the associated package group."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the package from which to get the associated package group. The package component that specifies its namespace depends on its type. For example: The namespace is required when getting associated package groups from packages of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t
+        [@ocaml.doc
+          "The package from which to get the associated package group."]}
+    let context_ = "GetAssociatedPackageGroupRequest"
+    let make ?domainOwner =
+      fun ?namespace ->
+        fun ~domain ->
+          fun ~format ->
+            fun ~package ->
+              fun () -> { domainOwner; namespace; domain; format; package }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Some (PackageName.to_value x.package)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let package =
+        PackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        PackageFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~package ?namespace ~format ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~package ?namespace ~format ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the most closely associated package group to the specified package. This API does not require that the package exist in any repository in the domain. As such, GetAssociatedPackageGroup can be used to see which package group's origin configuration applies to a package before that package is in a repository. This can be helpful to check if public packages are blocked without ingesting them. For information package group association and matching, see Package group definition syntax and matching behavior in the CodeArtifact User Guide."]
 module DisposePackageVersionsResult =
   struct
     type nonrec t =
@@ -5974,11 +9049,11 @@ module DisposePackageVersionsResult =
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedVersions =
-        field_map json "failedVersions" PackageVersionErrorMap.of_json in
+        field_map json__ "failedVersions" PackageVersionErrorMap.of_json in
       let successfulVersions =
-        field_map json "successfulVersions"
+        field_map json__ "successfulVersions"
           SuccessfulPackageVersionInfoMap.of_json in
       make ?failedVersions ?successfulVersions ()
     let to_json v = composed_to_json to_value v
@@ -5993,16 +9068,16 @@ module DisposePackageVersionsRequest =
           "The name of the domain that contains the repository you want to dispose."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that contains the package versions you want to dispose."];
       format: PackageFormat.t
         [@ocaml.doc
-          "A format that specifies the type of package versions you want to dispose. The valid values are: npm pypi maven"];
+          "A format that specifies the type of package versions you want to dispose."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package versions to be disposed. The package component that specifies its namespace depends on its type. For example: The namespace is required when disposing package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc
           "The name of the package with the versions you want to dispose."];
@@ -6012,8 +9087,7 @@ module DisposePackageVersionsRequest =
         [@ocaml.doc
           "The revisions of the package versions you want to dispose."];
       expectedStatus: PackageVersionStatus.t option
-        [@ocaml.doc
-          "The expected status of the package version to dispose. Valid values are: Published Unfinished Unlisted Archived Disposed"]}
+        [@ocaml.doc "The expected status of the package version to dispose."]}
     let context_ = "DisposePackageVersionsRequest"
     let make ?domainOwner =
       fun ?namespace ->
@@ -6080,18 +9154,20 @@ module DisposePackageVersionsRequest =
       make ?expectedStatus ?versionRevisions ~versions ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedStatus =
-        field_map json "expectedStatus" PackageVersionStatus.of_json in
+        field_map json__ "expectedStatus" PackageVersionStatus.of_json in
       let versionRevisions =
-        field_map json "versionRevisions" PackageVersionRevisionMap.of_json in
-      let versions = field_map_exn json "versions" PackageVersionList.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "versionRevisions" PackageVersionRevisionMap.of_json in
+      let versions =
+        field_map_exn json__ "versions" PackageVersionList.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?expectedStatus ?versionRevisions ~versions ~package ?namespace
         ~format ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
@@ -6199,9 +9275,9 @@ module DisassociateExternalConnectionResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6215,7 +9291,7 @@ module DisassociateExternalConnectionRequest =
           "The name of the domain that contains the repository from which to remove the external repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository from which the external connection will be removed."];
@@ -6249,13 +9325,14 @@ module DisassociateExternalConnectionRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~externalConnection ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let externalConnection =
-        field_map_exn json "externalConnection"
+        field_map_exn json__ "externalConnection"
           ExternalConnectionName.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~externalConnection ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6342,9 +9419,9 @@ module DescribeRepositoryResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6358,7 +9435,7 @@ module DescribeRepositoryRequest =
           "The name of the domain that contains the repository to describe."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "A string that specifies the name of the requested repository."]}
@@ -6382,10 +9459,11 @@ module DescribeRepositoryRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6394,7 +9472,7 @@ module DescribePackageVersionResult =
   struct
     type nonrec t =
       {
-      packageVersion: PackageVersionDescription.t
+      packageVersion: PackageVersionDescription.t option
         [@ocaml.doc
           "A PackageVersionDescription object that contains information about the requested package version."]}
     type nonrec error =
@@ -6405,8 +9483,7 @@ module DescribePackageVersionResult =
       | `ThrottlingException of ThrottlingException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribePackageVersionResult"
-    let make ~packageVersion = fun () -> { packageVersion }
+    let make ?packageVersion = fun () -> { packageVersion }
     let error_of_json name json =
       match name with
       | "AccessDeniedException" ->
@@ -6474,18 +9551,18 @@ module DescribePackageVersionResult =
     let to_value x =
       structure_to_value
         [("packageVersion",
-           (Some (PackageVersionDescription.to_value x.packageVersion)))]
+           (Option.map x.packageVersion ~f:PackageVersionDescription.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let packageVersion =
-        PackageVersionDescription.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "packageVersion") in
-      make ~packageVersion ()
+        (Option.map ~f:PackageVersionDescription.of_xml)
+          (Xml.child xml_arg0 "packageVersion") in
+      make ?packageVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersionDescription.of_json in
-      make ~packageVersion ()
+        field_map json__ "packageVersion" PackageVersionDescription.of_json in
+      make ?packageVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a PackageVersionDescription object that contains information about the requested package version."]
@@ -6498,16 +9575,16 @@ module DescribePackageVersionRequest =
           "The name of the domain that contains the repository that contains the package version."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that contains the package version."];
       format: PackageFormat.t
         [@ocaml.doc
-          "A format that specifies the type of the requested package version. The valid values are: npm pypi maven"];
+          "A format that specifies the type of the requested package version."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the requested package version. The package component that specifies its namespace depends on its type. For example: The namespace is required when requesting package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc "The name of the requested package version."];
       packageVersion: PackageVersion.t
@@ -6564,20 +9641,316 @@ module DescribePackageVersionRequest =
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageVersion =
-        field_map_exn json "packageVersion" PackageVersion.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "packageVersion" PackageVersion.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~packageVersion ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a PackageVersionDescription object that contains information about the requested package version."]
+module DescribePackageResult =
+  struct
+    type nonrec t =
+      {
+      package: PackageDescription.t option
+        [@ocaml.doc
+          "A PackageDescription object that contains information about the requested package."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?package = fun () -> { package }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("package", (Option.map x.package ~f:PackageDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let package =
+        (Option.map ~f:PackageDescription.of_xml)
+          (Xml.child xml_arg0 "package") in
+      make ?package ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let package = field_map json__ "package" PackageDescription.of_json in
+      make ?package ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a PackageDescription object that contains information about the requested package."]
+module DescribePackageRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the repository that contains the package."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      repository: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository that contains the requested package."];
+      format: PackageFormat.t
+        [@ocaml.doc
+          "A format that specifies the type of the requested package."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the requested package. The package component that specifies its namespace depends on its type. For example: The namespace is required when requesting packages of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t
+        [@ocaml.doc "The name of the requested package."]}
+    let context_ = "DescribePackageRequest"
+    let make ?domainOwner =
+      fun ?namespace ->
+        fun ~domain ->
+          fun ~repository ->
+            fun ~format ->
+              fun ~package ->
+                fun () ->
+                  {
+                    domainOwner;
+                    namespace;
+                    domain;
+                    repository;
+                    format;
+                    package
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("repository", (Some (RepositoryName.to_value x.repository)));
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Some (PackageName.to_value x.package)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let package =
+        PackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        PackageFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+      let repository =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a PackageDescription object that contains information about the requested package."]
+module DescribePackageGroupResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "A PackageGroupDescription object that contains information about the requested package group."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup = fun () -> { packageGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a PackageGroupDescription object that contains information about the requested package group."]
+module DescribePackageGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the package group."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc "The pattern of the requested package group."]}
+    let context_ = "DescribePackageGroupRequest"
+    let make ?domainOwner =
+      fun ~domain ->
+        fun ~packageGroup -> fun () -> { domainOwner; domain; packageGroup }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group",
+          (Some (PackageGroupPattern.to_value x.packageGroup)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~packageGroup ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~packageGroup ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a PackageGroupDescription object that contains information about the requested package group."]
 module DescribeDomainResult =
   struct
     type nonrec t = {
@@ -6656,8 +10029,8 @@ module DescribeDomainResult =
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" DomainDescription.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" DomainDescription.of_json in
       make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6671,7 +10044,7 @@ module DescribeDomainRequest =
           "A string that specifies the name of the requested domain."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."]}
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."]}
     let context_ = "DescribeDomainRequest"
     let make ?domainOwner = fun ~domain -> fun () -> { domainOwner; domain }
     let to_value x =
@@ -6686,9 +10059,9 @@ module DescribeDomainRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6784,9 +10157,9 @@ module DeleteRepositoryResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a repository."]
@@ -6799,7 +10172,7 @@ module DeleteRepositoryRequest =
           "The name of the domain that contains the repository to delete."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc "The name of the repository to delete."]}
     let context_ = "DeleteRepositoryRequest"
@@ -6822,10 +10195,11 @@ module DeleteRepositoryRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a repository."]
@@ -6918,12 +10292,12 @@ module DeleteRepositoryPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the resource policy that is set on a repository. After a resource policy is deleted, the permissions allowed and denied by the deleted policy are removed. The effect of deleting a resource policy might not be immediate. Use DeleteRepositoryPermissionsPolicy with caution. After a policy is deleted, AWS users, roles, and accounts lose permissions to perform the repository actions granted by the deleted policy."]
+       "Deletes the resource policy that is set on a repository. After a resource policy is deleted, the permissions allowed and denied by the deleted policy are removed. The effect of deleting a resource policy might not be immediate. Use DeleteRepositoryPermissionsPolicy with caution. After a policy is deleted, Amazon Web Services users, roles, and accounts lose permissions to perform the repository actions granted by the deleted policy."]
 module DeleteRepositoryPermissionsPolicyRequest =
   struct
     type nonrec t =
@@ -6933,7 +10307,7 @@ module DeleteRepositoryPermissionsPolicyRequest =
           "The name of the domain that contains the repository associated with the resource policy to be deleted."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that is associated with the resource policy to be deleted"];
@@ -6967,23 +10341,24 @@ module DeleteRepositoryPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?policyRevision ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevision =
-        field_map json "policyRevision" PolicyRevision.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "policyRevision" PolicyRevision.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?policyRevision ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes the resource policy that is set on a repository. After a resource policy is deleted, the permissions allowed and denied by the deleted policy are removed. The effect of deleting a resource policy might not be immediate. Use DeleteRepositoryPermissionsPolicy with caution. After a policy is deleted, AWS users, roles, and accounts lose permissions to perform the repository actions granted by the deleted policy."]
+       "Deletes the resource policy that is set on a repository. After a resource policy is deleted, the permissions allowed and denied by the deleted policy are removed. The effect of deleting a resource policy might not be immediate. Use DeleteRepositoryPermissionsPolicy with caution. After a policy is deleted, Amazon Web Services users, roles, and accounts lose permissions to perform the repository actions granted by the deleted policy."]
 module DeletePackageVersionsResult =
   struct
     type nonrec t =
       {
       successfulVersions: SuccessfulPackageVersionInfoMap.t option
         [@ocaml.doc
-          "A list of the package versions that were successfully deleted."];
+          "A list of the package versions that were successfully deleted. The status of every successful version will be Deleted."];
       failedVersions: PackageVersionErrorMap.t option
         [@ocaml.doc
           "A PackageVersionError object that contains a map of errors codes for the deleted package that failed. The possible error codes are: ALREADY_EXISTS MISMATCHED_REVISION MISMATCHED_STATUS NOT_ALLOWED NOT_FOUND SKIPPED"]}
@@ -7078,16 +10453,16 @@ module DeletePackageVersionsResult =
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedVersions =
-        field_map json "failedVersions" PackageVersionErrorMap.of_json in
+        field_map json__ "failedVersions" PackageVersionErrorMap.of_json in
       let successfulVersions =
-        field_map json "successfulVersions"
+        field_map json__ "successfulVersions"
           SuccessfulPackageVersionInfoMap.of_json in
       make ?failedVersions ?successfulVersions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes one or more versions of a package. A deleted package version cannot be restored in your repository. If you want to remove a package version from your repository and be able to restore it later, set its status to Archived. Archived packages cannot be downloaded from a repository and don't show up with list package APIs (for example, ListackageVersions), but you can restore them using UpdatePackageVersionsStatus."]
+       "Deletes one or more versions of a package. A deleted package version cannot be restored in your repository. If you want to remove a package version from your repository and be able to restore it later, set its status to Archived. Archived packages cannot be downloaded from a repository and don't show up with list package APIs (for example, ListPackageVersions), but you can restore them using UpdatePackageVersionsStatus."]
 module DeletePackageVersionsRequest =
   struct
     type nonrec t =
@@ -7097,24 +10472,22 @@ module DeletePackageVersionsRequest =
           "The name of the domain that contains the package to delete."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository that contains the package versions to delete."];
       format: PackageFormat.t
-        [@ocaml.doc
-          "The format of the package versions to delete. The valid values are: npm pypi maven"];
+        [@ocaml.doc "The format of the package versions to delete."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package versions to be deleted. The package component that specifies its namespace depends on its type. For example: The namespace is required when deleting package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
         [@ocaml.doc "The name of the package with the versions to delete."];
       versions: PackageVersionList.t
         [@ocaml.doc
           "An array of strings that specify the versions of the package to delete."];
       expectedStatus: PackageVersionStatus.t option
-        [@ocaml.doc
-          "The expected status of the package version to delete. Valid values are: Published Unfinished Unlisted Archived Disposed"]}
+        [@ocaml.doc "The expected status of the package version to delete."]}
     let context_ = "DeletePackageVersionsRequest"
     let make ?domainOwner =
       fun ?namespace ->
@@ -7173,21 +10546,343 @@ module DeletePackageVersionsRequest =
       make ?expectedStatus ~versions ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let expectedStatus =
-        field_map json "expectedStatus" PackageVersionStatus.of_json in
-      let versions = field_map_exn json "versions" PackageVersionList.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "expectedStatus" PackageVersionStatus.of_json in
+      let versions =
+        field_map_exn json__ "versions" PackageVersionList.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?expectedStatus ~versions ~package ?namespace ~format ~repository
         ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Deletes one or more versions of a package. A deleted package version cannot be restored in your repository. If you want to remove a package version from your repository and be able to restore it later, set its status to Archived. Archived packages cannot be downloaded from a repository and don't show up with list package APIs (for example, ListackageVersions), but you can restore them using UpdatePackageVersionsStatus."]
+       "Deletes one or more versions of a package. A deleted package version cannot be restored in your repository. If you want to remove a package version from your repository and be able to restore it later, set its status to Archived. Archived packages cannot be downloaded from a repository and don't show up with list package APIs (for example, ListPackageVersions), but you can restore them using UpdatePackageVersionsStatus."]
+module DeletePackageResult =
+  struct
+    type nonrec t = {
+      deletedPackage: PackageSummary.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?deletedPackage = fun () -> { deletedPackage }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("deletedPackage",
+           (Option.map x.deletedPackage ~f:PackageSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deletedPackage =
+        (Option.map ~f:PackageSummary.of_xml)
+          (Xml.child xml_arg0 "deletedPackage") in
+      make ?deletedPackage ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deletedPackage =
+        field_map json__ "deletedPackage" PackageSummary.of_json in
+      make ?deletedPackage ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a package and all associated package versions. A deleted package cannot be restored. To delete one or more package versions, use the DeletePackageVersions API."]
+module DeletePackageRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain that contains the package to delete."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      repository: RepositoryName.t
+        [@ocaml.doc
+          "The name of the repository that contains the package to delete."];
+      format: PackageFormat.t
+        [@ocaml.doc "The format of the requested package to delete."];
+      namespace: PackageNamespace.t option
+        [@ocaml.doc
+          "The namespace of the package to delete. The package component that specifies its namespace depends on its type. For example: The namespace is required when deleting packages of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
+      package: PackageName.t
+        [@ocaml.doc "The name of the package to delete."]}
+    let context_ = "DeletePackageRequest"
+    let make ?domainOwner =
+      fun ?namespace ->
+        fun ~domain ->
+          fun ~repository ->
+            fun ~format ->
+              fun ~package ->
+                fun () ->
+                  {
+                    domainOwner;
+                    namespace;
+                    domain;
+                    repository;
+                    format;
+                    package
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("repository", (Some (RepositoryName.to_value x.repository)));
+        ("format", (Some (PackageFormat.to_value x.format)));
+        ("namespace", (Option.map x.namespace ~f:PackageNamespace.to_value));
+        ("package", (Some (PackageName.to_value x.package)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let package =
+        PackageName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package") in
+      let namespace =
+        (Option.map ~f:PackageNamespace.of_xml)
+          (Xml.child xml_arg0 "namespace") in
+      let format =
+        PackageFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "format") in
+      let repository =
+        RepositoryName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "repository") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~package ?namespace ~format ~repository ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a package and all associated package versions. A deleted package cannot be restored. To delete one or more package versions, use the DeletePackageVersions API."]
+module DeletePackageGroupResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "Information about the deleted package group after processing the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup = fun () -> { packageGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a package group. Deleting a package group does not delete packages or package versions associated with the package group. When a package group is deleted, the direct child package groups will become children of the package group's direct parent package group. Therefore, if any of the child groups are inheriting any settings from the parent, those settings could change."]
+module DeletePackageGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The domain that contains the package group to be deleted."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: String_.t
+        [@ocaml.doc "The pattern of the package group to be deleted."]}
+    let context_ = "DeletePackageGroupRequest"
+    let make ?domainOwner =
+      fun ~domain ->
+        fun ~packageGroup -> fun () -> { domainOwner; domain; packageGroup }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("package-group", (Some (String_.to_value x.packageGroup)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "package-group") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ~packageGroup ?domainOwner ~domain ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup = field_map_exn json__ "packageGroup" String_.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ~packageGroup ?domainOwner ~domain ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a package group. Deleting a package group does not delete packages or package versions associated with the package group. When a package group is deleted, the direct child package groups will become children of the package group's direct parent package group. Therefore, if any of the child groups are inheriting any settings from the parent, those settings could change."]
 module DeleteDomainResult =
   struct
     type nonrec t =
@@ -7269,8 +10964,8 @@ module DeleteDomainResult =
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" DomainDescription.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" DomainDescription.of_json in
       make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7282,7 +10977,7 @@ module DeleteDomainRequest =
       domain: DomainName.t [@ocaml.doc "The name of the domain to delete."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."]}
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."]}
     let context_ = "DeleteDomainRequest"
     let make ?domainOwner = fun ~domain -> fun () -> { domainOwner; domain }
     let to_value x =
@@ -7297,9 +10992,9 @@ module DeleteDomainRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7393,8 +11088,8 @@ module DeleteDomainPermissionsPolicyResult =
         (Option.map ~f:ResourcePolicy.of_xml) (Xml.child xml_arg0 "policy") in
       make ?policy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let policy = field_map json "policy" ResourcePolicy.of_json in
+    let of_json json__ =
+      let policy = field_map json__ "policy" ResourcePolicy.of_json in
       make ?policy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the resource policy set on a domain."]
@@ -7407,7 +11102,7 @@ module DeleteDomainPermissionsPolicyRequest =
           "The name of the domain associated with the resource policy to be deleted."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       policyRevision: PolicyRevision.t option
         [@ocaml.doc
           "The current revision of the resource policy to be deleted. This revision is used for optimistic locking, which prevents others from overwriting your changes to the domain's resource policy."]}
@@ -7432,11 +11127,11 @@ module DeleteDomainPermissionsPolicyRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?policyRevision ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let policyRevision =
-        field_map json "policyRevision" PolicyRevision.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "policyRevision" PolicyRevision.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?policyRevision ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the resource policy set on a domain."]
@@ -7542,9 +11237,9 @@ module CreateRepositoryResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a repository."]
@@ -7557,14 +11252,14 @@ module CreateRepositoryRequest =
           "The name of the domain that contains the created repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc "The name of the repository to create."];
       description: Description.t option
         [@ocaml.doc "A description of the created repository."];
       upstreams: UpstreamRepositoryList.t option
         [@ocaml.doc
-          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when AWS CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."];
+          "A list of upstream repositories to associate with the repository. The order of the upstream repositories in the list determines their priority order when CodeArtifact looks for a requested package version. For more information, see Working with upstream repositories."];
       tags: TagList.t option
         [@ocaml.doc "One or more tag key-value pairs for the repository."]}
     let context_ = "CreateRepositoryRequest"
@@ -7609,17 +11304,204 @@ module CreateRepositoryRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?tags ?upstreams ?description ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
       let upstreams =
-        field_map json "upstreams" UpstreamRepositoryList.of_json in
-      let description = field_map json "description" Description.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map json__ "upstreams" UpstreamRepositoryList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?tags ?upstreams ?description ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a repository."]
+module CreatePackageGroupResult =
+  struct
+    type nonrec t =
+      {
+      packageGroup: PackageGroupDescription.t option
+        [@ocaml.doc
+          "Information about the created package group after processing the request."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?packageGroup = fun () -> { packageGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("packageGroup",
+           (Option.map x.packageGroup ~f:PackageGroupDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let packageGroup =
+        (Option.map ~f:PackageGroupDescription.of_xml)
+          (Xml.child xml_arg0 "packageGroup") in
+      make ?packageGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let packageGroup =
+        field_map json__ "packageGroup" PackageGroupDescription.of_json in
+      make ?packageGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a package group. For more information about creating package groups, including example CLI commands, see Create a package group in the CodeArtifact User Guide."]
+module CreatePackageGroupRequest =
+  struct
+    type nonrec t =
+      {
+      domain: DomainName.t
+        [@ocaml.doc
+          "The name of the domain in which you want to create a package group."];
+      domainOwner: AccountId.t option
+        [@ocaml.doc
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
+      packageGroup: PackageGroupPattern.t
+        [@ocaml.doc
+          "The pattern of the package group to create. The pattern is also the identifier of the package group."];
+      contactInfo: PackageGroupContactInfo.t option
+        [@ocaml.doc "The contact information for the created package group."];
+      description: Description.t option
+        [@ocaml.doc "A description of the package group."];
+      tags: TagList.t option
+        [@ocaml.doc "One or more tag key-value pairs for the package group."]}
+    let context_ = "CreatePackageGroupRequest"
+    let make ?domainOwner =
+      fun ?contactInfo ->
+        fun ?description ->
+          fun ?tags ->
+            fun ~domain ->
+              fun ~packageGroup ->
+                fun () ->
+                  {
+                    domainOwner;
+                    contactInfo;
+                    description;
+                    tags;
+                    domain;
+                    packageGroup
+                  }
+    let to_value x =
+      structure_to_value
+        [("domain", (Some (DomainName.to_value x.domain)));
+        ("domain-owner", (Option.map x.domainOwner ~f:AccountId.to_value));
+        ("packageGroup",
+          (Some (PackageGroupPattern.to_value x.packageGroup)));
+        ("contactInfo",
+          (Option.map x.contactInfo ~f:PackageGroupContactInfo.to_value));
+        ("description", (Option.map x.description ~f:Description.to_value));
+        ("tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "tags") in
+      let description =
+        (Option.map ~f:Description.of_xml) (Xml.child xml_arg0 "description") in
+      let contactInfo =
+        (Option.map ~f:PackageGroupContactInfo.of_xml)
+          (Xml.child xml_arg0 "contactInfo") in
+      let packageGroup =
+        PackageGroupPattern.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "packageGroup") in
+      let domainOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "domain-owner") in
+      let domain =
+        DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
+      make ?tags ?description ?contactInfo ~packageGroup ?domainOwner ~domain
+        ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let description = field_map json__ "description" Description.of_json in
+      let contactInfo =
+        field_map json__ "contactInfo" PackageGroupContactInfo.of_json in
+      let packageGroup =
+        field_map_exn json__ "packageGroup" PackageGroupPattern.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
+      make ?tags ?description ?contactInfo ~packageGroup ?domainOwner ~domain
+        ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a package group. For more information about creating package groups, including example CLI commands, see Create a package group in the CodeArtifact User Guide."]
 module CreateDomainResult =
   struct
     type nonrec t =
@@ -7721,22 +11603,22 @@ module CreateDomainResult =
           (Xml.child xml_arg0 "domain") in
       make ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domain = field_map json "domain" DomainDescription.of_json in
+    let of_json json__ =
+      let domain = field_map json__ "domain" DomainDescription.of_json in
       make ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a domain. CodeArtifact domains make it easier to manage multiple repositories across an organization. You can use a domain to apply permissions across many repositories owned by different AWS accounts. An asset is stored only once in a domain, even if it's in multiple repositories. Although you can have multiple domains, we recommend a single production domain that contains all published artifacts so that your development teams can find and share packages. You can use a second pre-production domain to test changes to the production domain configuration."]
+       "Creates a domain. CodeArtifact domains make it easier to manage multiple repositories across an organization. You can use a domain to apply permissions across many repositories owned by different Amazon Web Services accounts. An asset is stored only once in a domain, even if it's in multiple repositories. Although you can have multiple domains, we recommend a single production domain that contains all published artifacts so that your development teams can find and share packages. You can use a second pre-production domain to test changes to the production domain configuration."]
 module CreateDomainRequest =
   struct
     type nonrec t =
       {
       domain: DomainName.t
         [@ocaml.doc
-          "The name of the domain to create. All domain names in an AWS Region that are in the same AWS account must be unique. The domain name is used as the prefix in DNS hostnames. Do not use sensitive information in a domain name because it is publicly discoverable."];
+          "The name of the domain to create. All domain names in an Amazon Web Services Region that are in the same Amazon Web Services account must be unique. The domain name is used as the prefix in DNS hostnames. Do not use sensitive information in a domain name because it is publicly discoverable."];
       encryptionKey: Arn.t option
         [@ocaml.doc
-          "The encryption key for the domain. This is used to encrypt content stored in a domain. An encryption key can be a key ID, a key Amazon Resource Name (ARN), a key alias, or a key alias ARN. To specify an encryptionKey, your IAM role must have kms:DescribeKey and kms:CreateGrant permissions on the encryption key that is used. For more information, see DescribeKey in the AWS Key Management Service API Reference and AWS KMS API Permissions Reference in the AWS Key Management Service Developer Guide. CodeArtifact supports only symmetric CMKs. Do not associate an asymmetric CMK with your domain. For more information, see Using symmetric and asymmetric keys in the AWS Key Management Service Developer Guide."];
+          "The encryption key for the domain. This is used to encrypt content stored in a domain. An encryption key can be a key ID, a key Amazon Resource Name (ARN), a key alias, or a key alias ARN. To specify an encryptionKey, your IAM role must have kms:DescribeKey and kms:CreateGrant permissions on the encryption key that is used. For more information, see DescribeKey in the Key Management Service API Reference and Key Management Service API Permissions Reference in the Key Management Service Developer Guide. CodeArtifact supports only symmetric CMKs. Do not associate an asymmetric CMK with your domain. For more information, see Using symmetric and asymmetric keys in the Key Management Service Developer Guide."];
       tags: TagList.t option
         [@ocaml.doc "One or more tag key-value pairs for the domain."]}
     let context_ = "CreateDomainRequest"
@@ -7756,14 +11638,14 @@ module CreateDomainRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ?tags ?encryptionKey ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagList.of_json in
-      let encryptionKey = field_map json "encryptionKey" Arn.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagList.of_json in
+      let encryptionKey = field_map json__ "encryptionKey" Arn.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?tags ?encryptionKey ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a domain. CodeArtifact domains make it easier to manage multiple repositories across an organization. You can use a domain to apply permissions across many repositories owned by different AWS accounts. An asset is stored only once in a domain, even if it's in multiple repositories. Although you can have multiple domains, we recommend a single production domain that contains all published artifacts so that your development teams can find and share packages. You can use a second pre-production domain to test changes to the production domain configuration."]
+       "Creates a domain. CodeArtifact domains make it easier to manage multiple repositories across an organization. You can use a domain to apply permissions across many repositories owned by different Amazon Web Services accounts. An asset is stored only once in a domain, even if it's in multiple repositories. Although you can have multiple domains, we recommend a single production domain that contains all published artifacts so that your development teams can find and share packages. You can use a second pre-production domain to test changes to the production domain configuration."]
 module CopyPackageVersionsResult =
   struct
     type nonrec t =
@@ -7876,11 +11758,11 @@ module CopyPackageVersionsResult =
           (Xml.child xml_arg0 "successfulVersions") in
       make ?failedVersions ?successfulVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let failedVersions =
-        field_map json "failedVersions" PackageVersionErrorMap.of_json in
+        field_map json__ "failedVersions" PackageVersionErrorMap.of_json in
       let successfulVersions =
-        field_map json "successfulVersions"
+        field_map json__ "successfulVersions"
           SuccessfulPackageVersionInfoMap.of_json in
       make ?failedVersions ?successfulVersions ()
     let to_json v = composed_to_json to_value v
@@ -7895,24 +11777,24 @@ module CopyPackageVersionsRequest =
           "The name of the domain that contains the source and destination repositories."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       sourceRepository: RepositoryName.t
         [@ocaml.doc
-          "The name of the repository that contains the package versions to copy."];
+          "The name of the repository that contains the package versions to be copied."];
       destinationRepository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository into which package versions are copied."];
       format: PackageFormat.t
-        [@ocaml.doc
-          "The format of the package that is copied. The valid package types are: npm: A Node Package Manager (npm) package. pypi: A Python Package Index (PyPI) package. maven: A Maven package that contains compiled code in a distributable format, such as a JAR file."];
+        [@ocaml.doc "The format of the package versions to be copied."];
       namespace: PackageNamespace.t option
         [@ocaml.doc
-          "The namespace of the package. The package component that specifies its namespace depends on its type. For example: The namespace of a Maven package is its groupId. The namespace of an npm package is its scope. A Python package does not contain a corresponding component, so Python packages do not have a namespace."];
+          "The namespace of the package versions to be copied. The package component that specifies its namespace depends on its type. For example: The namespace is required when copying package versions of the following formats: Maven Swift generic The namespace of a Maven package version is its groupId. The namespace of an npm or Swift package version is its scope. The namespace of a generic package is its namespace. Python, NuGet, Ruby, and Cargo package versions do not contain a corresponding component, package versions of those formats do not have a namespace."];
       package: PackageName.t
-        [@ocaml.doc "The name of the package that is copied."];
+        [@ocaml.doc
+          "The name of the package that contains the versions to be copied."];
       versions: PackageVersionList.t option
         [@ocaml.doc
-          "The versions of the package to copy. You must specify versions or versionRevisions. You cannot specify both."];
+          "The versions of the package to be copied. You must specify versions or versionRevisions. You cannot specify both."];
       versionRevisions: PackageVersionRevisionMap.t option
         [@ocaml.doc
           "A list of key-value pairs. The keys are package versions and the values are package version revisions. A CopyPackageVersion operation succeeds if the specified versions in the source repository match the specified package version revision. You must specify versions or versionRevisions. You cannot specify both."];
@@ -8004,23 +11886,23 @@ module CopyPackageVersionsRequest =
         ~package ?namespace ~format ~destinationRepository ~sourceRepository
         ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeFromUpstream =
-        field_map json "includeFromUpstream" BooleanOptional.of_json in
+        field_map json__ "includeFromUpstream" BooleanOptional.of_json in
       let allowOverwrite =
-        field_map json "allowOverwrite" BooleanOptional.of_json in
+        field_map json__ "allowOverwrite" BooleanOptional.of_json in
       let versionRevisions =
-        field_map json "versionRevisions" PackageVersionRevisionMap.of_json in
-      let versions = field_map json "versions" PackageVersionList.of_json in
-      let package = field_map_exn json "package" PackageName.of_json in
-      let namespace = field_map json "namespace" PackageNamespace.of_json in
-      let format = field_map_exn json "format" PackageFormat.of_json in
+        field_map json__ "versionRevisions" PackageVersionRevisionMap.of_json in
+      let versions = field_map json__ "versions" PackageVersionList.of_json in
+      let package = field_map_exn json__ "package" PackageName.of_json in
+      let namespace = field_map json__ "namespace" PackageNamespace.of_json in
+      let format = field_map_exn json__ "format" PackageFormat.of_json in
       let destinationRepository =
-        field_map_exn json "destinationRepository" RepositoryName.of_json in
+        field_map_exn json__ "destinationRepository" RepositoryName.of_json in
       let sourceRepository =
-        field_map_exn json "sourceRepository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+        field_map_exn json__ "sourceRepository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ?includeFromUpstream ?allowOverwrite ?versionRevisions ?versions
         ~package ?namespace ~format ~destinationRepository ~sourceRepository
         ?domainOwner ~domain ()
@@ -8129,9 +12011,9 @@ module AssociateExternalConnectionResult =
           (Xml.child xml_arg0 "repository") in
       make ?repository ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let repository =
-        field_map json "repository" RepositoryDescription.of_json in
+        field_map json__ "repository" RepositoryDescription.of_json in
       make ?repository ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8144,13 +12026,13 @@ module AssociateExternalConnectionRequest =
         [@ocaml.doc "The name of the domain that contains the repository."];
       domainOwner: AccountId.t option
         [@ocaml.doc
-          "The 12-digit account number of the AWS account that owns the domain. It does not include dashes or spaces."];
+          "The 12-digit account number of the Amazon Web Services account that owns the domain. It does not include dashes or spaces."];
       repository: RepositoryName.t
         [@ocaml.doc
           "The name of the repository to which the external connection is added."];
       externalConnection: ExternalConnectionName.t
         [@ocaml.doc
-          "The name of the external connection to add to the repository. The following values are supported: public:npmjs - for the npm public repository. public:pypi - for the Python Package Index. public:maven-central - for Maven Central. public:maven-googleandroid - for the Google Android repository. public:maven-gradleplugins - for the Gradle plugins repository. public:maven-commonsware - for the CommonsWare Android repository."]}
+          "The name of the external connection to add to the repository. The following values are supported: public:npmjs - for the npm public repository. public:nuget-org - for the NuGet Gallery. public:pypi - for the Python Package Index. public:maven-central - for Maven Central. public:maven-googleandroid - for the Google Android repository. public:maven-gradleplugins - for the Gradle plugins repository. public:maven-commonsware - for the CommonsWare Android repository. public:maven-clojars - for the Clojars repository. public:ruby-gems-org - for RubyGems.org. public:crates-io - for Crates.io."]}
     let context_ = "AssociateExternalConnectionRequest"
     let make ?domainOwner =
       fun ~domain ->
@@ -8178,13 +12060,14 @@ module AssociateExternalConnectionRequest =
         DomainName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "domain") in
       make ~externalConnection ~repository ?domainOwner ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let externalConnection =
-        field_map_exn json "externalConnection"
+        field_map_exn json__ "externalConnection"
           ExternalConnectionName.of_json in
-      let repository = field_map_exn json "repository" RepositoryName.of_json in
-      let domainOwner = field_map json "domainOwner" AccountId.of_json in
-      let domain = field_map_exn json "domain" DomainName.of_json in
+      let repository =
+        field_map_exn json__ "repository" RepositoryName.of_json in
+      let domainOwner = field_map json__ "domainOwner" AccountId.of_json in
+      let domain = field_map_exn json__ "domain" DomainName.of_json in
       make ~externalConnection ~repository ?domainOwner ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

@@ -79,6 +79,9 @@ let create_stream =
          flag "data-retention-in-hours" (optional int)
            ~doc:"INT DataRetentionInHours"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON ResourceTags"
+       and streamStorageConfiguration =
+         flag "stream-storage-configuration" (optional json_arg)
+           ~doc:"JSON StreamStorageConfiguration"
        and streamName =
          flag "stream-name" (required string) ~doc:"STRING StreamName" in
        fun () ->
@@ -87,8 +90,31 @@ let create_stream =
            (Values.CreateStreamInput.make ?deviceName ?mediaType ?kmsKeyId
               ?dataRetentionInHours
               ?tags:(Option.map ~f:Values.ResourceTags.of_json tags)
+              ?streamStorageConfiguration:(Option.map
+                                             ~f:Values.StreamStorageConfiguration.of_json
+                                             streamStorageConfiguration)
               ~streamName ()) (Some Values.CreateStreamOutput.to_json)
            (Some Values.CreateStreamOutput.error_to_json)])
+let delete_edge_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_edge_configuration
+           (Values.DeleteEdgeConfigurationInput.make ?streamName ?streamARN
+              ()) (Some Values.DeleteEdgeConfigurationOutput.to_json)
+           (Some Values.DeleteEdgeConfigurationOutput.error_to_json)])
 let delete_signaling_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -130,6 +156,117 @@ let delete_stream =
            (Values.DeleteStreamInput.make ?currentVersion ~streamARN ())
            (Some Values.DeleteStreamOutput.to_json)
            (Some Values.DeleteStreamOutput.error_to_json)])
+let describe_edge_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_edge_configuration
+           (Values.DescribeEdgeConfigurationInput.make ?streamName ?streamARN
+              ()) (Some Values.DescribeEdgeConfigurationOutput.to_json)
+           (Some Values.DescribeEdgeConfigurationOutput.error_to_json)])
+let describe_image_generation_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_image_generation_configuration
+           (Values.DescribeImageGenerationConfigurationInput.make ?streamName
+              ?streamARN ())
+           (Some Values.DescribeImageGenerationConfigurationOutput.to_json)
+           (Some
+              Values.DescribeImageGenerationConfigurationOutput.error_to_json)])
+let describe_mapped_resource_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT MappedResourceConfigurationListLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_mapped_resource_configuration
+           (Values.DescribeMappedResourceConfigurationInput.make ?streamName
+              ?streamARN ?maxResults ?nextToken ())
+           (Some Values.DescribeMappedResourceConfigurationOutput.to_json)
+           (Some
+              Values.DescribeMappedResourceConfigurationOutput.error_to_json)])
+let describe_media_storage_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channelName =
+         flag "channel-name" (optional string) ~doc:"STRING ChannelName"
+       and channelARN =
+         flag "channel-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_media_storage_configuration
+           (Values.DescribeMediaStorageConfigurationInput.make ?channelName
+              ?channelARN ())
+           (Some Values.DescribeMediaStorageConfigurationOutput.to_json)
+           (Some Values.DescribeMediaStorageConfigurationOutput.error_to_json)])
+let describe_notification_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_notification_configuration
+           (Values.DescribeNotificationConfigurationInput.make ?streamName
+              ?streamARN ())
+           (Some Values.DescribeNotificationConfigurationOutput.to_json)
+           (Some Values.DescribeNotificationConfigurationOutput.error_to_json)])
 let describe_signaling_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -171,6 +308,28 @@ let describe_stream =
            (Values.DescribeStreamInput.make ?streamName ?streamARN ())
            (Some Values.DescribeStreamOutput.to_json)
            (Some Values.DescribeStreamOutput.error_to_json)])
+let describe_stream_storage_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_stream_storage_configuration
+           (Values.DescribeStreamStorageConfigurationInput.make ?streamName
+              ?streamARN ())
+           (Some Values.DescribeStreamStorageConfigurationOutput.to_json)
+           (Some
+              Values.DescribeStreamStorageConfigurationOutput.error_to_json)])
 let get_data_endpoint =
   Command.async ~summary:""
     ([%map_open.Command
@@ -220,6 +379,30 @@ let get_signaling_channel_endpoint =
               ~channelARN ())
            (Some Values.GetSignalingChannelEndpointOutput.to_json)
            (Some Values.GetSignalingChannelEndpointOutput.error_to_json)])
+let list_edge_agent_configurations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int)
+           ~doc:"INT ListEdgeAgentConfigurationsInputLimit"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and hubDeviceArn =
+         flag "hub-device-arn" (required string) ~doc:"STRING HubDeviceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_edge_agent_configurations
+           (Values.ListEdgeAgentConfigurationsInput.make ?maxResults
+              ?nextToken ~hubDeviceArn ())
+           (Some Values.ListEdgeAgentConfigurationsOutput.to_json)
+           (Some Values.ListEdgeAgentConfigurationsOutput.error_to_json)])
 let list_signaling_channels =
   Command.async ~summary:""
     ([%map_open.Command
@@ -314,6 +497,29 @@ let list_tags_for_stream =
            (Values.ListTagsForStreamInput.make ?nextToken ?streamARN
               ?streamName ()) (Some Values.ListTagsForStreamOutput.to_json)
            (Some Values.ListTagsForStreamOutput.error_to_json)])
+let start_edge_configuration_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and edgeConfig =
+         flag "edge-config" (required json_arg) ~doc:"JSON EdgeConfig" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_edge_configuration_update
+           (Values.StartEdgeConfigurationUpdateInput.make ?streamName
+              ?streamARN ~edgeConfig:(Values.EdgeConfig.of_json edgeConfig)
+              ()) (Some Values.StartEdgeConfigurationUpdateOutput.to_json)
+           (Some Values.StartEdgeConfigurationUpdateOutput.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -431,6 +637,85 @@ let update_data_retention =
                             operation) ~dataRetentionChangeInHours ())
            (Some Values.UpdateDataRetentionOutput.to_json)
            (Some Values.UpdateDataRetentionOutput.error_to_json)])
+let update_image_generation_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and imageGenerationConfiguration =
+         flag "image-generation-configuration" (optional json_arg)
+           ~doc:"JSON ImageGenerationConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_image_generation_configuration
+           (Values.UpdateImageGenerationConfigurationInput.make ?streamName
+              ?streamARN
+              ?imageGenerationConfiguration:(Option.map
+                                               ~f:Values.ImageGenerationConfiguration.of_json
+                                               imageGenerationConfiguration)
+              ())
+           (Some Values.UpdateImageGenerationConfigurationOutput.to_json)
+           (Some
+              Values.UpdateImageGenerationConfigurationOutput.error_to_json)])
+let update_media_storage_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and channelARN =
+         flag "channel-a-r-n" (required string) ~doc:"STRING ResourceARN"
+       and mediaStorageConfiguration =
+         flag "media-storage-configuration" (required json_arg)
+           ~doc:"JSON MediaStorageConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_media_storage_configuration
+           (Values.UpdateMediaStorageConfigurationInput.make ~channelARN
+              ~mediaStorageConfiguration:(Values.MediaStorageConfiguration.of_json
+                                            mediaStorageConfiguration) ())
+           (Some Values.UpdateMediaStorageConfigurationOutput.to_json)
+           (Some Values.UpdateMediaStorageConfigurationOutput.error_to_json)])
+let update_notification_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and notificationConfiguration =
+         flag "notification-configuration" (optional json_arg)
+           ~doc:"JSON NotificationConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_notification_configuration
+           (Values.UpdateNotificationConfigurationInput.make ?streamName
+              ?streamARN
+              ?notificationConfiguration:(Option.map
+                                            ~f:Values.NotificationConfiguration.of_json
+                                            notificationConfiguration) ())
+           (Some Values.UpdateNotificationConfigurationOutput.to_json)
+           (Some Values.UpdateNotificationConfigurationOutput.error_to_json)])
 let update_signaling_channel =
   Command.async ~summary:""
     ([%map_open.Command
@@ -485,25 +770,74 @@ let update_stream =
               ?mediaType ~currentVersion ())
            (Some Values.UpdateStreamOutput.to_json)
            (Some Values.UpdateStreamOutput.error_to_json)])
+let update_stream_storage_configuration =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING ResourceARN"
+       and currentVersion =
+         flag "current-version" (required string) ~doc:"STRING Version"
+       and streamStorageConfiguration =
+         flag "stream-storage-configuration" (required json_arg)
+           ~doc:"JSON StreamStorageConfiguration" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_stream_storage_configuration
+           (Values.UpdateStreamStorageConfigurationInput.make ?streamName
+              ?streamARN ~currentVersion
+              ~streamStorageConfiguration:(Values.StreamStorageConfiguration.of_json
+                                             streamStorageConfiguration) ())
+           (Some Values.UpdateStreamStorageConfigurationOutput.to_json)
+           (Some Values.UpdateStreamStorageConfigurationOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-signaling-channel", create_signaling_channel);
     ("create-stream", create_stream);
+    ("delete-edge-configuration", delete_edge_configuration);
     ("delete-signaling-channel", delete_signaling_channel);
     ("delete-stream", delete_stream);
+    ("describe-edge-configuration", describe_edge_configuration);
+    ("describe-image-generation-configuration",
+      describe_image_generation_configuration);
+    ("describe-mapped-resource-configuration",
+      describe_mapped_resource_configuration);
+    ("describe-media-storage-configuration",
+      describe_media_storage_configuration);
+    ("describe-notification-configuration",
+      describe_notification_configuration);
     ("describe-signaling-channel", describe_signaling_channel);
     ("describe-stream", describe_stream);
+    ("describe-stream-storage-configuration",
+      describe_stream_storage_configuration);
     ("get-data-endpoint", get_data_endpoint);
     ("get-signaling-channel-endpoint", get_signaling_channel_endpoint);
+    ("list-edge-agent-configurations", list_edge_agent_configurations);
     ("list-signaling-channels", list_signaling_channels);
     ("list-streams", list_streams);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-tags-for-stream", list_tags_for_stream);
+    ("start-edge-configuration-update", start_edge_configuration_update);
     ("tag-resource", tag_resource);
     ("tag-stream", tag_stream);
     ("untag-resource", untag_resource);
     ("untag-stream", untag_stream);
     ("update-data-retention", update_data_retention);
+    ("update-image-generation-configuration",
+      update_image_generation_configuration);
+    ("update-media-storage-configuration",
+      update_media_storage_configuration);
+    ("update-notification-configuration", update_notification_configuration);
     ("update-signaling-channel", update_signaling_channel);
-    ("update-stream", update_stream)]
+    ("update-stream", update_stream);
+    ("update-stream-storage-configuration",
+      update_stream_storage_configuration)]

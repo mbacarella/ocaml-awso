@@ -114,7 +114,7 @@ let suite_main ~sso bucket () =
       dispatch_exn
         ~name:"s3.list_buckets"
         ~error_to_json:S3.ListBucketsOutput.error_to_json
-        ~f:(fun () -> S3.list_buckets ~cfg ())
+        ~f:(fun () -> S3.list_buckets ~cfg (S3.ListBucketsRequest.make ()))
       >>| fun _ -> ()
     in
     dispatch_exn

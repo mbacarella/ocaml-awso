@@ -67,6 +67,9 @@ module EncryptionAlgorithms =
   struct
     type nonrec t = EncryptionAlgorithm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EncryptionAlgorithm.to_value)) |>
         (fun x -> `List x)
@@ -93,6 +96,9 @@ module HashAlgorithms =
   struct
     type nonrec t = HashAlgorithm.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:HashAlgorithm.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -299,80 +305,83 @@ module EncryptionAlgorithmOptions =
   struct
     type nonrec t =
       {
-      allowedValues: EncryptionAlgorithms.t
+      allowedValues: EncryptionAlgorithms.t option
         [@ocaml.doc
-          "The set of accepted encryption algorithms that are allowed in a code signing job."];
-      defaultValue: EncryptionAlgorithm.t
+          "The set of accepted encryption algorithms that are allowed in a code-signing job."];
+      defaultValue: EncryptionAlgorithm.t option
         [@ocaml.doc
-          "The default encryption algorithm that is used by a code signing job."]}
-    let context_ = "EncryptionAlgorithmOptions"
-    let make ~allowedValues =
-      fun ~defaultValue -> fun () -> { allowedValues; defaultValue }
+          "The default encryption algorithm that is used by a code-signing job."]}
+    let make ?allowedValues =
+      fun ?defaultValue -> fun () -> { allowedValues; defaultValue }
     let to_value x =
       structure_to_value
         [("allowedValues",
-           (Some (EncryptionAlgorithms.to_value x.allowedValues)));
+           (Option.map x.allowedValues ~f:EncryptionAlgorithms.to_value));
         ("defaultValue",
-          (Some (EncryptionAlgorithm.to_value x.defaultValue)))]
+          (Option.map x.defaultValue ~f:EncryptionAlgorithm.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let defaultValue =
-        EncryptionAlgorithm.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "defaultValue") in
+        (Option.map ~f:EncryptionAlgorithm.of_xml)
+          (Xml.child xml_arg0 "defaultValue") in
       let allowedValues =
-        EncryptionAlgorithms.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "allowedValues") in
-      make ~defaultValue ~allowedValues ()
+        (Option.map ~f:EncryptionAlgorithms.of_xml)
+          (Xml.child xml_arg0 "allowedValues") in
+      make ?defaultValue ?allowedValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultValue =
-        field_map_exn json "defaultValue" EncryptionAlgorithm.of_json in
+        field_map json__ "defaultValue" EncryptionAlgorithm.of_json in
       let allowedValues =
-        field_map_exn json "allowedValues" EncryptionAlgorithms.of_json in
-      make ~defaultValue ~allowedValues ()
+        field_map json__ "allowedValues" EncryptionAlgorithms.of_json in
+      make ?defaultValue ?allowedValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The encryption algorithm options that are available to a code signing job."]
+       "The encryption algorithm options that are available to a code-signing job."]
 module HashAlgorithmOptions =
   struct
     type nonrec t =
       {
-      allowedValues: HashAlgorithms.t
+      allowedValues: HashAlgorithms.t option
         [@ocaml.doc
-          "The set of accepted hash algorithms allowed in a code signing job."];
-      defaultValue: HashAlgorithm.t
+          "The set of accepted hash algorithms allowed in a code-signing job."];
+      defaultValue: HashAlgorithm.t option
         [@ocaml.doc
-          "The default hash algorithm that is used in a code signing job."]}
-    let context_ = "HashAlgorithmOptions"
-    let make ~allowedValues =
-      fun ~defaultValue -> fun () -> { allowedValues; defaultValue }
+          "The default hash algorithm that is used in a code-signing job."]}
+    let make ?allowedValues =
+      fun ?defaultValue -> fun () -> { allowedValues; defaultValue }
     let to_value x =
       structure_to_value
-        [("allowedValues", (Some (HashAlgorithms.to_value x.allowedValues)));
-        ("defaultValue", (Some (HashAlgorithm.to_value x.defaultValue)))]
+        [("allowedValues",
+           (Option.map x.allowedValues ~f:HashAlgorithms.to_value));
+        ("defaultValue",
+          (Option.map x.defaultValue ~f:HashAlgorithm.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let defaultValue =
-        HashAlgorithm.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "defaultValue") in
+        (Option.map ~f:HashAlgorithm.of_xml)
+          (Xml.child xml_arg0 "defaultValue") in
       let allowedValues =
-        HashAlgorithms.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "allowedValues") in
-      make ~defaultValue ~allowedValues ()
+        (Option.map ~f:HashAlgorithms.of_xml)
+          (Xml.child xml_arg0 "allowedValues") in
+      make ?defaultValue ?allowedValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultValue =
-        field_map_exn json "defaultValue" HashAlgorithm.of_json in
+        field_map json__ "defaultValue" HashAlgorithm.of_json in
       let allowedValues =
-        field_map_exn json "allowedValues" HashAlgorithms.of_json in
-      make ~defaultValue ~allowedValues ()
+        field_map json__ "allowedValues" HashAlgorithms.of_json in
+      make ?defaultValue ?allowedValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The hash algorithms that are available to a code signing job."]
+       "The hash algorithms that are available to a code-signing job."]
 module ImageFormats =
   struct
     type nonrec t = ImageFormat.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ImageFormat.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -413,13 +422,13 @@ module S3SignedObject =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?key ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let key = field_map json "key" Key.of_json in
-      let bucketName = field_map json "bucketName" BucketName.of_json in
+    let of_json json__ =
+      let key = field_map json__ "key" Key.of_json in
+      let bucketName = field_map json__ "bucketName" BucketName.of_json in
       make ?key ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The S3 bucket name and key where code signing saved your signed code image."]
+       "The Amazon S3 bucket name and key where Signer saved your signed code image."]
 module S3Source =
   struct
     type nonrec t =
@@ -449,14 +458,14 @@ module S3Source =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ~version ~key ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map_exn json "version" Version.of_json in
-      let key = field_map_exn json "key" Key.of_json in
-      let bucketName = field_map_exn json "bucketName" BucketName.of_json in
+    let of_json json__ =
+      let version = field_map_exn json__ "version" Version.of_json in
+      let key = field_map_exn json__ "key" Key.of_json in
+      let bucketName = field_map_exn json__ "bucketName" BucketName.of_json in
       make ~version ~key ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Information about the S3 bucket where you saved your unsigned code."]
+       "Information about the Amazon S3 bucket where you saved your unsigned code."]
 module Prefix =
   struct
     type nonrec t = string
@@ -575,9 +584,9 @@ module SignatureValidityPeriod =
       let value = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "value") in
       make ?type_ ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map json "type" ValidityType.of_json in
-      let value = field_map json "value" Integer.of_json in
+    let of_json json__ =
+      let type_ = field_map json__ "type" ValidityType.of_json in
+      let value = field_map json__ "value" Integer.of_json in
       make ?type_ ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The validity period for a signing job."]
@@ -601,9 +610,9 @@ module SigningMaterial =
           (Xml.child_exn ~context:context_ xml_arg0 "certificateArn") in
       make ~certificateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let certificateArn =
-        field_map_exn json "certificateArn" CertificateArn.of_json in
+        field_map_exn json__ "certificateArn" CertificateArn.of_json in
       make ~certificateArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ACM certificate that is used to sign your code."]
@@ -630,6 +639,8 @@ module SigningParameters =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -705,6 +716,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -746,79 +759,75 @@ module SigningConfiguration =
   struct
     type nonrec t =
       {
-      encryptionAlgorithmOptions: EncryptionAlgorithmOptions.t
+      encryptionAlgorithmOptions: EncryptionAlgorithmOptions.t option
         [@ocaml.doc
-          "The encryption algorithm options that are available for a code signing job."];
-      hashAlgorithmOptions: HashAlgorithmOptions.t
+          "The encryption algorithm options that are available for a code-signing job."];
+      hashAlgorithmOptions: HashAlgorithmOptions.t option
         [@ocaml.doc
-          "The hash algorithm options that are available for a code signing job."]}
-    let context_ = "SigningConfiguration"
-    let make ~encryptionAlgorithmOptions =
-      fun ~hashAlgorithmOptions ->
+          "The hash algorithm options that are available for a code-signing job."]}
+    let make ?encryptionAlgorithmOptions =
+      fun ?hashAlgorithmOptions ->
         fun () -> { encryptionAlgorithmOptions; hashAlgorithmOptions }
     let to_value x =
       structure_to_value
         [("encryptionAlgorithmOptions",
-           (Some
-              (EncryptionAlgorithmOptions.to_value
-                 x.encryptionAlgorithmOptions)));
+           (Option.map x.encryptionAlgorithmOptions
+              ~f:EncryptionAlgorithmOptions.to_value));
         ("hashAlgorithmOptions",
-          (Some (HashAlgorithmOptions.to_value x.hashAlgorithmOptions)))]
+          (Option.map x.hashAlgorithmOptions ~f:HashAlgorithmOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let hashAlgorithmOptions =
-        HashAlgorithmOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "hashAlgorithmOptions") in
+        (Option.map ~f:HashAlgorithmOptions.of_xml)
+          (Xml.child xml_arg0 "hashAlgorithmOptions") in
       let encryptionAlgorithmOptions =
-        EncryptionAlgorithmOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "encryptionAlgorithmOptions") in
-      make ~hashAlgorithmOptions ~encryptionAlgorithmOptions ()
+        (Option.map ~f:EncryptionAlgorithmOptions.of_xml)
+          (Xml.child xml_arg0 "encryptionAlgorithmOptions") in
+      make ?hashAlgorithmOptions ?encryptionAlgorithmOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hashAlgorithmOptions =
-        field_map_exn json "hashAlgorithmOptions"
-          HashAlgorithmOptions.of_json in
+        field_map json__ "hashAlgorithmOptions" HashAlgorithmOptions.of_json in
       let encryptionAlgorithmOptions =
-        field_map_exn json "encryptionAlgorithmOptions"
+        field_map json__ "encryptionAlgorithmOptions"
           EncryptionAlgorithmOptions.of_json in
-      make ~hashAlgorithmOptions ~encryptionAlgorithmOptions ()
+      make ?hashAlgorithmOptions ?encryptionAlgorithmOptions ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The configuration of a code signing operation."]
+  end[@@ocaml.doc "The configuration of a signing operation."]
 module SigningImageFormat =
   struct
     type nonrec t =
       {
-      supportedFormats: ImageFormats.t
-        [@ocaml.doc "The supported formats of a code signing image."];
-      defaultFormat: ImageFormat.t
-        [@ocaml.doc "The default format of a code signing image."]}
-    let context_ = "SigningImageFormat"
-    let make ~supportedFormats =
-      fun ~defaultFormat -> fun () -> { supportedFormats; defaultFormat }
+      supportedFormats: ImageFormats.t option
+        [@ocaml.doc "The supported formats of a signing image."];
+      defaultFormat: ImageFormat.t option
+        [@ocaml.doc "The default format of a signing image."]}
+    let make ?supportedFormats =
+      fun ?defaultFormat -> fun () -> { supportedFormats; defaultFormat }
     let to_value x =
       structure_to_value
         [("supportedFormats",
-           (Some (ImageFormats.to_value x.supportedFormats)));
-        ("defaultFormat", (Some (ImageFormat.to_value x.defaultFormat)))]
+           (Option.map x.supportedFormats ~f:ImageFormats.to_value));
+        ("defaultFormat",
+          (Option.map x.defaultFormat ~f:ImageFormat.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let defaultFormat =
-        ImageFormat.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "defaultFormat") in
+        (Option.map ~f:ImageFormat.of_xml)
+          (Xml.child xml_arg0 "defaultFormat") in
       let supportedFormats =
-        ImageFormats.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "supportedFormats") in
-      make ~defaultFormat ~supportedFormats ()
+        (Option.map ~f:ImageFormats.of_xml)
+          (Xml.child xml_arg0 "supportedFormats") in
+      make ?defaultFormat ?supportedFormats ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultFormat =
-        field_map_exn json "defaultFormat" ImageFormat.of_json in
+        field_map json__ "defaultFormat" ImageFormat.of_json in
       let supportedFormats =
-        field_map_exn json "supportedFormats" ImageFormats.of_json in
-      make ~defaultFormat ~supportedFormats ()
+        field_map json__ "supportedFormats" ImageFormats.of_json in
+      make ?defaultFormat ?supportedFormats ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The image format of a code signing platform or profile."]
+  end[@@ocaml.doc "The image format of a AWS Signer platform or profile."]
 module String_ =
   struct
     type nonrec t = string
@@ -832,7 +841,7 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
-module Bool =
+module Bool_ =
   struct
     type nonrec t = bool
     let make i = i
@@ -893,8 +902,8 @@ module SignedObject =
         (Option.map ~f:S3SignedObject.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3SignedObject.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3SignedObject.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Points to an S3SignedObject object that contains information about your signed code image."]
@@ -939,8 +948,8 @@ module Source =
       let s3 = (Option.map ~f:S3Source.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3Source.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3Source.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An S3Source object that contains information about the S3 bucket where you saved your unsigned code."]
@@ -989,7 +998,7 @@ module S3Destination =
       bucketName: BucketName.t option [@ocaml.doc "Name of the S3 bucket."];
       prefix: Prefix.t option
         [@ocaml.doc
-          "An Amazon S3 prefix that you can use to limit responses to those that begin with the specified prefix."]}
+          "An S3 prefix that you can use to limit responses to those that begin with the specified prefix."]}
     let make ?bucketName = fun ?prefix -> fun () -> { bucketName; prefix }
     let to_value x =
       structure_to_value
@@ -1003,23 +1012,23 @@ module S3Destination =
         (Option.map ~f:BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" Prefix.of_json in
-      let bucketName = field_map json "bucketName" BucketName.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" Prefix.of_json in
+      let bucketName = field_map json__ "bucketName" BucketName.of_json in
       make ?prefix ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The name and prefix of the S3 bucket where code signing saves your signed objects."]
+       "The name and prefix of the Amazon S3 bucket where AWS Signer saves your signed objects."]
 module SigningConfigurationOverrides =
   struct
     type nonrec t =
       {
       encryptionAlgorithm: EncryptionAlgorithm.t option
         [@ocaml.doc
-          "A specified override of the default encryption algorithm that is used in a code signing job."];
+          "A specified override of the default encryption algorithm that is used in a code-signing job."];
       hashAlgorithm: HashAlgorithm.t option
         [@ocaml.doc
-          "A specified override of the default hash algorithm that is used in a code signing job."]}
+          "A specified override of the default hash algorithm that is used in a code-signing job."]}
     let make ?encryptionAlgorithm =
       fun ?hashAlgorithm -> fun () -> { encryptionAlgorithm; hashAlgorithm }
     let to_value x =
@@ -1038,11 +1047,11 @@ module SigningConfigurationOverrides =
           (Xml.child xml_arg0 "encryptionAlgorithm") in
       make ?hashAlgorithm ?encryptionAlgorithm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hashAlgorithm =
-        field_map json "hashAlgorithm" HashAlgorithm.of_json in
+        field_map json__ "hashAlgorithm" HashAlgorithm.of_json in
       let encryptionAlgorithm =
-        field_map json "encryptionAlgorithm" EncryptionAlgorithm.of_json in
+        field_map json__ "encryptionAlgorithm" EncryptionAlgorithm.of_json in
       make ?hashAlgorithm ?encryptionAlgorithm ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1071,9 +1080,9 @@ module SigningProfile =
         [@ocaml.doc "The name of the signing platform."];
       signingParameters: SigningParameters.t option
         [@ocaml.doc
-          "The parameters that are available for use by a code signing user."];
+          "The parameters that are available for use by a Signer user."];
       status: SigningProfileStatus.t option
-        [@ocaml.doc "The status of a code signing profile."];
+        [@ocaml.doc "The status of a signing profile."];
       arn: String__lc1.t option
         [@ocaml.doc
           "The Amazon Resource Name (ARN) for the signing profile."];
@@ -1156,54 +1165,54 @@ module SigningProfile =
         ?platformId ?signatureValidityPeriod ?signingMaterial
         ?profileVersionArn ?profileVersion ?profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let arn = field_map json "arn" String__lc1.of_json in
-      let status = field_map json "status" SigningProfileStatus.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let arn = field_map json__ "arn" String__lc1.of_json in
+      let status = field_map json__ "status" SigningProfileStatus.of_json in
       let signingParameters =
-        field_map json "signingParameters" SigningParameters.of_json in
+        field_map json__ "signingParameters" SigningParameters.of_json in
       let platformDisplayName =
-        field_map json "platformDisplayName" DisplayName.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
+        field_map json__ "platformDisplayName" DisplayName.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
       let signatureValidityPeriod =
-        field_map json "signatureValidityPeriod"
+        field_map json__ "signatureValidityPeriod"
           SignatureValidityPeriod.of_json in
       let signingMaterial =
-        field_map json "signingMaterial" SigningMaterial.of_json in
-      let profileVersionArn = field_map json "profileVersionArn" Arn.of_json in
+        field_map json__ "signingMaterial" SigningMaterial.of_json in
+      let profileVersionArn =
+        field_map json__ "profileVersionArn" Arn.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map json "profileName" ProfileName.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let profileName = field_map json__ "profileName" ProfileName.of_json in
       make ?tags ?arn ?status ?signingParameters ?platformDisplayName
         ?platformId ?signatureValidityPeriod ?signingMaterial
         ?profileVersionArn ?profileVersion ?profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the ACM certificates and code signing configuration parameters that can be used by a given code signing user."]
+       "Contains information about the ACM certificates and signing configuration parameters that can be used by a given code signing user."]
 module SigningPlatform =
   struct
     type nonrec t =
       {
       platformId: String_.t option
-        [@ocaml.doc "The ID of a code signing; platform."];
+        [@ocaml.doc "The ID of a signing platform."];
       displayName: String_.t option
-        [@ocaml.doc "The display name of a code signing platform."];
+        [@ocaml.doc "The display name of a signing platform."];
       partner: String_.t option
-        [@ocaml.doc
-          "Any partner entities linked to a code signing platform."];
+        [@ocaml.doc "Any partner entities linked to a signing platform."];
       target: String_.t option
         [@ocaml.doc
-          "The types of targets that can be signed by a code signing platform."];
+          "The types of targets that can be signed by a signing platform."];
       category: Category.t option
-        [@ocaml.doc "The category of a code signing platform."];
+        [@ocaml.doc "The category of a signing platform."];
       signingConfiguration: SigningConfiguration.t option
         [@ocaml.doc
-          "The configuration of a code signing platform. This includes the designated hash algorithm and encryption algorithm of a signing platform."];
+          "The configuration of a signing platform. This includes the designated hash algorithm and encryption algorithm of a signing platform."];
       signingImageFormat: SigningImageFormat.t option ;
       maxSizeInMB: MaxSizeInMB.t option
         [@ocaml.doc
-          "The maximum size (in MB) of code that can be signed by a code signing platform."];
-      revocationSupported: Bool.t option
+          "The maximum size (in MB) of code that can be signed by a signing platform."];
+      revocationSupported: Bool_.t option
         [@ocaml.doc
           "Indicates whether revocation is supported for the platform."]}
     let make ?platformId =
@@ -1240,11 +1249,11 @@ module SigningPlatform =
           (Option.map x.signingImageFormat ~f:SigningImageFormat.to_value));
         ("maxSizeInMB", (Option.map x.maxSizeInMB ~f:MaxSizeInMB.to_value));
         ("revocationSupported",
-          (Option.map x.revocationSupported ~f:Bool.to_value))]
+          (Option.map x.revocationSupported ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let revocationSupported =
-        (Option.map ~f:Bool.of_xml)
+        (Option.map ~f:Bool_.of_xml)
           (Xml.child xml_arg0 "revocationSupported") in
       let maxSizeInMB =
         (Option.map ~f:MaxSizeInMB.of_xml) (Xml.child xml_arg0 "maxSizeInMB") in
@@ -1268,25 +1277,25 @@ module SigningPlatform =
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revocationSupported =
-        field_map json "revocationSupported" Bool.of_json in
-      let maxSizeInMB = field_map json "maxSizeInMB" MaxSizeInMB.of_json in
+        field_map json__ "revocationSupported" Bool_.of_json in
+      let maxSizeInMB = field_map json__ "maxSizeInMB" MaxSizeInMB.of_json in
       let signingImageFormat =
-        field_map json "signingImageFormat" SigningImageFormat.of_json in
+        field_map json__ "signingImageFormat" SigningImageFormat.of_json in
       let signingConfiguration =
-        field_map json "signingConfiguration" SigningConfiguration.of_json in
-      let category = field_map json "category" Category.of_json in
-      let target = field_map json "target" String_.of_json in
-      let partner = field_map json "partner" String_.of_json in
-      let displayName = field_map json "displayName" String_.of_json in
-      let platformId = field_map json "platformId" String_.of_json in
+        field_map json__ "signingConfiguration" SigningConfiguration.of_json in
+      let category = field_map json__ "category" Category.of_json in
+      let target = field_map json__ "target" String_.of_json in
+      let partner = field_map json__ "partner" String_.of_json in
+      let displayName = field_map json__ "displayName" String_.of_json in
+      let platformId = field_map json__ "platformId" String_.of_json in
       make ?revocationSupported ?maxSizeInMB ?signingImageFormat
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Contains information about the signing configurations and parameters that are used to perform a code signing job."]
+       "Contains information about the signing configurations and parameters that are used to perform a code-signing job."]
 module SigningJob =
   struct
     type nonrec t =
@@ -1305,7 +1314,7 @@ module SigningJob =
         [@ocaml.doc "The date and time that the signing job was created."];
       status: SigningStatus.t option
         [@ocaml.doc "The status of the signing job."];
-      isRevoked: Bool.t option
+      isRevoked: Bool_.t option
         [@ocaml.doc "Indicates whether the signing job is revoked."];
       profileName: ProfileName.t option
         [@ocaml.doc
@@ -1364,7 +1373,7 @@ module SigningJob =
           (Option.map x.signingMaterial ~f:SigningMaterial.to_value));
         ("createdAt", (Option.map x.createdAt ~f:Timestamp.to_value));
         ("status", (Option.map x.status ~f:SigningStatus.to_value));
-        ("isRevoked", (Option.map x.isRevoked ~f:Bool.to_value));
+        ("isRevoked", (Option.map x.isRevoked ~f:Bool_.to_value));
         ("profileName", (Option.map x.profileName ~f:ProfileName.to_value));
         ("profileVersion",
           (Option.map x.profileVersion ~f:ProfileVersion.to_value));
@@ -1395,7 +1404,7 @@ module SigningJob =
       let profileName =
         (Option.map ~f:ProfileName.of_xml) (Xml.child xml_arg0 "profileName") in
       let isRevoked =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "isRevoked") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "isRevoked") in
       let status =
         (Option.map ~f:SigningStatus.of_xml) (Xml.child xml_arg0 "status") in
       let createdAt =
@@ -1413,25 +1422,25 @@ module SigningJob =
         ?platformId ?profileVersion ?profileName ?isRevoked ?status
         ?createdAt ?signingMaterial ?signedObject ?source ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
-      let jobOwner = field_map json "jobOwner" AccountId.of_json in
+    let of_json json__ =
+      let jobInvoker = field_map json__ "jobInvoker" AccountId.of_json in
+      let jobOwner = field_map json__ "jobOwner" AccountId.of_json in
       let signatureExpiresAt =
-        field_map json "signatureExpiresAt" Timestamp.of_json in
+        field_map json__ "signatureExpiresAt" Timestamp.of_json in
       let platformDisplayName =
-        field_map json "platformDisplayName" DisplayName.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
+        field_map json__ "platformDisplayName" DisplayName.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map json "profileName" ProfileName.of_json in
-      let isRevoked = field_map json "isRevoked" Bool.of_json in
-      let status = field_map json "status" SigningStatus.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let profileName = field_map json__ "profileName" ProfileName.of_json in
+      let isRevoked = field_map json__ "isRevoked" Bool_.of_json in
+      let status = field_map json__ "status" SigningStatus.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let signingMaterial =
-        field_map json "signingMaterial" SigningMaterial.of_json in
-      let signedObject = field_map json "signedObject" SignedObject.of_json in
-      let source = field_map json "source" Source.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "signingMaterial" SigningMaterial.of_json in
+      let signedObject = field_map json__ "signedObject" SignedObject.of_json in
+      let source = field_map json__ "source" Source.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?jobInvoker ?jobOwner ?signatureExpiresAt ?platformDisplayName
         ?platformId ?profileVersion ?profileName ?isRevoked ?status
         ?createdAt ?signingMaterial ?signedObject ?source ?jobId ()
@@ -1478,12 +1487,12 @@ module Permission =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "action") in
       make ?profileVersion ?statementId ?principal ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let statementId = field_map json "statementId" String_.of_json in
-      let principal = field_map json "principal" String_.of_json in
-      let action = field_map json "action" String_.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let statementId = field_map json__ "statementId" String_.of_json in
+      let principal = field_map json__ "principal" String_.of_json in
+      let action = field_map json__ "action" String_.of_json in
       make ?profileVersion ?statementId ?principal ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A cross-account permission for a signing profile."]
@@ -1505,9 +1514,9 @@ module BadRequestException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1530,9 +1539,9 @@ module InternalServiceErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal error occurred."]
@@ -1554,9 +1563,9 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The signing profile was not found."]
@@ -1578,9 +1587,9 @@ module TooManyRequestsException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1594,6 +1603,9 @@ module TagKeyList =
           ((check_list_max i ~max:200) >>=
              (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1631,9 +1643,9 @@ module AccessDeniedException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1656,9 +1668,9 @@ module ResourceNotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A specified resource could not be found."]
@@ -1680,9 +1692,9 @@ module ThrottlingException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1705,9 +1717,9 @@ module ValidationException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You signing certificate could not be validated."]
@@ -1738,11 +1750,65 @@ module Destination =
       let s3 = (Option.map ~f:S3Destination.of_xml) (Xml.child xml_arg0 "s3") in
       make ?s3 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3 = field_map json "s3" S3Destination.of_json in make ?s3 ()
+    let of_json json__ =
+      let s3 = field_map json__ "s3" S3Destination.of_json in make ?s3 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Points to an S3Destination object that contains information about your S3 bucket."]
+module Blob =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
+module Metadata =
+  struct
+    type nonrec t = (String_.t * String_.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((String_.of_string chopped),
+                              (String_.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (String_.to_value x) |>
+                    (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:String_.of_string
+        ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module Payload =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Blob x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml xml_arg0 = string_of_xml ~kind:"a blob" xml_arg0
+    let of_json j = string_of_json ~kind:"a blob" j
+    let to_json = simple_to_json to_value
+  end
 module RevocationReasonString =
   struct
     type nonrec t = string
@@ -1779,9 +1845,9 @@ module ConflictException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The resource encountered a conflicting state."]
@@ -1815,16 +1881,16 @@ module SigningPlatformOverrides =
           (Xml.child xml_arg0 "signingConfiguration") in
       make ?signingImageFormat ?signingConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let signingImageFormat =
-        field_map json "signingImageFormat" ImageFormat.of_json in
+        field_map json__ "signingImageFormat" ImageFormat.of_json in
       let signingConfiguration =
-        field_map json "signingConfiguration"
+        field_map json__ "signingConfiguration"
           SigningConfigurationOverrides.of_json in
       make ?signingImageFormat ?signingConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Any overrides that are applied to the signing configuration of a code signing platform."]
+       "Any overrides that are applied to the signing configuration of a signing platform."]
 module NextToken =
   struct
     type nonrec t = string
@@ -1842,6 +1908,9 @@ module SigningProfiles =
   struct
     type nonrec t = SigningProfile.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SigningProfile.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1884,6 +1953,9 @@ module Statuses =
   struct
     type nonrec t = SigningProfileStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SigningProfileStatus.to_value)) |>
         (fun x -> `List x)
@@ -1909,6 +1981,9 @@ module SigningPlatforms =
   struct
     type nonrec t = SigningPlatform.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SigningPlatform.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1934,6 +2009,9 @@ module SigningJobs =
   struct
     type nonrec t = SigningJob.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SigningJob.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1971,6 +2049,9 @@ module Permissions =
   struct
     type nonrec t = Permission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Permission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2035,14 +2116,68 @@ module SigningProfileRevocationRecord =
           (Xml.child xml_arg0 "revocationEffectiveFrom") in
       make ?revokedBy ?revokedAt ?revocationEffectiveFrom ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revokedBy = field_map json "revokedBy" String_.of_json in
-      let revokedAt = field_map json "revokedAt" Timestamp.of_json in
+    let of_json json__ =
+      let revokedBy = field_map json__ "revokedBy" String_.of_json in
+      let revokedAt = field_map json__ "revokedAt" Timestamp.of_json in
       let revocationEffectiveFrom =
-        field_map json "revocationEffectiveFrom" Timestamp.of_json in
+        field_map json__ "revocationEffectiveFrom" Timestamp.of_json in
       make ?revokedBy ?revokedAt ?revocationEffectiveFrom ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Revocation information for a signing profile."]
+module RevokedEntities =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"RevokedEntities" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CertificateHashes =
+  struct
+    type nonrec t = String_.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:String_.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CertificateHashes" ~of_json:String_.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module SigningJobRevocationRecord =
   struct
     type nonrec t =
@@ -2069,10 +2204,10 @@ module SigningJobRevocationRecord =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "reason") in
       make ?revokedBy ?revokedAt ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revokedBy = field_map json "revokedBy" String_.of_json in
-      let revokedAt = field_map json "revokedAt" Timestamp.of_json in
-      let reason = field_map json "reason" String_.of_json in
+    let of_json json__ =
+      let revokedBy = field_map json__ "revokedBy" String_.of_json in
+      let revokedAt = field_map json__ "revokedAt" Timestamp.of_json in
+      let reason = field_map json__ "reason" String_.of_json in
       make ?revokedBy ?revokedAt ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Revocation information for a signing job."]
@@ -2107,9 +2242,9 @@ module ServiceLimitExceededException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?code ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let code = field_map json "code" ErrorCode.of_json in
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let code = field_map json__ "code" ErrorCode.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?code ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2210,9 +2345,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2311,9 +2446,9 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2411,13 +2546,13 @@ module StartSigningJobResponse =
       let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
       make ?jobOwner ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobOwner = field_map json "jobOwner" AccountId.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+    let of_json json__ =
+      let jobOwner = field_map json__ "jobOwner" AccountId.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?jobOwner ?jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Initiates a signing job to be performed on the code provided. Signing jobs are viewable by the ListSigningJobs operation for two years after they are performed. Note the following requirements: You must create an Amazon S3 source bucket. For more information, see Create a Bucket in the Amazon S3 Getting Started Guide. Your S3 source bucket must be version enabled. You must create an S3 destination bucket. Code signing uses your S3 destination bucket to write your signed code. You specify the name of the source and destination buckets when calling the StartSigningJob operation. You must also specify a request token that identifies your request to code signing. You can call the DescribeSigningJob and the ListSigningJobs actions after you call StartSigningJob. For a Java example that shows how to use this action, see http://docs.aws.amazon.com/acm/latest/userguide/"]
+       "Initiates a signing job to be performed on the code provided. Signing jobs are viewable by the ListSigningJobs operation. Note the following requirements: You must create an Amazon S3 source bucket. For more information, see Creating a Bucket in the Amazon S3 Getting Started Guide. Your S3 source bucket must be version enabled. You must create an S3 destination bucket. AWS Signer uses your S3 destination bucket to write your signed code. You specify the name of the source and destination buckets when calling the StartSigningJob operation. You must ensure the S3 buckets are from the same Region as the signing profile. Cross-Region signing isn't supported. You must also specify a request token that identifies your request to Signer. You can call the DescribeSigningJob and the ListSigningJobs actions after you call StartSigningJob. For a Java example that shows how to use this action, see StartSigningJob."]
 module StartSigningJobRequest =
   struct
     type nonrec t =
@@ -2475,18 +2610,176 @@ module StartSigningJobRequest =
       make ?profileOwner ~clientRequestToken ~profileName ~destination
         ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let profileOwner = field_map json "profileOwner" AccountId.of_json in
+    let of_json json__ =
+      let profileOwner = field_map json__ "profileOwner" AccountId.of_json in
       let clientRequestToken =
-        field_map_exn json "clientRequestToken" ClientRequestToken.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
-      let destination = field_map_exn json "destination" Destination.of_json in
-      let source = field_map_exn json "source" Source.of_json in
+        field_map_exn json__ "clientRequestToken" ClientRequestToken.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
+      let destination =
+        field_map_exn json__ "destination" Destination.of_json in
+      let source = field_map_exn json__ "source" Source.of_json in
       make ?profileOwner ~clientRequestToken ~profileName ~destination
         ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Initiates a signing job to be performed on the code provided. Signing jobs are viewable by the ListSigningJobs operation for two years after they are performed. Note the following requirements: You must create an Amazon S3 source bucket. For more information, see Create a Bucket in the Amazon S3 Getting Started Guide. Your S3 source bucket must be version enabled. You must create an S3 destination bucket. Code signing uses your S3 destination bucket to write your signed code. You specify the name of the source and destination buckets when calling the StartSigningJob operation. You must also specify a request token that identifies your request to code signing. You can call the DescribeSigningJob and the ListSigningJobs actions after you call StartSigningJob. For a Java example that shows how to use this action, see http://docs.aws.amazon.com/acm/latest/userguide/"]
+       "Initiates a signing job to be performed on the code provided. Signing jobs are viewable by the ListSigningJobs operation. Note the following requirements: You must create an Amazon S3 source bucket. For more information, see Creating a Bucket in the Amazon S3 Getting Started Guide. Your S3 source bucket must be version enabled. You must create an S3 destination bucket. AWS Signer uses your S3 destination bucket to write your signed code. You specify the name of the source and destination buckets when calling the StartSigningJob operation. You must ensure the S3 buckets are from the same Region as the signing profile. Cross-Region signing isn't supported. You must also specify a request token that identifies your request to Signer. You can call the DescribeSigningJob and the ListSigningJobs actions after you call StartSigningJob. For a Java example that shows how to use this action, see StartSigningJob."]
+module SignPayloadResponse =
+  struct
+    type nonrec t =
+      {
+      jobId: JobId.t option
+        [@ocaml.doc "Unique identifier of the signing job."];
+      jobOwner: AccountId.t option
+        [@ocaml.doc "The AWS account ID of the job owner."];
+      metadata: Metadata.t option
+        [@ocaml.doc
+          "Information including the signing profile ARN and the signing job ID."];
+      signature: Blob.t option [@ocaml.doc "A cryptographic signature."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?jobId =
+      fun ?jobOwner ->
+        fun ?metadata ->
+          fun ?signature ->
+            fun () -> { jobId; jobOwner; metadata; signature }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("jobId", (Option.map x.jobId ~f:JobId.to_value));
+        ("jobOwner", (Option.map x.jobOwner ~f:AccountId.to_value));
+        ("metadata", (Option.map x.metadata ~f:Metadata.to_value));
+        ("signature", (Option.map x.signature ~f:Blob.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signature =
+        (Option.map ~f:Blob.of_xml) (Xml.child xml_arg0 "signature") in
+      let metadata =
+        (Option.map ~f:Metadata.of_xml) (Xml.child xml_arg0 "metadata") in
+      let jobOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "jobOwner") in
+      let jobId = (Option.map ~f:JobId.of_xml) (Xml.child xml_arg0 "jobId") in
+      make ?signature ?metadata ?jobOwner ?jobId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signature = field_map json__ "signature" Blob.of_json in
+      let metadata = field_map json__ "metadata" Metadata.of_json in
+      let jobOwner = field_map json__ "jobOwner" AccountId.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
+      make ?signature ?metadata ?jobOwner ?jobId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Signs a binary payload and returns a signature envelope."]
+module SignPayloadRequest =
+  struct
+    type nonrec t =
+      {
+      profileName: ProfileName.t
+        [@ocaml.doc "The name of the signing profile."];
+      profileOwner: AccountId.t option
+        [@ocaml.doc "The AWS account ID of the profile owner."];
+      payload: Payload.t
+        [@ocaml.doc "Specifies the object digest (hash) to sign."];
+      payloadFormat: String_.t
+        [@ocaml.doc
+          "Payload content type. The single valid type is application/vnd.cncf.notary.payload.v1+json."]}
+    let context_ = "SignPayloadRequest"
+    let make ?profileOwner =
+      fun ~profileName ->
+        fun ~payload ->
+          fun ~payloadFormat ->
+            fun () -> { profileOwner; profileName; payload; payloadFormat }
+    let to_value x =
+      structure_to_value
+        [("profileName", (Some (ProfileName.to_value x.profileName)));
+        ("profileOwner", (Option.map x.profileOwner ~f:AccountId.to_value));
+        ("payload", (Some (Payload.to_value x.payload)));
+        ("payloadFormat", (Some (String_.to_value x.payloadFormat)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let payloadFormat =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "payloadFormat") in
+      let payload =
+        Payload.of_xml (Xml.child_exn ~context:context_ xml_arg0 "payload") in
+      let profileOwner =
+        (Option.map ~f:AccountId.of_xml) (Xml.child xml_arg0 "profileOwner") in
+      let profileName =
+        ProfileName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
+      make ~payloadFormat ~payload ?profileOwner ~profileName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let payloadFormat =
+        field_map_exn json__ "payloadFormat" String_.of_json in
+      let payload = field_map_exn json__ "payload" Payload.of_json in
+      let profileOwner = field_map json__ "profileOwner" AccountId.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
+      make ~payloadFormat ~payload ?profileOwner ~profileName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Signs a binary payload and returns a signature envelope."]
 module RevokeSigningProfileRequest =
   struct
     type nonrec t =
@@ -2528,17 +2821,19 @@ module RevokeSigningProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~effectiveTime ~reason ~profileVersion ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let effectiveTime =
-        field_map_exn json "effectiveTime" Timestamp.of_json in
-      let reason = field_map_exn json "reason" RevocationReasonString.of_json in
+        field_map_exn json__ "effectiveTime" Timestamp.of_json in
+      let reason =
+        field_map_exn json__ "reason" RevocationReasonString.of_json in
       let profileVersion =
-        field_map_exn json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+        field_map_exn json__ "profileVersion" ProfileVersion.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ~effectiveTime ~reason ~profileVersion ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the state of a signing profile to REVOKED. This indicates that signatures generated using the signing profile after an effective start date are no longer valid."]
+       "Changes the state of a signing profile to REVOKED. This indicates that signatures generated using the signing profile after an effective start date are no longer valid. A revoked profile is still viewable with the ListSigningProfiles operation, but it cannot perform new signing jobs. See Data Retention for more information on scheduled deletion of a revoked signing profile."]
 module RevokeSignatureRequest =
   struct
     type nonrec t =
@@ -2567,10 +2862,11 @@ module RevokeSignatureRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~reason ?jobOwner ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map_exn json "reason" RevocationReasonString.of_json in
-      let jobOwner = field_map json "jobOwner" AccountId.of_json in
-      let jobId = field_map_exn json "jobId" JobId.of_json in
+    let of_json json__ =
+      let reason =
+        field_map_exn json__ "reason" RevocationReasonString.of_json in
+      let jobOwner = field_map json__ "jobOwner" AccountId.of_json in
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
       make ~reason ?jobOwner ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2666,8 +2962,8 @@ module RemoveProfilePermissionResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "revisionId" String_.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
       make ?revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2708,10 +3004,11 @@ module RemoveProfilePermissionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~statementId ~revisionId ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statementId = field_map_exn json "statementId" String_.of_json in
-      let revisionId = field_map_exn json "revisionId" String_.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+    let of_json json__ =
+      let statementId = field_map_exn json__ "statementId" String_.of_json in
+      let revisionId = field_map_exn json__ "revisionId" String_.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ~statementId ~revisionId ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2814,15 +3111,16 @@ module PutSigningProfileResponse =
       let arn = (Option.map ~f:String__lc1.of_xml) (Xml.child xml_arg0 "arn") in
       make ?profileVersionArn ?profileVersion ?arn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let profileVersionArn = field_map json "profileVersionArn" Arn.of_json in
+    let of_json json__ =
+      let profileVersionArn =
+        field_map json__ "profileVersionArn" Arn.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let arn = field_map json "arn" String__lc1.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let arn = field_map json__ "arn" String__lc1.of_json in
       make ?profileVersionArn ?profileVersion ?arn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a signing profile. A signing profile is a code signing template that can be used to carry out a pre-defined signing job. For more information, see http://docs.aws.amazon.com/signer/latest/developerguide/gs-profile.html"]
+       "Creates a signing profile. A signing profile is a code-signing template that can be used to carry out a pre-defined signing job."]
 module PutSigningProfileRequest =
   struct
     type nonrec t =
@@ -2902,24 +3200,25 @@ module PutSigningProfileRequest =
       make ?tags ?signingParameters ?overrides ~platformId
         ?signatureValidityPeriod ?signingMaterial ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let signingParameters =
-        field_map json "signingParameters" SigningParameters.of_json in
+        field_map json__ "signingParameters" SigningParameters.of_json in
       let overrides =
-        field_map json "overrides" SigningPlatformOverrides.of_json in
-      let platformId = field_map_exn json "platformId" PlatformId.of_json in
+        field_map json__ "overrides" SigningPlatformOverrides.of_json in
+      let platformId = field_map_exn json__ "platformId" PlatformId.of_json in
       let signatureValidityPeriod =
-        field_map json "signatureValidityPeriod"
+        field_map json__ "signatureValidityPeriod"
           SignatureValidityPeriod.of_json in
       let signingMaterial =
-        field_map json "signingMaterial" SigningMaterial.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+        field_map json__ "signingMaterial" SigningMaterial.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ?tags ?signingParameters ?overrides ~platformId
         ?signatureValidityPeriod ?signingMaterial ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a signing profile. A signing profile is a code signing template that can be used to carry out a pre-defined signing job. For more information, see http://docs.aws.amazon.com/signer/latest/developerguide/gs-profile.html"]
+       "Creates a signing profile. A signing profile is a code-signing template that can be used to carry out a pre-defined signing job."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -2990,8 +3289,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of the tags associated with a signing profile resource."]
@@ -3014,8 +3313,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" String_.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "resourceArn" String_.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3091,18 +3390,18 @@ module ListSigningProfilesResponse =
           (Xml.child xml_arg0 "profiles") in
       make ?nextToken ?profiles ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let profiles = field_map json "profiles" SigningProfiles.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let profiles = field_map json__ "profiles" SigningProfiles.of_json in
       make ?nextToken ?profiles ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all available signing profiles in your AWS account. Returns only profiles with an ACTIVE status unless the includeCanceled request field is set to true. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all available signing profiles in your AWS account. Returns only profiles with an ACTIVE status unless the includeCanceled request field is set to true. If additional jobs remain to be listed, AWS Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListSigningProfilesRequest =
   struct
     type nonrec t =
       {
-      includeCanceled: Bool.t option
+      includeCanceled: Bool_.t option
         [@ocaml.doc
           "Designates whether to include profiles with the status of CANCELED."];
       maxResults: MaxResults.t option
@@ -3131,7 +3430,8 @@ module ListSigningProfilesRequest =
                 }
     let to_value x =
       structure_to_value
-        [("includeCanceled", (Option.map x.includeCanceled ~f:Bool.to_value));
+        [("includeCanceled",
+           (Option.map x.includeCanceled ~f:Bool_.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
         ("platformId", (Option.map x.platformId ~f:PlatformId.to_value));
@@ -3147,19 +3447,19 @@ module ListSigningProfilesRequest =
       let maxResults =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let includeCanceled =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "includeCanceled") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "includeCanceled") in
       make ?statuses ?platformId ?nextToken ?maxResults ?includeCanceled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statuses = field_map json "statuses" Statuses.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let includeCanceled = field_map json "includeCanceled" Bool.of_json in
+    let of_json json__ =
+      let statuses = field_map json__ "statuses" Statuses.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let includeCanceled = field_map json__ "includeCanceled" Bool_.of_json in
       make ?statuses ?platformId ?nextToken ?maxResults ?includeCanceled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all available signing profiles in your AWS account. Returns only profiles with an ACTIVE status unless the includeCanceled request field is set to true. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all available signing profiles in your AWS account. Returns only profiles with an ACTIVE status unless the includeCanceled request field is set to true. If additional jobs remain to be listed, AWS Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListSigningPlatformsResponse =
   struct
     type nonrec t =
@@ -3241,13 +3541,13 @@ module ListSigningPlatformsResponse =
           (Xml.child xml_arg0 "platforms") in
       make ?nextToken ?platforms ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let platforms = field_map json "platforms" SigningPlatforms.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let platforms = field_map json__ "platforms" SigningPlatforms.of_json in
       make ?nextToken ?platforms ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all signing platforms available in code signing that match the request parameters. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all signing platforms available in AWS Signer that match the request parameters. If additional jobs remain to be listed, Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListSigningPlatformsRequest =
   struct
     type nonrec t =
@@ -3292,16 +3592,16 @@ module ListSigningPlatformsRequest =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "category") in
       make ?nextToken ?maxResults ?target ?partner ?category ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let target = field_map json "target" String_.of_json in
-      let partner = field_map json "partner" String_.of_json in
-      let category = field_map json "category" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let target = field_map json__ "target" String_.of_json in
+      let partner = field_map json__ "partner" String_.of_json in
+      let category = field_map json__ "category" String_.of_json in
       make ?nextToken ?maxResults ?target ?partner ?category ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all signing platforms available in code signing that match the request parameters. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all signing platforms available in AWS Signer that match the request parameters. If additional jobs remain to be listed, Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListSigningJobsResponse =
   struct
     type nonrec t =
@@ -3379,13 +3679,13 @@ module ListSigningJobsResponse =
         (Option.map ~f:SigningJobs.of_xml) (Xml.child xml_arg0 "jobs") in
       make ?nextToken ?jobs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let jobs = field_map json "jobs" SigningJobs.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let jobs = field_map json__ "jobs" SigningJobs.of_json in
       make ?nextToken ?jobs ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all your signing jobs. You can use the maxResults parameter to limit the number of signing jobs that are returned in the response. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all your signing jobs. You can use the maxResults parameter to limit the number of signing jobs that are returned in the response. If additional jobs remain to be listed, AWS Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListSigningJobsRequest =
   struct
     type nonrec t =
@@ -3403,7 +3703,7 @@ module ListSigningJobsRequest =
       nextToken: NextToken.t option
         [@ocaml.doc
           "String for specifying the next set of paginated results to return. After you receive a response with truncated results, use this parameter in a subsequent request. Set it to the value of nextToken from the response that you just received."];
-      isRevoked: Bool.t option
+      isRevoked: Bool_.t option
         [@ocaml.doc
           "Filters results to return only signing jobs with revoked signatures."];
       signatureExpiresBefore: Timestamp.t option
@@ -3443,7 +3743,7 @@ module ListSigningJobsRequest =
         ("requestedBy", (Option.map x.requestedBy ~f:RequestedBy.to_value));
         ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
         ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
-        ("isRevoked", (Option.map x.isRevoked ~f:Bool.to_value));
+        ("isRevoked", (Option.map x.isRevoked ~f:Bool_.to_value));
         ("signatureExpiresBefore",
           (Option.map x.signatureExpiresBefore ~f:Timestamp.to_value));
         ("signatureExpiresAfter",
@@ -3460,7 +3760,7 @@ module ListSigningJobsRequest =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "signatureExpiresBefore") in
       let isRevoked =
-        (Option.map ~f:Bool.of_xml) (Xml.child xml_arg0 "isRevoked") in
+        (Option.map ~f:Bool_.of_xml) (Xml.child xml_arg0 "isRevoked") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
@@ -3474,23 +3774,23 @@ module ListSigningJobsRequest =
       make ?jobInvoker ?signatureExpiresAfter ?signatureExpiresBefore
         ?isRevoked ?nextToken ?maxResults ?requestedBy ?platformId ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
+    let of_json json__ =
+      let jobInvoker = field_map json__ "jobInvoker" AccountId.of_json in
       let signatureExpiresAfter =
-        field_map json "signatureExpiresAfter" Timestamp.of_json in
+        field_map json__ "signatureExpiresAfter" Timestamp.of_json in
       let signatureExpiresBefore =
-        field_map json "signatureExpiresBefore" Timestamp.of_json in
-      let isRevoked = field_map json "isRevoked" Bool.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let requestedBy = field_map json "requestedBy" RequestedBy.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
-      let status = field_map json "status" SigningStatus.of_json in
+        field_map json__ "signatureExpiresBefore" Timestamp.of_json in
+      let isRevoked = field_map json__ "isRevoked" Bool_.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let requestedBy = field_map json__ "requestedBy" RequestedBy.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
+      let status = field_map json__ "status" SigningStatus.of_json in
       make ?jobInvoker ?signatureExpiresAfter ?signatureExpiresBefore
         ?isRevoked ?nextToken ?maxResults ?requestedBy ?platformId ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all your signing jobs. You can use the maxResults parameter to limit the number of signing jobs that are returned in the response. If additional jobs remain to be listed, code signing returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that code signing returns in the nextToken parameter until all of your signing jobs have been returned."]
+       "Lists all your signing jobs. You can use the maxResults parameter to limit the number of signing jobs that are returned in the response. If additional jobs remain to be listed, AWS Signer returns a nextToken value. Use this value in subsequent calls to ListSigningJobs to fetch the remaining values. You can continue calling ListSigningJobs with your maxResults parameter and with new values that Signer returns in the nextToken parameter until all of your signing jobs have been returned."]
 module ListProfilePermissionsResponse =
   struct
     type nonrec t =
@@ -3597,12 +3897,12 @@ module ListProfilePermissionsResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?nextToken ?permissions ?policySizeBytes ?revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let permissions = field_map json "permissions" Permissions.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let permissions = field_map json__ "permissions" Permissions.of_json in
       let policySizeBytes =
-        field_map json "policySizeBytes" PolicySizeBytes.of_json in
-      let revisionId = field_map json "revisionId" String_.of_json in
+        field_map json__ "policySizeBytes" PolicySizeBytes.of_json in
+      let revisionId = field_map json__ "revisionId" String_.of_json in
       make ?nextToken ?permissions ?policySizeBytes ?revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3633,9 +3933,10 @@ module ListProfilePermissionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ?nextToken ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" String_.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" String_.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ?nextToken ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3831,30 +4132,31 @@ module GetSigningProfileResponse =
         ?signingMaterial ?revocationRecord ?profileVersionArn ?profileVersion
         ?profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let arn = field_map json "arn" String__lc1.of_json in
-      let statusReason = field_map json "statusReason" String_.of_json in
-      let status = field_map json "status" SigningProfileStatus.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let arn = field_map json__ "arn" String__lc1.of_json in
+      let statusReason = field_map json__ "statusReason" String_.of_json in
+      let status = field_map json__ "status" SigningProfileStatus.of_json in
       let signingParameters =
-        field_map json "signingParameters" SigningParameters.of_json in
+        field_map json__ "signingParameters" SigningParameters.of_json in
       let overrides =
-        field_map json "overrides" SigningPlatformOverrides.of_json in
+        field_map json__ "overrides" SigningPlatformOverrides.of_json in
       let signatureValidityPeriod =
-        field_map json "signatureValidityPeriod"
+        field_map json__ "signatureValidityPeriod"
           SignatureValidityPeriod.of_json in
       let platformDisplayName =
-        field_map json "platformDisplayName" DisplayName.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
+        field_map json__ "platformDisplayName" DisplayName.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
       let signingMaterial =
-        field_map json "signingMaterial" SigningMaterial.of_json in
+        field_map json__ "signingMaterial" SigningMaterial.of_json in
       let revocationRecord =
-        field_map json "revocationRecord"
+        field_map json__ "revocationRecord"
           SigningProfileRevocationRecord.of_json in
-      let profileVersionArn = field_map json "profileVersionArn" Arn.of_json in
+      let profileVersionArn =
+        field_map json__ "profileVersionArn" Arn.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map json "profileName" ProfileName.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let profileName = field_map json__ "profileName" ProfileName.of_json in
       make ?tags ?arn ?statusReason ?status ?signingParameters ?overrides
         ?signatureValidityPeriod ?platformDisplayName ?platformId
         ?signingMaterial ?revocationRecord ?profileVersionArn ?profileVersion
@@ -3885,9 +4187,10 @@ module GetSigningProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ?profileOwner ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let profileOwner = field_map json "profileOwner" AccountId.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+    let of_json json__ =
+      let profileOwner = field_map json__ "profileOwner" AccountId.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ?profileOwner ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information on a specific signing profile."]
@@ -3915,7 +4218,7 @@ module GetSigningPlatformResponse =
       maxSizeInMB: MaxSizeInMB.t option
         [@ocaml.doc
           "The maximum size (in MB) of the payload that can be signed by the target platform."];
-      revocationSupported: Bool.t option
+      revocationSupported: Bool_.t option
         [@ocaml.doc
           "A flag indicating whether signatures generated for the signing platform can be revoked."]}
     type nonrec error =
@@ -4008,11 +4311,11 @@ module GetSigningPlatformResponse =
           (Option.map x.signingImageFormat ~f:SigningImageFormat.to_value));
         ("maxSizeInMB", (Option.map x.maxSizeInMB ~f:MaxSizeInMB.to_value));
         ("revocationSupported",
-          (Option.map x.revocationSupported ~f:Bool.to_value))]
+          (Option.map x.revocationSupported ~f:Bool_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let revocationSupported =
-        (Option.map ~f:Bool.of_xml)
+        (Option.map ~f:Bool_.of_xml)
           (Xml.child xml_arg0 "revocationSupported") in
       let maxSizeInMB =
         (Option.map ~f:MaxSizeInMB.of_xml) (Xml.child xml_arg0 "maxSizeInMB") in
@@ -4036,19 +4339,19 @@ module GetSigningPlatformResponse =
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let revocationSupported =
-        field_map json "revocationSupported" Bool.of_json in
-      let maxSizeInMB = field_map json "maxSizeInMB" MaxSizeInMB.of_json in
+        field_map json__ "revocationSupported" Bool_.of_json in
+      let maxSizeInMB = field_map json__ "maxSizeInMB" MaxSizeInMB.of_json in
       let signingImageFormat =
-        field_map json "signingImageFormat" SigningImageFormat.of_json in
+        field_map json__ "signingImageFormat" SigningImageFormat.of_json in
       let signingConfiguration =
-        field_map json "signingConfiguration" SigningConfiguration.of_json in
-      let category = field_map json "category" Category.of_json in
-      let target = field_map json "target" String_.of_json in
-      let partner = field_map json "partner" String_.of_json in
-      let displayName = field_map json "displayName" DisplayName.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
+        field_map json__ "signingConfiguration" SigningConfiguration.of_json in
+      let category = field_map json__ "category" Category.of_json in
+      let target = field_map json__ "target" String_.of_json in
+      let partner = field_map json__ "partner" String_.of_json in
+      let displayName = field_map json__ "displayName" DisplayName.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
       make ?revocationSupported ?maxSizeInMB ?signingImageFormat
         ?signingConfiguration ?category ?target ?partner ?displayName
         ?platformId ()
@@ -4072,11 +4375,163 @@ module GetSigningPlatformRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "platformId") in
       make ~platformId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let platformId = field_map_exn json "platformId" PlatformId.of_json in
+    let of_json json__ =
+      let platformId = field_map_exn json__ "platformId" PlatformId.of_json in
       make ~platformId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information on a specific signing platform."]
+module GetRevocationStatusResponse =
+  struct
+    type nonrec t =
+      {
+      revokedEntities: RevokedEntities.t option
+        [@ocaml.doc
+          "A list of revoked entities (including zero or more of the signing profile ARN, signing job ARN, and certificate hashes) supplied as input to the API."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServiceErrorException of InternalServiceErrorException.t 
+      | `TooManyRequestsException of TooManyRequestsException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?revokedEntities = fun () -> { revokedEntities }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_json json)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServiceErrorException" ->
+          `InternalServiceErrorException
+            (InternalServiceErrorException.of_xml xml)
+      | "TooManyRequestsException" ->
+          `TooManyRequestsException (TooManyRequestsException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServiceErrorException e ->
+          `Assoc
+            [("error", (`String "InternalServiceErrorException"));
+            ("details", (InternalServiceErrorException.to_json e))]
+      | `TooManyRequestsException e ->
+          `Assoc
+            [("error", (`String "TooManyRequestsException"));
+            ("details", (TooManyRequestsException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("revokedEntities",
+           (Option.map x.revokedEntities ~f:RevokedEntities.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let revokedEntities =
+        (Option.map ~f:RevokedEntities.of_xml)
+          (Xml.child xml_arg0 "revokedEntities") in
+      make ?revokedEntities ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let revokedEntities =
+        field_map json__ "revokedEntities" RevokedEntities.of_json in
+      make ?revokedEntities ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the revocation status of one or more of the signing profile, signing job, and signing certificate."]
+module GetRevocationStatusRequest =
+  struct
+    type nonrec t =
+      {
+      signatureTimestamp: Timestamp.t
+        [@ocaml.doc
+          "The timestamp of the signature that validates the profile or job."];
+      platformId: PlatformId.t [@ocaml.doc "The ID of a signing platform."];
+      profileVersionArn: Arn.t
+        [@ocaml.doc "The version of a signing profile."];
+      jobArn: Arn.t [@ocaml.doc "The ARN of a signing job."];
+      certificateHashes: CertificateHashes.t
+        [@ocaml.doc
+          "A list of composite signed hashes that identify certificates. A certificate identifier consists of a subject certificate TBS hash (signed by the parent CA) combined with a parent CA TBS hash (signed by the parent CA\226\128\153s CA). Root certificates are defined as their own CA. The following example shows how to calculate a hash for this parameter using OpenSSL commands: openssl asn1parse -in childCert.pem -strparse 4 -out childCert.tbs openssl sha384 < childCert.tbs -binary > childCertTbsHash openssl asn1parse -in parentCert.pem -strparse 4 -out parentCert.tbs openssl sha384 < parentCert.tbs -binary > parentCertTbsHash xxd -p childCertTbsHash > certificateHash.hex xxd -p parentCertTbsHash >> certificateHash.hex cat certificateHash.hex | tr -d '\\n'"]}
+    let context_ = "GetRevocationStatusRequest"
+    let make ~signatureTimestamp =
+      fun ~platformId ->
+        fun ~profileVersionArn ->
+          fun ~jobArn ->
+            fun ~certificateHashes ->
+              fun () ->
+                {
+                  signatureTimestamp;
+                  platformId;
+                  profileVersionArn;
+                  jobArn;
+                  certificateHashes
+                }
+    let to_value x =
+      structure_to_value
+        [("signatureTimestamp",
+           (Some (Timestamp.to_value x.signatureTimestamp)));
+        ("platformId", (Some (PlatformId.to_value x.platformId)));
+        ("profileVersionArn", (Some (Arn.to_value x.profileVersionArn)));
+        ("jobArn", (Some (Arn.to_value x.jobArn)));
+        ("certificateHashes",
+          (Some (CertificateHashes.to_value x.certificateHashes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let certificateHashes =
+        CertificateHashes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "certificateHashes") in
+      let jobArn =
+        Arn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobArn") in
+      let profileVersionArn =
+        Arn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "profileVersionArn") in
+      let platformId =
+        PlatformId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "platformId") in
+      let signatureTimestamp =
+        Timestamp.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "signatureTimestamp") in
+      make ~certificateHashes ~jobArn ~profileVersionArn ~platformId
+        ~signatureTimestamp ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let certificateHashes =
+        field_map_exn json__ "certificateHashes" CertificateHashes.of_json in
+      let jobArn = field_map_exn json__ "jobArn" Arn.of_json in
+      let profileVersionArn =
+        field_map_exn json__ "profileVersionArn" Arn.of_json in
+      let platformId = field_map_exn json__ "platformId" PlatformId.of_json in
+      let signatureTimestamp =
+        field_map_exn json__ "signatureTimestamp" Timestamp.of_json in
+      make ~certificateHashes ~jobArn ~profileVersionArn ~platformId
+        ~signatureTimestamp ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves the revocation status of one or more of the signing profile, signing job, and signing certificate."]
 module DescribeSigningJobResponse =
   struct
     type nonrec t =
@@ -4125,7 +4580,7 @@ module DescribeSigningJobResponse =
           "A revocation record if the signature generated by the signing job has been revoked. Contains a timestamp and the ID of the IAM entity that revoked the signature."];
       signedObject: SignedObject.t option
         [@ocaml.doc
-          "Name of the S3 bucket where the signed code image is saved by code signing."];
+          "Name of the S3 bucket where the signed code image is saved by AWS Signer."];
       jobOwner: AccountId.t option
         [@ocaml.doc "The AWS account ID of the job owner."];
       jobInvoker: AccountId.t option
@@ -4311,33 +4766,34 @@ module DescribeSigningJobResponse =
         ?createdAt ?signingParameters ?overrides ?profileVersion ?profileName
         ?platformDisplayName ?platformId ?signingMaterial ?source ?jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobInvoker = field_map json "jobInvoker" AccountId.of_json in
-      let jobOwner = field_map json "jobOwner" AccountId.of_json in
-      let signedObject = field_map json "signedObject" SignedObject.of_json in
+    let of_json json__ =
+      let jobInvoker = field_map json__ "jobInvoker" AccountId.of_json in
+      let jobOwner = field_map json__ "jobOwner" AccountId.of_json in
+      let signedObject = field_map json__ "signedObject" SignedObject.of_json in
       let revocationRecord =
-        field_map json "revocationRecord" SigningJobRevocationRecord.of_json in
-      let statusReason = field_map json "statusReason" StatusReason.of_json in
-      let status = field_map json "status" SigningStatus.of_json in
-      let requestedBy = field_map json "requestedBy" RequestedBy.of_json in
+        field_map json__ "revocationRecord"
+          SigningJobRevocationRecord.of_json in
+      let statusReason = field_map json__ "statusReason" StatusReason.of_json in
+      let status = field_map json__ "status" SigningStatus.of_json in
+      let requestedBy = field_map json__ "requestedBy" RequestedBy.of_json in
       let signatureExpiresAt =
-        field_map json "signatureExpiresAt" Timestamp.of_json in
-      let completedAt = field_map json "completedAt" Timestamp.of_json in
-      let createdAt = field_map json "createdAt" Timestamp.of_json in
+        field_map json__ "signatureExpiresAt" Timestamp.of_json in
+      let completedAt = field_map json__ "completedAt" Timestamp.of_json in
+      let createdAt = field_map json__ "createdAt" Timestamp.of_json in
       let signingParameters =
-        field_map json "signingParameters" SigningParameters.of_json in
+        field_map json__ "signingParameters" SigningParameters.of_json in
       let overrides =
-        field_map json "overrides" SigningPlatformOverrides.of_json in
+        field_map json__ "overrides" SigningPlatformOverrides.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map json "profileName" ProfileName.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let profileName = field_map json__ "profileName" ProfileName.of_json in
       let platformDisplayName =
-        field_map json "platformDisplayName" DisplayName.of_json in
-      let platformId = field_map json "platformId" PlatformId.of_json in
+        field_map json__ "platformDisplayName" DisplayName.of_json in
+      let platformId = field_map json__ "platformId" PlatformId.of_json in
       let signingMaterial =
-        field_map json "signingMaterial" SigningMaterial.of_json in
-      let source = field_map json "source" Source.of_json in
-      let jobId = field_map json "jobId" JobId.of_json in
+        field_map json__ "signingMaterial" SigningMaterial.of_json in
+      let source = field_map json__ "source" Source.of_json in
+      let jobId = field_map json__ "jobId" JobId.of_json in
       make ?jobInvoker ?jobOwner ?signedObject ?revocationRecord
         ?statusReason ?status ?requestedBy ?signatureExpiresAt ?completedAt
         ?createdAt ?signingParameters ?overrides ?profileVersion ?profileName
@@ -4360,8 +4816,9 @@ module DescribeSigningJobRequest =
         JobId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "jobId") in
       make ~jobId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobId = field_map_exn json "jobId" JobId.of_json in make ~jobId ()
+    let of_json json__ =
+      let jobId = field_map_exn json__ "jobId" JobId.of_json in
+      make ~jobId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns information about a specific code signing job. You specify the job by using the jobId value that is returned by the StartSigningJob operation."]
@@ -4383,12 +4840,13 @@ module CancelSigningProfileRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "profileName") in
       make ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+    let of_json json__ =
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ~profileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Changes the state of an ACTIVE signing profile to CANCELED. A canceled profile is still viewable with the ListSigningProfiles operation, but it cannot perform new signing jobs, and is deleted two years after cancelation."]
+       "Changes the state of an ACTIVE signing profile to CANCELED. A canceled profile is still viewable with the ListSigningProfiles operation, but it cannot perform new signing jobs. See Data Retention for more information on scheduled deletion of a canceled signing profile."]
 module AddProfilePermissionResponse =
   struct
     type nonrec t =
@@ -4490,8 +4948,8 @@ module AddProfilePermissionResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "revisionId") in
       make ?revisionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let revisionId = field_map json "revisionId" String_.of_json in
+    let of_json json__ =
+      let revisionId = field_map json__ "revisionId" String_.of_json in
       make ?revisionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Adds cross-account permissions to a signing profile."]
@@ -4505,7 +4963,7 @@ module AddProfilePermissionRequest =
         [@ocaml.doc "The version of the signing profile."];
       action: String_.t
         [@ocaml.doc
-          "The AWS Signer action permitted as part of cross-account permissions."];
+          "For cross-account signing. Grant a designated account permission to perform one or more of the following actions. Each action is associated with a specific API's operations. For more information about cross-account signing, see Using cross-account signing with signing profiles in the AWS Signer Developer Guide. You can designate the following actions to an account. signer:StartSigningJob. This action isn't supported for container image workflows. For details, see StartSigningJob. signer:SignPayload. This action isn't supported for AWS Lambda workflows. For details, see SignPayload signer:GetSigningProfile. For details, see GetSigningProfile. signer:RevokeSignature. For details, see RevokeSignature."];
       principal: String_.t
         [@ocaml.doc
           "The AWS principal receiving cross-account permissions. This may be an IAM role or another AWS account ID."];
@@ -4559,14 +5017,15 @@ module AddProfilePermissionRequest =
       make ~statementId ?revisionId ~principal ~action ?profileVersion
         ~profileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statementId = field_map_exn json "statementId" String_.of_json in
-      let revisionId = field_map json "revisionId" String_.of_json in
-      let principal = field_map_exn json "principal" String_.of_json in
-      let action = field_map_exn json "action" String_.of_json in
+    let of_json json__ =
+      let statementId = field_map_exn json__ "statementId" String_.of_json in
+      let revisionId = field_map json__ "revisionId" String_.of_json in
+      let principal = field_map_exn json__ "principal" String_.of_json in
+      let action = field_map_exn json__ "action" String_.of_json in
       let profileVersion =
-        field_map json "profileVersion" ProfileVersion.of_json in
-      let profileName = field_map_exn json "profileName" ProfileName.of_json in
+        field_map json__ "profileVersion" ProfileVersion.of_json in
+      let profileName =
+        field_map_exn json__ "profileName" ProfileName.of_json in
       make ~statementId ?revisionId ~principal ~action ?profileVersion
         ~profileName ()
     let to_json v = composed_to_json to_value v

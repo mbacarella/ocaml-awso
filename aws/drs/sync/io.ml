@@ -11,22 +11,39 @@ let eval ?endpoint_url ?cfg endpoint input =
          (Io.call ?endpoint_url ~cfg ~service:Values.service meth
             (Endpoints.to_request endpoint input) uri)
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
+let associate_source_network_stack ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.AssociateSourceNetworkStack input
+let create_extended_source_server ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateExtendedSourceServer input
+let create_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateLaunchConfigurationTemplate input
 let create_replication_configuration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateReplicationConfigurationTemplate
     input
+let create_source_network ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSourceNetwork input
 let delete_job ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteJob input
+let delete_launch_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLaunchAction input
+let delete_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteLaunchConfigurationTemplate input
 let delete_recovery_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteRecoveryInstance input
 let delete_replication_configuration_template ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteReplicationConfigurationTemplate
     input
+let delete_source_network ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteSourceNetwork input
 let delete_source_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteSourceServer input
 let describe_job_log_items ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobLogItems input
 let describe_jobs ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeJobs input
+let describe_launch_configuration_templates ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeLaunchConfigurationTemplates
+    input
 let describe_recovery_instances ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRecoveryInstances input
 let describe_recovery_snapshots ?endpoint_url ?cfg input =
@@ -34,12 +51,16 @@ let describe_recovery_snapshots ?endpoint_url ?cfg input =
 let describe_replication_configuration_templates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeReplicationConfigurationTemplates
     input
+let describe_source_networks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSourceNetworks input
 let describe_source_servers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSourceServers input
 let disconnect_recovery_instance ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisconnectRecoveryInstance input
 let disconnect_source_server ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisconnectSourceServer input
+let export_source_network_cfn_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ExportSourceNetworkCfnTemplate input
 let get_failback_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFailbackReplicationConfiguration input
 let get_launch_configuration ?endpoint_url ?cfg input =
@@ -48,16 +69,36 @@ let get_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetReplicationConfiguration input
 let initialize_service ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.InitializeService input
+let list_extensible_source_servers ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListExtensibleSourceServers input
+let list_launch_actions ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListLaunchActions input
+let list_staging_accounts ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListStagingAccounts input
 let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
+let put_launch_action ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.PutLaunchAction input
 let retry_data_replication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RetryDataReplication input
+let reverse_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ReverseReplication input
 let start_failback_launch ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartFailbackLaunch input
 let start_recovery ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartRecovery input
+let start_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartReplication input
+let start_source_network_recovery ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSourceNetworkRecovery input
+let start_source_network_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartSourceNetworkReplication input
 let stop_failback ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StopFailback input
+let stop_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopReplication input
+let stop_source_network_replication ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopSourceNetworkReplication input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let terminate_recovery_instances ?endpoint_url ?cfg input =
@@ -69,6 +110,8 @@ let update_failback_replication_configuration ?endpoint_url ?cfg input =
     input
 let update_launch_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateLaunchConfiguration input
+let update_launch_configuration_template ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateLaunchConfigurationTemplate input
 let update_replication_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateReplicationConfiguration input
 let update_replication_configuration_template ?endpoint_url ?cfg input =

@@ -24,6 +24,18 @@ val create_contact_channel :
       CreateContactChannelRequest.t ->
         (CreateContactChannelResult.t, CreateContactChannelResult.error)
           Result.t Async.Deferred.t
+val create_rotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRotationRequest.t ->
+        (CreateRotationResult.t, CreateRotationResult.error) Result.t
+          Async.Deferred.t
+val create_rotation_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRotationOverrideRequest.t ->
+        (CreateRotationOverrideResult.t, CreateRotationOverrideResult.error)
+          Result.t Async.Deferred.t
 val deactivate_contact_channel :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -41,6 +53,18 @@ val delete_contact_channel :
     ?cfg:Awso.Cfg.t ->
       DeleteContactChannelRequest.t ->
         (DeleteContactChannelResult.t, DeleteContactChannelResult.error)
+          Result.t Async.Deferred.t
+val delete_rotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRotationRequest.t ->
+        (DeleteRotationResult.t, DeleteRotationResult.error) Result.t
+          Async.Deferred.t
+val delete_rotation_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRotationOverrideRequest.t ->
+        (DeleteRotationOverrideResult.t, DeleteRotationOverrideResult.error)
           Result.t Async.Deferred.t
 val describe_engagement :
   ?endpoint_url:string ->
@@ -72,6 +96,18 @@ val get_contact_policy :
       GetContactPolicyRequest.t ->
         (GetContactPolicyResult.t, GetContactPolicyResult.error) Result.t
           Async.Deferred.t
+val get_rotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRotationRequest.t ->
+        (GetRotationResult.t, GetRotationResult.error) Result.t
+          Async.Deferred.t
+val get_rotation_override :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRotationOverrideRequest.t ->
+        (GetRotationOverrideResult.t, GetRotationOverrideResult.error)
+          Result.t Async.Deferred.t
 val list_contact_channels :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -96,6 +132,12 @@ val list_page_receipts :
       ListPageReceiptsRequest.t ->
         (ListPageReceiptsResult.t, ListPageReceiptsResult.error) Result.t
           Async.Deferred.t
+val list_page_resolutions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPageResolutionsRequest.t ->
+        (ListPageResolutionsResult.t, ListPageResolutionsResult.error)
+          Result.t Async.Deferred.t
 val list_pages_by_contact :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -108,6 +150,30 @@ val list_pages_by_engagement :
       ListPagesByEngagementRequest.t ->
         (ListPagesByEngagementResult.t, ListPagesByEngagementResult.error)
           Result.t Async.Deferred.t
+val list_preview_rotation_shifts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPreviewRotationShiftsRequest.t ->
+        (ListPreviewRotationShiftsResult.t,
+          ListPreviewRotationShiftsResult.error) Result.t Async.Deferred.t
+val list_rotation_overrides :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRotationOverridesRequest.t ->
+        (ListRotationOverridesResult.t, ListRotationOverridesResult.error)
+          Result.t Async.Deferred.t
+val list_rotation_shifts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRotationShiftsRequest.t ->
+        (ListRotationShiftsResult.t, ListRotationShiftsResult.error) Result.t
+          Async.Deferred.t
+val list_rotations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRotationsRequest.t ->
+        (ListRotationsResult.t, ListRotationsResult.error) Result.t
+          Async.Deferred.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -162,3 +228,9 @@ val update_contact_channel :
       UpdateContactChannelRequest.t ->
         (UpdateContactChannelResult.t, UpdateContactChannelResult.error)
           Result.t Async.Deferred.t
+val update_rotation :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRotationRequest.t ->
+        (UpdateRotationResult.t, UpdateRotationResult.error) Result.t
+          Async.Deferred.t

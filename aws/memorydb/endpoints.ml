@@ -10,6 +10,9 @@ type ('i, 'o, 'e) t =
   CreateACLResponse.error) t 
   | CreateCluster: (CreateClusterRequest.t, CreateClusterResponse.t,
   CreateClusterResponse.error) t 
+  | CreateMultiRegionCluster: (CreateMultiRegionClusterRequest.t,
+  CreateMultiRegionClusterResponse.t, CreateMultiRegionClusterResponse.error)
+  t 
   | CreateParameterGroup: (CreateParameterGroupRequest.t,
   CreateParameterGroupResponse.t, CreateParameterGroupResponse.error) t 
   | CreateSnapshot: (CreateSnapshotRequest.t, CreateSnapshotResponse.t,
@@ -22,6 +25,9 @@ type ('i, 'o, 'e) t =
   DeleteACLResponse.error) t 
   | DeleteCluster: (DeleteClusterRequest.t, DeleteClusterResponse.t,
   DeleteClusterResponse.error) t 
+  | DeleteMultiRegionCluster: (DeleteMultiRegionClusterRequest.t,
+  DeleteMultiRegionClusterResponse.t, DeleteMultiRegionClusterResponse.error)
+  t 
   | DeleteParameterGroup: (DeleteParameterGroupRequest.t,
   DeleteParameterGroupResponse.t, DeleteParameterGroupResponse.error) t 
   | DeleteSnapshot: (DeleteSnapshotRequest.t, DeleteSnapshotResponse.t,
@@ -38,11 +44,26 @@ type ('i, 'o, 'e) t =
   DescribeEngineVersionsResponse.t, DescribeEngineVersionsResponse.error) t 
   | DescribeEvents: (DescribeEventsRequest.t, DescribeEventsResponse.t,
   DescribeEventsResponse.error) t 
+  | DescribeMultiRegionClusters: (DescribeMultiRegionClustersRequest.t,
+  DescribeMultiRegionClustersResponse.t,
+  DescribeMultiRegionClustersResponse.error) t 
+  | DescribeMultiRegionParameterGroups:
+  (DescribeMultiRegionParameterGroupsRequest.t,
+  DescribeMultiRegionParameterGroupsResponse.t,
+  DescribeMultiRegionParameterGroupsResponse.error) t 
+  | DescribeMultiRegionParameters: (DescribeMultiRegionParametersRequest.t,
+  DescribeMultiRegionParametersResponse.t,
+  DescribeMultiRegionParametersResponse.error) t 
   | DescribeParameterGroups: (DescribeParameterGroupsRequest.t,
   DescribeParameterGroupsResponse.t, DescribeParameterGroupsResponse.error) t
   
   | DescribeParameters: (DescribeParametersRequest.t,
   DescribeParametersResponse.t, DescribeParametersResponse.error) t 
+  | DescribeReservedNodes: (DescribeReservedNodesRequest.t,
+  DescribeReservedNodesResponse.t, DescribeReservedNodesResponse.error) t 
+  | DescribeReservedNodesOfferings: (DescribeReservedNodesOfferingsRequest.t,
+  DescribeReservedNodesOfferingsResponse.t,
+  DescribeReservedNodesOfferingsResponse.error) t 
   | DescribeServiceUpdates: (DescribeServiceUpdatesRequest.t,
   DescribeServiceUpdatesResponse.t, DescribeServiceUpdatesResponse.error) t 
   | DescribeSnapshots: (DescribeSnapshotsRequest.t,
@@ -53,11 +74,18 @@ type ('i, 'o, 'e) t =
   DescribeUsersResponse.error) t 
   | FailoverShard: (FailoverShardRequest.t, FailoverShardResponse.t,
   FailoverShardResponse.error) t 
+  | ListAllowedMultiRegionClusterUpdates:
+  (ListAllowedMultiRegionClusterUpdatesRequest.t,
+  ListAllowedMultiRegionClusterUpdatesResponse.t,
+  ListAllowedMultiRegionClusterUpdatesResponse.error) t 
   | ListAllowedNodeTypeUpdates: (ListAllowedNodeTypeUpdatesRequest.t,
   ListAllowedNodeTypeUpdatesResponse.t,
   ListAllowedNodeTypeUpdatesResponse.error) t 
   | ListTags: (ListTagsRequest.t, ListTagsResponse.t, ListTagsResponse.error)
   t 
+  | PurchaseReservedNodesOffering: (PurchaseReservedNodesOfferingRequest.t,
+  PurchaseReservedNodesOfferingResponse.t,
+  PurchaseReservedNodesOfferingResponse.error) t 
   | ResetParameterGroup: (ResetParameterGroupRequest.t,
   ResetParameterGroupResponse.t, ResetParameterGroupResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
@@ -68,6 +96,9 @@ type ('i, 'o, 'e) t =
   UpdateACLResponse.error) t 
   | UpdateCluster: (UpdateClusterRequest.t, UpdateClusterResponse.t,
   UpdateClusterResponse.error) t 
+  | UpdateMultiRegionCluster: (UpdateMultiRegionClusterRequest.t,
+  UpdateMultiRegionClusterResponse.t, UpdateMultiRegionClusterResponse.error)
+  t 
   | UpdateParameterGroup: (UpdateParameterGroupRequest.t,
   UpdateParameterGroupResponse.t, UpdateParameterGroupResponse.error) t 
   | UpdateSubnetGroup: (UpdateSubnetGroupRequest.t,
@@ -80,12 +111,14 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CopySnapshot -> `POST
   | CreateACL -> `POST
   | CreateCluster -> `POST
+  | CreateMultiRegionCluster -> `POST
   | CreateParameterGroup -> `POST
   | CreateSnapshot -> `POST
   | CreateSubnetGroup -> `POST
   | CreateUser -> `POST
   | DeleteACL -> `POST
   | DeleteCluster -> `POST
+  | DeleteMultiRegionCluster -> `POST
   | DeleteParameterGroup -> `POST
   | DeleteSnapshot -> `POST
   | DeleteSubnetGroup -> `POST
@@ -94,20 +127,28 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeClusters -> `POST
   | DescribeEngineVersions -> `POST
   | DescribeEvents -> `POST
+  | DescribeMultiRegionClusters -> `POST
+  | DescribeMultiRegionParameterGroups -> `POST
+  | DescribeMultiRegionParameters -> `POST
   | DescribeParameterGroups -> `POST
   | DescribeParameters -> `POST
+  | DescribeReservedNodes -> `POST
+  | DescribeReservedNodesOfferings -> `POST
   | DescribeServiceUpdates -> `POST
   | DescribeSnapshots -> `POST
   | DescribeSubnetGroups -> `POST
   | DescribeUsers -> `POST
   | FailoverShard -> `POST
+  | ListAllowedMultiRegionClusterUpdates -> `POST
   | ListAllowedNodeTypeUpdates -> `POST
   | ListTags -> `POST
+  | PurchaseReservedNodesOffering -> `POST
   | ResetParameterGroup -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateACL -> `POST
   | UpdateCluster -> `POST
+  | UpdateMultiRegionCluster -> `POST
   | UpdateParameterGroup -> `POST
   | UpdateSubnetGroup -> `POST
   | UpdateUser -> `POST
@@ -118,12 +159,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CopySnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateACL -> (Format.kasprintf Uri.of_string) "/"
       | CreateCluster -> (Format.kasprintf Uri.of_string) "/"
+      | CreateMultiRegionCluster -> (Format.kasprintf Uri.of_string) "/"
       | CreateParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | CreateSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | CreateUser -> (Format.kasprintf Uri.of_string) "/"
       | DeleteACL -> (Format.kasprintf Uri.of_string) "/"
       | DeleteCluster -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteMultiRegionCluster -> (Format.kasprintf Uri.of_string) "/"
       | DeleteParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
@@ -132,20 +175,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeClusters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEngineVersions -> (Format.kasprintf Uri.of_string) "/"
       | DescribeEvents -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMultiRegionClusters -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeMultiRegionParameterGroups ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeMultiRegionParameters -> (Format.kasprintf Uri.of_string) "/"
       | DescribeParameterGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeParameters -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeReservedNodes -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeReservedNodesOfferings ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeServiceUpdates -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | DescribeSubnetGroups -> (Format.kasprintf Uri.of_string) "/"
       | DescribeUsers -> (Format.kasprintf Uri.of_string) "/"
       | FailoverShard -> (Format.kasprintf Uri.of_string) "/"
+      | ListAllowedMultiRegionClusterUpdates ->
+          (Format.kasprintf Uri.of_string) "/"
       | ListAllowedNodeTypeUpdates -> (Format.kasprintf Uri.of_string) "/"
       | ListTags -> (Format.kasprintf Uri.of_string) "/"
+      | PurchaseReservedNodesOffering -> (Format.kasprintf Uri.of_string) "/"
       | ResetParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateACL -> (Format.kasprintf Uri.of_string) "/"
       | UpdateCluster -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateMultiRegionCluster -> (Format.kasprintf Uri.of_string) "/"
       | UpdateParameterGroup -> (Format.kasprintf Uri.of_string) "/"
       | UpdateSubnetGroup -> (Format.kasprintf Uri.of_string) "/"
       | UpdateUser -> (Format.kasprintf Uri.of_string) "/")
@@ -183,6 +237,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.CreateCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateMultiRegionCluster ->
+      let json = CreateMultiRegionClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.CreateMultiRegionCluster")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateParameterGroup ->
       let json = CreateParameterGroupRequest.to_json req in
@@ -231,6 +293,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.DeleteCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteMultiRegionCluster ->
+      let json = DeleteMultiRegionClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.DeleteMultiRegionCluster")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteParameterGroup ->
       let json = DeleteParameterGroupRequest.to_json req in
@@ -296,6 +366,31 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.DescribeEvents")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMultiRegionClusters ->
+      let json = DescribeMultiRegionClustersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.DescribeMultiRegionClusters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMultiRegionParameterGroups ->
+      let json = DescribeMultiRegionParameterGroupsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonMemoryDB.DescribeMultiRegionParameterGroups")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeMultiRegionParameters ->
+      let json = DescribeMultiRegionParametersRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.DescribeMultiRegionParameters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeParameterGroups ->
       let json = DescribeParameterGroupsRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -311,6 +406,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.DescribeParameters")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReservedNodes ->
+      let json = DescribeReservedNodesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.DescribeReservedNodes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeReservedNodesOfferings ->
+      let json = DescribeReservedNodesOfferingsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.DescribeReservedNodesOfferings")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeServiceUpdates ->
       let json = DescribeServiceUpdatesRequest.to_json req in
@@ -352,6 +463,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.FailoverShard")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListAllowedMultiRegionClusterUpdates ->
+      let json = ListAllowedMultiRegionClusterUpdatesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AmazonMemoryDB.ListAllowedMultiRegionClusterUpdates")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListAllowedNodeTypeUpdates ->
       let json = ListAllowedNodeTypeUpdatesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -367,6 +487,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.ListTags")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PurchaseReservedNodesOffering ->
+      let json = PurchaseReservedNodesOfferingRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.PurchaseReservedNodesOffering")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ResetParameterGroup ->
       let json = ResetParameterGroupRequest.to_json req in
@@ -407,6 +535,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonMemoryDB.UpdateCluster")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateMultiRegionCluster ->
+      let json = UpdateMultiRegionClusterRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonMemoryDB.UpdateMultiRegionCluster")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateParameterGroup ->
       let json = UpdateParameterGroupRequest.to_json req in
@@ -481,6 +617,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateClusterResponse.of_json json)
       else Error (parse_aws_error (Some CreateClusterResponse.error_of_json))
+  | CreateMultiRegionCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateMultiRegionClusterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateMultiRegionClusterResponse.error_of_json))
   | CreateParameterGroup ->
       if is_success
       then
@@ -522,6 +667,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteClusterResponse.of_json json)
       else Error (parse_aws_error (Some DeleteClusterResponse.error_of_json))
+  | DeleteMultiRegionCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteMultiRegionClusterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteMultiRegionClusterResponse.error_of_json))
   | DeleteParameterGroup ->
       if is_success
       then
@@ -580,6 +734,33 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeEventsResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeEventsResponse.error_of_json))
+  | DescribeMultiRegionClusters ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMultiRegionClustersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMultiRegionClustersResponse.error_of_json))
+  | DescribeMultiRegionParameterGroups ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMultiRegionParameterGroupsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMultiRegionParameterGroupsResponse.error_of_json))
+  | DescribeMultiRegionParameters ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeMultiRegionParametersResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeMultiRegionParametersResponse.error_of_json))
   | DescribeParameterGroups ->
       if is_success
       then
@@ -597,6 +778,23 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeParametersResponse.error_of_json))
+  | DescribeReservedNodes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReservedNodesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeReservedNodesResponse.error_of_json))
+  | DescribeReservedNodesOfferings ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeReservedNodesOfferingsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeReservedNodesOfferingsResponse.error_of_json))
   | DescribeServiceUpdates ->
       if is_success
       then
@@ -634,6 +832,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (FailoverShardResponse.of_json json)
       else Error (parse_aws_error (Some FailoverShardResponse.error_of_json))
+  | ListAllowedMultiRegionClusterUpdates ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListAllowedMultiRegionClusterUpdatesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListAllowedMultiRegionClusterUpdatesResponse.error_of_json))
   | ListAllowedNodeTypeUpdates ->
       if is_success
       then
@@ -649,6 +856,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListTagsResponse.of_json json)
       else Error (parse_aws_error (Some ListTagsResponse.error_of_json))
+  | PurchaseReservedNodesOffering ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PurchaseReservedNodesOfferingResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PurchaseReservedNodesOfferingResponse.error_of_json))
   | ResetParameterGroup ->
       if is_success
       then
@@ -681,6 +897,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UpdateClusterResponse.of_json json)
       else Error (parse_aws_error (Some UpdateClusterResponse.error_of_json))
+  | UpdateMultiRegionCluster ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateMultiRegionClusterResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateMultiRegionClusterResponse.error_of_json))
   | UpdateParameterGroup ->
       if is_success
       then

@@ -89,6 +89,9 @@ module LimitValueList =
   struct
     type nonrec t = LimitValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:LimitValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -167,9 +170,9 @@ module Duration =
         (Option.map ~f:DurationValue.of_xml) (Xml.child xml_arg0 "Value") in
       make ?unit ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let unit = field_map json "Unit" TimeUnit.of_json in
-      let value = field_map json "Value" DurationValue.of_json in
+    let of_json json__ =
+      let unit = field_map json__ "Unit" TimeUnit.of_json in
+      let value = field_map json__ "Value" DurationValue.of_json in
       make ?unit ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -218,7 +221,7 @@ module StorageTypeLimit =
       {
       limitName: LimitName.t option
         [@ocaml.doc
-          "Name of storage limits that are applicable for given storage type. If StorageType is ebs, following storage options are applicable MinimumVolumeSize Minimum amount of volume size that is applicable for given storage type.It can be empty if it is not applicable. MaximumVolumeSize Maximum amount of volume size that is applicable for given storage type.It can be empty if it is not applicable. MaximumIops Maximum amount of Iops that is applicable for given storage type.It can be empty if it is not applicable. MinimumIops Minimum amount of Iops that is applicable for given storage type.It can be empty if it is not applicable."];
+          "Name of storage limits that are applicable for given storage type. If StorageType is ebs, following storage options are applicable MinimumVolumeSize Minimum amount of volume size that is applicable for given storage type.It can be empty if it is not applicable. MaximumVolumeSize Maximum amount of volume size that is applicable for given storage type.It can be empty if it is not applicable. MaximumIops Maximum amount of Iops that is applicable for given storage type.It can be empty if it is not applicable. MinimumIops Minimum amount of Iops that is applicable for given storage type.It can be empty if it is not applicable. MaximumThroughput Maximum amount of Throughput that is applicable for given storage type.It can be empty if it is not applicable. MinimumThroughput Minimum amount of Throughput that is applicable for given storage type.It can be empty if it is not applicable."];
       limitValues: LimitValueList.t option
         [@ocaml.doc "Values for the StorageTypeLimit$LimitName ."]}
     let make ?limitName =
@@ -237,9 +240,9 @@ module StorageTypeLimit =
         (Option.map ~f:LimitName.of_xml) (Xml.child xml_arg0 "LimitName") in
       make ?limitValues ?limitName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limitValues = field_map json "LimitValues" LimitValueList.of_json in
-      let limitName = field_map json "LimitName" LimitName.of_json in
+    let of_json json__ =
+      let limitValues = field_map json__ "LimitValues" LimitValueList.of_json in
+      let limitName = field_map json__ "LimitName" LimitName.of_json in
       make ?limitValues ?limitName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Limits that are applicable for given storage type."]
@@ -297,10 +300,10 @@ module SAMLIdp =
           (Xml.child_exn ~context:context_ xml_arg0 "MetadataContent") in
       make ~entityId ~metadataContent ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let entityId = field_map_exn json "EntityId" SAMLEntityId.of_json in
+    let of_json json__ =
+      let entityId = field_map_exn json__ "EntityId" SAMLEntityId.of_json in
       let metadataContent =
-        field_map_exn json "MetadataContent" SAMLMetadata.of_json in
+        field_map_exn json__ "MetadataContent" SAMLMetadata.of_json in
       make ~entityId ~metadataContent ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the SAML Identity Provider's information."]
@@ -338,11 +341,11 @@ module AutoTuneMaintenanceSchedule =
         (Option.map ~f:StartAt.of_xml) (Xml.child xml_arg0 "StartAt") in
       make ?cronExpressionForRecurrence ?duration ?startAt ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cronExpressionForRecurrence =
-        field_map json "CronExpressionForRecurrence" String_.of_json in
-      let duration = field_map json "Duration" Duration.of_json in
-      let startAt = field_map json "StartAt" StartAt.of_json in
+        field_map json__ "CronExpressionForRecurrence" String_.of_json in
+      let duration = field_map json__ "Duration" Duration.of_json in
+      let startAt = field_map json__ "StartAt" StartAt.of_json in
       make ?cronExpressionForRecurrence ?duration ?startAt ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -379,6 +382,9 @@ module Issues =
   struct
     type nonrec t = Issue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Issue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -492,7 +498,7 @@ module MinimumInstanceCount =
 module StorageSubTypeName =
   struct
     type nonrec t = string[@@ocaml.doc
-                            "SubType of the given storage type. List of available sub-storage options: For \"instance\" storageType we wont have any storageSubType, in case of \"ebs\" storageType we will have following valid storageSubTypes standard gp2 io1 Refer VolumeType for more information regarding above EBS storage options."]
+                            "SubType of the given storage type. List of available sub-storage options: For \"instance\" storageType we wont have any storageSubType, in case of \"ebs\" storageType we will have following valid storageSubTypes standard gp2 gp3 io1 Refer VolumeType for more information regarding above EBS storage options."]
     let context_ = "StorageSubTypeName"
     let make i = i
     let of_string x = x
@@ -503,11 +509,14 @@ module StorageSubTypeName =
     let of_json j = string_of_json ~kind:"StorageSubTypeName" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
-       "SubType of the given storage type. List of available sub-storage options: For \"instance\" storageType we wont have any storageSubType, in case of \"ebs\" storageType we will have following valid storageSubTypes standard gp2 io1 Refer VolumeType for more information regarding above EBS storage options."]
+       "SubType of the given storage type. List of available sub-storage options: For \"instance\" storageType we wont have any storageSubType, in case of \"ebs\" storageType we will have following valid storageSubTypes standard gp2 gp3 io1 Refer VolumeType for more information regarding above EBS storage options."]
 module StorageTypeLimitList =
   struct
     type nonrec t = StorageTypeLimit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageTypeLimit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -544,6 +553,32 @@ module StorageTypeName =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "Type of the storage. List of available storage options: instance Inbuilt storage available for the given Instance ebs Elastic block storage that would be attached to the given Instance"]
+module PropertyValueType =
+  struct
+    type nonrec t =
+      | PLAIN_TEXT 
+      | STRINGIFIED_JSON 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PLAIN_TEXT -> "PLAIN_TEXT"
+      | STRINGIFIED_JSON -> "STRINGIFIED_JSON"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PLAIN_TEXT" -> PLAIN_TEXT
+      | "STRINGIFIED_JSON" -> STRINGIFIED_JSON
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PropertyValueType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PropertyValueType" j)
+    let to_json = simple_to_json to_value
+  end
 module AutoTuneDate =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -740,13 +775,13 @@ module SAMLOptionsOutput =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?sessionTimeoutMinutes ?rolesKey ?subjectKey ?idp ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionTimeoutMinutes =
-        field_map json "SessionTimeoutMinutes" IntegerClass.of_json in
-      let rolesKey = field_map json "RolesKey" String_.of_json in
-      let subjectKey = field_map json "SubjectKey" String_.of_json in
-      let idp = field_map json "Idp" SAMLIdp.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "SessionTimeoutMinutes" IntegerClass.of_json in
+      let rolesKey = field_map json__ "RolesKey" String_.of_json in
+      let subjectKey = field_map json__ "SubjectKey" String_.of_json in
+      let idp = field_map json__ "Idp" SAMLIdp.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?sessionTimeoutMinutes ?rolesKey ?subjectKey ?idp ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -782,6 +817,9 @@ module AutoTuneMaintenanceScheduleList =
     type nonrec t = AutoTuneMaintenanceSchedule.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:100); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoTuneMaintenanceSchedule.to_value)) |>
         (fun x -> `List x)
@@ -878,6 +916,37 @@ module AutoTuneState =
     let of_json j = of_string (string_of_json ~kind:"AutoTuneState" j)
     let to_json = simple_to_json to_value
   end
+module PauseState =
+  struct
+    type nonrec t =
+      | Active 
+      | Completed 
+      | Scheduled 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Active -> "Active"
+      | Completed -> "Completed"
+      | Scheduled -> "Scheduled"
+      | Disabled -> "Disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Active" -> Active
+      | "Completed" -> Completed
+      | "Scheduled" -> Scheduled
+      | "Disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PauseState" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PauseState" j)
+    let to_json = simple_to_json to_value
+  end
 module IdentityPoolId =
   struct
     type nonrec t = string
@@ -936,6 +1005,32 @@ module UserPoolId =
     let of_json j = string_of_json ~kind:"UserPoolId" j
     let to_json = simple_to_json to_value
   end
+module DeploymentStrategy =
+  struct
+    type nonrec t =
+      | Default 
+      | CapacityOptimized 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Default -> "Default"
+      | CapacityOptimized -> "CapacityOptimized"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Default" -> Default
+      | "CapacityOptimized" -> CapacityOptimized
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DeploymentStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"DeploymentStrategy" j)
+    let to_json = simple_to_json to_value
+  end
 module ARN =
   struct
     type nonrec t = string[@@ocaml.doc
@@ -978,17 +1073,25 @@ module TLSSecurityPolicy =
     type nonrec t =
       | Policy_Min_TLS_1_0_2019_07 
       | Policy_Min_TLS_1_2_2019_07 
+      | Policy_Min_TLS_1_2_PFS_2023_10 
+      | Policy_Min_TLS_1_2_RFC9151_FIPS_2024_08 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Policy_Min_TLS_1_0_2019_07 -> "Policy-Min-TLS-1-0-2019-07"
       | Policy_Min_TLS_1_2_2019_07 -> "Policy-Min-TLS-1-2-2019-07"
+      | Policy_Min_TLS_1_2_PFS_2023_10 -> "Policy-Min-TLS-1-2-PFS-2023-10"
+      | Policy_Min_TLS_1_2_RFC9151_FIPS_2024_08 ->
+          "Policy-Min-TLS-1-2-RFC9151-FIPS-2024-08"
       | Non_static_id s -> s
     let of_string =
       function
       | "Policy-Min-TLS-1-0-2019-07" -> Policy_Min_TLS_1_0_2019_07
       | "Policy-Min-TLS-1-2-2019-07" -> Policy_Min_TLS_1_2_2019_07
+      | "Policy-Min-TLS-1-2-PFS-2023-10" -> Policy_Min_TLS_1_2_PFS_2023_10
+      | "Policy-Min-TLS-1-2-RFC9151-FIPS-2024-08" ->
+          Policy_Min_TLS_1_2_RFC9151_FIPS_2024_08
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1005,6 +1108,7 @@ module VolumeType =
       | Standard 
       | Gp2 
       | Io1 
+      | Gp3 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1012,12 +1116,14 @@ module VolumeType =
       | Standard -> "standard"
       | Gp2 -> "gp2"
       | Io1 -> "io1"
+      | Gp3 -> "gp3"
       | Non_static_id s -> s
     let of_string =
       function
       | "standard" -> Standard
       | "gp2" -> Gp2
       | "io1" -> Io1
+      | "gp3" -> Gp3
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1044,8 +1150,8 @@ module ColdStorageOptions =
         Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
       make ~enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map_exn json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
       make ~enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1292,9 +1398,9 @@ module ZoneAwarenessConfig =
           (Xml.child xml_arg0 "AvailabilityZoneCount") in
       make ?availabilityZoneCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZoneCount =
-        field_map json "AvailabilityZoneCount" IntegerClass.of_json in
+        field_map json__ "AvailabilityZoneCount" IntegerClass.of_json in
       make ?availabilityZoneCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1342,10 +1448,10 @@ module LogPublishingOption =
           (Xml.child xml_arg0 "CloudWatchLogsLogGroupArn") in
       make ?enabled ?cloudWatchLogsLogGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       let cloudWatchLogsLogGroupArn =
-        field_map json "CloudWatchLogsLogGroupArn"
+        field_map json__ "CloudWatchLogsLogGroupArn"
           CloudWatchLogsLogGroupArn.of_json in
       make ?enabled ?cloudWatchLogsLogGroupArn ()
     let to_json v = composed_to_json to_value v
@@ -1386,6 +1492,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1475,12 +1584,12 @@ module UpgradeStepItem =
         (Option.map ~f:UpgradeStep.of_xml) (Xml.child xml_arg0 "UpgradeStep") in
       make ?progressPercent ?issues ?upgradeStepStatus ?upgradeStep ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let progressPercent = field_map json "ProgressPercent" Double.of_json in
-      let issues = field_map json "Issues" Issues.of_json in
+    let of_json json__ =
+      let progressPercent = field_map json__ "ProgressPercent" Double.of_json in
+      let issues = field_map json__ "Issues" Issues.of_json in
       let upgradeStepStatus =
-        field_map json "UpgradeStepStatus" UpgradeStatus.of_json in
-      let upgradeStep = field_map json "UpgradeStep" UpgradeStep.of_json in
+        field_map json__ "UpgradeStepStatus" UpgradeStatus.of_json in
+      let upgradeStep = field_map json__ "UpgradeStep" UpgradeStep.of_json in
       make ?progressPercent ?issues ?upgradeStepStatus ?upgradeStep ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1493,7 +1602,7 @@ module ElasticsearchVersionString =
       let open Result in
         ok_or_failwith
           (check_pattern i
-             ~pattern:"^[0-9]{1}\\.[0-9]{1,2}$|^OpenSearch_[0-9]{1,2}\\.[0-9]{1,2}$");
+             ~pattern:"^[0-9]{1}\\.[0-9]{1,2}$|^OpenSearch_[0-9]{1,2}\\.[0-9]{1,2}$|^OS_[0-9]{1,2}\\.[0-9]{1,2}$");
         i
     let of_string x = x
     let to_value x = `String x
@@ -1530,11 +1639,11 @@ module RecurringCharge =
           (Xml.child xml_arg0 "RecurringChargeAmount") in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringChargeFrequency =
-        field_map json "RecurringChargeFrequency" String_.of_json in
+        field_map json__ "RecurringChargeFrequency" String_.of_json in
       let recurringChargeAmount =
-        field_map json "RecurringChargeAmount" Double.of_json in
+        field_map json__ "RecurringChargeAmount" Double.of_json in
       make ?recurringChargeFrequency ?recurringChargeAmount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1754,9 +1863,9 @@ module AdditionalLimit =
         (Option.map ~f:LimitName.of_xml) (Xml.child xml_arg0 "LimitName") in
       make ?limitValues ?limitName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limitValues = field_map json "LimitValues" LimitValueList.of_json in
-      let limitName = field_map json "LimitName" LimitName.of_json in
+    let of_json json__ =
+      let limitValues = field_map json__ "LimitValues" LimitValueList.of_json in
+      let limitName = field_map json__ "LimitName" LimitName.of_json in
       make ?limitValues ?limitName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1787,11 +1896,11 @@ module InstanceCountLimits =
           (Xml.child xml_arg0 "MinimumInstanceCount") in
       make ?maximumInstanceCount ?minimumInstanceCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumInstanceCount =
-        field_map json "MaximumInstanceCount" MaximumInstanceCount.of_json in
+        field_map json__ "MaximumInstanceCount" MaximumInstanceCount.of_json in
       let minimumInstanceCount =
-        field_map json "MinimumInstanceCount" MinimumInstanceCount.of_json in
+        field_map json__ "MinimumInstanceCount" MinimumInstanceCount.of_json in
       make ?maximumInstanceCount ?minimumInstanceCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1831,17 +1940,61 @@ module StorageType =
           (Xml.child xml_arg0 "StorageTypeName") in
       make ?storageTypeLimits ?storageSubTypeName ?storageTypeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let storageTypeLimits =
-        field_map json "StorageTypeLimits" StorageTypeLimitList.of_json in
+        field_map json__ "StorageTypeLimits" StorageTypeLimitList.of_json in
       let storageSubTypeName =
-        field_map json "StorageSubTypeName" StorageSubTypeName.of_json in
+        field_map json__ "StorageSubTypeName" StorageSubTypeName.of_json in
       let storageTypeName =
-        field_map json "StorageTypeName" StorageTypeName.of_json in
+        field_map json__ "StorageTypeName" StorageTypeName.of_json in
       make ?storageTypeLimits ?storageSubTypeName ?storageTypeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "StorageTypes represents the list of storage related types and their attributes that are available for given InstanceType."]
+module ConfigChangeStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Initializing 
+      | Validating 
+      | ValidationFailed 
+      | ApplyingChanges 
+      | Completed 
+      | PendingUserInput 
+      | Cancelled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "Pending"
+      | Initializing -> "Initializing"
+      | Validating -> "Validating"
+      | ValidationFailed -> "ValidationFailed"
+      | ApplyingChanges -> "ApplyingChanges"
+      | Completed -> "Completed"
+      | PendingUserInput -> "PendingUserInput"
+      | Cancelled -> "Cancelled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Pending" -> Pending
+      | "Initializing" -> Initializing
+      | "Validating" -> Validating
+      | "ValidationFailed" -> ValidationFailed
+      | "ApplyingChanges" -> ApplyingChanges
+      | "Completed" -> Completed
+      | "PendingUserInput" -> PendingUserInput
+      | "Cancelled" -> Cancelled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ConfigChangeStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ConfigChangeStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module GUID =
   struct
     type nonrec t = string
@@ -1858,6 +2011,31 @@ module GUID =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"GUID" j
+    let to_json = simple_to_json to_value
+  end
+module InitiatedBy =
+  struct
+    type nonrec t =
+      | CUSTOMER 
+      | SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CUSTOMER -> "CUSTOMER"
+      | SERVICE -> "SERVICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CUSTOMER" -> CUSTOMER
+      | "SERVICE" -> SERVICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration InitiatedBy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"InitiatedBy" j)
     let to_json = simple_to_json to_value
   end
 module Message =
@@ -1893,6 +2071,54 @@ module ServiceUrl =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "The endpoint to which service requests are submitted. For example, search-imdb-movies-oopcnjfn6ugofer3zx5iadxxca.eu-west-1.es.amazonaws.com or doc-imdb-movies-oopcnjfn6ugofer3zx5iadxxca.eu-west-1.es.amazonaws.com."]
+module ModifyingProperties =
+  struct
+    type nonrec t =
+      {
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the property that is currently being modified."];
+      activeValue: String_.t option
+        [@ocaml.doc
+          "The current value of the domain property that is being modified."];
+      pendingValue: String_.t option
+        [@ocaml.doc
+          "The value that the property that is currently being modified will eventually have."];
+      valueType: PropertyValueType.t option
+        [@ocaml.doc
+          "The type of value that is currently being modified. Properties can have two types: PLAIN_TEXT: Contain direct values such as \"1\", \"True\", or \"c5.large.search\". STRINGIFIED_JSON: Contain content in JSON format, such as \\{\"Enabled\":\"True\"\\}\"."]}
+    let make ?name =
+      fun ?activeValue ->
+        fun ?pendingValue ->
+          fun ?valueType ->
+            fun () -> { name; activeValue; pendingValue; valueType }
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:String_.to_value));
+        ("ActiveValue", (Option.map x.activeValue ~f:String_.to_value));
+        ("PendingValue", (Option.map x.pendingValue ~f:String_.to_value));
+        ("ValueType", (Option.map x.valueType ~f:PropertyValueType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let valueType =
+        (Option.map ~f:PropertyValueType.of_xml)
+          (Xml.child xml_arg0 "ValueType") in
+      let pendingValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PendingValue") in
+      let activeValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ActiveValue") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?valueType ?pendingValue ?activeValue ?name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let valueType = field_map json__ "ValueType" PropertyValueType.of_json in
+      let pendingValue = field_map json__ "PendingValue" String_.of_json in
+      let activeValue = field_map json__ "ActiveValue" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      make ?valueType ?pendingValue ?activeValue ?name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the domain properties that are currently being modified."]
 module DeploymentCloseDateTimeStamp =
   struct
     type nonrec t = string
@@ -2043,14 +2269,14 @@ module ScheduledAutoTuneDetails =
         (Option.map ~f:AutoTuneDate.of_xml) (Xml.child xml_arg0 "Date") in
       make ?severity ?action ?actionType ?date ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let severity =
-        field_map json "Severity" ScheduledAutoTuneSeverityType.of_json in
+        field_map json__ "Severity" ScheduledAutoTuneSeverityType.of_json in
       let action =
-        field_map json "Action" ScheduledAutoTuneDescription.of_json in
+        field_map json__ "Action" ScheduledAutoTuneDescription.of_json in
       let actionType =
-        field_map json "ActionType" ScheduledAutoTuneActionType.of_json in
-      let date = field_map json "Date" AutoTuneDate.of_json in
+        field_map json__ "ActionType" ScheduledAutoTuneActionType.of_json in
+      let date = field_map json__ "Date" AutoTuneDate.of_json in
       make ?severity ?action ?actionType ?date ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2059,39 +2285,39 @@ module OptionStatus =
   struct
     type nonrec t =
       {
-      creationDate: UpdateTimestamp.t
+      creationDate: UpdateTimestamp.t option
         [@ocaml.doc
           "Timestamp which tells the creation date for the entity."];
-      updateDate: UpdateTimestamp.t
+      updateDate: UpdateTimestamp.t option
         [@ocaml.doc
           "Timestamp which tells the last updated time for the entity."];
       updateVersion: UIntValue.t option
         [@ocaml.doc "Specifies the latest version for the entity."];
-      state: OptionState.t
+      state: OptionState.t option
         [@ocaml.doc "Provides the OptionState for the Elasticsearch domain."];
       pendingDeletion: Boolean.t option
         [@ocaml.doc
           "Indicates whether the Elasticsearch domain is being deleted."]}
-    let context_ = "OptionStatus"
-    let make ?updateVersion =
-      fun ?pendingDeletion ->
-        fun ~creationDate ->
-          fun ~updateDate ->
-            fun ~state ->
+    let make ?creationDate =
+      fun ?updateDate ->
+        fun ?updateVersion ->
+          fun ?state ->
+            fun ?pendingDeletion ->
               fun () ->
                 {
-                  updateVersion;
-                  pendingDeletion;
                   creationDate;
                   updateDate;
-                  state
+                  updateVersion;
+                  state;
+                  pendingDeletion
                 }
     let to_value x =
       structure_to_value
-        [("CreationDate", (Some (UpdateTimestamp.to_value x.creationDate)));
-        ("UpdateDate", (Some (UpdateTimestamp.to_value x.updateDate)));
+        [("CreationDate",
+           (Option.map x.creationDate ~f:UpdateTimestamp.to_value));
+        ("UpdateDate", (Option.map x.updateDate ~f:UpdateTimestamp.to_value));
         ("UpdateVersion", (Option.map x.updateVersion ~f:UIntValue.to_value));
-        ("State", (Some (OptionState.to_value x.state)));
+        ("State", (Option.map x.state ~f:OptionState.to_value));
         ("PendingDeletion",
           (Option.map x.pendingDeletion ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
@@ -2099,27 +2325,27 @@ module OptionStatus =
       let pendingDeletion =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "PendingDeletion") in
       let state =
-        OptionState.of_xml (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:OptionState.of_xml) (Xml.child xml_arg0 "State") in
       let updateVersion =
         (Option.map ~f:UIntValue.of_xml) (Xml.child xml_arg0 "UpdateVersion") in
       let updateDate =
-        UpdateTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateDate") in
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "UpdateDate") in
       let creationDate =
-        UpdateTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDate") in
-      make ?pendingDeletion ~state ?updateVersion ~updateDate ~creationDate
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "CreationDate") in
+      make ?pendingDeletion ?state ?updateVersion ?updateDate ?creationDate
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pendingDeletion = field_map json "PendingDeletion" Boolean.of_json in
-      let state = field_map_exn json "State" OptionState.of_json in
-      let updateVersion = field_map json "UpdateVersion" UIntValue.of_json in
-      let updateDate =
-        field_map_exn json "UpdateDate" UpdateTimestamp.of_json in
+    let of_json json__ =
+      let pendingDeletion =
+        field_map json__ "PendingDeletion" Boolean.of_json in
+      let state = field_map json__ "State" OptionState.of_json in
+      let updateVersion = field_map json__ "UpdateVersion" UIntValue.of_json in
+      let updateDate = field_map json__ "UpdateDate" UpdateTimestamp.of_json in
       let creationDate =
-        field_map_exn json "CreationDate" UpdateTimestamp.of_json in
-      make ?pendingDeletion ~state ?updateVersion ~updateDate ~creationDate
+        field_map json__ "CreationDate" UpdateTimestamp.of_json in
+      make ?pendingDeletion ?state ?updateVersion ?updateDate ?creationDate
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the current status of the entity."]
@@ -2159,6 +2385,8 @@ module AdvancedOptions =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2226,16 +2454,16 @@ module AdvancedSecurityOptions =
       make ?anonymousAuthEnabled ?anonymousAuthDisableDate ?sAMLOptions
         ?internalUserDatabaseEnabled ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let anonymousAuthEnabled =
-        field_map json "AnonymousAuthEnabled" Boolean.of_json in
+        field_map json__ "AnonymousAuthEnabled" Boolean.of_json in
       let anonymousAuthDisableDate =
-        field_map json "AnonymousAuthDisableDate" DisableTimestamp.of_json in
+        field_map json__ "AnonymousAuthDisableDate" DisableTimestamp.of_json in
       let sAMLOptions =
-        field_map json "SAMLOptions" SAMLOptionsOutput.of_json in
+        field_map json__ "SAMLOptions" SAMLOptionsOutput.of_json in
       let internalUserDatabaseEnabled =
-        field_map json "InternalUserDatabaseEnabled" Boolean.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "InternalUserDatabaseEnabled" Boolean.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?anonymousAuthEnabled ?anonymousAuthDisableDate ?sAMLOptions
         ?internalUserDatabaseEnabled ?enabled ()
     let to_json v = composed_to_json to_value v
@@ -2280,14 +2508,14 @@ module AutoTuneOptions =
           (Xml.child xml_arg0 "DesiredState") in
       make ?maintenanceSchedules ?rollbackOnDisable ?desiredState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maintenanceSchedules =
-        field_map json "MaintenanceSchedules"
+        field_map json__ "MaintenanceSchedules"
           AutoTuneMaintenanceScheduleList.of_json in
       let rollbackOnDisable =
-        field_map json "RollbackOnDisable" RollbackOnDisable.of_json in
+        field_map json__ "RollbackOnDisable" RollbackOnDisable.of_json in
       let desiredState =
-        field_map json "DesiredState" AutoTuneDesiredState.of_json in
+        field_map json__ "DesiredState" AutoTuneDesiredState.of_json in
       make ?maintenanceSchedules ?rollbackOnDisable ?desiredState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2296,15 +2524,15 @@ module AutoTuneStatus =
   struct
     type nonrec t =
       {
-      creationDate: UpdateTimestamp.t
+      creationDate: UpdateTimestamp.t option
         [@ocaml.doc
           "Timestamp which tells Auto-Tune options creation date ."];
-      updateDate: UpdateTimestamp.t
+      updateDate: UpdateTimestamp.t option
         [@ocaml.doc
           "Timestamp which tells Auto-Tune options last updated time."];
       updateVersion: UIntValue.t option
         [@ocaml.doc "Specifies the Auto-Tune options latest version."];
-      state: AutoTuneState.t
+      state: AutoTuneState.t option
         [@ocaml.doc
           "Specifies the AutoTuneState for the Elasticsearch domain."];
       errorMessage: String_.t option
@@ -2313,28 +2541,28 @@ module AutoTuneStatus =
       pendingDeletion: Boolean.t option
         [@ocaml.doc
           "Indicates whether the Elasticsearch domain is being deleted."]}
-    let context_ = "AutoTuneStatus"
-    let make ?updateVersion =
-      fun ?errorMessage ->
-        fun ?pendingDeletion ->
-          fun ~creationDate ->
-            fun ~updateDate ->
-              fun ~state ->
+    let make ?creationDate =
+      fun ?updateDate ->
+        fun ?updateVersion ->
+          fun ?state ->
+            fun ?errorMessage ->
+              fun ?pendingDeletion ->
                 fun () ->
                   {
-                    updateVersion;
-                    errorMessage;
-                    pendingDeletion;
                     creationDate;
                     updateDate;
-                    state
+                    updateVersion;
+                    state;
+                    errorMessage;
+                    pendingDeletion
                   }
     let to_value x =
       structure_to_value
-        [("CreationDate", (Some (UpdateTimestamp.to_value x.creationDate)));
-        ("UpdateDate", (Some (UpdateTimestamp.to_value x.updateDate)));
+        [("CreationDate",
+           (Option.map x.creationDate ~f:UpdateTimestamp.to_value));
+        ("UpdateDate", (Option.map x.updateDate ~f:UpdateTimestamp.to_value));
         ("UpdateVersion", (Option.map x.updateVersion ~f:UIntValue.to_value));
-        ("State", (Some (AutoTuneState.to_value x.state)));
+        ("State", (Option.map x.state ~f:AutoTuneState.to_value));
         ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value));
         ("PendingDeletion",
           (Option.map x.pendingDeletion ~f:Boolean.to_value))]
@@ -2345,32 +2573,79 @@ module AutoTuneStatus =
       let errorMessage =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
       let state =
-        AutoTuneState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:AutoTuneState.of_xml) (Xml.child xml_arg0 "State") in
       let updateVersion =
         (Option.map ~f:UIntValue.of_xml) (Xml.child xml_arg0 "UpdateVersion") in
       let updateDate =
-        UpdateTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "UpdateDate") in
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "UpdateDate") in
       let creationDate =
-        UpdateTimestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDate") in
-      make ?pendingDeletion ?errorMessage ~state ?updateVersion ~updateDate
-        ~creationDate ()
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "CreationDate") in
+      make ?pendingDeletion ?errorMessage ?state ?updateVersion ?updateDate
+        ?creationDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pendingDeletion = field_map json "PendingDeletion" Boolean.of_json in
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let state = field_map_exn json "State" AutoTuneState.of_json in
-      let updateVersion = field_map json "UpdateVersion" UIntValue.of_json in
-      let updateDate =
-        field_map_exn json "UpdateDate" UpdateTimestamp.of_json in
+    let of_json json__ =
+      let pendingDeletion =
+        field_map json__ "PendingDeletion" Boolean.of_json in
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let state = field_map json__ "State" AutoTuneState.of_json in
+      let updateVersion = field_map json__ "UpdateVersion" UIntValue.of_json in
+      let updateDate = field_map json__ "UpdateDate" UpdateTimestamp.of_json in
       let creationDate =
-        field_map_exn json "CreationDate" UpdateTimestamp.of_json in
-      make ?pendingDeletion ?errorMessage ~state ?updateVersion ~updateDate
-        ~creationDate ()
+        field_map json__ "CreationDate" UpdateTimestamp.of_json in
+      make ?pendingDeletion ?errorMessage ?state ?updateVersion ?updateDate
+        ?creationDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides the current status of the Auto-Tune options."]
+module AutomatedSnapshotPauseOptions =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t option
+        [@ocaml.doc
+          "Whether automated snapshot pause is enabled for the domain."];
+      startTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the automated snapshot pause begins."];
+      endTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the automated snapshot pause ends."];
+      state: PauseState.t option
+        [@ocaml.doc
+          "The current state of the automated snapshot pause. Valid values are Active, Completed, Scheduled, and Disabled."]}
+    let make ?enabled =
+      fun ?startTime ->
+        fun ?endTime ->
+          fun ?state -> fun () -> { enabled; startTime; endTime; state }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Option.map x.enabled ~f:Boolean.to_value));
+        ("StartTime", (Option.map x.startTime ~f:UpdateTimestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:UpdateTimestamp.to_value));
+        ("State", (Option.map x.state ~f:PauseState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:PauseState.of_xml) (Xml.child xml_arg0 "State") in
+      let endTime =
+        (Option.map ~f:UpdateTimestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let enabled =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
+      make ?state ?endTime ?startTime ?enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "State" PauseState.of_json in
+      let endTime = field_map json__ "EndTime" UpdateTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" UpdateTimestamp.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
+      make ?state ?endTime ?startTime ?enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the automated snapshot pause options for the domain. These options allow you to temporarily pause automated snapshots for a specified time period."]
 module CognitoOptions =
   struct
     type nonrec t =
@@ -2412,16 +2687,43 @@ module CognitoOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?roleArn ?identityPoolId ?userPoolId ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let roleArn = field_map json "RoleArn" RoleArn.of_json in
+    let of_json json__ =
+      let roleArn = field_map json__ "RoleArn" RoleArn.of_json in
       let identityPoolId =
-        field_map json "IdentityPoolId" IdentityPoolId.of_json in
-      let userPoolId = field_map json "UserPoolId" UserPoolId.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "IdentityPoolId" IdentityPoolId.of_json in
+      let userPoolId = field_map json__ "UserPoolId" UserPoolId.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?roleArn ?identityPoolId ?userPoolId ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Options to specify the Cognito user and identity pools for Kibana authentication. For more information, see Amazon Cognito Authentication for Kibana."]
+module DeploymentStrategyOptions =
+  struct
+    type nonrec t =
+      {
+      deploymentStrategy: DeploymentStrategy.t
+        [@ocaml.doc
+          "Specifies the deployment strategy for the domain. Valid values are Default and CapacityOptimized."]}
+    let context_ = "DeploymentStrategyOptions"
+    let make ~deploymentStrategy = fun () -> { deploymentStrategy }
+    let to_value x =
+      structure_to_value
+        [("DeploymentStrategy",
+           (Some (DeploymentStrategy.to_value x.deploymentStrategy)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let deploymentStrategy =
+        DeploymentStrategy.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DeploymentStrategy") in
+      make ~deploymentStrategy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let deploymentStrategy =
+        field_map_exn json__ "DeploymentStrategy" DeploymentStrategy.of_json in
+      make ~deploymentStrategy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the deployment strategy options for the domain."]
 module DomainEndpointOptions =
   struct
     type nonrec t =
@@ -2431,7 +2733,7 @@ module DomainEndpointOptions =
           "Specify if only HTTPS endpoint should be enabled for the Elasticsearch domain."];
       tLSSecurityPolicy: TLSSecurityPolicy.t option
         [@ocaml.doc
-          "Specify the TLS security policy that needs to be applied to the HTTPS endpoint of Elasticsearch domain. It can be one of the following values: Policy-Min-TLS-1-0-2019-07: TLS security policy which supports TLSv1.0 and higher. Policy-Min-TLS-1-2-2019-07: TLS security policy which supports only TLSv1.2"];
+          "Specify the TLS security policy that needs to be applied to the HTTPS endpoint of Elasticsearch domain. It can be one of the following values: Policy-Min-TLS-1-0-2019-07: TLS security policy that supports TLS version 1.0 to TLS version 1.2 Policy-Min-TLS-1-2-2019-07: TLS security policy that supports only TLS version 1.2 Policy-Min-TLS-1-2-PFS-2023-10: TLS security policy that supports TLS version 1.2 to TLS version 1.3 with perfect forward secrecy cipher suites Policy-Min-TLS-1-2-RFC9151-FIPS-2024-08: TLS security policy that supports TLS version 1.3 with FIPS"];
       customEndpointEnabled: Boolean.t option
         [@ocaml.doc
           "Specify if custom endpoint should be enabled for the Elasticsearch domain."];
@@ -2483,16 +2785,16 @@ module DomainEndpointOptions =
       make ?customEndpointCertificateArn ?customEndpoint
         ?customEndpointEnabled ?tLSSecurityPolicy ?enforceHTTPS ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customEndpointCertificateArn =
-        field_map json "CustomEndpointCertificateArn" ARN.of_json in
+        field_map json__ "CustomEndpointCertificateArn" ARN.of_json in
       let customEndpoint =
-        field_map json "CustomEndpoint" DomainNameFqdn.of_json in
+        field_map json__ "CustomEndpoint" DomainNameFqdn.of_json in
       let customEndpointEnabled =
-        field_map json "CustomEndpointEnabled" Boolean.of_json in
+        field_map json__ "CustomEndpointEnabled" Boolean.of_json in
       let tLSSecurityPolicy =
-        field_map json "TLSSecurityPolicy" TLSSecurityPolicy.of_json in
-      let enforceHTTPS = field_map json "EnforceHTTPS" Boolean.of_json in
+        field_map json__ "TLSSecurityPolicy" TLSSecurityPolicy.of_json in
+      let enforceHTTPS = field_map json__ "EnforceHTTPS" Boolean.of_json in
       make ?customEndpointCertificateArn ?customEndpoint
         ?customEndpointEnabled ?tLSSecurityPolicy ?enforceHTTPS ()
     let to_json v = composed_to_json to_value v
@@ -2510,19 +2812,27 @@ module EBSOptions =
         [@ocaml.doc "Integer to specify the size of an EBS volume."];
       iops: IntegerClass.t option
         [@ocaml.doc
-          "Specifies the IOPD for a Provisioned IOPS EBS volume (SSD)."]}
+          "Specifies the IOPS for Provisioned IOPS And GP3 EBS volume (SSD)."];
+      throughput: IntegerClass.t option
+        [@ocaml.doc "Specifies the Throughput for GP3 EBS volume (SSD)."]}
     let make ?eBSEnabled =
       fun ?volumeType ->
         fun ?volumeSize ->
-          fun ?iops -> fun () -> { eBSEnabled; volumeType; volumeSize; iops }
+          fun ?iops ->
+            fun ?throughput ->
+              fun () ->
+                { eBSEnabled; volumeType; volumeSize; iops; throughput }
     let to_value x =
       structure_to_value
         [("EBSEnabled", (Option.map x.eBSEnabled ~f:Boolean.to_value));
         ("VolumeType", (Option.map x.volumeType ~f:VolumeType.to_value));
         ("VolumeSize", (Option.map x.volumeSize ~f:IntegerClass.to_value));
-        ("Iops", (Option.map x.iops ~f:IntegerClass.to_value))]
+        ("Iops", (Option.map x.iops ~f:IntegerClass.to_value));
+        ("Throughput", (Option.map x.throughput ~f:IntegerClass.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let throughput =
+        (Option.map ~f:IntegerClass.of_xml) (Xml.child xml_arg0 "Throughput") in
       let iops =
         (Option.map ~f:IntegerClass.of_xml) (Xml.child xml_arg0 "Iops") in
       let volumeSize =
@@ -2531,14 +2841,15 @@ module EBSOptions =
         (Option.map ~f:VolumeType.of_xml) (Xml.child xml_arg0 "VolumeType") in
       let eBSEnabled =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EBSEnabled") in
-      make ?iops ?volumeSize ?volumeType ?eBSEnabled ()
+      make ?throughput ?iops ?volumeSize ?volumeType ?eBSEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let iops = field_map json "Iops" IntegerClass.of_json in
-      let volumeSize = field_map json "VolumeSize" IntegerClass.of_json in
-      let volumeType = field_map json "VolumeType" VolumeType.of_json in
-      let eBSEnabled = field_map json "EBSEnabled" Boolean.of_json in
-      make ?iops ?volumeSize ?volumeType ?eBSEnabled ()
+    let of_json json__ =
+      let throughput = field_map json__ "Throughput" IntegerClass.of_json in
+      let iops = field_map json__ "Iops" IntegerClass.of_json in
+      let volumeSize = field_map json__ "VolumeSize" IntegerClass.of_json in
+      let volumeType = field_map json__ "VolumeType" VolumeType.of_json in
+      let eBSEnabled = field_map json__ "EBSEnabled" Boolean.of_json in
+      make ?throughput ?iops ?volumeSize ?volumeType ?eBSEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Options to enable, disable, and specify the properties of EBS storage volumes. For more information, see Configuring EBS-based Storage."]
@@ -2662,26 +2973,28 @@ module ElasticsearchClusterConfig =
         ?zoneAwarenessEnabled ?dedicatedMasterEnabled ?instanceCount
         ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let coldStorageOptions =
-        field_map json "ColdStorageOptions" ColdStorageOptions.of_json in
-      let warmCount = field_map json "WarmCount" IntegerClass.of_json in
+        field_map json__ "ColdStorageOptions" ColdStorageOptions.of_json in
+      let warmCount = field_map json__ "WarmCount" IntegerClass.of_json in
       let warmType =
-        field_map json "WarmType" ESWarmPartitionInstanceType.of_json in
-      let warmEnabled = field_map json "WarmEnabled" Boolean.of_json in
+        field_map json__ "WarmType" ESWarmPartitionInstanceType.of_json in
+      let warmEnabled = field_map json__ "WarmEnabled" Boolean.of_json in
       let dedicatedMasterCount =
-        field_map json "DedicatedMasterCount" IntegerClass.of_json in
+        field_map json__ "DedicatedMasterCount" IntegerClass.of_json in
       let dedicatedMasterType =
-        field_map json "DedicatedMasterType" ESPartitionInstanceType.of_json in
+        field_map json__ "DedicatedMasterType"
+          ESPartitionInstanceType.of_json in
       let zoneAwarenessConfig =
-        field_map json "ZoneAwarenessConfig" ZoneAwarenessConfig.of_json in
+        field_map json__ "ZoneAwarenessConfig" ZoneAwarenessConfig.of_json in
       let zoneAwarenessEnabled =
-        field_map json "ZoneAwarenessEnabled" Boolean.of_json in
+        field_map json__ "ZoneAwarenessEnabled" Boolean.of_json in
       let dedicatedMasterEnabled =
-        field_map json "DedicatedMasterEnabled" Boolean.of_json in
-      let instanceCount = field_map json "InstanceCount" IntegerClass.of_json in
+        field_map json__ "DedicatedMasterEnabled" Boolean.of_json in
+      let instanceCount =
+        field_map json__ "InstanceCount" IntegerClass.of_json in
       let instanceType =
-        field_map json "InstanceType" ESPartitionInstanceType.of_json in
+        field_map json__ "InstanceType" ESPartitionInstanceType.of_json in
       make ?coldStorageOptions ?warmCount ?warmType ?warmEnabled
         ?dedicatedMasterCount ?dedicatedMasterType ?zoneAwarenessConfig
         ?zoneAwarenessEnabled ?dedicatedMasterEnabled ?instanceCount
@@ -2711,9 +3024,9 @@ module EncryptionAtRestOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?kmsKeyId ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let kmsKeyId = field_map json "KmsKeyId" KmsKeyId.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let kmsKeyId = field_map json__ "KmsKeyId" KmsKeyId.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?kmsKeyId ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the Encryption At Rest Options."]
@@ -2741,6 +3054,8 @@ module LogPublishingOptions =
                        (LogPublishingOption.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2764,8 +3079,8 @@ module NodeToNodeEncryptionOptions =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Enabled") in
       make ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let enabled = field_map json "Enabled" Boolean.of_json in
+    let of_json json__ =
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the node-to-node encryption options."]
@@ -2789,9 +3104,9 @@ module SnapshotOptions =
           (Xml.child xml_arg0 "AutomatedSnapshotStartHour") in
       make ?automatedSnapshotStartHour ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let automatedSnapshotStartHour =
-        field_map json "AutomatedSnapshotStartHour" IntegerClass.of_json in
+        field_map json__ "AutomatedSnapshotStartHour" IntegerClass.of_json in
       make ?automatedSnapshotStartHour ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2837,13 +3152,13 @@ module VPCDerivedInfo =
       let vPCId = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "VPCId") in
       make ?securityGroupIds ?availabilityZones ?subnetIds ?vPCId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let securityGroupIds =
-        field_map json "SecurityGroupIds" StringList.of_json in
+        field_map json__ "SecurityGroupIds" StringList.of_json in
       let availabilityZones =
-        field_map json "AvailabilityZones" StringList.of_json in
-      let subnetIds = field_map json "SubnetIds" StringList.of_json in
-      let vPCId = field_map json "VPCId" String_.of_json in
+        field_map json__ "AvailabilityZones" StringList.of_json in
+      let subnetIds = field_map json__ "SubnetIds" StringList.of_json in
+      let vPCId = field_map json__ "VPCId" String_.of_json in
       make ?securityGroupIds ?availabilityZones ?subnetIds ?vPCId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2892,6 +3207,114 @@ module BackendRole =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"BackendRole" j
+    let to_json = simple_to_json to_value
+  end
+module DomainArn =
+  struct
+    type nonrec t = string
+    let context_ = "DomainArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:512) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:aws[a-z\\-]*:[a-z]+:[a-z0-9\\-]+:[0-9]+:domain\\/[a-z0-9\\-]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DomainArn" j
+    let to_json = simple_to_json to_value
+  end
+module VpcEndpointId =
+  struct
+    type nonrec t = string
+    let context_ = "VpcEndpointId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:5) >>=
+             (fun () ->
+                (check_string_max i ~max:256) >>=
+                  (fun () -> check_pattern i ~pattern:"^aos-[a-zA-Z0-9]*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"VpcEndpointId" j
+    let to_json = simple_to_json to_value
+  end
+module VpcEndpointStatus =
+  struct
+    type nonrec t =
+      | CREATING 
+      | CREATE_FAILED 
+      | ACTIVE 
+      | UPDATING 
+      | UPDATE_FAILED 
+      | DELETING 
+      | DELETE_FAILED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | CREATING -> "CREATING"
+      | CREATE_FAILED -> "CREATE_FAILED"
+      | ACTIVE -> "ACTIVE"
+      | UPDATING -> "UPDATING"
+      | UPDATE_FAILED -> "UPDATE_FAILED"
+      | DELETING -> "DELETING"
+      | DELETE_FAILED -> "DELETE_FAILED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "CREATING" -> CREATING
+      | "CREATE_FAILED" -> CREATE_FAILED
+      | "ACTIVE" -> ACTIVE
+      | "UPDATING" -> UPDATING
+      | "UPDATE_FAILED" -> UPDATE_FAILED
+      | "DELETING" -> DELETING
+      | "DELETE_FAILED" -> DELETE_FAILED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpcEndpointStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VpcEndpointStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module PrincipalType =
+  struct
+    type nonrec t =
+      | AWS_ACCOUNT 
+      | AWS_SERVICE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | AWS_ACCOUNT -> "AWS_ACCOUNT"
+      | AWS_SERVICE -> "AWS_SERVICE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "AWS_ACCOUNT" -> AWS_ACCOUNT
+      | "AWS_SERVICE" -> AWS_SERVICE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration PrincipalType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PrincipalType" j)
     let to_json = simple_to_json to_value
   end
 module TagKey =
@@ -2991,9 +3414,9 @@ module ErrorDetails =
         (Option.map ~f:ErrorType.of_xml) (Xml.child xml_arg0 "ErrorType") in
       make ?errorMessage ?errorType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" ErrorMessage.of_json in
-      let errorType = field_map json "ErrorType" ErrorType.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" ErrorMessage.of_json in
+      let errorType = field_map json__ "ErrorType" ErrorType.of_json in
       make ?errorMessage ?errorType ()
     let to_json v = composed_to_json to_value v
   end
@@ -3128,6 +3551,9 @@ module UpgradeStepsList =
   struct
     type nonrec t = UpgradeStepItem.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpgradeStepItem.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3179,6 +3605,9 @@ module ElasticsearchVersionList =
   struct
     type nonrec t = ElasticsearchVersionString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ElasticsearchVersionString.to_value)) |>
         (fun x -> `List x)
@@ -3201,6 +3630,62 @@ module ElasticsearchVersionList =
         ~of_json:ElasticsearchVersionString.of_json j
     let to_json v = composed_to_json to_value v
   end
+module VpcEndpointErrorCode =
+  struct
+    type nonrec t =
+      | ENDPOINT_NOT_FOUND 
+      | SERVER_ERROR 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ENDPOINT_NOT_FOUND -> "ENDPOINT_NOT_FOUND"
+      | SERVER_ERROR -> "SERVER_ERROR"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ENDPOINT_NOT_FOUND" -> ENDPOINT_NOT_FOUND
+      | "SERVER_ERROR" -> SERVER_ERROR
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration VpcEndpointErrorCode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"VpcEndpointErrorCode" j)
+    let to_json = simple_to_json to_value
+  end
+module AWSAccount =
+  struct
+    type nonrec t = string
+    let context_ = "AWSAccount"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[0-9]+$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AWSAccount" j
+    let to_json = simple_to_json to_value
+  end
+module Endpoint =
+  struct
+    type nonrec t = string
+    let context_ = "Endpoint"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"^[A-Za-z0-9\\-\\.]+$"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Endpoint" j
+    let to_json = simple_to_json to_value
+  end
 module Integer =
   struct
     type nonrec t = int
@@ -3218,6 +3703,9 @@ module RecurringChargeList =
   struct
     type nonrec t = RecurringCharge.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RecurringCharge.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3381,7 +3869,11 @@ module DescribePackagesFilterName =
 module DescribePackagesFilterValues =
   struct
     type nonrec t = DescribePackagesFilterValue.t list
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribePackagesFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -3458,10 +3950,10 @@ module DomainInformation =
         (Option.map ~f:OwnerId.of_xml) (Xml.child xml_arg0 "OwnerId") in
       make ?region ~domainName ?ownerId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let region = field_map json "Region" Region.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let ownerId = field_map json "OwnerId" OwnerId.of_json in
+    let of_json json__ =
+      let region = field_map json__ "Region" Region.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let ownerId = field_map json__ "OwnerId" OwnerId.of_json in
       make ?region ~domainName ?ownerId ()
     let to_json v = composed_to_json to_value v
   end
@@ -3494,12 +3986,12 @@ module OutboundCrossClusterSearchConnectionStatus =
           (Xml.child xml_arg0 "StatusCode") in
       make ?message ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "Message"
+        field_map json__ "Message"
           CrossClusterSearchConnectionStatusMessage.of_json in
       let statusCode =
-        field_map json "StatusCode"
+        field_map json__ "StatusCode"
           OutboundCrossClusterSearchConnectionStatusCode.of_json in
       make ?message ?statusCode ()
     let to_json v = composed_to_json to_value v
@@ -3510,6 +4002,9 @@ module ValueStringList =
     type nonrec t = NonEmptyString.t list
     let make i =
       let open Result in ok_or_failwith (check_list_min i ~min:1); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NonEmptyString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3559,12 +4054,12 @@ module InboundCrossClusterSearchConnectionStatus =
           (Xml.child xml_arg0 "StatusCode") in
       make ?message ?statusCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let message =
-        field_map json "Message"
+        field_map json__ "Message"
           CrossClusterSearchConnectionStatusMessage.of_json in
       let statusCode =
-        field_map json "StatusCode"
+        field_map json__ "StatusCode"
           InboundCrossClusterSearchConnectionStatusCode.of_json in
       make ?message ?statusCode ()
     let to_json v = composed_to_json to_value v
@@ -3574,6 +4069,9 @@ module AdditionalLimitList =
   struct
     type nonrec t = AdditionalLimit.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AdditionalLimit.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3611,9 +4109,9 @@ module InstanceLimits =
           (Xml.child xml_arg0 "InstanceCountLimits") in
       make ?instanceCountLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceCountLimits =
-        field_map json "InstanceCountLimits" InstanceCountLimits.of_json in
+        field_map json__ "InstanceCountLimits" InstanceCountLimits.of_json in
       make ?instanceCountLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3622,6 +4120,9 @@ module StorageTypeList =
   struct
     type nonrec t = StorageType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StorageType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3665,9 +4166,9 @@ module AutoTuneOptionsOutput =
         (Option.map ~f:AutoTuneState.of_xml) (Xml.child xml_arg0 "State") in
       make ?errorMessage ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorMessage = field_map json "ErrorMessage" String_.of_json in
-      let state = field_map json "State" AutoTuneState.of_json in
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let state = field_map json__ "State" AutoTuneState.of_json in
       make ?errorMessage ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3681,24 +4182,74 @@ module ChangeProgressDetails =
           "The unique change identifier associated with a specific domain configuration change."];
       message: Message.t option
         [@ocaml.doc
-          "Contains an optional message associated with the domain configuration change."]}
-    let make ?changeId = fun ?message -> fun () -> { changeId; message }
+          "Contains an optional message associated with the domain configuration change."];
+      configChangeStatus: ConfigChangeStatus.t option
+        [@ocaml.doc "The current status of the configuration change."];
+      startTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The time that the configuration change was initiated, in Universal Coordinated Time (UTC)."];
+      lastUpdatedTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The last time that the configuration change was updated."];
+      initiatedBy: InitiatedBy.t option
+        [@ocaml.doc
+          "The IAM principal who initiated the configuration change."]}
+    let make ?changeId =
+      fun ?message ->
+        fun ?configChangeStatus ->
+          fun ?startTime ->
+            fun ?lastUpdatedTime ->
+              fun ?initiatedBy ->
+                fun () ->
+                  {
+                    changeId;
+                    message;
+                    configChangeStatus;
+                    startTime;
+                    lastUpdatedTime;
+                    initiatedBy
+                  }
     let to_value x =
       structure_to_value
         [("ChangeId", (Option.map x.changeId ~f:GUID.to_value));
-        ("Message", (Option.map x.message ~f:Message.to_value))]
+        ("Message", (Option.map x.message ~f:Message.to_value));
+        ("ConfigChangeStatus",
+          (Option.map x.configChangeStatus ~f:ConfigChangeStatus.to_value));
+        ("StartTime", (Option.map x.startTime ~f:UpdateTimestamp.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:UpdateTimestamp.to_value));
+        ("InitiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let initiatedBy =
+        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "InitiatedBy") in
+      let lastUpdatedTime =
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let startTime =
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let configChangeStatus =
+        (Option.map ~f:ConfigChangeStatus.of_xml)
+          (Xml.child xml_arg0 "ConfigChangeStatus") in
       let message =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       let changeId =
         (Option.map ~f:GUID.of_xml) (Xml.child xml_arg0 "ChangeId") in
-      make ?message ?changeId ()
+      make ?initiatedBy ?lastUpdatedTime ?startTime ?configChangeStatus
+        ?message ?changeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
-      let changeId = field_map json "ChangeId" GUID.of_json in
-      make ?message ?changeId ()
+    let of_json json__ =
+      let initiatedBy = field_map json__ "InitiatedBy" InitiatedBy.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" UpdateTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" UpdateTimestamp.of_json in
+      let configChangeStatus =
+        field_map json__ "ConfigChangeStatus" ConfigChangeStatus.of_json in
+      let message = field_map json__ "Message" Message.of_json in
+      let changeId = field_map json__ "ChangeId" GUID.of_json in
+      make ?initiatedBy ?lastUpdatedTime ?startTime ?configChangeStatus
+        ?message ?changeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies change details of the domain configuration change."]
@@ -3721,6 +4272,49 @@ module DomainId =
     let of_json j = string_of_json ~kind:"DomainId" j
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "Unique identifier for an Elasticsearch domain."]
+module DomainProcessingStatusType =
+  struct
+    type nonrec t =
+      | Creating 
+      | Active 
+      | Modifying 
+      | UpgradingEngineVersion 
+      | UpdatingServiceSoftware 
+      | Isolated 
+      | Deleting 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Creating -> "Creating"
+      | Active -> "Active"
+      | Modifying -> "Modifying"
+      | UpgradingEngineVersion -> "UpgradingEngineVersion"
+      | UpdatingServiceSoftware -> "UpdatingServiceSoftware"
+      | Isolated -> "Isolated"
+      | Deleting -> "Deleting"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "Creating" -> Creating
+      | "Active" -> Active
+      | "Modifying" -> Modifying
+      | "UpgradingEngineVersion" -> UpgradingEngineVersion
+      | "UpdatingServiceSoftware" -> UpdatingServiceSoftware
+      | "Isolated" -> Isolated
+      | "Deleting" -> Deleting
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration DomainProcessingStatusType"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"DomainProcessingStatusType" j)
+    let to_json = simple_to_json to_value
+  end
 module EndpointsMap =
   struct
     type nonrec t = (String_.t * ServiceUrl.t) list
@@ -3742,11 +4336,42 @@ module EndpointsMap =
                     (fun x -> (ServiceUrl.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
       object_of_json ~key_of_string:String_.of_string
         ~of_json:ServiceUrl.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ModifyingPropertiesList =
+  struct
+    type nonrec t = ModifyingProperties.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ModifyingProperties.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ModifyingProperties.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ModifyingPropertiesList"
+        ~of_json:ModifyingProperties.of_json j
     let to_json v = composed_to_json to_value v
   end
 module ServiceSoftwareOptions =
@@ -3835,19 +4460,20 @@ module ServiceSoftwareOptions =
         ?updateStatus ?cancellable ?updateAvailable ?newVersion
         ?currentVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let optionalDeployment =
-        field_map json "OptionalDeployment" Boolean.of_json in
+        field_map json__ "OptionalDeployment" Boolean.of_json in
       let automatedUpdateDate =
-        field_map json "AutomatedUpdateDate"
+        field_map json__ "AutomatedUpdateDate"
           DeploymentCloseDateTimeStamp.of_json in
-      let description = field_map json "Description" String_.of_json in
+      let description = field_map json__ "Description" String_.of_json in
       let updateStatus =
-        field_map json "UpdateStatus" DeploymentStatus.of_json in
-      let cancellable = field_map json "Cancellable" Boolean.of_json in
-      let updateAvailable = field_map json "UpdateAvailable" Boolean.of_json in
-      let newVersion = field_map json "NewVersion" String_.of_json in
-      let currentVersion = field_map json "CurrentVersion" String_.of_json in
+        field_map json__ "UpdateStatus" DeploymentStatus.of_json in
+      let cancellable = field_map json__ "Cancellable" Boolean.of_json in
+      let updateAvailable =
+        field_map json__ "UpdateAvailable" Boolean.of_json in
+      let newVersion = field_map json__ "NewVersion" String_.of_json in
+      let currentVersion = field_map json__ "CurrentVersion" String_.of_json in
       make ?optionalDeployment ?automatedUpdateDate ?description
         ?updateStatus ?cancellable ?updateAvailable ?newVersion
         ?currentVersion ()
@@ -3892,11 +4518,12 @@ module ChangeProgressStage =
           (Xml.child xml_arg0 "Name") in
       make ?lastUpdated ?description ?status ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastUpdated = field_map json "LastUpdated" LastUpdated.of_json in
-      let description = field_map json "Description" Description.of_json in
-      let status = field_map json "Status" ChangeProgressStageStatus.of_json in
-      let name = field_map json "Name" ChangeProgressStageName.of_json in
+    let of_json json__ =
+      let lastUpdated = field_map json__ "LastUpdated" LastUpdated.of_json in
+      let description = field_map json__ "Description" Description.of_json in
+      let status =
+        field_map json__ "Status" ChangeProgressStageStatus.of_json in
+      let name = field_map json__ "Name" ChangeProgressStageName.of_json in
       make ?lastUpdated ?description ?status ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3920,9 +4547,9 @@ module AutoTuneDetails =
           (Xml.child xml_arg0 "ScheduledAutoTuneDetails") in
       make ?scheduledAutoTuneDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scheduledAutoTuneDetails =
-        field_map json "ScheduledAutoTuneDetails"
+        field_map json__ "ScheduledAutoTuneDetails"
           ScheduledAutoTuneDetails.of_json in
       make ?scheduledAutoTuneDetails ()
     let to_json v = composed_to_json to_value v
@@ -4003,32 +4630,29 @@ module AccessPoliciesStatus =
   struct
     type nonrec t =
       {
-      options: PolicyDocument.t
+      options: PolicyDocument.t option
         [@ocaml.doc
           "The access policy configured for the Elasticsearch domain. Access policies may be resource-based, IP-based, or IAM-based. See Configuring Access Policiesfor more information."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "The status of the access policy for the Elasticsearch domain. See OptionStatus for the status information that's included."]}
-    let context_ = "AccessPoliciesStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (PolicyDocument.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:PolicyDocument.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        PolicyDocument.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:PolicyDocument.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" PolicyDocument.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" PolicyDocument.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configured access rules for the domain's document and search endpoints, and the current status of those rules."]
@@ -4036,32 +4660,29 @@ module AdvancedOptionsStatus =
   struct
     type nonrec t =
       {
-      options: AdvancedOptions.t
+      options: AdvancedOptions.t option
         [@ocaml.doc
           "Specifies the status of advanced options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of OptionStatus for advanced options for the specified Elasticsearch domain."]}
-    let context_ = "AdvancedOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (AdvancedOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:AdvancedOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        AdvancedOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:AdvancedOptions.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" AdvancedOptions.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" AdvancedOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the advanced options for the specified Elasticsearch domain. Currently, the following advanced options are available: Option to allow references to indices in an HTTP request body. Must be false when configuring access to individual sub-resources. By default, the value is true. See Configuration Advanced Options for more information. Option to specify the percentage of heap space that is allocated to field data. By default, this setting is unbounded. For more information, see Configuring Advanced Options."]
@@ -4069,33 +4690,32 @@ module AdvancedSecurityOptionsStatus =
   struct
     type nonrec t =
       {
-      options: AdvancedSecurityOptions.t
+      options: AdvancedSecurityOptions.t option
         [@ocaml.doc
           "Specifies advanced security options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Status of the advanced security options for the specified Elasticsearch domain."]}
-    let context_ = "AdvancedSecurityOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (AdvancedSecurityOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:AdvancedSecurityOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        AdvancedSecurityOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:AdvancedSecurityOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
       let options =
-        field_map_exn json "Options" AdvancedSecurityOptions.of_json in
-      make ~status ~options ()
+        field_map json__ "Options" AdvancedSecurityOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the status of advanced security options for the specified Elasticsearch domain."]
@@ -4122,77 +4742,138 @@ module AutoTuneOptionsStatus =
         (Option.map ~f:AutoTuneOptions.of_xml) (Xml.child xml_arg0 "Options") in
       make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" AutoTuneStatus.of_json in
-      let options = field_map json "Options" AutoTuneOptions.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" AutoTuneStatus.of_json in
+      let options = field_map json__ "Options" AutoTuneOptions.of_json in
       make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the status of Auto-Tune options for the specified Elasticsearch domain."]
+module AutomatedSnapshotPauseOptionsStatus =
+  struct
+    type nonrec t =
+      {
+      options: AutomatedSnapshotPauseOptions.t option
+        [@ocaml.doc
+          "Automated snapshot pause options for the specified Elasticsearch domain."];
+      status: OptionStatus.t option
+        [@ocaml.doc
+          "The current status of the automated snapshot pause options for the specified Elasticsearch domain."]}
+    let make ?options = fun ?status -> fun () -> { options; status }
+    let to_value x =
+      structure_to_value
+        [("Options",
+           (Option.map x.options ~f:AutomatedSnapshotPauseOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let options =
+        (Option.map ~f:AutomatedSnapshotPauseOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options =
+        field_map json__ "Options" AutomatedSnapshotPauseOptions.of_json in
+      make ?status ?options ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The status of automated snapshot pause options for the specified Elasticsearch domain."]
 module CognitoOptionsStatus =
   struct
     type nonrec t =
       {
-      options: CognitoOptions.t
+      options: CognitoOptions.t option
         [@ocaml.doc
           "Specifies the Cognito options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the Cognito options for the specified Elasticsearch domain."]}
-    let context_ = "CognitoOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (CognitoOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:CognitoOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        CognitoOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:CognitoOptions.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" CognitoOptions.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" CognitoOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the Cognito options for the specified Elasticsearch domain."]
+module DeploymentStrategyOptionsStatus =
+  struct
+    type nonrec t =
+      {
+      options: DeploymentStrategyOptions.t option
+        [@ocaml.doc
+          "Specifies deployment strategy options for the specified Elasticsearch domain."];
+      status: OptionStatus.t option
+        [@ocaml.doc
+          "Specifies the status of the deployment strategy options for the specified Elasticsearch domain."]}
+    let make ?options = fun ?status -> fun () -> { options; status }
+    let to_value x =
+      structure_to_value
+        [("Options",
+           (Option.map x.options ~f:DeploymentStrategyOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
+      let options =
+        (Option.map ~f:DeploymentStrategyOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options =
+        field_map json__ "Options" DeploymentStrategyOptions.of_json in
+      make ?status ?options ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the status of deployment strategy options for the specified Elasticsearch domain."]
 module DomainEndpointOptionsStatus =
   struct
     type nonrec t =
       {
-      options: DomainEndpointOptions.t
+      options: DomainEndpointOptions.t option
         [@ocaml.doc
           "Options to configure endpoint for the Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "The status of the endpoint options for the Elasticsearch domain. See OptionStatus for the status information that's included."]}
-    let context_ = "DomainEndpointOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (DomainEndpointOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:DomainEndpointOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        DomainEndpointOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:DomainEndpointOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options =
-        field_map_exn json "Options" DomainEndpointOptions.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" DomainEndpointOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The configured endpoint options for the domain and their current status."]
@@ -4200,32 +4881,29 @@ module EBSOptionsStatus =
   struct
     type nonrec t =
       {
-      options: EBSOptions.t
+      options: EBSOptions.t option
         [@ocaml.doc
           "Specifies the EBS options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the EBS options for the specified Elasticsearch domain."]}
-    let context_ = "EBSOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (EBSOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:EBSOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        EBSOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:EBSOptions.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" EBSOptions.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" EBSOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the EBS options for the specified Elasticsearch domain."]
@@ -4233,33 +4911,32 @@ module ElasticsearchClusterConfigStatus =
   struct
     type nonrec t =
       {
-      options: ElasticsearchClusterConfig.t
+      options: ElasticsearchClusterConfig.t option
         [@ocaml.doc
           "Specifies the cluster configuration for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the configuration for the specified Elasticsearch domain."]}
-    let context_ = "ElasticsearchClusterConfigStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (ElasticsearchClusterConfig.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:ElasticsearchClusterConfig.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        ElasticsearchClusterConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:ElasticsearchClusterConfig.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
       let options =
-        field_map_exn json "Options" ElasticsearchClusterConfig.of_json in
-      make ~status ~options ()
+        field_map json__ "Options" ElasticsearchClusterConfig.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the configuration status for the specified Elasticsearch domain."]
@@ -4267,33 +4944,32 @@ module ElasticsearchVersionStatus =
   struct
     type nonrec t =
       {
-      options: ElasticsearchVersionString.t
+      options: ElasticsearchVersionString.t option
         [@ocaml.doc
           "Specifies the Elasticsearch version for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the Elasticsearch version options for the specified Elasticsearch domain."]}
-    let context_ = "ElasticsearchVersionStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (ElasticsearchVersionString.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:ElasticsearchVersionString.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        ElasticsearchVersionString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:ElasticsearchVersionString.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
       let options =
-        field_map_exn json "Options" ElasticsearchVersionString.of_json in
-      make ~status ~options ()
+        field_map json__ "Options" ElasticsearchVersionString.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the Elasticsearch version options for the specified Elasticsearch domain."]
@@ -4301,33 +4977,32 @@ module EncryptionAtRestOptionsStatus =
   struct
     type nonrec t =
       {
-      options: EncryptionAtRestOptions.t
+      options: EncryptionAtRestOptions.t option
         [@ocaml.doc
           "Specifies the Encryption At Rest options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the Encryption At Rest options for the specified Elasticsearch domain."]}
-    let context_ = "EncryptionAtRestOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (EncryptionAtRestOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:EncryptionAtRestOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        EncryptionAtRestOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:EncryptionAtRestOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
       let options =
-        field_map_exn json "Options" EncryptionAtRestOptions.of_json in
-      make ~status ~options ()
+        field_map json__ "Options" EncryptionAtRestOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the Encryption At Rest options for the specified Elasticsearch domain."]
@@ -4355,9 +5030,9 @@ module LogPublishingOptionsStatus =
           (Xml.child xml_arg0 "Options") in
       make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" OptionStatus.of_json in
-      let options = field_map json "Options" LogPublishingOptions.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" LogPublishingOptions.of_json in
       make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4366,33 +5041,32 @@ module NodeToNodeEncryptionOptionsStatus =
   struct
     type nonrec t =
       {
-      options: NodeToNodeEncryptionOptions.t
+      options: NodeToNodeEncryptionOptions.t option
         [@ocaml.doc
           "Specifies the node-to-node encryption options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the node-to-node encryption options for the specified Elasticsearch domain."]}
-    let context_ = "NodeToNodeEncryptionOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (NodeToNodeEncryptionOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options",
+           (Option.map x.options ~f:NodeToNodeEncryptionOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        NodeToNodeEncryptionOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:NodeToNodeEncryptionOptions.of_xml)
+          (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
       let options =
-        field_map_exn json "Options" NodeToNodeEncryptionOptions.of_json in
-      make ~status ~options ()
+        field_map json__ "Options" NodeToNodeEncryptionOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the node-to-node encryption options for the specified Elasticsearch domain."]
@@ -4400,63 +5074,57 @@ module SnapshotOptionsStatus =
   struct
     type nonrec t =
       {
-      options: SnapshotOptions.t
+      options: SnapshotOptions.t option
         [@ocaml.doc
           "Specifies the daily snapshot options specified for the Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc "Specifies the status of a daily automated snapshot."]}
-    let context_ = "SnapshotOptionsStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (SnapshotOptions.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:SnapshotOptions.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        SnapshotOptions.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:SnapshotOptions.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" SnapshotOptions.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" SnapshotOptions.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Status of a daily automated snapshot."]
 module VPCDerivedInfoStatus =
   struct
     type nonrec t =
       {
-      options: VPCDerivedInfo.t
+      options: VPCDerivedInfo.t option
         [@ocaml.doc
           "Specifies the VPC options for the specified Elasticsearch domain."];
-      status: OptionStatus.t
+      status: OptionStatus.t option
         [@ocaml.doc
           "Specifies the status of the VPC options for the specified Elasticsearch domain."]}
-    let context_ = "VPCDerivedInfoStatus"
-    let make ~options = fun ~status -> fun () -> { options; status }
+    let make ?options = fun ?status -> fun () -> { options; status }
     let to_value x =
       structure_to_value
-        [("Options", (Some (VPCDerivedInfo.to_value x.options)));
-        ("Status", (Some (OptionStatus.to_value x.status)))]
+        [("Options", (Option.map x.options ~f:VPCDerivedInfo.to_value));
+        ("Status", (Option.map x.status ~f:OptionStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        OptionStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OptionStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let options =
-        VPCDerivedInfo.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Options") in
-      make ~status ~options ()
+        (Option.map ~f:VPCDerivedInfo.of_xml) (Xml.child xml_arg0 "Options") in
+      make ?status ?options ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map_exn json "Status" OptionStatus.of_json in
-      let options = field_map_exn json "Options" VPCDerivedInfo.of_json in
-      make ~status ~options ()
+    let of_json json__ =
+      let status = field_map json__ "Status" OptionStatus.of_json in
+      let options = field_map json__ "Options" VPCDerivedInfo.of_json in
+      make ?status ?options ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Status of the VPC options for the specified Elasticsearch domain."]
@@ -4494,11 +5162,11 @@ module MasterUserOptions =
         (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "MasterUserARN") in
       make ?masterUserPassword ?masterUserName ?masterUserARN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let masterUserPassword =
-        field_map json "MasterUserPassword" Password.of_json in
-      let masterUserName = field_map json "MasterUserName" Username.of_json in
-      let masterUserARN = field_map json "MasterUserARN" ARN.of_json in
+        field_map json__ "MasterUserPassword" Password.of_json in
+      let masterUserName = field_map json__ "MasterUserName" Username.of_json in
+      let masterUserARN = field_map json__ "MasterUserARN" ARN.of_json in
       make ?masterUserPassword ?masterUserName ?masterUserARN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4573,21 +5241,106 @@ module SAMLOptionsInput =
       make ?sessionTimeoutMinutes ?rolesKey ?subjectKey ?masterBackendRole
         ?masterUserName ?idp ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionTimeoutMinutes =
-        field_map json "SessionTimeoutMinutes" IntegerClass.of_json in
-      let rolesKey = field_map json "RolesKey" String_.of_json in
-      let subjectKey = field_map json "SubjectKey" String_.of_json in
+        field_map json__ "SessionTimeoutMinutes" IntegerClass.of_json in
+      let rolesKey = field_map json__ "RolesKey" String_.of_json in
+      let subjectKey = field_map json__ "SubjectKey" String_.of_json in
       let masterBackendRole =
-        field_map json "MasterBackendRole" BackendRole.of_json in
-      let masterUserName = field_map json "MasterUserName" Username.of_json in
-      let idp = field_map json "Idp" SAMLIdp.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "MasterBackendRole" BackendRole.of_json in
+      let masterUserName = field_map json__ "MasterUserName" Username.of_json in
+      let idp = field_map json__ "Idp" SAMLIdp.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?sessionTimeoutMinutes ?rolesKey ?subjectKey ?masterBackendRole
         ?masterUserName ?idp ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the SAML application configuration for the domain."]
+module VpcEndpointSummary =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointId: VpcEndpointId.t option
+        [@ocaml.doc "The unique identifier of the endpoint."];
+      vpcEndpointOwner: String_.t option
+        [@ocaml.doc "The creator of the endpoint."];
+      domainArn: DomainArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the domain associated with the endpoint."];
+      status: VpcEndpointStatus.t option
+        [@ocaml.doc "The current status of the endpoint."]}
+    let make ?vpcEndpointId =
+      fun ?vpcEndpointOwner ->
+        fun ?domainArn ->
+          fun ?status ->
+            fun () -> { vpcEndpointId; vpcEndpointOwner; domainArn; status }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointId",
+           (Option.map x.vpcEndpointId ~f:VpcEndpointId.to_value));
+        ("VpcEndpointOwner",
+          (Option.map x.vpcEndpointOwner ~f:String_.to_value));
+        ("DomainArn", (Option.map x.domainArn ~f:DomainArn.to_value));
+        ("Status", (Option.map x.status ~f:VpcEndpointStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let status =
+        (Option.map ~f:VpcEndpointStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let domainArn =
+        (Option.map ~f:DomainArn.of_xml) (Xml.child xml_arg0 "DomainArn") in
+      let vpcEndpointOwner =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointOwner") in
+      let vpcEndpointId =
+        (Option.map ~f:VpcEndpointId.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointId") in
+      make ?status ?domainArn ?vpcEndpointOwner ?vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let status = field_map json__ "Status" VpcEndpointStatus.of_json in
+      let domainArn = field_map json__ "DomainArn" DomainArn.of_json in
+      let vpcEndpointOwner =
+        field_map json__ "VpcEndpointOwner" String_.of_json in
+      let vpcEndpointId =
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      make ?status ?domainArn ?vpcEndpointOwner ?vpcEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Summary information for an Amazon OpenSearch Service-managed VPC endpoint."]
+module AuthorizedPrincipal =
+  struct
+    type nonrec t =
+      {
+      principalType: PrincipalType.t option
+        [@ocaml.doc "The type of principal."];
+      principal: String_.t option
+        [@ocaml.doc
+          "The IAM principal that is allowed access to the domain."]}
+    let make ?principalType =
+      fun ?principal -> fun () -> { principalType; principal }
+    let to_value x =
+      structure_to_value
+        [("PrincipalType",
+           (Option.map x.principalType ~f:PrincipalType.to_value));
+        ("Principal", (Option.map x.principal ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let principal =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Principal") in
+      let principalType =
+        (Option.map ~f:PrincipalType.of_xml)
+          (Xml.child xml_arg0 "PrincipalType") in
+      make ?principal ?principalType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let principal = field_map json__ "Principal" String_.of_json in
+      let principalType =
+        field_map json__ "PrincipalType" PrincipalType.of_json in
+      make ?principal ?principalType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about an account or service that has access to an Amazon OpenSearch Service domain through the use of an interface VPC endpoint."]
 module Tag =
   struct
     type nonrec t =
@@ -4612,9 +5365,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a key value pair for a resource tag."]
@@ -4706,19 +5459,19 @@ module DomainPackageDetails =
       make ?errorDetails ?referencePath ?packageVersion ?domainPackageStatus
         ?domainName ?lastUpdated ?packageType ?packageName ?packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       let referencePath =
-        field_map json "ReferencePath" ReferencePath.of_json in
+        field_map json__ "ReferencePath" ReferencePath.of_json in
       let packageVersion =
-        field_map json "PackageVersion" PackageVersion.of_json in
+        field_map json__ "PackageVersion" PackageVersion.of_json in
       let domainPackageStatus =
-        field_map json "DomainPackageStatus" DomainPackageStatus.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
-      let lastUpdated = field_map json "LastUpdated" LastUpdated.of_json in
-      let packageType = field_map json "PackageType" PackageType.of_json in
-      let packageName = field_map json "PackageName" PackageName.of_json in
-      let packageID = field_map json "PackageID" PackageID.of_json in
+        field_map json__ "DomainPackageStatus" DomainPackageStatus.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let lastUpdated = field_map json__ "LastUpdated" LastUpdated.of_json in
+      let packageType = field_map json__ "PackageType" PackageType.of_json in
+      let packageName = field_map json__ "PackageName" PackageName.of_json in
+      let packageID = field_map json__ "PackageID" PackageID.of_json in
       make ?errorDetails ?referencePath ?packageVersion ?domainPackageStatus
         ?domainName ?lastUpdated ?packageType ?packageName ?packageID ()
     let to_json v = composed_to_json to_value v
@@ -4746,9 +5499,9 @@ module DomainInfo =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?engineType ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineType = field_map json "EngineType" EngineType.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let engineType = field_map json__ "EngineType" EngineType.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?engineType ?domainName ()
     let to_json v = composed_to_json to_value v
   end
@@ -4796,13 +5549,13 @@ module UpgradeHistory =
         (Option.map ~f:UpgradeName.of_xml) (Xml.child xml_arg0 "UpgradeName") in
       make ?stepsList ?upgradeStatus ?startTimestamp ?upgradeName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stepsList = field_map json "StepsList" UpgradeStepsList.of_json in
+    let of_json json__ =
+      let stepsList = field_map json__ "StepsList" UpgradeStepsList.of_json in
       let upgradeStatus =
-        field_map json "UpgradeStatus" UpgradeStatus.of_json in
+        field_map json__ "UpgradeStatus" UpgradeStatus.of_json in
       let startTimestamp =
-        field_map json "StartTimestamp" StartTimestamp.of_json in
-      let upgradeName = field_map json "UpgradeName" UpgradeName.of_json in
+        field_map json__ "StartTimestamp" StartTimestamp.of_json in
+      let upgradeName = field_map json__ "UpgradeName" UpgradeName.of_json in
       make ?stepsList ?upgradeStatus ?startTimestamp ?upgradeName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4841,12 +5594,12 @@ module PackageVersionHistory =
           (Xml.child xml_arg0 "PackageVersion") in
       make ?createdAt ?commitMessage ?packageVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
+    let of_json json__ =
+      let createdAt = field_map json__ "CreatedAt" CreatedAt.of_json in
       let commitMessage =
-        field_map json "CommitMessage" CommitMessage.of_json in
+        field_map json__ "CommitMessage" CommitMessage.of_json in
       let packageVersion =
-        field_map json "PackageVersion" PackageVersion.of_json in
+        field_map json__ "PackageVersion" PackageVersion.of_json in
       make ?createdAt ?commitMessage ?packageVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Details of a package version."]
@@ -4876,15 +5629,137 @@ module CompatibleVersionsMap =
           (Xml.child xml_arg0 "SourceVersion") in
       make ?targetVersions ?sourceVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetVersions =
-        field_map json "TargetVersions" ElasticsearchVersionList.of_json in
+        field_map json__ "TargetVersions" ElasticsearchVersionList.of_json in
       let sourceVersion =
-        field_map json "SourceVersion" ElasticsearchVersionString.of_json in
+        field_map json__ "SourceVersion" ElasticsearchVersionString.of_json in
       make ?targetVersions ?sourceVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A map from an ElasticsearchVersion to a list of compatible ElasticsearchVersion s to which the domain can be upgraded."]
+module VpcEndpointError =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointId: VpcEndpointId.t option
+        [@ocaml.doc "The unique identifier of the endpoint."];
+      errorCode: VpcEndpointErrorCode.t option
+        [@ocaml.doc "The code associated with the error."];
+      errorMessage: String_.t option
+        [@ocaml.doc "A message describing the error."]}
+    let make ?vpcEndpointId =
+      fun ?errorCode ->
+        fun ?errorMessage ->
+          fun () -> { vpcEndpointId; errorCode; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointId",
+           (Option.map x.vpcEndpointId ~f:VpcEndpointId.to_value));
+        ("ErrorCode",
+          (Option.map x.errorCode ~f:VpcEndpointErrorCode.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorCode =
+        (Option.map ~f:VpcEndpointErrorCode.of_xml)
+          (Xml.child xml_arg0 "ErrorCode") in
+      let vpcEndpointId =
+        (Option.map ~f:VpcEndpointId.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointId") in
+      make ?errorMessage ?errorCode ?vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorCode =
+        field_map json__ "ErrorCode" VpcEndpointErrorCode.of_json in
+      let vpcEndpointId =
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      make ?errorMessage ?errorCode ?vpcEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Error information when attempting to describe an Amazon OpenSearch Service-managed VPC endpoint."]
+module VpcEndpoint =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointId: VpcEndpointId.t option
+        [@ocaml.doc "The unique identifier of the endpoint."];
+      vpcEndpointOwner: AWSAccount.t option
+        [@ocaml.doc "The creator of the endpoint."];
+      domainArn: DomainArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the domain associated with the endpoint."];
+      vpcOptions: VPCDerivedInfo.t option
+        [@ocaml.doc
+          "Options to specify the subnets and security groups for an Amazon OpenSearch Service VPC endpoint."];
+      status: VpcEndpointStatus.t option
+        [@ocaml.doc "The current status of the endpoint."];
+      endpoint: Endpoint.t option
+        [@ocaml.doc
+          "The connection endpoint ID for connecting to the domain."]}
+    let make ?vpcEndpointId =
+      fun ?vpcEndpointOwner ->
+        fun ?domainArn ->
+          fun ?vpcOptions ->
+            fun ?status ->
+              fun ?endpoint ->
+                fun () ->
+                  {
+                    vpcEndpointId;
+                    vpcEndpointOwner;
+                    domainArn;
+                    vpcOptions;
+                    status;
+                    endpoint
+                  }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointId",
+           (Option.map x.vpcEndpointId ~f:VpcEndpointId.to_value));
+        ("VpcEndpointOwner",
+          (Option.map x.vpcEndpointOwner ~f:AWSAccount.to_value));
+        ("DomainArn", (Option.map x.domainArn ~f:DomainArn.to_value));
+        ("VpcOptions", (Option.map x.vpcOptions ~f:VPCDerivedInfo.to_value));
+        ("Status", (Option.map x.status ~f:VpcEndpointStatus.to_value));
+        ("Endpoint", (Option.map x.endpoint ~f:Endpoint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endpoint =
+        (Option.map ~f:Endpoint.of_xml) (Xml.child xml_arg0 "Endpoint") in
+      let status =
+        (Option.map ~f:VpcEndpointStatus.of_xml)
+          (Xml.child xml_arg0 "Status") in
+      let vpcOptions =
+        (Option.map ~f:VPCDerivedInfo.of_xml)
+          (Xml.child xml_arg0 "VpcOptions") in
+      let domainArn =
+        (Option.map ~f:DomainArn.of_xml) (Xml.child xml_arg0 "DomainArn") in
+      let vpcEndpointOwner =
+        (Option.map ~f:AWSAccount.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointOwner") in
+      let vpcEndpointId =
+        (Option.map ~f:VpcEndpointId.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointId") in
+      make ?endpoint ?status ?vpcOptions ?domainArn ?vpcEndpointOwner
+        ?vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endpoint = field_map json__ "Endpoint" Endpoint.of_json in
+      let status = field_map json__ "Status" VpcEndpointStatus.of_json in
+      let vpcOptions = field_map json__ "VpcOptions" VPCDerivedInfo.of_json in
+      let domainArn = field_map json__ "DomainArn" DomainArn.of_json in
+      let vpcEndpointOwner =
+        field_map json__ "VpcEndpointOwner" AWSAccount.of_json in
+      let vpcEndpointId =
+        field_map json__ "VpcEndpointId" VpcEndpointId.of_json in
+      make ?endpoint ?status ?vpcOptions ?domainArn ?vpcEndpointOwner
+        ?vpcEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The connection endpoint for connecting to an Amazon OpenSearch Service domain through a proxy."]
 module ReservedElasticsearchInstance =
   struct
     type nonrec t =
@@ -5019,30 +5894,30 @@ module ReservedElasticsearchInstance =
         ?reservedElasticsearchInstanceOfferingId
         ?reservedElasticsearchInstanceId ?reservationName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
       let paymentOption =
-        field_map json "PaymentOption"
+        field_map json__ "PaymentOption"
           ReservedElasticsearchInstancePaymentOption.of_json in
-      let state = field_map json "State" String_.of_json in
+      let state = field_map json__ "State" String_.of_json in
       let elasticsearchInstanceCount =
-        field_map json "ElasticsearchInstanceCount" Integer.of_json in
-      let currencyCode = field_map json "CurrencyCode" String_.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
-      let startTime = field_map json "StartTime" UpdateTimestamp.of_json in
+        field_map json__ "ElasticsearchInstanceCount" Integer.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" String_.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
+      let startTime = field_map json__ "StartTime" UpdateTimestamp.of_json in
       let elasticsearchInstanceType =
-        field_map json "ElasticsearchInstanceType"
+        field_map json__ "ElasticsearchInstanceType"
           ESPartitionInstanceType.of_json in
       let reservedElasticsearchInstanceOfferingId =
-        field_map json "ReservedElasticsearchInstanceOfferingId"
+        field_map json__ "ReservedElasticsearchInstanceOfferingId"
           String_.of_json in
       let reservedElasticsearchInstanceId =
-        field_map json "ReservedElasticsearchInstanceId" GUID.of_json in
+        field_map json__ "ReservedElasticsearchInstanceId" GUID.of_json in
       let reservationName =
-        field_map json "ReservationName" ReservationToken.of_json in
+        field_map json__ "ReservationName" ReservationToken.of_json in
       make ?recurringCharges ?paymentOption ?state
         ?elasticsearchInstanceCount ?currencyCode ?usagePrice ?fixedPrice
         ?duration ?startTime ?elasticsearchInstanceType
@@ -5140,21 +6015,22 @@ module ReservedElasticsearchInstanceOffering =
         ?fixedPrice ?duration ?elasticsearchInstanceType
         ?reservedElasticsearchInstanceOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let recurringCharges =
-        field_map json "RecurringCharges" RecurringChargeList.of_json in
+        field_map json__ "RecurringCharges" RecurringChargeList.of_json in
       let paymentOption =
-        field_map json "PaymentOption"
+        field_map json__ "PaymentOption"
           ReservedElasticsearchInstancePaymentOption.of_json in
-      let currencyCode = field_map json "CurrencyCode" String_.of_json in
-      let usagePrice = field_map json "UsagePrice" Double.of_json in
-      let fixedPrice = field_map json "FixedPrice" Double.of_json in
-      let duration = field_map json "Duration" Integer.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" String_.of_json in
+      let usagePrice = field_map json__ "UsagePrice" Double.of_json in
+      let fixedPrice = field_map json__ "FixedPrice" Double.of_json in
+      let duration = field_map json__ "Duration" Integer.of_json in
       let elasticsearchInstanceType =
-        field_map json "ElasticsearchInstanceType"
+        field_map json__ "ElasticsearchInstanceType"
           ESPartitionInstanceType.of_json in
       let reservedElasticsearchInstanceOfferingId =
-        field_map json "ReservedElasticsearchInstanceOfferingId" GUID.of_json in
+        field_map json__ "ReservedElasticsearchInstanceOfferingId"
+          GUID.of_json in
       make ?recurringCharges ?paymentOption ?currencyCode ?usagePrice
         ?fixedPrice ?duration ?elasticsearchInstanceType
         ?reservedElasticsearchInstanceOfferingId ()
@@ -5248,19 +6124,20 @@ module PackageDetails =
         ?packageStatus ?packageDescription ?packageType ?packageName
         ?packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let errorDetails = field_map json "ErrorDetails" ErrorDetails.of_json in
+    let of_json json__ =
+      let errorDetails = field_map json__ "ErrorDetails" ErrorDetails.of_json in
       let availablePackageVersion =
-        field_map json "AvailablePackageVersion" PackageVersion.of_json in
-      let lastUpdatedAt = field_map json "LastUpdatedAt" LastUpdated.of_json in
-      let createdAt = field_map json "CreatedAt" CreatedAt.of_json in
+        field_map json__ "AvailablePackageVersion" PackageVersion.of_json in
+      let lastUpdatedAt =
+        field_map json__ "LastUpdatedAt" LastUpdated.of_json in
+      let createdAt = field_map json__ "CreatedAt" CreatedAt.of_json in
       let packageStatus =
-        field_map json "PackageStatus" PackageStatus.of_json in
+        field_map json__ "PackageStatus" PackageStatus.of_json in
       let packageDescription =
-        field_map json "PackageDescription" PackageDescription.of_json in
-      let packageType = field_map json "PackageType" PackageType.of_json in
-      let packageName = field_map json "PackageName" PackageName.of_json in
-      let packageID = field_map json "PackageID" PackageID.of_json in
+        field_map json__ "PackageDescription" PackageDescription.of_json in
+      let packageType = field_map json__ "PackageType" PackageType.of_json in
+      let packageName = field_map json__ "PackageName" PackageName.of_json in
+      let packageID = field_map json__ "PackageID" PackageID.of_json in
       make ?errorDetails ?availablePackageVersion ?lastUpdatedAt ?createdAt
         ?packageStatus ?packageDescription ?packageType ?packageName
         ?packageID ()
@@ -5273,7 +6150,7 @@ module DescribePackagesFilter =
       name: DescribePackagesFilterName.t option
         [@ocaml.doc "Any field from PackageDetails."];
       value: DescribePackagesFilterValues.t option
-        [@ocaml.doc "A list of values for the specified field."]}
+        [@ocaml.doc "A non-empty list of values for the specified field."]}
     let make ?name = fun ?value -> fun () -> { name; value }
     let to_value x =
       structure_to_value
@@ -5290,9 +6167,10 @@ module DescribePackagesFilter =
           (Xml.child xml_arg0 "Name") in
       make ?value ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" DescribePackagesFilterValues.of_json in
-      let name = field_map json "Name" DescribePackagesFilterName.of_json in
+    let of_json json__ =
+      let value =
+        field_map json__ "Value" DescribePackagesFilterValues.of_json in
+      let name = field_map json__ "Name" DescribePackagesFilterName.of_json in
       make ?value ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Filter to apply in DescribePackage response."]
@@ -5362,19 +6240,19 @@ module OutboundCrossClusterSearchConnection =
       make ?connectionStatus ?connectionAlias ?crossClusterSearchConnectionId
         ?destinationDomainInfo ?sourceDomainInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionStatus =
-        field_map json "ConnectionStatus"
+        field_map json__ "ConnectionStatus"
           OutboundCrossClusterSearchConnectionStatus.of_json in
       let connectionAlias =
-        field_map json "ConnectionAlias" ConnectionAlias.of_json in
+        field_map json__ "ConnectionAlias" ConnectionAlias.of_json in
       let crossClusterSearchConnectionId =
-        field_map json "CrossClusterSearchConnectionId"
+        field_map json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       let destinationDomainInfo =
-        field_map json "DestinationDomainInfo" DomainInformation.of_json in
+        field_map json__ "DestinationDomainInfo" DomainInformation.of_json in
       let sourceDomainInfo =
-        field_map json "SourceDomainInfo" DomainInformation.of_json in
+        field_map json__ "SourceDomainInfo" DomainInformation.of_json in
       make ?connectionStatus ?connectionAlias ?crossClusterSearchConnectionId
         ?destinationDomainInfo ?sourceDomainInfo ()
     let to_json v = composed_to_json to_value v
@@ -5400,9 +6278,9 @@ module Filter =
         (Option.map ~f:NonEmptyString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?values ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map json "Values" ValueStringList.of_json in
-      let name = field_map json "Name" NonEmptyString.of_json in
+    let of_json json__ =
+      let values = field_map json__ "Values" ValueStringList.of_json in
+      let name = field_map json__ "Name" NonEmptyString.of_json in
       make ?values ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5463,17 +6341,17 @@ module InboundCrossClusterSearchConnection =
       make ?connectionStatus ?crossClusterSearchConnectionId
         ?destinationDomainInfo ?sourceDomainInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionStatus =
-        field_map json "ConnectionStatus"
+        field_map json__ "ConnectionStatus"
           InboundCrossClusterSearchConnectionStatus.of_json in
       let crossClusterSearchConnectionId =
-        field_map json "CrossClusterSearchConnectionId"
+        field_map json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       let destinationDomainInfo =
-        field_map json "DestinationDomainInfo" DomainInformation.of_json in
+        field_map json__ "DestinationDomainInfo" DomainInformation.of_json in
       let sourceDomainInfo =
-        field_map json "SourceDomainInfo" DomainInformation.of_json in
+        field_map json__ "SourceDomainInfo" DomainInformation.of_json in
       make ?connectionStatus ?crossClusterSearchConnectionId
         ?destinationDomainInfo ?sourceDomainInfo ()
     let to_json v = composed_to_json to_value v
@@ -5527,13 +6405,13 @@ module Limits =
           (Xml.child xml_arg0 "StorageTypes") in
       make ?additionalLimits ?instanceLimits ?storageTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalLimits =
-        field_map json "AdditionalLimits" AdditionalLimitList.of_json in
+        field_map json__ "AdditionalLimits" AdditionalLimitList.of_json in
       let instanceLimits =
-        field_map json "InstanceLimits" InstanceLimits.of_json in
+        field_map json__ "InstanceLimits" InstanceLimits.of_json in
       let storageTypes =
-        field_map json "StorageTypes" StorageTypeList.of_json in
+        field_map json__ "StorageTypes" StorageTypeList.of_json in
       make ?additionalLimits ?instanceLimits ?storageTypes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5542,13 +6420,13 @@ module ElasticsearchDomainStatus =
   struct
     type nonrec t =
       {
-      domainId: DomainId.t
+      domainId: DomainId.t option
         [@ocaml.doc
           "The unique identifier for the specified Elasticsearch domain."];
-      domainName: DomainName.t
+      domainName: DomainName.t option
         [@ocaml.doc
           "The name of an Elasticsearch domain. Domain names are unique across the domains owned by an account within an AWS region. Domain names start with a letter or number and can contain the following characters: a-z (lowercase), 0-9, and - (hyphen)."];
-      aRN: ARN.t
+      aRN: ARN.t option
         [@ocaml.doc
           "The Amazon resource name (ARN) of an Elasticsearch domain. See Identifiers for IAM Entities in Using AWS Identity and Access Management for more information."];
       created: Boolean.t option
@@ -5570,7 +6448,7 @@ module ElasticsearchDomainStatus =
         [@ocaml.doc
           "The status of an Elasticsearch domain version upgrade. True if Amazon Elasticsearch Service is undergoing a version upgrade. False if the configuration is active."];
       elasticsearchVersion: ElasticsearchVersionString.t option ;
-      elasticsearchClusterConfig: ElasticsearchClusterConfig.t
+      elasticsearchClusterConfig: ElasticsearchClusterConfig.t option
         [@ocaml.doc
           "The type and number of instances in the domain cluster."];
       eBSOptions: EBSOptions.t option
@@ -5609,68 +6487,96 @@ module ElasticsearchDomainStatus =
           "The current status of the Elasticsearch domain's Auto-Tune options."];
       changeProgressDetails: ChangeProgressDetails.t option
         [@ocaml.doc
-          "Specifies change details of the domain configuration change."]}
-    let context_ = "ElasticsearchDomainStatus"
-    let make ?created =
-      fun ?deleted ->
-        fun ?endpoint ->
-          fun ?endpoints ->
-            fun ?processing ->
-              fun ?upgradeProcessing ->
-                fun ?elasticsearchVersion ->
-                  fun ?eBSOptions ->
-                    fun ?accessPolicies ->
-                      fun ?snapshotOptions ->
-                        fun ?vPCOptions ->
-                          fun ?cognitoOptions ->
-                            fun ?encryptionAtRestOptions ->
-                              fun ?nodeToNodeEncryptionOptions ->
-                                fun ?advancedOptions ->
-                                  fun ?logPublishingOptions ->
-                                    fun ?serviceSoftwareOptions ->
-                                      fun ?domainEndpointOptions ->
-                                        fun ?advancedSecurityOptions ->
-                                          fun ?autoTuneOptions ->
-                                            fun ?changeProgressDetails ->
-                                              fun ~domainId ->
-                                                fun ~domainName ->
-                                                  fun ~aRN ->
+          "Specifies change details of the domain configuration change."];
+      domainProcessingStatus: DomainProcessingStatusType.t option
+        [@ocaml.doc
+          "The status of any changes that are currently in progress for the domain."];
+      modifyingProperties: ModifyingPropertiesList.t option
+        [@ocaml.doc
+          "Information about the domain properties that are currently being modified."];
+      deploymentStrategyOptions: DeploymentStrategyOptions.t option
+        [@ocaml.doc
+          "The current status of the Elasticsearch domain's deployment strategy options."];
+      automatedSnapshotPauseOptions: AutomatedSnapshotPauseOptions.t option
+        [@ocaml.doc
+          "The current status of the Elasticsearch domain's automated snapshot pause options."]}
+    let make ?domainId =
+      fun ?domainName ->
+        fun ?aRN ->
+          fun ?created ->
+            fun ?deleted ->
+              fun ?endpoint ->
+                fun ?endpoints ->
+                  fun ?processing ->
+                    fun ?upgradeProcessing ->
+                      fun ?elasticsearchVersion ->
+                        fun ?elasticsearchClusterConfig ->
+                          fun ?eBSOptions ->
+                            fun ?accessPolicies ->
+                              fun ?snapshotOptions ->
+                                fun ?vPCOptions ->
+                                  fun ?cognitoOptions ->
+                                    fun ?encryptionAtRestOptions ->
+                                      fun ?nodeToNodeEncryptionOptions ->
+                                        fun ?advancedOptions ->
+                                          fun ?logPublishingOptions ->
+                                            fun ?serviceSoftwareOptions ->
+                                              fun ?domainEndpointOptions ->
+                                                fun ?advancedSecurityOptions
+                                                  ->
+                                                  fun ?autoTuneOptions ->
                                                     fun
-                                                      ~elasticsearchClusterConfig
+                                                      ?changeProgressDetails
                                                       ->
-                                                      fun () ->
-                                                        {
-                                                          created;
-                                                          deleted;
-                                                          endpoint;
-                                                          endpoints;
-                                                          processing;
-                                                          upgradeProcessing;
-                                                          elasticsearchVersion;
-                                                          eBSOptions;
-                                                          accessPolicies;
-                                                          snapshotOptions;
-                                                          vPCOptions;
-                                                          cognitoOptions;
-                                                          encryptionAtRestOptions;
-                                                          nodeToNodeEncryptionOptions;
-                                                          advancedOptions;
-                                                          logPublishingOptions;
-                                                          serviceSoftwareOptions;
-                                                          domainEndpointOptions;
-                                                          advancedSecurityOptions;
-                                                          autoTuneOptions;
-                                                          changeProgressDetails;
-                                                          domainId;
-                                                          domainName;
-                                                          aRN;
-                                                          elasticsearchClusterConfig
-                                                        }
+                                                      fun
+                                                        ?domainProcessingStatus
+                                                        ->
+                                                        fun
+                                                          ?modifyingProperties
+                                                          ->
+                                                          fun
+                                                            ?deploymentStrategyOptions
+                                                            ->
+                                                            fun
+                                                              ?automatedSnapshotPauseOptions
+                                                              ->
+                                                              fun () ->
+                                                                {
+                                                                  domainId;
+                                                                  domainName;
+                                                                  aRN;
+                                                                  created;
+                                                                  deleted;
+                                                                  endpoint;
+                                                                  endpoints;
+                                                                  processing;
+                                                                  upgradeProcessing;
+                                                                  elasticsearchVersion;
+                                                                  elasticsearchClusterConfig;
+                                                                  eBSOptions;
+                                                                  accessPolicies;
+                                                                  snapshotOptions;
+                                                                  vPCOptions;
+                                                                  cognitoOptions;
+                                                                  encryptionAtRestOptions;
+                                                                  nodeToNodeEncryptionOptions;
+                                                                  advancedOptions;
+                                                                  logPublishingOptions;
+                                                                  serviceSoftwareOptions;
+                                                                  domainEndpointOptions;
+                                                                  advancedSecurityOptions;
+                                                                  autoTuneOptions;
+                                                                  changeProgressDetails;
+                                                                  domainProcessingStatus;
+                                                                  modifyingProperties;
+                                                                  deploymentStrategyOptions;
+                                                                  automatedSnapshotPauseOptions
+                                                                }
     let to_value x =
       structure_to_value
-        [("DomainId", (Some (DomainId.to_value x.domainId)));
-        ("DomainName", (Some (DomainName.to_value x.domainName)));
-        ("ARN", (Some (ARN.to_value x.aRN)));
+        [("DomainId", (Option.map x.domainId ~f:DomainId.to_value));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("ARN", (Option.map x.aRN ~f:ARN.to_value));
         ("Created", (Option.map x.created ~f:Boolean.to_value));
         ("Deleted", (Option.map x.deleted ~f:Boolean.to_value));
         ("Endpoint", (Option.map x.endpoint ~f:ServiceUrl.to_value));
@@ -5682,9 +6588,8 @@ module ElasticsearchDomainStatus =
           (Option.map x.elasticsearchVersion
              ~f:ElasticsearchVersionString.to_value));
         ("ElasticsearchClusterConfig",
-          (Some
-             (ElasticsearchClusterConfig.to_value
-                x.elasticsearchClusterConfig)));
+          (Option.map x.elasticsearchClusterConfig
+             ~f:ElasticsearchClusterConfig.to_value));
         ("EBSOptions", (Option.map x.eBSOptions ~f:EBSOptions.to_value));
         ("AccessPolicies",
           (Option.map x.accessPolicies ~f:PolicyDocument.to_value));
@@ -5716,9 +6621,33 @@ module ElasticsearchDomainStatus =
           (Option.map x.autoTuneOptions ~f:AutoTuneOptionsOutput.to_value));
         ("ChangeProgressDetails",
           (Option.map x.changeProgressDetails
-             ~f:ChangeProgressDetails.to_value))]
+             ~f:ChangeProgressDetails.to_value));
+        ("DomainProcessingStatus",
+          (Option.map x.domainProcessingStatus
+             ~f:DomainProcessingStatusType.to_value));
+        ("ModifyingProperties",
+          (Option.map x.modifyingProperties
+             ~f:ModifyingPropertiesList.to_value));
+        ("DeploymentStrategyOptions",
+          (Option.map x.deploymentStrategyOptions
+             ~f:DeploymentStrategyOptions.to_value));
+        ("AutomatedSnapshotPauseOptions",
+          (Option.map x.automatedSnapshotPauseOptions
+             ~f:AutomatedSnapshotPauseOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let automatedSnapshotPauseOptions =
+        (Option.map ~f:AutomatedSnapshotPauseOptions.of_xml)
+          (Xml.child xml_arg0 "AutomatedSnapshotPauseOptions") in
+      let deploymentStrategyOptions =
+        (Option.map ~f:DeploymentStrategyOptions.of_xml)
+          (Xml.child xml_arg0 "DeploymentStrategyOptions") in
+      let modifyingProperties =
+        (Option.map ~f:ModifyingPropertiesList.of_xml)
+          (Xml.child xml_arg0 "ModifyingProperties") in
+      let domainProcessingStatus =
+        (Option.map ~f:DomainProcessingStatusType.of_xml)
+          (Xml.child xml_arg0 "DomainProcessingStatus") in
       let changeProgressDetails =
         (Option.map ~f:ChangeProgressDetails.of_xml)
           (Xml.child xml_arg0 "ChangeProgressDetails") in
@@ -5761,9 +6690,8 @@ module ElasticsearchDomainStatus =
       let eBSOptions =
         (Option.map ~f:EBSOptions.of_xml) (Xml.child xml_arg0 "EBSOptions") in
       let elasticsearchClusterConfig =
-        ElasticsearchClusterConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "ElasticsearchClusterConfig") in
+        (Option.map ~f:ElasticsearchClusterConfig.of_xml)
+          (Xml.child xml_arg0 "ElasticsearchClusterConfig") in
       let elasticsearchVersion =
         (Option.map ~f:ElasticsearchVersionString.of_xml)
           (Xml.child xml_arg0 "ElasticsearchVersion") in
@@ -5780,80 +6708,100 @@ module ElasticsearchDomainStatus =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Deleted") in
       let created =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Created") in
-      let aRN = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
+      let aRN = (Option.map ~f:ARN.of_xml) (Xml.child xml_arg0 "ARN") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       let domainId =
-        DomainId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "DomainId") in
-      make ?changeProgressDetails ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?serviceSoftwareOptions ?logPublishingOptions
-        ?advancedOptions ?nodeToNodeEncryptionOptions
-        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
-        ?accessPolicies ?eBSOptions ~elasticsearchClusterConfig
-        ?elasticsearchVersion ?upgradeProcessing ?processing ?endpoints
-        ?endpoint ?deleted ?created ~aRN ~domainName ~domainId ()
+        (Option.map ~f:DomainId.of_xml) (Xml.child xml_arg0 "DomainId") in
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions
+        ?modifyingProperties ?domainProcessingStatus ?changeProgressDetails
+        ?autoTuneOptions ?advancedSecurityOptions ?domainEndpointOptions
+        ?serviceSoftwareOptions ?logPublishingOptions ?advancedOptions
+        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
+        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
+        ?elasticsearchClusterConfig ?elasticsearchVersion ?upgradeProcessing
+        ?processing ?endpoints ?endpoint ?deleted ?created ?aRN ?domainName
+        ?domainId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let automatedSnapshotPauseOptions =
+        field_map json__ "AutomatedSnapshotPauseOptions"
+          AutomatedSnapshotPauseOptions.of_json in
+      let deploymentStrategyOptions =
+        field_map json__ "DeploymentStrategyOptions"
+          DeploymentStrategyOptions.of_json in
+      let modifyingProperties =
+        field_map json__ "ModifyingProperties"
+          ModifyingPropertiesList.of_json in
+      let domainProcessingStatus =
+        field_map json__ "DomainProcessingStatus"
+          DomainProcessingStatusType.of_json in
       let changeProgressDetails =
-        field_map json "ChangeProgressDetails" ChangeProgressDetails.of_json in
+        field_map json__ "ChangeProgressDetails"
+          ChangeProgressDetails.of_json in
       let autoTuneOptions =
-        field_map json "AutoTuneOptions" AutoTuneOptionsOutput.of_json in
+        field_map json__ "AutoTuneOptions" AutoTuneOptionsOutput.of_json in
       let advancedSecurityOptions =
-        field_map json "AdvancedSecurityOptions"
+        field_map json__ "AdvancedSecurityOptions"
           AdvancedSecurityOptions.of_json in
       let domainEndpointOptions =
-        field_map json "DomainEndpointOptions" DomainEndpointOptions.of_json in
+        field_map json__ "DomainEndpointOptions"
+          DomainEndpointOptions.of_json in
       let serviceSoftwareOptions =
-        field_map json "ServiceSoftwareOptions"
+        field_map json__ "ServiceSoftwareOptions"
           ServiceSoftwareOptions.of_json in
       let logPublishingOptions =
-        field_map json "LogPublishingOptions" LogPublishingOptions.of_json in
+        field_map json__ "LogPublishingOptions" LogPublishingOptions.of_json in
       let advancedOptions =
-        field_map json "AdvancedOptions" AdvancedOptions.of_json in
+        field_map json__ "AdvancedOptions" AdvancedOptions.of_json in
       let nodeToNodeEncryptionOptions =
-        field_map json "NodeToNodeEncryptionOptions"
+        field_map json__ "NodeToNodeEncryptionOptions"
           NodeToNodeEncryptionOptions.of_json in
       let encryptionAtRestOptions =
-        field_map json "EncryptionAtRestOptions"
+        field_map json__ "EncryptionAtRestOptions"
           EncryptionAtRestOptions.of_json in
       let cognitoOptions =
-        field_map json "CognitoOptions" CognitoOptions.of_json in
-      let vPCOptions = field_map json "VPCOptions" VPCDerivedInfo.of_json in
+        field_map json__ "CognitoOptions" CognitoOptions.of_json in
+      let vPCOptions = field_map json__ "VPCOptions" VPCDerivedInfo.of_json in
       let snapshotOptions =
-        field_map json "SnapshotOptions" SnapshotOptions.of_json in
+        field_map json__ "SnapshotOptions" SnapshotOptions.of_json in
       let accessPolicies =
-        field_map json "AccessPolicies" PolicyDocument.of_json in
-      let eBSOptions = field_map json "EBSOptions" EBSOptions.of_json in
+        field_map json__ "AccessPolicies" PolicyDocument.of_json in
+      let eBSOptions = field_map json__ "EBSOptions" EBSOptions.of_json in
       let elasticsearchClusterConfig =
-        field_map_exn json "ElasticsearchClusterConfig"
+        field_map json__ "ElasticsearchClusterConfig"
           ElasticsearchClusterConfig.of_json in
       let elasticsearchVersion =
-        field_map json "ElasticsearchVersion"
+        field_map json__ "ElasticsearchVersion"
           ElasticsearchVersionString.of_json in
       let upgradeProcessing =
-        field_map json "UpgradeProcessing" Boolean.of_json in
-      let processing = field_map json "Processing" Boolean.of_json in
-      let endpoints = field_map json "Endpoints" EndpointsMap.of_json in
-      let endpoint = field_map json "Endpoint" ServiceUrl.of_json in
-      let deleted = field_map json "Deleted" Boolean.of_json in
-      let created = field_map json "Created" Boolean.of_json in
-      let aRN = field_map_exn json "ARN" ARN.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let domainId = field_map_exn json "DomainId" DomainId.of_json in
-      make ?changeProgressDetails ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?serviceSoftwareOptions ?logPublishingOptions
-        ?advancedOptions ?nodeToNodeEncryptionOptions
-        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
-        ?accessPolicies ?eBSOptions ~elasticsearchClusterConfig
-        ?elasticsearchVersion ?upgradeProcessing ?processing ?endpoints
-        ?endpoint ?deleted ?created ~aRN ~domainName ~domainId ()
+        field_map json__ "UpgradeProcessing" Boolean.of_json in
+      let processing = field_map json__ "Processing" Boolean.of_json in
+      let endpoints = field_map json__ "Endpoints" EndpointsMap.of_json in
+      let endpoint = field_map json__ "Endpoint" ServiceUrl.of_json in
+      let deleted = field_map json__ "Deleted" Boolean.of_json in
+      let created = field_map json__ "Created" Boolean.of_json in
+      let aRN = field_map json__ "ARN" ARN.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let domainId = field_map json__ "DomainId" DomainId.of_json in
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions
+        ?modifyingProperties ?domainProcessingStatus ?changeProgressDetails
+        ?autoTuneOptions ?advancedSecurityOptions ?domainEndpointOptions
+        ?serviceSoftwareOptions ?logPublishingOptions ?advancedOptions
+        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
+        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
+        ?elasticsearchClusterConfig ?elasticsearchVersion ?upgradeProcessing
+        ?processing ?endpoints ?endpoint ?deleted ?created ?aRN ?domainName
+        ?domainId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The current status of an Elasticsearch domain."]
 module ChangeProgressStageList =
   struct
     type nonrec t = ChangeProgressStage.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangeProgressStage.to_value)) |>
         (fun x -> `List x)
@@ -5950,13 +6898,52 @@ module AutoTune =
           (Xml.child xml_arg0 "AutoTuneType") in
       make ?autoTuneDetails ?autoTuneType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoTuneDetails =
-        field_map json "AutoTuneDetails" AutoTuneDetails.of_json in
-      let autoTuneType = field_map json "AutoTuneType" AutoTuneType.of_json in
+        field_map json__ "AutoTuneDetails" AutoTuneDetails.of_json in
+      let autoTuneType = field_map json__ "AutoTuneType" AutoTuneType.of_json in
       make ?autoTuneDetails ?autoTuneType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies Auto-Tune type and Auto-Tune action details."]
+module CancelledChangeProperty =
+  struct
+    type nonrec t =
+      {
+      propertyName: String_.t option
+        [@ocaml.doc "The name of the property whose change was cancelled."];
+      cancelledValue: String_.t option
+        [@ocaml.doc
+          "The pending value of the property that was cancelled. This would have been the eventual value of the property if the chance had not been cancelled."];
+      activeValue: String_.t option
+        [@ocaml.doc
+          "The current value of the property, after the change was cancelled."]}
+    let make ?propertyName =
+      fun ?cancelledValue ->
+        fun ?activeValue ->
+          fun () -> { propertyName; cancelledValue; activeValue }
+    let to_value x =
+      structure_to_value
+        [("PropertyName", (Option.map x.propertyName ~f:String_.to_value));
+        ("CancelledValue", (Option.map x.cancelledValue ~f:String_.to_value));
+        ("ActiveValue", (Option.map x.activeValue ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let activeValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ActiveValue") in
+      let cancelledValue =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "CancelledValue") in
+      let propertyName =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "PropertyName") in
+      make ?activeValue ?cancelledValue ?propertyName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let activeValue = field_map json__ "ActiveValue" String_.of_json in
+      let cancelledValue = field_map json__ "CancelledValue" String_.of_json in
+      let propertyName = field_map json__ "PropertyName" String_.of_json in
+      make ?activeValue ?cancelledValue ?propertyName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A property change that was cancelled for an Amazon OpenSearch Service domain."]
 module BaseException =
   struct
     type nonrec t =
@@ -5973,8 +6960,8 @@ module BaseException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An error occurred while processing the request."]
@@ -6043,6 +7030,51 @@ module ValidationException =
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An exception for missing / invalid input fields. Gives http status code of 400."]
+module ConflictException =
+  struct
+    type nonrec t = unit
+    let make () = ()
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An error occurred because the client attempts to remove a resource that is currently in use. Returns HTTP status code 409."]
+module VPCOptions =
+  struct
+    type nonrec t =
+      {
+      subnetIds: StringList.t option
+        [@ocaml.doc "Specifies the subnets for VPC endpoint."];
+      securityGroupIds: StringList.t option
+        [@ocaml.doc "Specifies the security groups for VPC endpoint."]}
+    let make ?subnetIds =
+      fun ?securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
+    let to_value x =
+      structure_to_value
+        [("SubnetIds", (Option.map x.subnetIds ~f:StringList.to_value));
+        ("SecurityGroupIds",
+          (Option.map x.securityGroupIds ~f:StringList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityGroupIds =
+        (Option.map ~f:StringList.of_xml)
+          (Xml.child xml_arg0 "SecurityGroupIds") in
+      let subnetIds =
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
+      make ?securityGroupIds ?subnetIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityGroupIds =
+        field_map json__ "SecurityGroupIds" StringList.of_json in
+      let subnetIds = field_map json__ "SubnetIds" StringList.of_json in
+      make ?securityGroupIds ?subnetIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Options to specify the subnets and security groups for VPC endpoint. For more information, see VPC Endpoints for Amazon Elasticsearch Service Domains."]
 module AccessDeniedException =
   struct
     type nonrec t = unit
@@ -6090,9 +7122,9 @@ module PackageSource =
           (Xml.child xml_arg0 "S3BucketName") in
       make ?s3Key ?s3BucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Key = field_map json "S3Key" S3Key.of_json in
-      let s3BucketName = field_map json "S3BucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let s3Key = field_map json__ "S3Key" S3Key.of_json in
+      let s3BucketName = field_map json__ "S3BucketName" S3BucketName.of_json in
       make ?s3Key ?s3BucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6123,10 +7155,10 @@ module DryRunResults =
           (Xml.child xml_arg0 "DeploymentType") in
       make ?message ?deploymentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" Message.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       let deploymentType =
-        field_map json "DeploymentType" DeploymentType.of_json in
+        field_map json__ "DeploymentType" DeploymentType.of_json in
       make ?message ?deploymentType ()
     let to_json v = composed_to_json to_value v
   end
@@ -6173,7 +7205,16 @@ module ElasticsearchDomainConfig =
         [@ocaml.doc "Specifies AutoTuneOptions for the domain."];
       changeProgressDetails: ChangeProgressDetails.t option
         [@ocaml.doc
-          "Specifies change details of the domain configuration change."]}
+          "Specifies change details of the domain configuration change."];
+      modifyingProperties: ModifyingPropertiesList.t option
+        [@ocaml.doc
+          "Information about the domain properties that are currently being modified."];
+      deploymentStrategyOptions: DeploymentStrategyOptionsStatus.t option
+        [@ocaml.doc "Specifies DeploymentStrategyOptions for the domain."];
+      automatedSnapshotPauseOptions:
+        AutomatedSnapshotPauseOptionsStatus.t option
+        [@ocaml.doc
+          "Specifies AutomatedSnapshotPauseOptions for the domain."]}
     let make ?elasticsearchVersion =
       fun ?elasticsearchClusterConfig ->
         fun ?eBSOptions ->
@@ -6189,24 +7230,30 @@ module ElasticsearchDomainConfig =
                             fun ?advancedSecurityOptions ->
                               fun ?autoTuneOptions ->
                                 fun ?changeProgressDetails ->
-                                  fun () ->
-                                    {
-                                      elasticsearchVersion;
-                                      elasticsearchClusterConfig;
-                                      eBSOptions;
-                                      accessPolicies;
-                                      snapshotOptions;
-                                      vPCOptions;
-                                      cognitoOptions;
-                                      encryptionAtRestOptions;
-                                      nodeToNodeEncryptionOptions;
-                                      advancedOptions;
-                                      logPublishingOptions;
-                                      domainEndpointOptions;
-                                      advancedSecurityOptions;
-                                      autoTuneOptions;
-                                      changeProgressDetails
-                                    }
+                                  fun ?modifyingProperties ->
+                                    fun ?deploymentStrategyOptions ->
+                                      fun ?automatedSnapshotPauseOptions ->
+                                        fun () ->
+                                          {
+                                            elasticsearchVersion;
+                                            elasticsearchClusterConfig;
+                                            eBSOptions;
+                                            accessPolicies;
+                                            snapshotOptions;
+                                            vPCOptions;
+                                            cognitoOptions;
+                                            encryptionAtRestOptions;
+                                            nodeToNodeEncryptionOptions;
+                                            advancedOptions;
+                                            logPublishingOptions;
+                                            domainEndpointOptions;
+                                            advancedSecurityOptions;
+                                            autoTuneOptions;
+                                            changeProgressDetails;
+                                            modifyingProperties;
+                                            deploymentStrategyOptions;
+                                            automatedSnapshotPauseOptions
+                                          }
     let to_value x =
       structure_to_value
         [("ElasticsearchVersion",
@@ -6246,9 +7293,27 @@ module ElasticsearchDomainConfig =
           (Option.map x.autoTuneOptions ~f:AutoTuneOptionsStatus.to_value));
         ("ChangeProgressDetails",
           (Option.map x.changeProgressDetails
-             ~f:ChangeProgressDetails.to_value))]
+             ~f:ChangeProgressDetails.to_value));
+        ("ModifyingProperties",
+          (Option.map x.modifyingProperties
+             ~f:ModifyingPropertiesList.to_value));
+        ("DeploymentStrategyOptions",
+          (Option.map x.deploymentStrategyOptions
+             ~f:DeploymentStrategyOptionsStatus.to_value));
+        ("AutomatedSnapshotPauseOptions",
+          (Option.map x.automatedSnapshotPauseOptions
+             ~f:AutomatedSnapshotPauseOptionsStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let automatedSnapshotPauseOptions =
+        (Option.map ~f:AutomatedSnapshotPauseOptionsStatus.of_xml)
+          (Xml.child xml_arg0 "AutomatedSnapshotPauseOptions") in
+      let deploymentStrategyOptions =
+        (Option.map ~f:DeploymentStrategyOptionsStatus.of_xml)
+          (Xml.child xml_arg0 "DeploymentStrategyOptions") in
+      let modifyingProperties =
+        (Option.map ~f:ModifyingPropertiesList.of_xml)
+          (Xml.child xml_arg0 "ModifyingProperties") in
       let changeProgressDetails =
         (Option.map ~f:ChangeProgressDetails.of_xml)
           (Xml.child xml_arg0 "ChangeProgressDetails") in
@@ -6294,54 +7359,68 @@ module ElasticsearchDomainConfig =
       let elasticsearchVersion =
         (Option.map ~f:ElasticsearchVersionStatus.of_xml)
           (Xml.child xml_arg0 "ElasticsearchVersion") in
-      make ?changeProgressDetails ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?logPublishingOptions ?advancedOptions
-        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
-        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
-        ?elasticsearchClusterConfig ?elasticsearchVersion ()
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions
+        ?modifyingProperties ?changeProgressDetails ?autoTuneOptions
+        ?advancedSecurityOptions ?domainEndpointOptions ?logPublishingOptions
+        ?advancedOptions ?nodeToNodeEncryptionOptions
+        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
+        ?accessPolicies ?eBSOptions ?elasticsearchClusterConfig
+        ?elasticsearchVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let automatedSnapshotPauseOptions =
+        field_map json__ "AutomatedSnapshotPauseOptions"
+          AutomatedSnapshotPauseOptionsStatus.of_json in
+      let deploymentStrategyOptions =
+        field_map json__ "DeploymentStrategyOptions"
+          DeploymentStrategyOptionsStatus.of_json in
+      let modifyingProperties =
+        field_map json__ "ModifyingProperties"
+          ModifyingPropertiesList.of_json in
       let changeProgressDetails =
-        field_map json "ChangeProgressDetails" ChangeProgressDetails.of_json in
+        field_map json__ "ChangeProgressDetails"
+          ChangeProgressDetails.of_json in
       let autoTuneOptions =
-        field_map json "AutoTuneOptions" AutoTuneOptionsStatus.of_json in
+        field_map json__ "AutoTuneOptions" AutoTuneOptionsStatus.of_json in
       let advancedSecurityOptions =
-        field_map json "AdvancedSecurityOptions"
+        field_map json__ "AdvancedSecurityOptions"
           AdvancedSecurityOptionsStatus.of_json in
       let domainEndpointOptions =
-        field_map json "DomainEndpointOptions"
+        field_map json__ "DomainEndpointOptions"
           DomainEndpointOptionsStatus.of_json in
       let logPublishingOptions =
-        field_map json "LogPublishingOptions"
+        field_map json__ "LogPublishingOptions"
           LogPublishingOptionsStatus.of_json in
       let advancedOptions =
-        field_map json "AdvancedOptions" AdvancedOptionsStatus.of_json in
+        field_map json__ "AdvancedOptions" AdvancedOptionsStatus.of_json in
       let nodeToNodeEncryptionOptions =
-        field_map json "NodeToNodeEncryptionOptions"
+        field_map json__ "NodeToNodeEncryptionOptions"
           NodeToNodeEncryptionOptionsStatus.of_json in
       let encryptionAtRestOptions =
-        field_map json "EncryptionAtRestOptions"
+        field_map json__ "EncryptionAtRestOptions"
           EncryptionAtRestOptionsStatus.of_json in
       let cognitoOptions =
-        field_map json "CognitoOptions" CognitoOptionsStatus.of_json in
+        field_map json__ "CognitoOptions" CognitoOptionsStatus.of_json in
       let vPCOptions =
-        field_map json "VPCOptions" VPCDerivedInfoStatus.of_json in
+        field_map json__ "VPCOptions" VPCDerivedInfoStatus.of_json in
       let snapshotOptions =
-        field_map json "SnapshotOptions" SnapshotOptionsStatus.of_json in
+        field_map json__ "SnapshotOptions" SnapshotOptionsStatus.of_json in
       let accessPolicies =
-        field_map json "AccessPolicies" AccessPoliciesStatus.of_json in
-      let eBSOptions = field_map json "EBSOptions" EBSOptionsStatus.of_json in
+        field_map json__ "AccessPolicies" AccessPoliciesStatus.of_json in
+      let eBSOptions = field_map json__ "EBSOptions" EBSOptionsStatus.of_json in
       let elasticsearchClusterConfig =
-        field_map json "ElasticsearchClusterConfig"
+        field_map json__ "ElasticsearchClusterConfig"
           ElasticsearchClusterConfigStatus.of_json in
       let elasticsearchVersion =
-        field_map json "ElasticsearchVersion"
+        field_map json__ "ElasticsearchVersion"
           ElasticsearchVersionStatus.of_json in
-      make ?changeProgressDetails ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?logPublishingOptions ?advancedOptions
-        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
-        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
-        ?elasticsearchClusterConfig ?elasticsearchVersion ()
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions
+        ?modifyingProperties ?changeProgressDetails ?autoTuneOptions
+        ?advancedSecurityOptions ?domainEndpointOptions ?logPublishingOptions
+        ?advancedOptions ?nodeToNodeEncryptionOptions
+        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
+        ?accessPolicies ?eBSOptions ?elasticsearchClusterConfig
+        ?elasticsearchVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The configuration of an Elasticsearch domain."]
 module InvalidTypeException =
@@ -6417,20 +7496,62 @@ module AdvancedSecurityOptionsInput =
       make ?anonymousAuthEnabled ?sAMLOptions ?masterUserOptions
         ?internalUserDatabaseEnabled ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let anonymousAuthEnabled =
-        field_map json "AnonymousAuthEnabled" Boolean.of_json in
-      let sAMLOptions = field_map json "SAMLOptions" SAMLOptionsInput.of_json in
+        field_map json__ "AnonymousAuthEnabled" Boolean.of_json in
+      let sAMLOptions =
+        field_map json__ "SAMLOptions" SAMLOptionsInput.of_json in
       let masterUserOptions =
-        field_map json "MasterUserOptions" MasterUserOptions.of_json in
+        field_map json__ "MasterUserOptions" MasterUserOptions.of_json in
       let internalUserDatabaseEnabled =
-        field_map json "InternalUserDatabaseEnabled" Boolean.of_json in
-      let enabled = field_map json "Enabled" Boolean.of_json in
+        field_map json__ "InternalUserDatabaseEnabled" Boolean.of_json in
+      let enabled = field_map json__ "Enabled" Boolean.of_json in
       make ?anonymousAuthEnabled ?sAMLOptions ?masterUserOptions
         ?internalUserDatabaseEnabled ?enabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the advanced security configuration: whether advanced security is enabled, whether the internal database option is enabled, master username and password (if internal database is enabled), and master user ARN (if IAM is enabled)."]
+module AutomatedSnapshotPauseRequestOptions =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t
+        [@ocaml.doc
+          "Whether to enable or disable automated snapshot pause for the domain."];
+      startTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the automated snapshot pause should begin."];
+      endTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The timestamp at which the automated snapshot pause should end. The maximum allowed duration between StartTime and EndTime is 3 days."]}
+    let context_ = "AutomatedSnapshotPauseRequestOptions"
+    let make ?startTime =
+      fun ?endTime ->
+        fun ~enabled -> fun () -> { startTime; endTime; enabled }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("StartTime", (Option.map x.startTime ~f:UpdateTimestamp.to_value));
+        ("EndTime", (Option.map x.endTime ~f:UpdateTimestamp.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:UpdateTimestamp.of_xml) (Xml.child xml_arg0 "EndTime") in
+      let startTime =
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "StartTime") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?endTime ?startTime ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "EndTime" UpdateTimestamp.of_json in
+      let startTime = field_map json__ "StartTime" UpdateTimestamp.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?endTime ?startTime ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the automated snapshot pause request options for the domain. Suspending snapshots reduces data protection. You cannot restore your domain to points in time when snapshots are suspended. Use this feature only for short-term operational needs such as migrations or maintenance windows. Maximum suspension duration: 3 days."]
 module DryRun =
   struct
     type nonrec t = bool
@@ -6444,38 +7565,6 @@ module DryRun =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
-module VPCOptions =
-  struct
-    type nonrec t =
-      {
-      subnetIds: StringList.t option
-        [@ocaml.doc "Specifies the subnets for VPC endpoint."];
-      securityGroupIds: StringList.t option
-        [@ocaml.doc "Specifies the security groups for VPC endpoint."]}
-    let make ?subnetIds =
-      fun ?securityGroupIds -> fun () -> { subnetIds; securityGroupIds }
-    let to_value x =
-      structure_to_value
-        [("SubnetIds", (Option.map x.subnetIds ~f:StringList.to_value));
-        ("SecurityGroupIds",
-          (Option.map x.securityGroupIds ~f:StringList.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let securityGroupIds =
-        (Option.map ~f:StringList.of_xml)
-          (Xml.child xml_arg0 "SecurityGroupIds") in
-      let subnetIds =
-        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "SubnetIds") in
-      make ?securityGroupIds ?subnetIds ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let securityGroupIds =
-        field_map json "SecurityGroupIds" StringList.of_json in
-      let subnetIds = field_map json "SubnetIds" StringList.of_json in
-      make ?securityGroupIds ?subnetIds ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Options to specify the subnets and security groups for VPC endpoint. For more information, see VPC Endpoints for Amazon Elasticsearch Service Domains."]
 module InstanceCount =
   struct
     type nonrec t = int[@@ocaml.doc
@@ -6493,10 +7582,85 @@ module InstanceCount =
     let to_json = simple_to_json to_value
   end[@@ocaml.doc
        "Specifies the number of EC2 instances in the Elasticsearch domain."]
+module NextToken =
+  struct
+    type nonrec t = string[@@ocaml.doc
+                            "Paginated APIs accepts NextToken input to returns next page results and provides a NextToken output in the response which can be used by the client to retrieve more results."]
+    let context_ = "NextToken"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"NextToken" j
+    let to_json = simple_to_json to_value
+  end[@@ocaml.doc
+       "Paginated APIs accepts NextToken input to returns next page results and provides a NextToken output in the response which can be used by the client to retrieve more results."]
+module VpcEndpointSummaryList =
+  struct
+    type nonrec t = VpcEndpointSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEndpointSummary.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEndpointSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEndpointSummaryList"
+        ~of_json:VpcEndpointSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module AuthorizedPrincipalList =
+  struct
+    type nonrec t = AuthorizedPrincipal.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:AuthorizedPrincipal.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:AuthorizedPrincipal.of_xml)
+    let of_json j =
+      list_of_json ~kind:"AuthorizedPrincipalList"
+        ~of_json:AuthorizedPrincipal.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6520,6 +7684,9 @@ module DomainPackageDetailsList =
   struct
     type nonrec t = DomainPackageDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainPackageDetails.to_value)) |>
         (fun x -> `List x)
@@ -6558,25 +7725,13 @@ module MaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end[@@ocaml.doc "Set this value to limit the number of results returned."]
-module NextToken =
-  struct
-    type nonrec t = string[@@ocaml.doc
-                            "Paginated APIs accepts NextToken input to returns next page results and provides a NextToken output in the response which can be used by the client to retrieve more results."]
-    let context_ = "NextToken"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"NextToken" j
-    let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "Paginated APIs accepts NextToken input to returns next page results and provides a NextToken output in the response which can be used by the client to retrieve more results."]
 module ElasticsearchInstanceTypeList =
   struct
     type nonrec t = ESPartitionInstanceType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ESPartitionInstanceType.to_value)) |>
         (fun x -> `List x)
@@ -6603,6 +7758,9 @@ module DomainInfoList =
   struct
     type nonrec t = DomainInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6627,6 +7785,9 @@ module UpgradeHistoryList =
   struct
     type nonrec t = UpgradeHistory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:UpgradeHistory.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6652,6 +7813,9 @@ module PackageVersionHistoryList =
   struct
     type nonrec t = PackageVersionHistory.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageVersionHistory.to_value)) |>
         (fun x -> `List x)
@@ -6678,6 +7842,9 @@ module CompatibleElasticsearchVersionsList =
   struct
     type nonrec t = CompatibleVersionsMap.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CompatibleVersionsMap.to_value)) |>
         (fun x -> `List x)
@@ -6700,23 +7867,95 @@ module CompatibleElasticsearchVersionsList =
         ~of_json:CompatibleVersionsMap.of_json j
     let to_json v = composed_to_json to_value v
   end
-module ConflictException =
+module VpcEndpointErrorList =
   struct
-    type nonrec t = unit
-    let make () = ()
-    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
-    let to_value _ = `Structure []
+    type nonrec t = VpcEndpointError.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEndpointError.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
-    let of_xml _ = make ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json _ = make ()
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEndpointError.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEndpointErrorList"
+        ~of_json:VpcEndpointError.of_json j
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An error occurred because the client attempts to remove a resource that is currently in use. Returns HTTP status code 409."]
+  end
+module VpcEndpoints =
+  struct
+    type nonrec t = VpcEndpoint.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEndpoint.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEndpoint.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEndpoints" ~of_json:VpcEndpoint.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module VpcEndpointIdList =
+  struct
+    type nonrec t = VpcEndpointId.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:VpcEndpointId.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:VpcEndpointId.of_xml)
+    let of_json j =
+      list_of_json ~kind:"VpcEndpointIdList" ~of_json:VpcEndpointId.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ReservedElasticsearchInstanceList =
   struct
     type nonrec t = ReservedElasticsearchInstance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedElasticsearchInstance.to_value)) |>
         (fun x -> `List x)
@@ -6743,6 +7982,9 @@ module ReservedElasticsearchInstanceOfferingList =
   struct
     type nonrec t = ReservedElasticsearchInstanceOffering.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ReservedElasticsearchInstanceOffering.to_value)) |>
         (fun x -> `List x)
@@ -6770,6 +8012,9 @@ module PackageDetailsList =
   struct
     type nonrec t = PackageDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PackageDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6795,6 +8040,9 @@ module DescribePackagesFilterList =
   struct
     type nonrec t = DescribePackagesFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DescribePackagesFilter.to_value)) |>
         (fun x -> `List x)
@@ -6834,6 +8082,9 @@ module OutboundCrossClusterSearchConnections =
   struct
     type nonrec t = OutboundCrossClusterSearchConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OutboundCrossClusterSearchConnection.to_value)) |>
         (fun x -> `List x)
@@ -6861,6 +8112,9 @@ module FilterList =
   struct
     type nonrec t = Filter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6884,6 +8138,9 @@ module InboundCrossClusterSearchConnections =
   struct
     type nonrec t = InboundCrossClusterSearchConnection.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InboundCrossClusterSearchConnection.to_value)) |>
         (fun x -> `List x)
@@ -6930,6 +8187,8 @@ module LimitsByRole =
                     (fun x -> (Limits.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -6941,6 +8200,9 @@ module ElasticsearchDomainStatusList =
   struct
     type nonrec t = ElasticsearchDomainStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ElasticsearchDomainStatus.to_value)) |>
         (fun x -> `List x)
@@ -6967,6 +8229,9 @@ module DomainNameList =
   struct
     type nonrec t = DomainName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7011,7 +8276,15 @@ module ChangeProgressStatusDetails =
           "The total number of stages required for the configuration change."];
       changeProgressStages: ChangeProgressStageList.t option
         [@ocaml.doc
-          "The specific stages that the domain is going through to perform the configuration change."]}
+          "The specific stages that the domain is going through to perform the configuration change."];
+      configChangeStatus: ConfigChangeStatus.t option
+        [@ocaml.doc "The current status of the configuration change."];
+      lastUpdatedTime: UpdateTimestamp.t option
+        [@ocaml.doc
+          "The last time that the status of the configuration change was updated."];
+      initiatedBy: InitiatedBy.t option
+        [@ocaml.doc
+          "The IAM principal who initiated the configuration change."]}
     let make ?changeId =
       fun ?startTime ->
         fun ?status ->
@@ -7019,16 +8292,22 @@ module ChangeProgressStatusDetails =
             fun ?completedProperties ->
               fun ?totalNumberOfStages ->
                 fun ?changeProgressStages ->
-                  fun () ->
-                    {
-                      changeId;
-                      startTime;
-                      status;
-                      pendingProperties;
-                      completedProperties;
-                      totalNumberOfStages;
-                      changeProgressStages
-                    }
+                  fun ?configChangeStatus ->
+                    fun ?lastUpdatedTime ->
+                      fun ?initiatedBy ->
+                        fun () ->
+                          {
+                            changeId;
+                            startTime;
+                            status;
+                            pendingProperties;
+                            completedProperties;
+                            totalNumberOfStages;
+                            changeProgressStages;
+                            configChangeStatus;
+                            lastUpdatedTime;
+                            initiatedBy
+                          }
     let to_value x =
       structure_to_value
         [("ChangeId", (Option.map x.changeId ~f:GUID.to_value));
@@ -7042,9 +8321,22 @@ module ChangeProgressStatusDetails =
           (Option.map x.totalNumberOfStages ~f:TotalNumberOfStages.to_value));
         ("ChangeProgressStages",
           (Option.map x.changeProgressStages
-             ~f:ChangeProgressStageList.to_value))]
+             ~f:ChangeProgressStageList.to_value));
+        ("ConfigChangeStatus",
+          (Option.map x.configChangeStatus ~f:ConfigChangeStatus.to_value));
+        ("LastUpdatedTime",
+          (Option.map x.lastUpdatedTime ~f:UpdateTimestamp.to_value));
+        ("InitiatedBy", (Option.map x.initiatedBy ~f:InitiatedBy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let initiatedBy =
+        (Option.map ~f:InitiatedBy.of_xml) (Xml.child xml_arg0 "InitiatedBy") in
+      let lastUpdatedTime =
+        (Option.map ~f:UpdateTimestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedTime") in
+      let configChangeStatus =
+        (Option.map ~f:ConfigChangeStatus.of_xml)
+          (Xml.child xml_arg0 "ConfigChangeStatus") in
       let changeProgressStages =
         (Option.map ~f:ChangeProgressStageList.of_xml)
           (Xml.child xml_arg0 "ChangeProgressStages") in
@@ -7065,22 +8357,30 @@ module ChangeProgressStatusDetails =
           (Xml.child xml_arg0 "StartTime") in
       let changeId =
         (Option.map ~f:GUID.of_xml) (Xml.child xml_arg0 "ChangeId") in
-      make ?changeProgressStages ?totalNumberOfStages ?completedProperties
+      make ?initiatedBy ?lastUpdatedTime ?configChangeStatus
+        ?changeProgressStages ?totalNumberOfStages ?completedProperties
         ?pendingProperties ?status ?startTime ?changeId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let initiatedBy = field_map json__ "InitiatedBy" InitiatedBy.of_json in
+      let lastUpdatedTime =
+        field_map json__ "LastUpdatedTime" UpdateTimestamp.of_json in
+      let configChangeStatus =
+        field_map json__ "ConfigChangeStatus" ConfigChangeStatus.of_json in
       let changeProgressStages =
-        field_map json "ChangeProgressStages" ChangeProgressStageList.of_json in
+        field_map json__ "ChangeProgressStages"
+          ChangeProgressStageList.of_json in
       let totalNumberOfStages =
-        field_map json "TotalNumberOfStages" TotalNumberOfStages.of_json in
+        field_map json__ "TotalNumberOfStages" TotalNumberOfStages.of_json in
       let completedProperties =
-        field_map json "CompletedProperties" StringList.of_json in
+        field_map json__ "CompletedProperties" StringList.of_json in
       let pendingProperties =
-        field_map json "PendingProperties" StringList.of_json in
-      let status = field_map json "Status" OverallChangeStatus.of_json in
-      let startTime = field_map json "StartTime" UpdateTimestamp.of_json in
-      let changeId = field_map json "ChangeId" GUID.of_json in
-      make ?changeProgressStages ?totalNumberOfStages ?completedProperties
+        field_map json__ "PendingProperties" StringList.of_json in
+      let status = field_map json__ "Status" OverallChangeStatus.of_json in
+      let startTime = field_map json__ "StartTime" UpdateTimestamp.of_json in
+      let changeId = field_map json__ "ChangeId" GUID.of_json in
+      make ?initiatedBy ?lastUpdatedTime ?configChangeStatus
+        ?changeProgressStages ?totalNumberOfStages ?completedProperties
         ?pendingProperties ?status ?startTime ?changeId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7089,6 +8389,9 @@ module AutoTuneList =
   struct
     type nonrec t = AutoTune.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AutoTune.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7108,6 +8411,24 @@ module AutoTuneList =
     let of_json j =
       list_of_json ~kind:"AutoTuneList" ~of_json:AutoTune.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module ClientToken =
+  struct
+    type nonrec t = string
+    let context_ = "ClientToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ClientToken" j
+    let to_json = simple_to_json to_value
   end
 module AutoTuneOptionsInput =
   struct
@@ -7139,16 +8460,71 @@ module AutoTuneOptionsInput =
           (Xml.child xml_arg0 "DesiredState") in
       make ?maintenanceSchedules ?desiredState ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maintenanceSchedules =
-        field_map json "MaintenanceSchedules"
+        field_map json__ "MaintenanceSchedules"
           AutoTuneMaintenanceScheduleList.of_json in
       let desiredState =
-        field_map json "DesiredState" AutoTuneDesiredState.of_json in
+        field_map json__ "DesiredState" AutoTuneDesiredState.of_json in
       make ?maintenanceSchedules ?desiredState ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the Auto-Tune options: the Auto-Tune desired state for the domain and list of maintenance schedules."]
+module CancelledChangePropertyList =
+  struct
+    type nonrec t = CancelledChangeProperty.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CancelledChangeProperty.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CancelledChangeProperty.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CancelledChangePropertyList"
+        ~of_json:CancelledChangeProperty.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module GUIDList =
+  struct
+    type nonrec t = GUID.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:GUID.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:GUID.of_xml)
+    let of_json j = list_of_json ~kind:"GUIDList" ~of_json:GUID.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module UpgradeElasticsearchDomainResponse =
   struct
     type nonrec t =
@@ -7271,14 +8647,15 @@ module UpgradeElasticsearchDomainResponse =
       make ?changeProgressDetails ?performCheckOnly ?targetVersion
         ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let changeProgressDetails =
-        field_map json "ChangeProgressDetails" ChangeProgressDetails.of_json in
+        field_map json__ "ChangeProgressDetails"
+          ChangeProgressDetails.of_json in
       let performCheckOnly =
-        field_map json "PerformCheckOnly" Boolean.of_json in
+        field_map json__ "PerformCheckOnly" Boolean.of_json in
       let targetVersion =
-        field_map json "TargetVersion" ElasticsearchVersionString.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+        field_map json__ "TargetVersion" ElasticsearchVersionString.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?changeProgressDetails ?performCheckOnly ?targetVersion
         ?domainName ()
     let to_json v = composed_to_json to_value v
@@ -7320,16 +8697,144 @@ module UpgradeElasticsearchDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?performCheckOnly ~targetVersion ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let performCheckOnly =
-        field_map json "PerformCheckOnly" Boolean.of_json in
+        field_map json__ "PerformCheckOnly" Boolean.of_json in
       let targetVersion =
-        field_map_exn json "TargetVersion" ElasticsearchVersionString.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+        field_map_exn json__ "TargetVersion"
+          ElasticsearchVersionString.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?performCheckOnly ~targetVersion ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for request parameters to UpgradeElasticsearchDomain operation."]
+module UpdateVpcEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpoint: VpcEndpoint.t option
+        [@ocaml.doc "The endpoint to be updated."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `ConflictException of ConflictException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpoint = fun () -> { vpcEndpoint }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpoint", (Option.map x.vpcEndpoint ~f:VpcEndpoint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpoint =
+        (Option.map ~f:VpcEndpoint.of_xml) (Xml.child xml_arg0 "VpcEndpoint") in
+      make ?vpcEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpoint = field_map json__ "VpcEndpoint" VpcEndpoint.of_json in
+      make ?vpcEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the configuration and status of the VPC endpoint being updated."]
+module UpdateVpcEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointId: VpcEndpointId.t
+        [@ocaml.doc "Unique identifier of the VPC endpoint to be updated."];
+      vpcOptions: VPCOptions.t
+        [@ocaml.doc
+          "The security groups and/or subnets to add, remove, or modify."]}
+    let context_ = "UpdateVpcEndpointRequest"
+    let make ~vpcEndpointId =
+      fun ~vpcOptions -> fun () -> { vpcEndpointId; vpcOptions }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointId", (Some (VpcEndpointId.to_value x.vpcEndpointId)));
+        ("VpcOptions", (Some (VPCOptions.to_value x.vpcOptions)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcOptions =
+        VPCOptions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcOptions") in
+      let vpcEndpointId =
+        VpcEndpointId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcEndpointId") in
+      make ~vpcOptions ~vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcOptions = field_map_exn json__ "VpcOptions" VPCOptions.of_json in
+      let vpcEndpointId =
+        field_map_exn json__ "VpcEndpointId" VpcEndpointId.of_json in
+      make ~vpcOptions ~vpcEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Modifies an Amazon OpenSearch Service-managed interface VPC endpoint."]
 module UpdatePackageResponse =
   struct
     type nonrec t =
@@ -7418,9 +8923,9 @@ module UpdatePackageResponse =
           (Xml.child xml_arg0 "PackageDetails") in
       make ?packageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageDetails =
-        field_map json "PackageDetails" PackageDetails.of_json in
+        field_map json__ "PackageDetails" PackageDetails.of_json in
       make ?packageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7468,14 +8973,14 @@ module UpdatePackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ?commitMessage ?packageDescription ~packageSource ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let commitMessage =
-        field_map json "CommitMessage" CommitMessage.of_json in
+        field_map json__ "CommitMessage" CommitMessage.of_json in
       let packageDescription =
-        field_map json "PackageDescription" PackageDescription.of_json in
+        field_map json__ "PackageDescription" PackageDescription.of_json in
       let packageSource =
-        field_map_exn json "PackageSource" PackageSource.of_json in
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+        field_map_exn json__ "PackageSource" PackageSource.of_json in
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ?commitMessage ?packageDescription ~packageSource ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7484,7 +8989,7 @@ module UpdateElasticsearchDomainConfigResponse =
   struct
     type nonrec t =
       {
-      domainConfig: ElasticsearchDomainConfig.t
+      domainConfig: ElasticsearchDomainConfig.t option
         [@ocaml.doc "The status of the updated Elasticsearch domain."];
       dryRunResults: DryRunResults.t option
         [@ocaml.doc "Contains result of DryRun."]}
@@ -7496,9 +9001,8 @@ module UpdateElasticsearchDomainConfigResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateElasticsearchDomainConfigResponse"
-    let make ?dryRunResults =
-      fun ~domainConfig -> fun () -> { dryRunResults; domainConfig }
+    let make ?domainConfig =
+      fun ?dryRunResults -> fun () -> { domainConfig; dryRunResults }
     let error_of_json name json =
       match name with
       | "BaseException" -> `BaseException (BaseException.of_json json)
@@ -7564,7 +9068,7 @@ module UpdateElasticsearchDomainConfigResponse =
     let to_value x =
       structure_to_value
         [("DomainConfig",
-           (Some (ElasticsearchDomainConfig.to_value x.domainConfig)));
+           (Option.map x.domainConfig ~f:ElasticsearchDomainConfig.to_value));
         ("DryRunResults",
           (Option.map x.dryRunResults ~f:DryRunResults.to_value))]
     let to_query v = to_query to_value v
@@ -7573,16 +9077,16 @@ module UpdateElasticsearchDomainConfigResponse =
         (Option.map ~f:DryRunResults.of_xml)
           (Xml.child xml_arg0 "DryRunResults") in
       let domainConfig =
-        ElasticsearchDomainConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainConfig") in
-      make ?dryRunResults ~domainConfig ()
+        (Option.map ~f:ElasticsearchDomainConfig.of_xml)
+          (Xml.child xml_arg0 "DomainConfig") in
+      make ?dryRunResults ?domainConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dryRunResults =
-        field_map json "DryRunResults" DryRunResults.of_json in
+        field_map json__ "DryRunResults" DryRunResults.of_json in
       let domainConfig =
-        field_map_exn json "DomainConfig" ElasticsearchDomainConfig.of_json in
-      make ?dryRunResults ~domainConfig ()
+        field_map json__ "DomainConfig" ElasticsearchDomainConfig.of_json in
+      make ?dryRunResults ?domainConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of an UpdateElasticsearchDomain request. Contains the status of the Elasticsearch domain being updated."]
@@ -7629,7 +9133,13 @@ module UpdateElasticsearchDomainConfigRequest =
         [@ocaml.doc "Specifies Auto-Tune options."];
       dryRun: DryRun.t option
         [@ocaml.doc
-          "This flag, when set to True, specifies whether the UpdateElasticsearchDomain request should return the results of validation checks without actually applying the change. This flag, when set to True, specifies the deployment mechanism through which the update shall be applied on the domain. This will not actually perform the Update."]}
+          "This flag, when set to True, specifies whether the UpdateElasticsearchDomain request should return the results of validation checks without actually applying the change. This flag, when set to True, specifies the deployment mechanism through which the update shall be applied on the domain. This will not actually perform the Update."];
+      deploymentStrategyOptions: DeploymentStrategyOptions.t option
+        [@ocaml.doc "Specifies the deployment strategy options."];
+      automatedSnapshotPauseOptions:
+        AutomatedSnapshotPauseRequestOptions.t option
+        [@ocaml.doc
+          "Specifies the automated snapshot pause options for the domain. Suspending snapshots reduces data protection. You cannot restore your domain to points in time when snapshots are suspended. Use this feature only for short-term operational needs such as migrations or maintenance windows. Maximum suspension duration: 3 days."]}
     let context_ = "UpdateElasticsearchDomainConfigRequest"
     let make ?elasticsearchClusterConfig =
       fun ?eBSOptions ->
@@ -7645,25 +9155,29 @@ module UpdateElasticsearchDomainConfigRequest =
                           fun ?encryptionAtRestOptions ->
                             fun ?autoTuneOptions ->
                               fun ?dryRun ->
-                                fun ~domainName ->
-                                  fun () ->
-                                    {
-                                      elasticsearchClusterConfig;
-                                      eBSOptions;
-                                      snapshotOptions;
-                                      vPCOptions;
-                                      cognitoOptions;
-                                      advancedOptions;
-                                      accessPolicies;
-                                      logPublishingOptions;
-                                      domainEndpointOptions;
-                                      advancedSecurityOptions;
-                                      nodeToNodeEncryptionOptions;
-                                      encryptionAtRestOptions;
-                                      autoTuneOptions;
-                                      dryRun;
-                                      domainName
-                                    }
+                                fun ?deploymentStrategyOptions ->
+                                  fun ?automatedSnapshotPauseOptions ->
+                                    fun ~domainName ->
+                                      fun () ->
+                                        {
+                                          elasticsearchClusterConfig;
+                                          eBSOptions;
+                                          snapshotOptions;
+                                          vPCOptions;
+                                          cognitoOptions;
+                                          advancedOptions;
+                                          accessPolicies;
+                                          logPublishingOptions;
+                                          domainEndpointOptions;
+                                          advancedSecurityOptions;
+                                          nodeToNodeEncryptionOptions;
+                                          encryptionAtRestOptions;
+                                          autoTuneOptions;
+                                          dryRun;
+                                          deploymentStrategyOptions;
+                                          automatedSnapshotPauseOptions;
+                                          domainName
+                                        }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
@@ -7696,9 +9210,21 @@ module UpdateElasticsearchDomainConfigRequest =
              ~f:EncryptionAtRestOptions.to_value));
         ("AutoTuneOptions",
           (Option.map x.autoTuneOptions ~f:AutoTuneOptions.to_value));
-        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value))]
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value));
+        ("DeploymentStrategyOptions",
+          (Option.map x.deploymentStrategyOptions
+             ~f:DeploymentStrategyOptions.to_value));
+        ("AutomatedSnapshotPauseOptions",
+          (Option.map x.automatedSnapshotPauseOptions
+             ~f:AutomatedSnapshotPauseRequestOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let automatedSnapshotPauseOptions =
+        (Option.map ~f:AutomatedSnapshotPauseRequestOptions.of_xml)
+          (Xml.child xml_arg0 "AutomatedSnapshotPauseOptions") in
+      let deploymentStrategyOptions =
+        (Option.map ~f:DeploymentStrategyOptions.of_xml)
+          (Xml.child xml_arg0 "DeploymentStrategyOptions") in
       let dryRun =
         (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
       let autoTuneOptions =
@@ -7741,44 +9267,53 @@ module UpdateElasticsearchDomainConfigRequest =
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?dryRun ?autoTuneOptions ?encryptionAtRestOptions
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions ?dryRun
+        ?autoTuneOptions ?encryptionAtRestOptions
         ?nodeToNodeEncryptionOptions ?advancedSecurityOptions
         ?domainEndpointOptions ?logPublishingOptions ?accessPolicies
         ?advancedOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
         ?eBSOptions ?elasticsearchClusterConfig ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dryRun = field_map json "DryRun" DryRun.of_json in
+    let of_json json__ =
+      let automatedSnapshotPauseOptions =
+        field_map json__ "AutomatedSnapshotPauseOptions"
+          AutomatedSnapshotPauseRequestOptions.of_json in
+      let deploymentStrategyOptions =
+        field_map json__ "DeploymentStrategyOptions"
+          DeploymentStrategyOptions.of_json in
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
       let autoTuneOptions =
-        field_map json "AutoTuneOptions" AutoTuneOptions.of_json in
+        field_map json__ "AutoTuneOptions" AutoTuneOptions.of_json in
       let encryptionAtRestOptions =
-        field_map json "EncryptionAtRestOptions"
+        field_map json__ "EncryptionAtRestOptions"
           EncryptionAtRestOptions.of_json in
       let nodeToNodeEncryptionOptions =
-        field_map json "NodeToNodeEncryptionOptions"
+        field_map json__ "NodeToNodeEncryptionOptions"
           NodeToNodeEncryptionOptions.of_json in
       let advancedSecurityOptions =
-        field_map json "AdvancedSecurityOptions"
+        field_map json__ "AdvancedSecurityOptions"
           AdvancedSecurityOptionsInput.of_json in
       let domainEndpointOptions =
-        field_map json "DomainEndpointOptions" DomainEndpointOptions.of_json in
+        field_map json__ "DomainEndpointOptions"
+          DomainEndpointOptions.of_json in
       let logPublishingOptions =
-        field_map json "LogPublishingOptions" LogPublishingOptions.of_json in
+        field_map json__ "LogPublishingOptions" LogPublishingOptions.of_json in
       let accessPolicies =
-        field_map json "AccessPolicies" PolicyDocument.of_json in
+        field_map json__ "AccessPolicies" PolicyDocument.of_json in
       let advancedOptions =
-        field_map json "AdvancedOptions" AdvancedOptions.of_json in
+        field_map json__ "AdvancedOptions" AdvancedOptions.of_json in
       let cognitoOptions =
-        field_map json "CognitoOptions" CognitoOptions.of_json in
-      let vPCOptions = field_map json "VPCOptions" VPCOptions.of_json in
+        field_map json__ "CognitoOptions" CognitoOptions.of_json in
+      let vPCOptions = field_map json__ "VPCOptions" VPCOptions.of_json in
       let snapshotOptions =
-        field_map json "SnapshotOptions" SnapshotOptions.of_json in
-      let eBSOptions = field_map json "EBSOptions" EBSOptions.of_json in
+        field_map json__ "SnapshotOptions" SnapshotOptions.of_json in
+      let eBSOptions = field_map json__ "EBSOptions" EBSOptions.of_json in
       let elasticsearchClusterConfig =
-        field_map json "ElasticsearchClusterConfig"
+        field_map json__ "ElasticsearchClusterConfig"
           ElasticsearchClusterConfig.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?dryRun ?autoTuneOptions ?encryptionAtRestOptions
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions ?dryRun
+        ?autoTuneOptions ?encryptionAtRestOptions
         ?nodeToNodeEncryptionOptions ?advancedSecurityOptions
         ?domainEndpointOptions ?logPublishingOptions ?accessPolicies
         ?advancedOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
@@ -7858,9 +9393,9 @@ module StartElasticsearchServiceSoftwareUpdateResponse =
           (Xml.child xml_arg0 "ServiceSoftwareOptions") in
       make ?serviceSoftwareOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSoftwareOptions =
-        field_map json "ServiceSoftwareOptions"
+        field_map json__ "ServiceSoftwareOptions"
           ServiceSoftwareOptions.of_json in
       make ?serviceSoftwareOptions ()
     let to_json v = composed_to_json to_value v
@@ -7885,12 +9420,118 @@ module StartElasticsearchServiceSoftwareUpdateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the StartElasticsearchServiceSoftwareUpdate operation. Specifies the name of the Elasticsearch domain that you wish to schedule a service software update on."]
+module RevokeVpcEndpointAccessResponse =
+  struct
+    type nonrec t = unit
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make () = ()
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let of_header_and_body = ((fun (xs, pipe) -> make ())[@warning "-27"])
+    let to_value _ = `Structure []
+    let to_query v = to_query to_value v
+    let of_xml _ = make ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json _ = make ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the RevokeVpcEndpointAccess operation. The response body for this operation is empty."]
+module RevokeVpcEndpointAccessRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t
+        [@ocaml.doc "The name of the OpenSearch Service domain."];
+      account: AWSAccount.t
+        [@ocaml.doc "The account ID to revoke access from."]}
+    let context_ = "RevokeVpcEndpointAccessRequest"
+    let make ~domainName = fun ~account -> fun () -> { domainName; account }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("Account", (Some (AWSAccount.to_value x.account)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let account =
+        AWSAccount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Account") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~account ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let account = field_map_exn json__ "Account" AWSAccount.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ~account ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Revokes access to an Amazon OpenSearch Service domain that was provided through an interface VPC endpoint."]
 module RemoveTagsRequest =
   struct
     type nonrec t =
@@ -7915,9 +9556,10 @@ module RemoveTagsRequest =
       let aRN = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
       make ~tagKeys ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" StringList.of_json in
-      let aRN = field_map_exn json "ARN" ARN.of_json in make ~tagKeys ~aRN ()
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" StringList.of_json in
+      let aRN = field_map_exn json__ "ARN" ARN.of_json in
+      make ~tagKeys ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the RemoveTags operation. Specify the ARN for the Elasticsearch domain from which you want to remove the specified TagKey."]
@@ -7980,9 +9622,9 @@ module RejectInboundCrossClusterSearchConnectionResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnection") in
       make ?crossClusterSearchConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnection =
-        field_map json "CrossClusterSearchConnection"
+        field_map json__ "CrossClusterSearchConnection"
           InboundCrossClusterSearchConnection.of_json in
       make ?crossClusterSearchConnection ()
     let to_json v = composed_to_json to_value v
@@ -8011,9 +9653,9 @@ module RejectInboundCrossClusterSearchConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionId") in
       make ~crossClusterSearchConnectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnectionId =
-        field_map_exn json "CrossClusterSearchConnectionId"
+        field_map_exn json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       make ~crossClusterSearchConnectionId ()
     let to_json v = composed_to_json to_value v
@@ -8123,11 +9765,11 @@ module PurchaseReservedElasticsearchInstanceOfferingResponse =
           (Xml.child xml_arg0 "ReservedElasticsearchInstanceId") in
       make ?reservationName ?reservedElasticsearchInstanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservationName =
-        field_map json "ReservationName" ReservationToken.of_json in
+        field_map json__ "ReservationName" ReservationToken.of_json in
       let reservedElasticsearchInstanceId =
-        field_map json "ReservedElasticsearchInstanceId" GUID.of_json in
+        field_map json__ "ReservedElasticsearchInstanceId" GUID.of_json in
       make ?reservationName ?reservedElasticsearchInstanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8177,19 +9819,364 @@ module PurchaseReservedElasticsearchInstanceOfferingRequest =
       make ?instanceCount ~reservationName
         ~reservedElasticsearchInstanceOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceCount =
-        field_map json "InstanceCount" InstanceCount.of_json in
+        field_map json__ "InstanceCount" InstanceCount.of_json in
       let reservationName =
-        field_map_exn json "ReservationName" ReservationToken.of_json in
+        field_map_exn json__ "ReservationName" ReservationToken.of_json in
       let reservedElasticsearchInstanceOfferingId =
-        field_map_exn json "ReservedElasticsearchInstanceOfferingId"
+        field_map_exn json__ "ReservedElasticsearchInstanceOfferingId"
           GUID.of_json in
       make ?instanceCount ~reservationName
         ~reservedElasticsearchInstanceOfferingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for parameters to PurchaseReservedElasticsearchInstanceOffering"]
+module ListVpcEndpointsResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointSummaryList: VpcEndpointSummaryList.t option
+        [@ocaml.doc "Information about each endpoint."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Provides an identifier to allow retrieval of paginated results."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpointSummaryList =
+      fun ?nextToken -> fun () -> { vpcEndpointSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointSummaryList",
+           (Option.map x.vpcEndpointSummaryList
+              ~f:VpcEndpointSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let vpcEndpointSummaryList =
+        (Option.map ~f:VpcEndpointSummaryList.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointSummaryList") in
+      make ?nextToken ?vpcEndpointSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let vpcEndpointSummaryList =
+        field_map json__ "VpcEndpointSummaryList"
+          VpcEndpointSummaryList.of_json in
+      make ?nextToken ?vpcEndpointSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the ListVpcEndpoints operation. Returns a list containing summarized details of the VPC endpoints."]
+module ListVpcEndpointsRequest =
+  struct
+    type nonrec t =
+      {
+      nextToken: NextToken.t option
+        [@ocaml.doc "Identifier to allow retrieval of paginated results."]}
+    let make ?nextToken = fun () -> { nextToken }
+    let to_value x =
+      structure_to_value
+        [("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      make ?nextToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      make ?nextToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for request parameters to the ListVpcEndpoints operation."]
+module ListVpcEndpointsForDomainResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointSummaryList: VpcEndpointSummaryList.t option
+        [@ocaml.doc
+          "Provides list of VpcEndpointSummary summarizing details of the VPC endpoints."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Information about each endpoint associated with the domain."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpointSummaryList =
+      fun ?nextToken -> fun () -> { vpcEndpointSummaryList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointSummaryList",
+           (Option.map x.vpcEndpointSummaryList
+              ~f:VpcEndpointSummaryList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let vpcEndpointSummaryList =
+        (Option.map ~f:VpcEndpointSummaryList.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointSummaryList") in
+      make ?nextToken ?vpcEndpointSummaryList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let vpcEndpointSummaryList =
+        field_map json__ "VpcEndpointSummaryList"
+          VpcEndpointSummaryList.of_json in
+      make ?nextToken ?vpcEndpointSummaryList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the ListVpcEndpointsForDomain operation. Returns a list containing summarized details of the VPC endpoints."]
+module ListVpcEndpointsForDomainRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t
+        [@ocaml.doc
+          "Name of the ElasticSearch domain whose VPC endpoints are to be listed."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Provides an identifier to allow retrieval of paginated results."]}
+    let context_ = "ListVpcEndpointsForDomainRequest"
+    let make ?nextToken =
+      fun ~domainName -> fun () -> { nextToken; domainName }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ?nextToken ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?nextToken ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for request parameters to the ListVpcEndpointsForDomain operation. Specifies the domain whose VPC endpoints will be listed."]
+module ListVpcEndpointAccessResponse =
+  struct
+    type nonrec t =
+      {
+      authorizedPrincipalList: AuthorizedPrincipalList.t option
+        [@ocaml.doc
+          "List of AuthorizedPrincipal describing the details of the permissions to manage VPC endpoints against the specified domain."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Provides an identifier to allow retrieval of paginated results."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?authorizedPrincipalList =
+      fun ?nextToken -> fun () -> { authorizedPrincipalList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AuthorizedPrincipalList",
+           (Option.map x.authorizedPrincipalList
+              ~f:AuthorizedPrincipalList.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let authorizedPrincipalList =
+        (Option.map ~f:AuthorizedPrincipalList.of_xml)
+          (Xml.child xml_arg0 "AuthorizedPrincipalList") in
+      make ?nextToken ?authorizedPrincipalList ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let authorizedPrincipalList =
+        field_map json__ "AuthorizedPrincipalList"
+          AuthorizedPrincipalList.of_json in
+      make ?nextToken ?authorizedPrincipalList ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the ListVpcEndpointAccess operation. Returns a list of accounts id and account type authorized to manage VPC endpoints."]
+module ListVpcEndpointAccessRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t
+        [@ocaml.doc
+          "The name of the OpenSearch Service domain to retrieve access information for."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "Provides an identifier to allow retrieval of paginated results."]}
+    let context_ = "ListVpcEndpointAccessRequest"
+    let make ?nextToken =
+      fun ~domainName -> fun () -> { nextToken; domainName }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ?nextToken ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?nextToken ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Retrieves information about each principal that is allowed to access a given Amazon OpenSearch Service domain through the use of an interface VPC endpoint"]
 module ListTagsResponse =
   struct
     type nonrec t =
@@ -8258,8 +10245,8 @@ module ListTagsResponse =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
       make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8280,8 +10267,8 @@ module ListTagsRequest =
       let aRN = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "arn") in
       make ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let aRN = field_map_exn json "ARN" ARN.of_json in make ~aRN ()
+    let of_json json__ =
+      let aRN = field_map_exn json__ "ARN" ARN.of_json in make ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the ListTags operation. Specify the ARN for the Elasticsearch domain to which the tags are attached that you want to view are attached."]
@@ -8372,10 +10359,10 @@ module ListPackagesForDomainResponse =
           (Xml.child xml_arg0 "DomainPackageDetailsList") in
       make ?nextToken ?domainPackageDetailsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let domainPackageDetailsList =
-        field_map json "DomainPackageDetailsList"
+        field_map json__ "DomainPackageDetailsList"
           DomainPackageDetailsList.of_json in
       make ?nextToken ?domainPackageDetailsList ()
     let to_json v = composed_to_json to_value v
@@ -8413,10 +10400,10 @@ module ListPackagesForDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?nextToken ?maxResults ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?nextToken ?maxResults ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8496,10 +10483,10 @@ module ListElasticsearchVersionsResponse =
           (Xml.child xml_arg0 "ElasticsearchVersions") in
       make ?nextToken ?elasticsearchVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let elasticsearchVersions =
-        field_map json "ElasticsearchVersions"
+        field_map json__ "ElasticsearchVersions"
           ElasticsearchVersionList.of_json in
       make ?nextToken ?elasticsearchVersions ()
     let to_json v = composed_to_json to_value v
@@ -8527,9 +10514,9 @@ module ListElasticsearchVersionsRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8613,10 +10600,10 @@ module ListElasticsearchInstanceTypesResponse =
           (Xml.child xml_arg0 "ElasticsearchInstanceTypes") in
       make ?nextToken ?elasticsearchInstanceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let elasticsearchInstanceTypes =
-        field_map json "ElasticsearchInstanceTypes"
+        field_map json__ "ElasticsearchInstanceTypes"
           ElasticsearchInstanceTypeList.of_json in
       make ?nextToken ?elasticsearchInstanceTypes ()
     let to_json v = composed_to_json to_value v
@@ -8665,12 +10652,12 @@ module ListElasticsearchInstanceTypesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ElasticsearchVersion") in
       make ?nextToken ?maxResults ?domainName ~elasticsearchVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       let elasticsearchVersion =
-        field_map_exn json "ElasticsearchVersion"
+        field_map_exn json__ "ElasticsearchVersion"
           ElasticsearchVersionString.of_json in
       make ?nextToken ?maxResults ?domainName ~elasticsearchVersion ()
     let to_json v = composed_to_json to_value v
@@ -8761,10 +10748,10 @@ module ListDomainsForPackageResponse =
           (Xml.child xml_arg0 "DomainPackageDetailsList") in
       make ?nextToken ?domainPackageDetailsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let domainPackageDetailsList =
-        field_map json "DomainPackageDetailsList"
+        field_map json__ "DomainPackageDetailsList"
           DomainPackageDetailsList.of_json in
       make ?nextToken ?domainPackageDetailsList ()
     let to_json v = composed_to_json to_value v
@@ -8801,10 +10788,10 @@ module ListDomainsForPackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ?nextToken ?maxResults ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ?nextToken ?maxResults ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8861,8 +10848,8 @@ module ListDomainNamesResponse =
           (Xml.child xml_arg0 "DomainNames") in
       make ?domainNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainNames = field_map json "DomainNames" DomainInfoList.of_json in
+    let of_json json__ =
+      let domainNames = field_map json__ "DomainNames" DomainInfoList.of_json in
       make ?domainNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8884,8 +10871,8 @@ module ListDomainNamesRequest =
         (Option.map ~f:EngineType.of_xml) (Xml.child xml_arg0 "engineType") in
       make ?engineType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let engineType = field_map json "EngineType" EngineType.of_json in
+    let of_json json__ =
+      let engineType = field_map json__ "EngineType" EngineType.of_json in
       make ?engineType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8984,10 +10971,10 @@ module GetUpgradeStatusResponse =
         (Option.map ~f:UpgradeStep.of_xml) (Xml.child xml_arg0 "UpgradeStep") in
       make ?upgradeName ?stepStatus ?upgradeStep ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let upgradeName = field_map json "UpgradeName" UpgradeName.of_json in
-      let stepStatus = field_map json "StepStatus" UpgradeStatus.of_json in
-      let upgradeStep = field_map json "UpgradeStep" UpgradeStep.of_json in
+    let of_json json__ =
+      let upgradeName = field_map json__ "UpgradeName" UpgradeName.of_json in
+      let stepStatus = field_map json__ "StepStatus" UpgradeStatus.of_json in
+      let upgradeStep = field_map json__ "UpgradeStep" UpgradeStep.of_json in
       make ?upgradeName ?stepStatus ?upgradeStep ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9008,8 +10995,8 @@ module GetUpgradeStatusRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9102,10 +11089,10 @@ module GetUpgradeHistoryResponse =
           (Xml.child xml_arg0 "UpgradeHistories") in
       make ?nextToken ?upgradeHistories ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let upgradeHistories =
-        field_map json "UpgradeHistories" UpgradeHistoryList.of_json in
+        field_map json__ "UpgradeHistories" UpgradeHistoryList.of_json in
       make ?nextToken ?upgradeHistories ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9137,10 +11124,10 @@ module GetUpgradeHistoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?nextToken ?maxResults ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?nextToken ?maxResults ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9236,12 +11223,12 @@ module GetPackageVersionHistoryResponse =
         (Option.map ~f:PackageID.of_xml) (Xml.child xml_arg0 "PackageID") in
       make ?nextToken ?packageVersionHistoryList ?packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let packageVersionHistoryList =
-        field_map json "PackageVersionHistoryList"
+        field_map json__ "PackageVersionHistoryList"
           PackageVersionHistoryList.of_json in
-      let packageID = field_map json "PackageID" PackageID.of_json in
+      let packageID = field_map json__ "PackageID" PackageID.of_json in
       make ?nextToken ?packageVersionHistoryList ?packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9277,10 +11264,10 @@ module GetPackageVersionHistoryRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ?nextToken ?maxResults ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ?nextToken ?maxResults ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9369,9 +11356,9 @@ module GetCompatibleElasticsearchVersionsResponse =
           (Xml.child xml_arg0 "CompatibleElasticsearchVersions") in
       make ?compatibleElasticsearchVersions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let compatibleElasticsearchVersions =
-        field_map json "CompatibleElasticsearchVersions"
+        field_map json__ "CompatibleElasticsearchVersions"
           CompatibleElasticsearchVersionsList.of_json in
       make ?compatibleElasticsearchVersions ()
     let to_json v = composed_to_json to_value v
@@ -9391,8 +11378,8 @@ module GetCompatibleElasticsearchVersionsRequest =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9486,9 +11473,9 @@ module DissociatePackageResponse =
           (Xml.child xml_arg0 "DomainPackageDetails") in
       make ?domainPackageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainPackageDetails =
-        field_map json "DomainPackageDetails" DomainPackageDetails.of_json in
+        field_map json__ "DomainPackageDetails" DomainPackageDetails.of_json in
       make ?domainPackageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9520,13 +11507,127 @@ module DissociatePackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ~domainName ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ~domainName ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for request parameters to DissociatePackage operation."]
+module DescribeVpcEndpointsResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpoints: VpcEndpoints.t option
+        [@ocaml.doc "Information about each requested VPC endpoint."];
+      vpcEndpointErrors: VpcEndpointErrorList.t option
+        [@ocaml.doc "Any errors associated with the request."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpoints =
+      fun ?vpcEndpointErrors -> fun () -> { vpcEndpoints; vpcEndpointErrors }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpoints",
+           (Option.map x.vpcEndpoints ~f:VpcEndpoints.to_value));
+        ("VpcEndpointErrors",
+          (Option.map x.vpcEndpointErrors ~f:VpcEndpointErrorList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointErrors =
+        (Option.map ~f:VpcEndpointErrorList.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointErrors") in
+      let vpcEndpoints =
+        (Option.map ~f:VpcEndpoints.of_xml)
+          (Xml.child xml_arg0 "VpcEndpoints") in
+      make ?vpcEndpointErrors ?vpcEndpoints ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointErrors =
+        field_map json__ "VpcEndpointErrors" VpcEndpointErrorList.of_json in
+      let vpcEndpoints = field_map json__ "VpcEndpoints" VpcEndpoints.of_json in
+      make ?vpcEndpointErrors ?vpcEndpoints ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the DescribeVpcEndpoints operation. Returns a list containing configuration details and status of the VPC Endpoints as well as a list containing error responses of the endpoints that could not be described"]
+module DescribeVpcEndpointsRequest =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointIds: VpcEndpointIdList.t
+        [@ocaml.doc
+          "The unique identifiers of the endpoints to get information about."]}
+    let context_ = "DescribeVpcEndpointsRequest"
+    let make ~vpcEndpointIds = fun () -> { vpcEndpointIds }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointIds",
+           (Some (VpcEndpointIdList.to_value x.vpcEndpointIds)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointIds =
+        VpcEndpointIdList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcEndpointIds") in
+      make ~vpcEndpointIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointIds =
+        field_map_exn json__ "VpcEndpointIds" VpcEndpointIdList.of_json in
+      make ~vpcEndpointIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for request parameters to the DescribeVpcEndpoints operation. Specifies the list of VPC endpoints to be described."]
 module DescribeReservedElasticsearchInstancesResponse =
   struct
     type nonrec t =
@@ -9610,11 +11711,11 @@ module DescribeReservedElasticsearchInstancesResponse =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?reservedElasticsearchInstances ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedElasticsearchInstances =
-        field_map json "ReservedElasticsearchInstances"
+        field_map json__ "ReservedElasticsearchInstances"
           ReservedElasticsearchInstanceList.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       make ?reservedElasticsearchInstances ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9653,11 +11754,11 @@ module DescribeReservedElasticsearchInstancesRequest =
         (Option.map ~f:GUID.of_xml) (Xml.child xml_arg0 "reservationId") in
       make ?nextToken ?maxResults ?reservedElasticsearchInstanceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let reservedElasticsearchInstanceId =
-        field_map json "ReservedElasticsearchInstanceId" GUID.of_json in
+        field_map json__ "ReservedElasticsearchInstanceId" GUID.of_json in
       make ?nextToken ?maxResults ?reservedElasticsearchInstanceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9745,11 +11846,11 @@ module DescribeReservedElasticsearchInstanceOfferingsResponse =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?reservedElasticsearchInstanceOfferings ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reservedElasticsearchInstanceOfferings =
-        field_map json "ReservedElasticsearchInstanceOfferings"
+        field_map json__ "ReservedElasticsearchInstanceOfferings"
           ReservedElasticsearchInstanceOfferingList.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?reservedElasticsearchInstanceOfferings ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9790,11 +11891,12 @@ module DescribeReservedElasticsearchInstanceOfferingsRequest =
         (Option.map ~f:GUID.of_xml) (Xml.child xml_arg0 "offeringId") in
       make ?nextToken ?maxResults ?reservedElasticsearchInstanceOfferingId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let reservedElasticsearchInstanceOfferingId =
-        field_map json "ReservedElasticsearchInstanceOfferingId" GUID.of_json in
+        field_map json__ "ReservedElasticsearchInstanceOfferingId"
+          GUID.of_json in
       make ?nextToken ?maxResults ?reservedElasticsearchInstanceOfferingId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9883,10 +11985,10 @@ module DescribePackagesResponse =
           (Xml.child xml_arg0 "PackageDetailsList") in
       make ?nextToken ?packageDetailsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let packageDetailsList =
-        field_map json "PackageDetailsList" PackageDetailsList.of_json in
+        field_map json__ "PackageDetailsList" PackageDetailsList.of_json in
       make ?nextToken ?packageDetailsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9923,11 +12025,11 @@ module DescribePackagesRequest =
           (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let filters =
-        field_map json "Filters" DescribePackagesFilterList.of_json in
+        field_map json__ "Filters" DescribePackagesFilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10000,10 +12102,10 @@ module DescribeOutboundCrossClusterSearchConnectionsResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnections") in
       make ?nextToken ?crossClusterSearchConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let crossClusterSearchConnections =
-        field_map json "CrossClusterSearchConnections"
+        field_map json__ "CrossClusterSearchConnections"
           OutboundCrossClusterSearchConnections.of_json in
       make ?nextToken ?crossClusterSearchConnections ()
     let to_json v = composed_to_json to_value v
@@ -10040,10 +12142,10 @@ module DescribeOutboundCrossClusterSearchConnectionsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10116,10 +12218,10 @@ module DescribeInboundCrossClusterSearchConnectionsResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnections") in
       make ?nextToken ?crossClusterSearchConnections ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let crossClusterSearchConnections =
-        field_map json "CrossClusterSearchConnections"
+        field_map json__ "CrossClusterSearchConnections"
           InboundCrossClusterSearchConnections.of_json in
       make ?nextToken ?crossClusterSearchConnections ()
     let to_json v = composed_to_json to_value v
@@ -10156,10 +12258,10 @@ module DescribeInboundCrossClusterSearchConnectionsRequest =
         (Option.map ~f:FilterList.of_xml) (Xml.child xml_arg0 "Filters") in
       make ?nextToken ?maxResults ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let filters = field_map json "Filters" FilterList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let filters = field_map json__ "Filters" FilterList.of_json in
       make ?nextToken ?maxResults ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10250,8 +12352,8 @@ module DescribeElasticsearchInstanceTypeLimitsResponse =
           (Xml.child xml_arg0 "LimitsByRole") in
       make ?limitsByRole ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let limitsByRole = field_map json "LimitsByRole" LimitsByRole.of_json in
+    let of_json json__ =
+      let limitsByRole = field_map json__ "LimitsByRole" LimitsByRole.of_json in
       make ?limitsByRole ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10292,13 +12394,13 @@ module DescribeElasticsearchInstanceTypeLimitsRequest =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ~elasticsearchVersion ~instanceType ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let elasticsearchVersion =
-        field_map_exn json "ElasticsearchVersion"
+        field_map_exn json__ "ElasticsearchVersion"
           ElasticsearchVersionString.of_json in
       let instanceType =
-        field_map_exn json "InstanceType" ESPartitionInstanceType.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+        field_map_exn json__ "InstanceType" ESPartitionInstanceType.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ~elasticsearchVersion ~instanceType ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10307,7 +12409,7 @@ module DescribeElasticsearchDomainsResponse =
   struct
     type nonrec t =
       {
-      domainStatusList: ElasticsearchDomainStatusList.t
+      domainStatusList: ElasticsearchDomainStatusList.t option
         [@ocaml.doc
           "The status of the domains requested in the DescribeElasticsearchDomains request."]}
     type nonrec error =
@@ -10315,8 +12417,7 @@ module DescribeElasticsearchDomainsResponse =
       | `InternalException of InternalException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeElasticsearchDomainsResponse"
-    let make ~domainStatusList = fun () -> { domainStatusList }
+    let make ?domainStatusList = fun () -> { domainStatusList }
     let error_of_json name json =
       match name with
       | "BaseException" -> `BaseException (BaseException.of_json json)
@@ -10358,19 +12459,20 @@ module DescribeElasticsearchDomainsResponse =
     let to_value x =
       structure_to_value
         [("DomainStatusList",
-           (Some (ElasticsearchDomainStatusList.to_value x.domainStatusList)))]
+           (Option.map x.domainStatusList
+              ~f:ElasticsearchDomainStatusList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainStatusList =
-        ElasticsearchDomainStatusList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainStatusList") in
-      make ~domainStatusList ()
+        (Option.map ~f:ElasticsearchDomainStatusList.of_xml)
+          (Xml.child xml_arg0 "DomainStatusList") in
+      make ?domainStatusList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainStatusList =
-        field_map_exn json "DomainStatusList"
+        field_map json__ "DomainStatusList"
           ElasticsearchDomainStatusList.of_json in
-      make ~domainStatusList ()
+      make ?domainStatusList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of a DescribeElasticsearchDomains request. Contains the status of the specified domains or all domains owned by the account."]
@@ -10393,9 +12495,9 @@ module DescribeElasticsearchDomainsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainNames") in
       make ~domainNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainNames =
-        field_map_exn json "DomainNames" DomainNameList.of_json in
+        field_map_exn json__ "DomainNames" DomainNameList.of_json in
       make ~domainNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10404,7 +12506,7 @@ module DescribeElasticsearchDomainResponse =
   struct
     type nonrec t =
       {
-      domainStatus: ElasticsearchDomainStatus.t
+      domainStatus: ElasticsearchDomainStatus.t option
         [@ocaml.doc "The current status of the Elasticsearch domain."]}
     type nonrec error =
       [ `BaseException of BaseException.t 
@@ -10412,8 +12514,7 @@ module DescribeElasticsearchDomainResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeElasticsearchDomainResponse"
-    let make ~domainStatus = fun () -> { domainStatus }
+    let make ?domainStatus = fun () -> { domainStatus }
     let error_of_json name json =
       match name with
       | "BaseException" -> `BaseException (BaseException.of_json json)
@@ -10463,18 +12564,18 @@ module DescribeElasticsearchDomainResponse =
     let to_value x =
       structure_to_value
         [("DomainStatus",
-           (Some (ElasticsearchDomainStatus.to_value x.domainStatus)))]
+           (Option.map x.domainStatus ~f:ElasticsearchDomainStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainStatus =
-        ElasticsearchDomainStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainStatus") in
-      make ~domainStatus ()
+        (Option.map ~f:ElasticsearchDomainStatus.of_xml)
+          (Xml.child xml_arg0 "DomainStatus") in
+      make ?domainStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainStatus =
-        field_map_exn json "DomainStatus" ElasticsearchDomainStatus.of_json in
-      make ~domainStatus ()
+        field_map json__ "DomainStatus" ElasticsearchDomainStatus.of_json in
+      make ?domainStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of a DescribeElasticsearchDomain request. Contains the status of the domain specified in the request."]
@@ -10497,8 +12598,8 @@ module DescribeElasticsearchDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10507,7 +12608,7 @@ module DescribeElasticsearchDomainConfigResponse =
   struct
     type nonrec t =
       {
-      domainConfig: ElasticsearchDomainConfig.t
+      domainConfig: ElasticsearchDomainConfig.t option
         [@ocaml.doc
           "The configuration information of the domain requested in the DescribeElasticsearchDomainConfig request."]}
     type nonrec error =
@@ -10516,8 +12617,7 @@ module DescribeElasticsearchDomainConfigResponse =
       | `ResourceNotFoundException of ResourceNotFoundException.t 
       | `ValidationException of ValidationException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeElasticsearchDomainConfigResponse"
-    let make ~domainConfig = fun () -> { domainConfig }
+    let make ?domainConfig = fun () -> { domainConfig }
     let error_of_json name json =
       match name with
       | "BaseException" -> `BaseException (BaseException.of_json json)
@@ -10567,18 +12667,18 @@ module DescribeElasticsearchDomainConfigResponse =
     let to_value x =
       structure_to_value
         [("DomainConfig",
-           (Some (ElasticsearchDomainConfig.to_value x.domainConfig)))]
+           (Option.map x.domainConfig ~f:ElasticsearchDomainConfig.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainConfig =
-        ElasticsearchDomainConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainConfig") in
-      make ~domainConfig ()
+        (Option.map ~f:ElasticsearchDomainConfig.of_xml)
+          (Xml.child xml_arg0 "DomainConfig") in
+      make ?domainConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainConfig =
-        field_map_exn json "DomainConfig" ElasticsearchDomainConfig.of_json in
-      make ~domainConfig ()
+        field_map json__ "DomainConfig" ElasticsearchDomainConfig.of_json in
+      make ?domainConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The result of a DescribeElasticsearchDomainConfig request. Contains the configuration information of the requested domain."]
@@ -10601,8 +12701,8 @@ module DescribeElasticsearchDomainConfigRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10679,9 +12779,9 @@ module DescribeDomainChangeProgressResponse =
           (Xml.child xml_arg0 "ChangeProgressStatus") in
       make ?changeProgressStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let changeProgressStatus =
-        field_map json "ChangeProgressStatus"
+        field_map json__ "ChangeProgressStatus"
           ChangeProgressStatusDetails.of_json in
       make ?changeProgressStatus ()
     let to_json v = composed_to_json to_value v
@@ -10713,9 +12813,9 @@ module DescribeDomainChangeProgressRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?changeId ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changeId = field_map json "ChangeId" GUID.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let changeId = field_map json__ "ChangeId" GUID.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?changeId ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10796,9 +12896,9 @@ module DescribeDomainAutoTunesResponse =
         (Option.map ~f:AutoTuneList.of_xml) (Xml.child xml_arg0 "AutoTunes") in
       make ?nextToken ?autoTunes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let autoTunes = field_map json "AutoTunes" AutoTuneList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let autoTunes = field_map json__ "AutoTunes" AutoTuneList.of_json in
       make ?nextToken ?autoTunes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10823,27 +12923,131 @@ module DescribeDomainAutoTunesRequest =
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
-        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("maxResults", (Option.map x.maxResults ~f:MaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
-        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
-        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "maxResults") in
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?nextToken ?maxResults ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?nextToken ?maxResults ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the DescribeDomainAutoTunes operation."]
+module DeleteVpcEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointSummary: VpcEndpointSummary.t option
+        [@ocaml.doc
+          "Information about the deleted endpoint, including its current status (DELETING or DELETE_FAILED)."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpointSummary = fun () -> { vpcEndpointSummary }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointSummary",
+           (Option.map x.vpcEndpointSummary ~f:VpcEndpointSummary.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointSummary =
+        (Option.map ~f:VpcEndpointSummary.of_xml)
+          (Xml.child xml_arg0 "VpcEndpointSummary") in
+      make ?vpcEndpointSummary ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointSummary =
+        field_map json__ "VpcEndpointSummary" VpcEndpointSummary.of_json in
+      make ?vpcEndpointSummary ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the DeleteVpcEndpoint operation. Contains the summarized detail of the VPC Endpoint being deleted."]
+module DeleteVpcEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      vpcEndpointId: VpcEndpointId.t
+        [@ocaml.doc "The unique identifier of the endpoint to be deleted."]}
+    let context_ = "DeleteVpcEndpointRequest"
+    let make ~vpcEndpointId = fun () -> { vpcEndpointId }
+    let to_value x =
+      structure_to_value
+        [("VpcEndpointId", (Some (VpcEndpointId.to_value x.vpcEndpointId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpointId =
+        VpcEndpointId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcEndpointId") in
+      make ~vpcEndpointId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpointId =
+        field_map_exn json__ "VpcEndpointId" VpcEndpointId.of_json in
+      make ~vpcEndpointId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes an Amazon OpenSearch Service-managed interface VPC endpoint."]
 module DeletePackageResponse =
   struct
     type nonrec t =
@@ -10931,9 +13135,9 @@ module DeletePackageResponse =
           (Xml.child xml_arg0 "PackageDetails") in
       make ?packageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageDetails =
-        field_map json "PackageDetails" PackageDetails.of_json in
+        field_map json__ "PackageDetails" PackageDetails.of_json in
       make ?packageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10957,8 +13161,8 @@ module DeletePackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+    let of_json json__ =
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11022,9 +13226,9 @@ module DeleteOutboundCrossClusterSearchConnectionResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnection") in
       make ?crossClusterSearchConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnection =
-        field_map json "CrossClusterSearchConnection"
+        field_map json__ "CrossClusterSearchConnection"
           OutboundCrossClusterSearchConnection.of_json in
       make ?crossClusterSearchConnection ()
     let to_json v = composed_to_json to_value v
@@ -11053,9 +13257,9 @@ module DeleteOutboundCrossClusterSearchConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionId") in
       make ~crossClusterSearchConnectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnectionId =
-        field_map_exn json "CrossClusterSearchConnectionId"
+        field_map_exn json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       make ~crossClusterSearchConnectionId ()
     let to_json v = composed_to_json to_value v
@@ -11120,9 +13324,9 @@ module DeleteInboundCrossClusterSearchConnectionResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnection") in
       make ?crossClusterSearchConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnection =
-        field_map json "CrossClusterSearchConnection"
+        field_map json__ "CrossClusterSearchConnection"
           InboundCrossClusterSearchConnection.of_json in
       make ?crossClusterSearchConnection ()
     let to_json v = composed_to_json to_value v
@@ -11151,9 +13355,9 @@ module DeleteInboundCrossClusterSearchConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionId") in
       make ~crossClusterSearchConnectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnectionId =
-        field_map_exn json "CrossClusterSearchConnectionId"
+        field_map_exn json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       make ~crossClusterSearchConnectionId ()
     let to_json v = composed_to_json to_value v
@@ -11229,9 +13433,9 @@ module DeleteElasticsearchDomainResponse =
           (Xml.child xml_arg0 "DomainStatus") in
       make ?domainStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainStatus =
-        field_map json "DomainStatus" ElasticsearchDomainStatus.of_json in
+        field_map json__ "DomainStatus" ElasticsearchDomainStatus.of_json in
       make ?domainStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11255,12 +13459,147 @@ module DeleteElasticsearchDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the DeleteElasticsearchDomain operation. Specifies the name of the Elasticsearch domain that you want to delete."]
+module CreateVpcEndpointResponse =
+  struct
+    type nonrec t =
+      {
+      vpcEndpoint: VpcEndpoint.t option
+        [@ocaml.doc "Information about the newly created VPC endpoint."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `ConflictException of ConflictException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?vpcEndpoint = fun () -> { vpcEndpoint }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("VpcEndpoint", (Option.map x.vpcEndpoint ~f:VpcEndpoint.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let vpcEndpoint =
+        (Option.map ~f:VpcEndpoint.of_xml) (Xml.child xml_arg0 "VpcEndpoint") in
+      make ?vpcEndpoint ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let vpcEndpoint = field_map json__ "VpcEndpoint" VpcEndpoint.of_json in
+      make ?vpcEndpoint ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the CreateVpcEndpoint operation. Contains the configuration and status of the VPC Endpoint being created."]
+module CreateVpcEndpointRequest =
+  struct
+    type nonrec t =
+      {
+      domainArn: DomainArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the domain to grant access to."];
+      vpcOptions: VPCOptions.t
+        [@ocaml.doc
+          "Options to specify the subnets and security groups for the endpoint."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier to ensure idempotency of the request."]}
+    let context_ = "CreateVpcEndpointRequest"
+    let make ?clientToken =
+      fun ~domainArn ->
+        fun ~vpcOptions -> fun () -> { clientToken; domainArn; vpcOptions }
+    let to_value x =
+      structure_to_value
+        [("DomainArn", (Some (DomainArn.to_value x.domainArn)));
+        ("VpcOptions", (Some (VPCOptions.to_value x.vpcOptions)));
+        ("ClientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "ClientToken") in
+      let vpcOptions =
+        VPCOptions.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "VpcOptions") in
+      let domainArn =
+        DomainArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainArn") in
+      make ?clientToken ~vpcOptions ~domainArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "ClientToken" ClientToken.of_json in
+      let vpcOptions = field_map_exn json__ "VpcOptions" VPCOptions.of_json in
+      let domainArn = field_map_exn json__ "DomainArn" DomainArn.of_json in
+      make ?clientToken ~vpcOptions ~domainArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for the parameters to the CreateVpcEndpointRequest operation."]
 module CreatePackageResponse =
   struct
     type nonrec t =
@@ -11360,9 +13699,9 @@ module CreatePackageResponse =
           (Xml.child xml_arg0 "PackageDetails") in
       make ?packageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageDetails =
-        field_map json "PackageDetails" PackageDetails.of_json in
+        field_map json__ "PackageDetails" PackageDetails.of_json in
       make ?packageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11411,13 +13750,15 @@ module CreatePackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageName") in
       make ~packageSource ?packageDescription ~packageType ~packageName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let packageSource =
-        field_map_exn json "PackageSource" PackageSource.of_json in
+        field_map_exn json__ "PackageSource" PackageSource.of_json in
       let packageDescription =
-        field_map json "PackageDescription" PackageDescription.of_json in
-      let packageType = field_map_exn json "PackageType" PackageType.of_json in
-      let packageName = field_map_exn json "PackageName" PackageName.of_json in
+        field_map json__ "PackageDescription" PackageDescription.of_json in
+      let packageType =
+        field_map_exn json__ "PackageType" PackageType.of_json in
+      let packageName =
+        field_map_exn json__ "PackageName" PackageName.of_json in
       make ~packageSource ?packageDescription ~packageType ~packageName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11545,19 +13886,19 @@ module CreateOutboundCrossClusterSearchConnectionResponse =
       make ?crossClusterSearchConnectionId ?connectionStatus ?connectionAlias
         ?destinationDomainInfo ?sourceDomainInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnectionId =
-        field_map json "CrossClusterSearchConnectionId"
+        field_map json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       let connectionStatus =
-        field_map json "ConnectionStatus"
+        field_map json__ "ConnectionStatus"
           OutboundCrossClusterSearchConnectionStatus.of_json in
       let connectionAlias =
-        field_map json "ConnectionAlias" ConnectionAlias.of_json in
+        field_map json__ "ConnectionAlias" ConnectionAlias.of_json in
       let destinationDomainInfo =
-        field_map json "DestinationDomainInfo" DomainInformation.of_json in
+        field_map json__ "DestinationDomainInfo" DomainInformation.of_json in
       let sourceDomainInfo =
-        field_map json "SourceDomainInfo" DomainInformation.of_json in
+        field_map json__ "SourceDomainInfo" DomainInformation.of_json in
       make ?crossClusterSearchConnectionId ?connectionStatus ?connectionAlias
         ?destinationDomainInfo ?sourceDomainInfo ()
     let to_json v = composed_to_json to_value v
@@ -11603,13 +13944,14 @@ module CreateOutboundCrossClusterSearchConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SourceDomainInfo") in
       make ~connectionAlias ~destinationDomainInfo ~sourceDomainInfo ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let connectionAlias =
-        field_map_exn json "ConnectionAlias" ConnectionAlias.of_json in
+        field_map_exn json__ "ConnectionAlias" ConnectionAlias.of_json in
       let destinationDomainInfo =
-        field_map_exn json "DestinationDomainInfo" DomainInformation.of_json in
+        field_map_exn json__ "DestinationDomainInfo"
+          DomainInformation.of_json in
       let sourceDomainInfo =
-        field_map_exn json "SourceDomainInfo" DomainInformation.of_json in
+        field_map_exn json__ "SourceDomainInfo" DomainInformation.of_json in
       make ~connectionAlias ~destinationDomainInfo ~sourceDomainInfo ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11714,9 +14056,9 @@ module CreateElasticsearchDomainResponse =
           (Xml.child xml_arg0 "DomainStatus") in
       make ?domainStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainStatus =
-        field_map json "DomainStatus" ElasticsearchDomainStatus.of_json in
+        field_map json__ "DomainStatus" ElasticsearchDomainStatus.of_json in
       make ?domainStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11766,7 +14108,13 @@ module CreateElasticsearchDomainRequest =
       autoTuneOptions: AutoTuneOptionsInput.t option
         [@ocaml.doc "Specifies Auto-Tune options."];
       tagList: TagList.t option
-        [@ocaml.doc "A list of Tag added during domain creation."]}
+        [@ocaml.doc "A list of Tag added during domain creation."];
+      deploymentStrategyOptions: DeploymentStrategyOptions.t option
+        [@ocaml.doc "Specifies the deployment strategy options."];
+      automatedSnapshotPauseOptions:
+        AutomatedSnapshotPauseRequestOptions.t option
+        [@ocaml.doc
+          "Specifies the automated snapshot pause options for the domain. Suspending snapshots reduces data protection. You cannot restore your domain to points in time when snapshots are suspended. Use this feature only for short-term operational needs such as migrations or maintenance windows. Maximum suspension duration: 3 days."]}
     let context_ = "CreateElasticsearchDomainRequest"
     let make ?elasticsearchVersion =
       fun ?elasticsearchClusterConfig ->
@@ -11783,26 +14131,30 @@ module CreateElasticsearchDomainRequest =
                             fun ?advancedSecurityOptions ->
                               fun ?autoTuneOptions ->
                                 fun ?tagList ->
-                                  fun ~domainName ->
-                                    fun () ->
-                                      {
-                                        elasticsearchVersion;
-                                        elasticsearchClusterConfig;
-                                        eBSOptions;
-                                        accessPolicies;
-                                        snapshotOptions;
-                                        vPCOptions;
-                                        cognitoOptions;
-                                        encryptionAtRestOptions;
-                                        nodeToNodeEncryptionOptions;
-                                        advancedOptions;
-                                        logPublishingOptions;
-                                        domainEndpointOptions;
-                                        advancedSecurityOptions;
-                                        autoTuneOptions;
-                                        tagList;
-                                        domainName
-                                      }
+                                  fun ?deploymentStrategyOptions ->
+                                    fun ?automatedSnapshotPauseOptions ->
+                                      fun ~domainName ->
+                                        fun () ->
+                                          {
+                                            elasticsearchVersion;
+                                            elasticsearchClusterConfig;
+                                            eBSOptions;
+                                            accessPolicies;
+                                            snapshotOptions;
+                                            vPCOptions;
+                                            cognitoOptions;
+                                            encryptionAtRestOptions;
+                                            nodeToNodeEncryptionOptions;
+                                            advancedOptions;
+                                            logPublishingOptions;
+                                            domainEndpointOptions;
+                                            advancedSecurityOptions;
+                                            autoTuneOptions;
+                                            tagList;
+                                            deploymentStrategyOptions;
+                                            automatedSnapshotPauseOptions;
+                                            domainName
+                                          }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
@@ -11838,9 +14190,21 @@ module CreateElasticsearchDomainRequest =
              ~f:AdvancedSecurityOptionsInput.to_value));
         ("AutoTuneOptions",
           (Option.map x.autoTuneOptions ~f:AutoTuneOptionsInput.to_value));
-        ("TagList", (Option.map x.tagList ~f:TagList.to_value))]
+        ("TagList", (Option.map x.tagList ~f:TagList.to_value));
+        ("DeploymentStrategyOptions",
+          (Option.map x.deploymentStrategyOptions
+             ~f:DeploymentStrategyOptions.to_value));
+        ("AutomatedSnapshotPauseOptions",
+          (Option.map x.automatedSnapshotPauseOptions
+             ~f:AutomatedSnapshotPauseRequestOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let automatedSnapshotPauseOptions =
+        (Option.map ~f:AutomatedSnapshotPauseRequestOptions.of_xml)
+          (Xml.child xml_arg0 "AutomatedSnapshotPauseOptions") in
+      let deploymentStrategyOptions =
+        (Option.map ~f:DeploymentStrategyOptions.of_xml)
+          (Xml.child xml_arg0 "DeploymentStrategyOptions") in
       let tagList =
         (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
       let autoTuneOptions =
@@ -11886,51 +14250,60 @@ module CreateElasticsearchDomainRequest =
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?tagList ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?logPublishingOptions ?advancedOptions
-        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
-        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
-        ?elasticsearchClusterConfig ?elasticsearchVersion ~domainName ()
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions ?tagList
+        ?autoTuneOptions ?advancedSecurityOptions ?domainEndpointOptions
+        ?logPublishingOptions ?advancedOptions ?nodeToNodeEncryptionOptions
+        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
+        ?accessPolicies ?eBSOptions ?elasticsearchClusterConfig
+        ?elasticsearchVersion ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map json "TagList" TagList.of_json in
+    let of_json json__ =
+      let automatedSnapshotPauseOptions =
+        field_map json__ "AutomatedSnapshotPauseOptions"
+          AutomatedSnapshotPauseRequestOptions.of_json in
+      let deploymentStrategyOptions =
+        field_map json__ "DeploymentStrategyOptions"
+          DeploymentStrategyOptions.of_json in
+      let tagList = field_map json__ "TagList" TagList.of_json in
       let autoTuneOptions =
-        field_map json "AutoTuneOptions" AutoTuneOptionsInput.of_json in
+        field_map json__ "AutoTuneOptions" AutoTuneOptionsInput.of_json in
       let advancedSecurityOptions =
-        field_map json "AdvancedSecurityOptions"
+        field_map json__ "AdvancedSecurityOptions"
           AdvancedSecurityOptionsInput.of_json in
       let domainEndpointOptions =
-        field_map json "DomainEndpointOptions" DomainEndpointOptions.of_json in
+        field_map json__ "DomainEndpointOptions"
+          DomainEndpointOptions.of_json in
       let logPublishingOptions =
-        field_map json "LogPublishingOptions" LogPublishingOptions.of_json in
+        field_map json__ "LogPublishingOptions" LogPublishingOptions.of_json in
       let advancedOptions =
-        field_map json "AdvancedOptions" AdvancedOptions.of_json in
+        field_map json__ "AdvancedOptions" AdvancedOptions.of_json in
       let nodeToNodeEncryptionOptions =
-        field_map json "NodeToNodeEncryptionOptions"
+        field_map json__ "NodeToNodeEncryptionOptions"
           NodeToNodeEncryptionOptions.of_json in
       let encryptionAtRestOptions =
-        field_map json "EncryptionAtRestOptions"
+        field_map json__ "EncryptionAtRestOptions"
           EncryptionAtRestOptions.of_json in
       let cognitoOptions =
-        field_map json "CognitoOptions" CognitoOptions.of_json in
-      let vPCOptions = field_map json "VPCOptions" VPCOptions.of_json in
+        field_map json__ "CognitoOptions" CognitoOptions.of_json in
+      let vPCOptions = field_map json__ "VPCOptions" VPCOptions.of_json in
       let snapshotOptions =
-        field_map json "SnapshotOptions" SnapshotOptions.of_json in
+        field_map json__ "SnapshotOptions" SnapshotOptions.of_json in
       let accessPolicies =
-        field_map json "AccessPolicies" PolicyDocument.of_json in
-      let eBSOptions = field_map json "EBSOptions" EBSOptions.of_json in
+        field_map json__ "AccessPolicies" PolicyDocument.of_json in
+      let eBSOptions = field_map json__ "EBSOptions" EBSOptions.of_json in
       let elasticsearchClusterConfig =
-        field_map json "ElasticsearchClusterConfig"
+        field_map json__ "ElasticsearchClusterConfig"
           ElasticsearchClusterConfig.of_json in
       let elasticsearchVersion =
-        field_map json "ElasticsearchVersion"
+        field_map json__ "ElasticsearchVersion"
           ElasticsearchVersionString.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?tagList ?autoTuneOptions ?advancedSecurityOptions
-        ?domainEndpointOptions ?logPublishingOptions ?advancedOptions
-        ?nodeToNodeEncryptionOptions ?encryptionAtRestOptions ?cognitoOptions
-        ?vPCOptions ?snapshotOptions ?accessPolicies ?eBSOptions
-        ?elasticsearchClusterConfig ?elasticsearchVersion ~domainName ()
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?automatedSnapshotPauseOptions ?deploymentStrategyOptions ?tagList
+        ?autoTuneOptions ?advancedSecurityOptions ?domainEndpointOptions
+        ?logPublishingOptions ?advancedOptions ?nodeToNodeEncryptionOptions
+        ?encryptionAtRestOptions ?cognitoOptions ?vPCOptions ?snapshotOptions
+        ?accessPolicies ?eBSOptions ?elasticsearchClusterConfig
+        ?elasticsearchVersion ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a new Elasticsearch domain. For more information, see Creating Elasticsearch Domains in the Amazon Elasticsearch Service Developer Guide."]
@@ -12006,9 +14379,9 @@ module CancelElasticsearchServiceSoftwareUpdateResponse =
           (Xml.child xml_arg0 "ServiceSoftwareOptions") in
       make ?serviceSoftwareOptions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let serviceSoftwareOptions =
-        field_map json "ServiceSoftwareOptions"
+        field_map json__ "ServiceSoftwareOptions"
           ServiceSoftwareOptions.of_json in
       make ?serviceSoftwareOptions ()
     let to_json v = composed_to_json to_value v
@@ -12033,12 +14406,281 @@ module CancelElasticsearchServiceSoftwareUpdateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the CancelElasticsearchServiceSoftwareUpdate operation. Specifies the name of the Elasticsearch domain that you wish to cancel a service software update on."]
+module CancelDomainConfigChangeResponse =
+  struct
+    type nonrec t =
+      {
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "Whether or not the request was a dry run. If True, the changes were not actually cancelled."];
+      cancelledChangeIds: GUIDList.t option
+        [@ocaml.doc
+          "The unique identifiers of the changes that were cancelled."];
+      cancelledChangeProperties: CancelledChangePropertyList.t option
+        [@ocaml.doc "The domain change properties that were cancelled."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?dryRun =
+      fun ?cancelledChangeIds ->
+        fun ?cancelledChangeProperties ->
+          fun () -> { dryRun; cancelledChangeIds; cancelledChangeProperties }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("DryRun", (Option.map x.dryRun ~f:DryRun.to_value));
+        ("CancelledChangeIds",
+          (Option.map x.cancelledChangeIds ~f:GUIDList.to_value));
+        ("CancelledChangeProperties",
+          (Option.map x.cancelledChangeProperties
+             ~f:CancelledChangePropertyList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cancelledChangeProperties =
+        (Option.map ~f:CancelledChangePropertyList.of_xml)
+          (Xml.child xml_arg0 "CancelledChangeProperties") in
+      let cancelledChangeIds =
+        (Option.map ~f:GUIDList.of_xml)
+          (Xml.child xml_arg0 "CancelledChangeIds") in
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      make ?cancelledChangeProperties ?cancelledChangeIds ?dryRun ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cancelledChangeProperties =
+        field_map json__ "CancelledChangeProperties"
+          CancelledChangePropertyList.of_json in
+      let cancelledChangeIds =
+        field_map json__ "CancelledChangeIds" GUIDList.of_json in
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      make ?cancelledChangeProperties ?cancelledChangeIds ?dryRun ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains the details of the cancelled domain config change."]
+module CancelDomainConfigChangeRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t
+        [@ocaml.doc
+          "Name of the OpenSearch Service domain configuration request to cancel."];
+      dryRun: DryRun.t option
+        [@ocaml.doc
+          "When set to True, returns the list of change IDs and properties that will be cancelled without actually cancelling the change."]}
+    let context_ = "CancelDomainConfigChangeRequest"
+    let make ?dryRun = fun ~domainName -> fun () -> { dryRun; domainName }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("DryRun", (Option.map x.dryRun ~f:DryRun.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dryRun =
+        (Option.map ~f:DryRun.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ?dryRun ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dryRun = field_map json__ "DryRun" DryRun.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?dryRun ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for parameters of the CancelDomainConfigChange operation."]
+module AuthorizeVpcEndpointAccessResponse =
+  struct
+    type nonrec t =
+      {
+      authorizedPrincipal: AuthorizedPrincipal.t option
+        [@ocaml.doc
+          "Information about the account or service that was provided access to the domain."]}
+    type nonrec error =
+      [ `BaseException of BaseException.t 
+      | `DisabledOperationException of DisabledOperationException.t 
+      | `InternalException of InternalException.t 
+      | `LimitExceededException of LimitExceededException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?authorizedPrincipal = fun () -> { authorizedPrincipal }
+    let error_of_json name json =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_json json)
+      | "DisabledOperationException" ->
+          `DisabledOperationException
+            (DisabledOperationException.of_json json)
+      | "InternalException" ->
+          `InternalException (InternalException.of_json json)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "BaseException" -> `BaseException (BaseException.of_xml xml)
+      | "DisabledOperationException" ->
+          `DisabledOperationException (DisabledOperationException.of_xml xml)
+      | "InternalException" ->
+          `InternalException (InternalException.of_xml xml)
+      | "LimitExceededException" ->
+          `LimitExceededException (LimitExceededException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `BaseException e ->
+          `Assoc
+            [("error", (`String "BaseException"));
+            ("details", (BaseException.to_json e))]
+      | `DisabledOperationException e ->
+          `Assoc
+            [("error", (`String "DisabledOperationException"));
+            ("details", (DisabledOperationException.to_json e))]
+      | `InternalException e ->
+          `Assoc
+            [("error", (`String "InternalException"));
+            ("details", (InternalException.to_json e))]
+      | `LimitExceededException e ->
+          `Assoc
+            [("error", (`String "LimitExceededException"));
+            ("details", (LimitExceededException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("AuthorizedPrincipal",
+           (Option.map x.authorizedPrincipal ~f:AuthorizedPrincipal.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let authorizedPrincipal =
+        (Option.map ~f:AuthorizedPrincipal.of_xml)
+          (Xml.child xml_arg0 "AuthorizedPrincipal") in
+      make ?authorizedPrincipal ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let authorizedPrincipal =
+        field_map json__ "AuthorizedPrincipal" AuthorizedPrincipal.of_json in
+      make ?authorizedPrincipal ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for response parameters to the AuthorizeVpcEndpointAccess operation. Contains the account ID and the type of the account being authorized to access the VPC endpoint."]
+module AuthorizeVpcEndpointAccessRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t
+        [@ocaml.doc
+          "The name of the OpenSearch Service domain to provide access to."];
+      account: AWSAccount.t [@ocaml.doc "The account ID to grant access to."]}
+    let context_ = "AuthorizeVpcEndpointAccessRequest"
+    let make ~domainName = fun ~account -> fun () -> { domainName; account }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("Account", (Some (AWSAccount.to_value x.account)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let account =
+        AWSAccount.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "Account") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~account ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let account = field_map_exn json__ "Account" AWSAccount.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ~account ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Container for request parameters to the AuthorizeVpcEndpointAccess operation. Specifies the account to be permitted to manage VPC endpoints against the domain."]
 module AssociatePackageResponse =
   struct
     type nonrec t =
@@ -12128,9 +14770,9 @@ module AssociatePackageResponse =
           (Xml.child xml_arg0 "DomainPackageDetails") in
       make ?domainPackageDetails ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainPackageDetails =
-        field_map json "DomainPackageDetails" DomainPackageDetails.of_json in
+        field_map json__ "DomainPackageDetails" DomainPackageDetails.of_json in
       make ?domainPackageDetails ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12162,9 +14804,9 @@ module AssociatePackageRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "PackageID") in
       make ~domainName ~packageID ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      let packageID = field_map_exn json "PackageID" PackageID.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      let packageID = field_map_exn json__ "PackageID" PackageID.of_json in
       make ~domainName ~packageID ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12191,9 +14833,10 @@ module AddTagsRequest =
       let aRN = ARN.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ARN") in
       make ~tagList ~aRN ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map_exn json "TagList" TagList.of_json in
-      let aRN = field_map_exn json "ARN" ARN.of_json in make ~tagList ~aRN ()
+    let of_json json__ =
+      let tagList = field_map_exn json__ "TagList" TagList.of_json in
+      let aRN = field_map_exn json__ "ARN" ARN.of_json in
+      make ~tagList ~aRN ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Container for the parameters to the AddTags operation. Specify the tags that you want to attach to the Elasticsearch domain."]
@@ -12265,9 +14908,9 @@ module AcceptInboundCrossClusterSearchConnectionResponse =
           (Xml.child xml_arg0 "CrossClusterSearchConnection") in
       make ?crossClusterSearchConnection ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnection =
-        field_map json "CrossClusterSearchConnection"
+        field_map json__ "CrossClusterSearchConnection"
           InboundCrossClusterSearchConnection.of_json in
       make ?crossClusterSearchConnection ()
     let to_json v = composed_to_json to_value v
@@ -12296,9 +14939,9 @@ module AcceptInboundCrossClusterSearchConnectionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConnectionId") in
       make ~crossClusterSearchConnectionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let crossClusterSearchConnectionId =
-        field_map_exn json "CrossClusterSearchConnectionId"
+        field_map_exn json__ "CrossClusterSearchConnectionId"
           CrossClusterSearchConnectionId.of_json in
       make ~crossClusterSearchConnectionId ()
     let to_json v = composed_to_json to_value v

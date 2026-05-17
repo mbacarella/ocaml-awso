@@ -4,6 +4,9 @@ open Values
 type ('i, 'o, 'e) t =
   | AddLFTagsToResource: (AddLFTagsToResourceRequest.t,
   AddLFTagsToResourceResponse.t, AddLFTagsToResourceResponse.error) t 
+  | AssumeDecoratedRoleWithSAML: (AssumeDecoratedRoleWithSAMLRequest.t,
+  AssumeDecoratedRoleWithSAMLResponse.t,
+  AssumeDecoratedRoleWithSAMLResponse.error) t 
   | BatchGrantPermissions: (BatchGrantPermissionsRequest.t,
   BatchGrantPermissionsResponse.t, BatchGrantPermissionsResponse.error) t 
   | BatchRevokePermissions: (BatchRevokePermissionsRequest.t,
@@ -16,20 +19,46 @@ type ('i, 'o, 'e) t =
   CreateDataCellsFilterResponse.t, CreateDataCellsFilterResponse.error) t 
   | CreateLFTag: (CreateLFTagRequest.t, CreateLFTagResponse.t,
   CreateLFTagResponse.error) t 
+  | CreateLFTagExpression: (CreateLFTagExpressionRequest.t,
+  CreateLFTagExpressionResponse.t, CreateLFTagExpressionResponse.error) t 
+  | CreateLakeFormationIdentityCenterConfiguration:
+  (CreateLakeFormationIdentityCenterConfigurationRequest.t,
+  CreateLakeFormationIdentityCenterConfigurationResponse.t,
+  CreateLakeFormationIdentityCenterConfigurationResponse.error) t 
+  | CreateLakeFormationOptIn: (CreateLakeFormationOptInRequest.t,
+  CreateLakeFormationOptInResponse.t, CreateLakeFormationOptInResponse.error)
+  t 
   | DeleteDataCellsFilter: (DeleteDataCellsFilterRequest.t,
   DeleteDataCellsFilterResponse.t, DeleteDataCellsFilterResponse.error) t 
   | DeleteLFTag: (DeleteLFTagRequest.t, DeleteLFTagResponse.t,
   DeleteLFTagResponse.error) t 
+  | DeleteLFTagExpression: (DeleteLFTagExpressionRequest.t,
+  DeleteLFTagExpressionResponse.t, DeleteLFTagExpressionResponse.error) t 
+  | DeleteLakeFormationIdentityCenterConfiguration:
+  (DeleteLakeFormationIdentityCenterConfigurationRequest.t,
+  DeleteLakeFormationIdentityCenterConfigurationResponse.t,
+  DeleteLakeFormationIdentityCenterConfigurationResponse.error) t 
+  | DeleteLakeFormationOptIn: (DeleteLakeFormationOptInRequest.t,
+  DeleteLakeFormationOptInResponse.t, DeleteLakeFormationOptInResponse.error)
+  t 
   | DeleteObjectsOnCancel: (DeleteObjectsOnCancelRequest.t,
   DeleteObjectsOnCancelResponse.t, DeleteObjectsOnCancelResponse.error) t 
   | DeregisterResource: (DeregisterResourceRequest.t,
   DeregisterResourceResponse.t, DeregisterResourceResponse.error) t 
+  | DescribeLakeFormationIdentityCenterConfiguration:
+  (DescribeLakeFormationIdentityCenterConfigurationRequest.t,
+  DescribeLakeFormationIdentityCenterConfigurationResponse.t,
+  DescribeLakeFormationIdentityCenterConfigurationResponse.error) t 
   | DescribeResource: (DescribeResourceRequest.t, DescribeResourceResponse.t,
   DescribeResourceResponse.error) t 
   | DescribeTransaction: (DescribeTransactionRequest.t,
   DescribeTransactionResponse.t, DescribeTransactionResponse.error) t 
   | ExtendTransaction: (ExtendTransactionRequest.t,
   ExtendTransactionResponse.t, ExtendTransactionResponse.error) t 
+  | GetDataCellsFilter: (GetDataCellsFilterRequest.t,
+  GetDataCellsFilterResponse.t, GetDataCellsFilterResponse.error) t 
+  | GetDataLakePrincipal: (GetDataLakePrincipalRequest.t,
+  GetDataLakePrincipalResponse.t, GetDataLakePrincipalResponse.error) t 
   | GetDataLakeSettings: (GetDataLakeSettingsRequest.t,
   GetDataLakeSettingsResponse.t, GetDataLakeSettingsResponse.error) t 
   | GetEffectivePermissionsForPath: (GetEffectivePermissionsForPathRequest.t,
@@ -37,6 +66,8 @@ type ('i, 'o, 'e) t =
   GetEffectivePermissionsForPathResponse.error) t 
   | GetLFTag: (GetLFTagRequest.t, GetLFTagResponse.t, GetLFTagResponse.error)
   t 
+  | GetLFTagExpression: (GetLFTagExpressionRequest.t,
+  GetLFTagExpressionResponse.t, GetLFTagExpressionResponse.error) t 
   | GetQueryState: (GetQueryStateRequest.t, GetQueryStateResponse.t,
   GetQueryStateResponse.error) t 
   | GetQueryStatistics: (GetQueryStatisticsRequest.t,
@@ -45,6 +76,10 @@ type ('i, 'o, 'e) t =
   GetResourceLFTagsResponse.t, GetResourceLFTagsResponse.error) t 
   | GetTableObjects: (GetTableObjectsRequest.t, GetTableObjectsResponse.t,
   GetTableObjectsResponse.error) t 
+  | GetTemporaryDataLocationCredentials:
+  (GetTemporaryDataLocationCredentialsRequest.t,
+  GetTemporaryDataLocationCredentialsResponse.t,
+  GetTemporaryDataLocationCredentialsResponse.error) t 
   | GetTemporaryGluePartitionCredentials:
   (GetTemporaryGluePartitionCredentialsRequest.t,
   GetTemporaryGluePartitionCredentialsResponse.t,
@@ -61,8 +96,13 @@ type ('i, 'o, 'e) t =
   GrantPermissionsResponse.error) t 
   | ListDataCellsFilter: (ListDataCellsFilterRequest.t,
   ListDataCellsFilterResponse.t, ListDataCellsFilterResponse.error) t 
+  | ListLFTagExpressions: (ListLFTagExpressionsRequest.t,
+  ListLFTagExpressionsResponse.t, ListLFTagExpressionsResponse.error) t 
   | ListLFTags: (ListLFTagsRequest.t, ListLFTagsResponse.t,
   ListLFTagsResponse.error) t 
+  | ListLakeFormationOptIns: (ListLakeFormationOptInsRequest.t,
+  ListLakeFormationOptInsResponse.t, ListLakeFormationOptInsResponse.error) t
+  
   | ListPermissions: (ListPermissionsRequest.t, ListPermissionsResponse.t,
   ListPermissionsResponse.error) t 
   | ListResources: (ListResourcesRequest.t, ListResourcesResponse.t,
@@ -90,8 +130,16 @@ type ('i, 'o, 'e) t =
   StartQueryPlanningResponse.t, StartQueryPlanningResponse.error) t 
   | StartTransaction: (StartTransactionRequest.t, StartTransactionResponse.t,
   StartTransactionResponse.error) t 
+  | UpdateDataCellsFilter: (UpdateDataCellsFilterRequest.t,
+  UpdateDataCellsFilterResponse.t, UpdateDataCellsFilterResponse.error) t 
   | UpdateLFTag: (UpdateLFTagRequest.t, UpdateLFTagResponse.t,
   UpdateLFTagResponse.error) t 
+  | UpdateLFTagExpression: (UpdateLFTagExpressionRequest.t,
+  UpdateLFTagExpressionResponse.t, UpdateLFTagExpressionResponse.error) t 
+  | UpdateLakeFormationIdentityCenterConfiguration:
+  (UpdateLakeFormationIdentityCenterConfigurationRequest.t,
+  UpdateLakeFormationIdentityCenterConfigurationResponse.t,
+  UpdateLakeFormationIdentityCenterConfigurationResponse.error) t 
   | UpdateResource: (UpdateResourceRequest.t, UpdateResourceResponse.t,
   UpdateResourceResponse.error) t 
   | UpdateTableObjects: (UpdateTableObjectsRequest.t,
@@ -102,33 +150,47 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | AddLFTagsToResource -> `POST
+  | AssumeDecoratedRoleWithSAML -> `POST
   | BatchGrantPermissions -> `POST
   | BatchRevokePermissions -> `POST
   | CancelTransaction -> `POST
   | CommitTransaction -> `POST
   | CreateDataCellsFilter -> `POST
   | CreateLFTag -> `POST
+  | CreateLFTagExpression -> `POST
+  | CreateLakeFormationIdentityCenterConfiguration -> `POST
+  | CreateLakeFormationOptIn -> `POST
   | DeleteDataCellsFilter -> `POST
   | DeleteLFTag -> `POST
+  | DeleteLFTagExpression -> `POST
+  | DeleteLakeFormationIdentityCenterConfiguration -> `POST
+  | DeleteLakeFormationOptIn -> `POST
   | DeleteObjectsOnCancel -> `POST
   | DeregisterResource -> `POST
+  | DescribeLakeFormationIdentityCenterConfiguration -> `POST
   | DescribeResource -> `POST
   | DescribeTransaction -> `POST
   | ExtendTransaction -> `POST
+  | GetDataCellsFilter -> `POST
+  | GetDataLakePrincipal -> `POST
   | GetDataLakeSettings -> `POST
   | GetEffectivePermissionsForPath -> `POST
   | GetLFTag -> `POST
+  | GetLFTagExpression -> `POST
   | GetQueryState -> `POST
   | GetQueryStatistics -> `POST
   | GetResourceLFTags -> `POST
   | GetTableObjects -> `POST
+  | GetTemporaryDataLocationCredentials -> `POST
   | GetTemporaryGluePartitionCredentials -> `POST
   | GetTemporaryGlueTableCredentials -> `POST
   | GetWorkUnitResults -> `POST
   | GetWorkUnits -> `POST
   | GrantPermissions -> `POST
   | ListDataCellsFilter -> `POST
+  | ListLFTagExpressions -> `POST
   | ListLFTags -> `POST
+  | ListLakeFormationOptIns -> `POST
   | ListPermissions -> `POST
   | ListResources -> `POST
   | ListTableStorageOptimizers -> `POST
@@ -141,7 +203,10 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | SearchTablesByLFTags -> `POST
   | StartQueryPlanning -> `POST
   | StartTransaction -> `POST
+  | UpdateDataCellsFilter -> `POST
   | UpdateLFTag -> `POST
+  | UpdateLFTagExpression -> `POST
+  | UpdateLakeFormationIdentityCenterConfiguration -> `POST
   | UpdateResource -> `POST
   | UpdateTableObjects -> `POST
   | UpdateTableStorageOptimizer -> `POST
@@ -150,6 +215,8 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | AddLFTagsToResource ->
           (Format.kasprintf Uri.of_string) "/AddLFTagsToResource"
+      | AssumeDecoratedRoleWithSAML ->
+          (Format.kasprintf Uri.of_string) "/AssumeDecoratedRoleWithSAML"
       | BatchGrantPermissions ->
           (Format.kasprintf Uri.of_string) "/BatchGrantPermissions"
       | BatchRevokePermissions ->
@@ -161,24 +228,47 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | CreateDataCellsFilter ->
           (Format.kasprintf Uri.of_string) "/CreateDataCellsFilter"
       | CreateLFTag -> (Format.kasprintf Uri.of_string) "/CreateLFTag"
+      | CreateLFTagExpression ->
+          (Format.kasprintf Uri.of_string) "/CreateLFTagExpression"
+      | CreateLakeFormationIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/CreateLakeFormationIdentityCenterConfiguration"
+      | CreateLakeFormationOptIn ->
+          (Format.kasprintf Uri.of_string) "/CreateLakeFormationOptIn"
       | DeleteDataCellsFilter ->
           (Format.kasprintf Uri.of_string) "/DeleteDataCellsFilter"
       | DeleteLFTag -> (Format.kasprintf Uri.of_string) "/DeleteLFTag"
+      | DeleteLFTagExpression ->
+          (Format.kasprintf Uri.of_string) "/DeleteLFTagExpression"
+      | DeleteLakeFormationIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/DeleteLakeFormationIdentityCenterConfiguration"
+      | DeleteLakeFormationOptIn ->
+          (Format.kasprintf Uri.of_string) "/DeleteLakeFormationOptIn"
       | DeleteObjectsOnCancel ->
           (Format.kasprintf Uri.of_string) "/DeleteObjectsOnCancel"
       | DeregisterResource ->
           (Format.kasprintf Uri.of_string) "/DeregisterResource"
+      | DescribeLakeFormationIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/DescribeLakeFormationIdentityCenterConfiguration"
       | DescribeResource ->
           (Format.kasprintf Uri.of_string) "/DescribeResource"
       | DescribeTransaction ->
           (Format.kasprintf Uri.of_string) "/DescribeTransaction"
       | ExtendTransaction ->
           (Format.kasprintf Uri.of_string) "/ExtendTransaction"
+      | GetDataCellsFilter ->
+          (Format.kasprintf Uri.of_string) "/GetDataCellsFilter"
+      | GetDataLakePrincipal ->
+          (Format.kasprintf Uri.of_string) "/GetDataLakePrincipal"
       | GetDataLakeSettings ->
           (Format.kasprintf Uri.of_string) "/GetDataLakeSettings"
       | GetEffectivePermissionsForPath ->
           (Format.kasprintf Uri.of_string) "/GetEffectivePermissionsForPath"
       | GetLFTag -> (Format.kasprintf Uri.of_string) "/GetLFTag"
+      | GetLFTagExpression ->
+          (Format.kasprintf Uri.of_string) "/GetLFTagExpression"
       | GetQueryState -> (Format.kasprintf Uri.of_string) "/GetQueryState"
       | GetQueryStatistics ->
           (Format.kasprintf Uri.of_string) "/GetQueryStatistics"
@@ -186,6 +276,9 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/GetResourceLFTags"
       | GetTableObjects ->
           (Format.kasprintf Uri.of_string) "/GetTableObjects"
+      | GetTemporaryDataLocationCredentials ->
+          (Format.kasprintf Uri.of_string)
+            "/GetTemporaryDataLocationCredentials"
       | GetTemporaryGluePartitionCredentials ->
           (Format.kasprintf Uri.of_string)
             "/GetTemporaryGluePartitionCredentials"
@@ -199,7 +292,11 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/GrantPermissions"
       | ListDataCellsFilter ->
           (Format.kasprintf Uri.of_string) "/ListDataCellsFilter"
+      | ListLFTagExpressions ->
+          (Format.kasprintf Uri.of_string) "/ListLFTagExpressions"
       | ListLFTags -> (Format.kasprintf Uri.of_string) "/ListLFTags"
+      | ListLakeFormationOptIns ->
+          (Format.kasprintf Uri.of_string) "/ListLakeFormationOptIns"
       | ListPermissions ->
           (Format.kasprintf Uri.of_string) "/ListPermissions"
       | ListResources -> (Format.kasprintf Uri.of_string) "/ListResources"
@@ -223,7 +320,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
           (Format.kasprintf Uri.of_string) "/StartQueryPlanning"
       | StartTransaction ->
           (Format.kasprintf Uri.of_string) "/StartTransaction"
+      | UpdateDataCellsFilter ->
+          (Format.kasprintf Uri.of_string) "/UpdateDataCellsFilter"
       | UpdateLFTag -> (Format.kasprintf Uri.of_string) "/UpdateLFTag"
+      | UpdateLFTagExpression ->
+          (Format.kasprintf Uri.of_string) "/UpdateLFTagExpression"
+      | UpdateLakeFormationIdentityCenterConfiguration ->
+          (Format.kasprintf Uri.of_string)
+            "/UpdateLakeFormationIdentityCenterConfiguration"
       | UpdateResource -> (Format.kasprintf Uri.of_string) "/UpdateResource"
       | UpdateTableObjects ->
           (Format.kasprintf Uri.of_string) "/UpdateTableObjects"
@@ -253,6 +357,40 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("LFTags",
                           (LFTagsList.to_value
                              req.AddLFTagsToResourceRequest.lFTags))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | AssumeDecoratedRoleWithSAML ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("SAMLAssertion",
+                           (SAMLAssertionString.to_value
+                              req.AssumeDecoratedRoleWithSAMLRequest.sAMLAssertion));
+                      Some
+                        ("RoleArn",
+                          (IAMRoleArn.to_value
+                             req.AssumeDecoratedRoleWithSAMLRequest.roleArn));
+                      Some
+                        ("PrincipalArn",
+                          (IAMSAMLProviderArn.to_value
+                             req.AssumeDecoratedRoleWithSAMLRequest.principalArn));
+                      Option.map
+                        req.AssumeDecoratedRoleWithSAMLRequest.durationSeconds
+                        ~f:(fun x ->
+                              ("DurationSeconds",
+                                (CredentialTimeoutDurationSecondInteger.to_value
+                                   x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -392,6 +530,103 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLFTagExpression ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NameString.to_value
+                              req.CreateLFTagExpressionRequest.name));
+                      Option.map req.CreateLFTagExpressionRequest.description
+                        ~f:(fun x ->
+                              ("Description", (DescriptionString.to_value x)));
+                      Option.map req.CreateLFTagExpressionRequest.catalogId
+                        ~f:(fun x ->
+                              ("CatalogId", (CatalogIdString.to_value x)));
+                      Some
+                        ("Expression",
+                          (Expression.to_value
+                             req.CreateLFTagExpressionRequest.expression))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLakeFormationIdentityCenterConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.CreateLakeFormationIdentityCenterConfigurationRequest.catalogId
+                         ~f:(fun x ->
+                               ("CatalogId", (CatalogIdString.to_value x)));
+                      Option.map
+                        req.CreateLakeFormationIdentityCenterConfigurationRequest.instanceArn
+                        ~f:(fun x ->
+                              ("InstanceArn",
+                                (IdentityCenterInstanceArn.to_value x)));
+                      Option.map
+                        req.CreateLakeFormationIdentityCenterConfigurationRequest.externalFiltering
+                        ~f:(fun x ->
+                              ("ExternalFiltering",
+                                (ExternalFilteringConfiguration.to_value x)));
+                      Option.map
+                        req.CreateLakeFormationIdentityCenterConfigurationRequest.shareRecipients
+                        ~f:(fun x ->
+                              ("ShareRecipients",
+                                (DataLakePrincipalList.to_value x)));
+                      Option.map
+                        req.CreateLakeFormationIdentityCenterConfigurationRequest.serviceIntegrations
+                        ~f:(fun x ->
+                              ("ServiceIntegrations",
+                                (ServiceIntegrationList.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | CreateLakeFormationOptIn ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Principal",
+                           (DataLakePrincipal.to_value
+                              req.CreateLakeFormationOptInRequest.principal));
+                      Some
+                        ("Resource",
+                          (Resource.to_value
+                             req.CreateLakeFormationOptInRequest.resource));
+                      Option.map
+                        req.CreateLakeFormationOptInRequest.condition
+                        ~f:(fun x -> ("Condition", (Condition.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | DeleteDataCellsFilter ->
       let (headers, body) =
         let headers =
@@ -436,6 +671,76 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("TagKey",
                           (LFTagKey.to_value req.DeleteLFTagRequest.tagKey))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteLFTagExpression ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NameString.to_value
+                              req.DeleteLFTagExpressionRequest.name));
+                      Option.map req.DeleteLFTagExpressionRequest.catalogId
+                        ~f:(fun x ->
+                              ("CatalogId", (CatalogIdString.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteLakeFormationIdentityCenterConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DeleteLakeFormationIdentityCenterConfigurationRequest.catalogId
+                         ~f:(fun x ->
+                               ("CatalogId", (CatalogIdString.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DeleteLakeFormationOptIn ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Principal",
+                           (DataLakePrincipal.to_value
+                              req.DeleteLakeFormationOptInRequest.principal));
+                      Some
+                        ("Resource",
+                          (Resource.to_value
+                             req.DeleteLakeFormationOptInRequest.resource));
+                      Option.map
+                        req.DeleteLakeFormationOptInRequest.condition
+                        ~f:(fun x -> ("Condition", (Condition.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -491,6 +796,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ("ResourceArn",
                            (ResourceArnString.to_value
                               req.DeregisterResourceRequest.resourceArn))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | DescribeLakeFormationIdentityCenterConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.DescribeLakeFormationIdentityCenterConfigurationRequest.catalogId
+                         ~f:(fun x ->
+                               ("CatalogId", (CatalogIdString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -558,6 +883,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDataCellsFilter ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TableCatalogId",
+                           (CatalogIdString.to_value
+                              req.GetDataCellsFilterRequest.tableCatalogId));
+                      Some
+                        ("DatabaseName",
+                          (NameString.to_value
+                             req.GetDataCellsFilterRequest.databaseName));
+                      Some
+                        ("TableName",
+                          (NameString.to_value
+                             req.GetDataCellsFilterRequest.tableName));
+                      Some
+                        ("Name",
+                          (NameString.to_value
+                             req.GetDataCellsFilterRequest.name))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetDataLakePrincipal ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetDataLakeSettings ->
       let (headers, body) =
         let headers =
@@ -622,6 +982,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("TagKey",
                           (LFTagKey.to_value req.GetLFTagRequest.tagKey))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetLFTagExpression ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NameString.to_value
+                              req.GetLFTagExpressionRequest.name));
+                      Option.map req.GetLFTagExpressionRequest.catalogId
+                        ~f:(fun x ->
+                              ("CatalogId", (CatalogIdString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -740,6 +1123,41 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | GetTemporaryDataLocationCredentials ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.GetTemporaryDataLocationCredentialsRequest.durationSeconds
+                         ~f:(fun x ->
+                               ("DurationSeconds",
+                                 (CredentialTimeoutDurationSecondInteger.to_value
+                                    x)));
+                      Option.map
+                        req.GetTemporaryDataLocationCredentialsRequest.auditContext
+                        ~f:(fun x ->
+                              ("AuditContext", (AuditContext.to_value x)));
+                      Option.map
+                        req.GetTemporaryDataLocationCredentialsRequest.dataLocations
+                        ~f:(fun x ->
+                              ("DataLocations", (PathStringList.to_value x)));
+                      Option.map
+                        req.GetTemporaryDataLocationCredentialsRequest.credentialsScope
+                        ~f:(fun x ->
+                              ("CredentialsScope",
+                                (CredentialsScope.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | GetTemporaryGluePartitionCredentials ->
       let (headers, body) =
         let headers =
@@ -771,10 +1189,11 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.GetTemporaryGluePartitionCredentialsRequest.auditContext
                         ~f:(fun x ->
                               ("AuditContext", (AuditContext.to_value x)));
-                      Some
-                        ("SupportedPermissionTypes",
-                          (PermissionTypeList.to_value
-                             req.GetTemporaryGluePartitionCredentialsRequest.supportedPermissionTypes))])
+                      Option.map
+                        req.GetTemporaryGluePartitionCredentialsRequest.supportedPermissionTypes
+                        ~f:(fun x ->
+                              ("SupportedPermissionTypes",
+                                (PermissionTypeList.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -809,10 +1228,19 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         req.GetTemporaryGlueTableCredentialsRequest.auditContext
                         ~f:(fun x ->
                               ("AuditContext", (AuditContext.to_value x)));
-                      Some
-                        ("SupportedPermissionTypes",
-                          (PermissionTypeList.to_value
-                             req.GetTemporaryGlueTableCredentialsRequest.supportedPermissionTypes))])
+                      Option.map
+                        req.GetTemporaryGlueTableCredentialsRequest.supportedPermissionTypes
+                        ~f:(fun x ->
+                              ("SupportedPermissionTypes",
+                                (PermissionTypeList.to_value x)));
+                      Option.map
+                        req.GetTemporaryGlueTableCredentialsRequest.s3Path
+                        ~f:(fun x -> ("S3Path", (PathString.to_value x)));
+                      Option.map
+                        req.GetTemporaryGlueTableCredentialsRequest.querySessionContext
+                        ~f:(fun x ->
+                              ("QuerySessionContext",
+                                (QuerySessionContext.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -896,6 +1324,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Permissions",
                           (PermissionList.to_value
                              req.GrantPermissionsRequest.permissions));
+                      Option.map req.GrantPermissionsRequest.condition
+                        ~f:(fun x -> ("Condition", (Condition.to_value x)));
                       Option.map
                         req.GrantPermissionsRequest.permissionsWithGrantOption
                         ~f:(fun x ->
@@ -930,6 +1360,29 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLFTagExpressions ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map req.ListLFTagExpressionsRequest.catalogId
+                         ~f:(fun x ->
+                               ("CatalogId", (CatalogIdString.to_value x)));
+                      Option.map req.ListLFTagExpressionsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (PageSize.to_value x)));
+                      Option.map req.ListLFTagExpressionsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | ListLFTags ->
       let (headers, body) =
         let headers =
@@ -949,6 +1402,33 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Option.map req.ListLFTagsRequest.maxResults
                         ~f:(fun x -> ("MaxResults", (PageSize.to_value x)));
                       Option.map req.ListLFTagsRequest.nextToken
+                        ~f:(fun x -> ("NextToken", (Token.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListLakeFormationOptIns ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.ListLakeFormationOptInsRequest.principal
+                         ~f:(fun x ->
+                               ("Principal", (DataLakePrincipal.to_value x)));
+                      Option.map req.ListLakeFormationOptInsRequest.resource
+                        ~f:(fun x -> ("Resource", (Resource.to_value x)));
+                      Option.map
+                        req.ListLakeFormationOptInsRequest.maxResults
+                        ~f:(fun x -> ("MaxResults", (PageSize.to_value x)));
+                      Option.map req.ListLakeFormationOptInsRequest.nextToken
                         ~f:(fun x -> ("NextToken", (Token.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
@@ -1126,7 +1606,25 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                               ("UseServiceLinkedRole",
                                 (NullableBoolean.to_value x)));
                       Option.map req.RegisterResourceRequest.roleArn
-                        ~f:(fun x -> ("RoleArn", (IAMRoleArn.to_value x)))])
+                        ~f:(fun x -> ("RoleArn", (IAMRoleArn.to_value x)));
+                      Option.map req.RegisterResourceRequest.withFederation
+                        ~f:(fun x ->
+                              ("WithFederation",
+                                (NullableBoolean.to_value x)));
+                      Option.map
+                        req.RegisterResourceRequest.hybridAccessEnabled
+                        ~f:(fun x ->
+                              ("HybridAccessEnabled",
+                                (NullableBoolean.to_value x)));
+                      Option.map
+                        req.RegisterResourceRequest.withPrivilegedAccess
+                        ~f:(fun x ->
+                              ("WithPrivilegedAccess", (Boolean.to_value x)));
+                      Option.map
+                        req.RegisterResourceRequest.expectedResourceOwnerAccount
+                        ~f:(fun x ->
+                              ("ExpectedResourceOwnerAccount",
+                                (AccountIdString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1186,6 +1684,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("Permissions",
                           (PermissionList.to_value
                              req.RevokePermissionsRequest.permissions));
+                      Option.map req.RevokePermissionsRequest.condition
+                        ~f:(fun x -> ("Condition", (Condition.to_value x)));
                       Option.map
                         req.RevokePermissionsRequest.permissionsWithGrantOption
                         ~f:(fun x ->
@@ -1212,7 +1712,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                          ~f:(fun x -> ("NextToken", (Token.to_value x)));
                       Option.map
                         req.SearchDatabasesByLFTagsRequest.maxResults
-                        ~f:(fun x -> ("MaxResults", (PageSize.to_value x)));
+                        ~f:(fun x ->
+                              ("MaxResults", (SearchPageSize.to_value x)));
                       Option.map req.SearchDatabasesByLFTagsRequest.catalogId
                         ~f:(fun x ->
                               ("CatalogId", (CatalogIdString.to_value x)));
@@ -1239,7 +1740,8 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       [Option.map req.SearchTablesByLFTagsRequest.nextToken
                          ~f:(fun x -> ("NextToken", (Token.to_value x)));
                       Option.map req.SearchTablesByLFTagsRequest.maxResults
-                        ~f:(fun x -> ("MaxResults", (PageSize.to_value x)));
+                        ~f:(fun x ->
+                              ("MaxResults", (SearchPageSize.to_value x)));
                       Option.map req.SearchTablesByLFTagsRequest.catalogId
                         ~f:(fun x ->
                               ("CatalogId", (CatalogIdString.to_value x)));
@@ -1298,6 +1800,26 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateDataCellsFilter ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("TableData",
+                           (DataCellsFilter.to_value
+                              req.UpdateDataCellsFilterRequest.tableData))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateLFTag ->
       let (headers, body) =
         let headers =
@@ -1327,6 +1849,76 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                |> Yojson.Safe.to_string) in
         (headers, body) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateLFTagExpression ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Some
+                         ("Name",
+                           (NameString.to_value
+                              req.UpdateLFTagExpressionRequest.name));
+                      Option.map req.UpdateLFTagExpressionRequest.description
+                        ~f:(fun x ->
+                              ("Description", (DescriptionString.to_value x)));
+                      Option.map req.UpdateLFTagExpressionRequest.catalogId
+                        ~f:(fun x ->
+                              ("CatalogId", (CatalogIdString.to_value x)));
+                      Some
+                        ("Expression",
+                          (Expression.to_value
+                             req.UpdateLFTagExpressionRequest.expression))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | UpdateLakeFormationIdentityCenterConfiguration ->
+      let (headers, body) =
+        let headers =
+          Some ((List.filter_opt []) |> Awso.Http.Headers.of_list) in
+        let body =
+          Some
+            ((`Assoc
+                (List.map
+                   (List.filter_opt
+                      [Option.map
+                         req.UpdateLakeFormationIdentityCenterConfigurationRequest.catalogId
+                         ~f:(fun x ->
+                               ("CatalogId", (CatalogIdString.to_value x)));
+                      Option.map
+                        req.UpdateLakeFormationIdentityCenterConfigurationRequest.shareRecipients
+                        ~f:(fun x ->
+                              ("ShareRecipients",
+                                (DataLakePrincipalList.to_value x)));
+                      Option.map
+                        req.UpdateLakeFormationIdentityCenterConfigurationRequest.serviceIntegrations
+                        ~f:(fun x ->
+                              ("ServiceIntegrations",
+                                (ServiceIntegrationList.to_value x)));
+                      Option.map
+                        req.UpdateLakeFormationIdentityCenterConfigurationRequest.applicationStatus
+                        ~f:(fun x ->
+                              ("ApplicationStatus",
+                                (ApplicationStatus.to_value x)));
+                      Option.map
+                        req.UpdateLakeFormationIdentityCenterConfigurationRequest.externalFiltering
+                        ~f:(fun x ->
+                              ("ExternalFiltering",
+                                (ExternalFilteringConfiguration.to_value x)))])
+                   ~f:(fun (x, y) ->
+                         let value =
+                           Awso.Botodata.Json.value_to_json_scalar y in
+                         (x, value))))
+               |> Yojson.Safe.to_string) in
+        (headers, body) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | UpdateResource ->
       let (headers, body) =
         let headers =
@@ -1343,7 +1935,21 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                       Some
                         ("ResourceArn",
                           (ResourceArnString.to_value
-                             req.UpdateResourceRequest.resourceArn))])
+                             req.UpdateResourceRequest.resourceArn));
+                      Option.map req.UpdateResourceRequest.withFederation
+                        ~f:(fun x ->
+                              ("WithFederation",
+                                (NullableBoolean.to_value x)));
+                      Option.map
+                        req.UpdateResourceRequest.hybridAccessEnabled
+                        ~f:(fun x ->
+                              ("HybridAccessEnabled",
+                                (NullableBoolean.to_value x)));
+                      Option.map
+                        req.UpdateResourceRequest.expectedResourceOwnerAccount
+                        ~f:(fun x ->
+                              ("ExpectedResourceOwnerAccount",
+                                (AccountIdString.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in
@@ -1472,6 +2078,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some AddLFTagsToResourceResponse.error_of_json))
+  | AssumeDecoratedRoleWithSAML ->
+      if is_success
+      then
+        Ok
+          (AssumeDecoratedRoleWithSAMLResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some AssumeDecoratedRoleWithSAMLResponse.error_of_json))
   | BatchGrantPermissions ->
       if is_success
       then Ok (BatchGrantPermissionsResponse.of_json (response_to_json resp))
@@ -1517,6 +2133,37 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (CreateLFTagResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some CreateLFTagResponse.error_of_json))
+  | CreateLFTagExpression ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (CreateLFTagExpressionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some CreateLFTagExpressionResponse.error_of_json))
+  | CreateLakeFormationIdentityCenterConfiguration ->
+      if is_success
+      then
+        Ok
+          (CreateLakeFormationIdentityCenterConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                CreateLakeFormationIdentityCenterConfigurationResponse.error_of_json))
+  | CreateLakeFormationOptIn ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (CreateLakeFormationOptInResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some CreateLakeFormationOptInResponse.error_of_json))
   | DeleteDataCellsFilter ->
       if is_success
       then
@@ -1533,6 +2180,39 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (DeleteLFTagResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some DeleteLFTagResponse.error_of_json))
+  | DeleteLFTagExpression ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (DeleteLFTagExpressionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some DeleteLFTagExpressionResponse.error_of_json))
+  | DeleteLakeFormationIdentityCenterConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteLakeFormationIdentityCenterConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DeleteLakeFormationIdentityCenterConfigurationResponse.error_of_json))
+  | DeleteLakeFormationOptIn ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (DeleteLakeFormationOptInResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteLakeFormationOptInResponse.error_of_json))
   | DeleteObjectsOnCancel ->
       if is_success
       then
@@ -1551,6 +2231,17 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DeregisterResourceResponse.error_of_json))
+  | DescribeLakeFormationIdentityCenterConfiguration ->
+      if is_success
+      then
+        Ok
+          (DescribeLakeFormationIdentityCenterConfigurationResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                DescribeLakeFormationIdentityCenterConfigurationResponse.error_of_json))
   | DescribeResource ->
       if is_success
       then Ok (DescribeResourceResponse.of_json (response_to_json resp))
@@ -1571,6 +2262,18 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ExtendTransactionResponse.error_of_json))
+  | GetDataCellsFilter ->
+      if is_success
+      then Ok (GetDataCellsFilterResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDataCellsFilterResponse.error_of_json))
+  | GetDataLakePrincipal ->
+      if is_success
+      then Ok (GetDataLakePrincipalResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetDataLakePrincipalResponse.error_of_json))
   | GetDataLakeSettings ->
       if is_success
       then Ok (GetDataLakeSettingsResponse.of_json (response_to_json resp))
@@ -1591,6 +2294,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       if is_success
       then Ok (GetLFTagResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some GetLFTagResponse.error_of_json))
+  | GetLFTagExpression ->
+      if is_success
+      then Ok (GetLFTagExpressionResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some GetLFTagExpressionResponse.error_of_json))
   | GetQueryState ->
       if is_success
       then Ok (GetQueryStateResponse.of_json (response_to_json resp))
@@ -1612,6 +2321,16 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (GetTableObjectsResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some GetTableObjectsResponse.error_of_json))
+  | GetTemporaryDataLocationCredentials ->
+      if is_success
+      then
+        Ok
+          (GetTemporaryDataLocationCredentialsResponse.of_json
+             (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some GetTemporaryDataLocationCredentialsResponse.error_of_json))
   | GetTemporaryGluePartitionCredentials ->
       if is_success
       then
@@ -1660,10 +2379,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListDataCellsFilterResponse.error_of_json))
+  | ListLFTagExpressions ->
+      if is_success
+      then Ok (ListLFTagExpressionsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListLFTagExpressionsResponse.error_of_json))
   | ListLFTags ->
       if is_success
       then Ok (ListLFTagsResponse.of_json (response_to_json resp))
       else Error (parse_aws_error (Some ListLFTagsResponse.error_of_json))
+  | ListLakeFormationOptIns ->
+      if is_success
+      then
+        Ok (ListLakeFormationOptInsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error
+             (Some ListLakeFormationOptInsResponse.error_of_json))
   | ListPermissions ->
       if is_success
       then Ok (ListPermissionsResponse.of_json (response_to_json resp))
@@ -1746,6 +2479,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       then Ok (StartTransactionResponse.of_json (response_to_json resp))
       else
         Error (parse_aws_error (Some StartTransactionResponse.error_of_json))
+  | UpdateDataCellsFilter ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateDataCellsFilterResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateDataCellsFilterResponse.error_of_json))
   | UpdateLFTag ->
       if is_success
       then
@@ -1753,6 +2495,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
           Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
         Ok (UpdateLFTagResponse.of_header_and_body (headers, ()))
       else Error (parse_aws_error (Some UpdateLFTagResponse.error_of_json))
+  | UpdateLFTagExpression ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok (UpdateLFTagExpressionResponse.of_header_and_body (headers, ()))
+      else
+        Error
+          (parse_aws_error (Some UpdateLFTagExpressionResponse.error_of_json))
+  | UpdateLakeFormationIdentityCenterConfiguration ->
+      if is_success
+      then
+        let headers =
+          Awso.Http.Headers.to_list (Awso.Http.Response.headers resp) in
+        Ok
+          (UpdateLakeFormationIdentityCenterConfigurationResponse.of_header_and_body
+             (headers, ()))
+      else
+        Error
+          (parse_aws_error
+             (Some
+                UpdateLakeFormationIdentityCenterConfigurationResponse.error_of_json))
   | UpdateResource ->
       if is_success
       then

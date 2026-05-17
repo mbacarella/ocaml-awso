@@ -5,11 +5,47 @@ val add_profile_key :
     ?cfg:Awso.Cfg.t ->
       AddProfileKeyRequest.t ->
         (AddProfileKeyResponse.t, AddProfileKeyResponse.error) Result.t Lwt.t
+val batch_get_calculated_attribute_for_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetCalculatedAttributeForProfileRequest.t ->
+        (BatchGetCalculatedAttributeForProfileResponse.t,
+          BatchGetCalculatedAttributeForProfileResponse.error) Result.t Lwt.t
+val batch_get_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      BatchGetProfileRequest.t ->
+        (BatchGetProfileResponse.t, BatchGetProfileResponse.error) Result.t
+          Lwt.t
+val create_calculated_attribute_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateCalculatedAttributeDefinitionRequest.t ->
+        (CreateCalculatedAttributeDefinitionResponse.t,
+          CreateCalculatedAttributeDefinitionResponse.error) Result.t Lwt.t
 val create_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateDomainRequest.t ->
         (CreateDomainResponse.t, CreateDomainResponse.error) Result.t Lwt.t
+val create_domain_layout :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateDomainLayoutRequest.t ->
+        (CreateDomainLayoutResponse.t, CreateDomainLayoutResponse.error)
+          Result.t Lwt.t
+val create_event_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateEventStreamRequest.t ->
+        (CreateEventStreamResponse.t, CreateEventStreamResponse.error)
+          Result.t Lwt.t
+val create_event_trigger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateEventTriggerRequest.t ->
+        (CreateEventTriggerResponse.t, CreateEventTriggerResponse.error)
+          Result.t Lwt.t
 val create_integration_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -21,11 +57,83 @@ val create_profile :
     ?cfg:Awso.Cfg.t ->
       CreateProfileRequest.t ->
         (CreateProfileResponse.t, CreateProfileResponse.error) Result.t Lwt.t
+val create_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRecommenderRequest.t ->
+        (CreateRecommenderResponse.t, CreateRecommenderResponse.error)
+          Result.t Lwt.t
+val create_recommender_filter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRecommenderFilterRequest.t ->
+        (CreateRecommenderFilterResponse.t,
+          CreateRecommenderFilterResponse.error) Result.t Lwt.t
+val create_recommender_schema :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateRecommenderSchemaRequest.t ->
+        (CreateRecommenderSchemaResponse.t,
+          CreateRecommenderSchemaResponse.error) Result.t Lwt.t
+val create_segment_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSegmentDefinitionRequest.t ->
+        (CreateSegmentDefinitionResponse.t,
+          CreateSegmentDefinitionResponse.error) Result.t Lwt.t
+val create_segment_estimate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSegmentEstimateRequest.t ->
+        (CreateSegmentEstimateResponse.t,
+          CreateSegmentEstimateResponse.error) Result.t Lwt.t
+val create_segment_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSegmentSnapshotRequest.t ->
+        (CreateSegmentSnapshotResponse.t,
+          CreateSegmentSnapshotResponse.error) Result.t Lwt.t
+val create_upload_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateUploadJobRequest.t ->
+        (CreateUploadJobResponse.t, CreateUploadJobResponse.error) Result.t
+          Lwt.t
+val delete_calculated_attribute_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteCalculatedAttributeDefinitionRequest.t ->
+        (DeleteCalculatedAttributeDefinitionResponse.t,
+          DeleteCalculatedAttributeDefinitionResponse.error) Result.t Lwt.t
 val delete_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteDomainRequest.t ->
         (DeleteDomainResponse.t, DeleteDomainResponse.error) Result.t Lwt.t
+val delete_domain_layout :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDomainLayoutRequest.t ->
+        (DeleteDomainLayoutResponse.t, DeleteDomainLayoutResponse.error)
+          Result.t Lwt.t
+val delete_domain_object_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteDomainObjectTypeRequest.t ->
+        (DeleteDomainObjectTypeResponse.t,
+          DeleteDomainObjectTypeResponse.error) Result.t Lwt.t
+val delete_event_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEventStreamRequest.t ->
+        (DeleteEventStreamResponse.t, DeleteEventStreamResponse.error)
+          Result.t Lwt.t
+val delete_event_trigger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteEventTriggerRequest.t ->
+        (DeleteEventTriggerResponse.t, DeleteEventTriggerResponse.error)
+          Result.t Lwt.t
 val delete_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -55,23 +163,89 @@ val delete_profile_object_type :
       DeleteProfileObjectTypeRequest.t ->
         (DeleteProfileObjectTypeResponse.t,
           DeleteProfileObjectTypeResponse.error) Result.t Lwt.t
+val delete_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRecommenderRequest.t ->
+        (DeleteRecommenderResponse.t, DeleteRecommenderResponse.error)
+          Result.t Lwt.t
+val delete_recommender_filter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRecommenderFilterRequest.t ->
+        (DeleteRecommenderFilterResponse.t,
+          DeleteRecommenderFilterResponse.error) Result.t Lwt.t
+val delete_recommender_schema :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteRecommenderSchemaRequest.t ->
+        (DeleteRecommenderSchemaResponse.t,
+          DeleteRecommenderSchemaResponse.error) Result.t Lwt.t
+val delete_segment_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteSegmentDefinitionRequest.t ->
+        (DeleteSegmentDefinitionResponse.t,
+          DeleteSegmentDefinitionResponse.error) Result.t Lwt.t
 val delete_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DeleteWorkflowRequest.t ->
         (DeleteWorkflowResponse.t, DeleteWorkflowResponse.error) Result.t
           Lwt.t
+val detect_profile_object_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DetectProfileObjectTypeRequest.t ->
+        (DetectProfileObjectTypeResponse.t,
+          DetectProfileObjectTypeResponse.error) Result.t Lwt.t
 val get_auto_merging_preview :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetAutoMergingPreviewRequest.t ->
         (GetAutoMergingPreviewResponse.t,
           GetAutoMergingPreviewResponse.error) Result.t Lwt.t
+val get_calculated_attribute_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCalculatedAttributeDefinitionRequest.t ->
+        (GetCalculatedAttributeDefinitionResponse.t,
+          GetCalculatedAttributeDefinitionResponse.error) Result.t Lwt.t
+val get_calculated_attribute_for_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetCalculatedAttributeForProfileRequest.t ->
+        (GetCalculatedAttributeForProfileResponse.t,
+          GetCalculatedAttributeForProfileResponse.error) Result.t Lwt.t
 val get_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       GetDomainRequest.t ->
         (GetDomainResponse.t, GetDomainResponse.error) Result.t Lwt.t
+val get_domain_layout :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDomainLayoutRequest.t ->
+        (GetDomainLayoutResponse.t, GetDomainLayoutResponse.error) Result.t
+          Lwt.t
+val get_domain_object_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetDomainObjectTypeRequest.t ->
+        (GetDomainObjectTypeResponse.t, GetDomainObjectTypeResponse.error)
+          Result.t Lwt.t
+val get_event_stream :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEventStreamRequest.t ->
+        (GetEventStreamResponse.t, GetEventStreamResponse.error) Result.t
+          Lwt.t
+val get_event_trigger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetEventTriggerRequest.t ->
+        (GetEventTriggerResponse.t, GetEventTriggerResponse.error) Result.t
+          Lwt.t
 val get_identity_resolution_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -89,6 +263,18 @@ val get_matches :
     ?cfg:Awso.Cfg.t ->
       GetMatchesRequest.t ->
         (GetMatchesResponse.t, GetMatchesResponse.error) Result.t Lwt.t
+val get_object_type_attribute_statistics :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetObjectTypeAttributeStatisticsRequest.t ->
+        (GetObjectTypeAttributeStatisticsResponse.t,
+          GetObjectTypeAttributeStatisticsResponse.error) Result.t Lwt.t
+val get_profile_history_record :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetProfileHistoryRecordRequest.t ->
+        (GetProfileHistoryRecordResponse.t,
+          GetProfileHistoryRecordResponse.error) Result.t Lwt.t
 val get_profile_object_type :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -101,6 +287,71 @@ val get_profile_object_type_template :
       GetProfileObjectTypeTemplateRequest.t ->
         (GetProfileObjectTypeTemplateResponse.t,
           GetProfileObjectTypeTemplateResponse.error) Result.t Lwt.t
+val get_profile_recommendations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetProfileRecommendationsRequest.t ->
+        (GetProfileRecommendationsResponse.t,
+          GetProfileRecommendationsResponse.error) Result.t Lwt.t
+val get_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRecommenderRequest.t ->
+        (GetRecommenderResponse.t, GetRecommenderResponse.error) Result.t
+          Lwt.t
+val get_recommender_filter :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRecommenderFilterRequest.t ->
+        (GetRecommenderFilterResponse.t, GetRecommenderFilterResponse.error)
+          Result.t Lwt.t
+val get_recommender_schema :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetRecommenderSchemaRequest.t ->
+        (GetRecommenderSchemaResponse.t, GetRecommenderSchemaResponse.error)
+          Result.t Lwt.t
+val get_segment_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSegmentDefinitionRequest.t ->
+        (GetSegmentDefinitionResponse.t, GetSegmentDefinitionResponse.error)
+          Result.t Lwt.t
+val get_segment_estimate :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSegmentEstimateRequest.t ->
+        (GetSegmentEstimateResponse.t, GetSegmentEstimateResponse.error)
+          Result.t Lwt.t
+val get_segment_membership :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSegmentMembershipRequest.t ->
+        (GetSegmentMembershipResponse.t, GetSegmentMembershipResponse.error)
+          Result.t Lwt.t
+val get_segment_snapshot :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSegmentSnapshotRequest.t ->
+        (GetSegmentSnapshotResponse.t, GetSegmentSnapshotResponse.error)
+          Result.t Lwt.t
+val get_similar_profiles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetSimilarProfilesRequest.t ->
+        (GetSimilarProfilesResponse.t, GetSimilarProfilesResponse.error)
+          Result.t Lwt.t
+val get_upload_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetUploadJobRequest.t ->
+        (GetUploadJobResponse.t, GetUploadJobResponse.error) Result.t Lwt.t
+val get_upload_job_path :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetUploadJobPathRequest.t ->
+        (GetUploadJobPathResponse.t, GetUploadJobPathResponse.error) Result.t
+          Lwt.t
 val get_workflow :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -118,11 +369,47 @@ val list_account_integrations :
       ListAccountIntegrationsRequest.t ->
         (ListAccountIntegrationsResponse.t,
           ListAccountIntegrationsResponse.error) Result.t Lwt.t
+val list_calculated_attribute_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCalculatedAttributeDefinitionsRequest.t ->
+        (ListCalculatedAttributeDefinitionsResponse.t,
+          ListCalculatedAttributeDefinitionsResponse.error) Result.t Lwt.t
+val list_calculated_attributes_for_profile :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListCalculatedAttributesForProfileRequest.t ->
+        (ListCalculatedAttributesForProfileResponse.t,
+          ListCalculatedAttributesForProfileResponse.error) Result.t Lwt.t
+val list_domain_layouts :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDomainLayoutsRequest.t ->
+        (ListDomainLayoutsResponse.t, ListDomainLayoutsResponse.error)
+          Result.t Lwt.t
+val list_domain_object_types :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListDomainObjectTypesRequest.t ->
+        (ListDomainObjectTypesResponse.t,
+          ListDomainObjectTypesResponse.error) Result.t Lwt.t
 val list_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListDomainsRequest.t ->
         (ListDomainsResponse.t, ListDomainsResponse.error) Result.t Lwt.t
+val list_event_streams :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEventStreamsRequest.t ->
+        (ListEventStreamsResponse.t, ListEventStreamsResponse.error) Result.t
+          Lwt.t
+val list_event_triggers :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListEventTriggersRequest.t ->
+        (ListEventTriggersResponse.t, ListEventTriggersResponse.error)
+          Result.t Lwt.t
 val list_identity_resolution_jobs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -135,6 +422,30 @@ val list_integrations :
       ListIntegrationsRequest.t ->
         (ListIntegrationsResponse.t, ListIntegrationsResponse.error) Result.t
           Lwt.t
+val list_object_type_attribute_values :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListObjectTypeAttributeValuesRequest.t ->
+        (ListObjectTypeAttributeValuesResponse.t,
+          ListObjectTypeAttributeValuesResponse.error) Result.t Lwt.t
+val list_object_type_attributes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListObjectTypeAttributesRequest.t ->
+        (ListObjectTypeAttributesResponse.t,
+          ListObjectTypeAttributesResponse.error) Result.t Lwt.t
+val list_profile_attribute_values :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ProfileAttributeValuesRequest.t ->
+        (ProfileAttributeValuesResponse.t,
+          ProfileAttributeValuesResponse.error) Result.t Lwt.t
+val list_profile_history_records :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListProfileHistoryRecordsRequest.t ->
+        (ListProfileHistoryRecordsResponse.t,
+          ListProfileHistoryRecordsResponse.error) Result.t Lwt.t
 val list_profile_object_type_templates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -153,12 +464,54 @@ val list_profile_objects :
       ListProfileObjectsRequest.t ->
         (ListProfileObjectsResponse.t, ListProfileObjectsResponse.error)
           Result.t Lwt.t
+val list_recommender_filters :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRecommenderFiltersRequest.t ->
+        (ListRecommenderFiltersResponse.t,
+          ListRecommenderFiltersResponse.error) Result.t Lwt.t
+val list_recommender_recipes :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRecommenderRecipesRequest.t ->
+        (ListRecommenderRecipesResponse.t,
+          ListRecommenderRecipesResponse.error) Result.t Lwt.t
+val list_recommender_schemas :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRecommenderSchemasRequest.t ->
+        (ListRecommenderSchemasResponse.t,
+          ListRecommenderSchemasResponse.error) Result.t Lwt.t
+val list_recommenders :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRecommendersRequest.t ->
+        (ListRecommendersResponse.t, ListRecommendersResponse.error) Result.t
+          Lwt.t
+val list_rule_based_matches :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListRuleBasedMatchesRequest.t ->
+        (ListRuleBasedMatchesResponse.t, ListRuleBasedMatchesResponse.error)
+          Result.t Lwt.t
+val list_segment_definitions :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListSegmentDefinitionsRequest.t ->
+        (ListSegmentDefinitionsResponse.t,
+          ListSegmentDefinitionsResponse.error) Result.t Lwt.t
 val list_tags_for_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       ListTagsForResourceRequest.t ->
         (ListTagsForResourceResponse.t, ListTagsForResourceResponse.error)
           Result.t Lwt.t
+val list_upload_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListUploadJobsRequest.t ->
+        (ListUploadJobsResponse.t, ListUploadJobsResponse.error) Result.t
+          Lwt.t
 val list_workflows :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -169,6 +522,12 @@ val merge_profiles :
     ?cfg:Awso.Cfg.t ->
       MergeProfilesRequest.t ->
         (MergeProfilesResponse.t, MergeProfilesResponse.error) Result.t Lwt.t
+val put_domain_object_type :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutDomainObjectTypeRequest.t ->
+        (PutDomainObjectTypeResponse.t, PutDomainObjectTypeResponse.error)
+          Result.t Lwt.t
 val put_integration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -193,6 +552,29 @@ val search_profiles :
       SearchProfilesRequest.t ->
         (SearchProfilesResponse.t, SearchProfilesResponse.error) Result.t
           Lwt.t
+val start_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartRecommenderRequest.t ->
+        (StartRecommenderResponse.t, StartRecommenderResponse.error) Result.t
+          Lwt.t
+val start_upload_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartUploadJobRequest.t ->
+        (StartUploadJobResponse.t, StartUploadJobResponse.error) Result.t
+          Lwt.t
+val stop_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopRecommenderRequest.t ->
+        (StopRecommenderResponse.t, StopRecommenderResponse.error) Result.t
+          Lwt.t
+val stop_upload_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopUploadJobRequest.t ->
+        (StopUploadJobResponse.t, StopUploadJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -203,13 +585,37 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_calculated_attribute_definition :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateCalculatedAttributeDefinitionRequest.t ->
+        (UpdateCalculatedAttributeDefinitionResponse.t,
+          UpdateCalculatedAttributeDefinitionResponse.error) Result.t Lwt.t
 val update_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateDomainRequest.t ->
         (UpdateDomainResponse.t, UpdateDomainResponse.error) Result.t Lwt.t
+val update_domain_layout :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateDomainLayoutRequest.t ->
+        (UpdateDomainLayoutResponse.t, UpdateDomainLayoutResponse.error)
+          Result.t Lwt.t
+val update_event_trigger :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateEventTriggerRequest.t ->
+        (UpdateEventTriggerResponse.t, UpdateEventTriggerResponse.error)
+          Result.t Lwt.t
 val update_profile :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UpdateProfileRequest.t ->
         (UpdateProfileResponse.t, UpdateProfileResponse.error) Result.t Lwt.t
+val update_recommender :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateRecommenderRequest.t ->
+        (UpdateRecommenderResponse.t, UpdateRecommenderResponse.error)
+          Result.t Lwt.t

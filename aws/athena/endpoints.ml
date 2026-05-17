@@ -4,70 +4,157 @@ open Values
 type ('i, 'o, 'e) t =
   | BatchGetNamedQuery: (BatchGetNamedQueryInput.t,
   BatchGetNamedQueryOutput.t, BatchGetNamedQueryOutput.error) t 
+  | BatchGetPreparedStatement: (BatchGetPreparedStatementInput.t,
+  BatchGetPreparedStatementOutput.t, BatchGetPreparedStatementOutput.error) t
+  
   | BatchGetQueryExecution: (BatchGetQueryExecutionInput.t,
   BatchGetQueryExecutionOutput.t, BatchGetQueryExecutionOutput.error) t 
+  | CancelCapacityReservation: (CancelCapacityReservationInput.t,
+  CancelCapacityReservationOutput.t, CancelCapacityReservationOutput.error) t
+  
+  | CreateCapacityReservation: (CreateCapacityReservationInput.t,
+  CreateCapacityReservationOutput.t, CreateCapacityReservationOutput.error) t
+  
   | CreateDataCatalog: (CreateDataCatalogInput.t, CreateDataCatalogOutput.t,
   CreateDataCatalogOutput.error) t 
   | CreateNamedQuery: (CreateNamedQueryInput.t, CreateNamedQueryOutput.t,
   CreateNamedQueryOutput.error) t 
+  | CreateNotebook: (CreateNotebookInput.t, CreateNotebookOutput.t,
+  CreateNotebookOutput.error) t 
   | CreatePreparedStatement: (CreatePreparedStatementInput.t,
   CreatePreparedStatementOutput.t, CreatePreparedStatementOutput.error) t 
+  | CreatePresignedNotebookUrl: (CreatePresignedNotebookUrlRequest.t,
+  CreatePresignedNotebookUrlResponse.t,
+  CreatePresignedNotebookUrlResponse.error) t 
   | CreateWorkGroup: (CreateWorkGroupInput.t, CreateWorkGroupOutput.t,
   CreateWorkGroupOutput.error) t 
+  | DeleteCapacityReservation: (DeleteCapacityReservationInput.t,
+  DeleteCapacityReservationOutput.t, DeleteCapacityReservationOutput.error) t
+  
   | DeleteDataCatalog: (DeleteDataCatalogInput.t, DeleteDataCatalogOutput.t,
   DeleteDataCatalogOutput.error) t 
   | DeleteNamedQuery: (DeleteNamedQueryInput.t, DeleteNamedQueryOutput.t,
   DeleteNamedQueryOutput.error) t 
+  | DeleteNotebook: (DeleteNotebookInput.t, DeleteNotebookOutput.t,
+  DeleteNotebookOutput.error) t 
   | DeletePreparedStatement: (DeletePreparedStatementInput.t,
   DeletePreparedStatementOutput.t, DeletePreparedStatementOutput.error) t 
   | DeleteWorkGroup: (DeleteWorkGroupInput.t, DeleteWorkGroupOutput.t,
   DeleteWorkGroupOutput.error) t 
+  | ExportNotebook: (ExportNotebookInput.t, ExportNotebookOutput.t,
+  ExportNotebookOutput.error) t 
+  | GetCalculationExecution: (GetCalculationExecutionRequest.t,
+  GetCalculationExecutionResponse.t, GetCalculationExecutionResponse.error) t
+  
+  | GetCalculationExecutionCode: (GetCalculationExecutionCodeRequest.t,
+  GetCalculationExecutionCodeResponse.t,
+  GetCalculationExecutionCodeResponse.error) t 
+  | GetCalculationExecutionStatus: (GetCalculationExecutionStatusRequest.t,
+  GetCalculationExecutionStatusResponse.t,
+  GetCalculationExecutionStatusResponse.error) t 
+  | GetCapacityAssignmentConfiguration:
+  (GetCapacityAssignmentConfigurationInput.t,
+  GetCapacityAssignmentConfigurationOutput.t,
+  GetCapacityAssignmentConfigurationOutput.error) t 
+  | GetCapacityReservation: (GetCapacityReservationInput.t,
+  GetCapacityReservationOutput.t, GetCapacityReservationOutput.error) t 
   | GetDataCatalog: (GetDataCatalogInput.t, GetDataCatalogOutput.t,
   GetDataCatalogOutput.error) t 
   | GetDatabase: (GetDatabaseInput.t, GetDatabaseOutput.t,
   GetDatabaseOutput.error) t 
   | GetNamedQuery: (GetNamedQueryInput.t, GetNamedQueryOutput.t,
   GetNamedQueryOutput.error) t 
+  | GetNotebookMetadata: (GetNotebookMetadataInput.t,
+  GetNotebookMetadataOutput.t, GetNotebookMetadataOutput.error) t 
   | GetPreparedStatement: (GetPreparedStatementInput.t,
   GetPreparedStatementOutput.t, GetPreparedStatementOutput.error) t 
   | GetQueryExecution: (GetQueryExecutionInput.t, GetQueryExecutionOutput.t,
   GetQueryExecutionOutput.error) t 
   | GetQueryResults: (GetQueryResultsInput.t, GetQueryResultsOutput.t,
   GetQueryResultsOutput.error) t 
+  | GetQueryRuntimeStatistics: (GetQueryRuntimeStatisticsInput.t,
+  GetQueryRuntimeStatisticsOutput.t, GetQueryRuntimeStatisticsOutput.error) t
+  
+  | GetResourceDashboard: (GetResourceDashboardRequest.t,
+  GetResourceDashboardResponse.t, GetResourceDashboardResponse.error) t 
+  | GetSession: (GetSessionRequest.t, GetSessionResponse.t,
+  GetSessionResponse.error) t 
+  | GetSessionEndpoint: (GetSessionEndpointRequest.t,
+  GetSessionEndpointResponse.t, GetSessionEndpointResponse.error) t 
+  | GetSessionStatus: (GetSessionStatusRequest.t, GetSessionStatusResponse.t,
+  GetSessionStatusResponse.error) t 
   | GetTableMetadata: (GetTableMetadataInput.t, GetTableMetadataOutput.t,
   GetTableMetadataOutput.error) t 
   | GetWorkGroup: (GetWorkGroupInput.t, GetWorkGroupOutput.t,
   GetWorkGroupOutput.error) t 
+  | ImportNotebook: (ImportNotebookInput.t, ImportNotebookOutput.t,
+  ImportNotebookOutput.error) t 
+  | ListApplicationDPUSizes: (ListApplicationDPUSizesInput.t,
+  ListApplicationDPUSizesOutput.t, ListApplicationDPUSizesOutput.error) t 
+  | ListCalculationExecutions: (ListCalculationExecutionsRequest.t,
+  ListCalculationExecutionsResponse.t,
+  ListCalculationExecutionsResponse.error) t 
+  | ListCapacityReservations: (ListCapacityReservationsInput.t,
+  ListCapacityReservationsOutput.t, ListCapacityReservationsOutput.error) t 
   | ListDataCatalogs: (ListDataCatalogsInput.t, ListDataCatalogsOutput.t,
   ListDataCatalogsOutput.error) t 
   | ListDatabases: (ListDatabasesInput.t, ListDatabasesOutput.t,
   ListDatabasesOutput.error) t 
   | ListEngineVersions: (ListEngineVersionsInput.t,
   ListEngineVersionsOutput.t, ListEngineVersionsOutput.error) t 
+  | ListExecutors: (ListExecutorsRequest.t, ListExecutorsResponse.t,
+  ListExecutorsResponse.error) t 
   | ListNamedQueries: (ListNamedQueriesInput.t, ListNamedQueriesOutput.t,
   ListNamedQueriesOutput.error) t 
+  | ListNotebookMetadata: (ListNotebookMetadataInput.t,
+  ListNotebookMetadataOutput.t, ListNotebookMetadataOutput.error) t 
+  | ListNotebookSessions: (ListNotebookSessionsRequest.t,
+  ListNotebookSessionsResponse.t, ListNotebookSessionsResponse.error) t 
   | ListPreparedStatements: (ListPreparedStatementsInput.t,
   ListPreparedStatementsOutput.t, ListPreparedStatementsOutput.error) t 
   | ListQueryExecutions: (ListQueryExecutionsInput.t,
   ListQueryExecutionsOutput.t, ListQueryExecutionsOutput.error) t 
+  | ListSessions: (ListSessionsRequest.t, ListSessionsResponse.t,
+  ListSessionsResponse.error) t 
   | ListTableMetadata: (ListTableMetadataInput.t, ListTableMetadataOutput.t,
   ListTableMetadataOutput.error) t 
   | ListTagsForResource: (ListTagsForResourceInput.t,
   ListTagsForResourceOutput.t, ListTagsForResourceOutput.error) t 
   | ListWorkGroups: (ListWorkGroupsInput.t, ListWorkGroupsOutput.t,
   ListWorkGroupsOutput.error) t 
+  | PutCapacityAssignmentConfiguration:
+  (PutCapacityAssignmentConfigurationInput.t,
+  PutCapacityAssignmentConfigurationOutput.t,
+  PutCapacityAssignmentConfigurationOutput.error) t 
+  | StartCalculationExecution: (StartCalculationExecutionRequest.t,
+  StartCalculationExecutionResponse.t,
+  StartCalculationExecutionResponse.error) t 
   | StartQueryExecution: (StartQueryExecutionInput.t,
   StartQueryExecutionOutput.t, StartQueryExecutionOutput.error) t 
+  | StartSession: (StartSessionRequest.t, StartSessionResponse.t,
+  StartSessionResponse.error) t 
+  | StopCalculationExecution: (StopCalculationExecutionRequest.t,
+  StopCalculationExecutionResponse.t, StopCalculationExecutionResponse.error)
+  t 
   | StopQueryExecution: (StopQueryExecutionInput.t,
   StopQueryExecutionOutput.t, StopQueryExecutionOutput.error) t 
   | TagResource: (TagResourceInput.t, TagResourceOutput.t,
   TagResourceOutput.error) t 
+  | TerminateSession: (TerminateSessionRequest.t, TerminateSessionResponse.t,
+  TerminateSessionResponse.error) t 
   | UntagResource: (UntagResourceInput.t, UntagResourceOutput.t,
   UntagResourceOutput.error) t 
+  | UpdateCapacityReservation: (UpdateCapacityReservationInput.t,
+  UpdateCapacityReservationOutput.t, UpdateCapacityReservationOutput.error) t
+  
   | UpdateDataCatalog: (UpdateDataCatalogInput.t, UpdateDataCatalogOutput.t,
   UpdateDataCatalogOutput.error) t 
   | UpdateNamedQuery: (UpdateNamedQueryInput.t, UpdateNamedQueryOutput.t,
   UpdateNamedQueryOutput.error) t 
+  | UpdateNotebook: (UpdateNotebookInput.t, UpdateNotebookOutput.t,
+  UpdateNotebookOutput.error) t 
+  | UpdateNotebookMetadata: (UpdateNotebookMetadataInput.t,
+  UpdateNotebookMetadataOutput.t, UpdateNotebookMetadataOutput.error) t 
   | UpdatePreparedStatement: (UpdatePreparedStatementInput.t,
   UpdatePreparedStatementOutput.t, UpdatePreparedStatementOutput.error) t 
   | UpdateWorkGroup: (UpdateWorkGroupInput.t, UpdateWorkGroupOutput.t,
@@ -75,76 +162,148 @@ type ('i, 'o, 'e) t =
 let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   function
   | BatchGetNamedQuery -> `POST
+  | BatchGetPreparedStatement -> `POST
   | BatchGetQueryExecution -> `POST
+  | CancelCapacityReservation -> `POST
+  | CreateCapacityReservation -> `POST
   | CreateDataCatalog -> `POST
   | CreateNamedQuery -> `POST
+  | CreateNotebook -> `POST
   | CreatePreparedStatement -> `POST
+  | CreatePresignedNotebookUrl -> `POST
   | CreateWorkGroup -> `POST
+  | DeleteCapacityReservation -> `POST
   | DeleteDataCatalog -> `POST
   | DeleteNamedQuery -> `POST
+  | DeleteNotebook -> `POST
   | DeletePreparedStatement -> `POST
   | DeleteWorkGroup -> `POST
+  | ExportNotebook -> `POST
+  | GetCalculationExecution -> `POST
+  | GetCalculationExecutionCode -> `POST
+  | GetCalculationExecutionStatus -> `POST
+  | GetCapacityAssignmentConfiguration -> `POST
+  | GetCapacityReservation -> `POST
   | GetDataCatalog -> `POST
   | GetDatabase -> `POST
   | GetNamedQuery -> `POST
+  | GetNotebookMetadata -> `POST
   | GetPreparedStatement -> `POST
   | GetQueryExecution -> `POST
   | GetQueryResults -> `POST
+  | GetQueryRuntimeStatistics -> `POST
+  | GetResourceDashboard -> `POST
+  | GetSession -> `POST
+  | GetSessionEndpoint -> `POST
+  | GetSessionStatus -> `POST
   | GetTableMetadata -> `POST
   | GetWorkGroup -> `POST
+  | ImportNotebook -> `POST
+  | ListApplicationDPUSizes -> `POST
+  | ListCalculationExecutions -> `POST
+  | ListCapacityReservations -> `POST
   | ListDataCatalogs -> `POST
   | ListDatabases -> `POST
   | ListEngineVersions -> `POST
+  | ListExecutors -> `POST
   | ListNamedQueries -> `POST
+  | ListNotebookMetadata -> `POST
+  | ListNotebookSessions -> `POST
   | ListPreparedStatements -> `POST
   | ListQueryExecutions -> `POST
+  | ListSessions -> `POST
   | ListTableMetadata -> `POST
   | ListTagsForResource -> `POST
   | ListWorkGroups -> `POST
+  | PutCapacityAssignmentConfiguration -> `POST
+  | StartCalculationExecution -> `POST
   | StartQueryExecution -> `POST
+  | StartSession -> `POST
+  | StopCalculationExecution -> `POST
   | StopQueryExecution -> `POST
   | TagResource -> `POST
+  | TerminateSession -> `POST
   | UntagResource -> `POST
+  | UpdateCapacityReservation -> `POST
   | UpdateDataCatalog -> `POST
   | UpdateNamedQuery -> `POST
+  | UpdateNotebook -> `POST
+  | UpdateNotebookMetadata -> `POST
   | UpdatePreparedStatement -> `POST
   | UpdateWorkGroup -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
   ((fun endpoint x ->
       match endpoint with
       | BatchGetNamedQuery -> (Format.kasprintf Uri.of_string) "/"
+      | BatchGetPreparedStatement -> (Format.kasprintf Uri.of_string) "/"
       | BatchGetQueryExecution -> (Format.kasprintf Uri.of_string) "/"
+      | CancelCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
+      | CreateCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
       | CreateDataCatalog -> (Format.kasprintf Uri.of_string) "/"
       | CreateNamedQuery -> (Format.kasprintf Uri.of_string) "/"
+      | CreateNotebook -> (Format.kasprintf Uri.of_string) "/"
       | CreatePreparedStatement -> (Format.kasprintf Uri.of_string) "/"
+      | CreatePresignedNotebookUrl -> (Format.kasprintf Uri.of_string) "/"
       | CreateWorkGroup -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataCatalog -> (Format.kasprintf Uri.of_string) "/"
       | DeleteNamedQuery -> (Format.kasprintf Uri.of_string) "/"
+      | DeleteNotebook -> (Format.kasprintf Uri.of_string) "/"
       | DeletePreparedStatement -> (Format.kasprintf Uri.of_string) "/"
       | DeleteWorkGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ExportNotebook -> (Format.kasprintf Uri.of_string) "/"
+      | GetCalculationExecution -> (Format.kasprintf Uri.of_string) "/"
+      | GetCalculationExecutionCode -> (Format.kasprintf Uri.of_string) "/"
+      | GetCalculationExecutionStatus -> (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityAssignmentConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | GetCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
       | GetDataCatalog -> (Format.kasprintf Uri.of_string) "/"
       | GetDatabase -> (Format.kasprintf Uri.of_string) "/"
       | GetNamedQuery -> (Format.kasprintf Uri.of_string) "/"
+      | GetNotebookMetadata -> (Format.kasprintf Uri.of_string) "/"
       | GetPreparedStatement -> (Format.kasprintf Uri.of_string) "/"
       | GetQueryExecution -> (Format.kasprintf Uri.of_string) "/"
       | GetQueryResults -> (Format.kasprintf Uri.of_string) "/"
+      | GetQueryRuntimeStatistics -> (Format.kasprintf Uri.of_string) "/"
+      | GetResourceDashboard -> (Format.kasprintf Uri.of_string) "/"
+      | GetSession -> (Format.kasprintf Uri.of_string) "/"
+      | GetSessionEndpoint -> (Format.kasprintf Uri.of_string) "/"
+      | GetSessionStatus -> (Format.kasprintf Uri.of_string) "/"
       | GetTableMetadata -> (Format.kasprintf Uri.of_string) "/"
       | GetWorkGroup -> (Format.kasprintf Uri.of_string) "/"
+      | ImportNotebook -> (Format.kasprintf Uri.of_string) "/"
+      | ListApplicationDPUSizes -> (Format.kasprintf Uri.of_string) "/"
+      | ListCalculationExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | ListCapacityReservations -> (Format.kasprintf Uri.of_string) "/"
       | ListDataCatalogs -> (Format.kasprintf Uri.of_string) "/"
       | ListDatabases -> (Format.kasprintf Uri.of_string) "/"
       | ListEngineVersions -> (Format.kasprintf Uri.of_string) "/"
+      | ListExecutors -> (Format.kasprintf Uri.of_string) "/"
       | ListNamedQueries -> (Format.kasprintf Uri.of_string) "/"
+      | ListNotebookMetadata -> (Format.kasprintf Uri.of_string) "/"
+      | ListNotebookSessions -> (Format.kasprintf Uri.of_string) "/"
       | ListPreparedStatements -> (Format.kasprintf Uri.of_string) "/"
       | ListQueryExecutions -> (Format.kasprintf Uri.of_string) "/"
+      | ListSessions -> (Format.kasprintf Uri.of_string) "/"
       | ListTableMetadata -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListWorkGroups -> (Format.kasprintf Uri.of_string) "/"
+      | PutCapacityAssignmentConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
+      | StartCalculationExecution -> (Format.kasprintf Uri.of_string) "/"
       | StartQueryExecution -> (Format.kasprintf Uri.of_string) "/"
+      | StartSession -> (Format.kasprintf Uri.of_string) "/"
+      | StopCalculationExecution -> (Format.kasprintf Uri.of_string) "/"
       | StopQueryExecution -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
+      | TerminateSession -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateCapacityReservation -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDataCatalog -> (Format.kasprintf Uri.of_string) "/"
       | UpdateNamedQuery -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateNotebook -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateNotebookMetadata -> (Format.kasprintf Uri.of_string) "/"
       | UpdatePreparedStatement -> (Format.kasprintf Uri.of_string) "/"
       | UpdateWorkGroup -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -158,6 +317,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.BatchGetNamedQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | BatchGetPreparedStatement ->
+      let json = BatchGetPreparedStatementInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.BatchGetPreparedStatement")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | BatchGetQueryExecution ->
       let json = BatchGetQueryExecutionInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -165,6 +332,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.BatchGetQueryExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CancelCapacityReservation ->
+      let json = CancelCapacityReservationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.CancelCapacityReservation")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateCapacityReservation ->
+      let json = CreateCapacityReservationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.CreateCapacityReservation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateDataCatalog ->
       let json = CreateDataCatalogInput.to_json req in
@@ -182,6 +365,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.CreateNamedQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateNotebook ->
+      let json = CreateNotebookInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.CreateNotebook")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreatePreparedStatement ->
       let json = CreatePreparedStatementInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -190,6 +381,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.CreatePreparedStatement")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreatePresignedNotebookUrl ->
+      let json = CreatePresignedNotebookUrlRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.CreatePresignedNotebookUrl")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateWorkGroup ->
       let json = CreateWorkGroupInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -197,6 +396,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.CreateWorkGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteCapacityReservation ->
+      let json = DeleteCapacityReservationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.DeleteCapacityReservation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteDataCatalog ->
       let json = DeleteDataCatalogInput.to_json req in
@@ -214,6 +421,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.DeleteNamedQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteNotebook ->
+      let json = DeleteNotebookInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.DeleteNotebook")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeletePreparedStatement ->
       let json = DeletePreparedStatementInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -229,6 +444,54 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.DeleteWorkGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ExportNotebook ->
+      let json = ExportNotebookInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ExportNotebook")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCalculationExecution ->
+      let json = GetCalculationExecutionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetCalculationExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCalculationExecutionCode ->
+      let json = GetCalculationExecutionCodeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetCalculationExecutionCode")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCalculationExecutionStatus ->
+      let json = GetCalculationExecutionStatusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetCalculationExecutionStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCapacityAssignmentConfiguration ->
+      let json = GetCapacityAssignmentConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetCapacityAssignmentConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetCapacityReservation ->
+      let json = GetCapacityReservationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetCapacityReservation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetDataCatalog ->
       let json = GetDataCatalogInput.to_json req in
@@ -254,6 +517,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.GetNamedQuery")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetNotebookMetadata ->
+      let json = GetNotebookMetadataInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetNotebookMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetPreparedStatement ->
       let json = GetPreparedStatementInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -278,6 +549,46 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.GetQueryResults")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetQueryRuntimeStatistics ->
+      let json = GetQueryRuntimeStatisticsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetQueryRuntimeStatistics")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetResourceDashboard ->
+      let json = GetResourceDashboardRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetResourceDashboard")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSession ->
+      let json = GetSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSessionEndpoint ->
+      let json = GetSessionEndpointRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetSessionEndpoint")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | GetSessionStatus ->
+      let json = GetSessionStatusRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.GetSessionStatus")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | GetTableMetadata ->
       let json = GetTableMetadataInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -293,6 +604,38 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.GetWorkGroup")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ImportNotebook ->
+      let json = ImportNotebookInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ImportNotebook")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListApplicationDPUSizes ->
+      let json = ListApplicationDPUSizesInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListApplicationDPUSizes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCalculationExecutions ->
+      let json = ListCalculationExecutionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListCalculationExecutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListCapacityReservations ->
+      let json = ListCapacityReservationsInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListCapacityReservations")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListDataCatalogs ->
       let json = ListDataCatalogsInput.to_json req in
@@ -318,6 +661,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.ListEngineVersions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListExecutors ->
+      let json = ListExecutorsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListExecutors")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListNamedQueries ->
       let json = ListNamedQueriesInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -325,6 +676,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.ListNamedQueries")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListNotebookMetadata ->
+      let json = ListNotebookMetadataInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListNotebookMetadata")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListNotebookSessions ->
+      let json = ListNotebookSessionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListNotebookSessions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListPreparedStatements ->
       let json = ListPreparedStatementsInput.to_json req in
@@ -341,6 +708,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.ListQueryExecutions")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | ListSessions ->
+      let json = ListSessionsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.ListSessions")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | ListTableMetadata ->
       let json = ListTableMetadataInput.to_json req in
@@ -366,6 +741,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.ListWorkGroups")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | PutCapacityAssignmentConfiguration ->
+      let json = PutCapacityAssignmentConfigurationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.PutCapacityAssignmentConfiguration")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartCalculationExecution ->
+      let json = StartCalculationExecutionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.StartCalculationExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StartQueryExecution ->
       let json = StartQueryExecutionInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -373,6 +764,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.StartQueryExecution")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartSession ->
+      let json = StartSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.StartSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StopCalculationExecution ->
+      let json = StopCalculationExecutionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.StopCalculationExecution")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | StopQueryExecution ->
       let json = StopQueryExecutionInput.to_json req in
@@ -390,6 +797,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.TagResource")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | TerminateSession ->
+      let json = TerminateSessionRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.TerminateSession")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UntagResource ->
       let json = UntagResourceInput.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -397,6 +812,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.UntagResource")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateCapacityReservation ->
+      let json = UpdateCapacityReservationInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.UpdateCapacityReservation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateDataCatalog ->
       let json = UpdateDataCatalogInput.to_json req in
@@ -413,6 +836,22 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AmazonAthena.UpdateNamedQuery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateNotebook ->
+      let json = UpdateNotebookInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.UpdateNotebook")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateNotebookMetadata ->
+      let json = UpdateNotebookMetadataInput.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AmazonAthena.UpdateNotebookMetadata")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdatePreparedStatement ->
       let json = UpdatePreparedStatementInput.to_json req in
@@ -460,6 +899,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (BatchGetNamedQueryOutput.of_json json)
       else
         Error (parse_aws_error (Some BatchGetNamedQueryOutput.error_of_json))
+  | BatchGetPreparedStatement ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (BatchGetPreparedStatementOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some BatchGetPreparedStatementOutput.error_of_json))
   | BatchGetQueryExecution ->
       if is_success
       then
@@ -468,6 +916,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some BatchGetQueryExecutionOutput.error_of_json))
+  | CancelCapacityReservation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CancelCapacityReservationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CancelCapacityReservationOutput.error_of_json))
+  | CreateCapacityReservation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateCapacityReservationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateCapacityReservationOutput.error_of_json))
   | CreateDataCatalog ->
       if is_success
       then
@@ -482,6 +948,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (CreateNamedQueryOutput.of_json json)
       else
         Error (parse_aws_error (Some CreateNamedQueryOutput.error_of_json))
+  | CreateNotebook ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateNotebookOutput.of_json json)
+      else Error (parse_aws_error (Some CreateNotebookOutput.error_of_json))
   | CreatePreparedStatement ->
       if is_success
       then
@@ -490,12 +962,30 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some CreatePreparedStatementOutput.error_of_json))
+  | CreatePresignedNotebookUrl ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreatePresignedNotebookUrlResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreatePresignedNotebookUrlResponse.error_of_json))
   | CreateWorkGroup ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CreateWorkGroupOutput.of_json json)
       else Error (parse_aws_error (Some CreateWorkGroupOutput.error_of_json))
+  | DeleteCapacityReservation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteCapacityReservationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DeleteCapacityReservationOutput.error_of_json))
   | DeleteDataCatalog ->
       if is_success
       then
@@ -510,6 +1000,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DeleteNamedQueryOutput.of_json json)
       else
         Error (parse_aws_error (Some DeleteNamedQueryOutput.error_of_json))
+  | DeleteNotebook ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteNotebookOutput.of_json json)
+      else Error (parse_aws_error (Some DeleteNotebookOutput.error_of_json))
   | DeletePreparedStatement ->
       if is_success
       then
@@ -524,6 +1020,56 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (DeleteWorkGroupOutput.of_json json)
       else Error (parse_aws_error (Some DeleteWorkGroupOutput.error_of_json))
+  | ExportNotebook ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ExportNotebookOutput.of_json json)
+      else Error (parse_aws_error (Some ExportNotebookOutput.error_of_json))
+  | GetCalculationExecution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCalculationExecutionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCalculationExecutionResponse.error_of_json))
+  | GetCalculationExecutionCode ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCalculationExecutionCodeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCalculationExecutionCodeResponse.error_of_json))
+  | GetCalculationExecutionStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCalculationExecutionStatusResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCalculationExecutionStatusResponse.error_of_json))
+  | GetCapacityAssignmentConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCapacityAssignmentConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetCapacityAssignmentConfigurationOutput.error_of_json))
+  | GetCapacityReservation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetCapacityReservationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetCapacityReservationOutput.error_of_json))
   | GetDataCatalog ->
       if is_success
       then
@@ -542,6 +1088,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetNamedQueryOutput.of_json json)
       else Error (parse_aws_error (Some GetNamedQueryOutput.error_of_json))
+  | GetNotebookMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetNotebookMetadataOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetNotebookMetadataOutput.error_of_json))
   | GetPreparedStatement ->
       if is_success
       then
@@ -563,6 +1117,44 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetQueryResultsOutput.of_json json)
       else Error (parse_aws_error (Some GetQueryResultsOutput.error_of_json))
+  | GetQueryRuntimeStatistics ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetQueryRuntimeStatisticsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some GetQueryRuntimeStatisticsOutput.error_of_json))
+  | GetResourceDashboard ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetResourceDashboardResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetResourceDashboardResponse.error_of_json))
+  | GetSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSessionResponse.of_json json)
+      else Error (parse_aws_error (Some GetSessionResponse.error_of_json))
+  | GetSessionEndpoint ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSessionEndpointResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some GetSessionEndpointResponse.error_of_json))
+  | GetSessionStatus ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (GetSessionStatusResponse.of_json json)
+      else
+        Error (parse_aws_error (Some GetSessionStatusResponse.error_of_json))
   | GetTableMetadata ->
       if is_success
       then
@@ -576,6 +1168,38 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (GetWorkGroupOutput.of_json json)
       else Error (parse_aws_error (Some GetWorkGroupOutput.error_of_json))
+  | ImportNotebook ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ImportNotebookOutput.of_json json)
+      else Error (parse_aws_error (Some ImportNotebookOutput.error_of_json))
+  | ListApplicationDPUSizes ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListApplicationDPUSizesOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListApplicationDPUSizesOutput.error_of_json))
+  | ListCalculationExecutions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCalculationExecutionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCalculationExecutionsResponse.error_of_json))
+  | ListCapacityReservations ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListCapacityReservationsOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some ListCapacityReservationsOutput.error_of_json))
   | ListDataCatalogs ->
       if is_success
       then
@@ -596,6 +1220,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListEngineVersionsOutput.of_json json)
       else
         Error (parse_aws_error (Some ListEngineVersionsOutput.error_of_json))
+  | ListExecutors ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListExecutorsResponse.of_json json)
+      else Error (parse_aws_error (Some ListExecutorsResponse.error_of_json))
   | ListNamedQueries ->
       if is_success
       then
@@ -603,6 +1233,22 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (ListNamedQueriesOutput.of_json json)
       else
         Error (parse_aws_error (Some ListNamedQueriesOutput.error_of_json))
+  | ListNotebookMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListNotebookMetadataOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListNotebookMetadataOutput.error_of_json))
+  | ListNotebookSessions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListNotebookSessionsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some ListNotebookSessionsResponse.error_of_json))
   | ListPreparedStatements ->
       if is_success
       then
@@ -619,6 +1265,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some ListQueryExecutionsOutput.error_of_json))
+  | ListSessions ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (ListSessionsResponse.of_json json)
+      else Error (parse_aws_error (Some ListSessionsResponse.error_of_json))
   | ListTableMetadata ->
       if is_success
       then
@@ -640,6 +1292,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (ListWorkGroupsOutput.of_json json)
       else Error (parse_aws_error (Some ListWorkGroupsOutput.error_of_json))
+  | PutCapacityAssignmentConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (PutCapacityAssignmentConfigurationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some PutCapacityAssignmentConfigurationOutput.error_of_json))
+  | StartCalculationExecution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartCalculationExecutionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartCalculationExecutionResponse.error_of_json))
   | StartQueryExecution ->
       if is_success
       then
@@ -648,6 +1318,21 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some StartQueryExecutionOutput.error_of_json))
+  | StartSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartSessionResponse.of_json json)
+      else Error (parse_aws_error (Some StartSessionResponse.error_of_json))
+  | StopCalculationExecution ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StopCalculationExecutionResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StopCalculationExecutionResponse.error_of_json))
   | StopQueryExecution ->
       if is_success
       then
@@ -661,12 +1346,28 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (TagResourceOutput.of_json json)
       else Error (parse_aws_error (Some TagResourceOutput.error_of_json))
+  | TerminateSession ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (TerminateSessionResponse.of_json json)
+      else
+        Error (parse_aws_error (Some TerminateSessionResponse.error_of_json))
   | UntagResource ->
       if is_success
       then
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (UntagResourceOutput.of_json json)
       else Error (parse_aws_error (Some UntagResourceOutput.error_of_json))
+  | UpdateCapacityReservation ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateCapacityReservationOutput.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateCapacityReservationOutput.error_of_json))
   | UpdateDataCatalog ->
       if is_success
       then
@@ -681,6 +1382,20 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateNamedQueryOutput.of_json json)
       else
         Error (parse_aws_error (Some UpdateNamedQueryOutput.error_of_json))
+  | UpdateNotebook ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateNotebookOutput.of_json json)
+      else Error (parse_aws_error (Some UpdateNotebookOutput.error_of_json))
+  | UpdateNotebookMetadata ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateNotebookMetadataOutput.of_json json)
+      else
+        Error
+          (parse_aws_error (Some UpdateNotebookMetadataOutput.error_of_json))
   | UpdatePreparedStatement ->
       if is_success
       then

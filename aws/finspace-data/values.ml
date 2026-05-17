@@ -87,7 +87,7 @@ module ColumnDescription =
       let open Result in
         ok_or_failwith
           ((check_string_max i ~max:512) >>=
-             (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*"));
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -146,11 +146,11 @@ module ColumnDefinition =
         (Option.map ~f:ColumnDataType.of_xml) (Xml.child xml_arg0 "dataType") in
       make ?columnDescription ?columnName ?dataType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let columnDescription =
-        field_map json "columnDescription" ColumnDescription.of_json in
-      let columnName = field_map json "columnName" ColumnName.of_json in
-      let dataType = field_map json "dataType" ColumnDataType.of_json in
+        field_map json__ "columnDescription" ColumnDescription.of_json in
+      let columnName = field_map json__ "columnName" ColumnName.of_json in
+      let dataType = field_map json__ "dataType" ColumnDataType.of_json in
       make ?columnDescription ?columnName ?dataType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The definition of a column in a tabular Dataset."]
@@ -158,6 +158,9 @@ module ColumnList =
   struct
     type nonrec t = ColumnDefinition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnDefinition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -182,6 +185,9 @@ module ColumnNameList =
   struct
     type nonrec t = ColumnName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ColumnName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -367,10 +373,10 @@ module SchemaDefinition =
         (Option.map ~f:ColumnList.of_xml) (Xml.child xml_arg0 "columns") in
       make ?primaryKeyColumns ?columns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let primaryKeyColumns =
-        field_map json "primaryKeyColumns" ColumnNameList.of_json in
-      let columns = field_map json "columns" ColumnList.of_json in
+        field_map json__ "primaryKeyColumns" ColumnNameList.of_json in
+      let columns = field_map json__ "columns" ColumnList.of_json in
       make ?primaryKeyColumns ?columns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Definition for a schema on a tabular Dataset."]
@@ -434,6 +440,8 @@ module S3DestinationFormatOptions =
                        (StringMapValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -711,10 +719,44 @@ module UserType =
     let of_json j = of_string (string_of_json ~kind:"UserType" j)
     let to_json = simple_to_json to_value
   end
+module PermissionGroupMembershipStatus =
+  struct
+    type nonrec t =
+      | ADDITION_IN_PROGRESS 
+      | ADDITION_SUCCESS 
+      | REMOVAL_IN_PROGRESS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | ADDITION_IN_PROGRESS -> "ADDITION_IN_PROGRESS"
+      | ADDITION_SUCCESS -> "ADDITION_SUCCESS"
+      | REMOVAL_IN_PROGRESS -> "REMOVAL_IN_PROGRESS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "ADDITION_IN_PROGRESS" -> ADDITION_IN_PROGRESS
+      | "ADDITION_SUCCESS" -> ADDITION_SUCCESS
+      | "REMOVAL_IN_PROGRESS" -> REMOVAL_IN_PROGRESS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PermissionGroupMembershipStatus"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"PermissionGroupMembershipStatus" j)
+    let to_json = simple_to_json to_value
+  end
 module ApplicationPermissionList =
   struct
     type nonrec t = ApplicationPermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ApplicationPermission.to_value)) |>
         (fun x -> `List x)
@@ -747,7 +789,7 @@ module PermissionGroupDescription =
           ((check_string_min i ~min:1) >>=
              (fun () ->
                 (check_string_max i ~max:4000) >>=
-                  (fun () -> check_pattern i ~pattern:".*\\S.*")));
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*")));
         i
     let of_string x = x
     let to_value x = `String x
@@ -837,10 +879,8 @@ module DatasetDescription =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_string_min i ~min:1) >>=
-             (fun () ->
-                (check_string_max i ~max:1000) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
+          ((check_string_max i ~max:1000) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
         i
     let of_string x = x
     let to_value x = `String x
@@ -918,10 +958,10 @@ module DatasetOwnerInfo =
       let name = (Option.map ~f:OwnerName.of_xml) (Xml.child xml_arg0 "name") in
       make ?email ?phoneNumber ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let email = field_map json "email" Email.of_json in
-      let phoneNumber = field_map json "phoneNumber" PhoneNumber.of_json in
-      let name = field_map json "name" OwnerName.of_json in
+    let of_json json__ =
+      let email = field_map json__ "email" Email.of_json in
+      let phoneNumber = field_map json__ "phoneNumber" PhoneNumber.of_json in
+      let name = field_map json__ "name" OwnerName.of_json in
       make ?email ?phoneNumber ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A structure for Dataset owner info."]
@@ -963,9 +1003,9 @@ module SchemaUnion =
           (Xml.child xml_arg0 "tabularSchemaConfig") in
       make ?tabularSchemaConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tabularSchemaConfig =
-        field_map json "tabularSchemaConfig" SchemaDefinition.of_json in
+        field_map json__ "tabularSchemaConfig" SchemaDefinition.of_json in
       make ?tabularSchemaConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A union of schema types."]
@@ -1004,7 +1044,7 @@ module DataViewDestinationTypeParams =
           "Destination type for a Dataview. GLUE_TABLE \226\128\147 Glue table destination type. S3 \226\128\147 S3 destination type."];
       s3DestinationExportFileFormat: ExportFileFormat.t option
         [@ocaml.doc
-          "Data view export file format. PARQUET \226\128\147 Parquet export file format. DELIMITED_TEXT \226\128\147 Delimited text export file format."];
+          "Dataview export file format. PARQUET \226\128\147 Parquet export file format. DELIMITED_TEXT \226\128\147 Delimited text export file format."];
       s3DestinationExportFileFormatOptions:
         S3DestinationFormatOptions.t option
         [@ocaml.doc
@@ -1043,15 +1083,16 @@ module DataViewDestinationTypeParams =
       make ?s3DestinationExportFileFormatOptions
         ?s3DestinationExportFileFormat ~destinationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let s3DestinationExportFileFormatOptions =
-        field_map json "s3DestinationExportFileFormatOptions"
+        field_map json__ "s3DestinationExportFileFormatOptions"
           S3DestinationFormatOptions.of_json in
       let s3DestinationExportFileFormat =
-        field_map json "s3DestinationExportFileFormat"
+        field_map json__ "s3DestinationExportFileFormat"
           ExportFileFormat.of_json in
       let destinationType =
-        field_map_exn json "destinationType" DataViewDestinationType.of_json in
+        field_map_exn json__ "destinationType"
+          DataViewDestinationType.of_json in
       make ?s3DestinationExportFileFormatOptions
         ?s3DestinationExportFileFormat ~destinationType ()
     let to_json v = composed_to_json to_value v
@@ -1083,11 +1124,11 @@ module DataViewErrorInfo =
           (Xml.child xml_arg0 "ErrorMessage__lc1") in
       make ?errorCategory ?errorMessage__lc1 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorCategory =
-        field_map json "errorCategory" ErrorCategory.of_json in
+        field_map json__ "errorCategory" ErrorCategory.of_json in
       let errorMessage__lc1 =
-        field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
       make ?errorCategory ?errorMessage__lc1 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The structure with error messages."]
@@ -1156,6 +1197,9 @@ module PartitionColumnList =
   struct
     type nonrec t = StringValueLength1to255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringValueLength1to255.to_value)) |>
         (fun x -> `List x)
@@ -1182,6 +1226,9 @@ module SortColumnList =
   struct
     type nonrec t = StringValueLength1to255.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StringValueLength1to255.to_value)) |>
         (fun x -> `List x)
@@ -1272,11 +1319,11 @@ module ChangesetErrorInfo =
           (Xml.child xml_arg0 "ErrorMessage__lc1") in
       make ?errorCategory ?errorMessage__lc1 ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let errorCategory =
-        field_map json "errorCategory" ErrorCategory.of_json in
+        field_map json__ "errorCategory" ErrorCategory.of_json in
       let errorMessage__lc1 =
-        field_map json "ErrorMessage__lc1" ErrorMessage.of_json in
+        field_map json__ "ErrorMessage__lc1" ErrorMessage.of_json in
       make ?errorCategory ?errorMessage__lc1 ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The structure with error messages."]
@@ -1320,6 +1367,8 @@ module FormatParams =
                        (StringMapValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1383,6 +1432,8 @@ module SourceParams =
                        (StringMapValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1408,13 +1459,13 @@ module ResourcePermission =
           (Xml.child xml_arg0 "permission") in
       make ?permission ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permission =
-        field_map json "permission" StringValueLength1to250.of_json in
+        field_map json__ "permission" StringValueLength1to250.of_json in
       make ?permission ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resource permission for a dataset. When you create a dataset, all the other members of the same user group inherit access to the dataset. You can only create a dataset if your user group has application permission for Create Datasets. The following is a list of valid dataset permissions that you can apply: ViewDatasetDetails ReadDatasetDetails AddDatasetData CreateSnapshot EditDatasetMetadata DeleteDataset For more information on the dataset permissions, see Supported Dataset Permissions in the FinSpace User Guide."]
+       "Resource permission for a dataset. When you create a dataset, all the other members of the same user group inherit access to the dataset. You can only create a dataset if your user group has application permission for Create Datasets. The following is a list of valid dataset permissions that you can apply: ViewDatasetDetails ReadDatasetDetails AddDatasetData CreateDataView EditDatasetMetadata DeleteDataset For more information on the dataset permissions, see Supported Dataset Permissions in the FinSpace User Guide."]
 module ErrorMessage__lc1 =
   struct
     type nonrec t = string
@@ -1436,7 +1487,7 @@ module User =
         [@ocaml.doc "The unique identifier for the user."];
       status: UserStatus.t option
         [@ocaml.doc
-          "The current status of the user account. CREATING \226\128\147 The user account creation is in progress. ENABLED \226\128\147 The user account is created and is currently active. DISABLED \226\128\147 The user account is currently inactive."];
+          "The current status of the user. CREATING \226\128\147 The user creation is in progress. ENABLED \226\128\147 The user is created and is currently active. DISABLED \226\128\147 The user is currently inactive."];
       firstName: FirstName.t option
         [@ocaml.doc "The first name of the user."];
       lastName: LastName.t option [@ocaml.doc "The last name of the user."];
@@ -1445,7 +1496,7 @@ module User =
           "The email address of the user. The email address serves as a uniquer identifier for each user and cannot be changed after it's created."];
       type_: UserType.t option
         [@ocaml.doc
-          "Indicates the type of user. SUPER_USER \226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permissions group."];
+          "Indicates the type of user. SUPER_USER \226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permission group."];
       apiAccess: ApiAccess.t option
         [@ocaml.doc
           "Indicates whether the user can use the GetProgrammaticAccessCredentials API to obtain credentials that can then be used to access other FinSpace Data API operations. ENABLED \226\128\147 The user has permissions to use the APIs. DISABLED \226\128\147 The user does not have permissions to use any APIs."];
@@ -1454,16 +1505,16 @@ module User =
           "The ARN identifier of an AWS user or role that is allowed to call the GetProgrammaticAccessCredentials API to obtain a credentials token for a specific FinSpace user. This must be an IAM role within your FinSpace account."];
       createTime: TimestampEpoch.t option
         [@ocaml.doc
-          "The timestamp at which the user account was created in FinSpace. The value is determined as epoch time in milliseconds."];
+          "The timestamp at which the user was created in FinSpace. The value is determined as epoch time in milliseconds."];
       lastEnabledTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was enabled. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user was activated. The value is determined as epoch time in milliseconds."];
       lastDisabledTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was disabled. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user was deactivated. The value is determined as epoch time in milliseconds."];
       lastModifiedTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was updated. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user was updated. The value is determined as epoch time in milliseconds."];
       lastLoginTime: TimestampEpoch.t option
         [@ocaml.doc
           "Describes the last time that the user logged into their account. The value is determined as epoch time in milliseconds."]}
@@ -1553,30 +1604,134 @@ module User =
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastLoginTime =
-        field_map json "lastLoginTime" TimestampEpoch.of_json in
+        field_map json__ "lastLoginTime" TimestampEpoch.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
       let lastDisabledTime =
-        field_map json "lastDisabledTime" TimestampEpoch.of_json in
+        field_map json__ "lastDisabledTime" TimestampEpoch.of_json in
       let lastEnabledTime =
-        field_map json "lastEnabledTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
+        field_map json__ "lastEnabledTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
       let apiAccessPrincipalArn =
-        field_map json "apiAccessPrincipalArn" RoleArn.of_json in
-      let apiAccess = field_map json "apiAccess" ApiAccess.of_json in
-      let type_ = field_map json "type" UserType.of_json in
-      let emailAddress = field_map json "emailAddress" Email.of_json in
-      let lastName = field_map json "lastName" LastName.of_json in
-      let firstName = field_map json "firstName" FirstName.of_json in
-      let status = field_map json "status" UserStatus.of_json in
-      let userId = field_map json "userId" UserId.of_json in
+        field_map json__ "apiAccessPrincipalArn" RoleArn.of_json in
+      let apiAccess = field_map json__ "apiAccess" ApiAccess.of_json in
+      let type_ = field_map json__ "type" UserType.of_json in
+      let emailAddress = field_map json__ "emailAddress" Email.of_json in
+      let lastName = field_map json__ "lastName" LastName.of_json in
+      let firstName = field_map json__ "firstName" FirstName.of_json in
+      let status = field_map json__ "status" UserStatus.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
       make ?lastLoginTime ?lastModifiedTime ?lastDisabledTime
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The details of the user account."]
+  end[@@ocaml.doc "The details of the user."]
+module UserByPermissionGroup =
+  struct
+    type nonrec t =
+      {
+      userId: UserId.t option
+        [@ocaml.doc "The unique identifier for the user."];
+      status: UserStatus.t option
+        [@ocaml.doc
+          "The current status of the user. CREATING \226\128\147 The user creation is in progress. ENABLED \226\128\147 The user is created and is currently active. DISABLED \226\128\147 The user is currently inactive."];
+      firstName: FirstName.t option
+        [@ocaml.doc "The first name of the user."];
+      lastName: LastName.t option [@ocaml.doc "The last name of the user."];
+      emailAddress: Email.t option
+        [@ocaml.doc
+          "The email address of the user. The email address serves as a unique identifier for each user and cannot be changed after it's created."];
+      type_: UserType.t option
+        [@ocaml.doc
+          "Indicates the type of user. SUPER_USER \226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permission group."];
+      apiAccess: ApiAccess.t option
+        [@ocaml.doc
+          "Indicates whether the user can access FinSpace API operations. ENABLED \226\128\147 The user has permissions to use the API operations. DISABLED \226\128\147 The user does not have permissions to use any API operations."];
+      apiAccessPrincipalArn: RoleArn.t option
+        [@ocaml.doc
+          "The IAM ARN identifier that is attached to FinSpace API calls."];
+      membershipStatus: PermissionGroupMembershipStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the user within a permission group. ADDITION_IN_PROGRESS \226\128\147 The user is currently being added to the permission group. ADDITION_SUCCESS \226\128\147 The user is successfully added to the permission group. REMOVAL_IN_PROGRESS \226\128\147 The user is currently being removed from the permission group."]}
+    let make ?userId =
+      fun ?status ->
+        fun ?firstName ->
+          fun ?lastName ->
+            fun ?emailAddress ->
+              fun ?type_ ->
+                fun ?apiAccess ->
+                  fun ?apiAccessPrincipalArn ->
+                    fun ?membershipStatus ->
+                      fun () ->
+                        {
+                          userId;
+                          status;
+                          firstName;
+                          lastName;
+                          emailAddress;
+                          type_;
+                          apiAccess;
+                          apiAccessPrincipalArn;
+                          membershipStatus
+                        }
+    let to_value x =
+      structure_to_value
+        [("userId", (Option.map x.userId ~f:UserId.to_value));
+        ("status", (Option.map x.status ~f:UserStatus.to_value));
+        ("firstName", (Option.map x.firstName ~f:FirstName.to_value));
+        ("lastName", (Option.map x.lastName ~f:LastName.to_value));
+        ("emailAddress", (Option.map x.emailAddress ~f:Email.to_value));
+        ("type", (Option.map x.type_ ~f:UserType.to_value));
+        ("apiAccess", (Option.map x.apiAccess ~f:ApiAccess.to_value));
+        ("apiAccessPrincipalArn",
+          (Option.map x.apiAccessPrincipalArn ~f:RoleArn.to_value));
+        ("membershipStatus",
+          (Option.map x.membershipStatus
+             ~f:PermissionGroupMembershipStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipStatus =
+        (Option.map ~f:PermissionGroupMembershipStatus.of_xml)
+          (Xml.child xml_arg0 "membershipStatus") in
+      let apiAccessPrincipalArn =
+        (Option.map ~f:RoleArn.of_xml)
+          (Xml.child xml_arg0 "apiAccessPrincipalArn") in
+      let apiAccess =
+        (Option.map ~f:ApiAccess.of_xml) (Xml.child xml_arg0 "apiAccess") in
+      let type_ = (Option.map ~f:UserType.of_xml) (Xml.child xml_arg0 "type") in
+      let emailAddress =
+        (Option.map ~f:Email.of_xml) (Xml.child xml_arg0 "emailAddress") in
+      let lastName =
+        (Option.map ~f:LastName.of_xml) (Xml.child xml_arg0 "lastName") in
+      let firstName =
+        (Option.map ~f:FirstName.of_xml) (Xml.child xml_arg0 "firstName") in
+      let status =
+        (Option.map ~f:UserStatus.of_xml) (Xml.child xml_arg0 "status") in
+      let userId =
+        (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
+      make ?membershipStatus ?apiAccessPrincipalArn ?apiAccess ?type_
+        ?emailAddress ?lastName ?firstName ?status ?userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipStatus =
+        field_map json__ "membershipStatus"
+          PermissionGroupMembershipStatus.of_json in
+      let apiAccessPrincipalArn =
+        field_map json__ "apiAccessPrincipalArn" RoleArn.of_json in
+      let apiAccess = field_map json__ "apiAccess" ApiAccess.of_json in
+      let type_ = field_map json__ "type" UserType.of_json in
+      let emailAddress = field_map json__ "emailAddress" Email.of_json in
+      let lastName = field_map json__ "lastName" LastName.of_json in
+      let firstName = field_map json__ "firstName" FirstName.of_json in
+      let status = field_map json__ "status" UserStatus.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
+      make ?membershipStatus ?apiAccessPrincipalArn ?apiAccess ?type_
+        ?emailAddress ?lastName ?firstName ?status ?userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure of a user associated with a permission group."]
 module PermissionGroup =
   struct
     type nonrec t =
@@ -1589,28 +1744,33 @@ module PermissionGroup =
         [@ocaml.doc "A brief description for the permission group."];
       applicationPermissions: ApplicationPermissionList.t option
         [@ocaml.doc
-          "Indicates the permissions that are granted to a specific group for accessing the FinSpace application. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
+          "Indicates the permissions that are granted to a specific group for accessing the FinSpace application. When assigning application permissions, be aware that the permission ManageUsersAndGroups allows users to grant themselves or others access to any functionality in their FinSpace environment's application. It should only be granted to trusted users. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. This is a privileged permission that allows users to grant themselves or others access to any functionality in the application. It should only be granted to trusted users. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
       createTime: TimestampEpoch.t option
         [@ocaml.doc
           "The timestamp at which the group was created in FinSpace. The value is determined as epoch time in milliseconds."];
       lastModifiedTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the permission group was updated. The value is determined as epoch time in milliseconds."]}
+          "Describes the last time the permission group was updated. The value is determined as epoch time in milliseconds."];
+      membershipStatus: PermissionGroupMembershipStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the user within a permission group. ADDITION_IN_PROGRESS \226\128\147 The user is currently being added to the permission group. ADDITION_SUCCESS \226\128\147 The user is successfully added to the permission group. REMOVAL_IN_PROGRESS \226\128\147 The user is currently being removed from the permission group."]}
     let make ?permissionGroupId =
       fun ?name ->
         fun ?description ->
           fun ?applicationPermissions ->
             fun ?createTime ->
               fun ?lastModifiedTime ->
-                fun () ->
-                  {
-                    permissionGroupId;
-                    name;
-                    description;
-                    applicationPermissions;
-                    createTime;
-                    lastModifiedTime
-                  }
+                fun ?membershipStatus ->
+                  fun () ->
+                    {
+                      permissionGroupId;
+                      name;
+                      description;
+                      applicationPermissions;
+                      createTime;
+                      lastModifiedTime;
+                      membershipStatus
+                    }
     let to_value x =
       structure_to_value
         [("permissionGroupId",
@@ -1623,9 +1783,15 @@ module PermissionGroup =
              ~f:ApplicationPermissionList.to_value));
         ("createTime", (Option.map x.createTime ~f:TimestampEpoch.to_value));
         ("lastModifiedTime",
-          (Option.map x.lastModifiedTime ~f:TimestampEpoch.to_value))]
+          (Option.map x.lastModifiedTime ~f:TimestampEpoch.to_value));
+        ("membershipStatus",
+          (Option.map x.membershipStatus
+             ~f:PermissionGroupMembershipStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let membershipStatus =
+        (Option.map ~f:PermissionGroupMembershipStatus.of_xml)
+          (Xml.child xml_arg0 "membershipStatus") in
       let lastModifiedTime =
         (Option.map ~f:TimestampEpoch.of_xml)
           (Xml.child xml_arg0 "lastModifiedTime") in
@@ -1644,25 +1810,75 @@ module PermissionGroup =
       let permissionGroupId =
         (Option.map ~f:PermissionGroupId.of_xml)
           (Xml.child xml_arg0 "permissionGroupId") in
-      make ?lastModifiedTime ?createTime ?applicationPermissions ?description
-        ?name ?permissionGroupId ()
+      make ?membershipStatus ?lastModifiedTime ?createTime
+        ?applicationPermissions ?description ?name ?permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let membershipStatus =
+        field_map json__ "membershipStatus"
+          PermissionGroupMembershipStatus.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
       let applicationPermissions =
-        field_map json "applicationPermissions"
+        field_map json__ "applicationPermissions"
           ApplicationPermissionList.of_json in
       let description =
-        field_map json "description" PermissionGroupDescription.of_json in
-      let name = field_map json "name" PermissionGroupName.of_json in
+        field_map json__ "description" PermissionGroupDescription.of_json in
+      let name = field_map json__ "name" PermissionGroupName.of_json in
       let permissionGroupId =
-        field_map json "permissionGroupId" PermissionGroupId.of_json in
-      make ?lastModifiedTime ?createTime ?applicationPermissions ?description
-        ?name ?permissionGroupId ()
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ?membershipStatus ?lastModifiedTime ?createTime
+        ?applicationPermissions ?description ?name ?permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The structure for a permission group."]
+module PermissionGroupByUser =
+  struct
+    type nonrec t =
+      {
+      permissionGroupId: PermissionGroupId.t option
+        [@ocaml.doc "The unique identifier for the permission group."];
+      name: PermissionGroupName.t option
+        [@ocaml.doc "The name of the permission group."];
+      membershipStatus: PermissionGroupMembershipStatus.t option
+        [@ocaml.doc
+          "Indicates the status of the user within a permission group. ADDITION_IN_PROGRESS \226\128\147 The user is currently being added to the permission group. ADDITION_SUCCESS \226\128\147 The user is successfully added to the permission group. REMOVAL_IN_PROGRESS \226\128\147 The user is currently being removed from the permission group."]}
+    let make ?permissionGroupId =
+      fun ?name ->
+        fun ?membershipStatus ->
+          fun () -> { permissionGroupId; name; membershipStatus }
+    let to_value x =
+      structure_to_value
+        [("permissionGroupId",
+           (Option.map x.permissionGroupId ~f:PermissionGroupId.to_value));
+        ("name", (Option.map x.name ~f:PermissionGroupName.to_value));
+        ("membershipStatus",
+          (Option.map x.membershipStatus
+             ~f:PermissionGroupMembershipStatus.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let membershipStatus =
+        (Option.map ~f:PermissionGroupMembershipStatus.of_xml)
+          (Xml.child xml_arg0 "membershipStatus") in
+      let name =
+        (Option.map ~f:PermissionGroupName.of_xml)
+          (Xml.child xml_arg0 "name") in
+      let permissionGroupId =
+        (Option.map ~f:PermissionGroupId.of_xml)
+          (Xml.child xml_arg0 "permissionGroupId") in
+      make ?membershipStatus ?name ?permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let membershipStatus =
+        field_map json__ "membershipStatus"
+          PermissionGroupMembershipStatus.of_json in
+      let name = field_map json__ "name" PermissionGroupName.of_json in
+      let permissionGroupId =
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ?membershipStatus ?name ?permissionGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The structure of a permission group associated with a user."]
 module Dataset =
   struct
     type nonrec t =
@@ -1760,20 +1976,20 @@ module Dataset =
       make ?alias ?schemaDefinition ?lastModifiedTime ?createTime ?ownerInfo
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let alias = field_map json "alias" AliasString.of_json in
+    let of_json json__ =
+      let alias = field_map json__ "alias" AliasString.of_json in
       let schemaDefinition =
-        field_map json "schemaDefinition" SchemaUnion.of_json in
+        field_map json__ "schemaDefinition" SchemaUnion.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
-      let ownerInfo = field_map json "ownerInfo" DatasetOwnerInfo.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
+      let ownerInfo = field_map json__ "ownerInfo" DatasetOwnerInfo.of_json in
       let datasetDescription =
-        field_map json "datasetDescription" DatasetDescription.of_json in
-      let kind = field_map json "kind" DatasetKind.of_json in
-      let datasetTitle = field_map json "datasetTitle" DatasetTitle.of_json in
-      let datasetArn = field_map json "datasetArn" DatasetArn.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+        field_map json__ "datasetDescription" DatasetDescription.of_json in
+      let kind = field_map json__ "kind" DatasetKind.of_json in
+      let datasetTitle = field_map json__ "datasetTitle" DatasetTitle.of_json in
+      let datasetArn = field_map json__ "datasetArn" DatasetArn.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?alias ?schemaDefinition ?lastModifiedTime ?createTime ?ownerInfo
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
     let to_json v = composed_to_json to_value v
@@ -1896,24 +2112,24 @@ module DataViewSummary =
         ?partitionColumns ?asOfTimestamp ?datasetId ?dataViewArn ?dataViewId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
-      let autoUpdate = field_map json "autoUpdate" Boolean.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" Boolean.of_json in
       let destinationTypeProperties =
-        field_map json "destinationTypeProperties"
+        field_map json__ "destinationTypeProperties"
           DataViewDestinationTypeParams.of_json in
-      let errorInfo = field_map json "errorInfo" DataViewErrorInfo.of_json in
-      let status = field_map json "status" DataViewStatus.of_json in
-      let sortColumns = field_map json "sortColumns" SortColumnList.of_json in
+      let errorInfo = field_map json__ "errorInfo" DataViewErrorInfo.of_json in
+      let status = field_map json__ "status" DataViewStatus.of_json in
+      let sortColumns = field_map json__ "sortColumns" SortColumnList.of_json in
       let partitionColumns =
-        field_map json "partitionColumns" PartitionColumnList.of_json in
+        field_map json__ "partitionColumns" PartitionColumnList.of_json in
       let asOfTimestamp =
-        field_map json "asOfTimestamp" TimestampEpoch.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
-      let dataViewArn = field_map json "dataViewArn" DataViewArn.of_json in
-      let dataViewId = field_map json "dataViewId" DataViewId.of_json in
+        field_map json__ "asOfTimestamp" TimestampEpoch.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
+      let dataViewArn = field_map json__ "dataViewArn" DataViewArn.of_json in
+      let dataViewId = field_map json__ "dataViewId" DataViewId.of_json in
       make ?lastModifiedTime ?createTime ?autoUpdate
         ?destinationTypeProperties ?errorInfo ?status ?sortColumns
         ?partitionColumns ?asOfTimestamp ?datasetId ?dataViewArn ?dataViewId
@@ -2052,24 +2268,24 @@ module ChangesetSummary =
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updatedByChangesetId =
-        field_map json "updatedByChangesetId" ChangesetId.of_json in
+        field_map json__ "updatedByChangesetId" ChangesetId.of_json in
       let updatesChangesetId =
-        field_map json "updatesChangesetId" ChangesetId.of_json in
+        field_map json__ "updatesChangesetId" ChangesetId.of_json in
       let activeFromTimestamp =
-        field_map json "activeFromTimestamp" TimestampEpoch.of_json in
+        field_map json__ "activeFromTimestamp" TimestampEpoch.of_json in
       let activeUntilTimestamp =
-        field_map json "activeUntilTimestamp" TimestampEpoch.of_json in
-      let errorInfo = field_map json "errorInfo" ChangesetErrorInfo.of_json in
-      let status = field_map json "status" IngestionStatus.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
-      let formatParams = field_map json "formatParams" FormatParams.of_json in
-      let sourceParams = field_map json "sourceParams" SourceParams.of_json in
-      let changeType = field_map json "changeType" ChangeType.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
-      let changesetArn = field_map json "changesetArn" ChangesetArn.of_json in
-      let changesetId = field_map json "changesetId" ChangesetId.of_json in
+        field_map json__ "activeUntilTimestamp" TimestampEpoch.of_json in
+      let errorInfo = field_map json__ "errorInfo" ChangesetErrorInfo.of_json in
+      let status = field_map json__ "status" IngestionStatus.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
+      let formatParams = field_map json__ "formatParams" FormatParams.of_json in
+      let sourceParams = field_map json__ "sourceParams" SourceParams.of_json in
+      let changeType = field_map json__ "changeType" ChangeType.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
+      let changesetArn = field_map json__ "changesetArn" ChangesetArn.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
       make ?updatedByChangesetId ?updatesChangesetId ?activeFromTimestamp
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
@@ -2107,10 +2323,113 @@ module StringValueMaxLength1000 =
     let of_json j = string_of_json ~kind:"stringValueMaxLength1000" j
     let to_json = simple_to_json to_value
   end
+module AccessKeyId =
+  struct
+    type nonrec t = string
+    let context_ = "AccessKeyId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:255) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AccessKeyId" j
+    let to_json = simple_to_json to_value
+  end
+module SecretAccessKey =
+  struct
+    type nonrec t = string
+    let context_ = "SecretAccessKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SecretAccessKey" j
+    let to_json = simple_to_json to_value
+  end
+module SessionToken =
+  struct
+    type nonrec t = string
+    let context_ = "SessionToken"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1000) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\s\\S]*\\S[\\s\\S]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SessionToken" j
+    let to_json = simple_to_json to_value
+  end
+module S3BucketName =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*\\S.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName" j
+    let to_json = simple_to_json to_value
+  end
+module S3Key =
+  struct
+    type nonrec t = string
+    let context_ = "S3Key"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:1024) >>=
+                  (fun () -> check_pattern i ~pattern:"^.*\\S.*$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3Key" j
+    let to_json = simple_to_json to_value
+  end
 module ResourcePermissionsList =
   struct
     type nonrec t = ResourcePermission.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourcePermission.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2147,8 +2466,8 @@ module AccessDeniedException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2174,9 +2493,9 @@ module ConflictException =
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ErrorMessage__lc1.of_json in
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" ErrorMessage__lc1.of_json in
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request conflicts with an existing resource."]
@@ -2195,8 +2514,8 @@ module InternalServerException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2222,9 +2541,9 @@ module ResourceNotFoundException =
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ErrorMessage__lc1.of_json in
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" ErrorMessage__lc1.of_json in
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more resources can't be found."]
@@ -2261,9 +2580,9 @@ module ValidationException =
           (Xml.child xml_arg0 "message") in
       make ?reason ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ErrorMessage__lc1.of_json in
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "reason" ErrorMessage__lc1.of_json in
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?reason ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2311,8 +2630,7 @@ module Password =
   end
 module PaginationToken =
   struct
-    type nonrec t = string[@@ocaml.doc
-                            "Pagination token for list operations"]
+    type nonrec t = string
     let context_ = "PaginationToken"
     let make i = i
     let of_string x = x
@@ -2322,11 +2640,14 @@ module PaginationToken =
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"PaginationToken" j
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc "Pagination token for list operations"]
+  end
 module UserList =
   struct
     type nonrec t = User.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:User.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2348,8 +2669,7 @@ module UserList =
   end
 module ResultLimit =
   struct
-    type nonrec t = int[@@ocaml.doc
-                         "Maximum number of results to be returned as part of a list operation"]
+    type nonrec t = int
     let make i =
       let open Result in
         ok_or_failwith
@@ -2364,12 +2684,43 @@ module ResultLimit =
         (string_of_xml ~kind:"an integer for ResultLimit" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
-  end[@@ocaml.doc
-       "Maximum number of results to be returned as part of a list operation"]
+  end
+module UserByPermissionGroupList =
+  struct
+    type nonrec t = UserByPermissionGroup.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:UserByPermissionGroup.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:UserByPermissionGroup.of_xml)
+    let of_json j =
+      list_of_json ~kind:"UserByPermissionGroupList"
+        ~of_json:UserByPermissionGroup.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module PermissionGroupList =
   struct
     type nonrec t = PermissionGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PermissionGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2391,10 +2742,42 @@ module PermissionGroupList =
         ~of_json:PermissionGroup.of_json j
     let to_json v = composed_to_json to_value v
   end
+module PermissionGroupByUserList =
+  struct
+    type nonrec t = PermissionGroupByUser.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PermissionGroupByUser.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PermissionGroupByUser.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PermissionGroupByUserList"
+        ~of_json:PermissionGroupByUser.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DatasetList =
   struct
     type nonrec t = Dataset.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Dataset.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2419,6 +2802,9 @@ module DataViewList =
   struct
     type nonrec t = DataViewSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DataViewSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2443,6 +2829,9 @@ module ChangesetList =
   struct
     type nonrec t = ChangesetSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ChangesetSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2563,13 +2952,13 @@ module Credentials =
           (Xml.child xml_arg0 "accessKeyId") in
       make ?sessionToken ?secretAccessKey ?accessKeyId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionToken =
-        field_map json "sessionToken" StringValueMaxLength1000.of_json in
+        field_map json__ "sessionToken" StringValueMaxLength1000.of_json in
       let secretAccessKey =
-        field_map json "secretAccessKey" StringValueMaxLength1000.of_json in
+        field_map json__ "secretAccessKey" StringValueMaxLength1000.of_json in
       let accessKeyId =
-        field_map json "accessKeyId" StringValueLength1to255__lc1.of_json in
+        field_map json__ "accessKeyId" StringValueLength1to255__lc1.of_json in
       make ?sessionToken ?secretAccessKey ?accessKeyId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Short term API credentials."]
@@ -2579,8 +2968,8 @@ module SessionDuration =
     let make i =
       let open Result in
         ok_or_failwith
-          ((check_int64_max i ~max:720L) >>=
-             (fun () -> check_int64_min i ~min:60L));
+          ((check_int64_max i ~max:60L) >>=
+             (fun () -> check_int64_min i ~min:1L));
         i
     let of_string = Int64.of_string
     let to_value x = `Long x
@@ -2609,6 +2998,84 @@ module IdType =
     let of_json j = string_of_json ~kind:"IdType" j
     let to_json = simple_to_json to_value
   end
+module AwsCredentials =
+  struct
+    type nonrec t =
+      {
+      accessKeyId: AccessKeyId.t option
+        [@ocaml.doc "The unique identifier for the security credentials."];
+      secretAccessKey: SecretAccessKey.t option
+        [@ocaml.doc
+          "The secret access key that can be used to sign requests."];
+      sessionToken: SessionToken.t option
+        [@ocaml.doc "The token that users must pass to use the credentials."];
+      expiration: TimestampEpoch.t option
+        [@ocaml.doc "The Epoch time when the current credentials expire."]}
+    let make ?accessKeyId =
+      fun ?secretAccessKey ->
+        fun ?sessionToken ->
+          fun ?expiration ->
+            fun () ->
+              { accessKeyId; secretAccessKey; sessionToken; expiration }
+    let to_value x =
+      structure_to_value
+        [("accessKeyId", (Option.map x.accessKeyId ~f:AccessKeyId.to_value));
+        ("secretAccessKey",
+          (Option.map x.secretAccessKey ~f:SecretAccessKey.to_value));
+        ("sessionToken",
+          (Option.map x.sessionToken ~f:SessionToken.to_value));
+        ("expiration", (Option.map x.expiration ~f:TimestampEpoch.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiration =
+        (Option.map ~f:TimestampEpoch.of_xml)
+          (Xml.child xml_arg0 "expiration") in
+      let sessionToken =
+        (Option.map ~f:SessionToken.of_xml)
+          (Xml.child xml_arg0 "sessionToken") in
+      let secretAccessKey =
+        (Option.map ~f:SecretAccessKey.of_xml)
+          (Xml.child xml_arg0 "secretAccessKey") in
+      let accessKeyId =
+        (Option.map ~f:AccessKeyId.of_xml) (Xml.child xml_arg0 "accessKeyId") in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiration = field_map json__ "expiration" TimestampEpoch.of_json in
+      let sessionToken = field_map json__ "sessionToken" SessionToken.of_json in
+      let secretAccessKey =
+        field_map json__ "secretAccessKey" SecretAccessKey.of_json in
+      let accessKeyId = field_map json__ "accessKeyId" AccessKeyId.of_json in
+      make ?expiration ?sessionToken ?secretAccessKey ?accessKeyId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The credentials required to access the external Dataview from the S3 location."]
+module S3Location =
+  struct
+    type nonrec t =
+      {
+      bucket: S3BucketName.t option [@ocaml.doc "The name of the S3 bucket."];
+      key: S3Key.t option
+        [@ocaml.doc
+          "The path of the folder, within the S3 bucket that contains the Dataset."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("bucket", (Option.map x.bucket ~f:S3BucketName.to_value));
+        ("key", (Option.map x.key ~f:S3Key.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:S3Key.of_xml) (Xml.child xml_arg0 "key") in
+      let bucket =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucket") in
+      make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "key" S3Key.of_json in
+      let bucket = field_map json__ "bucket" S3BucketName.of_json in
+      make ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The location of an external Dataview in an S3 bucket."]
 module DatasetStatus =
   struct
     type nonrec t =
@@ -2655,11 +3122,25 @@ module LimitExceededException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage__lc1.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage__lc1.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A limit has exceeded."]
+module StatusCode =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for StatusCode" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module PermissionGroupParams =
   struct
     type nonrec t =
@@ -2688,11 +3169,11 @@ module PermissionGroupParams =
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?datasetPermissions ?permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetPermissions =
-        field_map json "datasetPermissions" ResourcePermissionsList.of_json in
+        field_map json__ "datasetPermissions" ResourcePermissionsList.of_json in
       let permissionGroupId =
-        field_map json "permissionGroupId" PermissionGroupId.of_json in
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?datasetPermissions ?permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2702,7 +3183,7 @@ module UpdateUserResponse =
     type nonrec t =
       {
       userId: UserId.t option
-        [@ocaml.doc "The unique identifier of the updated user account."]}
+        [@ocaml.doc "The unique identifier of the updated user."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -2785,20 +3266,22 @@ module UpdateUserResponse =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "userId" UserId.of_json in make ?userId ()
+    let of_json json__ =
+      let userId = field_map json__ "userId" UserId.of_json in
+      make ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the details of the specified user account. You cannot update the userId for a user."]
+       "Modifies the details of the specified user. You cannot update the userId for a user."]
 module UpdateUserRequest =
   struct
     type nonrec t =
       {
       userId: UserId.t
-        [@ocaml.doc "The unique identifier for the user account to update."];
+        [@ocaml.doc
+          "The unique identifier for the user that you want to update."];
       type_: UserType.t option
         [@ocaml.doc
-          "The option to indicate the type of user. SUPER_USER\226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permissions group."];
+          "The option to indicate the type of user. SUPER_USER\226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permission group."];
       firstName: FirstName.t option
         [@ocaml.doc "The first name of the user."];
       lastName: LastName.t option [@ocaml.doc "The last name of the user."];
@@ -2858,20 +3341,20 @@ module UpdateUserRequest =
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ?type_ ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let apiAccessPrincipalArn =
-        field_map json "apiAccessPrincipalArn" RoleArn.of_json in
-      let apiAccess = field_map json "apiAccess" ApiAccess.of_json in
-      let lastName = field_map json "lastName" LastName.of_json in
-      let firstName = field_map json "firstName" FirstName.of_json in
-      let type_ = field_map json "type" UserType.of_json in
-      let userId = field_map_exn json "userId" UserId.of_json in
+        field_map json__ "apiAccessPrincipalArn" RoleArn.of_json in
+      let apiAccess = field_map json__ "apiAccess" ApiAccess.of_json in
+      let lastName = field_map json__ "lastName" LastName.of_json in
+      let firstName = field_map json__ "firstName" FirstName.of_json in
+      let type_ = field_map json__ "type" UserType.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ?type_ ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the details of the specified user account. You cannot update the userId for a user."]
+       "Modifies the details of the specified user. You cannot update the userId for a user."]
 module UpdatePermissionGroupResponse =
   struct
     type nonrec t =
@@ -2963,9 +3446,9 @@ module UpdatePermissionGroupResponse =
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionGroupId =
-        field_map json "permissionGroupId" PermissionGroupId.of_json in
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2983,7 +3466,7 @@ module UpdatePermissionGroupRequest =
         [@ocaml.doc "A brief description for the permission group."];
       applicationPermissions: ApplicationPermissionList.t option
         [@ocaml.doc
-          "The permissions that are granted to a specific group for accessing the FinSpace application. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
+          "The permissions that are granted to a specific group for accessing the FinSpace application. When assigning application permissions, be aware that the permission ManageUsersAndGroups allows users to grant themselves or others access to any functionality in their FinSpace environment's application. It should only be granted to trusted users. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. This is a privileged permission that allows users to grant themselves or others access to any functionality in the application. It should only be granted to trusted users. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A token that ensures idempotency. This token expires in 10 minutes."]}
@@ -3031,16 +3514,16 @@ module UpdatePermissionGroupRequest =
       make ?clientToken ?applicationPermissions ?description ?name
         ~permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let applicationPermissions =
-        field_map json "applicationPermissions"
+        field_map json__ "applicationPermissions"
           ApplicationPermissionList.of_json in
       let description =
-        field_map json "description" PermissionGroupDescription.of_json in
-      let name = field_map json "name" PermissionGroupName.of_json in
+        field_map json__ "description" PermissionGroupDescription.of_json in
+      let name = field_map json__ "name" PermissionGroupName.of_json in
       let permissionGroupId =
-        field_map_exn json "permissionGroupId" PermissionGroupId.of_json in
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?clientToken ?applicationPermissions ?description ?name
         ~permissionGroupId ()
     let to_json v = composed_to_json to_value v
@@ -3134,8 +3617,8 @@ module UpdateDatasetResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from an UpdateDataset operation"]
@@ -3211,17 +3694,17 @@ module UpdateDatasetRequest =
       make ?schemaDefinition ?alias ?datasetDescription ~kind ~datasetTitle
         ~datasetId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaDefinition =
-        field_map json "schemaDefinition" SchemaUnion.of_json in
-      let alias = field_map json "alias" AliasString.of_json in
+        field_map json__ "schemaDefinition" SchemaUnion.of_json in
+      let alias = field_map json__ "alias" AliasString.of_json in
       let datasetDescription =
-        field_map json "datasetDescription" DatasetDescription.of_json in
-      let kind = field_map_exn json "kind" DatasetKind.of_json in
+        field_map json__ "datasetDescription" DatasetDescription.of_json in
+      let kind = field_map_exn json__ "kind" DatasetKind.of_json in
       let datasetTitle =
-        field_map_exn json "datasetTitle" DatasetTitle.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map_exn json__ "datasetTitle" DatasetTitle.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ?schemaDefinition ?alias ?datasetDescription ~kind ~datasetTitle
         ~datasetId ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -3321,9 +3804,9 @@ module UpdateChangesetResponse =
         (Option.map ~f:ChangesetId.of_xml) (Xml.child xml_arg0 "changesetId") in
       make ?datasetId ?changesetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
-      let changesetId = field_map json "changesetId" ChangesetId.of_json in
+    let of_json json__ =
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
       make ?datasetId ?changesetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from a update changeset operation."]
@@ -3385,14 +3868,15 @@ module UpdateChangesetRequest =
       make ~formatParams ~sourceParams ~changesetId ~datasetId ?clientToken
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let formatParams =
-        field_map_exn json "formatParams" FormatParams.of_json in
+        field_map_exn json__ "formatParams" FormatParams.of_json in
       let sourceParams =
-        field_map_exn json "sourceParams" SourceParams.of_json in
-      let changesetId = field_map_exn json "changesetId" ChangesetId.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map_exn json__ "sourceParams" SourceParams.of_json in
+      let changesetId =
+        field_map_exn json__ "changesetId" ChangesetId.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~formatParams ~sourceParams ~changesetId ~datasetId ?clientToken
         ()
     let to_json v = composed_to_json to_value v
@@ -3406,7 +3890,7 @@ module ResetUserPasswordResponse =
           "The unique identifier of the user that a new password is generated for."];
       temporaryPassword: Password.t option
         [@ocaml.doc
-          "A randomly generated temporary password for the requested user account. This password expires in 7 days."]}
+          "A randomly generated temporary password for the requested user. This password expires in 7 days."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -3495,10 +3979,10 @@ module ResetUserPasswordResponse =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?temporaryPassword ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let temporaryPassword =
-        field_map json "temporaryPassword" Password.of_json in
-      let userId = field_map json "userId" UserId.of_json in
+        field_map json__ "temporaryPassword" Password.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
       make ?temporaryPassword ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3527,9 +4011,9 @@ module ResetUserPasswordRequest =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let userId = field_map_exn json "userId" UserId.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
       make ?clientToken ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3538,8 +4022,7 @@ module ListUsersResponse =
   struct
     type nonrec t =
       {
-      users: UserList.t option
-        [@ocaml.doc "A list of all the user accounts."];
+      users: UserList.t option [@ocaml.doc "A list of all the users."];
       nextToken: PaginationToken.t option
         [@ocaml.doc
           "A token that indicates where a results page should begin."]}
@@ -3611,12 +4094,12 @@ module ListUsersResponse =
         (Option.map ~f:UserList.of_xml) (Xml.child xml_arg0 "users") in
       make ?nextToken ?users ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let users = field_map json "users" UserList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let users = field_map json__ "users" UserList.of_json in
       make ?nextToken ?users ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all available user accounts in FinSpace."]
+  end[@@ocaml.doc "Lists all available users in FinSpace."]
 module ListUsersRequest =
   struct
     type nonrec t =
@@ -3643,12 +4126,152 @@ module ListUsersRequest =
           (Xml.child xml_arg0 "nextToken") in
       make ~maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map_exn json "maxResults" ResultLimit.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map_exn json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ~maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Lists all available user accounts in FinSpace."]
+  end[@@ocaml.doc "Lists all available users in FinSpace."]
+module ListUsersByPermissionGroupResponse =
+  struct
+    type nonrec t =
+      {
+      users: UserByPermissionGroupList.t option
+        [@ocaml.doc
+          "Lists details of all users in a specific permission group."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?users = fun ?nextToken -> fun () -> { users; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("users",
+           (Option.map x.users ~f:UserByPermissionGroupList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let users =
+        (Option.map ~f:UserByPermissionGroupList.of_xml)
+          (Xml.child xml_arg0 "users") in
+      make ?nextToken ?users ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let users = field_map json__ "users" UserByPermissionGroupList.of_json in
+      make ?nextToken ?users ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists details of all the users in a specific permission group."]
+module ListUsersByPermissionGroupRequest =
+  struct
+    type nonrec t =
+      {
+      permissionGroupId: PermissionGroupId.t
+        [@ocaml.doc "The unique identifier for the permission group."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: ResultLimit.t
+        [@ocaml.doc "The maximum number of results per page."]}
+    let context_ = "ListUsersByPermissionGroupRequest"
+    let make ?nextToken =
+      fun ~permissionGroupId ->
+        fun ~maxResults ->
+          fun () -> { nextToken; permissionGroupId; maxResults }
+    let to_value x =
+      structure_to_value
+        [("permissionGroupId",
+           (Some (PermissionGroupId.to_value x.permissionGroupId)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Some (ResultLimit.to_value x.maxResults)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        ResultLimit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let permissionGroupId =
+        PermissionGroupId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
+      make ~maxResults ?nextToken ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map_exn json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let permissionGroupId =
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ~maxResults ?nextToken ~permissionGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists details of all the users in a specific permission group."]
 module ListPermissionGroupsResponse =
   struct
     type nonrec t =
@@ -3729,10 +4352,10 @@ module ListPermissionGroupsResponse =
           (Xml.child xml_arg0 "permissionGroups") in
       make ?nextToken ?permissionGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       let permissionGroups =
-        field_map json "permissionGroups" PermissionGroupList.of_json in
+        field_map json__ "permissionGroups" PermissionGroupList.of_json in
       make ?nextToken ?permissionGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all available permission groups in FinSpace."]
@@ -3762,12 +4385,149 @@ module ListPermissionGroupsRequest =
           (Xml.child xml_arg0 "nextToken") in
       make ~maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map_exn json "maxResults" ResultLimit.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map_exn json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ~maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all available permission groups in FinSpace."]
+module ListPermissionGroupsByUserResponse =
+  struct
+    type nonrec t =
+      {
+      permissionGroups: PermissionGroupByUserList.t option
+        [@ocaml.doc "A list of returned permission groups."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permissionGroups =
+      fun ?nextToken -> fun () -> { permissionGroups; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permissionGroups",
+           (Option.map x.permissionGroups
+              ~f:PermissionGroupByUserList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let permissionGroups =
+        (Option.map ~f:PermissionGroupByUserList.of_xml)
+          (Xml.child xml_arg0 "permissionGroups") in
+      make ?nextToken ?permissionGroups ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let permissionGroups =
+        field_map json__ "permissionGroups" PermissionGroupByUserList.of_json in
+      make ?nextToken ?permissionGroups ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the permission groups that are associated with a specific user."]
+module ListPermissionGroupsByUserRequest =
+  struct
+    type nonrec t =
+      {
+      userId: UserId.t [@ocaml.doc "The unique identifier for the user."];
+      nextToken: PaginationToken.t option
+        [@ocaml.doc
+          "A token that indicates where a results page should begin."];
+      maxResults: ResultLimit.t
+        [@ocaml.doc "The maximum number of results per page."]}
+    let context_ = "ListPermissionGroupsByUserRequest"
+    let make ?nextToken =
+      fun ~userId ->
+        fun ~maxResults -> fun () -> { nextToken; userId; maxResults }
+    let to_value x =
+      structure_to_value
+        [("userId", (Some (UserId.to_value x.userId)));
+        ("nextToken", (Option.map x.nextToken ~f:PaginationToken.to_value));
+        ("maxResults", (Some (ResultLimit.to_value x.maxResults)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        ResultLimit.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "maxResults") in
+      let nextToken =
+        (Option.map ~f:PaginationToken.of_xml)
+          (Xml.child xml_arg0 "nextToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
+      make ~maxResults ?nextToken ~userId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map_exn json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
+      make ~maxResults ?nextToken ~userId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists all the permission groups that are associated with a specific user."]
 module ListDatasetsResponse =
   struct
     type nonrec t =
@@ -3853,9 +4613,9 @@ module ListDatasetsResponse =
         (Option.map ~f:DatasetList.of_xml) (Xml.child xml_arg0 "datasets") in
       make ?nextToken ?datasets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let datasets = field_map json "datasets" DatasetList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let datasets = field_map json__ "datasets" DatasetList.of_json in
       make ?nextToken ?datasets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for the ListDatasets operation"]
@@ -3883,9 +4643,9 @@ module ListDatasetsRequest =
           (Xml.child xml_arg0 "nextToken") in
       make ?maxResults ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ResultLimit.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ?maxResults ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request for the ListDatasets operation."]
@@ -3975,9 +4735,9 @@ module ListDataViewsResponse =
           (Xml.child xml_arg0 "nextToken") in
       make ?dataViews ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataViews = field_map json "dataViews" DataViewList.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
+    let of_json json__ =
+      let dataViews = field_map json__ "dataViews" DataViewList.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
       make ?dataViews ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists all available Dataviews for a Dataset."]
@@ -4014,10 +4774,10 @@ module ListDataViewsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ?maxResults ?nextToken ~datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" ResultLimit.of_json in
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
       make ?maxResults ?nextToken ~datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request for a list data views."]
@@ -4118,9 +4878,9 @@ module ListChangesetsResponse =
           (Xml.child xml_arg0 "changesets") in
       make ?nextToken ?changesets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let changesets = field_map json "changesets" ChangesetList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let changesets = field_map json__ "changesets" ChangesetList.of_json in
       make ?nextToken ?changesets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4158,10 +4918,10 @@ module ListChangesetsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ?nextToken ?maxResults ~datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" PaginationToken.of_json in
-      let maxResults = field_map json "maxResults" ResultLimit.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" PaginationToken.of_json in
+      let maxResults = field_map json__ "maxResults" ResultLimit.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
       make ?nextToken ?maxResults ~datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4253,10 +5013,11 @@ module GetWorkingLocationResponse =
           (Xml.child xml_arg0 "s3Uri") in
       make ?s3Bucket ?s3Path ?s3Uri ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let s3Bucket = field_map json "s3Bucket" StringValueLength1to63.of_json in
-      let s3Path = field_map json "s3Path" StringValueLength1to1024.of_json in
-      let s3Uri = field_map json "s3Uri" StringValueLength1to1024.of_json in
+    let of_json json__ =
+      let s3Bucket =
+        field_map json__ "s3Bucket" StringValueLength1to63.of_json in
+      let s3Path = field_map json__ "s3Path" StringValueLength1to1024.of_json in
+      let s3Uri = field_map json__ "s3Uri" StringValueLength1to1024.of_json in
       make ?s3Bucket ?s3Path ?s3Uri ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4280,8 +5041,8 @@ module GetWorkingLocationRequest =
           (Xml.child xml_arg0 "locationType") in
       make ?locationType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let locationType = field_map json "locationType" LocationType.of_json in
+    let of_json json__ =
+      let locationType = field_map json__ "locationType" LocationType.of_json in
       make ?locationType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4291,11 +5052,10 @@ module GetUserResponse =
     type nonrec t =
       {
       userId: UserId.t option
-        [@ocaml.doc
-          "The unique identifier for the user account that is retrieved."];
+        [@ocaml.doc "The unique identifier for the user that is retrieved."];
       status: UserStatus.t option
         [@ocaml.doc
-          "The current status of the user account. CREATING \226\128\147 The user account creation is in progress. ENABLED \226\128\147 The user account is created and is currently active. DISABLED \226\128\147 The user account is currently inactive."];
+          "The current status of the user. CREATING \226\128\147 The creation is in progress. ENABLED \226\128\147 The user is created and is currently active. DISABLED \226\128\147 The user is currently inactive."];
       firstName: FirstName.t option
         [@ocaml.doc "The first name of the user."];
       lastName: LastName.t option [@ocaml.doc "The last name of the user."];
@@ -4303,7 +5063,7 @@ module GetUserResponse =
         [@ocaml.doc "The email address that is associated with the user."];
       type_: UserType.t option
         [@ocaml.doc
-          "Indicates the type of user. SUPER_USER \226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permissions group."];
+          "Indicates the type of user. SUPER_USER \226\128\147 A user with permission to all the functionality and data in FinSpace. APP_USER \226\128\147 A user with specific permissions in FinSpace. The users are assigned permissions by adding them to a permission group."];
       apiAccess: ApiAccess.t option
         [@ocaml.doc
           "Indicates whether the user can use the GetProgrammaticAccessCredentials API to obtain credentials that can then be used to access other FinSpace Data API operations. ENABLED \226\128\147 The user has permissions to use the APIs. DISABLED \226\128\147 The user does not have permissions to use any APIs."];
@@ -4312,16 +5072,16 @@ module GetUserResponse =
           "The ARN identifier of an AWS user or role that is allowed to call the GetProgrammaticAccessCredentials API to obtain a credentials token for a specific FinSpace user. This must be an IAM role within your FinSpace account."];
       createTime: TimestampEpoch.t option
         [@ocaml.doc
-          "The timestamp at which the user account was created in FinSpace. The value is determined as epoch time in milliseconds."];
+          "The timestamp at which the user was created in FinSpace. The value is determined as epoch time in milliseconds."];
       lastEnabledTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was enabled. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user was activated. The value is determined as epoch time in milliseconds."];
       lastDisabledTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was disabled. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user was deactivated. The value is determined as epoch time in milliseconds."];
       lastModifiedTime: TimestampEpoch.t option
         [@ocaml.doc
-          "Describes the last time the user account was updated. The value is determined as epoch time in milliseconds."];
+          "Describes the last time the user details were updated. The value is determined as epoch time in milliseconds."];
       lastLoginTime: TimestampEpoch.t option
         [@ocaml.doc
           "Describes the last time that the user logged into their account. The value is determined as epoch time in milliseconds."]}
@@ -4474,25 +5234,25 @@ module GetUserResponse =
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastLoginTime =
-        field_map json "lastLoginTime" TimestampEpoch.of_json in
+        field_map json__ "lastLoginTime" TimestampEpoch.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
       let lastDisabledTime =
-        field_map json "lastDisabledTime" TimestampEpoch.of_json in
+        field_map json__ "lastDisabledTime" TimestampEpoch.of_json in
       let lastEnabledTime =
-        field_map json "lastEnabledTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
+        field_map json__ "lastEnabledTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
       let apiAccessPrincipalArn =
-        field_map json "apiAccessPrincipalArn" RoleArn.of_json in
-      let apiAccess = field_map json "apiAccess" ApiAccess.of_json in
-      let type_ = field_map json "type" UserType.of_json in
-      let emailAddress = field_map json "emailAddress" Email.of_json in
-      let lastName = field_map json "lastName" LastName.of_json in
-      let firstName = field_map json "firstName" FirstName.of_json in
-      let status = field_map json "status" UserStatus.of_json in
-      let userId = field_map json "userId" UserId.of_json in
+        field_map json__ "apiAccessPrincipalArn" RoleArn.of_json in
+      let apiAccess = field_map json__ "apiAccess" ApiAccess.of_json in
+      let type_ = field_map json__ "type" UserType.of_json in
+      let emailAddress = field_map json__ "emailAddress" Email.of_json in
+      let lastName = field_map json__ "lastName" LastName.of_json in
+      let firstName = field_map json__ "firstName" FirstName.of_json in
+      let status = field_map json__ "status" UserStatus.of_json in
+      let userId = field_map json__ "userId" UserId.of_json in
       make ?lastLoginTime ?lastModifiedTime ?lastDisabledTime
         ?lastEnabledTime ?createTime ?apiAccessPrincipalArn ?apiAccess ?type_
         ?emailAddress ?lastName ?firstName ?status ?userId ()
@@ -4514,8 +5274,8 @@ module GetUserRequest =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map_exn json "userId" UserId.of_json in
+    let of_json json__ =
+      let userId = field_map_exn json__ "userId" UserId.of_json in
       make ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Retrieves details for a specific user."]
@@ -4598,10 +5358,10 @@ module GetProgrammaticAccessCredentialsResponse =
         (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "credentials") in
       make ?durationInMinutes ?credentials ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let durationInMinutes =
-        field_map json "durationInMinutes" SessionDuration.of_json in
-      let credentials = field_map json "credentials" Credentials.of_json in
+        field_map json__ "durationInMinutes" SessionDuration.of_json in
+      let credentials = field_map json__ "credentials" Credentials.of_json in
       make ?durationInMinutes ?credentials ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for GetProgrammaticAccessCredentials operation"]
@@ -4632,13 +5392,251 @@ module GetProgrammaticAccessCredentialsRequest =
           (Xml.child xml_arg0 "durationInMinutes") in
       make ~environmentId ?durationInMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let environmentId = field_map_exn json "environmentId" IdType.of_json in
+    let of_json json__ =
+      let environmentId = field_map_exn json__ "environmentId" IdType.of_json in
       let durationInMinutes =
-        field_map json "durationInMinutes" SessionDuration.of_json in
+        field_map json__ "durationInMinutes" SessionDuration.of_json in
       make ~environmentId ?durationInMinutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request for GetProgrammaticAccessCredentials operation"]
+module GetPermissionGroupResponse =
+  struct
+    type nonrec t = {
+      permissionGroup: PermissionGroup.t option }
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?permissionGroup = fun () -> { permissionGroup }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("permissionGroup",
+           (Option.map x.permissionGroup ~f:PermissionGroup.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let permissionGroup =
+        (Option.map ~f:PermissionGroup.of_xml)
+          (Xml.child xml_arg0 "permissionGroup") in
+      make ?permissionGroup ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let permissionGroup =
+        field_map json__ "permissionGroup" PermissionGroup.of_json in
+      make ?permissionGroup ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the details of a specific permission group."]
+module GetPermissionGroupRequest =
+  struct
+    type nonrec t =
+      {
+      permissionGroupId: PermissionGroupId.t
+        [@ocaml.doc "The unique identifier for the permission group."]}
+    let context_ = "GetPermissionGroupRequest"
+    let make ~permissionGroupId = fun () -> { permissionGroupId }
+    let to_value x =
+      structure_to_value
+        [("permissionGroupId",
+           (Some (PermissionGroupId.to_value x.permissionGroupId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let permissionGroupId =
+        PermissionGroupId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
+      make ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let permissionGroupId =
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ~permissionGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Retrieves the details of a specific permission group."]
+module GetExternalDataViewAccessDetailsResponse =
+  struct
+    type nonrec t =
+      {
+      credentials: AwsCredentials.t option
+        [@ocaml.doc
+          "The credentials required to access the external Dataview from the S3 location."];
+      s3Location: S3Location.t option
+        [@ocaml.doc "The location where the external Dataview is stored."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?credentials =
+      fun ?s3Location -> fun () -> { credentials; s3Location }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("credentials",
+           (Option.map x.credentials ~f:AwsCredentials.to_value));
+        ("s3Location", (Option.map x.s3Location ~f:S3Location.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Location =
+        (Option.map ~f:S3Location.of_xml) (Xml.child xml_arg0 "s3Location") in
+      let credentials =
+        (Option.map ~f:AwsCredentials.of_xml)
+          (Xml.child xml_arg0 "credentials") in
+      make ?s3Location ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Location = field_map json__ "s3Location" S3Location.of_json in
+      let credentials = field_map json__ "credentials" AwsCredentials.of_json in
+      make ?s3Location ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the credentials to access the external Dataview from an S3 location. To call this API: You must retrieve the programmatic credentials. You must be a member of a FinSpace user group, where the dataset that you want to access has Read Dataset Data permissions."]
+module GetExternalDataViewAccessDetailsRequest =
+  struct
+    type nonrec t =
+      {
+      dataViewId: DataViewId.t
+        [@ocaml.doc
+          "The unique identifier for the Dataview that you want to access."];
+      datasetId: DatasetId.t
+        [@ocaml.doc "The unique identifier for the Dataset."]}
+    let context_ = "GetExternalDataViewAccessDetailsRequest"
+    let make ~dataViewId =
+      fun ~datasetId -> fun () -> { dataViewId; datasetId }
+    let to_value x =
+      structure_to_value
+        [("dataviewId", (Some (DataViewId.to_value x.dataViewId)));
+        ("datasetId", (Some (DatasetId.to_value x.datasetId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datasetId =
+        DatasetId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
+      let dataViewId =
+        DataViewId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "dataviewId") in
+      make ~datasetId ~dataViewId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let dataViewId = field_map_exn json__ "dataViewId" DataViewId.of_json in
+      make ~datasetId ~dataViewId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns the credentials to access the external Dataview from an S3 location. To call this API: You must retrieve the programmatic credentials. You must be a member of a FinSpace user group, where the dataset that you want to access has Read Dataset Data permissions."]
 module GetDatasetResponse =
   struct
     type nonrec t =
@@ -4808,20 +5806,20 @@ module GetDatasetResponse =
       make ?status ?alias ?schemaDefinition ?lastModifiedTime ?createTime
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" DatasetStatus.of_json in
-      let alias = field_map json "alias" AliasString.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" DatasetStatus.of_json in
+      let alias = field_map json__ "alias" AliasString.of_json in
       let schemaDefinition =
-        field_map json "schemaDefinition" SchemaUnion.of_json in
+        field_map json__ "schemaDefinition" SchemaUnion.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
       let datasetDescription =
-        field_map json "datasetDescription" DatasetDescription.of_json in
-      let kind = field_map json "kind" DatasetKind.of_json in
-      let datasetTitle = field_map json "datasetTitle" DatasetTitle.of_json in
-      let datasetArn = field_map json "datasetArn" DatasetArn.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+        field_map json__ "datasetDescription" DatasetDescription.of_json in
+      let kind = field_map json__ "kind" DatasetKind.of_json in
+      let datasetTitle = field_map json__ "datasetTitle" DatasetTitle.of_json in
+      let datasetArn = field_map json__ "datasetArn" DatasetArn.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?status ?alias ?schemaDefinition ?lastModifiedTime ?createTime
         ?datasetDescription ?kind ?datasetTitle ?datasetArn ?datasetId ()
     let to_json v = composed_to_json to_value v
@@ -4844,9 +5842,9 @@ module GetDatasetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ~datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let datasetId =
-        field_map_exn json "datasetId" StringValueLength1to255.of_json in
+        field_map_exn json__ "datasetId" StringValueLength1to255.of_json in
       make ~datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request for the GetDataset operation."]
@@ -5033,24 +6031,24 @@ module GetDataViewResponse =
         ?sortColumns ?createTime ?lastModifiedTime ?errorInfo ?asOfTimestamp
         ?datasetId ?partitionColumns ?autoUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" DataViewStatus.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" DataViewStatus.of_json in
       let destinationTypeParams =
-        field_map json "destinationTypeParams"
+        field_map json__ "destinationTypeParams"
           DataViewDestinationTypeParams.of_json in
-      let dataViewArn = field_map json "dataViewArn" DataViewArn.of_json in
-      let dataViewId = field_map json "dataViewId" DataViewId.of_json in
-      let sortColumns = field_map json "sortColumns" SortColumnList.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
+      let dataViewArn = field_map json__ "dataViewArn" DataViewArn.of_json in
+      let dataViewId = field_map json__ "dataViewId" DataViewId.of_json in
+      let sortColumns = field_map json__ "sortColumns" SortColumnList.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
       let lastModifiedTime =
-        field_map json "lastModifiedTime" TimestampEpoch.of_json in
-      let errorInfo = field_map json "errorInfo" DataViewErrorInfo.of_json in
+        field_map json__ "lastModifiedTime" TimestampEpoch.of_json in
+      let errorInfo = field_map json__ "errorInfo" DataViewErrorInfo.of_json in
       let asOfTimestamp =
-        field_map json "asOfTimestamp" TimestampEpoch.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+        field_map json__ "asOfTimestamp" TimestampEpoch.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       let partitionColumns =
-        field_map json "partitionColumns" PartitionColumnList.of_json in
-      let autoUpdate = field_map json "autoUpdate" Boolean.of_json in
+        field_map json__ "partitionColumns" PartitionColumnList.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" Boolean.of_json in
       make ?status ?destinationTypeParams ?dataViewArn ?dataViewId
         ?sortColumns ?createTime ?lastModifiedTime ?errorInfo ?asOfTimestamp
         ?datasetId ?partitionColumns ?autoUpdate ()
@@ -5083,9 +6081,9 @@ module GetDataViewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "dataviewId") in
       make ~datasetId ~dataViewId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let dataViewId = field_map_exn json "dataViewId" DataViewId.of_json in
+    let of_json json__ =
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let dataViewId = field_map_exn json__ "dataViewId" DataViewId.of_json in
       make ~datasetId ~dataViewId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5292,24 +6290,24 @@ module GetChangesetResponse =
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let updatedByChangesetId =
-        field_map json "updatedByChangesetId" ChangesetId.of_json in
+        field_map json__ "updatedByChangesetId" ChangesetId.of_json in
       let updatesChangesetId =
-        field_map json "updatesChangesetId" ChangesetId.of_json in
+        field_map json__ "updatesChangesetId" ChangesetId.of_json in
       let activeFromTimestamp =
-        field_map json "activeFromTimestamp" TimestampEpoch.of_json in
+        field_map json__ "activeFromTimestamp" TimestampEpoch.of_json in
       let activeUntilTimestamp =
-        field_map json "activeUntilTimestamp" TimestampEpoch.of_json in
-      let errorInfo = field_map json "errorInfo" ChangesetErrorInfo.of_json in
-      let status = field_map json "status" IngestionStatus.of_json in
-      let createTime = field_map json "createTime" TimestampEpoch.of_json in
-      let formatParams = field_map json "formatParams" FormatParams.of_json in
-      let sourceParams = field_map json "sourceParams" SourceParams.of_json in
-      let changeType = field_map json "changeType" ChangeType.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
-      let changesetArn = field_map json "changesetArn" ChangesetArn.of_json in
-      let changesetId = field_map json "changesetId" ChangesetId.of_json in
+        field_map json__ "activeUntilTimestamp" TimestampEpoch.of_json in
+      let errorInfo = field_map json__ "errorInfo" ChangesetErrorInfo.of_json in
+      let status = field_map json__ "status" IngestionStatus.of_json in
+      let createTime = field_map json__ "createTime" TimestampEpoch.of_json in
+      let formatParams = field_map json__ "formatParams" FormatParams.of_json in
+      let sourceParams = field_map json__ "sourceParams" SourceParams.of_json in
+      let changeType = field_map json__ "changeType" ChangeType.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
+      let changesetArn = field_map json__ "changesetArn" ChangesetArn.of_json in
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
       make ?updatedByChangesetId ?updatesChangesetId ?activeFromTimestamp
         ?activeUntilTimestamp ?errorInfo ?status ?createTime ?formatParams
         ?sourceParams ?changeType ?datasetId ?changesetArn ?changesetId ()
@@ -5342,9 +6340,10 @@ module GetChangesetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "datasetId") in
       make ~changesetId ~datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changesetId = field_map_exn json "changesetId" ChangesetId.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let changesetId =
+        field_map_exn json__ "changesetId" ChangesetId.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
       make ~changesetId ~datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request to describe a changeset."]
@@ -5353,7 +6352,7 @@ module EnableUserResponse =
     type nonrec t =
       {
       userId: UserId.t option
-        [@ocaml.doc "The unique identifier for the enabled user account."]}
+        [@ocaml.doc "The unique identifier for the active user."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5445,8 +6444,9 @@ module EnableUserResponse =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "userId" UserId.of_json in make ?userId ()
+    let of_json json__ =
+      let userId = field_map json__ "userId" UserId.of_json in
+      make ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows the specified user to access the FinSpace web application and API."]
@@ -5456,7 +6456,7 @@ module EnableUserRequest =
       {
       userId: UserId.t
         [@ocaml.doc
-          "The unique identifier for the user account that you want to enable."];
+          "The unique identifier for the user that you want to activate."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A token that ensures idempotency. This token expires in 10 minutes."]}
@@ -5474,19 +6474,151 @@ module EnableUserRequest =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let userId = field_map_exn json "userId" UserId.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
       make ?clientToken ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Allows the specified user to access the FinSpace web application and API."]
+module DisassociateUserFromPermissionGroupResponse =
+  struct
+    type nonrec t =
+      {
+      statusCode: StatusCode.t option
+        [@ocaml.doc "The returned status code of the response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?statusCode = fun () -> { statusCode }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("statusCode", (Option.map x.statusCode ~f:StatusCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusCode =
+        (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "statusCode") in
+      make ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusCode = field_map json__ "statusCode" StatusCode.of_json in
+      make ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes a user from a permission group."]
+module DisassociateUserFromPermissionGroupRequest =
+  struct
+    type nonrec t =
+      {
+      permissionGroupId: PermissionGroupId.t
+        [@ocaml.doc "The unique identifier for the permission group."];
+      userId: UserId.t [@ocaml.doc "The unique identifier for the user."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "DisassociateUserFromPermissionGroupRequest"
+    let make ?clientToken =
+      fun ~permissionGroupId ->
+        fun ~userId -> fun () -> { clientToken; permissionGroupId; userId }
+    let to_value x =
+      structure_to_value
+        [("permissionGroupId",
+           (Some (PermissionGroupId.to_value x.permissionGroupId)));
+        ("userId", (Some (UserId.to_value x.userId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
+      let permissionGroupId =
+        PermissionGroupId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
+      make ?clientToken ~userId ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
+      let permissionGroupId =
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ?clientToken ~userId ~permissionGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Removes a user from a permission group."]
 module DisableUserResponse =
   struct
     type nonrec t =
       {
       userId: UserId.t option
-        [@ocaml.doc "The unique identifier for the disabled user account."]}
+        [@ocaml.doc "The unique identifier for the deactivated user."]}
     type nonrec error =
       [ `AccessDeniedException of AccessDeniedException.t 
       | `ConflictException of ConflictException.t 
@@ -5569,8 +6701,9 @@ module DisableUserResponse =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "userId" UserId.of_json in make ?userId ()
+    let of_json json__ =
+      let userId = field_map json__ "userId" UserId.of_json in
+      make ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Denies access to the FinSpace web application and API for the specified user."]
@@ -5580,7 +6713,7 @@ module DisableUserRequest =
       {
       userId: UserId.t
         [@ocaml.doc
-          "The unique identifier for the user account that you want to disable."];
+          "The unique identifier for the user that you want to deactivate."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A token that ensures idempotency. This token expires in 10 minutes."]}
@@ -5598,9 +6731,9 @@ module DisableUserRequest =
         UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
       make ?clientToken ~userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
-      let userId = field_map_exn json "userId" UserId.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
       make ?clientToken ~userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5705,9 +6838,9 @@ module DeletePermissionGroupResponse =
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionGroupId =
-        field_map json "permissionGroupId" PermissionGroupId.of_json in
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a permission group. This action is irreversible."]
@@ -5738,10 +6871,10 @@ module DeletePermissionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
       make ?clientToken ~permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let permissionGroupId =
-        field_map_exn json "permissionGroupId" PermissionGroupId.of_json in
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?clientToken ~permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a permission group. This action is irreversible."]
@@ -5842,8 +6975,8 @@ module DeleteDatasetResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from an DeleteDataset operation"]
@@ -5872,9 +7005,9 @@ module DeleteDatasetRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~datasetId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~datasetId ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request for a DeleteDataset operation."]
@@ -5966,8 +7099,9 @@ module CreateUserResponse =
         (Option.map ~f:UserId.of_xml) (Xml.child xml_arg0 "userId") in
       make ?userId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let userId = field_map json "userId" UserId.of_json in make ?userId ()
+    let of_json json__ =
+      let userId = field_map json__ "userId" UserId.of_json in
+      make ?userId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new user in FinSpace."]
 module CreateUserRequest =
@@ -6017,7 +7151,7 @@ module CreateUserRequest =
         ("type", (Some (UserType.to_value x.type_)));
         ("firstName", (Option.map x.firstName ~f:FirstName.to_value));
         ("lastName", (Option.map x.lastName ~f:LastName.to_value));
-        ("ApiAccess", (Option.map x.apiAccess ~f:ApiAccess.to_value));
+        ("apiAccess", (Option.map x.apiAccess ~f:ApiAccess.to_value));
         ("apiAccessPrincipalArn",
           (Option.map x.apiAccessPrincipalArn ~f:RoleArn.to_value));
         ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
@@ -6029,7 +7163,7 @@ module CreateUserRequest =
         (Option.map ~f:RoleArn.of_xml)
           (Xml.child xml_arg0 "apiAccessPrincipalArn") in
       let apiAccess =
-        (Option.map ~f:ApiAccess.of_xml) (Xml.child xml_arg0 "ApiAccess") in
+        (Option.map ~f:ApiAccess.of_xml) (Xml.child xml_arg0 "apiAccess") in
       let lastName =
         (Option.map ~f:LastName.of_xml) (Xml.child xml_arg0 "lastName") in
       let firstName =
@@ -6042,15 +7176,15 @@ module CreateUserRequest =
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ~type_ ~emailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let apiAccessPrincipalArn =
-        field_map json "apiAccessPrincipalArn" RoleArn.of_json in
-      let apiAccess = field_map json "ApiAccess" ApiAccess.of_json in
-      let lastName = field_map json "lastName" LastName.of_json in
-      let firstName = field_map json "firstName" FirstName.of_json in
-      let type_ = field_map_exn json "type" UserType.of_json in
-      let emailAddress = field_map_exn json "emailAddress" Email.of_json in
+        field_map json__ "apiAccessPrincipalArn" RoleArn.of_json in
+      let apiAccess = field_map json__ "apiAccess" ApiAccess.of_json in
+      let lastName = field_map json__ "lastName" LastName.of_json in
+      let firstName = field_map json__ "firstName" FirstName.of_json in
+      let type_ = field_map_exn json__ "type" UserType.of_json in
+      let emailAddress = field_map_exn json__ "emailAddress" Email.of_json in
       make ?clientToken ?apiAccessPrincipalArn ?apiAccess ?lastName
         ?firstName ~type_ ~emailAddress ()
     let to_json v = composed_to_json to_value v
@@ -6145,9 +7279,9 @@ module CreatePermissionGroupResponse =
           (Xml.child xml_arg0 "permissionGroupId") in
       make ?permissionGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permissionGroupId =
-        field_map json "permissionGroupId" PermissionGroupId.of_json in
+        field_map json__ "permissionGroupId" PermissionGroupId.of_json in
       make ?permissionGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6162,7 +7296,7 @@ module CreatePermissionGroupRequest =
         [@ocaml.doc "A brief description for the permission group."];
       applicationPermissions: ApplicationPermissionList.t
         [@ocaml.doc
-          "The option to indicate FinSpace application permissions that are granted to a specific group. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
+          "The option to indicate FinSpace application permissions that are granted to a specific group. When assigning application permissions, be aware that the permission ManageUsersAndGroups allows users to grant themselves or others access to any functionality in their FinSpace environment's application. It should only be granted to trusted users. CreateDataset \226\128\147 Group members can create new datasets. ManageClusters \226\128\147 Group members can manage Apache Spark clusters from FinSpace notebooks. ManageUsersAndGroups \226\128\147 Group members can manage users and permission groups. This is a privileged permission that allows users to grant themselves or others access to any functionality in the application. It should only be granted to trusted users. ManageAttributeSets \226\128\147 Group members can manage attribute sets. ViewAuditData \226\128\147 Group members can view audit data. AccessNotebooks \226\128\147 Group members will have access to FinSpace notebooks. GetTemporaryCredentials \226\128\147 Group members can get temporary API credentials."];
       clientToken: ClientToken.t option
         [@ocaml.doc
           "A token that ensures idempotency. This token expires in 10 minutes."]}
@@ -6196,14 +7330,14 @@ module CreatePermissionGroupRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "name") in
       make ?clientToken ~applicationPermissions ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       let applicationPermissions =
-        field_map_exn json "applicationPermissions"
+        field_map_exn json__ "applicationPermissions"
           ApplicationPermissionList.of_json in
       let description =
-        field_map json "description" PermissionGroupDescription.of_json in
-      let name = field_map_exn json "name" PermissionGroupName.of_json in
+        field_map json__ "description" PermissionGroupDescription.of_json in
+      let name = field_map_exn json__ "name" PermissionGroupName.of_json in
       make ?clientToken ~applicationPermissions ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6305,8 +7439,8 @@ module CreateDatasetResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from a CreateDataset operation"]
@@ -6391,20 +7525,20 @@ module CreateDatasetRequest =
       make ?schemaDefinition ?alias ~permissionGroupParams ?ownerInfo
         ?datasetDescription ~kind ~datasetTitle ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let schemaDefinition =
-        field_map json "schemaDefinition" SchemaUnion.of_json in
-      let alias = field_map json "alias" AliasString.of_json in
+        field_map json__ "schemaDefinition" SchemaUnion.of_json in
+      let alias = field_map json__ "alias" AliasString.of_json in
       let permissionGroupParams =
-        field_map_exn json "permissionGroupParams"
+        field_map_exn json__ "permissionGroupParams"
           PermissionGroupParams.of_json in
-      let ownerInfo = field_map json "ownerInfo" DatasetOwnerInfo.of_json in
+      let ownerInfo = field_map json__ "ownerInfo" DatasetOwnerInfo.of_json in
       let datasetDescription =
-        field_map json "datasetDescription" DatasetDescription.of_json in
-      let kind = field_map_exn json "kind" DatasetKind.of_json in
+        field_map json__ "datasetDescription" DatasetDescription.of_json in
+      let kind = field_map_exn json__ "kind" DatasetKind.of_json in
       let datasetTitle =
-        field_map_exn json "datasetTitle" DatasetTitle.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map_exn json__ "datasetTitle" DatasetTitle.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ?schemaDefinition ?alias ~permissionGroupParams ?ownerInfo
         ?datasetDescription ~kind ~datasetTitle ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -6504,9 +7638,9 @@ module CreateDataViewResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?dataViewId ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dataViewId = field_map json "dataViewId" DataViewId.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let dataViewId = field_map json__ "dataViewId" DataViewId.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?dataViewId ?datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Response for creating a data view."]
@@ -6589,18 +7723,18 @@ module CreateDataViewRequest =
       make ~destinationTypeParams ?asOfTimestamp ?partitionColumns
         ?sortColumns ?autoUpdate ~datasetId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationTypeParams =
-        field_map_exn json "destinationTypeParams"
+        field_map_exn json__ "destinationTypeParams"
           DataViewDestinationTypeParams.of_json in
       let asOfTimestamp =
-        field_map json "asOfTimestamp" TimestampEpoch.of_json in
+        field_map json__ "asOfTimestamp" TimestampEpoch.of_json in
       let partitionColumns =
-        field_map json "partitionColumns" PartitionColumnList.of_json in
-      let sortColumns = field_map json "sortColumns" SortColumnList.of_json in
-      let autoUpdate = field_map json "autoUpdate" Boolean.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map json__ "partitionColumns" PartitionColumnList.of_json in
+      let sortColumns = field_map json__ "sortColumns" SortColumnList.of_json in
+      let autoUpdate = field_map json__ "autoUpdate" Boolean.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~destinationTypeParams ?asOfTimestamp ?partitionColumns
         ?sortColumns ?autoUpdate ~datasetId ?clientToken ()
     let to_json v = composed_to_json to_value v
@@ -6710,9 +7844,9 @@ module CreateChangesetResponse =
         (Option.map ~f:DatasetId.of_xml) (Xml.child xml_arg0 "datasetId") in
       make ?changesetId ?datasetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let changesetId = field_map json "changesetId" ChangesetId.of_json in
-      let datasetId = field_map json "datasetId" DatasetId.of_json in
+    let of_json json__ =
+      let changesetId = field_map json__ "changesetId" ChangesetId.of_json in
+      let datasetId = field_map json__ "datasetId" DatasetId.of_json in
       make ?changesetId ?datasetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The response from a CreateChangeset operation."]
@@ -6774,14 +7908,148 @@ module CreateChangesetRequest =
         (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
       make ~formatParams ~sourceParams ~changeType ~datasetId ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let formatParams =
-        field_map_exn json "formatParams" FormatParams.of_json in
+        field_map_exn json__ "formatParams" FormatParams.of_json in
       let sourceParams =
-        field_map_exn json "sourceParams" SourceParams.of_json in
-      let changeType = field_map_exn json "changeType" ChangeType.of_json in
-      let datasetId = field_map_exn json "datasetId" DatasetId.of_json in
-      let clientToken = field_map json "clientToken" ClientToken.of_json in
+        field_map_exn json__ "sourceParams" SourceParams.of_json in
+      let changeType = field_map_exn json__ "changeType" ChangeType.of_json in
+      let datasetId = field_map_exn json__ "datasetId" DatasetId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
       make ~formatParams ~sourceParams ~changeType ~datasetId ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request for a CreateChangeset operation."]
+module AssociateUserToPermissionGroupResponse =
+  struct
+    type nonrec t =
+      {
+      statusCode: StatusCode.t option
+        [@ocaml.doc "The returned status code of the response."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?statusCode = fun () -> { statusCode }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("statusCode", (Option.map x.statusCode ~f:StatusCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let statusCode =
+        (Option.map ~f:StatusCode.of_xml) (Xml.child xml_arg0 "statusCode") in
+      make ?statusCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let statusCode = field_map json__ "statusCode" StatusCode.of_json in
+      make ?statusCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a user to a permission group to grant permissions for actions a user can perform in FinSpace."]
+module AssociateUserToPermissionGroupRequest =
+  struct
+    type nonrec t =
+      {
+      permissionGroupId: PermissionGroupId.t
+        [@ocaml.doc "The unique identifier for the permission group."];
+      userId: UserId.t [@ocaml.doc "The unique identifier for the user."];
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "A token that ensures idempotency. This token expires in 10 minutes."]}
+    let context_ = "AssociateUserToPermissionGroupRequest"
+    let make ?clientToken =
+      fun ~permissionGroupId ->
+        fun ~userId -> fun () -> { clientToken; permissionGroupId; userId }
+    let to_value x =
+      structure_to_value
+        [("permissionGroupId",
+           (Some (PermissionGroupId.to_value x.permissionGroupId)));
+        ("userId", (Some (UserId.to_value x.userId)));
+        ("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      let userId =
+        UserId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "userId") in
+      let permissionGroupId =
+        PermissionGroupId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "permissionGroupId") in
+      make ?clientToken ~userId ~permissionGroupId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      let userId = field_map_exn json__ "userId" UserId.of_json in
+      let permissionGroupId =
+        field_map_exn json__ "permissionGroupId" PermissionGroupId.of_json in
+      make ?clientToken ~userId ~permissionGroupId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Adds a user to a permission group to grant permissions for actions a user can perform in FinSpace."]

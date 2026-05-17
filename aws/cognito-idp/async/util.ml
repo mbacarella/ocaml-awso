@@ -100,21 +100,16 @@ let get_user ?retry_delay ?retry_cnt cfg ~access_token () =
   let request = GetUserRequest.make ~accessToken () in
   match%map Io.get_user ~cfg request with
   | Error e -> Error e
-  | Ok
-      ({ GetUserResponse.username
-       ; userAttributes
-       ; mFAOptions = _
-       ; preferredMfaSetting = _
-       ; userMFASettingList = _
-       } as response) ->
+  | Ok ({ GetUserResponse.username; userAttributes; _ } as response) ->
     let x = GetUserResponse.to_json response in
     let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
-      match UsernameType.to_value username with
-      | `String username -> username
-      | _ -> failwith "username shape not a string"
+      match Option.map username ~f:UsernameType.to_value with
+      | Some (`String username) -> username
+      | _ -> failwith "get_user: username missing or not a string"
     in
+    let userAttributes = Option.value userAttributes ~default:[] in
     List.map ~f:Attribute.Safe.of_unsafe userAttributes
     |> fun attributes -> Ok User.{ username; attributes; access_token }
 ;;
@@ -147,9 +142,9 @@ let admin_get_user ?retry_delay ?retry_cnt cfg ~user_pool_id ~username () =
     let resp_str = Yojson.Safe.to_string x in
     Log.Global.debug "response body is %s" resp_str;
     let username =
-      match UsernameType.to_value username with
-      | `String username -> username
-      | _ -> failwith "username shape not a string"
+      match Option.map username ~f:UsernameType.to_value with
+      | Some (`String username) -> username
+      | _ -> failwith "admin_get_user: username missing or not a string"
     in
     List.map ~f:Attribute.Safe.of_unsafe userAttributes
     |> fun attributes -> return (Ok User.{ username; attributes; access_token = "" })

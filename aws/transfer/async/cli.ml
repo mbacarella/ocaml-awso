@@ -68,6 +68,133 @@ let create_access =
                                posixProfile) ~role ~serverId ~externalId ())
            (Some Values.CreateAccessResponse.to_json)
            (Some Values.CreateAccessResponse.error_to_json)])
+let create_agreement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and baseDirectory =
+         flag "base-directory" (optional string) ~doc:"STRING HomeDirectory"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON AgreementStatusType"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and preserveFilename =
+         flag "preserve-filename" (optional json_arg)
+           ~doc:"JSON PreserveFilenameType"
+       and enforceMessageSigning =
+         flag "enforce-message-signing" (optional json_arg)
+           ~doc:"JSON EnforceMessageSigningType"
+       and customDirectories =
+         flag "custom-directories" (optional json_arg)
+           ~doc:"JSON CustomDirectoriesType"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId"
+       and localProfileId =
+         flag "local-profile-id" (required string) ~doc:"STRING ProfileId"
+       and partnerProfileId =
+         flag "partner-profile-id" (required string) ~doc:"STRING ProfileId"
+       and accessRole =
+         flag "access-role" (required string) ~doc:"STRING Role" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_agreement
+           (Values.CreateAgreementRequest.make ?description ?baseDirectory
+              ?status:(Option.map ~f:Values.AgreementStatusType.of_json
+                         status)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?preserveFilename:(Option.map
+                                   ~f:Values.PreserveFilenameType.of_json
+                                   preserveFilename)
+              ?enforceMessageSigning:(Option.map
+                                        ~f:Values.EnforceMessageSigningType.of_json
+                                        enforceMessageSigning)
+              ?customDirectories:(Option.map
+                                    ~f:Values.CustomDirectoriesType.of_json
+                                    customDirectories) ~serverId
+              ~localProfileId ~partnerProfileId ~accessRole ())
+           (Some Values.CreateAgreementResponse.to_json)
+           (Some Values.CreateAgreementResponse.error_to_json)])
+let create_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and url = flag "url" (optional string) ~doc:"STRING Url"
+       and as2Config =
+         flag "as2-config" (optional json_arg) ~doc:"JSON As2ConnectorConfig"
+       and loggingRole =
+         flag "logging-role" (optional string) ~doc:"STRING Role"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and sftpConfig =
+         flag "sftp-config" (optional json_arg)
+           ~doc:"JSON SftpConnectorConfig"
+       and securityPolicyName =
+         flag "security-policy-name" (optional string)
+           ~doc:"STRING ConnectorSecurityPolicyName"
+       and egressConfig =
+         flag "egress-config" (optional json_arg)
+           ~doc:"JSON ConnectorEgressConfig"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg)
+           ~doc:"JSON ConnectorsIpAddressType"
+       and accessRole =
+         flag "access-role" (required string) ~doc:"STRING Role" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_connector
+           (Values.CreateConnectorRequest.make ?url
+              ?as2Config:(Option.map ~f:Values.As2ConnectorConfig.of_json
+                            as2Config) ?loggingRole
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?sftpConfig:(Option.map ~f:Values.SftpConnectorConfig.of_json
+                             sftpConfig) ?securityPolicyName
+              ?egressConfig:(Option.map
+                               ~f:Values.ConnectorEgressConfig.of_json
+                               egressConfig)
+              ?ipAddressType:(Option.map
+                                ~f:Values.ConnectorsIpAddressType.of_json
+                                ipAddressType) ~accessRole ())
+           (Some Values.CreateConnectorResponse.to_json)
+           (Some Values.CreateConnectorResponse.error_to_json)])
+let create_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateIds =
+         flag "certificate-ids" (optional json_arg)
+           ~doc:"JSON CertificateIds"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and as2Id = flag "as2-id" (required string) ~doc:"STRING As2Id"
+       and profileType =
+         flag "profile-type" (required json_arg) ~doc:"JSON ProfileType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_profile
+           (Values.CreateProfileRequest.make
+              ?certificateIds:(Option.map ~f:Values.CertificateIds.of_json
+                                 certificateIds)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~as2Id
+              ~profileType:(Values.ProfileType.of_json profileType) ())
+           (Some Values.CreateProfileResponse.to_json)
+           (Some Values.CreateProfileResponse.error_to_json)])
 let create_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -94,7 +221,7 @@ let create_server =
          flag "identity-provider-type" (optional json_arg)
            ~doc:"JSON IdentityProviderType"
        and loggingRole =
-         flag "logging-role" (optional string) ~doc:"STRING Role"
+         flag "logging-role" (optional string) ~doc:"STRING NullableRole"
        and postAuthenticationLoginBanner =
          flag "post-authentication-login-banner" (optional string)
            ~doc:"STRING PostAuthenticationLoginBanner"
@@ -112,7 +239,15 @@ let create_server =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
        and workflowDetails =
          flag "workflow-details" (optional json_arg)
-           ~doc:"JSON WorkflowDetails" in
+           ~doc:"JSON WorkflowDetails"
+       and structuredLogDestinations =
+         flag "structured-log-destinations" (optional json_arg)
+           ~doc:"JSON StructuredLogDestinations"
+       and s3StorageOptions =
+         flag "s3-storage-options" (optional json_arg)
+           ~doc:"JSON S3StorageOptions"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_server
@@ -134,7 +269,15 @@ let create_server =
                                   protocolDetails) ?securityPolicyName
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
               ?workflowDetails:(Option.map ~f:Values.WorkflowDetails.of_json
-                                  workflowDetails) ())
+                                  workflowDetails)
+              ?structuredLogDestinations:(Option.map
+                                            ~f:Values.StructuredLogDestinations.of_json
+                                            structuredLogDestinations)
+              ?s3StorageOptions:(Option.map
+                                   ~f:Values.S3StorageOptions.of_json
+                                   s3StorageOptions)
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType) ())
            (Some Values.CreateServerResponse.to_json)
            (Some Values.CreateServerResponse.error_to_json)])
 let create_user =
@@ -182,6 +325,48 @@ let create_user =
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ~role ~serverId
               ~userName ()) (Some Values.CreateUserResponse.to_json)
            (Some Values.CreateUserResponse.error_to_json)])
+let create_web_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and accessEndpoint =
+         flag "access-endpoint" (optional string)
+           ~doc:"STRING WebAppAccessEndpoint"
+       and webAppUnits =
+         flag "web-app-units" (optional json_arg) ~doc:"JSON WebAppUnits"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and webAppEndpointPolicy =
+         flag "web-app-endpoint-policy" (optional json_arg)
+           ~doc:"JSON WebAppEndpointPolicy"
+       and endpointDetails =
+         flag "endpoint-details" (optional json_arg)
+           ~doc:"JSON WebAppEndpointDetails"
+       and identityProviderDetails =
+         flag "identity-provider-details" (required json_arg)
+           ~doc:"JSON WebAppIdentityProviderDetails" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_web_app
+           (Values.CreateWebAppRequest.make ?accessEndpoint
+              ?webAppUnits:(Option.map ~f:Values.WebAppUnits.of_json
+                              webAppUnits)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?webAppEndpointPolicy:(Option.map
+                                       ~f:Values.WebAppEndpointPolicy.of_json
+                                       webAppEndpointPolicy)
+              ?endpointDetails:(Option.map
+                                  ~f:Values.WebAppEndpointDetails.of_json
+                                  endpointDetails)
+              ~identityProviderDetails:(Values.WebAppIdentityProviderDetails.of_json
+                                          identityProviderDetails) ())
+           (Some Values.CreateWebAppResponse.to_json)
+           (Some Values.CreateWebAppResponse.error_to_json)])
 let create_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -229,6 +414,92 @@ let delete_access =
            Io.delete_access
            (Values.DeleteAccessRequest.make ~serverId ~externalId ()) None
            None])
+let delete_agreement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and agreementId =
+         flag "agreement-id" (required string) ~doc:"STRING AgreementId"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_agreement
+           (Values.DeleteAgreementRequest.make ~agreementId ~serverId ())
+           None None])
+let delete_certificate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateId =
+         flag "certificate-id" (required string) ~doc:"STRING CertificateId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_certificate
+           (Values.DeleteCertificateRequest.make ~certificateId ()) None None])
+let delete_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connector
+           (Values.DeleteConnectorRequest.make ~connectorId ()) None None])
+let delete_host_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId"
+       and hostKeyId =
+         flag "host-key-id" (required string) ~doc:"STRING HostKeyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_host_key
+           (Values.DeleteHostKeyRequest.make ~serverId ~hostKeyId ()) None
+           None])
+let delete_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING ProfileId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_profile (Values.DeleteProfileRequest.make ~profileId ())
+           None None])
 let delete_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -285,6 +556,39 @@ let delete_user =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_user
            (Values.DeleteUserRequest.make ~serverId ~userName ()) None None])
+let delete_web_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_web_app (Values.DeleteWebAppRequest.make ~webAppId ())
+           None None])
+let delete_web_app_customization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_web_app_customization
+           (Values.DeleteWebAppCustomizationRequest.make ~webAppId ()) None
+           None])
 let delete_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -321,6 +625,62 @@ let describe_access =
            (Values.DescribeAccessRequest.make ~serverId ~externalId ())
            (Some Values.DescribeAccessResponse.to_json)
            (Some Values.DescribeAccessResponse.error_to_json)])
+let describe_agreement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and agreementId =
+         flag "agreement-id" (required string) ~doc:"STRING AgreementId"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_agreement
+           (Values.DescribeAgreementRequest.make ~agreementId ~serverId ())
+           (Some Values.DescribeAgreementResponse.to_json)
+           (Some Values.DescribeAgreementResponse.error_to_json)])
+let describe_certificate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateId =
+         flag "certificate-id" (required string) ~doc:"STRING CertificateId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_certificate
+           (Values.DescribeCertificateRequest.make ~certificateId ())
+           (Some Values.DescribeCertificateResponse.to_json)
+           (Some Values.DescribeCertificateResponse.error_to_json)])
+let describe_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_connector
+           (Values.DescribeConnectorRequest.make ~connectorId ())
+           (Some Values.DescribeConnectorResponse.to_json)
+           (Some Values.DescribeConnectorResponse.error_to_json)])
 let describe_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -341,6 +701,44 @@ let describe_execution =
            (Values.DescribeExecutionRequest.make ~executionId ~workflowId ())
            (Some Values.DescribeExecutionResponse.to_json)
            (Some Values.DescribeExecutionResponse.error_to_json)])
+let describe_host_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId"
+       and hostKeyId =
+         flag "host-key-id" (required string) ~doc:"STRING HostKeyId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_host_key
+           (Values.DescribeHostKeyRequest.make ~serverId ~hostKeyId ())
+           (Some Values.DescribeHostKeyResponse.to_json)
+           (Some Values.DescribeHostKeyResponse.error_to_json)])
+let describe_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING ProfileId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_profile
+           (Values.DescribeProfileRequest.make ~profileId ())
+           (Some Values.DescribeProfileResponse.to_json)
+           (Some Values.DescribeProfileResponse.error_to_json)])
 let describe_security_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -398,6 +796,42 @@ let describe_user =
            (Values.DescribeUserRequest.make ~serverId ~userName ())
            (Some Values.DescribeUserResponse.to_json)
            (Some Values.DescribeUserResponse.error_to_json)])
+let describe_web_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_web_app
+           (Values.DescribeWebAppRequest.make ~webAppId ())
+           (Some Values.DescribeWebAppResponse.to_json)
+           (Some Values.DescribeWebAppResponse.error_to_json)])
+let describe_web_app_customization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_web_app_customization
+           (Values.DescribeWebAppCustomizationRequest.make ~webAppId ())
+           (Some Values.DescribeWebAppCustomizationResponse.to_json)
+           (Some Values.DescribeWebAppCustomizationResponse.error_to_json)])
 let describe_workflow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -416,6 +850,70 @@ let describe_workflow =
            (Values.DescribeWorkflowRequest.make ~workflowId ())
            (Some Values.DescribeWorkflowResponse.to_json)
            (Some Values.DescribeWorkflowResponse.error_to_json)])
+let import_certificate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateChain =
+         flag "certificate-chain" (optional string)
+           ~doc:"STRING CertificateChainType"
+       and privateKey =
+         flag "private-key" (optional string) ~doc:"STRING PrivateKeyType"
+       and activeDate =
+         flag "active-date" (optional json_arg) ~doc:"JSON CertDate"
+       and inactiveDate =
+         flag "inactive-date" (optional json_arg) ~doc:"JSON CertDate"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and usage =
+         flag "usage" (required json_arg) ~doc:"JSON CertificateUsageType"
+       and certificate =
+         flag "certificate" (required string)
+           ~doc:"STRING CertificateBodyType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_certificate
+           (Values.ImportCertificateRequest.make ?certificateChain
+              ?privateKey
+              ?activeDate:(Option.map ~f:Values.CertDate.of_json activeDate)
+              ?inactiveDate:(Option.map ~f:Values.CertDate.of_json
+                               inactiveDate) ?description
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~usage:(Values.CertificateUsageType.of_json usage) ~certificate
+              ()) (Some Values.ImportCertificateResponse.to_json)
+           (Some Values.ImportCertificateResponse.error_to_json)])
+let import_host_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string)
+           ~doc:"STRING HostKeyDescription"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId"
+       and hostKeyBody =
+         flag "host-key-body" (required string) ~doc:"STRING HostKey" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_host_key
+           (Values.ImportHostKeyRequest.make ?description
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~serverId
+              ~hostKeyBody ()) (Some Values.ImportHostKeyResponse.to_json)
+           (Some Values.ImportHostKeyResponse.error_to_json)])
 let import_ssh_public_key =
   Command.async ~summary:""
     ([%map_open.Command
@@ -461,6 +959,68 @@ let list_accesses =
            (Values.ListAccessesRequest.make ?maxResults ?nextToken ~serverId
               ()) (Some Values.ListAccessesResponse.to_json)
            (Some Values.ListAccessesResponse.error_to_json)])
+let list_agreements =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_agreements
+           (Values.ListAgreementsRequest.make ?maxResults ?nextToken
+              ~serverId ()) (Some Values.ListAgreementsResponse.to_json)
+           (Some Values.ListAgreementsResponse.error_to_json)])
+let list_certificates =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_certificates
+           (Values.ListCertificatesRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListCertificatesResponse.to_json)
+           (Some Values.ListCertificatesResponse.error_to_json)])
+let list_connectors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_connectors
+           (Values.ListConnectorsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListConnectorsResponse.to_json)
+           (Some Values.ListConnectorsResponse.error_to_json)])
 let list_executions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -483,6 +1043,77 @@ let list_executions =
            (Values.ListExecutionsRequest.make ?maxResults ?nextToken
               ~workflowId ()) (Some Values.ListExecutionsResponse.to_json)
            (Some Values.ListExecutionsResponse.error_to_json)])
+let list_file_transfer_results =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId"
+       and transferId =
+         flag "transfer-id" (required string) ~doc:"STRING TransferId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_file_transfer_results
+           (Values.ListFileTransferResultsRequest.make ?nextToken ?maxResults
+              ~connectorId ~transferId ())
+           (Some Values.ListFileTransferResultsResponse.to_json)
+           (Some Values.ListFileTransferResultsResponse.error_to_json)])
+let list_host_keys =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_host_keys
+           (Values.ListHostKeysRequest.make ?maxResults ?nextToken ~serverId
+              ()) (Some Values.ListHostKeysResponse.to_json)
+           (Some Values.ListHostKeysResponse.error_to_json)])
+let list_profiles =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and profileType =
+         flag "profile-type" (optional json_arg) ~doc:"JSON ProfileType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_profiles
+           (Values.ListProfilesRequest.make ?maxResults ?nextToken
+              ?profileType:(Option.map ~f:Values.ProfileType.of_json
+                              profileType) ())
+           (Some Values.ListProfilesResponse.to_json)
+           (Some Values.ListProfilesResponse.error_to_json)])
 let list_security_policies =
   Command.async ~summary:""
     ([%map_open.Command
@@ -566,6 +1197,26 @@ let list_users =
            (Values.ListUsersRequest.make ?maxResults ?nextToken ~serverId ())
            (Some Values.ListUsersResponse.to_json)
            (Some Values.ListUsersResponse.error_to_json)])
+let list_web_apps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_web_apps
+           (Values.ListWebAppsRequest.make ?maxResults ?nextToken ())
+           (Some Values.ListWebAppsResponse.to_json)
+           (Some Values.ListWebAppsResponse.error_to_json)])
 let list_workflows =
   Command.async ~summary:""
     ([%map_open.Command
@@ -610,6 +1261,112 @@ let send_workflow_step_state =
               ~token ~status:(Values.CustomStepStatus.of_json status) ())
            (Some Values.SendWorkflowStepStateResponse.to_json)
            (Some Values.SendWorkflowStepStateResponse.error_to_json)])
+let start_directory_listing =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxItems = flag "max-items" (optional int) ~doc:"INT MaxItems"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId"
+       and remoteDirectoryPath =
+         flag "remote-directory-path" (required string)
+           ~doc:"STRING FilePath"
+       and outputDirectoryPath =
+         flag "output-directory-path" (required string)
+           ~doc:"STRING FilePath" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_directory_listing
+           (Values.StartDirectoryListingRequest.make ?maxItems ~connectorId
+              ~remoteDirectoryPath ~outputDirectoryPath ())
+           (Some Values.StartDirectoryListingResponse.to_json)
+           (Some Values.StartDirectoryListingResponse.error_to_json)])
+let start_file_transfer =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sendFilePaths =
+         flag "send-file-paths" (optional json_arg) ~doc:"JSON FilePaths"
+       and retrieveFilePaths =
+         flag "retrieve-file-paths" (optional json_arg) ~doc:"JSON FilePaths"
+       and localDirectoryPath =
+         flag "local-directory-path" (optional string) ~doc:"STRING FilePath"
+       and remoteDirectoryPath =
+         flag "remote-directory-path" (optional string)
+           ~doc:"STRING FilePath"
+       and customHttpHeaders =
+         flag "custom-http-headers" (optional json_arg)
+           ~doc:"JSON CustomHttpHeaders"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_file_transfer
+           (Values.StartFileTransferRequest.make
+              ?sendFilePaths:(Option.map ~f:Values.FilePaths.of_json
+                                sendFilePaths)
+              ?retrieveFilePaths:(Option.map ~f:Values.FilePaths.of_json
+                                    retrieveFilePaths) ?localDirectoryPath
+              ?remoteDirectoryPath
+              ?customHttpHeaders:(Option.map
+                                    ~f:Values.CustomHttpHeaders.of_json
+                                    customHttpHeaders) ~connectorId ())
+           (Some Values.StartFileTransferResponse.to_json)
+           (Some Values.StartFileTransferResponse.error_to_json)])
+let start_remote_delete =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId"
+       and deletePath =
+         flag "delete-path" (required string) ~doc:"STRING FilePath" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_remote_delete
+           (Values.StartRemoteDeleteRequest.make ~connectorId ~deletePath ())
+           (Some Values.StartRemoteDeleteResponse.to_json)
+           (Some Values.StartRemoteDeleteResponse.error_to_json)])
+let start_remote_move =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId"
+       and sourcePath =
+         flag "source-path" (required string) ~doc:"STRING FilePath"
+       and targetPath =
+         flag "target-path" (required string) ~doc:"STRING FilePath" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_remote_move
+           (Values.StartRemoteMoveRequest.make ~connectorId ~sourcePath
+              ~targetPath ()) (Some Values.StartRemoteMoveResponse.to_json)
+           (Some Values.StartRemoteMoveResponse.error_to_json)])
 let start_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -659,6 +1416,24 @@ let tag_resource =
            Io.tag_resource
            (Values.TagResourceRequest.make ~arn
               ~tags:(Values.Tags.of_json tags) ()) None None])
+let test_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.test_connection
+           (Values.TestConnectionRequest.make ~connectorId ())
+           (Some Values.TestConnectionResponse.to_json)
+           (Some Values.TestConnectionResponse.error_to_json)])
 let test_identity_provider =
   Command.async ~summary:""
     ([%map_open.Command
@@ -745,6 +1520,179 @@ let update_access =
                                posixProfile) ?role ~serverId ~externalId ())
            (Some Values.UpdateAccessResponse.to_json)
            (Some Values.UpdateAccessResponse.error_to_json)])
+let update_agreement =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON AgreementStatusType"
+       and localProfileId =
+         flag "local-profile-id" (optional string) ~doc:"STRING ProfileId"
+       and partnerProfileId =
+         flag "partner-profile-id" (optional string) ~doc:"STRING ProfileId"
+       and baseDirectory =
+         flag "base-directory" (optional string) ~doc:"STRING HomeDirectory"
+       and accessRole =
+         flag "access-role" (optional string) ~doc:"STRING Role"
+       and preserveFilename =
+         flag "preserve-filename" (optional json_arg)
+           ~doc:"JSON PreserveFilenameType"
+       and enforceMessageSigning =
+         flag "enforce-message-signing" (optional json_arg)
+           ~doc:"JSON EnforceMessageSigningType"
+       and customDirectories =
+         flag "custom-directories" (optional json_arg)
+           ~doc:"JSON CustomDirectoriesType"
+       and agreementId =
+         flag "agreement-id" (required string) ~doc:"STRING AgreementId"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_agreement
+           (Values.UpdateAgreementRequest.make ?description
+              ?status:(Option.map ~f:Values.AgreementStatusType.of_json
+                         status) ?localProfileId ?partnerProfileId
+              ?baseDirectory ?accessRole
+              ?preserveFilename:(Option.map
+                                   ~f:Values.PreserveFilenameType.of_json
+                                   preserveFilename)
+              ?enforceMessageSigning:(Option.map
+                                        ~f:Values.EnforceMessageSigningType.of_json
+                                        enforceMessageSigning)
+              ?customDirectories:(Option.map
+                                    ~f:Values.CustomDirectoriesType.of_json
+                                    customDirectories) ~agreementId ~serverId
+              ()) (Some Values.UpdateAgreementResponse.to_json)
+           (Some Values.UpdateAgreementResponse.error_to_json)])
+let update_certificate =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and activeDate =
+         flag "active-date" (optional json_arg) ~doc:"JSON CertDate"
+       and inactiveDate =
+         flag "inactive-date" (optional json_arg) ~doc:"JSON CertDate"
+       and description =
+         flag "description" (optional string) ~doc:"STRING Description"
+       and certificateId =
+         flag "certificate-id" (required string) ~doc:"STRING CertificateId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_certificate
+           (Values.UpdateCertificateRequest.make
+              ?activeDate:(Option.map ~f:Values.CertDate.of_json activeDate)
+              ?inactiveDate:(Option.map ~f:Values.CertDate.of_json
+                               inactiveDate) ?description ~certificateId ())
+           (Some Values.UpdateCertificateResponse.to_json)
+           (Some Values.UpdateCertificateResponse.error_to_json)])
+let update_connector =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and url = flag "url" (optional string) ~doc:"STRING Url"
+       and as2Config =
+         flag "as2-config" (optional json_arg) ~doc:"JSON As2ConnectorConfig"
+       and accessRole =
+         flag "access-role" (optional string) ~doc:"STRING Role"
+       and loggingRole =
+         flag "logging-role" (optional string) ~doc:"STRING Role"
+       and sftpConfig =
+         flag "sftp-config" (optional json_arg)
+           ~doc:"JSON SftpConnectorConfig"
+       and securityPolicyName =
+         flag "security-policy-name" (optional string)
+           ~doc:"STRING ConnectorSecurityPolicyName"
+       and egressConfig =
+         flag "egress-config" (optional json_arg)
+           ~doc:"JSON UpdateConnectorEgressConfig"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg)
+           ~doc:"JSON ConnectorsIpAddressType"
+       and connectorId =
+         flag "connector-id" (required string) ~doc:"STRING ConnectorId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_connector
+           (Values.UpdateConnectorRequest.make ?url
+              ?as2Config:(Option.map ~f:Values.As2ConnectorConfig.of_json
+                            as2Config) ?accessRole ?loggingRole
+              ?sftpConfig:(Option.map ~f:Values.SftpConnectorConfig.of_json
+                             sftpConfig) ?securityPolicyName
+              ?egressConfig:(Option.map
+                               ~f:Values.UpdateConnectorEgressConfig.of_json
+                               egressConfig)
+              ?ipAddressType:(Option.map
+                                ~f:Values.ConnectorsIpAddressType.of_json
+                                ipAddressType) ~connectorId ())
+           (Some Values.UpdateConnectorResponse.to_json)
+           (Some Values.UpdateConnectorResponse.error_to_json)])
+let update_host_key =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serverId =
+         flag "server-id" (required string) ~doc:"STRING ServerId"
+       and hostKeyId =
+         flag "host-key-id" (required string) ~doc:"STRING HostKeyId"
+       and description =
+         flag "description" (required string)
+           ~doc:"STRING HostKeyDescription" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_host_key
+           (Values.UpdateHostKeyRequest.make ~serverId ~hostKeyId
+              ~description ()) (Some Values.UpdateHostKeyResponse.to_json)
+           (Some Values.UpdateHostKeyResponse.error_to_json)])
+let update_profile =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and certificateIds =
+         flag "certificate-ids" (optional json_arg)
+           ~doc:"JSON CertificateIds"
+       and profileId =
+         flag "profile-id" (required string) ~doc:"STRING ProfileId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_profile
+           (Values.UpdateProfileRequest.make
+              ?certificateIds:(Option.map ~f:Values.CertificateIds.of_json
+                                 certificateIds) ~profileId ())
+           (Some Values.UpdateProfileResponse.to_json)
+           (Some Values.UpdateProfileResponse.error_to_json)])
 let update_server =
   Command.async ~summary:""
     ([%map_open.Command
@@ -785,6 +1733,17 @@ let update_server =
        and workflowDetails =
          flag "workflow-details" (optional json_arg)
            ~doc:"JSON WorkflowDetails"
+       and structuredLogDestinations =
+         flag "structured-log-destinations" (optional json_arg)
+           ~doc:"JSON StructuredLogDestinations"
+       and s3StorageOptions =
+         flag "s3-storage-options" (optional json_arg)
+           ~doc:"JSON S3StorageOptions"
+       and ipAddressType =
+         flag "ip-address-type" (optional json_arg) ~doc:"JSON IpAddressType"
+       and identityProviderType =
+         flag "identity-provider-type" (optional json_arg)
+           ~doc:"JSON IdentityProviderType"
        and serverId =
          flag "server-id" (required string) ~doc:"STRING ServerId" in
        fun () ->
@@ -805,7 +1764,18 @@ let update_server =
               ?protocols:(Option.map ~f:Values.Protocols.of_json protocols)
               ?securityPolicyName
               ?workflowDetails:(Option.map ~f:Values.WorkflowDetails.of_json
-                                  workflowDetails) ~serverId ())
+                                  workflowDetails)
+              ?structuredLogDestinations:(Option.map
+                                            ~f:Values.StructuredLogDestinations.of_json
+                                            structuredLogDestinations)
+              ?s3StorageOptions:(Option.map
+                                   ~f:Values.S3StorageOptions.of_json
+                                   s3StorageOptions)
+              ?ipAddressType:(Option.map ~f:Values.IpAddressType.of_json
+                                ipAddressType)
+              ?identityProviderType:(Option.map
+                                       ~f:Values.IdentityProviderType.of_json
+                                       identityProviderType) ~serverId ())
            (Some Values.UpdateServerResponse.to_json)
            (Some Values.UpdateServerResponse.error_to_json)])
 let update_user =
@@ -848,38 +1818,142 @@ let update_user =
                                posixProfile) ?role ~serverId ~userName ())
            (Some Values.UpdateUserResponse.to_json)
            (Some Values.UpdateUserResponse.error_to_json)])
+let update_web_app =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and identityProviderDetails =
+         flag "identity-provider-details" (optional json_arg)
+           ~doc:"JSON UpdateWebAppIdentityProviderDetails"
+       and accessEndpoint =
+         flag "access-endpoint" (optional string)
+           ~doc:"STRING WebAppAccessEndpoint"
+       and webAppUnits =
+         flag "web-app-units" (optional json_arg) ~doc:"JSON WebAppUnits"
+       and endpointDetails =
+         flag "endpoint-details" (optional json_arg)
+           ~doc:"JSON UpdateWebAppEndpointDetails"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_web_app
+           (Values.UpdateWebAppRequest.make
+              ?identityProviderDetails:(Option.map
+                                          ~f:Values.UpdateWebAppIdentityProviderDetails.of_json
+                                          identityProviderDetails)
+              ?accessEndpoint
+              ?webAppUnits:(Option.map ~f:Values.WebAppUnits.of_json
+                              webAppUnits)
+              ?endpointDetails:(Option.map
+                                  ~f:Values.UpdateWebAppEndpointDetails.of_json
+                                  endpointDetails) ~webAppId ())
+           (Some Values.UpdateWebAppResponse.to_json)
+           (Some Values.UpdateWebAppResponse.error_to_json)])
+let update_web_app_customization =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and title = flag "title" (optional string) ~doc:"STRING WebAppTitle"
+       and logoFile =
+         flag "logo-file" (optional json_arg) ~doc:"JSON WebAppLogoFile"
+       and faviconFile =
+         flag "favicon-file" (optional json_arg)
+           ~doc:"JSON WebAppFaviconFile"
+       and webAppId =
+         flag "web-app-id" (required string) ~doc:"STRING WebAppId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_web_app_customization
+           (Values.UpdateWebAppCustomizationRequest.make ?title
+              ?logoFile:(Option.map ~f:Values.WebAppLogoFile.of_json logoFile)
+              ?faviconFile:(Option.map ~f:Values.WebAppFaviconFile.of_json
+                              faviconFile) ~webAppId ())
+           (Some Values.UpdateWebAppCustomizationResponse.to_json)
+           (Some Values.UpdateWebAppCustomizationResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-access", create_access);
+    ("create-agreement", create_agreement);
+    ("create-connector", create_connector);
+    ("create-profile", create_profile);
     ("create-server", create_server);
     ("create-user", create_user);
+    ("create-web-app", create_web_app);
     ("create-workflow", create_workflow);
     ("delete-access", delete_access);
+    ("delete-agreement", delete_agreement);
+    ("delete-certificate", delete_certificate);
+    ("delete-connector", delete_connector);
+    ("delete-host-key", delete_host_key);
+    ("delete-profile", delete_profile);
     ("delete-server", delete_server);
     ("delete-ssh-public-key", delete_ssh_public_key);
     ("delete-user", delete_user);
+    ("delete-web-app", delete_web_app);
+    ("delete-web-app-customization", delete_web_app_customization);
     ("delete-workflow", delete_workflow);
     ("describe-access", describe_access);
+    ("describe-agreement", describe_agreement);
+    ("describe-certificate", describe_certificate);
+    ("describe-connector", describe_connector);
     ("describe-execution", describe_execution);
+    ("describe-host-key", describe_host_key);
+    ("describe-profile", describe_profile);
     ("describe-security-policy", describe_security_policy);
     ("describe-server", describe_server);
     ("describe-user", describe_user);
+    ("describe-web-app", describe_web_app);
+    ("describe-web-app-customization", describe_web_app_customization);
     ("describe-workflow", describe_workflow);
+    ("import-certificate", import_certificate);
+    ("import-host-key", import_host_key);
     ("import-ssh-public-key", import_ssh_public_key);
     ("list-accesses", list_accesses);
+    ("list-agreements", list_agreements);
+    ("list-certificates", list_certificates);
+    ("list-connectors", list_connectors);
     ("list-executions", list_executions);
+    ("list-file-transfer-results", list_file_transfer_results);
+    ("list-host-keys", list_host_keys);
+    ("list-profiles", list_profiles);
     ("list-security-policies", list_security_policies);
     ("list-servers", list_servers);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-users", list_users);
+    ("list-web-apps", list_web_apps);
     ("list-workflows", list_workflows);
     ("send-workflow-step-state", send_workflow_step_state);
+    ("start-directory-listing", start_directory_listing);
+    ("start-file-transfer", start_file_transfer);
+    ("start-remote-delete", start_remote_delete);
+    ("start-remote-move", start_remote_move);
     ("start-server", start_server);
     ("stop-server", stop_server);
     ("tag-resource", tag_resource);
+    ("test-connection", test_connection);
     ("test-identity-provider", test_identity_provider);
     ("untag-resource", untag_resource);
     ("update-access", update_access);
+    ("update-agreement", update_agreement);
+    ("update-certificate", update_certificate);
+    ("update-connector", update_connector);
+    ("update-host-key", update_host_key);
+    ("update-profile", update_profile);
     ("update-server", update_server);
-    ("update-user", update_user)]
+    ("update-user", update_user);
+    ("update-web-app", update_web_app);
+    ("update-web-app-customization", update_web_app_customization)]

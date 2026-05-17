@@ -60,6 +60,11 @@ let create_auto_predictor =
        and explainPredictor =
          flag "explain-predictor" (optional bool) ~doc:"BOOL Boolean"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and monitorConfig =
+         flag "monitor-config" (optional json_arg) ~doc:"JSON MonitorConfig"
+       and timeAlignmentBoundary =
+         flag "time-alignment-boundary" (optional json_arg)
+           ~doc:"JSON TimeAlignmentBoundary"
        and predictorName =
          flag "predictor-name" (required string) ~doc:"STRING Name" in
        fun () ->
@@ -78,7 +83,12 @@ let create_auto_predictor =
               ?optimizationMetric:(Option.map
                                      ~f:Values.OptimizationMetric.of_json
                                      optimizationMetric) ?explainPredictor
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~predictorName
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?monitorConfig:(Option.map ~f:Values.MonitorConfig.of_json
+                                monitorConfig)
+              ?timeAlignmentBoundary:(Option.map
+                                        ~f:Values.TimeAlignmentBoundary.of_json
+                                        timeAlignmentBoundary) ~predictorName
               ()) (Some Values.CreateAutoPredictorResponse.to_json)
            (Some Values.CreateAutoPredictorResponse.error_to_json)])
 let create_dataset =
@@ -163,6 +173,9 @@ let create_dataset_import_job =
          flag "geolocation-format" (optional string)
            ~doc:"STRING GeolocationFormat"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and format = flag "format" (optional string) ~doc:"STRING Format"
+       and importMode =
+         flag "import-mode" (optional json_arg) ~doc:"JSON ImportMode"
        and datasetImportJobName =
          flag "dataset-import-job-name" (required string) ~doc:"STRING Name"
        and datasetArn =
@@ -174,7 +187,8 @@ let create_dataset_import_job =
            Io.create_dataset_import_job
            (Values.CreateDatasetImportJobRequest.make ?timestampFormat
               ?timeZone ?useGeolocationForTimeZone ?geolocationFormat
-              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?format
+              ?importMode:(Option.map ~f:Values.ImportMode.of_json importMode)
               ~datasetImportJobName ~datasetArn
               ~dataSource:(Values.DataSource.of_json dataSource) ())
            (Some Values.CreateDatasetImportJobResponse.to_json)
@@ -230,6 +244,7 @@ let create_explainability_export =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and format = flag "format" (optional string) ~doc:"STRING Format"
        and explainabilityExportName =
          flag "explainability-export-name" (required string)
            ~doc:"STRING Name"
@@ -241,7 +256,7 @@ let create_explainability_export =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_explainability_export
            (Values.CreateExplainabilityExportRequest.make
-              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?format
               ~explainabilityExportName ~explainabilityArn
               ~destination:(Values.DataDestination.of_json destination) ())
            (Some Values.CreateExplainabilityExportResponse.to_json)
@@ -259,6 +274,9 @@ let create_forecast =
        and forecastTypes =
          flag "forecast-types" (optional json_arg) ~doc:"JSON ForecastTypes"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and timeSeriesSelector =
+         flag "time-series-selector" (optional json_arg)
+           ~doc:"JSON TimeSeriesSelector"
        and forecastName =
          flag "forecast-name" (required string) ~doc:"STRING Name"
        and predictorArn =
@@ -269,7 +287,10 @@ let create_forecast =
            (Values.CreateForecastRequest.make
               ?forecastTypes:(Option.map ~f:Values.ForecastTypes.of_json
                                 forecastTypes)
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~forecastName
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?timeSeriesSelector:(Option.map
+                                     ~f:Values.TimeSeriesSelector.of_json
+                                     timeSeriesSelector) ~forecastName
               ~predictorArn ()) (Some Values.CreateForecastResponse.to_json)
            (Some Values.CreateForecastResponse.error_to_json)])
 let create_forecast_export_job =
@@ -283,6 +304,7 @@ let create_forecast_export_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and format = flag "format" (optional string) ~doc:"STRING Format"
        and forecastExportJobName =
          flag "forecast-export-job-name" (required string) ~doc:"STRING Name"
        and forecastArn =
@@ -293,11 +315,33 @@ let create_forecast_export_job =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_forecast_export_job
            (Values.CreateForecastExportJobRequest.make
-              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?format
               ~forecastExportJobName ~forecastArn
               ~destination:(Values.DataDestination.of_json destination) ())
            (Some Values.CreateForecastExportJobResponse.to_json)
            (Some Values.CreateForecastExportJobResponse.error_to_json)])
+let create_monitor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and monitorName =
+         flag "monitor-name" (required string) ~doc:"STRING Name"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_monitor
+           (Values.CreateMonitorRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~monitorName
+              ~resourceArn ()) (Some Values.CreateMonitorResponse.to_json)
+           (Some Values.CreateMonitorResponse.error_to_json)])
 let create_predictor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -388,6 +432,7 @@ let create_predictor_backtest_export_job =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and format = flag "format" (optional string) ~doc:"STRING Format"
        and predictorBacktestExportJobName =
          flag "predictor-backtest-export-job-name" (required string)
            ~doc:"STRING Name"
@@ -399,12 +444,107 @@ let create_predictor_backtest_export_job =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_predictor_backtest_export_job
            (Values.CreatePredictorBacktestExportJobRequest.make
-              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?format
               ~predictorBacktestExportJobName ~predictorArn
               ~destination:(Values.DataDestination.of_json destination) ())
            (Some Values.CreatePredictorBacktestExportJobResponse.to_json)
            (Some
               Values.CreatePredictorBacktestExportJobResponse.error_to_json)])
+let create_what_if_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and timeSeriesSelector =
+         flag "time-series-selector" (optional json_arg)
+           ~doc:"JSON TimeSeriesSelector"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and whatIfAnalysisName =
+         flag "what-if-analysis-name" (required string) ~doc:"STRING Name"
+       and forecastArn =
+         flag "forecast-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_what_if_analysis
+           (Values.CreateWhatIfAnalysisRequest.make
+              ?timeSeriesSelector:(Option.map
+                                     ~f:Values.TimeSeriesSelector.of_json
+                                     timeSeriesSelector)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~whatIfAnalysisName ~forecastArn ())
+           (Some Values.CreateWhatIfAnalysisResponse.to_json)
+           (Some Values.CreateWhatIfAnalysisResponse.error_to_json)])
+let create_what_if_forecast =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and timeSeriesTransformations =
+         flag "time-series-transformations" (optional json_arg)
+           ~doc:"JSON TimeSeriesTransformations"
+       and timeSeriesReplacementsDataSource =
+         flag "time-series-replacements-data-source" (optional json_arg)
+           ~doc:"JSON TimeSeriesReplacementsDataSource"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and whatIfForecastName =
+         flag "what-if-forecast-name" (required string) ~doc:"STRING Name"
+       and whatIfAnalysisArn =
+         flag "what-if-analysis-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_what_if_forecast
+           (Values.CreateWhatIfForecastRequest.make
+              ?timeSeriesTransformations:(Option.map
+                                            ~f:Values.TimeSeriesTransformations.of_json
+                                            timeSeriesTransformations)
+              ?timeSeriesReplacementsDataSource:(Option.map
+                                                   ~f:Values.TimeSeriesReplacementsDataSource.of_json
+                                                   timeSeriesReplacementsDataSource)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~whatIfForecastName ~whatIfAnalysisArn ())
+           (Some Values.CreateWhatIfForecastResponse.to_json)
+           (Some Values.CreateWhatIfForecastResponse.error_to_json)])
+let create_what_if_forecast_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and format = flag "format" (optional string) ~doc:"STRING Format"
+       and whatIfForecastExportName =
+         flag "what-if-forecast-export-name" (required string)
+           ~doc:"STRING Name"
+       and whatIfForecastArns =
+         flag "what-if-forecast-arns" (required json_arg)
+           ~doc:"JSON WhatIfForecastArnListForExport"
+       and destination =
+         flag "destination" (required json_arg) ~doc:"JSON DataDestination" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_what_if_forecast_export
+           (Values.CreateWhatIfForecastExportRequest.make
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?format
+              ~whatIfForecastExportName
+              ~whatIfForecastArns:(Values.WhatIfForecastArnListForExport.of_json
+                                     whatIfForecastArns)
+              ~destination:(Values.DataDestination.of_json destination) ())
+           (Some Values.CreateWhatIfForecastExportResponse.to_json)
+           (Some Values.CreateWhatIfForecastExportResponse.error_to_json)])
 let delete_dataset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -522,6 +662,22 @@ let delete_forecast_export_job =
            Io.delete_forecast_export_job
            (Values.DeleteForecastExportJobRequest.make ~forecastExportJobArn
               ()) None None])
+let delete_monitor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and monitorArn =
+         flag "monitor-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_monitor
+           (Values.DeleteMonitorRequest.make ~monitorArn ()) None None])
 let delete_predictor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -572,6 +728,58 @@ let delete_resource_tree =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_resource_tree
            (Values.DeleteResourceTreeRequest.make ~resourceArn ()) None None])
+let delete_what_if_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfAnalysisArn =
+         flag "what-if-analysis-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_what_if_analysis
+           (Values.DeleteWhatIfAnalysisRequest.make ~whatIfAnalysisArn ())
+           None None])
+let delete_what_if_forecast =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfForecastArn =
+         flag "what-if-forecast-arn" (required string) ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_what_if_forecast
+           (Values.DeleteWhatIfForecastRequest.make ~whatIfForecastArn ())
+           None None])
+let delete_what_if_forecast_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfForecastExportArn =
+         flag "what-if-forecast-export-arn" (required string)
+           ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_what_if_forecast_export
+           (Values.DeleteWhatIfForecastExportRequest.make
+              ~whatIfForecastExportArn ()) None None])
 let describe_auto_predictor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -718,6 +926,24 @@ let describe_forecast_export_job =
               ~forecastExportJobArn ())
            (Some Values.DescribeForecastExportJobResponse.to_json)
            (Some Values.DescribeForecastExportJobResponse.error_to_json)])
+let describe_monitor =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and monitorArn =
+         flag "monitor-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_monitor
+           (Values.DescribeMonitorRequest.make ~monitorArn ())
+           (Some Values.DescribeMonitorResponse.to_json)
+           (Some Values.DescribeMonitorResponse.error_to_json)])
 let describe_predictor =
   Command.async ~summary:""
     ([%map_open.Command
@@ -757,6 +983,62 @@ let describe_predictor_backtest_export_job =
            (Some Values.DescribePredictorBacktestExportJobResponse.to_json)
            (Some
               Values.DescribePredictorBacktestExportJobResponse.error_to_json)])
+let describe_what_if_analysis =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfAnalysisArn =
+         flag "what-if-analysis-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_what_if_analysis
+           (Values.DescribeWhatIfAnalysisRequest.make ~whatIfAnalysisArn ())
+           (Some Values.DescribeWhatIfAnalysisResponse.to_json)
+           (Some Values.DescribeWhatIfAnalysisResponse.error_to_json)])
+let describe_what_if_forecast =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfForecastArn =
+         flag "what-if-forecast-arn" (required string) ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_what_if_forecast
+           (Values.DescribeWhatIfForecastRequest.make ~whatIfForecastArn ())
+           (Some Values.DescribeWhatIfForecastResponse.to_json)
+           (Some Values.DescribeWhatIfForecastResponse.error_to_json)])
+let describe_what_if_forecast_export =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and whatIfForecastExportArn =
+         flag "what-if-forecast-export-arn" (required string)
+           ~doc:"STRING LongArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_what_if_forecast_export
+           (Values.DescribeWhatIfForecastExportRequest.make
+              ~whatIfForecastExportArn ())
+           (Some Values.DescribeWhatIfForecastExportResponse.to_json)
+           (Some Values.DescribeWhatIfForecastExportResponse.error_to_json)])
 let get_accuracy_metrics =
   Command.async ~summary:""
     ([%map_open.Command
@@ -926,6 +1208,53 @@ let list_forecasts =
               ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
            (Some Values.ListForecastsResponse.to_json)
            (Some Values.ListForecastsResponse.error_to_json)])
+let list_monitor_evaluations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters"
+       and monitorArn =
+         flag "monitor-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_monitor_evaluations
+           (Values.ListMonitorEvaluationsRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.Filters.of_json filters)
+              ~monitorArn ())
+           (Some Values.ListMonitorEvaluationsResponse.to_json)
+           (Some Values.ListMonitorEvaluationsResponse.error_to_json)])
+let list_monitors =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_monitors
+           (Values.ListMonitorsRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
+           (Some Values.ListMonitorsResponse.to_json)
+           (Some Values.ListMonitorsResponse.error_to_json)])
 let list_predictor_backtest_export_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -989,6 +1318,89 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_what_if_analyses =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_what_if_analyses
+           (Values.ListWhatIfAnalysesRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
+           (Some Values.ListWhatIfAnalysesResponse.to_json)
+           (Some Values.ListWhatIfAnalysesResponse.error_to_json)])
+let list_what_if_forecast_exports =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_what_if_forecast_exports
+           (Values.ListWhatIfForecastExportsRequest.make ?nextToken
+              ?maxResults
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
+           (Some Values.ListWhatIfForecastExportsResponse.to_json)
+           (Some Values.ListWhatIfForecastExportsResponse.error_to_json)])
+let list_what_if_forecasts =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and filters = flag "filters" (optional json_arg) ~doc:"JSON Filters" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_what_if_forecasts
+           (Values.ListWhatIfForecastsRequest.make ?nextToken ?maxResults
+              ?filters:(Option.map ~f:Values.Filters.of_json filters) ())
+           (Some Values.ListWhatIfForecastsResponse.to_json)
+           (Some Values.ListWhatIfForecastsResponse.error_to_json)])
+let resume_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING Arn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.resume_resource
+           (Values.ResumeResourceRequest.make ~resourceArn ()) None None])
 let stop_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1077,9 +1489,13 @@ let main =
     ("create-explainability-export", create_explainability_export);
     ("create-forecast", create_forecast);
     ("create-forecast-export-job", create_forecast_export_job);
+    ("create-monitor", create_monitor);
     ("create-predictor", create_predictor);
     ("create-predictor-backtest-export-job",
       create_predictor_backtest_export_job);
+    ("create-what-if-analysis", create_what_if_analysis);
+    ("create-what-if-forecast", create_what_if_forecast);
+    ("create-what-if-forecast-export", create_what_if_forecast_export);
     ("delete-dataset", delete_dataset);
     ("delete-dataset-group", delete_dataset_group);
     ("delete-dataset-import-job", delete_dataset_import_job);
@@ -1087,10 +1503,14 @@ let main =
     ("delete-explainability-export", delete_explainability_export);
     ("delete-forecast", delete_forecast);
     ("delete-forecast-export-job", delete_forecast_export_job);
+    ("delete-monitor", delete_monitor);
     ("delete-predictor", delete_predictor);
     ("delete-predictor-backtest-export-job",
       delete_predictor_backtest_export_job);
     ("delete-resource-tree", delete_resource_tree);
+    ("delete-what-if-analysis", delete_what_if_analysis);
+    ("delete-what-if-forecast", delete_what_if_forecast);
+    ("delete-what-if-forecast-export", delete_what_if_forecast_export);
     ("describe-auto-predictor", describe_auto_predictor);
     ("describe-dataset", describe_dataset);
     ("describe-dataset-group", describe_dataset_group);
@@ -1099,9 +1519,13 @@ let main =
     ("describe-explainability-export", describe_explainability_export);
     ("describe-forecast", describe_forecast);
     ("describe-forecast-export-job", describe_forecast_export_job);
+    ("describe-monitor", describe_monitor);
     ("describe-predictor", describe_predictor);
     ("describe-predictor-backtest-export-job",
       describe_predictor_backtest_export_job);
+    ("describe-what-if-analysis", describe_what_if_analysis);
+    ("describe-what-if-forecast", describe_what_if_forecast);
+    ("describe-what-if-forecast-export", describe_what_if_forecast_export);
     ("get-accuracy-metrics", get_accuracy_metrics);
     ("list-dataset-groups", list_dataset_groups);
     ("list-dataset-import-jobs", list_dataset_import_jobs);
@@ -1110,10 +1534,16 @@ let main =
     ("list-explainability-exports", list_explainability_exports);
     ("list-forecast-export-jobs", list_forecast_export_jobs);
     ("list-forecasts", list_forecasts);
+    ("list-monitor-evaluations", list_monitor_evaluations);
+    ("list-monitors", list_monitors);
     ("list-predictor-backtest-export-jobs",
       list_predictor_backtest_export_jobs);
     ("list-predictors", list_predictors);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-what-if-analyses", list_what_if_analyses);
+    ("list-what-if-forecast-exports", list_what_if_forecast_exports);
+    ("list-what-if-forecasts", list_what_if_forecasts);
+    ("resume-resource", resume_resource);
     ("stop-resource", stop_resource);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);

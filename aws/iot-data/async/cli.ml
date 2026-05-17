@@ -28,6 +28,28 @@ let call ?endpoint_url ?profile ?region f m result_to_json error_to_json =
                       ((result |> to_json) |> Yojson.Safe.to_string) |>
                         print_endline);
                  return ())))
+let delete_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and cleanSession =
+         flag "clean-session" (optional bool) ~doc:"BOOL CleanSession"
+       and preventWillMessage =
+         flag "prevent-will-message" (optional bool)
+           ~doc:"BOOL PreventWillMessage"
+       and clientId =
+         flag "client-id" (required string) ~doc:"STRING ClientId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_connection
+           (Values.DeleteConnectionRequest.make ?cleanSession
+              ?preventWillMessage ~clientId ()) None None])
 let delete_thing_shadow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -140,13 +162,34 @@ let publish =
        and qos = flag "qos" (optional int) ~doc:"INT Qos"
        and retain = flag "retain" (optional bool) ~doc:"BOOL Retain"
        and payload = flag "payload" (optional json_arg) ~doc:"JSON Payload"
+       and userProperties =
+         flag "user-properties" (optional string)
+           ~doc:"STRING UserProperties"
+       and payloadFormatIndicator =
+         flag "payload-format-indicator" (optional json_arg)
+           ~doc:"JSON PayloadFormatIndicator"
+       and contentType =
+         flag "content-type" (optional string) ~doc:"STRING ContentType"
+       and responseTopic =
+         flag "response-topic" (optional string) ~doc:"STRING ResponseTopic"
+       and correlationData =
+         flag "correlation-data" (optional string)
+           ~doc:"STRING CorrelationData"
+       and messageExpiry =
+         flag "message-expiry" (optional json_arg) ~doc:"JSON MessageExpiry"
        and topic = flag "topic" (required string) ~doc:"STRING Topic" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.publish
            (Values.PublishRequest.make ?qos ?retain
-              ?payload:(Option.map ~f:Values.Payload.of_json payload) ~topic
-              ()) None None])
+              ?payload:(Option.map ~f:Values.Payload.of_json payload)
+              ?userProperties
+              ?payloadFormatIndicator:(Option.map
+                                         ~f:Values.PayloadFormatIndicator.of_json
+                                         payloadFormatIndicator) ?contentType
+              ?responseTopic ?correlationData
+              ?messageExpiry:(Option.map ~f:Values.MessageExpiry.of_json
+                                messageExpiry) ~topic ()) None None])
 let update_thing_shadow =
   Command.async ~summary:""
     ([%map_open.Command
@@ -173,7 +216,8 @@ let update_thing_shadow =
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
-    [("delete-thing-shadow", delete_thing_shadow);
+    [("delete-connection", delete_connection);
+    ("delete-thing-shadow", delete_thing_shadow);
     ("get-retained-message", get_retained_message);
     ("get-thing-shadow", get_thing_shadow);
     ("list-named-shadows-for-thing", list_named_shadows_for_thing);

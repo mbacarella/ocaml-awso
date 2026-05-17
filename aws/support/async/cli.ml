@@ -204,6 +204,31 @@ let describe_communications =
               ?nextToken ?maxResults ~caseId ())
            (Some Values.DescribeCommunicationsResponse.to_json)
            (Some Values.DescribeCommunicationsResponse.error_to_json)])
+let describe_create_case_options =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and issueType =
+         flag "issue-type" (required string) ~doc:"STRING IssueType"
+       and serviceCode =
+         flag "service-code" (required string) ~doc:"STRING ServiceCode"
+       and language =
+         flag "language" (required string) ~doc:"STRING Language"
+       and categoryCode =
+         flag "category-code" (required string) ~doc:"STRING CategoryCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_create_case_options
+           (Values.DescribeCreateCaseOptionsRequest.make ~issueType
+              ~serviceCode ~language ~categoryCode ())
+           (Some Values.DescribeCreateCaseOptionsResponse.to_json)
+           (Some Values.DescribeCreateCaseOptionsResponse.error_to_json)])
 let describe_services =
   Command.async ~summary:""
     ([%map_open.Command
@@ -245,6 +270,32 @@ let describe_severity_levels =
            (Values.DescribeSeverityLevelsRequest.make ?language ())
            (Some Values.DescribeSeverityLevelsResponse.to_json)
            (Some Values.DescribeSeverityLevelsResponse.error_to_json)])
+let describe_supported_languages =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and issueType =
+         flag "issue-type" (required string)
+           ~doc:"STRING ValidatedIssueTypeString"
+       and serviceCode =
+         flag "service-code" (required string)
+           ~doc:"STRING ValidatedServiceCode"
+       and categoryCode =
+         flag "category-code" (required string)
+           ~doc:"STRING ValidatedCategoryCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_supported_languages
+           (Values.DescribeSupportedLanguagesRequest.make ~issueType
+              ~serviceCode ~categoryCode ())
+           (Some Values.DescribeSupportedLanguagesResponse.to_json)
+           (Some Values.DescribeSupportedLanguagesResponse.error_to_json)])
 let describe_trusted_advisor_check_refresh_statuses =
   Command.async ~summary:""
     ([%map_open.Command
@@ -365,8 +416,10 @@ let main =
     ("describe-attachment", describe_attachment);
     ("describe-cases", describe_cases);
     ("describe-communications", describe_communications);
+    ("describe-create-case-options", describe_create_case_options);
     ("describe-services", describe_services);
     ("describe-severity-levels", describe_severity_levels);
+    ("describe-supported-languages", describe_supported_languages);
     ("describe-trusted-advisor-check-refresh-statuses",
       describe_trusted_advisor_check_refresh_statuses);
     ("describe-trusted-advisor-check-result",

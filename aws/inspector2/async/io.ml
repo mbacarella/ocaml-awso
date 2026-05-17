@@ -13,16 +13,50 @@ let eval ?endpoint_url ?cfg endpoint input =
          (fun resp_result -> Endpoints.of_response endpoint resp_result))
 let associate_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.AssociateMember input
+let batch_associate_code_security_scan_configuration ?endpoint_url ?cfg input
+  =
+  eval ?endpoint_url ?cfg
+    Endpoints.BatchAssociateCodeSecurityScanConfiguration input
+let batch_disassociate_code_security_scan_configuration ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.BatchDisassociateCodeSecurityScanConfiguration input
 let batch_get_account_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetAccountStatus input
+let batch_get_code_snippet ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetCodeSnippet input
+let batch_get_finding_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetFindingDetails input
 let batch_get_free_trial_info ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.BatchGetFreeTrialInfo input
+let batch_get_member_ec2_deep_inspection_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchGetMemberEc2DeepInspectionStatus
+    input
+let batch_update_member_ec2_deep_inspection_status ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.BatchUpdateMemberEc2DeepInspectionStatus
+    input
 let cancel_findings_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CancelFindingsReport input
+let cancel_sbom_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CancelSbomExport input
+let create_cis_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCisScanConfiguration input
+let create_code_security_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCodeSecurityIntegration input
+let create_code_security_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateCodeSecurityScanConfiguration input
 let create_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFilter input
 let create_findings_report ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateFindingsReport input
+let create_sbom_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateSbomExport input
+let delete_cis_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCisScanConfiguration input
+let delete_code_security_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCodeSecurityIntegration input
+let delete_code_security_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteCodeSecurityScanConfiguration input
 let delete_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteFilter input
 let describe_organization_configuration ?endpoint_url ?cfg input =
@@ -37,14 +71,53 @@ let enable ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.Enable input
 let enable_delegated_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableDelegatedAdminAccount input
+let get_cis_scan_report ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCisScanReport input
+let get_cis_scan_result_details ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCisScanResultDetails input
+let get_clusters_for_image ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetClustersForImage input
+let get_code_security_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCodeSecurityIntegration input
+let get_code_security_scan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCodeSecurityScan input
+let get_code_security_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetCodeSecurityScanConfiguration input
+let get_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetConfiguration input
 let get_delegated_admin_account ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDelegatedAdminAccount input
+let get_ec2_deep_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEc2DeepInspectionConfiguration input
+let get_encryption_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetEncryptionKey input
 let get_findings_report_status ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetFindingsReportStatus input
 let get_member ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetMember input
+let get_sbom_export ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.GetSbomExport input
 let list_account_permissions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListAccountPermissions input
+let list_cis_scan_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCisScanConfigurations input
+let list_cis_scan_results_aggregated_by_checks ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCisScanResultsAggregatedByChecks
+    input
+let list_cis_scan_results_aggregated_by_target_resource ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ListCisScanResultsAggregatedByTargetResource input
+let list_cis_scans ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCisScans input
+let list_code_security_integrations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCodeSecurityIntegrations input
+let list_code_security_scan_configuration_associations ?endpoint_url ?cfg
+  input =
+  eval ?endpoint_url ?cfg
+    Endpoints.ListCodeSecurityScanConfigurationAssociations input
+let list_code_security_scan_configurations ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListCodeSecurityScanConfigurations input
 let list_coverage ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCoverage input
 let list_coverage_statistics ?endpoint_url ?cfg input =
@@ -63,11 +136,41 @@ let list_tags_for_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListTagsForResource input
 let list_usage_totals ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListUsageTotals input
+let reset_encryption_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ResetEncryptionKey input
+let search_vulnerabilities ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SearchVulnerabilities input
+let send_cis_session_health ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendCisSessionHealth input
+let send_cis_session_telemetry ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.SendCisSessionTelemetry input
+let start_cis_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCisSession input
+let start_code_security_scan ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartCodeSecurityScan input
+let stop_cis_session ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StopCisSession input
 let tag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.TagResource input
 let untag_resource ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UntagResource input
+let update_cis_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCisScanConfiguration input
+let update_code_security_integration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCodeSecurityIntegration input
+let update_code_security_scan_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateCodeSecurityScanConfiguration input
+let update_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateConfiguration input
+let update_ec2_deep_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEc2DeepInspectionConfiguration
+    input
+let update_encryption_key ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateEncryptionKey input
 let update_filter ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateFilter input
+let update_org_ec2_deep_inspection_configuration ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateOrgEc2DeepInspectionConfiguration
+    input
 let update_organization_configuration ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateOrganizationConfiguration input

@@ -129,6 +129,21 @@ module InstanceType =
     let of_json j = string_of_json ~kind:"InstanceType" j
     let to_json = simple_to_json to_value
   end
+module ThroughputVal =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in ok_or_failwith (check_int_min i ~min:0); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ThroughputVal" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -161,50 +176,60 @@ module VolumeSpecification =
       {
       volumeType: String_.t
         [@ocaml.doc
-          "The volume type. Volume types supported are gp2, io1, and standard."];
+          "The volume type. Volume types supported are gp3, gp2, io1, st1, sc1, and standard."];
       iops: Integer.t option
         [@ocaml.doc
           "The number of I/O operations per second (IOPS) that the volume supports."];
       sizeInGB: Integer.t
         [@ocaml.doc
-          "The volume size, in gibibytes (GiB). This can be a number from 1 - 1024. If the volume type is EBS-optimized, the minimum value is 10."]}
+          "The volume size, in gibibytes (GiB). This can be a number from 1 - 1024. If the volume type is EBS-optimized, the minimum value is 10."];
+      throughput: ThroughputVal.t option
+        [@ocaml.doc
+          "The throughput, in mebibyte per second (MiB/s). This optional parameter can be a number from 125 - 1000 and is valid only for gp3 volumes."]}
     let context_ = "VolumeSpecification"
     let make ?iops =
-      fun ~volumeType ->
-        fun ~sizeInGB -> fun () -> { iops; volumeType; sizeInGB }
+      fun ?throughput ->
+        fun ~volumeType ->
+          fun ~sizeInGB ->
+            fun () -> { iops; throughput; volumeType; sizeInGB }
     let to_value x =
       structure_to_value
         [("VolumeType", (Some (String_.to_value x.volumeType)));
         ("Iops", (Option.map x.iops ~f:Integer.to_value));
-        ("SizeInGB", (Some (Integer.to_value x.sizeInGB)))]
+        ("SizeInGB", (Some (Integer.to_value x.sizeInGB)));
+        ("Throughput", (Option.map x.throughput ~f:ThroughputVal.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let throughput =
+        (Option.map ~f:ThroughputVal.of_xml)
+          (Xml.child xml_arg0 "Throughput") in
       let sizeInGB =
         Integer.of_xml (Xml.child_exn ~context:context_ xml_arg0 "SizeInGB") in
       let iops = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "Iops") in
       let volumeType =
         String_.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeType") in
-      make ~sizeInGB ?iops ~volumeType ()
+      make ?throughput ~sizeInGB ?iops ~volumeType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sizeInGB = field_map_exn json "SizeInGB" Integer.of_json in
-      let iops = field_map json "Iops" Integer.of_json in
-      let volumeType = field_map_exn json "VolumeType" String_.of_json in
-      make ~sizeInGB ?iops ~volumeType ()
+    let of_json json__ =
+      let throughput = field_map json__ "Throughput" ThroughputVal.of_json in
+      let sizeInGB = field_map_exn json__ "SizeInGB" Integer.of_json in
+      let iops = field_map json__ "Iops" Integer.of_json in
+      let volumeType = field_map_exn json__ "VolumeType" String_.of_json in
+      make ?throughput ~sizeInGB ?iops ~volumeType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "EBS volume specifications such as volume type, IOPS, and size (GiB) that will be requested for the EBS volume attached to an EC2 instance in the cluster."]
+       "EBS volume specifications such as volume type, IOPS, size (GiB) and throughput (MiB/s) that are requested for the EBS volume attached to an Amazon EC2 instance in the cluster."]
 module EbsBlockDeviceConfig =
   struct
     type nonrec t =
       {
       volumeSpecification: VolumeSpecification.t
         [@ocaml.doc
-          "EBS volume specifications such as volume type, IOPS, and size (GiB) that will be requested for the EBS volume attached to an EC2 instance in the cluster."];
+          "EBS volume specifications such as volume type, IOPS, size (GiB) and throughput (MiB/s) that are requested for the EBS volume attached to an Amazon EC2 instance in the cluster."];
       volumesPerInstance: Integer.t option
         [@ocaml.doc
-          "Number of EBS volumes with a specific volume configuration that will be associated with every instance in the instance group"]}
+          "Number of EBS volumes with a specific volume configuration that are associated with every instance in the instance group"]}
     let context_ = "EbsBlockDeviceConfig"
     let make ?volumesPerInstance =
       fun ~volumeSpecification ->
@@ -225,19 +250,23 @@ module EbsBlockDeviceConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "VolumeSpecification") in
       make ?volumesPerInstance ~volumeSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let volumesPerInstance =
-        field_map json "VolumesPerInstance" Integer.of_json in
+        field_map json__ "VolumesPerInstance" Integer.of_json in
       let volumeSpecification =
-        field_map_exn json "VolumeSpecification" VolumeSpecification.of_json in
+        field_map_exn json__ "VolumeSpecification"
+          VolumeSpecification.of_json in
       make ?volumesPerInstance ~volumeSpecification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configuration of requested EBS block device associated with the instance group with count of volumes that will be associated to every instance."]
+       "Configuration of requested EBS block device associated with the instance group with count of volumes that are associated to every instance."]
 module EbsBlockDeviceConfigList =
   struct
     type nonrec t = EbsBlockDeviceConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EbsBlockDeviceConfig.to_value)) |>
         (fun x -> `List x)
@@ -282,7 +311,7 @@ module EbsConfiguration =
           "An array of Amazon EBS volume specifications attached to a cluster instance."];
       ebsOptimized: BooleanObject.t option
         [@ocaml.doc
-          "Indicates whether an Amazon EBS volume is EBS-optimized."]}
+          "Indicates whether an Amazon EBS volume is EBS-optimized. The default is false. You should explicitly set this value to true to enable the Amazon EBS-optimized setting for an EC2 instance."]}
     let make ?ebsBlockDeviceConfigs =
       fun ?ebsOptimized -> fun () -> { ebsBlockDeviceConfigs; ebsOptimized }
     let to_value x =
@@ -302,10 +331,11 @@ module EbsConfiguration =
           (Xml.child xml_arg0 "EbsBlockDeviceConfigs") in
       make ?ebsOptimized ?ebsBlockDeviceConfigs ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ebsOptimized = field_map json "EbsOptimized" BooleanObject.of_json in
+    let of_json json__ =
+      let ebsOptimized =
+        field_map json__ "EbsOptimized" BooleanObject.of_json in
       let ebsBlockDeviceConfigs =
-        field_map json "EbsBlockDeviceConfigs"
+        field_map json__ "EbsBlockDeviceConfigs"
           EbsBlockDeviceConfigList.of_json in
       make ?ebsOptimized ?ebsBlockDeviceConfigs ()
     let to_json v = composed_to_json to_value v
@@ -331,6 +361,8 @@ module StringMap =
                     (fun x -> (String_.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -394,11 +426,11 @@ module rec
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Classification") in
       make ?properties ?configurations ?classification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let properties = field_map json "Properties" StringMap.of_json in
+    let of_json json__ =
+      let properties = field_map json__ "Properties" StringMap.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
-      let classification = field_map json "Classification" String_.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
+      let classification = field_map json__ "Classification" String_.of_json in
       make ?properties ?configurations ?classification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -417,6 +449,9 @@ module rec
   struct
     type nonrec t = Configuration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Configuration.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -442,16 +477,16 @@ module InstanceTypeConfig =
     type nonrec t =
       {
       instanceType: InstanceType.t
-        [@ocaml.doc "An EC2 instance type, such as m3.xlarge."];
+        [@ocaml.doc "An Amazon EC2 instance type, such as m3.xlarge."];
       weightedCapacity: WholeNumber.t option
         [@ocaml.doc
           "The number of units that a provisioned instance of this type provides toward fulfilling the target capacities defined in InstanceFleetConfig. This value is 1 for a master instance fleet, and must be 1 or greater for core and task instance fleets. Defaults to 1 if not specified."];
       bidPrice: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The bid price for each EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
+          "The bid price for each Amazon EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
       bidPriceAsPercentageOfOnDemandPrice: NonNegativeDouble.t option
         [@ocaml.doc
-          "The bid price, as a percentage of On-Demand price, for each EC2 Spot Instance as defined by InstanceType. Expressed as a number (for example, 20 specifies 20%). If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
+          "The bid price, as a percentage of On-Demand price, for each Amazon EC2 Spot Instance as defined by InstanceType. Expressed as a number (for example, 20 specifies 20%). If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
       ebsConfiguration: EbsConfiguration.t option
         [@ocaml.doc
           "The configuration of Amazon Elastic Block Store (Amazon EBS) attached to each instance as defined by InstanceType."];
@@ -459,7 +494,10 @@ module InstanceTypeConfig =
         [@ocaml.doc
           "A configuration classification that applies when provisioning cluster instances, which can include configurations for applications and software that run on the cluster."];
       customAmiId: XmlStringMaxLen256.t option
-        [@ocaml.doc "The custom AMI ID to use for the instance type."]}
+        [@ocaml.doc "The custom AMI ID to use for the instance type."];
+      priority: NonNegativeDouble.t option
+        [@ocaml.doc
+          "The priority at which Amazon EMR launches the Amazon EC2 instances with this instance type. Priority starts at 0, which is the highest priority. Amazon EMR considers the highest priority first."]}
     let context_ = "InstanceTypeConfig"
     let make ?weightedCapacity =
       fun ?bidPrice ->
@@ -467,17 +505,19 @@ module InstanceTypeConfig =
           fun ?ebsConfiguration ->
             fun ?configurations ->
               fun ?customAmiId ->
-                fun ~instanceType ->
-                  fun () ->
-                    {
-                      weightedCapacity;
-                      bidPrice;
-                      bidPriceAsPercentageOfOnDemandPrice;
-                      ebsConfiguration;
-                      configurations;
-                      customAmiId;
-                      instanceType
-                    }
+                fun ?priority ->
+                  fun ~instanceType ->
+                    fun () ->
+                      {
+                        weightedCapacity;
+                        bidPrice;
+                        bidPriceAsPercentageOfOnDemandPrice;
+                        ebsConfiguration;
+                        configurations;
+                        customAmiId;
+                        priority;
+                        instanceType
+                      }
     let to_value x =
       structure_to_value
         [("InstanceType", (Some (InstanceType.to_value x.instanceType)));
@@ -492,9 +532,13 @@ module InstanceTypeConfig =
         ("Configurations",
           (Option.map x.configurations ~f:ConfigurationList.to_value));
         ("CustomAmiId",
-          (Option.map x.customAmiId ~f:XmlStringMaxLen256.to_value))]
+          (Option.map x.customAmiId ~f:XmlStringMaxLen256.to_value));
+        ("Priority", (Option.map x.priority ~f:NonNegativeDouble.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let priority =
+        (Option.map ~f:NonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "Priority") in
       let customAmiId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "CustomAmiId") in
@@ -516,35 +560,39 @@ module InstanceTypeConfig =
       let instanceType =
         InstanceType.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
-      make ?customAmiId ?configurations ?ebsConfiguration
+      make ?priority ?customAmiId ?configurations ?ebsConfiguration
         ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice ?weightedCapacity
         ~instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let priority = field_map json__ "Priority" NonNegativeDouble.of_json in
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
       let ebsConfiguration =
-        field_map json "EbsConfiguration" EbsConfiguration.of_json in
+        field_map json__ "EbsConfiguration" EbsConfiguration.of_json in
       let bidPriceAsPercentageOfOnDemandPrice =
-        field_map json "BidPriceAsPercentageOfOnDemandPrice"
+        field_map json__ "BidPriceAsPercentageOfOnDemandPrice"
           NonNegativeDouble.of_json in
-      let bidPrice = field_map json "BidPrice" XmlStringMaxLen256.of_json in
+      let bidPrice = field_map json__ "BidPrice" XmlStringMaxLen256.of_json in
       let weightedCapacity =
-        field_map json "WeightedCapacity" WholeNumber.of_json in
+        field_map json__ "WeightedCapacity" WholeNumber.of_json in
       let instanceType =
-        field_map_exn json "InstanceType" InstanceType.of_json in
-      make ?customAmiId ?configurations ?ebsConfiguration
+        field_map_exn json__ "InstanceType" InstanceType.of_json in
+      make ?priority ?customAmiId ?configurations ?ebsConfiguration
         ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice ?weightedCapacity
         ~instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An instance type configuration for each instance type in an instance fleet, which determines the EC2 instances Amazon EMR attempts to provision to fulfill On-Demand and Spot target capacities. When you use an allocation strategy, you can include a maximum of 30 instance type configurations for a fleet. For more information about how to use an allocation strategy, see Configure Instance Fleets. Without an allocation strategy, you may specify a maximum of five instance type configurations for a fleet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "An instance type configuration for each instance type in an instance fleet, which determines the Amazon EC2 instances Amazon EMR attempts to provision to fulfill On-Demand and Spot target capacities. When you use an allocation strategy, you can include a maximum of 30 instance type configurations for a fleet. For more information about how to use an allocation strategy, see Configure Instance Fleets. Without an allocation strategy, you may specify a maximum of five instance type configurations for a fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceTypeConfigList =
   struct
     type nonrec t = InstanceTypeConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -595,47 +643,31 @@ module InstanceFleetType =
     let of_json j = of_string (string_of_json ~kind:"InstanceFleetType" j)
     let to_json = simple_to_json to_value
   end
-module SpotProvisioningTimeoutAction =
-  struct
-    type nonrec t =
-      | SWITCH_TO_ON_DEMAND 
-      | TERMINATE_CLUSTER 
-      | Non_static_id of string 
-    let make i = i
-    let to_string =
-      function
-      | SWITCH_TO_ON_DEMAND -> "SWITCH_TO_ON_DEMAND"
-      | TERMINATE_CLUSTER -> "TERMINATE_CLUSTER"
-      | Non_static_id s -> s
-    let of_string =
-      function
-      | "SWITCH_TO_ON_DEMAND" -> SWITCH_TO_ON_DEMAND
-      | "TERMINATE_CLUSTER" -> TERMINATE_CLUSTER
-      | x -> Non_static_id x
-    let to_value x = `Enum (to_string x)
-    let to_query v = to_query to_value v
-    let to_header x = to_string x
-    let of_xml xml_arg0 =
-      of_string
-        (string_of_xml ~kind:"enumeration SpotProvisioningTimeoutAction"
-           xml_arg0)
-    let of_json j =
-      of_string (string_of_json ~kind:"SpotProvisioningTimeoutAction" j)
-    let to_json = simple_to_json to_value
-  end
 module SpotProvisioningAllocationStrategy =
   struct
     type nonrec t =
       | Capacity_optimized 
+      | Price_capacity_optimized 
+      | Lowest_price 
+      | Diversified 
+      | Capacity_optimized_prioritized 
       | Non_static_id of string 
     let make i = i
     let to_string =
       function
       | Capacity_optimized -> "capacity-optimized"
+      | Price_capacity_optimized -> "price-capacity-optimized"
+      | Lowest_price -> "lowest-price"
+      | Diversified -> "diversified"
+      | Capacity_optimized_prioritized -> "capacity-optimized-prioritized"
       | Non_static_id s -> s
     let of_string =
       function
       | "capacity-optimized" -> Capacity_optimized
+      | "price-capacity-optimized" -> Price_capacity_optimized
+      | "lowest-price" -> Lowest_price
+      | "diversified" -> Diversified
+      | "capacity-optimized-prioritized" -> Capacity_optimized_prioritized
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -648,42 +680,23 @@ module SpotProvisioningAllocationStrategy =
       of_string (string_of_json ~kind:"SpotProvisioningAllocationStrategy" j)
     let to_json = simple_to_json to_value
   end
-module SpotProvisioningSpecification =
+module SpotResizingSpecification =
   struct
     type nonrec t =
       {
-      timeoutDurationMinutes: WholeNumber.t
+      timeoutDurationMinutes: WholeNumber.t option
         [@ocaml.doc
-          "The spot provisioning timeout period in minutes. If Spot Instances are not provisioned within this time period, the TimeOutAction is taken. Minimum value is 5 and maximum value is 1440. The timeout applies only during initial provisioning, when the cluster is first created."];
-      timeoutAction: SpotProvisioningTimeoutAction.t
-        [@ocaml.doc
-          "The action to take when TargetSpotCapacity has not been fulfilled when the TimeoutDurationMinutes has expired; that is, when all Spot Instances could not be provisioned within the Spot provisioning timeout. Valid values are TERMINATE_CLUSTER and SWITCH_TO_ON_DEMAND. SWITCH_TO_ON_DEMAND specifies that if no Spot Instances are available, On-Demand Instances should be provisioned to fulfill any remaining Spot capacity."];
-      blockDurationMinutes: WholeNumber.t option
-        [@ocaml.doc
-          "The defined duration for Spot Instances (also known as Spot blocks) in minutes. When specified, the Spot Instance does not terminate before the defined duration expires, and defined duration pricing for Spot Instances applies. Valid values are 60, 120, 180, 240, 300, or 360. The duration period starts as soon as a Spot Instance receives its instance ID. At the end of the duration, Amazon EC2 marks the Spot Instance for termination and provides a Spot Instance termination notice, which gives the instance a two-minute warning before it terminates. Spot Instances with a defined duration (also known as Spot blocks) are no longer available to new customers from July 1, 2021. For customers who have previously used the feature, we will continue to support Spot Instances with a defined duration until December 31, 2022."];
+          "Spot resize timeout in minutes. If Spot Instances are not provisioned within this time, the resize workflow will stop provisioning of Spot instances. Minimum value is 5 minutes and maximum value is 10,080 minutes (7 days). The timeout applies to all resize workflows on the Instance Fleet. The resize could be triggered by Amazon EMR Managed Scaling or by the customer (via Amazon EMR Console, Amazon EMR CLI modify-instance-fleet or Amazon EMR SDK ModifyInstanceFleet API) or by Amazon EMR due to Amazon EC2 Spot Reclamation."];
       allocationStrategy: SpotProvisioningAllocationStrategy.t option
         [@ocaml.doc
-          "Specifies the strategy to use in launching Spot Instance fleets. Currently, the only option is capacity-optimized (the default), which launches instances from Spot Instance pools with optimal capacity for the number of instances that are launching."]}
-    let context_ = "SpotProvisioningSpecification"
-    let make ?blockDurationMinutes =
+          "Specifies the allocation strategy to use to launch Spot instances during a resize. If you run Amazon EMR releases 6.9.0 or higher, the default is price-capacity-optimized. If you run Amazon EMR releases 6.8.0 or lower, the default is capacity-optimized."]}
+    let make ?timeoutDurationMinutes =
       fun ?allocationStrategy ->
-        fun ~timeoutDurationMinutes ->
-          fun ~timeoutAction ->
-            fun () ->
-              {
-                blockDurationMinutes;
-                allocationStrategy;
-                timeoutDurationMinutes;
-                timeoutAction
-              }
+        fun () -> { timeoutDurationMinutes; allocationStrategy }
     let to_value x =
       structure_to_value
         [("TimeoutDurationMinutes",
-           (Some (WholeNumber.to_value x.timeoutDurationMinutes)));
-        ("TimeoutAction",
-          (Some (SpotProvisioningTimeoutAction.to_value x.timeoutAction)));
-        ("BlockDurationMinutes",
-          (Option.map x.blockDurationMinutes ~f:WholeNumber.to_value));
+           (Option.map x.timeoutDurationMinutes ~f:WholeNumber.to_value));
         ("AllocationStrategy",
           (Option.map x.allocationStrategy
              ~f:SpotProvisioningAllocationStrategy.to_value))]
@@ -692,44 +705,38 @@ module SpotProvisioningSpecification =
       let allocationStrategy =
         (Option.map ~f:SpotProvisioningAllocationStrategy.of_xml)
           (Xml.child xml_arg0 "AllocationStrategy") in
-      let blockDurationMinutes =
+      let timeoutDurationMinutes =
         (Option.map ~f:WholeNumber.of_xml)
-          (Xml.child xml_arg0 "BlockDurationMinutes") in
-      let timeoutAction =
-        SpotProvisioningTimeoutAction.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimeoutAction") in
-      let timeoutDurationMinutes =
-        WholeNumber.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TimeoutDurationMinutes") in
-      make ?allocationStrategy ?blockDurationMinutes ~timeoutAction
-        ~timeoutDurationMinutes ()
+          (Xml.child xml_arg0 "TimeoutDurationMinutes") in
+      make ?allocationStrategy ?timeoutDurationMinutes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let allocationStrategy =
-        field_map json "AllocationStrategy"
+        field_map json__ "AllocationStrategy"
           SpotProvisioningAllocationStrategy.of_json in
-      let blockDurationMinutes =
-        field_map json "BlockDurationMinutes" WholeNumber.of_json in
-      let timeoutAction =
-        field_map_exn json "TimeoutAction"
-          SpotProvisioningTimeoutAction.of_json in
       let timeoutDurationMinutes =
-        field_map_exn json "TimeoutDurationMinutes" WholeNumber.of_json in
-      make ?allocationStrategy ?blockDurationMinutes ~timeoutAction
-        ~timeoutDurationMinutes ()
+        field_map json__ "TimeoutDurationMinutes" WholeNumber.of_json in
+      make ?allocationStrategy ?timeoutDurationMinutes ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The launch specification for Spot Instances in the instance fleet, which determines the defined duration, provisioning timeout behavior, and allocation strategy. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. Spot Instance allocation strategy is available in Amazon EMR version 5.12.1 and later. Spot Instances with a defined duration (also known as Spot blocks) are no longer available to new customers from July 1, 2021. For customers who have previously used the feature, we will continue to support Spot Instances with a defined duration until December 31, 2022."]
+       "The resize specification for Spot Instances in the instance fleet, which contains the resize timeout period."]
 module OnDemandProvisioningAllocationStrategy =
   struct
     type nonrec t =
       | Lowest_price 
+      | Prioritized 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | Lowest_price -> "lowest-price" | Non_static_id s -> s
+      function
+      | Lowest_price -> "lowest-price"
+      | Prioritized -> "prioritized"
+      | Non_static_id s -> s
     let of_string =
-      function | "lowest-price" -> Lowest_price | x -> Non_static_id x
+      function
+      | "lowest-price" -> Lowest_price
+      | "prioritized" -> Prioritized
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -841,28 +848,228 @@ module OnDemandCapacityReservationOptions =
       make ?capacityReservationResourceGroupArn
         ?capacityReservationPreference ?usageStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let capacityReservationResourceGroupArn =
-        field_map json "CapacityReservationResourceGroupArn"
+        field_map json__ "CapacityReservationResourceGroupArn"
           XmlStringMaxLen256.of_json in
       let capacityReservationPreference =
-        field_map json "CapacityReservationPreference"
+        field_map json__ "CapacityReservationPreference"
           OnDemandCapacityReservationPreference.of_json in
       let usageStrategy =
-        field_map json "UsageStrategy"
+        field_map json__ "UsageStrategy"
           OnDemandCapacityReservationUsageStrategy.of_json in
       make ?capacityReservationResourceGroupArn
         ?capacityReservationPreference ?usageStrategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the strategy for using unused Capacity Reservations for fulfilling On-Demand capacity."]
+module OnDemandResizingSpecification =
+  struct
+    type nonrec t =
+      {
+      timeoutDurationMinutes: WholeNumber.t option
+        [@ocaml.doc
+          "On-Demand resize timeout in minutes. If On-Demand Instances are not provisioned within this time, the resize workflow stops. The minimum value is 5 minutes, and the maximum value is 10,080 minutes (7 days). The timeout applies to all resize workflows on the Instance Fleet. The resize could be triggered by Amazon EMR Managed Scaling or by the customer (via Amazon EMR Console, Amazon EMR CLI modify-instance-fleet or Amazon EMR SDK ModifyInstanceFleet API) or by Amazon EMR due to Amazon EC2 Spot Reclamation."];
+      allocationStrategy: OnDemandProvisioningAllocationStrategy.t option
+        [@ocaml.doc
+          "Specifies the allocation strategy to use to launch On-Demand instances during a resize. The default is lowest-price."];
+      capacityReservationOptions: OnDemandCapacityReservationOptions.t option }
+    let make ?timeoutDurationMinutes =
+      fun ?allocationStrategy ->
+        fun ?capacityReservationOptions ->
+          fun () ->
+            {
+              timeoutDurationMinutes;
+              allocationStrategy;
+              capacityReservationOptions
+            }
+    let to_value x =
+      structure_to_value
+        [("TimeoutDurationMinutes",
+           (Option.map x.timeoutDurationMinutes ~f:WholeNumber.to_value));
+        ("AllocationStrategy",
+          (Option.map x.allocationStrategy
+             ~f:OnDemandProvisioningAllocationStrategy.to_value));
+        ("CapacityReservationOptions",
+          (Option.map x.capacityReservationOptions
+             ~f:OnDemandCapacityReservationOptions.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let capacityReservationOptions =
+        (Option.map ~f:OnDemandCapacityReservationOptions.of_xml)
+          (Xml.child xml_arg0 "CapacityReservationOptions") in
+      let allocationStrategy =
+        (Option.map ~f:OnDemandProvisioningAllocationStrategy.of_xml)
+          (Xml.child xml_arg0 "AllocationStrategy") in
+      let timeoutDurationMinutes =
+        (Option.map ~f:WholeNumber.of_xml)
+          (Xml.child xml_arg0 "TimeoutDurationMinutes") in
+      make ?capacityReservationOptions ?allocationStrategy
+        ?timeoutDurationMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let capacityReservationOptions =
+        field_map json__ "CapacityReservationOptions"
+          OnDemandCapacityReservationOptions.of_json in
+      let allocationStrategy =
+        field_map json__ "AllocationStrategy"
+          OnDemandProvisioningAllocationStrategy.of_json in
+      let timeoutDurationMinutes =
+        field_map json__ "TimeoutDurationMinutes" WholeNumber.of_json in
+      make ?capacityReservationOptions ?allocationStrategy
+        ?timeoutDurationMinutes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resize specification for On-Demand Instances in the instance fleet, which contains the resize timeout period."]
+module InstanceFleetResizingSpecifications =
+  struct
+    type nonrec t =
+      {
+      spotResizeSpecification: SpotResizingSpecification.t option
+        [@ocaml.doc
+          "The resize specification for Spot Instances in the instance fleet, which contains the allocation strategy and the resize timeout period."];
+      onDemandResizeSpecification: OnDemandResizingSpecification.t option
+        [@ocaml.doc
+          "The resize specification for On-Demand Instances in the instance fleet, which contains the allocation strategy, capacity reservation options, and the resize timeout period."]}
+    let make ?spotResizeSpecification =
+      fun ?onDemandResizeSpecification ->
+        fun () -> { spotResizeSpecification; onDemandResizeSpecification }
+    let to_value x =
+      structure_to_value
+        [("SpotResizeSpecification",
+           (Option.map x.spotResizeSpecification
+              ~f:SpotResizingSpecification.to_value));
+        ("OnDemandResizeSpecification",
+          (Option.map x.onDemandResizeSpecification
+             ~f:OnDemandResizingSpecification.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let onDemandResizeSpecification =
+        (Option.map ~f:OnDemandResizingSpecification.of_xml)
+          (Xml.child xml_arg0 "OnDemandResizeSpecification") in
+      let spotResizeSpecification =
+        (Option.map ~f:SpotResizingSpecification.of_xml)
+          (Xml.child xml_arg0 "SpotResizeSpecification") in
+      make ?onDemandResizeSpecification ?spotResizeSpecification ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let onDemandResizeSpecification =
+        field_map json__ "OnDemandResizeSpecification"
+          OnDemandResizingSpecification.of_json in
+      let spotResizeSpecification =
+        field_map json__ "SpotResizeSpecification"
+          SpotResizingSpecification.of_json in
+      make ?onDemandResizeSpecification ?spotResizeSpecification ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The resize specification for On-Demand and Spot Instances in the fleet."]
+module SpotProvisioningTimeoutAction =
+  struct
+    type nonrec t =
+      | SWITCH_TO_ON_DEMAND 
+      | TERMINATE_CLUSTER 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SWITCH_TO_ON_DEMAND -> "SWITCH_TO_ON_DEMAND"
+      | TERMINATE_CLUSTER -> "TERMINATE_CLUSTER"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SWITCH_TO_ON_DEMAND" -> SWITCH_TO_ON_DEMAND
+      | "TERMINATE_CLUSTER" -> TERMINATE_CLUSTER
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SpotProvisioningTimeoutAction"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SpotProvisioningTimeoutAction" j)
+    let to_json = simple_to_json to_value
+  end
+module SpotProvisioningSpecification =
+  struct
+    type nonrec t =
+      {
+      timeoutDurationMinutes: WholeNumber.t
+        [@ocaml.doc
+          "The Spot provisioning timeout period in minutes. If Spot Instances are not provisioned within this time period, the TimeOutAction is taken. Minimum value is 5 and maximum value is 1440. The timeout applies only during initial provisioning, when the cluster is first created."];
+      timeoutAction: SpotProvisioningTimeoutAction.t
+        [@ocaml.doc
+          "The action to take when TargetSpotCapacity has not been fulfilled when the TimeoutDurationMinutes has expired; that is, when all Spot Instances could not be provisioned within the Spot provisioning timeout. Valid values are TERMINATE_CLUSTER and SWITCH_TO_ON_DEMAND. SWITCH_TO_ON_DEMAND specifies that if no Spot Instances are available, On-Demand Instances should be provisioned to fulfill any remaining Spot capacity."];
+      blockDurationMinutes: WholeNumber.t option
+        [@ocaml.doc
+          "The defined duration for Spot Instances (also known as Spot blocks) in minutes. When specified, the Spot Instance does not terminate before the defined duration expires, and defined duration pricing for Spot Instances applies. Valid values are 60, 120, 180, 240, 300, or 360. The duration period starts as soon as a Spot Instance receives its instance ID. At the end of the duration, Amazon EC2 marks the Spot Instance for termination and provides a Spot Instance termination notice, which gives the instance a two-minute warning before it terminates. Spot Instances with a defined duration (also known as Spot blocks) are no longer available to new customers from July 1, 2021. For customers who have previously used the feature, we will continue to support Spot Instances with a defined duration until December 31, 2022."];
+      allocationStrategy: SpotProvisioningAllocationStrategy.t option
+        [@ocaml.doc
+          "Specifies one of the following strategies to launch Spot Instance fleets: capacity-optimized, price-capacity-optimized, lowest-price, or diversified, and capacity-optimized-prioritized. For more information on the provisioning strategies, see Allocation strategies for Spot Instances in the Amazon EC2 User Guide for Linux Instances. When you launch a Spot Instance fleet with the old console, it automatically launches with the capacity-optimized strategy. You can't change the allocation strategy from the old console."]}
+    let context_ = "SpotProvisioningSpecification"
+    let make ?blockDurationMinutes =
+      fun ?allocationStrategy ->
+        fun ~timeoutDurationMinutes ->
+          fun ~timeoutAction ->
+            fun () ->
+              {
+                blockDurationMinutes;
+                allocationStrategy;
+                timeoutDurationMinutes;
+                timeoutAction
+              }
+    let to_value x =
+      structure_to_value
+        [("TimeoutDurationMinutes",
+           (Some (WholeNumber.to_value x.timeoutDurationMinutes)));
+        ("TimeoutAction",
+          (Some (SpotProvisioningTimeoutAction.to_value x.timeoutAction)));
+        ("BlockDurationMinutes",
+          (Option.map x.blockDurationMinutes ~f:WholeNumber.to_value));
+        ("AllocationStrategy",
+          (Option.map x.allocationStrategy
+             ~f:SpotProvisioningAllocationStrategy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let allocationStrategy =
+        (Option.map ~f:SpotProvisioningAllocationStrategy.of_xml)
+          (Xml.child xml_arg0 "AllocationStrategy") in
+      let blockDurationMinutes =
+        (Option.map ~f:WholeNumber.of_xml)
+          (Xml.child xml_arg0 "BlockDurationMinutes") in
+      let timeoutAction =
+        SpotProvisioningTimeoutAction.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TimeoutAction") in
+      let timeoutDurationMinutes =
+        WholeNumber.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TimeoutDurationMinutes") in
+      make ?allocationStrategy ?blockDurationMinutes ~timeoutAction
+        ~timeoutDurationMinutes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let allocationStrategy =
+        field_map json__ "AllocationStrategy"
+          SpotProvisioningAllocationStrategy.of_json in
+      let blockDurationMinutes =
+        field_map json__ "BlockDurationMinutes" WholeNumber.of_json in
+      let timeoutAction =
+        field_map_exn json__ "TimeoutAction"
+          SpotProvisioningTimeoutAction.of_json in
+      let timeoutDurationMinutes =
+        field_map_exn json__ "TimeoutDurationMinutes" WholeNumber.of_json in
+      make ?allocationStrategy ?blockDurationMinutes ~timeoutAction
+        ~timeoutDurationMinutes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The launch specification for Spot Instances in the instance fleet, which determines the defined duration, provisioning timeout behavior, and allocation strategy. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. Spot Instance allocation strategy is available in Amazon EMR releases 5.12.1 and later. Spot Instances with a defined duration (also known as Spot blocks) are no longer available to new customers from July 1, 2021. For customers who have previously used the feature, we will continue to support Spot Instances with a defined duration until December 31, 2022."]
 module OnDemandProvisioningSpecification =
   struct
     type nonrec t =
       {
       allocationStrategy: OnDemandProvisioningAllocationStrategy.t
         [@ocaml.doc
-          "Specifies the strategy to use in launching On-Demand instance fleets. Currently, the only option is lowest-price (the default), which launches the lowest price first."];
+          "Specifies the strategy to use in launching On-Demand instance fleets. Available options are lowest-price and prioritized. lowest-price specifies to launch the instances with the lowest price first, and prioritized specifies that Amazon EMR should launch the instances with the highest priority first. The default is lowest-price."];
       capacityReservationOptions: OnDemandCapacityReservationOptions.t option
         [@ocaml.doc
           "The launch specification for On-Demand instances in the instance fleet, which determines the allocation strategy."]}
@@ -889,27 +1096,27 @@ module OnDemandProvisioningSpecification =
           (Xml.child_exn ~context:context_ xml_arg0 "AllocationStrategy") in
       make ?capacityReservationOptions ~allocationStrategy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let capacityReservationOptions =
-        field_map json "CapacityReservationOptions"
+        field_map json__ "CapacityReservationOptions"
           OnDemandCapacityReservationOptions.of_json in
       let allocationStrategy =
-        field_map_exn json "AllocationStrategy"
+        field_map_exn json__ "AllocationStrategy"
           OnDemandProvisioningAllocationStrategy.of_json in
       make ?capacityReservationOptions ~allocationStrategy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The launch specification for On-Demand Instances in the instance fleet, which determines the allocation strategy. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. On-Demand Instances allocation strategy is available in Amazon EMR version 5.12.1 and later."]
+       "The launch specification for On-Demand Instances in the instance fleet, which determines the allocation strategy. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. On-Demand Instances allocation strategy is available in Amazon EMR releases 5.12.1 and later."]
 module InstanceFleetProvisioningSpecifications =
   struct
     type nonrec t =
       {
       spotSpecification: SpotProvisioningSpecification.t option
         [@ocaml.doc
-          "The launch specification for Spot Instances in the fleet, which determines the defined duration, provisioning timeout behavior, and allocation strategy."];
+          "The launch specification for Spot instances in the fleet, which determines the allocation strategy, defined duration, and provisioning timeout behavior."];
       onDemandSpecification: OnDemandProvisioningSpecification.t option
         [@ocaml.doc
-          "The launch specification for On-Demand Instances in the instance fleet, which determines the allocation strategy. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. On-Demand Instances allocation strategy is available in Amazon EMR version 5.12.1 and later."]}
+          "The launch specification for On-Demand Instances in the instance fleet, which determines the allocation strategy and capacity reservation options. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. On-Demand Instances allocation strategy is available in Amazon EMR releases 5.12.1 and later."]}
     let make ?spotSpecification =
       fun ?onDemandSpecification ->
         fun () -> { spotSpecification; onDemandSpecification }
@@ -931,17 +1138,17 @@ module InstanceFleetProvisioningSpecifications =
           (Xml.child xml_arg0 "SpotSpecification") in
       make ?onDemandSpecification ?spotSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let onDemandSpecification =
-        field_map json "OnDemandSpecification"
+        field_map json__ "OnDemandSpecification"
           OnDemandProvisioningSpecification.of_json in
       let spotSpecification =
-        field_map json "SpotSpecification"
+        field_map json__ "SpotSpecification"
           SpotProvisioningSpecification.of_json in
       make ?onDemandSpecification ?spotSpecification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The launch specification for Spot Instances in the fleet, which determines the defined duration, provisioning timeout behavior, and allocation strategy. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. On-Demand and Spot Instance allocation strategies are available in Amazon EMR version 5.12.1 and later."]
+       "The launch specification for On-Demand and Spot Instances in the fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. On-Demand and Spot instance allocation strategies are available in Amazon EMR releases 5.12.1 and later."]
 module InstanceFleetConfig =
   struct
     type nonrec t =
@@ -959,25 +1166,32 @@ module InstanceFleetConfig =
           "The target capacity of Spot units for the instance fleet, which determines how many Spot Instances to provision. When the instance fleet launches, Amazon EMR tries to provision Spot Instances as specified by InstanceTypeConfig. Each instance configuration has a specified WeightedCapacity. When a Spot Instance is provisioned, the WeightedCapacity units count toward the target capacity. Amazon EMR provisions instances until the target capacity is totally fulfilled, even if this results in an overage. For example, if there are 2 units remaining to fulfill capacity, and Amazon EMR can only provision an instance with a WeightedCapacity of 5 units, the instance is provisioned, and the target capacity is exceeded by 3 units. If not specified or set to 0, only On-Demand Instances are provisioned for the instance fleet. At least one of TargetSpotCapacity and TargetOnDemandCapacity should be greater than 0. For a master instance fleet, only one of TargetSpotCapacity and TargetOnDemandCapacity can be specified, and its value must be 1."];
       instanceTypeConfigs: InstanceTypeConfigList.t option
         [@ocaml.doc
-          "The instance type configurations that define the EC2 instances in the instance fleet."];
+          "The instance type configurations that define the Amazon EC2 instances in the instance fleet."];
       launchSpecifications: InstanceFleetProvisioningSpecifications.t option
-        [@ocaml.doc "The launch specification for the instance fleet."]}
+        [@ocaml.doc "The launch specification for the instance fleet."];
+      resizeSpecifications: InstanceFleetResizingSpecifications.t option
+        [@ocaml.doc "The resize specification for the instance fleet."];
+      context: XmlStringMaxLen256.t option [@ocaml.doc "Reserved."]}
     let context_ = "InstanceFleetConfig"
     let make ?name =
       fun ?targetOnDemandCapacity ->
         fun ?targetSpotCapacity ->
           fun ?instanceTypeConfigs ->
             fun ?launchSpecifications ->
-              fun ~instanceFleetType ->
-                fun () ->
-                  {
-                    name;
-                    targetOnDemandCapacity;
-                    targetSpotCapacity;
-                    instanceTypeConfigs;
-                    launchSpecifications;
-                    instanceFleetType
-                  }
+              fun ?resizeSpecifications ->
+                fun ?context ->
+                  fun ~instanceFleetType ->
+                    fun () ->
+                      {
+                        name;
+                        targetOnDemandCapacity;
+                        targetSpotCapacity;
+                        instanceTypeConfigs;
+                        launchSpecifications;
+                        resizeSpecifications;
+                        context;
+                        instanceFleetType
+                      }
     let to_value x =
       structure_to_value
         [("Name", (Option.map x.name ~f:XmlStringMaxLen256.to_value));
@@ -992,9 +1206,19 @@ module InstanceFleetConfig =
              ~f:InstanceTypeConfigList.to_value));
         ("LaunchSpecifications",
           (Option.map x.launchSpecifications
-             ~f:InstanceFleetProvisioningSpecifications.to_value))]
+             ~f:InstanceFleetProvisioningSpecifications.to_value));
+        ("ResizeSpecifications",
+          (Option.map x.resizeSpecifications
+             ~f:InstanceFleetResizingSpecifications.to_value));
+        ("Context", (Option.map x.context ~f:XmlStringMaxLen256.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Context") in
+      let resizeSpecifications =
+        (Option.map ~f:InstanceFleetResizingSpecifications.of_xml)
+          (Xml.child xml_arg0 "ResizeSpecifications") in
       let launchSpecifications =
         (Option.map ~f:InstanceFleetProvisioningSpecifications.of_xml)
           (Xml.child xml_arg0 "LaunchSpecifications") in
@@ -1012,27 +1236,33 @@ module InstanceFleetConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceFleetType") in
       let name =
         (Option.map ~f:XmlStringMaxLen256.of_xml) (Xml.child xml_arg0 "Name") in
-      make ?launchSpecifications ?instanceTypeConfigs ?targetSpotCapacity
-        ?targetOnDemandCapacity ~instanceFleetType ?name ()
+      make ?context ?resizeSpecifications ?launchSpecifications
+        ?instanceTypeConfigs ?targetSpotCapacity ?targetOnDemandCapacity
+        ~instanceFleetType ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let context = field_map json__ "Context" XmlStringMaxLen256.of_json in
+      let resizeSpecifications =
+        field_map json__ "ResizeSpecifications"
+          InstanceFleetResizingSpecifications.of_json in
       let launchSpecifications =
-        field_map json "LaunchSpecifications"
+        field_map json__ "LaunchSpecifications"
           InstanceFleetProvisioningSpecifications.of_json in
       let instanceTypeConfigs =
-        field_map json "InstanceTypeConfigs" InstanceTypeConfigList.of_json in
+        field_map json__ "InstanceTypeConfigs" InstanceTypeConfigList.of_json in
       let targetSpotCapacity =
-        field_map json "TargetSpotCapacity" WholeNumber.of_json in
+        field_map json__ "TargetSpotCapacity" WholeNumber.of_json in
       let targetOnDemandCapacity =
-        field_map json "TargetOnDemandCapacity" WholeNumber.of_json in
+        field_map json__ "TargetOnDemandCapacity" WholeNumber.of_json in
       let instanceFleetType =
-        field_map_exn json "InstanceFleetType" InstanceFleetType.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
-      make ?launchSpecifications ?instanceTypeConfigs ?targetSpotCapacity
-        ?targetOnDemandCapacity ~instanceFleetType ?name ()
+        field_map_exn json__ "InstanceFleetType" InstanceFleetType.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      make ?context ?resizeSpecifications ?launchSpecifications
+        ?instanceTypeConfigs ?targetSpotCapacity ?targetOnDemandCapacity
+        ~instanceFleetType ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration that defines an instance fleet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "The configuration that defines an instance fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module AddInstanceFleetInput =
   struct
     type nonrec t =
@@ -1059,15 +1289,15 @@ module AddInstanceFleetInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~instanceFleet ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceFleet =
-        field_map_exn json "InstanceFleet" InstanceFleetConfig.of_json in
+        field_map_exn json__ "InstanceFleet" InstanceFleetConfig.of_json in
       let clusterId =
-        field_map_exn json "ClusterId" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "ClusterId" XmlStringMaxLen256.of_json in
       make ~instanceFleet ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an instance fleet to a running cluster. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x."]
+       "Adds an instance fleet to a running cluster. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x."]
 module ErrorMessage =
   struct
     type nonrec t = string
@@ -1120,9 +1350,9 @@ module InvalidRequestException =
         (Option.map ~f:ErrorCode.of_xml) (Xml.child xml_arg0 "ErrorCode") in
       make ?message ?errorCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let errorCode = field_map json "ErrorCode" ErrorCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let errorCode = field_map json__ "ErrorCode" ErrorCode.of_json in
       make ?message ?errorCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1143,8 +1373,8 @@ module InternalServerException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1249,15 +1479,15 @@ module AddInstanceFleetOutput =
           (Xml.child xml_arg0 "ClusterId") in
       make ?clusterArn ?instanceFleetId ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
+    let of_json json__ =
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
       let instanceFleetId =
-        field_map json "InstanceFleetId" InstanceFleetId.of_json in
-      let clusterId = field_map json "ClusterId" XmlStringMaxLen256.of_json in
+        field_map json__ "InstanceFleetId" InstanceFleetId.of_json in
+      let clusterId = field_map json__ "ClusterId" XmlStringMaxLen256.of_json in
       make ?clusterArn ?instanceFleetId ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds an instance fleet to a running cluster. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x."]
+       "Adds an instance fleet to a running cluster. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x."]
 module MarketType =
   struct
     type nonrec t =
@@ -1462,9 +1692,9 @@ module MetricDimension =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A CloudWatch dimension, which is specified using a Key (known as a Name in CloudWatch), Value pair. By default, Amazon EMR uses one dimension whose Key is JobFlowID and Value is a variable representing the cluster ID, which is $\\{emr.clusterId\\}. This enables the rule to bootstrap when the cluster ID becomes available."]
@@ -1472,6 +1702,9 @@ module MetricDimensionList =
   struct
     type nonrec t = MetricDimension.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MetricDimension.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1543,7 +1776,7 @@ module CloudWatchAlarmDefinition =
           "The namespace for the CloudWatch metric. The default is AWS/ElasticMapReduce."];
       period: Integer.t
         [@ocaml.doc
-          "The period, in seconds, over which the statistic is applied. EMR CloudWatch metrics are emitted every five minutes (300 seconds), so if an EMR CloudWatch metric is specified, specify 300."];
+          "The period, in seconds, over which the statistic is applied. CloudWatch metrics for Amazon EMR are emitted every five minutes (300 seconds), so if you specify a CloudWatch metric, specify 300."];
       statistic: Statistic.t option
         [@ocaml.doc
           "The statistic to apply to the metric associated with the alarm. The default is AVERAGE."];
@@ -1618,20 +1851,20 @@ module CloudWatchAlarmDefinition =
       make ?dimensions ?unit ~threshold ?statistic ~period ?namespace
         ~metricName ?evaluationPeriods ~comparisonOperator ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensions =
-        field_map json "Dimensions" MetricDimensionList.of_json in
-      let unit = field_map json "Unit" Unit.of_json in
+        field_map json__ "Dimensions" MetricDimensionList.of_json in
+      let unit = field_map json__ "Unit" Unit.of_json in
       let threshold =
-        field_map_exn json "Threshold" NonNegativeDouble.of_json in
-      let statistic = field_map json "Statistic" Statistic.of_json in
-      let period = field_map_exn json "Period" Integer.of_json in
-      let namespace = field_map json "Namespace" String_.of_json in
-      let metricName = field_map_exn json "MetricName" String_.of_json in
+        field_map_exn json__ "Threshold" NonNegativeDouble.of_json in
+      let statistic = field_map json__ "Statistic" Statistic.of_json in
+      let period = field_map_exn json__ "Period" Integer.of_json in
+      let namespace = field_map json__ "Namespace" String_.of_json in
+      let metricName = field_map_exn json__ "MetricName" String_.of_json in
       let evaluationPeriods =
-        field_map json "EvaluationPeriods" Integer.of_json in
+        field_map json__ "EvaluationPeriods" Integer.of_json in
       let comparisonOperator =
-        field_map_exn json "ComparisonOperator" ComparisonOperator.of_json in
+        field_map_exn json__ "ComparisonOperator" ComparisonOperator.of_json in
       make ?dimensions ?unit ~threshold ?statistic ~period ?namespace
         ~metricName ?evaluationPeriods ~comparisonOperator ()
     let to_json v = composed_to_json to_value v
@@ -1660,9 +1893,9 @@ module ScalingTrigger =
              "CloudWatchAlarmDefinition") in
       make ~cloudWatchAlarmDefinition ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cloudWatchAlarmDefinition =
-        field_map_exn json "CloudWatchAlarmDefinition"
+        field_map_exn json__ "CloudWatchAlarmDefinition"
           CloudWatchAlarmDefinition.of_json in
       make ~cloudWatchAlarmDefinition ()
     let to_json v = composed_to_json to_value v
@@ -1702,10 +1935,10 @@ module SimpleScalingPolicyConfiguration =
       {
       adjustmentType: AdjustmentType.t option
         [@ocaml.doc
-          "The way in which EC2 instances are added (if ScalingAdjustment is a positive number) or terminated (if ScalingAdjustment is a negative number) each time the scaling activity is triggered. CHANGE_IN_CAPACITY is the default. CHANGE_IN_CAPACITY indicates that the EC2 instance count increments or decrements by ScalingAdjustment, which should be expressed as an integer. PERCENT_CHANGE_IN_CAPACITY indicates the instance count increments or decrements by the percentage specified by ScalingAdjustment, which should be expressed as an integer. For example, 20 indicates an increase in 20% increments of cluster capacity. EXACT_CAPACITY indicates the scaling activity results in an instance group with the number of EC2 instances specified by ScalingAdjustment, which should be expressed as a positive integer."];
+          "The way in which Amazon EC2 instances are added (if ScalingAdjustment is a positive number) or terminated (if ScalingAdjustment is a negative number) each time the scaling activity is triggered. CHANGE_IN_CAPACITY is the default. CHANGE_IN_CAPACITY indicates that the Amazon EC2 instance count increments or decrements by ScalingAdjustment, which should be expressed as an integer. PERCENT_CHANGE_IN_CAPACITY indicates the instance count increments or decrements by the percentage specified by ScalingAdjustment, which should be expressed as an integer. For example, 20 indicates an increase in 20% increments of cluster capacity. EXACT_CAPACITY indicates the scaling activity results in an instance group with the number of Amazon EC2 instances specified by ScalingAdjustment, which should be expressed as a positive integer."];
       scalingAdjustment: Integer.t
         [@ocaml.doc
-          "The amount by which to scale in or scale out, based on the specified AdjustmentType. A positive value adds to the instance group's EC2 instance count while a negative number removes instances. If AdjustmentType is set to EXACT_CAPACITY, the number should only be a positive integer. If AdjustmentType is set to PERCENT_CHANGE_IN_CAPACITY, the value should express the percentage as an integer. For example, -20 indicates a decrease in 20% increments of cluster capacity."];
+          "The amount by which to scale in or scale out, based on the specified AdjustmentType. A positive value adds to the instance group's Amazon EC2 instance count while a negative number removes instances. If AdjustmentType is set to EXACT_CAPACITY, the number should only be a positive integer. If AdjustmentType is set to PERCENT_CHANGE_IN_CAPACITY, the value should express the percentage as an integer. For example, -20 indicates a decrease in 20% increments of cluster capacity."];
       coolDown: Integer.t option
         [@ocaml.doc
           "The amount of time, in seconds, after a scaling activity completes before any further trigger-related scaling activities can start. The default value is 0."]}
@@ -1732,16 +1965,16 @@ module SimpleScalingPolicyConfiguration =
           (Xml.child xml_arg0 "AdjustmentType") in
       make ?coolDown ~scalingAdjustment ?adjustmentType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let coolDown = field_map json "CoolDown" Integer.of_json in
+    let of_json json__ =
+      let coolDown = field_map json__ "CoolDown" Integer.of_json in
       let scalingAdjustment =
-        field_map_exn json "ScalingAdjustment" Integer.of_json in
+        field_map_exn json__ "ScalingAdjustment" Integer.of_json in
       let adjustmentType =
-        field_map json "AdjustmentType" AdjustmentType.of_json in
+        field_map json__ "AdjustmentType" AdjustmentType.of_json in
       make ?coolDown ~scalingAdjustment ?adjustmentType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An automatic scaling configuration, which describes how the policy adds or removes instances, the cooldown period, and the number of EC2 instances that will be added each time the CloudWatch metric alarm condition is satisfied."]
+       "An automatic scaling configuration, which describes how the policy adds or removes instances, the cooldown period, and the number of Amazon EC2 instances that will be added each time the CloudWatch metric alarm condition is satisfied."]
 module ScalingAction =
   struct
     type nonrec t =
@@ -1773,11 +2006,11 @@ module ScalingAction =
         (Option.map ~f:MarketType.of_xml) (Xml.child xml_arg0 "Market") in
       make ~simpleScalingPolicyConfiguration ?market ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let simpleScalingPolicyConfiguration =
-        field_map_exn json "SimpleScalingPolicyConfiguration"
+        field_map_exn json__ "SimpleScalingPolicyConfiguration"
           SimpleScalingPolicyConfiguration.of_json in
-      let market = field_map json "Market" MarketType.of_json in
+      let market = field_map json__ "Market" MarketType.of_json in
       make ~simpleScalingPolicyConfiguration ?market ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1823,19 +2056,22 @@ module ScalingRule =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~trigger ~action ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trigger = field_map_exn json "Trigger" ScalingTrigger.of_json in
-      let action = field_map_exn json "Action" ScalingAction.of_json in
-      let description = field_map json "Description" String_.of_json in
-      let name = field_map_exn json "Name" String_.of_json in
+    let of_json json__ =
+      let trigger = field_map_exn json__ "Trigger" ScalingTrigger.of_json in
+      let action = field_map_exn json__ "Action" ScalingAction.of_json in
+      let description = field_map json__ "Description" String_.of_json in
+      let name = field_map_exn json__ "Name" String_.of_json in
       make ~trigger ~action ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A scale-in or scale-out rule that defines scaling activity, including the CloudWatch metric alarm that triggers activity, how EC2 instances are added or removed, and the periodicity of adjustments. The automatic scaling policy for an instance group can comprise one or more automatic scaling rules."]
+       "A scale-in or scale-out rule that defines scaling activity, including the CloudWatch metric alarm that triggers activity, how Amazon EC2 instances are added or removed, and the periodicity of adjustments. The automatic scaling policy for an instance group can comprise one or more automatic scaling rules."]
 module ScalingRuleList =
   struct
     type nonrec t = ScalingRule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ScalingRule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1862,10 +2098,10 @@ module ScalingConstraints =
       {
       minCapacity: Integer.t
         [@ocaml.doc
-          "The lower boundary of EC2 instances in an instance group below which scaling activities are not allowed to shrink. Scale-in activities will not terminate instances below this boundary."];
+          "The lower boundary of Amazon EC2 instances in an instance group below which scaling activities are not allowed to shrink. Scale-in activities will not terminate instances below this boundary."];
       maxCapacity: Integer.t
         [@ocaml.doc
-          "The upper boundary of EC2 instances in an instance group beyond which scaling activities are not allowed to grow. Scale-out activities will not add instances beyond this boundary."]}
+          "The upper boundary of Amazon EC2 instances in an instance group beyond which scaling activities are not allowed to grow. Scale-out activities will not add instances beyond this boundary."]}
     let context_ = "ScalingConstraints"
     let make ~minCapacity =
       fun ~maxCapacity -> fun () -> { minCapacity; maxCapacity }
@@ -1883,20 +2119,20 @@ module ScalingConstraints =
           (Xml.child_exn ~context:context_ xml_arg0 "MinCapacity") in
       make ~maxCapacity ~minCapacity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxCapacity = field_map_exn json "MaxCapacity" Integer.of_json in
-      let minCapacity = field_map_exn json "MinCapacity" Integer.of_json in
+    let of_json json__ =
+      let maxCapacity = field_map_exn json__ "MaxCapacity" Integer.of_json in
+      let minCapacity = field_map_exn json__ "MinCapacity" Integer.of_json in
       make ~maxCapacity ~minCapacity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The upper and lower EC2 instance limits for an automatic scaling policy. Automatic scaling activities triggered by automatic scaling rules will not cause an instance group to grow above or below these limits."]
+       "The upper and lower Amazon EC2 instance limits for an automatic scaling policy. Automatic scaling activities triggered by automatic scaling rules will not cause an instance group to grow above or below these limits."]
 module AutoScalingPolicy =
   struct
     type nonrec t =
       {
       constraints: ScalingConstraints.t
         [@ocaml.doc
-          "The upper and lower EC2 instance limits for an automatic scaling policy. Automatic scaling activity will not cause an instance group to grow above or below these limits."];
+          "The upper and lower Amazon EC2 instance limits for an automatic scaling policy. Automatic scaling activity will not cause an instance group to grow above or below these limits."];
       rules: ScalingRuleList.t
         [@ocaml.doc
           "The scale-in and scale-out rules that comprise the automatic scaling policy."]}
@@ -1916,14 +2152,14 @@ module AutoScalingPolicy =
           (Xml.child_exn ~context:context_ xml_arg0 "Constraints") in
       make ~rules ~constraints ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map_exn json "Rules" ScalingRuleList.of_json in
+    let of_json json__ =
+      let rules = field_map_exn json__ "Rules" ScalingRuleList.of_json in
       let constraints =
-        field_map_exn json "Constraints" ScalingConstraints.of_json in
+        field_map_exn json__ "Constraints" ScalingConstraints.of_json in
       make ~rules ~constraints ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. An automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."]
+       "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. An automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."]
 module InstanceGroupConfig =
   struct
     type nonrec t =
@@ -1932,26 +2168,26 @@ module InstanceGroupConfig =
         [@ocaml.doc "Friendly name given to the instance group."];
       market: MarketType.t option
         [@ocaml.doc
-          "Market type of the EC2 instances used to create a cluster node."];
+          "Market type of the Amazon EC2 instances used to create a cluster node."];
       instanceRole: InstanceRoleType.t
         [@ocaml.doc "The role of the instance group in the cluster."];
       bidPrice: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "If specified, indicates that the instance group uses Spot Instances. This is the maximum price you are willing to pay for Spot Instances. Specify OnDemandPrice to set the amount equal to the On-Demand price, or specify an amount in USD."];
+          "The bid price for each Amazon EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
       instanceType: InstanceType.t
         [@ocaml.doc
-          "The EC2 instance type for all instances in the instance group."];
+          "The Amazon EC2 instance type for all instances in the instance group."];
       instanceCount: Integer.t
         [@ocaml.doc "Target number of instances for the instance group."];
       configurations: ConfigurationList.t option
         [@ocaml.doc
-          "Amazon EMR releases 4.x or later. The list of configurations supplied for an EMR cluster instance group. You can specify a separate configuration for each instance group (master, core, and task)."];
+          "Amazon EMR releases 4.x or later. The list of configurations supplied for an Amazon EMR cluster instance group. You can specify a separate configuration for each instance group (master, core, and task)."];
       ebsConfiguration: EbsConfiguration.t option
         [@ocaml.doc
-          "EBS configurations that will be attached to each EC2 instance in the instance group."];
+          "EBS configurations that will be attached to each Amazon EC2 instance in the instance group."];
       autoScalingPolicy: AutoScalingPolicy.t option
         [@ocaml.doc
-          "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."];
+          "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."];
       customAmiId: XmlStringMaxLen256.t option
         [@ocaml.doc
           "The custom AMI ID to use for the provisioned instance group."]}
@@ -2028,23 +2264,24 @@ module InstanceGroupConfig =
       make ?customAmiId ?autoScalingPolicy ?ebsConfiguration ?configurations
         ~instanceCount ~instanceType ?bidPrice ~instanceRole ?market ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
       let autoScalingPolicy =
-        field_map json "AutoScalingPolicy" AutoScalingPolicy.of_json in
+        field_map json__ "AutoScalingPolicy" AutoScalingPolicy.of_json in
       let ebsConfiguration =
-        field_map json "EbsConfiguration" EbsConfiguration.of_json in
+        field_map json__ "EbsConfiguration" EbsConfiguration.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
-      let instanceCount = field_map_exn json "InstanceCount" Integer.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
+      let instanceCount =
+        field_map_exn json__ "InstanceCount" Integer.of_json in
       let instanceType =
-        field_map_exn json "InstanceType" InstanceType.of_json in
-      let bidPrice = field_map json "BidPrice" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "InstanceType" InstanceType.of_json in
+      let bidPrice = field_map json__ "BidPrice" XmlStringMaxLen256.of_json in
       let instanceRole =
-        field_map_exn json "InstanceRole" InstanceRoleType.of_json in
-      let market = field_map json "Market" MarketType.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "InstanceRole" InstanceRoleType.of_json in
+      let market = field_map json__ "Market" MarketType.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
       make ?customAmiId ?autoScalingPolicy ?ebsConfiguration ?configurations
         ~instanceCount ~instanceType ?bidPrice ~instanceRole ?market ?name ()
     let to_json v = composed_to_json to_value v
@@ -2053,6 +2290,9 @@ module InstanceGroupConfigList =
   struct
     type nonrec t = InstanceGroupConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGroupConfig.to_value)) |>
         (fun x -> `List x)
@@ -2101,11 +2341,11 @@ module AddInstanceGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceGroups") in
       make ~jobFlowId ~instanceGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobFlowId =
-        field_map_exn json "JobFlowId" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "JobFlowId" XmlStringMaxLen256.of_json in
       let instanceGroups =
-        field_map_exn json "InstanceGroups" InstanceGroupConfigList.of_json in
+        field_map_exn json__ "InstanceGroups" InstanceGroupConfigList.of_json in
       make ~jobFlowId ~instanceGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to an AddInstanceGroups call."]
@@ -2126,6 +2366,9 @@ module InstanceGroupIdsList =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2209,11 +2452,11 @@ module AddInstanceGroupsOutput =
           (Xml.child xml_arg0 "JobFlowId") in
       make ?clusterArn ?instanceGroupIds ?jobFlowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
+    let of_json json__ =
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
       let instanceGroupIds =
-        field_map json "InstanceGroupIds" InstanceGroupIdsList.of_json in
-      let jobFlowId = field_map json "JobFlowId" XmlStringMaxLen256.of_json in
+        field_map json__ "InstanceGroupIds" InstanceGroupIdsList.of_json in
+      let jobFlowId = field_map json__ "JobFlowId" XmlStringMaxLen256.of_json in
       make ?clusterArn ?instanceGroupIds ?jobFlowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Output from an AddInstanceGroups call."]
@@ -2239,10 +2482,74 @@ module XmlString =
     let of_json j = string_of_json ~kind:"XmlString" j
     let to_json = simple_to_json to_value
   end
+module S3MonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      logUri: XmlString.t option
+        [@ocaml.doc "The Amazon S3 destination URI for log publishing."];
+      encryptionKeyArn: XmlString.t option
+        [@ocaml.doc
+          "The KMS key ARN to encrypt the logs published to the given Amazon S3 destination."]}
+    let make ?logUri =
+      fun ?encryptionKeyArn -> fun () -> { logUri; encryptionKeyArn }
+    let to_value x =
+      structure_to_value
+        [("LogUri", (Option.map x.logUri ~f:XmlString.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:XmlString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let logUri =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "LogUri") in
+      make ?encryptionKeyArn ?logUri ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" XmlString.of_json in
+      let logUri = field_map json__ "LogUri" XmlString.of_json in
+      make ?encryptionKeyArn ?logUri ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 configuration for monitoring log publishing. You can configure your step to send log information to Amazon S3. When it's specified, it takes precedence over the cluster's logging configuration. If you don't specify this configuration entirely, or omit individual fields, EMR falls back to cluster-level logging behavior."]
+module StepMonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      s3MonitoringConfiguration: S3MonitoringConfiguration.t option
+        [@ocaml.doc
+          "The Amazon S3 configuration for monitoring log publishing. You can configure your step to send log information to Amazon S3. When it's specified, it takes precedence over the cluster's logging configuration. If you don't specify this configuration entirely, or omit individual fields, EMR falls back to cluster-level logging behavior."]}
+    let make ?s3MonitoringConfiguration =
+      fun () -> { s3MonitoringConfiguration }
+    let to_value x =
+      structure_to_value
+        [("S3MonitoringConfiguration",
+           (Option.map x.s3MonitoringConfiguration
+              ~f:S3MonitoringConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3MonitoringConfiguration =
+        (Option.map ~f:S3MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3MonitoringConfiguration") in
+      make ?s3MonitoringConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3MonitoringConfiguration =
+        field_map json__ "S3MonitoringConfiguration"
+          S3MonitoringConfiguration.of_json in
+      make ?s3MonitoringConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Object that holds configuration properties for logging."]
 module XmlStringList =
   struct
     type nonrec t = XmlString.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlString.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2283,15 +2590,19 @@ module KeyValue =
       let key = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" XmlString.of_json in
-      let key = field_map json "Key" XmlString.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" XmlString.of_json in
+      let key = field_map json__ "Key" XmlString.of_json in
+      make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A key-value pair."]
 module KeyValueList =
   struct
     type nonrec t = KeyValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:KeyValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2350,11 +2661,11 @@ module HadoopJarStepConfig =
         (Option.map ~f:KeyValueList.of_xml) (Xml.child xml_arg0 "Properties") in
       make ?args ?mainClass ~jar ?properties ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let args = field_map json "Args" XmlStringList.of_json in
-      let mainClass = field_map json "MainClass" XmlString.of_json in
-      let jar = field_map_exn json "Jar" XmlString.of_json in
-      let properties = field_map json "Properties" KeyValueList.of_json in
+    let of_json json__ =
+      let args = field_map json__ "Args" XmlStringList.of_json in
+      let mainClass = field_map json__ "MainClass" XmlString.of_json in
+      let jar = field_map_exn json__ "Jar" XmlString.of_json in
+      let properties = field_map json__ "Properties" KeyValueList.of_json in
       make ?args ?mainClass ~jar ?properties ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2368,21 +2679,37 @@ module StepConfig =
         [@ocaml.doc
           "The action to take when the step fails. Use one of the following values: TERMINATE_CLUSTER - Shuts down the cluster. CANCEL_AND_WAIT - Cancels any pending steps and returns the cluster to the WAITING state. CONTINUE - Continues to the next step in the queue. TERMINATE_JOB_FLOW - Shuts down the cluster. TERMINATE_JOB_FLOW is provided for backward compatibility. We recommend using TERMINATE_CLUSTER instead. If a cluster's StepConcurrencyLevel is greater than 1, do not use AddJobFlowSteps to submit a step with this parameter set to CANCEL_AND_WAIT or TERMINATE_CLUSTER. The step is not submitted and the action fails with a message that the ActionOnFailure setting is not valid. If you change a cluster's StepConcurrencyLevel to be greater than 1 while a step is running, the ActionOnFailure parameter may not behave as you expect. In this case, for a step that fails with this parameter set to CANCEL_AND_WAIT, pending steps and the running step are not canceled; for a step that fails with this parameter set to TERMINATE_CLUSTER, the cluster does not terminate."];
       hadoopJarStep: HadoopJarStepConfig.t
-        [@ocaml.doc "The JAR file used for the step."]}
+        [@ocaml.doc "The JAR file used for the step."];
+      stepMonitoringConfiguration: StepMonitoringConfiguration.t option
+        [@ocaml.doc
+          "Object that holds configuration properties for logging."]}
     let context_ = "StepConfig"
     let make ?actionOnFailure =
-      fun ~name ->
-        fun ~hadoopJarStep ->
-          fun () -> { actionOnFailure; name; hadoopJarStep }
+      fun ?stepMonitoringConfiguration ->
+        fun ~name ->
+          fun ~hadoopJarStep ->
+            fun () ->
+              {
+                actionOnFailure;
+                stepMonitoringConfiguration;
+                name;
+                hadoopJarStep
+              }
     let to_value x =
       structure_to_value
         [("Name", (Some (XmlStringMaxLen256.to_value x.name)));
         ("ActionOnFailure",
           (Option.map x.actionOnFailure ~f:ActionOnFailure.to_value));
         ("HadoopJarStep",
-          (Some (HadoopJarStepConfig.to_value x.hadoopJarStep)))]
+          (Some (HadoopJarStepConfig.to_value x.hadoopJarStep)));
+        ("StepMonitoringConfiguration",
+          (Option.map x.stepMonitoringConfiguration
+             ~f:StepMonitoringConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let stepMonitoringConfiguration =
+        (Option.map ~f:StepMonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "StepMonitoringConfiguration") in
       let hadoopJarStep =
         HadoopJarStepConfig.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "HadoopJarStep") in
@@ -2392,21 +2719,29 @@ module StepConfig =
       let name =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~hadoopJarStep ?actionOnFailure ~name ()
+      make ?stepMonitoringConfiguration ~hadoopJarStep ?actionOnFailure ~name
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let stepMonitoringConfiguration =
+        field_map json__ "StepMonitoringConfiguration"
+          StepMonitoringConfiguration.of_json in
       let hadoopJarStep =
-        field_map_exn json "HadoopJarStep" HadoopJarStepConfig.of_json in
+        field_map_exn json__ "HadoopJarStep" HadoopJarStepConfig.of_json in
       let actionOnFailure =
-        field_map json "ActionOnFailure" ActionOnFailure.of_json in
-      let name = field_map_exn json "Name" XmlStringMaxLen256.of_json in
-      make ~hadoopJarStep ?actionOnFailure ~name ()
+        field_map json__ "ActionOnFailure" ActionOnFailure.of_json in
+      let name = field_map_exn json__ "Name" XmlStringMaxLen256.of_json in
+      make ?stepMonitoringConfiguration ~hadoopJarStep ?actionOnFailure ~name
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specification for a cluster (job flow) step."]
 module StepConfigList =
   struct
     type nonrec t = StepConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepConfig.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2435,34 +2770,49 @@ module AddJobFlowStepsInput =
         [@ocaml.doc
           "A string that uniquely identifies the job flow. This identifier is returned by RunJobFlow and can also be obtained from ListClusters."];
       steps: StepConfigList.t
-        [@ocaml.doc "A list of StepConfig to be executed by the job flow."]}
+        [@ocaml.doc "A list of StepConfig to be executed by the job flow."];
+      executionRoleArn: ArnType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the runtime role for a step on the cluster. The runtime role can be a cross-account IAM role. The runtime role ARN is a combination of account ID, role name, and role type using the following format: arn:partition:service:region:account:resource. For example, arn:aws:IAM::1234567890:role/ReadOnly is a correctly formatted runtime role ARN."]}
     let context_ = "AddJobFlowStepsInput"
-    let make ~jobFlowId = fun ~steps -> fun () -> { jobFlowId; steps }
+    let make ?executionRoleArn =
+      fun ~jobFlowId ->
+        fun ~steps -> fun () -> { executionRoleArn; jobFlowId; steps }
     let to_value x =
       structure_to_value
         [("JobFlowId", (Some (XmlStringMaxLen256.to_value x.jobFlowId)));
-        ("Steps", (Some (StepConfigList.to_value x.steps)))]
+        ("Steps", (Some (StepConfigList.to_value x.steps)));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:ArnType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let executionRoleArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
       let steps =
         StepConfigList.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Steps") in
       let jobFlowId =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "JobFlowId") in
-      make ~steps ~jobFlowId ()
+      make ?executionRoleArn ~steps ~jobFlowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let steps = field_map_exn json "Steps" StepConfigList.of_json in
+    let of_json json__ =
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" ArnType.of_json in
+      let steps = field_map_exn json__ "Steps" StepConfigList.of_json in
       let jobFlowId =
-        field_map_exn json "JobFlowId" XmlStringMaxLen256.of_json in
-      make ~steps ~jobFlowId ()
+        field_map_exn json__ "JobFlowId" XmlStringMaxLen256.of_json in
+      make ?executionRoleArn ~steps ~jobFlowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input argument to the AddJobFlowSteps operation."]
 module StepIdsList =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2527,8 +2877,8 @@ module AddJobFlowStepsOutput =
         (Option.map ~f:StepIdsList.of_xml) (Xml.child xml_arg0 "StepIds") in
       make ?stepIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stepIds = field_map json "StepIds" StepIdsList.of_json in
+    let of_json json__ =
+      let stepIds = field_map json__ "StepIds" StepIdsList.of_json in
       make ?stepIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the AddJobFlowSteps operation."]
@@ -2553,9 +2903,9 @@ module Tag =
       let key = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in
-      let key = field_map json "Key" String_.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in
+      let key = field_map json__ "Key" String_.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A key-value pair containing user-defined metadata that you can associate with an Amazon EMR resource. Tags make it easier to associate clusters in various ways, such as grouping clusters to track your Amazon EMR resource allocation costs. For more information, see Tag Clusters."]
@@ -2563,6 +2913,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2620,9 +2973,9 @@ module AddTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tags ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tags ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2680,6 +3033,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2736,11 +3092,12 @@ module Application =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?additionalInfo ?args ?version ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let additionalInfo = field_map json "AdditionalInfo" StringMap.of_json in
-      let args = field_map json "Args" StringList.of_json in
-      let version = field_map json "Version" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let additionalInfo =
+        field_map json__ "AdditionalInfo" StringMap.of_json in
+      let args = field_map json__ "Args" StringList.of_json in
+      let version = field_map json__ "Version" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?additionalInfo ?args ?version ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2749,6 +3106,9 @@ module ApplicationList =
   struct
     type nonrec t = Application.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Application.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2847,10 +3207,11 @@ module AutoScalingPolicyStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code" AutoScalingPolicyStateChangeReasonCode.of_json in
+        field_map json__ "Code"
+          AutoScalingPolicyStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The reason for an AutoScalingPolicyStatus change."]
@@ -2919,11 +3280,11 @@ module AutoScalingPolicyStatus =
           (Xml.child xml_arg0 "State") in
       make ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stateChangeReason =
-        field_map json "StateChangeReason"
+        field_map json__ "StateChangeReason"
           AutoScalingPolicyStateChangeReason.of_json in
-      let state = field_map json "State" AutoScalingPolicyState.of_json in
+      let state = field_map json__ "State" AutoScalingPolicyState.of_json in
       make ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status of an automatic scaling policy."]
@@ -2935,7 +3296,7 @@ module AutoScalingPolicyDescription =
         [@ocaml.doc "The status of an automatic scaling policy."];
       constraints: ScalingConstraints.t option
         [@ocaml.doc
-          "The upper and lower EC2 instance limits for an automatic scaling policy. Automatic scaling activity will not cause an instance group to grow above or below these limits."];
+          "The upper and lower Amazon EC2 instance limits for an automatic scaling policy. Automatic scaling activity will not cause an instance group to grow above or below these limits."];
       rules: ScalingRuleList.t option
         [@ocaml.doc
           "The scale-in and scale-out rules that comprise the automatic scaling policy."]}
@@ -2961,15 +3322,15 @@ module AutoScalingPolicyDescription =
           (Xml.child xml_arg0 "Status") in
       make ?rules ?constraints ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let rules = field_map json "Rules" ScalingRuleList.of_json in
+    let of_json json__ =
+      let rules = field_map json__ "Rules" ScalingRuleList.of_json in
       let constraints =
-        field_map json "Constraints" ScalingConstraints.of_json in
-      let status = field_map json "Status" AutoScalingPolicyStatus.of_json in
+        field_map json__ "Constraints" ScalingConstraints.of_json in
+      let status = field_map json__ "Status" AutoScalingPolicyStatus.of_json in
       make ?rules ?constraints ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."]
+       "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."]
 module Long =
   struct
     type nonrec t = Int64.t
@@ -3000,8 +3361,8 @@ module AutoTerminationPolicy =
         (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "IdleTimeout") in
       make ?idleTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idleTimeout = field_map json "IdleTimeout" Long.of_json in
+    let of_json json__ =
+      let idleTimeout = field_map json__ "IdleTimeout" Long.of_json in
       make ?idleTimeout ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3048,9 +3409,9 @@ module PortRange =
         Port.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MinRange") in
       make ?maxRange ~minRange ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxRange = field_map json "MaxRange" Port.of_json in
-      let minRange = field_map_exn json "MinRange" Port.of_json in
+    let of_json json__ =
+      let maxRange = field_map json__ "MaxRange" Port.of_json in
+      let minRange = field_map_exn json__ "MinRange" Port.of_json in
       make ?maxRange ~minRange ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3059,6 +3420,9 @@ module PortRanges =
   struct
     type nonrec t = PortRange.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PortRange.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3098,10 +3462,10 @@ module BlockPublicAccessConfiguration =
       {
       blockPublicSecurityGroupRules: Boolean.t
         [@ocaml.doc
-          "Indicates whether Amazon EMR block public access is enabled (true) or disabled (false). By default, the value is false for accounts that have created EMR clusters before July 2019. For accounts created after this, the default is true."];
+          "Indicates whether Amazon EMR block public access is enabled (true) or disabled (false). By default, the value is false for accounts that have created Amazon EMR clusters before July 2019. For accounts created after this, the default is true."];
       permittedPublicSecurityGroupRuleRanges: PortRanges.t option
         [@ocaml.doc
-          "Specifies ports and port ranges that are permitted to have security group rules that allow inbound traffic from all public sources. For example, if Port 23 (Telnet) is specified for PermittedPublicSecurityGroupRuleRanges, Amazon EMR allows cluster creation if a security group associated with the cluster has a rule that allows inbound traffic on Port 23 from IPv4 0.0.0.0/0 or IPv6 port ::/0 as the source. By default, Port 22, which is used for SSH access to the cluster EC2 instances, is in the list of PermittedPublicSecurityGroupRuleRanges."]}
+          "Specifies ports and port ranges that are permitted to have security group rules that allow inbound traffic from all public sources. For example, if Port 23 (Telnet) is specified for PermittedPublicSecurityGroupRuleRanges, Amazon EMR allows cluster creation if a security group associated with the cluster has a rule that allows inbound traffic on Port 23 from IPv4 0.0.0.0/0 or IPv6 port ::/0 as the source. By default, Port 22, which is used for SSH access to the cluster Amazon EC2 instances, is in the list of PermittedPublicSecurityGroupRuleRanges."]}
     let context_ = "BlockPublicAccessConfiguration"
     let make ?permittedPublicSecurityGroupRuleRanges =
       fun ~blockPublicSecurityGroupRules ->
@@ -3129,12 +3493,12 @@ module BlockPublicAccessConfiguration =
       make ?permittedPublicSecurityGroupRuleRanges
         ~blockPublicSecurityGroupRules ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let permittedPublicSecurityGroupRuleRanges =
-        field_map json "PermittedPublicSecurityGroupRuleRanges"
+        field_map json__ "PermittedPublicSecurityGroupRuleRanges"
           PortRanges.of_json in
       let blockPublicSecurityGroupRules =
-        field_map_exn json "BlockPublicSecurityGroupRules" Boolean.of_json in
+        field_map_exn json__ "BlockPublicSecurityGroupRules" Boolean.of_json in
       make ?permittedPublicSecurityGroupRuleRanges
         ~blockPublicSecurityGroupRules ()
     let to_json v = composed_to_json to_value v
@@ -3156,33 +3520,30 @@ module BlockPublicAccessConfigurationMetadata =
   struct
     type nonrec t =
       {
-      creationDateTime: Date.t
+      creationDateTime: Date.t option
         [@ocaml.doc "The date and time that the configuration was created."];
-      createdByArn: ArnType.t
+      createdByArn: ArnType.t option
         [@ocaml.doc
           "The Amazon Resource Name that created or last modified the configuration."]}
-    let context_ = "BlockPublicAccessConfigurationMetadata"
-    let make ~creationDateTime =
-      fun ~createdByArn -> fun () -> { creationDateTime; createdByArn }
+    let make ?creationDateTime =
+      fun ?createdByArn -> fun () -> { creationDateTime; createdByArn }
     let to_value x =
       structure_to_value
-        [("CreationDateTime", (Some (Date.to_value x.creationDateTime)));
-        ("CreatedByArn", (Some (ArnType.to_value x.createdByArn)))]
+        [("CreationDateTime",
+           (Option.map x.creationDateTime ~f:Date.to_value));
+        ("CreatedByArn", (Option.map x.createdByArn ~f:ArnType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let createdByArn =
-        ArnType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreatedByArn") in
+        (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "CreatedByArn") in
       let creationDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDateTime") in
-      make ~createdByArn ~creationDateTime ()
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
+      make ?createdByArn ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let createdByArn = field_map_exn json "CreatedByArn" ArnType.of_json in
-      let creationDateTime =
-        field_map_exn json "CreationDateTime" Date.of_json in
-      make ~createdByArn ~creationDateTime ()
+    let of_json json__ =
+      let createdByArn = field_map json__ "CreatedByArn" ArnType.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      make ?createdByArn ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Properties that describe the Amazon Web Services principal that created the BlockPublicAccessConfiguration using the PutBlockPublicAccessConfiguration action as well as the date and time that the configuration was created. Each time a configuration for block public access is updated, Amazon EMR updates this metadata."]
@@ -3210,9 +3571,9 @@ module ScriptBootstrapActionConfig =
         XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Path") in
       make ?args ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let args = field_map json "Args" XmlStringList.of_json in
-      let path = field_map_exn json "Path" XmlString.of_json in
+    let of_json json__ =
+      let args = field_map json__ "Args" XmlStringList.of_json in
+      let path = field_map_exn json__ "Path" XmlString.of_json in
       make ?args ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3244,11 +3605,11 @@ module BootstrapActionConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~scriptBootstrapAction ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scriptBootstrapAction =
-        field_map_exn json "ScriptBootstrapAction"
+        field_map_exn json__ "ScriptBootstrapAction"
           ScriptBootstrapActionConfig.of_json in
-      let name = field_map_exn json "Name" XmlStringMaxLen256.of_json in
+      let name = field_map_exn json__ "Name" XmlStringMaxLen256.of_json in
       make ~scriptBootstrapAction ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Configuration of a bootstrap action."]
@@ -3256,6 +3617,9 @@ module BootstrapActionConfigList =
   struct
     type nonrec t = BootstrapActionConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BootstrapActionConfig.to_value)) |>
         (fun x -> `List x)
@@ -3297,9 +3661,10 @@ module BootstrapActionDetail =
           (Xml.child xml_arg0 "BootstrapActionConfig") in
       make ?bootstrapActionConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bootstrapActionConfig =
-        field_map json "BootstrapActionConfig" BootstrapActionConfig.of_json in
+        field_map json__ "BootstrapActionConfig"
+          BootstrapActionConfig.of_json in
       make ?bootstrapActionConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3308,6 +3673,9 @@ module BootstrapActionDetailList =
   struct
     type nonrec t = BootstrapActionDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BootstrapActionDetail.to_value)) |>
         (fun x -> `List x)
@@ -3400,10 +3768,10 @@ module CancelStepsInfo =
         (Option.map ~f:StepId.of_xml) (Xml.child xml_arg0 "StepId") in
       make ?reason ?status ?stepId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "Reason" String_.of_json in
-      let status = field_map json "Status" CancelStepsRequestStatus.of_json in
-      let stepId = field_map json "StepId" StepId.of_json in
+    let of_json json__ =
+      let reason = field_map json__ "Reason" String_.of_json in
+      let status = field_map json__ "Status" CancelStepsRequestStatus.of_json in
+      let stepId = field_map json__ "StepId" StepId.of_json in
       make ?reason ?status ?stepId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3412,6 +3780,9 @@ module CancelStepsInfoList =
   struct
     type nonrec t = CancelStepsInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CancelStepsInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3498,13 +3869,13 @@ module CancelStepsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?stepCancellationOption ~stepIds ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let stepCancellationOption =
-        field_map json "StepCancellationOption"
+        field_map json__ "StepCancellationOption"
           StepCancellationOption.of_json in
-      let stepIds = field_map_exn json "StepIds" StepIdsList.of_json in
+      let stepIds = field_map_exn json__ "StepIds" StepIdsList.of_json in
       let clusterId =
-        field_map_exn json "ClusterId" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "ClusterId" XmlStringMaxLen256.of_json in
       make ?stepCancellationOption ~stepIds ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input argument to the CancelSteps operation."]
@@ -3563,12 +3934,114 @@ module CancelStepsOutput =
           (Xml.child xml_arg0 "CancelStepsInfoList") in
       make ?cancelStepsInfoList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let cancelStepsInfoList =
-        field_map json "CancelStepsInfoList" CancelStepsInfoList.of_json in
+        field_map json__ "CancelStepsInfoList" CancelStepsInfoList.of_json in
       make ?cancelStepsInfoList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the CancelSteps operation."]
+module LogTypesMap =
+  struct
+    type nonrec t = (XmlString.t * XmlStringList.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            let (_ : string) = v in
+                            let (_ : string) = chopped in
+                            failwith
+                              "no of_header for complex types XmlString XmlStringList"))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (XmlString.to_value x) |>
+                    (fun x -> (XmlStringList.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:XmlString.of_string
+        ~of_json:XmlStringList.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module CloudWatchLogConfiguration =
+  struct
+    type nonrec t =
+      {
+      enabled: Boolean.t
+        [@ocaml.doc "Specifies if CloudWatch logging is enabled."];
+      logGroupName: XmlString.t option
+        [@ocaml.doc
+          "The name of the CloudWatch log group where logs are published."];
+      logStreamNamePrefix: XmlString.t option
+        [@ocaml.doc "The prefix of the log stream name."];
+      encryptionKeyArn: XmlString.t option
+        [@ocaml.doc
+          "The ARN of the encryption key used to encrypt the logs."];
+      logTypes: LogTypesMap.t option
+        [@ocaml.doc
+          "A map of log types to file names for publishing logs to the standard output or standard error streams for CloudWatch. Valid log types include STEP_LOGS, SPARK_DRIVER, and SPARK_EXECUTOR. Valid file names for each type include STDOUT and STDERR."]}
+    let context_ = "CloudWatchLogConfiguration"
+    let make ?logGroupName =
+      fun ?logStreamNamePrefix ->
+        fun ?encryptionKeyArn ->
+          fun ?logTypes ->
+            fun ~enabled ->
+              fun () ->
+                {
+                  logGroupName;
+                  logStreamNamePrefix;
+                  encryptionKeyArn;
+                  logTypes;
+                  enabled
+                }
+    let to_value x =
+      structure_to_value
+        [("Enabled", (Some (Boolean.to_value x.enabled)));
+        ("LogGroupName", (Option.map x.logGroupName ~f:XmlString.to_value));
+        ("LogStreamNamePrefix",
+          (Option.map x.logStreamNamePrefix ~f:XmlString.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:XmlString.to_value));
+        ("LogTypes", (Option.map x.logTypes ~f:LogTypesMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypes =
+        (Option.map ~f:LogTypesMap.of_xml) (Xml.child xml_arg0 "LogTypes") in
+      let encryptionKeyArn =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let logStreamNamePrefix =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "LogStreamNamePrefix") in
+      let logGroupName =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "LogGroupName") in
+      let enabled =
+        Boolean.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Enabled") in
+      make ?logTypes ?encryptionKeyArn ?logStreamNamePrefix ?logGroupName
+        ~enabled ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypes = field_map json__ "LogTypes" LogTypesMap.of_json in
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" XmlString.of_json in
+      let logStreamNamePrefix =
+        field_map json__ "LogStreamNamePrefix" XmlString.of_json in
+      let logGroupName = field_map json__ "LogGroupName" XmlString.of_json in
+      let enabled = field_map_exn json__ "Enabled" Boolean.of_json in
+      make ?logTypes ?encryptionKeyArn ?logStreamNamePrefix ?logGroupName
+        ~enabled ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Holds CloudWatch log configuration settings and metadata that specify settings like log files to monitor and where to send them."]
 module ScaleDownBehavior =
   struct
     type nonrec t =
@@ -3660,10 +4133,10 @@ module PlacementGroupConfig =
       {
       instanceRole: InstanceRoleType.t
         [@ocaml.doc
-          "Role of the instance in the cluster. Starting with Amazon EMR version 5.23.0, the only supported instance role is MASTER."];
+          "Role of the instance in the cluster. Starting with Amazon EMR release 5.23.0, the only supported instance role is MASTER."];
       placementStrategy: PlacementGroupStrategy.t option
         [@ocaml.doc
-          "EC2 Placement Group strategy associated with instance role. Starting with Amazon EMR version 5.23.0, the only supported placement strategy is SPREAD for the MASTER instance role."]}
+          "Amazon EC2 Placement Group strategy associated with instance role. Starting with Amazon EMR release 5.23.0, the only supported placement strategy is SPREAD for the MASTER instance role."]}
     let context_ = "PlacementGroupConfig"
     let make ?placementStrategy =
       fun ~instanceRole -> fun () -> { placementStrategy; instanceRole }
@@ -3682,19 +4155,22 @@ module PlacementGroupConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceRole") in
       make ?placementStrategy ~instanceRole ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let placementStrategy =
-        field_map json "PlacementStrategy" PlacementGroupStrategy.of_json in
+        field_map json__ "PlacementStrategy" PlacementGroupStrategy.of_json in
       let instanceRole =
-        field_map_exn json "InstanceRole" InstanceRoleType.of_json in
+        field_map_exn json__ "InstanceRole" InstanceRoleType.of_json in
       make ?placementStrategy ~instanceRole ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Placement group configuration for an Amazon EMR cluster. The configuration specifies the placement strategy that can be applied to instance roles during cluster creation. To use this configuration, consider attaching managed policy AmazonElasticMapReducePlacementGroupPolicy to the EMR role."]
+       "Placement group configuration for an Amazon EMR cluster. The configuration specifies the placement strategy that can be applied to instance roles during cluster creation. To use this configuration, consider attaching managed policy AmazonElasticMapReducePlacementGroupPolicy to the Amazon EMR role."]
 module PlacementGroupConfigList =
   struct
     type nonrec t = PlacementGroupConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PlacementGroupConfig.to_value)) |>
         (fun x -> `List x)
@@ -3735,6 +4211,162 @@ module OptionalArnType =
     let of_json j = string_of_json ~kind:"OptionalArnType" j
     let to_json = simple_to_json to_value
   end
+module LogUploadPolicyValue =
+  struct
+    type nonrec t =
+      | Emr_managed 
+      | On_customer_s3only 
+      | Disabled 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Emr_managed -> "emr-managed"
+      | On_customer_s3only -> "on-customer-s3only"
+      | Disabled -> "disabled"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "emr-managed" -> Emr_managed
+      | "on-customer-s3only" -> On_customer_s3only
+      | "disabled" -> Disabled
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration LogUploadPolicyValue" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogUploadPolicyValue" j)
+    let to_json = simple_to_json to_value
+  end
+module LogType =
+  struct
+    type nonrec t =
+      | System_logs 
+      | Application_logs 
+      | Persistent_ui_logs 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | System_logs -> "system-logs"
+      | Application_logs -> "application-logs"
+      | Persistent_ui_logs -> "persistent-ui-logs"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "system-logs" -> System_logs
+      | "application-logs" -> Application_logs
+      | "persistent-ui-logs" -> Persistent_ui_logs
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration LogType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"LogType" j)
+    let to_json = simple_to_json to_value
+  end
+module LogTypeMap =
+  struct
+    type nonrec t = (LogType.t * LogUploadPolicyValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((LogType.of_string chopped),
+                              (LogUploadPolicyValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (LogType.to_value x) |>
+                    (fun x ->
+                       (LogUploadPolicyValue.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:LogType.of_string
+        ~of_json:LogUploadPolicyValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module S3LoggingConfiguration =
+  struct
+    type nonrec t =
+      {
+      logTypeUploadPolicy: LogTypeMap.t option
+        [@ocaml.doc
+          "A map that specifies the upload policy for each log type. The key is the log type, and the value is the upload policy. Valid log types: system-logs: System-level logs including daemon logs, bootstrap logs, and other infrastructure logs. application-logs: Application-level logs from frameworks like Hadoop, Spark, Hive, etc. persistent-ui-logs: Logs for persistent application UIs like Spark History Server. Valid upload policies: emr-managed: Logs are uploaded to both the EMR-managed S3 bucket and the customer-specified S3 bucket (if LogUri is provided). on-customer-s3only: Logs are uploaded only to the customer-specified S3 bucket. Requires LogUri to be specified in the cluster configuration. disabled: Log upload is disabled for this log type."]}
+    let make ?logTypeUploadPolicy = fun () -> { logTypeUploadPolicy }
+    let to_value x =
+      structure_to_value
+        [("LogTypeUploadPolicy",
+           (Option.map x.logTypeUploadPolicy ~f:LogTypeMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let logTypeUploadPolicy =
+        (Option.map ~f:LogTypeMap.of_xml)
+          (Xml.child xml_arg0 "LogTypeUploadPolicy") in
+      make ?logTypeUploadPolicy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let logTypeUploadPolicy =
+        field_map json__ "LogTypeUploadPolicy" LogTypeMap.of_json in
+      make ?logTypeUploadPolicy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Configuration for S3 logging behavior in EMR clusters. Defines how different types of logs are uploaded to S3 based on the specified upload policies for each log type."]
+module MonitoringConfiguration =
+  struct
+    type nonrec t =
+      {
+      cloudWatchLogConfiguration: CloudWatchLogConfiguration.t option
+        [@ocaml.doc
+          "CloudWatch log configuration settings and metadata that specify settings like log files to monitor and where to send them."];
+      s3LoggingConfiguration: S3LoggingConfiguration.t option
+        [@ocaml.doc
+          "S3 logging configuration that controls how different types of logs (system logs, application logs, and persistent UI logs) are uploaded to S3. Each log type can be configured with a specific upload policy."]}
+    let make ?cloudWatchLogConfiguration =
+      fun ?s3LoggingConfiguration ->
+        fun () -> { cloudWatchLogConfiguration; s3LoggingConfiguration }
+    let to_value x =
+      structure_to_value
+        [("CloudWatchLogConfiguration",
+           (Option.map x.cloudWatchLogConfiguration
+              ~f:CloudWatchLogConfiguration.to_value));
+        ("S3LoggingConfiguration",
+          (Option.map x.s3LoggingConfiguration
+             ~f:S3LoggingConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3LoggingConfiguration =
+        (Option.map ~f:S3LoggingConfiguration.of_xml)
+          (Xml.child xml_arg0 "S3LoggingConfiguration") in
+      let cloudWatchLogConfiguration =
+        (Option.map ~f:CloudWatchLogConfiguration.of_xml)
+          (Xml.child xml_arg0 "CloudWatchLogConfiguration") in
+      make ?s3LoggingConfiguration ?cloudWatchLogConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3LoggingConfiguration =
+        field_map json__ "S3LoggingConfiguration"
+          S3LoggingConfiguration.of_json in
+      let cloudWatchLogConfiguration =
+        field_map json__ "CloudWatchLogConfiguration"
+          CloudWatchLogConfiguration.of_json in
+      make ?s3LoggingConfiguration ?cloudWatchLogConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Contains CloudWatch log configuration and S3 logging configuration metadata and settings."]
 module KerberosAttributes =
   struct
     type nonrec t =
@@ -3799,17 +4431,17 @@ module KerberosAttributes =
       make ?aDDomainJoinPassword ?aDDomainJoinUser
         ?crossRealmTrustPrincipalPassword ~kdcAdminPassword ~realm ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let aDDomainJoinPassword =
-        field_map json "ADDomainJoinPassword" XmlStringMaxLen256.of_json in
+        field_map json__ "ADDomainJoinPassword" XmlStringMaxLen256.of_json in
       let aDDomainJoinUser =
-        field_map json "ADDomainJoinUser" XmlStringMaxLen256.of_json in
+        field_map json__ "ADDomainJoinUser" XmlStringMaxLen256.of_json in
       let crossRealmTrustPrincipalPassword =
-        field_map json "CrossRealmTrustPrincipalPassword"
+        field_map json__ "CrossRealmTrustPrincipalPassword"
           XmlStringMaxLen256.of_json in
       let kdcAdminPassword =
-        field_map_exn json "KdcAdminPassword" XmlStringMaxLen256.of_json in
-      let realm = field_map_exn json "Realm" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "KdcAdminPassword" XmlStringMaxLen256.of_json in
+      let realm = field_map_exn json__ "Realm" XmlStringMaxLen256.of_json in
       make ?aDDomainJoinPassword ?aDDomainJoinUser
         ?crossRealmTrustPrincipalPassword ~kdcAdminPassword ~realm ()
     let to_json v = composed_to_json to_value v
@@ -3846,6 +4478,9 @@ module XmlStringMaxLen256List =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3879,15 +4514,15 @@ module Ec2InstanceAttributes =
           "Set this parameter to the identifier of the Amazon VPC subnet where you want the cluster to launch. If you do not specify this value, and your account supports EC2-Classic, the cluster launches in EC2-Classic."];
       requestedEc2SubnetIds: XmlStringMaxLen256List.t option
         [@ocaml.doc
-          "Applies to clusters configured with the instance fleets option. Specifies the unique identifier of one or more Amazon EC2 subnets in which to launch EC2 cluster instances. Subnets must exist within the same VPC. Amazon EMR chooses the EC2 subnet with the best fit from among the list of RequestedEc2SubnetIds, and then launches all cluster instances within that Subnet. If this value is not specified, and the account and Region support EC2-Classic networks, the cluster launches instances in the EC2-Classic network and uses RequestedEc2AvailabilityZones instead of this setting. If EC2-Classic is not supported, and no Subnet is specified, Amazon EMR chooses the subnet for you. RequestedEc2SubnetIDs and RequestedEc2AvailabilityZones cannot be specified together."];
+          "Applies to clusters configured with the instance fleets option. Specifies the unique identifier of one or more Amazon EC2 subnets in which to launch Amazon EC2 cluster instances. Subnets must exist within the same VPC. Amazon EMR chooses the Amazon EC2 subnet with the best fit from among the list of RequestedEc2SubnetIds, and then launches all cluster instances within that Subnet. If this value is not specified, and the account and Region support EC2-Classic networks, the cluster launches instances in the EC2-Classic network and uses RequestedEc2AvailabilityZones instead of this setting. If EC2-Classic is not supported, and no Subnet is specified, Amazon EMR chooses the subnet for you. RequestedEc2SubnetIDs and RequestedEc2AvailabilityZones cannot be specified together."];
       ec2AvailabilityZone: String_.t option
         [@ocaml.doc "The Availability Zone in which the cluster will run."];
       requestedEc2AvailabilityZones: XmlStringMaxLen256List.t option
         [@ocaml.doc
-          "Applies to clusters configured with the instance fleets option. Specifies one or more Availability Zones in which to launch EC2 cluster instances when the EC2-Classic network configuration is supported. Amazon EMR chooses the Availability Zone with the best fit from among the list of RequestedEc2AvailabilityZones, and then launches all cluster instances within that Availability Zone. If you do not specify this value, Amazon EMR chooses the Availability Zone for you. RequestedEc2SubnetIDs and RequestedEc2AvailabilityZones cannot be specified together."];
+          "Applies to clusters configured with the instance fleets option. Specifies one or more Availability Zones in which to launch Amazon EC2 cluster instances when the EC2-Classic network configuration is supported. Amazon EMR chooses the Availability Zone with the best fit from among the list of RequestedEc2AvailabilityZones, and then launches all cluster instances within that Availability Zone. If you do not specify this value, Amazon EMR chooses the Availability Zone for you. RequestedEc2SubnetIDs and RequestedEc2AvailabilityZones cannot be specified together."];
       iamInstanceProfile: String_.t option
         [@ocaml.doc
-          "The IAM role that was specified when the cluster was launched. The EC2 instances of the cluster assume this role."];
+          "The IAM role that was specified when the cluster was launched. The Amazon EC2 instances of the cluster assume this role."];
       emrManagedMasterSecurityGroup: String_.t option
         [@ocaml.doc
           "The identifier of the Amazon EC2 security group for the master node."];
@@ -3991,28 +4626,29 @@ module Ec2InstanceAttributes =
         ?requestedEc2AvailabilityZones ?ec2AvailabilityZone
         ?requestedEc2SubnetIds ?ec2SubnetId ?ec2KeyName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalSlaveSecurityGroups =
-        field_map json "AdditionalSlaveSecurityGroups" StringList.of_json in
+        field_map json__ "AdditionalSlaveSecurityGroups" StringList.of_json in
       let additionalMasterSecurityGroups =
-        field_map json "AdditionalMasterSecurityGroups" StringList.of_json in
+        field_map json__ "AdditionalMasterSecurityGroups" StringList.of_json in
       let serviceAccessSecurityGroup =
-        field_map json "ServiceAccessSecurityGroup" String_.of_json in
+        field_map json__ "ServiceAccessSecurityGroup" String_.of_json in
       let emrManagedSlaveSecurityGroup =
-        field_map json "EmrManagedSlaveSecurityGroup" String_.of_json in
+        field_map json__ "EmrManagedSlaveSecurityGroup" String_.of_json in
       let emrManagedMasterSecurityGroup =
-        field_map json "EmrManagedMasterSecurityGroup" String_.of_json in
+        field_map json__ "EmrManagedMasterSecurityGroup" String_.of_json in
       let iamInstanceProfile =
-        field_map json "IamInstanceProfile" String_.of_json in
+        field_map json__ "IamInstanceProfile" String_.of_json in
       let requestedEc2AvailabilityZones =
-        field_map json "RequestedEc2AvailabilityZones"
+        field_map json__ "RequestedEc2AvailabilityZones"
           XmlStringMaxLen256List.of_json in
       let ec2AvailabilityZone =
-        field_map json "Ec2AvailabilityZone" String_.of_json in
+        field_map json__ "Ec2AvailabilityZone" String_.of_json in
       let requestedEc2SubnetIds =
-        field_map json "RequestedEc2SubnetIds" XmlStringMaxLen256List.of_json in
-      let ec2SubnetId = field_map json "Ec2SubnetId" String_.of_json in
-      let ec2KeyName = field_map json "Ec2KeyName" String_.of_json in
+        field_map json__ "RequestedEc2SubnetIds"
+          XmlStringMaxLen256List.of_json in
+      let ec2SubnetId = field_map json__ "Ec2SubnetId" String_.of_json in
+      let ec2KeyName = field_map json__ "Ec2KeyName" String_.of_json in
       make ?additionalSlaveSecurityGroups ?additionalMasterSecurityGroups
         ?serviceAccessSecurityGroup ?emrManagedSlaveSecurityGroup
         ?emrManagedMasterSecurityGroup ?iamInstanceProfile
@@ -4020,7 +4656,98 @@ module Ec2InstanceAttributes =
         ?requestedEc2SubnetIds ?ec2SubnetId ?ec2KeyName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides information about the EC2 instances in a cluster grouped by category. For example, key name, subnet ID, IAM instance profile, and so on."]
+       "Provides information about the Amazon EC2 instances in a cluster grouped by category. For example, key name, subnet ID, IAM instance profile, and so on."]
+module ErrorData =
+  struct
+    type nonrec t = StringMap.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:StringMap.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:StringMap.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ErrorData" ~of_json:StringMap.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ErrorDetail =
+  struct
+    type nonrec t =
+      {
+      errorCode: String_.t option
+        [@ocaml.doc "The name or code associated with the error."];
+      errorData: ErrorData.t option
+        [@ocaml.doc
+          "A list of key value pairs that provides contextual information about why an error occured."];
+      errorMessage: String_.t option
+        [@ocaml.doc "A message that describes the error."]}
+    let make ?errorCode =
+      fun ?errorData ->
+        fun ?errorMessage -> fun () -> { errorCode; errorData; errorMessage }
+    let to_value x =
+      structure_to_value
+        [("ErrorCode", (Option.map x.errorCode ~f:String_.to_value));
+        ("ErrorData", (Option.map x.errorData ~f:ErrorData.to_value));
+        ("ErrorMessage", (Option.map x.errorMessage ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let errorMessage =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorMessage") in
+      let errorData =
+        (Option.map ~f:ErrorData.of_xml) (Xml.child xml_arg0 "ErrorData") in
+      let errorCode =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ErrorCode") in
+      make ?errorMessage ?errorData ?errorCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let errorMessage = field_map json__ "ErrorMessage" String_.of_json in
+      let errorData = field_map json__ "ErrorData" ErrorData.of_json in
+      let errorCode = field_map json__ "ErrorCode" String_.of_json in
+      make ?errorMessage ?errorData ?errorCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A tuple that provides information about an error that caused a cluster to terminate."]
+module ErrorDetailList =
+  struct
+    type nonrec t = ErrorDetail.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ErrorDetail.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ErrorDetail.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ErrorDetailList" ~of_json:ErrorDetail.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module ClusterTimeline =
   struct
     type nonrec t =
@@ -4052,10 +4779,10 @@ module ClusterTimeline =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the timeline of the cluster's lifecycle."]
@@ -4128,9 +4855,9 @@ module ClusterStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" ClusterStateChangeReasonCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" ClusterStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4185,19 +4912,29 @@ module ClusterStatus =
         [@ocaml.doc "The reason for the cluster status change."];
       timeline: ClusterTimeline.t option
         [@ocaml.doc
-          "A timeline that represents the status of a cluster over the lifetime of the cluster."]}
+          "A timeline that represents the status of a cluster over the lifetime of the cluster."];
+      errorDetails: ErrorDetailList.t option
+        [@ocaml.doc
+          "A list of tuples that provides information about the errors that caused a cluster to terminate. This structure can contain up to 10 different ErrorDetail tuples."]}
     let make ?state =
       fun ?stateChangeReason ->
-        fun ?timeline -> fun () -> { state; stateChangeReason; timeline }
+        fun ?timeline ->
+          fun ?errorDetails ->
+            fun () -> { state; stateChangeReason; timeline; errorDetails }
     let to_value x =
       structure_to_value
         [("State", (Option.map x.state ~f:ClusterState.to_value));
         ("StateChangeReason",
           (Option.map x.stateChangeReason
              ~f:ClusterStateChangeReason.to_value));
-        ("Timeline", (Option.map x.timeline ~f:ClusterTimeline.to_value))]
+        ("Timeline", (Option.map x.timeline ~f:ClusterTimeline.to_value));
+        ("ErrorDetails",
+          (Option.map x.errorDetails ~f:ErrorDetailList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let errorDetails =
+        (Option.map ~f:ErrorDetailList.of_xml)
+          (Xml.child xml_arg0 "ErrorDetails") in
       let timeline =
         (Option.map ~f:ClusterTimeline.of_xml)
           (Xml.child xml_arg0 "Timeline") in
@@ -4206,14 +4943,16 @@ module ClusterStatus =
           (Xml.child xml_arg0 "StateChangeReason") in
       let state =
         (Option.map ~f:ClusterState.of_xml) (Xml.child xml_arg0 "State") in
-      make ?timeline ?stateChangeReason ?state ()
+      make ?errorDetails ?timeline ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeline = field_map json "Timeline" ClusterTimeline.of_json in
+    let of_json json__ =
+      let errorDetails =
+        field_map json__ "ErrorDetails" ErrorDetailList.of_json in
+      let timeline = field_map json__ "Timeline" ClusterTimeline.of_json in
       let stateChangeReason =
-        field_map json "StateChangeReason" ClusterStateChangeReason.of_json in
-      let state = field_map json "State" ClusterState.of_json in
-      make ?timeline ?stateChangeReason ?state ()
+        field_map json__ "StateChangeReason" ClusterStateChangeReason.of_json in
+      let state = field_map json__ "State" ClusterState.of_json in
+      make ?errorDetails ?timeline ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The detailed status of the cluster."]
 module ClusterId =
@@ -4235,21 +4974,23 @@ module Cluster =
       {
       id: ClusterId.t option
         [@ocaml.doc "The unique identifier for the cluster."];
-      name: String_.t option [@ocaml.doc "The name of the cluster."];
+      name: String_.t option
+        [@ocaml.doc
+          "The name of the cluster. This parameter can't contain the characters <, >, $, |, or ` (backtick)."];
       status: ClusterStatus.t option
         [@ocaml.doc "The current status details about the cluster."];
       ec2InstanceAttributes: Ec2InstanceAttributes.t option
         [@ocaml.doc
-          "Provides information about the EC2 instances in a cluster grouped by category. For example, key name, subnet ID, IAM instance profile, and so on."];
+          "Provides information about the Amazon EC2 instances in a cluster grouped by category. For example, key name, subnet ID, IAM instance profile, and so on."];
       instanceCollectionType: InstanceCollectionType.t option
         [@ocaml.doc
-          "The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. The instance group configuration of the cluster. A value of INSTANCE_GROUP indicates a uniform instance group configuration. A value of INSTANCE_FLEET indicates an instance fleets configuration."];
+          "The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. The instance group configuration of the cluster. A value of INSTANCE_GROUP indicates a uniform instance group configuration. A value of INSTANCE_FLEET indicates an instance fleets configuration."];
       logUri: String_.t option
         [@ocaml.doc
           "The path to the Amazon S3 location where logs for this cluster are stored."];
       logEncryptionKmsKeyId: String_.t option
         [@ocaml.doc
-          "The KMS key used for encrypting log files. This attribute is only available with EMR version 5.30.0 and later, excluding EMR 6.0.0."];
+          "The KMS key used for encrypting log files. This attribute is only available with Amazon EMR 5.30.0 and later, excluding Amazon EMR 6.0.0."];
       requestedAmiVersion: String_.t option
         [@ocaml.doc "The AMI version requested for this cluster."];
       runningAmiVersion: String_.t option
@@ -4262,10 +5003,13 @@ module Cluster =
           "Specifies whether the cluster should terminate after completing all steps."];
       terminationProtected: Boolean.t option
         [@ocaml.doc
-          "Indicates whether Amazon EMR will lock the cluster to prevent the EC2 instances from being terminated by an API call or user intervention, or in the event of a cluster error."];
+          "Indicates whether Amazon EMR will lock the cluster to prevent the Amazon EC2 instances from being terminated by an API call or user intervention, or in the event of a cluster error."];
+      unhealthyNodeReplacement: BooleanObject.t option
+        [@ocaml.doc
+          "Indicates whether Amazon EMR should gracefully replace Amazon EC2 core instances that have degraded within the cluster."];
       visibleToAllUsers: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the cluster is visible to IAM principals in the Amazon Web Services account associated with the cluster. When true, IAM principals in the Amazon Web Services account can perform EMR cluster actions on the cluster that their IAM policies allow. When false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform EMR actions, regardless of IAM permissions policies attached to other IAM principals. The default value is true if a value is not provided when creating a cluster using the EMR API RunJobFlow command, the CLI create-cluster command, or the Amazon Web Services Management Console."];
+          "Indicates whether the cluster is visible to IAM principals in the Amazon Web Services account associated with the cluster. When true, IAM principals in the Amazon Web Services account can perform Amazon EMR cluster actions on the cluster that their IAM policies allow. When false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform Amazon EMR actions, regardless of IAM permissions policies attached to other IAM principals. The default value is true if a value is not provided when creating a cluster using the Amazon EMR API RunJobFlow command, the CLI create-cluster command, or the Amazon Web Services Management Console."];
       applications: ApplicationList.t option
         [@ocaml.doc "The applications installed on this cluster."];
       tags: TagList.t option
@@ -4275,31 +5019,31 @@ module Cluster =
           "The IAM role that Amazon EMR assumes in order to access Amazon Web Services resources on your behalf."];
       normalizedInstanceHours: Integer.t option
         [@ocaml.doc
-          "An approximation of the cost of the cluster, represented in m1.small/hours. This value is incremented one time for every hour an m1.small instance runs. Larger instances are weighted more, so an EC2 instance that is roughly four times more expensive would result in the normalized instance hours being incremented by four. This result is only an approximation and does not reflect the actual billing rate."];
+          "An approximation of the cost of the cluster, represented in m1.small/hours. This value is incremented one time for every hour an m1.small instance runs. Larger instances are weighted more, so an Amazon EC2 instance that is roughly four times more expensive would result in the normalized instance hours being incremented by four. This result is only an approximation and does not reflect the actual billing rate."];
       masterPublicDnsName: String_.t option
         [@ocaml.doc
           "The DNS name of the master node. If the cluster is on a private subnet, this is the private DNS name. On a public subnet, this is the public DNS name."];
       configurations: ConfigurationList.t option
         [@ocaml.doc
-          "Applies only to Amazon EMR releases 4.x and later. The list of Configurations supplied to the EMR cluster."];
+          "Applies only to Amazon EMR releases 4.x and later. The list of configurations that are supplied to the Amazon EMR cluster."];
       securityConfiguration: XmlString.t option
         [@ocaml.doc
           "The name of the security configuration applied to the cluster."];
       autoScalingRole: XmlString.t option
         [@ocaml.doc
-          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides permissions that the automatic scaling feature requires to launch and terminate EC2 instances in an instance group."];
+          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides permissions that the automatic scaling feature requires to launch and terminate Amazon EC2 instances in an instance group."];
       scaleDownBehavior: ScaleDownBehavior.t option
         [@ocaml.doc
-          "The way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION is available only in Amazon EMR version 4.1.0 and later, and is the default for versions of Amazon EMR earlier than 5.1.0."];
+          "The way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION is available only in Amazon EMR releases 4.1.0 and later, and is the default for versions of Amazon EMR earlier than 5.1.0."];
       customAmiId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "Available only in Amazon EMR version 5.7.0 and later. The ID of a custom Amazon EBS-backed Linux AMI if the cluster uses a custom AMI."];
+          "Available only in Amazon EMR releases 5.7.0 and later. The ID of a custom Amazon EBS-backed Linux AMI if the cluster uses a custom AMI."];
       ebsRootVolumeSize: Integer.t option
         [@ocaml.doc
-          "The size, in GiB, of the Amazon EBS root device volume of the Linux AMI that is used for each EC2 instance. Available in Amazon EMR version 4.x and later."];
+          "The size, in GiB, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 4.x and later."];
       repoUpgradeOnBoot: RepoUpgradeOnBoot.t option
         [@ocaml.doc
-          "Applies only when CustomAmiID is used. Specifies the type of updates that are applied from the Amazon Linux AMI package repositories when an instance boots using the AMI."];
+          "Applies only when CustomAmiID is used. Specifies the type of updates that the Amazon Linux AMI package repositories apply when an instance boots using the AMI."];
       kerberosAttributes: KerberosAttributes.t option
         [@ocaml.doc
           "Attributes for Kerberos configuration when Kerberos authentication is enabled using a security configuration. For more information see Use Kerberos Authentication in the Amazon EMR Management Guide."];
@@ -4312,7 +5056,20 @@ module Cluster =
         [@ocaml.doc
           "Specifies the number of steps that can be executed concurrently."];
       placementGroups: PlacementGroupConfigList.t option
-        [@ocaml.doc "Placement group configured for an Amazon EMR cluster."]}
+        [@ocaml.doc "Placement group configured for an Amazon EMR cluster."];
+      oSReleaseLabel: String_.t option
+        [@ocaml.doc
+          "The Amazon Linux release specified in a cluster launch RunJobFlow request. If no Amazon Linux release was specified, the default Amazon Linux release is shown in the response."];
+      ebsRootVolumeIops: Integer.t option
+        [@ocaml.doc
+          "The IOPS, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 6.15.0 and later."];
+      ebsRootVolumeThroughput: Integer.t option
+        [@ocaml.doc
+          "The throughput, in MiB/s, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 6.15.0 and later."];
+      extendedSupport: BooleanObject.t option [@ocaml.doc "Reserved."];
+      monitoringConfiguration: MonitoringConfiguration.t option
+        [@ocaml.doc
+          "Contains Cloudwatch log configuration metadata and settings."]}
     let make ?id =
       fun ?name ->
         fun ?status ->
@@ -4325,31 +5082,50 @@ module Cluster =
                       fun ?releaseLabel ->
                         fun ?autoTerminate ->
                           fun ?terminationProtected ->
-                            fun ?visibleToAllUsers ->
-                              fun ?applications ->
-                                fun ?tags ->
-                                  fun ?serviceRole ->
-                                    fun ?normalizedInstanceHours ->
-                                      fun ?masterPublicDnsName ->
-                                        fun ?configurations ->
-                                          fun ?securityConfiguration ->
-                                            fun ?autoScalingRole ->
-                                              fun ?scaleDownBehavior ->
-                                                fun ?customAmiId ->
-                                                  fun ?ebsRootVolumeSize ->
-                                                    fun ?repoUpgradeOnBoot ->
-                                                      fun ?kerberosAttributes
+                            fun ?unhealthyNodeReplacement ->
+                              fun ?visibleToAllUsers ->
+                                fun ?applications ->
+                                  fun ?tags ->
+                                    fun ?serviceRole ->
+                                      fun ?normalizedInstanceHours ->
+                                        fun ?masterPublicDnsName ->
+                                          fun ?configurations ->
+                                            fun ?securityConfiguration ->
+                                              fun ?autoScalingRole ->
+                                                fun ?scaleDownBehavior ->
+                                                  fun ?customAmiId ->
+                                                    fun ?ebsRootVolumeSize ->
+                                                      fun ?repoUpgradeOnBoot
                                                         ->
-                                                        fun ?clusterArn ->
-                                                          fun ?outpostArn ->
-                                                            fun
-                                                              ?stepConcurrencyLevel
+                                                        fun
+                                                          ?kerberosAttributes
+                                                          ->
+                                                          fun ?clusterArn ->
+                                                            fun ?outpostArn
                                                               ->
                                                               fun
-                                                                ?placementGroups
+                                                                ?stepConcurrencyLevel
                                                                 ->
-                                                                fun () ->
-                                                                  {
+                                                                fun
+                                                                  ?placementGroups
+                                                                  ->
+                                                                  fun
+                                                                    ?oSReleaseLabel
+                                                                    ->
+                                                                    fun
+                                                                    ?ebsRootVolumeIops
+                                                                    ->
+                                                                    fun
+                                                                    ?ebsRootVolumeThroughput
+                                                                    ->
+                                                                    fun
+                                                                    ?extendedSupport
+                                                                    ->
+                                                                    fun
+                                                                    ?monitoringConfiguration
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
                                                                     id;
                                                                     name;
                                                                     status;
@@ -4362,6 +5138,7 @@ module Cluster =
                                                                     releaseLabel;
                                                                     autoTerminate;
                                                                     terminationProtected;
+                                                                    unhealthyNodeReplacement;
                                                                     visibleToAllUsers;
                                                                     applications;
                                                                     tags;
@@ -4379,8 +5156,13 @@ module Cluster =
                                                                     clusterArn;
                                                                     outpostArn;
                                                                     stepConcurrencyLevel;
-                                                                    placementGroups
-                                                                  }
+                                                                    placementGroups;
+                                                                    oSReleaseLabel;
+                                                                    ebsRootVolumeIops;
+                                                                    ebsRootVolumeThroughput;
+                                                                    extendedSupport;
+                                                                    monitoringConfiguration
+                                                                    }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:ClusterId.to_value));
@@ -4403,6 +5185,8 @@ module Cluster =
         ("AutoTerminate", (Option.map x.autoTerminate ~f:Boolean.to_value));
         ("TerminationProtected",
           (Option.map x.terminationProtected ~f:Boolean.to_value));
+        ("UnhealthyNodeReplacement",
+          (Option.map x.unhealthyNodeReplacement ~f:BooleanObject.to_value));
         ("VisibleToAllUsers",
           (Option.map x.visibleToAllUsers ~f:Boolean.to_value));
         ("Applications",
@@ -4434,9 +5218,33 @@ module Cluster =
         ("StepConcurrencyLevel",
           (Option.map x.stepConcurrencyLevel ~f:Integer.to_value));
         ("PlacementGroups",
-          (Option.map x.placementGroups ~f:PlacementGroupConfigList.to_value))]
+          (Option.map x.placementGroups ~f:PlacementGroupConfigList.to_value));
+        ("OSReleaseLabel", (Option.map x.oSReleaseLabel ~f:String_.to_value));
+        ("EbsRootVolumeIops",
+          (Option.map x.ebsRootVolumeIops ~f:Integer.to_value));
+        ("EbsRootVolumeThroughput",
+          (Option.map x.ebsRootVolumeThroughput ~f:Integer.to_value));
+        ("ExtendedSupport",
+          (Option.map x.extendedSupport ~f:BooleanObject.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let extendedSupport =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "ExtendedSupport") in
+      let ebsRootVolumeThroughput =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "EbsRootVolumeThroughput") in
+      let ebsRootVolumeIops =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "EbsRootVolumeIops") in
+      let oSReleaseLabel =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "OSReleaseLabel") in
       let placementGroups =
         (Option.map ~f:PlacementGroupConfigList.of_xml)
           (Xml.child xml_arg0 "PlacementGroups") in
@@ -4487,6 +5295,9 @@ module Cluster =
       let visibleToAllUsers =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "VisibleToAllUsers") in
+      let unhealthyNodeReplacement =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "UnhealthyNodeReplacement") in
       let terminationProtected =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "TerminationProtected") in
@@ -4515,83 +5326,101 @@ module Cluster =
         (Option.map ~f:ClusterStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?placementGroups ?stepConcurrencyLevel ?outpostArn ?clusterArn
-        ?kerberosAttributes ?repoUpgradeOnBoot ?ebsRootVolumeSize
-        ?customAmiId ?scaleDownBehavior ?autoScalingRole
-        ?securityConfiguration ?configurations ?masterPublicDnsName
-        ?normalizedInstanceHours ?serviceRole ?tags ?applications
-        ?visibleToAllUsers ?terminationProtected ?autoTerminate ?releaseLabel
-        ?runningAmiVersion ?requestedAmiVersion ?logEncryptionKmsKeyId
-        ?logUri ?instanceCollectionType ?ec2InstanceAttributes ?status ?name
-        ?id ()
+      make ?monitoringConfiguration ?extendedSupport ?ebsRootVolumeThroughput
+        ?ebsRootVolumeIops ?oSReleaseLabel ?placementGroups
+        ?stepConcurrencyLevel ?outpostArn ?clusterArn ?kerberosAttributes
+        ?repoUpgradeOnBoot ?ebsRootVolumeSize ?customAmiId ?scaleDownBehavior
+        ?autoScalingRole ?securityConfiguration ?configurations
+        ?masterPublicDnsName ?normalizedInstanceHours ?serviceRole ?tags
+        ?applications ?visibleToAllUsers ?unhealthyNodeReplacement
+        ?terminationProtected ?autoTerminate ?releaseLabel ?runningAmiVersion
+        ?requestedAmiVersion ?logEncryptionKmsKeyId ?logUri
+        ?instanceCollectionType ?ec2InstanceAttributes ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let extendedSupport =
+        field_map json__ "ExtendedSupport" BooleanObject.of_json in
+      let ebsRootVolumeThroughput =
+        field_map json__ "EbsRootVolumeThroughput" Integer.of_json in
+      let ebsRootVolumeIops =
+        field_map json__ "EbsRootVolumeIops" Integer.of_json in
+      let oSReleaseLabel = field_map json__ "OSReleaseLabel" String_.of_json in
       let placementGroups =
-        field_map json "PlacementGroups" PlacementGroupConfigList.of_json in
+        field_map json__ "PlacementGroups" PlacementGroupConfigList.of_json in
       let stepConcurrencyLevel =
-        field_map json "StepConcurrencyLevel" Integer.of_json in
-      let outpostArn = field_map json "OutpostArn" OptionalArnType.of_json in
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
+        field_map json__ "StepConcurrencyLevel" Integer.of_json in
+      let outpostArn = field_map json__ "OutpostArn" OptionalArnType.of_json in
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
       let kerberosAttributes =
-        field_map json "KerberosAttributes" KerberosAttributes.of_json in
+        field_map json__ "KerberosAttributes" KerberosAttributes.of_json in
       let repoUpgradeOnBoot =
-        field_map json "RepoUpgradeOnBoot" RepoUpgradeOnBoot.of_json in
+        field_map json__ "RepoUpgradeOnBoot" RepoUpgradeOnBoot.of_json in
       let ebsRootVolumeSize =
-        field_map json "EbsRootVolumeSize" Integer.of_json in
+        field_map json__ "EbsRootVolumeSize" Integer.of_json in
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
       let scaleDownBehavior =
-        field_map json "ScaleDownBehavior" ScaleDownBehavior.of_json in
+        field_map json__ "ScaleDownBehavior" ScaleDownBehavior.of_json in
       let autoScalingRole =
-        field_map json "AutoScalingRole" XmlString.of_json in
+        field_map json__ "AutoScalingRole" XmlString.of_json in
       let securityConfiguration =
-        field_map json "SecurityConfiguration" XmlString.of_json in
+        field_map json__ "SecurityConfiguration" XmlString.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
       let masterPublicDnsName =
-        field_map json "MasterPublicDnsName" String_.of_json in
+        field_map json__ "MasterPublicDnsName" String_.of_json in
       let normalizedInstanceHours =
-        field_map json "NormalizedInstanceHours" Integer.of_json in
-      let serviceRole = field_map json "ServiceRole" String_.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
+        field_map json__ "NormalizedInstanceHours" Integer.of_json in
+      let serviceRole = field_map json__ "ServiceRole" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let applications =
-        field_map json "Applications" ApplicationList.of_json in
+        field_map json__ "Applications" ApplicationList.of_json in
       let visibleToAllUsers =
-        field_map json "VisibleToAllUsers" Boolean.of_json in
+        field_map json__ "VisibleToAllUsers" Boolean.of_json in
+      let unhealthyNodeReplacement =
+        field_map json__ "UnhealthyNodeReplacement" BooleanObject.of_json in
       let terminationProtected =
-        field_map json "TerminationProtected" Boolean.of_json in
-      let autoTerminate = field_map json "AutoTerminate" Boolean.of_json in
-      let releaseLabel = field_map json "ReleaseLabel" String_.of_json in
+        field_map json__ "TerminationProtected" Boolean.of_json in
+      let autoTerminate = field_map json__ "AutoTerminate" Boolean.of_json in
+      let releaseLabel = field_map json__ "ReleaseLabel" String_.of_json in
       let runningAmiVersion =
-        field_map json "RunningAmiVersion" String_.of_json in
+        field_map json__ "RunningAmiVersion" String_.of_json in
       let requestedAmiVersion =
-        field_map json "RequestedAmiVersion" String_.of_json in
+        field_map json__ "RequestedAmiVersion" String_.of_json in
       let logEncryptionKmsKeyId =
-        field_map json "LogEncryptionKmsKeyId" String_.of_json in
-      let logUri = field_map json "LogUri" String_.of_json in
+        field_map json__ "LogEncryptionKmsKeyId" String_.of_json in
+      let logUri = field_map json__ "LogUri" String_.of_json in
       let instanceCollectionType =
-        field_map json "InstanceCollectionType"
+        field_map json__ "InstanceCollectionType"
           InstanceCollectionType.of_json in
       let ec2InstanceAttributes =
-        field_map json "Ec2InstanceAttributes" Ec2InstanceAttributes.of_json in
-      let status = field_map json "Status" ClusterStatus.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" ClusterId.of_json in
-      make ?placementGroups ?stepConcurrencyLevel ?outpostArn ?clusterArn
-        ?kerberosAttributes ?repoUpgradeOnBoot ?ebsRootVolumeSize
-        ?customAmiId ?scaleDownBehavior ?autoScalingRole
-        ?securityConfiguration ?configurations ?masterPublicDnsName
-        ?normalizedInstanceHours ?serviceRole ?tags ?applications
-        ?visibleToAllUsers ?terminationProtected ?autoTerminate ?releaseLabel
-        ?runningAmiVersion ?requestedAmiVersion ?logEncryptionKmsKeyId
-        ?logUri ?instanceCollectionType ?ec2InstanceAttributes ?status ?name
-        ?id ()
+        field_map json__ "Ec2InstanceAttributes"
+          Ec2InstanceAttributes.of_json in
+      let status = field_map json__ "Status" ClusterStatus.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" ClusterId.of_json in
+      make ?monitoringConfiguration ?extendedSupport ?ebsRootVolumeThroughput
+        ?ebsRootVolumeIops ?oSReleaseLabel ?placementGroups
+        ?stepConcurrencyLevel ?outpostArn ?clusterArn ?kerberosAttributes
+        ?repoUpgradeOnBoot ?ebsRootVolumeSize ?customAmiId ?scaleDownBehavior
+        ?autoScalingRole ?securityConfiguration ?configurations
+        ?masterPublicDnsName ?normalizedInstanceHours ?serviceRole ?tags
+        ?applications ?visibleToAllUsers ?unhealthyNodeReplacement
+        ?terminationProtected ?autoTerminate ?releaseLabel ?runningAmiVersion
+        ?requestedAmiVersion ?logEncryptionKmsKeyId ?logUri
+        ?instanceCollectionType ?ec2InstanceAttributes ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The detailed description of the cluster."]
 module ClusterStateList =
   struct
     type nonrec t = ClusterState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4623,7 +5452,7 @@ module ClusterSummary =
         [@ocaml.doc "The details about the current status of the cluster."];
       normalizedInstanceHours: Integer.t option
         [@ocaml.doc
-          "An approximation of the cost of the cluster, represented in m1.small/hours. This value is incremented one time for every hour an m1.small instance runs. Larger instances are weighted more, so an EC2 instance that is roughly four times more expensive would result in the normalized instance hours being incremented by four. This result is only an approximation and does not reflect the actual billing rate."];
+          "An approximation of the cost of the cluster, represented in m1.small/hours. This value is incremented one time for every hour an m1.small instance runs. Larger instances are weighted more, so an Amazon EC2 instance that is roughly four times more expensive would result in the normalized instance hours being incremented by four. This result is only an approximation and does not reflect the actual billing rate."];
       clusterArn: ArnType.t option
         [@ocaml.doc "The Amazon Resource Name of the cluster."];
       outpostArn: OptionalArnType.t option
@@ -4670,14 +5499,14 @@ module ClusterSummary =
       make ?outpostArn ?clusterArn ?normalizedInstanceHours ?status ?name ?id
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let outpostArn = field_map json "OutpostArn" OptionalArnType.of_json in
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
+    let of_json json__ =
+      let outpostArn = field_map json__ "OutpostArn" OptionalArnType.of_json in
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
       let normalizedInstanceHours =
-        field_map json "NormalizedInstanceHours" Integer.of_json in
-      let status = field_map json "Status" ClusterStatus.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" ClusterId.of_json in
+        field_map json__ "NormalizedInstanceHours" Integer.of_json in
+      let status = field_map json__ "Status" ClusterStatus.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" ClusterId.of_json in
       make ?outpostArn ?clusterArn ?normalizedInstanceHours ?status ?name ?id
         ()
     let to_json v = composed_to_json to_value v
@@ -4686,6 +5515,9 @@ module ClusterSummaryList =
   struct
     type nonrec t = ClusterSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4733,10 +5565,10 @@ module Command =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?args ?scriptPath ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let args = field_map json "Args" StringList.of_json in
-      let scriptPath = field_map json "ScriptPath" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let args = field_map json__ "Args" StringList.of_json in
+      let scriptPath = field_map json__ "ScriptPath" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?args ?scriptPath ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4745,6 +5577,9 @@ module CommandList =
   struct
     type nonrec t = Command.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Command.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4804,16 +5639,16 @@ module ComputeLimits =
           "The unit type used for specifying a managed scaling policy."];
       minimumCapacityUnits: Integer.t
         [@ocaml.doc
-          "The lower boundary of EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. Managed scaling activities are not allowed beyond this boundary. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."];
+          "The lower boundary of Amazon EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. Managed scaling activities are not allowed beyond this boundary. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."];
       maximumCapacityUnits: Integer.t
         [@ocaml.doc
-          "The upper boundary of EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. Managed scaling activities are not allowed beyond this boundary. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."];
+          "The upper boundary of Amazon EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. Managed scaling activities are not allowed beyond this boundary. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."];
       maximumOnDemandCapacityUnits: Integer.t option
         [@ocaml.doc
-          "The upper boundary of On-Demand EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. The On-Demand units are not allowed to scale beyond this boundary. The parameter is used to split capacity allocation between On-Demand and Spot Instances."];
+          "The upper boundary of On-Demand Amazon EC2 units. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. The On-Demand units are not allowed to scale beyond this boundary. The parameter is used to split capacity allocation between On-Demand and Spot Instances."];
       maximumCoreCapacityUnits: Integer.t option
         [@ocaml.doc
-          "The upper boundary of EC2 units for core node type in a cluster. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. The core units are not allowed to scale beyond this boundary. The parameter is used to split capacity allocation between core and task nodes."]}
+          "The upper boundary of Amazon EC2 units for core node type in a cluster. It is measured through vCPU cores or instances for instance groups and measured through units for instance fleets. The core units are not allowed to scale beyond this boundary. The parameter is used to split capacity allocation between core and task nodes."]}
     let context_ = "ComputeLimits"
     let make ?maximumOnDemandCapacityUnits =
       fun ?maximumCoreCapacityUnits ->
@@ -4859,72 +5694,157 @@ module ComputeLimits =
       make ?maximumCoreCapacityUnits ?maximumOnDemandCapacityUnits
         ~maximumCapacityUnits ~minimumCapacityUnits ~unitType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let maximumCoreCapacityUnits =
-        field_map json "MaximumCoreCapacityUnits" Integer.of_json in
+        field_map json__ "MaximumCoreCapacityUnits" Integer.of_json in
       let maximumOnDemandCapacityUnits =
-        field_map json "MaximumOnDemandCapacityUnits" Integer.of_json in
+        field_map json__ "MaximumOnDemandCapacityUnits" Integer.of_json in
       let maximumCapacityUnits =
-        field_map_exn json "MaximumCapacityUnits" Integer.of_json in
+        field_map_exn json__ "MaximumCapacityUnits" Integer.of_json in
       let minimumCapacityUnits =
-        field_map_exn json "MinimumCapacityUnits" Integer.of_json in
+        field_map_exn json__ "MinimumCapacityUnits" Integer.of_json in
       let unitType =
-        field_map_exn json "UnitType" ComputeLimitsUnitType.of_json in
+        field_map_exn json__ "UnitType" ComputeLimitsUnitType.of_json in
       make ?maximumCoreCapacityUnits ?maximumOnDemandCapacityUnits
         ~maximumCapacityUnits ~minimumCapacityUnits ~unitType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The EC2 unit limits for a managed scaling policy. The managed scaling activity of a cluster can not be above or below these limits. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
-module CreateSecurityConfigurationInput =
+       "The Amazon EC2 unit limits for a managed scaling policy. The managed scaling activity of a cluster can not be above or below these limits. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
+module ProfilerType =
+  struct
+    type nonrec t =
+      | SHS 
+      | TEZUI 
+      | YTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SHS -> "SHS"
+      | TEZUI -> "TEZUI"
+      | YTS -> "YTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SHS" -> SHS
+      | "TEZUI" -> TEZUI
+      | "YTS" -> YTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ProfilerType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ProfilerType" j)
+    let to_json = simple_to_json to_value
+  end
+module EMRContainersConfig =
   struct
     type nonrec t =
       {
-      name: XmlString.t
-        [@ocaml.doc "The name of the security configuration."];
-      securityConfiguration: String_.t
-        [@ocaml.doc
-          "The security configuration details in JSON format. For JSON parameters and examples, see Use Security Configurations to Set Up Cluster Security in the Amazon EMR Management Guide."]}
-    let context_ = "CreateSecurityConfigurationInput"
-    let make ~name =
-      fun ~securityConfiguration -> fun () -> { name; securityConfiguration }
+      jobRunId: XmlStringMaxLen256.t option
+        [@ocaml.doc "The Job run ID for the container configuration."]}
+    let make ?jobRunId = fun () -> { jobRunId }
     let to_value x =
       structure_to_value
-        [("Name", (Some (XmlString.to_value x.name)));
-        ("SecurityConfiguration",
-          (Some (String_.to_value x.securityConfiguration)))]
+        [("JobRunId", (Option.map x.jobRunId ~f:XmlStringMaxLen256.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let securityConfiguration =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SecurityConfiguration") in
-      let name =
-        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~securityConfiguration ~name ()
+      let jobRunId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "JobRunId") in
+      make ?jobRunId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let securityConfiguration =
-        field_map_exn json "SecurityConfiguration" String_.of_json in
-      let name = field_map_exn json "Name" XmlString.of_json in
-      make ~securityConfiguration ~name ()
+    let of_json json__ =
+      let jobRunId = field_map json__ "JobRunId" XmlStringMaxLen256.of_json in
+      make ?jobRunId ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "Creates a security configuration, which is stored in the service and can be specified when a cluster is created."]
-module CreateSecurityConfigurationOutput =
+  end[@@ocaml.doc "The EMR container configuration."]
+module CreatePersistentAppUIInput =
   struct
     type nonrec t =
       {
-      name: XmlString.t
-        [@ocaml.doc "The name of the security configuration."];
-      creationDateTime: Date.t
+      targetResourceArn: ArnType.t
         [@ocaml.doc
-          "The date and time the security configuration was created."]}
+          "The unique Amazon Resource Name (ARN) of the target resource."];
+      eMRContainersConfig: EMRContainersConfig.t option
+        [@ocaml.doc "The EMR containers configuration."];
+      tags: TagList.t option
+        [@ocaml.doc "Tags for the persistent application user interface."];
+      xReferer: String_.t option
+        [@ocaml.doc
+          "The cross reference for the persistent application user interface."];
+      profilerType: ProfilerType.t option
+        [@ocaml.doc
+          "The profiler type for the persistent application user interface."]}
+    let context_ = "CreatePersistentAppUIInput"
+    let make ?eMRContainersConfig =
+      fun ?tags ->
+        fun ?xReferer ->
+          fun ?profilerType ->
+            fun ~targetResourceArn ->
+              fun () ->
+                {
+                  eMRContainersConfig;
+                  tags;
+                  xReferer;
+                  profilerType;
+                  targetResourceArn
+                }
+    let to_value x =
+      structure_to_value
+        [("TargetResourceArn", (Some (ArnType.to_value x.targetResourceArn)));
+        ("EMRContainersConfig",
+          (Option.map x.eMRContainersConfig ~f:EMRContainersConfig.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("XReferer", (Option.map x.xReferer ~f:String_.to_value));
+        ("ProfilerType",
+          (Option.map x.profilerType ~f:ProfilerType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let profilerType =
+        (Option.map ~f:ProfilerType.of_xml)
+          (Xml.child xml_arg0 "ProfilerType") in
+      let xReferer =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "XReferer") in
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let eMRContainersConfig =
+        (Option.map ~f:EMRContainersConfig.of_xml)
+          (Xml.child xml_arg0 "EMRContainersConfig") in
+      let targetResourceArn =
+        ArnType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "TargetResourceArn") in
+      make ?profilerType ?xReferer ?tags ?eMRContainersConfig
+        ~targetResourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let profilerType = field_map json__ "ProfilerType" ProfilerType.of_json in
+      let xReferer = field_map json__ "XReferer" String_.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let eMRContainersConfig =
+        field_map json__ "EMRContainersConfig" EMRContainersConfig.of_json in
+      let targetResourceArn =
+        field_map_exn json__ "TargetResourceArn" ArnType.of_json in
+      make ?profilerType ?xReferer ?tags ?eMRContainersConfig
+        ~targetResourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a persistent application user interface."]
+module CreatePersistentAppUIOutput =
+  struct
+    type nonrec t =
+      {
+      persistentAppUIId: XmlStringMaxLen256.t option
+        [@ocaml.doc "The persistent application user interface identifier."];
+      runtimeRoleEnabledCluster: Boolean.t option
+        [@ocaml.doc
+          "Represents if the EMR on EC2 cluster that the persisent application user interface is created for is a runtime role enabled cluster or not."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateSecurityConfigurationOutput"
-    let make ~name =
-      fun ~creationDateTime -> fun () -> { name; creationDateTime }
+    let make ?persistentAppUIId =
+      fun ?runtimeRoleEnabledCluster ->
+        fun () -> { persistentAppUIId; runtimeRoleEnabledCluster }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -4959,22 +5879,125 @@ module CreateSecurityConfigurationOutput =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
+        [("PersistentAppUIId",
+           (Option.map x.persistentAppUIId ~f:XmlStringMaxLen256.to_value));
+        ("RuntimeRoleEnabledCluster",
+          (Option.map x.runtimeRoleEnabledCluster ~f:Boolean.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let runtimeRoleEnabledCluster =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "RuntimeRoleEnabledCluster") in
+      let persistentAppUIId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUIId") in
+      make ?runtimeRoleEnabledCluster ?persistentAppUIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let runtimeRoleEnabledCluster =
+        field_map json__ "RuntimeRoleEnabledCluster" Boolean.of_json in
+      let persistentAppUIId =
+        field_map json__ "PersistentAppUIId" XmlStringMaxLen256.of_json in
+      make ?runtimeRoleEnabledCluster ?persistentAppUIId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Creates a persistent application user interface."]
+module CreateSecurityConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      name: XmlString.t
+        [@ocaml.doc "The name of the security configuration."];
+      securityConfiguration: String_.t
+        [@ocaml.doc
+          "The security configuration details in JSON format. For JSON parameters and examples, see Use Security Configurations to Set Up Cluster Security in the Amazon EMR Management Guide."]}
+    let context_ = "CreateSecurityConfigurationInput"
+    let make ~name =
+      fun ~securityConfiguration -> fun () -> { name; securityConfiguration }
+    let to_value x =
+      structure_to_value
         [("Name", (Some (XmlString.to_value x.name)));
-        ("CreationDateTime", (Some (Date.to_value x.creationDateTime)))]
+        ("SecurityConfiguration",
+          (Some (String_.to_value x.securityConfiguration)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let securityConfiguration =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SecurityConfiguration") in
+      let name =
+        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+      make ~securityConfiguration ~name ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let securityConfiguration =
+        field_map_exn json__ "SecurityConfiguration" String_.of_json in
+      let name = field_map_exn json__ "Name" XmlString.of_json in
+      make ~securityConfiguration ~name ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a security configuration, which is stored in the service and can be specified when a cluster is created."]
+module CreateSecurityConfigurationOutput =
+  struct
+    type nonrec t =
+      {
+      name: XmlString.t option
+        [@ocaml.doc "The name of the security configuration."];
+      creationDateTime: Date.t option
+        [@ocaml.doc
+          "The date and time the security configuration was created."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?name =
+      fun ?creationDateTime -> fun () -> { name; creationDateTime }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Name", (Option.map x.name ~f:XmlString.to_value));
+        ("CreationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let creationDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDateTime") in
-      let name =
-        XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ~creationDateTime ~name ()
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
+      let name = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Name") in
+      make ?creationDateTime ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDateTime =
-        field_map_exn json "CreationDateTime" Date.of_json in
-      let name = field_map_exn json "Name" XmlString.of_json in
-      make ~creationDateTime ~name ()
+    let of_json json__ =
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let name = field_map json__ "Name" XmlString.of_json in
+      make ?creationDateTime ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Creates a security configuration, which is stored in the service and can be specified when a cluster is created."]
@@ -4982,6 +6005,9 @@ module SubnetIdList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5002,6 +6028,32 @@ module SubnetIdList =
       list_of_json ~kind:"SubnetIdList" ~of_json:String_.of_json j
     let to_json v = composed_to_json to_value v
   end
+module IdcUserAssignment =
+  struct
+    type nonrec t =
+      | REQUIRED 
+      | OPTIONAL 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | REQUIRED -> "REQUIRED"
+      | OPTIONAL -> "OPTIONAL"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "REQUIRED" -> REQUIRED
+      | "OPTIONAL" -> OPTIONAL
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration IdcUserAssignment" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"IdcUserAssignment" j)
+    let to_json = simple_to_json to_value
+  end
 module CreateStudioInput =
   struct
     type nonrec t =
@@ -5012,7 +6064,7 @@ module CreateStudioInput =
         [@ocaml.doc "A detailed description of the Amazon EMR Studio."];
       authMode: AuthMode.t
         [@ocaml.doc
-          "Specifies whether the Studio authenticates users using IAM or Amazon Web Services SSO."];
+          "Specifies whether the Studio authenticates users using IAM or IAM Identity Center."];
       vpcId: XmlStringMaxLen256.t
         [@ocaml.doc
           "The ID of the Amazon Virtual Private Cloud (Amazon VPC) to associate with the Studio."];
@@ -5024,7 +6076,7 @@ module CreateStudioInput =
           "The IAM role that the Amazon EMR Studio assumes. The service role provides a way for Amazon EMR Studio to interoperate with other Amazon Web Services services."];
       userRole: XmlString.t option
         [@ocaml.doc
-          "The IAM user role that users and groups assume when logged in to an Amazon EMR Studio. Only specify a UserRole when you use Amazon Web Services SSO authentication. The permissions attached to the UserRole can be scoped down for each user or group using session policies."];
+          "The IAM user role that users and groups assume when logged in to an Amazon EMR Studio. Only specify a UserRole when you use IAM Identity Center authentication. The permissions attached to the UserRole can be scoped down for each user or group using session policies."];
       workspaceSecurityGroupId: XmlStringMaxLen256.t
         [@ocaml.doc
           "The ID of the Amazon EMR Studio Workspace security group. The Workspace security group allows outbound network traffic to resources in the Engine security group, and it must be in the same VPC specified by VpcId."];
@@ -5042,37 +6094,57 @@ module CreateStudioInput =
           "The name that your identity provider (IdP) uses for its RelayState parameter. For example, RelayState or TargetSource. Specify this value when you use IAM authentication and want to let federated users log in to a Studio using the Studio URL. The RelayState parameter differs by IdP."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags to associate with the Amazon EMR Studio. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters, and an optional value string with a maximum of 256 characters."]}
+          "A list of tags to associate with the Amazon EMR Studio. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters, and an optional value string with a maximum of 256 characters."];
+      trustedIdentityPropagationEnabled: BooleanObject.t option
+        [@ocaml.doc
+          "A Boolean indicating whether to enable Trusted identity propagation for the Studio. The default value is false."];
+      idcUserAssignment: IdcUserAssignment.t option
+        [@ocaml.doc
+          "Specifies whether IAM Identity Center user assignment is REQUIRED or OPTIONAL. If the value is set to REQUIRED, users must be explicitly assigned to the Studio application to access the Studio."];
+      idcInstanceArn: ArnType.t option
+        [@ocaml.doc
+          "The ARN of the IAM Identity Center instance to create the Studio application."];
+      encryptionKeyArn: XmlString.t option
+        [@ocaml.doc
+          "The KMS key identifier (ARN) used to encrypt Amazon EMR Studio workspace and notebook files when backed up to Amazon S3."]}
     let context_ = "CreateStudioInput"
     let make ?description =
       fun ?userRole ->
         fun ?idpAuthUrl ->
           fun ?idpRelayStateParameterName ->
             fun ?tags ->
-              fun ~name ->
-                fun ~authMode ->
-                  fun ~vpcId ->
-                    fun ~subnetIds ->
-                      fun ~serviceRole ->
-                        fun ~workspaceSecurityGroupId ->
-                          fun ~engineSecurityGroupId ->
-                            fun ~defaultS3Location ->
-                              fun () ->
-                                {
-                                  description;
-                                  userRole;
-                                  idpAuthUrl;
-                                  idpRelayStateParameterName;
-                                  tags;
-                                  name;
-                                  authMode;
-                                  vpcId;
-                                  subnetIds;
-                                  serviceRole;
-                                  workspaceSecurityGroupId;
-                                  engineSecurityGroupId;
-                                  defaultS3Location
-                                }
+              fun ?trustedIdentityPropagationEnabled ->
+                fun ?idcUserAssignment ->
+                  fun ?idcInstanceArn ->
+                    fun ?encryptionKeyArn ->
+                      fun ~name ->
+                        fun ~authMode ->
+                          fun ~vpcId ->
+                            fun ~subnetIds ->
+                              fun ~serviceRole ->
+                                fun ~workspaceSecurityGroupId ->
+                                  fun ~engineSecurityGroupId ->
+                                    fun ~defaultS3Location ->
+                                      fun () ->
+                                        {
+                                          description;
+                                          userRole;
+                                          idpAuthUrl;
+                                          idpRelayStateParameterName;
+                                          tags;
+                                          trustedIdentityPropagationEnabled;
+                                          idcUserAssignment;
+                                          idcInstanceArn;
+                                          encryptionKeyArn;
+                                          name;
+                                          authMode;
+                                          vpcId;
+                                          subnetIds;
+                                          serviceRole;
+                                          workspaceSecurityGroupId;
+                                          engineSecurityGroupId;
+                                          defaultS3Location
+                                        }
     let to_value x =
       structure_to_value
         [("Name", (Some (XmlStringMaxLen256.to_value x.name)));
@@ -5093,9 +6165,28 @@ module CreateStudioInput =
         ("IdpRelayStateParameterName",
           (Option.map x.idpRelayStateParameterName
              ~f:XmlStringMaxLen256.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("TrustedIdentityPropagationEnabled",
+          (Option.map x.trustedIdentityPropagationEnabled
+             ~f:BooleanObject.to_value));
+        ("IdcUserAssignment",
+          (Option.map x.idcUserAssignment ~f:IdcUserAssignment.to_value));
+        ("IdcInstanceArn", (Option.map x.idcInstanceArn ~f:ArnType.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let idcInstanceArn =
+        (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "IdcInstanceArn") in
+      let idcUserAssignment =
+        (Option.map ~f:IdcUserAssignment.of_xml)
+          (Xml.child xml_arg0 "IdcUserAssignment") in
+      let trustedIdentityPropagationEnabled =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "TrustedIdentityPropagationEnabled") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let idpRelayStateParameterName =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
@@ -5131,34 +6222,47 @@ module CreateStudioInput =
       let name =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?tags ?idpRelayStateParameterName ?idpAuthUrl ~defaultS3Location
-        ~engineSecurityGroupId ~workspaceSecurityGroupId ?userRole
-        ~serviceRole ~subnetIds ~vpcId ~authMode ?description ~name ()
+      make ?encryptionKeyArn ?idcInstanceArn ?idcUserAssignment
+        ?trustedIdentityPropagationEnabled ?tags ?idpRelayStateParameterName
+        ?idpAuthUrl ~defaultS3Location ~engineSecurityGroupId
+        ~workspaceSecurityGroupId ?userRole ~serviceRole ~subnetIds ~vpcId
+        ~authMode ?description ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" XmlString.of_json in
+      let idcInstanceArn = field_map json__ "IdcInstanceArn" ArnType.of_json in
+      let idcUserAssignment =
+        field_map json__ "IdcUserAssignment" IdcUserAssignment.of_json in
+      let trustedIdentityPropagationEnabled =
+        field_map json__ "TrustedIdentityPropagationEnabled"
+          BooleanObject.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let idpRelayStateParameterName =
-        field_map json "IdpRelayStateParameterName"
+        field_map json__ "IdpRelayStateParameterName"
           XmlStringMaxLen256.of_json in
-      let idpAuthUrl = field_map json "IdpAuthUrl" XmlString.of_json in
+      let idpAuthUrl = field_map json__ "IdpAuthUrl" XmlString.of_json in
       let defaultS3Location =
-        field_map_exn json "DefaultS3Location" XmlString.of_json in
+        field_map_exn json__ "DefaultS3Location" XmlString.of_json in
       let engineSecurityGroupId =
-        field_map_exn json "EngineSecurityGroupId" XmlStringMaxLen256.of_json in
-      let workspaceSecurityGroupId =
-        field_map_exn json "WorkspaceSecurityGroupId"
+        field_map_exn json__ "EngineSecurityGroupId"
           XmlStringMaxLen256.of_json in
-      let userRole = field_map json "UserRole" XmlString.of_json in
-      let serviceRole = field_map_exn json "ServiceRole" XmlString.of_json in
-      let subnetIds = field_map_exn json "SubnetIds" SubnetIdList.of_json in
-      let vpcId = field_map_exn json "VpcId" XmlStringMaxLen256.of_json in
-      let authMode = field_map_exn json "AuthMode" AuthMode.of_json in
+      let workspaceSecurityGroupId =
+        field_map_exn json__ "WorkspaceSecurityGroupId"
+          XmlStringMaxLen256.of_json in
+      let userRole = field_map json__ "UserRole" XmlString.of_json in
+      let serviceRole = field_map_exn json__ "ServiceRole" XmlString.of_json in
+      let subnetIds = field_map_exn json__ "SubnetIds" SubnetIdList.of_json in
+      let vpcId = field_map_exn json__ "VpcId" XmlStringMaxLen256.of_json in
+      let authMode = field_map_exn json__ "AuthMode" AuthMode.of_json in
       let description =
-        field_map json "Description" XmlStringMaxLen256.of_json in
-      let name = field_map_exn json "Name" XmlStringMaxLen256.of_json in
-      make ?tags ?idpRelayStateParameterName ?idpAuthUrl ~defaultS3Location
-        ~engineSecurityGroupId ~workspaceSecurityGroupId ?userRole
-        ~serviceRole ~subnetIds ~vpcId ~authMode ?description ~name ()
+        field_map json__ "Description" XmlStringMaxLen256.of_json in
+      let name = field_map_exn json__ "Name" XmlStringMaxLen256.of_json in
+      make ?encryptionKeyArn ?idcInstanceArn ?idcUserAssignment
+        ?trustedIdentityPropagationEnabled ?tags ?idpRelayStateParameterName
+        ?idpAuthUrl ~defaultS3Location ~engineSecurityGroupId
+        ~workspaceSecurityGroupId ?userRole ~serviceRole ~subnetIds ~vpcId
+        ~authMode ?description ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new Amazon EMR Studio."]
 module CreateStudioOutput =
@@ -5217,9 +6321,9 @@ module CreateStudioOutput =
           (Xml.child xml_arg0 "StudioId") in
       make ?url ?studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let url = field_map json "Url" XmlString.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let url = field_map json__ "Url" XmlString.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
       make ?url ?studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a new Amazon EMR Studio."]
@@ -5251,16 +6355,16 @@ module CreateStudioSessionMappingInput =
           "The ID of the Amazon EMR Studio to which the user or group will be mapped."];
       identityId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The globally unique identifier (GUID) of the user or group from the Amazon Web Services SSO Identity Store. For more information, see UserId and GroupId in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified, but not both."];
+          "The globally unique identifier (GUID) of the user or group from the IAM Identity Center Identity Store. For more information, see UserId and GroupId in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified, but not both."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user or group. For more information, see UserName and DisplayName in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified, but not both."];
+          "The name of the user or group. For more information, see UserName and DisplayName in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified, but not both."];
       identityType: IdentityType.t
         [@ocaml.doc
           "Specifies whether the identity to map to the Amazon EMR Studio is a user or a group."];
       sessionPolicyArn: XmlStringMaxLen256.t
         [@ocaml.doc
-          "The Amazon Resource Name (ARN) for the session policy that will be applied to the user or group. You should specify the ARN for the session policy that you want to apply, not the ARN of your user role. For more information, see Create an EMR Studio User Role with Session Policies."]}
+          "The Amazon Resource Name (ARN) for the session policy that will be applied to the user or group. You should specify the ARN for the session policy that you want to apply, not the ARN of your user role. For more information, see Create an Amazon EMR Studio User Role with Session Policies."]}
     let context_ = "CreateStudioSessionMappingInput"
     let make ?identityId =
       fun ?identityName ->
@@ -5305,20 +6409,80 @@ module CreateStudioSessionMappingInput =
       make ~sessionPolicyArn ~identityType ?identityName ?identityId
         ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionPolicyArn =
-        field_map_exn json "SessionPolicyArn" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "SessionPolicyArn" XmlStringMaxLen256.of_json in
       let identityType =
-        field_map_exn json "IdentityType" IdentityType.of_json in
+        field_map_exn json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~sessionPolicyArn ~identityType ?identityName ?identityId
         ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Maps a user or group to the Amazon EMR Studio specified by StudioId, and applies a session policy to refine Studio permissions for that user or group. Use CreateStudioSessionMapping to assign users to a Studio when you use Amazon Web Services SSO authentication. For instructions on how to assign users to a Studio when you use IAM authentication, see Assign a user or group to your EMR Studio."]
+       "Maps a user or group to the Amazon EMR Studio specified by StudioId, and applies a session policy to refine Studio permissions for that user or group. Use CreateStudioSessionMapping to assign users to a Studio when you use IAM Identity Center authentication. For instructions on how to assign users to a Studio when you use IAM authentication, see Assign a user or group to your EMR Studio."]
+module UsernamePassword =
+  struct
+    type nonrec t =
+      {
+      username: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The username associated with the temporary credentials that you use to connect to cluster endpoints."];
+      password: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The password associated with the temporary credentials that you use to connect to cluster endpoints."]}
+    let make ?username = fun ?password -> fun () -> { username; password }
+    let to_value x =
+      structure_to_value
+        [("Username", (Option.map x.username ~f:XmlStringMaxLen256.to_value));
+        ("Password", (Option.map x.password ~f:XmlStringMaxLen256.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let password =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Password") in
+      let username =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Username") in
+      make ?password ?username ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let password = field_map json__ "Password" XmlStringMaxLen256.of_json in
+      let username = field_map json__ "Username" XmlStringMaxLen256.of_json in
+      make ?password ?username ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The username and password that you use to connect to cluster endpoints."]
+module Credentials =
+  struct
+    type nonrec t =
+      {
+      usernamePassword: UsernamePassword.t option
+        [@ocaml.doc
+          "The username and password that you use to connect to cluster endpoints."]}
+    let make ?usernamePassword = fun () -> { usernamePassword }
+    let to_value x =
+      structure_to_value
+        [("UsernamePassword",
+           (Option.map x.usernamePassword ~f:UsernamePassword.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let usernamePassword =
+        (Option.map ~f:UsernamePassword.of_xml)
+          (Xml.child xml_arg0 "UsernamePassword") in
+      make ?usernamePassword ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let usernamePassword =
+        field_map json__ "UsernamePassword" UsernamePassword.of_json in
+      make ?usernamePassword ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The credentials that you can use to connect to cluster endpoints. Credentials consist of a username and a password."]
 module DeleteSecurityConfigurationInput =
   struct
     type nonrec t =
@@ -5335,8 +6499,9 @@ module DeleteSecurityConfigurationInput =
         XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" XmlString.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" XmlString.of_json in
+      make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a security configuration."]
 module DeleteSecurityConfigurationOutput =
@@ -5405,8 +6570,9 @@ module DeleteStudioInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StudioId") in
       make ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5419,10 +6585,10 @@ module DeleteStudioSessionMappingInput =
         [@ocaml.doc "The ID of the Amazon EMR Studio."];
       identityId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The globally unique identifier (GUID) of the user or group to remove from the Amazon EMR Studio. For more information, see UserId and GroupId in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The globally unique identifier (GUID) of the user or group to remove from the Amazon EMR Studio. For more information, see UserId and GroupId in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user name or group to remove from the Amazon EMR Studio. For more information, see UserName and DisplayName in the Amazon Web Services SSO Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The name of the user name or group to remove from the Amazon EMR Studio. For more information, see UserName and DisplayName in the IAM Identity Center Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityType: IdentityType.t
         [@ocaml.doc
           "Specifies whether the identity to delete from the Amazon EMR Studio is a user or a group."]}
@@ -5456,13 +6622,15 @@ module DeleteStudioSessionMappingInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StudioId") in
       make ~identityType ?identityName ?identityId ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityType =
-        field_map_exn json "IdentityType" IdentityType.of_json in
+        field_map_exn json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~identityType ?identityName ?identityId ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a user or group from an Amazon EMR Studio."]
@@ -5484,8 +6652,8 @@ module DescribeClusterInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This input determines which cluster to describe."]
@@ -5542,8 +6710,8 @@ module DescribeClusterOutput =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This output contains the description of the cluster."]
@@ -5596,6 +6764,9 @@ module JobFlowExecutionStateList =
   struct
     type nonrec t = JobFlowExecutionState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobFlowExecutionState.to_value)) |>
         (fun x -> `List x)
@@ -5661,12 +6832,12 @@ module DescribeJobFlowsInput =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedAfter") in
       make ?jobFlowStates ?jobFlowIds ?createdBefore ?createdAfter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let jobFlowStates =
-        field_map json "JobFlowStates" JobFlowExecutionStateList.of_json in
-      let jobFlowIds = field_map json "JobFlowIds" XmlStringList.of_json in
-      let createdBefore = field_map json "CreatedBefore" Date.of_json in
-      let createdAfter = field_map json "CreatedAfter" Date.of_json in
+        field_map json__ "JobFlowStates" JobFlowExecutionStateList.of_json in
+      let jobFlowIds = field_map json__ "JobFlowIds" XmlStringList.of_json in
+      let createdBefore = field_map json__ "CreatedBefore" Date.of_json in
+      let createdAfter = field_map json__ "CreatedAfter" Date.of_json in
       make ?jobFlowStates ?jobFlowIds ?createdBefore ?createdAfter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input for the DescribeJobFlows operation."]
@@ -5674,6 +6845,9 @@ module SupportedProductsList =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5740,8 +6914,9 @@ module StepExecutionStatusDetail =
   struct
     type nonrec t =
       {
-      state: StepExecutionState.t [@ocaml.doc "The state of the step."];
-      creationDateTime: Date.t
+      state: StepExecutionState.t option
+        [@ocaml.doc "The state of the step."];
+      creationDateTime: Date.t option
         [@ocaml.doc "The creation date and time of the step."];
       startDateTime: Date.t option
         [@ocaml.doc "The start date and time of the step."];
@@ -5749,24 +6924,24 @@ module StepExecutionStatusDetail =
         [@ocaml.doc "The completion date and time of the step."];
       lastStateChangeReason: XmlString.t option
         [@ocaml.doc "A description of the step's current state."]}
-    let context_ = "StepExecutionStatusDetail"
-    let make ?startDateTime =
-      fun ?endDateTime ->
-        fun ?lastStateChangeReason ->
-          fun ~state ->
-            fun ~creationDateTime ->
+    let make ?state =
+      fun ?creationDateTime ->
+        fun ?startDateTime ->
+          fun ?endDateTime ->
+            fun ?lastStateChangeReason ->
               fun () ->
                 {
+                  state;
+                  creationDateTime;
                   startDateTime;
                   endDateTime;
-                  lastStateChangeReason;
-                  state;
-                  creationDateTime
+                  lastStateChangeReason
                 }
     let to_value x =
       structure_to_value
-        [("State", (Some (StepExecutionState.to_value x.state)));
-        ("CreationDateTime", (Some (Date.to_value x.creationDateTime)));
+        [("State", (Option.map x.state ~f:StepExecutionState.to_value));
+        ("CreationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
         ("StartDateTime", (Option.map x.startDateTime ~f:Date.to_value));
         ("EndDateTime", (Option.map x.endDateTime ~f:Date.to_value));
         ("LastStateChangeReason",
@@ -5781,58 +6956,55 @@ module StepExecutionStatusDetail =
       let startDateTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartDateTime") in
       let creationDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDateTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       let state =
-        StepExecutionState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:StepExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
       make ?lastStateChangeReason ?endDateTime ?startDateTime
-        ~creationDateTime ~state ()
+        ?creationDateTime ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastStateChangeReason =
-        field_map json "LastStateChangeReason" XmlString.of_json in
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let startDateTime = field_map json "StartDateTime" Date.of_json in
-      let creationDateTime =
-        field_map_exn json "CreationDateTime" Date.of_json in
-      let state = field_map_exn json "State" StepExecutionState.of_json in
+        field_map json__ "LastStateChangeReason" XmlString.of_json in
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let state = field_map json__ "State" StepExecutionState.of_json in
       make ?lastStateChangeReason ?endDateTime ?startDateTime
-        ~creationDateTime ~state ()
+        ?creationDateTime ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The execution state of a step."]
 module StepDetail =
   struct
     type nonrec t =
       {
-      stepConfig: StepConfig.t [@ocaml.doc "The step configuration."];
-      executionStatusDetail: StepExecutionStatusDetail.t
+      stepConfig: StepConfig.t option [@ocaml.doc "The step configuration."];
+      executionStatusDetail: StepExecutionStatusDetail.t option
         [@ocaml.doc "The description of the step status."]}
-    let context_ = "StepDetail"
-    let make ~stepConfig =
-      fun ~executionStatusDetail ->
+    let make ?stepConfig =
+      fun ?executionStatusDetail ->
         fun () -> { stepConfig; executionStatusDetail }
     let to_value x =
       structure_to_value
-        [("StepConfig", (Some (StepConfig.to_value x.stepConfig)));
+        [("StepConfig", (Option.map x.stepConfig ~f:StepConfig.to_value));
         ("ExecutionStatusDetail",
-          (Some (StepExecutionStatusDetail.to_value x.executionStatusDetail)))]
+          (Option.map x.executionStatusDetail
+             ~f:StepExecutionStatusDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let executionStatusDetail =
-        StepExecutionStatusDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionStatusDetail") in
+        (Option.map ~f:StepExecutionStatusDetail.of_xml)
+          (Xml.child xml_arg0 "ExecutionStatusDetail") in
       let stepConfig =
-        StepConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "StepConfig") in
-      make ~executionStatusDetail ~stepConfig ()
+        (Option.map ~f:StepConfig.of_xml) (Xml.child xml_arg0 "StepConfig") in
+      make ?executionStatusDetail ?stepConfig ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let executionStatusDetail =
-        field_map_exn json "ExecutionStatusDetail"
+        field_map json__ "ExecutionStatusDetail"
           StepExecutionStatusDetail.of_json in
-      let stepConfig = field_map_exn json "StepConfig" StepConfig.of_json in
-      make ~executionStatusDetail ~stepConfig ()
+      let stepConfig = field_map json__ "StepConfig" StepConfig.of_json in
+      make ?executionStatusDetail ?stepConfig ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Combines the execution state and configuration of a step."]
@@ -5840,6 +7012,9 @@ module StepDetailList =
   struct
     type nonrec t = StepDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -5869,7 +7044,7 @@ module PlacementType =
           "The Amazon EC2 Availability Zone for the cluster. AvailabilityZone is used for uniform instance groups, while AvailabilityZones (plural) is used for instance fleets."];
       availabilityZones: XmlStringMaxLen256List.t option
         [@ocaml.doc
-          "When multiple Availability Zones are specified, Amazon EMR evaluates them and launches instances in the optimal Availability Zone. AvailabilityZones is used for instance fleets, while AvailabilityZone (singular) is used for uniform instance groups. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]}
+          "When multiple Availability Zones are specified, Amazon EMR evaluates them and launches instances in the optimal Availability Zone. AvailabilityZones is used for instance fleets, while AvailabilityZone (singular) is used for uniform instance groups. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]}
     let make ?availabilityZone =
       fun ?availabilityZones ->
         fun () -> { availabilityZone; availabilityZones }
@@ -5889,11 +7064,11 @@ module PlacementType =
           (Xml.child xml_arg0 "AvailabilityZone") in
       make ?availabilityZones ?availabilityZone ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availabilityZones =
-        field_map json "AvailabilityZones" XmlStringMaxLen256List.of_json in
+        field_map json__ "AvailabilityZones" XmlStringMaxLen256List.of_json in
       let availabilityZone =
-        field_map json "AvailabilityZone" XmlString.of_json in
+        field_map json__ "AvailabilityZone" XmlString.of_json in
       make ?availabilityZones ?availabilityZone ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5959,26 +7134,27 @@ module InstanceGroupDetail =
         [@ocaml.doc "Unique identifier for the instance group."];
       name: XmlStringMaxLen256.t option
         [@ocaml.doc "Friendly name for the instance group."];
-      market: MarketType.t
+      market: MarketType.t option
         [@ocaml.doc
-          "Market type of the EC2 instances used to create a cluster node."];
-      instanceRole: InstanceRoleType.t
+          "Market type of the Amazon EC2 instances used to create a cluster node."];
+      instanceRole: InstanceRoleType.t option
         [@ocaml.doc "Instance group role in the cluster"];
       bidPrice: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "If specified, indicates that the instance group uses Spot Instances. This is the maximum price you are willing to pay for Spot Instances. Specify OnDemandPrice to set the amount equal to the On-Demand price, or specify an amount in USD."];
-      instanceType: InstanceType.t [@ocaml.doc "EC2 instance type."];
-      instanceRequestCount: Integer.t
+          "The bid price for each Amazon EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
+      instanceType: InstanceType.t option
+        [@ocaml.doc "Amazon EC2 instance type."];
+      instanceRequestCount: Integer.t option
         [@ocaml.doc
           "Target number of instances to run in the instance group."];
-      instanceRunningCount: Integer.t
+      instanceRunningCount: Integer.t option
         [@ocaml.doc "Actual count of running instances."];
-      state: InstanceGroupState.t
+      state: InstanceGroupState.t option
         [@ocaml.doc
           "State of instance group. The following values are no longer supported: STARTING, TERMINATED, and FAILED."];
       lastStateChangeReason: XmlString.t option
         [@ocaml.doc "Details regarding the state of the instance group."];
-      creationDateTime: Date.t
+      creationDateTime: Date.t option
         [@ocaml.doc "The date/time the instance group was created."];
       startDateTime: Date.t option
         [@ocaml.doc "The date/time the instance group was started."];
@@ -5990,57 +7166,59 @@ module InstanceGroupDetail =
       customAmiId: XmlStringMaxLen256.t option
         [@ocaml.doc
           "The custom AMI ID to use for the provisioned instance group."]}
-    let context_ = "InstanceGroupDetail"
     let make ?instanceGroupId =
       fun ?name ->
-        fun ?bidPrice ->
-          fun ?lastStateChangeReason ->
-            fun ?startDateTime ->
-              fun ?readyDateTime ->
-                fun ?endDateTime ->
-                  fun ?customAmiId ->
-                    fun ~market ->
-                      fun ~instanceRole ->
-                        fun ~instanceType ->
-                          fun ~instanceRequestCount ->
-                            fun ~instanceRunningCount ->
-                              fun ~state ->
-                                fun ~creationDateTime ->
+        fun ?market ->
+          fun ?instanceRole ->
+            fun ?bidPrice ->
+              fun ?instanceType ->
+                fun ?instanceRequestCount ->
+                  fun ?instanceRunningCount ->
+                    fun ?state ->
+                      fun ?lastStateChangeReason ->
+                        fun ?creationDateTime ->
+                          fun ?startDateTime ->
+                            fun ?readyDateTime ->
+                              fun ?endDateTime ->
+                                fun ?customAmiId ->
                                   fun () ->
                                     {
                                       instanceGroupId;
                                       name;
-                                      bidPrice;
-                                      lastStateChangeReason;
-                                      startDateTime;
-                                      readyDateTime;
-                                      endDateTime;
-                                      customAmiId;
                                       market;
                                       instanceRole;
+                                      bidPrice;
                                       instanceType;
                                       instanceRequestCount;
                                       instanceRunningCount;
                                       state;
-                                      creationDateTime
+                                      lastStateChangeReason;
+                                      creationDateTime;
+                                      startDateTime;
+                                      readyDateTime;
+                                      endDateTime;
+                                      customAmiId
                                     }
     let to_value x =
       structure_to_value
         [("InstanceGroupId",
            (Option.map x.instanceGroupId ~f:XmlStringMaxLen256.to_value));
         ("Name", (Option.map x.name ~f:XmlStringMaxLen256.to_value));
-        ("Market", (Some (MarketType.to_value x.market)));
-        ("InstanceRole", (Some (InstanceRoleType.to_value x.instanceRole)));
+        ("Market", (Option.map x.market ~f:MarketType.to_value));
+        ("InstanceRole",
+          (Option.map x.instanceRole ~f:InstanceRoleType.to_value));
         ("BidPrice", (Option.map x.bidPrice ~f:XmlStringMaxLen256.to_value));
-        ("InstanceType", (Some (InstanceType.to_value x.instanceType)));
+        ("InstanceType",
+          (Option.map x.instanceType ~f:InstanceType.to_value));
         ("InstanceRequestCount",
-          (Some (Integer.to_value x.instanceRequestCount)));
+          (Option.map x.instanceRequestCount ~f:Integer.to_value));
         ("InstanceRunningCount",
-          (Some (Integer.to_value x.instanceRunningCount)));
-        ("State", (Some (InstanceGroupState.to_value x.state)));
+          (Option.map x.instanceRunningCount ~f:Integer.to_value));
+        ("State", (Option.map x.state ~f:InstanceGroupState.to_value));
         ("LastStateChangeReason",
           (Option.map x.lastStateChangeReason ~f:XmlString.to_value));
-        ("CreationDateTime", (Some (Date.to_value x.creationDateTime)));
+        ("CreationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
         ("StartDateTime", (Option.map x.startDateTime ~f:Date.to_value));
         ("ReadyDateTime", (Option.map x.readyDateTime ~f:Date.to_value));
         ("EndDateTime", (Option.map x.endDateTime ~f:Date.to_value));
@@ -6058,68 +7236,65 @@ module InstanceGroupDetail =
       let startDateTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartDateTime") in
       let creationDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDateTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       let lastStateChangeReason =
         (Option.map ~f:XmlString.of_xml)
           (Xml.child xml_arg0 "LastStateChangeReason") in
       let state =
-        InstanceGroupState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:InstanceGroupState.of_xml)
+          (Xml.child xml_arg0 "State") in
       let instanceRunningCount =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceRunningCount") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "InstanceRunningCount") in
       let instanceRequestCount =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceRequestCount") in
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "InstanceRequestCount") in
       let instanceType =
-        InstanceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceType") in
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "InstanceType") in
       let bidPrice =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "BidPrice") in
       let instanceRole =
-        InstanceRoleType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceRole") in
+        (Option.map ~f:InstanceRoleType.of_xml)
+          (Xml.child xml_arg0 "InstanceRole") in
       let market =
-        MarketType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Market") in
+        (Option.map ~f:MarketType.of_xml) (Xml.child xml_arg0 "Market") in
       let name =
         (Option.map ~f:XmlStringMaxLen256.of_xml) (Xml.child xml_arg0 "Name") in
       let instanceGroupId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "InstanceGroupId") in
       make ?customAmiId ?endDateTime ?readyDateTime ?startDateTime
-        ~creationDateTime ?lastStateChangeReason ~state ~instanceRunningCount
-        ~instanceRequestCount ~instanceType ?bidPrice ~instanceRole ~market
+        ?creationDateTime ?lastStateChangeReason ?state ?instanceRunningCount
+        ?instanceRequestCount ?instanceType ?bidPrice ?instanceRole ?market
         ?name ?instanceGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let startDateTime = field_map json "StartDateTime" Date.of_json in
-      let creationDateTime =
-        field_map_exn json "CreationDateTime" Date.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       let lastStateChangeReason =
-        field_map json "LastStateChangeReason" XmlString.of_json in
-      let state = field_map_exn json "State" InstanceGroupState.of_json in
+        field_map json__ "LastStateChangeReason" XmlString.of_json in
+      let state = field_map json__ "State" InstanceGroupState.of_json in
       let instanceRunningCount =
-        field_map_exn json "InstanceRunningCount" Integer.of_json in
+        field_map json__ "InstanceRunningCount" Integer.of_json in
       let instanceRequestCount =
-        field_map_exn json "InstanceRequestCount" Integer.of_json in
-      let instanceType =
-        field_map_exn json "InstanceType" InstanceType.of_json in
-      let bidPrice = field_map json "BidPrice" XmlStringMaxLen256.of_json in
+        field_map json__ "InstanceRequestCount" Integer.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let bidPrice = field_map json__ "BidPrice" XmlStringMaxLen256.of_json in
       let instanceRole =
-        field_map_exn json "InstanceRole" InstanceRoleType.of_json in
-      let market = field_map_exn json "Market" MarketType.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
+        field_map json__ "InstanceRole" InstanceRoleType.of_json in
+      let market = field_map json__ "Market" MarketType.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
       let instanceGroupId =
-        field_map json "InstanceGroupId" XmlStringMaxLen256.of_json in
+        field_map json__ "InstanceGroupId" XmlStringMaxLen256.of_json in
       make ?customAmiId ?endDateTime ?readyDateTime ?startDateTime
-        ~creationDateTime ?lastStateChangeReason ~state ~instanceRunningCount
-        ~instanceRequestCount ~instanceType ?bidPrice ~instanceRole ~market
+        ?creationDateTime ?lastStateChangeReason ?state ?instanceRunningCount
+        ?instanceRequestCount ?instanceType ?bidPrice ?instanceRole ?market
         ?name ?instanceGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Detailed information about an instance group."]
@@ -6127,6 +7302,9 @@ module InstanceGroupDetailList =
   struct
     type nonrec t = InstanceGroupDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGroupDetail.to_value)) |>
         (fun x -> `List x)
@@ -6153,16 +7331,16 @@ module JobFlowInstancesDetail =
   struct
     type nonrec t =
       {
-      masterInstanceType: InstanceType.t
+      masterInstanceType: InstanceType.t option
         [@ocaml.doc "The Amazon EC2 master node instance type."];
       masterPublicDnsName: XmlString.t option
         [@ocaml.doc
           "The DNS name of the master node. If the cluster is on a private subnet, this is the private DNS name. On a public subnet, this is the public DNS name."];
       masterInstanceId: XmlString.t option
         [@ocaml.doc "The Amazon EC2 instance identifier of the master node."];
-      slaveInstanceType: InstanceType.t
+      slaveInstanceType: InstanceType.t option
         [@ocaml.doc "The Amazon EC2 core and task node instance type."];
-      instanceCount: Integer.t
+      instanceCount: Integer.t option
         [@ocaml.doc
           "The number of Amazon EC2 instances in the cluster. If the value is 1, the same instance serves as both the master and core and task node. If the value is greater than 1, one instance is the master node and all others are core and task nodes."];
       instanceGroups: InstanceGroupDetailList.t option
@@ -6184,49 +7362,53 @@ module JobFlowInstancesDetail =
       terminationProtected: Boolean.t option
         [@ocaml.doc
           "Specifies whether the Amazon EC2 instances in the cluster are protected from termination by API calls, user intervention, or in the event of a job-flow error."];
+      unhealthyNodeReplacement: BooleanObject.t option
+        [@ocaml.doc
+          "Indicates whether Amazon EMR should gracefully replace core nodes that have degraded within the cluster."];
       hadoopVersion: XmlStringMaxLen256.t option
         [@ocaml.doc "The Hadoop version for the cluster."]}
-    let context_ = "JobFlowInstancesDetail"
-    let make ?masterPublicDnsName =
-      fun ?masterInstanceId ->
-        fun ?instanceGroups ->
-          fun ?normalizedInstanceHours ->
-            fun ?ec2KeyName ->
-              fun ?ec2SubnetId ->
-                fun ?placement ->
-                  fun ?keepJobFlowAliveWhenNoSteps ->
-                    fun ?terminationProtected ->
-                      fun ?hadoopVersion ->
-                        fun ~masterInstanceType ->
-                          fun ~slaveInstanceType ->
-                            fun ~instanceCount ->
-                              fun () ->
-                                {
-                                  masterPublicDnsName;
-                                  masterInstanceId;
-                                  instanceGroups;
-                                  normalizedInstanceHours;
-                                  ec2KeyName;
-                                  ec2SubnetId;
-                                  placement;
-                                  keepJobFlowAliveWhenNoSteps;
-                                  terminationProtected;
-                                  hadoopVersion;
-                                  masterInstanceType;
-                                  slaveInstanceType;
-                                  instanceCount
-                                }
+    let make ?masterInstanceType =
+      fun ?masterPublicDnsName ->
+        fun ?masterInstanceId ->
+          fun ?slaveInstanceType ->
+            fun ?instanceCount ->
+              fun ?instanceGroups ->
+                fun ?normalizedInstanceHours ->
+                  fun ?ec2KeyName ->
+                    fun ?ec2SubnetId ->
+                      fun ?placement ->
+                        fun ?keepJobFlowAliveWhenNoSteps ->
+                          fun ?terminationProtected ->
+                            fun ?unhealthyNodeReplacement ->
+                              fun ?hadoopVersion ->
+                                fun () ->
+                                  {
+                                    masterInstanceType;
+                                    masterPublicDnsName;
+                                    masterInstanceId;
+                                    slaveInstanceType;
+                                    instanceCount;
+                                    instanceGroups;
+                                    normalizedInstanceHours;
+                                    ec2KeyName;
+                                    ec2SubnetId;
+                                    placement;
+                                    keepJobFlowAliveWhenNoSteps;
+                                    terminationProtected;
+                                    unhealthyNodeReplacement;
+                                    hadoopVersion
+                                  }
     let to_value x =
       structure_to_value
         [("MasterInstanceType",
-           (Some (InstanceType.to_value x.masterInstanceType)));
+           (Option.map x.masterInstanceType ~f:InstanceType.to_value));
         ("MasterPublicDnsName",
           (Option.map x.masterPublicDnsName ~f:XmlString.to_value));
         ("MasterInstanceId",
           (Option.map x.masterInstanceId ~f:XmlString.to_value));
         ("SlaveInstanceType",
-          (Some (InstanceType.to_value x.slaveInstanceType)));
-        ("InstanceCount", (Some (Integer.to_value x.instanceCount)));
+          (Option.map x.slaveInstanceType ~f:InstanceType.to_value));
+        ("InstanceCount", (Option.map x.instanceCount ~f:Integer.to_value));
         ("InstanceGroups",
           (Option.map x.instanceGroups ~f:InstanceGroupDetailList.to_value));
         ("NormalizedInstanceHours",
@@ -6240,6 +7422,8 @@ module JobFlowInstancesDetail =
           (Option.map x.keepJobFlowAliveWhenNoSteps ~f:Boolean.to_value));
         ("TerminationProtected",
           (Option.map x.terminationProtected ~f:Boolean.to_value));
+        ("UnhealthyNodeReplacement",
+          (Option.map x.unhealthyNodeReplacement ~f:BooleanObject.to_value));
         ("HadoopVersion",
           (Option.map x.hadoopVersion ~f:XmlStringMaxLen256.to_value))]
     let to_query v = to_query to_value v
@@ -6247,6 +7431,9 @@ module JobFlowInstancesDetail =
       let hadoopVersion =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "HadoopVersion") in
+      let unhealthyNodeReplacement =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "UnhealthyNodeReplacement") in
       let terminationProtected =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "TerminationProtected") in
@@ -6268,11 +7455,10 @@ module JobFlowInstancesDetail =
         (Option.map ~f:InstanceGroupDetailList.of_xml)
           (Xml.child xml_arg0 "InstanceGroups") in
       let instanceCount =
-        Integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "InstanceCount") in
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "InstanceCount") in
       let slaveInstanceType =
-        InstanceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SlaveInstanceType") in
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "SlaveInstanceType") in
       let masterInstanceId =
         (Option.map ~f:XmlString.of_xml)
           (Xml.child xml_arg0 "MasterInstanceId") in
@@ -6280,41 +7466,46 @@ module JobFlowInstancesDetail =
         (Option.map ~f:XmlString.of_xml)
           (Xml.child xml_arg0 "MasterPublicDnsName") in
       let masterInstanceType =
-        InstanceType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MasterInstanceType") in
-      make ?hadoopVersion ?terminationProtected ?keepJobFlowAliveWhenNoSteps
-        ?placement ?ec2SubnetId ?ec2KeyName ?normalizedInstanceHours
-        ?instanceGroups ~instanceCount ~slaveInstanceType ?masterInstanceId
-        ?masterPublicDnsName ~masterInstanceType ()
+        (Option.map ~f:InstanceType.of_xml)
+          (Xml.child xml_arg0 "MasterInstanceType") in
+      make ?hadoopVersion ?unhealthyNodeReplacement ?terminationProtected
+        ?keepJobFlowAliveWhenNoSteps ?placement ?ec2SubnetId ?ec2KeyName
+        ?normalizedInstanceHours ?instanceGroups ?instanceCount
+        ?slaveInstanceType ?masterInstanceId ?masterPublicDnsName
+        ?masterInstanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let hadoopVersion =
-        field_map json "HadoopVersion" XmlStringMaxLen256.of_json in
+        field_map json__ "HadoopVersion" XmlStringMaxLen256.of_json in
+      let unhealthyNodeReplacement =
+        field_map json__ "UnhealthyNodeReplacement" BooleanObject.of_json in
       let terminationProtected =
-        field_map json "TerminationProtected" Boolean.of_json in
+        field_map json__ "TerminationProtected" Boolean.of_json in
       let keepJobFlowAliveWhenNoSteps =
-        field_map json "KeepJobFlowAliveWhenNoSteps" Boolean.of_json in
-      let placement = field_map json "Placement" PlacementType.of_json in
+        field_map json__ "KeepJobFlowAliveWhenNoSteps" Boolean.of_json in
+      let placement = field_map json__ "Placement" PlacementType.of_json in
       let ec2SubnetId =
-        field_map json "Ec2SubnetId" XmlStringMaxLen256.of_json in
-      let ec2KeyName = field_map json "Ec2KeyName" XmlStringMaxLen256.of_json in
+        field_map json__ "Ec2SubnetId" XmlStringMaxLen256.of_json in
+      let ec2KeyName =
+        field_map json__ "Ec2KeyName" XmlStringMaxLen256.of_json in
       let normalizedInstanceHours =
-        field_map json "NormalizedInstanceHours" Integer.of_json in
+        field_map json__ "NormalizedInstanceHours" Integer.of_json in
       let instanceGroups =
-        field_map json "InstanceGroups" InstanceGroupDetailList.of_json in
-      let instanceCount = field_map_exn json "InstanceCount" Integer.of_json in
+        field_map json__ "InstanceGroups" InstanceGroupDetailList.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
       let slaveInstanceType =
-        field_map_exn json "SlaveInstanceType" InstanceType.of_json in
+        field_map json__ "SlaveInstanceType" InstanceType.of_json in
       let masterInstanceId =
-        field_map json "MasterInstanceId" XmlString.of_json in
+        field_map json__ "MasterInstanceId" XmlString.of_json in
       let masterPublicDnsName =
-        field_map json "MasterPublicDnsName" XmlString.of_json in
+        field_map json__ "MasterPublicDnsName" XmlString.of_json in
       let masterInstanceType =
-        field_map_exn json "MasterInstanceType" InstanceType.of_json in
-      make ?hadoopVersion ?terminationProtected ?keepJobFlowAliveWhenNoSteps
-        ?placement ?ec2SubnetId ?ec2KeyName ?normalizedInstanceHours
-        ?instanceGroups ~instanceCount ~slaveInstanceType ?masterInstanceId
-        ?masterPublicDnsName ~masterInstanceType ()
+        field_map json__ "MasterInstanceType" InstanceType.of_json in
+      make ?hadoopVersion ?unhealthyNodeReplacement ?terminationProtected
+        ?keepJobFlowAliveWhenNoSteps ?placement ?ec2SubnetId ?ec2KeyName
+        ?normalizedInstanceHours ?instanceGroups ?instanceCount
+        ?slaveInstanceType ?masterInstanceId ?masterPublicDnsName
+        ?masterInstanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specify the type of Amazon EC2 instances that the cluster (job flow) runs on."]
@@ -6322,9 +7513,9 @@ module JobFlowExecutionStatusDetail =
   struct
     type nonrec t =
       {
-      state: JobFlowExecutionState.t
+      state: JobFlowExecutionState.t option
         [@ocaml.doc "The state of the job flow."];
-      creationDateTime: Date.t
+      creationDateTime: Date.t option
         [@ocaml.doc "The creation date and time of the job flow."];
       startDateTime: Date.t option
         [@ocaml.doc "The start date and time of the job flow."];
@@ -6335,26 +7526,26 @@ module JobFlowExecutionStatusDetail =
         [@ocaml.doc "The completion date and time of the job flow."];
       lastStateChangeReason: XmlString.t option
         [@ocaml.doc "Description of the job flow last changed state."]}
-    let context_ = "JobFlowExecutionStatusDetail"
-    let make ?startDateTime =
-      fun ?readyDateTime ->
-        fun ?endDateTime ->
-          fun ?lastStateChangeReason ->
-            fun ~state ->
-              fun ~creationDateTime ->
+    let make ?state =
+      fun ?creationDateTime ->
+        fun ?startDateTime ->
+          fun ?readyDateTime ->
+            fun ?endDateTime ->
+              fun ?lastStateChangeReason ->
                 fun () ->
                   {
+                    state;
+                    creationDateTime;
                     startDateTime;
                     readyDateTime;
                     endDateTime;
-                    lastStateChangeReason;
-                    state;
-                    creationDateTime
+                    lastStateChangeReason
                   }
     let to_value x =
       structure_to_value
-        [("State", (Some (JobFlowExecutionState.to_value x.state)));
-        ("CreationDateTime", (Some (Date.to_value x.creationDateTime)));
+        [("State", (Option.map x.state ~f:JobFlowExecutionState.to_value));
+        ("CreationDateTime",
+          (Option.map x.creationDateTime ~f:Date.to_value));
         ("StartDateTime", (Option.map x.startDateTime ~f:Date.to_value));
         ("ReadyDateTime", (Option.map x.readyDateTime ~f:Date.to_value));
         ("EndDateTime", (Option.map x.endDateTime ~f:Date.to_value));
@@ -6372,45 +7563,45 @@ module JobFlowExecutionStatusDetail =
       let startDateTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "StartDateTime") in
       let creationDateTime =
-        Date.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "CreationDateTime") in
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       let state =
-        JobFlowExecutionState.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "State") in
+        (Option.map ~f:JobFlowExecutionState.of_xml)
+          (Xml.child xml_arg0 "State") in
       make ?lastStateChangeReason ?endDateTime ?readyDateTime ?startDateTime
-        ~creationDateTime ~state ()
+        ?creationDateTime ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastStateChangeReason =
-        field_map json "LastStateChangeReason" XmlString.of_json in
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let startDateTime = field_map json "StartDateTime" Date.of_json in
-      let creationDateTime =
-        field_map_exn json "CreationDateTime" Date.of_json in
-      let state = field_map_exn json "State" JobFlowExecutionState.of_json in
+        field_map json__ "LastStateChangeReason" XmlString.of_json in
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let state = field_map json__ "State" JobFlowExecutionState.of_json in
       make ?lastStateChangeReason ?endDateTime ?readyDateTime ?startDateTime
-        ~creationDateTime ~state ()
+        ?creationDateTime ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the status of the cluster (job flow)."]
 module JobFlowDetail =
   struct
     type nonrec t =
       {
-      jobFlowId: XmlStringMaxLen256.t [@ocaml.doc "The job flow identifier."];
-      name: XmlStringMaxLen256.t [@ocaml.doc "The name of the job flow."];
+      jobFlowId: XmlStringMaxLen256.t option
+        [@ocaml.doc "The job flow identifier."];
+      name: XmlStringMaxLen256.t option
+        [@ocaml.doc "The name of the job flow."];
       logUri: XmlString.t option
         [@ocaml.doc
           "The location in Amazon S3 where log files for the job are stored."];
       logEncryptionKmsKeyId: XmlString.t option
         [@ocaml.doc
-          "The KMS key used for encrypting log files. This attribute is only available with EMR version 5.30.0 and later, excluding EMR 6.0.0."];
+          "The KMS key used for encrypting log files. This attribute is only available with Amazon EMR 5.30.0 and later, excluding 6.0.0."];
       amiVersion: XmlStringMaxLen256.t option
         [@ocaml.doc
           "Applies only to Amazon EMR AMI versions 3.x and 2.x. For Amazon EMR releases 4.0 and later, ReleaseLabel is used. To specify a custom AMI, use CustomAmiID."];
-      executionStatusDetail: JobFlowExecutionStatusDetail.t
+      executionStatusDetail: JobFlowExecutionStatusDetail.t option
         [@ocaml.doc "Describes the execution status of the job flow."];
-      instances: JobFlowInstancesDetail.t
+      instances: JobFlowInstancesDetail.t option
         [@ocaml.doc "Describes the Amazon EC2 instances of the job flow."];
       steps: StepDetailList.t option
         [@ocaml.doc "A list of steps run by the job flow."];
@@ -6421,40 +7612,43 @@ module JobFlowDetail =
           "A list of strings set by third-party software when the job flow is launched. If you are not using third-party software to manage the job flow, this value is empty."];
       visibleToAllUsers: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the cluster is visible to IAM principals in the Amazon Web Services account associated with the cluster. When true, IAM principals in the Amazon Web Services account can perform EMR cluster actions that their IAM policies allow. When false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform EMR actions, regardless of IAM permissions policies attached to other IAM principals. The default value is true if a value is not provided when creating a cluster using the EMR API RunJobFlow command, the CLI create-cluster command, or the Amazon Web Services Management Console."];
+          "Indicates whether the cluster is visible to IAM principals in the Amazon Web Services account associated with the cluster. When true, IAM principals in the Amazon Web Services account can perform Amazon EMR cluster actions that their IAM policies allow. When false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform Amazon EMR actions, regardless of IAM permissions policies attached to other IAM principals. The default value is true if a value is not provided when creating a cluster using the Amazon EMR API RunJobFlow command, the CLI create-cluster command, or the Amazon Web Services Management Console."];
       jobFlowRole: XmlString.t option
         [@ocaml.doc
-          "The IAM role that was specified when the job flow was launched. The EC2 instances of the job flow assume this role."];
+          "The IAM role that was specified when the job flow was launched. The Amazon EC2 instances of the job flow assume this role."];
       serviceRole: XmlString.t option
         [@ocaml.doc
           "The IAM role that is assumed by the Amazon EMR service to access Amazon Web Services resources on your behalf."];
       autoScalingRole: XmlString.t option
         [@ocaml.doc
-          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides a way for the automatic scaling feature to get the required permissions it needs to launch and terminate EC2 instances in an instance group."];
+          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides a way for the automatic scaling feature to get the required permissions it needs to launch and terminate Amazon EC2 instances in an instance group."];
       scaleDownBehavior: ScaleDownBehavior.t option
         [@ocaml.doc
-          "The way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION available only in Amazon EMR version 4.1.0 and later, and is the default for versions of Amazon EMR earlier than 5.1.0."]}
-    let context_ = "JobFlowDetail"
-    let make ?logUri =
-      fun ?logEncryptionKmsKeyId ->
-        fun ?amiVersion ->
-          fun ?steps ->
-            fun ?bootstrapActions ->
-              fun ?supportedProducts ->
-                fun ?visibleToAllUsers ->
-                  fun ?jobFlowRole ->
-                    fun ?serviceRole ->
-                      fun ?autoScalingRole ->
-                        fun ?scaleDownBehavior ->
-                          fun ~jobFlowId ->
-                            fun ~name ->
-                              fun ~executionStatusDetail ->
-                                fun ~instances ->
+          "The way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION available only in Amazon EMR releases 4.1.0 and later, and is the default for releases of Amazon EMR earlier than 5.1.0."]}
+    let make ?jobFlowId =
+      fun ?name ->
+        fun ?logUri ->
+          fun ?logEncryptionKmsKeyId ->
+            fun ?amiVersion ->
+              fun ?executionStatusDetail ->
+                fun ?instances ->
+                  fun ?steps ->
+                    fun ?bootstrapActions ->
+                      fun ?supportedProducts ->
+                        fun ?visibleToAllUsers ->
+                          fun ?jobFlowRole ->
+                            fun ?serviceRole ->
+                              fun ?autoScalingRole ->
+                                fun ?scaleDownBehavior ->
                                   fun () ->
                                     {
+                                      jobFlowId;
+                                      name;
                                       logUri;
                                       logEncryptionKmsKeyId;
                                       amiVersion;
+                                      executionStatusDetail;
+                                      instances;
                                       steps;
                                       bootstrapActions;
                                       supportedProducts;
@@ -6462,25 +7656,23 @@ module JobFlowDetail =
                                       jobFlowRole;
                                       serviceRole;
                                       autoScalingRole;
-                                      scaleDownBehavior;
-                                      jobFlowId;
-                                      name;
-                                      executionStatusDetail;
-                                      instances
+                                      scaleDownBehavior
                                     }
     let to_value x =
       structure_to_value
-        [("JobFlowId", (Some (XmlStringMaxLen256.to_value x.jobFlowId)));
-        ("Name", (Some (XmlStringMaxLen256.to_value x.name)));
+        [("JobFlowId",
+           (Option.map x.jobFlowId ~f:XmlStringMaxLen256.to_value));
+        ("Name", (Option.map x.name ~f:XmlStringMaxLen256.to_value));
         ("LogUri", (Option.map x.logUri ~f:XmlString.to_value));
         ("LogEncryptionKmsKeyId",
           (Option.map x.logEncryptionKmsKeyId ~f:XmlString.to_value));
         ("AmiVersion",
           (Option.map x.amiVersion ~f:XmlStringMaxLen256.to_value));
         ("ExecutionStatusDetail",
-          (Some
-             (JobFlowExecutionStatusDetail.to_value x.executionStatusDetail)));
-        ("Instances", (Some (JobFlowInstancesDetail.to_value x.instances)));
+          (Option.map x.executionStatusDetail
+             ~f:JobFlowExecutionStatusDetail.to_value));
+        ("Instances",
+          (Option.map x.instances ~f:JobFlowInstancesDetail.to_value));
         ("Steps", (Option.map x.steps ~f:StepDetailList.to_value));
         ("BootstrapActions",
           (Option.map x.bootstrapActions
@@ -6519,11 +7711,11 @@ module JobFlowDetail =
       let steps =
         (Option.map ~f:StepDetailList.of_xml) (Xml.child xml_arg0 "Steps") in
       let instances =
-        JobFlowInstancesDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Instances") in
+        (Option.map ~f:JobFlowInstancesDetail.of_xml)
+          (Xml.child xml_arg0 "Instances") in
       let executionStatusDetail =
-        JobFlowExecutionStatusDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ExecutionStatusDetail") in
+        (Option.map ~f:JobFlowExecutionStatusDetail.of_xml)
+          (Xml.child xml_arg0 "ExecutionStatusDetail") in
       let amiVersion =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "AmiVersion") in
@@ -6533,52 +7725,54 @@ module JobFlowDetail =
       let logUri =
         (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "LogUri") in
       let name =
-        XmlStringMaxLen256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:XmlStringMaxLen256.of_xml) (Xml.child xml_arg0 "Name") in
       let jobFlowId =
-        XmlStringMaxLen256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "JobFlowId") in
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "JobFlowId") in
       make ?scaleDownBehavior ?autoScalingRole ?serviceRole ?jobFlowRole
         ?visibleToAllUsers ?supportedProducts ?bootstrapActions ?steps
-        ~instances ~executionStatusDetail ?amiVersion ?logEncryptionKmsKeyId
-        ?logUri ~name ~jobFlowId ()
+        ?instances ?executionStatusDetail ?amiVersion ?logEncryptionKmsKeyId
+        ?logUri ?name ?jobFlowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let scaleDownBehavior =
-        field_map json "ScaleDownBehavior" ScaleDownBehavior.of_json in
+        field_map json__ "ScaleDownBehavior" ScaleDownBehavior.of_json in
       let autoScalingRole =
-        field_map json "AutoScalingRole" XmlString.of_json in
-      let serviceRole = field_map json "ServiceRole" XmlString.of_json in
-      let jobFlowRole = field_map json "JobFlowRole" XmlString.of_json in
+        field_map json__ "AutoScalingRole" XmlString.of_json in
+      let serviceRole = field_map json__ "ServiceRole" XmlString.of_json in
+      let jobFlowRole = field_map json__ "JobFlowRole" XmlString.of_json in
       let visibleToAllUsers =
-        field_map json "VisibleToAllUsers" Boolean.of_json in
+        field_map json__ "VisibleToAllUsers" Boolean.of_json in
       let supportedProducts =
-        field_map json "SupportedProducts" SupportedProductsList.of_json in
+        field_map json__ "SupportedProducts" SupportedProductsList.of_json in
       let bootstrapActions =
-        field_map json "BootstrapActions" BootstrapActionDetailList.of_json in
-      let steps = field_map json "Steps" StepDetailList.of_json in
+        field_map json__ "BootstrapActions" BootstrapActionDetailList.of_json in
+      let steps = field_map json__ "Steps" StepDetailList.of_json in
       let instances =
-        field_map_exn json "Instances" JobFlowInstancesDetail.of_json in
+        field_map json__ "Instances" JobFlowInstancesDetail.of_json in
       let executionStatusDetail =
-        field_map_exn json "ExecutionStatusDetail"
+        field_map json__ "ExecutionStatusDetail"
           JobFlowExecutionStatusDetail.of_json in
-      let amiVersion = field_map json "AmiVersion" XmlStringMaxLen256.of_json in
+      let amiVersion =
+        field_map json__ "AmiVersion" XmlStringMaxLen256.of_json in
       let logEncryptionKmsKeyId =
-        field_map json "LogEncryptionKmsKeyId" XmlString.of_json in
-      let logUri = field_map json "LogUri" XmlString.of_json in
-      let name = field_map_exn json "Name" XmlStringMaxLen256.of_json in
-      let jobFlowId =
-        field_map_exn json "JobFlowId" XmlStringMaxLen256.of_json in
+        field_map json__ "LogEncryptionKmsKeyId" XmlString.of_json in
+      let logUri = field_map json__ "LogUri" XmlString.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      let jobFlowId = field_map json__ "JobFlowId" XmlStringMaxLen256.of_json in
       make ?scaleDownBehavior ?autoScalingRole ?serviceRole ?jobFlowRole
         ?visibleToAllUsers ?supportedProducts ?bootstrapActions ?steps
-        ~instances ~executionStatusDetail ?amiVersion ?logEncryptionKmsKeyId
-        ?logUri ~name ~jobFlowId ()
+        ?instances ?executionStatusDetail ?amiVersion ?logEncryptionKmsKeyId
+        ?logUri ?name ?jobFlowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A description of a cluster (job flow)."]
 module JobFlowDetailList =
   struct
     type nonrec t = JobFlowDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:JobFlowDetail.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -6643,8 +7837,8 @@ module DescribeJobFlowsOutput =
           (Xml.child xml_arg0 "JobFlows") in
       make ?jobFlows ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobFlows = field_map json "JobFlows" JobFlowDetailList.of_json in
+    let of_json json__ =
+      let jobFlows = field_map json__ "JobFlows" JobFlowDetailList.of_json in
       make ?jobFlows ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The output for the DescribeJobFlows operation."]
@@ -6667,12 +7861,111 @@ module DescribeNotebookExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "NotebookExecutionId") in
       make ~notebookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notebookExecutionId =
-        field_map_exn json "NotebookExecutionId" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "NotebookExecutionId" XmlStringMaxLen256.of_json in
       make ~notebookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details of a notebook execution."]
+module UriString =
+  struct
+    type nonrec t = string
+    let context_ = "UriString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:1) >>=
+             (fun () ->
+                (check_string_max i ~max:10280) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0020-\\uD7FF\\uE000-\\uFFFD\\uD800\\uDBFF-\\uDC00\\uDFFF\\r\\n\\t]*")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"UriString" j
+    let to_json = simple_to_json to_value
+  end
+module OutputNotebookS3LocationForOutput =
+  struct
+    type nonrec t =
+      {
+      bucket: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The Amazon S3 bucket that stores the notebook execution output."];
+      key: UriString.t option
+        [@ocaml.doc
+          "The key to the Amazon S3 location that stores the notebook execution output."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Option.map x.bucket ~f:XmlStringMaxLen256.to_value));
+        ("Key", (Option.map x.key ~f:UriString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:UriString.of_xml) (Xml.child xml_arg0 "Key") in
+      let bucket =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Bucket") in
+      make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" UriString.of_json in
+      let bucket = field_map json__ "Bucket" XmlStringMaxLen256.of_json in
+      make ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 location that stores the notebook execution output."]
+module OutputNotebookFormat =
+  struct
+    type nonrec t =
+      | HTML 
+      | Non_static_id of string 
+    let make i = i
+    let to_string = function | HTML -> "HTML" | Non_static_id s -> s
+    let of_string = function | "HTML" -> HTML | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OutputNotebookFormat" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OutputNotebookFormat" j)
+    let to_json = simple_to_json to_value
+  end
+module NotebookS3LocationForOutput =
+  struct
+    type nonrec t =
+      {
+      bucket: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The Amazon S3 bucket that stores the notebook execution input."];
+      key: UriString.t option
+        [@ocaml.doc
+          "The key to the Amazon S3 location that stores the notebook execution input."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Option.map x.bucket ~f:XmlStringMaxLen256.to_value));
+        ("Key", (Option.map x.key ~f:UriString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:UriString.of_xml) (Xml.child xml_arg0 "Key") in
+      let bucket =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Bucket") in
+      make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" UriString.of_json in
+      let bucket = field_map json__ "Bucket" XmlStringMaxLen256.of_json in
+      make ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 location that stores the notebook execution input."]
 module NotebookExecutionStatus =
   struct
     type nonrec t =
@@ -6724,6 +8017,28 @@ module NotebookExecutionStatus =
       of_string (string_of_json ~kind:"NotebookExecutionStatus" j)
     let to_json = simple_to_json to_value
   end
+module IAMRoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "IAMRoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"^arn:(aws[a-zA-Z0-9-]*):iam::(\\d{12})?:(role((\\u002F)|(\\u002F[\\u0021-\\u007F]+\\u002F))[\\w+=,.@-]+)$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IAMRoleArn" j
+    let to_json = simple_to_json to_value
+  end
 module ExecutionEngineType =
   struct
     type nonrec t =
@@ -6747,26 +8062,37 @@ module ExecutionEngineConfig =
       {
       id: XmlStringMaxLen256.t
         [@ocaml.doc
-          "The unique identifier of the execution engine. For an EMR cluster, this is the cluster ID."];
+          "The unique identifier of the execution engine. For an Amazon EMR cluster, this is the cluster ID."];
       type_: ExecutionEngineType.t option
         [@ocaml.doc
-          "The type of execution engine. A value of EMR specifies an EMR cluster."];
+          "The type of execution engine. A value of EMR specifies an Amazon EMR cluster."];
       masterInstanceSecurityGroupId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "An optional unique ID of an EC2 security group to associate with the master instance of the EMR cluster for this notebook execution. For more information see Specifying EC2 Security Groups for EMR Notebooks in the EMR Management Guide."]}
+          "An optional unique ID of an Amazon EC2 security group to associate with the master instance of the Amazon EMR cluster for this notebook execution. For more information see Specifying Amazon EC2 Security Groups for Amazon EMR Notebooks in the EMR Management Guide."];
+      executionRoleArn: IAMRoleArn.t option
+        [@ocaml.doc
+          "The execution role ARN required for the notebook execution."]}
     let context_ = "ExecutionEngineConfig"
     let make ?type_ =
       fun ?masterInstanceSecurityGroupId ->
-        fun ~id -> fun () -> { type_; masterInstanceSecurityGroupId; id }
+        fun ?executionRoleArn ->
+          fun ~id ->
+            fun () ->
+              { type_; masterInstanceSecurityGroupId; executionRoleArn; id }
     let to_value x =
       structure_to_value
         [("Id", (Some (XmlStringMaxLen256.to_value x.id)));
         ("Type", (Option.map x.type_ ~f:ExecutionEngineType.to_value));
         ("MasterInstanceSecurityGroupId",
           (Option.map x.masterInstanceSecurityGroupId
-             ~f:XmlStringMaxLen256.to_value))]
+             ~f:XmlStringMaxLen256.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:IAMRoleArn.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let executionRoleArn =
+        (Option.map ~f:IAMRoleArn.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
       let masterInstanceSecurityGroupId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "MasterInstanceSecurityGroupId") in
@@ -6776,18 +8102,50 @@ module ExecutionEngineConfig =
       let id =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Id") in
-      make ?masterInstanceSecurityGroupId ?type_ ~id ()
+      make ?executionRoleArn ?masterInstanceSecurityGroupId ?type_ ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" IAMRoleArn.of_json in
       let masterInstanceSecurityGroupId =
-        field_map json "MasterInstanceSecurityGroupId"
+        field_map json__ "MasterInstanceSecurityGroupId"
           XmlStringMaxLen256.of_json in
-      let type_ = field_map json "Type" ExecutionEngineType.of_json in
-      let id = field_map_exn json "Id" XmlStringMaxLen256.of_json in
-      make ?masterInstanceSecurityGroupId ?type_ ~id ()
+      let type_ = field_map json__ "Type" ExecutionEngineType.of_json in
+      let id = field_map_exn json__ "Id" XmlStringMaxLen256.of_json in
+      make ?executionRoleArn ?masterInstanceSecurityGroupId ?type_ ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies the execution engine (cluster) to run the notebook and perform the notebook execution, for example, an EMR cluster."]
+       "Specifies the execution engine (cluster) to run the notebook and perform the notebook execution, for example, an Amazon EMR cluster."]
+module EnvironmentVariablesMap =
+  struct
+    type nonrec t = (XmlStringMaxLen256.t * XmlString.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((XmlStringMaxLen256.of_string chopped),
+                              (XmlString.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (XmlStringMaxLen256.to_value x) |>
+                    (fun x -> (XmlString.to_value y) |> (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:XmlStringMaxLen256.of_string
+        ~of_json:XmlString.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module NotebookExecution =
   struct
     type nonrec t =
@@ -6796,15 +8154,15 @@ module NotebookExecution =
         [@ocaml.doc "The unique identifier of a notebook execution."];
       editorId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The unique identifier of the EMR Notebook that is used for the notebook execution."];
+          "The unique identifier of the Amazon EMR Notebook that is used for the notebook execution."];
       executionEngine: ExecutionEngineConfig.t option
         [@ocaml.doc
-          "The execution engine, such as an EMR cluster, used to run the EMR notebook and perform the notebook execution."];
+          "The execution engine, such as an Amazon EMR cluster, used to run the Amazon EMR notebook and perform the notebook execution."];
       notebookExecutionName: XmlStringMaxLen256.t option
         [@ocaml.doc "A name for the notebook execution."];
       notebookParams: XmlString.t option
         [@ocaml.doc
-          "Input parameters in JSON format passed to the EMR Notebook at runtime for execution."];
+          "Input parameters in JSON format passed to the Amazon EMR Notebook at runtime for execution."];
       status: NotebookExecutionStatus.t option
         [@ocaml.doc
           "The status of the notebook execution. START_PENDING indicates that the cluster has received the execution request but execution has not begun. STARTING indicates that the execution is starting on the cluster. RUNNING indicates that the execution is being processed by the cluster. FINISHING indicates that execution processing is in the final stages. FINISHED indicates that the execution has completed without error. FAILING indicates that the execution is failing and will not finish successfully. FAILED indicates that the execution failed. STOP_PENDING indicates that the cluster has received a StopNotebookExecution request and the stop is pending. STOPPING indicates that the cluster is in the process of stopping the execution as a result of a StopNotebookExecution request. STOPPED indicates that the execution stopped because of a StopNotebookExecution request."];
@@ -6823,10 +8181,21 @@ module NotebookExecution =
           "The reason for the latest status change of the notebook execution."];
       notebookInstanceSecurityGroupId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The unique identifier of the EC2 security group associated with the EMR Notebook instance. For more information see Specifying EC2 Security Groups for EMR Notebooks in the EMR Management Guide."];
+          "The unique identifier of the Amazon EC2 security group associated with the Amazon EMR Notebook instance. For more information see Specifying Amazon EC2 Security Groups for Amazon EMR Notebooks in the Amazon EMR Management Guide."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags associated with a notebook execution. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters and an optional value string with a maximum of 256 characters."]}
+          "A list of tags associated with a notebook execution. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters and an optional value string with a maximum of 256 characters."];
+      notebookS3Location: NotebookS3LocationForOutput.t option
+        [@ocaml.doc
+          "The Amazon S3 location that stores the notebook execution input."];
+      outputNotebookS3Location: OutputNotebookS3LocationForOutput.t option
+        [@ocaml.doc
+          "The Amazon S3 location for the notebook execution output."];
+      outputNotebookFormat: OutputNotebookFormat.t option
+        [@ocaml.doc "The output format for the notebook execution."];
+      environmentVariables: EnvironmentVariablesMap.t option
+        [@ocaml.doc
+          "The environment variables associated with the notebook execution."]}
     let make ?notebookExecutionId =
       fun ?editorId ->
         fun ?executionEngine ->
@@ -6840,22 +8209,30 @@ module NotebookExecution =
                         fun ?lastStateChangeReason ->
                           fun ?notebookInstanceSecurityGroupId ->
                             fun ?tags ->
-                              fun () ->
-                                {
-                                  notebookExecutionId;
-                                  editorId;
-                                  executionEngine;
-                                  notebookExecutionName;
-                                  notebookParams;
-                                  status;
-                                  startTime;
-                                  endTime;
-                                  arn;
-                                  outputNotebookURI;
-                                  lastStateChangeReason;
-                                  notebookInstanceSecurityGroupId;
-                                  tags
-                                }
+                              fun ?notebookS3Location ->
+                                fun ?outputNotebookS3Location ->
+                                  fun ?outputNotebookFormat ->
+                                    fun ?environmentVariables ->
+                                      fun () ->
+                                        {
+                                          notebookExecutionId;
+                                          editorId;
+                                          executionEngine;
+                                          notebookExecutionName;
+                                          notebookParams;
+                                          status;
+                                          startTime;
+                                          endTime;
+                                          arn;
+                                          outputNotebookURI;
+                                          lastStateChangeReason;
+                                          notebookInstanceSecurityGroupId;
+                                          tags;
+                                          notebookS3Location;
+                                          outputNotebookS3Location;
+                                          outputNotebookFormat;
+                                          environmentVariables
+                                        }
     let to_value x =
       structure_to_value
         [("NotebookExecutionId",
@@ -6878,9 +8255,32 @@ module NotebookExecution =
         ("NotebookInstanceSecurityGroupId",
           (Option.map x.notebookInstanceSecurityGroupId
              ~f:XmlStringMaxLen256.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("NotebookS3Location",
+          (Option.map x.notebookS3Location
+             ~f:NotebookS3LocationForOutput.to_value));
+        ("OutputNotebookS3Location",
+          (Option.map x.outputNotebookS3Location
+             ~f:OutputNotebookS3LocationForOutput.to_value));
+        ("OutputNotebookFormat",
+          (Option.map x.outputNotebookFormat ~f:OutputNotebookFormat.to_value));
+        ("EnvironmentVariables",
+          (Option.map x.environmentVariables
+             ~f:EnvironmentVariablesMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let environmentVariables =
+        (Option.map ~f:EnvironmentVariablesMap.of_xml)
+          (Xml.child xml_arg0 "EnvironmentVariables") in
+      let outputNotebookFormat =
+        (Option.map ~f:OutputNotebookFormat.of_xml)
+          (Xml.child xml_arg0 "OutputNotebookFormat") in
+      let outputNotebookS3Location =
+        (Option.map ~f:OutputNotebookS3LocationForOutput.of_xml)
+          (Xml.child xml_arg0 "OutputNotebookS3Location") in
+      let notebookS3Location =
+        (Option.map ~f:NotebookS3LocationForOutput.of_xml)
+          (Xml.child xml_arg0 "NotebookS3Location") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let notebookInstanceSecurityGroupId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
@@ -6915,39 +8315,55 @@ module NotebookExecution =
       let notebookExecutionId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "NotebookExecutionId") in
-      make ?tags ?notebookInstanceSecurityGroupId ?lastStateChangeReason
+      make ?environmentVariables ?outputNotebookFormat
+        ?outputNotebookS3Location ?notebookS3Location ?tags
+        ?notebookInstanceSecurityGroupId ?lastStateChangeReason
         ?outputNotebookURI ?arn ?endTime ?startTime ?status ?notebookParams
         ?notebookExecutionName ?executionEngine ?editorId
         ?notebookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let environmentVariables =
+        field_map json__ "EnvironmentVariables"
+          EnvironmentVariablesMap.of_json in
+      let outputNotebookFormat =
+        field_map json__ "OutputNotebookFormat" OutputNotebookFormat.of_json in
+      let outputNotebookS3Location =
+        field_map json__ "OutputNotebookS3Location"
+          OutputNotebookS3LocationForOutput.of_json in
+      let notebookS3Location =
+        field_map json__ "NotebookS3Location"
+          NotebookS3LocationForOutput.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let notebookInstanceSecurityGroupId =
-        field_map json "NotebookInstanceSecurityGroupId"
+        field_map json__ "NotebookInstanceSecurityGroupId"
           XmlStringMaxLen256.of_json in
       let lastStateChangeReason =
-        field_map json "LastStateChangeReason" XmlString.of_json in
+        field_map json__ "LastStateChangeReason" XmlString.of_json in
       let outputNotebookURI =
-        field_map json "OutputNotebookURI" XmlString.of_json in
-      let arn = field_map json "Arn" XmlStringMaxLen256.of_json in
-      let endTime = field_map json "EndTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
-      let status = field_map json "Status" NotebookExecutionStatus.of_json in
-      let notebookParams = field_map json "NotebookParams" XmlString.of_json in
+        field_map json__ "OutputNotebookURI" XmlString.of_json in
+      let arn = field_map json__ "Arn" XmlStringMaxLen256.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      let status = field_map json__ "Status" NotebookExecutionStatus.of_json in
+      let notebookParams =
+        field_map json__ "NotebookParams" XmlString.of_json in
       let notebookExecutionName =
-        field_map json "NotebookExecutionName" XmlStringMaxLen256.of_json in
+        field_map json__ "NotebookExecutionName" XmlStringMaxLen256.of_json in
       let executionEngine =
-        field_map json "ExecutionEngine" ExecutionEngineConfig.of_json in
-      let editorId = field_map json "EditorId" XmlStringMaxLen256.of_json in
+        field_map json__ "ExecutionEngine" ExecutionEngineConfig.of_json in
+      let editorId = field_map json__ "EditorId" XmlStringMaxLen256.of_json in
       let notebookExecutionId =
-        field_map json "NotebookExecutionId" XmlStringMaxLen256.of_json in
-      make ?tags ?notebookInstanceSecurityGroupId ?lastStateChangeReason
+        field_map json__ "NotebookExecutionId" XmlStringMaxLen256.of_json in
+      make ?environmentVariables ?outputNotebookFormat
+        ?outputNotebookS3Location ?notebookS3Location ?tags
+        ?notebookInstanceSecurityGroupId ?lastStateChangeReason
         ?outputNotebookURI ?arn ?endTime ?startTime ?status ?notebookParams
         ?notebookExecutionName ?executionEngine ?editorId
         ?notebookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A notebook execution. An execution is a specific instance that an EMR Notebook is run using the StartNotebookExecution action."]
+       "A notebook execution. An execution is a specific instance that an Amazon EMR Notebook is run using the StartNotebookExecution action."]
 module DescribeNotebookExecutionOutput =
   struct
     type nonrec t =
@@ -7002,12 +8418,265 @@ module DescribeNotebookExecutionOutput =
           (Xml.child xml_arg0 "NotebookExecution") in
       make ?notebookExecution ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notebookExecution =
-        field_map json "NotebookExecution" NotebookExecution.of_json in
+        field_map json__ "NotebookExecution" NotebookExecution.of_json in
       make ?notebookExecution ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides details of a notebook execution."]
+module DescribePersistentAppUIInput =
+  struct
+    type nonrec t =
+      {
+      persistentAppUIId: XmlStringMaxLen256.t
+        [@ocaml.doc
+          "The identifier for the persistent application user interface."]}
+    let context_ = "DescribePersistentAppUIInput"
+    let make ~persistentAppUIId = fun () -> { persistentAppUIId }
+    let to_value x =
+      structure_to_value
+        [("PersistentAppUIId",
+           (Some (XmlStringMaxLen256.to_value x.persistentAppUIId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let persistentAppUIId =
+        XmlStringMaxLen256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PersistentAppUIId") in
+      make ~persistentAppUIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let persistentAppUIId =
+        field_map_exn json__ "PersistentAppUIId" XmlStringMaxLen256.of_json in
+      make ~persistentAppUIId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a persistent application user interface."]
+module PersistentAppUIType =
+  struct
+    type nonrec t =
+      | SHS 
+      | TEZ 
+      | YTS 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SHS -> "SHS"
+      | TEZ -> "TEZ"
+      | YTS -> "YTS"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SHS" -> SHS
+      | "TEZ" -> TEZ
+      | "YTS" -> YTS
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration PersistentAppUIType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"PersistentAppUIType" j)
+    let to_json = simple_to_json to_value
+  end
+module PersistentAppUITypeList =
+  struct
+    type nonrec t = PersistentAppUIType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:PersistentAppUIType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:PersistentAppUIType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PersistentAppUITypeList"
+        ~of_json:PersistentAppUIType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PersistentAppUI =
+  struct
+    type nonrec t =
+      {
+      persistentAppUIId: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The identifier for the persistent application user interface object."];
+      persistentAppUITypeList: PersistentAppUITypeList.t option
+        [@ocaml.doc
+          "The type list for the persistent application user interface object. Valid values include SHS, YTS, or TEZ."];
+      persistentAppUIStatus: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The status for the persistent application user interface object."];
+      authorId: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The author ID for the persistent application user interface object."];
+      creationTime: Date.t option
+        [@ocaml.doc
+          "The creation date and time for the persistent application user interface object."];
+      lastModifiedTime: Date.t option
+        [@ocaml.doc
+          "The date and time the persistent application user interface object was last changed."];
+      lastStateChangeReason: XmlString.t option
+        [@ocaml.doc
+          "The reason the persistent application user interface object was last changed."];
+      tags: TagList.t option
+        [@ocaml.doc
+          "A collection of tags for the persistent application user interface object."]}
+    let make ?persistentAppUIId =
+      fun ?persistentAppUITypeList ->
+        fun ?persistentAppUIStatus ->
+          fun ?authorId ->
+            fun ?creationTime ->
+              fun ?lastModifiedTime ->
+                fun ?lastStateChangeReason ->
+                  fun ?tags ->
+                    fun () ->
+                      {
+                        persistentAppUIId;
+                        persistentAppUITypeList;
+                        persistentAppUIStatus;
+                        authorId;
+                        creationTime;
+                        lastModifiedTime;
+                        lastStateChangeReason;
+                        tags
+                      }
+    let to_value x =
+      structure_to_value
+        [("PersistentAppUIId",
+           (Option.map x.persistentAppUIId ~f:XmlStringMaxLen256.to_value));
+        ("PersistentAppUITypeList",
+          (Option.map x.persistentAppUITypeList
+             ~f:PersistentAppUITypeList.to_value));
+        ("PersistentAppUIStatus",
+          (Option.map x.persistentAppUIStatus ~f:XmlStringMaxLen256.to_value));
+        ("AuthorId", (Option.map x.authorId ~f:XmlStringMaxLen256.to_value));
+        ("CreationTime", (Option.map x.creationTime ~f:Date.to_value));
+        ("LastModifiedTime",
+          (Option.map x.lastModifiedTime ~f:Date.to_value));
+        ("LastStateChangeReason",
+          (Option.map x.lastStateChangeReason ~f:XmlString.to_value));
+        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      let lastStateChangeReason =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "LastStateChangeReason") in
+      let lastModifiedTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "LastModifiedTime") in
+      let creationTime =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationTime") in
+      let authorId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "AuthorId") in
+      let persistentAppUIStatus =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUIStatus") in
+      let persistentAppUITypeList =
+        (Option.map ~f:PersistentAppUITypeList.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUITypeList") in
+      let persistentAppUIId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUIId") in
+      make ?tags ?lastStateChangeReason ?lastModifiedTime ?creationTime
+        ?authorId ?persistentAppUIStatus ?persistentAppUITypeList
+        ?persistentAppUIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let lastStateChangeReason =
+        field_map json__ "LastStateChangeReason" XmlString.of_json in
+      let lastModifiedTime = field_map json__ "LastModifiedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let authorId = field_map json__ "AuthorId" XmlStringMaxLen256.of_json in
+      let persistentAppUIStatus =
+        field_map json__ "PersistentAppUIStatus" XmlStringMaxLen256.of_json in
+      let persistentAppUITypeList =
+        field_map json__ "PersistentAppUITypeList"
+          PersistentAppUITypeList.of_json in
+      let persistentAppUIId =
+        field_map json__ "PersistentAppUIId" XmlStringMaxLen256.of_json in
+      make ?tags ?lastStateChangeReason ?lastModifiedTime ?creationTime
+        ?authorId ?persistentAppUIStatus ?persistentAppUITypeList
+        ?persistentAppUIId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Holds persistent application user interface information. Applications installed on the Amazon EMR cluster publish user interfaces as web sites to monitor cluster activity."]
+module DescribePersistentAppUIOutput =
+  struct
+    type nonrec t =
+      {
+      persistentAppUI: PersistentAppUI.t option
+        [@ocaml.doc "The persistent application user interface."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?persistentAppUI = fun () -> { persistentAppUI }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PersistentAppUI",
+           (Option.map x.persistentAppUI ~f:PersistentAppUI.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let persistentAppUI =
+        (Option.map ~f:PersistentAppUI.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUI") in
+      make ?persistentAppUI ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let persistentAppUI =
+        field_map json__ "PersistentAppUI" PersistentAppUI.of_json in
+      make ?persistentAppUI ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a persistent application user interface."]
 module MaxResultsNumber =
   struct
     type nonrec t = int
@@ -7057,14 +8726,14 @@ module DescribeReleaseLabelInput =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReleaseLabel") in
       make ?maxResults ?nextToken ?releaseLabel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsNumber.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let releaseLabel = field_map json "ReleaseLabel" String_.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResultsNumber.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let releaseLabel = field_map json__ "ReleaseLabel" String_.of_json in
       make ?maxResults ?nextToken ?releaseLabel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides EMR release label details, such as releases available the region where the API request is run, and the available applications for a specific EMR release label. Can also list EMR release versions that support a specified version of Spark."]
+       "Provides Amazon EMR release label details, such as the releases available the Region where the API request is run, and the available applications for a specific Amazon EMR release label. Can also list Amazon EMR releases that support a specified version of Spark."]
 module SimplifiedApplication =
   struct
     type nonrec t =
@@ -7087,9 +8756,9 @@ module SimplifiedApplication =
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       make ?version ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let version = field_map json "Version" String_.of_json in
-      let name = field_map json "Name" String_.of_json in
+    let of_json json__ =
+      let version = field_map json__ "Version" String_.of_json in
+      let name = field_map json__ "Name" String_.of_json in
       make ?version ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7098,6 +8767,9 @@ module SimplifiedApplicationList =
   struct
     type nonrec t = SimplifiedApplication.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SimplifiedApplication.to_value)) |>
         (fun x -> `List x)
@@ -7120,6 +8792,54 @@ module SimplifiedApplicationList =
         ~of_json:SimplifiedApplication.of_json j
     let to_json v = composed_to_json to_value v
   end
+module OSRelease =
+  struct
+    type nonrec t =
+      {
+      label: String_.t option
+        [@ocaml.doc
+          "The Amazon Linux release specified for a cluster in the RunJobFlow request. The format is as shown in Amazon Linux 2 Release Notes . For example, 2.0.20220218.1."]}
+    let make ?label = fun () -> { label }
+    let to_value x =
+      structure_to_value
+        [("Label", (Option.map x.label ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let label = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Label") in
+      make ?label ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let label = field_map json__ "Label" String_.of_json in make ?label ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon Linux release specified for a cluster in the RunJobFlow request."]
+module OSReleaseList =
+  struct
+    type nonrec t = OSRelease.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OSRelease.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OSRelease.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OSReleaseList" ~of_json:OSRelease.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DescribeReleaseLabelOutput =
   struct
     type nonrec t =
@@ -7131,14 +8851,20 @@ module DescribeReleaseLabelOutput =
           "The list of applications available for the target release label. Name is the name of the application. Version is the concise version of the application."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The pagination token. Reserved for future use. Currently set to null."]}
+          "The pagination token. Reserved for future use. Currently set to null."];
+      availableOSReleases: OSReleaseList.t option
+        [@ocaml.doc
+          "The list of available Amazon Linux release versions for an Amazon EMR release. Contains a Label field that is formatted as shown in Amazon Linux 2 Release Notes . For example, 2.0.20220218.1."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?releaseLabel =
       fun ?applications ->
-        fun ?nextToken -> fun () -> { releaseLabel; applications; nextToken }
+        fun ?nextToken ->
+          fun ?availableOSReleases ->
+            fun () ->
+              { releaseLabel; applications; nextToken; availableOSReleases }
     let error_of_json name json =
       match name with
       | "InternalServerException" ->
@@ -7176,9 +8902,14 @@ module DescribeReleaseLabelOutput =
         [("ReleaseLabel", (Option.map x.releaseLabel ~f:String_.to_value));
         ("Applications",
           (Option.map x.applications ~f:SimplifiedApplicationList.to_value));
-        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("AvailableOSReleases",
+          (Option.map x.availableOSReleases ~f:OSReleaseList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let availableOSReleases =
+        (Option.map ~f:OSReleaseList.of_xml)
+          (Xml.child xml_arg0 "AvailableOSReleases") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let applications =
@@ -7186,17 +8917,19 @@ module DescribeReleaseLabelOutput =
           (Xml.child xml_arg0 "Applications") in
       let releaseLabel =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ReleaseLabel") in
-      make ?nextToken ?applications ?releaseLabel ()
+      make ?availableOSReleases ?nextToken ?applications ?releaseLabel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let availableOSReleases =
+        field_map json__ "AvailableOSReleases" OSReleaseList.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let applications =
-        field_map json "Applications" SimplifiedApplicationList.of_json in
-      let releaseLabel = field_map json "ReleaseLabel" String_.of_json in
-      make ?nextToken ?applications ?releaseLabel ()
+        field_map json__ "Applications" SimplifiedApplicationList.of_json in
+      let releaseLabel = field_map json__ "ReleaseLabel" String_.of_json in
+      make ?availableOSReleases ?nextToken ?applications ?releaseLabel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides EMR release label details, such as releases available the region where the API request is run, and the available applications for a specific EMR release label. Can also list EMR release versions that support a specified version of Spark."]
+       "Provides Amazon EMR release label details, such as the releases available the Region where the API request is run, and the available applications for a specific Amazon EMR release label. Can also list Amazon EMR releases that support a specified version of Spark."]
 module DescribeSecurityConfigurationInput =
   struct
     type nonrec t =
@@ -7213,8 +8946,9 @@ module DescribeSecurityConfigurationInput =
         XmlString.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map_exn json "Name" XmlString.of_json in make ~name ()
+    let of_json json__ =
+      let name = field_map_exn json__ "Name" XmlString.of_json in
+      make ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Provides the details of a security configuration by returning the configuration JSON."]
@@ -7286,11 +9020,11 @@ module DescribeSecurityConfigurationOutput =
       let name = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?creationDateTime ?securityConfiguration ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       let securityConfiguration =
-        field_map json "SecurityConfiguration" String_.of_json in
-      let name = field_map json "Name" XmlString.of_json in
+        field_map json__ "SecurityConfiguration" String_.of_json in
+      let name = field_map json__ "Name" XmlString.of_json in
       make ?creationDateTime ?securityConfiguration ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7317,9 +9051,9 @@ module DescribeStepInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~stepId ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let stepId = field_map_exn json "StepId" StepId.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let stepId = field_map_exn json__ "StepId" StepId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~stepId ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This input determines which step to describe."]
@@ -7355,10 +9089,10 @@ module StepTimeline =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       make ?endDateTime ?startDateTime ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let startDateTime = field_map json "StartDateTime" Date.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let startDateTime = field_map json__ "StartDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       make ?endDateTime ?startDateTime ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The timeline of the cluster step lifecycle."]
@@ -7403,9 +9137,9 @@ module StepStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" StepStateChangeReasonCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code = field_map json__ "Code" StepStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the step state change reason."]
@@ -7479,10 +9213,10 @@ module FailureDetails =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Reason") in
       make ?logFile ?message ?reason ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let logFile = field_map json "LogFile" String_.of_json in
-      let message = field_map json "Message" String_.of_json in
-      let reason = field_map json "Reason" String_.of_json in
+    let of_json json__ =
+      let logFile = field_map json__ "LogFile" String_.of_json in
+      let message = field_map json__ "Message" String_.of_json in
+      let reason = field_map json__ "Reason" String_.of_json in
       make ?logFile ?message ?reason ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7527,13 +9261,13 @@ module StepStatus =
         (Option.map ~f:StepState.of_xml) (Xml.child xml_arg0 "State") in
       make ?timeline ?failureDetails ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeline = field_map json "Timeline" StepTimeline.of_json in
+    let of_json json__ =
+      let timeline = field_map json__ "Timeline" StepTimeline.of_json in
       let failureDetails =
-        field_map json "FailureDetails" FailureDetails.of_json in
+        field_map json__ "FailureDetails" FailureDetails.of_json in
       let stateChangeReason =
-        field_map json "StateChangeReason" StepStateChangeReason.of_json in
-      let state = field_map json "State" StepState.of_json in
+        field_map json__ "StateChangeReason" StepStateChangeReason.of_json in
+      let state = field_map json__ "State" StepState.of_json in
       make ?timeline ?failureDetails ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The execution status details of the cluster step."]
@@ -7573,11 +9307,11 @@ module HadoopStepConfig =
       let jar = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Jar") in
       make ?args ?mainClass ?properties ?jar ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let args = field_map json "Args" StringList.of_json in
-      let mainClass = field_map json "MainClass" String_.of_json in
-      let properties = field_map json "Properties" StringMap.of_json in
-      let jar = field_map json "Jar" String_.of_json in
+    let of_json json__ =
+      let args = field_map json__ "Args" StringList.of_json in
+      let mainClass = field_map json__ "MainClass" String_.of_json in
+      let properties = field_map json__ "Properties" StringMap.of_json in
+      let jar = field_map json__ "Jar" String_.of_json in
       make ?args ?mainClass ?properties ?jar ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7595,13 +9329,34 @@ module Step =
           "The action to take when the cluster step fails. Possible values are TERMINATE_CLUSTER, CANCEL_AND_WAIT, and CONTINUE. TERMINATE_JOB_FLOW is provided for backward compatibility. We recommend using TERMINATE_CLUSTER instead. If a cluster's StepConcurrencyLevel is greater than 1, do not use AddJobFlowSteps to submit a step with this parameter set to CANCEL_AND_WAIT or TERMINATE_CLUSTER. The step is not submitted and the action fails with a message that the ActionOnFailure setting is not valid. If you change a cluster's StepConcurrencyLevel to be greater than 1 while a step is running, the ActionOnFailure parameter may not behave as you expect. In this case, for a step that fails with this parameter set to CANCEL_AND_WAIT, pending steps and the running step are not canceled; for a step that fails with this parameter set to TERMINATE_CLUSTER, the cluster does not terminate."];
       status: StepStatus.t option
         [@ocaml.doc
-          "The current execution status details of the cluster step."]}
+          "The current execution status details of the cluster step."];
+      executionRoleArn: OptionalArnType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the runtime role for a step on the cluster. The runtime role can be a cross-account IAM role. The runtime role ARN is a combination of account ID, role name, and role type using the following format: arn:partition:service:region:account:resource. For example, arn:aws:IAM::1234567890:role/ReadOnly is a correctly formatted runtime role ARN."];
+      logUri: String_.t option
+        [@ocaml.doc "The Amazon S3 destination URI for log publishing."];
+      encryptionKeyArn: String_.t option
+        [@ocaml.doc
+          "The KMS key ARN to encrypt the logs published to the given Amazon S3 destination."]}
     let make ?id =
       fun ?name ->
         fun ?config ->
           fun ?actionOnFailure ->
             fun ?status ->
-              fun () -> { id; name; config; actionOnFailure; status }
+              fun ?executionRoleArn ->
+                fun ?logUri ->
+                  fun ?encryptionKeyArn ->
+                    fun () ->
+                      {
+                        id;
+                        name;
+                        config;
+                        actionOnFailure;
+                        status;
+                        executionRoleArn;
+                        logUri;
+                        encryptionKeyArn
+                      }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:StepId.to_value));
@@ -7609,9 +9364,22 @@ module Step =
         ("Config", (Option.map x.config ~f:HadoopStepConfig.to_value));
         ("ActionOnFailure",
           (Option.map x.actionOnFailure ~f:ActionOnFailure.to_value));
-        ("Status", (Option.map x.status ~f:StepStatus.to_value))]
+        ("Status", (Option.map x.status ~f:StepStatus.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:OptionalArnType.to_value));
+        ("LogUri", (Option.map x.logUri ~f:String_.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let logUri =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogUri") in
+      let executionRoleArn =
+        (Option.map ~f:OptionalArnType.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
       let status =
         (Option.map ~f:StepStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let actionOnFailure =
@@ -7621,16 +9389,23 @@ module Step =
         (Option.map ~f:HadoopStepConfig.of_xml) (Xml.child xml_arg0 "Config") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:StepId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?status ?actionOnFailure ?config ?name ?id ()
+      make ?encryptionKeyArn ?logUri ?executionRoleArn ?status
+        ?actionOnFailure ?config ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" StepStatus.of_json in
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" String_.of_json in
+      let logUri = field_map json__ "LogUri" String_.of_json in
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" OptionalArnType.of_json in
+      let status = field_map json__ "Status" StepStatus.of_json in
       let actionOnFailure =
-        field_map json "ActionOnFailure" ActionOnFailure.of_json in
-      let config = field_map json "Config" HadoopStepConfig.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" StepId.of_json in
-      make ?status ?actionOnFailure ?config ?name ?id ()
+        field_map json__ "ActionOnFailure" ActionOnFailure.of_json in
+      let config = field_map json__ "Config" HadoopStepConfig.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" StepId.of_json in
+      make ?encryptionKeyArn ?logUri ?executionRoleArn ?status
+        ?actionOnFailure ?config ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This represents a step in a cluster."]
 module DescribeStepOutput =
@@ -7683,8 +9458,8 @@ module DescribeStepOutput =
       let step = (Option.map ~f:Step.of_xml) (Xml.child xml_arg0 "Step") in
       make ?step ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let step = field_map json "Step" Step.of_json in make ?step ()
+    let of_json json__ =
+      let step = field_map json__ "Step" Step.of_json in make ?step ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This output contains the description of the cluster step."]
@@ -7705,8 +9480,9 @@ module DescribeStudioInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StudioId") in
       make ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7726,7 +9502,7 @@ module Studio =
         [@ocaml.doc "The detailed description of the Amazon EMR Studio."];
       authMode: AuthMode.t option
         [@ocaml.doc
-          "Specifies whether the Amazon EMR Studio authenticates users using IAM or Amazon Web Services SSO."];
+          "Specifies whether the Amazon EMR Studio authenticates users with IAM or IAM Identity Center."];
       vpcId: XmlStringMaxLen256.t option
         [@ocaml.doc
           "The ID of the VPC associated with the Amazon EMR Studio."];
@@ -7759,7 +9535,19 @@ module Studio =
         [@ocaml.doc
           "The name of your identity provider's RelayState parameter."];
       tags: TagList.t option
-        [@ocaml.doc "A list of tags associated with the Amazon EMR Studio."]}
+        [@ocaml.doc "A list of tags associated with the Amazon EMR Studio."];
+      idcInstanceArn: ArnType.t option
+        [@ocaml.doc
+          "The ARN of the IAM Identity Center instance the Studio application belongs to."];
+      trustedIdentityPropagationEnabled: BooleanObject.t option
+        [@ocaml.doc
+          "Indicates whether the Studio has Trusted identity propagation enabled. The default value is false."];
+      idcUserAssignment: IdcUserAssignment.t option
+        [@ocaml.doc
+          "Indicates whether the Studio has REQUIRED or OPTIONAL IAM Identity Center user assignment. If the value is set to REQUIRED, users must be explicitly assigned to the Studio application to access the Studio."];
+      encryptionKeyArn: XmlString.t option
+        [@ocaml.doc
+          "The KMS key identifier (ARN) used to encrypt Amazon EMR Studio workspace and notebook files when backed up to Amazon S3."]}
     let make ?studioId =
       fun ?studioArn ->
         fun ?name ->
@@ -7777,26 +9565,36 @@ module Studio =
                                 fun ?idpAuthUrl ->
                                   fun ?idpRelayStateParameterName ->
                                     fun ?tags ->
-                                      fun () ->
-                                        {
-                                          studioId;
-                                          studioArn;
-                                          name;
-                                          description;
-                                          authMode;
-                                          vpcId;
-                                          subnetIds;
-                                          serviceRole;
-                                          userRole;
-                                          workspaceSecurityGroupId;
-                                          engineSecurityGroupId;
-                                          url;
-                                          creationTime;
-                                          defaultS3Location;
-                                          idpAuthUrl;
-                                          idpRelayStateParameterName;
-                                          tags
-                                        }
+                                      fun ?idcInstanceArn ->
+                                        fun
+                                          ?trustedIdentityPropagationEnabled
+                                          ->
+                                          fun ?idcUserAssignment ->
+                                            fun ?encryptionKeyArn ->
+                                              fun () ->
+                                                {
+                                                  studioId;
+                                                  studioArn;
+                                                  name;
+                                                  description;
+                                                  authMode;
+                                                  vpcId;
+                                                  subnetIds;
+                                                  serviceRole;
+                                                  userRole;
+                                                  workspaceSecurityGroupId;
+                                                  engineSecurityGroupId;
+                                                  url;
+                                                  creationTime;
+                                                  defaultS3Location;
+                                                  idpAuthUrl;
+                                                  idpRelayStateParameterName;
+                                                  tags;
+                                                  idcInstanceArn;
+                                                  trustedIdentityPropagationEnabled;
+                                                  idcUserAssignment;
+                                                  encryptionKeyArn
+                                                }
     let to_value x =
       structure_to_value
         [("StudioId", (Option.map x.studioId ~f:XmlStringMaxLen256.to_value));
@@ -7823,9 +9621,28 @@ module Studio =
         ("IdpRelayStateParameterName",
           (Option.map x.idpRelayStateParameterName
              ~f:XmlStringMaxLen256.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("IdcInstanceArn", (Option.map x.idcInstanceArn ~f:ArnType.to_value));
+        ("TrustedIdentityPropagationEnabled",
+          (Option.map x.trustedIdentityPropagationEnabled
+             ~f:BooleanObject.to_value));
+        ("IdcUserAssignment",
+          (Option.map x.idcUserAssignment ~f:IdcUserAssignment.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let idcUserAssignment =
+        (Option.map ~f:IdcUserAssignment.of_xml)
+          (Xml.child xml_arg0 "IdcUserAssignment") in
+      let trustedIdentityPropagationEnabled =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "TrustedIdentityPropagationEnabled") in
+      let idcInstanceArn =
+        (Option.map ~f:ArnType.of_xml) (Xml.child xml_arg0 "IdcInstanceArn") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let idpRelayStateParameterName =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
@@ -7866,36 +9683,49 @@ module Studio =
       let studioId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "StudioId") in
-      make ?tags ?idpRelayStateParameterName ?idpAuthUrl ?defaultS3Location
+      make ?encryptionKeyArn ?idcUserAssignment
+        ?trustedIdentityPropagationEnabled ?idcInstanceArn ?tags
+        ?idpRelayStateParameterName ?idpAuthUrl ?defaultS3Location
         ?creationTime ?url ?engineSecurityGroupId ?workspaceSecurityGroupId
         ?userRole ?serviceRole ?subnetIds ?vpcId ?authMode ?description ?name
         ?studioArn ?studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" XmlString.of_json in
+      let idcUserAssignment =
+        field_map json__ "IdcUserAssignment" IdcUserAssignment.of_json in
+      let trustedIdentityPropagationEnabled =
+        field_map json__ "TrustedIdentityPropagationEnabled"
+          BooleanObject.of_json in
+      let idcInstanceArn = field_map json__ "IdcInstanceArn" ArnType.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let idpRelayStateParameterName =
-        field_map json "IdpRelayStateParameterName"
+        field_map json__ "IdpRelayStateParameterName"
           XmlStringMaxLen256.of_json in
-      let idpAuthUrl = field_map json "IdpAuthUrl" XmlString.of_json in
+      let idpAuthUrl = field_map json__ "IdpAuthUrl" XmlString.of_json in
       let defaultS3Location =
-        field_map json "DefaultS3Location" XmlString.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let url = field_map json "Url" XmlString.of_json in
+        field_map json__ "DefaultS3Location" XmlString.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let url = field_map json__ "Url" XmlString.of_json in
       let engineSecurityGroupId =
-        field_map json "EngineSecurityGroupId" XmlStringMaxLen256.of_json in
+        field_map json__ "EngineSecurityGroupId" XmlStringMaxLen256.of_json in
       let workspaceSecurityGroupId =
-        field_map json "WorkspaceSecurityGroupId" XmlStringMaxLen256.of_json in
-      let userRole = field_map json "UserRole" XmlString.of_json in
-      let serviceRole = field_map json "ServiceRole" XmlString.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIdList.of_json in
-      let vpcId = field_map json "VpcId" XmlStringMaxLen256.of_json in
-      let authMode = field_map json "AuthMode" AuthMode.of_json in
+        field_map json__ "WorkspaceSecurityGroupId"
+          XmlStringMaxLen256.of_json in
+      let userRole = field_map json__ "UserRole" XmlString.of_json in
+      let serviceRole = field_map json__ "ServiceRole" XmlString.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdList.of_json in
+      let vpcId = field_map json__ "VpcId" XmlStringMaxLen256.of_json in
+      let authMode = field_map json__ "AuthMode" AuthMode.of_json in
       let description =
-        field_map json "Description" XmlStringMaxLen256.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
-      let studioArn = field_map json "StudioArn" XmlStringMaxLen256.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
-      make ?tags ?idpRelayStateParameterName ?idpAuthUrl ?defaultS3Location
+        field_map json__ "Description" XmlStringMaxLen256.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      let studioArn = field_map json__ "StudioArn" XmlStringMaxLen256.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
+      make ?encryptionKeyArn ?idcUserAssignment
+        ?trustedIdentityPropagationEnabled ?idcInstanceArn ?tags
+        ?idpRelayStateParameterName ?idpAuthUrl ?defaultS3Location
         ?creationTime ?url ?engineSecurityGroupId ?workspaceSecurityGroupId
         ?userRole ?serviceRole ?subnetIds ?vpcId ?authMode ?description ?name
         ?studioArn ?studioId ()
@@ -7953,8 +9783,9 @@ module DescribeStudioOutput =
         (Option.map ~f:Studio.of_xml) (Xml.child xml_arg0 "Studio") in
       make ?studio ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let studio = field_map json "Studio" Studio.of_json in make ?studio ()
+    let of_json json__ =
+      let studio = field_map json__ "Studio" Studio.of_json in
+      make ?studio ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns details for the specified Amazon EMR Studio including ID, Name, VPC, Studio access URL, and so on."]
@@ -7975,6 +9806,9 @@ module EC2InstanceIdsList =
   struct
     type nonrec t = InstanceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -7999,6 +9833,9 @@ module EC2InstanceIdsToTerminateList =
   struct
     type nonrec t = InstanceId.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8026,7 +9863,7 @@ module EbsBlockDevice =
       {
       volumeSpecification: VolumeSpecification.t option
         [@ocaml.doc
-          "EBS volume specifications such as volume type, IOPS, and size (GiB) that will be requested for the EBS volume attached to an EC2 instance in the cluster."];
+          "EBS volume specifications such as volume type, IOPS, size (GiB) and throughput (MiB/s) that are requested for the EBS volume attached to an Amazon EC2 instance in the cluster."];
       device: String_.t option
         [@ocaml.doc
           "The device name that is exposed to the instance, such as /dev/sdh."]}
@@ -8046,10 +9883,10 @@ module EbsBlockDevice =
           (Xml.child xml_arg0 "VolumeSpecification") in
       make ?device ?volumeSpecification ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let device = field_map json "Device" String_.of_json in
+    let of_json json__ =
+      let device = field_map json__ "Device" String_.of_json in
       let volumeSpecification =
-        field_map json "VolumeSpecification" VolumeSpecification.of_json in
+        field_map json__ "VolumeSpecification" VolumeSpecification.of_json in
       make ?device ?volumeSpecification ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8058,6 +9895,9 @@ module EbsBlockDeviceList =
   struct
     type nonrec t = EbsBlockDevice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EbsBlockDevice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8101,16 +9941,20 @@ module EbsVolume =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Device") in
       make ?volumeId ?device ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let volumeId = field_map json "VolumeId" String_.of_json in
-      let device = field_map json "Device" String_.of_json in
+    let of_json json__ =
+      let volumeId = field_map json__ "VolumeId" String_.of_json in
+      let device = field_map json__ "Device" String_.of_json in
       make ?volumeId ?device ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "EBS block device that's attached to an EC2 instance."]
+  end[@@ocaml.doc
+       "EBS block device that's attached to an Amazon EC2 instance."]
 module EbsVolumeList =
   struct
     type nonrec t = EbsVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EbsVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -8131,6 +9975,19 @@ module EbsVolumeList =
       list_of_json ~kind:"EbsVolumeList" ~of_json:EbsVolume.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Float_ =
+  struct
+    type nonrec t = float
+    let make i = i
+    let of_string = Float.of_string
+    let to_value x = `Float x
+    let to_query v = to_query to_value v
+    let to_header x = Stdlib.Float.to_string x
+    let of_xml xml_arg0 =
+      Float.of_string (string_of_xml ~kind:"a float" xml_arg0)
+    let of_json j = float_of_json ~kind:"a float" j
+    let to_json = simple_to_json to_value
+  end
 module GetAutoTerminationPolicyInput =
   struct
     type nonrec t =
@@ -8150,8 +10007,8 @@ module GetAutoTerminationPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8194,9 +10051,10 @@ module GetAutoTerminationPolicyOutput =
           (Xml.child xml_arg0 "AutoTerminationPolicy") in
       make ?autoTerminationPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoTerminationPolicy =
-        field_map json "AutoTerminationPolicy" AutoTerminationPolicy.of_json in
+        field_map json__ "AutoTerminationPolicy"
+          AutoTerminationPolicy.of_json in
       make ?autoTerminationPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8218,20 +10076,19 @@ module GetBlockPublicAccessConfigurationOutput =
   struct
     type nonrec t =
       {
-      blockPublicAccessConfiguration: BlockPublicAccessConfiguration.t
+      blockPublicAccessConfiguration: BlockPublicAccessConfiguration.t option
         [@ocaml.doc
-          "A configuration for Amazon EMR block public access. The configuration applies to all clusters created in your account for the current Region. The configuration specifies whether block public access is enabled. If block public access is enabled, security groups associated with the cluster cannot have rules that allow inbound traffic from 0.0.0.0/0 or ::/0 on a port, unless the port is specified as an exception using PermittedPublicSecurityGroupRuleRanges in the BlockPublicAccessConfiguration. By default, Port 22 (SSH) is an exception, and public access is allowed on this port. You can change this by updating the block public access configuration to remove the exception. For accounts that created clusters in a Region before November 25, 2019, block public access is disabled by default in that Region. To use this feature, you must manually enable and configure it. For accounts that did not create an EMR cluster in a Region before this date, block public access is enabled by default in that Region."];
+          "A configuration for Amazon EMR block public access. The configuration applies to all clusters created in your account for the current Region. The configuration specifies whether block public access is enabled. If block public access is enabled, security groups associated with the cluster cannot have rules that allow inbound traffic from 0.0.0.0/0 or ::/0 on a port, unless the port is specified as an exception using PermittedPublicSecurityGroupRuleRanges in the BlockPublicAccessConfiguration. By default, Port 22 (SSH) is an exception, and public access is allowed on this port. You can change this by updating the block public access configuration to remove the exception. For accounts that created clusters in a Region before November 25, 2019, block public access is disabled by default in that Region. To use this feature, you must manually enable and configure it. For accounts that did not create an Amazon EMR cluster in a Region before this date, block public access is enabled by default in that Region."];
       blockPublicAccessConfigurationMetadata:
-        BlockPublicAccessConfigurationMetadata.t
+        BlockPublicAccessConfigurationMetadata.t option
         [@ocaml.doc
           "Properties that describe the Amazon Web Services principal that created the BlockPublicAccessConfiguration using the PutBlockPublicAccessConfiguration action as well as the date and time that the configuration was created. Each time a configuration for block public access is updated, Amazon EMR updates this metadata."]}
     type nonrec error =
       [ `InternalServerException of InternalServerException.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBlockPublicAccessConfigurationOutput"
-    let make ~blockPublicAccessConfiguration =
-      fun ~blockPublicAccessConfigurationMetadata ->
+    let make ?blockPublicAccessConfiguration =
+      fun ?blockPublicAccessConfigurationMetadata ->
         fun () ->
           {
             blockPublicAccessConfiguration;
@@ -8272,38 +10129,137 @@ module GetBlockPublicAccessConfigurationOutput =
     let to_value x =
       structure_to_value
         [("BlockPublicAccessConfiguration",
-           (Some
-              (BlockPublicAccessConfiguration.to_value
-                 x.blockPublicAccessConfiguration)));
+           (Option.map x.blockPublicAccessConfiguration
+              ~f:BlockPublicAccessConfiguration.to_value));
         ("BlockPublicAccessConfigurationMetadata",
-          (Some
-             (BlockPublicAccessConfigurationMetadata.to_value
-                x.blockPublicAccessConfigurationMetadata)))]
+          (Option.map x.blockPublicAccessConfigurationMetadata
+             ~f:BlockPublicAccessConfigurationMetadata.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let blockPublicAccessConfigurationMetadata =
-        BlockPublicAccessConfigurationMetadata.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "BlockPublicAccessConfigurationMetadata") in
+        (Option.map ~f:BlockPublicAccessConfigurationMetadata.of_xml)
+          (Xml.child xml_arg0 "BlockPublicAccessConfigurationMetadata") in
       let blockPublicAccessConfiguration =
-        BlockPublicAccessConfiguration.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "BlockPublicAccessConfiguration") in
-      make ~blockPublicAccessConfigurationMetadata
-        ~blockPublicAccessConfiguration ()
+        (Option.map ~f:BlockPublicAccessConfiguration.of_xml)
+          (Xml.child xml_arg0 "BlockPublicAccessConfiguration") in
+      make ?blockPublicAccessConfigurationMetadata
+        ?blockPublicAccessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blockPublicAccessConfigurationMetadata =
-        field_map_exn json "BlockPublicAccessConfigurationMetadata"
+        field_map json__ "BlockPublicAccessConfigurationMetadata"
           BlockPublicAccessConfigurationMetadata.of_json in
       let blockPublicAccessConfiguration =
-        field_map_exn json "BlockPublicAccessConfiguration"
+        field_map json__ "BlockPublicAccessConfiguration"
           BlockPublicAccessConfiguration.of_json in
-      make ~blockPublicAccessConfigurationMetadata
-        ~blockPublicAccessConfiguration ()
+      make ?blockPublicAccessConfigurationMetadata
+        ?blockPublicAccessConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns the Amazon EMR block public access configuration for your Amazon Web Services account in the current Region. For more information see Configure Block Public Access for Amazon EMR in the Amazon EMR Management Guide."]
+module GetClusterSessionCredentialsInput =
+  struct
+    type nonrec t =
+      {
+      clusterId: XmlStringMaxLen256.t
+        [@ocaml.doc "The unique identifier of the cluster."];
+      executionRoleArn: ArnType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the runtime role for interactive workload submission on the cluster. The runtime role can be a cross-account IAM role. The runtime role ARN is a combination of account ID, role name, and role type using the following format: arn:partition:service:region:account:resource."]}
+    let context_ = "GetClusterSessionCredentialsInput"
+    let make ?executionRoleArn =
+      fun ~clusterId -> fun () -> { executionRoleArn; clusterId }
+    let to_value x =
+      structure_to_value
+        [("ClusterId", (Some (XmlStringMaxLen256.to_value x.clusterId)));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:ArnType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionRoleArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let clusterId =
+        XmlStringMaxLen256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
+      make ?executionRoleArn ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" ArnType.of_json in
+      let clusterId =
+        field_map_exn json__ "ClusterId" XmlStringMaxLen256.of_json in
+      make ?executionRoleArn ~clusterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides temporary, HTTP basic credentials that are associated with a given runtime IAM role and used by a cluster with fine-grained access control activated. You can use these credentials to connect to cluster endpoints that support username and password authentication."]
+module GetClusterSessionCredentialsOutput =
+  struct
+    type nonrec t =
+      {
+      credentials: Credentials.t option
+        [@ocaml.doc
+          "The credentials that you can use to connect to cluster endpoints that support username and password authentication."];
+      expiresAt: Date.t option
+        [@ocaml.doc
+          "The time when the credentials that are returned by the GetClusterSessionCredentials API expire."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?credentials =
+      fun ?expiresAt -> fun () -> { credentials; expiresAt }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Credentials", (Option.map x.credentials ~f:Credentials.to_value));
+        ("ExpiresAt", (Option.map x.expiresAt ~f:Date.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let expiresAt =
+        (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "ExpiresAt") in
+      let credentials =
+        (Option.map ~f:Credentials.of_xml) (Xml.child xml_arg0 "Credentials") in
+      make ?expiresAt ?credentials ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let expiresAt = field_map json__ "ExpiresAt" Date.of_json in
+      let credentials = field_map json__ "Credentials" Credentials.of_json in
+      make ?expiresAt ?credentials ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Provides temporary, HTTP basic credentials that are associated with a given runtime IAM role and used by a cluster with fine-grained access control activated. You can use these credentials to connect to cluster endpoints that support username and password authentication."]
 module GetManagedScalingPolicyInput =
   struct
     type nonrec t =
@@ -8323,35 +10279,106 @@ module GetManagedScalingPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Fetches the attached managed scaling policy for an Amazon EMR cluster."]
+module UtilizationPerformanceIndexInteger =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for UtilizationPerformanceIndexInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ScalingStrategy =
+  struct
+    type nonrec t =
+      | DEFAULT 
+      | ADVANCED 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | DEFAULT -> "DEFAULT"
+      | ADVANCED -> "ADVANCED"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "DEFAULT" -> DEFAULT
+      | "ADVANCED" -> ADVANCED
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ScalingStrategy" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ScalingStrategy" j)
+    let to_json = simple_to_json to_value
+  end
 module ManagedScalingPolicy =
   struct
     type nonrec t =
       {
       computeLimits: ComputeLimits.t option
         [@ocaml.doc
-          "The EC2 unit limits for a managed scaling policy. The managed scaling activity of a cluster is not allowed to go above or below these limits. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]}
-    let make ?computeLimits = fun () -> { computeLimits }
+          "The Amazon EC2 unit limits for a managed scaling policy. The managed scaling activity of a cluster is not allowed to go above or below these limits. The limit only applies to the core and task nodes. The master node cannot be scaled after initial configuration."];
+      utilizationPerformanceIndex:
+        UtilizationPerformanceIndexInteger.t option
+        [@ocaml.doc
+          "An integer value that represents an advanced scaling strategy. Setting a higher value optimizes for performance. Setting a lower value optimizes for resource conservation. Setting the value to 50 balances performance and resource conservation. Possible values are 1, 25, 50, 75, and 100."];
+      scalingStrategy: ScalingStrategy.t option
+        [@ocaml.doc
+          "Determines whether a custom scaling utilization performance index can be set. Possible values include ADVANCED or DEFAULT."]}
+    let make ?computeLimits =
+      fun ?utilizationPerformanceIndex ->
+        fun ?scalingStrategy ->
+          fun () ->
+            { computeLimits; utilizationPerformanceIndex; scalingStrategy }
     let to_value x =
       structure_to_value
         [("ComputeLimits",
-           (Option.map x.computeLimits ~f:ComputeLimits.to_value))]
+           (Option.map x.computeLimits ~f:ComputeLimits.to_value));
+        ("UtilizationPerformanceIndex",
+          (Option.map x.utilizationPerformanceIndex
+             ~f:UtilizationPerformanceIndexInteger.to_value));
+        ("ScalingStrategy",
+          (Option.map x.scalingStrategy ~f:ScalingStrategy.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let scalingStrategy =
+        (Option.map ~f:ScalingStrategy.of_xml)
+          (Xml.child xml_arg0 "ScalingStrategy") in
+      let utilizationPerformanceIndex =
+        (Option.map ~f:UtilizationPerformanceIndexInteger.of_xml)
+          (Xml.child xml_arg0 "UtilizationPerformanceIndex") in
       let computeLimits =
         (Option.map ~f:ComputeLimits.of_xml)
           (Xml.child xml_arg0 "ComputeLimits") in
-      make ?computeLimits ()
+      make ?scalingStrategy ?utilizationPerformanceIndex ?computeLimits ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let scalingStrategy =
+        field_map json__ "ScalingStrategy" ScalingStrategy.of_json in
+      let utilizationPerformanceIndex =
+        field_map json__ "UtilizationPerformanceIndex"
+          UtilizationPerformanceIndexInteger.of_json in
       let computeLimits =
-        field_map json "ComputeLimits" ComputeLimits.of_json in
-      make ?computeLimits ()
+        field_map json__ "ComputeLimits" ComputeLimits.of_json in
+      make ?scalingStrategy ?utilizationPerformanceIndex ?computeLimits ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Managed scaling policy for an Amazon EMR cluster. The policy specifies the limits for resources that can be added or terminated from a cluster. The policy only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
@@ -8393,13 +10420,344 @@ module GetManagedScalingPolicyOutput =
           (Xml.child xml_arg0 "ManagedScalingPolicy") in
       make ?managedScalingPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedScalingPolicy =
-        field_map json "ManagedScalingPolicy" ManagedScalingPolicy.of_json in
+        field_map json__ "ManagedScalingPolicy" ManagedScalingPolicy.of_json in
       make ?managedScalingPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Fetches the attached managed scaling policy for an Amazon EMR cluster."]
+module OnClusterAppUIType =
+  struct
+    type nonrec t =
+      | SparkHistoryServer 
+      | YarnTimelineService 
+      | TezUI 
+      | ApplicationMaster 
+      | JobHistoryServer 
+      | ResourceManager 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | SparkHistoryServer -> "SparkHistoryServer"
+      | YarnTimelineService -> "YarnTimelineService"
+      | TezUI -> "TezUI"
+      | ApplicationMaster -> "ApplicationMaster"
+      | JobHistoryServer -> "JobHistoryServer"
+      | ResourceManager -> "ResourceManager"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "SparkHistoryServer" -> SparkHistoryServer
+      | "YarnTimelineService" -> YarnTimelineService
+      | "TezUI" -> TezUI
+      | "ApplicationMaster" -> ApplicationMaster
+      | "JobHistoryServer" -> JobHistoryServer
+      | "ResourceManager" -> ResourceManager
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration OnClusterAppUIType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"OnClusterAppUIType" j)
+    let to_json = simple_to_json to_value
+  end
+module GetOnClusterAppUIPresignedURLInput =
+  struct
+    type nonrec t =
+      {
+      clusterId: XmlStringMaxLen256.t
+        [@ocaml.doc
+          "The cluster ID associated with the cluster's application user interface presigned URL."];
+      onClusterAppUIType: OnClusterAppUIType.t option
+        [@ocaml.doc
+          "The application UI type associated with the cluster's application user interface presigned URL."];
+      applicationId: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The application ID associated with the cluster's application user interface presigned URL."];
+      dryRun: BooleanObject.t option
+        [@ocaml.doc
+          "Determines if the user interface presigned URL is for a dry run."];
+      executionRoleArn: ArnType.t option
+        [@ocaml.doc
+          "The execution role ARN associated with the cluster's application user interface presigned URL."]}
+    let context_ = "GetOnClusterAppUIPresignedURLInput"
+    let make ?onClusterAppUIType =
+      fun ?applicationId ->
+        fun ?dryRun ->
+          fun ?executionRoleArn ->
+            fun ~clusterId ->
+              fun () ->
+                {
+                  onClusterAppUIType;
+                  applicationId;
+                  dryRun;
+                  executionRoleArn;
+                  clusterId
+                }
+    let to_value x =
+      structure_to_value
+        [("ClusterId", (Some (XmlStringMaxLen256.to_value x.clusterId)));
+        ("OnClusterAppUIType",
+          (Option.map x.onClusterAppUIType ~f:OnClusterAppUIType.to_value));
+        ("ApplicationId",
+          (Option.map x.applicationId ~f:XmlStringMaxLen256.to_value));
+        ("DryRun", (Option.map x.dryRun ~f:BooleanObject.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:ArnType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionRoleArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let dryRun =
+        (Option.map ~f:BooleanObject.of_xml) (Xml.child xml_arg0 "DryRun") in
+      let applicationId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "ApplicationId") in
+      let onClusterAppUIType =
+        (Option.map ~f:OnClusterAppUIType.of_xml)
+          (Xml.child xml_arg0 "OnClusterAppUIType") in
+      let clusterId =
+        XmlStringMaxLen256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
+      make ?executionRoleArn ?dryRun ?applicationId ?onClusterAppUIType
+        ~clusterId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" ArnType.of_json in
+      let dryRun = field_map json__ "DryRun" BooleanObject.of_json in
+      let applicationId =
+        field_map json__ "ApplicationId" XmlStringMaxLen256.of_json in
+      let onClusterAppUIType =
+        field_map json__ "OnClusterAppUIType" OnClusterAppUIType.of_json in
+      let clusterId =
+        field_map_exn json__ "ClusterId" XmlStringMaxLen256.of_json in
+      make ?executionRoleArn ?dryRun ?applicationId ?onClusterAppUIType
+        ~clusterId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The presigned URL properties for the cluster's application user interface."]
+module GetOnClusterAppUIPresignedURLOutput =
+  struct
+    type nonrec t =
+      {
+      presignedURLReady: Boolean.t option
+        [@ocaml.doc "Used to determine if the presigned URL is ready."];
+      presignedURL: XmlString.t option
+        [@ocaml.doc "The cluster's generated presigned URL."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?presignedURLReady =
+      fun ?presignedURL -> fun () -> { presignedURLReady; presignedURL }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PresignedURLReady",
+           (Option.map x.presignedURLReady ~f:Boolean.to_value));
+        ("PresignedURL", (Option.map x.presignedURL ~f:XmlString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let presignedURL =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "PresignedURL") in
+      let presignedURLReady =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "PresignedURLReady") in
+      make ?presignedURL ?presignedURLReady ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let presignedURL = field_map json__ "PresignedURL" XmlString.of_json in
+      let presignedURLReady =
+        field_map json__ "PresignedURLReady" Boolean.of_json in
+      make ?presignedURL ?presignedURLReady ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The presigned URL properties for the cluster's application user interface."]
+module GetPersistentAppUIPresignedURLInput =
+  struct
+    type nonrec t =
+      {
+      persistentAppUIId: XmlStringMaxLen256.t
+        [@ocaml.doc
+          "The persistent application user interface ID associated with the presigned URL."];
+      persistentAppUIType: PersistentAppUIType.t option
+        [@ocaml.doc
+          "The persistent application user interface type associated with the presigned URL."];
+      applicationId: XmlStringMaxLen256.t option
+        [@ocaml.doc "The application ID associated with the presigned URL."];
+      authProxyCall: BooleanObject.t option
+        [@ocaml.doc
+          "A boolean that represents if the caller is an authentication proxy call."];
+      executionRoleArn: ArnType.t option
+        [@ocaml.doc
+          "The execution role ARN associated with the presigned URL."]}
+    let context_ = "GetPersistentAppUIPresignedURLInput"
+    let make ?persistentAppUIType =
+      fun ?applicationId ->
+        fun ?authProxyCall ->
+          fun ?executionRoleArn ->
+            fun ~persistentAppUIId ->
+              fun () ->
+                {
+                  persistentAppUIType;
+                  applicationId;
+                  authProxyCall;
+                  executionRoleArn;
+                  persistentAppUIId
+                }
+    let to_value x =
+      structure_to_value
+        [("PersistentAppUIId",
+           (Some (XmlStringMaxLen256.to_value x.persistentAppUIId)));
+        ("PersistentAppUIType",
+          (Option.map x.persistentAppUIType ~f:PersistentAppUIType.to_value));
+        ("ApplicationId",
+          (Option.map x.applicationId ~f:XmlStringMaxLen256.to_value));
+        ("AuthProxyCall",
+          (Option.map x.authProxyCall ~f:BooleanObject.to_value));
+        ("ExecutionRoleArn",
+          (Option.map x.executionRoleArn ~f:ArnType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let executionRoleArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "ExecutionRoleArn") in
+      let authProxyCall =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "AuthProxyCall") in
+      let applicationId =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "ApplicationId") in
+      let persistentAppUIType =
+        (Option.map ~f:PersistentAppUIType.of_xml)
+          (Xml.child xml_arg0 "PersistentAppUIType") in
+      let persistentAppUIId =
+        XmlStringMaxLen256.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PersistentAppUIId") in
+      make ?executionRoleArn ?authProxyCall ?applicationId
+        ?persistentAppUIType ~persistentAppUIId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let executionRoleArn =
+        field_map json__ "ExecutionRoleArn" ArnType.of_json in
+      let authProxyCall =
+        field_map json__ "AuthProxyCall" BooleanObject.of_json in
+      let applicationId =
+        field_map json__ "ApplicationId" XmlStringMaxLen256.of_json in
+      let persistentAppUIType =
+        field_map json__ "PersistentAppUIType" PersistentAppUIType.of_json in
+      let persistentAppUIId =
+        field_map_exn json__ "PersistentAppUIId" XmlStringMaxLen256.of_json in
+      make ?executionRoleArn ?authProxyCall ?applicationId
+        ?persistentAppUIType ~persistentAppUIId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The presigned URL properties for the cluster's application user interface."]
+module GetPersistentAppUIPresignedURLOutput =
+  struct
+    type nonrec t =
+      {
+      presignedURLReady: Boolean.t option
+        [@ocaml.doc "Used to determine if the presigned URL is ready."];
+      presignedURL: XmlString.t option
+        [@ocaml.doc "The returned presigned URL."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?presignedURLReady =
+      fun ?presignedURL -> fun () -> { presignedURLReady; presignedURL }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("PresignedURLReady",
+           (Option.map x.presignedURLReady ~f:Boolean.to_value));
+        ("PresignedURL", (Option.map x.presignedURL ~f:XmlString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let presignedURL =
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "PresignedURL") in
+      let presignedURLReady =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "PresignedURLReady") in
+      make ?presignedURL ?presignedURLReady ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let presignedURL = field_map json__ "PresignedURL" XmlString.of_json in
+      let presignedURLReady =
+        field_map json__ "PresignedURLReady" Boolean.of_json in
+      make ?presignedURL ?presignedURLReady ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The presigned URL properties for the cluster's application user interface."]
 module GetStudioSessionMappingInput =
   struct
     type nonrec t =
@@ -8408,10 +10766,10 @@ module GetStudioSessionMappingInput =
         [@ocaml.doc "The ID of the Amazon EMR Studio."];
       identityId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The globally unique identifier (GUID) of the user or group. For more information, see UserId and GroupId in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The globally unique identifier (GUID) of the user or group. For more information, see UserId and GroupId in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user or group to fetch. For more information, see UserName and DisplayName in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The name of the user or group to fetch. For more information, see UserName and DisplayName in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityType: IdentityType.t
         [@ocaml.doc
           "Specifies whether the identity to fetch is a user or a group."]}
@@ -8445,13 +10803,15 @@ module GetStudioSessionMappingInput =
           (Xml.child_exn ~context:context_ xml_arg0 "StudioId") in
       make ~identityType ?identityName ?identityId ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let identityType =
-        field_map_exn json "IdentityType" IdentityType.of_json in
+        field_map_exn json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~identityType ?identityName ?identityId ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8467,7 +10827,7 @@ module SessionMappingDetail =
           "The globally unique identifier (GUID) of the user or group."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user or group. For more information, see UserName and DisplayName in the Amazon Web Services SSO Identity Store API Reference."];
+          "The name of the user or group. For more information, see UserName and DisplayName in the IAM Identity Center Identity Store API Reference."];
       identityType: IdentityType.t option
         [@ocaml.doc
           "Specifies whether the identity mapped to the Amazon EMR Studio is a user or a group."];
@@ -8533,16 +10893,17 @@ module SessionMappingDetail =
       make ?lastModifiedTime ?creationTime ?sessionPolicyArn ?identityType
         ?identityName ?identityId ?studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let lastModifiedTime = field_map json "LastModifiedTime" Date.of_json in
-      let creationTime = field_map json "CreationTime" Date.of_json in
+    let of_json json__ =
+      let lastModifiedTime = field_map json__ "LastModifiedTime" Date.of_json in
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let sessionPolicyArn =
-        field_map json "SessionPolicyArn" XmlStringMaxLen256.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+        field_map json__ "SessionPolicyArn" XmlStringMaxLen256.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
       make ?lastModifiedTime ?creationTime ?sessionPolicyArn ?identityType
         ?identityName ?identityId ?studioId ()
     let to_json v = composed_to_json to_value v
@@ -8603,9 +10964,9 @@ module GetStudioSessionMappingOutput =
           (Xml.child xml_arg0 "SessionMapping") in
       make ?sessionMapping ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionMapping =
-        field_map json "SessionMapping" SessionMappingDetail.of_json in
+        field_map json__ "SessionMapping" SessionMappingDetail.of_json in
       make ?sessionMapping ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8641,10 +11002,10 @@ module InstanceTimeline =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The timeline of the instance lifecycle."]
@@ -8708,9 +11069,10 @@ module InstanceStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
-      let code = field_map json "Code" InstanceStateChangeReasonCode.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
+      let code =
+        field_map json__ "Code" InstanceStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -8782,11 +11144,12 @@ module InstanceStatus =
         (Option.map ~f:InstanceState.of_xml) (Xml.child xml_arg0 "State") in
       make ?timeline ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeline = field_map json "Timeline" InstanceTimeline.of_json in
+    let of_json json__ =
+      let timeline = field_map json__ "Timeline" InstanceTimeline.of_json in
       let stateChangeReason =
-        field_map json "StateChangeReason" InstanceStateChangeReason.of_json in
-      let state = field_map json "State" InstanceState.of_json in
+        field_map json__ "StateChangeReason"
+          InstanceStateChangeReason.of_json in
+      let state = field_map json__ "State" InstanceState.of_json in
       make ?timeline ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The instance status details."]
@@ -8813,12 +11176,12 @@ module Instance =
           "The identifier of the instance group to which this instance belongs."];
       instanceFleetId: InstanceFleetId.t option
         [@ocaml.doc
-          "The unique identifier of the instance fleet to which an EC2 instance belongs."];
+          "The unique identifier of the instance fleet to which an Amazon EC2 instance belongs."];
       market: MarketType.t option
         [@ocaml.doc
           "The instance purchasing option. Valid values are ON_DEMAND or SPOT."];
       instanceType: InstanceType.t option
-        [@ocaml.doc "The EC2 instance type, for example m3.xlarge."];
+        [@ocaml.doc "The Amazon EC2 instance type, for example m3.xlarge."];
       ebsVolumes: EbsVolumeList.t option
         [@ocaml.doc
           "The list of Amazon EBS volumes that are attached to this instance."]}
@@ -8903,42 +11266,44 @@ module Instance =
         ?instanceGroupId ?status ?privateIpAddress ?privateDnsName
         ?publicIpAddress ?publicDnsName ?ec2InstanceId ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ebsVolumes = field_map json "EbsVolumes" EbsVolumeList.of_json in
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      let market = field_map json "Market" MarketType.of_json in
+    let of_json json__ =
+      let ebsVolumes = field_map json__ "EbsVolumes" EbsVolumeList.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let market = field_map json__ "Market" MarketType.of_json in
       let instanceFleetId =
-        field_map json "InstanceFleetId" InstanceFleetId.of_json in
-      let instanceGroupId = field_map json "InstanceGroupId" String_.of_json in
-      let status = field_map json "Status" InstanceStatus.of_json in
+        field_map json__ "InstanceFleetId" InstanceFleetId.of_json in
+      let instanceGroupId =
+        field_map json__ "InstanceGroupId" String_.of_json in
+      let status = field_map json__ "Status" InstanceStatus.of_json in
       let privateIpAddress =
-        field_map json "PrivateIpAddress" String_.of_json in
-      let privateDnsName = field_map json "PrivateDnsName" String_.of_json in
-      let publicIpAddress = field_map json "PublicIpAddress" String_.of_json in
-      let publicDnsName = field_map json "PublicDnsName" String_.of_json in
-      let ec2InstanceId = field_map json "Ec2InstanceId" InstanceId.of_json in
-      let id = field_map json "Id" InstanceId.of_json in
+        field_map json__ "PrivateIpAddress" String_.of_json in
+      let privateDnsName = field_map json__ "PrivateDnsName" String_.of_json in
+      let publicIpAddress =
+        field_map json__ "PublicIpAddress" String_.of_json in
+      let publicDnsName = field_map json__ "PublicDnsName" String_.of_json in
+      let ec2InstanceId = field_map json__ "Ec2InstanceId" InstanceId.of_json in
+      let id = field_map json__ "Id" InstanceId.of_json in
       make ?ebsVolumes ?instanceType ?market ?instanceFleetId
         ?instanceGroupId ?status ?privateIpAddress ?privateDnsName
         ?publicIpAddress ?publicDnsName ?ec2InstanceId ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Represents an EC2 instance provisioned as part of cluster."]
+       "Represents an Amazon EC2 instance provisioned as part of cluster."]
 module InstanceTypeSpecification =
   struct
     type nonrec t =
       {
       instanceType: InstanceType.t option
-        [@ocaml.doc "The EC2 instance type, for example m3.xlarge."];
+        [@ocaml.doc "The Amazon EC2 instance type, for example m3.xlarge."];
       weightedCapacity: WholeNumber.t option
         [@ocaml.doc
           "The number of units that a provisioned instance of this type provides toward fulfilling the target capacities defined in InstanceFleetConfig. Capacity values represent performance characteristics such as vCPUs, memory, or I/O. If not specified, the default value is 1."];
       bidPrice: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The bid price for each EC2 Spot Instance type as defined by InstanceType. Expressed in USD."];
+          "The bid price for each Amazon EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
       bidPriceAsPercentageOfOnDemandPrice: NonNegativeDouble.t option
         [@ocaml.doc
-          "The bid price, as a percentage of On-Demand price, for each EC2 Spot Instance as defined by InstanceType. Expressed as a number (for example, 20 specifies 20%)."];
+          "The bid price, as a percentage of On-Demand price, for each Amazon EC2 Spot Instance as defined by InstanceType. Expressed as a number (for example, 20 specifies 20%)."];
       configurations: ConfigurationList.t option
         [@ocaml.doc
           "A configuration classification that applies when provisioning cluster instances, which can include configurations for applications and software bundled with Amazon EMR."];
@@ -8949,7 +11314,10 @@ module InstanceTypeSpecification =
         [@ocaml.doc
           "Evaluates to TRUE when the specified InstanceType is EBS-optimized."];
       customAmiId: XmlStringMaxLen256.t option
-        [@ocaml.doc "The custom AMI ID to use for the instance type."]}
+        [@ocaml.doc "The custom AMI ID to use for the instance type."];
+      priority: NonNegativeDouble.t option
+        [@ocaml.doc
+          "The priority at which Amazon EMR launches the Amazon EC2 instances with this instance type. Priority starts at 0, which is the highest priority. Amazon EMR considers the highest priority first."]}
     let make ?instanceType =
       fun ?weightedCapacity ->
         fun ?bidPrice ->
@@ -8958,17 +11326,19 @@ module InstanceTypeSpecification =
               fun ?ebsBlockDevices ->
                 fun ?ebsOptimized ->
                   fun ?customAmiId ->
-                    fun () ->
-                      {
-                        instanceType;
-                        weightedCapacity;
-                        bidPrice;
-                        bidPriceAsPercentageOfOnDemandPrice;
-                        configurations;
-                        ebsBlockDevices;
-                        ebsOptimized;
-                        customAmiId
-                      }
+                    fun ?priority ->
+                      fun () ->
+                        {
+                          instanceType;
+                          weightedCapacity;
+                          bidPrice;
+                          bidPriceAsPercentageOfOnDemandPrice;
+                          configurations;
+                          ebsBlockDevices;
+                          ebsOptimized;
+                          customAmiId;
+                          priority
+                        }
     let to_value x =
       structure_to_value
         [("InstanceType",
@@ -8986,9 +11356,13 @@ module InstanceTypeSpecification =
         ("EbsOptimized",
           (Option.map x.ebsOptimized ~f:BooleanObject.to_value));
         ("CustomAmiId",
-          (Option.map x.customAmiId ~f:XmlStringMaxLen256.to_value))]
+          (Option.map x.customAmiId ~f:XmlStringMaxLen256.to_value));
+        ("Priority", (Option.map x.priority ~f:NonNegativeDouble.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let priority =
+        (Option.map ~f:NonNegativeDouble.of_xml)
+          (Xml.child xml_arg0 "Priority") in
       let customAmiId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "CustomAmiId") in
@@ -9013,35 +11387,40 @@ module InstanceTypeSpecification =
       let instanceType =
         (Option.map ~f:InstanceType.of_xml)
           (Xml.child xml_arg0 "InstanceType") in
-      make ?customAmiId ?ebsOptimized ?ebsBlockDevices ?configurations
-        ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice ?weightedCapacity
-        ?instanceType ()
+      make ?priority ?customAmiId ?ebsOptimized ?ebsBlockDevices
+        ?configurations ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice
+        ?weightedCapacity ?instanceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let priority = field_map json__ "Priority" NonNegativeDouble.of_json in
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" BooleanObject.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
+      let ebsOptimized =
+        field_map json__ "EbsOptimized" BooleanObject.of_json in
       let ebsBlockDevices =
-        field_map json "EbsBlockDevices" EbsBlockDeviceList.of_json in
+        field_map json__ "EbsBlockDevices" EbsBlockDeviceList.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
       let bidPriceAsPercentageOfOnDemandPrice =
-        field_map json "BidPriceAsPercentageOfOnDemandPrice"
+        field_map json__ "BidPriceAsPercentageOfOnDemandPrice"
           NonNegativeDouble.of_json in
-      let bidPrice = field_map json "BidPrice" XmlStringMaxLen256.of_json in
+      let bidPrice = field_map json__ "BidPrice" XmlStringMaxLen256.of_json in
       let weightedCapacity =
-        field_map json "WeightedCapacity" WholeNumber.of_json in
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      make ?customAmiId ?ebsOptimized ?ebsBlockDevices ?configurations
-        ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice ?weightedCapacity
-        ?instanceType ()
+        field_map json__ "WeightedCapacity" WholeNumber.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      make ?priority ?customAmiId ?ebsOptimized ?ebsBlockDevices
+        ?configurations ?bidPriceAsPercentageOfOnDemandPrice ?bidPrice
+        ?weightedCapacity ?instanceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The configuration specification for each instance type in an instance fleet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "The configuration specification for each instance type in an instance fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceTypeSpecificationList =
   struct
     type nonrec t = InstanceTypeSpecification.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceTypeSpecification.to_value)) |>
         (fun x -> `List x)
@@ -9095,14 +11474,14 @@ module InstanceFleetTimeline =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides historical timestamps for the instance fleet, including the time of creation, the time it became ready to run jobs, and the time of termination. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Provides historical timestamps for the instance fleet, including the time of creation, the time it became ready to run jobs, and the time of termination. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceFleetStateChangeReasonCode =
   struct
     type nonrec t =
@@ -9160,14 +11539,14 @@ module InstanceFleetStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code" InstanceFleetStateChangeReasonCode.of_json in
+        field_map json__ "Code" InstanceFleetStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides status change reason details for the instance fleet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Provides status change reason details for the instance fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceFleetState =
   struct
     type nonrec t =
@@ -9175,6 +11554,7 @@ module InstanceFleetState =
       | BOOTSTRAPPING 
       | RUNNING 
       | RESIZING 
+      | RECONFIGURING 
       | SUSPENDED 
       | TERMINATING 
       | TERMINATED 
@@ -9186,6 +11566,7 @@ module InstanceFleetState =
       | BOOTSTRAPPING -> "BOOTSTRAPPING"
       | RUNNING -> "RUNNING"
       | RESIZING -> "RESIZING"
+      | RECONFIGURING -> "RECONFIGURING"
       | SUSPENDED -> "SUSPENDED"
       | TERMINATING -> "TERMINATING"
       | TERMINATED -> "TERMINATED"
@@ -9196,6 +11577,7 @@ module InstanceFleetState =
       | "BOOTSTRAPPING" -> BOOTSTRAPPING
       | "RUNNING" -> RUNNING
       | "RESIZING" -> RESIZING
+      | "RECONFIGURING" -> RECONFIGURING
       | "SUSPENDED" -> SUSPENDED
       | "TERMINATING" -> TERMINATING
       | "TERMINATED" -> TERMINATED
@@ -9215,7 +11597,7 @@ module InstanceFleetStatus =
       {
       state: InstanceFleetState.t option
         [@ocaml.doc
-          "A code representing the instance fleet status. PROVISIONING\226\128\148The instance fleet is provisioning EC2 resources and is not yet ready to run jobs. BOOTSTRAPPING\226\128\148EC2 instances and other resources have been provisioned and the bootstrap actions specified for the instances are underway. RUNNING\226\128\148EC2 instances and other resources are running. They are either executing jobs or waiting to execute jobs. RESIZING\226\128\148A resize operation is underway. EC2 instances are either being added or removed. SUSPENDED\226\128\148A resize operation could not complete. Existing EC2 instances are running, but instances can't be added or removed. TERMINATING\226\128\148The instance fleet is terminating EC2 instances. TERMINATED\226\128\148The instance fleet is no longer active, and all EC2 instances have been terminated."];
+          "A code representing the instance fleet status. PROVISIONING\226\128\148The instance fleet is provisioning Amazon EC2 resources and is not yet ready to run jobs. BOOTSTRAPPING\226\128\148Amazon EC2 instances and other resources have been provisioned and the bootstrap actions specified for the instances are underway. RUNNING\226\128\148Amazon EC2 instances and other resources are running. They are either executing jobs or waiting to execute jobs. RESIZING\226\128\148A resize operation is underway. Amazon EC2 instances are either being added or removed. SUSPENDED\226\128\148A resize operation could not complete. Existing Amazon EC2 instances are running, but instances can't be added or removed. TERMINATING\226\128\148The instance fleet is terminating Amazon EC2 instances. TERMINATED\226\128\148The instance fleet is no longer active, and all Amazon EC2 instances have been terminated."];
       stateChangeReason: InstanceFleetStateChangeReason.t option
         [@ocaml.doc
           "Provides status change reason details for the instance fleet."];
@@ -9246,16 +11628,17 @@ module InstanceFleetStatus =
           (Xml.child xml_arg0 "State") in
       make ?timeline ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeline = field_map json "Timeline" InstanceFleetTimeline.of_json in
+    let of_json json__ =
+      let timeline =
+        field_map json__ "Timeline" InstanceFleetTimeline.of_json in
       let stateChangeReason =
-        field_map json "StateChangeReason"
+        field_map json__ "StateChangeReason"
           InstanceFleetStateChangeReason.of_json in
-      let state = field_map json "State" InstanceFleetState.of_json in
+      let state = field_map json__ "State" InstanceFleetState.of_json in
       make ?timeline ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The status of the instance fleet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "The status of the instance fleet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceFleet =
   struct
     type nonrec t =
@@ -9286,7 +11669,10 @@ module InstanceFleet =
           "An array of specifications for the instance types that comprise an instance fleet."];
       launchSpecifications: InstanceFleetProvisioningSpecifications.t option
         [@ocaml.doc
-          "Describes the launch specification for an instance fleet."]}
+          "Describes the launch specification for an instance fleet."];
+      resizeSpecifications: InstanceFleetResizingSpecifications.t option
+        [@ocaml.doc "The resize specification for the instance fleet."];
+      context: XmlStringMaxLen256.t option [@ocaml.doc "Reserved."]}
     let make ?id =
       fun ?name ->
         fun ?status ->
@@ -9297,19 +11683,23 @@ module InstanceFleet =
                   fun ?provisionedSpotCapacity ->
                     fun ?instanceTypeSpecifications ->
                       fun ?launchSpecifications ->
-                        fun () ->
-                          {
-                            id;
-                            name;
-                            status;
-                            instanceFleetType;
-                            targetOnDemandCapacity;
-                            targetSpotCapacity;
-                            provisionedOnDemandCapacity;
-                            provisionedSpotCapacity;
-                            instanceTypeSpecifications;
-                            launchSpecifications
-                          }
+                        fun ?resizeSpecifications ->
+                          fun ?context ->
+                            fun () ->
+                              {
+                                id;
+                                name;
+                                status;
+                                instanceFleetType;
+                                targetOnDemandCapacity;
+                                targetSpotCapacity;
+                                provisionedOnDemandCapacity;
+                                provisionedSpotCapacity;
+                                instanceTypeSpecifications;
+                                launchSpecifications;
+                                resizeSpecifications;
+                                context
+                              }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:InstanceFleetId.to_value));
@@ -9330,9 +11720,19 @@ module InstanceFleet =
              ~f:InstanceTypeSpecificationList.to_value));
         ("LaunchSpecifications",
           (Option.map x.launchSpecifications
-             ~f:InstanceFleetProvisioningSpecifications.to_value))]
+             ~f:InstanceFleetProvisioningSpecifications.to_value));
+        ("ResizeSpecifications",
+          (Option.map x.resizeSpecifications
+             ~f:InstanceFleetResizingSpecifications.to_value));
+        ("Context", (Option.map x.context ~f:XmlStringMaxLen256.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Context") in
+      let resizeSpecifications =
+        (Option.map ~f:InstanceFleetResizingSpecifications.of_xml)
+          (Xml.child xml_arg0 "ResizeSpecifications") in
       let launchSpecifications =
         (Option.map ~f:InstanceFleetProvisioningSpecifications.of_xml)
           (Xml.child xml_arg0 "LaunchSpecifications") in
@@ -9361,42 +11761,49 @@ module InstanceFleet =
         (Option.map ~f:XmlStringMaxLen256.of_xml) (Xml.child xml_arg0 "Name") in
       let id =
         (Option.map ~f:InstanceFleetId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?launchSpecifications ?instanceTypeSpecifications
-        ?provisionedSpotCapacity ?provisionedOnDemandCapacity
-        ?targetSpotCapacity ?targetOnDemandCapacity ?instanceFleetType
-        ?status ?name ?id ()
+      make ?context ?resizeSpecifications ?launchSpecifications
+        ?instanceTypeSpecifications ?provisionedSpotCapacity
+        ?provisionedOnDemandCapacity ?targetSpotCapacity
+        ?targetOnDemandCapacity ?instanceFleetType ?status ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let context = field_map json__ "Context" XmlStringMaxLen256.of_json in
+      let resizeSpecifications =
+        field_map json__ "ResizeSpecifications"
+          InstanceFleetResizingSpecifications.of_json in
       let launchSpecifications =
-        field_map json "LaunchSpecifications"
+        field_map json__ "LaunchSpecifications"
           InstanceFleetProvisioningSpecifications.of_json in
       let instanceTypeSpecifications =
-        field_map json "InstanceTypeSpecifications"
+        field_map json__ "InstanceTypeSpecifications"
           InstanceTypeSpecificationList.of_json in
       let provisionedSpotCapacity =
-        field_map json "ProvisionedSpotCapacity" WholeNumber.of_json in
+        field_map json__ "ProvisionedSpotCapacity" WholeNumber.of_json in
       let provisionedOnDemandCapacity =
-        field_map json "ProvisionedOnDemandCapacity" WholeNumber.of_json in
+        field_map json__ "ProvisionedOnDemandCapacity" WholeNumber.of_json in
       let targetSpotCapacity =
-        field_map json "TargetSpotCapacity" WholeNumber.of_json in
+        field_map json__ "TargetSpotCapacity" WholeNumber.of_json in
       let targetOnDemandCapacity =
-        field_map json "TargetOnDemandCapacity" WholeNumber.of_json in
+        field_map json__ "TargetOnDemandCapacity" WholeNumber.of_json in
       let instanceFleetType =
-        field_map json "InstanceFleetType" InstanceFleetType.of_json in
-      let status = field_map json "Status" InstanceFleetStatus.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
-      let id = field_map json "Id" InstanceFleetId.of_json in
-      make ?launchSpecifications ?instanceTypeSpecifications
-        ?provisionedSpotCapacity ?provisionedOnDemandCapacity
-        ?targetSpotCapacity ?targetOnDemandCapacity ?instanceFleetType
-        ?status ?name ?id ()
+        field_map json__ "InstanceFleetType" InstanceFleetType.of_json in
+      let status = field_map json__ "Status" InstanceFleetStatus.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      let id = field_map json__ "Id" InstanceFleetId.of_json in
+      make ?context ?resizeSpecifications ?launchSpecifications
+        ?instanceTypeSpecifications ?provisionedSpotCapacity
+        ?provisionedOnDemandCapacity ?targetSpotCapacity
+        ?targetOnDemandCapacity ?instanceFleetType ?status ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an instance fleet, which is a group of EC2 instances that host a particular node type (master, core, or task) in an Amazon EMR cluster. Instance fleets can consist of a mix of instance types and On-Demand and Spot Instances, which are provisioned to meet a defined target capacity. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Describes an instance fleet, which is a group of Amazon EC2 instances that host a particular node type (master, core, or task) in an Amazon EMR cluster. Instance fleets can consist of a mix of instance types and On-Demand and Spot Instances, which are provisioned to meet a defined target capacity. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceFleetConfigList =
   struct
     type nonrec t = InstanceFleetConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceFleetConfig.to_value)) |>
         (fun x -> `List x)
@@ -9423,6 +11830,9 @@ module InstanceFleetList =
   struct
     type nonrec t = InstanceFleet.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceFleet.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -9454,13 +11864,29 @@ module InstanceFleetModifyConfig =
           "The target capacity of On-Demand units for the instance fleet. For more information see InstanceFleetConfig$TargetOnDemandCapacity."];
       targetSpotCapacity: WholeNumber.t option
         [@ocaml.doc
-          "The target capacity of Spot units for the instance fleet. For more information, see InstanceFleetConfig$TargetSpotCapacity."]}
+          "The target capacity of Spot units for the instance fleet. For more information, see InstanceFleetConfig$TargetSpotCapacity."];
+      resizeSpecifications: InstanceFleetResizingSpecifications.t option
+        [@ocaml.doc "The resize specification for the instance fleet."];
+      instanceTypeConfigs: InstanceTypeConfigList.t option
+        [@ocaml.doc
+          "An array of InstanceTypeConfig objects that specify how Amazon EMR provisions Amazon EC2 instances when it fulfills On-Demand and Spot capacities. For more information, see InstanceTypeConfig."];
+      context: XmlStringMaxLen256.t option [@ocaml.doc "Reserved."]}
     let context_ = "InstanceFleetModifyConfig"
     let make ?targetOnDemandCapacity =
       fun ?targetSpotCapacity ->
-        fun ~instanceFleetId ->
-          fun () ->
-            { targetOnDemandCapacity; targetSpotCapacity; instanceFleetId }
+        fun ?resizeSpecifications ->
+          fun ?instanceTypeConfigs ->
+            fun ?context ->
+              fun ~instanceFleetId ->
+                fun () ->
+                  {
+                    targetOnDemandCapacity;
+                    targetSpotCapacity;
+                    resizeSpecifications;
+                    instanceTypeConfigs;
+                    context;
+                    instanceFleetId
+                  }
     let to_value x =
       structure_to_value
         [("InstanceFleetId",
@@ -9468,9 +11894,25 @@ module InstanceFleetModifyConfig =
         ("TargetOnDemandCapacity",
           (Option.map x.targetOnDemandCapacity ~f:WholeNumber.to_value));
         ("TargetSpotCapacity",
-          (Option.map x.targetSpotCapacity ~f:WholeNumber.to_value))]
+          (Option.map x.targetSpotCapacity ~f:WholeNumber.to_value));
+        ("ResizeSpecifications",
+          (Option.map x.resizeSpecifications
+             ~f:InstanceFleetResizingSpecifications.to_value));
+        ("InstanceTypeConfigs",
+          (Option.map x.instanceTypeConfigs
+             ~f:InstanceTypeConfigList.to_value));
+        ("Context", (Option.map x.context ~f:XmlStringMaxLen256.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let context =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Context") in
+      let instanceTypeConfigs =
+        (Option.map ~f:InstanceTypeConfigList.of_xml)
+          (Xml.child xml_arg0 "InstanceTypeConfigs") in
+      let resizeSpecifications =
+        (Option.map ~f:InstanceFleetResizingSpecifications.of_xml)
+          (Xml.child xml_arg0 "ResizeSpecifications") in
       let targetSpotCapacity =
         (Option.map ~f:WholeNumber.of_xml)
           (Xml.child xml_arg0 "TargetSpotCapacity") in
@@ -9480,19 +11922,27 @@ module InstanceFleetModifyConfig =
       let instanceFleetId =
         InstanceFleetId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceFleetId") in
-      make ?targetSpotCapacity ?targetOnDemandCapacity ~instanceFleetId ()
+      make ?context ?instanceTypeConfigs ?resizeSpecifications
+        ?targetSpotCapacity ?targetOnDemandCapacity ~instanceFleetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let context = field_map json__ "Context" XmlStringMaxLen256.of_json in
+      let instanceTypeConfigs =
+        field_map json__ "InstanceTypeConfigs" InstanceTypeConfigList.of_json in
+      let resizeSpecifications =
+        field_map json__ "ResizeSpecifications"
+          InstanceFleetResizingSpecifications.of_json in
       let targetSpotCapacity =
-        field_map json "TargetSpotCapacity" WholeNumber.of_json in
+        field_map json__ "TargetSpotCapacity" WholeNumber.of_json in
       let targetOnDemandCapacity =
-        field_map json "TargetOnDemandCapacity" WholeNumber.of_json in
+        field_map json__ "TargetOnDemandCapacity" WholeNumber.of_json in
       let instanceFleetId =
-        field_map_exn json "InstanceFleetId" InstanceFleetId.of_json in
-      make ?targetSpotCapacity ?targetOnDemandCapacity ~instanceFleetId ()
+        field_map_exn json__ "InstanceFleetId" InstanceFleetId.of_json in
+      make ?context ?instanceTypeConfigs ?resizeSpecifications
+        ?targetSpotCapacity ?targetOnDemandCapacity ~instanceFleetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Configuration parameters for an instance fleet modification request. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Configuration parameters for an instance fleet modification request. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module InstanceResizePolicy =
   struct
     type nonrec t =
@@ -9537,13 +11987,13 @@ module InstanceResizePolicy =
       make ?instanceTerminationTimeout ?instancesToProtect
         ?instancesToTerminate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceTerminationTimeout =
-        field_map json "InstanceTerminationTimeout" Integer.of_json in
+        field_map json__ "InstanceTerminationTimeout" Integer.of_json in
       let instancesToProtect =
-        field_map json "InstancesToProtect" EC2InstanceIdsList.of_json in
+        field_map json__ "InstancesToProtect" EC2InstanceIdsList.of_json in
       let instancesToTerminate =
-        field_map json "InstancesToTerminate" EC2InstanceIdsList.of_json in
+        field_map json__ "InstancesToTerminate" EC2InstanceIdsList.of_json in
       make ?instanceTerminationTimeout ?instancesToProtect
         ?instancesToTerminate ()
     let to_json v = composed_to_json to_value v
@@ -9578,11 +12028,11 @@ module ShrinkPolicy =
           (Xml.child xml_arg0 "DecommissionTimeout") in
       make ?instanceResizePolicy ?decommissionTimeout ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceResizePolicy =
-        field_map json "InstanceResizePolicy" InstanceResizePolicy.of_json in
+        field_map json__ "InstanceResizePolicy" InstanceResizePolicy.of_json in
       let decommissionTimeout =
-        field_map json "DecommissionTimeout" Integer.of_json in
+        field_map json__ "DecommissionTimeout" Integer.of_json in
       make ?instanceResizePolicy ?decommissionTimeout ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -9647,10 +12097,10 @@ module InstanceGroupTimeline =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreationDateTime") in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDateTime = field_map json "EndDateTime" Date.of_json in
-      let readyDateTime = field_map json "ReadyDateTime" Date.of_json in
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
+    let of_json json__ =
+      let endDateTime = field_map json__ "EndDateTime" Date.of_json in
+      let readyDateTime = field_map json__ "ReadyDateTime" Date.of_json in
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
       make ?endDateTime ?readyDateTime ?creationDateTime ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The timeline of the instance group lifecycle."]
@@ -9711,10 +12161,10 @@ module InstanceGroupStateChangeReason =
           (Xml.child xml_arg0 "Code") in
       make ?message ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" String_.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" String_.of_json in
       let code =
-        field_map json "Code" InstanceGroupStateChangeReasonCode.of_json in
+        field_map json__ "Code" InstanceGroupStateChangeReasonCode.of_json in
       make ?message ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The status change reason details for the instance group."]
@@ -9753,12 +12203,13 @@ module InstanceGroupStatus =
           (Xml.child xml_arg0 "State") in
       make ?timeline ?stateChangeReason ?state ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let timeline = field_map json "Timeline" InstanceGroupTimeline.of_json in
+    let of_json json__ =
+      let timeline =
+        field_map json__ "Timeline" InstanceGroupTimeline.of_json in
       let stateChangeReason =
-        field_map json "StateChangeReason"
+        field_map json__ "StateChangeReason"
           InstanceGroupStateChangeReason.of_json in
-      let state = field_map json "State" InstanceGroupState.of_json in
+      let state = field_map json__ "State" InstanceGroupState.of_json in
       make ?timeline ?stateChangeReason ?state ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the instance group status."]
@@ -9790,10 +12241,10 @@ module InstanceGroup =
           "The type of the instance group. Valid values are MASTER, CORE or TASK."];
       bidPrice: String_.t option
         [@ocaml.doc
-          "If specified, indicates that the instance group uses Spot Instances. This is the maximum price you are willing to pay for Spot Instances. Specify OnDemandPrice to set the amount equal to the On-Demand price, or specify an amount in USD."];
+          "The bid price for each Amazon EC2 Spot Instance type as defined by InstanceType. Expressed in USD. If neither BidPrice nor BidPriceAsPercentageOfOnDemandPrice is provided, BidPriceAsPercentageOfOnDemandPrice defaults to 100%."];
       instanceType: InstanceType.t option
         [@ocaml.doc
-          "The EC2 instance type for all instances in the instance group."];
+          "The Amazon EC2 instance type for all instances in the instance group."];
       requestedInstanceCount: Integer.t option
         [@ocaml.doc "The target number of instances for the instance group."];
       runningInstanceCount: Integer.t option
@@ -9823,7 +12274,7 @@ module InstanceGroup =
         [@ocaml.doc "Policy for customizing shrink operations."];
       autoScalingPolicy: AutoScalingPolicyDescription.t option
         [@ocaml.doc
-          "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."];
+          "An automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric. See PutAutoScalingPolicy."];
       customAmiId: XmlStringMaxLen256.t option
         [@ocaml.doc
           "The custom AMI ID to use for the provisioned instance group."]}
@@ -9960,38 +12411,39 @@ module InstanceGroup =
         ?configurations ?status ?runningInstanceCount ?requestedInstanceCount
         ?instanceType ?bidPrice ?instanceGroupType ?market ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
       let autoScalingPolicy =
-        field_map json "AutoScalingPolicy"
+        field_map json__ "AutoScalingPolicy"
           AutoScalingPolicyDescription.of_json in
-      let shrinkPolicy = field_map json "ShrinkPolicy" ShrinkPolicy.of_json in
-      let ebsOptimized = field_map json "EbsOptimized" BooleanObject.of_json in
+      let shrinkPolicy = field_map json__ "ShrinkPolicy" ShrinkPolicy.of_json in
+      let ebsOptimized =
+        field_map json__ "EbsOptimized" BooleanObject.of_json in
       let ebsBlockDevices =
-        field_map json "EbsBlockDevices" EbsBlockDeviceList.of_json in
+        field_map json__ "EbsBlockDevices" EbsBlockDeviceList.of_json in
       let lastSuccessfullyAppliedConfigurationsVersion =
-        field_map json "LastSuccessfullyAppliedConfigurationsVersion"
+        field_map json__ "LastSuccessfullyAppliedConfigurationsVersion"
           Long.of_json in
       let lastSuccessfullyAppliedConfigurations =
-        field_map json "LastSuccessfullyAppliedConfigurations"
+        field_map json__ "LastSuccessfullyAppliedConfigurations"
           ConfigurationList.of_json in
       let configurationsVersion =
-        field_map json "ConfigurationsVersion" Long.of_json in
+        field_map json__ "ConfigurationsVersion" Long.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
-      let status = field_map json "Status" InstanceGroupStatus.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
+      let status = field_map json__ "Status" InstanceGroupStatus.of_json in
       let runningInstanceCount =
-        field_map json "RunningInstanceCount" Integer.of_json in
+        field_map json__ "RunningInstanceCount" Integer.of_json in
       let requestedInstanceCount =
-        field_map json "RequestedInstanceCount" Integer.of_json in
-      let instanceType = field_map json "InstanceType" InstanceType.of_json in
-      let bidPrice = field_map json "BidPrice" String_.of_json in
+        field_map json__ "RequestedInstanceCount" Integer.of_json in
+      let instanceType = field_map json__ "InstanceType" InstanceType.of_json in
+      let bidPrice = field_map json__ "BidPrice" String_.of_json in
       let instanceGroupType =
-        field_map json "InstanceGroupType" InstanceGroupType.of_json in
-      let market = field_map json "Market" MarketType.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" InstanceGroupId.of_json in
+        field_map json__ "InstanceGroupType" InstanceGroupType.of_json in
+      let market = field_map json__ "Market" MarketType.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" InstanceGroupId.of_json in
       make ?customAmiId ?autoScalingPolicy ?shrinkPolicy ?ebsOptimized
         ?ebsBlockDevices ?lastSuccessfullyAppliedConfigurationsVersion
         ?lastSuccessfullyAppliedConfigurations ?configurationsVersion
@@ -10004,6 +12456,9 @@ module InstanceGroupList =
   struct
     type nonrec t = InstanceGroup.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGroup.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10024,6 +12479,32 @@ module InstanceGroupList =
       list_of_json ~kind:"InstanceGroupList" ~of_json:InstanceGroup.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReconfigurationType =
+  struct
+    type nonrec t =
+      | OVERWRITE 
+      | MERGE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | OVERWRITE -> "OVERWRITE"
+      | MERGE -> "MERGE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "OVERWRITE" -> OVERWRITE
+      | "MERGE" -> MERGE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ReconfigurationType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ReconfigurationType" j)
+    let to_json = simple_to_json to_value
+  end
 module InstanceGroupModifyConfig =
   struct
     type nonrec t =
@@ -10034,9 +12515,12 @@ module InstanceGroupModifyConfig =
         [@ocaml.doc "Target size for the instance group."];
       eC2InstanceIdsToTerminate: EC2InstanceIdsToTerminateList.t option
         [@ocaml.doc
-          "The EC2 InstanceIds to terminate. After you terminate the instances, the instance group will not return to its original requested size."];
+          "The Amazon EC2 InstanceIds to terminate. After you terminate the instances, the instance group will not return to its original requested size."];
       shrinkPolicy: ShrinkPolicy.t option
         [@ocaml.doc "Policy for customizing shrink operations."];
+      reconfigurationType: ReconfigurationType.t option
+        [@ocaml.doc
+          "Type of reconfiguration requested. Valid values are MERGE and OVERWRITE."];
       configurations: ConfigurationList.t option
         [@ocaml.doc
           "A list of new or modified configurations to apply for an instance group."]}
@@ -10044,16 +12528,18 @@ module InstanceGroupModifyConfig =
     let make ?instanceCount =
       fun ?eC2InstanceIdsToTerminate ->
         fun ?shrinkPolicy ->
-          fun ?configurations ->
-            fun ~instanceGroupId ->
-              fun () ->
-                {
-                  instanceCount;
-                  eC2InstanceIdsToTerminate;
-                  shrinkPolicy;
-                  configurations;
-                  instanceGroupId
-                }
+          fun ?reconfigurationType ->
+            fun ?configurations ->
+              fun ~instanceGroupId ->
+                fun () ->
+                  {
+                    instanceCount;
+                    eC2InstanceIdsToTerminate;
+                    shrinkPolicy;
+                    reconfigurationType;
+                    configurations;
+                    instanceGroupId
+                  }
     let to_value x =
       structure_to_value
         [("InstanceGroupId",
@@ -10064,6 +12550,8 @@ module InstanceGroupModifyConfig =
              ~f:EC2InstanceIdsToTerminateList.to_value));
         ("ShrinkPolicy",
           (Option.map x.shrinkPolicy ~f:ShrinkPolicy.to_value));
+        ("ReconfigurationType",
+          (Option.map x.reconfigurationType ~f:ReconfigurationType.to_value));
         ("Configurations",
           (Option.map x.configurations ~f:ConfigurationList.to_value))]
     let to_query v = to_query to_value v
@@ -10071,6 +12559,9 @@ module InstanceGroupModifyConfig =
       let configurations =
         (Option.map ~f:ConfigurationList.of_xml)
           (Xml.child xml_arg0 "Configurations") in
+      let reconfigurationType =
+        (Option.map ~f:ReconfigurationType.of_xml)
+          (Xml.child xml_arg0 "ReconfigurationType") in
       let shrinkPolicy =
         (Option.map ~f:ShrinkPolicy.of_xml)
           (Xml.child xml_arg0 "ShrinkPolicy") in
@@ -10082,27 +12573,32 @@ module InstanceGroupModifyConfig =
       let instanceGroupId =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "InstanceGroupId") in
-      make ?configurations ?shrinkPolicy ?eC2InstanceIdsToTerminate
-        ?instanceCount ~instanceGroupId ()
+      make ?configurations ?reconfigurationType ?shrinkPolicy
+        ?eC2InstanceIdsToTerminate ?instanceCount ~instanceGroupId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
-      let shrinkPolicy = field_map json "ShrinkPolicy" ShrinkPolicy.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
+      let reconfigurationType =
+        field_map json__ "ReconfigurationType" ReconfigurationType.of_json in
+      let shrinkPolicy = field_map json__ "ShrinkPolicy" ShrinkPolicy.of_json in
       let eC2InstanceIdsToTerminate =
-        field_map json "EC2InstanceIdsToTerminate"
+        field_map json__ "EC2InstanceIdsToTerminate"
           EC2InstanceIdsToTerminateList.of_json in
-      let instanceCount = field_map json "InstanceCount" Integer.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
       let instanceGroupId =
-        field_map_exn json "InstanceGroupId" XmlStringMaxLen256.of_json in
-      make ?configurations ?shrinkPolicy ?eC2InstanceIdsToTerminate
-        ?instanceCount ~instanceGroupId ()
+        field_map_exn json__ "InstanceGroupId" XmlStringMaxLen256.of_json in
+      make ?configurations ?reconfigurationType ?shrinkPolicy
+        ?eC2InstanceIdsToTerminate ?instanceCount ~instanceGroupId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Modify the size or configurations of an instance group."]
 module InstanceGroupModifyConfigList =
   struct
     type nonrec t = InstanceGroupModifyConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGroupModifyConfig.to_value)) |>
         (fun x -> `List x)
@@ -10129,6 +12625,9 @@ module InstanceGroupTypeList =
   struct
     type nonrec t = InstanceGroupType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceGroupType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10154,6 +12653,9 @@ module InstanceList =
   struct
     type nonrec t = Instance.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Instance.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10178,6 +12680,9 @@ module InstanceStateList =
   struct
     type nonrec t = InstanceState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:InstanceState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10202,6 +12707,9 @@ module SecurityGroupsList =
   struct
     type nonrec t = XmlStringMaxLen256.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:XmlStringMaxLen256.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -10228,27 +12736,31 @@ module JobFlowInstancesConfig =
     type nonrec t =
       {
       masterInstanceType: InstanceType.t option
-        [@ocaml.doc "The EC2 instance type of the master node."];
+        [@ocaml.doc "The Amazon EC2 instance type of the master node."];
       slaveInstanceType: InstanceType.t option
-        [@ocaml.doc "The EC2 instance type of the core and task nodes."];
+        [@ocaml.doc
+          "The Amazon EC2 instance type of the core and task nodes."];
       instanceCount: Integer.t option
-        [@ocaml.doc "The number of EC2 instances in the cluster."];
+        [@ocaml.doc "The number of Amazon EC2 instances in the cluster."];
       instanceGroups: InstanceGroupConfigList.t option
         [@ocaml.doc "Configuration for the instance groups in a cluster."];
       instanceFleets: InstanceFleetConfigList.t option
         [@ocaml.doc
-          "The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions. Describes the EC2 instances and instance configurations for clusters that use the instance fleet configuration."];
+          "The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions. Describes the Amazon EC2 instances and instance configurations for clusters that use the instance fleet configuration."];
       ec2KeyName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the EC2 key pair that can be used to connect to the master node using SSH as the user called \"hadoop.\""];
+          "The name of the Amazon EC2 key pair that can be used to connect to the master node using SSH as the user called \"hadoop.\""];
       placement: PlacementType.t option
         [@ocaml.doc "The Availability Zone in which the cluster runs."];
       keepJobFlowAliveWhenNoSteps: Boolean.t option
         [@ocaml.doc
-          "Specifies whether the cluster should remain available after completing all steps. Defaults to true. For more information about configuring cluster termination, see Control Cluster Termination in the EMR Management Guide."];
+          "Specifies whether the cluster should remain available after completing all steps. Defaults to false. For more information about configuring cluster termination, see Control Cluster Termination in the EMR Management Guide."];
       terminationProtected: Boolean.t option
         [@ocaml.doc
           "Specifies whether to lock the cluster to prevent the Amazon EC2 instances from being terminated by API call, user intervention, or in the event of a job-flow error."];
+      unhealthyNodeReplacement: BooleanObject.t option
+        [@ocaml.doc
+          "Indicates whether Amazon EMR should gracefully replace core nodes that have degraded within the cluster."];
       hadoopVersion: XmlStringMaxLen256.t option
         [@ocaml.doc
           "Applies only to Amazon EMR release versions earlier than 4.0. The Hadoop version for the cluster. Valid inputs are \"0.18\" (no longer maintained), \"0.20\" (no longer maintained), \"0.20.205\" (no longer maintained), \"1.0.3\", \"2.2.0\", or \"2.4.0\". If you do not set this value, the default of 0.18 is used, unless the AmiVersion parameter is set in the RunJobFlow call, in which case the default version of Hadoop for that AMI version is used."];
@@ -10257,7 +12769,7 @@ module JobFlowInstancesConfig =
           "Applies to clusters that use the uniform instance group configuration. To launch the cluster in Amazon Virtual Private Cloud (Amazon VPC), set this parameter to the identifier of the Amazon VPC subnet where you want the cluster to launch. If you do not specify this value and your account supports EC2-Classic, the cluster launches in EC2-Classic."];
       ec2SubnetIds: XmlStringMaxLen256List.t option
         [@ocaml.doc
-          "Applies to clusters that use the instance fleet configuration. When multiple EC2 subnet IDs are specified, Amazon EMR evaluates them and launches instances in the optimal subnet. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."];
+          "Applies to clusters that use the instance fleet configuration. When multiple Amazon EC2 subnet IDs are specified, Amazon EMR evaluates them and launches instances in the optimal subnet. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."];
       emrManagedMasterSecurityGroup: XmlStringMaxLen256.t option
         [@ocaml.doc
           "The identifier of the Amazon EC2 security group for the master node. If you specify EmrManagedMasterSecurityGroup, you must also specify EmrManagedSlaveSecurityGroup."];
@@ -10282,34 +12794,36 @@ module JobFlowInstancesConfig =
                 fun ?placement ->
                   fun ?keepJobFlowAliveWhenNoSteps ->
                     fun ?terminationProtected ->
-                      fun ?hadoopVersion ->
-                        fun ?ec2SubnetId ->
-                          fun ?ec2SubnetIds ->
-                            fun ?emrManagedMasterSecurityGroup ->
-                              fun ?emrManagedSlaveSecurityGroup ->
-                                fun ?serviceAccessSecurityGroup ->
-                                  fun ?additionalMasterSecurityGroups ->
-                                    fun ?additionalSlaveSecurityGroups ->
-                                      fun () ->
-                                        {
-                                          masterInstanceType;
-                                          slaveInstanceType;
-                                          instanceCount;
-                                          instanceGroups;
-                                          instanceFleets;
-                                          ec2KeyName;
-                                          placement;
-                                          keepJobFlowAliveWhenNoSteps;
-                                          terminationProtected;
-                                          hadoopVersion;
-                                          ec2SubnetId;
-                                          ec2SubnetIds;
-                                          emrManagedMasterSecurityGroup;
-                                          emrManagedSlaveSecurityGroup;
-                                          serviceAccessSecurityGroup;
-                                          additionalMasterSecurityGroups;
-                                          additionalSlaveSecurityGroups
-                                        }
+                      fun ?unhealthyNodeReplacement ->
+                        fun ?hadoopVersion ->
+                          fun ?ec2SubnetId ->
+                            fun ?ec2SubnetIds ->
+                              fun ?emrManagedMasterSecurityGroup ->
+                                fun ?emrManagedSlaveSecurityGroup ->
+                                  fun ?serviceAccessSecurityGroup ->
+                                    fun ?additionalMasterSecurityGroups ->
+                                      fun ?additionalSlaveSecurityGroups ->
+                                        fun () ->
+                                          {
+                                            masterInstanceType;
+                                            slaveInstanceType;
+                                            instanceCount;
+                                            instanceGroups;
+                                            instanceFleets;
+                                            ec2KeyName;
+                                            placement;
+                                            keepJobFlowAliveWhenNoSteps;
+                                            terminationProtected;
+                                            unhealthyNodeReplacement;
+                                            hadoopVersion;
+                                            ec2SubnetId;
+                                            ec2SubnetIds;
+                                            emrManagedMasterSecurityGroup;
+                                            emrManagedSlaveSecurityGroup;
+                                            serviceAccessSecurityGroup;
+                                            additionalMasterSecurityGroups;
+                                            additionalSlaveSecurityGroups
+                                          }
     let to_value x =
       structure_to_value
         [("MasterInstanceType",
@@ -10328,6 +12842,8 @@ module JobFlowInstancesConfig =
           (Option.map x.keepJobFlowAliveWhenNoSteps ~f:Boolean.to_value));
         ("TerminationProtected",
           (Option.map x.terminationProtected ~f:Boolean.to_value));
+        ("UnhealthyNodeReplacement",
+          (Option.map x.unhealthyNodeReplacement ~f:BooleanObject.to_value));
         ("HadoopVersion",
           (Option.map x.hadoopVersion ~f:XmlStringMaxLen256.to_value));
         ("Ec2SubnetId",
@@ -10375,6 +12891,9 @@ module JobFlowInstancesConfig =
       let hadoopVersion =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "HadoopVersion") in
+      let unhealthyNodeReplacement =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "UnhealthyNodeReplacement") in
       let terminationProtected =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "TerminationProtected") in
@@ -10403,53 +12922,58 @@ module JobFlowInstancesConfig =
       make ?additionalSlaveSecurityGroups ?additionalMasterSecurityGroups
         ?serviceAccessSecurityGroup ?emrManagedSlaveSecurityGroup
         ?emrManagedMasterSecurityGroup ?ec2SubnetIds ?ec2SubnetId
-        ?hadoopVersion ?terminationProtected ?keepJobFlowAliveWhenNoSteps
-        ?placement ?ec2KeyName ?instanceFleets ?instanceGroups ?instanceCount
-        ?slaveInstanceType ?masterInstanceType ()
+        ?hadoopVersion ?unhealthyNodeReplacement ?terminationProtected
+        ?keepJobFlowAliveWhenNoSteps ?placement ?ec2KeyName ?instanceFleets
+        ?instanceGroups ?instanceCount ?slaveInstanceType ?masterInstanceType
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let additionalSlaveSecurityGroups =
-        field_map json "AdditionalSlaveSecurityGroups"
+        field_map json__ "AdditionalSlaveSecurityGroups"
           SecurityGroupsList.of_json in
       let additionalMasterSecurityGroups =
-        field_map json "AdditionalMasterSecurityGroups"
+        field_map json__ "AdditionalMasterSecurityGroups"
           SecurityGroupsList.of_json in
       let serviceAccessSecurityGroup =
-        field_map json "ServiceAccessSecurityGroup"
+        field_map json__ "ServiceAccessSecurityGroup"
           XmlStringMaxLen256.of_json in
       let emrManagedSlaveSecurityGroup =
-        field_map json "EmrManagedSlaveSecurityGroup"
+        field_map json__ "EmrManagedSlaveSecurityGroup"
           XmlStringMaxLen256.of_json in
       let emrManagedMasterSecurityGroup =
-        field_map json "EmrManagedMasterSecurityGroup"
+        field_map json__ "EmrManagedMasterSecurityGroup"
           XmlStringMaxLen256.of_json in
       let ec2SubnetIds =
-        field_map json "Ec2SubnetIds" XmlStringMaxLen256List.of_json in
+        field_map json__ "Ec2SubnetIds" XmlStringMaxLen256List.of_json in
       let ec2SubnetId =
-        field_map json "Ec2SubnetId" XmlStringMaxLen256.of_json in
+        field_map json__ "Ec2SubnetId" XmlStringMaxLen256.of_json in
       let hadoopVersion =
-        field_map json "HadoopVersion" XmlStringMaxLen256.of_json in
+        field_map json__ "HadoopVersion" XmlStringMaxLen256.of_json in
+      let unhealthyNodeReplacement =
+        field_map json__ "UnhealthyNodeReplacement" BooleanObject.of_json in
       let terminationProtected =
-        field_map json "TerminationProtected" Boolean.of_json in
+        field_map json__ "TerminationProtected" Boolean.of_json in
       let keepJobFlowAliveWhenNoSteps =
-        field_map json "KeepJobFlowAliveWhenNoSteps" Boolean.of_json in
-      let placement = field_map json "Placement" PlacementType.of_json in
-      let ec2KeyName = field_map json "Ec2KeyName" XmlStringMaxLen256.of_json in
+        field_map json__ "KeepJobFlowAliveWhenNoSteps" Boolean.of_json in
+      let placement = field_map json__ "Placement" PlacementType.of_json in
+      let ec2KeyName =
+        field_map json__ "Ec2KeyName" XmlStringMaxLen256.of_json in
       let instanceFleets =
-        field_map json "InstanceFleets" InstanceFleetConfigList.of_json in
+        field_map json__ "InstanceFleets" InstanceFleetConfigList.of_json in
       let instanceGroups =
-        field_map json "InstanceGroups" InstanceGroupConfigList.of_json in
-      let instanceCount = field_map json "InstanceCount" Integer.of_json in
+        field_map json__ "InstanceGroups" InstanceGroupConfigList.of_json in
+      let instanceCount = field_map json__ "InstanceCount" Integer.of_json in
       let slaveInstanceType =
-        field_map json "SlaveInstanceType" InstanceType.of_json in
+        field_map json__ "SlaveInstanceType" InstanceType.of_json in
       let masterInstanceType =
-        field_map json "MasterInstanceType" InstanceType.of_json in
+        field_map json__ "MasterInstanceType" InstanceType.of_json in
       make ?additionalSlaveSecurityGroups ?additionalMasterSecurityGroups
         ?serviceAccessSecurityGroup ?emrManagedSlaveSecurityGroup
         ?emrManagedMasterSecurityGroup ?ec2SubnetIds ?ec2SubnetId
-        ?hadoopVersion ?terminationProtected ?keepJobFlowAliveWhenNoSteps
-        ?placement ?ec2KeyName ?instanceFleets ?instanceGroups ?instanceCount
-        ?slaveInstanceType ?masterInstanceType ()
+        ?hadoopVersion ?unhealthyNodeReplacement ?terminationProtected
+        ?keepJobFlowAliveWhenNoSteps ?placement ?ec2KeyName ?instanceFleets
+        ?instanceGroups ?instanceCount ?slaveInstanceType ?masterInstanceType
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A description of the Amazon EC2 instance on which the cluster (job flow) runs. A valid JobFlowInstancesConfig must contain either InstanceGroups or InstanceFleets. They cannot be used together. You may also have MasterInstanceType, SlaveInstanceType, and InstanceCount (all three must be present), but we don't recommend this configuration."]
@@ -10491,9 +13015,9 @@ module ListBootstrapActionsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?marker ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?marker ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10559,10 +13083,10 @@ module ListBootstrapActionsOutput =
           (Xml.child xml_arg0 "BootstrapActions") in
       make ?marker ?bootstrapActions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let bootstrapActions =
-        field_map json "BootstrapActions" CommandList.of_json in
+        field_map json__ "BootstrapActions" CommandList.of_json in
       make ?marker ?bootstrapActions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This output contains the bootstrap actions detail."]
@@ -10607,12 +13131,12 @@ module ListClustersInput =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "CreatedAfter") in
       make ?marker ?clusterStates ?createdBefore ?createdAfter ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let clusterStates =
-        field_map json "ClusterStates" ClusterStateList.of_json in
-      let createdBefore = field_map json "CreatedBefore" Date.of_json in
-      let createdAfter = field_map json "CreatedAfter" Date.of_json in
+        field_map json__ "ClusterStates" ClusterStateList.of_json in
+      let createdBefore = field_map json__ "CreatedBefore" Date.of_json in
+      let createdAfter = field_map json__ "CreatedAfter" Date.of_json in
       make ?marker ?clusterStates ?createdBefore ?createdAfter ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10677,9 +13201,9 @@ module ListClustersOutput =
           (Xml.child xml_arg0 "Clusters") in
       make ?marker ?clusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let clusters = field_map json "Clusters" ClusterSummaryList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let clusters = field_map json__ "Clusters" ClusterSummaryList.of_json in
       make ?marker ?clusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -10708,13 +13232,13 @@ module ListInstanceFleetsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?marker ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?marker ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all available details about the instance fleets in a cluster. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Lists all available details about the instance fleets in a cluster. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module ListInstanceFleetsOutput =
   struct
     type nonrec t =
@@ -10777,14 +13301,14 @@ module ListInstanceFleetsOutput =
           (Xml.child xml_arg0 "InstanceFleets") in
       make ?marker ?instanceFleets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let instanceFleets =
-        field_map json "InstanceFleets" InstanceFleetList.of_json in
+        field_map json__ "InstanceFleets" InstanceFleetList.of_json in
       make ?marker ?instanceFleets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Lists all available details about the instance fleets in a cluster. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Lists all available details about the instance fleets in a cluster. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module ListInstanceGroupsInput =
   struct
     type nonrec t =
@@ -10810,9 +13334,9 @@ module ListInstanceGroupsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?marker ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?marker ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This input determines which instance groups to retrieve."]
@@ -10878,10 +13402,10 @@ module ListInstanceGroupsOutput =
           (Xml.child xml_arg0 "InstanceGroups") in
       make ?marker ?instanceGroups ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let instanceGroups =
-        field_map json "InstanceGroups" InstanceGroupList.of_json in
+        field_map json__ "InstanceGroups" InstanceGroupList.of_json in
       make ?marker ?instanceGroups ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This input determines which instance groups to retrieve."]
@@ -10966,19 +13490,19 @@ module ListInstancesInput =
       make ?marker ?instanceStates ?instanceFleetType ?instanceFleetId
         ?instanceGroupTypes ?instanceGroupId ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let instanceStates =
-        field_map json "InstanceStates" InstanceStateList.of_json in
+        field_map json__ "InstanceStates" InstanceStateList.of_json in
       let instanceFleetType =
-        field_map json "InstanceFleetType" InstanceFleetType.of_json in
+        field_map json__ "InstanceFleetType" InstanceFleetType.of_json in
       let instanceFleetId =
-        field_map json "InstanceFleetId" InstanceFleetId.of_json in
+        field_map json__ "InstanceFleetId" InstanceFleetId.of_json in
       let instanceGroupTypes =
-        field_map json "InstanceGroupTypes" InstanceGroupTypeList.of_json in
+        field_map json__ "InstanceGroupTypes" InstanceGroupTypeList.of_json in
       let instanceGroupId =
-        field_map json "InstanceGroupId" InstanceGroupId.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map json__ "InstanceGroupId" InstanceGroupId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?marker ?instanceStates ?instanceFleetType ?instanceFleetId
         ?instanceGroupTypes ?instanceGroupId ~clusterId ()
     let to_json v = composed_to_json to_value v
@@ -11042,9 +13566,9 @@ module ListInstancesOutput =
         (Option.map ~f:InstanceList.of_xml) (Xml.child xml_arg0 "Instances") in
       make ?marker ?instances ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let instances = field_map json "Instances" InstanceList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let instances = field_map json__ "Instances" InstanceList.of_json in
       make ?marker ?instances ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This output contains the list of instances."]
@@ -11066,21 +13590,31 @@ module ListNotebookExecutionsInput =
           "The end of time range filter for listing notebook executions. The default is the current timestamp."];
       marker: Marker.t option
         [@ocaml.doc
-          "The pagination token, returned by a previous ListNotebookExecutions call, that indicates the start of the list for this ListNotebookExecutions call."]}
+          "The pagination token, returned by a previous ListNotebookExecutions call, that indicates the start of the list for this ListNotebookExecutions call."];
+      executionEngineId: XmlString.t option
+        [@ocaml.doc "The unique ID of the execution engine."]}
     let make ?editorId =
       fun ?status ->
         fun ?from ->
           fun ?to_ ->
-            fun ?marker -> fun () -> { editorId; status; from; to_; marker }
+            fun ?marker ->
+              fun ?executionEngineId ->
+                fun () ->
+                  { editorId; status; from; to_; marker; executionEngineId }
     let to_value x =
       structure_to_value
         [("EditorId", (Option.map x.editorId ~f:XmlStringMaxLen256.to_value));
         ("Status", (Option.map x.status ~f:NotebookExecutionStatus.to_value));
         ("From", (Option.map x.from ~f:Date.to_value));
         ("To", (Option.map x.to_ ~f:Date.to_value));
-        ("Marker", (Option.map x.marker ~f:Marker.to_value))]
+        ("Marker", (Option.map x.marker ~f:Marker.to_value));
+        ("ExecutionEngineId",
+          (Option.map x.executionEngineId ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let executionEngineId =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "ExecutionEngineId") in
       let marker =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       let to_ = (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "To") in
@@ -11091,18 +13625,20 @@ module ListNotebookExecutionsInput =
       let editorId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "EditorId") in
-      make ?marker ?to_ ?from ?status ?editorId ()
+      make ?executionEngineId ?marker ?to_ ?from ?status ?editorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let to_ = field_map json "To" Date.of_json in
-      let from = field_map json "From" Date.of_json in
-      let status = field_map json "Status" NotebookExecutionStatus.of_json in
-      let editorId = field_map json "EditorId" XmlStringMaxLen256.of_json in
-      make ?marker ?to_ ?from ?status ?editorId ()
+    let of_json json__ =
+      let executionEngineId =
+        field_map json__ "ExecutionEngineId" XmlString.of_json in
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let to_ = field_map json__ "To" Date.of_json in
+      let from = field_map json__ "From" Date.of_json in
+      let status = field_map json__ "Status" NotebookExecutionStatus.of_json in
+      let editorId = field_map json__ "EditorId" XmlStringMaxLen256.of_json in
+      make ?executionEngineId ?marker ?to_ ?from ?status ?editorId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides summaries of all notebook executions. You can filter the list based on multiple criteria such as status, time range, and editor id. Returns a maximum of 50 notebook executions and a marker to track the paging of a longer notebook execution list across multiple ListNotebookExecution calls."]
+       "Provides summaries of all notebook executions. You can filter the list based on multiple criteria such as status, time range, and editor id. Returns a maximum of 50 notebook executions and a marker to track the paging of a longer notebook execution list across multiple ListNotebookExecutions calls."]
 module NotebookExecutionSummary =
   struct
     type nonrec t =
@@ -11120,22 +13656,32 @@ module NotebookExecutionSummary =
       startTime: Date.t option
         [@ocaml.doc "The timestamp when notebook execution started."];
       endTime: Date.t option
-        [@ocaml.doc "The timestamp when notebook execution started."]}
+        [@ocaml.doc "The timestamp when notebook execution started."];
+      notebookS3Location: NotebookS3LocationForOutput.t option
+        [@ocaml.doc
+          "The Amazon S3 location that stores the notebook execution input."];
+      executionEngineId: XmlString.t option
+        [@ocaml.doc
+          "The unique ID of the execution engine for the notebook execution."]}
     let make ?notebookExecutionId =
       fun ?editorId ->
         fun ?notebookExecutionName ->
           fun ?status ->
             fun ?startTime ->
               fun ?endTime ->
-                fun () ->
-                  {
-                    notebookExecutionId;
-                    editorId;
-                    notebookExecutionName;
-                    status;
-                    startTime;
-                    endTime
-                  }
+                fun ?notebookS3Location ->
+                  fun ?executionEngineId ->
+                    fun () ->
+                      {
+                        notebookExecutionId;
+                        editorId;
+                        notebookExecutionName;
+                        status;
+                        startTime;
+                        endTime;
+                        notebookS3Location;
+                        executionEngineId
+                      }
     let to_value x =
       structure_to_value
         [("NotebookExecutionId",
@@ -11145,9 +13691,20 @@ module NotebookExecutionSummary =
           (Option.map x.notebookExecutionName ~f:XmlStringMaxLen256.to_value));
         ("Status", (Option.map x.status ~f:NotebookExecutionStatus.to_value));
         ("StartTime", (Option.map x.startTime ~f:Date.to_value));
-        ("EndTime", (Option.map x.endTime ~f:Date.to_value))]
+        ("EndTime", (Option.map x.endTime ~f:Date.to_value));
+        ("NotebookS3Location",
+          (Option.map x.notebookS3Location
+             ~f:NotebookS3LocationForOutput.to_value));
+        ("ExecutionEngineId",
+          (Option.map x.executionEngineId ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let executionEngineId =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "ExecutionEngineId") in
+      let notebookS3Location =
+        (Option.map ~f:NotebookS3LocationForOutput.of_xml)
+          (Xml.child xml_arg0 "NotebookS3Location") in
       let endTime =
         (Option.map ~f:Date.of_xml) (Xml.child xml_arg0 "EndTime") in
       let startTime =
@@ -11164,20 +13721,25 @@ module NotebookExecutionSummary =
       let notebookExecutionId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "NotebookExecutionId") in
-      make ?endTime ?startTime ?status ?notebookExecutionName ?editorId
-        ?notebookExecutionId ()
+      make ?executionEngineId ?notebookS3Location ?endTime ?startTime ?status
+        ?notebookExecutionName ?editorId ?notebookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "EndTime" Date.of_json in
-      let startTime = field_map json "StartTime" Date.of_json in
-      let status = field_map json "Status" NotebookExecutionStatus.of_json in
+    let of_json json__ =
+      let executionEngineId =
+        field_map json__ "ExecutionEngineId" XmlString.of_json in
+      let notebookS3Location =
+        field_map json__ "NotebookS3Location"
+          NotebookS3LocationForOutput.of_json in
+      let endTime = field_map json__ "EndTime" Date.of_json in
+      let startTime = field_map json__ "StartTime" Date.of_json in
+      let status = field_map json__ "Status" NotebookExecutionStatus.of_json in
       let notebookExecutionName =
-        field_map json "NotebookExecutionName" XmlStringMaxLen256.of_json in
-      let editorId = field_map json "EditorId" XmlStringMaxLen256.of_json in
+        field_map json__ "NotebookExecutionName" XmlStringMaxLen256.of_json in
+      let editorId = field_map json__ "EditorId" XmlStringMaxLen256.of_json in
       let notebookExecutionId =
-        field_map json "NotebookExecutionId" XmlStringMaxLen256.of_json in
-      make ?endTime ?startTime ?status ?notebookExecutionName ?editorId
-        ?notebookExecutionId ()
+        field_map json__ "NotebookExecutionId" XmlStringMaxLen256.of_json in
+      make ?executionEngineId ?notebookS3Location ?endTime ?startTime ?status
+        ?notebookExecutionName ?editorId ?notebookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details for a notebook execution. The details include information such as the unique ID and status of the notebook execution."]
@@ -11185,6 +13747,9 @@ module NotebookExecutionSummaryList =
   struct
     type nonrec t = NotebookExecutionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:NotebookExecutionSummary.to_value)) |>
         (fun x -> `List x)
@@ -11269,15 +13834,15 @@ module ListNotebookExecutionsOutput =
           (Xml.child xml_arg0 "NotebookExecutions") in
       make ?marker ?notebookExecutions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let notebookExecutions =
-        field_map json "NotebookExecutions"
+        field_map json__ "NotebookExecutions"
           NotebookExecutionSummaryList.of_json in
       make ?marker ?notebookExecutions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Provides summaries of all notebook executions. You can filter the list based on multiple criteria such as status, time range, and editor id. Returns a maximum of 50 notebook executions and a marker to track the paging of a longer notebook execution list across multiple ListNotebookExecution calls."]
+       "Provides summaries of all notebook executions. You can filter the list based on multiple criteria such as status, time range, and editor id. Returns a maximum of 50 notebook executions and a marker to track the paging of a longer notebook execution list across multiple ListNotebookExecutions calls."]
 module ReleaseLabelFilter =
   struct
     type nonrec t =
@@ -11301,9 +13866,9 @@ module ReleaseLabelFilter =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Prefix") in
       make ?application ?prefix ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let application = field_map json "Application" String_.of_json in
-      let prefix = field_map json "Prefix" String_.of_json in
+    let of_json json__ =
+      let application = field_map json__ "Application" String_.of_json in
+      let prefix = field_map json__ "Prefix" String_.of_json in
       make ?application ?prefix ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11342,14 +13907,14 @@ module ListReleaseLabelsInput =
           (Xml.child xml_arg0 "Filters") in
       make ?maxResults ?nextToken ?filters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" MaxResultsNumber.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let filters = field_map json "Filters" ReleaseLabelFilter.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResultsNumber.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let filters = field_map json__ "Filters" ReleaseLabelFilter.of_json in
       make ?maxResults ?nextToken ?filters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves release labels of EMR services in the region where the API is called."]
+       "Retrieves release labels of Amazon EMR services in the Region where the API is called."]
 module ListReleaseLabelsOutput =
   struct
     type nonrec t =
@@ -11411,13 +13976,13 @@ module ListReleaseLabelsOutput =
           (Xml.child xml_arg0 "ReleaseLabels") in
       make ?nextToken ?releaseLabels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let releaseLabels = field_map json "ReleaseLabels" StringList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let releaseLabels = field_map json__ "ReleaseLabels" StringList.of_json in
       make ?nextToken ?releaseLabels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Retrieves release labels of EMR services in the region where the API is called."]
+       "Retrieves release labels of Amazon EMR services in the Region where the API is called."]
 module ListSecurityConfigurationsInput =
   struct
     type nonrec t =
@@ -11435,8 +14000,9 @@ module ListSecurityConfigurationsInput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in make ?marker ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      make ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists all the security configurations visible to this account, providing their creation dates and times, and their names. This call returns a maximum of 50 clusters per call, but returns a marker to track the paging of the cluster list across multiple ListSecurityConfigurations calls."]
@@ -11463,9 +14029,9 @@ module SecurityConfigurationSummary =
       let name = (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "Name") in
       make ?creationDateTime ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationDateTime = field_map json "CreationDateTime" Date.of_json in
-      let name = field_map json "Name" XmlString.of_json in
+    let of_json json__ =
+      let creationDateTime = field_map json__ "CreationDateTime" Date.of_json in
+      let name = field_map json__ "Name" XmlString.of_json in
       make ?creationDateTime ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11474,6 +14040,9 @@ module SecurityConfigurationList =
   struct
     type nonrec t = SecurityConfigurationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SecurityConfigurationSummary.to_value)) |>
         (fun x -> `List x)
@@ -11559,10 +14128,10 @@ module ListSecurityConfigurationsOutput =
           (Xml.child xml_arg0 "SecurityConfigurations") in
       make ?marker ?securityConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let securityConfigurations =
-        field_map json "SecurityConfigurations"
+        field_map json__ "SecurityConfigurations"
           SecurityConfigurationList.of_json in
       make ?marker ?securityConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -11572,6 +14141,9 @@ module StepStateList =
   struct
     type nonrec t = StepState.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepState.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11634,11 +14206,11 @@ module ListStepsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?marker ?stepIds ?stepStates ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let stepIds = field_map json "StepIds" XmlStringList.of_json in
-      let stepStates = field_map json "StepStates" StepStateList.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let stepIds = field_map json__ "StepIds" XmlStringList.of_json in
+      let stepStates = field_map json__ "StepStates" StepStateList.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?marker ?stepIds ?stepStates ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "This input determines which steps to list."]
@@ -11655,13 +14227,29 @@ module StepSummary =
           "The action to take when the cluster step fails. Possible values are TERMINATE_CLUSTER, CANCEL_AND_WAIT, and CONTINUE. TERMINATE_JOB_FLOW is available for backward compatibility."];
       status: StepStatus.t option
         [@ocaml.doc
-          "The current execution status details of the cluster step."]}
+          "The current execution status details of the cluster step."];
+      logUri: String_.t option
+        [@ocaml.doc "The Amazon S3 destination URI for log publishing."];
+      encryptionKeyArn: String_.t option
+        [@ocaml.doc
+          "The KMS key ARN to encrypt the logs published to the given Amazon S3 destination."]}
     let make ?id =
       fun ?name ->
         fun ?config ->
           fun ?actionOnFailure ->
             fun ?status ->
-              fun () -> { id; name; config; actionOnFailure; status }
+              fun ?logUri ->
+                fun ?encryptionKeyArn ->
+                  fun () ->
+                    {
+                      id;
+                      name;
+                      config;
+                      actionOnFailure;
+                      status;
+                      logUri;
+                      encryptionKeyArn
+                    }
     let to_value x =
       structure_to_value
         [("Id", (Option.map x.id ~f:StepId.to_value));
@@ -11669,9 +14257,17 @@ module StepSummary =
         ("Config", (Option.map x.config ~f:HadoopStepConfig.to_value));
         ("ActionOnFailure",
           (Option.map x.actionOnFailure ~f:ActionOnFailure.to_value));
-        ("Status", (Option.map x.status ~f:StepStatus.to_value))]
+        ("Status", (Option.map x.status ~f:StepStatus.to_value));
+        ("LogUri", (Option.map x.logUri ~f:String_.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
+      let logUri =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "LogUri") in
       let status =
         (Option.map ~f:StepStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let actionOnFailure =
@@ -11681,22 +14277,30 @@ module StepSummary =
         (Option.map ~f:HadoopStepConfig.of_xml) (Xml.child xml_arg0 "Config") in
       let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Name") in
       let id = (Option.map ~f:StepId.of_xml) (Xml.child xml_arg0 "Id") in
-      make ?status ?actionOnFailure ?config ?name ?id ()
+      make ?encryptionKeyArn ?logUri ?status ?actionOnFailure ?config ?name
+        ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" StepStatus.of_json in
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" String_.of_json in
+      let logUri = field_map json__ "LogUri" String_.of_json in
+      let status = field_map json__ "Status" StepStatus.of_json in
       let actionOnFailure =
-        field_map json "ActionOnFailure" ActionOnFailure.of_json in
-      let config = field_map json "Config" HadoopStepConfig.of_json in
-      let name = field_map json "Name" String_.of_json in
-      let id = field_map json "Id" StepId.of_json in
-      make ?status ?actionOnFailure ?config ?name ?id ()
+        field_map json__ "ActionOnFailure" ActionOnFailure.of_json in
+      let config = field_map json__ "Config" HadoopStepConfig.of_json in
+      let name = field_map json__ "Name" String_.of_json in
+      let id = field_map json__ "Id" StepId.of_json in
+      make ?encryptionKeyArn ?logUri ?status ?actionOnFailure ?config ?name
+        ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The summary of the cluster step."]
 module StepSummaryList =
   struct
     type nonrec t = StepSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StepSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -11775,9 +14379,9 @@ module ListStepsOutput =
         (Option.map ~f:StepSummaryList.of_xml) (Xml.child xml_arg0 "Steps") in
       make ?marker ?steps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let steps = field_map json "Steps" StepSummaryList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let steps = field_map json__ "Steps" StepSummaryList.of_json in
       make ?marker ?steps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11815,10 +14419,10 @@ module ListStudioSessionMappingsInput =
           (Xml.child xml_arg0 "StudioId") in
       make ?marker ?identityType ?studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
       make ?marker ?identityType ?studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -11831,10 +14435,10 @@ module SessionMappingSummary =
         [@ocaml.doc "The ID of the Amazon EMR Studio."];
       identityId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The globally unique identifier (GUID) of the user or group from the Amazon Web Services SSO Identity Store."];
+          "The globally unique identifier (GUID) of the user or group from the IAM Identity Center Identity Store."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user or group. For more information, see UserName and DisplayName in the Amazon Web Services SSO Identity Store API Reference."];
+          "The name of the user or group. For more information, see UserName and DisplayName in the IAM Identity Center Identity Store API Reference."];
       identityType: IdentityType.t option
         [@ocaml.doc
           "Specifies whether the identity mapped to the Amazon EMR Studio is a user or a group."];
@@ -11892,15 +14496,16 @@ module SessionMappingSummary =
       make ?creationTime ?sessionPolicyArn ?identityType ?identityName
         ?identityId ?studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
       let sessionPolicyArn =
-        field_map json "SessionPolicyArn" XmlStringMaxLen256.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+        field_map json__ "SessionPolicyArn" XmlStringMaxLen256.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
       make ?creationTime ?sessionPolicyArn ?identityType ?identityName
         ?identityId ?studioId ()
     let to_json v = composed_to_json to_value v
@@ -11910,6 +14515,9 @@ module SessionMappingSummaryList =
   struct
     type nonrec t = SessionMappingSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SessionMappingSummary.to_value)) |>
         (fun x -> `List x)
@@ -11995,10 +14603,10 @@ module ListStudioSessionMappingsOutput =
           (Xml.child xml_arg0 "SessionMappings") in
       make ?marker ?sessionMappings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
       let sessionMappings =
-        field_map json "SessionMappings" SessionMappingSummaryList.of_json in
+        field_map json__ "SessionMappings" SessionMappingSummaryList.of_json in
       make ?marker ?sessionMappings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12020,8 +14628,9 @@ module ListStudiosInput =
         (Option.map ~f:Marker.of_xml) (Xml.child xml_arg0 "Marker") in
       make ?marker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in make ?marker ()
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      make ?marker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all Amazon EMR Studios associated with the Amazon Web Services account. The list includes details such as ID, Studio Access URL, and creation time for each Studio."]
@@ -12042,7 +14651,7 @@ module StudioSummary =
         [@ocaml.doc "The unique access URL of the Amazon EMR Studio."];
       authMode: AuthMode.t option
         [@ocaml.doc
-          "Specifies whether the Studio authenticates users using IAM or Amazon Web Services SSO."];
+          "Specifies whether the Studio authenticates users using IAM or IAM Identity Center."];
       creationTime: Date.t option
         [@ocaml.doc "The time when the Amazon EMR Studio was created."]}
     let make ?studioId =
@@ -12094,24 +14703,27 @@ module StudioSummary =
       make ?creationTime ?authMode ?url ?description ?vpcId ?name ?studioId
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let creationTime = field_map json "CreationTime" Date.of_json in
-      let authMode = field_map json "AuthMode" AuthMode.of_json in
-      let url = field_map json "Url" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let creationTime = field_map json__ "CreationTime" Date.of_json in
+      let authMode = field_map json__ "AuthMode" AuthMode.of_json in
+      let url = field_map json__ "Url" XmlStringMaxLen256.of_json in
       let description =
-        field_map json "Description" XmlStringMaxLen256.of_json in
-      let vpcId = field_map json "VpcId" XmlStringMaxLen256.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
-      let studioId = field_map json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "Description" XmlStringMaxLen256.of_json in
+      let vpcId = field_map json__ "VpcId" XmlStringMaxLen256.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      let studioId = field_map json__ "StudioId" XmlStringMaxLen256.of_json in
       make ?creationTime ?authMode ?url ?description ?vpcId ?name ?studioId
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Details for an Amazon EMR Studio, including ID, Name, VPC, and Description. The details do not include subnets, IAM roles, security groups, or tags associated with the Studio."]
+       "Details for an Amazon EMR Studio, including ID, Name, VPC, and Description. To fetch additional details such as subnets, IAM roles, security groups, and tags for the Studio, use the DescribeStudio API."]
 module StudioSummaryList =
   struct
     type nonrec t = StudioSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:StudioSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -12191,13 +14803,274 @@ module ListStudiosOutput =
           (Xml.child xml_arg0 "Studios") in
       make ?marker ?studios ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let marker = field_map json "Marker" Marker.of_json in
-      let studios = field_map json "Studios" StudioSummaryList.of_json in
+    let of_json json__ =
+      let marker = field_map json__ "Marker" Marker.of_json in
+      let studios = field_map json__ "Studios" StudioSummaryList.of_json in
       make ?marker ?studios ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all Amazon EMR Studios associated with the Amazon Web Services account. The list includes details such as ID, Studio Access URL, and creation time for each Studio."]
+module ListSupportedInstanceTypesInput =
+  struct
+    type nonrec t =
+      {
+      releaseLabel: String_.t
+        [@ocaml.doc
+          "The Amazon EMR release label determines the versions of open-source application packages that Amazon EMR has installed on the cluster. Release labels are in the format emr-x.x.x, where x.x.x is an Amazon EMR release number such as emr-6.10.0. For more information about Amazon EMR releases and their included application versions and features, see the Amazon EMR Release Guide ."];
+      marker: String_.t option
+        [@ocaml.doc
+          "The pagination token that marks the next set of results to retrieve."]}
+    let context_ = "ListSupportedInstanceTypesInput"
+    let make ?marker =
+      fun ~releaseLabel -> fun () -> { marker; releaseLabel }
+    let to_value x =
+      structure_to_value
+        [("ReleaseLabel", (Some (String_.to_value x.releaseLabel)));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let releaseLabel =
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ReleaseLabel") in
+      make ?marker ~releaseLabel ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let releaseLabel = field_map_exn json__ "ReleaseLabel" String_.of_json in
+      make ?marker ~releaseLabel ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of the instance types that Amazon EMR supports. You can filter the list by Amazon Web Services Region and Amazon EMR release."]
+module SupportedInstanceType =
+  struct
+    type nonrec t =
+      {
+      type_: String_.t option
+        [@ocaml.doc
+          "The Amazon EC2 instance type, for example m5.xlarge, of the SupportedInstanceType."];
+      memoryGB: Float_.t option
+        [@ocaml.doc
+          "The amount of memory that is available to Amazon EMR from the SupportedInstanceType. The kernel and hypervisor software consume some memory, so this value might be lower than the overall memory for the instance type."];
+      storageGB: Integer.t option
+        [@ocaml.doc
+          "StorageGB represents the storage capacity of the SupportedInstanceType. This value is 0 for Amazon EBS-only instance types."];
+      vCPU: Integer.t option
+        [@ocaml.doc
+          "The number of vCPUs available for the SupportedInstanceType."];
+      is64BitsOnly: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the SupportedInstanceType only supports 64-bit architecture."];
+      instanceFamilyId: String_.t option
+        [@ocaml.doc
+          "The Amazon EC2 family and generation for the SupportedInstanceType."];
+      ebsOptimizedAvailable: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the SupportedInstanceType supports Amazon EBS optimization."];
+      ebsOptimizedByDefault: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the SupportedInstanceType uses Amazon EBS optimization by default."];
+      numberOfDisks: Integer.t option
+        [@ocaml.doc
+          "Number of disks for the SupportedInstanceType. This value is 0 for Amazon EBS-only instance types."];
+      ebsStorageOnly: Boolean.t option
+        [@ocaml.doc
+          "Indicates whether the SupportedInstanceType only supports Amazon EBS."];
+      architecture: String_.t option
+        [@ocaml.doc "The CPU architecture, for example X86_64 or AARCH64."]}
+    let make ?type_ =
+      fun ?memoryGB ->
+        fun ?storageGB ->
+          fun ?vCPU ->
+            fun ?is64BitsOnly ->
+              fun ?instanceFamilyId ->
+                fun ?ebsOptimizedAvailable ->
+                  fun ?ebsOptimizedByDefault ->
+                    fun ?numberOfDisks ->
+                      fun ?ebsStorageOnly ->
+                        fun ?architecture ->
+                          fun () ->
+                            {
+                              type_;
+                              memoryGB;
+                              storageGB;
+                              vCPU;
+                              is64BitsOnly;
+                              instanceFamilyId;
+                              ebsOptimizedAvailable;
+                              ebsOptimizedByDefault;
+                              numberOfDisks;
+                              ebsStorageOnly;
+                              architecture
+                            }
+    let to_value x =
+      structure_to_value
+        [("Type", (Option.map x.type_ ~f:String_.to_value));
+        ("MemoryGB", (Option.map x.memoryGB ~f:Float_.to_value));
+        ("StorageGB", (Option.map x.storageGB ~f:Integer.to_value));
+        ("VCPU", (Option.map x.vCPU ~f:Integer.to_value));
+        ("Is64BitsOnly", (Option.map x.is64BitsOnly ~f:Boolean.to_value));
+        ("InstanceFamilyId",
+          (Option.map x.instanceFamilyId ~f:String_.to_value));
+        ("EbsOptimizedAvailable",
+          (Option.map x.ebsOptimizedAvailable ~f:Boolean.to_value));
+        ("EbsOptimizedByDefault",
+          (Option.map x.ebsOptimizedByDefault ~f:Boolean.to_value));
+        ("NumberOfDisks", (Option.map x.numberOfDisks ~f:Integer.to_value));
+        ("EbsStorageOnly", (Option.map x.ebsStorageOnly ~f:Boolean.to_value));
+        ("Architecture", (Option.map x.architecture ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let architecture =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Architecture") in
+      let ebsStorageOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "EbsStorageOnly") in
+      let numberOfDisks =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "NumberOfDisks") in
+      let ebsOptimizedByDefault =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EbsOptimizedByDefault") in
+      let ebsOptimizedAvailable =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "EbsOptimizedAvailable") in
+      let instanceFamilyId =
+        (Option.map ~f:String_.of_xml)
+          (Xml.child xml_arg0 "InstanceFamilyId") in
+      let is64BitsOnly =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "Is64BitsOnly") in
+      let vCPU = (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "VCPU") in
+      let storageGB =
+        (Option.map ~f:Integer.of_xml) (Xml.child xml_arg0 "StorageGB") in
+      let memoryGB =
+        (Option.map ~f:Float_.of_xml) (Xml.child xml_arg0 "MemoryGB") in
+      let type_ = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Type") in
+      make ?architecture ?ebsStorageOnly ?numberOfDisks
+        ?ebsOptimizedByDefault ?ebsOptimizedAvailable ?instanceFamilyId
+        ?is64BitsOnly ?vCPU ?storageGB ?memoryGB ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let architecture = field_map json__ "Architecture" String_.of_json in
+      let ebsStorageOnly = field_map json__ "EbsStorageOnly" Boolean.of_json in
+      let numberOfDisks = field_map json__ "NumberOfDisks" Integer.of_json in
+      let ebsOptimizedByDefault =
+        field_map json__ "EbsOptimizedByDefault" Boolean.of_json in
+      let ebsOptimizedAvailable =
+        field_map json__ "EbsOptimizedAvailable" Boolean.of_json in
+      let instanceFamilyId =
+        field_map json__ "InstanceFamilyId" String_.of_json in
+      let is64BitsOnly = field_map json__ "Is64BitsOnly" Boolean.of_json in
+      let vCPU = field_map json__ "VCPU" Integer.of_json in
+      let storageGB = field_map json__ "StorageGB" Integer.of_json in
+      let memoryGB = field_map json__ "MemoryGB" Float_.of_json in
+      let type_ = field_map json__ "Type" String_.of_json in
+      make ?architecture ?ebsStorageOnly ?numberOfDisks
+        ?ebsOptimizedByDefault ?ebsOptimizedAvailable ?instanceFamilyId
+        ?is64BitsOnly ?vCPU ?storageGB ?memoryGB ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "An instance type that the specified Amazon EMR release supports."]
+module SupportedInstanceTypesList =
+  struct
+    type nonrec t = SupportedInstanceType.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SupportedInstanceType.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SupportedInstanceType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedInstanceTypesList"
+        ~of_json:SupportedInstanceType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListSupportedInstanceTypesOutput =
+  struct
+    type nonrec t =
+      {
+      supportedInstanceTypes: SupportedInstanceTypesList.t option
+        [@ocaml.doc
+          "The list of instance types that the release specified in ListSupportedInstanceTypesInput$ReleaseLabel supports, filtered by Amazon Web Services Region."];
+      marker: String_.t option
+        [@ocaml.doc
+          "The pagination token that marks the next set of results to retrieve."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `InvalidRequestException of InvalidRequestException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?supportedInstanceTypes =
+      fun ?marker -> fun () -> { supportedInstanceTypes; marker }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "InvalidRequestException" ->
+          `InvalidRequestException (InvalidRequestException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `InvalidRequestException e ->
+          `Assoc
+            [("error", (`String "InvalidRequestException"));
+            ("details", (InvalidRequestException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("SupportedInstanceTypes",
+           (Option.map x.supportedInstanceTypes
+              ~f:SupportedInstanceTypesList.to_value));
+        ("Marker", (Option.map x.marker ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let marker =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Marker") in
+      let supportedInstanceTypes =
+        (Option.map ~f:SupportedInstanceTypesList.of_xml)
+          (Xml.child xml_arg0 "SupportedInstanceTypes") in
+      make ?marker ?supportedInstanceTypes ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let marker = field_map json__ "Marker" String_.of_json in
+      let supportedInstanceTypes =
+        field_map json__ "SupportedInstanceTypes"
+          SupportedInstanceTypesList.of_json in
+      make ?marker ?supportedInstanceTypes ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A list of the instance types that Amazon EMR supports. You can filter the list by Amazon Web Services Region and Amazon EMR release."]
 module ModifyClusterInput =
   struct
     type nonrec t =
@@ -12206,29 +15079,39 @@ module ModifyClusterInput =
         [@ocaml.doc "The unique identifier of the cluster."];
       stepConcurrencyLevel: Integer.t option
         [@ocaml.doc
-          "The number of steps that can be executed concurrently. You can specify a minimum of 1 step and a maximum of 256 steps. We recommend that you do not change this parameter while steps are running or the ActionOnFailure setting may not behave as expected. For more information see Step$ActionOnFailure."]}
+          "The number of steps that can be executed concurrently. You can specify a minimum of 1 step and a maximum of 256 steps. We recommend that you do not change this parameter while steps are running or the ActionOnFailure setting may not behave as expected. For more information see Step$ActionOnFailure."];
+      extendedSupport: BooleanObject.t option [@ocaml.doc "Reserved."]}
     let context_ = "ModifyClusterInput"
     let make ?stepConcurrencyLevel =
-      fun ~clusterId -> fun () -> { stepConcurrencyLevel; clusterId }
+      fun ?extendedSupport ->
+        fun ~clusterId ->
+          fun () -> { stepConcurrencyLevel; extendedSupport; clusterId }
     let to_value x =
       structure_to_value
         [("ClusterId", (Some (String_.to_value x.clusterId)));
         ("StepConcurrencyLevel",
-          (Option.map x.stepConcurrencyLevel ~f:Integer.to_value))]
+          (Option.map x.stepConcurrencyLevel ~f:Integer.to_value));
+        ("ExtendedSupport",
+          (Option.map x.extendedSupport ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extendedSupport =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "ExtendedSupport") in
       let stepConcurrencyLevel =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "StepConcurrencyLevel") in
       let clusterId =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
-      make ?stepConcurrencyLevel ~clusterId ()
+      make ?extendedSupport ?stepConcurrencyLevel ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let extendedSupport =
+        field_map json__ "ExtendedSupport" BooleanObject.of_json in
       let stepConcurrencyLevel =
-        field_map json "StepConcurrencyLevel" Integer.of_json in
-      let clusterId = field_map_exn json "ClusterId" String_.of_json in
-      make ?stepConcurrencyLevel ~clusterId ()
+        field_map json__ "StepConcurrencyLevel" Integer.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" String_.of_json in
+      make ?extendedSupport ?stepConcurrencyLevel ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the number of steps that can be executed concurrently for the cluster specified using ClusterID."]
@@ -12237,12 +15120,15 @@ module ModifyClusterOutput =
     type nonrec t =
       {
       stepConcurrencyLevel: Integer.t option
-        [@ocaml.doc "The number of steps that can be executed concurrently."]}
+        [@ocaml.doc "The number of steps that can be executed concurrently."];
+      extendedSupport: BooleanObject.t option [@ocaml.doc "Reserved."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `InvalidRequestException of InvalidRequestException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?stepConcurrencyLevel = fun () -> { stepConcurrencyLevel }
+    let make ?stepConcurrencyLevel =
+      fun ?extendedSupport ->
+        fun () -> { stepConcurrencyLevel; extendedSupport }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -12278,18 +15164,25 @@ module ModifyClusterOutput =
     let to_value x =
       structure_to_value
         [("StepConcurrencyLevel",
-           (Option.map x.stepConcurrencyLevel ~f:Integer.to_value))]
+           (Option.map x.stepConcurrencyLevel ~f:Integer.to_value));
+        ("ExtendedSupport",
+          (Option.map x.extendedSupport ~f:BooleanObject.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let extendedSupport =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "ExtendedSupport") in
       let stepConcurrencyLevel =
         (Option.map ~f:Integer.of_xml)
           (Xml.child xml_arg0 "StepConcurrencyLevel") in
-      make ?stepConcurrencyLevel ()
+      make ?extendedSupport ?stepConcurrencyLevel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let extendedSupport =
+        field_map json__ "ExtendedSupport" BooleanObject.of_json in
       let stepConcurrencyLevel =
-        field_map json "StepConcurrencyLevel" Integer.of_json in
-      make ?stepConcurrencyLevel ()
+        field_map json__ "StepConcurrencyLevel" Integer.of_json in
+      make ?extendedSupport ?stepConcurrencyLevel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Modifies the number of steps that can be executed concurrently for the cluster specified using ClusterID."]
@@ -12319,14 +15212,15 @@ module ModifyInstanceFleetInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~instanceFleet ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceFleet =
-        field_map_exn json "InstanceFleet" InstanceFleetModifyConfig.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map_exn json__ "InstanceFleet"
+          InstanceFleetModifyConfig.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~instanceFleet ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Modifies the target On-Demand and target Spot capacities for the instance fleet with the specified InstanceFleetID within the cluster specified using ClusterID. The call either succeeds or fails atomically. The instance fleet configuration is available only in Amazon EMR versions 4.8.0 and later, excluding 5.0.x versions."]
+       "Modifies the target On-Demand and target Spot capacities for the instance fleet with the specified InstanceFleetID within the cluster specified using ClusterID. The call either succeeds or fails atomically. The instance fleet configuration is available only in Amazon EMR releases 4.8.0 and later, excluding 5.0.x versions."]
 module ModifyInstanceGroupsInput =
   struct
     type nonrec t =
@@ -12353,10 +15247,11 @@ module ModifyInstanceGroupsInput =
         (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "ClusterId") in
       make ?instanceGroups ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceGroups =
-        field_map json "InstanceGroups" InstanceGroupModifyConfigList.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
+        field_map json__ "InstanceGroups"
+          InstanceGroupModifyConfigList.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
       make ?instanceGroups ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Change the size of some instance groups."]
@@ -12381,17 +15276,20 @@ module SupportedProductConfig =
         (Option.map ~f:XmlStringMaxLen256.of_xml) (Xml.child xml_arg0 "Name") in
       make ?args ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let args = field_map json "Args" XmlStringList.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let args = field_map json__ "Args" XmlStringList.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
       make ?args ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "The list of supported product configurations that allow user-supplied arguments. EMR accepts these arguments and forwards them to the corresponding installation script as bootstrap action arguments."]
+       "The list of supported product configurations that allow user-supplied arguments. Amazon EMR accepts these arguments and forwards them to the corresponding installation script as bootstrap action arguments."]
 module NewSupportedProductsList =
   struct
     type nonrec t = SupportedProductConfig.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SupportedProductConfig.to_value)) |>
         (fun x -> `List x)
@@ -12414,6 +15312,66 @@ module NewSupportedProductsList =
         ~of_json:SupportedProductConfig.of_json j
     let to_json v = composed_to_json to_value v
   end
+module NotebookS3LocationFromInput =
+  struct
+    type nonrec t =
+      {
+      bucket: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The Amazon S3 bucket that stores the notebook execution input."];
+      key: UriString.t option
+        [@ocaml.doc
+          "The key to the Amazon S3 location that stores the notebook execution input."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Option.map x.bucket ~f:XmlStringMaxLen256.to_value));
+        ("Key", (Option.map x.key ~f:UriString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:UriString.of_xml) (Xml.child xml_arg0 "Key") in
+      let bucket =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Bucket") in
+      make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" UriString.of_json in
+      let bucket = field_map json__ "Bucket" XmlStringMaxLen256.of_json in
+      make ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 location that stores the notebook execution input."]
+module OutputNotebookS3LocationFromInput =
+  struct
+    type nonrec t =
+      {
+      bucket: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "The Amazon S3 bucket that stores the notebook execution output."];
+      key: UriString.t option
+        [@ocaml.doc
+          "The key to the Amazon S3 location that stores the notebook execution output."]}
+    let make ?bucket = fun ?key -> fun () -> { bucket; key }
+    let to_value x =
+      structure_to_value
+        [("Bucket", (Option.map x.bucket ~f:XmlStringMaxLen256.to_value));
+        ("Key", (Option.map x.key ~f:UriString.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let key = (Option.map ~f:UriString.of_xml) (Xml.child xml_arg0 "Key") in
+      let bucket =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "Bucket") in
+      make ?key ?bucket ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let key = field_map json__ "Key" UriString.of_json in
+      let bucket = field_map json__ "Bucket" XmlStringMaxLen256.of_json in
+      make ?key ?bucket ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The Amazon S3 location that stores the notebook execution output."]
 module PutAutoScalingPolicyInput =
   struct
     type nonrec t =
@@ -12452,16 +15410,16 @@ module PutAutoScalingPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~autoScalingPolicy ~instanceGroupId ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoScalingPolicy =
-        field_map_exn json "AutoScalingPolicy" AutoScalingPolicy.of_json in
+        field_map_exn json__ "AutoScalingPolicy" AutoScalingPolicy.of_json in
       let instanceGroupId =
-        field_map_exn json "InstanceGroupId" InstanceGroupId.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map_exn json__ "InstanceGroupId" InstanceGroupId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~autoScalingPolicy ~instanceGroupId ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates an automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric."]
+       "Creates or updates an automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric."]
 module PutAutoScalingPolicyOutput =
   struct
     type nonrec t =
@@ -12523,18 +15481,18 @@ module PutAutoScalingPolicyOutput =
         (Option.map ~f:ClusterId.of_xml) (Xml.child xml_arg0 "ClusterId") in
       make ?clusterArn ?autoScalingPolicy ?instanceGroupId ?clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
+    let of_json json__ =
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
       let autoScalingPolicy =
-        field_map json "AutoScalingPolicy"
+        field_map json__ "AutoScalingPolicy"
           AutoScalingPolicyDescription.of_json in
       let instanceGroupId =
-        field_map json "InstanceGroupId" InstanceGroupId.of_json in
-      let clusterId = field_map json "ClusterId" ClusterId.of_json in
+        field_map json__ "InstanceGroupId" InstanceGroupId.of_json in
+      let clusterId = field_map json__ "ClusterId" ClusterId.of_json in
       make ?clusterArn ?autoScalingPolicy ?instanceGroupId ?clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates an automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates EC2 instances in response to the value of a CloudWatch metric."]
+       "Creates or updates an automatic scaling policy for a core instance group or task instance group in an Amazon EMR cluster. The automatic scaling policy defines how an instance group dynamically adds and terminates Amazon EC2 instances in response to the value of a CloudWatch metric."]
 module PutAutoTerminationPolicyInput =
   struct
     type nonrec t =
@@ -12564,14 +15522,15 @@ module PutAutoTerminationPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ?autoTerminationPolicy ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoTerminationPolicy =
-        field_map json "AutoTerminationPolicy" AutoTerminationPolicy.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map json__ "AutoTerminationPolicy"
+          AutoTerminationPolicy.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ?autoTerminationPolicy ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Auto-termination is supported in Amazon EMR versions 5.30.0 and 6.1.0 and later. For more information, see Using an auto-termination policy. Creates or updates an auto-termination policy for an Amazon EMR cluster. An auto-termination policy defines the amount of idle time in seconds after which a cluster automatically terminates. For alternative cluster termination options, see Control cluster termination."]
+       "Auto-termination is supported in Amazon EMR releases 5.30.0 and 6.1.0 and later. For more information, see Using an auto-termination policy. Creates or updates an auto-termination policy for an Amazon EMR cluster. An auto-termination policy defines the amount of idle time in seconds after which a cluster automatically terminates. For alternative cluster termination options, see Control cluster termination."]
 module PutAutoTerminationPolicyOutput =
   struct
     type nonrec t = unit
@@ -12602,14 +15561,14 @@ module PutAutoTerminationPolicyOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Auto-termination is supported in Amazon EMR versions 5.30.0 and 6.1.0 and later. For more information, see Using an auto-termination policy. Creates or updates an auto-termination policy for an Amazon EMR cluster. An auto-termination policy defines the amount of idle time in seconds after which a cluster automatically terminates. For alternative cluster termination options, see Control cluster termination."]
+       "Auto-termination is supported in Amazon EMR releases 5.30.0 and 6.1.0 and later. For more information, see Using an auto-termination policy. Creates or updates an auto-termination policy for an Amazon EMR cluster. An auto-termination policy defines the amount of idle time in seconds after which a cluster automatically terminates. For alternative cluster termination options, see Control cluster termination."]
 module PutBlockPublicAccessConfigurationInput =
   struct
     type nonrec t =
       {
       blockPublicAccessConfiguration: BlockPublicAccessConfiguration.t
         [@ocaml.doc
-          "A configuration for Amazon EMR block public access. The configuration applies to all clusters created in your account for the current Region. The configuration specifies whether block public access is enabled. If block public access is enabled, security groups associated with the cluster cannot have rules that allow inbound traffic from 0.0.0.0/0 or ::/0 on a port, unless the port is specified as an exception using PermittedPublicSecurityGroupRuleRanges in the BlockPublicAccessConfiguration. By default, Port 22 (SSH) is an exception, and public access is allowed on this port. You can change this by updating BlockPublicSecurityGroupRules to remove the exception. For accounts that created clusters in a Region before November 25, 2019, block public access is disabled by default in that Region. To use this feature, you must manually enable and configure it. For accounts that did not create an EMR cluster in a Region before this date, block public access is enabled by default in that Region."]}
+          "A configuration for Amazon EMR block public access. The configuration applies to all clusters created in your account for the current Region. The configuration specifies whether block public access is enabled. If block public access is enabled, security groups associated with the cluster cannot have rules that allow inbound traffic from 0.0.0.0/0 or ::/0 on a port, unless the port is specified as an exception using PermittedPublicSecurityGroupRuleRanges in the BlockPublicAccessConfiguration. By default, Port 22 (SSH) is an exception, and public access is allowed on this port. You can change this by updating BlockPublicSecurityGroupRules to remove the exception. For accounts that created clusters in a Region before November 25, 2019, block public access is disabled by default in that Region. To use this feature, you must manually enable and configure it. For accounts that did not create an Amazon EMR cluster in a Region before this date, block public access is enabled by default in that Region."]}
     let context_ = "PutBlockPublicAccessConfigurationInput"
     let make ~blockPublicAccessConfiguration =
       fun () -> { blockPublicAccessConfiguration }
@@ -12627,9 +15586,9 @@ module PutBlockPublicAccessConfigurationInput =
              "BlockPublicAccessConfiguration") in
       make ~blockPublicAccessConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blockPublicAccessConfiguration =
-        field_map_exn json "BlockPublicAccessConfiguration"
+        field_map_exn json__ "BlockPublicAccessConfiguration"
           BlockPublicAccessConfiguration.of_json in
       make ~blockPublicAccessConfiguration ()
     let to_json v = composed_to_json to_value v
@@ -12690,7 +15649,7 @@ module PutManagedScalingPolicyInput =
       {
       clusterId: ClusterId.t
         [@ocaml.doc
-          "Specifies the ID of an EMR cluster where the managed scaling policy is attached."];
+          "Specifies the ID of an Amazon EMR cluster where the managed scaling policy is attached."];
       managedScalingPolicy: ManagedScalingPolicy.t
         [@ocaml.doc
           "Specifies the constraints for the managed scaling policy."]}
@@ -12713,15 +15672,15 @@ module PutManagedScalingPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~managedScalingPolicy ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let managedScalingPolicy =
-        field_map_exn json "ManagedScalingPolicy"
+        field_map_exn json__ "ManagedScalingPolicy"
           ManagedScalingPolicy.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~managedScalingPolicy ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a managed scaling policy for an Amazon EMR cluster. The managed scaling policy defines the limits for resources, such as EC2 instances that can be added or terminated from a cluster. The policy only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
+       "Creates or updates a managed scaling policy for an Amazon EMR cluster. The managed scaling policy defines the limits for resources, such as Amazon EC2 instances that can be added or terminated from a cluster. The policy only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
 module PutManagedScalingPolicyOutput =
   struct
     type nonrec t = unit
@@ -12752,7 +15711,7 @@ module PutManagedScalingPolicyOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates or updates a managed scaling policy for an Amazon EMR cluster. The managed scaling policy defines the limits for resources, such as EC2 instances that can be added or terminated from a cluster. The policy only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
+       "Creates or updates a managed scaling policy for an Amazon EMR cluster. The managed scaling policy defines the limits for resources, such as Amazon EC2 instances that can be added or terminated from a cluster. The policy only applies to the core and task nodes. The master node cannot be scaled after initial configuration."]
 module RemoveAutoScalingPolicyInput =
   struct
     type nonrec t =
@@ -12781,14 +15740,14 @@ module RemoveAutoScalingPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~instanceGroupId ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let instanceGroupId =
-        field_map_exn json "InstanceGroupId" InstanceGroupId.of_json in
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+        field_map_exn json__ "InstanceGroupId" InstanceGroupId.of_json in
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~instanceGroupId ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes an automatic scaling policy from a specified instance group within an EMR cluster."]
+       "Removes an automatic scaling policy from a specified instance group within an Amazon EMR cluster."]
 module RemoveAutoScalingPolicyOutput =
   struct
     type nonrec t = unit
@@ -12819,7 +15778,7 @@ module RemoveAutoScalingPolicyOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes an automatic scaling policy from a specified instance group within an EMR cluster."]
+       "Removes an automatic scaling policy from a specified instance group within an Amazon EMR cluster."]
 module RemoveAutoTerminationPolicyInput =
   struct
     type nonrec t =
@@ -12839,8 +15798,8 @@ module RemoveAutoTerminationPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -12895,12 +15854,12 @@ module RemoveManagedScalingPolicyInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterId") in
       make ~clusterId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterId = field_map_exn json "ClusterId" ClusterId.of_json in
+    let of_json json__ =
+      let clusterId = field_map_exn json__ "ClusterId" ClusterId.of_json in
       make ~clusterId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a managed scaling policy from a specified EMR cluster."]
+       "Removes a managed scaling policy from a specified Amazon EMR cluster."]
 module RemoveManagedScalingPolicyOutput =
   struct
     type nonrec t = unit
@@ -12931,7 +15890,7 @@ module RemoveManagedScalingPolicyOutput =
     let of_json _ = make ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Removes a managed scaling policy from a specified EMR cluster."]
+       "Removes a managed scaling policy from a specified Amazon EMR cluster."]
 module RemoveTagsInput =
   struct
     type nonrec t =
@@ -12957,9 +15916,9 @@ module RemoveTagsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceId") in
       make ~tagKeys ~resourceId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" StringList.of_json in
-      let resourceId = field_map_exn json "ResourceId" ResourceId.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" StringList.of_json in
+      let resourceId = field_map_exn json__ "ResourceId" ResourceId.of_json in
       make ~tagKeys ~resourceId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -13023,7 +15982,7 @@ module RunJobFlowInput =
           "The location in Amazon S3 to write the log files of the job flow. If a value is not provided, logs are not created."];
       logEncryptionKmsKeyId: XmlString.t option
         [@ocaml.doc
-          "The KMS key used for encrypting log files. If a value is not provided, the logs remain encrypted by AES-256. This attribute is only available with Amazon EMR version 5.30.0 and later, excluding Amazon EMR 6.0.0."];
+          "The KMS key used for encrypting log files. If a value is not provided, the logs remain encrypted by AES-256. This attribute is only available with Amazon EMR releases 5.30.0 and later, excluding Amazon EMR 6.0.0."];
       additionalInfo: XmlString.t option
         [@ocaml.doc "A JSON string for selecting additional features."];
       amiVersion: XmlStringMaxLen256.t option
@@ -13036,6 +15995,9 @@ module RunJobFlowInput =
         [@ocaml.doc
           "A specification of the number and type of Amazon EC2 instances."];
       steps: StepConfigList.t option [@ocaml.doc "A list of steps to run."];
+      stepExecutionRoleArn: ArnType.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the runtime role for steps specified in the RunJobFlow request. The runtime role can be a cross-account IAM role. The runtime role ARN is a combination of account ID, role name, and role type using the following format: arn:partition:iam::account-id:role/role-name. For example, arn:aws:iam::1234567890:role/ReadOnly is a correctly formatted runtime role ARN. This parameter applies only to steps included in the Steps parameter of this RunJobFlow request. It does not apply to steps added later to the cluster."];
       bootstrapActions: BootstrapActionConfigList.t option
         [@ocaml.doc
           "A list of bootstrap actions to run before Hadoop starts on the cluster nodes."];
@@ -13044,22 +16006,22 @@ module RunJobFlowInput =
           "For Amazon EMR releases 3.x and 2.x. For Amazon EMR releases 4.x and later, use Applications. A list of strings that indicates third-party software to use. For more information, see the Amazon EMR Developer Guide. Currently supported values are: \"mapr-m3\" - launch the job flow using MapR M3 Edition. \"mapr-m5\" - launch the job flow using MapR M5 Edition."];
       newSupportedProducts: NewSupportedProductsList.t option
         [@ocaml.doc
-          "For Amazon EMR releases 3.x and 2.x. For Amazon EMR releases 4.x and later, use Applications. A list of strings that indicates third-party software to use with the job flow that accepts a user argument list. EMR accepts and forwards the argument list to the corresponding installation script as bootstrap action arguments. For more information, see \"Launch a Job Flow on the MapR Distribution for Hadoop\" in the Amazon EMR Developer Guide. Supported values are: \"mapr-m3\" - launch the cluster using MapR M3 Edition. \"mapr-m5\" - launch the cluster using MapR M5 Edition. \"mapr\" with the user arguments specifying \"--edition,m3\" or \"--edition,m5\" - launch the job flow using MapR M3 or M5 Edition respectively. \"mapr-m7\" - launch the cluster using MapR M7 Edition. \"hunk\" - launch the cluster with the Hunk Big Data Analytics Platform. \"hue\"- launch the cluster with Hue installed. \"spark\" - launch the cluster with Apache Spark installed. \"ganglia\" - launch the cluster with the Ganglia Monitoring System installed."];
+          "For Amazon EMR releases 3.x and 2.x. For Amazon EMR releases 4.x and later, use Applications. A list of strings that indicates third-party software to use with the job flow that accepts a user argument list. Amazon EMR accepts and forwards the argument list to the corresponding installation script as bootstrap action arguments. For more information, see \"Launch a Job Flow on the MapR Distribution for Hadoop\" in the Amazon EMR Developer Guide. Supported values are: \"mapr-m3\" - launch the cluster using MapR M3 Edition. \"mapr-m5\" - launch the cluster using MapR M5 Edition. \"mapr\" with the user arguments specifying \"--edition,m3\" or \"--edition,m5\" - launch the job flow using MapR M3 or M5 Edition respectively. \"mapr-m7\" - launch the cluster using MapR M7 Edition. \"hunk\" - launch the cluster with the Hunk Big Data Analytics Platform. \"hue\"- launch the cluster with Hue installed. \"spark\" - launch the cluster with Apache Spark installed. \"ganglia\" - launch the cluster with the Ganglia Monitoring System installed."];
       applications: ApplicationList.t option
         [@ocaml.doc
           "Applies to Amazon EMR releases 4.0 and later. A case-insensitive list of applications for Amazon EMR to install and configure when launching the cluster. For a list of applications available for each Amazon EMR release version, see the Amazon EMRRelease Guide."];
       configurations: ConfigurationList.t option
         [@ocaml.doc
-          "For Amazon EMR releases 4.0 and later. The list of configurations supplied for the EMR cluster you are creating."];
+          "For Amazon EMR releases 4.0 and later. The list of configurations supplied for the Amazon EMR cluster that you are creating."];
       visibleToAllUsers: Boolean.t option
         [@ocaml.doc
-          "The VisibleToAllUsers parameter is no longer supported. By default, the value is set to true. Setting it to false now has no effect. Set this value to true so that IAM principals in the Amazon Web Services account associated with the cluster can perform EMR actions on the cluster that their IAM policies allow. This value defaults to true for clusters created using the EMR API or the CLI create-cluster command. When set to false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform EMR actions for the cluster, regardless of the IAM permissions policies attached to other IAM principals. For more information, see Understanding the EMR Cluster VisibleToAllUsers Setting in the Amazon EMRManagement Guide."];
+          "The VisibleToAllUsers parameter is no longer supported. By default, the value is set to true. Setting it to false now has no effect. Set this value to true so that IAM principals in the Amazon Web Services account associated with the cluster can perform Amazon EMR actions on the cluster that their IAM policies allow. This value defaults to true for clusters created using the Amazon EMR API or the CLI create-cluster command. When set to false, only the IAM principal that created the cluster and the Amazon Web Services account root user can perform Amazon EMR actions for the cluster, regardless of the IAM permissions policies attached to other IAM principals. For more information, see Understanding the Amazon EMR cluster VisibleToAllUsers setting in the Amazon EMR Management Guide."];
       jobFlowRole: XmlString.t option
         [@ocaml.doc
-          "Also called instance profile and EC2 role. An IAM role for an EMR cluster. The EC2 instances of the cluster assume this role. The default role is EMR_EC2_DefaultRole. In order to use the default role, you must have already created it using the CLI or console."];
+          "Also called instance profile and Amazon EC2 role. An IAM role for an Amazon EMR cluster. The Amazon EC2 instances of the cluster assume this role. The default role is EMR_EC2_DefaultRole. In order to use the default role, you must have already created it using the CLI or console."];
       serviceRole: XmlString.t option
         [@ocaml.doc
-          "The IAM role that Amazon EMR assumes in order to access Amazon Web Services resources on your behalf."];
+          "The IAM role that Amazon EMR assumes in order to access Amazon Web Services resources on your behalf. If you've created a custom service role path, you must specify it for the service role when you launch your cluster."];
       tags: TagList.t option
         [@ocaml.doc
           "A list of tags to associate with a cluster and propagate to Amazon EC2 instances."];
@@ -13068,16 +16030,16 @@ module RunJobFlowInput =
           "The name of a security configuration to apply to the cluster."];
       autoScalingRole: XmlString.t option
         [@ocaml.doc
-          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides permissions that the automatic scaling feature requires to launch and terminate EC2 instances in an instance group."];
+          "An IAM role for automatic scaling policies. The default role is EMR_AutoScaling_DefaultRole. The IAM role provides permissions that the automatic scaling feature requires to launch and terminate Amazon EC2 instances in an instance group."];
       scaleDownBehavior: ScaleDownBehavior.t option
         [@ocaml.doc
-          "Specifies the way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION available only in Amazon EMR version 4.1.0 and later, and is the default for versions of Amazon EMR earlier than 5.1.0."];
+          "Specifies the way that individual Amazon EC2 instances terminate when an automatic scale-in activity occurs or an instance group is resized. TERMINATE_AT_INSTANCE_HOUR indicates that Amazon EMR terminates nodes at the instance-hour boundary, regardless of when the request to terminate the instance was submitted. This option is only available with Amazon EMR 5.1.0 and later and is the default for clusters created using that version. TERMINATE_AT_TASK_COMPLETION indicates that Amazon EMR adds nodes to a deny list and drains tasks from nodes before terminating the Amazon EC2 instances, regardless of the instance-hour boundary. With either behavior, Amazon EMR removes the least active nodes first and blocks instance termination if it could lead to HDFS corruption. TERMINATE_AT_TASK_COMPLETION available only in Amazon EMR releases 4.1.0 and later, and is the default for releases of Amazon EMR earlier than 5.1.0."];
       customAmiId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "Available only in Amazon EMR version 5.7.0 and later. The ID of a custom Amazon EBS-backed Linux AMI. If specified, Amazon EMR uses this AMI when it launches cluster EC2 instances. For more information about custom AMIs in Amazon EMR, see Using a Custom AMI in the Amazon EMR Management Guide. If omitted, the cluster uses the base Linux AMI for the ReleaseLabel specified. For Amazon EMR versions 2.x and 3.x, use AmiVersion instead. For information about creating a custom AMI, see Creating an Amazon EBS-Backed Linux AMI in the Amazon Elastic Compute Cloud User Guide for Linux Instances. For information about finding an AMI ID, see Finding a Linux AMI."];
+          "Available only in Amazon EMR releases 5.7.0 and later. The ID of a custom Amazon EBS-backed Linux AMI. If specified, Amazon EMR uses this AMI when it launches cluster Amazon EC2 instances. For more information about custom AMIs in Amazon EMR, see Using a Custom AMI in the Amazon EMR Management Guide. If omitted, the cluster uses the base Linux AMI for the ReleaseLabel specified. For Amazon EMR releases 2.x and 3.x, use AmiVersion instead. For information about creating a custom AMI, see Creating an Amazon EBS-Backed Linux AMI in the Amazon Elastic Compute Cloud User Guide for Linux Instances. For information about finding an AMI ID, see Finding a Linux AMI."];
       ebsRootVolumeSize: Integer.t option
         [@ocaml.doc
-          "The size, in GiB, of the Amazon EBS root device volume of the Linux AMI that is used for each EC2 instance. Available in Amazon EMR version 4.x and later."];
+          "The size, in GiB, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 4.x and later."];
       repoUpgradeOnBoot: RepoUpgradeOnBoot.t option
         [@ocaml.doc
           "Applies only when CustomAmiID is used. Specifies which updates from the Amazon Linux AMI package repositories to apply automatically when the instance boots using the AMI. If omitted, the default is SECURITY, which indicates that only security updates are applied. If NONE is specified, no updates are applied, and all updates must be applied manually."];
@@ -13093,7 +16055,20 @@ module RunJobFlowInput =
       placementGroupConfigs: PlacementGroupConfigList.t option
         [@ocaml.doc
           "The specified placement group configuration for an Amazon EMR cluster."];
-      autoTerminationPolicy: AutoTerminationPolicy.t option }
+      autoTerminationPolicy: AutoTerminationPolicy.t option ;
+      oSReleaseLabel: XmlStringMaxLen256.t option
+        [@ocaml.doc
+          "Specifies a particular Amazon Linux release for all nodes in a cluster launch RunJobFlow request. If a release is not specified, Amazon EMR uses the latest validated Amazon Linux release for cluster launch."];
+      ebsRootVolumeIops: Integer.t option
+        [@ocaml.doc
+          "The IOPS, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 6.15.0 and later."];
+      ebsRootVolumeThroughput: Integer.t option
+        [@ocaml.doc
+          "The throughput, in MiB/s, of the Amazon EBS root device volume of the Linux AMI that is used for each Amazon EC2 instance. Available in Amazon EMR releases 6.15.0 and later."];
+      extendedSupport: BooleanObject.t option [@ocaml.doc "Reserved."];
+      monitoringConfiguration: MonitoringConfiguration.t option
+        [@ocaml.doc
+          "Contains CloudWatch log configuration metadata and settings."]}
     let context_ = "RunJobFlowInput"
     let make ?logUri =
       fun ?logEncryptionKmsKeyId ->
@@ -13101,64 +16076,89 @@ module RunJobFlowInput =
           fun ?amiVersion ->
             fun ?releaseLabel ->
               fun ?steps ->
-                fun ?bootstrapActions ->
-                  fun ?supportedProducts ->
-                    fun ?newSupportedProducts ->
-                      fun ?applications ->
-                        fun ?configurations ->
-                          fun ?visibleToAllUsers ->
-                            fun ?jobFlowRole ->
-                              fun ?serviceRole ->
-                                fun ?tags ->
-                                  fun ?securityConfiguration ->
-                                    fun ?autoScalingRole ->
-                                      fun ?scaleDownBehavior ->
-                                        fun ?customAmiId ->
-                                          fun ?ebsRootVolumeSize ->
-                                            fun ?repoUpgradeOnBoot ->
-                                              fun ?kerberosAttributes ->
-                                                fun ?stepConcurrencyLevel ->
-                                                  fun ?managedScalingPolicy
+                fun ?stepExecutionRoleArn ->
+                  fun ?bootstrapActions ->
+                    fun ?supportedProducts ->
+                      fun ?newSupportedProducts ->
+                        fun ?applications ->
+                          fun ?configurations ->
+                            fun ?visibleToAllUsers ->
+                              fun ?jobFlowRole ->
+                                fun ?serviceRole ->
+                                  fun ?tags ->
+                                    fun ?securityConfiguration ->
+                                      fun ?autoScalingRole ->
+                                        fun ?scaleDownBehavior ->
+                                          fun ?customAmiId ->
+                                            fun ?ebsRootVolumeSize ->
+                                              fun ?repoUpgradeOnBoot ->
+                                                fun ?kerberosAttributes ->
+                                                  fun ?stepConcurrencyLevel
                                                     ->
-                                                    fun
-                                                      ?placementGroupConfigs
+                                                    fun ?managedScalingPolicy
                                                       ->
                                                       fun
-                                                        ?autoTerminationPolicy
+                                                        ?placementGroupConfigs
                                                         ->
-                                                        fun ~name ->
-                                                          fun ~instances ->
-                                                            fun () ->
-                                                              {
-                                                                logUri;
-                                                                logEncryptionKmsKeyId;
-                                                                additionalInfo;
-                                                                amiVersion;
-                                                                releaseLabel;
-                                                                steps;
-                                                                bootstrapActions;
-                                                                supportedProducts;
-                                                                newSupportedProducts;
-                                                                applications;
-                                                                configurations;
-                                                                visibleToAllUsers;
-                                                                jobFlowRole;
-                                                                serviceRole;
-                                                                tags;
-                                                                securityConfiguration;
-                                                                autoScalingRole;
-                                                                scaleDownBehavior;
-                                                                customAmiId;
-                                                                ebsRootVolumeSize;
-                                                                repoUpgradeOnBoot;
-                                                                kerberosAttributes;
-                                                                stepConcurrencyLevel;
-                                                                managedScalingPolicy;
-                                                                placementGroupConfigs;
-                                                                autoTerminationPolicy;
-                                                                name;
-                                                                instances
-                                                              }
+                                                        fun
+                                                          ?autoTerminationPolicy
+                                                          ->
+                                                          fun ?oSReleaseLabel
+                                                            ->
+                                                            fun
+                                                              ?ebsRootVolumeIops
+                                                              ->
+                                                              fun
+                                                                ?ebsRootVolumeThroughput
+                                                                ->
+                                                                fun
+                                                                  ?extendedSupport
+                                                                  ->
+                                                                  fun
+                                                                    ?monitoringConfiguration
+                                                                    ->
+                                                                    fun ~name
+                                                                    ->
+                                                                    fun
+                                                                    ~instances
+                                                                    ->
+                                                                    fun () ->
+                                                                    {
+                                                                    logUri;
+                                                                    logEncryptionKmsKeyId;
+                                                                    additionalInfo;
+                                                                    amiVersion;
+                                                                    releaseLabel;
+                                                                    steps;
+                                                                    stepExecutionRoleArn;
+                                                                    bootstrapActions;
+                                                                    supportedProducts;
+                                                                    newSupportedProducts;
+                                                                    applications;
+                                                                    configurations;
+                                                                    visibleToAllUsers;
+                                                                    jobFlowRole;
+                                                                    serviceRole;
+                                                                    tags;
+                                                                    securityConfiguration;
+                                                                    autoScalingRole;
+                                                                    scaleDownBehavior;
+                                                                    customAmiId;
+                                                                    ebsRootVolumeSize;
+                                                                    repoUpgradeOnBoot;
+                                                                    kerberosAttributes;
+                                                                    stepConcurrencyLevel;
+                                                                    managedScalingPolicy;
+                                                                    placementGroupConfigs;
+                                                                    autoTerminationPolicy;
+                                                                    oSReleaseLabel;
+                                                                    ebsRootVolumeIops;
+                                                                    ebsRootVolumeThroughput;
+                                                                    extendedSupport;
+                                                                    monitoringConfiguration;
+                                                                    name;
+                                                                    instances
+                                                                    }
     let to_value x =
       structure_to_value
         [("Name", (Some (XmlStringMaxLen256.to_value x.name)));
@@ -13173,6 +16173,8 @@ module RunJobFlowInput =
           (Option.map x.releaseLabel ~f:XmlStringMaxLen256.to_value));
         ("Instances", (Some (JobFlowInstancesConfig.to_value x.instances)));
         ("Steps", (Option.map x.steps ~f:StepConfigList.to_value));
+        ("StepExecutionRoleArn",
+          (Option.map x.stepExecutionRoleArn ~f:ArnType.to_value));
         ("BootstrapActions",
           (Option.map x.bootstrapActions
              ~f:BootstrapActionConfigList.to_value));
@@ -13213,9 +16215,35 @@ module RunJobFlowInput =
              ~f:PlacementGroupConfigList.to_value));
         ("AutoTerminationPolicy",
           (Option.map x.autoTerminationPolicy
-             ~f:AutoTerminationPolicy.to_value))]
+             ~f:AutoTerminationPolicy.to_value));
+        ("OSReleaseLabel",
+          (Option.map x.oSReleaseLabel ~f:XmlStringMaxLen256.to_value));
+        ("EbsRootVolumeIops",
+          (Option.map x.ebsRootVolumeIops ~f:Integer.to_value));
+        ("EbsRootVolumeThroughput",
+          (Option.map x.ebsRootVolumeThroughput ~f:Integer.to_value));
+        ("ExtendedSupport",
+          (Option.map x.extendedSupport ~f:BooleanObject.to_value));
+        ("MonitoringConfiguration",
+          (Option.map x.monitoringConfiguration
+             ~f:MonitoringConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let monitoringConfiguration =
+        (Option.map ~f:MonitoringConfiguration.of_xml)
+          (Xml.child xml_arg0 "MonitoringConfiguration") in
+      let extendedSupport =
+        (Option.map ~f:BooleanObject.of_xml)
+          (Xml.child xml_arg0 "ExtendedSupport") in
+      let ebsRootVolumeThroughput =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "EbsRootVolumeThroughput") in
+      let ebsRootVolumeIops =
+        (Option.map ~f:Integer.of_xml)
+          (Xml.child xml_arg0 "EbsRootVolumeIops") in
+      let oSReleaseLabel =
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "OSReleaseLabel") in
       let autoTerminationPolicy =
         (Option.map ~f:AutoTerminationPolicy.of_xml)
           (Xml.child xml_arg0 "AutoTerminationPolicy") in
@@ -13272,6 +16300,9 @@ module RunJobFlowInput =
       let bootstrapActions =
         (Option.map ~f:BootstrapActionConfigList.of_xml)
           (Xml.child xml_arg0 "BootstrapActions") in
+      let stepExecutionRoleArn =
+        (Option.map ~f:ArnType.of_xml)
+          (Xml.child xml_arg0 "StepExecutionRoleArn") in
       let steps =
         (Option.map ~f:StepConfigList.of_xml) (Xml.child xml_arg0 "Steps") in
       let instances =
@@ -13294,74 +16325,94 @@ module RunJobFlowInput =
       let name =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      make ?autoTerminationPolicy ?placementGroupConfigs
-        ?managedScalingPolicy ?stepConcurrencyLevel ?kerberosAttributes
-        ?repoUpgradeOnBoot ?ebsRootVolumeSize ?customAmiId ?scaleDownBehavior
-        ?autoScalingRole ?securityConfiguration ?tags ?serviceRole
-        ?jobFlowRole ?visibleToAllUsers ?configurations ?applications
-        ?newSupportedProducts ?supportedProducts ?bootstrapActions ?steps
-        ~instances ?releaseLabel ?amiVersion ?additionalInfo
-        ?logEncryptionKmsKeyId ?logUri ~name ()
+      make ?monitoringConfiguration ?extendedSupport ?ebsRootVolumeThroughput
+        ?ebsRootVolumeIops ?oSReleaseLabel ?autoTerminationPolicy
+        ?placementGroupConfigs ?managedScalingPolicy ?stepConcurrencyLevel
+        ?kerberosAttributes ?repoUpgradeOnBoot ?ebsRootVolumeSize
+        ?customAmiId ?scaleDownBehavior ?autoScalingRole
+        ?securityConfiguration ?tags ?serviceRole ?jobFlowRole
+        ?visibleToAllUsers ?configurations ?applications
+        ?newSupportedProducts ?supportedProducts ?bootstrapActions
+        ?stepExecutionRoleArn ?steps ~instances ?releaseLabel ?amiVersion
+        ?additionalInfo ?logEncryptionKmsKeyId ?logUri ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let monitoringConfiguration =
+        field_map json__ "MonitoringConfiguration"
+          MonitoringConfiguration.of_json in
+      let extendedSupport =
+        field_map json__ "ExtendedSupport" BooleanObject.of_json in
+      let ebsRootVolumeThroughput =
+        field_map json__ "EbsRootVolumeThroughput" Integer.of_json in
+      let ebsRootVolumeIops =
+        field_map json__ "EbsRootVolumeIops" Integer.of_json in
+      let oSReleaseLabel =
+        field_map json__ "OSReleaseLabel" XmlStringMaxLen256.of_json in
       let autoTerminationPolicy =
-        field_map json "AutoTerminationPolicy" AutoTerminationPolicy.of_json in
+        field_map json__ "AutoTerminationPolicy"
+          AutoTerminationPolicy.of_json in
       let placementGroupConfigs =
-        field_map json "PlacementGroupConfigs"
+        field_map json__ "PlacementGroupConfigs"
           PlacementGroupConfigList.of_json in
       let managedScalingPolicy =
-        field_map json "ManagedScalingPolicy" ManagedScalingPolicy.of_json in
+        field_map json__ "ManagedScalingPolicy" ManagedScalingPolicy.of_json in
       let stepConcurrencyLevel =
-        field_map json "StepConcurrencyLevel" Integer.of_json in
+        field_map json__ "StepConcurrencyLevel" Integer.of_json in
       let kerberosAttributes =
-        field_map json "KerberosAttributes" KerberosAttributes.of_json in
+        field_map json__ "KerberosAttributes" KerberosAttributes.of_json in
       let repoUpgradeOnBoot =
-        field_map json "RepoUpgradeOnBoot" RepoUpgradeOnBoot.of_json in
+        field_map json__ "RepoUpgradeOnBoot" RepoUpgradeOnBoot.of_json in
       let ebsRootVolumeSize =
-        field_map json "EbsRootVolumeSize" Integer.of_json in
+        field_map json__ "EbsRootVolumeSize" Integer.of_json in
       let customAmiId =
-        field_map json "CustomAmiId" XmlStringMaxLen256.of_json in
+        field_map json__ "CustomAmiId" XmlStringMaxLen256.of_json in
       let scaleDownBehavior =
-        field_map json "ScaleDownBehavior" ScaleDownBehavior.of_json in
+        field_map json__ "ScaleDownBehavior" ScaleDownBehavior.of_json in
       let autoScalingRole =
-        field_map json "AutoScalingRole" XmlString.of_json in
+        field_map json__ "AutoScalingRole" XmlString.of_json in
       let securityConfiguration =
-        field_map json "SecurityConfiguration" XmlString.of_json in
-      let tags = field_map json "Tags" TagList.of_json in
-      let serviceRole = field_map json "ServiceRole" XmlString.of_json in
-      let jobFlowRole = field_map json "JobFlowRole" XmlString.of_json in
+        field_map json__ "SecurityConfiguration" XmlString.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let serviceRole = field_map json__ "ServiceRole" XmlString.of_json in
+      let jobFlowRole = field_map json__ "JobFlowRole" XmlString.of_json in
       let visibleToAllUsers =
-        field_map json "VisibleToAllUsers" Boolean.of_json in
+        field_map json__ "VisibleToAllUsers" Boolean.of_json in
       let configurations =
-        field_map json "Configurations" ConfigurationList.of_json in
+        field_map json__ "Configurations" ConfigurationList.of_json in
       let applications =
-        field_map json "Applications" ApplicationList.of_json in
+        field_map json__ "Applications" ApplicationList.of_json in
       let newSupportedProducts =
-        field_map json "NewSupportedProducts"
+        field_map json__ "NewSupportedProducts"
           NewSupportedProductsList.of_json in
       let supportedProducts =
-        field_map json "SupportedProducts" SupportedProductsList.of_json in
+        field_map json__ "SupportedProducts" SupportedProductsList.of_json in
       let bootstrapActions =
-        field_map json "BootstrapActions" BootstrapActionConfigList.of_json in
-      let steps = field_map json "Steps" StepConfigList.of_json in
+        field_map json__ "BootstrapActions" BootstrapActionConfigList.of_json in
+      let stepExecutionRoleArn =
+        field_map json__ "StepExecutionRoleArn" ArnType.of_json in
+      let steps = field_map json__ "Steps" StepConfigList.of_json in
       let instances =
-        field_map_exn json "Instances" JobFlowInstancesConfig.of_json in
+        field_map_exn json__ "Instances" JobFlowInstancesConfig.of_json in
       let releaseLabel =
-        field_map json "ReleaseLabel" XmlStringMaxLen256.of_json in
-      let amiVersion = field_map json "AmiVersion" XmlStringMaxLen256.of_json in
-      let additionalInfo = field_map json "AdditionalInfo" XmlString.of_json in
+        field_map json__ "ReleaseLabel" XmlStringMaxLen256.of_json in
+      let amiVersion =
+        field_map json__ "AmiVersion" XmlStringMaxLen256.of_json in
+      let additionalInfo =
+        field_map json__ "AdditionalInfo" XmlString.of_json in
       let logEncryptionKmsKeyId =
-        field_map json "LogEncryptionKmsKeyId" XmlString.of_json in
-      let logUri = field_map json "LogUri" XmlString.of_json in
-      let name = field_map_exn json "Name" XmlStringMaxLen256.of_json in
-      make ?autoTerminationPolicy ?placementGroupConfigs
-        ?managedScalingPolicy ?stepConcurrencyLevel ?kerberosAttributes
-        ?repoUpgradeOnBoot ?ebsRootVolumeSize ?customAmiId ?scaleDownBehavior
-        ?autoScalingRole ?securityConfiguration ?tags ?serviceRole
-        ?jobFlowRole ?visibleToAllUsers ?configurations ?applications
-        ?newSupportedProducts ?supportedProducts ?bootstrapActions ?steps
-        ~instances ?releaseLabel ?amiVersion ?additionalInfo
-        ?logEncryptionKmsKeyId ?logUri ~name ()
+        field_map json__ "LogEncryptionKmsKeyId" XmlString.of_json in
+      let logUri = field_map json__ "LogUri" XmlString.of_json in
+      let name = field_map_exn json__ "Name" XmlStringMaxLen256.of_json in
+      make ?monitoringConfiguration ?extendedSupport ?ebsRootVolumeThroughput
+        ?ebsRootVolumeIops ?oSReleaseLabel ?autoTerminationPolicy
+        ?placementGroupConfigs ?managedScalingPolicy ?stepConcurrencyLevel
+        ?kerberosAttributes ?repoUpgradeOnBoot ?ebsRootVolumeSize
+        ?customAmiId ?scaleDownBehavior ?autoScalingRole
+        ?securityConfiguration ?tags ?serviceRole ?jobFlowRole
+        ?visibleToAllUsers ?configurations ?applications
+        ?newSupportedProducts ?supportedProducts ?bootstrapActions
+        ?stepExecutionRoleArn ?steps ~instances ?releaseLabel ?amiVersion
+        ?additionalInfo ?logEncryptionKmsKeyId ?logUri ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to the RunJobFlow operation."]
 module RunJobFlowOutput =
@@ -13415,12 +16466,51 @@ module RunJobFlowOutput =
           (Xml.child xml_arg0 "JobFlowId") in
       make ?clusterArn ?jobFlowId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map json "ClusterArn" ArnType.of_json in
-      let jobFlowId = field_map json "JobFlowId" XmlStringMaxLen256.of_json in
+    let of_json json__ =
+      let clusterArn = field_map json__ "ClusterArn" ArnType.of_json in
+      let jobFlowId = field_map json__ "JobFlowId" XmlStringMaxLen256.of_json in
       make ?clusterArn ?jobFlowId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the RunJobFlow operation."]
+module SetKeepJobFlowAliveWhenNoStepsInput =
+  struct
+    type nonrec t =
+      {
+      jobFlowIds: XmlStringList.t
+        [@ocaml.doc
+          "A list of strings that uniquely identify the clusters to protect. This identifier is returned by RunJobFlow and can also be obtained from DescribeJobFlows."];
+      keepJobFlowAliveWhenNoSteps: Boolean.t
+        [@ocaml.doc
+          "A Boolean that indicates whether to terminate the cluster after all steps are executed."]}
+    let context_ = "SetKeepJobFlowAliveWhenNoStepsInput"
+    let make ~jobFlowIds =
+      fun ~keepJobFlowAliveWhenNoSteps ->
+        fun () -> { jobFlowIds; keepJobFlowAliveWhenNoSteps }
+    let to_value x =
+      structure_to_value
+        [("JobFlowIds", (Some (XmlStringList.to_value x.jobFlowIds)));
+        ("KeepJobFlowAliveWhenNoSteps",
+          (Some (Boolean.to_value x.keepJobFlowAliveWhenNoSteps)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let keepJobFlowAliveWhenNoSteps =
+        Boolean.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "KeepJobFlowAliveWhenNoSteps") in
+      let jobFlowIds =
+        XmlStringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "JobFlowIds") in
+      make ~keepJobFlowAliveWhenNoSteps ~jobFlowIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let keepJobFlowAliveWhenNoSteps =
+        field_map_exn json__ "KeepJobFlowAliveWhenNoSteps" Boolean.of_json in
+      let jobFlowIds =
+        field_map_exn json__ "JobFlowIds" XmlStringList.of_json in
+      make ~keepJobFlowAliveWhenNoSteps ~jobFlowIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You can use the SetKeepJobFlowAliveWhenNoSteps to configure a cluster (job flow) to terminate after the step execution, i.e., all your steps are executed. If you want a transient cluster that shuts down after the last of the current executing steps are completed, you can configure SetKeepJobFlowAliveWhenNoSteps to false. If you want a long running cluster, configure SetKeepJobFlowAliveWhenNoSteps to true. For more information, see Managing Cluster Termination in the Amazon EMR Management Guide."]
 module SetTerminationProtectionInput =
   struct
     type nonrec t =
@@ -13450,14 +16540,54 @@ module SetTerminationProtectionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "JobFlowIds") in
       make ~terminationProtected ~jobFlowIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let terminationProtected =
-        field_map_exn json "TerminationProtected" Boolean.of_json in
-      let jobFlowIds = field_map_exn json "JobFlowIds" XmlStringList.of_json in
+        field_map_exn json__ "TerminationProtected" Boolean.of_json in
+      let jobFlowIds =
+        field_map_exn json__ "JobFlowIds" XmlStringList.of_json in
       make ~terminationProtected ~jobFlowIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The input argument to the TerminationProtection operation."]
+module SetUnhealthyNodeReplacementInput =
+  struct
+    type nonrec t =
+      {
+      jobFlowIds: XmlStringList.t
+        [@ocaml.doc
+          "The list of strings that uniquely identify the clusters for which to turn on unhealthy node replacement. You can get these identifiers by running the RunJobFlow or the DescribeJobFlows operations."];
+      unhealthyNodeReplacement: BooleanObject.t
+        [@ocaml.doc
+          "Indicates whether to turn on or turn off graceful unhealthy node replacement."]}
+    let context_ = "SetUnhealthyNodeReplacementInput"
+    let make ~jobFlowIds =
+      fun ~unhealthyNodeReplacement ->
+        fun () -> { jobFlowIds; unhealthyNodeReplacement }
+    let to_value x =
+      structure_to_value
+        [("JobFlowIds", (Some (XmlStringList.to_value x.jobFlowIds)));
+        ("UnhealthyNodeReplacement",
+          (Some (BooleanObject.to_value x.unhealthyNodeReplacement)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let unhealthyNodeReplacement =
+        BooleanObject.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0
+             "UnhealthyNodeReplacement") in
+      let jobFlowIds =
+        XmlStringList.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "JobFlowIds") in
+      make ~unhealthyNodeReplacement ~jobFlowIds ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let unhealthyNodeReplacement =
+        field_map_exn json__ "UnhealthyNodeReplacement" BooleanObject.of_json in
+      let jobFlowIds =
+        field_map_exn json__ "JobFlowIds" XmlStringList.of_json in
+      make ~unhealthyNodeReplacement ~jobFlowIds ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specify whether to enable unhealthy node replacement, which lets Amazon EMR gracefully replace core nodes on a cluster if any nodes become unhealthy. For example, a node becomes unhealthy if disk usage is above 90%. If unhealthy node replacement is on and TerminationProtected are off, Amazon EMR immediately terminates the unhealthy core nodes. To use unhealthy node replacement and retain unhealthy core nodes, use to turn on termination protection. In such cases, Amazon EMR adds the unhealthy nodes to a denylist, reducing job interruptions and failures. If unhealthy node replacement is on, Amazon EMR notifies YARN and other applications on the cluster to stop scheduling tasks with these nodes, moves the data, and then terminates the nodes. For more information, see graceful node replacement in the Amazon EMR Management Guide."]
 module SetVisibleToAllUsersInput =
   struct
     type nonrec t =
@@ -13466,7 +16596,7 @@ module SetVisibleToAllUsersInput =
         [@ocaml.doc "The unique identifier of the job flow (cluster)."];
       visibleToAllUsers: Boolean.t
         [@ocaml.doc
-          "A value of true indicates that an IAM principal in the Amazon Web Services account can perform EMR actions on the cluster that the IAM policies attached to the principal allow. A value of false indicates that only the IAM principal that created the cluster and the Amazon Web Services root user can perform EMR actions on the cluster."]}
+          "A value of true indicates that an IAM principal in the Amazon Web Services account can perform Amazon EMR actions on the cluster that the IAM policies attached to the principal allow. A value of false indicates that only the IAM principal that created the cluster and the Amazon Web Services root user can perform Amazon EMR actions on the cluster."]}
     let context_ = "SetVisibleToAllUsersInput"
     let make ~jobFlowIds =
       fun ~visibleToAllUsers -> fun () -> { jobFlowIds; visibleToAllUsers }
@@ -13484,10 +16614,11 @@ module SetVisibleToAllUsersInput =
           (Xml.child_exn ~context:context_ xml_arg0 "JobFlowIds") in
       make ~visibleToAllUsers ~jobFlowIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let visibleToAllUsers =
-        field_map_exn json "VisibleToAllUsers" Boolean.of_json in
-      let jobFlowIds = field_map_exn json "JobFlowIds" XmlStringList.of_json in
+        field_map_exn json__ "VisibleToAllUsers" Boolean.of_json in
+      let jobFlowIds =
+        field_map_exn json__ "JobFlowIds" XmlStringList.of_json in
       make ~visibleToAllUsers ~jobFlowIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The input to the SetVisibleToAllUsers action."]
@@ -13495,53 +16626,72 @@ module StartNotebookExecutionInput =
   struct
     type nonrec t =
       {
-      editorId: XmlStringMaxLen256.t
+      editorId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The unique identifier of the EMR Notebook to use for notebook execution."];
-      relativePath: XmlString.t
+          "The unique identifier of the Amazon EMR Notebook to use for notebook execution."];
+      relativePath: XmlString.t option
         [@ocaml.doc
-          "The path and file name of the notebook file for this execution, relative to the path specified for the EMR Notebook. For example, if you specify a path of s3://MyBucket/MyNotebooks when you create an EMR Notebook for a notebook with an ID of e-ABCDEFGHIJK1234567890ABCD (the EditorID of this request), and you specify a RelativePath of my_notebook_executions/notebook_execution.ipynb, the location of the file for the notebook execution is s3://MyBucket/MyNotebooks/e-ABCDEFGHIJK1234567890ABCD/my_notebook_executions/notebook_execution.ipynb."];
+          "The path and file name of the notebook file for this execution, relative to the path specified for the Amazon EMR Notebook. For example, if you specify a path of s3://MyBucket/MyNotebooks when you create an Amazon EMR Notebook for a notebook with an ID of e-ABCDEFGHIJK1234567890ABCD (the EditorID of this request), and you specify a RelativePath of my_notebook_executions/notebook_execution.ipynb, the location of the file for the notebook execution is s3://MyBucket/MyNotebooks/e-ABCDEFGHIJK1234567890ABCD/my_notebook_executions/notebook_execution.ipynb."];
       notebookExecutionName: XmlStringMaxLen256.t option
         [@ocaml.doc "An optional name for the notebook execution."];
       notebookParams: XmlString.t option
         [@ocaml.doc
-          "Input parameters in JSON format passed to the EMR Notebook at runtime for execution."];
+          "Input parameters in JSON format passed to the Amazon EMR Notebook at runtime for execution."];
       executionEngine: ExecutionEngineConfig.t
         [@ocaml.doc
           "Specifies the execution engine (cluster) that runs the notebook execution."];
       serviceRole: XmlString.t
         [@ocaml.doc
-          "The name or ARN of the IAM role that is used as the service role for Amazon EMR (the EMR role) for the notebook execution."];
+          "The name or ARN of the IAM role that is used as the service role for Amazon EMR (the Amazon EMR role) for the notebook execution."];
       notebookInstanceSecurityGroupId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The unique identifier of the Amazon EC2 security group to associate with the EMR Notebook for this notebook execution."];
+          "The unique identifier of the Amazon EC2 security group to associate with the Amazon EMR Notebook for this notebook execution."];
       tags: TagList.t option
         [@ocaml.doc
-          "A list of tags associated with a notebook execution. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters and an optional value string with a maximum of 256 characters."]}
+          "A list of tags associated with a notebook execution. Tags are user-defined key-value pairs that consist of a required key string with a maximum of 128 characters and an optional value string with a maximum of 256 characters."];
+      notebookS3Location: NotebookS3LocationFromInput.t option
+        [@ocaml.doc
+          "The Amazon S3 location for the notebook execution input."];
+      outputNotebookS3Location: OutputNotebookS3LocationFromInput.t option
+        [@ocaml.doc
+          "The Amazon S3 location for the notebook execution output."];
+      outputNotebookFormat: OutputNotebookFormat.t option
+        [@ocaml.doc "The output format for the notebook execution."];
+      environmentVariables: EnvironmentVariablesMap.t option
+        [@ocaml.doc
+          "The environment variables associated with the notebook execution."]}
     let context_ = "StartNotebookExecutionInput"
-    let make ?notebookExecutionName =
-      fun ?notebookParams ->
-        fun ?notebookInstanceSecurityGroupId ->
-          fun ?tags ->
-            fun ~editorId ->
-              fun ~relativePath ->
-                fun ~executionEngine ->
-                  fun ~serviceRole ->
-                    fun () ->
-                      {
-                        notebookExecutionName;
-                        notebookParams;
-                        notebookInstanceSecurityGroupId;
-                        tags;
-                        editorId;
-                        relativePath;
-                        executionEngine;
-                        serviceRole
-                      }
+    let make ?editorId =
+      fun ?relativePath ->
+        fun ?notebookExecutionName ->
+          fun ?notebookParams ->
+            fun ?notebookInstanceSecurityGroupId ->
+              fun ?tags ->
+                fun ?notebookS3Location ->
+                  fun ?outputNotebookS3Location ->
+                    fun ?outputNotebookFormat ->
+                      fun ?environmentVariables ->
+                        fun ~executionEngine ->
+                          fun ~serviceRole ->
+                            fun () ->
+                              {
+                                editorId;
+                                relativePath;
+                                notebookExecutionName;
+                                notebookParams;
+                                notebookInstanceSecurityGroupId;
+                                tags;
+                                notebookS3Location;
+                                outputNotebookS3Location;
+                                outputNotebookFormat;
+                                environmentVariables;
+                                executionEngine;
+                                serviceRole
+                              }
     let to_value x =
       structure_to_value
-        [("EditorId", (Some (XmlStringMaxLen256.to_value x.editorId)));
-        ("RelativePath", (Some (XmlString.to_value x.relativePath)));
+        [("EditorId", (Option.map x.editorId ~f:XmlStringMaxLen256.to_value));
+        ("RelativePath", (Option.map x.relativePath ~f:XmlString.to_value));
         ("NotebookExecutionName",
           (Option.map x.notebookExecutionName ~f:XmlStringMaxLen256.to_value));
         ("NotebookParams",
@@ -13552,9 +16702,32 @@ module StartNotebookExecutionInput =
         ("NotebookInstanceSecurityGroupId",
           (Option.map x.notebookInstanceSecurityGroupId
              ~f:XmlStringMaxLen256.to_value));
-        ("Tags", (Option.map x.tags ~f:TagList.to_value))]
+        ("Tags", (Option.map x.tags ~f:TagList.to_value));
+        ("NotebookS3Location",
+          (Option.map x.notebookS3Location
+             ~f:NotebookS3LocationFromInput.to_value));
+        ("OutputNotebookS3Location",
+          (Option.map x.outputNotebookS3Location
+             ~f:OutputNotebookS3LocationFromInput.to_value));
+        ("OutputNotebookFormat",
+          (Option.map x.outputNotebookFormat ~f:OutputNotebookFormat.to_value));
+        ("EnvironmentVariables",
+          (Option.map x.environmentVariables
+             ~f:EnvironmentVariablesMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let environmentVariables =
+        (Option.map ~f:EnvironmentVariablesMap.of_xml)
+          (Xml.child xml_arg0 "EnvironmentVariables") in
+      let outputNotebookFormat =
+        (Option.map ~f:OutputNotebookFormat.of_xml)
+          (Xml.child xml_arg0 "OutputNotebookFormat") in
+      let outputNotebookS3Location =
+        (Option.map ~f:OutputNotebookS3LocationFromInput.of_xml)
+          (Xml.child xml_arg0 "OutputNotebookS3Location") in
+      let notebookS3Location =
+        (Option.map ~f:NotebookS3LocationFromInput.of_xml)
+          (Xml.child xml_arg0 "NotebookS3Location") in
       let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
       let notebookInstanceSecurityGroupId =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
@@ -13572,31 +16745,44 @@ module StartNotebookExecutionInput =
         (Option.map ~f:XmlStringMaxLen256.of_xml)
           (Xml.child xml_arg0 "NotebookExecutionName") in
       let relativePath =
-        XmlString.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RelativePath") in
+        (Option.map ~f:XmlString.of_xml) (Xml.child xml_arg0 "RelativePath") in
       let editorId =
-        XmlStringMaxLen256.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "EditorId") in
-      make ?tags ?notebookInstanceSecurityGroupId ~serviceRole
-        ~executionEngine ?notebookParams ?notebookExecutionName ~relativePath
-        ~editorId ()
+        (Option.map ~f:XmlStringMaxLen256.of_xml)
+          (Xml.child xml_arg0 "EditorId") in
+      make ?environmentVariables ?outputNotebookFormat
+        ?outputNotebookS3Location ?notebookS3Location ?tags
+        ?notebookInstanceSecurityGroupId ~serviceRole ~executionEngine
+        ?notebookParams ?notebookExecutionName ?relativePath ?editorId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let environmentVariables =
+        field_map json__ "EnvironmentVariables"
+          EnvironmentVariablesMap.of_json in
+      let outputNotebookFormat =
+        field_map json__ "OutputNotebookFormat" OutputNotebookFormat.of_json in
+      let outputNotebookS3Location =
+        field_map json__ "OutputNotebookS3Location"
+          OutputNotebookS3LocationFromInput.of_json in
+      let notebookS3Location =
+        field_map json__ "NotebookS3Location"
+          NotebookS3LocationFromInput.of_json in
+      let tags = field_map json__ "Tags" TagList.of_json in
       let notebookInstanceSecurityGroupId =
-        field_map json "NotebookInstanceSecurityGroupId"
+        field_map json__ "NotebookInstanceSecurityGroupId"
           XmlStringMaxLen256.of_json in
-      let serviceRole = field_map_exn json "ServiceRole" XmlString.of_json in
+      let serviceRole = field_map_exn json__ "ServiceRole" XmlString.of_json in
       let executionEngine =
-        field_map_exn json "ExecutionEngine" ExecutionEngineConfig.of_json in
-      let notebookParams = field_map json "NotebookParams" XmlString.of_json in
+        field_map_exn json__ "ExecutionEngine" ExecutionEngineConfig.of_json in
+      let notebookParams =
+        field_map json__ "NotebookParams" XmlString.of_json in
       let notebookExecutionName =
-        field_map json "NotebookExecutionName" XmlStringMaxLen256.of_json in
-      let relativePath = field_map_exn json "RelativePath" XmlString.of_json in
-      let editorId = field_map_exn json "EditorId" XmlStringMaxLen256.of_json in
-      make ?tags ?notebookInstanceSecurityGroupId ~serviceRole
-        ~executionEngine ?notebookParams ?notebookExecutionName ~relativePath
-        ~editorId ()
+        field_map json__ "NotebookExecutionName" XmlStringMaxLen256.of_json in
+      let relativePath = field_map json__ "RelativePath" XmlString.of_json in
+      let editorId = field_map json__ "EditorId" XmlStringMaxLen256.of_json in
+      make ?environmentVariables ?outputNotebookFormat
+        ?outputNotebookS3Location ?notebookS3Location ?tags
+        ?notebookInstanceSecurityGroupId ~serviceRole ~executionEngine
+        ?notebookParams ?notebookExecutionName ?relativePath ?editorId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a notebook execution."]
 module StartNotebookExecutionOutput =
@@ -13653,9 +16839,9 @@ module StartNotebookExecutionOutput =
           (Xml.child xml_arg0 "NotebookExecutionId") in
       make ?notebookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notebookExecutionId =
-        field_map json "NotebookExecutionId" XmlStringMaxLen256.of_json in
+        field_map json__ "NotebookExecutionId" XmlStringMaxLen256.of_json in
       make ?notebookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Starts a notebook execution."]
@@ -13678,9 +16864,9 @@ module StopNotebookExecutionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "NotebookExecutionId") in
       make ~notebookExecutionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let notebookExecutionId =
-        field_map_exn json "NotebookExecutionId" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "NotebookExecutionId" XmlStringMaxLen256.of_json in
       make ~notebookExecutionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops a notebook execution."]
@@ -13702,8 +16888,9 @@ module TerminateJobFlowsInput =
           (Xml.child_exn ~context:context_ xml_arg0 "JobFlowIds") in
       make ~jobFlowIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let jobFlowIds = field_map_exn json "JobFlowIds" XmlStringList.of_json in
+    let of_json json__ =
+      let jobFlowIds =
+        field_map_exn json__ "JobFlowIds" XmlStringList.of_json in
       make ~jobFlowIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Input to the TerminateJobFlows operation."]
@@ -13723,15 +16910,26 @@ module UpdateStudioInput =
           "A list of subnet IDs to associate with the Amazon EMR Studio. The list can include new subnet IDs, but must also include all of the subnet IDs previously associated with the Studio. The list order does not matter. A Studio can have a maximum of 5 subnets. The subnets must belong to the same VPC as the Studio."];
       defaultS3Location: XmlString.t option
         [@ocaml.doc
-          "The Amazon S3 location to back up Workspaces and notebook files for the Amazon EMR Studio."]}
+          "The Amazon S3 location to back up Workspaces and notebook files for the Amazon EMR Studio."];
+      encryptionKeyArn: XmlString.t option
+        [@ocaml.doc
+          "The KMS key identifier (ARN) used to encrypt Amazon EMR Studio workspace and notebook files when backed up to Amazon S3."]}
     let context_ = "UpdateStudioInput"
     let make ?name =
       fun ?description ->
         fun ?subnetIds ->
           fun ?defaultS3Location ->
-            fun ~studioId ->
-              fun () ->
-                { name; description; subnetIds; defaultS3Location; studioId }
+            fun ?encryptionKeyArn ->
+              fun ~studioId ->
+                fun () ->
+                  {
+                    name;
+                    description;
+                    subnetIds;
+                    defaultS3Location;
+                    encryptionKeyArn;
+                    studioId
+                  }
     let to_value x =
       structure_to_value
         [("StudioId", (Some (XmlStringMaxLen256.to_value x.studioId)));
@@ -13740,9 +16938,14 @@ module UpdateStudioInput =
           (Option.map x.description ~f:XmlStringMaxLen256.to_value));
         ("SubnetIds", (Option.map x.subnetIds ~f:SubnetIdList.to_value));
         ("DefaultS3Location",
-          (Option.map x.defaultS3Location ~f:XmlString.to_value))]
+          (Option.map x.defaultS3Location ~f:XmlString.to_value));
+        ("EncryptionKeyArn",
+          (Option.map x.encryptionKeyArn ~f:XmlString.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let encryptionKeyArn =
+        (Option.map ~f:XmlString.of_xml)
+          (Xml.child xml_arg0 "EncryptionKeyArn") in
       let defaultS3Location =
         (Option.map ~f:XmlString.of_xml)
           (Xml.child xml_arg0 "DefaultS3Location") in
@@ -13756,17 +16959,22 @@ module UpdateStudioInput =
       let studioId =
         XmlStringMaxLen256.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "StudioId") in
-      make ?defaultS3Location ?subnetIds ?description ?name ~studioId ()
+      make ?encryptionKeyArn ?defaultS3Location ?subnetIds ?description ?name
+        ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let encryptionKeyArn =
+        field_map json__ "EncryptionKeyArn" XmlString.of_json in
       let defaultS3Location =
-        field_map json "DefaultS3Location" XmlString.of_json in
-      let subnetIds = field_map json "SubnetIds" SubnetIdList.of_json in
+        field_map json__ "DefaultS3Location" XmlString.of_json in
+      let subnetIds = field_map json__ "SubnetIds" SubnetIdList.of_json in
       let description =
-        field_map json "Description" XmlStringMaxLen256.of_json in
-      let name = field_map json "Name" XmlStringMaxLen256.of_json in
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
-      make ?defaultS3Location ?subnetIds ?description ?name ~studioId ()
+        field_map json__ "Description" XmlStringMaxLen256.of_json in
+      let name = field_map json__ "Name" XmlStringMaxLen256.of_json in
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
+      make ?encryptionKeyArn ?defaultS3Location ?subnetIds ?description ?name
+        ~studioId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Updates an Amazon EMR Studio configuration, including attributes such as name, description, and subnets."]
@@ -13778,10 +16986,10 @@ module UpdateStudioSessionMappingInput =
         [@ocaml.doc "The ID of the Amazon EMR Studio."];
       identityId: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The globally unique identifier (GUID) of the user or group. For more information, see UserId and GroupId in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The globally unique identifier (GUID) of the user or group. For more information, see UserId and GroupId in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityName: XmlStringMaxLen256.t option
         [@ocaml.doc
-          "The name of the user or group to update. For more information, see UserName and DisplayName in the Amazon Web Services SSO Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
+          "The name of the user or group to update. For more information, see UserName and DisplayName in the IAM Identity Center Identity Store API Reference. Either IdentityName or IdentityId must be specified."];
       identityType: IdentityType.t
         [@ocaml.doc
           "Specifies whether the identity to update is a user or a group."];
@@ -13832,15 +17040,17 @@ module UpdateStudioSessionMappingInput =
       make ~sessionPolicyArn ~identityType ?identityName ?identityId
         ~studioId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sessionPolicyArn =
-        field_map_exn json "SessionPolicyArn" XmlStringMaxLen256.of_json in
+        field_map_exn json__ "SessionPolicyArn" XmlStringMaxLen256.of_json in
       let identityType =
-        field_map_exn json "IdentityType" IdentityType.of_json in
+        field_map_exn json__ "IdentityType" IdentityType.of_json in
       let identityName =
-        field_map json "IdentityName" XmlStringMaxLen256.of_json in
-      let identityId = field_map json "IdentityId" XmlStringMaxLen256.of_json in
-      let studioId = field_map_exn json "StudioId" XmlStringMaxLen256.of_json in
+        field_map json__ "IdentityName" XmlStringMaxLen256.of_json in
+      let identityId =
+        field_map json__ "IdentityId" XmlStringMaxLen256.of_json in
+      let studioId =
+        field_map_exn json__ "StudioId" XmlStringMaxLen256.of_json in
       make ~sessionPolicyArn ~identityType ?identityName ?identityId
         ~studioId ()
     let to_json v = composed_to_json to_value v

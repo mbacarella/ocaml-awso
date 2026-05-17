@@ -12,6 +12,9 @@ type ('i, 'o, 'e) t =
   ListTunnelsResponse.error) t 
   | OpenTunnel: (OpenTunnelRequest.t, OpenTunnelResponse.t,
   OpenTunnelResponse.error) t 
+  | RotateTunnelAccessToken: (RotateTunnelAccessTokenRequest.t,
+  RotateTunnelAccessTokenResponse.t, RotateTunnelAccessTokenResponse.error) t
+  
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -23,6 +26,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | ListTagsForResource -> `POST
   | ListTunnels -> `POST
   | OpenTunnel -> `POST
+  | RotateTunnelAccessToken -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -33,6 +37,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ListTunnels -> (Format.kasprintf Uri.of_string) "/"
       | OpenTunnel -> (Format.kasprintf Uri.of_string) "/"
+      | RotateTunnelAccessToken -> (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/")
   [@ocaml.warning "-27"])
@@ -77,6 +82,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "IoTSecuredTunneling.OpenTunnel")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | RotateTunnelAccessToken ->
+      let json = RotateTunnelAccessTokenRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "IoTSecuredTunneling.RotateTunnelAccessToken")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
@@ -150,6 +163,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (OpenTunnelResponse.of_json json)
       else Error (parse_aws_error (Some OpenTunnelResponse.error_of_json))
+  | RotateTunnelAccessToken ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (RotateTunnelAccessTokenResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some RotateTunnelAccessTokenResponse.error_of_json))
   | TagResource ->
       if is_success
       then

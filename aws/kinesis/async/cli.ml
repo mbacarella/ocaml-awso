@@ -39,12 +39,16 @@ let add_tags_to_stream =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.add_tags_to_stream
-           (Values.AddTagsToStreamInput.make ~streamName
+           (Values.AddTagsToStreamInput.make ?streamName ?streamARN ?streamId
               ~tags:(Values.TagMap.of_json tags) ()) None None])
 let create_stream =
   Command.async ~summary:""
@@ -61,6 +65,13 @@ let create_stream =
        and streamModeDetails =
          flag "stream-mode-details" (optional json_arg)
            ~doc:"JSON StreamModeDetails"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and warmThroughputMiBps =
+         flag "warm-throughput-mi-bps" (optional int)
+           ~doc:"INT NaturalIntegerObject"
+       and maxRecordSizeInKiB =
+         flag "max-record-size-in-ki-b" (optional int)
+           ~doc:"INT MaxRecordSizeInKiB"
        and streamName =
          flag "stream-name" (required string) ~doc:"STRING StreamName" in
        fun () ->
@@ -69,7 +80,9 @@ let create_stream =
            (Values.CreateStreamInput.make ?shardCount
               ?streamModeDetails:(Option.map
                                     ~f:Values.StreamModeDetails.of_json
-                                    streamModeDetails) ~streamName ()) None
+                                    streamModeDetails)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?warmThroughputMiBps ?maxRecordSizeInKiB ~streamName ()) None
            None])
 let decrease_stream_retention_period =
   Command.async ~summary:""
@@ -82,15 +95,38 @@ let decrease_stream_retention_period =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and retentionPeriodHours =
          flag "retention-period-hours" (required int)
            ~doc:"INT RetentionPeriodHours" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.decrease_stream_retention_period
-           (Values.DecreaseStreamRetentionPeriodInput.make ~streamName
-              ~retentionPeriodHours ()) None None])
+           (Values.DecreaseStreamRetentionPeriodInput.make ?streamName
+              ?streamARN ?streamId ~retentionPeriodHours ()) None None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyInput.make ?streamId ~resourceARN ())
+           None None])
 let delete_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -101,16 +137,20 @@ let delete_stream =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
        and enforceConsumerDeletion =
          flag "enforce-consumer-deletion" (optional bool)
            ~doc:"BOOL BooleanObject"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName" in
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_stream
-           (Values.DeleteStreamInput.make ?enforceConsumerDeletion
-              ~streamName ()) None None])
+           (Values.DeleteStreamInput.make ?streamName
+              ?enforceConsumerDeletion ?streamARN ?streamId ()) None None])
 let deregister_stream_consumer =
   Command.async ~summary:""
     ([%map_open.Command
@@ -126,12 +166,31 @@ let deregister_stream_consumer =
        and consumerName =
          flag "consumer-name" (optional string) ~doc:"STRING ConsumerName"
        and consumerARN =
-         flag "consumer-a-r-n" (optional string) ~doc:"STRING ConsumerARN" in
+         flag "consumer-a-r-n" (optional string) ~doc:"STRING ConsumerARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.deregister_stream_consumer
            (Values.DeregisterStreamConsumerInput.make ?streamARN
-              ?consumerName ?consumerARN ()) None None])
+              ?consumerName ?consumerARN ?streamId ()) None None])
+let describe_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and () = return () in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_account_settings
+           (Values.DescribeAccountSettingsInput.make ())
+           (Some Values.DescribeAccountSettingsOutput.to_json)
+           (Some Values.DescribeAccountSettingsOutput.error_to_json)])
 let describe_limits =
   Command.async ~summary:""
     ([%map_open.Command
@@ -158,18 +217,23 @@ let describe_stream =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
        and limit =
          flag "limit" (optional int) ~doc:"INT DescribeStreamInputLimit"
        and exclusiveStartShardId =
          flag "exclusive-start-shard-id" (optional string)
            ~doc:"STRING ShardId"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName" in
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_stream
-           (Values.DescribeStreamInput.make ?limit ?exclusiveStartShardId
-              ~streamName ()) (Some Values.DescribeStreamOutput.to_json)
+           (Values.DescribeStreamInput.make ?streamName ?limit
+              ?exclusiveStartShardId ?streamARN ?streamId ())
+           (Some Values.DescribeStreamOutput.to_json)
            (Some Values.DescribeStreamOutput.error_to_json)])
 let describe_stream_consumer =
   Command.async ~summary:""
@@ -186,12 +250,14 @@ let describe_stream_consumer =
        and consumerName =
          flag "consumer-name" (optional string) ~doc:"STRING ConsumerName"
        and consumerARN =
-         flag "consumer-a-r-n" (optional string) ~doc:"STRING ConsumerARN" in
+         flag "consumer-a-r-n" (optional string) ~doc:"STRING ConsumerARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_stream_consumer
            (Values.DescribeStreamConsumerInput.make ?streamARN ?consumerName
-              ?consumerARN ())
+              ?consumerARN ?streamId ())
            (Some Values.DescribeStreamConsumerOutput.to_json)
            (Some Values.DescribeStreamConsumerOutput.error_to_json)])
 let describe_stream_summary =
@@ -205,12 +271,16 @@ let describe_stream_summary =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName" in
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.describe_stream_summary
-           (Values.DescribeStreamSummaryInput.make ~streamName ())
-           (Some Values.DescribeStreamSummaryOutput.to_json)
+           (Values.DescribeStreamSummaryInput.make ?streamName ?streamARN
+              ?streamId ()) (Some Values.DescribeStreamSummaryOutput.to_json)
            (Some Values.DescribeStreamSummaryOutput.error_to_json)])
 let disable_enhanced_monitoring =
   Command.async ~summary:""
@@ -223,14 +293,19 @@ let disable_enhanced_monitoring =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardLevelMetrics =
          flag "shard-level-metrics" (required json_arg)
            ~doc:"JSON MetricsNameList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.disable_enhanced_monitoring
-           (Values.DisableEnhancedMonitoringInput.make ~streamName
+           (Values.DisableEnhancedMonitoringInput.make ?streamName ?streamARN
+              ?streamId
               ~shardLevelMetrics:(Values.MetricsNameList.of_json
                                     shardLevelMetrics) ())
            (Some Values.EnhancedMonitoringOutput.to_json)
@@ -246,14 +321,19 @@ let enable_enhanced_monitoring =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardLevelMetrics =
          flag "shard-level-metrics" (required json_arg)
            ~doc:"JSON MetricsNameList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.enable_enhanced_monitoring
-           (Values.EnableEnhancedMonitoringInput.make ~streamName
+           (Values.EnableEnhancedMonitoringInput.make ?streamName ?streamARN
+              ?streamId
               ~shardLevelMetrics:(Values.MetricsNameList.of_json
                                     shardLevelMetrics) ())
            (Some Values.EnhancedMonitoringOutput.to_json)
@@ -270,14 +350,38 @@ let get_records =
            ~doc:"URL override endpoint url"
        and limit =
          flag "limit" (optional int) ~doc:"INT GetRecordsInputLimit"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardIterator =
          flag "shard-iterator" (required string) ~doc:"STRING ShardIterator" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_records
-           (Values.GetRecordsInput.make ?limit ~shardIterator ())
-           (Some Values.GetRecordsOutput.to_json)
+           (Values.GetRecordsInput.make ?limit ?streamARN ?streamId
+              ~shardIterator ()) (Some Values.GetRecordsOutput.to_json)
            (Some Values.GetRecordsOutput.error_to_json)])
+let get_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_resource_policy
+           (Values.GetResourcePolicyInput.make ?streamId ~resourceARN ())
+           (Some Values.GetResourcePolicyOutput.to_json)
+           (Some Values.GetResourcePolicyOutput.error_to_json)])
 let get_shard_iterator =
   Command.async ~summary:""
     ([%map_open.Command
@@ -288,13 +392,17 @@ let get_shard_iterator =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
        and startingSequenceNumber =
          flag "starting-sequence-number" (optional string)
            ~doc:"STRING SequenceNumber"
        and timestamp =
          flag "timestamp" (optional json_arg) ~doc:"JSON Timestamp"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardId = flag "shard-id" (required string) ~doc:"STRING ShardId"
        and shardIteratorType =
          flag "shard-iterator-type" (required json_arg)
@@ -302,9 +410,10 @@ let get_shard_iterator =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.get_shard_iterator
-           (Values.GetShardIteratorInput.make ?startingSequenceNumber
+           (Values.GetShardIteratorInput.make ?streamName
+              ?startingSequenceNumber
               ?timestamp:(Option.map ~f:Values.Timestamp.of_json timestamp)
-              ~streamName ~shardId
+              ?streamARN ?streamId ~shardId
               ~shardIteratorType:(Values.ShardIteratorType.of_json
                                     shardIteratorType) ())
            (Some Values.GetShardIteratorOutput.to_json)
@@ -320,15 +429,19 @@ let increase_stream_retention_period =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and retentionPeriodHours =
          flag "retention-period-hours" (required int)
            ~doc:"INT RetentionPeriodHours" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.increase_stream_retention_period
-           (Values.IncreaseStreamRetentionPeriodInput.make ~streamName
-              ~retentionPeriodHours ()) None None])
+           (Values.IncreaseStreamRetentionPeriodInput.make ?streamName
+              ?streamARN ?streamId ~retentionPeriodHours ()) None None])
 let list_shards =
   Command.async ~summary:""
     ([%map_open.Command
@@ -352,7 +465,11 @@ let list_shards =
          flag "stream-creation-timestamp" (optional json_arg)
            ~doc:"JSON Timestamp"
        and shardFilter =
-         flag "shard-filter" (optional json_arg) ~doc:"JSON ShardFilter" in
+         flag "shard-filter" (optional json_arg) ~doc:"JSON ShardFilter"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_shards
@@ -362,7 +479,7 @@ let list_shards =
                                           ~f:Values.Timestamp.of_json
                                           streamCreationTimestamp)
               ?shardFilter:(Option.map ~f:Values.ShardFilter.of_json
-                              shardFilter) ())
+                              shardFilter) ?streamARN ?streamId ())
            (Some Values.ListShardsOutput.to_json)
            (Some Values.ListShardsOutput.error_to_json)])
 let list_stream_consumers =
@@ -383,6 +500,8 @@ let list_stream_consumers =
        and streamCreationTimestamp =
          flag "stream-creation-timestamp" (optional json_arg)
            ~doc:"JSON Timestamp"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and streamARN =
          flag "stream-a-r-n" (required string) ~doc:"STRING StreamARN" in
        fun () ->
@@ -391,8 +510,8 @@ let list_stream_consumers =
            (Values.ListStreamConsumersInput.make ?nextToken ?maxResults
               ?streamCreationTimestamp:(Option.map
                                           ~f:Values.Timestamp.of_json
-                                          streamCreationTimestamp) ~streamARN
-              ()) (Some Values.ListStreamConsumersOutput.to_json)
+                                          streamCreationTimestamp) ?streamId
+              ~streamARN ()) (Some Values.ListStreamConsumersOutput.to_json)
            (Some Values.ListStreamConsumersOutput.error_to_json)])
 let list_streams =
   Command.async ~summary:""
@@ -408,13 +527,35 @@ let list_streams =
          flag "limit" (optional int) ~doc:"INT ListStreamsInputLimit"
        and exclusiveStartStreamName =
          flag "exclusive-start-stream-name" (optional string)
-           ~doc:"STRING StreamName" in
+           ~doc:"STRING StreamName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_streams
-           (Values.ListStreamsInput.make ?limit ?exclusiveStartStreamName ())
-           (Some Values.ListStreamsOutput.to_json)
+           (Values.ListStreamsInput.make ?limit ?exclusiveStartStreamName
+              ?nextToken ()) (Some Values.ListStreamsOutput.to_json)
            (Some Values.ListStreamsOutput.error_to_json)])
+let list_tags_for_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_tags_for_resource
+           (Values.ListTagsForResourceInput.make ?streamId ~resourceARN ())
+           (Some Values.ListTagsForResourceOutput.to_json)
+           (Some Values.ListTagsForResourceOutput.error_to_json)])
 let list_tags_for_stream =
   Command.async ~summary:""
     ([%map_open.Command
@@ -425,18 +566,23 @@ let list_tags_for_stream =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
        and exclusiveStartTagKey =
          flag "exclusive-start-tag-key" (optional string)
            ~doc:"STRING TagKey"
        and limit =
          flag "limit" (optional int) ~doc:"INT ListTagsForStreamInputLimit"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName" in
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tags_for_stream
-           (Values.ListTagsForStreamInput.make ?exclusiveStartTagKey ?limit
-              ~streamName ()) (Some Values.ListTagsForStreamOutput.to_json)
+           (Values.ListTagsForStreamInput.make ?streamName
+              ?exclusiveStartTagKey ?limit ?streamARN ?streamId ())
+           (Some Values.ListTagsForStreamOutput.to_json)
            (Some Values.ListTagsForStreamOutput.error_to_json)])
 let merge_shards =
   Command.async ~summary:""
@@ -449,7 +595,11 @@ let merge_shards =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardToMerge =
          flag "shard-to-merge" (required string) ~doc:"STRING ShardId"
        and adjacentShardToMerge =
@@ -458,8 +608,8 @@ let merge_shards =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.merge_shards
-           (Values.MergeShardsInput.make ~streamName ~shardToMerge
-              ~adjacentShardToMerge ()) None None])
+           (Values.MergeShardsInput.make ?streamName ?streamARN ?streamId
+              ~shardToMerge ~adjacentShardToMerge ()) None None])
 let put_record =
   Command.async ~summary:""
     ([%map_open.Command
@@ -470,21 +620,25 @@ let put_record =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
        and explicitHashKey =
          flag "explicit-hash-key" (optional string) ~doc:"STRING HashKey"
        and sequenceNumberForOrdering =
          flag "sequence-number-for-ordering" (optional string)
            ~doc:"STRING SequenceNumber"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and data = flag "data" (required json_arg) ~doc:"JSON Data"
        and partitionKey =
          flag "partition-key" (required string) ~doc:"STRING PartitionKey" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_record
-           (Values.PutRecordInput.make ?explicitHashKey
-              ?sequenceNumberForOrdering ~streamName
+           (Values.PutRecordInput.make ?streamName ?explicitHashKey
+              ?sequenceNumberForOrdering ?streamARN ?streamId
               ~data:(Values.Data.of_json data) ~partitionKey ())
            (Some Values.PutRecordOutput.to_json)
            (Some Values.PutRecordOutput.error_to_json)])
@@ -498,18 +652,42 @@ let put_records =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and records =
          flag "records" (required json_arg)
-           ~doc:"JSON PutRecordsRequestEntryList"
-       and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName" in
+           ~doc:"JSON PutRecordsRequestEntryList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.put_records
-           (Values.PutRecordsInput.make
-              ~records:(Values.PutRecordsRequestEntryList.of_json records)
-              ~streamName ()) (Some Values.PutRecordsOutput.to_json)
+           (Values.PutRecordsInput.make ?streamName ?streamARN ?streamId
+              ~records:(Values.PutRecordsRequestEntryList.of_json records) ())
+           (Some Values.PutRecordsOutput.to_json)
            (Some Values.PutRecordsOutput.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN"
+       and policy = flag "policy" (required string) ~doc:"STRING Policy" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyInput.make ?streamId ~resourceARN ~policy
+              ()) None None])
 let register_stream_consumer =
   Command.async ~summary:""
     ([%map_open.Command
@@ -520,6 +698,9 @@ let register_stream_consumer =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and streamARN =
          flag "stream-a-r-n" (required string) ~doc:"STRING StreamARN"
        and consumerName =
@@ -527,8 +708,10 @@ let register_stream_consumer =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.register_stream_consumer
-           (Values.RegisterStreamConsumerInput.make ~streamARN ~consumerName
-              ()) (Some Values.RegisterStreamConsumerOutput.to_json)
+           (Values.RegisterStreamConsumerInput.make ?streamId
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~streamARN
+              ~consumerName ())
+           (Some Values.RegisterStreamConsumerOutput.to_json)
            (Some Values.RegisterStreamConsumerOutput.error_to_json)])
 let remove_tags_from_stream =
   Command.async ~summary:""
@@ -541,14 +724,19 @@ let remove_tags_from_stream =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and tagKeys =
          flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.remove_tags_from_stream
-           (Values.RemoveTagsFromStreamInput.make ~streamName
-              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ()) None None])
+           (Values.RemoveTagsFromStreamInput.make ?streamName ?streamARN
+              ?streamId ~tagKeys:(Values.TagKeyList.of_json tagKeys) ()) None
+           None])
 let split_shard =
   Command.async ~summary:""
     ([%map_open.Command
@@ -560,7 +748,11 @@ let split_shard =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and shardToSplit =
          flag "shard-to-split" (required string) ~doc:"STRING ShardId"
        and newStartingHashKey =
@@ -568,8 +760,8 @@ let split_shard =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.split_shard
-           (Values.SplitShardInput.make ~streamName ~shardToSplit
-              ~newStartingHashKey ()) None None])
+           (Values.SplitShardInput.make ?streamName ?streamARN ?streamId
+              ~shardToSplit ~newStartingHashKey ()) None None])
 let start_stream_encryption =
   Command.async ~summary:""
     ([%map_open.Command
@@ -581,7 +773,11 @@ let start_stream_encryption =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and encryptionType =
          flag "encryption-type" (required json_arg)
            ~doc:"JSON EncryptionType"
@@ -589,7 +785,8 @@ let start_stream_encryption =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_stream_encryption
-           (Values.StartStreamEncryptionInput.make ~streamName
+           (Values.StartStreamEncryptionInput.make ?streamName ?streamARN
+              ?streamId
               ~encryptionType:(Values.EncryptionType.of_json encryptionType)
               ~keyId ()) None None])
 let stop_stream_encryption =
@@ -603,7 +800,11 @@ let stop_stream_encryption =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and encryptionType =
          flag "encryption-type" (required json_arg)
            ~doc:"JSON EncryptionType"
@@ -611,7 +812,8 @@ let stop_stream_encryption =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.stop_stream_encryption
-           (Values.StopStreamEncryptionInput.make ~streamName
+           (Values.StopStreamEncryptionInput.make ?streamName ?streamARN
+              ?streamId
               ~encryptionType:(Values.EncryptionType.of_json encryptionType)
               ~keyId ()) None None])
 let subscribe_to_shard =
@@ -624,6 +826,8 @@ let subscribe_to_shard =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and consumerARN =
          flag "consumer-a-r-n" (required string) ~doc:"STRING ConsumerARN"
        and shardId = flag "shard-id" (required string) ~doc:"STRING ShardId"
@@ -633,11 +837,96 @@ let subscribe_to_shard =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.subscribe_to_shard
-           (Values.SubscribeToShardInput.make ~consumerARN ~shardId
+           (Values.SubscribeToShardInput.make ?streamId ~consumerARN ~shardId
               ~startingPosition:(Values.StartingPosition.of_json
                                    startingPosition) ())
            (Some Values.SubscribeToShardOutput.to_json)
            (Some Values.SubscribeToShardOutput.error_to_json)])
+let tag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and tags = flag "tags" (required json_arg) ~doc:"JSON TagMap"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.tag_resource
+           (Values.TagResourceInput.make ?streamId
+              ~tags:(Values.TagMap.of_json tags) ~resourceARN ()) None None])
+let untag_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and tagKeys =
+         flag "tag-keys" (required json_arg) ~doc:"JSON TagKeyList"
+       and resourceARN =
+         flag "resource-a-r-n" (required string) ~doc:"STRING ResourceARN" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.untag_resource
+           (Values.UntagResourceInput.make ?streamId
+              ~tagKeys:(Values.TagKeyList.of_json tagKeys) ~resourceARN ())
+           None None])
+let update_account_settings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and minimumThroughputBillingCommitment =
+         flag "minimum-throughput-billing-commitment" (required json_arg)
+           ~doc:"JSON MinimumThroughputBillingCommitmentInput" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_account_settings
+           (Values.UpdateAccountSettingsInput.make
+              ~minimumThroughputBillingCommitment:(Values.MinimumThroughputBillingCommitmentInput.of_json
+                                                     minimumThroughputBillingCommitment)
+              ()) (Some Values.UpdateAccountSettingsOutput.to_json)
+           (Some Values.UpdateAccountSettingsOutput.error_to_json)])
+let update_max_record_size =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and maxRecordSizeInKiB =
+         flag "max-record-size-in-ki-b" (required int)
+           ~doc:"INT MaxRecordSizeInKiB" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_max_record_size
+           (Values.UpdateMaxRecordSizeInput.make ?streamARN ?streamId
+              ~maxRecordSizeInKiB ()) None None])
 let update_shard_count =
   Command.async ~summary:""
     ([%map_open.Command
@@ -649,7 +938,11 @@ let update_shard_count =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
        and streamName =
-         flag "stream-name" (required string) ~doc:"STRING StreamName"
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
        and targetShardCount =
          flag "target-shard-count" (required int)
            ~doc:"INT PositiveIntegerObject"
@@ -658,7 +951,8 @@ let update_shard_count =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_shard_count
-           (Values.UpdateShardCountInput.make ~streamName ~targetShardCount
+           (Values.UpdateShardCountInput.make ?streamName ?streamARN
+              ?streamId ~targetShardCount
               ~scalingType:(Values.ScalingType.of_json scalingType) ())
            (Some Values.UpdateShardCountOutput.to_json)
            (Some Values.UpdateShardCountOutput.error_to_json)])
@@ -672,6 +966,11 @@ let update_stream_mode =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and warmThroughputMiBps =
+         flag "warm-throughput-mi-bps" (optional int)
+           ~doc:"INT NaturalIntegerObject"
        and streamARN =
          flag "stream-a-r-n" (required string) ~doc:"STRING StreamARN"
        and streamModeDetails =
@@ -680,17 +979,46 @@ let update_stream_mode =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_stream_mode
-           (Values.UpdateStreamModeInput.make ~streamARN
+           (Values.UpdateStreamModeInput.make ?streamId ?warmThroughputMiBps
+              ~streamARN
               ~streamModeDetails:(Values.StreamModeDetails.of_json
                                     streamModeDetails) ()) None None])
+let update_stream_warm_throughput =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and streamARN =
+         flag "stream-a-r-n" (optional string) ~doc:"STRING StreamARN"
+       and streamName =
+         flag "stream-name" (optional string) ~doc:"STRING StreamName"
+       and streamId =
+         flag "stream-id" (optional string) ~doc:"STRING StreamId"
+       and warmThroughputMiBps =
+         flag "warm-throughput-mi-bps" (required int)
+           ~doc:"INT NaturalIntegerObject" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_stream_warm_throughput
+           (Values.UpdateStreamWarmThroughputInput.make ?streamARN
+              ?streamName ?streamId ~warmThroughputMiBps ())
+           (Some Values.UpdateStreamWarmThroughputOutput.to_json)
+           (Some Values.UpdateStreamWarmThroughputOutput.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("add-tags-to-stream", add_tags_to_stream);
     ("create-stream", create_stream);
     ("decrease-stream-retention-period", decrease_stream_retention_period);
+    ("delete-resource-policy", delete_resource_policy);
     ("delete-stream", delete_stream);
     ("deregister-stream-consumer", deregister_stream_consumer);
+    ("describe-account-settings", describe_account_settings);
     ("describe-limits", describe_limits);
     ("describe-stream", describe_stream);
     ("describe-stream-consumer", describe_stream_consumer);
@@ -698,20 +1026,28 @@ let main =
     ("disable-enhanced-monitoring", disable_enhanced_monitoring);
     ("enable-enhanced-monitoring", enable_enhanced_monitoring);
     ("get-records", get_records);
+    ("get-resource-policy", get_resource_policy);
     ("get-shard-iterator", get_shard_iterator);
     ("increase-stream-retention-period", increase_stream_retention_period);
     ("list-shards", list_shards);
     ("list-stream-consumers", list_stream_consumers);
     ("list-streams", list_streams);
+    ("list-tags-for-resource", list_tags_for_resource);
     ("list-tags-for-stream", list_tags_for_stream);
     ("merge-shards", merge_shards);
     ("put-record", put_record);
     ("put-records", put_records);
+    ("put-resource-policy", put_resource_policy);
     ("register-stream-consumer", register_stream_consumer);
     ("remove-tags-from-stream", remove_tags_from_stream);
     ("split-shard", split_shard);
     ("start-stream-encryption", start_stream_encryption);
     ("stop-stream-encryption", stop_stream_encryption);
     ("subscribe-to-shard", subscribe_to_shard);
+    ("tag-resource", tag_resource);
+    ("untag-resource", untag_resource);
+    ("update-account-settings", update_account_settings);
+    ("update-max-record-size", update_max_record_size);
     ("update-shard-count", update_shard_count);
-    ("update-stream-mode", update_stream_mode)]
+    ("update-stream-mode", update_stream_mode);
+    ("update-stream-warm-throughput", update_stream_warm_throughput)]

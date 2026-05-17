@@ -33,7 +33,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       match endpoint with
       | CreateLifecyclePolicy -> (Format.kasprintf Uri.of_string) "/policies"
       | DeleteLifecyclePolicy ->
-          (Format.kasprintf Uri.of_string) "/policies/%s/"
+          (Format.kasprintf Uri.of_string) "/policies/%s"
             (PolicyId.to_header x.DeleteLifecyclePolicyRequest.policyId)
       | GetLifecyclePolicies ->
           Uri.add_query_params'
@@ -58,9 +58,14 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
                Option.map
                  ~f:(fun v ->
                        ("tagsToAdd", (TagsToAddFilterList.to_header v)))
-                 x.tagsToAdd])
+                 x.tagsToAdd;
+               Option.map
+                 ~f:(fun v ->
+                       ("defaultPolicyType",
+                         (DefaultPoliciesTypeValues.to_header v)))
+                 x.defaultPolicyType])
       | GetLifecyclePolicy ->
-          (Format.kasprintf Uri.of_string) "/policies/%s/"
+          (Format.kasprintf Uri.of_string) "/policies/%s"
             (PolicyId.to_header x.GetLifecyclePolicyRequest.policyId)
       | ListTagsForResource ->
           (Format.kasprintf Uri.of_string) "/tags/%s"
@@ -102,12 +107,39 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
                         ("State",
                           (SettablePolicyStateValues.to_value
                              req.CreateLifecyclePolicyRequest.state));
-                      Some
-                        ("PolicyDetails",
-                          (PolicyDetails.to_value
-                             req.CreateLifecyclePolicyRequest.policyDetails));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.policyDetails
+                        ~f:(fun x ->
+                              ("PolicyDetails", (PolicyDetails.to_value x)));
                       Option.map req.CreateLifecyclePolicyRequest.tags
-                        ~f:(fun x -> ("Tags", (TagMap.to_value x)))])
+                        ~f:(fun x -> ("Tags", (TagMap.to_value x)));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.defaultPolicy
+                        ~f:(fun x ->
+                              ("DefaultPolicy",
+                                (DefaultPolicyTypeValues.to_value x)));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.createInterval
+                        ~f:(fun x ->
+                              ("CreateInterval", (CreateInterval.to_value x)));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.retainInterval
+                        ~f:(fun x ->
+                              ("RetainInterval", (RetainInterval.to_value x)));
+                      Option.map req.CreateLifecyclePolicyRequest.copyTags
+                        ~f:(fun x ->
+                              ("CopyTags", (CopyTagsNullable.to_value x)));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.extendDeletion
+                        ~f:(fun x ->
+                              ("ExtendDeletion", (ExtendDeletion.to_value x)));
+                      Option.map
+                        req.CreateLifecyclePolicyRequest.crossRegionCopyTargets
+                        ~f:(fun x ->
+                              ("CrossRegionCopyTargets",
+                                (CrossRegionCopyTargetList.to_value x)));
+                      Option.map req.CreateLifecyclePolicyRequest.exclusions
+                        ~f:(fun x -> ("Exclusions", (Exclusions.to_value x)))])
                    ~f:(fun (x, y) ->
                          let value =
                            Awso.Botodata.Json.value_to_json_scalar y in

@@ -36,6 +36,12 @@ val get_statement_result :
       GetStatementResultRequest.t ->
         (GetStatementResultResponse.t, GetStatementResultResponse.error)
           Result.t Async.Deferred.t
+val get_statement_result_v2 :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetStatementResultV2Request.t ->
+        (GetStatementResultV2Response.t, GetStatementResultV2Response.error)
+          Result.t Async.Deferred.t
 val list_databases :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

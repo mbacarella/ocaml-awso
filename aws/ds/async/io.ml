@@ -31,6 +31,8 @@ let create_conditional_forwarder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateConditionalForwarder input
 let create_directory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateDirectory input
+let create_hybrid_a_d ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.CreateHybridAD input
 let create_log_subscription ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateLogSubscription input
 let create_microsoft_a_d ?endpoint_url ?cfg input =
@@ -39,6 +41,8 @@ let create_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateSnapshot input
 let create_trust ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.CreateTrust input
+let delete_a_d_assessment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DeleteADAssessment input
 let delete_conditional_forwarder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeleteConditionalForwarder input
 let delete_directory ?endpoint_url ?cfg input =
@@ -53,6 +57,10 @@ let deregister_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterCertificate input
 let deregister_event_topic ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DeregisterEventTopic input
+let describe_a_d_assessment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeADAssessment input
+let describe_c_a_enrollment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeCAEnrollmentPolicy input
 let describe_certificate ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeCertificate input
 let describe_client_authentication_settings ?endpoint_url ?cfg input =
@@ -62,30 +70,46 @@ let describe_conditional_forwarders ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeConditionalForwarders input
 let describe_directories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDirectories input
+let describe_directory_data_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeDirectoryDataAccess input
 let describe_domain_controllers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeDomainControllers input
 let describe_event_topics ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeEventTopics input
+let describe_hybrid_a_d_update ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeHybridADUpdate input
 let describe_l_d_a_p_s_settings ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeLDAPSSettings input
 let describe_regions ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeRegions input
+let describe_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeSettings input
 let describe_shared_directories ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSharedDirectories input
 let describe_snapshots ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeSnapshots input
 let describe_trusts ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DescribeTrusts input
+let describe_update_directory ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DescribeUpdateDirectory input
+let disable_c_a_enrollment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableCAEnrollmentPolicy input
 let disable_client_authentication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableClientAuthentication input
+let disable_directory_data_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.DisableDirectoryDataAccess input
 let disable_l_d_a_p_s ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableLDAPS input
 let disable_radius ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableRadius input
 let disable_sso ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.DisableSso input
+let enable_c_a_enrollment_policy ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableCAEnrollmentPolicy input
 let enable_client_authentication ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableClientAuthentication input
+let enable_directory_data_access ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.EnableDirectoryDataAccess input
 let enable_l_d_a_p_s ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.EnableLDAPS input
 let enable_radius ?endpoint_url ?cfg input =
@@ -96,6 +120,8 @@ let get_directory_limits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetDirectoryLimits input
 let get_snapshot_limits ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.GetSnapshotLimits input
+let list_a_d_assessments ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.ListADAssessments input
 let list_certificates ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ListCertificates input
 let list_ip_routes ?endpoint_url ?cfg input =
@@ -124,16 +150,24 @@ let restore_from_snapshot ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.RestoreFromSnapshot input
 let share_directory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.ShareDirectory input
+let start_a_d_assessment ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.StartADAssessment input
 let start_schema_extension ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.StartSchemaExtension input
 let unshare_directory ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UnshareDirectory input
 let update_conditional_forwarder ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateConditionalForwarder input
+let update_directory_setup ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateDirectorySetup input
+let update_hybrid_a_d ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateHybridAD input
 let update_number_of_domain_controllers ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateNumberOfDomainControllers input
 let update_radius ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateRadius input
+let update_settings ?endpoint_url ?cfg input =
+  eval ?endpoint_url ?cfg Endpoints.UpdateSettings input
 let update_trust ?endpoint_url ?cfg input =
   eval ?endpoint_url ?cfg Endpoints.UpdateTrust input
 let verify_trust ?endpoint_url ?cfg input =

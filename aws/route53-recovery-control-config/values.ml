@@ -171,10 +171,10 @@ module RuleConfig =
           (Xml.child_exn ~context:context_ xml_arg0 "Inverted") in
       make ~type_ ~threshold ~inverted ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let type_ = field_map_exn json "Type" RuleType.of_json in
-      let threshold = field_map_exn json "Threshold" Zz__integer.of_json in
-      let inverted = field_map_exn json "Inverted" Zz__boolean.of_json in
+    let of_json json__ =
+      let type_ = field_map_exn json__ "Type" RuleType.of_json in
+      let threshold = field_map_exn json__ "Threshold" Zz__integer.of_json in
+      let inverted = field_map_exn json__ "Inverted" Zz__boolean.of_json in
       make ~type_ ~threshold ~inverted ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -211,6 +211,9 @@ module Zz__listOf__stringMin1Max256PatternAZaZ09 =
   struct
     type nonrec t = Zz__stringMin1Max256PatternAZaZ09.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__stringMin1Max256PatternAZaZ09.to_value)) |>
         (fun x -> `List x)
@@ -233,6 +236,26 @@ module Zz__listOf__stringMin1Max256PatternAZaZ09 =
       list_of_json ~kind:"__listOf__stringMin1Max256PatternAZaZ09"
         ~of_json:Zz__stringMin1Max256PatternAZaZ09.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module Zz__stringMin12Max12PatternD12 =
+  struct
+    type nonrec t = string
+    let context_ = "__stringMin12Max12PatternD12"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:12) >>=
+                  (fun () -> check_pattern i ~pattern:"^\\d{12}$")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__stringMin12Max12PatternD12" j
+    let to_json = simple_to_json to_value
   end
 module Zz__stringMin1Max64PatternS =
   struct
@@ -281,11 +304,11 @@ module ClusterEndpoint =
           (Xml.child xml_arg0 "Endpoint") in
       make ?region ?endpoint ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let region =
-        field_map json "Region" Zz__stringMin1Max32PatternS.of_json in
+        field_map json__ "Region" Zz__stringMin1Max32PatternS.of_json in
       let endpoint =
-        field_map json "Endpoint" Zz__stringMin1Max128PatternAZaZ09.of_json in
+        field_map json__ "Endpoint" Zz__stringMin1Max128PatternAZaZ09.of_json in
       make ?region ?endpoint ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -294,225 +317,268 @@ module AssertionRule =
   struct
     type nonrec t =
       {
-      assertedControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t
+      assertedControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t option
         [@ocaml.doc
           "The routing controls that are part of transactions that are evaluated to determine if a request to change a routing control state is allowed. For example, you might include three routing controls, one for each of three Amazon Web Services Regions."];
-      controlPanelArn: Zz__stringMin1Max256PatternAZaZ09.t
+      controlPanelArn: Zz__stringMin1Max256PatternAZaZ09.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the control panel."];
-      name: Zz__stringMin1Max64PatternS.t
+      name: Zz__stringMin1Max64PatternS.t option
         [@ocaml.doc
           "Name of the assertion rule. You can use any non-white space character in the name."];
-      ruleConfig: RuleConfig.t
+      ruleConfig: RuleConfig.t option
         [@ocaml.doc
-          "The criteria that you set for specific assertion routing controls (AssertedControls) that designate how many routing control states must be ON as the result of a transaction. For example, if you have three assertion routing controls, you might specify atleast 2 for your rule configuration. This means that at least two assertion routing control states must be ON, so that at least two Amazon Web Services Regions have traffic flowing to them."];
-      safetyRuleArn: Zz__stringMin1Max256PatternAZaZ09.t
+          "The criteria that you set for specific assertion routing controls (AssertedControls) that designate how many routing control states must be ON as the result of a transaction. For example, if you have three assertion routing controls, you might specify ATLEAST 2 for your rule configuration. This means that at least two assertion routing control states must be ON, so that at least two Amazon Web Services Regions have traffic flowing to them."];
+      safetyRuleArn: Zz__stringMin1Max256PatternAZaZ09.t option
         [@ocaml.doc "The Amazon Resource Name (ARN) of the assertion rule."];
-      status: Status.t
+      status: Status.t option
         [@ocaml.doc
           "The deployment status of an assertion rule. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
-      waitPeriodMs: Zz__integer.t
+      waitPeriodMs: Zz__integer.t option
         [@ocaml.doc
-          "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."]}
-    let context_ = "AssertionRule"
-    let make ~assertedControls =
-      fun ~controlPanelArn ->
-        fun ~name ->
-          fun ~ruleConfig ->
-            fun ~safetyRuleArn ->
-              fun ~status ->
-                fun ~waitPeriodMs ->
-                  fun () ->
-                    {
-                      assertedControls;
-                      controlPanelArn;
-                      name;
-                      ruleConfig;
-                      safetyRuleArn;
-                      status;
-                      waitPeriodMs
-                    }
-    let to_value x =
-      structure_to_value
-        [("AssertedControls",
-           (Some
-              (Zz__listOf__stringMin1Max256PatternAZaZ09.to_value
-                 x.assertedControls)));
-        ("ControlPanelArn",
-          (Some
-             (Zz__stringMin1Max256PatternAZaZ09.to_value x.controlPanelArn)));
-        ("Name", (Some (Zz__stringMin1Max64PatternS.to_value x.name)));
-        ("RuleConfig", (Some (RuleConfig.to_value x.ruleConfig)));
-        ("SafetyRuleArn",
-          (Some (Zz__stringMin1Max256PatternAZaZ09.to_value x.safetyRuleArn)));
-        ("Status", (Some (Status.to_value x.status)));
-        ("WaitPeriodMs", (Some (Zz__integer.to_value x.waitPeriodMs)))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let waitPeriodMs =
-        Zz__integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WaitPeriodMs") in
-      let status =
-        Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
-      let safetyRuleArn =
-        Zz__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
-      let ruleConfig =
-        RuleConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RuleConfig") in
-      let name =
-        Zz__stringMin1Max64PatternS.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let controlPanelArn =
-        Zz__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
-      let assertedControls =
-        Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AssertedControls") in
-      make ~waitPeriodMs ~status ~safetyRuleArn ~ruleConfig ~name
-        ~controlPanelArn ~assertedControls ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
-      let status = field_map_exn json "Status" Status.of_json in
-      let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn"
-          Zz__stringMin1Max256PatternAZaZ09.of_json in
-      let ruleConfig = field_map_exn json "RuleConfig" RuleConfig.of_json in
-      let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
-      let controlPanelArn =
-        field_map_exn json "ControlPanelArn"
-          Zz__stringMin1Max256PatternAZaZ09.of_json in
-      let assertedControls =
-        field_map_exn json "AssertedControls"
-          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
-      make ~waitPeriodMs ~status ~safetyRuleArn ~ruleConfig ~name
-        ~controlPanelArn ~assertedControls ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "An assertion rule enforces that, when you change a routing control state, that the criteria that you set in the rule configuration is met. Otherwise, the change to the routing control is not accepted. For example, the criteria might be that at least one routing control state is On after the transation so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario."]
-module GatingRule =
-  struct
-    type nonrec t =
-      {
-      controlPanelArn: Zz__stringMin1Max256PatternAZaZ09.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the control panel."];
-      gatingControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t
+          "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."];
+      owner: Zz__stringMin12Max12PatternD12.t option
         [@ocaml.doc
-          "An array of gating routing control Amazon Resource Names (ARNs). For a simple \"on/off\" switch, specify the ARN for one routing control. The gating routing controls are evaluated by the rule configuration that you specify to determine if the target routing control states can be changed."];
-      name: Zz__stringMin1Max64PatternS.t
-        [@ocaml.doc
-          "The name for the gating rule. You can use any non-white space character in the name."];
-      ruleConfig: RuleConfig.t
-        [@ocaml.doc
-          "The criteria that you set for gating routing controls that designates how many of the routing control states must be ON to allow you to update target routing control states."];
-      safetyRuleArn: Zz__stringMin1Max256PatternAZaZ09.t
-        [@ocaml.doc "The Amazon Resource Name (ARN) of the gating rule."];
-      status: Status.t
-        [@ocaml.doc
-          "The deployment status of a gating rule. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
-      targetControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t
-        [@ocaml.doc
-          "An array of target routing control Amazon Resource Names (ARNs) for which the states can only be updated if the rule configuration that you specify evaluates to true for the gating routing control. As a simple example, if you have a single gating control, it acts as an overall \"on/off\" switch for a set of target routing controls. You can use this to manually override automated fail over, for example."];
-      waitPeriodMs: Zz__integer.t
-        [@ocaml.doc
-          "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."]}
-    let context_ = "GatingRule"
-    let make ~controlPanelArn =
-      fun ~gatingControls ->
-        fun ~name ->
-          fun ~ruleConfig ->
-            fun ~safetyRuleArn ->
-              fun ~status ->
-                fun ~targetControls ->
-                  fun ~waitPeriodMs ->
+          "The Amazon Web Services account ID of the assertion rule owner."]}
+    let make ?assertedControls =
+      fun ?controlPanelArn ->
+        fun ?name ->
+          fun ?ruleConfig ->
+            fun ?safetyRuleArn ->
+              fun ?status ->
+                fun ?waitPeriodMs ->
+                  fun ?owner ->
                     fun () ->
                       {
+                        assertedControls;
                         controlPanelArn;
-                        gatingControls;
                         name;
                         ruleConfig;
                         safetyRuleArn;
                         status;
-                        targetControls;
-                        waitPeriodMs
+                        waitPeriodMs;
+                        owner
                       }
     let to_value x =
       structure_to_value
-        [("ControlPanelArn",
-           (Some
-              (Zz__stringMin1Max256PatternAZaZ09.to_value x.controlPanelArn)));
-        ("GatingControls",
-          (Some
-             (Zz__listOf__stringMin1Max256PatternAZaZ09.to_value
-                x.gatingControls)));
-        ("Name", (Some (Zz__stringMin1Max64PatternS.to_value x.name)));
-        ("RuleConfig", (Some (RuleConfig.to_value x.ruleConfig)));
+        [("AssertedControls",
+           (Option.map x.assertedControls
+              ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.to_value));
+        ("ControlPanelArn",
+          (Option.map x.controlPanelArn
+             ~f:Zz__stringMin1Max256PatternAZaZ09.to_value));
+        ("Name", (Option.map x.name ~f:Zz__stringMin1Max64PatternS.to_value));
+        ("RuleConfig", (Option.map x.ruleConfig ~f:RuleConfig.to_value));
         ("SafetyRuleArn",
-          (Some (Zz__stringMin1Max256PatternAZaZ09.to_value x.safetyRuleArn)));
-        ("Status", (Some (Status.to_value x.status)));
-        ("TargetControls",
-          (Some
-             (Zz__listOf__stringMin1Max256PatternAZaZ09.to_value
-                x.targetControls)));
-        ("WaitPeriodMs", (Some (Zz__integer.to_value x.waitPeriodMs)))]
+          (Option.map x.safetyRuleArn
+             ~f:Zz__stringMin1Max256PatternAZaZ09.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("WaitPeriodMs", (Option.map x.waitPeriodMs ~f:Zz__integer.to_value));
+        ("Owner",
+          (Option.map x.owner ~f:Zz__stringMin12Max12PatternD12.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owner =
+        (Option.map ~f:Zz__stringMin12Max12PatternD12.of_xml)
+          (Xml.child xml_arg0 "Owner") in
       let waitPeriodMs =
-        Zz__integer.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WaitPeriodMs") in
-      let targetControls =
-        Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TargetControls") in
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "WaitPeriodMs") in
       let status =
-        Status.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let safetyRuleArn =
-        Zz__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
+        (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "SafetyRuleArn") in
       let ruleConfig =
-        RuleConfig.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RuleConfig") in
+        (Option.map ~f:RuleConfig.of_xml) (Xml.child xml_arg0 "RuleConfig") in
       let name =
-        Zz__stringMin1Max64PatternS.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
-      let gatingControls =
-        Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "GatingControls") in
+        (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
+          (Xml.child xml_arg0 "Name") in
       let controlPanelArn =
-        Zz__stringMin1Max256PatternAZaZ09.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
-      make ~waitPeriodMs ~targetControls ~status ~safetyRuleArn ~ruleConfig
-        ~name ~gatingControls ~controlPanelArn ()
+        (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "ControlPanelArn") in
+      let assertedControls =
+        (Option.map ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "AssertedControls") in
+      make ?owner ?waitPeriodMs ?status ?safetyRuleArn ?ruleConfig ?name
+        ?controlPanelArn ?assertedControls ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
-      let targetControls =
-        field_map_exn json "TargetControls"
-          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
-      let status = field_map_exn json "Status" Status.of_json in
+    let of_json json__ =
+      let owner =
+        field_map json__ "Owner" Zz__stringMin12Max12PatternD12.of_json in
+      let waitPeriodMs = field_map json__ "WaitPeriodMs" Zz__integer.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn"
+        field_map json__ "SafetyRuleArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
-      let ruleConfig = field_map_exn json "RuleConfig" RuleConfig.of_json in
-      let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
-      let gatingControls =
-        field_map_exn json "GatingControls"
-          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
+      let ruleConfig = field_map json__ "RuleConfig" RuleConfig.of_json in
+      let name = field_map json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn"
+        field_map json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
-      make ~waitPeriodMs ~targetControls ~status ~safetyRuleArn ~ruleConfig
-        ~name ~gatingControls ~controlPanelArn ()
+      let assertedControls =
+        field_map json__ "AssertedControls"
+          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
+      make ?owner ?waitPeriodMs ?status ?safetyRuleArn ?ruleConfig ?name
+        ?controlPanelArn ?assertedControls ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A gating rule verifies that a gating routing control or set of gating rounting controls, evaluates as true, based on a rule configuration that you specify, which allows a set of routing control state changes to complete. For example, if you specify one gating routing control and you set the Type in the rule configuration to OR, that indicates that you must set the gating routing control to On for the rule to evaluate as true; that is, for the gating control \"switch\" to be \"On\". When you do that, then you can update the routing control states for the target routing controls that you specify in the gating rule."]
+       "An assertion rule enforces that, when you change a routing control state, that the criteria that you set in the rule configuration is met. Otherwise, the change to the routing control is not accepted. For example, the criteria might be that at least one routing control state is On after the transaction so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario."]
+module GatingRule =
+  struct
+    type nonrec t =
+      {
+      controlPanelArn: Zz__stringMin1Max256PatternAZaZ09.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the control panel."];
+      gatingControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t option
+        [@ocaml.doc
+          "An array of gating routing control Amazon Resource Names (ARNs). For a simple \"on/off\" switch, specify the ARN for one routing control. The gating routing controls are evaluated by the rule configuration that you specify to determine if the target routing control states can be changed."];
+      name: Zz__stringMin1Max64PatternS.t option
+        [@ocaml.doc
+          "The name for the gating rule. You can use any non-white space character in the name."];
+      ruleConfig: RuleConfig.t option
+        [@ocaml.doc
+          "The criteria that you set for gating routing controls that designate how many of the routing control states must be ON to allow you to update target routing control states."];
+      safetyRuleArn: Zz__stringMin1Max256PatternAZaZ09.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the gating rule."];
+      status: Status.t option
+        [@ocaml.doc
+          "The deployment status of a gating rule. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
+      targetControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t option
+        [@ocaml.doc
+          "An array of target routing control Amazon Resource Names (ARNs) for which the states can only be updated if the rule configuration that you specify evaluates to true for the gating routing control. As a simple example, if you have a single gating control, it acts as an overall \"on/off\" switch for a set of target routing controls. You can use this to manually override automated failover, for example."];
+      waitPeriodMs: Zz__integer.t option
+        [@ocaml.doc
+          "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."];
+      owner: Zz__stringMin12Max12PatternD12.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the gating rule owner."]}
+    let make ?controlPanelArn =
+      fun ?gatingControls ->
+        fun ?name ->
+          fun ?ruleConfig ->
+            fun ?safetyRuleArn ->
+              fun ?status ->
+                fun ?targetControls ->
+                  fun ?waitPeriodMs ->
+                    fun ?owner ->
+                      fun () ->
+                        {
+                          controlPanelArn;
+                          gatingControls;
+                          name;
+                          ruleConfig;
+                          safetyRuleArn;
+                          status;
+                          targetControls;
+                          waitPeriodMs;
+                          owner
+                        }
+    let to_value x =
+      structure_to_value
+        [("ControlPanelArn",
+           (Option.map x.controlPanelArn
+              ~f:Zz__stringMin1Max256PatternAZaZ09.to_value));
+        ("GatingControls",
+          (Option.map x.gatingControls
+             ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.to_value));
+        ("Name", (Option.map x.name ~f:Zz__stringMin1Max64PatternS.to_value));
+        ("RuleConfig", (Option.map x.ruleConfig ~f:RuleConfig.to_value));
+        ("SafetyRuleArn",
+          (Option.map x.safetyRuleArn
+             ~f:Zz__stringMin1Max256PatternAZaZ09.to_value));
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("TargetControls",
+          (Option.map x.targetControls
+             ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.to_value));
+        ("WaitPeriodMs", (Option.map x.waitPeriodMs ~f:Zz__integer.to_value));
+        ("Owner",
+          (Option.map x.owner ~f:Zz__stringMin12Max12PatternD12.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let owner =
+        (Option.map ~f:Zz__stringMin12Max12PatternD12.of_xml)
+          (Xml.child xml_arg0 "Owner") in
+      let waitPeriodMs =
+        (Option.map ~f:Zz__integer.of_xml)
+          (Xml.child xml_arg0 "WaitPeriodMs") in
+      let targetControls =
+        (Option.map ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "TargetControls") in
+      let status =
+        (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
+      let safetyRuleArn =
+        (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "SafetyRuleArn") in
+      let ruleConfig =
+        (Option.map ~f:RuleConfig.of_xml) (Xml.child xml_arg0 "RuleConfig") in
+      let name =
+        (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
+          (Xml.child xml_arg0 "Name") in
+      let gatingControls =
+        (Option.map ~f:Zz__listOf__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "GatingControls") in
+      let controlPanelArn =
+        (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
+          (Xml.child xml_arg0 "ControlPanelArn") in
+      make ?owner ?waitPeriodMs ?targetControls ?status ?safetyRuleArn
+        ?ruleConfig ?name ?gatingControls ?controlPanelArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let owner =
+        field_map json__ "Owner" Zz__stringMin12Max12PatternD12.of_json in
+      let waitPeriodMs = field_map json__ "WaitPeriodMs" Zz__integer.of_json in
+      let targetControls =
+        field_map json__ "TargetControls"
+          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let safetyRuleArn =
+        field_map json__ "SafetyRuleArn"
+          Zz__stringMin1Max256PatternAZaZ09.of_json in
+      let ruleConfig = field_map json__ "RuleConfig" RuleConfig.of_json in
+      let name = field_map json__ "Name" Zz__stringMin1Max64PatternS.of_json in
+      let gatingControls =
+        field_map json__ "GatingControls"
+          Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
+      let controlPanelArn =
+        field_map json__ "ControlPanelArn"
+          Zz__stringMin1Max256PatternAZaZ09.of_json in
+      make ?owner ?waitPeriodMs ?targetControls ?status ?safetyRuleArn
+        ?ruleConfig ?name ?gatingControls ?controlPanelArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A gating rule verifies that a gating routing control or set of gating routing controls, evaluates as true, based on a rule configuration that you specify, which allows a set of routing control state changes to complete. For example, if you specify one gating routing control and you set the Type in the rule configuration to OR, that indicates that you must set the gating routing control to On for the rule to evaluate as true; that is, for the gating control \"switch\" to be \"On\". When you do that, then you can update the routing control states for the target routing controls that you specify in the gating rule."]
+module NetworkType =
+  struct
+    type nonrec t =
+      | IPV4 
+      | DUALSTACK 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | IPV4 -> "IPV4"
+      | DUALSTACK -> "DUALSTACK"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "IPV4" -> IPV4
+      | "DUALSTACK" -> DUALSTACK
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration NetworkType" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"NetworkType" j)
+    let to_json = simple_to_json to_value
+  end
 module Zz__listOfClusterEndpoint =
   struct
     type nonrec t = ClusterEndpoint.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ClusterEndpoint.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -573,10 +639,10 @@ module Rule =
       {
       aSSERTION: AssertionRule.t option
         [@ocaml.doc
-          "An assertion rule enforces that, when a routing control state is changed, the criteria set by the rule configuration is met. Otherwise, the change to the routing control state is not accepted. For example, the criteria might be that at least one routing control state is On after the transation so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario."];
+          "An assertion rule enforces that, when a routing control state is changed, the criteria set by the rule configuration is met. Otherwise, the change to the routing control state is not accepted. For example, the criteria might be that at least one routing control state is On after the transaction so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario."];
       gATING: GatingRule.t option
         [@ocaml.doc
-          "A gating rule verifies that a gating routing control or set of gating rounting controls, evaluates as true, based on a rule configuration that you specify, which allows a set of routing control state changes to complete. For example, if you specify one gating routing control and you set the Type in the rule configuration to OR, that indicates that you must set the gating routing control to On for the rule to evaluate as true; that is, for the gating control \"switch\" to be \"On\". When you do that, then you can update the routing control states for the target routing controls that you specify in the gating rule."]}
+          "A gating rule verifies that a gating routing control or set of gating routing controls, evaluates as true, based on a rule configuration that you specify, which allows a set of routing control state changes to complete. For example, if you specify one gating routing control and you set the Type in the rule configuration to OR, that indicates that you must set the gating routing control to On for the rule to evaluate as true; that is, for the gating control \"switch\" to be \"On\". When you do that, then you can update the routing control states for the target routing controls that you specify in the gating rule."]}
     let make ?aSSERTION = fun ?gATING -> fun () -> { aSSERTION; gATING }
     let to_value x =
       structure_to_value
@@ -590,9 +656,9 @@ module Rule =
         (Option.map ~f:AssertionRule.of_xml) (Xml.child xml_arg0 "ASSERTION") in
       make ?gATING ?aSSERTION ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gATING = field_map json "GATING" GatingRule.of_json in
-      let aSSERTION = field_map json "ASSERTION" AssertionRule.of_json in
+    let of_json json__ =
+      let gATING = field_map json__ "GATING" GatingRule.of_json in
+      let aSSERTION = field_map json__ "ASSERTION" AssertionRule.of_json in
       make ?gATING ?aSSERTION ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -610,12 +676,17 @@ module RoutingControl =
         [@ocaml.doc "The Amazon Resource Name (ARN) of the routing control."];
       status: Status.t option
         [@ocaml.doc
-          "The deployment status of a routing control. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."]}
+          "The deployment status of a routing control. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
+      owner: Zz__stringMin12Max12PatternD12.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the routing control owner."]}
     let make ?controlPanelArn =
       fun ?name ->
         fun ?routingControlArn ->
           fun ?status ->
-            fun () -> { controlPanelArn; name; routingControlArn; status }
+            fun ?owner ->
+              fun () ->
+                { controlPanelArn; name; routingControlArn; status; owner }
     let to_value x =
       structure_to_value
         [("ControlPanelArn",
@@ -625,9 +696,14 @@ module RoutingControl =
         ("RoutingControlArn",
           (Option.map x.routingControlArn
              ~f:Zz__stringMin1Max256PatternAZaZ09.to_value));
-        ("Status", (Option.map x.status ~f:Status.to_value))]
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Owner",
+          (Option.map x.owner ~f:Zz__stringMin12Max12PatternD12.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owner =
+        (Option.map ~f:Zz__stringMin12Max12PatternD12.of_xml)
+          (Xml.child xml_arg0 "Owner") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let routingControlArn =
@@ -639,18 +715,20 @@ module RoutingControl =
       let controlPanelArn =
         (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "ControlPanelArn") in
-      make ?status ?routingControlArn ?name ?controlPanelArn ()
+      make ?owner ?status ?routingControlArn ?name ?controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let owner =
+        field_map json__ "Owner" Zz__stringMin12Max12PatternD12.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let routingControlArn =
-        field_map json "RoutingControlArn"
+        field_map json__ "RoutingControlArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
-      let name = field_map json "Name" Zz__stringMin1Max64PatternS.of_json in
+      let name = field_map json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let controlPanelArn =
-        field_map json "ControlPanelArn"
+        field_map json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
-      make ?status ?routingControlArn ?name ?controlPanelArn ()
+      make ?owner ?status ?routingControlArn ?name ?controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A routing control has one of two states: ON and OFF. You can map the routing control state to the state of an Amazon Route 53 health check, which can be used to control traffic routing."]
@@ -673,22 +751,27 @@ module ControlPanel =
         [@ocaml.doc "The number of routing controls in the control panel."];
       status: Status.t option
         [@ocaml.doc
-          "The deployment status of control panel. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."]}
+          "The deployment status of control panel. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
+      owner: Zz__stringMin12Max12PatternD12.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the control panel owner."]}
     let make ?clusterArn =
       fun ?controlPanelArn ->
         fun ?defaultControlPanel ->
           fun ?name ->
             fun ?routingControlCount ->
               fun ?status ->
-                fun () ->
-                  {
-                    clusterArn;
-                    controlPanelArn;
-                    defaultControlPanel;
-                    name;
-                    routingControlCount;
-                    status
-                  }
+                fun ?owner ->
+                  fun () ->
+                    {
+                      clusterArn;
+                      controlPanelArn;
+                      defaultControlPanel;
+                      name;
+                      routingControlCount;
+                      status;
+                      owner
+                    }
     let to_value x =
       structure_to_value
         [("ClusterArn",
@@ -702,9 +785,14 @@ module ControlPanel =
         ("Name", (Option.map x.name ~f:Zz__stringMin1Max64PatternS.to_value));
         ("RoutingControlCount",
           (Option.map x.routingControlCount ~f:Zz__integer.to_value));
-        ("Status", (Option.map x.status ~f:Status.to_value))]
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Owner",
+          (Option.map x.owner ~f:Zz__stringMin12Max12PatternD12.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let owner =
+        (Option.map ~f:Zz__stringMin12Max12PatternD12.of_xml)
+          (Xml.child xml_arg0 "Owner") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let routingControlCount =
@@ -722,22 +810,25 @@ module ControlPanel =
       let clusterArn =
         (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "ClusterArn") in
-      make ?status ?routingControlCount ?name ?defaultControlPanel
+      make ?owner ?status ?routingControlCount ?name ?defaultControlPanel
         ?controlPanelArn ?clusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
+    let of_json json__ =
+      let owner =
+        field_map json__ "Owner" Zz__stringMin12Max12PatternD12.of_json in
+      let status = field_map json__ "Status" Status.of_json in
       let routingControlCount =
-        field_map json "RoutingControlCount" Zz__integer.of_json in
-      let name = field_map json "Name" Zz__stringMin1Max64PatternS.of_json in
+        field_map json__ "RoutingControlCount" Zz__integer.of_json in
+      let name = field_map json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let defaultControlPanel =
-        field_map json "DefaultControlPanel" Zz__boolean.of_json in
+        field_map json__ "DefaultControlPanel" Zz__boolean.of_json in
       let controlPanelArn =
-        field_map json "ControlPanelArn"
+        field_map json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let clusterArn =
-        field_map json "ClusterArn" Zz__stringMin1Max256PatternAZaZ09.of_json in
-      make ?status ?routingControlCount ?name ?defaultControlPanel
+        field_map json__ "ClusterArn"
+          Zz__stringMin1Max256PatternAZaZ09.of_json in
+      make ?owner ?status ?routingControlCount ?name ?defaultControlPanel
         ?controlPanelArn ?clusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -755,12 +846,28 @@ module Cluster =
         [@ocaml.doc "The name of the cluster."];
       status: Status.t option
         [@ocaml.doc
-          "Deployment status of a resource. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."]}
+          "Deployment status of a resource. Status can be one of the following: PENDING, DEPLOYED, PENDING_DELETION."];
+      owner: Zz__stringMin12Max12PatternD12.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the cluster owner."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the cluster. NetworkType can be one of the following: IPV4, DUALSTACK."]}
     let make ?clusterArn =
       fun ?clusterEndpoints ->
         fun ?name ->
           fun ?status ->
-            fun () -> { clusterArn; clusterEndpoints; name; status }
+            fun ?owner ->
+              fun ?networkType ->
+                fun () ->
+                  {
+                    clusterArn;
+                    clusterEndpoints;
+                    name;
+                    status;
+                    owner;
+                    networkType
+                  }
     let to_value x =
       structure_to_value
         [("ClusterArn",
@@ -770,9 +877,17 @@ module Cluster =
           (Option.map x.clusterEndpoints
              ~f:Zz__listOfClusterEndpoint.to_value));
         ("Name", (Option.map x.name ~f:Zz__stringMin1Max64PatternS.to_value));
-        ("Status", (Option.map x.status ~f:Status.to_value))]
+        ("Status", (Option.map x.status ~f:Status.to_value));
+        ("Owner",
+          (Option.map x.owner ~f:Zz__stringMin12Max12PatternD12.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
+      let owner =
+        (Option.map ~f:Zz__stringMin12Max12PatternD12.of_xml)
+          (Xml.child xml_arg0 "Owner") in
       let status =
         (Option.map ~f:Status.of_xml) (Xml.child xml_arg0 "Status") in
       let name =
@@ -784,16 +899,20 @@ module Cluster =
       let clusterArn =
         (Option.map ~f:Zz__stringMin1Max256PatternAZaZ09.of_xml)
           (Xml.child xml_arg0 "ClusterArn") in
-      make ?status ?name ?clusterEndpoints ?clusterArn ()
+      make ?networkType ?owner ?status ?name ?clusterEndpoints ?clusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "Status" Status.of_json in
-      let name = field_map json "Name" Zz__stringMin1Max64PatternS.of_json in
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
+      let owner =
+        field_map json__ "Owner" Zz__stringMin12Max12PatternD12.of_json in
+      let status = field_map json__ "Status" Status.of_json in
+      let name = field_map json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let clusterEndpoints =
-        field_map json "ClusterEndpoints" Zz__listOfClusterEndpoint.of_json in
+        field_map json__ "ClusterEndpoints" Zz__listOfClusterEndpoint.of_json in
       let clusterArn =
-        field_map json "ClusterArn" Zz__stringMin1Max256PatternAZaZ09.of_json in
-      make ?status ?name ?clusterEndpoints ?clusterArn ()
+        field_map json__ "ClusterArn"
+          Zz__stringMin1Max256PatternAZaZ09.of_json in
+      make ?networkType ?owner ?status ?name ?clusterEndpoints ?clusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A set of five redundant Regional endpoints against which you can execute API calls to update or get the state of routing controls. You can host multiple control panels and routing controls on one cluster."]
@@ -818,66 +937,60 @@ module Zz__stringMax36PatternS =
 module InternalServerException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "InternalServerException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "500 response - InternalServiceError. Temporary service error. Retry the request."]
 module ResourceNotFoundException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "ResourceNotFoundException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "404 response - MalformedQueryString. The query string contains a syntax error or resource not found.."]
+       "404 response - MalformedQueryString. The query string contains a syntax error or resource not found."]
 module ValidationException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "ValidationException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "400 response - Multiple causes. For example, you might have a malformed query string and input parameter might be out of range, or you might have used parameters together incorrectly."]
@@ -916,14 +1029,14 @@ module AssertionRuleUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
+        field_map_exn json__ "WaitPeriodMs" Zz__integer.of_json in
       let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn"
+        field_map_exn json__ "SafetyRuleArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
+        field_map_exn json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -963,14 +1076,14 @@ module GatingRuleUpdate =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
+        field_map_exn json__ "WaitPeriodMs" Zz__integer.of_json in
       let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn"
+        field_map_exn json__ "SafetyRuleArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
+        field_map_exn json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       make ~waitPeriodMs ~safetyRuleArn ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -978,66 +1091,60 @@ module GatingRuleUpdate =
 module AccessDeniedException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "AccessDeniedException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "403 response - You do not have sufficient access to perform this action."]
 module ConflictException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "ConflictException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "409 response - ConflictException. You might be using a predefined variable."]
 module ThrottlingException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "ThrottlingException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "429 response - LimitExceededException or TooManyRequestsException."]
@@ -1045,6 +1152,9 @@ module Zz__listOf__string =
   struct
     type nonrec t = Zz__string.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__string.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1088,6 +1198,8 @@ module Zz__mapOf__stringMin0Max256PatternS =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1099,6 +1211,9 @@ module Zz__listOfRule =
   struct
     type nonrec t = Rule.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Rule.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1160,6 +1275,9 @@ module Zz__listOfRoutingControl =
   struct
     type nonrec t = RoutingControl.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:RoutingControl.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1185,6 +1303,9 @@ module Zz__listOfControlPanel =
   struct
     type nonrec t = ControlPanel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ControlPanel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1210,6 +1331,9 @@ module Zz__listOfCluster =
   struct
     type nonrec t = Cluster.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Cluster.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1234,6 +1358,9 @@ module Zz__listOf__stringMax36PatternS =
   struct
     type nonrec t = Zz__stringMax36PatternS.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Zz__stringMax36PatternS.to_value)) |>
         (fun x -> `List x)
@@ -1256,6 +1383,28 @@ module Zz__listOf__stringMax36PatternS =
         ~of_json:Zz__stringMax36PatternS.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Zz__policy =
+  struct
+    type nonrec t = string
+    let context_ = "__policy"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:2) >>=
+             (fun () ->
+                (check_string_max i ~max:10240) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"[\\u0009\\u000A\\u000D\\u0020-\\u007E\\u00A1-\\u00FF]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"__policy" j
+    let to_json = simple_to_json to_value
+  end
 module NewAssertionRule =
   struct
     type nonrec t =
@@ -1270,7 +1419,7 @@ module NewAssertionRule =
           "The name of the assertion rule. You can use any non-white space character in the name."];
       ruleConfig: RuleConfig.t
         [@ocaml.doc
-          "The criteria that you set for specific assertion controls (routing controls) that designate how many control states must be ON as the result of a transaction. For example, if you have three assertion controls, you might specify ATLEAST 2for your rule configuration. This means that at least two assertion controls must be ON, so that at least two Amazon Web Services Regions have traffic flowing to them."];
+          "The criteria that you set for specific assertion controls (routing controls) that designate how many control states must be ON as the result of a transaction. For example, if you have three assertion controls, you might specify ATLEAST 2 for your rule configuration. This means that at least two assertion controls must be ON, so that at least two Amazon Web Services Regions have traffic flowing to them."];
       waitPeriodMs: Zz__integer.t
         [@ocaml.doc
           "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."]}
@@ -1320,17 +1469,17 @@ module NewAssertionRule =
       make ~waitPeriodMs ~ruleConfig ~name ~controlPanelArn ~assertedControls
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
-      let ruleConfig = field_map_exn json "RuleConfig" RuleConfig.of_json in
+        field_map_exn json__ "WaitPeriodMs" Zz__integer.of_json in
+      let ruleConfig = field_map_exn json__ "RuleConfig" RuleConfig.of_json in
       let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
+        field_map_exn json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn"
+        field_map_exn json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let assertedControls =
-        field_map_exn json "AssertedControls"
+        field_map_exn json__ "AssertedControls"
           Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
       make ~waitPeriodMs ~ruleConfig ~name ~controlPanelArn ~assertedControls
         ()
@@ -1349,10 +1498,10 @@ module NewGatingRule =
         [@ocaml.doc "The name for the new gating rule."];
       ruleConfig: RuleConfig.t
         [@ocaml.doc
-          "The criteria that you set for specific gating controls (routing controls) that designates how many control states must be ON to allow you to change (set or unset) the target control states."];
+          "The criteria that you set for specific gating controls (routing controls) that designate how many control states must be ON to allow you to change (set or unset) the target control states."];
       targetControls: Zz__listOf__stringMin1Max256PatternAZaZ09.t
         [@ocaml.doc
-          "Routing controls that can only be set or unset if the specified RuleConfig evaluates to true for the specified GatingControls. For example, say you have three gating controls, one for each of three Amazon Web Services Regions. Now you specify AtLeast 2 as your RuleConfig. With these settings, you can only change (set or unset) the routing controls that you have specified as TargetControls if that rule evaluates to true. In other words, your ability to change the routing controls that you have specified as TargetControls is gated by the rule that you set for the routing controls in GatingControls."];
+          "Routing controls that can only be set or unset if the specified RuleConfig evaluates to true for the specified GatingControls. For example, say you have three gating controls, one for each of three Amazon Web Services Regions. Now you specify ATLEAST 2 as your RuleConfig. With these settings, you can only change (set or unset) the routing controls that you have specified as TargetControls if that rule evaluates to true. In other words, your ability to change the routing controls that you have specified as TargetControls is gated by the rule that you set for the routing controls in GatingControls."];
       waitPeriodMs: Zz__integer.t
         [@ocaml.doc
           "An evaluation period, in milliseconds (ms), during which any request against the target routing controls will fail. This helps prevent \"flapping\" of state. The wait period is 5000 ms by default, but you can choose a custom value."]}
@@ -1411,20 +1560,20 @@ module NewGatingRule =
       make ~waitPeriodMs ~targetControls ~ruleConfig ~name ~gatingControls
         ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let waitPeriodMs =
-        field_map_exn json "WaitPeriodMs" Zz__integer.of_json in
+        field_map_exn json__ "WaitPeriodMs" Zz__integer.of_json in
       let targetControls =
-        field_map_exn json "TargetControls"
+        field_map_exn json__ "TargetControls"
           Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
-      let ruleConfig = field_map_exn json "RuleConfig" RuleConfig.of_json in
+      let ruleConfig = field_map_exn json__ "RuleConfig" RuleConfig.of_json in
       let name =
-        field_map_exn json "Name" Zz__stringMin1Max64PatternS.of_json in
+        field_map_exn json__ "Name" Zz__stringMin1Max64PatternS.of_json in
       let gatingControls =
-        field_map_exn json "GatingControls"
+        field_map_exn json__ "GatingControls"
           Zz__listOf__stringMin1Max256PatternAZaZ09.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn"
+        field_map_exn json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       make ~waitPeriodMs ~targetControls ~ruleConfig ~name ~gatingControls
         ~controlPanelArn ()
@@ -1433,22 +1582,20 @@ module NewGatingRule =
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
-      message: Zz__string.t }
-    let context_ = "ServiceQuotaExceededException"
-    let make ~message = fun () -> { message }
+      message: Zz__string.t option }
+    let make ?message = fun () -> { message }
     let to_value x =
       structure_to_value
-        [("message", (Some (Zz__string.to_value x.message)))]
+        [("message", (Option.map x.message ~f:Zz__string.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
-        Zz__string.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "message") in
-      make ~message ()
+        (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map_exn json "Message" Zz__string.of_json in
-      make ~message ()
+    let of_json json__ =
+      let message = field_map json__ "Message" Zz__string.of_json in
+      make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "402 response - You attempted to create more resources than the service allows based on service quotas."]
@@ -1570,10 +1717,10 @@ module UpdateSafetyRuleResponse =
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatingRule = field_map json "GatingRule" GatingRule.of_json in
+    let of_json json__ =
+      let gatingRule = field_map json__ "GatingRule" GatingRule.of_json in
       let assertionRule =
-        field_map json "AssertionRule" AssertionRule.of_json in
+        field_map json__ "AssertionRule" AssertionRule.of_json in
       make ?gatingRule ?assertionRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1605,11 +1752,11 @@ module UpdateSafetyRuleRequest =
           (Xml.child xml_arg0 "AssertionRuleUpdate") in
       make ?gatingRuleUpdate ?assertionRuleUpdate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let gatingRuleUpdate =
-        field_map json "GatingRuleUpdate" GatingRuleUpdate.of_json in
+        field_map json__ "GatingRuleUpdate" GatingRuleUpdate.of_json in
       let assertionRuleUpdate =
-        field_map json "AssertionRuleUpdate" AssertionRuleUpdate.of_json in
+        field_map json__ "AssertionRuleUpdate" AssertionRuleUpdate.of_json in
       make ?gatingRuleUpdate ?assertionRuleUpdate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1704,9 +1851,9 @@ module UpdateRoutingControlResponse =
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControl =
-        field_map json "RoutingControl" RoutingControl.of_json in
+        field_map json__ "RoutingControl" RoutingControl.of_json in
       make ?routingControl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1740,12 +1887,12 @@ module UpdateRoutingControlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlName ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlName =
-        field_map_exn json "RoutingControlName"
+        field_map_exn json__ "RoutingControlName"
           Zz__stringMin1Max64PatternS.of_json in
       let routingControlArn =
-        field_map_exn json "RoutingControlArn"
+        field_map_exn json__ "RoutingControlArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       make ~routingControlName ~routingControlArn ()
     let to_json v = composed_to_json to_value v
@@ -1840,8 +1987,8 @@ module UpdateControlPanelResponse =
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
+    let of_json json__ =
+      let controlPanel = field_map json__ "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1875,16 +2022,145 @@ module UpdateControlPanelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelName ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlPanelName =
-        field_map_exn json "ControlPanelName"
+        field_map_exn json__ "ControlPanelName"
           Zz__stringMin1Max64PatternS.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn"
+        field_map_exn json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       make ~controlPanelName ~controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the control panel that you're updating."]
+module UpdateClusterResponse =
+  struct
+    type nonrec t =
+      {
+      cluster: Cluster.t option [@ocaml.doc "The cluster that was updated."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ConflictException of ConflictException.t 
+      | `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?cluster = fun () -> { cluster }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Cluster", (Option.map x.cluster ~f:Cluster.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cluster =
+        (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
+      make ?cluster ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
+      make ?cluster ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates an existing cluster. You can only update the network type of a cluster."]
+module UpdateClusterRequest =
+  struct
+    type nonrec t =
+      {
+      clusterArn: Zz__stringMin1Max256PatternAZaZ09.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the cluster."];
+      networkType: NetworkType.t
+        [@ocaml.doc
+          "The network type of the cluster. NetworkType can be one of the following: IPV4, DUALSTACK."]}
+    let context_ = "UpdateClusterRequest"
+    let make ~clusterArn =
+      fun ~networkType -> fun () -> { clusterArn; networkType }
+    let to_value x =
+      structure_to_value
+        [("ClusterArn",
+           (Some (Zz__stringMin1Max256PatternAZaZ09.to_value x.clusterArn)));
+        ("NetworkType", (Some (NetworkType.to_value x.networkType)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let networkType =
+        NetworkType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "NetworkType") in
+      let clusterArn =
+        Zz__stringMin1Max256PatternAZaZ09.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ClusterArn") in
+      make ~networkType ~clusterArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let networkType =
+        field_map_exn json__ "NetworkType" NetworkType.of_json in
+      let clusterArn =
+        field_map_exn json__ "ClusterArn"
+          Zz__stringMin1Max256PatternAZaZ09.of_json in
+      make ~networkType ~clusterArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The details of the cluster that you're updating."]
 module UntagResourceResponse =
   struct
     type nonrec t = unit
@@ -1968,9 +2244,9 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" Zz__listOf__string.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" Zz__listOf__string.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes a tag from a resource."]
@@ -2057,10 +2333,11 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map_exn json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+        field_map_exn json__ "Tags"
+          Zz__mapOf__stringMin0Max256PatternS.of_json in
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Request of adding tag to the resource"]
@@ -2127,9 +2404,9 @@ module ListTagsForResourceResponse =
           (Xml.child xml_arg0 "Tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
+        field_map json__ "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
       make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a resource."]
@@ -2152,8 +2429,8 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "ResourceArn" Zz__string.of_json in
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for a resource."]
@@ -2247,10 +2524,10 @@ module ListSafetyRulesResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?safetyRules ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let safetyRules = field_map json "SafetyRules" Zz__listOfRule.of_json in
+    let of_json json__ =
+      let safetyRules = field_map json__ "SafetyRules" Zz__listOfRule.of_json in
       let nextToken =
-        field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
+        field_map json__ "NextToken" Zz__stringMin1Max8096PatternS.of_json in
       make ?safetyRules ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2288,11 +2565,11 @@ module ListSafetyRulesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ?nextToken ?maxResults ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn" Zz__string.of_json in
+        field_map_exn json__ "ControlPanelArn" Zz__string.of_json in
       make ?nextToken ?maxResults ~controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2387,11 +2664,11 @@ module ListRoutingControlsResponse =
           (Xml.child xml_arg0 "NextToken") in
       make ?routingControls ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControls =
-        field_map json "RoutingControls" Zz__listOfRoutingControl.of_json in
+        field_map json__ "RoutingControls" Zz__listOfRoutingControl.of_json in
       let nextToken =
-        field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
+        field_map json__ "NextToken" Zz__stringMin1Max8096PatternS.of_json in
       make ?routingControls ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2429,11 +2706,11 @@ module ListRoutingControlsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ?nextToken ?maxResults ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn" Zz__string.of_json in
+        field_map_exn json__ "ControlPanelArn" Zz__string.of_json in
       make ?nextToken ?maxResults ~controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2528,11 +2805,11 @@ module ListControlPanelsResponse =
           (Xml.child xml_arg0 "ControlPanels") in
       make ?nextToken ?controlPanels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
+        field_map json__ "NextToken" Zz__stringMin1Max8096PatternS.of_json in
       let controlPanels =
-        field_map json "ControlPanels" Zz__listOfControlPanel.of_json in
+        field_map json__ "ControlPanels" Zz__listOfControlPanel.of_json in
       make ?nextToken ?controlPanels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2567,10 +2844,10 @@ module ListControlPanelsRequest =
         (Option.map ~f:Zz__string.of_xml) (Xml.child xml_arg0 "ClusterArn") in
       make ?nextToken ?maxResults ?clusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
-      let clusterArn = field_map json "ClusterArn" Zz__string.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let clusterArn = field_map json__ "ClusterArn" Zz__string.of_json in
       make ?nextToken ?maxResults ?clusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2663,10 +2940,10 @@ module ListClustersResponse =
           (Xml.child xml_arg0 "Clusters") in
       make ?nextToken ?clusters ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
-      let clusters = field_map json "Clusters" Zz__listOfCluster.of_json in
+        field_map json__ "NextToken" Zz__stringMin1Max8096PatternS.of_json in
+      let clusters = field_map json__ "Clusters" Zz__listOfCluster.of_json in
       make ?nextToken ?clusters ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of all the clusters in an account."]
@@ -2694,9 +2971,9 @@ module ListClustersRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns an array of all the clusters in an account."]
@@ -2772,11 +3049,11 @@ module ListAssociatedRoute53HealthChecksResponse =
           (Xml.child xml_arg0 "HealthCheckIds") in
       make ?nextToken ?healthCheckIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nextToken =
-        field_map json "NextToken" Zz__stringMin1Max8096PatternS.of_json in
+        field_map json__ "NextToken" Zz__stringMin1Max8096PatternS.of_json in
       let healthCheckIds =
-        field_map json "HealthCheckIds"
+        field_map json__ "HealthCheckIds"
           Zz__listOf__stringMax36PatternS.of_json in
       make ?nextToken ?healthCheckIds ()
     let to_json v = composed_to_json to_value v
@@ -2816,15 +3093,94 @@ module ListAssociatedRoute53HealthChecksRequest =
         (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
       make ~routingControlArn ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Zz__string.of_json in
-      let nextToken = field_map json "NextToken" Zz__string.of_json in
-      let maxResults = field_map json "MaxResults" MaxResults.of_json in
+        field_map_exn json__ "RoutingControlArn" Zz__string.of_json in
+      let nextToken = field_map json__ "NextToken" Zz__string.of_json in
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
       make ~routingControlArn ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns an array of all Amazon Route 53 health checks associated with a specific routing control."]
+module GetResourcePolicyResponse =
+  struct
+    type nonrec t =
+      {
+      policy: Zz__policy.t option [@ocaml.doc "The resource policy."]}
+    type nonrec error =
+      [ `InternalServerException of InternalServerException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?policy = fun () -> { policy }
+    let error_of_json name json =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerException" ->
+          `InternalServerException (InternalServerException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerException e ->
+          `Assoc
+            [("error", (`String "InternalServerException"));
+            ("details", (InternalServerException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("Policy", (Option.map x.policy ~f:Zz__policy.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let policy =
+        (Option.map ~f:Zz__policy.of_xml) (Xml.child xml_arg0 "Policy") in
+      make ?policy ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let policy = field_map json__ "Policy" Zz__policy.of_json in
+      make ?policy ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get information about the resource policy for a cluster."]
+module GetResourcePolicyRequest =
+  struct
+    type nonrec t =
+      {
+      resourceArn: Zz__string.t
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the resource."]}
+    let context_ = "GetResourcePolicyRequest"
+    let make ~resourceArn = fun () -> { resourceArn }
+    let to_value x =
+      structure_to_value
+        [("ResourceArn", (Some (Zz__string.to_value x.resourceArn)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let resourceArn =
+        Zz__string.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
+      make ~resourceArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let resourceArn = field_map_exn json__ "ResourceArn" Zz__string.of_json in
+      make ~resourceArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Get information about the resource policy for a cluster."]
 module DescribeSafetyRuleResponse =
   struct
     type nonrec t =
@@ -2885,10 +3241,10 @@ module DescribeSafetyRuleResponse =
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatingRule = field_map json "GatingRule" GatingRule.of_json in
+    let of_json json__ =
+      let gatingRule = field_map json__ "GatingRule" GatingRule.of_json in
       let assertionRule =
-        field_map json "AssertionRule" AssertionRule.of_json in
+        field_map json__ "AssertionRule" AssertionRule.of_json in
       make ?gatingRule ?assertionRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a safety rule."]
@@ -2909,9 +3265,9 @@ module DescribeSafetyRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
       make ~safetyRuleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn" Zz__string.of_json in
+        field_map_exn json__ "SafetyRuleArn" Zz__string.of_json in
       make ~safetyRuleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Returns information about a safety rule."]
@@ -3005,9 +3361,9 @@ module DescribeRoutingControlResponse =
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControl =
-        field_map json "RoutingControl" RoutingControl.of_json in
+        field_map json__ "RoutingControl" RoutingControl.of_json in
       make ?routingControl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3031,9 +3387,9 @@ module DescribeRoutingControlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Zz__string.of_json in
+        field_map_exn json__ "RoutingControlArn" Zz__string.of_json in
       make ~routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3128,8 +3484,8 @@ module DescribeControlPanelResponse =
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
+    let of_json json__ =
+      let controlPanel = field_map json__ "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Displays details about a control panel."]
@@ -3151,9 +3507,9 @@ module DescribeControlPanelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn" Zz__string.of_json in
+        field_map_exn json__ "ControlPanelArn" Zz__string.of_json in
       make ~controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Displays details about a control panel."]
@@ -3245,8 +3601,8 @@ module DescribeClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3269,8 +3625,8 @@ module DescribeClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterArn") in
       make ~clusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
+    let of_json json__ =
+      let clusterArn = field_map_exn json__ "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3349,9 +3705,9 @@ module DeleteSafetyRuleRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "SafetyRuleArn") in
       make ~safetyRuleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let safetyRuleArn =
-        field_map_exn json "SafetyRuleArn" Zz__string.of_json in
+        field_map_exn json__ "SafetyRuleArn" Zz__string.of_json in
       make ~safetyRuleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a safety rule./>"]
@@ -3459,9 +3815,9 @@ module DeleteRoutingControlRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "RoutingControlArn") in
       make ~routingControlArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlArn =
-        field_map_exn json "RoutingControlArn" Zz__string.of_json in
+        field_map_exn json__ "RoutingControlArn" Zz__string.of_json in
       make ~routingControlArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a routing control."]
@@ -3567,9 +3923,9 @@ module DeleteControlPanelRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ControlPanelArn") in
       make ~controlPanelArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let controlPanelArn =
-        field_map_exn json "ControlPanelArn" Zz__string.of_json in
+        field_map_exn json__ "ControlPanelArn" Zz__string.of_json in
       make ~controlPanelArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes a control panel."]
@@ -3676,8 +4032,8 @@ module DeleteClusterRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ClusterArn") in
       make ~clusterArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let clusterArn = field_map_exn json "ClusterArn" Zz__string.of_json in
+    let of_json json__ =
+      let clusterArn = field_map_exn json__ "ClusterArn" Zz__string.of_json in
       make ~clusterArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Delete a cluster."]
@@ -3740,14 +4096,14 @@ module CreateSafetyRuleResponse =
           (Xml.child xml_arg0 "AssertionRule") in
       make ?gatingRule ?assertionRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let gatingRule = field_map json "GatingRule" GatingRule.of_json in
+    let of_json json__ =
+      let gatingRule = field_map json__ "GatingRule" GatingRule.of_json in
       let assertionRule =
-        field_map json "AssertionRule" AssertionRule.of_json in
+        field_map json__ "AssertionRule" AssertionRule.of_json in
       make ?gatingRule ?assertionRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a safety rule in a control panel. Safety rules let you add safeguards around changing routing control states, and for enabling and disabling routing controls, to help prevent unexpected outcomes. There are two types of safety rules: assertion rules and gating rules. Assertion rule: An assertion rule enforces that, when you change a routing control state, that a certain criteria is met. For example, the criteria might be that at least one routing control state is On after the transation so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario. Gating rule: A gating rule lets you configure a gating routing control as an overall \"on/off\" switch for a group of routing controls. Or, you can configure more complex gating scenarios, for example by configuring multiple gating routing controls. For more information, see Safety rules in the Amazon Route 53 Application Recovery Controller Developer Guide."]
+       "Creates a safety rule in a control panel. Safety rules let you add safeguards around changing routing control states, and for enabling and disabling routing controls, to help prevent unexpected outcomes. There are two types of safety rules: assertion rules and gating rules. Assertion rule: An assertion rule enforces that, when you change a routing control state, that a certain criteria is met. For example, the criteria might be that at least one routing control state is On after the transaction so that traffic continues to flow to at least one cell for the application. This ensures that you avoid a fail-open scenario. Gating rule: A gating rule lets you configure a gating routing control as an overall \"on/off\" switch for a group of routing controls. Or, you can configure more complex gating scenarios, for example by configuring multiple gating routing controls. For more information, see Safety rules in the Amazon Route 53 Application Recovery Controller Developer Guide."]
 module CreateSafetyRuleRequest =
   struct
     type nonrec t =
@@ -3791,14 +4147,14 @@ module CreateSafetyRuleRequest =
           (Xml.child xml_arg0 "AssertionRule") in
       make ?tags ?gatingRule ?clientToken ?assertionRule ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
-      let gatingRule = field_map json "GatingRule" NewGatingRule.of_json in
+        field_map json__ "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
+      let gatingRule = field_map json__ "GatingRule" NewGatingRule.of_json in
       let clientToken =
-        field_map json "ClientToken" Zz__stringMin1Max64PatternS.of_json in
+        field_map json__ "ClientToken" Zz__stringMin1Max64PatternS.of_json in
       let assertionRule =
-        field_map json "AssertionRule" NewAssertionRule.of_json in
+        field_map json__ "AssertionRule" NewAssertionRule.of_json in
       make ?tags ?gatingRule ?clientToken ?assertionRule ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3904,9 +4260,9 @@ module CreateRoutingControlResponse =
           (Xml.child xml_arg0 "RoutingControl") in
       make ?routingControl ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControl =
-        field_map json "RoutingControl" RoutingControl.of_json in
+        field_map json__ "RoutingControl" RoutingControl.of_json in
       make ?routingControl ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3961,18 +4317,18 @@ module CreateRoutingControlRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ~routingControlName ?controlPanelArn ~clusterArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let routingControlName =
-        field_map_exn json "RoutingControlName"
+        field_map_exn json__ "RoutingControlName"
           Zz__stringMin1Max64PatternS.of_json in
       let controlPanelArn =
-        field_map json "ControlPanelArn"
+        field_map json__ "ControlPanelArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let clusterArn =
-        field_map_exn json "ClusterArn"
+        field_map_exn json__ "ClusterArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let clientToken =
-        field_map json "ClientToken" Zz__stringMin1Max64PatternS.of_json in
+        field_map json__ "ClientToken" Zz__stringMin1Max64PatternS.of_json in
       make ~routingControlName ?controlPanelArn ~clusterArn ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the routing control that you're creating."]
@@ -4077,8 +4433,8 @@ module CreateControlPanelResponse =
           (Xml.child xml_arg0 "ControlPanel") in
       make ?controlPanel ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let controlPanel = field_map json "ControlPanel" ControlPanel.of_json in
+    let of_json json__ =
+      let controlPanel = field_map json__ "ControlPanel" ControlPanel.of_json in
       make ?controlPanel ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4129,17 +4485,17 @@ module CreateControlPanelRequest =
           (Xml.child xml_arg0 "ClientToken") in
       make ?tags ~controlPanelName ~clusterArn ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let tags =
-        field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
+        field_map json__ "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
       let controlPanelName =
-        field_map_exn json "ControlPanelName"
+        field_map_exn json__ "ControlPanelName"
           Zz__stringMin1Max64PatternS.of_json in
       let clusterArn =
-        field_map_exn json "ClusterArn"
+        field_map_exn json__ "ClusterArn"
           Zz__stringMin1Max256PatternAZaZ09.of_json in
       let clientToken =
-        field_map json "ClientToken" Zz__stringMin1Max64PatternS.of_json in
+        field_map json__ "ClientToken" Zz__stringMin1Max64PatternS.of_json in
       make ?tags ~controlPanelName ~clusterArn ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The details of the control panel that you're creating."]
@@ -4241,8 +4597,8 @@ module CreateClusterResponse =
         (Option.map ~f:Cluster.of_xml) (Xml.child xml_arg0 "Cluster") in
       make ?cluster ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let cluster = field_map json "Cluster" Cluster.of_json in
+    let of_json json__ =
+      let cluster = field_map json__ "Cluster" Cluster.of_json in
       make ?cluster ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4257,11 +4613,16 @@ module CreateClusterRequest =
       clusterName: Zz__stringMin1Max64PatternS.t
         [@ocaml.doc "The name of the cluster."];
       tags: Zz__mapOf__stringMin0Max256PatternS.t option
-        [@ocaml.doc "The tags associated with the cluster."]}
+        [@ocaml.doc "The tags associated with the cluster."];
+      networkType: NetworkType.t option
+        [@ocaml.doc
+          "The network type of the cluster. NetworkType can be one of the following: IPV4, DUALSTACK."]}
     let context_ = "CreateClusterRequest"
     let make ?clientToken =
       fun ?tags ->
-        fun ~clusterName -> fun () -> { clientToken; tags; clusterName }
+        fun ?networkType ->
+          fun ~clusterName ->
+            fun () -> { clientToken; tags; networkType; clusterName }
     let to_value x =
       structure_to_value
         [("ClientToken",
@@ -4269,9 +4630,12 @@ module CreateClusterRequest =
         ("ClusterName",
           (Some (Zz__stringMin1Max64PatternS.to_value x.clusterName)));
         ("Tags",
-          (Option.map x.tags ~f:Zz__mapOf__stringMin0Max256PatternS.to_value))]
+          (Option.map x.tags ~f:Zz__mapOf__stringMin0Max256PatternS.to_value));
+        ("NetworkType", (Option.map x.networkType ~f:NetworkType.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let networkType =
+        (Option.map ~f:NetworkType.of_xml) (Xml.child xml_arg0 "NetworkType") in
       let tags =
         (Option.map ~f:Zz__mapOf__stringMin0Max256PatternS.of_xml)
           (Xml.child xml_arg0 "Tags") in
@@ -4281,15 +4645,17 @@ module CreateClusterRequest =
       let clientToken =
         (Option.map ~f:Zz__stringMin1Max64PatternS.of_xml)
           (Xml.child xml_arg0 "ClientToken") in
-      make ?tags ~clusterName ?clientToken ()
+      make ?networkType ?tags ~clusterName ?clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let networkType = field_map json__ "NetworkType" NetworkType.of_json in
       let tags =
-        field_map json "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
+        field_map json__ "Tags" Zz__mapOf__stringMin0Max256PatternS.of_json in
       let clusterName =
-        field_map_exn json "ClusterName" Zz__stringMin1Max64PatternS.of_json in
+        field_map_exn json__ "ClusterName"
+          Zz__stringMin1Max64PatternS.of_json in
       let clientToken =
-        field_map json "ClientToken" Zz__stringMin1Max64PatternS.of_json in
-      make ?tags ~clusterName ?clientToken ()
+        field_map json__ "ClientToken" Zz__stringMin1Max64PatternS.of_json in
+      make ?networkType ?tags ~clusterName ?clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Creates a cluster."]

@@ -38,18 +38,26 @@ let create_capacity_provider =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
-       and name = flag "name" (required string) ~doc:"STRING String"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
        and autoScalingGroupProvider =
-         flag "auto-scaling-group-provider" (required json_arg)
-           ~doc:"JSON AutoScalingGroupProvider" in
+         flag "auto-scaling-group-provider" (optional json_arg)
+           ~doc:"JSON AutoScalingGroupProvider"
+       and managedInstancesProvider =
+         flag "managed-instances-provider" (optional json_arg)
+           ~doc:"JSON CreateManagedInstancesProviderConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and name = flag "name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_capacity_provider
-           (Values.CreateCapacityProviderRequest.make
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name
-              ~autoScalingGroupProvider:(Values.AutoScalingGroupProvider.of_json
-                                           autoScalingGroupProvider) ())
+           (Values.CreateCapacityProviderRequest.make ?cluster
+              ?autoScalingGroupProvider:(Option.map
+                                           ~f:Values.AutoScalingGroupProvider.of_json
+                                           autoScalingGroupProvider)
+              ?managedInstancesProvider:(Option.map
+                                           ~f:Values.CreateManagedInstancesProviderConfiguration.of_json
+                                           managedInstancesProvider)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~name ())
            (Some Values.CreateCapacityProviderResponse.to_json)
            (Some Values.CreateCapacityProviderResponse.error_to_json)])
 let create_cluster =
@@ -74,7 +82,10 @@ let create_cluster =
          flag "capacity-providers" (optional json_arg) ~doc:"JSON StringList"
        and defaultCapacityProviderStrategy =
          flag "default-capacity-provider-strategy" (optional json_arg)
-           ~doc:"JSON CapacityProviderStrategy" in
+           ~doc:"JSON CapacityProviderStrategy"
+       and serviceConnectDefaults =
+         flag "service-connect-defaults" (optional json_arg)
+           ~doc:"JSON ClusterServiceConnectDefaultsRequest" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_cluster
@@ -90,8 +101,112 @@ let create_cluster =
               ?defaultCapacityProviderStrategy:(Option.map
                                                   ~f:Values.CapacityProviderStrategy.of_json
                                                   defaultCapacityProviderStrategy)
-              ()) (Some Values.CreateClusterResponse.to_json)
+              ?serviceConnectDefaults:(Option.map
+                                         ~f:Values.ClusterServiceConnectDefaultsRequest.of_json
+                                         serviceConnectDefaults) ())
+           (Some Values.CreateClusterResponse.to_json)
            (Some Values.CreateClusterResponse.error_to_json)])
+let create_daemon =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (optional string) ~doc:"STRING String"
+       and deploymentConfiguration =
+         flag "deployment-configuration" (optional json_arg)
+           ~doc:"JSON DaemonDeploymentConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and propagateTags =
+         flag "propagate-tags" (optional json_arg)
+           ~doc:"JSON DaemonPropagateTags"
+       and enableECSManagedTags =
+         flag "enable-e-c-s-managed-tags" (optional bool) ~doc:"BOOL Boolean"
+       and enableExecuteCommand =
+         flag "enable-execute-command" (optional bool) ~doc:"BOOL Boolean"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and daemonName =
+         flag "daemon-name" (required string) ~doc:"STRING String"
+       and daemonTaskDefinitionArn =
+         flag "daemon-task-definition-arn" (required string)
+           ~doc:"STRING String"
+       and capacityProviderArns =
+         flag "capacity-provider-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_daemon
+           (Values.CreateDaemonRequest.make ?clusterArn
+              ?deploymentConfiguration:(Option.map
+                                          ~f:Values.DaemonDeploymentConfiguration.of_json
+                                          deploymentConfiguration)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?propagateTags:(Option.map
+                                ~f:Values.DaemonPropagateTags.of_json
+                                propagateTags) ?enableECSManagedTags
+              ?enableExecuteCommand ?clientToken ~daemonName
+              ~daemonTaskDefinitionArn
+              ~capacityProviderArns:(Values.StringList.of_json
+                                       capacityProviderArns) ())
+           (Some Values.CreateDaemonResponse.to_json)
+           (Some Values.CreateDaemonResponse.error_to_json)])
+let create_express_gateway_service =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceName =
+         flag "service-name" (optional string) ~doc:"STRING String"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
+       and healthCheckPath =
+         flag "health-check-path" (optional string) ~doc:"STRING String"
+       and taskRoleArn =
+         flag "task-role-arn" (optional string) ~doc:"STRING String"
+       and networkConfiguration =
+         flag "network-configuration" (optional json_arg)
+           ~doc:"JSON ExpressGatewayServiceNetworkConfiguration"
+       and cpu = flag "cpu" (optional string) ~doc:"STRING String"
+       and memory = flag "memory" (optional string) ~doc:"STRING String"
+       and scalingTarget =
+         flag "scaling-target" (optional json_arg)
+           ~doc:"JSON ExpressGatewayScalingTarget"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and executionRoleArn =
+         flag "execution-role-arn" (required string) ~doc:"STRING String"
+       and infrastructureRoleArn =
+         flag "infrastructure-role-arn" (required string)
+           ~doc:"STRING String"
+       and primaryContainer =
+         flag "primary-container" (required json_arg)
+           ~doc:"JSON ExpressGatewayContainer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_express_gateway_service
+           (Values.CreateExpressGatewayServiceRequest.make ?serviceName
+              ?cluster ?healthCheckPath ?taskRoleArn
+              ?networkConfiguration:(Option.map
+                                       ~f:Values.ExpressGatewayServiceNetworkConfiguration.of_json
+                                       networkConfiguration) ?cpu ?memory
+              ?scalingTarget:(Option.map
+                                ~f:Values.ExpressGatewayScalingTarget.of_json
+                                scalingTarget)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ~executionRoleArn ~infrastructureRoleArn
+              ~primaryContainer:(Values.ExpressGatewayContainer.of_json
+                                   primaryContainer) ())
+           (Some Values.CreateExpressGatewayServiceResponse.to_json)
+           (Some Values.CreateExpressGatewayServiceResponse.error_to_json)])
 let create_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -105,6 +220,9 @@ let create_service =
        and cluster = flag "cluster" (optional string) ~doc:"STRING String"
        and taskDefinition =
          flag "task-definition" (optional string) ~doc:"STRING String"
+       and availabilityZoneRebalancing =
+         flag "availability-zone-rebalancing" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneRebalancing"
        and loadBalancers =
          flag "load-balancers" (optional json_arg) ~doc:"JSON LoadBalancers"
        and serviceRegistries =
@@ -150,12 +268,24 @@ let create_service =
          flag "propagate-tags" (optional json_arg) ~doc:"JSON PropagateTags"
        and enableExecuteCommand =
          flag "enable-execute-command" (optional bool) ~doc:"BOOL Boolean"
+       and serviceConnectConfiguration =
+         flag "service-connect-configuration" (optional json_arg)
+           ~doc:"JSON ServiceConnectConfiguration"
+       and volumeConfigurations =
+         flag "volume-configurations" (optional json_arg)
+           ~doc:"JSON ServiceVolumeConfigurations"
+       and vpcLatticeConfigurations =
+         flag "vpc-lattice-configurations" (optional json_arg)
+           ~doc:"JSON VpcLatticeConfigurations"
        and serviceName =
          flag "service-name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_service
            (Values.CreateServiceRequest.make ?cluster ?taskDefinition
+              ?availabilityZoneRebalancing:(Option.map
+                                              ~f:Values.AvailabilityZoneRebalancing.of_json
+                                              availabilityZoneRebalancing)
               ?loadBalancers:(Option.map ~f:Values.LoadBalancers.of_json
                                 loadBalancers)
               ?serviceRegistries:(Option.map
@@ -190,6 +320,15 @@ let create_service =
               ?enableECSManagedTags
               ?propagateTags:(Option.map ~f:Values.PropagateTags.of_json
                                 propagateTags) ?enableExecuteCommand
+              ?serviceConnectConfiguration:(Option.map
+                                              ~f:Values.ServiceConnectConfiguration.of_json
+                                              serviceConnectConfiguration)
+              ?volumeConfigurations:(Option.map
+                                       ~f:Values.ServiceVolumeConfigurations.of_json
+                                       volumeConfigurations)
+              ?vpcLatticeConfigurations:(Option.map
+                                           ~f:Values.VpcLatticeConfigurations.of_json
+                                           vpcLatticeConfigurations)
               ~serviceName ()) (Some Values.CreateServiceResponse.to_json)
            (Some Values.CreateServiceResponse.error_to_json)])
 let create_task_set =
@@ -299,12 +438,14 @@ let delete_capacity_provider =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
        and capacityProvider =
          flag "capacity-provider" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_capacity_provider
-           (Values.DeleteCapacityProviderRequest.make ~capacityProvider ())
+           (Values.DeleteCapacityProviderRequest.make ?cluster
+              ~capacityProvider ())
            (Some Values.DeleteCapacityProviderResponse.to_json)
            (Some Values.DeleteCapacityProviderResponse.error_to_json)])
 let delete_cluster =
@@ -323,6 +464,60 @@ let delete_cluster =
            Io.delete_cluster (Values.DeleteClusterRequest.make ~cluster ())
            (Some Values.DeleteClusterResponse.to_json)
            (Some Values.DeleteClusterResponse.error_to_json)])
+let delete_daemon =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonArn =
+         flag "daemon-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_daemon (Values.DeleteDaemonRequest.make ~daemonArn ())
+           (Some Values.DeleteDaemonResponse.to_json)
+           (Some Values.DeleteDaemonResponse.error_to_json)])
+let delete_daemon_task_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonTaskDefinition =
+         flag "daemon-task-definition" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_daemon_task_definition
+           (Values.DeleteDaemonTaskDefinitionRequest.make
+              ~daemonTaskDefinition ())
+           (Some Values.DeleteDaemonTaskDefinitionResponse.to_json)
+           (Some Values.DeleteDaemonTaskDefinitionResponse.error_to_json)])
+let delete_express_gateway_service =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceArn =
+         flag "service-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_express_gateway_service
+           (Values.DeleteExpressGatewayServiceRequest.make ~serviceArn ())
+           (Some Values.DeleteExpressGatewayServiceResponse.to_json)
+           (Some Values.DeleteExpressGatewayServiceResponse.error_to_json)])
 let delete_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -342,6 +537,25 @@ let delete_service =
            (Values.DeleteServiceRequest.make ?cluster ?force ~service ())
            (Some Values.DeleteServiceResponse.to_json)
            (Some Values.DeleteServiceResponse.error_to_json)])
+let delete_task_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskDefinitions =
+         flag "task-definitions" (required json_arg) ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_task_definitions
+           (Values.DeleteTaskDefinitionsRequest.make
+              ~taskDefinitions:(Values.StringList.of_json taskDefinitions) ())
+           (Some Values.DeleteTaskDefinitionsResponse.to_json)
+           (Some Values.DeleteTaskDefinitionsResponse.error_to_json)])
 let delete_task_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -413,6 +627,7 @@ let describe_capacity_providers =
            ~doc:"URL override endpoint url"
        and capacityProviders =
          flag "capacity-providers" (optional json_arg) ~doc:"JSON StringList"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
        and include_ =
          flag "include-" (optional json_arg)
            ~doc:"JSON CapacityProviderFieldList"
@@ -425,7 +640,7 @@ let describe_capacity_providers =
            Io.describe_capacity_providers
            (Values.DescribeCapacityProvidersRequest.make
               ?capacityProviders:(Option.map ~f:Values.StringList.of_json
-                                    capacityProviders)
+                                    capacityProviders) ?cluster
               ?include_:(Option.map
                            ~f:Values.CapacityProviderFieldList.of_json
                            include_) ?maxResults ?nextToken ())
@@ -482,6 +697,151 @@ let describe_container_instances =
                                      containerInstances) ())
            (Some Values.DescribeContainerInstancesResponse.to_json)
            (Some Values.DescribeContainerInstancesResponse.error_to_json)])
+let describe_daemon =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonArn =
+         flag "daemon-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_daemon
+           (Values.DescribeDaemonRequest.make ~daemonArn ())
+           (Some Values.DescribeDaemonResponse.to_json)
+           (Some Values.DescribeDaemonResponse.error_to_json)])
+let describe_daemon_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonDeploymentArns =
+         flag "daemon-deployment-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_daemon_deployments
+           (Values.DescribeDaemonDeploymentsRequest.make
+              ~daemonDeploymentArns:(Values.StringList.of_json
+                                       daemonDeploymentArns) ())
+           (Some Values.DescribeDaemonDeploymentsResponse.to_json)
+           (Some Values.DescribeDaemonDeploymentsResponse.error_to_json)])
+let describe_daemon_revisions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonRevisionArns =
+         flag "daemon-revision-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_daemon_revisions
+           (Values.DescribeDaemonRevisionsRequest.make
+              ~daemonRevisionArns:(Values.StringList.of_json
+                                     daemonRevisionArns) ())
+           (Some Values.DescribeDaemonRevisionsResponse.to_json)
+           (Some Values.DescribeDaemonRevisionsResponse.error_to_json)])
+let describe_daemon_task_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and daemonTaskDefinition =
+         flag "daemon-task-definition" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_daemon_task_definition
+           (Values.DescribeDaemonTaskDefinitionRequest.make
+              ~daemonTaskDefinition ())
+           (Some Values.DescribeDaemonTaskDefinitionResponse.to_json)
+           (Some Values.DescribeDaemonTaskDefinitionResponse.error_to_json)])
+let describe_express_gateway_service =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and include_ =
+         flag "include-" (optional json_arg)
+           ~doc:"JSON ExpressGatewayServiceIncludeList"
+       and serviceArn =
+         flag "service-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_express_gateway_service
+           (Values.DescribeExpressGatewayServiceRequest.make
+              ?include_:(Option.map
+                           ~f:Values.ExpressGatewayServiceIncludeList.of_json
+                           include_) ~serviceArn ())
+           (Some Values.DescribeExpressGatewayServiceResponse.to_json)
+           (Some Values.DescribeExpressGatewayServiceResponse.error_to_json)])
+let describe_service_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceDeploymentArns =
+         flag "service-deployment-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_service_deployments
+           (Values.DescribeServiceDeploymentsRequest.make
+              ~serviceDeploymentArns:(Values.StringList.of_json
+                                        serviceDeploymentArns) ())
+           (Some Values.DescribeServiceDeploymentsResponse.to_json)
+           (Some Values.DescribeServiceDeploymentsResponse.error_to_json)])
+let describe_service_revisions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and serviceRevisionArns =
+         flag "service-revision-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_service_revisions
+           (Values.DescribeServiceRevisionsRequest.make
+              ~serviceRevisionArns:(Values.StringList.of_json
+                                      serviceRevisionArns) ())
+           (Some Values.DescribeServiceRevisionsResponse.to_json)
+           (Some Values.DescribeServiceRevisionsResponse.error_to_json)])
 let describe_services =
   Command.async ~summary:""
     ([%map_open.Command
@@ -619,6 +979,25 @@ let execute_command =
               ~interactive ~task ())
            (Some Values.ExecuteCommandResponse.to_json)
            (Some Values.ExecuteCommandResponse.error_to_json)])
+let get_task_protection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tasks = flag "tasks" (optional json_arg) ~doc:"JSON StringList"
+       and cluster = flag "cluster" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_task_protection
+           (Values.GetTaskProtectionRequest.make
+              ?tasks:(Option.map ~f:Values.StringList.of_json tasks) ~cluster
+              ()) (Some Values.GetTaskProtectionResponse.to_json)
+           (Some Values.GetTaskProtectionResponse.error_to_json)])
 let list_account_settings =
   Command.async ~summary:""
     ([%map_open.Command
@@ -723,6 +1102,134 @@ let list_container_instances =
                          status) ())
            (Some Values.ListContainerInstancesResponse.to_json)
            (Some Values.ListContainerInstancesResponse.error_to_json)])
+let list_daemon_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON DaemonDeploymentStatusList"
+       and createdAt =
+         flag "created-at" (optional json_arg) ~doc:"JSON CreatedAt"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and daemonArn =
+         flag "daemon-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_daemon_deployments
+           (Values.ListDaemonDeploymentsRequest.make
+              ?status:(Option.map
+                         ~f:Values.DaemonDeploymentStatusList.of_json status)
+              ?createdAt:(Option.map ~f:Values.CreatedAt.of_json createdAt)
+              ?maxResults ?nextToken ~daemonArn ())
+           (Some Values.ListDaemonDeploymentsResponse.to_json)
+           (Some Values.ListDaemonDeploymentsResponse.error_to_json)])
+let list_daemon_task_definitions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and familyPrefix =
+         flag "family-prefix" (optional string) ~doc:"STRING String"
+       and family = flag "family" (optional string) ~doc:"STRING String"
+       and revision =
+         flag "revision" (optional json_arg)
+           ~doc:"JSON DaemonTaskDefinitionRevisionFilter"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON DaemonTaskDefinitionStatusFilter"
+       and sort = flag "sort" (optional json_arg) ~doc:"JSON SortOrder"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_daemon_task_definitions
+           (Values.ListDaemonTaskDefinitionsRequest.make ?familyPrefix
+              ?family
+              ?revision:(Option.map
+                           ~f:Values.DaemonTaskDefinitionRevisionFilter.of_json
+                           revision)
+              ?status:(Option.map
+                         ~f:Values.DaemonTaskDefinitionStatusFilter.of_json
+                         status)
+              ?sort:(Option.map ~f:Values.SortOrder.of_json sort) ?nextToken
+              ?maxResults ())
+           (Some Values.ListDaemonTaskDefinitionsResponse.to_json)
+           (Some Values.ListDaemonTaskDefinitionsResponse.error_to_json)])
+let list_daemons =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clusterArn =
+         flag "cluster-arn" (optional string) ~doc:"STRING String"
+       and capacityProviderArns =
+         flag "capacity-provider-arns" (optional json_arg)
+           ~doc:"JSON StringList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_daemons
+           (Values.ListDaemonsRequest.make ?clusterArn
+              ?capacityProviderArns:(Option.map ~f:Values.StringList.of_json
+                                       capacityProviderArns) ?maxResults
+              ?nextToken ()) (Some Values.ListDaemonsResponse.to_json)
+           (Some Values.ListDaemonsResponse.error_to_json)])
+let list_service_deployments =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON ServiceDeploymentStatusList"
+       and createdAt =
+         flag "created-at" (optional json_arg) ~doc:"JSON CreatedAt"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger"
+       and service = flag "service" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_service_deployments
+           (Values.ListServiceDeploymentsRequest.make ?cluster
+              ?status:(Option.map
+                         ~f:Values.ServiceDeploymentStatusList.of_json status)
+              ?createdAt:(Option.map ~f:Values.CreatedAt.of_json createdAt)
+              ?nextToken ?maxResults ~service ())
+           (Some Values.ListServiceDeploymentsResponse.to_json)
+           (Some Values.ListServiceDeploymentsResponse.error_to_json)])
 let list_services =
   Command.async ~summary:""
     ([%map_open.Command
@@ -742,7 +1249,10 @@ let list_services =
          flag "launch-type" (optional json_arg) ~doc:"JSON LaunchType"
        and schedulingStrategy =
          flag "scheduling-strategy" (optional json_arg)
-           ~doc:"JSON SchedulingStrategy" in
+           ~doc:"JSON SchedulingStrategy"
+       and resourceManagementType =
+         flag "resource-management-type" (optional json_arg)
+           ~doc:"JSON ResourceManagementType" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_services
@@ -750,9 +1260,35 @@ let list_services =
               ?launchType:(Option.map ~f:Values.LaunchType.of_json launchType)
               ?schedulingStrategy:(Option.map
                                      ~f:Values.SchedulingStrategy.of_json
-                                     schedulingStrategy) ())
+                                     schedulingStrategy)
+              ?resourceManagementType:(Option.map
+                                         ~f:Values.ResourceManagementType.of_json
+                                         resourceManagementType) ())
            (Some Values.ListServicesResponse.to_json)
            (Some Values.ListServicesResponse.error_to_json)])
+let list_services_by_namespace =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT BoxedInteger"
+       and namespace =
+         flag "namespace" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_services_by_namespace
+           (Values.ListServicesByNamespaceRequest.make ?nextToken ?maxResults
+              ~namespace ())
+           (Some Values.ListServicesByNamespaceResponse.to_json)
+           (Some Values.ListServicesByNamespaceResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -853,7 +1389,9 @@ let list_tasks =
        and desiredStatus =
          flag "desired-status" (optional json_arg) ~doc:"JSON DesiredStatus"
        and launchType =
-         flag "launch-type" (optional json_arg) ~doc:"JSON LaunchType" in
+         flag "launch-type" (optional json_arg) ~doc:"JSON LaunchType"
+       and daemonName =
+         flag "daemon-name" (optional string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_tasks
@@ -862,7 +1400,7 @@ let list_tasks =
               ?desiredStatus:(Option.map ~f:Values.DesiredStatus.of_json
                                 desiredStatus)
               ?launchType:(Option.map ~f:Values.LaunchType.of_json launchType)
-              ()) (Some Values.ListTasksResponse.to_json)
+              ?daemonName ()) (Some Values.ListTasksResponse.to_json)
            (Some Values.ListTasksResponse.error_to_json)])
 let put_account_setting =
   Command.async ~summary:""
@@ -993,6 +1531,40 @@ let register_container_instance =
               ?tags:(Option.map ~f:Values.Tags.of_json tags) ())
            (Some Values.RegisterContainerInstanceResponse.to_json)
            (Some Values.RegisterContainerInstanceResponse.error_to_json)])
+let register_daemon_task_definition =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and taskRoleArn =
+         flag "task-role-arn" (optional string) ~doc:"STRING String"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING String"
+       and cpu = flag "cpu" (optional string) ~doc:"STRING String"
+       and memory = flag "memory" (optional string) ~doc:"STRING String"
+       and volumes =
+         flag "volumes" (optional json_arg) ~doc:"JSON DaemonVolumeList"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and family = flag "family" (required string) ~doc:"STRING String"
+       and containerDefinitions =
+         flag "container-definitions" (required json_arg)
+           ~doc:"JSON DaemonContainerDefinitionList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.register_daemon_task_definition
+           (Values.RegisterDaemonTaskDefinitionRequest.make ?taskRoleArn
+              ?executionRoleArn ?cpu ?memory
+              ?volumes:(Option.map ~f:Values.DaemonVolumeList.of_json volumes)
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~family
+              ~containerDefinitions:(Values.DaemonContainerDefinitionList.of_json
+                                       containerDefinitions) ())
+           (Some Values.RegisterDaemonTaskDefinitionResponse.to_json)
+           (Some Values.RegisterDaemonTaskDefinitionResponse.error_to_json)])
 let register_task_definition =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1034,6 +1606,9 @@ let register_task_definition =
        and runtimePlatform =
          flag "runtime-platform" (optional json_arg)
            ~doc:"JSON RuntimePlatform"
+       and enableFaultInjection =
+         flag "enable-fault-injection" (optional bool)
+           ~doc:"BOOL BoxedBoolean"
        and family = flag "family" (required string) ~doc:"STRING String"
        and containerDefinitions =
          flag "container-definitions" (required json_arg)
@@ -1065,7 +1640,8 @@ let register_task_definition =
                                    ~f:Values.EphemeralStorage.of_json
                                    ephemeralStorage)
               ?runtimePlatform:(Option.map ~f:Values.RuntimePlatform.of_json
-                                  runtimePlatform) ~family
+                                  runtimePlatform) ?enableFaultInjection
+              ~family
               ~containerDefinitions:(Values.ContainerDefinitions.of_json
                                        containerDefinitions) ())
            (Some Values.RegisterTaskDefinitionResponse.to_json)
@@ -1112,6 +1688,11 @@ let run_task =
        and startedBy =
          flag "started-by" (optional string) ~doc:"STRING String"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING String"
+       and volumeConfigurations =
+         flag "volume-configurations" (optional json_arg)
+           ~doc:"JSON TaskVolumeConfigurations"
        and taskDefinition =
          flag "task-definition" (required string) ~doc:"STRING String" in
        fun () ->
@@ -1135,7 +1716,10 @@ let run_task =
                                     placementStrategy) ?platformVersion
               ?propagateTags:(Option.map ~f:Values.PropagateTags.of_json
                                 propagateTags) ?referenceId ?startedBy
-              ?tags:(Option.map ~f:Values.Tags.of_json tags) ~taskDefinition
+              ?tags:(Option.map ~f:Values.Tags.of_json tags) ?clientToken
+              ?volumeConfigurations:(Option.map
+                                       ~f:Values.TaskVolumeConfigurations.of_json
+                                       volumeConfigurations) ~taskDefinition
               ()) (Some Values.RunTaskResponse.to_json)
            (Some Values.RunTaskResponse.error_to_json)])
 let start_task =
@@ -1166,6 +1750,9 @@ let start_task =
        and startedBy =
          flag "started-by" (optional string) ~doc:"STRING String"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON Tags"
+       and volumeConfigurations =
+         flag "volume-configurations" (optional json_arg)
+           ~doc:"JSON TaskVolumeConfigurations"
        and containerInstances =
          flag "container-instances" (required json_arg)
            ~doc:"JSON StringList"
@@ -1183,10 +1770,37 @@ let start_task =
               ?propagateTags:(Option.map ~f:Values.PropagateTags.of_json
                                 propagateTags) ?referenceId ?startedBy
               ?tags:(Option.map ~f:Values.Tags.of_json tags)
+              ?volumeConfigurations:(Option.map
+                                       ~f:Values.TaskVolumeConfigurations.of_json
+                                       volumeConfigurations)
               ~containerInstances:(Values.StringList.of_json
                                      containerInstances) ~taskDefinition ())
            (Some Values.StartTaskResponse.to_json)
            (Some Values.StartTaskResponse.error_to_json)])
+let stop_service_deployment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stopType =
+         flag "stop-type" (optional json_arg)
+           ~doc:"JSON StopServiceDeploymentStopType"
+       and serviceDeploymentArn =
+         flag "service-deployment-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_service_deployment
+           (Values.StopServiceDeploymentRequest.make
+              ?stopType:(Option.map
+                           ~f:Values.StopServiceDeploymentStopType.of_json
+                           stopType) ~serviceDeploymentArn ())
+           (Some Values.StopServiceDeploymentResponse.to_json)
+           (Some Values.StopServiceDeploymentResponse.error_to_json)])
 let stop_task =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1359,16 +1973,24 @@ let update_capacity_provider =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
-       and name = flag "name" (required string) ~doc:"STRING String"
+       and cluster = flag "cluster" (optional string) ~doc:"STRING String"
        and autoScalingGroupProvider =
-         flag "auto-scaling-group-provider" (required json_arg)
-           ~doc:"JSON AutoScalingGroupProviderUpdate" in
+         flag "auto-scaling-group-provider" (optional json_arg)
+           ~doc:"JSON AutoScalingGroupProviderUpdate"
+       and managedInstancesProvider =
+         flag "managed-instances-provider" (optional json_arg)
+           ~doc:"JSON UpdateManagedInstancesProviderConfiguration"
+       and name = flag "name" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.update_capacity_provider
-           (Values.UpdateCapacityProviderRequest.make ~name
-              ~autoScalingGroupProvider:(Values.AutoScalingGroupProviderUpdate.of_json
-                                           autoScalingGroupProvider) ())
+           (Values.UpdateCapacityProviderRequest.make ?cluster
+              ?autoScalingGroupProvider:(Option.map
+                                           ~f:Values.AutoScalingGroupProviderUpdate.of_json
+                                           autoScalingGroupProvider)
+              ?managedInstancesProvider:(Option.map
+                                           ~f:Values.UpdateManagedInstancesProviderConfiguration.of_json
+                                           managedInstancesProvider) ~name ())
            (Some Values.UpdateCapacityProviderResponse.to_json)
            (Some Values.UpdateCapacityProviderResponse.error_to_json)])
 let update_cluster =
@@ -1386,6 +2008,9 @@ let update_cluster =
        and configuration =
          flag "configuration" (optional json_arg)
            ~doc:"JSON ClusterConfiguration"
+       and serviceConnectDefaults =
+         flag "service-connect-defaults" (optional json_arg)
+           ~doc:"JSON ClusterServiceConnectDefaultsRequest"
        and cluster = flag "cluster" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1395,7 +2020,10 @@ let update_cluster =
                            settings)
               ?configuration:(Option.map
                                 ~f:Values.ClusterConfiguration.of_json
-                                configuration) ~cluster ())
+                                configuration)
+              ?serviceConnectDefaults:(Option.map
+                                         ~f:Values.ClusterServiceConnectDefaultsRequest.of_json
+                                         serviceConnectDefaults) ~cluster ())
            (Some Values.UpdateClusterResponse.to_json)
            (Some Values.UpdateClusterResponse.error_to_json)])
 let update_cluster_settings =
@@ -1464,6 +2092,94 @@ let update_container_instances_state =
               ~status:(Values.ContainerInstanceStatus.of_json status) ())
            (Some Values.UpdateContainerInstancesStateResponse.to_json)
            (Some Values.UpdateContainerInstancesStateResponse.error_to_json)])
+let update_daemon =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and deploymentConfiguration =
+         flag "deployment-configuration" (optional json_arg)
+           ~doc:"JSON DaemonDeploymentConfiguration"
+       and propagateTags =
+         flag "propagate-tags" (optional json_arg)
+           ~doc:"JSON DaemonPropagateTags"
+       and enableECSManagedTags =
+         flag "enable-e-c-s-managed-tags" (optional bool) ~doc:"BOOL Boolean"
+       and enableExecuteCommand =
+         flag "enable-execute-command" (optional bool) ~doc:"BOOL Boolean"
+       and daemonArn =
+         flag "daemon-arn" (required string) ~doc:"STRING String"
+       and daemonTaskDefinitionArn =
+         flag "daemon-task-definition-arn" (required string)
+           ~doc:"STRING String"
+       and capacityProviderArns =
+         flag "capacity-provider-arns" (required json_arg)
+           ~doc:"JSON StringList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_daemon
+           (Values.UpdateDaemonRequest.make
+              ?deploymentConfiguration:(Option.map
+                                          ~f:Values.DaemonDeploymentConfiguration.of_json
+                                          deploymentConfiguration)
+              ?propagateTags:(Option.map
+                                ~f:Values.DaemonPropagateTags.of_json
+                                propagateTags) ?enableECSManagedTags
+              ?enableExecuteCommand ~daemonArn ~daemonTaskDefinitionArn
+              ~capacityProviderArns:(Values.StringList.of_json
+                                       capacityProviderArns) ())
+           (Some Values.UpdateDaemonResponse.to_json)
+           (Some Values.UpdateDaemonResponse.error_to_json)])
+let update_express_gateway_service =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionRoleArn =
+         flag "execution-role-arn" (optional string) ~doc:"STRING String"
+       and healthCheckPath =
+         flag "health-check-path" (optional string) ~doc:"STRING String"
+       and primaryContainer =
+         flag "primary-container" (optional json_arg)
+           ~doc:"JSON ExpressGatewayContainer"
+       and taskRoleArn =
+         flag "task-role-arn" (optional string) ~doc:"STRING String"
+       and networkConfiguration =
+         flag "network-configuration" (optional json_arg)
+           ~doc:"JSON ExpressGatewayServiceNetworkConfiguration"
+       and cpu = flag "cpu" (optional string) ~doc:"STRING String"
+       and memory = flag "memory" (optional string) ~doc:"STRING String"
+       and scalingTarget =
+         flag "scaling-target" (optional json_arg)
+           ~doc:"JSON ExpressGatewayScalingTarget"
+       and serviceArn =
+         flag "service-arn" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_express_gateway_service
+           (Values.UpdateExpressGatewayServiceRequest.make ?executionRoleArn
+              ?healthCheckPath
+              ?primaryContainer:(Option.map
+                                   ~f:Values.ExpressGatewayContainer.of_json
+                                   primaryContainer) ?taskRoleArn
+              ?networkConfiguration:(Option.map
+                                       ~f:Values.ExpressGatewayServiceNetworkConfiguration.of_json
+                                       networkConfiguration) ?cpu ?memory
+              ?scalingTarget:(Option.map
+                                ~f:Values.ExpressGatewayScalingTarget.of_json
+                                scalingTarget) ~serviceArn ())
+           (Some Values.UpdateExpressGatewayServiceResponse.to_json)
+           (Some Values.UpdateExpressGatewayServiceResponse.error_to_json)])
 let update_service =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1485,6 +2201,9 @@ let update_service =
        and deploymentConfiguration =
          flag "deployment-configuration" (optional json_arg)
            ~doc:"JSON DeploymentConfiguration"
+       and availabilityZoneRebalancing =
+         flag "availability-zone-rebalancing" (optional json_arg)
+           ~doc:"JSON AvailabilityZoneRebalancing"
        and networkConfiguration =
          flag "network-configuration" (optional json_arg)
            ~doc:"JSON NetworkConfiguration"
@@ -1501,6 +2220,9 @@ let update_service =
        and healthCheckGracePeriodSeconds =
          flag "health-check-grace-period-seconds" (optional int)
            ~doc:"INT BoxedInteger"
+       and deploymentController =
+         flag "deployment-controller" (optional json_arg)
+           ~doc:"JSON DeploymentController"
        and enableExecuteCommand =
          flag "enable-execute-command" (optional bool)
            ~doc:"BOOL BoxedBoolean"
@@ -1514,6 +2236,15 @@ let update_service =
        and serviceRegistries =
          flag "service-registries" (optional json_arg)
            ~doc:"JSON ServiceRegistries"
+       and serviceConnectConfiguration =
+         flag "service-connect-configuration" (optional json_arg)
+           ~doc:"JSON ServiceConnectConfiguration"
+       and volumeConfigurations =
+         flag "volume-configurations" (optional json_arg)
+           ~doc:"JSON ServiceVolumeConfigurations"
+       and vpcLatticeConfigurations =
+         flag "vpc-lattice-configurations" (optional json_arg)
+           ~doc:"JSON VpcLatticeConfigurations"
        and service = flag "service" (required string) ~doc:"STRING String" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1526,6 +2257,9 @@ let update_service =
               ?deploymentConfiguration:(Option.map
                                           ~f:Values.DeploymentConfiguration.of_json
                                           deploymentConfiguration)
+              ?availabilityZoneRebalancing:(Option.map
+                                              ~f:Values.AvailabilityZoneRebalancing.of_json
+                                              availabilityZoneRebalancing)
               ?networkConfiguration:(Option.map
                                        ~f:Values.NetworkConfiguration.of_json
                                        networkConfiguration)
@@ -1536,6 +2270,9 @@ let update_service =
                                     ~f:Values.PlacementStrategies.of_json
                                     placementStrategy) ?platformVersion
               ?forceNewDeployment ?healthCheckGracePeriodSeconds
+              ?deploymentController:(Option.map
+                                       ~f:Values.DeploymentController.of_json
+                                       deploymentController)
               ?enableExecuteCommand ?enableECSManagedTags
               ?loadBalancers:(Option.map ~f:Values.LoadBalancers.of_json
                                 loadBalancers)
@@ -1543,8 +2280,17 @@ let update_service =
                                 propagateTags)
               ?serviceRegistries:(Option.map
                                     ~f:Values.ServiceRegistries.of_json
-                                    serviceRegistries) ~service ())
-           (Some Values.UpdateServiceResponse.to_json)
+                                    serviceRegistries)
+              ?serviceConnectConfiguration:(Option.map
+                                              ~f:Values.ServiceConnectConfiguration.of_json
+                                              serviceConnectConfiguration)
+              ?volumeConfigurations:(Option.map
+                                       ~f:Values.ServiceVolumeConfigurations.of_json
+                                       volumeConfigurations)
+              ?vpcLatticeConfigurations:(Option.map
+                                           ~f:Values.VpcLatticeConfigurations.of_json
+                                           vpcLatticeConfigurations) ~service
+              ()) (Some Values.UpdateServiceResponse.to_json)
            (Some Values.UpdateServiceResponse.error_to_json)])
 let update_service_primary_task_set =
   Command.async ~summary:""
@@ -1567,6 +2313,30 @@ let update_service_primary_task_set =
               ~primaryTaskSet ())
            (Some Values.UpdateServicePrimaryTaskSetResponse.to_json)
            (Some Values.UpdateServicePrimaryTaskSetResponse.error_to_json)])
+let update_task_protection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and expiresInMinutes =
+         flag "expires-in-minutes" (optional int) ~doc:"INT BoxedInteger"
+       and cluster = flag "cluster" (required string) ~doc:"STRING String"
+       and tasks = flag "tasks" (required json_arg) ~doc:"JSON StringList"
+       and protectionEnabled =
+         flag "protection-enabled" (required bool) ~doc:"BOOL Boolean" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_task_protection
+           (Values.UpdateTaskProtectionRequest.make ?expiresInMinutes
+              ~cluster ~tasks:(Values.StringList.of_json tasks)
+              ~protectionEnabled ())
+           (Some Values.UpdateTaskProtectionResponse.to_json)
+           (Some Values.UpdateTaskProtectionResponse.error_to_json)])
 let update_task_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1593,30 +2363,49 @@ let main =
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-capacity-provider", create_capacity_provider);
     ("create-cluster", create_cluster);
+    ("create-daemon", create_daemon);
+    ("create-express-gateway-service", create_express_gateway_service);
     ("create-service", create_service);
     ("create-task-set", create_task_set);
     ("delete-account-setting", delete_account_setting);
     ("delete-attributes", delete_attributes);
     ("delete-capacity-provider", delete_capacity_provider);
     ("delete-cluster", delete_cluster);
+    ("delete-daemon", delete_daemon);
+    ("delete-daemon-task-definition", delete_daemon_task_definition);
+    ("delete-express-gateway-service", delete_express_gateway_service);
     ("delete-service", delete_service);
+    ("delete-task-definitions", delete_task_definitions);
     ("delete-task-set", delete_task_set);
     ("deregister-container-instance", deregister_container_instance);
     ("deregister-task-definition", deregister_task_definition);
     ("describe-capacity-providers", describe_capacity_providers);
     ("describe-clusters", describe_clusters);
     ("describe-container-instances", describe_container_instances);
+    ("describe-daemon", describe_daemon);
+    ("describe-daemon-deployments", describe_daemon_deployments);
+    ("describe-daemon-revisions", describe_daemon_revisions);
+    ("describe-daemon-task-definition", describe_daemon_task_definition);
+    ("describe-express-gateway-service", describe_express_gateway_service);
+    ("describe-service-deployments", describe_service_deployments);
+    ("describe-service-revisions", describe_service_revisions);
     ("describe-services", describe_services);
     ("describe-task-definition", describe_task_definition);
     ("describe-task-sets", describe_task_sets);
     ("describe-tasks", describe_tasks);
     ("discover-poll-endpoint", discover_poll_endpoint);
     ("execute-command", execute_command);
+    ("get-task-protection", get_task_protection);
     ("list-account-settings", list_account_settings);
     ("list-attributes", list_attributes);
     ("list-clusters", list_clusters);
     ("list-container-instances", list_container_instances);
+    ("list-daemon-deployments", list_daemon_deployments);
+    ("list-daemon-task-definitions", list_daemon_task_definitions);
+    ("list-daemons", list_daemons);
+    ("list-service-deployments", list_service_deployments);
     ("list-services", list_services);
+    ("list-services-by-namespace", list_services_by_namespace);
     ("list-tags-for-resource", list_tags_for_resource);
     ("list-task-definition-families", list_task_definition_families);
     ("list-task-definitions", list_task_definitions);
@@ -1626,9 +2415,11 @@ let main =
     ("put-attributes", put_attributes);
     ("put-cluster-capacity-providers", put_cluster_capacity_providers);
     ("register-container-instance", register_container_instance);
+    ("register-daemon-task-definition", register_daemon_task_definition);
     ("register-task-definition", register_task_definition);
     ("run-task", run_task);
     ("start-task", start_task);
+    ("stop-service-deployment", stop_service_deployment);
     ("stop-task", stop_task);
     ("submit-attachment-state-changes", submit_attachment_state_changes);
     ("submit-container-state-change", submit_container_state_change);
@@ -1640,6 +2431,9 @@ let main =
     ("update-cluster-settings", update_cluster_settings);
     ("update-container-agent", update_container_agent);
     ("update-container-instances-state", update_container_instances_state);
+    ("update-daemon", update_daemon);
+    ("update-express-gateway-service", update_express_gateway_service);
     ("update-service", update_service);
     ("update-service-primary-task-set", update_service_primary_task_set);
+    ("update-task-protection", update_task_protection);
     ("update-task-set", update_task_set)]

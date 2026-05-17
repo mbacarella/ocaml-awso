@@ -191,15 +191,15 @@ module CloudWatchDimensionConfiguration =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionName") in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let defaultDimensionValue =
-        field_map_exn json "DefaultDimensionValue"
+        field_map_exn json__ "DefaultDimensionValue"
           DefaultDimensionValue.of_json in
       let dimensionValueSource =
-        field_map_exn json "DimensionValueSource"
+        field_map_exn json__ "DimensionValueSource"
           DimensionValueSource.of_json in
       let dimensionName =
-        field_map_exn json "DimensionName" DimensionName.of_json in
+        field_map_exn json__ "DimensionName" DimensionName.of_json in
       make ~defaultDimensionValue ~dimensionValueSource ~dimensionName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -226,9 +226,9 @@ module Content =
         MessageData.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ?charset ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let charset = field_map json "Charset" Charset.of_json in
-      let data = field_map_exn json "Data" MessageData.of_json in
+    let of_json json__ =
+      let charset = field_map json__ "Charset" Charset.of_json in
+      let data = field_map_exn json__ "Data" MessageData.of_json in
       make ?charset ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -250,6 +250,9 @@ module IspNameList =
   struct
     type nonrec t = IspName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IspName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -356,13 +359,14 @@ module DomainIspPlacement =
       make ?spamPercentage ?inboxPercentage ?spamRawCount ?inboxRawCount
         ?ispName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let spamPercentage = field_map json "SpamPercentage" Percentage.of_json in
+    let of_json json__ =
+      let spamPercentage =
+        field_map json__ "SpamPercentage" Percentage.of_json in
       let inboxPercentage =
-        field_map json "InboxPercentage" Percentage.of_json in
-      let spamRawCount = field_map json "SpamRawCount" Volume.of_json in
-      let inboxRawCount = field_map json "InboxRawCount" Volume.of_json in
-      let ispName = field_map json "IspName" IspName.of_json in
+        field_map json__ "InboxPercentage" Percentage.of_json in
+      let spamRawCount = field_map json__ "SpamRawCount" Volume.of_json in
+      let inboxRawCount = field_map json__ "InboxRawCount" Volume.of_json in
+      let ispName = field_map json__ "IspName" IspName.of_json in
       make ?spamPercentage ?inboxPercentage ?spamRawCount ?inboxRawCount
         ?ispName ()
     let to_json v = composed_to_json to_value v
@@ -372,6 +376,9 @@ module CloudWatchDimensionConfigurations =
   struct
     type nonrec t = CloudWatchDimensionConfiguration.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CloudWatchDimensionConfiguration.to_value)) |>
         (fun x -> `List x)
@@ -551,9 +558,10 @@ module Body =
       let text = (Option.map ~f:Content.of_xml) (Xml.child xml_arg0 "Text") in
       make ?html ?text ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let html = field_map json "Html" Content.of_json in
-      let text = field_map json "Text" Content.of_json in make ?html ?text ()
+    let of_json json__ =
+      let html = field_map json__ "Html" Content.of_json in
+      let text = field_map json__ "Text" Content.of_json in
+      make ?html ?text ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Represents the body of the email message."]
 module RawMessageData =
@@ -663,9 +671,9 @@ module InboxPlacementTrackingOption =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Global") in
       make ?trackedIsps ?global ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let trackedIsps = field_map json "TrackedIsps" IspNameList.of_json in
-      let global = field_map json "Global" Enabled.of_json in
+    let of_json json__ =
+      let trackedIsps = field_map json__ "TrackedIsps" IspNameList.of_json in
+      let global = field_map json__ "Global" Enabled.of_json in
       make ?trackedIsps ?global ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -728,6 +736,9 @@ module Esps =
   struct
     type nonrec t = Esp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Esp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -764,6 +775,9 @@ module IpList =
   struct
     type nonrec t = Ip.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs = (xs |> (List.map ~f:Ip.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
@@ -884,6 +898,9 @@ module DomainIspPlacements =
   struct
     type nonrec t = DomainIspPlacement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainIspPlacement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -945,11 +962,11 @@ module VolumeStatistics =
         (Option.map ~f:Volume.of_xml) (Xml.child xml_arg0 "InboxRawCount") in
       make ?projectedSpam ?projectedInbox ?spamRawCount ?inboxRawCount ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let projectedSpam = field_map json "ProjectedSpam" Volume.of_json in
-      let projectedInbox = field_map json "ProjectedInbox" Volume.of_json in
-      let spamRawCount = field_map json "SpamRawCount" Volume.of_json in
-      let inboxRawCount = field_map json "InboxRawCount" Volume.of_json in
+    let of_json json__ =
+      let projectedSpam = field_map json__ "ProjectedSpam" Volume.of_json in
+      let projectedInbox = field_map json__ "ProjectedInbox" Volume.of_json in
+      let spamRawCount = field_map json__ "SpamRawCount" Volume.of_json in
+      let inboxRawCount = field_map json__ "InboxRawCount" Volume.of_json in
       make ?projectedSpam ?projectedInbox ?spamRawCount ?inboxRawCount ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1018,14 +1035,16 @@ module PlacementStatistics =
       make ?dkimPercentage ?spfPercentage ?missingPercentage ?spamPercentage
         ?inboxPercentage ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dkimPercentage = field_map json "DkimPercentage" Percentage.of_json in
-      let spfPercentage = field_map json "SpfPercentage" Percentage.of_json in
+    let of_json json__ =
+      let dkimPercentage =
+        field_map json__ "DkimPercentage" Percentage.of_json in
+      let spfPercentage = field_map json__ "SpfPercentage" Percentage.of_json in
       let missingPercentage =
-        field_map json "MissingPercentage" Percentage.of_json in
-      let spamPercentage = field_map json "SpamPercentage" Percentage.of_json in
+        field_map json__ "MissingPercentage" Percentage.of_json in
+      let spamPercentage =
+        field_map json__ "SpamPercentage" Percentage.of_json in
       let inboxPercentage =
-        field_map json "InboxPercentage" Percentage.of_json in
+        field_map json__ "InboxPercentage" Percentage.of_json in
       make ?dkimPercentage ?spfPercentage ?missingPercentage ?spamPercentage
         ?inboxPercentage ()
     let to_json v = composed_to_json to_value v
@@ -1105,9 +1124,9 @@ module CloudWatchDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "DimensionConfigurations") in
       make ~dimensionConfigurations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dimensionConfigurations =
-        field_map_exn json "DimensionConfigurations"
+        field_map_exn json__ "DimensionConfigurations"
           CloudWatchDimensionConfigurations.of_json in
       make ~dimensionConfigurations ()
     let to_json v = composed_to_json to_value v
@@ -1132,6 +1151,9 @@ module EventTypes =
   struct
     type nonrec t = EventType.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventType.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1180,11 +1202,11 @@ module KinesisFirehoseDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "IamRoleArn") in
       make ~deliveryStreamArn ~iamRoleArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliveryStreamArn =
-        field_map_exn json "DeliveryStreamArn" AmazonResourceName.of_json in
+        field_map_exn json__ "DeliveryStreamArn" AmazonResourceName.of_json in
       let iamRoleArn =
-        field_map_exn json "IamRoleArn" AmazonResourceName.of_json in
+        field_map_exn json__ "IamRoleArn" AmazonResourceName.of_json in
       make ~deliveryStreamArn ~iamRoleArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1208,9 +1230,9 @@ module PinpointDestination =
           (Xml.child xml_arg0 "ApplicationArn") in
       make ?applicationArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let applicationArn =
-        field_map json "ApplicationArn" AmazonResourceName.of_json in
+        field_map json__ "ApplicationArn" AmazonResourceName.of_json in
       make ?applicationArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1234,8 +1256,9 @@ module SnsDestination =
           (Xml.child_exn ~context:context_ xml_arg0 "TopicArn") in
       make ~topicArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let topicArn = field_map_exn json "TopicArn" AmazonResourceName.of_json in
+    let of_json json__ =
+      let topicArn =
+        field_map_exn json__ "TopicArn" AmazonResourceName.of_json in
       make ~topicArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1273,11 +1296,11 @@ module BlacklistEntry =
         (Option.map ~f:RblName.of_xml) (Xml.child xml_arg0 "RblName") in
       make ?description ?listingTime ?rblName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "Description" BlacklistingDescription.of_json in
-      let listingTime = field_map json "ListingTime" Timestamp.of_json in
-      let rblName = field_map json "RblName" RblName.of_json in
+        field_map json__ "Description" BlacklistingDescription.of_json in
+      let listingTime = field_map json__ "ListingTime" Timestamp.of_json in
+      let rblName = field_map json__ "RblName" RblName.of_json in
       make ?description ?listingTime ?rblName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1306,9 +1329,9 @@ module Tag =
         TagKey.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Key") in
       make ~value ~key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" TagValue.of_json in
-      let key = field_map_exn json "Key" TagKey.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" TagValue.of_json in
+      let key = field_map_exn json__ "Key" TagKey.of_json in
       make ~value ~key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1317,6 +1340,9 @@ module EmailAddressList =
   struct
     type nonrec t = EmailAddress.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EmailAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1361,9 +1387,9 @@ module Message =
         Content.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Subject") in
       make ~body ~subject ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let body = field_map_exn json "Body" Body.of_json in
-      let subject = field_map_exn json "Subject" Content.of_json in
+    let of_json json__ =
+      let body = field_map_exn json__ "Body" Body.of_json in
+      let subject = field_map_exn json__ "Subject" Content.of_json in
       make ~body ~subject ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1388,8 +1414,8 @@ module RawMessage =
           (Xml.child_exn ~context:context_ xml_arg0 "Data") in
       make ~data ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map_exn json "Data" RawMessageData.of_json in
+    let of_json json__ =
+      let data = field_map_exn json__ "Data" RawMessageData.of_json in
       make ~data ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The raw email message."]
@@ -1418,9 +1444,9 @@ module Template =
         (Option.map ~f:TemplateArn.of_xml) (Xml.child xml_arg0 "TemplateArn") in
       make ?templateData ?templateArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let templateData = field_map json "TemplateData" TemplateData.of_json in
-      let templateArn = field_map json "TemplateArn" TemplateArn.of_json in
+    let of_json json__ =
+      let templateData = field_map json__ "TemplateData" TemplateData.of_json in
+      let templateArn = field_map json__ "TemplateArn" TemplateArn.of_json in
       make ?templateData ?templateArn ()
     let to_json v = composed_to_json to_value v
   end
@@ -1450,9 +1476,9 @@ module MessageTag =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" MessageTagValue.of_json in
-      let name = field_map_exn json "Name" MessageTagName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" MessageTagValue.of_json in
+      let name = field_map_exn json__ "Name" MessageTagName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1495,13 +1521,13 @@ module DomainDeliverabilityTrackingOption =
         (Option.map ~f:Domain.of_xml) (Xml.child xml_arg0 "Domain") in
       make ?inboxPlacementTrackingOption ?subscriptionStartDate ?domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let inboxPlacementTrackingOption =
-        field_map json "InboxPlacementTrackingOption"
+        field_map json__ "InboxPlacementTrackingOption"
           InboxPlacementTrackingOption.of_json in
       let subscriptionStartDate =
-        field_map json "SubscriptionStartDate" Timestamp.of_json in
-      let domain = field_map json "Domain" Domain.of_json in
+        field_map json__ "SubscriptionStartDate" Timestamp.of_json in
+      let domain = field_map json__ "Domain" Domain.of_json in
       make ?inboxPlacementTrackingOption ?subscriptionStartDate ?domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1539,10 +1565,10 @@ module IdentityInfo =
           (Xml.child xml_arg0 "IdentityType") in
       make ?sendingEnabled ?identityName ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
-      let identityName = field_map json "IdentityName" Identity.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
+      let identityName = field_map json__ "IdentityName" Identity.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       make ?sendingEnabled ?identityName ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about an email identity."]
@@ -1678,23 +1704,24 @@ module DomainDeliverabilityCampaign =
         ?spamCount ?inboxCount ?lastSeenDateTime ?firstSeenDateTime
         ?sendingIps ?fromAddress ?subject ?imageUrl ?campaignId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let esps = field_map json "Esps" Esps.of_json in
-      let projectedVolume = field_map json "ProjectedVolume" Volume.of_json in
-      let readDeleteRate = field_map json "ReadDeleteRate" Percentage.of_json in
-      let deleteRate = field_map json "DeleteRate" Percentage.of_json in
-      let readRate = field_map json "ReadRate" Percentage.of_json in
-      let spamCount = field_map json "SpamCount" Volume.of_json in
-      let inboxCount = field_map json "InboxCount" Volume.of_json in
+    let of_json json__ =
+      let esps = field_map json__ "Esps" Esps.of_json in
+      let projectedVolume = field_map json__ "ProjectedVolume" Volume.of_json in
+      let readDeleteRate =
+        field_map json__ "ReadDeleteRate" Percentage.of_json in
+      let deleteRate = field_map json__ "DeleteRate" Percentage.of_json in
+      let readRate = field_map json__ "ReadRate" Percentage.of_json in
+      let spamCount = field_map json__ "SpamCount" Volume.of_json in
+      let inboxCount = field_map json__ "InboxCount" Volume.of_json in
       let lastSeenDateTime =
-        field_map json "LastSeenDateTime" Timestamp.of_json in
+        field_map json__ "LastSeenDateTime" Timestamp.of_json in
       let firstSeenDateTime =
-        field_map json "FirstSeenDateTime" Timestamp.of_json in
-      let sendingIps = field_map json "SendingIps" IpList.of_json in
-      let fromAddress = field_map json "FromAddress" Identity.of_json in
-      let subject = field_map json "Subject" Subject.of_json in
-      let imageUrl = field_map json "ImageUrl" ImageUrl.of_json in
-      let campaignId = field_map json "CampaignId" CampaignId.of_json in
+        field_map json__ "FirstSeenDateTime" Timestamp.of_json in
+      let sendingIps = field_map json__ "SendingIps" IpList.of_json in
+      let fromAddress = field_map json__ "FromAddress" Identity.of_json in
+      let subject = field_map json__ "Subject" Subject.of_json in
+      let imageUrl = field_map json__ "ImageUrl" ImageUrl.of_json in
+      let campaignId = field_map json__ "CampaignId" CampaignId.of_json in
       make ?esps ?projectedVolume ?readDeleteRate ?deleteRate ?readRate
         ?spamCount ?inboxCount ?lastSeenDateTime ?firstSeenDateTime
         ?sendingIps ?fromAddress ?subject ?imageUrl ?campaignId ()
@@ -1770,17 +1797,17 @@ module DeliverabilityTestReport =
       make ?deliverabilityTestStatus ?createDate ?fromEmailAddress ?subject
         ?reportName ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliverabilityTestStatus =
-        field_map json "DeliverabilityTestStatus"
+        field_map json__ "DeliverabilityTestStatus"
           DeliverabilityTestStatus.of_json in
-      let createDate = field_map json "CreateDate" Timestamp.of_json in
+      let createDate = field_map json__ "CreateDate" Timestamp.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
       let subject =
-        field_map json "Subject" DeliverabilityTestSubject.of_json in
-      let reportName = field_map json "ReportName" ReportName.of_json in
-      let reportId = field_map json "ReportId" ReportId.of_json in
+        field_map json__ "Subject" DeliverabilityTestSubject.of_json in
+      let reportName = field_map json__ "ReportName" ReportName.of_json in
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
       make ?deliverabilityTestStatus ?createDate ?fromEmailAddress ?subject
         ?reportName ?reportId ()
     let to_json v = composed_to_json to_value v
@@ -1839,6 +1866,9 @@ module DnsTokenList =
   struct
     type nonrec t = DnsToken.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DnsToken.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1967,12 +1997,12 @@ module DailyVolume =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "StartDate") in
       make ?domainIspPlacements ?volumeStatistics ?startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainIspPlacements =
-        field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
+        field_map json__ "DomainIspPlacements" DomainIspPlacements.of_json in
       let volumeStatistics =
-        field_map json "VolumeStatistics" VolumeStatistics.of_json in
-      let startDate = field_map json "StartDate" Timestamp.of_json in
+        field_map json__ "VolumeStatistics" VolumeStatistics.of_json in
+      let startDate = field_map json__ "StartDate" Timestamp.of_json in
       make ?domainIspPlacements ?volumeStatistics ?startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2003,10 +2033,10 @@ module IspPlacement =
         (Option.map ~f:IspName.of_xml) (Xml.child xml_arg0 "IspName") in
       make ?placementStatistics ?ispName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let placementStatistics =
-        field_map json "PlacementStatistics" PlacementStatistics.of_json in
-      let ispName = field_map json "IspName" IspName.of_json in
+        field_map json__ "PlacementStatistics" PlacementStatistics.of_json in
+      let ispName = field_map json__ "IspName" IspName.of_json in
       make ?placementStatistics ?ispName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2015,52 +2045,51 @@ module DedicatedIp =
   struct
     type nonrec t =
       {
-      ip: Ip.t
+      ip: Ip.t option
         [@ocaml.doc
           "An IP address that is reserved for use by your Amazon Pinpoint account."];
-      warmupStatus: WarmupStatus.t
+      warmupStatus: WarmupStatus.t option
         [@ocaml.doc
           "The warm-up status of a dedicated IP address. The status can have one of the following values: IN_PROGRESS \226\128\147 The IP address isn't ready to use because the dedicated IP warm-up process is ongoing. DONE \226\128\147 The dedicated IP warm-up process is complete, and the IP address is ready to use."];
-      warmupPercentage: Percentage100Wrapper.t
+      warmupPercentage: Percentage100Wrapper.t option
         [@ocaml.doc
           "Indicates how complete the dedicated IP warm-up process is. When this value equals 1, the address has completed the warm-up process and is ready for use."];
       poolName: PoolName.t option
         [@ocaml.doc
           "The name of the dedicated IP pool that the IP address is associated with."]}
-    let context_ = "DedicatedIp"
-    let make ?poolName =
-      fun ~ip ->
-        fun ~warmupStatus ->
-          fun ~warmupPercentage ->
-            fun () -> { poolName; ip; warmupStatus; warmupPercentage }
+    let make ?ip =
+      fun ?warmupStatus ->
+        fun ?warmupPercentage ->
+          fun ?poolName ->
+            fun () -> { ip; warmupStatus; warmupPercentage; poolName }
     let to_value x =
       structure_to_value
-        [("Ip", (Some (Ip.to_value x.ip)));
-        ("WarmupStatus", (Some (WarmupStatus.to_value x.warmupStatus)));
+        [("Ip", (Option.map x.ip ~f:Ip.to_value));
+        ("WarmupStatus",
+          (Option.map x.warmupStatus ~f:WarmupStatus.to_value));
         ("WarmupPercentage",
-          (Some (Percentage100Wrapper.to_value x.warmupPercentage)));
+          (Option.map x.warmupPercentage ~f:Percentage100Wrapper.to_value));
         ("PoolName", (Option.map x.poolName ~f:PoolName.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let poolName =
         (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
       let warmupPercentage =
-        Percentage100Wrapper.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WarmupPercentage") in
+        (Option.map ~f:Percentage100Wrapper.of_xml)
+          (Xml.child xml_arg0 "WarmupPercentage") in
       let warmupStatus =
-        WarmupStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "WarmupStatus") in
-      let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Ip") in
-      make ?poolName ~warmupPercentage ~warmupStatus ~ip ()
+        (Option.map ~f:WarmupStatus.of_xml)
+          (Xml.child xml_arg0 "WarmupStatus") in
+      let ip = (Option.map ~f:Ip.of_xml) (Xml.child xml_arg0 "Ip") in
+      make ?poolName ?warmupPercentage ?warmupStatus ?ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolName = field_map json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
       let warmupPercentage =
-        field_map_exn json "WarmupPercentage" Percentage100Wrapper.of_json in
-      let warmupStatus =
-        field_map_exn json "WarmupStatus" WarmupStatus.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
-      make ?poolName ~warmupPercentage ~warmupStatus ~ip ()
+        field_map json__ "WarmupPercentage" Percentage100Wrapper.of_json in
+      let warmupStatus = field_map json__ "WarmupStatus" WarmupStatus.of_json in
+      let ip = field_map json__ "Ip" Ip.of_json in
+      make ?poolName ?warmupPercentage ?warmupStatus ?ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a dedicated IP address that is associated with your Amazon Pinpoint account."]
@@ -2122,12 +2151,12 @@ module EventDestination =
   struct
     type nonrec t =
       {
-      name: EventDestinationName.t
+      name: EventDestinationName.t option
         [@ocaml.doc "A name that identifies the event destination."];
       enabled: Enabled.t option
         [@ocaml.doc
           "If true, the event destination is enabled. When the event destination is enabled, the specified event types are sent to the destinations in this EventDestinationDefinition. If false, the event destination is disabled. When the event destination is disabled, events aren't sent to the specified destinations."];
-      matchingEventTypes: EventTypes.t
+      matchingEventTypes: EventTypes.t option
         [@ocaml.doc
           "The types of events that Amazon Pinpoint sends to the specified event destinations."];
       kinesisFirehoseDestination: KinesisFirehoseDestination.t option
@@ -2142,30 +2171,29 @@ module EventDestination =
       pinpointDestination: PinpointDestination.t option
         [@ocaml.doc
           "An object that defines a Amazon Pinpoint destination for email events. You can use Amazon Pinpoint events to create attributes in Amazon Pinpoint projects. You can use these attributes to create segments for your campaigns."]}
-    let context_ = "EventDestination"
-    let make ?enabled =
-      fun ?kinesisFirehoseDestination ->
-        fun ?cloudWatchDestination ->
-          fun ?snsDestination ->
-            fun ?pinpointDestination ->
-              fun ~name ->
-                fun ~matchingEventTypes ->
+    let make ?name =
+      fun ?enabled ->
+        fun ?matchingEventTypes ->
+          fun ?kinesisFirehoseDestination ->
+            fun ?cloudWatchDestination ->
+              fun ?snsDestination ->
+                fun ?pinpointDestination ->
                   fun () ->
                     {
+                      name;
                       enabled;
+                      matchingEventTypes;
                       kinesisFirehoseDestination;
                       cloudWatchDestination;
                       snsDestination;
-                      pinpointDestination;
-                      name;
-                      matchingEventTypes
+                      pinpointDestination
                     }
     let to_value x =
       structure_to_value
-        [("Name", (Some (EventDestinationName.to_value x.name)));
+        [("Name", (Option.map x.name ~f:EventDestinationName.to_value));
         ("Enabled", (Option.map x.enabled ~f:Enabled.to_value));
         ("MatchingEventTypes",
-          (Some (EventTypes.to_value x.matchingEventTypes)));
+          (Option.map x.matchingEventTypes ~f:EventTypes.to_value));
         ("KinesisFirehoseDestination",
           (Option.map x.kinesisFirehoseDestination
              ~f:KinesisFirehoseDestination.to_value));
@@ -2191,32 +2219,33 @@ module EventDestination =
         (Option.map ~f:KinesisFirehoseDestination.of_xml)
           (Xml.child xml_arg0 "KinesisFirehoseDestination") in
       let matchingEventTypes =
-        EventTypes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MatchingEventTypes") in
+        (Option.map ~f:EventTypes.of_xml)
+          (Xml.child xml_arg0 "MatchingEventTypes") in
       let enabled =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "Enabled") in
       let name =
-        EventDestinationName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Name") in
+        (Option.map ~f:EventDestinationName.of_xml)
+          (Xml.child xml_arg0 "Name") in
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ~matchingEventTypes ?enabled ~name ()
+        ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pinpointDestination =
-        field_map json "PinpointDestination" PinpointDestination.of_json in
+        field_map json__ "PinpointDestination" PinpointDestination.of_json in
       let snsDestination =
-        field_map json "SnsDestination" SnsDestination.of_json in
+        field_map json__ "SnsDestination" SnsDestination.of_json in
       let cloudWatchDestination =
-        field_map json "CloudWatchDestination" CloudWatchDestination.of_json in
+        field_map json__ "CloudWatchDestination"
+          CloudWatchDestination.of_json in
       let kinesisFirehoseDestination =
-        field_map json "KinesisFirehoseDestination"
+        field_map json__ "KinesisFirehoseDestination"
           KinesisFirehoseDestination.of_json in
       let matchingEventTypes =
-        field_map_exn json "MatchingEventTypes" EventTypes.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
-      let name = field_map_exn json "Name" EventDestinationName.of_json in
+        field_map json__ "MatchingEventTypes" EventTypes.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
+      let name = field_map json__ "Name" EventDestinationName.of_json in
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
-        ?kinesisFirehoseDestination ~matchingEventTypes ?enabled ~name ()
+        ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ?name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "In Amazon Pinpoint, events include message sends, deliveries, opens, clicks, bounces, and complaints. Event destinations are places that you can send information about these events to. For example, you can send event data to Amazon SNS to receive notifications when you receive bounces or complaints, or you can use Amazon Kinesis Data Firehose to stream data to Amazon S3 for long-term storage."]
@@ -2224,6 +2253,9 @@ module BlacklistEntries =
   struct
     type nonrec t = BlacklistEntry.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlacklistEntry.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2408,19 +2440,20 @@ module EventDestinationDefinition =
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
         ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pinpointDestination =
-        field_map json "PinpointDestination" PinpointDestination.of_json in
+        field_map json__ "PinpointDestination" PinpointDestination.of_json in
       let snsDestination =
-        field_map json "SnsDestination" SnsDestination.of_json in
+        field_map json__ "SnsDestination" SnsDestination.of_json in
       let cloudWatchDestination =
-        field_map json "CloudWatchDestination" CloudWatchDestination.of_json in
+        field_map json__ "CloudWatchDestination"
+          CloudWatchDestination.of_json in
       let kinesisFirehoseDestination =
-        field_map json "KinesisFirehoseDestination"
+        field_map json__ "KinesisFirehoseDestination"
           KinesisFirehoseDestination.of_json in
       let matchingEventTypes =
-        field_map json "MatchingEventTypes" EventTypes.of_json in
-      let enabled = field_map json "Enabled" Enabled.of_json in
+        field_map json__ "MatchingEventTypes" EventTypes.of_json in
+      let enabled = field_map json__ "Enabled" Enabled.of_json in
       make ?pinpointDestination ?snsDestination ?cloudWatchDestination
         ?kinesisFirehoseDestination ?matchingEventTypes ?enabled ()
     let to_json v = composed_to_json to_value v
@@ -2443,6 +2476,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2466,6 +2502,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2601,11 +2640,13 @@ module Destination =
           (Xml.child xml_arg0 "ToAddresses") in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let bccAddresses =
-        field_map json "BccAddresses" EmailAddressList.of_json in
-      let ccAddresses = field_map json "CcAddresses" EmailAddressList.of_json in
-      let toAddresses = field_map json "ToAddresses" EmailAddressList.of_json in
+        field_map json__ "BccAddresses" EmailAddressList.of_json in
+      let ccAddresses =
+        field_map json__ "CcAddresses" EmailAddressList.of_json in
+      let toAddresses =
+        field_map json__ "ToAddresses" EmailAddressList.of_json in
       make ?bccAddresses ?ccAddresses ?toAddresses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An object that describes the recipients for an email."]
@@ -2637,10 +2678,10 @@ module EmailContent =
         (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Simple") in
       make ?template ?raw ?simple ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let template = field_map json "Template" Template.of_json in
-      let raw = field_map json "Raw" RawMessage.of_json in
-      let simple = field_map json "Simple" Message.of_json in
+    let of_json json__ =
+      let template = field_map json__ "Template" Template.of_json in
+      let raw = field_map json__ "Raw" RawMessage.of_json in
+      let simple = field_map json__ "Simple" Message.of_json in
       make ?template ?raw ?simple ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2649,6 +2690,9 @@ module MessageTagList =
   struct
     type nonrec t = MessageTag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:MessageTag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2685,6 +2729,9 @@ module DomainDeliverabilityTrackingOptions =
   struct
     type nonrec t = DomainDeliverabilityTrackingOption.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainDeliverabilityTrackingOption.to_value)) |>
         (fun x -> `List x)
@@ -2727,6 +2774,9 @@ module IdentityInfoList =
   struct
     type nonrec t = IdentityInfo.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IdentityInfo.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2777,6 +2827,9 @@ module DomainDeliverabilityCampaignList =
   struct
     type nonrec t = DomainDeliverabilityCampaign.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainDeliverabilityCampaign.to_value)) |>
         (fun x -> `List x)
@@ -2803,6 +2856,9 @@ module DeliverabilityTestReports =
   struct
     type nonrec t = DeliverabilityTestReport.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DeliverabilityTestReport.to_value)) |>
         (fun x -> `List x)
@@ -2829,6 +2885,9 @@ module ListOfDedicatedIpPools =
   struct
     type nonrec t = PoolName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:PoolName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2853,6 +2912,9 @@ module ConfigurationSetNameList =
   struct
     type nonrec t = ConfigurationSetName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ConfigurationSetName.to_value)) |>
         (fun x -> `List x)
@@ -2907,10 +2969,10 @@ module DkimAttributes =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SigningEnabled") in
       make ?tokens ?status ?signingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tokens = field_map json "Tokens" DnsTokenList.of_json in
-      let status = field_map json "Status" DkimStatus.of_json in
-      let signingEnabled = field_map json "SigningEnabled" Enabled.of_json in
+    let of_json json__ =
+      let tokens = field_map json__ "Tokens" DnsTokenList.of_json in
+      let status = field_map json__ "Status" DkimStatus.of_json in
+      let signingEnabled = field_map json__ "SigningEnabled" Enabled.of_json in
       make ?tokens ?status ?signingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2919,51 +2981,49 @@ module MailFromAttributes =
   struct
     type nonrec t =
       {
-      mailFromDomain: MailFromDomainName.t
+      mailFromDomain: MailFromDomainName.t option
         [@ocaml.doc
           "The name of a domain that an email identity uses as a custom MAIL FROM domain."];
-      mailFromDomainStatus: MailFromDomainStatus.t
+      mailFromDomainStatus: MailFromDomainStatus.t option
         [@ocaml.doc
           "The status of the MAIL FROM domain. This status can have the following values: PENDING \226\128\147 Amazon Pinpoint hasn't started searching for the MX record yet. SUCCESS \226\128\147 Amazon Pinpoint detected the required MX record for the MAIL FROM domain. FAILED \226\128\147 Amazon Pinpoint can't find the required MX record, or the record no longer exists. TEMPORARY_FAILURE \226\128\147 A temporary issue occurred, which prevented Amazon Pinpoint from determining the status of the MAIL FROM domain."];
-      behaviorOnMxFailure: BehaviorOnMxFailure.t
+      behaviorOnMxFailure: BehaviorOnMxFailure.t option
         [@ocaml.doc
           "The action that Amazon Pinpoint to takes if it can't read the required MX record for a custom MAIL FROM domain. When you set this value to UseDefaultValue, Amazon Pinpoint uses amazonses.com as the MAIL FROM domain. When you set this value to RejectMessage, Amazon Pinpoint returns a MailFromDomainNotVerified error, and doesn't attempt to deliver the email. These behaviors are taken when the custom MAIL FROM domain configuration is in the Pending, Failed, and TemporaryFailure states."]}
-    let context_ = "MailFromAttributes"
-    let make ~mailFromDomain =
-      fun ~mailFromDomainStatus ->
-        fun ~behaviorOnMxFailure ->
+    let make ?mailFromDomain =
+      fun ?mailFromDomainStatus ->
+        fun ?behaviorOnMxFailure ->
           fun () ->
             { mailFromDomain; mailFromDomainStatus; behaviorOnMxFailure }
     let to_value x =
       structure_to_value
         [("MailFromDomain",
-           (Some (MailFromDomainName.to_value x.mailFromDomain)));
+           (Option.map x.mailFromDomain ~f:MailFromDomainName.to_value));
         ("MailFromDomainStatus",
-          (Some (MailFromDomainStatus.to_value x.mailFromDomainStatus)));
+          (Option.map x.mailFromDomainStatus ~f:MailFromDomainStatus.to_value));
         ("BehaviorOnMxFailure",
-          (Some (BehaviorOnMxFailure.to_value x.behaviorOnMxFailure)))]
+          (Option.map x.behaviorOnMxFailure ~f:BehaviorOnMxFailure.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let behaviorOnMxFailure =
-        BehaviorOnMxFailure.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BehaviorOnMxFailure") in
+        (Option.map ~f:BehaviorOnMxFailure.of_xml)
+          (Xml.child xml_arg0 "BehaviorOnMxFailure") in
       let mailFromDomainStatus =
-        MailFromDomainStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomainStatus") in
+        (Option.map ~f:MailFromDomainStatus.of_xml)
+          (Xml.child xml_arg0 "MailFromDomainStatus") in
       let mailFromDomain =
-        MailFromDomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "MailFromDomain") in
-      make ~behaviorOnMxFailure ~mailFromDomainStatus ~mailFromDomain ()
+        (Option.map ~f:MailFromDomainName.of_xml)
+          (Xml.child xml_arg0 "MailFromDomain") in
+      make ?behaviorOnMxFailure ?mailFromDomainStatus ?mailFromDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMxFailure =
-        field_map_exn json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
+        field_map json__ "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
       let mailFromDomainStatus =
-        field_map_exn json "MailFromDomainStatus"
-          MailFromDomainStatus.of_json in
+        field_map json__ "MailFromDomainStatus" MailFromDomainStatus.of_json in
       let mailFromDomain =
-        field_map_exn json "MailFromDomain" MailFromDomainName.of_json in
-      make ~behaviorOnMxFailure ~mailFromDomainStatus ~mailFromDomain ()
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      make ?behaviorOnMxFailure ?mailFromDomainStatus ?mailFromDomain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of attributes that are associated with a MAIL FROM domain."]
@@ -2971,6 +3031,9 @@ module DailyVolumes =
   struct
     type nonrec t = DailyVolume.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DailyVolume.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3030,13 +3093,13 @@ module OverallVolume =
           (Xml.child xml_arg0 "VolumeStatistics") in
       make ?domainIspPlacements ?readRatePercent ?volumeStatistics ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainIspPlacements =
-        field_map json "DomainIspPlacements" DomainIspPlacements.of_json in
+        field_map json__ "DomainIspPlacements" DomainIspPlacements.of_json in
       let readRatePercent =
-        field_map json "ReadRatePercent" Percentage.of_json in
+        field_map json__ "ReadRatePercent" Percentage.of_json in
       let volumeStatistics =
-        field_map json "VolumeStatistics" VolumeStatistics.of_json in
+        field_map json__ "VolumeStatistics" VolumeStatistics.of_json in
       make ?domainIspPlacements ?readRatePercent ?volumeStatistics ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3045,6 +3108,9 @@ module IspPlacements =
   struct
     type nonrec t = IspPlacement.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:IspPlacement.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3114,6 +3180,9 @@ module DedicatedIpList =
   struct
     type nonrec t = DedicatedIp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DedicatedIp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3160,9 +3229,10 @@ module DeliveryOptions =
         (Option.map ~f:TlsPolicy.of_xml) (Xml.child xml_arg0 "TlsPolicy") in
       make ?sendingPoolName ?tlsPolicy ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingPoolName = field_map json "SendingPoolName" PoolName.of_json in
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
+    let of_json json__ =
+      let sendingPoolName =
+        field_map json__ "SendingPoolName" PoolName.of_json in
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
       make ?sendingPoolName ?tlsPolicy ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3196,11 +3266,11 @@ module ReputationOptions =
           (Xml.child xml_arg0 "ReputationMetricsEnabled") in
       make ?lastFreshStart ?reputationMetricsEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let lastFreshStart =
-        field_map json "LastFreshStart" LastFreshStart.of_json in
+        field_map json__ "LastFreshStart" LastFreshStart.of_json in
       let reputationMetricsEnabled =
-        field_map json "ReputationMetricsEnabled" Enabled.of_json in
+        field_map json__ "ReputationMetricsEnabled" Enabled.of_json in
       make ?lastFreshStart ?reputationMetricsEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3223,8 +3293,8 @@ module SendingOptions =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3249,9 +3319,9 @@ module TrackingOptions =
           (Xml.child_exn ~context:context_ xml_arg0 "CustomRedirectDomain") in
       make ~customRedirectDomain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customRedirectDomain =
-        field_map_exn json "CustomRedirectDomain"
+        field_map_exn json__ "CustomRedirectDomain"
           CustomRedirectDomain.of_json in
       make ~customRedirectDomain ()
     let to_json v = composed_to_json to_value v
@@ -3261,6 +3331,9 @@ module EventDestinations =
   struct
     type nonrec t = EventDestination.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:EventDestination.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3306,6 +3379,8 @@ module BlacklistReport =
                        (BlacklistEntries.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3317,6 +3392,9 @@ module BlacklistItemNames =
   struct
     type nonrec t = BlacklistItemName.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BlacklistItemName.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3387,12 +3465,12 @@ module SendQuota =
           (Xml.child xml_arg0 "Max24HourSend") in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sentLast24Hours =
-        field_map json "SentLast24Hours" SentLast24Hours.of_json in
-      let maxSendRate = field_map json "MaxSendRate" MaxSendRate.of_json in
+        field_map json__ "SentLast24Hours" SentLast24Hours.of_json in
+      let maxSendRate = field_map json__ "MaxSendRate" MaxSendRate.of_json in
       let max24HourSend =
-        field_map json "Max24HourSend" Max24HourSend.of_json in
+        field_map json__ "Max24HourSend" Max24HourSend.of_json in
       make ?sentLast24Hours ?maxSendRate ?max24HourSend ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3494,15 +3572,15 @@ module UpdateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination"
+        field_map_exn json__ "EventDestination"
           EventDestinationDefinition.of_json in
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -3604,10 +3682,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map_exn json "TagKeys" TagKeyList.of_json in
+    let of_json json__ =
+      let tagKeys = field_map_exn json__ "TagKeys" TagKeyList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3706,10 +3784,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "Tags" TagList.of_json in
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3824,8 +3902,8 @@ module SendEmailResponse =
           (Xml.child xml_arg0 "MessageId") in
       make ?messageId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let messageId = field_map json "MessageId" OutboundMessageId.of_json in
+    let of_json json__ =
+      let messageId = field_map json__ "MessageId" OutboundMessageId.of_json in
       make ?messageId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3914,18 +3992,20 @@ module SendEmailRequest =
         ?feedbackForwardingEmailAddress ?replyToAddresses ~destination
         ?fromEmailAddress ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
-      let emailTags = field_map json "EmailTags" MessageTagList.of_json in
-      let content = field_map_exn json "Content" EmailContent.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
+      let emailTags = field_map json__ "EmailTags" MessageTagList.of_json in
+      let content = field_map_exn json__ "Content" EmailContent.of_json in
       let feedbackForwardingEmailAddress =
-        field_map json "FeedbackForwardingEmailAddress" EmailAddress.of_json in
+        field_map json__ "FeedbackForwardingEmailAddress"
+          EmailAddress.of_json in
       let replyToAddresses =
-        field_map json "ReplyToAddresses" EmailAddressList.of_json in
-      let destination = field_map_exn json "Destination" Destination.of_json in
+        field_map json__ "ReplyToAddresses" EmailAddressList.of_json in
+      let destination =
+        field_map_exn json__ "Destination" Destination.of_json in
       let fromEmailAddress =
-        field_map json "FromEmailAddress" EmailAddress.of_json in
+        field_map json__ "FromEmailAddress" EmailAddress.of_json in
       make ?configurationSetName ?emailTags ~content
         ?feedbackForwardingEmailAddress ?replyToAddresses ~destination
         ?fromEmailAddress ()
@@ -4027,12 +4107,13 @@ module PutEmailIdentityMailFromAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?behaviorOnMxFailure ?mailFromDomain ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let behaviorOnMxFailure =
-        field_map json "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
+        field_map json__ "BehaviorOnMxFailure" BehaviorOnMxFailure.of_json in
       let mailFromDomain =
-        field_map json "MailFromDomain" MailFromDomainName.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "MailFromDomain" MailFromDomainName.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?behaviorOnMxFailure ?mailFromDomain ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4124,10 +4205,11 @@ module PutEmailIdentityFeedbackAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?emailForwardingEnabled ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let emailForwardingEnabled =
-        field_map json "EmailForwardingEnabled" Enabled.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+        field_map json__ "EmailForwardingEnabled" Enabled.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?emailForwardingEnabled ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4216,9 +4298,10 @@ module PutEmailIdentityDkimAttributesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?signingEnabled ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let signingEnabled = field_map json "SigningEnabled" Enabled.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let signingEnabled = field_map json__ "SigningEnabled" Enabled.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?signingEnabled ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4329,12 +4412,12 @@ module PutDeliverabilityDashboardOptionRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
       make ?subscribedDomains ~dashboardEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let subscribedDomains =
-        field_map json "SubscribedDomains"
+        field_map json__ "SubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let dashboardEnabled =
-        field_map_exn json "DashboardEnabled" Enabled.of_json in
+        field_map_exn json__ "DashboardEnabled" Enabled.of_json in
       make ?subscribedDomains ~dashboardEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4423,10 +4506,10 @@ module PutDedicatedIpWarmupAttributesRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~warmupPercentage ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let warmupPercentage =
-        field_map_exn json "WarmupPercentage" Percentage100Wrapper.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
+        field_map_exn json__ "WarmupPercentage" Percentage100Wrapper.of_json in
+      let ip = field_map_exn json__ "Ip" Ip.of_json in
       make ~warmupPercentage ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4515,10 +4598,10 @@ module PutDedicatedIpInPoolRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~destinationPoolName ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let destinationPoolName =
-        field_map_exn json "DestinationPoolName" PoolName.of_json in
-      let ip = field_map_exn json "Ip" Ip.of_json in
+        field_map_exn json__ "DestinationPoolName" PoolName.of_json in
+      let ip = field_map_exn json__ "Ip" Ip.of_json in
       make ~destinationPoolName ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4611,11 +4694,11 @@ module PutConfigurationSetTrackingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?customRedirectDomain ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let customRedirectDomain =
-        field_map json "CustomRedirectDomain" CustomRedirectDomain.of_json in
+        field_map json__ "CustomRedirectDomain" CustomRedirectDomain.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?customRedirectDomain ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -4707,10 +4790,10 @@ module PutConfigurationSetSendingOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?sendingEnabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?sendingEnabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -4804,11 +4887,11 @@ module PutConfigurationSetReputationOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?reputationMetricsEnabled ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reputationMetricsEnabled =
-        field_map json "ReputationMetricsEnabled" Enabled.of_json in
+        field_map json__ "ReputationMetricsEnabled" Enabled.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?reputationMetricsEnabled ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -4909,12 +4992,12 @@ module PutConfigurationSetDeliveryOptionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ?sendingPoolName ?tlsPolicy ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let sendingPoolName =
-        field_map json "SendingPoolName" SendingPoolName.of_json in
-      let tlsPolicy = field_map json "TlsPolicy" TlsPolicy.of_json in
+        field_map json__ "SendingPoolName" SendingPoolName.of_json in
+      let tlsPolicy = field_map json__ "TlsPolicy" TlsPolicy.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?sendingPoolName ?tlsPolicy ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -4987,8 +5070,8 @@ module PutAccountSendingAttributesRequest =
         (Option.map ~f:Enabled.of_xml) (Xml.child xml_arg0 "SendingEnabled") in
       make ?sendingEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
+    let of_json json__ =
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
       make ?sendingEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5061,9 +5144,9 @@ module PutAccountDedicatedIpWarmupAttributesRequest =
           (Xml.child xml_arg0 "AutoWarmupEnabled") in
       make ?autoWarmupEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let autoWarmupEnabled =
-        field_map json "AutoWarmupEnabled" Enabled.of_json in
+        field_map json__ "AutoWarmupEnabled" Enabled.of_json in
       make ?autoWarmupEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5072,7 +5155,7 @@ module ListTagsForResourceResponse =
   struct
     type nonrec t =
       {
-      tags: TagList.t
+      tags: TagList.t option
         [@ocaml.doc
           "An array that lists all the tags that are associated with the resource. Each tag consists of a required tag key (Key) and an associated tag value (Value)"]}
     type nonrec error =
@@ -5080,8 +5163,7 @@ module ListTagsForResourceResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForResourceResponse"
-    let make ~tags = fun () -> { tags }
+    let make ?tags = fun () -> { tags }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5123,15 +5205,14 @@ module ListTagsForResourceResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("Tags", (Some (TagList.to_value x.tags)))]
+      structure_to_value [("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
-      let tags =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Tags") in
-      make ~tags ()
+      let tags = (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "Tags") in
+      make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "Tags" TagList.of_json in make ~tags ()
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Retrieve a list of the tags (keys and values) that are associated with a specified resource. A\194\160tag\194\160is a label that you optionally define and associate with a resource in Amazon Pinpoint. Each tag consists of a required\194\160tag key\194\160and an optional associated\194\160tag value. A tag key is a general label that acts as a category for more specific tag values. A tag value acts as a descriptor within a tag key."]
@@ -5154,9 +5235,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ResourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceArn =
-        field_map_exn json "ResourceArn" AmazonResourceName.of_json in
+        field_map_exn json__ "ResourceArn" AmazonResourceName.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5223,10 +5304,10 @@ module ListEmailIdentitiesResponse =
           (Xml.child xml_arg0 "EmailIdentities") in
       make ?nextToken ?emailIdentities ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let emailIdentities =
-        field_map json "EmailIdentities" IdentityInfoList.of_json in
+        field_map json__ "EmailIdentities" IdentityInfoList.of_json in
       make ?nextToken ?emailIdentities ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5254,9 +5335,9 @@ module ListEmailIdentitiesRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5265,7 +5346,8 @@ module ListDomainDeliverabilityCampaignsResponse =
   struct
     type nonrec t =
       {
-      domainDeliverabilityCampaigns: DomainDeliverabilityCampaignList.t
+      domainDeliverabilityCampaigns:
+        DomainDeliverabilityCampaignList.t option
         [@ocaml.doc
           "An array of responses, one for each campaign that used the domain to send email during the specified time range."];
       nextToken: NextToken.t option
@@ -5276,10 +5358,9 @@ module ListDomainDeliverabilityCampaignsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDomainDeliverabilityCampaignsResponse"
-    let make ?nextToken =
-      fun ~domainDeliverabilityCampaigns ->
-        fun () -> { nextToken; domainDeliverabilityCampaigns }
+    let make ?domainDeliverabilityCampaigns =
+      fun ?nextToken ->
+        fun () -> { domainDeliverabilityCampaigns; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5323,26 +5404,24 @@ module ListDomainDeliverabilityCampaignsResponse =
     let to_value x =
       structure_to_value
         [("DomainDeliverabilityCampaigns",
-           (Some
-              (DomainDeliverabilityCampaignList.to_value
-                 x.domainDeliverabilityCampaigns)));
+           (Option.map x.domainDeliverabilityCampaigns
+              ~f:DomainDeliverabilityCampaignList.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let domainDeliverabilityCampaigns =
-        DomainDeliverabilityCampaignList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DomainDeliverabilityCampaigns") in
-      make ?nextToken ~domainDeliverabilityCampaigns ()
+        (Option.map ~f:DomainDeliverabilityCampaignList.of_xml)
+          (Xml.child xml_arg0 "DomainDeliverabilityCampaigns") in
+      make ?nextToken ?domainDeliverabilityCampaigns ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let domainDeliverabilityCampaigns =
-        field_map_exn json "DomainDeliverabilityCampaigns"
+        field_map json__ "DomainDeliverabilityCampaigns"
           DomainDeliverabilityCampaignList.of_json in
-      make ?nextToken ~domainDeliverabilityCampaigns ()
+      make ?nextToken ?domainDeliverabilityCampaigns ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An array of objects that provide deliverability data for all the campaigns that used a specific domain to send email during a specified time range. This data is available for a domain only if you enabled the Deliverability dashboard (PutDeliverabilityDashboardOption operation) for the domain."]
@@ -5395,13 +5474,13 @@ module ListDomainDeliverabilityCampaignsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "StartDate") in
       make ?pageSize ?nextToken ~subscribedDomain ~endDate ~startDate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let subscribedDomain =
-        field_map_exn json "SubscribedDomain" Domain.of_json in
-      let endDate = field_map_exn json "EndDate" Timestamp.of_json in
-      let startDate = field_map_exn json "StartDate" Timestamp.of_json in
+        field_map_exn json__ "SubscribedDomain" Domain.of_json in
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
       make ?pageSize ?nextToken ~subscribedDomain ~endDate ~startDate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5410,7 +5489,7 @@ module ListDeliverabilityTestReportsResponse =
   struct
     type nonrec t =
       {
-      deliverabilityTestReports: DeliverabilityTestReports.t
+      deliverabilityTestReports: DeliverabilityTestReports.t option
         [@ocaml.doc
           "An object that contains a lists of predictive inbox placement tests that you've performed."];
       nextToken: NextToken.t option
@@ -5421,10 +5500,8 @@ module ListDeliverabilityTestReportsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDeliverabilityTestReportsResponse"
-    let make ?nextToken =
-      fun ~deliverabilityTestReports ->
-        fun () -> { nextToken; deliverabilityTestReports }
+    let make ?deliverabilityTestReports =
+      fun ?nextToken -> fun () -> { deliverabilityTestReports; nextToken }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5468,25 +5545,24 @@ module ListDeliverabilityTestReportsResponse =
     let to_value x =
       structure_to_value
         [("DeliverabilityTestReports",
-           (Some
-              (DeliverabilityTestReports.to_value x.deliverabilityTestReports)));
+           (Option.map x.deliverabilityTestReports
+              ~f:DeliverabilityTestReports.to_value));
         ("NextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       let deliverabilityTestReports =
-        DeliverabilityTestReports.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestReports") in
-      make ?nextToken ~deliverabilityTestReports ()
+        (Option.map ~f:DeliverabilityTestReports.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestReports") in
+      make ?nextToken ?deliverabilityTestReports ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let deliverabilityTestReports =
-        field_map_exn json "DeliverabilityTestReports"
+        field_map json__ "DeliverabilityTestReports"
           DeliverabilityTestReports.of_json in
-      make ?nextToken ~deliverabilityTestReports ()
+      make ?nextToken ?deliverabilityTestReports ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A list of the predictive inbox placement test reports that are available for your account, regardless of whether or not those tests are complete."]
@@ -5513,9 +5589,9 @@ module ListDeliverabilityTestReportsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5582,10 +5658,10 @@ module ListDedicatedIpPoolsResponse =
           (Xml.child xml_arg0 "DedicatedIpPools") in
       make ?nextToken ?dedicatedIpPools ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dedicatedIpPools =
-        field_map json "DedicatedIpPools" ListOfDedicatedIpPools.of_json in
+        field_map json__ "DedicatedIpPools" ListOfDedicatedIpPools.of_json in
       make ?nextToken ?dedicatedIpPools ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A list of dedicated IP pools."]
@@ -5612,9 +5688,9 @@ module ListDedicatedIpPoolsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to obtain a list of dedicated IP pools."]
@@ -5681,10 +5757,10 @@ module ListConfigurationSetsResponse =
           (Xml.child xml_arg0 "ConfigurationSets") in
       make ?nextToken ?configurationSets ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let configurationSets =
-        field_map json "ConfigurationSets" ConfigurationSetNameList.of_json in
+        field_map json__ "ConfigurationSets" ConfigurationSetNameList.of_json in
       make ?nextToken ?configurationSets ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5712,9 +5788,9 @@ module ListConfigurationSetsRequest =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "NextToken") in
       make ?pageSize ?nextToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       make ?pageSize ?nextToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5834,17 +5910,17 @@ module GetEmailIdentityResponse =
       make ?tags ?mailFromAttributes ?dkimAttributes
         ?verifiedForSendingStatus ?feedbackForwardingStatus ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let mailFromAttributes =
-        field_map json "MailFromAttributes" MailFromAttributes.of_json in
+        field_map json__ "MailFromAttributes" MailFromAttributes.of_json in
       let dkimAttributes =
-        field_map json "DkimAttributes" DkimAttributes.of_json in
+        field_map json__ "DkimAttributes" DkimAttributes.of_json in
       let verifiedForSendingStatus =
-        field_map json "VerifiedForSendingStatus" Enabled.of_json in
+        field_map json__ "VerifiedForSendingStatus" Enabled.of_json in
       let feedbackForwardingStatus =
-        field_map json "FeedbackForwardingStatus" Enabled.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+        field_map json__ "FeedbackForwardingStatus" Enabled.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       make ?tags ?mailFromAttributes ?dkimAttributes
         ?verifiedForSendingStatus ?feedbackForwardingStatus ?identityType ()
     let to_json v = composed_to_json to_value v
@@ -5868,8 +5944,9 @@ module GetEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to return details about an email identity."]
@@ -5877,10 +5954,10 @@ module GetDomainStatisticsReportResponse =
   struct
     type nonrec t =
       {
-      overallVolume: OverallVolume.t
+      overallVolume: OverallVolume.t option
         [@ocaml.doc
           "An object that contains deliverability metrics for the domain that you specified. The data in this object is a summary of all of the data that was collected from the StartDate to the EndDate."];
-      dailyVolumes: DailyVolumes.t
+      dailyVolumes: DailyVolumes.t option
         [@ocaml.doc
           "An object that contains deliverability metrics for the domain that you specified. This object contains data for each day, starting on the StartDate and ending on the EndDate."]}
     type nonrec error =
@@ -5888,9 +5965,8 @@ module GetDomainStatisticsReportResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainStatisticsReportResponse"
-    let make ~overallVolume =
-      fun ~dailyVolumes -> fun () -> { overallVolume; dailyVolumes }
+    let make ?overallVolume =
+      fun ?dailyVolumes -> fun () -> { overallVolume; dailyVolumes }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -5933,24 +6009,25 @@ module GetDomainStatisticsReportResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OverallVolume", (Some (OverallVolume.to_value x.overallVolume)));
-        ("DailyVolumes", (Some (DailyVolumes.to_value x.dailyVolumes)))]
+        [("OverallVolume",
+           (Option.map x.overallVolume ~f:OverallVolume.to_value));
+        ("DailyVolumes",
+          (Option.map x.dailyVolumes ~f:DailyVolumes.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let dailyVolumes =
-        DailyVolumes.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DailyVolumes") in
+        (Option.map ~f:DailyVolumes.of_xml)
+          (Xml.child xml_arg0 "DailyVolumes") in
       let overallVolume =
-        OverallVolume.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OverallVolume") in
-      make ~dailyVolumes ~overallVolume ()
+        (Option.map ~f:OverallVolume.of_xml)
+          (Xml.child xml_arg0 "OverallVolume") in
+      make ?dailyVolumes ?overallVolume ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dailyVolumes =
-        field_map_exn json "DailyVolumes" DailyVolumes.of_json in
+    let of_json json__ =
+      let dailyVolumes = field_map json__ "DailyVolumes" DailyVolumes.of_json in
       let overallVolume =
-        field_map_exn json "OverallVolume" OverallVolume.of_json in
-      make ~dailyVolumes ~overallVolume ()
+        field_map json__ "OverallVolume" OverallVolume.of_json in
+      make ?dailyVolumes ?overallVolume ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that includes statistics that are related to the domain that you specified."]
@@ -5987,10 +6064,10 @@ module GetDomainStatisticsReportRequest =
         Identity.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Domain") in
       make ~endDate ~startDate ~domain ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endDate = field_map_exn json "EndDate" Timestamp.of_json in
-      let startDate = field_map_exn json "StartDate" Timestamp.of_json in
-      let domain = field_map_exn json "Domain" Identity.of_json in
+    let of_json json__ =
+      let endDate = field_map_exn json__ "EndDate" Timestamp.of_json in
+      let startDate = field_map_exn json__ "StartDate" Timestamp.of_json in
+      let domain = field_map_exn json__ "Domain" Identity.of_json in
       make ~endDate ~startDate ~domain ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to obtain deliverability metrics for a domain."]
@@ -5998,7 +6075,7 @@ module GetDomainDeliverabilityCampaignResponse =
   struct
     type nonrec t =
       {
-      domainDeliverabilityCampaign: DomainDeliverabilityCampaign.t
+      domainDeliverabilityCampaign: DomainDeliverabilityCampaign.t option
         [@ocaml.doc
           "An object that contains the deliverability data for the campaign."]}
     type nonrec error =
@@ -6006,8 +6083,7 @@ module GetDomainDeliverabilityCampaignResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainDeliverabilityCampaignResponse"
-    let make ~domainDeliverabilityCampaign =
+    let make ?domainDeliverabilityCampaign =
       fun () -> { domainDeliverabilityCampaign }
     let error_of_json name json =
       match name with
@@ -6052,22 +6128,20 @@ module GetDomainDeliverabilityCampaignResponse =
     let to_value x =
       structure_to_value
         [("DomainDeliverabilityCampaign",
-           (Some
-              (DomainDeliverabilityCampaign.to_value
-                 x.domainDeliverabilityCampaign)))]
+           (Option.map x.domainDeliverabilityCampaign
+              ~f:DomainDeliverabilityCampaign.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let domainDeliverabilityCampaign =
-        DomainDeliverabilityCampaign.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DomainDeliverabilityCampaign") in
-      make ~domainDeliverabilityCampaign ()
+        (Option.map ~f:DomainDeliverabilityCampaign.of_xml)
+          (Xml.child xml_arg0 "DomainDeliverabilityCampaign") in
+      make ?domainDeliverabilityCampaign ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let domainDeliverabilityCampaign =
-        field_map_exn json "DomainDeliverabilityCampaign"
+        field_map json__ "DomainDeliverabilityCampaign"
           DomainDeliverabilityCampaign.of_json in
-      make ~domainDeliverabilityCampaign ()
+      make ?domainDeliverabilityCampaign ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains all the deliverability data for a specific campaign. This data is available for a campaign only if the campaign sent email by using a domain that the Deliverability dashboard is enabled for (PutDeliverabilityDashboardOption operation)."]
@@ -6090,8 +6164,8 @@ module GetDomainDeliverabilityCampaignRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "CampaignId") in
       make ~campaignId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let campaignId = field_map_exn json "CampaignId" CampaignId.of_json in
+    let of_json json__ =
+      let campaignId = field_map_exn json__ "CampaignId" CampaignId.of_json in
       make ~campaignId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6100,13 +6174,13 @@ module GetDeliverabilityTestReportResponse =
   struct
     type nonrec t =
       {
-      deliverabilityTestReport: DeliverabilityTestReport.t
+      deliverabilityTestReport: DeliverabilityTestReport.t option
         [@ocaml.doc
           "An object that contains the results of the predictive inbox placement test."];
-      overallPlacement: PlacementStatistics.t
+      overallPlacement: PlacementStatistics.t option
         [@ocaml.doc
           "An object that specifies how many test messages that were sent during the predictive inbox placement test were delivered to recipients' inboxes, how many were sent to recipients' spam folders, and how many weren't delivered."];
-      ispPlacements: IspPlacements.t
+      ispPlacements: IspPlacements.t option
         [@ocaml.doc
           "An object that describes how the test email was handled by several email providers, including Gmail, Hotmail, Yahoo, AOL, and others."];
       message: MessageContent.t option
@@ -6120,19 +6194,18 @@ module GetDeliverabilityTestReportResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDeliverabilityTestReportResponse"
-    let make ?message =
-      fun ?tags ->
-        fun ~deliverabilityTestReport ->
-          fun ~overallPlacement ->
-            fun ~ispPlacements ->
+    let make ?deliverabilityTestReport =
+      fun ?overallPlacement ->
+        fun ?ispPlacements ->
+          fun ?message ->
+            fun ?tags ->
               fun () ->
                 {
-                  message;
-                  tags;
                   deliverabilityTestReport;
                   overallPlacement;
-                  ispPlacements
+                  ispPlacements;
+                  message;
+                  tags
                 }
     let error_of_json name json =
       match name with
@@ -6177,11 +6250,12 @@ module GetDeliverabilityTestReportResponse =
     let to_value x =
       structure_to_value
         [("DeliverabilityTestReport",
-           (Some
-              (DeliverabilityTestReport.to_value x.deliverabilityTestReport)));
+           (Option.map x.deliverabilityTestReport
+              ~f:DeliverabilityTestReport.to_value));
         ("OverallPlacement",
-          (Some (PlacementStatistics.to_value x.overallPlacement)));
-        ("IspPlacements", (Some (IspPlacements.to_value x.ispPlacements)));
+          (Option.map x.overallPlacement ~f:PlacementStatistics.to_value));
+        ("IspPlacements",
+          (Option.map x.ispPlacements ~f:IspPlacements.to_value));
         ("Message", (Option.map x.message ~f:MessageContent.to_value));
         ("Tags", (Option.map x.tags ~f:TagList.to_value))]
     let to_query v = to_query to_value v
@@ -6190,30 +6264,29 @@ module GetDeliverabilityTestReportResponse =
       let message =
         (Option.map ~f:MessageContent.of_xml) (Xml.child xml_arg0 "Message") in
       let ispPlacements =
-        IspPlacements.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "IspPlacements") in
+        (Option.map ~f:IspPlacements.of_xml)
+          (Xml.child xml_arg0 "IspPlacements") in
       let overallPlacement =
-        PlacementStatistics.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OverallPlacement") in
+        (Option.map ~f:PlacementStatistics.of_xml)
+          (Xml.child xml_arg0 "OverallPlacement") in
       let deliverabilityTestReport =
-        DeliverabilityTestReport.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestReport") in
-      make ?tags ?message ~ispPlacements ~overallPlacement
-        ~deliverabilityTestReport ()
+        (Option.map ~f:DeliverabilityTestReport.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestReport") in
+      make ?tags ?message ?ispPlacements ?overallPlacement
+        ?deliverabilityTestReport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let message = field_map json "Message" MessageContent.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let message = field_map json__ "Message" MessageContent.of_json in
       let ispPlacements =
-        field_map_exn json "IspPlacements" IspPlacements.of_json in
+        field_map json__ "IspPlacements" IspPlacements.of_json in
       let overallPlacement =
-        field_map_exn json "OverallPlacement" PlacementStatistics.of_json in
+        field_map json__ "OverallPlacement" PlacementStatistics.of_json in
       let deliverabilityTestReport =
-        field_map_exn json "DeliverabilityTestReport"
+        field_map json__ "DeliverabilityTestReport"
           DeliverabilityTestReport.of_json in
-      make ?tags ?message ~ispPlacements ~overallPlacement
-        ~deliverabilityTestReport ()
+      make ?tags ?message ?ispPlacements ?overallPlacement
+        ?deliverabilityTestReport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The results of the predictive inbox placement test."]
 module GetDeliverabilityTestReportRequest =
@@ -6234,8 +6307,8 @@ module GetDeliverabilityTestReportRequest =
         ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
       make ~reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reportId = field_map_exn json "ReportId" ReportId.of_json in
+    let of_json json__ =
+      let reportId = field_map_exn json__ "ReportId" ReportId.of_json in
       make ~reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6244,7 +6317,7 @@ module GetDeliverabilityDashboardOptionsResponse =
   struct
     type nonrec t =
       {
-      dashboardEnabled: Enabled.t
+      dashboardEnabled: Enabled.t option
         [@ocaml.doc
           "Specifies whether the Deliverability dashboard is enabled for your Amazon Pinpoint account. If this value is true, the dashboard is enabled."];
       subscriptionExpiryDate: Timestamp.t option
@@ -6265,19 +6338,18 @@ module GetDeliverabilityDashboardOptionsResponse =
       | `LimitExceededException of LimitExceededException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDeliverabilityDashboardOptionsResponse"
-    let make ?subscriptionExpiryDate =
-      fun ?accountStatus ->
-        fun ?activeSubscribedDomains ->
-          fun ?pendingExpirationSubscribedDomains ->
-            fun ~dashboardEnabled ->
+    let make ?dashboardEnabled =
+      fun ?subscriptionExpiryDate ->
+        fun ?accountStatus ->
+          fun ?activeSubscribedDomains ->
+            fun ?pendingExpirationSubscribedDomains ->
               fun () ->
                 {
+                  dashboardEnabled;
                   subscriptionExpiryDate;
                   accountStatus;
                   activeSubscribedDomains;
-                  pendingExpirationSubscribedDomains;
-                  dashboardEnabled
+                  pendingExpirationSubscribedDomains
                 }
     let error_of_json name json =
       match name with
@@ -6321,7 +6393,8 @@ module GetDeliverabilityDashboardOptionsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DashboardEnabled", (Some (Enabled.to_value x.dashboardEnabled)));
+        [("DashboardEnabled",
+           (Option.map x.dashboardEnabled ~f:Enabled.to_value));
         ("SubscriptionExpiryDate",
           (Option.map x.subscriptionExpiryDate ~f:Timestamp.to_value));
         ("AccountStatus",
@@ -6348,27 +6421,27 @@ module GetDeliverabilityDashboardOptionsResponse =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "SubscriptionExpiryDate") in
       let dashboardEnabled =
-        Enabled.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DashboardEnabled") in
+        (Option.map ~f:Enabled.of_xml)
+          (Xml.child xml_arg0 "DashboardEnabled") in
       make ?pendingExpirationSubscribedDomains ?activeSubscribedDomains
-        ?accountStatus ?subscriptionExpiryDate ~dashboardEnabled ()
+        ?accountStatus ?subscriptionExpiryDate ?dashboardEnabled ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let pendingExpirationSubscribedDomains =
-        field_map json "PendingExpirationSubscribedDomains"
+        field_map json__ "PendingExpirationSubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let activeSubscribedDomains =
-        field_map json "ActiveSubscribedDomains"
+        field_map json__ "ActiveSubscribedDomains"
           DomainDeliverabilityTrackingOptions.of_json in
       let accountStatus =
-        field_map json "AccountStatus"
+        field_map json__ "AccountStatus"
           DeliverabilityDashboardAccountStatus.of_json in
       let subscriptionExpiryDate =
-        field_map json "SubscriptionExpiryDate" Timestamp.of_json in
+        field_map json__ "SubscriptionExpiryDate" Timestamp.of_json in
       let dashboardEnabled =
-        field_map_exn json "DashboardEnabled" Enabled.of_json in
+        field_map json__ "DashboardEnabled" Enabled.of_json in
       make ?pendingExpirationSubscribedDomains ?activeSubscribedDomains
-        ?accountStatus ?subscriptionExpiryDate ~dashboardEnabled ()
+        ?accountStatus ?subscriptionExpiryDate ?dashboardEnabled ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that shows the status of the Deliverability dashboard for your Amazon Pinpoint account."]
@@ -6456,10 +6529,10 @@ module GetDedicatedIpsResponse =
           (Xml.child xml_arg0 "DedicatedIps") in
       make ?nextToken ?dedicatedIps ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
       let dedicatedIps =
-        field_map json "DedicatedIps" DedicatedIpList.of_json in
+        field_map json__ "DedicatedIps" DedicatedIpList.of_json in
       make ?nextToken ?dedicatedIps ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6495,10 +6568,10 @@ module GetDedicatedIpsRequest =
         (Option.map ~f:PoolName.of_xml) (Xml.child xml_arg0 "PoolName") in
       make ?pageSize ?nextToken ?poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let pageSize = field_map json "PageSize" MaxItems.of_json in
-      let nextToken = field_map json "NextToken" NextToken.of_json in
-      let poolName = field_map json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let pageSize = field_map json__ "PageSize" MaxItems.of_json in
+      let nextToken = field_map json__ "NextToken" NextToken.of_json in
+      let poolName = field_map json__ "PoolName" PoolName.of_json in
       make ?pageSize ?nextToken ?poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6565,8 +6638,8 @@ module GetDedicatedIpResponse =
         (Option.map ~f:DedicatedIp.of_xml) (Xml.child xml_arg0 "DedicatedIp") in
       make ?dedicatedIp ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let dedicatedIp = field_map json "DedicatedIp" DedicatedIp.of_json in
+    let of_json json__ =
+      let dedicatedIp = field_map json__ "DedicatedIp" DedicatedIp.of_json in
       make ?dedicatedIp ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about a dedicated IP address."]
@@ -6585,8 +6658,8 @@ module GetDedicatedIpRequest =
       let ip = Ip.of_xml (Xml.child_exn ~context:context_ xml_arg0 "IP") in
       make ~ip ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let ip = field_map_exn json "Ip" Ip.of_json in make ~ip ()
+    let of_json json__ =
+      let ip = field_map_exn json__ "Ip" Ip.of_json in make ~ip ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request to obtain more information about a dedicated IP address."]
@@ -6706,18 +6779,18 @@ module GetConfigurationSetResponse =
       make ?tags ?sendingOptions ?reputationOptions ?deliveryOptions
         ?trackingOptions ?configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let sendingOptions =
-        field_map json "SendingOptions" SendingOptions.of_json in
+        field_map json__ "SendingOptions" SendingOptions.of_json in
       let reputationOptions =
-        field_map json "ReputationOptions" ReputationOptions.of_json in
+        field_map json__ "ReputationOptions" ReputationOptions.of_json in
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let trackingOptions =
-        field_map json "TrackingOptions" TrackingOptions.of_json in
+        field_map json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map json "ConfigurationSetName" ConfigurationSetName.of_json in
+        field_map json__ "ConfigurationSetName" ConfigurationSetName.of_json in
       make ?tags ?sendingOptions ?reputationOptions ?deliveryOptions
         ?trackingOptions ?configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -6742,9 +6815,9 @@ module GetConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -6814,9 +6887,9 @@ module GetConfigurationSetEventDestinationsResponse =
           (Xml.child xml_arg0 "EventDestinations") in
       make ?eventDestinations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinations =
-        field_map json "EventDestinations" EventDestinations.of_json in
+        field_map json__ "EventDestinations" EventDestinations.of_json in
       make ?eventDestinations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6841,9 +6914,9 @@ module GetConfigurationSetEventDestinationsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -6853,7 +6926,7 @@ module GetBlacklistReportsResponse =
   struct
     type nonrec t =
       {
-      blacklistReport: BlacklistReport.t
+      blacklistReport: BlacklistReport.t option
         [@ocaml.doc
           "An object that contains information about a blacklist that one of your dedicated IP addresses appears on."]}
     type nonrec error =
@@ -6861,8 +6934,7 @@ module GetBlacklistReportsResponse =
       | `NotFoundException of NotFoundException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetBlacklistReportsResponse"
-    let make ~blacklistReport = fun () -> { blacklistReport }
+    let make ?blacklistReport = fun () -> { blacklistReport }
     let error_of_json name json =
       match name with
       | "BadRequestException" ->
@@ -6906,18 +6978,18 @@ module GetBlacklistReportsResponse =
     let to_value x =
       structure_to_value
         [("BlacklistReport",
-           (Some (BlacklistReport.to_value x.blacklistReport)))]
+           (Option.map x.blacklistReport ~f:BlacklistReport.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let blacklistReport =
-        BlacklistReport.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "BlacklistReport") in
-      make ~blacklistReport ()
+        (Option.map ~f:BlacklistReport.of_xml)
+          (Xml.child xml_arg0 "BlacklistReport") in
+      make ?blacklistReport ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blacklistReport =
-        field_map_exn json "BlacklistReport" BlacklistReport.of_json in
-      make ~blacklistReport ()
+        field_map json__ "BlacklistReport" BlacklistReport.of_json in
+      make ?blacklistReport ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "An object that contains information about blacklist events."]
@@ -6941,9 +7013,9 @@ module GetBlacklistReportsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "BlacklistItemNames") in
       make ~blacklistItemNames ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let blacklistItemNames =
-        field_map_exn json "BlacklistItemNames" BlacklistItemNames.of_json in
+        field_map_exn json__ "BlacklistItemNames" BlacklistItemNames.of_json in
       make ~blacklistItemNames ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7045,15 +7117,15 @@ module GetAccountResponse =
       make ?productionAccessEnabled ?enforcementStatus
         ?dedicatedIpAutoWarmupEnabled ?sendingEnabled ?sendQuota ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let productionAccessEnabled =
-        field_map json "ProductionAccessEnabled" Enabled.of_json in
+        field_map json__ "ProductionAccessEnabled" Enabled.of_json in
       let enforcementStatus =
-        field_map json "EnforcementStatus" GeneralEnforcementStatus.of_json in
+        field_map json__ "EnforcementStatus" GeneralEnforcementStatus.of_json in
       let dedicatedIpAutoWarmupEnabled =
-        field_map json "DedicatedIpAutoWarmupEnabled" Enabled.of_json in
-      let sendingEnabled = field_map json "SendingEnabled" Enabled.of_json in
-      let sendQuota = field_map json "SendQuota" SendQuota.of_json in
+        field_map json__ "DedicatedIpAutoWarmupEnabled" Enabled.of_json in
+      let sendingEnabled = field_map json__ "SendingEnabled" Enabled.of_json in
+      let sendQuota = field_map json__ "SendQuota" SendQuota.of_json in
       make ?productionAccessEnabled ?enforcementStatus
         ?dedicatedIpAutoWarmupEnabled ?sendingEnabled ?sendQuota ()
     let to_json v = composed_to_json to_value v
@@ -7160,8 +7232,9 @@ module DeleteEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7253,8 +7326,8 @@ module DeleteDedicatedIpPoolRequest =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ~poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let poolName = field_map_exn json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
       make ~poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to delete a dedicated IP pool."]
@@ -7347,9 +7420,9 @@ module DeleteConfigurationSetRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -7442,12 +7515,12 @@ module DeleteConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v
@@ -7547,12 +7620,12 @@ module CreateEmailIdentityResponse =
           (Xml.child xml_arg0 "IdentityType") in
       make ?dkimAttributes ?verifiedForSendingStatus ?identityType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let dkimAttributes =
-        field_map json "DkimAttributes" DkimAttributes.of_json in
+        field_map json__ "DkimAttributes" DkimAttributes.of_json in
       let verifiedForSendingStatus =
-        field_map json "VerifiedForSendingStatus" Enabled.of_json in
-      let identityType = field_map json "IdentityType" IdentityType.of_json in
+        field_map json__ "VerifiedForSendingStatus" Enabled.of_json in
+      let identityType = field_map json__ "IdentityType" IdentityType.of_json in
       make ?dkimAttributes ?verifiedForSendingStatus ?identityType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7580,9 +7653,10 @@ module CreateEmailIdentityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "EmailIdentity") in
       make ?tags ~emailIdentity ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let emailIdentity = field_map_exn json "EmailIdentity" Identity.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let emailIdentity =
+        field_map_exn json__ "EmailIdentity" Identity.of_json in
       make ?tags ~emailIdentity ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7591,10 +7665,10 @@ module CreateDeliverabilityTestReportResponse =
   struct
     type nonrec t =
       {
-      reportId: ReportId.t
+      reportId: ReportId.t option
         [@ocaml.doc
           "A unique string that identifies the predictive inbox placement test."];
-      deliverabilityTestStatus: DeliverabilityTestStatus.t
+      deliverabilityTestStatus: DeliverabilityTestStatus.t option
         [@ocaml.doc
           "The status of the predictive inbox placement test. If the status is IN_PROGRESS, then the predictive inbox placement test is currently running. Predictive inbox placement tests are usually complete within 24 hours of creating the test. If the status is COMPLETE, then the test is finished, and you can use the GetDeliverabilityTestReport to view the results of the test."]}
     type nonrec error =
@@ -7609,9 +7683,8 @@ module CreateDeliverabilityTestReportResponse =
       | `SendingPausedException of SendingPausedException.t 
       | `TooManyRequestsException of TooManyRequestsException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CreateDeliverabilityTestReportResponse"
-    let make ~reportId =
-      fun ~deliverabilityTestStatus ->
+    let make ?reportId =
+      fun ?deliverabilityTestStatus ->
         fun () -> { reportId; deliverabilityTestStatus }
     let error_of_json name json =
       match name with
@@ -7705,26 +7778,25 @@ module CreateDeliverabilityTestReportResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("ReportId", (Some (ReportId.to_value x.reportId)));
+        [("ReportId", (Option.map x.reportId ~f:ReportId.to_value));
         ("DeliverabilityTestStatus",
-          (Some
-             (DeliverabilityTestStatus.to_value x.deliverabilityTestStatus)))]
+          (Option.map x.deliverabilityTestStatus
+             ~f:DeliverabilityTestStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let deliverabilityTestStatus =
-        DeliverabilityTestStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "DeliverabilityTestStatus") in
+        (Option.map ~f:DeliverabilityTestStatus.of_xml)
+          (Xml.child xml_arg0 "DeliverabilityTestStatus") in
       let reportId =
-        ReportId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "ReportId") in
-      make ~deliverabilityTestStatus ~reportId ()
+        (Option.map ~f:ReportId.of_xml) (Xml.child xml_arg0 "ReportId") in
+      make ?deliverabilityTestStatus ?reportId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let deliverabilityTestStatus =
-        field_map_exn json "DeliverabilityTestStatus"
+        field_map json__ "DeliverabilityTestStatus"
           DeliverabilityTestStatus.of_json in
-      let reportId = field_map_exn json "ReportId" ReportId.of_json in
-      make ~deliverabilityTestStatus ~reportId ()
+      let reportId = field_map json__ "ReportId" ReportId.of_json in
+      make ?deliverabilityTestStatus ?reportId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the predictive inbox placement test that you created."]
@@ -7770,12 +7842,12 @@ module CreateDeliverabilityTestReportRequest =
         (Option.map ~f:ReportName.of_xml) (Xml.child xml_arg0 "ReportName") in
       make ?tags ~content ~fromEmailAddress ?reportName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let content = field_map_exn json "Content" EmailContent.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let content = field_map_exn json__ "Content" EmailContent.of_json in
       let fromEmailAddress =
-        field_map_exn json "FromEmailAddress" EmailAddress.of_json in
-      let reportName = field_map json "ReportName" ReportName.of_json in
+        field_map_exn json__ "FromEmailAddress" EmailAddress.of_json in
+      let reportName = field_map json__ "ReportName" ReportName.of_json in
       make ?tags ~content ~fromEmailAddress ?reportName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -7879,9 +7951,9 @@ module CreateDedicatedIpPoolRequest =
         PoolName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "PoolName") in
       make ?tags ~poolName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
-      let poolName = field_map_exn json "PoolName" PoolName.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
+      let poolName = field_map_exn json__ "PoolName" PoolName.of_json in
       make ?tags ~poolName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "A request to create a new dedicated IP pool."]
@@ -8043,18 +8115,18 @@ module CreateConfigurationSetRequest =
       make ?tags ?sendingOptions ?reputationOptions ?deliveryOptions
         ?trackingOptions ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "Tags" TagList.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "Tags" TagList.of_json in
       let sendingOptions =
-        field_map json "SendingOptions" SendingOptions.of_json in
+        field_map json__ "SendingOptions" SendingOptions.of_json in
       let reputationOptions =
-        field_map json "ReputationOptions" ReputationOptions.of_json in
+        field_map json__ "ReputationOptions" ReputationOptions.of_json in
       let deliveryOptions =
-        field_map json "DeliveryOptions" DeliveryOptions.of_json in
+        field_map json__ "DeliveryOptions" DeliveryOptions.of_json in
       let trackingOptions =
-        field_map json "TrackingOptions" TrackingOptions.of_json in
+        field_map json__ "TrackingOptions" TrackingOptions.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ?tags ?sendingOptions ?reputationOptions ?deliveryOptions
         ?trackingOptions ~configurationSetName ()
@@ -8175,15 +8247,15 @@ module CreateConfigurationSetEventDestinationRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ConfigurationSetName") in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let eventDestination =
-        field_map_exn json "EventDestination"
+        field_map_exn json__ "EventDestination"
           EventDestinationDefinition.of_json in
       let eventDestinationName =
-        field_map_exn json "EventDestinationName"
+        field_map_exn json__ "EventDestinationName"
           EventDestinationName.of_json in
       let configurationSetName =
-        field_map_exn json "ConfigurationSetName"
+        field_map_exn json__ "ConfigurationSetName"
           ConfigurationSetName.of_json in
       make ~eventDestination ~eventDestinationName ~configurationSetName ()
     let to_json v = composed_to_json to_value v

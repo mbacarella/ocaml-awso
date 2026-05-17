@@ -82,6 +82,47 @@ let batch_get_builds =
               ~ids:(Values.BuildIds.of_json ids) ())
            (Some Values.BatchGetBuildsOutput.to_json)
            (Some Values.BatchGetBuildsOutput.error_to_json)])
+let batch_get_command_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sandboxId =
+         flag "sandbox-id" (required string) ~doc:"STRING NonEmptyString"
+       and commandExecutionIds =
+         flag "command-execution-ids" (required json_arg)
+           ~doc:"JSON CommandExecutionIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_command_executions
+           (Values.BatchGetCommandExecutionsInput.make ~sandboxId
+              ~commandExecutionIds:(Values.CommandExecutionIds.of_json
+                                      commandExecutionIds) ())
+           (Some Values.BatchGetCommandExecutionsOutput.to_json)
+           (Some Values.BatchGetCommandExecutionsOutput.error_to_json)])
+let batch_get_fleets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and names = flag "names" (required json_arg) ~doc:"JSON FleetNames" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_fleets
+           (Values.BatchGetFleetsInput.make
+              ~names:(Values.FleetNames.of_json names) ())
+           (Some Values.BatchGetFleetsOutput.to_json)
+           (Some Values.BatchGetFleetsOutput.error_to_json)])
 let batch_get_projects =
   Command.async ~summary:""
     ([%map_open.Command
@@ -140,6 +181,87 @@ let batch_get_reports =
               ~reportArns:(Values.ReportArns.of_json reportArns) ())
            (Some Values.BatchGetReportsOutput.to_json)
            (Some Values.BatchGetReportsOutput.error_to_json)])
+let batch_get_sandboxes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ids = flag "ids" (required json_arg) ~doc:"JSON SandboxIds" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.batch_get_sandboxes
+           (Values.BatchGetSandboxesInput.make
+              ~ids:(Values.SandboxIds.of_json ids) ())
+           (Some Values.BatchGetSandboxesOutput.to_json)
+           (Some Values.BatchGetSandboxesOutput.error_to_json)])
+let create_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and computeConfiguration =
+         flag "compute-configuration" (optional json_arg)
+           ~doc:"JSON ComputeConfiguration"
+       and scalingConfiguration =
+         flag "scaling-configuration" (optional json_arg)
+           ~doc:"JSON ScalingConfigurationInput"
+       and overflowBehavior =
+         flag "overflow-behavior" (optional json_arg)
+           ~doc:"JSON FleetOverflowBehavior"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
+       and proxyConfiguration =
+         flag "proxy-configuration" (optional json_arg)
+           ~doc:"JSON ProxyConfiguration"
+       and imageId =
+         flag "image-id" (optional string) ~doc:"STRING NonEmptyString"
+       and fleetServiceRole =
+         flag "fleet-service-role" (optional string)
+           ~doc:"STRING NonEmptyString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and name = flag "name" (required string) ~doc:"STRING FleetName"
+       and baseCapacity =
+         flag "base-capacity" (required int) ~doc:"INT FleetCapacity"
+       and environmentType =
+         flag "environment-type" (required json_arg)
+           ~doc:"JSON EnvironmentType"
+       and computeType =
+         flag "compute-type" (required json_arg) ~doc:"JSON ComputeType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_fleet
+           (Values.CreateFleetInput.make
+              ?computeConfiguration:(Option.map
+                                       ~f:Values.ComputeConfiguration.of_json
+                                       computeConfiguration)
+              ?scalingConfiguration:(Option.map
+                                       ~f:Values.ScalingConfigurationInput.of_json
+                                       scalingConfiguration)
+              ?overflowBehavior:(Option.map
+                                   ~f:Values.FleetOverflowBehavior.of_json
+                                   overflowBehavior)
+              ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
+              ?proxyConfiguration:(Option.map
+                                     ~f:Values.ProxyConfiguration.of_json
+                                     proxyConfiguration) ?imageId
+              ?fleetServiceRole
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~name
+              ~baseCapacity
+              ~environmentType:(Values.EnvironmentType.of_json
+                                  environmentType)
+              ~computeType:(Values.ComputeType.of_json computeType) ())
+           (Some Values.CreateFleetOutput.to_json)
+           (Some Values.CreateFleetOutput.error_to_json)])
 let create_project =
   Command.async ~summary:""
     ([%map_open.Command
@@ -166,7 +288,7 @@ let create_project =
            ~doc:"JSON ProjectArtifactsList"
        and cache = flag "cache" (optional json_arg) ~doc:"JSON ProjectCache"
        and timeoutInMinutes =
-         flag "timeout-in-minutes" (optional int) ~doc:"INT TimeOut"
+         flag "timeout-in-minutes" (optional int) ~doc:"INT BuildTimeOut"
        and queuedTimeoutInMinutes =
          flag "queued-timeout-in-minutes" (optional int) ~doc:"INT TimeOut"
        and encryptionKey =
@@ -186,6 +308,8 @@ let create_project =
            ~doc:"JSON ProjectBuildBatchConfig"
        and concurrentBuildLimit =
          flag "concurrent-build-limit" (optional int) ~doc:"INT WrapperInt"
+       and autoRetryLimit =
+         flag "auto-retry-limit" (optional int) ~doc:"INT WrapperInt"
        and name = flag "name" (required string) ~doc:"STRING ProjectName"
        and source =
          flag "source" (required json_arg) ~doc:"JSON ProjectSource"
@@ -220,7 +344,8 @@ let create_project =
               ?buildBatchConfig:(Option.map
                                    ~f:Values.ProjectBuildBatchConfig.of_json
                                    buildBatchConfig) ?concurrentBuildLimit
-              ~name ~source:(Values.ProjectSource.of_json source)
+              ?autoRetryLimit ~name
+              ~source:(Values.ProjectSource.of_json source)
               ~artifacts:(Values.ProjectArtifacts.of_json artifacts)
               ~environment:(Values.ProjectEnvironment.of_json environment)
               ~serviceRole ()) (Some Values.CreateProjectOutput.to_json)
@@ -266,6 +391,14 @@ let create_webhook =
          flag "filter-groups" (optional json_arg) ~doc:"JSON FilterGroups"
        and buildType =
          flag "build-type" (optional json_arg) ~doc:"JSON WebhookBuildType"
+       and manualCreation =
+         flag "manual-creation" (optional bool) ~doc:"BOOL WrapperBoolean"
+       and scopeConfiguration =
+         flag "scope-configuration" (optional json_arg)
+           ~doc:"JSON ScopeConfiguration"
+       and pullRequestBuildPolicy =
+         flag "pull-request-build-policy" (optional json_arg)
+           ~doc:"JSON PullRequestBuildPolicy"
        and projectName =
          flag "project-name" (required string) ~doc:"STRING ProjectName" in
        fun () ->
@@ -275,8 +408,14 @@ let create_webhook =
               ?filterGroups:(Option.map ~f:Values.FilterGroups.of_json
                                filterGroups)
               ?buildType:(Option.map ~f:Values.WebhookBuildType.of_json
-                            buildType) ~projectName ())
-           (Some Values.CreateWebhookOutput.to_json)
+                            buildType) ?manualCreation
+              ?scopeConfiguration:(Option.map
+                                     ~f:Values.ScopeConfiguration.of_json
+                                     scopeConfiguration)
+              ?pullRequestBuildPolicy:(Option.map
+                                         ~f:Values.PullRequestBuildPolicy.of_json
+                                         pullRequestBuildPolicy) ~projectName
+              ()) (Some Values.CreateWebhookOutput.to_json)
            (Some Values.CreateWebhookOutput.error_to_json)])
 let delete_build_batch =
   Command.async ~summary:""
@@ -294,6 +433,22 @@ let delete_build_batch =
            Io.delete_build_batch (Values.DeleteBuildBatchInput.make ~id ())
            (Some Values.DeleteBuildBatchOutput.to_json)
            (Some Values.DeleteBuildBatchOutput.error_to_json)])
+let delete_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and arn = flag "arn" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_fleet (Values.DeleteFleetInput.make ~arn ())
+           (Some Values.DeleteFleetOutput.to_json)
+           (Some Values.DeleteFleetOutput.error_to_json)])
 let delete_project =
   Command.async ~summary:""
     ([%map_open.Command
@@ -653,6 +808,31 @@ let list_builds_for_project =
                             sortOrder) ?nextToken ~projectName ())
            (Some Values.ListBuildsForProjectOutput.to_json)
            (Some Values.ListBuildsForProjectOutput.error_to_json)])
+let list_command_executions_for_sandbox =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING SensitiveString"
+       and sandboxId =
+         flag "sandbox-id" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_command_executions_for_sandbox
+           (Values.ListCommandExecutionsForSandboxInput.make ?maxResults
+              ?sortOrder:(Option.map ~f:Values.SortOrderType.of_json
+                            sortOrder) ?nextToken ~sandboxId ())
+           (Some Values.ListCommandExecutionsForSandboxOutput.to_json)
+           (Some Values.ListCommandExecutionsForSandboxOutput.error_to_json)])
 let list_curated_environment_images =
   Command.async ~summary:""
     ([%map_open.Command
@@ -670,6 +850,32 @@ let list_curated_environment_images =
            (Values.ListCuratedEnvironmentImagesInput.make ())
            (Some Values.ListCuratedEnvironmentImagesOutput.to_json)
            (Some Values.ListCuratedEnvironmentImagesOutput.error_to_json)])
+let list_fleets =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING SensitiveString"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType"
+       and sortBy =
+         flag "sort-by" (optional json_arg) ~doc:"JSON FleetSortByType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_fleets
+           (Values.ListFleetsInput.make ?nextToken ?maxResults
+              ?sortOrder:(Option.map ~f:Values.SortOrderType.of_json
+                            sortOrder)
+              ?sortBy:(Option.map ~f:Values.FleetSortByType.of_json sortBy)
+              ()) (Some Values.ListFleetsOutput.to_json)
+           (Some Values.ListFleetsOutput.error_to_json)])
 let list_projects =
   Command.async ~summary:""
     ([%map_open.Command
@@ -777,6 +983,54 @@ let list_reports_for_report_group =
               ~reportGroupArn ())
            (Some Values.ListReportsForReportGroupOutput.to_json)
            (Some Values.ListReportsForReportGroupOutput.error_to_json)])
+let list_sandboxes =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sandboxes
+           (Values.ListSandboxesInput.make ?maxResults
+              ?sortOrder:(Option.map ~f:Values.SortOrderType.of_json
+                            sortOrder) ?nextToken ())
+           (Some Values.ListSandboxesOutput.to_json)
+           (Some Values.ListSandboxesOutput.error_to_json)])
+let list_sandboxes_for_project =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults = flag "max-results" (optional int) ~doc:"INT PageSize"
+       and sortOrder =
+         flag "sort-order" (optional json_arg) ~doc:"JSON SortOrderType"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING SensitiveString"
+       and projectName =
+         flag "project-name" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sandboxes_for_project
+           (Values.ListSandboxesForProjectInput.make ?maxResults
+              ?sortOrder:(Option.map ~f:Values.SortOrderType.of_json
+                            sortOrder) ?nextToken ~projectName ())
+           (Some Values.ListSandboxesForProjectOutput.to_json)
+           (Some Values.ListSandboxesForProjectOutput.error_to_json)])
 let list_shared_projects =
   Command.async ~summary:""
     ([%map_open.Command
@@ -985,7 +1239,8 @@ let start_build =
          flag "privileged-mode-override" (optional bool)
            ~doc:"BOOL WrapperBoolean"
        and timeoutInMinutesOverride =
-         flag "timeout-in-minutes-override" (optional int) ~doc:"INT TimeOut"
+         flag "timeout-in-minutes-override" (optional int)
+           ~doc:"INT BuildTimeOut"
        and queuedTimeoutInMinutesOverride =
          flag "queued-timeout-in-minutes-override" (optional int)
            ~doc:"INT TimeOut"
@@ -1006,6 +1261,11 @@ let start_build =
        and debugSessionEnabled =
          flag "debug-session-enabled" (optional bool)
            ~doc:"BOOL WrapperBoolean"
+       and fleetOverride =
+         flag "fleet-override" (optional json_arg) ~doc:"JSON ProjectFleet"
+       and autoRetryLimitOverride =
+         flag "auto-retry-limit-override" (optional int)
+           ~doc:"INT WrapperInt"
        and projectName =
          flag "project-name" (required string) ~doc:"STRING NonEmptyString" in
        fun () ->
@@ -1062,8 +1322,10 @@ let start_build =
               ?imagePullCredentialsTypeOverride:(Option.map
                                                    ~f:Values.ImagePullCredentialsType.of_json
                                                    imagePullCredentialsTypeOverride)
-              ?debugSessionEnabled ~projectName ())
-           (Some Values.StartBuildOutput.to_json)
+              ?debugSessionEnabled
+              ?fleetOverride:(Option.map ~f:Values.ProjectFleet.of_json
+                                fleetOverride) ?autoRetryLimitOverride
+              ~projectName ()) (Some Values.StartBuildOutput.to_json)
            (Some Values.StartBuildOutput.error_to_json)])
 let start_build_batch =
   Command.async ~summary:""
@@ -1135,7 +1397,7 @@ let start_build_batch =
            ~doc:"BOOL WrapperBoolean"
        and buildTimeoutInMinutesOverride =
          flag "build-timeout-in-minutes-override" (optional int)
-           ~doc:"INT TimeOut"
+           ~doc:"INT BuildTimeOut"
        and queuedTimeoutInMinutesOverride =
          flag "queued-timeout-in-minutes-override" (optional int)
            ~doc:"INT TimeOut"
@@ -1218,6 +1480,69 @@ let start_build_batch =
               ?debugSessionEnabled ~projectName ())
            (Some Values.StartBuildBatchOutput.to_json)
            (Some Values.StartBuildBatchOutput.error_to_json)])
+let start_command_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and type_ = flag "type-" (optional json_arg) ~doc:"JSON CommandType"
+       and sandboxId =
+         flag "sandbox-id" (required string) ~doc:"STRING NonEmptyString"
+       and command =
+         flag "command" (required string)
+           ~doc:"STRING SensitiveNonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_command_execution
+           (Values.StartCommandExecutionInput.make
+              ?type_:(Option.map ~f:Values.CommandType.of_json type_)
+              ~sandboxId ~command ())
+           (Some Values.StartCommandExecutionOutput.to_json)
+           (Some Values.StartCommandExecutionOutput.error_to_json)])
+let start_sandbox =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and projectName =
+         flag "project-name" (optional string) ~doc:"STRING NonEmptyString"
+       and idempotencyToken =
+         flag "idempotency-token" (optional string)
+           ~doc:"STRING SensitiveString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_sandbox
+           (Values.StartSandboxInput.make ?projectName ?idempotencyToken ())
+           (Some Values.StartSandboxOutput.to_json)
+           (Some Values.StartSandboxOutput.error_to_json)])
+let start_sandbox_connection =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and sandboxId =
+         flag "sandbox-id" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_sandbox_connection
+           (Values.StartSandboxConnectionInput.make ~sandboxId ())
+           (Some Values.StartSandboxConnectionOutput.to_json)
+           (Some Values.StartSandboxConnectionOutput.error_to_json)])
 let stop_build =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1250,6 +1575,85 @@ let stop_build_batch =
            Io.stop_build_batch (Values.StopBuildBatchInput.make ~id ())
            (Some Values.StopBuildBatchOutput.to_json)
            (Some Values.StopBuildBatchOutput.error_to_json)])
+let stop_sandbox =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and id = flag "id" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_sandbox (Values.StopSandboxInput.make ~id ())
+           (Some Values.StopSandboxOutput.to_json)
+           (Some Values.StopSandboxOutput.error_to_json)])
+let update_fleet =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and baseCapacity =
+         flag "base-capacity" (optional int) ~doc:"INT FleetCapacity"
+       and environmentType =
+         flag "environment-type" (optional json_arg)
+           ~doc:"JSON EnvironmentType"
+       and computeType =
+         flag "compute-type" (optional json_arg) ~doc:"JSON ComputeType"
+       and computeConfiguration =
+         flag "compute-configuration" (optional json_arg)
+           ~doc:"JSON ComputeConfiguration"
+       and scalingConfiguration =
+         flag "scaling-configuration" (optional json_arg)
+           ~doc:"JSON ScalingConfigurationInput"
+       and overflowBehavior =
+         flag "overflow-behavior" (optional json_arg)
+           ~doc:"JSON FleetOverflowBehavior"
+       and vpcConfig =
+         flag "vpc-config" (optional json_arg) ~doc:"JSON VpcConfig"
+       and proxyConfiguration =
+         flag "proxy-configuration" (optional json_arg)
+           ~doc:"JSON ProxyConfiguration"
+       and imageId =
+         flag "image-id" (optional string) ~doc:"STRING NonEmptyString"
+       and fleetServiceRole =
+         flag "fleet-service-role" (optional string)
+           ~doc:"STRING NonEmptyString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and arn = flag "arn" (required string) ~doc:"STRING NonEmptyString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_fleet
+           (Values.UpdateFleetInput.make ?baseCapacity
+              ?environmentType:(Option.map ~f:Values.EnvironmentType.of_json
+                                  environmentType)
+              ?computeType:(Option.map ~f:Values.ComputeType.of_json
+                              computeType)
+              ?computeConfiguration:(Option.map
+                                       ~f:Values.ComputeConfiguration.of_json
+                                       computeConfiguration)
+              ?scalingConfiguration:(Option.map
+                                       ~f:Values.ScalingConfigurationInput.of_json
+                                       scalingConfiguration)
+              ?overflowBehavior:(Option.map
+                                   ~f:Values.FleetOverflowBehavior.of_json
+                                   overflowBehavior)
+              ?vpcConfig:(Option.map ~f:Values.VpcConfig.of_json vpcConfig)
+              ?proxyConfiguration:(Option.map
+                                     ~f:Values.ProxyConfiguration.of_json
+                                     proxyConfiguration) ?imageId
+              ?fleetServiceRole
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ~arn ())
+           (Some Values.UpdateFleetOutput.to_json)
+           (Some Values.UpdateFleetOutput.error_to_json)])
 let update_project =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1285,7 +1689,7 @@ let update_project =
        and serviceRole =
          flag "service-role" (optional string) ~doc:"STRING NonEmptyString"
        and timeoutInMinutes =
-         flag "timeout-in-minutes" (optional int) ~doc:"INT TimeOut"
+         flag "timeout-in-minutes" (optional int) ~doc:"INT BuildTimeOut"
        and queuedTimeoutInMinutes =
          flag "queued-timeout-in-minutes" (optional int) ~doc:"INT TimeOut"
        and encryptionKey =
@@ -1305,6 +1709,8 @@ let update_project =
            ~doc:"JSON ProjectBuildBatchConfig"
        and concurrentBuildLimit =
          flag "concurrent-build-limit" (optional int) ~doc:"INT WrapperInt"
+       and autoRetryLimit =
+         flag "auto-retry-limit" (optional int) ~doc:"INT WrapperInt"
        and name = flag "name" (required string) ~doc:"STRING NonEmptyString" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
@@ -1335,7 +1741,8 @@ let update_project =
               ?buildBatchConfig:(Option.map
                                    ~f:Values.ProjectBuildBatchConfig.of_json
                                    buildBatchConfig) ?concurrentBuildLimit
-              ~name ()) (Some Values.UpdateProjectOutput.to_json)
+              ?autoRetryLimit ~name ())
+           (Some Values.UpdateProjectOutput.to_json)
            (Some Values.UpdateProjectOutput.error_to_json)])
 let update_project_visibility =
   Command.async ~summary:""
@@ -1406,6 +1813,9 @@ let update_webhook =
          flag "filter-groups" (optional json_arg) ~doc:"JSON FilterGroups"
        and buildType =
          flag "build-type" (optional json_arg) ~doc:"JSON WebhookBuildType"
+       and pullRequestBuildPolicy =
+         flag "pull-request-build-policy" (optional json_arg)
+           ~doc:"JSON PullRequestBuildPolicy"
        and projectName =
          flag "project-name" (required string) ~doc:"STRING ProjectName" in
        fun () ->
@@ -1415,8 +1825,11 @@ let update_webhook =
               ?filterGroups:(Option.map ~f:Values.FilterGroups.of_json
                                filterGroups)
               ?buildType:(Option.map ~f:Values.WebhookBuildType.of_json
-                            buildType) ~projectName ())
-           (Some Values.UpdateWebhookOutput.to_json)
+                            buildType)
+              ?pullRequestBuildPolicy:(Option.map
+                                         ~f:Values.PullRequestBuildPolicy.of_json
+                                         pullRequestBuildPolicy) ~projectName
+              ()) (Some Values.UpdateWebhookOutput.to_json)
            (Some Values.UpdateWebhookOutput.error_to_json)])
 let main =
   Command.group
@@ -1424,13 +1837,18 @@ let main =
     [("batch-delete-builds", batch_delete_builds);
     ("batch-get-build-batches", batch_get_build_batches);
     ("batch-get-builds", batch_get_builds);
+    ("batch-get-command-executions", batch_get_command_executions);
+    ("batch-get-fleets", batch_get_fleets);
     ("batch-get-projects", batch_get_projects);
     ("batch-get-report-groups", batch_get_report_groups);
     ("batch-get-reports", batch_get_reports);
+    ("batch-get-sandboxes", batch_get_sandboxes);
+    ("create-fleet", create_fleet);
     ("create-project", create_project);
     ("create-report-group", create_report_group);
     ("create-webhook", create_webhook);
     ("delete-build-batch", delete_build_batch);
+    ("delete-fleet", delete_fleet);
     ("delete-project", delete_project);
     ("delete-report", delete_report);
     ("delete-report-group", delete_report_group);
@@ -1447,11 +1865,16 @@ let main =
     ("list-build-batches-for-project", list_build_batches_for_project);
     ("list-builds", list_builds);
     ("list-builds-for-project", list_builds_for_project);
+    ("list-command-executions-for-sandbox",
+      list_command_executions_for_sandbox);
     ("list-curated-environment-images", list_curated_environment_images);
+    ("list-fleets", list_fleets);
     ("list-projects", list_projects);
     ("list-report-groups", list_report_groups);
     ("list-reports", list_reports);
     ("list-reports-for-report-group", list_reports_for_report_group);
+    ("list-sandboxes", list_sandboxes);
+    ("list-sandboxes-for-project", list_sandboxes_for_project);
     ("list-shared-projects", list_shared_projects);
     ("list-shared-report-groups", list_shared_report_groups);
     ("list-source-credentials", list_source_credentials);
@@ -1460,8 +1883,13 @@ let main =
     ("retry-build-batch", retry_build_batch);
     ("start-build", start_build);
     ("start-build-batch", start_build_batch);
+    ("start-command-execution", start_command_execution);
+    ("start-sandbox", start_sandbox);
+    ("start-sandbox-connection", start_sandbox_connection);
     ("stop-build", stop_build);
     ("stop-build-batch", stop_build_batch);
+    ("stop-sandbox", stop_sandbox);
+    ("update-fleet", update_fleet);
     ("update-project", update_project);
     ("update-project-visibility", update_project_visibility);
     ("update-report-group", update_report_group);

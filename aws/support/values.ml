@@ -74,9 +74,9 @@ module AttachmentDetails =
           (Xml.child xml_arg0 "attachmentId") in
       make ?fileName ?attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let fileName = field_map json "fileName" FileName.of_json in
-      let attachmentId = field_map json "attachmentId" AttachmentId.of_json in
+    let of_json json__ =
+      let fileName = field_map json__ "fileName" FileName.of_json in
+      let attachmentId = field_map json__ "attachmentId" AttachmentId.of_json in
       make ?fileName ?attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -85,6 +85,9 @@ module AttachmentSet =
   struct
     type nonrec t = AttachmentDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttachmentDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -118,24 +121,6 @@ module CaseId =
     let of_json j = string_of_json ~kind:"CaseId" j
     let to_json = simple_to_json to_value
   end
-module CommunicationBody =
-  struct
-    type nonrec t = string
-    let context_ = "CommunicationBody"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:8000) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"CommunicationBody" j
-    let to_json = simple_to_json to_value
-  end
 module SubmittedBy =
   struct
     type nonrec t = string
@@ -160,6 +145,24 @@ module TimeCreated =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TimeCreated" j
+    let to_json = simple_to_json to_value
+  end
+module ValidatedCommunicationBody =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedCommunicationBody"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedCommunicationBody" j
     let to_json = simple_to_json to_value
   end
 module Double =
@@ -214,6 +217,50 @@ module CategoryName =
     let of_json j = string_of_json ~kind:"CategoryName" j
     let to_json = simple_to_json to_value
   end
+module ValidatedDateTime =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedDateTime"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:30) >>=
+             (fun () -> check_string_min i ~min:8));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedDateTime" j
+    let to_json = simple_to_json to_value
+  end
+module EndTime =
+  struct
+    type nonrec t = string
+    let context_ = "EndTime"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"EndTime" j
+    let to_json = simple_to_json to_value
+  end
+module StartTime =
+  struct
+    type nonrec t = string
+    let context_ = "StartTime"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"StartTime" j
+    let to_json = simple_to_json to_value
+  end
 module Communication =
   struct
     type nonrec t =
@@ -221,12 +268,12 @@ module Communication =
       caseId: CaseId.t option
         [@ocaml.doc
           "The support case ID requested or returned in the call. The case ID is an alphanumeric string formatted as shown in this example: case-12345678910-2013-c4c1d2bf33c5cf47"];
-      body: CommunicationBody.t option
+      body: ValidatedCommunicationBody.t option
         [@ocaml.doc
           "The text of the communication between the customer and Amazon Web Services Support."];
       submittedBy: SubmittedBy.t option
         [@ocaml.doc
-          "The identity of the account that submitted, or responded to, the support case. Customer entries include the role or IAM user as well as the email address. For example, \"AdminRole (Role) <janedoe\\@example.com>. Entries from the Amazon Web Services Support team display \"Amazon Web Services,\" and don't show an email address."];
+          "The identity of the account that submitted, or responded to, the support case. Customer entries include the IAM role as well as the email address (for example, \"AdminRole (Role) <janedoe\\@example.com>). Entries from the Amazon Web Services Support team display \"Amazon Web Services,\" and don't show an email address."];
       timeCreated: TimeCreated.t option
         [@ocaml.doc "The time the communication was created."];
       attachmentSet: AttachmentSet.t option
@@ -242,7 +289,7 @@ module Communication =
     let to_value x =
       structure_to_value
         [("caseId", (Option.map x.caseId ~f:CaseId.to_value));
-        ("body", (Option.map x.body ~f:CommunicationBody.to_value));
+        ("body", (Option.map x.body ~f:ValidatedCommunicationBody.to_value));
         ("submittedBy", (Option.map x.submittedBy ~f:SubmittedBy.to_value));
         ("timeCreated", (Option.map x.timeCreated ~f:TimeCreated.to_value));
         ("attachmentSet",
@@ -257,18 +304,19 @@ module Communication =
       let submittedBy =
         (Option.map ~f:SubmittedBy.of_xml) (Xml.child xml_arg0 "submittedBy") in
       let body =
-        (Option.map ~f:CommunicationBody.of_xml) (Xml.child xml_arg0 "body") in
+        (Option.map ~f:ValidatedCommunicationBody.of_xml)
+          (Xml.child xml_arg0 "body") in
       let caseId =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?attachmentSet ?timeCreated ?submittedBy ?body ?caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentSet =
-        field_map json "attachmentSet" AttachmentSet.of_json in
-      let timeCreated = field_map json "timeCreated" TimeCreated.of_json in
-      let submittedBy = field_map json "submittedBy" SubmittedBy.of_json in
-      let body = field_map json "body" CommunicationBody.of_json in
-      let caseId = field_map json "caseId" CaseId.of_json in
+        field_map json__ "attachmentSet" AttachmentSet.of_json in
+      let timeCreated = field_map json__ "timeCreated" TimeCreated.of_json in
+      let submittedBy = field_map json__ "submittedBy" SubmittedBy.of_json in
+      let body = field_map json__ "body" ValidatedCommunicationBody.of_json in
+      let caseId = field_map json__ "caseId" CaseId.of_json in
       make ?attachmentSet ?timeCreated ?submittedBy ?body ?caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -277,39 +325,37 @@ module TrustedAdvisorCostOptimizingSummary =
   struct
     type nonrec t =
       {
-      estimatedMonthlySavings: Double.t
+      estimatedMonthlySavings: Double.t option
         [@ocaml.doc
           "The estimated monthly savings that might be realized if the recommended operations are taken."];
-      estimatedPercentMonthlySavings: Double.t
+      estimatedPercentMonthlySavings: Double.t option
         [@ocaml.doc
           "The estimated percentage of savings that might be realized if the recommended operations are taken."]}
-    let context_ = "TrustedAdvisorCostOptimizingSummary"
-    let make ~estimatedMonthlySavings =
-      fun ~estimatedPercentMonthlySavings ->
+    let make ?estimatedMonthlySavings =
+      fun ?estimatedPercentMonthlySavings ->
         fun () -> { estimatedMonthlySavings; estimatedPercentMonthlySavings }
     let to_value x =
       structure_to_value
         [("estimatedMonthlySavings",
-           (Some (Double.to_value x.estimatedMonthlySavings)));
+           (Option.map x.estimatedMonthlySavings ~f:Double.to_value));
         ("estimatedPercentMonthlySavings",
-          (Some (Double.to_value x.estimatedPercentMonthlySavings)))]
+          (Option.map x.estimatedPercentMonthlySavings ~f:Double.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let estimatedPercentMonthlySavings =
-        Double.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "estimatedPercentMonthlySavings") in
+        (Option.map ~f:Double.of_xml)
+          (Xml.child xml_arg0 "estimatedPercentMonthlySavings") in
       let estimatedMonthlySavings =
-        Double.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "estimatedMonthlySavings") in
-      make ~estimatedPercentMonthlySavings ~estimatedMonthlySavings ()
+        (Option.map ~f:Double.of_xml)
+          (Xml.child xml_arg0 "estimatedMonthlySavings") in
+      make ?estimatedPercentMonthlySavings ?estimatedMonthlySavings ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let estimatedPercentMonthlySavings =
-        field_map_exn json "estimatedPercentMonthlySavings" Double.of_json in
+        field_map json__ "estimatedPercentMonthlySavings" Double.of_json in
       let estimatedMonthlySavings =
-        field_map_exn json "estimatedMonthlySavings" Double.of_json in
-      make ~estimatedPercentMonthlySavings ~estimatedMonthlySavings ()
+        field_map json__ "estimatedMonthlySavings" Double.of_json in
+      make ?estimatedPercentMonthlySavings ?estimatedMonthlySavings ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The estimated cost savings that might be realized if the recommended operations are taken."]
@@ -343,6 +389,9 @@ module StringList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -384,13 +433,78 @@ module Category =
         (Option.map ~f:CategoryCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" CategoryName.of_json in
-      let code = field_map json "code" CategoryCode.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" CategoryName.of_json in
+      let code = field_map json__ "code" CategoryCode.of_json in
       make ?name ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A JSON-formatted name/value pair that represents the category name and category code of the problem, selected from the DescribeServices response for each Amazon Web Services service."]
+module DateInterval =
+  struct
+    type nonrec t =
+      {
+      startDateTime: ValidatedDateTime.t option
+        [@ocaml.doc
+          "A JSON object containing start and date time (UTC). Date and time format is RFC 3339 : 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ'."];
+      endDateTime: ValidatedDateTime.t option
+        [@ocaml.doc
+          "End Date Time (UTC). RFC 3339 format : 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ'."]}
+    let make ?startDateTime =
+      fun ?endDateTime -> fun () -> { startDateTime; endDateTime }
+    let to_value x =
+      structure_to_value
+        [("startDateTime",
+           (Option.map x.startDateTime ~f:ValidatedDateTime.to_value));
+        ("endDateTime",
+          (Option.map x.endDateTime ~f:ValidatedDateTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endDateTime =
+        (Option.map ~f:ValidatedDateTime.of_xml)
+          (Xml.child xml_arg0 "endDateTime") in
+      let startDateTime =
+        (Option.map ~f:ValidatedDateTime.of_xml)
+          (Xml.child xml_arg0 "startDateTime") in
+      make ?endDateTime ?startDateTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endDateTime =
+        field_map json__ "endDateTime" ValidatedDateTime.of_json in
+      let startDateTime =
+        field_map json__ "startDateTime" ValidatedDateTime.of_json in
+      make ?endDateTime ?startDateTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Date and time (UTC) format in RFC 3339 : 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ'."]
+module SupportedHour =
+  struct
+    type nonrec t =
+      {
+      startTime: StartTime.t option
+        [@ocaml.doc "Start Time. RFC 3339 format 'HH:mm:ss.SSS'."];
+      endTime: EndTime.t option
+        [@ocaml.doc "End Time. RFC 3339 format 'HH:mm:ss.SSS'."]}
+    let make ?startTime = fun ?endTime -> fun () -> { startTime; endTime }
+    let to_value x =
+      structure_to_value
+        [("startTime", (Option.map x.startTime ~f:StartTime.to_value));
+        ("endTime", (Option.map x.endTime ~f:EndTime.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let endTime =
+        (Option.map ~f:EndTime.of_xml) (Xml.child xml_arg0 "endTime") in
+      let startTime =
+        (Option.map ~f:StartTime.of_xml) (Xml.child xml_arg0 "startTime") in
+      make ?endTime ?startTime ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let endTime = field_map json__ "endTime" EndTime.of_json in
+      let startTime = field_map json__ "startTime" StartTime.of_json in
+      make ?endTime ?startTime ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Time range object with startTime and endTime range in RFC 3339 format. 'HH:mm:ss.SSS'."]
 module CcEmailAddress =
   struct
     type nonrec t = string
@@ -408,6 +522,9 @@ module CommunicationList =
   struct
     type nonrec t = Communication.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Communication.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -461,9 +578,9 @@ module TrustedAdvisorCategorySpecificSummary =
           (Xml.child xml_arg0 "costOptimizing") in
       make ?costOptimizing ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let costOptimizing =
-        field_map json "costOptimizing"
+        field_map json__ "costOptimizing"
           TrustedAdvisorCostOptimizingSummary.of_json in
       make ?costOptimizing ()
     let to_json v = composed_to_json to_value v
@@ -473,23 +590,22 @@ module TrustedAdvisorResourcesSummary =
   struct
     type nonrec t =
       {
-      resourcesProcessed: Long.t
+      resourcesProcessed: Long.t option
         [@ocaml.doc
           "The number of Amazon Web Services resources that were analyzed by the Trusted Advisor check."];
-      resourcesFlagged: Long.t
+      resourcesFlagged: Long.t option
         [@ocaml.doc
           "The number of Amazon Web Services resources that were flagged (listed) by the Trusted Advisor check."];
-      resourcesIgnored: Long.t
+      resourcesIgnored: Long.t option
         [@ocaml.doc
           "The number of Amazon Web Services resources ignored by Trusted Advisor because information was unavailable."];
-      resourcesSuppressed: Long.t
+      resourcesSuppressed: Long.t option
         [@ocaml.doc
           "The number of Amazon Web Services resources ignored by Trusted Advisor because they were marked as suppressed by the user."]}
-    let context_ = "TrustedAdvisorResourcesSummary"
-    let make ~resourcesProcessed =
-      fun ~resourcesFlagged ->
-        fun ~resourcesIgnored ->
-          fun ~resourcesSuppressed ->
+    let make ?resourcesProcessed =
+      fun ?resourcesFlagged ->
+        fun ?resourcesIgnored ->
+          fun ?resourcesSuppressed ->
             fun () ->
               {
                 resourcesProcessed;
@@ -499,38 +615,37 @@ module TrustedAdvisorResourcesSummary =
               }
     let to_value x =
       structure_to_value
-        [("resourcesProcessed", (Some (Long.to_value x.resourcesProcessed)));
-        ("resourcesFlagged", (Some (Long.to_value x.resourcesFlagged)));
-        ("resourcesIgnored", (Some (Long.to_value x.resourcesIgnored)));
-        ("resourcesSuppressed", (Some (Long.to_value x.resourcesSuppressed)))]
+        [("resourcesProcessed",
+           (Option.map x.resourcesProcessed ~f:Long.to_value));
+        ("resourcesFlagged",
+          (Option.map x.resourcesFlagged ~f:Long.to_value));
+        ("resourcesIgnored",
+          (Option.map x.resourcesIgnored ~f:Long.to_value));
+        ("resourcesSuppressed",
+          (Option.map x.resourcesSuppressed ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let resourcesSuppressed =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesSuppressed") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "resourcesSuppressed") in
       let resourcesIgnored =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesIgnored") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "resourcesIgnored") in
       let resourcesFlagged =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesFlagged") in
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "resourcesFlagged") in
       let resourcesProcessed =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesProcessed") in
-      make ~resourcesSuppressed ~resourcesIgnored ~resourcesFlagged
-        ~resourcesProcessed ()
+        (Option.map ~f:Long.of_xml) (Xml.child xml_arg0 "resourcesProcessed") in
+      make ?resourcesSuppressed ?resourcesIgnored ?resourcesFlagged
+        ?resourcesProcessed ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourcesSuppressed =
-        field_map_exn json "resourcesSuppressed" Long.of_json in
-      let resourcesIgnored =
-        field_map_exn json "resourcesIgnored" Long.of_json in
-      let resourcesFlagged =
-        field_map_exn json "resourcesFlagged" Long.of_json in
+        field_map json__ "resourcesSuppressed" Long.of_json in
+      let resourcesIgnored = field_map json__ "resourcesIgnored" Long.of_json in
+      let resourcesFlagged = field_map json__ "resourcesFlagged" Long.of_json in
       let resourcesProcessed =
-        field_map_exn json "resourcesProcessed" Long.of_json in
-      make ~resourcesSuppressed ~resourcesIgnored ~resourcesFlagged
-        ~resourcesProcessed ()
+        field_map json__ "resourcesProcessed" Long.of_json in
+      make ?resourcesSuppressed ?resourcesIgnored ?resourcesFlagged
+        ?resourcesProcessed ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Details about Amazon Web Services resources that were analyzed in a call to Trusted Advisor DescribeTrustedAdvisorCheckSummaries."]
@@ -538,61 +653,97 @@ module TrustedAdvisorResourceDetail =
   struct
     type nonrec t =
       {
-      status: String_.t
+      status: String_.t option
         [@ocaml.doc
           "The status code for the resource identified in the Trusted Advisor check."];
       region: String_.t option
         [@ocaml.doc
           "The Amazon Web Services Region in which the identified resource is located."];
-      resourceId: String_.t
+      resourceId: String_.t option
         [@ocaml.doc "The unique identifier for the identified resource."];
       isSuppressed: Boolean.t option
         [@ocaml.doc
           "Specifies whether the Amazon Web Services resource was ignored by Trusted Advisor because it was marked as suppressed by the user."];
-      metadata: StringList.t
+      metadata: StringList.t option
         [@ocaml.doc
           "Additional information about the identified resource. The exact metadata and its order can be obtained by inspecting the TrustedAdvisorCheckDescription object returned by the call to DescribeTrustedAdvisorChecks. Metadata contains all the data that is shown in the Excel download, even in those cases where the UI shows just summary data."]}
-    let context_ = "TrustedAdvisorResourceDetail"
-    let make ?region =
-      fun ?isSuppressed ->
-        fun ~status ->
-          fun ~resourceId ->
-            fun ~metadata ->
+    let make ?status =
+      fun ?region ->
+        fun ?resourceId ->
+          fun ?isSuppressed ->
+            fun ?metadata ->
               fun () ->
-                { region; isSuppressed; status; resourceId; metadata }
+                { status; region; resourceId; isSuppressed; metadata }
     let to_value x =
       structure_to_value
-        [("status", (Some (String_.to_value x.status)));
+        [("status", (Option.map x.status ~f:String_.to_value));
         ("region", (Option.map x.region ~f:String_.to_value));
-        ("resourceId", (Some (String_.to_value x.resourceId)));
+        ("resourceId", (Option.map x.resourceId ~f:String_.to_value));
         ("isSuppressed", (Option.map x.isSuppressed ~f:Boolean.to_value));
-        ("metadata", (Some (StringList.to_value x.metadata)))]
+        ("metadata", (Option.map x.metadata ~f:StringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let metadata =
-        StringList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "metadata") in
       let isSuppressed =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "isSuppressed") in
       let resourceId =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourceId") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "resourceId") in
       let region =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "region") in
       let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~metadata ?isSuppressed ~resourceId ?region ~status ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
+      make ?metadata ?isSuppressed ?resourceId ?region ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map_exn json "metadata" StringList.of_json in
-      let isSuppressed = field_map json "isSuppressed" Boolean.of_json in
-      let resourceId = field_map_exn json "resourceId" String_.of_json in
-      let region = field_map json "region" String_.of_json in
-      let status = field_map_exn json "status" String_.of_json in
-      make ~metadata ?isSuppressed ~resourceId ?region ~status ()
+    let of_json json__ =
+      let metadata = field_map json__ "metadata" StringList.of_json in
+      let isSuppressed = field_map json__ "isSuppressed" Boolean.of_json in
+      let resourceId = field_map json__ "resourceId" String_.of_json in
+      let region = field_map json__ "region" String_.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      make ?metadata ?isSuppressed ?resourceId ?region ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Contains information about a resource identified by a Trusted Advisor check."]
+module Code =
+  struct
+    type nonrec t = string
+    let context_ = "Code"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Code" j
+    let to_json = simple_to_json to_value
+  end
+module Display =
+  struct
+    type nonrec t = string
+    let context_ = "Display"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Display" j
+    let to_json = simple_to_json to_value
+  end
+module Language =
+  struct
+    type nonrec t = string
+    let context_ = "Language"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Language" j
+    let to_json = simple_to_json to_value
+  end
 module SeverityLevelCode =
   struct
     type nonrec t = string
@@ -623,6 +774,9 @@ module CategoryList =
   struct
     type nonrec t = Category.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Category.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -669,6 +823,75 @@ module ServiceName =
     let of_json j = string_of_json ~kind:"ServiceName" j
     let to_json = simple_to_json to_value
   end
+module DatesWithoutSupportList =
+  struct
+    type nonrec t = DateInterval.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DateInterval.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DateInterval.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DatesWithoutSupportList"
+        ~of_json:DateInterval.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module SupportedHoursList =
+  struct
+    type nonrec t = SupportedHour.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SupportedHour.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SupportedHour.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedHoursList" ~of_json:SupportedHour.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module Type =
+  struct
+    type nonrec t = string
+    let context_ = "Type"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Type" j
+    let to_json = simple_to_json to_value
+  end
 module CcEmailAddressList =
   struct
     type nonrec t = CcEmailAddress.t list
@@ -677,6 +900,9 @@ module CcEmailAddressList =
         ok_or_failwith
           ((check_list_max i ~max:10) >>= (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CcEmailAddress.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -711,19 +937,6 @@ module DisplayId =
     let of_json j = string_of_json ~kind:"DisplayId" j
     let to_json = simple_to_json to_value
   end
-module Language =
-  struct
-    type nonrec t = string
-    let context_ = "Language"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"Language" j
-    let to_json = simple_to_json to_value
-  end
 module RecentCaseCommunications =
   struct
     type nonrec t =
@@ -749,10 +962,10 @@ module RecentCaseCommunications =
           (Xml.child xml_arg0 "communications") in
       make ?nextToken ?communications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let communications =
-        field_map json "communications" CommunicationList.of_json in
+        field_map json__ "communications" CommunicationList.of_json in
       make ?nextToken ?communications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -821,58 +1034,67 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"ErrorMessage" j
     let to_json = simple_to_json to_value
   end
+module AvailabilityErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "AvailabilityErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"AvailabilityErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
 module TrustedAdvisorCheckDescription =
   struct
     type nonrec t =
       {
-      id: String_.t
+      id: String_.t option
         [@ocaml.doc "The unique identifier for the Trusted Advisor check."];
-      name: String_.t
+      name: String_.t option
         [@ocaml.doc "The display name for the Trusted Advisor check."];
-      description: String_.t
+      description: String_.t option
         [@ocaml.doc
           "The description of the Trusted Advisor check, which includes the alert criteria and recommended operations (contains HTML markup)."];
-      category: String_.t
+      category: String_.t option
         [@ocaml.doc "The category of the Trusted Advisor check."];
-      metadata: StringList.t
+      metadata: StringList.t option
         [@ocaml.doc
           "The column headings for the data returned by the Trusted Advisor check. The order of the headings corresponds to the order of the data in the Metadata element of the TrustedAdvisorResourceDetail for the check. Metadata contains all the data that is shown in the Excel download, even in those cases where the UI shows just summary data."]}
-    let context_ = "TrustedAdvisorCheckDescription"
-    let make ~id =
-      fun ~name ->
-        fun ~description ->
-          fun ~category ->
-            fun ~metadata ->
+    let make ?id =
+      fun ?name ->
+        fun ?description ->
+          fun ?category ->
+            fun ?metadata ->
               fun () -> { id; name; description; category; metadata }
     let to_value x =
       structure_to_value
-        [("id", (Some (String_.to_value x.id)));
-        ("name", (Some (String_.to_value x.name)));
-        ("description", (Some (String_.to_value x.description)));
-        ("category", (Some (String_.to_value x.category)));
-        ("metadata", (Some (StringList.to_value x.metadata)))]
+        [("id", (Option.map x.id ~f:String_.to_value));
+        ("name", (Option.map x.name ~f:String_.to_value));
+        ("description", (Option.map x.description ~f:String_.to_value));
+        ("category", (Option.map x.category ~f:String_.to_value));
+        ("metadata", (Option.map x.metadata ~f:StringList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let metadata =
-        StringList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "metadata") in
+        (Option.map ~f:StringList.of_xml) (Xml.child xml_arg0 "metadata") in
       let category =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "category") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "category") in
       let description =
-        String_.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "description") in
-      let name =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "name") in
-      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ~metadata ~category ~description ~name ~id ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "description") in
+      let name = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "name") in
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "id") in
+      make ?metadata ?category ?description ?name ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let metadata = field_map_exn json "metadata" StringList.of_json in
-      let category = field_map_exn json "category" String_.of_json in
-      let description = field_map_exn json "description" String_.of_json in
-      let name = field_map_exn json "name" String_.of_json in
-      let id = field_map_exn json "id" String_.of_json in
-      make ~metadata ~category ~description ~name ~id ()
+    let of_json json__ =
+      let metadata = field_map json__ "metadata" StringList.of_json in
+      let category = field_map json__ "category" String_.of_json in
+      let description = field_map json__ "description" String_.of_json in
+      let name = field_map json__ "name" String_.of_json in
+      let id = field_map json__ "id" String_.of_json in
+      make ?metadata ?category ?description ?name ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The description and metadata for a Trusted Advisor check."]
@@ -880,83 +1102,82 @@ module TrustedAdvisorCheckSummary =
   struct
     type nonrec t =
       {
-      checkId: String_.t
+      checkId: String_.t option
         [@ocaml.doc "The unique identifier for the Trusted Advisor check."];
-      timestamp: String_.t
+      timestamp: String_.t option
         [@ocaml.doc "The time of the last refresh of the check."];
-      status: String_.t
+      status: String_.t option
         [@ocaml.doc
           "The alert status of the check: \"ok\" (green), \"warning\" (yellow), \"error\" (red), or \"not_available\"."];
       hasFlaggedResources: Boolean.t option
         [@ocaml.doc
           "Specifies whether the Trusted Advisor check has flagged resources."];
-      resourcesSummary: TrustedAdvisorResourcesSummary.t ;
-      categorySpecificSummary: TrustedAdvisorCategorySpecificSummary.t
+      resourcesSummary: TrustedAdvisorResourcesSummary.t option ;
+      categorySpecificSummary: TrustedAdvisorCategorySpecificSummary.t option
         [@ocaml.doc
           "Summary information that relates to the category of the check. Cost Optimizing is the only category that is currently supported."]}
-    let context_ = "TrustedAdvisorCheckSummary"
-    let make ?hasFlaggedResources =
-      fun ~checkId ->
-        fun ~timestamp ->
-          fun ~status ->
-            fun ~resourcesSummary ->
-              fun ~categorySpecificSummary ->
+    let make ?checkId =
+      fun ?timestamp ->
+        fun ?status ->
+          fun ?hasFlaggedResources ->
+            fun ?resourcesSummary ->
+              fun ?categorySpecificSummary ->
                 fun () ->
                   {
-                    hasFlaggedResources;
                     checkId;
                     timestamp;
                     status;
+                    hasFlaggedResources;
                     resourcesSummary;
                     categorySpecificSummary
                   }
     let to_value x =
       structure_to_value
-        [("checkId", (Some (String_.to_value x.checkId)));
-        ("timestamp", (Some (String_.to_value x.timestamp)));
-        ("status", (Some (String_.to_value x.status)));
+        [("checkId", (Option.map x.checkId ~f:String_.to_value));
+        ("timestamp", (Option.map x.timestamp ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
         ("hasFlaggedResources",
           (Option.map x.hasFlaggedResources ~f:Boolean.to_value));
         ("resourcesSummary",
-          (Some (TrustedAdvisorResourcesSummary.to_value x.resourcesSummary)));
+          (Option.map x.resourcesSummary
+             ~f:TrustedAdvisorResourcesSummary.to_value));
         ("categorySpecificSummary",
-          (Some
-             (TrustedAdvisorCategorySpecificSummary.to_value
-                x.categorySpecificSummary)))]
+          (Option.map x.categorySpecificSummary
+             ~f:TrustedAdvisorCategorySpecificSummary.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let categorySpecificSummary =
-        TrustedAdvisorCategorySpecificSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "categorySpecificSummary") in
+        (Option.map ~f:TrustedAdvisorCategorySpecificSummary.of_xml)
+          (Xml.child xml_arg0 "categorySpecificSummary") in
       let resourcesSummary =
-        TrustedAdvisorResourcesSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesSummary") in
+        (Option.map ~f:TrustedAdvisorResourcesSummary.of_xml)
+          (Xml.child xml_arg0 "resourcesSummary") in
       let hasFlaggedResources =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "hasFlaggedResources") in
       let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       let timestamp =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "timestamp") in
       let checkId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
-      make ~categorySpecificSummary ~resourcesSummary ?hasFlaggedResources
-        ~status ~timestamp ~checkId ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "checkId") in
+      make ?categorySpecificSummary ?resourcesSummary ?hasFlaggedResources
+        ?status ?timestamp ?checkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let categorySpecificSummary =
-        field_map_exn json "categorySpecificSummary"
+        field_map json__ "categorySpecificSummary"
           TrustedAdvisorCategorySpecificSummary.of_json in
       let resourcesSummary =
-        field_map_exn json "resourcesSummary"
+        field_map json__ "resourcesSummary"
           TrustedAdvisorResourcesSummary.of_json in
       let hasFlaggedResources =
-        field_map json "hasFlaggedResources" Boolean.of_json in
-      let status = field_map_exn json "status" String_.of_json in
-      let timestamp = field_map_exn json "timestamp" String_.of_json in
-      let checkId = field_map_exn json "checkId" String_.of_json in
-      make ~categorySpecificSummary ~resourcesSummary ?hasFlaggedResources
-        ~status ~timestamp ~checkId ()
+        field_map json__ "hasFlaggedResources" Boolean.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let timestamp = field_map json__ "timestamp" String_.of_json in
+      let checkId = field_map json__ "checkId" String_.of_json in
+      make ?categorySpecificSummary ?resourcesSummary ?hasFlaggedResources
+        ?status ?timestamp ?checkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A summary of a Trusted Advisor check result, including the alert status, last refresh, and number of resources examined."]
@@ -964,6 +1185,9 @@ module TrustedAdvisorResourceDetailList =
   struct
     type nonrec t = TrustedAdvisorResourceDetail.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustedAdvisorResourceDetail.to_value)) |>
         (fun x -> `List x)
@@ -990,45 +1214,76 @@ module TrustedAdvisorCheckRefreshStatus =
   struct
     type nonrec t =
       {
-      checkId: String_.t
+      checkId: String_.t option
         [@ocaml.doc "The unique identifier for the Trusted Advisor check."];
-      status: String_.t
+      status: String_.t option
         [@ocaml.doc
           "The status of the Trusted Advisor check for which a refresh has been requested: none - The check is not refreshed or the non-success status exceeds the timeout enqueued - The check refresh requests has entered the refresh queue processing - The check refresh request is picked up by the rule processing engine success - The check is successfully refreshed abandoned - The check refresh has failed"];
-      millisUntilNextRefreshable: Long.t
+      millisUntilNextRefreshable: Long.t option
         [@ocaml.doc
           "The amount of time, in milliseconds, until the Trusted Advisor check is eligible for refresh."]}
-    let context_ = "TrustedAdvisorCheckRefreshStatus"
-    let make ~checkId =
-      fun ~status ->
-        fun ~millisUntilNextRefreshable ->
+    let make ?checkId =
+      fun ?status ->
+        fun ?millisUntilNextRefreshable ->
           fun () -> { checkId; status; millisUntilNextRefreshable }
     let to_value x =
       structure_to_value
-        [("checkId", (Some (String_.to_value x.checkId)));
-        ("status", (Some (String_.to_value x.status)));
+        [("checkId", (Option.map x.checkId ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
         ("millisUntilNextRefreshable",
-          (Some (Long.to_value x.millisUntilNextRefreshable)))]
+          (Option.map x.millisUntilNextRefreshable ~f:Long.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let millisUntilNextRefreshable =
-        Long.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0
-             "millisUntilNextRefreshable") in
+        (Option.map ~f:Long.of_xml)
+          (Xml.child xml_arg0 "millisUntilNextRefreshable") in
       let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       let checkId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
-      make ~millisUntilNextRefreshable ~status ~checkId ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "checkId") in
+      make ?millisUntilNextRefreshable ?status ?checkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let millisUntilNextRefreshable =
-        field_map_exn json "millisUntilNextRefreshable" Long.of_json in
-      let status = field_map_exn json "status" String_.of_json in
-      let checkId = field_map_exn json "checkId" String_.of_json in
-      make ~millisUntilNextRefreshable ~status ~checkId ()
+        field_map json__ "millisUntilNextRefreshable" Long.of_json in
+      let status = field_map json__ "status" String_.of_json in
+      let checkId = field_map json__ "checkId" String_.of_json in
+      make ?millisUntilNextRefreshable ?status ?checkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The refresh status of a Trusted Advisor check."]
+module SupportedLanguage =
+  struct
+    type nonrec t =
+      {
+      code: Code.t option [@ocaml.doc "2 digit ISO 639-1 code. e.g. en"];
+      language: Language.t option
+        [@ocaml.doc "Full language description e.g. ENGLISH"];
+      display: Display.t option
+        [@ocaml.doc "Language display value e.g. ENGLISH"]}
+    let make ?code =
+      fun ?language -> fun ?display -> fun () -> { code; language; display }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:Code.to_value));
+        ("language", (Option.map x.language ~f:Language.to_value));
+        ("display", (Option.map x.display ~f:Display.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let display =
+        (Option.map ~f:Display.of_xml) (Xml.child xml_arg0 "display") in
+      let language =
+        (Option.map ~f:Language.of_xml) (Xml.child xml_arg0 "language") in
+      let code = (Option.map ~f:Code.of_xml) (Xml.child xml_arg0 "code") in
+      make ?display ?language ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let display = field_map json__ "display" Display.of_json in
+      let language = field_map json__ "language" Language.of_json in
+      let code = field_map json__ "code" Code.of_json in
+      make ?display ?language ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A JSON-formatted object that contains the available ISO 639-1 language code, language name and langauge display value. The language code is what should be used in the CreateCase call."]
 module SeverityLevel =
   struct
     type nonrec t =
@@ -1052,9 +1307,9 @@ module SeverityLevel =
         (Option.map ~f:SeverityLevelCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?name ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let name = field_map json "name" SeverityLevelName.of_json in
-      let code = field_map json "code" SeverityLevelCode.of_json in
+    let of_json json__ =
+      let name = field_map json__ "name" SeverityLevelName.of_json in
+      let code = field_map json__ "code" SeverityLevelCode.of_json in
       make ?name ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1089,14 +1344,61 @@ module Service =
         (Option.map ~f:ServiceCode.of_xml) (Xml.child xml_arg0 "code") in
       make ?categories ?name ?code ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let categories = field_map json "categories" CategoryList.of_json in
-      let name = field_map json "name" ServiceName.of_json in
-      let code = field_map json "code" ServiceCode.of_json in
+    let of_json json__ =
+      let categories = field_map json__ "categories" CategoryList.of_json in
+      let name = field_map json__ "name" ServiceName.of_json in
+      let code = field_map json__ "code" ServiceCode.of_json in
       make ?categories ?name ?code ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about an Amazon Web Services service returned by the DescribeServices operation."]
+module CommunicationTypeOptions =
+  struct
+    type nonrec t =
+      {
+      type_: Type.t option
+        [@ocaml.doc
+          "A string value indicating the communication type. At the moment the type value can assume one of 3 values at the moment chat, web and call."];
+      supportedHours: SupportedHoursList.t option
+        [@ocaml.doc
+          "A JSON-formatted list containing time ranges when support is available."];
+      datesWithoutSupport: DatesWithoutSupportList.t option
+        [@ocaml.doc
+          "A JSON-formatted list containing date and time ranges for periods without support"]}
+    let make ?type_ =
+      fun ?supportedHours ->
+        fun ?datesWithoutSupport ->
+          fun () -> { type_; supportedHours; datesWithoutSupport }
+    let to_value x =
+      structure_to_value
+        [("type", (Option.map x.type_ ~f:Type.to_value));
+        ("supportedHours",
+          (Option.map x.supportedHours ~f:SupportedHoursList.to_value));
+        ("datesWithoutSupport",
+          (Option.map x.datesWithoutSupport
+             ~f:DatesWithoutSupportList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let datesWithoutSupport =
+        (Option.map ~f:DatesWithoutSupportList.of_xml)
+          (Xml.child xml_arg0 "datesWithoutSupport") in
+      let supportedHours =
+        (Option.map ~f:SupportedHoursList.of_xml)
+          (Xml.child xml_arg0 "supportedHours") in
+      let type_ = (Option.map ~f:Type.of_xml) (Xml.child xml_arg0 "type") in
+      make ?datesWithoutSupport ?supportedHours ?type_ ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let datesWithoutSupport =
+        field_map json__ "datesWithoutSupport"
+          DatesWithoutSupportList.of_json in
+      let supportedHours =
+        field_map json__ "supportedHours" SupportedHoursList.of_json in
+      let type_ = field_map json__ "type" Type.of_json in
+      make ?datesWithoutSupport ?supportedHours ?type_ ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "A JSON-formatted object that contains the CommunicationTypeOptions for creating a case for a certain communication channel. It is contained in the response from a DescribeCreateCaseOptions request. CommunicationTypeOptions contains the following fields: datesWithoutSupport - A JSON-formatted list containing date and time ranges for periods without support in UTC time. Date and time format is RFC 3339 : 'yyyy-MM-dd'T'HH:mm:ss.SSSZZ'. supportedHours - A JSON-formatted list containing time ranges when support are available. Time format is RFC 3339 : 'HH:mm:ss.SSS'. type - A string value indicating the communication type that the aforementioned rules apply to. At the moment the type value can assume one of 3 values at the moment chat, web and call."]
 module CaseDetails =
   struct
     type nonrec t =
@@ -1112,7 +1414,7 @@ module CaseDetails =
           "The subject line for the case in the Amazon Web Services Support Center."];
       status: Status.t option
         [@ocaml.doc
-          "The status of the case. Valid values: opened pending-customer-action reopened resolved unassigned work-in-progress"];
+          "The status of the case. Valid values: all-open customer-action-completed opened pending-customer-action reopened resolved unassigned work-in-progress"];
       serviceCode: ServiceCode.t option
         [@ocaml.doc
           "The code for the Amazon Web Services service. You can get a list of codes and the corresponding service names by calling DescribeServices."];
@@ -1135,7 +1437,7 @@ module CaseDetails =
           "The email addresses that receive copies of communication about the case."];
       language: Language.t option
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."]}
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."]}
     let make ?caseId =
       fun ?displayId ->
         fun ?subject ->
@@ -1216,28 +1518,28 @@ module CaseDetails =
         ?submittedBy ?severityCode ?categoryCode ?serviceCode ?status
         ?subject ?displayId ?caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let language = field_map json "language" Language.of_json in
+    let of_json json__ =
+      let language = field_map json__ "language" Language.of_json in
       let ccEmailAddresses =
-        field_map json "ccEmailAddresses" CcEmailAddressList.of_json in
+        field_map json__ "ccEmailAddresses" CcEmailAddressList.of_json in
       let recentCommunications =
-        field_map json "recentCommunications"
+        field_map json__ "recentCommunications"
           RecentCaseCommunications.of_json in
-      let timeCreated = field_map json "timeCreated" TimeCreated.of_json in
-      let submittedBy = field_map json "submittedBy" SubmittedBy.of_json in
-      let severityCode = field_map json "severityCode" SeverityCode.of_json in
-      let categoryCode = field_map json "categoryCode" CategoryCode.of_json in
-      let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
-      let status = field_map json "status" Status.of_json in
-      let subject = field_map json "subject" Subject.of_json in
-      let displayId = field_map json "displayId" DisplayId.of_json in
-      let caseId = field_map json "caseId" CaseId.of_json in
+      let timeCreated = field_map json__ "timeCreated" TimeCreated.of_json in
+      let submittedBy = field_map json__ "submittedBy" SubmittedBy.of_json in
+      let severityCode = field_map json__ "severityCode" SeverityCode.of_json in
+      let categoryCode = field_map json__ "categoryCode" CategoryCode.of_json in
+      let serviceCode = field_map json__ "serviceCode" ServiceCode.of_json in
+      let status = field_map json__ "status" Status.of_json in
+      let subject = field_map json__ "subject" Subject.of_json in
+      let displayId = field_map json__ "displayId" DisplayId.of_json in
+      let caseId = field_map json__ "caseId" CaseId.of_json in
       make ?language ?ccEmailAddresses ?recentCommunications ?timeCreated
         ?submittedBy ?severityCode ?categoryCode ?serviceCode ?status
         ?subject ?displayId ?caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "A JSON-formatted object that contains the metadata for a support case. It is contained in the response from a DescribeCases request. CaseDetails contains the following fields: caseId - The support case ID requested or returned in the call. The case ID is an alphanumeric string formatted as shown in this example: case-12345678910-2013-c4c1d2bf33c5cf47. categoryCode - The category of problem for the support case. Corresponds to the CategoryCode values returned by a call to DescribeServices. displayId - The identifier for the case on pages in the Amazon Web Services Support Center. language - The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them. nextToken - A resumption point for pagination. recentCommunications - One or more Communication objects. Fields of these objects are attachments, body, caseId, submittedBy, and timeCreated. serviceCode - The identifier for the Amazon Web Services service that corresponds to the service code defined in the call to DescribeServices. severityCode - The severity code assigned to the case. Contains one of the values returned by the call to DescribeSeverityLevels. The possible values are: low, normal, high, urgent, and critical. status - The status of the case in the Amazon Web Services Support Center. Valid values: opened pending-customer-action reopened resolved unassigned work-in-progress subject - The subject line of the case. submittedBy - The email address of the account that submitted the case. timeCreated - The time the case was created, in ISO-8601 format."]
+       "A JSON-formatted object that contains the metadata for a support case. It is contained in the response from a DescribeCases request. CaseDetails contains the following fields: caseId - The support case ID requested or returned in the call. The case ID is an alphanumeric string formatted as shown in this example: case-12345678910-2013-c4c1d2bf33c5cf47. categoryCode - The category of problem for the support case. Corresponds to the CategoryCode values returned by a call to DescribeServices. displayId - The identifier for the case on pages in the Amazon Web Services Support Center. language - The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language. nextToken - A resumption point for pagination. recentCommunications - One or more Communication objects. Fields of these objects are attachments, body, caseId, submittedBy, and timeCreated. serviceCode - The identifier for the Amazon Web Services service that corresponds to the service code defined in the call to DescribeServices. severityCode - The severity code assigned to the case. Contains one of the values returned by the call to DescribeSeverityLevels. The possible values are: low, normal, high, urgent, and critical. status - The status of the case in the Amazon Web Services Support Center. Valid values: all-open customer-action-completed opened pending-customer-action reopened resolved unassigned work-in-progress subject - The subject line of the case. submittedBy - The email address of the account that submitted the case. timeCreated - The time the case was created, in ISO-8601 format."]
 module Attachment =
   struct
     type nonrec t =
@@ -1257,13 +1559,13 @@ module Attachment =
         (Option.map ~f:FileName.of_xml) (Xml.child xml_arg0 "fileName") in
       make ?data ?fileName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let data = field_map json "data" Data.of_json in
-      let fileName = field_map json "fileName" FileName.of_json in
+    let of_json json__ =
+      let data = field_map json__ "data" Data.of_json in
+      let fileName = field_map json__ "fileName" FileName.of_json in
       make ?data ?fileName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "An attachment to a case communication. The attachment consists of the file name and the content of the file."]
+       "An attachment to a case communication. The attachment consists of the file name and the content of the file. Each attachment file size should not exceed 5 MB. File types that are supported include the following: pdf, jpeg,.doc, .log, .text"]
 module CaseIdNotFound =
   struct
     type nonrec t =
@@ -1280,8 +1582,8 @@ module CaseIdNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested caseId couldn't be located."]
@@ -1314,15 +1616,41 @@ module InternalServerError =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An internal server error occurred."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: AvailabilityErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message",
+           (Option.map x.message ~f:AvailabilityErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:AvailabilityErrorMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message =
+        field_map json__ "message" AvailabilityErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "You have exceeded the maximum allowed TPS (Transactions Per Second) for the operations."]
 module TrustedAdvisorCheckList =
   struct
     type nonrec t = TrustedAdvisorCheckDescription.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustedAdvisorCheckDescription.to_value)) |>
         (fun x -> `List x)
@@ -1349,6 +1677,9 @@ module TrustedAdvisorCheckSummaryList =
   struct
     type nonrec t = TrustedAdvisorCheckSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustedAdvisorCheckSummary.to_value)) |>
         (fun x -> `List x)
@@ -1375,27 +1706,26 @@ module TrustedAdvisorCheckResult =
   struct
     type nonrec t =
       {
-      checkId: String_.t
+      checkId: String_.t option
         [@ocaml.doc "The unique identifier for the Trusted Advisor check."];
-      timestamp: String_.t
+      timestamp: String_.t option
         [@ocaml.doc "The time of the last refresh of the check."];
-      status: String_.t
+      status: String_.t option
         [@ocaml.doc
           "The alert status of the check: \"ok\" (green), \"warning\" (yellow), \"error\" (red), or \"not_available\"."];
-      resourcesSummary: TrustedAdvisorResourcesSummary.t ;
-      categorySpecificSummary: TrustedAdvisorCategorySpecificSummary.t
+      resourcesSummary: TrustedAdvisorResourcesSummary.t option ;
+      categorySpecificSummary: TrustedAdvisorCategorySpecificSummary.t option
         [@ocaml.doc
           "Summary information that relates to the category of the check. Cost Optimizing is the only category that is currently supported."];
-      flaggedResources: TrustedAdvisorResourceDetailList.t
+      flaggedResources: TrustedAdvisorResourceDetailList.t option
         [@ocaml.doc
           "The details about each resource listed in the check result."]}
-    let context_ = "TrustedAdvisorCheckResult"
-    let make ~checkId =
-      fun ~timestamp ->
-        fun ~status ->
-          fun ~resourcesSummary ->
-            fun ~categorySpecificSummary ->
-              fun ~flaggedResources ->
+    let make ?checkId =
+      fun ?timestamp ->
+        fun ?status ->
+          fun ?resourcesSummary ->
+            fun ?categorySpecificSummary ->
+              fun ?flaggedResources ->
                 fun () ->
                   {
                     checkId;
@@ -1407,53 +1737,53 @@ module TrustedAdvisorCheckResult =
                   }
     let to_value x =
       structure_to_value
-        [("checkId", (Some (String_.to_value x.checkId)));
-        ("timestamp", (Some (String_.to_value x.timestamp)));
-        ("status", (Some (String_.to_value x.status)));
+        [("checkId", (Option.map x.checkId ~f:String_.to_value));
+        ("timestamp", (Option.map x.timestamp ~f:String_.to_value));
+        ("status", (Option.map x.status ~f:String_.to_value));
         ("resourcesSummary",
-          (Some (TrustedAdvisorResourcesSummary.to_value x.resourcesSummary)));
+          (Option.map x.resourcesSummary
+             ~f:TrustedAdvisorResourcesSummary.to_value));
         ("categorySpecificSummary",
-          (Some
-             (TrustedAdvisorCategorySpecificSummary.to_value
-                x.categorySpecificSummary)));
+          (Option.map x.categorySpecificSummary
+             ~f:TrustedAdvisorCategorySpecificSummary.to_value));
         ("flaggedResources",
-          (Some
-             (TrustedAdvisorResourceDetailList.to_value x.flaggedResources)))]
+          (Option.map x.flaggedResources
+             ~f:TrustedAdvisorResourceDetailList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let flaggedResources =
-        TrustedAdvisorResourceDetailList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "flaggedResources") in
+        (Option.map ~f:TrustedAdvisorResourceDetailList.of_xml)
+          (Xml.child xml_arg0 "flaggedResources") in
       let categorySpecificSummary =
-        TrustedAdvisorCategorySpecificSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "categorySpecificSummary") in
+        (Option.map ~f:TrustedAdvisorCategorySpecificSummary.of_xml)
+          (Xml.child xml_arg0 "categorySpecificSummary") in
       let resourcesSummary =
-        TrustedAdvisorResourcesSummary.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "resourcesSummary") in
+        (Option.map ~f:TrustedAdvisorResourcesSummary.of_xml)
+          (Xml.child xml_arg0 "resourcesSummary") in
       let status =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "status") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "status") in
       let timestamp =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "timestamp") in
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "timestamp") in
       let checkId =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
-      make ~flaggedResources ~categorySpecificSummary ~resourcesSummary
-        ~status ~timestamp ~checkId ()
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "checkId") in
+      make ?flaggedResources ?categorySpecificSummary ?resourcesSummary
+        ?status ?timestamp ?checkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let flaggedResources =
-        field_map_exn json "flaggedResources"
+        field_map json__ "flaggedResources"
           TrustedAdvisorResourceDetailList.of_json in
       let categorySpecificSummary =
-        field_map_exn json "categorySpecificSummary"
+        field_map json__ "categorySpecificSummary"
           TrustedAdvisorCategorySpecificSummary.of_json in
       let resourcesSummary =
-        field_map_exn json "resourcesSummary"
+        field_map json__ "resourcesSummary"
           TrustedAdvisorResourcesSummary.of_json in
-      let status = field_map_exn json "status" String_.of_json in
-      let timestamp = field_map_exn json "timestamp" String_.of_json in
-      let checkId = field_map_exn json "checkId" String_.of_json in
-      make ~flaggedResources ~categorySpecificSummary ~resourcesSummary
-        ~status ~timestamp ~checkId ()
+      let status = field_map json__ "status" String_.of_json in
+      let timestamp = field_map json__ "timestamp" String_.of_json in
+      let checkId = field_map json__ "checkId" String_.of_json in
+      make ?flaggedResources ?categorySpecificSummary ?resourcesSummary
+        ?status ?timestamp ?checkId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The results of a Trusted Advisor check returned by DescribeTrustedAdvisorCheckResult."]
@@ -1461,6 +1791,9 @@ module TrustedAdvisorCheckRefreshStatusList =
   struct
     type nonrec t = TrustedAdvisorCheckRefreshStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TrustedAdvisorCheckRefreshStatus.to_value)) |>
         (fun x -> `List x)
@@ -1484,10 +1817,100 @@ module TrustedAdvisorCheckRefreshStatusList =
         ~of_json:TrustedAdvisorCheckRefreshStatus.of_json j
     let to_json v = composed_to_json to_value v
   end
+module SupportedLanguagesList =
+  struct
+    type nonrec t = SupportedLanguage.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SupportedLanguage.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:SupportedLanguage.of_xml)
+    let of_json j =
+      list_of_json ~kind:"SupportedLanguagesList"
+        ~of_json:SupportedLanguage.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidatedCategoryCode =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedCategoryCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedCategoryCode" j
+    let to_json = simple_to_json to_value
+  end
+module ValidatedIssueTypeString =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedIssueTypeString"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:22) >>=
+             (fun () -> check_string_min i ~min:9));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedIssueTypeString" j
+    let to_json = simple_to_json to_value
+  end
+module ValidatedServiceCode =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedServiceCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedServiceCode" j
+    let to_json = simple_to_json to_value
+  end
 module SeverityLevelsList =
   struct
     type nonrec t = SeverityLevel.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:SeverityLevel.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1513,6 +1936,9 @@ module ServiceList =
   struct
     type nonrec t = Service.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Service.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1542,6 +1968,9 @@ module ServiceCodeList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ServiceCode.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1561,6 +1990,71 @@ module ServiceCodeList =
     let of_json j =
       list_of_json ~kind:"ServiceCodeList" ~of_json:ServiceCode.of_json j
     let to_json v = composed_to_json to_value v
+  end
+module CommunicationTypeOptionsList =
+  struct
+    type nonrec t = CommunicationTypeOptions.t list
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:100) >>=
+             (fun () -> check_list_min i ~min:1));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:CommunicationTypeOptions.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:CommunicationTypeOptions.of_xml)
+    let of_json j =
+      list_of_json ~kind:"CommunicationTypeOptionsList"
+        ~of_json:CommunicationTypeOptions.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ValidatedLanguageAvailability =
+  struct
+    type nonrec t = string
+    let context_ = "ValidatedLanguageAvailability"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:100) >>=
+             (fun () -> check_string_min i ~min:0));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ValidatedLanguageAvailability" j
+    let to_json = simple_to_json to_value
+  end
+module IssueType =
+  struct
+    type nonrec t = string
+    let context_ = "IssueType"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"IssueType" j
+    let to_json = simple_to_json to_value
   end
 module AfterTime =
   struct
@@ -1610,6 +2104,9 @@ module CaseList =
   struct
     type nonrec t = CaseDetails.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CaseDetails.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1639,6 +2136,9 @@ module CaseIdList =
           ((check_list_max i ~max:100) >>=
              (fun () -> check_list_min i ~min:0));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:CaseId.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1701,8 +2201,8 @@ module AttachmentIdNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "An attachment with the specified ID could not be found."]
@@ -1723,8 +2223,8 @@ module DescribeAttachmentLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1746,8 +2246,8 @@ module AttachmentSetExpired =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1769,8 +2269,8 @@ module AttachmentSetIdNotFound =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1792,8 +2292,8 @@ module CaseCreationLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1811,17 +2311,22 @@ module AttachmentSetId =
     let of_json j = string_of_json ~kind:"AttachmentSetId" j
     let to_json = simple_to_json to_value
   end
-module IssueType =
+module CommunicationBody =
   struct
     type nonrec t = string
-    let context_ = "IssueType"
-    let make i = i
+    let context_ = "CommunicationBody"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:8000) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"IssueType" j
+    let of_json j = string_of_json ~kind:"CommunicationBody" j
     let to_json = simple_to_json to_value
   end
 module Result_ =
@@ -1854,8 +2359,8 @@ module AttachmentLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1877,8 +2382,8 @@ module AttachmentSetSizeLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1900,6 +2405,9 @@ module Attachments =
   struct
     type nonrec t = Attachment.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Attachment.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1983,11 +2491,11 @@ module ResolveCaseResponse =
           (Xml.child xml_arg0 "initialCaseStatus") in
       make ?finalCaseStatus ?initialCaseStatus ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let finalCaseStatus =
-        field_map json "finalCaseStatus" CaseStatus.of_json in
+        field_map json__ "finalCaseStatus" CaseStatus.of_json in
       let initialCaseStatus =
-        field_map json "initialCaseStatus" CaseStatus.of_json in
+        field_map json__ "initialCaseStatus" CaseStatus.of_json in
       make ?finalCaseStatus ?initialCaseStatus ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2009,23 +2517,23 @@ module ResolveCaseRequest =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caseId = field_map json "caseId" CaseId.of_json in make ?caseId ()
+    let of_json json__ =
+      let caseId = field_map json__ "caseId" CaseId.of_json in
+      make ?caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Resolves a support case. This operation takes a caseId and returns the initial and final state of the case. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Resolves a support case. This operation takes a caseId and returns the initial and final state of the case. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module RefreshTrustedAdvisorCheckResponse =
   struct
     type nonrec t =
       {
-      status: TrustedAdvisorCheckRefreshStatus.t
+      status: TrustedAdvisorCheckRefreshStatus.t option
         [@ocaml.doc
           "The current refresh status for a check, including the amount of time until the check is eligible for refresh."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RefreshTrustedAdvisorCheckResponse"
-    let make ~status = fun () -> { status }
+    let make ?status = fun () -> { status }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
@@ -2053,18 +2561,18 @@ module RefreshTrustedAdvisorCheckResponse =
     let to_value x =
       structure_to_value
         [("status",
-           (Some (TrustedAdvisorCheckRefreshStatus.to_value x.status)))]
+           (Option.map x.status ~f:TrustedAdvisorCheckRefreshStatus.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let status =
-        TrustedAdvisorCheckRefreshStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "status") in
-      make ~status ()
+        (Option.map ~f:TrustedAdvisorCheckRefreshStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let status =
-        field_map_exn json "status" TrustedAdvisorCheckRefreshStatus.of_json in
-      make ~status ()
+        field_map json__ "status" TrustedAdvisorCheckRefreshStatus.of_json in
+      make ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The current refresh status of a Trusted Advisor check."]
 module RefreshTrustedAdvisorCheckRequest =
@@ -2084,8 +2592,8 @@ module RefreshTrustedAdvisorCheckRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ~checkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checkId = field_map_exn json "checkId" String_.of_json in
+    let of_json json__ =
+      let checkId = field_map_exn json__ "checkId" String_.of_json in
       make ~checkId ()
     let to_json v = composed_to_json to_value v
   end
@@ -2093,18 +2601,20 @@ module DescribeTrustedAdvisorChecksResponse =
   struct
     type nonrec t =
       {
-      checks: TrustedAdvisorCheckList.t
+      checks: TrustedAdvisorCheckList.t option
         [@ocaml.doc
           "Information about all available Trusted Advisor checks."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeTrustedAdvisorChecksResponse"
-    let make ~checks = fun () -> { checks }
+    let make ?checks = fun () -> { checks }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2112,6 +2622,8 @@ module DescribeTrustedAdvisorChecksResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2120,6 +2632,10 @@ module DescribeTrustedAdvisorChecksResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2127,18 +2643,18 @@ module DescribeTrustedAdvisorChecksResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("checks", (Some (TrustedAdvisorCheckList.to_value x.checks)))]
+        [("checks",
+           (Option.map x.checks ~f:TrustedAdvisorCheckList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let checks =
-        TrustedAdvisorCheckList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "checks") in
-      make ~checks ()
+        (Option.map ~f:TrustedAdvisorCheckList.of_xml)
+          (Xml.child xml_arg0 "checks") in
+      make ?checks ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checks =
-        field_map_exn json "checks" TrustedAdvisorCheckList.of_json in
-      make ~checks ()
+    let of_json json__ =
+      let checks = field_map json__ "checks" TrustedAdvisorCheckList.of_json in
+      make ?checks ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Information about the Trusted Advisor checks returned by the DescribeTrustedAdvisorChecks operation."]
@@ -2148,7 +2664,7 @@ module DescribeTrustedAdvisorChecksRequest =
       {
       language: String_.t
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."]}
+          "The ISO 639-1 code for the language that you want your checks to appear in. The Amazon Web Services Support API currently supports the following languages for Trusted Advisor: Chinese, Simplified - zh Chinese, Traditional - zh_TW English - en French - fr German - de Indonesian - id Italian - it Japanese - ja Korean - ko Portuguese, Brazilian - pt_BR Spanish - es"]}
     let context_ = "DescribeTrustedAdvisorChecksRequest"
     let make ~language = fun () -> { language }
     let to_value x =
@@ -2159,28 +2675,30 @@ module DescribeTrustedAdvisorChecksRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "language") in
       make ~language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let language = field_map_exn json "language" String_.of_json in
+    let of_json json__ =
+      let language = field_map_exn json__ "language" String_.of_json in
       make ~language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns information about all available Trusted Advisor checks, including the name, ID, category, description, and metadata. You must specify a language code. The Amazon Web Services Support API currently supports English (\"en\") and Japanese (\"ja\"). The response contains a TrustedAdvisorCheckDescription object for each check. You must set the Amazon Web Services Region to us-east-1. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support. The names and descriptions for Trusted Advisor checks are subject to change. We recommend that you specify the check ID in your code to uniquely identify a check."]
+       "Returns information about all available Trusted Advisor checks, including the name, ID, category, description, and metadata. You must specify a language code. The response contains a TrustedAdvisorCheckDescription object for each check. You must set the Amazon Web Services Region to us-east-1. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support. The names and descriptions for Trusted Advisor checks are subject to change. We recommend that you specify the check ID in your code to uniquely identify a check. To call the Trusted Advisor operations in the Amazon Web Services Support API, you must use the US East (N. Virginia) endpoint. Currently, the US West (Oregon) and Europe (Ireland) endpoints don't support the Trusted Advisor operations. For more information, see About the Amazon Web Services Support API in the Amazon Web Services Support User Guide."]
 module DescribeTrustedAdvisorCheckSummariesResponse =
   struct
     type nonrec t =
       {
-      summaries: TrustedAdvisorCheckSummaryList.t
+      summaries: TrustedAdvisorCheckSummaryList.t option
         [@ocaml.doc
           "The summary information for the requested Trusted Advisor checks."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeTrustedAdvisorCheckSummariesResponse"
-    let make ~summaries = fun () -> { summaries }
+    let make ?summaries = fun () -> { summaries }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2188,6 +2706,8 @@ module DescribeTrustedAdvisorCheckSummariesResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2196,6 +2716,10 @@ module DescribeTrustedAdvisorCheckSummariesResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2204,18 +2728,18 @@ module DescribeTrustedAdvisorCheckSummariesResponse =
     let to_value x =
       structure_to_value
         [("summaries",
-           (Some (TrustedAdvisorCheckSummaryList.to_value x.summaries)))]
+           (Option.map x.summaries ~f:TrustedAdvisorCheckSummaryList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let summaries =
-        TrustedAdvisorCheckSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "summaries") in
-      make ~summaries ()
+        (Option.map ~f:TrustedAdvisorCheckSummaryList.of_xml)
+          (Xml.child xml_arg0 "summaries") in
+      make ?summaries ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let summaries =
-        field_map_exn json "summaries" TrustedAdvisorCheckSummaryList.of_json in
-      make ~summaries ()
+        field_map json__ "summaries" TrustedAdvisorCheckSummaryList.of_json in
+      make ?summaries ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The summaries of the Trusted Advisor checks returned by the DescribeTrustedAdvisorCheckSummaries operation."]
@@ -2237,12 +2761,12 @@ module DescribeTrustedAdvisorCheckSummariesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "checkIds") in
       make ~checkIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checkIds = field_map_exn json "checkIds" StringList.of_json in
+    let of_json json__ =
+      let checkIds = field_map_exn json__ "checkIds" StringList.of_json in
       make ~checkIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the results for the Trusted Advisor check summaries for the check IDs that you specified. You can get the check IDs by calling the DescribeTrustedAdvisorChecks operation. The response contains an array of TrustedAdvisorCheckSummary objects. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns the results for the Trusted Advisor check summaries for the check IDs that you specified. You can get the check IDs by calling the DescribeTrustedAdvisorChecks operation. The response contains an array of TrustedAdvisorCheckSummary objects. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support. To call the Trusted Advisor operations in the Amazon Web Services Support API, you must use the US East (N. Virginia) endpoint. Currently, the US West (Oregon) and Europe (Ireland) endpoints don't support the Trusted Advisor operations. For more information, see About the Amazon Web Services Support API in the Amazon Web Services Support User Guide."]
 module DescribeTrustedAdvisorCheckResultResponse =
   struct
     type nonrec t =
@@ -2251,12 +2775,15 @@ module DescribeTrustedAdvisorCheckResultResponse =
         [@ocaml.doc "The detailed results of the Trusted Advisor check."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?result = fun () -> { result }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2264,6 +2791,8 @@ module DescribeTrustedAdvisorCheckResultResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2272,6 +2801,10 @@ module DescribeTrustedAdvisorCheckResultResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2288,8 +2821,9 @@ module DescribeTrustedAdvisorCheckResultResponse =
           (Xml.child xml_arg0 "result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" TrustedAdvisorCheckResult.of_json in
+    let of_json json__ =
+      let result =
+        field_map json__ "result" TrustedAdvisorCheckResult.of_json in
       make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2302,7 +2836,7 @@ module DescribeTrustedAdvisorCheckResultRequest =
         [@ocaml.doc "The unique identifier for the Trusted Advisor check."];
       language: String_.t option
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."]}
+          "The ISO 639-1 code for the language that you want your check results to appear in. The Amazon Web Services Support API currently supports the following languages for Trusted Advisor: Chinese, Simplified - zh Chinese, Traditional - zh_TW English - en French - fr German - de Indonesian - id Italian - it Japanese - ja Korean - ko Portuguese, Brazilian - pt_BR Spanish - es"]}
     let context_ = "DescribeTrustedAdvisorCheckResultRequest"
     let make ?language = fun ~checkId -> fun () -> { language; checkId }
     let to_value x =
@@ -2317,9 +2851,9 @@ module DescribeTrustedAdvisorCheckResultRequest =
         String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "checkId") in
       make ?language ~checkId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let language = field_map json "language" String_.of_json in
-      let checkId = field_map_exn json "checkId" String_.of_json in
+    let of_json json__ =
+      let language = field_map json__ "language" String_.of_json in
+      let checkId = field_map_exn json__ "checkId" String_.of_json in
       make ?language ~checkId ()
     let to_json v = composed_to_json to_value v
   end
@@ -2327,18 +2861,20 @@ module DescribeTrustedAdvisorCheckRefreshStatusesResponse =
   struct
     type nonrec t =
       {
-      statuses: TrustedAdvisorCheckRefreshStatusList.t
+      statuses: TrustedAdvisorCheckRefreshStatusList.t option
         [@ocaml.doc
           "The refresh status of the specified Trusted Advisor checks."]}
     type nonrec error =
       [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DescribeTrustedAdvisorCheckRefreshStatusesResponse"
-    let make ~statuses = fun () -> { statuses }
+    let make ?statuses = fun () -> { statuses }
     let error_of_json name json =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
@@ -2346,6 +2882,8 @@ module DescribeTrustedAdvisorCheckRefreshStatusesResponse =
       match name with
       | "InternalServerError" ->
           `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
@@ -2354,6 +2892,10 @@ module DescribeTrustedAdvisorCheckRefreshStatusesResponse =
           `Assoc
             [("error", (`String "InternalServerError"));
             ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -2362,19 +2904,20 @@ module DescribeTrustedAdvisorCheckRefreshStatusesResponse =
     let to_value x =
       structure_to_value
         [("statuses",
-           (Some (TrustedAdvisorCheckRefreshStatusList.to_value x.statuses)))]
+           (Option.map x.statuses
+              ~f:TrustedAdvisorCheckRefreshStatusList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let statuses =
-        TrustedAdvisorCheckRefreshStatusList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "statuses") in
-      make ~statuses ()
+        (Option.map ~f:TrustedAdvisorCheckRefreshStatusList.of_xml)
+          (Xml.child xml_arg0 "statuses") in
+      make ?statuses ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let statuses =
-        field_map_exn json "statuses"
+        field_map json__ "statuses"
           TrustedAdvisorCheckRefreshStatusList.of_json in
-      make ~statuses ()
+      make ?statuses ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The statuses of the Trusted Advisor checks returned by the DescribeTrustedAdvisorCheckRefreshStatuses operation."]
@@ -2397,12 +2940,124 @@ module DescribeTrustedAdvisorCheckRefreshStatusesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "checkIds") in
       make ~checkIds ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let checkIds = field_map_exn json "checkIds" StringList.of_json in
+    let of_json json__ =
+      let checkIds = field_map_exn json__ "checkIds" StringList.of_json in
       make ~checkIds ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the refresh status of the Trusted Advisor checks that have the specified check IDs. You can get the check IDs by calling the DescribeTrustedAdvisorChecks operation. Some checks are refreshed automatically, and you can't return their refresh statuses by using the DescribeTrustedAdvisorCheckRefreshStatuses operation. If you call this operation for these checks, you might see an InvalidParameterValue error. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns the refresh status of the Trusted Advisor checks that have the specified check IDs. You can get the check IDs by calling the DescribeTrustedAdvisorChecks operation. Some checks are refreshed automatically, and you can't return their refresh statuses by using the DescribeTrustedAdvisorCheckRefreshStatuses operation. If you call this operation for these checks, you might see an InvalidParameterValue error. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support. To call the Trusted Advisor operations in the Amazon Web Services Support API, you must use the US East (N. Virginia) endpoint. Currently, the US West (Oregon) and Europe (Ireland) endpoints don't support the Trusted Advisor operations. For more information, see About the Amazon Web Services Support API in the Amazon Web Services Support User Guide."]
+module DescribeSupportedLanguagesResponse =
+  struct
+    type nonrec t =
+      {
+      supportedLanguages: SupportedLanguagesList.t option
+        [@ocaml.doc
+          "A JSON-formatted array that contains the available ISO 639-1 language codes."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?supportedLanguages = fun () -> { supportedLanguages }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("supportedLanguages",
+           (Option.map x.supportedLanguages
+              ~f:SupportedLanguagesList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let supportedLanguages =
+        (Option.map ~f:SupportedLanguagesList.of_xml)
+          (Xml.child xml_arg0 "supportedLanguages") in
+      make ?supportedLanguages ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let supportedLanguages =
+        field_map json__ "supportedLanguages" SupportedLanguagesList.of_json in
+      make ?supportedLanguages ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of supported languages for a specified categoryCode, issueType and serviceCode. The returned supported languages will include a ISO 639-1 code for the language, and the language display name. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+module DescribeSupportedLanguagesRequest =
+  struct
+    type nonrec t =
+      {
+      issueType: ValidatedIssueTypeString.t
+        [@ocaml.doc
+          "The type of issue for the case. You can specify customer-service or technical."];
+      serviceCode: ValidatedServiceCode.t
+        [@ocaml.doc
+          "The code for the Amazon Web Services service. You can use the DescribeServices operation to get the possible serviceCode values."];
+      categoryCode: ValidatedCategoryCode.t
+        [@ocaml.doc
+          "The category of problem for the support case. You also use the DescribeServices operation to get the category code for a service. Each Amazon Web Services service defines its own set of category codes."]}
+    let context_ = "DescribeSupportedLanguagesRequest"
+    let make ~issueType =
+      fun ~serviceCode ->
+        fun ~categoryCode ->
+          fun () -> { issueType; serviceCode; categoryCode }
+    let to_value x =
+      structure_to_value
+        [("issueType",
+           (Some (ValidatedIssueTypeString.to_value x.issueType)));
+        ("serviceCode", (Some (ValidatedServiceCode.to_value x.serviceCode)));
+        ("categoryCode",
+          (Some (ValidatedCategoryCode.to_value x.categoryCode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let categoryCode =
+        ValidatedCategoryCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "categoryCode") in
+      let serviceCode =
+        ValidatedServiceCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
+      let issueType =
+        ValidatedIssueTypeString.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "issueType") in
+      make ~categoryCode ~serviceCode ~issueType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let categoryCode =
+        field_map_exn json__ "categoryCode" ValidatedCategoryCode.of_json in
+      let serviceCode =
+        field_map_exn json__ "serviceCode" ValidatedServiceCode.of_json in
+      let issueType =
+        field_map_exn json__ "issueType" ValidatedIssueTypeString.of_json in
+      make ~categoryCode ~serviceCode ~issueType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of supported languages for a specified categoryCode, issueType and serviceCode. The returned supported languages will include a ISO 639-1 code for the language, and the language display name. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module DescribeSeverityLevelsResponse =
   struct
     type nonrec t =
@@ -2449,9 +3104,9 @@ module DescribeSeverityLevelsResponse =
           (Xml.child xml_arg0 "severityLevels") in
       make ?severityLevels ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let severityLevels =
-        field_map json "severityLevels" SeverityLevelsList.of_json in
+        field_map json__ "severityLevels" SeverityLevelsList.of_json in
       make ?severityLevels ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2462,7 +3117,7 @@ module DescribeSeverityLevelsRequest =
       {
       language: Language.t option
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."]}
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."]}
     let make ?language = fun () -> { language }
     let to_value x =
       structure_to_value
@@ -2473,12 +3128,12 @@ module DescribeSeverityLevelsRequest =
         (Option.map ~f:Language.of_xml) (Xml.child xml_arg0 "language") in
       make ?language ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let language = field_map json "language" Language.of_json in
+    let of_json json__ =
+      let language = field_map json__ "language" Language.of_json in
       make ?language ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the list of severity levels that you can assign to a support case. The severity level for a case is also a field in the CaseDetails data type that you include for a CreateCase request. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns the list of severity levels that you can assign to a support case. The severity level for a case is also a field in the CaseDetails data type that you include for a CreateCase request. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module DescribeServicesResponse =
   struct
     type nonrec t =
@@ -2522,8 +3177,8 @@ module DescribeServicesResponse =
         (Option.map ~f:ServiceList.of_xml) (Xml.child xml_arg0 "services") in
       make ?services ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let services = field_map json "services" ServiceList.of_json in
+    let of_json json__ =
+      let services = field_map json__ "services" ServiceList.of_json in
       make ?services ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2537,7 +3192,7 @@ module DescribeServicesRequest =
           "A JSON-formatted list of service codes available for Amazon Web Services services."];
       language: Language.t option
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."]}
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."]}
     let make ?serviceCodeList =
       fun ?language -> fun () -> { serviceCodeList; language }
     let to_value x =
@@ -2554,14 +3209,146 @@ module DescribeServicesRequest =
           (Xml.child xml_arg0 "serviceCodeList") in
       make ?language ?serviceCodeList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let language = field_map json "language" Language.of_json in
+    let of_json json__ =
+      let language = field_map json__ "language" Language.of_json in
       let serviceCodeList =
-        field_map json "serviceCodeList" ServiceCodeList.of_json in
+        field_map json__ "serviceCodeList" ServiceCodeList.of_json in
       make ?language ?serviceCodeList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the current list of Amazon Web Services services and a list of service categories for each service. You then use service names and categories in your CreateCase requests. Each Amazon Web Services service has its own set of categories. The service codes and category codes correspond to the values that appear in the Service and Category lists on the Amazon Web Services Support Center Create Case page. The values in those fields don't necessarily match the service codes and categories returned by the DescribeServices operation. Always use the service codes and categories that the DescribeServices operation returns, so that you have the most recent set of service and category codes. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns the current list of Amazon Web Services services and a list of service categories for each service. You then use service names and categories in your CreateCase requests. Each Amazon Web Services service has its own set of categories. The service codes and category codes correspond to the values that appear in the Service and Category lists on the Amazon Web Services Support Center Create Case page. The values in those fields don't necessarily match the service codes and categories returned by the DescribeServices operation. Always use the service codes and categories that the DescribeServices operation returns, so that you have the most recent set of service and category codes. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+module DescribeCreateCaseOptionsResponse =
+  struct
+    type nonrec t =
+      {
+      languageAvailability: ValidatedLanguageAvailability.t option
+        [@ocaml.doc
+          "Language availability can be any of the following: available best_effort unavailable"];
+      communicationTypes: CommunicationTypeOptionsList.t option
+        [@ocaml.doc
+          "A JSON-formatted array that contains the available communication type options, along with the available support timeframes for the given inputs."]}
+    type nonrec error =
+      [ `InternalServerError of InternalServerError.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?languageAvailability =
+      fun ?communicationTypes ->
+        fun () -> { languageAvailability; communicationTypes }
+    let error_of_json name json =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "InternalServerError" ->
+          `InternalServerError (InternalServerError.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `InternalServerError e ->
+          `Assoc
+            [("error", (`String "InternalServerError"));
+            ("details", (InternalServerError.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("languageAvailability",
+           (Option.map x.languageAvailability
+              ~f:ValidatedLanguageAvailability.to_value));
+        ("communicationTypes",
+          (Option.map x.communicationTypes
+             ~f:CommunicationTypeOptionsList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let communicationTypes =
+        (Option.map ~f:CommunicationTypeOptionsList.of_xml)
+          (Xml.child xml_arg0 "communicationTypes") in
+      let languageAvailability =
+        (Option.map ~f:ValidatedLanguageAvailability.of_xml)
+          (Xml.child xml_arg0 "languageAvailability") in
+      make ?communicationTypes ?languageAvailability ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let communicationTypes =
+        field_map json__ "communicationTypes"
+          CommunicationTypeOptionsList.of_json in
+      let languageAvailability =
+        field_map json__ "languageAvailability"
+          ValidatedLanguageAvailability.of_json in
+      make ?communicationTypes ?languageAvailability ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of CreateCaseOption types along with the corresponding supported hours and language availability. You can specify the language categoryCode, issueType and serviceCode used to retrieve the CreateCaseOptions. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+module DescribeCreateCaseOptionsRequest =
+  struct
+    type nonrec t =
+      {
+      issueType: IssueType.t
+        [@ocaml.doc
+          "The type of issue for the case. You can specify customer-service or technical. If you don't specify a value, the default is technical."];
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "The code for the Amazon Web Services service. You can use the DescribeServices operation to get the possible serviceCode values."];
+      language: Language.t
+        [@ocaml.doc
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."];
+      categoryCode: CategoryCode.t
+        [@ocaml.doc
+          "The category of problem for the support case. You also use the DescribeServices operation to get the category code for a service. Each Amazon Web Services service defines its own set of category codes."]}
+    let context_ = "DescribeCreateCaseOptionsRequest"
+    let make ~issueType =
+      fun ~serviceCode ->
+        fun ~language ->
+          fun ~categoryCode ->
+            fun () -> { issueType; serviceCode; language; categoryCode }
+    let to_value x =
+      structure_to_value
+        [("issueType", (Some (IssueType.to_value x.issueType)));
+        ("serviceCode", (Some (ServiceCode.to_value x.serviceCode)));
+        ("language", (Some (Language.to_value x.language)));
+        ("categoryCode", (Some (CategoryCode.to_value x.categoryCode)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let categoryCode =
+        CategoryCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "categoryCode") in
+      let language =
+        Language.of_xml (Xml.child_exn ~context:context_ xml_arg0 "language") in
+      let serviceCode =
+        ServiceCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "serviceCode") in
+      let issueType =
+        IssueType.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "issueType") in
+      make ~categoryCode ~language ~serviceCode ~issueType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let categoryCode =
+        field_map_exn json__ "categoryCode" CategoryCode.of_json in
+      let language = field_map_exn json__ "language" Language.of_json in
+      let serviceCode =
+        field_map_exn json__ "serviceCode" ServiceCode.of_json in
+      let issueType = field_map_exn json__ "issueType" IssueType.of_json in
+      make ~categoryCode ~language ~serviceCode ~issueType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Returns a list of CreateCaseOption types along with the corresponding supported hours and language availability. You can specify the language categoryCode, issueType and serviceCode used to retrieve the CreateCaseOptions. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module DescribeCommunicationsResponse =
   struct
     type nonrec t =
@@ -2620,10 +3407,10 @@ module DescribeCommunicationsResponse =
           (Xml.child xml_arg0 "communications") in
       make ?nextToken ?communications ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let communications =
-        field_map json "communications" CommunicationList.of_json in
+        field_map json__ "communications" CommunicationList.of_json in
       make ?nextToken ?communications ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2675,16 +3462,16 @@ module DescribeCommunicationsRequest =
         CaseId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "caseId") in
       make ?maxResults ?nextToken ?afterTime ?beforeTime ~caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let afterTime = field_map json "afterTime" AfterTime.of_json in
-      let beforeTime = field_map json "beforeTime" BeforeTime.of_json in
-      let caseId = field_map_exn json "caseId" CaseId.of_json in
+    let of_json json__ =
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let afterTime = field_map json__ "afterTime" AfterTime.of_json in
+      let beforeTime = field_map json__ "beforeTime" BeforeTime.of_json in
+      let caseId = field_map_exn json__ "caseId" CaseId.of_json in
       make ?maxResults ?nextToken ?afterTime ?beforeTime ~caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns communications and attachments for one or more support cases. Use the afterTime and beforeTime parameters to filter by date. You can use the caseId parameter to restrict the results to a specific case. Case data is available for 12 months after creation. If a case was created more than 12 months ago, a request for data might cause an error. You can use the maxResults and nextToken parameters to control the pagination of the results. Set maxResults to the number of cases that you want to display on each page, and use nextToken to specify the resumption of pagination. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns communications and attachments for one or more support cases. Use the afterTime and beforeTime parameters to filter by date. You can use the caseId parameter to restrict the results to a specific case. Case data is available for 12 months after creation. If a case was created more than 12 months ago, a request for data might cause an error. You can use the maxResults and nextToken parameters to control the pagination of the results. Set maxResults to the number of cases that you want to display on each page, and use nextToken to specify the resumption of pagination. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module DescribeCasesResponse =
   struct
     type nonrec t =
@@ -2740,9 +3527,9 @@ module DescribeCasesResponse =
         (Option.map ~f:CaseList.of_xml) (Xml.child xml_arg0 "cases") in
       make ?nextToken ?cases ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let cases = field_map json "cases" CaseList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let cases = field_map json__ "cases" CaseList.of_json in
       make ?nextToken ?cases ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2773,7 +3560,7 @@ module DescribeCasesRequest =
           "The maximum number of results to return before paginating."];
       language: Language.t option
         [@ocaml.doc
-          "The ISO 639-1 code for the language in which Amazon Web Services provides support. Amazon Web Services Support currently supports English (\"en\") and Japanese (\"ja\"). Language parameters must be passed explicitly for operations that take them."];
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."];
       includeCommunications: IncludeCommunications.t option
         [@ocaml.doc
           "Specifies whether to include communications in the DescribeCases response. By default, communications are included."]}
@@ -2838,24 +3625,25 @@ module DescribeCasesRequest =
         ?includeResolvedCases ?beforeTime ?afterTime ?displayId ?caseIdList
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let includeCommunications =
-        field_map json "includeCommunications" IncludeCommunications.of_json in
-      let language = field_map json "language" Language.of_json in
-      let maxResults = field_map json "maxResults" MaxResults.of_json in
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+        field_map json__ "includeCommunications"
+          IncludeCommunications.of_json in
+      let language = field_map json__ "language" Language.of_json in
+      let maxResults = field_map json__ "maxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let includeResolvedCases =
-        field_map json "includeResolvedCases" IncludeResolvedCases.of_json in
-      let beforeTime = field_map json "beforeTime" BeforeTime.of_json in
-      let afterTime = field_map json "afterTime" AfterTime.of_json in
-      let displayId = field_map json "displayId" DisplayId.of_json in
-      let caseIdList = field_map json "caseIdList" CaseIdList.of_json in
+        field_map json__ "includeResolvedCases" IncludeResolvedCases.of_json in
+      let beforeTime = field_map json__ "beforeTime" BeforeTime.of_json in
+      let afterTime = field_map json__ "afterTime" AfterTime.of_json in
+      let displayId = field_map json__ "displayId" DisplayId.of_json in
+      let caseIdList = field_map json__ "caseIdList" CaseIdList.of_json in
       make ?includeCommunications ?language ?maxResults ?nextToken
         ?includeResolvedCases ?beforeTime ?afterTime ?displayId ?caseIdList
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of cases that you specify by passing one or more case IDs. You can use the afterTime and beforeTime parameters to filter the cases by date. You can set values for the includeResolvedCases and includeCommunications parameters to specify how much information to return. The response returns the following in JSON format: One or more CaseDetails data types. One or more nextToken values, which specify where to paginate the returned records represented by the CaseDetails objects. Case data is available for 12 months after creation. If a case was created more than 12 months ago, a request might return an error. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns a list of cases that you specify by passing one or more case IDs. You can use the afterTime and beforeTime parameters to filter the cases by date. You can set values for the includeResolvedCases and includeCommunications parameters to specify how much information to return. The response returns the following in JSON format: One or more CaseDetails data types. One or more nextToken values, which specify where to paginate the returned records represented by the CaseDetails objects. Case data is available for 12 months after creation. If a case was created more than 12 months ago, a request might return an error. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module DescribeAttachmentResponse =
   struct
     type nonrec t =
@@ -2920,8 +3708,8 @@ module DescribeAttachmentResponse =
         (Option.map ~f:Attachment.of_xml) (Xml.child xml_arg0 "attachment") in
       make ?attachment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachment = field_map json "attachment" Attachment.of_json in
+    let of_json json__ =
+      let attachment = field_map json__ "attachment" Attachment.of_json in
       make ?attachment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2945,13 +3733,13 @@ module DescribeAttachmentRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "attachmentId") in
       make ~attachmentId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentId =
-        field_map_exn json "attachmentId" AttachmentId.of_json in
+        field_map_exn json__ "attachmentId" AttachmentId.of_json in
       make ~attachmentId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns the attachment that has the specified ID. Attachments can include screenshots, error logs, or other files that describe your issue. Attachment IDs are generated by the case management system when you add an attachment to a case or case communication. Attachment IDs are returned in the AttachmentDetails objects that are returned by the DescribeCommunications operation. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Returns the attachment that has the specified ID. Attachments can include screenshots, error logs, or other files that describe your issue. Attachment IDs are generated by the case management system when you add an attachment to a case or case communication. Attachment IDs are returned in the AttachmentDetails objects that are returned by the DescribeCommunications operation. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module CreateCaseResponse =
   struct
     type nonrec t =
@@ -3023,8 +3811,9 @@ module CreateCaseResponse =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let caseId = field_map json "caseId" CaseId.of_json in make ?caseId ()
+    let of_json json__ =
+      let caseId = field_map json__ "caseId" CaseId.of_json in
+      make ?caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The support case ID returned by a successful completion of the CreateCase operation."]
@@ -3052,7 +3841,7 @@ module CreateCaseRequest =
           "A list of email addresses that Amazon Web Services Support copies on case correspondence. Amazon Web Services Support identifies the account that creates the case when you specify your Amazon Web Services credentials in an HTTP POST method or use the Amazon Web Services SDKs."];
       language: Language.t option
         [@ocaml.doc
-          "The language in which Amazon Web Services Support handles the case. You must specify the ISO 639-1 code for the language parameter if you want support in that language. Currently, English (\"en\") and Japanese (\"ja\") are supported."];
+          "The language in which Amazon Web Services Support handles the case. Amazon Web Services Support currently supports Chinese (\226\128\156zh\226\128\157), English (\"en\"), Japanese (\"ja\") and Korean (\226\128\156ko\226\128\157). You must specify the ISO 639-1 code for the language parameter if you want support in that language."];
       issueType: IssueType.t option
         [@ocaml.doc
           "The type of issue for the case. You can specify customer-service or technical. If you don't specify a value, the default is technical."];
@@ -3126,25 +3915,25 @@ module CreateCaseRequest =
         ~communicationBody ?categoryCode ?severityCode ?serviceCode ~subject
         ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentSetId =
-        field_map json "attachmentSetId" AttachmentSetId.of_json in
-      let issueType = field_map json "issueType" IssueType.of_json in
-      let language = field_map json "language" Language.of_json in
+        field_map json__ "attachmentSetId" AttachmentSetId.of_json in
+      let issueType = field_map json__ "issueType" IssueType.of_json in
+      let language = field_map json__ "language" Language.of_json in
       let ccEmailAddresses =
-        field_map json "ccEmailAddresses" CcEmailAddressList.of_json in
+        field_map json__ "ccEmailAddresses" CcEmailAddressList.of_json in
       let communicationBody =
-        field_map_exn json "communicationBody" CommunicationBody.of_json in
-      let categoryCode = field_map json "categoryCode" CategoryCode.of_json in
-      let severityCode = field_map json "severityCode" SeverityCode.of_json in
-      let serviceCode = field_map json "serviceCode" ServiceCode.of_json in
-      let subject = field_map_exn json "subject" Subject.of_json in
+        field_map_exn json__ "communicationBody" CommunicationBody.of_json in
+      let categoryCode = field_map json__ "categoryCode" CategoryCode.of_json in
+      let severityCode = field_map json__ "severityCode" SeverityCode.of_json in
+      let serviceCode = field_map json__ "serviceCode" ServiceCode.of_json in
+      let subject = field_map_exn json__ "subject" Subject.of_json in
       make ?attachmentSetId ?issueType ?language ?ccEmailAddresses
         ~communicationBody ?categoryCode ?severityCode ?serviceCode ~subject
         ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates a case in the Amazon Web Services Support Center. This operation is similar to how you create a case in the Amazon Web Services Support Center Create Case page. The Amazon Web Services Support API doesn't support requesting service limit increases. You can submit a service limit increase in the following ways: Submit a request from the Amazon Web Services Support Center Create Case page. Use the Service Quotas RequestServiceQuotaIncrease operation. A successful CreateCase request returns an Amazon Web Services Support case number. You can use the DescribeCases operation and specify the case number to get existing Amazon Web Services Support cases. After you create a case, use the AddCommunicationToCase operation to add additional communication or attachments to an existing case. The caseId is separate from the displayId that appears in the Amazon Web Services Support Center. Use the DescribeCases operation to get the displayId. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Creates a case in the Amazon Web Services Support Center. This operation is similar to how you create a case in the Amazon Web Services Support Center Create Case page. The Amazon Web Services Support API doesn't support requesting service limit increases. You can submit a service limit increase in the following ways: Submit a request from the Amazon Web Services Support Center Create Case page. Use the Service Quotas RequestServiceQuotaIncrease operation. A successful CreateCase request returns an Amazon Web Services Support case number. You can use the DescribeCases operation and specify the case number to get existing Amazon Web Services Support cases. After you create a case, use the AddCommunicationToCase operation to add additional communication or attachments to an existing case. The caseId is separate from the displayId that appears in the Amazon Web Services Support Center. Use the DescribeCases operation to get the displayId. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module AddCommunicationToCaseResponse =
   struct
     type nonrec t =
@@ -3214,8 +4003,9 @@ module AddCommunicationToCaseResponse =
         (Option.map ~f:Result_.of_xml) (Xml.child xml_arg0 "result") in
       make ?result ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let result = field_map json "result" Result_.of_json in make ?result ()
+    let of_json json__ =
+      let result = field_map json__ "result" Result_.of_json in
+      make ?result ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The result of the AddCommunicationToCase operation."]
 module AddCommunicationToCaseRequest =
@@ -3266,18 +4056,18 @@ module AddCommunicationToCaseRequest =
         (Option.map ~f:CaseId.of_xml) (Xml.child xml_arg0 "caseId") in
       make ?attachmentSetId ?ccEmailAddresses ~communicationBody ?caseId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attachmentSetId =
-        field_map json "attachmentSetId" AttachmentSetId.of_json in
+        field_map json__ "attachmentSetId" AttachmentSetId.of_json in
       let ccEmailAddresses =
-        field_map json "ccEmailAddresses" CcEmailAddressList.of_json in
+        field_map json__ "ccEmailAddresses" CcEmailAddressList.of_json in
       let communicationBody =
-        field_map_exn json "communicationBody" CommunicationBody.of_json in
-      let caseId = field_map json "caseId" CaseId.of_json in
+        field_map_exn json__ "communicationBody" CommunicationBody.of_json in
+      let caseId = field_map json__ "caseId" CaseId.of_json in
       make ?attachmentSetId ?ccEmailAddresses ~communicationBody ?caseId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds additional customer communication to an Amazon Web Services Support case. Use the caseId parameter to identify the case to which to add communication. You can list a set of email addresses to copy on the communication by using the ccEmailAddresses parameter. The communicationBody value contains the text of the communication. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Adds additional customer communication to an Amazon Web Services Support case. Use the caseId parameter to identify the case to which to add communication. You can list a set of email addresses to copy on the communication by using the ccEmailAddresses parameter. The communicationBody value contains the text of the communication. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
 module AddAttachmentsToSetResponse =
   struct
     type nonrec t =
@@ -3368,10 +4158,10 @@ module AddAttachmentsToSetResponse =
           (Xml.child xml_arg0 "attachmentSetId") in
       make ?expiryTime ?attachmentSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiryTime = field_map json "expiryTime" ExpiryTime.of_json in
+    let of_json json__ =
+      let expiryTime = field_map json__ "expiryTime" ExpiryTime.of_json in
       let attachmentSetId =
-        field_map json "attachmentSetId" AttachmentSetId.of_json in
+        field_map json__ "attachmentSetId" AttachmentSetId.of_json in
       make ?expiryTime ?attachmentSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3404,11 +4194,12 @@ module AddAttachmentsToSetRequest =
           (Xml.child xml_arg0 "attachmentSetId") in
       make ~attachments ?attachmentSetId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let attachments = field_map_exn json "attachments" Attachments.of_json in
+    let of_json json__ =
+      let attachments =
+        field_map_exn json__ "attachments" Attachments.of_json in
       let attachmentSetId =
-        field_map json "attachmentSetId" AttachmentSetId.of_json in
+        field_map json__ "attachmentSetId" AttachmentSetId.of_json in
       make ~attachments ?attachmentSetId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Adds one or more attachments to an attachment set. An attachment set is a temporary container for attachments that you add to a case or case communication. The set is available for 1 hour after it's created. The expiryTime returned in the response is when the set expires. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that does not have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]
+       "Adds one or more attachments to an attachment set. An attachment set is a temporary container for attachments that you add to a case or case communication. The set is available for 1 hour after it's created. The expiryTime returned in the response is when the set expires. You must have a Business, Enterprise On-Ramp, or Enterprise Support plan to use the Amazon Web Services Support API. If you call the Amazon Web Services Support API from an account that doesn't have a Business, Enterprise On-Ramp, or Enterprise Support plan, the SubscriptionRequiredException error message appears. For information about changing your support plan, see Amazon Web Services Support."]

@@ -38,22 +38,23 @@ let create_dataset =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and datasetSchema =
+         flag "dataset-schema" (optional json_arg) ~doc:"JSON DatasetSchema"
        and serverSideKmsKeyId =
          flag "server-side-kms-key-id" (optional string)
            ~doc:"STRING NameOrArn"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and datasetName =
          flag "dataset-name" (required string) ~doc:"STRING DatasetName"
-       and datasetSchema =
-         flag "dataset-schema" (required json_arg) ~doc:"JSON DatasetSchema"
        and clientToken =
          flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_dataset
-           (Values.CreateDatasetRequest.make ?serverSideKmsKeyId
+           (Values.CreateDatasetRequest.make
+              ?datasetSchema:(Option.map ~f:Values.DatasetSchema.of_json
+                                datasetSchema) ?serverSideKmsKeyId
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ~datasetName
-              ~datasetSchema:(Values.DatasetSchema.of_json datasetSchema)
               ~clientToken ()) (Some Values.CreateDatasetResponse.to_json)
            (Some Values.CreateDatasetResponse.error_to_json)])
 let create_inference_scheduler =
@@ -110,6 +111,67 @@ let create_inference_scheduler =
               ~clientToken ())
            (Some Values.CreateInferenceSchedulerResponse.to_json)
            (Some Values.CreateInferenceSchedulerResponse.error_to_json)])
+let create_label =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and faultCode =
+         flag "fault-code" (optional string) ~doc:"STRING FaultCode"
+       and notes = flag "notes" (optional string) ~doc:"STRING Comments"
+       and equipment =
+         flag "equipment" (optional string) ~doc:"STRING Equipment"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName"
+       and startTime =
+         flag "start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and endTime =
+         flag "end-time" (required json_arg) ~doc:"JSON Timestamp"
+       and rating = flag "rating" (required json_arg) ~doc:"JSON LabelRating"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_label
+           (Values.CreateLabelRequest.make ?faultCode ?notes ?equipment
+              ~labelGroupName ~startTime:(Values.Timestamp.of_json startTime)
+              ~endTime:(Values.Timestamp.of_json endTime)
+              ~rating:(Values.LabelRating.of_json rating) ~clientToken ())
+           (Some Values.CreateLabelResponse.to_json)
+           (Some Values.CreateLabelResponse.error_to_json)])
+let create_label_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and faultCodes =
+         flag "fault-codes" (optional json_arg) ~doc:"JSON FaultCodes"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_label_group
+           (Values.CreateLabelGroupRequest.make
+              ?faultCodes:(Option.map ~f:Values.FaultCodes.of_json faultCodes)
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~labelGroupName ~clientToken ())
+           (Some Values.CreateLabelGroupResponse.to_json)
+           (Some Values.CreateLabelGroupResponse.error_to_json)])
 let create_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -148,6 +210,9 @@ let create_model =
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and offCondition =
          flag "off-condition" (optional string) ~doc:"STRING OffCondition"
+       and modelDiagnosticsOutputConfiguration =
+         flag "model-diagnostics-output-configuration" (optional json_arg)
+           ~doc:"JSON ModelDiagnosticsOutputConfiguration"
        and modelName =
          flag "model-name" (required string) ~doc:"STRING ModelName"
        and datasetName =
@@ -178,9 +243,48 @@ let create_model =
                                                  dataPreProcessingConfiguration)
               ?serverSideKmsKeyId
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?offCondition
+              ?modelDiagnosticsOutputConfiguration:(Option.map
+                                                      ~f:Values.ModelDiagnosticsOutputConfiguration.of_json
+                                                      modelDiagnosticsOutputConfiguration)
               ~modelName ~datasetName ~clientToken ())
            (Some Values.CreateModelResponse.to_json)
            (Some Values.CreateModelResponse.error_to_json)])
+let create_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retrainingStartDate =
+         flag "retraining-start-date" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and promoteMode =
+         flag "promote-mode" (optional json_arg) ~doc:"JSON ModelPromoteMode"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName"
+       and retrainingFrequency =
+         flag "retraining-frequency" (required string)
+           ~doc:"STRING RetrainingFrequency"
+       and lookbackWindow =
+         flag "lookback-window" (required string)
+           ~doc:"STRING LookbackWindow"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_retraining_scheduler
+           (Values.CreateRetrainingSchedulerRequest.make
+              ?retrainingStartDate:(Option.map ~f:Values.Timestamp.of_json
+                                      retrainingStartDate)
+              ?promoteMode:(Option.map ~f:Values.ModelPromoteMode.of_json
+                              promoteMode) ~modelName ~retrainingFrequency
+              ~lookbackWindow ~clientToken ())
+           (Some Values.CreateRetrainingSchedulerResponse.to_json)
+           (Some Values.CreateRetrainingSchedulerResponse.error_to_json)])
 let delete_dataset =
   Command.async ~summary:""
     ([%map_open.Command
@@ -216,6 +320,42 @@ let delete_inference_scheduler =
            Io.delete_inference_scheduler
            (Values.DeleteInferenceSchedulerRequest.make
               ~inferenceSchedulerName ()) None None])
+let delete_label =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName"
+       and labelId = flag "label-id" (required string) ~doc:"STRING LabelId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_label
+           (Values.DeleteLabelRequest.make ~labelGroupName ~labelId ()) None
+           None])
+let delete_label_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_label_group
+           (Values.DeleteLabelGroupRequest.make ~labelGroupName ()) None None])
 let delete_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -232,6 +372,40 @@ let delete_model =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.delete_model (Values.DeleteModelRequest.make ~modelName ())
            None None])
+let delete_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_resource_policy
+           (Values.DeleteResourcePolicyRequest.make ~resourceArn ()) None
+           None])
+let delete_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_retraining_scheduler
+           (Values.DeleteRetrainingSchedulerRequest.make ~modelName ()) None
+           None])
 let describe_data_ingestion_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -289,6 +463,45 @@ let describe_inference_scheduler =
               ~inferenceSchedulerName ())
            (Some Values.DescribeInferenceSchedulerResponse.to_json)
            (Some Values.DescribeInferenceSchedulerResponse.error_to_json)])
+let describe_label =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName"
+       and labelId = flag "label-id" (required string) ~doc:"STRING LabelId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_label
+           (Values.DescribeLabelRequest.make ~labelGroupName ~labelId ())
+           (Some Values.DescribeLabelResponse.to_json)
+           (Some Values.DescribeLabelResponse.error_to_json)])
+let describe_label_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_label_group
+           (Values.DescribeLabelGroupRequest.make ~labelGroupName ())
+           (Some Values.DescribeLabelGroupResponse.to_json)
+           (Some Values.DescribeLabelGroupResponse.error_to_json)])
 let describe_model =
   Command.async ~summary:""
     ([%map_open.Command
@@ -306,6 +519,138 @@ let describe_model =
            Io.describe_model (Values.DescribeModelRequest.make ~modelName ())
            (Some Values.DescribeModelResponse.to_json)
            (Some Values.DescribeModelResponse.error_to_json)])
+let describe_model_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName"
+       and modelVersion =
+         flag "model-version" (required json_arg) ~doc:"JSON ModelVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_model_version
+           (Values.DescribeModelVersionRequest.make ~modelName
+              ~modelVersion:(Values.ModelVersion.of_json modelVersion) ())
+           (Some Values.DescribeModelVersionResponse.to_json)
+           (Some Values.DescribeModelVersionResponse.error_to_json)])
+let describe_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_resource_policy
+           (Values.DescribeResourcePolicyRequest.make ~resourceArn ())
+           (Some Values.DescribeResourcePolicyResponse.to_json)
+           (Some Values.DescribeResourcePolicyResponse.error_to_json)])
+let describe_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.describe_retraining_scheduler
+           (Values.DescribeRetrainingSchedulerRequest.make ~modelName ())
+           (Some Values.DescribeRetrainingSchedulerResponse.to_json)
+           (Some Values.DescribeRetrainingSchedulerResponse.error_to_json)])
+let import_dataset =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and datasetName =
+         flag "dataset-name" (optional string) ~doc:"STRING DatasetName"
+       and serverSideKmsKeyId =
+         flag "server-side-kms-key-id" (optional string)
+           ~doc:"STRING NameOrArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and sourceDatasetArn =
+         flag "source-dataset-arn" (required string) ~doc:"STRING DatasetArn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_dataset
+           (Values.ImportDatasetRequest.make ?datasetName ?serverSideKmsKeyId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ~sourceDatasetArn ~clientToken ())
+           (Some Values.ImportDatasetResponse.to_json)
+           (Some Values.ImportDatasetResponse.error_to_json)])
+let import_model_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (optional string) ~doc:"STRING ModelName"
+       and labelsInputConfiguration =
+         flag "labels-input-configuration" (optional json_arg)
+           ~doc:"JSON LabelsInputConfiguration"
+       and roleArn =
+         flag "role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and serverSideKmsKeyId =
+         flag "server-side-kms-key-id" (optional string)
+           ~doc:"STRING NameOrArn"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and inferenceDataImportStrategy =
+         flag "inference-data-import-strategy" (optional json_arg)
+           ~doc:"JSON InferenceDataImportStrategy"
+       and sourceModelVersionArn =
+         flag "source-model-version-arn" (required string)
+           ~doc:"STRING ModelVersionArn"
+       and datasetName =
+         flag "dataset-name" (required string)
+           ~doc:"STRING DatasetIdentifier"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_model_version
+           (Values.ImportModelVersionRequest.make ?modelName
+              ?labelsInputConfiguration:(Option.map
+                                           ~f:Values.LabelsInputConfiguration.of_json
+                                           labelsInputConfiguration) ?roleArn
+              ?serverSideKmsKeyId
+              ?tags:(Option.map ~f:Values.TagList.of_json tags)
+              ?inferenceDataImportStrategy:(Option.map
+                                              ~f:Values.InferenceDataImportStrategy.of_json
+                                              inferenceDataImportStrategy)
+              ~sourceModelVersionArn ~datasetName ~clientToken ())
+           (Some Values.ImportModelVersionResponse.to_json)
+           (Some Values.ImportModelVersionResponse.error_to_json)])
 let list_data_ingestion_jobs =
   Command.async ~summary:""
     ([%map_open.Command
@@ -356,6 +701,36 @@ let list_datasets =
               ?datasetNameBeginsWith ())
            (Some Values.ListDatasetsResponse.to_json)
            (Some Values.ListDatasetsResponse.error_to_json)])
+let list_inference_events =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and inferenceSchedulerName =
+         flag "inference-scheduler-name" (required string)
+           ~doc:"STRING InferenceSchedulerIdentifier"
+       and intervalStartTime =
+         flag "interval-start-time" (required json_arg) ~doc:"JSON Timestamp"
+       and intervalEndTime =
+         flag "interval-end-time" (required json_arg) ~doc:"JSON Timestamp" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_inference_events
+           (Values.ListInferenceEventsRequest.make ?nextToken ?maxResults
+              ~inferenceSchedulerName
+              ~intervalStartTime:(Values.Timestamp.of_json intervalStartTime)
+              ~intervalEndTime:(Values.Timestamp.of_json intervalEndTime) ())
+           (Some Values.ListInferenceEventsResponse.to_json)
+           (Some Values.ListInferenceEventsResponse.error_to_json)])
 let list_inference_executions =
   Command.async ~summary:""
     ([%map_open.Command
@@ -412,14 +787,129 @@ let list_inference_schedulers =
          flag "inference-scheduler-name-begins-with" (optional string)
            ~doc:"STRING InferenceSchedulerIdentifier"
        and modelName =
-         flag "model-name" (optional string) ~doc:"STRING ModelName" in
+         flag "model-name" (optional string) ~doc:"STRING ModelName"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON InferenceSchedulerStatus" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_inference_schedulers
            (Values.ListInferenceSchedulersRequest.make ?nextToken ?maxResults
-              ?inferenceSchedulerNameBeginsWith ?modelName ())
+              ?inferenceSchedulerNameBeginsWith ?modelName
+              ?status:(Option.map ~f:Values.InferenceSchedulerStatus.of_json
+                         status) ())
            (Some Values.ListInferenceSchedulersResponse.to_json)
            (Some Values.ListInferenceSchedulersResponse.error_to_json)])
+let list_label_groups =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelGroupNameBeginsWith =
+         flag "label-group-name-begins-with" (optional string)
+           ~doc:"STRING LabelGroupName"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_label_groups
+           (Values.ListLabelGroupsRequest.make ?labelGroupNameBeginsWith
+              ?nextToken ?maxResults ())
+           (Some Values.ListLabelGroupsResponse.to_json)
+           (Some Values.ListLabelGroupsResponse.error_to_json)])
+let list_labels =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and intervalStartTime =
+         flag "interval-start-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and intervalEndTime =
+         flag "interval-end-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and faultCode =
+         flag "fault-code" (optional string) ~doc:"STRING FaultCode"
+       and equipment =
+         flag "equipment" (optional string) ~doc:"STRING Equipment"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_labels
+           (Values.ListLabelsRequest.make
+              ?intervalStartTime:(Option.map ~f:Values.Timestamp.of_json
+                                    intervalStartTime)
+              ?intervalEndTime:(Option.map ~f:Values.Timestamp.of_json
+                                  intervalEndTime) ?faultCode ?equipment
+              ?nextToken ?maxResults ~labelGroupName ())
+           (Some Values.ListLabelsResponse.to_json)
+           (Some Values.ListLabelsResponse.error_to_json)])
+let list_model_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON ModelVersionStatus"
+       and sourceType =
+         flag "source-type" (optional json_arg)
+           ~doc:"JSON ModelVersionSourceType"
+       and createdAtEndTime =
+         flag "created-at-end-time" (optional json_arg) ~doc:"JSON Timestamp"
+       and createdAtStartTime =
+         flag "created-at-start-time" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and maxModelVersion =
+         flag "max-model-version" (optional json_arg)
+           ~doc:"JSON ModelVersion"
+       and minModelVersion =
+         flag "min-model-version" (optional json_arg)
+           ~doc:"JSON ModelVersion"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_model_versions
+           (Values.ListModelVersionsRequest.make ?nextToken ?maxResults
+              ?status:(Option.map ~f:Values.ModelVersionStatus.of_json status)
+              ?sourceType:(Option.map
+                             ~f:Values.ModelVersionSourceType.of_json
+                             sourceType)
+              ?createdAtEndTime:(Option.map ~f:Values.Timestamp.of_json
+                                   createdAtEndTime)
+              ?createdAtStartTime:(Option.map ~f:Values.Timestamp.of_json
+                                     createdAtStartTime)
+              ?maxModelVersion:(Option.map ~f:Values.ModelVersion.of_json
+                                  maxModelVersion)
+              ?minModelVersion:(Option.map ~f:Values.ModelVersion.of_json
+                                  minModelVersion) ~modelName ())
+           (Some Values.ListModelVersionsResponse.to_json)
+           (Some Values.ListModelVersionsResponse.error_to_json)])
 let list_models =
   Command.async ~summary:""
     ([%map_open.Command
@@ -449,6 +939,60 @@ let list_models =
               ?modelNameBeginsWith ?datasetNameBeginsWith ())
            (Some Values.ListModelsResponse.to_json)
            (Some Values.ListModelsResponse.error_to_json)])
+let list_retraining_schedulers =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelNameBeginsWith =
+         flag "model-name-begins-with" (optional string)
+           ~doc:"STRING ModelName"
+       and status =
+         flag "status" (optional json_arg)
+           ~doc:"JSON RetrainingSchedulerStatus"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_retraining_schedulers
+           (Values.ListRetrainingSchedulersRequest.make ?modelNameBeginsWith
+              ?status:(Option.map ~f:Values.RetrainingSchedulerStatus.of_json
+                         status) ?nextToken ?maxResults ())
+           (Some Values.ListRetrainingSchedulersResponse.to_json)
+           (Some Values.ListRetrainingSchedulersResponse.error_to_json)])
+let list_sensor_statistics =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and ingestionJobId =
+         flag "ingestion-job-id" (optional string)
+           ~doc:"STRING IngestionJobId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and datasetName =
+         flag "dataset-name" (required string) ~doc:"STRING DatasetName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_sensor_statistics
+           (Values.ListSensorStatisticsRequest.make ?ingestionJobId
+              ?maxResults ?nextToken ~datasetName ())
+           (Some Values.ListSensorStatisticsResponse.to_json)
+           (Some Values.ListSensorStatisticsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -468,6 +1012,32 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_resource_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and policyRevisionId =
+         flag "policy-revision-id" (optional string)
+           ~doc:"STRING PolicyRevisionId"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ResourceArn"
+       and resourcePolicy =
+         flag "resource-policy" (required string) ~doc:"STRING Policy"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING IdempotenceToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_resource_policy
+           (Values.PutResourcePolicyRequest.make ?policyRevisionId
+              ~resourceArn ~resourcePolicy ~clientToken ())
+           (Some Values.PutResourcePolicyResponse.to_json)
+           (Some Values.PutResourcePolicyResponse.error_to_json)])
 let start_data_ingestion_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -517,6 +1087,24 @@ let start_inference_scheduler =
               ~inferenceSchedulerName ())
            (Some Values.StartInferenceSchedulerResponse.to_json)
            (Some Values.StartInferenceSchedulerResponse.error_to_json)])
+let start_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_retraining_scheduler
+           (Values.StartRetrainingSchedulerRequest.make ~modelName ())
+           (Some Values.StartRetrainingSchedulerResponse.to_json)
+           (Some Values.StartRetrainingSchedulerResponse.error_to_json)])
 let stop_inference_scheduler =
   Command.async ~summary:""
     ([%map_open.Command
@@ -536,6 +1124,24 @@ let stop_inference_scheduler =
            (Values.StopInferenceSchedulerRequest.make ~inferenceSchedulerName
               ()) (Some Values.StopInferenceSchedulerResponse.to_json)
            (Some Values.StopInferenceSchedulerResponse.error_to_json)])
+let stop_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.stop_retraining_scheduler
+           (Values.StopRetrainingSchedulerRequest.make ~modelName ())
+           (Some Values.StopRetrainingSchedulerResponse.to_json)
+           (Some Values.StopRetrainingSchedulerResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -579,6 +1185,27 @@ let untag_resource =
               ~tagKeys:(Values.TagKeyList.of_json tagKeys) ())
            (Some Values.UntagResourceResponse.to_json)
            (Some Values.UntagResourceResponse.error_to_json)])
+let update_active_model_version =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName"
+       and modelVersion =
+         flag "model-version" (required json_arg) ~doc:"JSON ModelVersion" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_active_model_version
+           (Values.UpdateActiveModelVersionRequest.make ~modelName
+              ~modelVersion:(Values.ModelVersion.of_json modelVersion) ())
+           (Some Values.UpdateActiveModelVersionResponse.to_json)
+           (Some Values.UpdateActiveModelVersionResponse.error_to_json)])
 let update_inference_scheduler =
   Command.async ~summary:""
     ([%map_open.Command
@@ -623,28 +1250,139 @@ let update_inference_scheduler =
                                           ~f:Values.InferenceOutputConfiguration.of_json
                                           dataOutputConfiguration) ?roleArn
               ~inferenceSchedulerName ()) None None])
+let update_label_group =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and faultCodes =
+         flag "fault-codes" (optional json_arg) ~doc:"JSON FaultCodes"
+       and labelGroupName =
+         flag "label-group-name" (required string)
+           ~doc:"STRING LabelGroupName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_label_group
+           (Values.UpdateLabelGroupRequest.make
+              ?faultCodes:(Option.map ~f:Values.FaultCodes.of_json faultCodes)
+              ~labelGroupName ()) None None])
+let update_model =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and labelsInputConfiguration =
+         flag "labels-input-configuration" (optional json_arg)
+           ~doc:"JSON LabelsInputConfiguration"
+       and roleArn =
+         flag "role-arn" (optional string) ~doc:"STRING IamRoleArn"
+       and modelDiagnosticsOutputConfiguration =
+         flag "model-diagnostics-output-configuration" (optional json_arg)
+           ~doc:"JSON ModelDiagnosticsOutputConfiguration"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_model
+           (Values.UpdateModelRequest.make
+              ?labelsInputConfiguration:(Option.map
+                                           ~f:Values.LabelsInputConfiguration.of_json
+                                           labelsInputConfiguration) ?roleArn
+              ?modelDiagnosticsOutputConfiguration:(Option.map
+                                                      ~f:Values.ModelDiagnosticsOutputConfiguration.of_json
+                                                      modelDiagnosticsOutputConfiguration)
+              ~modelName ()) None None])
+let update_retraining_scheduler =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and retrainingStartDate =
+         flag "retraining-start-date" (optional json_arg)
+           ~doc:"JSON Timestamp"
+       and retrainingFrequency =
+         flag "retraining-frequency" (optional string)
+           ~doc:"STRING RetrainingFrequency"
+       and lookbackWindow =
+         flag "lookback-window" (optional string)
+           ~doc:"STRING LookbackWindow"
+       and promoteMode =
+         flag "promote-mode" (optional json_arg) ~doc:"JSON ModelPromoteMode"
+       and modelName =
+         flag "model-name" (required string) ~doc:"STRING ModelName" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_retraining_scheduler
+           (Values.UpdateRetrainingSchedulerRequest.make
+              ?retrainingStartDate:(Option.map ~f:Values.Timestamp.of_json
+                                      retrainingStartDate)
+              ?retrainingFrequency ?lookbackWindow
+              ?promoteMode:(Option.map ~f:Values.ModelPromoteMode.of_json
+                              promoteMode) ~modelName ()) None None])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("create-dataset", create_dataset);
     ("create-inference-scheduler", create_inference_scheduler);
+    ("create-label", create_label);
+    ("create-label-group", create_label_group);
     ("create-model", create_model);
+    ("create-retraining-scheduler", create_retraining_scheduler);
     ("delete-dataset", delete_dataset);
     ("delete-inference-scheduler", delete_inference_scheduler);
+    ("delete-label", delete_label);
+    ("delete-label-group", delete_label_group);
     ("delete-model", delete_model);
+    ("delete-resource-policy", delete_resource_policy);
+    ("delete-retraining-scheduler", delete_retraining_scheduler);
     ("describe-data-ingestion-job", describe_data_ingestion_job);
     ("describe-dataset", describe_dataset);
     ("describe-inference-scheduler", describe_inference_scheduler);
+    ("describe-label", describe_label);
+    ("describe-label-group", describe_label_group);
     ("describe-model", describe_model);
+    ("describe-model-version", describe_model_version);
+    ("describe-resource-policy", describe_resource_policy);
+    ("describe-retraining-scheduler", describe_retraining_scheduler);
+    ("import-dataset", import_dataset);
+    ("import-model-version", import_model_version);
     ("list-data-ingestion-jobs", list_data_ingestion_jobs);
     ("list-datasets", list_datasets);
+    ("list-inference-events", list_inference_events);
     ("list-inference-executions", list_inference_executions);
     ("list-inference-schedulers", list_inference_schedulers);
+    ("list-label-groups", list_label_groups);
+    ("list-labels", list_labels);
+    ("list-model-versions", list_model_versions);
     ("list-models", list_models);
+    ("list-retraining-schedulers", list_retraining_schedulers);
+    ("list-sensor-statistics", list_sensor_statistics);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-resource-policy", put_resource_policy);
     ("start-data-ingestion-job", start_data_ingestion_job);
     ("start-inference-scheduler", start_inference_scheduler);
+    ("start-retraining-scheduler", start_retraining_scheduler);
     ("stop-inference-scheduler", stop_inference_scheduler);
+    ("stop-retraining-scheduler", stop_retraining_scheduler);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
-    ("update-inference-scheduler", update_inference_scheduler)]
+    ("update-active-model-version", update_active_model_version);
+    ("update-inference-scheduler", update_inference_scheduler);
+    ("update-label-group", update_label_group);
+    ("update-model", update_model);
+    ("update-retraining-scheduler", update_retraining_scheduler)]

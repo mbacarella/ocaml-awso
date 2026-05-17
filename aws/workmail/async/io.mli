@@ -13,6 +13,12 @@ val associate_member_to_group :
       AssociateMemberToGroupRequest.t ->
         (AssociateMemberToGroupResponse.t,
           AssociateMemberToGroupResponse.error) Result.t Async.Deferred.t
+val assume_impersonation_role :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      AssumeImpersonationRoleRequest.t ->
+        (AssumeImpersonationRoleResponse.t,
+          AssumeImpersonationRoleResponse.error) Result.t Async.Deferred.t
 val cancel_mailbox_export_job :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -25,12 +31,32 @@ val create_alias :
       CreateAliasRequest.t ->
         (CreateAliasResponse.t, CreateAliasResponse.error) Result.t
           Async.Deferred.t
+val create_availability_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateAvailabilityConfigurationRequest.t ->
+        (CreateAvailabilityConfigurationResponse.t,
+          CreateAvailabilityConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val create_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGroupRequest.t ->
         (CreateGroupResponse.t, CreateGroupResponse.error) Result.t
           Async.Deferred.t
+val create_identity_center_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateIdentityCenterApplicationRequest.t ->
+        (CreateIdentityCenterApplicationResponse.t,
+          CreateIdentityCenterApplicationResponse.error) Result.t
+          Async.Deferred.t
+val create_impersonation_role :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateImpersonationRoleRequest.t ->
+        (CreateImpersonationRoleResponse.t,
+          CreateImpersonationRoleResponse.error) Result.t Async.Deferred.t
 val create_mobile_device_access_rule :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -68,6 +94,13 @@ val delete_alias :
       DeleteAliasRequest.t ->
         (DeleteAliasResponse.t, DeleteAliasResponse.error) Result.t
           Async.Deferred.t
+val delete_availability_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteAvailabilityConfigurationRequest.t ->
+        (DeleteAvailabilityConfigurationResponse.t,
+          DeleteAvailabilityConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val delete_email_monitoring_configuration :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -81,6 +114,26 @@ val delete_group :
       DeleteGroupRequest.t ->
         (DeleteGroupResponse.t, DeleteGroupResponse.error) Result.t
           Async.Deferred.t
+val delete_identity_center_application :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIdentityCenterApplicationRequest.t ->
+        (DeleteIdentityCenterApplicationResponse.t,
+          DeleteIdentityCenterApplicationResponse.error) Result.t
+          Async.Deferred.t
+val delete_identity_provider_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteIdentityProviderConfigurationRequest.t ->
+        (DeleteIdentityProviderConfigurationResponse.t,
+          DeleteIdentityProviderConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val delete_impersonation_role :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteImpersonationRoleRequest.t ->
+        (DeleteImpersonationRoleResponse.t,
+          DeleteImpersonationRoleResponse.error) Result.t Async.Deferred.t
 val delete_mailbox_permissions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -107,6 +160,12 @@ val delete_organization :
       DeleteOrganizationRequest.t ->
         (DeleteOrganizationResponse.t, DeleteOrganizationResponse.error)
           Result.t Async.Deferred.t
+val delete_personal_access_token :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeletePersonalAccessTokenRequest.t ->
+        (DeletePersonalAccessTokenResponse.t,
+          DeletePersonalAccessTokenResponse.error) Result.t Async.Deferred.t
 val delete_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -144,11 +203,24 @@ val describe_email_monitoring_configuration :
         (DescribeEmailMonitoringConfigurationResponse.t,
           DescribeEmailMonitoringConfigurationResponse.error) Result.t
           Async.Deferred.t
+val describe_entity :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeEntityRequest.t ->
+        (DescribeEntityResponse.t, DescribeEntityResponse.error) Result.t
+          Async.Deferred.t
 val describe_group :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       DescribeGroupRequest.t ->
         (DescribeGroupResponse.t, DescribeGroupResponse.error) Result.t
+          Async.Deferred.t
+val describe_identity_provider_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeIdentityProviderConfigurationRequest.t ->
+        (DescribeIdentityProviderConfigurationResponse.t,
+          DescribeIdentityProviderConfigurationResponse.error) Result.t
           Async.Deferred.t
 val describe_inbound_dmarc_settings :
   ?endpoint_url:string ->
@@ -207,6 +279,18 @@ val get_default_retention_policy :
       GetDefaultRetentionPolicyRequest.t ->
         (GetDefaultRetentionPolicyResponse.t,
           GetDefaultRetentionPolicyResponse.error) Result.t Async.Deferred.t
+val get_impersonation_role :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetImpersonationRoleRequest.t ->
+        (GetImpersonationRoleResponse.t, GetImpersonationRoleResponse.error)
+          Result.t Async.Deferred.t
+val get_impersonation_role_effect :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetImpersonationRoleEffectRequest.t ->
+        (GetImpersonationRoleEffectResponse.t,
+          GetImpersonationRoleEffectResponse.error) Result.t Async.Deferred.t
 val get_mail_domain :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -233,6 +317,13 @@ val get_mobile_device_access_override :
         (GetMobileDeviceAccessOverrideResponse.t,
           GetMobileDeviceAccessOverrideResponse.error) Result.t
           Async.Deferred.t
+val get_personal_access_token_metadata :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPersonalAccessTokenMetadataRequest.t ->
+        (GetPersonalAccessTokenMetadataResponse.t,
+          GetPersonalAccessTokenMetadataResponse.error) Result.t
+          Async.Deferred.t
 val list_access_control_rules :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -244,6 +335,13 @@ val list_aliases :
     ?cfg:Awso.Cfg.t ->
       ListAliasesRequest.t ->
         (ListAliasesResponse.t, ListAliasesResponse.error) Result.t
+          Async.Deferred.t
+val list_availability_configurations :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListAvailabilityConfigurationsRequest.t ->
+        (ListAvailabilityConfigurationsResponse.t,
+          ListAvailabilityConfigurationsResponse.error) Result.t
           Async.Deferred.t
 val list_group_members :
   ?endpoint_url:string ->
@@ -257,6 +355,18 @@ val list_groups :
       ListGroupsRequest.t ->
         (ListGroupsResponse.t, ListGroupsResponse.error) Result.t
           Async.Deferred.t
+val list_groups_for_entity :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListGroupsForEntityRequest.t ->
+        (ListGroupsForEntityResponse.t, ListGroupsForEntityResponse.error)
+          Result.t Async.Deferred.t
+val list_impersonation_roles :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListImpersonationRolesRequest.t ->
+        (ListImpersonationRolesResponse.t,
+          ListImpersonationRolesResponse.error) Result.t Async.Deferred.t
 val list_mail_domains :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -295,6 +405,12 @@ val list_organizations :
       ListOrganizationsRequest.t ->
         (ListOrganizationsResponse.t, ListOrganizationsResponse.error)
           Result.t Async.Deferred.t
+val list_personal_access_tokens :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListPersonalAccessTokensRequest.t ->
+        (ListPersonalAccessTokensResponse.t,
+          ListPersonalAccessTokensResponse.error) Result.t Async.Deferred.t
 val list_resource_delegates :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -331,6 +447,13 @@ val put_email_monitoring_configuration :
       PutEmailMonitoringConfigurationRequest.t ->
         (PutEmailMonitoringConfigurationResponse.t,
           PutEmailMonitoringConfigurationResponse.error) Result.t
+          Async.Deferred.t
+val put_identity_provider_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      PutIdentityProviderConfigurationRequest.t ->
+        (PutIdentityProviderConfigurationResponse.t,
+          PutIdentityProviderConfigurationResponse.error) Result.t
           Async.Deferred.t
 val put_inbound_dmarc_settings :
   ?endpoint_url:string ->
@@ -387,11 +510,25 @@ val tag_resource :
       TagResourceRequest.t ->
         (TagResourceResponse.t, TagResourceResponse.error) Result.t
           Async.Deferred.t
+val test_availability_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      TestAvailabilityConfigurationRequest.t ->
+        (TestAvailabilityConfigurationResponse.t,
+          TestAvailabilityConfigurationResponse.error) Result.t
+          Async.Deferred.t
 val untag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t
+          Async.Deferred.t
+val update_availability_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAvailabilityConfigurationRequest.t ->
+        (UpdateAvailabilityConfigurationResponse.t,
+          UpdateAvailabilityConfigurationResponse.error) Result.t
           Async.Deferred.t
 val update_default_mail_domain :
   ?endpoint_url:string ->
@@ -399,6 +536,18 @@ val update_default_mail_domain :
       UpdateDefaultMailDomainRequest.t ->
         (UpdateDefaultMailDomainResponse.t,
           UpdateDefaultMailDomainResponse.error) Result.t Async.Deferred.t
+val update_group :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateGroupRequest.t ->
+        (UpdateGroupResponse.t, UpdateGroupResponse.error) Result.t
+          Async.Deferred.t
+val update_impersonation_role :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateImpersonationRoleRequest.t ->
+        (UpdateImpersonationRoleResponse.t,
+          UpdateImpersonationRoleResponse.error) Result.t Async.Deferred.t
 val update_mailbox_quota :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -423,4 +572,10 @@ val update_resource :
     ?cfg:Awso.Cfg.t ->
       UpdateResourceRequest.t ->
         (UpdateResourceResponse.t, UpdateResourceResponse.error) Result.t
+          Async.Deferred.t
+val update_user :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateUserRequest.t ->
+        (UpdateUserResponse.t, UpdateUserResponse.error) Result.t
           Async.Deferred.t

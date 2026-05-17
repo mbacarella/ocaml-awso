@@ -91,6 +91,37 @@ let describe_signing_job =
            (Values.DescribeSigningJobRequest.make ~jobId ())
            (Some Values.DescribeSigningJobResponse.to_json)
            (Some Values.DescribeSigningJobResponse.error_to_json)])
+let get_revocation_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and signatureTimestamp =
+         flag "signature-timestamp" (required json_arg) ~doc:"JSON Timestamp"
+       and platformId =
+         flag "platform-id" (required string) ~doc:"STRING PlatformId"
+       and profileVersionArn =
+         flag "profile-version-arn" (required string) ~doc:"STRING Arn"
+       and jobArn = flag "job-arn" (required string) ~doc:"STRING Arn"
+       and certificateHashes =
+         flag "certificate-hashes" (required json_arg)
+           ~doc:"JSON CertificateHashes" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_revocation_status
+           (Values.GetRevocationStatusRequest.make
+              ~signatureTimestamp:(Values.Timestamp.of_json
+                                     signatureTimestamp) ~platformId
+              ~profileVersionArn ~jobArn
+              ~certificateHashes:(Values.CertificateHashes.of_json
+                                    certificateHashes) ())
+           (Some Values.GetRevocationStatusResponse.to_json)
+           (Some Values.GetRevocationStatusResponse.error_to_json)])
 let get_signing_platform =
   Command.async ~summary:""
     ([%map_open.Command
@@ -374,6 +405,30 @@ let revoke_signing_profile =
               ~profileVersion ~reason
               ~effectiveTime:(Values.Timestamp.of_json effectiveTime) ())
            None None])
+let sign_payload =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and profileOwner =
+         flag "profile-owner" (optional string) ~doc:"STRING AccountId"
+       and profileName =
+         flag "profile-name" (required string) ~doc:"STRING ProfileName"
+       and payload = flag "payload" (required json_arg) ~doc:"JSON Payload"
+       and payloadFormat =
+         flag "payload-format" (required string) ~doc:"STRING String" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.sign_payload
+           (Values.SignPayloadRequest.make ?profileOwner ~profileName
+              ~payload:(Values.Payload.of_json payload) ~payloadFormat ())
+           (Some Values.SignPayloadResponse.to_json)
+           (Some Values.SignPayloadResponse.error_to_json)])
 let start_signing_job =
   Command.async ~summary:""
     ([%map_open.Command
@@ -450,6 +505,7 @@ let main =
     [("add-profile-permission", add_profile_permission);
     ("cancel-signing-profile", cancel_signing_profile);
     ("describe-signing-job", describe_signing_job);
+    ("get-revocation-status", get_revocation_status);
     ("get-signing-platform", get_signing_platform);
     ("get-signing-profile", get_signing_profile);
     ("list-profile-permissions", list_profile_permissions);
@@ -461,6 +517,7 @@ let main =
     ("remove-profile-permission", remove_profile_permission);
     ("revoke-signature", revoke_signature);
     ("revoke-signing-profile", revoke_signing_profile);
+    ("sign-payload", sign_payload);
     ("start-signing-job", start_signing_job);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource)]

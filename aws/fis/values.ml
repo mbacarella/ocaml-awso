@@ -61,6 +61,26 @@ module ExperimentTargetFilterValue =
     let of_json j = string_of_json ~kind:"ExperimentTargetFilterValue" j
     let to_json = simple_to_json to_value
   end
+module ReportConfigurationCloudWatchDashboardIdentifier =
+  struct
+    type nonrec t = string
+    let context_ = "ReportConfigurationCloudWatchDashboardIdentifier"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ReportConfigurationCloudWatchDashboardIdentifier"
+        j
+    let to_json = simple_to_json to_value
+  end
 module ExperimentTemplateTargetFilterPath =
   struct
     type nonrec t = string
@@ -84,6 +104,9 @@ module ExperimentTemplateTargetFilterValues =
   struct
     type nonrec t = ExperimentTemplateTargetFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateTargetFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -129,6 +152,9 @@ module ExperimentTargetFilterValues =
   struct
     type nonrec t = ExperimentTargetFilterValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTargetFilterValue.to_value)) |>
         (fun x -> `List x)
@@ -245,6 +271,75 @@ module ExperimentTemplateTargetName =
     let of_json j = string_of_json ~kind:"ExperimentTemplateTargetName" j
     let to_json = simple_to_json to_value
   end
+module ExperimentTemplateReportConfigurationCloudWatchDashboard =
+  struct
+    type nonrec t =
+      {
+      dashboardIdentifier:
+        ReportConfigurationCloudWatchDashboardIdentifier.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudWatch dashboard to include in the experiment report."]}
+    let make ?dashboardIdentifier = fun () -> { dashboardIdentifier }
+    let to_value x =
+      structure_to_value
+        [("dashboardIdentifier",
+           (Option.map x.dashboardIdentifier
+              ~f:ReportConfigurationCloudWatchDashboardIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dashboardIdentifier =
+        (Option.map
+           ~f:ReportConfigurationCloudWatchDashboardIdentifier.of_xml)
+          (Xml.child xml_arg0 "dashboardIdentifier") in
+      make ?dashboardIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dashboardIdentifier =
+        field_map json__ "dashboardIdentifier"
+          ReportConfigurationCloudWatchDashboardIdentifier.of_json in
+      make ?dashboardIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The CloudWatch dashboards to include as data sources in the experiment report."]
+module ReportConfigurationS3OutputPrefix =
+  struct
+    type nonrec t = string
+    let context_ = "ReportConfigurationS3OutputPrefix"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:256) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"ReportConfigurationS3OutputPrefix" j
+    let to_json = simple_to_json to_value
+  end
+module S3BucketName =
+  struct
+    type nonrec t = string
+    let context_ = "S3BucketName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:3) >>=
+             (fun () ->
+                (check_string_max i ~max:63) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"S3BucketName" j
+    let to_json = simple_to_json to_value
+  end
 module ExperimentTemplateTargetFilter =
   struct
     type nonrec t =
@@ -271,11 +366,12 @@ module ExperimentTemplateTargetFilter =
           (Xml.child xml_arg0 "path") in
       make ?values ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "values" ExperimentTemplateTargetFilterValues.of_json in
+        field_map json__ "values"
+          ExperimentTemplateTargetFilterValues.of_json in
       let path =
-        field_map json "path" ExperimentTemplateTargetFilterPath.of_json in
+        field_map json__ "path" ExperimentTemplateTargetFilterPath.of_json in
       make ?values ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -443,6 +539,7 @@ module ExperimentActionStatus =
       | Stopping 
       | Stopped 
       | Failed 
+      | Skipped 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -455,6 +552,7 @@ module ExperimentActionStatus =
       | Stopping -> "stopping"
       | Stopped -> "stopped"
       | Failed -> "failed"
+      | Skipped -> "skipped"
       | Non_static_id s -> s
     let of_string =
       function
@@ -466,6 +564,7 @@ module ExperimentActionStatus =
       | "stopping" -> Stopping
       | "stopped" -> Stopped
       | "failed" -> Failed
+      | "skipped" -> Skipped
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -531,6 +630,84 @@ module ExperimentTargetName =
     let of_json j = string_of_json ~kind:"ExperimentTargetName" j
     let to_json = simple_to_json to_value
   end
+module ExperimentReportS3ReportArn =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentReportS3ReportArn"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[\\s\\S]+"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentReportS3ReportArn" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentReportS3ReportType =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentReportS3ReportType"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[\\s\\S]+"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentReportS3ReportType" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentReportErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentReportErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentReportErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentReportConfigurationCloudWatchDashboard =
+  struct
+    type nonrec t =
+      {
+      dashboardIdentifier:
+        ReportConfigurationCloudWatchDashboardIdentifier.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudWatch dashboard to include in the experiment report."]}
+    let make ?dashboardIdentifier = fun () -> { dashboardIdentifier }
+    let to_value x =
+      structure_to_value
+        [("dashboardIdentifier",
+           (Option.map x.dashboardIdentifier
+              ~f:ReportConfigurationCloudWatchDashboardIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dashboardIdentifier =
+        (Option.map
+           ~f:ReportConfigurationCloudWatchDashboardIdentifier.of_xml)
+          (Xml.child xml_arg0 "dashboardIdentifier") in
+      make ?dashboardIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dashboardIdentifier =
+        field_map json__ "dashboardIdentifier"
+          ReportConfigurationCloudWatchDashboardIdentifier.of_json in
+      make ?dashboardIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the CloudWatch dashboard to include in the experiment report. The dashboard widgets will be captured as snapshot graphs within the report."]
 module ExperimentTargetFilter =
   struct
     type nonrec t =
@@ -555,10 +732,10 @@ module ExperimentTargetFilter =
           (Xml.child xml_arg0 "path") in
       make ?values ?path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map json "values" ExperimentTargetFilterValues.of_json in
-      let path = field_map json "path" ExperimentTargetFilterPath.of_json in
+        field_map json__ "values" ExperimentTargetFilterValues.of_json in
+      let path = field_map json__ "path" ExperimentTargetFilterPath.of_json in
       make ?values ?path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -597,6 +774,50 @@ module ExperimentTargetParameterValue =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ExperimentTargetParameterValue" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentErrorAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentErrorAccountId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentErrorAccountId" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentErrorCode =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentErrorCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:128) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentErrorCode" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentErrorLocation =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentErrorLocation"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentErrorLocation" j
     let to_json = simple_to_json to_value
   end
 module TargetResourceTypeId =
@@ -680,6 +901,8 @@ module ExperimentTemplateActionParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -692,6 +915,9 @@ module ExperimentTemplateActionStartAfterList =
   struct
     type nonrec t = ExperimentTemplateActionStartAfter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateActionStartAfter.to_value)) |>
         (fun x -> `List x)
@@ -741,6 +967,8 @@ module ExperimentTemplateActionTargetMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -769,26 +997,6 @@ module CloudWatchLogGroupArn =
     let of_json j = string_of_json ~kind:"CloudWatchLogGroupArn" j
     let to_json = simple_to_json to_value
   end
-module S3BucketName =
-  struct
-    type nonrec t = string
-    let context_ = "S3BucketName"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:3) >>=
-             (fun () ->
-                (check_string_max i ~max:63) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"S3BucketName" j
-    let to_json = simple_to_json to_value
-  end
 module S3ObjectKey =
   struct
     type nonrec t = string
@@ -798,7 +1006,7 @@ module S3ObjectKey =
         ok_or_failwith
           ((check_string_min i ~min:1) >>=
              (fun () ->
-                (check_string_max i ~max:1024) >>=
+                (check_string_max i ~max:700) >>=
                   (fun () -> check_pattern i ~pattern:"[\\s\\S]+")));
         i
     let of_string x = x
@@ -809,6 +1017,73 @@ module S3ObjectKey =
     let of_json j = string_of_json ~kind:"S3ObjectKey" j
     let to_json = simple_to_json to_value
   end
+module ExperimentTemplateReportConfigurationCloudWatchDashboardList =
+  struct
+    type nonrec t =
+      ExperimentTemplateReportConfigurationCloudWatchDashboard.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:ExperimentTemplateReportConfigurationCloudWatchDashboard.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ExperimentTemplateReportConfigurationCloudWatchDashboard.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ExperimentTemplateReportConfigurationCloudWatchDashboardList"
+        ~of_json:ExperimentTemplateReportConfigurationCloudWatchDashboard.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ReportConfigurationS3Output =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t option
+        [@ocaml.doc
+          "The name of the S3 bucket where the experiment report will be stored."];
+      prefix: ReportConfigurationS3OutputPrefix.t option
+        [@ocaml.doc
+          "The prefix of the S3 bucket where the experiment report will be stored."]}
+    let make ?bucketName = fun ?prefix -> fun () -> { bucketName; prefix }
+    let to_value x =
+      structure_to_value
+        [("bucketName", (Option.map x.bucketName ~f:S3BucketName.to_value));
+        ("prefix",
+          (Option.map x.prefix ~f:ReportConfigurationS3OutputPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:ReportConfigurationS3OutputPrefix.of_xml)
+          (Xml.child xml_arg0 "prefix") in
+      let bucketName =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix =
+        field_map json__ "prefix" ReportConfigurationS3OutputPrefix.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
+      make ?prefix ?bucketName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the S3 destination for the experiment report."]
 module StopConditionSource =
   struct
     type nonrec t = string
@@ -851,6 +1126,9 @@ module ExperimentTemplateTargetFilterList =
   struct
     type nonrec t = ExperimentTemplateTargetFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateTargetFilter.to_value)) |>
         (fun x -> `List x)
@@ -900,6 +1178,8 @@ module ExperimentTemplateTargetParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -932,6 +1212,9 @@ module ResourceArnList =
     type nonrec t = ResourceArn.t list
     let make i =
       let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ResourceArn.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -974,6 +1257,8 @@ module TagMap =
                     (fun x -> (TagValue.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -981,6 +1266,36 @@ module TagMap =
         ~of_json:TagValue.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ReportConfigurationCloudWatchDashboardInput =
+  struct
+    type nonrec t =
+      {
+      dashboardIdentifier:
+        ReportConfigurationCloudWatchDashboardIdentifier.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the CloudWatch dashboard to include in the experiment report."]}
+    let make ?dashboardIdentifier = fun () -> { dashboardIdentifier }
+    let to_value x =
+      structure_to_value
+        [("dashboardIdentifier",
+           (Option.map x.dashboardIdentifier
+              ~f:ReportConfigurationCloudWatchDashboardIdentifier.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let dashboardIdentifier =
+        (Option.map
+           ~f:ReportConfigurationCloudWatchDashboardIdentifier.of_xml)
+          (Xml.child xml_arg0 "dashboardIdentifier") in
+      make ?dashboardIdentifier ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let dashboardIdentifier =
+        field_map json__ "dashboardIdentifier"
+          ReportConfigurationCloudWatchDashboardIdentifier.of_json in
+      make ?dashboardIdentifier ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the CloudWatch dashboard for the experiment report."]
 module ExperimentTemplateTargetInputFilter =
   struct
     type nonrec t =
@@ -1007,16 +1322,17 @@ module ExperimentTemplateTargetInputFilter =
           (Xml.child_exn ~context:context_ xml_arg0 "path") in
       make ~values ~path ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let values =
-        field_map_exn json "values"
+        field_map_exn json__ "values"
           ExperimentTemplateTargetFilterValues.of_json in
       let path =
-        field_map_exn json "path" ExperimentTemplateTargetFilterPath.of_json in
+        field_map_exn json__ "path"
+          ExperimentTemplateTargetFilterPath.of_json in
       make ~values ~path ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a filter used for the target resource input in an experiment template. For more information, see Resource filters in the Fault Injection Simulator User Guide."]
+       "Specifies a filter used for the target resource input in an experiment template. For more information, see Resource filters in the Fault Injection Service User Guide."]
 module ExperimentActionDescription =
   struct
     type nonrec t = string
@@ -1071,6 +1387,8 @@ module ExperimentActionParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1082,6 +1400,9 @@ module ExperimentActionStartAfterList =
   struct
     type nonrec t = ExperimentActionStartAfter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentActionStartAfter.to_value)) |>
         (fun x -> `List x)
@@ -1140,10 +1461,10 @@ module ExperimentActionState =
           (Xml.child xml_arg0 "status") in
       make ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let reason =
-        field_map json "reason" ExperimentActionStatusReason.of_json in
-      let status = field_map json "status" ExperimentActionStatus.of_json in
+        field_map json__ "reason" ExperimentActionStatusReason.of_json in
+      let status = field_map json__ "status" ExperimentActionStatus.of_json in
       make ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of an action."]
@@ -1170,6 +1491,8 @@ module ExperimentActionTargetMap =
                        (ExperimentTargetName.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1177,10 +1500,188 @@ module ExperimentActionTargetMap =
         ~of_json:ExperimentTargetName.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExperimentReportS3Report =
+  struct
+    type nonrec t =
+      {
+      arn: ExperimentReportS3ReportArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the generated report."];
+      reportType: ExperimentReportS3ReportType.t option
+        [@ocaml.doc "The report type for the experiment report."]}
+    let make ?arn = fun ?reportType -> fun () -> { arn; reportType }
+    let to_value x =
+      structure_to_value
+        [("arn", (Option.map x.arn ~f:ExperimentReportS3ReportArn.to_value));
+        ("reportType",
+          (Option.map x.reportType ~f:ExperimentReportS3ReportType.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reportType =
+        (Option.map ~f:ExperimentReportS3ReportType.of_xml)
+          (Xml.child xml_arg0 "reportType") in
+      let arn =
+        (Option.map ~f:ExperimentReportS3ReportArn.of_xml)
+          (Xml.child xml_arg0 "arn") in
+      make ?reportType ?arn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reportType =
+        field_map json__ "reportType" ExperimentReportS3ReportType.of_json in
+      let arn = field_map json__ "arn" ExperimentReportS3ReportArn.of_json in
+      make ?reportType ?arn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the S3 destination for the report."]
+module ExperimentReportError =
+  struct
+    type nonrec t =
+      {
+      code: ExperimentReportErrorCode.t option
+        [@ocaml.doc
+          "The error code for the failed experiment report generation."]}
+    let make ?code = fun () -> { code }
+    let to_value x =
+      structure_to_value
+        [("code", (Option.map x.code ~f:ExperimentReportErrorCode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let code =
+        (Option.map ~f:ExperimentReportErrorCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      make ?code ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let code = field_map json__ "code" ExperimentReportErrorCode.of_json in
+      make ?code ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the error when experiment report generation has failed."]
+module ExperimentReportReason =
+  struct
+    type nonrec t = string
+    let context_ = "ExperimentReportReason"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExperimentReportReason" j
+    let to_json = simple_to_json to_value
+  end
+module ExperimentReportStatus =
+  struct
+    type nonrec t =
+      | Pending 
+      | Running 
+      | Completed 
+      | Cancelled 
+      | Failed 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Pending -> "pending"
+      | Running -> "running"
+      | Completed -> "completed"
+      | Cancelled -> "cancelled"
+      | Failed -> "failed"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "pending" -> Pending
+      | "running" -> Running
+      | "completed" -> Completed
+      | "cancelled" -> Cancelled
+      | "failed" -> Failed
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ExperimentReportStatus" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ExperimentReportStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module ExperimentReportConfigurationCloudWatchDashboardList =
+  struct
+    type nonrec t = ExperimentReportConfigurationCloudWatchDashboard.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:ExperimentReportConfigurationCloudWatchDashboard.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ExperimentReportConfigurationCloudWatchDashboard.of_xml)
+    let of_json j =
+      list_of_json
+        ~kind:"ExperimentReportConfigurationCloudWatchDashboardList"
+        ~of_json:ExperimentReportConfigurationCloudWatchDashboard.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExperimentReportConfigurationOutputsS3Configuration =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t option
+        [@ocaml.doc
+          "The name of the S3 bucket where the experiment report will be stored."];
+      prefix: ReportConfigurationS3OutputPrefix.t option
+        [@ocaml.doc
+          "The prefix of the S3 bucket where the experiment report will be stored."]}
+    let make ?bucketName = fun ?prefix -> fun () -> { bucketName; prefix }
+    let to_value x =
+      structure_to_value
+        [("bucketName", (Option.map x.bucketName ~f:S3BucketName.to_value));
+        ("prefix",
+          (Option.map x.prefix ~f:ReportConfigurationS3OutputPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:ReportConfigurationS3OutputPrefix.of_xml)
+          (Xml.child xml_arg0 "prefix") in
+      let bucketName =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix =
+        field_map json__ "prefix" ReportConfigurationS3OutputPrefix.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
+      make ?prefix ?bucketName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the S3 destination for the experiment report."]
 module ExperimentTargetFilterList =
   struct
     type nonrec t = ExperimentTargetFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTargetFilter.to_value)) |>
         (fun x -> `List x)
@@ -1228,6 +1729,8 @@ module ExperimentTargetParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -1253,6 +1756,120 @@ module ExperimentTargetSelectionMode =
     let of_json j = string_of_json ~kind:"ExperimentTargetSelectionMode" j
     let to_json = simple_to_json to_value
   end
+module AccountTargeting =
+  struct
+    type nonrec t =
+      | Single_account 
+      | Multi_account 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Single_account -> "single-account"
+      | Multi_account -> "multi-account"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "single-account" -> Single_account
+      | "multi-account" -> Multi_account
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration AccountTargeting" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"AccountTargeting" j)
+    let to_json = simple_to_json to_value
+  end
+module ActionsMode =
+  struct
+    type nonrec t =
+      | Skip_all 
+      | Run_all 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Skip_all -> "skip-all"
+      | Run_all -> "run-all"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "skip-all" -> Skip_all
+      | "run-all" -> Run_all
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration ActionsMode" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"ActionsMode" j)
+    let to_json = simple_to_json to_value
+  end
+module EmptyTargetResolutionMode =
+  struct
+    type nonrec t =
+      | Fail 
+      | Skip 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | Fail -> "fail" | Skip -> "skip" | Non_static_id s -> s
+    let of_string =
+      function | "fail" -> Fail | "skip" -> Skip | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration EmptyTargetResolutionMode" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"EmptyTargetResolutionMode" j)
+    let to_json = simple_to_json to_value
+  end
+module ExperimentError =
+  struct
+    type nonrec t =
+      {
+      accountId: ExperimentErrorAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services Account ID where the experiment failure occurred."];
+      code: ExperimentErrorCode.t option
+        [@ocaml.doc "The error code for the failed experiment."];
+      location: ExperimentErrorLocation.t option
+        [@ocaml.doc
+          "Context for the section of the experiment template that failed."]}
+    let make ?accountId =
+      fun ?code -> fun ?location -> fun () -> { accountId; code; location }
+    let to_value x =
+      structure_to_value
+        [("accountId",
+           (Option.map x.accountId ~f:ExperimentErrorAccountId.to_value));
+        ("code", (Option.map x.code ~f:ExperimentErrorCode.to_value));
+        ("location",
+          (Option.map x.location ~f:ExperimentErrorLocation.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let location =
+        (Option.map ~f:ExperimentErrorLocation.of_xml)
+          (Xml.child xml_arg0 "location") in
+      let code =
+        (Option.map ~f:ExperimentErrorCode.of_xml)
+          (Xml.child xml_arg0 "code") in
+      let accountId =
+        (Option.map ~f:ExperimentErrorAccountId.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      make ?location ?code ?accountId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let location =
+        field_map json__ "location" ExperimentErrorLocation.of_json in
+      let code = field_map json__ "code" ExperimentErrorCode.of_json in
+      let accountId =
+        field_map json__ "accountId" ExperimentErrorAccountId.of_json in
+      make ?location ?code ?accountId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the error when an experiment has failed."]
 module ExperimentStatus =
   struct
     type nonrec t =
@@ -1263,6 +1880,7 @@ module ExperimentStatus =
       | Stopping 
       | Stopped 
       | Failed 
+      | Cancelled 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1274,6 +1892,7 @@ module ExperimentStatus =
       | Stopping -> "stopping"
       | Stopped -> "stopped"
       | Failed -> "failed"
+      | Cancelled -> "cancelled"
       | Non_static_id s -> s
     let of_string =
       function
@@ -1284,6 +1903,7 @@ module ExperimentStatus =
       | "stopping" -> Stopping
       | "stopped" -> Stopped
       | "failed" -> Failed
+      | "cancelled" -> Cancelled
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -1311,6 +1931,42 @@ module ExperimentStatusReason =
     let of_json j = string_of_json ~kind:"ExperimentStatusReason" j
     let to_json = simple_to_json to_value
   end
+module TargetInformationKey =
+  struct
+    type nonrec t = string
+    let context_ = "TargetInformationKey"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetInformationKey" j
+    let to_json = simple_to_json to_value
+  end
+module TargetInformationValue =
+  struct
+    type nonrec t = string
+    let context_ = "TargetInformationValue"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:2048) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetInformationValue" j
+    let to_json = simple_to_json to_value
+  end
 module ActionTarget =
   struct
     type nonrec t =
@@ -1329,9 +1985,9 @@ module ActionTarget =
           (Xml.child xml_arg0 "resourceType") in
       make ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map json "resourceType" TargetResourceTypeId.of_json in
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
       make ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a target for an action."]
@@ -1416,6 +2072,48 @@ module ActionParameterRequired =
     let of_json = bool_of_json
     let to_json = simple_to_json to_value
   end
+module SafetyLeverStatus =
+  struct
+    type nonrec t =
+      | Disengaged 
+      | Engaged 
+      | Engaging 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disengaged -> "disengaged"
+      | Engaged -> "engaged"
+      | Engaging -> "engaging"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "disengaged" -> Disengaged
+      | "engaged" -> Engaged
+      | "engaging" -> Engaging
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SafetyLeverStatus" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"SafetyLeverStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module SafetyLeverStatusReason =
+  struct
+    type nonrec t = string
+    let context_ = "SafetyLeverStatusReason"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SafetyLeverStatusReason" j
+    let to_json = simple_to_json to_value
+  end
 module ExperimentTemplateAction =
   struct
     type nonrec t =
@@ -1469,19 +2167,19 @@ module ExperimentTemplateAction =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startAfter =
-        field_map json "startAfter"
+        field_map json__ "startAfter"
           ExperimentTemplateActionStartAfterList.of_json in
       let targets =
-        field_map json "targets" ExperimentTemplateActionTargetMap.of_json in
+        field_map json__ "targets" ExperimentTemplateActionTargetMap.of_json in
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateActionParameterMap.of_json in
       let description =
-        field_map json "description"
+        field_map json__ "description"
           ExperimentTemplateActionDescription.of_json in
-      let actionId = field_map json "actionId" ActionId.of_json in
+      let actionId = field_map json__ "actionId" ActionId.of_json in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an action for an experiment template."]
@@ -1522,9 +2220,9 @@ module ExperimentTemplateCloudWatchLogsLogConfiguration =
           (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logGroupArn =
-        field_map json "logGroupArn" CloudWatchLogGroupArn.of_json in
+        field_map json__ "logGroupArn" CloudWatchLogGroupArn.of_json in
       make ?logGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1549,9 +2247,9 @@ module ExperimentTemplateS3LogConfiguration =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" S3ObjectKey.of_json in
-      let bucketName = field_map json "bucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" S3ObjectKey.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
       make ?prefix ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1568,6 +2266,79 @@ module LogSchemaVersion =
       Int.of_string
         (string_of_xml ~kind:"an integer for LogSchemaVersion" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ExperimentTemplateReportConfigurationDataSources =
+  struct
+    type nonrec t =
+      {
+      cloudWatchDashboards:
+        ExperimentTemplateReportConfigurationCloudWatchDashboardList.t option
+        [@ocaml.doc
+          "The CloudWatch dashboards to include as data sources in the experiment report."]}
+    let make ?cloudWatchDashboards = fun () -> { cloudWatchDashboards }
+    let to_value x =
+      structure_to_value
+        [("cloudWatchDashboards",
+           (Option.map x.cloudWatchDashboards
+              ~f:ExperimentTemplateReportConfigurationCloudWatchDashboardList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cloudWatchDashboards =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationCloudWatchDashboardList.of_xml)
+          (Xml.child xml_arg0 "cloudWatchDashboards") in
+      make ?cloudWatchDashboards ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cloudWatchDashboards =
+        field_map json__ "cloudWatchDashboards"
+          ExperimentTemplateReportConfigurationCloudWatchDashboardList.of_json in
+      make ?cloudWatchDashboards ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the data sources for the experiment report."]
+module ExperimentTemplateReportConfigurationOutputs =
+  struct
+    type nonrec t =
+      {
+      s3Configuration: ReportConfigurationS3Output.t option
+        [@ocaml.doc "The S3 destination for the experiment report."]}
+    let make ?s3Configuration = fun () -> { s3Configuration }
+    let to_value x =
+      structure_to_value
+        [("s3Configuration",
+           (Option.map x.s3Configuration
+              ~f:ReportConfigurationS3Output.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Configuration =
+        (Option.map ~f:ReportConfigurationS3Output.of_xml)
+          (Xml.child xml_arg0 "s3Configuration") in
+      make ?s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Configuration =
+        field_map json__ "s3Configuration"
+          ReportConfigurationS3Output.of_json in
+      make ?s3Configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The output destinations of the experiment report."]
+module ReportConfigurationDuration =
+  struct
+    type nonrec t = string
+    let context_ = "ReportConfigurationDuration"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ReportConfigurationDuration" j
     let to_json = simple_to_json to_value
   end
 module ExperimentTemplateStopCondition =
@@ -1594,9 +2365,9 @@ module ExperimentTemplateStopCondition =
           (Xml.child xml_arg0 "source") in
       make ?value ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" StopConditionValue.of_json in
-      let source = field_map json "source" StopConditionSource.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" StopConditionValue.of_json in
+      let source = field_map json__ "source" StopConditionSource.of_json in
       make ?value ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a stop condition for an experiment template."]
@@ -1671,28 +2442,94 @@ module ExperimentTemplateTarget =
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateTargetParameterMap.of_json in
       let selectionMode =
-        field_map json "selectionMode"
+        field_map json__ "selectionMode"
           ExperimentTemplateTargetSelectionMode.of_json in
       let filters =
-        field_map json "filters" ExperimentTemplateTargetFilterList.of_json in
-      let resourceTags = field_map json "resourceTags" TagMap.of_json in
+        field_map json__ "filters" ExperimentTemplateTargetFilterList.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagMap.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceType =
-        field_map json "resourceType" TargetResourceTypeId.of_json in
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a target for an experiment template."]
+module ReportConfigurationCloudWatchDashboardInputList =
+  struct
+    type nonrec t = ReportConfigurationCloudWatchDashboardInput.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ReportConfigurationCloudWatchDashboardInput.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ReportConfigurationCloudWatchDashboardInput.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ReportConfigurationCloudWatchDashboardInputList"
+        ~of_json:ReportConfigurationCloudWatchDashboardInput.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ReportConfigurationS3OutputInput =
+  struct
+    type nonrec t =
+      {
+      bucketName: S3BucketName.t option
+        [@ocaml.doc
+          "The name of the S3 bucket where the experiment report will be stored."];
+      prefix: ReportConfigurationS3OutputPrefix.t option
+        [@ocaml.doc
+          "The prefix of the S3 bucket where the experiment report will be stored."]}
+    let make ?bucketName = fun ?prefix -> fun () -> { bucketName; prefix }
+    let to_value x =
+      structure_to_value
+        [("bucketName", (Option.map x.bucketName ~f:S3BucketName.to_value));
+        ("prefix",
+          (Option.map x.prefix ~f:ReportConfigurationS3OutputPrefix.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let prefix =
+        (Option.map ~f:ReportConfigurationS3OutputPrefix.of_xml)
+          (Xml.child xml_arg0 "prefix") in
+      let bucketName =
+        (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
+      make ?prefix ?bucketName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let prefix =
+        field_map json__ "prefix" ReportConfigurationS3OutputPrefix.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
+      make ?prefix ?bucketName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the S3 destination for the experiment report."]
 module ExperimentTemplateTargetFilterInputList =
   struct
     type nonrec t = ExperimentTemplateTargetInputFilter.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateTargetInputFilter.to_value)) |>
         (fun x -> `List x)
@@ -1799,20 +2636,21 @@ module ExperimentAction =
       make ?endTime ?startTime ?state ?startAfter ?targets ?parameters
         ?description ?actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let endTime = field_map json "endTime" ExperimentActionEndTime.of_json in
+    let of_json json__ =
+      let endTime =
+        field_map json__ "endTime" ExperimentActionEndTime.of_json in
       let startTime =
-        field_map json "startTime" ExperimentActionStartTime.of_json in
-      let state = field_map json "state" ExperimentActionState.of_json in
+        field_map json__ "startTime" ExperimentActionStartTime.of_json in
+      let state = field_map json__ "state" ExperimentActionState.of_json in
       let startAfter =
-        field_map json "startAfter" ExperimentActionStartAfterList.of_json in
+        field_map json__ "startAfter" ExperimentActionStartAfterList.of_json in
       let targets =
-        field_map json "targets" ExperimentActionTargetMap.of_json in
+        field_map json__ "targets" ExperimentActionTargetMap.of_json in
       let parameters =
-        field_map json "parameters" ExperimentActionParameterMap.of_json in
+        field_map json__ "parameters" ExperimentActionParameterMap.of_json in
       let description =
-        field_map json "description" ExperimentActionDescription.of_json in
-      let actionId = field_map json "actionId" ActionId.of_json in
+        field_map json__ "description" ExperimentActionDescription.of_json in
+      let actionId = field_map json__ "actionId" ActionId.of_json in
       make ?endTime ?startTime ?state ?startAfter ?targets ?parameters
         ?description ?actionId ()
     let to_json v = composed_to_json to_value v
@@ -1854,9 +2692,9 @@ module ExperimentCloudWatchLogsLogConfiguration =
           (Xml.child xml_arg0 "logGroupArn") in
       make ?logGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logGroupArn =
-        field_map json "logGroupArn" CloudWatchLogGroupArn.of_json in
+        field_map json__ "logGroupArn" CloudWatchLogGroupArn.of_json in
       make ?logGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1881,13 +2719,139 @@ module ExperimentS3LogConfiguration =
         (Option.map ~f:S3BucketName.of_xml) (Xml.child xml_arg0 "bucketName") in
       make ?prefix ?bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" S3ObjectKey.of_json in
-      let bucketName = field_map json "bucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" S3ObjectKey.of_json in
+      let bucketName = field_map json__ "bucketName" S3BucketName.of_json in
       make ?prefix ?bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Describes the configuration for experiment logging to Amazon S3."]
+module ExperimentReportS3ReportList =
+  struct
+    type nonrec t = ExperimentReportS3Report.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ExperimentReportS3Report.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ExperimentReportS3Report.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExperimentReportS3ReportList"
+        ~of_json:ExperimentReportS3Report.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ExperimentReportState =
+  struct
+    type nonrec t =
+      {
+      status: ExperimentReportStatus.t option
+        [@ocaml.doc "The state of the experiment report generation."];
+      reason: ExperimentReportReason.t option
+        [@ocaml.doc
+          "The reason for the state of the experiment report generation."];
+      error: ExperimentReportError.t option
+        [@ocaml.doc
+          "The error information of the experiment when the experiment report generation has failed."]}
+    let make ?status =
+      fun ?reason -> fun ?error -> fun () -> { status; reason; error }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:ExperimentReportStatus.to_value));
+        ("reason", (Option.map x.reason ~f:ExperimentReportReason.to_value));
+        ("error", (Option.map x.error ~f:ExperimentReportError.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let error =
+        (Option.map ~f:ExperimentReportError.of_xml)
+          (Xml.child xml_arg0 "error") in
+      let reason =
+        (Option.map ~f:ExperimentReportReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:ExperimentReportStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?error ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let error = field_map json__ "error" ExperimentReportError.of_json in
+      let reason = field_map json__ "reason" ExperimentReportReason.of_json in
+      let status = field_map json__ "status" ExperimentReportStatus.of_json in
+      make ?error ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the state of the experiment report generation."]
+module ExperimentReportConfigurationDataSources =
+  struct
+    type nonrec t =
+      {
+      cloudWatchDashboards:
+        ExperimentReportConfigurationCloudWatchDashboardList.t option
+        [@ocaml.doc
+          "The CloudWatch dashboards to include as data sources in the experiment report."]}
+    let make ?cloudWatchDashboards = fun () -> { cloudWatchDashboards }
+    let to_value x =
+      structure_to_value
+        [("cloudWatchDashboards",
+           (Option.map x.cloudWatchDashboards
+              ~f:ExperimentReportConfigurationCloudWatchDashboardList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cloudWatchDashboards =
+        (Option.map
+           ~f:ExperimentReportConfigurationCloudWatchDashboardList.of_xml)
+          (Xml.child xml_arg0 "cloudWatchDashboards") in
+      make ?cloudWatchDashboards ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cloudWatchDashboards =
+        field_map json__ "cloudWatchDashboards"
+          ExperimentReportConfigurationCloudWatchDashboardList.of_json in
+      make ?cloudWatchDashboards ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the data sources for the experiment report."]
+module ExperimentReportConfigurationOutputs =
+  struct
+    type nonrec t =
+      {
+      s3Configuration:
+        ExperimentReportConfigurationOutputsS3Configuration.t option
+        [@ocaml.doc "The S3 destination for the experiment report."]}
+    let make ?s3Configuration = fun () -> { s3Configuration }
+    let to_value x =
+      structure_to_value
+        [("s3Configuration",
+           (Option.map x.s3Configuration
+              ~f:ExperimentReportConfigurationOutputsS3Configuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Configuration =
+        (Option.map
+           ~f:ExperimentReportConfigurationOutputsS3Configuration.of_xml)
+          (Xml.child xml_arg0 "s3Configuration") in
+      make ?s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Configuration =
+        field_map json__ "s3Configuration"
+          ExperimentReportConfigurationOutputsS3Configuration.of_json in
+      make ?s3Configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the output destinations of the experiment report."]
 module ExperimentStopCondition =
   struct
     type nonrec t =
@@ -1912,9 +2876,9 @@ module ExperimentStopCondition =
           (Xml.child xml_arg0 "source") in
       make ?value ?source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" StopConditionValue.of_json in
-      let source = field_map json "source" StopConditionSource.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" StopConditionValue.of_json in
+      let source = field_map json__ "source" StopConditionSource.of_json in
       make ?value ?source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the stop condition for an experiment."]
@@ -1987,18 +2951,19 @@ module ExperimentTarget =
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters" ExperimentTargetParameterMap.of_json in
+        field_map json__ "parameters" ExperimentTargetParameterMap.of_json in
       let selectionMode =
-        field_map json "selectionMode" ExperimentTargetSelectionMode.of_json in
+        field_map json__ "selectionMode"
+          ExperimentTargetSelectionMode.of_json in
       let filters =
-        field_map json "filters" ExperimentTargetFilterList.of_json in
-      let resourceTags = field_map json "resourceTags" TagMap.of_json in
+        field_map json__ "filters" ExperimentTargetFilterList.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagMap.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceType =
-        field_map json "resourceType" TargetResourceTypeId.of_json in
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
       make ?parameters ?selectionMode ?filters ?resourceTags ?resourceArns
         ?resourceType ()
     let to_json v = composed_to_json to_value v
@@ -2019,6 +2984,65 @@ module TargetResourceTypeDescription =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"TargetResourceTypeDescription" j
+    let to_json = simple_to_json to_value
+  end
+module RoleArn =
+  struct
+    type nonrec t = string
+    let context_ = "RoleArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:20) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RoleArn" j
+    let to_json = simple_to_json to_value
+  end
+module TargetAccountConfigurationDescription =
+  struct
+    type nonrec t = string
+    let context_ = "TargetAccountConfigurationDescription"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:512) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]*"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j =
+      string_of_json ~kind:"TargetAccountConfigurationDescription" j
+    let to_json = simple_to_json to_value
+  end
+module TargetAccountId =
+  struct
+    type nonrec t = string
+    let context_ = "TargetAccountId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:12) >>=
+             (fun () ->
+                (check_string_max i ~max:48) >>=
+                  (fun () -> check_pattern i ~pattern:"[\\S]+")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetAccountId" j
     let to_json = simple_to_json to_value
   end
 module CreationTime =
@@ -2051,6 +3075,52 @@ module ExperimentId =
     let of_json j = string_of_json ~kind:"ExperimentId" j
     let to_json = simple_to_json to_value
   end
+module ExperimentOptions =
+  struct
+    type nonrec t =
+      {
+      accountTargeting: AccountTargeting.t option
+        [@ocaml.doc "The account targeting setting for an experiment."];
+      emptyTargetResolutionMode: EmptyTargetResolutionMode.t option
+        [@ocaml.doc "The empty target resolution mode for an experiment."];
+      actionsMode: ActionsMode.t option
+        [@ocaml.doc
+          "The actions mode of the experiment that is set from the StartExperiment API command."]}
+    let make ?accountTargeting =
+      fun ?emptyTargetResolutionMode ->
+        fun ?actionsMode ->
+          fun () ->
+            { accountTargeting; emptyTargetResolutionMode; actionsMode }
+    let to_value x =
+      structure_to_value
+        [("accountTargeting",
+           (Option.map x.accountTargeting ~f:AccountTargeting.to_value));
+        ("emptyTargetResolutionMode",
+          (Option.map x.emptyTargetResolutionMode
+             ~f:EmptyTargetResolutionMode.to_value));
+        ("actionsMode", (Option.map x.actionsMode ~f:ActionsMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionsMode =
+        (Option.map ~f:ActionsMode.of_xml) (Xml.child xml_arg0 "actionsMode") in
+      let emptyTargetResolutionMode =
+        (Option.map ~f:EmptyTargetResolutionMode.of_xml)
+          (Xml.child xml_arg0 "emptyTargetResolutionMode") in
+      let accountTargeting =
+        (Option.map ~f:AccountTargeting.of_xml)
+          (Xml.child xml_arg0 "accountTargeting") in
+      make ?actionsMode ?emptyTargetResolutionMode ?accountTargeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionsMode = field_map json__ "actionsMode" ActionsMode.of_json in
+      let emptyTargetResolutionMode =
+        field_map json__ "emptyTargetResolutionMode"
+          EmptyTargetResolutionMode.of_json in
+      let accountTargeting =
+        field_map json__ "accountTargeting" AccountTargeting.of_json in
+      make ?actionsMode ?emptyTargetResolutionMode ?accountTargeting ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the options for an experiment."]
 module ExperimentState =
   struct
     type nonrec t =
@@ -2058,25 +3128,33 @@ module ExperimentState =
       status: ExperimentStatus.t option
         [@ocaml.doc "The state of the experiment."];
       reason: ExperimentStatusReason.t option
-        [@ocaml.doc "The reason for the state."]}
-    let make ?status = fun ?reason -> fun () -> { status; reason }
+        [@ocaml.doc "The reason for the state."];
+      error: ExperimentError.t option
+        [@ocaml.doc
+          "The error information of the experiment when the action has failed."]}
+    let make ?status =
+      fun ?reason -> fun ?error -> fun () -> { status; reason; error }
     let to_value x =
       structure_to_value
         [("status", (Option.map x.status ~f:ExperimentStatus.to_value));
-        ("reason", (Option.map x.reason ~f:ExperimentStatusReason.to_value))]
+        ("reason", (Option.map x.reason ~f:ExperimentStatusReason.to_value));
+        ("error", (Option.map x.error ~f:ExperimentError.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let error =
+        (Option.map ~f:ExperimentError.of_xml) (Xml.child xml_arg0 "error") in
       let reason =
         (Option.map ~f:ExperimentStatusReason.of_xml)
           (Xml.child xml_arg0 "reason") in
       let status =
         (Option.map ~f:ExperimentStatus.of_xml) (Xml.child xml_arg0 "status") in
-      make ?reason ?status ()
+      make ?error ?reason ?status ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let reason = field_map json "reason" ExperimentStatusReason.of_json in
-      let status = field_map json "status" ExperimentStatus.of_json in
-      make ?reason ?status ()
+    let of_json json__ =
+      let error = field_map json__ "error" ExperimentError.of_json in
+      let reason = field_map json__ "reason" ExperimentStatusReason.of_json in
+      let status = field_map json__ "status" ExperimentStatus.of_json in
+      make ?error ?reason ?status ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the state of an experiment."]
 module ExperimentTemplateId =
@@ -2127,6 +3205,56 @@ module LastUpdateTime =
     let of_json = timestamp_of_json
     let to_json = simple_to_json to_value
   end
+module TargetInformationMap =
+  struct
+    type nonrec t = (TargetInformationKey.t * TargetInformationValue.t) list
+    let make i = i
+    let of_header xs =
+      make
+        (List.filter_map xs
+           ~f:(fun (k, v) ->
+                 (Base.String.chop_prefix k ~prefix:"x-amz-meta-") |>
+                   (Option.map
+                      ~f:(fun chopped ->
+                            ((TargetInformationKey.of_string chopped),
+                              (TargetInformationValue.of_string v))))))
+    let to_value xs =
+      (xs |>
+         (List.map
+            ~f:(fun (x, y) ->
+                  (TargetInformationKey.to_value x) |>
+                    (fun x ->
+                       (TargetInformationValue.to_value y) |>
+                         (fun y -> (x, y))))))
+        |> (fun x -> `Map x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
+    let of_xml _ =
+      failwith "of_xml_converter_of_shape: Map_shape case not implemented"
+    let of_json j =
+      object_of_json ~key_of_string:TargetInformationKey.of_string
+        ~of_json:TargetInformationValue.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module TargetName =
+  struct
+    type nonrec t = string
+    let context_ = "TargetName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TargetName" j
+    let to_json = simple_to_json to_value
+  end
 module ActionDescription =
   struct
     type nonrec t = string
@@ -2168,6 +3296,8 @@ module ActionTargetMap =
                     (fun x -> (ActionTarget.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2203,11 +3333,12 @@ module TargetResourceTypeParameter =
           (Xml.child xml_arg0 "description") in
       make ?required ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let required =
-        field_map json "required" TargetResourceTypeParameterRequired.of_json in
+        field_map json__ "required"
+          TargetResourceTypeParameterRequired.of_json in
       let description =
-        field_map json "description"
+        field_map json__ "description"
           TargetResourceTypeParameterDescription.of_json in
       make ?required ?description ()
     let to_json v = composed_to_json to_value v
@@ -2257,11 +3388,11 @@ module ActionParameter =
           (Xml.child xml_arg0 "description") in
       make ?required ?description ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let required =
-        field_map json "required" ActionParameterRequired.of_json in
+        field_map json__ "required" ActionParameterRequired.of_json in
       let description =
-        field_map json "description" ActionParameterDescription.of_json in
+        field_map json__ "description" ActionParameterDescription.of_json in
       make ?required ?description ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a parameter for an action."]
@@ -2281,6 +3412,98 @@ module ActionParameterName =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ActionParameterName" j
+    let to_json = simple_to_json to_value
+  end
+module ExceptionMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ExceptionMessage"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_pattern i ~pattern:"[\\s\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ExceptionMessage" j
+    let to_json = simple_to_json to_value
+  end
+module SafetyLeverId =
+  struct
+    type nonrec t = string
+    let context_ = "SafetyLeverId"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:64) >>=
+             (fun () -> check_pattern i ~pattern:"[\\S]+"));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"SafetyLeverId" j
+    let to_json = simple_to_json to_value
+  end
+module SafetyLeverState =
+  struct
+    type nonrec t =
+      {
+      status: SafetyLeverStatus.t option
+        [@ocaml.doc "The state of the safety lever."];
+      reason: SafetyLeverStatusReason.t option
+        [@ocaml.doc "The reason for the state of the safety lever."]}
+    let make ?status = fun ?reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status", (Option.map x.status ~f:SafetyLeverStatus.to_value));
+        ("reason", (Option.map x.reason ~f:SafetyLeverStatusReason.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        (Option.map ~f:SafetyLeverStatusReason.of_xml)
+          (Xml.child xml_arg0 "reason") in
+      let status =
+        (Option.map ~f:SafetyLeverStatus.of_xml)
+          (Xml.child xml_arg0 "status") in
+      make ?reason ?status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason = field_map json__ "reason" SafetyLeverStatusReason.of_json in
+      let status = field_map json__ "status" SafetyLeverStatus.of_json in
+      make ?reason ?status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the state of the safety lever."]
+module SafetyLeverStatusInput =
+  struct
+    type nonrec t =
+      | Disengaged 
+      | Engaged 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | Disengaged -> "disengaged"
+      | Engaged -> "engaged"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "disengaged" -> Disengaged
+      | "engaged" -> Engaged
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration SafetyLeverStatusInput" xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"SafetyLeverStatusInput" j)
     let to_json = simple_to_json to_value
   end
 module ExperimentTemplateActionMap =
@@ -2309,6 +3532,8 @@ module ExperimentTemplateActionMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2316,6 +3541,46 @@ module ExperimentTemplateActionMap =
         ~of_json:ExperimentTemplateAction.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ExperimentTemplateExperimentOptions =
+  struct
+    type nonrec t =
+      {
+      accountTargeting: AccountTargeting.t option
+        [@ocaml.doc
+          "The account targeting setting for an experiment template."];
+      emptyTargetResolutionMode: EmptyTargetResolutionMode.t option
+        [@ocaml.doc
+          "The empty target resolution mode for an experiment template."]}
+    let make ?accountTargeting =
+      fun ?emptyTargetResolutionMode ->
+        fun () -> { accountTargeting; emptyTargetResolutionMode }
+    let to_value x =
+      structure_to_value
+        [("accountTargeting",
+           (Option.map x.accountTargeting ~f:AccountTargeting.to_value));
+        ("emptyTargetResolutionMode",
+          (Option.map x.emptyTargetResolutionMode
+             ~f:EmptyTargetResolutionMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let emptyTargetResolutionMode =
+        (Option.map ~f:EmptyTargetResolutionMode.of_xml)
+          (Xml.child xml_arg0 "emptyTargetResolutionMode") in
+      let accountTargeting =
+        (Option.map ~f:AccountTargeting.of_xml)
+          (Xml.child xml_arg0 "accountTargeting") in
+      make ?emptyTargetResolutionMode ?accountTargeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let emptyTargetResolutionMode =
+        field_map json__ "emptyTargetResolutionMode"
+          EmptyTargetResolutionMode.of_json in
+      let accountTargeting =
+        field_map json__ "accountTargeting" AccountTargeting.of_json in
+      make ?emptyTargetResolutionMode ?accountTargeting ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the experiment options for an experiment template."]
 module ExperimentTemplateLogConfiguration =
   struct
     type nonrec t =
@@ -2358,22 +3623,101 @@ module ExperimentTemplateLogConfiguration =
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logSchemaVersion =
-        field_map json "logSchemaVersion" LogSchemaVersion.of_json in
+        field_map json__ "logSchemaVersion" LogSchemaVersion.of_json in
       let s3Configuration =
-        field_map json "s3Configuration"
+        field_map json__ "s3Configuration"
           ExperimentTemplateS3LogConfiguration.of_json in
       let cloudWatchLogsConfiguration =
-        field_map json "cloudWatchLogsConfiguration"
+        field_map json__ "cloudWatchLogsConfiguration"
           ExperimentTemplateCloudWatchLogsLogConfiguration.of_json in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the configuration for experiment logging."]
+module ExperimentTemplateReportConfiguration =
+  struct
+    type nonrec t =
+      {
+      outputs: ExperimentTemplateReportConfigurationOutputs.t option
+        [@ocaml.doc
+          "Describes the output destinations of the experiment report."];
+      dataSources: ExperimentTemplateReportConfigurationDataSources.t option
+        [@ocaml.doc "The data sources for the experiment report."];
+      preExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration before the experiment start time for the data sources to include in the report."];
+      postExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration after the experiment end time for the data sources to include in the report."]}
+    let make ?outputs =
+      fun ?dataSources ->
+        fun ?preExperimentDuration ->
+          fun ?postExperimentDuration ->
+            fun () ->
+              {
+                outputs;
+                dataSources;
+                preExperimentDuration;
+                postExperimentDuration
+              }
+    let to_value x =
+      structure_to_value
+        [("outputs",
+           (Option.map x.outputs
+              ~f:ExperimentTemplateReportConfigurationOutputs.to_value));
+        ("dataSources",
+          (Option.map x.dataSources
+             ~f:ExperimentTemplateReportConfigurationDataSources.to_value));
+        ("preExperimentDuration",
+          (Option.map x.preExperimentDuration
+             ~f:ReportConfigurationDuration.to_value));
+        ("postExperimentDuration",
+          (Option.map x.postExperimentDuration
+             ~f:ReportConfigurationDuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let postExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "postExperimentDuration") in
+      let preExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "preExperimentDuration") in
+      let dataSources =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationDataSources.of_xml)
+          (Xml.child xml_arg0 "dataSources") in
+      let outputs =
+        (Option.map ~f:ExperimentTemplateReportConfigurationOutputs.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let postExperimentDuration =
+        field_map json__ "postExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let preExperimentDuration =
+        field_map json__ "preExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let dataSources =
+        field_map json__ "dataSources"
+          ExperimentTemplateReportConfigurationDataSources.of_json in
+      let outputs =
+        field_map json__ "outputs"
+          ExperimentTemplateReportConfigurationOutputs.of_json in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the experiment report configuration. For more information, see Experiment report configurations for AWS FIS."]
 module ExperimentTemplateStopConditionList =
   struct
     type nonrec t = ExperimentTemplateStopCondition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateStopCondition.to_value)) |>
         (fun x -> `List x)
@@ -2422,6 +3766,8 @@ module ExperimentTemplateTargetMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2429,42 +3775,18 @@ module ExperimentTemplateTargetMap =
         ~of_json:ExperimentTemplateTarget.of_json j
     let to_json v = composed_to_json to_value v
   end
-module RoleArn =
+module TargetAccountConfigurationsCount =
   struct
-    type nonrec t = string
-    let context_ = "RoleArn"
+    type nonrec t = Int64.t
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_min i ~min:20) >>=
-             (fun () ->
-                (check_string_max i ~max:2048) >>=
-                  (fun () -> check_pattern i ~pattern:"[\\S]+")));
-        i
-    let of_string x = x
-    let to_value x = `String x
+      let open Result in ok_or_failwith (check_int64_min i ~min:0L); i
+    let of_string = Int64.of_string
+    let to_value x = `Long x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"RoleArn" j
-    let to_json = simple_to_json to_value
-  end
-module ExceptionMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ExceptionMessage"
-    let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:1024) >>=
-             (fun () -> check_pattern i ~pattern:"[\\s\\S]+"));
-        i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ExceptionMessage" j
+    let to_header x = Int64.to_string x
+    let of_xml xml_arg0 =
+      Int64.of_string (string_of_xml ~kind:"a long" xml_arg0)
+    let of_json j = Int64.of_float (float_of_json ~kind:"a long" j)
     let to_json = simple_to_json to_value
   end
 module UpdateExperimentTemplateActionInputItem =
@@ -2520,19 +3842,19 @@ module UpdateExperimentTemplateActionInputItem =
         (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startAfter =
-        field_map json "startAfter"
+        field_map json__ "startAfter"
           ExperimentTemplateActionStartAfterList.of_json in
       let targets =
-        field_map json "targets" ExperimentTemplateActionTargetMap.of_json in
+        field_map json__ "targets" ExperimentTemplateActionTargetMap.of_json in
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateActionParameterMap.of_json in
       let description =
-        field_map json "description"
+        field_map json__ "description"
           ExperimentTemplateActionDescription.of_json in
-      let actionId = field_map json "actionId" ActionId.of_json in
+      let actionId = field_map json__ "actionId" ActionId.of_json in
       make ?startAfter ?targets ?parameters ?description ?actionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies an action for an experiment template."]
@@ -2556,9 +3878,9 @@ module ExperimentTemplateCloudWatchLogsLogConfigurationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "logGroupArn") in
       make ~logGroupArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logGroupArn =
-        field_map_exn json "logGroupArn" CloudWatchLogGroupArn.of_json in
+        field_map_exn json__ "logGroupArn" CloudWatchLogGroupArn.of_json in
       make ~logGroupArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2585,13 +3907,67 @@ module ExperimentTemplateS3LogConfigurationInput =
           (Xml.child_exn ~context:context_ xml_arg0 "bucketName") in
       make ?prefix ~bucketName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let prefix = field_map json "prefix" S3ObjectKey.of_json in
-      let bucketName = field_map_exn json "bucketName" S3BucketName.of_json in
+    let of_json json__ =
+      let prefix = field_map json__ "prefix" S3ObjectKey.of_json in
+      let bucketName = field_map_exn json__ "bucketName" S3BucketName.of_json in
       make ?prefix ~bucketName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Specifies the configuration for experiment logging to Amazon S3."]
+module ExperimentTemplateReportConfigurationDataSourcesInput =
+  struct
+    type nonrec t =
+      {
+      cloudWatchDashboards:
+        ReportConfigurationCloudWatchDashboardInputList.t option
+        [@ocaml.doc
+          "The CloudWatch dashboards to include as data sources in the experiment report."]}
+    let make ?cloudWatchDashboards = fun () -> { cloudWatchDashboards }
+    let to_value x =
+      structure_to_value
+        [("cloudWatchDashboards",
+           (Option.map x.cloudWatchDashboards
+              ~f:ReportConfigurationCloudWatchDashboardInputList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let cloudWatchDashboards =
+        (Option.map ~f:ReportConfigurationCloudWatchDashboardInputList.of_xml)
+          (Xml.child xml_arg0 "cloudWatchDashboards") in
+      make ?cloudWatchDashboards ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let cloudWatchDashboards =
+        field_map json__ "cloudWatchDashboards"
+          ReportConfigurationCloudWatchDashboardInputList.of_json in
+      make ?cloudWatchDashboards ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the data sources for the experiment report."]
+module ExperimentTemplateReportConfigurationOutputsInput =
+  struct
+    type nonrec t =
+      {
+      s3Configuration: ReportConfigurationS3OutputInput.t option
+        [@ocaml.doc "The S3 destination for the experiment report."]}
+    let make ?s3Configuration = fun () -> { s3Configuration }
+    let to_value x =
+      structure_to_value
+        [("s3Configuration",
+           (Option.map x.s3Configuration
+              ~f:ReportConfigurationS3OutputInput.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Configuration =
+        (Option.map ~f:ReportConfigurationS3OutputInput.of_xml)
+          (Xml.child xml_arg0 "s3Configuration") in
+      make ?s3Configuration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Configuration =
+        field_map json__ "s3Configuration"
+          ReportConfigurationS3OutputInput.of_json in
+      make ?s3Configuration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the outputs for the experiment templates."]
 module UpdateExperimentTemplateStopConditionInput =
   struct
     type nonrec t =
@@ -2618,9 +3994,9 @@ module UpdateExperimentTemplateStopConditionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?value ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" StopConditionValue.of_json in
-      let source = field_map_exn json "source" StopConditionSource.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" StopConditionValue.of_json in
+      let source = field_map_exn json__ "source" StopConditionSource.of_json in
       make ?value ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2698,21 +4074,21 @@ module UpdateExperimentTemplateTargetInput =
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateTargetParameterMap.of_json in
       let selectionMode =
-        field_map_exn json "selectionMode"
+        field_map_exn json__ "selectionMode"
           ExperimentTemplateTargetSelectionMode.of_json in
       let filters =
-        field_map json "filters"
+        field_map json__ "filters"
           ExperimentTemplateTargetFilterInputList.of_json in
-      let resourceTags = field_map json "resourceTags" TagMap.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagMap.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceType =
-        field_map_exn json "resourceType" TargetResourceTypeId.of_json in
+        field_map_exn json__ "resourceType" TargetResourceTypeId.of_json in
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
     let to_json v = composed_to_json to_value v
@@ -2742,6 +4118,8 @@ module ExperimentActionMap =
                        (ExperimentAction.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2802,17 +4180,123 @@ module ExperimentLogConfiguration =
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logSchemaVersion =
-        field_map json "logSchemaVersion" LogSchemaVersion.of_json in
+        field_map json__ "logSchemaVersion" LogSchemaVersion.of_json in
       let s3Configuration =
-        field_map json "s3Configuration" ExperimentS3LogConfiguration.of_json in
+        field_map json__ "s3Configuration"
+          ExperimentS3LogConfiguration.of_json in
       let cloudWatchLogsConfiguration =
-        field_map json "cloudWatchLogsConfiguration"
+        field_map json__ "cloudWatchLogsConfiguration"
           ExperimentCloudWatchLogsLogConfiguration.of_json in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes the configuration for experiment logging."]
+module ExperimentReport =
+  struct
+    type nonrec t =
+      {
+      state: ExperimentReportState.t option
+        [@ocaml.doc "The state of the experiment report."];
+      s3Reports: ExperimentReportS3ReportList.t option
+        [@ocaml.doc "The S3 destination of the experiment report."]}
+    let make ?state = fun ?s3Reports -> fun () -> { state; s3Reports }
+    let to_value x =
+      structure_to_value
+        [("state", (Option.map x.state ~f:ExperimentReportState.to_value));
+        ("s3Reports",
+          (Option.map x.s3Reports ~f:ExperimentReportS3ReportList.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let s3Reports =
+        (Option.map ~f:ExperimentReportS3ReportList.of_xml)
+          (Xml.child xml_arg0 "s3Reports") in
+      let state =
+        (Option.map ~f:ExperimentReportState.of_xml)
+          (Xml.child xml_arg0 "state") in
+      make ?s3Reports ?state ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let s3Reports =
+        field_map json__ "s3Reports" ExperimentReportS3ReportList.of_json in
+      let state = field_map json__ "state" ExperimentReportState.of_json in
+      make ?s3Reports ?state ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes the experiment report."]
+module ExperimentReportConfiguration =
+  struct
+    type nonrec t =
+      {
+      outputs: ExperimentReportConfigurationOutputs.t option
+        [@ocaml.doc "The output destinations of the experiment report."];
+      dataSources: ExperimentReportConfigurationDataSources.t option
+        [@ocaml.doc "The data sources for the experiment report."];
+      preExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration before the experiment start time for the data sources to include in the report."];
+      postExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration after the experiment end time for the data sources to include in the report."]}
+    let make ?outputs =
+      fun ?dataSources ->
+        fun ?preExperimentDuration ->
+          fun ?postExperimentDuration ->
+            fun () ->
+              {
+                outputs;
+                dataSources;
+                preExperimentDuration;
+                postExperimentDuration
+              }
+    let to_value x =
+      structure_to_value
+        [("outputs",
+           (Option.map x.outputs
+              ~f:ExperimentReportConfigurationOutputs.to_value));
+        ("dataSources",
+          (Option.map x.dataSources
+             ~f:ExperimentReportConfigurationDataSources.to_value));
+        ("preExperimentDuration",
+          (Option.map x.preExperimentDuration
+             ~f:ReportConfigurationDuration.to_value));
+        ("postExperimentDuration",
+          (Option.map x.postExperimentDuration
+             ~f:ReportConfigurationDuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let postExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "postExperimentDuration") in
+      let preExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "preExperimentDuration") in
+      let dataSources =
+        (Option.map ~f:ExperimentReportConfigurationDataSources.of_xml)
+          (Xml.child xml_arg0 "dataSources") in
+      let outputs =
+        (Option.map ~f:ExperimentReportConfigurationOutputs.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let postExperimentDuration =
+        field_map json__ "postExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let preExperimentDuration =
+        field_map json__ "preExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let dataSources =
+        field_map json__ "dataSources"
+          ExperimentReportConfigurationDataSources.of_json in
+      let outputs =
+        field_map json__ "outputs"
+          ExperimentReportConfigurationOutputs.of_json in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes the report configuration for the experiment. For more information, see Experiment report configurations for AWS FIS."]
 module ExperimentStartTime =
   struct
     type nonrec t = string
@@ -2829,6 +4313,9 @@ module ExperimentStopConditionList =
   struct
     type nonrec t = ExperimentStopCondition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentStopCondition.to_value)) |>
         (fun x -> `List x)
@@ -2875,6 +4362,8 @@ module ExperimentTargetMap =
                        (ExperimentTarget.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -2908,44 +4397,107 @@ module TargetResourceTypeSummary =
           (Xml.child xml_arg0 "resourceType") in
       make ?description ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let description =
-        field_map json "description" TargetResourceTypeDescription.of_json in
+        field_map json__ "description" TargetResourceTypeDescription.of_json in
       let resourceType =
-        field_map json "resourceType" TargetResourceTypeId.of_json in
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
       make ?description ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource type."]
+module TargetAccountConfigurationSummary =
+  struct
+    type nonrec t =
+      {
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      accountId: TargetAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let make ?roleArn =
+      fun ?accountId ->
+        fun ?description -> fun () -> { roleArn; accountId; description }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:TargetAccountId.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let accountId =
+        (Option.map ~f:TargetAccountId.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?description ?accountId ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let accountId = field_map json__ "accountId" TargetAccountId.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      make ?description ?accountId ?roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a summary of a target account configuration."]
 module ExperimentSummary =
   struct
     type nonrec t =
       {
       id: ExperimentId.t option [@ocaml.doc "The ID of the experiment."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the experiment."];
       experimentTemplateId: ExperimentTemplateId.t option
         [@ocaml.doc "The ID of the experiment template."];
       state: ExperimentState.t option
         [@ocaml.doc "The state of the experiment."];
       creationTime: CreationTime.t option
         [@ocaml.doc "The time that the experiment was created."];
-      tags: TagMap.t option [@ocaml.doc "The tags for the experiment."]}
+      tags: TagMap.t option [@ocaml.doc "The tags for the experiment."];
+      experimentOptions: ExperimentOptions.t option
+        [@ocaml.doc "The experiment options for the experiment."]}
     let make ?id =
-      fun ?experimentTemplateId ->
-        fun ?state ->
-          fun ?creationTime ->
-            fun ?tags ->
-              fun () ->
-                { id; experimentTemplateId; state; creationTime; tags }
+      fun ?arn ->
+        fun ?experimentTemplateId ->
+          fun ?state ->
+            fun ?creationTime ->
+              fun ?tags ->
+                fun ?experimentOptions ->
+                  fun () ->
+                    {
+                      id;
+                      arn;
+                      experimentTemplateId;
+                      state;
+                      creationTime;
+                      tags;
+                      experimentOptions
+                    }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ExperimentId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("experimentTemplateId",
           (Option.map x.experimentTemplateId ~f:ExperimentTemplateId.to_value));
         ("state", (Option.map x.state ~f:ExperimentState.to_value));
         ("creationTime",
           (Option.map x.creationTime ~f:CreationTime.to_value));
-        ("tags", (Option.map x.tags ~f:TagMap.to_value))]
+        ("tags", (Option.map x.tags ~f:TagMap.to_value));
+        ("experimentOptions",
+          (Option.map x.experimentOptions ~f:ExperimentOptions.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentOptions =
+        (Option.map ~f:ExperimentOptions.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       let creationTime =
         (Option.map ~f:CreationTime.of_xml)
@@ -2955,17 +4507,23 @@ module ExperimentSummary =
       let experimentTemplateId =
         (Option.map ~f:ExperimentTemplateId.of_xml)
           (Xml.child xml_arg0 "experimentTemplateId") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ExperimentId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?creationTime ?state ?experimentTemplateId ?id ()
+      make ?experimentOptions ?tags ?creationTime ?state
+        ?experimentTemplateId ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let creationTime = field_map json "creationTime" CreationTime.of_json in
-      let state = field_map json "state" ExperimentState.of_json in
+    let of_json json__ =
+      let experimentOptions =
+        field_map json__ "experimentOptions" ExperimentOptions.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let creationTime = field_map json__ "creationTime" CreationTime.of_json in
+      let state = field_map json__ "state" ExperimentState.of_json in
       let experimentTemplateId =
-        field_map json "experimentTemplateId" ExperimentTemplateId.of_json in
-      let id = field_map json "id" ExperimentId.of_json in
-      make ?tags ?creationTime ?state ?experimentTemplateId ?id ()
+        field_map json__ "experimentTemplateId" ExperimentTemplateId.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ExperimentId.of_json in
+      make ?experimentOptions ?tags ?creationTime ?state
+        ?experimentTemplateId ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a summary of an experiment."]
 module ExperimentTemplateSummary =
@@ -2974,6 +4532,9 @@ module ExperimentTemplateSummary =
       {
       id: ExperimentTemplateId.t option
         [@ocaml.doc "The ID of the experiment template."];
+      arn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the experiment template."];
       description: ExperimentTemplateDescription.t option
         [@ocaml.doc "The description of the experiment template."];
       creationTime: CreationTime.t option
@@ -2984,15 +4545,18 @@ module ExperimentTemplateSummary =
       tags: TagMap.t option
         [@ocaml.doc "The tags for the experiment template."]}
     let make ?id =
-      fun ?description ->
-        fun ?creationTime ->
-          fun ?lastUpdateTime ->
-            fun ?tags ->
-              fun () ->
-                { id; description; creationTime; lastUpdateTime; tags }
+      fun ?arn ->
+        fun ?description ->
+          fun ?creationTime ->
+            fun ?lastUpdateTime ->
+              fun ?tags ->
+                fun () ->
+                  { id; arn; description; creationTime; lastUpdateTime; tags
+                  }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ExperimentTemplateId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("description",
           (Option.map x.description ~f:ExperimentTemplateDescription.to_value));
         ("creationTime",
@@ -3012,38 +4576,128 @@ module ExperimentTemplateSummary =
       let description =
         (Option.map ~f:ExperimentTemplateDescription.of_xml)
           (Xml.child xml_arg0 "description") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:ExperimentTemplateId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?lastUpdateTime ?creationTime ?description ?id ()
+      make ?tags ?lastUpdateTime ?creationTime ?description ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
       let lastUpdateTime =
-        field_map json "lastUpdateTime" LastUpdateTime.of_json in
-      let creationTime = field_map json "creationTime" CreationTime.of_json in
+        field_map json__ "lastUpdateTime" LastUpdateTime.of_json in
+      let creationTime = field_map json__ "creationTime" CreationTime.of_json in
       let description =
-        field_map json "description" ExperimentTemplateDescription.of_json in
-      let id = field_map json "id" ExperimentTemplateId.of_json in
-      make ?tags ?lastUpdateTime ?creationTime ?description ?id ()
+        field_map json__ "description" ExperimentTemplateDescription.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ExperimentTemplateId.of_json in
+      make ?tags ?lastUpdateTime ?creationTime ?description ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a summary of an experiment template."]
+module ExperimentTargetAccountConfigurationSummary =
+  struct
+    type nonrec t =
+      {
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      accountId: TargetAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let make ?roleArn =
+      fun ?accountId ->
+        fun ?description -> fun () -> { roleArn; accountId; description }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:TargetAccountId.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let accountId =
+        (Option.map ~f:TargetAccountId.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?description ?accountId ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let accountId = field_map json__ "accountId" TargetAccountId.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      make ?description ?accountId ?roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Provides a summary of a target account configuration."]
+module ResolvedTarget =
+  struct
+    type nonrec t =
+      {
+      resourceType: TargetResourceTypeId.t option
+        [@ocaml.doc "The resource type of the target."];
+      targetName: TargetName.t option [@ocaml.doc "The name of the target."];
+      targetInformation: TargetInformationMap.t option
+        [@ocaml.doc "Information about the target."]}
+    let make ?resourceType =
+      fun ?targetName ->
+        fun ?targetInformation ->
+          fun () -> { resourceType; targetName; targetInformation }
+    let to_value x =
+      structure_to_value
+        [("resourceType",
+           (Option.map x.resourceType ~f:TargetResourceTypeId.to_value));
+        ("targetName", (Option.map x.targetName ~f:TargetName.to_value));
+        ("targetInformation",
+          (Option.map x.targetInformation ~f:TargetInformationMap.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetInformation =
+        (Option.map ~f:TargetInformationMap.of_xml)
+          (Xml.child xml_arg0 "targetInformation") in
+      let targetName =
+        (Option.map ~f:TargetName.of_xml) (Xml.child xml_arg0 "targetName") in
+      let resourceType =
+        (Option.map ~f:TargetResourceTypeId.of_xml)
+          (Xml.child xml_arg0 "resourceType") in
+      make ?targetInformation ?targetName ?resourceType ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetInformation =
+        field_map json__ "targetInformation" TargetInformationMap.of_json in
+      let targetName = field_map json__ "targetName" TargetName.of_json in
+      let resourceType =
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
+      make ?targetInformation ?targetName ?resourceType ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a resolved target."]
 module ActionSummary =
   struct
     type nonrec t =
       {
       id: ActionId.t option [@ocaml.doc "The ID of the action."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the action."];
       description: ActionDescription.t option
         [@ocaml.doc "The description for the action."];
       targets: ActionTargetMap.t option
         [@ocaml.doc "The targets for the action."];
       tags: TagMap.t option [@ocaml.doc "The tags for the action."]}
     let make ?id =
-      fun ?description ->
-        fun ?targets ->
-          fun ?tags -> fun () -> { id; description; targets; tags }
+      fun ?arn ->
+        fun ?description ->
+          fun ?targets ->
+            fun ?tags -> fun () -> { id; arn; description; targets; tags }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ActionId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("description",
           (Option.map x.description ~f:ActionDescription.to_value));
         ("targets", (Option.map x.targets ~f:ActionTargetMap.to_value));
@@ -3056,16 +4710,18 @@ module ActionSummary =
       let description =
         (Option.map ~f:ActionDescription.of_xml)
           (Xml.child xml_arg0 "description") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?targets ?description ?id ()
+      make ?tags ?targets ?description ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let targets = field_map json "targets" ActionTargetMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let targets = field_map json__ "targets" ActionTargetMap.of_json in
       let description =
-        field_map json "description" ActionDescription.of_json in
-      let id = field_map json "id" ActionId.of_json in
-      make ?tags ?targets ?description ?id ()
+        field_map json__ "description" ActionDescription.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ActionId.of_json in
+      make ?tags ?targets ?description ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Provides a summary of an action."]
 module TargetResourceTypeParameterMap =
@@ -3095,6 +4751,8 @@ module TargetResourceTypeParameterMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3126,6 +4784,8 @@ module ActionParameterMap =
                        (ActionParameter.to_value y) |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3189,23 +4849,23 @@ module CreateExperimentTemplateActionInput =
         ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "actionId") in
       make ?startAfter ?targets ?parameters ?description ~actionId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let startAfter =
-        field_map json "startAfter"
+        field_map json__ "startAfter"
           ExperimentTemplateActionStartAfterList.of_json in
       let targets =
-        field_map json "targets" ExperimentTemplateActionTargetMap.of_json in
+        field_map json__ "targets" ExperimentTemplateActionTargetMap.of_json in
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateActionParameterMap.of_json in
       let description =
-        field_map json "description"
+        field_map json__ "description"
           ExperimentTemplateActionDescription.of_json in
-      let actionId = field_map_exn json "actionId" ActionId.of_json in
+      let actionId = field_map_exn json__ "actionId" ActionId.of_json in
       make ?startAfter ?targets ?parameters ?description ~actionId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies an action for an experiment template. For more information, see Actions in the Fault Injection Simulator User Guide."]
+       "Specifies an action for an experiment template. For more information, see Actions in the Fault Injection Service User Guide."]
 module CreateExperimentTemplateStopConditionInput =
   struct
     type nonrec t =
@@ -3232,9 +4892,9 @@ module CreateExperimentTemplateStopConditionInput =
           (Xml.child_exn ~context:context_ xml_arg0 "source") in
       make ?value ~source ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "value" StopConditionValue.of_json in
-      let source = field_map_exn json "source" StopConditionSource.of_json in
+    let of_json json__ =
+      let value = field_map json__ "value" StopConditionValue.of_json in
+      let source = field_map_exn json__ "source" StopConditionSource.of_json in
       make ?value ~source ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies a stop condition for an experiment template."]
@@ -3311,32 +4971,202 @@ module CreateExperimentTemplateTargetInput =
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters"
+        field_map json__ "parameters"
           ExperimentTemplateTargetParameterMap.of_json in
       let selectionMode =
-        field_map_exn json "selectionMode"
+        field_map_exn json__ "selectionMode"
           ExperimentTemplateTargetSelectionMode.of_json in
       let filters =
-        field_map json "filters"
+        field_map json__ "filters"
           ExperimentTemplateTargetFilterInputList.of_json in
-      let resourceTags = field_map json "resourceTags" TagMap.of_json in
+      let resourceTags = field_map json__ "resourceTags" TagMap.of_json in
       let resourceArns =
-        field_map json "resourceArns" ResourceArnList.of_json in
+        field_map json__ "resourceArns" ResourceArnList.of_json in
       let resourceType =
-        field_map_exn json "resourceType" TargetResourceTypeId.of_json in
+        field_map_exn json__ "resourceType" TargetResourceTypeId.of_json in
       make ?parameters ~selectionMode ?filters ?resourceTags ?resourceArns
         ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Specifies a target for an experiment. You must specify at least one Amazon Resource Name (ARN) or at least one resource tag. You cannot specify both ARNs and tags. For more information, see Targets in the Fault Injection Simulator User Guide."]
+       "Specifies a target for an experiment. You must specify at least one Amazon Resource Name (ARN) or at least one resource tag. You cannot specify both ARNs and tags. For more information, see Targets in the Fault Injection Service User Guide."]
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The specified resource cannot be found."]
+module TargetAccountConfiguration =
+  struct
+    type nonrec t =
+      {
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      accountId: TargetAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let make ?roleArn =
+      fun ?accountId ->
+        fun ?description -> fun () -> { roleArn; accountId; description }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:TargetAccountId.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let accountId =
+        (Option.map ~f:TargetAccountId.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?description ?accountId ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let accountId = field_map json__ "accountId" TargetAccountId.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      make ?description ?accountId ?roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a target account configuration."]
+module ValidationException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The specified input is not valid, or fails to satisfy the constraints for the request."]
+module ConflictException =
+  struct
+    type nonrec t = {
+      message: ExceptionMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ExceptionMessage.of_xml)
+          (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The request could not be processed because of a conflict."]
+module SafetyLever =
+  struct
+    type nonrec t =
+      {
+      id: SafetyLeverId.t option [@ocaml.doc "The ID of the safety lever."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the safety lever."];
+      state: SafetyLeverState.t option
+        [@ocaml.doc "The state of the safety lever."]}
+    let make ?id = fun ?arn -> fun ?state -> fun () -> { id; arn; state }
+    let to_value x =
+      structure_to_value
+        [("id", (Option.map x.id ~f:SafetyLeverId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
+        ("state", (Option.map x.state ~f:SafetyLeverState.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        (Option.map ~f:SafetyLeverState.of_xml) (Xml.child xml_arg0 "state") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
+      let id = (Option.map ~f:SafetyLeverId.of_xml) (Xml.child xml_arg0 "id") in
+      make ?state ?arn ?id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state = field_map json__ "state" SafetyLeverState.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" SafetyLeverId.of_json in
+      make ?state ?arn ?id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Describes a safety lever."]
+module UpdateSafetyLeverStateInput =
+  struct
+    type nonrec t =
+      {
+      status: SafetyLeverStatusInput.t
+        [@ocaml.doc "The updated state of the safety lever."];
+      reason: SafetyLeverStatusReason.t
+        [@ocaml.doc "The reason for updating the state of the safety lever."]}
+    let context_ = "UpdateSafetyLeverStateInput"
+    let make ~status = fun ~reason -> fun () -> { status; reason }
+    let to_value x =
+      structure_to_value
+        [("status", (Some (SafetyLeverStatusInput.to_value x.status)));
+        ("reason", (Some (SafetyLeverStatusReason.to_value x.reason)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let reason =
+        SafetyLeverStatusReason.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "reason") in
+      let status =
+        SafetyLeverStatusInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "status") in
+      make ~reason ~status ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let reason =
+        field_map_exn json__ "reason" SafetyLeverStatusReason.of_json in
+      let status =
+        field_map_exn json__ "status" SafetyLeverStatusInput.of_json in
+      make ~reason ~status ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies a state for a safety lever."]
 module ExperimentTemplate =
   struct
     type nonrec t =
       {
       id: ExperimentTemplateId.t option
         [@ocaml.doc "The ID of the experiment template."];
+      arn: ResourceArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of the experiment template."];
       description: ExperimentTemplateDescription.t option
         [@ocaml.doc "The description for the experiment template."];
       targets: ExperimentTemplateTargetMap.t option
@@ -3354,33 +5184,52 @@ module ExperimentTemplate =
       tags: TagMap.t option
         [@ocaml.doc "The tags for the experiment template."];
       logConfiguration: ExperimentTemplateLogConfiguration.t option
-        [@ocaml.doc "The configuration for experiment logging."]}
+        [@ocaml.doc "The configuration for experiment logging."];
+      experimentOptions: ExperimentTemplateExperimentOptions.t option
+        [@ocaml.doc "The experiment options for an experiment template."];
+      targetAccountConfigurationsCount:
+        TargetAccountConfigurationsCount.t option
+        [@ocaml.doc
+          "The count of target account configurations for the experiment template."];
+      experimentReportConfiguration:
+        ExperimentTemplateReportConfiguration.t option
+        [@ocaml.doc
+          "Describes the report configuration for the experiment template."]}
     let make ?id =
-      fun ?description ->
-        fun ?targets ->
-          fun ?actions ->
-            fun ?stopConditions ->
-              fun ?creationTime ->
-                fun ?lastUpdateTime ->
-                  fun ?roleArn ->
-                    fun ?tags ->
-                      fun ?logConfiguration ->
-                        fun () ->
-                          {
-                            id;
-                            description;
-                            targets;
-                            actions;
-                            stopConditions;
-                            creationTime;
-                            lastUpdateTime;
-                            roleArn;
-                            tags;
-                            logConfiguration
-                          }
+      fun ?arn ->
+        fun ?description ->
+          fun ?targets ->
+            fun ?actions ->
+              fun ?stopConditions ->
+                fun ?creationTime ->
+                  fun ?lastUpdateTime ->
+                    fun ?roleArn ->
+                      fun ?tags ->
+                        fun ?logConfiguration ->
+                          fun ?experimentOptions ->
+                            fun ?targetAccountConfigurationsCount ->
+                              fun ?experimentReportConfiguration ->
+                                fun () ->
+                                  {
+                                    id;
+                                    arn;
+                                    description;
+                                    targets;
+                                    actions;
+                                    stopConditions;
+                                    creationTime;
+                                    lastUpdateTime;
+                                    roleArn;
+                                    tags;
+                                    logConfiguration;
+                                    experimentOptions;
+                                    targetAccountConfigurationsCount;
+                                    experimentReportConfiguration
+                                  }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ExperimentTemplateId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("description",
           (Option.map x.description ~f:ExperimentTemplateDescription.to_value));
         ("targets",
@@ -3398,9 +5247,27 @@ module ExperimentTemplate =
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("logConfiguration",
           (Option.map x.logConfiguration
-             ~f:ExperimentTemplateLogConfiguration.to_value))]
+             ~f:ExperimentTemplateLogConfiguration.to_value));
+        ("experimentOptions",
+          (Option.map x.experimentOptions
+             ~f:ExperimentTemplateExperimentOptions.to_value));
+        ("targetAccountConfigurationsCount",
+          (Option.map x.targetAccountConfigurationsCount
+             ~f:TargetAccountConfigurationsCount.to_value));
+        ("experimentReportConfiguration",
+          (Option.map x.experimentReportConfiguration
+             ~f:ExperimentTemplateReportConfiguration.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentReportConfiguration =
+        (Option.map ~f:ExperimentTemplateReportConfiguration.of_xml)
+          (Xml.child xml_arg0 "experimentReportConfiguration") in
+      let targetAccountConfigurationsCount =
+        (Option.map ~f:TargetAccountConfigurationsCount.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfigurationsCount") in
+      let experimentOptions =
+        (Option.map ~f:ExperimentTemplateExperimentOptions.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let logConfiguration =
         (Option.map ~f:ExperimentTemplateLogConfiguration.of_xml)
           (Xml.child xml_arg0 "logConfiguration") in
@@ -3425,54 +5292,49 @@ module ExperimentTemplate =
       let description =
         (Option.map ~f:ExperimentTemplateDescription.of_xml)
           (Xml.child xml_arg0 "description") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id =
         (Option.map ~f:ExperimentTemplateId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?logConfiguration ?tags ?roleArn ?lastUpdateTime ?creationTime
-        ?stopConditions ?actions ?targets ?description ?id ()
+      make ?experimentReportConfiguration ?targetAccountConfigurationsCount
+        ?experimentOptions ?logConfiguration ?tags ?roleArn ?lastUpdateTime
+        ?creationTime ?stopConditions ?actions ?targets ?description ?arn ?id
+        ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let experimentReportConfiguration =
+        field_map json__ "experimentReportConfiguration"
+          ExperimentTemplateReportConfiguration.of_json in
+      let targetAccountConfigurationsCount =
+        field_map json__ "targetAccountConfigurationsCount"
+          TargetAccountConfigurationsCount.of_json in
+      let experimentOptions =
+        field_map json__ "experimentOptions"
+          ExperimentTemplateExperimentOptions.of_json in
       let logConfiguration =
-        field_map json "logConfiguration"
+        field_map json__ "logConfiguration"
           ExperimentTemplateLogConfiguration.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let lastUpdateTime =
-        field_map json "lastUpdateTime" LastUpdateTime.of_json in
-      let creationTime = field_map json "creationTime" CreationTime.of_json in
+        field_map json__ "lastUpdateTime" LastUpdateTime.of_json in
+      let creationTime = field_map json__ "creationTime" CreationTime.of_json in
       let stopConditions =
-        field_map json "stopConditions"
+        field_map json__ "stopConditions"
           ExperimentTemplateStopConditionList.of_json in
       let actions =
-        field_map json "actions" ExperimentTemplateActionMap.of_json in
+        field_map json__ "actions" ExperimentTemplateActionMap.of_json in
       let targets =
-        field_map json "targets" ExperimentTemplateTargetMap.of_json in
+        field_map json__ "targets" ExperimentTemplateTargetMap.of_json in
       let description =
-        field_map json "description" ExperimentTemplateDescription.of_json in
-      let id = field_map json "id" ExperimentTemplateId.of_json in
-      make ?logConfiguration ?tags ?roleArn ?lastUpdateTime ?creationTime
-        ?stopConditions ?actions ?targets ?description ?id ()
+        field_map json__ "description" ExperimentTemplateDescription.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ExperimentTemplateId.of_json in
+      make ?experimentReportConfiguration ?targetAccountConfigurationsCount
+        ?experimentOptions ?logConfiguration ?tags ?roleArn ?lastUpdateTime
+        ?creationTime ?stopConditions ?actions ?targets ?description ?arn ?id
+        ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an experiment template."]
-module ResourceNotFoundException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "The specified resource cannot be found."]
 module ServiceQuotaExceededException =
   struct
     type nonrec t = {
@@ -3488,32 +5350,11 @@ module ServiceQuotaExceededException =
           (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ExceptionMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "You have exceeded your service quota."]
-module ValidationException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The specified input is not valid, or fails to satisfy the constraints for the request."]
 module UpdateExperimentTemplateActionInputMap =
   struct
     type nonrec t =
@@ -3541,6 +5382,8 @@ module UpdateExperimentTemplateActionInputMap =
                          |> (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3548,6 +5391,35 @@ module UpdateExperimentTemplateActionInputMap =
         ~of_json:UpdateExperimentTemplateActionInputItem.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateExperimentTemplateExperimentOptionsInput =
+  struct
+    type nonrec t =
+      {
+      emptyTargetResolutionMode: EmptyTargetResolutionMode.t option
+        [@ocaml.doc
+          "The empty target resolution mode of the experiment template."]}
+    let make ?emptyTargetResolutionMode =
+      fun () -> { emptyTargetResolutionMode }
+    let to_value x =
+      structure_to_value
+        [("emptyTargetResolutionMode",
+           (Option.map x.emptyTargetResolutionMode
+              ~f:EmptyTargetResolutionMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let emptyTargetResolutionMode =
+        (Option.map ~f:EmptyTargetResolutionMode.of_xml)
+          (Xml.child xml_arg0 "emptyTargetResolutionMode") in
+      make ?emptyTargetResolutionMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let emptyTargetResolutionMode =
+        field_map json__ "emptyTargetResolutionMode"
+          EmptyTargetResolutionMode.of_json in
+      make ?emptyTargetResolutionMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies an experiment option for an experiment template."]
 module UpdateExperimentTemplateLogConfigurationInput =
   struct
     type nonrec t =
@@ -3590,22 +5462,103 @@ module UpdateExperimentTemplateLogConfigurationInput =
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logSchemaVersion =
-        field_map json "logSchemaVersion" LogSchemaVersion.of_json in
+        field_map json__ "logSchemaVersion" LogSchemaVersion.of_json in
       let s3Configuration =
-        field_map json "s3Configuration"
+        field_map json__ "s3Configuration"
           ExperimentTemplateS3LogConfigurationInput.of_json in
       let cloudWatchLogsConfiguration =
-        field_map json "cloudWatchLogsConfiguration"
+        field_map json__ "cloudWatchLogsConfiguration"
           ExperimentTemplateCloudWatchLogsLogConfigurationInput.of_json in
       make ?logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the configuration for experiment logging."]
+module UpdateExperimentTemplateReportConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      outputs: ExperimentTemplateReportConfigurationOutputsInput.t option
+        [@ocaml.doc
+          "Describes the output destinations of the experiment report."];
+      dataSources:
+        ExperimentTemplateReportConfigurationDataSourcesInput.t option
+        [@ocaml.doc "The data sources for the experiment report."];
+      preExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration before the experiment start time for the data sources to include in the report."];
+      postExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration after the experiment end time for the data sources to include in the report."]}
+    let make ?outputs =
+      fun ?dataSources ->
+        fun ?preExperimentDuration ->
+          fun ?postExperimentDuration ->
+            fun () ->
+              {
+                outputs;
+                dataSources;
+                preExperimentDuration;
+                postExperimentDuration
+              }
+    let to_value x =
+      structure_to_value
+        [("outputs",
+           (Option.map x.outputs
+              ~f:ExperimentTemplateReportConfigurationOutputsInput.to_value));
+        ("dataSources",
+          (Option.map x.dataSources
+             ~f:ExperimentTemplateReportConfigurationDataSourcesInput.to_value));
+        ("preExperimentDuration",
+          (Option.map x.preExperimentDuration
+             ~f:ReportConfigurationDuration.to_value));
+        ("postExperimentDuration",
+          (Option.map x.postExperimentDuration
+             ~f:ReportConfigurationDuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let postExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "postExperimentDuration") in
+      let preExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "preExperimentDuration") in
+      let dataSources =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationDataSourcesInput.of_xml)
+          (Xml.child xml_arg0 "dataSources") in
+      let outputs =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationOutputsInput.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let postExperimentDuration =
+        field_map json__ "postExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let preExperimentDuration =
+        field_map json__ "preExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let dataSources =
+        field_map json__ "dataSources"
+          ExperimentTemplateReportConfigurationDataSourcesInput.of_json in
+      let outputs =
+        field_map json__ "outputs"
+          ExperimentTemplateReportConfigurationOutputsInput.of_json in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Specifies the input for the experiment report configuration."]
 module UpdateExperimentTemplateStopConditionInputList =
   struct
     type nonrec t = UpdateExperimentTemplateStopConditionInput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:UpdateExperimentTemplateStopConditionInput.to_value))
@@ -3657,6 +5610,8 @@ module UpdateExperimentTemplateTargetInputMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -3668,6 +5623,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3692,6 +5650,8 @@ module Experiment =
     type nonrec t =
       {
       id: ExperimentId.t option [@ocaml.doc "The ID of the experiment."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the experiment."];
       experimentTemplateId: ExperimentTemplateId.t option
         [@ocaml.doc "The ID of the experiment template."];
       roleArn: RoleArn.t option
@@ -3713,37 +5673,59 @@ module Experiment =
         [@ocaml.doc "The time that the experiment ended."];
       tags: TagMap.t option [@ocaml.doc "The tags for the experiment."];
       logConfiguration: ExperimentLogConfiguration.t option
-        [@ocaml.doc "The configuration for experiment logging."]}
+        [@ocaml.doc "The configuration for experiment logging."];
+      experimentOptions: ExperimentOptions.t option
+        [@ocaml.doc "The experiment options for the experiment."];
+      targetAccountConfigurationsCount:
+        TargetAccountConfigurationsCount.t option
+        [@ocaml.doc
+          "The count of target account configurations for the experiment."];
+      experimentReportConfiguration: ExperimentReportConfiguration.t option
+        [@ocaml.doc
+          "The experiment report configuration for the experiment."];
+      experimentReport: ExperimentReport.t option
+        [@ocaml.doc "The experiment report for the experiment."]}
     let make ?id =
-      fun ?experimentTemplateId ->
-        fun ?roleArn ->
-          fun ?state ->
-            fun ?targets ->
-              fun ?actions ->
-                fun ?stopConditions ->
-                  fun ?creationTime ->
-                    fun ?startTime ->
-                      fun ?endTime ->
-                        fun ?tags ->
-                          fun ?logConfiguration ->
-                            fun () ->
-                              {
-                                id;
-                                experimentTemplateId;
-                                roleArn;
-                                state;
-                                targets;
-                                actions;
-                                stopConditions;
-                                creationTime;
-                                startTime;
-                                endTime;
-                                tags;
-                                logConfiguration
-                              }
+      fun ?arn ->
+        fun ?experimentTemplateId ->
+          fun ?roleArn ->
+            fun ?state ->
+              fun ?targets ->
+                fun ?actions ->
+                  fun ?stopConditions ->
+                    fun ?creationTime ->
+                      fun ?startTime ->
+                        fun ?endTime ->
+                          fun ?tags ->
+                            fun ?logConfiguration ->
+                              fun ?experimentOptions ->
+                                fun ?targetAccountConfigurationsCount ->
+                                  fun ?experimentReportConfiguration ->
+                                    fun ?experimentReport ->
+                                      fun () ->
+                                        {
+                                          id;
+                                          arn;
+                                          experimentTemplateId;
+                                          roleArn;
+                                          state;
+                                          targets;
+                                          actions;
+                                          stopConditions;
+                                          creationTime;
+                                          startTime;
+                                          endTime;
+                                          tags;
+                                          logConfiguration;
+                                          experimentOptions;
+                                          targetAccountConfigurationsCount;
+                                          experimentReportConfiguration;
+                                          experimentReport
+                                        }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ExperimentId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("experimentTemplateId",
           (Option.map x.experimentTemplateId ~f:ExperimentTemplateId.to_value));
         ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
@@ -3761,9 +5743,31 @@ module Experiment =
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("logConfiguration",
           (Option.map x.logConfiguration
-             ~f:ExperimentLogConfiguration.to_value))]
+             ~f:ExperimentLogConfiguration.to_value));
+        ("experimentOptions",
+          (Option.map x.experimentOptions ~f:ExperimentOptions.to_value));
+        ("targetAccountConfigurationsCount",
+          (Option.map x.targetAccountConfigurationsCount
+             ~f:TargetAccountConfigurationsCount.to_value));
+        ("experimentReportConfiguration",
+          (Option.map x.experimentReportConfiguration
+             ~f:ExperimentReportConfiguration.to_value));
+        ("experimentReport",
+          (Option.map x.experimentReport ~f:ExperimentReport.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentReport =
+        (Option.map ~f:ExperimentReport.of_xml)
+          (Xml.child xml_arg0 "experimentReport") in
+      let experimentReportConfiguration =
+        (Option.map ~f:ExperimentReportConfiguration.of_xml)
+          (Xml.child xml_arg0 "experimentReportConfiguration") in
+      let targetAccountConfigurationsCount =
+        (Option.map ~f:TargetAccountConfigurationsCount.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfigurationsCount") in
+      let experimentOptions =
+        (Option.map ~f:ExperimentOptions.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let logConfiguration =
         (Option.map ~f:ExperimentLogConfiguration.of_xml)
           (Xml.child xml_arg0 "logConfiguration") in
@@ -3793,53 +5797,50 @@ module Experiment =
       let experimentTemplateId =
         (Option.map ~f:ExperimentTemplateId.of_xml)
           (Xml.child xml_arg0 "experimentTemplateId") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ExperimentId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?logConfiguration ?tags ?endTime ?startTime ?creationTime
+      make ?experimentReport ?experimentReportConfiguration
+        ?targetAccountConfigurationsCount ?experimentOptions
+        ?logConfiguration ?tags ?endTime ?startTime ?creationTime
         ?stopConditions ?actions ?targets ?state ?roleArn
-        ?experimentTemplateId ?id ()
+        ?experimentTemplateId ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let experimentReport =
+        field_map json__ "experimentReport" ExperimentReport.of_json in
+      let experimentReportConfiguration =
+        field_map json__ "experimentReportConfiguration"
+          ExperimentReportConfiguration.of_json in
+      let targetAccountConfigurationsCount =
+        field_map json__ "targetAccountConfigurationsCount"
+          TargetAccountConfigurationsCount.of_json in
+      let experimentOptions =
+        field_map json__ "experimentOptions" ExperimentOptions.of_json in
       let logConfiguration =
-        field_map json "logConfiguration" ExperimentLogConfiguration.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let endTime = field_map json "endTime" ExperimentEndTime.of_json in
-      let startTime = field_map json "startTime" ExperimentStartTime.of_json in
-      let creationTime = field_map json "creationTime" CreationTime.of_json in
+        field_map json__ "logConfiguration"
+          ExperimentLogConfiguration.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let endTime = field_map json__ "endTime" ExperimentEndTime.of_json in
+      let startTime =
+        field_map json__ "startTime" ExperimentStartTime.of_json in
+      let creationTime = field_map json__ "creationTime" CreationTime.of_json in
       let stopConditions =
-        field_map json "stopConditions" ExperimentStopConditionList.of_json in
-      let actions = field_map json "actions" ExperimentActionMap.of_json in
-      let targets = field_map json "targets" ExperimentTargetMap.of_json in
-      let state = field_map json "state" ExperimentState.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+        field_map json__ "stopConditions" ExperimentStopConditionList.of_json in
+      let actions = field_map json__ "actions" ExperimentActionMap.of_json in
+      let targets = field_map json__ "targets" ExperimentTargetMap.of_json in
+      let state = field_map json__ "state" ExperimentState.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let experimentTemplateId =
-        field_map json "experimentTemplateId" ExperimentTemplateId.of_json in
-      let id = field_map json "id" ExperimentId.of_json in
-      make ?logConfiguration ?tags ?endTime ?startTime ?creationTime
+        field_map json__ "experimentTemplateId" ExperimentTemplateId.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ExperimentId.of_json in
+      make ?experimentReport ?experimentReportConfiguration
+        ?targetAccountConfigurationsCount ?experimentOptions
+        ?logConfiguration ?tags ?endTime ?startTime ?creationTime
         ?stopConditions ?actions ?targets ?state ?roleArn
-        ?experimentTemplateId ?id ()
+        ?experimentTemplateId ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes an experiment."]
-module ConflictException =
-  struct
-    type nonrec t = {
-      message: ExceptionMessage.t option }
-    let make ?message = fun () -> { message }
-    let to_value x =
-      structure_to_value
-        [("message", (Option.map x.message ~f:ExceptionMessage.to_value))]
-    let to_query v = to_query to_value v
-    let of_xml xml_arg0 =
-      let message =
-        (Option.map ~f:ExceptionMessage.of_xml)
-          (Xml.child xml_arg0 "message") in
-      make ?message ()
-    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ExceptionMessage.of_json in
-      make ?message ()
-    let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc
-       "The request could not be processed because of a conflict."]
 module ClientToken =
   struct
     type nonrec t = string
@@ -3860,6 +5861,27 @@ module ClientToken =
     let of_json j = string_of_json ~kind:"ClientToken" j
     let to_json = simple_to_json to_value
   end
+module StartExperimentExperimentOptionsInput =
+  struct
+    type nonrec t =
+      {
+      actionsMode: ActionsMode.t option
+        [@ocaml.doc "Specifies the actions mode for experiment options."]}
+    let make ?actionsMode = fun () -> { actionsMode }
+    let to_value x =
+      structure_to_value
+        [("actionsMode", (Option.map x.actionsMode ~f:ActionsMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let actionsMode =
+        (Option.map ~f:ActionsMode.of_xml) (Xml.child xml_arg0 "actionsMode") in
+      make ?actionsMode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let actionsMode = field_map json__ "actionsMode" ActionsMode.of_json in
+      make ?actionsMode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies experiment options for running an experiment."]
 module NextToken =
   struct
     type nonrec t = string
@@ -3884,6 +5906,9 @@ module TargetResourceTypeSummaryList =
   struct
     type nonrec t = TargetResourceTypeSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TargetResourceTypeSummary.to_value)) |>
         (fun x -> `List x)
@@ -3925,10 +5950,63 @@ module ListTargetResourceTypesMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module TargetAccountConfigurationList =
+  struct
+    type nonrec t = TargetAccountConfigurationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:TargetAccountConfigurationSummary.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:TargetAccountConfigurationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"TargetAccountConfigurationList"
+        ~of_json:TargetAccountConfigurationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ListTargetAccountConfigurationsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListTargetAccountConfigurationsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ExperimentSummaryList =
   struct
     type nonrec t = ExperimentSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -3973,6 +6051,9 @@ module ExperimentTemplateSummaryList =
   struct
     type nonrec t = ExperimentTemplateSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExperimentTemplateSummary.to_value)) |>
         (fun x -> `List x)
@@ -4014,10 +6095,92 @@ module ListExperimentTemplatesMaxResults =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module ExperimentTargetAccountConfigurationList =
+  struct
+    type nonrec t = ExperimentTargetAccountConfigurationSummary.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |>
+         (List.map ~f:ExperimentTargetAccountConfigurationSummary.to_value))
+        |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:ExperimentTargetAccountConfigurationSummary.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ExperimentTargetAccountConfigurationList"
+        ~of_json:ExperimentTargetAccountConfigurationSummary.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module ResolvedTargetList =
+  struct
+    type nonrec t = ResolvedTarget.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:ResolvedTarget.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:ResolvedTarget.of_xml)
+    let of_json j =
+      list_of_json ~kind:"ResolvedTargetList" ~of_json:ResolvedTarget.of_json
+        j
+    let to_json v = composed_to_json to_value v
+  end
+module ListExperimentResolvedTargetsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml
+           ~kind:"an integer for ListExperimentResolvedTargetsMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ActionSummaryList =
   struct
     type nonrec t = ActionSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ActionSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -4091,21 +6254,67 @@ module TargetResourceType =
           (Xml.child xml_arg0 "resourceType") in
       make ?parameters ?description ?resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let parameters =
-        field_map json "parameters" TargetResourceTypeParameterMap.of_json in
+        field_map json__ "parameters" TargetResourceTypeParameterMap.of_json in
       let description =
-        field_map json "description" TargetResourceTypeDescription.of_json in
+        field_map json__ "description" TargetResourceTypeDescription.of_json in
       let resourceType =
-        field_map json "resourceType" TargetResourceTypeId.of_json in
+        field_map json__ "resourceType" TargetResourceTypeId.of_json in
       make ?parameters ?description ?resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Describes a resource type."]
+module ExperimentTargetAccountConfiguration =
+  struct
+    type nonrec t =
+      {
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      accountId: TargetAccountId.t option
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let make ?roleArn =
+      fun ?accountId ->
+        fun ?description -> fun () -> { roleArn; accountId; description }
+    let to_value x =
+      structure_to_value
+        [("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("accountId", (Option.map x.accountId ~f:TargetAccountId.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let accountId =
+        (Option.map ~f:TargetAccountId.of_xml)
+          (Xml.child xml_arg0 "accountId") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      make ?description ?accountId ?roleArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let accountId = field_map json__ "accountId" TargetAccountId.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      make ?description ?accountId ?roleArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Describes a target account configuration for an experiment."]
 module Action =
   struct
     type nonrec t =
       {
       id: ActionId.t option [@ocaml.doc "The ID of the action."];
+      arn: ResourceArn.t option
+        [@ocaml.doc "The Amazon Resource Name (ARN) of the action."];
       description: ActionDescription.t option
         [@ocaml.doc "The description for the action."];
       parameters: ActionParameterMap.t option
@@ -4114,14 +6323,16 @@ module Action =
         [@ocaml.doc "The supported targets for the action."];
       tags: TagMap.t option [@ocaml.doc "The tags for the action."]}
     let make ?id =
-      fun ?description ->
-        fun ?parameters ->
-          fun ?targets ->
-            fun ?tags ->
-              fun () -> { id; description; parameters; targets; tags }
+      fun ?arn ->
+        fun ?description ->
+          fun ?parameters ->
+            fun ?targets ->
+              fun ?tags ->
+                fun () -> { id; arn; description; parameters; targets; tags }
     let to_value x =
       structure_to_value
         [("id", (Option.map x.id ~f:ActionId.to_value));
+        ("arn", (Option.map x.arn ~f:ResourceArn.to_value));
         ("description",
           (Option.map x.description ~f:ActionDescription.to_value));
         ("parameters",
@@ -4139,20 +6350,23 @@ module Action =
       let description =
         (Option.map ~f:ActionDescription.of_xml)
           (Xml.child xml_arg0 "description") in
+      let arn = (Option.map ~f:ResourceArn.of_xml) (Xml.child xml_arg0 "arn") in
       let id = (Option.map ~f:ActionId.of_xml) (Xml.child xml_arg0 "id") in
-      make ?tags ?targets ?parameters ?description ?id ()
+      make ?tags ?targets ?parameters ?description ?arn ?id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
-      let targets = field_map json "targets" ActionTargetMap.of_json in
-      let parameters = field_map json "parameters" ActionParameterMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let targets = field_map json__ "targets" ActionTargetMap.of_json in
+      let parameters =
+        field_map json__ "parameters" ActionParameterMap.of_json in
       let description =
-        field_map json "description" ActionDescription.of_json in
-      let id = field_map json "id" ActionId.of_json in
-      make ?tags ?targets ?parameters ?description ?id ()
+        field_map json__ "description" ActionDescription.of_json in
+      let arn = field_map json__ "arn" ResourceArn.of_json in
+      let id = field_map json__ "id" ActionId.of_json in
+      make ?tags ?targets ?parameters ?description ?arn ?id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Describes an action. For more information, see FIS actions in the Fault Injection Simulator User Guide."]
+       "Describes an action. For more information, see FIS actions in the Fault Injection Service User Guide."]
 module CreateExperimentTemplateActionInputMap =
   struct
     type nonrec t =
@@ -4180,6 +6394,8 @@ module CreateExperimentTemplateActionInputMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4187,6 +6403,45 @@ module CreateExperimentTemplateActionInputMap =
         ~of_json:CreateExperimentTemplateActionInput.of_json j
     let to_json v = composed_to_json to_value v
   end
+module CreateExperimentTemplateExperimentOptionsInput =
+  struct
+    type nonrec t =
+      {
+      accountTargeting: AccountTargeting.t option
+        [@ocaml.doc
+          "Specifies the account targeting setting for experiment options."];
+      emptyTargetResolutionMode: EmptyTargetResolutionMode.t option
+        [@ocaml.doc
+          "Specifies the empty target resolution mode for experiment options."]}
+    let make ?accountTargeting =
+      fun ?emptyTargetResolutionMode ->
+        fun () -> { accountTargeting; emptyTargetResolutionMode }
+    let to_value x =
+      structure_to_value
+        [("accountTargeting",
+           (Option.map x.accountTargeting ~f:AccountTargeting.to_value));
+        ("emptyTargetResolutionMode",
+          (Option.map x.emptyTargetResolutionMode
+             ~f:EmptyTargetResolutionMode.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let emptyTargetResolutionMode =
+        (Option.map ~f:EmptyTargetResolutionMode.of_xml)
+          (Xml.child xml_arg0 "emptyTargetResolutionMode") in
+      let accountTargeting =
+        (Option.map ~f:AccountTargeting.of_xml)
+          (Xml.child xml_arg0 "accountTargeting") in
+      make ?emptyTargetResolutionMode ?accountTargeting ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let emptyTargetResolutionMode =
+        field_map json__ "emptyTargetResolutionMode"
+          EmptyTargetResolutionMode.of_json in
+      let accountTargeting =
+        field_map json__ "accountTargeting" AccountTargeting.of_json in
+      make ?emptyTargetResolutionMode ?accountTargeting ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies experiment options for an experiment template."]
 module CreateExperimentTemplateLogConfigurationInput =
   struct
     type nonrec t =
@@ -4229,22 +6484,101 @@ module CreateExperimentTemplateLogConfigurationInput =
           (Xml.child xml_arg0 "cloudWatchLogsConfiguration") in
       make ~logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let logSchemaVersion =
-        field_map_exn json "logSchemaVersion" LogSchemaVersion.of_json in
+        field_map_exn json__ "logSchemaVersion" LogSchemaVersion.of_json in
       let s3Configuration =
-        field_map json "s3Configuration"
+        field_map json__ "s3Configuration"
           ExperimentTemplateS3LogConfigurationInput.of_json in
       let cloudWatchLogsConfiguration =
-        field_map json "cloudWatchLogsConfiguration"
+        field_map json__ "cloudWatchLogsConfiguration"
           ExperimentTemplateCloudWatchLogsLogConfigurationInput.of_json in
       make ~logSchemaVersion ?s3Configuration ?cloudWatchLogsConfiguration ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Specifies the configuration for experiment logging."]
+module CreateExperimentTemplateReportConfigurationInput =
+  struct
+    type nonrec t =
+      {
+      outputs: ExperimentTemplateReportConfigurationOutputsInput.t option
+        [@ocaml.doc "The output destinations of the experiment report."];
+      dataSources:
+        ExperimentTemplateReportConfigurationDataSourcesInput.t option
+        [@ocaml.doc "The data sources for the experiment report."];
+      preExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration before the experiment start time for the data sources to include in the report."];
+      postExperimentDuration: ReportConfigurationDuration.t option
+        [@ocaml.doc
+          "The duration after the experiment end time for the data sources to include in the report."]}
+    let make ?outputs =
+      fun ?dataSources ->
+        fun ?preExperimentDuration ->
+          fun ?postExperimentDuration ->
+            fun () ->
+              {
+                outputs;
+                dataSources;
+                preExperimentDuration;
+                postExperimentDuration
+              }
+    let to_value x =
+      structure_to_value
+        [("outputs",
+           (Option.map x.outputs
+              ~f:ExperimentTemplateReportConfigurationOutputsInput.to_value));
+        ("dataSources",
+          (Option.map x.dataSources
+             ~f:ExperimentTemplateReportConfigurationDataSourcesInput.to_value));
+        ("preExperimentDuration",
+          (Option.map x.preExperimentDuration
+             ~f:ReportConfigurationDuration.to_value));
+        ("postExperimentDuration",
+          (Option.map x.postExperimentDuration
+             ~f:ReportConfigurationDuration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let postExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "postExperimentDuration") in
+      let preExperimentDuration =
+        (Option.map ~f:ReportConfigurationDuration.of_xml)
+          (Xml.child xml_arg0 "preExperimentDuration") in
+      let dataSources =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationDataSourcesInput.of_xml)
+          (Xml.child xml_arg0 "dataSources") in
+      let outputs =
+        (Option.map
+           ~f:ExperimentTemplateReportConfigurationOutputsInput.of_xml)
+          (Xml.child xml_arg0 "outputs") in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let postExperimentDuration =
+        field_map json__ "postExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let preExperimentDuration =
+        field_map json__ "preExperimentDuration"
+          ReportConfigurationDuration.of_json in
+      let dataSources =
+        field_map json__ "dataSources"
+          ExperimentTemplateReportConfigurationDataSourcesInput.of_json in
+      let outputs =
+        field_map json__ "outputs"
+          ExperimentTemplateReportConfigurationOutputsInput.of_json in
+      make ?postExperimentDuration ?preExperimentDuration ?dataSources
+        ?outputs ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Specifies the configuration for experiment reports."]
 module CreateExperimentTemplateStopConditionInputList =
   struct
     type nonrec t = CreateExperimentTemplateStopConditionInput.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |>
          (List.map ~f:CreateExperimentTemplateStopConditionInput.to_value))
@@ -4296,6 +6630,8 @@ module CreateExperimentTemplateTargetInputMap =
                          (fun y -> (x, y))))))
         |> (fun x -> `Map x)
     let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for Map_shape objects" ()
     let of_xml _ =
       failwith "of_xml_converter_of_shape: Map_shape case not implemented"
     let of_json j =
@@ -4303,6 +6639,224 @@ module CreateExperimentTemplateTargetInputMap =
         ~of_json:CreateExperimentTemplateTargetInput.of_json j
     let to_json v = composed_to_json to_value v
   end
+module UpdateTargetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfiguration: TargetAccountConfiguration.t option
+        [@ocaml.doc "Information about the target account configuration."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfiguration =
+      fun () -> { targetAccountConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfiguration",
+           (Option.map x.targetAccountConfiguration
+              ~f:TargetAccountConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetAccountConfiguration =
+        (Option.map ~f:TargetAccountConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfiguration") in
+      make ?targetAccountConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetAccountConfiguration =
+        field_map json__ "targetAccountConfiguration"
+          TargetAccountConfiguration.of_json in
+      make ?targetAccountConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the target account configuration for the specified experiment template."]
+module UpdateTargetAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      experimentTemplateId: ExperimentTemplateId.t
+        [@ocaml.doc "The ID of the experiment template."];
+      accountId: TargetAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      roleArn: RoleArn.t option
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let context_ = "UpdateTargetAccountConfigurationRequest"
+    let make ?roleArn =
+      fun ?description ->
+        fun ~experimentTemplateId ->
+          fun ~accountId ->
+            fun () ->
+              { roleArn; description; experimentTemplateId; accountId }
+    let to_value x =
+      structure_to_value
+        [("id",
+           (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("accountId", (Some (TargetAccountId.to_value x.accountId)));
+        ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let roleArn =
+        (Option.map ~f:RoleArn.of_xml) (Xml.child xml_arg0 "roleArn") in
+      let accountId =
+        TargetAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
+      let experimentTemplateId =
+        ExperimentTemplateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?description ?roleArn ~accountId ~experimentTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
+      let accountId =
+        field_map_exn json__ "accountId" TargetAccountId.of_json in
+      let experimentTemplateId =
+        field_map_exn json__ "experimentTemplateId"
+          ExperimentTemplateId.of_json in
+      make ?description ?roleArn ~accountId ~experimentTemplateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Updates the target account configuration for the specified experiment template."]
+module UpdateSafetyLeverStateResponse =
+  struct
+    type nonrec t =
+      {
+      safetyLever: SafetyLever.t option
+        [@ocaml.doc "Information about the safety lever."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?safetyLever = fun () -> { safetyLever }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("safetyLever", (Option.map x.safetyLever ~f:SafetyLever.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let safetyLever =
+        (Option.map ~f:SafetyLever.of_xml) (Xml.child xml_arg0 "safetyLever") in
+      make ?safetyLever ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let safetyLever = field_map json__ "safetyLever" SafetyLever.of_json in
+      make ?safetyLever ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the specified safety lever state."]
+module UpdateSafetyLeverStateRequest =
+  struct
+    type nonrec t =
+      {
+      id: SafetyLeverId.t [@ocaml.doc "The ID of the safety lever."];
+      state: UpdateSafetyLeverStateInput.t
+        [@ocaml.doc "The state of the safety lever."]}
+    let context_ = "UpdateSafetyLeverStateRequest"
+    let make ~id = fun ~state -> fun () -> { id; state }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (SafetyLeverId.to_value x.id)));
+        ("state", (Some (UpdateSafetyLeverStateInput.to_value x.state)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let state =
+        UpdateSafetyLeverStateInput.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "state") in
+      let id =
+        SafetyLeverId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~state ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let state =
+        field_map_exn json__ "state" UpdateSafetyLeverStateInput.of_json in
+      let id = field_map_exn json__ "id" SafetyLeverId.of_json in
+      make ~state ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Updates the specified safety lever state."]
 module UpdateExperimentTemplateResponse =
   struct
     type nonrec t =
@@ -4368,9 +6922,9 @@ module UpdateExperimentTemplateResponse =
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let experimentTemplate =
-        field_map json "experimentTemplate" ExperimentTemplate.of_json in
+        field_map json__ "experimentTemplate" ExperimentTemplate.of_json in
       make ?experimentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified experiment template."]
@@ -4393,7 +6947,14 @@ module UpdateExperimentTemplateRequest =
           "The Amazon Resource Name (ARN) of an IAM role that grants the FIS service permission to perform service actions on your behalf."];
       logConfiguration:
         UpdateExperimentTemplateLogConfigurationInput.t option
-        [@ocaml.doc "The configuration for experiment logging."]}
+        [@ocaml.doc "The configuration for experiment logging."];
+      experimentOptions:
+        UpdateExperimentTemplateExperimentOptionsInput.t option
+        [@ocaml.doc "The experiment options for the experiment template."];
+      experimentReportConfiguration:
+        UpdateExperimentTemplateReportConfigurationInput.t option
+        [@ocaml.doc
+          "The experiment report configuration for the experiment template."]}
     let context_ = "UpdateExperimentTemplateRequest"
     let make ?description =
       fun ?stopConditions ->
@@ -4401,17 +6962,21 @@ module UpdateExperimentTemplateRequest =
           fun ?actions ->
             fun ?roleArn ->
               fun ?logConfiguration ->
-                fun ~id ->
-                  fun () ->
-                    {
-                      description;
-                      stopConditions;
-                      targets;
-                      actions;
-                      roleArn;
-                      logConfiguration;
-                      id
-                    }
+                fun ?experimentOptions ->
+                  fun ?experimentReportConfiguration ->
+                    fun ~id ->
+                      fun () ->
+                        {
+                          description;
+                          stopConditions;
+                          targets;
+                          actions;
+                          roleArn;
+                          logConfiguration;
+                          experimentOptions;
+                          experimentReportConfiguration;
+                          id
+                        }
     let to_value x =
       structure_to_value
         [("id", (Some (ExperimentTemplateId.to_value x.id)));
@@ -4429,9 +6994,22 @@ module UpdateExperimentTemplateRequest =
         ("roleArn", (Option.map x.roleArn ~f:RoleArn.to_value));
         ("logConfiguration",
           (Option.map x.logConfiguration
-             ~f:UpdateExperimentTemplateLogConfigurationInput.to_value))]
+             ~f:UpdateExperimentTemplateLogConfigurationInput.to_value));
+        ("experimentOptions",
+          (Option.map x.experimentOptions
+             ~f:UpdateExperimentTemplateExperimentOptionsInput.to_value));
+        ("experimentReportConfiguration",
+          (Option.map x.experimentReportConfiguration
+             ~f:UpdateExperimentTemplateReportConfigurationInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentReportConfiguration =
+        (Option.map
+           ~f:UpdateExperimentTemplateReportConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "experimentReportConfiguration") in
+      let experimentOptions =
+        (Option.map ~f:UpdateExperimentTemplateExperimentOptionsInput.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let logConfiguration =
         (Option.map ~f:UpdateExperimentTemplateLogConfigurationInput.of_xml)
           (Xml.child xml_arg0 "logConfiguration") in
@@ -4452,27 +7030,35 @@ module UpdateExperimentTemplateRequest =
       let id =
         ExperimentTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
-      make ?logConfiguration ?roleArn ?actions ?targets ?stopConditions
+      make ?experimentReportConfiguration ?experimentOptions
+        ?logConfiguration ?roleArn ?actions ?targets ?stopConditions
         ?description ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let experimentReportConfiguration =
+        field_map json__ "experimentReportConfiguration"
+          UpdateExperimentTemplateReportConfigurationInput.of_json in
+      let experimentOptions =
+        field_map json__ "experimentOptions"
+          UpdateExperimentTemplateExperimentOptionsInput.of_json in
       let logConfiguration =
-        field_map json "logConfiguration"
+        field_map json__ "logConfiguration"
           UpdateExperimentTemplateLogConfigurationInput.of_json in
-      let roleArn = field_map json "roleArn" RoleArn.of_json in
+      let roleArn = field_map json__ "roleArn" RoleArn.of_json in
       let actions =
-        field_map json "actions"
+        field_map json__ "actions"
           UpdateExperimentTemplateActionInputMap.of_json in
       let targets =
-        field_map json "targets"
+        field_map json__ "targets"
           UpdateExperimentTemplateTargetInputMap.of_json in
       let stopConditions =
-        field_map json "stopConditions"
+        field_map json__ "stopConditions"
           UpdateExperimentTemplateStopConditionInputList.of_json in
       let description =
-        field_map json "description" ExperimentTemplateDescription.of_json in
-      let id = field_map_exn json "id" ExperimentTemplateId.of_json in
-      make ?logConfiguration ?roleArn ?actions ?targets ?stopConditions
+        field_map json__ "description" ExperimentTemplateDescription.of_json in
+      let id = field_map_exn json__ "id" ExperimentTemplateId.of_json in
+      make ?experimentReportConfiguration ?experimentOptions
+        ?logConfiguration ?roleArn ?actions ?targets ?stopConditions
         ?description ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Updates the specified experiment template."]
@@ -4529,9 +7115,10 @@ module UntagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ?tagKeys ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagKeys = field_map json "tagKeys" TagKeyList.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tagKeys = field_map json__ "tagKeys" TagKeyList.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ?tagKeys ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Removes the specified tags from the specified resource."]
@@ -4587,9 +7174,10 @@ module TagResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~tags ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map_exn json "tags" TagMap.of_json in
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let tags = field_map_exn json__ "tags" TagMap.of_json in
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~tags ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Applies the specified tags to the specified resource."]
@@ -4645,8 +7233,8 @@ module StopExperimentResponse =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let experiment = field_map json "experiment" Experiment.of_json in
+    let of_json json__ =
+      let experiment = field_map json__ "experiment" Experiment.of_json in
       make ?experiment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the specified experiment."]
@@ -4665,8 +7253,8 @@ module StopExperimentRequest =
         ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ExperimentId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ExperimentId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Stops the specified experiment."]
 module StartExperimentResponse =
@@ -4741,8 +7329,8 @@ module StartExperimentResponse =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let experiment = field_map json "experiment" Experiment.of_json in
+    let of_json json__ =
+      let experiment = field_map json__ "experiment" Experiment.of_json in
       make ?experiment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4756,37 +7344,51 @@ module StartExperimentRequest =
           "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
       experimentTemplateId: ExperimentTemplateId.t
         [@ocaml.doc "The ID of the experiment template."];
+      experimentOptions: StartExperimentExperimentOptionsInput.t option
+        [@ocaml.doc "The experiment options for running the experiment."];
       tags: TagMap.t option
         [@ocaml.doc "The tags to apply to the experiment."]}
     let context_ = "StartExperimentRequest"
-    let make ?tags =
-      fun ~clientToken ->
-        fun ~experimentTemplateId ->
-          fun () -> { tags; clientToken; experimentTemplateId }
+    let make ?experimentOptions =
+      fun ?tags ->
+        fun ~clientToken ->
+          fun ~experimentTemplateId ->
+            fun () ->
+              { experimentOptions; tags; clientToken; experimentTemplateId }
     let to_value x =
       structure_to_value
         [("clientToken", (Some (ClientToken.to_value x.clientToken)));
         ("experimentTemplateId",
           (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("experimentOptions",
+          (Option.map x.experimentOptions
+             ~f:StartExperimentExperimentOptionsInput.to_value));
         ("tags", (Option.map x.tags ~f:TagMap.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
+      let experimentOptions =
+        (Option.map ~f:StartExperimentExperimentOptionsInput.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let experimentTemplateId =
         ExperimentTemplateId.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "experimentTemplateId") in
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
-      make ?tags ~experimentTemplateId ~clientToken ()
+      make ?tags ?experimentOptions ~experimentTemplateId ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let experimentOptions =
+        field_map json__ "experimentOptions"
+          StartExperimentExperimentOptionsInput.of_json in
       let experimentTemplateId =
-        field_map_exn json "experimentTemplateId"
+        field_map_exn json__ "experimentTemplateId"
           ExperimentTemplateId.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      make ?tags ~experimentTemplateId ~clientToken ()
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      make ?tags ?experimentOptions ~experimentTemplateId ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Starts running an experiment from the specified experiment template."]
@@ -4843,10 +7445,10 @@ module ListTargetResourceTypesResponse =
           (Xml.child xml_arg0 "targetResourceTypes") in
       make ?nextToken ?targetResourceTypes ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let targetResourceTypes =
-        field_map json "targetResourceTypes"
+        field_map json__ "targetResourceTypes"
           TargetResourceTypeSummaryList.of_json in
       make ?nextToken ?targetResourceTypes ()
     let to_json v = composed_to_json to_value v
@@ -4877,13 +7479,133 @@ module ListTargetResourceTypesRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListTargetResourceTypesMaxResults.of_json in
+        field_map json__ "maxResults"
+          ListTargetResourceTypesMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the target resource types."]
+module ListTargetAccountConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfigurations: TargetAccountConfigurationList.t option
+        [@ocaml.doc "The target account configurations."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfigurations =
+      fun ?nextToken -> fun () -> { targetAccountConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfigurations",
+           (Option.map x.targetAccountConfigurations
+              ~f:TargetAccountConfigurationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let targetAccountConfigurations =
+        (Option.map ~f:TargetAccountConfigurationList.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfigurations") in
+      make ?nextToken ?targetAccountConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let targetAccountConfigurations =
+        field_map json__ "targetAccountConfigurations"
+          TargetAccountConfigurationList.of_json in
+      make ?nextToken ?targetAccountConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the target account configurations of the specified experiment template."]
+module ListTargetAccountConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      experimentTemplateId: ExperimentTemplateId.t
+        [@ocaml.doc "The ID of the experiment template."];
+      maxResults: ListTargetAccountConfigurationsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "ListTargetAccountConfigurationsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ~experimentTemplateId ->
+          fun () -> { maxResults; nextToken; experimentTemplateId }
+    let to_value x =
+      structure_to_value
+        [("id",
+           (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListTargetAccountConfigurationsMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListTargetAccountConfigurationsMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let experimentTemplateId =
+        ExperimentTemplateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?nextToken ?maxResults ~experimentTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListTargetAccountConfigurationsMaxResults.of_json in
+      let experimentTemplateId =
+        field_map_exn json__ "experimentTemplateId"
+          ExperimentTemplateId.of_json in
+      make ?nextToken ?maxResults ~experimentTemplateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the target account configurations of the specified experiment template."]
 module ListTagsForResourceResponse =
   struct
     type nonrec t =
@@ -4915,8 +7637,8 @@ module ListTagsForResourceResponse =
       let tags = (Option.map ~f:TagMap.of_xml) (Xml.child xml_arg0 "tags") in
       make ?tags ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tags = field_map json "tags" TagMap.of_json in make ?tags ()
+    let of_json json__ =
+      let tags = field_map json__ "tags" TagMap.of_json in make ?tags ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
 module ListTagsForResourceRequest =
@@ -4937,8 +7659,9 @@ module ListTagsForResourceRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceArn") in
       make ~resourceArn ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let resourceArn = field_map_exn json "resourceArn" ResourceArn.of_json in
+    let of_json json__ =
+      let resourceArn =
+        field_map_exn json__ "resourceArn" ResourceArn.of_json in
       make ~resourceArn ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the tags for the specified resource."]
@@ -4994,10 +7717,10 @@ module ListExperimentsResponse =
           (Xml.child xml_arg0 "experiments") in
       make ?nextToken ?experiments ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let experiments =
-        field_map json "experiments" ExperimentSummaryList.of_json in
+        field_map json__ "experiments" ExperimentSummaryList.of_json in
       make ?nextToken ?experiments ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your experiments."]
@@ -5009,28 +7732,39 @@ module ListExperimentsRequest =
         [@ocaml.doc
           "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
       nextToken: NextToken.t option
-        [@ocaml.doc "The token for the next page of results."]}
+        [@ocaml.doc "The token for the next page of results."];
+      experimentTemplateId: ExperimentTemplateId.t option
+        [@ocaml.doc "The ID of the experiment template."]}
     let make ?maxResults =
-      fun ?nextToken -> fun () -> { maxResults; nextToken }
+      fun ?nextToken ->
+        fun ?experimentTemplateId ->
+          fun () -> { maxResults; nextToken; experimentTemplateId }
     let to_value x =
       structure_to_value
         [("maxResults",
            (Option.map x.maxResults ~f:ListExperimentsMaxResults.to_value));
-        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("experimentTemplateId",
+          (Option.map x.experimentTemplateId ~f:ExperimentTemplateId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentTemplateId =
+        (Option.map ~f:ExperimentTemplateId.of_xml)
+          (Xml.child xml_arg0 "experimentTemplateId") in
       let nextToken =
         (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
       let maxResults =
         (Option.map ~f:ListExperimentsMaxResults.of_xml)
           (Xml.child xml_arg0 "maxResults") in
-      make ?nextToken ?maxResults ()
+      make ?experimentTemplateId ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let experimentTemplateId =
+        field_map json__ "experimentTemplateId" ExperimentTemplateId.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListExperimentsMaxResults.of_json in
-      make ?nextToken ?maxResults ()
+        field_map json__ "maxResults" ListExperimentsMaxResults.of_json in
+      make ?experimentTemplateId ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your experiments."]
 module ListExperimentTemplatesResponse =
@@ -5086,10 +7820,10 @@ module ListExperimentTemplatesResponse =
           (Xml.child xml_arg0 "experimentTemplates") in
       make ?nextToken ?experimentTemplates ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let experimentTemplates =
-        field_map json "experimentTemplates"
+        field_map json__ "experimentTemplates"
           ExperimentTemplateSummaryList.of_json in
       make ?nextToken ?experimentTemplates ()
     let to_json v = composed_to_json to_value v
@@ -5120,13 +7854,235 @@ module ListExperimentTemplatesRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListExperimentTemplatesMaxResults.of_json in
+        field_map json__ "maxResults"
+          ListExperimentTemplatesMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists your experiment templates."]
+module ListExperimentTargetAccountConfigurationsResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfigurations:
+        ExperimentTargetAccountConfigurationList.t option
+        [@ocaml.doc "The target account configurations."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfigurations =
+      fun ?nextToken -> fun () -> { targetAccountConfigurations; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfigurations",
+           (Option.map x.targetAccountConfigurations
+              ~f:ExperimentTargetAccountConfigurationList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let targetAccountConfigurations =
+        (Option.map ~f:ExperimentTargetAccountConfigurationList.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfigurations") in
+      make ?nextToken ?targetAccountConfigurations ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let targetAccountConfigurations =
+        field_map json__ "targetAccountConfigurations"
+          ExperimentTargetAccountConfigurationList.of_json in
+      make ?nextToken ?targetAccountConfigurations ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the target account configurations of the specified experiment."]
+module ListExperimentTargetAccountConfigurationsRequest =
+  struct
+    type nonrec t =
+      {
+      experimentId: ExperimentId.t [@ocaml.doc "The ID of the experiment."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."]}
+    let context_ = "ListExperimentTargetAccountConfigurationsRequest"
+    let make ?nextToken =
+      fun ~experimentId -> fun () -> { nextToken; experimentId }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (ExperimentId.to_value x.experimentId)));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let experimentId =
+        ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?nextToken ~experimentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let experimentId =
+        field_map_exn json__ "experimentId" ExperimentId.of_json in
+      make ?nextToken ~experimentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the target account configurations of the specified experiment."]
+module ListExperimentResolvedTargetsResponse =
+  struct
+    type nonrec t =
+      {
+      resolvedTargets: ResolvedTargetList.t option
+        [@ocaml.doc "The resolved targets."];
+      nextToken: NextToken.t option
+        [@ocaml.doc
+          "The token to use to retrieve the next page of results. This value is null when there are no more results to return."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?resolvedTargets =
+      fun ?nextToken -> fun () -> { resolvedTargets; nextToken }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("resolvedTargets",
+           (Option.map x.resolvedTargets ~f:ResolvedTargetList.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let resolvedTargets =
+        (Option.map ~f:ResolvedTargetList.of_xml)
+          (Xml.child xml_arg0 "resolvedTargets") in
+      make ?nextToken ?resolvedTargets ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let resolvedTargets =
+        field_map json__ "resolvedTargets" ResolvedTargetList.of_json in
+      make ?nextToken ?resolvedTargets ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the resolved targets information of the specified experiment."]
+module ListExperimentResolvedTargetsRequest =
+  struct
+    type nonrec t =
+      {
+      experimentId: ExperimentId.t [@ocaml.doc "The ID of the experiment."];
+      maxResults: ListExperimentResolvedTargetsMaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return with a single call. To retrieve the remaining results, make another call with the returned nextToken value."];
+      nextToken: NextToken.t option
+        [@ocaml.doc "The token for the next page of results."];
+      targetName: TargetName.t option [@ocaml.doc "The name of the target."]}
+    let context_ = "ListExperimentResolvedTargetsRequest"
+    let make ?maxResults =
+      fun ?nextToken ->
+        fun ?targetName ->
+          fun ~experimentId ->
+            fun () -> { maxResults; nextToken; targetName; experimentId }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (ExperimentId.to_value x.experimentId)));
+        ("maxResults",
+          (Option.map x.maxResults
+             ~f:ListExperimentResolvedTargetsMaxResults.to_value));
+        ("nextToken", (Option.map x.nextToken ~f:NextToken.to_value));
+        ("targetName", (Option.map x.targetName ~f:TargetName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetName =
+        (Option.map ~f:TargetName.of_xml) (Xml.child xml_arg0 "targetName") in
+      let nextToken =
+        (Option.map ~f:NextToken.of_xml) (Xml.child xml_arg0 "nextToken") in
+      let maxResults =
+        (Option.map ~f:ListExperimentResolvedTargetsMaxResults.of_xml)
+          (Xml.child xml_arg0 "maxResults") in
+      let experimentId =
+        ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ?targetName ?nextToken ?maxResults ~experimentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetName = field_map json__ "targetName" TargetName.of_json in
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let maxResults =
+        field_map json__ "maxResults"
+          ListExperimentResolvedTargetsMaxResults.of_json in
+      let experimentId =
+        field_map_exn json__ "experimentId" ExperimentId.of_json in
+      make ?targetName ?nextToken ?maxResults ~experimentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Lists the resolved targets information of the specified experiment."]
 module ListActionsResponse =
   struct
     type nonrec t =
@@ -5176,9 +8132,9 @@ module ListActionsResponse =
           (Xml.child xml_arg0 "actions") in
       make ?nextToken ?actions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
-      let actions = field_map json "actions" ActionSummaryList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
+      let actions = field_map json__ "actions" ActionSummaryList.of_json in
       make ?nextToken ?actions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the available FIS actions."]
@@ -5207,10 +8163,10 @@ module ListActionsRequest =
           (Xml.child xml_arg0 "maxResults") in
       make ?nextToken ?maxResults ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "nextToken" NextToken.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "nextToken" NextToken.of_json in
       let maxResults =
-        field_map json "maxResults" ListActionsMaxResults.of_json in
+        field_map json__ "maxResults" ListActionsMaxResults.of_json in
       make ?nextToken ?maxResults ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Lists the available FIS actions."]
@@ -5268,9 +8224,9 @@ module GetTargetResourceTypeResponse =
           (Xml.child xml_arg0 "targetResourceType") in
       make ?targetResourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let targetResourceType =
-        field_map json "targetResourceType" TargetResourceType.of_json in
+        field_map json__ "targetResourceType" TargetResourceType.of_json in
       make ?targetResourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified resource type."]
@@ -5292,12 +8248,180 @@ module GetTargetResourceTypeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "resourceType") in
       make ~resourceType ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let resourceType =
-        field_map_exn json "resourceType" TargetResourceTypeId.of_json in
+        field_map_exn json__ "resourceType" TargetResourceTypeId.of_json in
       make ~resourceType ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified resource type."]
+module GetTargetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfiguration: TargetAccountConfiguration.t option
+        [@ocaml.doc "Information about the target account configuration."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfiguration =
+      fun () -> { targetAccountConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfiguration",
+           (Option.map x.targetAccountConfiguration
+              ~f:TargetAccountConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetAccountConfiguration =
+        (Option.map ~f:TargetAccountConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfiguration") in
+      make ?targetAccountConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetAccountConfiguration =
+        field_map json__ "targetAccountConfiguration"
+          TargetAccountConfiguration.of_json in
+      make ?targetAccountConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the specified target account configuration of the experiment template."]
+module GetTargetAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      experimentTemplateId: ExperimentTemplateId.t
+        [@ocaml.doc "The ID of the experiment template."];
+      accountId: TargetAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."]}
+    let context_ = "GetTargetAccountConfigurationRequest"
+    let make ~experimentTemplateId =
+      fun ~accountId -> fun () -> { experimentTemplateId; accountId }
+    let to_value x =
+      structure_to_value
+        [("id",
+           (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("accountId", (Some (TargetAccountId.to_value x.accountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        TargetAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
+      let experimentTemplateId =
+        ExperimentTemplateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~accountId ~experimentTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId =
+        field_map_exn json__ "accountId" TargetAccountId.of_json in
+      let experimentTemplateId =
+        field_map_exn json__ "experimentTemplateId"
+          ExperimentTemplateId.of_json in
+      make ~accountId ~experimentTemplateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the specified target account configuration of the experiment template."]
+module GetSafetyLeverResponse =
+  struct
+    type nonrec t =
+      {
+      safetyLever: SafetyLever.t option
+        [@ocaml.doc "Information about the safety lever."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?safetyLever = fun () -> { safetyLever }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("safetyLever", (Option.map x.safetyLever ~f:SafetyLever.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let safetyLever =
+        (Option.map ~f:SafetyLever.of_xml) (Xml.child xml_arg0 "safetyLever") in
+      make ?safetyLever ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let safetyLever = field_map json__ "safetyLever" SafetyLever.of_json in
+      make ?safetyLever ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the specified safety lever."]
+module GetSafetyLeverRequest =
+  struct
+    type nonrec t =
+      {
+      id: SafetyLeverId.t [@ocaml.doc "The ID of the safety lever."]}
+    let context_ = "GetSafetyLeverRequest"
+    let make ~id = fun () -> { id }
+    let to_value x =
+      structure_to_value [("id", (Some (SafetyLeverId.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id =
+        SafetyLeverId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~id ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "id" SafetyLeverId.of_json in make ~id ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Gets information about the specified safety lever."]
 module GetExperimentTemplateResponse =
   struct
     type nonrec t =
@@ -5352,9 +8476,9 @@ module GetExperimentTemplateResponse =
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let experimentTemplate =
-        field_map json "experimentTemplate" ExperimentTemplate.of_json in
+        field_map json__ "experimentTemplate" ExperimentTemplate.of_json in
       make ?experimentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5377,12 +8501,110 @@ module GetExperimentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ExperimentTemplateId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ExperimentTemplateId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Gets information about the specified experiment template."]
+module GetExperimentTargetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfiguration:
+        ExperimentTargetAccountConfiguration.t option
+        [@ocaml.doc "Information about the target account configuration."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfiguration =
+      fun () -> { targetAccountConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfiguration",
+           (Option.map x.targetAccountConfiguration
+              ~f:ExperimentTargetAccountConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetAccountConfiguration =
+        (Option.map ~f:ExperimentTargetAccountConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfiguration") in
+      make ?targetAccountConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetAccountConfiguration =
+        field_map json__ "targetAccountConfiguration"
+          ExperimentTargetAccountConfiguration.of_json in
+      make ?targetAccountConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the specified target account configuration of the experiment."]
+module GetExperimentTargetAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      experimentId: ExperimentId.t [@ocaml.doc "The ID of the experiment."];
+      accountId: TargetAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."]}
+    let context_ = "GetExperimentTargetAccountConfigurationRequest"
+    let make ~experimentId =
+      fun ~accountId -> fun () -> { experimentId; accountId }
+    let to_value x =
+      structure_to_value
+        [("id", (Some (ExperimentId.to_value x.experimentId)));
+        ("accountId", (Some (TargetAccountId.to_value x.accountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        TargetAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
+      let experimentId =
+        ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~accountId ~experimentId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId =
+        field_map_exn json__ "accountId" TargetAccountId.of_json in
+      let experimentId =
+        field_map_exn json__ "experimentId" ExperimentId.of_json in
+      make ~accountId ~experimentId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Gets information about the specified target account configuration of the experiment."]
 module GetExperimentResponse =
   struct
     type nonrec t =
@@ -5435,8 +8657,8 @@ module GetExperimentResponse =
         (Option.map ~f:Experiment.of_xml) (Xml.child xml_arg0 "experiment") in
       make ?experiment ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let experiment = field_map json "experiment" Experiment.of_json in
+    let of_json json__ =
+      let experiment = field_map json__ "experiment" Experiment.of_json in
       make ?experiment ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified experiment."]
@@ -5455,8 +8677,8 @@ module GetExperimentRequest =
         ExperimentId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ExperimentId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ExperimentId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified experiment."]
 module GetActionResponse =
@@ -5510,8 +8732,9 @@ module GetActionResponse =
         (Option.map ~f:Action.of_xml) (Xml.child xml_arg0 "action") in
       make ?action ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let action = field_map json "action" Action.of_json in make ?action ()
+    let of_json json__ =
+      let action = field_map json__ "action" Action.of_json in
+      make ?action ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified FIS action."]
 module GetActionRequest =
@@ -5528,10 +8751,111 @@ module GetActionRequest =
         ActionId.of_xml (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ActionId.of_json in make ~id ()
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ActionId.of_json in make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Gets information about the specified FIS action."]
+module DeleteTargetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfiguration: TargetAccountConfiguration.t option
+        [@ocaml.doc "Information about the target account configuration."]}
+    type nonrec error =
+      [ `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfiguration =
+      fun () -> { targetAccountConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfiguration",
+           (Option.map x.targetAccountConfiguration
+              ~f:TargetAccountConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetAccountConfiguration =
+        (Option.map ~f:TargetAccountConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfiguration") in
+      make ?targetAccountConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetAccountConfiguration =
+        field_map json__ "targetAccountConfiguration"
+          TargetAccountConfiguration.of_json in
+      make ?targetAccountConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified target account configuration of the experiment template."]
+module DeleteTargetAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      experimentTemplateId: ExperimentTemplateId.t
+        [@ocaml.doc "The ID of the experiment template."];
+      accountId: TargetAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."]}
+    let context_ = "DeleteTargetAccountConfigurationRequest"
+    let make ~experimentTemplateId =
+      fun ~accountId -> fun () -> { experimentTemplateId; accountId }
+    let to_value x =
+      structure_to_value
+        [("id",
+           (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("accountId", (Some (TargetAccountId.to_value x.accountId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let accountId =
+        TargetAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
+      let experimentTemplateId =
+        ExperimentTemplateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      make ~accountId ~experimentTemplateId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let accountId =
+        field_map_exn json__ "accountId" TargetAccountId.of_json in
+      let experimentTemplateId =
+        field_map_exn json__ "experimentTemplateId"
+          ExperimentTemplateId.of_json in
+      make ~accountId ~experimentTemplateId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes the specified target account configuration of the experiment template."]
 module DeleteExperimentTemplateResponse =
   struct
     type nonrec t =
@@ -5586,9 +8910,9 @@ module DeleteExperimentTemplateResponse =
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let experimentTemplate =
-        field_map json "experimentTemplate" ExperimentTemplate.of_json in
+        field_map json__ "experimentTemplate" ExperimentTemplate.of_json in
       make ?experimentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified experiment template."]
@@ -5610,11 +8934,169 @@ module DeleteExperimentTemplateRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "id") in
       make ~id ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let id = field_map_exn json "id" ExperimentTemplateId.of_json in
+    let of_json json__ =
+      let id = field_map_exn json__ "id" ExperimentTemplateId.of_json in
       make ~id ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Deletes the specified experiment template."]
+module CreateTargetAccountConfigurationResponse =
+  struct
+    type nonrec t =
+      {
+      targetAccountConfiguration: TargetAccountConfiguration.t option
+        [@ocaml.doc "Information about the target account configuration."]}
+    type nonrec error =
+      [ `ConflictException of ConflictException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ServiceQuotaExceededException of ServiceQuotaExceededException.t 
+      | `ValidationException of ValidationException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?targetAccountConfiguration =
+      fun () -> { targetAccountConfiguration }
+    let error_of_json name json =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_json json)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "ConflictException" ->
+          `ConflictException (ConflictException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ServiceQuotaExceededException" ->
+          `ServiceQuotaExceededException
+            (ServiceQuotaExceededException.of_xml xml)
+      | "ValidationException" ->
+          `ValidationException (ValidationException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `ConflictException e ->
+          `Assoc
+            [("error", (`String "ConflictException"));
+            ("details", (ConflictException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ServiceQuotaExceededException e ->
+          `Assoc
+            [("error", (`String "ServiceQuotaExceededException"));
+            ("details", (ServiceQuotaExceededException.to_json e))]
+      | `ValidationException e ->
+          `Assoc
+            [("error", (`String "ValidationException"));
+            ("details", (ValidationException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("targetAccountConfiguration",
+           (Option.map x.targetAccountConfiguration
+              ~f:TargetAccountConfiguration.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let targetAccountConfiguration =
+        (Option.map ~f:TargetAccountConfiguration.of_xml)
+          (Xml.child xml_arg0 "targetAccountConfiguration") in
+      make ?targetAccountConfiguration ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let targetAccountConfiguration =
+        field_map json__ "targetAccountConfiguration"
+          TargetAccountConfiguration.of_json in
+      make ?targetAccountConfiguration ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a target account configuration for the experiment template. A target account configuration is required when accountTargeting of experimentOptions is set to multi-account. For more information, see experiment options in the Fault Injection Service User Guide."]
+module CreateTargetAccountConfigurationRequest =
+  struct
+    type nonrec t =
+      {
+      clientToken: ClientToken.t option
+        [@ocaml.doc
+          "Unique, case-sensitive identifier that you provide to ensure the idempotency of the request."];
+      experimentTemplateId: ExperimentTemplateId.t
+        [@ocaml.doc "The experiment template ID."];
+      accountId: TargetAccountId.t
+        [@ocaml.doc
+          "The Amazon Web Services account ID of the target account."];
+      roleArn: RoleArn.t
+        [@ocaml.doc
+          "The Amazon Resource Name (ARN) of an IAM role for the target account."];
+      description: TargetAccountConfigurationDescription.t option
+        [@ocaml.doc "The description of the target account."]}
+    let context_ = "CreateTargetAccountConfigurationRequest"
+    let make ?clientToken =
+      fun ?description ->
+        fun ~experimentTemplateId ->
+          fun ~accountId ->
+            fun ~roleArn ->
+              fun () ->
+                {
+                  clientToken;
+                  description;
+                  experimentTemplateId;
+                  accountId;
+                  roleArn
+                }
+    let to_value x =
+      structure_to_value
+        [("clientToken", (Option.map x.clientToken ~f:ClientToken.to_value));
+        ("id", (Some (ExperimentTemplateId.to_value x.experimentTemplateId)));
+        ("accountId", (Some (TargetAccountId.to_value x.accountId)));
+        ("roleArn", (Some (RoleArn.to_value x.roleArn)));
+        ("description",
+          (Option.map x.description
+             ~f:TargetAccountConfigurationDescription.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let description =
+        (Option.map ~f:TargetAccountConfigurationDescription.of_xml)
+          (Xml.child xml_arg0 "description") in
+      let roleArn =
+        RoleArn.of_xml (Xml.child_exn ~context:context_ xml_arg0 "roleArn") in
+      let accountId =
+        TargetAccountId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "accountId") in
+      let experimentTemplateId =
+        ExperimentTemplateId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "id") in
+      let clientToken =
+        (Option.map ~f:ClientToken.of_xml) (Xml.child xml_arg0 "clientToken") in
+      make ?description ~roleArn ~accountId ~experimentTemplateId
+        ?clientToken ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let description =
+        field_map json__ "description"
+          TargetAccountConfigurationDescription.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
+      let accountId =
+        field_map_exn json__ "accountId" TargetAccountId.of_json in
+      let experimentTemplateId =
+        field_map_exn json__ "experimentTemplateId"
+          ExperimentTemplateId.of_json in
+      let clientToken = field_map json__ "clientToken" ClientToken.of_json in
+      make ?description ~roleArn ~accountId ~experimentTemplateId
+        ?clientToken ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a target account configuration for the experiment template. A target account configuration is required when accountTargeting of experimentOptions is set to multi-account. For more information, see experiment options in the Fault Injection Service User Guide."]
 module CreateExperimentTemplateResponse =
   struct
     type nonrec t =
@@ -5689,13 +9171,13 @@ module CreateExperimentTemplateResponse =
           (Xml.child xml_arg0 "experimentTemplate") in
       make ?experimentTemplate ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let experimentTemplate =
-        field_map json "experimentTemplate" ExperimentTemplate.of_json in
+        field_map json__ "experimentTemplate" ExperimentTemplate.of_json in
       make ?experimentTemplate ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an experiment template. An experiment template includes the following components: Targets: A target can be a specific resource in your Amazon Web Services environment, or one or more resources that match criteria that you specify, for example, resources that have specific tags. Actions: The actions to carry out on the target. You can specify multiple actions, the duration of each action, and when to start each action during an experiment. Stop conditions: If a stop condition is triggered while an experiment is running, the experiment is automatically stopped. You can define a stop condition as a CloudWatch alarm. For more information, see Experiment templates in the Fault Injection Simulator User Guide."]
+       "Creates an experiment template. An experiment template includes the following components: Targets: A target can be a specific resource in your Amazon Web Services environment, or one or more resources that match criteria that you specify, for example, resources that have specific tags. Actions: The actions to carry out on the target. You can specify multiple actions, the duration of each action, and when to start each action during an experiment. Stop conditions: If a stop condition is triggered while an experiment is running, the experiment is automatically stopped. You can define a stop condition as a CloudWatch alarm. For more information, see experiment templates in the Fault Injection Service User Guide."]
 module CreateExperimentTemplateRequest =
   struct
     type nonrec t =
@@ -5718,27 +9200,38 @@ module CreateExperimentTemplateRequest =
         [@ocaml.doc "The tags to apply to the experiment template."];
       logConfiguration:
         CreateExperimentTemplateLogConfigurationInput.t option
-        [@ocaml.doc "The configuration for experiment logging."]}
+        [@ocaml.doc "The configuration for experiment logging."];
+      experimentOptions:
+        CreateExperimentTemplateExperimentOptionsInput.t option
+        [@ocaml.doc "The experiment options for the experiment template."];
+      experimentReportConfiguration:
+        CreateExperimentTemplateReportConfigurationInput.t option
+        [@ocaml.doc
+          "The experiment report configuration for the experiment template."]}
     let context_ = "CreateExperimentTemplateRequest"
     let make ?targets =
       fun ?tags ->
         fun ?logConfiguration ->
-          fun ~clientToken ->
-            fun ~description ->
-              fun ~stopConditions ->
-                fun ~actions ->
-                  fun ~roleArn ->
-                    fun () ->
-                      {
-                        targets;
-                        tags;
-                        logConfiguration;
-                        clientToken;
-                        description;
-                        stopConditions;
-                        actions;
-                        roleArn
-                      }
+          fun ?experimentOptions ->
+            fun ?experimentReportConfiguration ->
+              fun ~clientToken ->
+                fun ~description ->
+                  fun ~stopConditions ->
+                    fun ~actions ->
+                      fun ~roleArn ->
+                        fun () ->
+                          {
+                            targets;
+                            tags;
+                            logConfiguration;
+                            experimentOptions;
+                            experimentReportConfiguration;
+                            clientToken;
+                            description;
+                            stopConditions;
+                            actions;
+                            roleArn
+                          }
     let to_value x =
       structure_to_value
         [("clientToken", (Some (ClientToken.to_value x.clientToken)));
@@ -5757,9 +9250,22 @@ module CreateExperimentTemplateRequest =
         ("tags", (Option.map x.tags ~f:TagMap.to_value));
         ("logConfiguration",
           (Option.map x.logConfiguration
-             ~f:CreateExperimentTemplateLogConfigurationInput.to_value))]
+             ~f:CreateExperimentTemplateLogConfigurationInput.to_value));
+        ("experimentOptions",
+          (Option.map x.experimentOptions
+             ~f:CreateExperimentTemplateExperimentOptionsInput.to_value));
+        ("experimentReportConfiguration",
+          (Option.map x.experimentReportConfiguration
+             ~f:CreateExperimentTemplateReportConfigurationInput.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let experimentReportConfiguration =
+        (Option.map
+           ~f:CreateExperimentTemplateReportConfigurationInput.of_xml)
+          (Xml.child xml_arg0 "experimentReportConfiguration") in
+      let experimentOptions =
+        (Option.map ~f:CreateExperimentTemplateExperimentOptionsInput.of_xml)
+          (Xml.child xml_arg0 "experimentOptions") in
       let logConfiguration =
         (Option.map ~f:CreateExperimentTemplateLogConfigurationInput.of_xml)
           (Xml.child xml_arg0 "logConfiguration") in
@@ -5781,30 +9287,39 @@ module CreateExperimentTemplateRequest =
       let clientToken =
         ClientToken.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "clientToken") in
-      make ?logConfiguration ?tags ~roleArn ~actions ?targets ~stopConditions
+      make ?experimentReportConfiguration ?experimentOptions
+        ?logConfiguration ?tags ~roleArn ~actions ?targets ~stopConditions
         ~description ~clientToken ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let experimentReportConfiguration =
+        field_map json__ "experimentReportConfiguration"
+          CreateExperimentTemplateReportConfigurationInput.of_json in
+      let experimentOptions =
+        field_map json__ "experimentOptions"
+          CreateExperimentTemplateExperimentOptionsInput.of_json in
       let logConfiguration =
-        field_map json "logConfiguration"
+        field_map json__ "logConfiguration"
           CreateExperimentTemplateLogConfigurationInput.of_json in
-      let tags = field_map json "tags" TagMap.of_json in
-      let roleArn = field_map_exn json "roleArn" RoleArn.of_json in
+      let tags = field_map json__ "tags" TagMap.of_json in
+      let roleArn = field_map_exn json__ "roleArn" RoleArn.of_json in
       let actions =
-        field_map_exn json "actions"
+        field_map_exn json__ "actions"
           CreateExperimentTemplateActionInputMap.of_json in
       let targets =
-        field_map json "targets"
+        field_map json__ "targets"
           CreateExperimentTemplateTargetInputMap.of_json in
       let stopConditions =
-        field_map_exn json "stopConditions"
+        field_map_exn json__ "stopConditions"
           CreateExperimentTemplateStopConditionInputList.of_json in
       let description =
-        field_map_exn json "description"
+        field_map_exn json__ "description"
           ExperimentTemplateDescription.of_json in
-      let clientToken = field_map_exn json "clientToken" ClientToken.of_json in
-      make ?logConfiguration ?tags ~roleArn ~actions ?targets ~stopConditions
+      let clientToken =
+        field_map_exn json__ "clientToken" ClientToken.of_json in
+      make ?experimentReportConfiguration ?experimentOptions
+        ?logConfiguration ?tags ~roleArn ~actions ?targets ~stopConditions
         ~description ~clientToken ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Creates an experiment template. An experiment template includes the following components: Targets: A target can be a specific resource in your Amazon Web Services environment, or one or more resources that match criteria that you specify, for example, resources that have specific tags. Actions: The actions to carry out on the target. You can specify multiple actions, the duration of each action, and when to start each action during an experiment. Stop conditions: If a stop condition is triggered while an experiment is running, the experiment is automatically stopped. You can define a stop condition as a CloudWatch alarm. For more information, see Experiment templates in the Fault Injection Simulator User Guide."]
+       "Creates an experiment template. An experiment template includes the following components: Targets: A target can be a specific resource in your Amazon Web Services environment, or one or more resources that match criteria that you specify, for example, resources that have specific tags. Actions: The actions to carry out on the target. You can specify multiple actions, the duration of each action, and when to start each action during an experiment. Stop conditions: If a stop condition is triggered while an experiment is running, the experiment is automatically stopped. You can define a stop condition as a CloudWatch alarm. For more information, see experiment templates in the Fault Injection Service User Guide."]

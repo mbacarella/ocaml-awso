@@ -156,6 +156,9 @@ let create_connect_attachment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (optional string)
+           ~doc:"STRING ConstrainedString"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
@@ -173,7 +176,7 @@ let create_connect_attachment =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_connect_attachment
-           (Values.CreateConnectAttachmentRequest.make
+           (Values.CreateConnectAttachmentRequest.make ?routingPolicyLabel
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
               ~coreNetworkId ~edgeLocation ~transportAttachmentId
               ~options:(Values.ConnectAttachmentOptions.of_json options) ())
@@ -194,26 +197,29 @@ let create_connect_peer =
            ~doc:"STRING IPAddress"
        and bgpOptions =
          flag "bgp-options" (optional json_arg) ~doc:"JSON BgpOptions"
+       and insideCidrBlocks =
+         flag "inside-cidr-blocks" (optional json_arg)
+           ~doc:"JSON ConstrainedStringList"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and subnetArn =
+         flag "subnet-arn" (optional string) ~doc:"STRING SubnetArn"
        and connectAttachmentId =
          flag "connect-attachment-id" (required string)
            ~doc:"STRING AttachmentId"
        and peerAddress =
-         flag "peer-address" (required string) ~doc:"STRING IPAddress"
-       and insideCidrBlocks =
-         flag "inside-cidr-blocks" (required json_arg)
-           ~doc:"JSON ConstrainedStringList" in
+         flag "peer-address" (required string) ~doc:"STRING IPAddress" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_connect_peer
            (Values.CreateConnectPeerRequest.make ?coreNetworkAddress
               ?bgpOptions:(Option.map ~f:Values.BgpOptions.of_json bgpOptions)
+              ?insideCidrBlocks:(Option.map
+                                   ~f:Values.ConstrainedStringList.of_json
+                                   insideCidrBlocks)
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
-              ~connectAttachmentId ~peerAddress
-              ~insideCidrBlocks:(Values.ConstrainedStringList.of_json
-                                   insideCidrBlocks) ())
+              ?subnetArn ~connectAttachmentId ~peerAddress ())
            (Some Values.CreateConnectPeerResponse.to_json)
            (Some Values.CreateConnectPeerResponse.error_to_json)])
 let create_connection =
@@ -276,6 +282,34 @@ let create_core_network =
               ?policyDocument ?clientToken ~globalNetworkId ())
            (Some Values.CreateCoreNetworkResponse.to_json)
            (Some Values.CreateCoreNetworkResponse.error_to_json)])
+let create_core_network_prefix_list_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and prefixListArn =
+         flag "prefix-list-arn" (required string) ~doc:"STRING PrefixListArn"
+       and prefixListAlias =
+         flag "prefix-list-alias" (required string)
+           ~doc:"STRING ConstrainedString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_core_network_prefix_list_association
+           (Values.CreateCoreNetworkPrefixListAssociationRequest.make
+              ?clientToken ~coreNetworkId ~prefixListArn ~prefixListAlias ())
+           (Some
+              Values.CreateCoreNetworkPrefixListAssociationResponse.to_json)
+           (Some
+              Values.CreateCoreNetworkPrefixListAssociationResponse.error_to_json)])
 let create_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -317,6 +351,42 @@ let create_device =
               ?siteId ?tags:(Option.map ~f:Values.TagList.of_json tags)
               ~globalNetworkId ()) (Some Values.CreateDeviceResponse.to_json)
            (Some Values.CreateDeviceResponse.error_to_json)])
+let create_direct_connect_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (optional string)
+           ~doc:"STRING ConstrainedString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and directConnectGatewayArn =
+         flag "direct-connect-gateway-arn" (required string)
+           ~doc:"STRING DirectConnectGatewayArn"
+       and edgeLocations =
+         flag "edge-locations" (required json_arg)
+           ~doc:"JSON ExternalRegionCodeList" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_direct_connect_gateway_attachment
+           (Values.CreateDirectConnectGatewayAttachmentRequest.make
+              ?routingPolicyLabel
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~coreNetworkId ~directConnectGatewayArn
+              ~edgeLocations:(Values.ExternalRegionCodeList.of_json
+                                edgeLocations) ())
+           (Some Values.CreateDirectConnectGatewayAttachmentResponse.to_json)
+           (Some
+              Values.CreateDirectConnectGatewayAttachmentResponse.error_to_json)])
 let create_global_network =
   Command.async ~summary:""
     ([%map_open.Command
@@ -405,6 +475,9 @@ let create_site_to_site_vpn_attachment =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (optional string)
+           ~doc:"STRING ConstrainedString"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
@@ -417,10 +490,69 @@ let create_site_to_site_vpn_attachment =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_site_to_site_vpn_attachment
            (Values.CreateSiteToSiteVpnAttachmentRequest.make
+              ?routingPolicyLabel
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
               ~coreNetworkId ~vpnConnectionArn ())
            (Some Values.CreateSiteToSiteVpnAttachmentResponse.to_json)
            (Some Values.CreateSiteToSiteVpnAttachmentResponse.error_to_json)])
+let create_transit_gateway_peering =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and transitGatewayArn =
+         flag "transit-gateway-arn" (required string)
+           ~doc:"STRING TransitGatewayArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_transit_gateway_peering
+           (Values.CreateTransitGatewayPeeringRequest.make
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~coreNetworkId ~transitGatewayArn ())
+           (Some Values.CreateTransitGatewayPeeringResponse.to_json)
+           (Some Values.CreateTransitGatewayPeeringResponse.error_to_json)])
+let create_transit_gateway_route_table_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (optional string)
+           ~doc:"STRING ConstrainedString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and peeringId =
+         flag "peering-id" (required string) ~doc:"STRING PeeringId"
+       and transitGatewayRouteTableArn =
+         flag "transit-gateway-route-table-arn" (required string)
+           ~doc:"STRING TransitGatewayRouteTableArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_transit_gateway_route_table_attachment
+           (Values.CreateTransitGatewayRouteTableAttachmentRequest.make
+              ?routingPolicyLabel
+              ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
+              ~peeringId ~transitGatewayRouteTableArn ())
+           (Some
+              Values.CreateTransitGatewayRouteTableAttachmentResponse.to_json)
+           (Some
+              Values.CreateTransitGatewayRouteTableAttachmentResponse.error_to_json)])
 let create_vpc_attachment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -433,6 +565,9 @@ let create_vpc_attachment =
            ~doc:"URL override endpoint url"
        and options =
          flag "options" (optional json_arg) ~doc:"JSON VpcOptions"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (optional string)
+           ~doc:"STRING ConstrainedString"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagList"
        and clientToken =
          flag "client-token" (optional string) ~doc:"STRING ClientToken"
@@ -446,6 +581,7 @@ let create_vpc_attachment =
            Io.create_vpc_attachment
            (Values.CreateVpcAttachmentRequest.make
               ?options:(Option.map ~f:Values.VpcOptions.of_json options)
+              ?routingPolicyLabel
               ?tags:(Option.map ~f:Values.TagList.of_json tags) ?clientToken
               ~coreNetworkId ~vpcArn
               ~subnetArns:(Values.SubnetArnList.of_json subnetArns) ())
@@ -548,6 +684,29 @@ let delete_core_network_policy_version =
               ~policyVersionId ())
            (Some Values.DeleteCoreNetworkPolicyVersionResponse.to_json)
            (Some Values.DeleteCoreNetworkPolicyVersionResponse.error_to_json)])
+let delete_core_network_prefix_list_association =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and prefixListArn =
+         flag "prefix-list-arn" (required string) ~doc:"STRING PrefixListArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_core_network_prefix_list_association
+           (Values.DeleteCoreNetworkPrefixListAssociationRequest.make
+              ~coreNetworkId ~prefixListArn ())
+           (Some
+              Values.DeleteCoreNetworkPrefixListAssociationResponse.to_json)
+           (Some
+              Values.DeleteCoreNetworkPrefixListAssociationResponse.error_to_json)])
 let delete_device =
   Command.async ~summary:""
     ([%map_open.Command
@@ -608,6 +767,23 @@ let delete_link =
            (Values.DeleteLinkRequest.make ~globalNetworkId ~linkId ())
            (Some Values.DeleteLinkResponse.to_json)
            (Some Values.DeleteLinkResponse.error_to_json)])
+let delete_peering =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and peeringId =
+         flag "peering-id" (required string) ~doc:"STRING PeeringId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_peering (Values.DeletePeeringRequest.make ~peeringId ())
+           (Some Values.DeletePeeringResponse.to_json)
+           (Some Values.DeletePeeringResponse.error_to_json)])
 let delete_resource_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -921,6 +1097,31 @@ let get_core_network =
            (Values.GetCoreNetworkRequest.make ~coreNetworkId ())
            (Some Values.GetCoreNetworkResponse.to_json)
            (Some Values.GetCoreNetworkResponse.error_to_json)])
+let get_core_network_change_events =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and policyVersionId =
+         flag "policy-version-id" (required int) ~doc:"INT Integer" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_core_network_change_events
+           (Values.GetCoreNetworkChangeEventsRequest.make ?maxResults
+              ?nextToken ~coreNetworkId ~policyVersionId ())
+           (Some Values.GetCoreNetworkChangeEventsResponse.to_json)
+           (Some Values.GetCoreNetworkChangeEventsResponse.error_to_json)])
 let get_core_network_change_set =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1028,6 +1229,26 @@ let get_devices =
               ?siteId ?maxResults ?nextToken ~globalNetworkId ())
            (Some Values.GetDevicesResponse.to_json)
            (Some Values.GetDevicesResponse.error_to_json)])
+let get_direct_connect_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attachmentId =
+         flag "attachment-id" (required string) ~doc:"STRING AttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_direct_connect_gateway_attachment
+           (Values.GetDirectConnectGatewayAttachmentRequest.make
+              ~attachmentId ())
+           (Some Values.GetDirectConnectGatewayAttachmentResponse.to_json)
+           (Some
+              Values.GetDirectConnectGatewayAttachmentResponse.error_to_json)])
 let get_link_associations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1412,6 +1633,24 @@ let get_transit_gateway_connect_peer_associations =
               Values.GetTransitGatewayConnectPeerAssociationsResponse.to_json)
            (Some
               Values.GetTransitGatewayConnectPeerAssociationsResponse.error_to_json)])
+let get_transit_gateway_peering =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and peeringId =
+         flag "peering-id" (required string) ~doc:"STRING PeeringId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transit_gateway_peering
+           (Values.GetTransitGatewayPeeringRequest.make ~peeringId ())
+           (Some Values.GetTransitGatewayPeeringResponse.to_json)
+           (Some Values.GetTransitGatewayPeeringResponse.error_to_json)])
 let get_transit_gateway_registrations =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1442,6 +1681,26 @@ let get_transit_gateway_registrations =
               ?nextToken ~globalNetworkId ())
            (Some Values.GetTransitGatewayRegistrationsResponse.to_json)
            (Some Values.GetTransitGatewayRegistrationsResponse.error_to_json)])
+let get_transit_gateway_route_table_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attachmentId =
+         flag "attachment-id" (required string) ~doc:"STRING AttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_transit_gateway_route_table_attachment
+           (Values.GetTransitGatewayRouteTableAttachmentRequest.make
+              ~attachmentId ())
+           (Some Values.GetTransitGatewayRouteTableAttachmentResponse.to_json)
+           (Some
+              Values.GetTransitGatewayRouteTableAttachmentResponse.error_to_json)])
 let get_vpc_attachment =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1460,6 +1719,33 @@ let get_vpc_attachment =
            (Values.GetVpcAttachmentRequest.make ~attachmentId ())
            (Some Values.GetVpcAttachmentResponse.to_json)
            (Some Values.GetVpcAttachmentResponse.error_to_json)])
+let list_attachment_routing_policy_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and attachmentId =
+         flag "attachment-id" (optional string) ~doc:"STRING AttachmentId"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_attachment_routing_policy_associations
+           (Values.ListAttachmentRoutingPolicyAssociationsRequest.make
+              ?attachmentId ?maxResults ?nextToken ~coreNetworkId ())
+           (Some
+              Values.ListAttachmentRoutingPolicyAssociationsResponse.to_json)
+           (Some
+              Values.ListAttachmentRoutingPolicyAssociationsResponse.error_to_json)])
 let list_attachments =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1543,6 +1829,89 @@ let list_core_network_policy_versions =
               ?nextToken ~coreNetworkId ())
            (Some Values.ListCoreNetworkPolicyVersionsResponse.to_json)
            (Some Values.ListCoreNetworkPolicyVersionsResponse.error_to_json)])
+let list_core_network_prefix_list_associations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and prefixListArn =
+         flag "prefix-list-arn" (optional string) ~doc:"STRING PrefixListArn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_core_network_prefix_list_associations
+           (Values.ListCoreNetworkPrefixListAssociationsRequest.make
+              ?prefixListArn ?maxResults ?nextToken ~coreNetworkId ())
+           (Some Values.ListCoreNetworkPrefixListAssociationsResponse.to_json)
+           (Some
+              Values.ListCoreNetworkPrefixListAssociationsResponse.error_to_json)])
+let list_core_network_routing_information =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and nextHopFilters =
+         flag "next-hop-filters" (optional json_arg) ~doc:"JSON FilterMap"
+       and localPreferenceMatches =
+         flag "local-preference-matches" (optional json_arg)
+           ~doc:"JSON ConstrainedStringList"
+       and exactAsPathMatches =
+         flag "exact-as-path-matches" (optional json_arg)
+           ~doc:"JSON ConstrainedStringList"
+       and medMatches =
+         flag "med-matches" (optional json_arg)
+           ~doc:"JSON ConstrainedStringList"
+       and communityMatches =
+         flag "community-matches" (optional json_arg)
+           ~doc:"JSON ConstrainedStringList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and segmentName =
+         flag "segment-name" (required string)
+           ~doc:"STRING ConstrainedString"
+       and edgeLocation =
+         flag "edge-location" (required string)
+           ~doc:"STRING ExternalRegionCode" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_core_network_routing_information
+           (Values.ListCoreNetworkRoutingInformationRequest.make
+              ?nextHopFilters:(Option.map ~f:Values.FilterMap.of_json
+                                 nextHopFilters)
+              ?localPreferenceMatches:(Option.map
+                                         ~f:Values.ConstrainedStringList.of_json
+                                         localPreferenceMatches)
+              ?exactAsPathMatches:(Option.map
+                                     ~f:Values.ConstrainedStringList.of_json
+                                     exactAsPathMatches)
+              ?medMatches:(Option.map ~f:Values.ConstrainedStringList.of_json
+                             medMatches)
+              ?communityMatches:(Option.map
+                                   ~f:Values.ConstrainedStringList.of_json
+                                   communityMatches) ?maxResults ?nextToken
+              ~coreNetworkId ~segmentName ~edgeLocation ())
+           (Some Values.ListCoreNetworkRoutingInformationResponse.to_json)
+           (Some
+              Values.ListCoreNetworkRoutingInformationResponse.error_to_json)])
 let list_core_networks =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1563,6 +1932,60 @@ let list_core_networks =
            (Values.ListCoreNetworksRequest.make ?maxResults ?nextToken ())
            (Some Values.ListCoreNetworksResponse.to_json)
            (Some Values.ListCoreNetworksResponse.error_to_json)])
+let list_organization_service_access_status =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_organization_service_access_status
+           (Values.ListOrganizationServiceAccessStatusRequest.make
+              ?maxResults ?nextToken ())
+           (Some Values.ListOrganizationServiceAccessStatusResponse.to_json)
+           (Some
+              Values.ListOrganizationServiceAccessStatusResponse.error_to_json)])
+let list_peerings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and coreNetworkId =
+         flag "core-network-id" (optional string) ~doc:"STRING CoreNetworkId"
+       and peeringType =
+         flag "peering-type" (optional json_arg) ~doc:"JSON PeeringType"
+       and edgeLocation =
+         flag "edge-location" (optional string)
+           ~doc:"STRING ExternalRegionCode"
+       and state = flag "state" (optional json_arg) ~doc:"JSON PeeringState"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT MaxResults"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING NextToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_peerings
+           (Values.ListPeeringsRequest.make ?coreNetworkId
+              ?peeringType:(Option.map ~f:Values.PeeringType.of_json
+                              peeringType) ?edgeLocation
+              ?state:(Option.map ~f:Values.PeeringState.of_json state)
+              ?maxResults ?nextToken ())
+           (Some Values.ListPeeringsResponse.to_json)
+           (Some Values.ListPeeringsResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1581,6 +2004,32 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let put_attachment_routing_policy_label =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and clientToken =
+         flag "client-token" (optional string) ~doc:"STRING ClientToken"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and attachmentId =
+         flag "attachment-id" (required string) ~doc:"STRING AttachmentId"
+       and routingPolicyLabel =
+         flag "routing-policy-label" (required string)
+           ~doc:"STRING ConstrainedString" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.put_attachment_routing_policy_label
+           (Values.PutAttachmentRoutingPolicyLabelRequest.make ?clientToken
+              ~coreNetworkId ~attachmentId ~routingPolicyLabel ())
+           (Some Values.PutAttachmentRoutingPolicyLabelResponse.to_json)
+           (Some Values.PutAttachmentRoutingPolicyLabelResponse.error_to_json)])
 let put_core_network_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1671,6 +2120,28 @@ let reject_attachment =
            (Values.RejectAttachmentRequest.make ~attachmentId ())
            (Some Values.RejectAttachmentResponse.to_json)
            (Some Values.RejectAttachmentResponse.error_to_json)])
+let remove_attachment_routing_policy_label =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and coreNetworkId =
+         flag "core-network-id" (required string) ~doc:"STRING CoreNetworkId"
+       and attachmentId =
+         flag "attachment-id" (required string) ~doc:"STRING AttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.remove_attachment_routing_policy_label
+           (Values.RemoveAttachmentRoutingPolicyLabelRequest.make
+              ~coreNetworkId ~attachmentId ())
+           (Some Values.RemoveAttachmentRoutingPolicyLabelResponse.to_json)
+           (Some
+              Values.RemoveAttachmentRoutingPolicyLabelResponse.error_to_json)])
 let restore_core_network_policy_version =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1692,6 +2163,25 @@ let restore_core_network_policy_version =
               ~policyVersionId ())
            (Some Values.RestoreCoreNetworkPolicyVersionResponse.to_json)
            (Some Values.RestoreCoreNetworkPolicyVersionResponse.error_to_json)])
+let start_organization_service_access_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and action = flag "action" (required string) ~doc:"STRING Action" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_organization_service_access_update
+           (Values.StartOrganizationServiceAccessUpdateRequest.make ~action
+              ())
+           (Some Values.StartOrganizationServiceAccessUpdateResponse.to_json)
+           (Some
+              Values.StartOrganizationServiceAccessUpdateResponse.error_to_json)])
 let start_route_analysis =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1856,6 +2346,31 @@ let update_device =
               ?siteId ~globalNetworkId ~deviceId ())
            (Some Values.UpdateDeviceResponse.to_json)
            (Some Values.UpdateDeviceResponse.error_to_json)])
+let update_direct_connect_gateway_attachment =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and edgeLocations =
+         flag "edge-locations" (optional json_arg)
+           ~doc:"JSON ExternalRegionCodeList"
+       and attachmentId =
+         flag "attachment-id" (required string) ~doc:"STRING AttachmentId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_direct_connect_gateway_attachment
+           (Values.UpdateDirectConnectGatewayAttachmentRequest.make
+              ?edgeLocations:(Option.map
+                                ~f:Values.ExternalRegionCodeList.of_json
+                                edgeLocations) ~attachmentId ())
+           (Some Values.UpdateDirectConnectGatewayAttachmentResponse.to_json)
+           (Some
+              Values.UpdateDirectConnectGatewayAttachmentResponse.error_to_json)])
 let update_global_network =
   Command.async ~summary:""
     ([%map_open.Command
@@ -2004,12 +2519,19 @@ let main =
     ("create-connect-peer", create_connect_peer);
     ("create-connection", create_connection);
     ("create-core-network", create_core_network);
+    ("create-core-network-prefix-list-association",
+      create_core_network_prefix_list_association);
     ("create-device", create_device);
+    ("create-direct-connect-gateway-attachment",
+      create_direct_connect_gateway_attachment);
     ("create-global-network", create_global_network);
     ("create-link", create_link);
     ("create-site", create_site);
     ("create-site-to-site-vpn-attachment",
       create_site_to_site_vpn_attachment);
+    ("create-transit-gateway-peering", create_transit_gateway_peering);
+    ("create-transit-gateway-route-table-attachment",
+      create_transit_gateway_route_table_attachment);
     ("create-vpc-attachment", create_vpc_attachment);
     ("delete-attachment", delete_attachment);
     ("delete-connect-peer", delete_connect_peer);
@@ -2017,9 +2539,12 @@ let main =
     ("delete-core-network", delete_core_network);
     ("delete-core-network-policy-version",
       delete_core_network_policy_version);
+    ("delete-core-network-prefix-list-association",
+      delete_core_network_prefix_list_association);
     ("delete-device", delete_device);
     ("delete-global-network", delete_global_network);
     ("delete-link", delete_link);
+    ("delete-peering", delete_peering);
     ("delete-resource-policy", delete_resource_policy);
     ("delete-site", delete_site);
     ("deregister-transit-gateway", deregister_transit_gateway);
@@ -2035,10 +2560,13 @@ let main =
     ("get-connect-peer-associations", get_connect_peer_associations);
     ("get-connections", get_connections);
     ("get-core-network", get_core_network);
+    ("get-core-network-change-events", get_core_network_change_events);
     ("get-core-network-change-set", get_core_network_change_set);
     ("get-core-network-policy", get_core_network_policy);
     ("get-customer-gateway-associations", get_customer_gateway_associations);
     ("get-devices", get_devices);
+    ("get-direct-connect-gateway-attachment",
+      get_direct_connect_gateway_attachment);
     ("get-link-associations", get_link_associations);
     ("get-links", get_links);
     ("get-network-resource-counts", get_network_resource_counts);
@@ -2053,25 +2581,45 @@ let main =
     ("get-sites", get_sites);
     ("get-transit-gateway-connect-peer-associations",
       get_transit_gateway_connect_peer_associations);
+    ("get-transit-gateway-peering", get_transit_gateway_peering);
     ("get-transit-gateway-registrations", get_transit_gateway_registrations);
+    ("get-transit-gateway-route-table-attachment",
+      get_transit_gateway_route_table_attachment);
     ("get-vpc-attachment", get_vpc_attachment);
+    ("list-attachment-routing-policy-associations",
+      list_attachment_routing_policy_associations);
     ("list-attachments", list_attachments);
     ("list-connect-peers", list_connect_peers);
     ("list-core-network-policy-versions", list_core_network_policy_versions);
+    ("list-core-network-prefix-list-associations",
+      list_core_network_prefix_list_associations);
+    ("list-core-network-routing-information",
+      list_core_network_routing_information);
     ("list-core-networks", list_core_networks);
+    ("list-organization-service-access-status",
+      list_organization_service_access_status);
+    ("list-peerings", list_peerings);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("put-attachment-routing-policy-label",
+      put_attachment_routing_policy_label);
     ("put-core-network-policy", put_core_network_policy);
     ("put-resource-policy", put_resource_policy);
     ("register-transit-gateway", register_transit_gateway);
     ("reject-attachment", reject_attachment);
+    ("remove-attachment-routing-policy-label",
+      remove_attachment_routing_policy_label);
     ("restore-core-network-policy-version",
       restore_core_network_policy_version);
+    ("start-organization-service-access-update",
+      start_organization_service_access_update);
     ("start-route-analysis", start_route_analysis);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-connection", update_connection);
     ("update-core-network", update_core_network);
     ("update-device", update_device);
+    ("update-direct-connect-gateway-attachment",
+      update_direct_connect_gateway_attachment);
     ("update-global-network", update_global_network);
     ("update-link", update_link);
     ("update-network-resource-metadata", update_network_resource_metadata);

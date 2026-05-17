@@ -54,12 +54,22 @@ val calculate_route_matrix :
       CalculateRouteMatrixRequest.t ->
         (CalculateRouteMatrixResponse.t, CalculateRouteMatrixResponse.error)
           Result.t Lwt.t
+val cancel_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CancelJobRequest.t ->
+        (CancelJobResponse.t, CancelJobResponse.error) Result.t Lwt.t
 val create_geofence_collection :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
       CreateGeofenceCollectionRequest.t ->
         (CreateGeofenceCollectionResponse.t,
           CreateGeofenceCollectionResponse.error) Result.t Lwt.t
+val create_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateKeyRequest.t ->
+        (CreateKeyResponse.t, CreateKeyResponse.error) Result.t Lwt.t
 val create_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -88,6 +98,11 @@ val delete_geofence_collection :
       DeleteGeofenceCollectionRequest.t ->
         (DeleteGeofenceCollectionResponse.t,
           DeleteGeofenceCollectionResponse.error) Result.t Lwt.t
+val delete_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DeleteKeyRequest.t ->
+        (DeleteKeyResponse.t, DeleteKeyResponse.error) Result.t Lwt.t
 val delete_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -116,6 +131,11 @@ val describe_geofence_collection :
       DescribeGeofenceCollectionRequest.t ->
         (DescribeGeofenceCollectionResponse.t,
           DescribeGeofenceCollectionResponse.error) Result.t Lwt.t
+val describe_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeKeyRequest.t ->
+        (DescribeKeyResponse.t, DescribeKeyResponse.error) Result.t Lwt.t
 val describe_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -145,6 +165,12 @@ val disassociate_tracker_consumer :
       DisassociateTrackerConsumerRequest.t ->
         (DisassociateTrackerConsumerResponse.t,
           DisassociateTrackerConsumerResponse.error) Result.t Lwt.t
+val forecast_geofence_events :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ForecastGeofenceEventsRequest.t ->
+        (ForecastGeofenceEventsResponse.t,
+          ForecastGeofenceEventsResponse.error) Result.t Lwt.t
 val get_device_position :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -162,6 +188,11 @@ val get_geofence :
     ?cfg:Awso.Cfg.t ->
       GetGeofenceRequest.t ->
         (GetGeofenceResponse.t, GetGeofenceResponse.error) Result.t Lwt.t
+val get_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetJobRequest.t ->
+        (GetJobResponse.t, GetJobResponse.error) Result.t Lwt.t
 val get_map_glyphs :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -183,6 +214,11 @@ val get_map_tile :
     ?cfg:Awso.Cfg.t ->
       GetMapTileRequest.t ->
         (GetMapTileResponse.t, GetMapTileResponse.error) Result.t Lwt.t
+val get_place :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetPlaceRequest.t ->
+        (GetPlaceResponse.t, GetPlaceResponse.error) Result.t Lwt.t
 val list_device_positions :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -200,6 +236,16 @@ val list_geofences :
     ?cfg:Awso.Cfg.t ->
       ListGeofencesRequest.t ->
         (ListGeofencesResponse.t, ListGeofencesResponse.error) Result.t Lwt.t
+val list_jobs :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListJobsRequest.t ->
+        (ListJobsResponse.t, ListJobsResponse.error) Result.t Lwt.t
+val list_keys :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      ListKeysRequest.t ->
+        (ListKeysResponse.t, ListKeysResponse.error) Result.t Lwt.t
 val list_maps :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -257,6 +303,11 @@ val search_place_index_for_text :
       SearchPlaceIndexForTextRequest.t ->
         (SearchPlaceIndexForTextResponse.t,
           SearchPlaceIndexForTextResponse.error) Result.t Lwt.t
+val start_job :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartJobRequest.t ->
+        (StartJobResponse.t, StartJobResponse.error) Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -273,6 +324,11 @@ val update_geofence_collection :
       UpdateGeofenceCollectionRequest.t ->
         (UpdateGeofenceCollectionResponse.t,
           UpdateGeofenceCollectionResponse.error) Result.t Lwt.t
+val update_key :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateKeyRequest.t ->
+        (UpdateKeyResponse.t, UpdateKeyResponse.error) Result.t Lwt.t
 val update_map :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -295,3 +351,9 @@ val update_tracker :
     ?cfg:Awso.Cfg.t ->
       UpdateTrackerRequest.t ->
         (UpdateTrackerResponse.t, UpdateTrackerResponse.error) Result.t Lwt.t
+val verify_device_position :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      VerifyDevicePositionRequest.t ->
+        (VerifyDevicePositionResponse.t, VerifyDevicePositionResponse.error)
+          Result.t Lwt.t

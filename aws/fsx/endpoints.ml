@@ -10,6 +10,12 @@ type ('i, 'o, 'e) t =
   t 
   | CopyBackup: (CopyBackupRequest.t, CopyBackupResponse.t,
   CopyBackupResponse.error) t 
+  | CopySnapshotAndUpdateVolume: (CopySnapshotAndUpdateVolumeRequest.t,
+  CopySnapshotAndUpdateVolumeResponse.t,
+  CopySnapshotAndUpdateVolumeResponse.error) t 
+  | CreateAndAttachS3AccessPoint: (CreateAndAttachS3AccessPointRequest.t,
+  CreateAndAttachS3AccessPointResponse.t,
+  CreateAndAttachS3AccessPointResponse.error) t 
   | CreateBackup: (CreateBackupRequest.t, CreateBackupResponse.t,
   CreateBackupResponse.error) t 
   | CreateDataRepositoryAssociation:
@@ -19,6 +25,8 @@ type ('i, 'o, 'e) t =
   | CreateDataRepositoryTask: (CreateDataRepositoryTaskRequest.t,
   CreateDataRepositoryTaskResponse.t, CreateDataRepositoryTaskResponse.error)
   t 
+  | CreateFileCache: (CreateFileCacheRequest.t, CreateFileCacheResponse.t,
+  CreateFileCacheResponse.error) t 
   | CreateFileSystem: (CreateFileSystemRequest.t, CreateFileSystemResponse.t,
   CreateFileSystemResponse.error) t 
   | CreateFileSystemFromBackup: (CreateFileSystemFromBackupRequest.t,
@@ -39,6 +47,8 @@ type ('i, 'o, 'e) t =
   (DeleteDataRepositoryAssociationRequest.t,
   DeleteDataRepositoryAssociationResponse.t,
   DeleteDataRepositoryAssociationResponse.error) t 
+  | DeleteFileCache: (DeleteFileCacheRequest.t, DeleteFileCacheResponse.t,
+  DeleteFileCacheResponse.error) t 
   | DeleteFileSystem: (DeleteFileSystemRequest.t, DeleteFileSystemResponse.t,
   DeleteFileSystemResponse.error) t 
   | DeleteSnapshot: (DeleteSnapshotRequest.t, DeleteSnapshotResponse.t,
@@ -57,11 +67,20 @@ type ('i, 'o, 'e) t =
   | DescribeDataRepositoryTasks: (DescribeDataRepositoryTasksRequest.t,
   DescribeDataRepositoryTasksResponse.t,
   DescribeDataRepositoryTasksResponse.error) t 
+  | DescribeFileCaches: (DescribeFileCachesRequest.t,
+  DescribeFileCachesResponse.t, DescribeFileCachesResponse.error) t 
   | DescribeFileSystemAliases: (DescribeFileSystemAliasesRequest.t,
   DescribeFileSystemAliasesResponse.t,
   DescribeFileSystemAliasesResponse.error) t 
   | DescribeFileSystems: (DescribeFileSystemsRequest.t,
   DescribeFileSystemsResponse.t, DescribeFileSystemsResponse.error) t 
+  | DescribeS3AccessPointAttachments:
+  (DescribeS3AccessPointAttachmentsRequest.t,
+  DescribeS3AccessPointAttachmentsResponse.t,
+  DescribeS3AccessPointAttachmentsResponse.error) t 
+  | DescribeSharedVpcConfiguration: (DescribeSharedVpcConfigurationRequest.t,
+  DescribeSharedVpcConfigurationResponse.t,
+  DescribeSharedVpcConfigurationResponse.error) t 
   | DescribeSnapshots: (DescribeSnapshotsRequest.t,
   DescribeSnapshotsResponse.t, DescribeSnapshotsResponse.error) t 
   | DescribeStorageVirtualMachines: (DescribeStorageVirtualMachinesRequest.t,
@@ -69,6 +88,9 @@ type ('i, 'o, 'e) t =
   DescribeStorageVirtualMachinesResponse.error) t 
   | DescribeVolumes: (DescribeVolumesRequest.t, DescribeVolumesResponse.t,
   DescribeVolumesResponse.error) t 
+  | DetachAndDeleteS3AccessPoint: (DetachAndDeleteS3AccessPointRequest.t,
+  DetachAndDeleteS3AccessPointResponse.t,
+  DetachAndDeleteS3AccessPointResponse.error) t 
   | DisassociateFileSystemAliases: (DisassociateFileSystemAliasesRequest.t,
   DisassociateFileSystemAliasesResponse.t,
   DisassociateFileSystemAliasesResponse.error) t 
@@ -80,6 +102,10 @@ type ('i, 'o, 'e) t =
   | RestoreVolumeFromSnapshot: (RestoreVolumeFromSnapshotRequest.t,
   RestoreVolumeFromSnapshotResponse.t,
   RestoreVolumeFromSnapshotResponse.error) t 
+  | StartMisconfiguredStateRecovery:
+  (StartMisconfiguredStateRecoveryRequest.t,
+  StartMisconfiguredStateRecoveryResponse.t,
+  StartMisconfiguredStateRecoveryResponse.error) t 
   | TagResource: (TagResourceRequest.t, TagResourceResponse.t,
   TagResourceResponse.error) t 
   | UntagResource: (UntagResourceRequest.t, UntagResourceResponse.t,
@@ -88,8 +114,13 @@ type ('i, 'o, 'e) t =
   (UpdateDataRepositoryAssociationRequest.t,
   UpdateDataRepositoryAssociationResponse.t,
   UpdateDataRepositoryAssociationResponse.error) t 
+  | UpdateFileCache: (UpdateFileCacheRequest.t, UpdateFileCacheResponse.t,
+  UpdateFileCacheResponse.error) t 
   | UpdateFileSystem: (UpdateFileSystemRequest.t, UpdateFileSystemResponse.t,
   UpdateFileSystemResponse.error) t 
+  | UpdateSharedVpcConfiguration: (UpdateSharedVpcConfigurationRequest.t,
+  UpdateSharedVpcConfigurationResponse.t,
+  UpdateSharedVpcConfigurationResponse.error) t 
   | UpdateSnapshot: (UpdateSnapshotRequest.t, UpdateSnapshotResponse.t,
   UpdateSnapshotResponse.error) t 
   | UpdateStorageVirtualMachine: (UpdateStorageVirtualMachineRequest.t,
@@ -102,9 +133,12 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | AssociateFileSystemAliases -> `POST
   | CancelDataRepositoryTask -> `POST
   | CopyBackup -> `POST
+  | CopySnapshotAndUpdateVolume -> `POST
+  | CreateAndAttachS3AccessPoint -> `POST
   | CreateBackup -> `POST
   | CreateDataRepositoryAssociation -> `POST
   | CreateDataRepositoryTask -> `POST
+  | CreateFileCache -> `POST
   | CreateFileSystem -> `POST
   | CreateFileSystemFromBackup -> `POST
   | CreateSnapshot -> `POST
@@ -113,6 +147,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | CreateVolumeFromBackup -> `POST
   | DeleteBackup -> `POST
   | DeleteDataRepositoryAssociation -> `POST
+  | DeleteFileCache -> `POST
   | DeleteFileSystem -> `POST
   | DeleteSnapshot -> `POST
   | DeleteStorageVirtualMachine -> `POST
@@ -120,19 +155,26 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DescribeBackups -> `POST
   | DescribeDataRepositoryAssociations -> `POST
   | DescribeDataRepositoryTasks -> `POST
+  | DescribeFileCaches -> `POST
   | DescribeFileSystemAliases -> `POST
   | DescribeFileSystems -> `POST
+  | DescribeS3AccessPointAttachments -> `POST
+  | DescribeSharedVpcConfiguration -> `POST
   | DescribeSnapshots -> `POST
   | DescribeStorageVirtualMachines -> `POST
   | DescribeVolumes -> `POST
+  | DetachAndDeleteS3AccessPoint -> `POST
   | DisassociateFileSystemAliases -> `POST
   | ListTagsForResource -> `POST
   | ReleaseFileSystemNfsV3Locks -> `POST
   | RestoreVolumeFromSnapshot -> `POST
+  | StartMisconfiguredStateRecovery -> `POST
   | TagResource -> `POST
   | UntagResource -> `POST
   | UpdateDataRepositoryAssociation -> `POST
+  | UpdateFileCache -> `POST
   | UpdateFileSystem -> `POST
+  | UpdateSharedVpcConfiguration -> `POST
   | UpdateSnapshot -> `POST
   | UpdateStorageVirtualMachine -> `POST
   | UpdateVolume -> `POST
@@ -142,10 +184,13 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | AssociateFileSystemAliases -> (Format.kasprintf Uri.of_string) "/"
       | CancelDataRepositoryTask -> (Format.kasprintf Uri.of_string) "/"
       | CopyBackup -> (Format.kasprintf Uri.of_string) "/"
+      | CopySnapshotAndUpdateVolume -> (Format.kasprintf Uri.of_string) "/"
+      | CreateAndAttachS3AccessPoint -> (Format.kasprintf Uri.of_string) "/"
       | CreateBackup -> (Format.kasprintf Uri.of_string) "/"
       | CreateDataRepositoryAssociation ->
           (Format.kasprintf Uri.of_string) "/"
       | CreateDataRepositoryTask -> (Format.kasprintf Uri.of_string) "/"
+      | CreateFileCache -> (Format.kasprintf Uri.of_string) "/"
       | CreateFileSystem -> (Format.kasprintf Uri.of_string) "/"
       | CreateFileSystemFromBackup -> (Format.kasprintf Uri.of_string) "/"
       | CreateSnapshot -> (Format.kasprintf Uri.of_string) "/"
@@ -155,6 +200,7 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DeleteBackup -> (Format.kasprintf Uri.of_string) "/"
       | DeleteDataRepositoryAssociation ->
           (Format.kasprintf Uri.of_string) "/"
+      | DeleteFileCache -> (Format.kasprintf Uri.of_string) "/"
       | DeleteFileSystem -> (Format.kasprintf Uri.of_string) "/"
       | DeleteSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | DeleteStorageVirtualMachine -> (Format.kasprintf Uri.of_string) "/"
@@ -163,21 +209,31 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
       | DescribeDataRepositoryAssociations ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeDataRepositoryTasks -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeFileCaches -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFileSystemAliases -> (Format.kasprintf Uri.of_string) "/"
       | DescribeFileSystems -> (Format.kasprintf Uri.of_string) "/"
+      | DescribeS3AccessPointAttachments ->
+          (Format.kasprintf Uri.of_string) "/"
+      | DescribeSharedVpcConfiguration ->
+          (Format.kasprintf Uri.of_string) "/"
       | DescribeSnapshots -> (Format.kasprintf Uri.of_string) "/"
       | DescribeStorageVirtualMachines ->
           (Format.kasprintf Uri.of_string) "/"
       | DescribeVolumes -> (Format.kasprintf Uri.of_string) "/"
+      | DetachAndDeleteS3AccessPoint -> (Format.kasprintf Uri.of_string) "/"
       | DisassociateFileSystemAliases -> (Format.kasprintf Uri.of_string) "/"
       | ListTagsForResource -> (Format.kasprintf Uri.of_string) "/"
       | ReleaseFileSystemNfsV3Locks -> (Format.kasprintf Uri.of_string) "/"
       | RestoreVolumeFromSnapshot -> (Format.kasprintf Uri.of_string) "/"
+      | StartMisconfiguredStateRecovery ->
+          (Format.kasprintf Uri.of_string) "/"
       | TagResource -> (Format.kasprintf Uri.of_string) "/"
       | UntagResource -> (Format.kasprintf Uri.of_string) "/"
       | UpdateDataRepositoryAssociation ->
           (Format.kasprintf Uri.of_string) "/"
+      | UpdateFileCache -> (Format.kasprintf Uri.of_string) "/"
       | UpdateFileSystem -> (Format.kasprintf Uri.of_string) "/"
+      | UpdateSharedVpcConfiguration -> (Format.kasprintf Uri.of_string) "/"
       | UpdateSnapshot -> (Format.kasprintf Uri.of_string) "/"
       | UpdateStorageVirtualMachine -> (Format.kasprintf Uri.of_string) "/"
       | UpdateVolume -> (Format.kasprintf Uri.of_string) "/")
@@ -210,6 +266,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSSimbaAPIService_v20180301.CopyBackup")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CopySnapshotAndUpdateVolume ->
+      let json = CopySnapshotAndUpdateVolumeRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.CopySnapshotAndUpdateVolume")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateAndAttachS3AccessPoint ->
+      let json = CreateAndAttachS3AccessPointRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.CreateAndAttachS3AccessPoint")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateBackup ->
       let json = CreateBackupRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -235,6 +309,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.CreateDataRepositoryTask")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | CreateFileCache ->
+      let json = CreateFileCacheRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSimbaAPIService_v20180301.CreateFileCache")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | CreateFileSystem ->
       let json = CreateFileSystemRequest.to_json req in
@@ -304,6 +386,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.DeleteDataRepositoryAssociation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DeleteFileCache ->
+      let json = DeleteFileCacheRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSimbaAPIService_v20180301.DeleteFileCache")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DeleteFileSystem ->
       let json = DeleteFileSystemRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -363,6 +453,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.DescribeDataRepositoryTasks")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeFileCaches ->
+      let json = DescribeFileCachesRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSimbaAPIService_v20180301.DescribeFileCaches")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeFileSystemAliases ->
       let json = DescribeFileSystemAliasesRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -380,6 +478,24 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.DescribeFileSystems")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeS3AccessPointAttachments ->
+      let json = DescribeS3AccessPointAttachmentsRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.DescribeS3AccessPointAttachments")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DescribeSharedVpcConfiguration ->
+      let json = DescribeSharedVpcConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.DescribeSharedVpcConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DescribeSnapshots ->
       let json = DescribeSnapshotsRequest.to_json req in
@@ -405,6 +521,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSSimbaAPIService_v20180301.DescribeVolumes")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | DetachAndDeleteS3AccessPoint ->
+      let json = DetachAndDeleteS3AccessPointRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.DetachAndDeleteS3AccessPoint")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | DisassociateFileSystemAliases ->
       let json = DisassociateFileSystemAliasesRequest.to_json req in
@@ -442,6 +567,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.RestoreVolumeFromSnapshot")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | StartMisconfiguredStateRecovery ->
+      let json = StartMisconfiguredStateRecoveryRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.StartMisconfiguredStateRecovery")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | TagResource ->
       let json = TagResourceRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -467,6 +601,14 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
           ("X-Amz-Target",
             "AWSSimbaAPIService_v20180301.UpdateDataRepositoryAssociation")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateFileCache ->
+      let json = UpdateFileCacheRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target", "AWSSimbaAPIService_v20180301.UpdateFileCache")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateFileSystem ->
       let json = UpdateFileSystemRequest.to_json req in
       let body = Yojson.Safe.to_string json in
@@ -474,6 +616,15 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
         Awso.Http.Headers.of_list
           [("Content-Type", "application/x-amz-json-1.1");
           ("X-Amz-Target", "AWSSimbaAPIService_v20180301.UpdateFileSystem")] in
+      Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
+  | UpdateSharedVpcConfiguration ->
+      let json = UpdateSharedVpcConfigurationRequest.to_json req in
+      let body = Yojson.Safe.to_string json in
+      let headers =
+        Awso.Http.Headers.of_list
+          [("Content-Type", "application/x-amz-json-1.1");
+          ("X-Amz-Target",
+            "AWSSimbaAPIService_v20180301.UpdateSharedVpcConfiguration")] in
       Awso.Http.Request.make ~body ~headers (method_of_endpoint endp)
   | UpdateSnapshot ->
       let json = UpdateSnapshotRequest.to_json req in
@@ -547,6 +698,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
         Ok (CopyBackupResponse.of_json json)
       else Error (parse_aws_error (Some CopyBackupResponse.error_of_json))
+  | CopySnapshotAndUpdateVolume ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CopySnapshotAndUpdateVolumeResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CopySnapshotAndUpdateVolumeResponse.error_of_json))
+  | CreateAndAttachS3AccessPoint ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateAndAttachS3AccessPointResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some CreateAndAttachS3AccessPointResponse.error_of_json))
   | CreateBackup ->
       if is_success
       then
@@ -571,6 +740,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some CreateDataRepositoryTaskResponse.error_of_json))
+  | CreateFileCache ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (CreateFileCacheResponse.of_json json)
+      else
+        Error (parse_aws_error (Some CreateFileCacheResponse.error_of_json))
   | CreateFileSystem ->
       if is_success
       then
@@ -633,6 +809,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DeleteDataRepositoryAssociationResponse.error_of_json))
+  | DeleteFileCache ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DeleteFileCacheResponse.of_json json)
+      else
+        Error (parse_aws_error (Some DeleteFileCacheResponse.error_of_json))
   | DeleteFileSystem ->
       if is_success
       then
@@ -687,6 +870,14 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some DescribeDataRepositoryTasksResponse.error_of_json))
+  | DescribeFileCaches ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeFileCachesResponse.of_json json)
+      else
+        Error
+          (parse_aws_error (Some DescribeFileCachesResponse.error_of_json))
   | DescribeFileSystemAliases ->
       if is_success
       then
@@ -704,6 +895,24 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
       else
         Error
           (parse_aws_error (Some DescribeFileSystemsResponse.error_of_json))
+  | DescribeS3AccessPointAttachments ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeS3AccessPointAttachmentsResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeS3AccessPointAttachmentsResponse.error_of_json))
+  | DescribeSharedVpcConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DescribeSharedVpcConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DescribeSharedVpcConfigurationResponse.error_of_json))
   | DescribeSnapshots ->
       if is_success
       then
@@ -728,6 +937,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (DescribeVolumesResponse.of_json json)
       else
         Error (parse_aws_error (Some DescribeVolumesResponse.error_of_json))
+  | DetachAndDeleteS3AccessPoint ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (DetachAndDeleteS3AccessPointResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some DetachAndDeleteS3AccessPointResponse.error_of_json))
   | DisassociateFileSystemAliases ->
       if is_success
       then
@@ -763,6 +981,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some RestoreVolumeFromSnapshotResponse.error_of_json))
+  | StartMisconfiguredStateRecovery ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (StartMisconfiguredStateRecoveryResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some StartMisconfiguredStateRecoveryResponse.error_of_json))
   | TagResource ->
       if is_success
       then
@@ -784,6 +1011,13 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some UpdateDataRepositoryAssociationResponse.error_of_json))
+  | UpdateFileCache ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateFileCacheResponse.of_json json)
+      else
+        Error (parse_aws_error (Some UpdateFileCacheResponse.error_of_json))
   | UpdateFileSystem ->
       if is_success
       then
@@ -791,6 +1025,15 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Ok (UpdateFileSystemResponse.of_json json)
       else
         Error (parse_aws_error (Some UpdateFileSystemResponse.error_of_json))
+  | UpdateSharedVpcConfiguration ->
+      if is_success
+      then
+        let json = Yojson.Safe.from_string (Awso.Http.Response.body resp) in
+        Ok (UpdateSharedVpcConfigurationResponse.of_json json)
+      else
+        Error
+          (parse_aws_error
+             (Some UpdateSharedVpcConfigurationResponse.error_of_json))
   | UpdateSnapshot ->
       if is_success
       then

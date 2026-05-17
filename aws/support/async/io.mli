@@ -36,6 +36,12 @@ val describe_communications :
       DescribeCommunicationsRequest.t ->
         (DescribeCommunicationsResponse.t,
           DescribeCommunicationsResponse.error) Result.t Async.Deferred.t
+val describe_create_case_options :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeCreateCaseOptionsRequest.t ->
+        (DescribeCreateCaseOptionsResponse.t,
+          DescribeCreateCaseOptionsResponse.error) Result.t Async.Deferred.t
 val describe_services :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -48,6 +54,12 @@ val describe_severity_levels :
       DescribeSeverityLevelsRequest.t ->
         (DescribeSeverityLevelsResponse.t,
           DescribeSeverityLevelsResponse.error) Result.t Async.Deferred.t
+val describe_supported_languages :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      DescribeSupportedLanguagesRequest.t ->
+        (DescribeSupportedLanguagesResponse.t,
+          DescribeSupportedLanguagesResponse.error) Result.t Async.Deferred.t
 val describe_trusted_advisor_check_refresh_statuses :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->

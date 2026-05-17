@@ -18,6 +18,8 @@ type ('i, 'o, 'e) t =
   (GetConfigurationSetEventDestinationsRequest.t,
   GetConfigurationSetEventDestinationsResponse.t,
   GetConfigurationSetEventDestinationsResponse.error) t 
+  | ListConfigurationSets: (ListConfigurationSetsRequest.t,
+  ListConfigurationSetsResponse.t, ListConfigurationSetsResponse.error) t 
   | SendVoiceMessage: (SendVoiceMessageRequest.t, SendVoiceMessageResponse.t,
   SendVoiceMessageResponse.error) t 
   | UpdateConfigurationSetEventDestination:
@@ -31,6 +33,7 @@ let method_of_endpoint : type i o e. (i, o, e) t -> _ =
   | DeleteConfigurationSet -> `DELETE
   | DeleteConfigurationSetEventDestination -> `DELETE
   | GetConfigurationSetEventDestinations -> `GET
+  | ListConfigurationSets -> `GET
   | SendVoiceMessage -> `POST
   | UpdateConfigurationSetEventDestination -> `PUT
 let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
@@ -60,6 +63,17 @@ let uri_of_endpoint : type i o e. (i, o, e) t -> i -> Uri.t =
             "/v1/sms-voice/configuration-sets/%s/event-destinations"
             (Zz__string.to_header
                x.GetConfigurationSetEventDestinationsRequest.configurationSetName)
+      | ListConfigurationSets ->
+          Uri.add_query_params'
+            ((Format.kasprintf Uri.of_string)
+               "/v1/sms-voice/configuration-sets")
+            (List.filter_opt
+               [Option.map
+                  ~f:(fun v -> ("NextToken", (Zz__string.to_header v)))
+                  x.nextToken;
+               Option.map
+                 ~f:(fun v -> ("PageSize", (Zz__string.to_header v)))
+                 x.pageSize])
       | SendVoiceMessage ->
           (Format.kasprintf Uri.of_string) "/v1/sms-voice/voice/message"
       | UpdateConfigurationSetEventDestination ->
@@ -125,6 +139,9 @@ let to_request (type i) (type o) (type e) (endp : (i, o, e) t) (req : i) =
   | DeleteConfigurationSetEventDestination ->
       Awso.Http.Request.make (method_of_endpoint endp)
   | GetConfigurationSetEventDestinations ->
+      let (headers, body) = (None, None) in
+      Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
+  | ListConfigurationSets ->
       let (headers, body) = (None, None) in
       Awso.Http.Request.make ?headers ?body (method_of_endpoint endp)
   | SendVoiceMessage ->
@@ -269,6 +286,12 @@ let of_response (type i) (type o) (type e) (endpoint : (i, o, e) t)
         Error
           (parse_aws_error
              (Some GetConfigurationSetEventDestinationsResponse.error_of_json))
+  | ListConfigurationSets ->
+      if is_success
+      then Ok (ListConfigurationSetsResponse.of_json (response_to_json resp))
+      else
+        Error
+          (parse_aws_error (Some ListConfigurationSetsResponse.error_of_json))
   | SendVoiceMessage ->
       if is_success
       then Ok (SendVoiceMessageResponse.of_json (response_to_json resp))

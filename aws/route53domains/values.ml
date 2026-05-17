@@ -71,6 +71,10 @@ module ExtraParamName =
       | UK_CONTACT_TYPE 
       | UK_COMPANY_NUMBER 
       | EU_COUNTRY_OF_CITIZENSHIP 
+      | AU_PRIORITY_TOKEN 
+      | AU_ELIGIBILITY_TYPE 
+      | AU_POLICY_REASON 
+      | AU_REGISTRANT_NAME 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -106,6 +110,10 @@ module ExtraParamName =
       | UK_CONTACT_TYPE -> "UK_CONTACT_TYPE"
       | UK_COMPANY_NUMBER -> "UK_COMPANY_NUMBER"
       | EU_COUNTRY_OF_CITIZENSHIP -> "EU_COUNTRY_OF_CITIZENSHIP"
+      | AU_PRIORITY_TOKEN -> "AU_PRIORITY_TOKEN"
+      | AU_ELIGIBILITY_TYPE -> "AU_ELIGIBILITY_TYPE"
+      | AU_POLICY_REASON -> "AU_POLICY_REASON"
+      | AU_REGISTRANT_NAME -> "AU_REGISTRANT_NAME"
       | Non_static_id s -> s
     let of_string =
       function
@@ -140,6 +148,10 @@ module ExtraParamName =
       | "UK_CONTACT_TYPE" -> UK_CONTACT_TYPE
       | "UK_COMPANY_NUMBER" -> UK_COMPANY_NUMBER
       | "EU_COUNTRY_OF_CITIZENSHIP" -> EU_COUNTRY_OF_CITIZENSHIP
+      | "AU_PRIORITY_TOKEN" -> AU_PRIORITY_TOKEN
+      | "AU_ELIGIBILITY_TYPE" -> AU_ELIGIBILITY_TYPE
+      | "AU_POLICY_REASON" -> AU_POLICY_REASON
+      | "AU_REGISTRANT_NAME" -> AU_REGISTRANT_NAME
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -184,7 +196,8 @@ module Currency =
 module Price =
   struct
     type nonrec t = float
-    let make i = i
+    let make i =
+      let open Result in ok_or_failwith (check_float_min i ~min:0.); i
     let of_string = Float.of_string
     let to_value x = `Double x
     let to_query v = to_query to_value v
@@ -260,6 +273,9 @@ module OperationType =
       | PUSH_DOMAIN 
       | INTERNAL_TRANSFER_OUT_DOMAIN 
       | INTERNAL_TRANSFER_IN_DOMAIN 
+      | RELEASE_TO_GANDI 
+      | TRANSFER_ON_RENEW 
+      | RESTORE_DOMAIN 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -282,6 +298,9 @@ module OperationType =
       | PUSH_DOMAIN -> "PUSH_DOMAIN"
       | INTERNAL_TRANSFER_OUT_DOMAIN -> "INTERNAL_TRANSFER_OUT_DOMAIN"
       | INTERNAL_TRANSFER_IN_DOMAIN -> "INTERNAL_TRANSFER_IN_DOMAIN"
+      | RELEASE_TO_GANDI -> "RELEASE_TO_GANDI"
+      | TRANSFER_ON_RENEW -> "TRANSFER_ON_RENEW"
+      | RESTORE_DOMAIN -> "RESTORE_DOMAIN"
       | Non_static_id s -> s
     let of_string =
       function
@@ -303,6 +322,9 @@ module OperationType =
       | "PUSH_DOMAIN" -> PUSH_DOMAIN
       | "INTERNAL_TRANSFER_OUT_DOMAIN" -> INTERNAL_TRANSFER_OUT_DOMAIN
       | "INTERNAL_TRANSFER_IN_DOMAIN" -> INTERNAL_TRANSFER_IN_DOMAIN
+      | "RELEASE_TO_GANDI" -> RELEASE_TO_GANDI
+      | "TRANSFER_ON_RENEW" -> TRANSFER_ON_RENEW
+      | "RESTORE_DOMAIN" -> RESTORE_DOMAIN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -364,6 +386,9 @@ module GlueIpList =
   struct
     type nonrec t = GlueIp.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:GlueIp.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -407,7 +432,7 @@ module ExtraParam =
       {
       name: ExtraParamName.t
         [@ocaml.doc
-          "The name of an additional parameter that is required by a top-level domain. Here are the top-level domains that require additional parameters and the names of the parameters that they require: .com.au and .net.au AU_ID_NUMBER AU_ID_TYPE Valid values include the following: ABN (Australian business number) ACN (Australian company number) TM (Trademark number) .ca BRAND_NUMBER CA_BUSINESS_ENTITY_TYPE Valid values include the following: BANK (Bank) COMMERCIAL_COMPANY (Commercial company) COMPANY (Company) COOPERATION (Cooperation) COOPERATIVE (Cooperative) COOPRIX (Cooprix) CORP (Corporation) CREDIT_UNION (Credit union) FOMIA (Federation of mutual insurance associations) INC (Incorporated) LTD (Limited) LTEE (Limit\195\169e) LLC (Limited liability corporation) LLP (Limited liability partnership) LTE (Lte.) MBA (Mutual benefit association) MIC (Mutual insurance company) NFP (Not-for-profit corporation) SA (S.A.) SAVINGS_COMPANY (Savings company) SAVINGS_UNION (Savings union) SARL (Soci\195\169t\195\169 \195\160 responsabilit\195\169 limit\195\169e) TRUST (Trust) ULC (Unlimited liability corporation) CA_LEGAL_TYPE When ContactType is PERSON, valid values include the following: ABO (Aboriginal Peoples indigenous to Canada) CCT (Canadian citizen) LGR (Legal Representative of a Canadian Citizen or Permanent Resident) RES (Permanent resident of Canada) When ContactType is a value other than PERSON, valid values include the following: ASS (Canadian unincorporated association) CCO (Canadian corporation) EDU (Canadian educational institution) GOV (Government or government entity in Canada) HOP (Canadian Hospital) INB (Indian Band recognized by the Indian Act of Canada) LAM (Canadian Library, Archive, or Museum) MAJ (Her/His Majesty the Queen/King) OMK (Official mark registered in Canada) PLT (Canadian Political Party) PRT (Partnership Registered in Canada) TDM (Trademark registered in Canada) TRD (Canadian Trade Union) TRS (Trust established in Canada) .es ES_IDENTIFICATION The value of ES_IDENTIFICATION depends on the following values: The value of ES_LEGAL_FORM The value of ES_IDENTIFICATION_TYPE If ES_LEGAL_FORM is any value other than INDIVIDUAL: Specify 1 letter + 8 numbers (CIF \\[Certificado de Identificaci\195\179n Fiscal\\]) Example: B12345678 If ES_LEGAL_FORM is INDIVIDUAL, the value that you specify for ES_IDENTIFICATION depends on the value of ES_IDENTIFICATION_TYPE: If ES_IDENTIFICATION_TYPE is DNI_AND_NIF (for Spanish contacts): Specify 8 numbers + 1 letter (DNI \\[Documento Nacional de Identidad\\], NIF \\[N\195\186mero de Identificaci\195\179n Fiscal\\]) Example: 12345678M If ES_IDENTIFICATION_TYPE is NIE (for foreigners with legal residence): Specify 1 letter + 7 numbers + 1 letter ( NIE \\[N\195\186mero de Identidad de Extranjero\\]) Example: Y1234567X If ES_IDENTIFICATION_TYPE is OTHER (for contacts outside of Spain): Specify a passport number, drivers license number, or national identity card number ES_IDENTIFICATION_TYPE Valid values include the following: DNI_AND_NIF (For Spanish contacts) NIE (For foreigners with legal residence) OTHER (For contacts outside of Spain) ES_LEGAL_FORM Valid values include the following: ASSOCIATION CENTRAL_GOVERNMENT_BODY CIVIL_SOCIETY COMMUNITY_OF_OWNERS COMMUNITY_PROPERTY CONSULATE COOPERATIVE DESIGNATION_OF_ORIGIN_SUPERVISORY_COUNCIL ECONOMIC_INTEREST_GROUP EMBASSY ENTITY_MANAGING_NATURAL_AREAS FARM_PARTNERSHIP FOUNDATION GENERAL_AND_LIMITED_PARTNERSHIP GENERAL_PARTNERSHIP INDIVIDUAL LIMITED_COMPANY LOCAL_AUTHORITY LOCAL_PUBLIC_ENTITY MUTUAL_INSURANCE_COMPANY NATIONAL_PUBLIC_ENTITY ORDER_OR_RELIGIOUS_INSTITUTION OTHERS (Only for contacts outside of Spain) POLITICAL_PARTY PROFESSIONAL_ASSOCIATION PUBLIC_LAW_ASSOCIATION PUBLIC_LIMITED_COMPANY REGIONAL_GOVERNMENT_BODY REGIONAL_PUBLIC_ENTITY SAVINGS_BANK SPANISH_OFFICE SPORTS_ASSOCIATION SPORTS_FEDERATION SPORTS_LIMITED_COMPANY TEMPORARY_ALLIANCE_OF_ENTERPRISES TRADE_UNION WORKER_OWNED_COMPANY WORKER_OWNED_LIMITED_COMPANY .eu EU_COUNTRY_OF_CITIZENSHIP .fi BIRTH_DATE_IN_YYYY_MM_DD FI_BUSINESS_NUMBER FI_ID_NUMBER FI_NATIONALITY Valid values include the following: FINNISH NOT_FINNISH FI_ORGANIZATION_TYPE Valid values include the following: COMPANY CORPORATION GOVERNMENT INSTITUTION POLITICAL_PARTY PUBLIC_COMMUNITY TOWNSHIP .fr BIRTH_CITY BIRTH_COUNTRY BIRTH_DATE_IN_YYYY_MM_DD BIRTH_DEPARTMENT: Specify the INSEE code that corresponds with the department where the contact was born. If the contact was born somewhere other than France or its overseas departments, specify 99. For more information, including a list of departments and the corresponding INSEE numbers, see the Wikipedia entry Departments of France. BRAND_NUMBER .it IT_NATIONALITY IT_PIN IT_REGISTRANT_ENTITY_TYPE Valid values include the following: FOREIGNERS FREELANCE_WORKERS (Freelance workers and professionals) ITALIAN_COMPANIES (Italian companies and one-person companies) NON_PROFIT_ORGANIZATIONS OTHER_SUBJECTS PUBLIC_ORGANIZATIONS .ru BIRTH_DATE_IN_YYYY_MM_DD RU_PASSPORT_DATA .se BIRTH_COUNTRY SE_ID_NUMBER .sg SG_ID_NUMBER .co.uk, .me.uk, and .org.uk UK_CONTACT_TYPE Valid values include the following: CRC (UK Corporation by Royal Charter) FCORP (Non-UK Corporation) FIND (Non-UK Individual, representing self) FOTHER (Non-UK Entity that does not fit into any other category) GOV (UK Government Body) IND (UK Individual (representing self)) IP (UK Industrial/Provident Registered Company) LLP (UK Limited Liability Partnership) LTD (UK Limited Company) OTHER (UK Entity that does not fit into any other category) PLC (UK Public Limited Company) PTNR (UK Partnership) RCHAR (UK Registered Charity) SCH (UK School) STAT (UK Statutory Body) STRA (UK Sole Trader) UK_COMPANY_NUMBER In addition, many TLDs require a VAT_NUMBER."];
+          "The name of an additional parameter that is required by a top-level domain. Here are the top-level domains that require additional parameters and the names of the parameters that they require: .au, .com.au, and .net.au AU_REGISTRANT_NAME AU_ID_NUMBER AU_ID_TYPE Valid values include the following: ABN (Australian business number) ACN (Australian company number) TM (Trademark number) AU_ELIGIBILITY_TYPE Valid values include the following: CHARITABLE_TRUST (Charitable trust) CHARITY (Charity) CHILD_CARE_CENTRE (Child care centre) CLUB (Club) COMMERCIAL_STATUTORY_BODY (Commercial statutory body) COMMONWEALTH_ENTITY (Commonwealth entity) COMPANY (Company) COMPANY_LIMITED_BY_GUARANTEE (Company limited by guarantee) EDUCATIONAL_INSTITUTION (Educational institution) GOVERNMENT_SCHOOL (Government school) HIGHER_EDUCATION_INSTITUTION (Higher education institution) INCORPORATED_ASSOCIATION (Incorporated association) INDIGENOUS_CORPORATION (Indigenous corporation) INDUSTRY_BODY (Industry body) INDUSTRY_ORGANISATION (Industry association) NATIONAL_BODY (National body) NON_DISTRIBUTING_COOPERATIVE (Non-distributing cooperative) NON_GOVERNMENT_SCHOOL (Non-government school) NON_PROFIT_ORGANISATION (Non-profit organisation) NON_TRADING_COOPERATIVE (Non-trading cooperative) NOT_FOR_PROFIT_COMMUNITY_GROUP (Not-for-profit community group) PARTNERSHIP (Partnership) PEAK_STATE_TERRITORY_BODY (Peak state/territory body) PENDING_TM_OWNER (Pending TM owner) POLITICAL_PARTY (Political party) PRESCHOOL (Pre-school) PUBLIC_PRIVATE_ANCILLARY_FUND (Public/private ancillary fund) REGISTERED_BUSINESS (Registered business) REGISTERED_ORGANISATION (Registered organisation) REGISTRABLE_BODY (Registrable body) RESEARCH_ORGANISATION (Research organisation) STATUTORY_BODY (Statutory body) TRADE_UNION (Trade union) TRADEMARK_OWNER (Trademark owner) TRADING_COOPERATIVE (Trading cooperative) TRAINING_ORGANISATION (Training organisation) TRUST (Trust) UNINCORPORATED_ASSOCIATION (Unincorporated association) EDUCATION_AND_CARE_SERVICES_CHILDCARE (Education and care services (child care)) GOVERNMENT_BODY (Government body) PROVIDER_OF_NON_ACCREDITED_TRAINING (Provider of non-accredited training) RELIGIOUS_CHURCH_GROUP (Religious/church group) SOLE_TRADER (Sole trader) AU_POLICY_REASON Valid values include the following: POLICY_REASON_1 POLICY_REASON_2 .ca BRAND_NUMBER CA_BUSINESS_ENTITY_TYPE Valid values include the following: BANK (Bank) COMMERCIAL_COMPANY (Commercial company) COMPANY (Company) COOPERATION (Cooperation) COOPERATIVE (Cooperative) COOPRIX (Cooprix) CORP (Corporation) CREDIT_UNION (Credit union) FOMIA (Federation of mutual insurance associations) INC (Incorporated) LTD (Limited) LTEE (Limit\195\169e) LLC (Limited liability corporation) LLP (Limited liability partnership) LTE (Lte.) MBA (Mutual benefit association) MIC (Mutual insurance company) NFP (Not-for-profit corporation) SA (S.A.) SAVINGS_COMPANY (Savings company) SAVINGS_UNION (Savings union) SARL (Soci\195\169t\195\169 \195\160 responsabilit\195\169 limit\195\169e) TRUST (Trust) ULC (Unlimited liability corporation) CA_LEGAL_TYPE When ContactType is PERSON, valid values include the following: ABO (Aboriginal Peoples indigenous to Canada) CCT (Canadian citizen) LGR (Legal Representative of a Canadian Citizen or Permanent Resident) RES (Permanent resident of Canada) When ContactType is a value other than PERSON, valid values include the following: ASS (Canadian unincorporated association) CCO (Canadian corporation) EDU (Canadian educational institution) GOV (Government or government entity in Canada) HOP (Canadian Hospital) INB (Indian Band recognized by the Indian Act of Canada) LAM (Canadian Library, Archive, or Museum) MAJ (Her/His Majesty the Queen/King) OMK (Official mark registered in Canada) PLT (Canadian Political Party) PRT (Partnership Registered in Canada) TDM (Trademark registered in Canada) TRD (Canadian Trade Union) TRS (Trust established in Canada) .es ES_IDENTIFICATION The value of ES_IDENTIFICATION depends on the following values: The value of ES_LEGAL_FORM The value of ES_IDENTIFICATION_TYPE If ES_LEGAL_FORM is any value other than INDIVIDUAL: Specify 1 letter + 8 numbers (CIF \\[Certificado de Identificaci\195\179n Fiscal\\]) Example: B12345678 If ES_LEGAL_FORM is INDIVIDUAL, the value that you specify for ES_IDENTIFICATION depends on the value of ES_IDENTIFICATION_TYPE: If ES_IDENTIFICATION_TYPE is DNI_AND_NIF (for Spanish contacts): Specify 8 numbers + 1 letter (DNI \\[Documento Nacional de Identidad\\], NIF \\[N\195\186mero de Identificaci\195\179n Fiscal\\]) Example: 12345678M If ES_IDENTIFICATION_TYPE is NIE (for foreigners with legal residence): Specify 1 letter + 7 numbers + 1 letter ( NIE \\[N\195\186mero de Identidad de Extranjero\\]) Example: Y1234567X If ES_IDENTIFICATION_TYPE is OTHER (for contacts outside of Spain): Specify a passport number, drivers license number, or national identity card number ES_IDENTIFICATION_TYPE Valid values include the following: DNI_AND_NIF (For Spanish contacts) NIE (For foreigners with legal residence) OTHER (For contacts outside of Spain) ES_LEGAL_FORM Valid values include the following: ASSOCIATION CENTRAL_GOVERNMENT_BODY CIVIL_SOCIETY COMMUNITY_OF_OWNERS COMMUNITY_PROPERTY CONSULATE COOPERATIVE DESIGNATION_OF_ORIGIN_SUPERVISORY_COUNCIL ECONOMIC_INTEREST_GROUP EMBASSY ENTITY_MANAGING_NATURAL_AREAS FARM_PARTNERSHIP FOUNDATION GENERAL_AND_LIMITED_PARTNERSHIP GENERAL_PARTNERSHIP INDIVIDUAL LIMITED_COMPANY LOCAL_AUTHORITY LOCAL_PUBLIC_ENTITY MUTUAL_INSURANCE_COMPANY NATIONAL_PUBLIC_ENTITY ORDER_OR_RELIGIOUS_INSTITUTION OTHERS (Only for contacts outside of Spain) POLITICAL_PARTY PROFESSIONAL_ASSOCIATION PUBLIC_LAW_ASSOCIATION PUBLIC_LIMITED_COMPANY REGIONAL_GOVERNMENT_BODY REGIONAL_PUBLIC_ENTITY SAVINGS_BANK SPANISH_OFFICE SPORTS_ASSOCIATION SPORTS_FEDERATION SPORTS_LIMITED_COMPANY TEMPORARY_ALLIANCE_OF_ENTERPRISES TRADE_UNION WORKER_OWNED_COMPANY WORKER_OWNED_LIMITED_COMPANY .eu EU_COUNTRY_OF_CITIZENSHIP .fi BIRTH_DATE_IN_YYYY_MM_DD FI_BUSINESS_NUMBER FI_ID_NUMBER FI_NATIONALITY Valid values include the following: FINNISH NOT_FINNISH FI_ORGANIZATION_TYPE Valid values include the following: COMPANY CORPORATION GOVERNMENT INSTITUTION POLITICAL_PARTY PUBLIC_COMMUNITY TOWNSHIP .it IT_NATIONALITY IT_PIN IT_REGISTRANT_ENTITY_TYPE Valid values include the following: FOREIGNERS FREELANCE_WORKERS (Freelance workers and professionals) ITALIAN_COMPANIES (Italian companies and one-person companies) NON_PROFIT_ORGANIZATIONS OTHER_SUBJECTS PUBLIC_ORGANIZATIONS .ru BIRTH_DATE_IN_YYYY_MM_DD RU_PASSPORT_DATA .se BIRTH_COUNTRY SE_ID_NUMBER .sg SG_ID_NUMBER .uk, .co.uk, .me.uk, and .org.uk UK_CONTACT_TYPE Valid values include the following: CRC (UK Corporation by Royal Charter) FCORP (Non-UK Corporation) FIND (Non-UK Individual, representing self) FOTHER (Non-UK Entity that does not fit into any other category) GOV (UK Government Body) IND (UK Individual (representing self)) IP (UK Industrial/Provident Registered Company) LLP (UK Limited Liability Partnership) LTD (UK Limited Company) OTHER (UK Entity that does not fit into any other category) PLC (UK Public Limited Company) PTNR (UK Partnership) RCHAR (UK Registered Charity) SCH (UK School) STAT (UK Statutory Body) STRA (UK Sole Trader) UK_COMPANY_NUMBER In addition, many TLDs require a VAT_NUMBER."];
       value: ExtraParamValue.t
         [@ocaml.doc
           "The value that corresponds with the name of an extra parameter."]}
@@ -427,9 +452,9 @@ module ExtraParam =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~value ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" ExtraParamValue.of_json in
-      let name = field_map_exn json "Name" ExtraParamName.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" ExtraParamValue.of_json in
+      let name = field_map_exn json__ "Name" ExtraParamName.of_json in
       make ~value ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ExtraParam includes the following elements."]
@@ -455,29 +480,40 @@ module PriceWithCurrency =
   struct
     type nonrec t =
       {
-      price: Price.t
+      price: Price.t option
         [@ocaml.doc "The price of a domain, in a specific currency."];
-      currency: Currency.t [@ocaml.doc "The currency specifier."]}
-    let context_ = "PriceWithCurrency"
-    let make ~price = fun ~currency -> fun () -> { price; currency }
+      currency: Currency.t option [@ocaml.doc "The currency specifier."]}
+    let make ?price = fun ?currency -> fun () -> { price; currency }
     let to_value x =
       structure_to_value
-        [("Price", (Some (Price.to_value x.price)));
-        ("Currency", (Some (Currency.to_value x.currency)))]
+        [("Price", (Option.map x.price ~f:Price.to_value));
+        ("Currency", (Option.map x.currency ~f:Currency.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let currency =
-        Currency.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Currency") in
-      let price =
-        Price.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Price") in
-      make ~currency ~price ()
+        (Option.map ~f:Currency.of_xml) (Xml.child xml_arg0 "Currency") in
+      let price = (Option.map ~f:Price.of_xml) (Xml.child xml_arg0 "Price") in
+      make ?currency ?price ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let currency = field_map_exn json "Currency" Currency.of_json in
-      let price = field_map_exn json "Price" Price.of_json in
-      make ~currency ~price ()
+    let of_json json__ =
+      let currency = field_map json__ "Currency" Currency.of_json in
+      let price = field_map json__ "Price" Price.of_json in
+      make ?currency ?price ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Currency-specific price information."]
+module ErrorMessage =
+  struct
+    type nonrec t = string
+    let context_ = "ErrorMessage"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ErrorMessage" j
+    let to_json = simple_to_json to_value
+  end
 module OperationId =
   struct
     type nonrec t = string
@@ -524,6 +560,40 @@ module OperationStatus =
     let of_xml xml_arg0 =
       of_string (string_of_xml ~kind:"enumeration OperationStatus" xml_arg0)
     let of_json j = of_string (string_of_json ~kind:"OperationStatus" j)
+    let to_json = simple_to_json to_value
+  end
+module StatusFlag =
+  struct
+    type nonrec t =
+      | PENDING_ACCEPTANCE 
+      | PENDING_CUSTOMER_ACTION 
+      | PENDING_AUTHORIZATION 
+      | PENDING_PAYMENT_VERIFICATION 
+      | PENDING_SUPPORT_CASE 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function
+      | PENDING_ACCEPTANCE -> "PENDING_ACCEPTANCE"
+      | PENDING_CUSTOMER_ACTION -> "PENDING_CUSTOMER_ACTION"
+      | PENDING_AUTHORIZATION -> "PENDING_AUTHORIZATION"
+      | PENDING_PAYMENT_VERIFICATION -> "PENDING_PAYMENT_VERIFICATION"
+      | PENDING_SUPPORT_CASE -> "PENDING_SUPPORT_CASE"
+      | Non_static_id s -> s
+    let of_string =
+      function
+      | "PENDING_ACCEPTANCE" -> PENDING_ACCEPTANCE
+      | "PENDING_CUSTOMER_ACTION" -> PENDING_CUSTOMER_ACTION
+      | "PENDING_AUTHORIZATION" -> PENDING_AUTHORIZATION
+      | "PENDING_PAYMENT_VERIFICATION" -> PENDING_PAYMENT_VERIFICATION
+      | "PENDING_SUPPORT_CASE" -> PENDING_SUPPORT_CASE
+      | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string (string_of_xml ~kind:"enumeration StatusFlag" xml_arg0)
+    let of_json j = of_string (string_of_json ~kind:"StatusFlag" j)
     let to_json = simple_to_json to_value
   end
 module Boolean =
@@ -602,6 +672,9 @@ module Values =
         ok_or_failwith
           ((check_list_max i ~max:1) >>= (fun () -> check_list_min i ~min:1));
         i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Value.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -634,6 +707,34 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module DnssecPublicKey =
+  struct
+    type nonrec t = string
+    let context_ = "DnssecPublicKey"
+    let make i =
+      let open Result in ok_or_failwith (check_string_max i ~max:32768); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"DnssecPublicKey" j
+    let to_json = simple_to_json to_value
+  end
+module NullableInteger =
+  struct
+    type nonrec t = int
+    let make i = i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for NullableInteger" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module BillingRecord =
   struct
     type nonrec t =
@@ -645,7 +746,7 @@ module BillingRecord =
         [@ocaml.doc "The operation that you were charged for."];
       invoiceId: InvoiceId.t option
         [@ocaml.doc
-          "The ID of the invoice that is associated with the billing record."];
+          "Deprecated property. This field is retained in report structure for backwards compatibility, but will appear blank."];
       billDate: Timestamp.t option
         [@ocaml.doc
           "The date that the operation was billed, in Unix format."];
@@ -678,28 +779,15 @@ module BillingRecord =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?price ?billDate ?invoiceId ?operation ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let price = field_map json "Price" Price.of_json in
-      let billDate = field_map json "BillDate" Timestamp.of_json in
-      let invoiceId = field_map json "InvoiceId" InvoiceId.of_json in
-      let operation = field_map json "Operation" OperationType.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let price = field_map json__ "Price" Price.of_json in
+      let billDate = field_map json__ "BillDate" Timestamp.of_json in
+      let invoiceId = field_map json__ "InvoiceId" InvoiceId.of_json in
+      let operation = field_map json__ "Operation" OperationType.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?price ?billDate ?invoiceId ?operation ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information for one billing record."]
-module ErrorMessage =
-  struct
-    type nonrec t = string
-    let context_ = "ErrorMessage"
-    let make i = i
-    let of_string x = x
-    let to_value x = `String x
-    let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"ErrorMessage" j
-    let to_json = simple_to_json to_value
-  end
 module Tag =
   struct
     type nonrec t =
@@ -722,11 +810,24 @@ module Tag =
       let key = (Option.map ~f:TagKey.of_xml) (Xml.child xml_arg0 "Key") in
       make ?value ?key ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" TagValue.of_json in
-      let key = field_map json "Key" TagKey.of_json in make ?value ?key ()
+    let of_json json__ =
+      let value = field_map json__ "Value" TagValue.of_json in
+      let key = field_map json__ "Key" TagKey.of_json in make ?value ?key ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Each tag includes the following elements."]
+module RequestId =
+  struct
+    type nonrec t = string
+    let context_ = "RequestId"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RequestId" j
+    let to_json = simple_to_json to_value
+  end
 module Nameserver =
   struct
     type nonrec t =
@@ -751,12 +852,12 @@ module Nameserver =
         HostName.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ?glueIps ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let glueIps = field_map json "GlueIps" GlueIpList.of_json in
-      let name = field_map_exn json "Name" HostName.of_json in
+    let of_json json__ =
+      let glueIps = field_map json__ "GlueIps" GlueIpList.of_json in
+      let name = field_map_exn json__ "Name" HostName.of_json in
       make ?glueIps ~name ()
     let to_json v = composed_to_json to_value v
-  end[@@ocaml.doc "Nameserver includes the following elements."]
+  end[@@ocaml.doc "Name server includes the following elements."]
 module AddressLine =
   struct
     type nonrec t = string
@@ -1637,6 +1738,9 @@ module ExtraParamList =
   struct
     type nonrec t = ExtraParam.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:ExtraParam.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -1683,6 +1787,24 @@ module ZipCode =
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
     let of_json j = string_of_json ~kind:"ZipCode" j
+    let to_json = simple_to_json to_value
+  end
+module TldName =
+  struct
+    type nonrec t = string
+    let context_ = "TldName"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:2));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"TldName" j
     let to_json = simple_to_json to_value
   end
 module DomainPrice =
@@ -1755,18 +1877,18 @@ module DomainPrice =
       make ?restorationPrice ?changeOwnershipPrice ?renewalPrice
         ?transferPrice ?registrationPrice ?name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let restorationPrice =
-        field_map json "RestorationPrice" PriceWithCurrency.of_json in
+        field_map json__ "RestorationPrice" PriceWithCurrency.of_json in
       let changeOwnershipPrice =
-        field_map json "ChangeOwnershipPrice" PriceWithCurrency.of_json in
+        field_map json__ "ChangeOwnershipPrice" PriceWithCurrency.of_json in
       let renewalPrice =
-        field_map json "RenewalPrice" PriceWithCurrency.of_json in
+        field_map json__ "RenewalPrice" PriceWithCurrency.of_json in
       let transferPrice =
-        field_map json "TransferPrice" PriceWithCurrency.of_json in
+        field_map json__ "TransferPrice" PriceWithCurrency.of_json in
       let registrationPrice =
-        field_map json "RegistrationPrice" PriceWithCurrency.of_json in
-      let name = field_map json "Name" DomainPriceName.of_json in
+        field_map json__ "RegistrationPrice" PriceWithCurrency.of_json in
+      let name = field_map json__ "Name" DomainPriceName.of_json in
       make ?restorationPrice ?changeOwnershipPrice ?renewalPrice
         ?transferPrice ?registrationPrice ?name ()
     let to_json v = composed_to_json to_value v
@@ -1776,56 +1898,95 @@ module OperationSummary =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc "Identifier returned to track the requested action."];
-      status: OperationStatus.t
+      status: OperationStatus.t option
         [@ocaml.doc
           "The current status of the requested operation in the system."];
-      type_: OperationType.t [@ocaml.doc "Type of the action requested."];
-      submittedDate: Timestamp.t
-        [@ocaml.doc "The date when the request was submitted."]}
-    let context_ = "OperationSummary"
-    let make ~operationId =
-      fun ~status ->
-        fun ~type_ ->
-          fun ~submittedDate ->
-            fun () -> { operationId; status; type_; submittedDate }
+      type_: OperationType.t option
+        [@ocaml.doc "Type of the action requested."];
+      submittedDate: Timestamp.t option
+        [@ocaml.doc "The date when the request was submitted."];
+      domainName: DomainName.t option [@ocaml.doc "Name of the domain."];
+      message: ErrorMessage.t option
+        [@ocaml.doc "Message about the operation."];
+      statusFlag: StatusFlag.t option
+        [@ocaml.doc
+          "Automatically checks whether there are no outstanding operations on domains that need customer attention. Valid values are: PENDING_ACCEPTANCE: The operation is waiting for acceptance from the account that is receiving the domain. PENDING_CUSTOMER_ACTION: The operation is waiting for customer action, for example, returning an email. PENDING_AUTHORIZATION: The operation is waiting for the form of authorization. For more information, see ResendOperationAuthorization. PENDING_PAYMENT_VERIFICATION: The operation is waiting for the payment method to validate. PENDING_SUPPORT_CASE: The operation includes a support case and is waiting for its resolution."];
+      lastUpdatedDate: Timestamp.t option
+        [@ocaml.doc
+          "The date when the last change was made in Unix time format and Coordinated Universal Time (UTC)."]}
+    let make ?operationId =
+      fun ?status ->
+        fun ?type_ ->
+          fun ?submittedDate ->
+            fun ?domainName ->
+              fun ?message ->
+                fun ?statusFlag ->
+                  fun ?lastUpdatedDate ->
+                    fun () ->
+                      {
+                        operationId;
+                        status;
+                        type_;
+                        submittedDate;
+                        domainName;
+                        message;
+                        statusFlag;
+                        lastUpdatedDate
+                      }
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)));
-        ("Status", (Some (OperationStatus.to_value x.status)));
-        ("Type", (Some (OperationType.to_value x.type_)));
-        ("SubmittedDate", (Some (Timestamp.to_value x.submittedDate)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value));
+        ("Status", (Option.map x.status ~f:OperationStatus.to_value));
+        ("Type", (Option.map x.type_ ~f:OperationType.to_value));
+        ("SubmittedDate", (Option.map x.submittedDate ~f:Timestamp.to_value));
+        ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("StatusFlag", (Option.map x.statusFlag ~f:StatusFlag.to_value));
+        ("LastUpdatedDate",
+          (Option.map x.lastUpdatedDate ~f:Timestamp.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let lastUpdatedDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDate") in
+      let statusFlag =
+        (Option.map ~f:StatusFlag.of_xml) (Xml.child xml_arg0 "StatusFlag") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      let domainName =
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       let submittedDate =
-        Timestamp.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "SubmittedDate") in
+        (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SubmittedDate") in
       let type_ =
-        OperationType.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Type") in
+        (Option.map ~f:OperationType.of_xml) (Xml.child xml_arg0 "Type") in
       let status =
-        OperationStatus.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Status") in
+        (Option.map ~f:OperationStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~submittedDate ~type_ ~status ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?lastUpdatedDate ?statusFlag ?message ?domainName ?submittedDate
+        ?type_ ?status ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let submittedDate =
-        field_map_exn json "SubmittedDate" Timestamp.of_json in
-      let type_ = field_map_exn json "Type" OperationType.of_json in
-      let status = field_map_exn json "Status" OperationStatus.of_json in
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~submittedDate ~type_ ~status ~operationId ()
+    let of_json json__ =
+      let lastUpdatedDate =
+        field_map json__ "LastUpdatedDate" Timestamp.of_json in
+      let statusFlag = field_map json__ "StatusFlag" StatusFlag.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let submittedDate = field_map json__ "SubmittedDate" Timestamp.of_json in
+      let type_ = field_map json__ "Type" OperationType.of_json in
+      let status = field_map json__ "Status" OperationStatus.of_json in
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?lastUpdatedDate ?statusFlag ?message ?domainName ?submittedDate
+        ?type_ ?status ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "OperationSummary includes the following elements."]
 module DomainSummary =
   struct
     type nonrec t =
       {
-      domainName: DomainName.t
+      domainName: DomainName.t option
         [@ocaml.doc
           "The name of the domain that the summary information applies to."];
       autoRenew: Boolean.t option
@@ -1837,15 +1998,14 @@ module DomainSummary =
       expiry: Timestamp.t option
         [@ocaml.doc
           "Expiration date of the domain in Unix time format and Coordinated Universal Time (UTC)."]}
-    let context_ = "DomainSummary"
-    let make ?autoRenew =
-      fun ?transferLock ->
-        fun ?expiry ->
-          fun ~domainName ->
-            fun () -> { autoRenew; transferLock; expiry; domainName }
+    let make ?domainName =
+      fun ?autoRenew ->
+        fun ?transferLock ->
+          fun ?expiry ->
+            fun () -> { domainName; autoRenew; transferLock; expiry }
     let to_value x =
       structure_to_value
-        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        [("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("AutoRenew", (Option.map x.autoRenew ~f:Boolean.to_value));
         ("TransferLock", (Option.map x.transferLock ~f:Boolean.to_value));
         ("Expiry", (Option.map x.expiry ~f:Timestamp.to_value))]
@@ -1858,16 +2018,15 @@ module DomainSummary =
       let autoRenew =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoRenew") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?expiry ?transferLock ?autoRenew ~domainName ()
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      make ?expiry ?transferLock ?autoRenew ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let expiry = field_map json "Expiry" Timestamp.of_json in
-      let transferLock = field_map json "TransferLock" Boolean.of_json in
-      let autoRenew = field_map json "AutoRenew" Boolean.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?expiry ?transferLock ?autoRenew ~domainName ()
+    let of_json json__ =
+      let expiry = field_map json__ "Expiry" Timestamp.of_json in
+      let transferLock = field_map json__ "TransferLock" Boolean.of_json in
+      let autoRenew = field_map json__ "AutoRenew" Boolean.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      make ?expiry ?transferLock ?autoRenew ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Summary information about one domain."]
 module FilterCondition =
@@ -1902,10 +2061,10 @@ module FilterCondition =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~values ~operator ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let values = field_map_exn json "Values" Values.of_json in
-      let operator = field_map_exn json "Operator" Operator.of_json in
-      let name = field_map_exn json "Name" ListDomainsAttributeName.of_json in
+    let of_json json__ =
+      let values = field_map_exn json__ "Values" Values.of_json in
+      let operator = field_map_exn json__ "Operator" Operator.of_json in
+      let name = field_map_exn json__ "Name" ListDomainsAttributeName.of_json in
       make ~values ~operator ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -1951,12 +2110,95 @@ module DomainSuggestion =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
       make ?availability ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let availability = field_map json "Availability" String_.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let availability = field_map json__ "Availability" String_.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
       make ?availability ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information about one suggested domain name."]
+module DnssecKey =
+  struct
+    type nonrec t =
+      {
+      algorithm: NullableInteger.t option
+        [@ocaml.doc
+          "The number of the public key\226\128\153s cryptographic algorithm according to an IANA assignment. If Route\194\16053 is your DNS service, set this to 13. For more information about enabling DNSSEC signing, see Enabling DNSSEC signing and establishing a chain of trust."];
+      flags: NullableInteger.t option
+        [@ocaml.doc
+          "Defines the type of key. It can be either a KSK (key-signing-key, value 257) or ZSK (zone-signing-key, value 256). Using KSK is always encouraged. Only use ZSK if your DNS provider isn't Route\194\16053 and you don\226\128\153t have KSK available. If you have KSK and ZSK keys, always use KSK to create a delegations signer (DS) record. If you have ZSK keys only \226\128\147 use ZSK to create a DS record."];
+      publicKey: DnssecPublicKey.t option
+        [@ocaml.doc
+          "The base64-encoded public key part of the key pair that is passed to the registry ."];
+      digestType: NullableInteger.t option
+        [@ocaml.doc
+          "The number of the DS digest algorithm according to an IANA assignment. For more information, see IANA for DNSSEC Delegation Signer (DS) Resource Record (RR) Type Digest Algorithms."];
+      digest: String_.t option
+        [@ocaml.doc
+          "The delegation signer digest. Digest is calculated from the public key provided using specified digest algorithm and this digest is the actual value returned from the registry nameservers as the value of DS records."];
+      keyTag: NullableInteger.t option
+        [@ocaml.doc
+          "A numeric identification of the DNSKEY record referred to by this DS record."];
+      id: String_.t option
+        [@ocaml.doc
+          "An ID assigned to each DS record created by AssociateDelegationSignerToDomain."]}
+    let make ?algorithm =
+      fun ?flags ->
+        fun ?publicKey ->
+          fun ?digestType ->
+            fun ?digest ->
+              fun ?keyTag ->
+                fun ?id ->
+                  fun () ->
+                    {
+                      algorithm;
+                      flags;
+                      publicKey;
+                      digestType;
+                      digest;
+                      keyTag;
+                      id
+                    }
+    let to_value x =
+      structure_to_value
+        [("Algorithm", (Option.map x.algorithm ~f:NullableInteger.to_value));
+        ("Flags", (Option.map x.flags ~f:NullableInteger.to_value));
+        ("PublicKey", (Option.map x.publicKey ~f:DnssecPublicKey.to_value));
+        ("DigestType", (Option.map x.digestType ~f:NullableInteger.to_value));
+        ("Digest", (Option.map x.digest ~f:String_.to_value));
+        ("KeyTag", (Option.map x.keyTag ~f:NullableInteger.to_value));
+        ("Id", (Option.map x.id ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Id") in
+      let keyTag =
+        (Option.map ~f:NullableInteger.of_xml) (Xml.child xml_arg0 "KeyTag") in
+      let digest =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Digest") in
+      let digestType =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "DigestType") in
+      let publicKey =
+        (Option.map ~f:DnssecPublicKey.of_xml)
+          (Xml.child xml_arg0 "PublicKey") in
+      let flags =
+        (Option.map ~f:NullableInteger.of_xml) (Xml.child xml_arg0 "Flags") in
+      let algorithm =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "Algorithm") in
+      make ?id ?keyTag ?digest ?digestType ?publicKey ?flags ?algorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map json__ "Id" String_.of_json in
+      let keyTag = field_map json__ "KeyTag" NullableInteger.of_json in
+      let digest = field_map json__ "Digest" String_.of_json in
+      let digestType = field_map json__ "DigestType" NullableInteger.of_json in
+      let publicKey = field_map json__ "PublicKey" DnssecPublicKey.of_json in
+      let flags = field_map json__ "Flags" NullableInteger.of_json in
+      let algorithm = field_map json__ "Algorithm" NullableInteger.of_json in
+      make ?id ?keyTag ?digest ?digestType ?publicKey ?flags ?algorithm ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about the DNSSEC key. You get this from your DNS provider and then give it to Route\194\16053 (by using AssociateDelegationSignerToDomain) to pass it to the registry to establish the chain of trust."]
 module DomainStatus =
   struct
     type nonrec t = string
@@ -1976,6 +2218,9 @@ module Transferable =
       | TRANSFERABLE 
       | UNTRANSFERABLE 
       | DONT_KNOW 
+      | DOMAIN_IN_OWN_ACCOUNT 
+      | DOMAIN_IN_ANOTHER_ACCOUNT 
+      | PREMIUM_DOMAIN 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -1983,12 +2228,18 @@ module Transferable =
       | TRANSFERABLE -> "TRANSFERABLE"
       | UNTRANSFERABLE -> "UNTRANSFERABLE"
       | DONT_KNOW -> "DONT_KNOW"
+      | DOMAIN_IN_OWN_ACCOUNT -> "DOMAIN_IN_OWN_ACCOUNT"
+      | DOMAIN_IN_ANOTHER_ACCOUNT -> "DOMAIN_IN_ANOTHER_ACCOUNT"
+      | PREMIUM_DOMAIN -> "PREMIUM_DOMAIN"
       | Non_static_id s -> s
     let of_string =
       function
       | "TRANSFERABLE" -> TRANSFERABLE
       | "UNTRANSFERABLE" -> UNTRANSFERABLE
       | "DONT_KNOW" -> DONT_KNOW
+      | "DOMAIN_IN_OWN_ACCOUNT" -> DOMAIN_IN_OWN_ACCOUNT
+      | "DOMAIN_IN_ANOTHER_ACCOUNT" -> DOMAIN_IN_ANOTHER_ACCOUNT
+      | "PREMIUM_DOMAIN" -> PREMIUM_DOMAIN
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2002,6 +2253,9 @@ module BillingRecords =
   struct
     type nonrec t = BillingRecord.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:BillingRecord.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2039,8 +2293,8 @@ module InvalidInput =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2091,8 +2345,8 @@ module OperationLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2114,8 +2368,8 @@ module UnsupportedTLD =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2124,6 +2378,9 @@ module TagList =
   struct
     type nonrec t = Tag.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Tag.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2147,21 +2404,27 @@ module DuplicateRequest =
   struct
     type nonrec t =
       {
+      requestId: RequestId.t option
+        [@ocaml.doc "ID of the request operation."];
       message: ErrorMessage.t option
         [@ocaml.doc "The request is already in progress for the domain."]}
-    let make ?message = fun () -> { message }
+    let make ?requestId = fun ?message -> fun () -> { requestId; message }
     let to_value x =
       structure_to_value
-        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+        [("requestId", (Option.map x.requestId ~f:RequestId.to_value));
+        ("message", (Option.map x.message ~f:ErrorMessage.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let message =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
-      make ?message ()
+      let requestId =
+        (Option.map ~f:RequestId.of_xml) (Xml.child xml_arg0 "requestId") in
+      make ?message ?requestId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
-      make ?message ()
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      let requestId = field_map json__ "requestId" RequestId.of_json in
+      make ?message ?requestId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The request is already in progress for the domain."]
 module TLDRulesViolation =
@@ -2180,8 +2443,8 @@ module TLDRulesViolation =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The top-level domain does not support this operation."]
@@ -2207,6 +2470,9 @@ module NameserverList =
   struct
     type nonrec t = Nameserver.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Nameserver.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2227,6 +2493,33 @@ module NameserverList =
       list_of_json ~kind:"NameserverList" ~of_json:Nameserver.of_json j
     let to_json v = composed_to_json to_value v
   end
+module Consent =
+  struct
+    type nonrec t =
+      {
+      maxPrice: Price.t
+        [@ocaml.doc "Maximum amount the customer agreed to accept."];
+      currency: Currency.t [@ocaml.doc "Currency for the MaxPrice."]}
+    let context_ = "Consent"
+    let make ~maxPrice = fun ~currency -> fun () -> { maxPrice; currency }
+    let to_value x =
+      structure_to_value
+        [("MaxPrice", (Some (Price.to_value x.maxPrice)));
+        ("Currency", (Some (Currency.to_value x.currency)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let currency =
+        Currency.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Currency") in
+      let maxPrice =
+        Price.of_xml (Xml.child_exn ~context:context_ xml_arg0 "MaxPrice") in
+      make ~currency ~maxPrice ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let currency = field_map_exn json__ "Currency" Currency.of_json in
+      let maxPrice = field_map_exn json__ "MaxPrice" Price.of_json in
+      make ~currency ~maxPrice ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "Customer's consent for the owner change request."]
 module ContactDetail =
   struct
     type nonrec t =
@@ -2345,27 +2638,40 @@ module ContactDetail =
         ?city ?addressLine2 ?addressLine1 ?organizationName ?contactType
         ?lastName ?firstName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let extraParams = field_map json "ExtraParams" ExtraParamList.of_json in
-      let fax = field_map json "Fax" ContactNumber.of_json in
-      let email = field_map json "Email" Email.of_json in
-      let phoneNumber = field_map json "PhoneNumber" ContactNumber.of_json in
-      let zipCode = field_map json "ZipCode" ZipCode.of_json in
-      let countryCode = field_map json "CountryCode" CountryCode.of_json in
-      let state = field_map json "State" State.of_json in
-      let city = field_map json "City" City.of_json in
-      let addressLine2 = field_map json "AddressLine2" AddressLine.of_json in
-      let addressLine1 = field_map json "AddressLine1" AddressLine.of_json in
+    let of_json json__ =
+      let extraParams = field_map json__ "ExtraParams" ExtraParamList.of_json in
+      let fax = field_map json__ "Fax" ContactNumber.of_json in
+      let email = field_map json__ "Email" Email.of_json in
+      let phoneNumber = field_map json__ "PhoneNumber" ContactNumber.of_json in
+      let zipCode = field_map json__ "ZipCode" ZipCode.of_json in
+      let countryCode = field_map json__ "CountryCode" CountryCode.of_json in
+      let state = field_map json__ "State" State.of_json in
+      let city = field_map json__ "City" City.of_json in
+      let addressLine2 = field_map json__ "AddressLine2" AddressLine.of_json in
+      let addressLine1 = field_map json__ "AddressLine1" AddressLine.of_json in
       let organizationName =
-        field_map json "OrganizationName" ContactName.of_json in
-      let contactType = field_map json "ContactType" ContactType.of_json in
-      let lastName = field_map json "LastName" ContactName.of_json in
-      let firstName = field_map json "FirstName" ContactName.of_json in
+        field_map json__ "OrganizationName" ContactName.of_json in
+      let contactType = field_map json__ "ContactType" ContactType.of_json in
+      let lastName = field_map json__ "LastName" ContactName.of_json in
+      let firstName = field_map json__ "FirstName" ContactName.of_json in
       make ?extraParams ?fax ?email ?phoneNumber ?zipCode ?countryCode ?state
         ?city ?addressLine2 ?addressLine1 ?organizationName ?contactType
         ?lastName ?firstName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "ContactDetail includes the following elements."]
+module Password =
+  struct
+    type nonrec t = string
+    let context_ = "Password"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Password" j
+    let to_json = simple_to_json to_value
+  end
 module AccountId =
   struct
     type nonrec t = string
@@ -2403,8 +2709,8 @@ module DomainLimitExceeded =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2446,7 +2752,8 @@ module LangCode =
     type nonrec t = string
     let context_ = "LangCode"
     let make i =
-      let open Result in ok_or_failwith (check_string_max i ~max:3); i
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"|[A-Za-z]{2,3}"); i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
@@ -2455,6 +2762,35 @@ module LangCode =
     let of_json j = string_of_json ~kind:"LangCode" j
     let to_json = simple_to_json to_value
   end
+module TLDInMaintenance =
+  struct
+    type nonrec t =
+      {
+      message: ErrorMessage.t option
+        [@ocaml.doc
+          "The top-level domain is currently undergoing maintenance and the request cannot be processed. Try again later."];
+      tld: TldName.t option
+        [@ocaml.doc
+          "The top-level domain that is currently undergoing maintenance."]}
+    let make ?message = fun ?tld -> fun () -> { message; tld }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value));
+        ("tld", (Option.map x.tld ~f:TldName.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let tld = (Option.map ~f:TldName.of_xml) (Xml.child xml_arg0 "tld") in
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?tld ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let tld = field_map json__ "tld" TldName.of_json in
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?tld ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "The top-level domain is currently undergoing maintenance and the request cannot be processed. Try again later."]
 module CurrentExpiryYear =
   struct
     type nonrec t = int
@@ -2469,10 +2805,31 @@ module CurrentExpiryYear =
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
+module Label =
+  struct
+    type nonrec t = string
+    let context_ = "Label"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Label" j
+    let to_json = simple_to_json to_value
+  end
 module DomainPriceList =
   struct
     type nonrec t = DomainPrice.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainPrice.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2493,28 +2850,28 @@ module DomainPriceList =
       list_of_json ~kind:"DomainPriceList" ~of_json:DomainPrice.of_json j
     let to_json v = composed_to_json to_value v
   end
-module TldName =
+module ListPricesPageMaxItems =
   struct
-    type nonrec t = string
-    let context_ = "TldName"
+    type nonrec t = int
     let make i =
-      let open Result in
-        ok_or_failwith
-          ((check_string_max i ~max:255) >>=
-             (fun () -> check_string_min i ~min:1));
-        i
-    let of_string x = x
-    let to_value x = `String x
+      let open Result in ok_or_failwith (check_int_max i ~max:1000); i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
     let to_query v = to_query to_value v
-    let to_header x = x
-    let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"TldName" j
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for ListPricesPageMaxItems" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
   end
 module OperationSummaryList =
   struct
     type nonrec t = OperationSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:OperationSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2536,10 +2893,91 @@ module OperationSummaryList =
         ~of_json:OperationSummary.of_json j
     let to_json v = composed_to_json to_value v
   end
+module ListOperationsSortAttributeName =
+  struct
+    type nonrec t =
+      | SubmittedDate 
+      | Non_static_id of string 
+    let make i = i
+    let to_string =
+      function | SubmittedDate -> "SubmittedDate" | Non_static_id s -> s
+    let of_string =
+      function | "SubmittedDate" -> SubmittedDate | x -> Non_static_id x
+    let to_value x = `Enum (to_string x)
+    let to_query v = to_query to_value v
+    let to_header x = to_string x
+    let of_xml xml_arg0 =
+      of_string
+        (string_of_xml ~kind:"enumeration ListOperationsSortAttributeName"
+           xml_arg0)
+    let of_json j =
+      of_string (string_of_json ~kind:"ListOperationsSortAttributeName" j)
+    let to_json = simple_to_json to_value
+  end
+module OperationStatusList =
+  struct
+    type nonrec t = OperationStatus.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:5); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OperationStatus.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OperationStatus.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OperationStatusList"
+        ~of_json:OperationStatus.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module OperationTypeList =
+  struct
+    type nonrec t = OperationType.t list
+    let make i =
+      let open Result in ok_or_failwith (check_list_max i ~max:21); i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:OperationType.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:OperationType.of_xml)
+    let of_json j =
+      list_of_json ~kind:"OperationTypeList" ~of_json:OperationType.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DomainSummaryList =
   struct
     type nonrec t = DomainSummary.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainSummary.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2564,6 +3002,9 @@ module FilterConditions =
   struct
     type nonrec t = FilterCondition.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:FilterCondition.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2611,9 +3052,9 @@ module SortCondition =
           (Xml.child_exn ~context:context_ xml_arg0 "Name") in
       make ~sortOrder ~name ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let sortOrder = field_map_exn json "SortOrder" SortOrder.of_json in
-      let name = field_map_exn json "Name" ListDomainsAttributeName.of_json in
+    let of_json json__ =
+      let sortOrder = field_map_exn json__ "SortOrder" SortOrder.of_json in
+      let name = field_map_exn json__ "Name" ListDomainsAttributeName.of_json in
       make ~sortOrder ~name ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "Information for sorting a list of domains."]
@@ -2621,6 +3062,9 @@ module DomainSuggestionsList =
   struct
     type nonrec t = DomainSuggestion.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainSuggestion.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2668,10 +3112,40 @@ module DNSSec =
     let of_json j = string_of_json ~kind:"DNSSec" j
     let to_json = simple_to_json to_value
   end
+module DnssecKeyList =
+  struct
+    type nonrec t = DnssecKey.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:DnssecKey.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:DnssecKey.of_xml)
+    let of_json j =
+      list_of_json ~kind:"DnssecKeyList" ~of_json:DnssecKey.of_json j
+    let to_json v = composed_to_json to_value v
+  end
 module DomainStatusList =
   struct
     type nonrec t = DomainStatus.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:DomainStatus.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2790,6 +3264,9 @@ module TagKeyList =
   struct
     type nonrec t = TagKey.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:TagKey.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -2825,12 +3302,25 @@ module DomainTransferability =
           (Xml.child xml_arg0 "Transferable") in
       make ?transferable ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let transferable = field_map json "Transferable" Transferable.of_json in
+    let of_json json__ =
+      let transferable = field_map json__ "Transferable" Transferable.of_json in
       make ?transferable ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A complex type that contains information about whether the specified domain can be transferred to Route 53."]
+module Message =
+  struct
+    type nonrec t = string
+    let context_ = "Message"
+    let make i = i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Message" j
+    let to_json = simple_to_json to_value
+  end
 module DomainAvailability =
   struct
     type nonrec t =
@@ -2842,6 +3332,8 @@ module DomainAvailability =
       | UNAVAILABLE_RESTRICTED 
       | RESERVED 
       | DONT_KNOW 
+      | INVALID_NAME_FOR_TLD 
+      | PENDING 
       | Non_static_id of string 
     let make i = i
     let to_string =
@@ -2854,6 +3346,8 @@ module DomainAvailability =
       | UNAVAILABLE_RESTRICTED -> "UNAVAILABLE_RESTRICTED"
       | RESERVED -> "RESERVED"
       | DONT_KNOW -> "DONT_KNOW"
+      | INVALID_NAME_FOR_TLD -> "INVALID_NAME_FOR_TLD"
+      | PENDING -> "PENDING"
       | Non_static_id s -> s
     let of_string =
       function
@@ -2865,6 +3359,8 @@ module DomainAvailability =
       | "UNAVAILABLE_RESTRICTED" -> UNAVAILABLE_RESTRICTED
       | "RESERVED" -> RESERVED
       | "DONT_KNOW" -> DONT_KNOW
+      | "INVALID_NAME_FOR_TLD" -> INVALID_NAME_FOR_TLD
+      | "PENDING" -> PENDING
       | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
@@ -2875,6 +3371,67 @@ module DomainAvailability =
     let of_json j = of_string (string_of_json ~kind:"DomainAvailability" j)
     let to_json = simple_to_json to_value
   end
+module DnssecLimitExceeded =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This error is returned if you call AssociateDelegationSignerToDomain when the specified domain has reached the maximum number of DS records. You can't add any additional DS records unless you delete an existing one first."]
+module DnssecSigningAttributes =
+  struct
+    type nonrec t =
+      {
+      algorithm: NullableInteger.t option
+        [@ocaml.doc
+          "Algorithm which was used to generate the digest from the public key."];
+      flags: NullableInteger.t option
+        [@ocaml.doc
+          "Defines the type of key. It can be either a KSK (key-signing-key, value 257) or ZSK (zone-signing-key, value 256). Using KSK is always encouraged. Only use ZSK if your DNS provider isn't Route 53 and you don\226\128\153t have KSK available. If you have KSK and ZSK keys, always use KSK to create a delegations signer (DS) record. If you have ZSK keys only \226\128\147 use ZSK to create a DS record."];
+      publicKey: DnssecPublicKey.t option
+        [@ocaml.doc
+          "The base64-encoded public key part of the key pair that is passed to the registry."]}
+    let make ?algorithm =
+      fun ?flags ->
+        fun ?publicKey -> fun () -> { algorithm; flags; publicKey }
+    let to_value x =
+      structure_to_value
+        [("Algorithm", (Option.map x.algorithm ~f:NullableInteger.to_value));
+        ("Flags", (Option.map x.flags ~f:NullableInteger.to_value));
+        ("PublicKey", (Option.map x.publicKey ~f:DnssecPublicKey.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let publicKey =
+        (Option.map ~f:DnssecPublicKey.of_xml)
+          (Xml.child xml_arg0 "PublicKey") in
+      let flags =
+        (Option.map ~f:NullableInteger.of_xml) (Xml.child xml_arg0 "Flags") in
+      let algorithm =
+        (Option.map ~f:NullableInteger.of_xml)
+          (Xml.child xml_arg0 "Algorithm") in
+      make ?publicKey ?flags ?algorithm ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let publicKey = field_map json__ "PublicKey" DnssecPublicKey.of_json in
+      let flags = field_map json__ "Flags" NullableInteger.of_json in
+      let algorithm = field_map json__ "Algorithm" NullableInteger.of_json in
+      make ?publicKey ?flags ?algorithm ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Information about a delegation signer (DS) record that was created in the registry by AssociateDelegationSignerToDomain."]
 module ViewBillingResponse =
   struct
     type nonrec t =
@@ -2927,10 +3484,11 @@ module ViewBillingResponse =
           (Xml.child xml_arg0 "NextPageMarker") in
       make ?billingRecords ?nextPageMarker ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let billingRecords =
-        field_map json "BillingRecords" BillingRecords.of_json in
-      let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
+        field_map json__ "BillingRecords" BillingRecords.of_json in
+      let nextPageMarker =
+        field_map json__ "NextPageMarker" PageMarker.of_json in
       make ?billingRecords ?nextPageMarker ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -2972,11 +3530,11 @@ module ViewBillingRequest =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "Start") in
       make ?maxItems ?marker ?end_ ?start ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      let end_ = field_map json "End" Timestamp.of_json in
-      let start = field_map json "Start" Timestamp.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      let end_ = field_map json__ "End" Timestamp.of_json in
+      let start = field_map json__ "Start" Timestamp.of_json in
       make ?maxItems ?marker ?end_ ?start ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ViewBilling request includes the following elements."]
@@ -3059,9 +3617,9 @@ module UpdateTagsForDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?tagsToUpdate ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsToUpdate = field_map json "TagsToUpdate" TagList.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let tagsToUpdate = field_map json__ "TagsToUpdate" TagList.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?tagsToUpdate ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3070,7 +3628,7 @@ module UpdateDomainNameserversResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -3080,8 +3638,7 @@ module UpdateDomainNameserversResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateDomainNameserversResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -3135,17 +3692,16 @@ module UpdateDomainNameserversResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The UpdateDomainNameservers response includes the following element."]
@@ -3181,11 +3737,11 @@ module UpdateDomainNameserversRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~nameservers ?fIAuthKey ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let nameservers =
-        field_map_exn json "Nameservers" NameserverList.of_json in
-      let fIAuthKey = field_map json "FIAuthKey" FIAuthKey.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+        field_map_exn json__ "Nameservers" NameserverList.of_json in
+      let fIAuthKey = field_map json__ "FIAuthKey" FIAuthKey.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~nameservers ?fIAuthKey ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3194,7 +3750,7 @@ module UpdateDomainContactResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -3204,8 +3760,7 @@ module UpdateDomainContactResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateDomainContactResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -3259,17 +3814,16 @@ module UpdateDomainContactResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The UpdateDomainContact response includes the following element."]
@@ -3285,14 +3839,28 @@ module UpdateDomainContactRequest =
       registrantContact: ContactDetail.t option
         [@ocaml.doc "Provides detailed contact information."];
       techContact: ContactDetail.t option
+        [@ocaml.doc "Provides detailed contact information."];
+      consent: Consent.t option
+        [@ocaml.doc
+          "Customer's consent for the owner change request. Required if the domain is not free (consent price is more than $0.00)."];
+      billingContact: ContactDetail.t option
         [@ocaml.doc "Provides detailed contact information."]}
     let context_ = "UpdateDomainContactRequest"
     let make ?adminContact =
       fun ?registrantContact ->
         fun ?techContact ->
-          fun ~domainName ->
-            fun () ->
-              { adminContact; registrantContact; techContact; domainName }
+          fun ?consent ->
+            fun ?billingContact ->
+              fun ~domainName ->
+                fun () ->
+                  {
+                    adminContact;
+                    registrantContact;
+                    techContact;
+                    consent;
+                    billingContact;
+                    domainName
+                  }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
@@ -3300,9 +3868,17 @@ module UpdateDomainContactRequest =
           (Option.map x.adminContact ~f:ContactDetail.to_value));
         ("RegistrantContact",
           (Option.map x.registrantContact ~f:ContactDetail.to_value));
-        ("TechContact", (Option.map x.techContact ~f:ContactDetail.to_value))]
+        ("TechContact", (Option.map x.techContact ~f:ContactDetail.to_value));
+        ("Consent", (Option.map x.consent ~f:Consent.to_value));
+        ("BillingContact",
+          (Option.map x.billingContact ~f:ContactDetail.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingContact =
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "BillingContact") in
+      let consent =
+        (Option.map ~f:Consent.of_xml) (Xml.child xml_arg0 "Consent") in
       let techContact =
         (Option.map ~f:ContactDetail.of_xml)
           (Xml.child xml_arg0 "TechContact") in
@@ -3315,15 +3891,21 @@ module UpdateDomainContactRequest =
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?techContact ?registrantContact ?adminContact ~domainName ()
+      make ?billingContact ?consent ?techContact ?registrantContact
+        ?adminContact ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let techContact = field_map json "TechContact" ContactDetail.of_json in
+    let of_json json__ =
+      let billingContact =
+        field_map json__ "BillingContact" ContactDetail.of_json in
+      let consent = field_map json__ "Consent" Consent.of_json in
+      let techContact = field_map json__ "TechContact" ContactDetail.of_json in
       let registrantContact =
-        field_map json "RegistrantContact" ContactDetail.of_json in
-      let adminContact = field_map json "AdminContact" ContactDetail.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?techContact ?registrantContact ?adminContact ~domainName ()
+        field_map json__ "RegistrantContact" ContactDetail.of_json in
+      let adminContact =
+        field_map json__ "AdminContact" ContactDetail.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?billingContact ?consent ?techContact ?registrantContact
+        ?adminContact ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The UpdateDomainContact request includes the following elements."]
@@ -3331,7 +3913,7 @@ module UpdateDomainContactPrivacyResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To use this ID to query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -3341,8 +3923,7 @@ module UpdateDomainContactPrivacyResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "UpdateDomainContactPrivacyResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -3396,17 +3977,16 @@ module UpdateDomainContactPrivacyResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The UpdateDomainContactPrivacy response includes the following element."]
@@ -3419,29 +3999,42 @@ module UpdateDomainContactPrivacyRequest =
           "The name of the domain that you want to update the privacy setting for."];
       adminPrivacy: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the admin contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts."];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the admin contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."];
       registrantPrivacy: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the registrant contact (domain owner). You must specify the same privacy setting for the administrative, registrant, and technical contacts."];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the registrant contact (domain owner). You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."];
       techPrivacy: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts."]}
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."];
+      billingPrivacy: Boolean.t option
+        [@ocaml.doc
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the billing contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."]}
     let context_ = "UpdateDomainContactPrivacyRequest"
     let make ?adminPrivacy =
       fun ?registrantPrivacy ->
         fun ?techPrivacy ->
-          fun ~domainName ->
-            fun () ->
-              { adminPrivacy; registrantPrivacy; techPrivacy; domainName }
+          fun ?billingPrivacy ->
+            fun ~domainName ->
+              fun () ->
+                {
+                  adminPrivacy;
+                  registrantPrivacy;
+                  techPrivacy;
+                  billingPrivacy;
+                  domainName
+                }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
         ("AdminPrivacy", (Option.map x.adminPrivacy ~f:Boolean.to_value));
         ("RegistrantPrivacy",
           (Option.map x.registrantPrivacy ~f:Boolean.to_value));
-        ("TechPrivacy", (Option.map x.techPrivacy ~f:Boolean.to_value))]
+        ("TechPrivacy", (Option.map x.techPrivacy ~f:Boolean.to_value));
+        ("BillingPrivacy", (Option.map x.billingPrivacy ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingPrivacy =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "BillingPrivacy") in
       let techPrivacy =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "TechPrivacy") in
       let registrantPrivacy =
@@ -3452,15 +4045,18 @@ module UpdateDomainContactPrivacyRequest =
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?techPrivacy ?registrantPrivacy ?adminPrivacy ~domainName ()
+      make ?billingPrivacy ?techPrivacy ?registrantPrivacy ?adminPrivacy
+        ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let techPrivacy = field_map json "TechPrivacy" Boolean.of_json in
+    let of_json json__ =
+      let billingPrivacy = field_map json__ "BillingPrivacy" Boolean.of_json in
+      let techPrivacy = field_map json__ "TechPrivacy" Boolean.of_json in
       let registrantPrivacy =
-        field_map json "RegistrantPrivacy" Boolean.of_json in
-      let adminPrivacy = field_map json "AdminPrivacy" Boolean.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?techPrivacy ?registrantPrivacy ?adminPrivacy ~domainName ()
+        field_map json__ "RegistrantPrivacy" Boolean.of_json in
+      let adminPrivacy = field_map json__ "AdminPrivacy" Boolean.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?billingPrivacy ?techPrivacy ?registrantPrivacy ?adminPrivacy
+        ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The UpdateDomainContactPrivacy request includes the following elements."]
@@ -3471,7 +4067,7 @@ module TransferDomainToAnotherAwsAccountResponse =
       operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."];
-      password: String_.t option
+      password: Password.t option
         [@ocaml.doc
           "To finish transferring a domain to another Amazon Web Services account, the account that the domain is being transferred to must submit an AcceptDomainTransferFromAnotherAwsAccount request. The request must include the value of the Password element that was returned in the TransferDomainToAnotherAwsAccount response."]}
     type nonrec error =
@@ -3528,18 +4124,18 @@ module TransferDomainToAnotherAwsAccountResponse =
     let to_value x =
       structure_to_value
         [("OperationId", (Option.map x.operationId ~f:OperationId.to_value));
-        ("Password", (Option.map x.password ~f:String_.to_value))]
+        ("Password", (Option.map x.password ~f:Password.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let password =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Password") in
+        (Option.map ~f:Password.of_xml) (Xml.child xml_arg0 "Password") in
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?password ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map json "Password" String_.of_json in
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let password = field_map json__ "Password" Password.of_json in
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?password ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3571,9 +4167,9 @@ module TransferDomainToAnotherAwsAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~accountId ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let accountId = field_map_exn json "AccountId" AccountId.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let accountId = field_map_exn json__ "AccountId" AccountId.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~accountId ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3582,7 +4178,7 @@ module TransferDomainResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -3593,8 +4189,7 @@ module TransferDomainResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "TransferDomainResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DomainLimitExceeded" ->
@@ -3656,17 +4251,16 @@ module TransferDomainResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The TransferDomain response includes the following element."]
@@ -3678,9 +4272,9 @@ module TransferDomainRequest =
         [@ocaml.doc
           "The name of the domain that you want to transfer to Route 53. The top-level domain (TLD), such as .com, must be a TLD that Route 53 supports. For a list of supported TLDs, see Domains that You Can Register with Amazon Route 53 in the Amazon Route 53 Developer Guide. The domain name can contain only the following characters: Letters a through z. Domain names are not case sensitive. Numbers 0 through 9. Hyphen (-). You can't specify a hyphen at the beginning or end of a label. Period (.) to separate the labels in the name, such as the . in example.com."];
       idnLangCode: LangCode.t option [@ocaml.doc "Reserved for future use."];
-      durationInYears: DurationInYears.t
+      durationInYears: DurationInYears.t option
         [@ocaml.doc
-          "The number of years that you want to register the domain for. Domains are registered for a minimum of one year. The maximum period depends on the top-level domain. Default: 1"];
+          "Reserved for future use. Currently, the effect of a domain transfer on the registration period varies by TLD. For information about how transferring a domain affects the expiration date, see the Transfer Term column in the pricing information at Amazon Route 53 Pricing. Default: 1"];
       nameservers: NameserverList.t option
         [@ocaml.doc "Contains details for the host and glue IP addresses."];
       authCode: DomainAuthCode.t option
@@ -3688,7 +4282,7 @@ module TransferDomainRequest =
           "The authorization code for the domain. You get this value from the current registrar."];
       autoRenew: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the domain will be automatically renewed (true) or not (false). Autorenewal only takes effect after the account is charged. Default: true"];
+          "Indicates whether the domain will be automatically renewed (true) or not (false). Auto renewal only takes effect after the account is charged. Default: true"];
       adminContact: ContactDetail.t
         [@ocaml.doc "Provides detailed contact information."];
       registrantContact: ContactDetail.t
@@ -3697,47 +4291,56 @@ module TransferDomainRequest =
         [@ocaml.doc "Provides detailed contact information."];
       privacyProtectAdminContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the admin contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information for the registrar, the phrase \"REDACTED FOR PRIVACY\", or \"On behalf of <domain name> owner.\". While some domains may allow different privacy settings per contact, we recommend specifying the same privacy setting for all contacts. Default: true"];
       privacyProtectRegistrantContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the registrant contact (domain owner). You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the registrant contact (domain owner). You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts. Default: true"];
       privacyProtectTechContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"]}
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts. Default: true"];
+      billingContact: ContactDetail.t option
+        [@ocaml.doc "Provides detailed contact information."];
+      privacyProtectBillingContact: Boolean.t option
+        [@ocaml.doc
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the billing contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."]}
     let context_ = "TransferDomainRequest"
     let make ?idnLangCode =
-      fun ?nameservers ->
-        fun ?authCode ->
-          fun ?autoRenew ->
-            fun ?privacyProtectAdminContact ->
-              fun ?privacyProtectRegistrantContact ->
-                fun ?privacyProtectTechContact ->
-                  fun ~domainName ->
-                    fun ~durationInYears ->
-                      fun ~adminContact ->
-                        fun ~registrantContact ->
-                          fun ~techContact ->
-                            fun () ->
-                              {
-                                idnLangCode;
-                                nameservers;
-                                authCode;
-                                autoRenew;
-                                privacyProtectAdminContact;
-                                privacyProtectRegistrantContact;
-                                privacyProtectTechContact;
-                                domainName;
-                                durationInYears;
-                                adminContact;
-                                registrantContact;
-                                techContact
-                              }
+      fun ?durationInYears ->
+        fun ?nameservers ->
+          fun ?authCode ->
+            fun ?autoRenew ->
+              fun ?privacyProtectAdminContact ->
+                fun ?privacyProtectRegistrantContact ->
+                  fun ?privacyProtectTechContact ->
+                    fun ?billingContact ->
+                      fun ?privacyProtectBillingContact ->
+                        fun ~domainName ->
+                          fun ~adminContact ->
+                            fun ~registrantContact ->
+                              fun ~techContact ->
+                                fun () ->
+                                  {
+                                    idnLangCode;
+                                    durationInYears;
+                                    nameservers;
+                                    authCode;
+                                    autoRenew;
+                                    privacyProtectAdminContact;
+                                    privacyProtectRegistrantContact;
+                                    privacyProtectTechContact;
+                                    billingContact;
+                                    privacyProtectBillingContact;
+                                    domainName;
+                                    adminContact;
+                                    registrantContact;
+                                    techContact
+                                  }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
         ("IdnLangCode", (Option.map x.idnLangCode ~f:LangCode.to_value));
         ("DurationInYears",
-          (Some (DurationInYears.to_value x.durationInYears)));
+          (Option.map x.durationInYears ~f:DurationInYears.to_value));
         ("Nameservers",
           (Option.map x.nameservers ~f:NameserverList.to_value));
         ("AuthCode", (Option.map x.authCode ~f:DomainAuthCode.to_value));
@@ -3751,9 +4354,19 @@ module TransferDomainRequest =
         ("PrivacyProtectRegistrantContact",
           (Option.map x.privacyProtectRegistrantContact ~f:Boolean.to_value));
         ("PrivacyProtectTechContact",
-          (Option.map x.privacyProtectTechContact ~f:Boolean.to_value))]
+          (Option.map x.privacyProtectTechContact ~f:Boolean.to_value));
+        ("BillingContact",
+          (Option.map x.billingContact ~f:ContactDetail.to_value));
+        ("PrivacyProtectBillingContact",
+          (Option.map x.privacyProtectBillingContact ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let privacyProtectBillingContact =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "PrivacyProtectBillingContact") in
+      let billingContact =
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "BillingContact") in
       let privacyProtectTechContact =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "PrivacyProtectTechContact") in
@@ -3780,41 +4393,47 @@ module TransferDomainRequest =
         (Option.map ~f:NameserverList.of_xml)
           (Xml.child xml_arg0 "Nameservers") in
       let durationInYears =
-        DurationInYears.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DurationInYears") in
+        (Option.map ~f:DurationInYears.of_xml)
+          (Xml.child xml_arg0 "DurationInYears") in
       let idnLangCode =
         (Option.map ~f:LangCode.of_xml) (Xml.child xml_arg0 "IdnLangCode") in
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?privacyProtectTechContact ?privacyProtectRegistrantContact
+      make ?privacyProtectBillingContact ?billingContact
+        ?privacyProtectTechContact ?privacyProtectRegistrantContact
         ?privacyProtectAdminContact ~techContact ~registrantContact
-        ~adminContact ?autoRenew ?authCode ?nameservers ~durationInYears
+        ~adminContact ?autoRenew ?authCode ?nameservers ?durationInYears
         ?idnLangCode ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let privacyProtectBillingContact =
+        field_map json__ "PrivacyProtectBillingContact" Boolean.of_json in
+      let billingContact =
+        field_map json__ "BillingContact" ContactDetail.of_json in
       let privacyProtectTechContact =
-        field_map json "PrivacyProtectTechContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectTechContact" Boolean.of_json in
       let privacyProtectRegistrantContact =
-        field_map json "PrivacyProtectRegistrantContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectRegistrantContact" Boolean.of_json in
       let privacyProtectAdminContact =
-        field_map json "PrivacyProtectAdminContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectAdminContact" Boolean.of_json in
       let techContact =
-        field_map_exn json "TechContact" ContactDetail.of_json in
+        field_map_exn json__ "TechContact" ContactDetail.of_json in
       let registrantContact =
-        field_map_exn json "RegistrantContact" ContactDetail.of_json in
+        field_map_exn json__ "RegistrantContact" ContactDetail.of_json in
       let adminContact =
-        field_map_exn json "AdminContact" ContactDetail.of_json in
-      let autoRenew = field_map json "AutoRenew" Boolean.of_json in
-      let authCode = field_map json "AuthCode" DomainAuthCode.of_json in
-      let nameservers = field_map json "Nameservers" NameserverList.of_json in
+        field_map_exn json__ "AdminContact" ContactDetail.of_json in
+      let autoRenew = field_map json__ "AutoRenew" Boolean.of_json in
+      let authCode = field_map json__ "AuthCode" DomainAuthCode.of_json in
+      let nameservers = field_map json__ "Nameservers" NameserverList.of_json in
       let durationInYears =
-        field_map_exn json "DurationInYears" DurationInYears.of_json in
-      let idnLangCode = field_map json "IdnLangCode" LangCode.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?privacyProtectTechContact ?privacyProtectRegistrantContact
+        field_map json__ "DurationInYears" DurationInYears.of_json in
+      let idnLangCode = field_map json__ "IdnLangCode" LangCode.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?privacyProtectBillingContact ?billingContact
+        ?privacyProtectTechContact ?privacyProtectRegistrantContact
         ?privacyProtectAdminContact ~techContact ~registrantContact
-        ~adminContact ?autoRenew ?authCode ?nameservers ~durationInYears
+        ~adminContact ?autoRenew ?authCode ?nameservers ?durationInYears
         ?idnLangCode ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -3823,17 +4442,19 @@ module RetrieveDomainAuthCodeResponse =
   struct
     type nonrec t =
       {
-      authCode: DomainAuthCode.t
+      authCode: DomainAuthCode.t option
         [@ocaml.doc "The authorization code for the domain."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
+      | `TLDInMaintenance of TLDInMaintenance.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RetrieveDomainAuthCodeResponse"
-    let make ~authCode = fun () -> { authCode }
+    let make ?authCode = fun () -> { authCode }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "TLDInMaintenance" ->
+          `TLDInMaintenance (TLDInMaintenance.of_json json)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
       | name ->
           `Unknown_operation_error
@@ -3841,6 +4462,7 @@ module RetrieveDomainAuthCodeResponse =
     let error_of_xml name xml =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "TLDInMaintenance" -> `TLDInMaintenance (TLDInMaintenance.of_xml xml)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -3850,6 +4472,10 @@ module RetrieveDomainAuthCodeResponse =
           `Assoc
             [("error", (`String "InvalidInput"));
             ("details", (InvalidInput.to_json e))]
+      | `TLDInMaintenance e ->
+          `Assoc
+            [("error", (`String "TLDInMaintenance"));
+            ("details", (TLDInMaintenance.to_json e))]
       | `UnsupportedTLD e ->
           `Assoc
             [("error", (`String "UnsupportedTLD"));
@@ -3861,17 +4487,16 @@ module RetrieveDomainAuthCodeResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("AuthCode", (Some (DomainAuthCode.to_value x.authCode)))]
+        [("AuthCode", (Option.map x.authCode ~f:DomainAuthCode.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let authCode =
-        DomainAuthCode.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AuthCode") in
-      make ~authCode ()
+        (Option.map ~f:DomainAuthCode.of_xml) (Xml.child xml_arg0 "AuthCode") in
+      make ?authCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authCode = field_map_exn json "AuthCode" DomainAuthCode.of_json in
-      make ~authCode ()
+    let of_json json__ =
+      let authCode = field_map json__ "AuthCode" DomainAuthCode.of_json in
+      make ?authCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The RetrieveDomainAuthCode response includes the following element."]
@@ -3894,12 +4519,35 @@ module RetrieveDomainAuthCodeRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "A request for the authorization code for the specified domain. To transfer a domain to another registrar, you provide this value to the new registrar."]
+module ResendOperationAuthorizationRequest =
+  struct
+    type nonrec t = {
+      operationId: OperationId.t [@ocaml.doc "Operation ID."]}
+    let context_ = "ResendOperationAuthorizationRequest"
+    let make ~operationId = fun () -> { operationId }
+    let to_value x =
+      structure_to_value
+        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationId =
+        OperationId.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
+      make ~operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationId =
+        field_map_exn json__ "OperationId" OperationId.of_json in
+      make ~operationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Resend the form of authorization email for this operation."]
 module ResendContactReachabilityEmailResponse =
   struct
     type nonrec t =
@@ -3916,6 +4564,7 @@ module ResendContactReachabilityEmailResponse =
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `OperationLimitExceeded of OperationLimitExceeded.t 
+      | `TLDInMaintenance of TLDInMaintenance.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?domainName =
@@ -3927,6 +4576,8 @@ module ResendContactReachabilityEmailResponse =
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
       | "OperationLimitExceeded" ->
           `OperationLimitExceeded (OperationLimitExceeded.of_json json)
+      | "TLDInMaintenance" ->
+          `TLDInMaintenance (TLDInMaintenance.of_json json)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
       | name ->
           `Unknown_operation_error
@@ -3936,6 +4587,7 @@ module ResendContactReachabilityEmailResponse =
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
       | "OperationLimitExceeded" ->
           `OperationLimitExceeded (OperationLimitExceeded.of_xml xml)
+      | "TLDInMaintenance" -> `TLDInMaintenance (TLDInMaintenance.of_xml xml)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -3949,6 +4601,10 @@ module ResendContactReachabilityEmailResponse =
           `Assoc
             [("error", (`String "OperationLimitExceeded"));
             ("details", (OperationLimitExceeded.to_json e))]
+      | `TLDInMaintenance e ->
+          `Assoc
+            [("error", (`String "TLDInMaintenance"));
+            ("details", (TLDInMaintenance.to_json e))]
       | `UnsupportedTLD e ->
           `Assoc
             [("error", (`String "UnsupportedTLD"));
@@ -3975,11 +4631,11 @@ module ResendContactReachabilityEmailResponse =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?isAlreadyVerified ?emailAddress ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let isAlreadyVerified =
-        field_map json "isAlreadyVerified" Boolean.of_json in
-      let emailAddress = field_map json "emailAddress" Email.of_json in
-      let domainName = field_map json "domainName" DomainName.of_json in
+        field_map json__ "isAlreadyVerified" Boolean.of_json in
+      let emailAddress = field_map json__ "emailAddress" Email.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       make ?isAlreadyVerified ?emailAddress ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4001,8 +4657,8 @@ module ResendContactReachabilityEmailRequest =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map json "domainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       make ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4011,7 +4667,7 @@ module RenewDomainResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -4021,8 +4677,7 @@ module RenewDomainResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RenewDomainResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -4076,17 +4731,16 @@ module RenewDomainResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This operation renews a domain for the specified number of years. The cost of renewing your domain is billed to your Amazon Web Services account. We recommend that you renew your domain several weeks before the expiration date. Some TLD registries delete domains before the expiration date if you haven't renewed far enough in advance. For more information about renewing domain registration, see Renewing Registration for a Domain in the Amazon Route 53 Developer Guide."]
@@ -4127,12 +4781,12 @@ module RenewDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~currentExpiryYear ?durationInYears ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let currentExpiryYear =
-        field_map_exn json "CurrentExpiryYear" CurrentExpiryYear.of_json in
+        field_map_exn json__ "CurrentExpiryYear" CurrentExpiryYear.of_json in
       let durationInYears =
-        field_map json "DurationInYears" DurationInYears.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+        field_map json__ "DurationInYears" DurationInYears.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~currentExpiryYear ?durationInYears ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4195,8 +4849,8 @@ module RejectDomainTransferFromAnotherAwsAccountResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4220,8 +4874,8 @@ module RejectDomainTransferFromAnotherAwsAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4230,7 +4884,7 @@ module RegisterDomainResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -4241,8 +4895,7 @@ module RegisterDomainResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "RegisterDomainResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DomainLimitExceeded" ->
@@ -4304,17 +4957,16 @@ module RegisterDomainResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The RegisterDomain response includes the following element."]
@@ -4331,7 +4983,7 @@ module RegisterDomainRequest =
           "The number of years that you want to register the domain for. Domains are registered for a minimum of one year. The maximum period depends on the top-level domain. For the range of valid values for your domain, see Domains that You Can Register with Amazon Route 53 in the Amazon Route 53 Developer Guide. Default: 1"];
       autoRenew: Boolean.t option
         [@ocaml.doc
-          "Indicates whether the domain will be automatically renewed (true) or not (false). Autorenewal only takes effect after the account is charged. Default: true"];
+          "Indicates whether the domain will be automatically renewed (true) or not (false). Auto renewal only takes effect after the account is charged. Default: true"];
       adminContact: ContactDetail.t
         [@ocaml.doc
           "Provides detailed contact information. For information about the values that you specify for each element, see ContactDetail."];
@@ -4343,37 +4995,47 @@ module RegisterDomainRequest =
           "Provides detailed contact information. For information about the values that you specify for each element, see ContactDetail."];
       privacyProtectAdminContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the admin contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the admin contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts. Default: true"];
       privacyProtectRegistrantContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the registrant contact (the domain owner). You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"];
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the registrant contact (the domain owner). You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts. Default: true"];
       privacyProtectTechContact: Boolean.t option
         [@ocaml.doc
-          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, registrant, and technical contacts. Default: true"]}
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the technical contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts. Default: true"];
+      billingContact: ContactDetail.t option
+        [@ocaml.doc
+          "Provides detailed contact information. For information about the values that you specify for each element, see ContactDetail."];
+      privacyProtectBillingContact: Boolean.t option
+        [@ocaml.doc
+          "Whether you want to conceal contact information from WHOIS queries. If you specify true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If you specify false, WHOIS queries return the information that you entered for the billing contact. You must specify the same privacy setting for the administrative, billing, registrant, and technical contacts."]}
     let context_ = "RegisterDomainRequest"
     let make ?idnLangCode =
       fun ?autoRenew ->
         fun ?privacyProtectAdminContact ->
           fun ?privacyProtectRegistrantContact ->
             fun ?privacyProtectTechContact ->
-              fun ~domainName ->
-                fun ~durationInYears ->
-                  fun ~adminContact ->
-                    fun ~registrantContact ->
-                      fun ~techContact ->
-                        fun () ->
-                          {
-                            idnLangCode;
-                            autoRenew;
-                            privacyProtectAdminContact;
-                            privacyProtectRegistrantContact;
-                            privacyProtectTechContact;
-                            domainName;
-                            durationInYears;
-                            adminContact;
-                            registrantContact;
-                            techContact
-                          }
+              fun ?billingContact ->
+                fun ?privacyProtectBillingContact ->
+                  fun ~domainName ->
+                    fun ~durationInYears ->
+                      fun ~adminContact ->
+                        fun ~registrantContact ->
+                          fun ~techContact ->
+                            fun () ->
+                              {
+                                idnLangCode;
+                                autoRenew;
+                                privacyProtectAdminContact;
+                                privacyProtectRegistrantContact;
+                                privacyProtectTechContact;
+                                billingContact;
+                                privacyProtectBillingContact;
+                                domainName;
+                                durationInYears;
+                                adminContact;
+                                registrantContact;
+                                techContact
+                              }
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
@@ -4390,9 +5052,19 @@ module RegisterDomainRequest =
         ("PrivacyProtectRegistrantContact",
           (Option.map x.privacyProtectRegistrantContact ~f:Boolean.to_value));
         ("PrivacyProtectTechContact",
-          (Option.map x.privacyProtectTechContact ~f:Boolean.to_value))]
+          (Option.map x.privacyProtectTechContact ~f:Boolean.to_value));
+        ("BillingContact",
+          (Option.map x.billingContact ~f:ContactDetail.to_value));
+        ("PrivacyProtectBillingContact",
+          (Option.map x.privacyProtectBillingContact ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let privacyProtectBillingContact =
+        (Option.map ~f:Boolean.of_xml)
+          (Xml.child xml_arg0 "PrivacyProtectBillingContact") in
+      let billingContact =
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "BillingContact") in
       let privacyProtectTechContact =
         (Option.map ~f:Boolean.of_xml)
           (Xml.child xml_arg0 "PrivacyProtectTechContact") in
@@ -4421,39 +5093,73 @@ module RegisterDomainRequest =
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?privacyProtectTechContact ?privacyProtectRegistrantContact
+      make ?privacyProtectBillingContact ?billingContact
+        ?privacyProtectTechContact ?privacyProtectRegistrantContact
         ?privacyProtectAdminContact ~techContact ~registrantContact
         ~adminContact ?autoRenew ~durationInYears ?idnLangCode ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let privacyProtectBillingContact =
+        field_map json__ "PrivacyProtectBillingContact" Boolean.of_json in
+      let billingContact =
+        field_map json__ "BillingContact" ContactDetail.of_json in
       let privacyProtectTechContact =
-        field_map json "PrivacyProtectTechContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectTechContact" Boolean.of_json in
       let privacyProtectRegistrantContact =
-        field_map json "PrivacyProtectRegistrantContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectRegistrantContact" Boolean.of_json in
       let privacyProtectAdminContact =
-        field_map json "PrivacyProtectAdminContact" Boolean.of_json in
+        field_map json__ "PrivacyProtectAdminContact" Boolean.of_json in
       let techContact =
-        field_map_exn json "TechContact" ContactDetail.of_json in
+        field_map_exn json__ "TechContact" ContactDetail.of_json in
       let registrantContact =
-        field_map_exn json "RegistrantContact" ContactDetail.of_json in
+        field_map_exn json__ "RegistrantContact" ContactDetail.of_json in
       let adminContact =
-        field_map_exn json "AdminContact" ContactDetail.of_json in
-      let autoRenew = field_map json "AutoRenew" Boolean.of_json in
+        field_map_exn json__ "AdminContact" ContactDetail.of_json in
+      let autoRenew = field_map json__ "AutoRenew" Boolean.of_json in
       let durationInYears =
-        field_map_exn json "DurationInYears" DurationInYears.of_json in
-      let idnLangCode = field_map json "IdnLangCode" LangCode.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?privacyProtectTechContact ?privacyProtectRegistrantContact
+        field_map_exn json__ "DurationInYears" DurationInYears.of_json in
+      let idnLangCode = field_map json__ "IdnLangCode" LangCode.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ?privacyProtectBillingContact ?billingContact
+        ?privacyProtectTechContact ?privacyProtectRegistrantContact
         ?privacyProtectAdminContact ~techContact ~registrantContact
         ~adminContact ?autoRenew ~durationInYears ?idnLangCode ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The RegisterDomain request includes the following elements."]
+module PushDomainRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t [@ocaml.doc "Name of the domain."];
+      target: Label.t [@ocaml.doc "New IPS tag for the domain."]}
+    let context_ = "PushDomainRequest"
+    let make ~domainName = fun ~target -> fun () -> { domainName; target }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("Target", (Some (Label.to_value x.target)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let target =
+        Label.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Target") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~target ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let target = field_map_exn json__ "Target" Label.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ~target ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Moves a domain from Amazon Web Services to another registrar. Supported actions: Changes the IPS tags of a .uk domain, and pushes it to transit. Transit means that the domain is ready to be transferred to another registrar."]
 module ListTagsForDomainResponse =
   struct
     type nonrec t =
       {
-      tagList: TagList.t
+      tagList: TagList.t option
         [@ocaml.doc
           "A list of the tags that are associated with the specified domain."]}
     type nonrec error =
@@ -4461,8 +5167,7 @@ module ListTagsForDomainResponse =
       | `OperationLimitExceeded of OperationLimitExceeded.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListTagsForDomainResponse"
-    let make ~tagList = fun () -> { tagList }
+    let make ?tagList = fun () -> { tagList }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4500,16 +5205,17 @@ module ListTagsForDomainResponse =
               | None -> []
               | Some m -> [("message", (`String m))])))
     let to_value x =
-      structure_to_value [("TagList", (Some (TagList.to_value x.tagList)))]
+      structure_to_value
+        [("TagList", (Option.map x.tagList ~f:TagList.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let tagList =
-        TagList.of_xml (Xml.child_exn ~context:context_ xml_arg0 "TagList") in
-      make ~tagList ()
+        (Option.map ~f:TagList.of_xml) (Xml.child xml_arg0 "TagList") in
+      make ?tagList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagList = field_map_exn json "TagList" TagList.of_json in
-      make ~tagList ()
+    let of_json json__ =
+      let tagList = field_map json__ "TagList" TagList.of_json in
+      make ?tagList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ListTagsForDomain response includes the following elements."]
@@ -4531,8 +5237,8 @@ module ListTagsForDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4541,7 +5247,7 @@ module ListPricesResponse =
   struct
     type nonrec t =
       {
-      prices: DomainPriceList.t
+      prices: DomainPriceList.t option
         [@ocaml.doc
           "A complex type that includes all the pricing information. If you specify a TLD, this array contains only the pricing for that TLD."];
       nextPageMarker: PageMarker.t option
@@ -4551,9 +5257,8 @@ module ListPricesResponse =
       [ `InvalidInput of InvalidInput.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListPricesResponse"
-    let make ?nextPageMarker =
-      fun ~prices -> fun () -> { nextPageMarker; prices }
+    let make ?prices =
+      fun ?nextPageMarker -> fun () -> { prices; nextPageMarker }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4584,7 +5289,7 @@ module ListPricesResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Prices", (Some (DomainPriceList.to_value x.prices)));
+        [("Prices", (Option.map x.prices ~f:DomainPriceList.to_value));
         ("NextPageMarker",
           (Option.map x.nextPageMarker ~f:PageMarker.to_value))]
     let to_query v = to_query to_value v
@@ -4593,14 +5298,14 @@ module ListPricesResponse =
         (Option.map ~f:PageMarker.of_xml)
           (Xml.child xml_arg0 "NextPageMarker") in
       let prices =
-        DomainPriceList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Prices") in
-      make ?nextPageMarker ~prices ()
+        (Option.map ~f:DomainPriceList.of_xml) (Xml.child xml_arg0 "Prices") in
+      make ?nextPageMarker ?prices ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
-      let prices = field_map_exn json "Prices" DomainPriceList.of_json in
-      make ?nextPageMarker ~prices ()
+    let of_json json__ =
+      let nextPageMarker =
+        field_map json__ "NextPageMarker" PageMarker.of_json in
+      let prices = field_map json__ "Prices" DomainPriceList.of_json in
+      make ?nextPageMarker ?prices ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Lists the following prices for either all the TLDs supported by Route\194\16053, or the specified TLD: Registration Transfer Owner change Domain renewal Domain restoration"]
@@ -4614,7 +5319,7 @@ module ListPricesRequest =
       marker: PageMarker.t option
         [@ocaml.doc
           "For an initial request for a list of prices, omit this element. If the number of prices that are not yet complete is greater than the value that you specified for MaxItems, you can use Marker to return additional prices. Get the value of NextPageMarker from the previous response, and submit another request that includes the value of NextPageMarker in the Marker element. Used only for all TLDs. If you specify a TLD, don't specify a Marker."];
-      maxItems: PageMaxItems.t option
+      maxItems: ListPricesPageMaxItems.t option
         [@ocaml.doc
           "Number of Prices to be returned. Used only for all TLDs. If you specify a TLD, don't specify a MaxItems."]}
     let make ?tld =
@@ -4623,20 +5328,23 @@ module ListPricesRequest =
       structure_to_value
         [("Tld", (Option.map x.tld ~f:TldName.to_value));
         ("Marker", (Option.map x.marker ~f:PageMarker.to_value));
-        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
+        ("MaxItems",
+          (Option.map x.maxItems ~f:ListPricesPageMaxItems.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxItems =
-        (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
+        (Option.map ~f:ListPricesPageMaxItems.of_xml)
+          (Xml.child xml_arg0 "MaxItems") in
       let marker =
         (Option.map ~f:PageMarker.of_xml) (Xml.child xml_arg0 "Marker") in
       let tld = (Option.map ~f:TldName.of_xml) (Xml.child xml_arg0 "Tld") in
       make ?maxItems ?marker ?tld ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      let tld = field_map json "Tld" TldName.of_json in
+    let of_json json__ =
+      let maxItems =
+        field_map json__ "MaxItems" ListPricesPageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      let tld = field_map json__ "Tld" TldName.of_json in
       make ?maxItems ?marker ?tld ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4645,7 +5353,7 @@ module ListOperationsResponse =
   struct
     type nonrec t =
       {
-      operations: OperationSummaryList.t
+      operations: OperationSummaryList.t option
         [@ocaml.doc "Lists summaries of the operations."];
       nextPageMarker: PageMarker.t option
         [@ocaml.doc
@@ -4653,9 +5361,8 @@ module ListOperationsResponse =
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListOperationsResponse"
-    let make ?nextPageMarker =
-      fun ~operations -> fun () -> { nextPageMarker; operations }
+    let make ?operations =
+      fun ?nextPageMarker -> fun () -> { operations; nextPageMarker }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4680,7 +5387,8 @@ module ListOperationsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Operations", (Some (OperationSummaryList.to_value x.operations)));
+        [("Operations",
+           (Option.map x.operations ~f:OperationSummaryList.to_value));
         ("NextPageMarker",
           (Option.map x.nextPageMarker ~f:PageMarker.to_value))]
     let to_query v = to_query to_value v
@@ -4689,15 +5397,16 @@ module ListOperationsResponse =
         (Option.map ~f:PageMarker.of_xml)
           (Xml.child xml_arg0 "NextPageMarker") in
       let operations =
-        OperationSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Operations") in
-      make ?nextPageMarker ~operations ()
+        (Option.map ~f:OperationSummaryList.of_xml)
+          (Xml.child xml_arg0 "Operations") in
+      make ?nextPageMarker ?operations ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
+    let of_json json__ =
+      let nextPageMarker =
+        field_map json__ "NextPageMarker" PageMarker.of_json in
       let operations =
-        field_map_exn json "Operations" OperationSummaryList.of_json in
-      make ?nextPageMarker ~operations ()
+        field_map json__ "Operations" OperationSummaryList.of_json in
+      make ?nextPageMarker ?operations ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ListOperations response includes the following elements."]
@@ -4712,18 +5421,56 @@ module ListOperationsRequest =
         [@ocaml.doc
           "For an initial request for a list of operations, omit this element. If the number of operations that are not yet complete is greater than the value that you specified for MaxItems, you can use Marker to return additional operations. Get the value of NextPageMarker from the previous response, and submit another request that includes the value of NextPageMarker in the Marker element."];
       maxItems: PageMaxItems.t option
-        [@ocaml.doc "Number of domains to be returned. Default: 20"]}
+        [@ocaml.doc "Number of domains to be returned. Default: 20"];
+      status: OperationStatusList.t option
+        [@ocaml.doc "The status of the operations."];
+      type_: OperationTypeList.t option
+        [@ocaml.doc "An arrays of the domains operation types."];
+      sortBy: ListOperationsSortAttributeName.t option
+        [@ocaml.doc "The sort type for returned values."];
+      sortOrder: SortOrder.t option
+        [@ocaml.doc
+          "The sort order for returned values, either ascending or descending."]}
     let make ?submittedSince =
       fun ?marker ->
-        fun ?maxItems -> fun () -> { submittedSince; marker; maxItems }
+        fun ?maxItems ->
+          fun ?status ->
+            fun ?type_ ->
+              fun ?sortBy ->
+                fun ?sortOrder ->
+                  fun () ->
+                    {
+                      submittedSince;
+                      marker;
+                      maxItems;
+                      status;
+                      type_;
+                      sortBy;
+                      sortOrder
+                    }
     let to_value x =
       structure_to_value
         [("SubmittedSince",
            (Option.map x.submittedSince ~f:Timestamp.to_value));
         ("Marker", (Option.map x.marker ~f:PageMarker.to_value));
-        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value))]
+        ("MaxItems", (Option.map x.maxItems ~f:PageMaxItems.to_value));
+        ("Status", (Option.map x.status ~f:OperationStatusList.to_value));
+        ("Type", (Option.map x.type_ ~f:OperationTypeList.to_value));
+        ("SortBy",
+          (Option.map x.sortBy ~f:ListOperationsSortAttributeName.to_value));
+        ("SortOrder", (Option.map x.sortOrder ~f:SortOrder.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let sortOrder =
+        (Option.map ~f:SortOrder.of_xml) (Xml.child xml_arg0 "SortOrder") in
+      let sortBy =
+        (Option.map ~f:ListOperationsSortAttributeName.of_xml)
+          (Xml.child xml_arg0 "SortBy") in
+      let type_ =
+        (Option.map ~f:OperationTypeList.of_xml) (Xml.child xml_arg0 "Type") in
+      let status =
+        (Option.map ~f:OperationStatusList.of_xml)
+          (Xml.child xml_arg0 "Status") in
       let maxItems =
         (Option.map ~f:PageMaxItems.of_xml) (Xml.child xml_arg0 "MaxItems") in
       let marker =
@@ -4731,13 +5478,21 @@ module ListOperationsRequest =
       let submittedSince =
         (Option.map ~f:Timestamp.of_xml)
           (Xml.child xml_arg0 "SubmittedSince") in
-      make ?maxItems ?marker ?submittedSince ()
+      make ?sortOrder ?sortBy ?type_ ?status ?maxItems ?marker
+        ?submittedSince ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
-      let submittedSince = field_map json "SubmittedSince" Timestamp.of_json in
-      make ?maxItems ?marker ?submittedSince ()
+    let of_json json__ =
+      let sortOrder = field_map json__ "SortOrder" SortOrder.of_json in
+      let sortBy =
+        field_map json__ "SortBy" ListOperationsSortAttributeName.of_json in
+      let type_ = field_map json__ "Type" OperationTypeList.of_json in
+      let status = field_map json__ "Status" OperationStatusList.of_json in
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
+      let submittedSince =
+        field_map json__ "SubmittedSince" Timestamp.of_json in
+      make ?sortOrder ?sortBy ?type_ ?status ?maxItems ?marker
+        ?submittedSince ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ListOperations request includes the following elements."]
@@ -4745,16 +5500,15 @@ module ListDomainsResponse =
   struct
     type nonrec t =
       {
-      domains: DomainSummaryList.t [@ocaml.doc "A list of domains."];
+      domains: DomainSummaryList.t option [@ocaml.doc "A list of domains."];
       nextPageMarker: PageMarker.t option
         [@ocaml.doc
           "If there are more domains than you specified for MaxItems in the request, submit another request and include the value of NextPageMarker in the value of Marker."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "ListDomainsResponse"
-    let make ?nextPageMarker =
-      fun ~domains -> fun () -> { nextPageMarker; domains }
+    let make ?domains =
+      fun ?nextPageMarker -> fun () -> { domains; nextPageMarker }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4779,7 +5533,7 @@ module ListDomainsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("Domains", (Some (DomainSummaryList.to_value x.domains)));
+        [("Domains", (Option.map x.domains ~f:DomainSummaryList.to_value));
         ("NextPageMarker",
           (Option.map x.nextPageMarker ~f:PageMarker.to_value))]
     let to_query v = to_query to_value v
@@ -4788,14 +5542,15 @@ module ListDomainsResponse =
         (Option.map ~f:PageMarker.of_xml)
           (Xml.child xml_arg0 "NextPageMarker") in
       let domains =
-        DomainSummaryList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Domains") in
-      make ?nextPageMarker ~domains ()
+        (Option.map ~f:DomainSummaryList.of_xml)
+          (Xml.child xml_arg0 "Domains") in
+      make ?nextPageMarker ?domains ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextPageMarker = field_map json "NextPageMarker" PageMarker.of_json in
-      let domains = field_map_exn json "Domains" DomainSummaryList.of_json in
-      make ?nextPageMarker ~domains ()
+    let of_json json__ =
+      let nextPageMarker =
+        field_map json__ "NextPageMarker" PageMarker.of_json in
+      let domains = field_map json__ "Domains" DomainSummaryList.of_json in
+      make ?nextPageMarker ?domains ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The ListDomains response includes the following elements."]
@@ -4841,13 +5596,13 @@ module ListDomainsRequest =
           (Xml.child xml_arg0 "FilterConditions") in
       make ?maxItems ?marker ?sortCondition ?filterConditions ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxItems = field_map json "MaxItems" PageMaxItems.of_json in
-      let marker = field_map json "Marker" PageMarker.of_json in
+    let of_json json__ =
+      let maxItems = field_map json__ "MaxItems" PageMaxItems.of_json in
+      let marker = field_map json__ "Marker" PageMarker.of_json in
       let sortCondition =
-        field_map json "SortCondition" SortCondition.of_json in
+        field_map json__ "SortCondition" SortCondition.of_json in
       let filterConditions =
-        field_map json "FilterConditions" FilterConditions.of_json in
+        field_map json__ "FilterConditions" FilterConditions.of_json in
       make ?maxItems ?marker ?sortCondition ?filterConditions ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The ListDomains request includes the following elements."]
@@ -4867,7 +5622,12 @@ module GetOperationDetailResponse =
       type_: OperationType.t option
         [@ocaml.doc "The type of operation that was requested."];
       submittedDate: Timestamp.t option
-        [@ocaml.doc "The date when the request was submitted."]}
+        [@ocaml.doc "The date when the request was submitted."];
+      lastUpdatedDate: Timestamp.t option
+        [@ocaml.doc "The date when the operation was last updated."];
+      statusFlag: StatusFlag.t option
+        [@ocaml.doc
+          "Lists any outstanding operations that require customer action. Valid values are: PENDING_ACCEPTANCE: The operation is waiting for acceptance from the account that is receiving the domain. PENDING_CUSTOMER_ACTION: The operation is waiting for customer action, for example, returning an email. PENDING_AUTHORIZATION: The operation is waiting for the form of authorization. For more information, see ResendOperationAuthorization. PENDING_PAYMENT_VERIFICATION: The operation is waiting for the payment method to validate. PENDING_SUPPORT_CASE: The operation includes a support case and is waiting for its resolution."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `Unknown_operation_error of (string * string option) ]
@@ -4877,15 +5637,19 @@ module GetOperationDetailResponse =
           fun ?domainName ->
             fun ?type_ ->
               fun ?submittedDate ->
-                fun () ->
-                  {
-                    operationId;
-                    status;
-                    message;
-                    domainName;
-                    type_;
-                    submittedDate
-                  }
+                fun ?lastUpdatedDate ->
+                  fun ?statusFlag ->
+                    fun () ->
+                      {
+                        operationId;
+                        status;
+                        message;
+                        domainName;
+                        type_;
+                        submittedDate;
+                        lastUpdatedDate;
+                        statusFlag
+                      }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -4915,9 +5679,17 @@ module GetOperationDetailResponse =
         ("Message", (Option.map x.message ~f:ErrorMessage.to_value));
         ("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
         ("Type", (Option.map x.type_ ~f:OperationType.to_value));
-        ("SubmittedDate", (Option.map x.submittedDate ~f:Timestamp.to_value))]
+        ("SubmittedDate", (Option.map x.submittedDate ~f:Timestamp.to_value));
+        ("LastUpdatedDate",
+          (Option.map x.lastUpdatedDate ~f:Timestamp.to_value));
+        ("StatusFlag", (Option.map x.statusFlag ~f:StatusFlag.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let statusFlag =
+        (Option.map ~f:StatusFlag.of_xml) (Xml.child xml_arg0 "StatusFlag") in
+      let lastUpdatedDate =
+        (Option.map ~f:Timestamp.of_xml)
+          (Xml.child xml_arg0 "LastUpdatedDate") in
       let submittedDate =
         (Option.map ~f:Timestamp.of_xml) (Xml.child xml_arg0 "SubmittedDate") in
       let type_ =
@@ -4930,16 +5702,21 @@ module GetOperationDetailResponse =
         (Option.map ~f:OperationStatus.of_xml) (Xml.child xml_arg0 "Status") in
       let operationId =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
-      make ?submittedDate ?type_ ?domainName ?message ?status ?operationId ()
+      make ?statusFlag ?lastUpdatedDate ?submittedDate ?type_ ?domainName
+        ?message ?status ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let submittedDate = field_map json "SubmittedDate" Timestamp.of_json in
-      let type_ = field_map json "Type" OperationType.of_json in
-      let domainName = field_map json "DomainName" DomainName.of_json in
-      let message = field_map json "Message" ErrorMessage.of_json in
-      let status = field_map json "Status" OperationStatus.of_json in
-      let operationId = field_map json "OperationId" OperationId.of_json in
-      make ?submittedDate ?type_ ?domainName ?message ?status ?operationId ()
+    let of_json json__ =
+      let statusFlag = field_map json__ "StatusFlag" StatusFlag.of_json in
+      let lastUpdatedDate =
+        field_map json__ "LastUpdatedDate" Timestamp.of_json in
+      let submittedDate = field_map json__ "SubmittedDate" Timestamp.of_json in
+      let type_ = field_map json__ "Type" OperationType.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      let status = field_map json__ "Status" OperationStatus.of_json in
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?statusFlag ?lastUpdatedDate ?submittedDate ?type_ ?domainName
+        ?message ?status ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The GetOperationDetail response includes the following elements."]
@@ -4962,8 +5739,9 @@ module GetOperationDetailRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
       make ~operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId =
+        field_map_exn json__ "OperationId" OperationId.of_json in
       make ~operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -4977,12 +5755,15 @@ module GetDomainSuggestionsResponse =
           "A list of possible domain names. If you specified true for OnlyAvailable in the request, the list contains only domains that are available for registration."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
+      | `TLDInMaintenance of TLDInMaintenance.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?suggestionsList = fun () -> { suggestionsList }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "TLDInMaintenance" ->
+          `TLDInMaintenance (TLDInMaintenance.of_json json)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
       | name ->
           `Unknown_operation_error
@@ -4990,6 +5771,7 @@ module GetDomainSuggestionsResponse =
     let error_of_xml name xml =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "TLDInMaintenance" -> `TLDInMaintenance (TLDInMaintenance.of_xml xml)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -4999,6 +5781,10 @@ module GetDomainSuggestionsResponse =
           `Assoc
             [("error", (`String "InvalidInput"));
             ("details", (InvalidInput.to_json e))]
+      | `TLDInMaintenance e ->
+          `Assoc
+            [("error", (`String "TLDInMaintenance"));
+            ("details", (TLDInMaintenance.to_json e))]
       | `UnsupportedTLD e ->
           `Assoc
             [("error", (`String "UnsupportedTLD"));
@@ -5019,9 +5805,9 @@ module GetDomainSuggestionsResponse =
           (Xml.child xml_arg0 "SuggestionsList") in
       make ?suggestionsList ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let suggestionsList =
-        field_map json "SuggestionsList" DomainSuggestionsList.of_json in
+        field_map json__ "SuggestionsList" DomainSuggestionsList.of_json in
       make ?suggestionsList ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5035,7 +5821,7 @@ module GetDomainSuggestionsRequest =
           "A domain name that you want to use as the basis for a list of possible domain names. The top-level domain (TLD), such as .com, must be a TLD that Route 53 supports. For a list of supported TLDs, see Domains that You Can Register with Amazon Route 53 in the Amazon Route 53 Developer Guide. The domain name can contain only the following characters: Letters a through z. Domain names are not case sensitive. Numbers 0 through 9. Hyphen (-). You can't specify a hyphen at the beginning or end of a label. Period (.) to separate the labels in the name, such as the . in example.com. Internationalized domain names are not supported for some top-level domains. To determine whether the TLD that you want to use supports internationalized domain names, see Domains that You Can Register with Amazon Route 53."];
       suggestionCount: Integer.t
         [@ocaml.doc
-          "The number of suggested domain names that you want Route 53 to return. Specify a value between 1 and 50."];
+          "The number of suggested domain names that you want Route 53 to return. Specify a value between 1 and 50. Note that fewer than the requested number might be returned."];
       onlyAvailable: Boolean.t
         [@ocaml.doc
           "If OnlyAvailable is true, Route 53 returns only domain names that are available. If OnlyAvailable is false, Route 53 returns domain names without checking whether they're available to be registered. To determine whether the domain is available, you can call checkDomainAvailability for each suggestion."]}
@@ -5062,11 +5848,12 @@ module GetDomainSuggestionsRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~onlyAvailable ~suggestionCount ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let onlyAvailable = field_map_exn json "OnlyAvailable" Boolean.of_json in
+    let of_json json__ =
+      let onlyAvailable =
+        field_map_exn json__ "OnlyAvailable" Boolean.of_json in
       let suggestionCount =
-        field_map_exn json "SuggestionCount" Integer.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+        field_map_exn json__ "SuggestionCount" Integer.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~onlyAvailable ~suggestionCount ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5075,30 +5862,31 @@ module GetDomainDetailResponse =
   struct
     type nonrec t =
       {
-      domainName: DomainName.t [@ocaml.doc "The name of a domain."];
-      nameservers: NameserverList.t [@ocaml.doc "The name of the domain."];
+      domainName: DomainName.t option [@ocaml.doc "The name of a domain."];
+      nameservers: NameserverList.t option
+        [@ocaml.doc "The name servers of the domain."];
       autoRenew: Boolean.t option
         [@ocaml.doc
           "Specifies whether the domain registration is set to renew automatically."];
-      adminContact: ContactDetail.t
+      adminContact: ContactDetail.t option
         [@ocaml.doc
           "Provides details about the domain administrative contact."];
-      registrantContact: ContactDetail.t
+      registrantContact: ContactDetail.t option
         [@ocaml.doc "Provides details about the domain registrant."];
-      techContact: ContactDetail.t
+      techContact: ContactDetail.t option
         [@ocaml.doc "Provides details about the domain technical contact."];
       adminPrivacy: Boolean.t option
         [@ocaml.doc
-          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If the value is false, WHOIS queries return the information that you entered for the admin contact."];
+          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If the value is false, WHOIS queries return the information that you entered for the admin contact."];
       registrantPrivacy: Boolean.t option
         [@ocaml.doc
-          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If the value is false, WHOIS queries return the information that you entered for the registrant contact (domain owner)."];
+          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If the value is false, WHOIS queries return the information that you entered for the registrant contact (domain owner)."];
       techPrivacy: Boolean.t option
         [@ocaml.doc
-          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar (for .com, .net, and .org domains) or for our registrar associate, Gandi (for all other TLDs). If the value is false, WHOIS queries return the information that you entered for the technical contact."];
+          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If the value is false, WHOIS queries return the information that you entered for the technical contact."];
       registrarName: RegistrarName.t option
         [@ocaml.doc
-          "Name of the registrar of the domain as identified in the registry. Domains with a .com, .net, or .org TLD are registered by Amazon Registrar. All other domains are registered by our registrar associate, Gandi. The value for domains that are registered by Gandi is \"GANDI SAS\"."];
+          "Name of the registrar of the domain as identified in the registry."];
       whoIsServer: RegistrarWhoIsServer.t option
         [@ocaml.doc
           "The fully qualified name of the WHOIS server that can answer the WHOIS query for the domain."];
@@ -5120,63 +5908,74 @@ module GetDomainDetailResponse =
       expirationDate: Timestamp.t option
         [@ocaml.doc
           "The date when the registration for the domain is set to expire. The date and time is in Unix time format and Coordinated Universal time (UTC)."];
-      reseller: Reseller.t option
-        [@ocaml.doc
-          "Reseller of the domain. Domains registered or transferred using Route 53 domains will have \"Amazon\" as the reseller."];
+      reseller: Reseller.t option [@ocaml.doc "Reserved for future use."];
       dnsSec: DNSSec.t option [@ocaml.doc "Deprecated."];
       statusList: DomainStatusList.t option
         [@ocaml.doc
-          "An array of domain name status codes, also known as Extensible Provisioning Protocol (EPP) status codes. ICANN, the organization that maintains a central database of domain names, has developed a set of domain name status codes that tell you the status of a variety of operations on a domain name, for example, registering a domain name, transferring a domain name to another registrar, renewing the registration for a domain name, and so on. All registrars use this same set of status codes. For a current list of domain name status codes and an explanation of what each code means, go to the ICANN website and search for epp status codes. (Search on the ICANN website; web searches sometimes return an old version of the document.)"]}
+          "An array of domain name status codes, also known as Extensible Provisioning Protocol (EPP) status codes. ICANN, the organization that maintains a central database of domain names, has developed a set of domain name status codes that tell you the status of a variety of operations on a domain name, for example, registering a domain name, transferring a domain name to another registrar, renewing the registration for a domain name, and so on. All registrars use this same set of status codes. For a current list of domain name status codes and an explanation of what each code means, go to the ICANN website and search for epp status codes. (Search on the ICANN website; web searches sometimes return an old version of the document.)"];
+      dnssecKeys: DnssecKeyList.t option
+        [@ocaml.doc
+          "A complex type that contains information about the DNSSEC configuration."];
+      billingContact: ContactDetail.t option
+        [@ocaml.doc "Provides details about the domain billing contact."];
+      billingPrivacy: Boolean.t option
+        [@ocaml.doc
+          "Specifies whether contact information is concealed from WHOIS queries. If the value is true, WHOIS (\"who is\") queries return contact information either for Amazon Registrar or for our registrar associate, Gandi. If the value is false, WHOIS queries return the information that you entered for the billing contact."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "GetDomainDetailResponse"
-    let make ?autoRenew =
-      fun ?adminPrivacy ->
-        fun ?registrantPrivacy ->
-          fun ?techPrivacy ->
-            fun ?registrarName ->
-              fun ?whoIsServer ->
-                fun ?registrarUrl ->
-                  fun ?abuseContactEmail ->
-                    fun ?abuseContactPhone ->
-                      fun ?registryDomainId ->
-                        fun ?creationDate ->
-                          fun ?updatedDate ->
-                            fun ?expirationDate ->
-                              fun ?reseller ->
-                                fun ?dnsSec ->
-                                  fun ?statusList ->
-                                    fun ~domainName ->
-                                      fun ~nameservers ->
-                                        fun ~adminContact ->
-                                          fun ~registrantContact ->
-                                            fun ~techContact ->
-                                              fun () ->
-                                                {
-                                                  autoRenew;
-                                                  adminPrivacy;
-                                                  registrantPrivacy;
-                                                  techPrivacy;
-                                                  registrarName;
-                                                  whoIsServer;
-                                                  registrarUrl;
-                                                  abuseContactEmail;
-                                                  abuseContactPhone;
-                                                  registryDomainId;
-                                                  creationDate;
-                                                  updatedDate;
-                                                  expirationDate;
-                                                  reseller;
-                                                  dnsSec;
-                                                  statusList;
-                                                  domainName;
-                                                  nameservers;
-                                                  adminContact;
-                                                  registrantContact;
-                                                  techContact
-                                                }
+    let make ?domainName =
+      fun ?nameservers ->
+        fun ?autoRenew ->
+          fun ?adminContact ->
+            fun ?registrantContact ->
+              fun ?techContact ->
+                fun ?adminPrivacy ->
+                  fun ?registrantPrivacy ->
+                    fun ?techPrivacy ->
+                      fun ?registrarName ->
+                        fun ?whoIsServer ->
+                          fun ?registrarUrl ->
+                            fun ?abuseContactEmail ->
+                              fun ?abuseContactPhone ->
+                                fun ?registryDomainId ->
+                                  fun ?creationDate ->
+                                    fun ?updatedDate ->
+                                      fun ?expirationDate ->
+                                        fun ?reseller ->
+                                          fun ?dnsSec ->
+                                            fun ?statusList ->
+                                              fun ?dnssecKeys ->
+                                                fun ?billingContact ->
+                                                  fun ?billingPrivacy ->
+                                                    fun () ->
+                                                      {
+                                                        domainName;
+                                                        nameservers;
+                                                        autoRenew;
+                                                        adminContact;
+                                                        registrantContact;
+                                                        techContact;
+                                                        adminPrivacy;
+                                                        registrantPrivacy;
+                                                        techPrivacy;
+                                                        registrarName;
+                                                        whoIsServer;
+                                                        registrarUrl;
+                                                        abuseContactEmail;
+                                                        abuseContactPhone;
+                                                        registryDomainId;
+                                                        creationDate;
+                                                        updatedDate;
+                                                        expirationDate;
+                                                        reseller;
+                                                        dnsSec;
+                                                        statusList;
+                                                        dnssecKeys;
+                                                        billingContact;
+                                                        billingPrivacy
+                                                      }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
@@ -5207,13 +6006,15 @@ module GetDomainDetailResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("DomainName", (Some (DomainName.to_value x.domainName)));
-        ("Nameservers", (Some (NameserverList.to_value x.nameservers)));
+        [("DomainName", (Option.map x.domainName ~f:DomainName.to_value));
+        ("Nameservers",
+          (Option.map x.nameservers ~f:NameserverList.to_value));
         ("AutoRenew", (Option.map x.autoRenew ~f:Boolean.to_value));
-        ("AdminContact", (Some (ContactDetail.to_value x.adminContact)));
+        ("AdminContact",
+          (Option.map x.adminContact ~f:ContactDetail.to_value));
         ("RegistrantContact",
-          (Some (ContactDetail.to_value x.registrantContact)));
-        ("TechContact", (Some (ContactDetail.to_value x.techContact)));
+          (Option.map x.registrantContact ~f:ContactDetail.to_value));
+        ("TechContact", (Option.map x.techContact ~f:ContactDetail.to_value));
         ("AdminPrivacy", (Option.map x.adminPrivacy ~f:Boolean.to_value));
         ("RegistrantPrivacy",
           (Option.map x.registrantPrivacy ~f:Boolean.to_value));
@@ -5237,9 +6038,21 @@ module GetDomainDetailResponse =
         ("Reseller", (Option.map x.reseller ~f:Reseller.to_value));
         ("DnsSec", (Option.map x.dnsSec ~f:DNSSec.to_value));
         ("StatusList",
-          (Option.map x.statusList ~f:DomainStatusList.to_value))]
+          (Option.map x.statusList ~f:DomainStatusList.to_value));
+        ("DnssecKeys", (Option.map x.dnssecKeys ~f:DnssecKeyList.to_value));
+        ("BillingContact",
+          (Option.map x.billingContact ~f:ContactDetail.to_value));
+        ("BillingPrivacy", (Option.map x.billingPrivacy ~f:Boolean.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let billingPrivacy =
+        (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "BillingPrivacy") in
+      let billingContact =
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "BillingContact") in
+      let dnssecKeys =
+        (Option.map ~f:DnssecKeyList.of_xml)
+          (Xml.child xml_arg0 "DnssecKeys") in
       let statusList =
         (Option.map ~f:DomainStatusList.of_xml)
           (Xml.child xml_arg0 "StatusList") in
@@ -5279,65 +6092,69 @@ module GetDomainDetailResponse =
       let adminPrivacy =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AdminPrivacy") in
       let techContact =
-        ContactDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "TechContact") in
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "TechContact") in
       let registrantContact =
-        ContactDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "RegistrantContact") in
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "RegistrantContact") in
       let adminContact =
-        ContactDetail.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "AdminContact") in
+        (Option.map ~f:ContactDetail.of_xml)
+          (Xml.child xml_arg0 "AdminContact") in
       let autoRenew =
         (Option.map ~f:Boolean.of_xml) (Xml.child xml_arg0 "AutoRenew") in
       let nameservers =
-        NameserverList.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Nameservers") in
+        (Option.map ~f:NameserverList.of_xml)
+          (Xml.child xml_arg0 "Nameservers") in
       let domainName =
-        DomainName.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
-      make ?statusList ?dnsSec ?reseller ?expirationDate ?updatedDate
-        ?creationDate ?registryDomainId ?abuseContactPhone ?abuseContactEmail
-        ?registrarUrl ?whoIsServer ?registrarName ?techPrivacy
-        ?registrantPrivacy ?adminPrivacy ~techContact ~registrantContact
-        ~adminContact ?autoRenew ~nameservers ~domainName ()
+        (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "DomainName") in
+      make ?billingPrivacy ?billingContact ?dnssecKeys ?statusList ?dnsSec
+        ?reseller ?expirationDate ?updatedDate ?creationDate
+        ?registryDomainId ?abuseContactPhone ?abuseContactEmail ?registrarUrl
+        ?whoIsServer ?registrarName ?techPrivacy ?registrantPrivacy
+        ?adminPrivacy ?techContact ?registrantContact ?adminContact
+        ?autoRenew ?nameservers ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let statusList = field_map json "StatusList" DomainStatusList.of_json in
-      let dnsSec = field_map json "DnsSec" DNSSec.of_json in
-      let reseller = field_map json "Reseller" Reseller.of_json in
-      let expirationDate = field_map json "ExpirationDate" Timestamp.of_json in
-      let updatedDate = field_map json "UpdatedDate" Timestamp.of_json in
-      let creationDate = field_map json "CreationDate" Timestamp.of_json in
+    let of_json json__ =
+      let billingPrivacy = field_map json__ "BillingPrivacy" Boolean.of_json in
+      let billingContact =
+        field_map json__ "BillingContact" ContactDetail.of_json in
+      let dnssecKeys = field_map json__ "DnssecKeys" DnssecKeyList.of_json in
+      let statusList = field_map json__ "StatusList" DomainStatusList.of_json in
+      let dnsSec = field_map json__ "DnsSec" DNSSec.of_json in
+      let reseller = field_map json__ "Reseller" Reseller.of_json in
+      let expirationDate =
+        field_map json__ "ExpirationDate" Timestamp.of_json in
+      let updatedDate = field_map json__ "UpdatedDate" Timestamp.of_json in
+      let creationDate = field_map json__ "CreationDate" Timestamp.of_json in
       let registryDomainId =
-        field_map json "RegistryDomainId" RegistryDomainId.of_json in
+        field_map json__ "RegistryDomainId" RegistryDomainId.of_json in
       let abuseContactPhone =
-        field_map json "AbuseContactPhone" ContactNumber.of_json in
+        field_map json__ "AbuseContactPhone" ContactNumber.of_json in
       let abuseContactEmail =
-        field_map json "AbuseContactEmail" Email.of_json in
-      let registrarUrl = field_map json "RegistrarUrl" RegistrarUrl.of_json in
+        field_map json__ "AbuseContactEmail" Email.of_json in
+      let registrarUrl = field_map json__ "RegistrarUrl" RegistrarUrl.of_json in
       let whoIsServer =
-        field_map json "WhoIsServer" RegistrarWhoIsServer.of_json in
+        field_map json__ "WhoIsServer" RegistrarWhoIsServer.of_json in
       let registrarName =
-        field_map json "RegistrarName" RegistrarName.of_json in
-      let techPrivacy = field_map json "TechPrivacy" Boolean.of_json in
+        field_map json__ "RegistrarName" RegistrarName.of_json in
+      let techPrivacy = field_map json__ "TechPrivacy" Boolean.of_json in
       let registrantPrivacy =
-        field_map json "RegistrantPrivacy" Boolean.of_json in
-      let adminPrivacy = field_map json "AdminPrivacy" Boolean.of_json in
-      let techContact =
-        field_map_exn json "TechContact" ContactDetail.of_json in
+        field_map json__ "RegistrantPrivacy" Boolean.of_json in
+      let adminPrivacy = field_map json__ "AdminPrivacy" Boolean.of_json in
+      let techContact = field_map json__ "TechContact" ContactDetail.of_json in
       let registrantContact =
-        field_map_exn json "RegistrantContact" ContactDetail.of_json in
+        field_map json__ "RegistrantContact" ContactDetail.of_json in
       let adminContact =
-        field_map_exn json "AdminContact" ContactDetail.of_json in
-      let autoRenew = field_map json "AutoRenew" Boolean.of_json in
-      let nameservers =
-        field_map_exn json "Nameservers" NameserverList.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
-      make ?statusList ?dnsSec ?reseller ?expirationDate ?updatedDate
-        ?creationDate ?registryDomainId ?abuseContactPhone ?abuseContactEmail
-        ?registrarUrl ?whoIsServer ?registrarName ?techPrivacy
-        ?registrantPrivacy ?adminPrivacy ~techContact ~registrantContact
-        ~adminContact ?autoRenew ~nameservers ~domainName ()
+        field_map json__ "AdminContact" ContactDetail.of_json in
+      let autoRenew = field_map json__ "AutoRenew" Boolean.of_json in
+      let nameservers = field_map json__ "Nameservers" NameserverList.of_json in
+      let domainName = field_map json__ "DomainName" DomainName.of_json in
+      make ?billingPrivacy ?billingContact ?dnssecKeys ?statusList ?dnsSec
+        ?reseller ?expirationDate ?updatedDate ?creationDate
+        ?registryDomainId ?abuseContactPhone ?abuseContactEmail ?registrarUrl
+        ?whoIsServer ?registrarName ?techPrivacy ?registrantPrivacy
+        ?adminPrivacy ?techContact ?registrantContact ?adminContact
+        ?autoRenew ?nameservers ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The GetDomainDetail response includes the following elements."]
@@ -5360,8 +6177,8 @@ module GetDomainDetailRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5431,9 +6248,9 @@ module GetContactReachabilityStatusResponse =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?status ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let status = field_map json "status" ReachabilityStatus.of_json in
-      let domainName = field_map json "domainName" DomainName.of_json in
+    let of_json json__ =
+      let status = field_map json__ "status" ReachabilityStatus.of_json in
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       make ?status ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5455,8 +6272,8 @@ module GetContactReachabilityStatusRequest =
         (Option.map ~f:DomainName.of_xml) (Xml.child xml_arg0 "domainName") in
       make ?domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map json "domainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map json__ "domainName" DomainName.of_json in
       make ?domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5465,7 +6282,7 @@ module EnableDomainTransferLockResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To use this ID to query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -5475,8 +6292,7 @@ module EnableDomainTransferLockResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "EnableDomainTransferLockResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -5530,17 +6346,16 @@ module EnableDomainTransferLockResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The EnableDomainTransferLock response includes the following elements."]
@@ -5563,8 +6378,8 @@ module EnableDomainTransferLockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5642,17 +6457,17 @@ module EnableDomainAutoRenewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "This operation configures Amazon Route 53 to automatically renew the specified domain before the domain registration expires. The cost of renewing your domain registration is billed to your Amazon Web Services account. The period during which you can renew a domain name varies by TLD. For a list of TLDs and their renewal policies, see Domains That You Can Register with Amazon Route 53 in the Amazon Route 53 Developer Guide. Route 53 requires that you renew before the end of the renewal period so we can complete processing before the deadline."]
-module DisableDomainTransferLockResponse =
+module DisassociateDelegationSignerFromDomainResponse =
   struct
     type nonrec t =
       {
-      operationId: OperationId.t
+      operationId: OperationId.t option
         [@ocaml.doc
           "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
     type nonrec error =
@@ -5662,8 +6477,7 @@ module DisableDomainTransferLockResponse =
       | `TLDRulesViolation of TLDRulesViolation.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "DisableDomainTransferLockResponse"
-    let make ~operationId = fun () -> { operationId }
+    let make ?operationId = fun () -> { operationId }
     let error_of_json name json =
       match name with
       | "DuplicateRequest" ->
@@ -5717,17 +6531,126 @@ module DisableDomainTransferLockResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("OperationId", (Some (OperationId.to_value x.operationId)))]
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let operationId =
-        OperationId.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "OperationId") in
-      make ~operationId ()
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map_exn json "OperationId" OperationId.of_json in
-      make ~operationId ()
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a delegation signer (DS) record in the registry zone for this domain name."]
+module DisassociateDelegationSignerFromDomainRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t [@ocaml.doc "Name of the domain."];
+      id: String_.t
+        [@ocaml.doc
+          "An internal identification number assigned to each DS record after it\226\128\153s created. You can retrieve it as part of DNSSEC information returned by GetDomainDetail."]}
+    let context_ = "DisassociateDelegationSignerFromDomainRequest"
+    let make ~domainName = fun ~id -> fun () -> { domainName; id }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("Id", (Some (String_.to_value x.id)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let id = String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Id") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~id ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let id = field_map_exn json__ "Id" String_.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ~id ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Deletes a delegation signer (DS) record in the registry zone for this domain name."]
+module DisableDomainTransferLockResponse =
+  struct
+    type nonrec t =
+      {
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "Identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
+    type nonrec error =
+      [ `DuplicateRequest of DuplicateRequest.t 
+      | `InvalidInput of InvalidInput.t 
+      | `OperationLimitExceeded of OperationLimitExceeded.t 
+      | `TLDRulesViolation of TLDRulesViolation.t 
+      | `UnsupportedTLD of UnsupportedTLD.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?operationId = fun () -> { operationId }
+    let error_of_json name json =
+      match name with
+      | "DuplicateRequest" ->
+          `DuplicateRequest (DuplicateRequest.of_json json)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "OperationLimitExceeded" ->
+          `OperationLimitExceeded (OperationLimitExceeded.of_json json)
+      | "TLDRulesViolation" ->
+          `TLDRulesViolation (TLDRulesViolation.of_json json)
+      | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DuplicateRequest" -> `DuplicateRequest (DuplicateRequest.of_xml xml)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "OperationLimitExceeded" ->
+          `OperationLimitExceeded (OperationLimitExceeded.of_xml xml)
+      | "TLDRulesViolation" ->
+          `TLDRulesViolation (TLDRulesViolation.of_xml xml)
+      | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DuplicateRequest e ->
+          `Assoc
+            [("error", (`String "DuplicateRequest"));
+            ("details", (DuplicateRequest.to_json e))]
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `OperationLimitExceeded e ->
+          `Assoc
+            [("error", (`String "OperationLimitExceeded"));
+            ("details", (OperationLimitExceeded.to_json e))]
+      | `TLDRulesViolation e ->
+          `Assoc
+            [("error", (`String "TLDRulesViolation"));
+            ("details", (TLDRulesViolation.to_json e))]
+      | `UnsupportedTLD e ->
+          `Assoc
+            [("error", (`String "UnsupportedTLD"));
+            ("details", (UnsupportedTLD.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The DisableDomainTransferLock response includes the following element."]
@@ -5750,8 +6673,8 @@ module DisableDomainTransferLockRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5820,8 +6743,8 @@ module DisableDomainAutoRenewRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5905,9 +6828,10 @@ module DeleteTagsForDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~tagsToDelete ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let tagsToDelete = field_map_exn json "TagsToDelete" TagKeyList.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let tagsToDelete =
+        field_map_exn json__ "TagsToDelete" TagKeyList.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~tagsToDelete ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -5978,12 +6902,12 @@ module DeleteDomainResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that\226\128\153s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply: You can\226\128\153t get a refund for the cost of a deleted domain registration. The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry). When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply\\@domainnameverification.net or noreply\\@registrar.amazon.com."]
+       "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that\226\128\153s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply: You can\226\128\153t get a refund for the cost of a deleted domain registration. The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry). When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply\\@domainnameverification.net or noreply\\@emailverification.info or noreply\\@registrar.amazon."]
 module DeleteDomainRequest =
   struct
     type nonrec t =
@@ -6002,28 +6926,34 @@ module DeleteDomainRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that\226\128\153s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply: You can\226\128\153t get a refund for the cost of a deleted domain registration. The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry). When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply\\@domainnameverification.net or noreply\\@registrar.amazon.com."]
+       "This operation deletes the specified domain. This action is permanent. For more information, see Deleting a domain name registration. To transfer the domain registration to another registrar, use the transfer process that\226\128\153s provided by the registrar to which you want to transfer the registration. Otherwise, the following apply: You can\226\128\153t get a refund for the cost of a deleted domain registration. The registry for the top-level domain might hold the domain name for a brief time before releasing it for other users to register (varies by registry). When the registration has been deleted, we'll send you a confirmation to the registrant contact. The email will come from noreply\\@domainnameverification.net or noreply\\@emailverification.info or noreply\\@registrar.amazon."]
 module CheckDomainTransferabilityResponse =
   struct
     type nonrec t =
       {
-      transferability: DomainTransferability.t
+      transferability: DomainTransferability.t option
         [@ocaml.doc
-          "A complex type that contains information about whether the specified domain can be transferred to Route 53."]}
+          "A complex type that contains information about whether the specified domain can be transferred to Route 53."];
+      message: Message.t option
+        [@ocaml.doc
+          "Provides an explanation for when a domain can't be transferred."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
+      | `TLDInMaintenance of TLDInMaintenance.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CheckDomainTransferabilityResponse"
-    let make ~transferability = fun () -> { transferability }
+    let make ?transferability =
+      fun ?message -> fun () -> { transferability; message }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "TLDInMaintenance" ->
+          `TLDInMaintenance (TLDInMaintenance.of_json json)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
       | name ->
           `Unknown_operation_error
@@ -6031,6 +6961,7 @@ module CheckDomainTransferabilityResponse =
     let error_of_xml name xml =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "TLDInMaintenance" -> `TLDInMaintenance (TLDInMaintenance.of_xml xml)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -6040,6 +6971,10 @@ module CheckDomainTransferabilityResponse =
           `Assoc
             [("error", (`String "InvalidInput"));
             ("details", (InvalidInput.to_json e))]
+      | `TLDInMaintenance e ->
+          `Assoc
+            [("error", (`String "TLDInMaintenance"));
+            ("details", (TLDInMaintenance.to_json e))]
       | `UnsupportedTLD e ->
           `Assoc
             [("error", (`String "UnsupportedTLD"));
@@ -6052,18 +6987,22 @@ module CheckDomainTransferabilityResponse =
     let to_value x =
       structure_to_value
         [("Transferability",
-           (Some (DomainTransferability.to_value x.transferability)))]
+           (Option.map x.transferability ~f:DomainTransferability.to_value));
+        ("Message", (Option.map x.message ~f:Message.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:Message.of_xml) (Xml.child xml_arg0 "Message") in
       let transferability =
-        DomainTransferability.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Transferability") in
-      make ~transferability ()
+        (Option.map ~f:DomainTransferability.of_xml)
+          (Xml.child xml_arg0 "Transferability") in
+      make ?message ?transferability ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
+      let message = field_map json__ "Message" Message.of_json in
       let transferability =
-        field_map_exn json "Transferability" DomainTransferability.of_json in
-      make ~transferability ()
+        field_map json__ "Transferability" DomainTransferability.of_json in
+      make ?message ?transferability ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The CheckDomainTransferability response includes the following elements."]
@@ -6093,9 +7032,9 @@ module CheckDomainTransferabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?authCode ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let authCode = field_map json "AuthCode" DomainAuthCode.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let authCode = field_map json__ "AuthCode" DomainAuthCode.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?authCode ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6104,18 +7043,20 @@ module CheckDomainAvailabilityResponse =
   struct
     type nonrec t =
       {
-      availability: DomainAvailability.t
+      availability: DomainAvailability.t option
         [@ocaml.doc
-          "Whether the domain name is available for registering. You can register only domains designated as AVAILABLE. Valid values: AVAILABLE The domain name is available. AVAILABLE_RESERVED The domain name is reserved under specific conditions. AVAILABLE_PREORDER The domain name is available and can be preordered. DONT_KNOW The TLD registry didn't reply with a definitive answer about whether the domain name is available. Route 53 can return this response for a variety of reasons, for example, the registry is performing maintenance. Try again later. PENDING The TLD registry didn't return a response in the expected amount of time. When the response is delayed, it usually takes just a few extra seconds. You can resubmit the request immediately. RESERVED The domain name has been reserved for another person or organization. UNAVAILABLE The domain name is not available. UNAVAILABLE_PREMIUM The domain name is not available. UNAVAILABLE_RESTRICTED The domain name is forbidden."]}
+          "Whether the domain name is available for registering. You can register only domains designated as AVAILABLE. Valid values: AVAILABLE The domain name is available. AVAILABLE_RESERVED The domain name is reserved under specific conditions. AVAILABLE_PREORDER The domain name is available and can be preordered. DONT_KNOW The TLD registry didn't reply with a definitive answer about whether the domain name is available. Route 53 can return this response for a variety of reasons, for example, the registry is performing maintenance. Try again later. INVALID_NAME_FOR_TLD The TLD isn't valid. For example, it can contain characters that aren't allowed. PENDING The TLD registry didn't return a response in the expected amount of time. When the response is delayed, it usually takes just a few extra seconds. You can resubmit the request immediately. RESERVED The domain name has been reserved for another person or organization. UNAVAILABLE The domain name is not available. UNAVAILABLE_PREMIUM The domain name is not available. UNAVAILABLE_RESTRICTED The domain name is forbidden."]}
     type nonrec error =
       [ `InvalidInput of InvalidInput.t 
+      | `TLDInMaintenance of TLDInMaintenance.t 
       | `UnsupportedTLD of UnsupportedTLD.t 
       | `Unknown_operation_error of (string * string option) ]
-    let context_ = "CheckDomainAvailabilityResponse"
-    let make ~availability = fun () -> { availability }
+    let make ?availability = fun () -> { availability }
     let error_of_json name json =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "TLDInMaintenance" ->
+          `TLDInMaintenance (TLDInMaintenance.of_json json)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
       | name ->
           `Unknown_operation_error
@@ -6123,6 +7064,7 @@ module CheckDomainAvailabilityResponse =
     let error_of_xml name xml =
       match name with
       | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "TLDInMaintenance" -> `TLDInMaintenance (TLDInMaintenance.of_xml xml)
       | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
@@ -6132,6 +7074,10 @@ module CheckDomainAvailabilityResponse =
           `Assoc
             [("error", (`String "InvalidInput"));
             ("details", (InvalidInput.to_json e))]
+      | `TLDInMaintenance e ->
+          `Assoc
+            [("error", (`String "TLDInMaintenance"));
+            ("details", (TLDInMaintenance.to_json e))]
       | `UnsupportedTLD e ->
           `Assoc
             [("error", (`String "UnsupportedTLD"));
@@ -6144,18 +7090,18 @@ module CheckDomainAvailabilityResponse =
     let to_value x =
       structure_to_value
         [("Availability",
-           (Some (DomainAvailability.to_value x.availability)))]
+           (Option.map x.availability ~f:DomainAvailability.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let availability =
-        DomainAvailability.of_xml
-          (Xml.child_exn ~context:context_ xml_arg0 "Availability") in
-      make ~availability ()
+        (Option.map ~f:DomainAvailability.of_xml)
+          (Xml.child xml_arg0 "Availability") in
+      make ?availability ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let availability =
-        field_map_exn json "Availability" DomainAvailability.of_json in
-      make ~availability ()
+        field_map json__ "Availability" DomainAvailability.of_json in
+      make ?availability ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The CheckDomainAvailability response includes the following elements."]
@@ -6183,9 +7129,9 @@ module CheckDomainAvailabilityRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ?idnLangCode ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let idnLangCode = field_map json "IdnLangCode" LangCode.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let idnLangCode = field_map json__ "IdnLangCode" LangCode.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ?idnLangCode ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6248,8 +7194,8 @@ module CancelDomainTransferToAnotherAwsAccountResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6273,12 +7219,137 @@ module CancelDomainTransferToAnotherAwsAccountRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The CancelDomainTransferToAnotherAwsAccount request includes the following element."]
+module AssociateDelegationSignerToDomainResponse =
+  struct
+    type nonrec t =
+      {
+      operationId: OperationId.t option
+        [@ocaml.doc
+          "The identifier for tracking the progress of the request. To query the operation status, use GetOperationDetail."]}
+    type nonrec error =
+      [ `DnssecLimitExceeded of DnssecLimitExceeded.t 
+      | `DuplicateRequest of DuplicateRequest.t 
+      | `InvalidInput of InvalidInput.t 
+      | `OperationLimitExceeded of OperationLimitExceeded.t 
+      | `TLDRulesViolation of TLDRulesViolation.t 
+      | `UnsupportedTLD of UnsupportedTLD.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?operationId = fun () -> { operationId }
+    let error_of_json name json =
+      match name with
+      | "DnssecLimitExceeded" ->
+          `DnssecLimitExceeded (DnssecLimitExceeded.of_json json)
+      | "DuplicateRequest" ->
+          `DuplicateRequest (DuplicateRequest.of_json json)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_json json)
+      | "OperationLimitExceeded" ->
+          `OperationLimitExceeded (OperationLimitExceeded.of_json json)
+      | "TLDRulesViolation" ->
+          `TLDRulesViolation (TLDRulesViolation.of_json json)
+      | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "DnssecLimitExceeded" ->
+          `DnssecLimitExceeded (DnssecLimitExceeded.of_xml xml)
+      | "DuplicateRequest" -> `DuplicateRequest (DuplicateRequest.of_xml xml)
+      | "InvalidInput" -> `InvalidInput (InvalidInput.of_xml xml)
+      | "OperationLimitExceeded" ->
+          `OperationLimitExceeded (OperationLimitExceeded.of_xml xml)
+      | "TLDRulesViolation" ->
+          `TLDRulesViolation (TLDRulesViolation.of_xml xml)
+      | "UnsupportedTLD" -> `UnsupportedTLD (UnsupportedTLD.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `DnssecLimitExceeded e ->
+          `Assoc
+            [("error", (`String "DnssecLimitExceeded"));
+            ("details", (DnssecLimitExceeded.to_json e))]
+      | `DuplicateRequest e ->
+          `Assoc
+            [("error", (`String "DuplicateRequest"));
+            ("details", (DuplicateRequest.to_json e))]
+      | `InvalidInput e ->
+          `Assoc
+            [("error", (`String "InvalidInput"));
+            ("details", (InvalidInput.to_json e))]
+      | `OperationLimitExceeded e ->
+          `Assoc
+            [("error", (`String "OperationLimitExceeded"));
+            ("details", (OperationLimitExceeded.to_json e))]
+      | `TLDRulesViolation e ->
+          `Assoc
+            [("error", (`String "TLDRulesViolation"));
+            ("details", (TLDRulesViolation.to_json e))]
+      | `UnsupportedTLD e ->
+          `Assoc
+            [("error", (`String "UnsupportedTLD"));
+            ("details", (UnsupportedTLD.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("OperationId", (Option.map x.operationId ~f:OperationId.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let operationId =
+        (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
+      make ?operationId ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
+      make ?operationId ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a delegation signer (DS) record in the registry zone for this domain name. Note that creating DS record at the registry impacts DNSSEC validation of your DNS records. This action may render your domain name unavailable on the internet if the steps are completed in the wrong order, or with incorrect timing. For more information about DNSSEC signing, see Configuring DNSSEC signing in the Route\194\16053 developer guide."]
+module AssociateDelegationSignerToDomainRequest =
+  struct
+    type nonrec t =
+      {
+      domainName: DomainName.t [@ocaml.doc "The name of the domain."];
+      signingAttributes: DnssecSigningAttributes.t
+        [@ocaml.doc
+          "The information about a key, including the algorithm, public key-value, and flags."]}
+    let context_ = "AssociateDelegationSignerToDomainRequest"
+    let make ~domainName =
+      fun ~signingAttributes -> fun () -> { domainName; signingAttributes }
+    let to_value x =
+      structure_to_value
+        [("DomainName", (Some (DomainName.to_value x.domainName)));
+        ("SigningAttributes",
+          (Some (DnssecSigningAttributes.to_value x.signingAttributes)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let signingAttributes =
+        DnssecSigningAttributes.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "SigningAttributes") in
+      let domainName =
+        DomainName.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
+      make ~signingAttributes ~domainName ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let signingAttributes =
+        field_map_exn json__ "SigningAttributes"
+          DnssecSigningAttributes.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
+      make ~signingAttributes ~domainName ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "Creates a delegation signer (DS) record in the registry zone for this domain name. Note that creating DS record at the registry impacts DNSSEC validation of your DNS records. This action may render your domain name unavailable on the internet if the steps are completed in the wrong order, or with incorrect timing. For more information about DNSSEC signing, see Configuring DNSSEC signing in the Route\194\16053 developer guide."]
 module AcceptDomainTransferFromAnotherAwsAccountResponse =
   struct
     type nonrec t =
@@ -6346,8 +7417,8 @@ module AcceptDomainTransferFromAnotherAwsAccountResponse =
         (Option.map ~f:OperationId.of_xml) (Xml.child xml_arg0 "OperationId") in
       make ?operationId ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let operationId = field_map json "OperationId" OperationId.of_json in
+    let of_json json__ =
+      let operationId = field_map json__ "OperationId" OperationId.of_json in
       make ?operationId ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -6359,7 +7430,7 @@ module AcceptDomainTransferFromAnotherAwsAccountRequest =
       domainName: DomainName.t
         [@ocaml.doc
           "The name of the domain that was specified when another Amazon Web Services account submitted a TransferDomainToAnotherAwsAccount request."];
-      password: String_.t
+      password: Password.t
         [@ocaml.doc
           "The password that was returned by the TransferDomainToAnotherAwsAccount request."]}
     let context_ = "AcceptDomainTransferFromAnotherAwsAccountRequest"
@@ -6368,19 +7439,19 @@ module AcceptDomainTransferFromAnotherAwsAccountRequest =
     let to_value x =
       structure_to_value
         [("DomainName", (Some (DomainName.to_value x.domainName)));
-        ("Password", (Some (String_.to_value x.password)))]
+        ("Password", (Some (Password.to_value x.password)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let password =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Password") in
+        Password.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Password") in
       let domainName =
         DomainName.of_xml
           (Xml.child_exn ~context:context_ xml_arg0 "DomainName") in
       make ~password ~domainName ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let password = field_map_exn json "Password" String_.of_json in
-      let domainName = field_map_exn json "DomainName" DomainName.of_json in
+    let of_json json__ =
+      let password = field_map_exn json__ "Password" Password.of_json in
+      let domainName = field_map_exn json__ "DomainName" DomainName.of_json in
       make ~password ~domainName ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc

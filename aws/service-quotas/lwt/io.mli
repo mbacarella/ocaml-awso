@@ -6,6 +6,12 @@ val associate_service_quota_template :
       AssociateServiceQuotaTemplateRequest.t ->
         (AssociateServiceQuotaTemplateResponse.t,
           AssociateServiceQuotaTemplateResponse.error) Result.t Lwt.t
+val create_support_case :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      CreateSupportCaseRequest.t ->
+        (CreateSupportCaseResponse.t, CreateSupportCaseResponse.error)
+          Result.t Lwt.t
 val delete_service_quota_increase_request_from_template :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -31,6 +37,18 @@ val get_association_for_service_quota_template :
       GetAssociationForServiceQuotaTemplateRequest.t ->
         (GetAssociationForServiceQuotaTemplateResponse.t,
           GetAssociationForServiceQuotaTemplateResponse.error) Result.t Lwt.t
+val get_auto_management_configuration :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetAutoManagementConfigurationRequest.t ->
+        (GetAutoManagementConfigurationResponse.t,
+          GetAutoManagementConfigurationResponse.error) Result.t Lwt.t
+val get_quota_utilization_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      GetQuotaUtilizationReportRequest.t ->
+        (GetQuotaUtilizationReportResponse.t,
+          GetQuotaUtilizationReportResponse.error) Result.t Lwt.t
 val get_requested_service_quota_change :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -107,6 +125,24 @@ val request_service_quota_increase :
       RequestServiceQuotaIncreaseRequest.t ->
         (RequestServiceQuotaIncreaseResponse.t,
           RequestServiceQuotaIncreaseResponse.error) Result.t Lwt.t
+val start_auto_management :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartAutoManagementRequest.t ->
+        (StartAutoManagementResponse.t, StartAutoManagementResponse.error)
+          Result.t Lwt.t
+val start_quota_utilization_report :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StartQuotaUtilizationReportRequest.t ->
+        (StartQuotaUtilizationReportResponse.t,
+          StartQuotaUtilizationReportResponse.error) Result.t Lwt.t
+val stop_auto_management :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      StopAutoManagementRequest.t ->
+        (StopAutoManagementResponse.t, StopAutoManagementResponse.error)
+          Result.t Lwt.t
 val tag_resource :
   ?endpoint_url:string ->
     ?cfg:Awso.Cfg.t ->
@@ -117,3 +153,9 @@ val untag_resource :
     ?cfg:Awso.Cfg.t ->
       UntagResourceRequest.t ->
         (UntagResourceResponse.t, UntagResourceResponse.error) Result.t Lwt.t
+val update_auto_management :
+  ?endpoint_url:string ->
+    ?cfg:Awso.Cfg.t ->
+      UpdateAutoManagementRequest.t ->
+        (UpdateAutoManagementResponse.t, UpdateAutoManagementResponse.error)
+          Result.t Lwt.t

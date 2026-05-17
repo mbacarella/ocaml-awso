@@ -50,6 +50,28 @@ let cancel_image_creation =
               ~clientToken ())
            (Some Values.CancelImageCreationResponse.to_json)
            (Some Values.CancelImageCreationResponse.error_to_json)])
+let cancel_lifecycle_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lifecycleExecutionId =
+         flag "lifecycle-execution-id" (required string)
+           ~doc:"STRING LifecycleExecutionId"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.cancel_lifecycle_execution
+           (Values.CancelLifecycleExecutionRequest.make ~lifecycleExecutionId
+              ~clientToken ())
+           (Some Values.CancelLifecycleExecutionResponse.to_json)
+           (Some Values.CancelLifecycleExecutionResponse.error_to_json)])
 let create_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -74,6 +96,7 @@ let create_component =
        and kmsKeyId =
          flag "kms-key-id" (optional string) ~doc:"STRING NonEmptyString"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and semanticVersion =
          flag "semantic-version" (required string)
@@ -91,7 +114,7 @@ let create_component =
                                       ~f:Values.OsVersionList.of_json
                                       supportedOsVersions) ?data ?uri
               ?kmsKeyId ?tags:(Option.map ~f:Values.TagMap.of_json tags)
-              ~name ~semanticVersion
+              ?dryRun ~name ~semanticVersion
               ~platform:(Values.Platform.of_json platform) ~clientToken ())
            (Some Values.CreateComponentResponse.to_json)
            (Some Values.CreateComponentResponse.error_to_json)])
@@ -107,6 +130,9 @@ let create_container_recipe =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and components =
+         flag "components" (optional json_arg)
+           ~doc:"JSON ComponentConfigurationList"
        and instanceConfiguration =
          flag "instance-configuration" (optional json_arg)
            ~doc:"JSON InstanceConfiguration"
@@ -131,10 +157,7 @@ let create_container_recipe =
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and semanticVersion =
          flag "semantic-version" (required string)
-           ~doc:"STRING VersionNumber"
-       and components =
-         flag "components" (required json_arg)
-           ~doc:"JSON ComponentConfigurationList"
+           ~doc:"STRING WildcardVersionNumber"
        and parentImage =
          flag "parent-image" (required string) ~doc:"STRING NonEmptyString"
        and targetRepository =
@@ -146,6 +169,9 @@ let create_container_recipe =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_container_recipe
            (Values.CreateContainerRecipeRequest.make ?description
+              ?components:(Option.map
+                             ~f:Values.ComponentConfigurationList.of_json
+                             components)
               ?instanceConfiguration:(Option.map
                                         ~f:Values.InstanceConfiguration.of_json
                                         instanceConfiguration)
@@ -155,9 +181,7 @@ let create_container_recipe =
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
               ?workingDirectory ?kmsKeyId
               ~containerType:(Values.ContainerType.of_json containerType)
-              ~name ~semanticVersion
-              ~components:(Values.ComponentConfigurationList.of_json
-                             components) ~parentImage
+              ~name ~semanticVersion ~parentImage
               ~targetRepository:(Values.TargetContainerRepository.of_json
                                    targetRepository) ~clientToken ())
            (Some Values.CreateContainerRecipeResponse.to_json)
@@ -216,6 +240,17 @@ let create_image =
          flag "enhanced-image-metadata-enabled" (optional bool)
            ~doc:"BOOL NullableBoolean"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and imageScanningConfiguration =
+         flag "image-scanning-configuration" (optional json_arg)
+           ~doc:"JSON ImageScanningConfiguration"
+       and workflows =
+         flag "workflows" (optional json_arg)
+           ~doc:"JSON WorkflowConfigurationList"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleNameOrArn"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON ImageLoggingConfiguration"
        and infrastructureConfigurationArn =
          flag "infrastructure-configuration-arn" (required string)
            ~doc:"STRING InfrastructureConfigurationArn"
@@ -231,6 +266,15 @@ let create_image =
                                           imageTestsConfiguration)
               ?enhancedImageMetadataEnabled
               ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?imageScanningConfiguration:(Option.map
+                                             ~f:Values.ImageScanningConfiguration.of_json
+                                             imageScanningConfiguration)
+              ?workflows:(Option.map
+                            ~f:Values.WorkflowConfigurationList.of_json
+                            workflows) ?executionRole
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.ImageLoggingConfiguration.of_json
+                                       loggingConfiguration)
               ~infrastructureConfigurationArn ~clientToken ())
            (Some Values.CreateImageResponse.to_json)
            (Some Values.CreateImageResponse.error_to_json)])
@@ -266,6 +310,19 @@ let create_image_pipeline =
        and status =
          flag "status" (optional json_arg) ~doc:"JSON PipelineStatus"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and imageTags =
+         flag "image-tags" (optional json_arg) ~doc:"JSON TagMap"
+       and imageScanningConfiguration =
+         flag "image-scanning-configuration" (optional json_arg)
+           ~doc:"JSON ImageScanningConfiguration"
+       and workflows =
+         flag "workflows" (optional json_arg)
+           ~doc:"JSON WorkflowConfigurationList"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleNameOrArn"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON PipelineLoggingConfiguration"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and infrastructureConfigurationArn =
          flag "infrastructure-configuration-arn" (required string)
@@ -284,7 +341,17 @@ let create_image_pipeline =
               ?enhancedImageMetadataEnabled
               ?schedule:(Option.map ~f:Values.Schedule.of_json schedule)
               ?status:(Option.map ~f:Values.PipelineStatus.of_json status)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?imageTags:(Option.map ~f:Values.TagMap.of_json imageTags)
+              ?imageScanningConfiguration:(Option.map
+                                             ~f:Values.ImageScanningConfiguration.of_json
+                                             imageScanningConfiguration)
+              ?workflows:(Option.map
+                            ~f:Values.WorkflowConfigurationList.of_json
+                            workflows) ?executionRole
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.PipelineLoggingConfiguration.of_json
+                                       loggingConfiguration) ~name
               ~infrastructureConfigurationArn ~clientToken ())
            (Some Values.CreateImagePipelineResponse.to_json)
            (Some Values.CreateImagePipelineResponse.error_to_json)])
@@ -300,6 +367,9 @@ let create_image_recipe =
            ~doc:"URL override endpoint url"
        and description =
          flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and components =
+         flag "components" (optional json_arg)
+           ~doc:"JSON ComponentConfigurationList"
        and blockDeviceMappings =
          flag "block-device-mappings" (optional json_arg)
            ~doc:"JSON InstanceBlockDeviceMappings"
@@ -310,13 +380,11 @@ let create_image_recipe =
        and additionalInstanceConfiguration =
          flag "additional-instance-configuration" (optional json_arg)
            ~doc:"JSON AdditionalInstanceConfiguration"
+       and amiTags = flag "ami-tags" (optional json_arg) ~doc:"JSON TagMap"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and semanticVersion =
          flag "semantic-version" (required string)
-           ~doc:"STRING VersionNumber"
-       and components =
-         flag "components" (required json_arg)
-           ~doc:"JSON ComponentConfigurationList"
+           ~doc:"STRING WildcardVersionNumber"
        and parentImage =
          flag "parent-image" (required string) ~doc:"STRING NonEmptyString"
        and clientToken =
@@ -325,6 +393,9 @@ let create_image_recipe =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.create_image_recipe
            (Values.CreateImageRecipeRequest.make ?description
+              ?components:(Option.map
+                             ~f:Values.ComponentConfigurationList.of_json
+                             components)
               ?blockDeviceMappings:(Option.map
                                       ~f:Values.InstanceBlockDeviceMappings.of_json
                                       blockDeviceMappings)
@@ -333,9 +404,8 @@ let create_image_recipe =
               ?additionalInstanceConfiguration:(Option.map
                                                   ~f:Values.AdditionalInstanceConfiguration.of_json
                                                   additionalInstanceConfiguration)
-              ~name ~semanticVersion
-              ~components:(Values.ComponentConfigurationList.of_json
-                             components) ~parentImage ~clientToken ())
+              ?amiTags:(Option.map ~f:Values.TagMap.of_json amiTags) ~name
+              ~semanticVersion ~parentImage ~clientToken ())
            (Some Values.CreateImageRecipeResponse.to_json)
            (Some Values.CreateImageRecipeResponse.error_to_json)])
 let create_infrastructure_configuration =
@@ -372,6 +442,8 @@ let create_infrastructure_configuration =
          flag "instance-metadata-options" (optional json_arg)
            ~doc:"JSON InstanceMetadataOptions"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and placement =
+         flag "placement" (optional json_arg) ~doc:"JSON Placement"
        and name = flag "name" (required string) ~doc:"STRING ResourceName"
        and instanceProfileName =
          flag "instance-profile-name" (required string)
@@ -394,11 +466,96 @@ let create_infrastructure_configuration =
               ?instanceMetadataOptions:(Option.map
                                           ~f:Values.InstanceMetadataOptions.of_json
                                           instanceMetadataOptions)
-              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
-              ~instanceProfileName ~clientToken ())
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?placement:(Option.map ~f:Values.Placement.of_json placement)
+              ~name ~instanceProfileName ~clientToken ())
            (Some Values.CreateInfrastructureConfigurationResponse.to_json)
            (Some
               Values.CreateInfrastructureConfigurationResponse.error_to_json)])
+let create_lifecycle_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON LifecyclePolicyStatus"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and executionRole =
+         flag "execution-role" (required string) ~doc:"STRING RoleNameOrArn"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON LifecyclePolicyResourceType"
+       and policyDetails =
+         flag "policy-details" (required json_arg)
+           ~doc:"JSON LifecyclePolicyDetails"
+       and resourceSelection =
+         flag "resource-selection" (required json_arg)
+           ~doc:"JSON LifecyclePolicyResourceSelection"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_lifecycle_policy
+           (Values.CreateLifecyclePolicyRequest.make ?description
+              ?status:(Option.map ~f:Values.LifecyclePolicyStatus.of_json
+                         status)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
+              ~executionRole
+              ~resourceType:(Values.LifecyclePolicyResourceType.of_json
+                               resourceType)
+              ~policyDetails:(Values.LifecyclePolicyDetails.of_json
+                                policyDetails)
+              ~resourceSelection:(Values.LifecyclePolicyResourceSelection.of_json
+                                    resourceSelection) ~clientToken ())
+           (Some Values.CreateLifecyclePolicyResponse.to_json)
+           (Some Values.CreateLifecyclePolicyResponse.error_to_json)])
+let create_workflow =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and changeDescription =
+         flag "change-description" (optional string)
+           ~doc:"STRING NonEmptyString"
+       and data =
+         flag "data" (optional string) ~doc:"STRING InlineWorkflowData"
+       and uri = flag "uri" (optional string) ~doc:"STRING Uri"
+       and kmsKeyId =
+         flag "kms-key-id" (optional string) ~doc:"STRING NonEmptyString"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and dryRun = flag "dry-run" (optional bool) ~doc:"BOOL Boolean"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and semanticVersion =
+         flag "semantic-version" (required string)
+           ~doc:"STRING VersionNumber"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken"
+       and type_ = flag "type-" (required json_arg) ~doc:"JSON WorkflowType" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.create_workflow
+           (Values.CreateWorkflowRequest.make ?description ?changeDescription
+              ?data ?uri ?kmsKeyId
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags) ?dryRun ~name
+              ~semanticVersion ~clientToken
+              ~type_:(Values.WorkflowType.of_json type_) ())
+           (Some Values.CreateWorkflowResponse.to_json)
+           (Some Values.CreateWorkflowResponse.error_to_json)])
 let delete_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -535,6 +692,78 @@ let delete_infrastructure_configuration =
            (Some Values.DeleteInfrastructureConfigurationResponse.to_json)
            (Some
               Values.DeleteInfrastructureConfigurationResponse.error_to_json)])
+let delete_lifecycle_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lifecyclePolicyArn =
+         flag "lifecycle-policy-arn" (required string)
+           ~doc:"STRING LifecyclePolicyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_lifecycle_policy
+           (Values.DeleteLifecyclePolicyRequest.make ~lifecyclePolicyArn ())
+           (Some Values.DeleteLifecyclePolicyResponse.to_json)
+           (Some Values.DeleteLifecyclePolicyResponse.error_to_json)])
+let delete_workflow =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workflowBuildVersionArn =
+         flag "workflow-build-version-arn" (required string)
+           ~doc:"STRING WorkflowBuildVersionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.delete_workflow
+           (Values.DeleteWorkflowRequest.make ~workflowBuildVersionArn ())
+           (Some Values.DeleteWorkflowResponse.to_json)
+           (Some Values.DeleteWorkflowResponse.error_to_json)])
+let distribute_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON ImageLoggingConfiguration"
+       and sourceImage =
+         flag "source-image" (required string) ~doc:"STRING NonEmptyString"
+       and distributionConfigurationArn =
+         flag "distribution-configuration-arn" (required string)
+           ~doc:"STRING DistributionConfigurationArn"
+       and executionRole =
+         flag "execution-role" (required string) ~doc:"STRING RoleNameOrArn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.distribute_image
+           (Values.DistributeImageRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.ImageLoggingConfiguration.of_json
+                                       loggingConfiguration) ~sourceImage
+              ~distributionConfigurationArn ~executionRole ~clientToken ())
+           (Some Values.DistributeImageResponse.to_json)
+           (Some Values.DistributeImageResponse.error_to_json)])
 let get_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -746,6 +975,127 @@ let get_infrastructure_configuration =
               ~infrastructureConfigurationArn ())
            (Some Values.GetInfrastructureConfigurationResponse.to_json)
            (Some Values.GetInfrastructureConfigurationResponse.error_to_json)])
+let get_lifecycle_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lifecycleExecutionId =
+         flag "lifecycle-execution-id" (required string)
+           ~doc:"STRING LifecycleExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lifecycle_execution
+           (Values.GetLifecycleExecutionRequest.make ~lifecycleExecutionId ())
+           (Some Values.GetLifecycleExecutionResponse.to_json)
+           (Some Values.GetLifecycleExecutionResponse.error_to_json)])
+let get_lifecycle_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and lifecyclePolicyArn =
+         flag "lifecycle-policy-arn" (required string)
+           ~doc:"STRING LifecyclePolicyArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_lifecycle_policy
+           (Values.GetLifecyclePolicyRequest.make ~lifecyclePolicyArn ())
+           (Some Values.GetLifecyclePolicyResponse.to_json)
+           (Some Values.GetLifecyclePolicyResponse.error_to_json)])
+let get_marketplace_resource =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and resourceLocation =
+         flag "resource-location" (optional string)
+           ~doc:"STRING MarketplaceResourceLocation"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON MarketplaceResourceType"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ImageBuilderArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_marketplace_resource
+           (Values.GetMarketplaceResourceRequest.make ?resourceLocation
+              ~resourceType:(Values.MarketplaceResourceType.of_json
+                               resourceType) ~resourceArn ())
+           (Some Values.GetMarketplaceResourceResponse.to_json)
+           (Some Values.GetMarketplaceResourceResponse.error_to_json)])
+let get_workflow =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workflowBuildVersionArn =
+         flag "workflow-build-version-arn" (required string)
+           ~doc:"STRING WorkflowVersionArnOrBuildVersionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_workflow
+           (Values.GetWorkflowRequest.make ~workflowBuildVersionArn ())
+           (Some Values.GetWorkflowResponse.to_json)
+           (Some Values.GetWorkflowResponse.error_to_json)])
+let get_workflow_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workflowExecutionId =
+         flag "workflow-execution-id" (required string)
+           ~doc:"STRING WorkflowExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_workflow_execution
+           (Values.GetWorkflowExecutionRequest.make ~workflowExecutionId ())
+           (Some Values.GetWorkflowExecutionResponse.to_json)
+           (Some Values.GetWorkflowExecutionResponse.error_to_json)])
+let get_workflow_step_execution =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and stepExecutionId =
+         flag "step-execution-id" (required string)
+           ~doc:"STRING WorkflowStepExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.get_workflow_step_execution
+           (Values.GetWorkflowStepExecutionRequest.make ~stepExecutionId ())
+           (Some Values.GetWorkflowStepExecutionResponse.to_json)
+           (Some Values.GetWorkflowStepExecutionResponse.error_to_json)])
 let import_component =
   Command.async ~summary:""
     ([%map_open.Command
@@ -788,6 +1138,62 @@ let import_component =
               ~platform:(Values.Platform.of_json platform) ~clientToken ())
            (Some Values.ImportComponentResponse.to_json)
            (Some Values.ImportComponentResponse.error_to_json)])
+let import_disk_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleNameOrArn"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON ImageLoggingConfiguration"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
+       and registerImageOptions =
+         flag "register-image-options" (optional json_arg)
+           ~doc:"JSON RegisterImageOptions"
+       and windowsConfiguration =
+         flag "windows-configuration" (optional json_arg)
+           ~doc:"JSON WindowsConfiguration"
+       and name = flag "name" (required string) ~doc:"STRING ResourceName"
+       and semanticVersion =
+         flag "semantic-version" (required string)
+           ~doc:"STRING VersionNumber"
+       and platform =
+         flag "platform" (required string) ~doc:"STRING NonEmptyString"
+       and osVersion =
+         flag "os-version" (required string) ~doc:"STRING OsVersion"
+       and infrastructureConfigurationArn =
+         flag "infrastructure-configuration-arn" (required string)
+           ~doc:"STRING InfrastructureConfigurationArn"
+       and uri = flag "uri" (required string) ~doc:"STRING Uri"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.import_disk_image
+           (Values.ImportDiskImageRequest.make ?description ?executionRole
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.ImageLoggingConfiguration.of_json
+                                       loggingConfiguration)
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ?registerImageOptions:(Option.map
+                                       ~f:Values.RegisterImageOptions.of_json
+                                       registerImageOptions)
+              ?windowsConfiguration:(Option.map
+                                       ~f:Values.WindowsConfiguration.of_json
+                                       windowsConfiguration) ~name
+              ~semanticVersion ~platform ~osVersion
+              ~infrastructureConfigurationArn ~uri ~clientToken ())
+           (Some Values.ImportDiskImageResponse.to_json)
+           (Some Values.ImportDiskImageResponse.error_to_json)])
 let import_vm_image =
   Command.async ~summary:""
     ([%map_open.Command
@@ -802,6 +1208,9 @@ let import_vm_image =
          flag "description" (optional string) ~doc:"STRING NonEmptyString"
        and osVersion =
          flag "os-version" (optional string) ~doc:"STRING OsVersion"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON ImageLoggingConfiguration"
        and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and name = flag "name" (required string) ~doc:"STRING NonEmptyString"
        and semanticVersion =
@@ -818,6 +1227,9 @@ let import_vm_image =
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.import_vm_image
            (Values.ImportVmImageRequest.make ?description ?osVersion
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.ImageLoggingConfiguration.of_json
+                                       loggingConfiguration)
               ?tags:(Option.map ~f:Values.TagMap.of_json tags) ~name
               ~semanticVersion ~platform:(Values.Platform.of_json platform)
               ~vmImportTaskId ~clientToken ())
@@ -833,18 +1245,18 @@ let list_component_build_versions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and componentVersionArn =
+         flag "component-version-arn" (optional string)
+           ~doc:"STRING ComponentVersionArn"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and componentVersionArn =
-         flag "component-version-arn" (required string)
-           ~doc:"STRING ComponentVersionArn" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_component_build_versions
-           (Values.ListComponentBuildVersionsRequest.make ?maxResults
-              ?nextToken ~componentVersionArn ())
+           (Values.ListComponentBuildVersionsRequest.make
+              ?componentVersionArn ?maxResults ?nextToken ())
            (Some Values.ListComponentBuildVersionsResponse.to_json)
            (Some Values.ListComponentBuildVersionsResponse.error_to_json)])
 let list_components =
@@ -890,7 +1302,7 @@ let list_container_recipes =
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING NonEmptyString" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_container_recipes
@@ -934,21 +1346,21 @@ let list_image_build_versions =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and imageVersionArn =
+         flag "image-version-arn" (optional string)
+           ~doc:"STRING ImageVersionArn"
        and filters =
          flag "filters" (optional json_arg) ~doc:"JSON FilterList"
        and maxResults =
          flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
        and nextToken =
-         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
-       and imageVersionArn =
-         flag "image-version-arn" (required string)
-           ~doc:"STRING ImageVersionArn" in
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.list_image_build_versions
-           (Values.ListImageBuildVersionsRequest.make
+           (Values.ListImageBuildVersionsRequest.make ?imageVersionArn
               ?filters:(Option.map ~f:Values.FilterList.of_json filters)
-              ?maxResults ?nextToken ~imageVersionArn ())
+              ?maxResults ?nextToken ())
            (Some Values.ListImageBuildVersionsResponse.to_json)
            (Some Values.ListImageBuildVersionsResponse.error_to_json)])
 let list_image_packages =
@@ -1052,6 +1464,54 @@ let list_image_recipes =
               ?maxResults ?nextToken ())
            (Some Values.ListImageRecipesResponse.to_json)
            (Some Values.ListImageRecipesResponse.error_to_json)])
+let list_image_scan_finding_aggregations =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filter = flag "filter" (optional json_arg) ~doc:"JSON Filter"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_image_scan_finding_aggregations
+           (Values.ListImageScanFindingAggregationsRequest.make
+              ?filter:(Option.map ~f:Values.Filter.of_json filter) ?nextToken
+              ())
+           (Some Values.ListImageScanFindingAggregationsResponse.to_json)
+           (Some
+              Values.ListImageScanFindingAggregationsResponse.error_to_json)])
+let list_image_scan_findings =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg)
+           ~doc:"JSON ImageScanFindingsFilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_image_scan_findings
+           (Values.ListImageScanFindingsRequest.make
+              ?filters:(Option.map
+                          ~f:Values.ImageScanFindingsFilterList.of_json
+                          filters) ?maxResults ?nextToken ())
+           (Some Values.ListImageScanFindingsResponse.to_json)
+           (Some Values.ListImageScanFindingsResponse.error_to_json)])
 let list_images =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1107,6 +1567,81 @@ let list_infrastructure_configurations =
            (Some Values.ListInfrastructureConfigurationsResponse.to_json)
            (Some
               Values.ListInfrastructureConfigurationsResponse.error_to_json)])
+let list_lifecycle_execution_resources =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and parentResourceId =
+         flag "parent-resource-id" (optional string)
+           ~doc:"STRING NonEmptyString"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and lifecycleExecutionId =
+         flag "lifecycle-execution-id" (required string)
+           ~doc:"STRING LifecycleExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_lifecycle_execution_resources
+           (Values.ListLifecycleExecutionResourcesRequest.make
+              ?parentResourceId ?maxResults ?nextToken ~lifecycleExecutionId
+              ())
+           (Some Values.ListLifecycleExecutionResourcesResponse.to_json)
+           (Some Values.ListLifecycleExecutionResourcesResponse.error_to_json)])
+let list_lifecycle_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and resourceArn =
+         flag "resource-arn" (required string) ~doc:"STRING ImageBuilderArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_lifecycle_executions
+           (Values.ListLifecycleExecutionsRequest.make ?maxResults ?nextToken
+              ~resourceArn ())
+           (Some Values.ListLifecycleExecutionsResponse.to_json)
+           (Some Values.ListLifecycleExecutionsResponse.error_to_json)])
+let list_lifecycle_policies =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_lifecycle_policies
+           (Values.ListLifecyclePoliciesRequest.make
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?maxResults ?nextToken ())
+           (Some Values.ListLifecyclePoliciesResponse.to_json)
+           (Some Values.ListLifecyclePoliciesResponse.error_to_json)])
 let list_tags_for_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1125,6 +1660,126 @@ let list_tags_for_resource =
            (Values.ListTagsForResourceRequest.make ~resourceArn ())
            (Some Values.ListTagsForResourceResponse.to_json)
            (Some Values.ListTagsForResourceResponse.error_to_json)])
+let list_waiting_workflow_steps =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_waiting_workflow_steps
+           (Values.ListWaitingWorkflowStepsRequest.make ?maxResults
+              ?nextToken ())
+           (Some Values.ListWaitingWorkflowStepsResponse.to_json)
+           (Some Values.ListWaitingWorkflowStepsResponse.error_to_json)])
+let list_workflow_build_versions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and workflowVersionArn =
+         flag "workflow-version-arn" (optional string)
+           ~doc:"STRING WorkflowWildcardVersionArn"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workflow_build_versions
+           (Values.ListWorkflowBuildVersionsRequest.make ?workflowVersionArn
+              ?maxResults ?nextToken ())
+           (Some Values.ListWorkflowBuildVersionsResponse.to_json)
+           (Some Values.ListWorkflowBuildVersionsResponse.error_to_json)])
+let list_workflow_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and imageBuildVersionArn =
+         flag "image-build-version-arn" (required string)
+           ~doc:"STRING ImageBuildVersionArn" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workflow_executions
+           (Values.ListWorkflowExecutionsRequest.make ?maxResults ?nextToken
+              ~imageBuildVersionArn ())
+           (Some Values.ListWorkflowExecutionsResponse.to_json)
+           (Some Values.ListWorkflowExecutionsResponse.error_to_json)])
+let list_workflow_step_executions =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken"
+       and workflowExecutionId =
+         flag "workflow-execution-id" (required string)
+           ~doc:"STRING WorkflowExecutionId" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workflow_step_executions
+           (Values.ListWorkflowStepExecutionsRequest.make ?maxResults
+              ?nextToken ~workflowExecutionId ())
+           (Some Values.ListWorkflowStepExecutionsResponse.to_json)
+           (Some Values.ListWorkflowStepExecutionsResponse.error_to_json)])
+let list_workflows =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and owner = flag "owner" (optional json_arg) ~doc:"JSON Ownership"
+       and filters =
+         flag "filters" (optional json_arg) ~doc:"JSON FilterList"
+       and byName = flag "by-name" (optional bool) ~doc:"BOOL Boolean"
+       and maxResults =
+         flag "max-results" (optional int) ~doc:"INT RestrictedInteger"
+       and nextToken =
+         flag "next-token" (optional string) ~doc:"STRING PaginationToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.list_workflows
+           (Values.ListWorkflowsRequest.make
+              ?owner:(Option.map ~f:Values.Ownership.of_json owner)
+              ?filters:(Option.map ~f:Values.FilterList.of_json filters)
+              ?byName ?maxResults ?nextToken ())
+           (Some Values.ListWorkflowsResponse.to_json)
+           (Some Values.ListWorkflowsResponse.error_to_json)])
 let put_component_policy =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1210,6 +1865,58 @@ let put_image_recipe_policy =
            (Values.PutImageRecipePolicyRequest.make ~imageRecipeArn ~policy
               ()) (Some Values.PutImageRecipePolicyResponse.to_json)
            (Some Values.PutImageRecipePolicyResponse.error_to_json)])
+let retry_image =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and imageBuildVersionArn =
+         flag "image-build-version-arn" (required string)
+           ~doc:"STRING ImageBuildVersionArn"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.retry_image
+           (Values.RetryImageRequest.make ~imageBuildVersionArn ~clientToken
+              ()) (Some Values.RetryImageResponse.to_json)
+           (Some Values.RetryImageResponse.error_to_json)])
+let send_workflow_step_action =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and reason =
+         flag "reason" (optional string) ~doc:"STRING NonEmptyString"
+       and stepExecutionId =
+         flag "step-execution-id" (required string)
+           ~doc:"STRING WorkflowStepExecutionId"
+       and imageBuildVersionArn =
+         flag "image-build-version-arn" (required string)
+           ~doc:"STRING ImageBuildVersionArn"
+       and action =
+         flag "action" (required json_arg) ~doc:"JSON WorkflowStepActionType"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.send_workflow_step_action
+           (Values.SendWorkflowStepActionRequest.make ?reason
+              ~stepExecutionId ~imageBuildVersionArn
+              ~action:(Values.WorkflowStepActionType.of_json action)
+              ~clientToken ())
+           (Some Values.SendWorkflowStepActionResponse.to_json)
+           (Some Values.SendWorkflowStepActionResponse.error_to_json)])
 let start_image_pipeline_execution =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1220,6 +1927,7 @@ let start_image_pipeline_execution =
        and endpoint_url =
          flag "-endpoint-url" (optional string)
            ~doc:"URL override endpoint url"
+       and tags = flag "tags" (optional json_arg) ~doc:"JSON TagMap"
        and imagePipelineArn =
          flag "image-pipeline-arn" (required string)
            ~doc:"STRING ImagePipelineArn"
@@ -1228,10 +1936,52 @@ let start_image_pipeline_execution =
        fun () ->
          call ?endpoint_url ?profile:cli_profile ?region:cli_region
            Io.start_image_pipeline_execution
-           (Values.StartImagePipelineExecutionRequest.make ~imagePipelineArn
-              ~clientToken ())
+           (Values.StartImagePipelineExecutionRequest.make
+              ?tags:(Option.map ~f:Values.TagMap.of_json tags)
+              ~imagePipelineArn ~clientToken ())
            (Some Values.StartImagePipelineExecutionResponse.to_json)
            (Some Values.StartImagePipelineExecutionResponse.error_to_json)])
+let start_resource_state_update =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleNameOrArn"
+       and includeResources =
+         flag "include-resources" (optional json_arg)
+           ~doc:"JSON ResourceStateUpdateIncludeResources"
+       and exclusionRules =
+         flag "exclusion-rules" (optional json_arg)
+           ~doc:"JSON ResourceStateUpdateExclusionRules"
+       and updateAt =
+         flag "update-at" (optional json_arg) ~doc:"JSON DateTimeTimestamp"
+       and resourceArn =
+         flag "resource-arn" (required string)
+           ~doc:"STRING ImageBuildVersionArn"
+       and state = flag "state" (required json_arg) ~doc:"JSON ResourceState"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.start_resource_state_update
+           (Values.StartResourceStateUpdateRequest.make ?executionRole
+              ?includeResources:(Option.map
+                                   ~f:Values.ResourceStateUpdateIncludeResources.of_json
+                                   includeResources)
+              ?exclusionRules:(Option.map
+                                 ~f:Values.ResourceStateUpdateExclusionRules.of_json
+                                 exclusionRules)
+              ?updateAt:(Option.map ~f:Values.DateTimeTimestamp.of_json
+                           updateAt) ~resourceArn
+              ~state:(Values.ResourceState.of_json state) ~clientToken ())
+           (Some Values.StartResourceStateUpdateResponse.to_json)
+           (Some Values.StartResourceStateUpdateResponse.error_to_json)])
 let tag_resource =
   Command.async ~summary:""
     ([%map_open.Command
@@ -1333,6 +2083,19 @@ let update_image_pipeline =
          flag "schedule" (optional json_arg) ~doc:"JSON Schedule"
        and status =
          flag "status" (optional json_arg) ~doc:"JSON PipelineStatus"
+       and imageScanningConfiguration =
+         flag "image-scanning-configuration" (optional json_arg)
+           ~doc:"JSON ImageScanningConfiguration"
+       and workflows =
+         flag "workflows" (optional json_arg)
+           ~doc:"JSON WorkflowConfigurationList"
+       and loggingConfiguration =
+         flag "logging-configuration" (optional json_arg)
+           ~doc:"JSON PipelineLoggingConfiguration"
+       and executionRole =
+         flag "execution-role" (optional string) ~doc:"STRING RoleNameOrArn"
+       and imageTags =
+         flag "image-tags" (optional json_arg) ~doc:"JSON TagMap"
        and imagePipelineArn =
          flag "image-pipeline-arn" (required string)
            ~doc:"STRING ImagePipelineArn"
@@ -1353,6 +2116,16 @@ let update_image_pipeline =
               ?enhancedImageMetadataEnabled
               ?schedule:(Option.map ~f:Values.Schedule.of_json schedule)
               ?status:(Option.map ~f:Values.PipelineStatus.of_json status)
+              ?imageScanningConfiguration:(Option.map
+                                             ~f:Values.ImageScanningConfiguration.of_json
+                                             imageScanningConfiguration)
+              ?workflows:(Option.map
+                            ~f:Values.WorkflowConfigurationList.of_json
+                            workflows)
+              ?loggingConfiguration:(Option.map
+                                       ~f:Values.PipelineLoggingConfiguration.of_json
+                                       loggingConfiguration) ?executionRole
+              ?imageTags:(Option.map ~f:Values.TagMap.of_json imageTags)
               ~imagePipelineArn ~infrastructureConfigurationArn ~clientToken
               ()) (Some Values.UpdateImagePipelineResponse.to_json)
            (Some Values.UpdateImagePipelineResponse.error_to_json)])
@@ -1389,6 +2162,8 @@ let update_infrastructure_configuration =
        and instanceMetadataOptions =
          flag "instance-metadata-options" (optional json_arg)
            ~doc:"JSON InstanceMetadataOptions"
+       and placement =
+         flag "placement" (optional json_arg) ~doc:"JSON Placement"
        and infrastructureConfigurationArn =
          flag "infrastructure-configuration-arn" (required string)
            ~doc:"STRING InfrastructureConfigurationArn"
@@ -1413,15 +2188,61 @@ let update_infrastructure_configuration =
               ?instanceMetadataOptions:(Option.map
                                           ~f:Values.InstanceMetadataOptions.of_json
                                           instanceMetadataOptions)
+              ?placement:(Option.map ~f:Values.Placement.of_json placement)
               ~infrastructureConfigurationArn ~instanceProfileName
               ~clientToken ())
            (Some Values.UpdateInfrastructureConfigurationResponse.to_json)
            (Some
               Values.UpdateInfrastructureConfigurationResponse.error_to_json)])
+let update_lifecycle_policy =
+  Command.async ~summary:""
+    ([%map_open.Command
+       let cli_profile =
+         flag "-cli-profile" (optional string) ~doc:"NAME aws profile to use"
+       and cli_region =
+         flag "-cli-region" (optional string) ~doc:"REGION override region"
+       and endpoint_url =
+         flag "-endpoint-url" (optional string)
+           ~doc:"URL override endpoint url"
+       and description =
+         flag "description" (optional string) ~doc:"STRING NonEmptyString"
+       and status =
+         flag "status" (optional json_arg) ~doc:"JSON LifecyclePolicyStatus"
+       and lifecyclePolicyArn =
+         flag "lifecycle-policy-arn" (required string)
+           ~doc:"STRING LifecyclePolicyArn"
+       and executionRole =
+         flag "execution-role" (required string) ~doc:"STRING RoleNameOrArn"
+       and resourceType =
+         flag "resource-type" (required json_arg)
+           ~doc:"JSON LifecyclePolicyResourceType"
+       and policyDetails =
+         flag "policy-details" (required json_arg)
+           ~doc:"JSON LifecyclePolicyDetails"
+       and resourceSelection =
+         flag "resource-selection" (required json_arg)
+           ~doc:"JSON LifecyclePolicyResourceSelection"
+       and clientToken =
+         flag "client-token" (required string) ~doc:"STRING ClientToken" in
+       fun () ->
+         call ?endpoint_url ?profile:cli_profile ?region:cli_region
+           Io.update_lifecycle_policy
+           (Values.UpdateLifecyclePolicyRequest.make ?description
+              ?status:(Option.map ~f:Values.LifecyclePolicyStatus.of_json
+                         status) ~lifecyclePolicyArn ~executionRole
+              ~resourceType:(Values.LifecyclePolicyResourceType.of_json
+                               resourceType)
+              ~policyDetails:(Values.LifecyclePolicyDetails.of_json
+                                policyDetails)
+              ~resourceSelection:(Values.LifecyclePolicyResourceSelection.of_json
+                                    resourceSelection) ~clientToken ())
+           (Some Values.UpdateLifecyclePolicyResponse.to_json)
+           (Some Values.UpdateLifecyclePolicyResponse.error_to_json)])
 let main =
   Command.group
     ~summary:((Awso.Service.to_string Values.service) ^ " commands")
     [("cancel-image-creation", cancel_image_creation);
+    ("cancel-lifecycle-execution", cancel_lifecycle_execution);
     ("create-component", create_component);
     ("create-container-recipe", create_container_recipe);
     ("create-distribution-configuration", create_distribution_configuration);
@@ -1430,6 +2251,8 @@ let main =
     ("create-image-recipe", create_image_recipe);
     ("create-infrastructure-configuration",
       create_infrastructure_configuration);
+    ("create-lifecycle-policy", create_lifecycle_policy);
+    ("create-workflow", create_workflow);
     ("delete-component", delete_component);
     ("delete-container-recipe", delete_container_recipe);
     ("delete-distribution-configuration", delete_distribution_configuration);
@@ -1438,6 +2261,9 @@ let main =
     ("delete-image-recipe", delete_image_recipe);
     ("delete-infrastructure-configuration",
       delete_infrastructure_configuration);
+    ("delete-lifecycle-policy", delete_lifecycle_policy);
+    ("delete-workflow", delete_workflow);
+    ("distribute-image", distribute_image);
     ("get-component", get_component);
     ("get-component-policy", get_component_policy);
     ("get-container-recipe", get_container_recipe);
@@ -1449,7 +2275,14 @@ let main =
     ("get-image-recipe", get_image_recipe);
     ("get-image-recipe-policy", get_image_recipe_policy);
     ("get-infrastructure-configuration", get_infrastructure_configuration);
+    ("get-lifecycle-execution", get_lifecycle_execution);
+    ("get-lifecycle-policy", get_lifecycle_policy);
+    ("get-marketplace-resource", get_marketplace_resource);
+    ("get-workflow", get_workflow);
+    ("get-workflow-execution", get_workflow_execution);
+    ("get-workflow-step-execution", get_workflow_step_execution);
     ("import-component", import_component);
+    ("import-disk-image", import_disk_image);
     ("import-vm-image", import_vm_image);
     ("list-component-build-versions", list_component_build_versions);
     ("list-components", list_components);
@@ -1460,18 +2293,34 @@ let main =
     ("list-image-pipeline-images", list_image_pipeline_images);
     ("list-image-pipelines", list_image_pipelines);
     ("list-image-recipes", list_image_recipes);
+    ("list-image-scan-finding-aggregations",
+      list_image_scan_finding_aggregations);
+    ("list-image-scan-findings", list_image_scan_findings);
     ("list-images", list_images);
     ("list-infrastructure-configurations",
       list_infrastructure_configurations);
+    ("list-lifecycle-execution-resources",
+      list_lifecycle_execution_resources);
+    ("list-lifecycle-executions", list_lifecycle_executions);
+    ("list-lifecycle-policies", list_lifecycle_policies);
     ("list-tags-for-resource", list_tags_for_resource);
+    ("list-waiting-workflow-steps", list_waiting_workflow_steps);
+    ("list-workflow-build-versions", list_workflow_build_versions);
+    ("list-workflow-executions", list_workflow_executions);
+    ("list-workflow-step-executions", list_workflow_step_executions);
+    ("list-workflows", list_workflows);
     ("put-component-policy", put_component_policy);
     ("put-container-recipe-policy", put_container_recipe_policy);
     ("put-image-policy", put_image_policy);
     ("put-image-recipe-policy", put_image_recipe_policy);
+    ("retry-image", retry_image);
+    ("send-workflow-step-action", send_workflow_step_action);
     ("start-image-pipeline-execution", start_image_pipeline_execution);
+    ("start-resource-state-update", start_resource_state_update);
     ("tag-resource", tag_resource);
     ("untag-resource", untag_resource);
     ("update-distribution-configuration", update_distribution_configuration);
     ("update-image-pipeline", update_image_pipeline);
     ("update-infrastructure-configuration",
-      update_infrastructure_configuration)]
+      update_infrastructure_configuration);
+    ("update-lifecycle-policy", update_lifecycle_policy)]

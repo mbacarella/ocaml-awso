@@ -25,6 +25,24 @@ let structure_to_value = structure_to_value_aux ~f:Fn.id
 let structure_to_wrapped_value ~wrapper ~response =
   structure_to_value_aux
     ~f:(fun x -> [(wrapper, (`Structure x)); (response, (`Structure []))])
+module FileFormat =
+  struct
+    type nonrec t = string
+    let context_ = "FileFormat"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FileFormat" j
+    let to_json = simple_to_json to_value
+  end
 module String_ =
   struct
     type nonrec t = string
@@ -38,16 +56,132 @@ module String_ =
     let of_json j = string_of_json ~kind:"String" j
     let to_json = simple_to_json to_value
   end
+module CurrencyCode =
+  struct
+    type nonrec t = string
+    let context_ = "CurrencyCode"
+    let make i =
+      let open Result in
+        ok_or_failwith (check_pattern i ~pattern:"[A-Z]{3}"); i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"CurrencyCode" j
+    let to_json = simple_to_json to_value
+  end
+module FileFormats =
+  struct
+    type nonrec t = FileFormat.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:FileFormat.to_value)) |> (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true))) ~f:FileFormat.of_xml)
+    let of_json j =
+      list_of_json ~kind:"FileFormats" ~of_json:FileFormat.of_json j
+    let to_json v = composed_to_json to_value v
+  end
+module PriceListArn =
+  struct
+    type nonrec t = string
+    let context_ = "PriceListArn"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_min i ~min:18) >>=
+             (fun () ->
+                (check_string_max i ~max:2048) >>=
+                  (fun () ->
+                     check_pattern i
+                       ~pattern:"arn:[A-Za-z0-9][-.A-Za-z0-9]{0,62}:pricing:::price-list/[A-Za-z0-9+_/.-]{1,1023}")));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"PriceListArn" j
+    let to_json = simple_to_json to_value
+  end
+module RegionCode =
+  struct
+    type nonrec t = string
+    let context_ = "RegionCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:255) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"RegionCode" j
+    let to_json = simple_to_json to_value
+  end
+module Field =
+  struct
+    type nonrec t = string
+    let context_ = "Field"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Field" j
+    let to_json = simple_to_json to_value
+  end
 module FilterType =
   struct
     type nonrec t =
       | TERM_MATCH 
+      | EQUALS 
+      | CONTAINS 
+      | ANY_OF 
+      | NONE_OF 
       | Non_static_id of string 
     let make i = i
     let to_string =
-      function | TERM_MATCH -> "TERM_MATCH" | Non_static_id s -> s
+      function
+      | TERM_MATCH -> "TERM_MATCH"
+      | EQUALS -> "EQUALS"
+      | CONTAINS -> "CONTAINS"
+      | ANY_OF -> "ANY_OF"
+      | NONE_OF -> "NONE_OF"
+      | Non_static_id s -> s
     let of_string =
-      function | "TERM_MATCH" -> TERM_MATCH | x -> Non_static_id x
+      function
+      | "TERM_MATCH" -> TERM_MATCH
+      | "EQUALS" -> EQUALS
+      | "CONTAINS" -> CONTAINS
+      | "ANY_OF" -> ANY_OF
+      | "NONE_OF" -> NONE_OF
+      | x -> Non_static_id x
     let to_value x = `Enum (to_string x)
     let to_query v = to_query to_value v
     let to_header x = to_string x
@@ -56,10 +190,31 @@ module FilterType =
     let of_json j = of_string (string_of_json ~kind:"FilterType" j)
     let to_json = simple_to_json to_value
   end
+module Value =
+  struct
+    type nonrec t = string
+    let context_ = "Value"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:1024) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"Value" j
+    let to_json = simple_to_json to_value
+  end
 module AttributeNameList =
   struct
     type nonrec t = String_.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:String_.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -93,17 +248,69 @@ module ErrorMessage =
     let of_json j = string_of_json ~kind:"errorMessage" j
     let to_json = simple_to_json to_value
   end
-module PriceListItemJSON =
+module PriceList =
+  struct
+    type nonrec t =
+      {
+      priceListArn: PriceListArn.t option
+        [@ocaml.doc
+          "The unique identifier that maps to where your Price List files are located. PriceListArn can be obtained from the ListPriceList response."];
+      regionCode: RegionCode.t option
+        [@ocaml.doc
+          "This is used to filter the Price List by Amazon Web Services Region. For example, to get the price list only for the US East (N. Virginia) Region, use us-east-1. If nothing is specified, you retrieve price lists for all applicable Regions. The available RegionCode list can be retrieved from GetAttributeValues API."];
+      currencyCode: CurrencyCode.t option
+        [@ocaml.doc
+          "The three alphabetical character ISO-4217 currency code the Price List files are denominated in."];
+      fileFormats: FileFormats.t option
+        [@ocaml.doc
+          "The format you want to retrieve your Price List files. The FileFormat can be obtained from the ListPriceList response."]}
+    let make ?priceListArn =
+      fun ?regionCode ->
+        fun ?currencyCode ->
+          fun ?fileFormats ->
+            fun () -> { priceListArn; regionCode; currencyCode; fileFormats }
+    let to_value x =
+      structure_to_value
+        [("PriceListArn",
+           (Option.map x.priceListArn ~f:PriceListArn.to_value));
+        ("RegionCode", (Option.map x.regionCode ~f:RegionCode.to_value));
+        ("CurrencyCode",
+          (Option.map x.currencyCode ~f:CurrencyCode.to_value));
+        ("FileFormats", (Option.map x.fileFormats ~f:FileFormats.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileFormats =
+        (Option.map ~f:FileFormats.of_xml) (Xml.child xml_arg0 "FileFormats") in
+      let currencyCode =
+        (Option.map ~f:CurrencyCode.of_xml)
+          (Xml.child xml_arg0 "CurrencyCode") in
+      let regionCode =
+        (Option.map ~f:RegionCode.of_xml) (Xml.child xml_arg0 "RegionCode") in
+      let priceListArn =
+        (Option.map ~f:PriceListArn.of_xml)
+          (Xml.child xml_arg0 "PriceListArn") in
+      make ?fileFormats ?currencyCode ?regionCode ?priceListArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileFormats = field_map json__ "FileFormats" FileFormats.of_json in
+      let currencyCode = field_map json__ "CurrencyCode" CurrencyCode.of_json in
+      let regionCode = field_map json__ "RegionCode" RegionCode.of_json in
+      let priceListArn = field_map json__ "PriceListArn" PriceListArn.of_json in
+      make ?fileFormats ?currencyCode ?regionCode ?priceListArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This feature is in preview release and is subject to change. Your use of Amazon Web Services Price List API is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This is the type of price list references that match your request."]
+module SynthesizedJsonPriceListJsonItem =
   struct
     type nonrec t = string
-    let context_ = "PriceListItemJSON"
+    let context_ = "SynthesizedJsonPriceListJsonItem"
     let make i = i
     let of_string x = x
     let to_value x = `String x
     let to_query v = to_query to_value v
     let to_header x = x
     let of_xml = Xml.string_data_exn ~context:context_
-    let of_json j = string_of_json ~kind:"PriceListItemJSON" j
+    let of_json j = string_of_json ~kind:"SynthesizedJsonPriceListJsonItem" j
     let to_json = simple_to_json to_value
   end
 module Filter =
@@ -112,35 +319,35 @@ module Filter =
       {
       type_: FilterType.t
         [@ocaml.doc
-          "The type of filter that you want to use. Valid values are: TERM_MATCH. TERM_MATCH returns only products that match both the given filter field and the given value."];
-      field: String_.t
+          "The type of filter that you want to use. Valid values are: TERM_MATCH: Returns only products that match both the given filter field and the given value. EQUALS: Returns products that have a field value exactly matching the provided value. CONTAINS: Returns products where the field value contains the provided value as a substring. ANY_OF: Returns products where the field value is any of the provided values. NONE_OF: Returns products where the field value is not any of the provided values."];
+      field: Field.t
         [@ocaml.doc
           "The product metadata field that you want to filter on. You can filter by just the service code to see all products for a specific service, filter by just the attribute name to see a specific attribute for multiple services, or use both a service code and an attribute name to retrieve only products that match both fields. Valid values include: ServiceCode, and all attribute names For example, you can filter by the AmazonEC2 service code and the volumeType attribute name to get the prices for only Amazon EC2 volumes."];
-      value: String_.t
+      value: Value.t
         [@ocaml.doc
-          "The service code or attribute value that you want to filter by. If you are filtering by service code this is the actual service code, such as AmazonEC2. If you are filtering by attribute name, this is the attribute value that you want the returned products to match, such as a Provisioned IOPS volume."]}
+          "The service code or attribute value that you want to filter by. If you're filtering by service code this is the actual service code, such as AmazonEC2. If you're filtering by attribute name, this is the attribute value that you want the returned products to match, such as a Provisioned IOPS volume."]}
     let context_ = "Filter"
     let make ~type_ =
       fun ~field -> fun ~value -> fun () -> { type_; field; value }
     let to_value x =
       structure_to_value
         [("Type", (Some (FilterType.to_value x.type_)));
-        ("Field", (Some (String_.to_value x.field)));
-        ("Value", (Some (String_.to_value x.value)))]
+        ("Field", (Some (Field.to_value x.field)));
+        ("Value", (Some (Value.to_value x.value)))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let value =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
+        Value.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Value") in
       let field =
-        String_.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Field") in
+        Field.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Field") in
       let type_ =
         FilterType.of_xml (Xml.child_exn ~context:context_ xml_arg0 "Type") in
       make ~value ~field ~type_ ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map_exn json "Value" String_.of_json in
-      let field = field_map_exn json "Field" String_.of_json in
-      let type_ = field_map_exn json "Type" FilterType.of_json in
+    let of_json json__ =
+      let value = field_map_exn json__ "Value" Value.of_json in
+      let field = field_map_exn json__ "Field" Field.of_json in
+      let type_ = field_map_exn json__ "Type" FilterType.of_json in
       make ~value ~field ~type_ ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -160,8 +367,8 @@ module AttributeValue =
       let value = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Value") in
       make ?value ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let value = field_map json "Value" String_.of_json in make ?value ()
+    let of_json json__ =
+      let value = field_map json__ "Value" String_.of_json in make ?value ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The values of a given attribute, such as Throughput Optimized HDD or Provisioned IOPS for the Amazon EC2 volumeType attribute."]
@@ -189,14 +396,34 @@ module Service =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?attributeNames ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
+    let of_json json__ =
       let attributeNames =
-        field_map json "AttributeNames" AttributeNameList.of_json in
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
+        field_map json__ "AttributeNames" AttributeNameList.of_json in
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
       make ?attributeNames ?serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "The metadata for a service, such as the service code and available attribute names."]
+module AccessDeniedException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "General authentication failure. The request wasn't signed correctly."]
 module ExpiredNextTokenException =
   struct
     type nonrec t = {
@@ -211,8 +438,8 @@ module ExpiredNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -231,8 +458,8 @@ module InternalErrorException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -251,8 +478,8 @@ module InvalidNextTokenException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -271,8 +498,8 @@ module InvalidParameterException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "One or more parameters had an invalid value."]
@@ -290,17 +517,20 @@ module NotFoundException =
         (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
       make ?message ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let message = field_map json "Message" ErrorMessage.of_json in
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
       make ?message ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc "The requested resource can't be found."]
-module PriceList =
+module PriceLists =
   struct
-    type nonrec t = PriceListItemJSON.t list
+    type nonrec t = PriceList.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
-      (xs |> (List.map ~f:PriceListItemJSON.to_value)) |> (fun x -> `List x)
+      (xs |> (List.map ~f:PriceList.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
     let to_header _ =
       failwithf "to_header is not implemented for List_shape objects" ()
@@ -314,12 +544,62 @@ module PriceList =
                          (match Stdlib.String.trim s with
                           | "" -> false
                           | _ -> true)
-                     | _ -> true))) ~f:PriceListItemJSON.of_xml)
+                     | _ -> true))) ~f:PriceList.of_xml)
     let of_json j =
-      list_of_json ~kind:"PriceList" ~of_json:PriceListItemJSON.of_json j
+      list_of_json ~kind:"PriceLists" ~of_json:PriceList.of_json j
     let to_json v = composed_to_json to_value v
   end
-module BoxedInteger =
+module ResourceNotFoundException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "The requested resource can't be found."]
+module ThrottlingException =
+  struct
+    type nonrec t = {
+      message: ErrorMessage.t option }
+    let make ?message = fun () -> { message }
+    let to_value x =
+      structure_to_value
+        [("Message", (Option.map x.message ~f:ErrorMessage.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let message =
+        (Option.map ~f:ErrorMessage.of_xml) (Xml.child xml_arg0 "Message") in
+      make ?message ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let message = field_map json__ "Message" ErrorMessage.of_json in
+      make ?message ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc "You've made too many requests exceeding service quotas."]
+module EffectiveDate =
+  struct
+    type nonrec t = string
+    let make i = i
+    let of_string x = x
+    let to_value x = `Timestamp x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = string_of_xml ~kind:"a timestamp"
+    let of_json = timestamp_of_json
+    let to_json = simple_to_json to_value
+  end
+module MaxResults =
   struct
     type nonrec t = int
     let make i =
@@ -333,14 +613,87 @@ module BoxedInteger =
     let to_header x = Int.to_string x
     let of_xml xml_arg0 =
       Int.of_string
-        (string_of_xml ~kind:"an integer for BoxedInteger" xml_arg0)
+        (string_of_xml ~kind:"an integer for MaxResults" xml_arg0)
     let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
     let to_json = simple_to_json to_value
+  end
+module ServiceCode =
+  struct
+    type nonrec t = string
+    let context_ = "ServiceCode"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"ServiceCode" j
+    let to_json = simple_to_json to_value
+  end
+module FormatVersion =
+  struct
+    type nonrec t = string
+    let context_ = "FormatVersion"
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_string_max i ~max:32) >>=
+             (fun () -> check_string_min i ~min:1));
+        i
+    let of_string x = x
+    let to_value x = `String x
+    let to_query v = to_query to_value v
+    let to_header x = x
+    let of_xml = Xml.string_data_exn ~context:context_
+    let of_json j = string_of_json ~kind:"FormatVersion" j
+    let to_json = simple_to_json to_value
+  end
+module PriceListJsonItems =
+  struct
+    type nonrec t = SynthesizedJsonPriceListJsonItem.t list
+    let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
+    let to_value xs =
+      (xs |> (List.map ~f:SynthesizedJsonPriceListJsonItem.to_value)) |>
+        (fun x -> `List x)
+    let to_query v = to_query to_value v
+    let to_header _ =
+      failwithf "to_header is not implemented for List_shape objects" ()
+    let of_xml x =
+      make
+        (List.map
+           ((Xml.all_children x) |>
+              (List.filter
+                 ~f:(function
+                     | `Data s ->
+                         (match Stdlib.String.trim s with
+                          | "" -> false
+                          | _ -> true)
+                     | _ -> true)))
+           ~f:SynthesizedJsonPriceListJsonItem.of_xml)
+    let of_json j =
+      list_of_json ~kind:"PriceListJsonItems"
+        ~of_json:SynthesizedJsonPriceListJsonItem.of_json j
+    let to_json v = composed_to_json to_value v
   end
 module Filters =
   struct
     type nonrec t = Filter.t list
-    let make i = i
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_list_max i ~max:50) >>= (fun () -> check_list_min i ~min:0));
+        i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Filter.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -360,10 +713,31 @@ module Filters =
     let of_json j = list_of_json ~kind:"Filters" ~of_json:Filter.of_json j
     let to_json v = composed_to_json to_value v
   end
+module GetProductsMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GetProductsMaxResults" xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module AttributeValueList =
   struct
     type nonrec t = AttributeValue.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:AttributeValue.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -385,10 +759,33 @@ module AttributeValueList =
         j
     let to_json v = composed_to_json to_value v
   end
+module GetAttributeValuesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:10000) >>=
+             (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for GetAttributeValuesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
 module ServiceList =
   struct
     type nonrec t = Service.t list
     let make i = i
+    let of_string _ =
+      failwithf "of_string is not implemented for List_shape objects" ()
+      [@@warning "-32"]
     let to_value xs =
       (xs |> (List.map ~f:Service.to_value)) |> (fun x -> `List x)
     let to_query v = to_query to_value v
@@ -409,31 +806,51 @@ module ServiceList =
       list_of_json ~kind:"ServiceList" ~of_json:Service.of_json j
     let to_json v = composed_to_json to_value v
   end
-module GetProductsResponse =
+module DescribeServicesMaxResults =
+  struct
+    type nonrec t = int
+    let make i =
+      let open Result in
+        ok_or_failwith
+          ((check_int_max i ~max:100) >>= (fun () -> check_int_min i ~min:1));
+        i
+    let of_string = Int.of_string
+    let to_value x = `Integer x
+    let to_query v = to_query to_value v
+    let to_header x = Int.to_string x
+    let of_xml xml_arg0 =
+      Int.of_string
+        (string_of_xml ~kind:"an integer for DescribeServicesMaxResults"
+           xml_arg0)
+    let of_json j = Int.of_float (float_of_json ~kind:"an integer" j)
+    let to_json = simple_to_json to_value
+  end
+module ListPriceListsResponse =
   struct
     type nonrec t =
       {
-      formatVersion: String_.t option
+      priceLists: PriceLists.t option
         [@ocaml.doc
-          "The format version of the response. For example, aws_v1."];
-      priceList: PriceList.t option
-        [@ocaml.doc
-          "The list of products that match your filters. The list contains both the product metadata and the price information."];
+          "The type of price list references that match your request."];
       nextToken: String_.t option
         [@ocaml.doc
           "The pagination token that indicates the next set of results to retrieve."]}
     type nonrec error =
-      [ `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
-    let make ?formatVersion =
-      fun ?priceList ->
-        fun ?nextToken -> fun () -> { formatVersion; priceList; nextToken }
+    let make ?priceLists =
+      fun ?nextToken -> fun () -> { priceLists; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
       | "InternalErrorException" ->
@@ -444,11 +861,17 @@ module GetProductsResponse =
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
       | "InternalErrorException" ->
@@ -459,10 +882,18 @@ module GetProductsResponse =
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ExpiredNextTokenException e ->
           `Assoc
             [("error", (`String "ExpiredNextTokenException"));
@@ -483,6 +914,14 @@ module GetProductsResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -490,23 +929,225 @@ module GetProductsResponse =
               | Some m -> [("message", (`String m))])))
     let to_value x =
       structure_to_value
-        [("FormatVersion", (Option.map x.formatVersion ~f:String_.to_value));
-        ("PriceList", (Option.map x.priceList ~f:PriceList.to_value));
+        [("PriceLists", (Option.map x.priceLists ~f:PriceLists.to_value));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let priceLists =
+        (Option.map ~f:PriceLists.of_xml) (Xml.child xml_arg0 "PriceLists") in
+      make ?nextToken ?priceLists ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let priceLists = field_map json__ "PriceLists" PriceLists.of_json in
+      make ?nextToken ?priceLists ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This feature is in preview release and is subject to change. Your use of Amazon Web Services Price List API is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This returns a list of Price List references that the requester if authorized to view, given a ServiceCode, CurrencyCode, and an EffectiveDate. Use without a RegionCode filter to list Price List references from all available Amazon Web Services Regions. Use with a RegionCode filter to get the Price List reference that's specific to a specific Amazon Web Services Region. You can use the PriceListArn from the response to get your preferred Price List files through the GetPriceListFileUrl API."]
+module ListPriceListsRequest =
+  struct
+    type nonrec t =
+      {
+      serviceCode: ServiceCode.t
+        [@ocaml.doc
+          "The service code or the Savings Plans service code for the attributes that you want to retrieve. For example, to get the list of applicable Amazon EC2 price lists, use AmazonEC2. For a full list of service codes containing On-Demand and Reserved Instance (RI) pricing, use the DescribeServices API. To retrieve the Reserved Instance and Compute Savings Plans price lists, use ComputeSavingsPlans. To retrieve Machine Learning Savings Plans price lists, use MachineLearningSavingsPlans."];
+      effectiveDate: EffectiveDate.t
+        [@ocaml.doc
+          "The date that the Price List file prices are effective from."];
+      regionCode: RegionCode.t option
+        [@ocaml.doc
+          "This is used to filter the Price List by Amazon Web Services Region. For example, to get the price list only for the US East (N. Virginia) Region, use us-east-1. If nothing is specified, you retrieve price lists for all applicable Regions. The available RegionCode list can be retrieved from GetAttributeValues API."];
+      currencyCode: CurrencyCode.t
+        [@ocaml.doc
+          "The three alphabetical character ISO-4217 currency code that the Price List files are denominated in."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that indicates the next set of results that you want to retrieve."];
+      maxResults: MaxResults.t option
+        [@ocaml.doc
+          "The maximum number of results to return in the response."]}
+    let context_ = "ListPriceListsRequest"
+    let make ?regionCode =
+      fun ?nextToken ->
+        fun ?maxResults ->
+          fun ~serviceCode ->
+            fun ~effectiveDate ->
+              fun ~currencyCode ->
+                fun () ->
+                  {
+                    regionCode;
+                    nextToken;
+                    maxResults;
+                    serviceCode;
+                    effectiveDate;
+                    currencyCode
+                  }
+    let to_value x =
+      structure_to_value
+        [("ServiceCode", (Some (ServiceCode.to_value x.serviceCode)));
+        ("EffectiveDate", (Some (EffectiveDate.to_value x.effectiveDate)));
+        ("RegionCode", (Option.map x.regionCode ~f:RegionCode.to_value));
+        ("CurrencyCode", (Some (CurrencyCode.to_value x.currencyCode)));
+        ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
+        ("MaxResults", (Option.map x.maxResults ~f:MaxResults.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let maxResults =
+        (Option.map ~f:MaxResults.of_xml) (Xml.child xml_arg0 "MaxResults") in
+      let nextToken =
+        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
+      let currencyCode =
+        CurrencyCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "CurrencyCode") in
+      let regionCode =
+        (Option.map ~f:RegionCode.of_xml) (Xml.child xml_arg0 "RegionCode") in
+      let effectiveDate =
+        EffectiveDate.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "EffectiveDate") in
+      let serviceCode =
+        ServiceCode.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+      make ?maxResults ?nextToken ~currencyCode ?regionCode ~effectiveDate
+        ~serviceCode ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let maxResults = field_map json__ "MaxResults" MaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let currencyCode =
+        field_map_exn json__ "CurrencyCode" CurrencyCode.of_json in
+      let regionCode = field_map json__ "RegionCode" RegionCode.of_json in
+      let effectiveDate =
+        field_map_exn json__ "EffectiveDate" EffectiveDate.of_json in
+      let serviceCode =
+        field_map_exn json__ "ServiceCode" ServiceCode.of_json in
+      make ?maxResults ?nextToken ~currencyCode ?regionCode ~effectiveDate
+        ~serviceCode ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This feature is in preview release and is subject to change. Your use of Amazon Web Services Price List API is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This returns a list of Price List references that the requester if authorized to view, given a ServiceCode, CurrencyCode, and an EffectiveDate. Use without a RegionCode filter to list Price List references from all available Amazon Web Services Regions. Use with a RegionCode filter to get the Price List reference that's specific to a specific Amazon Web Services Region. You can use the PriceListArn from the response to get your preferred Price List files through the GetPriceListFileUrl API."]
+module GetProductsResponse =
+  struct
+    type nonrec t =
+      {
+      formatVersion: FormatVersion.t option
+        [@ocaml.doc
+          "The format version of the response. For example, aws_v1."];
+      priceList: PriceListJsonItems.t option
+        [@ocaml.doc
+          "The list of products that match your filters. The list contains both the product metadata and the price information."];
+      nextToken: String_.t option
+        [@ocaml.doc
+          "The pagination token that indicates the next set of results to retrieve."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidNextTokenException of InvalidNextTokenException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?formatVersion =
+      fun ?priceList ->
+        fun ?nextToken -> fun () -> { formatVersion; priceList; nextToken }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "ExpiredNextTokenException" ->
+          `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidNextTokenException" ->
+          `InvalidNextTokenException (InvalidNextTokenException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `ExpiredNextTokenException e ->
+          `Assoc
+            [("error", (`String "ExpiredNextTokenException"));
+            ("details", (ExpiredNextTokenException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidNextTokenException e ->
+          `Assoc
+            [("error", (`String "InvalidNextTokenException"));
+            ("details", (InvalidNextTokenException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value
+        [("FormatVersion",
+           (Option.map x.formatVersion ~f:FormatVersion.to_value));
+        ("PriceList",
+          (Option.map x.priceList ~f:PriceListJsonItems.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let priceList =
-        (Option.map ~f:PriceList.of_xml) (Xml.child xml_arg0 "PriceList") in
+        (Option.map ~f:PriceListJsonItems.of_xml)
+          (Xml.child xml_arg0 "PriceList") in
       let formatVersion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FormatVersion") in
+        (Option.map ~f:FormatVersion.of_xml)
+          (Xml.child xml_arg0 "FormatVersion") in
       make ?nextToken ?priceList ?formatVersion ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let priceList = field_map json "PriceList" PriceList.of_json in
-      let formatVersion = field_map json "FormatVersion" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let priceList = field_map json__ "PriceList" PriceListJsonItems.of_json in
+      let formatVersion =
+        field_map json__ "FormatVersion" FormatVersion.of_json in
       make ?nextToken ?priceList ?formatVersion ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -515,60 +1156,194 @@ module GetProductsRequest =
   struct
     type nonrec t =
       {
-      serviceCode: String_.t option
+      serviceCode: String_.t
         [@ocaml.doc
           "The code for the service whose products you want to retrieve."];
       filters: Filters.t option
         [@ocaml.doc
           "The list of filters that limit the returned products. only products that match all filters are returned."];
-      formatVersion: String_.t option
+      formatVersion: FormatVersion.t option
         [@ocaml.doc
           "The format version that you want the response to be in. Valid values are: aws_v1"];
       nextToken: String_.t option
         [@ocaml.doc
           "The pagination token that indicates the next set of results that you want to retrieve."];
-      maxResults: BoxedInteger.t option
+      maxResults: GetProductsMaxResults.t option
         [@ocaml.doc
           "The maximum number of results to return in the response."]}
-    let make ?serviceCode =
-      fun ?filters ->
-        fun ?formatVersion ->
-          fun ?nextToken ->
-            fun ?maxResults ->
+    let context_ = "GetProductsRequest"
+    let make ?filters =
+      fun ?formatVersion ->
+        fun ?nextToken ->
+          fun ?maxResults ->
+            fun ~serviceCode ->
               fun () ->
-                { serviceCode; filters; formatVersion; nextToken; maxResults
+                { filters; formatVersion; nextToken; maxResults; serviceCode
                 }
     let to_value x =
       structure_to_value
-        [("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value));
+        [("ServiceCode", (Some (String_.to_value x.serviceCode)));
         ("Filters", (Option.map x.filters ~f:Filters.to_value));
-        ("FormatVersion", (Option.map x.formatVersion ~f:String_.to_value));
+        ("FormatVersion",
+          (Option.map x.formatVersion ~f:FormatVersion.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:BoxedInteger.to_value))]
+        ("MaxResults",
+          (Option.map x.maxResults ~f:GetProductsMaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:BoxedInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:GetProductsMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let formatVersion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FormatVersion") in
+        (Option.map ~f:FormatVersion.of_xml)
+          (Xml.child xml_arg0 "FormatVersion") in
       let filters =
         (Option.map ~f:Filters.of_xml) (Xml.child xml_arg0 "Filters") in
       let serviceCode =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
-      make ?maxResults ?nextToken ?formatVersion ?filters ?serviceCode ()
+        String_.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
+      make ?maxResults ?nextToken ?formatVersion ?filters ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let formatVersion = field_map json "FormatVersion" String_.of_json in
-      let filters = field_map json "Filters" Filters.of_json in
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
-      make ?maxResults ?nextToken ?formatVersion ?filters ?serviceCode ()
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" GetProductsMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let formatVersion =
+        field_map json__ "FormatVersion" FormatVersion.of_json in
+      let filters = field_map json__ "Filters" Filters.of_json in
+      let serviceCode = field_map_exn json__ "ServiceCode" String_.of_json in
+      make ?maxResults ?nextToken ?formatVersion ?filters ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
        "Returns a list of all products that match the filter criteria."]
+module GetPriceListFileUrlResponse =
+  struct
+    type nonrec t =
+      {
+      url: String_.t option
+        [@ocaml.doc "The URL to download your Price List file from."]}
+    type nonrec error =
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `InternalErrorException of InternalErrorException.t 
+      | `InvalidParameterException of InvalidParameterException.t 
+      | `NotFoundException of NotFoundException.t 
+      | `ResourceNotFoundException of ResourceNotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
+      | `Unknown_operation_error of (string * string option) ]
+    let make ?url = fun () -> { url }
+    let error_of_json name json =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_json json)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_json json)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_json json)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
+      | name ->
+          `Unknown_operation_error
+            (name, (Some (Yojson.Safe.to_string json)))
+    let error_of_xml name xml =
+      match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
+      | "InternalErrorException" ->
+          `InternalErrorException (InternalErrorException.of_xml xml)
+      | "InvalidParameterException" ->
+          `InvalidParameterException (InvalidParameterException.of_xml xml)
+      | "NotFoundException" ->
+          `NotFoundException (NotFoundException.of_xml xml)
+      | "ResourceNotFoundException" ->
+          `ResourceNotFoundException (ResourceNotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
+      | name ->
+          `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
+    let error_to_json : error -> Yojson.Safe.t =
+      function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
+      | `InternalErrorException e ->
+          `Assoc
+            [("error", (`String "InternalErrorException"));
+            ("details", (InternalErrorException.to_json e))]
+      | `InvalidParameterException e ->
+          `Assoc
+            [("error", (`String "InvalidParameterException"));
+            ("details", (InvalidParameterException.to_json e))]
+      | `NotFoundException e ->
+          `Assoc
+            [("error", (`String "NotFoundException"));
+            ("details", (NotFoundException.to_json e))]
+      | `ResourceNotFoundException e ->
+          `Assoc
+            [("error", (`String "ResourceNotFoundException"));
+            ("details", (ResourceNotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
+      | `Unknown_operation_error (code, msg) ->
+          `Assoc (("error", (`String code)) ::
+            ((match msg with
+              | None -> []
+              | Some m -> [("message", (`String m))])))
+    let to_value x =
+      structure_to_value [("Url", (Option.map x.url ~f:String_.to_value))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let url = (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "Url") in
+      make ?url ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let url = field_map json__ "Url" String_.of_json in make ?url ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This feature is in preview release and is subject to change. Your use of Amazon Web Services Price List API is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This returns the URL that you can retrieve your Price List file from. This URL is based on the PriceListArn and FileFormat that you retrieve from the ListPriceLists response."]
+module GetPriceListFileUrlRequest =
+  struct
+    type nonrec t =
+      {
+      priceListArn: PriceListArn.t
+        [@ocaml.doc
+          "The unique identifier that maps to where your Price List files are located. PriceListArn can be obtained from the ListPriceLists response."];
+      fileFormat: FileFormat.t
+        [@ocaml.doc
+          "The format that you want to retrieve your Price List files in. The FileFormat can be obtained from the ListPriceLists response."]}
+    let context_ = "GetPriceListFileUrlRequest"
+    let make ~priceListArn =
+      fun ~fileFormat -> fun () -> { priceListArn; fileFormat }
+    let to_value x =
+      structure_to_value
+        [("PriceListArn", (Some (PriceListArn.to_value x.priceListArn)));
+        ("FileFormat", (Some (FileFormat.to_value x.fileFormat)))]
+    let to_query v = to_query to_value v
+    let of_xml xml_arg0 =
+      let fileFormat =
+        FileFormat.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "FileFormat") in
+      let priceListArn =
+        PriceListArn.of_xml
+          (Xml.child_exn ~context:context_ xml_arg0 "PriceListArn") in
+      make ~fileFormat ~priceListArn ()
+    let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
+    let of_json json__ =
+      let fileFormat = field_map_exn json__ "FileFormat" FileFormat.of_json in
+      let priceListArn =
+        field_map_exn json__ "PriceListArn" PriceListArn.of_json in
+      make ~fileFormat ~priceListArn ()
+    let to_json v = composed_to_json to_value v
+  end[@@ocaml.doc
+       "This feature is in preview release and is subject to change. Your use of Amazon Web Services Price List API is subject to the Beta Service Participation terms of the Amazon Web Services Service Terms (Section 1.10). This returns the URL that you can retrieve your Price List file from. This URL is based on the PriceListArn and FileFormat that you retrieve from the ListPriceLists response."]
 module GetAttributeValuesResponse =
   struct
     type nonrec t =
@@ -580,16 +1355,20 @@ module GetAttributeValuesResponse =
         [@ocaml.doc
           "The pagination token that indicates the next set of results to retrieve."]}
     type nonrec error =
-      [ `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?attributeValues =
       fun ?nextToken -> fun () -> { attributeValues; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
       | "InternalErrorException" ->
@@ -600,11 +1379,15 @@ module GetAttributeValuesResponse =
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
       | "InternalErrorException" ->
@@ -615,10 +1398,16 @@ module GetAttributeValuesResponse =
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ExpiredNextTokenException e ->
           `Assoc
             [("error", (`String "ExpiredNextTokenException"));
@@ -639,6 +1428,10 @@ module GetAttributeValuesResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -658,14 +1451,14 @@ module GetAttributeValuesResponse =
           (Xml.child xml_arg0 "AttributeValues") in
       make ?nextToken ?attributeValues ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
       let attributeValues =
-        field_map json "AttributeValues" AttributeValueList.of_json in
+        field_map json__ "AttributeValues" AttributeValueList.of_json in
       make ?nextToken ?attributeValues ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of attribute values. Attibutes are similar to the details in a Price List API offer file. For a list of available attributes, see Offer File Definitions in the Amazon Web Services Billing and Cost Management User Guide."]
+       "Returns a list of attribute values. Attributes are similar to the details in a Price List API offer file. For a list of available attributes, see Offer File Definitions in the Billing and Cost Management User Guide."]
 module GetAttributeValuesRequest =
   struct
     type nonrec t =
@@ -679,7 +1472,7 @@ module GetAttributeValuesRequest =
       nextToken: String_.t option
         [@ocaml.doc
           "The pagination token that indicates the next set of results that you want to retrieve."];
-      maxResults: BoxedInteger.t option
+      maxResults: GetAttributeValuesMaxResults.t option
         [@ocaml.doc "The maximum number of results to return in response."]}
     let context_ = "GetAttributeValuesRequest"
     let make ?nextToken =
@@ -692,11 +1485,13 @@ module GetAttributeValuesRequest =
         [("ServiceCode", (Some (String_.to_value x.serviceCode)));
         ("AttributeName", (Some (String_.to_value x.attributeName)));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:BoxedInteger.to_value))]
+        ("MaxResults",
+          (Option.map x.maxResults ~f:GetAttributeValuesMaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:BoxedInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:GetAttributeValuesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let attributeName =
@@ -707,15 +1502,17 @@ module GetAttributeValuesRequest =
           (Xml.child_exn ~context:context_ xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ~attributeName ~serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let attributeName = field_map_exn json "AttributeName" String_.of_json in
-      let serviceCode = field_map_exn json "ServiceCode" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" GetAttributeValuesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let attributeName =
+        field_map_exn json__ "AttributeName" String_.of_json in
+      let serviceCode = field_map_exn json__ "ServiceCode" String_.of_json in
       make ?maxResults ?nextToken ~attributeName ~serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
-       "Returns a list of attribute values. Attibutes are similar to the details in a Price List API offer file. For a list of available attributes, see Offer File Definitions in the Amazon Web Services Billing and Cost Management User Guide."]
+       "Returns a list of attribute values. Attributes are similar to the details in a Price List API offer file. For a list of available attributes, see Offer File Definitions in the Billing and Cost Management User Guide."]
 module DescribeServicesResponse =
   struct
     type nonrec t =
@@ -723,24 +1520,28 @@ module DescribeServicesResponse =
       services: ServiceList.t option
         [@ocaml.doc
           "The service metadata for the service or services in the response."];
-      formatVersion: String_.t option
+      formatVersion: FormatVersion.t option
         [@ocaml.doc
           "The format version of the response. For example, aws_v1."];
       nextToken: String_.t option
         [@ocaml.doc
-          "The pagination token for the next set of retreivable results."]}
+          "The pagination token for the next set of retrievable results."]}
     type nonrec error =
-      [ `ExpiredNextTokenException of ExpiredNextTokenException.t 
+      [ `AccessDeniedException of AccessDeniedException.t 
+      | `ExpiredNextTokenException of ExpiredNextTokenException.t 
       | `InternalErrorException of InternalErrorException.t 
       | `InvalidNextTokenException of InvalidNextTokenException.t 
       | `InvalidParameterException of InvalidParameterException.t 
       | `NotFoundException of NotFoundException.t 
+      | `ThrottlingException of ThrottlingException.t 
       | `Unknown_operation_error of (string * string option) ]
     let make ?services =
       fun ?formatVersion ->
         fun ?nextToken -> fun () -> { services; formatVersion; nextToken }
     let error_of_json name json =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_json json)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_json json)
       | "InternalErrorException" ->
@@ -751,11 +1552,15 @@ module DescribeServicesResponse =
           `InvalidParameterException (InvalidParameterException.of_json json)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_json json)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_json json)
       | name ->
           `Unknown_operation_error
             (name, (Some (Yojson.Safe.to_string json)))
     let error_of_xml name xml =
       match name with
+      | "AccessDeniedException" ->
+          `AccessDeniedException (AccessDeniedException.of_xml xml)
       | "ExpiredNextTokenException" ->
           `ExpiredNextTokenException (ExpiredNextTokenException.of_xml xml)
       | "InternalErrorException" ->
@@ -766,10 +1571,16 @@ module DescribeServicesResponse =
           `InvalidParameterException (InvalidParameterException.of_xml xml)
       | "NotFoundException" ->
           `NotFoundException (NotFoundException.of_xml xml)
+      | "ThrottlingException" ->
+          `ThrottlingException (ThrottlingException.of_xml xml)
       | name ->
           `Unknown_operation_error (name, (Some (Awso.Xml.to_string xml)))
     let error_to_json : error -> Yojson.Safe.t =
       function
+      | `AccessDeniedException e ->
+          `Assoc
+            [("error", (`String "AccessDeniedException"));
+            ("details", (AccessDeniedException.to_json e))]
       | `ExpiredNextTokenException e ->
           `Assoc
             [("error", (`String "ExpiredNextTokenException"));
@@ -790,6 +1601,10 @@ module DescribeServicesResponse =
           `Assoc
             [("error", (`String "NotFoundException"));
             ("details", (NotFoundException.to_json e))]
+      | `ThrottlingException e ->
+          `Assoc
+            [("error", (`String "ThrottlingException"));
+            ("details", (ThrottlingException.to_json e))]
       | `Unknown_operation_error (code, msg) ->
           `Assoc (("error", (`String code)) ::
             ((match msg with
@@ -798,22 +1613,25 @@ module DescribeServicesResponse =
     let to_value x =
       structure_to_value
         [("Services", (Option.map x.services ~f:ServiceList.to_value));
-        ("FormatVersion", (Option.map x.formatVersion ~f:String_.to_value));
+        ("FormatVersion",
+          (Option.map x.formatVersion ~f:FormatVersion.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let formatVersion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FormatVersion") in
+        (Option.map ~f:FormatVersion.of_xml)
+          (Xml.child xml_arg0 "FormatVersion") in
       let services =
         (Option.map ~f:ServiceList.of_xml) (Xml.child xml_arg0 "Services") in
       make ?nextToken ?formatVersion ?services ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let formatVersion = field_map json "FormatVersion" String_.of_json in
-      let services = field_map json "Services" ServiceList.of_json in
+    let of_json json__ =
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let formatVersion =
+        field_map json__ "FormatVersion" FormatVersion.of_json in
+      let services = field_map json__ "Services" ServiceList.of_json in
       make ?nextToken ?formatVersion ?services ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
@@ -825,13 +1643,13 @@ module DescribeServicesRequest =
       serviceCode: String_.t option
         [@ocaml.doc
           "The code for the service whose information you want to retrieve, such as AmazonEC2. You can use the ServiceCode to filter the results in a GetProducts call. To retrieve a list of all services, leave this blank."];
-      formatVersion: String_.t option
+      formatVersion: FormatVersion.t option
         [@ocaml.doc
           "The format version that you want the response to be in. Valid values are: aws_v1"];
       nextToken: String_.t option
         [@ocaml.doc
           "The pagination token that indicates the next set of results that you want to retrieve."];
-      maxResults: BoxedInteger.t option
+      maxResults: DescribeServicesMaxResults.t option
         [@ocaml.doc
           "The maximum number of results that you want returned in the response."]}
     let make ?serviceCode =
@@ -842,26 +1660,32 @@ module DescribeServicesRequest =
     let to_value x =
       structure_to_value
         [("ServiceCode", (Option.map x.serviceCode ~f:String_.to_value));
-        ("FormatVersion", (Option.map x.formatVersion ~f:String_.to_value));
+        ("FormatVersion",
+          (Option.map x.formatVersion ~f:FormatVersion.to_value));
         ("NextToken", (Option.map x.nextToken ~f:String_.to_value));
-        ("MaxResults", (Option.map x.maxResults ~f:BoxedInteger.to_value))]
+        ("MaxResults",
+          (Option.map x.maxResults ~f:DescribeServicesMaxResults.to_value))]
     let to_query v = to_query to_value v
     let of_xml xml_arg0 =
       let maxResults =
-        (Option.map ~f:BoxedInteger.of_xml) (Xml.child xml_arg0 "MaxResults") in
+        (Option.map ~f:DescribeServicesMaxResults.of_xml)
+          (Xml.child xml_arg0 "MaxResults") in
       let nextToken =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "NextToken") in
       let formatVersion =
-        (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "FormatVersion") in
+        (Option.map ~f:FormatVersion.of_xml)
+          (Xml.child xml_arg0 "FormatVersion") in
       let serviceCode =
         (Option.map ~f:String_.of_xml) (Xml.child xml_arg0 "ServiceCode") in
       make ?maxResults ?nextToken ?formatVersion ?serviceCode ()
     let of_string s = of_xml (Awso.Xml.parse_response s)[@@warning "-32"]
-    let of_json json =
-      let maxResults = field_map json "MaxResults" BoxedInteger.of_json in
-      let nextToken = field_map json "NextToken" String_.of_json in
-      let formatVersion = field_map json "FormatVersion" String_.of_json in
-      let serviceCode = field_map json "ServiceCode" String_.of_json in
+    let of_json json__ =
+      let maxResults =
+        field_map json__ "MaxResults" DescribeServicesMaxResults.of_json in
+      let nextToken = field_map json__ "NextToken" String_.of_json in
+      let formatVersion =
+        field_map json__ "FormatVersion" FormatVersion.of_json in
+      let serviceCode = field_map json__ "ServiceCode" String_.of_json in
       make ?maxResults ?nextToken ?formatVersion ?serviceCode ()
     let to_json v = composed_to_json to_value v
   end[@@ocaml.doc
